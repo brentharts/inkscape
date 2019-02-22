@@ -116,6 +116,7 @@ protected:
     Glib::ustring const _prefs_path;
     int            _verb_num;
     Glib::ustring  _title;
+    Glib::ustring  _tooltip;
     Glib::ustring  _apply_label;
     SPDesktop *    _desktop;
     bool           _is_active_desktop;

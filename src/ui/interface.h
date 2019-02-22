@@ -54,7 +54,7 @@ void sp_ui_import_files(gchar *buffer);
  */
 unsigned int sp_ui_close_all ();
 
-void sp_ui_dialog_title_string (Inkscape::Verb * verb, char* c);
+void sp_ui_dialog_title_string (Inkscape::Verb * verb, char* c, bool showShortcut = false);
 
 Glib::ustring getLayoutPrefPath( Inkscape::UI::View::View *view );
 

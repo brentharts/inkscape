@@ -169,7 +169,7 @@ sp_ui_close_all()
 
 
 void
-sp_ui_dialog_title_string(Inkscape::Verb *verb, gchar *c)
+sp_ui_dialog_title_string(Inkscape::Verb *verb, gchar *c, bool showShortcut)
 {
     SPAction     *action;
     unsigned int shortcut;
@@ -185,9 +185,6 @@ sp_ui_dialog_title_string(Inkscape::Verb *verb, gchar *c)
     s = g_stpcpy(c, atitle);
 
     g_free(atitle);
-
-    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    bool showShortcut = prefs->getBool("/options/shortcutindialogtitle/value", false);
 
     if (showShortcut) {
         shortcut = sp_shortcut_get_primary(verb);

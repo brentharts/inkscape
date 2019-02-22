@@ -22,7 +22,8 @@ namespace UI {
 namespace Widget {
 
 DockItem::DockItem(Dock& dock, const Glib::ustring& name, const Glib::ustring& long_name,
-                   const Glib::ustring& icon_name, State state, GdlDockPlacement placement) :
+                   const Glib::ustring& icon_name, const Glib::ustring& tooltip,
+                   State state, GdlDockPlacement placement) :
     _dock(dock),
     _prev_state(state),
     _prev_position(0),
@@ -49,6 +50,11 @@ DockItem::DockItem(Dock& dock, const Glib::ustring& name, const Glib::ustring& l
                                                              _icon_pixbuf->gobj(), gdl_dock_behavior );
     } else {
         _gdl_dock_item = gdl_dock_item_new(name.c_str(), long_name.c_str(), gdl_dock_behavior);
+    }
+
+    GtkWidget *grip = gdl_dock_item_get_grip(GDL_DOCK_ITEM(_gdl_dock_item));
+    if (grip) {
+        gtk_widget_set_tooltip_text(grip, tooltip.c_str());
     }
 
     _frame.set_shadow_type(Gtk::SHADOW_IN);

@@ -43,7 +43,8 @@ public:
                  ICONIFIED_FLOATING_STATE}; // item iconified in its assigned dock from float
 
     DockItem(Dock& dock, const Glib::ustring& name, const Glib::ustring& long_name, 
-             const Glib::ustring& icon_name, State state, GdlDockPlacement placement);
+             const Glib::ustring& icon_name, const Glib::ustring& tooltip,
+             State state, GdlDockPlacement placement);
 
     ~DockItem();
 

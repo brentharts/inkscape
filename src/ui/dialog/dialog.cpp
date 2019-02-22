@@ -55,18 +55,25 @@ Dialog::Dialog(Behavior::BehaviorFactory behavior_factory, const char *prefs_pat
       _prefs_path(prefs_path),
       _verb_num(verb_num),
       _title(),
+      _tooltip(),
       _apply_label(std::move(apply_label)),
       _desktop(nullptr),
       _is_active_desktop(true),
       _behavior(nullptr)
 {
     gchar title[500];
+    gchar tooltip[500];
 
     if (verb_num) {
-        sp_ui_dialog_title_string (Inkscape::Verb::get(verb_num), title);
+        Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+        bool showShortcut = prefs->getBool("/options/shortcutindialogtitle/value", false);
+
+        sp_ui_dialog_title_string (Inkscape::Verb::get(verb_num), title, showShortcut);
+        sp_ui_dialog_title_string (Inkscape::Verb::get(verb_num), tooltip, true);
     }
 
     _title = title;
+    _tooltip = tooltip;
     _behavior = behavior_factory(*this);
     _desktop = SP_ACTIVE_DESKTOP;
 

@@ -30,7 +30,7 @@ DockBehavior::DockBehavior(Dialog &dialog) :
     _dock_item(*SP_ACTIVE_DESKTOP->getDock(),
                Inkscape::Verb::get(dialog._verb_num)->get_id(), dialog._title.c_str(),
                (Inkscape::Verb::get(dialog._verb_num)->get_image() ?
-                Inkscape::Verb::get(dialog._verb_num)->get_image() : ""),
+                Inkscape::Verb::get(dialog._verb_num)->get_image() : ""), dialog._tooltip.c_str(),
                static_cast<Widget::DockItem::State>(
                    Inkscape::Preferences::get()->getInt(_dialog._prefs_path + "/state",
                                             UI::Widget::DockItem::DOCKED_STATE)),
