@@ -1067,6 +1067,7 @@ void InkscapePreferences::initPageUI()
     _win_hide_task.init ( _("Dialogs are hidden in taskbar"), "/options/dialogsskiptaskbar/value", true);
     _win_save_viewport.init ( _("Save and restore documents viewport"), "/options/savedocviewport/value", true);
     _win_zoom_resize.init ( _("Zoom when window is resized"), "/options/stickyzoom/value", false);
+    _win_show_shortcut_dialog.init ( _("Show shortcut in dialog title bar (requires restart)"), "/options/shortcutindialogtitle/value", false);
     _win_ontop_none.init ( C_("Dialog on top", "None"), "/options/transientpolicy/value", 0, false, nullptr);
     _win_ontop_normal.init ( _("Normal"), "/options/transientpolicy/value", 1, true, &_win_ontop_none);
     _win_ontop_agressive.init ( _("Aggressive"), "/options/transientpolicy/value", 2, false, &_win_ontop_none);
@@ -1144,6 +1145,8 @@ void InkscapePreferences::initPageUI()
                             _("Zoom drawing when document window is resized, to keep the same area visible (this is the default which can be changed in any window using the button above the right scrollbar)"));
     _page_windows.add_line( true, "", _win_save_viewport, "",
                             _("Save documents viewport (zoom and panning position). Useful to turn off when sharing version controlled files."));
+    _page_windows.add_line( true, "", _win_show_shortcut_dialog, "",
+                            _("Show the dialog shortcut in its title bar."));
     this->AddPage(_page_windows, _("Windows"), iter_ui, PREFS_PAGE_UI_WINDOWS);
 
     // Grids

@@ -186,13 +186,18 @@ sp_ui_dialog_title_string(Inkscape::Verb *verb, gchar *c)
 
     g_free(atitle);
 
-    shortcut = sp_shortcut_get_primary(verb);
-    if (shortcut!=GDK_KEY_VoidSymbol) {
-        gchar* key = sp_shortcut_get_label(shortcut);
-        s = g_stpcpy(s, " (");
-        s = g_stpcpy(s, key);
-        g_stpcpy(s, ")");
-        g_free(key);
+    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+    bool showShortcut = prefs->getBool("/options/shortcutindialogtitle/value", false);
+
+    if (showShortcut) {
+        shortcut = sp_shortcut_get_primary(verb);
+        if (shortcut!=GDK_KEY_VoidSymbol) {
+            gchar* key = sp_shortcut_get_label(shortcut);
+            s = g_stpcpy(s, " (");
+            s = g_stpcpy(s, key);
+            g_stpcpy(s, ")");
+            g_free(key);
+        }
     }
 }
 
