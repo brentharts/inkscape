@@ -59,15 +59,23 @@ bool SPPaintServer::isSolid() const
 
 bool SPPaintServer::isOpaque() const
 {
-    if (swatch && SP_IS_GRADIENT(this)) {
-        SPGradient *grad = SP_GRADIENT(this);
+    bool opaque = false;
+    SPGradient *grad = dynamic_cast<SPGradient*>((SPObject*)this);
+    if (grad) {
         for(auto stop : grad->vector.stops) {
             if (stop.opacity < 0.995) {
                 return false;
             }
+            opaque = true;
+        }
+        for(auto corner : grad->array.corners) {
+            if (corner->opacity < 0.995) {
+                return false;
+            }
+            opaque = true;
         }
     }
-    return true;
+    return opaque;
 }
 
 bool SPPaintServer::isValid() const
