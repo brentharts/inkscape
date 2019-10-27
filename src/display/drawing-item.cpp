@@ -15,16 +15,25 @@
 #include "display/drawing-context.h"
 #include "display/drawing-group.h"
 #include "display/drawing-item.h"
+#include "display/drawing-shape.h"
 #include "display/drawing-pattern.h"
 #include "display/drawing-surface.h"
 #include "display/drawing-text.h"
 #include "display/drawing.h"
+#include "display/curve.h"
+#include "display/nr-style.h"
 #include "nr-filter.h"
 #include "preferences.h"
 #include "style.h"
 
+#include "object/sp-item-group.h"
+#include "object/sp-root.h"
+
 #include "display/cairo-utils.h"
 #include "display/cairo-templates.h"
+
+#include <2geom/pathvector.h>
+#include <boost/range/adaptor/reversed.hpp>
 
 #include "object/sp-item.h"
 
@@ -49,6 +58,9 @@ namespace Inkscape {
  * Outside of the SP tree, you should not use any references after the root node
  * has been deleted.
  */
+
+// Define this to output the time spent in a full idle loop and the number of "tiles" painted
+#define DEBUG_DRAWING_ITEM 1;
 
 DrawingItem::DrawingItem(Drawing &drawing)
     : _drawing(drawing)
@@ -636,6 +648,112 @@ struct MaskLuminanceToAlpha {
     }
 };
 
+/*
+* We find here the shapes that give a opaque result and use it to set up the start render 
+* drawing item to avoid render invisible items
+*/
+DrawingItem *
+DrawingItem::_getCoverItem(DrawingContext &ict, Geom::IntRect const &area, unsigned flags, DrawingItem *parentitem, double &opacity)
+{
+    ChildrenList::reverse_iterator rit = parentitem->_children.rbegin();
+    for (rit = parentitem->_children.rbegin(); rit!= parentitem->_children.rend(); ++rit) {
+        DrawingItem *child = (&*rit);
+        if (child && child->visible()) {
+            SPRoot *root = dynamic_cast<SPRoot *>(child->_item);
+            if (!root) {
+                SPGroup *group = dynamic_cast<SPGroup *>(child->_item);
+                if (!group || group->layerMode() != SPGroup::LAYER) {
+                    Geom::OptRect bbox = child->_item_bbox;
+                    if (bbox) {
+                        *bbox *= child->ctm();
+                    }
+                    Geom::Rect bboxarea = area;
+                    if (!bbox || !(*bbox).contains(bboxarea)  && child->_item) {
+                        Glib::ustring id = Glib::ustring(child->_item->getId());
+#ifdef DEBUG_DRAWING_ITEM
+                        g_message("%s first check ignored", id.c_str());
+#endif
+                        continue;
+                    }
+                }
+            }
+            if (is_drawing_group(child)) {
+                DrawingItem *ret = _getCoverItem(ict, area, flags, child, opacity);
+                if (ret) {
+                    return ret;
+                }
+                continue;
+            }
+            DrawingShape *shape = dynamic_cast<DrawingShape *>(child);
+            if (!shape) {
+                continue;
+            }
+            Glib::ustring id = Glib::ustring(child->_item->getId());
+            bool render_filters = _drawing.renderFilters();
+            // determine whether this shape needs intermediate rendering.
+            bool needs_intermediate_rendering = false;
+            bool &nir = needs_intermediate_rendering;
+            // this item needs an intermediate rendering if:                      
+            nir |= (child->_clip != nullptr);                       // 1. it has a clipping path
+            nir |= (child->_mask != nullptr);                       // 2. it has a mask
+            nir |= (child->_filter != nullptr && render_filters);   // 3. it has a filter
+            nir |= (child->_mix_blend_mode != SP_CSS_BLEND_NORMAL); // 5. it has blend mode            
+            if (!needs_intermediate_rendering) {
+                double fill_opacity = shape->getSolidFillOpacity(ict);
+                if (fill_opacity || child->_opacity) {
+                    opacity += fill_opacity;
+                    opacity += child->_opacity;
+                    if (opacity < 1.995) {
+                        continue;
+                    }
+                    Geom::PathVector pv = shape->getPath()->get_pathvector();
+                    Geom::Rect bboxarea = area;
+                    //bboxarea *= child->ctm().inverse();
+                    Geom::Path drawarea = Geom::Path(bboxarea);
+                    pv *= child->ctm();
+                    if (!id.empty() && 
+                         pv.size() == 1 && 
+                         !pv[0].intersect(drawarea).size()) 
+                    {
+#ifdef DEBUG_DRAWING_ITEM
+                        g_message("%s start item defined", id.c_str());
+#endif
+                        return child;
+                    }
+                }
+            }
+        }
+    }
+    return nullptr;
+}
+/*
+* This is a wrap function called on rootrender on drawing.render 
+* to acall a overrided function with start limit, We calculate the
+* start item in the previious function called here, Items rendered before 
+* the item result are ignored
+*/
+
+unsigned
+DrawingItem::rootrender(DrawingContext &dc, Geom::IntRect const &area, unsigned flags)
+{   
+    bool outline = _drawing.outline();
+    bool render_filters = _drawing.renderFilters();
+    // stop_at is handled in DrawingGroup, but this check is required to handle the case
+    // where a filtered item with background-accessing filter has enable-background: new
+    
+    // Device scale for HiDPI screens (typically 1 or 2)
+    int device_scale = dc.surface()->device_scale();
+    DrawingItem *start_at = nullptr;
+    if (!parent() && !outline) {
+        DrawingSurface cover(area, device_scale);
+        DrawingContext ict(cover);
+        double opacity = 0.0;
+        start_at = _getCoverItem(ict, area, flags, this, opacity);
+    }
+    _drawing.setStartItem(start_at);
+    return render(dc, area, flags, nullptr);
+}
+
 /**
  * Rasterize items.
  * This method submits the drawing operations required to draw this item
@@ -648,11 +766,42 @@ struct MaskLuminanceToAlpha {
  */
 unsigned
 DrawingItem::render(DrawingContext &dc, Geom::IntRect const &area, unsigned flags, DrawingItem *stop_at)
-{
+{   
+
     bool outline = _drawing.outline();
     bool render_filters = _drawing.renderFilters();
     // stop_at is handled in DrawingGroup, but this check is required to handle the case
     // where a filtered item with background-accessing filter has enable-background: new
+    
+    // Device scale for HiDPI screens (typically 1 or 2)
+    int device_scale = dc.surface()->device_scale();
+
+    Glib::ustring id = "";
+    if (this->_item) {
+        id = this->_item->getId();
+    }
+    DrawingItem *start_at = _drawing.getStartItem();
+    if (!id.empty() && start_at) {
+        SPRoot *root = dynamic_cast<SPRoot *>(this->_item);
+        if (!root) {
+            SPGroup *group = dynamic_cast<SPGroup *>(this->_item);
+            if (this->_item->parent && (!group || group->layerMode() != SPGroup::LAYER)) {
+                Glib::ustring start_id = start_at->_item->getId();
+                if (start_id == id) {
+                    _drawing.setStartItem(nullptr);
+#ifdef DEBUG_DRAWING_ITEM
+                    g_message("%s raised item ", start_id.c_str());
+#endif
+                } else {
+#ifdef DEBUG_DRAWING_ITEM
+                    g_message("%s item not rendered, is before start item %s", id.c_str(), start_id.c_str());
+#endif
+                    return RENDER_OK;
+                }
+            }
+        }
+    }
+
     if (this == stop_at) {
         return RENDER_STOP;
     }
@@ -745,7 +894,6 @@ DrawingItem::render(DrawingContext &dc, Geom::IntRect const &area, unsigned flag
         // if our caching was turned off after the last update, it was already
         // deleted in setCached()
     }
-
     // determine whether this shape needs intermediate rendering.
     bool needs_intermediate_rendering = false;
     bool &nir = needs_intermediate_rendering;

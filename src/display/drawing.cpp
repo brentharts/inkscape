@@ -183,7 +183,7 @@ Drawing::render(DrawingContext &dc, Geom::IntRect const &area, unsigned flags, i
         int prev_a = _root->_antialias;
         if(antialiasing >= 0)
             _root->setAntialiasing(antialiasing);
-        _root->render(dc, area, flags);
+        _root->rootrender(dc, area, flags);
         _root->setAntialiasing(prev_a);
     }
 

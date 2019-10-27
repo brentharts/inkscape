@@ -29,9 +29,11 @@ public:
     ~DrawingShape() override;
 
     void setPath(SPCurve *curve);
+    SPCurve *getPath() const { return _curve; };
     void setStyle(SPStyle *style, SPStyle *context_style = nullptr) override;
     void setChildrenStyle(SPStyle *context_style) override;
-
+    double getSolidFillOpacity(DrawingContext &dc);
+    
 protected:
     unsigned _updateItem(Geom::IntRect const &area, UpdateContext const &ctx,
                                  unsigned flags, unsigned reset) override;
@@ -45,7 +47,7 @@ protected:
     void _renderStroke(DrawingContext &dc);
     void _renderMarkers(DrawingContext &dc, Geom::IntRect const &area, unsigned flags,
                         DrawingItem *stop_at);
-
+    
     SPCurve *_curve;
     NRStyle _nrstyle;
 

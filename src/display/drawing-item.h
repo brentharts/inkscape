@@ -139,6 +139,7 @@ public:
 
     void update(Geom::IntRect const &area = Geom::IntRect::infinite(), UpdateContext const &ctx = UpdateContext(), unsigned flags = STATE_ALL, unsigned reset = 0);
     unsigned render(DrawingContext &dc, Geom::IntRect const &area, unsigned flags = 0, DrawingItem *stop_at = nullptr);
+    unsigned rootrender(DrawingContext &dc, Geom::IntRect const &area, unsigned flags);
     void clip(DrawingContext &dc, Geom::IntRect const &area);
     DrawingItem *pick(Geom::Point const &p, double delta, unsigned flags = 0);
 
@@ -167,11 +168,12 @@ protected:
     Geom::OptIntRect _cacheRect(bool cropped = false);
     virtual unsigned _updateItem(Geom::IntRect const &/*area*/, UpdateContext const &/*ctx*/,
                                  unsigned /*flags*/, unsigned /*reset*/) { return 0; }
-    virtual unsigned _renderItem(DrawingContext &/*dc*/, Geom::IntRect const &/*area*/, unsigned /*flags*/,
+    virtual unsigned _renderItem(DrawingContext &/*dc*/, Geom::IntRect const &/*area*/, unsigned /*flags*/, 
                                  DrawingItem * /*stop_at*/) { return RENDER_OK; }
     virtual void _clipItem(DrawingContext &/*dc*/, Geom::IntRect const &/*area*/) {}
     virtual DrawingItem *_pickItem(Geom::Point const &/*p*/, double /*delta*/, unsigned /*flags*/) { return nullptr; }
     virtual bool _canClip() { return false; }
+    DrawingItem * _getCoverItem(DrawingContext &ict, Geom::IntRect const &area, unsigned flags, DrawingItem *parentitem, double &opacity);
 
     // member variables start here
 

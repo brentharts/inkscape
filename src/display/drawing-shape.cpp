@@ -169,6 +169,15 @@ DrawingShape::_renderFill(DrawingContext &dc)
     }
 }
 
+double
+DrawingShape::getSolidFillOpacity(DrawingContext &dc)
+{
+    if (_nrstyle.fill.type == NRStyle::PAINT_COLOR) {
+        return _nrstyle.fill.opacity;
+    }
+    return 0;
+}
+
 void
 DrawingShape::_renderStroke(DrawingContext &dc)
 {

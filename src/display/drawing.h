@@ -59,6 +59,8 @@ public:
     void setColorMode(ColorMode mode);
     void setBlurQuality(int q);
     void setFilterQuality(int q);
+    void setStartItem(DrawingItem *start_item) {_start_item = start_item;};
+    DrawingItem *getStartItem() const { return _start_item;};
     void setExact(bool e);
     bool getExact() const { return _exact; };
     void setOutlineSensitive(bool e);
@@ -86,6 +88,7 @@ private:
     typedef std::list<CacheRecord> CandidateList;
     bool _outline_sensitive;
     DrawingItem *_root;
+    DrawingItem *_start_item;
     std::set<DrawingItem *> _cached_items; // modified by DrawingItem::setCached()
     CacheList _candidate_items;
 public:

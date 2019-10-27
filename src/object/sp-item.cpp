@@ -680,8 +680,8 @@ void SPItem::update(SPCtx* ctx, guint flags) {
             }
         }
     }
-    /* Update bounding box in user space, used for filter and objectBoundingBox units */
-    if (style->filter.set && display) {
+    /* Update bounding box in user space, used for objectBoundingBox units and reverse iterator check*/
+    if (display) {
         Geom::OptRect item_bbox = geometricBounds();
         SPItemView *itemview = display;
         do {
