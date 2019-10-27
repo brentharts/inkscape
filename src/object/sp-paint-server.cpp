@@ -57,6 +57,19 @@ bool SPPaintServer::isSolid() const
     return solid;
 }
 
+bool SPPaintServer::isOpaque() const
+{
+    if (swatch && SP_IS_GRADIENT(this)) {
+        SPGradient *grad = SP_GRADIENT(this);
+        for(auto stop : grad->vector.stops) {
+            if (stop.opacity < 0.995) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 bool SPPaintServer::isValid() const
 {
     return true;

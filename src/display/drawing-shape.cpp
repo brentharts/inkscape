@@ -27,6 +27,7 @@
 #include "helper/geom-curves.h"
 #include "helper/geom.h"
 #include "preferences.h"
+#include "object/sp-paint-server.h"
 #include "style.h"
 #include "svg/svg.h"
 
@@ -174,6 +175,11 @@ DrawingShape::getSolidFillOpacity(DrawingContext &dc)
 {
     if (_nrstyle.fill.type == NRStyle::PAINT_COLOR) {
         return _nrstyle.fill.opacity;
+    }
+    if (_nrstyle.fill.type == NRStyle::PAINT_SERVER &&
+        _nrstyle.fill.server->isOpaque()) 
+    {
+        return 1;
     }
     return 0;
 }

@@ -671,7 +671,7 @@ DrawingItem::_getCoverItem(DrawingContext &ict, Geom::IntRect const &area, unsig
                     if (!bbox || (!(*bbox).contains(bboxarea)  && child->_item)) {
                         Glib::ustring id = Glib::ustring(child->_item->getId());
 #ifdef DEBUG_DRAWING_ITEM
-                        g_message("%s first check ignored", id.c_str());
+                        //g_message("%s first check ignored", id.c_str());
 #endif
                         continue;
                     }
@@ -716,7 +716,7 @@ DrawingItem::_getCoverItem(DrawingContext &ict, Geom::IntRect const &area, unsig
                          !pv[0].intersect(drawarea).size()) 
                     {
 #ifdef DEBUG_DRAWING_ITEM
-                        g_message("%s start item defined", id.c_str());
+                        g_message("%s START ITEM", id.c_str());
 #endif
                         return child;
                     }
@@ -790,11 +790,11 @@ DrawingItem::render(DrawingContext &dc, Geom::IntRect const &area, unsigned flag
                 if (start_id == id) {
                     _drawing.setStartItem(nullptr);
 #ifdef DEBUG_DRAWING_ITEM
-                    g_message("%s raised item ", start_id.c_str());
+                    g_message("%s RAISED ", start_id.c_str());
 #endif
                 } else {
 #ifdef DEBUG_DRAWING_ITEM
-                    g_message("%s item not rendered, is before start item %s", id.c_str(), start_id.c_str());
+                    g_message("%s NOT RENDER", id.c_str());
 #endif
                     return RENDER_OK;
                 }
