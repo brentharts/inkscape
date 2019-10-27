@@ -21,7 +21,6 @@
 #include "display/drawing-text.h"
 #include "display/drawing.h"
 #include "display/curve.h"
-#include "display/nr-style.h"
 #include "nr-filter.h"
 #include "preferences.h"
 #include "style.h"
@@ -31,9 +30,7 @@
 
 #include "display/cairo-utils.h"
 #include "display/cairo-templates.h"
-
 #include <2geom/pathvector.h>
-#include <boost/range/adaptor/reversed.hpp>
 
 #include "object/sp-item.h"
 
@@ -653,7 +650,7 @@ struct MaskLuminanceToAlpha {
 * drawing item to avoid render invisible items
 */
 DrawingItem *
-DrawingItem::_getCoverItem(DrawingContext &ict, Geom::IntRect const &area, unsigned flags, DrawingItem *parentitem, double &opacity)
+DrawingItem::setCoverItem(Geom::IntRect const &area, unsigned flags, DrawingItem *parentitem, double &opacity)
 {
     ChildrenList::reverse_iterator rit = parentitem->_children.rbegin();
     for (rit = parentitem->_children.rbegin(); rit!= parentitem->_children.rend(); ++rit) {
@@ -678,7 +675,7 @@ DrawingItem::_getCoverItem(DrawingContext &ict, Geom::IntRect const &area, unsig
                 }
             }
             if (is_drawing_group(child)) {
-                DrawingItem *ret = _getCoverItem(ict, area, flags, child, opacity);
+                DrawingItem *ret = setCoverItem(area, flags, child, opacity);
                 if (ret) {
                     return ret;
                 }
@@ -699,7 +696,7 @@ DrawingItem::_getCoverItem(DrawingContext &ict, Geom::IntRect const &area, unsig
             nir |= (child->_filter != nullptr && render_filters);   // 3. it has a filter
             nir |= (child->_mix_blend_mode != SP_CSS_BLEND_NORMAL); // 5. it has blend mode            
             if (!needs_intermediate_rendering) {
-                double fill_opacity = shape->getSolidFillOpacity(ict);
+                double fill_opacity = shape->getSolidFillOpacity();
                 if (fill_opacity || child->_opacity) {
                     opacity += fill_opacity;
                     opacity += child->_opacity;
@@ -725,33 +722,6 @@ DrawingItem::_getCoverItem(DrawingContext &ict, Geom::IntRect const &area, unsig
         }
     }
     return nullptr;
-}
-/*
-* This is a wrap function called on rootrender on drawing.render 
-* to acall a overrided function with start limit, We calculate the
-* start item in the previious function called here, Items rendered before 
-* the item result are ignored
-*/
-
-unsigned
-DrawingItem::rootrender(DrawingContext &dc, Geom::IntRect const &area, unsigned flags)
-{   
-    bool outline = _drawing.outline();
-    bool render_filters = _drawing.renderFilters();
-    // stop_at is handled in DrawingGroup, but this check is required to handle the case
-    // where a filtered item with background-accessing filter has enable-background: new
-    
-    // Device scale for HiDPI screens (typically 1 or 2)
-    int device_scale = dc.surface()->device_scale();
-    DrawingItem *start_at = nullptr;
-    if (!parent() && !outline) {
-        DrawingSurface cover(area, device_scale);
-        DrawingContext ict(cover);
-        double opacity = 0.0;
-        start_at = _getCoverItem(ict, area, flags, this, opacity);
-    }
-    _drawing.setStartItem(start_at);
-    return render(dc, area, flags, nullptr);
 }
 
 /**

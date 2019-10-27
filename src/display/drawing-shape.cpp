@@ -171,7 +171,7 @@ DrawingShape::_renderFill(DrawingContext &dc)
 }
 
 double
-DrawingShape::getSolidFillOpacity(DrawingContext &dc)
+DrawingShape::getSolidFillOpacity()
 {
     if (_nrstyle.fill.type == NRStyle::PAINT_COLOR) {
         return _nrstyle.fill.opacity;

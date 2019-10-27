@@ -32,7 +32,7 @@ public:
     SPCurve *getPath() const { return _curve; };
     void setStyle(SPStyle *style, SPStyle *context_style = nullptr) override;
     void setChildrenStyle(SPStyle *context_style) override;
-    double getSolidFillOpacity(DrawingContext &dc);
+    double getSolidFillOpacity();
     
 protected:
     unsigned _updateItem(Geom::IntRect const &area, UpdateContext const &ctx,

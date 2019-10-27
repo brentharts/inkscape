@@ -180,10 +180,18 @@ void
 Drawing::render(DrawingContext &dc, Geom::IntRect const &area, unsigned flags, int antialiasing)
 {
     if (_root) {
+        // stop_at is handled in DrawingGroup, but this check is required to handle the case
+        // where a filtered item with background-accessing filter has enable-background: new
+        DrawingItem *start_at = nullptr;
+        if (!outline()) {
+            double opacity = 0.0;
+            start_at = _root->setCoverItem(area, flags, _root, opacity);
+        }
+        setStartItem(start_at);
         int prev_a = _root->_antialias;
         if(antialiasing >= 0)
             _root->setAntialiasing(antialiasing);
-        _root->rootrender(dc, area, flags);
+        _root->render(dc, area, flags);
         _root->setAntialiasing(prev_a);
     }
 
