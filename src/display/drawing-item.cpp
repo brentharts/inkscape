@@ -685,7 +685,6 @@ DrawingItem::setCoverItem(Geom::IntRect const &area, unsigned flags, DrawingItem
             if (!shape) {
                 continue;
             }
-            Glib::ustring id = Glib::ustring(child->_item->getId());
             bool render_filters = _drawing.renderFilters();
             // determine whether this shape needs intermediate rendering.
             bool needs_intermediate_rendering = false;
@@ -705,18 +704,16 @@ DrawingItem::setCoverItem(Geom::IntRect const &area, unsigned flags, DrawingItem
                     }
                     Geom::PathVector pv = shape->getPath()->get_pathvector();
                     Geom::Rect bboxarea = area;
-                    //bboxarea *= child->ctm().inverse();
                     Geom::Path drawarea = Geom::Path(bboxarea);
                     pv *= child->ctm();
                     if (!pv[0].closed()) {
-                       pv[0].close(true); 
+                        pv[0].close(true); 
                     }
-                    if (!id.empty() && 
-                         pv.size() == 1 && 
-                         !pv[0].intersect(drawarea).size()) 
-                    {
+                    if (pv.size() == 1 && !pv[0].intersect(drawarea).size()) {
 #ifdef DEBUG_DRAWING_ITEM
-                        g_message("%s START ITEM", id.c_str());
+                        if (child->_item->getId()) {
+                            g_message("%s START ITEM", child->_item->getId());
+                        }
 #endif
                         return child;
                     }
@@ -748,26 +745,24 @@ DrawingItem::render(DrawingContext &dc, Geom::IntRect const &area, unsigned flag
     
     // Device scale for HiDPI screens (typically 1 or 2)
     int device_scale = dc.surface()->device_scale();
-
-    Glib::ustring id = "";
-    if (this->_item) {
-        id = this->_item->getId();
-    }
     DrawingItem *start_at = _drawing.getStartItem();
-    if (!id.empty() && start_at) {
+    if (start_at) {
         SPRoot *root = dynamic_cast<SPRoot *>(this->_item);
         if (!root) {
             SPGroup *group = dynamic_cast<SPGroup *>(this->_item);
             if (this->_item->parent && (!group || group->layerMode() != SPGroup::LAYER)) {
-                Glib::ustring start_id = start_at->_item->getId();
-                if (start_id == id) {
+                if (start_at == this) {
                     _drawing.setStartItem(nullptr);
 #ifdef DEBUG_DRAWING_ITEM
-                    g_message("%s RAISED ", start_id.c_str());
+                    if (this->_item->getId()) {
+                        g_message("%s RAISED ", this->_item->getId());
+                    }
 #endif
                 } else {
 #ifdef DEBUG_DRAWING_ITEM
-                    g_message("%s NOT RENDER", id.c_str());
+                    if (this->_item->getId()) {
+                        g_message("%s NOT RENDER", this->_item->getId());
+                    }
 #endif
                     return RENDER_OK;
                 }
