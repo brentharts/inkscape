@@ -708,6 +708,9 @@ DrawingItem::setCoverItem(Geom::IntRect const &area, unsigned flags, DrawingItem
                     //bboxarea *= child->ctm().inverse();
                     Geom::Path drawarea = Geom::Path(bboxarea);
                     pv *= child->ctm();
+                    if (!pv[0].closed()) {
+                       pv[0].close(true); 
+                    }
                     if (!id.empty() && 
                          pv.size() == 1 && 
                          !pv[0].intersect(drawarea).size()) 
