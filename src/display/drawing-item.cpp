@@ -668,7 +668,7 @@ DrawingItem::_getCoverItem(DrawingContext &ict, Geom::IntRect const &area, unsig
                         *bbox *= child->ctm();
                     }
                     Geom::Rect bboxarea = area;
-                    if (!bbox || !(*bbox).contains(bboxarea)  && child->_item) {
+                    if (!bbox || (!(*bbox).contains(bboxarea)  && child->_item)) {
                         Glib::ustring id = Glib::ustring(child->_item->getId());
 #ifdef DEBUG_DRAWING_ITEM
                         g_message("%s first check ignored", id.c_str());
