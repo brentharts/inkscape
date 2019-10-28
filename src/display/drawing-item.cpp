@@ -746,22 +746,24 @@ DrawingItem::render(DrawingContext &dc, Geom::IntRect const &area, unsigned flag
     // Device scale for HiDPI screens (typically 1 or 2)
     int device_scale = dc.surface()->device_scale();
     DrawingItem *start_at = _drawing.getStartItem();
-    if (start_at) {
+    if (start_at && this->_item) {
+        const gchar *current_id = this->_item->getId();
+        const gchar *start_id = start_at->_item->getId();
         SPRoot *root = dynamic_cast<SPRoot *>(this->_item);
         if (!root) {
             SPGroup *group = dynamic_cast<SPGroup *>(this->_item);
-            if (this->_item->parent && (!group || group->layerMode() != SPGroup::LAYER)) {
-                if (start_at == this) {
+            if (!group || group->layerMode() != SPGroup::LAYER) {
+                if (current_id && !strcmp(start_id, current_id)) {
                     _drawing.setStartItem(nullptr);
 #ifdef DEBUG_DRAWING_ITEM
-                    if (this->_item->getId()) {
-                        g_message("%s RAISED ", this->_item->getId());
+                    if (current_id) {
+                        g_message("%s RAISED ", current_id);
                     }
 #endif
                 } else {
 #ifdef DEBUG_DRAWING_ITEM
-                    if (this->_item->getId()) {
-                        g_message("%s NOT RENDER", this->_item->getId());
+                    if (current_id) {
+                        g_message("%s NOT RENDER", current_id);
                     }
 #endif
                     return RENDER_OK;
