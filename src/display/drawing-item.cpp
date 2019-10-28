@@ -725,7 +725,7 @@ DrawingItem::setCoverItem(Geom::IntRect const &area, unsigned flags, DrawingItem
                     } else {
 #ifdef DEBUG_DRAWING_ITEM
                         if (child->_item->getId()) {
-                            g_message("%s IGNORED INTERSECT", child->_item->getId());
+                            g_message("%s IGNORED INTERSECT OR MULTIPATH", child->_item->getId());
                         }
 #endif
                     }
