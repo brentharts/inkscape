@@ -666,9 +666,10 @@ DrawingItem::setCoverItem(Geom::IntRect const &area, unsigned flags, DrawingItem
                     }
                     Geom::Rect bboxarea = area;
                     if (!bbox || (!(*bbox).contains(bboxarea)  && child->_item)) {
-                        Glib::ustring id = Glib::ustring(child->_item->getId());
 #ifdef DEBUG_DRAWING_ITEM
-                        //g_message("%s first check ignored", id.c_str());
+                        if (child->_item->getId()) {
+                            g_message("%s IGNORED BBOX", child->_item->getId());
+                        }
 #endif
                         continue;
                     }
@@ -683,6 +684,11 @@ DrawingItem::setCoverItem(Geom::IntRect const &area, unsigned flags, DrawingItem
             }
             DrawingShape *shape = dynamic_cast<DrawingShape *>(child);
             if (!shape) {
+#ifdef DEBUG_DRAWING_ITEM
+                if (child->_item->getId()) {
+                    g_message("%s NOT SHAPE", child->_item->getId());
+                }
+#endif
                 continue;
             }
             bool render_filters = _drawing.renderFilters();
@@ -716,6 +722,12 @@ DrawingItem::setCoverItem(Geom::IntRect const &area, unsigned flags, DrawingItem
                         }
 #endif
                         return child;
+                    } else {
+#ifdef DEBUG_DRAWING_ITEM
+                        if (child->_item->getId()) {
+                            g_message("%s IGNORED INTERSECT", child->_item->getId());
+                        }
+#endif
                     }
                 }
             }
