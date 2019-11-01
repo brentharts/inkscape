@@ -21,7 +21,7 @@ static GtkWidget* ink_action_create_tool_item( GtkAction* action );
 typedef struct
 {
     gchar* iconId;
-    GtkIconSize iconSize;
+    Inkscape::UI::InkIconSize iconSize;
 } InkActionPrivate;
 
 #define INK_ACTION_GET_PRIVATE( o ) \
@@ -61,8 +61,8 @@ static void ink_action_class_init( InkActionClass* klass )
                                          g_param_spec_int( "iconSize",
                                                            "Icon Size",
                                                            "The size the icon",
-                                                           (int)GTK_ICON_SIZE_MENU,
-                                                           (int)GTK_ICON_SIZE_DIALOG,
+                                                           INT_MIN, //  (int)GTK_ICON_SIZE_MENU,
+                                                           INT_MAX, // Inkscape::UI::InkIconSize::maxValue(), // (int)GTK_ICON_SIZE_DIALOG,
                                                            (int)GTK_ICON_SIZE_SMALL_TOOLBAR,
                                                            (GParamFlags)(G_PARAM_READABLE | G_PARAM_WRITABLE | G_PARAM_CONSTRUCT) ) );
     }
@@ -90,14 +90,14 @@ InkAction* ink_action_new( const gchar *name,
                            const gchar *label,
                            const gchar *tooltip,
                            const gchar *inkId,
-                           GtkIconSize size )
+                           Inkscape::UI::InkIconSize size )
 {
     GObject* obj = (GObject*)g_object_new( INK_ACTION_TYPE,
                                            "name", name,
                                            "label", label,
                                            "tooltip", tooltip,
                                            "iconId", inkId,
-                                           "iconSize", size,
+                                           "iconSize", size.getRawValue(),
                                            NULL );
 
     InkAction* action = INK_ACTION( obj );
@@ -119,7 +119,7 @@ static void ink_action_get_property( GObject* obj, guint propId, GValue* value, 
 
         case PROP_INK_SIZE:
         {
-            g_value_set_int( value, priv->iconSize );
+            g_value_set_int( value, priv->iconSize.getRawValue() );
         }
         break;
 
@@ -144,7 +144,7 @@ void ink_action_set_property( GObject* obj, guint propId, const GValue *value, G
 
         case PROP_INK_SIZE:
         {
-            priv->iconSize = (GtkIconSize)g_value_get_int( value );
+            priv->iconSize = Inkscape::UI::InkIconSize::fromRawValue(g_value_get_int(value));
         }
         break;
 
@@ -173,8 +173,8 @@ static GtkWidget* ink_action_create_tool_item( GtkAction* action )
         if ( GTK_IS_TOOL_BUTTON(item) ) {
             GtkToolButton* button = GTK_TOOL_BUTTON(item);
 
-            GtkWidget *child = sp_get_icon_image(priv->iconId, priv->iconSize);
-            gtk_tool_button_set_icon_widget( button, child );
+            Gtk::Widget* child = sp_get_sized_icon_image(priv->iconId, priv->iconSize);
+            gtk_tool_button_set_icon_widget(button, child ? child->gobj() : nullptr);
         } else {
             // For now trigger a warning but don't do anything else
             GtkToolButton* button = GTK_TOOL_BUTTON(item);

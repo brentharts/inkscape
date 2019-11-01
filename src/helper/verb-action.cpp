@@ -38,12 +38,13 @@
 #include "helper/action.h"
 #include "ui/widget/button.h"
 #include "widgets/toolbox.h"
+#include "ui/ink-icon-size.h"
 
-static GtkToolItem * sp_toolbox_button_item_new_from_verb_with_doubleclick( GtkWidget *t, GtkIconSize size, Inkscape::UI::Widget::ButtonType type,
+static GtkToolItem * sp_toolbox_button_item_new_from_verb_with_doubleclick( GtkWidget *t, Inkscape::UI::InkIconSize size, Inkscape::UI::Widget::ButtonType type,
                                                                      Inkscape::Verb *verb, Inkscape::Verb *doubleclick_verb,
                                                                      Inkscape::UI::View::View *view);
 
-GtkToolItem * sp_toolbox_button_item_new_from_verb_with_doubleclick(GtkWidget *t, GtkIconSize size, Inkscape::UI::Widget::ButtonType type,
+GtkToolItem * sp_toolbox_button_item_new_from_verb_with_doubleclick(GtkWidget *t, Inkscape::UI::InkIconSize size, Inkscape::UI::Widget::ButtonType type,
                                                              Inkscape::Verb *verb, Inkscape::Verb *doubleclick_verb,
                                                              Inkscape::UI::View::View *view)
 {
@@ -120,7 +121,7 @@ Gtk::Widget* VerbAction::create_menu_item_vfunc()
 Gtk::Widget* VerbAction::create_tool_item_vfunc()
 {
 //     Gtk::Widget* widg = Gtk::Action::create_tool_item_vfunc();
-    GtkIconSize toolboxSize = Inkscape::UI::ToolboxFactory::prefToSize("/toolbox/tools/small");
+    Inkscape::UI::InkIconSize toolboxSize = Inkscape::UI::ToolboxFactory::prefToIconSize("/toolbox/tools/small");
     GtkWidget* toolbox = nullptr;
     auto holder = Glib::wrap(sp_toolbox_button_item_new_from_verb_with_doubleclick( toolbox, toolboxSize,
                                                                                     Inkscape::UI::Widget::BUTTON_TYPE_TOGGLE,

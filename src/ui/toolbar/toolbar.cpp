@@ -16,10 +16,19 @@
 #include "desktop.h"
 
 #include "helper/action.h"
+#include "ui/icon-loader.h"
 
 namespace Inkscape {
 namespace UI {
 namespace Toolbar {
+
+Toolbar::Toolbar(SPDesktop* desktop): _desktop(desktop) {
+    // default icon size
+    _icon_size = Inkscape::UI::InkIconSize("/toolbox/small");
+}
+
+Toolbar::Toolbar(SPDesktop* desktop, Inkscape::UI::InkIconSize icon_size): _desktop(desktop), _icon_size(icon_size) {
+}
 
 Gtk::ToolItem *
 Toolbar::add_label(const Glib::ustring &label_text)
@@ -87,6 +96,12 @@ Toolbar::create(SPDesktop *desktop)
     auto toolbar = Gtk::manage(new Toolbar(desktop));
     return GTK_WIDGET(toolbar->gobj());
 }
+
+Gtk::ToggleToolButton* Toolbar::add_toggle_button(const Glib::ustring& label_text,
+        const Glib::ustring& tooltip_text, const Glib::ustring& icon_name) {
+    return add_button<Gtk::ToggleToolButton>(label_text, tooltip_text, icon_name);
+}
+
 }
 }
 }

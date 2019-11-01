@@ -100,6 +100,7 @@ using Inkscape::UI::UXManager;
 using Inkscape::DocumentUndo;
 using Inkscape::UI::ToolboxFactory;
 using Inkscape::UI::Tools::ToolBase;
+using Inkscape::UI::InkIconSize;
 
 using Inkscape::IO::Resource::get_filename;
 using Inkscape::IO::Resource::UIS;
@@ -125,7 +126,7 @@ GtkIconSize ToolboxFactory::prefToSize( Glib::ustring const &path, int base ) {
         GTK_ICON_SIZE_DIALOG
     };
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    int index = prefs->getIntLimited( path, base, 0, G_N_ELEMENTS(sizeChoices) );
+    int index = prefs->getIntLimited(path, base, 0, G_N_ELEMENTS(sizeChoices) - 1);
     return sizeChoices[index];
 }
 
@@ -134,7 +135,7 @@ Gtk::IconSize ToolboxFactory::prefToSize_mm(Glib::ustring const &path, int base)
     static Gtk::IconSize sizeChoices[] = { Gtk::ICON_SIZE_LARGE_TOOLBAR, Gtk::ICON_SIZE_SMALL_TOOLBAR,
                                            Gtk::ICON_SIZE_MENU, Gtk::ICON_SIZE_DIALOG };
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    int index = prefs->getIntLimited(path, base, 0, G_N_ELEMENTS(sizeChoices));
+    int index = prefs->getIntLimited(path, base, 0, G_N_ELEMENTS(sizeChoices) - 1);
     return sizeChoices[index];
 }
 
@@ -250,7 +251,7 @@ static void trigger_sp_action( GtkAction* /*act*/, gpointer user_data )
     }
 }
 
-static GtkAction* create_action_for_verb( Inkscape::Verb* verb, Inkscape::UI::View::View* view, GtkIconSize size )
+static GtkAction* create_action_for_verb( Inkscape::Verb* verb, Inkscape::UI::View::View* view, Inkscape::UI::InkIconSize size )
 {
     GtkAction* act = nullptr;
 
@@ -332,7 +333,7 @@ static Glib::RefPtr<Gtk::ActionGroup> create_or_fetch_actions( SPDesktop* deskto
         SP_VERB_ZOOM_CENTER_PAGE
     };
 
-    GtkIconSize toolboxSize = ToolboxFactory::prefToSize("/toolbox/small");
+    Inkscape::UI::InkIconSize toolboxSize = ToolboxFactory::prefToIconSize("/toolbox/small");
     Glib::RefPtr<Gtk::ActionGroup> mainActions;
     if (desktop == nullptr)
     {
@@ -541,7 +542,7 @@ static void setupToolboxCommon( GtkWidget *toolbox,
     }
 
     GtkIconSize toolboxSize = ToolboxFactory::prefToSize(sizePref);
-    gtk_toolbar_set_icon_size( GTK_TOOLBAR(toolBar), static_cast<GtkIconSize>(toolboxSize) );
+    gtk_toolbar_set_icon_size(GTK_TOOLBAR(toolBar), static_cast<GtkIconSize>(toolboxSize));
 
     GtkPositionType pos = static_cast<GtkPositionType>(GPOINTER_TO_INT(g_object_get_data( G_OBJECT(toolbox), HANDLE_POS_MARK )));
     orientation = ((pos == GTK_POS_LEFT) || (pos == GTK_POS_RIGHT)) ? GTK_ORIENTATION_HORIZONTAL : GTK_ORIENTATION_VERTICAL;
@@ -745,8 +746,9 @@ void update_commands_toolbox(SPDesktop * /*desktop*/, ToolBase * /*eventcontext*
 void setup_snap_toolbox(GtkWidget *toolbox, SPDesktop *desktop)
 {
     Glib::ustring sizePref("/toolbox/secondary");
-    auto toolBar = Inkscape::UI::Toolbar::SnapToolbar::create(desktop);
     auto prefs = Inkscape::Preferences::get();
+    auto icon_size = ToolboxFactory::prefToIconSize(sizePref);
+    auto toolBar = Inkscape::UI::Toolbar::SnapToolbar::create(desktop, icon_size);
 
     if ( prefs->getBool("/toolbox/icononly", true) ) {
         gtk_toolbar_set_style( GTK_TOOLBAR(toolBar), GTK_TOOLBAR_ICONS );
@@ -816,6 +818,9 @@ void ToolboxFactory::showAuxToolbox(GtkWidget *toolbox_toplevel)
 
 #define MODE_LABEL_WIDTH 70
 
+InkIconSize ToolboxFactory::prefToIconSize(const Glib::ustring& prefPath) {
+    return InkIconSize(prefPath);
+}
 
 /*
   Local Variables:
