@@ -14,6 +14,7 @@
 
 #include <gtkmm/togglebutton.h>
 #include <sigc++/connection.h>
+#include "ui/ink-icon-size.h"
 
 struct SPAction;
 
@@ -33,7 +34,7 @@ enum ButtonType {
 class Button : public Gtk::ToggleButton{
 private:
     ButtonType _type;
-    GtkIconSize _lsize;
+    Inkscape::UI::InkIconSize _lsize;
     unsigned int _psize;
     SPAction *_action;
     SPAction *_doubleclick_action;
@@ -66,6 +67,11 @@ public:
            Inkscape::UI::View::View *view,
            const gchar              *name,
            const gchar              *tip);
+
+    Button(Inkscape::UI::InkIconSize  size,
+           ButtonType   type,
+           SPAction    *action,
+           SPAction    *doubleclick_action);
 
     ~Button() override;
 

@@ -188,11 +188,14 @@ public:
     void init(Glib::ustring const &prefs_path, std::vector<Glib::ustring> labels, std::vector<Glib::ustring> values,
               Glib::ustring default_value);
 
+    void set_on_change_callback(const std::function<void(int)>& on_change);
+
   protected:
     Glib::ustring _prefs_path;
     std::vector<int> _values;
     std::vector<Glib::ustring> _ustr_values;    ///< string key values used optionally instead of numeric _values
     void on_changed() override;
+    std::function<void(int)> _on_change;
 };
 
 class PrefEntry : public Gtk::Entry
