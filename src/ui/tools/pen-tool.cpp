@@ -1963,8 +1963,18 @@ bool PenTool::_undoLastPoint() {
         sp_canvas_item_hide(this->cl0);
         sp_canvas_item_hide(this->cl1);
         this->state = PenTool::POINT;
+
+        if(this->polylines_paraxial) {
+            // We compare the point we're removing with the nearest horiz/vert to
+            // see if the line was added with SHIFT or not.
+            Geom::Point compare(pt);
+            this->_setToNearestHorizVert(compare, 0);
+            if ((std::abs(compare[Geom::X] - pt[Geom::X]) > 1e-9) 
+                || (std::abs(compare[Geom::Y] - pt[Geom::Y]) > 1e-9)) {
+                this->paraxial_angle = this->paraxial_angle.cw();
+            }
+        }
         this->_setSubsequentPoint(pt, true);
-        this->paraxial_angle = this->paraxial_angle.cw();
 
         //redraw
         this->_bsplineSpiroBuild();
