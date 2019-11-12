@@ -1965,8 +1965,7 @@ bool PenTool::_undoLastPoint() {
         sp_canvas_item_hide(this->cl1);
         this->state = PenTool::POINT;
         this->_setSubsequentPoint(pt, true);
-        //pen_last_paraxial_dir = !pen_last_paraxial_dir;
-        // XXX UNDO DIRECTION?
+        this->paraxial_angle = this->paraxial_angle.cw();
 
         //redraw
         this->_bsplineSpiroBuild();
