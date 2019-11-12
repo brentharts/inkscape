@@ -53,9 +53,10 @@ public:
 
     Mode mode;
     State state;
-
     bool polylines_only;
     bool polylines_paraxial;
+    Geom::Point paraxial_angle;
+
     // propiety which saves if Spiro mode is active or not
     bool spiro;
     bool bspline;
@@ -77,7 +78,7 @@ public:
 
     const std::string& getPrefsPath() override;
 
-    int nextParaxialDirection(Geom::Point const &pt, Geom::Point const &origin, guint state) const;
+    void nextParaxialDirection(Geom::Point const &pt, Geom::Point const &origin, guint state);
     void setPolylineMode();
     bool hasWaitingLPE();
     void waitForLPEMouseClicks(Inkscape::LivePathEffect::EffectType effect_type, unsigned int num_clicks, bool use_polylines = true);
