@@ -132,7 +132,7 @@ private:
     void _disableEvents();
     void _enableEvents();
 
-    void _setToNearestHorizVert(Geom::Point &pt, guint const state, bool snap) const;
+    void _setToNearestHorizVert(Geom::Point &pt, guint const state) const;
 
     void _setAngleDistanceStatusMessage(Geom::Point const p, int pc_point_to_compare, gchar const *message);
 

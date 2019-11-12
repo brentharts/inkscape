@@ -271,7 +271,7 @@ void PenTool::_endpointSnap(Geom::Point &p, guint const state) const {
         // have to use the %-key, the menu, or the snap toolbar
         if ((this->npoints > 0) && poly) {
             // snap constrained
-            this->_setToNearestHorizVert(p, state, true);
+            this->_setToNearestHorizVert(p, state);
         } else {
             // snap freely
             boost::optional<Geom::Point> origin = this->npoints > 0 ? this->p[0] : boost::optional<Geom::Point>();
@@ -1774,7 +1774,7 @@ void PenTool::_setSubsequentPoint(Geom::Point const p, bool statusbar, guint sta
         if ((std::abs(p[Geom::X] - origin[Geom::X]) > 1e-9) && (std::abs(p[Geom::Y] - origin[Geom::Y]) > 1e-9)) {
             // ...then we should draw an L-shaped path, consisting of two paraxial segments
             Geom::Point intermed = p;
-            this->_setToNearestHorizVert(intermed, status, false);
+            this->_setToNearestHorizVert(intermed, status);
             this->red_curve->lineto(intermed);
         }
         this->red_curve->lineto(p);
@@ -2056,34 +2056,23 @@ void PenTool::nextParaxialDirection(Geom::Point const &pt, Geom::Point const &or
     }
 }
 
-void PenTool::_setToNearestHorizVert(Geom::Point &pt, guint const state, bool snap) const {
+void PenTool::_setToNearestHorizVert(Geom::Point &pt, guint const state) const {
     Geom::Point const origin = this->p[0];
-
     Geom::Point const target = (state & GDK_SHIFT_MASK) ? this->paraxial_angle : this->paraxial_angle.ccw();
 
-    if (!snap) {
-        //if (next_dir == 0) {
-            // line is forced to be horizontal
-            //pt[Geom::Y] = origin[Geom::Y];
-        //} else {
-            // line is forced to be vertical
-            //pt[Geom::X] = origin[Geom::X];
-        //}
-    } else {
-        // Create a horizontal or vertical constraint line
-        Inkscape::Snapper::SnapConstraint cl(origin, target);
+    // Create a horizontal or vertical constraint line
+    Inkscape::Snapper::SnapConstraint cl(origin, target);
 
-        // Snap along the constraint line; if we didn't snap then still the constraint will be applied
-        SnapManager &m = this->desktop->namedview->snap_manager;
+    // Snap along the constraint line; if we didn't snap then still the constraint will be applied
+    SnapManager &m = this->desktop->namedview->snap_manager;
 
-        Inkscape::Selection *selection = this->desktop->getSelection();
-        // selection->singleItem() is the item that is currently being drawn. This item will not be snapped to (to avoid self-snapping)
-        // TODO: Allow snapping to the stationary parts of the item, and only ignore the last segment
+    Inkscape::Selection *selection = this->desktop->getSelection();
+    // selection->singleItem() is the item that is currently being drawn. This item will not be snapped to (to avoid self-snapping)
+    // TODO: Allow snapping to the stationary parts of the item, and only ignore the last segment
 
-        m.setup(this->desktop, true, selection->singleItem());
-        m.constrainedSnapReturnByRef(pt, Inkscape::SNAPSOURCE_NODE_HANDLE, cl);
-        m.unSetup();
-    }
+    m.setup(this->desktop, true, selection->singleItem());
+    m.constrainedSnapReturnByRef(pt, Inkscape::SNAPSOURCE_NODE_HANDLE, cl);
+    m.unSetup();
 }
 
 }
