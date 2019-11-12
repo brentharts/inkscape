@@ -2046,11 +2046,11 @@ void PenTool::nextParaxialDirection(Geom::Point const &pt, Geom::Point const &or
 
     if (this->green_curve->is_unset()) {
         // first mouse click
-        double dist_h = fabs(pt[Geom::X] - origin[Geom::X]);
-        double dist_v = fabs(pt[Geom::Y] - origin[Geom::Y]);
-        this->paraxial_angle = Geom::Point(dist_h, dist_v);
+        double h = pt[Geom::X] - origin[Geom::X];
+        double v = pt[Geom::Y] - origin[Geom::Y];
+        this->paraxial_angle = Geom::Point(h, v).ccw();
     }
-    if(!state & GDK_SHIFT_MASK) {
+    if(!(state & GDK_SHIFT_MASK)) {
         // XXX Memory leak?
         this->paraxial_angle = this->paraxial_angle.ccw();
     }
@@ -2071,7 +2071,6 @@ void PenTool::_setToNearestHorizVert(Geom::Point &pt, guint const state, bool sn
         //}
     } else {
         // Create a horizontal or vertical constraint line
-        // XXX HERE !
         Inkscape::Snapper::SnapConstraint cl(origin, target);
 
         // Snap along the constraint line; if we didn't snap then still the constraint will be applied
