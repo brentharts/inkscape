@@ -77,7 +77,6 @@ namespace Tools {
 
 static Geom::Point pen_drag_origin_w(0, 0);
 static bool pen_within_tolerance = false;
-//static int pen_last_paraxial_dir = 0; // last used direction in horizontal/vertical mode; 0 = horizontal, 1 = vertical
 const double HANDLE_CUBIC_GAP = 0.001;
 
 const std::string& PenTool::getPrefsPath() {
@@ -2050,7 +2049,6 @@ void PenTool::nextParaxialDirection(Geom::Point const &pt, Geom::Point const &or
         this->paraxial_angle = Geom::Point(h, v).ccw();
     }
     if(!(state & GDK_SHIFT_MASK)) {
-        // XXX Memory leak?
         this->paraxial_angle = this->paraxial_angle.ccw();
     }
 }
