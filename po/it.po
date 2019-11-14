@@ -13274,19 +13274,19 @@ msgstr "Modifica sul disegno"
 
 #: ../src/live_effects/parameter/path.cpp:233
 msgid "Copy path"
-msgstr "Copia tracciato"
+msgstr "Copia il tracciato"
 
 #: ../src/live_effects/parameter/path.cpp:245
 msgid "Paste path"
-msgstr "Incolla tracciato"
+msgstr "Incolla il tracciato"
 
 #: ../src/live_effects/parameter/path.cpp:531
 msgid "Paste path parameter"
-msgstr "Incolla parametri tracciato"
+msgstr "Incolla i parametri tracciato"
 
 #: ../src/live_effects/parameter/point.cpp:163
 msgid "Change point parameter"
-msgstr "Modifica parametri del punto"
+msgstr "Modifica i parametri del punto"
 
 #: ../src/live_effects/parameter/powerstrokepointarray.cpp:268
 #: ../src/live_effects/parameter/powerstrokepointarray.cpp:285
@@ -13301,7 +13301,7 @@ msgstr ""
 
 #: ../src/live_effects/parameter/random.cpp:156
 msgid "Change random parameter"
-msgstr "Modifica parametri casuali"
+msgstr "Modifica i parametri casuali"
 
 #: ../src/live_effects/parameter/satellitesarray.cpp:195
 msgid ""
@@ -14212,7 +14212,7 @@ msgstr "Seleziona l'<b>oggetto</b> da cui rimuovere gli effetti su tracciato."
 
 #: ../src/selection-chemistry.cpp:1345
 msgid "Remove live path effect"
-msgstr "Rimuovi effetto su tracciato"
+msgstr "Rimuovi l'effetto su tracciato"
 
 #: ../src/selection-chemistry.cpp:1354
 msgid "Select <b>object(s)</b> to remove filters from."
@@ -14221,15 +14221,15 @@ msgstr "Seleziona l'<b>oggetto</b> da cui rimuovere i filtri."
 #: ../src/selection-chemistry.cpp:1364
 #: ../src/ui/dialog/filter-effects-dialog.cpp:1681
 msgid "Remove filter"
-msgstr "Rimuovi filtro"
+msgstr "Rimuovi il filtro"
 
 #: ../src/selection-chemistry.cpp:1373
 msgid "Paste size"
-msgstr "Incolla dimensione"
+msgstr "Incolla la dimensione"
 
 #: ../src/selection-chemistry.cpp:1382
 msgid "Paste size separately"
-msgstr "Incolla dimensione separatamente"
+msgstr "Incolla la dimensione separatamente"
 
 #: ../src/selection-chemistry.cpp:1411
 msgid "Select <b>object(s)</b> to move to the layer above."
@@ -14249,7 +14249,7 @@ msgstr "Seleziona l'<b>oggetto</b> da spostare al livello inferiore."
 
 #: ../src/selection-chemistry.cpp:1483
 msgid "Lower to previous layer"
-msgstr "Sposta al livello precedente"
+msgstr "Abbassa al livello precedente"
 
 #: ../src/selection-chemistry.cpp:1490
 msgid "No more layers below."
@@ -14269,7 +14269,7 @@ msgstr "Impossibile trasformare un SVG incorporato."
 
 #: ../src/selection-chemistry.cpp:1779
 msgid "Remove transform"
-msgstr "Rimuovi trasformazione"
+msgstr "Rimuovi la trasformazione"
 
 #: ../src/selection-chemistry.cpp:1880
 msgid "Rotate 90° CCW"
@@ -14286,7 +14286,7 @@ msgstr "Ruota"
 
 #: ../src/selection-chemistry.cpp:2246
 msgid "Rotate by pixels"
-msgstr "Ruota tramite pixel"
+msgstr "Ruota di pixel in pixel"
 
 #: ../src/selection-chemistry.cpp:2299
 msgid "Scale by whole factor"
@@ -14307,11 +14307,11 @@ msgstr "Muovi"
 
 #: ../src/selection-chemistry.cpp:2338
 msgid "Move vertically by pixels"
-msgstr "Scosta verticalmente di pixel"
+msgstr "Scosta verticalmente di pixel in pixel"
 
 #: ../src/selection-chemistry.cpp:2341
 msgid "Move horizontally by pixels"
-msgstr "Scosta orizzontalmente di pixel"
+msgstr "Scosta orizzontalmente di pixel in pixel"
 
 #: ../src/selection-chemistry.cpp:2548
 msgid "The selection has no applied path effect."
@@ -14332,7 +14332,7 @@ msgstr "Seleziona i <b>cloni</b> da ricollegare."
 
 #: ../src/selection-chemistry.cpp:2658
 msgid "Copy an <b>object</b> to clipboard to relink clones to."
-msgstr "Copiare un <b>oggetto</b> negli appunti per ricollegargli i cloni."
+msgstr "Copia un <b>oggetto</b> negli appunti per ricollegargli i cloni."
 
 #: ../src/selection-chemistry.cpp:2680
 msgid "<b>No clones to relink</b> in the selection."
@@ -14352,12 +14352,12 @@ msgstr "<b>Nessun clone da scollegare</b> nella selezione."
 
 #: ../src/selection-chemistry.cpp:2776
 msgid "Unlink clone"
-msgstr "Scollega clone"
+msgstr "Scollega il clone"
 
 #: ../src/selection-chemistry.cpp:2806
 #, fuzzy
 msgid "Unlink clone recursively"
-msgstr "Scollega clone"
+msgstr "Scollega il clone ricorsivamente"
 
 #: ../src/selection-chemistry.cpp:2816
 msgid ""
@@ -14376,7 +14376,7 @@ msgid ""
 "flowed text?)"
 msgstr ""
 "<b>Impossibile trovare</b> l'oggetto da selezionare (clone orfano, "
-"proiezione, testo su percorso o testo dinamico?)"
+"offset, testo su percorso o testo dinamico?)"
 
 #: ../src/selection-chemistry.cpp:2864
 msgid ""
@@ -14796,11 +14796,11 @@ msgstr ""
 
 #: ../src/splivarot.cpp:1768 ../src/splivarot.cpp:1839
 msgid "Create linked offset"
-msgstr "Crea proiezione collegata"
+msgstr "Crea una proiezione collegata"
 
 #: ../src/splivarot.cpp:1769 ../src/splivarot.cpp:1840
 msgid "Create dynamic offset"
-msgstr "Crea proiezione dinamica"
+msgstr "Crea una proiezione dinamica"
 
 #: ../src/splivarot.cpp:1863
 msgid "Select <b>path(s)</b> to inset/outset."
@@ -14808,11 +14808,11 @@ msgstr "Seleziona il <b>tracciato</b> da intrudere/estrudere."
 
 #: ../src/splivarot.cpp:2046
 msgid "Outset path"
-msgstr "Estrudi tracciato"
+msgstr "Estrudi il tracciato"
 
 #: ../src/splivarot.cpp:2046
 msgid "Inset path"
-msgstr "Intrudi tracciato"
+msgstr "Intrudi il tracciato"
 
 #: ../src/splivarot.cpp:2048
 msgid "<b>No paths</b> to inset/outset in the selection."
@@ -14873,7 +14873,7 @@ msgstr ""
 
 #: ../src/text-chemistry.cpp:180 ../src/verbs.cpp:2680
 msgid "Put text on path"
-msgstr "Mette il testo sul tracciato"
+msgstr "Mette il testo lungo il tracciato"
 
 #: ../src/text-chemistry.cpp:191
 msgid "Select <b>a text on path</b> to remove it from path."
@@ -14921,7 +14921,7 @@ msgstr "Seleziona <b>un testo dinamico</b> da convertire."
 
 #: ../src/text-chemistry.cpp:553
 msgid "Convert flowed text to text"
-msgstr "Converti testo dinamica in testo"
+msgstr "Converti il testo dinamico in testo"
 
 #: ../src/text-chemistry.cpp:559
 msgid "Flowed text(s) must be <b>visible</b> in order to be converted."
@@ -15045,7 +15045,7 @@ msgstr "Nascondi gli oggetti selezionati"
 
 #: ../src/ui/contextmenu.cpp:114
 msgid "Unhide Objects Below"
-msgstr "Mostra oggetti sottostanti"
+msgstr "Mostra gli oggetti sottostanti"
 
 #: ../src/ui/contextmenu.cpp:122
 msgid "Lock Selected Objects"
@@ -15053,7 +15053,7 @@ msgstr "Blocca gli oggetti selezionati"
 
 #: ../src/ui/contextmenu.cpp:130
 msgid "Unlock Objects Below"
-msgstr "Blocca oggetti sottostanti"
+msgstr "Blocca gli oggetti sottostanti"
 
 #. TRANSLATORS: #%1 is the id of the group e.g. <g id="#g7">, not a number.
 #: ../src/ui/contextmenu.cpp:154
@@ -15082,19 +15082,19 @@ msgstr "Riempimento e contorni"
 
 #: ../src/ui/contextmenu.cpp:391
 msgid "Fill Color"
-msgstr "Colore riempimento"
+msgstr "Colore del riempimento"
 
 #: ../src/ui/contextmenu.cpp:398
 msgid "Stroke Color"
-msgstr "Colore contorno"
+msgstr "Colore del contorno"
 
 #: ../src/ui/contextmenu.cpp:405
 msgid "Stroke Style"
-msgstr "Stile contorno"
+msgstr "Stile del contorno"
 
 #: ../src/ui/contextmenu.cpp:412
 msgid "Object Type"
-msgstr "Tipo oggetto"
+msgstr "Tipo di oggetto"
 
 #: ../src/ui/contextmenu.cpp:419
 msgid "_Move to Layer..."
@@ -15106,11 +15106,11 @@ msgstr "_Crea collegamento"
 
 #: ../src/ui/contextmenu.cpp:452
 msgid "Set Mask"
-msgstr "Imposta maschera"
+msgstr "Imposta la maschera"
 
 #: ../src/ui/contextmenu.cpp:463
 msgid "Release Mask"
-msgstr "Rimuovi maschera"
+msgstr "Rimuovi la maschera"
 
 #: ../src/ui/contextmenu.cpp:474
 msgid "Create Clip G_roup"
@@ -15213,7 +15213,7 @@ msgstr "Larga"
 
 #: ../src/ui/desktop/menubar.cpp:321
 msgid "Setup for widescreen work"
-msgstr "Impostazione interfaccia per schermi larghi"
+msgstr "Impostazione dell'interfaccia per schermi larghi"
 
 #: ../src/ui/desktop/menubar.cpp:519
 msgid "Open _Recent"
@@ -15300,11 +15300,11 @@ msgstr "Rimuovi sovrapposizione"
 #: ../src/ui/dialog/align-and-distribute.cpp:547
 #: ../src/ui/toolbar/connector-toolbar.cpp:365
 msgid "Arrange connector network"
-msgstr "Sistema connettori rete"
+msgstr "Sistema i connettori rete"
 
 #: ../src/ui/dialog/align-and-distribute.cpp:637
 msgid "Exchange Positions"
-msgstr "Scambia posizioni"
+msgstr "Scambia le posizioni"
 
 #: ../src/ui/dialog/align-and-distribute.cpp:672
 msgid "Unclump"
@@ -15384,7 +15384,7 @@ msgstr "Allinea i margini inferiori"
 #: ../src/verbs.cpp:3214
 msgid "Align top edges of objects to the bottom edge of the anchor"
 msgstr ""
-"Allinea il margine superiore dell'oggetto al margine inferiore del fisso"
+"Allinea il margine superiore dell'oggetto al margine inferiore del riferimento"
 
 #: ../src/ui/dialog/align-and-distribute.cpp:979
 msgid "Align baseline anchors of texts horizontally"
@@ -15442,15 +15442,15 @@ msgstr "Dispone ordinatamente i connettori di rete selezionati"
 
 #: ../src/ui/dialog/align-and-distribute.cpp:1028
 msgid "Exchange positions of selected objects - selection order"
-msgstr "Scambia le posizioni degli oggetti selezionati - ordine di selezione"
+msgstr "Scambia le posizioni degli oggetti selezionati per ordine di selezione"
 
 #: ../src/ui/dialog/align-and-distribute.cpp:1031
 msgid "Exchange positions of selected objects - stacking order"
-msgstr "Scambia le posizioni degli oggetti selezionati - ordine di impilamento"
+msgstr "Scambia le posizioni degli oggetti selezionati per ordine di impilamento"
 
 #: ../src/ui/dialog/align-and-distribute.cpp:1034
 msgid "Exchange positions of selected objects - clockwise rotate"
-msgstr "Scambia le posizioni degli oggetti selezionati - rotazione oraria"
+msgstr "Scambia le posizioni degli oggetti selezionati con una rotazione oraria"
 
 #: ../src/ui/dialog/align-and-distribute.cpp:1039
 msgid "Randomize centers in both dimensions"
@@ -15516,7 +15516,7 @@ msgstr "Area selezione"
 
 #: ../src/ui/dialog/align-and-distribute.cpp:1081
 msgid "Middle of selection"
-msgstr "Metà selezione"
+msgstr "Centro della selezione"
 
 #: ../src/ui/dialog/align-and-distribute.cpp:1082
 msgid "Min value"
@@ -15534,7 +15534,7 @@ msgstr "_Gestisci selezione come gruppo"
 # File: ../src/ui/dialog/align-and-distribute.cpp, line: 1107
 #: ../src/ui/dialog/align-and-distribute.cpp:1107
 msgid "Enable on-canvas alignment handles."
-msgstr "Abilita maniglie di allineamento sul canvas"
+msgstr "Abilita le maniglie di allineamento sul canvas"
 
 #: ../src/ui/dialog/attrdialog.cpp:92
 #, fuzzy
@@ -15575,24 +15575,24 @@ msgstr ""
 
 #: ../src/ui/dialog/attrdialog.cpp:458 ../src/ui/dialog/attrdialog.cpp:485
 msgid "Delete attribute"
-msgstr "Cancella attributo"
+msgstr "Cancella l'attributo"
 
 #: ../src/ui/dialog/attrdialog.cpp:597
 msgid "Rename attribute"
-msgstr "Rinomina attributo"
+msgstr "Rinomina l'attributo"
 
 #: ../src/ui/dialog/attrdialog.cpp:653
 msgid "Change attribute value"
-msgstr "Modifica valore attributo"
+msgstr "Modifica il valore dell'attributo"
 
 #: ../src/ui/dialog/calligraphic-profile-rename.cpp:31
 #: ../src/ui/dialog/calligraphic-profile-rename.cpp:118
 msgid "Edit profile"
-msgstr "Modifica profilo"
+msgstr "Modifica il profilo"
 
 #: ../src/ui/dialog/calligraphic-profile-rename.cpp:39
 msgid "Profile name:"
-msgstr "Nome profilo:"
+msgstr "Nome del profilo:"
 
 #: ../src/ui/dialog/calligraphic-profile-rename.cpp:55
 #: ../src/ui/dialog/guides.cpp:179 ../src/verbs.cpp:2581
@@ -15818,7 +15818,7 @@ msgstr ""
 
 #: ../src/ui/dialog/clonetiler.cpp:346
 msgid "Randomize the horizontal scale by this percentage"
-msgstr "Rende casuale di questa percentuale il ridimensionamento orizzontale"
+msgstr "Rende casuale il ridimensionamento orizzontale di questa percentuale"
 
 #: ../src/ui/dialog/clonetiler.cpp:354
 msgid "<b>Scale Y:</b>"
@@ -15828,18 +15828,18 @@ msgstr "<b>Scala Y:</b>"
 #, no-c-format
 msgid "Vertical scale per row (in % of tile height)"
 msgstr ""
-"Il ridimensionamento verticale per ogni riga (in % sulla larghezza del clone)"
+"Ridimensionamento verticale per ogni riga (in % sulla larghezza del clone)"
 
 #: ../src/ui/dialog/clonetiler.cpp:371
 #, no-c-format
 msgid "Vertical scale per column (in % of tile height)"
 msgstr ""
-"Il ridimensionamento verticale per ogni colonna (in % sulla larghezza del "
+"Ridimensionamento verticale per ogni colonna (in % sulla larghezza del "
 "clone)"
 
 #: ../src/ui/dialog/clonetiler.cpp:377
 msgid "Randomize the vertical scale by this percentage"
-msgstr "Rende casuale di questa percentuale il ridimensionamento verticale"
+msgstr "Rende casuale il ridimensionamento verticale di questa percentuale"
 
 #: ../src/ui/dialog/clonetiler.cpp:392
 msgid "Whether row scaling is uniform (1), converge (<1) or diverge (>1)"
@@ -15900,7 +15900,7 @@ msgstr "Ruota i cloni di questo angolo per ogni colonna"
 
 #: ../src/ui/dialog/clonetiler.cpp:498
 msgid "Randomize the rotation angle by this percentage"
-msgstr "Rende casuale di questa percentuale l'angolo di rotazione"
+msgstr "Rende casuale l'angolo di rotazione di questa percentuale"
 
 #: ../src/ui/dialog/clonetiler.cpp:513
 msgid "Alternate the rotation direction for each row"
@@ -15953,11 +15953,11 @@ msgstr "<b>Opacità:</b>"
 
 #: ../src/ui/dialog/clonetiler.cpp:610
 msgid "Decrease tile opacity by this percentage for each row"
-msgstr "Riduce di questa percentuale per ogni riga l'opacità dei cloni"
+msgstr "Riduce di questa percentuale l'opacità dei cloni per ogni riga"
 
 #: ../src/ui/dialog/clonetiler.cpp:616
 msgid "Decrease tile opacity by this percentage for each column"
-msgstr "Riduce di questa percentuale per ogni colonna l'opacità dei cloni"
+msgstr "Riduce di questa percentuale l'opacità dei cloni per ogni colonna"
 
 #: ../src/ui/dialog/clonetiler.cpp:622
 msgid "Randomize the tile opacity by this percentage"
@@ -16013,12 +16013,12 @@ msgstr "<b>S:</b>"
 
 #: ../src/ui/dialog/clonetiler.cpp:710
 msgid "Change the color saturation by this percentage for each row"
-msgstr "Cambia di questa percentuale per ogni riga la saturazione del colore"
+msgstr "Cambia di questa percentuale la saturazione del colore per ogni riga"
 
 #: ../src/ui/dialog/clonetiler.cpp:716
 msgid "Change the color saturation by this percentage for each column"
 msgstr ""
-"Cambia di questa percentuale per ogni colonna la saturazione del colore"
+"Cambia di questa percentuale la saturazione del colore per ogni colonna"
 
 #: ../src/ui/dialog/clonetiler.cpp:722
 msgid "Randomize the color saturation by this percentage"
@@ -16262,7 +16262,7 @@ msgstr " Spa_rpaglia "
 #: ../src/ui/dialog/clonetiler.cpp:1148
 msgid "Spread out clones to reduce clumping; can be applied repeatedly"
 msgstr ""
-"Distribuisce i cloni in modo da ridurre gli agglomerati, può essere ripetuto"
+"Distribuisce i cloni in modo da ridurre gli agglomerati; può essere ripetuto"
 
 #: ../src/ui/dialog/clonetiler.cpp:1154
 msgid " Re_move "
@@ -16416,15 +16416,15 @@ msgstr "<b>Licenza</b>"
 
 #: ../src/ui/dialog/document-properties.cpp:103
 msgid "Use antialiasing"
-msgstr "Usa antialias"
+msgstr "Usa antialiasing"
 
 #: ../src/ui/dialog/document-properties.cpp:103
 msgid "If unset, no antialiasing will be done on the drawing"
-msgstr "Se attivo, l'antialias verrà abilitato per il disegno"
+msgstr "Se attivo, l'antialiasing verrà abilitato per il disegno"
 
 #: ../src/ui/dialog/document-properties.cpp:104
 msgid "Checkerboard background"
-msgstr "Sfondo a scacchiera"
+msgstr "Sfondo a scacchi"
 
 #: ../src/ui/dialog/document-properties.cpp:104
 msgid "If set, use a colored checkerboard for the canvas background"
@@ -16499,7 +16499,7 @@ msgstr "Blocca tutte le guide"
 #: ../src/ui/dialog/document-properties.cpp:115 ../src/verbs.cpp:2646
 #: ../src/widgets/desktop-widget.cpp:379
 msgid "Toggle lock of all guides in the document"
-msgstr "Imposta il blocco di tutte le guide nel documento"
+msgstr "Alterna il blocco/sblocco di tutte le guide nel documento"
 
 #: ../src/ui/dialog/document-properties.cpp:116
 msgid "Guide co_lor:"
@@ -17301,7 +17301,7 @@ msgid ""
 msgstr ""
 "Questo è l'angolo tra l'asse del punto di illuminazione (ossia l'asse "
 "congiungente la sorgente luminosa e il punto illuminato) e il cono "
-"d'illuminazione. All'infuori di questo coso non verrà proiettata alcuna luce."
+"d'illuminazione. All'infuori di questo cono non verrà proiettata alcuna luce."
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:1257
 msgid "New light source"
@@ -29297,11 +29297,11 @@ msgstr "Ritocco spostamento"
 
 #: ../src/ui/tools/tweak-tool.cpp:1250
 msgid "Move in/out tweak"
-msgstr "Ritocco sposta dentro/fuori"
+msgstr "Sposta il ritocco dentro o fuori"
 
 #: ../src/ui/tools/tweak-tool.cpp:1254
 msgid "Move jitter tweak"
-msgstr "Ritocco spostamento sfalsato"
+msgstr "Muovi lo sfalsamento"
 
 #: ../src/ui/tools/tweak-tool.cpp:1258
 msgid "Scale tweak"
@@ -29325,7 +29325,7 @@ msgstr "Ritocco riduzione/accrescimento"
 
 #: ../src/ui/tools/tweak-tool.cpp:1278
 msgid "Attract/repel path tweak"
-msgstr "Ritocco attrazione/repulsione"
+msgstr "Ritocco attrazione/repulsione tracciato"
 
 #: ../src/ui/tools/tweak-tool.cpp:1282
 msgid "Roughen path tweak"
@@ -29498,7 +29498,7 @@ msgstr "Opacità (%)"
 #: ../src/ui/widget/font-selector-toolbar.cpp:143
 #, fuzzy
 msgid "Select all text with this text family"
-msgstr "Seleziona tutti i testi con questa famiglia carattere"
+msgstr "Seleziona tutti i testi con questa famiglia di caratteri"
 
 #: ../src/ui/widget/font-selector-toolbar.cpp:146
 msgid "Font not found on system: "
@@ -29568,13 +29568,13 @@ msgstr "Maiuscole"
 #, fuzzy
 msgctxt "Font feature"
 msgid "Small"
-msgstr "Piccola"
+msgstr "Minuscole"
 
 #: ../src/ui/widget/font-variants.cpp:168
 #, fuzzy
 msgctxt "Font feature"
 msgid "All small"
-msgstr "All small"
+msgstr "Tutto minuscolo"
 
 #: ../src/ui/widget/font-variants.cpp:169
 #, fuzzy
