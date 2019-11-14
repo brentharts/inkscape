@@ -46916,17 +46916,17 @@ msgstr ""
 #~ msgstr "Angolo Z"
 
 #~ msgid "Grow (outset) parts of paths"
-#~ msgstr "Accresce (estrude) parti di tracciati"
+#~ msgstr "Accresce, estrudendoli, parti di tracciati"
 
 #~ msgid "Repel mode"
 #~ msgstr "Repulsione"
 
 #~ msgid "Repel parts of paths from cursor"
-#~ msgstr "Respinge parte di tracciati dal cursore"
+#~ msgstr "Allontana parte di tracciati dal cursore"
 
 #, fuzzy
 #~ msgid "Save current settings as new profile"
-#~ msgstr "Salva il documento con un nuovo nome"
+#~ msgstr "Salva le impostazioni correnti come nuovo profilo"
 
 #~ msgid ""
 #~ "dxf2svg may come with Inkscape, but is also at http://dxf-svg-convert."
@@ -46938,11 +46938,11 @@ msgstr ""
 #~ msgid ""
 #~ "Cannot set <b>%s</b>: Another element with value <b>%s</b> already exists!"
 #~ msgstr ""
-#~ "Impossibile impostare <b>%s</b>:Esiste già una altro elemento con valore "
+#~ "Impossibile impostare <b>%s</b>:Esiste già un altro elemento con valore "
 #~ "<b>%s</b>!"
 
 #~ msgid "Bend Path"
-#~ msgstr "Distorci tracciato"
+#~ msgstr "Fletti tracciato"
 
 #~ msgid "This effect does not support arcs yet, try to convert to path."
 #~ msgstr ""
@@ -46951,7 +46951,7 @@ msgstr ""
 
 #~ msgid "At least one of the objects is <b>not a path</b>, cannot combine."
 #~ msgstr ""
-#~ "Combinazione impossibile, almeno un oggetto <b>non è un tracciato</b>."
+#~ "La combinazione è impossibile, perché almeno un oggetto <b>non è un tracciato</b>."
 
 #~ msgid ""
 #~ "You cannot combine objects from <b>different groups</b> or <b>layers</b>."
@@ -46960,7 +46960,7 @@ msgstr ""
 #~ "b>."
 
 #~ msgid "Nothing in the clipboard."
-#~ msgstr "Niente negli appunti."
+#~ msgstr "Non c'è niente negli appunti."
 
 #~ msgid "Nothing on the style clipboard."
 #~ msgstr "Niente negli appunti per lo stile."
@@ -46979,9 +46979,9 @@ msgstr ""
 #~ "ReleaseNotes on this issue! (Rightclick the taskbar button and press "
 #~ "'Restore' to bring back a minimized document window)"
 #~ msgstr ""
-#~ "Determina se se le sottofinestre stanno sopra la finestra del documento."
+#~ "Determina se le sottofinestre devono apparire sopra la finestra del documento."
 #~ "Si vedano le ReleaseNotes in caso di problemi! (Fare clic col destro "
-#~ "sulla barra e premere «Ripristoina» per mostrare nuovamente un documento "
+#~ "sulla barra e premere «Ripristina» per mostrare nuovamente un documento "
 #~ "minimizzato)"
 
 #~ msgid "Make the commands toolbar icons smaller"
@@ -46998,7 +46998,7 @@ msgstr ""
 #~ msgstr "Elimina segmento"
 
 #~ msgid "Node Break"
-#~ msgstr "Spezza nodo"
+#~ msgstr "Interrompi nodo"
 
 #~ msgid "Interpolate style (experimental)"
 #~ msgstr "Interpola stile (sperimentale)"
@@ -47087,13 +47087,13 @@ msgstr ""
 #~ msgstr "Solido 3D: attiva punto di fuga"
 
 #~ msgid "Angle of infinite vanishing point in X direction"
-#~ msgstr "Angolo del punto di fuga all'infinito sulla direzione X"
+#~ msgstr "Angolazione del punto di fuga all'infinito sulla direzione X"
 
 #~ msgid "Angle of infinite vanishing point in Y direction"
-#~ msgstr "Angolo del punto di fuga all'infinito sulla direzione Y"
+#~ msgstr "Angolazione del punto di fuga all'infinito sulla direzione Y"
 
 #~ msgid "Angle of infinite vanishing point in Z direction"
-#~ msgstr "Angolo del punto di fuga all'infinito sulla direzione Z"
+#~ msgstr "Angolazione del punto di fuga all'infinito sulla direzione Z"
 
 #~ msgid "%s at %s"
 #~ msgstr "%s in %s"
@@ -47114,7 +47114,7 @@ msgstr ""
 #~ "If set, objects snap to the nearest grid line, regardless of distance"
 #~ msgstr ""
 #~ "Se attivo, gli oggetti si agganciano alla linea della griglia più vicina, "
-#~ "senza riguardo per la distanza"
+#~ "indipendentemente dalla distanza"
 
 #~ msgid "<b>Global snapping toggle</b>"
 #~ msgstr "<b>Aggancio globale</b>"
@@ -47123,10 +47123,10 @@ msgstr ""
 #~ msgstr "Stampa _diretta"
 
 #~ msgid "Print directly without prompting to a file or pipe"
-#~ msgstr "Stampa diretta su un file o in una pipe senza chiedere conferma"
+#~ msgstr "Stampa direttamente su un file o in una pipe senza chiedere conferma"
 
 #~ msgid "unknown error"
-#~ msgstr "errore sconosciuto"
+#~ msgstr "Errore sconosciuto"
 
 #~ msgid "Printer '%s' does not support PS output"
 #~ msgstr "La stampante «%s» non supporta l'output PS"
@@ -47141,7 +47141,7 @@ msgstr ""
 #~ msgstr "Calibrazione del display"
 
 #~ msgid "Enable display calibration"
-#~ msgstr "Abilita calibrazione del display"
+#~ msgstr "Abilita la calibrazione del display"
 
 #~ msgid "Enables application of the display using an ICC profile."
 #~ msgstr "Abilita la calibrazione del display usando un profilo ICC."
