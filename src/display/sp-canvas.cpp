@@ -1710,7 +1710,7 @@ int SPCanvas::handle_motion(GtkWidget *widget, GdkEventMotion *event)
          tools_isactive(desktop, TOOLS_SHAPES_SPIRAL) || 
          tools_isactive(desktop, TOOLS_SHAPES_STAR) ||
          tools_isactive(desktop, TOOLS_CALLIGRAPHIC) ||
-         tools_isactive(desktop, TOOLS_SPRAY))
+         tools_isactive(desktop, TOOLS_SPRAY)))
     {
         gdk_window_set_event_compression (event->window, FALSE);
     } else if (!gdk_window_get_event_compression (event->window)) {
