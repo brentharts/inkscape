@@ -1701,9 +1701,13 @@ int SPCanvas::handle_motion(GtkWidget *widget, GdkEventMotion *event)
         return FALSE;
     }
     if (gdk_window_get_event_compression (event->window) && 
-        tools_isactive(desktop, TOOLS_SELECT) || 
+        (tools_isactive(desktop, TOOLS_SELECT) || 
+        (tools_isactive(desktop, TOOLS_NODES) || 
+        (tools_isactive(desktop, TOOLS_FREEHAND_PEN) || 
+        (tools_isactive(desktop, TOOLS_FREEHAND_PENCIL) || 
+        (tools_isactive(desktop, TOOLS_CALLIGRAPHIC) || 
         desktop->getEventContext()->space_panning ||
-        event->state & GDK_BUTTON2_MASK)
+        event->state & GDK_BUTTON2_MASK))
     {
         gdk_window_set_event_compression (event->window, TRUE);
     } else if (!gdk_window_get_event_compression (event->window)) {
