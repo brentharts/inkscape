@@ -45,6 +45,7 @@
 #include "sodipodi-ctrlrect.h"
 #include "ui/tools/node-tool.h"
 #include "ui/tools/tool-base.h"
+#include "ui/tools-switch.h"
 #include "widgets/desktop-widget.h"
 #include <2geom/affine.h>
 #include <2geom/rect.h>
@@ -1133,7 +1134,6 @@ void SPCanvas::handle_realize(GtkWidget *widget)
     GdkWindow *window = gdk_window_new (gtk_widget_get_parent_window (widget), &attributes, attributes_mask);
     gtk_widget_set_window (widget, window);
     gdk_window_set_user_data (window, widget);
-    gdk_window_set_event_compression (window, FALSE);
 
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     if (prefs->getBool("/options/useextinput/value", true)) {
@@ -1699,6 +1699,22 @@ int SPCanvas::handle_motion(GtkWidget *widget, GdkEventMotion *event)
 
     if (event->window != getWindow(canvas)) {
         return FALSE;
+    }
+    if (gdk_window_get_event_compression (event->window) &&
+        (!desktop->getEventContext()->space_panning ||
+         !(event->state & GDK_BUTTON2_MASK)) && 
+        (tools_isactive(desktop, TOOLS_SHAPES_RECT) || 
+         tools_isactive(desktop, TOOLS_SHAPES_3DBOX) || 
+         tools_isactive(desktop, TOOLS_SHAPES_ARC) || 
+         tools_isactive(desktop, TOOLS_SHAPES_RECT) || 
+         tools_isactive(desktop, TOOLS_SHAPES_SPIRAL) || 
+         tools_isactive(desktop, TOOLS_SHAPES_STAR) ||
+         tools_isactive(desktop, TOOLS_CALLIGRAPHIC) ||
+         tools_isactive(desktop, TOOLS_SPRAY)))
+    {
+        gdk_window_set_event_compression (event->window, FALSE);
+    } else if (!gdk_window_get_event_compression (event->window)) {
+        gdk_window_set_event_compression (event->window, TRUE);
     }
 
     if (canvas->_root == nullptr) // canvas being deleted
