@@ -45,6 +45,7 @@
 #include "sodipodi-ctrlrect.h"
 #include "ui/tools/node-tool.h"
 #include "ui/tools/tool-base.h"
+#include "ui/tools-switch.h"
 #include "widgets/desktop-widget.h"
 #include <2geom/affine.h>
 #include <2geom/rect.h>
@@ -1702,7 +1703,7 @@ int SPCanvas::handle_motion(GtkWidget *widget, GdkEventMotion *event)
     if (gdk_window_get_event_compression (event->window) && 
         tools_isactive(desktop, TOOLS_SELECT) || 
         desktop->getEventContext()->space_panning ||
-        event->button.button == 2)
+        event->state & GDK_BUTTON2_MASK)
     {
         gdk_window_set_event_compression (event->window, FALSE);
     } else if (!gdk_window_get_event_compression (event->window)) {
