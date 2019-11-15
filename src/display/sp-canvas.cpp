@@ -1700,18 +1700,21 @@ int SPCanvas::handle_motion(GtkWidget *widget, GdkEventMotion *event)
     if (event->window != getWindow(canvas)) {
         return FALSE;
     }
-    if (!gdk_window_get_event_compression (event->window) && 
-        (tools_isactive(desktop, TOOLS_SELECT) || 
-        tools_isactive(desktop, TOOLS_NODES) || 
-        tools_isactive(desktop, TOOLS_FREEHAND_PEN) || 
-        tools_isactive(desktop, TOOLS_FREEHAND_PENCIL) || 
-        tools_isactive(desktop, TOOLS_CALLIGRAPHIC) || 
-        desktop->getEventContext()->space_panning ||
-        (event->state & GDK_BUTTON2_MASK)))
+    if (gdk_window_get_event_compression (event->window) &&
+        (!desktop->getEventContext()->space_panning ||
+         !(event->state & GDK_BUTTON2_MASK)) && 
+        (tools_isactive(desktop, TOOLS_SHAPES_RECT) || 
+         tools_isactive(desktop, TOOLS_SHAPES_3DBOX) || 
+         tools_isactive(desktop, TOOLS_SHAPES_ARC) || 
+         tools_isactive(desktop, TOOLS_SHAPES_RECT) || 
+         tools_isactive(desktop, TOOLS_SHAPES_SPIRAL) || 
+         tools_isactive(desktop, TOOLS_SHAPES_STAR) ||
+         tools_isactive(desktop, TOOLS_CALLIGRAPHIC) ||
+         tools_isactive(desktop, TOOLS_SPRAY))
     {
-        gdk_window_set_event_compression (event->window, TRUE);
-    } else if (gdk_window_get_event_compression (event->window)) {
         gdk_window_set_event_compression (event->window, FALSE);
+    } else if (!gdk_window_get_event_compression (event->window)) {
+        gdk_window_set_event_compression (event->window, TRUE);
     }
 
     if (canvas->_root == nullptr) // canvas being deleted
