@@ -1700,7 +1700,7 @@ int SPCanvas::handle_motion(GtkWidget *widget, GdkEventMotion *event)
     if (event->window != getWindow(canvas)) {
         return FALSE;
     }
-    if (gdk_window_get_event_compression (event->window) && 
+    if (!gdk_window_get_event_compression (event->window) && 
         (tools_isactive(desktop, TOOLS_SELECT) || 
         tools_isactive(desktop, TOOLS_NODES) || 
         tools_isactive(desktop, TOOLS_FREEHAND_PEN) || 
@@ -1710,7 +1710,7 @@ int SPCanvas::handle_motion(GtkWidget *widget, GdkEventMotion *event)
         (event->state & GDK_BUTTON2_MASK)))
     {
         gdk_window_set_event_compression (event->window, TRUE);
-    } else if (!gdk_window_get_event_compression (event->window)) {
+    } else if (gdk_window_get_event_compression (event->window)) {
         gdk_window_set_event_compression (event->window, FALSE);
     }
 
