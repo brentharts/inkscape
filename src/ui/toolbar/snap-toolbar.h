@@ -46,10 +46,10 @@ private:
     void on_snap_toggled(SPAttributeEnum attr);
 
 protected:
-    SnapToolbar(SPDesktop *desktop, Inkscape::UI::InkIconSize icon_size);
+    SnapToolbar(SPDesktop *desktop);
 
 public:
-    static GtkWidget * create(SPDesktop *desktop, Inkscape::UI::InkIconSize icon_size);
+    static GtkWidget * create(SPDesktop *desktop);
     static void update(SnapToolbar *tb);
 };
 

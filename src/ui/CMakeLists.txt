@@ -7,7 +7,6 @@ set(ui_SRC
 	draw-anchor.cpp
         drag-and-drop.cpp
 	icon-loader.cpp
-	ink-icon-size.cpp
 	interface.cpp
         monitor.cpp
         pref-pusher.cpp

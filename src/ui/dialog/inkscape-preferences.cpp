@@ -63,7 +63,6 @@
 #include "ui/widget/style-swatch.h"
 #include "widgets/desktop-widget.h"
 #include <fstream>
-#include "ui/ink-icon-size.h"
 
 #if HAVE_ASPELL
 # include "ui/dialog/spellcheck.h" // for get_available_langs
@@ -1194,29 +1193,21 @@ void InkscapePreferences::initPageUI()
                          false);
     {
         Glib::ustring sizeLabels[] = { C_("Icon size", "Larger"), C_("Icon size", "Large"), C_("Icon size", "Small"),
-                                       C_("Icon size", "Smaller"), _("Custom") };
-        const int CUSTOM = 4;
-        int sizeValues[] = { 3, 0, 1, 2, CUSTOM };
+                                       C_("Icon size", "Smaller") };
+        int sizeValues[] = { 3, 0, 1, 2 };
         // "Larger" is 3 to not break existing preference files. Should fix in GTK3
-        // 4 is not a GTK3 enum value, but instead signifies custom size
-        struct El { UI::Widget::PrefCombo* combo; UI::Widget::PrefSlider* slider; Glib::ustring pref, label, tip; };
-        El elements[] = {
-           {&_misc_small_tools, &_misc_small_tools_size, "/toolbox/tools/small", _("Toolbox icon size:"), _("Set the size for the tool icons (requires restart)")},
-           {&_misc_small_toolbar, &_misc_small_toolbar_size, "/toolbox/small", _("Control bar icon size:"), _("Set the size for the icons in tools' control bars to use (requires restart)")},
-           {&_misc_small_secondary, &_misc_small_secondary_size, "/toolbox/secondary", _("Secondary toolbar icon size:"), _("Set the size for the icons in secondary toolbars to use (requires restart)")}
-        };
-        const int minSize = Inkscape::UI::InkIconSize::minPixelValue();
-        const int maxSize = Inkscape::UI::InkIconSize::maxPixelValue();
 
-        for (auto& el : elements) {
-            auto combo = el.combo;
-            combo->init(el.pref, sizeLabels, sizeValues, G_N_ELEMENTS(sizeLabels), 0);
-            auto slider = el.slider;
-            slider->init(el.pref + "_px", minSize, maxSize, 1, 2, Inkscape::UI::InkIconSize::defaultCustomSize(), 0);
-            _page_theme.add_line(false, el.label, *combo, "", el.tip, true, slider);
-            combo->set_on_change_callback([=](int index) { slider->set_sensitive(index == CUSTOM); });
-            slider->set_sensitive(combo->get_active_row_number() == CUSTOM);
-        }
+        _misc_small_tools.init("/toolbox/tools/small", sizeLabels, sizeValues, G_N_ELEMENTS(sizeLabels), 0);
+        _page_theme.add_line(false, _("Toolbox icon size:"), _misc_small_tools, "",
+                             _("Set the size for the tool icons (requires restart)"), false);
+
+        _misc_small_toolbar.init("/toolbox/small", sizeLabels, sizeValues, G_N_ELEMENTS(sizeLabels), 0);
+        _page_theme.add_line(false, _("Control bar icon size:"), _misc_small_toolbar, "",
+                             _("Set the size for the icons in tools' control bars to use (requires restart)"), false);
+
+        _misc_small_secondary.init("/toolbox/secondary", sizeLabels, sizeValues, G_N_ELEMENTS(sizeLabels), 1);
+        _page_theme.add_line(false, _("Secondary toolbar icon size:"), _misc_small_secondary, "",
+                             _("Set the size for the icons in secondary toolbars to use (requires restart)"), false);
     }
     {
         Glib::ustring menu_icons_labels[] = {_("Yes"), _("No"), _("Theme decides")};

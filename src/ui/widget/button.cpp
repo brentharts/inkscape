@@ -117,18 +117,11 @@ Button::Button(GtkIconSize   size,
                    ButtonType  type,
                    SPAction     *action,
                    SPAction     *doubleclick_action)
-    : Button(Inkscape::UI::InkIconSize(CLAMP(size, GTK_ICON_SIZE_MENU, GTK_ICON_SIZE_DIALOG)), type, action, doubleclick_action)
-{}
-
-Button::Button(Inkscape::UI::InkIconSize size,
-                   ButtonType  type,
-                   SPAction     *action,
-                   SPAction     *doubleclick_action)
     :
     _action(nullptr),
     _doubleclick_action(nullptr),
     _type(type),
-    _lsize(size)
+    _lsize(CLAMP(size, GTK_ICON_SIZE_MENU, GTK_ICON_SIZE_DIALOG))
 {
     set_border_width(0);
 
@@ -194,11 +187,9 @@ Button::set_action(SPAction *action)
                 sigc::mem_fun(*this, &Gtk::Widget::set_sensitive));
 
         if (action->image) {
-            child = sp_get_sized_icon_image(action->image, _lsize);
-            if (child) {
-               child->show();
-               add(*child);
-            }
+            child = Glib::wrap(sp_get_icon_image(action->image, _lsize));
+            child->show();
+            add(*child);
         }
     }
 

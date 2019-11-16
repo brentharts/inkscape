@@ -80,7 +80,7 @@ namespace Inkscape {
 namespace UI {
 namespace Toolbar {
 
-NodeToolbar::NodeToolbar(SPDesktop *desktop) //, Inkscape::UI::InkIconSize icon_size)
+NodeToolbar::NodeToolbar(SPDesktop *desktop)
     : Toolbar(desktop),
     _tracker(new UnitTracker(Inkscape::Util::UNIT_TYPE_LINEAR)),
     _freeze(false)
@@ -91,8 +91,12 @@ NodeToolbar::NodeToolbar(SPDesktop *desktop) //, Inkscape::UI::InkIconSize icon_
     _tracker->setActiveUnit(&doc_units);
 
     {
-        auto insert_node_item = add_button<Gtk::MenuToolButton>(_("Insert node"), _("Insert new nodes into selected segments"), INKSCAPE_ICON("node-add"));
+        auto insert_node_item = Gtk::manage(new Gtk::MenuToolButton());
+        insert_node_item->set_icon_name(INKSCAPE_ICON("node-add"));
+        insert_node_item->set_label(_("Insert node"));
+        insert_node_item->set_tooltip_text(_("Insert new nodes into selected segments"));
         insert_node_item->signal_clicked().connect(sigc::mem_fun(*this, &NodeToolbar::edit_add));
+
         auto insert_node_menu = Gtk::manage(new Gtk::Menu());
 
         {
@@ -139,7 +143,9 @@ NodeToolbar::NodeToolbar(SPDesktop *desktop) //, Inkscape::UI::InkIconSize icon_
     }
 
     {
-        auto delete_item = add_button<Gtk::ToolButton>(_("Delete node"), _("Delete selected nodes"), INKSCAPE_ICON("node-delete"));
+        auto delete_item = Gtk::manage(new Gtk::ToolButton(_("Delete node")));
+        delete_item->set_tooltip_text(_("Delete selected nodes"));
+        delete_item->set_icon_name(INKSCAPE_ICON("node-delete"));
         delete_item->signal_clicked().connect(sigc::mem_fun(*this, &NodeToolbar::edit_delete));
         add(*delete_item);
     }
@@ -147,13 +153,17 @@ NodeToolbar::NodeToolbar(SPDesktop *desktop) //, Inkscape::UI::InkIconSize icon_
     add(* Gtk::manage(new Gtk::SeparatorToolItem()));
 
     {
-        auto join_item = add_button<Gtk::ToolButton>(_("Join nodes"), _("Join selected nodes"), INKSCAPE_ICON("node-join"));
+        auto join_item = Gtk::manage(new Gtk::ToolButton(_("Join nodes")));
+        join_item->set_tooltip_text(_("Join selected nodes"));
+        join_item->set_icon_name(INKSCAPE_ICON("node-join"));
         join_item->signal_clicked().connect(sigc::mem_fun(*this, &NodeToolbar::edit_join));
         add(*join_item);
     }
 
     {
-        auto break_item = add_button<Gtk::ToolButton>(_("Break nodes"), _("Break path at selected nodes"), INKSCAPE_ICON("node-break"));
+        auto break_item = Gtk::manage(new Gtk::ToolButton(_("Break nodes")));
+        break_item->set_tooltip_text(_("Break path at selected nodes"));
+        break_item->set_icon_name(INKSCAPE_ICON("node-break"));
         break_item->signal_clicked().connect(sigc::mem_fun(*this, &NodeToolbar::edit_break));
         add(*break_item);
     }
@@ -161,13 +171,17 @@ NodeToolbar::NodeToolbar(SPDesktop *desktop) //, Inkscape::UI::InkIconSize icon_
     add(* Gtk::manage(new Gtk::SeparatorToolItem()));
 
     {
-        auto join_segment_item = add_button<Gtk::ToolButton>(_("Join with segment"), _("Join selected endnodes with a new segment"), INKSCAPE_ICON("node-join-segment"));
+        auto join_segment_item = Gtk::manage(new Gtk::ToolButton(_("Join with segment")));
+        join_segment_item->set_tooltip_text(_("Join selected endnodes with a new segment"));
+        join_segment_item->set_icon_name(INKSCAPE_ICON("node-join-segment"));
         join_segment_item->signal_clicked().connect(sigc::mem_fun(*this, &NodeToolbar::edit_join_segment));
         add(*join_segment_item);
     }
 
     {
-        auto delete_segment_item = add_button<Gtk::ToolButton>(_("Delete segment"), _("Delete segment between two non-endpoint nodes"), INKSCAPE_ICON("node-delete-segment"));
+        auto delete_segment_item = Gtk::manage(new Gtk::ToolButton(_("Delete segment")));
+        delete_segment_item->set_tooltip_text(_("Delete segment between two non-endpoint nodes"));
+        delete_segment_item->set_icon_name(INKSCAPE_ICON("node-delete-segment"));
         delete_segment_item->signal_clicked().connect(sigc::mem_fun(*this, &NodeToolbar::edit_delete_segment));
         add(*delete_segment_item);
     }
@@ -175,25 +189,33 @@ NodeToolbar::NodeToolbar(SPDesktop *desktop) //, Inkscape::UI::InkIconSize icon_
     add(* Gtk::manage(new Gtk::SeparatorToolItem()));
 
     {
-        auto cusp_item = add_button<Gtk::ToolButton>(_("Node Cusp"), _("Make selected nodes corner"), INKSCAPE_ICON("node-type-cusp"));
+        auto cusp_item = Gtk::manage(new Gtk::ToolButton(_("Node Cusp")));
+        cusp_item->set_tooltip_text(_("Make selected nodes corner"));
+        cusp_item->set_icon_name(INKSCAPE_ICON("node-type-cusp"));
         cusp_item->signal_clicked().connect(sigc::mem_fun(*this, &NodeToolbar::edit_cusp));
         add(*cusp_item);
     }
 
     {
-        auto smooth_item = add_button<Gtk::ToolButton>(_("Node Smooth"), _("Make selected nodes smooth"), INKSCAPE_ICON("node-type-smooth"));
+        auto smooth_item = Gtk::manage(new Gtk::ToolButton(_("Node Smooth")));
+        smooth_item->set_tooltip_text(_("Make selected nodes smooth"));
+        smooth_item->set_icon_name(INKSCAPE_ICON("node-type-smooth"));
         smooth_item->signal_clicked().connect(sigc::mem_fun(*this, &NodeToolbar::edit_smooth));
         add(*smooth_item);
     }
 
     {
-        auto symmetric_item = add_button<Gtk::ToolButton>(_("Node Symmetric"), _("Make selected nodes symmetric"), INKSCAPE_ICON("node-type-symmetric"));
+        auto symmetric_item = Gtk::manage(new Gtk::ToolButton(_("Node Symmetric")));
+        symmetric_item->set_tooltip_text(_("Make selected nodes symmetric"));
+        symmetric_item->set_icon_name(INKSCAPE_ICON("node-type-symmetric"));
         symmetric_item->signal_clicked().connect(sigc::mem_fun(*this, &NodeToolbar::edit_symmetrical));
         add(*symmetric_item);
     }
 
     {
-        auto auto_item = add_button<Gtk::ToolButton>(_("Node Auto"), _("Make selected nodes auto-smooth"), INKSCAPE_ICON("node-type-auto-smooth"));
+        auto auto_item = Gtk::manage(new Gtk::ToolButton(_("Node Auto")));
+        auto_item->set_tooltip_text(_("Make selected nodes auto-smooth"));
+        auto_item->set_icon_name(INKSCAPE_ICON("node-type-auto-smooth"));
         auto_item->signal_clicked().connect(sigc::mem_fun(*this, &NodeToolbar::edit_auto));
         add(*auto_item);
     }
@@ -201,13 +223,17 @@ NodeToolbar::NodeToolbar(SPDesktop *desktop) //, Inkscape::UI::InkIconSize icon_
     add(* Gtk::manage(new Gtk::SeparatorToolItem()));
 
     {
-        auto line_item = add_button<Gtk::ToolButton>(_("Node Line"), _("Make selected segments lines"), INKSCAPE_ICON("node-segment-line"));
+        auto line_item = Gtk::manage(new Gtk::ToolButton(_("Node Line")));
+        line_item->set_tooltip_text(_("Make selected segments lines"));
+        line_item->set_icon_name(INKSCAPE_ICON("node-segment-line"));
         line_item->signal_clicked().connect(sigc::mem_fun(*this, &NodeToolbar::edit_toline));
         add(*line_item);
     }
 
     {
-        auto curve_item = add_button<Gtk::ToolButton>(_("Node Curve"), _("Make selected segments curves"), INKSCAPE_ICON("node-segment-curve"));
+        auto curve_item = Gtk::manage(new Gtk::ToolButton(_("Node Curve")));
+        curve_item->set_tooltip_text(_("Make selected segments curves"));
+        curve_item->set_icon_name(INKSCAPE_ICON("node-segment-curve"));
         curve_item->signal_clicked().connect(sigc::mem_fun(*this, &NodeToolbar::edit_tocurve));
         add(*curve_item);
     }
@@ -268,7 +294,8 @@ NodeToolbar::NodeToolbar(SPDesktop *desktop) //, Inkscape::UI::InkIconSize icon_
 
     {
         _object_edit_clip_path_item = add_toggle_button(_("Edit clipping paths"),
-                                                        _("Show clipping path(s) of selected object(s)"), INKSCAPE_ICON("path-clip-edit"));
+                                                        _("Show clipping path(s) of selected object(s)"));
+        _object_edit_clip_path_item->set_icon_name(INKSCAPE_ICON("path-clip-edit"));
         _pusher_edit_clipping_paths.reset(new SimplePrefPusher(_object_edit_clip_path_item, "/tools/nodes/edit_clipping_paths"));
         _object_edit_clip_path_item->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &NodeToolbar::on_pref_toggled),
                                                                          _object_edit_clip_path_item,
@@ -277,7 +304,8 @@ NodeToolbar::NodeToolbar(SPDesktop *desktop) //, Inkscape::UI::InkIconSize icon_
 
     {
         _object_edit_mask_path_item = add_toggle_button(_("Edit masks"),
-                                                        _("Show mask(s) of selected object(s)"), INKSCAPE_ICON("path-mask-edit"));
+                                                        _("Show mask(s) of selected object(s)"));
+        _object_edit_mask_path_item->set_icon_name(INKSCAPE_ICON("path-mask-edit"));
         _pusher_edit_masks.reset(new SimplePrefPusher(_object_edit_mask_path_item, "/tools/nodes/edit_masks"));
         _object_edit_mask_path_item->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &NodeToolbar::on_pref_toggled),
                                                                          _object_edit_mask_path_item,
@@ -293,7 +321,8 @@ NodeToolbar::NodeToolbar(SPDesktop *desktop) //, Inkscape::UI::InkIconSize icon_
 
     {
         _show_transform_handles_item = add_toggle_button(_("Show Transform Handles"),
-                                                         _("Show transformation handles for selected nodes"), INKSCAPE_ICON("node-transform"));
+                                                         _("Show transformation handles for selected nodes"));
+        _show_transform_handles_item->set_icon_name(INKSCAPE_ICON("node-transform"));
         _pusher_show_transform_handles.reset(new UI::SimplePrefPusher(_show_transform_handles_item, "/tools/nodes/show_transform_handles"));
         _show_transform_handles_item->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &NodeToolbar::on_pref_toggled),
                                                                           _show_transform_handles_item,
@@ -302,7 +331,8 @@ NodeToolbar::NodeToolbar(SPDesktop *desktop) //, Inkscape::UI::InkIconSize icon_
 
     {
         _show_handles_item = add_toggle_button(_("Show Handles"),
-                                               _("Show Bezier handles of selected nodes"), INKSCAPE_ICON("show-node-handles"));
+                                               _("Show Bezier handles of selected nodes"));
+        _show_handles_item->set_icon_name(INKSCAPE_ICON("show-node-handles"));
         _pusher_show_handles.reset(new UI::SimplePrefPusher(_show_handles_item, "/tools/nodes/show_handles"));
         _show_handles_item->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &NodeToolbar::on_pref_toggled),
                                                                 _show_handles_item,
@@ -311,7 +341,8 @@ NodeToolbar::NodeToolbar(SPDesktop *desktop) //, Inkscape::UI::InkIconSize icon_
 
     {
         _show_helper_path_item = add_toggle_button(_("Show Outline"),
-                                                   _("Show path outline (without path effects)"), INKSCAPE_ICON("show-path-outline"));
+                                                   _("Show path outline (without path effects)"));
+        _show_helper_path_item->set_icon_name(INKSCAPE_ICON("show-path-outline"));
         _pusher_show_outline.reset(new UI::SimplePrefPusher(_show_helper_path_item, "/tools/nodes/show_outline"));
         _show_helper_path_item->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &NodeToolbar::on_pref_toggled),
                                                                 _show_helper_path_item,
@@ -325,10 +356,9 @@ NodeToolbar::NodeToolbar(SPDesktop *desktop) //, Inkscape::UI::InkIconSize icon_
 }
 
 GtkWidget *
-NodeToolbar::create(SPDesktop *desktop) //, Inkscape::UI::InkIconSize icon_size)
+NodeToolbar::create(SPDesktop *desktop)
 {
-Inkscape::UI::InkIconSize icon_size;
-    auto holder = new NodeToolbar(desktop);//, icon_size);
+    auto holder = new NodeToolbar(desktop);
     return GTK_WIDGET(holder->gobj());
 } // NodeToolbar::prep()
 

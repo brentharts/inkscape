@@ -12,7 +12,6 @@
 
 #include <gtk/gtk.h>
 #include "attributes.h"
-#include "ui/ink-icon-size.h"
 
 /* Equivalent to GTK Actions of the same type, but can support Inkscape SVG icons */
 
@@ -44,7 +43,7 @@ InkAction* ink_action_new( const gchar *name,
                            const gchar *label,
                            const gchar *tooltip,
                            const gchar *inkId,
-                           Inkscape::UI::InkIconSize size);
+                           GtkIconSize  size );
 
 
 G_END_DECLS
