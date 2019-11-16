@@ -251,9 +251,6 @@ protected:
     UI::Widget::PrefCombo _misc_small_secondary;
     UI::Widget::PrefCombo _misc_small_tools;
     UI::Widget::PrefCombo _menu_icons;
-    UI::Widget::PrefSlider _misc_small_toolbar_size;
-    UI::Widget::PrefSlider _misc_small_secondary_size;
-    UI::Widget::PrefSlider _misc_small_tools_size;
 
     Gtk::Button _apply_theme;
 

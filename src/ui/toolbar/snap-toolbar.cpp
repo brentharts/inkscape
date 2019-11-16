@@ -25,15 +25,16 @@ namespace Inkscape {
 namespace UI {
 namespace Toolbar {
 
-SnapToolbar::SnapToolbar(SPDesktop *desktop, Inkscape::UI::InkIconSize icon_size)
-    : Toolbar(desktop, icon_size),
+SnapToolbar::SnapToolbar(SPDesktop *desktop)
+    : Toolbar(desktop),
     _freeze(false)
 {
     // Global snapping control
     {
         auto snap_global_verb = Inkscape::Verb::get(SP_VERB_TOGGLE_SNAPPING);
         _snap_global_item = add_toggle_button(snap_global_verb->get_name(),
-                                              snap_global_verb->get_tip(), INKSCAPE_ICON("snap"));
+                                              snap_global_verb->get_tip());
+        _snap_global_item->set_icon_name(INKSCAPE_ICON("snap"));
         _snap_global_item->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &SnapToolbar::on_snap_toggled),
                                                                SP_ATTR_INKSCAPE_SNAP_GLOBAL));
     }
@@ -43,35 +44,40 @@ SnapToolbar::SnapToolbar(SPDesktop *desktop, Inkscape::UI::InkIconSize icon_size
     // Snapping to bounding boxes
     {
         _snap_from_bbox_corner_item = add_toggle_button(_("Bounding box"),
-                                                        _("Snap bounding boxes"), INKSCAPE_ICON("snap"));
+                                                        _("Snap bounding boxes"));
+        _snap_from_bbox_corner_item->set_icon_name(INKSCAPE_ICON("snap"));
         _snap_from_bbox_corner_item->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &SnapToolbar::on_snap_toggled),
                                                                          SP_ATTR_INKSCAPE_SNAP_BBOX));
     }
 
     {
         _snap_to_bbox_path_item = add_toggle_button(_("Bounding box edges"),
-                                                    _("Snap to edges of a bounding box"), INKSCAPE_ICON("snap-bounding-box-edges"));
+                                                    _("Snap to edges of a bounding box"));
+        _snap_to_bbox_path_item->set_icon_name(INKSCAPE_ICON("snap-bounding-box-edges"));
         _snap_to_bbox_path_item->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &SnapToolbar::on_snap_toggled),
                                                                      SP_ATTR_INKSCAPE_SNAP_BBOX_EDGE));
     }
 
     {
         _snap_to_bbox_node_item = add_toggle_button(_("Bounding box corners"),
-                                                    _("Snap bounding box corners"), INKSCAPE_ICON("snap-bounding-box-corners"));
+                                                    _("Snap bounding box corners"));
+        _snap_to_bbox_node_item->set_icon_name(INKSCAPE_ICON("snap-bounding-box-corners"));
         _snap_to_bbox_node_item->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &SnapToolbar::on_snap_toggled),
                                                                      SP_ATTR_INKSCAPE_SNAP_BBOX_CORNER));
     }
 
     {
         _snap_to_from_bbox_edge_midpoints_item = add_toggle_button(_("BBox Edge Midpoints"),
-                                                                   _("Snap midpoints of bounding box edges"), INKSCAPE_ICON("snap-bounding-box-midpoints"));
+                                                                   _("Snap midpoints of bounding box edges"));
+        _snap_to_from_bbox_edge_midpoints_item->set_icon_name(INKSCAPE_ICON("snap-bounding-box-midpoints"));
         _snap_to_from_bbox_edge_midpoints_item->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &SnapToolbar::on_snap_toggled),
                                                                                     SP_ATTR_INKSCAPE_SNAP_BBOX_EDGE_MIDPOINT));
     }
 
     {
         _snap_to_from_bbox_edge_centers_item = add_toggle_button(_("BBox Centers"),
-                                                                 _("Snapping centers of bounding boxes"), INKSCAPE_ICON("snap-bounding-box-center"));
+                                                                 _("Snapping centers of bounding boxes"));
+        _snap_to_from_bbox_edge_centers_item->set_icon_name(INKSCAPE_ICON("snap-bounding-box-center"));
         _snap_to_from_bbox_edge_centers_item->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &SnapToolbar::on_snap_toggled),
                                                                                   SP_ATTR_INKSCAPE_SNAP_BBOX_MIDPOINT));
     }
@@ -81,42 +87,48 @@ SnapToolbar::SnapToolbar(SPDesktop *desktop, Inkscape::UI::InkIconSize icon_size
     // Snapping to nodes, paths & handles
     {
         _snap_from_node_item = add_toggle_button(_("Nodes"),
-                                                 _("Snap nodes, paths, and handles"), INKSCAPE_ICON("snap"));
+                                                 _("Snap nodes, paths, and handles"));
+        _snap_from_node_item->set_icon_name(INKSCAPE_ICON("snap"));
         _snap_from_node_item->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &SnapToolbar::on_snap_toggled),
                                                                   SP_ATTR_INKSCAPE_SNAP_NODE));
     }
 
     {
         _snap_to_item_path_item = add_toggle_button(_("Paths"),
-                                                    _("Snap to paths"), INKSCAPE_ICON("snap-nodes-path"));
+                                                    _("Snap to paths"));
+        _snap_to_item_path_item->set_icon_name(INKSCAPE_ICON("snap-nodes-path"));
         _snap_to_item_path_item->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &SnapToolbar::on_snap_toggled),
                                                                      SP_ATTR_INKSCAPE_SNAP_PATH));
     }
 
     {
         _snap_to_path_intersections_item = add_toggle_button(_("Path intersections"),
-                                                             _("Snap to path intersections"), INKSCAPE_ICON("snap-nodes-intersection"));
+                                                             _("Snap to path intersections"));
+        _snap_to_path_intersections_item->set_icon_name(INKSCAPE_ICON("snap-nodes-intersection"));
         _snap_to_path_intersections_item->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &SnapToolbar::on_snap_toggled),
                                                                      SP_ATTR_INKSCAPE_SNAP_PATH_INTERSECTION));
     }
 
     {
         _snap_to_item_node_item = add_toggle_button(_("To nodes"),
-                                                             _("Snap to cusp nodes, incl. rectangle corners"), INKSCAPE_ICON("snap-nodes-cusp"));
+                                                             _("Snap to cusp nodes, incl. rectangle corners"));
+        _snap_to_item_node_item->set_icon_name(INKSCAPE_ICON("snap-nodes-cusp"));
         _snap_to_item_node_item->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &SnapToolbar::on_snap_toggled),
                                                                      SP_ATTR_INKSCAPE_SNAP_NODE_CUSP));
     }
 
     {
         _snap_to_smooth_nodes_item = add_toggle_button(_("Smooth nodes"),
-                                                       _("Snap smooth nodes, incl. quadrant points of ellipses"), INKSCAPE_ICON("snap-nodes-smooth"));
+                                                       _("Snap smooth nodes, incl. quadrant points of ellipses"));
+        _snap_to_smooth_nodes_item->set_icon_name(INKSCAPE_ICON("snap-nodes-smooth"));
         _snap_to_smooth_nodes_item->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &SnapToolbar::on_snap_toggled),
                                                                         SP_ATTR_INKSCAPE_SNAP_NODE_SMOOTH));
     }
 
     {
         _snap_to_from_line_midpoints_item = add_toggle_button(_("Line Midpoints"),
-                                                              _("Snap midpoints of line segments"), INKSCAPE_ICON("snap-nodes-midpoint"));
+                                                              _("Snap midpoints of line segments"));
+        _snap_to_from_line_midpoints_item->set_icon_name(INKSCAPE_ICON("snap-nodes-midpoint"));
         _snap_to_from_line_midpoints_item->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &SnapToolbar::on_snap_toggled),
                                                                         SP_ATTR_INKSCAPE_SNAP_LINE_MIDPOINT));
     }
@@ -125,28 +137,32 @@ SnapToolbar::SnapToolbar(SPDesktop *desktop, Inkscape::UI::InkIconSize icon_size
 
     {
         _snap_from_others_item = add_toggle_button(_("Others"),
-                                                   _("Snap other points (centers, guide origins, gradient handles, etc.)"), INKSCAPE_ICON("snap"));
+                                                   _("Snap other points (centers, guide origins, gradient handles, etc.)"));
+        _snap_from_others_item->set_icon_name(INKSCAPE_ICON("snap"));
         _snap_from_others_item->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &SnapToolbar::on_snap_toggled),
                                                                         SP_ATTR_INKSCAPE_SNAP_OTHERS));
     }
 
     {
         _snap_to_from_object_centers_item = add_toggle_button(_("Object Centers"),
-                                                   _("Snap centers of objects"), INKSCAPE_ICON("snap-nodes-center"));
+                                                   _("Snap centers of objects"));
+        _snap_to_from_object_centers_item->set_icon_name(INKSCAPE_ICON("snap-nodes-center"));
         _snap_to_from_object_centers_item->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &SnapToolbar::on_snap_toggled),
                                                                         SP_ATTR_INKSCAPE_SNAP_OBJECT_MIDPOINT));
     }
 
     {
         _snap_to_from_rotation_center_item = add_toggle_button(_("Rotation Centers"),
-                                                               _("Snap an item's rotation center"), INKSCAPE_ICON("snap-nodes-rotation-center"));
+                                                               _("Snap an item's rotation center"));
+        _snap_to_from_rotation_center_item->set_icon_name(INKSCAPE_ICON("snap-nodes-rotation-center"));
         _snap_to_from_rotation_center_item->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &SnapToolbar::on_snap_toggled),
                                                                         SP_ATTR_INKSCAPE_SNAP_ROTATION_CENTER));
     }
 
     {
         _snap_to_from_text_baseline_item = add_toggle_button(_("Text baseline"),
-                                                               _("Snap text anchors and baselines"), INKSCAPE_ICON("snap-text-baseline"));
+                                                               _("Snap text anchors and baselines"));
+        _snap_to_from_text_baseline_item->set_icon_name(INKSCAPE_ICON("snap-text-baseline"));
         _snap_to_from_text_baseline_item->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &SnapToolbar::on_snap_toggled),
                                                                         SP_ATTR_INKSCAPE_SNAP_TEXT_BASELINE));
     }
@@ -155,21 +171,24 @@ SnapToolbar::SnapToolbar(SPDesktop *desktop, Inkscape::UI::InkIconSize icon_size
 
     {
         _snap_to_page_border_item = add_toggle_button(_("Page border"),
-                                                      _("Snap to the page border"), INKSCAPE_ICON("snap-page"));
+                                                      _("Snap to the page border"));
+        _snap_to_page_border_item->set_icon_name(INKSCAPE_ICON("snap-page"));
         _snap_to_page_border_item->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &SnapToolbar::on_snap_toggled),
                                                                         SP_ATTR_INKSCAPE_SNAP_PAGE_BORDER));
     }
 
     {
         _snap_to_grids_item = add_toggle_button(_("Grids"),
-                                                _("Snap to grids"), INKSCAPE_ICON("grid-rectangular"));
+                                                _("Snap to grids"));
+        _snap_to_grids_item->set_icon_name(INKSCAPE_ICON("grid-rectangular"));
         _snap_to_grids_item->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &SnapToolbar::on_snap_toggled),
                                                                         SP_ATTR_INKSCAPE_SNAP_GRID));
     }
 
     {
         _snap_to_guides_item = add_toggle_button(_("Guides"),
-                                                _("Snap guides"), INKSCAPE_ICON("guides"));
+                                                _("Snap guides"));
+        _snap_to_guides_item->set_icon_name(INKSCAPE_ICON("guides"));
         _snap_to_guides_item->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &SnapToolbar::on_snap_toggled),
                                                                         SP_ATTR_INKSCAPE_SNAP_GUIDE));
     }
@@ -178,9 +197,9 @@ SnapToolbar::SnapToolbar(SPDesktop *desktop, Inkscape::UI::InkIconSize icon_size
 }
 
 GtkWidget *
-SnapToolbar::create(SPDesktop *desktop, Inkscape::UI::InkIconSize icon_size)
+SnapToolbar::create(SPDesktop *desktop)
 {
-    auto tb = Gtk::manage(new SnapToolbar(desktop, icon_size));
+    auto tb = Gtk::manage(new SnapToolbar(desktop));
     return GTK_WIDGET(tb->gobj());
 }
 

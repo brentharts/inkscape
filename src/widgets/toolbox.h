@@ -17,7 +17,6 @@
 #include <glibmm/ustring.h>
 
 #include "preferences.h"
-#include "ui/ink-icon-size.h"
 
 #define TOOLBAR_SLIDER_HINT "compact"
 
@@ -60,9 +59,8 @@ public:
 
     static void updateSnapToolbox(SPDesktop *desktop, Inkscape::UI::Tools::ToolBase *eventcontext, GtkWidget *toolbox);
 
-    static GtkIconSize prefToSize(Glib::ustring const &path, int base = static_cast<int>(GTK_ICON_SIZE_SMALL_TOOLBAR));
-    static Gtk::IconSize prefToSize_mm(Glib::ustring const &path, int base = static_cast<int>(GTK_ICON_SIZE_SMALL_TOOLBAR));
-    static InkIconSize prefToIconSize(const Glib::ustring& prefPath);
+    static GtkIconSize prefToSize(Glib::ustring const &path, int base = 0 );
+    static Gtk::IconSize prefToSize_mm(Glib::ustring const &path, int base = 0);
 
     ToolboxFactory() = delete;
 };

@@ -682,9 +682,6 @@ void PrefCombo::on_changed()
 {
     if (this->get_visible()) //only take action if user changed value
     {
-        if (_on_change) {
-            _on_change(this->get_active_row_number());
-        }
         Inkscape::Preferences *prefs = Inkscape::Preferences::get();
         if(!_values.empty())
         {
@@ -695,10 +692,6 @@ void PrefCombo::on_changed()
             prefs->setString(_prefs_path, _ustr_values[this->get_active_row_number()]);
         }
     }
-}
-
-void PrefCombo::set_on_change_callback(const std::function<void(int)>& on_change) {
-    _on_change = on_change;
 }
 
 void PrefEntryButtonHBox::init(Glib::ustring const &prefs_path,
