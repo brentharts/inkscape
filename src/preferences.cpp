@@ -10,6 +10,7 @@
  * Released under GNU GPL.  Read the file 'COPYING' for more information.
  */
 
+#include <cerrno>
 #include <cstring>
 #include <sstream>
 #include <glibmm/fileutils.h>
@@ -790,6 +791,11 @@ int Preferences::_extractInt(Entry const &v)
     } else if ( !strcmp(s, "false") ) {
         return false;
     } else {
+        errno = 0;
+        long long val = strtoll(s, NULL, 0);
+        if (errno != ERANGE) {
+            return val;
+        }
         return atoi(s);
     }
 }
