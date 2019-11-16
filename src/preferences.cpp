@@ -790,6 +790,11 @@ int Preferences::_extractInt(Entry const &v)
     } else if ( !strcmp(s, "false") ) {
         return false;
     } else {
+        errno = 0;
+        long val = strtol(s, NULL, 0);
+        if (errno != ERANGE) {
+            return val;
+        }
         return atoi(s);
     }
 }
