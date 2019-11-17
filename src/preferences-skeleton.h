@@ -322,7 +322,11 @@ R"=====(
     <group id="outlinemode" value="0"/>
 
     <group id="wireframecolors"
-           />
+           onlight="255"
+           ondark="4294967295"
+           images="4278190335"
+           clips="16711935"
+           masks="65535"/>
     <group id="svgoutput"
            disable_optimizations="0"
            usenamedcolors="0"
