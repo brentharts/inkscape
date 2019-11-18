@@ -427,7 +427,8 @@ void ObjectsPanel::_addObject(SPItem* item, const Gtk::TreeModel::Row &row, bool
 {
     SPGroup * group = SP_IS_GROUP(item) ? SP_GROUP(item) : nullptr;
     row[_model->_colObject] = item;
-    row[_model->_colLabel] = item->defaultLabel();
+    gchar const * label = item->label() ? item->label() : item->getId();
+    row[_model->_colLabel] = label ? label : item->defaultLabel();
     row[_model->_colVisible] = !item->isHidden();
     row[_model->_colLocked] = !item->isSensitive();
     row[_model->_colType] = group ? (group->layerMode() == SPGroup::LAYER ? 2 : 1) : 0;
@@ -459,7 +460,8 @@ void ObjectsPanel::_updateObject( SPObject *obj, bool recurse ) {
         SPItem * item = SP_IS_ITEM(obj) ? SP_ITEM(obj) : nullptr;
         SPGroup * group = SP_IS_GROUP(obj) ? SP_GROUP(obj) : nullptr;
 
-        row[_model->_colLabel] = obj->defaultLabel();
+        gchar const * label = obj->label() ? obj->label() : obj->getId();
+        row[_model->_colLabel] = label ? label : obj->defaultLabel();
         row[_model->_colVisible] = item ? !item->isHidden() : false;
         row[_model->_colLocked] = item ? !item->isSensitive() : false;
         row[_model->_colType] = group ? (group->layerMode() == SPGroup::LAYER ? 2 : 1) : 0;
