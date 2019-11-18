@@ -422,10 +422,10 @@ bool ObjectsPanel::_processQueue() {
  * @param row Row where the item is residing
  * @param expanded True if the item is part of a group that is shown as expanded in the tree view
  */
+
 void ObjectsPanel::_addObject(SPItem* item, const Gtk::TreeModel::Row &row, bool expanded)
 {
     SPGroup * group = SP_IS_GROUP(item) ? SP_GROUP(item) : nullptr;
-
     row[_model->_colObject] = item;
     gchar const * label = item->label() ? item->label() : item->getId();
     row[_model->_colLabel] = label ? label : item->defaultLabel();
