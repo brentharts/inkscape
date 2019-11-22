@@ -665,7 +665,7 @@ DrawingItem::setCoverItem(Geom::IntRect const &area, unsigned flags, DrawingItem
                         *bbox *= child->ctm();
                     }
                     Geom::Rect bboxarea = area;
-                    if (!bbox || (!(*bbox).contains(bboxarea)  && child->_item)) {
+                    if ((!bbox || !(*bbox).contains(bboxarea)) && child->_item) {
 #ifdef DEBUG_DRAWING_ITEM
                         if (child->_item->getId()) {
                             g_message("%s IGNORED BBOX", child->_item->getId());
@@ -703,9 +703,8 @@ DrawingItem::setCoverItem(Geom::IntRect const &area, unsigned flags, DrawingItem
             if (!needs_intermediate_rendering) {
                 double fill_opacity = shape->getSolidFillOpacity();
                 if (fill_opacity || child->_opacity) {
-                    opacity += fill_opacity;
-                    opacity += child->_opacity;
-                    if (opacity < 1.995) {
+                    opacity = 1 - (1 - opacity) * (1 - fill_opacity) * (1 - child->_opacity);
+                    if (opacity < 0.995) {
                         continue;
                     }
                     Geom::PathVector pv = shape->getPath()->get_pathvector();
