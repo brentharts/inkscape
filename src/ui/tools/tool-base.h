@@ -196,6 +196,13 @@ public:
 	virtual void set(const Inkscape::Preferences::Entry& val);
     virtual bool root_handler(GdkEvent *event);
     virtual bool item_handler(SPItem *item, GdkEvent *event);
+
+    //! Release desktop selection, e.g. before selection will be deleted
+    virtual void ungrab(){};
+
+    //! Release desktop selection and discard delayed snap events
+    void interrupt();
+
     bool block_button(GdkEvent *event);
 
     virtual const std::string& getPrefsPath() = 0;

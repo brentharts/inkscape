@@ -223,6 +223,18 @@ bool SelectTool::sp_select_context_abort() {
     return false;
 }
 
+void SelectTool::ungrab() {
+    if (grabbed) {
+        sp_canvas_item_ungrab(grabbed);
+        grabbed = nullptr;
+    }
+
+    if (item) {
+        sp_object_unref(item, nullptr);
+        item = nullptr;
+    }
+}
+
 static bool
 key_is_a_modifier (guint key) {
     return (key == GDK_KEY_Alt_L ||
