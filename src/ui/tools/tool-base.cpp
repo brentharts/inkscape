@@ -1507,10 +1507,13 @@ gboolean sp_event_context_snap_watchdog_callback(gpointer data) {
 
     ToolBase *ec = dse->getEventContext();
     if (ec == nullptr) {
+        g_critical("dse->getEventContext() is NULL");
         delete dse;
         return false;
     }
+
     if (ec->desktop == nullptr) {
+        g_assert(ec->_delayed_snap_event == dse);
         ec->_delayed_snap_event = nullptr;
         delete dse;
         return false;
@@ -1547,6 +1550,7 @@ gboolean sp_event_context_snap_watchdog_callback(gpointer data) {
         gpointer pitem2 = dse->getItem2();
         if (!pitem2)
         {
+            g_assert(ec->_delayed_snap_event == dse);
             ec->_delayed_snap_event = nullptr;
             delete dse;
             return false;
@@ -1596,8 +1600,10 @@ gboolean sp_event_context_snap_watchdog_callback(gpointer data) {
         break;
     }
 
-    ec->_delayed_snap_event = nullptr;
-    delete dse;
+    if (ec->_delayed_snap_event == dse) {
+        ec->_delayed_snap_event = nullptr;
+        delete dse;
+    }
 
     ec->_dse_callback_in_process = false;
 
@@ -1608,6 +1614,12 @@ void sp_event_context_discard_delayed_snap_event(ToolBase *ec) {
     delete ec->_delayed_snap_event;
     ec->_delayed_snap_event = nullptr;
     ec->desktop->namedview->snap_manager.snapprefs.setSnapPostponedGlobally(false);
+}
+
+void ToolBase::interrupt()
+{
+    sp_event_context_discard_delayed_snap_event(this);
+    ungrab();
 }
 
 }

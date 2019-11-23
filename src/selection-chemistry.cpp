@@ -384,12 +384,21 @@ static void sp_selection_delete_impl(std::vector<SPItem*> const &items, bool pro
 
 void ObjectSet::deleteItems()
 {
+    SPDesktop *d = desktop();
+
     if(desktop() && tools_isactive(desktop(), TOOLS_TEXT)){
          if (Inkscape::UI::Tools::sp_text_delete_selection(desktop()->event_context)) {
             DocumentUndo::done(desktop()->getDocument(), SP_VERB_CONTEXT_TEXT,
                                _("Delete text"));
             return;
          }
+    }
+
+    if (d && d->event_context) {
+        /* a tool may have set up private information in it's selection context
+         * that depends on desktop items.
+         */
+        d->event_context->interrupt();
     }
 
         if (isEmpty()) {
@@ -401,14 +410,6 @@ void ObjectSet::deleteItems()
     sp_selection_delete_impl(selected);
     if(SPDesktop *d = desktop()){
         d->currentLayer()->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
-
-        /* a tool may have set up private information in it's selection context
-         * that depends on desktop items.  I think the only sane way to deal with
-         * this currently is to reset the current tool, which will reset it's
-         * associated selection context.  For example: deleting an object
-         * while moving it around the canvas.
-         */
-        tools_switch( d, tools_active( d ) );
     }
     if(document())
             DocumentUndo::done(document(), SP_VERB_EDIT_DELETE,

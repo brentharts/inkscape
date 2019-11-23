@@ -56,6 +56,7 @@ public:
 	void set(const Inkscape::Preferences::Entry& val) override;
 	bool root_handler(GdkEvent* event) override;
 	bool item_handler(SPItem* item, GdkEvent* event) override;
+	void ungrab() override;
 
 	const std::string& getPrefsPath() override;
 
