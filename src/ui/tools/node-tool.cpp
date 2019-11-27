@@ -481,7 +481,7 @@ bool NodeTool::root_handler(GdkEvent* event) {
      * 3. some keybindings
      */
     using namespace Inkscape::UI; // pull in event helpers
-    
+
     desktop->getCanvas()->forceFullRedrawAfterInterruptions(5, false);
 
     Inkscape::Selection *selection = desktop->selection;

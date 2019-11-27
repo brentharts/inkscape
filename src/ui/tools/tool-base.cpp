@@ -91,7 +91,7 @@ void ToolBase::set(const Inkscape::Preferences::Entry& /*val*/) {
 
 void ToolBase::finish() {
     this->desktop->canvas->endForcedFullRedraws();
-	this->enableSelectionCue(false);
+    this->enableSelectionCue(false);
 }
 
 SPDesktop const& ToolBase::getDesktop() const {
