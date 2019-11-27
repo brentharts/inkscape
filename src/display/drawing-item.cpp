@@ -831,9 +831,6 @@ DrawingItem::render(DrawingContext &dc, Geom::IntRect const &area, unsigned flag
     if (!iarea) {
         return RENDER_OK;
     }
-    
-    // Device scale for HiDPI screens (typically 1 or 2)
-    int device_scale = dc.surface()->device_scale();
 
     switch(_antialias){
         case 0:
