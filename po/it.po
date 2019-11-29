@@ -6,6 +6,7 @@
 # Luca Ferretti <elle.uca@infinito.it>, 2005.
 # Luca Bruno <lucab@debian.org>, 2005-2009.
 # Firas Hanife <FirasHanife@gmail.com>, 2014-2019.
+# Germano Gasparini <grigio60@gmail.com>, 2019.
 #
 msgid ""
 msgstr ""
@@ -3180,7 +3181,7 @@ msgstr "Cassiere"
 #: ../share/symbols/symbols.h:213 ../share/symbols/symbols.h:214
 msgctxt "Symbol"
 msgid "First Aid"
-msgstr "Primo soccorso"
+msgstr "Pronto soccorso"
 
 #: ../share/symbols/symbols.h:15 ../share/symbols/symbols.h:16
 msgctxt "Symbol"
@@ -3707,32 +3708,32 @@ msgstr "Simboli logici"
 #: ../share/symbols/symbols.h:178
 msgctxt "Symbol"
 msgid "Xnor Gate"
-msgstr "Xnor Gate"
+msgstr "Porta Xnor"
 
 #: ../share/symbols/symbols.h:179
 msgctxt "Symbol"
 msgid "Xor Gate"
-msgstr "Xor Gate"
+msgstr "Porta Xor"
 
 #: ../share/symbols/symbols.h:180
 msgctxt "Symbol"
 msgid "Nor Gate"
-msgstr "Nor Gate"
+msgstr "Porta Nor"
 
 #: ../share/symbols/symbols.h:181
 msgctxt "Symbol"
 msgid "Or Gate"
-msgstr "Or Gate"
+msgstr "Porta Or"
 
 #: ../share/symbols/symbols.h:182
 msgctxt "Symbol"
 msgid "Nand Gate"
-msgstr "Nand Gate"
+msgstr "Porta Nand"
 
 #: ../share/symbols/symbols.h:183
 msgctxt "Symbol"
 msgid "And Gate"
-msgstr "And Gate"
+msgstr "Porta And"
 
 #: ../share/symbols/symbols.h:184
 msgctxt "Symbol"
@@ -3742,7 +3743,7 @@ msgstr "Buffer"
 #: ../share/symbols/symbols.h:185
 msgctxt "Symbol"
 msgid "Not Gate"
-msgstr "Not Gate"
+msgstr "Porta Not"
 
 #: ../share/symbols/symbols.h:186
 msgctxt "Symbol"
@@ -3752,7 +3753,7 @@ msgstr "Buffer piccolo"
 #: ../share/symbols/symbols.h:187
 msgctxt "Symbol"
 msgid "Not Gate Small"
-msgstr "Not Gate piccolo"
+msgstr "Porta Not piccola"
 
 #: ../share/symbols/symbols.h:188
 msgctxt "Symbol"
@@ -10477,7 +10478,7 @@ msgstr "Metodo di divisione"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:56
 msgid "Method used to order sub paths"
-msgstr ""
+msgstr "Metodo usato per ordinare i sotto-tracciati"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:57
 #, fuzzy
@@ -10486,7 +10487,7 @@ msgstr "Lunghezza connettori"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:57
 msgid "Method to connect end points of sub paths"
-msgstr ""
+msgstr "Metodo per collegare gli estremi dei sotto-tracciati"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:58
 #, fuzzy
@@ -10495,7 +10496,7 @@ msgstr "Lunghezza tracciato"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:58
 msgid "If not 0, linearize path with given step length"
-msgstr ""
+msgstr "Se diversa da 0, linearizza il tracciato con il passo indicato"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:59
 #, fuzzy
@@ -10504,7 +10505,7 @@ msgstr "Lunghezza massima del segmento (px):"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:59
 msgid "Combine steps shorter than this [%]"
-msgstr ""
+msgstr "Combina i passi più brevi di [%]"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:60
 #, fuzzy
@@ -10536,11 +10537,11 @@ msgstr ""
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:63
 msgid "Jump if longer"
-msgstr ""
+msgstr "Salta se più lungo"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:63
 msgid "Jump connection if longer than"
-msgstr ""
+msgstr "Salta connettore se più lungo di"
 
 #: ../src/live_effects/lpe-envelope.cpp:18
 msgid "Top bend path:"
@@ -10980,7 +10981,7 @@ msgstr "Aggancia alle intersezioni dei tracciati"
 
 #: ../src/live_effects/lpe-knot.cpp:361
 msgid "_Groups: Inverse"
-msgstr ""
+msgstr "_Gruppi: Inverti"
 
 #: ../src/live_effects/lpe-knot.cpp:361
 msgid "Use other stroke width, useful in groups with different stroke widths"
@@ -15256,7 +15257,8 @@ msgstr ""
 "Firas Hanife (FirasHanife@gmail.com)\n"
 "Luca Bruno (lucab@debian.org)\n"
 "Luca Ferretti (elle.uca@infinito.it)\n"
-"Francesco Ricci (tardo2002@libero.it)"
+"Francesco Ricci (tardo2002@libero.it)\n"
+"Germano Gasparini (grigio60@gmail.com)"
 
 #: ../src/ui/dialog/align-and-distribute.cpp:212
 #: ../src/ui/dialog/align-and-distribute.cpp:930
@@ -17099,7 +17101,7 @@ msgstr "Attiva anteprima"
 
 #: ../src/ui/dialog/filedialogimpl-gtkmm.cpp:129
 msgid "Export as SVG 1.1 per settings in Preference Dialog."
-msgstr ""
+msgstr "Esporta come SVG 1.1 come impostato nelle Preferenze."
 
 #: ../src/ui/dialog/filedialogimpl-gtkmm.cpp:252
 #, fuzzy
@@ -19166,11 +19168,11 @@ msgstr "Movimento"
 
 #: ../src/ui/dialog/glyphs.cpp:383
 msgid "Ornamental Dingbats"
-msgstr ""
+msgstr "Dingbat ornamentali"
 
 #: ../src/ui/dialog/glyphs.cpp:384
 msgid "Transport and Map Symbols"
-msgstr ""
+msgstr "Simboli mappe e trasporti"
 
 #: ../src/ui/dialog/glyphs.cpp:385
 #, fuzzy
@@ -19189,7 +19191,7 @@ msgstr "Supplemento Frecce A"
 
 #: ../src/ui/dialog/glyphs.cpp:388
 msgid "Supplemental Symbols and Pictographs"
-msgstr ""
+msgstr "Simboli e pittogrammi supplementari"
 
 #: ../src/ui/dialog/glyphs.cpp:389
 #, fuzzy
@@ -20473,7 +20475,7 @@ msgstr "Cambia tema Gtk:"
 #: ../src/ui/dialog/inkscape-preferences.cpp:1112
 #: ../src/ui/dialog/inkscape-preferences.cpp:2551
 msgid "Open themes folder"
-msgstr "Apre la locazione dei temi"
+msgstr "Apre la cartella dei temi"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1113
 #: ../src/ui/dialog/inkscape-preferences.cpp:2552
@@ -20483,7 +20485,7 @@ msgstr "Temi: "
 #: ../src/ui/dialog/inkscape-preferences.cpp:1113
 #: ../src/ui/dialog/inkscape-preferences.cpp:2552
 msgid "Location of the user’s themes"
-msgstr "Locazione dei temi"
+msgstr "Posizione dei temi"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1114
 #: ../src/ui/dialog/inkscape-preferences.cpp:1115
@@ -20532,6 +20534,8 @@ msgid ""
 "Highlights colors, some symbolic icon themes use it. Some icons changes need "
 "reload"
 msgstr ""
+"Colori evidenziatori, usati da alcuni temi di icone simboliche. Alcune "
+"modifiche alle icone richiedono il ricaricamento"
 
 #
 # File: ../src/ui/dialog/inkscape-preferences.cpp, line: 1208
@@ -20540,6 +20544,8 @@ msgid ""
 "Reset theme colors, some symbolic icon themes use it. Some icons changes "
 "need reload"
 msgstr ""
+"Reinizializza i colori del tema, usati da alcuni temi di icone simboliche. "
+"Alcune modifiche alle icone richiedono il ricaricamento"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1194
 msgctxt "Icon size"
@@ -20616,6 +20622,9 @@ msgid ""
 "determines which icons to display by using the 'show-icons' attribute in its "
 "'menus.xml' file. (requires restart)"
 msgstr ""
+"È possibile abilitare o disabilitare tutte le icone nei menu. Il tema per "
+"impostazione predefinita determina le icone da mostrare con l'attributo "
+"'show-icons' del file 'menus.xml'. (richiede il riavvio)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1219
 msgid "Theme"
@@ -21277,15 +21286,15 @@ msgstr "SVG 2 a SVG 1.1"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1547
 msgid "Replace markers with 'auto_start_reverse'."
-msgstr ""
+msgstr "Sostituisci i marcatori con 'auto_start_reverse'."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1548
-msgid "Replace markers using 'context_paint' or 'context_fill'."
+msgid "Sostituisci i marcatori usando 'context_paint' o 'context_fill'."
 msgstr ""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1550
 msgid "SVG 2 allows markers to automatically be reversed at start of path."
-msgstr ""
+msgstr "SVG 2 consente l'inversione automatica dei marcatori a inizio tracciato"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1551
 msgid "SVG 2 allows markers to automatically match stroke color."
@@ -21782,6 +21791,8 @@ msgid ""
 "Initial state of snapping in new documents and non-Inkscape SVGs. Snap "
 "status is subsequently saved per-document."
 msgstr ""
+"Stato iniziale dell'aggancio per i nuovi documenti e gli SVG non-Inkscape. Lo "
+"stato dell'aggancio viene successivamente salvato per documento."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1831
 msgid "Snap indicator"
@@ -22588,11 +22599,11 @@ msgstr "Preferenze: "
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2541
 msgid "Location of the user’s preferences file"
-msgstr "Locazione del file delle preferenze"
+msgstr "Posizione del file delle preferenze"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2543
 msgid "Open preferences folder"
-msgstr "Apre la locazione delle preferenze"
+msgstr "Apre la cartella delle preferenze"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2544
 msgid "User config: "
@@ -22600,11 +22611,11 @@ msgstr "Configurazione: "
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2544
 msgid "Location of users configuration"
-msgstr "Locazione della configurazione"
+msgstr "Posizione della configurazione"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2547
 msgid "Open extensions folder"
-msgstr "Apre la locazione delle estensioni"
+msgstr "Apre la cartella delle estensioni"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2548
 msgid "User extensions: "
@@ -22612,11 +22623,11 @@ msgstr "Estensioni: "
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2549
 msgid "Location of the user’s extensions"
-msgstr "Locazione delle estensioni"
+msgstr "Posizione delle estensioni"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2555
 msgid "Open icons folder"
-msgstr "Apre la locazione delle icone"
+msgstr "Apre la cartella delle icone"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2556
 msgid "User icons: "
@@ -22624,11 +22635,11 @@ msgstr "Icone: "
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2556
 msgid "Location of the user’s icons"
-msgstr "Locazione delle icone"
+msgstr "Posizione delle icone"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2559
 msgid "Open templates folder"
-msgstr "Apre la locazione dei modelli"
+msgstr "Apre la cartella dei modelli"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2560
 msgid "User templates: "
@@ -22636,11 +22647,11 @@ msgstr "Modelli: "
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2561
 msgid "Location of the user’s templates"
-msgstr "Locazione dei modelli"
+msgstr "Posizione dei modelli"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2564
 msgid "Open symbols folder"
-msgstr "Apre la locazione dei simboli"
+msgstr "Apre la cartella dei simboli"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2566
 msgid "User symbols: "
@@ -22648,12 +22659,12 @@ msgstr "Simboli: "
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2566
 msgid "Location of the user’s symbols"
-msgstr "Locazione dei simboli"
+msgstr "Posizione dei simboli"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2570
 #, fuzzy
 msgid "Open paint servers folder"
-msgstr "Apri file HPGL per plotter"
+msgstr "Apre la cartella delle estensioni"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2572
 #, fuzzy
@@ -22663,11 +22674,11 @@ msgstr "Estensioni utente: "
 #: ../src/ui/dialog/inkscape-preferences.cpp:2573
 #, fuzzy
 msgid "Location of the user’s paint servers"
-msgstr "Locazione delle estensioni dell'utente"
+msgstr "Posizione delle estensioni dell'utente"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2576
 msgid "Open palettes folder"
-msgstr "Apre la locazione delle palette"
+msgstr "Apre la cartella delle palette"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2577
 msgid "User palettes: "
@@ -22675,11 +22686,11 @@ msgstr "Palette: "
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2577
 msgid "Location of the user’s palettes"
-msgstr "Locazione delle palette dell'utente"
+msgstr "Posizione delle palette dell'utente"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2581
 msgid "Open keyboard shortcuts folder"
-msgstr "Apre la locazione delle scorciatoie da tastiera"
+msgstr "Apre la cartella delle scorciatoie da tastiera"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2582
 msgid "User keys: "
@@ -22687,11 +22698,11 @@ msgstr "Scorciatoie: "
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2583
 msgid "Location of the user’s keyboard mapping files"
-msgstr "Locazione dei file di mappatura delle scorciatoie da tastiera"
+msgstr "Posizione dei file di mappatura delle scorciatoie da tastiera"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2586
 msgid "Open user interface folder"
-msgstr "Apre la locazione della interfaccia utente"
+msgstr "Apre la cartella dell'interfaccia utente"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2587
 msgid "User UI: "
@@ -22700,7 +22711,7 @@ msgstr "UI: "
 #: ../src/ui/dialog/inkscape-preferences.cpp:2588
 #, fuzzy
 msgid "Location of the user’s user interface description files"
-msgstr "Locazione del file di preferenze dell'utente"
+msgstr "Posizione del file di preferenze dell'utente"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2592
 msgid "User cache: "
@@ -22708,7 +22719,7 @@ msgstr "Cache: "
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2592
 msgid "Location of user’s cache"
-msgstr "Locazione della cache"
+msgstr "Posizione della cache"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2600
 msgid "Temporary files: "
@@ -22716,7 +22727,7 @@ msgstr "File temporanei: "
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2600
 msgid "Location of the temporary files used for autosave"
-msgstr "Locazione dei file temporanei usati per l'autosalvataggio"
+msgstr "Posizione dei file temporanei usati per l'autosalvataggio"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2604
 msgid "Inkscape data: "
@@ -22724,7 +22735,7 @@ msgstr "Dati Inkscape: "
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2604
 msgid "Location of Inkscape data"
-msgstr "Locazione dei dati di Inkscape"
+msgstr "Posizione dei dati di Inkscape"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2608
 msgid "Inkscape extensions: "
@@ -22732,7 +22743,7 @@ msgstr "Estensioni di Inkscape: "
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2608
 msgid "Location of the Inkscape extensions"
-msgstr "Locazione delle estensioni di Inkscape"
+msgstr "Posizione delle estensioni di Inkscape"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2618
 msgid "System data: "
@@ -22740,7 +22751,7 @@ msgstr "Dati sistema: "
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2618
 msgid "Locations of system data"
-msgstr "Locazione dei dati di sistema"
+msgstr "Posizione dei dati di sistema"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2632
 msgid "Icon theme: "
@@ -22748,7 +22759,7 @@ msgstr "Tema icone: "
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2632
 msgid "Locations of icon themes"
-msgstr "Locazione dei temi delle icone"
+msgstr "Posizione dei temi delle icone"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2634
 msgid "System"
@@ -22850,11 +22861,11 @@ msgstr "Pressione"
 
 #: ../src/ui/dialog/input.cpp:1433
 msgid "X tilt"
-msgstr ""
+msgstr "Inclinazione X"
 
 #: ../src/ui/dialog/input.cpp:1433
 msgid "Y tilt"
-msgstr ""
+msgstr "Inclinazione Y"
 
 #: ../src/ui/dialog/input.cpp:1433 ../src/ui/widget/color-wheel-selector.cpp:31
 msgid "Wheel"
@@ -23784,7 +23795,7 @@ msgstr "Valore"
 
 #: ../src/ui/dialog/styledialog.cpp:788
 msgid "This value is commented"
-msgstr ""
+msgstr "Questo valore è commentato"
 
 #: ../src/ui/dialog/styledialog.cpp:976
 #, fuzzy
@@ -23795,7 +23806,7 @@ msgstr "Nome di programma non valido: %s"
 # File: ../src/ui/dialog/styledialog.cpp, line: 793
 #: ../src/ui/dialog/styledialog.cpp:978
 msgid "Used in "
-msgstr ""
+msgstr "Usato in "
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:146
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:218
@@ -23813,11 +23824,11 @@ msgstr "Imposta attributi"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:457
 msgid "Horiz. Advance X"
-msgstr ""
+msgstr "Avanzamento orizzontale"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:457
 msgid "Average amount of horizontal space each letter takes up."
-msgstr ""
+msgstr "Spazio orizzontale mediamente occupato da ogni lettera."
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:458
 #, fuzzy
@@ -23853,6 +23864,7 @@ msgid ""
 "Name of the font as it appears in font selectors and css font-family "
 "properties."
 msgstr ""
+"Nome del font come riportato nei selettori e nella proprietà css font-family."
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:462
 #, fuzzy
@@ -23861,7 +23873,7 @@ msgstr "Unità utente per "
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:462
 msgid "Number of display units each letter takes up."
-msgstr ""
+msgstr "Numero di unità di display occupate da ogni lettera"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:463
 #, fuzzy
@@ -23872,6 +23884,7 @@ msgstr "Ascendente:"
 msgid ""
 "Amount of space taken up by accenders like the tall line on the letter 'h'."
 msgstr ""
+"Spazio occupato dai tratti ascendenti come la linea lunga della lettera 'h'."
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:464
 #, fuzzy
@@ -23881,6 +23894,7 @@ msgstr "Discendente:"
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:464
 msgid "Amount of space taken up by decenders like the tail on the letter 'g'."
 msgstr ""
+"Spazio occupato dai tratti discendenti come il ricciolo della lettera 'g'."
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:465
 #, fuzzy
@@ -23891,6 +23905,7 @@ msgstr "Altezza della maiuscola:"
 msgid ""
 "The height of a capital letter above the baseline like the letter 'H' or 'I'."
 msgstr ""
+"Altezza delle maiuscole rispetto alla linea base come nelle lettere 'H' o 'I'."
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:466
 #, fuzzy
@@ -23901,6 +23916,7 @@ msgstr "Altezza:"
 msgid ""
 "The height of a lower-case letter above the baseline like the letter 'x'."
 msgstr ""
+"Altezza delle minuscole rispetto alla linea base come nella lettera 'x'."
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:542
 msgid "glyph"
@@ -33815,7 +33831,7 @@ msgstr "Sbaffi di pixel"
 
 #: ../share/ui/dialog-trace.glade:1007
 msgid "SIOX"
-msgstr ""
+msgstr "SIOX"
 
 #: ../share/ui/dialog-trace.glade:1011
 msgid "Cover the area you want to select as the foreground"
@@ -33832,7 +33848,7 @@ msgstr "Informazioni"
 
 #: ../share/extensions/convert2dashes.py:40
 msgid "Total number of objects not converted: {}\n"
-msgstr ""
+msgstr "Numero totale di oggetti non convertiti: {}\n"
 
 #: ../share/extensions/dimension.py:103
 msgid "Please select an object."
@@ -33844,10 +33860,12 @@ msgid ""
 "%d ENTITIES of type POLYLINE encountered and ignored. Please try to convert "
 "to Release 13 format using QCad."
 msgstr ""
+"Trovate e ignorate %d ENTITIES di tipo POLYLINE. Provare a convertire nel "
+"formato Release 13 usando QCad."
 
 #: ../share/extensions/embedimage.py:77
 msgid "File not found \"{}\". Unable to embed image."
-msgstr ""
+msgstr "File non trovato \"{}\". Impossibile incorporare l'immagine."
 
 #: ../share/extensions/embedimage.py:91
 #, python-format
@@ -33890,18 +33908,21 @@ msgid ""
 "The HPGL data contained unknown (unsupported) commands, there is a "
 "possibility that the drawing is missing some content."
 msgstr ""
+"I dati HPGL contengono comandi sconosciuti (non supportati), è possibile "
+"che nel disegno manchino dei contenuti."
 
 #: ../share/extensions/hpgl_output.py:54
 msgid "No paths were found. Please convert objects you want into paths."
 msgstr ""
+"Nessun tracciato trovato. Convertire gli oggetti desiderati in tracciati."
 
 #: ../share/extensions/inkex/bezier.py:406
 msgid "Area is zero, cannot calculate Center of Mass"
-msgstr ""
+msgstr "L'area è zero, impossibile calcolare il centro di massa"
 
 #: ../share/extensions/inkex/deprecated.py:84
 msgid "{} is deprecated and should be removed"
-msgstr ""
+msgstr "{} è deprecato e va rimosso"
 
 #
 # File: ../share/extensions/inkex/deprecated.py, line: 93
@@ -33911,6 +33932,9 @@ msgid ""
 "change `self.OptionParser.add_option` to `self.arg_parser.add_argument`; the "
 "arguments are similar."
 msgstr ""
+"{} o `optparse` sono stati deprecati e sostituiti da `argparser`. Cambiare "
+"`self.OptionParser.add_option` in `self.arg_parser.add_argument`; gli "
+"argomenti sono simili."
 
 #
 # File: ../share/extensions/inkex/deprecated.py, line: 108
@@ -33919,6 +33943,8 @@ msgid ""
 "{} method is now a required method. It should be created on {cls}, even if "
 "it does nothing."
 msgstr ""
+"Il metodo {} ora è obbligatorio. Va creato in {cls}, anche se non deve fare "
+"nulla."
 
 #
 # File: ../share/extensions/inkex/deprecated.py, line: 114
@@ -33926,6 +33952,7 @@ msgstr ""
 msgid ""
 "{} is now a method in the svg. Use `self.svg.get_current_layer()` instead."
 msgstr ""
+"{} ora è un metodo in svg. Usare `self.svg.get_current_layer()` al suo posto."
 
 #
 # File: ../share/extensions/inkex/deprecated.py, line: 120
@@ -33933,6 +33960,7 @@ msgstr ""
 msgid ""
 "{} is now a method in the svg. Use `self.svg.get_center_position()` instead."
 msgstr ""
+"{} ora è un metodo in svg. Usare `self.svg.get_center_position()` al suo posto"
 
 #
 # File: ../share/extensions/inkex/deprecated.py, line: 125
@@ -33944,18 +33972,19 @@ msgstr ""
 msgid ""
 "{} is now a method in the svg document. Use `self.svg.get_ids()` instead."
 msgstr ""
+"{} ora è un metodo nel documento svg. Usare `self.svg.get_ids()` al suo posto."
 
 #
 # File: ../share/extensions/inkex/deprecated.py, line: 143
 #: ../share/extensions/inkex/deprecated.py:144
 msgid "Use `self.svg.get_ids()` instead of {} and `doc_ids`."
-msgstr ""
+msgstr "Usare `self.svg.get_ids()` al posto di {} e `doc_ids`."
 
 #
 # File: ../share/extensions/inkex/deprecated.py, line: 148
 #: ../share/extensions/inkex/deprecated.py:149
 msgid "{} has been removed"
-msgstr ""
+msgstr "{} è stato rimosso"
 
 #
 # File: ../share/extensions/inkex/deprecated.py, line: 136
@@ -33963,18 +33992,21 @@ msgstr ""
 msgid ""
 "{} is now a method in the svg. Use `self.svg.getElementById(eid)` instead."
 msgstr ""
+"{} ora è un metodo in svg. Usare `self.svg.getElementById(eid)` al suo posto."
 
 #: ../share/extensions/inkex/deprecated.py:157
 msgid ""
 "{} is now a new method in the svg document. Use `self.svg.getElement(path)` "
 "instead.`"
 msgstr ""
+"{} ora è un metodo nel documento svg. Usare `self.svg.getElement(path)` "
+"al suo posto.`"
 
 #
 # File: ../share/extensions/inkex/deprecated.py, line: 162
 #: ../share/extensions/inkex/deprecated.py:163
 msgid "{} is no longer in use. Use the lxml .getparent() method instead."
-msgstr ""
+msgstr "{} non è più usato. Usare il metodo lxml .getparent() method."
 
 #
 # File: ../share/extensions/inkex/deprecated.py, line: 152
@@ -33983,72 +34015,88 @@ msgid ""
 "{} is now a property of the svg. Use `self.svg.namedview` to access this "
 "element"
 msgstr ""
+"{} ora è una proprietà di svg. Usare `self.svg.namedview` per accedere a "
+"questo elemento"
 
 #: ../share/extensions/inkex/deprecated.py:173
 msgid ""
 "{} is now a method of the namedview element object. Use `self.svg.namedview."
 "add(Guide().move_to(x, y, a))` instead"
 msgstr ""
+"{} è ora un metodo dell'oggetto namedview element. Usare `self.svg.namedview."
+"add(Guide().move_to(x, y, a))` al suo posto"
 
 #
 # File: ../share/extensions/inkex/deprecated.py, line: 178
 #: ../share/extensions/inkex/deprecated.py:179
 msgid "{} is now `Effect.run()`. The `output` argument has changed."
-msgstr ""
+msgstr "{} ora è `Effect.run()`. L'argomento `output` è cambiato."
 
 #
 # File: ../share/extensions/inkex/deprecated.py, line: 184
 #: ../share/extensions/inkex/deprecated.py:185
 msgid "self.args[-1] is now self.options.input_file"
-msgstr ""
+msgstr "self.args[-1] ora è self.options.input_file"
 
 #
 # File: ../share/extensions/inkex/deprecated.py, line: 189
 #: ../share/extensions/inkex/deprecated.py:190
 msgid "self.svg_file is now self.options.input_file"
-msgstr ""
+msgstr "self.svg_file ora è self.options.input_file"
 
 #: ../share/extensions/inkex/deprecated.py:202
 msgid ""
 "{} is now a method in the svg document.  Use `self.svg."
 "get_unique_id(old_id)` instead."
 msgstr ""
+"{} ora è un metodo del documento document. Usare `self.svg."
+"get_unique_id(old_id)` al suo posto."
 
 #: ../share/extensions/inkex/deprecated.py:207
 msgid "{} is now a property of the svg document. Use `self.svg.width` instead."
-msgstr ""
+msgstr "{} ora è una proprietà del documento svg. Usare `self.svg.width` al "
+suo posto."
 
 #: ../share/extensions/inkex/deprecated.py:212
 msgid ""
 "{} is now a property of the svg document. Use `self.svg.height` instead."
 msgstr ""
+"{} ora è una proprietà del documento svg. Usare `self.svg.height` al "
+suo posto."
 
 #: ../share/extensions/inkex/deprecated.py:217
 msgid "{} is now a property of the svg document. Use `self.svg.unit` instead."
-msgstr ""
+msgstr "{} ora è una proprietà del documento svg. Usare `self.svg.unit` al "
+suo posto."
 
 #: ../share/extensions/inkex/deprecated.py:222
 msgid ""
 "{} is now a method in the svg document. Use `self.svg.unittouu(str)` instead."
 msgstr ""
+"{} ora è un metodo del documento svg. Usare `self.svg.unittouu(str)` al "
+suo posto."
 
 #: ../share/extensions/inkex/deprecated.py:227
 msgid ""
 "{} is now a method in the svg document. Use `self.svg.uutounit(value, unit)` "
 "instead."
 msgstr ""
+"{} ora è un metodo del documento svg. Usare `self.svg.uutounit(value, unit)` " 
+al suo posto."
 
 #: ../share/extensions/inkex/deprecated.py:232
 msgid ""
 "{} is now a method in the svg document. Use `self.svg.add_unit(value)` "
 "instead."
 msgstr ""
+"{} ora è un metodo del documento svg. Usare `self.svg.add_unit(value)` " 
+al suo posto."
 
 #
 # File: ../share/extensions/interp_att_g.py, line: 92
 #: ../share/extensions/interp_att_g.py:87
 msgid "Bad values for a number field: {}, {}."
-msgstr ""
+msgstr "Valore non valido per un campo numerico: {}, {}."
 
 #: ../share/extensions/interp_att_g.py:113
 #, fuzzy
@@ -34058,7 +34106,7 @@ msgstr "Tutti quelli selezionati impostano un attributo all'ultimo"
 #: ../share/extensions/interp_att_g.py:134
 #, fuzzy
 msgid "There is no selection to interpolate"
-msgstr "Sposta la selezione in cima"
+msgstr "Nessuna selezione da interpolare"
 
 #: ../share/extensions/jessyInk_autoTexts.py:33
 #: ../share/extensions/jessyInk_effects.py:38
