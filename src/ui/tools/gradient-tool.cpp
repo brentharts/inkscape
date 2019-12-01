@@ -745,15 +745,15 @@ bool GradientTool::root_handler(GdkEvent* event) {
                     get_latin_keyval(&event->key), 0); // with any mask
                 if (MOD__ALT(event)) { // alt
                     if (MOD__SHIFT(event)) {
-                    	drag->selected_move_screen(0, mul*10); // shift
+                        drag->selected_move_screen(0, -mul*10*desktop->yaxisdir()); // shift
                     } else {
-                    	drag->selected_move_screen(0, mul*1); // no shift
+                        drag->selected_move_screen(0, -mul*desktop->yaxisdir()); // no shift
                     }
                 } else { // no alt
                     if (MOD__SHIFT(event)) {
-                    	drag->selected_move(0, mul*10*nudge); // shift
+                        drag->selected_move(0, -mul*10*nudge*desktop->yaxisdir()); // shift
                     } else {
-                    	drag->selected_move(0, mul*nudge); // no shift
+                        drag->selected_move(0, -mul*nudge*desktop->yaxisdir()); // no shift
                     }
                 }
 
@@ -795,15 +795,15 @@ bool GradientTool::root_handler(GdkEvent* event) {
 
                 if (MOD__ALT(event)) { // alt
                     if (MOD__SHIFT(event)) {
-                    	drag->selected_move_screen(0, mul*-10); // shift
+                        drag->selected_move_screen(0, mul*10*desktop->yaxisdir()); // shift
                     } else {
-                    	drag->selected_move_screen(0, mul*-1); // no shift
+                        drag->selected_move_screen(0, mul*desktop->yaxisdir()); // no shift
                     }
                 } else { // no alt
                     if (MOD__SHIFT(event)) {
-                    	drag->selected_move(0, mul*-10*nudge); // shift
+                        drag->selected_move(0, mul*10*nudge*desktop->yaxisdir()); // shift
                     } else {
-                    	drag->selected_move(0, mul*-nudge); // no shift
+                        drag->selected_move(0, mul*nudge*desktop->yaxisdir()); // no shift
                     }
                 }
 
