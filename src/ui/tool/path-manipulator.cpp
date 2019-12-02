@@ -123,7 +123,8 @@ PathManipulator::PathManipulator(MultiPathManipulator &mpm, SPPath *path,
     , _is_bspline(false)
     , _lpe_key(std::move(lpe_key))
 {
-    if (_lpe_key.empty()) {
+    LivePathEffectObject *lpeobj = dynamic_cast<LivePathEffectObject *>((SPObject *)_path);
+    if (!lpeobj) {
         _i2d_transform = path->i2dt_affine();
     } else {
         _i2d_transform = Geom::identity();
@@ -1468,8 +1469,9 @@ void PathManipulator::_updateOutline()
 void PathManipulator::_getGeometry()
 {
     using namespace Inkscape::LivePathEffect;
-    if (!_lpe_key.empty()) {
-        Effect *lpe = LIVEPATHEFFECT(_path)->get_lpe();
+    LivePathEffectObject *lpeobj = dynamic_cast<LivePathEffectObject *>((SPObject *)_path);
+    if (lpeobj) {
+        Effect *lpe = lpeobj->get_lpe();
         if (lpe) {
             PathParam *pathparam = dynamic_cast<PathParam *>(lpe->getParameter(_lpe_key.data()));
             _spcurve->unref();
@@ -1489,11 +1491,12 @@ void PathManipulator::_getGeometry()
 void PathManipulator::_setGeometry()
 {
     using namespace Inkscape::LivePathEffect;
-    if (!_lpe_key.empty()) {
+    LivePathEffectObject *lpeobj = dynamic_cast<LivePathEffectObject *>((SPObject *)_path);
+    if (lpeobj) {
         // copied from nodepath.cpp
         // NOTE: if we are editing an LPE param, _path is not actually an SPPath, it is
         // a LivePathEffectObject. (mad laughter)
-        Effect *lpe = LIVEPATHEFFECT(_path)->get_lpe();
+        Effect *lpe = lpeobj->get_lpe();
         if (lpe) {
             PathParam *pathparam = dynamic_cast<PathParam *>(lpe->getParameter(_lpe_key.data()));
             if (pathparam->get_pathvector() == _spcurve->get_pathvector()) {
@@ -1520,7 +1523,8 @@ void PathManipulator::_setGeometry()
 /** Figure out in what attribute to store the nodetype string. */
 Glib::ustring PathManipulator::_nodetypesKey()
 {
-    if (_lpe_key.empty()) {
+    LivePathEffectObject *lpeobj = dynamic_cast<LivePathEffectObject *>((SPObject *)_path);
+    if (!lpeobj) {
         return "sodipodi:nodetypes";
     } else {
         return _lpe_key + "-nodetypes";
@@ -1532,9 +1536,11 @@ Glib::ustring PathManipulator::_nodetypesKey()
 Inkscape::XML::Node *PathManipulator::_getXMLNode()
 {
     //XML Tree being used here directly while it shouldn't be.
-    if (_lpe_key.empty()) return _path->getRepr();
+    LivePathEffectObject *lpeobj = dynamic_cast<LivePathEffectObject *>((SPObject *)_path);
+    if (!lpeobj)
+        return _path->getRepr();
     //XML Tree being used here directly while it shouldn't be.
-    return LIVEPATHEFFECT(_path)->getRepr();
+    return lpeobj->getRepr();
 }
 
 bool PathManipulator::_nodeClicked(Node *n, GdkEventButton *event)
