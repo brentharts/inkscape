@@ -400,8 +400,8 @@ void gather_items(NodeTool *nt, SPItem *base, SPObject *obj, Inkscape::UI::Shape
             gather_items(nt, base, &c, role, s);
         }
     } else if (SP_IS_ITEM(obj)) {
-        SPObject *object = static_cast<SPObject *>(obj);
-        SPItem *item = static_cast<SPItem*>(obj);
+        SPObject *object = obj;
+        SPItem *item = dynamic_cast<SPItem *>(obj);
         ShapeRecord r;
         r.object = object;
         // TODO add support for objectBoundingBox
