@@ -473,7 +473,6 @@ void ObjectsPanel::_addObjectToTree(SPItem* item, const Gtk::TreeModel::Row &row
     row[_model->_colObject] = item;
     gchar const * label = item->label() ? item->label() : item->getId();
     row[_model->_colLabel] = label ? label : item->defaultLabel();
-    std::cout << " _addObjectToTree: " << item << " -> " << row[_model->_colLabel] << std::endl;
     row[_model->_colVisible] = !item->isHidden();
     row[_model->_colLocked] = !item->isSensitive();
     row[_model->_colType] = group ? (group->layerMode() == SPGroup::LAYER ? 2 : 1) : 0;
