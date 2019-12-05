@@ -67,7 +67,7 @@ void SPShape::build(SPDocument *document, Inkscape::XML::Node *repr) {
     SPLPEItem::build(document, repr);
 
     for (int i = 0 ; i < SP_MARKER_LOC_QTY ; i++) {
-        sp_shape_set_marker (this, i, this->style->marker_ptrs[i]->value);
+        sp_shape_set_marker (this, i, this->style->marker_ptrs[i]->value());
     }
 }
 
@@ -133,7 +133,7 @@ void SPShape::update(SPCtx* ctx, guint flags) {
      * match the style.
      */
     for (int i = 0 ; i < SP_MARKER_LOC_QTY ; i++) {
-        sp_shape_set_marker (this, i, this->style->marker_ptrs[i]->value);
+        sp_shape_set_marker (this, i, this->style->marker_ptrs[i]->value());
     }
 
     if (flags & (SP_OBJECT_STYLE_MODIFIED_FLAG | SP_OBJECT_VIEWPORT_MODIFIED_FLAG)) {
@@ -467,7 +467,10 @@ Geom::OptRect SPShape::bbox(Geom::Affine const &transform, SPItem::BBoxType bbox
     // the cache doesn't get called if the object is moved, so we need
     // to compare the transformations as well.
     bool cached = (bboxtype == SPItem::VISUAL_BBOX) ? bbox_vis_cache_is_valid : bbox_geom_cache_is_valid;
-    if (cached && transform == bbox_transform_cache) {
+    if (transform != bbox_transform_cache) {
+        bbox_vis_cache_is_valid = false;
+        bbox_geom_cache_is_valid = false;
+    } else if (cached) {
         return (bboxtype == SPItem::VISUAL_BBOX) ? bbox_vis_cache : bbox_geom_cache;
     }
 
@@ -853,7 +856,7 @@ Inkscape::DrawingItem* SPShape::show(Inkscape::Drawing &drawing, unsigned int /*
      * match the style.
      */
     for (int i = 0 ; i < SP_MARKER_LOC_QTY ; i++) {
-        sp_shape_set_marker (this, i, this->style->marker_ptrs[i]->value);
+        sp_shape_set_marker (this, i, this->style->marker_ptrs[i]->value());
     }
 
     if (has_markers) {

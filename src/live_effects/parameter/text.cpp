@@ -108,20 +108,16 @@ TextParam::param_readSVGValue(const gchar * strvalue)
     return true;
 }
 
-gchar *
+Glib::ustring
 TextParam::param_getSVGValue() const
 {
-    Inkscape::SVGOStringStream os;
-    os << value;
-    return g_strdup(os.str().c_str());
+    return value;
 }
 
-gchar *
+Glib::ustring
 TextParam::param_getDefaultSVGValue() const
 {
-    Inkscape::SVGOStringStream os;
-    os << defvalue;
-    return g_strdup(os.str().c_str());
+    return defvalue;
 }
 
 void 
@@ -155,7 +151,7 @@ void
 TextParam::param_setValue(const Glib::ustring newvalue)
 {
     if (value != newvalue) {
-        param_effect->upd_params = true;
+        param_effect->refresh_widgets = true;
     }
     value = newvalue;
     if (!_hide_canvas_text) {

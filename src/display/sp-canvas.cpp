@@ -1003,6 +1003,7 @@ static void sp_canvas_init(SPCanvas *canvas)
     canvas->_spliter_right = Geom::OptIntRect();
     canvas->_spliter_control_pos = Geom::Point();
     canvas->_spliter_in_control_pos = Geom::Point();
+    canvas->_xray_rect = Geom::OptIntRect();
     canvas->_split_value = 0.5;
     canvas->_split_vertical = true;
     canvas->_split_inverse = false;
@@ -1018,12 +1019,10 @@ static void sp_canvas_init(SPCanvas *canvas)
     canvas->_changecursor = 0;
     canvas->_inside = false; // this could be wrong on start but we update it as far we bo to the other side.
     canvas->_splits = 0;
-    canvas->_forcefull = false;
-    canvas->_delayrendering = 0;
     canvas->_totalelapsed = 0;
     canvas->_scrooling = false;
     canvas->_idle_time = g_get_monotonic_time();
-    bool _is_dragging;
+    canvas->_is_dragging = false;
 
 #if defined(HAVE_LIBLCMS2)
     canvas->_enable_cms_display_adj = false;
@@ -1133,7 +1132,6 @@ void SPCanvas::handle_realize(GtkWidget *widget)
     GdkWindow *window = gdk_window_new (gtk_widget_get_parent_window (widget), &attributes, attributes_mask);
     gtk_widget_set_window (widget, window);
     gdk_window_set_user_data (window, widget);
-    gdk_window_set_event_compression (window, FALSE);
 
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     if (prefs->getBool("/options/useextinput/value", true)) {
@@ -1174,7 +1172,6 @@ void SPCanvas::handle_get_preferred_height(GtkWidget *widget, gint *minimum_heig
 void SPCanvas::handle_size_allocate(GtkWidget *widget, GtkAllocation *allocation)
 {
     SPCanvas *canvas = SP_CANVAS (widget);
-    canvas->_delayrendering = 20;
     // Allocation does not depend on device scale.
     GtkAllocation old_allocation;
     gtk_widget_get_allocation(widget, &old_allocation);
@@ -1648,43 +1645,45 @@ void SPCanvas::set_cursor(GtkWidget *widget)
 {
     SPCanvas *canvas = SP_CANVAS(widget);
     SPDesktop *desktop = SP_ACTIVE_DESKTOP;
-    if (desktop && desktop->splitMode()) {
-        GdkDisplay *display = gdk_display_get_default();
-        GdkCursor *cursor = nullptr;
-        if (canvas->_split_hover_vertical) {
-            if (canvas->_changecursor != 1) {
-                cursor = gdk_cursor_new_from_name(display, "pointer");
-                gdk_window_set_cursor(gtk_widget_get_window(widget), cursor);
-                g_object_unref(cursor);
-                canvas->paintSpliter();
-            }
+    GdkDisplay *display = gdk_display_get_default();
+    GdkCursor *cursor = nullptr;
+    if (canvas->_split_hover_vertical) {
+        if (canvas->_changecursor != 1) {
+            cursor = gdk_cursor_new_from_name(display, "pointer");
+            gdk_window_set_cursor(gtk_widget_get_window(widget), cursor);
+            g_object_unref(cursor);
+            canvas->paintSpliter();
             canvas->_changecursor = 1;
-        } else if (canvas->_split_hover_horizontal) {
-            if (canvas->_changecursor != 2) {
-                cursor = gdk_cursor_new_from_name(display, "pointer");
-                gdk_window_set_cursor(gtk_widget_get_window(widget), cursor);
-                g_object_unref(cursor);
-                canvas->paintSpliter();
-            }
+        }
+    } else if (canvas->_split_hover_horizontal) {
+        if (canvas->_changecursor != 2) {
+            cursor = gdk_cursor_new_from_name(display, "pointer");
+            gdk_window_set_cursor(gtk_widget_get_window(widget), cursor);
+            g_object_unref(cursor);
+            canvas->paintSpliter();
             canvas->_changecursor = 2;
-        } else if (canvas->_split_hover) {
-            if (canvas->_changecursor != 3) {
-                Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-                if (_split_vertical) {
-                    cursor = gdk_cursor_new_from_name(display, "ew-resize");
-                } else {
-                    cursor = gdk_cursor_new_from_name(display, "ns-resize");
-                }
-                gdk_window_set_cursor(gtk_widget_get_window(widget), cursor);
-                g_object_unref(cursor);
-                canvas->paintSpliter();
+        }  
+    } else if (canvas->_split_hover) {
+        if (canvas->_changecursor != 3) {
+            Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+            if (_split_vertical) {
+                cursor = gdk_cursor_new_from_name(display, "ew-resize");
+            } else {
+                cursor = gdk_cursor_new_from_name(display, "ns-resize");
             }
+            gdk_window_set_cursor(gtk_widget_get_window(widget), cursor);
+            g_object_unref(cursor);
+            canvas->paintSpliter();
             canvas->_changecursor = 3;
-        } else {
-            if (desktop && desktop->event_context && !canvas->_split_pressed && canvas->_changecursor != 4) {
-                desktop->event_context->sp_event_context_update_cursor();
-                canvas->paintSpliter();
-            }
+        }
+    } else {
+        if (desktop && 
+            desktop->event_context && 
+            !canvas->_split_pressed &&
+            (canvas->_changecursor != 0 && canvas->_changecursor != 4)) 
+        {
+            desktop->event_context->sp_event_context_update_cursor();
+            canvas->paintSpliter();
             canvas->_changecursor = 4;
         }
     }
@@ -1702,32 +1701,35 @@ int SPCanvas::handle_motion(GtkWidget *widget, GdkEventMotion *event)
 
     if (canvas->_root == nullptr) // canvas being deleted
         return FALSE;
-
+    
     Geom::IntPoint cursor_pos = Geom::IntPoint(event->x, event->y);
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    if (canvas->_spliter &&
-        ((*canvas->_spliter).contains(cursor_pos) || canvas->_spliter_control.contains(cursor_pos)) &&
-        !canvas->_is_dragging) {
-        canvas->_split_hover = true;
-    } else {
-        canvas->_split_hover = false;
-    }
-    if (canvas->_spliter_left && canvas->_spliter_right &&
-        ((*canvas->_spliter_left).contains(cursor_pos) || (*canvas->_spliter_right).contains(cursor_pos)) &&
-        !canvas->_is_dragging) {
-        canvas->_split_hover_horizontal = true;
-    } else {
-        canvas->_split_hover_horizontal = false;
-    }
-    if (!canvas->_split_hover_horizontal && canvas->_spliter_top && canvas->_spliter_bottom &&
-        ((*canvas->_spliter_top).contains(cursor_pos) || (*canvas->_spliter_bottom).contains(cursor_pos)) &&
-        !canvas->_is_dragging) {
-        canvas->_split_hover_vertical = true;
-    } else {
-        canvas->_split_hover_vertical = false;
-    }
+        
+    if (desktop && desktop->splitMode()) {
+        if (canvas->_spliter &&
+            ((*canvas->_spliter).contains(cursor_pos) || canvas->_spliter_control.contains(cursor_pos)) &&
+            !canvas->_is_dragging) {
+            canvas->_split_hover = true;
+        } else {
+            canvas->_split_hover = false;
+        }
+        if (canvas->_spliter_left && canvas->_spliter_right &&
+            ((*canvas->_spliter_left).contains(cursor_pos) || (*canvas->_spliter_right).contains(cursor_pos)) &&
+            !canvas->_is_dragging) {
+            canvas->_split_hover_horizontal = true;
+        } else {
+            canvas->_split_hover_horizontal = false;
+        }
+        if (!canvas->_split_hover_horizontal && canvas->_spliter_top && canvas->_spliter_bottom &&
+            ((*canvas->_spliter_top).contains(cursor_pos) || (*canvas->_spliter_bottom).contains(cursor_pos)) &&
+            !canvas->_is_dragging) {
+            canvas->_split_hover_vertical = true;
+        } else {
+            canvas->_split_hover_vertical = false;
+        }
 
-    canvas->set_cursor(widget);
+        canvas->set_cursor(widget);
+    }
     if (canvas->_split_pressed && desktop && desktop->event_context && desktop->splitMode()) {
         GtkAllocation allocation;
         canvas->_split_dragging = true;
@@ -1760,10 +1762,18 @@ int SPCanvas::handle_motion(GtkWidget *widget, GdkEventMotion *event)
             }
             canvas->_xray = true;
             if (canvas->_xray_orig[Geom::X] != Geom::infinity()) {
+                if (canvas->_xray_rect) {
+                    canvas->dirtyRect(*canvas->_xray_rect);
+                    canvas->_xray_rect = Geom::OptIntRect();
+                }
                 canvas->addIdle();
             }
             status = 1;
         } else {
+            if (canvas->_xray_rect) {
+                canvas->dirtyRect(*canvas->_xray_rect);
+                canvas->_xray_rect = Geom::OptIntRect();
+            }
             canvas->_xray = false;
         }
         canvas->_state = event->state;
@@ -1928,7 +1938,7 @@ void SPCanvas::paintXRayBuffer(Geom::IntRect const &paint_rect, Geom::IntRect co
     cairo_set_operator(buf.ct, CAIRO_OPERATOR_SOURCE);
     cairo_paint(buf.ct);
     cairo_translate(buf.ct, paint_rect.left(), paint_rect.top());
-        // cairo_surface_write_to_png( copy_backing, "debug1.png" );
+    // cairo_surface_write_to_png( copy_backing, "debug1.png" );
 
 
 
@@ -1948,15 +1958,16 @@ void SPCanvas::paintXRayBuffer(Geom::IntRect const &paint_rect, Geom::IntRect co
     cairo_set_source_surface(result, copy_backing, paint_rect.left(), paint_rect.top());
     cairo_set_operator(buf.ct, CAIRO_OPERATOR_IN);
     cairo_paint(result);
-    cairo_destroy(buf.ct);
-
     cairo_surface_destroy(copy_backing);
+    cairo_destroy(buf.ct);
+    cairo_destroy(result);
+    
     // cairo_surface_write_to_png( _backing_store, "debug3.png" );
     cairo_surface_mark_dirty(_backing_store);
     // Mark the painted rectangle un-clean to remove old x-ray when mouse change position
+    _xray_rect = paint_rect;
     gtk_widget_queue_draw_area(GTK_WIDGET(this), paint_rect.left() - _x0, paint_rect.top() - _y0, paint_rect.width(),
                                paint_rect.height());
-    dirtyRect(paint_rect);
 }
 
 void SPCanvas::paintSpliter()
@@ -2075,23 +2086,11 @@ int SPCanvas::paintRectInternal(PaintRectSetup const *setup, Geom::IntRect const
     gint64 now = g_get_monotonic_time();
     gint64 elapsed = now - setup->start_time;
 
-    // if we do canvas resize or panning we want the canvas not redraw in enought times
-    // to make a smooth response.
-    if (_delayrendering != 0) {
-        --_delayrendering;
-        return false;
-    }
-
     // Allow only very fast buffers to be run together;
     // as soon as the total redraw time exceeds 1ms, cancel;
     // this returns control to the idle loop and allows Inkscape to process user input
     // (potentially interrupting the redraw); as soon as Inkscape has some more idle time,
-    // it will get back and finish painting what remains to paint.
-
-    // if force full is set we allways redraw all is used in node tool
-    // to render in one pass highlighed path or selected nodes, that can get long time
-    // to render and if the render area go across diferent rendering tiles it render splited
-    if (elapsed > 1000 && !_forcefull) {
+    if (elapsed > 1000) {
 
         // Interrupting redraw isn't always good.
         // For example, when you drag one node of a big path, only the buffer containing
@@ -2109,13 +2108,15 @@ int SPCanvas::paintRectInternal(PaintRectSetup const *setup, Geom::IntRect const
             }
             return false;
         }
+        _forced_redraw_count = 0;
     }
 
     // Find the optimal buffer dimensions
     int bw = this_rect.width();
     int bh = this_rect.height();
+    // we dont want to stop the idle process if the area is empty
     if ((bw < 1) || (bh < 1))
-        return 0;
+        return 1;
 
     if (bw * bh < setup->max_pixels) {
         // We are small enough
@@ -2202,7 +2203,10 @@ bool SPCanvas::paintRect(int xx0, int yy0, int xx1, int yy1)
     Geom::IntRect paint_rect(xx0, yy0, xx1, yy1);
 
     Geom::OptIntRect area = paint_rect & canvas_rect;
-    if (!area || area->hasZeroArea()) return false;
+    // we dont want to stop the idle process if the area is empty
+    if (!area || area->hasZeroArea()) {
+        return true;
+    }
     paint_rect = *area;
 
     PaintRectSetup setup;
@@ -2240,10 +2244,12 @@ bool SPCanvas::paintRect(int xx0, int yy0, int xx1, int yy1)
     return paintRectInternal(&setup, paint_rect);
 }
 
-void SPCanvas::forceFullRedrawAfterInterruptions(unsigned int count)
+void SPCanvas::forceFullRedrawAfterInterruptions(unsigned int count, bool reset)
 {
     _forced_redraw_limit = count;
-    _forced_redraw_count = 0;
+    if (reset) {
+        _forced_redraw_count = 0;
+    }
 }
 
 void SPCanvas::endForcedFullRedraws()
@@ -2546,12 +2552,10 @@ gint SPCanvas::idle_handler(gpointer data)
     static int totaloops = 1;
     gint64 now = 0;
     gint64 elapsed = 0;
-    if (!canvas->_delayrendering) {
-        now = g_get_monotonic_time();
-        elapsed = now - canvas->_idle_time;
-        g_message("[%i] start loop %i in split %i at %f", canvas->_idle_id, totaloops, canvas->_splits,
-                  canvas->_totalelapsed / (double)1000000 + elapsed / (double)1000000);
-    }
+    now = g_get_monotonic_time();
+    elapsed = now - canvas->_idle_time;
+    g_message("[%i] start loop %i in split %i at %f", canvas->_idle_id, totaloops, canvas->_splits,
+                canvas->_totalelapsed / (double)1000000 + elapsed / (double)1000000);
 #endif
     int ret = canvas->doUpdate();
     int n_rects = cairo_region_num_rectangles(canvas->_clean_region);
@@ -2560,20 +2564,16 @@ gint SPCanvas::idle_handler(gpointer data)
     }
 
 #ifdef DEBUG_PERFORMANCE
-    if (ret == 0 && !canvas->_delayrendering) {
+    if (ret == 0) {
         now = g_get_monotonic_time();
         elapsed = now - canvas->_idle_time;
         g_message("[%i] loop ended unclean at %f", canvas->_idle_id,
-                  canvas->_totalelapsed / (double)1000000 + elapsed / (double)1000000);
-    }
-    if (ret == 0 && !canvas->_delayrendering) {
+                    canvas->_totalelapsed / (double)1000000 + elapsed / (double)1000000);
         totaloops += 1;
     }
     if (ret) {
         // Reset idle id
         canvas->_scrooling = false;
-        canvas->_forcefull = false;
-        canvas->_delayrendering = 0;
         now = g_get_monotonic_time();
         elapsed = now - canvas->_idle_time;
         canvas->_totalelapsed += elapsed;
@@ -2596,15 +2596,14 @@ gint SPCanvas::idle_handler(gpointer data)
         canvas->_idle_id = 0;
         totaloops = 1;
         canvas->_splits = 0;
+    }
 #else
     if (ret) {
         // Reset idle id
         canvas->_idle_id = 0;
         canvas->_scrooling = false;
-        canvas->_forcefull = false;
-        canvas->_delayrendering = 0;
-#endif
     }
+#endif
     return !ret;
 }
 
@@ -2658,64 +2657,71 @@ void SPCanvas::scrollTo( Geom::Point const &c, unsigned int clear, bool is_scrol
 
     Geom::IntRect old_area = getViewboxIntegers();
     Geom::IntRect new_area = old_area + Geom::IntPoint(dx, dy);
-
+    bool outsidescrool = false;
+    if (!new_area.intersects(old_area)) {
+        outsidescrool = true;
+    }
     GtkAllocation allocation;
     gtk_widget_get_allocation(&_widget, &allocation);
 
-    // Adjust backing store contents
-    assert(_backing_store);
-
-    cairo_surface_t *new_backing_store = nullptr;
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 12, 0)
-    if (_surface_for_similar != nullptr)
-
-        // Size in device pixels. Does not set device scale.
-        new_backing_store =
-            cairo_surface_create_similar_image(_surface_for_similar,
-                                               CAIRO_FORMAT_ARGB32,
-                                               allocation.width  * _device_scale,
-                                               allocation.height * _device_scale);
-#endif
-    if (new_backing_store == nullptr)
-
-        // Size in device pixels. Does not set device scale.
-        new_backing_store =
-            cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
-                                       allocation.width  * _device_scale,
-                                       allocation.height * _device_scale);
-
-    // Set device scale
-    cairo_surface_set_device_scale(new_backing_store, _device_scale, _device_scale);
-
-    cairo_t *cr = cairo_create(new_backing_store);
-    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
-    // Paint the background
-    cairo_translate(cr, -ix, -iy);
-    cairo_set_source(cr, _background);
-    cairo_paint(cr);
-
-    // cairo_surface_write_to_png( _backing_store, "scroll0.png" );
-
-    // Copy the old backing store contents
-    cairo_set_source_surface(cr, _backing_store, _x0, _y0);
-    cairo_rectangle(cr, _x0, _y0, allocation.width, allocation.height);
-    cairo_clip(cr);
-    cairo_paint(cr);
-    cairo_destroy(cr);
-    cairo_surface_destroy(_backing_store);
-    _backing_store = new_backing_store;
-
     // cairo_surface_write_to_png( _backing_store, "scroll1.png" );
-
-    _dx0 = cx; // here the 'd' stands for double, not delta!
-    _dy0 = cy;
-    _x0 = ix;
-    _y0 = iy;
-
-    // Adjust the clean region
-    if (clear || _spliter || _xray) {
+    bool split = false;
+    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
+    if (desktop && desktop->splitMode()) {
+        split = true;
+    }
+    if (clear || split || _xray || outsidescrool) {
+        _dx0 = cx; // here the 'd' stands for double, not delta!
+        _dy0 = cy;
+        _x0 = ix;
+        _y0 = iy;
         requestFullRedraw();
     } else {
+        // Adjust backing store contents
+        assert(_backing_store);
+        // this cairo operation is slow, improvements welcome
+        cairo_surface_t *new_backing_store = nullptr;
+#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 12, 0)
+        if (_surface_for_similar != nullptr)
+
+            // Size in device pixels. Does not set device scale.
+            new_backing_store =
+                cairo_surface_create_similar_image(_surface_for_similar,
+                                                CAIRO_FORMAT_ARGB32,
+                                                allocation.width  * _device_scale,
+                                                allocation.height * _device_scale);
+#endif
+        if (new_backing_store == nullptr)
+            // Size in device pixels. Does not set device scale.
+            new_backing_store =
+                cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
+                                        allocation.width  * _device_scale,
+                                        allocation.height * _device_scale);
+
+        // Set device scale
+        cairo_surface_set_device_scale(new_backing_store, _device_scale, _device_scale);
+
+        cairo_t *cr = cairo_create(new_backing_store);
+        cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+        // Paint the background
+        cairo_translate(cr, -ix, -iy);
+        cairo_set_source(cr, _background);
+        cairo_paint(cr);
+
+        // cairo_surface_write_to_png( _backing_store, "scroll0.png" );
+
+        // Copy the old backing store contents
+        cairo_set_source_surface(cr, _backing_store, _x0, _y0);
+        cairo_rectangle(cr, _x0, _y0, allocation.width, allocation.height);
+        cairo_clip(cr);
+        cairo_paint(cr);
+        cairo_destroy(cr);
+        cairo_surface_destroy(_backing_store);
+        _backing_store = new_backing_store;
+        _dx0 = cx; // here the 'd' stands for double, not delta!
+        _dy0 = cy;
+        _x0 = ix;
+        _y0 = iy;
         cairo_rectangle_int_t crect = { _x0, _y0, allocation.width, allocation.height };
         cairo_region_intersect_rectangle(_clean_region, &crect);
     }
@@ -2729,7 +2735,7 @@ void SPCanvas::scrollTo( Geom::Point const &c, unsigned int clear, bool is_scrol
         if ((dx != 0) || (dy != 0)) {
             if (gtk_widget_get_realized(GTK_WIDGET(this))) {
                 SPCanvas *canvas = SP_CANVAS(this);
-                if (canvas->_spliter) {
+                if (split) {
                     double scroll_horiz = 1 / (allocation.width  / (double)-dx);
                     double scroll_vert  = 1 / (allocation.height / (double)-dy);
                     double gap = canvas->_split_vertical ? scroll_horiz : scroll_vert;

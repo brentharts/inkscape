@@ -109,26 +109,29 @@ ObjectCompositeSettings::_blendBlurValueChanged()
         if (!SP_IS_ITEM(*i)) {
             continue;
         }
-
         SPItem * item = SP_ITEM(*i);
         SPStyle *style = item->style;
         g_assert(style != nullptr);
+        bool change_blend = (item->style->mix_blend_mode.set ? item->style->mix_blend_mode.value : SP_CSS_BLEND_NORMAL) != _filter_modifier.get_blend_mode();
         item->style->mix_blend_mode.set = TRUE;
-        item->style->mix_blend_mode.value = _filter_modifier.get_blend_mode();
-        item->updateRepr(SP_OBJECT_WRITE_NO_CHILDREN | SP_OBJECT_WRITE_EXT);
+        if (item->style->isolation.value == SP_CSS_ISOLATION_ISOLATE) {
+            item->style->mix_blend_mode.value = SP_CSS_BLEND_NORMAL;
+        } else { 
+            item->style->mix_blend_mode.value = _filter_modifier.get_blend_mode();
+        }
 
         if (radius == 0 && item->style->filter.set
             && filter_is_single_gaussian_blur(SP_FILTER(item->style->getFilter()))) {
             remove_filter(item, false);
-        }
-        else if (radius != 0) {
+        } else if (radius != 0) {
             SPFilter *filter = modify_filter_gaussian_blur_from_item(document, item, radius);
             sp_style_set_property_url(item, "filter", filter, false);
+        } 
+        if (change_blend) { //we do blend so we need update display style
+            item->updateRepr(SP_OBJECT_WRITE_NO_CHILDREN | SP_OBJECT_WRITE_EXT);
+        } else {
+            item->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_STYLE_MODIFIED_FLAG);
         }
-
-        //request update
-        item->requestDisplayUpdate(( SP_OBJECT_MODIFIED_FLAG |
-                                     SP_OBJECT_STYLE_MODIFIED_FLAG ));
     }
 
     DocumentUndo::maybeDone(document, _blur_tag.c_str(), _verb_code,
@@ -193,6 +196,10 @@ void ObjectCompositeSettings::_isolationValueChanged()
     for (auto item : _subject->list()) {
         item->style->isolation.set = TRUE;
         item->style->isolation.value = _filter_modifier.get_isolation_mode();
+        if (item->style->isolation.value == SP_CSS_ISOLATION_ISOLATE) {
+            item->style->mix_blend_mode.set = TRUE;
+            item->style->mix_blend_mode.value = SP_CSS_BLEND_NORMAL;
+        }
         item->updateRepr(SP_OBJECT_WRITE_NO_CHILDREN | SP_OBJECT_WRITE_EXT);
     }
 
@@ -251,14 +258,14 @@ ObjectCompositeSettings::_subjectChanged() {
     const int blend_result = _subject->queryStyle(&query, QUERY_STYLE_PROPERTY_BLEND);
     switch(blend_result) {
         case QUERY_STYLE_NOTHING:
-            _filter_modifier.set_blend_mode(0, false);
+            _filter_modifier.set_blend_mode(SP_CSS_BLEND_NORMAL, false);
             break;
         case QUERY_STYLE_SINGLE:
         case QUERY_STYLE_MULTIPLE_SAME:
             _filter_modifier.set_blend_mode(query.mix_blend_mode.value, true); // here dont work mix_blend_mode.set
             break;
         case QUERY_STYLE_MULTIPLE_DIFFERENT:
-            _filter_modifier.set_blend_mode(0, false);
+            _filter_modifier.set_blend_mode(SP_CSS_BLEND_NORMAL, false);
             break;
     }
 

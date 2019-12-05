@@ -791,7 +791,7 @@ Geom::OptRect SPItem::geometricBounds(Geom::Affine const &transform) const
     return bbox;
 }
 
-Geom::OptRect SPItem::visualBounds(Geom::Affine const &transform) const
+Geom::OptRect SPItem::visualBounds(Geom::Affine const &transform, bool wfilter, bool wclip, bool wmask) const
 {
     using Geom::X;
     using Geom::Y;
@@ -800,7 +800,7 @@ Geom::OptRect SPItem::visualBounds(Geom::Affine const &transform) const
 
 
     SPFilter *filter = (style && style->filter.href) ? dynamic_cast<SPFilter *>(style->getFilter()) : nullptr;
-    if ( filter ) {
+    if (filter && wfilter) {
         // call the subclass method
     	// CPPIFY
     	//bbox = this->bbox(Geom::identity(), SPItem::VISUAL_BBOX);
@@ -851,13 +851,13 @@ Geom::OptRect SPItem::visualBounds(Geom::Affine const &transform) const
     	//bbox = this->bbox(transform, SPItem::VISUAL_BBOX);
     	bbox = const_cast<SPItem*>(this)->bbox(transform, SPItem::VISUAL_BBOX);
     }
-    if (clip_ref->getObject()) {
+    if (clip_ref->getObject() && wclip) {
         SPItem *ownerItem = dynamic_cast<SPItem *>(clip_ref->getOwner());
         g_assert(ownerItem != nullptr);
         ownerItem->bbox_valid = FALSE;  // LP Bug 1349018
         bbox.intersectWith(clip_ref->getObject()->geometricBounds(transform));
     }
-    if (mask_ref->getObject()) {
+    if (mask_ref->getObject() && wmask) {
         bbox_valid = false;  // LP Bug 1349018
         bbox.intersectWith(mask_ref->getObject()->visualBounds(transform));
     }
@@ -1525,21 +1525,23 @@ void SPItem::doWriteTransform(Geom::Affine const &transform, Geom::Affine const 
         )
     {
         transform_attr = this->set_transform(transform);
-        if (freeze_stroke_width) {
-            freeze_stroke_width_recursive(false);
-        }
-    } else {
-        if (freeze_stroke_width) {
-            freeze_stroke_width_recursive(false);
-            if (compensate) {
-                if (!prefs->getBool("/options/transform/stroke", true)) {
-                    // Recursively compensate for stroke scaling, depending on user preference
-                    // (As to why we need to do this, see the comment a few lines above near the freeze_stroke_width_recursive(true) call)
-                    double const expansion = 1. / advertized_transform.descrim();
-                    adjust_stroke_width_recursive(expansion);
-                }
+    }
+    if (freeze_stroke_width) {
+        freeze_stroke_width_recursive(false);
+        if (compensate) {
+            if (!prefs->getBool("/options/transform/stroke", true)) {
+                // Recursively compensate for stroke scaling, depending on user preference
+                // (As to why we need to do this, see the comment a few lines above near the freeze_stroke_width_recursive(true) call)
+                double const expansion = 1. / advertized_transform.descrim();
+                adjust_stroke_width_recursive(expansion);
             }
         }
+    }
+    // this avoid temporary scaling issues on display when near identity
+    // this must be a bit grater than EPSILON * transform.descrim()
+    double e = 1e-5 * transform.descrim();
+    if (transform_attr.isIdentity(e)) {
+        transform_attr = Geom::Affine();
     }
     set_item_transform(transform_attr);
 

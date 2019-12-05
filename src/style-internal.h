@@ -22,6 +22,7 @@
 #include <vector>
 #include <map>
 
+#include "attributes.h"
 #include "style-enums.h"
 
 #include "color.h"
@@ -36,8 +37,6 @@
 
 #include "xml/repr.h"
 
-
-struct SPStyleEnum;
 
 static const unsigned SP_STYLE_FLAG_ALWAYS (1 << 2);
 static const unsigned SP_STYLE_FLAG_IFSET  (1 << 0);
@@ -127,9 +126,8 @@ class SPIBase
 {
 
 public:
-    SPIBase( Glib::ustring name, bool inherits = true )
-        : name(std::move(name)),
-          inherits(inherits),
+    SPIBase(bool inherits_ = true)
+        : inherits(inherits_),
           set(false),
           inherit(false),
           important(false),
@@ -141,45 +139,14 @@ public:
     = default;
 
     virtual void read( gchar const *str ) = 0;
-    virtual void readIfUnset( gchar const *str, SPStyleSrc const &source = SP_STYLE_SRC_STYLE_PROP ) {
-        if (!str) return;
-
-        bool has_important = false;
-        Glib::ustring stripped = strip_important(str, has_important); // Sets 'has_important'
-        // '!important' is invalid on attributes, don't read.
-        if (source == SP_STYLE_SRC_ATTRIBUTE && has_important){
-            return;
-        }
-
-        if ( !set || (has_important && !important) ) {
-            read( stripped.c_str() );
-            if ( set ) {
-                style_src = source;
-                if (has_important) {
-                    important = true;
-                }
-            }
-        }
-    }
+    virtual void readIfUnset(gchar const *str, SPStyleSrc source = SP_STYLE_SRC_STYLE_PROP);
 
     Glib::ustring important_str() const {
         return Glib::ustring(important ? " !important" : "");
     }
 
-    Glib::ustring strip_important( gchar const *str, bool &important ) {
-        assert (str != NULL);
-        Glib::ustring string = Glib::ustring(str);
-        auto pos = string.rfind( " !important" );
-        important = false;
-        if (pos != std::string::npos) {
-            important = true;
-            string.erase(pos);
-        }
-        return string;
-    }
-
     virtual void readAttribute( Inkscape::XML::Node *repr ) {
-        readIfUnset( repr->attribute( name.c_str() ), SP_STYLE_SRC_ATTRIBUTE );
+        readIfUnset(repr->attribute(name().c_str()), SP_STYLE_SRC_ATTRIBUTE);
     }
 
     virtual const Glib::ustring get_value() const = 0;
@@ -202,20 +169,22 @@ public:
 
     // Check apples being compared to apples
     virtual bool operator==(const SPIBase& rhs) {
-        return (name == rhs.name);
+        return id() == rhs.id();
     }
 
     virtual bool operator!=(const SPIBase& rhs) {
         return !(*this == rhs);
     }
 
+    virtual SPAttributeEnum id() const { return SP_ATTR_INVALID; }
+    Glib::ustring const &name() const;
+
   // To do: make private
 public:
-    Glib::ustring name;       // Make const
-    unsigned inherits : 1;    // Property inherits by default from parent.
-    unsigned set : 1;         // Property has been explicitly set (vs. inherited).
-    unsigned inherit : 1;     // Property value set to 'inherit'.
-    unsigned important : 1;   // Property rule 'important' has been explicitly set.
+    bool inherits : 1;    // Property inherits by default from parent.
+    bool set : 1;         // Property has been explicitly set (vs. inherited).
+    bool inherit : 1;     // Property value set to 'inherit'.
+    bool important : 1;   // Property rule 'important' has been explicitly set.
     SPStyleSrc style_src : 2; // Source (attribute, style attribute, style-sheet).
 
   // To do: make private after g_asserts removed
@@ -223,19 +192,36 @@ public:
     SPStyle* style;       // Used by SPIPaint, SPIFilter... to find values of other properties
 };
 
+
+/**
+ * Decorator which overrides SPIBase::id()
+ */
+template <SPAttributeEnum Id, class Base>
+class TypedSPI : public Base {
+  public:
+    using Base::Base;
+
+    /**
+     * Get the attribute enum
+     */
+    SPAttributeEnum id() const override { return Id; }
+    static SPAttributeEnum static_id() { return Id; }
+
+    /**
+     * Upcast to the base class
+     */
+    Base *upcast() { return static_cast<Base *>(this); }
+    Base const *upcast() const { return static_cast<Base const *>(this); }
+};
+
+
 /// Float type internal to SPStyle. (Only 'stroke-miterlimit')
 class SPIFloat : public SPIBase
 {
 
 public:
-    SPIFloat()
-        : SPIBase( "anonymous_float" ),
-          value(0.0)
-    {}
-
-    SPIFloat( Glib::ustring const &name, float value_default  = 0.0 )
-        : SPIBase( name ),
-          value(value_default),
+    SPIFloat(float value_default = 0.0 )
+        : value(value_default),
           value_default(value_default)
     {}
 
@@ -259,10 +245,10 @@ public:
 
   // To do: make private
 public:
-    float value;
+    float value = 0.0;
 
 private:
-    float value_default;
+    float value_default = 0.0;
 };
 
 /*
@@ -299,17 +285,12 @@ static const unsigned SP_SCALE24_MAX = 0xff0000;
 // Opacity does not inherit but stroke-opacity and fill-opacity do. 
 class SPIScale24 : public SPIBase
 {
+    static unsigned get_default() { return SP_SCALE24_MAX; }
 
 public:
-    SPIScale24()
-        : SPIBase( "anonymous_scale24" ),
-          value(0)
-    {}
-
-    SPIScale24( Glib::ustring const &name, unsigned value = 0, bool inherits = true )
-        : SPIBase( name, inherits ),
-          value(value),
-          value_default(value)
+    SPIScale24(bool inherits = true )
+        : SPIBase(inherits),
+          value(get_default())
     {}
 
     ~SPIScale24() override
@@ -319,7 +300,7 @@ public:
     const Glib::ustring get_value() const override;
     void clear() override {
         SPIBase::clear();
-        value = value_default;
+        value = get_default();
     }
 
     void cascade( const SPIBase* const parent ) override;
@@ -336,9 +317,6 @@ public:
   // To do: make private
 public:
     unsigned value : 24;
-
-private:
-    unsigned value_default : 24;
 };
 
 
@@ -363,16 +341,8 @@ class SPILength : public SPIBase
 {
 
 public:
-    SPILength()
-        : SPIBase( "anonymous_length" ),
-          unit(SP_CSS_UNIT_NONE),
-          value(0),
-          computed(0)
-    {}
-
-    SPILength( Glib::ustring const &name, float value = 0 )
-        : SPIBase( name ),
-          unit(SP_CSS_UNIT_NONE),
+    SPILength(float value = 0)
+        : unit(SP_CSS_UNIT_NONE),
           value(value),
           computed(value),
           value_default(value)
@@ -404,11 +374,11 @@ public:
     // To do: make private
   public:
     unsigned unit : 4;
-    float value;
-    float computed;
+    float value = 0.f;
+    float computed = 0.f;
 
 private:
-    float value_default;
+    float value_default = 0.f;
 };
 
 
@@ -418,13 +388,8 @@ class SPILengthOrNormal : public SPILength
 {
 
 public:
-    SPILengthOrNormal()
-        : SPILength( "anonymous_length" ),
-          normal(true)
-    {}
-
-    SPILengthOrNormal( Glib::ustring const &name, float value = 0 )
-        : SPILength( name, value ),
+    SPILengthOrNormal(float value = 0)
+        : SPILength(value),
           normal(true)
     {}
 
@@ -461,13 +426,7 @@ class SPIFontVariationSettings : public SPIBase
 
 public:
     SPIFontVariationSettings()
-        : SPIBase( "anonymous_fontvariationsettings" ),
-          normal(true)
-    {}
-
-    SPIFontVariationSettings( Glib::ustring const &name )
-        : SPIBase( name ),
-          normal(true)
+        : normal(true)
     {}
 
     ~SPIFontVariationSettings() override
@@ -508,35 +467,18 @@ public:
 
 /// Enum type internal to SPStyle.
 // Used for many properties. 'font-stretch' and 'font-weight' must be special cased.
+template <typename T>
 class SPIEnum : public SPIBase
 {
 
 public:
-    SPIEnum() :
-        SPIBase( "anonymous_enum" ),
-        enums( nullptr ),
-        value(0),
-        computed(0)
-    {}
-
-    SPIEnum( Glib::ustring const &name, SPStyleEnum const *enums, unsigned value = 0, bool inherits = true ) :
-        SPIBase( name, inherits ),
-        enums( enums ),
+    SPIEnum(T value = T(), bool inherits = true) :
+        SPIBase(inherits),
         value(value),
-        computed(value),
-        value_default(value),
-        computed_default(value)
-    {}
-
-    // Following is needed for font-weight
-    SPIEnum( Glib::ustring const &name, SPStyleEnum const *enums, SPCSSFontWeight value, SPCSSFontWeight computed ) :
-        SPIBase( name ),
-        enums( enums ),
-        value(value),
-        computed(computed),
-        value_default(value),
-        computed_default(computed)
-    {}
+        value_default(value)
+    {
+        update_computed();
+    }
 
     ~SPIEnum() override
     = default;
@@ -545,7 +487,8 @@ public:
     const Glib::ustring get_value() const override;
     void clear() override {
         SPIBase::clear();
-        value = value_default, computed = computed_default;
+        value = value_default;
+        update_computed();
     }
 
     void cascade( const SPIBase* const parent ) override;
@@ -556,7 +499,6 @@ public:
         value            = rhs.value;
         computed         = rhs.computed;
         value_default    = rhs.value_default;
-        computed_default = rhs.computed_default;
         return *this;
     }
 
@@ -567,26 +509,29 @@ public:
 
   // To do: make private
 public:
-    SPStyleEnum const *enums;
-
-    unsigned value : 16;  // 9 bits required for 'font-variant-east-asian'
-    unsigned computed: 16;
+    T value{};
+    T computed{};
 
 private:
-    unsigned value_default : 16;
-    unsigned computed_default: 16; // for font-weight
+    T value_default{};
+
+    //! Update computed from value
+    void update_computed();
+    //! Update computed from parent computed
+    void update_computed_cascade(T const &parent_computed) {}
+    //! Update value from parent
+    //! @pre computed is up to date
+    void update_value_merge(SPIEnum<T> const &) {}
+    void update_value_merge(SPIEnum<T> const &, T, T);
 };
 
 
+#if 0
 /// SPIEnum w/ bits, allows values with multiple key words.
 class SPIEnumBits : public SPIEnum
 {
 
 public:
-    SPIEnumBits() :
-        SPIEnum( "anonymous_enumbits", nullptr )
-    {}
-
     SPIEnumBits( Glib::ustring const &name, SPStyleEnum const *enums, unsigned value = 0, bool inherits = true ) :
         SPIEnum( name, enums, value, inherits )
     {}
@@ -597,22 +542,20 @@ public:
     void read( gchar const *str ) override;
     const Glib::ustring get_value() const override;
 };
+#endif
 
 
 /// SPIEnum w/ extra bits. The 'font-variants-ligatures' property is a complete mess that needs
 /// special handling. For OpenType fonts the values 'common-ligatures', 'contextual',
 /// 'no-discretionary-ligatures', and 'no-historical-ligatures' are not useful but we still must be
 /// able to parse them.
-class SPILigatures : public SPIEnum
+using _SPCSSFontVariantLigatures_int = typename std::underlying_type<SPCSSFontVariantLigatures>::type;
+class SPILigatures : public SPIEnum<_SPCSSFontVariantLigatures_int>
 {
 
 public:
     SPILigatures() :
-        SPIEnum( "anonymous_enumligatures", nullptr )
-    {}
-
-    SPILigatures( Glib::ustring const &name, SPStyleEnum const *enums) :
-        SPIEnum( name, enums, SP_CSS_FONT_VARIANT_LIGATURES_NORMAL )
+        SPIEnum<_SPCSSFontVariantLigatures_int>(SP_CSS_FONT_VARIANT_LIGATURES_NORMAL)
     {}
 
     ~SPILigatures() override
@@ -625,16 +568,13 @@ public:
 
 /// SPIEnum w/ extra bits. The 'font-variants-numeric' property is a complete mess that needs
 /// special handling. Multiple key words can be specified, some exclusive of others.
-class SPINumeric : public SPIEnum
+using _SPCSSFontVariantNumeric_int = typename std::underlying_type<SPCSSFontVariantNumeric>::type;
+class SPINumeric : public SPIEnum<_SPCSSFontVariantNumeric_int>
 {
 
 public:
     SPINumeric() :
-        SPIEnum( "anonymous_enumnumeric", nullptr )
-    {}
-
-    SPINumeric( Glib::ustring const &name, SPStyleEnum const *enums) :
-        SPIEnum( name, enums, SP_CSS_FONT_VARIANT_NUMERIC_NORMAL )
+        SPIEnum<_SPCSSFontVariantNumeric_int>(SP_CSS_FONT_VARIANT_NUMERIC_NORMAL)
     {}
 
     ~SPINumeric() override
@@ -647,16 +587,13 @@ public:
 
 /// SPIEnum w/ extra bits. The 'font-variants-east-asian' property is a complete mess that needs
 /// special handling. Multiple key words can be specified, some exclusive of others.
-class SPIEastAsian : public SPIEnum
+using _SPCSSFontVariantEastAsian_int = typename std::underlying_type<SPCSSFontVariantEastAsian>::type;
+class SPIEastAsian : public SPIEnum<_SPCSSFontVariantEastAsian_int>
 {
 
 public:
     SPIEastAsian() :
-        SPIEnum( "anonymous_enumeastasian", nullptr )
-    {}
-
-    SPIEastAsian( Glib::ustring const &name, SPStyleEnum const *enums) :
-        SPIEnum( name, enums, SP_CSS_FONT_VARIANT_EAST_ASIAN_NORMAL )
+        SPIEnum<_SPCSSFontVariantEastAsian_int>(SP_CSS_FONT_VARIANT_EAST_ASIAN_NORMAL)
     {}
 
     ~SPIEastAsian() override
@@ -673,21 +610,14 @@ class SPIString : public SPIBase
 {
 
 public:
-    SPIString()
-        : SPIBase( "anonymous_string" ),
-          value(nullptr)
+    SPIString(bool inherits = true)
+        : SPIBase(inherits)
     {}
 
-    // TODO probably want to avoid gchar* and c-style strings.
-    SPIString( Glib::ustring const &name, gchar const* value_default_in = nullptr )
-        : SPIBase( name ),
-          value(nullptr),
-          value_default(value_default_in ? g_strdup(value_default_in) : nullptr)
-    {}
+    SPIString(const SPIString &rhs) { *this = rhs; }
 
     ~SPIString() override {
-        g_free(value);
-        g_free(value_default);
+        g_free(_value);
     }
 
     void read( gchar const *str ) override;
@@ -697,11 +627,12 @@ public:
     void merge(   const SPIBase* const parent ) override;
 
     SPIString& operator=(const SPIString& rhs) {
+        if (this == &rhs) {
+            return *this;
+        }
         SPIBase::operator=(rhs);
-        g_free(value);
-        g_free(value_default);
-        value            = rhs.value ? g_strdup(rhs.value) : nullptr;
-        value_default    = rhs.value_default ? g_strdup(rhs.value_default) : nullptr;
+        g_free(_value);
+        _value = g_strdup(rhs._value);
         return *this;
     }
 
@@ -710,10 +641,13 @@ public:
         return !(*this == rhs);
     }
 
-  // To do: make private, convert value to Glib::ustring
-public:
-    gchar *value;
-    gchar *value_default;
+    //! Get value if set, or inherited value, or default value (may be NULL)
+    char const *value() const;
+
+  private:
+    char const *get_default_value() const;
+
+    gchar *_value = nullptr;
 };
 
 /// Shapes type internal to SPStyle.
@@ -723,14 +657,7 @@ class SPIShapes : public SPIString
 {
 
 public:
-    SPIShapes()
-        : SPIString()
-    {}
-
-    // TODO probably want to avoid gchar* and c-style strings.
-    SPIShapes( Glib::ustring const &name, gchar const* value_default_in = nullptr )
-        : SPIString( name, value_default_in )
-    {}
+    SPIShapes() = default;
 
     void read( gchar const *str ) override;
 
@@ -743,15 +670,10 @@ class SPIColor : public SPIBase
 {
 
 public:
-    SPIColor()
-        : SPIBase( "anonymous_color" ),
-          currentcolor(false) {
-        value.color.set(0);
-    }
-
-    SPIColor( Glib::ustring const &name, bool inherits = true )
-        : SPIBase( name, inherits ),
-          currentcolor(false) {
+    SPIColor(bool inherits = true)
+        : SPIBase(inherits)
+        , currentcolor(false)
+    {
         value.color.set(0);
     }
 
@@ -820,20 +742,11 @@ class SPIPaint : public SPIBase
 
 public:
     SPIPaint()
-        : SPIBase( "anonymous_paint" ),
-          paintOrigin( SP_CSS_PAINT_ORIGIN_NORMAL ),
+        : paintOrigin(SP_CSS_PAINT_ORIGIN_NORMAL),
           colorSet(false),
           noneSet(false) {
         value.href = nullptr;
         clear();
-    }
-
-    SPIPaint( Glib::ustring const &name )
-        : SPIBase( name ),
-          colorSet(false),
-          noneSet(false) {
-        value.href = nullptr;
-        clear();  // Sets defaults
     }
 
     ~SPIPaint() override;  // Clear and delete href.
@@ -926,11 +839,11 @@ class SPIPaintOrder : public SPIBase
 {
 
 public:
-    SPIPaintOrder()
-        : SPIBase( "paint-order" ),
-          value(nullptr) {
+    SPIPaintOrder() {
         this->clear();
     }
+
+    SPIPaintOrder(const SPIPaintOrder &rhs) { *this = rhs; }
 
     ~SPIPaintOrder() override {
         g_free( value );
@@ -951,6 +864,9 @@ public:
     void merge(   const SPIBase* const parent ) override;
 
     SPIPaintOrder& operator=(const SPIPaintOrder& rhs) {
+        if (this == &rhs) {
+            return *this;
+        }
         SPIBase::operator=(rhs);
         for( unsigned i = 0; i < PAINT_ORDER_LAYERS; ++i ) {
             layer[i]     = rhs.layer[i];
@@ -971,7 +887,7 @@ public:
 public:
     SPPaintOrderLayer layer[PAINT_ORDER_LAYERS];
     bool layer_set[PAINT_ORDER_LAYERS];
-    gchar *value;  // Raw string
+    gchar *value = nullptr; // Raw string
 };
 
 
@@ -980,9 +896,7 @@ class SPIDashArray : public SPIBase
 {
 
 public:
-    SPIDashArray()
-        : SPIBase( "stroke-dasharray" )
-    {}  // Only one instance of SPIDashArray
+    SPIDashArray() = default;
 
     ~SPIDashArray() override
     = default;
@@ -1015,8 +929,7 @@ class SPIFilter : public SPIBase
 
 public:
     SPIFilter()
-        : SPIBase( "filter", false ),
-          href(nullptr)
+        : SPIBase(false)
     {}
 
     ~SPIFilter() override;
@@ -1035,7 +948,7 @@ public:
 
   // To do: make private
 public:
-    SPFilterReference *href;
+    SPFilterReference *href = nullptr;
 };
 
 
@@ -1051,8 +964,7 @@ class SPIFontSize : public SPIBase
 {
 
 public:
-    SPIFontSize()
-        : SPIBase( "font-size" ) {
+    SPIFontSize() {
         this->clear();
     }
 
@@ -1099,9 +1011,7 @@ class SPIFont : public SPIBase
 {
 
 public:
-    SPIFont()
-        : SPIBase( "font" )
-    {}
+    SPIFont() = default;
 
     ~SPIFont() override
     = default;
@@ -1139,7 +1049,7 @@ class SPIBaselineShift : public SPIBase
 
 public:
     SPIBaselineShift()
-        : SPIBase( "baseline-shift", false ) {
+        : SPIBase(false) {
         this->clear();
     }
 
@@ -1185,8 +1095,7 @@ class SPITextDecorationLine : public SPIBase
 {
 
 public:
-    SPITextDecorationLine()
-        : SPIBase( "text-decoration-line" ) {
+    SPITextDecorationLine() {
         this->clear();
     }
 
@@ -1224,8 +1133,7 @@ class SPITextDecorationStyle : public SPIBase
 {
 
 public:
-    SPITextDecorationStyle()
-        : SPIBase( "text-decoration-style" ) {
+    SPITextDecorationStyle() {
         this->clear();
     }
 
@@ -1271,10 +1179,7 @@ class SPITextDecoration : public SPIBase
 {
 
 public:
-    SPITextDecoration()
-        : SPIBase( "text-decoration" ),
-          style_td( nullptr )
-    {}
+    SPITextDecoration() = default;
 
     ~SPITextDecoration() override
     = default;
@@ -1304,7 +1209,7 @@ public:
     }
 
 public:
-    SPStyle* style_td;   // Style to be used for drawing CSS2 text decorations 
+    SPStyle* style_td = nullptr;   // Style to be used for drawing CSS2 text decorations
 };
 
 
@@ -1328,9 +1233,9 @@ class SPIVectorEffect : public SPIBase
 
 public:
     SPIVectorEffect()
-        : SPIBase( "vector-effect" ) {
+        : SPIBase(false)
+    {
         this->clear();
-        inherits = false;
     }
 
     ~SPIVectorEffect() override

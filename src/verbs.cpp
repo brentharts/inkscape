@@ -874,12 +874,6 @@ void FileVerb::perform(SPAction *action, void *data)
 //        case SP_VERB_FILE_EXPORT:
 //            sp_file_export_dialog(*parent);
 //            break;
-        case SP_VERB_FILE_IMPORT_FROM_OCAL:
-            sp_file_import_from_ocal(*parent);
-            break;
-//        case SP_VERB_FILE_EXPORT_TO_OCAL:
-//            sp_file_export_to_ocal(*parent);
-//            break;
         case SP_VERB_FILE_NEXT_DESKTOP:
             INKSCAPE.switch_desktops_next();
             break;
@@ -1551,7 +1545,6 @@ void ObjectVerb::perform( SPAction *action, void *data)
         center = *sel->center();
     else
         center = bbox->midpoint();
-
     switch (reinterpret_cast<std::size_t>(data)) {
         case SP_VERB_OBJECT_ROTATE_90_CW:
             sel->rotate90(false);
@@ -1586,13 +1579,17 @@ void ObjectVerb::perform( SPAction *action, void *data)
             break;
         case SP_VERB_OBJECT_SET_INVERSE_MASK:
             sel->setMask(false, false);
+            Inkscape::DocumentUndo::setUndoSensitive(dt->getDocument(), false);
             Inkscape::LivePathEffect::sp_inverse_powermask(sp_action_get_selection(action));
+            Inkscape::DocumentUndo::setUndoSensitive(dt->getDocument(), true);
             break;
         case SP_VERB_OBJECT_EDIT_MASK:
             sel->editMask(false);
             break;
         case SP_VERB_OBJECT_UNSET_MASK:
+            Inkscape::DocumentUndo::setUndoSensitive(dt->getDocument(), false);
             Inkscape::LivePathEffect::sp_remove_powermask(sp_action_get_selection(action));
+            Inkscape::DocumentUndo::setUndoSensitive(dt->getDocument(), true);
             sel->unsetMask(false);
             break;
         case SP_VERB_OBJECT_SET_CLIPPATH:
@@ -1600,7 +1597,9 @@ void ObjectVerb::perform( SPAction *action, void *data)
             break;
         case SP_VERB_OBJECT_SET_INVERSE_CLIPPATH:
             sel->setMask(true, false);
+            Inkscape::DocumentUndo::setUndoSensitive(dt->getDocument(), false);
             Inkscape::LivePathEffect::sp_inverse_powerclip(sp_action_get_selection(action));
+            Inkscape::DocumentUndo::setUndoSensitive(dt->getDocument(), true);
             break;
         case SP_VERB_OBJECT_CREATE_CLIP_GROUP:
             sel->setClipGroup();
@@ -1609,7 +1608,9 @@ void ObjectVerb::perform( SPAction *action, void *data)
             sel->editMask(true);
             break;
         case SP_VERB_OBJECT_UNSET_CLIPPATH:
+            Inkscape::DocumentUndo::setUndoSensitive(dt->getDocument(), false);
             Inkscape::LivePathEffect::sp_remove_powerclip(sp_action_get_selection(action));
+            Inkscape::DocumentUndo::setUndoSensitive(dt->getDocument(), true);
             sel->unsetMask(true);
             break;
         default:
@@ -1947,12 +1948,12 @@ void ZoomVerb::perform(SPAction *action, void *data)
                 SPCurve *rc = SP_DRAW_CONTEXT(ec)->red_curve;
                 if (!rc->is_empty()) {
                     Geom::Point const rotate_to (*rc->last_point());
-                    dt->rotate_relative_keep_point(rotate_to, -mul*rotate_inc);
+                    dt->rotate_relative_keep_point(rotate_to, mul * rotate_inc);
                     break;
                 }
             }
 
-            dt->rotate_relative_center_point( midpoint, -mul*rotate_inc);
+            dt->rotate_relative_center_point(midpoint, mul * rotate_inc);
             break;
         }
         case SP_VERB_ROTATE_CCW:
@@ -1963,16 +1964,16 @@ void ZoomVerb::perform(SPAction *action, void *data)
                 SPCurve *rc = SP_DRAW_CONTEXT(ec)->red_curve;
                 if (!rc->is_empty()) {
                     Geom::Point const rotate_to (*rc->last_point());
-                    dt->rotate_relative_keep_point(rotate_to, mul*rotate_inc);
+                    dt->rotate_relative_keep_point(rotate_to, -mul * rotate_inc);
                     break;
                 }
             }
 
-            dt->rotate_relative_center_point( midpoint, mul*rotate_inc);
+            dt->rotate_relative_center_point(midpoint, -mul * rotate_inc);
             break;
         }
         case SP_VERB_ROTATE_ZERO:
-            dt->rotate_absolute_center_point( midpoint, 0.0 );
+            dt->rotate_absolute_center_point(midpoint, 0.0);
             break;
         case SP_VERB_FLIP_HORIZONTAL:
         {
@@ -2380,9 +2381,7 @@ public:
                    gchar const *tip,
                    gchar const *image) :
         Verb(code, id, name, tip, image, _("View"))
-    {
-        set_default_sensitive(false);
-    }
+    { }
 }; // FitCanvasVerb class
 
 /**
@@ -2533,10 +2532,6 @@ Verb *Verb::_base_verbs[] = {
                  N_("Import a bitmap or SVG image into this document"), INKSCAPE_ICON("document-import")),
     //    new FileVerb(SP_VERB_FILE_EXPORT, "FileExport", N_("_Export Bitmap..."), N_("Export this document or a
     //    selection as a bitmap image"), INKSCAPE_ICON("document-export")),
-    new FileVerb(SP_VERB_FILE_IMPORT_FROM_OCAL, "FileImportFromOCAL", N_("Import Clip Art..."),
-                 N_("Import clipart from Open Clip Art Library"), INKSCAPE_ICON("document-import-ocal")),
-    //    new FileVerb(SP_VERB_FILE_EXPORT_TO_OCAL, "FileExportToOCAL", N_("Export To Open Clip Art Library"),
-    //    N_("Export this document to Open Clip Art Library"), INKSCAPE_ICON_DOCUMENT_EXPORT_OCAL),
     new FileVerb(SP_VERB_FILE_NEXT_DESKTOP, "NextWindow", N_("N_ext Window"), N_("Switch to the next document window"),
                  INKSCAPE_ICON("window-next")),
     new FileVerb(SP_VERB_FILE_PREV_DESKTOP, "PrevWindow", N_("P_revious Window"),

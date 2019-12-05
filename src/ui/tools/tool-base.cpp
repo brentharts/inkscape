@@ -90,7 +90,8 @@ void ToolBase::set(const Inkscape::Preferences::Entry& /*val*/) {
 }
 
 void ToolBase::finish() {
-	this->enableSelectionCue(false);
+    this->desktop->canvas->endForcedFullRedraws();
+    this->enableSelectionCue(false);
 }
 
 SPDesktop const& ToolBase::getDesktop() const {
@@ -455,9 +456,6 @@ bool ToolBase::root_handler(GdkEvent* event) {
         break;
 
     case GDK_MOTION_NOTIFY:
-        if (this->space_panning) {
-            this->desktop->canvas->_delayrendering = 20;
-        }
         if (panning) {
             if (panning == 4 && !xp && !yp ) {
                 // <Space> + mouse panning started, save location and grab canvas
@@ -480,9 +478,11 @@ bool ToolBase::root_handler(GdkEvent* event) {
                 sp_canvas_item_ungrab(SP_CANVAS_ITEM(desktop->acetate));
                 ret = TRUE;
             } else {
+                // To fix https://bugs.launchpad.net/inkscape/+bug/1458200
+                // we increase the tolerance because no sensible data for panning
                 if (within_tolerance && (abs((gint) event->motion.x - xp)
-                        < tolerance) && (abs((gint) event->motion.y - yp)
-                        < tolerance)) {
+                        < tolerance * 3) && (abs((gint) event->motion.y - yp)
+                        < tolerance * 3)) {
                     // do not drag if we're within tolerance from origin
                     break;
                 }
@@ -1060,6 +1060,23 @@ bool ToolBase::deleteSelectedDrag(bool just_one) {
     return FALSE;
 }
 
+/** Enable (or disable) high precision for motion events
+  *
+  * This is intended to be used by drawing tools, that need to process motion events with high accuracy
+  * and high update rate (for example free hand tools)
+  *
+  * With standard accuracy some intermediate motion events might be discarded
+  *
+  * Call this function when an operation that requires high accuracy is started (e.g. mouse button is pressed
+  * to draw a line). Make sure to call it again and restore standard precision afterwards. **/
+void ToolBase::set_high_motion_precision(bool high_precision) {
+    Glib::RefPtr<Gdk::Window> window = desktop->getToplevel()->get_window();
+
+    if (window) {
+        window->set_event_compression(!high_precision);
+    }
+}
+
 /**
  * Calls virtual set() function of ToolBase.
  */
@@ -1131,7 +1148,12 @@ gint sp_event_context_virtual_root_handler(ToolBase * event_context, GdkEvent * 
         // This will toggle the current tool and delete the current one.
         // Thus, save a pointer to the desktop before calling it.
         SPDesktop* desktop = event_context->desktop;
-
+        if (event->type == GDK_KEY_PRESS && 
+            get_latin_keyval(&event->key) == GDK_KEY_space &&
+            desktop->event_context->space_panning) 
+        {
+            return FALSE;
+        }
         ret = event_context->root_handler(event);
 
         set_event_location(desktop, event);

@@ -72,9 +72,9 @@ $ARCH-gtkspell3
 #     or (always!) run pacman with the additional command line switch
 #        --ignore=mingw-w64-*-imagemagick
 for arch in $(eval echo $ARCH); do
-  wget -nv https://gitlab.com/Ede123/bintray/raw/master/${arch}-imagemagick-6.9.9.23-1-any.pkg.tar.xz \
-    && pacman -U $PACMAN_OPTIONS ${arch}-imagemagick-6.9.9.23-1-any.pkg.tar.xz \
-    && rm  ${arch}-imagemagick-6.9.9.23-1-any.pkg.tar.xz
+  wget -nv https://gitlab.com/ede123/bintray/raw/master/${arch}-imagemagick-6.9.10.69-1-any.pkg.tar.xz \
+    && pacman -U $PACMAN_OPTIONS ${arch}-imagemagick-6.9.10.69-1-any.pkg.tar.xz \
+    && rm  ${arch}-imagemagick-6.9.10.69-1-any.pkg.tar.xz
 done
 
 
@@ -87,13 +87,17 @@ $ARCH-python3-numpy \
 $ARCH-python3-pillow \
 $ARCH-python3-six \
 $ARCH-python3-gobject
+
+PACKAGES="coverage pyserial scour"
 for arch in $(eval echo $ARCH); do
   case ${arch} in
     mingw-w64-i686)
-      /mingw32/bin/pip3 install --upgrade --upgrade-strategy eager coverage pyserial scour
+      /mingw32/bin/pip3 install --upgrade --upgrade-strategy eager ${PACKAGES} || \
+      /mingw32/bin/pip3 install --upgrade ${PACKAGES}
       ;;
     mingw-w64-x86_64)
-      /mingw64/bin/pip3 install --upgrade --upgrade-strategy eager coverage pyserial scour
+      /mingw64/bin/pip3 install --upgrade --upgrade-strategy eager ${PACKAGES} || \
+      /mingw64/bin/pip3 install --upgrade ${PACKAGES}
       ;;
   esac
 done

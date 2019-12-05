@@ -267,8 +267,13 @@ SPObject *sp_object_unref(SPObject *object, SPObject *owner)
 
 void SPObject::hrefObject(SPObject* owner)
 {
-    hrefcount++;
-    _updateTotalHRefCount(1);
+    // if (owner) std::cout << "  owner: " << *owner << std::endl;
+
+    // If owner is a clone, do not increase hrefcount, it's already href'ed by original.
+    if (!owner || !owner->cloned) {
+        hrefcount++;
+        _updateTotalHRefCount(1);
+    }
 
     if(owner)
         hrefList.push_front(owner);
@@ -278,7 +283,10 @@ void SPObject::unhrefObject(SPObject* owner)
 {
     g_return_if_fail(hrefcount > 0);
 
-    hrefcount--;
+    if (!owner || !owner->cloned) {
+        hrefcount--;
+    }
+
     _updateTotalHRefCount(-1);
 
     if(owner)
@@ -416,8 +424,10 @@ gchar const *SPObject::defaultLabel() const {
         if (!_default_label) {
             if (getId()) {
                 _default_label = g_strdup_printf("#%s", getId());
-            } else {
+            } else if (getRepr()) {
                 _default_label = g_strdup_printf("<%s>", getRepr()->name());
+            } else {
+                _default_label = g_strdup("Default label");
             }
         }
         return _default_label;
@@ -1616,7 +1626,9 @@ void SPObject::recursivePrintTree( unsigned level )
     for (unsigned i = 0; i < level; ++i) {
         std::cout << "  ";
     }
-    std::cout << (getId()?getId():"No object id") << std::endl;
+    std::cout << (getId()?getId():"No object id")
+              << " clone: " << std::boolalpha << (bool)cloned
+              << " hrefcount: " << hrefcount << std::endl;
     for (auto& child: children) {
         child.recursivePrintTree(level + 1);
     }
@@ -1632,9 +1644,10 @@ void SPObject::objectTrace( std::string text, bool in, unsigned flags ) {
         std::cout << text << ":"
                   << " entrance: "
                   << (id?id:"null")
-                  << " uflags: " << uflags
-                  << " mflags: " << mflags
-                  << " flags: " << flags << std::endl;
+                  // << " uflags: " << uflags
+                  // << " mflags: " << mflags
+                  // << " flags: " << flags
+                  << std::endl;
         ++indent_level;
     } else {
         --indent_level;
@@ -1642,14 +1655,21 @@ void SPObject::objectTrace( std::string text, bool in, unsigned flags ) {
             std::cout << "  ";
         }
         std::cout << text << ":"
-                  << " exit: "
+                  << " exit:     "
                   << (id?id:"null")
-                  << " uflags: " << uflags
-                  << " mflags: " << mflags
-                  << " flags: " << flags << std::endl;
+                  // << " uflags: " << uflags
+                  // << " mflags: " << mflags
+                  // << " flags: " << flags
+                  << std::endl;
     }
 }
 
+std::ostream &operator<<(std::ostream &out, const SPObject &o)
+{
+    out << (o.getId()?o.getId():"No ID")
+        << " cloned: " << std::boolalpha << (bool)o.cloned;
+    return out;
+}
 /*
   Local Variables:
   mode:c++

@@ -146,6 +146,7 @@ SelectTool::~SelectTool() {
         g_object_unref(CursorSelectMouseover);
         CursorSelectMouseover = nullptr;
     }
+    this->desktop->canvas->endForcedFullRedraws();
 }
 
 void SelectTool::setup() {
@@ -303,7 +304,6 @@ bool SelectTool::item_handler(SPItem* item, GdkEvent* event) {
 
                     gdk_window_set_cursor(window, CursorSelectDragging);
 
-                    desktop->canvas->forceFullRedrawAfterInterruptions(5);
 
                     // remember the clicked item in this->item:
                     if (this->item) {
@@ -329,8 +329,6 @@ bool SelectTool::item_handler(SPItem* item, GdkEvent* event) {
 
                     this->grabbed = SP_CANVAS_ITEM(desktop->drawing);
 
-                    desktop->canvas->forceFullRedrawAfterInterruptions(5);
-
                     ret = TRUE;
                 }
             } else if (event->button.button == 3 && !this->dragging) {
@@ -338,6 +336,7 @@ bool SelectTool::item_handler(SPItem* item, GdkEvent* event) {
                 this->sp_select_context_abort();
             }
             break;
+    
 
         case GDK_ENTER_NOTIFY: {
             if (!desktop->isWaitingCursor() && !this->dragging) {
@@ -477,6 +476,7 @@ bool SelectTool::root_handler(GdkEvent* event) {
     if (this->item && this->item->document == nullptr) {
         this->sp_select_context_abort();
     }
+    desktop->canvas->forceFullRedrawAfterInterruptions(5, false);
 
     switch (event->type) {
         case GDK_2BUTTON_PRESS:
@@ -490,7 +490,7 @@ bool SelectTool::root_handler(GdkEvent* event) {
                         this->dragging = false;
                         sp_event_context_discard_delayed_snap_event(this);
 
-                        desktop->canvas->endForcedFullRedraws();
+                        
                     } else { // switch tool
                         Geom::Point const button_pt(event->button.x, event->button.y);
                         Geom::Point const p(desktop->w2d(button_pt));
@@ -572,8 +572,6 @@ bool SelectTool::root_handler(GdkEvent* event) {
                     GdkWindow* window = gtk_widget_get_window (GTK_WIDGET (desktop->getCanvas()));
 
                     gdk_window_set_cursor(window, CursorSelectDragging);
-
-                    desktop->canvas->forceFullRedrawAfterInterruptions(5);
                 }
 
                 if (this->dragging) {
@@ -641,8 +639,9 @@ bool SelectTool::root_handler(GdkEvent* event) {
                     } else {
                         this->dragging = FALSE;
                         sp_event_context_discard_delayed_snap_event(this);
-                        desktop->canvas->endForcedFullRedraws();
+                        
                     }
+
                 } else {
                     if (Inkscape::Rubberband::get(desktop)->is_started()) {
                         Inkscape::Rubberband::get(desktop)->move(p);
@@ -704,7 +703,6 @@ bool SelectTool::root_handler(GdkEvent* event) {
 
                     gdk_window_set_cursor(window, CursorSelectMouseover);
                     sp_event_context_discard_delayed_snap_event(this);
-                    desktop->canvas->endForcedFullRedraws();
 
                     if (this->item) {
                         sp_object_unref( this->item, nullptr);
@@ -790,13 +788,12 @@ bool SelectTool::root_handler(GdkEvent* event) {
 
                     ret = TRUE;
                 }
-
                 if (this->grabbed) {
                     sp_canvas_item_ungrab(this->grabbed);
                     this->grabbed = nullptr;
                 }
-
-                desktop->updateNow();
+                // Think is not necesary now
+                // desktop->updateNow();
             }
 
             if (event->button.button == 1) {

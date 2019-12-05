@@ -74,14 +74,22 @@ SimpleFilterModifier::SimpleFilterModifier(int flags)
         _lb_blend.set_mnemonic_widget(_blend);
         _hb_blend.pack_start(_lb_blend, false, false, 5);
         _hb_blend.pack_start(_blend, false, false, 5);
-        if (flags & ISOLATION) {
+        /*
+        * For best fit inkscape-browsers with no GUI to isolation we need all groups, 
+        * clones and symbols with isolation == isolate to not show to the user of
+        * Inkscape a "strange" behabiour from the designer point of view. 
+        * Is strange because only happends when object not has clip, mask, 
+        * filter, blending or opacity .
+        * Anyway the feature is a no-gui feature and render as spected.
+        */
+        /* if (flags & ISOLATION) {
             _isolation.property_active() = false;
             _hb_blend.pack_start(_isolation, false, false, 5);
             _hb_blend.pack_start(_lb_isolation, false, false, 5);
-        }
-        _hb_blend.pack_start(_lb_blend, false, false, 5);
-        _hb_blend.pack_start(_blend, false, false, 5);
-        Gtk::Separator *separator = Gtk::manage(new Gtk::Separator());
+            _isolation.set_tooltip_text("Don't blend childrens with objects behind");
+            _lb_isolation.set_tooltip_text("Don't blend childrens with objects behind");
+        } */
+        Gtk::Separator *separator = Gtk::manage(new Gtk::Separator());  
         separator->set_margin_top(8);
         separator->set_margin_bottom(8);
         add(*separator);
@@ -132,18 +140,18 @@ sigc::signal<void>& SimpleFilterModifier::signal_opacity_changed()
     return _signal_opacity_changed;
 }
 
-int SimpleFilterModifier::get_isolation_mode()
+SPIsolation SimpleFilterModifier::get_isolation_mode()
 {
     return _isolation.get_active() ? SP_CSS_ISOLATION_ISOLATE : SP_CSS_ISOLATION_AUTO;
 }
 
-void SimpleFilterModifier::set_isolation_mode(const int val, bool notify)
+void SimpleFilterModifier::set_isolation_mode(const SPIsolation val, bool notify)
 {
     _notify = notify;
     _isolation.set_active(val == SP_CSS_ISOLATION_ISOLATE);
 }
 
-int SimpleFilterModifier::get_blend_mode()
+SPBlendMode SimpleFilterModifier::get_blend_mode()
 {
     const Util::EnumData<SPBlendMode> *d = _blend.get_active_data();
     if (d) {
@@ -153,7 +161,7 @@ int SimpleFilterModifier::get_blend_mode()
     }
 }
 
-void SimpleFilterModifier::set_blend_mode(const int val, bool notify)
+void SimpleFilterModifier::set_blend_mode(const SPBlendMode val, bool notify)
 {
     _notify = notify;
     _blend.set_active(val);

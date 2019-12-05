@@ -754,8 +754,7 @@ void ClipboardManagerImpl::_copySelection(ObjectSet *selection)
             SPCSSAttr *css = sp_repr_css_attr_inherited(obj, "style");
             for (auto iter : item->style->properties()) {
                 if (iter->style_src == SP_STYLE_SRC_STYLE_SHEET) {
-                    Glib::ustring val = iter->get_value();
-                    css->setAttribute(iter->name, val.c_str());
+                    css->setAttribute(iter->name(), iter->get_value());
                 }
             }
             sp_repr_css_set(obj_copy, css, "style");
@@ -1041,6 +1040,13 @@ bool ClipboardManagerImpl::_pasteImage(SPDocument *doc)
 
     // retrieve image data
     Glib::RefPtr<Gdk::Pixbuf> img = _clipboard->wait_for_image();
+#ifdef _WIN32
+    // For some reason the first call to wait_for_image() often fails, despite image data being available
+    // TODO: Figure out why that is and remove this hack.
+    if (!img) {
+        img = _clipboard->wait_for_image();
+    }
+#endif
     if (!img) {
         return false;
     }
@@ -1332,9 +1338,6 @@ void ClipboardManagerImpl::_onGet(Gtk::SelectionData &sel, guint /*info*/)
                 (*out)->set_state(Inkscape::Extension::Extension::STATE_LOADED);
             }
 
-            if (SP_ACTIVE_DOCUMENT) {
-                _clipboardSPDoc->setDocumentBase(SP_ACTIVE_DOCUMENT->getDocumentBase());
-            }
 
             (*out)->save(_clipboardSPDoc, filename, true);
         }
@@ -1374,6 +1377,10 @@ void ClipboardManagerImpl::_createInternalClipboard()
         _defs = _clipboardSPDoc->getDefs()->getRepr();
         _doc = _clipboardSPDoc->getReprDoc();
         _root = _clipboardSPDoc->getReprRoot();
+
+        if (SP_ACTIVE_DOCUMENT) {
+            _clipboardSPDoc->setDocumentBase(SP_ACTIVE_DOCUMENT->getDocumentBase());
+        }
 
         _clipnode = _doc->createElement("inkscape:clipboard");
         _root->appendChild(_clipnode);

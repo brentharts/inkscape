@@ -553,13 +553,13 @@ private:
 
       private:
         void _update() {
-            _d2w = _rotate * _scale * _flip;
+            _d2w = _scale * _rotate * _flip;
             _w2d = _d2w.inverse();
         }            
         Geom::Affine  _w2d;      // Window to desktop
         Geom::Affine  _d2w;      // Desktop to window
         Geom::Rotate  _rotate;   // Rotate part of _w2d
-        Geom::Scale   _scale;    // Scale part of _w2d
+        Geom::Scale   _scale;    // Scale part of _w2d, holds y-axis direction
         Geom::Scale   _flip;     // Flip part of _w2d
         Geom::Point   _offset;   // Point on canvas to align to (0,0) of window
     };

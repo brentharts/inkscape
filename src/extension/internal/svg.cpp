@@ -351,7 +351,7 @@ static void remove_marker_context_paint (Inkscape::XML::Node *repr,
  * Notes:
  *   Text must have been layed out. Access via old document.
  */
-static void insert_text_fallback( Inkscape::XML::Node *repr, SPDocument *doc, Inkscape::XML::Node *defs = nullptr )
+static void insert_text_fallback( Inkscape::XML::Node *repr, SPDocument *original_doc, Inkscape::XML::Node *defs = nullptr )
 {
     if (repr) {
 
@@ -360,8 +360,8 @@ static void insert_text_fallback( Inkscape::XML::Node *repr, SPDocument *doc, In
             auto id = repr->attribute("id");
             // std::cout << "insert_text_fallback: found text!  id: " << (id?id:"null") << std::endl;
 
-            // We need to get SPText object to access layout.
-            SPText* text = static_cast<SPText *>(doc->getObjectById( id ));
+            // We need to get original SPText object to access layout.
+            SPText* text = static_cast<SPText *>(original_doc->getObjectById( id ));
             if (text == nullptr) {
                 std::cerr << "insert_text_fallback: bad cast" << std::endl;
                 return;
@@ -374,6 +374,20 @@ static void insert_text_fallback( Inkscape::XML::Node *repr, SPDocument *doc, In
             }
 
             // We will keep this text node but replace all children.
+
+            // For text in a shape, We need to unset 'text-anchor' or SVG 1.1 fallback won't work.
+            // Note 'text' here refers to original document while 'repr' refers to new document copy.
+            if (text->has_shape_inside()) {
+                SPCSSAttr *css = sp_repr_css_attr(repr, "style" );
+                sp_repr_css_unset_property(css, "text-anchor");
+                sp_repr_css_set(repr, css, "style");
+                sp_repr_css_attr_unref(css);
+            }
+
+            // We need to put trailing white space into it's own tspan for inline size so
+            // it is excluded during calculation of line position in SVG 1.1 renderers.
+            bool trim = text->has_inline_size() &&
+                !(text->style->text_anchor.computed == SP_CSS_TEXT_ANCHOR_START);
 
             // Make a list of children to delete at end:
             std::vector<Inkscape::XML::Node *> old_children;
@@ -399,8 +413,9 @@ static void insert_text_fallback( Inkscape::XML::Node *repr, SPDocument *doc, In
                 // Create a <tspan> with 'x' and 'y' for each line.
                 Inkscape::XML::Node *line_tspan = repr->document()->createElement("svg:tspan");
 
-                // This could be useful if one wants to edit in an old version of Inkscape but we need to check if it breaks anything:
-                // line_tspan->setAttribute("sodipodi:role", "line");
+                // This could be useful if one wants to edit in an old version of Inkscape but we
+                // need to check if it breaks anything:
+                line_tspan->setAttribute("sodipodi:role", "line");
 
                 Geom::Point line_anchor_point = text->layout.characterAnchorPoint(it);
                 double line_x = line_anchor_point[Geom::X];
@@ -438,6 +453,13 @@ static void insert_text_fallback( Inkscape::XML::Node *repr, SPDocument *doc, In
                 Inkscape::Text::Layout::iterator it_line_end = it;
                 it_line_end.nextStartOfLine();
 
+                // Find last span in line so we can put trailing whitespace in its own tspan for SVG 1.1 fallback.
+                Inkscape::Text::Layout::iterator it_last_span = it;
+                it_last_span.nextStartOfLine();
+                it_last_span.prevStartOfSpan();
+
+                Glib::ustring trailing_whitespace;
+
                 // Loop over chunks in line
                 while (it != it_line_end) {
 
@@ -454,10 +476,9 @@ static void insert_text_fallback( Inkscape::XML::Node *repr, SPDocument *doc, In
                         std::swap(attrs.dx, attrs.dy);
                     }
                     TextTagAttributes(attrs).writeTo(span_tspan);
-                    void *rawptr = nullptr;
+                    SPObject *source_obj = nullptr;
                     Glib::ustring::iterator span_text_start_iter;
-                    text->layout.getSourceOfCharacter(it, &rawptr, &span_text_start_iter);
-                    SPObject *source_obj = reinterpret_cast<SPObject *>(rawptr);
+                    text->layout.getSourceOfCharacter(it, &source_obj, &span_text_start_iter);
 
                     // Set tspan style
                     Glib::ustring style_text = (dynamic_cast<SPString *>(source_obj) ? source_obj->parent : source_obj)->style->write( SP_STYLE_FLAG_IFDIFF, SP_STYLE_SRC_UNSET, text->style);
@@ -469,10 +490,9 @@ static void insert_text_fallback( Inkscape::XML::Node *repr, SPDocument *doc, In
                     SPString *str = dynamic_cast<SPString *>(source_obj);
                     if (str) {
                         Glib::ustring *string = &(str->string); // TODO fixme: dangerous, unsafe premature-optimization
-                        void *rawptr = nullptr;
+                        SPObject *span_end_obj = nullptr;
                         Glib::ustring::iterator span_text_end_iter;
-                        text->layout.getSourceOfCharacter(it_span_end, &rawptr, &span_text_end_iter);
-                        SPObject *span_end_obj = reinterpret_cast<SPObject *>(rawptr);
+                        text->layout.getSourceOfCharacter(it_span_end, &span_end_obj, &span_text_end_iter);
                         if (span_end_obj != source_obj) {
                             if (it_span_end == text->layout.end()) {
                                 span_text_end_iter = span_text_start_iter;
@@ -486,6 +506,14 @@ static void insert_text_fallback( Inkscape::XML::Node *repr, SPDocument *doc, In
                             Glib::ustring new_string;
                             while (span_text_start_iter != span_text_end_iter)
                                 new_string += *span_text_start_iter++;    // grr. no substr() with iterators
+
+                            if (it == it_last_span && trim) {
+                                // Found last span in line
+                                const auto s = new_string.find_last_not_of(" \t"); // Any other white space characters needed?
+                                trailing_whitespace = new_string.substr(s+1, new_string.length());
+                                new_string.erase(s+1);
+                            }
+
                             Inkscape::XML::Node *new_text = repr->document()->createTextNode(new_string.c_str());
                             span_tspan->appendChild(new_text);
                             Inkscape::GC::release(new_text);
@@ -496,13 +524,33 @@ static void insert_text_fallback( Inkscape::XML::Node *repr, SPDocument *doc, In
 
                     // Add tspan to document
                     line_tspan->appendChild(span_tspan);
-                    line_tspan->setAttribute("sodipodi:role", "line");
                     Inkscape::GC::release(span_tspan);
                 }
 
                 // Add line tspan to document
                 repr->appendChild(line_tspan);
                 Inkscape::GC::release(line_tspan);
+
+                // For center and end justified text, we need to remove any spaces and put them
+                // into a separate tspan (alignment is done by "text chunk" and spaces at ends of
+                // line will mess this up).
+                if (trim && trailing_whitespace.length() != 0) {
+
+                    Inkscape::XML::Node *space_tspan = repr->document()->createElement("svg:tspan");
+                    // Set either 'x' or 'y' to force a new text chunk. To do: this really should
+                    // be positioned at the end of the line (overhanging).
+                    if (text->is_horizontal()) {
+                        sp_repr_set_svg_double(space_tspan, "y", line_y);
+                    } else {
+                        sp_repr_set_svg_double(space_tspan, "x", line_x);
+                    }
+                    Inkscape::XML::Node *space = repr->document()->createTextNode(trailing_whitespace.c_str());
+                    space_tspan->appendChild(space);
+                    Inkscape::GC::release(space);
+                    line_tspan->appendChild(space_tspan);
+                    Inkscape::GC::release(space_tspan);
+                }
+
             }
 
             for (auto i: old_children) {
@@ -513,7 +561,7 @@ static void insert_text_fallback( Inkscape::XML::Node *repr, SPDocument *doc, In
         }
 
         for ( Node *child = repr->firstChild(); child; child = child->next() ) {
-            insert_text_fallback (child, doc, defs);
+            insert_text_fallback (child, original_doc, defs);
         }
     }
 }

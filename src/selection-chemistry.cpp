@@ -2007,12 +2007,12 @@ std::vector<SPItem*> sp_get_same_fill_or_stroke_color(SPItem *sel, std::vector<S
     std::vector<SPItem*> matches ;
     gboolean match = false;
 
-    SPIPaint *sel_paint = (type == SP_FILL_COLOR) ? &(sel->style->fill) : &(sel->style->stroke);
+    SPIPaint *sel_paint = sel->style->getFillOrStroke(type == SP_FILL_COLOR);
 
     for (std::vector<SPItem*>::const_reverse_iterator i=src.rbegin();i!=src.rend();++i) {
         SPItem *iter = *i;
         if (iter) {
-            SPIPaint *iter_paint = (type == SP_FILL_COLOR) ? &(iter->style->fill) : &(iter->style->stroke);
+            SPIPaint *iter_paint = iter->style->getFillOrStroke(type == SP_FILL_COLOR);
             match = false;
             if (sel_paint->isColor() && iter_paint->isColor() // color == color comparison doesn't seem to work here.
                 && (sel_paint->value.color.toRGBA32(1.0) == iter_paint->value.color.toRGBA32(1.0))) {
@@ -2175,9 +2175,8 @@ std::vector<SPItem*> sp_get_same_style(SPItem *sel, std::vector<SPItem*> &src, S
                 match = true;
                 int len = sizeof(sel_style->marker)/sizeof(SPIString);
                 for (int i = 0; i < len; i++) {
-                    match = (sel_style->marker_ptrs[i]->set == iter_style->marker_ptrs[i]->set);
-                    if (sel_style->marker_ptrs[i]->set && iter_style->marker_ptrs[i]->set &&
-                        (strcmp(sel_style->marker_ptrs[i]->value, iter_style->marker_ptrs[i]->value))) {
+                    if (g_strcmp0(sel_style->marker_ptrs[i]->value(),
+                                  iter_style->marker_ptrs[i]->value())) {
                         match = false;
                         break;
                     }
@@ -4180,7 +4179,10 @@ void ObjectSet::unsetMask(const bool apply_clip_path, const bool skip_undo) {
             // insert into parent, restore pos
             parent->addChild(repr, ref_repr);
 
-            SPItem *mask_item = static_cast<SPItem *>(document()->getObjectByRepr(repr));
+            SPItem *mask_item = dynamic_cast<SPItem *>(document()->getObjectByRepr(repr));
+            if (!mask_item) {
+                continue;
+            }
             items_to_select.push_back(mask_item);
 
             // transform mask, so it is moved the same spot where mask was applied

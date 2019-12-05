@@ -107,6 +107,9 @@ LPELattice2::doEffect_pwd2 (Geom::Piecewise<Geom::D2<Geom::SBasis> > const & pwd
     PathVector pathv = path_from_piecewise(pwd2_in,0.001);
     //this is because strange problems with sb2 and LineSegment
     PathVector cubic = pathv_to_cubicbezier(pathv);
+    if (cubic.empty()) {
+        return pwd2_in;
+    }
     Geom::Piecewise<Geom::D2<Geom::SBasis> > const &pwd2_in_linear_and_cubic = paths_to_pw(cubic);
     D2<SBasis2d> sb2;
 
@@ -332,6 +335,9 @@ LPELattice2::doBeforeEffect (SPLPEItem const* lpeitem)
 {
     original_bbox(lpeitem, false, true);
     setDefaults();
+    if (is_applied) {
+        resetGrid();
+    }
     Geom::Line vert(grid_point_8x9.param_get_default(),grid_point_10x11.param_get_default());
     Geom::Line horiz(grid_point_24x26.param_get_default(),grid_point_25x27.param_get_default());
     if(vertical_mirror) {

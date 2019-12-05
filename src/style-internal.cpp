@@ -54,6 +54,17 @@ using Inkscape::CSSOStringStream;
 
 // SPIBase --------------------------------------------------------------
 
+Glib::ustring const &SPIBase::name() const
+{
+    static Glib::ustring names[SPAttributeEnum_SIZE];
+    auto &name = names[id()];
+    if (name.empty()) {
+        auto const *namecstr = sp_attribute_name(id());
+        name = namecstr ? namecstr : "anonymous";
+    }
+    return name;
+}
+
 // Standard criteria for writing a property
 // dfp == different from parent
 inline bool should_write( guint const flags, bool set, bool dfp, bool src) {
@@ -76,10 +87,64 @@ const Glib::ustring SPIBase::write(guint const flags, SPStyleSrc const &style_sr
     if (should_write(flags, set, dfp, src)) {
         auto value = this->get_value();
         if ( !value.empty() ) {
-            return (name + ":" + value + important_str() + ";");
+            return (name() + ":" + value + important_str() + ";");
         }
     }
     return Glib::ustring("");
+}
+
+
+/**
+ * If str.endswith("!important") then assign stripped = str[:-10].rstrip() and return true.
+ * Otherwise, leave stripped unmodified and return false.
+ */
+static bool strip_important(gchar const *str, std::string &stripped)
+{
+    assert(str != nullptr);
+
+    constexpr size_t N = 10; // strlen("!important")
+    auto pos = strlen(str);
+
+    if (pos >= N && strncmp(str + pos - N, "!important", N) == 0) {
+        pos -= N;
+
+        // strip whitespace from the right
+        while (pos > 0 && g_ascii_isspace(str[pos - 1])) {
+            --pos;
+        }
+
+        stripped.assign(str, pos);
+        return true;
+    }
+
+    return false;
+}
+
+void SPIBase::readIfUnset(gchar const *str, SPStyleSrc source)
+{
+    if (!str)
+        return;
+
+    bool has_important = false;
+    std::string stripped;
+
+    // '!important' is invalid on attributes
+    if (source != SP_STYLE_SRC_ATTRIBUTE) {
+        has_important = strip_important(str, stripped);
+        if (has_important) {
+            str = stripped.c_str();
+        }
+    }
+
+    if (!set || (has_important && !important)) {
+        style_src = source;
+        read(str);
+        if (set) {
+            if (has_important) {
+                important = true;
+            }
+        }
+    }
 }
 
 
@@ -191,11 +256,11 @@ SPIScale24::merge( const SPIBase* const parent ) {
             }
         } else {
             // Needed only for 'opacity' and 'stop-opacity' which do not inherit. See comment at bottom of file.
-            if( name != "opacity" && name != "stop-opacity" )
-                std::cerr << "SPIScale24::merge: unhandled property: " << name << std::endl;
+            if (id() != SP_PROP_OPACITY && id() != SP_PROP_STOP_OPACITY)
+                std::cerr << "SPIScale24::merge: unhandled property: " << name() << std::endl;
             if( !set || (!inherit && value == SP_SCALE24_MAX) ) {
                 value = p->value;
-                set = (value != 1.0);
+                set = (value != SP_SCALE24_MAX);
             } else {
                 if( inherit ) value = p->value; // Insures child is up-to-date
                 value = SP_SCALE24_MUL( value, p->value );
@@ -286,7 +351,7 @@ SPILength::read( gchar const *str ) {
                 /* Percentage */
                 unit = SP_CSS_UNIT_PERCENT;
                 value = value * 0.01;
-                if (name.compare( "line-height" ) == 0) {
+                if (id() == SP_PROP_LINE_HEIGHT) {
                     // See: http://www.w3.org/TR/CSS2/visudet.html#propdef-line-height
                     if( style ) {
                         computed = value * style->font_size.computed;
@@ -354,7 +419,7 @@ SPILength::cascade( const SPIBase* const parent ) {
             } else if (unit == SP_CSS_UNIT_EX) {
                 // FIXME: Get x height from libnrtype or pango.
                 computed = value * em * 0.5;
-            } else if (unit == SP_CSS_UNIT_PERCENT && name.compare( "line-height" ) == 0 ) {
+            } else if (unit == SP_CSS_UNIT_PERCENT && id() == SP_PROP_LINE_HEIGHT) {
                 // Special case
                 computed = value * em;
             }
@@ -413,7 +478,7 @@ const Glib::ustring SPILength::toString(bool wname) const
 {
     CSSOStringStream os;
     if (wname) {
-        os << name << ":";
+        os << name() << ":";
     }
     os << this->get_value();
     if (wname) {
@@ -611,10 +676,65 @@ SPIFontVariationSettings::toString() const {
     return string;
 }
 
+// Helpers for SPIEnum -----------------------------------------------------
+
+// The default exists to satisfy linking of derived classes but must never be called
+template <typename T> static SPStyleEnum const *get_enums() { g_assert_not_reached(); return nullptr; }
+
+template <> SPStyleEnum const *get_enums<SPBlendMode>() { return enum_blend_mode; }
+template <> SPStyleEnum const *get_enums<SPColorInterpolation>() { return enum_color_interpolation; }
+template <> SPStyleEnum const *get_enums<SPColorRendering>() { return enum_color_rendering; }
+template <> SPStyleEnum const *get_enums<SPCSSBaseline>() { return enum_baseline; }
+template <> SPStyleEnum const *get_enums<SPCSSDirection>() { return enum_direction; }
+template <> SPStyleEnum const *get_enums<SPCSSDisplay>() { return enum_display; }
+template <> SPStyleEnum const *get_enums<SPCSSFontVariantAlternates>() { return enum_font_variant_alternates; }
+template <> SPStyleEnum const *get_enums<SPCSSTextAlign>() { return enum_text_align; }
+template <> SPStyleEnum const *get_enums<SPCSSTextOrientation>() { return enum_text_orientation; }
+template <> SPStyleEnum const *get_enums<SPCSSTextTransform>() { return enum_text_transform; }
+template <> SPStyleEnum const *get_enums<SPCSSWritingMode>() { return enum_writing_mode; }
+template <> SPStyleEnum const *get_enums<SPEnableBackground>() { return enum_enable_background; }
+template <> SPStyleEnum const *get_enums<SPImageRendering>() { return enum_image_rendering; }
+template <> SPStyleEnum const *get_enums<SPIsolation>() { return enum_isolation; }
+template <> SPStyleEnum const *get_enums<SPOverflow>() { return enum_overflow; }
+template <> SPStyleEnum const *get_enums<SPShapeRendering>() { return enum_shape_rendering; }
+template <> SPStyleEnum const *get_enums<SPStrokeCapType>() { return enum_stroke_linecap; }
+template <> SPStyleEnum const *get_enums<SPStrokeJoinType>() { return enum_stroke_linejoin; }
+template <> SPStyleEnum const *get_enums<SPTextAnchor>() { return enum_text_anchor; }
+template <> SPStyleEnum const *get_enums<SPTextRendering>() { return enum_text_rendering; }
+template <> SPStyleEnum const *get_enums<SPVisibility>() { return enum_visibility; }
+template <> SPStyleEnum const *get_enums<SPWhiteSpace>() { return enum_white_space; }
+template <> SPStyleEnum const *get_enums<SPWindRule>() { return enum_clip_rule; }
+template <> SPStyleEnum const *get_enums<SPCSSFontStyle>() { return enum_font_style; }
+template <> SPStyleEnum const *get_enums<SPCSSFontVariant>() { return enum_font_variant; }
+template <> SPStyleEnum const *get_enums<SPCSSFontWeight>() { return enum_font_weight; }
+template <> SPStyleEnum const *get_enums<SPCSSFontStretch>() { return enum_font_stretch; }
+template <> SPStyleEnum const *get_enums<SPCSSFontVariantPosition>() { return enum_font_variant_position; }
+template <> SPStyleEnum const *get_enums<SPCSSFontVariantCaps>() { return enum_font_variant_caps; }
+
 // SPIEnum --------------------------------------------------------------
 
-void
-SPIEnum::read( gchar const *str ) {
+template <typename T>
+void SPIEnum<T>::update_computed()
+{
+    computed = value;
+}
+
+template <>
+void SPIEnum<SPCSSFontWeight>::update_computed()
+{
+    // The following is defined in CSS 2.1
+    if (value == SP_CSS_FONT_WEIGHT_NORMAL) {
+        computed = SP_CSS_FONT_WEIGHT_400;
+    } else if (value == SP_CSS_FONT_WEIGHT_BOLD) {
+        computed = SP_CSS_FONT_WEIGHT_700;
+    } else {
+        computed = value;
+    }
+}
+
+template <typename T>
+void SPIEnum<T>::read(gchar const *str)
+{
 
     if( !str ) return;
 
@@ -622,30 +742,27 @@ SPIEnum::read( gchar const *str ) {
         set = true;
         inherit = true;
     } else {
+        auto const *enums = get_enums<T>();
         for (unsigned i = 0; enums[i].key; i++) {
             if (!strcmp(str, enums[i].key)) {
                 set = true;
                 inherit = false;
-                value = enums[i].value;
+                value = static_cast<T>(enums[i].value);
                 /* Save copying for values not needing it */
-                computed = value;
                 break;
             }
         }
-        // The following is defined in CSS 2.1
-        if( name.compare("font-weight" ) == 0 ) {
-            if( value == SP_CSS_FONT_WEIGHT_NORMAL ) {
-                computed = SP_CSS_FONT_WEIGHT_400;
-            } else if (value == SP_CSS_FONT_WEIGHT_BOLD ) {
-                computed = SP_CSS_FONT_WEIGHT_700;
-            }
-        }
+
+        // type-specialized subroutine
+        update_computed();
     }
 }
 
-const Glib::ustring SPIEnum::get_value() const
+template <typename T>
+const Glib::ustring SPIEnum<T>::get_value() const
 {
     if (this->inherit) return Glib::ustring("inherit");
+    auto const *enums = get_enums<T>();
     for (unsigned i = 0; enums[i].key; ++i) {
         if (enums[i].value == static_cast< gint > (this->value) ) {
             return Glib::ustring(enums[i].key);
@@ -654,45 +771,79 @@ const Glib::ustring SPIEnum::get_value() const
     return Glib::ustring("");
 }
 
-void
-SPIEnum::cascade( const SPIBase* const parent ) {
-    if( const SPIEnum* p = dynamic_cast<const SPIEnum*>(parent) ) {
+template <>
+void SPIEnum<SPCSSFontWeight>::update_computed_cascade(SPCSSFontWeight const &p_computed)
+{
+    // strictly, 'bolder' and 'lighter' should go to the next weight
+    // expressible in the current font family, but that's difficult to
+    // find out, so jumping by 3 seems an appropriate approximation
+    if (value == SP_CSS_FONT_WEIGHT_LIGHTER) {
+        computed = static_cast<SPCSSFontWeight>(std::max<int>(SP_CSS_FONT_WEIGHT_100, int(p_computed) - 3));
+    } else if (value == SP_CSS_FONT_WEIGHT_BOLDER) {
+        computed = static_cast<SPCSSFontWeight>(std::min<int>(SP_CSS_FONT_WEIGHT_900, p_computed + 3));
+    }
+}
+
+template <>
+void SPIEnum<SPCSSFontStretch>::update_computed_cascade(SPCSSFontStretch const &p_computed)
+{
+    if (value == SP_CSS_FONT_STRETCH_NARROWER) {
+        computed =
+            static_cast<SPCSSFontStretch>(std::max<int>(SP_CSS_FONT_STRETCH_ULTRA_CONDENSED, int(p_computed) - 1));
+    } else if (value == SP_CSS_FONT_STRETCH_WIDER) {
+        computed = static_cast<SPCSSFontStretch>(std::min<int>(SP_CSS_FONT_STRETCH_ULTRA_EXPANDED, p_computed + 1));
+    }
+}
+
+template <typename T>
+void SPIEnum<T>::cascade(const SPIBase *const parent)
+{
+    if (const auto *p = dynamic_cast<const SPIEnum<T> *>(parent)) {
         if( inherits && (!set || inherit) ) {
             computed = p->computed;
         } else {
-            if( name.compare("font-stretch" ) == 0 ) {
-                unsigned const parent_val = p->computed;
-                if( value == SP_CSS_FONT_STRETCH_NARROWER ) {
-                    computed = (parent_val == SP_CSS_FONT_STRETCH_ULTRA_CONDENSED ?
-                                parent_val : parent_val - 1);
-                } else if (value == SP_CSS_FONT_STRETCH_WIDER ) {
-                    computed = (parent_val == SP_CSS_FONT_STRETCH_ULTRA_EXPANDED ?
-                                parent_val : parent_val + 1);
-                }
-            }
-            // strictly, 'bolder' and 'lighter' should go to the next weight
-            // expressible in the current font family, but that's difficult to
-            // find out, so jumping by 3 seems an appropriate approximation
-            if( name.compare("font-weight" ) == 0 ) {
-                unsigned const parent_val = p->computed;
-                if( value == SP_CSS_FONT_WEIGHT_LIGHTER ) {
-                    computed = (parent_val <= SP_CSS_FONT_WEIGHT_100 + 3 ?
-                                (unsigned)SP_CSS_FONT_WEIGHT_100 : parent_val - 3);
-                } else if (value == SP_CSS_FONT_WEIGHT_BOLDER ) {
-                    computed = (parent_val >= SP_CSS_FONT_WEIGHT_900 - 3 ?
-                                (unsigned)SP_CSS_FONT_WEIGHT_900 : parent_val + 3);
-                }
-            }
+            // type-specialized subroutine
+            update_computed_cascade(p->computed);
         }
     } else {
-        std::cerr << "SPIEnum::cascade(): Incorrect parent type" << std::endl;
+        std::cerr << "SPIEnum<T>::cascade(): Incorrect parent type" << std::endl;
     }
 }
 
 // FIXME Handle font_stretch and font_weight (relative values) New derived class?
-void
-SPIEnum::merge( const SPIBase* const parent ) {
-    if( const SPIEnum* p = dynamic_cast<const SPIEnum*>(parent) ) {
+template <typename T>
+void SPIEnum<T>::update_value_merge(SPIEnum<T> const &p, T smaller, T larger)
+{
+    g_assert(set);
+
+    if (value == p.value) {
+        // Leave as is, what does applying "wider" twice do?
+    } else if ((value == smaller && p.value == larger) || //
+               (value == larger && p.value == smaller)) {
+        // Values cancel, unset
+        set = false;
+    } else if (value == smaller || value == larger) {
+        value = computed;
+        inherit = false;
+    }
+}
+
+template <>
+void SPIEnum<SPCSSFontWeight>::update_value_merge(SPIEnum<SPCSSFontWeight> const &p)
+{
+    update_value_merge(p, SP_CSS_FONT_WEIGHT_LIGHTER, SP_CSS_FONT_WEIGHT_BOLDER);
+}
+
+template <>
+void SPIEnum<SPCSSFontStretch>::update_value_merge(SPIEnum<SPCSSFontStretch> const &p)
+{
+    update_value_merge(p, SP_CSS_FONT_STRETCH_NARROWER, SP_CSS_FONT_STRETCH_WIDER);
+}
+
+template <typename T>
+void SPIEnum<T>::merge(const SPIBase *const parent)
+{
+    if (const auto *p = dynamic_cast<const SPIEnum<T> *>(parent)) {
         if( inherits ) {
             if( p->set && !p->inherit ) {
                 if( !set || inherit ) {
@@ -701,46 +852,18 @@ SPIEnum::merge( const SPIBase* const parent ) {
                     value    = p->value;
                     computed = p->computed; // Different from value for font-weight and font-stretch
                 } else {
-                    // The following is to special case 'font-stretch' and 'font-weight'
-                    unsigned max_computed_val = 100;
-                    unsigned smaller_val      = 100;
-                    if( name.compare("font-stretch" ) == 0 ) {
-                        max_computed_val = SP_CSS_FONT_STRETCH_ULTRA_EXPANDED;
-                        smaller_val      = SP_CSS_FONT_STRETCH_NARROWER;
-                    } else if( name.compare("font-weight"  ) == 0 ) {
-                        max_computed_val = SP_CSS_FONT_WEIGHT_900;
-                        smaller_val      = SP_CSS_FONT_WEIGHT_LIGHTER;
-                    }
-                    unsigned const min_computed_val = 0;
-                    unsigned const larger_val = smaller_val + 1;
-                    if( value < smaller_val ) {
-                        // Child has absolute value, leave as is.
-                        // Works for all enum properties
-                    } else if( (value == smaller_val && p->value == larger_val ) ||
-                               (value == larger_val  && p->value == smaller_val) ) {
-                        // Values cancel, unset
-                        set = false;
-                    } else if( value == p->value ) {
-                        // Leave as is, what does applying "wider" twice do?
-                    } else {
-                        // Child is smaller or larger, adjust parent value accordingly
-                        unsigned const parent_val = p->computed;
-                        value = (value == smaller_val ?
-                                 ( parent_val == min_computed_val ? parent_val : parent_val - 1 ) :
-                                 ( parent_val == max_computed_val ? parent_val : parent_val + 1 ) );
-                        g_assert(value <= max_computed_val);
-                        inherit = false;
-                        g_assert(set);
-                    }
+                    // type-specialized subroutine
+                    update_value_merge(*p);
                 }
             }
         }
     }
 }
 
-bool
-SPIEnum::operator==(const SPIBase& rhs) {
-    if( const SPIEnum* r = dynamic_cast<const SPIEnum*>(&rhs) ) {
+template <typename T>
+bool SPIEnum<T>::operator==(const SPIBase &rhs)
+{
+    if (auto *r = dynamic_cast<const SPIEnum<T> *>(&rhs)) {
         return (computed == r->computed && SPIBase::operator==(rhs));
     } else {
         return false;
@@ -748,6 +871,7 @@ SPIEnum::operator==(const SPIBase& rhs) {
 }
 
 
+#if 0
 // SPIEnumBits ----------------------------------------------------------
 // Used for 'font-variant-xxx'
 void
@@ -762,11 +886,11 @@ SPIEnumBits::read( gchar const *str ) {
             if (!strcmp(str, enums[i].key)) {
                 set = true;
                 inherit = false;
-                value += enums[i].value;
-                /* Save copying for values not needing it */
-                computed = value;
+                value |= enums[i].value;
             }
         }
+        /* Save copying for values not needing it */
+        computed = value;
     }
 }
 
@@ -776,13 +900,14 @@ const Glib::ustring SPIEnumBits::get_value() const
     if (this->value == 0) return Glib::ustring("normal");
     auto ret = Glib::ustring("");
     for (unsigned i = 0; enums[i].key; ++i) {
-        if (this->value & (1 << i)) {
+        if (this->value & enums[i].value) {
             if (!ret.empty()) ret += " ";
             ret += enums[i].key;
         }
     }
     return ret;
 }
+#endif
 
 // SPILigatures -----------------------------------------------------
 // Used for 'font-variant-ligatures'
@@ -806,6 +931,7 @@ SPILigatures::read( gchar const *str ) {
     } else {
         // We need to parse in order
         std::vector<Glib::ustring> tokens = Glib::Regex::split_simple("\\s+", str );
+        auto const *enums = enum_font_variant_ligatures;
         for(auto & token : tokens) {
             for (unsigned j = 0; enums[j].key; ++j ) {
                 if (token.compare( enums[j].key ) == 0 ) {
@@ -863,6 +989,7 @@ SPINumeric::read( gchar const *str ) {
     } else {
         // We need to parse in order
         std::vector<Glib::ustring> tokens = Glib::Regex::split_simple("\\s+", str );
+        auto const *enums = enum_font_variant_numeric;
         for(auto & token : tokens) {
             for (unsigned j = 0; enums[j].key; ++j ) {
                 if (token.compare( enums[j].key ) == 0 ) {
@@ -945,6 +1072,7 @@ SPIEastAsian::read( gchar const *str ) {
     } else {
         // We need to parse in order
         std::vector<Glib::ustring> tokens = Glib::Regex::split_simple("\\s+", str );
+        auto const *enums = enum_font_variant_east_asian;
         for(auto & token : tokens) {
             for (unsigned j = 0; enums[j].key; ++j ) {
                 if (token.compare( enums[j].key ) == 0 ) {
@@ -1012,62 +1140,94 @@ const Glib::ustring SPIEastAsian::get_value() const
 
 void
 SPIString::read( gchar const *str ) {
+
     if( !str ) return;
+
+    clear();
+
+    if (style_src == SP_STYLE_SRC_ATTRIBUTE && id() == SP_ATTR_D) {
+        return;
+    }
 
     if (!strcmp(str, "inherit")) {
         set = true;
         inherit = true;
-        value = nullptr;
-    } else {
+    } else if (!g_strcmp0(str, get_default_value())) {
+        // no need to copy string
         set = true;
-        inherit = false;
+    } else {
+        Glib::ustring str_temp;
 
-        Glib::ustring str_temp(str);
-        if( name.compare( "d" ) == 0 && style_src == SP_STYLE_SRC_ATTRIBUTE) {
-            set = false;
-        }
-        if( name.compare( "font-family" ) == 0 ) {
+        if (id() == SP_PROP_FONT_FAMILY) {
             // Family names may be quoted in CSS, internally we use unquoted names.
+            str_temp = str;
             css_font_family_unquote( str_temp );
-        } else if( name.compare( "-inkscape-font-specification" ) == 0 ) {
+            str = str_temp.c_str();
+        } else if (id() == SP_PROP_INKSCAPE_FONT_SPEC) {
+            str_temp = str;
             css_unquote( str_temp );
+            str = str_temp.c_str();
         }
 
-        value = g_strdup(str_temp.c_str());
+        set = true;
+        _value = g_strdup(str);
     }
 }
 
 
+/**
+ * Value as it should be written to CSS representation, including quotes if needed.
+ */
 const Glib::ustring SPIString::get_value() const
 {
-    if (this->inherit) return Glib::ustring("inherit");
-    if (!this->value) return Glib::ustring("");
-    if( name.compare( "font-family" ) == 0 ) {
-        Glib::ustring font_family( this->value );
-        css_font_family_quote( font_family );
-        return font_family;
-    } else if( name.compare( "-inkscape-font-specification" ) == 0 ) {
-        Glib::ustring font_spec( this->value );
-        css_quote( font_spec );
-        return font_spec;
+    Glib::ustring val;
+
+    if (set && inherit) {
+        val = "inherit";
+    } else if (auto *v = value()) {
+        val = v;
+
+        if (id() == SP_PROP_FONT_FAMILY) {
+            css_font_family_quote(val);
+        } else if (id() == SP_PROP_INKSCAPE_FONT_SPEC) {
+            css_quote(val);
+        }
     }
-    return Glib::ustring(this->value);
+
+    return val;
 }
+
+char const *SPIString::value() const
+{
+    return _value ? _value : get_default_value();
+}
+
+char const *SPIString::get_default_value() const
+{
+    switch (id()) {
+        case SP_PROP_FONT_FAMILY:
+            return "sans-serif";
+        case SP_PROP_FONT_FEATURE_SETTINGS:
+            return "normal";
+        default:
+            return nullptr;
+    }
+}
+
 
 void
 SPIString::clear() {
     SPIBase::clear();
-    g_free( value );
-    value = nullptr;
-    if( value_default ) value = g_strdup( value_default );
+    g_free(_value);
+    _value = nullptr;
 }
 
 void
 SPIString::cascade( const SPIBase* const parent ) {
     if( const SPIString* p = dynamic_cast<const SPIString*>(parent) ) {
         if( inherits && (!set || inherit) ) {
-            g_free(value);
-            value = g_strdup(p->value);
+            g_free(_value);
+            _value = g_strdup(p->_value);
         }
     } else {
         std::cerr << "SPIString::cascade(): Incorrect parent type" << std::endl;
@@ -1081,8 +1241,8 @@ SPIString::merge( const SPIBase* const parent ) {
             if( (!set || inherit) && p->set && !(p->inherit) ) {
                 set     = p->set;
                 inherit = p->inherit;
-                g_free(value);
-                value = g_strdup(p->value);
+                g_free(_value);
+                _value = g_strdup(p->_value);
             }
         }
     }
@@ -1091,10 +1251,7 @@ SPIString::merge( const SPIBase* const parent ) {
 bool
 SPIString::operator==(const SPIBase& rhs) {
     if( const SPIString* r = dynamic_cast<const SPIString*>(&rhs) ) {
-        if( value == nullptr && r->value == nullptr ) return (SPIBase::operator==(rhs));
-        if( value == nullptr || r->value == nullptr ) return false;
-
-        return (strcmp(value, r->value) == 0 && SPIBase::operator==(rhs));
+        return g_strcmp0(_value, r->_value) == 0 && SPIBase::operator==(rhs);
     } else {
         return false;
     }
@@ -1116,9 +1273,7 @@ SPIShapes::read( gchar const *str) {
 
     if( !str ) return;
 
-    set = true;
-    inherit = false;
-    value = g_strdup(str);
+    SPIString::read(str);
 
     // The object/repr this property is connected to..
     SPObject* object = style->object;
@@ -1179,7 +1334,7 @@ void SPIColor::read( gchar const *str ) {
     } else if ( !strcmp(str, "currentColor") ) {
         set = true;
         currentcolor = true;
-        if( name.compare( "color") == 0 ) {
+        if (id() == SP_PROP_COLOR) {
             inherit = true;  // CSS3
         } else {
             setColor( style->color.value.color );
@@ -1303,7 +1458,7 @@ SPIPaint::read( gchar const *str ) {
         if ( strneq(str, "url", 3) ) {
 
             // FIXME: THE FOLLOWING CODE SHOULD BE PUT IN A PRIVATE FUNCTION FOR REUSE
-            auto uri = extract_uri(str, &str);
+            auto uri = extract_uri(str, &str); // std::string
             if(uri.empty()) {
                 std::cerr << "SPIPaint::read: url is empty or invalid" << std::endl;
             } else if (!style ) {
@@ -1313,9 +1468,17 @@ SPIPaint::read( gchar const *str ) {
                 SPDocument *document = (style->object) ? style->object->document : nullptr;
 
                 // Create href if not done already
-                if (!value.href && document) {
-                    // std::cout << "  Creating value.href" << std::endl;
-                    value.href = new SPPaintServerReference(document);
+                if (!value.href) {
+
+                    if (style->object) {
+                        value.href = new SPPaintServerReference(style->object);
+                    } else if (document) {
+                        value.href = new SPPaintServerReference(document);
+                    } else {
+                        std::cerr << "SPIPaint::read: No valid object or document!" << std::endl;
+                        return;
+                    }
+
                     if (this == &style->fill) {
                         style->fill_ps_changed_connection = value.href->changedSignal().connect(sigc::bind(sigc::ptr_fun(sp_style_fill_paint_server_ref_changed), style));
                     } else {
@@ -1448,11 +1611,10 @@ SPIPaint::reset( bool init ) {
         }
     }
     if( init ) {
-        if( name.compare( "fill" ) == 0 ) {
+        if (id() == SP_PROP_FILL) {
             // 'black' is default for 'fill'
             setColor(0.0, 0.0, 0.0);
-        }
-        if( name.compare( "text-decoration-color" ) == 0 ) {
+        } else if (id() == SP_PROP_TEXT_DECORATION_COLOR) {
             // currentcolor = true;
         }
     }
@@ -1858,7 +2020,7 @@ SPIDashArray::read( gchar const *str ) {
     bool LineSolid = true;
 
     for (auto token : tokens) {
-        SPILength spilength("temp");
+        SPILength spilength;
         spilength.read(token.c_str());
         if (spilength.value > 0.00000001)
             LineSolid = false;
@@ -1948,7 +2110,7 @@ SPIFontSize::read( gchar const *str ) {
         /* Invalid */
         return;
     } else {
-        SPILength length("temp");
+        SPILength length;
         length.set = false;
         length.read( str );
         if( length.set ) {
@@ -2201,7 +2363,7 @@ SPIFont::read( gchar const *str ) {
             } else {
                 // Try to parse each property in turn
 
-                SPIEnum test_style("font-style", enum_font_style);
+                decltype(style->font_style) test_style;
                 test_style.read( lparam.c_str() );
                 if( test_style.set ) {
                     style->font_style = test_style;
@@ -2209,7 +2371,7 @@ SPIFont::read( gchar const *str ) {
                 }
 
                 // font-variant (Note: only CSS2.1 value small-caps is valid in shortcut.)
-                SPIEnum test_variant("font-variant", enum_font_variant);
+                decltype(style->font_variant) test_variant;
                 test_variant.read( lparam.c_str() );
                 if( test_variant.set ) {
                     style->font_variant = test_variant;
@@ -2217,7 +2379,7 @@ SPIFont::read( gchar const *str ) {
                 }
 
                 // font-weight
-                SPIEnum test_weight("font-weight", enum_font_weight);
+                decltype(style->font_weight) test_weight;
                 test_weight.read( lparam.c_str() );
                 if( test_weight.set ) {
                     style->font_weight = test_weight;
@@ -2225,7 +2387,7 @@ SPIFont::read( gchar const *str ) {
                 }
 
                 // font-stretch (added in CSS 3 Fonts)
-                SPIEnum test_stretch("font-stretch", enum_font_stretch);
+                decltype(style->font_stretch) test_stretch;
                 test_stretch.read( lparam.c_str() );
                 if( test_stretch.set ) {
                     style->font_stretch = test_stretch;
@@ -2233,7 +2395,7 @@ SPIFont::read( gchar const *str ) {
                 }
 
                 // font-size
-                SPIFontSize test_size;
+                decltype(style->font_size) test_size;
                 test_size.read( lparam.c_str() );
                 if( test_size.set ) {
                     style->font_size = test_size;
@@ -2326,7 +2488,7 @@ SPIBaselineShift::read( gchar const *str ) {
         /* Invalid */
         return;
     } else {
-        SPILength length( "temp" );
+        SPILength length;
         length.read( str );
         set      = length.set;
         inherit  = length.inherit;
@@ -2721,13 +2883,13 @@ SPITextDecoration::read( gchar const *str ) {
 
     bool is_css3 = false;
 
-    SPITextDecorationLine test_line;
+    decltype(style->text_decoration_line) test_line;
     test_line.read( str );
     if( test_line.set ) {
         style->text_decoration_line = test_line;
     }
 
-    SPITextDecorationStyle test_style;
+    decltype(style->text_decoration_style) test_style;
     test_style.read( str );
     if( test_style.set ) {
         style->text_decoration_style = test_style;
@@ -2738,7 +2900,7 @@ SPITextDecoration::read( gchar const *str ) {
     // one is used  ???? then why break on set?
 
     // This could certainly be designed better
-    SPIColor test_color("text-decoration-color");
+    decltype(style->text_decoration_color) test_color;
     test_color.setStylePointer( style );
     test_color.read( "currentColor" );  // Default value
     test_color.set = false;
@@ -2796,7 +2958,7 @@ SPITextDecoration::write( guint const flags, SPStyleSrc const &style_src_req, SP
           && (!my_base->style->text_decoration_line.set ||
               style->text_decoration_line != my_base->style->text_decoration_line )))
     {
-        return (name + ":" + this->get_value() + important_str() + ";");
+        return (name() + ":" + this->get_value() + important_str() + ";");
     }
     return Glib::ustring("");
 }
@@ -2939,6 +3101,38 @@ SPIVectorEffect::operator==(const SPIBase& rhs) {
 }
 
 
+// template instantiation
+template class SPIEnum<SPBlendMode>;
+template class SPIEnum<SPColorInterpolation>;
+template class SPIEnum<SPColorRendering>;
+template class SPIEnum<SPCSSBaseline>;
+template class SPIEnum<SPCSSDirection>;
+template class SPIEnum<SPCSSDisplay>;
+template class SPIEnum<SPCSSFontVariantAlternates>;
+template class SPIEnum<SPCSSTextAlign>;
+template class SPIEnum<SPCSSTextOrientation>;
+template class SPIEnum<SPCSSTextTransform>;
+template class SPIEnum<SPCSSWritingMode>;
+template class SPIEnum<SPEnableBackground>;
+template class SPIEnum<SPImageRendering>;
+template class SPIEnum<SPIsolation>;
+template class SPIEnum<SPOverflow>;
+template class SPIEnum<SPShapeRendering>;
+template class SPIEnum<SPStrokeCapType>;
+template class SPIEnum<SPStrokeJoinType>;
+template class SPIEnum<SPTextAnchor>;
+template class SPIEnum<SPTextRendering>;
+template class SPIEnum<SPVisibility>;
+template class SPIEnum<SPWhiteSpace>;
+template class SPIEnum<SPWindRule>;
+template class SPIEnum<SPCSSFontStretch>;
+template class SPIEnum<SPCSSFontStyle>;
+template class SPIEnum<SPCSSFontVariant>;
+template class SPIEnum<SPCSSFontVariantPosition>;
+template class SPIEnum<SPCSSFontVariantCaps>;
+template class SPIEnum<SPCSSFontWeight>;
+template class SPIEnum<uint_least16_t>;
+template class SPIEnum<uint_least8_t>;
 
 
 

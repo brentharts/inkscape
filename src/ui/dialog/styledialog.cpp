@@ -169,7 +169,7 @@ void StyleDialog::_nodeRemoved(Inkscape::XML::Node &repr)
 
 void StyleDialog::_nodeChanged(Inkscape::XML::Node &object)
 {
-    g_debug("StyleDialog::_nodeChanged");
+    g_debug("StyleDialog::_nodeChanged"); 
     readStyleElement();
 }
 
@@ -201,7 +201,6 @@ StyleDialog::StyleDialog()
     _styleBox.set_orientation(Gtk::ORIENTATION_VERTICAL);
     _styleBox.set_valign(Gtk::ALIGN_START);
     _scrolledWindow.add(_styleBox);
-    Gtk::Box *alltoggler = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL));
     Gtk::Label *infotoggler = Gtk::manage(new Gtk::Label(_("Edit Full Stylesheet")));
     infotoggler->get_style_context()->add_class("inksmall");
     _vadj = _scrolledWindow.get_vadjustment();
@@ -563,13 +562,13 @@ void StyleDialog::readStyleElement()
         Glib::ustring style = obj->getRepr()->attribute("style");
         attr_prop = parseStyle(style);
         for (auto iter : obj->style->properties()) {
-            if (attr_prop.count(iter->name)) {
+            if (attr_prop.count(iter->name())) {
                 empty = false;
                 Gtk::TreeModel::Row row = *(store->prepend());
                 row[_mColumns._colSelector] = "style_properties";
                 row[_mColumns._colSelectorPos] = 0;
                 row[_mColumns._colActive] = true;
-                row[_mColumns._colName] = iter->name;
+                row[_mColumns._colName] = iter->name();
                 row[_mColumns._colValue] = iter->get_value();
                 row[_mColumns._colStrike] = false;
                 row[_mColumns._colOwner] = Glib::ustring("Current value");
@@ -584,7 +583,7 @@ void StyleDialog::readStyleElement()
                         row[_mColumns._colLinked] = true;
                     }
                 }
-                _addOwnerStyle(iter->name, "style attribute");
+                _addOwnerStyle(iter->name(), "style attribute");
             }
         }
         // this is to fix a bug on cairo win:
@@ -604,6 +603,11 @@ void StyleDialog::readStyleElement()
         Glib::ustring selector = tokens[i];
         REMOVE_SPACES(selector); // Remove leading/trailing spaces
         // Get list of objects selector matches
+        std::vector<Glib::ustring> selectordata = Glib::Regex::split_simple(";", selector);
+        Glib::ustring selector_orig = selector;
+        if (!selectordata.empty()) {
+            selector = selectordata.back();
+        }
         std::vector<SPObject *> objVec = _getObjVec(selector);
         if (obj) {
             bool stop = true;
@@ -750,14 +754,14 @@ void StyleDialog::readStyleElement()
         empty = true;
         css_selector_event_add->signal_button_release_event().connect(
             sigc::bind<Glib::RefPtr<Gtk::TreeStore>, Gtk::TreeView *, Glib::ustring, gint>(
-                sigc::mem_fun(*this, &StyleDialog::_addRow), store, css_tree, selector, selectorpos));
+                sigc::mem_fun(*this, &StyleDialog::_addRow), store, css_tree, selector_orig, selectorpos));
         if (obj) {
             for (auto iter : result_props) {
                 empty = false;
                 Gtk::TreeIter iterstore = store->append();
                 Gtk::TreeModel::Path path = (Gtk::TreeModel::Path)iterstore;
                 Gtk::TreeModel::Row row = *(iterstore);
-                row[_mColumns._colSelector] = selector;
+                row[_mColumns._colSelector] = selector_orig;
                 row[_mColumns._colSelectorPos] = selectorpos;
                 row[_mColumns._colActive] = iter.second.second;
                 row[_mColumns._colName] = iter.first;
@@ -766,7 +770,7 @@ void StyleDialog::readStyleElement()
                 if (iter.second.second) {
                     Glib::ustring val = "";
                     for (auto iterprop : obj->style->properties()) {
-                        if (iterprop->style_src != SP_STYLE_SRC_UNSET && iterprop->name == iter.first) {
+                        if (iterprop->style_src != SP_STYLE_SRC_UNSET && iterprop->name() == iter.first) {
                             val = iterprop->get_value();
                             break;
                         }
@@ -793,7 +797,7 @@ void StyleDialog::readStyleElement()
             for (auto iter : result_props) {
                 empty = false;
                 Gtk::TreeModel::Row row = *(store->prepend());
-                row[_mColumns._colSelector] = selector;
+                row[_mColumns._colSelector] = selector_orig;
                 row[_mColumns._colSelectorPos] = selectorpos;
                 row[_mColumns._colActive] = iter.second.second;
                 row[_mColumns._colName] = iter.first;
@@ -831,8 +835,9 @@ void StyleDialog::readStyleElement()
     if (obj) {
         for (auto iter : obj->style->properties()) {
             if (iter->style_src != SP_STYLE_SRC_UNSET) {
-                if (iter->name != "font" && iter->name != "d" && iter->name != "marker") {
-                    const gchar *attr = obj->getRepr()->attribute(iter->name.c_str());
+                auto key = iter->id();
+                if (key != SP_PROP_FONT && key != SP_ATTR_D && key != SP_PROP_MARKER) {
+                    const gchar *attr = obj->getRepr()->attribute(iter->name().c_str());
                     if (attr) {
                         if (!hasattributes) {
                             Inkscape::UI::Widget::IconRenderer *addRenderer =
@@ -878,16 +883,16 @@ void StyleDialog::readStyleElement()
                         row[_mColumns._colSelector] = "attributes";
                         row[_mColumns._colSelectorPos] = selectorpos;
                         row[_mColumns._colActive] = true;
-                        row[_mColumns._colName] = iter->name;
+                        row[_mColumns._colName] = iter->name();
                         row[_mColumns._colValue] = attr;
-                        if (_owner_style.find(iter->name) != _owner_style.end()) {
+                        if (_owner_style.find(iter->name()) != _owner_style.end()) {
                             row[_mColumns._colStrike] = true;
                             Glib::ustring tooltiptext = Glib::ustring("");
                             row[_mColumns._colOwner] = tooltiptext;
                         } else {
                             row[_mColumns._colStrike] = false;
                             row[_mColumns._colOwner] = Glib::ustring("Current value");
-                            _addOwnerStyle(iter->name, "inline attributes");
+                            _addOwnerStyle(iter->name(), "inline attributes");
                         }
                         hasattributes = true;
                     }
@@ -938,17 +943,17 @@ bool StyleDialog::_selectorStartEdit(GdkEventButton *event, Gtk::Label *selector
     return false;
 }
 
-void StyleDialog::_selectorActivate(Glib::RefPtr<Gtk::TreeStore> store, Gtk::Label *selector, Gtk::Entry *selector_edit)
+/* void StyleDialog::_selectorActivate(Glib::RefPtr<Gtk::TreeStore> store, Gtk::Label *selector, Gtk::Entry
+*selector_edit)
 {
     g_debug("StyleDialog::_selectorEditKeyPress");
-    bool ret = false;
     Glib::ustring newselector = fixCSSSelectors(selector_edit->get_text());
     if (newselector.empty()) {
         selector_edit->get_style_context()->add_class("system_error_color");
         return;
     }
     _writeStyleElement(store, selector->get_text(), selector_edit->get_text());
-}
+} */
 
 bool StyleDialog::_selectorEditKeyPress(GdkEventKey *event, Glib::RefPtr<Gtk::TreeStore> store, Gtk::Label *selector,
                                         Gtk::Entry *selector_edit)
@@ -1087,7 +1092,15 @@ void StyleDialog::_writeStyleElement(Glib::RefPtr<Gtk::TreeStore> store, Glib::u
         if (!new_selector.empty()) {
             selector = new_selector;
         }
-        styleContent = "\n" + selector + " { \n";
+        std::vector<Glib::ustring> selectordata = Glib::Regex::split_simple(";", selector);
+        for (auto selectoritem : selectordata) {
+            if (selectordata[selectordata.size() - 1] == selectoritem) {
+                selector = selectoritem;
+            } else {
+                styleContent = styleContent + selectoritem + ";\n";
+            }
+        }
+        styleContent = styleContent + "\n" + selector + " { \n";
     }
     selectorpos = _deleted_pos;
     for (auto &row : store->children()) {
@@ -1114,11 +1127,12 @@ void StyleDialog::_writeStyleElement(Glib::RefPtr<Gtk::TreeStore> store, Glib::u
         _updating = false;
     } else if (selector == "attributes") {
         for (auto iter : obj->style->properties()) {
-            if (iter->name != "font" && iter->name != "d" && iter->name != "marker") {
-                const gchar *attr = obj->getRepr()->attribute(iter->name.c_str());
+            auto key = iter->id();
+            if (key != SP_PROP_FONT && key != SP_ATTR_D && key != SP_PROP_MARKER) {
+                const gchar *attr = obj->getRepr()->attribute(iter->name().c_str());
                 if (attr) {
                     _updating = true;
-                    obj->getRepr()->setAttribute(iter->name.c_str(), nullptr);
+                    obj->getRepr()->setAttribute(iter->name(), nullptr);
                     _updating = false;
                 }
             }
@@ -1229,7 +1243,6 @@ void StyleDialog::_setAutocompletion(Gtk::Entry *entry, Glib::ustring name)
     entry_completion->set_text_column(_mCSSData._colCSSData);
     entry_completion->set_minimum_key_length(0);
     entry_completion->set_popup_completion(true);
-    gint counter = 0;
     if (name == "paint-order") {
         Gtk::TreeModel::Row row = *(completionModel->append());
         row[_mCSSData._colCSSData] = Glib::ustring("fill markers stroke");
@@ -1602,6 +1615,10 @@ std::vector<SPObject *> StyleDialog::_getObjVec(Glib::ustring selector)
 {
     g_debug("StyleDialog::_getObjVec");
 
+    std::vector<Glib::ustring> selectordata = Glib::Regex::split_simple(";", selector);
+    if (!selectordata.empty()) {
+        selector = selectordata.back();
+    }
     std::vector<SPObject *> objVec = SP_ACTIVE_DOCUMENT->getObjectsBySelector(selector);
 
     g_debug("StyleDialog::_getObjVec: | %s |", selector.c_str());

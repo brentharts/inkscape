@@ -67,10 +67,13 @@ private:
     ObjectsPanel::ObjectWatcher* _rootWatcher;
     
     //All object watchers
-    std::vector<ObjectsPanel::ObjectWatcher*> _objectWatchers;
+    std::map<SPItem*, std::pair<ObjectsPanel::ObjectWatcher*, bool> > _objectWatchers;
     
     //Connection for when the desktop changes
     sigc::connection desktopChangeConn;
+
+    //Connection for when the desktop is destroyed (I.e. its deconstructor is called)
+    sigc::connection _desktopDestroyedConnection;
 
     //Connection for when the document changes
     sigc::connection _documentChangedConnection;
@@ -90,6 +93,9 @@ private:
     sigc::connection _blendConnection;
     sigc::connection _blurConnection;
     
+    sigc::connection _processQueue_sig;
+    sigc::connection _executeUpdate_sig;
+
     //Desktop tracker for grabbing the desktop changed connection
     DesktopTracker _deskTrack;
     
@@ -109,7 +115,6 @@ private:
     
     //
     InternalUIBounce* _pending;
-    bool _pendingUpdateTree;
     
     //Whether the drag & drop was dragged into an item
     gboolean _dnd_into;
@@ -133,7 +138,16 @@ private:
     Gtk::TreeModel::Path _defer_target;
 
     Glib::RefPtr<Gtk::TreeStore> _store;
+    std::list<std::tuple<SPItem*, Gtk::TreeModel::iterator, bool> > _tree_update_queue;
+    //When the user selects an item in the document, we need to find that item in the tree view
+    //and highlight it. When looking up a specific item in the tree though, we don't want to have
+    //to iterate through the whole list, as this would take too long if the list is very long. So
+    //we will use a std::map for this instead, which is much faster (and call it _tree_cache). It
+    //would have been cleaner to create our own custom tree model, as described here
+    //https://en.wikibooks.org/wiki/GTK%2B_By_Example/Tree_View/Tree_Models
     std::map<SPItem*, Gtk::TreeModel::iterator> _tree_cache;
+    std::list<SPItem *> _selected_objects_order; // ordered by time of selection
+    std::list<Gtk::TreePath> _paths_to_be_expanded;
 
     std::vector<Gtk::Widget*> _watching;
     std::vector<Gtk::Widget*> _watchingNonTop;
@@ -165,8 +179,8 @@ private:
     
     //Methods:
     
-    ObjectsPanel(ObjectsPanel const &); // no copy
-    ObjectsPanel &operator=(ObjectsPanel const &); // no assign
+    ObjectsPanel(ObjectsPanel const &) = delete; // no copy
+    ObjectsPanel &operator=(ObjectsPanel const &) = delete; // no assign
 
     void _styleButton( Gtk::Button& btn, char const* iconName, char const* tooltip );
     void _fireAction( unsigned int code );
@@ -189,7 +203,9 @@ private:
     void _renameObject(Gtk::TreeModel::Row row, const Glib::ustring& name);
 
     void _pushTreeSelectionToCurrent();
-    void _selected_row_callback( const Gtk::TreeModel::iterator& iter, bool *setOpacity );
+    bool _selectItemCallback(const Gtk::TreeModel::iterator& iter, bool *setOpacity, bool *first_pass);
+    bool _clearPrevSelectionState(const Gtk::TreeModel::iterator& iter);
+    void _desktopDestroyed(SPDesktop* desktop);
     
     void _checkTreeSelection();
 
@@ -214,10 +230,13 @@ private:
     void _objectsSelected(Selection *sel);
     void _updateObjectSelected(SPItem* item, bool scrollto, bool expand);
 
-    void _removeWatchers();
+    void _removeWatchers(bool only_unused);
+    void _addWatcher(SPItem* item);
     void _objectsChangedWrapper(SPObject *obj);
     void _objectsChanged(SPObject *obj);
-    void _addObject( SPObject* obj, Gtk::TreeModel::Row* parentRow );
+    bool _processQueue();
+    void _queueObject(SPObject* obj, Gtk::TreeModel::Row* parentRow);
+    void _addObjectToTree(SPItem* item, const Gtk::TreeModel::Row &parentRow, bool expanded);
 
     void _isolationChangedIter(const Gtk::TreeIter &iter);
     void _isolationValueChanged();
@@ -231,11 +250,7 @@ private:
     void _blurChangedIter(const Gtk::TreeIter& iter, double blur);
     void _blurValueChanged();
 
-    
-    void setupDialog(const Glib::ustring &title);
-    
     void _highlightPickerColorMod();
-
 };
 
 

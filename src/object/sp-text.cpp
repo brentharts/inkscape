@@ -352,7 +352,7 @@ gchar* SPText::description() const {
 
     SPStyle *style = this->style;
 
-    char *n = xml_quote_strdup( style->font_family.value );
+    char *n = xml_quote_strdup(style->font_family.value());
 
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     int unit = prefs->getInt("/options/font/unitType", SP_CSS_UNIT_PT);
@@ -625,7 +625,7 @@ void SPText::_buildLayoutInit()
 unsigned SPText::_buildLayoutInput(SPObject *object, Inkscape::Text::Layout::OptionalTextTagAttrs const &parent_optional_attrs, unsigned parent_attrs_offset, bool in_textpath)
 {
     unsigned length = 0;
-    int child_attrs_offset = 0;
+    unsigned child_attrs_offset = 0;
     Inkscape::Text::Layout::OptionalTextTagAttrs optional_attrs;
 
     // Per SVG spec, an object with 'display:none' doesn't contribute to text layout.
@@ -633,7 +633,12 @@ unsigned SPText::_buildLayoutInput(SPObject *object, Inkscape::Text::Layout::Opt
         return 0;
     }
 
-    if (SP_IS_TEXT(object)) {
+    SPText*  text_object  = dynamic_cast<SPText*>(object);
+    SPTSpan* tspan_object = dynamic_cast<SPTSpan*>(object);
+    SPTRef*  tref_object  = dynamic_cast<SPTRef*>(object);
+    SPTextPath* textpath_object = dynamic_cast<SPTextPath*>(object);
+
+    if (text_object) {
 
         bool use_xy = true;
         bool use_dxdyrotate = true;
@@ -645,7 +650,7 @@ unsigned SPText::_buildLayoutInput(SPObject *object, Inkscape::Text::Layout::Opt
             use_dxdyrotate = false;
         }
 
-        SP_TEXT(object)->attributes.mergeInto(&optional_attrs, parent_optional_attrs, parent_attrs_offset, use_xy, use_dxdyrotate);
+        text_object->attributes.mergeInto(&optional_attrs, parent_optional_attrs, parent_attrs_offset, use_xy, use_dxdyrotate);
 
         // SVG 2 Text wrapping
         if (layout.wrap_mode == Inkscape::Text::Layout::WRAP_INLINE_SIZE) {
@@ -682,21 +687,21 @@ unsigned SPText::_buildLayoutInput(SPObject *object, Inkscape::Text::Layout::Opt
         }
 
         // set textLength on the entire layout, see note in TNG-Layout.h
-        if (SP_TEXT(object)->attributes.getTextLength()->_set) {
+        if (text_object->attributes.getTextLength()->_set) {
             layout.textLength._set = true;
-            layout.textLength.value = SP_TEXT(object)->attributes.getTextLength()->value;
-            layout.textLength.computed = SP_TEXT(object)->attributes.getTextLength()->computed;
-            layout.textLength.unit = SP_TEXT(object)->attributes.getTextLength()->unit;
-            layout.lengthAdjust = (Inkscape::Text::Layout::LengthAdjust) SP_TEXT(object)->attributes.getLengthAdjust();
+            layout.textLength.value    = text_object->attributes.getTextLength()->value;
+            layout.textLength.computed = text_object->attributes.getTextLength()->computed;
+            layout.textLength.unit     = text_object->attributes.getTextLength()->unit;
+            layout.lengthAdjust = (Inkscape::Text::Layout::LengthAdjust) text_object->attributes.getLengthAdjust();
         }
     }
 
-    else if (SP_IS_TSPAN(object)) {
-        SPTSpan *tspan = SP_TSPAN(object);
+    else if (tspan_object) {
 
         // x, y attributes are stripped from some tspans marked with role="line" as we do our own line layout.
         // This should be checked carefully, as it can undo line layout in imported SVG files.
-        bool use_xy = !in_textpath && (tspan->role == SP_TSPAN_ROLE_UNSPECIFIED || !tspan->attributes.singleXYCoordinates());
+        bool use_xy = !in_textpath &&
+            (tspan_object->role == SP_TSPAN_ROLE_UNSPECIFIED || !tspan_object->attributes.singleXYCoordinates());
         bool use_dxdyrotate = true;
 
         // SVG 2 Text wrapping: see comment above.
@@ -706,17 +711,44 @@ unsigned SPText::_buildLayoutInput(SPObject *object, Inkscape::Text::Layout::Opt
             use_dxdyrotate = false;
         }
 
-        tspan->attributes.mergeInto(&optional_attrs, parent_optional_attrs, parent_attrs_offset, use_xy, use_dxdyrotate);
+        tspan_object->attributes.mergeInto(&optional_attrs, parent_optional_attrs, parent_attrs_offset, use_xy, use_dxdyrotate);
+
+        if (tspan_object->role != SP_TSPAN_ROLE_UNSPECIFIED) {
+            // We are doing line wrapping using sodipodi:role="line". New lines have been stripped.
+
+            // Insert paragraph break before text if not first tspan.
+            SPObject *prev_object = object->getPrev();
+            if (prev_object && dynamic_cast<SPTSpan*>(prev_object)) {
+                if (!layout.inputExists()) {
+                    // Add an object to store style, needed even if there is no text. When does this happen?
+                    layout.appendText("", prev_object->style, prev_object, &optional_attrs);
+                }
+                layout.appendControlCode(Inkscape::Text::Layout::PARAGRAPH_BREAK, prev_object);
+            }
+
+            // Create empty span to store info (any non-empty tspan with sodipodi:role="line" has a child).
+            if (!object->hasChildren()) {
+                layout.appendText("", object->style, object, &optional_attrs);
+            }
+
+            length++;     // interpreting line breaks as a character for the purposes of x/y/etc attributes
+                          // is a liberal interpretation of the svg spec, but a strict reading would mean
+                          // that if the first line is empty the second line would take its place at the
+                          // start position. Very confusing.
+                          // SVG 2 clarifies, attributes are matched to unicode input characters so line
+                          // breaks do match to an x/y/etc attribute.
+            child_attrs_offset--;
+        }
     }
 
-    else if (SP_IS_TREF(object)) {
-        SP_TREF(object)->attributes.mergeInto(&optional_attrs, parent_optional_attrs, parent_attrs_offset, true, true);
+    else if (tref_object) {
+        tref_object->attributes.mergeInto(&optional_attrs, parent_optional_attrs, parent_attrs_offset, true, true);
     }
 
-    else if (SP_IS_TEXTPATH(object)) {
-        in_textpath = true;
-        SP_TEXTPATH(object)->attributes.mergeInto(&optional_attrs, parent_optional_attrs, parent_attrs_offset, false, true);
-        optional_attrs.x.clear();
+    else if (textpath_object) {
+        in_textpath = true; // This should be made local so we can mix normal text with textpath per SVG 2.
+        textpath_object->attributes.mergeInto(&optional_attrs, parent_optional_attrs, parent_attrs_offset, false, true);
+        optional_attrs.x.clear(); // Hmm, you can use x with horizontal text. So this is probably wrong.
         optional_attrs.y.clear();
     }
 
@@ -725,28 +757,7 @@ unsigned SPText::_buildLayoutInput(SPObject *object, Inkscape::Text::Layout::Opt
         child_attrs_offset = parent_attrs_offset;
     }
 
-
-    if (SP_IS_TSPAN(object)) {
-        if (SP_TSPAN(object)->role != SP_TSPAN_ROLE_UNSPECIFIED) {
-            // we need to allow the first line not to have role=line, but still set the source_cookie to the right value
-            SPObject *prev_object = object->getPrev();
-            if (prev_object && SP_IS_TSPAN(prev_object)) {
-                if (!layout.inputExists()) {
-                    layout.appendText("", prev_object->style, prev_object, &optional_attrs);
-                }
-                layout.appendControlCode(Inkscape::Text::Layout::PARAGRAPH_BREAK, prev_object);
-            }
-            if (!object->hasChildren()) {
-                layout.appendText("", object->style, object, &optional_attrs);
-            }
-            length++;     // interpreting line breaks as a character for the purposes of x/y/etc attributes
-                          // is a liberal interpretation of the svg spec, but a strict reading would mean
-                          // that if the first line is empty the second line would take its place at the
-                          // start position. Very confusing.
-            child_attrs_offset--;
-        }
-    }
-
+    // Recurse
     for (auto& child: object->children) {
         SPString *str = dynamic_cast<SPString *>(&child);
         if (str) {
@@ -896,7 +907,7 @@ void SPText::_adjustFontsizeRecursive(SPItem *item, double ex, bool is_root)
 
     if (style && !Geom::are_near(ex, 1.0)) {
         if (!style->font_size.set && is_root) {
-            style->font_size.set = 1;
+            style->font_size.set = true;
         }
         style->font_size.type = SP_FONT_SIZE_LENGTH;
         style->font_size.computed *= ex;
@@ -1024,7 +1035,7 @@ Inkscape::XML::Node* SPText::get_first_rectangle()
 
     Inkscape::XML::Node *our_ref = getRepr();
 
-    if (style->shape_inside.set && style->shape_inside.value) {
+    if (style->shape_inside.set) {
 
         std::vector<Glib::ustring> shapes = get_shapes();
 
@@ -1047,11 +1058,16 @@ Inkscape::XML::Node* SPText::get_first_rectangle()
 std::vector<Glib::ustring> SPText::get_shapes() const
 {
     std::vector<Glib::ustring> shapes;
-    if (style->shape_inside.set && style->shape_inside.value) {
-
+    char const *val;
+    if (style->shape_inside.set && (val = style->shape_inside.value())) {
         static Glib::RefPtr<Glib::Regex> regex = Glib::Regex::create("url\\(#([A-z0-9#]*)\\)");
         Glib::MatchInfo matchInfo;
-        regex->match(style->shape_inside.value, matchInfo);
+
+        // Glib::Regex::match stack-use-after-scope workaround
+        // https://gitlab.gnome.org/GNOME/glibmm/issues/66
+        Glib::ustring val_stack = val;
+
+        regex->match(val_stack, matchInfo);
 
         while (matchInfo.matches()) {
             shapes.push_back(matchInfo.fetch(1));

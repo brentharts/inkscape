@@ -67,7 +67,7 @@ LPECopyRotate::LPECopyRotate(LivePathEffectObject *lpeobject) :
     starting_angle(_("Starting angle"), _("Angle of the first copy"), "starting_angle", &wr, this, 0.0),
     rotation_angle(_("Rotation angle"), _("Angle between two successive copies"), "rotation_angle", &wr, this, 60.0),
     num_copies(_("Number of copies"), _("Number of copies of the original path"), "num_copies", &wr, this, 6),
-    gap(_("Gap"), _("Gap"), _("Gap space between copies, use small negative gaps to fix some joins"), &wr, this, 0.05),
+    gap(_("Gap"), _("Gap space between copies, use small negative gaps to fix some joins"), "gap", &wr, this, 0.05),
     copies_to_360(_("360° Copies"), _("No rotation angle, fixed to 360°"), "copies_to_360", &wr, this, true),
     mirror_copies(_("Mirror copies"), _("Mirror between copies"), "mirror_copies", &wr, this, false),
     split_items(_("Split elements"), _("Split elements, so each can have its own style"), "split_items", &wr, this, false),
@@ -112,7 +112,6 @@ LPECopyRotate::~LPECopyRotate()
 void
 LPECopyRotate::doAfterEffect (SPLPEItem const* lpeitem)
 {
-    is_load = false;
     if (split_items) {
         SPDocument *document = getSPDoc();
         if (!document) {
@@ -191,10 +190,11 @@ void LPECopyRotate::cloneStyle(SPObject *orig, SPObject *dest)
     dest->getRepr()->setAttribute("style", orig->getRepr()->attribute("style"));
     for (auto iter : orig->style->properties()) {
         if (iter->style_src != SP_STYLE_SRC_UNSET) {
-            if (iter->name != "font" && iter->name != "d" && iter->name != "marker") {
-                const gchar *attr = orig->getRepr()->attribute(iter->name.c_str());
+            auto key = iter->id();
+            if (key != SP_PROP_FONT && key != SP_ATTR_D && key != SP_PROP_MARKER) {
+                const gchar *attr = orig->getRepr()->attribute(iter->name().c_str());
                 if (attr) {
-                    dest->getRepr()->setAttribute(iter->name.c_str(), attr);
+                    dest->getRepr()->setAttribute(iter->name(), attr);
                 }
             }
         }

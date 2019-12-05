@@ -507,11 +507,11 @@ Glib::ustring Application::get_symbolic_colors()
     guint32 colorsetbase_inverse = colorsetbase ^ 0xffffff00;
     guint32 colorsetsuccess = 0x4AD589ff;
     guint32 colorsetwarning = 0xF57900ff;
-    guint32 colorseterror = 0xcc0000ff;
-    colorsetbase = prefs->getInt("/theme/" + themeiconname + "/symbolicBaseColor", colorsetbase);
-    colorsetsuccess = prefs->getInt("/theme/" + themeiconname + "/symbolicSuccessColor", colorsetsuccess);
-    colorsetwarning = prefs->getInt("/theme/" + themeiconname + "/symbolicWarningColor", colorsetwarning);
-    colorseterror = prefs->getInt("/theme/" + themeiconname + "/symbolicErrorColor", colorseterror);
+    guint32 colorseterror = 0xCC0000ff;
+    colorsetbase = prefs->getUInt("/theme/" + themeiconname + "/symbolicBaseColor", colorsetbase);
+    colorsetsuccess = prefs->getUInt("/theme/" + themeiconname + "/symbolicSuccessColor", colorsetsuccess);
+    colorsetwarning = prefs->getUInt("/theme/" + themeiconname + "/symbolicWarningColor", colorsetwarning);
+    colorseterror = prefs->getUInt("/theme/" + themeiconname + "/symbolicErrorColor", colorseterror);
     sp_svg_write_color(colornamed, sizeof(colornamed), colorsetbase);
     sp_svg_write_color(colornamedsuccess, sizeof(colornamedsuccess), colorsetsuccess);
     sp_svg_write_color(colornamedwarning, sizeof(colornamedwarning), colorsetwarning);
@@ -643,7 +643,7 @@ void Application::readStyleSheets(bool forceupd)
     for (unsigned i = 0; i < root->childCount(); ++i) {
         Inkscape::XML::Node *child = root->nthChild(i);
         if (child && strcmp(child->name(), "svg:style") == 0) {
-            styles.insert(styles.begin(), child);
+            styles.push_back(child);
         }
     }
     if (forceupd || styles.size() > 1) {

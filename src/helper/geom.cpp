@@ -558,6 +558,9 @@ pathv_to_cubicbezier( Geom::PathVector const &pathv)
     Geom::PathVector output;
     double cubicGap = 0.01;
     for (const auto & pit : pathv) {
+        if (pit.empty()) {
+            continue;
+        }
         output.push_back( Geom::Path() );
         output.back().start( pit.initialPoint() );
         output.back().close( pit.closed() );
@@ -593,6 +596,16 @@ pathv_to_cubicbezier( Geom::PathVector const &pathv)
     }
 
     return output;
+}
+
+//Study move to 2Geom
+size_t 
+count_pathvector_nodes(Geom::PathVector const &pathv) {
+    size_t tot = 0;
+    for (auto subpath : pathv) {
+        tot += subpath.size_closed();
+    }
+    return tot;
 }
 
 // The next routine is modified from curv4_div::recursive_bezier from file agg_curves.cpp

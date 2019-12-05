@@ -15,6 +15,7 @@
 #include "display/drawing-context.h"
 #include "display/drawing-item.h"
 #include "display/drawing-surface.h"
+#include "display/drawing-text.h"
 #include "display/drawing.h"
 #include "style.h"
 
@@ -93,22 +94,11 @@ DrawingGroup::_updateItem(Geom::IntRect const &area, UpdateContext const &ctx, u
 unsigned
 DrawingGroup::_renderItem(DrawingContext &dc, Geom::IntRect const &area, unsigned flags, DrawingItem *stop_at)
 {
-    bool isolated = false;
-    if (!parent() || (_isolation == SP_CSS_ISOLATION_ISOLATE && !_mix_blend_mode)) {
-        isolated = true;
-    } 
-    int device_scale = dc.surface()->device_scale();
-    DrawingSurface intermediate(area, device_scale);
-    DrawingContext ict(intermediate);
-    ict.setOperator(CAIRO_OPERATOR_OVER);
-    if (parent() && isolated) {
-        flags = flags | RENDER_FILTER_BACKGROUND;
-    }
     if (stop_at == nullptr) {
         // normal rendering
         for (auto &i : _children) {
             i.setAntialiasing(_antialias);
-            i.render(isolated ? ict : dc, area, flags, stop_at);
+            i.render(dc, area, flags, stop_at);
         }
     } else {
         // background rendering
@@ -118,19 +108,13 @@ DrawingGroup::_renderItem(DrawingContext &dc, Geom::IntRect const &area, unsigne
             if (i.isAncestorOf(stop_at)) {
                 // render its ancestors without masks, opacity or filters
                 i.setAntialiasing(_antialias);
-                i.render(isolated ? ict : dc, area, flags | RENDER_FILTER_BACKGROUND, stop_at);
-                break;
+                i.render(dc, area, flags | RENDER_FILTER_BACKGROUND, stop_at);
+                return RENDER_OK;
             } else {
                 i.setAntialiasing(_antialias);
-                i.render(isolated ? ict : dc, area, flags, stop_at);
+                i.render(dc, area, flags, stop_at);
             }
         }
-    }
-    if (isolated) {
-        dc.rectangle(area);
-        dc.setSource(&intermediate);
-        dc.setOperator(CAIRO_OPERATOR_OVER);
-        dc.fill();
     }
     return RENDER_OK;
 }

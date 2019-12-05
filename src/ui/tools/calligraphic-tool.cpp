@@ -274,25 +274,24 @@ bool CalligraphicTool::apply(Geom::Point p) {
 
     /* Calculate angle of drawing tool */
 
-    double a1;
+    Geom::Point ang1;
     if (this->usetilt) {
         // 1a. calculate nib angle from input device tilt:
-        gdouble length = std::sqrt(this->xtilt*this->xtilt + this->ytilt*this->ytilt);;
-
-        if (length > 0) {
-            Geom::Point ang1 = Geom::Point(this->ytilt/length, this->xtilt/length);
-            a1 = atan2(ang1);
+        if (this->xtilt == 0 && this->ytilt == 0) {
+            // to be sure that atan2 in the computation below
+            // would not crash or return NaN.
+            ang1 = Geom::Point(1, 0);
+        } else {
+            ang1 = Geom::Point(-this->xtilt, this->ytilt);
         }
-        else
-            a1 = 0.0;
     }
     else {
         // 1b. fixed dc->angle (absolutely flat nib):
         double const radians = ( (this->angle - 90) / 180.0 ) * M_PI;
-        Geom::Point ang1 = Geom::Point(-sin(radians),  cos(radians));
-        ang1.y() *= -this->desktop->yaxisdir();
-        a1 = atan2(ang1);
+        ang1 = Geom::Point(-sin(radians),  cos(radians));
     }
+    ang1.y() *= -this->desktop->yaxisdir();
+    double a1 = atan2(ang1);
 
     // 2. perpendicular to dc->vel (absolutely non-flat nib):
     gdouble const mag_vel = Geom::L2(this->vel);
@@ -471,6 +470,7 @@ bool CalligraphicTool::root_handler(GdkEvent* event) {
                 ret = TRUE;
 
                 desktop->canvas->forceFullRedrawAfterInterruptions(3);
+                set_high_motion_precision();
                 this->is_drawing = true;
                 this->just_started_drawing = true;
             }
@@ -729,6 +729,7 @@ bool CalligraphicTool::root_handler(GdkEvent* event) {
 
         sp_canvas_item_ungrab(SP_CANVAS_ITEM(desktop->acetate));
         desktop->canvas->endForcedFullRedraws();
+        set_high_motion_precision(false);
         this->is_drawing = false;
 
         if (this->dragging && event->button.button == 1 && !this->space_panning) {

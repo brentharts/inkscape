@@ -262,10 +262,10 @@ static void svgSetTransform(Inkscape::XML::Node *node, double c0, double c1,
 /**
  * \brief Generates a SVG path string from poppler's data structure
  */
-static gchar *svgInterpretPath(GfxPath *path) {
+static gchar *svgInterpretPath(_POPPLER_CONST_83 GfxPath *path) {
     Inkscape::SVG::PathString pathString;
     for (int i = 0 ; i < path->getNumSubpaths() ; ++i ) {
-        GfxSubpath *subpath = path->getSubpath(i);
+        _POPPLER_CONST_83 GfxSubpath *subpath = path->getSubpath(i);
         if (subpath->getNumPoints() > 0) {
             pathString.moveTo(subpath->getX(0), subpath->getY(0));
             int j = 1;
@@ -1395,7 +1395,7 @@ void SvgBuilder::beginString(GfxState *state) {
 void SvgBuilder::addChar(GfxState *state, double x, double y,
                          double dx, double dy,
                          double originX, double originY,
-                         CharCode /*code*/, int /*nBytes*/, Unicode *u, int uLen) {
+                         CharCode /*code*/, int /*nBytes*/, Unicode const *u, int uLen) {
 
 
     bool is_space = ( uLen == 1 && u[0] == 32 );

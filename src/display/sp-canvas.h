@@ -84,7 +84,7 @@ struct SPCanvas {
     void requestFullRedraw();
     void requestUpdate();
 
-    void forceFullRedrawAfterInterruptions(unsigned int count);
+    void forceFullRedrawAfterInterruptions(unsigned int count, bool reset = true);
     void endForcedFullRedraws();
 
     Geom::Rect getViewbox() const;
@@ -186,6 +186,7 @@ public:
     Geom::OptIntRect _spliter_bottom;
     Geom::OptIntRect _spliter_left;
     Geom::OptIntRect _spliter_right;
+    Geom::OptIntRect _xray_rect;
     Geom::Point _spliter_control_pos;
     Geom::Point _spliter_in_control_pos;
     Geom::Point _xray_orig;
@@ -206,9 +207,7 @@ public:
     double _dy0;
     int _x0; ///< World coordinate of the leftmost pixels of window
     int _y0; ///< World coordinate of the topmost pixels of window
-    bool _forcefull;
     bool _scrooling;
-    int _delayrendering;
     int _device_scale; ///< Scale for high DPI montiors
     gint64 _idle_time;
     int _splits;

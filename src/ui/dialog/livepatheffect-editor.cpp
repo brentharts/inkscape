@@ -209,7 +209,7 @@ bool LivePathEffectEditor::_on_button_release(GdkEventButton* button_event) {
         if (lperef->getObject()) {
             LivePathEffect::Effect * effect = lperef->lpeobject->get_lpe();
             if (effect) {
-                effect->upd_params = true;
+                effect->refresh_widgets = true;
                 showParams(*effect);
             }
         }
@@ -220,7 +220,7 @@ bool LivePathEffectEditor::_on_button_release(GdkEventButton* button_event) {
 void
 LivePathEffectEditor::showParams(LivePathEffect::Effect& effect)
 {
-    if (effectwidget && !effect.upd_params) {
+    if (effectwidget && !effect.refresh_widgets) {
         return;
     }
     if (effectwidget) {
@@ -237,7 +237,7 @@ LivePathEffectEditor::showParams(LivePathEffect::Effect& effect)
     effectcontrol_frame.show();
     effectcontrol_vbox.show_all_children();
     // fixme: add resizing of dialog
-    effect.upd_params = false;
+    effect.refresh_widgets = false;
 }
 
 void
@@ -516,12 +516,17 @@ void LivePathEffectEditor::onUp()
         SPItem *item = sel->singleItem();
         SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(item);
         if ( lpeitem ) {
+            Inkscape::LivePathEffect::Effect *lpe = lpeitem->getCurrentLPE();
             lpeitem->upCurrentPathEffect();
-
             DocumentUndo::done( current_desktop->getDocument(), SP_VERB_DIALOG_LIVE_PATH_EFFECT,
                                 _("Move path effect up") );
             
             effect_list_reload(lpeitem);
+            if (lpe) {
+                showParams(*lpe);
+                lpe_list_locked = true;
+                selectInList(lpe);
+            }
         }
     }
 }
@@ -533,11 +538,17 @@ void LivePathEffectEditor::onDown()
         SPItem *item = sel->singleItem();
         SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(item);
         if ( lpeitem ) {
+            Inkscape::LivePathEffect::Effect *lpe = lpeitem->getCurrentLPE();
             lpeitem->downCurrentPathEffect();
 
             DocumentUndo::done( current_desktop->getDocument(), SP_VERB_DIALOG_LIVE_PATH_EFFECT,
                                 _("Move path effect down") );
             effect_list_reload(lpeitem);
+            if (lpe) {
+                showParams(*lpe);
+                lpe_list_locked = true;
+                selectInList(lpe);
+            }
         }
     }
 }
@@ -561,7 +572,7 @@ void LivePathEffectEditor::on_effect_selection_changed()
             current_lperef = lperef;
             LivePathEffect::Effect * effect = lperef->lpeobject->get_lpe();
             if (effect) {
-                effect->upd_params = true;
+                effect->refresh_widgets = true;
                 showParams(*effect);
                 //To reload knots and helper paths
                 Inkscape::Selection *sel = _getSelection();

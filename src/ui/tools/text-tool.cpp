@@ -657,7 +657,7 @@ bool TextTool::root_handler(GdkEvent* event) {
                             SPItem *text = create_text_with_rectangle (desktop, this->p0, p1);
 
                             /* Get "shape-inside" */
-                            gchar* shape_inside = g_strdup(text->style->shape_inside.value);
+                            auto shape_inside = text->style->shape_inside;
 
                             /* Set style */
                             sp_desktop_apply_style_tool(desktop, text->getRepr(), "/tools/text", true);
@@ -667,12 +667,10 @@ bool TextTool::root_handler(GdkEvent* event) {
                             if ( (ex != 0.0) && (ex != 1.0) ) {
                                 sp_css_attr_scale(css, 1/ex);
                             }
+                            sp_repr_css_set_property (css, "shape-inside", shape_inside.value()); // Restore (over-written by desktop style).
+                            sp_repr_css_set_property (css, "white-space", "pre");                 // Respect new lines.
                             text->setCSS(css,"style");
                             sp_repr_css_attr_unref(css);
-                            /* Restore "shape-inside" */
-                            text->style->shape_inside.read( shape_inside );
-                            g_free( shape_inside );
-                            text->updateRepr();
 
                             desktop->getSelection()->set(text);
 
@@ -1612,12 +1610,10 @@ int TextTool::_styleQueried(SPStyle *style, int property)
     }
     for (Inkscape::Text::Layout::iterator it = begin_it ; it < end_it ; it.nextStartOfSpan()) {
         SPObject *pos_obj = nullptr;
-        void *rawptr = nullptr;
-        layout->getSourceOfCharacter(it, &rawptr);
-        if (!rawptr || !SP_IS_OBJECT(rawptr)) {
+        layout->getSourceOfCharacter(it, &pos_obj);
+        if (!pos_obj) {
             continue;
         }
-        pos_obj = reinterpret_cast<SPObject *>(rawptr);
         while (SP_IS_STRING(pos_obj) && pos_obj->parent) {
            pos_obj = pos_obj->parent;   // SPStrings don't have style
         }

@@ -678,10 +678,10 @@ void InkscapePreferences::resetIconsColors(bool themechange)
         _symbolic_success_color.setRgba32(colorsetsuccess);
         _symbolic_warning_color.setRgba32(colorsetwarning);
         _symbolic_error_color.setRgba32(colorseterror);
-        prefs->setInt("/theme/" + themeiconname + "/symbolicBaseColor", colorsetbase);
-        prefs->setInt("/theme/" + themeiconname + "/symbolicSuccessColor", colorsetsuccess);
-        prefs->setInt("/theme/" + themeiconname + "/symbolicWarningColor", colorsetwarning);
-        prefs->setInt("/theme/" + themeiconname + "/symbolicErrorColor", colorseterror);
+        prefs->setUInt("/theme/" + themeiconname + "/symbolicBaseColor", colorsetbase);
+        prefs->setUInt("/theme/" + themeiconname + "/symbolicSuccessColor", colorsetsuccess);
+        prefs->setUInt("/theme/" + themeiconname + "/symbolicWarningColor", colorsetwarning);
+        prefs->setUInt("/theme/" + themeiconname + "/symbolicErrorColor", colorseterror);
         if (prefs->getBool("/theme/symbolicDefaultColors", true)) {
             _symbolic_base_color.setSensitive(false);
             _symbolic_success_color.setSensitive(false);
@@ -705,10 +705,10 @@ void InkscapePreferences::changeIconsColors()
 {
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     Glib::ustring themeiconname = prefs->getString("/theme/iconTheme");
-    guint32 colorsetbase = prefs->getInt("/theme/" + themeiconname + "/symbolicBaseColor", 0x2E3436ff);
-    guint32 colorsetsuccess = prefs->getInt("/theme/" + themeiconname + "/symbolicSuccessColor", 0x4AD589ff);
-    guint32 colorsetwarning = prefs->getInt("/theme/" + themeiconname + "/symbolicWarningColor", 0xF57900ff);
-    guint32 colorseterror = prefs->getInt("/theme/" + themeiconname + "/symbolicErrorColor", 0xcc0000ff);
+    guint32 colorsetbase = prefs->getUInt("/theme/" + themeiconname + "/symbolicBaseColor", 0x2E3436ff);
+    guint32 colorsetsuccess = prefs->getUInt("/theme/" + themeiconname + "/symbolicSuccessColor", 0x4AD589ff);
+    guint32 colorsetwarning = prefs->getUInt("/theme/" + themeiconname + "/symbolicWarningColor", 0xF57900ff);
+    guint32 colorseterror = prefs->getUInt("/theme/" + themeiconname + "/symbolicErrorColor", 0xCC0000ff);
     _symbolic_base_color.setRgba32(colorsetbase);
     _symbolic_success_color.setRgba32(colorsetsuccess);
     _symbolic_warning_color.setRgba32(colorsetwarning);
@@ -773,8 +773,6 @@ void InkscapePreferences::themeChange()
         GtkSettings *settings = gtk_settings_get_default();
         g_object_set(settings, "gtk-theme-name", themename.c_str(), NULL);
         g_object_set(settings, "gtk-application-prefer-dark-theme", darktheme, NULL);
-        gchar *gtkThemeName;
-        gboolean gtkApplicationPreferDarkTheme;
         bool dark = darktheme || themename.find(":dark") != -1;
         if (!dark) {
             Glib::RefPtr<Gtk::StyleContext> stylecontext = window->get_style_context();
@@ -857,10 +855,10 @@ void InkscapePreferences::symbolicThemeCheck()
         } else {
             changeIconsColors();
         }
-        guint32 colorsetbase = prefs->getInt("/theme/" + themeiconname + "/symbolicBaseColor", 0x2E3436ff);
-        guint32 colorsetsuccess = prefs->getInt("/theme/" + themeiconname + "/symbolicSuccessColor", 0x4AD589ff);
-        guint32 colorsetwarning = prefs->getInt("/theme/" + themeiconname + "/symbolicWarningColor", 0xF57900ff);
-        guint32 colorseterror = prefs->getInt("/theme/" + themeiconname + "/symbolicErrorColor", 0xcc0000ff);
+        guint32 colorsetbase = prefs->getUInt("/theme/" + themeiconname + "/symbolicBaseColor", 0x2E3436ff);
+        guint32 colorsetsuccess = prefs->getUInt("/theme/" + themeiconname + "/symbolicSuccessColor", 0x4AD589ff);
+        guint32 colorsetwarning = prefs->getUInt("/theme/" + themeiconname + "/symbolicWarningColor", 0xF57900ff);
+        guint32 colorseterror = prefs->getUInt("/theme/" + themeiconname + "/symbolicErrorColor", 0xCC0000ff);
         _symbolic_base_color.init(_("Color for symbolic icons:"), "/theme/" + themeiconname + "/symbolicBaseColor",
                                   colorsetbase);
         _symbolic_success_color.init(_("Color for symbolic success icons:"),
@@ -889,9 +887,9 @@ Glib::RefPtr< Gdk::Pixbuf > sp_mix_colors()
 {
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     Glib::ustring themeiconname = prefs->getString("/theme/iconTheme");
-    guint32 colorsetsuccess = prefs->getInt("/theme/" + themeiconname + "/symbolicSuccessColor", 0x4AD589ff);
-    guint32 colorsetwarning = prefs->getInt("/theme/" + themeiconname + "/symbolicWarningColor", 0xF57900ff);
-    guint32 colorseterror = prefs->getInt("/theme/" + themeiconname + "/symbolicErrorColor", 0xcc0000ff);
+    guint32 colorsetsuccess = prefs->getUInt("/theme/" + themeiconname + "/symbolicSuccessColor", 0x4AD589ff);
+    guint32 colorsetwarning = prefs->getUInt("/theme/" + themeiconname + "/symbolicWarningColor", 0xF57900ff);
+    guint32 colorseterror = prefs->getUInt("/theme/" + themeiconname + "/symbolicErrorColor", 0xCC0000ff);
     SPColor success(colorsetsuccess);
     SPColor warning(colorsetwarning);
     SPColor error(colorseterror);
@@ -1143,6 +1141,9 @@ void InkscapePreferences::initPageUI()
         _icon_theme.init("/theme/iconTheme", labels, values, "hicolor");
         _page_theme.add_line(false, _("Change icon theme:"), _icon_theme, "", "", false);
         _icon_theme.signal_changed().connect(sigc::mem_fun(*this, &InkscapePreferences::symbolicThemeCheck));
+        _sys_user_icons_dir_copy.init((char const *)IO::Resource::get_path(IO::Resource::USER, IO::Resource::ICONS, ""),
+                             _("Open icons folder"));
+        _page_theme.add_line(true, _("User icons: "), _sys_user_icons_dir_copy, "", _("Location of the user’s icons"), true, Gtk::manage(new Gtk::Box()));
     }
     Glib::ustring themeiconname = prefs->getString("/theme/iconTheme");
     _symbolic_icons.init(_("Use symbolic icons"), "/theme/symbolicIcons", false);
@@ -1158,7 +1159,7 @@ void InkscapePreferences::initPageUI()
     _symbolic_warning_color.init(_("Color for symbolic warning icons:"),
                                  "/theme/" + themeiconname + "/symbolicWarningColor", 0xF57900ff);
     _symbolic_error_color.init(_("Color for symbolic error icons:"), "/theme/" + themeiconname + "/symbolicErrorColor",
-                               0xcc0000ff);
+                               0xCC0000ff);
     _symbolic_base_color.get_style_context()->add_class("system_base_color");
     _symbolic_success_color.get_style_context()->add_class("system_success_color");
     _symbolic_warning_color.get_style_context()->add_class("system_warning_color");
@@ -1343,9 +1344,9 @@ void InkscapePreferences::initPageUI()
         _grids_xy.add_line( false, _("Spacing X:"), _grids_xy_spacing_x, "", _("Distance between vertical grid lines"), false);
         _grids_xy.add_line( false, _("Spacing Y:"), _grids_xy_spacing_y, "", _("Distance between horizontal grid lines"), false);
 
-        _grids_xy_color.init(_("Minor grid line color:"), "/options/grids/xy/color", 0x0000ff20);
+        _grids_xy_color.init(_("Minor grid line color:"), "/options/grids/xy/color", GRID_DEFAULT_COLOR);
         _grids_xy.add_line( false, _("Minor grid line color:"), _grids_xy_color, "", _("Color used for normal grid lines"), false);
-        _grids_xy_empcolor.init(_("Major grid line color:"), "/options/grids/xy/empcolor", 0x0000ff40);
+        _grids_xy_empcolor.init(_("Major grid line color:"), "/options/grids/xy/empcolor", GRID_DEFAULT_EMPCOLOR);
         _grids_xy.add_line( false, _("Major grid line color:"), _grids_xy_empcolor, "", _("Color used for major (highlighted) grid lines"), false);
         _grids_xy_empspacing.init("/options/grids/xy/empspacing", 1.0, 1000.0, 1.0, 5.0, 5.0, true, false);
         _grids_xy.add_line( false, _("Major grid line every:"), _grids_xy_empspacing, "", "", false);
@@ -1368,9 +1369,9 @@ void InkscapePreferences::initPageUI()
         _grids_axonom_angle_z.init("/options/grids/axonom/angle_z", -360.0, 360.0, 1.0, 10.0, 30.0, false, false);
         _grids_axonom.add_line( false, _("Angle X:"), _grids_axonom_angle_x, "", _("Angle of x-axis"), false);
         _grids_axonom.add_line( false, _("Angle Z:"), _grids_axonom_angle_z, "", _("Angle of z-axis"), false);
-        _grids_axonom_color.init(_("Minor grid line color:"), "/options/grids/axonom/color", 0x0000ff20);
+        _grids_axonom_color.init(_("Minor grid line color:"), "/options/grids/axonom/color", GRID_DEFAULT_COLOR);
         _grids_axonom.add_line( false, _("Minor grid line color:"), _grids_axonom_color, "", _("Color used for normal grid lines"), false);
-        _grids_axonom_empcolor.init(_("Major grid line color:"), "/options/grids/axonom/empcolor", 0x0000ff40);
+        _grids_axonom_empcolor.init(_("Major grid line color:"), "/options/grids/axonom/empcolor", GRID_DEFAULT_EMPCOLOR);
         _grids_axonom.add_line( false, _("Major grid line color:"), _grids_axonom_empcolor, "", _("Color used for major (highlighted) grid lines"), false);
         _grids_axonom_empspacing.init("/options/grids/axonom/empspacing", 1.0, 1000.0, 1.0, 5.0, 5.0, true, false);
         _grids_axonom.add_line( false, _("Major grid line every:"), _grids_axonom_empspacing, "", "", false);
@@ -1720,18 +1721,6 @@ void InkscapePreferences::initPageIO()
 
     // -----------
     this->AddPage(_page_autosave, _("Autosave"), iter_io, PREFS_PAGE_IO_AUTOSAVE);
-
-    // Open Clip Art options
-    _importexport_ocal_url.init("/options/ocalurl/str", true, g_strdup_printf("openclipart.org"));
-    _page_openclipart.add_line( false, _("Open Clip Art Library _Server Name:"), _importexport_ocal_url, "",
-        _("The server name of the Open Clip Art Library webdav server; it's used by the Import and Export to OCAL function"), true);
-    _importexport_ocal_username.init("/options/ocalusername/str", true);
-    _page_openclipart.add_line( false, _("Open Clip Art Library _Username:"), _importexport_ocal_username, "",
-            _("The username used to log into Open Clip Art Library"), true);
-    _importexport_ocal_password.init("/options/ocalpassword/str", false);
-    _page_openclipart.add_line( false, _("Open Clip Art Library _Password:"), _importexport_ocal_password, "",
-            _("The password used to log into Open Clip Art Library"), true);
-    this->AddPage(_page_openclipart, _("Open Clip Art"), iter_io, PREFS_PAGE_IO_OPENCLIPART);
 }
 
 void InkscapePreferences::initPageBehavior()

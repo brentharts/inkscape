@@ -267,7 +267,7 @@ public:
     ClipHistoryEntry *save();
     ClipHistoryEntry *restore();
     GBool hasSaves() { return saved != nullptr; }
-    void setClip(GfxPath *newClipPath, GfxClipType newClipType = clipNormal);
+    void setClip(_POPPLER_CONST_83 GfxPath *newClipPath, GfxClipType newClipType = clipNormal);
     GfxPath *getClipPath() { return clipPath; }
     GfxClipType getClipType() { return clipType; }
 
@@ -2405,7 +2405,7 @@ void PdfParser::doShowText(GooString *s) {
   int wMode;
   double riseX, riseY;
   CharCode code;
-  Unicode *u = nullptr;
+  Unicode _POPPLER_CONST_82 *u = nullptr;
   double x, y, dx, dy, tdx, tdy;
   double originX, originY, tOriginX, tOriginY;
   double oldCTM[6], newCTM[6];
@@ -3377,7 +3377,7 @@ ClipHistoryEntry::~ClipHistoryEntry()
     }
 }
 
-void ClipHistoryEntry::setClip(GfxPath *clipPathA, GfxClipType clipTypeA) {
+void ClipHistoryEntry::setClip(_POPPLER_CONST_83 GfxPath *clipPathA, GfxClipType clipTypeA) {
     // Free previous clip path
     if (clipPath) {
         delete clipPath;

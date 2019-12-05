@@ -42,16 +42,16 @@ UnitParam::param_readSVGValue(const gchar * strvalue)
     return false;
 }
 
-gchar *
+Glib::ustring
 UnitParam::param_getSVGValue() const
 {
-    return g_strdup(unit->abbr.c_str());
+    return unit->abbr;
 }
 
-gchar *
+Glib::ustring
 UnitParam::param_getDefaultSVGValue() const
 {
-    return g_strdup(defunit->abbr.c_str());
+    return defunit->abbr;
 }
 
 void
@@ -69,7 +69,7 @@ UnitParam::param_update_default(const gchar * default_unit)
 void
 UnitParam::param_set_value(Inkscape::Util::Unit const &val)
 {
-    param_effect->upd_params = true;
+    param_effect->refresh_widgets = true;
     unit = new Inkscape::Util::Unit(val);
 }
 
