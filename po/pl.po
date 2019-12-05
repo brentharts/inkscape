@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: Inkscape 1.0\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
 "POT-Creation-Date: 2019-10-09 15:17+0200\n"
-"PO-Revision-Date: 2019-12-05 12:55+0100\n"
+"PO-Revision-Date: 2019-12-05 13:57+0100\n"
 "Last-Translator: Artur Krzysztof Wróblewski\n"
 "Language-Team: Freelancer\n"
 "Language: pl_PL\n"
@@ -35237,7 +35237,7 @@ msgstr "Ukryj obramowanie"
 
 #: ../share/extensions/empty_generic.inx:37
 msgid "Generic canvas..."
-msgstr "Czyste płótno"
+msgstr "Czyste płótno..."
 
 #: ../share/extensions/empty_generic.inx:39
 msgid "Generic canvas of chosen size."
