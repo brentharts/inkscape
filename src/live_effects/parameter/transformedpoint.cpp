@@ -72,20 +72,20 @@ TransformedPointParam::param_readSVGValue(const gchar * strvalue)
     return false;
 }
 
-gchar *
+Glib::ustring
 TransformedPointParam::param_getSVGValue() const
 {
     Inkscape::SVGOStringStream os;
     os << origin << " , " << vector;
-    return g_strdup(os.str().c_str());
+    return os.str();
 }
 
-gchar *
+Glib::ustring
 TransformedPointParam::param_getDefaultSVGValue() const
 {
     Inkscape::SVGOStringStream os;
     os << defvalue;
-    return g_strdup(os.str().c_str());
+    return os.str();
 }
 
 void
@@ -133,9 +133,7 @@ void
 TransformedPointParam::set_and_write_new_values(Geom::Point const &new_origin, Geom::Point const &new_vector)
 {
     setValues(new_origin, new_vector);
-    gchar * str = param_getSVGValue();
-    param_write_to_repr(str);
-    g_free(str);
+    param_write_to_repr(param_getSVGValue().c_str());
 }
 
 void
@@ -176,6 +174,7 @@ public:
     void knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) override
     {
         param->param_effect->refresh_widgets = true;
+        param->write_to_SVG();
     };
     Geom::Point knot_get() const override{
         return param->origin + param->vector;
@@ -192,7 +191,8 @@ void
 TransformedPointParam::addKnotHolderEntities(KnotHolder *knotholder, SPDesktop *desktop, SPItem *item)
 {
     TransformedPointParamKnotHolderEntity_Vector *vector_e = new TransformedPointParamKnotHolderEntity_Vector(this);
-    vector_e->create(desktop, item, knotholder, Inkscape::CTRL_TYPE_UNKNOWN, handleTip(), vec_knot_shape, vec_knot_mode, vec_knot_color);
+    vector_e->create(desktop, item, knotholder, Inkscape::CTRL_TYPE_LPE, handleTip(), vec_knot_shape, vec_knot_mode,
+                     vec_knot_color);
     knotholder->add(vector_e);
 }
 

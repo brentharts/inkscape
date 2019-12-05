@@ -138,7 +138,13 @@ public:
         _styleAttr(g_quark_from_string("style")),
         _clipAttr(g_quark_from_string("clip-path")),
         _maskAttr(g_quark_from_string("mask"))
-    {}
+    {
+        _repr->addObserver(*this);
+    }
+
+    ~ObjectWatcher() override {
+        _repr->removeObserver(*this);
+    }
 
     void notifyChildAdded( Node &/*node*/, Node &/*child*/, Node */*prev*/ ) override
     {
@@ -159,8 +165,15 @@ public:
         }
     }
     void notifyContentChanged( Node &/*node*/, Util::ptr_shared /*old_content*/, Util::ptr_shared /*new_content*/ ) override {}
-    void notifyAttributeChanged( Node &/*node*/, GQuark name, Util::ptr_shared /*old_value*/, Util::ptr_shared /*new_value*/ ) override {
-        if ( _pnl && _obj ) {
+    void notifyAttributeChanged( Node &node, GQuark name, Util::ptr_shared /*old_value*/, Util::ptr_shared /*new_value*/ ) override {
+        /* Weird things happen on undo! we get notified about the child being removed, but after that we still get
+         * notified for attributes being changed on this XML node! In that case the corresponding SPObject might already
+         * have been deleted and the pointer to might be invalid, leading to a segfault if we're not carefull.
+         * So after we initiated the update of the treeview using _objectsChangedWrapper() in notifyChildRemoved(), the
+         * _pending_update flag is set, and we will no longer process any notifyAttributeChanged()
+         * Reproducing the crash: new document -> open objects panel -> draw freehand line -> undo -> segfault (but only
+         * if we don't check for _pending_update) */
+        if ( _pnl && (!_pnl->_pending_update) && _obj ) {
             if ( name == _lockedAttr || name == _labelAttr || name == _highlightAttr || name == _groupAttr || name == _styleAttr || name == _clipAttr || name == _maskAttr ) {
                 _pnl->_updateObject(_obj, name == _highlightAttr);
                 if ( name == _styleAttr ) {
@@ -280,16 +293,45 @@ Gtk::MenuItem& ObjectsPanel::_addPopupItem( SPDesktop *desktop, unsigned int cod
     return *item;
 }
 
-void ObjectsPanel::_removeWatchers() {
-    while (!_objectWatchers.empty())
-    {
-        ObjectsPanel::ObjectWatcher *w = _objectWatchers.back();
-        w->_repr->removeObserver(*w);
-        _objectWatchers.pop_back();
-        delete w;
+/**
+ * Attach a watcher to the XML node of an item, which will signal us in case of changes to that item or node
+ * @param item The item of which the XML node is to be watched
+ */
+void ObjectsPanel::_addWatcher(SPItem *item) {
+    bool used = true; // Any newly created watcher is obviously being used
+    auto iter = _objectWatchers.find(item);
+    if (iter == _objectWatchers.end()) { // If not found then watcher doesn't exist yet
+        ObjectsPanel::ObjectWatcher *w = new ObjectsPanel::ObjectWatcher(this, item);
+        _objectWatchers.emplace(item, std::make_pair(w, used));
+    } else { // Found; no need to create a new watcher; just flag it as "in use"
+        (*iter).second.second = used;
     }
 }
 
+/**
+ * Delete the watchers, which signal us in case of changes to the item being watched
+ * @param only_unused Only delete those watchers that are no longer in use
+ */
+void ObjectsPanel::_removeWatchers(bool only_unused = false) {
+    // Delete all watchers (optionally only those which are not in use)
+    auto iter = _objectWatchers.begin();
+    while (iter != _objectWatchers.end()) {
+        bool used = (*iter).second.second;
+        bool delete_watcher = (!only_unused) || (only_unused && !used);
+        if ( delete_watcher ) {
+            ObjectsPanel::ObjectWatcher *w = (*iter).second.first;
+            delete w;
+            iter = _objectWatchers.erase(iter);
+        } else {
+            // It must be in use, so the used "field" should be set to true;
+            // However, when _removeWatchers is being called, we will already have processed the complete queue ...
+            g_assert(_tree_update_queue.empty());
+            // .. and we can preemptively flag it as unused for the processing of the next queue
+            (*iter).second.second = false; // It will be set to true again by _addWatcher, if in use
+            iter++;
+        }
+    }
+}
 /**
  * Call function for asynchronous invocation of _objectsChanged
  */
@@ -305,9 +347,6 @@ void ObjectsPanel::_objectsChangedWrapper(SPObject */*obj*/) {
  */
 void ObjectsPanel::_objectsChanged(SPObject */*obj*/)
 {
-    //First, detach the watchers
-    _removeWatchers();
-
     if (_desktop) {
         //Get the current document's root and use that to enumerate the tree
         SPDocument* document = _desktop->doc();
@@ -385,25 +424,29 @@ bool ObjectsPanel::_processQueue() {
         Gtk::TreeModel::iterator iter   = std::get<1>(*queue_iter);
         bool expanded                   = std::get<2>(*queue_iter);
         //Add the object to the tree view and tree cache
-        _addObject(item, *iter, expanded);
+        _addObjectToTree(item, *iter, expanded);
         _tree_cache.emplace(item, *iter);
 
-        //Add an object watcher to the item
-        ObjectsPanel::ObjectWatcher *w = new ObjectsPanel::ObjectWatcher(this, item);
-        item->getRepr()->addObserver(*w);
-        _objectWatchers.push_back(w);
+        /* Update the watchers; No watcher shall be deleted before the processing of the queue has
+         * finished; we need to keep watching for items that might have been deleted while the queue,
+         * which is being processed on idle, was not yet empty. This is because when an item is deleted, the
+         * queue is still holding a pointer to it. The NotifyChildRemoved method of the watcher will stop the
+         * processing of the queue and prevent a segmentation fault, but only if there is a watcher in place*/
+        _addWatcher(item);
 
         queue_iter = _tree_update_queue.erase(queue_iter);
         count++;
-        if (count == 100) {
+        if (count == 100 && (!_tree_update_queue.empty())) {
             return true; // we have not yet reached the end of the queue, so return true to keep the timeout signal alive
         }
     }
 
-    //We have reached the end of the queue, so we can now bring the tree view back to life safely
+    //We have reached the end of the queue, and it is safe to remove any watchers
+    _removeWatchers(true); // ... but only remove those that are no longer in use
 
+    // Now we can bring the tree view back to life safely
     _tree.set_model(_store); // Attach the store again to the tree view
-    // Expand the tree; this is kept outside of the _addObject and _processQueue() to allow
+    // Expand the tree; this is kept outside of _addObjectToTree() and _processQueue() to allow
     // temporarily detaching the store from the tree, which slightly reduces flickering
     for (auto path: _paths_to_be_expanded) {
         _tree.expand_to_path(path);
@@ -413,6 +456,7 @@ bool ObjectsPanel::_processQueue() {
     _blockAllSignals(false);
     _objectsSelected(_desktop->selection); //Set the tree selection
     _checkTreeSelection(); //Handle button sensitivity
+    _pending_update = false;
     return false; // Return false to kill the timeout signal that kept calling _processQueue
 }
 
@@ -422,7 +466,7 @@ bool ObjectsPanel::_processQueue() {
  * @param row Row where the item is residing
  * @param expanded True if the item is part of a group that is shown as expanded in the tree view
  */
-void ObjectsPanel::_addObject(SPItem* item, const Gtk::TreeModel::Row &row, bool expanded)
+void ObjectsPanel::_addObjectToTree(SPItem* item, const Gtk::TreeModel::Row &row, bool expanded)
 {
     SPGroup * group = SP_IS_GROUP(item) ? SP_GROUP(item) : nullptr;
 
@@ -1281,12 +1325,12 @@ bool ObjectsPanel::_executeUpdate() {
 void ObjectsPanel::_takeAction( int val )
 {
     if (val == UPDATE_TREE) {
+        _pending_update = true;
         // We might already have been updating the tree, but new data is available now
         // so we will then first cancel the old update before scheduling a new one
         _processQueue_sig.disconnect();
         _executeUpdate_sig.disconnect();
         _blockAllSignals(true);
-        _removeWatchers();
         //_store->clear();
         _tree_cache.clear();
         _executeUpdate_sig = Glib::signal_timeout().connect( sigc::mem_fun(*this, &ObjectsPanel::_executeUpdate), 500, Glib::PRIORITY_DEFAULT_IDLE+50);
@@ -1793,6 +1837,7 @@ ObjectsPanel::ObjectsPanel() :
     _document(nullptr),
     _model(nullptr),
     _pending(nullptr),
+    _pending_update(false),
     _toggleEvent(nullptr),
     _defer_target(),
     _visibleHeader(C_("Visibility", "V")),
@@ -2111,10 +2156,13 @@ ObjectsPanel::ObjectsPanel() :
     _deskTrack.connect(GTK_WIDGET(gobj()));
 }
 
+/**
+ * Callback method that will be called when the desktop is destroyed
+ */
 void ObjectsPanel::_desktopDestroyed(SPDesktop* /*desktop*/) {
     // We need to make sure that we're not trying to update the tree after the desktop has vanished, e.g.
-    // when closing Inkscape. Preferable, we would do this in the deconstructor of the ObjectsPanel. But
-    // as this deconstructor is never ever called, we will do this by attach to the desktop_destroyed signal
+    // when closing Inkscape. Preferably, we would have done so in the destructor of the ObjectsPanel. But
+    // as this destructor is never ever called, we will do this by attaching to the desktop_destroyed signal
     // instead
     _processQueue_sig.disconnect();
     _executeUpdate_sig.disconnect();

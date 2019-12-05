@@ -67,7 +67,7 @@ private:
     ObjectsPanel::ObjectWatcher* _rootWatcher;
     
     //All object watchers
-    std::vector<ObjectsPanel::ObjectWatcher*> _objectWatchers;
+    std::map<SPItem*, std::pair<ObjectsPanel::ObjectWatcher*, bool> > _objectWatchers;
     
     //Connection for when the desktop changes
     sigc::connection desktopChangeConn;
@@ -115,6 +115,7 @@ private:
     
     //
     InternalUIBounce* _pending;
+    bool _pending_update;
     
     //Whether the drag & drop was dragged into an item
     gboolean _dnd_into;
@@ -230,12 +231,13 @@ private:
     void _objectsSelected(Selection *sel);
     void _updateObjectSelected(SPItem* item, bool scrollto, bool expand);
 
-    void _removeWatchers();
+    void _removeWatchers(bool only_unused);
+    void _addWatcher(SPItem* item);
     void _objectsChangedWrapper(SPObject *obj);
     void _objectsChanged(SPObject *obj);
     bool _processQueue();
     void _queueObject(SPObject* obj, Gtk::TreeModel::Row* parentRow);
-    void _addObject(SPItem* item, const Gtk::TreeModel::Row &parentRow, bool expanded);
+    void _addObjectToTree(SPItem* item, const Gtk::TreeModel::Row &parentRow, bool expanded);
 
     void _isolationChangedIter(const Gtk::TreeIter &iter);
     void _isolationValueChanged();

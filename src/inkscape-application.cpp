@@ -701,7 +701,7 @@ ConcreteInkscapeApplication<T>::create_window(const Glib::RefPtr<Gio::File>& fil
                                               bool add_to_recent,
                                               bool replace_empty)
 {
-    std::cerr << "ConcreteInkscapeApplication<T>::create_window: Should not be called!";
+    std::cerr << "ConcreteInkscapeApplication<T>::create_window: Should not be called!" << std::endl;
     return nullptr;
 }
 
@@ -919,6 +919,9 @@ ConcreteInkscapeApplication<Gtk::Application>::process_file_with_gui(Glib::RefPt
     // Create a window for each file.
     SPDesktop* desktop = create_window(file);
 
+    if (!desktop)
+        return;
+
     // Process each file.
     for (auto action: _command_line_actions) {
         Gio::Application::activate_action( action.first, action.second );
@@ -927,8 +930,7 @@ ConcreteInkscapeApplication<Gtk::Application>::process_file_with_gui(Glib::RefPt
     // Close window after we're done with file. This may not be the best way...
     // but we need to rewrite most of the window handling code so do this for now.
     if (_batch_process) {
-        std::vector<Gtk::Window*> windows = get_windows();
-        remove_window(*windows[0]);  // There should be only one window (added in InkscapeWindow constructor).
+        remove_window(*desktop->getToplevel());
                                      // Eventually create_window() should return a pointer to the window, not the desktop.
     }
 }

@@ -65,8 +65,6 @@ LPECloneOriginal::LPECloneOriginal(LivePathEffectObject *lpeobject)
     registerParameter(&attributes);
     registerParameter(&css_properties);
     registerParameter(&allow_transforms);
-    old_css_properties = strdup("");
-    old_attributes = strdup("");
     attributes.param_hide_canvas_text();
     css_properties.param_hide_canvas_text();
 }
@@ -184,7 +182,7 @@ LPECloneOriginal::cloneAttrbutes(SPObject *origin, SPObject *dest, const gchar *
             }
         }
     }
-    gchar ** attarray = g_strsplit(old_attributes, ",", 0);
+    gchar ** attarray = g_strsplit(old_attributes.c_str(), ",", 0);
     gchar ** iter = attarray;
     while (*iter != nullptr) {
         const char* attribute = (*iter);
@@ -211,7 +209,8 @@ LPECloneOriginal::cloneAttrbutes(SPObject *origin, SPObject *dest, const gchar *
                             if (lpeobj) {
                                 Inkscape::LivePathEffect::Effect *lpe = lpeobj->get_lpe();
                                 if (dynamic_cast<Inkscape::LivePathEffect::LPEBSpline *>(lpe)) {
-                                    LivePathEffect::sp_bspline_do_effect(c, 0);
+                                    Geom::PathVector hp;
+                                    LivePathEffect::sp_bspline_do_effect(c, 0, hp);
                                 } else if (dynamic_cast<Inkscape::LivePathEffect::LPESpiro *>(lpe)) {
                                     LivePathEffect::sp_spiro_do_effect(c);
                                 }
@@ -251,7 +250,7 @@ LPECloneOriginal::cloneAttrbutes(SPObject *origin, SPObject *dest, const gchar *
     sp_repr_css_attr_add_from_string(css_origin, origin->getRepr()->attribute("style"));
     SPCSSAttr *css_dest = sp_repr_css_attr_new();
     sp_repr_css_attr_add_from_string(css_dest, dest->getRepr()->attribute("style"));
-    gchar ** styleattarray = g_strsplit(old_css_properties, ",", 0);
+    gchar ** styleattarray = g_strsplit(old_css_properties.c_str(), ",", 0);
     gchar ** styleiter = styleattarray;
     while (*styleiter != nullptr) {
         const char* attribute = (*styleiter);
@@ -291,17 +290,17 @@ LPECloneOriginal::doBeforeEffect (SPLPEItem const* lpeitem){
         if (!allow_transforms) {
            attr += Glib::ustring("transform") + Glib::ustring(",");
         }
-        gchar * attributes_str = attributes.param_getSVGValue();
-        attr += Glib::ustring(attributes_str) + Glib::ustring(",");
-        if (attr.size()  && !Glib::ustring(attributes_str).size()) {
+        auto attributes_str = attributes.param_getSVGValue();
+        attr += attributes_str + ",";
+        if (attr.size()  && attributes_str.empty()) {
             attr.erase (attr.size()-1, 1);
         }
-        gchar * css_properties_str = css_properties.param_getSVGValue();
+        auto css_properties_str = css_properties.param_getSVGValue();
         Glib::ustring style_attr = "";
-        if (style_attr.size() && !Glib::ustring( css_properties_str).size()) {
+        if (style_attr.size() && css_properties_str.empty()) {
             style_attr.erase (style_attr.size()-1, 1);
         }
-        style_attr += Glib::ustring( css_properties_str) + Glib::ustring(",");
+        style_attr += css_properties_str + ",";
 
         SPItem * orig =  SP_ITEM(linkeditem.getObject());
         if(!orig) {
@@ -351,9 +350,6 @@ LPECloneOriginal::modified(SPObject */*obj*/, guint /*flags*/)
 LPECloneOriginal::~LPECloneOriginal()
 {
     quit_listening();
-    g_free(old_css_properties);
-    g_free(old_attributes);
-
 }
 
 void 

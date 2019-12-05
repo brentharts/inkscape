@@ -84,7 +84,6 @@ LPEMirrorSymmetry::~LPEMirrorSymmetry()
 void
 LPEMirrorSymmetry::doAfterEffect (SPLPEItem const* lpeitem)
 {
-    is_load = false;
     SPDocument *document = getSPDoc();
     if (!document) {
         return;
@@ -158,13 +157,15 @@ LPEMirrorSymmetry::newWidget()
 void
 LPEMirrorSymmetry::centerVert(){
     center_vert = true;
-    sp_lpe_item_update_patheffect(sp_lpe_item, true, false);
+    refresh_widgets = true;
+    writeParamsToSVG();
 }
 
 void
 LPEMirrorSymmetry::centerHoriz(){
     center_horiz = true;
-    sp_lpe_item_update_patheffect(sp_lpe_item, true, false);
+    refresh_widgets = true;
+    writeParamsToSVG();
 }
 
 void
@@ -234,7 +235,6 @@ LPEMirrorSymmetry::doBeforeEffect (SPLPEItem const* lpeitem)
                 Geom::Point trans = center_point - Geom::middle_point((Geom::Point)start_point, (Geom::Point)end_point);
                 start_point.param_setValue(start_point * trans);
                 end_point.param_setValue(end_point * trans);
-
             }
         } else if ( mode == MT_V){
             SPDocument *document = getSPDoc();
@@ -395,7 +395,7 @@ LPEMirrorSymmetry::toMirror(Geom::Affine transform, bool reset)
 void
 LPEMirrorSymmetry::resetStyles(){
     reset = true;
-    doAfterEffect(sp_lpe_item);
+    doAfterEffect_impl(sp_lpe_item);
 }
 
 

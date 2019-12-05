@@ -822,17 +822,20 @@ void MeasureTool::toMarkDimension()
     totallengthval = Inkscape::Util::Quantity::convert(totallengthval, "px", unit_name);
     double scale = prefs->getDouble("/tools/measure/scale", 100.0) / 100.0;
     gchar *totallength_str = g_strdup_printf(precision_str.str().c_str(), totallengthval * scale, unit_name.c_str());
-    double textangle = Geom::rad_from_deg(180) - ray.angle();
     if (desktop->is_yaxisdown()) {
-        textangle = ray.angle() - Geom::rad_from_deg(180);
+        end_p *= Geom::Scale(1, -1);
+        start_p *= Geom::Scale(1, -1);
+        ray.setPoints(start_p, end_p);
     }
+    double textangle = ray.angle();
+
     setLabelText(totallength_str, middle, fontsize, textangle, color);
     g_free(totallength_str);
     doc->ensureUpToDate();
     DocumentUndo::done(desktop->getDocument(), SP_VERB_CONTEXT_MEASURE,_("Add global measure line"));
 }
 
-void MeasureTool::setGuide(Geom::Point origin,double angle, const char *label)
+void MeasureTool::setGuide(Geom::Point origin, double angle, const char *label)
 {
     SPDesktop *desktop = SP_ACTIVE_DESKTOP;
     SPDocument *doc = desktop->getDocument();
@@ -850,7 +853,6 @@ void MeasureTool::setGuide(Geom::Point origin,double angle, const char *label)
     // <sodipodi:guide> stores inverted y-axis coordinates
     if (desktop->is_yaxisdown()) {
         origin[Geom::Y] = doc->getHeight().value("px") - origin[Geom::Y];
-        angle *= -1.0;
     }
 
     origin *= affine;
@@ -1180,7 +1182,7 @@ void MeasureTool::showInfoBox(Geom::Point cursor, bool into_groups)
                 y_point *= desktop->doc2dt();
                 item_y = Inkscape::Util::Quantity::convert(y_point[Geom::Y] * scale, "px", unit_name);
                 if (SP_IS_SHAPE(over)) {
-                    Geom::PathVector shape = SP_SHAPE(over)->getCurve()->get_pathvector();
+                    Geom::PathVector shape = SP_SHAPE(over)->getCurve(true)->get_pathvector();
                     item_length = Geom::length(paths_to_pw(shape));
                     item_length = Inkscape::Util::Quantity::convert(item_length * scale, unit->abbr, unit_name);
                 }
@@ -1265,7 +1267,10 @@ void MeasureTool::showCanvasItems(bool to_guides, bool to_item, bool to_phantom,
     p.start(start_p_doc);
     p.appendNew<Geom::LineSegment>(end_p_doc);
     lineseg.push_back(p);
-
+    if (desktop->is_yaxisdown()) {
+        end_p *= Geom::Scale(1, -1);
+        start_p *= Geom::Scale(1, -1);
+    }
     double angle = atan2(end_p - start_p);
     double baseAngle = 0;
 

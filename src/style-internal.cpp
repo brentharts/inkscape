@@ -1140,11 +1140,10 @@ const Glib::ustring SPIEastAsian::get_value() const
 
 void
 SPIString::read( gchar const *str ) {
-    g_assert(!set);
-    g_assert(!inherit);
-    g_assert(!_value);
 
     if( !str ) return;
+
+    clear();
 
     if (style_src == SP_STYLE_SRC_ATTRIBUTE && id() == SP_ATTR_D) {
         return;
@@ -3131,6 +3130,7 @@ template class SPIEnum<SPCSSFontStyle>;
 template class SPIEnum<SPCSSFontVariant>;
 template class SPIEnum<SPCSSFontVariantPosition>;
 template class SPIEnum<SPCSSFontVariantCaps>;
+template class SPIEnum<SPCSSFontWeight>;
 template class SPIEnum<uint_least16_t>;
 template class SPIEnum<uint_least8_t>;
 
