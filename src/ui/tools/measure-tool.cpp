@@ -827,8 +827,10 @@ void MeasureTool::toMarkDimension()
         start_p *= Geom::Scale(1, -1);
         ray.setPoints(start_p, end_p);
     }
-    double textangle = ray.angle();
-
+    double textangle = Geom::rad_from_deg(180) - ray.angle();
+    if (desktop->is_yaxisdown()) {
+        textangle = ray.angle() - Geom::rad_from_deg(180);
+    }
     setLabelText(totallength_str, middle, fontsize, textangle, color);
     g_free(totallength_str);
     doc->ensureUpToDate();
