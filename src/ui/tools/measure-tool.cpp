@@ -851,7 +851,6 @@ void MeasureTool::setGuide(Geom::Point origin, double angle, const char *label)
     if (desktop->is_yaxisdown()) {
         origin[Geom::Y] = doc->getHeight().value("px") - origin[Geom::Y];
         angle *= -1.0;
-
     }
 
     origin *= affine;
