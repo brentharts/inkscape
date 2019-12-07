@@ -136,6 +136,13 @@ DrawingShape::_updateItem(Geom::IntRect const &area, UpdateContext const &ctx, u
 
     _bbox = boundingbox ? boundingbox->roundOutwards() : Geom::OptIntRect();
 
+    if (!_curve || 
+        !_style ||
+        _curve->is_empty())
+    {
+        return STATE_ALL;
+    }
+
     if (beststate & STATE_BBOX) {
         for (auto & i : _children) {
             _bbox.unionWith(i.geometricBounds());
