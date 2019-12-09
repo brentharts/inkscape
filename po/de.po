@@ -18,14 +18,13 @@
 # Maren Hachmann <marenhachmann@yahoo.com>, 2015, 2016, 2019.
 # Patrick Storz <eduard.braun2@gmx.de>, 2015-2019.
 # Michael Rack <miohna@freenet.de>, 2018.
-# Julius, 2019.
 # Frank Beckmann, 2019.
 msgid ""
 msgstr ""
 "Project-Id-Version: inkscape\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
 "POT-Creation-Date: 2019-12-02 14:57+0100\n"
-"PO-Revision-Date: 2019-11-23 00:13+0100\n"
+"PO-Revision-Date: 2019-12-09 01:11+0100\n"
 "Last-Translator: Maren Hachmann <marenhachmann@yahoo.com>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de\n"
@@ -373,7 +372,7 @@ msgstr "Weiche Wölbung, leicht abgesenkte Mitte"
 
 #: ../share/filters/filters.svg.h:110
 msgid "Inset"
-msgstr "Einlage"
+msgstr "Vertiefung"
 
 #: ../share/filters/filters.svg.h:111 ../share/filters/filters.svg.h:267
 #: ../share/filters/filters.svg.h:343 ../share/filters/filters.svg.h:435
@@ -1130,7 +1129,7 @@ msgstr "Oberflächenstrukturen mit samtartiger Erscheinung"
 
 #: ../share/filters/filters.svg.h:426
 msgid "Comics Cream"
-msgstr "Comic sahnig"
+msgstr "Comic mit Wellentransparenz"
 
 #: ../share/filters/filters.svg.h:427 ../share/filters/filters.svg.h:727
 #: ../share/filters/filters.svg.h:731 ../share/filters/filters.svg.h:735
@@ -1147,7 +1146,7 @@ msgstr "Übersteigerte Schattierungen"
 
 #: ../share/filters/filters.svg.h:428
 msgid "Comics shader with creamy waves transparency"
-msgstr "Comicschattierung mit cremiger Wellen-Transparenz"
+msgstr "Comicschattierung mit transparenten, wellenförmigen Bereichen"
 
 #: ../share/filters/filters.svg.h:430
 msgid "Chewing Gum"
@@ -1340,7 +1339,7 @@ msgstr "Struktur von dicker Acrylfarbe mit stark unebener Oberfläche"
 
 #: ../share/filters/filters.svg.h:514
 msgid "Alpha Engraving B"
-msgstr "Alphagravur B"
+msgstr "Alpha-Gravur B"
 
 #: ../share/filters/filters.svg.h:516
 msgid ""
@@ -1640,7 +1639,7 @@ msgstr "Fügt einen weißen, deckenden Hintergrund hinzu"
 
 #: ../share/filters/filters.svg.h:654
 msgid "Blur Double"
-msgstr "Unschärfe doppelt"
+msgstr "Unschärfe, doppelt"
 
 #: ../share/filters/filters.svg.h:656
 msgid ""
@@ -1707,7 +1706,7 @@ msgstr "Einfaches Farbrauschen für Füllungen, mit Füllfarbe einstellen"
 
 #: ../share/filters/filters.svg.h:686
 msgid "Alpha Turbulent"
-msgstr "Alphaturbulenz"
+msgstr "Alpha-Turbulenz"
 
 #: ../share/filters/filters.svg.h:690
 msgid "Colorize Turbulent"
@@ -1743,7 +1742,7 @@ msgstr "Poster-Turbulenz"
 
 #: ../share/filters/filters.svg.h:714
 msgid "Tartan Smart"
-msgstr "Tartan schick"
+msgstr "Tartan, schick"
 
 #: ../share/filters/filters.svg.h:716
 msgid "Highly configurable checkered tartan pattern"
@@ -1883,7 +1882,7 @@ msgstr "Tiefe und dunkle Metallschattierung"
 
 #: ../share/filters/filters.svg.h:786
 msgid "Aluminium Emboss"
-msgstr "Aluminium geprägt"
+msgstr "Aluminium, geprägt"
 
 #: ../share/filters/filters.svg.h:788
 msgid "Satiny aluminium effect with embossing"
@@ -1915,7 +1914,7 @@ msgstr "Geschnitzter Prägeeffekt"
 
 #: ../share/filters/filters.svg.h:802
 msgid "Chromolitho Alternate"
-msgstr "Chromolitho abwechselnd"
+msgstr "Chromolitho, abwechselnd"
 
 #: ../share/filters/filters.svg.h:804
 msgid "Old chromolithographic effect"
@@ -23714,7 +23713,6 @@ msgid "X coordinate of the radius"
 msgstr "X-Koordinate des Radius"
 
 #: ../src/ui/dialog/polar-arrange-tab.cpp:41
-#, fuzzy
 msgctxt "Polar arrange tab"
 msgid "Ending angle"
 msgstr "Endwinkel"
@@ -31862,7 +31860,7 @@ msgstr "Sperre auf aktuellen Layer umschalten"
 
 #: ../src/verbs.cpp:2796
 msgid "_Show/Hide Current Layer"
-msgstr "Aktuelle Ebene anzeigen oder au_sblenden"
+msgstr "Aktuelle Ebene ein-/au_sblenden"
 
 #: ../src/verbs.cpp:2797
 msgid "Toggle visibility of current layer"
@@ -32862,7 +32860,7 @@ msgstr "Nachrichten zur Fehlersuche anzeigen"
 
 #: ../src/verbs.cpp:3083
 msgid "Show/Hide D_ialogs"
-msgstr "_Dialoge anzeigen oder ausblenden"
+msgstr "_Dialoge ein-/ausblenden"
 
 #: ../src/verbs.cpp:3084
 msgid "Show or hide all open dialogs"
@@ -34466,9 +34464,8 @@ msgid "unable to locate marker: %s"
 msgstr "kann Knotenmarkierung nicht finden: %s"
 
 #: ../share/extensions/path_envelope.py:29
-#, fuzzy
 msgid "You must select two paths only."
-msgstr "Sie müssen zwei Elemente auswählen."
+msgstr "Sie dürfen nur zwei Pfade auswählen."
 
 #: ../share/extensions/path_envelope.py:39
 msgid "Selected path is too short. Must be four or more nodes."
@@ -34539,7 +34536,6 @@ msgstr ""
 " Versuchen sie den Befehl Pfad | Objekt in Pfad umwandeln."
 
 #: ../share/extensions/plotter.py:66
-#, fuzzy
 msgid "No paths where found. Please convert objects to paths."
 msgstr "Keine Pfade gefunden. Bitte Objekte in Pfade umwandeln."
 
@@ -37169,7 +37165,6 @@ msgstr ""
 "Hershey-Text\n"
 
 #: ../share/extensions/hershey.inx:13
-#, fuzzy
 msgid ""
 "A tool to replace text with stroke fonts\n"
 "\n"
@@ -37177,9 +37172,9 @@ msgid ""
 "\n"
 "\n"
 msgstr ""
-"Eine Funktion zum Ersetzen von Text durch Strich-basierte Schriftarten\n"
+"Eine Funktion zum Ersetzen von Text durch Strich basierte Schriftarten\n"
 "\n"
-"Version 3.0.2, 7.9.2019\n"
+"Version 3.0.3, 11.11.2019\n"
 "\n"
 "\n"
 
@@ -37820,9 +37815,8 @@ msgstr "Neu in dieser Version"
 
 #. i18n. Please don't translate link unless the page exists in your language. Add your language code to the link this way: https://inkscape.org/[lang]/release/1.0/
 #: ../share/extensions/inkscape_help_relnotes.inx:6
-#, fuzzy
 msgid "https://inkscape.org/release/1.0/"
-msgstr "https://inkscape.org/ask/"
+msgstr "https://inkscape.org/release/1.0"
 
 #: ../share/extensions/inkscape_help_reportabug.inx:3
 msgid "Report a Bug"
@@ -38550,9 +38544,8 @@ msgid "Directory"
 msgstr "Verzeichnis"
 
 #: ../share/extensions/layer2png.inx:15
-#, fuzzy
 msgid "Layer Slicer"
-msgstr "Ebene mit Ausschnitten:"
+msgstr "Ausschnitte exportieren"
 
 #: ../share/extensions/layer2png.inx:16
 msgid ""
@@ -41057,9 +41050,8 @@ msgid "Convert SVG Font to Glyph Layers"
 msgstr "Konvertiere SVG-Schrift zu Glyph-Ebenen"
 
 #: ../share/extensions/svgfont2layers.inx:5
-#, fuzzy
 msgid "Stop after (30 Recommended)"
-msgstr "Lade nur die ersten 30 Glyphen (Empfohlen)"
+msgstr "Lade nur (30 empfohlen)"
 
 #: ../share/extensions/synfig_output.inx:3
 msgid "Synfig Output"
@@ -41310,14 +41302,12 @@ msgid "Page orientation:"
 msgstr "Ausrichtung der Seite:"
 
 #: ../share/extensions/template_page.inx:16
-#, fuzzy
 msgid "Vertical (Portrait)"
-msgstr "Vertikaler Punkt:"
+msgstr "Hochformat (Portrait)"
 
 #: ../share/extensions/template_page.inx:17
-#, fuzzy
 msgid "Horizontal (Landscape)"
-msgstr "Horizontaler Radius"
+msgstr "Querformat (Landschaft)"
 
 #: ../share/extensions/template_page.inx:20
 msgid "Page background:"
@@ -42190,7 +42180,7 @@ msgstr "Farb-Anzeigemodus"
 
 #: ../share/ui/menus.xml:124
 msgid "_Canvas Orientation"
-msgstr "Ausrichtung der Seite:"
+msgstr "Ausrichtung der Zeichenfläche"
 
 #: ../share/ui/menus.xml:137
 msgid "Sh_ow/Hide"
