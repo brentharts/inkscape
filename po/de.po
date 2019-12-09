@@ -24,7 +24,7 @@ msgstr ""
 "Project-Id-Version: inkscape\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
 "POT-Creation-Date: 2019-12-02 14:57+0100\n"
-"PO-Revision-Date: 2019-12-09 01:11+0100\n"
+"PO-Revision-Date: 2019-12-09 01:43+0100\n"
 "Last-Translator: Maren Hachmann <marenhachmann@yahoo.com>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de\n"
@@ -15171,7 +15171,7 @@ msgstr "Auswahl aus Gruppe herauslösen"
 
 #: ../src/ui/contextmenu.cpp:354 ../src/verbs.cpp:3090
 msgid "_Object Properties..."
-msgstr "_Objekteigenschaften …"
+msgstr "_Objekteigenschaften…"
 
 #: ../src/ui/contextmenu.cpp:363
 msgid "_Select This"
@@ -15203,7 +15203,7 @@ msgstr "Objekttyp"
 
 #: ../src/ui/contextmenu.cpp:419
 msgid "_Move to Layer..."
-msgstr "_Verschiebe zu Ebene …"
+msgstr "_Verschiebe zu Ebene…"
 
 #: ../src/ui/contextmenu.cpp:429
 msgid "Create _Link"
@@ -15243,7 +15243,7 @@ msgstr "Grupp_ierung aufheben"
 
 #: ../src/ui/contextmenu.cpp:639
 msgid "Link _Properties..."
-msgstr "Verknüpfungs_eigenschaften …"
+msgstr "Verknüpfungs_eigenschaften…"
 
 #: ../src/ui/contextmenu.cpp:645
 msgid "_Follow Link"
@@ -15259,16 +15259,16 @@ msgstr "Verknüpfung entfernen"
 
 #: ../src/ui/contextmenu.cpp:692
 msgid "Image _Properties..."
-msgstr "Bild_eigenschaften …"
+msgstr "Bild_eigenschaften…"
 
 #: ../src/ui/contextmenu.cpp:698
 msgid "Edit Externally..."
-msgstr "Extern bearbeiten …"
+msgstr "Extern bearbeiten…"
 
 #. TRANSLATORS: "to trace" means "to convert a bitmap to vector graphics" (to vectorize)
 #: ../src/ui/contextmenu.cpp:707 ../src/verbs.cpp:2745
 msgid "_Trace Bitmap..."
-msgstr "Bitmap _nachzeichnen …"
+msgstr "Bitmap _nachzeichnen…"
 
 #: ../src/ui/contextmenu.cpp:717
 msgctxt "Context menu"
@@ -15278,20 +15278,20 @@ msgstr "Bild einbetten"
 #: ../src/ui/contextmenu.cpp:728
 msgctxt "Context menu"
 msgid "Extract Image..."
-msgstr "Bild extrahieren …"
+msgstr "Bild extrahieren…"
 
 #: ../src/ui/contextmenu.cpp:883 ../src/ui/contextmenu.cpp:903
 #: ../src/verbs.cpp:3043
 msgid "_Fill and Stroke..."
-msgstr "_Füllung und Kontur …"
+msgstr "_Füllung und Kontur…"
 
 #: ../src/ui/contextmenu.cpp:909 ../src/verbs.cpp:3068
 msgid "_Text and Font..."
-msgstr "_Text und Schriftart …"
+msgstr "_Text und Schriftart…"
 
 #: ../src/ui/contextmenu.cpp:916 ../src/verbs.cpp:3078
 msgid "Check Spellin_g..."
-msgstr "Rechtschreibprüfun_g …"
+msgstr "Rechtschreibprüfun_g…"
 
 #: ../src/ui/desktop/menubar.cpp:482
 msgctxt "Interface setup"
@@ -16998,7 +16998,7 @@ msgstr "Einheiten:"
 
 #: ../src/ui/dialog/export.cpp:137
 msgid "_Export As..."
-msgstr "_Exportieren als …"
+msgstr "_Exportieren als…"
 
 #: ../src/ui/dialog/export.cpp:140
 msgid "B_atch export all selected objects"
@@ -21047,7 +21047,7 @@ msgstr "Eingabe/Ausgabe"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1431
 msgid "Use current directory for \"Save As ...\""
-msgstr "Verwende aktuelles Verzeichnis für „Speichern unter …“"
+msgstr "Verwende aktuelles Verzeichnis für „Speichern unter…“"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1433
 msgid ""
@@ -22613,7 +22613,7 @@ msgstr ""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2204
 msgid "Import ..."
-msgstr "_Importieren …"
+msgstr "_Importieren…"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2206
 msgid "Import custom keyboard shortcuts from a file"
@@ -22621,7 +22621,7 @@ msgstr "Importieren einer benutzerdefinierten Tastenkürzel-Datei"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2209
 msgid "Export ..."
-msgstr "Exportieren …"
+msgstr "Exportieren…"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2211
 msgid "Export custom keyboard shortcuts to a file"
@@ -23642,7 +23642,7 @@ msgstr ""
 
 #: ../src/ui/dialog/objects.cpp:1997
 msgid "Add layer..."
-msgstr "Ebe_ne hinzufügen …"
+msgstr "Ebe_ne hinzufügen…"
 
 #: ../src/ui/dialog/objects.cpp:2004
 msgid "Remove object"
@@ -24143,7 +24143,7 @@ msgstr "Glyphe hinzufügen"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:826
 msgid "Get curves from selection..."
-msgstr "Kurven von der Auswahl erhalten …"
+msgstr "Kurven von der Auswahl erhalten…"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:878
 msgid "Add kerning pair"
@@ -24231,7 +24231,7 @@ msgstr "Kontur festlegen"
 
 #: ../src/ui/dialog/swatches.cpp:292
 msgid "Edit..."
-msgstr "Bearbeiten …"
+msgstr "Bearbeiten…"
 
 # !!! not the best translation
 #: ../src/ui/dialog/swatches.cpp:304
@@ -30139,7 +30139,7 @@ msgstr "Benutzerdefiniert"
 
 #: ../src/ui/widget/page-sizer.cpp:196
 msgid "Resi_ze page to content..."
-msgstr "Ändern der Seitengröße auf Inhalt …"
+msgstr "Ändern der Seitengröße auf Inhalt…"
 
 #: ../src/ui/widget/page-sizer.cpp:204
 #: ../share/extensions/guides_creator.inx:22
@@ -30160,7 +30160,7 @@ msgstr ""
 
 #: ../src/ui/widget/page-sizer.cpp:256
 msgid "_Viewbox..."
-msgstr "_Viewbox …"
+msgstr "_Viewbox…"
 
 #: ../src/ui/widget/page-sizer.cpp:351
 msgid "Set page size"
@@ -30180,7 +30180,7 @@ msgstr "'viewBox' festlegen"
 
 #: ../src/ui/widget/preferences-widget.cpp:756
 msgid "_Browse..."
-msgstr "_Durchsuchen …"
+msgstr "_Durchsuchen…"
 
 #: ../src/ui/widget/preferences-widget.cpp:842
 msgid "Select a bitmap editor"
@@ -30417,11 +30417,11 @@ msgstr "Mehrere ausgewählte Objekte haben die selbe Kontur"
 
 #: ../src/ui/widget/selected-style.cpp:255
 msgid "Edit fill..."
-msgstr "Füllung bearbeiten …"
+msgstr "Füllung bearbeiten…"
 
 #: ../src/ui/widget/selected-style.cpp:255
 msgid "Edit stroke..."
-msgstr "Kontur bearbeiten …"
+msgstr "Kontur bearbeiten…"
 
 #: ../src/ui/widget/selected-style.cpp:259
 msgid "Last set color"
@@ -30864,7 +30864,7 @@ msgstr "Ein neues Dokument mit der Standardvorlage anlegen"
 
 #: ../src/verbs.cpp:2512
 msgid "_Open..."
-msgstr "_Öffnen …"
+msgstr "_Öffnen…"
 
 #: ../src/verbs.cpp:2512
 msgid "Open an existing document"
@@ -30886,7 +30886,7 @@ msgstr "Das Dokument speichern"
 
 #: ../src/verbs.cpp:2518
 msgid "Save _As..."
-msgstr "Speichern _unter …"
+msgstr "Speichern _unter…"
 
 #: ../src/verbs.cpp:2518
 msgid "Save document under a new name"
@@ -30894,7 +30894,7 @@ msgstr "Dokument unter einem anderen Namen speichern"
 
 #: ../src/verbs.cpp:2520
 msgid "Save a Cop_y..."
-msgstr "_Kopie speichern …"
+msgstr "_Kopie speichern…"
 
 #: ../src/verbs.cpp:2521
 msgid "Save a copy of the document under a new name"
@@ -30902,7 +30902,7 @@ msgstr "Eine Kopie des Dokuments unter einem anderen Namen speichern"
 
 #: ../src/verbs.cpp:2522
 msgid "Save Template..."
-msgstr "Als Vorlage speichern …"
+msgstr "Als Vorlage speichern…"
 
 #: ../src/verbs.cpp:2523
 msgid "Save a copy of the document as template"
@@ -30910,7 +30910,7 @@ msgstr "Eine Kopie des Dokuments als Vorlage speichern"
 
 #: ../src/verbs.cpp:2524
 msgid "_Print..."
-msgstr "_Drucken …"
+msgstr "_Drucken…"
 
 #: ../src/verbs.cpp:2524
 msgid "Print document"
@@ -30930,7 +30930,7 @@ msgstr ""
 
 #: ../src/verbs.cpp:2531
 msgid "_Import..."
-msgstr "_Importieren …"
+msgstr "_Importieren…"
 
 #: ../src/verbs.cpp:2532
 msgid "Import a bitmap or SVG image into this document"
@@ -31696,7 +31696,7 @@ msgstr "Die markierten Pfade in Unterpfade zerlegen"
 
 #: ../src/verbs.cpp:2756
 msgid "_Arrange..."
-msgstr "_Anordnen …"
+msgstr "_Anordnen…"
 
 #: ../src/verbs.cpp:2757
 msgid "Arrange selected objects in a table or circle"
@@ -31704,7 +31704,7 @@ msgstr "Ausgewählte Objekte in einer Tabelle oder im Kreis anordnen"
 
 #: ../src/verbs.cpp:2759
 msgid "_Add Layer..."
-msgstr "Ebene _hinzufügen …"
+msgstr "Ebene _hinzufügen…"
 
 #: ../src/verbs.cpp:2759
 msgid "Create a new layer"
@@ -31712,7 +31712,7 @@ msgstr "Eine neue Ebene anlegen"
 
 #: ../src/verbs.cpp:2761
 msgid "Re_name Layer..."
-msgstr "Ebene umbe_nennen …"
+msgstr "Ebene umbe_nennen…"
 
 #: ../src/verbs.cpp:2761
 msgid "Rename the current layer"
@@ -32705,7 +32705,7 @@ msgstr "Ansicht mit Farbverwaltung ein-/ausschalten"
 
 #: ../src/verbs.cpp:3029
 msgid "Ico_n Preview..."
-msgstr "Sy_mbolvorschau …"
+msgstr "Sy_mbolvorschau…"
 
 #: ../src/verbs.cpp:3030
 msgid "Open a window to preview objects at different icon resolutions"
@@ -32715,7 +32715,7 @@ msgstr ""
 
 #: ../src/verbs.cpp:3034
 msgid "Prototype..."
-msgstr "Prototyp …"
+msgstr "Prototyp…"
 
 #: ../src/verbs.cpp:3034
 msgid "Prototype Dialog"
@@ -32731,7 +32731,7 @@ msgstr "Globale Einstellungen für Inkscape bearbeiten"
 
 #: ../src/verbs.cpp:3038
 msgid "_Document Properties..."
-msgstr "_Dokumenteinstellungen …"
+msgstr "_Dokumenteinstellungen…"
 
 #: ../src/verbs.cpp:3039
 msgid "Edit properties of this document (to be saved with the document)"
@@ -32739,7 +32739,7 @@ msgstr "Einstellungen bearbeiten, die mit dem Dokument gespeichert werden"
 
 #: ../src/verbs.cpp:3041
 msgid "Document _Metadata..."
-msgstr "Dokument_metadaten …"
+msgstr "Dokument_metadaten…"
 
 #: ../src/verbs.cpp:3042
 msgid "Edit document metadata (to be saved with the document)"
@@ -32754,7 +32754,7 @@ msgstr ""
 
 #: ../src/verbs.cpp:3049
 msgid "_Unicode Characters..."
-msgstr "_Unicode-Zeichen …"
+msgstr "_Unicode-Zeichen…"
 
 #: ../src/verbs.cpp:3050
 msgid "Select Unicode characters from a palette"
@@ -32763,7 +32763,7 @@ msgstr "Wählen Sie Unicode-Zeichen aus einer Glyphenpalette aus"
 #. TRANSLATORS: "Swatches" means: color samples
 #: ../src/verbs.cpp:3053
 msgid "S_watches..."
-msgstr "_Farbfelder-Palette …"
+msgstr "_Farbfelder-Palette…"
 
 #: ../src/verbs.cpp:3054
 msgid "Select colors from a swatches palette"
@@ -32771,7 +32771,7 @@ msgstr "Farben aus einer Farbfelder-Palette auswählen"
 
 #: ../src/verbs.cpp:3055
 msgid "S_ymbols..."
-msgstr "S_ymbole …"
+msgstr "S_ymbole…"
 
 #: ../src/verbs.cpp:3056
 msgid "Select symbol from a symbols palette"
@@ -32779,7 +32779,7 @@ msgstr "Symbol aus einer Symbol-Palette auswählen"
 
 #: ../src/verbs.cpp:3057
 msgid "_Paint Servers..."
-msgstr "_Farbgebungsarten …"
+msgstr "_Farbgebungsarten…"
 
 #: ../src/verbs.cpp:3059
 msgid "Select paint server from a collection"
@@ -32787,7 +32787,7 @@ msgstr "Farbgebungsart aus der Sammlung wählen"
 
 #: ../src/verbs.cpp:3060
 msgid "Transfor_m..."
-msgstr "_Transformation …"
+msgstr "_Transformation…"
 
 #: ../src/verbs.cpp:3061
 msgid "Precisely control objects' transformations"
@@ -32795,7 +32795,7 @@ msgstr "Transformationen eines Objektes präzise einstellen"
 
 #: ../src/verbs.cpp:3062
 msgid "_Align and Distribute..."
-msgstr "_Ausrichten und verteilen …"
+msgstr "_Ausrichten und verteilen…"
 
 #: ../src/verbs.cpp:3063
 msgid "Align and distribute objects"
@@ -32811,7 +32811,7 @@ msgstr "Einige Optionen des Sprühwerkzeuges"
 
 #: ../src/verbs.cpp:3066
 msgid "Undo _History..."
-msgstr "Bearbeitungs_historie …"
+msgstr "Bearbeitungs_historie…"
 
 #: ../src/verbs.cpp:3066
 msgid "Undo History"
@@ -32824,7 +32824,7 @@ msgstr ""
 
 #: ../src/verbs.cpp:3071
 msgid "_XML Editor..."
-msgstr "_XML-Editor …"
+msgstr "_XML-Editor…"
 
 #: ../src/verbs.cpp:3072
 msgid "View and edit the XML tree of the document"
@@ -32832,7 +32832,7 @@ msgstr "Zeige und ändere den XML-Baum des Dokuments"
 
 #: ../src/verbs.cpp:3073
 msgid "_Selectors and CSS..."
-msgstr "_Selektoren und CSS …"
+msgstr "_Selektoren und CSS…"
 
 #: ../src/verbs.cpp:3074
 msgid "View and edit CSS selectors and styles"
@@ -32840,7 +32840,7 @@ msgstr "CSS-Selektoren und Stile ansehen und bearbeiten"
 
 #: ../src/verbs.cpp:3075
 msgid "_Find/Replace..."
-msgstr "_Suchen/Ersetzen …"
+msgstr "_Suchen/Ersetzen…"
 
 #: ../src/verbs.cpp:3075
 msgid "Find objects in document"
@@ -32852,7 +32852,7 @@ msgstr "Rechtschreibprüfung für Text im Dokument"
 
 #: ../src/verbs.cpp:3081
 msgid "_Messages..."
-msgstr "_Nachrichten …"
+msgstr "_Benachrichtigungen…"
 
 #: ../src/verbs.cpp:3081
 msgid "View debug messages"
@@ -32868,7 +32868,7 @@ msgstr "Alle offenen Dialoge zeigen oder ausblenden"
 
 #: ../src/verbs.cpp:3085
 msgid "Create Tiled Clones..."
-msgstr "Gekachelte Klone erzeugen …"
+msgstr "Gekachelte Klone erzeugen…"
 
 #: ../src/verbs.cpp:3086
 msgid ""
@@ -32880,7 +32880,7 @@ msgstr ""
 
 #: ../src/verbs.cpp:3088
 msgid "_Object attributes..."
-msgstr "_Objekteigenschaften …"
+msgstr "_Objekteigenschaften…"
 
 #: ../src/verbs.cpp:3089
 msgid "Edit the object attributes..."
@@ -32893,7 +32893,7 @@ msgstr ""
 
 #: ../src/verbs.cpp:3093
 msgid "_Input Devices..."
-msgstr "_Eingabegeräte …"
+msgstr "_Eingabegeräte…"
 
 #: ../src/verbs.cpp:3094
 msgid "Configure extended input devices, such as a graphics tablet"
@@ -32901,7 +32901,7 @@ msgstr "Erweiterte Eingabegeräte konfigurieren, wie z.B. Grafiktabletts"
 
 #: ../src/verbs.cpp:3096
 msgid "_Extensions..."
-msgstr "_Erweiterungen …"
+msgstr "_Erweiterungen…"
 
 #: ../src/verbs.cpp:3097
 msgid "Query information about extensions"
@@ -32909,7 +32909,7 @@ msgstr "Informationen über Erweiterungen abfragen"
 
 #: ../src/verbs.cpp:3098
 msgid "Layer_s..."
-msgstr "_Ebenen …"
+msgstr "_Ebenen…"
 
 #: ../src/verbs.cpp:3098
 msgid "View Layers"
@@ -32917,7 +32917,7 @@ msgstr "Ebenen anzeigen"
 
 #: ../src/verbs.cpp:3100
 msgid "Object_s..."
-msgstr "_Objekte …"
+msgstr "_Objekte…"
 
 #: ../src/verbs.cpp:3100
 msgid "View Objects"
@@ -32925,7 +32925,7 @@ msgstr "Objekte ansehen"
 
 #: ../src/verbs.cpp:3102
 msgid "Style Dialog..."
-msgstr "Stildialog …"
+msgstr "Stildialog…"
 
 #: ../src/verbs.cpp:3102
 msgid "View Style Dialog"
@@ -32933,7 +32933,7 @@ msgstr "Stildialog anzeigen"
 
 #: ../src/verbs.cpp:3103
 msgid "Path E_ffects..."
-msgstr "Pfade_ffekte …"
+msgstr "Pfade_ffekte…"
 
 #: ../src/verbs.cpp:3104
 msgid "Manage, edit, and apply path effects"
@@ -32941,7 +32941,7 @@ msgstr "Pfadeffekte verwalten, bearbeiten und anwenden"
 
 #: ../src/verbs.cpp:3105
 msgid "Filter _Editor..."
-msgstr "Filter_editor …"
+msgstr "Filter_editor…"
 
 #: ../src/verbs.cpp:3106
 msgid "Manage, edit, and apply SVG filters"
@@ -32949,7 +32949,7 @@ msgstr "SVG-Filter verwalten, bearbeiten und anwenden"
 
 #: ../src/verbs.cpp:3107
 msgid "SVG Font Editor..."
-msgstr "SVG-Schriftarteneditor …"
+msgstr "SVG-Schriftarteneditor…"
 
 #: ../src/verbs.cpp:3107
 msgid "Edit SVG fonts"
@@ -32957,7 +32957,7 @@ msgstr "SVG-Schriften bearbeiten"
 
 #: ../src/verbs.cpp:3108
 msgid "Print Colors..."
-msgstr "Druckfarben …"
+msgstr "Druckfarben…"
 
 #: ../src/verbs.cpp:3109
 msgid ""
@@ -32968,7 +32968,7 @@ msgstr ""
 
 #: ../src/verbs.cpp:3110
 msgid "_Export PNG Image..."
-msgstr "PNG-Bild _exportieren …"
+msgstr "PNG-Bild _exportieren…"
 
 #: ../src/verbs.cpp:3111
 msgid "Export this document or a selection as a PNG image"
@@ -33081,7 +33081,7 @@ msgstr "Letzten Effekt mit den gleichen Einstellungen anwenden"
 
 #: ../src/verbs.cpp:3146
 msgid "_Previous Extension Settings..."
-msgstr "_Vorherige Erweiterungseinstellungen …"
+msgstr "_Vorherige Erweiterungseinstellungen…"
 
 #: ../src/verbs.cpp:3147
 msgid "Repeat the last extension with new settings"
@@ -34281,7 +34281,7 @@ msgid ""
 msgstr ""
 "Das JessyInk-Skript ist in dieser SVG-Datei nicht installiert oder hat eine "
 "andere Version als die JessyInk-Erweiterung. Bitte wählen Sie „Installation/"
-"Aktualisierung …“ aus dem „JessyInk“ Untermenü des „Erweiterungen“-Menüs, um "
+"Aktualisierung…“ aus dem „JessyInk“ Untermenü des „Erweiterungen“-Menüs, um "
 "das JessyInk-Skript zu installieren oder zu aktualisieren.\n"
 "\n"
 
@@ -37056,7 +37056,7 @@ msgstr "Hilfslinienvoreinstellung:"
 #: ../share/extensions/guides_creator.inx:8
 #: ../share/extensions/guides_creator.inx:24
 msgid "Custom..."
-msgstr "Benutzerdefiniert …"
+msgstr "Benutzerdefiniert…"
 
 #: ../share/extensions/guides_creator.inx:9
 msgid "Golden ratio"
@@ -41119,7 +41119,7 @@ msgstr "3,5 x 2 Zoll (USA, Kanada)"
 
 #: ../share/extensions/template_business_card.inx:21
 msgid "Business Card..."
-msgstr "Visitenkarte …"
+msgstr "Visitenkarte…"
 
 #: ../share/extensions/template_business_card.inx:23
 msgid "Business card of chosen size."
@@ -41151,7 +41151,7 @@ msgstr "Benutzerdefinierte Höhe:"
 
 #: ../share/extensions/template_desktop.inx:31
 msgid "Desktop..."
-msgstr "Desktop …"
+msgstr "Desktop…"
 
 #: ../share/extensions/template_desktop.inx:33
 msgid "Empty desktop of chosen size."
@@ -41193,7 +41193,7 @@ msgstr "DVD-Cover-Beschnittzugabe (mm):"
 # denkbar: DVD-Umschlag (aber lässt auch an eine Hülle aus Papier denken)
 #: ../share/extensions/template_dvd_cover.inx:20
 msgid "DVD Cover..."
-msgstr "DVD-Cover …"
+msgstr "DVD-Cover…"
 
 #
 # File: ../share/extensions/empty_dvd_cover.inx, line: 23
@@ -41213,7 +41213,7 @@ msgstr "Größe des Umschlags:"
 
 #: ../share/extensions/template_envelope.inx:16
 msgid "Envelope..."
-msgstr "Umschlag …"
+msgstr "Umschlag…"
 
 #: ../share/extensions/template_envelope.inx:18
 msgid "Blank envelope of chosen size."
@@ -41257,7 +41257,7 @@ msgstr "Rand verbergen"
 
 #: ../share/extensions/template_generic.inx:32
 msgid "Generic canvas..."
-msgstr "Beliebige Größe …"
+msgstr "Beliebige Größe…"
 
 #: ../share/extensions/template_generic.inx:34
 msgid "Generic canvas of chosen size."
@@ -41277,7 +41277,7 @@ msgstr "Symbolgröße:"
 
 #: ../share/extensions/template_icon.inx:14
 msgid "Icon..."
-msgstr "Icon …"
+msgstr "Icon…"
 
 #
 # File: ../share/extensions/empty_icon.inx, line: 16
@@ -41315,7 +41315,7 @@ msgstr "Seitenhintergrund:"
 
 #: ../share/extensions/template_page.inx:34
 msgid "Blank Page..."
-msgstr "Leere Seite …"
+msgstr "Leere Seite…"
 
 #
 # File: ../share/extensions/empty_page.inx, line: 35
@@ -41345,7 +41345,7 @@ msgstr "Benutzerdefinierte Höhe (px):"
 
 #: ../share/extensions/template_seamless_pattern.inx:14
 msgid "Seamless Pattern..."
-msgstr "Nahtloses Muster …"
+msgstr "Nahtloses Muster…"
 
 #: ../share/extensions/template_seamless_pattern.inx:16
 msgid "Create seamless patterns."
@@ -41365,7 +41365,7 @@ msgstr "Videogröße:"
 
 #: ../share/extensions/template_video.inx:24
 msgid "Video..."
-msgstr "Video …"
+msgstr "Video…"
 
 #
 # File: ../share/extensions/empty_video.inx, line: 27
