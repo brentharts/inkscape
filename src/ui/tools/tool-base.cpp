@@ -163,8 +163,8 @@ void ToolBase::sp_event_context_update_cursor() {
 	    bool fillHasColor=false, strokeHasColor=false;
 	    guint32 fillColor = sp_desktop_get_color_tool(this->desktop, this->getPrefsPath(), true, &fillHasColor);
 	    guint32 strokeColor = sp_desktop_get_color_tool(this->desktop, this->getPrefsPath(), false, &strokeHasColor);
-	    double fillOpacity = fillHasColor ? sp_desktop_get_opacity_tool(this->desktop, this->getPrefsPath(), true) : 0;
-	    double strokeOpacity = strokeHasColor ? sp_desktop_get_opacity_tool(this->desktop, this->getPrefsPath(), false) : 0;
+	    double fillOpacity = fillHasColor ? sp_desktop_get_opacity_tool(this->desktop, this->getPrefsPath(), true) : 1.0;
+	    double strokeOpacity = strokeHasColor ? sp_desktop_get_opacity_tool(this->desktop, this->getPrefsPath(), false) : 1.0;
 
             this->cursor = Glib::wrap(sp_cursor_from_xpm(
 		this->cursor_shape,
@@ -1143,17 +1143,7 @@ gint sp_event_context_virtual_root_handler(ToolBase * event_context, GdkEvent * 
         if (event_context->block_button(event)) {
             return false;
         }
-
-        // The root handler also handles pressing the space key.
-        // This will toggle the current tool and delete the current one.
-        // Thus, save a pointer to the desktop before calling it.
         SPDesktop* desktop = event_context->desktop;
-        if (event->type == GDK_KEY_PRESS && 
-            get_latin_keyval(&event->key) == GDK_KEY_space &&
-            desktop->event_context->space_panning) 
-        {
-            return FALSE;
-        }
         ret = event_context->root_handler(event);
 
         set_event_location(desktop, event);

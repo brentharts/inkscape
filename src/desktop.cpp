@@ -65,6 +65,7 @@
 #include "ui/dialog/dialog-manager.h"
 #include "ui/interface.h" // Only for getLayoutPrefPath
 #include "ui/tool-factory.h"
+#include "ui/tools/tool-base.h"
 #include "ui/tools/box3d-tool.h"
 #include "ui/tools/select-tool.h"
 
@@ -1934,6 +1935,12 @@ _onSelectionChanged
 static gint
 _arena_handler (SPCanvasArena */*arena*/, Inkscape::DrawingItem *ai, GdkEvent *event, SPDesktop *desktop)
 {
+    if (event->type == GDK_KEY_PRESS && 
+        Inkscape::UI::Tools::get_latin_keyval(&event->key) == GDK_KEY_space &&
+        desktop->event_context->space_panning) 
+    {
+        return true;
+    }
     if (ai) {
         SPItem *spi = ai->getItem();
         return sp_event_context_item_handler (desktop->event_context, spi, event);
@@ -2145,8 +2152,21 @@ SPDesktop::show_dialogs()
 
     for (std::map<Glib::ustring, Glib::ustring>::const_iterator iter = mapVerbPreference.begin(); iter != mapVerbPreference.end(); ++iter) {
         Glib::ustring pref = iter->second;
+
         int visible = prefs->getInt(pref + "/visible", 0);
         if (visible) {
+
+#ifdef GDK_WINDOWING_WAYLAND
+            // Hack to prevent crash with Wayland. See: https://gitlab.com/inkscape/inkscape/issues/454
+            if (iter->first == "InkscapePreferences") {
+                Glib::ustring session_type  = Glib::getenv("XDG_SESSION_TYPE");  // Window session
+                Glib::ustring session_type2 = Glib::getenv("GDK_BACKEND");       // Possible override
+                if (session_type == "wayland" && session_type2 != "x11") {
+                    std::cerr << "SPDesktop::show_dialog: Cannot restore InkscapePreferences dialog due to GTK Wayland bug." << std::endl;
+                    continue;
+                }
+            }
+#endif
 
             // Try to ensure that the panel is created attached to the correct desktop (bug 1720096).
             // There must be a better way of handling this problem!
