@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 /**
-    \file bluredge.cpp
+    \file bluredgr.cpp
 
     A plug-in to add an effect to blur the edges of an object.
 */

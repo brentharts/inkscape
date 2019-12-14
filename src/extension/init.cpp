@@ -50,6 +50,7 @@
 #include "internal/latex-pstricks.h"
 #include "internal/gdkpixbuf-input.h"
 #include "internal/bluredge.h"
+#include "internal/offset-path.h"
 #include "internal/gimpgrad.h"
 #include "internal/grid.h"
 #ifdef WITH_LIBWPG
@@ -186,6 +187,7 @@ init()
     Internal::BlurEdge::init();
     Internal::GimpGrad::init();
     Internal::Grid::init();
+    Internal::OffsetPath::init();
 
 #ifdef WITH_DBUS
     Dbus::init();

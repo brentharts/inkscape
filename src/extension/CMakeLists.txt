@@ -43,6 +43,7 @@ set(extension_SRC
 	internal/text_reassemble.c
 	internal/wmf-inout.cpp
 	internal/wmf-print.cpp
+        internal/offset-path.cpp
 
 	internal/filter/filter-all.cpp
 	internal/filter/filter-file.cpp
@@ -131,6 +132,7 @@ set(extension_SRC
 	internal/text_reassemble.h
 	internal/wmf-inout.h
 	internal/wmf-print.h
+	internal/offset-path.h
 
 	prefdialog/prefdialog.h
 	prefdialog/parameter.h

@@ -64,7 +64,6 @@ using Inkscape::DocumentUndo;
 
 bool   Ancetre(Inkscape::XML::Node *a, Inkscape::XML::Node *who);
 
-void sp_selected_path_do_offset(SPDesktop *desktop, bool expand, double prefOffset);
 void sp_selected_path_create_offset_object(SPDesktop *desktop, int expand, bool updating);
 
 bool Inkscape::ObjectSet::pathUnion(const bool skip_undo) {
@@ -1833,17 +1832,6 @@ void sp_selected_path_create_offset_object(SPDesktop *desktop, int expand, bool 
     delete res;
     delete orig;
 }
-
-
-
-
-
-
-
-
-
-
-
 
 void
 sp_selected_path_do_offset(SPDesktop *desktop, bool expand, double prefOffset)
