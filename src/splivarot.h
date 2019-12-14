@@ -35,6 +35,7 @@ void sp_selected_path_create_offset (SPDesktop *desktop);
 void sp_selected_path_create_inset (SPDesktop *desktop);
 void sp_selected_path_create_updating_offset (SPDesktop *desktop);
 void sp_selected_path_create_updating_inset (SPDesktop *desktop);
+void sp_selected_path_do_offset(SPDesktop *desktop, bool expand, double prefOffset);
 
 void sp_selected_path_create_offset_object_zero (SPDesktop *desktop);
 void sp_selected_path_create_updating_offset_object_zero (SPDesktop *desktop);
