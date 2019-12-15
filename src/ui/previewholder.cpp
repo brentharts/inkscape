@@ -357,7 +357,6 @@ void PreviewHolder::rebuildUI()
     auto children = _insides->get_children();
     for (auto child : children) {
         _insides->remove(*child);
-        delete child;
     }
 
     _insides->set_column_spacing(0);
