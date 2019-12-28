@@ -291,9 +291,10 @@ bool CalligraphicTool::apply(Geom::Point p) {
         a1 = ( this->angle / 180.0 ) * M_PI;
     }
     a1 *= -this->desktop->yaxisdir();
+    a1 = fmod(a1, M_PI);
     if (a1 > 0.5*M_PI) {
         a1 -= M_PI;
-    } else if (a1 < -0.5*M_PI) {
+    } else if (a1 <= -0.5*M_PI) {
         a1 += M_PI;
     }
 
