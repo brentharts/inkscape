@@ -74,7 +74,7 @@ SPNamedView::SPNamedView() : SPObjectGroup(), snap_manager(this) {
     this->page_size_units = nullptr;
     this->pagecolor = 0;
     this->cx = 0;
-    this->document_rotation = 0;
+    this->rotation = 0;
     this->pageshadow = 0;
     this->window_width = 0;
     this->window_height = 0;
@@ -213,7 +213,7 @@ void SPNamedView::build(SPDocument *document, Inkscape::XML::Node *repr) {
     this->readAttr( "inkscape:pageopacity" );
     this->readAttr( "inkscape:pageshadow" );
     this->readAttr( "inkscape:zoom" );
-    this->readAttr( "inkscape:document-rotation" );
+    this->readAttr( "inkscape:rotation" );
     this->readAttr( "inkscape:cx" );
     this->readAttr( "inkscape:cy" );
     this->readAttr( "inkscape:window-width" );
@@ -407,8 +407,8 @@ void SPNamedView::set(SPAttributeEnum key, const gchar* value) {
             this->zoom = value ? g_ascii_strtod(value, nullptr) : 0; // zero means not set
             this->requestModified(SP_OBJECT_MODIFIED_FLAG);
             break;
-    case SP_ATTR_INKSCAPE_DOCUMENT_ROTATION:
-            this->document_rotation = value ? g_ascii_strtod(value, nullptr) : 0; // zero means not set
+    case SP_ATTR_INKSCAPE_ROTATION:
+            this->rotation = value ? g_ascii_strtod(value, nullptr) : 0; // zero means not set
             this->requestModified(SP_OBJECT_MODIFIED_FLAG);
             break;
     case SP_ATTR_INKSCAPE_CX:
@@ -851,14 +851,14 @@ void sp_namedview_zoom_and_view_from_document(SPDesktop *desktop)
     } else if (desktop->getDocument()) { // document without saved zoom, zoom to its page
         desktop->zoom_page();
     }
-    if (nv->document_rotation != 0 && nv->document_rotation != HUGE_VAL && !std::isnan(nv->document_rotation)) {
+    if (nv->rotation != 0 && nv->rotation != HUGE_VAL && !std::isnan(nv->rotation)) {
         Geom::Point p;
         if (nv->cx != HUGE_VAL && !std::isnan(nv->cx) && nv->cy != HUGE_VAL && !std::isnan(nv->cy)) {
             p = Geom::Point(nv->cx, nv->cy);
         }else{
             p = desktop->current_center();
         }
-        desktop->rotate_absolute_keep_point(p, nv->document_rotation * M_PI / 180.0);
+        desktop->rotate_absolute_keep_point(p, nv->rotation * M_PI / 180.0);
     }
 }
 
@@ -921,7 +921,7 @@ void sp_namedview_document_from_window(SPDesktop *desktop)
 
     if (save_viewport_in_file) {
         sp_repr_set_svg_double(view, "inkscape:zoom", desktop->current_zoom());
-        sp_repr_set_svg_double(view, "inkscape:document-rotation", ::round(desktop->current_rotation()*180.0/M_PI));
+        sp_repr_set_svg_double(view, "inkscape:rotation", ::round(desktop->current_rotation()*180.0/M_PI));
         Geom::Point center = desktop->current_center();
         sp_repr_set_svg_double(view, "inkscape:cx", center.x());
         sp_repr_set_svg_double(view, "inkscape:cy", center.y());
