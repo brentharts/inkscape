@@ -851,6 +851,15 @@ void sp_namedview_zoom_and_view_from_document(SPDesktop *desktop)
     } else if (desktop->getDocument()) { // document without saved zoom, zoom to its page
         desktop->zoom_page();
     }
+    if (nv->document_rotation != 0 && nv->document_rotation != HUGE_VAL && !std::isnan(nv->document_rotation)) {
+        Geom::Point p;
+        if (nv->cx != HUGE_VAL && !std::isnan(nv->cx) && nv->cy != HUGE_VAL && !std::isnan(nv->cy)) {
+            p = Geom::Point(nv->cx, nv->cy);
+        }else{
+            p = desktop->current_center();
+        }
+        desktop->rotate_absolute_keep_point(p, nv->document_rotation * M_PI / 180.0);
+    }
 }
 
 void SPNamedView::writeNewGrid(SPDocument *document,int gridtype)
@@ -905,7 +914,6 @@ void sp_namedview_document_from_window(SPDesktop *desktop)
     bool save_geometry_in_file = window_geometry == PREFS_WINDOW_GEOMETRY_FILE;
     bool save_viewport_in_file = prefs->getBool("/options/savedocviewport/value", true);
     Inkscape::XML::Node *view = desktop->namedview->getRepr();
-    Geom::Rect const r = desktop->get_display_area();
 
     // saving window geometry is not undoable
     bool saved = DocumentUndo::getUndoSensitive(desktop->getDocument());
@@ -913,8 +921,10 @@ void sp_namedview_document_from_window(SPDesktop *desktop)
 
     if (save_viewport_in_file) {
         sp_repr_set_svg_double(view, "inkscape:zoom", desktop->current_zoom());
-        sp_repr_set_svg_double(view, "inkscape:cx", r.midpoint()[Geom::X]);
-        sp_repr_set_svg_double(view, "inkscape:cy", r.midpoint()[Geom::Y]);
+        sp_repr_set_svg_double(view, "inkscape:document-rotation", ::round(desktop->current_rotation()*180.0/M_PI));
+        Geom::Point center = desktop->current_center();
+        sp_repr_set_svg_double(view, "inkscape:cx", center.x());
+        sp_repr_set_svg_double(view, "inkscape:cy", center.y());
     }
 
     if (save_geometry_in_file) {
