@@ -74,6 +74,7 @@ SPNamedView::SPNamedView() : SPObjectGroup(), snap_manager(this) {
     this->page_size_units = nullptr;
     this->pagecolor = 0;
     this->cx = 0;
+    this->document_rotation = 0;
     this->pageshadow = 0;
     this->window_width = 0;
     this->window_height = 0;
@@ -212,6 +213,7 @@ void SPNamedView::build(SPDocument *document, Inkscape::XML::Node *repr) {
     this->readAttr( "inkscape:pageopacity" );
     this->readAttr( "inkscape:pageshadow" );
     this->readAttr( "inkscape:zoom" );
+    this->readAttr( "inkscape:document-rotation" );
     this->readAttr( "inkscape:cx" );
     this->readAttr( "inkscape:cy" );
     this->readAttr( "inkscape:window-width" );
@@ -403,6 +405,10 @@ void SPNamedView::set(SPAttributeEnum key, const gchar* value) {
             break;
     case SP_ATTR_INKSCAPE_ZOOM:
             this->zoom = value ? g_ascii_strtod(value, nullptr) : 0; // zero means not set
+            this->requestModified(SP_OBJECT_MODIFIED_FLAG);
+            break;
+    case SP_ATTR_INKSCAPE_DOCUMENT_ROTATION:
+            this->document_rotation = value ? g_ascii_strtod(value, nullptr) : 0; // zero means not set
             this->requestModified(SP_OBJECT_MODIFIED_FLAG);
             break;
     case SP_ATTR_INKSCAPE_CX:
