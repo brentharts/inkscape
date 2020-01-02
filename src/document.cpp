@@ -376,7 +376,6 @@ SPDocument *SPDocument::createDoc(Inkscape::XML::Document *rdoc,
         if (!bordercolor.empty()) {
             rnew->setAttribute("bordercolor", bordercolor.data());
         }
-        sp_repr_set_svg_double(rnew, "inkscape:rotation", 0.);
         sp_repr_set_svg_double(rnew, "borderopacity",
             prefs->getDouble("/template/base/borderopacity", 1.0));
         sp_repr_set_svg_double(rnew, "objecttolerance",
