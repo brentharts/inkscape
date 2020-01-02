@@ -921,7 +921,8 @@ void sp_namedview_document_from_window(SPDesktop *desktop)
 
     if (save_viewport_in_file) {
         sp_repr_set_svg_double(view, "inkscape:zoom", desktop->current_zoom());
-        sp_repr_set_svg_double(view, "inkscape:rotation", ::round(desktop->current_rotation()*180.0/M_PI));
+        double rotation = ::round(desktop->current_rotation() * 180.0 / M_PI);
+        sp_repr_set_svg_non_default_double(view, "inkscape:rotation", rotation, 0.0);
         Geom::Point center = desktop->current_center();
         sp_repr_set_svg_double(view, "inkscape:cx", center.x());
         sp_repr_set_svg_double(view, "inkscape:cy", center.y());

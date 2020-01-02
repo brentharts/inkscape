@@ -400,9 +400,6 @@ SPDocument *SPDocument::createDoc(Inkscape::XML::Document *rdoc,
         Inkscape::GC::release(rnew);
     } else {
         Inkscape::XML::Node *nv_repr = sp_item_group_get_child_by_name(document->root, nullptr, "sodipodi:namedview")->getRepr();
-        if (!nv_repr->attribute("inkscape:rotation")) {
-            sp_repr_set_svg_double(nv_repr, "inkscape:rotation", 0.);
-        }
     }
 
     // Defs
