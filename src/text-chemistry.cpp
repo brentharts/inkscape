@@ -423,7 +423,7 @@ text_unflow ()
 
     Inkscape::Selection *selection = desktop->getSelection();
 
-    if (!text_or_flowtext_in_selection (selection) || boost::distance(selection->items()) < 1) {
+    if (!text_or_flowtext_in_selection(selection) || boost::distance(selection->items()) < 1) {
         desktop->getMessageStack()->flash(Inkscape::WARNING_MESSAGE, _("Select <b>a flowed text</b> to unflow it."));
         return;
     }
@@ -432,10 +432,10 @@ text_unflow ()
     std::vector<SPItem *> old_objs;
 
     auto items = selection->items();
-    for(auto i : items) {
+    for (auto i : items) {
 
-        SPFlowtext *flowtext = dynamic_cast<SPFlowtext*>(i);
-        SPText *text = dynamic_cast<SPText*>(i);
+        SPFlowtext *flowtext = dynamic_cast<SPFlowtext *>(i);
+        SPText *text = dynamic_cast<SPText *>(i);
 
         if (flowtext) {
 
@@ -452,7 +452,8 @@ text_unflow ()
             rtext->setAttribute("xml:space", "preserve"); // we preserve spaces in the text objects we create
 
             /* Set style */
-            rtext->setAttribute("style", flowtext->getRepr()->attribute("style")); // fixme: transfer style attrs too; and from descendants
+            rtext->setAttribute("style", flowtext->getRepr()->attribute("style")); // fixme: transfer style attrs too;
+                                                                                   // and from descendants
 
             Geom::OptRect bbox = flowtext->geometricBounds(flowtext->i2doc_affine());
             if (bbox) {
@@ -478,14 +479,14 @@ text_unflow ()
             SPText *text = SP_TEXT(text_object);
             text->_adjustFontsizeRecursive(text, ex);
 
-            new_objs.push_back((SPItem*)text_object);
+            new_objs.push_back((SPItem *)text_object);
             old_objs.push_back(flowtext);
 
             Inkscape::GC::release(rtext);
             Inkscape::GC::release(rtspan);
             Inkscape::GC::release(text_repr);
 
-        } else if(text){
+        } else if (text){
 
             if (text->has_shape_inside()) {
 
@@ -510,7 +511,7 @@ text_unflow ()
                 // We'll also remove temporarily 'sodipodi:role' (which shouldn't be
                 // necessary later).
                 for (auto j : text->childList(false)) {
-                    SPTSpan* tspan = dynamic_cast<SPTSpan*>(j);
+                    SPTSpan* tspan = dynamic_cast<SPTSpan *>(j);
                     if (tspan) {
                         tspan->getRepr()->setAttribute("x", nullptr);
                         tspan->getRepr()->setAttribute("y", nullptr);
@@ -526,12 +527,12 @@ text_unflow ()
 
         // Update selection
         selection->clear();
-        reverse(new_objs.begin(),new_objs.end());
+        reverse(new_objs.begin(), new_objs.end());
         selection->setList(new_objs);
 
         // Delete old objects
-        for (auto i:old_objs) {
-            i->deleteObject (true);
+        for (auto i : old_objs) {
+            i->deleteObject(true);
         }
     }
 
