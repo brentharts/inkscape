@@ -707,9 +707,10 @@ public:
      */
     void setKeyValue(SPAttributeEnum key, char const *value);
 
-    void setAttribute(         char const *key,          char const *value, SPException *ex=nullptr);
-    void setAttribute(         char const *key, Glib::ustring const &value, SPException *ex=nullptr);
-    void setAttribute(Glib::ustring const &key, Glib::ustring const &value, SPException *ex=nullptr);
+
+    void setAttribute(Inkscape::Util::const_char_ptr key,
+                      Inkscape::Util::const_char_ptr value,
+                      SPException *ex=nullptr);
 
     /**
      * Read value of key attribute from XML node into object.
@@ -773,6 +774,8 @@ private:
      * Must not be used on anything except elements.
      */
     Glib::ustring textualContent() const;
+
+    void setAttributeImpl(char const *key, char const *value, SPException *ex);
 
     /* Real handlers of repr signals */
 
