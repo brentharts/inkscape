@@ -200,7 +200,6 @@ public:
      * @param value The new value of the attribute
      * @param is_interactive Ignored
      */
-    virtual void setAttribute(char const *key, char const *value, bool is_interactive)=0;
 
     void setAttribute(Inkscape::Util::const_char_ptr key,
                       Inkscape::Util::const_char_ptr value, bool is_interactive=false);
@@ -497,6 +496,8 @@ public:
 
 protected:
     Node(Node const &) : Anchored() {}
+
+    virtual void setAttributeImpl(char const *key, char const *value, bool is_interactive)=0;
 };
 
 }
