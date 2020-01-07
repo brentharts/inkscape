@@ -16,6 +16,7 @@
 #include <glibmm/ustring.h>
 #include "gc-anchored.h"
 #include "util/list.h"
+#include "util/const_char_ptr.h"
 
 namespace Inkscape {
 namespace XML {
@@ -199,18 +200,11 @@ public:
      * @param value The new value of the attribute
      * @param is_interactive Ignored
      */
-    virtual void setAttribute(char const *key, char const *value, bool is_interactive=false)=0;
+    virtual void setAttribute(char const *key, char const *value, bool is_interactive)=0;
 
-    void setAttribute(char const *key, Glib::ustring const &value, bool is_interactive=false)
-    {
-        setAttribute(key, value.empty() ? nullptr : value.c_str(), is_interactive);
-    }
+    void setAttribute(Inkscape::Util::const_char_ptr key,
+                      Inkscape::Util::const_char_ptr value, bool is_interactive=false);
 
-    void setAttribute(Glib::ustring const &key, Glib::ustring const &value, bool is_interactive=false)
-    {
-        setAttribute( key.empty()   ? nullptr : key.c_str(),
-                      value.empty() ? nullptr : value.c_str(), is_interactive);
-    }
     //@}
     /**
      * @brief Set the integer GQuark code for the name of the node.
