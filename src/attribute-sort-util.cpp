@@ -113,13 +113,13 @@ void sp_attribute_sort_element(Node *repr) {
   for (auto & it : my_list) {
       // Removing "inkscape:label" results in crash when Layers dialog is open.
       if (it.first != "inkscape:label") {
-          repr->setAttribute( it.first.c_str(), nullptr, false );
+          repr->setAttribute( it.first, nullptr);
       }
   }
   // Insert all attributes in proper order
   for (auto & it : my_list) {
       if (it.first != "inkscape:label") {
-          repr->setAttribute( it.first.c_str(), it.second.c_str(), false );
+          repr->setAttribute( it.first, it.second);
       }
   } 
 }
@@ -144,7 +144,7 @@ void sp_attribute_sort_style(Node *repr) {
   if( value.empty() ) {
       repr->setAttribute("style", nullptr );
   } else {
-      repr->setAttribute("style", value.c_str());
+      repr->setAttribute("style", value);
   }
 
   sp_repr_css_attr_unref( css );

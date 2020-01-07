@@ -219,11 +219,11 @@ Inkscape::XML::Node* SPBox3D::write(Inkscape::XML::Document *xml_doc, Inkscape::
             SPDocument *doc = object->document;
             if (box->persp_ref->getURI()) {
                 auto uri_string = box->persp_ref->getURI()->str();
-                repr->setAttribute("inkscape:perspectiveID", uri_string.c_str());
+                repr->setAttribute("inkscape:perspectiveID", uri_string);
             } else {
                 Glib::ustring href = "#";
                 href += doc->getCurrentPersp3D()->getId();
-                repr->setAttribute("inkscape:perspectiveID", href.c_str());
+                repr->setAttribute("inkscape:perspectiveID", href);
             }
         }
 
@@ -1253,7 +1253,7 @@ box3d_switch_perspectives(SPBox3D *box, Persp3D *old_persp, Persp3D *new_persp, 
 
     Glib::ustring href = "#";
     href += new_persp->getId();
-    box->setAttribute("inkscape:perspectiveID", href.c_str());
+    box->setAttribute("inkscape:perspectiveID", href);
 }
 
 /* Converts the 3D box to an ordinary SPGroup, adds it to the XML tree at the same position as

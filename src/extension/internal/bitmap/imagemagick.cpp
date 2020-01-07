@@ -216,7 +216,7 @@ ImageMagick::effect (Inkscape::Extension::Effect *module, Inkscape::UI::View::Vi
             *formatted_i = '\0';
 
             dc->_nodes[i]->setAttribute("xlink:href", dc->_caches[i], true);            
-            dc->_nodes[i]->setAttribute("sodipodi:absref", NULL, true);
+            dc->_nodes[i]->setAttribute("sodipodi:absref", nullptr, true);
             delete blob;
         }
         catch (Magick::Exception &error_) {

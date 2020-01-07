@@ -17,7 +17,7 @@
  */
 
 #include <glibmm/ustring.h>
-
+#include "util/const_char_ptr.h"
 /* SPObject flags */
 
 class SPObject;

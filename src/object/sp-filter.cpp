@@ -316,7 +316,7 @@ Inkscape::XML::Node* SPFilter::write(Inkscape::XML::Document *doc, Inkscape::XML
 
     if (this->href->getURI()) {
         auto uri_string = this->href->getURI()->str();
-        repr->setAttribute("xlink:href", uri_string.c_str());
+        repr->setAttribute("xlink:href", uri_string);
     }
 
     SPObject::write(doc, repr, flags);

@@ -1285,7 +1285,7 @@ void TextTagAttributes::update( double em, double ex, double w, double h )
 void TextTagAttributes::writeSingleAttributeLength(Inkscape::XML::Node *node, gchar const *key, const SVGLength &length)
 {
     if (length._set) {
-        node->setAttribute(key, length.write().c_str());
+        node->setAttribute(key, length.write());
     } else
         node->setAttribute(key, nullptr);
 }
@@ -1302,7 +1302,7 @@ void TextTagAttributes::writeSingleAttributeVector(Inkscape::XML::Node *node, gc
             if (!string.empty()) string += ' ';
             string += it.write();
         }
-        node->setAttribute(key, string.c_str());
+        node->setAttribute(key, string);
     }
 }
 

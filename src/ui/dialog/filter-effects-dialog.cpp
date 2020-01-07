@@ -2419,7 +2419,7 @@ bool FilterEffectsDialog::PrimitiveList::on_button_release_event(GdkEventButton*
                         const gchar *gres = repr->attribute("result");
                         if(!gres) {
                             result = SP_FILTER(prim->parent)->get_new_result_name();
-                            repr->setAttribute("result", result.c_str());
+                            repr->setAttribute("result", result);
                             in_val = result.c_str();
                         }
                         else

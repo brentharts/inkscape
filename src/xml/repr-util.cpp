@@ -567,7 +567,7 @@ unsigned int sp_repr_set_css_double(Inkscape::XML::Node *repr, gchar const *key,
     Inkscape::CSSOStringStream os;
     os << val;
 
-    repr->setAttribute(key, os.str().c_str());
+    repr->setAttribute(key, os.str());
     return true;
 }
 
@@ -585,7 +585,7 @@ unsigned int sp_repr_set_svg_double(Inkscape::XML::Node *repr, gchar const *key,
     Inkscape::SVGOStringStream os;
     os << val;
 
-    repr->setAttribute(key, os.str().c_str());
+    repr->setAttribute(key, os.str());
     return true;
 }
 
@@ -620,7 +620,7 @@ unsigned sp_repr_set_point(Inkscape::XML::Node *repr, gchar const *key, Geom::Po
     Inkscape::SVGOStringStream os;
     os << val[Geom::X] << "," << val[Geom::Y];
 
-    repr->setAttribute(key, os.str().c_str());
+    repr->setAttribute(key, os.str());
     return true;
 }
 

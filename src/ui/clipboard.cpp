@@ -311,7 +311,7 @@ void ClipboardManagerImpl::copySymbol(Inkscape::XML::Node* symbol, gchar const* 
     Glib::ustring symbol_name = repr->attribute("id");
 
     symbol_name += "_inkscape_duplicate";
-    repr->setAttribute("id",    symbol_name.c_str());
+    repr->setAttribute("id",    symbol_name);
     _defs->appendChild(repr);
 
     Glib::ustring id("#");
@@ -331,7 +331,7 @@ void ClipboardManagerImpl::copySymbol(Inkscape::XML::Node* symbol, gchar const* 
     }
 
     Inkscape::XML::Node *use = _doc->createElement("svg:use");
-    use->setAttribute("xlink:href", id.c_str() );
+    use->setAttribute("xlink:href", id );
     // Set a default style in <use> rather than <symbol> so it can be changed.
     use->setAttribute("style", style );
     if (!Geom::are_near(scale_units, 1.0, Geom::EPSILON)) {

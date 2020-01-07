@@ -310,7 +310,7 @@ LPECopyRotate::toItem(Geom::Affine transform, size_t i, bool reset)
         phantom = elemref->getRepr();
     } else {
         phantom = createPathBase(sp_lpe_item);
-        phantom->setAttribute("id", elemref_id.c_str());
+        phantom->setAttribute("id", elemref_id);
         reset = true;
         elemref = container->appendChildRepr(phantom);
         Inkscape::GC::release(phantom);
@@ -322,7 +322,7 @@ LPECopyRotate::toItem(Geom::Affine transform, size_t i, bool reset)
     SP_ITEM(elemref)->setHidden(false);
     if (elemref->parent != container) {
         Inkscape::XML::Node *copy = phantom->duplicate(xml_doc);
-        copy->setAttribute("id", elemref_id.c_str());
+        copy->setAttribute("id", elemref_id);
         container->appendChildRepr(copy);
         Inkscape::GC::release(copy);
         elemref->deleteObject();

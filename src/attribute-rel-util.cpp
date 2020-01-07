@@ -130,7 +130,7 @@ void sp_attribute_clean_element(Node *repr, unsigned int flags) {
 
   // Do actual deleting (done after so as not to perturb List iterator).
   for(const auto & iter_d : attributesToDelete) {
-    repr->setAttribute( iter_d.c_str(), nullptr, false );
+    repr->setAttribute( iter_d, nullptr);
   }
 }
 
@@ -154,7 +154,7 @@ void sp_attribute_clean_style(Node *repr, unsigned int flags) {
   if( value.empty() ) {
       repr->setAttribute("style", nullptr );
   } else {
-      repr->setAttribute("style", value.c_str());
+      repr->setAttribute("style", value);
   }
 
   sp_repr_css_attr_unref( css );

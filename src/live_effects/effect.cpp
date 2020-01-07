@@ -1233,7 +1233,7 @@ Effect::processObjects(LPEAction lpe_action)
                     css->setAttribute("display", nullptr);
                 }
                 sp_repr_css_write_string(css,css_str);
-                elemnode->setAttribute("style", css_str.c_str());
+                elemnode->setAttribute("style", css_str);
                 break;
 
             default:

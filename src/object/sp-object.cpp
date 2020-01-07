@@ -1381,17 +1381,6 @@ gchar const *SPObject::getAttribute(gchar const *key, SPException *ex) const
     return (gchar const *) getRepr()->attribute(key);
 }
 
-void SPObject::setAttributeImpl(gchar const *key, gchar const *value, SPException *ex)
-{
-    g_assert(this->repr != nullptr);
-    /* If exception is not clear, return */
-    g_return_if_fail(SP_EXCEPTION_IS_OK(ex));
-
-    /// \todo fixme: Exception if object is NULL? */
-    //XML Tree being used here.
-    getRepr()->setAttribute(key, value);
-}
-
 void SPObject::setAttribute(Inkscape::Util::const_char_ptr key,
                             Inkscape::Util::const_char_ptr value, SPException *ex)
 {
@@ -1610,6 +1599,17 @@ Glib::ustring SPObject::textualContent() const
         }
     }
     return text;
+}
+
+void SPObject::setAttributeImpl(gchar const *key, gchar const *value, SPException *ex)
+{
+    g_assert(this->repr != nullptr);
+    /* If exception is not clear, return */
+    g_return_if_fail(SP_EXCEPTION_IS_OK(ex));
+
+    /// \todo fixme: Exception if object is NULL? */
+    //XML Tree being used here.
+    getRepr()->setAttribute(key, value);
 }
 
 // For debugging: Print SP tree structure.

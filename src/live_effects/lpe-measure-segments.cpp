@@ -351,18 +351,18 @@ LPEMeasureSegments::createArrowMarker(Glib::ustring mode)
             Inkscape::XML::Node *arrow_data = arrow->firstChild();
             if (arrow_data) {
                 arrow_data->setAttribute("transform", nullptr);
-                arrow_data->setAttribute("style", style.c_str());
+                arrow_data->setAttribute("style", style);
             }
         }
     } else {
         arrow = xml_doc->createElement("svg:marker");
-        arrow->setAttribute("id", mode.c_str());
+        arrow->setAttribute("id", mode);
         Glib::ustring classarrow = itemid;
         classarrow += " ";
         classarrow += lpobjid;
         classarrow += " measure-arrow-marker";
-        arrow->setAttribute("class", classarrow.c_str());
-        arrow->setAttribute("inkscape:stockid", mode.c_str());
+        arrow->setAttribute("class", classarrow);
+        arrow->setAttribute("inkscape:stockid", mode);
         arrow->setAttribute("orient", "auto");
         arrow->setAttribute("refX", "0.0");
         arrow->setAttribute("refY", "0.0");
@@ -383,10 +383,10 @@ LPEMeasureSegments::createArrowMarker(Glib::ustring mode)
         classarrowpath += " ";
         classarrowpath += lpobjid;
         classarrowpath += " measure-arrow";
-        arrow_path->setAttribute("class", classarrowpath.c_str());
+        arrow_path->setAttribute("class", classarrowpath);
         Glib::ustring arrowpath = mode + Glib::ustring("_path");
-        arrow_path->setAttribute("id", arrowpath.c_str());
-        arrow_path->setAttribute("style", style.c_str());
+        arrow_path->setAttribute("id", arrowpath);
+        arrow_path->setAttribute("style", style);
         arrow->addChild(arrow_path, nullptr);
         Inkscape::GC::release(arrow_path);
         elemref = SP_OBJECT(document->getDefs()->appendChildRepr(arrow));
@@ -428,16 +428,16 @@ LPEMeasureSegments::createTextLabel(Geom::Point pos, size_t counter, double leng
         classlabel += " ";
         classlabel += lpobjid;
         classlabel += " measure-label";
-        rtext->setAttribute("class", classlabel.c_str());
+        rtext->setAttribute("class", classlabel);
     } else {
         rtext = xml_doc->createElement("svg:text");
         rtext->setAttribute("xml:space", "preserve");
-        rtext->setAttribute("id", id.c_str());
+        rtext->setAttribute("id", id);
         Glib::ustring classlabel = itemid;
         classlabel += " ";
         classlabel += lpobjid;
         classlabel += " measure-label";
-        rtext->setAttribute("class", classlabel.c_str());
+        rtext->setAttribute("class", classlabel);
         rtext->setAttribute("sodipodi:insensitive", "true");
         rtext->setAttribute("transform", nullptr);
         sp_repr_set_svg_double(rtext, "x", pos[Geom::X]);
@@ -475,8 +475,8 @@ LPEMeasureSegments::createTextLabel(Geom::Point pos, size_t counter, double leng
     }
     Glib::ustring css_str;
     sp_repr_css_write_string(css,css_str);
-    rtext->setAttribute("style", css_str.c_str());
-    rtspan->setAttribute("style", css_str.c_str());
+    rtext->setAttribute("style", css_str);
+    rtspan->setAttribute("style", css_str);
     rtspan->setAttribute("transform", nullptr);
     sp_repr_css_attr_unref (css);
     length = Inkscape::Util::Quantity::convert(length, display_unit.c_str(), unit.get_abbreviation());
@@ -598,19 +598,19 @@ LPEMeasureSegments::createLine(Geom::Point start,Geom::Point end, Glib::ustring 
         g_free(line_str);
     } else {
         line = xml_doc->createElement("svg:path");
-        line->setAttribute("id", id.c_str());
+        line->setAttribute("id", id);
         if (main) {
             Glib::ustring classlinedim = itemid;
             classlinedim += " ";
             classlinedim += lpobjid;
             classlinedim += " measure-DIM-line measure-line";
-            line->setAttribute("class", classlinedim.c_str());
+            line->setAttribute("class", classlinedim);
         } else {
             Glib::ustring classlinehelper = itemid;
             classlinehelper += " ";
             classlinehelper += lpobjid;
             classlinehelper += " measure-helper-line measure-line";
-            line->setAttribute("class", classlinehelper.c_str());
+            line->setAttribute("class", classlinehelper);
         }
         gchar * line_str = sp_svg_write_path( line_pathv );
         line->setAttribute("d" , line_str);
@@ -655,7 +655,7 @@ LPEMeasureSegments::createLine(Geom::Point start,Geom::Point end, Glib::ustring 
     sp_repr_css_attr_add_from_string(css, style.c_str());
     Glib::ustring css_str;
     sp_repr_css_write_string(css,css_str);
-    line->setAttribute("style", css_str.c_str());
+    line->setAttribute("style", css_str);
     if (!elemref) {
         elemref = document->getRoot()->appendChildRepr(line);
         Inkscape::GC::release(line);

@@ -169,12 +169,12 @@ Inkscape::XML::Node* SPUse::write(Inkscape::XML::Document *xml_doc, Inkscape::XM
 
     sp_repr_set_svg_double(repr, "x", this->x.computed);
     sp_repr_set_svg_double(repr, "y", this->y.computed);
-    repr->setAttribute("width", sp_svg_length_write_with_units(this->width).c_str());
-    repr->setAttribute("height", sp_svg_length_write_with_units(this->height).c_str());
+    repr->setAttribute("width", sp_svg_length_write_with_units(this->width));
+    repr->setAttribute("height", sp_svg_length_write_with_units(this->height));
 
     if (this->ref->getURI()) {
         auto uri_string = this->ref->getURI()->str();
-        repr->setAttribute("xlink:href", uri_string.c_str());
+        repr->setAttribute("xlink:href", uri_string);
     }
 
     SPShape *shape = dynamic_cast<SPShape *>(child);

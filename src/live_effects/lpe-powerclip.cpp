@@ -153,14 +153,14 @@ void LPEPowerClip::add()
                     Glib::ustring newclip = Glib::ustring("clipath_") + getId();
                     Glib::ustring uri = Glib::ustring("url(#") + newclip + Glib::ustring(")");
                     parent = clip_path->getRepr()->duplicate(xml_doc);
-                    parent->setAttribute("id", newclip.c_str());
+                    parent->setAttribute("id", newclip);
                     Inkscape::XML::Node *defs = clip_path->getRepr()->parent();
                     clip_path = SP_OBJECT(document->getDefs()->appendChildRepr(parent));
                     Inkscape::GC::release(parent);
-                    sp_lpe_item->setAttribute("clip-path", uri.c_str());
+                    sp_lpe_item->setAttribute("clip-path", uri);
                     SPLPEItem *childitemdel = dynamic_cast<SPLPEItem *>(clip_path->childList(true).back());
                     if (childitemdel) {
-                        childitemdel->setAttribute("id", getId().c_str());
+                        childitemdel->setAttribute("id", getId());
                         return;
                     }
                 }
@@ -173,7 +173,7 @@ void LPEPowerClip::add()
         if (elemref) {
             elemref->setAttribute("style", "fill-rule:evenodd");
             elemref->setAttribute("class", "powerclip");
-            elemref->setAttribute("id", getId().c_str());
+            elemref->setAttribute("id", getId());
             gchar *str = sp_svg_write_path(getClipPathvector());
             elemref->setAttribute("d", str);
             g_free(str);

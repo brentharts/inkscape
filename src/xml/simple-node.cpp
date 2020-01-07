@@ -318,7 +318,7 @@ void SimpleNode::setContent(gchar const *content) {
 }
 
 void
-SimpleNode::setAttributeImpl(gchar const *name, gchar const *value)
+SimpleNode::setAttributeImpl(gchar const *name, gchar const *value, bool is_interactive)
 {
     g_return_if_fail(name && *name);
 

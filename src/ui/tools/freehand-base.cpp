@@ -232,7 +232,7 @@ static void spdc_paste_curve_as_freehand_shape(Geom::PathVector const &newpath, 
     }
     Inkscape::SVGOStringStream os;
     os << scale;
-    lpe->getRepr()->setAttribute("prop_scale", os.str().c_str());
+    lpe->getRepr()->setAttribute("prop_scale", os.str());
     DocumentUndo::setUndoSensitive(document, saved);
 }
 
@@ -343,7 +343,7 @@ static void spdc_apply_bend_shape(gchar const *svgd, FreehandBase *dc, SPItem *i
     }
     Inkscape::SVGOStringStream os;
     os << scale;
-    lpe->getRepr()->setAttribute("prop_scale", os.str().c_str());
+    lpe->getRepr()->setAttribute("prop_scale", os.str());
     lpe->getRepr()->setAttribute("scale_y_rel", "false");
     lpe->getRepr()->setAttribute("vertical", "false");
     static_cast<LPEBendPath*>(lpe)->bend_path.paste_param_path(svgd);

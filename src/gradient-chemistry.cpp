@@ -1503,7 +1503,7 @@ static void sp_gradient_repr_set_link(Inkscape::XML::Node *repr, SPGradient *lin
     if (link) {
         Glib::ustring ref("#");
         ref += link->getId();
-        repr->setAttribute("xlink:href", ref.c_str());
+        repr->setAttribute("xlink:href", ref);
     } else {
         repr->setAttribute("xlink:href", nullptr);
     }

@@ -415,7 +415,7 @@ void SPGradient::set(SPAttributeEnum key, gchar const *value)
                 Glib::ustring paintVal = ( this->hasStops() && (this->getStopCount() == 0) ) ? "solid" : "gradient";
 
                 if ( paintVal != value ) {
-                    this->setAttribute( "osb:paint", paintVal.c_str(), nullptr );
+                    this->setAttribute( "osb:paint", paintVal, nullptr );
                     modified = true;
                 }
             }
@@ -631,7 +631,7 @@ Inkscape::XML::Node *SPGradient::write(Inkscape::XML::Document *xml_doc, Inkscap
 
     if (this->ref->getURI()) {
         auto uri_string = this->ref->getURI()->str();
-        repr->setAttribute("xlink:href", uri_string.c_str());
+        repr->setAttribute("xlink:href", uri_string);
     }
 
     if ((flags & SP_OBJECT_WRITE_ALL) || this->units_set) {
@@ -903,7 +903,7 @@ SPGradient::repr_write_vector()
         /* strictly speaking, offset an SVG <number> rather than a CSS one, but exponents make no
          * sense for offset proportions. */
         os << "stop-color:" << stop.color.toString() << ";stop-opacity:" << stop.opacity;
-        child->setAttribute("style", os.str().c_str());
+        child->setAttribute("style", os.str());
         /* Order will be reversed here */
         l.push_back(child);
     }

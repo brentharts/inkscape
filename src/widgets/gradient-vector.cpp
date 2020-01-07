@@ -495,13 +495,13 @@ static void verify_grad(SPGradient *gradient)
 
         child = xml_doc->createElement("svg:stop");
         sp_repr_set_css_double(child, "offset", 0.0);
-        child->setAttribute("style", os.str().c_str());
+        child->setAttribute("style", os.str());
         gradient->getRepr()->addChild(child, nullptr);
         Inkscape::GC::release(child);
 
         child = xml_doc->createElement("svg:stop");
         sp_repr_set_css_double(child, "offset", 1.0);
-        child->setAttribute("style", os.str().c_str());
+        child->setAttribute("style", os.str());
         gradient->getRepr()->addChild(child, nullptr);
         Inkscape::GC::release(child);
         return;
