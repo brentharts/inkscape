@@ -202,7 +202,34 @@ public:
      */
 
     void setAttribute(Inkscape::Util::const_char_ptr key,
-                      Inkscape::Util::const_char_ptr value, bool is_interactive=false);
+                      Inkscape::Util::const_char_ptr value,
+                      bool is_interactive=false) {
+        this->setAttributeImpl(key.data(), value.data(), is_interactive);
+    }
+
+    /**
+     * @brief Change an attribute of this node. Empty string deletes the attribute.
+     *
+     * @param key Name of the attribute to change
+     * @param value The new value of the attribute
+     *
+     */
+    void setAttributeOrDeleteIfEmpty(Inkscape::Util::const_char_ptr key,
+                                     Inkscape::Util::const_char_ptr value) {
+        this->setAttributeImpl(key.data(),
+                (value.data() == nullptr || value.data()[0]=='\0') ? nullptr : value.data(), false);
+    }
+
+
+    /**
+     * @brief Remove an attribute of this node
+     *
+     * @param key Name of the attribute to delete
+     *
+     */
+    void removeAttribute(Inkscape::Util::const_char_ptr key) {
+        this->setAttributeImpl(key.data(), nullptr, false);
+    }
 
     //@}
     /**

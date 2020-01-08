@@ -592,7 +592,7 @@ unsigned int sp_repr_set_svg_double(Inkscape::XML::Node *repr, gchar const *key,
 unsigned int sp_repr_set_svg_non_default_double(Inkscape::XML::Node *repr, gchar const *key, double val, double default_value)
 {
     if (val==default_value){
-        repr->setAttribute(key, nullptr);
+        repr->removeAttribute(key);
         return true;
     }
     return sp_repr_set_svg_double(repr, key, val);

@@ -321,7 +321,7 @@ LPEMirrorSymmetry::cloneD(SPObject *orig, SPObject *dest, bool reset)
             g_free(str);
             c->unref();
         } else {
-            dest->getRepr()->setAttribute("d", nullptr);
+            dest->getRepr()->removeAttribute("d");
         }
     }
     if (reset) {

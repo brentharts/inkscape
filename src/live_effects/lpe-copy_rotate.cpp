@@ -77,7 +77,7 @@ LPECopyRotate::LPECopyRotate(LivePathEffectObject *lpeobject) :
     _provides_knotholder_entities = true;
     //0.92 compatibility
     if (this->getRepr()->attribute("fuse_paths") && strcmp(this->getRepr()->attribute("fuse_paths"), "true") == 0){
-        this->getRepr()->setAttribute("fuse_paths", nullptr);
+        this->getRepr()->removeAttribute("fuse_paths");
         this->getRepr()->setAttribute("method", "kaleidoskope");
         this->getRepr()->setAttribute("mirror_copies", "true");
     };
@@ -255,7 +255,7 @@ LPECopyRotate::cloneD(SPObject *orig, SPObject *dest, Geom::Affine transform, bo
             g_free(str);
             c->unref();
         } else {
-            path->getRepr()->setAttribute("d", nullptr);
+            path->getRepr()->removeAttribute("d");
         }
         
     }

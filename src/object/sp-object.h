@@ -712,6 +712,13 @@ public:
                       Inkscape::Util::const_char_ptr value,
                       SPException *ex=nullptr);
 
+    void setAttributeOrDeleteIfEmpty(Inkscape::Util::const_char_ptr key,
+                                     Inkscape::Util::const_char_ptr value,
+                                     SPException *ex=nullptr) {
+        this->setAttributeImpl(key.data(),
+                               (value.data() == nullptr || value.data()[0]=='\0') ? nullptr : value.data(), ex);
+    }
+
     /**
      * Read value of key attribute from XML node into object.
      */

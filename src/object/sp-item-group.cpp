@@ -407,7 +407,7 @@ sp_recursive_scale_text_size(Inkscape::XML::Node *repr, double scale){
                 sp_repr_css_set_property(css, "font-size", os.str().c_str());
                 Glib::ustring css_str;
                 sp_repr_css_write_string(css,css_str);
-                repr->setAttribute("style", css_str);
+                repr->setAttributeOrDeleteIfEmpty("style", css_str);
             }
         }
         w = nullptr;
@@ -422,7 +422,7 @@ sp_recursive_scale_text_size(Inkscape::XML::Node *repr, double scale){
                 sp_repr_css_set_property(css, "letter-spacing", os.str().c_str());
                 Glib::ustring css_str;
                 sp_repr_css_write_string(css,css_str);
-                repr->setAttribute("style", css_str);
+                repr->setAttributeOrDeleteIfEmpty("style", css_str);
             }
         }
         w = nullptr;
@@ -437,7 +437,7 @@ sp_recursive_scale_text_size(Inkscape::XML::Node *repr, double scale){
                 sp_repr_css_set_property(css, "word-spacing", os.str().c_str());
                 Glib::ustring css_str;
                 sp_repr_css_write_string(css,css_str);
-                repr->setAttribute("style", css_str);
+                repr->setAttributeOrDeleteIfEmpty("style", css_str);
             }
         }
         gchar const *dx = repr->attribute("dx");

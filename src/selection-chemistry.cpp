@@ -1768,7 +1768,7 @@ void ObjectSet::removeTransform()
 {
     auto items = xmlNodes();
     for (auto l=items.begin();l!=items.end() ;++l) {
-        (*l)->setAttribute("transform", nullptr);
+        (*l)->removeAttribute("transform");
     }
 
     if(document())
@@ -2916,7 +2916,7 @@ void ObjectSet::cloneOriginalPathLPE(bool allow_transforms)
         Inkscape::XML::Node *lpe_repr = xml_doc->createElement("inkscape:path-effect");
         if (multiple) {
             lpe_repr->setAttribute("effect", "fill_between_many");
-            lpe_repr->setAttribute("linkedpaths", os.str());
+            lpe_repr->setAttributeOrDeleteIfEmpty("linkedpaths", os.str());
             lpe_repr->setAttribute("applied", "true");
         } else {
             lpe_repr->setAttribute("effect", "clone_original");
@@ -3192,7 +3192,7 @@ void ObjectSet::toSymbol()
         symbol_repr->setAttribute("inkscape:transform-center-y",
                                   the_group->getAttribute("inkscape:transform-center-y"));
 
-        the_group->setAttribute("style", nullptr);
+        the_group->removeAttribute("style");
 
     }
 
@@ -3874,8 +3874,9 @@ void ObjectSet::setClipGroup()
     // add the new clone to the top of the original's parent
     gchar const *mask_id = SPClipPath::create(templist, doc);
 
-
-    outer->setAttribute("clip-path", g_strdup_printf("url(#%s)", mask_id));
+    char* tmp = g_strdup_printf("url(#%s)", mask_id);
+    outer->setAttribute("clip-path", tmp);
+    g_free(tmp);
 
     Inkscape::GC::release(clone);
 
@@ -4153,10 +4154,10 @@ void ObjectSet::unsetMask(const bool apply_clip_path, const bool skip_undo) {
                 copy->setAttribute("d", copy->attribute("inkscape:original-d"));
             } else if (copy->attribute("inkscape:original-d")) {
                 copy->setAttribute("d", copy->attribute("inkscape:original-d"));
-                copy->setAttribute("inkscape:original-d", nullptr);
+                copy->removeAttribute("inkscape:original-d");
             } else if (!copy->attribute("inkscape:path-effect") && !SP_IS_PATH(&child)) {
-                copy->setAttribute("d", nullptr);
-                copy->setAttribute("inkscape:original-d", nullptr);
+                copy->removeAttribute("d");
+                copy->removeAttribute("inkscape:original-d");
             }
             items_to_move.push_back(copy);
         }

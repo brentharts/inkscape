@@ -174,7 +174,7 @@ Inkscape::XML::Node* SPUse::write(Inkscape::XML::Document *xml_doc, Inkscape::XM
 
     if (this->ref->getURI()) {
         auto uri_string = this->ref->getURI()->str();
-        repr->setAttribute("xlink:href", uri_string);
+        repr->setAttributeOrDeleteIfEmpty("xlink:href", uri_string);
     }
 
     SPShape *shape = dynamic_cast<SPShape *>(child);
@@ -711,11 +711,11 @@ SPItem *SPUse::unlink() {
     Inkscape::GC::release(repr);
 
     // Remove tiled clone attrs.
-    copy->setAttribute("inkscape:tiled-clone-of", nullptr);
-    copy->setAttribute("inkscape:tile-w", nullptr);
-    copy->setAttribute("inkscape:tile-h", nullptr);
-    copy->setAttribute("inkscape:tile-cx", nullptr);
-    copy->setAttribute("inkscape:tile-cy", nullptr);
+    copy->removeAttribute("inkscape:tiled-clone-of");
+    copy->removeAttribute("inkscape:tile-w");
+    copy->removeAttribute("inkscape:tile-h");
+    copy->removeAttribute("inkscape:tile-cx");
+    copy->removeAttribute("inkscape:tile-cy");
 
     // Establish the succession and let go of our object.
     this->setSuccessor(unlinked);

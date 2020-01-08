@@ -1070,7 +1070,7 @@ Inkscape::XML::Node* SPObject::write(Inkscape::XML::Document *doc, Inkscape::XML
     if (!repr && (flags & SP_OBJECT_WRITE_BUILD)) {
         repr = this->getRepr()->duplicate(doc);
         if (!( flags & SP_OBJECT_WRITE_EXT )) {
-            repr->setAttribute("inkscape:collect", nullptr);
+            repr->removeAttribute("inkscape:collect");
         }
     } else if (repr) {
         repr->setAttribute("id", this->getId());
@@ -1086,7 +1086,7 @@ Inkscape::XML::Node* SPObject::write(Inkscape::XML::Document *doc, Inkscape::XML
         {
             repr->setAttribute("inkscape:collect", "always");
         } else {
-            repr->setAttribute("inkscape:collect", nullptr);
+            repr->removeAttribute("inkscape:collect");
         }
 
         if (style) {
@@ -1103,12 +1103,7 @@ Inkscape::XML::Node* SPObject::write(Inkscape::XML::Document *doc, Inkscape::XML
                 Glib::ustring s_cleaned = sp_attribute_clean_style( repr, s.c_str(), flags ); 
             }
 
-            if( s.empty() ) {
-                repr->setAttribute("style", nullptr);
-            } else {
-                repr->setAttribute("style", s);
-            }
-
+            repr->setAttributeOrDeleteIfEmpty("style", s);
         } else {
             /** \todo I'm not sure what to do in this case.  Bug #1165868
              * suggests that it can arise, but the submitter doesn't know
@@ -1384,7 +1379,7 @@ gchar const *SPObject::getAttribute(gchar const *key, SPException *ex) const
 void SPObject::setAttribute(Inkscape::Util::const_char_ptr key,
                             Inkscape::Util::const_char_ptr value, SPException *ex)
 {
-    this->setAttributeImpl(key.ptr, value.ptr, ex);
+    this->setAttributeImpl(key.data(), value.data(), ex);
 }
 
 

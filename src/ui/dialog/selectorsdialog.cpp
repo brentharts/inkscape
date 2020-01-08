@@ -1129,7 +1129,7 @@ void SelectorsDialog::_removeClass(SPObject *obj, const Glib::ustring &className
         }
         REMOVE_SPACES(classAttr);
         if (classAttr.empty()) {
-            obj->getRepr()->setAttribute("class", nullptr);
+            obj->getRepr()->removeAttribute("class");
         } else {
             obj->getRepr()->setAttribute("class", classAttr);
         }

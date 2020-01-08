@@ -267,7 +267,7 @@ void SPGradient::build(SPDocument *document, Inkscape::XML::Node *repr)
 {
     // Work-around in case a swatch had been marked for immediate collection:
     if ( repr->attribute("osb:paint") && repr->attribute("inkscape:collect") ) {
-        repr->setAttribute("inkscape:collect", nullptr);
+        repr->removeAttribute("inkscape:collect");
     }
 
     SPPaintServer::build(document, repr);
@@ -631,7 +631,7 @@ Inkscape::XML::Node *SPGradient::write(Inkscape::XML::Document *xml_doc, Inkscap
 
     if (this->ref->getURI()) {
         auto uri_string = this->ref->getURI()->str();
-        repr->setAttribute("xlink:href", uri_string);
+        repr->setAttributeOrDeleteIfEmpty("xlink:href", uri_string);
     }
 
     if ((flags & SP_OBJECT_WRITE_ALL) || this->units_set) {
@@ -675,7 +675,7 @@ Inkscape::XML::Node *SPGradient::write(Inkscape::XML::Document *xml_doc, Inkscap
             repr->setAttribute( "osb:paint", "gradient" );
         }
     } else {
-        repr->setAttribute( "osb:paint", nullptr );
+        repr->removeAttribute("osb:paint");
     }
 
 #ifdef OBJECT_TRACE

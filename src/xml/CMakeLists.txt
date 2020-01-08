@@ -5,7 +5,6 @@ set(xml_SRC
 	croco-node-iface.cpp
 	event.cpp
 	log-builder.cpp
-	node.cpp
 	node-fns.cpp
 	quote.cpp
 	repr.cpp

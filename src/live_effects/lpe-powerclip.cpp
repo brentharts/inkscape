@@ -42,7 +42,7 @@ LPEPowerClip::LPEPowerClip(LivePathEffectObject *lpeobject)
     _legacy = false;
     // legazy fix between 0.92.4 launch and 1.0beta1
     if (this->getRepr()->attribute("is_inverse")) {
-        this->getRepr()->setAttribute("is_inverse", nullptr);
+        this->getRepr()->removeAttribute("is_inverse");
         _legacy = true;
     }
 }

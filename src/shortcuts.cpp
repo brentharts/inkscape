@@ -614,9 +614,7 @@ void sp_shortcut_add_to_file(char const *action, unsigned int const shortcut) {
     Inkscape::XML::Node *newnode;
     newnode = doc->createElement("bind");
     newnode->setAttribute("key", key);
-    if (!modifiers.empty()) {
-        newnode->setAttribute("modifiers", modifiers);
-    }
+    newnode->setAttributeOrDeleteIfEmpty("modifiers", modifiers);
     newnode->setAttribute("action", action);
     newnode->setAttribute("display", "true");
 
@@ -627,10 +625,7 @@ void sp_shortcut_add_to_file(char const *action, unsigned int const shortcut) {
         Inkscape::XML::Node *newnode;
         newnode = doc->createElement("bind");
         newnode->setAttribute("key", Glib::ustring(key).uppercase());
-        if (!modifiers.empty()) {
-            newnode->setAttribute("modifiers", modifiers);
-        }
-
+        newnode->setAttributeOrDeleteIfEmpty("modifiers", modifiers);
         newnode->setAttribute("action", action);
         doc->root()->appendChild(newnode);
     }
