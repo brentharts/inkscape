@@ -1117,7 +1117,7 @@ private:
         SPFilterPrimitive* prim = _dialog._primitive_list.get_selected();
         if(prim) {
 
-            _funcNode->setAttributeOrDeleteIfEmpty("type", _type.get_as_attribute());
+            _funcNode->setAttributeOrRemoveIfEmpty("type", _type.get_as_attribute());
 
             SPFilter* filter = _dialog._filter_modifier.get_selected_filter();
             filter->requestModified(SP_OBJECT_MODIFIED_FLAG);
@@ -2419,7 +2419,7 @@ bool FilterEffectsDialog::PrimitiveList::on_button_release_event(GdkEventButton*
                         const gchar *gres = repr->attribute("result");
                         if(!gres) {
                             result = SP_FILTER(prim->parent)->get_new_result_name();
-                            repr->setAttributeOrDeleteIfEmpty("result", result);
+                            repr->setAttributeOrRemoveIfEmpty("result", result);
                             in_val = result.c_str();
                         }
                         else
@@ -2993,7 +2993,7 @@ void FilterEffectsDialog::set_filternode_attr(const AttrWidget* input)
         SPFilter *filter = _filter_modifier.get_selected_filter();
         const gchar* name = (const gchar*)sp_attribute_name(input->get_attribute());
         if (filter && name && filter->getRepr()){
-            filter->setAttributeOrDeleteIfEmpty(name, input->get_as_attribute());
+            filter->setAttributeOrRemoveIfEmpty(name, input->get_as_attribute());
             filter->requestModified(SP_OBJECT_MODIFIED_FLAG);
         }
         _attr_lock = false;

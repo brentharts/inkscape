@@ -2916,7 +2916,7 @@ void ObjectSet::cloneOriginalPathLPE(bool allow_transforms)
         Inkscape::XML::Node *lpe_repr = xml_doc->createElement("inkscape:path-effect");
         if (multiple) {
             lpe_repr->setAttribute("effect", "fill_between_many");
-            lpe_repr->setAttributeOrDeleteIfEmpty("linkedpaths", os.str());
+            lpe_repr->setAttributeOrRemoveIfEmpty("linkedpaths", os.str());
             lpe_repr->setAttribute("applied", "true");
         } else {
             lpe_repr->setAttribute("effect", "clone_original");

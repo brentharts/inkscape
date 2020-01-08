@@ -1103,7 +1103,7 @@ Inkscape::XML::Node* SPObject::write(Inkscape::XML::Document *doc, Inkscape::XML
                 Glib::ustring s_cleaned = sp_attribute_clean_style( repr, s.c_str(), flags ); 
             }
 
-            repr->setAttributeOrDeleteIfEmpty("style", s);
+            repr->setAttributeOrRemoveIfEmpty("style", s);
         } else {
             /** \todo I'm not sure what to do in this case.  Bug #1165868
              * suggests that it can arise, but the submitter doesn't know

@@ -515,8 +515,8 @@ void Tracer::traceThread()
         totalNodeCount += result.getNodeCount();
 
         Inkscape::XML::Node *pathRepr = xml_doc->createElement("svg:path");
-        pathRepr->setAttributeOrDeleteIfEmpty("style", result.getStyle());
-        pathRepr->setAttributeOrDeleteIfEmpty("d",     result.getPathData());
+        pathRepr->setAttributeOrRemoveIfEmpty("style", result.getStyle());
+        pathRepr->setAttributeOrRemoveIfEmpty("d",     result.getPathData());
 
         if (nrPaths > 1)
             groupRepr->addChild(pathRepr, nullptr);

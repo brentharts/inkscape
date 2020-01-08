@@ -219,7 +219,7 @@ Inkscape::XML::Node* SPBox3D::write(Inkscape::XML::Document *xml_doc, Inkscape::
             SPDocument *doc = object->document;
             if (box->persp_ref->getURI()) {
                 auto uri_string = box->persp_ref->getURI()->str();
-                repr->setAttributeOrDeleteIfEmpty("inkscape:perspectiveID", uri_string);
+                repr->setAttributeOrRemoveIfEmpty("inkscape:perspectiveID", uri_string);
             } else {
                 Glib::ustring href = "#";
                 href += doc->getCurrentPersp3D()->getId();
@@ -1289,9 +1289,9 @@ SPGroup *box3d_convert_to_group(SPBox3D *box)
     SPObject *parent = box->parent;
     parent->appendChild(grepr);
     grepr->setPosition(pos);
-    grepr->setAttributeOrDeleteIfEmpty("style", style);
-    grepr->setAttributeOrDeleteIfEmpty("mask", mask);
-    grepr->setAttributeOrDeleteIfEmpty("clip-path", clip_path);
+    grepr->setAttributeOrRemoveIfEmpty("style", style);
+    grepr->setAttributeOrRemoveIfEmpty("mask", mask);
+    grepr->setAttributeOrRemoveIfEmpty("clip-path", clip_path);
 
     box->deleteObject(true);
 

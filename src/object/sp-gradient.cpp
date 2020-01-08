@@ -631,7 +631,7 @@ Inkscape::XML::Node *SPGradient::write(Inkscape::XML::Document *xml_doc, Inkscap
 
     if (this->ref->getURI()) {
         auto uri_string = this->ref->getURI()->str();
-        repr->setAttributeOrDeleteIfEmpty("xlink:href", uri_string);
+        repr->setAttributeOrRemoveIfEmpty("xlink:href", uri_string);
     }
 
     if ((flags & SP_OBJECT_WRITE_ALL) || this->units_set) {

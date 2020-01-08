@@ -276,7 +276,7 @@ LPECloneOriginal::cloneAttrbutes(SPObject *origin, SPObject *dest, const gchar *
     g_strfreev (styleattarray);
     Glib::ustring css_str;
     sp_repr_css_write_string(css_dest,css_str);
-    dest->getRepr()->setAttributeOrDeleteIfEmpty("style", css_str);
+    dest->getRepr()->setAttributeOrRemoveIfEmpty("style", css_str);
 }
 void
 LPECloneOriginal::doBeforeEffect (SPLPEItem const* lpeitem){

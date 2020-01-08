@@ -759,7 +759,7 @@ void Preferences::_setRawValue(Glib::ustring const &path, Glib::ustring const &v
 
     // set the attribute
     Inkscape::XML::Node *node = _getNode(node_key, true);
-    node->setAttributeOrDeleteIfEmpty(attr_key, value);
+    node->setAttributeOrRemoveIfEmpty(attr_key, value);
 
     if (_initialized) {
         cachedRawValue[path.c_str()] = RAWCACHE_CODE_VALUE + value;

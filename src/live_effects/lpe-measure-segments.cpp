@@ -362,7 +362,7 @@ LPEMeasureSegments::createArrowMarker(Glib::ustring mode)
         classarrow += lpobjid;
         classarrow += " measure-arrow-marker";
         arrow->setAttribute("class", classarrow);
-        arrow->setAttributeOrDeleteIfEmpty("inkscape:stockid", mode);
+        arrow->setAttributeOrRemoveIfEmpty("inkscape:stockid", mode);
         arrow->setAttribute("orient", "auto");
         arrow->setAttribute("refX", "0.0");
         arrow->setAttribute("refY", "0.0");
@@ -383,7 +383,7 @@ LPEMeasureSegments::createArrowMarker(Glib::ustring mode)
         classarrowpath += " ";
         classarrowpath += lpobjid;
         classarrowpath += " measure-arrow";
-        arrow_path->setAttributeOrDeleteIfEmpty("class", classarrowpath);
+        arrow_path->setAttributeOrRemoveIfEmpty("class", classarrowpath);
         Glib::ustring arrowpath = mode + Glib::ustring("_path");
         arrow_path->setAttribute("id", arrowpath);
         arrow_path->setAttribute("style", style);
@@ -475,8 +475,8 @@ LPEMeasureSegments::createTextLabel(Geom::Point pos, size_t counter, double leng
     }
     Glib::ustring css_str;
     sp_repr_css_write_string(css,css_str);
-    rtext->setAttributeOrDeleteIfEmpty("style", css_str);
-    rtspan->setAttributeOrDeleteIfEmpty("style", css_str);
+    rtext->setAttributeOrRemoveIfEmpty("style", css_str);
+    rtspan->setAttributeOrRemoveIfEmpty("style", css_str);
     rtspan->removeAttribute("transform");
     sp_repr_css_attr_unref (css);
     length = Inkscape::Util::Quantity::convert(length, display_unit.c_str(), unit.get_abbreviation());
@@ -598,7 +598,7 @@ LPEMeasureSegments::createLine(Geom::Point start,Geom::Point end, Glib::ustring 
         g_free(line_str);
     } else {
         line = xml_doc->createElement("svg:path");
-        line->setAttributeOrDeleteIfEmpty("id", id);
+        line->setAttributeOrRemoveIfEmpty("id", id);
         if (main) {
             Glib::ustring classlinedim = itemid;
             classlinedim += " ";
@@ -655,7 +655,7 @@ LPEMeasureSegments::createLine(Geom::Point start,Geom::Point end, Glib::ustring 
     sp_repr_css_attr_add_from_string(css, style.c_str());
     Glib::ustring css_str;
     sp_repr_css_write_string(css,css_str);
-    line->setAttributeOrDeleteIfEmpty("style", css_str);
+    line->setAttributeOrRemoveIfEmpty("style", css_str);
     if (!elemref) {
         elemref = document->getRoot()->appendChildRepr(line);
         Inkscape::GC::release(line);

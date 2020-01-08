@@ -151,7 +151,7 @@ void sp_attribute_clean_style(Node *repr, unsigned int flags) {
   // sp_repr_css_set( repr, css, "style"); // Don't use as it will cause loop.
   Glib::ustring value;
   sp_repr_css_write_string(css, value);
-  repr->setAttributeOrDeleteIfEmpty("style", value);
+  repr->setAttributeOrRemoveIfEmpty("style", value);
 
   sp_repr_css_attr_unref( css );
 }

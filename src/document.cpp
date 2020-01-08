@@ -370,11 +370,11 @@ SPDocument *SPDocument::createDoc(Inkscape::XML::Document *rdoc,
         // we can't use getAllEntries because this could produce non-SVG doubles
         Glib::ustring pagecolor = prefs->getString("/template/base/pagecolor");
 
-        rnew->setAttributeOrDeleteIfEmpty("pagecolor", pagecolor.data());
+        rnew->setAttributeOrRemoveIfEmpty("pagecolor", pagecolor.data());
 
         Glib::ustring bordercolor = prefs->getString("/template/base/bordercolor");
 
-        rnew->setAttributeOrDeleteIfEmpty("bordercolor", bordercolor.data());
+        rnew->setAttributeOrRemoveIfEmpty("bordercolor", bordercolor.data());
 
         sp_repr_set_svg_double(rnew, "borderopacity",
             prefs->getDouble("/template/base/borderopacity", 1.0));

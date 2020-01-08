@@ -197,7 +197,7 @@ void Inkscape::XML::rebase_hrefs(SPDocument *const doc, gchar const *const new_b
                 url = URI::from_native_filename(spabsref);
             }
         } else if (spns) {
-            ir->setAttributeOrDeleteIfEmpty("sodipodi:absref", url.toNativeFilename());
+            ir->setAttributeOrRemoveIfEmpty("sodipodi:absref", url.toNativeFilename());
         }
 
         if (!spns) {

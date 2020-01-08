@@ -685,7 +685,7 @@ SPStop *sp_vector_add_stop(SPGradient *vector, SPStop* prev_stop, SPStop* next_s
     sp_svg_write_color (c, sizeof(c), cnew);
     gdouble opacity = (gdouble) SP_RGBA32_A_F (cnew);
     os << "stop-color:" << c << ";stop-opacity:" << opacity <<";";
-    newstop->setAttributeOrDeleteIfEmpty("style", os.str());
+    newstop->setAttributeOrRemoveIfEmpty("style", os.str());
     Inkscape::GC::release(new_stop_repr);
 
     return newstop;

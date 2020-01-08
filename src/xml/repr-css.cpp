@@ -336,7 +336,7 @@ void sp_repr_css_set(Node *repr, SPCSSAttr *css, gchar const *attr)
      * SPObject::repr_attr_changed and thus updates the object's SPStyle. This update
      * results in another call to repr->setAttribute().
      */
-    repr->setAttributeOrDeleteIfEmpty(attr, value);
+    repr->setAttributeOrRemoveIfEmpty(attr, value);
 }
 
 /**

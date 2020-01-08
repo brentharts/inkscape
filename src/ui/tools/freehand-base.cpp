@@ -365,7 +365,7 @@ static void spdc_apply_simplify(std::string threshold, FreehandBase *dc, SPItem 
     Effect* lpe = SP_LPE_ITEM(item)->getCurrentLPE();
     // write simplify parameters:
     lpe->getRepr()->setAttribute("steps", "1");
-    lpe->getRepr()->setAttributeOrDeleteIfEmpty("threshold", threshold);
+    lpe->getRepr()->setAttributeOrRemoveIfEmpty("threshold", threshold);
     lpe->getRepr()->setAttribute("smooth_angles", "360");
     lpe->getRepr()->setAttribute("helper_size", "0");
     lpe->getRepr()->setAttribute("simplify_individual_paths", "false");

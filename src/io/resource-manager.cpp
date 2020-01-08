@@ -364,7 +364,7 @@ bool ResourceManagerImpl::fixupBrokenLinks(SPDocument *doc)
                 if ( mapping.find(href) != mapping.end() ) {
                     // TODO debug g_message("                     Found a replacement");
 
-                    ir->setAttributeOrDeleteIfEmpty( "xlink:href", mapping[href] );
+                    ir->setAttributeOrRemoveIfEmpty( "xlink:href", mapping[href] );
                     if ( ir->attribute( "sodipodi:absref" ) ) {
                         ir->removeAttribute("sodipodi:absref"); // Remove this attribute
                     }

@@ -1233,7 +1233,7 @@ Effect::processObjects(LPEAction lpe_action)
                     css->removeAttribute("display");
                 }
                 sp_repr_css_write_string(css,css_str);
-                elemnode->setAttributeOrDeleteIfEmpty("style", css_str);
+                elemnode->setAttributeOrRemoveIfEmpty("style", css_str);
                 break;
 
             default:

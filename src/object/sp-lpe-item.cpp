@@ -173,7 +173,7 @@ void SPLPEItem::modified(unsigned int flags) {
 Inkscape::XML::Node* SPLPEItem::write(Inkscape::XML::Document *xml_doc, Inkscape::XML::Node *repr, guint flags) {
     if (flags & SP_OBJECT_WRITE_EXT) {
         if ( hasPathEffect() ) {
-            repr->setAttributeOrDeleteIfEmpty("inkscape:path-effect", patheffectlist_svg_string(*this->path_effect_list));
+            repr->setAttributeOrRemoveIfEmpty("inkscape:path-effect", patheffectlist_svg_string(*this->path_effect_list));
         } else {
             repr->removeAttribute("inkscape:path-effect");
         }
@@ -611,7 +611,7 @@ void SPLPEItem::addPathEffect(std::string value, bool reset)
         }
         hreflist.push_back(value); // C++11: should be emplace_back std::move'd  (also the reason why passed by value to addPathEffect)
 
-        this->setAttributeOrDeleteIfEmpty("inkscape:path-effect", hreflist_svg_string(hreflist));
+        this->setAttributeOrRemoveIfEmpty("inkscape:path-effect", hreflist_svg_string(hreflist));
         // Make sure that ellipse is stored as <svg:path>
         if( SP_IS_GENERICELLIPSE(this)) {
             SP_GENERICELLIPSE(this)->write( this->getRepr()->document(), this->getRepr(), SP_OBJECT_WRITE_EXT );
@@ -663,7 +663,7 @@ void SPLPEItem::removeCurrentPathEffect(bool keep_paths)
         effect_->keep_paths = keep_paths;
         effect_->doOnRemove(this);
         this->path_effect_list->remove(lperef); //current lpe ref is always our 'own' pointer from the path_effect_list
-        this->setAttributeOrDeleteIfEmpty("inkscape:path-effect", patheffectlist_svg_string(*this->path_effect_list));
+        this->setAttributeOrRemoveIfEmpty("inkscape:path-effect", patheffectlist_svg_string(*this->path_effect_list));
         if (!keep_paths) {
             // Make sure that ellipse is stored as <svg:circle> or <svg:ellipse> if possible.
             if( SP_IS_GENERICELLIPSE(this)) {
@@ -727,7 +727,7 @@ void SPLPEItem::downCurrentPathEffect()
         }
     }
 
-    this->setAttributeOrDeleteIfEmpty("inkscape:path-effect", patheffectlist_svg_string(new_list));
+    this->setAttributeOrRemoveIfEmpty("inkscape:path-effect", patheffectlist_svg_string(new_list));
 
     sp_lpe_item_cleanup_original_path_recursive(this, false);
 }
@@ -746,7 +746,7 @@ void SPLPEItem::upCurrentPathEffect()
         std::iter_swap(cur_it, up_it);
     }
 
-    this->setAttributeOrDeleteIfEmpty("inkscape:path-effect", patheffectlist_svg_string(new_list));
+    this->setAttributeOrRemoveIfEmpty("inkscape:path-effect", patheffectlist_svg_string(new_list));
 
     sp_lpe_item_cleanup_original_path_recursive(this, false);
 }
@@ -1203,7 +1203,7 @@ void SPLPEItem::replacePathEffects( std::vector<LivePathEffectObject const *> co
         }
     }
 
-    this->setAttributeOrDeleteIfEmpty("inkscape:path-effect", hreflist_svg_string(hreflist));
+    this->setAttributeOrRemoveIfEmpty("inkscape:path-effect", hreflist_svg_string(hreflist));
 }
 
 /**

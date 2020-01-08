@@ -421,7 +421,7 @@ void SvgBuilder::_setBlendMode(Inkscape::XML::Node *node, GfxState *state)
     }
     Glib::ustring value;
     sp_repr_css_write_string(css, value);
-    node->setAttributeOrDeleteIfEmpty("style", value);
+    node->setAttributeOrRemoveIfEmpty("style", value);
     sp_repr_css_attr_unref(css);
 }
 /**
@@ -1290,12 +1290,12 @@ void SvgBuilder::_flushText() {
                 if ( same_coords[0] ) {
                     sp_repr_set_svg_double(tspan_node, "x", last_delta_pos[0]);
                 } else {
-                    tspan_node->setAttributeOrDeleteIfEmpty("x", x_coords);
+                    tspan_node->setAttributeOrRemoveIfEmpty("x", x_coords);
                 }
                 if ( same_coords[1] ) {
                     sp_repr_set_svg_double(tspan_node, "y", last_delta_pos[1]);
                 } else {
-                    tspan_node->setAttributeOrDeleteIfEmpty("y", y_coords);
+                    tspan_node->setAttributeOrRemoveIfEmpty("y", y_coords);
                 }
                 TRACE(("tspan content: %s\n", text_buffer.c_str()));
                 if ( glyphs_in_a_row > 1 ) {
@@ -1689,7 +1689,7 @@ Inkscape::XML::Node *SvgBuilder::_createImage(Stream *str, int width, int height
         auto *base64String = g_base64_encode(png_buffer.data(), png_buffer.size());
         auto png_data = std::string("data:image/png;base64,") + base64String;
         g_free(base64String);
-        image_node->setAttributeOrDeleteIfEmpty("xlink:href", png_data);
+        image_node->setAttributeOrRemoveIfEmpty("xlink:href", png_data);
     } else {
         fclose(fp);
         image_node->setAttribute("xlink:href", file_name);

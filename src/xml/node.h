@@ -214,7 +214,7 @@ public:
      * @param value The new value of the attribute
      *
      */
-    void setAttributeOrDeleteIfEmpty(Inkscape::Util::const_char_ptr key,
+    void setAttributeOrRemoveIfEmpty(Inkscape::Util::const_char_ptr key,
                                      Inkscape::Util::const_char_ptr value) {
         this->setAttributeImpl(key.data(),
                 (value.data() == nullptr || value.data()[0]=='\0') ? nullptr : value.data(), false);

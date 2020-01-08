@@ -657,9 +657,9 @@ static SPObject* delete_line_break(SPObject *root, SPObject *item, bool *next_is
     Inkscape::XML::Document *xml_doc = item->getRepr()->document();
     Inkscape::XML::Node *new_span_repr = xml_doc->createElement(span_name_for_text_object(root));
 
-    new_span_repr->setAttributeOrDeleteIfEmpty("dx", this_repr->attribute("dx"));
-    new_span_repr->setAttributeOrDeleteIfEmpty("dy", this_repr->attribute("dy"));
-    new_span_repr->setAttributeOrDeleteIfEmpty("rotate", this_repr->attribute("rotate"));
+    new_span_repr->setAttributeOrRemoveIfEmpty("dx", this_repr->attribute("dx"));
+    new_span_repr->setAttributeOrRemoveIfEmpty("dy", this_repr->attribute("dy"));
+    new_span_repr->setAttributeOrRemoveIfEmpty("rotate", this_repr->attribute("rotate"));
 
     SPObject *following_item = item;
     while (following_item->getNext() == nullptr) {
@@ -1379,7 +1379,7 @@ static void overwrite_style_with_string(SPObject *item, gchar const *style_strin
         style.mergeString(item_style_string);
     }
     Glib::ustring new_style_string = style.write();
-    item->setAttributeOrDeleteIfEmpty("style", new_style_string);
+    item->setAttributeOrRemoveIfEmpty("style", new_style_string);
 }
 
 // Move to style.h?

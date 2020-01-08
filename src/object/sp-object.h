@@ -712,7 +712,7 @@ public:
                       Inkscape::Util::const_char_ptr value,
                       SPException *ex=nullptr);
 
-    void setAttributeOrDeleteIfEmpty(Inkscape::Util::const_char_ptr key,
+    void setAttributeOrRemoveIfEmpty(Inkscape::Util::const_char_ptr key,
                                      Inkscape::Util::const_char_ptr value,
                                      SPException *ex=nullptr) {
         this->setAttributeImpl(key.data(),

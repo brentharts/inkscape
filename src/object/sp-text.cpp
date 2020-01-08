@@ -1302,7 +1302,7 @@ void TextTagAttributes::writeSingleAttributeVector(Inkscape::XML::Node *node, gc
             if (!string.empty()) string += ' ';
             string += it.write();
         }
-        node->setAttributeOrDeleteIfEmpty(key, string);
+        node->setAttributeOrRemoveIfEmpty(key, string);
     }
 }
 

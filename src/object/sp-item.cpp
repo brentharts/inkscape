@@ -768,13 +768,13 @@ Inkscape::XML::Node* SPItem::write(Inkscape::XML::Document *xml_doc, Inkscape::X
     if (item->clip_ref){
         if (item->clip_ref->getObject()) {
             auto value = item->clip_ref->getURI()->cssStr();
-            repr->setAttributeOrDeleteIfEmpty("clip-path", value);
+            repr->setAttributeOrRemoveIfEmpty("clip-path", value);
         }
     }
     if (item->mask_ref){
         if (item->mask_ref->getObject()) {
             auto value = item->mask_ref->getURI()->cssStr();
-            repr->setAttributeOrDeleteIfEmpty("mask", value);
+            repr->setAttributeOrRemoveIfEmpty("mask", value);
         }
     }
     if (item->_highlightColor){

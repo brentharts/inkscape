@@ -1032,7 +1032,7 @@ void DocumentProperties::addExternalScript(){
 
         Inkscape::XML::Document *xml_doc = desktop->doc()->getReprDoc();
         Inkscape::XML::Node *scriptRepr = xml_doc->createElement("svg:script");
-        scriptRepr->setAttributeOrDeleteIfEmpty("xlink:href", _script_entry.get_text());
+        scriptRepr->setAttributeOrRemoveIfEmpty("xlink:href", _script_entry.get_text());
         _script_entry.set_text("");
 
         xml_doc->root()->addChild(scriptRepr, nullptr);
