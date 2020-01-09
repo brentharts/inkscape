@@ -715,8 +715,8 @@ public:
     void setAttributeOrRemoveIfEmpty(Inkscape::Util::const_char_ptr key,
                                      Inkscape::Util::const_char_ptr value,
                                      SPException *ex=nullptr) {
-        this->setAttributeImpl(key.data(),
-                               (value.data() == nullptr || value.data()[0]=='\0') ? nullptr : value.data(), ex);
+        this->setAttribute(key.data(),
+                          (value.data() == nullptr || value.data()[0]=='\0') ? nullptr : value.data(), ex);
     }
 
     /**
@@ -781,8 +781,6 @@ private:
      * Must not be used on anything except elements.
      */
     Glib::ustring textualContent() const;
-
-    void setAttributeImpl(char const *key, char const *value, SPException *ex);
 
     /* Real handlers of repr signals */
 
