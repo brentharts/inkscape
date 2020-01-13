@@ -1608,9 +1608,29 @@ TextToolbar::wordspacing_value_changed()
     osfs << _word_spacing_adj->get_value() << "px"; // For now always use px
     sp_repr_css_set_property (css, "word-spacing", osfs.str().c_str());
 
-    // Apply word-spacing to selected objects.
     SPDesktop *desktop = SP_ACTIVE_DESKTOP;
-    sp_desktop_set_style (desktop, css, true, false);
+    if(_outer) {
+        // Apply word spacing to parent text directly.
+        for (auto i : desktop->getSelection()->items()) {
+            SPItem *item = dynamic_cast<SPItem *>(i);
+            if (dynamic_cast<SPText *>(item) || dynamic_cast<SPFlowtext *>(item)) {
+                // Scale by inverse of accumulated parent transform
+                SPCSSAttr *css_set = sp_repr_css_attr_new();
+                sp_repr_css_merge(css_set, css);
+                Geom::Affine const local(item->i2doc_affine());
+                double const ex(local.descrim());
+                if ((ex != 0.0) && (ex != 1.0)) {
+                    sp_css_attr_scale(css_set, 1 / ex);
+                }
+                recursively_set_properties(item, css_set);
+                sp_repr_css_attr_unref(css_set);
+            }
+        }
+    } else {
+        // Apply work-spacing to selected objects.
+        sp_desktop_set_style (desktop, css, true, false);
+    }
+
     // If no selected objects, set default.
     SPStyle query(SP_ACTIVE_DOCUMENT);
     int result_numbers =
