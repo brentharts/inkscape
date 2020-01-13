@@ -365,6 +365,25 @@ void AttrDialog::attr_reset_context(gint attr)
 }
 
 /**
+ * String which should be displayed in the table. Long values are truncated for better performance.
+ * @param value Attribute value
+ * @return `value` or `value[:limit] + "..."`
+ */
+static Glib::ustring make_renderval(gchar const *value)
+{
+    if (!value) {
+        return {};
+    }
+
+    if (g_utf8_strlen(value, -1) > 100) {
+        constexpr char const *UTF8ELLIPSIS = "\xE2\x80\xA6"; // U+2026
+        return Glib::ustring(value, 90) + UTF8ELLIPSIS;
+    }
+
+    return value;
+}
+
+/**
  * @brief AttrDialog::onAttrChanged
  * This is called when the XML has an updated attribute
  */
@@ -373,16 +392,7 @@ void AttrDialog::onAttrChanged(Inkscape::XML::Node *repr, const gchar * name, co
     if (_updating) {
         return;
     }
-    Glib::ustring renderval = "";
-    if (new_value) {
-        // We do not ever want to show a long value in-line (gtk hates big columns with multi-lines)
-        glong length = g_utf8_strlen(new_value, -1);
-        if(length > 100) {
-            renderval = Glib::ustring("[...]");
-        } else {
-            renderval = Glib::ustring(new_value);
-        }
-    }
+    auto renderval = make_renderval(new_value);
     for(auto iter: this->_store->children())
     {
         Gtk::TreeModel::Row row = *iter;
@@ -632,10 +642,7 @@ void AttrDialog::valueEdited (const Glib::ustring& path, const Glib::ustring& va
         }
         if(!value.empty()) {
             row[_attrColumns._attributeValue] = value;
-            Glib::ustring renderval = Glib::ustring("[...]");
-            if(value.length() <= 100) {
-                renderval = value;
-            }
+            auto renderval = make_renderval(value.c_str());
             row[_attrColumns._attributeValueRender] = renderval;
         }
         Inkscape::Selection *selection = _desktop->getSelection();
