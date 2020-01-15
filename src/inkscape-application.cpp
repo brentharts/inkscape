@@ -9,7 +9,6 @@
  */
 
 #include <iostream>
-
 #include <glibmm/i18n.h>  // Internationalization
 
 #ifdef HAVE_CONFIG_H
@@ -20,6 +19,7 @@
 #include "inkscape-window.h"
 
 #include "inkscape.h"             // Inkscape::Application
+#include "auto-save.h"            // Auto-save
 #include "desktop.h"              // Access to window
 #include "file.h"                 // sp_file_convert_dpi
 
@@ -340,6 +340,21 @@ InkscapeApplication::document_fix(InkscapeWindow* window)
 }
 
 
+/** Get a list of open documents (from document map).
+ */
+std::vector<SPDocument*>
+InkscapeApplication::get_documents()
+{
+    std::vector<SPDocument*> documents;
+    for (auto i : _documents) {
+        documents.push_back(i.first);
+    }
+    return documents;
+}
+
+
+
+
 // Take an already open document and create a new window, adding window to document map.
 InkscapeWindow*
 InkscapeApplication::window_open(SPDocument* document)
@@ -507,6 +522,9 @@ ConcreteInkscapeApplication<T>::ConcreteInkscapeApplication()
     // Native Language Support (shouldn't this always be used?).
     Inkscape::initialize_gettext();
 #endif
+
+    // Autosave
+    Inkscape::AutoSave::getInstance().init(this);
 
     // Don't set application name for now. We don't use it anywhere but
     // it overrides the name used for adding recently opened files and breaks the Gtk::RecentFilter
