@@ -18,10 +18,10 @@
 #include "inkscape-application.h"
 #include "inkscape-window.h"
 
-#include "inkscape.h"             // Inkscape::Application
 #include "auto-save.h"            // Auto-save
 #include "desktop.h"              // Access to window
 #include "file.h"                 // sp_file_convert_dpi
+#include "inkscape.h"             // Inkscape::Application
 
 #include "include/glibmm_version.h"
 
@@ -346,7 +346,7 @@ std::vector<SPDocument*>
 InkscapeApplication::get_documents()
 {
     std::vector<SPDocument*> documents;
-    for (auto & i : _documents) {
+    for (auto &i : _documents) {
         documents.push_back(i.first);
     }
     return documents;

@@ -23,11 +23,11 @@ private:
 
 public:
     AutoSave(const AutoSave &) = delete;
-    AutoSave& operator=(const AutoSave &) = delete;
+    AutoSave &operator=(const AutoSave &) = delete;
     AutoSave(AutoSave &&) = delete;
     AutoSave &operator=(AutoSave &&) = delete;
 
-    static AutoSave& getInstance()
+    static AutoSave &getInstance()
     {
         static AutoSave theInstance;
         return theInstance;

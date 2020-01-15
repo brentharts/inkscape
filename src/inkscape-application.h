@@ -73,7 +73,7 @@ public:
 
     void                  document_fix(InkscapeWindow* window);
 
-    std::vector<SPDocument*> get_documents();
+    std::vector<SPDocument *> get_documents();
 
     /******* Window *******/
     InkscapeWindow*       window_open(SPDocument* document);

@@ -15,14 +15,14 @@
 #include <iostream>
 #include <sstream>
 
-#include <glibmm/i18n.h>  // Internationalization
+#include <glibmm/i18n.h> // Internationalization
 #include <gtkmm.h>
 
 #include "auto-save.h"
 #include "document.h"
 #include "inkscape-application.h"
-
 #include "preferences.h"
+
 #include "extension/output.h"
 #include "io/sys.h"
 #include "xml/repr.h"
@@ -52,8 +52,12 @@ AutoSave::start()
 
     if (prefs->getBool("/options/autosave/enable", true)) {
         // Turn on autosave (timeout is in seconds).
-        guint32 timeout = prefs->getInt("/options/autosave/interval", 10) * 60;
-
+        guint32 timeout = std::max(prefs->getInt("/options/autosave/interval", 10), 1) * 60;
+        if (timeout > 60 * 60 * 24) {
+            // Sanity check
+            std::cerr << "AutoSave::start: auto-save interval set to greater than one day. Not enabling." << std::endl;
+            return;
+        }
         autosave_connection = Glib::signal_timeout().connect_seconds(sigc::mem_fun(*this, &AutoSave::save), timeout);
     }
 }
@@ -61,7 +65,7 @@ AutoSave::start()
 bool
 AutoSave::save()
 {
-    std::vector<SPDocument*> documents = _app->get_documents();
+    std::vector<SPDocument *> documents = _app->get_documents();
     if (documents.empty()) {
         // Nothing to save!
         return true;
@@ -70,7 +74,7 @@ AutoSave::save()
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
 
     // Find/create autosave directory
-    std::string autosave_dir = prefs->getString("/options/autosave/path");  // Filenames should be std::string
+    std::string autosave_dir = prefs->getString("/options/autosave/path"); // Filenames should be std::string
     if (autosave_dir.empty()) {
         autosave_dir = Glib::build_filename(Glib::get_user_cache_dir(), "inkscape");
     }
@@ -116,7 +120,7 @@ AutoSave::save()
 
             // Delete oldest files.
             int count = 0;
-            for (auto & file_name : file_names) {
+            for (auto &file_name : file_names) {
                 if (file_name.compare(0, base_name.size(), base_name) == 0) {
                     ++count;
                     if (count >= autosave_max) {
