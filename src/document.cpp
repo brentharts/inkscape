@@ -95,8 +95,6 @@ static unsigned long next_serial = 0;
 SPDocument::SPDocument() :
     keepalive(false),
     virgin(true),
-    modified_since_save(false),
-    modified_since_autosave(false),
     rdoc(nullptr),
     rroot(nullptr),
     root(nullptr),

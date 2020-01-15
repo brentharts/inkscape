@@ -346,12 +346,11 @@ std::vector<SPDocument*>
 InkscapeApplication::get_documents()
 {
     std::vector<SPDocument*> documents;
-    for (auto i : _documents) {
+    for (auto & i : _documents) {
         documents.push_back(i.first);
     }
     return documents;
 }
-
 
 
 

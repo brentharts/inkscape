@@ -19,30 +19,31 @@ namespace Inkscape {
 
 class AutoSave {
 private:
-    AutoSave() {}
+    AutoSave() = default;
 
 public:
-    AutoSave(const AutoSave&) = delete;
-    AutoSave& operator=(const AutoSave&) = delete;
+    AutoSave(const AutoSave &) = delete;
+    AutoSave& operator=(const AutoSave &) = delete;
     AutoSave(AutoSave &&) = delete;
     AutoSave &operator=(AutoSave &&) = delete;
 
-    static AutoSave& getInstance() {
+    static AutoSave& getInstance()
+    {
         static AutoSave theInstance;
         return theInstance;
     }
 
     static void restart();
-    void init(InkscapeApplication* app);
+    void init(InkscapeApplication *app);
     void start(); // Includes restarting.
     bool save();
 
 private:
-    InkscapeApplication* _app;
+    InkscapeApplication* _app = nullptr;
 };
 
 } // namespace Inkscape
-    
+
 #endif // INKSCAPE_AUTOSAVE_H
 
 /*

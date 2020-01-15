@@ -10,10 +10,10 @@
  *
  */
 
+#include <ctime>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
-#include <iomanip>
-#include <ctime>
 
 #include <glibmm/i18n.h>  // Internationalization
 #include <gtkmm.h>
@@ -75,7 +75,7 @@ AutoSave::save()
         autosave_dir = Glib::build_filename(Glib::get_user_cache_dir(), "inkscape");
     }
 
-    Glib::RefPtr<Gio::File> dir_file = Gio::File::create_for_path (autosave_dir);
+    Glib::RefPtr<Gio::File> dir_file = Gio::File::create_for_path(autosave_dir);
     if (!dir_file->query_exists()) {
         if (!dir_file->make_directory_with_parents()) {
             std::cerr << "InkscapeApplication::document_autosave: Failed to create autosave directory: " << Glib::filename_to_utf8(autosave_dir) << std::endl;
@@ -109,15 +109,15 @@ AutoSave::save()
 
             // Open directory
             Glib::Dir directory(autosave_dir);
-            std::vector<std::string> file_names (directory.begin(), directory.end());
+            std::vector<std::string> file_names(directory.begin(), directory.end());
 
             // Sort them so that oldest are last (file name encodes time).
             std::sort(file_names.begin(), file_names.end(), std::greater<std::string>());
 
             // Delete oldest files.
             int count = 0;
-            for (auto file_name : file_names) {
-                if (file_name.compare(0,base_name.size(),base_name) == 0) {
+            for (auto & file_name : file_names) {
+                if (file_name.compare(0, base_name.size(), base_name) == 0) {
                     ++count;
                     if (count >= autosave_max) {
                         // Delete (making room for one more).
@@ -145,7 +145,7 @@ AutoSave::save()
             FILE *file = Inkscape::IO::fopen_utf8name(path.c_str(), "w");
             gchar *errortext = nullptr;
             if (file) {
-                try{
+                try {
                     Inkscape::XML::Node *repr = document->getReprRoot();
                     sp_repr_save_stream(repr->document(), file, SP_SVG_NS_URI);
                 } catch (Inkscape::Extension::Output::no_extension_found &e) {
@@ -156,8 +156,7 @@ AutoSave::save()
                     g_free(safeUri);
                 }
                 fclose(file);
-            }
-            else {
+            } else {
                 gchar *safeUri = Inkscape::IO::sanitizeString(path.c_str());
                 errortext = g_strdup_printf(_("Autosave failed! File %s could not be saved."), safeUri);
                 g_free(safeUri);

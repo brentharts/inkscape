@@ -298,8 +298,8 @@ private:
 
     bool keepalive; ///< false if temporary document (e.g. to generate a PNG for display in a dialog).
     bool virgin ;   ///< Has the document never been touched?
-    bool modified_since_save;
-    bool modified_since_autosave;
+    bool modified_since_save = false;
+    bool modified_since_autosave = false;
     sigc::connection modified_connection;
     sigc::connection rerouting_connection;
 
