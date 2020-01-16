@@ -952,8 +952,8 @@ ConcreteInkscapeApplication<T>::process_document(SPDocument* document, std::stri
         shell();
     }
 
-    // If were doing one file at a time, assume we automatically export it if there's no filename given.
-    if (replace && _file_export.export_filename.empty()) {
+    // If were are using actions or are using the shell, don't export automatically.
+    if (_command_line_actions.empty() && !_use_shell) {
         // Save... can't use action yet.
         _file_export.do_export(document, output_path);
     }
