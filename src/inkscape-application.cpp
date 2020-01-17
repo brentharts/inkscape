@@ -1013,10 +1013,6 @@ ConcreteInkscapeApplication<T>::on_open(const Gio::Application::type_vec_files& 
             continue;
         }
 
-        // Add to recent menu
-        auto recentmanager = Gtk::RecentManager::get_default();
-        recentmanager->add_item (file->get_uri());
-
         // Process document (command line actions, shell, create window)
         process_document (document, file->get_path());
     }
