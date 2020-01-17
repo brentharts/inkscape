@@ -67,19 +67,6 @@ using Inkscape::IO::Resource::UIS;
 // flags are set. If the open flag is set and the command line not, the all the remainng arguments
 // after calling on_handle_local_options() are assumed to be filenames.
 
-InkscapeApplication::InkscapeApplication()
-    : _with_gui(true)
-    , _batch_process(false)
-    , _use_shell(false)
-    , _use_pipe(false)
-    , _active_document(nullptr)
-    , _active_selection(nullptr)
-    , _active_view(nullptr)
-    , _active_window(nullptr)
-    , _pdf_page(1)
-    , _pdf_poppler(false)
-{}
-
 // Add document to app.
 void
 InkscapeApplication::document_add(SPDocument* document)
@@ -641,7 +628,6 @@ ConcreteInkscapeApplication<T>::ConcreteInkscapeApplication()
 
     // Interface
     _start_main_option_section(_("Interface"));
-    this->add_main_option_entry(T::OPTION_TYPE_BOOL,     "without-gui",            'z', N_("Console interface only (no visible GUI)"),                                  "");
     this->add_main_option_entry(T::OPTION_TYPE_BOOL,     "with-gui",               'g', N_("With graphical user interface (required by some actions/verbs)"),           "");
     this->add_main_option_entry(T::OPTION_TYPE_BOOL,     "batch-process",         '\0', N_("Close GUI after executing all actions/verbs"),"");
     _start_main_option_section();
@@ -952,8 +938,8 @@ ConcreteInkscapeApplication<T>::process_document(SPDocument* document, std::stri
         shell();
     }
 
-    // If were are using actions or are using the shell, don't export automatically.
-    if (_command_line_actions.empty() && !_use_shell) {
+    // Only if --export-file, --export-type, or --export-overwrite are used.
+    if (_auto_export) {
         // Save... can't use action yet.
         _file_export.do_export(document, output_path);
     }
@@ -1186,28 +1172,71 @@ ConcreteInkscapeApplication<T>::on_handle_local_options(const Glib::RefPtr<Glib:
     auto base = Glib::VariantBase();
 
     // ================== GUI and Shell ================
-    if (options->contains("without-gui"))    _with_gui = false;
-    if (options->contains("with-gui"))       _with_gui = true;
+
+    // Use of most commmand line options turns off use of gui unless explicitly requested!
+    // Listed in order that they appear in constructor.
+    if (options->contains("pipe")                  ||
+
+        options->contains("export-file")           ||
+        options->contains("export-overwrite")      ||
+        options->contains("export-type")           ||
+
+        options->contains("export-area-page")      ||
+        options->contains("export-area-drawing")   ||
+        options->contains("export-area")           ||
+        options->contains("export-area-snap")      ||
+        options->contains("export-dpi")            ||
+        options->contains("export-width")          ||
+        options->contains("export-height")         ||
+        options->contains("export-margin")         ||
+        options->contains("export-height")         ||
+
+        options->contains("export-id")             ||
+        options->contains("export-id-only")        ||
+        options->contains("export-plain-svg")      ||
+        options->contains("export-ps-level")       ||
+        options->contains("export-pdf-version")    ||
+        options->contains("export-text-to_path")   ||
+        options->contains("export-latex")          ||
+        options->contains("export-ignore-filters") ||
+        options->contains("export-use-hints")      ||
+        options->contains("export-background")     ||
+        options->contains("export-background-opacity") ||
+        options->contains("export-text-to_path")   ||
+
+        options->contains("query-id")              ||
+        options->contains("query-x")               ||
+        options->contains("query-all")             ||
+        options->contains("query-y")               ||
+        options->contains("query-width")           ||
+        options->contains("query-height")          ||
+
+        options->contains("vacuum-defs")           ||
+        options->contains("select")                ||
+        options->contains("actions")               ||
+        options->contains("verb")                  ||
+        options->contains("shell")
+        ) {
+        _with_gui = false;
+    }
+
+    if (options->contains("with-gui")        ||
+        options->contains("batch-process")
+        ) {
+        _with_gui = true; // Override turning GUI off
+    }
+
     if (options->contains("batch-process"))  _batch_process = true;
     if (options->contains("shell"))          _use_shell = true;
     if (options->contains("pipe"))           _use_pipe  = true;
 
-    // Some options should preclude using gui!
-    if (options->contains("query-id")         ||
-        options->contains("query-x")          ||
-        options->contains("query-all")        ||
-        options->contains("query-y")          ||
-        options->contains("query-width")      ||
-        options->contains("query-height")     ||
-        options->contains("export-file")      ||
+
+    // Enable auto-export
+    if (options->contains("export-file")      ||
         options->contains("export-type")      ||
-        options->contains("export-overwrite") ||
-        options->contains("export-id")        ||
-        options->contains("export-plain-svg") ||
-        options->contains("export-text-to_path") ||
-        options->contains("pipe")
+        options->contains("export-overwrite")
         ) {
-        _with_gui = false;
+        _auto_export = true;
     }
 
     // ==================== ACTIONS ====================

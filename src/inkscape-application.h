@@ -100,23 +100,24 @@ public:
     // void unreference() { /*printf("unreference()\n");*/ }
 
 protected:
-    bool _with_gui;
-    bool _batch_process; // Temp
-    bool _use_shell;
-    bool _use_pipe;
-    int _pdf_page;
-    int _pdf_poppler;
-    InkscapeApplication();
+    bool _with_gui    = true;
+    bool _batch_process = false; // Temp
+    bool _use_shell   = false;
+    bool _use_pipe    = false;
+    bool _auto_export = false;
+    int _pdf_page     = 1;
+    int _pdf_poppler  = false;
+    InkscapeApplication() = default;
 
     // Documents are owned by the application which is responsible for opening/saving/exporting. WIP
     // std::vector<SPDocument*> _documents;   For a true headless version
     std::map<SPDocument*, std::vector<InkscapeWindow*> > _documents;
 
     // We keep track of these things so we don't need a window to find them (for headless operation).
-    SPDocument*               _active_document;
-    Inkscape::Selection*      _active_selection;
-    Inkscape::UI::View::View* _active_view;
-    InkscapeWindow*           _active_window;
+    SPDocument*               _active_document   = nullptr;
+    Inkscape::Selection*      _active_selection  = nullptr;
+    Inkscape::UI::View::View* _active_view       = nullptr;
+    InkscapeWindow*           _active_window     = nullptr;
 
     InkFileExportCmd _file_export;
 
