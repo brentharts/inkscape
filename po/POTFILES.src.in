@@ -10,7 +10,6 @@
 ../src/actions/actions-selection.cpp
 ../src/actions/actions-transform.cpp
 ../src/actions/actions-window.cpp
-../src/actions/selection.cpp
 ../src/auto-save.cpp
 ../src/context-fns.cpp
 ../src/desktop-events.cpp
