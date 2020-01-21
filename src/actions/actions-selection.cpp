@@ -11,6 +11,7 @@
 #include <iostream>
 
 #include <giomm.h>  // Not <gtkmm.h>! To eventually allow a headless version!
+#include <glibmm/i18n.h>
 
 #include "actions-selection.h"
 #include "actions-helper.h"
@@ -214,6 +215,7 @@ select_invert(Glib::ustring condition, InkscapeApplication* app)
     selection->setList(objects);
 }
 
+
 // Debug... print selected items
 void
 select_list(InkscapeApplication* app)
@@ -231,6 +233,21 @@ select_list(InkscapeApplication* app)
 }
 
 
+std::vector<std::vector<Glib::ustring>> raw_data_selection =
+{
+    {"select-clear",              "SelectClear",             "Select",     N_("Selection clear")                                    },
+    {"select",                    "Select",                  "Select",     N_("Select via ID (Deprecated)")                         },
+    {"unselect",                  "UnSelect",                "Select",     N_("Unselect via ID (Deprecated)")                       },
+    {"select-via-id",             "SelectViaId",             "Select",     N_("Select via ID")                                      },
+    {"unselect-via-id",           "UnselectViaId",           "Select",     N_("Unselect via ID")                                    },
+    {"select-via-class",          "SelectViaClass",          "Select",     N_("Select via class")                                   },
+    {"select-via-element",        "SelectViaElement",        "Select",     N_("Select via SVG element (e.g. 'rect').")              },
+    {"select-via-selector",       "SelectViaSelector",       "Select",     N_("Select via CSS selector")                            },
+    {"select-all",                "SelectAll",               "Select",     N_("Select all. Options: 'all' (every object including groups), 'layers', 'no-layers' (top level objects in layers), 'groups' (all groups including layers), 'no-groups' (all objects other than groups and layers, default).")},
+    {"select-invert",             "SelectInvert",            "Select",     N_("Invert selection. Options: 'all', 'layers', 'no-layers', 'groups', 'no-groups' (default).")},
+    {"select-list",               "SelectList",              "Select",     N_("Print a list of objects in current selection.")      }
+};
+
 template<class T>
 void
 add_actions_selection(ConcreteInkscapeApplication<T>* app)
@@ -246,6 +263,8 @@ add_actions_selection(ConcreteInkscapeApplication<T>* app)
     app->add_action_radio_string(  "select-all",         sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&select_all),                app), "null");
     app->add_action_radio_string(  "select-invert",      sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&select_invert),             app), "null");
     app->add_action(               "select-list",        sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&select_list),               app)        );
+
+    app->get_action_extra_data().add_data(raw_data_selection);
 }
 
 template void add_actions_selection(ConcreteInkscapeApplication<Gio::Application>* app);
