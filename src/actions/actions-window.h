@@ -1,21 +1,23 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 /*
- * Gio::Actions for selection tied to the application and without GUI.
+ * Gio::Actions for window handling tied to the application and with GUI.
  *
- * Copyright (C) 2018 Tavmjong Bah
+ * Copyright (C) 2020 Tavmjong Bah
  *
  * The contents of this file may be used under the GNU General Public License Version 2 or later.
  *
  */
 
-#ifndef INK_ACTIONS_SELECTION_H
-#define INK_ACTIONS_SELECTION_H
+#ifndef INK_ACTIONS_WINDOW_H
+#define INK_ACTIONS_WINDOW_H
 
 class InkscapeApplication;
+template<class T> class ConcreteInkscapeApplication;
 
-void add_actions_selection(InkscapeApplication* app);
+template<class T>
+void add_actions_window(ConcreteInkscapeApplication<T>* app);
 
-#endif // INK_ACTIONS_SELECTION_H
+#endif // INK_ACTIONS_WINDOW_H
 
 /*
   Local Variables:

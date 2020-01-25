@@ -218,16 +218,24 @@ set(inkscape_SRC
 
   inkscape-application.h
   inkscape-application.cpp
+  actions/actions-extra-data.h
+  actions/actions-extra-data.cpp
   actions/actions-base.h
   actions/actions-base.cpp
+  actions/actions-file.h
+  actions/actions-file.cpp
   actions/actions-helper.h
   actions/actions-helper.cpp
+  actions/actions-object.h
+  actions/actions-object.cpp
   actions/actions-output.h
   actions/actions-output.cpp
   actions/actions-selection.h
   actions/actions-selection.cpp
   actions/actions-transform.h
   actions/actions-transform.cpp
+  actions/actions-window.h
+  actions/actions-window.cpp
 
   inkview-application.h
   inkview-application.cpp
