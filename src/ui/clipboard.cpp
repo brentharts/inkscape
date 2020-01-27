@@ -1184,8 +1184,7 @@ void ClipboardManagerImpl::_applyPathEffect(SPItem *item, gchar const *effectsta
     }
 
     SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(item);
-    if (lpeitem)
-    {
+    if (lpeitem && effectstack) {
         std::istringstream iss(effectstack);
         std::string href;
         while (std::getline(iss, href, ';'))
