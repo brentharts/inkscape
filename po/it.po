@@ -72,7 +72,7 @@ msgstr "Sfocature"
 
 #: ../share/filters/filters.svg.h:12
 msgid "Edges are partly feathered out"
-msgstr "I bordi sono parzialmente spiumati"
+msgstr "I bordi sono parzialmente sfumati"
 
 #: ../share/filters/filters.svg.h:14
 msgid "Jigsaw Piece"
