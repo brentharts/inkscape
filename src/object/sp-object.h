@@ -34,9 +34,10 @@ class SPObject;
 #define SP_OBJECT_USER_MODIFIED_FLAG_A (1 << 5)
 #define SP_OBJECT_USER_MODIFIED_FLAG_B (1 << 6)
 #define SP_OBJECT_USER_MODIFIED_FLAG_C (1 << 7)
+#define SP_OBJECT_IDLE_UPDATE_CHECK (1 << 8)
 
 /* Convenience */
-#define SP_OBJECT_FLAGS_ALL 0xff
+#define SP_OBJECT_FLAGS_ALL 0x1ff
 
 /* Flags that mark object as modified */
 /* Object, Child, Style, Viewport, User */
