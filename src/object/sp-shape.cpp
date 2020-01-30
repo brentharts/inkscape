@@ -470,11 +470,19 @@ Geom::OptRect SPShape::bbox(Geom::Affine const &transform, SPItem::BBoxType bbox
     // the cache doesn't get called if the object is moved, so we need
     // to compare the transformations as well.
     bool cached = (bboxtype == SPItem::VISUAL_BBOX) ? bbox_vis_cache_is_valid : bbox_geom_cache_is_valid;
-    if (transform != bbox_transform_cache) {
+
+    auto delta = transform * bbox_transform_cache.inverse();
+    if(!delta.isTranslation()) {
         bbox_vis_cache_is_valid = false;
         bbox_geom_cache_is_valid = false;
     } else if (cached) {
-        return (bboxtype == SPItem::VISUAL_BBOX) ? bbox_vis_cache : bbox_geom_cache;
+        auto bbox_cache = (bboxtype == SPItem::VISUAL_BBOX) ? bbox_vis_cache : bbox_geom_cache;
+
+        // Offset the cached bbox by the translation amount (to avoid recalculation)
+        Geom::Point translation = transform.translation();
+        return Geom::Rect(
+            Geom::Point(bbox_cache->left(), bbox_cache->top()) + translation,
+            Geom::Point(bbox_cache->right(), bbox_cache->bottom()) + translation);
     }
 
     Geom::OptRect bbox;
