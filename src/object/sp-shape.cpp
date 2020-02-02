@@ -473,16 +473,18 @@ Geom::OptRect SPShape::bbox(Geom::Affine const &transform, SPItem::BBoxType bbox
     if(bboxtype == SPItem::VISUAL_BBOX) {
         bbox_vis_cache = either_bbox(transform, bboxtype,
             bbox_vis_cache_is_valid, bbox_vis_cache, bbox_vis_cache_transform);
-        if(bbox_vis_cache)
+        if(bbox_vis_cache) {
             bbox_vis_cache_transform = transform;
             bbox_vis_cache_is_valid = true;
+        }
         return bbox_vis_cache;
     } else {
         bbox_geom_cache = either_bbox(transform, bboxtype,
             bbox_geom_cache_is_valid, bbox_geom_cache, bbox_geom_cache_transform);
-        if(bbox_geom_cache)
+        if(bbox_geom_cache) {
             bbox_geom_cache_transform = transform;
             bbox_geom_cache_is_valid = true;
+        }
         return bbox_geom_cache;
     }
 }
@@ -493,7 +495,7 @@ Geom::OptRect SPShape::either_bbox(Geom::Affine const &transform, SPItem::BBoxTy
 
     // Return the cache if possible.
     auto delta = transform * transform_cache.inverse();
-    if (delta.isTranslation() && cache_is_valid) {
+    if (cache_is_valid && bbox_cache && delta.isTranslation()) {
 
         // Don't re-adjust the cache if we haven't moved
         if(!delta.isNonzeroTranslation()) {
