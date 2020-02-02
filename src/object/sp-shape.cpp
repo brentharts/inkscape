@@ -122,7 +122,7 @@ void SPShape::update(SPCtx* ctx, guint flags) {
     // Any update can change the bounding box,
     // so the cached version can no longer be used.
     // But the idle checker usually is just moving the objects around.
-    if(!(flags & SP_OBJECT_IDLE_UPDATE_CHECK)) {
+    if (!(flags & SP_OBJECT_IDLE_UPDATE_CHECK)) {
         bbox_vis_cache_is_valid = false;
         bbox_geom_cache_is_valid = false;
     }
@@ -470,18 +470,18 @@ Geom::OptRect SPShape::bbox(Geom::Affine const &transform, SPItem::BBoxType bbox
     // the cache doesn't get called if the object is moved, so we need
     // to compare the transformations as well.
 
-    if(bboxtype == SPItem::VISUAL_BBOX) {
-        bbox_vis_cache = either_bbox(transform, bboxtype,
-            bbox_vis_cache_is_valid, bbox_vis_cache, bbox_vis_cache_transform);
-        if(bbox_vis_cache) {
+    if (bboxtype == SPItem::VISUAL_BBOX) {
+        bbox_vis_cache =
+            either_bbox(transform, bboxtype, bbox_vis_cache_is_valid, bbox_vis_cache, bbox_vis_cache_transform);
+        if (bbox_vis_cache) {
             bbox_vis_cache_transform = transform;
             bbox_vis_cache_is_valid = true;
         }
         return bbox_vis_cache;
     } else {
-        bbox_geom_cache = either_bbox(transform, bboxtype,
-            bbox_geom_cache_is_valid, bbox_geom_cache, bbox_geom_cache_transform);
-        if(bbox_geom_cache) {
+        bbox_geom_cache =
+            either_bbox(transform, bboxtype, bbox_geom_cache_is_valid, bbox_geom_cache, bbox_geom_cache_transform);
+        if (bbox_geom_cache) {
             bbox_geom_cache_transform = transform;
             bbox_geom_cache_is_valid = true;
         }
@@ -489,7 +489,9 @@ Geom::OptRect SPShape::bbox(Geom::Affine const &transform, SPItem::BBoxType bbox
     }
 }
 
-Geom::OptRect SPShape::either_bbox(Geom::Affine const &transform, SPItem::BBoxType bboxtype, bool cache_is_valid, Geom::OptRect bbox_cache, Geom::Affine const &transform_cache) const {
+Geom::OptRect SPShape::either_bbox(Geom::Affine const &transform, SPItem::BBoxType bboxtype, bool cache_is_valid,
+                                   Geom::OptRect bbox_cache, Geom::Affine const &transform_cache) const
+{
 
     Geom::OptRect bbox;
 
@@ -498,19 +500,20 @@ Geom::OptRect SPShape::either_bbox(Geom::Affine const &transform, SPItem::BBoxTy
     if (cache_is_valid && bbox_cache && delta.isTranslation()) {
 
         // Don't re-adjust the cache if we haven't moved
-        if(!delta.isNonzeroTranslation()) {
+        if (!delta.isNonzeroTranslation()) {
             return bbox_cache;
         }
 
         // Remove rotate and skew from both transformations as they cause bbox growth
-        auto prev = Geom::Affine(transform_cache[0], 0.0, 0.0, transform_cache[3], transform_cache[4], transform_cache[5]);
+        auto prev =
+            Geom::Affine(transform_cache[0], 0.0, 0.0, transform_cache[3], transform_cache[4], transform_cache[5]);
         auto next = Geom::Affine(transform[0], 0.0, 0.0, transform[3], transform[4], transform[5]);
 
         // Unapply previous scale and translation; and apply the latest, this keeps the scaling
         // factors constant for clones, document units and scales in parent groups.
-        return Geom::Rect(
-            Geom::Point(bbox_cache->left(), bbox_cache->top()),
-            Geom::Point(bbox_cache->right(), bbox_cache->bottom())) * prev.inverse() * next;
+        return Geom::Rect(Geom::Point(bbox_cache->left(), bbox_cache->top()),
+                          Geom::Point(bbox_cache->right(), bbox_cache->bottom())) *
+               prev.inverse() * next;
     }
 
     if (!this->_curve || this->_curve->get_pathvector().empty()) {
