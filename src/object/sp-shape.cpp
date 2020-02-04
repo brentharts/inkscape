@@ -521,7 +521,7 @@ Geom::OptRect SPShape::either_bbox(Geom::Affine const &transform, SPItem::BBoxTy
         // convert the stroke to a path and calculate that path's geometric bbox
 
         if (!this->style->stroke.isNone()) {
-            Geom::PathVector *pathv = item_outline(this, true);  // calculate bbox_only
+            Geom::PathVector *pathv = item_to_outline(this, true);  // calculate bbox_only
 
             if (pathv) {
                 bbox |= bounds_exact_transformed(*pathv, transform);
@@ -689,6 +689,7 @@ Geom::OptRect SPShape::either_bbox(Geom::Affine const &transform, SPItem::BBoxTy
             }
         }
     }
+
 
     return bbox;
 }
