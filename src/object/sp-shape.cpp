@@ -35,13 +35,13 @@
 #include "sp-path.h"
 #include "preferences.h"
 #include "attributes.h"
+#include "path/path-outline.h" // For bound box calculation
+
 #include "svg/svg.h"
 #include "svg/path-string.h"
 #include "live_effects/lpeobject.h"
 
 #include "helper/mathfns.h" // for triangle_area()
-
-#include "splivarot.h" // for bounding box calculation
 
 #define noSHAPE_VERBOSE
 

@@ -66,6 +66,8 @@
 #include "object/sp-guide.h"
 #include "object/sp-namedview.h"
 
+#include "path/path-outline.h"
+
 #include "ui/dialog/align-and-distribute.h"
 #include "ui/dialog/clonetiler.h"
 #include "ui/dialog/dialog-manager.h"
