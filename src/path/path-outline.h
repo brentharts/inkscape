@@ -23,14 +23,24 @@ namespace Geom {
   class PathVector;
 }
 
+namespace Inkscape {
+namespace XML {
+  class Node;
+}
+}
+
 /**
  * Find an outline that represents an item.
  */
 Geom::PathVector* item_to_outline (SPItem const *item, bool exclude_markers = false);
 
+/**
+ * Replace item by path objects (a.k.a. stroke to path).
+ */
+Inkscape::XML::Node* item_to_paths(SPItem *item, bool legacy = false);
 
 /**
- * Replace selected items by path objects (a.k.a stroke->path).
+ * Replace selected items by path objects (a.k.a. stroke to >path).
  * TODO: remove desktop dependency.
  */
 void selection_to_paths (SPDesktop *desktop, bool legacy = false);

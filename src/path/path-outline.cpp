@@ -20,7 +20,7 @@
 
 #include <vector>
 
-#include <glibmm/i18n.h>    // Should be removed... no GUI dependence here.
+#include <glibmm/i18n.h>
 
 #include "path-chemistry.h" // Should be moved to path directory
 #include "message-stack.h"  // Should be removed.
@@ -337,14 +337,11 @@ Geom::PathVector* item_to_outline(SPItem const *item, bool exclude_markers)
 
 // ========================= Stroke to Path ====================== //
 
-
-bool item_to_paths(SPItem *item, SPDesktop *desktop, bool legacy);
-
 static
 void item_to_paths_add_marker( SPObject *marker_object, Geom::Affine marker_transform,
-                                          Geom::Scale stroke_scale, Geom::Affine transform,
-                                          Inkscape::XML::Node *g_repr, Inkscape::XML::Document *xml_doc, SPDocument * doc,
-                                          SPDesktop *desktop , bool legacy)
+                               Geom::Scale stroke_scale, Geom::Affine transform,
+                               Inkscape::XML::Node *g_repr, Inkscape::XML::Document *xml_doc,
+                               SPDocument * doc, bool legacy)
 {
     SPMarker* marker = SP_MARKER (marker_object);
     SPItem* marker_item = sp_item_first_item_child(marker_object);
@@ -366,7 +363,7 @@ void item_to_paths_add_marker( SPObject *marker_object, Geom::Affine marker_tran
         SPItem *marker_item = (SPItem *) doc->getObjectByRepr(m_repr);
         marker_item->doWriteTransform(tr);
         if (!legacy) {
-            item_to_paths(marker_item, desktop, legacy);
+            item_to_paths(marker_item, legacy);
         }
     }
 }
@@ -376,12 +373,15 @@ void item_to_paths_add_marker( SPObject *marker_object, Geom::Affine marker_tran
  * Find an outline that represents an item.
  * If not legacy, items are already converted to paths (see verbs.cpp).
  * If legacy, text will not be handled as it is not a shape.
+ * If a new item is created it is returned.
+ * If the input item is a group and that group contains a changed item, the group node is returned
+ * (marking a change).
+ *
+ * The return value is only used externally to update a selection.
  */
-bool
-item_to_paths(SPItem *item, SPDesktop *desktop, bool legacy)
+Inkscape::XML::Node*
+item_to_paths(SPItem *item, bool legacy)
 {
-    bool did = false;
-
     SPLPEItem *lpeitem = SP_LPE_ITEM(item);
     if (lpeitem) {
         lpeitem->removeAllPathEffects(true);
@@ -390,19 +390,27 @@ item_to_paths(SPItem *item, SPDesktop *desktop, bool legacy)
     SPGroup *group = dynamic_cast<SPGroup *>(item);
     if (group) {
         if (legacy) {
-            return false;
+            return nullptr;
         }
         std::vector<SPItem*> const item_list = sp_item_group_item_list(group);
+        bool did = false;
         for (auto subitem : item_list) {
-            item_to_paths(subitem, desktop, legacy);
+            if (item_to_paths(subitem, legacy)) {
+                did = true;
+            }
         }
-        return true;
+        if (did) {
+            // This indicates that at least one thing was changed inside the group.
+            return group->getRepr();
+        } else {
+            return nullptr;
+        }
     }
 
     // As written, only shapes are handled. We bail on text early.
     SPShape* shape = dynamic_cast<SPShape *>(item);
     if (!shape) {
-        return false;
+        return nullptr;
     }
 
     Geom::PathVector fill_path;
@@ -411,7 +419,7 @@ item_to_paths(SPItem *item, SPDesktop *desktop, bool legacy)
 
     if (!status) {
         // Was not a well structured shape (or text).
-        return false;
+        return nullptr;
     }
 
     // The styles ------------------------
@@ -459,7 +467,7 @@ item_to_paths(SPItem *item, SPDesktop *desktop, bool legacy)
     // Remember parent
     Inkscape::XML::Node *parent = item->getRepr()->parent();
 
-    SPDocument * doc = desktop->getDocument();
+    SPDocument * doc = item->document;
     Inkscape::XML::Document *xml_doc = doc->getReprDoc();
 
     // Create a group to put everything in.
@@ -515,7 +523,7 @@ item_to_paths(SPItem *item, SPDesktop *desktop, bool legacy)
             if ( SPObject *marker_obj = shape->_marker[i] ) {
                 Geom::Affine const m (sp_shape_marker_get_transform_at_start(fill_path.front().front()));
                 item_to_paths_add_marker( marker_obj, m, scale, transform,
-                                          markers, xml_doc, doc, desktop, legacy);
+                                          markers, xml_doc, doc, legacy);
             }
         }
 
@@ -531,7 +539,7 @@ item_to_paths(SPItem *item, SPDesktop *desktop, bool legacy)
                 {
                     Geom::Affine const m (sp_shape_marker_get_transform_at_start(path_it->front()));
                     item_to_paths_add_marker( midmarker_obj, m, scale, transform,
-                                              markers, xml_doc, doc, desktop, legacy);
+                                              markers, xml_doc, doc, legacy);
                 }
 
                 // MID position
@@ -545,7 +553,7 @@ item_to_paths(SPItem *item, SPDesktop *desktop, bool legacy)
                          */
                         Geom::Affine const m (sp_shape_marker_get_transform(*curve_it1, *curve_it2));
                         item_to_paths_add_marker( midmarker_obj, m, scale, transform,
-                                                  markers, xml_doc, doc, desktop, legacy);
+                                                  markers, xml_doc, doc, legacy);
 
                         ++curve_it1;
                         ++curve_it2;
@@ -557,7 +565,7 @@ item_to_paths(SPItem *item, SPDesktop *desktop, bool legacy)
                     Geom::Curve const &lastcurve = path_it->back_default();
                     Geom::Affine const m = sp_shape_marker_get_transform_at_end(lastcurve);
                     item_to_paths_add_marker( midmarker_obj, m, scale, transform,
-                                              markers, xml_doc, doc, desktop, legacy);
+                                              markers, xml_doc, doc, legacy);
                 }
             }
         }
@@ -576,7 +584,7 @@ item_to_paths(SPItem *item, SPDesktop *desktop, bool legacy)
 
                 Geom::Affine const m = sp_shape_marker_get_transform_at_end(lastcurve);
                 item_to_paths_add_marker( marker_obj, m, scale, transform,
-                                          markers, xml_doc, doc, desktop, legacy);
+                                          markers, xml_doc, doc, legacy);
             }
         }
     }
@@ -669,11 +677,14 @@ item_to_paths(SPItem *item, SPDesktop *desktop, bool legacy)
             markers->setPosition(2);
         }
     }
+
+    bool did = false;
     if( fill || stroke || markers ) {
         did = true;
     }
 
     Inkscape::XML::Node *out = nullptr;
+
     if (!fill && !markers && did) {
         out = stroke;
     } else if (!fill && !stroke  && did) {
@@ -697,56 +708,12 @@ item_to_paths(SPItem *item, SPDesktop *desktop, bool legacy)
     }
     out->setAttribute("transform", item->getRepr()->attribute("transform"));
 
-    //Check for recursive markers to path
-    if (did) {
-        Inkscape::Selection *selection = desktop->getSelection();
-        if( selection->includes(item) ){
-            selection->remove(item);
-            item->deleteObject(false);
-            selection->add(out);
-        } else {
-            item->deleteObject(false);
-        }
-        Inkscape::GC::release(g_repr);
-    }
+    Inkscape::GC::release(g_repr);
 
-    return did;
-}
+    // We're replacing item, delete it.
+    item->deleteObject(false);
 
-/**
- * Replace selected items by path objects (a.k.a stroke->path).
- * TODO: remove desktop dependency.
- * (Document dependent version should elsewhere.)
- */
-void
-selection_to_paths(SPDesktop *desktop, bool legacy)
-{
-    Inkscape::Selection *selection = desktop->getSelection();
-
-    if (selection->isEmpty()) {
-        desktop->messageStack()->flash(Inkscape::WARNING_MESSAGE, _("Select <b>stroked path(s)</b> to convert stroke to path."));
-        return;
-    }
-    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    bool scale_stroke = prefs->getBool("/options/transform/stroke", true);
-    prefs->setBool("/options/transform/stroke", true);
-    bool did = false;
-    std::vector<SPItem*> il(selection->items().begin(), selection->items().end());
-    for (std::vector<SPItem*>::const_iterator l = il.begin(); l != il.end(); l++){
-        SPItem *item = *l;
-
-        did = item_to_paths(item, desktop, legacy);
-    }
-
-    prefs->setBool("/options/transform/stroke", scale_stroke);
-    if (did) {
-        Inkscape::DocumentUndo::done(desktop->getDocument(), SP_VERB_SELECTION_OUTLINE, 
-                                     _("Convert stroke to path"));
-    } else {
-        // TRANSLATORS: "to outline" means "to convert stroke to path"
-        desktop->messageStack()->flash(Inkscape::ERROR_MESSAGE, _("<b>No stroked paths</b> in the selection."));
-        return;
-    }
+    return out;
 }
 
 /*

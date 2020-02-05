@@ -1230,10 +1230,10 @@ void SelectionVerb::perform(SPAction *action, void *data)
             break;
         case SP_VERB_SELECTION_OUTLINE:
             selection->toCurves(true);
-            selection_to_paths(dt);
+            selection->strokesToPaths();
             break;
         case SP_VERB_SELECTION_OUTLINE_LEGACY:
-            selection_to_paths(dt, true);
+            selection->strokesToPaths(true);
             break;
         case SP_VERB_SELECTION_SIMPLIFY:
             selection->toCurves(true);

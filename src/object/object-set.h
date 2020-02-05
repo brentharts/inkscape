@@ -405,6 +405,10 @@ public:
     void toLPEItems();
     void pathReverse();
 
+    // path operations
+    // in path/path-object-set.cpp
+    bool strokesToPaths(bool legacy = false, bool skip_undo = false);
+
     // Boolean operations
     // in splivarot.cpp
     bool pathUnion(const bool skip_undo = false);

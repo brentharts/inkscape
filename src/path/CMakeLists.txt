@@ -2,6 +2,7 @@
 
 
 set(path_SRC
+  path-object-set.cpp
   path-outline.cpp
 
   # -------
