@@ -132,7 +132,7 @@ public:
             _document = desktop->getDocument(); 
     };
     ObjectSet(SPDocument* doc): _desktop(nullptr), _document(doc) {};
-    ObjectSet(): _desktop(nullptr), _document(nullptr) { std::cout << "ObjectSet created without document!" << std::endl; };
+    ObjectSet(): _desktop(nullptr), _document(nullptr) {}; // Used in spray-tool.h.
     virtual ~ObjectSet();
     
     void setDocument(SPDocument* doc){
