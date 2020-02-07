@@ -175,13 +175,24 @@ bool Dependency::check ()
 
             switch (_location) {
                 case LOCATION_EXTENSIONS: {
+                    // get_filename will warn if the resource isn't found, while returning an empty string.
                     std::string temploc =
                         Inkscape::IO::Resource::get_filename(Inkscape::IO::Resource::EXTENSIONS, location.c_str());
-                    if (Glib::file_test(temploc, filetest)) {
+                    if (!temploc.empty()) {
                         location = temploc;
                         _absolute_location = temploc;
                         break;
                     }
+                    /* Look for deprecated locations next */
+                    auto deprloc = g_build_filename("inkex", "deprecated-simple", location.c_str(), NULL);
+                    std::string tempdepr =
+                        Inkscape::IO::Resource::get_filename(Inkscape::IO::Resource::EXTENSIONS, deprloc, false, true);
+                    if (!tempdepr.empty()) {
+                        location = tempdepr;
+                        _absolute_location = tempdepr;
+                        break;
+                    }
+
                 } /* PASS THROUGH!!! */ // TODO: the pass-through seems wrong - either it's relative or not.
                 case LOCATION_ABSOLUTE: {
                     // TODO: should we check if the directory actually is absolute and/or sanitize the filename somehow?
