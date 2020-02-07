@@ -10933,9 +10933,8 @@ msgid "Overrides the miter limit and forces a join."
 msgstr "Sovrascrive la lunghezza massima dello spigolo e lo forza."
 
 #: ../src/live_effects/lpe-knot.cpp:353
-#, fuzzy
 msgid "_Gap length:"
-msgstr "Lunghezza p_rincipali:"
+msgstr "Lunghezza _spaziatura:"
 
 #: ../src/live_effects/lpe-knot.cpp:353
 msgid "Size of hidden region of lower string"
@@ -10950,16 +10949,16 @@ msgid ""
 "Gap width is given in multiples of stroke width. When unchecked, document "
 "units are used."
 msgstr ""
+"La lunghezza della spaziatura è indicata in multipli della larghezza del "
+"contorno. Se non selezionata usa l'unità del documento."
 
 #: ../src/live_effects/lpe-knot.cpp:359
-#, fuzzy
 msgid "_Both gaps"
-msgstr "Area cuscinetto"
+msgstr "Spaziatura su entrambi"
 
 #: ../src/live_effects/lpe-knot.cpp:359
-#, fuzzy
 msgid "Use gap in both intersection elements"
-msgstr "Aggancia alle intersezioni dei tracciati"
+msgstr "Applica spaziatura su entrambi gli elementi intersecati"
 
 #: ../src/live_effects/lpe-knot.cpp:360
 msgid "_Groups: Inverse"
