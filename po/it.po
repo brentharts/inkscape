@@ -39022,7 +39022,6 @@ msgstr ""
 "123.675 verrà rappresentata come 124."
 
 #: ../share/extensions/output_scour.inx:14
-#, fuzzy
 msgid "Shorten color values"
 msgstr "Abbrevia i valori dei colori"
 
@@ -39037,7 +39036,6 @@ msgstr ""
 "possibile)."
 
 #: ../share/extensions/output_scour.inx:17
-#, fuzzy
 msgid "Convert CSS attributes to XML attributes"
 msgstr "Converte gli attributi CSS in attributi XML"
 
@@ -39048,7 +39046,6 @@ msgid ""
 msgstr "Converte i tag style e le dichiarazioni style=\"\" in attributi XML."
 
 #: ../share/extensions/output_scour.inx:21
-#, fuzzy
 msgid "Collapse groups"
 msgstr "Unisci i gruppi"
 
@@ -39061,7 +39058,6 @@ msgstr ""
 "Richiede l'opzione \"Rimouvi ID non utilizzati\"."
 
 #: ../share/extensions/output_scour.inx:24
-#, fuzzy
 msgid "Create groups for similar attributes"
 msgstr "Crea gruppi per attributi simili"
 
@@ -39120,12 +39116,10 @@ msgstr ""
 "producendo un file SVG un po' più grande."
 
 #: ../share/extensions/output_scour.inx:38
-#, fuzzy
 msgid "Document options"
 msgstr "Opzioni documento"
 
 #: ../share/extensions/output_scour.inx:41
-#, fuzzy
 msgid "Remove the XML declaration"
 msgstr "Rimuovi dichiarazione XML"
 
@@ -39141,7 +39135,6 @@ msgstr ""
 "messa, in particolare se il documento contiene caratteri speciali)."
 
 #: ../share/extensions/output_scour.inx:44
-#, fuzzy
 msgid "Remove metadata"
 msgstr "Rimuovi metadati"
 
@@ -39158,7 +39151,6 @@ msgstr ""
 "gestiscono SVG eccetera."
 
 #: ../share/extensions/output_scour.inx:47
-#, fuzzy
 msgid "Remove comments"
 msgstr "Rimuovi commenti"
 
@@ -39169,9 +39161,8 @@ msgid "Remove all XML comments from output."
 msgstr "Rimuove tutti i commenti XML."
 
 #: ../share/extensions/output_scour.inx:50
-#, fuzzy
 msgid "Embed raster images"
-msgstr "Incorpora immagini grezze"
+msgstr "Incorpora immagini raster"
 
 #
 # File: ../share/extensions/output_scour.inx, line: 50
@@ -39184,7 +39175,6 @@ msgstr ""
 "URL codificate in Base64."
 
 #: ../share/extensions/output_scour.inx:53
-#, fuzzy
 msgid "Enable viewboxing"
 msgstr "Attiva anteprima"
 
@@ -39200,7 +39190,6 @@ msgstr ""
 "dimensioni del disegno."
 
 #: ../share/extensions/output_scour.inx:55
-#, fuzzy
 msgid "Pretty-printing"
 msgstr "Formattazione"
 
@@ -39223,7 +39212,6 @@ msgstr ""
 "ridurre la dimensione del file a scapito della leggibilità."
 
 #: ../share/extensions/output_scour.inx:61
-#, fuzzy
 msgid "Indentation characters:"
 msgstr "Caratteri di indentazione:"
 
@@ -39238,32 +39226,28 @@ msgstr ""
 "se \"Output con a capo e indentazioni\" è disabilitato."
 
 #: ../share/extensions/output_scour.inx:62
-#, fuzzy
 msgid "Space"
 msgstr "Spazio"
 
 #: ../share/extensions/output_scour.inx:63
-#, fuzzy
 msgid "Tab"
 msgstr "Tabulazione"
 
 #: ../share/extensions/output_scour.inx:64
-#, fuzzy
 msgctxt "Indent"
 msgid "None"
 msgstr "Nessuno"
 
 #: ../share/extensions/output_scour.inx:68
-#, fuzzy
 msgid "Depth of indentation:"
-msgstr "Ampiezza indentazione:"
+msgstr "Profondità indentazione:"
 
 #: ../share/extensions/output_scour.inx:68
 msgid ""
 "The depth of the chosen type of indentation. E.g. if you choose \"2\" every "
 "nesting level in the output will be indented by two additional spaces/tabs."
 msgstr ""
-"Ampiezza dell'indentazione prescelta. Per esempio, impostando \"2\" ogni "
+"Profondità dell'indentazione prescelta. Per esempio, impostando \"2\" ogni "
 "livello verrà indentato di due spazi/tabulazioni in più."
 
 #: ../share/extensions/output_scour.inx:71
@@ -39278,12 +39262,10 @@ msgid ""
 msgstr ""
 
 #: ../share/extensions/output_scour.inx:73
-#, fuzzy
 msgid "IDs"
 msgstr "ID"
 
 #: ../share/extensions/output_scour.inx:76
-#, fuzzy
 msgid "Remove unused IDs"
 msgstr "Rimuovi ID non utilizzati"
 
@@ -39346,7 +39328,6 @@ msgstr ""
 "degli editor SVG, compreso Inkscape) verranno rimossi o abbreviati."
 
 #: ../share/extensions/output_scour.inx:90
-#, fuzzy
 msgid "Preserve the following IDs:"
 msgstr "Mantieni gli ID seguenti:"
 
@@ -39371,7 +39352,6 @@ msgstr ""
 "farà mantenere \"flag-mx\", \"flag-pt\", eccetera)."
 
 #: ../share/extensions/output_scour.inx:101
-#, fuzzy
 msgid "Optimized SVG Output is provided by"
 msgstr "Output SVG ottimizzato fornito da"
 
@@ -39388,7 +39368,6 @@ msgid "https://github.com/scour-project/scour"
 msgstr "https://github.com/scour-project/scour"
 
 #: ../share/extensions/output_scour.inx:110
-#, fuzzy
 msgid "This version of the extension is designed for"
 msgstr "Questa versione dell'estensione è progettata per"
 
@@ -40172,7 +40151,6 @@ msgid "View Previous Glyph"
 msgstr "Visualizza glifo precedente"
 
 #: ../share/extensions/print_win32_vector.inx:3
-#, fuzzy
 msgid "Win32 Vector Print"
 msgstr "Stampa Windows 32-bit"
 
