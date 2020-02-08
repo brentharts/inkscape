@@ -38293,7 +38293,7 @@ msgid ""
 "extension will export a PNG file for each rectangle into the directory with "
 "the name of the {rectangle ID}.png (use Object Properties to set this)."
 msgstr ""
-"Creando un livello (nome predefinito \"slices\") contente dei rettangoli, "
+"Creando un livello (nome predefinito \"slices\") contenente dei rettangoli, "
 "l'estensione esporterà un file PNG per ogni rettangolo nella cartella con il "
 "nome del {rettangolo}.png (modifica le proprietà dell'oggetto per impostarlo)."
 
