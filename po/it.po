@@ -38261,37 +38261,31 @@ msgstr ""
 
 #: ../share/extensions/layer2png.inx:3
 msgid "Export Layer Slices"
-msgstr ""
+msgstr "Esporta Slice Livello"
 
 #: ../share/extensions/layer2png.inx:7
-#, fuzzy
 msgid "Icon mode"
-msgstr "Modalità indice"
+msgstr "Modalità icona"
 
 #: ../share/extensions/layer2png.inx:8
-#, fuzzy
 msgid "Sizes"
-msgstr "Dimensione"
+msgstr "Dimensioni"
 
 #: ../share/extensions/layer2png.inx:9
-#, fuzzy
 msgid "Layer with Slices:"
-msgstr "Spruzza copie"
+msgstr "Livello con Slice:"
 
 #: ../share/extensions/layer2png.inx:10
-#, fuzzy
 msgid "Overwrite existing exports"
-msgstr "Cancella tracciato esistente"
+msgstr "Sovrascrivi già esportati se presenti"
 
 #: ../share/extensions/layer2png.inx:11
-#, fuzzy
 msgid "Directory"
-msgstr "Cartella:"
+msgstr "Cartella"
 
 #: ../share/extensions/layer2png.inx:15
-#, fuzzy
 msgid "Layer Slicer"
-msgstr "Spruzza copie"
+msgstr "Slicer livello"
 
 #: ../share/extensions/layer2png.inx:16
 msgid ""
@@ -38299,6 +38293,9 @@ msgid ""
 "extension will export a PNG file for each rectangle into the directory with "
 "the name of the {rectangle ID}.png (use Object Properties to set this)."
 msgstr ""
+"Creando un livello (nome predefinito \"slices\") contente dei rettangoli, "
+"l'estensione esporterà un file PNG per ogni rettangolo nella cartella con il "
+"nome del {rettangolo}.png (modifica le proprietà dell'oggetto per impostarlo)."
 
 #: ../share/extensions/layer2png.inx:17
 msgid ""
@@ -38307,12 +38304,19 @@ msgid ""
 "previously generated, it will color the rectangle RED. For new exports that "
 "did not previously exist, the rectangle will be GREEN."
 msgstr ""
+"Se è già presente il file esportato, lo salterà e assegnerà al rettangolo il "
+"colore GRIGIO. Se la modalità \"Sovrascrivi già esportati se presenti\" è "
+"selezionata e il file è già presente, assegnerà il colore ROSSO. Se nessun "
+"file era presente, assegnerà il colore VERDE."
 
 #: ../share/extensions/layer2png.inx:18
 msgid ""
 "If you want to create (square) icons at different sizes, select \"Icon mode"
 "\". Icon mode will create a square export for each dimension in \"Sizes\"."
 msgstr ""
+"Per creare icone (quadrate) con differenti dimensioni, seleziona \"Modalità "
+"icona\". La modalità esporterà un'immagine quadrata per ogni dimensione "
+"indicata in \"Dimensioni\"."
 
 #: ../share/extensions/layers2svgfont.inx:3
 msgid "3 - Convert Glyph Layers to SVG Font"
