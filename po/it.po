@@ -38809,7 +38809,7 @@ msgstr "Visualizza glifo successivo"
 
 #: ../share/extensions/nicechart.inx:29
 msgid "NiceCharts"
-msgstr ""
+msgstr "NiceCharts"
 
 #
 # File: ../share/extensions/nicechart.inx, line: 31
@@ -38818,27 +38818,22 @@ msgid "Data"
 msgstr "Dati"
 
 #: ../share/extensions/nicechart.inx:34
-#, fuzzy
 msgid "Data from file"
 msgstr "Carica da file"
 
 #: ../share/extensions/nicechart.inx:35
-#, fuzzy
 msgid "Enter the full path to a CSV file:"
 msgstr "Percorso completo del file CSV:"
 
 #: ../share/extensions/nicechart.inx:37
-#, fuzzy
 msgid "Delimiter:"
 msgstr "Separatore:"
 
 #: ../share/extensions/nicechart.inx:38
-#, fuzzy
 msgid "Column that contains the keys:"
 msgstr "Colonna contenente le chiavi:"
 
 #: ../share/extensions/nicechart.inx:39
-#, fuzzy
 msgid "Column that contains the values:"
 msgstr "Colonna contenente i valori:"
 
@@ -38855,7 +38850,6 @@ msgid "First line contains headings"
 msgstr "Prima riga con intestazioni"
 
 #: ../share/extensions/nicechart.inx:43
-#, fuzzy
 msgid "Direct input"
 msgstr "Input diretto"
 
@@ -38878,17 +38872,14 @@ msgid "Data:"
 msgstr "Dati:"
 
 #: ../share/extensions/nicechart.inx:50
-#, fuzzy
 msgid "Labels"
 msgstr "Etichette"
 
 #: ../share/extensions/nicechart.inx:51
-#, fuzzy
 msgid "Font:"
 msgstr "Carattere:"
 
 #: ../share/extensions/nicechart.inx:53
-#, fuzzy
 msgid "Font color:"
 msgstr "Colore carattere:"
 
@@ -38899,27 +38890,22 @@ msgid "Charts"
 msgstr "Grafici"
 
 #: ../share/extensions/nicechart.inx:56
-#, fuzzy
 msgid "Draw horizontally"
 msgstr "Disegna in orizzontale"
 
 #: ../share/extensions/nicechart.inx:57
-#, fuzzy
 msgid "Bar length:"
 msgstr "Lunghezza barre:"
 
 #: ../share/extensions/nicechart.inx:58
-#, fuzzy
 msgid "Bar width:"
 msgstr "Larghezza barre:"
 
 #: ../share/extensions/nicechart.inx:59
-#, fuzzy
 msgid "Pie radius:"
 msgstr "Raggio diagramma a torta:"
 
 #: ../share/extensions/nicechart.inx:60
-#, fuzzy
 msgid "Bar offset:"
 msgstr "Spaziatura barre:"
 
@@ -38942,7 +38928,6 @@ msgid "Work around aliasing effects (creates overlapping segments)"
 msgstr "Correggi gli effetti di arrotondamento (crea segmenti sovrapposti)"
 
 #: ../share/extensions/nicechart.inx:66
-#, fuzzy
 msgid "Color scheme:"
 msgstr "Schema di colori:"
 
@@ -38953,47 +38938,38 @@ msgid "SAP"
 msgstr "SAP"
 
 #: ../share/extensions/nicechart.inx:74
-#, fuzzy
 msgid "Custom colors:"
 msgstr "Colori personalizzati:"
 
 #: ../share/extensions/nicechart.inx:76
-#, fuzzy
 msgid "Reverse color scheme"
 msgstr "Inverti schema di colori"
 
 #: ../share/extensions/nicechart.inx:77
-#, fuzzy
 msgid "Drop shadow"
 msgstr "Proietta ombra"
 
 #: ../share/extensions/nicechart.inx:80
-#, fuzzy
 msgid "Show values"
 msgstr "Mostra i valori"
 
 #: ../share/extensions/nicechart.inx:87
-#, fuzzy
 msgid "Chart type:"
 msgstr "Tipo di grafico:"
 
 #: ../share/extensions/nicechart.inx:88
-#, fuzzy
 msgid "Bar chart"
 msgstr "Grafico a barre"
 
 #: ../share/extensions/nicechart.inx:89
-#, fuzzy
 msgid "Pie chart"
 msgstr "Grafico a torta"
 
 #: ../share/extensions/nicechart.inx:90
-#, fuzzy
 msgid "Pie chart (percentage)"
 msgstr "Grafico a torta (percentuale)"
 
 #: ../share/extensions/nicechart.inx:91
-#, fuzzy
 msgid "Stacked bar chart"
 msgstr "Grafico a barre sovrapposte"
 
