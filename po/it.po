@@ -37187,7 +37187,6 @@ msgid "HP Graphics Language file (*.hpgl)"
 msgstr "File HP Graphics Language (*.hpgl)"
 
 #: ../share/extensions/hpgl_input.inx:15
-#, fuzzy
 msgid "Import an HP Graphics Language file"
 msgstr "Importa un file HP Graphics Language"
 
@@ -37417,7 +37416,6 @@ msgstr ""
 "informazioni consultare il manuale o il sito web del plotter."
 
 #: ../share/extensions/hpgl_output.inx:41
-#, fuzzy
 msgid "Export an HP Graphics Language file"
 msgstr "Esporta un file HP Graphics Language"
 
@@ -38655,19 +38653,16 @@ msgid "Text anchor:"
 msgstr "Ancoraggio testo:"
 
 #: ../share/extensions/measure.inx:26
-#, fuzzy
 msgid "Left (Start)"
-msgstr "Da sinistra a destra"
+msgstr "Sinistra (inizio)"
 
 #: ../share/extensions/measure.inx:27
-#, fuzzy
 msgid "Center (Middle)"
-msgstr "Centroide"
+msgstr "Centro (metà)"
 
 #: ../share/extensions/measure.inx:28
-#, fuzzy
 msgid "Right (End)"
-msgstr "Destra (px):"
+msgstr "Destra (fine)"
 
 #: ../share/extensions/measure.inx:31
 msgid "Fixed Text"
@@ -38745,7 +38740,7 @@ msgstr "Inkscape SVG compresso con altri media"
 #: ../share/extensions/media_zip.inx:6
 #, fuzzy
 msgid "Image zip directory:"
-msgstr "Cartella di lavoro non valida: %s"
+msgstr ""
 
 #: ../share/extensions/media_zip.inx:7
 msgid "Add font list"
@@ -38799,9 +38794,8 @@ msgid "2 - Add Glyph Layer"
 msgstr "2 - Aggiungi livello glifo"
 
 #: ../share/extensions/new_glyph_layer.inx:5
-#, fuzzy
 msgid "Unicode character:"
-msgstr "Inserisci carattere Unicode"
+msgstr "Carattere Unicode:"
 
 #: ../share/extensions/next_glyph_layer.inx:3
 msgid "View Next Glyph"
