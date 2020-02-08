@@ -17055,7 +17055,7 @@ msgstr "La cartella %s non esiste o non è una cartella.\n"
 #. TRANSLATORS: %1 will be the filename, %2 the width, and %3 the height of the image
 #: ../src/ui/dialog/export.cpp:1136 ../src/ui/dialog/export.cpp:1138
 msgid "Exporting %1 (%2 x %3)"
-msgstr "Sto esportando %1 (%2 x %3) "
+msgstr "Sto esportando %1 (%2 x %3)"
 
 #: ../src/ui/dialog/export.cpp:1169
 #, c-format
@@ -37206,21 +37206,19 @@ msgstr ""
 "collegamento seriale."
 
 #: ../share/extensions/hpgl_output.inx:9 ../share/extensions/plotter.inx:67
-#, fuzzy
 msgid "Plotter Settings"
 msgstr "Impostazioni Plotter"
 
 #: ../share/extensions/hpgl_output.inx:12 ../share/extensions/plotter.inx:70
-#, fuzzy
 msgid "Pen number:"
-msgstr "Numero di penne:"
+msgstr "Numero di penna:"
 
 #
 # File: ../share/extensions/hpgl_output.inx, line: 13
 # File: ../share/extensions/plotter.inx, line: 71
 #: ../share/extensions/hpgl_output.inx:12 ../share/extensions/plotter.inx:70
 msgid "The number of the pen (tool) to use (Standard: '1')"
-msgstr "Numero di penne da utilizzare (standard: '1')"
+msgstr "Numero della penna da utilizzare (standard: '1')"
 
 #
 # File: ../share/extensions/hpgl_output.inx, line: 14
@@ -37271,7 +37269,6 @@ msgid "Rotation of the drawing (Default: 0°)"
 msgstr "Rotazione del disegno (predefinito: 0°)"
 
 #: ../share/extensions/hpgl_output.inx:21 ../share/extensions/plotter.inx:79
-#, fuzzy
 msgid "Mirror X axis"
 msgstr "Rifletti asse X"
 
@@ -37283,7 +37280,6 @@ msgid "Check this to mirror the X axis (Default: Unchecked)"
 msgstr "Seleziona per riflettere sull'asse X (predefinito: non selezionato)"
 
 #: ../share/extensions/hpgl_output.inx:22 ../share/extensions/plotter.inx:80
-#, fuzzy
 msgid "Mirror Y axis"
 msgstr "Rifletti asse Y"
 
@@ -37295,7 +37291,6 @@ msgid "Check this to mirror the Y axis (Default: Unchecked)"
 msgstr "Seleziona per riflettere sull'asse Y (predefinito: non selezionato)"
 
 #: ../share/extensions/hpgl_output.inx:23 ../share/extensions/plotter.inx:81
-#, fuzzy
 msgid "Center zero point"
 msgstr "Punto zero centrato"
 
@@ -39767,24 +39762,20 @@ msgstr ""
 "Assicurarsi che tutti gli oggetti da disegnare sono convertiti in tracciati."
 
 #: ../share/extensions/plotter.inx:9
-#, fuzzy
 msgid "Connection Settings"
-msgstr "Connessione"
+msgstr "Impostazioni connessione"
 
 #: ../share/extensions/plotter.inx:10
-#, fuzzy
 msgid "Port type:"
 msgstr "Tipo di porta:"
 
 #: ../share/extensions/plotter.inx:11
-#, fuzzy
 msgid "Serial"
 msgstr "Seriale"
 
 #: ../share/extensions/plotter.inx:14
-#, fuzzy
 msgid "Parallel port:"
-msgstr "Parallela:"
+msgstr "Porta parallela:"
 
 #
 # File: ../share/extensions/plotter.inx, line: 15
@@ -39797,7 +39788,6 @@ msgstr ""
 "Linux è del tipo: '/dev/usb/lp2' (predefinito: /dev/usb/lp2)"
 
 #: ../share/extensions/plotter.inx:15
-#, fuzzy
 msgid "Serial port:"
 msgstr "Porta seriale:"
 
@@ -39812,9 +39802,8 @@ msgstr ""
 "Linux è del tipo: '/dev/ttyUSB0' (predefinito: COM1)"
 
 #: ../share/extensions/plotter.inx:16
-#, fuzzy
 msgid "Serial baud rate:"
-msgstr "Baud rate:"
+msgstr "Baud rate seriale:"
 
 #
 # File: ../share/extensions/plotter.inx, line: 17
@@ -39823,9 +39812,8 @@ msgid "The Baud rate of your serial connection (Default: 9600)"
 msgstr "Baud rate della linea seriale (predefinito: 9600)"
 
 #: ../share/extensions/plotter.inx:33
-#, fuzzy
 msgid "Serial byte size:"
-msgstr "Dimensione byte"
+msgstr "Dimensione byte seriale:"
 
 #
 # File: ../share/extensions/plotter.inx, line: 34
@@ -39838,9 +39826,8 @@ msgstr ""
 "il valore predefinito (8 bit)"
 
 #: ../share/extensions/plotter.inx:39
-#, fuzzy
 msgid "Serial stop bits:"
-msgstr "Numero di bit di stop:"
+msgstr "Numero di bit di stop seriale:"
 
 #
 # File: ../share/extensions/plotter.inx, line: 40
@@ -39853,9 +39840,8 @@ msgstr ""
 "usano il valore predefinito (1 bit)"
 
 #: ../share/extensions/plotter.inx:44
-#, fuzzy
 msgid "Serial parity:"
-msgstr "Parità:"
+msgstr "Parità seriale:"
 
 #
 # File: ../share/extensions/plotter.inx, line: 45
@@ -39868,9 +39854,8 @@ msgstr ""
 "valore predefinito (nessuna)"
 
 #: ../share/extensions/plotter.inx:51
-#, fuzzy
 msgid "Serial flow control:"
-msgstr "Controllo di flusso:"
+msgstr "Controllo di flusso seriale:"
 
 #
 # File: ../share/extensions/plotter.inx, line: 52
@@ -39895,7 +39880,6 @@ msgid "Hardware (DSR/DTR + RTS/CTS)"
 msgstr "Hardware (DSR/DTR + RTS/CTS)"
 
 #: ../share/extensions/plotter.inx:57
-#, fuzzy
 msgid "Command language:"
 msgstr "Linguaggio di comando:"
 
@@ -39914,9 +39898,8 @@ msgid "DMPL"
 msgstr "DMPL"
 
 #: ../share/extensions/plotter.inx:60
-#, fuzzy
 msgid "KNK Plotter (HPGL variant)"
-msgstr "KNK Zing (variante HPGL)"
+msgstr "KNK Plotter (variante HPGL)"
 
 #: ../share/extensions/plotter.inx:63
 msgid ""
@@ -40920,9 +40903,8 @@ msgid "Convert SVG Font to Glyph Layers"
 msgstr "Converti SVG Font in livelli glifo"
 
 #: ../share/extensions/svgfont2layers.inx:5
-#, fuzzy
 msgid "Stop after (30 Recommended)"
-msgstr "Carica solo i primi 30 glifi (consigliato)"
+msgstr "Ferma dopo (consigliato 30)"
 
 #: ../share/extensions/synfig_output.inx:3
 msgid "Synfig Output"
@@ -41768,7 +41750,6 @@ msgstr "Forza dimensione:"
 
 #. i18n. Description duplicated in a fake value attribute in order to make it translatable
 #: ../share/extensions/webslicer_create_rect.inx:15
-#, fuzzy
 msgid "Force Dimension must be set as <width>x<height>"
 msgstr "Forza dimensione deve essere impostato come <larghezza>x<altezza>"
 
@@ -41807,14 +41788,12 @@ msgid "GIF specific options"
 msgstr "Opzioni specifiche GIF"
 
 #: ../share/extensions/webslicer_create_rect.inx:28
-#, fuzzy
 msgid "Palette"
-msgstr "Paletta"
+msgstr "Palette"
 
 #: ../share/extensions/webslicer_create_rect.inx:30
-#, fuzzy
 msgid "Palette size:"
-msgstr "Incolla dimensione"
+msgstr "Dimensione palette:"
 
 #
 # File: ../share/extensions/webslicer_create_rect.inx, line: 33
@@ -41876,48 +41855,40 @@ msgid "Position anchor:"
 msgstr "Posizione"
 
 #: ../share/extensions/webslicer_create_rect.inx:48
-#, fuzzy
 msgid "Top and Left"
-msgstr "Tracciato lato superiore"
+msgstr "Alto a sinistra"
 
 #: ../share/extensions/webslicer_create_rect.inx:49
-#, fuzzy
 msgid "Top and Center"
-msgstr "Tracciato lato superiore"
+msgstr "Alto al centro"
 
 #: ../share/extensions/webslicer_create_rect.inx:50
-#, fuzzy
 msgid "Top and right"
-msgstr "_Trucchi"
+msgstr "Alto a destra"
 
 #: ../share/extensions/webslicer_create_rect.inx:51
-#, fuzzy
 msgid "Middle and Left"
-msgstr "Tracciato lato superiore"
+msgstr "Metà a sinistra"
 
 #: ../share/extensions/webslicer_create_rect.inx:52
 msgid "Middle and Center"
-msgstr ""
+msgstr "Metà al centro"
 
 #: ../share/extensions/webslicer_create_rect.inx:53
-#, fuzzy
 msgid "Middle and Right"
-msgstr "Tracciato lato inferiore"
+msgstr "Metà a destra"
 
 #: ../share/extensions/webslicer_create_rect.inx:54
-#, fuzzy
 msgid "Bottom and Left"
-msgstr "Tracciato lato inferiore"
+msgstr "Basso a sinistra"
 
 #: ../share/extensions/webslicer_create_rect.inx:55
-#, fuzzy
 msgid "Bottom and Center"
-msgstr "Tracciato lato inferiore"
+msgstr "Basso al centro"
 
 #: ../share/extensions/webslicer_create_rect.inx:56
-#, fuzzy
 msgid "Bottom and Right"
-msgstr "Tracciato lato inferiore"
+msgstr "Basso a destra"
 
 #: ../share/extensions/webslicer_export.inx:3
 msgid "Export layout pieces and HTML+CSS code"
@@ -42026,7 +41997,7 @@ msgstr "immagine;editor;vettoriale;disegno;"
 # File: ../org.inkscape.Inkscape.desktop.template, line: 17
 #: ../org.inkscape.Inkscape.desktop.template:17
 msgid "${INKSCAPE_ICONPATH}"
-msgstr ""
+msgstr "${INKSCAPE_ICONPATH}"
 
 #: ../org.inkscape.Inkscape.desktop.template:21
 msgid "New Drawing"
