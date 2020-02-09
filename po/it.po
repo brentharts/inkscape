@@ -5532,21 +5532,18 @@ msgstr "Converti testo in tracciato"
 
 #: ../src/extension/internal/emf-inout.cpp:3653
 #: ../src/extension/internal/wmf-inout.cpp:3232
-#, fuzzy
 msgid "Map Unicode to Symbol font"
-msgstr "Map Unicode a Symbol font"
+msgstr "Mappa Unicode a Symbol font"
 
 #: ../src/extension/internal/emf-inout.cpp:3654
 #: ../src/extension/internal/wmf-inout.cpp:3233
-#, fuzzy
 msgid "Map Unicode to Wingdings"
-msgstr "Map Unicode a Wingdings"
+msgstr "Mappa Unicode a Wingdings"
 
 #: ../src/extension/internal/emf-inout.cpp:3655
 #: ../src/extension/internal/wmf-inout.cpp:3234
-#, fuzzy
 msgid "Map Unicode to Zapf Dingbats"
-msgstr "Map Unicode a Zapf Dingbats"
+msgstr "Mappa Unicode a Zapf Dingbats"
 
 #: ../src/extension/internal/emf-inout.cpp:3656
 #: ../src/extension/internal/wmf-inout.cpp:3235
@@ -8341,12 +8338,10 @@ msgid "Default"
 msgstr "Predefinito"
 
 #: ../src/filter-enums.cpp:96
-#, fuzzy
 msgid "Clear"
-msgstr "Pulisci"
+msgstr "Clear"
 
 #: ../src/filter-enums.cpp:97
-#, fuzzy
 msgid "Copy"
 msgstr "Copia"
 
@@ -8355,27 +8350,22 @@ msgid "Destination"
 msgstr "Destinazione"
 
 #: ../src/filter-enums.cpp:99
-#, fuzzy
 msgid "Destination Over"
-msgstr "Destinazione"
+msgstr "Destinazione Over"
 
 #: ../src/filter-enums.cpp:100
-#, fuzzy
 msgid "Destination In"
-msgstr "Destinazione"
+msgstr "Destinazione In"
 
 #: ../src/filter-enums.cpp:101
-#, fuzzy
 msgid "Destination Out"
-msgstr "Destinazione"
+msgstr "Destinazione Out"
 
 #: ../src/filter-enums.cpp:102
-#, fuzzy
 msgid "Destination Atop"
-msgstr "Destinazione"
+msgstr "Destinazione Atop"
 
 #: ../src/filter-enums.cpp:103
-#, fuzzy
 msgid "Lighter"
 msgstr "Illumina"
 
@@ -38760,7 +38750,7 @@ msgstr ""
 
 #: ../share/extensions/merge_styles.inx:3
 msgid "Merge Styles into CSS"
-msgstr ""
+msgstr "Unisci Stili in CSS"
 
 #: ../share/extensions/merge_styles.inx:6
 msgid ""
@@ -38769,17 +38759,20 @@ msgid ""
 "inline style attributes. Please use a name which best describes the kinds of "
 "objects and their common context for best effect."
 msgstr ""
+"Tutti i nodi selezionati saranno raggruppati e i loro attributi di stile "
+"comuni formeranno una nuova classe che sostituirà gli esistenti attributi di "
+"stile inline. Si consiglia di usare un nome descrittivo del tipo di oggetti e "
+"e delle loro caratteristiche."
 
 #
 # File: ../share/extensions/merge_styles.inx, line: 9
 #: ../share/extensions/merge_styles.inx:8
 msgid "New Class Name:"
-msgstr ""
+msgstr "Nome nuova classe:"
 
 #: ../share/extensions/merge_styles.inx:13
-#, fuzzy
 msgid "Stylesheet"
-msgstr "_Stile"
+msgstr "Stylesheet"
 
 #: ../share/extensions/motion.inx:3
 msgid "Motion"
