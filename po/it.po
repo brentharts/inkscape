@@ -11725,6 +11725,25 @@ msgid ""
 "<b><i>Set Defaults:</i></b> For every LPE, default values can be set at the "
 "bottom."
 msgstr ""
+"<b><big>Generale</big></b>\n"
+"Aspetto e posizione delle linee di misurazione e del testo\n"
+"\n"
+"<b><big>Proiezione</big></b>\n"
+"Mostra una linea di misurazione secondo gli oggetti selezionati\n"
+"\n"
+"<b><big>Opzioni</big></b>\n"
+"Opzioni per colore, precisione, formattazione e aspetto del testo\n"
+"\n"
+"<b><big>Consigli</big></b>\n"
+"<b><i>Stile personalizzato:</i></b> per personalizzare ulteriormente gli "
+"stili, usa l'editor XML per trovare la classe o l'ID, poi usa la finestra "
+"Stile per applicare un nuovo stile.\n"
+"<b><i>Blacklist</i></b>: nascondi alcuni elementi o proiezioni.\n"
+"<b><i>Misure multiple LPE:</i></b> sullo stesso oggetto, insieme alla "
+"blacklist, permette di aggiungere testi o misure con differenti orientazioni "
+"o proiezioni aggiuntive.\n"
+"<b><i>Imposta predefiniti:</i></b> per ogni LPE, i valori predefiniti "
+"possono essere impostati infondo."
 
 #: ../src/live_effects/lpe-measure-segments.cpp:297
 #: ../src/ui/dialog/find.cpp:77
@@ -11736,9 +11755,8 @@ msgid "Projection"
 msgstr "Proiezione"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:518
-#, fuzzy
 msgid "Non Uniform Scale"
-msgstr "Disturbo uniforme"
+msgstr "Scala non uniforme"
 
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:43
 msgid "Vertical page center"
