@@ -40270,51 +40270,44 @@ msgid "Square size (px):"
 msgstr "Dimensione quadretto (px):"
 
 #: ../share/extensions/render_barcode_qrcode.inx:35
-#, fuzzy
 msgid "Drawing type:"
-msgstr "Miscela disegno:"
+msgstr "Tipo disegno:"
 
 #: ../share/extensions/render_barcode_qrcode.inx:36
-#, fuzzy
 msgid "Smooth: neutral"
-msgstr "Nodo curvo"
+msgstr "Smussato: neutral"
 
 #: ../share/extensions/render_barcode_qrcode.inx:37
-#, fuzzy
 msgid "Smooth: greedy"
-msgstr "Smussata"
+msgstr "Smussato: greedy"
 
 #: ../share/extensions/render_barcode_qrcode.inx:38
-#, fuzzy
 msgid "Smooth: proud"
-msgstr "Nodo curvo"
+msgstr "Smussato: proud"
 
 #: ../share/extensions/render_barcode_qrcode.inx:39
-#, fuzzy
 msgid "Path: simple"
-msgstr "Percorso: "
+msgstr "Percorso: semplice"
 
 #: ../share/extensions/render_barcode_qrcode.inx:40
-#, fuzzy
 msgid "Path: circle"
-msgstr "Cerchi impacchettati"
+msgstr "Percorso: cerchio"
 
 #: ../share/extensions/render_barcode_qrcode.inx:41
-#, fuzzy
 msgid "Path: custom"
-msgstr "Percorso: "
+msgstr "Percorso: personalizzato"
 
 #
 # File: ../share/extensions/render_barcode_qrcode.inx, line: 44
 #: ../share/extensions/render_barcode_qrcode.inx:43
 msgid "Square sharp: obsolete"
-msgstr ""
+msgstr "Quadrato netto: obsoleto"
 
 #
 # File: ../share/extensions/render_barcode_qrcode.inx, line: 46
 #: ../share/extensions/render_barcode_qrcode.inx:45
 msgid "Smooth square value (0-1):"
-msgstr ""
+msgstr "Valore smussatura (0-1):"
 
 #
 # File: ../share/extensions/render_barcode_qrcode.inx, line: 47
@@ -40323,12 +40316,14 @@ msgid ""
 "For Path: custom set the path in relative coordinates (0,0)=(left,up) square "
 "size 1.0 "
 msgstr ""
+"Per Percorso: imposta il percorso personalizzato in coordinate relative "
+"(0,0)=(sinistra,alto) del quadrato di dimensione 1.0 "
 
 #
 # File: ../share/extensions/render_barcode_qrcode.inx, line: 48
 #: ../share/extensions/render_barcode_qrcode.inx:47
 msgid "Path string (Path: custom) or symbol #url:"
-msgstr ""
+msgstr "Stringa percorso (Percorso: personalizzato) o #url simbolo:"
 
 #: ../share/extensions/render_gear_rack.inx:3
 msgid "Rack Gear"
@@ -41645,19 +41640,17 @@ msgstr ""
 
 #: ../share/extensions/webslicer_create_group.inx:3
 msgid "Set a layout group"
-msgstr ""
+msgstr "Imposta un gruppo di layout"
 
 #: ../share/extensions/webslicer_create_group.inx:8
 #: ../share/extensions/webslicer_create_rect.inx:33
-#, fuzzy
 msgid "HTML id attribute:"
-msgstr "Imposta attributo"
+msgstr "Attributo id HTML:"
 
 #: ../share/extensions/webslicer_create_group.inx:9
 #: ../share/extensions/webslicer_create_rect.inx:34
-#, fuzzy
 msgid "HTML class attribute:"
-msgstr "Imposta attributo"
+msgstr "Attributo classe HTML:"
 
 #: ../share/extensions/webslicer_create_group.inx:10
 msgid "Width unit:"
@@ -41676,7 +41669,7 @@ msgstr "Percentuale (relativo alla dimensione)"
 #: ../share/extensions/webslicer_create_group.inx:13
 #: ../share/extensions/webslicer_create_group.inx:18
 msgid "Undefined (relative to non-floating content size)"
-msgstr ""
+msgstr "Non definito (relativo a dimensione contenuto non fluttuante)"
 
 #: ../share/extensions/webslicer_create_group.inx:15
 msgid "Height unit:"
@@ -41692,18 +41685,18 @@ msgid ""
 "Layout Group is only about to help a better code generation (if you need "
 "it). To use this, you must to select some \"Slicer rectangles\" first."
 msgstr ""
+"Il gruppo di layout è utile per generare un codice migliore (se necessario). "
+"Per utilizzarlo è necessario selezionare alcuni \"Rettangoli di taglio\"."
 
 #: ../share/extensions/webslicer_create_group.inx:30
 #: ../share/extensions/webslicer_create_rect.inx:64
 #: ../share/extensions/webslicer_export.inx:20
-#, fuzzy
 msgid "Slicer"
-msgstr "Sciame"
+msgstr "Slicer"
 
 #: ../share/extensions/webslicer_create_rect.inx:3
-#, fuzzy
 msgid "Create a slicer rectangle"
-msgstr "Crea rettangolo"
+msgstr "Crea rettangolo di taglio"
 
 #: ../share/extensions/webslicer_create_rect.inx:12
 msgid "DPI:"
@@ -41771,53 +41764,48 @@ msgid "Options for HTML export"
 msgstr "Opzioni per l'esportazione HTML"
 
 #: ../share/extensions/webslicer_create_rect.inx:36
-#, fuzzy
 msgid "Layout disposition:"
-msgstr "Posizione casuale"
+msgstr "Disposizione layout:"
 
 #: ../share/extensions/webslicer_create_rect.inx:37
 msgid "Positioned html block element with the image as Background"
-msgstr ""
+msgstr "Elemento blocco html posizionato con l'immagine come sfondo"
 
 #: ../share/extensions/webslicer_create_rect.inx:38
 msgid "Tiled Background (on parent group)"
-msgstr ""
+msgstr "Sfondo Tiled (sul gruppo parent)"
 
 #: ../share/extensions/webslicer_create_rect.inx:39
 msgid "Background — repeat horizontally (on parent group)"
-msgstr ""
+msgstr "Sfondo — ripeti orizzontalmente (sul gruppo parent)"
 
 #: ../share/extensions/webslicer_create_rect.inx:40
 msgid "Background — repeat vertically (on parent group)"
-msgstr ""
+msgstr "Sfondo — ripeti verticalmente (sul gruppo parent)"
 
 #: ../share/extensions/webslicer_create_rect.inx:41
 msgid "Background — no repeat (on parent group)"
-msgstr ""
+msgstr "Sfondo — non ripetere (sul gruppo parent)"
 
 #: ../share/extensions/webslicer_create_rect.inx:42
-#, fuzzy
 msgid "Positioned Image"
-msgstr "Posizionamento"
+msgstr "Immagine posizionata"
 
 #: ../share/extensions/webslicer_create_rect.inx:43
-#, fuzzy
 msgid "Non Positioned Image"
-msgstr "Angolo di rotazione"
+msgstr "Immagine non posizionata"
 
 #: ../share/extensions/webslicer_create_rect.inx:44
 msgid "Left Floated Image"
-msgstr ""
+msgstr "Immagine Float a sinistra"
 
 #: ../share/extensions/webslicer_create_rect.inx:45
-#, fuzzy
 msgid "Right Floated Image"
-msgstr "Angolo destro"
+msgstr "Immagine Float a destra"
 
 #: ../share/extensions/webslicer_create_rect.inx:47
-#, fuzzy
 msgid "Position anchor:"
-msgstr "Posizione"
+msgstr "Posizione ancora:"
 
 #: ../share/extensions/webslicer_create_rect.inx:48
 msgid "Top and Left"
@@ -41857,7 +41845,7 @@ msgstr "Basso a destra"
 
 #: ../share/extensions/webslicer_export.inx:3
 msgid "Export layout pieces and HTML+CSS code"
-msgstr ""
+msgstr "Esporta parti layout e codice HTML+CSS"
 
 #: ../share/extensions/webslicer_export.inx:8
 msgid "Directory path to export:"
@@ -41876,6 +41864,8 @@ msgid ""
 "All sliced images, and optionally - code, will be generated as you had "
 "configured and saved to one directory."
 msgstr ""
+"Tutte le immagini tagliate e opzionalmente il codice saranno generati come "
+"configurato e salvati in una cartella."
 
 #: ../share/extensions/whirl.inx:3
 msgid "Whirl"
