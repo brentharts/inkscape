@@ -10517,6 +10517,7 @@ msgstr "Mostra punti"
 msgid ""
 "Show stitches as small gaps (just for inspection - don't use for output)"
 msgstr ""
+"Mostra punti come piccoli spazi (solo per ispezione, non usare per output)"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:62
 msgid "Show stitch gap"
@@ -10970,11 +10971,13 @@ msgstr "Applica spaziatura su entrambi gli elementi intersecati"
 
 #: ../src/live_effects/lpe-knot.cpp:360
 msgid "_Groups: Inverse"
-msgstr ""
+msgstr "_Gruppi: Inverti"
 
 #: ../src/live_effects/lpe-knot.cpp:360
 msgid "Use other stroke width, useful in groups with different stroke widths"
 msgstr ""
+"Usa l'altra larghezza contorno, utile per gruppi con differente larghezza "
+"dei contorni"
 
 #: ../src/live_effects/lpe-knot.cpp:366
 msgid "S_witcher size:"
@@ -11013,9 +11016,8 @@ msgid "Mirror movements in vertical"
 msgstr "Rispecchia i movimenti verticalmente"
 
 #: ../src/live_effects/lpe-lattice2.cpp:39
-#, fuzzy
 msgid "Use only perimeter"
-msgstr "Modifica parametri booleani"
+msgstr "Usa solo perimetro"
 
 #: ../src/live_effects/lpe-lattice2.cpp:40
 msgid "Update while moving knots (maybe slow)"
