@@ -8108,6 +8108,26 @@ msgid ""
 "More information about this change are available in the <a href='https://"
 "inkscape.org/en/learn/faq#dpi_change'>Inkscape FAQ</a></small>"
 msgstr ""
+"<small>Inkscape è stato aggiornato per seguire gli standard CSS a 96 DPI per "
+"migliorare la compatibilità nei browser (invece dei precedenti 90 DPI).\n"
+"Le grafiche per schermi saranno convertite a 96 DPI senza riscalare o essere "
+"modificate.\n"
+"Le grafiche a 90 DPI per una specifica dimensione fisica sarebbero troppo "
+"piccole se convertite a 96 DPI senza riscalarle. La riscala è eseguita con "
+"due metodi:\n"
+"<b>Scala tutto il documento:</b> soggetto a meno errore, preserva l'aspetto "
+"della grafica, inclusi filtri e posizione delle maschere, ecc.\n"
+"La scala della grafica rispetto alla dimensione del documento potrebbe non "
+"essere accurata.\n"
+"\n"
+"<b>Scala singoli elementi della grafica:</b> soggetto a più errore, può "
+"risultare in un cambiamento,\n"
+"ma è migliore per output fisici che necessitano di dimensioni e posizioni "
+"accurate (e.g. stampa 3D).\n"
+"\n"
+"Ulteriori informazioni sono disponibili qui: 
+"<a href='https://inkscape.org/en/learn/faq#dpi_change'>Inkscape "
+"FAQ</a></small>"
 
 #: ../src/file-update.cpp:446
 msgid "OK"
@@ -9947,9 +9967,8 @@ msgid "positive"
 msgstr "positivo"
 
 #: ../src/live_effects/lpe-bool.cpp:58
-#, fuzzy
 msgid "take from object"
-msgstr "Da oggetto"
+msgstr "prendi da oggetto"
 
 #: ../src/live_effects/lpe-bool.cpp:73
 msgid "Operand path:"
@@ -9984,15 +10003,16 @@ msgid "Hide linked path"
 msgstr "Nascondi tracciato collegato"
 
 #: ../src/live_effects/lpe-bool.cpp:78
-#, fuzzy
 msgid "Remove inner"
-msgstr "Rimuovi filtro"
+msgstr "Rimuovi interno"
 
 #: ../src/live_effects/lpe-bool.cpp:79
 msgid ""
 "For cut operations: remove inner (non-contour) lines of cutting path to "
 "avoid invisible extra points"
 msgstr ""
+"Per le operazioni di taglio: rimuove linee interne (non contorno) del "
+"tracciato di taglio per evitare punti invisibili aggiuntivi"
 
 #: ../src/live_effects/lpe-bool.cpp:81
 msgid "Fill type this:"
@@ -10004,11 +10024,11 @@ msgstr "Regola dello riempimento per questo tracciato"
 
 #: ../src/live_effects/lpe-bool.cpp:83
 msgid "Fill type operand:"
-msgstr ""
+msgstr "Operando riempimento:"
 
 #: ../src/live_effects/lpe-bool.cpp:83
 msgid "Fill type (winding mode) for operand path"
-msgstr ""
+msgstr "Regola dello riempimento per il tracciato operando"
 
 #: ../src/live_effects/lpe-bounding-box.cpp:20
 #: ../src/live_effects/lpe-fill-between-many.cpp:35
@@ -10348,9 +10368,8 @@ msgid "Number of dashes"
 msgstr "Numero di tratteggi"
 
 #: ../src/live_effects/lpe-dashed-stroke.cpp:19
-#, fuzzy
 msgid "Hole factor"
-msgstr "Selettore"
+msgstr "Fattore tratteggio"
 
 #: ../src/live_effects/lpe-dashed-stroke.cpp:20
 msgid "Use segments"
@@ -10509,11 +10528,11 @@ msgstr "Spaziatura tra i punti quando vengono mostrati i punti"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:63
 msgid "Jump if longer"
-msgstr ""
+msgstr "Salta se più lunga"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:63
 msgid "Jump connection if longer than"
-msgstr ""
+msgstr "Salta la connessione se più lunga del valore"
 
 #: ../src/live_effects/lpe-envelope.cpp:18
 msgid "Top bend path:"
@@ -10592,7 +10611,7 @@ msgstr "LPE sui tracciati collegati"
 #: ../src/live_effects/lpe-fill-between-many.cpp:37
 #: ../src/live_effects/lpe-fill-between-strokes.cpp:23
 msgid "Fuse coincident points"
-msgstr ""
+msgstr "Fondi punti coincidenti"
 
 #: ../src/live_effects/lpe-fill-between-many.cpp:38
 #: ../src/live_effects/lpe-fill-between-strokes.cpp:24
@@ -10610,9 +10629,8 @@ msgid "Close path"
 msgstr "Chiudi tracciato"
 
 #: ../src/live_effects/lpe-fill-between-many.cpp:40
-#, fuzzy
 msgid "Autoreverse"
-msgstr "Inverti"
+msgstr "Inverti automaticamente"
 
 #: ../src/live_effects/lpe-fill-between-strokes.cpp:21
 msgid "Second path:"
