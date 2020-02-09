@@ -8125,7 +8125,7 @@ msgstr ""
 "ma è migliore per output fisici che necessitano di dimensioni e posizioni "
 "accurate (e.g. stampa 3D).\n"
 "\n"
-"Ulteriori informazioni sono disponibili qui: 
+"Ulteriori informazioni sono disponibili qui: "
 "<a href='https://inkscape.org/en/learn/faq#dpi_change'>Inkscape "
 "FAQ</a></small>"
 
