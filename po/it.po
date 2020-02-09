@@ -5571,7 +5571,7 @@ msgstr "Usa gradienti lineari rettangolari nativi"
 
 #: ../src/extension/internal/emf-inout.cpp:3661
 msgid "Map all fill patterns to standard EMF hatches"
-msgstr ""
+msgstr "Mappa tutti i motivi di riempimento a hatch standard EMF"
 
 #: ../src/extension/internal/emf-inout.cpp:3662
 msgid "Ignore image rotations"
@@ -7951,7 +7951,7 @@ msgstr "Output WMF"
 
 #: ../src/extension/internal/wmf-inout.cpp:3239
 msgid "Map all fill patterns to standard WMF hatches"
-msgstr ""
+msgstr "Mappa tutti i motivi di riempimento a hatch standard WMF"
 
 #: ../src/extension/internal/wmf-inout.cpp:3243
 msgid "Windows Metafile (*.wmf)"
@@ -18217,11 +18217,11 @@ msgstr "tutti"
 
 #: ../src/ui/dialog/glyphs.cpp:56
 msgid "common"
-msgstr ""
+msgstr "comune"
 
 #: ../src/ui/dialog/glyphs.cpp:57
 msgid "inherited"
-msgstr ""
+msgstr "ereditato"
 
 #: ../src/ui/dialog/glyphs.cpp:58 ../src/ui/dialog/glyphs.cpp:241
 msgid "Arabic"
@@ -18545,11 +18545,11 @@ msgstr "Aramaico imperiale"
 
 #: ../src/ui/dialog/glyphs.cpp:138
 msgid "Inscriptional Pahlavi"
-msgstr ""
+msgstr "Inscriptional Pahlavi"
 
 #: ../src/ui/dialog/glyphs.cpp:139
 msgid "Inscriptional Parthian"
-msgstr ""
+msgstr "Inscriptional Parthian"
 
 #: ../src/ui/dialog/glyphs.cpp:140 ../src/ui/dialog/glyphs.cpp:357
 msgid "Javanese"
@@ -18740,22 +18740,20 @@ msgid "Old Hungarian"
 msgstr "Ungherese antico"
 
 #: ../src/ui/dialog/glyphs.cpp:187
-#, fuzzy
 msgid "Signwriting"
-msgstr "Script"
+msgstr "Signwriting"
 
 #: ../src/ui/dialog/glyphs.cpp:225
-#, fuzzy
 msgid "Basic Plane"
-msgstr "Latino di base"
+msgstr "Basic Plane"
 
 #: ../src/ui/dialog/glyphs.cpp:226
 msgid "Extended Multilingual Plane"
-msgstr ""
+msgstr "Extended Multilingual Plane"
 
 #: ../src/ui/dialog/glyphs.cpp:227
 msgid "Supplementary Ideographic Plane"
-msgstr ""
+msgstr "Supplementary Ideographic Plane"
 
 #: ../src/ui/dialog/glyphs.cpp:229
 msgid "Basic Latin"
@@ -19063,71 +19061,67 @@ msgstr "Hangul Jamo esteso B"
 
 #: ../src/ui/dialog/glyphs.cpp:364
 msgid "High Surrogates"
-msgstr ""
+msgstr "High Surrogates"
 
 #: ../src/ui/dialog/glyphs.cpp:365
 msgid "High Private Use Surrogates"
-msgstr ""
+msgstr "High Private Use Surrogates"
 
 #: ../src/ui/dialog/glyphs.cpp:366
 msgid "Low Surrogates"
-msgstr ""
+msgstr "Low Surrogates"
 
 #: ../src/ui/dialog/glyphs.cpp:367
 msgid "Private Use Area"
-msgstr ""
+msgstr "Private Use Area"
 
 #: ../src/ui/dialog/glyphs.cpp:368
 msgid "CJK Compatibility Ideographs"
-msgstr ""
+msgstr "CJK Compatibility Ideographs"
 
 #: ../src/ui/dialog/glyphs.cpp:369
 msgid "Alphabetic Presentation Forms"
-msgstr ""
+msgstr "Alphabetic Presentation Forms"
 
 #: ../src/ui/dialog/glyphs.cpp:370
 msgid "Arabic Presentation Forms-A"
-msgstr ""
+msgstr "Arabic Presentation Forms-A"
 
 #: ../src/ui/dialog/glyphs.cpp:371
-#, fuzzy
 msgid "Variation Selectors"
-msgstr "Adatta pagina alla selezione"
+msgstr "Variation Selectors"
 
 #: ../src/ui/dialog/glyphs.cpp:372
-#, fuzzy
 msgid "Vertical Forms"
-msgstr "Raggio verticale"
+msgstr "Vertical Forms"
 
 #: ../src/ui/dialog/glyphs.cpp:373
-#, fuzzy
 msgid "Combining Half Marks"
-msgstr "Margini di stampa"
+msgstr "Combining Half Marks"
 
 #: ../src/ui/dialog/glyphs.cpp:374
 msgid "CJK Compatibility Forms"
-msgstr ""
+msgstr "CJK Compatibility Forms"
 
 #: ../src/ui/dialog/glyphs.cpp:375
 msgid "Small Form Variants"
-msgstr ""
+msgstr "Small Form Variants"
 
 #: ../src/ui/dialog/glyphs.cpp:376
 msgid "Arabic Presentation Forms-B"
-msgstr ""
+msgstr "Arabic Presentation Forms-B"
 
 #: ../src/ui/dialog/glyphs.cpp:377
 msgid "Halfwidth and Fullwidth Forms"
-msgstr ""
+msgstr "Halfwidth and Fullwidth Forms"
 
 #: ../src/ui/dialog/glyphs.cpp:378
 msgid "Specials"
 msgstr "Speciali"
 
 #: ../src/ui/dialog/glyphs.cpp:381
-#, fuzzy
 msgid "Miscellaneous Symbols and Pictographs"
-msgstr "Vari Simboli e Frecce"
+msgstr "Simboli e pittogrammi vari"
 
 #: ../src/ui/dialog/glyphs.cpp:382
 msgid "Emoticons"
@@ -19150,7 +19144,6 @@ msgid "Geometric Shapes Extended"
 msgstr "Forme geometriche esteso"
 
 #: ../src/ui/dialog/glyphs.cpp:387
-#, fuzzy
 msgid "Supplemental Arrows-C"
 msgstr "Supplemento Frecce C"
 
@@ -19164,7 +19157,7 @@ msgstr "Simboli scacchi"
 
 #: ../src/ui/dialog/glyphs.cpp:390
 msgid "Symbols and Pictographs Extended-A"
-msgstr ""
+msgstr "Simboli e pittogrammi esteso A"
 
 #: ../src/ui/dialog/glyphs.cpp:452
 msgid "Script: "
@@ -23775,42 +23768,36 @@ msgid "Adjust kerning value"
 msgstr "Modifica valore crenatura"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:456
-#, fuzzy
 msgid "Font Attributes"
-msgstr "Imposta attributi"
+msgstr "Attributi font"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:457
 msgid "Horiz. Advance X"
-msgstr "Avanzamento orizzontale"
+msgstr "Avanzamento orizzontale X:"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:457
 msgid "Average amount of horizontal space each letter takes up."
 msgstr "Quantità media di spazio occupata da ogni lettera."
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:458
-#, fuzzy
 msgid "Horiz. Origin X"
-msgstr "Origine X:"
+msgstr "Origine orizz. X:"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:458
-#, fuzzy
 msgid "Average horizontal origin location for each letter."
 msgstr "Posizione orizzontale di inizio di ogni lettera."
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:459
-#, fuzzy
 msgid "Horiz. Origin Y"
-msgstr "Origine Y"
+msgstr "Origine vert. Y:"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:459
-#, fuzzy
 msgid "Average vertical origin location for each letter."
 msgstr "Posizione verticale di inizio di ogni lettera."
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:460
-#, fuzzy
 msgid "Font Face Attributes"
-msgstr "Imposta attributi"
+msgstr "Attributi font face"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:461
 msgid "Family Name:"
@@ -23832,7 +23819,6 @@ msgid "Number of display units each letter takes up."
 msgstr "Numero di unità di display occupate da ogni lettera."
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:463
-#, fuzzy
 msgid "Ascent:"
 msgstr "Ascendente:"
 
@@ -23843,7 +23829,6 @@ msgstr ""
 "Spazio occupato dalle linee ascendenti come la linea lunga della lettera 'h'."
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:464
-#, fuzzy
 msgid "Descent:"
 msgstr "Discendente:"
 
@@ -23853,9 +23838,8 @@ msgstr ""
 "Spazio occupato dalle linee discendenti come il ricciolo della lettera 'g'."
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:465
-#, fuzzy
 msgid "Cap Height:"
-msgstr "Altezza della maiuscola:"
+msgstr "Altezza maiuscola:"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:465
 msgid ""
@@ -23864,9 +23848,8 @@ msgstr ""
 "Altezza delle lettere maiuscole sulla linea base come le lettere 'H' o 'I'."
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:466
-#, fuzzy
 msgid "x Height:"
-msgstr "Altezza della minuscola:"
+msgstr "Altezza minuscola:"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:466
 msgid ""
@@ -24000,9 +23983,8 @@ msgid "Add font"
 msgstr "Aggiungi font"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:1018
-#, fuzzy
 msgid "_Fonts"
-msgstr "_Carattere"
+msgstr "_Font"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:1026
 msgid "_Global Settings"
