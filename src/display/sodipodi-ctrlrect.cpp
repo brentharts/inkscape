@@ -88,6 +88,7 @@ void CtrlRect::init()
     _border_color = 0x000000ff;
     _fill_color = 0xffffffff;
     _shadow_color = 0x000000ff;
+    _inverted = false;
 }
 
 
@@ -118,6 +119,10 @@ void CtrlRect::render(SPCanvasBuf *buf)
         Geom::Point rect_transformed[4];
         for (unsigned i = 0; i < 4; ++i) {
             rect_transformed[i] = _rect.corner(i) * _affine;
+        }
+
+        if(_inverted) {
+            cairo_set_operator(buf->ct, CAIRO_OPERATOR_DIFFERENCE);
         }
 
         // Draw shadow first. Shadow extends under rectangle to reduce aliasing effects.
@@ -215,7 +220,7 @@ void CtrlRect::render(SPCanvasBuf *buf)
             cairo_stroke_preserve(buf->ct);
         }
 
-        cairo_new_path( buf->ct ); // Clear path or get weird artifacts.
+        cairo_new_path(buf->ct); // Clear path or get weird artifacts.
         cairo_restore(buf->ct);
     }
 }
@@ -250,7 +255,10 @@ void CtrlRect::update(Geom::Affine const &affine, unsigned int flags)
 
     if (_area) {
         Geom::IntRect area = *_area;
-        sp_canvas_update_bbox( this, area[X].min(), area[Y].min(), area[X].max(), area[Y].max() );
+        // Windows glitches sometimes in cairo, possibly due to the way the surface is cleared.
+        // Increasing '_area' won't work as the box must be drawn 'inside' the updated area.
+        sp_canvas_update_bbox(this, area.left(), area.top(), area.right() + 1, area.bottom() + 1);
+
     } else {
         std::cerr << "CtrlRect::update: No area!!" << std::endl;
     }
@@ -272,6 +280,11 @@ void CtrlRect::setShadow(int s, guint c)
 {
     _shadow_width = s;
     _shadow_color = c;
+    _requestUpdate();
+}
+
+void CtrlRect::setInvert(bool invert) {
+    _inverted = invert;
     _requestUpdate();
 }
 
