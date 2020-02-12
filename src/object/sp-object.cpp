@@ -1107,9 +1107,8 @@ Inkscape::XML::Node* SPObject::write(Inkscape::XML::Document *doc, Inkscape::XML
             if(any_written) {
                 // We need to ask the object to update the style and keep things in sync
                 // see `case SP_ATTR_STYLE` above for how the style attr itself does this.
-                SPObject* object = this;
-                object->style->readFromObject( object );
-                object->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_STYLE_MODIFIED_FLAG);
+                style->readFromObject(this);
+                requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_STYLE_MODIFIED_FLAG);
             }
 
             // Check for valid attributes. This may be time consuming.
