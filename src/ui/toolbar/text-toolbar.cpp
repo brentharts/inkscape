@@ -27,7 +27,10 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
+#include <algorithm>
+#include <glib/gi18n.h>
 #include <glibmm/i18n.h>
+#include <gtkmm/object.h>
 
 #include "text-toolbar.h"
 
@@ -137,25 +140,24 @@ static void recursively_set_properties(SPObject *object, SPCSSAttr *css, bool un
 /*
  * Set the default list of font sizes, scaled to the users preferred unit
  */
-static void sp_text_set_sizes(GtkListStore* model_size, int unit)
+static std::vector<double> sp_text_set_sizes(int unit)
 {
-    gtk_list_store_clear(model_size);
 
-    // List of font sizes for dropchange-down menu
-    int sizes[] = {
+    // List of font sizes for drop-down menu
+    std::vector<double> sizes{
         4, 6, 8, 9, 10, 11, 12, 13, 14, 16, 18, 20, 22, 24, 28,
         32, 36, 40, 48, 56, 64, 72, 144
     };
 
     // Array must be same length as SPCSSUnit in style.h
-    float ratios[] = {1, 1, 1, 10, 4, 40, 100, 16, 8, 0.16};
+    static float const ratios[] = {1, 1, 1, 1.0/10, 1.0/4, 1.0/40, 1.0/100, 1.0/16, 1.0/8, 1.0/0.16};
 
-    for(int i : sizes) {
-        GtkTreeIter iter;
-        Glib::ustring size = Glib::ustring::format(i / (float)ratios[unit]);
-        gtk_list_store_append( model_size, &iter );
-        gtk_list_store_set( model_size, &iter, 0, size.c_str(), -1 );
-    }
+    const float scaling = ratios[unit];
+
+    std::transform(sizes.begin(), sizes.end(), sizes.begin(),
+                   [scaling](double size) { return size * scaling; });
+
+    return sizes;
 }
 
 
@@ -301,7 +303,30 @@ TextToolbar::TextToolbar(SPDesktop *desktop)
     /* Font size */
     {
         // List of font sizes for drop-down menu
-        GtkListStore* model_size = gtk_list_store_new( 1, G_TYPE_STRING );
+        Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+        int unit = prefs->getInt("/options/font/unitType", SP_CSS_UNIT_PT);
+        int max_size =
+            prefs->getInt("/dialogs/textandfont/maxFontSize",
+                          10000); // somewhat arbitrary, but text&font preview freezes with too huge fontsizes
+
+        auto model_sizes = sp_text_set_sizes(unit);
+        /* std::vector<Glib::ustring> labels(model_sizes.size(), ""); */
+
+        // one million should be enough
+        _font_size_adj = Gtk::Adjustment::create(12, 0.0, max_size);
+
+        auto unit_str = sp_style_get_css_unit_string(unit);
+        Glib::ustring tooltip = Glib::ustring::format(_("Font size"), " (", unit_str, ")");
+
+        _font_size_item =
+            Gtk::manage(new UI::Widget::SpinButtonToolItem("TextFontSizeAction", "", _font_size_adj, 1, 3));
+        _font_size_item->set_tooltip_text(tooltip);
+        _font_size_item->set_custom_numeric_menu_data(model_sizes);
+        _font_size_item->set_focus_widget(Glib::wrap(GTK_WIDGET(desktop->canvas)));
+        _font_size_adj->signal_value_changed().connect(sigc::mem_fun(*this, &TextToolbar::fontsize_value_changed));
+        _font_size_item->set_sensitive();
+        add(*_font_size_item);
+       /*  GtkListStore* model_size = gtk_list_store_new( 1, G_TYPE_STRING );
         Inkscape::Preferences *prefs = Inkscape::Preferences::get();
         int unit = prefs->getInt("/options/font/unitType", SP_CSS_UNIT_PT);
 
@@ -322,7 +347,7 @@ TextToolbar::TextToolbar(SPDesktop *desktop)
 
         _font_size_item->signal_changed().connect(sigc::mem_fun(*this, &TextToolbar::fontsize_value_changed));
         _font_size_item->focus_on_click(false);
-        add(*_font_size_item);
+        add(*_font_size_item); */
     }
     /* Font_ size units */
     {
@@ -761,22 +786,19 @@ TextToolbar::fontsize_value_changed()
     }
     _freeze = true;
 
-    gchar *text = _font_size_item->get_active_text();
-    gchar *endptr;
-    gdouble size = g_strtod( text, &endptr );
-    if (endptr == text) {  // Conversion failed, non-numeric input.
-        g_warning( "Conversion of size text to double failed, input: %s\n", text );
-        g_free( text );
-        _freeze = false;
-        return;
-    }
-    g_free( text );
+    gdouble size = _font_size_adj->get_value();
+    /* gchar *text = _font_size_item->get_active_text(); */
+    /* gchar *endptr; */
+    /* gdouble size = g_strtod( text, &endptr ); */
+    /* if (endptr == text) {  // Conversion failed, non-numeric input. */
+    /*     g_warning( "Conversion of size text to double failed, input: %s\n", text ); */
+    /*     g_free( text ); */
+    /*     _freeze = false; */
+    /*     return; */
+    /* } */
+    /* g_free( text ); */
 
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    int max_size = prefs->getInt("/dialogs/textandfont/maxFontSize", 10000); // somewhat arbitrary, but text&font preview freezes with too huge fontsizes
-
-    if (size > max_size)
-        size = max_size;
 
     // Set css font size.
     SPCSSAttr *css = sp_repr_css_attr_new ();
@@ -1950,7 +1972,7 @@ void TextToolbar::selection_changed(Inkscape::Selection *selection) // don't bot
         auto unit_str = sp_style_get_css_unit_string(unit);
         Glib::ustring tooltip = Glib::ustring::format(_("Font size"), " (", unit_str, ")");
 
-        _font_size_item->set_tooltip(tooltip.c_str());
+        _font_size_item->set_tooltip_text(tooltip);
 
         Inkscape::CSSOStringStream os;
         // We dot want to parse values just show
@@ -1968,10 +1990,15 @@ void TextToolbar::selection_changed(Inkscape::Selection *selection) // don't bot
 
         // Freeze to ignore callbacks.
         //g_object_freeze_notify( G_OBJECT( fontSizeAction->combobox ) );
-        sp_text_set_sizes(GTK_LIST_STORE(_font_size_item->get_model()), unit);
+        //sp_text_set_sizes(GTK_LIST_STORE(_font_size_item->get_model()), unit);
         //g_object_thaw_notify( G_OBJECT( fontSizeAction->combobox ) );
+        {
+            auto model_sizes = sp_text_set_sizes(unit);
+            _font_size_item->set_custom_numeric_menu_data(model_sizes);
+        }
 
-        _font_size_item->set_active_text( os.str().c_str() );
+        /* _font_size_item->set_active_text( os.str().c_str() ); */
+        _font_size_adj->set_value(selection_fontsize);
 
         // Superscript
         gboolean superscriptSet =

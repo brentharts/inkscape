@@ -70,7 +70,7 @@ private:
     UI::Widget::UnitTracker *_tracker_fs;
 
     UI::Widget::ComboBoxEntryToolItem *_font_family_item;
-    UI::Widget::ComboBoxEntryToolItem *_font_size_item;
+    UI::Widget::SpinButtonToolItem *_font_size_item;
     UI::Widget::ComboToolItem *_font_size_units_item;
     UI::Widget::ComboBoxEntryToolItem *_font_style_item;
     UI::Widget::ComboToolItem *_line_height_units_item;
@@ -89,6 +89,7 @@ private:
     UI::Widget::SpinButtonToolItem *_dy_item;
     UI::Widget::SpinButtonToolItem *_rotation_item;
 
+    Glib::RefPtr<Gtk::Adjustment> _font_size_adj;
     Glib::RefPtr<Gtk::Adjustment> _line_height_adj;
     Glib::RefPtr<Gtk::Adjustment> _word_spacing_adj;
     Glib::RefPtr<Gtk::Adjustment> _letter_spacing_adj;
