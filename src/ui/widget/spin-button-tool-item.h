@@ -5,6 +5,8 @@
 #include <gtkmm/toolitem.h>
 #include <utility>
 
+#include "2geom/math-utils.h"
+
 namespace Gtk {
 class Box;
 class RadioButtonGroup;
@@ -24,7 +26,7 @@ class SpinButtonToolItem : public Gtk::ToolItem
 {
 private:
     using ValueLabel = std::pair<double, Glib::ustring>;
-    using NumericMenuData = std::vector<ValueLabel>;
+    using NumericMenuData = std::map<double, Glib::ustring>;
 
     Glib::ustring  _name;           ///< A unique ID for the widget (NOT translatable)
     SpinButton    *_btn;            ///< The spin-button within the widget
@@ -48,6 +50,12 @@ private:
 
     // sort in decreasing order
     bool _sort_decreasing;
+
+    // digits of adjustment
+    int _digits;
+
+    // just a wrapper for Geom::decimal_round to simplify calls
+    double round_to_precision(double value);
 
     // Event handlers
     bool on_btn_focus_in_event(GdkEventFocus  *focus_event);

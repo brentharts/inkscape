@@ -275,27 +275,11 @@ SpinButtonToolItem::create_numeric_menu()
 
     // Get values for the adjustment
     auto adj = _btn->get_adjustment();
-    auto adj_value = adj->get_value();
-    auto lower = adj->get_lower();
-    auto upper = adj->get_upper();
+    auto adj_value = round_to_precision(adj->get_value());
+    auto lower = round_to_precision(adj->get_lower());
+    auto upper = round_to_precision(adj->get_upper());
     auto step = adj->get_step_increment();
     auto page = adj->get_page_increment();
-
-    auto digits = _btn->get_digits();
-
-    // A number a little smaller than the smallest increment that can be
-    // displayed in the spinbutton entry.
-    //
-    // For example, if digits = 0, we are displaying integers only and
-    // epsilon = 0.9 * 10^-0 = 0.9
-    //
-    // For digits = 1, we get epsilon = 0.9 * 10^-1 = 0.09
-    // For digits = 2, we get epsilon = 0.9 * 10^-2 = 0.009 etc...
-
-    double const epsilon = 0.9 * pow(10.0, -float(digits));
-    auto const nearly_equal = [digits, epsilon](double number1, double number2) {
-        return fabs(number1 - number2) < epsilon;
-    };
 
     // Start by setting some fixed values based on the adjustment's
     // parameters.
@@ -303,59 +287,33 @@ SpinButtonToolItem::create_numeric_menu()
 
     // first add all custom items (necessary)
     for (auto custom_data : _custom_menu_data) {
-        values.push_back(custom_data);
+        values.insert(custom_data);
     }
 
-    values.push_back(std::make_pair(adj_value, ""));
-
-    if (_show_upper_limit) {
-        values.push_back(std::make_pair(upper, ""));
-    }
-    if (_show_lower_limit) {
-        values.push_back(std::make_pair(lower, ""));
+    if (!values.count(adj_value)) {
+        values.insert({ adj_value, "" });
     }
 
-    {
-        // for one time condition check
-        std::function<bool(double, double)> cmp;
-        if (_sort_decreasing) {
-            cmp = std::greater<int>();
-        } else {
-            cmp = std::less<int>();
-        }
-
-        auto const sorter = [&nearly_equal, &cmp](ValueLabel l, ValueLabel r) -> bool {
-            // sorts nearly_equal values by their string in decreasing order to keep
-            if (nearly_equal(l.first, r.first)) {
-                return l.second > r.second;
-            }
-            return cmp(l.first, r.first);
-        };
-        // Sort the numeric menu items in requested order
-        std::sort(begin(values), end(values), sorter);
+    if (_show_upper_limit && !values.count(upper)) {
+        values.insert({upper, ""});
+    }
+    if (_show_lower_limit && !values.count(lower)) {
+        values.insert({lower, ""});
     }
 
-    {
-        //std::sort preserves order, we want to keep labled values rather than with same value but no
-        //label, hence insert them before the unlabled values
-        auto unique_values_end =
-            std::unique(begin(values), end(values), [&nearly_equal](ValueLabel value1, ValueLabel value2) {
-                return nearly_equal(value1.first, value2.first);
-            });
-
-        values.erase(unique_values_end, values.end());
-    }
-
-    for (auto value : values)
-    {
+    auto add_item = [&numeric_menu, this, &group, adj_value](ValueLabel value){
         auto numeric_menu_item = create_numeric_menu_item(&group, value.first, value.second);
         numeric_menu->append(*numeric_menu_item);
 
-        if (fabs(adj_value - value.first) < epsilon) {
-            // If the adjustment value is very close to the value of this menu item,
-            // make this menu item active
+        if (adj_value == value.first) {
             numeric_menu_item->set_active();
         }
+    };
+
+    if (_sort_decreasing) {
+        std::for_each(values.crbegin(), values.crend(), add_item);
+    } else {
+        std::for_each(values.cbegin(), values.cend(), add_item);
     }
 
     return numeric_menu;
@@ -405,7 +363,8 @@ SpinButtonToolItem::SpinButtonToolItem(const Glib::ustring            name,
       _focus_widget(nullptr),
       _show_lower_limit(false),
       _show_upper_limit(false),
-      _sort_decreasing(false)
+      _sort_decreasing(false),
+      _digits(digits)
 {
     set_margin_start(3);
     set_margin_end(3);
@@ -527,6 +486,11 @@ SpinButtonToolItem::grab_button_focus()
     _btn->grab_focus();
 }
 
+double
+SpinButtonToolItem::round_to_precision(double value) {
+    return Geom::decimal_round(value, _digits);
+}
+
 void
 SpinButtonToolItem::set_custom_numeric_menu_data(std::vector<double>&              values,
                                                  const std::vector<Glib::ustring>& labels)
@@ -541,11 +505,10 @@ SpinButtonToolItem::set_custom_numeric_menu_data(std::vector<double>&           
     int i = 0;
 
     for (auto value : values) {
-        if(labels.empty()) {
-            _custom_menu_data.push_back(std::make_pair(value, ""));
-        }
-        else {
-            _custom_menu_data.push_back(std::make_pair(value, labels[i++]));
+        if (labels.empty()) {
+            _custom_menu_data.insert({ round_to_precision(value), "" });
+        } else {
+            _custom_menu_data.insert({ round_to_precision(value), labels[i++] });
         }
     }
 }
