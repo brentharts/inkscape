@@ -27,7 +27,6 @@ set(TEST_SOURCES
 	svg-stringstream-test
 	sp-gradient-test
 	object-test
-        svg-extension-test
 	curve-test
 	2geom-characterization-test)
 
