@@ -317,7 +317,7 @@ SpinButtonToolItem::create_numeric_menu()
 
     {
         // for one time condition check
-        std::function<bool(int, int)> cmp;
+        std::function<bool(double, double)> cmp;
         if (_sort_decreasing) {
             cmp = std::greater<int>();
         } else {
