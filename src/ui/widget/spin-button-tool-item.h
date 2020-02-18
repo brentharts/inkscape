@@ -3,6 +3,7 @@
 #define SEEN_SPIN_BUTTON_TOOL_ITEM_H
 
 #include <gtkmm/toolitem.h>
+#include <utility>
 
 namespace Gtk {
 class Box;
@@ -22,7 +23,8 @@ class SpinButton;
 class SpinButtonToolItem : public Gtk::ToolItem
 {
 private:
-    typedef std::vector< std::pair<double, Glib::ustring> > NumericMenuData;
+    using ValueLabel = std::pair<double, Glib::ustring>;
+    using NumericMenuData = std::vector<ValueLabel>;
 
     Glib::ustring  _name;           ///< A unique ID for the widget (NOT translatable)
     SpinButton    *_btn;            ///< The spin-button within the widget
@@ -39,6 +41,13 @@ private:
 
     // Custom values and labels to add to the numeric popup-menu
     NumericMenuData _custom_menu_data;
+
+    // To show or not to show upper/lower limit of the adjustment
+    bool _show_upper_limit;
+    bool _show_lower_limit;
+
+    // sort in decreasing order
+    bool _sort_decreasing;
 
     // Event handlers
     bool on_btn_focus_in_event(GdkEventFocus  *focus_event);
@@ -78,6 +87,14 @@ public:
                                       const std::vector<Glib::ustring>& labels = std::vector<Glib::ustring>());
     Glib::RefPtr<Gtk::Adjustment> get_adjustment();
     void set_icon(const Glib::ustring& icon_name);
+
+    // display limits
+    void show_upper_limit(bool show = true);
+    void show_lower_limit(bool show = true);
+    void show_limits     (bool show = true);
+
+    // sorting order
+    void sort_decreasing(bool decreasing = true);
 };
 } // namespace Widget
 } // namespace UI

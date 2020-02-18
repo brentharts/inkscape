@@ -2,6 +2,8 @@
 
 #include "spin-button-tool-item.h"
 
+#include <algorithm>
+#include <functional>
 #include <gtkmm/box.h>
 #include <gtkmm/image.h>
 #include <gtkmm/radiomenuitem.h>
@@ -196,7 +198,7 @@ SpinButtonToolItem::process_tab(int increment)
 
         auto test_index = my_index + increment; // The index of the item we want to check
 
-        // Loop through tool items as long as we're within the bounds of the toolbar and
+        // Loop through tool items as long as we're within the limits of the toolbar and
         // we haven't yet found our new item to focus on
         while(test_index > 0 && test_index <= n_items && !handled) {
 
@@ -289,27 +291,60 @@ SpinButtonToolItem::create_numeric_menu()
     //
     // For digits = 1, we get epsilon = 0.9 * 10^-1 = 0.09
     // For digits = 2, we get epsilon = 0.9 * 10^-2 = 0.009 etc...
-    auto epsilon = 0.9 * pow(10.0, -float(digits));
+
+    double const epsilon = 0.9 * pow(10.0, -float(digits));
+    auto const nearly_equal = [digits, epsilon](double number1, double number2) {
+        return fabs(number1 - number2) < epsilon;
+    };
 
     // Start by setting some fixed values based on the adjustment's
     // parameters.
     NumericMenuData values;
-    values.push_back(std::make_pair(upper,            ""));
-    values.push_back(std::make_pair(adj_value + page, ""));
-    values.push_back(std::make_pair(adj_value + step, ""));
-    values.push_back(std::make_pair(adj_value,        ""));
-    values.push_back(std::make_pair(adj_value - step, ""));
-    values.push_back(std::make_pair(adj_value - page, ""));
-    values.push_back(std::make_pair(lower,            ""));
 
-    // Now add any custom items
+    // first add all custom items (necessary)
     for (auto custom_data : _custom_menu_data) {
         values.push_back(custom_data);
     }
 
-    // Sort the numeric menu items into reverse numerical order (largest at top of menu)
-    std::sort   (begin(values), end(values));
-    std::reverse(begin(values), end(values));
+    values.push_back(std::make_pair(adj_value, ""));
+
+    if (_show_upper_limit) {
+        values.push_back(std::make_pair(upper, ""));
+    }
+    if (_show_lower_limit) {
+        values.push_back(std::make_pair(lower, ""));
+    }
+
+    {
+        // for one time condition check
+        std::function<bool(int, int)> cmp;
+        if (_sort_decreasing) {
+            cmp = std::greater<int>();
+        } else {
+            cmp = std::less<int>();
+        }
+
+        auto const sorter = [&nearly_equal, &cmp](ValueLabel l, ValueLabel r) -> bool {
+            // sorts nearly_equal values by their string in decreasing order to keep
+            if (nearly_equal(l.first, r.first)) {
+                return l.second > r.second;
+            }
+            return cmp(l.first, r.first);
+        };
+        // Sort the numeric menu items in requested order
+        std::sort(begin(values), end(values), sorter);
+    }
+
+    {
+        //std::sort preserves order, we want to keep labled values rather than with same value but no
+        //label, hence insert them before the unlabled values
+        auto unique_values_end =
+            std::unique(begin(values), end(values), [&nearly_equal](ValueLabel value1, ValueLabel value2) {
+                return nearly_equal(value1.first, value2.first);
+            });
+
+        values.erase(unique_values_end, values.end());
+    }
 
     for (auto value : values)
     {
@@ -367,7 +402,10 @@ SpinButtonToolItem::SpinButtonToolItem(const Glib::ustring            name,
       _label_text(label_text),
       _last_val(0.0),
       _transfer_focus(false),
-      _focus_widget(nullptr)
+      _focus_widget(nullptr),
+      _show_lower_limit(false),
+      _show_upper_limit(false),
+      _sort_decreasing(false)
 {
     set_margin_start(3);
     set_margin_end(3);
@@ -511,6 +549,14 @@ SpinButtonToolItem::set_custom_numeric_menu_data(std::vector<double>&           
         }
     }
 }
+
+void SpinButtonToolItem::show_upper_limit(bool show) { _show_upper_limit = show; }
+
+void SpinButtonToolItem::show_lower_limit(bool show) { _show_lower_limit = show; }
+
+void SpinButtonToolItem::show_limits(bool show) { _show_upper_limit = _show_lower_limit = show; }
+
+void SpinButtonToolItem::sort_decreasing(bool decreasing) { _sort_decreasing = decreasing; }
 
 Glib::RefPtr<Gtk::Adjustment>
 SpinButtonToolItem::get_adjustment()
