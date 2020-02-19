@@ -45,11 +45,11 @@ private:
     NumericMenuData _custom_menu_data;
 
     // To show or not to show upper/lower limit of the adjustment
-    bool _show_upper_limit;
-    bool _show_lower_limit;
+    bool _show_upper_limit = false;
+    bool _show_lower_limit = false;
 
     // sort in decreasing order
-    bool _sort_decreasing;
+    bool _sort_decreasing = false;
 
     // digits of adjustment
     int _digits;

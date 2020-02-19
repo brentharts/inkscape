@@ -9,6 +9,7 @@
 #include <gtkmm/radiomenuitem.h>
 #include <gtkmm/toolbar.h>
 
+#include <math.h>
 #include <utility>
 
 #include "spinbutton.h"
@@ -287,18 +288,22 @@ SpinButtonToolItem::create_numeric_menu()
 
     // first add all custom items (necessary)
     for (auto custom_data : _custom_menu_data) {
-        values.insert(custom_data);
+        values.emplace(custom_data);
     }
 
-    if (!values.count(adj_value)) {
-        values.insert({ adj_value, "" });
-    }
+    values.emplace(adj_value, "");
 
-    if (_show_upper_limit && !values.count(upper)) {
-        values.insert({upper, ""});
+    // for quick page changes using mouse, step can changes can be done with +/- buttons on
+    // SpinButton
+    values.emplace(fmin(adj_value + page, upper), "");
+    values.emplace(fmax(adj_value - page, lower), "");
+
+    // add upper/lower limits to options
+    if (_show_upper_limit) {
+        values.emplace(upper, "");
     }
-    if (_show_lower_limit && !values.count(lower)) {
-        values.insert({lower, ""});
+    if (_show_lower_limit) {
+        values.emplace(lower, "");
     }
 
     auto add_item = [&numeric_menu, this, &group, adj_value](ValueLabel value){
@@ -361,9 +366,6 @@ SpinButtonToolItem::SpinButtonToolItem(const Glib::ustring            name,
       _last_val(0.0),
       _transfer_focus(false),
       _focus_widget(nullptr),
-      _show_lower_limit(false),
-      _show_upper_limit(false),
-      _sort_decreasing(false),
       _digits(digits)
 {
     set_margin_start(3);
@@ -506,9 +508,9 @@ SpinButtonToolItem::set_custom_numeric_menu_data(std::vector<double>&           
 
     for (auto value : values) {
         if (labels.empty()) {
-            _custom_menu_data.insert({ round_to_precision(value), "" });
+            _custom_menu_data.emplace(round_to_precision(value), "");
         } else {
-            _custom_menu_data.insert({ round_to_precision(value), labels[i++] });
+            _custom_menu_data.emplace(round_to_precision(value), labels[i++]);
         }
     }
 }
