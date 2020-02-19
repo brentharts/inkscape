@@ -3,13 +3,12 @@
 #include "spin-button-tool-item.h"
 
 #include <algorithm>
-#include <functional>
 #include <gtkmm/box.h>
 #include <gtkmm/image.h>
 #include <gtkmm/radiomenuitem.h>
 #include <gtkmm/toolbar.h>
 
-#include <math.h>
+#include <cmath>
 #include <utility>
 
 #include "spinbutton.h"
@@ -295,8 +294,8 @@ SpinButtonToolItem::create_numeric_menu()
 
     // for quick page changes using mouse, step can changes can be done with +/- buttons on
     // SpinButton
-    values.emplace(fmin(adj_value + page, upper), "");
-    values.emplace(fmax(adj_value - page, lower), "");
+    values.emplace(::fmin(adj_value + page, upper), "");
+    values.emplace(::fmax(adj_value - page, lower), "");
 
     // add upper/lower limits to options
     if (_show_upper_limit) {
@@ -488,13 +487,26 @@ SpinButtonToolItem::grab_button_focus()
     _btn->grab_focus();
 }
 
+/**
+ * \brief A wrapper of Geom::decimal_round to remember precision
+ */
 double
 SpinButtonToolItem::round_to_precision(double value) {
     return Geom::decimal_round(value, _digits);
 }
 
+/**
+ * \brief     [discouraged] Set numeric data option in Radio menu.
+ *
+ * \param[in] values  values to provide as options
+ * \param[in] labels  label to show for the value at same index in values.
+ *
+ * \detail    Use is advised only when there are no labels.
+ *            This is discouraged in favor of other overloads of the function, due to error prone
+ *            usage. Using two vectors for related data, undermining encapsulation.
+ */
 void
-SpinButtonToolItem::set_custom_numeric_menu_data(std::vector<double>&              values,
+SpinButtonToolItem::set_custom_numeric_menu_data(const std::vector<double>&        values,
                                                  const std::vector<Glib::ustring>& labels)
 {
     if(values.size() != labels.size() && !labels.empty()) {
@@ -506,7 +518,7 @@ SpinButtonToolItem::set_custom_numeric_menu_data(std::vector<double>&           
 
     int i = 0;
 
-    for (auto value : values) {
+    for (const auto& value : values) {
         if (labels.empty()) {
             _custom_menu_data.emplace(round_to_precision(value), "");
         } else {
@@ -514,6 +526,51 @@ SpinButtonToolItem::set_custom_numeric_menu_data(std::vector<double>&           
         }
     }
 }
+
+/**
+ * \brief     Set numeric data options for Radio menu (densely labeled data).
+ *
+ * \param[in] value_labels  value and labels to provide as options
+ *
+ * \detail    Should be used when most of the values have an associated label (densely labeled data)
+ *
+ */
+void
+SpinButtonToolItem::set_custom_numeric_menu_data(const std::vector<ValueLabel>& value_labels) {
+    _custom_menu_data.clear();
+    for(const auto& value_label : value_labels) {
+        _custom_menu_data.emplace(round_to_precision(value_label.first), value_label.second);
+    }
+}
+
+
+/**
+ * \brief     Set numeric data options for Radio menu (sparsely labeled data).
+ *
+ * \param[in] values         values without labels
+ * \param[in] sparse_labels  value and labels to provide as options
+ *
+ * \detail    Should be used when very few values have an associated label (sparsely labeled data).
+ *            Duplicate values in vector and map are acceptable but, values labels in map are
+ *            preferred. Avoid using duplicate values intentionally though.
+ *
+ */
+void
+SpinButtonToolItem::set_custom_numeric_menu_data(const std::vector<double> &values,
+                                                      const std::unordered_map<double, Glib::ustring> &sparse_labels)
+{
+    _custom_menu_data.clear();
+
+    for(const auto& value_label : sparse_labels) {
+        _custom_menu_data.emplace(round_to_precision(value_label.first), value_label.second);
+    }
+
+    for(const auto& value : values) {
+        _custom_menu_data.emplace(round_to_precision(value), "");
+    }
+
+}
+
 
 void SpinButtonToolItem::show_upper_limit(bool show) { _show_upper_limit = show; }
 

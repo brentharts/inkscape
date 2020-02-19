@@ -3,6 +3,7 @@
 #define SEEN_SPIN_BUTTON_TOOL_ITEM_H
 
 #include <gtkmm/toolitem.h>
+#include <unordered_map>
 #include <utility>
 
 #include "2geom/math-utils.h"
@@ -91,8 +92,14 @@ public:
     void set_focus_widget(Gtk::Widget *widget);
     void grab_button_focus();
 
-    void set_custom_numeric_menu_data(std::vector<double>&              values,
+    void set_custom_numeric_menu_data(const std::vector<double>&        values,
                                       const std::vector<Glib::ustring>& labels = std::vector<Glib::ustring>());
+
+    void set_custom_numeric_menu_data(const std::vector<ValueLabel> &value_labels);
+
+    void set_custom_numeric_menu_data(const std::vector<double>&                       values,
+                                      const std::unordered_map<double, Glib::ustring>& sparse_labels);
+
     Glib::RefPtr<Gtk::Adjustment> get_adjustment();
     void set_icon(const Glib::ustring& icon_name);
 
