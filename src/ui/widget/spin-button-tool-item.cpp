@@ -509,21 +509,24 @@ void
 SpinButtonToolItem::set_custom_numeric_menu_data(const std::vector<double>&        values,
                                                  const std::vector<Glib::ustring>& labels)
 {
-    if(values.size() != labels.size() && !labels.empty()) {
-        g_warning("Cannot add custom menu items.  Value and label arrays are different sizes");
+
+    if (values.size() != labels.size() && !labels.empty()) {
+        g_warning("Cannot add custom menu items. Value and label arrays are different sizes");
         return;
     }
 
     _custom_menu_data.clear();
 
-    int i = 0;
-
-    for (const auto& value : values) {
-        if (labels.empty()) {
+    if (labels.empty()) {
+        for (const auto &value : values) {
             _custom_menu_data.emplace(round_to_precision(value), "");
-        } else {
-            _custom_menu_data.emplace(round_to_precision(value), labels[i++]);
         }
+        return;
+    }
+
+    int i = 0;
+    for (const auto &value : values) {
+        _custom_menu_data.emplace(round_to_precision(value), labels[i++]);
     }
 }
 
