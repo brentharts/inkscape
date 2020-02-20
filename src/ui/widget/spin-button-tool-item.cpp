@@ -278,7 +278,6 @@ SpinButtonToolItem::create_numeric_menu()
     auto adj_value = round_to_precision(adj->get_value());
     auto lower = round_to_precision(adj->get_lower());
     auto upper = round_to_precision(adj->get_upper());
-    auto step = adj->get_step_increment();
     auto page = adj->get_page_increment();
 
     // Start by setting some fixed values based on the adjustment's
@@ -362,9 +361,6 @@ SpinButtonToolItem::SpinButtonToolItem(const Glib::ustring            name,
     : _btn(Gtk::manage(new SpinButton(adjustment, climb_rate, digits))),
       _name(std::move(name)),
       _label_text(label_text),
-      _last_val(0.0),
-      _transfer_focus(false),
-      _focus_widget(nullptr),
       _digits(digits)
 {
     set_margin_start(3);

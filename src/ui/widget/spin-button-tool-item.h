@@ -29,18 +29,18 @@ private:
     using ValueLabel = std::pair<double, Glib::ustring>;
     using NumericMenuData = std::map<double, Glib::ustring>;
 
-    Glib::ustring  _name;           ///< A unique ID for the widget (NOT translatable)
-    SpinButton    *_btn;            ///< The spin-button within the widget
-    Glib::ustring  _label_text;     ///< A string to use in labels for the widget (translatable)
-    double         _last_val;       ///< The last value of the adjustment
-    bool           _transfer_focus; ///< Whether or not to transfer focus
+    Glib::ustring  _name;                  ///< A unique ID for the widget (NOT translatable)
+    SpinButton    *_btn;                   ///< The spin-button within the widget
+    Glib::ustring  _label_text;            ///< A string to use in labels for the widget (translatable)
+    double         _last_val = 0.0;        ///< The last value of the adjustment
+    bool           _transfer_focus = false; ///< Whether or not to transfer focus
 
     Gtk::Box    *_hbox;       ///< Horizontal box, to store widgets
     Gtk::Widget *_label;      ///< A text label to describe the setting
     Gtk::Widget *_icon;       ///< An icon to describe the setting
 
     /** A widget that grabs focus when this one loses it */
-    Gtk::Widget * _focus_widget;
+    Gtk::Widget * _focus_widget = nullptr;
 
     // Custom values and labels to add to the numeric popup-menu
     NumericMenuData _custom_menu_data;
