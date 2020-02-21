@@ -252,15 +252,6 @@ SPDesktopWidget::SPDesktopWidget()
 
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
 
-    dtw->_ruler_clicked = false;
-    dtw->_ruler_dragged = false;
-    dtw->_active_guide = nullptr;
-    dtw->_xp = 0;
-    dtw->_yp = 0;
-    dtw->window = nullptr;
-    dtw->desktop = nullptr;
-    dtw->_interaction_disabled_counter = 0;
-
     /* Main table */
     dtw->_vbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
     dtw->_vbox->set_name("DesktopMainTable");
@@ -507,9 +498,7 @@ SPDesktopWidget::SPDesktopWidget()
 		                false, false);
 
     // Layer Selector
-    dtw->layer_selector = new Inkscape::UI::Widget::LayerSelector(nullptr);
-    // FIXME: need to unreference on container destruction to avoid leak
-    dtw->layer_selector->reference();
+    dtw->layer_selector = Gtk::manage(new Inkscape::UI::Widget::LayerSelector(nullptr));
     dtw->_statusbar->pack_start(*dtw->layer_selector, false, false, 1);
 
     // Select Status
@@ -698,7 +687,6 @@ SPDesktopWidget::on_unrealize()
         }
 
         dtw->layer_selector->setDesktop(nullptr);
-        dtw->layer_selector->unreference();
         INKSCAPE.remove_desktop(dtw->desktop); // clears selection and event_context
         dtw->modified_connection.disconnect();
         dtw->desktop->destroy();
@@ -1792,13 +1780,13 @@ SPDesktopWidget::on_adjustment_value_changed()
     if (update)
         return;
 
-    update = 1;
+    update = true;
 
     // Do not call canvas->scrollTo directly... messes up 'offset'.
     desktop->scroll_absolute( Geom::Point(_hadj->get_value(),
                                           _vadj->get_value()), false);
 
-    update = 0;
+    update = false;
 }
 
 /* we make the desktop window with focus active, signal is connected in interface.c */
@@ -2136,7 +2124,7 @@ void
 SPDesktopWidget::update_scrollbars(double scale)
 {
     if (update) return;
-    update = 1;
+    update = true;
 
     /* The desktop region we always show unconditionally */
     SPDocument *doc = desktop->doc();
@@ -2172,7 +2160,7 @@ SPDesktopWidget::update_scrollbars(double scale)
                    viewbox.dimensions()[Geom::Y]);
     _vadj->set_value(viewbox.min()[Geom::Y]);
 
-    update = 0;
+    update = false;
 }
 
 bool
