@@ -1699,4 +1699,3 @@ Geom::Point get_point_on_Path(Path *path, int piece, double t)
   End:
 */
 // vim: filetype=cpp:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:fileencoding=utf-8:textwidth=99 :
-// Move and split
