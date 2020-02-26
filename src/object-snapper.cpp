@@ -21,11 +21,9 @@
 #include "desktop.h"
 #include "document.h"
 #include "inkscape.h"
-#include "splivarot.h"
 #include "preferences.h"
 #include "text-editing.h"
 
-#include "splivarot.h"   // curve_for_item, pathvector_for_curves
 #include "object/sp-clippath.h"
 #include "object/sp-flowtext.h"
 #include "object/sp-image.h"
@@ -37,6 +35,8 @@
 #include "object/sp-shape.h"
 #include "object/sp-text.h"
 #include "object/sp-use.h"
+
+#include "path/path-util.h"
 
 #include "svg/svg.h"
 

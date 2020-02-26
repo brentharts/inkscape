@@ -1,28 +1,16 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 /** @file
- * boolean operations and outlines
+ * Path offsets.
  *//*
  * Authors: see git history
  *
  * Copyright (C) 2018 Authors
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
-#ifndef SEEN_SP_LIVAROT_H
-#define SEEN_SP_LIVAROT_H
+#ifndef PATH_OFFSET_H
+#define PATH_OFFSET_H
 
-#include <2geom/forward.h>
-#include <2geom/path.h>
-#include "livarot/Path.h"
-#include "object/object-set.h"  // bool_op
-
-class SPCurve;
 class SPDesktop;
-class SPItem;
-
-namespace Inkscape {
-    class Selection;
-    class ObjectSet;
-}
 
 // offset/inset of a curve
 // takes the fill-rule in consideration
@@ -39,21 +27,7 @@ void sp_selected_path_create_updating_inset (SPDesktop *desktop);
 void sp_selected_path_create_offset_object_zero (SPDesktop *desktop);
 void sp_selected_path_create_updating_offset_object_zero (SPDesktop *desktop);
 
-
-// simplifies a path (removes small segments and the like)
-void sp_selected_path_simplify (SPDesktop *desktop);
-
-Path *Path_for_pathvector(Geom::PathVector const &pathv);
-Path *Path_for_item(SPItem *item, bool doTransformation, bool transformFull = true);
-Path *Path_for_item_before_LPE(SPItem *item, bool doTransformation, bool transformFull = true);
-Geom::PathVector* pathvector_for_curve(SPItem *item, SPCurve *curve, bool doTransformation, bool transformFull, Geom::Affine extraPreAffine, Geom::Affine extraPostAffine);
-SPCurve *curve_for_item(SPItem *item);
-SPCurve *curve_for_item_before_LPE(SPItem *item);
-boost::optional<Path::cut_position> get_nearest_position_on_Path(Path *path, Geom::Point p, unsigned seg = 0);
-Geom::Point get_point_on_Path(Path *path, int piece, double t);
-Geom::PathVector sp_pathvector_boolop(Geom::PathVector const &pathva, Geom::PathVector const &pathvb, bool_op bop, FillRule fra, FillRule frb);
-
-#endif
+#endif // PATH_OFFSET_H
 
 /*
   Local Variables:
