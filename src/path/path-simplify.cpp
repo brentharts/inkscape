@@ -19,8 +19,10 @@
 #include "path-simplify.h"
 #include "path-util.h"
 
+#include "document-undo.h"
+#include "preferences.h"
+
 #include "livarot/Path.h"
-#include "livarot/Shape.h"
 
 #include "object/sp-item-group.h"
 #include "object/sp-path.h"
