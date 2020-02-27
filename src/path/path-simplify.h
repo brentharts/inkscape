@@ -10,11 +10,9 @@
 #ifndef PATH_SIMPLIFY_H
 #define PATH_SIMPLIFY_H
 
-namespace Inkscape {
-  class Selection;
-} // Inkscape
+class SPItem;
 
-void sp_selected_path_simplify (Inkscape::Selection *selection);
+int path_simplify(SPItem *item, float threshold, bool justCoalesce, double size);
 
 #endif // PATH_SIMPLIFY_H
 

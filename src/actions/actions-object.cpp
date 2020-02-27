@@ -134,8 +134,7 @@ object_simplify_path(InkscapeApplication *app)
     auto document  = app->get_active_document();
     selection->setDocument(document);
 
-    // selection->simplifyPaths();
-    sp_selected_path_simplify(selection);
+    selection->simplifyPaths();
 }
 
 
