@@ -10,9 +10,11 @@
 #ifndef PATH_SIMPLIFY_H
 #define PATH_SIMPLIFY_H
 
-class SPDesktop;
+namespace Inkscape {
+  class Selection;
+} // Inkscape
 
-void sp_selected_path_simplify (SPDesktop *desktop);
+void sp_selected_path_simplify (Inkscape::Selection *selection);
 
 #endif // PATH_SIMPLIFY_H
 

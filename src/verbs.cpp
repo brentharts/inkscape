@@ -1238,7 +1238,7 @@ void SelectionVerb::perform(SPAction *action, void *data)
             break;
         case SP_VERB_SELECTION_SIMPLIFY:
             selection->toCurves(true);
-            sp_selected_path_simplify(dt);
+            sp_selected_path_simplify(selection);
             break;
         case SP_VERB_SELECTION_REVERSE:
             selection->toCurves(true);

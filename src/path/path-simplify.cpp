@@ -35,32 +35,30 @@
 using Inkscape::DocumentUndo;
 
 static bool
-sp_selected_path_simplify_items(SPDesktop *desktop,
-                                Inkscape::Selection *selection, std::vector<SPItem*> &items,
+sp_selected_path_simplify_items(Inkscape::Selection *selection, std::vector<SPItem*> &items,
                                 float threshold,  bool justCoalesce,
-                                float angleLimit, bool breakableAngles,
                                 bool modifySelection);
 
 
 //return true if we changed something, else false
 static bool
-sp_selected_path_simplify_item(SPDesktop *desktop,
-                 Inkscape::Selection *selection, SPItem *item,
-                 float threshold,  bool justCoalesce,
-                 float angleLimit, bool breakableAngles,
-                 gdouble size,     bool modifySelection)
+sp_selected_path_simplify_item(Inkscape::Selection *selection, SPItem *item,
+                               float threshold,  bool justCoalesce,
+                               gdouble size,     bool modifySelection)
 {
-    if (!(SP_IS_GROUP(item) || SP_IS_SHAPE(item) || SP_IS_TEXT(item)))
+    SPGroup* group = dynamic_cast<SPGroup *>(item);
+    SPShape* shape = dynamic_cast<SPShape *>(item);
+    SPText*  text  = dynamic_cast<SPText  *>(item);
+
+    if (!group && !shape && !text) {
         return false;
+    }
 
     //If this is a group, do the children instead
-    if (SP_IS_GROUP(item)) {
-    	std::vector<SPItem*> items = sp_item_group_item_list(SP_GROUP(item));
+    if (group) {
+        std::vector<SPItem*> items = sp_item_group_item_list(group);
         
-        return sp_selected_path_simplify_items(desktop, selection, items,
-                                               threshold, justCoalesce,
-                                               angleLimit, breakableAngles,
-                                               false);
+        return sp_selected_path_simplify_items(selection, items, threshold, justCoalesce, false);
     }
 
     // get path to simplify (note that the path *before* LPE calculation is needed)
@@ -101,7 +99,8 @@ sp_selected_path_simplify_item(SPDesktop *desktop,
         orig->Simplify(threshold * size);
     }
 
-    Inkscape::XML::Document *xml_doc = desktop->doc()->getReprDoc();
+    SPDocument* document = selection->document();
+    Inkscape::XML::Document *xml_doc = document->getReprDoc();
     Inkscape::XML::Node *repr = xml_doc->createElement("svg:path");
 
     // restore attributes
@@ -124,7 +123,7 @@ sp_selected_path_simplify_item(SPDesktop *desktop,
     // move to the saved position
     parent->addChildAtPos(repr, pos);
 
-    SPItem *newitem = (SPItem *) desktop->getDocument()->getObjectByRepr(repr);
+    SPItem *newitem = (SPItem *) document->getObjectByRepr(repr);
 
     // reapply the transform
     newitem->doWriteTransform(transform);
@@ -143,12 +142,13 @@ sp_selected_path_simplify_item(SPDesktop *desktop,
 
 
 bool
-sp_selected_path_simplify_items(SPDesktop *desktop,
-                                Inkscape::Selection *selection, std::vector<SPItem*> &items,
+sp_selected_path_simplify_items(Inkscape::Selection *selection, std::vector<SPItem*> &items,
                                 float threshold,  bool justCoalesce,
-                                float angleLimit, bool breakableAngles,
                                 bool modifySelection)
 {
+    SPDesktop  *desktop  = selection->desktop();
+
+    // There is actually no option in the preferences dialog for this!
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     bool simplifyIndividualPaths = prefs->getBool("/options/simplifyindividualpaths/value");
 
@@ -173,13 +173,19 @@ sp_selected_path_simplify_items(SPDesktop *desktop,
     int totalPathCount  = items.size();
 
     // set "busy" cursor
-    desktop->setWaitingCursor();
+    if (desktop) {
+        desktop->setWaitingCursor();
+    }
 
-    for (std::vector<SPItem*>::const_iterator l = items.begin(); l != items.end(); l++){
-        SPItem *item = *l;
+    for (auto item : items) {
 
-        if (!(SP_IS_GROUP(item) || SP_IS_SHAPE(item) || SP_IS_TEXT(item)))
-          continue;
+        SPGroup* group = dynamic_cast<SPGroup *>(item);
+        SPShape* shape = dynamic_cast<SPShape *>(item);
+        SPText*  text  = dynamic_cast<SPText  *>(item);
+
+        if (!group && !shape && !text) {
+            continue;
+        }
 
         if (simplifyIndividualPaths) {
             Geom::OptRect itemBbox = item->documentVisualBounds();
@@ -195,86 +201,85 @@ sp_selected_path_simplify_items(SPDesktop *desktop,
         if (pathsSimplified % 20 == 0) {
             gchar *message = g_strdup_printf(_("%s <b>%d</b> of <b>%d</b> paths simplified..."),
                 simplificationType, pathsSimplified, totalPathCount);
-            desktop->messageStack()->flash(Inkscape::IMMEDIATE_MESSAGE, message);
+            if (desktop) {
+                desktop->messageStack()->flash(Inkscape::IMMEDIATE_MESSAGE, message);
+            } else {
+                std::cerr << message << std::endl;
+            }
             g_free(message);
         }
 
-        didSomething |= sp_selected_path_simplify_item(desktop, selection, item,
-            threshold, justCoalesce, angleLimit, breakableAngles, simplifySize, modifySelection);
+        didSomething |= sp_selected_path_simplify_item(selection, item,
+            threshold, justCoalesce, simplifySize, modifySelection);
     }
 
-    desktop->clearWaitingCursor();
+    if (desktop) {
+        desktop->clearWaitingCursor();
+    }
 
-    if (pathsSimplified > 20) {
+    if (desktop && pathsSimplified > 20) {
         desktop->messageStack()->flashF(Inkscape::NORMAL_MESSAGE, _("<b>%d</b> paths simplified."), pathsSimplified);
     }
 
     return didSomething;
 }
 
-static void
-sp_selected_path_simplify_selection(SPDesktop *desktop, float threshold, bool justCoalesce,
-                                    float angleLimit, bool breakableAngles)
+void
+sp_selected_path_simplify(Inkscape::Selection *selection)
 {
-    Inkscape::Selection *selection = desktop->getSelection();
+    SPDesktop  *desktop  = selection->desktop();
+    SPDocument *document = selection->document();
 
-    if (selection->isEmpty()) {
-        desktop->messageStack()->flash(Inkscape::WARNING_MESSAGE,
-                         _("Select <b>path(s)</b> to simplify."));
+    if (!document) {
+        std::cerr << "sp_selected_path_simplify: no document!" << std::endl;
         return;
     }
 
-    std::vector<SPItem*> items(selection->items().begin(), selection->items().end());
+    if (selection->isEmpty()) {
+        if (selection->desktop()) {
+            desktop->messageStack()->flash(Inkscape::WARNING_MESSAGE,
+                                           _("Select <b>path(s)</b> to simplify."));
+        } else {
+            std::cerr << "sp_selected_path_simplify: empty selection!" << std::endl;
+        }
+        return;
+    }
 
-    bool didSomething = sp_selected_path_simplify_items(desktop, selection,
-                                                        items, threshold,
-                                                        justCoalesce,
-                                                        angleLimit,
-                                                        breakableAngles, true);
-
-    if (didSomething)
-        DocumentUndo::done(desktop->getDocument(), SP_VERB_SELECTION_SIMPLIFY, 
-                           _("Simplify"));
-    else
-        desktop->messageStack()->flash(Inkscape::ERROR_MESSAGE, _("<b>No paths</b> to simplify in the selection."));
-
-}
-
-
-// globals for keeping track of accelerated simplify
-static gint64 previous_time = 0;
-static gdouble simplifyMultiply = 1.0;
-
-void
-sp_selected_path_simplify(SPDesktop *desktop)
-{
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    gdouble simplifyThreshold =
-        prefs->getDouble("/options/simplifythreshold/value", 0.003);
-    bool simplifyJustCoalesce = prefs->getBool("/options/simplifyjustcoalesce/value", false);
+    gdouble threshold = prefs->getDouble("/options/simplifythreshold/value", 0.003);
+    bool justCoalesce = prefs->getBool(  "/options/simplifyjustcoalesce/value", false);
 
-    //Get the current time
+    // Keep track of accelerated simplify
+    static gint64 previous_time = 0;
+    static gdouble multiply = 1.0;
+
+    // Get the current time
     gint64 current_time = g_get_monotonic_time();
-    //Was the previous call to this function recent? (<0.5 sec)
+
+    // Was the previous call to this function recent? (<0.5 sec)
     if (previous_time > 0 && current_time - previous_time < 500000) {
 
         // add to the threshold 1/2 of its original value
-        simplifyMultiply  += 0.5;
-        simplifyThreshold *= simplifyMultiply;
+        multiply  += 0.5;
+        threshold *= multiply;
 
     } else {
         // reset to the default
-        simplifyMultiply = 1;
+        multiply = 1;
     }
 
-    //remember time for next call
+    // Remember time for next call
     previous_time = current_time;
 
-    //g_print("%g\n", simplify_threshold);
+    std::vector<SPItem *> items(selection->items().begin(), selection->items().end());
 
-    //Make the actual call
-    sp_selected_path_simplify_selection(desktop, simplifyThreshold,
-                                        simplifyJustCoalesce, 0.0, false);
+    bool didSomething = sp_selected_path_simplify_items(selection, items, threshold, justCoalesce, true);
+
+    if (didSomething) {
+        DocumentUndo::done(document, SP_VERB_SELECTION_SIMPLIFY,  _("Simplify"));
+    } else if (desktop) {
+        desktop->messageStack()->flash(Inkscape::ERROR_MESSAGE, _("<b>No paths</b> to simplify in the selection."));
+    }
 }
 
 /*
