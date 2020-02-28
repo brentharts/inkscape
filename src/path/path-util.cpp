@@ -16,8 +16,6 @@
 
 #include <vector>
 
-#include <glibmm/i18n.h>
-
 #include "path-util.h"
 
 #include "text-editing.h"
