@@ -181,7 +181,7 @@ bool
 InkscapeWindow::on_delete_event(GdkEventAny* event)
 {
     sp_ui_close_view(nullptr);
-    return true;
+    return false;
 };
 
 /*
