@@ -180,8 +180,10 @@ InkscapeWindow::on_focus_in_event(GdkEventFocus* event)
 bool
 InkscapeWindow::on_delete_event(GdkEventAny* event)
 {
-    sp_ui_close_view(nullptr);
-    return false;
+    if (_app) {
+        _app->destroy_window(this);
+    }
+    return true;
 };
 
 /*
