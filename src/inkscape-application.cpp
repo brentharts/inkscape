@@ -1165,7 +1165,8 @@ template<class T>
 void
 ConcreteInkscapeApplication<T>::shell()
 {
-    std::cout << "Inkscape interactive shell mode. Type 'quit' to quit." << std::endl;
+    std::cout << "Inkscape interactive shell mode. Type 'help-action' to list all actions. " 
+              << "Type 'quit' to quit." << std::endl;
     std::cout << " Input of the form:" << std::endl;
     std::cout << " action1:arg1; action2;arg2; verb1; verb2; ..." << std::endl;
     if (!_with_gui) {
