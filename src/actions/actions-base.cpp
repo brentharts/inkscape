@@ -48,6 +48,12 @@ print_user_data_directory()
 }
 
 void
+print_action_list(InkscapeApplication* app)
+{
+    app->print_actions(app);
+}
+
+void
 print_verb_list()
 {
     // This really shouldn't go here, we should init the app.
@@ -221,6 +227,7 @@ std::vector<std::vector<Glib::ustring>> raw_data_base =
     {"inkscape-version",          "InkscapeVersion",         "Base",       N_("Print Inkscape version and exit.")                   },
     {"system-data-directory",     "InkscapeSystemDir",       "Base",       N_("Print system data directory and exit.")              },
     {"user-data-directory",       "InkscapeUserDir",         "Base",       N_("Print user data directory and exit.")                },
+    {"help-action",               "InkscapeActions",         "Base",       N_("Print a list of actions and exit.")                  },
     {"verb-list",                 "InkscapeVerbs",           "Base",       N_("Print a list of verbs and exit.")                    },
     {"verb",                      "Verb",                    "Base",       N_("Execute verb(s).")                                   },
     {"vacuum-defs",               "VacuumDefs",              "Base",       N_("Remove unused definitions (gradients, etc.).")       },
@@ -245,6 +252,7 @@ add_actions_base(ConcreteInkscapeApplication<T>* app)
     app->add_action(               "inkscape-version",                                    sigc::ptr_fun(&print_inkscape_version)                 );
     app->add_action(               "system-data-directory",                               sigc::ptr_fun(&print_system_data_directory)            );
     app->add_action(               "user-data-directory",                                 sigc::ptr_fun(&print_user_data_directory)              );
+    app->add_action(               "help-action",        sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&print_action_list),         app)        );
     app->add_action(               "verb-list",                                           sigc::ptr_fun(&print_verb_list)                        );
     app->add_action_radio_string(  "verb",               sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&verbs),                     app), "null");
     app->add_action(               "vacuum-defs",        sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&vacuum_defs),               app)        );

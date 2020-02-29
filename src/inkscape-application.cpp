@@ -1264,12 +1264,7 @@ ConcreteInkscapeApplication<T>::on_handle_local_options(const Glib::RefPtr<Glib:
     }
 
     if (options->contains("action-list")) {
-        std::vector<Glib::ustring> actions = T::list_actions();
-        std::sort(actions.begin(), actions.end());
-        for (auto action : actions) {
-            std::cout << std::left << std::setw(20) << action
-                      << ":  " << _action_extra_data.get_tooltip_for_action(action) << std::endl;
-        }
+        print_actions(this);
         return EXIT_SUCCESS;
     }
 
@@ -1528,6 +1523,18 @@ ConcreteInkscapeApplication<Gtk::Application>::on_quit()
     }
     */
     quit();
+}
+
+template<class T>
+void
+ConcreteInkscapeApplication<T>::print_actions(InkscapeApplication* app)
+{
+    std::vector<Glib::ustring> actions = T::list_actions();
+    std::sort(actions.begin(), actions.end());
+    for (auto action : actions) {
+        std::cout << std::left << std::setw(20) << action
+                  << ":  " << _action_extra_data.get_tooltip_for_action(action) << std::endl;
+    }
 }
 
 //   ======================== macOS =============================

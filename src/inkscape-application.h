@@ -44,6 +44,7 @@ public:
     virtual int  on_handle_local_options(const Glib::RefPtr<Glib::VariantDict>& options) = 0;
     virtual void on_new() = 0;
     virtual void on_quit() = 0;
+    virtual void print_actions(InkscapeApplication* app) = 0;
 
     // Gio::Actions need to know what document, selection, view to work on.
     // In headless mode, these are set for each file processed.
@@ -152,6 +153,7 @@ public:
                                     bool add_to_recent = true, bool replace_empty = true);
     bool              destroy_window(InkscapeWindow* window);
     void              destroy_all();
+    void              print_actions(InkscapeApplication *app) override;
 
 protected:
     void on_startup()  override;
