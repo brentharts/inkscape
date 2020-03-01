@@ -1265,7 +1265,7 @@ ConcreteInkscapeApplication<T>::on_handle_local_options(const Glib::RefPtr<Glib:
     }
 
     if (options->contains("action-list")) {
-        print_actions(this);
+        T::activate_action("action-list");
         return EXIT_SUCCESS;
     }
 
