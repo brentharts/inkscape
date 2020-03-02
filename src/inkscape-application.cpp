@@ -1528,7 +1528,7 @@ ConcreteInkscapeApplication<Gtk::Application>::on_quit()
 
 template<class T>
 void
-ConcreteInkscapeApplication<T>::print_actions(InkscapeApplication* app)
+ConcreteInkscapeApplication<T>::print_action_list()
 {
     std::vector<Glib::ustring> actions = T::list_actions();
     std::sort(actions.begin(), actions.end());
