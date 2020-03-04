@@ -431,7 +431,7 @@ void PaintServersDialog::on_item_activated(const Gtk::TreeModel::Path& path)
     Glib::RefPtr<Gdk::Pixbuf> pixbuf = (*iter)[columns->pixbuf];
     Glib::ustring document_title = (*iter)[columns->document];
     Glib::ustring attribute = target_selected ? "fill" : "stroke";
-    Glib::ustring new_value(attribute + Glib::ustring(":") + paint);
+    Glib::ustring new_value(attribute + ":" + paint);
     SPDocument *document = document_map[document_title];
     SPObject *paint_server = document->getObjectById(id);
     SPDocument *document_target = desktop->getDocument();
@@ -471,8 +471,8 @@ void PaintServersDialog::on_item_activated(const Gtk::TreeModel::Path& path)
     // Set attribute for each selected item
     for (auto item : items) {
         // Find start of attribute in the style string
-        gchar const * style_ptr = item->getAttribute("style", nullptr);
-        Glib::ustring style = style_ptr ? Glib::ustring(style_ptr) : Glib::ustring();
+        gchar const *style_raw = item->getAttribute("style", nullptr);
+        Glib::ustring style = style_raw ? Glib::ustring(style_raw) : Glib::ustring();
         int search_start = style.find(attribute, 0);
         Glib::ustring previous_value;
 
@@ -480,14 +480,14 @@ void PaintServersDialog::on_item_activated(const Gtk::TreeModel::Path& path)
             // case: attribute is not in the style string
 
             // unset attribute if it exists, to avoid duplication
-            gchar const * attribute_ptr = item->getAttribute(attribute.c_str(), nullptr);
-            if (attribute_ptr) {
-                previous_value = Glib::ustring(attribute_ptr);
+            gchar const *attribute_raw = item->getAttribute(attribute.c_str(), nullptr);
+            if (attribute_raw) {
+                previous_value = Glib::ustring(attribute_raw);
                 item->removeAttribute(attribute.c_str());
             }
 
             // prepare the new style string
-            if (!style_ptr) {
+            if (!style_raw) {
                 style = new_value;
             } else {
                 if (style.raw()[style.raw().size() - 1] != ';') {
