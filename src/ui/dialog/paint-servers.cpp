@@ -430,8 +430,8 @@ void PaintServersDialog::on_item_activated(const Gtk::TreeModel::Path& path)
     Glib::ustring paint = (*iter)[columns->paint];
     Glib::RefPtr<Gdk::Pixbuf> pixbuf = (*iter)[columns->pixbuf];
     Glib::ustring document_title = (*iter)[columns->document];
-    Glib::ustring attribute = target_selected ? "fill:" : "stroke:";
-    Glib::ustring new_value(attribute + paint);
+    Glib::ustring attribute = target_selected ? "fill" : "stroke";
+    Glib::ustring new_value(attribute + ":" + paint);
     SPDocument *document = document_map[document_title];
     SPObject *paint_server = document->getObjectById(id);
     SPDocument *document_target = desktop->getDocument();
@@ -468,20 +468,48 @@ void PaintServersDialog::on_item_activated(const Gtk::TreeModel::Path& path)
 
     static Glib::RefPtr<Glib::Regex> regex_url = Glib::Regex::create("url\\(#([A-z0-9\\-_\\.#])*\\)");
 
+    // Set attribute for each selected item
     for (auto item : items) {
-        // FIXME - maybe the item doesn't have that attribute
-        Glib::ustring style = item->getAttribute("style", nullptr);
+        // Find start of attribute in the style string
+        gchar const *style_raw = item->getAttribute("style", nullptr);
+        Glib::ustring style = style_raw ? Glib::ustring(style_raw) : Glib::ustring();
         int search_start = style.find(attribute, 0);
-        int search_end = style.find(";", search_start) - search_start;
-        Glib::ustring previous_value = style.substr(search_start + 5, search_end - 5);
+        Glib::ustring previous_value;
 
-        // Set attribute for each selected item
-        style.replace(search_start, search_end, new_value);
+        if (search_start == std::string::npos) {
+            // case: attribute is not in the style string
+
+            // unset attribute if it exists, to avoid duplication
+            gchar const *attribute_raw = item->getAttribute(attribute.c_str(), nullptr);
+            if (attribute_raw) {
+                previous_value = Glib::ustring(attribute_raw);
+                item->removeAttribute(attribute.c_str());
+            }
+
+            // prepare the new style string
+            if (!style_raw) {
+                style = new_value;
+            } else {
+                if (style.raw()[style.raw().size() - 1] != ';') {
+                    style.append(";");
+                }
+                style.append(new_value);
+            }
+        } else {
+            // case: attribute is in the style string
+            // prepare the new style string
+            int search_end = style.find(";", search_start) - search_start;
+            int attr_size = attribute.size() + 1; // include the colon
+            previous_value = style.substr(search_start + attr_size, search_end - attr_size);
+            style.replace(search_start, search_end, new_value);
+        }
+        // set the new style string
         item->setAttribute("style", style);
 
         // Remove previous paint server, if it exists
-        if (regex_url->match(previous_value)) {
-            previous_value = previous_value.substr(4, previous_value.size() - 5);
+        const int pad_len = 5; // account for url()
+        if (regex_url->match(previous_value) && previous_value.size() > pad_len) {
+            previous_value = previous_value.substr(pad_len - 1, previous_value.size() - pad_len);
             std::vector<SPObject *> defs = desktop->getDocument()->getDefs()->childList(true);
             auto it  = find_if(defs.begin(), defs.end(),
                 [&previous_value](const SPObject *obj) {return previous_value.compare(obj->getId());}
