@@ -430,7 +430,6 @@ void PaintServersDialog::on_item_activated(const Gtk::TreeModel::Path& path)
     Glib::ustring paint = (*iter)[columns->paint];
     Glib::RefPtr<Gdk::Pixbuf> pixbuf = (*iter)[columns->pixbuf];
     Glib::ustring document_title = (*iter)[columns->document];
-    Glib::ustring attribute = target_selected ? "fill:" : "stroke:";
     SPDocument *document = document_map[document_title];
     SPObject *paint_server = document->getObjectById(id);
     SPDocument *document_target = desktop->getDocument();
@@ -466,12 +465,8 @@ void PaintServersDialog::on_item_activated(const Gtk::TreeModel::Path& path)
     }
 
     for (auto item : items) {
-        SPIPaint &prop = *item->style->getFillOrStroke(target_selected);
-
-        prop.read(paint.c_str());
-
-        // TODO also handle SP_STYLE_SRC_ATTRIBUTE
-        item->setAttribute("style", item->style->write());
+        item->style->getFillOrStroke(target_selected)->read(paint.c_str());
+        item->updateRepr();
     }
 
     document_target->collectOrphans();
