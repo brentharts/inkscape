@@ -467,31 +467,14 @@ void PaintServersDialog::on_item_activated(const Gtk::TreeModel::Path& path)
 
     for (auto item : items) {
         SPIPaint &prop = *item->style->getFillOrStroke(target_selected);
-        auto previous = prop.value.href ? prop.value.href->getObject() : nullptr;
 
         prop.read(paint.c_str());
 
         // TODO also handle SP_STYLE_SRC_ATTRIBUTE
         item->setAttribute("style", item->style->write());
-
-        // TODO should this use inkscape:collect?
-        if (previous) {
-            if (dynamic_cast<SPGradient *>(previous)) {
-                // linear and radial gradients reference another target gradient
-                // remove the target gradient only if it's not referenced by
-                // other elements
-                auto &hrefs = previous->hrefList;
-                if (!hrefs.empty() && !hrefs.front()->isReferenced()) {
-                    hrefs.front()->deleteObject();
-                }
-            }
-
-            // if no other elements reference this paint server, remove it
-            if (!previous->isReferenced()) {
-                previous->deleteObject();
-            }
-        }
     }
+
+    document_target->collectOrphans();
 }
 
 std::vector<SPObject*> PaintServersDialog::extract_elements(SPObject* item)
