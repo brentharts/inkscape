@@ -52,6 +52,7 @@ public:
     ColorMode colorMode() const;
     bool outline() const;
     bool visibleHairlines() const;
+    bool noHiDPI() const;
     bool renderFilters() const;
     int blurQuality() const;
     int filterQuality() const;

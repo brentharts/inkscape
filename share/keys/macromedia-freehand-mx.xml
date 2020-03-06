@@ -169,6 +169,7 @@ File, Edit, View, Modify, Text, Xtras, Window, Help.
   <bind action="ViewIconPreview"/>
 
   <bind action="ViewModeNormal"/>
+  <bind action="ViewModeNoHiDPI"/>
   <!-- Wireframe View (Inkscape).  Keyline View Ctrl+K  (Freehand).  -->
   <bind key="K" modifiers="Ctrl" action="ViewModeOutline"/>
 

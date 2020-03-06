@@ -1172,8 +1172,12 @@ void SPCanvas::handle_size_allocate(GtkWidget *widget, GtkAllocation *allocation
     gtk_widget_get_allocation(widget, &old_allocation);
 
     // For HiDPI monitors.
-    canvas->_device_scale = gtk_widget_get_scale_factor( widget );
 
+    canvas->_device_scale = gtk_widget_get_scale_factor( widget );
+    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
+    if (desktop && desktop->getMode() == Inkscape::RENDERMODE_NOHIDPI) {
+        canvas->_device_scale = 1;
+    }
     Geom::IntRect new_area = Geom::IntRect::from_xywh(canvas->_x0, canvas->_y0,
         allocation->width, allocation->height);
 
@@ -2626,6 +2630,10 @@ void SPCanvas::scrollTo( Geom::Point const &c, unsigned int clear, bool is_scrol
 
     // For HiDPI monitors
     int device_scale = gtk_widget_get_scale_factor(GTK_WIDGET(this));
+    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
+    if (desktop && desktop->getMode() == Inkscape::RENDERMODE_NOHIDPI) {
+        device_scale = 1;
+    }
     assert( device_scale == _device_scale);
 
     double cx = c[Geom::X];
@@ -2647,7 +2655,6 @@ void SPCanvas::scrollTo( Geom::Point const &c, unsigned int clear, bool is_scrol
 
     // cairo_surface_write_to_png( _backing_store, "scroll1.png" );
     bool split = false;
-    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
     if (desktop && desktop->splitMode()) {
         split = true;
     }

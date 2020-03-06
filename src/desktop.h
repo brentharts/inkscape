@@ -283,6 +283,11 @@ public:
         _setDisplayMode(Inkscape::RENDERMODE_OUTLINE);
         return true;
     }
+    bool setDisplayModeNoHiDPI()
+    {
+        _setDisplayMode(Inkscape::RENDERMODE_NOHIDPI);
+        return true;
+    }
     bool setDisplayModeVisibleHairlines()
     {
         _setDisplayMode(Inkscape::RENDERMODE_VISIBLE_HAIRLINES);

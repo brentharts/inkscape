@@ -735,7 +735,10 @@ SPDesktopWidget::updateTitle(gchar const* uri)
             Name += N_("no filters");
         } else if (desktop->getMode() == Inkscape::RENDERMODE_VISIBLE_HAIRLINES) {
             Name += N_("visible hairlines");
+        } else if (desktop->getMode() == Inkscape::RENDERMODE_NOHIDPI) {
+            Name += N_("no HiDPI");
         }
+
 
         if (desktop->getColorMode() != Inkscape::COLORMODE_NORMAL &&
             desktop->getMode()      != Inkscape::RENDERMODE_NORMAL) {

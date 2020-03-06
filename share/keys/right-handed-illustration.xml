@@ -231,6 +231,7 @@ Future improvements:
   <bind action="ViewIconPreview"/>
 
   <bind action="ViewModeNormal"/>
+  <bind action="ViewModeNoHiDPI"/>
   <bind action="ViewModeOutline"/>
 
   <bind key="KP_5" modifiers="Ctrl" action="ViewModeToggle" display="true" />

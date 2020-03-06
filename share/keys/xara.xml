@@ -254,6 +254,7 @@ Hom/end keys-select minimum or maximum feather values
   <bind action="ViewIconPreview"/>
 
   <bind action="ViewModeNormal"/>
+  <bind action="ViewModeNoHiDPI"/>
   <bind action="ViewModeOutline"/>
 
 <!-- Edit -->
