@@ -258,6 +258,7 @@ and tooltips. Only one binding for each action may have this attribute.
   <bind key="KP_5" modifiers="Cmd" action="ViewModeToggle" display="true" />
 
   <bind action="ViewModeNormal" />
+  <bind action="ViewModeNoHiDPI" />
   <bind action="ViewModeNoFilters" />
   <bind action="ViewModeOutline" />
 

@@ -2061,6 +2061,9 @@ void ZoomVerb::perform(SPAction *action, void *data)
         case SP_VERB_VIEW_MODE_NORMAL:
             dt->setDisplayModeNormal();
             break;
+        case SP_VERB_VIEW_MODE_NOHIDPI:
+            dt->setDisplayModeNoHiDPI();
+            break;
         case SP_VERB_VIEW_MODE_NO_FILTERS:
             dt->setDisplayModeNoFilters();
             break;
@@ -2995,6 +2998,8 @@ Verb *Verb::_base_verbs[] = {
                  INKSCAPE_ICON("window-new")),
 
     new ZoomVerb(SP_VERB_VIEW_MODE_NORMAL, "ViewModeNormal", N_("_Normal"), N_("Switch to normal display mode"),
+                 nullptr),
+    new ZoomVerb(SP_VERB_VIEW_MODE_NOHIDPI, "ViewModeNoHiDPI", N_("No _HiDPI "), N_("Switch to no HiDPI display mode"),
                  nullptr),
     new ZoomVerb(SP_VERB_VIEW_MODE_NO_FILTERS, "ViewModeNoFilters", N_("No _Filters"),
                  N_("Switch to normal display without filters"), nullptr),

@@ -258,6 +258,7 @@ override) the bindings in the main default.xml.
   <bind key="KP_5" modifiers="Primary" action="ViewModeToggle" />
 
   <bind action="ViewModeNormal" />
+  <bind action="ViewModeNoHiDPI" />
   <bind action="ViewModeNoFilters" />
   <bind action="ViewModeOutline" />
   <bind action="ViewModeVisibleHairlines" />

@@ -104,7 +104,8 @@
      </submenu>
        <submenu name="_Display Mode">
          <verb verb-id="ViewModeToggle"/>
-         <verb verb-id="ViewModeNormal" radio="yes" default="yes"/>
+         <verb verb-id="ViewModeNormal" radio="yes"/>
+         <verb verb-id="ViewModeNoHiDPI" radio="yes" default="yes"/>
          <verb verb-id="ViewModeNoFilters" radio="yes"/>
          <verb verb-id="ViewModeOutline" radio="yes"/>
          <verb verb-id="ViewModeVisibleHairlines" radio="yes"/>

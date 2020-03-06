@@ -142,7 +142,7 @@ SPDesktop::SPDesktop()
     , gr_fill_or_stroke(Inkscape::FOR_FILL)
     , _reconstruction_old_layer_id()
     , // an id attribute is not allowed to be the empty string
-    _display_mode(Inkscape::RENDERMODE_NORMAL)
+    _display_mode(Inkscape::RENDERMODE_NOHIDPI)
     , _display_color_mode(Inkscape::COLORMODE_NORMAL)
     , _split_canvas(false)
     , _xray(false)
@@ -561,6 +561,13 @@ bool SPDesktop::displayModeToggle()
     Inkscape::Verb *verb = Inkscape::Verb::get(SP_VERB_VIEW_MODE_NORMAL);
     switch (_display_mode) {
     case Inkscape::RENDERMODE_NORMAL:
+        _setDisplayMode(Inkscape::RENDERMODE_NOHIDPI);
+        verb = Inkscape::Verb::get(SP_VERB_VIEW_MODE_NO_FILTERS);
+        if (verb) {
+            _menu_update.emit(verb->get_code(), setDisplayModeNoHiDPI());
+        }
+        break;
+    case Inkscape::RENDERMODE_NOHIDPI:
         _setDisplayMode(Inkscape::RENDERMODE_NO_FILTERS);
         verb = Inkscape::Verb::get(SP_VERB_VIEW_MODE_NO_FILTERS);
         if (verb) {

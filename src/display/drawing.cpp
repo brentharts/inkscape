@@ -37,7 +37,7 @@ Drawing::Drawing(SPCanvasArena *arena)
     , delta(0)
     , _exact(false)
     , _outline_sensitive(true)
-    , _rendermode(RENDERMODE_NORMAL)
+    , _rendermode(RENDERMODE_NOHIDPI)
     , _colormode(COLORMODE_NORMAL)
     , _blur_quality(BLUR_QUALITY_BEST)
     , _filter_quality(Filters::FILTER_QUALITY_BEST)
@@ -85,15 +85,22 @@ Drawing::visibleHairlines() const
 {
     return renderMode() == RENDERMODE_VISIBLE_HAIRLINES;
 }
+
+bool
+Drawing::noHiDPI() const
+{
+    return renderMode() == RENDERMODE_NOHIDPI;
+}
+
 bool
 Drawing::renderFilters() const
 {
-    return renderMode() == RENDERMODE_NORMAL || renderMode() == RENDERMODE_VISIBLE_HAIRLINES;
+    return renderMode() == RENDERMODE_NORMAL || renderMode() == RENDERMODE_NOHIDPI || renderMode() == RENDERMODE_VISIBLE_HAIRLINES;
 }
 int
 Drawing::blurQuality() const
 {
-    if (renderMode() == RENDERMODE_NORMAL) {
+    if (renderMode() == RENDERMODE_NORMAL || renderMode() == RENDERMODE_NOHIDPI) {
         return _exact ? BLUR_QUALITY_BEST : _blur_quality;
     } else {
         return BLUR_QUALITY_WORST;
@@ -102,7 +109,7 @@ Drawing::blurQuality() const
 int
 Drawing::filterQuality() const
 {
-    if (renderMode() == RENDERMODE_NORMAL) {
+    if (renderMode() == RENDERMODE_NORMAL || renderMode() == RENDERMODE_NOHIDPI) {
         return _exact ? Filters::FILTER_QUALITY_BEST : _filter_quality;
     } else {
         return Filters::FILTER_QUALITY_WORST;
