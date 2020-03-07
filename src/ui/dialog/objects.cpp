@@ -396,7 +396,15 @@ void ObjectsPanel::_queueObject(SPObject* obj, Gtk::TreeModel::Row* parentRow)
             //Add the item to a queue, so we can fill in the data in each row asynchronously
             //at a later stage. See the comments in _objectsChanged() for more details
             bool expand = SP_IS_GROUP(obj) && SP_GROUP(obj)->expanded() && (not already_expanded);
-            _tree_update_queue.emplace_back(SP_ITEM(&child), iter, expand);
+
+            /* Update the watchers; No watcher shall be deleted before the processing of the queue has
+             * finished; we need to keep watching for items that might have been deleted while the queue,
+             * which is being processed on idle, was not yet empty. This is because when an item is deleted, the
+             * queue is still holding a pointer to it. The NotifyChildRemoved method of the watcher will stop the
+             * processing of the queue and prevent a segmentation fault, but only if there is a watcher in place*/
+            auto item(SP_ITEM(&child));
+            _addWatcher(item);
+            _tree_update_queue.emplace_back(item, iter, expand);
 
             already_expanded = expand || already_expanded; // We need to expand only a single child in each group
 
@@ -431,13 +439,6 @@ bool ObjectsPanel::_processQueue() {
         //Add the object to the tree view and tree cache
         _addObjectToTree(item, *iter, expanded);
         _tree_cache.emplace(item, *iter);
-
-        /* Update the watchers; No watcher shall be deleted before the processing of the queue has
-         * finished; we need to keep watching for items that might have been deleted while the queue,
-         * which is being processed on idle, was not yet empty. This is because when an item is deleted, the
-         * queue is still holding a pointer to it. The NotifyChildRemoved method of the watcher will stop the
-         * processing of the queue and prevent a segmentation fault, but only if there is a watcher in place*/
-        _addWatcher(item);
 
         queue_iter = _tree_update_queue.erase(queue_iter);
         count++;
