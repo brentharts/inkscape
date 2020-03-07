@@ -166,7 +166,7 @@ XmlTree::XmlTree()
     tree_scroller->set_shadow_type(Gtk::SHADOW_IN);
     tree_scroller->add(*Gtk::manage(Glib::wrap(GTK_WIDGET(tree))));
 
-    node_box.pack_start(*tree_scroller);
+    node_box.pack_start(*Gtk::manage(tree_scroller));
 
     node_box.pack_end(status_box, false, false, 2);
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
@@ -176,7 +176,7 @@ XmlTree::XmlTree()
     _paned.set_orientation(dir ? Gtk::ORIENTATION_VERTICAL : Gtk::ORIENTATION_HORIZONTAL);
     _paned.check_resize();
     _paned.set_wide_handle(true);
-    _paned.pack1(node_box, Gtk::SHRINK);
+    _paned.pack1(node_box);
     /* attributes */
     Gtk::Box *actionsbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL));
     actionsbox->set_valign(Gtk::ALIGN_START);
@@ -202,7 +202,7 @@ XmlTree::XmlTree()
     _vertical->property_draw_indicator() = false;
     actionsbox->pack_end(*_horizontal, false, false, 0);
     actionsbox->pack_end(*_vertical, false, false, 0);
-    _paned.pack2(*attributes, true, true);
+    _paned.pack2(*attributes);
     contents->pack_start(*actionsbox, false, false, 0);
     /* Signal handlers */
     GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(tree));
@@ -230,11 +230,7 @@ XmlTree::XmlTree()
     _paned.property_position() = panedpos;
     _updating = false;
     tree_reset_context();
-    Gtk::ScrolledWindow *dialog_scroller = new Gtk::ScrolledWindow();
-    dialog_scroller->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-    dialog_scroller->set_shadow_type(Gtk::SHADOW_IN);
-    dialog_scroller->add(*Gtk::manage(contents));
-    root->pack_start(*dialog_scroller, true, true, 0);
+    root->pack_start(*Gtk::manage(contents), true, true);
 
 }
 
