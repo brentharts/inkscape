@@ -1172,7 +1172,7 @@ void SPCanvas::handle_size_allocate(GtkWidget *widget, GtkAllocation *allocation
     gtk_widget_get_allocation(widget, &old_allocation);
 
     // For HiDPI monitors.
-    canvas->_device_scale = gtk_widget_get_scale_factor( widget );
+    canvas->_device_scale = 1; //gtk_widget_get_scale_factor( widget );
 
     Geom::IntRect new_area = Geom::IntRect::from_xywh(canvas->_x0, canvas->_y0,
         allocation->width, allocation->height);
@@ -2625,7 +2625,7 @@ void SPCanvas::scrollTo( Geom::Point const &c, unsigned int clear, bool is_scrol
     // To do: extract out common code with SPCanvas::handle_size_allocate()
 
     // For HiDPI monitors
-    int device_scale = gtk_widget_get_scale_factor(GTK_WIDGET(this));
+    int device_scale = 1; //gtk_widget_get_scale_factor(GTK_WIDGET(this));
     assert( device_scale == _device_scale);
 
     double cx = c[Geom::X];
