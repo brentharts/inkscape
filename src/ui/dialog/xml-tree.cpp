@@ -176,7 +176,7 @@ XmlTree::XmlTree()
     _paned.set_orientation(dir ? Gtk::ORIENTATION_VERTICAL : Gtk::ORIENTATION_HORIZONTAL);
     _paned.check_resize();
     _paned.set_wide_handle(true);
-    _paned.pack1(node_box);
+    _paned.pack1(node_box, false, false);
     /* attributes */
     Gtk::Box *actionsbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL));
     actionsbox->set_valign(Gtk::ALIGN_START);
@@ -202,7 +202,7 @@ XmlTree::XmlTree()
     _vertical->property_draw_indicator() = false;
     actionsbox->pack_end(*_horizontal, false, false, 0);
     actionsbox->pack_end(*_vertical, false, false, 0);
-    _paned.pack2(*attributes);
+    _paned.pack2(*attributes, true, false);
     contents->pack_start(*actionsbox, false, false, 0);
     /* Signal handlers */
     GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(tree));
