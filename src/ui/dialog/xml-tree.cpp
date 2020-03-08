@@ -218,48 +218,25 @@ XmlTree::XmlTree()
     raise_node_button.signal_clicked().connect(sigc::mem_fun(*this, &XmlTree::cmd_raise_node));
     lower_node_button.signal_clicked().connect(sigc::mem_fun(*this, &XmlTree::cmd_lower_node));
 
-    _paned.property_position().signal_changed().connect(sigc::mem_fun(*this, &XmlTree::_childresized));
-    _paned.signal_size_allocate().connect(sigc::mem_fun(*this, &XmlTree::_panedresized));
     set_name("XMLAndAttributesDialog");
     set_spacing(0);
     set_size_request(320, 260);
     show_all();
-    int widthpos = _paned.property_max_position() - _paned.property_min_position();
-    int panedpos = prefs->getInt("/dialogs/xml/panedpos", widthpos / 2);
-    _updating = true;
+
+    int panedpos = prefs->getInt("/dialogs/xml/panedpos", 200);
     _paned.property_position() = panedpos;
-    _updating = false;
+    _paned.property_position().signal_changed().connect(sigc::mem_fun(*this, &XmlTree::_resized));
+
     tree_reset_context();
     root->pack_start(*Gtk::manage(contents), true, true);
 
 }
 
-void XmlTree::_panedresized(Gtk::Allocation allocation) { _resized(); }
-
-void XmlTree::_childresized() { _resized(); }
-
 void XmlTree::_resized()
 {
-    if (_updating) {
-        return;
-    }
-    _updating = true;
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    int max = int(_paned.property_max_position() * 0.95);
-    int min = int(_paned.property_max_position() * 0.05);
-    bool attrtoggler = prefs->getBool("/dialogs/xml/attrtoggler", true);
-    if (attrtoggler && _paned.property_position() > max) {
-        _paned.property_position() = max;
-    }
-    if (attrtoggler && _paned.property_position() < min) {
-        _paned.property_position() = min;
-    }
-    if (!attrtoggler) {
-        attributes->hide();
-        _paned.property_position() = _paned.property_max_position();
-    }
+
     prefs->setInt("/dialogs/xml/panedpos", _paned.property_position());
-    _updating = false;
 }
 
 void XmlTree::_toggleDirection(Gtk::RadioButton *vertical)
@@ -269,9 +246,7 @@ void XmlTree::_toggleDirection(Gtk::RadioButton *vertical)
     prefs->setBool("/dialogs/xml/vertical", dir);
     _paned.set_orientation(dir ? Gtk::ORIENTATION_VERTICAL : Gtk::ORIENTATION_HORIZONTAL);
     _paned.check_resize();
-    int widthpos = _paned.property_max_position() - _paned.property_min_position();
-    prefs->setInt("/dialogs/xml/panedpos", widthpos / 2);
-    _paned.property_position() = widthpos / 2;
+    prefs->setInt("/dialogs/xml/panedpos", _paned.property_position());
 }
 
 void XmlTree::_attrtoggler()
@@ -281,14 +256,8 @@ void XmlTree::_attrtoggler()
     prefs->setBool("/dialogs/xml/attrtoggler", attrtoggler);
     if (attrtoggler) {
         attributes->show();
-        int widthpos = _paned.property_max_position() - _paned.property_min_position();
-        prefs->setInt("/dialogs/xml/panedpos", widthpos / 2);
-        _paned.property_position() = widthpos / 2;
     } else {
         attributes->hide();
-        int widthpos = _paned.property_max_position() - _paned.property_min_position();
-        prefs->setInt("/dialogs/xml/panedpos", widthpos);
-        _paned.property_position() = widthpos;
     }
 }
 
@@ -297,6 +266,10 @@ void XmlTree::present()
     set_tree_select(get_dt_select());
 
     UI::Widget::Panel::present();
+
+    if (!_attrswitch.property_active()) {
+        attributes->hide();
+    }
 }
 
 XmlTree::~XmlTree ()
