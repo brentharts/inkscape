@@ -1708,32 +1708,29 @@ void FilterEffectsDialog::FilterModifier::select_filter_elements()
 {
     SPFilter *filter = get_selected_filter();
 
-    if(filter) {
-        std::vector<SPItem*> x,y;
-        std::vector<SPItem*> items;
-        std::vector<SPItem*> all = get_all_items(x, _desktop->currentRoot(), _desktop, false, false, true, y);
-        for(std::vector<SPItem*>::const_iterator i=all.begin(); all.end() != i; ++i) {
-            if (!SP_IS_ITEM(*i)) {
-                continue;
-            }
-            SPItem *item = *i;
-            if (!item->style) {
-                continue;
-            }
+    if(!filter)
+        return;
 
-            const SPIFilter *ifilter = &(item->style->filter);
-            if (ifilter && ifilter->href) {
-                const SPObject *obj = ifilter->href->getObject();
-                if (obj && obj == (SPObject *)filter) {
-                    items.push_back(item);
-                }
+    std::vector<SPItem*> x,y;
+    std::vector<SPItem*> items;
+    std::vector<SPItem*> all = get_all_items(x, _desktop->currentRoot(), _desktop, false, false, true, y);
+    for(SPItem *item: all) {
+        if (!item->style) {
+            continue;
+        }
+
+        const SPIFilter *ifilter = &(item->style->filter);
+        if (ifilter && ifilter->href) {
+            const SPObject *obj = ifilter->href->getObject();
+            if (obj && obj == (SPObject *)filter) {
+                items.push_back(item);
             }
         }
-        Inkscape::Selection *selection = _desktop->getSelection();
-        selection->clear();
-        if(items.size() > 0)
-            selection->setList(items);
     }
+    Inkscape::Selection *selection = _desktop->getSelection();
+    selection->clear();
+    if(items.size() > 0)
+        selection->setList(items);
 }
 
 FilterEffectsDialog::CellRendererConnection::CellRendererConnection()
