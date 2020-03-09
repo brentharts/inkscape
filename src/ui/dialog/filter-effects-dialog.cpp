@@ -1719,18 +1719,16 @@ void FilterEffectsDialog::FilterModifier::select_filter_elements()
             continue;
         }
 
-        const SPIFilter *ifilter = &(item->style->filter);
-        if (ifilter && ifilter->href) {
-            const SPObject *obj = ifilter->href->getObject();
+        SPIFilter const &ifilter = item->style->filter;
+        if (ifilter.href) {
+            const SPObject *obj = ifilter.href->getObject();
             if (obj && obj == (SPObject *)filter) {
                 items.push_back(item);
             }
         }
     }
     Inkscape::Selection *selection = _desktop->getSelection();
-    selection->clear();
-    if(items.size() > 0)
-        selection->setList(items);
+    selection->setList(items);
 }
 
 FilterEffectsDialog::CellRendererConnection::CellRendererConnection()
