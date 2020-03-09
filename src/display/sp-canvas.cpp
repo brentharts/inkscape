@@ -2658,32 +2658,11 @@ void SPCanvas::scrollTo( Geom::Point const &c, unsigned int clear, bool is_scrol
         // Adjust backing store contents
         assert(_backing_store);
         // this cairo operation is slow, improvements welcome
-        cairo_surface_t *new_backing_store = nullptr;
-        if (_surface_for_similar != nullptr)
-
-            // Size in device pixels. Does not set device scale.
-            new_backing_store =
-                cairo_surface_create_similar_image(_surface_for_similar,
-                                                CAIRO_FORMAT_ARGB32,
-                                                allocation.width  * _device_scale,
-                                                allocation.height * _device_scale);
-        if (new_backing_store == nullptr)
-            // Size in device pixels. Does not set device scale.
-            new_backing_store =
-                cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
-                                        allocation.width  * _device_scale,
-                                        allocation.height * _device_scale);
-
-        // Set device scale
-        cairo_surface_set_device_scale(new_backing_store, _device_scale, _device_scale);
-
+        cairo_surface_t *new_backing_store = cairo_surface_reference(_backing_store);
         cairo_t *cr = cairo_create(new_backing_store);
         cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
         // Paint the background
         cairo_translate(cr, -ix, -iy);
-        cairo_set_source(cr, _background);
-        cairo_paint(cr);
-
         // cairo_surface_write_to_png( _backing_store, "scroll0.png" );
 
         // Copy the old backing store contents
