@@ -174,46 +174,16 @@ add_custom_target(check-license-headers WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} CO
 # -----------------------------------------------------------------------------
 # Test Harness
 # -----------------------------------------------------------------------------
-find_package(GTest) # gtest 1.8.0 and later already include gmock
-if(GTEST_FOUND AND EXISTS "${GTEST_INCLUDE_DIR}/gmock" AND IS_DIRECTORY "${GTEST_INCLUDE_DIR}/gmock")
-    set(GMOCK_PRESENT ON)
-else()
-    unset(GTEST_FOUND)
-    if(NOT GMOCK_DIR)
-        find_path(GMOCK_DIR
-              NAMES src/gmock.cc
-              PATHS "$ENV{GMOCK_DIR}"
-                "/usr/src/googletest/googlemock"
-                    "/usr/src/gmock"
-                "${CMAKE_SOURCE_DIR}/gtest/gtest/googlemock"
-             )
-    endif(NOT GMOCK_DIR)
-    if(EXISTS "${GMOCK_DIR}" AND IS_DIRECTORY "${GMOCK_DIR}")
-        set(GMOCK_PRESENT ON)
-    else()
-        set(GMOCK_PRESENT OFF)
-        message("No gmock/gtest found! Perhaps you wish to run 'bash download-gtest.sh' to download it.")
-    endif()
-endif()
-if(GMOCK_PRESENT)
-    enable_testing()
-    set(CMAKE_CTEST_COMMAND ctest -V)
-    if(WIN32)
-        set(CMAKE_CTEST_ENV INKSCAPE_DATADIR=${CMAKE_BINARY_DIR}/inkscape_datadir)
-    endif()
-    add_subdirectory(testfiles EXCLUDE_FROM_ALL)
-    add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} DEPENDS tests)
-    add_dependencies(check inkscape)
 
-    if(WIN32)
-        # create symlink "inkscape_datadir" to use as INKSCAPE_DATADIR
-        file(TO_NATIVE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/share inkscape_share)
-        add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/inkscape_datadir
-            COMMAND mkdir inkscape_datadir
-            COMMAND mklink /D inkscape_datadir\\inkscape ${inkscape_share}
-        )
-        add_custom_target(inkscape_datadir_symlink DEPENDS ${CMAKE_BINARY_DIR}/inkscape_datadir)
-        add_dependencies(check inkscape_datadir_symlink)
+include(CTest)
+if(BUILD_TESTING)
+    find_package(GTest)
+    if(GTEST_FOUND)
+        add_subdirectory(testfiles EXCLUDE_FROM_ALL)
+    else()
+        set(BUILD_TESTING OFF)
+        message(WARNING "No gtest found! Disabling testing...\n"
+                        "Consider installing it via package manager (install 'libgtest-dev' or equivalent).")
     endif()
 endif()
 
@@ -299,7 +269,6 @@ endif()
 message("ENABLE_LCMS:             ${ENABLE_LCMS}")
 message("ENABLE_POPPLER:          ${ENABLE_POPPLER}")
 message("ENABLE_POPPLER_CAIRO:    ${ENABLE_POPPLER_CAIRO}")
-message("GMOCK_PRESENT:           ${GMOCK_PRESENT}")
 message("WITH_GNU_READLINE:       ${WITH_GNU_READLINE}")
 message("WITH_DBUS:               ${WITH_DBUS}")
 message("WITH_GTKSPELL:           ${WITH_GTKSPELL}")
@@ -310,8 +279,10 @@ message("WITH_LIBVISIO:           ${WITH_LIBVISIO}")
 message("WITH_LIBWPG:             ${WITH_LIBWPG}")
 message("WITH_NLS:                ${WITH_NLS}")
 message("WITH_OPENMP:             ${WITH_OPENMP}")
-message("WITH_PROFILING:          ${WITH_PROFILING}")
 message("WITH_JEMALLOC:           ${WITH_JEMALLOC}")
+
+message("WITH_PROFILING:          ${WITH_PROFILING}")
+message("BUILD_TESTING:           ${BUILD_TESTING}")
 
 if(WIN32)
 message("")
