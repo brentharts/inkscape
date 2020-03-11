@@ -364,8 +364,9 @@ LPEOffset::doEffect_path(Geom::PathVector const & path_in)
         bool path_inside = wdg % 2 != 0;
         double gap_size = -0.01;
         bool closed = original.closed();
+        //display_unit already accomodated in doBeforeEffect. The code calculations are based on mm units.
         double to_offset =
-            Inkscape::Util::Quantity::convert(std::abs(offset), unit.get_abbreviation(), display_unit.c_str());
+            Inkscape::Util::Quantity::convert(std::abs(offset), unit.get_abbreviation(), "mm");
         if (to_offset <= 0.01) {
             return path_in;
         }
