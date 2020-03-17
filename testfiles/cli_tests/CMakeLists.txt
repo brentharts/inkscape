@@ -230,10 +230,9 @@ add_cli_test(export-width_export-use-hints_png PARAMETERS --export-width=380 --e
 # SVG, PDF, PS, EPS, EMF, WMF: doesn't make sense
 
 # --export-height
-# PNG: Implementation is buggy. Bug report: https://gitlab.com/inkscape/inkscape/issues/1135
-# add_cli_test(export-height_png                  PARAMETERS --export-height=40                                      --export-type=png INPUT_FILENAME export_hints.svg OUTPUT_FILENAME export-height.png  REFERENCE_FILENAME export-height_expected.png )
-# add_cli_test(export-height_export-dpi_png       PARAMETERS --export-height=40 --export-dpi=300                     --export-type=png INPUT_FILENAME export_hints.svg OUTPUT_FILENAME export-height2.png REFERENCE_FILENAME export-height_expected.png )
-# add_cli_test(export-height_export-use-hints_png PARAMETERS --export-height=40 --export-use-hints --export-id=rect1 --export-type=png
-#                                                  INPUT_FILENAME export_hints.svg PASS_FOR_OUTPUT "Area 10:10:90:70 exported to 53 x 40 pixels \\(64 dpi\\)"
-#                                                  EXPECTED_FILES "${CMAKE_CURRENT_SOURCE_DIR}/testcases/export_hints_rectangle.png" )
+add_cli_test(export-height_png                  PARAMETERS --export-height=40                                      --export-type=png INPUT_FILENAME export_hints.svg OUTPUT_FILENAME export-height.png  REFERENCE_FILENAME export-height_expected.png )
+add_cli_test(export-height_export-dpi_png       PARAMETERS --export-height=40 --export-dpi=300                     --export-type=png INPUT_FILENAME export_hints.svg OUTPUT_FILENAME export-height2.png REFERENCE_FILENAME export-height_expected.png )
+add_cli_test(export-height_export-use-hints_png PARAMETERS --export-height=40 --export-use-hints --export-id=rect1 --export-type=png
+                                                INPUT_FILENAME export_hints.svg PASS_FOR_OUTPUT "Area 10:10:90:70 exported to 53 x 40 pixels \\(64 dpi\\)"
+                                                EXPECTED_FILES "${CMAKE_CURRENT_SOURCE_DIR}/testcases/export_hints_rectangle.png" )
 # SVG, PDF, PS, EPS, EMF, WMF: doesn't make sense
