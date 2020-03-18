@@ -82,14 +82,19 @@ endfunction(add_cli_test)
 
 ### Tests follow below ###
 
+#### Options
+#### All options from the --help and their documented features from the man
+###########################################################################
+
+# --help
+
+# --version
 # check if we can run inkscape and the revision is known
 add_cli_test(version       PARAMETERS --version)
 add_cli_test(version_known PARAMETERS --version FAIL_FOR_OUTPUT unknown)
 
-# --action-list and --verb-list
-add_cli_test(action_list   PARAMETERS --action-list PASS_FOR_OUTPUT "file-new")
-add_cli_test(verb_list     PARAMETERS --verb-list   PASS_FOR_OUTPUT "FileNew:")
-
+# --system-data-directory
+# --user-data-directory
 # check --system-data-directory and --user-data-directory (unset variables to override our override)
 # TODO: Can we make these tests more specific without making too many assumptions?
 add_cli_test(system_data_directory PARAMETERS --system-data-directory ENVIRONMENT unset PASS_FOR_OUTPUT "inkscape\n$")
@@ -110,26 +115,28 @@ add_cli_test(inkscape_profile_dir_handle_illegal
                                    ENVIRONMENT INKSCAPE_PROFILE_DIR=invalid:dir
                                    INPUT_FILENAME empty.svg OUTPUT_FILENAME empty.svg)
 
-# check --query family of parameters
-string(CONCAT query_all_expected "rect1,10,10,80,80\n"
-                                 "rect2,110,20,80,70\n"
-                                 "rect3,210,30,80,60")
-add_cli_test(query_x       PARAMETERS --query-id=rect2 --query-x      INPUT_FILENAME rects.svg PASS_FOR_OUTPUT 110)
-add_cli_test(query_y       PARAMETERS --query-id=rect2 --query-y      INPUT_FILENAME rects.svg PASS_FOR_OUTPUT 20)
-add_cli_test(query_width   PARAMETERS --query-id=rect2 --query-width  INPUT_FILENAME rects.svg PASS_FOR_OUTPUT 80)
-add_cli_test(query_height  PARAMETERS --query-id=rect2 --query-height INPUT_FILENAME rects.svg PASS_FOR_OUTPUT 70)
-add_cli_test(query_all     PARAMETERS --query-id=rect2 --query-all    INPUT_FILENAME rects.svg PASS_FOR_OUTPUT ${query_all_expected})
+# --pipe
+
+# --pdf-page=PAGE
+
+# --pdf-poppler
+
+# --convert-dpi-method=METHOD
+
+# --no-convert-text-baseline-spacing
+
+# --export-filename=FILENAME
+
+# --export-overwrite
+
+# --export-type=TYPE[,TYPE]*
+# test basic support of SVG export functionality
+add_cli_test(export_svg    PARAMETERS --export-type=svg INPUT_FILENAME shapes.svg OUTPUT_FILENAME shapes.svg REFERENCE_FILENAME shapes.svg)
 
 # check --export-type
 add_cli_test(export_type   PARAMETERS --export-type=svg,png,ps,eps,pdf,emf,wmf,xaml
                            INPUT_FILENAME empty.svg OUTPUT_FILENAME empty
                            EXPECTED_FILES empty.svg empty.png empty.ps empty.eps empty.pdf empty.emf empty.wmf empty.xaml)
-
-# test basic support of SVG export functionality
-add_cli_test(export_svg    PARAMETERS --export-type=svg INPUT_FILENAME shapes.svg OUTPUT_FILENAME shapes.svg REFERENCE_FILENAME shapes.svg)
-add_cli_test(export_plain  PARAMETERS --export-type=svg --export-plain-svg
-                           INPUT_FILENAME shapes.svg OUTPUT_FILENAME shapes.svg REFERENCE_FILENAME shapes.svg
-                           TEST_SCRIPT match_regex_fail.sh "shapes.svg" "inkscape:|sodipodi:")
 
 # test basic support of export functionality into various formats
 add_cli_test(export_png    PARAMETERS --export-type=png INPUT_FILENAME shapes.svg OUTPUT_FILENAME shapes.png REFERENCE_FILENAME shapes_expected.png)
@@ -142,15 +149,89 @@ add_cli_test(export_wmf    PARAMETERS --export-type=wmf INPUT_FILENAME shapes.sv
 add_cli_test(export_xaml   PARAMETERS --export-type=xaml INPUT_FILENAME shapes.svg OUTPUT_FILENAME shapes.xaml
                            TEST_SCRIPT compare.sh shapes.xaml "${CMAKE_CURRENT_SOURCE_DIR}/testcases/shapes_expected.xaml")
 
+# --export-area-page
+add_cli_test(export-area-page_png PARAMETERS --export-area-page --export-type=png INPUT_FILENAME areas.svg OUTPUT_FILENAME export-area-page.png REFERENCE_FILENAME export-area-page_expected.png )
+add_cli_test(export-area-page_svg PARAMETERS --export-area-page --export-type=svg INPUT_FILENAME areas.svg OUTPUT_FILENAME export-area-page.svg REFERENCE_FILENAME export-area-page_expected.svg )
+add_cli_test(export-area-page_pdf PARAMETERS --export-area-page --export-type=pdf INPUT_FILENAME areas.svg OUTPUT_FILENAME export-area-page.pdf REFERENCE_FILENAME export-area-page_expected.pdf )
+add_cli_test(export-area-page_ps  PARAMETERS --export-area-page --export-type=ps  INPUT_FILENAME areas.svg OUTPUT_FILENAME export-area-page.ps  REFERENCE_FILENAME export-area-page_expected.ps  )
+# EPS: Currently not supported. Feature request: https://gitlab.com/inkscape/inkscape/issues/1074
+# add_cli_test(export-area-page_eps PARAMETERS --export-area-page --export-type=eps INPUT_FILENAME areas.svg OUTPUT_FILENAME export-area-page.eps REFERENCE_FILENAME export-area-page_expected.eps )
+add_cli_test(export-area-page_emf PARAMETERS --export-area-page --export-type=emf INPUT_FILENAME areas.svg OUTPUT_FILENAME export-area-page.emf REFERENCE_FILENAME export-area-page_expected.emf )
+add_cli_test(export-area-page_wmf PARAMETERS --export-area-page --export-type=wmf INPUT_FILENAME areas.svg OUTPUT_FILENAME export-area-page.wmf REFERENCE_FILENAME export-area-page_expected.wmf )
+
+# --export-area-drawing
+add_cli_test(export-area-drawing_png PARAMETERS --export-area-drawing --export-type=png INPUT_FILENAME areas.svg OUTPUT_FILENAME export-area-drawing.png REFERENCE_FILENAME export-area-drawing_expected.png )
+add_cli_test(export-area-drawing_svg PARAMETERS --export-area-drawing --export-type=svg INPUT_FILENAME areas.svg OUTPUT_FILENAME export-area-drawing.svg REFERENCE_FILENAME export-area-drawing_expected.svg )
+add_cli_test(export-area-drawing_pdf PARAMETERS --export-area-drawing --export-type=pdf INPUT_FILENAME areas.svg OUTPUT_FILENAME export-area-drawing.pdf REFERENCE_FILENAME export-area-drawing_expected.pdf )
+add_cli_test(export-area-drawing_ps  PARAMETERS --export-area-drawing --export-type=ps  INPUT_FILENAME areas.svg OUTPUT_FILENAME export-area-drawing.ps  REFERENCE_FILENAME export-area-drawing_expected.ps  )
+add_cli_test(export-area-drawing_eps PARAMETERS --export-area-drawing --export-type=eps INPUT_FILENAME areas.svg OUTPUT_FILENAME export-area-drawing.eps REFERENCE_FILENAME export-area-drawing_expected.eps )
+# EMF, WMF: Currently not supported. Feature request: https://gitlab.com/inkscape/inkscape/issues/1056
+# add_cli_test(export-area-drawing_emf PARAMETERS --export-area-drawing --export-type=emf INPUT_FILENAME areas.svg OUTPUT_FILENAME export-area-drawing.emf REFERENCE_FILENAME export-area-drawing_expected.emf )
+# add_cli_test(export-area-drawing_wmf PARAMETERS --export-area-drawing --export-type=wmf INPUT_FILENAME areas.svg OUTPUT_FILENAME export-area-drawing.wmf REFERENCE_FILENAME export-area-drawing_expected.wmf )
+
+# --export-area=x0:y0:x1:y1
+add_cli_test(export-area_png PARAMETERS --export-area=150:150:350:300 --export-type=png INPUT_FILENAME areas.svg OUTPUT_FILENAME export-area.png REFERENCE_FILENAME export-area_expected.png )
+# SVG, PDF, PS, EPS, EMF, WMF: Not supported. Feature request: https://gitlab.com/inkscape/inkscape/issues/678
+
+# --export-area-snap
+add_cli_test(export-area-snap-id_png   PARAMETERS --export-id=rect_misaligned --export-area-snap --export-type=png INPUT_FILENAME pyramids.svg OUTPUT_FILENAME export-area-snap-id.png      REFERENCE_FILENAME export-area-snap_expected.png )
+add_cli_test(export-area-snap-area_png PARAMETERS --export-area-drawing       --export-area-snap --export-type=png INPUT_FILENAME pyramids.svg OUTPUT_FILENAME export-area-snap-drawing.png REFERENCE_FILENAME export-area-snap_expected.png )
+# SVG, PDF, PS, EPS, EMF, WMF: doesn't make sense
+
+# --export-dpi=DPI
+add_cli_test(export-dpi_png PARAMETERS --export-dpi=12 --export-type=png INPUT_FILENAME filter.svg OUTPUT_FILENAME export-dpi.png REFERENCE_FILENAME export-dpi_expected.png )
+# SVG: doesn't make sense
+add_cli_test(export-dpi_pdf PARAMETERS --export-dpi=12 --export-type=pdf INPUT_FILENAME filter.svg OUTPUT_FILENAME export-dpi.pdf REFERENCE_FILENAME export-dpi_expected.pdf )
+add_cli_test(export-dpi_ps  PARAMETERS --export-dpi=12 --export-type=ps  INPUT_FILENAME filter.svg OUTPUT_FILENAME export-dpi.ps  REFERENCE_FILENAME export-dpi_expected.ps  )
+add_cli_test(export-dpi_eps PARAMETERS --export-dpi=12 --export-type=eps INPUT_FILENAME filter.svg OUTPUT_FILENAME export-dpi.eps REFERENCE_FILENAME export-dpi_expected.eps )
+# EMF, WMF: doesn't make sense
+
+# --export-width=WIDTH
+add_cli_test(export-width_png                  PARAMETERS --export-width=380                                      --export-type=png INPUT_FILENAME export_hints.svg OUTPUT_FILENAME export-width.png  REFERENCE_FILENAME export-width_expected.png )
+add_cli_test(export-width_export-dpi_png       PARAMETERS --export-width=380 --export-dpi=300                     --export-type=png INPUT_FILENAME export_hints.svg OUTPUT_FILENAME export-width2.png REFERENCE_FILENAME export-width_expected.png )
+add_cli_test(export-width_export-use-hints_png PARAMETERS --export-width=380 --export-use-hints --export-id=rect1 --export-type=png
+                                               INPUT_FILENAME export_hints.svg
+                                               PASS_FOR_OUTPUT "Area 10:10:90:70 exported to 380 x 285 pixels \\(456 dpi\\)"
+                                               EXPECTED_FILES "${CMAKE_CURRENT_SOURCE_DIR}/testcases/export_hints_rectangle.png" )
+# SVG, PDF, PS, EPS, EMF, WMF: doesn't make sense
+
+# --export-height=HEIGHT
+add_cli_test(export-height_png                  PARAMETERS --export-height=40                                      --export-type=png INPUT_FILENAME export_hints.svg OUTPUT_FILENAME export-height.png  REFERENCE_FILENAME export-height_expected.png )
+add_cli_test(export-height_export-dpi_png       PARAMETERS --export-height=40 --export-dpi=300                     --export-type=png INPUT_FILENAME export_hints.svg OUTPUT_FILENAME export-height2.png REFERENCE_FILENAME export-height_expected.png )
+add_cli_test(export-height_export-use-hints_png PARAMETERS --export-height=40 --export-use-hints --export-id=rect1 --export-type=png
+                                                INPUT_FILENAME export_hints.svg PASS_FOR_OUTPUT "Area 10:10:90:70 exported to 53 x 40 pixels \\(64 dpi\\)"
+                                                EXPECTED_FILES "${CMAKE_CURRENT_SOURCE_DIR}/testcases/export_hints_rectangle.png" )
+# SVG, PDF, PS, EPS, EMF, WMF: doesn't make sense
+
+# --export-margin=MARGIN
+
+# --export-id=OBJECT-ID[;OBJECT-ID]*
+
+# --export-id-only
+
+# --export-plain-svg
+add_cli_test(export_plain  PARAMETERS --export-type=svg --export-plain-svg
+                           INPUT_FILENAME shapes.svg OUTPUT_FILENAME shapes.svg REFERENCE_FILENAME shapes.svg
+                           TEST_SCRIPT match_regex_fail.sh "shapes.svg" "inkscape:|sodipodi:")
+
+# --export-ps-level=LEVEL
+
+# --export-pdf-version=VERSION
+
+# --export-text-to-path
+add_cli_test(export_text_to_path
+                           PARAMETERS --export-text-to-path
+                           INPUT_FILENAME text.svg OUTPUT_FILENAME text.svg
+                           TEST_SCRIPT match_regex_fail.sh "text.svg" "<text")
+
+# --export-latex
 # test PDF export options
 add_cli_test(export_latex  PARAMETERS --export-type=pdf --export-latex
                            INPUT_FILENAME text.svg OUTPUT_FILENAME text.pdf
                            EXPECTED_FILES text.pdf text.pdf_tex
                            TEST_SCRIPT match_regex.sh "text.pdf_tex" "some text")
-add_cli_test(export_text_to_path
-                           PARAMETERS --export-text-to-path
-                           INPUT_FILENAME text.svg OUTPUT_FILENAME text.svg
-                           TEST_SCRIPT match_regex_fail.sh "text.svg" "<text")
+
+# --export-ignore-filters
 
 # --export-use-hints
 add_cli_test(export_hints1 PARAMETERS --export-use-hints --export-id=rect1 INPUT_FILENAME export_hints.svg
@@ -159,6 +240,62 @@ add_cli_test(export_hints1 PARAMETERS --export-use-hints --export-id=rect1 INPUT
 add_cli_test(export_hints2 PARAMETERS --export-use-hints --export-area-drawing INPUT_FILENAME export_hints.svg
                            PASS_FOR_OUTPUT "Area 10:10:180:70 exported to 197 x 69 pixels \\(111 dpi\\)"
                            EXPECTED_FILES "${CMAKE_CURRENT_SOURCE_DIR}/testcases/export_hints_drawing.png")
+
+
+# --export-background=COLOR
+
+# --export-background-opacity=VALUE
+
+# --query-id=OBJECT-ID[,OBJECT-ID]*
+
+# --query-all
+# --query-x
+# --query-y
+# --query-width
+# --query-height
+# check --query family of parameters
+string(CONCAT query_all_expected "rect1,10,10,80,80\n"
+                                 "rect2,110,20,80,70\n"
+                                 "rect3,210,30,80,60")
+add_cli_test(query_x       PARAMETERS --query-id=rect2 --query-x      INPUT_FILENAME rects.svg PASS_FOR_OUTPUT 110)
+add_cli_test(query_y       PARAMETERS --query-id=rect2 --query-y      INPUT_FILENAME rects.svg PASS_FOR_OUTPUT 20)
+add_cli_test(query_width   PARAMETERS --query-id=rect2 --query-width  INPUT_FILENAME rects.svg PASS_FOR_OUTPUT 80)
+add_cli_test(query_height  PARAMETERS --query-id=rect2 --query-height INPUT_FILENAME rects.svg PASS_FOR_OUTPUT 70)
+add_cli_test(query_all     PARAMETERS --query-id=rect2 --query-all    INPUT_FILENAME rects.svg PASS_FOR_OUTPUT ${query_all_expected})
+
+# --vacuum-defs
+
+# --select=OBJECT-ID[,OBJECT-ID]*
+
+# --actions=ACTION(:ARG)[;ACTION(:ARG)]*
+
+# --action-list
+add_cli_test(action_list   PARAMETERS --action-list PASS_FOR_OUTPUT "file-new")
+
+# --verb=VERB[;VERB]*
+
+# --verb-list
+add_cli_test(verb_list     PARAMETERS --verb-list   PASS_FOR_OUTPUT "FileNew:")
+
+# --with-gui
+
+# --batch-process
+
+# --shell
+
+#### Verbs
+#### Some verbs from the --verb-list (depracated)
+#################################################
+
+
+#### Actions
+#### All actions from --action-list
+###################################
+
+
+#### Compile options
+#### Features available behind of a compile option
+##################################################
 
 # test librevenge formats
 if(WITH_LIBCDR)
@@ -182,57 +319,3 @@ if(WITH_LIBWPG)
                            INPUT_FILENAME librevenge_formats/word_perfect.wpg OUTPUT_FILENAME format_word_perfect.png
                            REFERENCE_FILENAME librevenge_formats/word_perfect_expected.png)
 endif()
-
-# --export-area-page
-add_cli_test(export-area-page_png PARAMETERS --export-area-page --export-type=png INPUT_FILENAME areas.svg OUTPUT_FILENAME export-area-page.png REFERENCE_FILENAME export-area-page_expected.png )
-add_cli_test(export-area-page_svg PARAMETERS --export-area-page --export-type=svg INPUT_FILENAME areas.svg OUTPUT_FILENAME export-area-page.svg REFERENCE_FILENAME export-area-page_expected.svg )
-add_cli_test(export-area-page_pdf PARAMETERS --export-area-page --export-type=pdf INPUT_FILENAME areas.svg OUTPUT_FILENAME export-area-page.pdf REFERENCE_FILENAME export-area-page_expected.pdf )
-add_cli_test(export-area-page_ps  PARAMETERS --export-area-page --export-type=ps  INPUT_FILENAME areas.svg OUTPUT_FILENAME export-area-page.ps  REFERENCE_FILENAME export-area-page_expected.ps  )
-# EPS: Currently not supported. Feature request: https://gitlab.com/inkscape/inkscape/issues/1074
-# add_cli_test(export-area-page_eps PARAMETERS --export-area-page --export-type=eps INPUT_FILENAME areas.svg OUTPUT_FILENAME export-area-page.eps REFERENCE_FILENAME export-area-page_expected.eps )
-add_cli_test(export-area-page_emf PARAMETERS --export-area-page --export-type=emf INPUT_FILENAME areas.svg OUTPUT_FILENAME export-area-page.emf REFERENCE_FILENAME export-area-page_expected.emf )
-add_cli_test(export-area-page_wmf PARAMETERS --export-area-page --export-type=wmf INPUT_FILENAME areas.svg OUTPUT_FILENAME export-area-page.wmf REFERENCE_FILENAME export-area-page_expected.wmf )
-
-# --export-area-drawing
-add_cli_test(export-area-drawing_png PARAMETERS --export-area-drawing --export-type=png INPUT_FILENAME areas.svg OUTPUT_FILENAME export-area-drawing.png REFERENCE_FILENAME export-area-drawing_expected.png )
-add_cli_test(export-area-drawing_svg PARAMETERS --export-area-drawing --export-type=svg INPUT_FILENAME areas.svg OUTPUT_FILENAME export-area-drawing.svg REFERENCE_FILENAME export-area-drawing_expected.svg )
-add_cli_test(export-area-drawing_pdf PARAMETERS --export-area-drawing --export-type=pdf INPUT_FILENAME areas.svg OUTPUT_FILENAME export-area-drawing.pdf REFERENCE_FILENAME export-area-drawing_expected.pdf )
-add_cli_test(export-area-drawing_ps  PARAMETERS --export-area-drawing --export-type=ps  INPUT_FILENAME areas.svg OUTPUT_FILENAME export-area-drawing.ps  REFERENCE_FILENAME export-area-drawing_expected.ps  )
-add_cli_test(export-area-drawing_eps PARAMETERS --export-area-drawing --export-type=eps INPUT_FILENAME areas.svg OUTPUT_FILENAME export-area-drawing.eps REFERENCE_FILENAME export-area-drawing_expected.eps )
-# EMF, WMF: Currently not supported. Feature request: https://gitlab.com/inkscape/inkscape/issues/1056
-# add_cli_test(export-area-drawing_emf PARAMETERS --export-area-drawing --export-type=emf INPUT_FILENAME areas.svg OUTPUT_FILENAME export-area-drawing.emf REFERENCE_FILENAME export-area-drawing_expected.emf )
-# add_cli_test(export-area-drawing_wmf PARAMETERS --export-area-drawing --export-type=wmf INPUT_FILENAME areas.svg OUTPUT_FILENAME export-area-drawing.wmf REFERENCE_FILENAME export-area-drawing_expected.wmf )
-
-# --export-area
-add_cli_test(export-area_png PARAMETERS --export-area=150:150:350:300 --export-type=png INPUT_FILENAME areas.svg OUTPUT_FILENAME export-area.png REFERENCE_FILENAME export-area_expected.png )
-# SVG, PDF, PS, EPS, EMF, WMF: Not supported. Feature request: https://gitlab.com/inkscape/inkscape/issues/678
-
-# --export-area-snap
-add_cli_test(export-area-snap-id_png   PARAMETERS --export-id=rect_misaligned --export-area-snap --export-type=png INPUT_FILENAME pyramids.svg OUTPUT_FILENAME export-area-snap-id.png      REFERENCE_FILENAME export-area-snap_expected.png )
-add_cli_test(export-area-snap-area_png PARAMETERS --export-area-drawing       --export-area-snap --export-type=png INPUT_FILENAME pyramids.svg OUTPUT_FILENAME export-area-snap-drawing.png REFERENCE_FILENAME export-area-snap_expected.png )
-# SVG, PDF, PS, EPS, EMF, WMF: doesn't make sense
-
-# --export-dpi
-add_cli_test(export-dpi_png PARAMETERS --export-dpi=12 --export-type=png INPUT_FILENAME filter.svg OUTPUT_FILENAME export-dpi.png REFERENCE_FILENAME export-dpi_expected.png )
-# SVG: doesn't make sense
-add_cli_test(export-dpi_pdf PARAMETERS --export-dpi=12 --export-type=pdf INPUT_FILENAME filter.svg OUTPUT_FILENAME export-dpi.pdf REFERENCE_FILENAME export-dpi_expected.pdf )
-add_cli_test(export-dpi_ps  PARAMETERS --export-dpi=12 --export-type=ps  INPUT_FILENAME filter.svg OUTPUT_FILENAME export-dpi.ps  REFERENCE_FILENAME export-dpi_expected.ps  )
-add_cli_test(export-dpi_eps PARAMETERS --export-dpi=12 --export-type=eps INPUT_FILENAME filter.svg OUTPUT_FILENAME export-dpi.eps REFERENCE_FILENAME export-dpi_expected.eps )
-# EMF, WMF: doesn't make sense
-
-# --export-width
-add_cli_test(export-width_png                  PARAMETERS --export-width=380                                      --export-type=png INPUT_FILENAME export_hints.svg OUTPUT_FILENAME export-width.png  REFERENCE_FILENAME export-width_expected.png )
-add_cli_test(export-width_export-dpi_png       PARAMETERS --export-width=380 --export-dpi=300                     --export-type=png INPUT_FILENAME export_hints.svg OUTPUT_FILENAME export-width2.png REFERENCE_FILENAME export-width_expected.png )
-add_cli_test(export-width_export-use-hints_png PARAMETERS --export-width=380 --export-use-hints --export-id=rect1 --export-type=png
-                                               INPUT_FILENAME export_hints.svg
-                                               PASS_FOR_OUTPUT "Area 10:10:90:70 exported to 380 x 285 pixels \\(456 dpi\\)"
-                                               EXPECTED_FILES "${CMAKE_CURRENT_SOURCE_DIR}/testcases/export_hints_rectangle.png" )
-# SVG, PDF, PS, EPS, EMF, WMF: doesn't make sense
-
-# --export-height
-add_cli_test(export-height_png                  PARAMETERS --export-height=40                                      --export-type=png INPUT_FILENAME export_hints.svg OUTPUT_FILENAME export-height.png  REFERENCE_FILENAME export-height_expected.png )
-add_cli_test(export-height_export-dpi_png       PARAMETERS --export-height=40 --export-dpi=300                     --export-type=png INPUT_FILENAME export_hints.svg OUTPUT_FILENAME export-height2.png REFERENCE_FILENAME export-height_expected.png )
-add_cli_test(export-height_export-use-hints_png PARAMETERS --export-height=40 --export-use-hints --export-id=rect1 --export-type=png
-                                                INPUT_FILENAME export_hints.svg PASS_FOR_OUTPUT "Area 10:10:90:70 exported to 53 x 40 pixels \\(64 dpi\\)"
-                                                EXPECTED_FILES "${CMAKE_CURRENT_SOURCE_DIR}/testcases/export_hints_rectangle.png" )
-# SVG, PDF, PS, EPS, EMF, WMF: doesn't make sense
