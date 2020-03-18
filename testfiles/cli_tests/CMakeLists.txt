@@ -82,39 +82,9 @@ endfunction(add_cli_test)
 
 ### Tests follow below ###
 
-##########################
-# Common CLI tests       #
-##########################
-
-# test basic support of SVG export functionality
-add_cli_test(export_svg    PARAMETERS --export-type=svg INPUT_FILENAME shapes.svg OUTPUT_FILENAME shapes.svg REFERENCE_FILENAME shapes.svg)
-
-# test librevenge formats
-if(WITH_LIBCDR)
-  # add_cli_test(import_cdr  PARAMETERS --export-type=png   # fails to open (regression in libcdr 1.6.0)
-  #                          INPUT_FILENAME librevenge_formats/corel_draw.cdr OUTPUT_FILENAME format_corel_draw.png
-  #                          REFERENCE_FILENAME librevenge_formats/corel_draw_expected.png)
-  add_cli_test(import_cdr2 PARAMETERS --export-type=png
-                           INPUT_FILENAME librevenge_formats/corel_draw2.cdr OUTPUT_FILENAME format_corel_draw2.png
-                           REFERENCE_FILENAME librevenge_formats/corel_draw2_expected.png)
-endif()
-if(WITH_LIBVISIO)
-  add_cli_test(import_vsd  PARAMETERS --export-type=png
-                           INPUT_FILENAME librevenge_formats/visio.vsd OUTPUT_FILENAME format_visio.vsd.png
-                           REFERENCE_FILENAME librevenge_formats/visio.vsd_expected.png)
-  add_cli_test(import_vsdx PARAMETERS --export-type=png
-                           INPUT_FILENAME librevenge_formats/visio.vsdx OUTPUT_FILENAME format_visio.vsdx.png
-                           REFERENCE_FILENAME librevenge_formats/visio.vsdx_expected.png)
-endif()
-if(WITH_LIBWPG)
-  add_cli_test(import_wpg  PARAMETERS --export-type=png
-                           INPUT_FILENAME librevenge_formats/word_perfect.wpg OUTPUT_FILENAME format_word_perfect.png
-                           REFERENCE_FILENAME librevenge_formats/word_perfect_expected.png)
-endif()
-
-##########################
-# Documented CLI tests   #
-##########################
+#### Options
+#### All options from the --help and their documented features from the man
+###########################################################################
 
 # --help
 
@@ -160,6 +130,9 @@ add_cli_test(inkscape_profile_dir_handle_illegal
 # --export-overwrite
 
 # --export-type=TYPE[,TYPE]*
+# test basic support of SVG export functionality
+add_cli_test(export_svg    PARAMETERS --export-type=svg INPUT_FILENAME shapes.svg OUTPUT_FILENAME shapes.svg REFERENCE_FILENAME shapes.svg)
+
 # check --export-type
 add_cli_test(export_type   PARAMETERS --export-type=svg,png,ps,eps,pdf,emf,wmf,xaml
                            INPUT_FILENAME empty.svg OUTPUT_FILENAME empty
@@ -310,6 +283,39 @@ add_cli_test(verb_list     PARAMETERS --verb-list   PASS_FOR_OUTPUT "FileNew:")
 
 # --shell
 
-##########################
-# Actions                #
-##########################
+#### Verbs
+#### Some verbs from the --verb-list (depracated)
+#################################################
+
+
+#### Actions
+#### All actions from --action-list
+###################################
+
+
+#### Compile options
+#### Features available behind of a compile option
+##################################################
+
+# test librevenge formats
+if(WITH_LIBCDR)
+  # add_cli_test(import_cdr  PARAMETERS --export-type=png   # fails to open (regression in libcdr 1.6.0)
+  #                          INPUT_FILENAME librevenge_formats/corel_draw.cdr OUTPUT_FILENAME format_corel_draw.png
+  #                          REFERENCE_FILENAME librevenge_formats/corel_draw_expected.png)
+  add_cli_test(import_cdr2 PARAMETERS --export-type=png
+                           INPUT_FILENAME librevenge_formats/corel_draw2.cdr OUTPUT_FILENAME format_corel_draw2.png
+                           REFERENCE_FILENAME librevenge_formats/corel_draw2_expected.png)
+endif()
+if(WITH_LIBVISIO)
+  add_cli_test(import_vsd  PARAMETERS --export-type=png
+                           INPUT_FILENAME librevenge_formats/visio.vsd OUTPUT_FILENAME format_visio.vsd.png
+                           REFERENCE_FILENAME librevenge_formats/visio.vsd_expected.png)
+  add_cli_test(import_vsdx PARAMETERS --export-type=png
+                           INPUT_FILENAME librevenge_formats/visio.vsdx OUTPUT_FILENAME format_visio.vsdx.png
+                           REFERENCE_FILENAME librevenge_formats/visio.vsdx_expected.png)
+endif()
+if(WITH_LIBWPG)
+  add_cli_test(import_wpg  PARAMETERS --export-type=png
+                           INPUT_FILENAME librevenge_formats/word_perfect.wpg OUTPUT_FILENAME format_word_perfect.png
+                           REFERENCE_FILENAME librevenge_formats/word_perfect_expected.png)
+endif()
