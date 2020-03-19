@@ -184,7 +184,7 @@ add_cli_test(export-height_export-use-hints PARAMETERS --export-height=40 --expo
 
 # --export-margin=MARGIN
 ## pixel based
-# PNG, EPS, EMF, WMF: Not supported. PDF: Buggy. Feature request: https://gitlab.com/inkscape/inkscape/issues/1142
+# PNG, EPS, EMF, WMF: Not supported. PDF: defaults to margin in millimeters. Feature request: https://gitlab.com/inkscape/inkscape/issues/1142
 # add_cli_test(export-margin_px_png PARAMETERS --export-margin=100 --export-type=png INPUT_FILENAME square_px.svg OUTPUT_FILENAME export-margin_px.png REFERENCE_FILENAME export-margin_px_expected.png )
 add_cli_test(export-margin_px_svg PARAMETERS --export-margin=100 --export-type=svg INPUT_FILENAME square_px.svg OUTPUT_FILENAME export-margin_px.svg REFERENCE_FILENAME export-margin_px_expected.svg )
 # add_cli_test(export-margin_px_pdf PARAMETERS --export-margin=100 --export-type=pdf INPUT_FILENAME square_px.svg OUTPUT_FILENAME export-margin_px.pdf REFERENCE_FILENAME export-margin_px_expected.pdf )
@@ -193,7 +193,7 @@ add_cli_test(export-margin_px_ps  PARAMETERS --export-margin=100 --export-type=p
 # add_cli_test(export-margin_px_emf PARAMETERS --export-margin=100 --export-type=emf INPUT_FILENAME square_px.svg OUTPUT_FILENAME export-margin_px.emf REFERENCE_FILENAME export-margin_px_expected.emf )
 # add_cli_test(export-margin_px_wmf PARAMETERS --export-margin=100 --export-type=wmf INPUT_FILENAME square_px.svg OUTPUT_FILENAME export-margin_px.wmf REFERENCE_FILENAME export-margin_px_expected.wmf )
 ## millimeter based
-# PNG, EPS, EMF, WMF: Not supported. PS: Buggy.
+# PNG, EPS, EMF, WMF: Not supported. PDF: defaults to margin in pixels.
 # add_cli_test(export-margin_mm_png PARAMETERS --export-margin=100 --export-type=png INPUT_FILENAME square_mm.svg OUTPUT_FILENAME export-margin_mm.png REFERENCE_FILENAME export-margin_mm_expected.png )
 add_cli_test(export-margin_mm_svg PARAMETERS --export-margin=100 --export-type=svg INPUT_FILENAME square_mm.svg OUTPUT_FILENAME export-margin_mm.svg REFERENCE_FILENAME export-margin_mm_expected.svg )
 add_cli_test(export-margin_mm_pdf PARAMETERS --export-margin=100 --export-type=pdf INPUT_FILENAME square_mm.svg OUTPUT_FILENAME export-margin_mm.pdf REFERENCE_FILENAME export-margin_mm_expected.pdf )
@@ -202,30 +202,18 @@ add_cli_test(export-margin_mm_pdf PARAMETERS --export-margin=100 --export-type=p
 # add_cli_test(export-margin_mm_emf PARAMETERS --export-margin=100 --export-type=emf INPUT_FILENAME square_mm.svg OUTPUT_FILENAME export-margin_mm.emf REFERENCE_FILENAME export-margin_mm_expected.emf )
 # add_cli_test(export-margin_mm_wmf PARAMETERS --export-margin=100 --export-type=wmf INPUT_FILENAME square_mm.svg OUTPUT_FILENAME export-margin_mm.wmf REFERENCE_FILENAME export-margin_mm_expected.wmf )
 ## combinations
-add_cli_test(export-margin_export-id_rect1_svg                PARAMETERS --export-margin=100 --export-id=rect1 --export-type=svg
-                                                              INPUT_FILENAME export_hints.svg
-                                                              OUTPUT_FILENAME export-margin_export-id_rect1.svg
-                                                              REFERENCE_FILENAME export-margin_export-id_rect1_expected.svg )
-add_cli_test(export-margin_export-id_rect2_svg                PARAMETERS --export-margin=100 --export-id=rect2 --export-type=svg
-                                                              INPUT_FILENAME export_hints.svg
-                                                              OUTPUT_FILENAME export-margin_export-id_rect2.svg
-                                                              REFERENCE_FILENAME export-margin_export-id_rect2_expected.svg )
-add_cli_test(export-margin_export-id_rect1_export-id-only_svg PARAMETERS --export-margin=100 --export-id=rect1 --export-id-only --export-type=svg
-                                                              INPUT_FILENAME export_hints.svg
-                                                              OUTPUT_FILENAME export-margin_export-id_rect1_export-id-only.svg
-                                                              REFERENCE_FILENAME export-margin_export-id_rect1_export-id-only_expected.svg )
-add_cli_test(export-margin_export-id_rect2_export-id-only_svg PARAMETERS --export-margin=100 --export-id=rect2 --export-id-only --export-type=svg
-                                                              INPUT_FILENAME export_hints.svg
-                                                              OUTPUT_FILENAME export-export-margin_export-id_rect2_export-id-only.svg
-                                                              REFERENCE_FILENAME export-margin_export-id_rect2_export-id-only_expected.svg )
-add_cli_test(export-margin_drawing_svg                        PARAMETERS --export-margin=100 --export-area-drawing --export-type=svg
-                                                              INPUT_FILENAME export_hints.svg
-                                                              OUTPUT_FILENAME export-margin_drawing.svg
-                                                              REFERENCE_FILENAME export-margin_drawing_expected.svg )
-add_cli_test(export-margin_page_svg                           PARAMETERS --export-margin=100 --export-area-page --export-type=svg
-                                                              INPUT_FILENAME export_hints.svg
-                                                              OUTPUT_FILENAME export-margin_page.svg
-                                                              REFERENCE_FILENAME export-margin_page_expected.svg )
+add_cli_test(export-margin_export-id1_svg                PARAMETERS --export-margin=100 --export-id=rect1 --export-type=svg
+                                                         INPUT_FILENAME export_hints.svg OUTPUT_FILENAME export-margin_export-id1.svg                REFERENCE_FILENAME export-margin_export-id1_expected.svg )
+add_cli_test(export-margin_export-id2_svg                PARAMETERS --export-margin=100 --export-id=rect2 --export-type=svg
+                                                         INPUT_FILENAME export_hints.svg OUTPUT_FILENAME export-margin_export-id2.svg                REFERENCE_FILENAME export-margin_export-id2_expected.svg )
+add_cli_test(export-margin_export-id1_export-id-only_svg PARAMETERS --export-margin=100 --export-id=rect1 --export-id-only --export-type=svg
+                                                         INPUT_FILENAME export_hints.svg OUTPUT_FILENAME export-margin_export-id1_export-id-only.svg REFERENCE_FILENAME export-margin_export-id1_export-id-only_expected.svg )
+add_cli_test(export-margin_export-id2_export-id-only_svg PARAMETERS --export-margin=100 --export-id=rect2 --export-id-only --export-type=svg
+                                                         INPUT_FILENAME export_hints.svg OUTPUT_FILENAME export-margin_export-id2_export-id-only.svg REFERENCE_FILENAME export-margin_export-id2_export-id-only_expected.svg )
+add_cli_test(export-margin_drawing_svg                   PARAMETERS --export-margin=100 --export-area-drawing --export-type=svg
+                                                         INPUT_FILENAME export_hints.svg OUTPUT_FILENAME export-margin_drawing.svg                   REFERENCE_FILENAME export-margin_drawing_expected.svg )
+add_cli_test(export-margin_page_svg                      PARAMETERS --export-margin=100 --export-area-page --export-type=svg
+                                                         INPUT_FILENAME export_hints.svg OUTPUT_FILENAME export-margin_page.svg                      REFERENCE_FILENAME export-margin_page_expected.svg )
 
 # --export-id=OBJECT-ID[;OBJECT-ID]*
 
