@@ -1,13 +1,18 @@
-%!PS-Adobe-3.0 EPSF-3.0
+%!PS-Adobe-3.0
 %%Creator: cairo 1.16.0 (https://cairographics.org)
-%%CreationDate: Fri Mar 20 22:12:29 2020
+%%CreationDate: Sat Mar 21 23:11:23 2020
 %%Pages: 1
 %%DocumentData: Clean7Bit
 %%LanguageLevel: 2
-%%BoundingBox: 0 0 567 567
+%%DocumentMedia: 150x200mm 425 567 0 () ()
+%%BoundingBox: 0 141 284 426
 %%EndComments
 %%BeginProlog
-50 dict begin
+/languagelevel where
+{ pop languagelevel } { 1 } ifelse
+2 lt { /Helvetica findfont 12 scalefont setfont 50 500 moveto
+  (This print job requires a PostScript Language Level 2 printer.) show
+  showpage quit } if
 /q { gsave } bind def
 /Q { grestore } bind def
 /cm { 6 array astore concat } bind def
@@ -62,19 +67,53 @@
 /cairo_flush_ascii85_file { cairo_ascii85_file status { cairo_ascii85_file flushfile } if } def
 /cairo_image { image cairo_flush_ascii85_file } def
 /cairo_imagemask { imagemask cairo_flush_ascii85_file } def
+/cairo_set_page_size {
+  % Change paper size, but only if different from previous paper size otherwise
+  % duplex fails. PLRM specifies a tolerance of 5 pts when matching paper size
+  % so we use the same when checking if the size changes.
+  /setpagedevice where {
+    pop currentpagedevice
+    /PageSize known {
+      2 copy
+      currentpagedevice /PageSize get aload pop
+      exch 4 1 roll
+      sub abs 5 gt
+      3 1 roll
+      sub abs 5 gt
+      or
+    } {
+      true
+    } ifelse
+    {
+      2 array astore
+      2 dict begin
+        /PageSize exch def
+        /ImagingBBox null def
+      currentdict end
+      setpagedevice
+    } {
+      pop pop
+    } ifelse
+  } {
+    pop
+  } ifelse
+} def
 %%EndProlog
 %%BeginSetup
 %%EndSetup
 %%Page: 1 1
 %%BeginPageSetup
-%%PageBoundingBox: 0 0 567 567
+%%PageMedia: 150x200mm
+%%PageBoundingBox: 0 141 284 426
+426 567 cairo_set_page_size
 %%EndPageSetup
-q 141 141 285 285 rectclip
+q 0 141 284 285 rectclip
 1 0 0 -1 0 567 cm q
 0 0 1 rg
-141.73 141.73 283.465 283.465 re f
+0 141.73 141.73 283.465 re f
+1 0 0 rg
+141.73 141.73 141.734 283.465 re f
 Q Q
 showpage
 %%Trailer
-end
 %%EOF
