@@ -190,7 +190,6 @@ add_cli_test(export-height_export-use-hints PARAMETERS --export-height=40 --expo
 # - --export-id for PDF/PS/EPS is buggy: works as --export-id + --export-id-only should work. See: https://gitlab.com/inkscape/inkscape/issues/1173
 # - --export-margin + --export-area=x0:y0:x1:y1 is PNG only feature.
 # - --export-margin + --export-use-hints is PNG only feature.
-# viewbox unit trick is buggy, see details here: https://gitlab.com/inkscape/inkscape/-/issues/1175
 # There is no test for --export-margin + --export-area-page combination because it's equivalent to --export-margin
 
 ## simple --export-margin (millimeter based)
@@ -246,7 +245,7 @@ add_cli_test(export-margin_export-area-drawing_ps  PARAMETERS --export-margin=50
 
 ## --export-margin (millimeter based, user units rescaled via viewBox)
 # add_cli_test(export-margin_viewbox_png PARAMETERS --export-margin=50 --export-type=png INPUT_FILENAME square_mm_viewbox.svg OUTPUT_FILENAME export-margin_viewbox.png REFERENCE_FILENAME export-margin_mm_viewbox_page_expected.png )
-# add_cli_test(export-margin_viewbox_svg PARAMETERS --export-margin=50 --export-type=svg INPUT_FILENAME square_mm_viewbox.svg OUTPUT_FILENAME export-margin_viewbox.svg REFERENCE_FILENAME export-margin_mm_viewbox_page_expected.svg )
+add_cli_test(export-margin_viewbox_svg PARAMETERS --export-margin=50 --export-type=svg INPUT_FILENAME square_mm_viewbox.svg OUTPUT_FILENAME export-margin_viewbox.svg REFERENCE_FILENAME export-margin_mm_viewbox_page_expected.svg )
 # add_cli_test(export-margin_viewbox_pdf PARAMETERS --export-margin=50 --export-type=pdf INPUT_FILENAME square_mm_viewbox.svg OUTPUT_FILENAME export-margin_viewbox.pdf REFERENCE_FILENAME export-margin_mm_viewbox_page_expected.pdf )
 # add_cli_test(export-margin_viewbox_ps  PARAMETERS --export-margin=50 --export-type=ps  INPUT_FILENAME square_mm_viewbox.svg OUTPUT_FILENAME export-margin_viewbox.ps  REFERENCE_FILENAME export-margin_mm_viewbox_page_expected.ps  )
 # add_cli_test(export-margin_viewbox_eps PARAMETERS --export-margin=50 --export-type=eps INPUT_FILENAME square_mm_viewbox.svg OUTPUT_FILENAME export-margin_viewbox.eps REFERENCE_FILENAME export-margin_mm_viewbox_page_expected.eps )
