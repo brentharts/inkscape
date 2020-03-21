@@ -253,7 +253,7 @@ add_cli_test(export-margin_export-area-drawing_ps  PARAMETERS --export-margin=50
 # add_cli_test(export-margin_viewbox_emf PARAMETERS --export-margin=50 --export-type=emf INPUT_FILENAME square_mm_viewbox.svg OUTPUT_FILENAME export-margin_viewbox.emf REFERENCE_FILENAME export-margin_mm_viewbox_expected.emf )
 # add_cli_test(export-margin_viewbox_wmf PARAMETERS --export-margin=50 --export-type=wmf INPUT_FILENAME square_mm_viewbox.svg OUTPUT_FILENAME export-margin_viewbox.wmf REFERENCE_FILENAME export-margin_mm_viewbox_expected.wmf )
 
-## viewbox unit trick: --export-margin + --export-area-page
+## --export-margin + --export-area-page (millimeter based, user units rescaled via viewBox)
 # add_cli_test(export-margin_viewbox_page_png PARAMETERS --export-margin=50 --export-area-page --export-type=png INPUT_FILENAME square_mm_viewbox.svg OUTPUT_FILENAME export-margin_viewbox_page.png REFERENCE_FILENAME export-margin_mm_viewbox_expected.png )
 # add_cli_test(export-margin_viewbox_page_svg PARAMETERS --export-margin=50 --export-area-page --export-type=svg INPUT_FILENAME square_mm_viewbox.svg OUTPUT_FILENAME export-margin_viewbox_page.svg REFERENCE_FILENAME export-margin_mm_viewbox_expected.svg )
 # add_cli_test(export-margin_viewbox_page_pdf PARAMETERS --export-margin=50 --export-area-page --export-type=pdf INPUT_FILENAME square_mm_viewbox.svg OUTPUT_FILENAME export-margin_viewbox_page.pdf REFERENCE_FILENAME export-margin_mm_viewbox_expected.pdf )
