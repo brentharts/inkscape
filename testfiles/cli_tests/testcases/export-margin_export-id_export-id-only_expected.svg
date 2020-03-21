@@ -7,14 +7,11 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   sodipodi:docname="export_hints.svg"
+   sodipodi:docname="square_px.svg"
    id="svg4"
    version="1.1"
-   inkscape:export-ydpi="222"
-   inkscape:export-xdpi="111"
-   inkscape:export-filename="export_hints_drawing.png"
-   height="260"
-   width="280">
+   height="200"
+   width="150">
   <metadata
      id="metadata10">
     <rdf:RDF>
@@ -29,10 +26,10 @@
   <defs
      id="defs8" />
   <sodipodi:namedview
-     fit-margin-bottom="100"
-     fit-margin-right="100"
-     fit-margin-left="100"
-     fit-margin-top="100"
+     fit-margin-bottom="50"
+     fit-margin-right="50"
+     fit-margin-left="50"
+     fit-margin-top="50"
      id="namedview6"
      inkscape:window-height="480"
      inkscape:window-width="640"
@@ -45,10 +42,10 @@
      bordercolor="#666666"
      pagecolor="#ffffff" />
   <rect
+     id="square-red"
      fill="#ff0000"
-     height="60"
-     width="80"
-     y="100"
-     x="100"
-     id="rect2" />
+     height="100"
+     width="50"
+     y="50"
+     x="50" />
 </svg>

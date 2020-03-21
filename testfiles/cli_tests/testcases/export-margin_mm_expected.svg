@@ -8,12 +8,12 @@
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    sodipodi:docname="square_mm.svg"
-   id="svg3"
+   id="svg4"
    version="1.1"
    height="300mm"
    width="300mm">
   <metadata
-     id="metadata9">
+     id="metadata10">
     <rdf:RDF>
       <cc:Work
          rdf:about="">
@@ -24,13 +24,13 @@
     </rdf:RDF>
   </metadata>
   <defs
-     id="defs7" />
+     id="defs8" />
   <sodipodi:namedview
-     fit-margin-bottom="100"
-     fit-margin-right="100"
-     fit-margin-left="100"
-     fit-margin-top="100"
-     id="namedview5"
+     fit-margin-bottom="50"
+     fit-margin-right="50"
+     fit-margin-left="50"
+     fit-margin-top="50"
+     id="namedview6"
      inkscape:window-height="480"
      inkscape:window-width="640"
      inkscape:pageshadow="2"
@@ -42,10 +42,17 @@
      bordercolor="#666666"
      pagecolor="#ffffff" />
   <rect
-     id="square"
+     id="square-blue"
      fill="#0000ff"
      height="100mm"
-     width="100mm"
+     width="50mm"
      y="377.95276"
      x="377.95276" />
+  <rect
+     id="square-red"
+     fill="#ff0000"
+     height="100mm"
+     width="50mm"
+     y="377.95276"
+     x="566.92914" />
 </svg>
