@@ -983,10 +983,10 @@ GtkWidget * sp_gradient_vector_editor_new(SPGradient *gradient, SPStop *stop)
         )));
         g_object_set_data(obj, "shutdown-connection", conn);
 
-        conn = new sigc::connection(INKSCAPE.signal_dialogs_hide.connect(sigc::bind(sigc::ptr_fun(&gtk_widget_hide), dlg)));
+        conn = new sigc::connection(SP_ACTIVE_DESKTOP->signal_dialogs_hide.connect(sigc::bind(sigc::ptr_fun(&gtk_widget_hide), dlg)));
         g_object_set_data(obj, "dialog-hide-connection", conn);
 
-        conn = new sigc::connection(INKSCAPE.signal_dialogs_unhide.connect(sigc::bind(sigc::ptr_fun(&gtk_widget_show), dlg)));
+        conn = new sigc::connection(SP_ACTIVE_DESKTOP->signal_dialogs_unhide.connect(sigc::bind(sigc::ptr_fun(&gtk_widget_show), dlg)));
         g_object_set_data(obj, "dialog-unhide-connection", conn);
 
         gtk_container_set_border_width(GTK_CONTAINER(dlg), PAD);
