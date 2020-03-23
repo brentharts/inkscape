@@ -95,7 +95,9 @@ unsigned DialogManager::_app_dialog_map_refcount = 0;
  *  to these signals.
  *
  */
-DialogManager::DialogManager() {
+DialogManager::DialogManager() :
+    _dialogs_toggle(TRUE)
+{
 
     using namespace Behavior;
 
@@ -290,6 +292,7 @@ void DialogManager::showDialog(gchar const *name, bool grabfocus) {
 void DialogManager::showDialog(GQuark name, bool /*grabfocus*/) {
     Dialog *dialog = getDialog(name);
     if ( dialog ) {
+        dialogs_unhide();
         // should check for grabfocus, but lp:1348927 prevents it
         dialog->present();
     }
