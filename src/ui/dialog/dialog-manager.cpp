@@ -95,9 +95,7 @@ unsigned DialogManager::_app_dialog_map_refcount = 0;
  *  to these signals.
  *
  */
-DialogManager::DialogManager() :
-    _dialogs_toggle(TRUE)
-{
+DialogManager::DialogManager() {
 
     using namespace Behavior;
 

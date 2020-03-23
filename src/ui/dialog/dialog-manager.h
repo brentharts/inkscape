@@ -61,7 +61,9 @@ protected:
     DialogMap _dialog_map; //< map of already created dialogs
     static DialogMap _app_dialog_map; //< map of application-level dialogs
     static unsigned _app_dialog_map_refcount;
-    bool _dialogs_toggle; //< boolean value to determine whether to hide or show dialogs 
+
+private:
+    bool _dialogs_toggle = true; //< F12 toggle state
 };
 
 } // namespace Dialog
