@@ -295,6 +295,44 @@ void DialogManager::showDialog(GQuark name, bool /*grabfocus*/) {
     }
 }
 
+void
+DialogManager::dialogs_hide()
+{
+    _dialogs_toggle = false;
+
+    for(auto &item : _dialog_map) {
+        item.second->onHideF12();
+    }
+
+    for(auto &item : _app_dialog_map) {
+        item.second->onHideF12();
+    }
+}
+
+void
+DialogManager::dialogs_unhide()
+{
+    _dialogs_toggle = true;
+    
+    for(auto &item : _dialog_map) {
+        item.second->onShowF12();
+    }
+
+    for(auto &item : _app_dialog_map) {
+        item.second->onShowF12();
+    }
+}
+
+void
+DialogManager::dialogs_toggle()
+{
+    if(_dialogs_toggle) {
+        dialogs_hide();
+    } else {
+        dialogs_unhide();
+    }
+}
+
 } // namespace Dialog
 } // namespace UI
 } // namespace Inkscape
