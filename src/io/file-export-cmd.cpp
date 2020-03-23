@@ -248,8 +248,13 @@ InkFileExportCmd::do_export_svg(SPDocument* doc, std::string filename_in)
         }
     }
 
-    if(export_area_drawing) {
+    if (export_area_drawing) {
         fit_canvas_to_drawing(doc, export_margin != 0 ? true : false);
+    } else if (export_area_page || export_id.empty() ) {
+        if (export_margin) {
+            doc->ensureUpToDate();
+            doc->fitToRect(*(doc->preferredBounds()), true);
+        }
     }
 
 
@@ -275,9 +280,9 @@ InkFileExportCmd::do_export_svg(SPDocument* doc, std::string filename_in)
                 // If -j then remove all other objects to complete the "crop"
                 doc->getRoot()->cropToObject(obj);
             }
-            Inkscape::ObjectSet s(doc);
-            s.set(obj);
-            if (!export_area_page) {
+            if (!(export_area_page || export_area_drawing)) {
+                Inkscape::ObjectSet s(doc);
+                s.set(obj);
                 s.fitCanvas(export_margin ? true : false);
             }
         }
@@ -505,18 +510,8 @@ InkFileExportCmd::do_export_png(SPDocument *doc, std::string filename_in)
 
         unsigned long int width = 0;
         unsigned long int height = 0;
-
-        if (export_width != 0) {
-            width = export_width;
-            if ((width < 1) || (width > PNG_UINT_31_MAX)) {
-                std::cerr << "InkFileExport::do_export_png: "
-                          << "Export width " << width << " out of range (1 to " << PNG_UINT_31_MAX << ")." << std::endl;
-                continue;
-            }
-            dpi = (gdouble) Inkscape::Util::Quantity::convert(width, "in", "px") / area.width();
-        } else {
-            width = (unsigned long int) (Inkscape::Util::Quantity::convert(area.width(), "px", "in") * dpi + 0.5);
-        }
+        double xdpi = dpi;
+        double ydpi = dpi;
 
         if (export_height != 0) {
             height = export_height;
@@ -525,8 +520,28 @@ InkFileExportCmd::do_export_png(SPDocument *doc, std::string filename_in)
                           << "Export height " << height << " out of range (1 to " << PNG_UINT_31_MAX << ")" << std::endl;
                 continue;
             }
-            dpi = (gdouble) Inkscape::Util::Quantity::convert(height, "in", "px") / area.height();
-        } else {
+            ydpi = Inkscape::Util::Quantity::convert(height, "in", "px") / area.height();
+            xdpi = ydpi;
+            dpi = ydpi;
+        }
+
+        if (export_width != 0) {
+            width = export_width;
+            if ((width < 1) || (width > PNG_UINT_31_MAX)) {
+                std::cerr << "InkFileExport::do_export_png: "
+                          << "Export width " << width << " out of range (1 to " << PNG_UINT_31_MAX << ")." << std::endl;
+                continue;
+            }
+            xdpi = Inkscape::Util::Quantity::convert(width, "in", "px") / area.width();
+            ydpi = export_height ? ydpi : xdpi;
+            dpi = xdpi;
+        }
+
+        if (width == 0) {
+            width = (unsigned long int) (Inkscape::Util::Quantity::convert(area.width(), "px", "in") * dpi + 0.5);
+        }
+
+        if (height == 0) {
             height = (unsigned long int) (Inkscape::Util::Quantity::convert(area.height(), "px", "in") * dpi + 0.5);
         }
 
@@ -546,8 +561,8 @@ InkFileExportCmd::do_export_png(SPDocument *doc, std::string filename_in)
 
         reverse(items.begin(),items.end()); // But there was only one item!
 
-        if( sp_export_png_file(doc, filename_out.c_str(), area, width, height, dpi,
-                               dpi, bgcolor, nullptr, nullptr, true, export_id_only ? items : std::vector<SPItem*>()) == 1 ) {
+        if( sp_export_png_file(doc, filename_out.c_str(), area, width, height, xdpi, ydpi,
+                               bgcolor, nullptr, nullptr, true, export_id_only ? items : std::vector<SPItem*>()) == 1 ) {
         } else {
             std::cerr << "InkFileExport::do_export_png: Failed to export to " << filename_out << std::endl;
             continue;
