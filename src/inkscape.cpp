@@ -966,35 +966,6 @@ Application::switch_desktops_prev()
 }
 
 void
-Application::dialogs_hide()
-{
-
-    active_desktop()->signal_dialogs_hide.emit();
-    _dialogs_toggle = false;
-}
-
-
-
-void
-Application::dialogs_unhide()
-{
-    active_desktop()->signal_dialogs_unhide.emit();
-    _dialogs_toggle = true;
-}
-
-
-
-void
-Application::dialogs_toggle()
-{
-    if (_dialogs_toggle) {
-        dialogs_hide();
-    } else {
-        dialogs_unhide();
-    }
-}
-
-void
 Application::external_change()
 {
     signal_external_change.emit();

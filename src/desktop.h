@@ -212,11 +212,6 @@ public:
     sigc::signal<bool, const SPCSSAttr *>::accumulated<StopOnTrue> _set_style_signal;
     sigc::signal<int, SPStyle *, int>::accumulated<StopOnNonZero> _query_style_signal;
 
-    // user pressed F12
-    sigc::signal<void> signal_dialogs_hide;
-    // user pressed F12
-    sigc::signal<void> signal_dialogs_unhide;
-
     /// Emitted when the zoom factor changes (not emitted when scrolling).
     /// The parameter is the new zoom factor
     sigc::signal<void, double> signal_zoom_changed;

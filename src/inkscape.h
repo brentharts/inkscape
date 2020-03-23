@@ -129,10 +129,6 @@ public:
     SPDesktop * next_desktop ();
     SPDesktop * prev_desktop ();
     
-    void dialogs_hide ();
-    void dialogs_unhide ();
-    void dialogs_toggle ();
-    
     void external_change ();
     void selection_modified (Inkscape::Selection *selection, guint flags);
     void selection_changed (Inkscape::Selection * selection);
@@ -219,7 +215,6 @@ public:
     std::vector<SPDesktop *> * _desktops;
 
     unsigned refCount;
-    bool _dialogs_toggle;
     guint _mapalt;
     guint _trackalt;
     static bool _crashIsHappening;
