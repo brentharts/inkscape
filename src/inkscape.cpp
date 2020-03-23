@@ -969,7 +969,7 @@ void
 Application::dialogs_hide()
 {
 
-    SP_ACTIVE_DESKTOP->signal_dialogs_hide.emit();
+    active_desktop()->signal_dialogs_hide.emit();
     _dialogs_toggle = false;
 }
 
@@ -978,7 +978,7 @@ Application::dialogs_hide()
 void
 Application::dialogs_unhide()
 {
-    SP_ACTIVE_DESKTOP->signal_dialogs_unhide.emit();
+    active_desktop()->signal_dialogs_unhide.emit();
     _dialogs_toggle = true;
 }
 
