@@ -146,9 +146,8 @@ std::vector<Inkscape::SnapCandidatePoint> Selection::getSnapPoints(SnapPreferenc
 
 SPObject *Selection::_objectForXMLNode(Inkscape::XML::Node *repr) const {
     g_return_val_if_fail(repr != nullptr, NULL);
-    gchar const *id = repr->attribute("id");
-    g_return_val_if_fail(id != nullptr, NULL);
-    SPObject *object=_layers->getDocument()->getObjectById(id);
+    SPObject *object = _layers->getDocument()->getObjectByRepr(repr);
+    g_assert(object == _layers->getDocument()->getObjectById(repr->attribute("id")));
     g_return_val_if_fail(object != nullptr, NULL);
     return object;
 }
