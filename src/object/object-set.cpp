@@ -47,7 +47,7 @@ void ObjectSet::add(XML::Node *repr)
 {
     if (document() && repr) {
         SPObject *obj = document()->getObjectByRepr(repr);
-        g_assert(obj == document()->getObjectById(repr->attribute("id")));
+        assert(obj == document()->getObjectById(repr->attribute("id")));
         add(obj);
     }
 }
@@ -258,7 +258,7 @@ void ObjectSet::set(XML::Node *repr)
 {
     if (document() && repr) {
         SPObject *obj = document()->getObjectByRepr(repr);
-        g_assert(obj == document()->getObjectById(repr->attribute("id")));
+        assert(obj == document()->getObjectById(repr->attribute("id")));
         set(obj);
     }
 }
@@ -269,7 +269,7 @@ void ObjectSet::setReprList(std::vector<XML::Node*> const &list) {
     clear();
     for (auto iter = list.rbegin(); iter != list.rend(); ++iter) {
         SPObject *obj = document()->getObjectByRepr(*iter);
-        g_assert(obj == document()->getObjectById((*iter)->attribute("id")));
+        assert(obj == document()->getObjectById((*iter)->attribute("id")));
         if (obj) {
             add(obj, true);
         }

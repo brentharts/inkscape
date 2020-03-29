@@ -52,7 +52,7 @@ text_refs_t text_categorize_refs(SPDocument *doc, InIter begin, InIter end, text
             }
 
             auto crnt_obj = doc->getObjectByRepr(crnt);
-            g_assert(crnt_obj == doc->getObjectById(crnt->attribute("id")));
+            assert(crnt_obj == doc->getObjectById(crnt->attribute("id")));
             {
                 const auto &inside_ids = crnt_obj->style->shape_inside.shape_ids;
                 std::for_each(inside_ids.begin(), inside_ids.end(), idVisitor);

@@ -332,7 +332,7 @@ SPPattern *SPPattern::_chain() const
 
     defsrepr->addChild(repr, nullptr);
     SPObject *child = document->getObjectByRepr(repr);
-    g_assert(child == document->getObjectById(repr->attribute("id")));
+    assert(child == document->getObjectById(repr->attribute("id")));
     g_assert(SP_IS_PATTERN(child));
 
     return SP_PATTERN(child);
