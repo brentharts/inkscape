@@ -54,6 +54,7 @@ configure_file("${CMAKE_SOURCE_DIR}/CMakeScripts/CPack.cmake" "${CMAKE_BINARY_DI
 
 # NSIS (Windows .exe installer)
 set(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/share/branding/inkscape.ico")
+set(CPACK_NSIS_MUI_HEADERIMAGE "${CMAKE_SOURCE_DIR}/packaging/nsis/header.bmp")
 set(CPACK_NSIS_MUI_WELCOMEFINISHPAGE_BITMAP "${CMAKE_SOURCE_DIR}/packaging/nsis/welcomefinish.bmp")
 set(CPACK_NSIS_INSTALLED_ICON_NAME "bin/inkscape.exe")
 set(CPACK_NSIS_HELP_LINK "${CPACK_PACKAGE_HOMEPAGE_URL}")
@@ -67,14 +68,6 @@ set(CPACK_NSIS_MUI_FINISHPAGE_RUN "inkscape") # TODO: this results in instance w
 set(CPACK_NSIS_COMPRESSOR "${CPACK_NSIS_COMPRESSOR}\n  SetCompressorDictSize 64") # hack (improve compression)
 set(CPACK_NSIS_COMPRESSOR "${CPACK_NSIS_COMPRESSOR}\n  BrandingText '${CPACK_PACKAGE_DESCRIPTION_SUMMARY}'") # hack (overwrite BrandingText)
 set(CPACK_NSIS_COMPRESSOR "${CPACK_NSIS_COMPRESSOR}\n  !define MUI_COMPONENTSPAGE_SMALLDESC") # hack (better components page layout)
-
-set(CPACK_NSIS_COMPRESSOR "${CPACK_NSIS_COMPRESSOR}\n  ReserveFile 'NSIS.InstallOptions.ini'") # more hacks (see https://gitlab.kitware.com/cmake/cmake/merge_requests/4171)
-set(CPACK_NSIS_COMPRESSOR "${CPACK_NSIS_COMPRESSOR}\n  ReserveFile '\\\${NSISDIR}\\\\Contrib\\\\Modern UI\\\\ioSpecial.ini'") # hack
-set(CPACK_NSIS_COMPRESSOR "${CPACK_NSIS_COMPRESSOR}\n  ReserveFile '${CMAKE_SOURCE_DIR}\\\\packaging\\\\nsis\\\\header.bmp'") # hack
-set(CPACK_NSIS_COMPRESSOR "${CPACK_NSIS_COMPRESSOR}\n  ReserveFile '${CMAKE_SOURCE_DIR}\\\\packaging\\\\nsis\\\\welcomefinish.bmp'") # hack
-set(CPACK_NSIS_COMPRESSOR "${CPACK_NSIS_COMPRESSOR}\n  !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS") # hack
-set(CPACK_NSIS_COMPRESSOR "${CPACK_NSIS_COMPRESSOR}\n  !insertmacro MUI_RESERVEFILE_LANGDLL") # hack
-set(CPACK_NSIS_COMPRESSOR "${CPACK_NSIS_COMPRESSOR}\n  ReserveFile /plugin 'InstallOptions.dll' 'StartMenu.dll' 'System.dll' 'UserInfo.dll'") # hack
 
 file(TO_NATIVE_PATH "${CMAKE_SOURCE_DIR}/packaging/nsis/fileassoc.nsh" native_path)
 string(REPLACE "\\" "\\\\" native_path "${native_path}")
