@@ -12,12 +12,19 @@
 #ifndef SEEN_HELP_H
 #define SEEN_HELP_H
 
-typedef struct _GtkMenuItem GtkMenuItem;
+namespace Glib {
+class ustring;
+}
+
+namespace Gtk {
+class Window;
+}
 
 /**
  * Help/About window.
  */
 void sp_help_about();
+void sp_help_open_url(const Glib::ustring &url, Gtk::Window *window);
 void sp_help_open_tutorial(Glib::ustring name);
 
 #endif // !SEEN_HELP_H
