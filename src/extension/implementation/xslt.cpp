@@ -115,7 +115,7 @@ SPDocument * XSLT::open(Inkscape::Extension::Input */*module*/,
 
     const char * params[1];
     params[0] = nullptr;
-    char *oldlocale = g_strdup(setlocale(LC_NUMERIC, nullptr));
+    char *oldlocale = g_strdup(std::setlocale(LC_NUMERIC, nullptr));
     std::setlocale(LC_NUMERIC, "C");
 
     xmlDocPtr result = xsltApplyStylesheet(_stylesheet, filein, params);
@@ -214,7 +214,7 @@ void XSLT::save(Inkscape::Extension::Output *module, SPDocument *doc, gchar cons
     xslt_params[count] = nullptr;
 
     // workaround for inbox#2208
-    char *oldlocale = g_strdup(setlocale(LC_NUMERIC, nullptr));
+    char *oldlocale = g_strdup(std::setlocale(LC_NUMERIC, nullptr));
     std::setlocale(LC_NUMERIC, "C");
     xmlDocPtr newdoc = xsltApplyStylesheet(_stylesheet, svgdoc, xslt_params);
     //xmlSaveFile(filename, newdoc);
