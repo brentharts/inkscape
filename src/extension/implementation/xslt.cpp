@@ -34,7 +34,7 @@
 #include "xml/node.h"
 #include "xml/repr.h"
 
-#include <locale.h>
+#include <clocale>
 
 
 Inkscape::XML::Document * sp_repr_do_read (xmlDocPtr doc, const gchar * default_ns);
@@ -116,15 +116,15 @@ SPDocument * XSLT::open(Inkscape::Extension::Input */*module*/,
 
     const char * params[1];
     params[0] = nullptr;
-    char *local_save = setlocale(LC_ALL, NULL);
-    setlocale( LC_ALL, "C");
+    char const *oldlocale = g_strdup(setlocale(LC_NUMERIC, nullptr));
+    std::setlocale(LC_NUMERIC, "C");
 
     xmlDocPtr result = xsltApplyStylesheet(_stylesheet, filein, params);
     xmlFreeDoc(filein);
 
     Inkscape::XML::Document * rdoc = sp_repr_do_read( result, SP_SVG_NS_URI);
     xmlFreeDoc(result);
-    setlocale( LC_ALL, local_save);
+    std::setlocale(LC_NUMERIC, oldlocale);
 
     if (rdoc == nullptr) {
         return nullptr;
@@ -214,12 +214,12 @@ void XSLT::save(Inkscape::Extension::Output *module, SPDocument *doc, gchar cons
     xslt_params[count] = nullptr;
 
     // workaround for inbox#2208
-    char *local_save = setlocale(LC_ALL, NULL);
-    setlocale(LC_ALL, "C");
+    char const *oldlocale = g_strdup(setlocale(LC_NUMERIC, nullptr));
+    std::setlocale(LC_NUMERIC, "C");
     xmlDocPtr newdoc = xsltApplyStylesheet(_stylesheet, svgdoc, xslt_params);
     //xmlSaveFile(filename, newdoc);
     int success = xsltSaveResultToFilename(filename, newdoc, _stylesheet, 0);
-    setlocale( LC_ALL, local_save);
+    std::setlocale(LC_NUMERIC, oldlocale);
 
     xmlFreeDoc(newdoc);
     xmlFreeDoc(svgdoc);
