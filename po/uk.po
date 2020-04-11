@@ -13,7 +13,7 @@ msgstr ""
 "Project-Id-Version: uk\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
 "POT-Creation-Date: 2020-04-11 20:25+0300\n"
-"PO-Revision-Date: 2020-04-11 20:29+0300\n"
+"PO-Revision-Date: 2020-04-11 20:59+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -6908,7 +6908,7 @@ msgstr "Ззовні"
 #: ../src/extension/internal/filter/morphology.h:64
 #: ../src/ui/widget/preferences-widget.cpp:884
 msgid "Open"
-msgstr "Відкрите"
+msgstr "Відкрити"
 
 #: ../src/extension/internal/filter/morphology.h:66
 #: ../src/ui/tools/measure-tool.cpp:1233 ../src/ui/widget/page-sizer.cpp:59
@@ -19940,7 +19940,7 @@ msgstr "Колір символьних піктограм помилок:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:932
 msgid "System default"
-msgstr "Типовий системний"
+msgstr "Типова для системи"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:933
 msgid "Albanian (sq)"
