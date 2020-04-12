@@ -473,6 +473,11 @@ void XmlTree::set_dt_select(Inkscape::XML::Node *repr)
     {
             /* We cannot set selection to root or string - they are not items and selection is not
              * equipped to deal with them */
+
+            if (SP_IS_GROUP(object->parent)) {
+                current_desktop->setCurrentLayer(object->parent);
+            }
+
             selection->set(SP_ITEM(object));
     }
 
