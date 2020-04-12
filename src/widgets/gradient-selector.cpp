@@ -127,6 +127,7 @@ static void sp_gradient_selector_init(SPGradientSelector *sel)
     sel->treeview->set_model(gvs->store);
     sel->treeview->set_headers_clickable (true);
     sel->treeview->set_search_column(1);
+    sel->treeview->set_vexpand();
     sel->icon_renderer = Gtk::manage(new Gtk::CellRendererPixbuf());
     sel->text_renderer = Gtk::manage(new Gtk::CellRendererText());
 
@@ -164,7 +165,8 @@ static void sp_gradient_selector_init(SPGradientSelector *sel)
     sel->scrolled_window->add(*sel->treeview);
     sel->scrolled_window->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
     sel->scrolled_window->set_shadow_type(Gtk::SHADOW_IN);
-    sel->scrolled_window->set_size_request(0, 150);
+    sel->scrolled_window->set_size_request(0, 180);
+    sel->scrolled_window->set_hexpand();
     sel->scrolled_window->show();
 
     gtk_box_pack_start (GTK_BOX (sel), GTK_WIDGET(sel->scrolled_window->gobj()), TRUE, TRUE, 4);
