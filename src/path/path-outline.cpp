@@ -152,7 +152,7 @@ item_find_paths(const SPItem *item, Geom::PathVector& fill, Geom::PathVector& st
     origin->Outline(offset, 0.5 * stroke_width, join, butt, 0.5 * miter);
 
     if (bbox_only) {
-        offset->WritePathVector(stroke);
+        stroke = offset->MakePathVector();
     } else {
         // Clean-up shape
 
@@ -165,7 +165,7 @@ item_find_paths(const SPItem *item, Geom::PathVector& fill, Geom::PathVector& st
         theOffset->ConvertToShape(theShape, fill_positive); // Create an intersection free polygon (theOffset), step2.
         theOffset->ConvertToForme(origin, 1, &offset); // Turn shape into contour (stored in origin).
 
-        origin->WritePathVector(stroke); // Note origin was replaced above by stroke!
+        stroke = origin->MakePathVector(); // Note origin was replaced above by stroke!
     }
 
     delete origin;

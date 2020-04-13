@@ -1109,8 +1109,7 @@ void PencilTool::_sketchInterpolate() {
             path.LoadPathVector(Geom::path_from_piecewise(this->sketch_interpolation, 0.01));
             path.Simplify(0.5);
 
-            Geom::PathVector pathv;
-            path.WritePathVector(pathv);
+            Geom::PathVector pathv = path.MakePathVector();
             this->sketch_interpolation = pathv[0].toPwSb();
         } else {
             this->sketch_interpolation = fit_pwd2;

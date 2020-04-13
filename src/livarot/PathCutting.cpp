@@ -271,13 +271,14 @@ void Path::DashSubPath(int spL, int spP, std::vector<path_lineto> const &orig_pt
 }
 
 /**
- * Write out data to PathVector
+ * Make a Geom::PathVector version of the path description.
  *
- * @param[out] pv The PathVector written to. Will append if pv is not cleared first.
+ * \return A PathVector copy of the path description
  */
-void
-Path::WritePathVector(Geom::PathVector &pv)
+Geom::PathVector
+Path::MakePathVector()
 {
+    Geom::PathVector pv;
     Geom::Path * currentpath = nullptr;
 
     Geom::Point   lastP,bezSt,bezEn;
@@ -384,6 +385,8 @@ Path::WritePathVector(Geom::PathVector &pv)
             break;
         }
     }
+
+    return pv;
 }
 
 void  Path::AddCurve(Geom::Curve const &c)
