@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: Inkscape 1.0\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
 "POT-Creation-Date: 2019-12-02 14:57+0100\n"
-"PO-Revision-Date: 2020-04-17 21:12+0200\n"
+"PO-Revision-Date: 2020-04-18 15:03+0200\n"
 "Last-Translator: Marcin Floryan\n"
 "Language-Team: Freelancer\n"
 "Language: pl_PL\n"
@@ -8505,7 +8505,7 @@ msgstr "plik1 [plik2 [plikN]]"
 # File: ../src/inkscape-application.cpp, line: 527
 #: ../src/inkscape-application.cpp:527
 msgid "Process (or open) one or more files."
-msgstr "Przetwarzaj (lub Otwieraj) jeden lub więcej plików."
+msgstr "Przetwarzaj (lub otwieraj) jeden lub więcej plików."
 
 #: ../src/inkscape-application.cpp:528
 msgid "Examples:"
@@ -8515,7 +8515,7 @@ msgstr "Przykłady:"
 # File: ../src/inkscape-application.cpp, line: 529
 #: ../src/inkscape-application.cpp:529
 msgid "Export input SVG (%1) to PDF (%2) format:"
-msgstr "Eksportuj wejściowy Format SVG (%1) do PDF (%2):"
+msgstr "Eksportuj wejściowy format SVG (%1) do PDF (%2):"
 
 #
 # File: ../src/inkscape-application.cpp, line: 531
@@ -8532,7 +8532,7 @@ msgstr "Zobacz %1 i %2, aby uzyskać więcej informacji."
 
 #: ../src/inkscape-application.cpp:536
 msgid "Print Inkscape version"
-msgstr "Drukuj wersję Inkscape"
+msgstr "Wyświetl wersję Inkscape"
 
 #: ../src/inkscape-application.cpp:537
 msgid "Print system extension directory"
@@ -8569,16 +8569,16 @@ msgid ""
 "Method used to convert pre-0.92 document dpi, if needed: [none|scale-viewbox|"
 "scale-document]"
 msgstr ""
-"Metoda używana do konwertowania pre-0,92 dokumentu dpi, w razie potrzeby: [none | "
-"Scale-Viewbox | Skala-dokument]"
+"Metoda używana do konwertowania DPI dokumentu w wersji przed 0.92, w razie "
+"potrzeby: [none|scale-viewbox|scale-document]"
 
 #
 # File: ../src/inkscape-application.cpp, line: 545
 #: ../src/inkscape-application.cpp:545
 msgid "Do not fix pre-0.92 document's text baseline spacing on opening"
 msgstr ""
-"Nie usuwaj odstępów między liniami bazową tekstu sprzed 0,92 dokumentu przy "
-"otwieraniu"
+"Nie naprawiaj odstępów linii bazowej tekstu przy otwieraniu dokumentów w wersji "
+"przed 0.92"
 
 #: ../src/inkscape-application.cpp:548
 msgid "File export"
@@ -8588,11 +8588,11 @@ msgstr "Eksport plików"
 # File: ../src/inkscape-application.cpp, line: 549
 #: ../src/inkscape-application.cpp:549
 msgid "Output file name (file type is guessed from extension)"
-msgstr "Nazwa pliku wyjściowego (typ pliku jest odgadnięte z rozszerzeniem)"
+msgstr "Nazwa pliku docelowego (typ pliku na podstawie rozszerzenia)"
 
 #: ../src/inkscape-application.cpp:549
 msgid "EXPORT-FILENAME"
-msgstr "Eksportuj-NazwaPliku"
+msgstr "NAZWA-EKSPORTOWANEGO-PLIKU"
 
 #
 # File: ../src/inkscape-application.cpp, line: 550
@@ -8603,12 +8603,11 @@ msgstr "Zastąp plik wejściowy"
 #
 #: ../src/inkscape-application.cpp:551
 msgid "File type(s) to export: [svg,png,ps,eps,pdf,emf,wmf,xaml]"
-msgstr ""
-"Typ (y) plików do wyeksportowania: [SVG, PNG, PS, EPS, PDF, Tex, EMF, WMF, XAML]"
+msgstr "Typ plików przy eksportowaniu: [svg, png, ps, eps, pdf, emf, wmf, xaml]"
 
 #: ../src/inkscape-application.cpp:554
 msgid "Export geometry"
-msgstr "Eksportuj geometrię"
+msgstr "Eksportowany obszar"
 
 #: ../src/inkscape-application.cpp:555
 msgid "Area to export is page"
@@ -8616,7 +8615,7 @@ msgstr "Obszar do wyeksportowania to strona"
 
 #: ../src/inkscape-application.cpp:556
 msgid "Area to export is whole drawing (ignoring page size)"
-msgstr "Obszar do wyeksportowania to cały rysunek (ignorowanie rozmiaru strony)"
+msgstr "Obszar do wyeksportowania to cały rysunek (bez względu na rozmiaru strony)"
 
 #
 # File: ../src/inkscape-application.cpp, line: 557
@@ -8644,7 +8643,7 @@ msgstr "DPI"
 
 #: ../src/inkscape-application.cpp:560
 msgid "Bitmap width in pixels (overrides --export-dpi)"
-msgstr "Szerokość bitmapy w pikselach (Przesłania--Export-dpi)"
+msgstr "Szerokość bitmapy w pikselach (zastępuje --export-dpi)"
 
 #: ../src/inkscape-application.cpp:560
 msgid "WIDTH"
@@ -8652,7 +8651,7 @@ msgstr "SZEROKOŚĆ"
 
 #: ../src/inkscape-application.cpp:561
 msgid "Bitmap height in pixels (overrides --export-dpi)"
-msgstr "Wysokość bitmapy w pikselach (Przesłania--Export-dpi)"
+msgstr "Wysokość bitmapy w pikselach (zastępuje --export-dpi)"
 
 #: ../src/inkscape-application.cpp:561
 msgid "HEIGHT"
@@ -8752,11 +8751,11 @@ msgstr "WARTOŚĆ"
 # File: ../src/inkscape-application.cpp, line: 579
 #: ../src/inkscape-application.cpp:579
 msgid "Query object/document geometry"
-msgstr "Kwerenda obiektu/dokumentu geometrii"
+msgstr "Kwerenda obiektów/obszaru dokumentu"
 
 #: ../src/inkscape-application.cpp:580
 msgid "ID(s) of object(s) to be queried"
-msgstr "IDENTYFIKATORY obiektów, które mają być wyszukiwane"
+msgstr "IDENTYFIKATORY obiektów, które mają być wybrane"
 
 #: ../src/inkscape-application.cpp:580 ../src/inkscape-application.cpp:590
 msgid "OBJECT-ID[,OBJECT-ID]*"
@@ -8768,19 +8767,19 @@ msgstr "Drukuj obwiednie wszystkich obiektów"
 
 #: ../src/inkscape-application.cpp:582
 msgid "X coordinate of drawing or object (if specified by --query-id)"
-msgstr "Współrzędna X rysunku lub obiektu (Jeśli określona przez--Query-ID)"
+msgstr "Współrzędna X rysunku lub obiektu (Jeśli określona przez --query-id)"
 
 #: ../src/inkscape-application.cpp:583
 msgid "Y coordinate of drawing or object (if specified by --query-id)"
-msgstr "Współrzędna Y rysunku lub obiektu (Jeśli określona przez--Query-ID)"
+msgstr "Współrzędna Y rysunku lub obiektu (Jeśli określona przez --query-id)"
 
 #: ../src/inkscape-application.cpp:584
 msgid "Width of drawing or object (if specified by --query-id)"
-msgstr "Szerokość rysunku lub obiektu (Jeśli określona przez--Query-ID)"
+msgstr "Szerokość rysunku lub obiektu (Jeśli określona przez --query-id)"
 
 #: ../src/inkscape-application.cpp:585
 msgid "Height of drawing or object (if specified by --query-id)"
-msgstr "Wysokość rysunku lub obiektu (Jeśli określona przez--Query-ID)"
+msgstr "Wysokość rysunku lub obiektu (Jeśli określona przez --query-id)"
 
 #
 # File: ../src/inkscape-application.cpp, line: 588
@@ -8790,7 +8789,7 @@ msgstr "Zaawansowane przetwarzanie plików"
 
 #: ../src/inkscape-application.cpp:589
 msgid "Remove unused definitions from the <defs> section(s) of document"
-msgstr "Usuń nieużywane definicje z <defs>sekcji (-ów) dokumentu</defs>"
+msgstr "Usuń nieużywane definicje ze wszystkich sekcji <defs> dokumentu"
 
 #
 # File: ../src/inkscape-application.cpp, line: 590
@@ -8802,34 +8801,33 @@ msgstr "Zaznaczanie obiektów: rozdzielana przecinkami lista identyfikatorów"
 # File: ../src/inkscape-application.cpp, line: 594
 #: ../src/inkscape-application.cpp:594
 msgid "List of actions (with optional arguments) to execute"
-msgstr "Lista akcji (z opcjonalnymi argumentami) do wykonania"
+msgstr "Lista operacji (z opcjonalnymi argumentami) do wykonania"
 
 #: ../src/inkscape-application.cpp:594
 msgid "ACTION(:ARG)[;ACTION(:ARG)]*"
-msgstr "ACTION (: ARG) [; ACTION (: ARG)] *"
+msgstr "OPERACJA(:ARG)[; OPERACJA(:ARG)]*"
 
 #: ../src/inkscape-application.cpp:595
 msgid "List all available actions"
-msgstr "Lista wszystkich dostępnych działań"
+msgstr "Lista wszystkich dostępnych operacji"
 
 #
 # File: ../src/inkscape-application.cpp, line: 599
 #: ../src/inkscape-application.cpp:599
 msgid "List of verbs to execute"
-msgstr "Lista czasowników do wykonania"
+msgstr "Lista poleceń do wykonania"
 
 #
 # File: ../src/inkscape-application.cpp, line: 599
 #: ../src/inkscape-application.cpp:599
-#, fuzzy
 msgid "VERB[;VERB]*"
-msgstr "CZASOWNIK [; CZASOWNIK] *"
+msgstr "POLECENIE[;POLECENIE]*"
 
 #
 # File: ../src/inkscape-application.cpp, line: 600
 #: ../src/inkscape-application.cpp:600
 msgid "List all available verbs"
-msgstr "Lista wszystkich dostępnych czasów"
+msgstr "Lista wszystkich dostępnych poleceń"
 
 #: ../src/inkscape-application.cpp:603 ../src/ui/dialog/inkscape-preferences.cpp:920
 msgid "Interface"
@@ -8839,21 +8837,20 @@ msgstr "Interfejs"
 # File: ../src/inkscape-application.cpp, line: 604
 #: ../src/inkscape-application.cpp:604
 msgid "Console interface only (no visible GUI)"
-msgstr "Tylko interfejs konsoli (bez widocznego GUI)"
+msgstr "Tylko interfejs konsoli (bez graficznego interfejsu użytkownika)"
 
 #
 # File: ../src/inkscape-application.cpp, line: 605
 #: ../src/inkscape-application.cpp:605
 msgid "With graphical user interface (required by some actions/verbs)"
 msgstr ""
-"Z graficznym interfejsem użytkownika (wymaganym przez niektóre działania/"
-"opuźnienia)"
+"Z graficznym interfejsem użytkownika (wymaganym przez niektóre operacje/polecenia)"
 
 #
 # File: ../src/inkscape-application.cpp, line: 606
 #: ../src/inkscape-application.cpp:606
 msgid "Close GUI after executing all actions/verbs"
-msgstr "Zamknij GUI po wykonaniu wszystkich działań/opóźnień"
+msgstr "Zamknij GUI po wykonaniu wszystkich operacji/poleceń"
 
 #: ../src/inkscape-application.cpp:608
 msgid "Start Inkscape in interactive shell mode"
@@ -8879,11 +8876,11 @@ msgstr "Określ nazwę D-Bus; wartość domyślna to 'org. Inkscape '"
 
 #: ../src/inkscape-application.cpp:613
 msgid "BUS-NAME"
-msgstr "BUS-Nazwa"
+msgstr "BUS-NAZWA"
 
 #: ../src/inkscape.cpp:236
 msgid "Autosave failed! Cannot open directory %1."
-msgstr "AutoSave nie powiodło się! Nie można otworzyć katalogu %1."
+msgstr "Automatyczne zapisanie nie powiodło się! Nie można otworzyć katalogu %1."
 
 #: ../src/inkscape.cpp:253
 msgid "Autosaving documents..."
@@ -8891,7 +8888,7 @@ msgstr "Automatyczne zapisywanie dokumentów…"
 
 #: ../src/inkscape.cpp:320
 msgid "Autosave failed! Could not find inkscape extension to save document."
-msgstr "Nie można znaleźć rozszerzenia Inkscape'a do zapisu dokumentu"
+msgstr ""
 
 #: ../src/inkscape.cpp:323 ../src/inkscape.cpp:330
 #, c-format
@@ -19859,7 +19856,7 @@ msgstr "angielski/Kanada (en_CA)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:929
 msgid "English/Great Britain (en_GB)"
-msgstr "angielski/Wlk.Brytania (en_GB)"
+msgstr "angielski/Wlk. Brytania (en_GB)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:929
 msgid "Esperanto (eo)"
