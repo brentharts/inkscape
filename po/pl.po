@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: Inkscape 1.0\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
 "POT-Creation-Date: 2019-12-02 14:57+0100\n"
-"PO-Revision-Date: 2020-04-18 15:03+0200\n"
+"PO-Revision-Date: 2020-04-18 20:26+0200\n"
 "Last-Translator: Marcin Floryan\n"
 "Language-Team: Freelancer\n"
 "Language: pl_PL\n"
@@ -1270,9 +1270,8 @@ msgid "Gives a transparent engraving effect with rough line and filling"
 msgstr "Tworzy efekt przezroczystego grawerowania o nierównej linii i wypełnieniu"
 
 #: ../share/filters/filters.svg.h:498
-#, fuzzy
 msgid "Alpha Draw Liquid"
-msgstr "Płynny przezroczysty rysunek"
+msgstr ""
 
 #: ../share/filters/filters.svg.h:500
 msgid "Gives a transparent fluid drawing effect with rough line and filling"
@@ -1635,32 +1634,28 @@ msgid "Overlay with a small scale screen like noise"
 msgstr "Pokrywanie z ekranem w małej skali, takim jak szum"
 
 #: ../share/filters/filters.svg.h:670
-#, fuzzy
 msgid "Cross Noise Poster B"
-msgstr "Szum Poissona"
+msgstr ""
 
 #: ../share/filters/filters.svg.h:672
 msgid "Adds a small scale screen like noise locally"
 msgstr "Dodaje lokalnie ekran o małej skali, taki jak szum"
 
 #: ../share/filters/filters.svg.h:674
-#, fuzzy
 msgid "Poster Color Fun"
-msgstr "Wklej kolor"
+msgstr ""
 
 #: ../share/filters/filters.svg.h:678
-#, fuzzy
 msgid "Poster Rough"
-msgstr "Tynk"
+msgstr ""
 
 #: ../share/filters/filters.svg.h:680
 msgid "Adds roughness to one of the two channels of the Poster paint filter"
 msgstr "Dodaje chropowatość do jednego z dwóch kanałów filtra plakatu"
 
 #: ../share/filters/filters.svg.h:682
-#, fuzzy
 msgid "Alpha Monochrome Cracked"
-msgstr "Alfa monochromatyczne pęknięty"
+msgstr ""
 
 #: ../share/filters/filters.svg.h:684 ../share/filters/filters.svg.h:688
 #: ../share/filters/filters.svg.h:692 ../share/filters/filters.svg.h:704
@@ -1669,14 +1664,12 @@ msgid "Basic noise fill texture; adjust color in Flood"
 msgstr "Podstawowe wypełnienie szumem; dostosuj kolor w oknie Wypełnienie i kontur"
 
 #: ../share/filters/filters.svg.h:686
-#, fuzzy
 msgid "Alpha Turbulent"
-msgstr "Przemalowywanie alfa"
+msgstr ""
 
 #: ../share/filters/filters.svg.h:690
-#, fuzzy
 msgid "Colorize Turbulent"
-msgstr "Koloryzacja"
+msgstr ""
 
 #: ../share/filters/filters.svg.h:694
 msgid "Cross Noise B"
@@ -1699,24 +1692,20 @@ msgid "Duotone Turbulent"
 msgstr "Turbulencja dwutonowa"
 
 #: ../share/filters/filters.svg.h:706
-#, fuzzy
 msgid "Light Eraser Cracked"
-msgstr "Gumka światła"
+msgstr ""
 
 #: ../share/filters/filters.svg.h:710
-#, fuzzy
 msgid "Poster Turbulent"
-msgstr "Turbulencja"
+msgstr ""
 
 #: ../share/filters/filters.svg.h:714
-#, fuzzy
 msgid "Tartan Smart"
-msgstr "Szkocka krata"
+msgstr ""
 
 #: ../share/filters/filters.svg.h:716
-#, fuzzy
 msgid "Highly configurable checkered tartan pattern"
-msgstr "Wzór szkockiej kraty"
+msgstr ""
 
 #: ../share/filters/filters.svg.h:718
 msgid "Light Contour"
@@ -1931,14 +1920,12 @@ msgid "Create a semi transparent posterized image"
 msgstr "Tworzenie półprzezroczystego, posterowanego obrazu"
 
 #: ../share/filters/filters.svg.h:826
-#, fuzzy
 msgid "Trichrome"
-msgstr "Chrom"
+msgstr ""
 
 #: ../share/filters/filters.svg.h:828
-#, fuzzy
 msgid "Like Duochrome but with three colors"
-msgstr "Jak duochrome ale z trzema kolorami"
+msgstr ""
 
 #: ../share/filters/filters.svg.h:830
 msgid "Simulate CMY"
@@ -1976,7 +1963,7 @@ msgstr "Ostry, wielokrotny kontur obiektów"
 #: ../share/palettes/palettes.h:2
 msgctxt "Palette"
 msgid "Black"
-msgstr "Czarny"
+msgstr "czarny"
 
 #: ../share/palettes/palettes.h:3
 #, no-c-format
@@ -2053,22 +2040,22 @@ msgstr "2.5% szarości"
 #: ../share/palettes/palettes.h:15
 msgctxt "Palette"
 msgid "White"
-msgstr "Biały"
+msgstr "biały"
 
 #: ../share/palettes/palettes.h:16
 msgctxt "Palette"
 msgid "Maroon (#800000)"
-msgstr "Kasztanowy (#800000)"
+msgstr "kasztanowy (#800000)"
 
 #: ../share/palettes/palettes.h:17
 msgctxt "Palette"
 msgid "Red (#FF0000)"
-msgstr "Czerwony (#FF0000)"
+msgstr "czerwony (#FF0000)"
 
 #: ../share/palettes/palettes.h:18
 msgctxt "Palette"
 msgid "Olive (#808000)"
-msgstr "Oliwkowy (#808000)"
+msgstr "oliwkowy (#808000)"
 
 #: ../share/palettes/palettes.h:19
 msgctxt "Palette"
@@ -2078,7 +2065,7 @@ msgstr "żółty (#FFFF00)"
 #: ../share/palettes/palettes.h:20
 msgctxt "Palette"
 msgid "Green (#008000)"
-msgstr "Zielony (#008000)"
+msgstr "zielony (#008000)"
 
 #: ../share/palettes/palettes.h:21
 msgctxt "Palette"
@@ -2153,7 +2140,7 @@ msgstr "gainsboro (#DCDCDC)"
 #: ../share/palettes/palettes.h:35
 msgctxt "Palette"
 msgid "whitesmoke (#F5F5F5)"
-msgstr "białyDym (#F5F5F5)"
+msgstr "biały dym (#F5F5F5)"
 
 #: ../share/palettes/palettes.h:36
 msgctxt "Palette"
@@ -2183,7 +2170,7 @@ msgstr "cegła palona (#B22222)"
 #: ../share/palettes/palettes.h:41
 msgctxt "Palette"
 msgid "lightcoral (#F08080)"
-msgstr "jasny_koral (#F08080)"
+msgstr "jasny koral (#F08080)"
 
 #: ../share/palettes/palettes.h:42
 msgctxt "Palette"
@@ -2233,7 +2220,7 @@ msgstr "koralowy (#FF7F50)"
 #: ../share/palettes/palettes.h:51
 msgctxt "Palette"
 msgid "orangered (#FF4500)"
-msgstr "pomarańczowo czerwony  (#FF4500)"
+msgstr "pomarańczowo czerwony (#FF4500)"
 
 #: ../share/palettes/palettes.h:52
 msgctxt "Palette"
@@ -2318,7 +2305,7 @@ msgstr "blanszowany migdał (#FFEBCD)"
 #: ../share/palettes/palettes.h:68
 msgctxt "Palette"
 msgid "papayawhip (#FFEFD5)"
-msgstr "Papaja (#FFEFD5)"
+msgstr "papaja (#FFEFD5)"
 
 #: ../share/palettes/palettes.h:69
 msgctxt "Palette"
@@ -2333,7 +2320,7 @@ msgstr "pomarańczowy (#FFA500)"
 #: ../share/palettes/palettes.h:71
 msgctxt "Palette"
 msgid "wheat (#F5DEB3)"
-msgstr "Pszenica (#F5DEB3)"
+msgstr "pszenica (#F5DEB3)"
 
 #: ../share/palettes/palettes.h:72
 msgctxt "Palette"
@@ -2448,7 +2435,7 @@ msgstr "zielony trawnik (#7CFC00)"
 #: ../share/palettes/palettes.h:94
 msgctxt "Palette"
 msgid "darkseagreen (#8FBC8F)"
-msgstr "ciemna morska zieleń (#8FBC8F)"
+msgstr "ciemna zieleń morska (#8FBC8F)"
 
 #: ../share/palettes/palettes.h:95
 msgctxt "Palette"
@@ -2496,10 +2483,9 @@ msgid "seagreen (#2E8B57)"
 msgstr "morska zieleń (#2E8B57)"
 
 #: ../share/palettes/palettes.h:104
-#, fuzzy
 msgctxt "Palette"
 msgid "mediumseagreen (#3CB371)"
-msgstr "MediumSeaGreen (#3CB371)"
+msgstr "średni morski zielony (#3CB371)"
 
 #: ../share/palettes/palettes.h:105
 msgctxt "Palette"
@@ -2512,16 +2498,14 @@ msgid "mintcream (#F5FFFA)"
 msgstr "krem miętowy (#F5FFFA)"
 
 #: ../share/palettes/palettes.h:107
-#, fuzzy
 msgctxt "Palette"
 msgid "mediumspringgreen (#00FA9A)"
-msgstr "MediumSpringGreen (#00FA9A)"
+msgstr "ciemno wiosenny zielony (#00FA9A)"
 
 #: ../share/palettes/palettes.h:108
-#, fuzzy
 msgctxt "Palette"
 msgid "mediumaquamarine (#66CDAA)"
-msgstr "MediumAquamarine (#66CDAA)"
+msgstr "ciemno akwamaryn (#66CDAA)"
 
 #: ../share/palettes/palettes.h:109
 msgctxt "Palette"
@@ -2546,7 +2530,7 @@ msgstr "ciemno turkusowy (#48D1CC)"
 #: ../share/palettes/palettes.h:113
 msgctxt "Palette"
 msgid "darkslategray (#2F4F4F)"
-msgstr "Ciemny Łupkowy Szary(#2F4F4F)"
+msgstr "ciemny łupkowy szary(#2F4F4F)"
 
 #: ../share/palettes/palettes.h:114
 msgctxt "Palette"
@@ -2561,17 +2545,17 @@ msgstr "morski (#008080)"
 #: ../share/palettes/palettes.h:116
 msgctxt "Palette"
 msgid "darkcyan (#008B8B)"
-msgstr "Ciemno-błękitny (#008B8B)"
+msgstr "ciemno-błękitny (#008B8B)"
 
 #: ../share/palettes/palettes.h:117
 msgctxt "Palette"
 msgid "cyan (#00FFFF)"
-msgstr "Błękitny (#00FFFF)"
+msgstr "błękitny (#00FFFF)"
 
 #: ../share/palettes/palettes.h:118
 msgctxt "Palette"
 msgid "lightcyan (#E0FFFF)"
-msgstr "Jasno błękitny (#E0FFFF)"
+msgstr "jasnobłękitny (#E0FFFF)"
 
 #: ../share/palettes/palettes.h:119
 msgctxt "Palette"
@@ -2591,7 +2575,7 @@ msgstr "kadet niebieski(#5F9EA0)"
 #: ../share/palettes/palettes.h:122
 msgctxt "Palette"
 msgid "powderblue (#B0E0E6)"
-msgstr "Sproszkowany niebieski (#B0E0E6)"
+msgstr "pudrowy niebieski (#B0E0E6)"
 
 #: ../share/palettes/palettes.h:123
 msgctxt "Palette"
@@ -2601,17 +2585,17 @@ msgstr "jasnoniebieski (#ADD8E6)"
 #: ../share/palettes/palettes.h:124
 msgctxt "Palette"
 msgid "deepskyblue (#00BFFF)"
-msgstr "Głębokie niebieskie niebo (#00BFFF)"
+msgstr "głębokie niebieskie niebo (#00BFFF)"
 
 #: ../share/palettes/palettes.h:125
 msgctxt "Palette"
 msgid "skyblue (#87CEEB)"
-msgstr "Niebieskie niebo(#87CEEB)"
+msgstr "niebieskie niebo (#87CEEB)"
 
 #: ../share/palettes/palettes.h:126
 msgctxt "Palette"
 msgid "lightskyblue (#87CEFA)"
-msgstr "Jasne niebieskie niebo (#87CEFA)"
+msgstr "jasne niebieskie niebo (#87CEFA)"
 
 #: ../share/palettes/palettes.h:127
 msgctxt "Palette"
@@ -2621,31 +2605,27 @@ msgstr "stalowy błękit (#4682B4)"
 #: ../share/palettes/palettes.h:128
 msgctxt "Palette"
 msgid "aliceblue (#F0F8FF)"
-msgstr "NIebieski Alicji (#F0F8FF)"
+msgstr "niebieski Alicji (#F0F8FF)"
 
 #: ../share/palettes/palettes.h:129
-#, fuzzy
 msgctxt "Palette"
 msgid "dodgerblue (#1E90FF)"
-msgstr "DodgerBlue (#1E90FF)"
+msgstr "niebieski Dodgersów (#1E90FF)"
 
 #: ../share/palettes/palettes.h:130
-#, fuzzy
 msgctxt "Palette"
 msgid "slategray (#708090)"
-msgstr "SlateGray (#708090)"
+msgstr "szary łupek (#708090)"
 
 #: ../share/palettes/palettes.h:131
-#, fuzzy
 msgctxt "Palette"
 msgid "lightslategray (#778899)"
-msgstr "LightSlateGray (#778899)"
+msgstr "jasnoszary łupek (#778899)"
 
 #: ../share/palettes/palettes.h:132
-#, fuzzy
 msgctxt "Palette"
 msgid "lightsteelblue (#B0C4DE)"
-msgstr "LightSteelBlue (#B0C4DE)"
+msgstr "jasny stalowoniebieski (#B0C4DE)"
 
 #: ../share/palettes/palettes.h:133
 msgctxt "Palette"
@@ -2655,18 +2635,17 @@ msgstr "chaboniebieski (#6495ED)"
 #: ../share/palettes/palettes.h:134
 msgctxt "Palette"
 msgid "royalblue (#4169E1)"
-msgstr "Królewski niebieski(#4169E1)"
+msgstr "królewski niebieski(#4169E1)"
 
 #: ../share/palettes/palettes.h:135
-#, fuzzy
 msgctxt "Palette"
 msgid "midnightblue (#191970)"
-msgstr "MidnightBlue (#191970)"
+msgstr "błękit północy (#191970)"
 
 #: ../share/palettes/palettes.h:136
 msgctxt "Palette"
 msgid "lavender (#E6E6FA)"
-msgstr "Lawenda (#E6E6FA)"
+msgstr "lawendowy (#E6E6FA)"
 
 #: ../share/palettes/palettes.h:137
 msgctxt "Palette"
@@ -2696,24 +2675,22 @@ msgstr "biały duch (#F8F8FF)"
 #: ../share/palettes/palettes.h:142
 msgctxt "Palette"
 msgid "slateblue (#6A5ACD)"
-msgstr "Szaro niebieski (#6A5ACD)"
+msgstr "szaro-niebieski (#6A5ACD)"
 
 #: ../share/palettes/palettes.h:143
 msgctxt "Palette"
 msgid "darkslateblue (#483D8B)"
-msgstr "Ciemno szaro niebieski (#483D8B)"
+msgstr "ciemno szaro niebieski (#483D8B)"
 
 #: ../share/palettes/palettes.h:144
-#, fuzzy
 msgctxt "Palette"
 msgid "mediumslateblue (#7B68EE)"
-msgstr "MediumSlateBlue (#7B68EE)"
+msgstr "ciemny niebieski łupek (#7B68EE)"
 
 #: ../share/palettes/palettes.h:145
-#, fuzzy
 msgctxt "Palette"
 msgid "mediumpurple (#9370DB)"
-msgstr "MediumPurple (#9370DB)"
+msgstr "ciemny purpurowy (#9370DB)"
 
 #: ../share/palettes/palettes.h:146
 msgctxt "Palette"
@@ -2738,17 +2715,17 @@ msgstr "ciemnofioletowy (#9400D3)"
 #: ../share/palettes/palettes.h:150
 msgctxt "Palette"
 msgid "mediumorchid (#BA55D3)"
-msgstr "Soczysta orchidea(#BA55D3)"
+msgstr "soczysta orchidea(#BA55D3)"
 
 #: ../share/palettes/palettes.h:151
 msgctxt "Palette"
 msgid "thistle (#D8BFD8)"
-msgstr "Oset (#D8BFD8)"
+msgstr "oset (#D8BFD8)"
 
 #: ../share/palettes/palettes.h:152
 msgctxt "Palette"
 msgid "plum (#DDA0DD)"
-msgstr "Śliwka (#DDA0DD)"
+msgstr "śliwka (#DDA0DD)"
 
 #: ../share/palettes/palettes.h:153
 msgctxt "Palette"
@@ -2773,22 +2750,22 @@ msgstr "magenta (#FF00FF)"
 #: ../share/palettes/palettes.h:157
 msgctxt "Palette"
 msgid "orchid (#DA70D6)"
-msgstr "Orchidea (#DA70D6)"
+msgstr "orchidea (#DA70D6)"
 
 #: ../share/palettes/palettes.h:158
 msgctxt "Palette"
 msgid "mediumvioletred (#C71585)"
-msgstr "Ciemniejszy Fioletowy-Czerwony(#C71585)"
+msgstr "ciemniejszy fioletowo-czerwony (#C71585)"
 
 #: ../share/palettes/palettes.h:159
 msgctxt "Palette"
 msgid "deeppink (#FF1493)"
-msgstr "Głęboki różowy (#FF1493)"
+msgstr "głęboki różowy (#FF1493)"
 
 #: ../share/palettes/palettes.h:160
 msgctxt "Palette"
 msgid "hotpink (#FF69B4)"
-msgstr "Gorący różowy (#FF69B4)"
+msgstr "gorący różowy (#FF69B4)"
 
 #: ../share/palettes/palettes.h:161
 msgctxt "Palette"
@@ -2823,17 +2800,17 @@ msgstr "ciemny niebiesko-magneta(#663399)"
 #: ../share/palettes/palettes.h:167
 msgctxt "Palette"
 msgid "Butter 1"
-msgstr "Maślana 1"
+msgstr "Maślany 1"
 
 #: ../share/palettes/palettes.h:168
 msgctxt "Palette"
 msgid "Butter 2"
-msgstr "Maślana 2"
+msgstr "Maślany 2"
 
 #: ../share/palettes/palettes.h:169
 msgctxt "Palette"
 msgid "Butter 3"
-msgstr "Maślana 3"
+msgstr "Maślany 3"
 
 #: ../share/palettes/palettes.h:170
 msgctxt "Palette"
@@ -2963,7 +2940,7 @@ msgstr "Aluminium 6"
 #: ../share/palettes/palettes.h:195
 msgctxt "Palette"
 msgid "Jet Black"
-msgstr "Głęboka czerń"
+msgstr "głęboka czerń"
 
 #: ../share/paint/patterns.svg.h:1
 msgid "Stripes 1:1"
@@ -3153,7 +3130,7 @@ msgstr "Wymiana walut"
 #: ../share/symbols/symbols.h:9 ../share/symbols/symbols.h:10
 msgctxt "Symbol"
 msgid "Currency Exchange - Euro"
-msgstr "Wymiana walut-euro"
+msgstr "Wymiana walut - Euro"
 
 #: ../share/symbols/symbols.h:11 ../share/symbols/symbols.h:12
 msgctxt "Symbol"
