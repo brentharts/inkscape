@@ -5,7 +5,7 @@
 # Kjartan Maraas <kmaraas@online.no>, 2000.
 # Rune Rønde Laursen <runerl@skjoldhoej.dk>, 2006.
 # scootergrisen, 2015-2016, 2020.
-# David Møller <some@kanute.dk, 2020.
+# David Møller <some@kanute.dk>, 2020.
 #
 msgid ""
 msgstr ""
