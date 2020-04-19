@@ -1665,7 +1665,6 @@ static void sp_text_context_update_cursor(TextTool *tc,  bool scroll_to_see)
                     scroll = false;
                 }
             }
-            std::cout << "Scroll: " << std::boolalpha << scroll << std::endl;
 
             if (scroll) {
                 Geom::Point const center = SP_EVENT_CONTEXT(tc)->desktop->current_center();
