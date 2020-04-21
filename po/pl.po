@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: Inkscape 1.0\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
 "POT-Creation-Date: 2019-12-02 14:57+0100\n"
-"PO-Revision-Date: 2020-04-21 20:20+0200\n"
+"PO-Revision-Date: 2020-04-21 22:06+0200\n"
 "Last-Translator: Marcin Floryan\n"
 "Language-Team: Freelancer\n"
 "Language: pl_PL\n"
@@ -1271,7 +1271,7 @@ msgstr "Tworzy efekt przezroczystego grawerowania o nierównej linii i wypełnie
 
 #: ../share/filters/filters.svg.h:498
 msgid "Alpha Draw Liquid"
-msgstr ""
+msgstr "Płynne rysowanie alfa"
 
 #: ../share/filters/filters.svg.h:500
 msgid "Gives a transparent fluid drawing effect with rough line and filling"
@@ -1643,11 +1643,11 @@ msgstr "Dodaje lokalnie ekran o małej skali, taki jak szum"
 
 #: ../share/filters/filters.svg.h:674
 msgid "Poster Color Fun"
-msgstr ""
+msgstr "Zabawny kolorowy plakat"
 
 #: ../share/filters/filters.svg.h:678
 msgid "Poster Rough"
-msgstr ""
+msgstr "Chropowaty plakat"
 
 #: ../share/filters/filters.svg.h:680
 msgid "Adds roughness to one of the two channels of the Poster paint filter"
@@ -1697,7 +1697,7 @@ msgstr "Delikatna gumka spękana"
 
 #: ../share/filters/filters.svg.h:710
 msgid "Poster Turbulent"
-msgstr ""
+msgstr "Burzliwy plakat"
 
 #: ../share/filters/filters.svg.h:714
 msgid "Tartan Smart"
@@ -7100,7 +7100,7 @@ msgstr "Szerokość linii:"
 
 #: ../src/extension/internal/filter/paint.h:606
 msgid "Posterize and draw smooth lines around color shapes"
-msgstr ""
+msgstr "Posteryzuje i rysuje gładkie linie dookoła kolorowych kształtów"
 
 #: ../src/extension/internal/filter/paint.h:688
 msgid "Point Engraving"
@@ -7164,7 +7164,7 @@ msgstr "Symuluj wygładzanie"
 
 #: ../src/extension/internal/filter/paint.h:881
 msgid "Poster and painting effects"
-msgstr ""
+msgstr "Efekty plakatu i farby"
 
 #: ../src/extension/internal/filter/paint.h:974
 msgid "Posterize Basic"
@@ -8240,26 +8240,23 @@ msgstr "Kopiuj"
 
 #: ../src/filter-enums.cpp:98
 msgid "Destination"
-msgstr "Miejsce docelowe"
+msgstr "Cel"
 
 #: ../src/filter-enums.cpp:99
 msgid "Destination Over"
-msgstr "Cel podróży"
+msgstr "Cel na górze"
 
 #: ../src/filter-enums.cpp:100
-#, fuzzy
 msgid "Destination In"
-msgstr "Miejsce docelowe w"
+msgstr "Cel uzwględniony"
 
 #: ../src/filter-enums.cpp:101
-#, fuzzy
 msgid "Destination Out"
-msgstr "Miejsce docelowe"
+msgstr "Cel wyłączony"
 
 #: ../src/filter-enums.cpp:102
-#, fuzzy
 msgid "Destination Atop"
-msgstr "Miejsce docelowe"
+msgstr "Cel ignorowany"
 
 #: ../src/filter-enums.cpp:103
 msgid "Lighter"
@@ -8863,6 +8860,8 @@ msgstr "Automatyczne zapisywanie dokumentów…"
 #: ../src/inkscape.cpp:320
 msgid "Autosave failed! Could not find inkscape extension to save document."
 msgstr ""
+"Automatyczne zapisane nie powiodło się. Nie można było odnaleźć rozszerzenie "
+"Inkscape'a aby zapisać dokument."
 
 #: ../src/inkscape.cpp:323 ../src/inkscape.cpp:330
 #, c-format
@@ -9362,10 +9361,8 @@ msgstr ""
 "wieloma innymi opcjami konfiguracji"
 
 #: ../src/live_effects/effect.cpp:571
-#, fuzzy
-#| msgid "Fillet/Chamfer"
 msgid "Corners (Fillet/Chamfer)"
-msgstr "Zaokrąglenie/sfazowanie"
+msgstr "Narożniki (Zaokrąglenie/sfazowanie)"
 
 #: ../src/live_effects/effect.cpp:575
 msgid ""
@@ -9835,30 +9832,24 @@ msgid "Boolean Operation"
 msgstr "Operacje Boolowskie"
 
 #: ../src/live_effects/lpe-bool.cpp:75
-#, fuzzy
-#| msgid "Swap operands:"
 msgid "Swap operands"
-msgstr "Zamień operandy:"
+msgstr "Zamień operandy"
 
 #: ../src/live_effects/lpe-bool.cpp:75
 msgid "Swap operands (useful e.g. for difference)"
 msgstr "Zamiana operandów (przydatna np. dla różnicy)"
 
 #: ../src/live_effects/lpe-bool.cpp:76
-#, fuzzy
-#| msgid "Hide Linked:"
 msgid "Hide Linked"
-msgstr "Ukryj połączone:"
+msgstr "Ukryj połączone"
 
 #: ../src/live_effects/lpe-bool.cpp:76
 msgid "Hide linked path"
 msgstr "Ukryj połączoną ścieżkę"
 
 #: ../src/live_effects/lpe-bool.cpp:78
-#, fuzzy
-#| msgid "Remove inner:"
 msgid "Remove inner"
-msgstr "Usuń wewnętrzną:"
+msgstr "Usuń wewnętrzną"
 
 #: ../src/live_effects/lpe-bool.cpp:79
 msgid ""
@@ -10640,27 +10631,23 @@ msgstr ""
 
 #: ../src/live_effects/lpe-interpolate_points.cpp:26
 #: ../src/live_effects/lpe-powerstroke.cpp:131
-#, fuzzy
 msgid "CubicBezierFit"
-msgstr "Krzywa Beziera"
+msgstr "Dopasowana Krzywa Béziera"
 
 #: ../src/live_effects/lpe-interpolate_points.cpp:27
 #: ../src/live_effects/lpe-powerstroke.cpp:132
-#, fuzzy
 msgid "CubicBezierJohan"
-msgstr "Kolejka linowa CubicBezierJohan"
+msgstr "Krzywa Béziera Johana"
 
 #: ../src/live_effects/lpe-interpolate_points.cpp:28
 #: ../src/live_effects/lpe-powerstroke.cpp:133
-#, fuzzy
 msgid "SpiroInterpolator"
-msgstr "Interpolacja"
+msgstr "Interpolacja Krzywej Spiro"
 
 #: ../src/live_effects/lpe-interpolate_points.cpp:29
 #: ../src/live_effects/lpe-powerstroke.cpp:134
-#, fuzzy
 msgid "Centripetal Catmull-Rom"
-msgstr "Centripetal Catmull-ROM"
+msgstr "Centripetal Catmull–Rom"
 
 #: ../src/live_effects/lpe-interpolate_points.cpp:37
 #: ../src/live_effects/lpe-powerstroke.cpp:160
@@ -12204,9 +12191,8 @@ msgstr ""
 "1=domyślne"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:226
-#, fuzzy
 msgid "Magnitude jitter: 1st side:"
-msgstr "Wielkość wahnięcia: 1. strona"
+msgstr "Wielkość wahnięcia: 1. strona:"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:226
 msgid "Randomly moves 'bottom' half-turns to produce magnitude variations."
@@ -12223,9 +12209,8 @@ msgid "Randomly moves 'top' half-turns to produce magnitude variations."
 msgstr "Losowe ruchy „góry” półobrotów wytwarzające amplitudę drgań."
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:228
-#, fuzzy
 msgid "Parallelism jitter: 1st side:"
-msgstr "Równoległość wahnięć: 1. strona"
+msgstr "Równoległość wahnięć: 1. strona:"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:228
 msgid ""
@@ -12404,7 +12389,7 @@ msgstr "<b>Jitter węzłów</b> Przenieś węzły/uchwyty"
 
 #: ../src/live_effects/lpe-roughen.cpp:138
 msgid "<b>Extra roughen</b> Add a extra layer of rough"
-msgstr "<b>Ekstra chropowat</b> Dodaj dodatkową warstwę surowca"
+msgstr "<b>Ekstra chropowatoś</b> Dodaj dodatkową warstwę surowca"
 
 #: ../src/live_effects/lpe-roughen.cpp:147
 msgid "<b>Options</b> Modify options to rough"
@@ -13668,16 +13653,12 @@ msgid "The file %s is not a valid Inkscape preferences file."
 msgstr "Plik %s nie jest poprawnym plikiem ustawień Inkscape'a."
 
 #: ../src/preferences.cpp:282
-#, fuzzy
-#| msgid "Preferences file was deleted."
 msgid "Preferences file was backed up to"
-msgstr "Plik preferencji został usunięty."
+msgstr "Plik preferencji został zarchiwizowany do"
 
 #: ../src/preferences.cpp:283
-#, fuzzy
-#| msgid "There was an error trying to delete the preferences file."
 msgid "There was an error trying to reset the preferences file."
-msgstr "Wystąpił błąd podczas próby usunięcia pliku preferencji."
+msgstr "Wystąpił błąd podczas próby wyzerowania pliku preferencji."
 
 #: ../src/rdf.cpp:178
 msgid "CC Attribution"
@@ -18365,10 +18346,8 @@ msgid "Javanese"
 msgstr "Jawajski"
 
 #: ../src/ui/dialog/glyphs.cpp:141
-#, fuzzy
-#| msgid "Kaithi."
 msgid "Kaithi"
-msgstr "Kaithi."
+msgstr "Kaithi"
 
 #: ../src/ui/dialog/glyphs.cpp:142 ../src/ui/dialog/glyphs.cpp:343
 msgid "Lisu"
@@ -18460,7 +18439,7 @@ msgstr "Grantha"
 
 #: ../src/ui/dialog/glyphs.cpp:164
 msgid "Khojki"
-msgstr ""
+msgstr "Khojki"
 
 #: ../src/ui/dialog/glyphs.cpp:165
 msgid "Khudawadi, Sindhi"
@@ -23104,10 +23083,8 @@ msgid "Set object opacity"
 msgstr "Ustawianie przezroczystości obiektu"
 
 #: ../src/ui/dialog/objects.cpp:1702
-#, fuzzy
-#| msgid "Set object description"
 msgid "Set object isolation"
-msgstr "Wprowadź opis obiektu: "
+msgstr "Ustawienie izolacji obiektu"
 
 #: ../src/ui/dialog/objects.cpp:1733
 msgid "Set object blend mode"
@@ -23513,9 +23490,8 @@ msgid "Font Attributes"
 msgstr "Atrybuty czcionek"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:457
-#, fuzzy
 msgid "Horiz. Advance X"
-msgstr "Horiz. Advance X"
+msgstr "Poziomy postęp X"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:457
 msgid "Average amount of horizontal space each letter takes up."
@@ -23523,21 +23499,19 @@ msgstr "Średnia ilość miejsca w poziomie każda litera zajmuje."
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:458
 msgid "Horiz. Origin X"
-msgstr "Horiz. Początek X"
+msgstr "Poziomy początek X"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:458
-#, fuzzy
 msgid "Average horizontal origin location for each letter."
-msgstr "Obrót będzie realizowany w co drugim wierszu"
+msgstr "Średnie położenie poziome początku każdej litery."
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:459
 msgid "Horiz. Origin Y"
-msgstr "Horiz. Początek Y"
+msgstr "Poziomy początek Y"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:459
-#, fuzzy
 msgid "Average vertical origin location for each letter."
-msgstr "Obrót będzie realizowany w co drugim wierszu"
+msgstr "Średnie położenie pionowe początku każdej litery."
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:460
 msgid "Font Face Attributes"
@@ -23555,9 +23529,8 @@ msgstr ""
 "właściwości."
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:462
-#, fuzzy
 msgid "Units per em"
-msgstr "Miesięcy w wierszu:"
+msgstr "Jednostek na em"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:462
 msgid "Number of display units each letter takes up."
@@ -24734,28 +24707,24 @@ msgid "Ctrl, Alt"
 msgstr "Ctrl, Alt"
 
 #: ../src/ui/tool/node.cpp:611
-#, fuzzy, c-format
-#| msgctxt "Path node tip"
-#| msgid ""
-#| "<b>%s</b>: drag to shape the path, click to select only this node (more: "
-#| "Shift, Ctrl, Alt)"
+#, c-format
 msgctxt "Path handle tip"
 msgid ""
 "<b>%s</b>: drag to shape the path, hover to lock, Shift+S to make smooth, Shift+Y "
 "to make symmetric. (more: %s)"
 msgstr ""
-"<b>%s</b>: ciągnij, by kształować ścieżkę, kliknij, by zaznaczyć dany węzeł "
-"(więcej z: Shift, Ctrl, Alt)"
+"<b>%s</b>: ciągnij, by kształtować ścieżkę, zatrzymaj aby zablokować, Shift+S "
+"wygładź, Shift+Y symetryczna (więcej: %s)"
 
 #: ../src/ui/tool/node.cpp:621
-#, fuzzy, c-format
-#| msgctxt "Path node tip"
-#| msgid "<b>%s</b>: drag to shape the path (more: Shift, Ctrl, Alt)"
+#, c-format
 msgctxt "Path handle tip"
 msgid ""
 "<b>%s</b>: drag to shape the path, hover to lock, Shift+Y to make symmetric. "
 "(more: %s)"
-msgstr "<b>%s</b>: ciągnij, by kształować ścieżkę (więcej z: Shift, Ctrl, Alt)"
+msgstr ""
+"<b>%s</b>: ciągnij, by kształtować ścieżkę, zatrzymaj aby zablokować, Shift+Y "
+"symetryczna (więcej: %s)"
 
 #: ../src/ui/tool/node.cpp:630
 #, c-format
@@ -24766,12 +24735,10 @@ msgid ""
 msgstr ""
 
 #: ../src/ui/tool/node.cpp:639
-#, fuzzy, c-format
-#| msgctxt "Path node tip"
-#| msgid "<b>%s</b>: drag to shape the path (more: Shift, Ctrl, Alt)"
+#, c-format
 msgctxt "Path handle tip"
 msgid "<b>%s</b>: drag to shape the path. (more: %s)"
-msgstr "<b>%s</b>: ciągnij, by kształować ścieżkę (więcej z: Shift, Ctrl, Alt)"
+msgstr "<b>%s</b>: ciągnij, by kształtować ścieżkę. (more: %s)"
 
 #
 # File: ../src/ui/tool/node.cpp, line: 656
@@ -24828,57 +24795,49 @@ msgid "<b>Alt</b>: sculpt nodes"
 msgstr "<b>Alt</b>: doskonalenie węzłów"
 
 #: ../src/ui/tool/node.cpp:1562
-#, fuzzy, c-format
-#| msgctxt "Path node tip"
-#| msgid "<b>%s</b>: drag to shape the path (more: Shift, Ctrl, Alt)"
+#, c-format
 msgctxt "Path node tip"
 msgid "<b>%s</b>: drag to shape the path. (more: Shift, Ctrl, Alt)"
-msgstr "<b>%s</b>: ciągnij, by kształować ścieżkę (więcej z: Shift, Ctrl, Alt)"
+msgstr "<b>%s</b>: ciągnij, by kształtować ścieżkę (więcej z: Shift, Ctrl, Alt)"
 
 #: ../src/ui/tool/node.cpp:1569
-#, fuzzy, c-format
+#, c-format
 msgctxt "Path node tip"
 msgid ""
 "<b>BSpline node</b> (%.3g power): drag to shape the path. (more: Shift, Ctrl, Alt)"
-msgstr "<b>%s</b>: ciągnij, by kształować ścieżkę (więcej z: Shift, Ctrl, Alt)"
+msgstr ""
+"<b>Węzeł BSpline</b>: (moc %.3g): ciągnij, by kształtować ścieżkę (więcej z: "
+"Shift, Ctrl, Alt)"
 
 #: ../src/ui/tool/node.cpp:1577
-#, fuzzy, c-format
-#| msgctxt "Path node tip"
-#| msgid ""
-#| "<b>%s</b>: drag to shape the path, click to toggle scale/rotation handles "
-#| "(more: Shift, Ctrl, Alt)"
+#, c-format
 msgctxt "Path node tip"
 msgid ""
 "<b>%s</b>: drag to shape the path, click to toggle scale/rotation handles. (more: "
 "Shift, Ctrl, Alt)"
 msgstr ""
-"<b>%s</b>: ciągnij, by kształować ścieżkę, kliknij, by przełączyć uchwyty skali/"
+"<b>%s</b>: ciągnij, by kształtować ścieżkę, kliknij, by przełączyć uchwyty skali/"
 "rotacji (więcej z: Shift, Ctrl, Alt)"
 
 #: ../src/ui/tool/node.cpp:1586
-#, fuzzy, c-format
-#| msgctxt "Path node tip"
-#| msgid ""
-#| "<b>%s</b>: drag to shape the path, click to select only this node (more: "
-#| "Shift, Ctrl, Alt)"
+#, c-format
 msgctxt "Path node tip"
 msgid ""
 "<b>%s</b>: drag to shape the path, click to select only this node. (more: Shift, "
 "Ctrl, Alt)"
 msgstr ""
-"<b>%s</b>: ciągnij, by kształować ścieżkę, kliknij, by zaznaczyć dany węzeł "
+"<b>%s</b>: ciągnij, by kształtować ścieżkę, kliknij, by zaznaczyć dany węzeł "
 "(więcej z: Shift, Ctrl, Alt)"
 
 #: ../src/ui/tool/node.cpp:1594
-#, fuzzy, c-format
+#, c-format
 msgctxt "Path node tip"
 msgid ""
 "<b>BSpline node</b> (%.3g power): drag to shape the path, click to select only "
 "this node. (more: Shift, Ctrl, Alt)"
 msgstr ""
-"<b>%s</b>: ciągnij, by kształować ścieżkę, kliknij, by zaznaczyć dany węzeł "
-"(więcej z: Shift, Ctrl, Alt)"
+"<b>węzeł BSpline</b> (moc %.3g): ciągnij, by kształtować ścieżkę, kliknij, by "
+"zaznaczyć dany węzeł (więcej z: Shift, Ctrl, Alt)"
 
 #: ../src/ui/tool/node.cpp:1613
 #, c-format
@@ -28210,10 +28169,8 @@ msgstr[1] "<b>% u wybranego węzła% u</b> ."
 msgstr[2] "<b>% u wybranego węzła% u</b> ."
 
 #: ../src/ui/tools/node-tool.cpp:709
-#, fuzzy
-#| msgid "Angle (°):"
 msgid "Angle: %1°."
-msgstr "Kąt (°):"
+msgstr "Kąt: %1°."
 
 #: ../src/ui/tools/node-tool.cpp:716
 #, c-format
@@ -29273,19 +29230,16 @@ msgid "All small-caps (uppercase and lowercase). OpenType tables: 'c2sc' and 'sm
 msgstr "Wszystkie kapitaliki (wielkie i małe). Tabele OpenType: \"c2sc\" i \"SMCP\""
 
 #: ../src/ui/widget/font-variants.cpp:307
-#, fuzzy
 msgid "Petite-caps (lowercase). OpenType table: 'pcap'"
 msgstr "Petite-CAPS (małe litery). Tabela OpenType: \"PCAP\""
 
 #: ../src/ui/widget/font-variants.cpp:308
-#, fuzzy
 msgid ""
 "All petite-caps (uppercase and lowercase). OpenType tables: 'c2sc' and 'pcap'"
 msgstr ""
 "Wszystkie drobne wersaliki (wielkie i małe). Tabele OpenType: \"c2sc\" i \"PCAP\""
 
 #: ../src/ui/widget/font-variants.cpp:309
-#, fuzzy
 msgid ""
 "Unicase (small caps for uppercase, normal for lowercase). OpenType table: 'unic'"
 msgstr ""
@@ -29293,21 +29247,19 @@ msgstr ""
 "OpenType: \"Unic\""
 
 #: ../src/ui/widget/font-variants.cpp:310
-#, fuzzy
 msgid ""
 "Titling caps (lighter-weight uppercase for use in titles). OpenType table: 'titl'"
 msgstr ""
-"Czapki tytułowe (lekkie wielkie litery do użycia w tytułami). Tabela OpenType: "
-"'titl '"
+"Czapki tytułowe (lekkie wielkie litery, używane w tytułach). Tabela OpenType: "
+"\"titl\""
 
 #: ../src/ui/widget/font-variants.cpp:350
 msgid "Normal style."
 msgstr "Normalny styl."
 
 #: ../src/ui/widget/font-variants.cpp:351
-#, fuzzy
 msgid "Lining numerals. OpenType table: 'lnum'"
-msgstr "Podszewka cyfry. Tabela OpenType: \"LNum\""
+msgstr "Wyrównane cyfry. Tabela OpenType: \"LNum\""
 
 #: ../src/ui/widget/font-variants.cpp:352
 msgid "Old style numerals. OpenType table: 'onum'"
@@ -29318,9 +29270,8 @@ msgid "Normal widths."
 msgstr "Normalne szerokości."
 
 #: ../src/ui/widget/font-variants.cpp:354
-#, fuzzy
 msgid "Proportional width numerals. OpenType table: 'pnum'"
-msgstr "Proporcjonalna Szerokość cyfr. Tabela OpenType: \"PNUM\""
+msgstr "Cyfry proporcjonalnej szerokości. Tabela OpenType: \"PNUM\""
 
 #: ../src/ui/widget/font-variants.cpp:355
 msgid "Same width numerals. OpenType table: 'tnum'"
@@ -29433,10 +29384,8 @@ msgid "Change opacity"
 msgstr "Zmień krycie"
 
 #: ../src/ui/widget/object-composite-settings.cpp:206
-#, fuzzy
-#| msgid "Change color definition"
 msgid "Change isolation"
-msgstr "Zmień określenie koloru"
+msgstr "Zmień izolację"
 
 #: ../src/ui/widget/page-sizer.cpp:44
 msgid "U_nits:"
@@ -33238,9 +33187,8 @@ msgid "Avoid single disconnected pixels"
 msgstr "Unikaj pojedynczych odłączonych pikseli"
 
 #: ../share/ui/dialog-trace.glade:733
-#, fuzzy
 msgid "Islands (weight)"
-msgstr "Wysokość kodu kreskowego:"
+msgstr "Wyspy (zakres)"
 
 #: ../share/ui/dialog-trace.glade:744 ../share/ui/dialog-trace.glade:757
 msgid "Favors connections that are part of foreground color"
@@ -33263,9 +33211,8 @@ msgstr ""
 "mnożnik"
 
 #: ../share/ui/dialog-trace.glade:770 ../share/ui/dialog-trace.glade:813
-#, fuzzy
 msgid "The heuristic computed vote will be multiplied by this value"
-msgstr "Głosowanie obliczane heurystyczne zostanie pomnożone przez tę wartość"
+msgstr "Wynik obliczonej heurystyki zostanie pomnożony przez tą wartość"
 
 #: ../share/ui/dialog-trace.glade:785
 msgid "A constant vote value"
@@ -33288,18 +33235,16 @@ msgid "Voronoi"
 msgstr "Voronoi"
 
 #: ../share/ui/dialog-trace.glade:854
-#, fuzzy
 msgid "Output composed of straight lines"
-msgstr "Wyjście składające się z linii prostych"
+msgstr "Wynik złożony z linii prostych"
 
 #: ../share/ui/dialog-trace.glade:867
 msgid "B-splines"
 msgstr "B-splajny"
 
 #: ../share/ui/dialog-trace.glade:871
-#, fuzzy
 msgid "Preserve staircasing artifacts"
-msgstr "Zachowaj artefakty klatki schodowe"
+msgstr "Zachowaj artefakty schodowe"
 
 #: ../share/ui/dialog-trace.glade:893
 msgid "Pixel art"
@@ -33384,12 +33329,8 @@ msgstr ""
 "na rysunku brakuje pewnej zawartości."
 
 #: ../share/extensions/hpgl_output.py:54
-#, fuzzy
-#| msgid "No paths where found. Please convert objects you want into paths."
 msgid "No paths were found. Please convert objects you want into paths."
-msgstr ""
-"Brak ścieżek w miejscu szukania. Należy przekonwertować obiekty, które chcesz na "
-"ścieżki."
+msgstr "Nie znaleziono żadnych ścieżek. Przekonwertuj wybrane obiekty na ścieżki."
 
 #: ../share/extensions/inkex/bezier.py:406
 msgid "Area is zero, cannot calculate Center of Mass"
@@ -33609,7 +33550,7 @@ msgstr ""
 #: ../share/extensions/jessyInk_autoTexts.py:43
 #, python-brace-format
 msgid "Text Element '{0}' is not suitable."
-msgstr ""
+msgstr "Element tekstu '{0}' nie jest odpowiedni."
 
 #: ../share/extensions/jessyInk_effects.py:42
 msgid ""
@@ -33776,14 +33717,12 @@ msgid "unable to locate marker: %s"
 msgstr "nie można zlokalizować znacznika: %s"
 
 #: ../share/extensions/path_envelope.py:29
-#, fuzzy
-#| msgid "You must select at least two elements."
 msgid "You must select two paths only."
-msgstr "Musisz zaznaczyć przynajmniej dwa elementy."
+msgstr "Należy wybrać tylko dwie ścieżki."
 
 #: ../share/extensions/path_envelope.py:39
 msgid "Selected path is too short. Must be four or more nodes."
-msgstr ""
+msgstr "Wybrana ścieżka jest zbyt krótka, musi posiadać co najmniej cztery węzły."
 
 #: ../share/extensions/pathalongpath.py:191 ../share/extensions/pathscatter.py:190
 #: ../share/extensions/perspective.py:47
@@ -33845,10 +33784,8 @@ msgstr ""
 "Spróbuj zastosować procedurę Ścieżka » Obiekt w ścieżkę."
 
 #: ../share/extensions/plotter.py:66
-#, fuzzy
-#| msgid "No paths where found. Please convert objects into paths."
 msgid "No paths where found. Please convert objects to paths."
-msgstr "Brak ścieżek, gdzie znaleziono. Proszę konwertować obiekty na ścieżki."
+msgstr "Nie znaleziono ścieżek. Należy najpierw zamienić obiekty na ścieżki."
 
 #: ../share/extensions/polyhedron_3d.py:371
 msgid "No face data found in specified file."
@@ -35351,9 +35288,8 @@ msgstr "Ścieżka według ścieżki"
 #: ../share/extensions/gcodetools_area.inx:54
 #: ../share/extensions/gcodetools_lathe.inx:34
 #: ../share/extensions/gcodetools_path_to_gcode.inx:14
-#, fuzzy
 msgid "Pass by Pass"
-msgstr "Przełęcz przez przełęcz"
+msgstr "Przejście według przejścia"
 
 #: ../share/extensions/gcodetools_area.inx:57
 #: ../share/extensions/gcodetools_lathe.inx:37
@@ -35830,7 +35766,6 @@ msgstr "Tokarka"
 
 #: ../share/extensions/gcodetools_lathe.inx:9
 #: ../share/extensions/gcodetools_lathe.inx:24
-#, fuzzy
 msgid "Lathe width:"
 msgstr "Określ szerokość:"
 
@@ -35966,9 +35901,8 @@ msgid "Prepare path for plasma or laser cutters"
 msgstr "Przygotuj ścieżkę do wycinarek plazmowych lub laserowych"
 
 #: ../share/extensions/gcodetools_prepare_path_for_plasma.inx:9
-#, fuzzy
 msgid "Create in-out paths"
-msgstr "Tworzy ścieżkę Spiro"
+msgstr "Tworzy ścieżki in-out."
 
 #: ../share/extensions/gcodetools_prepare_path_for_plasma.inx:10
 msgid "In-out path length:"
@@ -36235,12 +36169,11 @@ msgstr "Odstępy między podziałami głównymi X:"
 
 #: ../share/extensions/grid_cartesian.inx:17
 msgid "Major X Division Spacing Unit:"
-msgstr "Główne rozmieszczenie dywizji X:"
+msgstr "Jednostka odstępów między podziałami głównymi X:"
 
 #: ../share/extensions/grid_cartesian.inx:23
-#, fuzzy
 msgid "Subdivisions per Major X Division:"
-msgstr "Podział głównych oczek siatki w osi X"
+msgstr "Liczba dodatkowych podziałów pomiędzy podziałami głównymi X:"
 
 #: ../share/extensions/grid_cartesian.inx:24
 msgid "Logarithmic X Subdiv. (Base given by entry above)"
@@ -36248,9 +36181,8 @@ msgstr ""
 "Logarytmiczny podział oczek siatki w osi X. (Podstawa logarytmu podana powyżej)"
 
 #: ../share/extensions/grid_cartesian.inx:25
-#, fuzzy
 msgid "Subsubdivs. per X Subdivision:"
-msgstr "Dalszy podział oczek siatki w osi X"
+msgstr "Dalszy podział oczek siatki w osi X:"
 
 #: ../share/extensions/grid_cartesian.inx:26
 msgid "Halve X Subsubdiv. Frequency after 'n' Subdivs. (log only):"
@@ -36289,9 +36221,8 @@ msgid "Major Y Division Spacing Unit:"
 msgstr "Jednostka podziału głównych Y:"
 
 #: ../share/extensions/grid_cartesian.inx:46
-#, fuzzy
 msgid "Subdivisions per Major Y Division:"
-msgstr "Podział głównych oczek siatki w osi Y"
+msgstr "Liczba dodatkowych podziałów pomiędzy podziałami głównymi Y:"
 
 #: ../share/extensions/grid_cartesian.inx:47
 msgid "Logarithmic Y Subdiv. (Base given by entry above)"
@@ -36299,24 +36230,20 @@ msgstr ""
 "Logarytmiczny podział oczek siatki w osi Y. (Podstawa logarytmu podana powyżej)"
 
 #: ../share/extensions/grid_cartesian.inx:48
-#, fuzzy
 msgid "Subsubdivs. per Y Subdivision:"
-msgstr "Dalszy podział oczek siatki w osi Y"
+msgstr "Dalszy podział oczek siatki w osi Y:"
 
 #: ../share/extensions/grid_cartesian.inx:49
-#, fuzzy
 msgid "Halve Y Subsubdiv. Frequency after 'n' Subdivs. (log only):"
-msgstr "Połowa subsubpodziału Y. Częstotliwość po „n” subpodziałach. (tylko log)"
+msgstr ""
 
 #: ../share/extensions/grid_cartesian.inx:50
-#, fuzzy
 msgid "Major Y Division Thickness:"
-msgstr "Grubość głównych linii siatki w osi Y (px)"
+msgstr "Grubość głównych podziałów w osi Y:"
 
 #: ../share/extensions/grid_cartesian.inx:51
-#, fuzzy
 msgid "Minor Y Division Thickness:"
-msgstr "Grubość drugorzędnych linii siatki w osi Y (px)"
+msgstr "Grubość drugorzędnych podziałów w osi Y:"
 
 #: ../share/extensions/grid_cartesian.inx:52
 msgid "Subminor Y Division Thickness:"
@@ -36435,11 +36362,8 @@ msgid "Subdivisions per Major Angular Division:"
 msgstr "Podział na główne podziały kątowe:"
 
 #: ../share/extensions/grid_polar.inx:26
-#, fuzzy
 msgid "Minor Angle Division End 'n' Divs. Before Centre:"
 msgstr ""
-"Dalsze podziały głównych podziałów kołowych niewidoczne dla podanej liczby "
-"podziałów od środka"
 
 #: ../share/extensions/grid_polar.inx:27
 msgid "Major Angular Division Thickness (px):"
@@ -36564,7 +36488,6 @@ msgid "Draw Handles"
 msgstr "Rysuj uchwyty"
 
 #: ../share/extensions/hershey.inx:3
-#, fuzzy
 msgid "Hershey Text"
 msgstr "Hershey tekst"
 
@@ -36579,13 +36502,6 @@ msgstr ""
 "Hershey tekst (pismo odręczne)\n"
 
 #: ../share/extensions/hershey.inx:13
-#, fuzzy
-#| msgid ""
-#| "A tool to replace text with stroke fonts\n"
-#| "\n"
-#| "Version 3.0.1, 2019-07-05\n"
-#| "\n"
-#| "\n"
 msgid ""
 "A tool to replace text with stroke fonts\n"
 "\n"
@@ -36595,7 +36511,7 @@ msgid ""
 msgstr ""
 "Narzędzie do zastępowania tekstu czcionkami pociągnięć\n"
 "\n"
-"Wersja 3.0.1, 2019-07-05\n"
+"Wersja 3.0.3, 2019-11-11\n"
 "\n"
 "\n"
 
@@ -36604,94 +36520,79 @@ msgid "Font face:"
 msgstr "Krój czcionki"
 
 #: ../share/extensions/hershey.inx:21
-#, fuzzy
 msgid "Hershey Sans 1-stroke"
-msgstr "Nie określono konturu"
+msgstr "Hershey Sans 1-pociągnięcie"
 
 #
 # File: ../share/extensions/hershey.inx, line: 25
 #: ../share/extensions/hershey.inx:22
-#, fuzzy
 msgid "Hershey Sans medium"
 msgstr "Hershey Sans medium"
 
 #: ../share/extensions/hershey.inx:24
-#, fuzzy
 msgid "Hershey Serif medium"
-msgstr "Średnie"
+msgstr "Hershey Serif medium"
 
 #: ../share/extensions/hershey.inx:25
-#, fuzzy
 msgid "Hershey Serif medium italic"
-msgstr "Średnie"
+msgstr "Hershey Serif medium kursywa"
 
 #: ../share/extensions/hershey.inx:27
-#, fuzzy
 msgid "Hershey Serif bold"
-msgstr "Pogrubienie"
+msgstr "Hershey Serif pogrubienie"
 
 #
 # File: ../share/extensions/hershey.inx, line: 31
 #: ../share/extensions/hershey.inx:28
-#, fuzzy
 msgid "Hershey Serif bold italic"
 msgstr "Hershey Serif pogrubienie kursywa"
 
 #: ../share/extensions/hershey.inx:30
-#, fuzzy
 msgid "Hershey Script 1-stroke"
-msgstr "Ustaw kontur"
+msgstr "Hershey Script 1-pociągnięcie"
 
 #: ../share/extensions/hershey.inx:31
-#, fuzzy
 msgid "Hershey Script medium"
-msgstr "Skrypt:"
+msgstr "Hershey Script medium"
 
 #: ../share/extensions/hershey.inx:33
-#, fuzzy
 msgid "Hershey Gothic English"
-msgstr "Gothic"
+msgstr "Hershey Gotyk Angielski"
 
 #
 # File: ../share/extensions/hershey.inx, line: 39
 #. Block below this are derived from fonts licensed under SIL Open Font License
 #: ../share/extensions/hershey.inx:36
-#, fuzzy
 msgid "EMS Allure"
-msgstr "Allure EMS"
+msgstr "EMS Allure"
 
 #
 # File: ../share/extensions/hershey.inx, line: 41
 #: ../share/extensions/hershey.inx:38
-#, fuzzy
 msgid "EMS Elfin"
 msgstr "EMS Elfin"
 
 #
 # File: ../share/extensions/hershey.inx, line: 42
 #: ../share/extensions/hershey.inx:39
-#, fuzzy
 msgid "EMS Felix"
-msgstr "Paryż"
+msgstr "EMS Felix"
 
 #
 # File: ../share/extensions/hershey.inx, line: 44
 #: ../share/extensions/hershey.inx:41
-#, fuzzy
 msgid "EMS Nixish"
 msgstr "EMS Nixish"
 
 #
 # File: ../share/extensions/hershey.inx, line: 45
 #: ../share/extensions/hershey.inx:42
-#, fuzzy
 msgid "EMS Nixish Italic"
-msgstr "EMS Nixish Italic"
+msgstr "EMS Nixish kursywa"
 
 #
 # File: ../share/extensions/hershey.inx, line: 47
 #: ../share/extensions/hershey.inx:44
-#, fuzzy
 msgid "EMS Osmotron"
 msgstr "EMS Osmotron"
 
@@ -36699,13 +36600,13 @@ msgstr "EMS Osmotron"
 # File: ../share/extensions/hershey.inx, line: 48
 #: ../share/extensions/hershey.inx:45
 msgid "EMS Readability"
-msgstr "Czytelność EMS"
+msgstr "EMS Readability"
 
 #
 # File: ../share/extensions/hershey.inx, line: 49
 #: ../share/extensions/hershey.inx:46
 msgid "EMS Readability Italic"
-msgstr "Czytelność EMS kursywa"
+msgstr "EMS Readability kursywa"
 
 #
 # File: ../share/extensions/hershey.inx, line: 50
@@ -37205,9 +37106,8 @@ msgstr "zachowaj atrybut Proporcje obrazu:"
 #
 # File: ../share/extensions/image_attributes.inx, line: 35
 #: ../share/extensions/image_attributes.inx:33
-#, fuzzy
 msgid "meetOrSlice:"
-msgstr "do meetOrSlice:"
+msgstr "zachowa lub podziel:"
 
 #
 # File: ../share/extensions/image_attributes.inx, line: 40
@@ -37310,10 +37210,9 @@ msgstr "Nowości w tej wersji"
 
 #. i18n. Please don't translate link unless the page exists in your language. Add your language code to the link this way: https://inkscape.org/[lang]/release/1.0/
 #: ../share/extensions/inkscape_help_relnotes.inx:6
-#, fuzzy
 #| msgid "https://inkscape.org/en/ask/"
 msgid "https://inkscape.org/release/1.0/"
-msgstr "https://inkscape.org/pl/community/chat/"
+msgstr "https://inkscape.org/release/1.0/"
 
 #: ../share/extensions/inkscape_help_reportabug.inx:3
 msgid "Report a Bug"
@@ -37998,43 +37897,31 @@ msgstr ""
 
 #: ../share/extensions/layer2png.inx:3
 msgid "Export Layer Slices"
-msgstr ""
+msgstr "Eksportuj podziały według warstwy"
 
 #: ../share/extensions/layer2png.inx:7
-#, fuzzy
-#| msgid "Index mode"
 msgid "Icon mode"
-msgstr "Tryb indeksu"
+msgstr "Tryb ikony"
 
 #: ../share/extensions/layer2png.inx:8
-#, fuzzy
-#| msgid "Size"
 msgid "Sizes"
-msgstr "Rozmiar"
+msgstr "Rozmiary"
 
 #: ../share/extensions/layer2png.inx:9
-#, fuzzy
-#| msgid "Spray with copies"
 msgid "Layer with Slices:"
-msgstr "Natryskuj kopie"
+msgstr "Warstwa z podziałami"
 
 #: ../share/extensions/layer2png.inx:10
-#, fuzzy
-#| msgid "Erase existing paths"
 msgid "Overwrite existing exports"
-msgstr "Gumka: Usuwanie istniejących ścieżek"
+msgstr "Zastąp istniejące pliki"
 
 #: ../share/extensions/layer2png.inx:11
-#, fuzzy
-#| msgid "Directory:"
 msgid "Directory"
-msgstr "Katalog:"
+msgstr "Katalog"
 
 #: ../share/extensions/layer2png.inx:15
-#, fuzzy
-#| msgid "Slicer"
 msgid "Layer Slicer"
-msgstr "Cięcie"
+msgstr "Cięcie warstw"
 
 #: ../share/extensions/layer2png.inx:16
 msgid ""
@@ -40582,10 +40469,8 @@ msgstr "Konwertowanie czcionek SVG na warstwy glifów"
 #
 # File: ../share/extensions/svgfont2layers.inx, line: 6
 #: ../share/extensions/svgfont2layers.inx:5
-#, fuzzy
-#| msgid "Load only the first 30 glyphs (Recommended)"
 msgid "Stop after (30 Recommended)"
-msgstr "Załaduj tylko pierwsze 30 glifów (zalecane)"
+msgstr "Załaduj tylko (zalecane: 30)"
 
 #: ../share/extensions/synfig_output.inx:3
 msgid "Synfig Output"
@@ -40707,9 +40592,8 @@ msgid "DVD Cover"
 msgstr "Okładka DVD"
 
 #: ../share/extensions/template_dvd_cover.inx:6
-#, fuzzy
 msgid "DVD spine width:"
-msgstr "Szerokość linii"
+msgstr "Grubość grzbietu DVD"
 
 #: ../share/extensions/template_dvd_cover.inx:7
 msgid "Normal (14mm)"
@@ -40846,16 +40730,12 @@ msgid "Page orientation:"
 msgstr "Orientacja strony:"
 
 #: ../share/extensions/template_page.inx:16
-#, fuzzy
-#| msgid "Vertical point:"
 msgid "Vertical (Portrait)"
-msgstr "Punkt pionowy:"
+msgstr "Pionowy (portret)"
 
 #: ../share/extensions/template_page.inx:17
-#, fuzzy
-#| msgid "Horizontal radius"
 msgid "Horizontal (Landscape)"
-msgstr "Promień poziomy"
+msgstr "Poziomy (krajobraz)"
 
 #: ../share/extensions/template_page.inx:20
 msgid "Page background:"
