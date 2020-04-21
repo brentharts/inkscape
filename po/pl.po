@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: Inkscape 1.0\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
 "POT-Creation-Date: 2019-12-02 14:57+0100\n"
-"PO-Revision-Date: 2020-04-18 20:26+0200\n"
+"PO-Revision-Date: 2020-04-21 20:20+0200\n"
 "Last-Translator: Marcin Floryan\n"
 "Language-Team: Freelancer\n"
 "Language: pl_PL\n"
@@ -1635,7 +1635,7 @@ msgstr "Pokrywanie z ekranem w małej skali, takim jak szum"
 
 #: ../share/filters/filters.svg.h:670
 msgid "Cross Noise Poster B"
-msgstr ""
+msgstr "Szum Krzyżowy B"
 
 #: ../share/filters/filters.svg.h:672
 msgid "Adds a small scale screen like noise locally"
@@ -1655,7 +1655,7 @@ msgstr "Dodaje chropowatość do jednego z dwóch kanałów filtra plakatu"
 
 #: ../share/filters/filters.svg.h:682
 msgid "Alpha Monochrome Cracked"
-msgstr ""
+msgstr "Spękana przezroczystość monochromatyczna"
 
 #: ../share/filters/filters.svg.h:684 ../share/filters/filters.svg.h:688
 #: ../share/filters/filters.svg.h:692 ../share/filters/filters.svg.h:704
@@ -1665,11 +1665,11 @@ msgstr "Podstawowe wypełnienie szumem; dostosuj kolor w oknie Wypełnienie i ko
 
 #: ../share/filters/filters.svg.h:686
 msgid "Alpha Turbulent"
-msgstr ""
+msgstr "Burzliwa przezroczystość"
 
 #: ../share/filters/filters.svg.h:690
 msgid "Colorize Turbulent"
-msgstr ""
+msgstr "Burzliwa koloryzacja"
 
 #: ../share/filters/filters.svg.h:694
 msgid "Cross Noise B"
@@ -1685,7 +1685,7 @@ msgstr "Szum Poissona"
 
 #: ../share/filters/filters.svg.h:700
 msgid "Adds a small scale screen like graininess"
-msgstr "Dodaje ekran małej skali jak ziarnistość"
+msgstr "Dodaje ziarnistość małej skali"
 
 #: ../share/filters/filters.svg.h:702
 msgid "Duotone Turbulent"
@@ -1693,7 +1693,7 @@ msgstr "Turbulencja dwutonowa"
 
 #: ../share/filters/filters.svg.h:706
 msgid "Light Eraser Cracked"
-msgstr ""
+msgstr "Delikatna gumka spękana"
 
 #: ../share/filters/filters.svg.h:710
 msgid "Poster Turbulent"
@@ -1701,11 +1701,11 @@ msgstr ""
 
 #: ../share/filters/filters.svg.h:714
 msgid "Tartan Smart"
-msgstr ""
+msgstr "Wszechstronny Tartan"
 
 #: ../share/filters/filters.svg.h:716
 msgid "Highly configurable checkered tartan pattern"
-msgstr ""
+msgstr "Różnorodny wzór szkockiej kraty"
 
 #: ../share/filters/filters.svg.h:718
 msgid "Light Contour"
@@ -1741,7 +1741,7 @@ msgstr "Efekt rysowania komiks kreskówka"
 
 #: ../share/filters/filters.svg.h:734
 msgid "Comics Draft"
-msgstr "Komiksy Rysowanie"
+msgstr "Komiksowy szkic"
 
 #: ../share/filters/filters.svg.h:736 ../share/filters/filters.svg.h:768
 msgid "Draft painted cartoon shading with a glassy look"
@@ -1749,7 +1749,7 @@ msgstr "Cieniowany szkic komiksowy ze szklistym wyglądem"
 
 #: ../share/filters/filters.svg.h:738
 msgid "Comics Fading"
-msgstr "Komiksy zanikanie"
+msgstr "Komiksowe przenikanie"
 
 #: ../share/filters/filters.svg.h:740
 msgid "Cartoon paint style with some fading at the edges"
@@ -1789,7 +1789,7 @@ msgstr "Efekt ciemnego chromu"
 
 #: ../share/filters/filters.svg.h:758
 msgid "Emboss Shader"
-msgstr "Cieniowanie Wytłaczania"
+msgstr "Cieniowanie wytłaczania"
 
 #: ../share/filters/filters.svg.h:760
 msgid "Combination of satiny and emboss effect"
@@ -1921,11 +1921,11 @@ msgstr "Tworzenie półprzezroczystego, posterowanego obrazu"
 
 #: ../share/filters/filters.svg.h:826
 msgid "Trichrome"
-msgstr ""
+msgstr "Potrójny Chrom"
 
 #: ../share/filters/filters.svg.h:828
 msgid "Like Duochrome but with three colors"
-msgstr ""
+msgstr "Efekt podobny do podwójnego chromu, z trzema kolorami"
 
 #: ../share/filters/filters.svg.h:830
 msgid "Simulate CMY"
@@ -5997,9 +5997,8 @@ msgid "Color bump"
 msgstr "Kolor wypukłości"
 
 #: ../src/extension/internal/filter/bumps.h:146
-#, fuzzy
 msgid "All purposes bump filter"
-msgstr "Wszystkie cele filtr bump"
+msgstr "Ogólny filtr wypukłości"
 
 #: ../src/extension/internal/filter/bumps.h:310
 msgid "Wax Bump"
@@ -6231,7 +6230,7 @@ msgstr "Podstawowa struktura transferu komponentów"
 
 #: ../src/extension/internal/filter/color.h:586
 msgid "Duochrome"
-msgstr "Podwujny Chrom"
+msgstr "Podwójny Chrom"
 
 #: ../src/extension/internal/filter/color.h:590
 msgid "Fluorescence level"
@@ -6483,7 +6482,7 @@ msgstr "Posuń kanały CMY osobno i mieszaj je z różnymi rodzajami tła"
 
 #: ../src/extension/internal/filter/color.h:1485
 msgid "Quadritone Fantasy"
-msgstr ""
+msgstr "Fantazja czterotonowa"
 
 #: ../src/extension/internal/filter/color.h:1487
 msgid "Hue distribution (°)"
@@ -7056,7 +7055,7 @@ msgstr "Obraz na pociągnięciu"
 
 #: ../src/extension/internal/filter/paint.h:367
 msgid "Convert images to duochrome drawings"
-msgstr "Konwertowanie obrazów na rysunki duochrome"
+msgstr "Konwertowanie obrazów na rysunki dwutonowe"
 
 #: ../src/extension/internal/filter/paint.h:495
 msgid "Electrize"
@@ -7101,7 +7100,7 @@ msgstr "Szerokość linii:"
 
 #: ../src/extension/internal/filter/paint.h:606
 msgid "Posterize and draw smooth lines around color shapes"
-msgstr "Posterize i rysować gładkie linie wokół kształtów kolorów"
+msgstr ""
 
 #: ../src/extension/internal/filter/paint.h:688
 msgid "Point Engraving"
@@ -7164,14 +7163,12 @@ msgid "Simulate antialiasing"
 msgstr "Symuluj wygładzanie"
 
 #: ../src/extension/internal/filter/paint.h:881
-#, fuzzy
 msgid "Poster and painting effects"
-msgstr "Wklej efekt żywej ścieżki"
+msgstr ""
 
 #: ../src/extension/internal/filter/paint.h:974
-#, fuzzy
 msgid "Posterize Basic"
-msgstr "Posterize podstawowe"
+msgstr "Prosta posteryzacja"
 
 #: ../src/extension/internal/filter/paint.h:985
 msgid "Simple posterizing effect"
