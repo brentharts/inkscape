@@ -16878,7 +16878,7 @@ msgstr "Dışa aktarılıyor %1 (%2 x %3)"
 #: ../src/ui/dialog/export.cpp:1169
 #, c-format
 msgid "Drawing exported to <b>%s</b>."
-msgstr "Çizim <b%s</b> konumuna aktarıldı."
+msgstr "Çizim <b>%s</b> konumuna aktarıldı."
 
 #: ../src/ui/dialog/export.cpp:1173
 msgid "Export aborted."
