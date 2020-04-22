@@ -4514,22 +4514,18 @@ msgid "_Redo"
 msgstr "_Ripeti"
 
 #: ../src/extension/dependency.cpp:335
-#, fuzzy
 msgid "Dependency"
 msgstr "Dipendenza"
 
 #: ../src/extension/dependency.cpp:336
-#, fuzzy
 msgid "type"
 msgstr "tipo"
 
 #: ../src/extension/dependency.cpp:337
-#, fuzzy
 msgid "location"
 msgstr "posizione"
 
 #: ../src/extension/dependency.cpp:338
-#, fuzzy
 msgid "string"
 msgstr "stringa"
 
@@ -8654,14 +8650,12 @@ msgid "Print Inkscape version"
 msgstr "Mostra la versione di Inkscape"
 
 #: ../src/inkscape-application.cpp:575
-#, fuzzy
 msgid "Print system data directory"
-msgstr "Mostra la posizione delle estensioni nel sistema"
+msgstr "Mostra la posizione dei dati di sistema"
 
 #: ../src/inkscape-application.cpp:576
-#, fuzzy
 msgid "Print user data directory"
-msgstr "Mostra la posizione delle estensioni nel sistema"
+msgstr "Mostra la posizione dei dati utente"
 
 #: ../src/inkscape-application.cpp:579
 msgid "File import"
@@ -8794,7 +8788,7 @@ msgstr ""
 
 #: ../src/inkscape-application.cpp:601
 msgid "MARGIN"
-msgstr ""
+msgstr "MARGINE"
 
 #: ../src/inkscape-application.cpp:604
 msgid "Export options"
@@ -10251,15 +10245,16 @@ msgstr ""
 "intersezione"
 
 #: ../src/live_effects/lpe-copy_rotate.cpp:72
-#, fuzzy
 msgid "Distribute evenly"
-msgstr "Distribuzione"
+msgstr "Distribuisci equamente"
 
 #: ../src/live_effects/lpe-copy_rotate.cpp:72
 msgid ""
 "Angle between copies is 360°/number of copies (ignores rotation angle "
 "setting)"
 msgstr ""
+"L'angolo tra le copie è 360°/numero di copie (ignora impostazione angolo di "
+"rotazione)"
 
 #: ../src/live_effects/lpe-copy_rotate.cpp:73
 msgid "Mirror copies"
@@ -11002,6 +10997,9 @@ msgid ""
 "Drag to select a crossing, click to flip it, Shift + click to change all "
 "crossings, Ctrl + click to reset and change all crossings"
 msgstr ""
+"Trascina per selezionare un'intersezione, clicca per girarla, Maiusc + clic "
+"per cambiare tutte le intersezioni, Ctrl + clic per reimpostare e modificarle "
+"tutte"
 
 #: ../src/live_effects/lpe-knot.cpp:709
 msgid "Change knot crossing"
@@ -12079,19 +12077,22 @@ msgid "Inverse clip"
 msgstr "Inverti fissaggio"
 
 #: ../src/live_effects/lpe-powerclip.cpp:31
-#, fuzzy
 msgid "Flatten clip"
 msgstr "Semplifica fissaggio"
 
 #: ../src/live_effects/lpe-powerclip.cpp:31
 msgid "Flatten clip, see fill rule once convert to paths"
 msgstr ""
+"Semplifica fissaggio, vedi regola riempimento una volta convertito in "
+"tracciato"
 
 #: ../src/live_effects/lpe-powerclip.cpp:34
 msgid ""
 "Use fill-rule evenodd on <b>fill and stroke</b> dialog if no flatten result "
 "after convert clip to paths."
 msgstr ""
+"Usa regola riempimento evenodd in <b>riempimento e contorni</b> se semplifica "
+"fissaggio non ha effetto dopo la conversione in tracciati."
 
 #: ../src/live_effects/lpe-powermask.cpp:37
 msgid "Invert mask"
@@ -12742,7 +12743,7 @@ msgstr "Passi:"
 
 #: ../src/live_effects/lpe-simplify.cpp:25
 msgid "Change number of simplify steps "
-msgstr "Cambia numero di passi per la semplificazione"
+msgstr "Cambia numero di passi per la semplificazione "
 
 #: ../src/live_effects/lpe-simplify.cpp:26
 msgid "Roughly threshold:"
@@ -13086,7 +13087,7 @@ msgstr "Cambia indice nodo"
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:802
 #: ../src/ui/widget/preferences-widget.cpp:704
 msgid "Reset"
-msgstr "Reimposta "
+msgstr "Reimposta"
 
 #: ../src/live_effects/lpe-vonkoch.cpp:45
 msgid "N_r of generations:"
@@ -20786,7 +20787,7 @@ msgstr "Usa finestre apri e salva in stile Windows"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1298
 msgid "Use GTK open and save dialogs "
-msgstr "Usa finestre apri e salva in stile GTK"
+msgstr "Usa finestre apri e salva in stile GTK "
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1302
 msgid "Dialogs on top:"
@@ -23993,7 +23994,6 @@ msgid "Second Unicode range"
 msgstr "Secondo intervallo Unicode"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:916
-#, fuzzy
 msgid "Kerning Value:"
 msgstr "Valore crenatura:"
 
@@ -24244,7 +24244,6 @@ msgid "Unnamed Symbols"
 msgstr "Simboli senza nome"
 
 #: ../src/ui/dialog/symbols.cpp:949
-#, fuzzy
 msgid "notitle_"
 msgstr "nessunTitolo_"
 
@@ -24528,7 +24527,7 @@ msgstr "Ruota in senso orario"
 #: ../src/ui/dialog/transformation.cpp:898
 #: ../src/ui/dialog/transformation.cpp:922
 msgid "Transform matrix is singular, <b>not used</b>."
-msgstr ""
+msgstr "La matrice di trasformazione è singolare, <b>non utilizzata</b>."
 
 #: ../src/ui/dialog/transformation.cpp:938
 msgid "Edit transformation matrix"
@@ -25584,7 +25583,7 @@ msgstr ""
 #: ../src/ui/toolbar/calligraphy-toolbar.cpp:132
 #: ../src/ui/toolbar/eraser-toolbar.cpp:127
 msgid "(speed blows up stroke)"
-msgstr "(sbava crescendo di velocità)"
+msgstr "(sbava crescendo di velocit&#224;)"
 
 #: ../src/ui/toolbar/calligraphy-toolbar.cpp:132
 #: ../src/ui/toolbar/eraser-toolbar.cpp:127
@@ -25604,7 +25603,7 @@ msgstr "(lieve assottigliamento, predefinito)"
 #: ../src/ui/toolbar/calligraphy-toolbar.cpp:132
 #: ../src/ui/toolbar/eraser-toolbar.cpp:127
 msgid "(speed deflates stroke)"
-msgstr "(assotigliato dalla velocità)"
+msgstr "(assottigliato dalla velocit&#224;)"
 
 #: ../src/ui/toolbar/calligraphy-toolbar.cpp:136
 #: ../src/ui/toolbar/eraser-toolbar.cpp:131
@@ -27094,7 +27093,7 @@ msgstr "parte dal centro"
 
 #: ../src/ui/toolbar/spiral-toolbar.cpp:111
 msgid "starts mid-way"
-msgstr "parte da metà"
+msgstr "parte da met&#224;"
 
 #: ../src/ui/toolbar/spiral-toolbar.cpp:111
 msgid "starts near edge"
@@ -27176,11 +27175,11 @@ msgstr ""
 
 #: ../src/ui/toolbar/spray-toolbar.cpp:141
 msgid "(low population)"
-msgstr "(bassa densità)"
+msgstr "(bassa densit&#224;)"
 
 #: ../src/ui/toolbar/spray-toolbar.cpp:141
 msgid "(high population)"
-msgstr "(alta densità)"
+msgstr "(alta densit&#224;)"
 
 #: ../src/ui/toolbar/spray-toolbar.cpp:146
 msgid "Adjusts the number of items sprayed per click"
@@ -30360,7 +30359,7 @@ msgstr "Modifica larghezza contorno"
 
 #: ../src/ui/widget/selected-style.cpp:999
 msgid ", drag to adjust, middle-click to remove"
-msgstr ""
+msgstr ", trascina per modificare, tasto centrale per rimuovere"
 
 #: ../src/ui/widget/selected-style.cpp:1083
 #, c-format
@@ -32574,11 +32573,11 @@ msgstr ""
 
 #: ../src/verbs.cpp:3190
 msgid "Prototype..."
-msgstr ""
+msgstr "Prototipo..."
 
 #: ../src/verbs.cpp:3190
 msgid "Prototype Dialog"
-msgstr ""
+msgstr "Finestra Prototipo"
 
 #: ../src/verbs.cpp:3192
 msgid "P_references..."
@@ -32902,9 +32901,8 @@ msgid "SVG 1.1 Specification"
 msgstr "Specifiche SVG 1.1"
 
 #: ../src/verbs.cpp:3299
-#, fuzzy
 msgid "SVG 2 Specification"
-msgstr "Specifiche SVG 1.1"
+msgstr "Specifiche SVG 2"
 
 #: ../src/verbs.cpp:3302
 msgid "Inkscape: _Basic"
@@ -33209,9 +33207,8 @@ msgid "Note:"
 msgstr "Nota:"
 
 #: ../src/widgets/desktop-widget.cpp:2027
-#, fuzzy
 msgid "Centre Page"
-msgstr "Pagine interne"
+msgstr "Centra Pagina"
 
 #: ../src/widgets/desktop-widget.cpp:2413
 msgid "Create guide"
@@ -33608,13 +33605,12 @@ msgid "Message"
 msgstr "Messaggi"
 
 #: ../share/ui/dialog-livepatheffect-effect.glade:77
-#, fuzzy
 msgid "LPEName"
-msgstr "Nome"
+msgstr "NomeLPE"
 
 #: ../share/ui/dialog-livepatheffect-effect.glade:113
 msgid "Experimental"
-msgstr ""
+msgstr "Sperimentale"
 
 #: ../share/ui/dialog-trace.glade:92
 msgid ""
@@ -33842,7 +33838,7 @@ msgstr "Sbaffi di pixel"
 
 #: ../share/ui/dialog-trace.glade:1007
 msgid "SIOX"
-msgstr ""
+msgstr "SIOX"
 
 #: ../share/ui/dialog-trace.glade:1011
 msgid "Cover the area you want to select as the foreground"
@@ -33858,7 +33854,7 @@ msgstr "_Informazioni"
 
 #: ../share/extensions/convert2dashes.py:39
 msgid "Total number of objects not converted: {}\n"
-msgstr ""
+msgstr "Numero totale di oggetti non convertiti: {}\n"
 
 #: ../share/extensions/dxf_input.py:619
 #, python-format
@@ -33957,10 +33953,9 @@ msgstr ""
 #
 # File: ../share/extensions/inkex/deprecated.py, line: 114
 #: ../share/extensions/inkex/deprecated.py:126
-#, fuzzy
 msgid "{} is now a method in the svg. Use `self.svg.namedview.center` instead."
 msgstr ""
-"{} ora è un metodo svg. Usare `self.svg.get_current_layer()` al suo posto."
+"{} ora è un metodo svg. Usare `self.svg.namedview.center` al suo posto."
 
 #
 # File: ../share/extensions/inkex/deprecated.py, line: 125
@@ -34447,13 +34442,12 @@ msgid "You must give a directory to export the slices."
 msgstr ""
 
 #: ../share/extensions/webslicer_export.py:52
-#, fuzzy
 msgid "Can't create '{}': {}."
-msgstr "Impossibile creare \"%s\"."
+msgstr "Impossibile creare '{}': {}."
 
 #: ../share/extensions/webslicer_export.py:54
 msgid "Dir doesn't exist '{}'."
-msgstr ""
+msgstr "La cartella non esiste '{}'."
 
 #: ../share/extensions/webslicer_export.py:58
 #, fuzzy
@@ -34801,7 +34795,6 @@ msgid "Switch DPI"
 msgstr "Cambia DPI"
 
 #: ../share/extensions/dpi90to96.inx:8
-#, fuzzy
 msgid "DPI Switch from 90 to 96"
 msgstr "Cambia DPI da 90 a 96"
 
@@ -34810,7 +34803,6 @@ msgid "DPI 96 to 90"
 msgstr "DPI da 96 a 90"
 
 #: ../share/extensions/dpi96to90.inx:8
-#, fuzzy
 msgid "DPI Switch from 96 to 90"
 msgstr "Cambia DPI da 96 a 90"
 
@@ -35078,10 +35070,9 @@ msgstr ""
 #: ../share/extensions/dxf_input.inx:17
 #: ../share/extensions/render_barcode_qrcode.inx:27
 msgid "Character encoding:"
-msgstr "Codifica caratteri"
+msgstr "Codifica caratteri:"
 
 #: ../share/extensions/dxf_input.inx:24
-#, fuzzy
 msgid "Text Font:"
 msgstr "Carattere testo:"
 
@@ -44414,7 +44405,7 @@ msgstr "Metà altezza carattere"
 #~ "dell'interruzione"
 
 #~ msgid "Drag to select a crossing, click to flip it"
-#~ msgstr "Trascina per selezionare un intersezione, clicca per girarla"
+#~ msgstr "Trascina per selezionare un'intersezione, clicca per girarla"
 
 #, fuzzy
 #~ msgid "Convert clips to paths, undoable"
