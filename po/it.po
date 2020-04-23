@@ -17240,9 +17240,8 @@ msgid "Exponent"
 msgstr "Esponente"
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:1125
-#, fuzzy
 msgid "New transfer function type"
-msgstr "Tipo operazione booleana"
+msgstr "Nuovo tipo funzione trasferimento"
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:1160
 msgid "Light Source:"
@@ -25590,7 +25589,7 @@ msgstr ""
 #: ../src/ui/toolbar/calligraphy-toolbar.cpp:132
 #: ../src/ui/toolbar/eraser-toolbar.cpp:127
 msgid "(speed blows up stroke)"
-msgstr "(sbava crescendo di velocit&#224;)"
+msgstr "(sbava crescendo di velocità)"
 
 #: ../src/ui/toolbar/calligraphy-toolbar.cpp:132
 #: ../src/ui/toolbar/eraser-toolbar.cpp:127
@@ -25610,7 +25609,7 @@ msgstr "(lieve assottigliamento, predefinito)"
 #: ../src/ui/toolbar/calligraphy-toolbar.cpp:132
 #: ../src/ui/toolbar/eraser-toolbar.cpp:127
 msgid "(speed deflates stroke)"
-msgstr "(assottigliato dalla velocit&#224;)"
+msgstr "(assottigliato dalla velocità)"
 
 #: ../src/ui/toolbar/calligraphy-toolbar.cpp:136
 #: ../src/ui/toolbar/eraser-toolbar.cpp:131
@@ -26133,12 +26132,10 @@ msgstr ""
 "riquadro della selezione attuale"
 
 #: ../src/ui/toolbar/lpe-toolbar.cpp:142
-#, fuzzy
 msgid "Line Type"
-msgstr "Tipo linea:"
+msgstr "Tipo linea"
 
 #: ../src/ui/toolbar/lpe-toolbar.cpp:142
-#, fuzzy
 msgid "Choose a line segment type"
 msgstr "Scegliere un tipo di segmento"
 
@@ -27100,7 +27097,7 @@ msgstr "parte dal centro"
 
 #: ../src/ui/toolbar/spiral-toolbar.cpp:111
 msgid "starts mid-way"
-msgstr "parte da met&#224;"
+msgstr "parte da metà"
 
 #: ../src/ui/toolbar/spiral-toolbar.cpp:111
 msgid "starts near edge"
@@ -27182,11 +27179,11 @@ msgstr ""
 
 #: ../src/ui/toolbar/spray-toolbar.cpp:141
 msgid "(low population)"
-msgstr "(bassa densit&#224;)"
+msgstr "(bassa densità)"
 
 #: ../src/ui/toolbar/spray-toolbar.cpp:141
 msgid "(high population)"
-msgstr "(alta densit&#224;)"
+msgstr "(alta densità)"
 
 #: ../src/ui/toolbar/spray-toolbar.cpp:146
 msgid "Adjusts the number of items sprayed per click"
@@ -30147,17 +30144,17 @@ msgstr "Motivo del contorno"
 #: ../src/ui/widget/selected-style.cpp:193
 #, fuzzy
 msgid "Hatch"
-msgstr "Campione"
+msgstr "Trama"
 
 #: ../src/ui/widget/selected-style.cpp:195
 #, fuzzy
 msgid "Hatch fill"
-msgstr "Riempimento campione"
+msgstr "Riempimento trama"
 
 #: ../src/ui/widget/selected-style.cpp:195
 #, fuzzy
 msgid "Hatch stroke"
-msgstr "Contorno campione"
+msgstr "Contorno trama"
 
 #: ../src/ui/widget/selected-style.cpp:197
 msgid "<b>L</b>"
@@ -33608,9 +33605,8 @@ msgid "Show Experimental"
 msgstr "Mostra sperimentali"
 
 #: ../share/ui/dialog-livepatheffect-add.glade:291
-#, fuzzy
 msgid "Message"
-msgstr "Messaggi"
+msgstr "Messaggio"
 
 #: ../share/ui/dialog-livepatheffect-effect.glade:77
 msgid "LPEName"
@@ -33650,11 +33646,38 @@ msgid ""
 "  4) If your goal is to get few nodes and good precision, manual tracing is "
 "always best.\n"
 msgstr ""
+"\n"
+" Questa finestra permette di convertire automaticamente un'immagine raster "
+"in tracciati vettoriali. Sono disponibili varie opzioni a seconda "
+"dell'utilizzo:\n"
+" * \"Soglia luminosità\" rileva le aree più scure del valore di soglia e "
+"crea un tracciato che le racchiude (usa potrace).\n"
+" * \"Rilevamento bordo\" rileva cambiamenti maggiori del valore di soglia "
+"per la luminosità del colore dell'area e crea tracciati per separarle (usa "
+"potrace).\n"
+" * \"Quantizzazione colore\" separa l'immagine nel numero specificato di "
+"colori e li separa con un tracciato (usa potrace).\n"
+" * \"Autotrace\" usa l'algoritmo autotrace con le impostazioni specificate.\n"
+" * \"Traccia linea centrale\" tenta di vettorizzare un disegno a linee (con "
+"autotrace).\n"
+" * \"Scansioni multiple\" è un'opzione che separa l'immagine nel numero di "
+"scansioni a seconda di luminosità, colori o livelli di grigio e crea più "
+"tracciati. Può anche usare autotrace.\n"
+" * La scheda \"Pixel Art\" permette di utilizzare l'algoritmo depixelize per "
+"vettorizzare le immagini.\n"
+"\n"
+" * NOTE:\n"
+"  1) Salva prima di tracciare\n"
+"  2) Controlla il numero di pixel: \"Pixel Art\" crea un tracciato per "
+"ogni pixel. Non è consigliato per immagini che non sono pixel art.\n"
+"  3) Autotrace è più lento di potrace, non è quindi consigliato per grandi "
+"immagini. Invece è consigliato aumentare il contrasto dell'immagine prima.\n"
+"  4) Per ottenere un risultato preciso con pochi nodi la tracciatura manuale "
+"è sempre migliore.\n"
 
 #: ../share/ui/dialog-trace.glade:136
-#, fuzzy
 msgid "Create a single path or create a group of paths"
-msgstr "Scansione multipla: crea un gruppo di tracciati"
+msgstr "Crea un singolo tracciato o un gruppo di tracciati"
 
 #: ../share/ui/dialog-trace.glade:195
 msgid "Brightness threshold"
@@ -33686,7 +33709,7 @@ msgstr "Scansione unica"
 
 #: ../share/ui/dialog-trace.glade:480
 msgid "Apply Gaussian blur to the bitmap before tracing"
-msgstr "Applica l'effetto Gaussian blur alla bitmap prima di vettorizzare"
+msgstr "Applica una sfocatura Gaussiana alla bitmap prima di tracciarla"
 
 #: ../share/ui/dialog-trace.glade:490
 msgid "Stack"
@@ -33714,7 +33737,7 @@ msgstr "Scansioni"
 
 #: ../share/ui/dialog-trace.glade:531
 msgid "The desired number of scans"
-msgstr "Il numero voluto di scansioni"
+msgstr "Il numero di scansioni effettuate"
 
 #: ../share/ui/dialog-trace.glade:552
 msgid "Multiple scans"
@@ -33771,45 +33794,47 @@ msgstr ""
 
 #: ../share/ui/dialog-trace.glade:720
 msgid "Favors connections that are part of a long curve"
-msgstr ""
+msgstr "Favorisce le connessioni parte di una lunga curva"
 
 #: ../share/ui/dialog-trace.glade:721
 msgid "Curves (multiplier)"
-msgstr ""
+msgstr "Curve (moltiplicatore)"
 
 #: ../share/ui/dialog-trace.glade:732
 msgid "Avoid single disconnected pixels"
-msgstr ""
+msgstr "Evita pixel singoli disconnessi"
 
 #: ../share/ui/dialog-trace.glade:733
-#, fuzzy
 msgid "Islands (weight)"
-msgstr "Altezza barre:"
+msgstr "Isole (peso)"
 
 #: ../share/ui/dialog-trace.glade:744 ../share/ui/dialog-trace.glade:757
 msgid "Favors connections that are part of foreground color"
-msgstr ""
+msgstr "Favorisce le connessioni parte del colore di primo piano"
 
 #: ../share/ui/dialog-trace.glade:745
 msgid ""
 "Sparse pixels\n"
 "(window radius)"
 msgstr ""
+"Pixel sparsi\n"
+"(raggio finestra)"
 
 #: ../share/ui/dialog-trace.glade:758
 msgid ""
 "Sparse pixels\n"
 "(multiplier)"
 msgstr ""
+"Pixel sparsi\n"
+"(moltiplicatore)"
 
 #: ../share/ui/dialog-trace.glade:770 ../share/ui/dialog-trace.glade:813
 msgid "The heuristic computed vote will be multiplied by this value"
-msgstr ""
+msgstr "Il valore euristico calcolato sarà moltiplicato per questo valore"
 
 #: ../share/ui/dialog-trace.glade:785
-#, fuzzy
 msgid "A constant vote value"
-msgstr "Angolo di rotazione"
+msgstr "Un valore di costante"
 
 #: ../share/ui/dialog-trace.glade:799
 msgid "The radius of the window analyzed"
@@ -33829,7 +33854,7 @@ msgstr "Voronoi"
 
 #: ../share/ui/dialog-trace.glade:854
 msgid "Output composed of straight lines"
-msgstr ""
+msgstr "Output composto da segmenti lineari"
 
 #: ../share/ui/dialog-trace.glade:867
 msgid "B-splines"
@@ -33837,12 +33862,11 @@ msgstr "BSpline"
 
 #: ../share/ui/dialog-trace.glade:871
 msgid "Preserve staircasing artifacts"
-msgstr ""
+msgstr "Preserva artifatti a gradini"
 
 #: ../share/ui/dialog-trace.glade:893
-#, fuzzy
 msgid "Pixel art"
-msgstr "Sbaffi di pixel"
+msgstr "Pixel Art"
 
 #: ../share/ui/dialog-trace.glade:1007
 msgid "SIOX"
@@ -33903,9 +33927,8 @@ msgid "Pen "
 msgstr "Inerzia pennino"
 
 #: ../share/extensions/hpgl_input.py:46
-#, fuzzy
 msgid "No HPGL data found."
-msgstr "Non arrotondato"
+msgstr "Nessun dato HPGL trovato."
 
 #: ../share/extensions/hpgl_input.py:54
 msgid ""
@@ -34719,18 +34742,16 @@ msgid "Color to replace"
 msgstr "Colore da rimpiazzare"
 
 #: ../share/extensions/color_replace.inx:7
-#, fuzzy
 msgid "From color"
-msgstr "Rilascia colore"
+msgstr "Da colore"
 
 #: ../share/extensions/color_replace.inx:9
 msgid "New color"
 msgstr "Nuovo colore"
 
 #: ../share/extensions/color_replace.inx:10
-#, fuzzy
 msgid "To color"
-msgstr "Colore icona"
+msgstr "A colore"
 
 #: ../share/extensions/color_rgbbarrel.inx:3
 msgid "RGB Barrel"
@@ -35013,19 +35034,16 @@ msgstr ""
 "            "
 
 #: ../share/extensions/dxf12_outlines.inx:3
-#, fuzzy
 msgid "Desktop Cutting Plotter R12"
-msgstr "Desktop Cutting Plotter"
+msgstr "Desktop Cutting Plotter R12"
 
 #: ../share/extensions/dxf12_outlines.inx:9
-#, fuzzy
 msgid "Desktop Cutting Plotter (AutoCAD DXF R12) (*.dxf)"
-msgstr "Desktop Cutting Plotter (AutoCAD DXF R14) (*.dxf)"
+msgstr "Desktop Cutting Plotter (AutoCAD DXF R12) (*.dxf)"
 
 #: ../share/extensions/dxf12_outlines.inx:10
-#, fuzzy
 msgid "DXF R12 Output"
-msgstr "Output DXF"
+msgstr "Output DXF R12"
 
 #: ../share/extensions/dxf_input.inx:3
 msgid "DXF Input"
@@ -35109,12 +35127,11 @@ msgstr "AutoCAD DXF R13 (*.dxf)"
 
 #: ../share/extensions/dxf_input.inx:41
 msgid "Import AutoCAD's Document Exchange Format"
-msgstr "Importa AutoCAD's Document Exchange Format"
+msgstr "Importa AutoCAD Document Exchange Format"
 
 #: ../share/extensions/dxf_outlines.inx:3
-#, fuzzy
 msgid "Desktop Cutting Plotter R14"
-msgstr "Desktop Cutting Plotter"
+msgstr "Desktop Cutting Plotter R14"
 
 #: ../share/extensions/dxf_outlines.inx:8
 #, fuzzy
@@ -35127,9 +35144,8 @@ msgid "use LWPOLYLINE type of line output"
 msgstr "abilita output ROBO-Master"
 
 #: ../share/extensions/dxf_outlines.inx:10
-#, fuzzy
 msgid "Base unit:"
-msgstr "Frequenza base:"
+msgstr "Unità base:"
 
 #: ../share/extensions/dxf_outlines.inx:11
 msgid "pt"
@@ -36873,7 +36889,6 @@ msgstr ""
 "Testo Hershey\n"
 
 #: ../share/extensions/hershey.inx:13
-#, fuzzy
 msgid ""
 "A tool to replace text with stroke fonts\n"
 "\n"
@@ -36883,7 +36898,7 @@ msgid ""
 msgstr ""
 "Strumento per sostituire il testo con tratti\n"
 "\n"
-"Versione 3.0.2, 2019-09-07\n"
+"Versione 3.0.3, 2019-11-11\n"
 "\n"
 "\n"
 
@@ -37367,7 +37382,7 @@ msgstr ""
 #: ../share/extensions/hpgl_output.inx:33 ../share/extensions/plotter.inx:92
 #, fuzzy
 msgid "Convert objects to paths"
-msgstr "Conversione oggetti in tracciati..."
+msgstr "Converti oggetti in tracciati"
 
 #
 # File: ../share/extensions/hpgl_output.inx, line: 34
@@ -38673,9 +38688,8 @@ msgid "Offset (px):"
 msgstr "Scostamento (px):"
 
 #: ../share/extensions/measure.inx:52
-#, fuzzy
 msgid "Scale Factor (Real:Drawing Length):"
-msgstr "Fattore di riduzione (Disegno:Lughezza reale) = 1:"
+msgstr "Fattore di riduzione (Lunghezza Reale:Disegno):"
 
 #: ../share/extensions/measure.inx:53
 msgid "Length Unit:"
@@ -38687,7 +38701,7 @@ msgstr "Inkscape SVG compresso con altri media"
 
 #: ../share/extensions/media_zip.inx:6
 msgid "Image zip directory:"
-msgstr ""
+msgstr "Cartella immagine zip:"
 
 #: ../share/extensions/media_zip.inx:7
 msgid "Add font list"
@@ -39374,14 +39388,12 @@ msgid "Envelope"
 msgstr "Busta"
 
 #: ../share/extensions/path_mesh_m2p.inx:3
-#, fuzzy
 msgid "Mesh-Gradient to Path"
-msgstr "Gradiente a maglia di contorno"
+msgstr "Gradiente a maglia a Tracciato"
 
 #: ../share/extensions/path_mesh_m2p.inx:12
-#, fuzzy
 msgid "Patches"
-msgstr "Campione"
+msgstr "Righe"
 
 #: ../share/extensions/path_mesh_m2p.inx:13
 #: ../share/extensions/polyhedron_3d.inx:77
@@ -39389,39 +39401,35 @@ msgid "Faces"
 msgstr "Facce"
 
 #: ../share/extensions/path_mesh_m2p.inx:18
-#, fuzzy
 msgid "Mesh to path"
-msgstr "Da oggetto a tracciato"
+msgstr "Gradiente a maglia a Tracciato"
 
 #: ../share/extensions/path_mesh_m2p.inx:19
-#, fuzzy
 msgid "Convert geometry of selected meshgradient to path data"
-msgstr "Converte in tracciati gli oggetti selezionati"
+msgstr "Converte il gradiente a maglia selezionato in tracciato"
 
 #: ../share/extensions/path_mesh_m2p.inx:28
 #: ../share/extensions/path_mesh_p2m.inx:23
-#, fuzzy
 msgid "Mesh"
 msgstr "Gradiente a maglia"
 
 #: ../share/extensions/path_mesh_p2m.inx:3
-#, fuzzy
 msgid "Path to Mesh-Gradient"
-msgstr "Gradiente a maglia"
+msgstr "Tracciato a Gradiente a maglia"
 
 #: ../share/extensions/path_mesh_p2m.inx:9
-#, fuzzy
 msgid "Convert each selected path to 1x1 mesh"
-msgstr "Converte in tracciati gli oggetti selezionati"
+msgstr "Converte ogni tracciato selezionato in mesh 1x1"
 
 #: ../share/extensions/path_mesh_p2m.inx:13
-#, fuzzy
 msgid "Path to mesh"
-msgstr "Percorso a Gcode"
+msgstr "Tracciato a Gradiente a maglia"
 
 #: ../share/extensions/path_mesh_p2m.inx:14
 msgid "Convert geometry of selected path (4 corners) to a meshgradient"
 msgstr ""
+"Converte la geometria del tracciato selezionato (4 vertici) in un gradiente a "
+"maglia"
 
 #: ../share/extensions/path_number_nodes.inx:3
 msgid "Number Nodes"
@@ -41223,7 +41231,6 @@ msgid "lowercase"
 msgstr "tutte minuscole"
 
 #: ../share/extensions/text_merge.inx:21
-#, fuzzy
 msgid "Flow text"
 msgstr "Testo dinamico"
 
