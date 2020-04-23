@@ -13150,27 +13150,24 @@ msgid "Change bool parameter"
 msgstr "Modifica parametri booleani"
 
 #: ../src/live_effects/parameter/colorpicker.cpp:123
-#, fuzzy
 msgid "Change color button parameter"
-msgstr "Cambia bottone parametro"
+msgstr "Cambia parametri bottone colore"
 
 #: ../src/live_effects/parameter/enum.h:53
 msgid "Change enumeration parameter"
 msgstr "Cambia parametri enumerazione"
 
 #: ../src/live_effects/parameter/fontbutton.cpp:79
-#, fuzzy
 msgid "Change font button parameter"
-msgstr "Cambia bottone parametro"
+msgstr "Cambia parametri bottone carattere"
 
 #: ../src/live_effects/parameter/item.cpp:133
 msgid "Link to item on clipboard"
 msgstr "Collega a oggetto negli appunti"
 
 #: ../src/live_effects/parameter/item.cpp:247
-#, fuzzy
 msgid "Link item parameter to path"
-msgstr "Lega il parametro del tracciato al parametro"
+msgstr "Collega parametri oggetto al tracciato"
 
 #: ../src/live_effects/parameter/originalitem.cpp:61
 #: ../src/live_effects/parameter/originalitemarray.cpp:145
@@ -13196,9 +13193,8 @@ msgid "Name"
 msgstr "Nome"
 
 #: ../src/live_effects/parameter/originalitemarray.cpp:120
-#, fuzzy
 msgid "Link item parameter to item"
-msgstr "Lega il parametro del tracciato al parametro"
+msgstr "Collega parametri oggetto a oggetto"
 
 #: ../src/live_effects/parameter/originalitemarray.cpp:157
 msgid "Remove Item"
@@ -17284,23 +17280,20 @@ msgid "Z coordinate"
 msgstr "Coordinata X"
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:1188
-#, fuzzy
 msgid "Points At:"
-msgstr "Punta a"
+msgstr "Punta a:"
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:1189
-#, fuzzy
 msgid "Specular Exponent:"
-msgstr "Esponente speculare"
+msgstr "Esponente speculare:"
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:1189
 msgid "Exponent value controlling the focus for the light source"
 msgstr "Valore esponenziale per il controllo del fuoco della sorgente luminosa"
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:1191
-#, fuzzy
 msgid "Cone Angle:"
-msgstr "Angolo del cono"
+msgstr "Angolo del cono:"
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:1191
 msgid ""
@@ -21245,33 +21238,35 @@ msgstr "SVG 2"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1537
 msgid "Insert SVG 1.1 fallback in text."
-msgstr ""
+msgstr "Inserisci fallback SVG 1.1 nel testo"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1538
 msgid "Insert Mesh Gradient JavaScript polyfill."
-msgstr ""
+msgstr "Inserisci JavaScript polyfill per gradienti a maglia"
 
 #
 # File: ../src/ui/dialog/inkscape-preferences.cpp, line: 1555
 #: ../src/ui/dialog/inkscape-preferences.cpp:1539
 msgid "Insert Hatch Paint Server JavaScript polyfill."
-msgstr ""
+msgstr "Inserisci JavaScript polyfill per trame"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1541
 msgid "Adds fallback options for non-SVG 2 renderers."
-msgstr ""
+msgstr "Aggiunge opzioni di fallback per renderer non-SVG 2"
 
 #
 # File: ../src/ui/dialog/inkscape-preferences.cpp, line: 1558
 #: ../src/ui/dialog/inkscape-preferences.cpp:1542
 msgid "Adds JavaScript polyfill to render meshes."
-msgstr ""
+msgstr "Aggiunge JavaScript polyfill per il rendering dei gradienti"
 
 #
 # File: ../src/ui/dialog/inkscape-preferences.cpp, line: 1559
 #: ../src/ui/dialog/inkscape-preferences.cpp:1543
 msgid "Adds JavaScript polyfill to render hatches (linear and absolute paths)."
 msgstr ""
+"Aggiunge JavaScript polyfill per il rendering delle trame (tracciati lineari "
+"e assoluti)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1546
 msgid "SVG 2 to SVG 1.1"
@@ -21279,19 +21274,21 @@ msgstr "SVG 2 a SVG 1.1"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1548
 msgid "Replace markers with 'auto_start_reverse'."
-msgstr ""
+msgstr "Sostituisci delimitatori con 'auto_start_reverse'"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1549
 msgid "Replace markers using 'context_paint' or 'context_fill'."
-msgstr ""
+msgstr "Sostituisci delimitatori con 'context_paint' o 'context_fill'"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1551
 msgid "SVG 2 allows markers to automatically be reversed at start of path."
 msgstr ""
+"SVG 2 permette ai delimitatori di essere invertiti all'inizio del tracciato"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1552
 msgid "SVG 2 allows markers to automatically match stroke color."
 msgstr ""
+"SVG permette ai delimitatori di abbinare automaticamente il colore di contorno"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1554
 msgid "SVG export"
@@ -22207,9 +22204,8 @@ msgstr ""
 "disabilitare l'opzione"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1999
-#, fuzzy
 msgid "Rendering tile multiplier:"
-msgstr "Dimensione _cache rendering:"
+msgstr "Moltiplicatore regione rendering:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2000
 msgid ""
@@ -22219,6 +22215,11 @@ msgid ""
 "zooming and panning in relevant areas faster on low-end hardware in drawings "
 "with few or no filters."
 msgstr ""
+"Su hardware recenti, aumentare questo valore (predefinito 16) può aiutare "
+"a migliorare le prestazioni quando sono presenti grandi aree con oggetti "
+"filtrati (tra cui sfocature e modalità miscela) nel disegno. Diminuire il "
+"valore velocizza l'ingrandimento e il posizionamento delle aree su hardware "
+"meno performanti con disegni poco o non filtrati."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2004
 msgid "Rendering XRay radius:"
@@ -22762,7 +22763,6 @@ msgid "Test Area"
 msgstr "Area di prova"
 
 #: ../src/ui/dialog/input.cpp:581
-#, fuzzy
 msgid "Axis"
 msgstr "Asse"
 
@@ -22775,9 +22775,8 @@ msgid "Hardware"
 msgstr "Hardware"
 
 #: ../src/ui/dialog/input.cpp:660
-#, fuzzy
 msgid "Link:"
-msgstr "Linea"
+msgstr "Collegamento:"
 
 #: ../src/ui/dialog/input.cpp:662 ../src/ui/dialog/input.cpp:663
 #: ../src/ui/dialog/input.cpp:1388 ../src/ui/widget/color-scales.cpp:47
@@ -22791,9 +22790,8 @@ msgid "Axes count:"
 msgstr "Quantità"
 
 #: ../src/ui/dialog/input.cpp:675
-#, fuzzy
 msgid "axis:"
-msgstr "Raggio:"
+msgstr "asse:"
 
 #: ../src/ui/dialog/input.cpp:688
 #, fuzzy
@@ -22818,7 +22816,7 @@ msgstr "Assi"
 
 #: ../src/ui/dialog/input.cpp:910
 msgid "Keys"
-msgstr ""
+msgstr "Tasti"
 
 #: ../src/ui/dialog/input.cpp:987
 msgid ""
@@ -23268,6 +23266,15 @@ msgid ""
 "Note that the specification of this property is not finalized. Support and "
 "interpretation of these values varies between renderers."
 msgstr ""
+"La proprietà 'image-rendering' può influenzare come una bitmap è ri-scalata:\n"
+"\t• 'auto' nessuna preferenza (solitamente regolare ma sfuocata)\n"
+"\t• 'optimizeQuality' preferisce qualità rendering (solitamente regolare ma "
+"sfuocata)\n"
+"\t• 'optimizeSpeed' preferisce velocità rendering (solitamente sgranata)\n"
+"\t• 'crisp-edges' riscala senza sfuocare contorni (spesso sgranata)\n"
+"\t• 'pixelated' renderizza sgranato\n"
+"Nota che la selezione di questa proprietà non è definitiva. Il supporto e "
+"l'interpretazione del valore varia a seconda del renderer."
 
 #: ../src/ui/dialog/object-properties.cpp:253
 msgid "Check to make the object invisible"
@@ -23445,7 +23452,7 @@ msgstr ""
 
 #: ../src/ui/dialog/objects.cpp:1954
 msgid "Is object clipped and/or masked?"
-msgstr "Oggetto con fissaggio e/o maschera?"
+msgstr "Oggetto con fissaggio e/o maschera"
 
 #: ../src/ui/dialog/objects.cpp:1965
 msgid ""
@@ -27306,7 +27313,8 @@ msgid ""
 "advanced effects. In clone mode original fill or stroke colors must be unset."
 msgstr ""
 "Preleva il colore dal disegno. Per effetti più avanzati usare i cloni in "
-"serie. In modalità di clonazione "
+"serie. In modalità di clonazione i colori di riempimento e contorno originali "
+"devono essere rimossi."
 
 #: ../src/ui/toolbar/spray-toolbar.cpp:314
 #: ../src/ui/toolbar/spray-toolbar.cpp:315
