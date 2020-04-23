@@ -7931,7 +7931,7 @@ msgstr "WPG Girdisi"
 
 #: ../src/extension/internal/wpg-input.cpp:163
 msgid "WordPerfect Graphics (*.wpg)"
-msgstr ""
+msgstr "WordPerfect Grafikleri (*.wpg)"
 
 #: ../src/extension/internal/wpg-input.cpp:164
 msgid "Vector graphics format used by Corel WordPerfect"
@@ -8561,7 +8561,7 @@ msgstr "Bozuk bağlantılar mevcut dosyalara işaret edecek şekilde değiştiri
 # File: ../src/inkscape-application.cpp, line: 526
 #: ../src/inkscape-application.cpp:526
 msgid "file1 [file2 [fileN]]"
-msgstr ""
+msgstr "dosya1 [dosya2 [dosyaN]]"
 
 #
 # File: ../src/inkscape-application.cpp, line: 527
@@ -8832,7 +8832,7 @@ msgstr "Çizimin veya nesnenin yüksekliği (--query-id ile belirtilmişse)"
 # File: ../src/inkscape-application.cpp, line: 588
 #: ../src/inkscape-application.cpp:588
 msgid "Advanced file processing"
-msgstr ""
+msgstr "Gelişmiş dosya işleme"
 
 #: ../src/inkscape-application.cpp:589
 msgid "Remove unused definitions from the <defs> section(s) of document"
@@ -8964,7 +8964,7 @@ msgstr "Inkview - Bir SVG Dosya Görüntüleyici"
 
 #: ../src/inkview-application.cpp:67
 msgid "path1 [path2 pathN]]"
-msgstr ""
+msgstr "yol1 [yol2 yolN]]"
 
 #: ../src/inkview-application.cpp:68
 msgid ""
@@ -33360,7 +33360,7 @@ msgid ""
 "Output\n"
 msgstr ""
 "\n"
-"Çıktı"
+"Çıktı\n"
 
 #: ../share/ui/dialog-trace.glade:850
 msgid "Voronoi"
@@ -34132,14 +34132,14 @@ msgid ""
 "    * Random Hue/Saturation/Lightness: randomize the parameter's value.\n"
 "      "
 msgstr ""
+"\n"
 "Seçilen nesnenin renginin HSL temsilindeki renk tonunu, doygunluğu ve "
 "açıklığı ayarlar.\n"
 "Options:\n"
 "    * Ton: Dereceyle döndürün (etrafına sarılır).\n"
 "    * Doygunluk: Ekle/çıkar % (min=-100, max=100).\n"
 "    * Açıklık: Ekle/çıkar % (min=-100, max=100).\n"
-"    * Rasgele Ton/Doygunluk/Açıklık: Parametrenin değerini "
-"rastgeleleştirin.\n"
+"    * Rastgele Ton/Doygunluk/Açıklık: Parametre değerini rastgeleleştirin.\n"
 "      "
 
 #: ../share/extensions/color_blackandwhite.inx:3
@@ -34191,6 +34191,7 @@ msgid ""
 "  Blue Function: g\n"
 "            "
 msgstr ""
+"\n"
 "Her kanal için farklı işlevleri değerlendirmenizi sağlar.\n"
 "r, g ve b, kırmızı, yeşil ve mavi kanalların normalleştirilmiş değerleridir. "
 "Elde edilen RGB değerleri otomatik olarak kenetlenir.\n"
@@ -35868,23 +35869,21 @@ msgid ""
 "      "
 msgstr ""
 "\n"
-"Gcodetools eklentisi: Yolları Gcode'a dönüştürür (dairesel enterpolasyon "
-"kullanarak), ofset yollarını yapar ve koni kesiciler kullanarak keskin "
-"köşeleri kazır.\n"
-"Bu eklenti, gerektiğinde dairesel enterpolasyon veya doğrusal hareket "
-"kullanan yollar için Gcode'u hesaplar.\n"
+"Gcodetools eklentisi:\n"
+"Yolları Gcode'a dönüştürür (dairesel enterpolasyon kullanarak), ofset "
+"yollarını yapar ve koni kesiciler kullanarak keskin köşeleri kazır. Bu "
+"eklenti, gerektiğinde dairesel enterpolasyon veya doğrusal hareket kullanan "
+"yollar için Gcode'u hesaplar.\n"
 "\n"
-"Rehberler, kılavuzlar ve destek adresinde bulunabilir.\n"
-"İngilizce destek forumu:\n"
-"\thttp://www.cnc-club.ru/gcodetools\n"
-"\t\n"
-"ve Rusça destek forumu:\n"
-"\thttp://www.cnc-club.ru/gcodetoolsru\n"
+"Rehberler, kılavuzlar ve destek İngilizce destek forumu olan "
+"http://www.cnc-club.ru/gcodetools ve Rusça destek forumu "
+"http://www.cnc-club.ru/gcodetoolsru adreslerinde bulunabilir.\n"
 "\n"
 "Katkıda bulunanlar: Nick Drobchenko, Vladimir Kalyaev, John Brooker, Henry "
 "Nicolas, Chris Lusby Taylor.\n"
 "\n"
 "Gcodetools ver. 1.7\n"
+"      "
 
 #: ../share/extensions/gcodetools_prepare_path_for_plasma.inx:4
 msgid "Prepare path for plasma"
@@ -36482,7 +36481,7 @@ msgid ""
 "Hershey Text\n"
 msgstr ""
 "\n"
-"Hershey Metin"
+"Hershey Metin\n"
 
 #: ../share/extensions/hershey.inx:13
 msgid ""
