@@ -24786,7 +24786,7 @@ msgid ""
 "(more: %s)"
 msgstr ""
 "<b>%s</b>: Yolu şekillendirmek için sürükle, kilitlemek için üzerine getir, "
-"simetrik yapmak için Shift+Y kullan (daha fazla: %s)"
+"simetrik yapmak için Shift+Y kullan (ek bilgi: %s)"
 
 #: ../src/ui/tool/node.cpp:630
 #, c-format
@@ -24800,7 +24800,7 @@ msgstr ""
 #, c-format
 msgctxt "Path handle tip"
 msgid "<b>%s</b>: drag to shape the path. (more: %s)"
-msgstr "<b>%s</b>: yolu şekillendirmek için sürükle (daha fazla: %s)"
+msgstr "<b>%s</b>: yolu şekillendirmek için sürükle (ek bilgi: %s)"
 
 #: ../src/ui/tool/node.cpp:647
 #, c-format
@@ -24809,8 +24809,8 @@ msgid ""
 "<b>BSpline node handle</b> (%.3g power): Shift-drag to move, double-click to "
 "reset. (more: %s)"
 msgstr ""
-"<b>Açılı düğüm tutacı</b>: Sürüklemek için Shift'e, sıfırlamak için çift "
-"tıkla (daha fazla: %s)"
+"<b>Açılı düğüm tutacı</b> (%.3g kuvveti): Sürüklemek için Shift'e, sıfırlamak için çift "
+"tıkla (ek bilgi: %s)."
 
 #: ../src/ui/tool/node.cpp:655
 msgctxt "Path handle tip"
@@ -24869,8 +24869,8 @@ msgid ""
 "<b>BSpline node</b> (%.3g power): drag to shape the path. (more: Shift, "
 "Ctrl, Alt)"
 msgstr ""
-"<b>Açılı düğüm</b>: yolu şekillendirmek için sürükle(ek bilgi: Shift, "
-"Ctrl, Alt). %g güç"
+"<b>Açılı düğüm</b> (%.3g kuvveti): Yolu şekillendirmek için sürükle (ek bilgi: Shift, "
+"Ctrl, Alt)."
 
 #: ../src/ui/tool/node.cpp:1577
 #, c-format
@@ -24899,7 +24899,7 @@ msgid ""
 "<b>BSpline node</b> (%.3g power): drag to shape the path, click to select "
 "only this node. (more: Shift, Ctrl, Alt)"
 msgstr ""
-"<b>Açılı düğüm</b> (%.3g gücü): Yolu şekillendirmek için sürükle, "
+"<b>Açılı düğüm</b> (%.3g kuvveti): Yolu şekillendirmek için sürükle, "
 "yalnızca bu düğümü seçmek için tıkla (ek bilgi: Shift, Ctrl, Alt)"
 
 #: ../src/ui/tool/node.cpp:1613
