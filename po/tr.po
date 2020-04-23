@@ -34197,9 +34197,10 @@ msgstr ""
 "Elde edilen RGB değerleri otomatik olarak kenetlenir.\n"
 "\n"
 "Örnek (yarı kırmızı, yeşil ve mavi renk değişimi):\n"
-"  Kırmızı İşlev: r*0.5\n"
+"  Kırmızı İşlev: r*0,5\n"
 "  Yeşil İşlev: b\n"
 "  Mavi İşlev: g\n"
+"            "
 
 #: ../share/extensions/color_darker.inx:3
 msgid "Darker"
