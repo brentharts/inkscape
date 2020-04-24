@@ -24,7 +24,7 @@ msgstr ""
 "Project-Id-Version: inkscape\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
 "POT-Creation-Date: 2019-12-02 14:57+0100\n"
-"PO-Revision-Date: 2020-01-26 23:47+0100\n"
+"PO-Revision-Date: 2020-04-24 22:52+0100\n"
 "Last-Translator: Maren Hachmann <marenhachmann@yahoo.com>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de\n"
@@ -1025,7 +1025,7 @@ msgstr "Tigerfell"
 
 #: ../share/filters/filters.svg.h:408
 msgid "Tiger fur pattern with folds and bevel around the edges"
-msgstr "Aufgefaltetes Tigerfellmuster mit abgeschrägten Kanten"
+msgstr "Tigerfellmuster mit Falten und abgeschrägten Kanten"
 
 #: ../share/filters/filters.svg.h:410
 msgid "Black Light"
