@@ -28537,7 +28537,7 @@ msgstr "Non selezionato"
 
 #: ../src/ui/tools/measure-tool.cpp:1211
 msgid "Press 'CTRL' to measure into group"
-msgstr ""
+msgstr "Premi 'Ctrl' per misurare all'interno del gruppo"
 
 #: ../src/ui/tools/measure-tool.cpp:1403 ../src/ui/tools/measure-tool.cpp:1405
 #, c-format
@@ -29878,9 +29878,8 @@ msgid "Document license updated"
 msgstr "Licenza documento aggiornata"
 
 #: ../src/ui/widget/object-composite-settings.cpp:141
-#, fuzzy
 msgid "Change blur/blend filter"
-msgstr "Modifica sfocatura"
+msgstr "Modifica filtro sfocatura/miscela"
 
 #: ../src/ui/widget/object-composite-settings.cpp:176
 #: ../src/ui/widget/selected-style.cpp:865
@@ -30142,19 +30141,16 @@ msgid "Pattern stroke"
 msgstr "Motivo del contorno"
 
 #: ../src/ui/widget/selected-style.cpp:193
-#, fuzzy
 msgid "Hatch"
 msgstr "Trama"
 
 #: ../src/ui/widget/selected-style.cpp:195
-#, fuzzy
 msgid "Hatch fill"
-msgstr "Riempimento trama"
+msgstr "Trama del riempimento"
 
 #: ../src/ui/widget/selected-style.cpp:195
-#, fuzzy
 msgid "Hatch stroke"
-msgstr "Contorno trama"
+msgstr "Trama del contorno"
 
 #: ../src/ui/widget/selected-style.cpp:197
 msgid "<b>L</b>"
