@@ -592,7 +592,7 @@ const EnumEffectData<EffectType> LPETypeData[] = {
         , true //on_group
         , false //on_image
         , false //on_text
-        , false //experimental
+        , true //experimental
     },
     {
         POWERCLIP
