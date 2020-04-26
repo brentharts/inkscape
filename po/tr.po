@@ -5,6 +5,7 @@
 # Serdar Soytetir <sendirom@gmail.com>, 2005, 2010.
 # Hasan Kiran <sunder67@hotmail.com>, 2015.
 # Mustafa Levent Fidancı <mustafaleventfidanci@gmail.com> 2015, 2019
+# Sinan Özgün <ozgunsinan@gmail.com> 2020
 
 msgid ""
 msgstr ""
@@ -41163,7 +41164,7 @@ msgstr "Dilimleyici dikdörtgen oluştur"
 # File: ../share/extensions/webslicer_create_rect.inx, line: 13
 #: ../share/extensions/webslicer_create_rect.inx:12
 msgid "DPI:"
-msgstr ""
+msgstr "DPI"
 
 #: ../share/extensions/webslicer_create_rect.inx:13
 msgid "Force Dimension:"
@@ -41202,7 +41203,7 @@ msgstr ""
 # File: ../share/extensions/webslicer_create_rect.inx, line: 11
 #: ../share/extensions/webslicer_create_rect.inx:24
 msgid "GIF"
-msgstr ""
+msgstr "GIF"
 
 #: ../share/extensions/webslicer_create_rect.inx:25
 msgid "GIF specific options"
@@ -41220,7 +41221,7 @@ msgstr "Palet boyutu:"
 # File: ../share/extensions/webslicer_create_rect.inx, line: 33
 #: ../share/extensions/webslicer_create_rect.inx:32
 msgid "HTML"
-msgstr ""
+msgstr "HTML"
 
 #: ../share/extensions/webslicer_create_rect.inx:35
 msgid "Options for HTML export"
@@ -41384,6 +41385,9 @@ msgid ""
 "Illustrator, CorelDraw, or Xara X, using the W3C standard Scalable Vector "
 "Graphics (SVG) file format."
 msgstr ""
+"W3C standardı Ölçeklenebilir Vektör Grafik (SVG) dosya formatını kullanarak "
+Illustrator, CorelDraw ya da Xara X'e benzer bir Açık Kaynak vektör grafik "
+"düzenleyici.
 
 #
 # File: ../org.inkscape.Inkscape.appdata.xml.in, line: 18
@@ -41395,6 +41399,12 @@ msgid ""
 "trace bitmaps and much more. We also aim to maintain a thriving user and "
 "developer community by using open, community-oriented development."
 msgstr ""
+"Inkscape birçok gelişmiş SVG özelliğini destekler (işaretçiler, klonlar, alfa "
+"harmanlama, vb.) ve elverişli bir arayüz oluşturmak için büyük özen "
+"gösterilmiştir. Düğüm düzenlemek, karmaşık yol operasyonları yapmak, bitmap "
+"takip etmek ve daha da fazlası oldukça kolaydır. Ayrıca açık ve topluluk "
+merkezli geliştirme yaparak gelişen bir kullanıcı ve geliştirici toplululuğu "
+oluşturmayı ve sürdürmeyi hedefliyoruz.
 
 #: ../org.inkscape.Inkscape.appdata.xml.in:38
 msgid "Main application window"
@@ -41412,7 +41422,7 @@ msgstr "görüntü;düzenleyici;vektör;çizim;"
 # File: ../org.inkscape.Inkscape.desktop.template, line: 17
 #: ../org.inkscape.Inkscape.desktop.template:17
 msgid "${INKSCAPE_ICONPATH}"
-msgstr ""
+msgstr "${INKSCAPE_ICONPATH}"
 
 #: ../org.inkscape.Inkscape.desktop.template:21
 msgid "New Drawing"
@@ -41498,7 +41508,7 @@ msgstr "piksel"
 # File: ../share/ui/units.xml, line: 15
 #: ../share/ui/units.xml:15
 msgid "CSS Pixels (96/inch)"
-msgstr ""
+msgstr "CSS piksel (96/inç)"
 
 #: ../share/ui/units.xml:18
 msgid "point"
@@ -41530,19 +41540,19 @@ msgstr "12 punto"
 # File: ../share/ui/units.xml, line: 32
 #: ../share/ui/units.xml:32
 msgid "inch"
-msgstr ""
+msgstr "inç"
 
 #
 # File: ../share/ui/units.xml, line: 33
 #: ../share/ui/units.xml:33
 msgid "inches"
-msgstr ""
+msgstr "İnç"
 
 #
 # File: ../share/ui/units.xml, line: 36
 #: ../share/ui/units.xml:36
 msgid "Inches (96 px/in)"
-msgstr ""
+msgstr "İnç (96 px/in)"
 
 #: ../share/ui/units.xml:39
 msgid "millimeter"
@@ -41556,7 +41566,7 @@ msgstr "milimetre"
 # File: ../share/ui/units.xml, line: 43
 #: ../share/ui/units.xml:43
 msgid "Millimeters (25.4 mm/in)"
-msgstr ""
+msgstr "Milimetre (25.4 mm/inç)"
 
 #: ../share/ui/units.xml:46
 msgid "centimeter"
@@ -41586,27 +41596,27 @@ msgstr "radyanlar"
 # File: ../share/ui/units.xml, line: 64
 #: ../share/ui/units.xml:64
 msgid "Radians (180/pi deg/rad)"
-msgstr ""
+msgstr "Radyan (180/pi derece/rad)"
 
 #: ../share/ui/units.xml:67
 msgid "gradian"
-msgstr ""
+msgstr "gradyan"
 
 #: ../share/ui/units.xml:68
 msgid "gradians"
-msgstr ""
+msgstr "gradyanlar"
 
 #
 # File: ../share/ui/units.xml, line: 71
 #: ../share/ui/units.xml:71
 msgid "Gradians (360/400 deg/grad)"
-msgstr ""
+msgstr "Gradyan (360/400 derece/grad)"
 
 #
 # File: ../share/ui/units.xml, line: 74
 #: ../share/ui/units.xml:74
 msgid "turn"
-msgstr ""
+msgstr "döndür"
 
 #: ../share/ui/units.xml:75
 msgid "turns"
@@ -41616,7 +41626,7 @@ msgstr "dönüş"
 # File: ../share/ui/units.xml, line: 78
 #: ../share/ui/units.xml:78
 msgid "Turns (360 deg/turn)"
-msgstr ""
+msgstr "Döndür (360 derece/tur)"
 
 #: ../share/ui/units.xml:81
 msgid "font-height"
@@ -41646,16 +41656,16 @@ msgstr "'x' harfinin yüksekliği"
 # File: ../share/ui/units.xml, line: 95
 #: ../share/ui/units.xml:95
 msgid "half-em"
-msgstr ""
+msgstr "yarım-em"
 
 #
 # File: ../share/ui/units.xml, line: 96
 #: ../share/ui/units.xml:96
 msgid "half-ems"
-msgstr ""
+msgstr "yarım-ems"
 
 #
 # File: ../share/ui/units.xml, line: 99
 #: ../share/ui/units.xml:99
 msgid "Half of font height"
-msgstr ""
+msgstr "Yazı tipi yüksekliğinin yarısı"
