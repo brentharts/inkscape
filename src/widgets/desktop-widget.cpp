@@ -1291,7 +1291,7 @@ SPDesktopWidget::setWindowSize (gint w, gint h)
 {
     if (window)
     {
-        window->set_default_size (w, h);
+        window->set_default_size (-1, -1);
         window->resize (w, h);
     }
 }
