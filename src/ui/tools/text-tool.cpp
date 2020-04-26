@@ -272,19 +272,22 @@ bool TextTool::item_handler(SPItem* item, GdkEvent* event) {
                 if (SP_IS_TEXT(item_ungrouped) || SP_IS_FLOWTEXT(item_ungrouped)) {
                     desktop->getSelection()->set(item_ungrouped);
                     if (this->text) {
-                        // find out click point in document coordinates
-                        Geom::Point p = desktop->w2d(Geom::Point(event->button.x, event->button.y));
-                        // set the cursor closest to that point
-                        if (event->button.state & GDK_SHIFT_MASK) {
-                            this->text_sel_start = old_start;
-                            this->text_sel_end = sp_te_get_position_by_coords(this->text, p);
-                        } else {
-                            this->text_sel_start = this->text_sel_end = sp_te_get_position_by_coords(this->text, p);
+                        Inkscape::Text::Layout const *layout = te_get_layout(this->text);
+                        if (layout && this->text_sel_start != layout->begin()) {
+                            // find out click point in document coordinates
+                            Geom::Point p = desktop->w2d(Geom::Point(event->button.x, event->button.y));
+                            // set the cursor closest to that point
+                            if (event->button.state & GDK_SHIFT_MASK) {
+                                this->text_sel_start = old_start;
+                                this->text_sel_end = sp_te_get_position_by_coords(this->text, p);
+                            } else {
+                                this->text_sel_start = this->text_sel_end = sp_te_get_position_by_coords(this->text, p);
+                            }
+                            // update display
+                            sp_text_context_update_cursor(this);
+                            sp_text_context_update_text_selection(this);
+                            this->dragging = 1;
                         }
-                        // update display
-                        sp_text_context_update_cursor(this);
-                        sp_text_context_update_text_selection(this);
-                        this->dragging = 1;
                     }
                     ret = TRUE;
                 }
@@ -368,8 +371,8 @@ static void sp_text_context_setup_text(TextTool *tc)
     Inkscape::GC::release(rtext);
     text_item->transform = SP_ITEM(ec->desktop->currentLayer())->i2doc_affine().inverse();
 
+    text_item->doWriteTransform(text_item->transform);
     text_item->updateRepr();
-    text_item->doWriteTransform(text_item->transform, nullptr, true);
     DocumentUndo::done(ec->desktop->getDocument(), SP_VERB_CONTEXT_TEXT,
                _("Create text"));
 }
