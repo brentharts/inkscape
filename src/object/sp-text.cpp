@@ -380,6 +380,9 @@ void SPText::snappoints(std::vector<Inkscape::SnapCandidatePoint> &p, Inkscape::
 void SPText::hide_shape_inside()
 {
     SPText *text = dynamic_cast<SPText *>(this);
+    if (text && !text->has_shape_inside()) {
+        return;
+    }
     SPStyle *item_style = this->style;
     if (item_style && text && item_style->shape_inside.set) {
         SPCSSAttr *css_unset = sp_css_attr_from_style(item_style, SP_STYLE_FLAG_IFSET);
@@ -395,6 +398,9 @@ void SPText::hide_shape_inside()
 void SPText::show_shape_inside()
 {
     SPText *text = dynamic_cast<SPText *>(this);
+    if (text && !text->has_shape_inside()) {
+        return;
+    }
     if (text && css) {
         this->changeCSS(css, "style");
     }
