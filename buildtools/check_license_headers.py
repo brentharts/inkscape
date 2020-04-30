@@ -35,6 +35,7 @@ IGNORE_PATHS = [
     "src/3rdparty",
     "testfiles/cli_tests/testcases",
     "testfiles/rendering_tests/fonts/LICENSES",
+    "testfiles/rendering_tests/fonts/LICENSES/*.COPYRIGHT",
 ]
 
 # do not check licenses for the following file endings:
