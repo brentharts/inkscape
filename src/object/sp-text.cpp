@@ -530,7 +530,7 @@ void SPText::_buildLayoutInit()
                         if ( curve ) {
                             Path *temp = new Path;
                             Path *padded = new Path;
-                            temp->LoadPathVector( curve->get_pathvector(), shape->transform, true );
+                            temp->LoadPathVector(curve->get_pathvector(), shape->getRelativeTransform(this), true );
                             if( style->shape_padding.set ) {
                                 // std::cout << "  padding: " << style->shape_padding.computed << std::endl;
                                 temp->OutsideOutline ( padded, style->shape_padding.computed, join_round, butt_straight, 20.0 );
@@ -782,7 +782,7 @@ Shape* SPText::_buildExclusionShape() const
                 if ( curve ) {
                     Path *temp = new Path;
                     Path *margin = new Path;
-                    temp->LoadPathVector( curve->get_pathvector(), shape->transform, true );
+                    temp->LoadPathVector(curve->get_pathvector(), shape->getRelativeTransform(this), true );
 
                     if( shape->style->shape_margin.set ) {
                         temp->OutsideOutline ( margin, -shape->style->shape_margin.computed, join_round, butt_straight, 20.0 );
