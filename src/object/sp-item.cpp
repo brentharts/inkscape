@@ -1604,30 +1604,69 @@ void SPItem::set_item_transform(Geom::Affine const &transform_matrix)
 //}
 
 
-Geom::Affine i2anc_affine(SPObject const *object, SPObject const *const ancestor) {
-    Geom::Affine ret(Geom::identity());
-    g_return_val_if_fail(object != nullptr, ret);
+/**
+ * Get the item-to-ancestor transformation. Return false if the path crosses
+ * a non-SPItem (`ret` will contain the transformation up to that point).
+ * @param object Start item (must not be NULL)
+ * @param ancestor Stop item (can be NULL for item-to-doc transformation)
+ * @param[out] ret Item to ancestor transformation
+ * @pre `ret` is the identity matrix
+ * @return True if `object` and all its parents up to `ancestor` are of type SPItem
+ */
+static bool _i2anc_affine(SPObject const *object, SPObject const *const ancestor, Geom::Affine &ret)
+{
+    g_return_val_if_fail(object != nullptr, false);
 
     /* stop at first non-renderable ancestor */
-    while ( object != ancestor && dynamic_cast<SPItem const *>(object) ) {
+    while (object != ancestor) {
+        SPItem const *item = dynamic_cast<SPItem const *>(object);
+        if (!item) {
+            // item not directly renderable, e.g. inside <defs>
+            return false;
+        }
         SPRoot const *root = dynamic_cast<SPRoot const *>(object);
         if (root) {
             ret *= root->c2p;
         } else {
-            SPItem const *item = dynamic_cast<SPItem const *>(object);
             g_assert(item != nullptr);
             ret *= item->transform;
         }
         object = object->parent;
     }
+    return true;
+}
+
+Geom::Affine i2anc_affine(SPObject const *object, SPObject const *const ancestor)
+{
+    Geom::Affine ret;
+    _i2anc_affine(object, ancestor, ret);
     return ret;
 }
 
+/**
+ * Get the item-to-item transformation if both objects are in "item" space
+ * (they and their ancestors up to their common ancestor are all of type SPItem).
+ * If `src` has a non-item ancestor, then assume it will be rendered in the viewport
+ * of `dest` and simply return `src->i2doc_affine()`. Vice versa if `dest` has
+ * a non-item ancestor.
+ * If both are not in "item" space, the result is undefined.
+ */
 Geom::Affine
 i2i_affine(SPObject const *src, SPObject const *dest) {
     g_return_val_if_fail(src != nullptr && dest != nullptr, Geom::identity());
     SPObject const *ancestor = src->nearestCommonAncestor(dest);
-    return i2anc_affine(src, ancestor) * i2anc_affine(dest, ancestor).inverse();
+
+    Geom::Affine src_affine;
+    if (!_i2anc_affine(src, ancestor, src_affine)) {
+        return src_affine;
+    }
+
+    Geom::Affine dest_affine;
+    if (!_i2anc_affine(dest, ancestor, dest_affine)) {
+        return dest_affine.inverse();
+    }
+
+    return src_affine * dest_affine.inverse();
 }
 
 Geom::Affine SPItem::getRelativeTransform(SPObject const *dest) const {
