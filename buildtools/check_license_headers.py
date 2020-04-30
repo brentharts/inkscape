@@ -56,6 +56,7 @@ IGNORE_FILE_ENDINGS = [
     ".ttf",
     ".xml",
     ".xpm",
+    ".COPYRIGHT",
     "AUTHORS",
     "BUILD_YOUR_OWN",
     "CONTRIBUTING.md",
