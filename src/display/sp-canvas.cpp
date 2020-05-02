@@ -144,7 +144,11 @@ struct SPCanvasClass {
 
 namespace {
 
-gint const UPDATE_PRIORITY = G_PRIORITY_DEFAULT_IDLE;
+/**
+ * Canvas display update priority during interaction (e.g. while moving/editing an object).
+ * High-idle priority to make the canvas feel responsive.
+ */
+gint const UPDATE_PRIORITY = G_PRIORITY_HIGH_IDLE;
 
 GdkWindow *getWindow(SPCanvas *canvas)
 {
