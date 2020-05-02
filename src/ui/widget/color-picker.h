@@ -57,7 +57,7 @@ protected:
     void on_clicked() override;
     virtual void on_changed (guint32);
 
-    ColorPreview        _preview;
+    ColorPreview *_preview;
 
     /*const*/ Glib::ustring _title;
     sigc::signal<void,guint32> _changed_signal;
@@ -82,9 +82,6 @@ public:
                          const Glib::ustring& tip,
                          const guint32 rgba,
                          bool undo) : Labelled(label, tip, new ColorPicker(title, tip, rgba, undo)) {}
-
-    ~LabelledColorPicker() override
-        { static_cast<ColorPicker*>(_widget)->~ColorPicker(); }
 
     void setRgba32 (guint32 rgba)
         { static_cast<ColorPicker*>(_widget)->setRgba32 (rgba); }
