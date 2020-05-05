@@ -384,8 +384,9 @@ protected:
     UI::Widget::PrefCombo       _ui_languages;
     UI::Widget::PrefCheckButton _ui_colorsliders_top;
     UI::Widget::PrefSpinButton  _misc_recent;
-    UI::Widget::PrefCheckButton _ui_partialdynamic;
     UI::Widget::ZoomCorrRulerSlider _ui_zoom_correction;
+    UI::Widget::PrefCombo       _ui_redraw_priority;
+    UI::Widget::PrefCheckButton _ui_partialdynamic;
     UI::Widget::PrefCheckButton _ui_yaxisdown;
 
     //Spellcheck

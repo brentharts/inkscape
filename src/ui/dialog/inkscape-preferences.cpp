@@ -1067,6 +1067,14 @@ void InkscapePreferences::initPageUI()
     _page_ui.add_line( false, _("_Zoom correction factor (in %):"), _ui_zoom_correction, "",
                               _("Adjust the slider until the length of the ruler on your screen matches its real length. This information is used when zooming to 1:1, 1:2, etc., to display objects in their true sizes"), true);
 
+    {
+        Glib::ustring redrawPriorityLabels[] = {_("Responsive"), _("Conservative")};
+        int redrawPriorityValues[] = {100, 200};
+
+        _ui_redraw_priority.init("/options/redrawpriority/value", redrawPriorityLabels, redrawPriorityValues, G_N_ELEMENTS(redrawPriorityLabels), 0);
+        _page_ui.add_line(false, _("Redraw while editing:"), _ui_redraw_priority, "",
+                                 _("Set how quickly the canvas display is updated while editing objects"), false);
+    }
 
     _ui_partialdynamic.init( _("Enable dynamic relayout for incomplete sections"), "/options/workarounds/dynamicnotdone", false);
     _page_ui.add_line( false, "", _ui_partialdynamic, "",
