@@ -309,7 +309,8 @@ protected:
     UI::Widget::PrefCheckButton _rendering_image_outline;
     UI::Widget::PrefSpinButton  _rendering_cache_size;
     UI::Widget::PrefSpinButton  _rendering_tile_multiplier;
-    UI::Widget::PrefSpinButton _rendering_xray_radius;
+    UI::Widget::PrefSpinButton  _rendering_xray_radius;
+    UI::Widget::PrefCombo       _rendering_redraw_priority;
     UI::Widget::PrefSpinButton  _filter_multi_threaded;
 
     UI::Widget::PrefCheckButton _trans_scale_stroke;
@@ -384,9 +385,8 @@ protected:
     UI::Widget::PrefCombo       _ui_languages;
     UI::Widget::PrefCheckButton _ui_colorsliders_top;
     UI::Widget::PrefSpinButton  _misc_recent;
-    UI::Widget::ZoomCorrRulerSlider _ui_zoom_correction;
-    UI::Widget::PrefCombo       _ui_redraw_priority;
     UI::Widget::PrefCheckButton _ui_partialdynamic;
+    UI::Widget::ZoomCorrRulerSlider _ui_zoom_correction;
     UI::Widget::PrefCheckButton _ui_yaxisdown;
 
     //Spellcheck

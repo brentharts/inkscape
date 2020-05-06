@@ -1067,15 +1067,6 @@ void InkscapePreferences::initPageUI()
     _page_ui.add_line( false, _("_Zoom correction factor (in %):"), _ui_zoom_correction, "",
                               _("Adjust the slider until the length of the ruler on your screen matches its real length. This information is used when zooming to 1:1, 1:2, etc., to display objects in their true sizes"), true);
 
-    {
-        Glib::ustring redrawPriorityLabels[] = {_("Responsive"), _("Conservative")};
-        int redrawPriorityValues[] = {100, 200};
-
-        _ui_redraw_priority.init("/options/redrawpriority/value", redrawPriorityLabels, redrawPriorityValues, G_N_ELEMENTS(redrawPriorityLabels), 0);
-        _page_ui.add_line(false, _("Redraw while editing:"), _ui_redraw_priority, "",
-                                 _("Set how quickly the canvas display is updated while editing objects"), false);
-    }
-
     _ui_partialdynamic.init( _("Enable dynamic relayout for incomplete sections"), "/options/workarounds/dynamicnotdone", false);
     _page_ui.add_line( false, "", _ui_partialdynamic, "",
                        _("When on, will allow dynamic layout of components that are not completely finished being refactored"), true);
@@ -2085,6 +2076,16 @@ void InkscapePreferences::initPageRendering()
     _rendering_xray_radius.init("/options/rendering/xray-radius", 1.0, 1500.0, 1.0, 100.0, 100.0, true, false);
     _page_rendering.add_line(false, _("X-ray radius:"), _rendering_xray_radius, "",
                              _("Radius of the circular area around the mouse cursor in X-ray mode"), false);
+
+    {
+        Glib::ustring redrawPriorityLabels[] = {_("Responsive"), _("Conservative")};
+        int redrawPriorityValues[] = {100, 200};
+
+        // redraw priority
+        _rendering_redraw_priority.init("/options/redrawpriority/value", redrawPriorityLabels, redrawPriorityValues, G_N_ELEMENTS(redrawPriorityLabels), 0);
+        _page_rendering.add_line(false, _("Redraw while editing:"), _rendering_redraw_priority, "",
+                                        _("Set how quickly the canvas display is updated while editing objects"), false);
+    }
 
     /* blur quality */
     _blur_quality_best.init ( _("Best quality (slowest)"), "/options/blurquality/value",
