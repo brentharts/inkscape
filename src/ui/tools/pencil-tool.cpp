@@ -49,7 +49,7 @@
 
 #include "object/sp-lpe-item.h"
 #include "object/sp-path.h"
-#include "path/path-boolop.h"
+#include "splivarot.h"
 #include "style.h"
 
 #include "ui/pixmaps/cursor-pencil.xpm"
