@@ -29,18 +29,6 @@ make install
 
 See `CONTRIBUTING.md` for more developer details and the [wiki](https://wiki.inkscape.org/wiki/index.php?title=Compiling_Inkscape).
 
-For non-linux platforms, please see the Inkscape wiki pages here:
-
-For building on ChromeOS, please click [here](
-https://wiki.inkscape.org/wiki/index.php?title=Compiling_Inkscape_on_Chrome_OS)
-
-For building on Windows, please click [here](
-https://wiki.inkscape.org/wiki/index.php?title=Compiling_Inkscape_on_Windows_with_MSYS2)
-
-For building on Mac, please click [here](
-https://wiki.inkscape.org/wiki/index.php?title=CompilingMacOsX)
-
-
 Running Without Installing
 --------------------------
 
