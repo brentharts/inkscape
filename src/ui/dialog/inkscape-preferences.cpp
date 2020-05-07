@@ -2078,8 +2078,12 @@ void InkscapePreferences::initPageRendering()
                              _("Radius of the circular area around the mouse cursor in X-ray mode"), false);
 
     {
+        // if these GTK constants ever change, consider adding a compatibility shim to SPCanvas::addIdle()
+        static_assert(G_PRIORITY_HIGH_IDLE    == 100, "G_PRIORITY_HIGH_IDLE must be 100 to match preferences.xml");
+        static_assert(G_PRIORITY_DEFAULT_IDLE == 200, "G_PRIORITY_DEFAULT_IDLE must be 200 to match preferences.xml");
+
         Glib::ustring redrawPriorityLabels[] = {_("Responsive"), _("Conservative")};
-        int redrawPriorityValues[] = {100, 200};
+        int redrawPriorityValues[] = {G_PRIORITY_HIGH_IDLE, G_PRIORITY_DEFAULT_IDLE};
 
         // redraw priority
         _rendering_redraw_priority.init("/options/redrawpriority/value", redrawPriorityLabels, redrawPriorityValues, G_N_ELEMENTS(redrawPriorityLabels), 0);

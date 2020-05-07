@@ -2597,20 +2597,7 @@ void SPCanvas::addIdle()
 {
     if (_idle_id == 0) {
         Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-        int redrawPriorityValue = prefs->getIntLimited("/options/redrawpriority/value", 100, 100, 200);
-        
-        guint redrawPriority;
-        switch (redrawPriorityValue) {
-        case 100:
-            redrawPriority = G_PRIORITY_HIGH_IDLE;
-            break;
-        case 200:
-            redrawPriority = G_PRIORITY_DEFAULT_IDLE;
-            break;
-        default:
-            // Allow custom value, but map config values 100..200 to the correct priority range
-            redrawPriority = G_PRIORITY_HIGH_IDLE + ((redrawPriorityValue - 100) * (G_PRIORITY_DEFAULT_IDLE - G_PRIORITY_HIGH_IDLE)) / (200 - 100);
-        }
+        guint redrawPriority = prefs->getIntLimited("/options/redrawpriority/value", G_PRIORITY_HIGH_IDLE, G_PRIORITY_HIGH_IDLE, G_PRIORITY_DEFAULT_IDLE);
 
 #ifdef DEBUG_PERFORMANCE
         _idle_time = g_get_monotonic_time();
