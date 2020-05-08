@@ -397,7 +397,7 @@ bool ToolBase::root_handler(GdkEvent* event) {
             break;
 
         case 2:
-            if (event->button.state & GDK_CONTROL_MASK) {
+            if ((event->button.state & GDK_CONTROL_MASK) && !desktop->get_rotation_lock()) {
                 // On screen canvas rotation preview
 
                 // Grab background before doing anything else
@@ -790,7 +790,7 @@ bool ToolBase::root_handler(GdkEvent* event) {
         gdouble delta_x = 0;
         gdouble delta_y = 0;
 
-        if (ctrl & shift) {
+        if ((ctrl & shift) && !desktop->get_rotation_lock()) {
             /* ctrl + shift, rotate */
 
             double rotate_inc = prefs->getDoubleLimited(
@@ -827,7 +827,7 @@ bool ToolBase::root_handler(GdkEvent* event) {
                 desktop->rotate_relative_keep_point(scroll_dt, rotate_inc);
             }
 
-        } else if (event->scroll.state & GDK_SHIFT_MASK) {
+        } else if (shift && !ctrl) {
            /* shift + wheel, pan left--right */
 
             switch (event->scroll.direction) {
