@@ -513,7 +513,7 @@ void Box3dTool::drag(guint /*state*/) {
             Inkscape::Preferences *prefs = Inkscape::Preferences::get();
 
             Glib::ustring descr = "/desktop/";
-            descr += box3d_side_axes_string(side);
+            descr += side->axes_string();
             descr += "/style";
 
             Glib::ustring cur_style = prefs->getString(descr);    
@@ -526,14 +526,14 @@ void Box3dTool::drag(guint /*state*/) {
             } else {
                 // use default style 
                 Glib::ustring tool_path = Glib::ustring::compose("/tools/shapes/3dbox/%1",
-                        box3d_side_axes_string(side));
+                        side->axes_string());
                 desktop->applyCurrentOrToolStyle (side, tool_path, false);
             }
 
-            side->updateRepr(); // calls box3d_side_write() and updates, e.g., the axes string description
+            side->updateRepr(); // calls Box3DSide::write() and updates, e.g., the axes string description
         }
 
-        box3d_set_z_orders(this->box3d);
+        this->box3d->set_z_orders();
         this->box3d->updateRepr();
 
         // TODO: It would be nice to show the VPs during dragging, but since there is no selection
@@ -548,13 +548,13 @@ void Box3dTool::drag(guint /*state*/) {
     this->box3d->orig_corner0 = this->drag_origin_proj;
     this->box3d->orig_corner7 = this->drag_ptC_proj;
 
-    box3d_check_for_swapped_coords(this->box3d);
+    this->box3d->check_for_swapped_coords();
 
-    /* we need to call this from here (instead of from box3d_position_set(), for example)
+    /* we need to call this from here (instead of from SPBox3D::position_set(), for example)
        because z-order setting must not interfere with display updates during undo/redo */
-    box3d_set_z_orders (this->box3d);
+    this->box3d->set_z_orders ();
 
-    box3d_position_set(this->box3d);
+    this->box3d->position_set();
 
     // status text
     this->message_context->setF(Inkscape::NORMAL_MESSAGE, "%s", _("<b>3D Box</b>; with <b>Shift</b> to extrude along the Z axis"));
@@ -577,7 +577,7 @@ void Box3dTool::finishItem() {
 
         this->box3d->updateRepr();
 
-        box3d_relabel_corners(this->box3d);
+        this->box3d->relabel_corners();
 
         desktop->canvas->endForcedFullRedraws();
 
