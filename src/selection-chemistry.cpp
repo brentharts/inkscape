@@ -4324,6 +4324,79 @@ void ObjectSet::swapFillStroke()
 }
 
 /**
+ * Creates a linked fill between all the objects in the current selection using
+ * the "Fill Between Many" LPE. After this method completes, the linked fill
+ * created becomes the new selection, so as to facilitate quick styling of the
+ * fill.
+ *
+ * All objects referred to must have an ID. If an ID does not exist, it will be
+ * created.
+ *
+ * As an additional timesaver, the fill object is created below the bottommost
+ * object in the selection.
+ */
+void ObjectSet::fillBetweenMany()
+{
+    if (isEmpty()) {
+        if (desktop()) {
+            desktop()->messageStack()->flash(Inkscape::WARNING_MESSAGE, _("Select <b>path(s)</b> to create fill between."));
+        }
+
+        return;
+    }
+
+    SPDocument *doc  = document();
+    SPObject *defs   = doc->getDefs();
+    SPObject *effect = nullptr;
+
+    Inkscape::XML::Node *effectRepr = doc->getReprDoc()->createElement("inkscape:path-effect");
+    Inkscape::XML::Node *fillRepr   = doc->getReprDoc()->createElement("svg:path");
+
+    Glib::ustring acc;
+    Glib::ustring pathTarget;
+
+    for (auto&& item : items()) {
+        // Force-assign id if there is none present
+        if (!item->getId()) {
+            gchar *id = sp_object_get_unique_id(item, nullptr);
+            item->set(SP_ATTR_ID, id);
+            item->updateRepr();
+            g_free(id);
+        }
+
+        acc += "#";
+        acc += item->getId();
+        acc += ",0,1|";
+    }
+
+    effectRepr->setAttribute("effect", "fill_between_many");
+    effectRepr->setAttribute("method", "originald");
+    effectRepr->setAttribute("linkedpaths", acc.c_str());
+    defs->appendChild(effectRepr);
+
+    effect = doc->getObjectByRepr(effectRepr);
+    pathTarget += "#";
+    pathTarget += effect->getId();
+
+    fillRepr->setAttribute("inkscape:original-d", "M 0,0");
+    fillRepr->setAttribute("inkscape:path-effect", pathTarget.c_str());
+    fillRepr->setAttribute("d", "M 0,0");
+
+    // Get bottommost element in selection to create fill underneath
+    SPObject *first = *std::min_element(items().begin(), items().end(), sp_object_compare_position_bool);
+    SPObject *prev  = first->getPrev();
+
+    first->parent->addChild(fillRepr, prev ? prev->getRepr() : nullptr);
+
+    doc->ensureUpToDate();
+
+    clear();
+    add(fillRepr);
+
+    DocumentUndo::done(doc, SP_VERB_SELECTION_FILL_BETWEEN_MANY, _("Create linked fill object between paths"));
+}
+
+/**
  * \param with_margins margins defined in the xml under <sodipodi:namedview>
  *                     "fit-margin-..." attributes.  See SPDocument::fitToRect.
  */

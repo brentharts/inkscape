@@ -253,6 +253,8 @@
        <verb verb-id="SelectionDynOffset"    show-icons="true" />
        <verb verb-id="SelectionLinkedOffset" show-icons="true" />
        <separator/>
+       <verb verb-id="SelectionFillBetweenMany" />
+       <separator/>
        <verb verb-id="SelectionSimplify" />
        <verb verb-id="SelectionReverse" />
        <separator/>
