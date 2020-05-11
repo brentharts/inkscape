@@ -59,7 +59,7 @@ msgstr ""
 "Project-Id-Version: inkscape 0.92\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
 "POT-Creation-Date: 2019-12-02 14:57+0100\n"
-"PO-Revision-Date: 2020-01-09 23:42+0100\n"
+"PO-Revision-Date: 2020-01-10 21:10+0100\n"
 "Last-Translator: Kris De Gussem <Kris.DeGussem@gmail.com>\n"
 "Language-Team: Dutch\n"
 "Language: nl\n"
@@ -8724,8 +8724,8 @@ msgstr "Invoerbestand overschrijven"
 
 #
 #: ../src/inkscape-application.cpp:551
-msgid "File type(s) to export: [svg,png,ps,eps,pdf,emf,wmf,xaml]"
-msgstr "Bestandstypes voor export: [svg,png,ps,eps,pdf,emf,wmf,xaml]"
+msgid "File type(s) to export: [svg,png,ps,eps,pdf,tex,emf,wmf,xaml]"
+msgstr "Bestandstypes voor export: [svg,png,ps,eps,pdf,tex,emf,wmf,xaml]"
 
 #: ../src/inkscape-application.cpp:554
 msgid "Export geometry"
@@ -33531,15 +33531,44 @@ msgid ""
 "  4) If your goal is to get few nodes and good precision, manual tracing is "
 "always best.\n"
 msgstr ""
+"\n"
+"Dit dialoogvenster laat je toe om een rasterafbeelding in vectorpaden om te "
+"zetten. Verschillende opties zijn beschikbaar:\n"
+" * \"Drempelwaarde helderheid\" detecteert vlakken die donkerder zijn de "
+"drempelwaarde en maakt paden om deze te scheiden (met behulp van potrace).\n"
+" * \"Randherkenning\" detecteert veranderingen groter dan de drempelwaarde "
+"voor de helderheid en maakt paden om deze te scheiden (met behulp van "
+"potrace).\n"
+" * \"Kleurkwantisatie\" deelt een afbeelding op een aantal kleuren en "
+"scheidt deze door een pad (met behulp van potrace).\n"
+" * \"Autotrace\" gebruikt het autotracealgoritme met de opgegeven "
+"instellingen.\n"
+" * \"Centerline tracing\" tracht een lijnafbeelding te vectoriseren (met "
+"behulp van autotrace).\n"
+" * \"Meerdere scans\" opties delen de afbeelding in in een aantal scan "
+"afhankelijk van helderheid, kleurscheiding of grijsniveau's en creëert "
+"hiervoor verschillende paden. Deze optie kan ook autotrace gebruiken.\n"
+" * De tab \"Pixelkunst\" om het depixelize algoritme te gebruiken om "
+"pixelkunst afbeeldingen te vectoriseren.\n"
+"\n"
+" * NOTA:\n"
+"  1) Bewaar je werk voor over te trekken\n"
+"  2) Hou het aantal pixels in het oog: \"Pixelkunst overtrekken\" maakt een "
+"pad per pixel. Dit wordt afgeraden voor afbeeldingen die geen pixelkunst "
+"zijn.\n"
+"  3) Autotrace is trager dan potrace en is niet aanbevolen voor grote "
+"afbeeldingen. Afbeeldingen voorbewerken om het contrast te verhogen wordt "
+"aanbevolen.\n"
+"  4) Als je doel is om een beperkt aantal knopen en goede precisie te "
+"bereiken, is manueel overtrekken steeds de beste optie.\n"
 
 #: ../share/ui/dialog-trace.glade:136
-#, fuzzy
 msgid "Create a single path or create a group of paths"
-msgstr "Meerdere scans: een groep van paden maken"
+msgstr "Een enkel of groep paden maken"
 
 #: ../share/ui/dialog-trace.glade:195
 msgid "Brightness threshold"
-msgstr "Drempelwaarden helderheid"
+msgstr "Drempelwaarde helderheid"
 
 #: ../share/ui/dialog-trace.glade:230
 msgid "Edge threshold"
@@ -33672,18 +33701,20 @@ msgid "Favors connections that are part of foreground color"
 msgstr "Bevoordeelt verbindingen die deel uitmaken van de voorgrondkleur"
 
 #: ../share/ui/dialog-trace.glade:745
-#, fuzzy
 msgid ""
 "Sparse pixels\n"
 "(window radius)"
-msgstr "Verspreidde pixels (_straal venster):"
+msgstr ""
+"Verspreidde pixels\n"
+"(straal venster)"
 
 #: ../share/ui/dialog-trace.glade:758
-#, fuzzy
 msgid ""
 "Sparse pixels\n"
 "(multiplier)"
-msgstr "Verspreide pixels (_factor):"
+msgstr ""
+"Verspreide pixels\n"
+"(factor)"
 
 #: ../share/ui/dialog-trace.glade:770 ../share/ui/dialog-trace.glade:813
 msgid "The heuristic computed vote will be multiplied by this value"
@@ -33719,7 +33750,6 @@ msgid "B-splines"
 msgstr "B-splines"
 
 #: ../share/ui/dialog-trace.glade:871
-#, fuzzy
 msgid "Preserve staircasing artifacts"
 msgstr "Trapvormige artefacten behouden"
 
@@ -34241,32 +34271,27 @@ msgstr ""
 "Bewerk aub. de patroonbreedte."
 
 #: ../share/extensions/perspective.py:42
-#, fuzzy
 msgid ""
 "Failed to import the numpy or numpy.linalg modules. These modules are "
 "required by this extension. Please install them.  On a Debian-like system "
 "this can be done with the command, sudo apt-get install python-numpy."
 msgstr ""
-"Laden van de numpy of numpy.linalg modules mislukt. Deze modules zijn nodig "
-"voor deze uitbreiding. Installeer deze alstublief en probeer opnieuw. Op een "
-"Debian-gebaseerd systeem kan dit gedaan worden met het commando, sudo apt-"
-"get install python-numpy."
+"Laden van de numpy of numpy.linalg modules mislukt. Deze modules zijn "
+"vereist voor deze uitbreiding. Installeer deze alstublief. Op een Debian-"
+"gebaseerd systeem kan dit gedaan worden met het commando, sudo apt-get "
+"install python-numpy."
 
 #: ../share/extensions/perspective.py:59
-#, fuzzy
 msgid "This extension requires that the second path be four nodes long."
-msgstr ""
-"Deze uitbreiding vereist dat het tweede geselecteerde pad vier knooppunten "
-"lang is."
+msgstr "Deze uitbreiding vereist dat het tweede pad vier knooppunten lang is."
 
 #: ../share/extensions/perspective.py:76
-#, fuzzy
 msgid ""
 "The second selected object is a group, not a path.\n"
 "Try using Object->Ungroup."
 msgstr ""
-"Het tweede geselecteerde object is een groep en geen pad.\n"
-"Probeer de procedure Object->Groep opheffen."
+"Het tweede geselecteerde object is een groep, geen pad.\n"
+"Probeer met Object->Groep opheffen."
 
 #: ../share/extensions/perspective.py:78
 msgid ""
@@ -34285,11 +34310,8 @@ msgstr ""
 "Probeer de procedure Paden->Object naar Pad."
 
 #: ../share/extensions/plotter.py:66
-#, fuzzy
 msgid "No paths where found. Please convert objects to paths."
-msgstr ""
-"Geen paden gevonden. Converteer aub. alle objecten die je wil bewaren in "
-"paden."
+msgstr "Geen paden gevonden. Converteer aub. de objecten naar paden."
 
 #: ../share/extensions/polyhedron_3d.py:371
 msgid "No face data found in specified file."
@@ -34498,7 +34520,6 @@ msgid "Random lightness"
 msgstr "Random lichtheid"
 
 #: ../share/extensions/color_HSL_adjust.inx:16
-#, fuzzy
 msgid ""
 "\n"
 "Adjusts hue, saturation and lightness in the HSL representation of the "
@@ -34510,8 +34531,9 @@ msgid ""
 "    * Random Hue/Saturation/Lightness: randomize the parameter's value.\n"
 "      "
 msgstr ""
-"Past tint, verzadiging en lichtheid in de TVL-vertegenwoordiging van de "
-"kleur van de geselecteerde objecten.\n"
+"\n"
+"Past tint, verzadiging en lichtheid aan in de TVL-voorstelling van de kleur "
+"van geselecteerde objecten.\n"
 "Opties:\n"
 "    * Tint: draaien met ... graden (telt door).\n"
 "    * Verzadiging: % toevoegen/aftrekken (min=-100, max=100).\n"
@@ -34556,7 +34578,6 @@ msgid "0 - 255"
 msgstr "0 - 255"
 
 #: ../share/extensions/color_custom.inx:17
-#, fuzzy
 msgid ""
 "\n"
 "Allows you to evaluate different functions for each channel.\n"
@@ -34569,13 +34590,14 @@ msgid ""
 "  Blue Function: g\n"
 "            "
 msgstr ""
+"\n"
 "Deze uitbreiding laat je toe verschillende functies te evalueren voor elk "
-"kleurkanaal\n"
+"kleurkanaal.\n"
 "R, g en b zijn de genormaliseerde waarden voor het rood-, groen- en "
 "blauwkanaal. De resulterende RGB-waarden worden automatisch vastgelegd.\n"
 " \n"
-"Voorbeeld (halveren rood, groen en blauw omwisselen):\n"
-"  Roodfunctie: r*0.5 \n"
+"Voorbeeld (halveert rood, wisselt groen en blauw):\n"
+"  Roodfunctie: r*0.5\n"
 "  Groenfunctie: b \n"
 "  Blauwfunctie: g"
 
@@ -34738,16 +34760,16 @@ msgid "DOC Info"
 msgstr "DOC Info"
 
 #: ../share/extensions/docinfo.inx:6
-#, fuzzy
 msgid "Show page info"
-msgstr "Pagina_rand weergeven"
+msgstr "Paginainfo weergeven"
 
 #: ../share/extensions/docinfo.inx:7
-#, fuzzy
 msgid ""
 "Choose this tab if you would like to see page info previously to apply DPI "
 "Switcher."
-msgstr "Klik op deze tab voor een lijst met gebruikte/gevonden lettertypes."
+msgstr ""
+"Klik op deze tab om de paginainfo te zien vooraleer de PPI-waarde aangepast "
+"wordt."
 
 #: ../share/extensions/docinfo.inx:13 ../share/extensions/dpi90to96.inx:15
 #: ../share/extensions/dpi96to90.inx:15
@@ -34796,26 +34818,26 @@ msgstr ""
 
 #: ../share/extensions/dpi90to96.inx:3
 msgid "DPI 90 to 96"
-msgstr ""
+msgstr "PPI 90 naar 96"
 
 #
 # File: ../share/extensions/dpi90to96.inx, line: 7
 # File: ../share/extensions/dpi96to90.inx, line: 7
 #: ../share/extensions/dpi90to96.inx:6 ../share/extensions/dpi96to90.inx:6
 msgid "Switch DPI"
-msgstr ""
+msgstr "PPI aanpassen"
 
 #: ../share/extensions/dpi90to96.inx:8
 msgid "DPI Switch from 90 to 96"
-msgstr ""
+msgstr "PPI aanpassen van 90 naar 96"
 
 #: ../share/extensions/dpi96to90.inx:3
 msgid "DPI 96 to 90"
-msgstr ""
+msgstr "PPI 96 naar 90"
 
 #: ../share/extensions/dpi96to90.inx:8
 msgid "DPI Switch from 96 to 90"
-msgstr ""
+msgstr "PPI aanpassen van 96 naar 90"
 
 #: ../share/extensions/draw_from_triangle.inx:3
 msgid "Draw From Triangle"
@@ -40061,9 +40083,8 @@ msgid "H (Approx. 30%)"
 msgstr "H (Ong. 30%)"
 
 #: ../share/extensions/render_barcode_qrcode.inx:33
-#, fuzzy
 msgid "Invert QR code:"
-msgstr "Knooppunt invoegen"
+msgstr "QR-code inverteren:"
 
 #: ../share/extensions/render_barcode_qrcode.inx:34
 msgid "Square size (px):"
