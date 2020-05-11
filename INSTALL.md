@@ -23,10 +23,16 @@ https://wiki.inkscape.org/wiki/index.php?title=Compiling_Inkscape_on_Chrome_OS)
 
 For building on Windows, please click [here](
 https://wiki.inkscape.org/wiki/index.php?title=Compiling_Inkscape_on_Windows_with_MSYS2)
+<br>
+You can also visit the following [link](https://cmake.org/install/) for more documentation on CMake.
+<br>
+Additionally, you can watch this [video](https://www.youtube.com/watch?v=8_X5Iq9niDE) on instructions for installing CMake on windows.
 
 For building on Mac, please click [here](
 https://wiki.inkscape.org/wiki/index.php?title=CompilingMacOsX)
 
+
+See `CONTRIBUTING.md` for more developer details and the [wiki](https://wiki.inkscape.org/wiki/index.php?title=Compiling_Inkscape).
 
 Running Without Installing
 --------------------------
