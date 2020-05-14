@@ -170,12 +170,16 @@ set(ui_SRC
 	widget/entity-entry.cpp
 	widget/entry.cpp
 	widget/filter-effect-chooser.cpp
+	widget/fill-style.cpp
 	widget/font-button.cpp
     widget/font-selector.cpp
     widget/font-selector-toolbar.cpp
 	widget/font-variants.cpp
 	widget/font-variations.cpp
 	widget/frame.cpp
+	widget/gradient-image.cpp
+	widget/gradient-selector.cpp
+	widget/gradient-vector-selector.cpp
 	widget/highlight-picker.cpp
 	widget/imagetoggler.cpp
     widget/ink-color-wheel.cpp
@@ -188,9 +192,11 @@ set(ui_SRC
 	widget/layer-selector.cpp
 	widget/layertypeicon.cpp
 	widget/licensor.cpp
+	widget/marker-combo-box.cpp
 	widget/notebook-page.cpp
 	widget/object-composite-settings.cpp
 	widget/page-sizer.cpp
+	widget/paint-selector.cpp
 	widget/panel.cpp
 	widget/point.cpp
 	widget/preferences-widget.cpp
@@ -207,8 +213,10 @@ set(ui_SRC
 	widget/spin-scale.cpp
 	widget/spin-slider.cpp
 	widget/spinbutton.cpp
+	widget/stroke-style.cpp
 	widget/style-subject.cpp
 	widget/style-swatch.cpp
+	widget/swatch-selector.cpp
 	widget/text.cpp
 	widget/tolerance-slider.cpp
 	widget/unit-menu.cpp
@@ -402,6 +410,7 @@ set(ui_SRC
 	widget/dock.h
 	widget/entity-entry.h
 	widget/entry.h
+	widget/fill-style.h
 	widget/filter-effect-chooser.h
 	widget/font-button.h
     widget/font-selector.h
@@ -409,6 +418,9 @@ set(ui_SRC
 	widget/font-variants.h
     widget/font-variations.h
 	widget/frame.h
+	widget/gradient-image.h
+	widget/gradient-selector.h
+	widget/gradient-vector-selector.h
 	widget/highlight-picker.h
 	widget/insertordericon.h
 	widget/imagetoggler.h
@@ -421,10 +433,12 @@ set(ui_SRC
 	widget/layer-selector.h
 	widget/layertypeicon.h
 	widget/licensor.h
+	widget/marker-combo-box.h
 	widget/notebook-page.h
 	widget/object-composite-settings.h
 	widget/page-sizer.h
 	widget/pages-skeleton.h
+	widget/paint-selector.h
 	widget/panel.h
 	widget/point.h
 	widget/preferences-widget.h
@@ -442,8 +456,10 @@ set(ui_SRC
 	widget/spin-scale.h
 	widget/spin-slider.h
 	widget/spinbutton.h
+	widget/stroke-style.h
 	widget/style-subject.h
 	widget/style-swatch.h
+	widget/swatch-selector.h
 	widget/text.h
 	widget/tolerance-slider.h
 	widget/unit-menu.h

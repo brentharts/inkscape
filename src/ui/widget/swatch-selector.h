@@ -16,12 +16,11 @@
 class SPDocument;
 class SPGradient;
 struct SPColorSelector;
-struct SPGradientSelector;
 
-namespace Inkscape
-{
-namespace Widgets
-{
+namespace Inkscape {
+namespace UI {
+namespace Widget {
+class GradientSelector;
 
 class SwatchSelector : public Gtk::VBox
 {
@@ -29,14 +28,11 @@ public:
     SwatchSelector();
     ~SwatchSelector() override;
 
-    void connectGrabbedHandler( GCallback handler, void *data );
-    void connectDraggedHandler( GCallback handler, void *data );
-    void connectReleasedHandler( GCallback handler, void *data );
     void connectchangedHandler( GCallback handler, void *data );
 
     void setVector(SPDocument *doc, SPGradient *vector);
 
-    SPGradientSelector *getGradientSelector();
+    GradientSelector *getGradientSelector();
 
 private:
     void _grabbedCb();
@@ -44,13 +40,14 @@ private:
     void _releasedCb();
     void _changedCb();
 
-    SPGradientSelector *_gsel;
+    GradientSelector *_gsel;
     Inkscape::UI::SelectedColor _selected_color;
     bool _updating_color;
 };
 
 
-} // namespace Widgets
+} // namespace Widget
+} // namespace UI
 } // namespace Inkscape
 
 #endif // SEEN_SP_SWATCH_SELECTOR_H

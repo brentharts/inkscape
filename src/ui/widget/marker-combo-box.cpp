@@ -13,14 +13,13 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
-#include "stroke-marker-selector.h"
+#include "marker-combo-box.h"
 
 #include <glibmm/i18n.h>
 #include <gtkmm/icontheme.h>
 
 #include "desktop-style.h"
 #include "path-prefix.h"
-#include "stroke-style.h"
 
 #include "helper/stock-items.h"
 #include "ui/icon-loader.h"
@@ -35,9 +34,15 @@
 #include "ui/cache/svg_preview_cache.h"
 #include "ui/dialog-events.h"
 #include "ui/util.h"
+
 #include "ui/widget/spinbutton.h"
+#include "ui/widget/stroke-style.h"
 
 static Inkscape::UI::Cache::SvgPreview svg_preview_cache;
+
+namespace Inkscape {
+namespace UI {
+namespace Widget {
 
 MarkerComboBox::MarkerComboBox(gchar const *id, int l) :
             Gtk::ComboBox(),
@@ -557,6 +562,10 @@ gchar const *buffer = R"A(
 
     return SPDocument::createNewDocFromMem (buffer, strlen(buffer), FALSE);
 }
+
+} // namespace Widget
+} // namespace UI
+} // namespace Inkscape
 
 /*
   Local Variables:

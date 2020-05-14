@@ -39,10 +39,9 @@
 #include "ui/util.h"
 #include "ui/widget/color-preview.h"
 #include "ui/widget/combo-tool-item.h"
+#include "ui/widget/gradient-image.h"
 #include "ui/widget/spin-button-tool-item.h"
-
-#include "widgets/gradient-image.h"
-#include "widgets/gradient-vector.h"
+#include "ui/widget/gradient-vector-selector.h"
 
 using Inkscape::DocumentUndo;
 using Inkscape::UI::Tools::ToolBase;
