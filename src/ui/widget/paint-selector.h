@@ -40,6 +40,8 @@ namespace Inkscape {
 namespace UI {
 namespace Widget {
 
+class FillRuleRadioButton;
+class StyleToggleButton;
 class GradientSelector;
 
 /**
@@ -71,20 +73,20 @@ class PaintSelector : public Gtk::Box {
     Mode _mode;
 
     Gtk::Box *_style;
-    Gtk::ToggleButton *_none;
-    Gtk::ToggleButton *_solid;
-    Gtk::ToggleButton *_gradient;
-    Gtk::ToggleButton *_radial;
+    StyleToggleButton *_none;
+    StyleToggleButton *_solid;
+    StyleToggleButton *_gradient;
+    StyleToggleButton *_radial;
 #ifdef WITH_MESH
-    Gtk::ToggleButton *_mesh;
+    StyleToggleButton *_mesh;
 #endif
-    Gtk::ToggleButton *_pattern;
-    Gtk::ToggleButton *_swatch;
-    Gtk::ToggleButton *_unset;
+    StyleToggleButton *_pattern;
+    StyleToggleButton *_swatch;
+    StyleToggleButton *_unset;
 
     Gtk::Box *_fillrulebox;
-    Gtk::RadioButton *_evenodd;
-    Gtk::RadioButton *_nonzero;
+    FillRuleRadioButton *_evenodd;
+    FillRuleRadioButton *_nonzero;
 
     Gtk::Box *_frame;
     Gtk::Box *_selector;
@@ -106,9 +108,9 @@ class PaintSelector : public Gtk::Box {
     sigc::signal<void> _signal_released;
     sigc::signal<void> _signal_changed;
 
-    Gtk::ToggleButton *style_button_add(gchar const *px, PaintSelector::Mode mode, gchar const *tip);
-    void style_button_toggled(Gtk::ToggleButton *tb);
-    void fillrule_toggled(Gtk::ToggleButton *tb);
+    StyleToggleButton *style_button_add(gchar const *px, PaintSelector::Mode mode, gchar const *tip);
+    void style_button_toggled(StyleToggleButton *tb);
+    void fillrule_toggled(FillRuleRadioButton *tb);
     void onSelectedColorGrabbed();
     void onSelectedColorDragged();
     void onSelectedColorReleased();
