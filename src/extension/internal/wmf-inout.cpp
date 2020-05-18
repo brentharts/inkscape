@@ -41,7 +41,6 @@
 #include "display/drawing.h"
 #include "display/drawing-item.h"
 #include "clear-n_.h"
-#include "path/path-boolop.h"
 #include "svg/svg.h"
 #include "util/units.h" // even though it is included indirectly by wmf-inout.h
 #include "inkscape.h" // even though it is included indirectly by wmf-inout.h
@@ -2556,12 +2555,7 @@ std::cout << "BEFORE DRAW"
             x1 = Dst.x;
             y1 = Dst.y;
             cChars = tlen;
-
-            if (d->dc[d->level].textAlign & U_TA_UPDATECP) {
-                x1 = d->dc[d->level].cur.x;
-                y1 = d->dc[d->level].cur.y;
-            }
-
+            
             double x = pix_to_x_point(d, x1, y1);
             double y = pix_to_y_point(d, x1, y1);
 
@@ -2679,6 +2673,10 @@ std::cout << "BEFORE DRAW"
                 free(ansi_text);
             }
 
+            if (d->dc[d->level].textAlign & U_TA_UPDATECP) {
+                d->dc[d->level].cur.x = x1;
+                d->dc[d->level].cur.y = y1;
+            }
             break;
         }
         case U_WMR_SETDIBTODEV:          dbg_str << "<!-- U_WMR_EXTTEXTOUT -->\n";           break;
