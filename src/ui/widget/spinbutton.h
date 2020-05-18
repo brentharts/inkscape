@@ -30,18 +30,13 @@ class SpinButton : public Gtk::SpinButton
 {
 public:
   SpinButton(double climb_rate = 0.0, guint digits = 0)
-    : Gtk::SpinButton(climb_rate, digits),
-      _unit_menu(nullptr),
-      _unit_tracker(nullptr),
-      _on_focus_in_value(0.)
+    : Gtk::SpinButton(climb_rate, digits)
   {
       connect_signals();
   };
+
   explicit SpinButton(Glib::RefPtr<Gtk::Adjustment>& adjustment, double climb_rate = 0.0, guint digits = 0)
-    : Gtk::SpinButton(adjustment, climb_rate, digits),
-      _unit_menu(nullptr),
-      _unit_tracker(nullptr),
-      _on_focus_in_value(0.)
+    : Gtk::SpinButton(adjustment, climb_rate, digits)
   {
       connect_signals();
   };
@@ -56,10 +51,19 @@ public:
   
   void addUnitTracker(UnitTracker* ut) { _unit_tracker = ut; };
 
+  // TODO: Might be better to just have a default value and a reset() method?
+  inline void set_zeroable(const bool zeroable = true) { _zeroable = zeroable; }
+  inline void set_oneable(const bool oneable = true) { _oneable = oneable; }
+
+  inline bool get_zeroable() const { return _zeroable; }
+  inline bool get_oneable() const { return _oneable; }
 protected:
-  UnitMenu *_unit_menu; /// Linked unit menu for unit conversion in entered expressions.
-  UnitTracker *_unit_tracker; // Linked unit tracker for unit conversion in entered expressions.
-  double _on_focus_in_value;
+  UnitMenu    *_unit_menu    = nullptr; /// < Linked unit menu for unit conversion in entered expressions.
+  UnitTracker *_unit_tracker = nullptr; /// < Linked unit tracker for unit conversion in entered expressions.
+  double _on_focus_in_value  = 0.;
+
+  bool _zeroable = false; ///< Reset-value should be zero
+  bool _oneable  = false; ///< Reset-value should be one
 
   void connect_signals();
 
