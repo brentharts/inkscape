@@ -83,6 +83,32 @@ namespace Inkscape {
 namespace UI {
 namespace Widget {
 
+class FillRuleRadioButton : public Gtk::RadioButton {
+  private:
+    PaintSelector::FillRule _fillrule;
+
+  public:
+    FillRuleRadioButton()
+        : Gtk::RadioButton()
+    {}
+
+    FillRuleRadioButton(Gtk::RadioButton::Group &group)
+        : Gtk::RadioButton(group)
+    {}
+
+    inline void set_fillrule(PaintSelector::FillRule fillrule) { _fillrule = fillrule; }
+    inline PaintSelector::FillRule get_fillrule() const { return _fillrule; }
+};
+
+class StyleToggleButton : public Gtk::ToggleButton {
+  private:
+    PaintSelector::Mode _style;
+
+  public:
+    inline void set_style(PaintSelector::Mode style) { _style = style; }
+    inline PaintSelector::Mode get_style() const { return _style; }
+};
+
 static bool isPaintModeGradient(PaintSelector::Mode mode)
 {
     bool isGrad = (mode == PaintSelector::MODE_GRADIENT_LINEAR) || (mode == PaintSelector::MODE_GRADIENT_RADIAL) ||
@@ -146,13 +172,13 @@ PaintSelector::PaintSelector(FillOrStroke kind)
         _fillrulebox->set_homogeneous(false);
         _style->pack_end(*_fillrulebox, false, false, 0);
 
-        _evenodd = Gtk::manage(new Gtk::RadioButton());
+        _evenodd = Gtk::manage(new FillRuleRadioButton());
         _evenodd->set_relief(Gtk::RELIEF_NONE);
         _evenodd->set_mode(false);
         // TRANSLATORS: for info, see http://www.w3.org/TR/2000/CR-SVG-20000802/painting.html#FillRuleProperty
         _evenodd->set_tooltip_text(
             _("Any path self-intersections or subpaths create holes in the fill (fill-rule: evenodd)"));
-        _evenodd->set_data("mode", GUINT_TO_POINTER(PaintSelector::FILLRULE_EVENODD));
+        _evenodd->set_fillrule(PaintSelector::FILLRULE_EVENODD);
         auto w = sp_get_icon_image("fill-rule-even-odd", GTK_ICON_SIZE_MENU);
         gtk_container_add(GTK_CONTAINER(_evenodd->gobj()), w);
         _fillrulebox->pack_start(*_evenodd, false, false, 0);
@@ -160,12 +186,12 @@ PaintSelector::PaintSelector(FillOrStroke kind)
             sigc::bind(sigc::mem_fun(*this, &PaintSelector::fillrule_toggled), _evenodd));
 
         auto grp = _evenodd->get_group();
-        _nonzero = Gtk::manage(new Gtk::RadioButton(grp));
+        _nonzero = Gtk::manage(new FillRuleRadioButton(grp));
         _nonzero->set_relief(Gtk::RELIEF_NONE);
         _nonzero->set_mode(false);
         // TRANSLATORS: for info, see http://www.w3.org/TR/2000/CR-SVG-20000802/painting.html#FillRuleProperty
         _nonzero->set_tooltip_text(_("Fill is solid unless a subpath is counterdirectional (fill-rule: nonzero)"));
-        _nonzero->set_data("mode", GUINT_TO_POINTER(PaintSelector::FILLRULE_NONZERO));
+        _nonzero->set_fillrule(PaintSelector::FILLRULE_NONZERO);
         w = sp_get_icon_image("fill-rule-nonzero", GTK_ICON_SIZE_MENU);
         gtk_container_add(GTK_CONTAINER(_nonzero->gobj()), w);
         _fillrulebox->pack_start(*_nonzero, false, false, 0);
@@ -214,17 +240,17 @@ PaintSelector::~PaintSelector()
     }
 }
 
-Gtk::ToggleButton *PaintSelector::style_button_add(gchar const *pixmap, PaintSelector::Mode mode, gchar const *tip)
+StyleToggleButton *PaintSelector::style_button_add(gchar const *pixmap, PaintSelector::Mode mode, gchar const *tip)
 {
     GtkWidget *w;
 
-    auto b = Gtk::manage(new Gtk::ToggleButton());
+    auto b = Gtk::manage(new StyleToggleButton());
     b->set_tooltip_text(tip);
     b->show();
     b->set_border_width(0);
     b->set_relief(Gtk::RELIEF_NONE);
     b->set_mode(false);
-    b->set_data("mode", GUINT_TO_POINTER(mode));
+    b->set_style(mode);
 
     w = sp_get_icon_image(pixmap, GTK_ICON_SIZE_BUTTON);
     gtk_container_add(GTK_CONTAINER(b->gobj()), w);
@@ -235,17 +261,17 @@ Gtk::ToggleButton *PaintSelector::style_button_add(gchar const *pixmap, PaintSel
     return b;
 }
 
-void PaintSelector::style_button_toggled(Gtk::ToggleButton *tb)
+void PaintSelector::style_button_toggled(StyleToggleButton *tb)
 {
     if (!_update && tb->get_active()) {
-        setMode(static_cast<PaintSelector::Mode>(GPOINTER_TO_UINT(tb->get_data("mode"))));
+        setMode(tb->get_style());
     }
 }
 
-void PaintSelector::fillrule_toggled(Gtk::ToggleButton *tb)
+void PaintSelector::fillrule_toggled(FillRuleRadioButton *tb)
 {
     if (!_update && tb->get_active()) {
-        auto fr = static_cast<PaintSelector::FillRule>(GPOINTER_TO_UINT(tb->get_data("mode")));
+        auto fr = tb->get_fillrule();
         _signal_fillrule_changed.emit(fr);
     }
 }
