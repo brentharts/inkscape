@@ -797,20 +797,19 @@ void PaintSelector::updateMeshList(SPMeshGradient *mesh)
         return;
     }
 
-    GtkWidget *combo = GTK_WIDGET(get_data("meshmenu"));
-    g_assert(combo != nullptr);
+    g_assert(_meshmenu != nullptr);
 
     /* Clear existing menu if any */
-    GtkTreeModel *store = gtk_combo_box_get_model(GTK_COMBO_BOX(combo));
+    GtkTreeModel *store = gtk_combo_box_get_model(GTK_COMBO_BOX(_meshmenu));
     gtk_list_store_clear(GTK_LIST_STORE(store));
 
-    ink_mesh_menu(combo);
+    ink_mesh_menu(_meshmenu);
 
     /* Set history */
 
-    if (mesh && !g_object_get_data(G_OBJECT(combo), "update")) {
+    if (mesh && !g_object_get_data(G_OBJECT(_meshmenu), "update")) {
 
-        g_object_set_data(G_OBJECT(combo), "update", GINT_TO_POINTER(TRUE));
+        g_object_set_data(G_OBJECT(_meshmenu), "update", GINT_TO_POINTER(TRUE));
         gchar const *meshname = mesh->getRepr()->attribute("id");
 
         // Find this mesh and set it active in the combo_box
@@ -829,10 +828,10 @@ void PaintSelector::updateMeshList(SPMeshGradient *mesh)
         }
 
         if (valid) {
-            gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo), &iter);
+            gtk_combo_box_set_active_iter(GTK_COMBO_BOX(_meshmenu), &iter);
         }
 
-        g_object_set_data(G_OBJECT(combo), "update", GINT_TO_POINTER(FALSE));
+        g_object_set_data(G_OBJECT(_meshmenu), "update", GINT_TO_POINTER(FALSE));
         g_free(meshid);
     }
 }
@@ -877,7 +876,7 @@ void PaintSelector::set_mode_mesh(PaintSelector::Mode mode)
             ink_mesh_menu(combo);
             g_signal_connect(G_OBJECT(combo), "changed", G_CALLBACK(PaintSelector::mesh_change), this);
             g_signal_connect(G_OBJECT(combo), "destroy", G_CALLBACK(PaintSelector::mesh_destroy), this);
-            set_data("meshmenu", combo); // TODO: Replace with proper member
+            _meshmenu = combo;
             g_object_ref(G_OBJECT(combo));
 
             gtk_container_add(GTK_CONTAINER(hb->gobj()), combo);
@@ -912,17 +911,15 @@ SPMeshGradient *PaintSelector::getMeshGradient()
 {
     g_return_val_if_fail((_mode == MODE_GRADIENT_MESH), NULL);
 
-    auto combo = GTK_WIDGET(get_data("meshmenu"));
-
     /* no mesh menu if we were just selected */
-    if (combo == nullptr) {
+    if (_meshmenu == nullptr) {
         return nullptr;
     }
-    GtkTreeModel *store = gtk_combo_box_get_model(GTK_COMBO_BOX(combo));
+    GtkTreeModel *store = gtk_combo_box_get_model(GTK_COMBO_BOX(_meshmenu));
 
     /* Get the selected mesh */
     GtkTreeIter iter;
-    if (!gtk_combo_box_get_active_iter(GTK_COMBO_BOX(combo), &iter) ||
+    if (!gtk_combo_box_get_active_iter(GTK_COMBO_BOX(_meshmenu), &iter) ||
         !gtk_list_store_iter_is_valid(GTK_LIST_STORE(store), &iter)) {
         return nullptr;
     }
