@@ -92,6 +92,9 @@ class PaintSelector : public Gtk::Box {
     Gtk::Box *_selector;
     Gtk::Label *_label;
     GtkWidget *_patternmenu;
+#ifdef WITH_MESH
+    GtkWidget *_meshmenu = nullptr;
+#endif
 
     Inkscape::UI::SelectedColor *_selected_color;
     bool _updating_color;
