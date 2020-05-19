@@ -857,7 +857,7 @@ StrokeStyle::updateLine()
         return;
     }
 
-    FillOrStroke kind = GPOINTER_TO_INT(get_data("kind")) ? FILL : STROKE;
+    FillOrStroke kind = STROKE;
 
     // create temporary style
     SPStyle query(SP_ACTIVE_DOCUMENT);
