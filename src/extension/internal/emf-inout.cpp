@@ -28,8 +28,6 @@
 #include <cstdint>
 #include <3rdparty/libuemf/symbol_convert.h>
 
-#include "emf-inout.h"
-
 #include "clear-n_.h"
 #include "display/drawing-item.h"
 #include "display/drawing.h"
@@ -39,15 +37,16 @@
 #include "extension/output.h"
 #include "extension/print.h"
 #include "extension/system.h"
+#include "inkscape.h" // even though it is included indirectly by emf-inout.h
 #include "object/sp-path.h"
 #include "object/sp-root.h"
-#include "path/path-boolop.h"
 #include "print.h"
 #include "svg/css-ostringstream.h"
 #include "svg/svg.h"
-#include "util/units.h"
+#include "util/units.h" // even though it is included indirectly by emf-inout.h
 
 #include "emf-print.h"
+#include "emf-inout.h"
 
 #define PRINT_EMF "org.inkscape.print.emf"
 
@@ -3105,11 +3104,6 @@ std::cout << "BEFORE DRAW"
             }
             uint32_t fOptions = pEmr->emrtext.fOptions;
 
-            if (d->dc[d->level].textAlign & U_TA_UPDATECP) {
-                x1 = d->dc[d->level].cur.x;
-                y1 = d->dc[d->level].cur.y;
-            }
-
             double x = pix_to_x_point(d, x1, y1);
             double y = pix_to_y_point(d, x1, y1);
 
@@ -3246,6 +3240,10 @@ std::cout << "BEFORE DRAW"
                 free(ansi_text);
             }
 
+            if (d->dc[d->level].textAlign & U_TA_UPDATECP) {
+                d->dc[d->level].cur.x = x1;
+                d->dc[d->level].cur.y = y1;
+            }
             break;
         }
         case U_EMR_POLYBEZIER16:
