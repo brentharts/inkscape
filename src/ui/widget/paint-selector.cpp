@@ -135,8 +135,6 @@ GradientSelector *PaintSelector::getGradientFromData() const
 #define YPAD 1
 
 PaintSelector::PaintSelector(FillOrStroke kind)
-    : _patternmenu(nullptr)
-    , _selector(nullptr)
 {
     set_orientation(Gtk::ORIENTATION_VERTICAL);
 
@@ -807,9 +805,8 @@ void PaintSelector::updateMeshList(SPMeshGradient *mesh)
 
     /* Set history */
 
-    if (mesh && !g_object_get_data(G_OBJECT(_meshmenu), "update")) {
-
-        g_object_set_data(G_OBJECT(_meshmenu), "update", GINT_TO_POINTER(TRUE));
+    if (mesh && !_meshmenu_update) {
+        _meshmenu_update = true;
         gchar const *meshname = mesh->getRepr()->attribute("id");
 
         // Find this mesh and set it active in the combo_box
@@ -831,7 +828,7 @@ void PaintSelector::updateMeshList(SPMeshGradient *mesh)
             gtk_combo_box_set_active_iter(GTK_COMBO_BOX(_meshmenu), &iter);
         }
 
-        g_object_set_data(G_OBJECT(_meshmenu), "update", GINT_TO_POINTER(FALSE));
+        _meshmenu_update = false;
         g_free(meshid);
     }
 }
@@ -1133,9 +1130,8 @@ void PaintSelector::updatePatternList(SPPattern *pattern)
 
     /* Set history */
 
-    if (pattern && !g_object_get_data(G_OBJECT(_patternmenu), "update")) {
-
-        g_object_set_data(G_OBJECT(_patternmenu), "update", GINT_TO_POINTER(TRUE));
+    if (pattern && !_patternmenu_update) {
+        _patternmenu_update = true;
         gchar const *patname = pattern->getRepr()->attribute("id");
 
         // Find this pattern and set it active in the combo_box
@@ -1158,7 +1154,7 @@ void PaintSelector::updatePatternList(SPPattern *pattern)
             gtk_combo_box_set_active_iter(GTK_COMBO_BOX(_patternmenu), &iter);
         }
 
-        g_object_set_data(G_OBJECT(_patternmenu), "update", GINT_TO_POINTER(FALSE));
+        _patternmenu_update = false;
     }
 }
 
