@@ -54,8 +54,6 @@
 
 #include "ui/uxmanager.h"
 
-#include "widgets/spinbutton-events.h"
-
 using Inkscape::UI::UXManager;
 
 namespace Inkscape {
