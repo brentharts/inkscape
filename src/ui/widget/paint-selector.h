@@ -89,11 +89,13 @@ class PaintSelector : public Gtk::Box {
     FillRuleRadioButton *_nonzero;
 
     Gtk::Box *_frame;
-    Gtk::Box *_selector;
+    Gtk::Box *_selector = nullptr;
     Gtk::Label *_label;
-    GtkWidget *_patternmenu;
+    GtkWidget *_patternmenu = nullptr;
+    bool _patternmenu_update = false;
 #ifdef WITH_MESH
     GtkWidget *_meshmenu = nullptr;
+    bool _meshmenu_update = false;
 #endif
 
     Inkscape::UI::SelectedColor *_selected_color;
