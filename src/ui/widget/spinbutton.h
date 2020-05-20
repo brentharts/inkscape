@@ -57,13 +57,20 @@ public:
 
   inline bool get_zeroable() const { return _zeroable; }
   inline bool get_oneable() const { return _oneable; }
+
+  void defocus();
+
 protected:
-  UnitMenu    *_unit_menu    = nullptr; /// < Linked unit menu for unit conversion in entered expressions.
-  UnitTracker *_unit_tracker = nullptr; /// < Linked unit tracker for unit conversion in entered expressions.
+  UnitMenu    *_unit_menu    = nullptr; ///< Linked unit menu for unit conversion in entered expressions.
+  UnitTracker *_unit_tracker = nullptr; ///< Linked unit tracker for unit conversion in entered expressions.
   double _on_focus_in_value  = 0.;
+  Gtk::Widget *_defocus_widget = nullptr; ///< Widget that should grab focus when the spinbutton defocuses
 
   bool _zeroable = false; ///< Reset-value should be zero
   bool _oneable  = false; ///< Reset-value should be one
+
+  bool _stay = false; ///< Whether to ignore defocusing
+  bool _dont_evaluate = false; ///< Don't attempt to evaluate expressions
 
   void connect_signals();
 
@@ -81,7 +88,7 @@ protected:
      * @retval false continue with default handler.
      * @retval true  don't call default handler. 
      */
-    bool on_my_focus_in_event(GdkEventFocus* event);
+    bool on_focus_in_event(GdkEventFocus* event) override;
 
     /**
      * When scroll is done.
@@ -89,18 +96,23 @@ protected:
      * @retval true  don't call default handler.
      */
     bool on_scroll_event(GdkEventScroll *event) override;
+
     /**
      * Handle specific keypress events, like Ctrl+Z.
      *
      * @retval false continue with default handler.
      * @retval true  don't call default handler. 
      */
-    bool on_my_key_press_event(GdkEventKey* event);
+    bool on_key_press_event(GdkEventKey* event) override;
 
     /**
      * Undo the editing, by resetting the value upon when the spinbutton got focus.
      */
     void undo();
+
+  public:
+    inline void set_defocus_widget(const decltype(_defocus_widget) widget) { _defocus_widget = widget; }
+    inline void set_dont_evaluate(bool flag) { _dont_evaluate = flag; }
 };
 
 } // namespace Widget
