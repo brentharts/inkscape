@@ -292,11 +292,11 @@ add_cli_test(export-margin_viewbox_id_svg PARAMETERS --export-margin=50 --export
 # --export-id=OBJECT-ID[;OBJECT-ID]*
 add_cli_test(export-id_png PARAMETERS --export-id=red --export-type=png INPUT_FILENAME theta.svg OUTPUT_FILENAME export-id.png REFERENCE_FILENAME export-id_expected.png )
 add_cli_test(export-id_svg PARAMETERS --export-id=red --export-type=svg INPUT_FILENAME theta.svg OUTPUT_FILENAME export-id.svg REFERENCE_FILENAME export-id_expected.svg )
-# PDF, PS, EPS doesn't respect --export-id-only, bug report: https://gitlab.com/inkscape/inkscape/issues/1173
+# PDF, PS, EPS doesn't respect --export-id-only, bug report: https://gitlab.com/inkscape/inkscape/-/issues/1173
 # add_cli_test(export-id_pdf PARAMETERS --export-id=red --export-type=pdf INPUT_FILENAME theta.svg OUTPUT_FILENAME export-id.pdf REFERENCE_FILENAME export-id_expected.pdf )
 # add_cli_test(export-id_ps  PARAMETERS --export-id=red --export-type=ps  INPUT_FILENAME theta.svg OUTPUT_FILENAME export-id.ps  REFERENCE_FILENAME export-id_expected.ps  )
 # add_cli_test(export-id_eps PARAMETERS --export-id=red --export-type=eps INPUT_FILENAME theta.svg OUTPUT_FILENAME export-id.eps REFERENCE_FILENAME export-id_expected.eps )
-# EMF, WMF There is no support, feature request: https://gitlab.com/inkscape/inkscape/issues/1204
+# EMF, WMF There is no support, feature request: https://gitlab.com/inkscape/inkscape/-/issues/1204
 # add_cli_test(export-id_emf PARAMETERS --export-id=red --export-type=emf INPUT_FILENAME theta.svg OUTPUT_FILENAME export-id.emf REFERENCE_FILENAME export-id_expected.emf )
 # add_cli_test(export-id_wmf PARAMETERS --export-id=red --export-type=wmf INPUT_FILENAME theta.svg OUTPUT_FILENAME export-id.wmf REFERENCE_FILENAME export-id_expected.wmf )
 
@@ -314,7 +314,7 @@ add_cli_test(export-id_export-id-only_svg PARAMETERS --export-id=blue --export-i
 add_cli_test(export-id_export-id-only_pdf PARAMETERS --export-id=blue --export-id-only --export-type=pdf INPUT_FILENAME theta.svg OUTPUT_FILENAME export-id_export-id-only.pdf REFERENCE_FILENAME export-id_export-id-only_expected.pdf )
 add_cli_test(export-id_export-id-only_ps  PARAMETERS --export-id=blue --export-id-only --export-type=ps  INPUT_FILENAME theta.svg OUTPUT_FILENAME export-id_export-id-only.ps  REFERENCE_FILENAME export-id_export-id-only_expected.ps  )
 add_cli_test(export-id_export-id-only_eps PARAMETERS --export-id=blue --export-id-only --export-type=eps INPUT_FILENAME theta.svg OUTPUT_FILENAME export-id_export-id-only.eps REFERENCE_FILENAME export-id_export-id-only_expected.eps )
-# EMF, WMF There is no support, feature request: https://gitlab.com/inkscape/inkscape/issues/1204
+# EMF, WMF There is no support, feature request: https://gitlab.com/inkscape/inkscape/-/issues/1204
 # add_cli_test(export-id_export-id-only_emf PARAMETERS --export-id=blue --export-id-only --export-type=emf INPUT_FILENAME theta.svg OUTPUT_FILENAME export-id_export-id-only.emf REFERENCE_FILENAME export-id_export-id-only_expected.emf )
 # add_cli_test(export-id_export-id-only_wmf PARAMETERS --export-id=blue --export-id-only --export-type=wmf INPUT_FILENAME theta.svg OUTPUT_FILENAME export-id_export-id-only.wmf REFERENCE_FILENAME export-id_export-id-only_expected.wmf )
 
@@ -323,14 +323,14 @@ add_cli_test(export-id_export-id-only_export-area-page_png PARAMETERS --export-i
 add_cli_test(export-id_export-id-only_export-area-page_svg PARAMETERS --export-id=yellow --export-id-only --export-area-page --export-type=svg INPUT_FILENAME theta.svg OUTPUT_FILENAME export-id_export-id-only_export-area-page.svg REFERENCE_FILENAME export-id_export-id-only_export-area-page_expected.svg )
 add_cli_test(export-id_export-id-only_export-area-page_pdf PARAMETERS --export-id=yellow --export-id-only --export-area-page --export-type=pdf INPUT_FILENAME theta.svg OUTPUT_FILENAME export-id_export-id-only_export-area-page.pdf REFERENCE_FILENAME export-id_export-id-only_export-area-page_expected.pdf )
 add_cli_test(export-id_export-id-only_export-area-page_ps  PARAMETERS --export-id=yellow --export-id-only --export-area-page --export-type=ps  INPUT_FILENAME theta.svg OUTPUT_FILENAME export-id_export-id-only_export-area-page.ps  REFERENCE_FILENAME export-id_export-id-only_export-area-page_expected.ps  )
-# EPS: Depents on https://gitlab.com/inkscape/inkscape/issues/1074
+# EPS: Depents on https://gitlab.com/inkscape/inkscape/-/issues/1074
 # add_cli_test(export-id_export-id-only_export-area-page_eps PARAMETERS --export-id=yellow --export-id-only --export-area-page --export-type=eps INPUT_FILENAME theta.svg OUTPUT_FILENAME export-id_export-id-only_export-area-page.eps REFERENCE_FILENAME export-id_export-id-only_export-area-page_expected.eps )
-# EMF, WMF: There is no support, feature request: https://gitlab.com/inkscape/inkscape/issues/1204
+# EMF, WMF: There is no support, feature request: https://gitlab.com/inkscape/inkscape/-/issues/1204
 # add_cli_test(export-id_export-id-only_export-area-page_emf PARAMETERS --export-id=yellow --export-id-only --export-area-page --export-type=emf INPUT_FILENAME theta.svg OUTPUT_FILENAME export-id_export-id-only_export-area-page.emf REFERENCE_FILENAME export-id_export-id-only_export-area-page_expected.emf )
 # add_cli_test(export-id_export-id-only_export-area-page_wmf PARAMETERS --export-id=yellow --export-id-only --export-area-page --export-type=wmf INPUT_FILENAME theta.svg OUTPUT_FILENAME export-id_export-id-only_export-area-page.wmf REFERENCE_FILENAME export-id_export-id-only_export-area-page_expected.wmf )
 
 ## --export-id + --export-id-only + --export-area-drawing
-# PNG, PDF, PS, EPS, EMF, WMF: Feature request: https://gitlab.com/inkscape/inkscape/issues/1215
+# PNG, PDF, PS, EPS, EMF, WMF: Feature request: https://gitlab.com/inkscape/inkscape/-/issues/1215
 # add_cli_test(export-id_export-id-only_export-area-drawing_png PARAMETERS --export-id=yellow --export-id-only --export-area-drawing --export-type=png INPUT_FILENAME theta.svg OUTPUT_FILENAME export-id_export-id-only_export-area-drawing.png REFERENCE_FILENAME export-id_export-id-only_export-area-drawing_expected.png )
 add_cli_test(export-id_export-id-only_export-area-drawing_svg PARAMETERS --export-id=yellow --export-id-only --export-area-drawing --export-type=svg INPUT_FILENAME theta.svg OUTPUT_FILENAME export-id_export-id-only_export-area-drawing.svg REFERENCE_FILENAME export-id_export-id-only_export-area-drawing_expected.svg )
 # add_cli_test(export-id_export-id-only_export-area-drawing_pdf PARAMETERS --export-id=yellow --export-id-only --export-area-drawing --export-type=pdf INPUT_FILENAME theta.svg OUTPUT_FILENAME export-id_export-id-only_export-area-drawing.pdf REFERENCE_FILENAME export-id_export-id-only_export-area-drawing_expected.pdf )
@@ -409,15 +409,15 @@ add_cli_test(export-with-filters_png  PARAMETERS --export-type=png INPUT_FILENAM
 add_cli_test(export-with-filters_ps   PARAMETERS --export-type=ps  INPUT_FILENAME offset.svg OUTPUT_FILENAME export-with-filters.ps  REFERENCE_FILENAME export-with-filters_expected.ps )
 add_cli_test(export-with-filters_eps  PARAMETERS --export-type=eps INPUT_FILENAME offset.svg OUTPUT_FILENAME export-with-filters.eps REFERENCE_FILENAME export-with-filters_expected.eps)
 add_cli_test(export-with-filters_pdf  PARAMETERS --export-type=pdf INPUT_FILENAME offset.svg OUTPUT_FILENAME export-with-filters.pdf REFERENCE_FILENAME export-with-filters_expected.pdf)
-# EMF, WMF: No support for exporting filters. Feature request: https://gitlab.com/inkscape/inbox/issues/2275
+# EMF, WMF: No support for exporting filters. Feature request: https://gitlab.com/inkscape/inbox/-/issues/2275
 # add_cli_test(export-with-filters_emf  PARAMETERS --export-type=emf INPUT_FILENAME offset.svg OUTPUT_FILENAME export-with-filters.emf REFERENCE_FILENAME export-with-filters_expected.emf)
 # add_cli_test(export-with-filters_wmf  PARAMETERS --export-type=wmf INPUT_FILENAME offset.svg OUTPUT_FILENAME export-with-filters.wmf REFERENCE_FILENAME export-with-filters_expected.wmf)
 ## --export-ignore-filters
-# SVG, PNG: No support for --export-ignore-filters. Feature request: https://gitlab.com/inkscape/inbox/issues/2275
+# SVG, PNG: No support for --export-ignore-filters. Feature request: https://gitlab.com/inkscape/inbox/-/issues/2275
 # add_cli_test(export-ignore-filters_svg  PARAMETERS --export-ignore-filters --export-type=svg INPUT_FILENAME offset.svg OUTPUT_FILENAME export-ignore-filters.svg REFERENCE_FILENAME export-ignore-filters_expected.svg)
 # add_cli_test(export-ignore-filters_png  PARAMETERS --export-ignore-filters --export-type=png INPUT_FILENAME offset.svg OUTPUT_FILENAME export-ignore-filters.png REFERENCE_FILENAME export-ignore-filters_expected.png)
 add_cli_test(export-ignore-filters_ps   PARAMETERS --export-ignore-filters --export-type=ps  INPUT_FILENAME offset.svg OUTPUT_FILENAME export-ignore-filters.ps  REFERENCE_FILENAME export-ignore-filters_expected.ps )
-# EPS: Works, but depends on https://gitlab.com/inkscape/inkscape/issues/1074
+# EPS: Works, but depends on https://gitlab.com/inkscape/inkscape/-/issues/1074
 # add_cli_test(export-ignore-filters_eps  PARAMETERS --export-ignore-filters --export-type=eps INPUT_FILENAME offset.svg OUTPUT_FILENAME export-ignore-filters.eps REFERENCE_FILENAME export-ignore-filters_expected.eps)
 add_cli_test(export-ignore-filters_pdf  PARAMETERS --export-ignore-filters --export-type=pdf INPUT_FILENAME offset.svg OUTPUT_FILENAME export-ignore-filters.pdf REFERENCE_FILENAME export-ignore-filters_expected.pdf)
 add_cli_test(export-ignore-filters_emf  PARAMETERS --export-ignore-filters --export-type=emf INPUT_FILENAME offset.svg OUTPUT_FILENAME export-ignore-filters.emf REFERENCE_FILENAME export-ignore-filters_expected.emf)
