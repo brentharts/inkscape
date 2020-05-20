@@ -21,7 +21,11 @@ namespace Widget {
 
 void
 SpinButton::connect_signals() {
-    add_events(Gdk::SCROLL_MASK | Gdk::SMOOTH_SCROLL_MASK);
+    signal_input().connect(sigc::mem_fun(this, &SpinButton::on_input));
+    signal_focus_in_event().connect(sigc::mem_fun(this, &SpinButton::on_my_focus_in_event));
+    signal_key_press_event().connect(sigc::mem_fun(this, &SpinButton::on_my_key_press_event));
+    gtk_widget_add_events(GTK_WIDGET(gobj()), GDK_SCROLL_MASK | GDK_SMOOTH_SCROLL_MASK);
+    signal_scroll_event().connect(sigc::mem_fun(this, &SpinButton::on_scroll_event));
     set_focus_on_click(true);
 };
 
@@ -59,7 +63,7 @@ int SpinButton::on_input(double* newvalue)
     return true;
 }
 
-bool SpinButton::on_focus_in_event(GdkEventFocus* /*event*/)
+bool SpinButton::on_my_focus_in_event(GdkEventFocus* /*event*/)
 {
     _on_focus_in_value = get_value();
     return false; // do not consume the event
@@ -92,7 +96,7 @@ bool SpinButton::on_scroll_event(GdkEventScroll *event)
     return true;
 }
 
-bool SpinButton::on_key_press_event(GdkEventKey* event)
+bool SpinButton::on_my_key_press_event(GdkEventKey* event)
 {
     switch (Inkscape::UI::Tools::get_latin_keyval (event)) {
     case GDK_KEY_Escape: // defocus

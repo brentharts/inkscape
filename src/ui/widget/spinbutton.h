@@ -88,14 +88,14 @@ protected:
      * @retval false continue with default handler.
      * @retval true  don't call default handler. 
      */
-    bool on_focus_in_event(GdkEventFocus* event) override;
+    bool on_my_focus_in_event(GdkEventFocus* event);
 
     /**
      * When scroll is done.
      * @retval false continue with default handler.
      * @retval true  don't call default handler.
      */
-    bool on_scroll_event(GdkEventScroll *event) override;
+    bool on_scroll_event(GdkEventScroll *event);
 
     /**
      * Handle specific keypress events, like Ctrl+Z.
@@ -103,7 +103,7 @@ protected:
      * @retval false continue with default handler.
      * @retval true  don't call default handler. 
      */
-    bool on_key_press_event(GdkEventKey* event) override;
+    bool on_my_key_press_event(GdkEventKey* event);
 
     /**
      * Undo the editing, by resetting the value upon when the spinbutton got focus.
