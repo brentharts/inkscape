@@ -236,12 +236,12 @@ ObjectSet::breakApart(bool skip_undo)
         item->deleteObject(false);
 
 
-        std::list<SPCurve *> list = curve->split();
+        auto list = curve->split();
 
         curve->unref();
 
         std::vector<Inkscape::XML::Node*> reprs;
-        for (auto curve:list) {
+        for (auto const &curve : list) {
 
             Inkscape::XML::Node *repr = parent->document()->createElement("svg:path");
             repr->setAttribute("style", style);
@@ -262,7 +262,7 @@ ObjectSet::breakApart(bool skip_undo)
             parent->addChildAtPos(repr, pos);
 
             // if it's the first one, restore id
-            if (curve == *(list.begin()))
+            if (curve == list.front())
                 repr->setAttribute("id", id);
 
             reprs.push_back(repr);
@@ -311,13 +311,14 @@ void ObjectSet::toCurves(bool skip_undo)
     }
     std::vector<SPItem*> selected(items().begin(), items().end());
     std::vector<Inkscape::XML::Node*> to_select;
-    clear();
     std::vector<SPItem*> items(selected);
 
     did = sp_item_list_to_curves(items, selected, to_select);
 
-    setReprList(to_select);
-    addList(selected);
+    if (did) {
+        setReprList(to_select);
+        addList(selected);
+    }
 
     if (desktop()) {
         desktop()->clearWaitingCursor();
@@ -389,13 +390,16 @@ sp_item_list_to_curves(const std::vector<SPItem*> &items, std::vector<SPItem*>& 
         
         SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(item);
         if (lpeitem) {
-            selected.erase(remove(selected.begin(), selected.end(), item), selected.end());
             lpeitem->removeAllPathEffects(true);
             SPObject *elemref = document->getObjectById(id);
-            if (elemref) {
-                //If the LPE item is a shape is converted to a path so we need to reupdate the item
-                item = dynamic_cast<SPItem *>(elemref);
-                selected.push_back(item);
+            if (elemref != item) {
+                selected.erase(remove(selected.begin(), selected.end(), item), selected.end());
+                if (elemref) {
+                    //If the LPE item is a shape is converted to a path so we need to reupdate the item
+                    item = dynamic_cast<SPItem *>(elemref);
+                    selected.push_back(item);
+                    did = true;
+                }
             }
         }
         
@@ -603,7 +607,7 @@ ObjectSet::pathReverse()
 
         did = true;
 
-        SPCurve *rcurve = path->getCurveForEdit(true)->create_reverse();
+        auto rcurve = path->getCurveForEdit(true)->create_reverse();
 
         gchar *str = sp_svg_write_path(rcurve->get_pathvector());
         if ( path->hasPathEffectRecursive() ) {
@@ -612,8 +616,6 @@ ObjectSet::pathReverse()
             path->setAttribute("d", str);
         }
         g_free(str);
-
-        rcurve->unref();
 
         // reverse nodetypes order (Bug #179866)
         gchar *nodetypes = g_strdup(path->getRepr()->attribute("sodipodi:nodetypes"));

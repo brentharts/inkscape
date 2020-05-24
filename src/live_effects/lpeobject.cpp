@@ -49,7 +49,7 @@ void LivePathEffectObject::build(SPDocument *document, Inkscape::XML::Node *repr
 
     SPObject::build(document, repr);
 
-    this->readAttr(SP_PROP_PATH_EFFECT);
+    this->readAttr(SPAttr::PATH_EFFECT);
 
     if (repr) {
         repr->addListener (&livepatheffect_repr_events, this);
@@ -94,13 +94,13 @@ void LivePathEffectObject::release() {
 /**
  * Virtual set: set attribute to value.
  */
-void LivePathEffectObject::set(SPAttributeEnum key, gchar const *value) {
+void LivePathEffectObject::set(SPAttr key, gchar const *value) {
 #ifdef LIVEPATHEFFECT_VERBOSE
     g_print("Set livepatheffect");
 #endif
 
     switch (key) {
-        case SP_PROP_PATH_EFFECT:
+        case SPAttr::PATH_EFFECT:
             if (this->lpe) {
                 delete this->lpe;
                 this->lpe = nullptr;
@@ -170,7 +170,7 @@ livepatheffect_on_repr_attr_changed ( Inkscape::XML::Node * /*repr*/,
 // effect, we use on clipboard to do not fork in same doc on pastepatheffect
 bool LivePathEffectObject::is_similar(LivePathEffectObject *that)
 {
-    if (this && that) {
+    if (that) {
         const char *thisid = this->getId();
         const char *thatid = that->getId();
         if (!thisid || !thatid || strcmp(thisid, thatid) != 0) {

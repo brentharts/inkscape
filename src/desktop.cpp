@@ -763,7 +763,7 @@ void SPDesktop::setEventContext(const std::string& toolName)
         event_context = nullptr;
     } else {
         event_context = ToolFactory::createObject(toolName);
-        event_context->desktop = this;
+        event_context->setDesktop(this);
         event_context->message_context = std::unique_ptr<Inkscape::MessageContext>(new Inkscape::MessageContext(this->messageStack()));
         event_context->setup();
 
@@ -2173,7 +2173,7 @@ SPDesktop::show_dialogs()
         if (visible) {
 
 #ifdef GDK_WINDOWING_WAYLAND
-            // Hack to prevent crash with Wayland. See: https://gitlab.com/inkscape/inkscape/issues/454
+            // Hack to prevent crash with Wayland. See: https://gitlab.com/inkscape/inkscape/-/issues/454
             if (iter->first == "InkscapePreferences") {
                 Glib::ustring session_type  = Glib::getenv("XDG_SESSION_TYPE");  // Window session
                 Glib::ustring session_type2 = Glib::getenv("GDK_BACKEND");       // Possible override

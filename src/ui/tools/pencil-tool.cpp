@@ -236,9 +236,9 @@ bool PencilTool::_handleButtonPress(GdkEventButton const &bevent) {
                     p = anchor->dp;
                     //Put the start overwrite curve always on the same direction
                     if (anchor->start) {
-                        this->sa_overwrited =  anchor->curve->create_reverse();
+                        this->sa_overwrited = anchor->curve->create_reverse();
                     } else {
-                        this->sa_overwrited =  anchor->curve->copy();
+                        this->sa_overwrited = anchor->curve->copy();
                     }
                     desktop->messageStack()->flash(Inkscape::NORMAL_MESSAGE, _("Continuing selected path"));
                 } else {
@@ -353,7 +353,7 @@ bool PencilTool::_handleMotionNotify(GdkEventMotion const &mevent) {
 
                 if ( !this->sa && !this->green_anchor ) {
                     /* Create green anchor */
-                    this->green_anchor = sp_draw_anchor_new(this, this->green_curve, TRUE, this->p[0]);
+                    this->green_anchor = sp_draw_anchor_new(this, this->green_curve.get(), TRUE, this->p[0]);
                 }
                 if (anchor) {
                     p = anchor->dp;
@@ -879,10 +879,10 @@ void PencilTool::_addFreehandPoint(Geom::Point const &p, guint /*state*/, bool l
         if (min > max) {
             min = max;
         }
-        double dezoomify_factor = 0.05 * 1000 / SP_EVENT_CONTEXT(this)->desktop->current_zoom();
+        double dezoomify_factor = 0.05 * 1000 / desktop->current_zoom();
         double pressure_shrunk = (((this->pressure - 0.25) * 1.25) * (max - min)) + min;
         double pressure_computed = std::abs(pressure_shrunk * dezoomify_factor);
-        double pressure_computed_scaled = std::abs(pressure_computed * SP_ACTIVE_DOCUMENT->getDocumentScale().inverse()[Geom::X]);
+        double pressure_computed_scaled = std::abs(pressure_computed * desktop->getDocument()->getDocumentScale().inverse()[Geom::X]);
         if (p != this->p[this->_npoints - 1]) {
             this->_wps.emplace_back(distance, pressure_computed_scaled);
         }
@@ -920,7 +920,7 @@ void PencilTool::powerStrokeInterpolate(Geom::Path const path)
     Geom::Point previous = Geom::Point(Geom::infinity(), 0);
     bool increase = false;
     size_t i = 0;
-    double dezoomify_factor = 0.05 * 1000 / SP_EVENT_CONTEXT(this)->desktop->current_zoom();
+    double dezoomify_factor = 0.05 * 1000 / desktop->current_zoom();
     double limit = 6 * dezoomify_factor;
     double max =
         std::max(this->_wps.back()[Geom::X] - (this->_wps.back()[Geom::X] / 10), this->_wps.back()[Geom::X] - limit);
@@ -1027,7 +1027,7 @@ void PencilTool::_interpolate() {
             }
         }
         if (!tablet_enabled) {
-            sp_canvas_bpath_set_bpath(SP_CANVAS_BPATH(this->red_bpath), this->green_curve);
+            sp_canvas_bpath_set_bpath(SP_CANVAS_BPATH(this->red_bpath), this->green_curve.get());
         }
         /* Fit and draw and copy last point */
         g_assert(!this->green_curve->is_empty());
@@ -1118,7 +1118,7 @@ void PencilTool::_sketchInterpolate() {
         this->green_curve->reset();
         this->green_curve->set_pathvector(Geom::path_from_piecewise(this->sketch_interpolation, 0.01));
         if (!tablet_enabled) {
-            sp_canvas_bpath_set_bpath(SP_CANVAS_BPATH(this->red_bpath), this->green_curve);
+            sp_canvas_bpath_set_bpath(SP_CANVAS_BPATH(this->red_bpath), this->green_curve.get());
         }
         /* Fit and draw and copy last point */
         g_assert(!this->green_curve->is_empty());
@@ -1201,11 +1201,10 @@ void PencilTool::_fitAndSplit() {
 
 
         this->green_curve->append_continuous(this->red_curve, 0.0625);
-        SPCurve *curve = this->red_curve->copy();
+        auto curve = this->red_curve->copy();
 
         /// \todo fixme:
-        SPCanvasItem *cshape = sp_canvas_bpath_new(this->desktop->getSketch(), curve, true);
-        curve->unref();
+        SPCanvasItem *cshape = sp_canvas_bpath_new(this->desktop->getSketch(), curve.get(), true);
 
         this->highlight_color = SP_ITEM(this->desktop->currentLayer())->highlight_color();
         if((unsigned int)prefs->getInt("/tools/nodes/highlight_color", 0xff0000ff) == this->highlight_color){

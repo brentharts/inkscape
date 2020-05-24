@@ -16,6 +16,8 @@
 #include <memory>
 #include <vector>
 
+#include <3rdparty/libcroco/cr-statement.h>
+
 class SPStyleElem : public SPObject {
 public:
     SPStyleElem();
@@ -30,7 +32,7 @@ public:
     std::vector<std::unique_ptr<SPStyle>> get_styles() const;
 
     void build(SPDocument* doc, Inkscape::XML::Node* repr) override;
-    void set(SPAttributeEnum key, char const* value) override;
+    void set(SPAttr key, char const* value) override;
     void read_content() override;
     void release() override;
 

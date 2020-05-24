@@ -649,12 +649,13 @@ void CairoRenderer::renderItem(CairoRenderContext *ctx, SPItem *item)
     ctx->transform(item->transform);
     sp_item_invoke_render(item, ctx);
 
-    if (state->need_layer)
+    if (state->need_layer) {
         if (blend) {
             ctx->popLayer(ink_css_blend_to_cairo_operator(style->mix_blend_mode.value)); // This applies clipping/masking
         } else {
             ctx->popLayer(); // This applies clipping/masking
         }
+    }
     ctx->popState();
 }
 
@@ -663,13 +664,12 @@ void CairoRenderer::renderHatchPath(CairoRenderContext *ctx, SPHatchPath const &
     ctx->setStateForStyle(hatchPath.style);
     ctx->transform(Geom::Translate(hatchPath.offset.computed, 0));
 
-    SPCurve *curve = hatchPath.calculateRenderCurve(key);
+    std::unique_ptr<SPCurve> curve = hatchPath.calculateRenderCurve(key);
     Geom::PathVector const & pathv =curve->get_pathvector();
     if (!pathv.empty()) {
         ctx->renderPathVector(pathv, hatchPath.style, Geom::OptRect());
     }
 
-    curve->unref();
     ctx->popState();
 }
 

@@ -159,7 +159,8 @@ Pixbuf::Pixbuf(cairo_surface_t *s)
     : _pixbuf(gdk_pixbuf_new_from_data(
         cairo_image_surface_get_data(s), GDK_COLORSPACE_RGB, TRUE, 8,
         cairo_image_surface_get_width(s), cairo_image_surface_get_height(s),
-        cairo_image_surface_get_stride(s), nullptr, nullptr))
+        cairo_image_surface_get_stride(s),
+        ink_cairo_pixbuf_cleanup, s))
     , _surface(s)
     , _mod_time(0)
     , _pixel_format(PF_CAIRO)
@@ -197,7 +198,6 @@ Pixbuf::~Pixbuf()
 {
     if (_cairo_store) {
         g_object_unref(_pixbuf);
-        cairo_surface_destroy(_surface);
     } else {
         cairo_surface_destroy(_surface);
         g_object_unref(_pixbuf);
@@ -320,14 +320,14 @@ Pixbuf *Pixbuf::create_from_data_uri(gchar const *uri_data, double svgdpi)
     if ((*data) && data_is_image && data_is_svg && data_is_base64) {
         gsize decoded_len = 0;
         guchar *decoded = g_base64_decode(data, &decoded_len);
-        SPDocument *svgDoc = SPDocument::createNewDocFromMem (reinterpret_cast<gchar const *>(decoded), decoded_len, false);
+        std::unique_ptr<SPDocument> svgDoc(
+            SPDocument::createNewDocFromMem(reinterpret_cast<gchar const *>(decoded), decoded_len, false));
         // Check the document loaded properly
         if (svgDoc == nullptr) {
             return nullptr;
         }
         if (svgDoc->getRoot() == nullptr)
         {
-            svgDoc->doUnref();
             return nullptr;
         }
         Inkscape::Preferences *prefs = Inkscape::Preferences::get();
@@ -352,12 +352,11 @@ Pixbuf *Pixbuf::create_from_data_uri(gchar const *uri_data, double svgdpi)
         const int scaledSvgHeight = round(svgHeight_px/(96.0/dpi));
 
         assert(!pixbuf);
-        pixbuf = sp_generate_internal_bitmap(svgDoc, nullptr, 0, 0, svgWidth_px, svgHeight_px, scaledSvgWidth,
+        pixbuf = sp_generate_internal_bitmap(svgDoc.get(), nullptr, 0, 0, svgWidth_px, svgHeight_px, scaledSvgWidth,
                                              scaledSvgHeight, dpi, dpi, 0xffffff00, nullptr);
         GdkPixbuf const *buf = pixbuf->getPixbufRaw();
 
         // Tidy up
-        svgDoc->doUnref();
         if (buf == nullptr) {
             std::cerr << "Pixbuf::create_from_data: failed to load contents: " << std::endl;
             delete pixbuf;
@@ -430,7 +429,7 @@ Pixbuf *Pixbuf::create_from_buffer(gchar *&&data, gsize len, double svgdpi, std:
         {
             if (boost::iequals(fn.substr(idx+1).c_str(), "svg")) {
 
-                SPDocument *svgDoc = SPDocument::createNewDocFromMem (data, len, true);
+                std::unique_ptr<SPDocument> svgDoc(SPDocument::createNewDocFromMem(data, len, true));
 
                 // Check the document loaded properly
                 if (svgDoc == nullptr) {
@@ -438,7 +437,6 @@ Pixbuf *Pixbuf::create_from_buffer(gchar *&&data, gsize len, double svgdpi, std:
                 }
                 if (svgDoc->getRoot() == nullptr)
                 {
-                    svgDoc->doUnref();
                     return nullptr;
                 }
 
@@ -463,12 +461,11 @@ Pixbuf *Pixbuf::create_from_buffer(gchar *&&data, gsize len, double svgdpi, std:
                 const int scaledSvgWidth  = round(svgWidth_px/(96.0/dpi));
                 const int scaledSvgHeight = round(svgHeight_px/(96.0/dpi));
 
-                pb = sp_generate_internal_bitmap(svgDoc, nullptr, 0, 0, svgWidth_px, svgHeight_px, scaledSvgWidth,
+                pb = sp_generate_internal_bitmap(svgDoc.get(), nullptr, 0, 0, svgWidth_px, svgHeight_px, scaledSvgWidth,
                                                  scaledSvgHeight, dpi, dpi, 0xffffff00);
                 buf = pb->getPixbufRaw();
 
                 // Tidy up
-                svgDoc->doUnref();
                 if (buf == nullptr) {
                     delete pb;
                     return nullptr;

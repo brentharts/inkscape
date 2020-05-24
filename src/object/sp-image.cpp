@@ -131,14 +131,14 @@ SPImage::~SPImage() = default;
 void SPImage::build(SPDocument *document, Inkscape::XML::Node *repr) {
     SPItem::build(document, repr);
 
-    this->readAttr(SP_ATTR_XLINK_HREF);
-    this->readAttr(SP_ATTR_X);
-    this->readAttr(SP_ATTR_Y);
-    this->readAttr(SP_ATTR_WIDTH);
-    this->readAttr(SP_ATTR_HEIGHT);
-    this->readAttr(SP_ATTR_SVG_DPI);
-    this->readAttr(SP_ATTR_PRESERVEASPECTRATIO);
-    this->readAttr(SP_PROP_COLOR_PROFILE);
+    this->readAttr(SPAttr::XLINK_HREF);
+    this->readAttr(SPAttr::X);
+    this->readAttr(SPAttr::Y);
+    this->readAttr(SPAttr::WIDTH);
+    this->readAttr(SPAttr::HEIGHT);
+    this->readAttr(SPAttr::SVG_DPI);
+    this->readAttr(SPAttr::PRESERVEASPECTRATIO);
+    this->readAttr(SPAttr::COLOR_PROFILE);
 
     /* Register */
     document->addResource("image", this);
@@ -165,22 +165,20 @@ void SPImage::release() {
     }
 #endif // defined(HAVE_LIBLCMS2)
 
-    if (this->curve) {
-        this->curve = this->curve->unref();
-    }
+    curve.reset();
 
     SPItem::release();
 }
 
-void SPImage::set(SPAttributeEnum key, const gchar* value) {
+void SPImage::set(SPAttr key, const gchar* value) {
     switch (key) {
-        case SP_ATTR_XLINK_HREF:
+        case SPAttr::XLINK_HREF:
             g_free (this->href);
             this->href = (value) ? g_strdup (value) : nullptr;
             this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG | SP_IMAGE_HREF_MODIFIED_FLAG);
             break;
 
-        case SP_ATTR_X:
+        case SPAttr::X:
             /* ex, em not handled correctly. */
             if (!this->x.read(value)) {
                 this->x.unset();
@@ -189,7 +187,7 @@ void SPImage::set(SPAttributeEnum key, const gchar* value) {
             this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
             break;
 
-        case SP_ATTR_Y:
+        case SPAttr::Y:
             /* ex, em not handled correctly. */
             if (!this->y.read(value)) {
                 this->y.unset();
@@ -198,7 +196,7 @@ void SPImage::set(SPAttributeEnum key, const gchar* value) {
             this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
             break;
 
-        case SP_ATTR_WIDTH:
+        case SPAttr::WIDTH:
             /* ex, em not handled correctly. */
             if (!this->width.read(value)) {
                 this->width.unset();
@@ -207,7 +205,7 @@ void SPImage::set(SPAttributeEnum key, const gchar* value) {
             this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
             break;
 
-        case SP_ATTR_HEIGHT:
+        case SPAttr::HEIGHT:
             /* ex, em not handled correctly. */
             if (!this->height.read(value)) {
                 this->height.unset();
@@ -216,17 +214,17 @@ void SPImage::set(SPAttributeEnum key, const gchar* value) {
             this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
             break;
 
-        case SP_ATTR_SVG_DPI:
+        case SPAttr::SVG_DPI:
             this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG | SP_IMAGE_HREF_MODIFIED_FLAG);
             break;
 
-        case SP_ATTR_PRESERVEASPECTRATIO:
+        case SPAttr::PRESERVEASPECTRATIO:
             set_preserveAspectRatio( value );
             this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_VIEWPORT_MODIFIED_FLAG);
             break;
 
 #if defined(HAVE_LIBLCMS2)
-        case SP_PROP_COLOR_PROFILE:
+        case SPAttr::COLOR_PROFILE:
             if ( this->color_profile ) {
                 g_free (this->color_profile);
             }
@@ -741,25 +739,11 @@ static void sp_image_set_curve( SPImage *image )
 {
     //create a curve at the image's boundary for snapping
     if ((image->height.computed < MAGIC_EPSILON_TOO) || (image->width.computed < MAGIC_EPSILON_TOO) || (image->getClipObject())) {
-        if (image->curve) {
-            image->curve = image->curve->unref();
-        }
     } else {
         Geom::OptRect rect = image->bbox(Geom::identity(), SPItem::VISUAL_BBOX);
-        SPCurve *c = nullptr;
         
         if (rect->isFinite()) {
-            c = SPCurve::new_from_rect(*rect, true);
-        }
-
-        if (image->curve) {
-            image->curve = image->curve->unref();
-        }
-
-        if (c) {
-            image->curve = c->ref();
-
-            c->unref();
+            image->curve = SPCurve::new_from_rect(*rect, true);
         }
     }
 }
@@ -767,13 +751,12 @@ static void sp_image_set_curve( SPImage *image )
 /**
  * Return duplicate of curve (if any exists) or NULL if there is no curve
  */
-SPCurve *SPImage::get_curve() const
+std::unique_ptr<SPCurve> SPImage::get_curve() const
 {
-    SPCurve *result = nullptr;
     if (curve) {
-        result = curve->copy();
+        return curve->copy();
     }
-    return result;
+    return {};
 }
 
 void sp_embed_image(Inkscape::XML::Node *image_node, Inkscape::Pixbuf *pb)
