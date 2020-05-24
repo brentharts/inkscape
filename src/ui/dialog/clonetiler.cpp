@@ -69,9 +69,7 @@ class CheckButtonInternal : public Gtk::CheckButton {
   private:
     bool _uncheckable = false;
   public:
-    CheckButtonInternal()
-        : Gtk::CheckButton()
-    {}
+    CheckButtonInternal() = default;
 
     CheckButtonInternal(const Glib::ustring &label)
         : Gtk::CheckButton(label)
