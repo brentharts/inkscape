@@ -1731,15 +1731,11 @@ void SPDesktopWidget::namedviewModified(SPObject *obj, guint flags)
                         if ( name == "TextToolbar" || name == "MeasureToolbar")
                             continue;
 
-                        gpointer t = sp_search_by_data_recursive(GTK_WIDGET(j->gobj()), (gpointer) "unit-tracker");
-                        if (t == nullptr) // didn't find any tracker data
-                            continue;
+                        auto tracker = dynamic_cast<UnitTracker*>(sp_search_by_name_recursive(j, "unit-tracker"));
 
-                        UnitTracker *tracker = reinterpret_cast<UnitTracker*>( t );
-                        if (tracker == nullptr) // it's null when inkscape is first opened
-                            continue;
-
-                        tracker->setActiveUnit( nv->display_units );
+                        if (tracker) { // it's null when inkscape is first opened
+                            tracker->setActiveUnit( nv->display_units );
+                        }
                     } // grandchildren
                 } // if child is a container
             } // children
