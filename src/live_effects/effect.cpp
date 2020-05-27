@@ -1148,6 +1148,34 @@ void
 Effect::doOnApply (SPLPEItem const*/*lpeitem*/)
 {
 }
+/**
+ * Is performed on forked to allow pass volatile data from original LPE to forked one
+ */
+void Effect::doOnFork(Effect const * /*forkedeffect*/) {}
+
+/**
+ * Is performed on stamp selection
+ */
+void Effect::doOnStamp(SPLPEItem const * /*lpeitem*/) {}
+/**
+ * Is performed a single time previously the item become copied (see bool LPE to add element to selection)
+ */
+void Effect::doOnCopy(SPLPEItem const * /*lpeitem*/, Inkscape::ObjectSet *set) {}
+
+/**
+ * Is performed a single time previously the item become cut (see bool LPE to add element to selection)
+ */
+void Effect::doOnCut(SPLPEItem const * /*lpeitem*/) {}
+
+/**
+ * Is performed a single time previously the item become pasted (see bool LPE to add element to selection)
+ */
+void Effect::doOnPaste(SPLPEItem const * /*lpeitem*/) {}
+
+/**
+ * Is performed a single time when the item become dupled
+ */
+void Effect::doOnDuple(SPLPEItem const * /*lpeitem*/) {}
 
 void
 Effect::setCurrentZoom(double cZ)
@@ -1164,6 +1192,20 @@ void
 Effect::setSelectedNodePoints(std::vector<Geom::Point> sNP)
 {
     selectedNodesPoints = sNP;
+}
+
+/**
+ * The lpe is on clipboard
+ */
+bool Effect::isOnClipboard()
+{
+    SPDocument *document = getSPDoc();
+    if (!document) {
+        return false;
+    }
+    Inkscape::XML::Node *root = document->getReprRoot();
+    Inkscape::XML::Node *clipnode = sp_repr_lookup_name(root, "inkscape:clipboard", 1);
+    return clipnode != nullptr;
 }
 
 bool

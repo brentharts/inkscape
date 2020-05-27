@@ -37,33 +37,24 @@
 // TODO FIXME: This should be moved into preference repr
 SPCycleType SP_CYCLING = SP_CYCLE_FOCUS;
 
-
 #include "context-fns.h"
 #include "desktop-style.h"
 #include "desktop.h"
-#include "document-undo.h"
-#include "gradient-drag.h"
-#include "layer-fns.h"
-#include "layer-manager.h"
-#include "layer-model.h"
-#include "message-stack.h"
-#include "path-chemistry.h"
-#include "selection.h"
-#include "text-editing.h"
-#include "text-chemistry.h"
-#include "verbs.h"
-
 #include "display/cairo-utils.h"
 #include "display/curve.h"
 #include "display/sp-canvas.h"
-
+#include "document-undo.h"
+#include "gradient-drag.h"
 #include "helper/png-write.h"
-
 #include "io/resource.h"
-
+#include "layer-fns.h"
+#include "layer-manager.h"
+#include "layer-model.h"
 #include "live_effects/effect.h"
+#include "live_effects/lpeobject-reference.h"
+#include "live_effects/lpeobject.h"
 #include "live_effects/parameter/originalpath.h"
-
+#include "message-stack.h"
 #include "object/box3d.h"
 #include "object/object-set.h"
 #include "object/persp3d.h"
@@ -96,11 +87,13 @@ SPCycleType SP_CYCLING = SP_CYCLE_FOCUS;
 #include "object/sp-tref.h"
 #include "object/sp-tspan.h"
 #include "object/sp-use.h"
+#include "path-chemistry.h"
+#include "selection.h"
 #include "style.h"
-
 #include "svg/svg-color.h"
 #include "svg/svg.h"
-
+#include "text-chemistry.h"
+#include "text-editing.h"
 #include "ui/clipboard.h"
 #include "ui/tool/control-point-selection.h"
 #include "ui/tool/multi-path-manipulator.h"
@@ -110,7 +103,7 @@ SPCycleType SP_CYCLING = SP_CYCLE_FOCUS;
 #include "ui/tools/gradient-tool.h"
 #include "ui/tools/node-tool.h"
 #include "ui/tools/text-tool.h"
-
+#include "verbs.h"
 #include "xml/rebase-hrefs.h"
 #include "xml/simple-document.h"
 
@@ -431,6 +424,43 @@ static void add_ids_recursive(std::vector<const gchar *> &ids, SPObject *obj)
     }
 }
 
+/**
+ * Call to LPE copy event
+ * Find a way to pass the function as parameter
+ */
+void sp_selection_livepatheffect_action(SPLPEItem *lpeitem, Glib::ustring action, Inkscape::ObjectSet *set)
+{
+    if (lpeitem && lpeitem->hasPathEffect()) {
+        PathEffectList path_effect_list(*lpeitem->path_effect_list);
+        std::vector<Inkscape::LivePathEffect::Effect *> lpelist;
+        for (auto &lperef : path_effect_list) {
+            if (!lperef) {
+                continue;
+            }
+            LivePathEffectObject *lpeobj = lperef->lpeobject;
+            if (lpeobj) {
+                Inkscape::LivePathEffect::Effect *lpe = lpeobj->get_lpe();
+                if (lpe) {
+                    lpelist.push_back(lpe);
+                }
+            }
+        }
+        for (auto lpe : lpelist) {
+            if (action == "copy") {
+                lpe->doOnCopy(lpeitem, set);
+            } else if (action == "paste") {
+                lpe->doOnPaste(lpeitem);
+            } else if (action == "cut") {
+                lpe->doOnCut(lpeitem);
+            } else if (action == "duple") {
+                lpe->doOnDuple(lpeitem);
+            } else if (action == "stamp") {
+                lpe->doOnStamp(lpeitem);
+            }
+        }
+    }
+}
+
 void ObjectSet::duplicate(bool suppressDone, bool duplicateLayer)
 {
     if(duplicateLayer && !desktop() ){
@@ -481,6 +511,14 @@ void ObjectSet::duplicate(bool suppressDone, bool duplicateLayer)
 
     std::vector<Inkscape::XML::Node*> copies;
     for(auto old_repr : reprs) {
+        SPItem *old_item = dynamic_cast<SPItem *>(doc->getObjectByRepr(old_repr));
+        if (old_item) {
+            SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(old_item);
+            if (lpeitem) {
+                Glib::ustring action = "duple";
+                sp_selection_livepatheffect_action(lpeitem, action, this);
+            }
+        }
         Inkscape::XML::Node *parent = old_repr->parent();
         Inkscape::XML::Node *copy = old_repr->duplicate(xml_doc);
 
@@ -507,6 +545,7 @@ void ObjectSet::duplicate(bool suppressDone, bool duplicateLayer)
             SPLPEItem *newLPEObj = dynamic_cast<SPLPEItem *>(new_obj);
             if (newLPEObj) {
                 newLPEObj->forkPathEffectsIfNecessary(1);
+                sp_lpe_item_update_patheffect(newLPEObj, false, false);
             }
         }
 
@@ -1241,6 +1280,35 @@ sp_redo(SPDesktop *desktop, SPDocument *)
 
 void ObjectSet::cut()
 {
+    // we need to unselect all active operands of bool LPE
+    auto list = items();
+    bool changed = false;
+    std::vector<SPObject *> tounselect;
+    for (auto itemlist = list.begin(); itemlist != list.end(); ++itemlist) {
+        SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(*itemlist);
+        if (lpeitem && lpeitem->style) {
+            SPFilter *filt = lpeitem->style->getFilter();
+            if (filt && (filt->getId() && strcmp(filt->getId(), "selectable_hidder_filter") == 0)) {
+                changed = true;
+                tounselect.push_back(lpeitem);
+            }
+        }
+    }
+    if (changed) {
+        for (auto obj : tounselect) {
+            remove(obj);
+        }
+        list = items();
+    }
+    // here we call to main bool lpe that chain to previously unselected items
+    // in the correct order
+    for (auto itemlist = list.begin(); itemlist != list.end(); ++itemlist) {
+        SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(*itemlist);
+        if (lpeitem) {
+            Glib::ustring action = "cut";
+            sp_selection_livepatheffect_action(lpeitem, action, this);
+        }
+    }
     copy();
     deleteItems();
 }
@@ -1300,7 +1368,42 @@ take_style_from_item(SPObject *object)
 void ObjectSet::copy()
 {
     Inkscape::UI::ClipboardManager *cm = Inkscape::UI::ClipboardManager::get();
+    // we need to unselect all active operands of bool LPE
+    auto list = items();
+    bool changed = false;
+    std::vector<SPObject *> tounselect;
+    for (auto itemlist = list.begin(); itemlist != list.end(); ++itemlist) {
+        SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(*itemlist);
+        if (lpeitem && lpeitem->style) {
+            SPFilter *filt = lpeitem->style->getFilter();
+            if (filt && (filt->getId() && strcmp(filt->getId(), "selectable_hidder_filter") == 0)) {
+                changed = true;
+                tounselect.push_back(lpeitem);
+            }
+        }
+    }
+    if (changed) {
+        for (auto obj : tounselect) {
+            remove(obj);
+        }
+        list = items();
+    }
+    // here we call to main bool lpe that chain to previously unselected items
+    // in the correct order
+    for (auto itemlist = list.begin(); itemlist != list.end(); ++itemlist) {
+        SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(*itemlist);
+        if (lpeitem) {
+            Glib::ustring action = "copy";
+            sp_selection_livepatheffect_action(lpeitem, action, this);
+        }
+    }
     cm->copy(this);
+    for (auto itemlist = list.begin(); itemlist != list.end(); ++itemlist) {
+        SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(*itemlist);
+        if (lpeitem) {
+            sp_lpe_item_update_patheffect(lpeitem, false, false);
+        }
+    }
 }
 
 void sp_selection_paste(SPDesktop *desktop, bool in_place)

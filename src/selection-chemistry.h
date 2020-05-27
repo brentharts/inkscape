@@ -26,6 +26,7 @@ class SPCSSAttr;
 class SPDesktop;
 class SPDocument;
 class SPItem;
+class SPLPEItem;
 class SPObject;
 
 namespace Inkscape {
@@ -90,6 +91,8 @@ enum SPSelectStrokeStyleType {
 
 void sp_select_same_fill_stroke_style(SPDesktop *desktop, gboolean fill, gboolean strok, gboolean style);
 void sp_select_same_object_type(SPDesktop *desktop);
+
+void sp_selection_livepatheffect_action(SPLPEItem *lpeitem, Glib::ustring action, Inkscape::ObjectSet *set);
 
 std::vector<SPItem*> sp_get_same_style(SPItem *sel, std::vector<SPItem*> &src, SPSelectStrokeStyleType type=SP_STYLE_ALL);
 std::vector<SPItem*> sp_get_same_object_type(SPItem *sel, std::vector<SPItem*> &src);

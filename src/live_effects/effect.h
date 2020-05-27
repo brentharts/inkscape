@@ -74,7 +74,14 @@ public:
     void setCurrentZoom(double cZ);
     void setSelectedNodePoints(std::vector<Geom::Point> sNP);
     bool isNodePointSelected(Geom::Point const &nodePoint) const;
+    bool isOnClipboard();
     virtual void doOnApply (SPLPEItem const* lpeitem);
+    virtual void doOnCopy(SPLPEItem const *lpeitem, Inkscape::ObjectSet *set);
+    virtual void doOnCut(SPLPEItem const *lpeitem);
+    virtual void doOnPaste(SPLPEItem const *lpeitem);
+    virtual void doOnDuple(SPLPEItem const *lpeitem);
+    virtual void doOnStamp(SPLPEItem const *lpeitem);
+    virtual void doOnFork(Effect const *forkedeffect);
     virtual void doBeforeEffect (SPLPEItem const* lpeitem);
     virtual void transform_multiply(Geom::Affine const &postmul, bool set);
     virtual void doAfterEffect (SPLPEItem const* lpeitem);

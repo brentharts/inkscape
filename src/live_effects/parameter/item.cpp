@@ -9,21 +9,19 @@
 #include "live_effects/parameter/item.h"
 
 #include <glibmm/i18n.h>
-
 #include <gtkmm/button.h>
 #include <gtkmm/label.h>
 
 #include "bad-uri-exception.h"
-#include "ui/widget/point.h"
-
-#include "live_effects/effect.h"
-#include "svg/svg.h"
-
 #include "desktop.h"
 #include "inkscape.h"
+#include "live_effects/effect.h"
+#include "live_effects/lpeobject.h"
 #include "message-stack.h"
 #include "selection-chemistry.h"
+#include "svg/svg.h"
 #include "ui/icon-loader.h"
+#include "ui/widget/point.h"
 #include "xml/repr.h"
 // clipboard support
 #include "ui/clipboard.h"
@@ -70,6 +68,27 @@ void
 ItemParam::param_set_and_write_default()
 {
     param_write_to_repr(defvalue);
+}
+
+SPObject *ItemParam::param_fork()
+{
+    SPObject *newobj = nullptr;
+    SPDocument *document = param_effect->getSPDoc();
+    if (!document) {
+        return newobj;
+    }
+    SPObject *oldobj = ref.getObject();
+
+    if (oldobj) {
+        Inkscape::XML::Document *xml_doc = document->getReprDoc();
+        Inkscape::XML::Node *fork = oldobj->getRepr()->duplicate(xml_doc);
+        newobj = oldobj->parent->appendChildRepr(fork);
+        if (newobj && newobj->getId()) {
+            Glib::ustring id = newobj->getId();
+            linkitem(id);
+        }
+    }
+    return newobj;
 }
 
 bool

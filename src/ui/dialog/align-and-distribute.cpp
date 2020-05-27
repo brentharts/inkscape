@@ -17,30 +17,25 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
-#include <glibmm/i18n.h>
+#include "align-and-distribute.h"
 
 #include <2geom/transforms.h>
-
+#include <glibmm/i18n.h>
 #include <utility>
-
-#include "align-and-distribute.h"
 
 #include "desktop.h"
 #include "document-undo.h"
 #include "document.h"
 #include "graphlayout.h"
 #include "inkscape.h"
-#include "preferences.h"
-#include "removeoverlap.h"
-#include "text-editing.h"
-#include "unclump.h"
-#include "verbs.h"
-
+#include "live_effects/effect-enum.h"
 #include "object/sp-flowtext.h"
 #include "object/sp-item-transform.h"
 #include "object/sp-root.h"
 #include "object/sp-text.h"
-
+#include "preferences.h"
+#include "removeoverlap.h"
+#include "text-editing.h"
 #include "ui/icon-loader.h"
 #include "ui/icon-names.h"
 #include "ui/tool/control-point-selection.h"
@@ -48,6 +43,8 @@
 #include "ui/tools-switch.h"
 #include "ui/tools/node-tool.h"
 #include "ui/widget/spinbutton.h"
+#include "unclump.h"
+#include "verbs.h"
 
 namespace Inkscape {
 namespace UI {
@@ -122,7 +119,14 @@ void ActionAlign::do_action(SPDesktop *desktop, int index)
 
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     bool sel_as_group = prefs->getBool("/dialogs/align/sel-as-groups");
-
+    // We force unselect operand in bool LPE
+    auto list = selection->items();
+    for (auto itemlist = list.begin(); itemlist != list.end(); ++itemlist) {
+        SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(*itemlist);
+        if (lpeitem && lpeitem->hasPathEffectOfType(Inkscape::LivePathEffect::EffectType::BOOL_OP)) {
+            sp_lpe_item_update_patheffect(lpeitem, false, false);
+        }
+    }
     std::vector<SPItem*> selected(selection->items().begin(), selection->items().end());
     if (selected.empty()) return;
 
