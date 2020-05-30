@@ -105,7 +105,7 @@ void StarTool::selection_changed(Inkscape::Selection* selection) {
 }
 
 void StarTool::setup() {
-	ToolBase::setup();
+    ToolBase::setup();
 
     sp_event_context_read(this, "isflatsided");
     sp_event_context_read(this, "magnitude");
@@ -113,27 +113,27 @@ void StarTool::setup() {
     sp_event_context_read(this, "rounded");
     sp_event_context_read(this, "randomized");
 
-	this->shape_editor = new ShapeEditor(this->desktop);
+    this->shape_editor = new ShapeEditor(this->desktop);
 
-	SPItem *item = this->desktop->getSelection()->singleItem();
-	if (item) {
-		this->shape_editor->set_item(item);
-	}
+    SPItem *item = this->desktop->getSelection()->singleItem();
+    if (item) {
+        this->shape_editor->set_item(item);
+    }
 
-	Inkscape::Selection *selection = this->desktop->getSelection();
+    Inkscape::Selection *selection = this->desktop->getSelection();
 
     this->sel_changed_connection.disconnect();
 
     this->sel_changed_connection = selection->connectChanged(sigc::mem_fun(this, &StarTool::selection_changed));
 
-	Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-	if (prefs->getBool("/tools/shapes/selcue")) {
-		this->enableSelectionCue();
-	}
+    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+    if (prefs->getBool("/tools/shapes/selcue")) {
+        this->enableSelectionCue();
+    }
 
-	if (prefs->getBool("/tools/shapes/gradientdrag")) {
-		this->enableGrDrag();
-	}
+    if (prefs->getBool("/tools/shapes/gradientdrag")) {
+        this->enableGrDrag();
+    }
 }
 
 void StarTool::set(const Inkscape::Preferences::Entry& val) {
