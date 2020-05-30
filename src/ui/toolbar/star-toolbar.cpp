@@ -103,8 +103,17 @@ StarToolbar::StarToolbar(SPDesktop *desktop) :
 
     /* Magnitude */
     {
-        std::vector<Glib::ustring> labels = {"", _("triangle/tri-star"), _("square/quad-star"), _("pentagon/five-pointed star"), _("hexagon/six-pointed star"), "", "", "", "", ""};
-        std::vector<double>        values = { 2,                      3,                     4,                               5,                             6,  7,  8, 10, 12, 20};
+        std::vector<Glib::ustring> labels = {"",
+                                             _("triangle/tri-star"),
+                                             _("square/quad-star"),
+                                             _("pentagon/five-pointed star"),
+                                             _("hexagon/six-pointed star"),
+                                             "",
+                                             "",
+                                             "",
+                                             "",
+                                             ""};
+        std::vector<double> values = {2, 3, 4, 5, 6, 7, 8, 10, 12, 20};
         auto magnitude_val = prefs->getDouble("/tools/shapes/star/magnitude", 3);
         _magnitude_adj = Gtk::Adjustment::create(magnitude_val, isFlatSided ? 3 : 2, 1024, 1, 5);
         _magnitude_item = Gtk::manage(new UI::Widget::SpinButtonToolItem("star-magnitude", _("Corners:"), _magnitude_adj, 1.0, 0));

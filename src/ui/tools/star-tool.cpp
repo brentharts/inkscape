@@ -107,8 +107,8 @@ void StarTool::selection_changed(Inkscape::Selection* selection) {
 void StarTool::setup() {
 	ToolBase::setup();
 
-	sp_event_context_read(this, "isflatsided");
-	sp_event_context_read(this, "magnitude");
+    sp_event_context_read(this, "isflatsided");
+    sp_event_context_read(this, "magnitude");
 	sp_event_context_read(this, "proportion");
 	sp_event_context_read(this, "rounded");
 	sp_event_context_read(this, "randomized");
@@ -122,7 +122,7 @@ void StarTool::setup() {
 
 	Inkscape::Selection *selection = this->desktop->getSelection();
 
-	this->sel_changed_connection.disconnect();
+    this->sel_changed_connection.disconnect();
 
 	this->sel_changed_connection = selection->connectChanged(sigc::mem_fun(this, &StarTool::selection_changed));
 

@@ -65,7 +65,7 @@ Inkscape::XML::Node* SPStar::write(Inkscape::XML::Document *xml_doc, Inkscape::X
 
     if (flags & SP_OBJECT_WRITE_EXT) {
         repr->setAttribute("sodipodi:type", "star");
-        sp_repr_set_boolean (repr, "inkscape:flatsided", this->flatsided);
+        sp_repr_set_boolean(repr, "inkscape:flatsided", this->flatsided);
         sp_repr_set_int (repr, "sodipodi:sides", this->sides);
         sp_repr_set_svg_double(repr, "sodipodi:cx", this->center[Geom::X]);
         sp_repr_set_svg_double(repr, "sodipodi:cy", this->center[Geom::Y]);
