@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Generated with glade 3.36.0 -->
 <interface>
-  <requires lib="gtk+" version="3.22"/>
+  <requires lib="gtk+" version="3.20"/>
   <template class="CPBase" parent="GtkBox">
     <property name="width_request">790</property>
     <property name="height_request">0</property>
@@ -59,9 +59,12 @@
         <property name="orientation">vertical</property>
         <child>
           <object class="GtkImage">
+            <property name="width_request">100</property>
+            <property name="height_request">100</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="stock">gtk-missing-image</property>
+            <property name="icon_name">align-vertical-baseline</property>
+            <property name="icon_size">6</property>
           </object>
           <packing>
             <property name="expand">True</property>
