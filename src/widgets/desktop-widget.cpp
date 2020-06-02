@@ -446,8 +446,9 @@ SPDesktopWidget::SPDesktopWidget() :
     gtk_widget_set_hexpand(GTK_WIDGET(dtw->_canvas), TRUE);
     gtk_widget_set_vexpand(GTK_WIDGET(dtw->_canvas), TRUE);
 
-    _canvas_overlay.add(*Glib::wrap(GTK_WIDGET(dtw->_canvas)));
     dtw->_canvas_tbl->attach(_canvas_overlay, 1, 1, 1, 1);
+
+    _canvas_overlay.add(*Glib::wrap(GTK_WIDGET(dtw->_canvas)));
 
     _canvas_overlay.add_overlay(_temp_overlay_label);
     _temp_overlay_label.override_color(Gdk::RGBA("red"), Gtk::STATE_FLAG_NORMAL);
