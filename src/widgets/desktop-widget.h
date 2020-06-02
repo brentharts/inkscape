@@ -15,6 +15,8 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
+#include <gtkmm/label.h>
+#include <gtkmm/overlay.h>
 #ifdef HAVE_CONFIG_H
 # include "config.h"  // only include where actually required!
 #endif
@@ -154,6 +156,11 @@ private:
 
     Geom::Point _ruler_origin;
     double _dt2r;
+
+    /** To help in putting thing above canvas */
+    Gtk::Overlay _canvas_overlay;
+    /** Temporary widget to test overlay */
+    Gtk::Label _temp_overlay_label;
 
     SPCanvas *_canvas;
 

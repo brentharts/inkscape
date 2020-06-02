@@ -21,6 +21,7 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
+#include <gtkmm/enums.h>
 #ifdef HAVE_CONFIG_H
 # include "config.h"  // only include where actually required!
 #endif
@@ -243,7 +244,9 @@ SPDesktopWidget::canvas_tbl_size_allocate(Gtk::Allocation& allocation)
     update_rulers();
 }
 
-SPDesktopWidget::SPDesktopWidget()
+SPDesktopWidget::SPDesktopWidget() :
+    _canvas_overlay(),
+    _temp_overlay_label("Abhay is coding", Gtk::ALIGN_START, Gtk::ALIGN_START)
 {
     auto *const dtw = this;
 
@@ -442,7 +445,12 @@ SPDesktopWidget::SPDesktopWidget()
 
     gtk_widget_set_hexpand(GTK_WIDGET(dtw->_canvas), TRUE);
     gtk_widget_set_vexpand(GTK_WIDGET(dtw->_canvas), TRUE);
-    dtw->_canvas_tbl->attach(*Glib::wrap(GTK_WIDGET(dtw->_canvas)), 1, 1, 1, 1);
+
+    _canvas_overlay.add(*Glib::wrap(GTK_WIDGET(dtw->_canvas)));
+    dtw->_canvas_tbl->attach(_canvas_overlay, 1, 1, 1, 1);
+
+    _canvas_overlay.add_overlay(_temp_overlay_label);
+    _temp_overlay_label.override_color(Gdk::RGBA("red"), Gtk::STATE_FLAG_NORMAL);
 
     /* Dock */
     bool create_dock =
