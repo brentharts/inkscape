@@ -9,13 +9,13 @@
     <property name="hexpand">True</property>
     <property name="border_width">1</property>
     <child>
-      <object class="GtkBox" id="CPOperationBaseBox">
+      <object class="GtkBox" id="CPBaseBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="margin_top">6</property>
         <property name="margin_bottom">6</property>
         <child>
-          <object class="GtkImage" id="CPOperationTypeIcon">
+          <object class="GtkImage" id="CPTypeIcon">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="tooltip_text" translatable="yes">Indicates the "type" of operation</property>
@@ -44,7 +44,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkImage" id="CPOperationIcon">
+          <object class="GtkImage" id="CPIcon">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="tooltip_text" translatable="yes">Decoration for operation</property>
@@ -58,7 +58,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkLabel">
+          <object class="GtkLabel" id="CPName">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="margin_end">10</property>
@@ -86,7 +86,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkLabel" id="CPOperationDescription">
+          <object class="GtkLabel" id="CPDescription">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="margin_end">10</property>
