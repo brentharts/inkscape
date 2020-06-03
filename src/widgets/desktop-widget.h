@@ -17,6 +17,7 @@
 
 #include <gtkmm/label.h>
 #include <gtkmm/overlay.h>
+#include "ui/dialog/command-palette.h"
 #ifdef HAVE_CONFIG_H
 # include "config.h"  // only include where actually required!
 #endif
@@ -161,6 +162,9 @@ private:
     Gtk::Overlay _canvas_overlay;
     /** Temporary widget to test overlay */
     Gtk::Label _temp_overlay_label;
+    
+    /** Command Palette */
+    Inkscape::UI::Dialog::CommandPalette _command_palette;
 
     SPCanvas *_canvas;
 

@@ -450,8 +450,7 @@ SPDesktopWidget::SPDesktopWidget() :
 
     _canvas_overlay.add(*Glib::wrap(GTK_WIDGET(dtw->_canvas)));
 
-    _canvas_overlay.add_overlay(_temp_overlay_label);
-    _temp_overlay_label.override_color(Gdk::RGBA("red"), Gtk::STATE_FLAG_NORMAL);
+    _canvas_overlay.add_overlay(*_command_palette.get_widget());
 
     /* Dock */
     bool create_dock =
