@@ -13,6 +13,7 @@
 
 #include <glibmm/i18n.h>
 #include <gtkmm/box.h>
+#include <gtkmm/enums.h>
 #include <gtkmm/eventbox.h>
 
 #include "io/resource.h"
@@ -23,11 +24,11 @@ namespace UI {
 namespace Dialog {
 
 CommandPalette::CommandPalette()
-
 {
     // setup builder
     {
         auto gladefile = get_filename_string(Inkscape::IO::Resource::UIS, "command-palette-main.glade");
+	// TODO: fails
         try {
             _builder = Gtk::Builder::create_from_file(gladefile);
         } catch (const Glib::Error &ex) {
@@ -37,29 +38,26 @@ CommandPalette::CommandPalette()
     }
 
     // Setup UI Components
-    {
-        _builder->get_widget("CPBase", _CPBase);
-        _builder->get_widget("CPFilter", _CPFilter);
-        _builder->get_widget("CPHeader", _CPHeader);
-        _builder->get_widget("CPSuggestionsBox", _CPSuggestionsBox);
-    }
+    _builder->get_widget("CPBase", _CPBase);
+    _builder->get_widget("CPFilter", _CPFilter);
+    _builder->get_widget("CPHeader", _CPHeader);
+    _builder->get_widget("CPSuggestionsBox", _CPSuggestionsBox);
 
     _CPBase->add_events(Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK |
                         Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK | Gdk::KEY_PRESS_MASK);
 
-    _CPFilter->signal_search_changed().connect(sigc::mem_fun(*this, &CommandPalette::on_search));
+    /* _CPFilter->signal_search_changed().connect(sigc::mem_fun(*this, &CommandPalette::on_search)); */
 
     // Setup operations [actins, verbs, extenstion]
     {
         auto gladefile = get_filename_string(Inkscape::IO::Resource::UIS, "command-palette-operation.glade");
-        auto all_verbs = Verb::getList();
 
-        for (const auto &verb : all_verbs) {
+        for (const auto &verb : Verb::getList()) {
             Glib::RefPtr<Gtk::Builder> operation_builder;
             try {
                 operation_builder = Gtk::Builder::create_from_file(gladefile);
             } catch (const Glib::Error &ex) {
-                g_warning("Glade file loading failed for filter effect dialog");
+                g_warning("Glade file loading failed for Command Palette operation dialog");
                 return;
             }
 
@@ -94,11 +92,25 @@ CommandPalette::CommandPalette()
             // Description
             CPDescription->set_text(_(verb->get_tip()));
 
-	    // Icon
-	    CPIcon->set_from_icon_name(verb->get_image(), Gtk::IconSize(Gtk::ICON_SIZE_LARGE_TOOLBAR));
+            // Icon
+            CPIcon->set_from_icon_name(verb->get_image(), Gtk::IconSize(Gtk::ICON_SIZE_LARGE_TOOLBAR));
+
+            // TODO: Add type icon (currently copies Icon)
+            CPTypeIcon->set_from_icon_name(verb->get_image(), Gtk::IconSize(Gtk::ICON_SIZE_LARGE_TOOLBAR));
+
+            _CPSuggestionsBox->append(*CPOperation);
         }
     }
+    _CPBase->show_all();
+    _CPBase->set_halign(Gtk::ALIGN_START);
+    _CPBase->set_valign(Gtk::ALIGN_START);
 }
+
+Gtk::Box *CommandPalette::get_widget()
+{
+    return _CPBase;
+}
+
 } // namespace Dialog
 } // namespace UI
 } // namespace Inkscape
