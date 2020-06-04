@@ -12,9 +12,12 @@
 #include "command-palette.h"
 
 #include <glibmm/i18n.h>
+#include <glibmm/markup.h>
 #include <gtkmm/box.h>
 #include <gtkmm/enums.h>
 #include <gtkmm/eventbox.h>
+#include <iostream>
+#include <ostream>
 
 #include "io/resource.h"
 #include "verbs.h"
@@ -28,7 +31,6 @@ CommandPalette::CommandPalette()
     // setup builder
     {
         auto gladefile = get_filename_string(Inkscape::IO::Resource::UIS, "command-palette-main.glade");
-	// TODO: fails
         try {
             _builder = Gtk::Builder::create_from_file(gladefile);
         } catch (const Glib::Error &ex) {
@@ -41,7 +43,9 @@ CommandPalette::CommandPalette()
     _builder->get_widget("CPBase", _CPBase);
     _builder->get_widget("CPFilter", _CPFilter);
     _builder->get_widget("CPHeader", _CPHeader);
-    _builder->get_widget("CPSuggestionsBox", _CPSuggestionsBox);
+    _builder->get_widget("CPScrolled", _CPScrolled);
+    _builder->get_widget("CPViewPort", _CPViewPort);
+    _builder->get_widget("CPSuggestions", _CPSuggestions);
 
     _CPBase->add_events(Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK |
                         Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK | Gdk::KEY_PRESS_MASK);
@@ -90,15 +94,23 @@ CommandPalette::CommandPalette()
             }
 
             // Description
-            CPDescription->set_text(_(verb->get_tip()));
+            auto tip = (verb->get_tip()) ? _(verb->get_tip()) : _("");
+            CPDescription->set_text(tip);
 
             // Icon
-            CPIcon->set_from_icon_name(verb->get_image(), Gtk::IconSize(Gtk::ICON_SIZE_LARGE_TOOLBAR));
+            if (verb->get_image()) {
+                CPIcon->set_from_icon_name(verb->get_image(), Gtk::IconSize(Gtk::ICON_SIZE_SMALL_TOOLBAR));
+	    } else {
+		    CPIcon->hide();
+	    }
 
-            // TODO: Add type icon (currently copies Icon)
-            CPTypeIcon->set_from_icon_name(verb->get_image(), Gtk::IconSize(Gtk::ICON_SIZE_LARGE_TOOLBAR));
+            if (verb->get_image()) {
+                CPTypeIcon->set_from_icon_name(verb->get_image(), Gtk::IconSize(Gtk::ICON_SIZE_SMALL_TOOLBAR));
+	    } else {
+		    CPTypeIcon->hide();
+	    }
 
-            _CPSuggestionsBox->append(*CPOperation);
+            _CPSuggestions->append(*CPOperation);
         }
     }
     _CPBase->show_all();
