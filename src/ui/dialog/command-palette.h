@@ -17,8 +17,9 @@
 #include <gtkmm/builder.h>
 #include <gtkmm/button.h>
 #include <gtkmm/listbox.h>
+#include <gtkmm/scrolledwindow.h>
 #include <gtkmm/searchentry.h>
-
+#include <gtkmm/viewport.h>
 #include "verbs.h"
 
 namespace Inkscape {
@@ -35,8 +36,7 @@ public:
     CommandPalette &operator=(CommandPalette const &) = delete; // no assignment
 
     void show();
-
-    Gtk::Box *get_widget();
+    Gtk::Box* get_widget();
 
 protected:
     /**
@@ -58,22 +58,16 @@ protected:
     /**
      * Executes verb: To be used with signals
      */
-    static bool execute_verb(Verb *verb);
-
-    /**
-     * Returns the Command Palette base widget to add to overlay
-     */
-
+    bool execute_verb(Verb* verb);
     Glib::RefPtr<Gtk::Builder> _builder;
 
-    Gtk::Box *_CPBase;
-    Gtk::Box *_CPHeader;
-    Gtk::SearchEntry *_CPFilter;
-    Gtk::ListBox *_CPSuggestionsBox;
-    /* std::unique_ptr<Gtk::Box> _CPBase; */
-    /* std::unique_ptr<Gtk::Box> _CPHeader; */
-    /* std::unique_ptr<Gtk::SearchEntry> _CPFilter; */
-    /* std::unique_ptr<Gtk::ListBox> _CPSuggestionsBox; */
+    Gtk::Box* _CPBase;
+    Gtk::Box* _CPHeader;
+    Gtk::ScrolledWindow* _CPScrolled;
+    Gtk::Viewport* _CPViewPort;
+
+    Gtk::SearchEntry* _CPFilter;
+    Gtk::ListBox* _CPSuggestions;
 };
 
 } // namespace Dialog
