@@ -5,24 +5,24 @@ set(ui_SRC
 	control-manager.cpp
 	dialog-events.cpp
 	draw-anchor.cpp
-        drag-and-drop.cpp
+	drag-and-drop.cpp
 	icon-loader.cpp
 	interface.cpp
-        monitor.cpp
-        pref-pusher.cpp
+	monitor.cpp
+	pref-pusher.cpp
 	previewholder.cpp
 	selected-color.cpp
 	shape-editor.cpp
 	shape-editor-knotholders.cpp
-        simple-pref-pusher.cpp
+	simple-pref-pusher.cpp
 	tool-factory.cpp
 	tools-switch.cpp
-        util.cpp
+	util.cpp
 	uxmanager.cpp
 
 	cache/svg_preview_cache.cpp
 
-        desktop/menubar.cpp
+	desktop/menubar.cpp
 
 	tool/control-point-selection.cpp
 	tool/control-point.cpp
@@ -92,7 +92,8 @@ set(ui_SRC
 	dialog/calligraphic-profile-rename.cpp
 	dialog/clonetiler.cpp
 	dialog/color-item.cpp
-    dialog/attrdialog.cpp
+	dialog/command-palette.cpp
+	dialog/attrdialog.cpp
 	dialog/debug.cpp
 	dialog/dialog-manager.cpp
 	dialog/dialog.cpp
@@ -104,7 +105,7 @@ set(ui_SRC
 	dialog/filedialog.cpp
 	dialog/filedialogimpl-gtkmm.cpp
 	dialog/fill-and-stroke.cpp
-        dialog/filter-editor.cpp
+	dialog/filter-editor.cpp
 	dialog/filter-effects-dialog.cpp
 	dialog/find.cpp
 	dialog/floating-behavior.cpp
@@ -133,9 +134,9 @@ set(ui_SRC
 	dialog/print.cpp
 	dialog/prototype.cpp
 	dialog/selectorsdialog.cpp
-    dialog/styledialog.cpp
+	dialog/styledialog.cpp
 	dialog/svg-fonts-dialog.cpp
-        dialog/svg-preview.cpp
+	dialog/svg-preview.cpp
 	dialog/swatches.cpp
 	dialog/symbols.cpp
 	dialog/paint-servers.cpp
@@ -147,13 +148,13 @@ set(ui_SRC
 	dialog/transformation.cpp
 	dialog/undo-history.cpp
 	dialog/xml-tree.cpp
-    dialog/save-template-dialog.cpp
+	dialog/save-template-dialog.cpp
 
 	widget/iconrenderer.cpp
 	widget/alignment-selector.cpp
 	widget/anchor-selector.cpp
-        widget/button.cpp
-        widget/canvas-grid.cpp
+	widget/button.cpp
+	widget/canvas-grid.cpp
 	widget/clipmaskicon.cpp
 	widget/color-entry.cpp
 	widget/color-icc-selector.cpp
@@ -164,8 +165,8 @@ set(ui_SRC
 	widget/color-slider.cpp
 	widget/color-wheel-selector.cpp
 	widget/combo-box-entry-tool-item.cpp
-        widget/combo-tool-item.cpp
-    widget/dash-selector.cpp
+	widget/combo-tool-item.cpp
+	widget/dash-selector.cpp
 	widget/dock-item.cpp
 	widget/dock.cpp
 	widget/entity-entry.cpp
@@ -173,8 +174,8 @@ set(ui_SRC
 	widget/filter-effect-chooser.cpp
 	widget/fill-style.cpp
 	widget/font-button.cpp
-    widget/font-selector.cpp
-    widget/font-selector-toolbar.cpp
+	widget/font-selector.cpp
+	widget/font-selector-toolbar.cpp
 	widget/font-variants.cpp
 	widget/font-variations.cpp
 	widget/frame.cpp
@@ -183,12 +184,12 @@ set(ui_SRC
 	widget/gradient-vector-selector.cpp
 	widget/highlight-picker.cpp
 	widget/imagetoggler.cpp
-    widget/ink-color-wheel.cpp
+	widget/ink-color-wheel.cpp
 	widget/ink-flow-box.cpp
-        widget/ink-ruler.cpp
+	widget/ink-ruler.cpp
 	widget/ink-spinscale.cpp
 	widget/insertordericon.cpp
-        widget/label-tool-item.cpp
+	widget/label-tool-item.cpp
 	widget/labelled.cpp
 	widget/layer-selector.cpp
 	widget/layertypeicon.cpp
@@ -201,7 +202,7 @@ set(ui_SRC
 	widget/panel.cpp
 	widget/point.cpp
 	widget/preferences-widget.cpp
-        widget/preview.cpp
+	widget/preview.cpp
 	widget/random.cpp
 	widget/registered-widget.cpp
 	widget/registry.cpp
@@ -210,7 +211,7 @@ set(ui_SRC
 	widget/scalar-unit.cpp
 	widget/scalar.cpp
 	widget/selected-style.cpp
-        widget/spin-button-tool-item.cpp
+	widget/spin-button-tool-item.cpp
 	widget/spin-scale.cpp
 	widget/spin-slider.cpp
 	widget/spinbutton.cpp
@@ -235,27 +236,27 @@ set(ui_SRC
 	control-manager.h
 	control-types.h
 	dialog-events.h
-        drag-and-drop.h
+	drag-and-drop.h
 	draw-anchor.h
 	event-debug.h
 	icon-names.h
 	icon-loader.h
 	interface.h
-        monitor.h
-        pref-pusher.h
+	monitor.h
+	pref-pusher.h
 	previewable.h
 	previewholder.h
 	selected-color.h
 	shape-editor.h
-        simple-pref-pusher.h
+	simple-pref-pusher.h
 	tool-factory.h
 	tools-switch.h
-        util.h
+	util.h
 	uxmanager.h
 
 	cache/svg_preview_cache.h
 
-        desktop/menubar.cpp
+	desktop/menubar.cpp
 
 	dialog/about.h
 	dialog/align-and-distribute.h
@@ -264,7 +265,8 @@ set(ui_SRC
 	dialog/calligraphic-profile-rename.h
 	dialog/clonetiler.h
 	dialog/color-item.h
-    dialog/attrdialog.h
+	dialog/command-palette.h
+	dialog/attrdialog.h
 	dialog/debug.h
 	dialog/dialog-manager.h
 	dialog/dialog.h
@@ -277,7 +279,7 @@ set(ui_SRC
 	dialog/filedialogimpl-gtkmm.h
 	dialog/filedialogimpl-win32.h
 	dialog/fill-and-stroke.h
-    dialog/filter-editor.h
+	dialog/filter-editor.h
 	dialog/filter-effects-dialog.h
 	dialog/find.h
 	dialog/floating-behavior.h
@@ -307,9 +309,9 @@ set(ui_SRC
 	dialog/print.h
 	dialog/prototype.h
 	dialog/selectorsdialog.h
-        dialog/styledialog.h
+	dialog/styledialog.h
 	dialog/svg-fonts-dialog.h
-        dialog/svg-preview.h
+	dialog/svg-preview.h
 	dialog/swatches.h
 	dialog/symbols.h
 	dialog/paint-servers.h
@@ -393,8 +395,8 @@ set(ui_SRC
 	widget/alignment-selector.h
 	widget/anchor-selector.h
 	widget/attr-widget.h
-        widget/button.h
-        widget/canvas-grid.h
+	widget/button.h
+	widget/canvas-grid.h
 	widget/clipmaskicon.h
 	widget/color-entry.h
 	widget/color-icc-selector.h
@@ -406,8 +408,8 @@ set(ui_SRC
 	widget/color-wheel-selector.h
 	widget/combo-enums.h
 	widget/combo-box-entry-tool-item.h
-        widget/combo-tool-item.h
-    widget/dash-selector.h
+	widget/combo-tool-item.h
+	widget/dash-selector.h
 	widget/dock-item.h
 	widget/dock.h
 	widget/entity-entry.h
@@ -415,10 +417,10 @@ set(ui_SRC
 	widget/fill-style.h
 	widget/filter-effect-chooser.h
 	widget/font-button.h
-    widget/font-selector.h
-    widget/font-selector-toolbar.h
+	widget/font-selector.h
+	widget/font-selector-toolbar.h
 	widget/font-variants.h
-    widget/font-variations.h
+	widget/font-variations.h
 	widget/frame.h
 	widget/gradient-image.h
 	widget/gradient-selector.h
@@ -426,11 +428,11 @@ set(ui_SRC
 	widget/highlight-picker.h
 	widget/insertordericon.h
 	widget/imagetoggler.h
-    widget/ink-color-wheel.h
-    widget/ink-flow-box.h
-        widget/ink-ruler.h
+	widget/ink-color-wheel.h
+	widget/ink-flow-box.h
+	widget/ink-ruler.h
 	widget/ink-spinscale.h
-        widget/label-tool-item.h
+	widget/label-tool-item.h
 	widget/labelled.h
 	widget/layer-selector.h
 	widget/layertypeicon.h
@@ -444,7 +446,7 @@ set(ui_SRC
 	widget/panel.h
 	widget/point.h
 	widget/preferences-widget.h
-        widget/preview.h
+	widget/preview.h
 	widget/random.h
 	widget/registered-enums.h
 	widget/registered-widget.h
@@ -454,7 +456,7 @@ set(ui_SRC
 	widget/scalar-unit.h
 	widget/scalar.h
 	widget/selected-style.h
-        widget/spin-button-tool-item.h
+	widget/spin-button-tool-item.h
 	widget/spin-scale.h
 	widget/spin-slider.h
 	widget/spinbutton.h

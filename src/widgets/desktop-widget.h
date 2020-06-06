@@ -15,18 +15,21 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
+#include <gtkmm/label.h>
+#include <gtkmm/overlay.h>
+
+#include "ui/dialog/command-palette.h"
 #ifdef HAVE_CONFIG_H
-# include "config.h"  // only include where actually required!
+#include "config.h" // only include where actually required!
 #endif
 
+#include <2geom/point.h>
+#include <cstddef>
 #include <gtkmm.h>
+#include <sigc++/connection.h>
 
 #include "message.h"
 #include "ui/view/view-widget.h"
-
-#include <cstddef>
-#include <sigc++/connection.h>
-#include <2geom/point.h>
 
 // forward declaration
 typedef struct _EgeColorProfTracker EgeColorProfTracker;
@@ -44,41 +47,42 @@ class SwatchesPanel;
 } // namespace Dialog
 
 namespace Widget {
-  class Button;
-  class CanvasGrid;
-  class LayerSelector;
-  class SelectedStyle;
-  class SpinButton;
-  class Ruler;
-  class Dock;
+class Button;
+class CanvasGrid;
+class LayerSelector;
+class SelectedStyle;
+class SpinButton;
+class Ruler;
+class Dock;
 } // namespace Widget
 } // namespace UI
 } // namespace Inkscape
 
-#define SP_DESKTOP_WIDGET(o) dynamic_cast<SPDesktopWidget*>(o)
+#define SP_DESKTOP_WIDGET(o) dynamic_cast<SPDesktopWidget *>(o)
 #define SP_IS_DESKTOP_WIDGET(o) bool(dynamic_cast<SPDesktopWidget const *>(o))
 
 void sp_desktop_widget_show_decorations(SPDesktopWidget *dtw, gboolean show);
-void sp_desktop_widget_update_hruler (SPDesktopWidget *dtw);
-void sp_desktop_widget_update_vruler (SPDesktopWidget *dtw);
+void sp_desktop_widget_update_hruler(SPDesktopWidget *dtw);
+void sp_desktop_widget_update_vruler(SPDesktopWidget *dtw);
 
 /* Show/hide rulers & scrollbars */
-void sp_desktop_widget_update_scrollbars (SPDesktopWidget *dtw, double scale);
+void sp_desktop_widget_update_scrollbars(SPDesktopWidget *dtw, double scale);
 
-void sp_dtw_desktop_activate (SPDesktopWidget *dtw);
-void sp_dtw_desktop_deactivate (SPDesktopWidget *dtw);
+void sp_dtw_desktop_activate(SPDesktopWidget *dtw);
+void sp_dtw_desktop_deactivate(SPDesktopWidget *dtw);
 
 /// A GtkEventBox on an SPDesktop.
-class SPDesktopWidget : public SPViewWidget {
+class SPDesktopWidget : public SPViewWidget
+{
     using parent_type = SPViewWidget;
 
     SPDesktopWidget();
 
-  public:
+public:
     SPDesktopWidget(SPDocument *document);
     ~SPDesktopWidget() override;
 
-  Inkscape::UI::Widget::CanvasGrid *GetCanvasGrid() { return _canvas_grid; }  // Temp, I hope!
+    Inkscape::UI::Widget::CanvasGrid *GetCanvasGrid() { return _canvas_grid; } // Temp, I hope!
 
     void on_size_allocate(Gtk::Allocation &) override;
     void on_realize() override;
@@ -98,17 +102,17 @@ private:
     bool update = false;
 
     SPCanvasItem *_active_guide = nullptr; ///< The guide currently being handled during a ruler event
-    Geom::Point _normal; ///< Normal to the guide currently being handled during ruler event
-    int _xp = 0; ///< x coordinate for start of drag
-    int _yp = 0; ///< y coordinate for start of drag
+    Geom::Point _normal;                   ///< Normal to the guide currently being handled during ruler event
+    int _xp = 0;                           ///< x coordinate for start of drag
+    int _yp = 0;                           ///< y coordinate for start of drag
 
     // The root vbox of the window layout.
     Gtk::Box *_vbox;
 
     Gtk::Box *_hbox;
 
-    Gtk::MenuBar *_menubar;  // TEMP
-    Gtk::Box     *_statusbar;
+    Gtk::MenuBar *_menubar; // TEMP
+    Gtk::Box *_statusbar;
 
     Inkscape::UI::Dialog::SwatchesPanel *_panels;
 
@@ -134,7 +138,6 @@ private:
 
     Inkscape::UI::Widget::Dock *_dock = nullptr;
 
-
     Inkscape::UI::Widget::SelectedStyle *_selected_style;
 
     /** A grid for display the canvas, rulers, and scrollbars. */
@@ -154,25 +157,25 @@ private:
 public:
     Inkscape::UI::Widget::LayerSelector *layer_selector;
 
-    EgeColorProfTracker* _tracker;
+    EgeColorProfTracker *_tracker;
 
     void setMessage(Inkscape::MessageType type, gchar const *message);
     Geom::Point window_get_pointer();
     bool shutdown();
-    void viewSetPosition (Geom::Point p);
+    void viewSetPosition(Geom::Point p);
     void letZoomGrabFocus();
-    void getWindowGeometry (gint &x, gint &y, gint &w, gint &h);
-    void setWindowPosition (Geom::Point p);
-    void setWindowSize (gint w, gint h);
-    void setWindowTransient (void *p, int transient_policy);
+    void getWindowGeometry(gint &x, gint &y, gint &w, gint &h);
+    void setWindowPosition(Geom::Point p);
+    void setWindowSize(gint w, gint h);
+    void setWindowTransient(void *p, int transient_policy);
     void presentWindow();
-    bool showInfoDialog( Glib::ustring const &message );
-    bool warnDialog (Glib::ustring const &text);
-    Gtk::Toolbar* get_toolbar_by_name(const Glib::ustring& name);
-    void setToolboxFocusTo (gchar const *);
-    void setToolboxAdjustmentValue (gchar const * id, double value);
-    bool isToolboxButtonActive (gchar const *id);
-    void setToolboxPosition(Glib::ustring const& id, GtkPositionType pos);
+    bool showInfoDialog(Glib::ustring const &message);
+    bool warnDialog(Glib::ustring const &text);
+    Gtk::Toolbar *get_toolbar_by_name(const Glib::ustring &name);
+    void setToolboxFocusTo(gchar const *);
+    void setToolboxAdjustmentValue(gchar const *id, double value);
+    bool isToolboxButtonActive(gchar const *id);
+    void setToolboxPosition(Glib::ustring const &id, GtkPositionType pos);
     void setCoordinateStatus(Geom::Point p);
     void storeDesktopPosition();
     void requestCanvasUpdate();
@@ -180,15 +183,14 @@ public:
     void enableInteraction();
     void disableInteraction();
     void updateTitle(gchar const *uri);
-    bool onFocusInEvent(GdkEventFocus*);
+    bool onFocusInEvent(GdkEventFocus *);
 
     Gtk::MenuBar *menubar() { return _menubar; }
 
-    Inkscape::UI::Widget::Dock* getDock();
+    Inkscape::UI::Widget::Dock *getDock();
 
     void updateNamedview();
     void update_guides_lock();
-
 
     void cms_adjust_set_sensitive(bool enabled);
     bool get_color_prof_adj_enabled() const;
@@ -227,15 +229,17 @@ private:
     bool rotation_output();
     void rotation_value_changed();
     void rotation_populate_popup(Gtk::Menu *menu);
-  //void canvas_tbl_size_allocate(Gtk::Allocation &allocation);
+    // void canvas_tbl_size_allocate(Gtk::Allocation &allocation);
 
 #if defined(HAVE_LIBLCMS2)
 public:
     void cms_adjust_toggled();
+
 private:
     static void color_profile_event(EgeColorProfTracker *tracker, SPDesktopWidget *dtw);
 #endif
-    static void ruler_snap_new_guide(SPDesktop *desktop, SPCanvasItem *guide, Geom::Point &event_dt, Geom::Point &normal);
+    static void ruler_snap_new_guide(SPDesktop *desktop, SPCanvasItem *guide, Geom::Point &event_dt,
+                                     Geom::Point &normal);
     static gint event(GtkWidget *widget, GdkEvent *event, SPDesktopWidget *dtw);
 
 public: // Move to CanvasGrid
