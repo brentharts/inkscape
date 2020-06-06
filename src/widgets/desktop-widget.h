@@ -17,6 +17,7 @@
 
 #include <gtkmm/label.h>
 #include <gtkmm/overlay.h>
+
 #include "ui/dialog/command-palette.h"
 #ifdef HAVE_CONFIG_H
 #include "config.h" // only include where actually required!
