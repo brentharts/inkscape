@@ -892,12 +892,13 @@ SPDesktopWidget::shutdown()
             std::vector<Gtk::Widget*> ma_labels = ma->get_children();
             ma_labels[0]->set_can_focus(false);
 
+            dialog.add_button(_("_Save"), Gtk::RESPONSE_YES);
+
             Gtk::Button close_button(_("Close _without saving"), true);
             close_button.show();
             dialog.add_action_widget(close_button, Gtk::RESPONSE_NO);
 
             dialog.add_button(_("_Cancel"), Gtk::RESPONSE_CANCEL);
-            dialog.add_button(_("_Save"), Gtk::RESPONSE_YES);
             dialog.set_default_response(Gtk::RESPONSE_YES);
 
             gint response = dialog.run();
