@@ -911,6 +911,9 @@ sp_file_save_template(Gtk::Window &parentWindow, Glib::ustring name,
         sp_repr_unparent(nodeToRemove);
         delete nodeToRemove;
     }
+    
+    // remove this node from current document after saving it as template
+    root->removeChild(templateinfo_node);
 
     DocumentUndo::setUndoSensitive(document, true);
 
