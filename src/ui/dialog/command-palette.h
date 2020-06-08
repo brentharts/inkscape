@@ -86,9 +86,6 @@ private: // variables
 
     // States
     bool is_open = false;
-
-    // Data
-    Glib::RefPtr<Gio::Application> app;
 };
 
 } // namespace Dialog

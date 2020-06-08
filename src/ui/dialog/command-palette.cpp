@@ -32,9 +32,6 @@ namespace Dialog {
 
 CommandPalette::CommandPalette()
 {
-    // TODO: Remove when https://gitlab.com/inkscape/inkscape/-/merge_requests/1987 is merged
-    Glib::RefPtr<Gio::Application> app = Gio::Application::get_default();
-
     // setup builder
     {
         auto gladefile = get_filename_string(Inkscape::IO::Resource::UIS, "command-palette-main.glade");
@@ -64,8 +61,8 @@ CommandPalette::CommandPalette()
 
     // Setup operations [actions, verbs, extenstion]
     {
-        auto iapp = dynamic_cast<InkscapeApplication *>(app.get());
-        InkActionExtraData &action_data = iapp->get_action_extra_data();
+        auto app = dynamic_cast<InkscapeApplication *>(Gio::Application::get_default().get());
+        InkActionExtraData &action_data = app->get_action_extra_data();
 
         auto gladefile = get_filename_string(Inkscape::IO::Resource::UIS, "command-palette-operation.glade");
 
@@ -111,18 +108,17 @@ CommandPalette::CommandPalette()
 // We need to do this ourselves as Gtk::Application does not have a function for this.
 std::vector<Glib::ustring> CommandPalette::list_all_actions()
 {
-    auto gapp = dynamic_cast<Gtk::Application *>(app.get());
+    auto app = dynamic_cast<Gtk::Application *>(Gio::Application::get_default().get());
     std::vector<Glib::ustring> all_actions;
 
-    std::cerr << "CP 1" << std::endl; // Error is caused by statement below
-    std::vector<Glib::ustring> actions = gapp->list_actions();
-    std::cerr << "CP 2" << std::endl; // this isn't printed
+    std::vector<Glib::ustring> actions = app->list_actions();
     std::sort(actions.begin(), actions.end());
+
     for (auto action : actions) {
         all_actions.emplace_back("app." + action);
     }
 
-    auto gwindow = gapp->get_active_window();
+    auto gwindow = app->get_active_window();
     auto window = dynamic_cast<InkscapeWindow *>(gwindow);
     if (window) {
         std::vector<Glib::ustring> actions = window->list_actions();
@@ -140,7 +136,7 @@ std::vector<Glib::ustring> CommandPalette::list_all_actions()
                     all_actions.emplace_back("doc." + action);
                 }
             } else {
-                std::cerr << "Shortcuts::list_all_actions: No document map!" << std::endl;
+                std::cerr << "CommandPalette::list_all_actions: No document map!" << std::endl;
             }
         }
     }
