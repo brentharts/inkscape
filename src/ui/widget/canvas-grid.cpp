@@ -40,7 +40,6 @@ namespace UI {
 namespace Widget {
 
 CanvasGrid::CanvasGrid(SPDesktopWidget *dtw)
-    : _temp_overlay_label("Abhay is coding", Gtk::ALIGN_START, Gtk::ALIGN_START)
 {
     _dtw = dtw;
     set_name("CanvasGrid");
@@ -53,6 +52,7 @@ CanvasGrid::CanvasGrid(SPDesktopWidget *dtw)
     _canvas->signal_event().connect(sigc::mem_fun(*this, &CanvasGrid::SignalEvent)); // TEMP
 
     _canvas_overlay.add(*_canvas);
+    _canvas_overlay.add_overlay(*_command_palette.get_base_widget());
 
     // Horizontal Scrollbar
     _hadj = Gtk::Adjustment::create(0.0, -4000.0, 4000.0, 10.0, 100.0, 4.0);

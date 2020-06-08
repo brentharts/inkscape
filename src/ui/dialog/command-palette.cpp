@@ -33,9 +33,7 @@ namespace Dialog {
 CommandPalette::CommandPalette()
 {
     // TODO: Remove when https://gitlab.com/inkscape/inkscape/-/merge_requests/1987 is merged
-    {
-        Glib::RefPtr<Gio::Application> app = Gio::Application::get_default();
-    }
+    Glib::RefPtr<Gio::Application> app = Gio::Application::get_default();
 
     // setup builder
     {
@@ -47,7 +45,8 @@ CommandPalette::CommandPalette()
             return;
         }
     }
-    // Setup UI Components _builder->get_widget("CPBase", _CPBase);
+    // Setup UI Components
+    _builder->get_widget("CPBase", _CPBase);
     _builder->get_widget("CPFilter", _CPFilter);
     _builder->get_widget("CPHeader", _CPHeader);
     _builder->get_widget("CPScrolled", _CPScrolled);
@@ -70,8 +69,9 @@ CommandPalette::CommandPalette()
 
         auto gladefile = get_filename_string(Inkscape::IO::Resource::UIS, "command-palette-operation.glade");
 
+        auto all_actions = list_all_actions();
         // can’t do const
-        for (/*const*/ auto &action : list_all_actions()) {
+        for (/*const*/ auto &action : all_actions) {
             Glib::RefPtr<Gtk::Builder> operation_builder;
             try {
                 operation_builder = Gtk::Builder::create_from_file(gladefile);
@@ -114,7 +114,9 @@ std::vector<Glib::ustring> CommandPalette::list_all_actions()
     auto gapp = dynamic_cast<Gtk::Application *>(app.get());
     std::vector<Glib::ustring> all_actions;
 
+    std::cerr << "CP 1" << std::endl; // Error is caused by statement below
     std::vector<Glib::ustring> actions = gapp->list_actions();
+    std::cerr << "CP 2" << std::endl; // this isn't printed
     std::sort(actions.begin(), actions.end());
     for (auto action : actions) {
         all_actions.emplace_back("app." + action);

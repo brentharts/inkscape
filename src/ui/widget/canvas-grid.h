@@ -14,6 +14,7 @@
 #include <gtkmm.h>
 #include <gtkmm/label.h>
 #include <gtkmm/overlay.h>
+#include "ui/dialog/command-palette.h"
 
 class SPCanvas;
 class SPDesktopWidget;
@@ -63,7 +64,8 @@ private:
     Inkscape::UI::Widget::Canvas *_canvas;
 
     Gtk::Overlay      _canvas_overlay;
-    Gtk::Label        _temp_overlay_label;
+
+    Dialog::CommandPalette _command_palette;
 
     Glib::RefPtr<Gtk::Adjustment> _hadj;
     Glib::RefPtr<Gtk::Adjustment> _vadj;
