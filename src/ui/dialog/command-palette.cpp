@@ -11,6 +11,7 @@
 
 #include "command-palette.h"
 
+#include <cstddef>
 #include <glibmm/i18n.h>
 #include <glibmm/markup.h>
 #include <gtkmm/application.h>
@@ -29,6 +30,47 @@
 namespace Inkscape {
 namespace UI {
 namespace Dialog {
+
+namespace {
+Glib::ustring camel_case_to_space_separated(const Glib::ustring &camel_case_string)
+{
+    bool prev_char_uppercase = false;
+    std::vector<std::size_t> transition_indices;
+
+    // ignore first char
+    for (std::size_t i = 1; i < camel_case_string.size(); ++i) {
+        if (g_unichar_isupper(camel_case_string[i])) {
+            if (not prev_char_uppercase) {
+                transition_indices.push_back(i);
+            }
+            prev_char_uppercase = true;
+        } else { // is lower case or number hence split before this
+            if (prev_char_uppercase) {
+                transition_indices.push_back(i - 1);
+            }
+            prev_char_uppercase = false;
+        }
+    }
+    transition_indices.push_back(camel_case_string.size());
+
+    Glib::ustring space_seperated_result;
+    space_seperated_result.reserve(transition_indices.size() + camel_case_string.size());
+
+    std::size_t prev_transition_point = 0;
+    for (const auto &tindex : transition_indices) {
+        for (size_t i = prev_transition_point; i < tindex; ++i) {
+            space_seperated_result += camel_case_string[i];
+        }
+        prev_transition_point = tindex;
+        if (tindex != camel_case_string.size()) {
+            space_seperated_result += " ";
+        }
+    }
+
+    return space_seperated_result;
+}
+
+} // namespace
 
 CommandPalette::CommandPalette()
 {
@@ -64,7 +106,7 @@ CommandPalette::CommandPalette()
         auto app = dynamic_cast<InkscapeApplication *>(Gio::Application::get_default().get());
         InkActionExtraData &action_data = app->get_action_extra_data();
 
-        auto gladefile = get_filename_string(Inkscape::IO::Resource::UIS, "command-palette-operation.glade");
+        auto gladefile = get_filename_string(Inkscape::IO::Resource::UIS, "command-palette-operation-lite.glade");
 
         auto all_actions = list_all_actions();
         // can’t do const
@@ -79,23 +121,34 @@ CommandPalette::CommandPalette()
 
             Gtk::EventBox *CPOperation;
             Gtk::Box *CPBaseBox;
+            /* Gtk::Box *CPIconBox; */
 
-            Gtk::Image *CPIcon;
-            Gtk::Image *CPTypeIcon;
+            /* Gtk::Image *CPIcon; */
+            /* Gtk::Image *CPTypeIcon; */
             Gtk::Label *CPName;
             Gtk::Label *CPDescription;
 
             // Reading widgets
             operation_builder->get_widget("CPOperation", CPOperation);
             operation_builder->get_widget("CPBaseBox", CPBaseBox);
+            /* operation_builder->get_widget("CPIconBox", CPIconBox); */
 
-            operation_builder->get_widget("CPIcon", CPIcon);
-            operation_builder->get_widget("CPTypeIcon", CPTypeIcon);
+            /* operation_builder->get_widget("CPIcon", CPIcon); */
+            /* operation_builder->get_widget("CPTypeIcon", CPTypeIcon); */
             operation_builder->get_widget("CPName", CPName);
             operation_builder->get_widget("CPDescription", CPDescription);
 
-            CPName->set_text(action_data.get_label_for_action(action));
+            {
+                auto name = camel_case_to_space_separated(action_data.get_label_for_action(action));
+                if (name.empty()) {
+                    name = action;
+                }
+                CPName->set_text(name);
+            }
             CPDescription->set_text(action_data.get_tooltip_for_action(action));
+
+            /* CPIcon->hide(); */
+            /* CPIconBox->hide(); */
 
             // Add to suggestions
             _CPSuggestions->append(*CPOperation);
