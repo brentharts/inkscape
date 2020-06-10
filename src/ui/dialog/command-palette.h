@@ -70,7 +70,7 @@ private: // Signal handlers
     /**
      * Executes verb: To be used with signals
      */
-    bool execute_verb(Verb *verb);
+    bool execute_action(const Glib::ustring &action);
 
 private: // variables
     // Widgets

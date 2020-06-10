@@ -12,6 +12,7 @@
 #include "command-palette.h"
 
 #include <cstddef>
+#include <giomm/application.h>
 #include <glibmm/i18n.h>
 #include <glibmm/markup.h>
 #include <gtkmm/application.h>
@@ -157,8 +158,44 @@ CommandPalette::CommandPalette()
     _CPBase->show_all();
 }
 
+/**
+ * checks if actions has parameters and asks values from user
+ */
+bool CommandPalette::execute_action(const Glib::ustring &action)
+{
+    auto app = Gio::Application::get_default();
+
+    auto action_ptr = app->lookup_action(action);
+    if (action_ptr) {
+        // Doesn't seem to be a way to test this using the C++ binding without Glib-CRITICAL errors.
+        const GVariantType *gtype = g_action_get_parameter_type(action_ptr->gobj());
+        if (gtype) {
+            // With value.
+            Glib::VariantType type = action_ptr->get_parameter_type();
+            if (type.get_string() == "b") {
+                // Get a boolean from user
+            } else if (type.get_string() == "i") {
+                // get an int from user
+            } else if (type.get_string() == "d") {
+                // get a double from user
+            } else if (type.get_string() == "s") {
+                // get a string from user
+            } else {
+                std::cerr << "InkscapeApplication::parse_actions: unhandled action value: " << action << ": "
+                          << type.get_string() << std::endl;
+            }
+        } else {
+            // Stateless (i.e. no value).
+            app->activate_action(action, Glib::VariantBase());
+            return true;
+        }
+    }
+    return false;
+}
+
 // Get a list of all actions (application, window, and document), properly prefixed.
 // We need to do this ourselves as Gtk::Application does not have a function for this.
+// TODO: Remove when Shortcuts branch merge
 std::vector<Glib::ustring> CommandPalette::list_all_actions()
 {
     auto app = dynamic_cast<Gtk::Application *>(Gio::Application::get_default().get());
