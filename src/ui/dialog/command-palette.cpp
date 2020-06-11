@@ -12,15 +12,19 @@
 #include "command-palette.h"
 
 #include <cstddef>
+#include <giomm/action.h>
 #include <giomm/application.h>
 #include <glibmm/i18n.h>
 #include <glibmm/markup.h>
+#include <glibmm/ustring.h>
 #include <gtkmm/application.h>
 #include <gtkmm/box.h>
 #include <gtkmm/enums.h>
 #include <gtkmm/eventbox.h>
 #include <iostream>
 #include <ostream>
+#include <sigc++/adaptors/bind.h>
+#include <sigc++/functors/mem_fun.h>
 
 #include "actions/actions-extra-data.h"
 #include "inkscape-application.h"
@@ -71,6 +75,11 @@ Glib::ustring camel_case_to_space_separated(const Glib::ustring &camel_case_stri
     return space_seperated_result;
 }
 
+template <typename T>
+void debug_print(T variable)
+{
+    std::cerr << variable << std::endl;
+}
 } // namespace
 
 CommandPalette::CommandPalette()
@@ -151,6 +160,9 @@ CommandPalette::CommandPalette()
             /* CPIcon->hide(); */
             /* CPIconBox->hide(); */
 
+            CPOperation->signal_button_press_event().connect(
+                sigc::bind<Glib::ustring>(sigc::mem_fun(*this, &CommandPalette::ask_action_parameter), action));
+
             // Add to suggestions
             _CPSuggestions->append(*CPOperation);
         }
@@ -159,36 +171,97 @@ CommandPalette::CommandPalette()
 }
 
 /**
+ * Maybe replaced by: Temporary arrangement may be replaced by snippets
+ * This can help us provide parameters for multiple argument function
+ * whose actions take a sring as param
+ */
+bool CommandPalette::ask_action_parameter(GdkEventButton * /*evt*/, const Glib::ustring &action)
+{
+    Gtk::Dialog dialog;
+    Gtk::Entry entry;
+
+    entry.set_placeholder_text("Enter action parameter");
+    entry.set_size_request(500);
+
+    dialog.get_content_area()->pack_start(entry);
+    dialog.add_button("Apply", Gtk::RESPONSE_OK);
+    dialog.show_all();
+
+    int result = dialog.run();
+    Glib::ustring value = entry.get_text();
+    debug_print("Value: " + value);
+    return execute_action(action, value);
+}
+
+Glib::RefPtr<Gio::Action> get_action_ptr(const Glib::ustring &action)
+{
+    static auto app = dynamic_cast<Gtk::Application *>(Gio::Application::get_default().get());
+    static auto window = dynamic_cast<InkscapeWindow *>(app->get_active_window());
+    static auto doc_map = window->get_document()->getActionGroup();
+
+    // TODO: Modify list_all_actions to use pairs
+    auto action_catergory = action.substr(0, action.find('.'));
+    auto action_name = action.substr(action.find('.') + 1);
+
+    if (action_catergory == "app") {
+        return app->lookup_action(action_name);
+    } else if (action_catergory == "win") {
+        return window->lookup_action(action_name);
+    } else if (action_catergory == "doc") {
+        return doc_map->lookup_action(action_name);
+    } else {
+        return Glib::RefPtr<Action>(nullptr);
+    }
+}
+
+/**
  * checks if actions has parameters and asks values from user
  */
-bool CommandPalette::execute_action(const Glib::ustring &action)
+bool CommandPalette::execute_action(const Glib::ustring &action, const Glib::ustring &value)
 {
-    auto app = Gio::Application::get_default();
+    auto action_ptr = get_action_ptr(action);
 
-    auto action_ptr = app->lookup_action(action);
+    debug_print(action.substr(4));
     if (action_ptr) {
+        debug_print("CommandPalette execute_action: found action_ptr");
         // Doesn't seem to be a way to test this using the C++ binding without Glib-CRITICAL errors.
         const GVariantType *gtype = g_action_get_parameter_type(action_ptr->gobj());
         if (gtype) {
+            debug_print("CommandPalette execute_action: found gtype");
             // With value.
             Glib::VariantType type = action_ptr->get_parameter_type();
             if (type.get_string() == "b") {
-                // Get a boolean from user
+                debug_print("CommandPalette execute_action: bool param");
+                bool b = false;
+                if (value == "1" || value == "true" || value.empty()) {
+                    b = true;
+                } else if (value == "0" || value == "false") {
+                    b = false;
+                } else {
+                    std::cerr << "InkscapeApplication::parse_actions: Invalid boolean value: " << action << ":" << value
+                              << std::endl;
+                }
+                action_ptr->activate(Glib::Variant<bool>::create(b));
             } else if (type.get_string() == "i") {
-                // get an int from user
+                debug_print("CommandPalette execute_action: int param");
+                action_ptr->activate(Glib::Variant<int>::create(std::stoi(value)));
             } else if (type.get_string() == "d") {
-                // get a double from user
+                debug_print("CommandPalette execute_action: double param");
+                action_ptr->activate(Glib::Variant<double>::create(std::stod(value)));
             } else if (type.get_string() == "s") {
-                // get a string from user
+                debug_print("CommandPalette execute_action: string param");
+                action_ptr->activate(Glib::Variant<Glib::ustring>::create(value));
             } else {
                 std::cerr << "InkscapeApplication::parse_actions: unhandled action value: " << action << ": "
                           << type.get_string() << std::endl;
             }
         } else {
             // Stateless (i.e. no value).
-            app->activate_action(action, Glib::VariantBase());
+            action_ptr->activate();
             return true;
         }
+    } else {
+        debug_print("Didn't found action pointer: " + action);
     }
     return false;
 }

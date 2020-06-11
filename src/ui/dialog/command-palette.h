@@ -12,6 +12,7 @@
 #ifndef INKSCAPE_DIALOG_COMMAND_PALETTE_H
 #define INKSCAPE_DIALOG_COMMAND_PALETTE_H
 
+#include <giomm/action.h>
 #include <giomm/application.h>
 #include <glibmm/refptr.h>
 #include <glibmm/ustring.h>
@@ -26,6 +27,7 @@
 #include <vector>
 
 #include "inkscape.h"
+#include "ui/dialog/align-and-distribute.h"
 #include "verbs.h"
 
 namespace Inkscape {
@@ -68,9 +70,19 @@ private: // Signal handlers
     void show_suggestions();
 
     /**
-     * Executes verb: To be used with signals
+     * Creates a dialog and asks for parameter of action
      */
-    bool execute_action(const Glib::ustring &action);
+    bool ask_action_parameter(GdkEventButton *evt, const Glib::ustring &action);
+
+    /**
+     * Executes Action
+     */
+    bool execute_action(const Glib::ustring &action, const Glib::ustring &value);
+
+    /**
+     * get action pointer from action name
+     */
+    Glib::RefPtr<Gio::Action> get_action_ptr(const Glib::ustring &action);
 
 private: // variables
     // Widgets
