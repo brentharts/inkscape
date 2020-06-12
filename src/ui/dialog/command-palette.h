@@ -24,6 +24,7 @@
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/searchentry.h>
 #include <gtkmm/viewport.h>
+#include <utility>
 #include <vector>
 
 #include "inkscape.h"
@@ -34,6 +35,7 @@ namespace Inkscape {
 namespace UI {
 namespace Dialog {
 
+using ActionInfo = std::pair<Glib::ustring, Glib::ustring>;
 class CommandPalette
 {
 public: // API
@@ -54,7 +56,7 @@ private: // Helpers
     /**
      * Get a list of all actions
      */
-    std::vector<Glib::ustring> list_all_actions();
+    std::vector<ActionInfo> list_all_actions();
 
 private: // Signal handlers
     void on_search();
@@ -72,17 +74,12 @@ private: // Signal handlers
     /**
      * Creates a dialog and asks for parameter of action
      */
-    bool ask_action_parameter(GdkEventButton *evt, const Glib::ustring &action);
+    bool ask_action_parameter(GdkEventButton *evt, const ActionInfo &action);
 
     /**
      * Executes Action
      */
-    bool execute_action(const Glib::ustring &action, const Glib::ustring &value);
-
-    /**
-     * get action pointer from action name
-     */
-    Glib::RefPtr<Gio::Action> get_action_ptr(const Glib::ustring &action);
+    static bool execute_action(const ActionInfo &action, const Glib::ustring &value);
 
 private: // variables
     // Widgets

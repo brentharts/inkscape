@@ -30,6 +30,7 @@
 #include "inkscape-application.h"
 #include "inkscape-window.h"
 #include "io/resource.h"
+#include "ui/dialog/align-and-distribute.h"
 #include "verbs.h"
 
 namespace Inkscape {
@@ -79,6 +80,11 @@ template <typename T>
 void debug_print(T variable)
 {
     std::cerr << variable << std::endl;
+}
+
+Glib::ustring full_action_name(const ActionInfo &action_info)
+{
+    return action_info.first + "." + action_info.second;
 }
 } // namespace
 
@@ -148,20 +154,22 @@ CommandPalette::CommandPalette()
             operation_builder->get_widget("CPName", CPName);
             operation_builder->get_widget("CPDescription", CPDescription);
 
+            auto action_fullsecond = full_action_name(action);
+
             {
-                auto name = camel_case_to_space_separated(action_data.get_label_for_action(action));
+                auto name = camel_case_to_space_separated(action_data.get_label_for_action(action_fullsecond));
                 if (name.empty()) {
-                    name = action;
+                    name = action_fullsecond;
                 }
                 CPName->set_text(name);
             }
-            CPDescription->set_text(action_data.get_tooltip_for_action(action));
+            CPDescription->set_text(action_data.get_tooltip_for_action(action_fullsecond));
 
             /* CPIcon->hide(); */
             /* CPIconBox->hide(); */
 
             CPOperation->signal_button_press_event().connect(
-                sigc::bind<Glib::ustring>(sigc::mem_fun(*this, &CommandPalette::ask_action_parameter), action));
+                sigc::bind<ActionInfo>(sigc::mem_fun(*this, &CommandPalette::ask_action_parameter), action));
 
             // Add to suggestions
             _CPSuggestions->append(*CPOperation);
@@ -175,7 +183,7 @@ CommandPalette::CommandPalette()
  * This can help us provide parameters for multiple argument function
  * whose actions take a sring as param
  */
-bool CommandPalette::ask_action_parameter(GdkEventButton * /*evt*/, const Glib::ustring &action)
+bool CommandPalette::ask_action_parameter(GdkEventButton * /*evt*/, const ActionInfo &action)
 {
     Gtk::Dialog dialog;
     Gtk::Entry entry;
@@ -187,41 +195,29 @@ bool CommandPalette::ask_action_parameter(GdkEventButton * /*evt*/, const Glib::
     dialog.add_button("Apply", Gtk::RESPONSE_OK);
     dialog.show_all();
 
-    int result = dialog.run();
+    dialog.run();
     Glib::ustring value = entry.get_text();
     debug_print("Value: " + value);
     return execute_action(action, value);
 }
 
-Glib::RefPtr<Gio::Action> get_action_ptr(const Glib::ustring &action)
+/**
+ * Calls actions with parameters
+ */
+bool CommandPalette::execute_action(const ActionInfo &action_info, const Glib::ustring &value)
 {
     static auto app = dynamic_cast<Gtk::Application *>(Gio::Application::get_default().get());
     static auto window = dynamic_cast<InkscapeWindow *>(app->get_active_window());
     static auto doc_map = window->get_document()->getActionGroup();
 
-    // TODO: Modify list_all_actions to use pairs
-    auto action_catergory = action.substr(0, action.find('.'));
-    auto action_name = action.substr(action.find('.') + 1);
+    auto action_ptr = app->lookup_action(action_info.second);
 
-    if (action_catergory == "app") {
-        return app->lookup_action(action_name);
-    } else if (action_catergory == "win") {
-        return window->lookup_action(action_name);
-    } else if (action_catergory == "doc") {
-        return doc_map->lookup_action(action_name);
-    } else {
-        return Glib::RefPtr<Action>(nullptr);
+    if (action_info.first == "win") {
+        action_ptr = window->lookup_action(action_info.second);
+    } else if (action_info.first == "doc") {
+        action_ptr = doc_map->lookup_action(action_info.second);
     }
-}
 
-/**
- * checks if actions has parameters and asks values from user
- */
-bool CommandPalette::execute_action(const Glib::ustring &action, const Glib::ustring &value)
-{
-    auto action_ptr = get_action_ptr(action);
-
-    debug_print(action.substr(4));
     if (action_ptr) {
         debug_print("CommandPalette execute_action: found action_ptr");
         // Doesn't seem to be a way to test this using the C++ binding without Glib-CRITICAL errors.
@@ -238,8 +234,8 @@ bool CommandPalette::execute_action(const Glib::ustring &action, const Glib::ust
                 } else if (value == "0" || value == "false") {
                     b = false;
                 } else {
-                    std::cerr << "InkscapeApplication::parse_actions: Invalid boolean value: " << action << ":" << value
-                              << std::endl;
+                    std::cerr << "InkscapeApplication::parse_actions: Invalid boolean value: "
+                              << full_action_name(action_info) << ":" << value << std::endl;
                 }
                 action_ptr->activate(Glib::Variant<bool>::create(b));
             } else if (type.get_string() == "i") {
@@ -252,8 +248,8 @@ bool CommandPalette::execute_action(const Glib::ustring &action, const Glib::ust
                 debug_print("CommandPalette execute_action: string param");
                 action_ptr->activate(Glib::Variant<Glib::ustring>::create(value));
             } else {
-                std::cerr << "InkscapeApplication::parse_actions: unhandled action value: " << action << ": "
-                          << type.get_string() << std::endl;
+                std::cerr << "InkscapeApplication::parse_actions: unhandled action value: "
+                          << full_action_name(action_info) << ": " << type.get_string() << std::endl;
             }
         } else {
             // Stateless (i.e. no value).
@@ -261,7 +257,7 @@ bool CommandPalette::execute_action(const Glib::ustring &action, const Glib::ust
             return true;
         }
     } else {
-        debug_print("Didn't found action pointer: " + action);
+        debug_print("Didn't found action pointer: " + full_action_name(action_info));
     }
     return false;
 }
@@ -269,16 +265,16 @@ bool CommandPalette::execute_action(const Glib::ustring &action, const Glib::ust
 // Get a list of all actions (application, window, and document), properly prefixed.
 // We need to do this ourselves as Gtk::Application does not have a function for this.
 // TODO: Remove when Shortcuts branch merge
-std::vector<Glib::ustring> CommandPalette::list_all_actions()
+std::vector<ActionInfo> CommandPalette::list_all_actions()
 {
     auto app = dynamic_cast<Gtk::Application *>(Gio::Application::get_default().get());
-    std::vector<Glib::ustring> all_actions;
+    std::vector<ActionInfo> all_actions_info;
 
     std::vector<Glib::ustring> actions = app->list_actions();
     std::sort(actions.begin(), actions.end());
 
     for (auto action : actions) {
-        all_actions.emplace_back("app." + action);
+        all_actions_info.emplace_back("app", action);
     }
 
     auto gwindow = app->get_active_window();
@@ -287,7 +283,7 @@ std::vector<Glib::ustring> CommandPalette::list_all_actions()
         std::vector<Glib::ustring> actions = window->list_actions();
         std::sort(actions.begin(), actions.end());
         for (auto action : actions) {
-            all_actions.emplace_back("win." + action);
+            all_actions_info.emplace_back("win", action);
         }
 
         auto document = window->get_document();
@@ -296,7 +292,7 @@ std::vector<Glib::ustring> CommandPalette::list_all_actions()
             if (map) {
                 std::vector<Glib::ustring> actions = map->list_actions();
                 for (auto action : actions) {
-                    all_actions.emplace_back("doc." + action);
+                    all_actions_info.emplace_back("doc", action);
                 }
             } else {
                 std::cerr << "CommandPalette::list_all_actions: No document map!" << std::endl;
@@ -304,7 +300,7 @@ std::vector<Glib::ustring> CommandPalette::list_all_actions()
         }
     }
 
-    return all_actions;
+    return all_actions_info;
 }
 
 Gtk::Box *CommandPalette::get_base_widget()
