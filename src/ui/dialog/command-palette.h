@@ -35,7 +35,17 @@ namespace Inkscape {
 namespace UI {
 namespace Dialog {
 
-using ActionInfo = std::pair<Glib::ustring, Glib::ustring>;
+// Enables using switch case
+enum class TypeOfVariant
+{
+    NONE,
+    UNKNOWN,
+    BOOL,
+    INT,
+    DOUBLE,
+    STRING,
+};
+
 class CommandPalette
 {
 public: // API
@@ -52,11 +62,14 @@ public: // API
     Gtk::Box *get_base_widget();
 
 private: // Helpers
+    using ActionPtr = Glib::RefPtr<Gio::Action>;
+    using ActionPtrName = std::pair<ActionPtr, Glib::ustring>;
+
     // TODO: Remove when https://gitlab.com/inkscape/inkscape/-/merge_requests/1987 is merged
     /**
      * Get a list of all actions
      */
-    std::vector<ActionInfo> list_all_actions();
+    std::vector<ActionPtrName> list_all_actions();
 
 private: // Signal handlers
     void on_search();
@@ -74,12 +87,14 @@ private: // Signal handlers
     /**
      * Creates a dialog and asks for parameter of action
      */
-    bool ask_action_parameter(GdkEventButton *evt, const ActionInfo &action);
+    bool ask_action_parameter(GdkEventButton *evt, const ActionPtrName &action);
 
     /**
      * Executes Action
      */
-    static bool execute_action(const ActionInfo &action, const Glib::ustring &value);
+    static bool execute_action(const ActionPtrName &action, const Glib::ustring &value);
+
+    static TypeOfVariant get_action_variant_type(const ActionPtr &action_ptr);
 
 private: // variables
     // Widgets
