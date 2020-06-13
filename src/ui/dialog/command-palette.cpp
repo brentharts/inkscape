@@ -107,7 +107,7 @@ CommandPalette::CommandPalette()
                         Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK | Gdk::KEY_PRESS_MASK);
 
     // TODO: Customise on user language RTL, LTR or better user preference
-    _CPBase->set_halign(Gtk::ALIGN_START);
+    _CPBase->set_halign(Gtk::ALIGN_CENTER);
     _CPBase->set_valign(Gtk::ALIGN_START);
 
     /* _CPFilter->signal_search_changed().connect(sigc::mem_fun(*this, &CommandPalette::on_search)); */
@@ -136,7 +136,11 @@ CommandPalette::CommandPalette()
 
             /* Gtk::Image *CPIcon; */
             /* Gtk::Image *CPTypeIcon; */
+            Gtk::Label *CPGroup;
             Gtk::Label *CPName;
+            Gtk::Label *CPShortcut;
+            Gtk::Label *CPActionFullName;
+            Gtk::Label *CPUntranslatedName;
             Gtk::Label *CPDescription;
 
             // Reading widgets
@@ -146,16 +150,26 @@ CommandPalette::CommandPalette()
 
             /* operation_builder->get_widget("CPIcon", CPIcon); */
             /* operation_builder->get_widget("CPTypeIcon", CPTypeIcon); */
+            operation_builder->get_widget("CPGroup", CPGroup);
             operation_builder->get_widget("CPName", CPName);
+            operation_builder->get_widget("CPShortcut", CPShortcut);
+            operation_builder->get_widget("CPActionFullName", CPActionFullName);
+            operation_builder->get_widget("CPUntranslatedName", CPUntranslatedName);
             operation_builder->get_widget("CPDescription", CPDescription);
 
+            CPGroup->set_text(action_data.get_section_for_action(action_ptr_name.second));
+
+            // CPName
             {
                 auto name = camel_case_to_space_separated(action_data.get_label_for_action(action_ptr_name.second));
                 if (name.empty()) {
                     name = action_ptr_name.second;
                 }
                 CPName->set_text(name);
+                CPUntranslatedName->set_markup("<span size='x-small'>" + name + "</span>");
             }
+
+            CPActionFullName->set_text(action_ptr_name.second);
             CPDescription->set_text(action_data.get_tooltip_for_action(action_ptr_name.second));
 
             /* CPIcon->hide(); */
@@ -199,8 +213,8 @@ bool CommandPalette::ask_action_parameter(GdkEventButton * /*evt*/, const Action
     if (action_param_type != TypeOfVariant::NONE) {
         dialog.run();
     }
+
     Glib::ustring value = entry.get_text();
-    debug_print("Value: " + value);
     return execute_action(action_ptr_name, value);
 }
 
