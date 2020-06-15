@@ -55,7 +55,7 @@ public: // API
     CommandPalette(CommandPalette const &) = delete;            // no copy
     CommandPalette &operator=(CommandPalette const &) = delete; // no assignment
 
-    void show();
+    void open();
     void close();
     void toggle();
 
@@ -109,7 +109,7 @@ private: // variables
     Gtk::ListBox *_CPSuggestions;
 
     // States
-    bool is_open = false;
+    bool _is_open = false;
 };
 
 } // namespace Dialog

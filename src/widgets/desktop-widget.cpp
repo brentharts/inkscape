@@ -1798,6 +1798,12 @@ SPDesktopWidget::update_rotation()
 
 // --------------- Rulers/Scrollbars/Etc. -----------------
 void
+SPDesktopWidget::toggle_command_palette() {
+    // TODO: Turn into action and remove this function.
+    _canvas_grid->ToggleCommandPalette();
+}
+
+void
 SPDesktopWidget::toggle_rulers()
 {
     // TODO: Turn into action and remove this function.

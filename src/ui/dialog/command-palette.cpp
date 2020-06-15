@@ -182,7 +182,39 @@ CommandPalette::CommandPalette()
             _CPSuggestions->append(*CPOperation);
         }
     }
+    // TODO: doesn't works
+    close();
+}
+
+void CommandPalette::open()
+{
+    debug_print("Open CP");
+
     _CPBase->show_all();
+    _CPFilter->grab_focus();
+    _is_open = true;
+}
+
+void CommandPalette::close()
+{
+    debug_print("Close CP");
+    _CPBase->hide();
+
+    // Reset filtering
+    _CPFilter->set_text("");
+    _CPSuggestions->invalidate_filter();
+
+    _is_open = false;
+}
+
+void CommandPalette::toggle()
+{
+    debug_print("Toggle CP");
+    if (!_is_open) {
+        open();
+        return;
+    }
+    close();
 }
 
 /**

@@ -43,6 +43,9 @@ public:
     void ToggleRulers();
     void UpdateRulers();
 
+    void ShowCommandPalette(bool state = true);
+    void ToggleCommandPalette();
+
     Inkscape::UI::Widget::Canvas *GetCanvas() { return _canvas; };
 
     // Hopefully temp.

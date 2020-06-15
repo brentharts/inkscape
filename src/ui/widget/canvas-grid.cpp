@@ -245,6 +245,20 @@ CanvasGrid::ToggleRulers()
     prefs->setBool("/window/rulers/state", _show_rulers);
 }
 
+void
+CanvasGrid::ToggleCommandPalette() {
+    _command_palette.toggle();
+}
+
+void
+CanvasGrid::ShowCommandPalette(bool state)
+{
+    if (state) {
+        _command_palette.open();
+    }
+    _command_palette.close();
+}
+
 // Update rulers on change of widget size, but only if allocation really changed.
 void
 CanvasGrid::OnSizeAllocate(Gtk::Allocation& allocation)
