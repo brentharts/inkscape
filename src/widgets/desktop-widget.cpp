@@ -386,6 +386,7 @@ SPDesktopWidget::SPDesktopWidget()
 
     // ------------------ Finish Up -------------------- //
     dtw->_vbox->show_all();
+    dtw->_canvas_grid->ShowCommandPalette(false);
 
     dtw->_canvas->grab_focus();
 }
