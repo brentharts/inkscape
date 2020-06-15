@@ -193,6 +193,8 @@ void CommandPalette::open()
 
 void CommandPalette::close()
 {
+    _CPBase->hide();
+
     // Reset filtering
     _CPFilter->set_text("");
     _CPSuggestions->invalidate_filter();
