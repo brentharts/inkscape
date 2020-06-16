@@ -614,8 +614,8 @@ sp_canvas_item_recursive_print_tree (unsigned level, SPCanvasItem* item)
 
     if (SP_IS_CANVAS_GROUP(item)) {
         SPCanvasGroup *group = SP_CANVAS_GROUP(item);
-        for (auto it = group->items.begin(); it != group->items.end(); ++it) {
-            sp_canvas_item_recursive_print_tree(level+1, &(*it));
+        for (auto & item : group->items) {
+            sp_canvas_item_recursive_print_tree(level+1, &item);
         }
     }
 }
