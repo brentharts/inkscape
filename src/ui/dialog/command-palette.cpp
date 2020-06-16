@@ -21,10 +21,12 @@
 #include <gtkmm/box.h>
 #include <gtkmm/enums.h>
 #include <gtkmm/eventbox.h>
+#include <gtkmm/label.h>
 #include <iostream>
 #include <ostream>
 #include <sigc++/adaptors/bind.h>
 #include <sigc++/functors/mem_fun.h>
+#include <string>
 
 #include "actions/actions-extra-data.h"
 #include "inkscape-application.h"
@@ -109,6 +111,10 @@ CommandPalette::CommandPalette()
     // TODO: Customise on user language RTL, LTR or better user preference
     _CPBase->set_halign(Gtk::ALIGN_CENTER);
     _CPBase->set_valign(Gtk::ALIGN_START);
+
+    _CPSuggestions->unset_filter_func();
+    _CPFilter->signal_search_changed().connect(sigc::mem_fun(*this, &CommandPalette::on_search));
+    _CPSuggestions->set_filter_func(sigc::mem_fun(*this, &CommandPalette::on_filter));
 
     /* _CPFilter->signal_search_changed().connect(sigc::mem_fun(*this, &CommandPalette::on_search)); */
 
@@ -211,6 +217,47 @@ void CommandPalette::toggle()
     close();
 }
 
+void CommandPalette::on_search()
+{
+    _CPSuggestions->invalidate_filter();
+}
+
+bool CommandPalette::on_filter(Gtk::ListBoxRow *child)
+{
+    auto search_text = _CPFilter->get_text().lowercase();
+
+    if (search_text.empty()) {
+        return true;
+    } // Every operation is visible
+    auto event_box = dynamic_cast<Gtk::EventBox *>(child->get_child());
+    if (event_box) {
+        // NOTE: These variables have same name as in the glade file command-operation-lite.glad
+        auto CPBaseBox = dynamic_cast<Gtk::Box *>(event_box->get_child());
+        if (CPBaseBox) {
+            Gtk::Label *CPDescription, *CPName, *CPUntranslatedName;
+            {
+                auto base_box_children = CPBaseBox->get_children();
+                auto CPSynapseBox = dynamic_cast<Gtk::Box *>(base_box_children[0]);
+                CPDescription = dynamic_cast<Gtk::Label *>(base_box_children[1]);
+
+                auto synapse_children = CPSynapseBox->get_children();
+                CPName = dynamic_cast<Gtk::Label *>(synapse_children[2]);
+                CPUntranslatedName = dynamic_cast<Gtk::Label *>(synapse_children[3]);
+            }
+            if (CPName && match_search(CPName->get_text(), search_text)) {
+                return true;
+            }
+            if (CPUntranslatedName && match_search(CPUntranslatedName->get_text(), search_text)) {
+                return true;
+            }
+            if (CPDescription && match_search(CPDescription->get_text(), search_text)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 /**
  * Maybe replaced by: Temporary arrangement may be replaced by snippets
  * This can help us provide parameters for multiple argument function
@@ -242,6 +289,15 @@ bool CommandPalette::ask_action_parameter(GdkEventButton * /*evt*/, const Action
 
     Glib::ustring value = entry.get_text();
     return execute_action(action_ptr_name, value);
+}
+
+bool CommandPalette::match_search(const Glib::ustring &subject, const Glib::ustring &search)
+{
+    // TODO: Better matching algorithm take inspiration from VS code
+    if (subject.lowercase().find(search) != -1) {
+        return true;
+    }
+    return false;
 }
 
 /**
