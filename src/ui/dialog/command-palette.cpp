@@ -114,7 +114,7 @@ CommandPalette::CommandPalette()
     _CPBase->set_valign(Gtk::ALIGN_START);
 
     _CPFilter->signal_search_changed().connect(sigc::mem_fun(*this, &CommandPalette::on_search));
-    _CPFilter->signal_key_press_event().connect(sigc::mem_fun(*this, &CommandPalette::on_filter_key_press));
+    _CPFilter->signal_key_press_event().connect(sigc::mem_fun(*this, &CommandPalette::on_filter_key_press), false);
 
     _CPSuggestions->unset_filter_func();
     _CPSuggestions->set_filter_func(sigc::mem_fun(*this, &CommandPalette::on_filter));
@@ -249,10 +249,11 @@ bool CommandPalette::on_filter(Gtk::ListBoxRow *child)
 
 bool CommandPalette::on_filter_key_press(GdkEventKey *evt)
 {
-    if (evt->keyval == 65513) { // Escape key
+    if (evt->keyval == GDK_KEY_Escape) {
         close();
+        return true; // block propagation of key press, not needed anymore
     }
-    return true;
+    return false; // Pass the key event which are not used
 }
 
 /**
@@ -357,7 +358,8 @@ TypeOfVariant CommandPalette::get_action_variant_type(const ActionPtr &action_pt
     return TypeOfVariant::NONE;
 }
 
-std::tuple<Gtk::Label *, Gtk::Label *, Gtk::Label *> CommandPalette::get_name_utranslated_name_desc(Gtk::ListBoxRow *child)
+std::tuple<Gtk::Label *, Gtk::Label *, Gtk::Label *>
+CommandPalette::get_name_utranslated_name_desc(Gtk::ListBoxRow *child)
 {
     auto event_box = dynamic_cast<Gtk::EventBox *>(child->get_child());
     if (event_box) {
