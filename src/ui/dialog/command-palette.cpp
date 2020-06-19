@@ -232,31 +232,17 @@ bool CommandPalette::on_filter(Gtk::ListBoxRow *child)
     if (search_text.empty()) {
         return true;
     } // Every operation is visible
-    auto event_box = dynamic_cast<Gtk::EventBox *>(child->get_child());
-    if (event_box) {
-        // NOTE: These variables have same name as in the glade file command-operation-lite.glad
-        auto CPBaseBox = dynamic_cast<Gtk::Box *>(event_box->get_child());
-        if (CPBaseBox) {
-            Gtk::Label *CPDescription, *CPName, *CPUntranslatedName;
-            {
-                auto base_box_children = CPBaseBox->get_children();
-                auto CPSynapseBox = dynamic_cast<Gtk::Box *>(base_box_children[0]);
-                CPDescription = dynamic_cast<Gtk::Label *>(base_box_children[1]);
 
-                auto synapse_children = CPSynapseBox->get_children();
-                CPName = dynamic_cast<Gtk::Label *>(synapse_children[2]);
-                CPUntranslatedName = dynamic_cast<Gtk::Label *>(synapse_children[3]);
-            }
-            if (CPName && match_search(CPName->get_text(), search_text)) {
-                return true;
-            }
-            if (CPUntranslatedName && match_search(CPUntranslatedName->get_text(), search_text)) {
-                return true;
-            }
-            if (CPDescription && match_search(CPDescription->get_text(), search_text)) {
-                return true;
-            }
-        }
+    auto [CPName, CPUntranslatedName, CPDescription] = get_name_utranslated_name_desc(child);
+
+    if (CPName && match_search(CPName->get_text(), search_text)) {
+        return true;
+    }
+    if (CPUntranslatedName && match_search(CPUntranslatedName->get_text(), search_text)) {
+        return true;
+    }
+    if (CPDescription && match_search(CPDescription->get_text(), search_text)) {
+        return true;
     }
     return false;
 }
@@ -371,6 +357,29 @@ TypeOfVariant CommandPalette::get_action_variant_type(const ActionPtr &action_pt
     return TypeOfVariant::NONE;
 }
 
+std::tuple<Gtk::Label *, Gtk::Label *, Gtk::Label *> CommandPalette::get_name_utranslated_name_desc(Gtk::ListBoxRow *child)
+{
+    auto event_box = dynamic_cast<Gtk::EventBox *>(child->get_child());
+    if (event_box) {
+        // NOTE: These variables have same name as in the glade file command-operation-lite.glad
+        auto CPBaseBox = dynamic_cast<Gtk::Box *>(event_box->get_child());
+        if (CPBaseBox) {
+            Gtk::Label *CPDescription, *CPName, *CPUntranslatedName;
+
+            auto base_box_children = CPBaseBox->get_children();
+            auto CPSynapseBox = dynamic_cast<Gtk::Box *>(base_box_children[0]);
+            CPDescription = dynamic_cast<Gtk::Label *>(base_box_children[1]);
+
+            auto synapse_children = CPSynapseBox->get_children();
+            CPName = dynamic_cast<Gtk::Label *>(synapse_children[2]);
+            CPUntranslatedName = dynamic_cast<Gtk::Label *>(synapse_children[3]);
+
+            return std::tuple(CPName, CPUntranslatedName, CPDescription);
+        }
+    }
+
+    return std::tuple(nullptr, nullptr, nullptr);
+}
 // Get a list of all actions (application, window, and document), properly prefixed.
 // We need to do this ourselves as Gtk::Application does not have a function for this.
 // TODO: Remove when Shortcuts branch merge

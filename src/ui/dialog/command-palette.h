@@ -20,6 +20,7 @@
 #include <gtkmm/builder.h>
 #include <gtkmm/button.h>
 #include <gtkmm/eventbox.h>
+#include <gtkmm/label.h>
 #include <gtkmm/listbox.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/searchentry.h>
@@ -102,6 +103,8 @@ private: // Signal handlers
     static bool execute_action(const ActionPtrName &action, const Glib::ustring &value);
 
     static TypeOfVariant get_action_variant_type(const ActionPtr &action_ptr);
+
+    static std::tuple<Gtk::Label *, Gtk::Label *, Gtk::Label *> get_name_utranslated_name_desc(Gtk::ListBoxRow *child);
 
 private: // variables
     // Widgets
