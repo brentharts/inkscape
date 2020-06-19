@@ -75,6 +75,8 @@ private: // Signal handlers
     void on_search();
     bool on_filter(Gtk::ListBoxRow *child);
 
+    bool on_filter_key_press(GdkEventKey *evt);
+
     /**
      * when search bar is empty
      */
@@ -93,7 +95,7 @@ private: // Signal handlers
     /**
      * Implements text matching logic
      */
-    bool match_search(const Glib::ustring& subject, const Glib::ustring& search);
+    bool match_search(const Glib::ustring &subject, const Glib::ustring &search);
     /**
      * Executes Action
      */

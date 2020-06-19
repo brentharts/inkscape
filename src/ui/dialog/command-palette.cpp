@@ -12,6 +12,7 @@
 #include "command-palette.h"
 
 #include <cstddef>
+#include <gdk/gdkkeysyms.h>
 #include <giomm/action.h>
 #include <giomm/application.h>
 #include <glibmm/i18n.h>
@@ -112,8 +113,10 @@ CommandPalette::CommandPalette()
     _CPBase->set_halign(Gtk::ALIGN_CENTER);
     _CPBase->set_valign(Gtk::ALIGN_START);
 
-    _CPSuggestions->unset_filter_func();
     _CPFilter->signal_search_changed().connect(sigc::mem_fun(*this, &CommandPalette::on_search));
+    _CPFilter->signal_key_press_event().connect(sigc::mem_fun(*this, &CommandPalette::on_filter_key_press));
+
+    _CPSuggestions->unset_filter_func();
     _CPSuggestions->set_filter_func(sigc::mem_fun(*this, &CommandPalette::on_filter));
 
     /* _CPFilter->signal_search_changed().connect(sigc::mem_fun(*this, &CommandPalette::on_search)); */
@@ -256,6 +259,14 @@ bool CommandPalette::on_filter(Gtk::ListBoxRow *child)
         }
     }
     return false;
+}
+
+bool CommandPalette::on_filter_key_press(GdkEventKey *evt)
+{
+    if (evt->keyval == 65513) { // Escape key
+        close();
+    }
+    return true;
 }
 
 /**
