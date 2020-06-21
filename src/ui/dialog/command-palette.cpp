@@ -128,6 +128,7 @@ CommandPalette::CommandPalette()
         auto gladefile = get_filename_string(Inkscape::IO::Resource::UIS, "command-palette-operation-lite.glade");
 
         auto all_actions_ptr_name = list_all_actions();
+
         // can’t do const
         for (/*const*/ auto &action_ptr_name : all_actions_ptr_name) {
             Glib::RefPtr<Gtk::Builder> operation_builder;
@@ -178,6 +179,7 @@ CommandPalette::CommandPalette()
             }
 
             CPActionFullName->set_text(action_ptr_name.second);
+
             CPDescription->set_text(action_data.get_tooltip_for_action(action_ptr_name.second));
 
             /* CPIcon->hide(); */
@@ -187,6 +189,10 @@ CommandPalette::CommandPalette()
                 sigc::mem_fun(*this, &CommandPalette::on_operation_clicked), action_ptr_name));
             CPOperation->signal_key_press_event().connect(sigc::bind<ActionPtrName>(
                 sigc::mem_fun(*this, &CommandPalette::on_operation_key_press), action_ptr_name));
+            CPActionFullName->signal_button_press_event().connect(
+                sigc::bind<Glib::ustring>(sigc::mem_fun(*this, &CommandPalette::on_action_fullname_clicked),
+                                          action_ptr_name.second),
+                false);
 
             // Add to suggestions
             _CPSuggestions->append(*CPOperation);
@@ -284,6 +290,15 @@ void CommandPalette::show_suggestions()
     _CPScrolled->show_all();
 }
 
+bool CommandPalette::on_action_fullname_clicked(GdkEventButton *evt, const Glib::ustring &action_fullname)
+{
+    static auto clipboard = Gtk::Clipboard::get();
+    debug_print("In fullname clicked");
+    clipboard->set_text(action_fullname);
+    clipboard->store();
+    return true;
+}
+
 bool CommandPalette::on_operation_clicked(GdkEventButton * /*evt*/, const ActionPtrName &action_ptr_name)
 {
     ask_action_parameter(action_ptr_name);
@@ -298,6 +313,7 @@ bool CommandPalette::on_operation_key_press(GdkEventKey *evt, const ActionPtrNam
     }
     return false;
 }
+
 /**
  * Maybe replaced by: Temporary arrangement may be replaced by snippets
  * This can help us provide parameters for multiple argument function

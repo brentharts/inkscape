@@ -99,6 +99,8 @@ private: // Signal handlers
     bool on_operation_clicked(GdkEventButton *evt, const ActionPtrName &action);
     bool on_operation_key_press(GdkEventKey *evt, const ActionPtrName &action);
 
+    bool on_action_fullname_clicked(GdkEventButton *evt, const Glib::ustring &action_fullname);
+
     /**
      * Implements text matching logic
      */
