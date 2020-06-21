@@ -113,13 +113,12 @@ CommandPalette::CommandPalette()
     _CPBase->set_halign(Gtk::ALIGN_CENTER);
     _CPBase->set_valign(Gtk::ALIGN_START);
 
-    _CPFilter->signal_search_changed().connect(sigc::mem_fun(*this, &CommandPalette::on_search));
-    _CPFilter->signal_key_press_event().connect(sigc::mem_fun(*this, &CommandPalette::on_filter_key_press), false);
+    _CPFilter->signal_key_press_event().connect(sigc::mem_fun(*this, &CommandPalette::on_filter_escape_key_press),
+                                                false);
+    change_cp_fiter_mode(CPFilterMode::SEARCH);
 
     _CPSuggestions->unset_filter_func();
     _CPSuggestions->set_filter_func(sigc::mem_fun(*this, &CommandPalette::on_filter));
-
-    /* _CPFilter->signal_search_changed().connect(sigc::mem_fun(*this, &CommandPalette::on_search)); */
 
     // Setup operations [actions, verbs, extenstion]
     {
@@ -185,7 +184,9 @@ CommandPalette::CommandPalette()
             /* CPIconBox->hide(); */
 
             CPOperation->signal_button_press_event().connect(sigc::bind<ActionPtrName>(
-                sigc::mem_fun(*this, &CommandPalette::ask_action_parameter), action_ptr_name));
+                sigc::mem_fun(*this, &CommandPalette::on_operation_clicked), action_ptr_name));
+            CPOperation->signal_key_press_event().connect(sigc::bind<ActionPtrName>(
+                sigc::mem_fun(*this, &CommandPalette::on_operation_key_press), action_ptr_name));
 
             // Add to suggestions
             _CPSuggestions->append(*CPOperation);
@@ -208,16 +209,19 @@ void CommandPalette::close()
     _CPFilter->set_text("");
     _CPSuggestions->invalidate_filter();
 
+    change_cp_fiter_mode(CPFilterMode::SEARCH);
+
     _is_open = false;
 }
 
 void CommandPalette::toggle()
 {
-    if (!_is_open) {
+    if (not _is_open) {
         open();
         return;
+    } else {
+        close();
     }
-    close();
 }
 
 void CommandPalette::on_search()
@@ -247,34 +251,62 @@ bool CommandPalette::on_filter(Gtk::ListBoxRow *child)
     return false;
 }
 
-bool CommandPalette::on_filter_key_press(GdkEventKey *evt)
+bool CommandPalette::on_filter_escape_key_press(GdkEventKey *evt)
 {
     if (evt->keyval == GDK_KEY_Escape) {
         close();
-        return true; // block propagation of key press, not needed anymore
+        return true; // stop propagation of key press, not needed anymore
     }
     return false; // Pass the key event which are not used
 }
 
 /**
+ * Executes action when enter pressed
+ */
+bool CommandPalette::on_filter_input_mode_key_press(GdkEventKey *evt, const ActionPtrName &action_ptr_name)
+{
+    switch (evt->keyval) {
+    case GDK_KEY_Return:
+    case GDK_KEY_Linefeed:
+        execute_action(action_ptr_name, _CPFilter->get_text());
+        close();
+        return true;
+    }
+    return false;
+}
+
+void CommandPalette::hide_suggestions()
+{
+    _CPScrolled->hide();
+}
+void CommandPalette::show_suggestions()
+{
+    _CPScrolled->show_all();
+}
+
+bool CommandPalette::on_operation_clicked(GdkEventButton * /*evt*/, const ActionPtrName &action_ptr_name)
+{
+    ask_action_parameter(action_ptr_name);
+    return true;
+}
+bool CommandPalette::on_operation_key_press(GdkEventKey *evt, const ActionPtrName &action_ptr_name)
+{
+    debug_print("Operation was key pressed");
+    if (evt->keyval == GDK_KEY_Return || evt->keyval == GDK_KEY_Return) {
+        ask_action_parameter(action_ptr_name);
+        return true;
+    }
+    return false;
+}
+/**
  * Maybe replaced by: Temporary arrangement may be replaced by snippets
  * This can help us provide parameters for multiple argument function
  * whose actions take a sring as param
  */
-bool CommandPalette::ask_action_parameter(GdkEventButton * /*evt*/, const ActionPtrName &action_ptr_name)
+bool CommandPalette::ask_action_parameter(const ActionPtrName &action_ptr_name)
 {
-    Gtk::Dialog dialog;
-    Gtk::Entry entry;
-
-    entry.set_placeholder_text("Enter action parameter");
-    entry.set_size_request(500);
-
-    dialog.get_content_area()->pack_start(entry);
-    dialog.add_button("Apply", Gtk::RESPONSE_OK);
-    dialog.show_all();
-
+    // Checking if action has handleable parameter type
     TypeOfVariant action_param_type = get_action_variant_type(action_ptr_name.first);
-
     if (action_param_type == TypeOfVariant::UNKNOWN) {
         std::cerr << "CommandPalette::ask_action_parameter: unhandled action value type (Unknown Type) "
                   << action_ptr_name.second << std::endl;
@@ -282,11 +314,39 @@ bool CommandPalette::ask_action_parameter(GdkEventButton * /*evt*/, const Action
     }
 
     if (action_param_type != TypeOfVariant::NONE) {
-        dialog.run();
+        change_cp_fiter_mode(CPFilterMode::INPUT);
+
+        _cp_filter_temp_connection = _CPFilter->signal_key_press_event().connect(
+            sigc::bind<ActionPtrName>(sigc::mem_fun(*this, &CommandPalette::on_filter_input_mode_key_press),
+                                      action_ptr_name),
+            false);
+
+        // get type string NOTE: Temporary should be replaced by adding some data to InkActionExtraDataj
+        Glib::ustring type_string;
+        switch (action_param_type) {
+        case TypeOfVariant::BOOL:
+            type_string = "bool";
+            break;
+        case TypeOfVariant::INT:
+            type_string = "integer";
+            break;
+        case TypeOfVariant::DOUBLE:
+            type_string = "double";
+            break;
+        case TypeOfVariant::STRING:
+            type_string = "string";
+            break;
+        default:
+            break;
+        }
+        _CPFilter->set_placeholder_text("Enter a " + type_string + "...");
+        _CPFilter->set_tooltip_text("Enter a " + type_string + "...");
+        return true;
     }
 
-    Glib::ustring value = entry.get_text();
-    return execute_action(action_ptr_name, value);
+    execute_action(action_ptr_name, "");
+
+    return true;
 }
 
 bool CommandPalette::match_search(const Glib::ustring &subject, const Glib::ustring &search)
@@ -296,6 +356,53 @@ bool CommandPalette::match_search(const Glib::ustring &subject, const Glib::ustr
         return true;
     }
     return false;
+}
+
+void CommandPalette::change_cp_fiter_mode(CPFilterMode mode)
+{
+    switch (mode) {
+    case CPFilterMode::SEARCH:
+        if (_mode == CPFilterMode::SEARCH) {
+            return;
+        }
+
+        _CPFilter->set_icon_from_icon_name("edit-find-symbolic");
+        _CPFilter->set_placeholder_text("Search operation...");
+        _CPFilter->set_tooltip_text("Search operation...");
+        show_suggestions();
+
+        _cp_filter_temp_connection.disconnect();
+        _cp_filter_temp_connection =
+            _CPFilter->signal_search_changed().connect(sigc::mem_fun(*this, &CommandPalette::on_search));
+        break;
+
+    case CPFilterMode::INPUT:
+        if (_mode == CPFilterMode::INPUT) {
+            return;
+        }
+        _cp_filter_temp_connection.disconnect();
+
+        hide_suggestions();
+        _CPFilter->set_text("");
+        _CPFilter->grab_focus();
+
+        _CPFilter->set_icon_from_icon_name("input-keyboard");
+        _CPFilter->set_placeholder_text("Enter action argument");
+        _CPFilter->set_tooltip_text("Enter action argument");
+
+        break;
+
+    case CPFilterMode::SHELL:
+        if (_mode == CPFilterMode::SHELL) {
+            return;
+        }
+
+        hide_suggestions();
+        _CPFilter->set_icon_from_icon_name("gtk-search");
+        _cp_filter_temp_connection.disconnect();
+        break;
+    }
+    _mode = mode;
 }
 
 /**

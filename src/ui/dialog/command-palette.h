@@ -47,6 +47,13 @@ enum class TypeOfVariant
     STRING,
 };
 
+enum class CPFilterMode
+{
+    SEARCH,
+    INPUT, // Input arguments
+    SHELL
+};
+
 class CommandPalette
 {
 public: // API
@@ -76,7 +83,8 @@ private: // Signal handlers
     void on_search();
     bool on_filter(Gtk::ListBoxRow *child);
 
-    bool on_filter_key_press(GdkEventKey *evt);
+    bool on_filter_escape_key_press(GdkEventKey *evt);
+    bool on_filter_input_mode_key_press(GdkEventKey *evt, const ActionPtrName &action_ptr_name);
 
     /**
      * when search bar is empty
@@ -88,18 +96,19 @@ private: // Signal handlers
      */
     void show_suggestions();
 
-    /**
-     * Creates a dialog and asks for parameter of action
-     */
-    bool ask_action_parameter(GdkEventButton *evt, const ActionPtrName &action);
+    bool on_operation_clicked(GdkEventButton *evt, const ActionPtrName &action);
+    bool on_operation_key_press(GdkEventKey *evt, const ActionPtrName &action);
 
     /**
      * Implements text matching logic
      */
     bool match_search(const Glib::ustring &subject, const Glib::ustring &search);
+    void change_cp_fiter_mode(CPFilterMode mode);
+
     /**
      * Executes Action
      */
+    bool ask_action_parameter(const ActionPtrName &action);
     static bool execute_action(const ActionPtrName &action, const Glib::ustring &value);
 
     static TypeOfVariant get_action_variant_type(const ActionPtr &action_ptr);
@@ -120,6 +129,9 @@ private: // variables
 
     // States
     bool _is_open = false;
+    CPFilterMode _mode;
+
+    sigc::connection _cp_filter_temp_connection;
 };
 
 } // namespace Dialog
