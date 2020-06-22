@@ -361,6 +361,7 @@ bool CommandPalette::ask_action_parameter(const ActionPtrName &action_ptr_name)
     }
 
     execute_action(action_ptr_name, "");
+    close();
 
     return true;
 }
