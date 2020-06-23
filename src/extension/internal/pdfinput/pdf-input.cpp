@@ -32,35 +32,31 @@
 #include <poppler/glib/poppler-page.h>
 #endif
 
+#include <gdkmm/general.h>
+#include <glibmm/convert.h>
+#include <glibmm/i18n.h>
+#include <glibmm/miscutils.h>
+#include <gtk/gtk.h>
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/drawingarea.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/scale.h>
-
-#include <glibmm/convert.h>
-#include <glibmm/miscutils.h>
-#include <gtk/gtk.h>
-#include <glibmm/i18n.h>
-
-#include "ui/dialog-events.h"
-#include "ui/widget/spinbutton.h"
-#include "ui/widget/frame.h"
-
-#include "extension/system.h"
-#include "extension/input.h"
-#include "svg-builder.h"
-#include "pdf-parser.h"
+#include <utility>
 
 #include "document-undo.h"
+#include "extension/input.h"
+#include "extension/system.h"
 #include "inkscape.h"
+#include "object/sp-root.h"
+#include "pdf-parser.h"
+#include "svg-builder.h"
+#include "ui/dialog-events.h"
+#include "ui/widget/frame.h"
+#include "ui/widget/spinbutton.h"
 #include "util/units.h"
 
-#include "object/sp-root.h"
-
-
-#include <gdkmm/general.h>
 
 
 namespace {
@@ -97,7 +93,7 @@ static const gchar * crop_setting_choices[] = {
 };
 
 PdfImportDialog::PdfImportDialog(std::shared_ptr<PDFDoc> doc, const gchar */*uri*/)
-    : _pdf_doc(doc)
+    : _pdf_doc(std::move(doc))
 {
     assert(_pdf_doc);
 #ifdef HAVE_POPPLER_CAIRO
