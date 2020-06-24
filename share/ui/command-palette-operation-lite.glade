@@ -3,7 +3,7 @@
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkEventBox" id="CPOperation">
-    <property name="width_request">700</property>
+    <property name="name">CPOperation</property>
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="hexpand">True</property>
@@ -12,20 +12,16 @@
       <object class="GtkBox" id="CPBaseBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="margin_start">10</property>
-        <property name="margin_end">10</property>
-        <property name="margin_top">3</property>
-        <property name="margin_bottom">3</property>
         <property name="orientation">vertical</property>
         <child>
           <object class="GtkBox" id="CPSynapseBox">
+            <property name="name">CPSynapseBox</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
               <object class="GtkLabel" id="CPGroup">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_end">6</property>
                 <property name="label" translatable="yes">Group</property>
               </object>
               <packing>
@@ -38,7 +34,6 @@
               <object class="GtkImage" id="Arrow">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_end">6</property>
                 <property name="icon_name">go-next</property>
               </object>
               <packing>
@@ -51,9 +46,6 @@
               <object class="GtkLabel" id="CPName">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_end">10</property>
-                <property name="margin_top">3</property>
-                <property name="margin_bottom">6</property>
                 <property name="label" translatable="yes">Name</property>
                 <attributes>
                   <attribute name="weight" value="semibold"/>
@@ -67,10 +59,11 @@
             </child>
             <child>
               <object class="GtkLabel" id="CPUntranslatedName">
+                <property name="name">CPUntranslatedName</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_end">10</property>
-                <property name="label" translatable="yes">( Untranslated name )</property>
+                <property name="no_show_all">True</property>
+                <property name="label" translatable="yes">Untranslated name</property>
                 <property name="wrap">True</property>
                 <property name="ellipsize">end</property>
                 <property name="xalign">0</property>
@@ -85,7 +78,6 @@
               <object class="GtkLabel" id="CPShortcut">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_end">10</property>
                 <property name="label" translatable="yes">( Ctrl + ` )</property>
               </object>
               <packing>
@@ -96,10 +88,11 @@
             </child>
             <child>
               <object class="GtkLabel" id="CPActionFullName">
+                <property name="name">CPActionFullName</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="no_show_all">True</property>
                 <property name="tooltip_text" translatable="yes">Click to copy full action name</property>
-                <property name="margin_end">10</property>
                 <property name="label" translatable="yes">action.full-name</property>
                 <property name="justify">right</property>
                 <attributes>
@@ -124,7 +117,6 @@
           <object class="GtkLabel" id="CPDescription">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="margin_bottom">3</property>
             <property name="label" translatable="yes">A very long description to fill empty space until we encounter ellipsis may be wrong spelling</property>
             <property name="ellipsize">end</property>
             <property name="xalign">0</property>

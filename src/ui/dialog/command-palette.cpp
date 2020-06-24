@@ -33,6 +33,7 @@
 #include "inkscape-application.h"
 #include "inkscape-window.h"
 #include "io/resource.h"
+#include "preferences.h"
 #include "ui/dialog/align-and-distribute.h"
 #include "verbs.h"
 
@@ -86,6 +87,7 @@ void debug_print(T variable)
 }
 } // namespace
 
+// constructor
 CommandPalette::CommandPalette()
 {
     // setup builder
@@ -100,8 +102,9 @@ CommandPalette::CommandPalette()
     }
     // Setup UI Components
     _builder->get_widget("CPBase", _CPBase);
-    _builder->get_widget("CPFilter", _CPFilter);
     _builder->get_widget("CPHeader", _CPHeader);
+    _builder->get_widget("CPSearchBar", _CPSearchBar);
+    _builder->get_widget("CPFilter", _CPFilter);
     _builder->get_widget("CPScrolled", _CPScrolled);
     _builder->get_widget("CPViewPort", _CPViewPort);
     _builder->get_widget("CPSuggestions", _CPSuggestions);
@@ -119,6 +122,9 @@ CommandPalette::CommandPalette()
 
     _CPSuggestions->unset_filter_func();
     _CPSuggestions->set_filter_func(sigc::mem_fun(*this, &CommandPalette::on_filter));
+
+    // Preferences load
+    auto prefs = Inkscape::Preferences::get();
 
     // Setup operations [actions, verbs, extenstion]
     {
@@ -175,10 +181,20 @@ CommandPalette::CommandPalette()
                     name = action_ptr_name.second;
                 }
                 CPName->set_text(name);
-                CPUntranslatedName->set_markup("<span size='x-small'>" + name + "</span>");
+
+                // Apply actual logic
+                auto untranslated_name = name;
+
+                // Required for searching
+                CPUntranslatedName->set_markup("<span size='x-small'>" + untranslated_name + "</span>");
             }
 
-            CPActionFullName->set_text(action_ptr_name.second);
+            {
+                bool show_full_action_name = prefs->getBool("/options/commandpalette/showfullactionname/value");
+                CPActionFullName->set_no_show_all(not show_full_action_name);
+                CPActionFullName->hide();
+                CPActionFullName->set_text(action_ptr_name.second);
+            }
 
             CPDescription->set_text(action_data.get_tooltip_for_action(action_ptr_name.second));
 
@@ -202,6 +218,7 @@ CommandPalette::CommandPalette()
 
 void CommandPalette::open()
 {
+    manage_untranslated_name_visibility();
     _CPBase->show_all();
     _CPFilter->grab_focus();
     _is_open = true;
@@ -283,11 +300,23 @@ bool CommandPalette::on_filter_input_mode_key_press(GdkEventKey *evt, const Acti
 
 void CommandPalette::hide_suggestions()
 {
+    _CPBase->set_size_request(-1, 10);
     _CPScrolled->hide();
 }
 void CommandPalette::show_suggestions()
 {
+    _CPBase->set_size_request(-1, _max_height_requestable);
     _CPScrolled->show_all();
+}
+void CommandPalette::manage_untranslated_name_visibility()
+{
+    static auto prefs = Inkscape::Preferences::get();
+
+    // TODO: Use locale detections (don't show English with English)
+    bool show_untranslated = prefs->getBool("/options/commandpalette/showuntranslatedname/value", true);
+    if (not show_untranslated) {
+        _CPSuggestions->get_style_context()->add_class("hidden-untranslated");
+    }
 }
 
 bool CommandPalette::on_action_fullname_clicked(GdkEventButton *evt, const Glib::ustring &action_fullname)

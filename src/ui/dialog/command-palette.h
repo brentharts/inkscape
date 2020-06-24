@@ -23,6 +23,7 @@
 #include <gtkmm/label.h>
 #include <gtkmm/listbox.h>
 #include <gtkmm/scrolledwindow.h>
+#include <gtkmm/searchbar.h>
 #include <gtkmm/searchentry.h>
 #include <gtkmm/viewport.h>
 #include <utility>
@@ -126,12 +127,27 @@ private: // variables
     Gtk::ScrolledWindow *_CPScrolled;
     Gtk::Viewport *_CPViewPort;
 
+    Gtk::SearchBar *_CPSearchBar;
     Gtk::SearchEntry *_CPFilter;
     Gtk::ListBox *_CPSuggestions;
 
+    // Data
+    int _max_height_requestable = 360;
+
     // States
     bool _is_open = false;
-    CPFilterMode _mode;
+
+    /**
+     * Remember the mode we are in helps in unecessary signal disconnection and reconnection
+     * Used by change_cp_fiter_mode()
+     */
+    CPFilterMode _mode = CPFilterMode::INPUT;
+    // Default value other than SEARCH required
+    // change_cp_fiter_mode() switches between mode hence checks if it already in the target mode.
+    // Constructed value is sometimes SEARCH being the first Item for now
+    // change_cp_fiter_mode() never attaches the on search listener then 
+    // This initialising value can be any thing ohter than the initial required mode
+    // Example currently it's open in search mode
 
     sigc::connection _cp_filter_temp_connection;
 };
