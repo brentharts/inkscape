@@ -126,6 +126,15 @@ CommandPalette::CommandPalette()
     // Preferences load
     auto prefs = Inkscape::Preferences::get();
 
+    // Show untranslated_label
+    {
+        // TODO: Use locale detections
+        bool show_untranslated = prefs->getBool("/options/commandpalette/showuntranslatedname/value", true);
+        if (not show_untranslated) {
+            _CPSuggestions->get_style_context()->add_class("hidden-untranslated");
+        }
+    }
+
     // Setup operations [actions, verbs, extenstion]
     {
         auto app = dynamic_cast<InkscapeApplication *>(Gio::Application::get_default().get());
@@ -218,7 +227,6 @@ CommandPalette::CommandPalette()
 
 void CommandPalette::open()
 {
-    manage_untranslated_name_visibility();
     _CPBase->show_all();
     _CPFilter->grab_focus();
     _is_open = true;
@@ -276,7 +284,7 @@ bool CommandPalette::on_filter(Gtk::ListBoxRow *child)
 
 bool CommandPalette::on_filter_escape_key_press(GdkEventKey *evt)
 {
-    if (evt->keyval == GDK_KEY_Escape) {
+    if (evt->keyval == GDK_KEY_Escape || evt->keyval == GDK_KEY_question) {
         close();
         return true; // stop propagation of key press, not needed anymore
     }
@@ -307,16 +315,6 @@ void CommandPalette::show_suggestions()
 {
     _CPBase->set_size_request(-1, _max_height_requestable);
     _CPScrolled->show_all();
-}
-void CommandPalette::manage_untranslated_name_visibility()
-{
-    static auto prefs = Inkscape::Preferences::get();
-
-    // TODO: Use locale detections (don't show English with English)
-    bool show_untranslated = prefs->getBool("/options/commandpalette/showuntranslatedname/value", true);
-    if (not show_untranslated) {
-        _CPSuggestions->get_style_context()->add_class("hidden-untranslated");
-    }
 }
 
 bool CommandPalette::on_action_fullname_clicked(GdkEventButton *evt, const Glib::ustring &action_fullname)
