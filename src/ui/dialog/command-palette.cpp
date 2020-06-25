@@ -210,17 +210,19 @@ CommandPalette::CommandPalette()
             /* CPIcon->hide(); */
             /* CPIconBox->hide(); */
 
+            // Add to suggestions
+            _CPSuggestions->append(*CPOperation);
+
             CPOperation->signal_button_press_event().connect(sigc::bind<ActionPtrName>(
                 sigc::mem_fun(*this, &CommandPalette::on_operation_clicked), action_ptr_name));
-            CPOperation->signal_key_press_event().connect(sigc::bind<ActionPtrName>(
+
+	    // Requires CPOperation added to _CPSuggestions
+            CPOperation->get_parent()->signal_key_press_event().connect(sigc::bind<ActionPtrName>(
                 sigc::mem_fun(*this, &CommandPalette::on_operation_key_press), action_ptr_name));
             CPActionFullName->signal_button_press_event().connect(
                 sigc::bind<Glib::ustring>(sigc::mem_fun(*this, &CommandPalette::on_action_fullname_clicked),
                                           action_ptr_name.second),
                 false);
-
-            // Add to suggestions
-            _CPSuggestions->append(*CPOperation);
         }
     }
 }
@@ -333,7 +335,6 @@ bool CommandPalette::on_operation_clicked(GdkEventButton * /*evt*/, const Action
 }
 bool CommandPalette::on_operation_key_press(GdkEventKey *evt, const ActionPtrName &action_ptr_name)
 {
-    debug_print("Operation was key pressed");
     if (evt->keyval == GDK_KEY_Return || evt->keyval == GDK_KEY_Return) {
         ask_action_parameter(action_ptr_name);
         return true;
