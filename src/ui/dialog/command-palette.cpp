@@ -123,6 +123,9 @@ CommandPalette::CommandPalette()
     _CPSuggestions->unset_filter_func();
     _CPSuggestions->set_filter_func(sigc::mem_fun(*this, &CommandPalette::on_filter));
 
+    _CPSuggestions->set_activate_on_single_click();
+    _CPSuggestions->set_selection_mode(Gtk::SELECTION_SINGLE);
+
     // Preferences load
     auto prefs = Inkscape::Preferences::get();
 
@@ -216,7 +219,7 @@ CommandPalette::CommandPalette()
             CPOperation->signal_button_press_event().connect(sigc::bind<ActionPtrName>(
                 sigc::mem_fun(*this, &CommandPalette::on_operation_clicked), action_ptr_name));
 
-	    // Requires CPOperation added to _CPSuggestions
+            // Requires CPOperation added to _CPSuggestions
             CPOperation->get_parent()->signal_key_press_event().connect(sigc::bind<ActionPtrName>(
                 sigc::mem_fun(*this, &CommandPalette::on_operation_key_press), action_ptr_name));
             CPActionFullName->signal_button_press_event().connect(
@@ -260,6 +263,9 @@ void CommandPalette::toggle()
 void CommandPalette::on_search()
 {
     _CPSuggestions->invalidate_filter();
+    if (auto top_row = _CPSuggestions->get_row_at_y(0); top_row) {
+        _CPSuggestions->select_row(*top_row); // select top row
+    }
 }
 
 bool CommandPalette::on_filter(Gtk::ListBoxRow *child)
@@ -291,6 +297,17 @@ bool CommandPalette::on_filter_escape_key_press(GdkEventKey *evt)
         return true; // stop propagation of key press, not needed anymore
     }
     return false; // Pass the key event which are not used
+}
+
+bool CommandPalette::on_filter_search_mode_key_press(GdkEventKey *evt)
+{
+    if (evt->keyval == GDK_KEY_Return or evt->keyval == GDK_KEY_Linefeed) {
+        if (auto selected_row = _CPSuggestions->get_selected_row(); selected_row) {
+            selected_row->activate();
+        }
+        return true;
+    }
+    return false;
 }
 
 /**
@@ -360,7 +377,7 @@ bool CommandPalette::ask_action_parameter(const ActionPtrName &action_ptr_name)
     if (action_param_type != TypeOfVariant::NONE) {
         change_cp_fiter_mode(CPFilterMode::INPUT);
 
-        _cp_filter_temp_connection = _CPFilter->signal_key_press_event().connect(
+        _cp_filter_key_press_connection = _CPFilter->signal_key_press_event().connect(
             sigc::bind<ActionPtrName>(sigc::mem_fun(*this, &CommandPalette::on_filter_input_mode_key_press),
                                       action_ptr_name),
             false);
@@ -416,16 +433,22 @@ void CommandPalette::change_cp_fiter_mode(CPFilterMode mode)
         _CPFilter->set_tooltip_text("Search operation...");
         show_suggestions();
 
-        _cp_filter_temp_connection.disconnect();
-        _cp_filter_temp_connection =
+        _cp_filter_search_connection.disconnect(); // to be sure
+        _cp_filter_key_press_connection.disconnect();
+
+        _cp_filter_search_connection =
             _CPFilter->signal_search_changed().connect(sigc::mem_fun(*this, &CommandPalette::on_search));
+        _cp_filter_key_press_connection = _CPFilter->signal_key_press_event().connect(
+            sigc::mem_fun(*this, &CommandPalette::on_filter_search_mode_key_press), false);
+
         break;
 
     case CPFilterMode::INPUT:
         if (_mode == CPFilterMode::INPUT) {
             return;
         }
-        _cp_filter_temp_connection.disconnect();
+        _cp_filter_search_connection.disconnect();
+        _cp_filter_key_press_connection.disconnect();
 
         hide_suggestions();
         _CPFilter->set_text("");
@@ -444,7 +467,8 @@ void CommandPalette::change_cp_fiter_mode(CPFilterMode mode)
 
         hide_suggestions();
         _CPFilter->set_icon_from_icon_name("gtk-search");
-        _cp_filter_temp_connection.disconnect();
+        _cp_filter_search_connection.disconnect();
+        _cp_filter_key_press_connection.disconnect();
         break;
     }
     _mode = mode;

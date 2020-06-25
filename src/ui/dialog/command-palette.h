@@ -85,6 +85,7 @@ private: // Signal handlers
     bool on_filter(Gtk::ListBoxRow *child);
 
     bool on_filter_escape_key_press(GdkEventKey *evt);
+    bool on_filter_search_mode_key_press(GdkEventKey *evt);
     bool on_filter_input_mode_key_press(GdkEventKey *evt, const ActionPtrName &action_ptr_name);
 
     /**
@@ -149,7 +150,14 @@ private: // variables
     // This initialising value can be any thing ohter than the initial required mode
     // Example currently it's open in search mode
 
-    sigc::connection _cp_filter_temp_connection;
+    /**
+     * Stores the search connection to deactivate when not needed
+     */
+    sigc::connection _cp_filter_search_connection;
+    /**
+     * Stores the key_press connection to deactivate when not needed
+     */
+    sigc::connection _cp_filter_key_press_connection;
 };
 
 } // namespace Dialog
