@@ -42,44 +42,6 @@ namespace UI {
 namespace Dialog {
 
 namespace {
-Glib::ustring camel_case_to_space_separated(const Glib::ustring &camel_case_string)
-{
-    bool prev_char_uppercase = false;
-    std::vector<std::size_t> transition_indices;
-
-    // ignore first char
-    for (std::size_t i = 1; i < camel_case_string.size(); ++i) {
-        if (g_unichar_isupper(camel_case_string[i])) {
-            if (not prev_char_uppercase) {
-                transition_indices.push_back(i);
-            }
-            prev_char_uppercase = true;
-        } else { // is lower case or number hence split before this
-            if (prev_char_uppercase) {
-                transition_indices.push_back(i - 1);
-            }
-            prev_char_uppercase = false;
-        }
-    }
-    transition_indices.push_back(camel_case_string.size());
-
-    Glib::ustring space_seperated_result;
-    space_seperated_result.reserve(transition_indices.size() + camel_case_string.size());
-
-    std::size_t prev_transition_point = 0;
-    for (const auto &tindex : transition_indices) {
-        for (size_t i = prev_transition_point; i < tindex; ++i) {
-            space_seperated_result += camel_case_string[i];
-        }
-        prev_transition_point = tindex;
-        if (tindex != camel_case_string.size()) {
-            space_seperated_result += " ";
-        }
-    }
-
-    return space_seperated_result;
-}
-
 template <typename T>
 void debug_print(T variable)
 {
@@ -130,13 +92,6 @@ CommandPalette::CommandPalette()
     auto prefs = Inkscape::Preferences::get();
 
     // Show untranslated_label
-    {
-        // TODO: Use locale detections
-        bool show_untranslated = prefs->getBool("/options/commandpalette/showuntranslatedname/value", true);
-        if (not show_untranslated) {
-            _CPSuggestions->get_style_context()->add_class("hidden-untranslated");
-        }
-    }
 
     // Setup operations [actions, verbs, extenstion]
     {
@@ -147,6 +102,7 @@ CommandPalette::CommandPalette()
 
         auto all_actions_ptr_name = list_all_actions();
 
+        bool show_untranslated = prefs->getBool("/options/commandpalette/showuntranslatedname/value", true);
         // can’t do const
         for (/*const*/ auto &action_ptr_name : all_actions_ptr_name) {
             Glib::RefPtr<Gtk::Builder> operation_builder;
@@ -188,7 +144,7 @@ CommandPalette::CommandPalette()
 
             // CPName
             {
-                auto name = camel_case_to_space_separated(action_data.get_label_for_action(action_ptr_name.second));
+                auto name = action_data.get_label_for_action(action_ptr_name.second);
                 if (name.empty()) {
                     name = action_ptr_name.second;
                 }
@@ -198,7 +154,13 @@ CommandPalette::CommandPalette()
                 auto untranslated_name = name;
 
                 // Required for searching
-                CPUntranslatedName->set_markup("<span size='x-small'>" + untranslated_name + "</span>");
+		CPUntranslatedName->set_text(untranslated_name);
+
+                if (not show_untranslated) {
+                    CPUntranslatedName->set_no_show_all(true);
+                    CPUntranslatedName->hide();
+                    CPName->set_hexpand();
+                }
             }
 
             {

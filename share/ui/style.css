@@ -201,10 +201,6 @@ iconview *:hover {
     padding-right: 10px;
 }
 
-#CPSuggestions.hidden-untranslated #CPUntranslatedName {
-    color: @theme_base_color;
-}
-
 /* LPE Dialog add */
 #LPESelectorFlowBox GtkFlowBoxChild,
 #LPESelectorFlowBox flowboxchild {
