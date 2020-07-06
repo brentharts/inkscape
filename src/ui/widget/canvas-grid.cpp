@@ -275,6 +275,7 @@ CanvasGrid::SignalEvent(GdkEvent *event)
 {
     if (event->type == GDK_BUTTON_PRESS) {
         _canvas->grab_focus();
+        _command_palette.close();
     }
 
     if (event->type == GDK_BUTTON_PRESS && event->button.button == 3) {

@@ -154,7 +154,7 @@ CommandPalette::CommandPalette()
                 auto untranslated_name = name;
 
                 // Required for searching
-		CPUntranslatedName->set_text(untranslated_name);
+                CPUntranslatedName->set_text(untranslated_name);
 
                 if (not show_untranslated) {
                     CPUntranslatedName->set_no_show_all(true);
