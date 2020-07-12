@@ -52,7 +52,15 @@ enum class CPFilterMode
 {
     SEARCH,
     INPUT, // Input arguments
-    SHELL
+    SHELL,
+    HISTORY
+};
+
+enum class HistoryType
+{
+    LPE,
+    ACTION,
+    RECENT_FILE,
 };
 
 class CommandPalette
@@ -80,13 +88,19 @@ private: // Helpers
      */
     std::vector<ActionPtrName> list_all_actions();
 
+    void focus_current_chapter();
+    void repeat_current_chapter();
+
 private: // Signal handlers
     void on_search();
-    bool on_filter(Gtk::ListBoxRow *child);
 
-    bool on_filter_escape_key_press(GdkEventKey *evt);
-    bool on_filter_search_mode_key_press(GdkEventKey *evt);
-    bool on_filter_input_mode_key_press(GdkEventKey *evt, const ActionPtrName &action_ptr_name);
+    bool on_filter_general(Gtk::ListBoxRow *child);
+    bool on_filter_full_action_name(Gtk::ListBoxRow *child);
+
+    bool on_key_press_cpfilter_escape(GdkEventKey *evt);
+    bool on_key_press_cpfilter_search_mode(GdkEventKey *evt);
+    bool on_key_press_cpfilter_input_mode(GdkEventKey *evt, const ActionPtrName &action_ptr_name);
+    bool on_key_press_cpfilter_history_mode(GdkEventKey *evt);
 
     /**
      * when search bar is empty
@@ -107,7 +121,7 @@ private: // Signal handlers
      * Implements text matching logic
      */
     bool match_search(const Glib::ustring &subject, const Glib::ustring &search);
-    void change_cp_fiter_mode(CPFilterMode mode);
+    void set_cp_fiter_mode(CPFilterMode mode);
 
     /**
      * Executes Action
@@ -118,6 +132,7 @@ private: // Signal handlers
     static TypeOfVariant get_action_variant_type(const ActionPtr &action_ptr);
 
     static std::tuple<Gtk::Label *, Gtk::Label *, Gtk::Label *> get_name_utranslated_name_desc(Gtk::ListBoxRow *child);
+    Gtk::Label *get_full_action_name_label(Gtk::ListBoxRow *child);
 
 private: // variables
     // Widgets
@@ -134,30 +149,39 @@ private: // variables
 
     // Data
     int _max_height_requestable = 360;
+    Glib::ustring _search_text;
 
     // States
     bool _is_open = false;
 
+    // History
+    using Chapter = std::pair<HistoryType, std::string>;
+    using History = std::vector<Chapter>;
+    History _history;
+    History::iterator _current_chapter;
+
+    Glib::RefPtr<Gio::FileOutputStream> _history_file_output_stream;
     /**
      * Remember the mode we are in helps in unecessary signal disconnection and reconnection
-     * Used by change_cp_fiter_mode()
+     * Used by set_cp_fiter_mode()
      */
-    CPFilterMode _mode = CPFilterMode::INPUT;
+    CPFilterMode _mode = CPFilterMode::SHELL;
     // Default value other than SEARCH required
-    // change_cp_fiter_mode() switches between mode hence checks if it already in the target mode.
+    // set_cp_fiter_mode() switches between mode hence checks if it already in the target mode.
     // Constructed value is sometimes SEARCH being the first Item for now
-    // change_cp_fiter_mode() never attaches the on search listener then 
+    // set_cp_fiter_mode() never attaches the on search listener then
     // This initialising value can be any thing ohter than the initial required mode
     // Example currently it's open in search mode
 
     /**
      * Stores the search connection to deactivate when not needed
      */
-    sigc::connection _cp_filter_search_connection;
+    sigc::connection _cpfilter_search_connection;
     /**
      * Stores the key_press connection to deactivate when not needed
      */
-    sigc::connection _cp_filter_key_press_connection;
+    sigc::connection _cpfilter_key_press_connection;
+
 };
 
 } // namespace Dialog

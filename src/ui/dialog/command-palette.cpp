@@ -15,16 +15,22 @@
 #include <gdk/gdkkeysyms.h>
 #include <giomm/action.h>
 #include <giomm/application.h>
+#include <giomm/file.h>
+#include <glibconfig.h>
+#include <glibmm/error.h>
 #include <glibmm/i18n.h>
 #include <glibmm/markup.h>
 #include <glibmm/ustring.h>
+#include <goo/gmem.h>
 #include <gtkmm/application.h>
 #include <gtkmm/box.h>
 #include <gtkmm/enums.h>
 #include <gtkmm/eventbox.h>
 #include <gtkmm/label.h>
 #include <iostream>
+#include <iterator>
 #include <ostream>
+#include <readline/history.h>
 #include <sigc++/adaptors/bind.h>
 #include <sigc++/functors/mem_fun.h>
 #include <string>
@@ -78,12 +84,9 @@ CommandPalette::CommandPalette()
     _CPBase->set_halign(Gtk::ALIGN_CENTER);
     _CPBase->set_valign(Gtk::ALIGN_START);
 
-    _CPFilter->signal_key_press_event().connect(sigc::mem_fun(*this, &CommandPalette::on_filter_escape_key_press),
+    _CPFilter->signal_key_press_event().connect(sigc::mem_fun(*this, &CommandPalette::on_key_press_cpfilter_escape),
                                                 false);
-    change_cp_fiter_mode(CPFilterMode::SEARCH);
-
-    _CPSuggestions->unset_filter_func();
-    _CPSuggestions->set_filter_func(sigc::mem_fun(*this, &CommandPalette::on_filter));
+    set_cp_fiter_mode(CPFilterMode::SEARCH);
 
     _CPSuggestions->set_activate_on_single_click();
     _CPSuggestions->set_selection_mode(Gtk::SELECTION_SINGLE);
@@ -190,6 +193,41 @@ CommandPalette::CommandPalette()
                 false);
         }
     }
+
+    auto file_name = Inkscape::IO::Resource::get_path_ustring(Inkscape::IO::Resource::USER, Inkscape::IO::Resource::UIS,
+                                                              "cpaction.history");
+    auto file = Gio::File::create_for_path(file_name);
+    if (file->query_exists()) {
+        char *contents = nullptr;
+        gsize length = 0;
+
+        file->load_contents(contents, length);
+        // length is set by the function ignoring last '\0' hence contents[length] is '\0'
+
+        if (length != 0 and contents != nullptr) {
+            // most recent first
+            std::istringstream lines(contents);
+            History full_history;
+            for (std::string line; std::getline(lines, line, '\n');) {
+                auto type = line.substr(0, line.find(':'));
+                auto data = line.substr(line.find(':') + 1);
+
+                if (type == "ACTION") {
+                    _history.emplace_back(HistoryType::ACTION, data);
+                } else if (type == "RECENT_FILE") {
+                    _history.emplace_back(HistoryType::RECENT_FILE, data);
+                } else if (type == "LPE") {
+                    _history.emplace_back(HistoryType::LPE, data);
+                }
+            }
+        }
+
+        g_free(contents);
+    } else {
+        std::cerr << "WARNING: file not found: " << file_name << ", creating new one!";
+    }
+
+    _history_file_output_stream = file->append_to();
 }
 
 void CommandPalette::open()
@@ -207,7 +245,7 @@ void CommandPalette::close()
     _CPFilter->set_text("");
     _CPSuggestions->invalidate_filter();
 
-    change_cp_fiter_mode(CPFilterMode::SEARCH);
+    set_cp_fiter_mode(CPFilterMode::SEARCH);
 
     _is_open = false;
 }
@@ -222,37 +260,99 @@ void CommandPalette::toggle()
     }
 }
 
+/**
+ * Highlights the current chapter
+ * Set text to readable operation name
+ * Highlights the ListBoxRow of the operation
+ */
+void CommandPalette::focus_current_chapter()
+{
+    static InkActionExtraData &action_data =
+        dynamic_cast<InkscapeApplication *>(Gio::Application::get_default().get())->get_action_extra_data();
+    switch (_current_chapter->first) {
+    case HistoryType::ACTION: {
+        _CPSuggestions->unset_filter_func();
+        _CPSuggestions->set_filter_func(sigc::mem_fun(*this, &CommandPalette::on_filter_full_action_name));
+
+        _search_text = _current_chapter->second;
+        _CPSuggestions->invalidate_filter();
+
+        Glib::ustring name = _current_chapter->second;
+        _CPFilter->set_text(action_data.get_label_for_action(name));
+    } break;
+    default:
+        break;
+    }
+}
+
+void CommandPalette::repeat_current_chapter()
+{
+    static auto app = dynamic_cast<Gtk::Application *>(Gio::Application::get_default().get());
+    static auto win = dynamic_cast<InkscapeWindow *>(app->get_active_window());
+    static auto doc = win->get_document()->getActionGroup();
+
+    switch (_current_chapter->first) {
+    case HistoryType::ACTION: {
+        auto action_domain_string =
+            _current_chapter->second.substr(0, _current_chapter->second.find('.')); // app, win, doc
+        auto action_name = _current_chapter->second.substr(_current_chapter->second.find('.') + 1);
+
+        ActionPtr action_ptr;
+        if (action_domain_string == "app") {
+            action_ptr = app->lookup_action(action_name);
+        } else if (action_domain_string == "win") {
+            action_ptr = win->lookup_action(action_name);
+        } else if (action_domain_string == "doc") {
+            action_ptr = doc->lookup_action(action_name);
+        }
+        ask_action_parameter({action_ptr, _current_chapter->second});
+    } break;
+
+    default:
+        close();
+        break;
+    }
+}
+
 void CommandPalette::on_search()
 {
+    _search_text = _CPFilter->get_text();
     _CPSuggestions->invalidate_filter();
     if (auto top_row = _CPSuggestions->get_row_at_y(0); top_row) {
         _CPSuggestions->select_row(*top_row); // select top row
     }
 }
 
-bool CommandPalette::on_filter(Gtk::ListBoxRow *child)
+bool CommandPalette::on_filter_general(Gtk::ListBoxRow *child)
 {
-    auto search_text = _CPFilter->get_text().lowercase();
-
-    if (search_text.empty()) {
+    if (_search_text.empty()) {
         return true;
     } // Every operation is visible
 
     auto [CPName, CPUntranslatedName, CPDescription] = get_name_utranslated_name_desc(child);
 
-    if (CPName && match_search(CPName->get_text(), search_text)) {
+    if (CPName && match_search(CPName->get_text(), _search_text)) {
         return true;
     }
-    if (CPUntranslatedName && match_search(CPUntranslatedName->get_text(), search_text)) {
+    if (CPUntranslatedName && match_search(CPUntranslatedName->get_text(), _search_text)) {
         return true;
     }
-    if (CPDescription && match_search(CPDescription->get_text(), search_text)) {
+    if (CPDescription && match_search(CPDescription->get_text(), _search_text)) {
         return true;
     }
     return false;
 }
 
-bool CommandPalette::on_filter_escape_key_press(GdkEventKey *evt)
+bool CommandPalette::on_filter_full_action_name(Gtk::ListBoxRow *child)
+{
+    auto CPActionFullName = get_full_action_name_label(child);
+    if (CPActionFullName and _search_text == CPActionFullName->get_text()) {
+        return true;
+    }
+    return false;
+}
+
+bool CommandPalette::on_key_press_cpfilter_escape(GdkEventKey *evt)
 {
     if (evt->keyval == GDK_KEY_Escape || evt->keyval == GDK_KEY_question) {
         close();
@@ -261,13 +361,19 @@ bool CommandPalette::on_filter_escape_key_press(GdkEventKey *evt)
     return false; // Pass the key event which are not used
 }
 
-bool CommandPalette::on_filter_search_mode_key_press(GdkEventKey *evt)
+bool CommandPalette::on_key_press_cpfilter_search_mode(GdkEventKey *evt)
 {
-    if (evt->keyval == GDK_KEY_Return or evt->keyval == GDK_KEY_Linefeed) {
+    auto key = evt->keyval;
+    if (key == GDK_KEY_Return or key == GDK_KEY_Linefeed) {
         if (auto selected_row = _CPSuggestions->get_selected_row(); selected_row) {
             selected_row->activate();
         }
         return true;
+    } else if (key == GDK_KEY_Up) {
+        if (not _history.empty()) {
+            set_cp_fiter_mode(CPFilterMode::HISTORY);
+            return true;
+        }
     }
     return false;
 }
@@ -275,7 +381,7 @@ bool CommandPalette::on_filter_search_mode_key_press(GdkEventKey *evt)
 /**
  * Executes action when enter pressed
  */
-bool CommandPalette::on_filter_input_mode_key_press(GdkEventKey *evt, const ActionPtrName &action_ptr_name)
+bool CommandPalette::on_key_press_cpfilter_input_mode(GdkEventKey *evt, const ActionPtrName &action_ptr_name)
 {
     switch (evt->keyval) {
     case GDK_KEY_Return:
@@ -284,6 +390,35 @@ bool CommandPalette::on_filter_input_mode_key_press(GdkEventKey *evt, const Acti
         close();
         return true;
     }
+    return false;
+}
+
+bool CommandPalette::on_key_press_cpfilter_history_mode(GdkEventKey *evt)
+{
+    // perform the previous action again
+    switch (evt->keyval) {
+    case GDK_KEY_Up:
+        if (_current_chapter != _history.begin()) {
+            _current_chapter--;
+            focus_current_chapter();
+        }
+        return true;
+    case GDK_KEY_Down:
+        if (_current_chapter != _history.end()) {
+            _current_chapter++;
+            focus_current_chapter();
+        } else {
+            set_cp_fiter_mode(CPFilterMode::SEARCH);
+        }
+        return true;
+    case GDK_KEY_Return:
+    case GDK_KEY_Linefeed:
+        repeat_current_chapter();
+        return true;
+    default:
+        break;
+    }
+
     return false;
 }
 
@@ -301,7 +436,6 @@ void CommandPalette::show_suggestions()
 bool CommandPalette::on_action_fullname_clicked(GdkEventButton *evt, const Glib::ustring &action_fullname)
 {
     static auto clipboard = Gtk::Clipboard::get();
-    debug_print("In fullname clicked");
     clipboard->set_text(action_fullname);
     clipboard->store();
     return true;
@@ -328,6 +462,12 @@ bool CommandPalette::on_operation_key_press(GdkEventKey *evt, const ActionPtrNam
  */
 bool CommandPalette::ask_action_parameter(const ActionPtrName &action_ptr_name)
 {
+    // Avoid writing same last action again
+    if (_history.empty() or _history.back().second != action_ptr_name.second) {
+        _history.emplace_back(HistoryType::ACTION, action_ptr_name.second);
+        _history_file_output_stream->write("ACTION:" + action_ptr_name.second + "\n");
+    }
+
     // Checking if action has handleable parameter type
     TypeOfVariant action_param_type = get_action_variant_type(action_ptr_name.first);
     if (action_param_type == TypeOfVariant::UNKNOWN) {
@@ -337,10 +477,10 @@ bool CommandPalette::ask_action_parameter(const ActionPtrName &action_ptr_name)
     }
 
     if (action_param_type != TypeOfVariant::NONE) {
-        change_cp_fiter_mode(CPFilterMode::INPUT);
+        set_cp_fiter_mode(CPFilterMode::INPUT);
 
-        _cp_filter_key_press_connection = _CPFilter->signal_key_press_event().connect(
-            sigc::bind<ActionPtrName>(sigc::mem_fun(*this, &CommandPalette::on_filter_input_mode_key_press),
+        _cpfilter_key_press_connection = _CPFilter->signal_key_press_event().connect(
+            sigc::bind<ActionPtrName>(sigc::mem_fun(*this, &CommandPalette::on_key_press_cpfilter_input_mode),
                                       action_ptr_name),
             false);
 
@@ -382,7 +522,7 @@ bool CommandPalette::match_search(const Glib::ustring &subject, const Glib::ustr
     return false;
 }
 
-void CommandPalette::change_cp_fiter_mode(CPFilterMode mode)
+void CommandPalette::set_cp_fiter_mode(CPFilterMode mode)
 {
     switch (mode) {
     case CPFilterMode::SEARCH:
@@ -390,27 +530,34 @@ void CommandPalette::change_cp_fiter_mode(CPFilterMode mode)
             return;
         }
 
+        _CPFilter->set_text("");
         _CPFilter->set_icon_from_icon_name("edit-find-symbolic");
         _CPFilter->set_placeholder_text("Search operation...");
         _CPFilter->set_tooltip_text("Search operation...");
         show_suggestions();
 
-        _cp_filter_search_connection.disconnect(); // to be sure
-        _cp_filter_key_press_connection.disconnect();
+        _CPSuggestions->unset_filter_func();
+        _CPSuggestions->set_filter_func(sigc::mem_fun(*this, &CommandPalette::on_filter_general));
 
-        _cp_filter_search_connection =
+        _cpfilter_search_connection.disconnect(); // to be sure
+        _cpfilter_key_press_connection.disconnect();
+
+        _cpfilter_search_connection =
             _CPFilter->signal_search_changed().connect(sigc::mem_fun(*this, &CommandPalette::on_search));
-        _cp_filter_key_press_connection = _CPFilter->signal_key_press_event().connect(
-            sigc::mem_fun(*this, &CommandPalette::on_filter_search_mode_key_press), false);
+        _cpfilter_key_press_connection = _CPFilter->signal_key_press_event().connect(
+            sigc::mem_fun(*this, &CommandPalette::on_key_press_cpfilter_search_mode), false);
 
+        _search_text = "";
+        _CPSuggestions->invalidate_filter();
+        _mode = CPFilterMode::SEARCH;
         break;
 
     case CPFilterMode::INPUT:
         if (_mode == CPFilterMode::INPUT) {
             return;
         }
-        _cp_filter_search_connection.disconnect();
-        _cp_filter_key_press_connection.disconnect();
+        _cpfilter_search_connection.disconnect();
+        _cpfilter_key_press_connection.disconnect();
 
         hide_suggestions();
         _CPFilter->set_text("");
@@ -420,6 +567,7 @@ void CommandPalette::change_cp_fiter_mode(CPFilterMode mode)
         _CPFilter->set_placeholder_text("Enter action argument");
         _CPFilter->set_tooltip_text("Enter action argument");
 
+        _mode = CPFilterMode::INPUT;
         break;
 
     case CPFilterMode::SHELL:
@@ -429,8 +577,28 @@ void CommandPalette::change_cp_fiter_mode(CPFilterMode mode)
 
         hide_suggestions();
         _CPFilter->set_icon_from_icon_name("gtk-search");
-        _cp_filter_search_connection.disconnect();
-        _cp_filter_key_press_connection.disconnect();
+        _cpfilter_search_connection.disconnect();
+        _cpfilter_key_press_connection.disconnect();
+
+        _mode = CPFilterMode::SHELL;
+        break;
+
+    case CPFilterMode::HISTORY:
+        if (_mode == CPFilterMode::HISTORY) {
+            return;
+        }
+
+        _CPFilter->set_icon_from_icon_name("format-justify-fill");
+        _cpfilter_search_connection.disconnect();
+        _cpfilter_key_press_connection.disconnect();
+
+        _current_chapter = _history.end() - 1;
+        focus_current_chapter();
+
+        _cpfilter_key_press_connection = _CPFilter->signal_key_press_event().connect(
+            sigc::mem_fun(*this, &CommandPalette::on_key_press_cpfilter_history_mode), false);
+
+        _mode = CPFilterMode::SHELL;
         break;
     }
     _mode = mode;
@@ -501,7 +669,7 @@ CommandPalette::get_name_utranslated_name_desc(Gtk::ListBoxRow *child)
 {
     auto event_box = dynamic_cast<Gtk::EventBox *>(child->get_child());
     if (event_box) {
-        // NOTE: These variables have same name as in the glade file command-operation-lite.glad
+        // NOTE: These variables have same name as in the glade file command-operation-lite.glade
         auto CPBaseBox = dynamic_cast<Gtk::Box *>(event_box->get_child());
         if (CPBaseBox) {
             Gtk::Label *CPDescription, *CPName, *CPUntranslatedName;
@@ -520,6 +688,26 @@ CommandPalette::get_name_utranslated_name_desc(Gtk::ListBoxRow *child)
 
     return std::tuple(nullptr, nullptr, nullptr);
 }
+
+Gtk::Label *CommandPalette::get_full_action_name_label(Gtk::ListBoxRow *child)
+{
+    auto event_box = dynamic_cast<Gtk::EventBox *>(child->get_child());
+    if (event_box) {
+        auto CPBaseBox = dynamic_cast<Gtk::Box *>(event_box->get_child());
+        if (CPBaseBox) {
+            auto base_box_children = CPBaseBox->get_children();
+            auto CPSynapseBox = dynamic_cast<Gtk::Box *>(base_box_children[0]);
+
+            auto synapse_children = CPSynapseBox->get_children();
+            auto CPActionFullName = dynamic_cast<Gtk::Label *>(synapse_children[5]);
+
+            return CPActionFullName;
+        }
+    }
+
+    return nullptr;
+}
+
 // Get a list of all actions (application, window, and document), properly prefixed.
 // We need to do this ourselves as Gtk::Application does not have a function for this.
 // TODO: Remove when Shortcuts branch merge
