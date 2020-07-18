@@ -82,7 +82,6 @@ private: // Helpers
     using ActionPtr = Glib::RefPtr<Gio::Action>;
     using ActionPtrName = std::pair<ActionPtr, Glib::ustring>;
 
-    // TODO: Remove when https://gitlab.com/inkscape/inkscape/-/merge_requests/1987 is merged
     /**
      * Get a list of all actions
      */
@@ -181,7 +180,6 @@ private: // variables
      * Stores the key_press connection to deactivate when not needed
      */
     sigc::connection _cpfilter_key_press_connection;
-
 };
 
 } // namespace Dialog

@@ -58,7 +58,7 @@ void debug_print(T variable)
 // constructor
 CommandPalette::CommandPalette()
 {
-    // setup builder
+    // setup _builder
     {
         auto gladefile = get_filename_string(Inkscape::IO::Resource::UIS, "command-palette-main.glade");
         try {
@@ -68,7 +68,8 @@ CommandPalette::CommandPalette()
             return;
         }
     }
-    // Setup UI Components
+
+    // Setup Base UI Components
     _builder->get_widget("CPBase", _CPBase);
     _builder->get_widget("CPHeader", _CPHeader);
     _builder->get_widget("CPSearchBar", _CPSearchBar);
@@ -94,8 +95,6 @@ CommandPalette::CommandPalette()
     // Preferences load
     auto prefs = Inkscape::Preferences::get();
 
-    // Show untranslated_label
-
     // Setup operations [actions, verbs, extenstion]
     {
         auto app = dynamic_cast<InkscapeApplication *>(Gio::Application::get_default().get());
@@ -106,7 +105,8 @@ CommandPalette::CommandPalette()
         auto all_actions_ptr_name = list_all_actions();
 
         bool show_untranslated = prefs->getBool("/options/commandpalette/showuntranslatedname/value", true);
-        // can’t do const
+
+        // setup actions - can’t do const
         for (/*const*/ auto &action_ptr_name : all_actions_ptr_name) {
             Glib::RefPtr<Gtk::Builder> operation_builder;
             try {
@@ -116,12 +116,10 @@ CommandPalette::CommandPalette()
                 return;
             }
 
+            // declaring required widgets pointers
             Gtk::EventBox *CPOperation;
             Gtk::Box *CPBaseBox;
-            /* Gtk::Box *CPIconBox; */
 
-            /* Gtk::Image *CPIcon; */
-            /* Gtk::Image *CPTypeIcon; */
             Gtk::Label *CPGroup;
             Gtk::Label *CPName;
             Gtk::Label *CPShortcut;
@@ -132,10 +130,7 @@ CommandPalette::CommandPalette()
             // Reading widgets
             operation_builder->get_widget("CPOperation", CPOperation);
             operation_builder->get_widget("CPBaseBox", CPBaseBox);
-            /* operation_builder->get_widget("CPIconBox", CPIconBox); */
 
-            /* operation_builder->get_widget("CPIcon", CPIcon); */
-            /* operation_builder->get_widget("CPTypeIcon", CPTypeIcon); */
             operation_builder->get_widget("CPGroup", CPGroup);
             operation_builder->get_widget("CPName", CPName);
             operation_builder->get_widget("CPShortcut", CPShortcut);
@@ -145,7 +140,7 @@ CommandPalette::CommandPalette()
 
             CPGroup->set_text(action_data.get_section_for_action(action_ptr_name.second));
 
-            // CPName
+            // Setting CPName
             {
                 auto name = action_data.get_label_for_action(action_ptr_name.second);
                 if (name.empty()) {
@@ -175,9 +170,6 @@ CommandPalette::CommandPalette()
 
             CPDescription->set_text(action_data.get_tooltip_for_action(action_ptr_name.second));
 
-            /* CPIcon->hide(); */
-            /* CPIconBox->hide(); */
-
             // Add to suggestions
             _CPSuggestions->append(*CPOperation);
 
@@ -194,40 +186,43 @@ CommandPalette::CommandPalette()
         }
     }
 
-    auto file_name = Inkscape::IO::Resource::get_path_ustring(Inkscape::IO::Resource::USER, Inkscape::IO::Resource::UIS,
-                                                              "cpaction.history");
-    auto file = Gio::File::create_for_path(file_name);
-    if (file->query_exists()) {
-        char *contents = nullptr;
-        gsize length = 0;
+    // History managment
+    {
+        auto file_name = Inkscape::IO::Resource::get_path_ustring(Inkscape::IO::Resource::USER,
+                                                                  Inkscape::IO::Resource::UIS, "cpaction.history");
+        auto file = Gio::File::create_for_path(file_name);
+        if (file->query_exists()) {
+            char *contents = nullptr;
+            gsize length = 0;
 
-        file->load_contents(contents, length);
-        // length is set by the function ignoring last '\0' hence contents[length] is '\0'
+            file->load_contents(contents, length);
+            // length is set by the function ignoring last '\0' hence contents[length] is '\0'
 
-        if (length != 0 and contents != nullptr) {
-            // most recent first
-            std::istringstream lines(contents);
-            History full_history;
-            for (std::string line; std::getline(lines, line, '\n');) {
-                auto type = line.substr(0, line.find(':'));
-                auto data = line.substr(line.find(':') + 1);
+            if (length != 0 and contents != nullptr) {
+                // most recent first
+                std::istringstream lines(contents);
+                History full_history;
+                for (std::string line; std::getline(lines, line, '\n');) {
+                    auto type = line.substr(0, line.find(':'));
+                    auto data = line.substr(line.find(':') + 1);
 
-                if (type == "ACTION") {
-                    _history.emplace_back(HistoryType::ACTION, data);
-                } else if (type == "RECENT_FILE") {
-                    _history.emplace_back(HistoryType::RECENT_FILE, data);
-                } else if (type == "LPE") {
-                    _history.emplace_back(HistoryType::LPE, data);
+                    if (type == "ACTION") {
+                        _history.emplace_back(HistoryType::ACTION, data);
+                    } else if (type == "RECENT_FILE") {
+                        _history.emplace_back(HistoryType::RECENT_FILE, data);
+                    } else if (type == "LPE") {
+                        _history.emplace_back(HistoryType::LPE, data);
+                    }
                 }
             }
+
+            g_free(contents);
+        } else {
+            std::cerr << "WARNING: file not found: " << file_name << ", creating new one!";
         }
 
-        g_free(contents);
-    } else {
-        std::cerr << "WARNING: file not found: " << file_name << ", creating new one!";
+        _history_file_output_stream = file->append_to();
     }
-
-    _history_file_output_stream = file->append_to();
 }
 
 void CommandPalette::open()
@@ -270,18 +265,18 @@ void CommandPalette::focus_current_chapter()
     static InkActionExtraData &action_data =
         dynamic_cast<InkscapeApplication *>(Gio::Application::get_default().get())->get_action_extra_data();
     switch (_current_chapter->first) {
-    case HistoryType::ACTION: {
-        _CPSuggestions->unset_filter_func();
-        _CPSuggestions->set_filter_func(sigc::mem_fun(*this, &CommandPalette::on_filter_full_action_name));
+        case HistoryType::ACTION: {
+            _CPSuggestions->unset_filter_func();
+            _CPSuggestions->set_filter_func(sigc::mem_fun(*this, &CommandPalette::on_filter_full_action_name));
 
-        _search_text = _current_chapter->second;
-        _CPSuggestions->invalidate_filter();
+            _search_text = _current_chapter->second;
+            _CPSuggestions->invalidate_filter();
 
-        Glib::ustring name = _current_chapter->second;
-        _CPFilter->set_text(action_data.get_label_for_action(name));
-    } break;
-    default:
-        break;
+            Glib::ustring name = _current_chapter->second;
+            _CPFilter->set_text(action_data.get_label_for_action(name));
+        } break;
+        default:
+            break;
     }
 }
 
@@ -292,25 +287,25 @@ void CommandPalette::repeat_current_chapter()
     static auto doc = win->get_document()->getActionGroup();
 
     switch (_current_chapter->first) {
-    case HistoryType::ACTION: {
-        auto action_domain_string =
-            _current_chapter->second.substr(0, _current_chapter->second.find('.')); // app, win, doc
-        auto action_name = _current_chapter->second.substr(_current_chapter->second.find('.') + 1);
+        case HistoryType::ACTION: {
+            auto action_domain_string =
+                _current_chapter->second.substr(0, _current_chapter->second.find('.')); // app, win, doc
+            auto action_name = _current_chapter->second.substr(_current_chapter->second.find('.') + 1);
 
-        ActionPtr action_ptr;
-        if (action_domain_string == "app") {
-            action_ptr = app->lookup_action(action_name);
-        } else if (action_domain_string == "win") {
-            action_ptr = win->lookup_action(action_name);
-        } else if (action_domain_string == "doc") {
-            action_ptr = doc->lookup_action(action_name);
-        }
-        ask_action_parameter({action_ptr, _current_chapter->second});
-    } break;
+            ActionPtr action_ptr;
+            if (action_domain_string == "app") {
+                action_ptr = app->lookup_action(action_name);
+            } else if (action_domain_string == "win") {
+                action_ptr = win->lookup_action(action_name);
+            } else if (action_domain_string == "doc") {
+                action_ptr = doc->lookup_action(action_name);
+            }
+            ask_action_parameter({action_ptr, _current_chapter->second});
+        } break;
 
-    default:
-        close();
-        break;
+        default:
+            close();
+            break;
     }
 }
 
@@ -384,11 +379,11 @@ bool CommandPalette::on_key_press_cpfilter_search_mode(GdkEventKey *evt)
 bool CommandPalette::on_key_press_cpfilter_input_mode(GdkEventKey *evt, const ActionPtrName &action_ptr_name)
 {
     switch (evt->keyval) {
-    case GDK_KEY_Return:
-    case GDK_KEY_Linefeed:
-        execute_action(action_ptr_name, _CPFilter->get_text());
-        close();
-        return true;
+        case GDK_KEY_Return:
+        case GDK_KEY_Linefeed:
+            execute_action(action_ptr_name, _CPFilter->get_text());
+            close();
+            return true;
     }
     return false;
 }
@@ -397,26 +392,26 @@ bool CommandPalette::on_key_press_cpfilter_history_mode(GdkEventKey *evt)
 {
     // perform the previous action again
     switch (evt->keyval) {
-    case GDK_KEY_Up:
-        if (_current_chapter != _history.begin()) {
-            _current_chapter--;
-            focus_current_chapter();
-        }
-        return true;
-    case GDK_KEY_Down:
-        if (_current_chapter != _history.end()) {
-            _current_chapter++;
-            focus_current_chapter();
-        } else {
-            set_cp_fiter_mode(CPFilterMode::SEARCH);
-        }
-        return true;
-    case GDK_KEY_Return:
-    case GDK_KEY_Linefeed:
-        repeat_current_chapter();
-        return true;
-    default:
-        break;
+        case GDK_KEY_Up:
+            if (_current_chapter != _history.begin()) {
+                _current_chapter--;
+                focus_current_chapter();
+            }
+            return true;
+        case GDK_KEY_Down:
+            if (_current_chapter != _history.end()) {
+                _current_chapter++;
+                focus_current_chapter();
+            } else {
+                set_cp_fiter_mode(CPFilterMode::SEARCH);
+            }
+            return true;
+        case GDK_KEY_Return:
+        case GDK_KEY_Linefeed:
+            repeat_current_chapter();
+            return true;
+        default:
+            break;
     }
 
     return false;
@@ -487,20 +482,20 @@ bool CommandPalette::ask_action_parameter(const ActionPtrName &action_ptr_name)
         // get type string NOTE: Temporary should be replaced by adding some data to InkActionExtraDataj
         Glib::ustring type_string;
         switch (action_param_type) {
-        case TypeOfVariant::BOOL:
-            type_string = "bool";
-            break;
-        case TypeOfVariant::INT:
-            type_string = "integer";
-            break;
-        case TypeOfVariant::DOUBLE:
-            type_string = "double";
-            break;
-        case TypeOfVariant::STRING:
-            type_string = "string";
-            break;
-        default:
-            break;
+            case TypeOfVariant::BOOL:
+                type_string = "bool";
+                break;
+            case TypeOfVariant::INT:
+                type_string = "integer";
+                break;
+            case TypeOfVariant::DOUBLE:
+                type_string = "double";
+                break;
+            case TypeOfVariant::STRING:
+                type_string = "string";
+                break;
+            default:
+                break;
         }
         _CPFilter->set_placeholder_text("Enter a " + type_string + "...");
         _CPFilter->set_tooltip_text("Enter a " + type_string + "...");
@@ -525,81 +520,81 @@ bool CommandPalette::match_search(const Glib::ustring &subject, const Glib::ustr
 void CommandPalette::set_cp_fiter_mode(CPFilterMode mode)
 {
     switch (mode) {
-    case CPFilterMode::SEARCH:
-        if (_mode == CPFilterMode::SEARCH) {
-            return;
-        }
+        case CPFilterMode::SEARCH:
+            if (_mode == CPFilterMode::SEARCH) {
+                return;
+            }
 
-        _CPFilter->set_text("");
-        _CPFilter->set_icon_from_icon_name("edit-find-symbolic");
-        _CPFilter->set_placeholder_text("Search operation...");
-        _CPFilter->set_tooltip_text("Search operation...");
-        show_suggestions();
+            _CPFilter->set_text("");
+            _CPFilter->set_icon_from_icon_name("edit-find-symbolic");
+            _CPFilter->set_placeholder_text("Search operation...");
+            _CPFilter->set_tooltip_text("Search operation...");
+            show_suggestions();
 
-        _CPSuggestions->unset_filter_func();
-        _CPSuggestions->set_filter_func(sigc::mem_fun(*this, &CommandPalette::on_filter_general));
+            _CPSuggestions->unset_filter_func();
+            _CPSuggestions->set_filter_func(sigc::mem_fun(*this, &CommandPalette::on_filter_general));
 
-        _cpfilter_search_connection.disconnect(); // to be sure
-        _cpfilter_key_press_connection.disconnect();
+            _cpfilter_search_connection.disconnect(); // to be sure
+            _cpfilter_key_press_connection.disconnect();
 
-        _cpfilter_search_connection =
-            _CPFilter->signal_search_changed().connect(sigc::mem_fun(*this, &CommandPalette::on_search));
-        _cpfilter_key_press_connection = _CPFilter->signal_key_press_event().connect(
-            sigc::mem_fun(*this, &CommandPalette::on_key_press_cpfilter_search_mode), false);
+            _cpfilter_search_connection =
+                _CPFilter->signal_search_changed().connect(sigc::mem_fun(*this, &CommandPalette::on_search));
+            _cpfilter_key_press_connection = _CPFilter->signal_key_press_event().connect(
+                sigc::mem_fun(*this, &CommandPalette::on_key_press_cpfilter_search_mode), false);
 
-        _search_text = "";
-        _CPSuggestions->invalidate_filter();
-        _mode = CPFilterMode::SEARCH;
-        break;
+            _search_text = "";
+            _CPSuggestions->invalidate_filter();
+            _mode = CPFilterMode::SEARCH;
+            break;
 
-    case CPFilterMode::INPUT:
-        if (_mode == CPFilterMode::INPUT) {
-            return;
-        }
-        _cpfilter_search_connection.disconnect();
-        _cpfilter_key_press_connection.disconnect();
+        case CPFilterMode::INPUT:
+            if (_mode == CPFilterMode::INPUT) {
+                return;
+            }
+            _cpfilter_search_connection.disconnect();
+            _cpfilter_key_press_connection.disconnect();
 
-        hide_suggestions();
-        _CPFilter->set_text("");
-        _CPFilter->grab_focus();
+            hide_suggestions();
+            _CPFilter->set_text("");
+            _CPFilter->grab_focus();
 
-        _CPFilter->set_icon_from_icon_name("input-keyboard");
-        _CPFilter->set_placeholder_text("Enter action argument");
-        _CPFilter->set_tooltip_text("Enter action argument");
+            _CPFilter->set_icon_from_icon_name("input-keyboard");
+            _CPFilter->set_placeholder_text("Enter action argument");
+            _CPFilter->set_tooltip_text("Enter action argument");
 
-        _mode = CPFilterMode::INPUT;
-        break;
+            _mode = CPFilterMode::INPUT;
+            break;
 
-    case CPFilterMode::SHELL:
-        if (_mode == CPFilterMode::SHELL) {
-            return;
-        }
+        case CPFilterMode::SHELL:
+            if (_mode == CPFilterMode::SHELL) {
+                return;
+            }
 
-        hide_suggestions();
-        _CPFilter->set_icon_from_icon_name("gtk-search");
-        _cpfilter_search_connection.disconnect();
-        _cpfilter_key_press_connection.disconnect();
+            hide_suggestions();
+            _CPFilter->set_icon_from_icon_name("gtk-search");
+            _cpfilter_search_connection.disconnect();
+            _cpfilter_key_press_connection.disconnect();
 
-        _mode = CPFilterMode::SHELL;
-        break;
+            _mode = CPFilterMode::SHELL;
+            break;
 
-    case CPFilterMode::HISTORY:
-        if (_mode == CPFilterMode::HISTORY) {
-            return;
-        }
+        case CPFilterMode::HISTORY:
+            if (_mode == CPFilterMode::HISTORY) {
+                return;
+            }
 
-        _CPFilter->set_icon_from_icon_name("format-justify-fill");
-        _cpfilter_search_connection.disconnect();
-        _cpfilter_key_press_connection.disconnect();
+            _CPFilter->set_icon_from_icon_name("format-justify-fill");
+            _cpfilter_search_connection.disconnect();
+            _cpfilter_key_press_connection.disconnect();
 
-        _current_chapter = _history.end() - 1;
-        focus_current_chapter();
+            _current_chapter = _history.end() - 1;
+            focus_current_chapter();
 
-        _cpfilter_key_press_connection = _CPFilter->signal_key_press_event().connect(
-            sigc::mem_fun(*this, &CommandPalette::on_key_press_cpfilter_history_mode), false);
+            _cpfilter_key_press_connection = _CPFilter->signal_key_press_event().connect(
+                sigc::mem_fun(*this, &CommandPalette::on_key_press_cpfilter_history_mode), false);
 
-        _mode = CPFilterMode::SHELL;
-        break;
+            _mode = CPFilterMode::SHELL;
+            break;
     }
     _mode = mode;
 }
@@ -612,33 +607,33 @@ bool CommandPalette::execute_action(const ActionPtrName &action_ptr_name, const 
     auto [action_ptr, action_name] = action_ptr_name;
 
     switch (get_action_variant_type(action_ptr)) {
-    case TypeOfVariant::BOOL:
-        if (value == "1" || value == "true" || value.empty()) {
-            action_ptr->activate(Glib::Variant<bool>::create(true));
-        } else if (value == "0" || value == "false") {
-            action_ptr->activate(Glib::Variant<bool>::create(false));
-        } else {
-            std::cerr << "CommandPalette::execute_action: Invalid boolean value: " << action_name << ":" << value
+        case TypeOfVariant::BOOL:
+            if (value == "1" || value == "true" || value.empty()) {
+                action_ptr->activate(Glib::Variant<bool>::create(true));
+            } else if (value == "0" || value == "false") {
+                action_ptr->activate(Glib::Variant<bool>::create(false));
+            } else {
+                std::cerr << "CommandPalette::execute_action: Invalid boolean value: " << action_name << ":" << value
+                          << std::endl;
+            }
+            break;
+        case TypeOfVariant::INT:
+            action_ptr->activate(Glib::Variant<int>::create(std::stoi(value)));
+            break;
+        case TypeOfVariant::DOUBLE:
+            action_ptr->activate(Glib::Variant<double>::create(std::stod(value)));
+            break;
+        case TypeOfVariant::STRING:
+            action_ptr->activate(Glib::Variant<Glib::ustring>::create(value));
+            break;
+        case TypeOfVariant::UNKNOWN:
+            std::cerr << "CommandPalette::execute_action: unhandled action value type (Unknown Type) " << action_name
                       << std::endl;
-        }
-        break;
-    case TypeOfVariant::INT:
-        action_ptr->activate(Glib::Variant<int>::create(std::stoi(value)));
-        break;
-    case TypeOfVariant::DOUBLE:
-        action_ptr->activate(Glib::Variant<double>::create(std::stod(value)));
-        break;
-    case TypeOfVariant::STRING:
-        action_ptr->activate(Glib::Variant<Glib::ustring>::create(value));
-        break;
-    case TypeOfVariant::UNKNOWN:
-        std::cerr << "CommandPalette::execute_action: unhandled action value type (Unknown Type) " << action_name
-                  << std::endl;
-        break;
-    case TypeOfVariant::NONE:
-    default:
-        action_ptr->activate();
-        break;
+            break;
+        case TypeOfVariant::NONE:
+        default:
+            action_ptr->activate();
+            break;
     }
     return false;
 }
