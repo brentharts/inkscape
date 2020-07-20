@@ -12,11 +12,14 @@
 #include "command-palette.h"
 
 #include <cstddef>
+#include <ctime>
 #include <gdk/gdkkeysyms.h>
 #include <giomm/action.h>
 #include <giomm/application.h>
 #include <giomm/file.h>
+#include <glib/gi18n.h>
 #include <glibconfig.h>
+#include <glibmm/date.h>
 #include <glibmm/error.h>
 #include <glibmm/i18n.h>
 #include <glibmm/markup.h>
@@ -27,6 +30,7 @@
 #include <gtkmm/enums.h>
 #include <gtkmm/eventbox.h>
 #include <gtkmm/label.h>
+#include <gtkmm/recentinfo.h>
 #include <iostream>
 #include <iterator>
 #include <ostream>
@@ -38,6 +42,7 @@
 #include "actions/actions-extra-data.h"
 #include "inkscape-application.h"
 #include "inkscape-window.h"
+#include "inkscape.h"
 #include "io/resource.h"
 #include "preferences.h"
 #include "ui/dialog/align-and-distribute.h"
@@ -174,15 +179,40 @@ CommandPalette::CommandPalette()
             _CPSuggestions->append(*CPOperation);
 
             CPOperation->signal_button_press_event().connect(sigc::bind<ActionPtrName>(
-                sigc::mem_fun(*this, &CommandPalette::on_operation_clicked), action_ptr_name));
+                sigc::mem_fun(*this, &CommandPalette::on_clicked_operation_action), action_ptr_name));
 
             // Requires CPOperation added to _CPSuggestions
             CPOperation->get_parent()->signal_key_press_event().connect(sigc::bind<ActionPtrName>(
-                sigc::mem_fun(*this, &CommandPalette::on_operation_key_press), action_ptr_name));
+                sigc::mem_fun(*this, &CommandPalette::on_key_press_operation_action), action_ptr_name));
             CPActionFullName->signal_button_press_event().connect(
                 sigc::bind<Glib::ustring>(sigc::mem_fun(*this, &CommandPalette::on_action_fullname_clicked),
                                           action_ptr_name.second),
                 false);
+        }
+
+        // setup recent files
+        {
+            auto recent_manager = Gtk::RecentManager::get_default();
+            auto recent_files = recent_manager->get_items();
+
+	    // FIXME: Get size from preferences
+	    if (recent_files.size() > 50) {
+		    recent_files.resize(50);
+	    }
+
+            for (auto const &recent_file : recent_files) {
+                bool inkscape_related = recent_file->has_application(g_get_prgname()) or
+                                        recent_file->has_application("org.inkscape.Inkscape") or
+                                        recent_file->has_application("inkscape") or
+                                        recent_file->has_application("inkscape.exe");
+
+                if (not inkscape_related) {
+                    continue;
+                }
+
+                append_rencent_file_operation(recent_file, false); //open
+                append_rencent_file_operation(recent_file, true);
+            }
         }
     }
 
@@ -308,6 +338,72 @@ void CommandPalette::repeat_current_chapter()
             break;
     }
 }
+
+void CommandPalette::append_rencent_file_operation(Glib::RefPtr<Gtk::RecentInfo> recent_file, bool is_import)
+{
+    auto gladefile = get_filename_string(Inkscape::IO::Resource::UIS, "command-palette-operation-lite.glade");
+    Glib::RefPtr<Gtk::Builder> operation_builder;
+    try {
+        operation_builder = Gtk::Builder::create_from_file(gladefile);
+    } catch (const Glib::Error &ex) {
+        g_warning("Glade file loading failed for Command Palette operation dialog");
+    }
+
+    // declaring required widgets pointers
+    Gtk::EventBox *CPOperation;
+    Gtk::Box *CPBaseBox;
+
+    Gtk::Label *CPGroup;
+    Gtk::Label *CPName;
+    Gtk::Label *CPShortcut;
+    Gtk::Label *CPActionFullName;
+    Gtk::Label *CPUntranslatedName;
+    Gtk::Label *CPDescription;
+
+    // Reading widgets
+    operation_builder->get_widget("CPOperation", CPOperation);
+    operation_builder->get_widget("CPBaseBox", CPBaseBox);
+
+    operation_builder->get_widget("CPGroup", CPGroup);
+    operation_builder->get_widget("CPName", CPName);
+    operation_builder->get_widget("CPShortcut", CPShortcut);
+    operation_builder->get_widget("CPActionFullName", CPActionFullName);
+    operation_builder->get_widget("CPUntranslatedName", CPUntranslatedName);
+    operation_builder->get_widget("CPDescription", CPDescription);
+
+    auto file_name = recent_file->get_display_name();
+    auto uri = recent_file->get_uri_display();
+    auto folder = uri.substr(0, uri.find(file_name));
+
+    if (is_import) {
+        CPGroup->set_text(N_("Import"));
+    } else {
+        CPGroup->set_text(N_("Open"));
+    }
+
+    CPName->set_text(file_name);
+    CPDescription->set_text(folder);
+
+    auto mod_time_t = recent_file->get_modified();
+
+    auto mod_time = Glib::DateTime::create_now_local(mod_time_t);
+    auto current_time = Glib::DateTime::create_now_local();
+
+    // Using this to reduce instead of ActionFullName widget because fullname is searched
+    CPShortcut->set_text(mod_time.format("%d %b %R"));
+
+    CPUntranslatedName->set_text("");
+    CPActionFullName->set_text("");
+
+    _CPSuggestions->append(*CPOperation);
+
+    CPOperation->signal_button_press_event().connect(sigc::bind<Glib::ustring const, bool const>(
+        sigc::mem_fun(*this, &CommandPalette::on_clicked_operation_recent_file), uri, is_import));
+
+    // Requires CPOperation added to _CPSuggestions
+    CPOperation->get_parent()->signal_key_press_event().connect(sigc::bind<Glib::ustring const, bool const>(
+        sigc::mem_fun(*this, &CommandPalette::on_key_press_operation_recent_file), uri, is_import));
+};
 
 void CommandPalette::on_search()
 {
@@ -436,20 +532,43 @@ bool CommandPalette::on_action_fullname_clicked(GdkEventButton *evt, const Glib:
     return true;
 }
 
-bool CommandPalette::on_operation_clicked(GdkEventButton * /*evt*/, const ActionPtrName &action_ptr_name)
+bool CommandPalette::on_clicked_operation_action(GdkEventButton * /*evt*/, const ActionPtrName &action_ptr_name)
 {
     ask_action_parameter(action_ptr_name);
     return true;
 }
-bool CommandPalette::on_operation_key_press(GdkEventKey *evt, const ActionPtrName &action_ptr_name)
+bool CommandPalette::on_key_press_operation_action(GdkEventKey *evt, const ActionPtrName &action_ptr_name)
 {
     if (evt->keyval == GDK_KEY_Return || evt->keyval == GDK_KEY_Return) {
-        ask_action_parameter(action_ptr_name);
-        return true;
+        return on_clicked_operation_action(nullptr, action_ptr_name);
     }
     return false;
 }
+bool CommandPalette::on_clicked_operation_recent_file(GdkEventButton *evt, Glib::ustring const &uri, bool const import)
+{
+    if (import) {
+        /* file_import(SP_ACTIVE_DOCUMENT, uri, nullptr); */
+        // import
+        debug_print("IMPORT not implemented");
+        close();
+        return true;
+    }
 
+    // open
+    auto app = &(ConcreteInkscapeApplication<Gtk::Application>::get_instance());
+    Glib::RefPtr<Gio::File> file = Gio::File::create_for_path(uri);
+    app->create_window(file);
+
+    close();
+    return true;
+}
+bool CommandPalette::on_key_press_operation_recent_file(GdkEventKey *evt, Glib::ustring const &uri, bool const import)
+{
+    if (auto key = evt->keyval; key == GDK_KEY_Linefeed or key == GDK_KEY_Return) {
+        return on_clicked_operation_recent_file(nullptr, uri, import);
+    }
+    return false;
+}
 /**
  * Maybe replaced by: Temporary arrangement may be replaced by snippets
  * This can help us provide parameters for multiple argument function

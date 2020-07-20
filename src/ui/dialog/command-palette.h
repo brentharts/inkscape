@@ -22,6 +22,7 @@
 #include <gtkmm/eventbox.h>
 #include <gtkmm/label.h>
 #include <gtkmm/listbox.h>
+#include <gtkmm/recentinfo.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/searchbar.h>
 #include <gtkmm/searchentry.h>
@@ -90,6 +91,8 @@ private: // Helpers
     void focus_current_chapter();
     void repeat_current_chapter();
 
+    void append_rencent_file_operation(Glib::RefPtr<Gtk::RecentInfo> recent_file, bool is_import = true);
+
 private: // Signal handlers
     void on_search();
 
@@ -111,8 +114,11 @@ private: // Signal handlers
      */
     void show_suggestions();
 
-    bool on_operation_clicked(GdkEventButton *evt, const ActionPtrName &action);
-    bool on_operation_key_press(GdkEventKey *evt, const ActionPtrName &action);
+    bool on_clicked_operation_action(GdkEventButton *evt, const ActionPtrName &action);
+    bool on_key_press_operation_action(GdkEventKey *evt, const ActionPtrName &action);
+
+    bool on_clicked_operation_recent_file(GdkEventButton *evt, Glib::ustring const &uri, bool const import);
+    bool on_key_press_operation_recent_file(GdkEventKey *evt, Glib::ustring const &uri, bool const import);
 
     bool on_action_fullname_clicked(GdkEventButton *evt, const Glib::ustring &action_fullname);
 
