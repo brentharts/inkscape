@@ -200,8 +200,7 @@ CommandPalette::CommandPalette()
             auto recent_manager = Gtk::RecentManager::get_default();
             auto recent_files = recent_manager->get_items();
 
-            // FIXME: Get size from preferences
-            int max_files = 50;
+            int max_files = Inkscape::Preferences::get()->getInt("/options/maxrecentdocuments/value");
 
             for (auto const &recent_file : recent_files) {
                 bool valid_file = recent_file->has_application(g_get_prgname()) or
@@ -215,7 +214,7 @@ CommandPalette::CommandPalette()
                     continue;
                 }
 
-                if (not max_files--) {
+                if (max_files-- <= 0) {
                     break;
                 }
 
