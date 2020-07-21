@@ -546,6 +546,7 @@ bool CommandPalette::on_clicked_operation_action(GdkEventButton * /*evt*/, const
     ask_action_parameter(action_ptr_name);
     return true;
 }
+
 bool CommandPalette::on_key_press_operation_action(GdkEventKey *evt, const ActionPtrName &action_ptr_name)
 {
     if (evt->keyval == GDK_KEY_Return || evt->keyval == GDK_KEY_Return) {
@@ -553,17 +554,15 @@ bool CommandPalette::on_key_press_operation_action(GdkEventKey *evt, const Actio
     }
     return false;
 }
+
 bool CommandPalette::on_clicked_operation_recent_file(GdkEventButton *evt, Glib::RefPtr<Gtk::RecentInfo> file_info,
                                                       bool const import)
 {
     static auto prefs = Inkscape::Preferences::get();
+
     auto display_uri = file_info->get_uri_display(); // ustring
 
     if (import) {
-        auto uri = file_info->get_uri();
-        gchar curl[uri.bytes() + 1];
-        strcpy(curl, uri.c_str());
-
         prefs->setBool("/options/onimport", true);
         file_import(SP_ACTIVE_DOCUMENT, display_uri, nullptr);
         prefs->setBool("/options/onimport", true);
