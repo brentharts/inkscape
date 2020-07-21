@@ -117,8 +117,8 @@ private: // Signal handlers
     bool on_clicked_operation_action(GdkEventButton *evt, const ActionPtrName &action);
     bool on_key_press_operation_action(GdkEventKey *evt, const ActionPtrName &action);
 
-    bool on_clicked_operation_recent_file(GdkEventButton *evt, Glib::ustring const &uri, bool const import);
-    bool on_key_press_operation_recent_file(GdkEventKey *evt, Glib::ustring const &uri, bool const import);
+    bool on_clicked_operation_recent_file(GdkEventButton *evt, Glib::RefPtr<Gtk::RecentInfo> file, bool const import);
+    bool on_key_press_operation_recent_file(GdkEventKey *evt, Glib::RefPtr<Gtk::RecentInfo> file, bool const import);
 
     bool on_action_fullname_clicked(GdkEventButton *evt, const Glib::ustring &action_fullname);
 

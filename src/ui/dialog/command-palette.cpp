@@ -12,11 +12,13 @@
 #include "command-palette.h"
 
 #include <cstddef>
+#include <cstring>
 #include <ctime>
 #include <gdk/gdkkeysyms.h>
 #include <giomm/action.h>
 #include <giomm/application.h>
 #include <giomm/file.h>
+#include <giomm/fileinfo.h>
 #include <glib/gi18n.h>
 #include <glibconfig.h>
 #include <glibmm/date.h>
@@ -40,12 +42,15 @@
 #include <string>
 
 #include "actions/actions-extra-data.h"
+#include "file.h"
 #include "inkscape-application.h"
 #include "inkscape-window.h"
 #include "inkscape.h"
 #include "io/resource.h"
+#include "object/uri.h"
 #include "preferences.h"
 #include "ui/dialog/align-and-distribute.h"
+#include "ui/interface.h"
 #include "verbs.h"
 
 namespace Inkscape {
@@ -100,7 +105,7 @@ CommandPalette::CommandPalette()
     // Preferences load
     auto prefs = Inkscape::Preferences::get();
 
-    // Setup operations [actions, verbs, extenstion]
+    // Setup operations [actions, verbs, extenstions]
     {
         auto app = dynamic_cast<InkscapeApplication *>(Gio::Application::get_default().get());
         InkActionExtraData &action_data = app->get_action_extra_data();
@@ -195,22 +200,26 @@ CommandPalette::CommandPalette()
             auto recent_manager = Gtk::RecentManager::get_default();
             auto recent_files = recent_manager->get_items();
 
-	    // FIXME: Get size from preferences
-	    if (recent_files.size() > 50) {
-		    recent_files.resize(50);
-	    }
+            // FIXME: Get size from preferences
+            int max_files = 50;
 
             for (auto const &recent_file : recent_files) {
-                bool inkscape_related = recent_file->has_application(g_get_prgname()) or
-                                        recent_file->has_application("org.inkscape.Inkscape") or
-                                        recent_file->has_application("inkscape") or
-                                        recent_file->has_application("inkscape.exe");
+                bool valid_file = recent_file->has_application(g_get_prgname()) or
+                                  recent_file->has_application("org.inkscape.Inkscape") or
+                                  recent_file->has_application("inkscape") or
+                                  recent_file->has_application("inkscape.exe");
 
-                if (not inkscape_related) {
+                valid_file = valid_file and recent_file->exists();
+
+                if (not valid_file) {
                     continue;
                 }
 
-                append_rencent_file_operation(recent_file, false); //open
+                if (not max_files--) {
+                    break;
+                }
+
+                append_rencent_file_operation(recent_file, false); // open
                 append_rencent_file_operation(recent_file, true);
             }
         }
@@ -397,12 +406,12 @@ void CommandPalette::append_rencent_file_operation(Glib::RefPtr<Gtk::RecentInfo>
 
     _CPSuggestions->append(*CPOperation);
 
-    CPOperation->signal_button_press_event().connect(sigc::bind<Glib::ustring const, bool const>(
-        sigc::mem_fun(*this, &CommandPalette::on_clicked_operation_recent_file), uri, is_import));
+    CPOperation->signal_button_press_event().connect(sigc::bind<Glib::RefPtr<Gtk::RecentInfo>, bool const>(
+        sigc::mem_fun(*this, &CommandPalette::on_clicked_operation_recent_file), recent_file, is_import));
 
     // Requires CPOperation added to _CPSuggestions
-    CPOperation->get_parent()->signal_key_press_event().connect(sigc::bind<Glib::ustring const, bool const>(
-        sigc::mem_fun(*this, &CommandPalette::on_key_press_operation_recent_file), uri, is_import));
+    CPOperation->get_parent()->signal_key_press_event().connect(sigc::bind<Glib::RefPtr<Gtk::RecentInfo>, bool const>(
+        sigc::mem_fun(*this, &CommandPalette::on_key_press_operation_recent_file), recent_file, is_import));
 };
 
 void CommandPalette::on_search()
@@ -544,28 +553,38 @@ bool CommandPalette::on_key_press_operation_action(GdkEventKey *evt, const Actio
     }
     return false;
 }
-bool CommandPalette::on_clicked_operation_recent_file(GdkEventButton *evt, Glib::ustring const &uri, bool const import)
+bool CommandPalette::on_clicked_operation_recent_file(GdkEventButton *evt, Glib::RefPtr<Gtk::RecentInfo> file_info,
+                                                      bool const import)
 {
+    static auto prefs = Inkscape::Preferences::get();
+    auto display_uri = file_info->get_uri_display(); // ustring
+
     if (import) {
-        /* file_import(SP_ACTIVE_DOCUMENT, uri, nullptr); */
-        // import
-        debug_print("IMPORT not implemented");
+        auto uri = file_info->get_uri();
+        gchar curl[uri.bytes() + 1];
+        strcpy(curl, uri.c_str());
+
+        prefs->setBool("/options/onimport", true);
+        file_import(SP_ACTIVE_DOCUMENT, display_uri, nullptr);
+        prefs->setBool("/options/onimport", true);
+
         close();
         return true;
     }
 
     // open
     auto app = &(ConcreteInkscapeApplication<Gtk::Application>::get_instance());
-    Glib::RefPtr<Gio::File> file = Gio::File::create_for_path(uri);
+    Glib::RefPtr<Gio::File> file = Gio::File::create_for_path(display_uri);
     app->create_window(file);
 
     close();
     return true;
 }
-bool CommandPalette::on_key_press_operation_recent_file(GdkEventKey *evt, Glib::ustring const &uri, bool const import)
+bool CommandPalette::on_key_press_operation_recent_file(GdkEventKey *evt, Glib::RefPtr<Gtk::RecentInfo> file,
+                                                        bool const import)
 {
     if (auto key = evt->keyval; key == GDK_KEY_Linefeed or key == GDK_KEY_Return) {
-        return on_clicked_operation_recent_file(nullptr, uri, import);
+        return on_clicked_operation_recent_file(nullptr, file, import);
     }
     return false;
 }
