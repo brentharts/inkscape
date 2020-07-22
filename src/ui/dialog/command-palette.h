@@ -22,6 +22,7 @@
 #include <gtkmm/eventbox.h>
 #include <gtkmm/label.h>
 #include <gtkmm/listbox.h>
+#include <gtkmm/listboxrow.h>
 #include <gtkmm/recentinfo.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/searchbar.h>
@@ -61,7 +62,8 @@ enum class HistoryType
 {
     LPE,
     ACTION,
-    RECENT_FILE,
+    OPEN_FILE,
+    IMPORT_FILE,
 };
 
 class CommandPalette
@@ -98,6 +100,7 @@ private: // Signal handlers
 
     bool on_filter_general(Gtk::ListBoxRow *child);
     bool on_filter_full_action_name(Gtk::ListBoxRow *child);
+    bool on_filter_recent_file(Gtk::ListBoxRow *child, bool const is_import);
 
     bool on_key_press_cpfilter_escape(GdkEventKey *evt);
     bool on_key_press_cpfilter_search_mode(GdkEventKey *evt);
@@ -117,8 +120,8 @@ private: // Signal handlers
     bool on_clicked_operation_action(GdkEventButton *evt, const ActionPtrName &action);
     bool on_key_press_operation_action(GdkEventKey *evt, const ActionPtrName &action);
 
-    bool on_clicked_operation_recent_file(GdkEventButton *evt, Glib::RefPtr<Gtk::RecentInfo> file, bool const import);
-    bool on_key_press_operation_recent_file(GdkEventKey *evt, Glib::RefPtr<Gtk::RecentInfo> file, bool const import);
+    bool on_clicked_operation_recent_file(GdkEventButton *evt, Glib::ustring const &uri, bool const import);
+    bool on_key_press_operation_recent_file(GdkEventKey *evt, Glib::ustring const &uri, bool const import);
 
     bool on_action_fullname_clicked(GdkEventButton *evt, const Glib::ustring &action_fullname);
 

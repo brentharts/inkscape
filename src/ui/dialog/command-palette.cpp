@@ -21,6 +21,7 @@
 #include <giomm/fileinfo.h>
 #include <glib/gi18n.h>
 #include <glibconfig.h>
+#include <glibmm/convert.h>
 #include <glibmm/date.h>
 #include <glibmm/error.h>
 #include <glibmm/i18n.h>
@@ -246,8 +247,10 @@ CommandPalette::CommandPalette()
 
                     if (type == "ACTION") {
                         _history.emplace_back(HistoryType::ACTION, data);
-                    } else if (type == "RECENT_FILE") {
-                        _history.emplace_back(HistoryType::RECENT_FILE, data);
+                    } else if (type == "OPEN_FILE") {
+                        _history.emplace_back(HistoryType::OPEN_FILE, data);
+                    } else if (type == "IMPORT_FILE") {
+                        _history.emplace_back(HistoryType::IMPORT_FILE, data);
                     } else if (type == "LPE") {
                         _history.emplace_back(HistoryType::LPE, data);
                     }
@@ -313,6 +316,24 @@ void CommandPalette::focus_current_chapter()
             Glib::ustring name = _current_chapter->second;
             _CPFilter->set_text(action_data.get_label_for_action(name));
         } break;
+        case HistoryType::OPEN_FILE:
+        case HistoryType::IMPORT_FILE: {
+            auto uri = _current_chapter->second;
+            bool is_import = _current_chapter->first == HistoryType::IMPORT_FILE;
+
+            _CPSuggestions->unset_filter_func();
+            _CPSuggestions->set_filter_func(
+                sigc::bind<bool>(sigc::mem_fun(*this, &CommandPalette::on_filter_recent_file), is_import));
+
+            _search_text = uri;
+            _CPSuggestions->invalidate_filter();
+
+            {
+                Glib::ustring method = (is_import ? N_("Import") : N_("Open"));
+                Glib::ustring file_name = Glib::filename_display_basename(uri);
+                _CPFilter->set_text(method + " > " + file_name);
+            }
+        } break;
         default:
             break;
     }
@@ -339,6 +360,12 @@ void CommandPalette::repeat_current_chapter()
                 action_ptr = doc->lookup_action(action_name);
             }
             ask_action_parameter({action_ptr, _current_chapter->second});
+        } break;
+
+        case HistoryType::OPEN_FILE:
+        case HistoryType::IMPORT_FILE: {
+            auto uri = _current_chapter->second;
+            on_clicked_operation_recent_file(nullptr, uri, _current_chapter->first == HistoryType::IMPORT_FILE);
         } break;
 
         default:
@@ -381,36 +408,43 @@ void CommandPalette::append_rencent_file_operation(Glib::RefPtr<Gtk::RecentInfo>
 
     auto file_name = recent_file->get_display_name();
     auto uri = recent_file->get_uri_display();
-    auto folder = uri.substr(0, uri.find(file_name));
 
     if (is_import) {
         CPGroup->set_text(N_("Import"));
+        CPActionFullName->set_text("import"); // For filtering only
+
     } else {
         CPGroup->set_text(N_("Open"));
+        CPActionFullName->set_text("open"); // For filtering only
     }
 
+    // Hide for recent_file, not required
+    CPActionFullName->set_no_show_all();
+    CPActionFullName->hide();
+
     CPName->set_text(file_name);
-    CPDescription->set_text(folder);
+    CPDescription->set_text(uri);
 
-    auto mod_time_t = recent_file->get_modified();
+    {
+        auto mod_time_t = recent_file->get_modified();
+        auto mod_time = Glib::DateTime::create_now_local(mod_time_t);
 
-    auto mod_time = Glib::DateTime::create_now_local(mod_time_t);
-    auto current_time = Glib::DateTime::create_now_local();
-
-    // Using this to reduce instead of ActionFullName widget because fullname is searched
-    CPShortcut->set_text(mod_time.format("%d %b %R"));
+        // Using this to reduce instead of ActionFullName widget because fullname is searched
+        CPShortcut->set_text(mod_time.format("%d %b %R"));
+    }
 
     CPUntranslatedName->set_text("");
-    CPActionFullName->set_text("");
 
     _CPSuggestions->append(*CPOperation);
 
-    CPOperation->signal_button_press_event().connect(sigc::bind<Glib::RefPtr<Gtk::RecentInfo>, bool const>(
-        sigc::mem_fun(*this, &CommandPalette::on_clicked_operation_recent_file), recent_file, is_import));
+    CPOperation->signal_button_press_event().connect(
+        sigc::bind<Glib::ustring, bool const>(sigc::mem_fun(*this, &CommandPalette::on_clicked_operation_recent_file),
+                                              recent_file->get_uri_display(), is_import));
 
     // Requires CPOperation added to _CPSuggestions
-    CPOperation->get_parent()->signal_key_press_event().connect(sigc::bind<Glib::RefPtr<Gtk::RecentInfo>, bool const>(
-        sigc::mem_fun(*this, &CommandPalette::on_key_press_operation_recent_file), recent_file, is_import));
+    CPOperation->get_parent()->signal_key_press_event().connect(
+        sigc::bind<Glib::ustring, bool const>(sigc::mem_fun(*this, &CommandPalette::on_key_press_operation_recent_file),
+                                              recent_file->get_uri_display(), is_import));
 };
 
 void CommandPalette::on_search()
@@ -447,6 +481,27 @@ bool CommandPalette::on_filter_full_action_name(Gtk::ListBoxRow *child)
     auto CPActionFullName = get_full_action_name_label(child);
     if (CPActionFullName and _search_text == CPActionFullName->get_text()) {
         return true;
+    }
+    return false;
+}
+
+bool CommandPalette::on_filter_recent_file(Gtk::ListBoxRow *child, bool const is_import)
+{
+    auto CPActionFullName = get_full_action_name_label(child);
+    if (is_import) {
+        if (CPActionFullName and CPActionFullName->get_text() == "import") {
+            auto [CPName, CPUntranslatedName, CPDescription] = get_name_utranslated_name_desc(child);
+            if (CPDescription && CPDescription->get_text() == _search_text) {
+                return true;
+            }
+        }
+        return false;
+    }
+    if (CPActionFullName and CPActionFullName->get_text() == "open") {
+        auto [CPName, CPUntranslatedName, CPDescription] = get_name_utranslated_name_desc(child);
+        if (CPDescription && CPDescription->get_text() == _search_text) {
+            return true;
+        }
     }
     return false;
 }
@@ -554,17 +609,20 @@ bool CommandPalette::on_key_press_operation_action(GdkEventKey *evt, const Actio
     return false;
 }
 
-bool CommandPalette::on_clicked_operation_recent_file(GdkEventButton *evt, Glib::RefPtr<Gtk::RecentInfo> file_info,
-                                                      bool const import)
+bool CommandPalette::on_clicked_operation_recent_file(GdkEventButton *evt, Glib::ustring const &uri, bool const import)
 {
     static auto prefs = Inkscape::Preferences::get();
 
-    auto display_uri = file_info->get_uri_display(); // ustring
-
     if (import) {
         prefs->setBool("/options/onimport", true);
-        file_import(SP_ACTIVE_DOCUMENT, display_uri, nullptr);
+        file_import(SP_ACTIVE_DOCUMENT, uri, nullptr);
         prefs->setBool("/options/onimport", true);
+
+        if (_history.empty() or
+            not(_history.back().first == HistoryType::IMPORT_FILE and _history.back().second == uri)) {
+            _history.emplace_back(HistoryType::IMPORT_FILE, uri);
+            _history_file_output_stream->write("IMPORT_FILE:" + uri + "\n");
+        }
 
         close();
         return true;
@@ -572,17 +630,21 @@ bool CommandPalette::on_clicked_operation_recent_file(GdkEventButton *evt, Glib:
 
     // open
     auto app = &(ConcreteInkscapeApplication<Gtk::Application>::get_instance());
-    Glib::RefPtr<Gio::File> file = Gio::File::create_for_path(display_uri);
+    Glib::RefPtr<Gio::File> file = Gio::File::create_for_path(uri);
     app->create_window(file);
+    if (_history.empty() or not(_history.back().first == HistoryType::OPEN_FILE and _history.back().second == uri)) {
+        _history.emplace_back(HistoryType::OPEN_FILE, uri);
+        _history_file_output_stream->write("OPEN_FILE:" + uri + "\n");
+    }
 
     close();
     return true;
 }
-bool CommandPalette::on_key_press_operation_recent_file(GdkEventKey *evt, Glib::RefPtr<Gtk::RecentInfo> file,
-                                                        bool const import)
+
+bool CommandPalette::on_key_press_operation_recent_file(GdkEventKey *evt, Glib::ustring const &uri, bool const import)
 {
     if (auto key = evt->keyval; key == GDK_KEY_Linefeed or key == GDK_KEY_Return) {
-        return on_clicked_operation_recent_file(nullptr, file, import);
+        return on_clicked_operation_recent_file(nullptr, uri, import);
     }
     return false;
 }
@@ -680,7 +742,6 @@ void CommandPalette::set_cp_fiter_mode(CPFilterMode mode)
 
             _search_text = "";
             _CPSuggestions->invalidate_filter();
-            _mode = CPFilterMode::SEARCH;
             break;
 
         case CPFilterMode::INPUT:
@@ -698,7 +759,6 @@ void CommandPalette::set_cp_fiter_mode(CPFilterMode mode)
             _CPFilter->set_placeholder_text("Enter action argument");
             _CPFilter->set_tooltip_text("Enter action argument");
 
-            _mode = CPFilterMode::INPUT;
             break;
 
         case CPFilterMode::SHELL:
@@ -711,7 +771,6 @@ void CommandPalette::set_cp_fiter_mode(CPFilterMode mode)
             _cpfilter_search_connection.disconnect();
             _cpfilter_key_press_connection.disconnect();
 
-            _mode = CPFilterMode::SHELL;
             break;
 
         case CPFilterMode::HISTORY:
@@ -720,6 +779,7 @@ void CommandPalette::set_cp_fiter_mode(CPFilterMode mode)
             }
 
             _CPFilter->set_icon_from_icon_name("format-justify-fill");
+            _CPFilter->set_icon_tooltip_text(N_("History mode"));
             _cpfilter_search_connection.disconnect();
             _cpfilter_key_press_connection.disconnect();
 
@@ -729,7 +789,6 @@ void CommandPalette::set_cp_fiter_mode(CPFilterMode mode)
             _cpfilter_key_press_connection = _CPFilter->signal_key_press_event().connect(
                 sigc::mem_fun(*this, &CommandPalette::on_key_press_cpfilter_history_mode), false);
 
-            _mode = CPFilterMode::SHELL;
             break;
     }
     _mode = mode;
