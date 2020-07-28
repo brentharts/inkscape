@@ -14,6 +14,7 @@
 #include <glibmm/i18n.h>
 
 #include "actions-canvas-snapping.h"
+#include "actions/actions-extra-data.h"
 #include "inkscape-application.h"
 
 #include "document.h"
@@ -179,7 +180,7 @@ canvas_snapping_toggle(SPDocument* document, const SPAttr option)
 
 }
 
-std::vector<std::vector<Glib::ustring>> raw_data_canvas_snapping =
+std::vector<std::pair<Glib::ustring, InkActionExtraDatum>> raw_data_canvas_snapping =
 {
     {"doc.snap-global-toggle",        N_("Snapping"),                          "Snap",  N_("Toggle snapping on/off.")                             },
 

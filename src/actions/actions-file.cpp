@@ -94,7 +94,7 @@ file_close(InkscapeApplication *app)
 // file_quit ... should just be quit
 // file_template
 
-std::vector<std::vector<Glib::ustring>> raw_data_file =
+std::vector<std::pair<Glib::ustring, InkActionExtraDatum>> raw_data_file =
 {
     // clang-format off
     {"app.file-open",              N_("File Open"),                "File",       N_("Open file.")                                         },

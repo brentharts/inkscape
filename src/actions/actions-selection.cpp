@@ -233,7 +233,7 @@ select_list(InkscapeApplication* app)
 }
 
 // SHOULD REALLY BE DOC ACTIONS
-std::vector<std::vector<Glib::ustring>> raw_data_selection =
+std::vector<std::pair<Glib::ustring, InkActionExtraDatum>> raw_data_selection =
 {
     // clang-format off
     {"app.select-clear",           N_("Clear Selection"),         "Select",   N_("Selection clear")                                    },

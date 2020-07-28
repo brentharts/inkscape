@@ -16,6 +16,7 @@
 #include "actions-base.h"
 #include "actions-helper.h"
 
+#include "actions/actions-extra-data.h"
 #include "inkscape-application.h"
 
 #include "inkscape.h"             // Inkscape::Application
@@ -218,7 +219,7 @@ quit_inkscape(InkscapeApplication* app)
     app->on_quit();
 }
 
-std::vector<std::vector<Glib::ustring>> raw_data_base =
+std::vector<std::pair<Glib::ustring, InkActionExtraDatum>> raw_data_base =
 {
     // clang-format off
     {"app.inkscape-version",          N_("Inkscape Version"),        "Base",       N_("Print Inkscape version and exit.")                   },
