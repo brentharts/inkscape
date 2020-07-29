@@ -22,7 +22,7 @@
               <object class="GtkLabel" id="CPGroup">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Group</property>
+                <property name="label">Group</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -46,7 +46,7 @@
               <object class="GtkLabel" id="CPName">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Name</property>
+                <property name="label">Name</property>
                 <property name="xalign">0</property>
                 <attributes>
                   <attribute name="weight" value="semibold"/>
@@ -64,7 +64,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="no_show_all">True</property>
-                <property name="label" translatable="yes">Untranslated name</property>
+                <property name="label">Untranslated name</property>
                 <property name="wrap">True</property>
                 <property name="ellipsize">end</property>
                 <property name="xalign">0</property>
@@ -80,9 +80,10 @@
             </child>
             <child>
               <object class="GtkLabel" id="CPShortcut">
+                <property name="name">CPShortcut</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">( Ctrl + ` )</property>
+                <property name="label">( Ctrl + ` )</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -96,9 +97,9 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="no_show_all">True</property>
-                <property name="tooltip_text" translatable="yes">Click to copy full action name</property>
-                <property name="label" translatable="yes">action.full-name</property>
+                <property name="label">action.full-name</property>
                 <property name="justify">right</property>
+                <property name="selectable">True</property>
                 <attributes>
                   <attribute name="weight" value="bold"/>
                 </attributes>
@@ -121,7 +122,7 @@
           <object class="GtkLabel" id="CPDescription">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="label" translatable="yes">A very long description to fill empty space until we encounter ellipsis may be wrong spelling</property>
+            <property name="label">A very long description to fill empty space until we encounter ellipsis may be wrong spelling</property>
             <property name="ellipsize">end</property>
             <property name="xalign">0</property>
           </object>
