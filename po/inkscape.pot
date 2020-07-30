@@ -4550,7 +4550,11 @@ msgstr ""
 msgid "File Open"
 msgstr ""
 
-#: ../src/actions/actions-file.cpp:100
+#: ../src/actions/actions-file.cpp:102
+msgid "Open file"
+msgstr ""
+
+#: ../src/actions/actions-file.cpp:102
 msgid "Open file."
 msgstr ""
 
@@ -40497,6 +40501,184 @@ msgstr ""
 msgid "Main application window"
 msgstr ""
 
+#: ../org.inkscape.Inkscape.appdata.xml.in:45
+msgid "Inkscape 1.0"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:47
+msgid "Theming support and more new customization options"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:48
+msgid "Better HiDPI (high resolution) screen support"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:49
+msgid "Native support for macOS with a signed and notarized .dmg file"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:50
+msgid "Coordinate origin in top left corner by default"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:51
+msgid "Canvas rotation and mirroring"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:52
+msgid "On-Canvas alignment of objects"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:53
+msgid "Split view and X-Ray modes"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:54
+msgid ""
+"PowerPencil for drawing editable, variable width strokes with a pressure "
+"sensitive graphics tablet"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:55
+msgid "New PNG export options"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:56
+msgid "Integrated centerline tracing for vectorizing line drawings"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:57
+msgid "Searchable Symbols dialog"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:58
+msgid "New Live Path Effect (LPE) selection dialog"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:59
+msgid ""
+"New Corners (Fillet/chamfer) LPE, (lossless) Boolean Operation LPE "
+"(experimental), Offset LPE and Measure Segments LPE (and more!)"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:60
+msgid ""
+"Path operations, deselection of a large number of paths as well as grouping/"
+"ungrouping are much faster now"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:61
+msgid "Much improved text line-height settings"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:62
+msgid ""
+"Variable fonts support (only if compiled with pango library version &gt;= "
+"1.41.1)"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:63
+msgid "Browser-compatible flowed text"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:64
+msgid ""
+"Extensions programming interface updated, with many new options - Note: this "
+"introduces breaking changes, some third-party extensions will have to be "
+"updated to work with Inkscape 1.0"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:65
+msgid "Python 3 support for extensions"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:73
+msgid "Bugfix release"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:74
+msgid "More python3 compatibility for extensions"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:81
+#: ../org.inkscape.Inkscape.appdata.xml.in:94
+#: ../org.inkscape.Inkscape.appdata.xml.in:107
+msgid "New 0.92.x bugfix release."
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:83
+msgid "Improvements to the align and distribute tool"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:84
+msgid "Support for piping standard input and output"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:85
+msgid "The color slider can be constrained to stepped values"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:86
+msgid "Performance improvements"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:87
+#: ../org.inkscape.Inkscape.appdata.xml.in:100
+msgid "And many more bugfixes"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:96
+msgid "New command-line options to control page size when exporting to SVG"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:97
+msgid "Support for left-to-right languages in the text tool"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:98
+msgid "Improvements to the circle/ellipse/arc tool"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:99
+msgid "Support for multi-line text when exporting to PDF+LaTeX"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:109
+msgid "Better importing and exporting"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:110
+msgid "Greater stability when printing on Windows"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:111
+msgid "Improved fill and stroke HSL color selection"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:112
+msgid "Greater stability when reverting and saving files"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:113
+msgid "An additional handle at the center of shapes"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:114
+msgid "A command line option for updating the file's DPI"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:115
+msgid "Improvements to user-defined shortcuts"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:116
+msgid "Migration to Gitlab to make contribution easier"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:117
+msgid "And many more bugfixes!"
+msgstr ""
+
 #: ../org.inkscape.Inkscape.desktop.template:8
 msgid "Create and edit Scalable Vector Graphics images"
 msgstr ""
@@ -40505,8 +40687,8 @@ msgstr ""
 msgid "image;editor;vector;drawing;"
 msgstr ""
 
-#: ../org.inkscape.Inkscape.desktop.template:17
-msgid "${INKSCAPE_ICONPATH}"
+#: ../org.inkscape.Inkscape.desktop.template:22
+msgid "New Drawing"
 msgstr ""
 
 #: ../org.inkscape.Inkscape.desktop.template:22

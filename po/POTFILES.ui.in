@@ -1,6 +1,5 @@
-../share/ui/command-palette-operation-compact.glade
+../share/ui/command-palette-main.glade
 ../share/ui/command-palette-operation-next-full-action.glade
-../share/ui/command-palette-operation-next.glade
 ../share/ui/dialog-css.glade
 ../share/ui/dialog-livepatheffect-add.glade
 ../share/ui/dialog-livepatheffect-effect.glade
