@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
-"POT-Creation-Date: 2020-07-15 15:04+0200\n"
+"POT-Creation-Date: 2020-08-04 21:04+0530\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -4350,25 +4350,25 @@ msgstr ""
 msgid "<b>Current layer is locked</b>. Unlock it to be able to draw on it."
 msgstr ""
 
-#: ../src/desktop-events.cpp:315
+#: ../src/desktop-events.cpp:314
 msgid "Move guide"
 msgstr ""
 
-#: ../src/desktop-events.cpp:324 ../src/desktop-events.cpp:380
+#: ../src/desktop-events.cpp:323 ../src/desktop-events.cpp:379
 #: ../src/ui/dialog/guides.cpp:151
 msgid "Delete guide"
 msgstr ""
 
-#: ../src/desktop-events.cpp:360
+#: ../src/desktop-events.cpp:359
 #, c-format
 msgid "<b>Guideline</b>: %s"
 msgstr ""
 
-#: ../src/desktop.cpp:864
+#: ../src/desktop.cpp:862
 msgid "No previous transform."
 msgstr ""
 
-#: ../src/desktop.cpp:887
+#: ../src/desktop.cpp:885
 msgid "No next transform."
 msgstr ""
 
@@ -4867,7 +4867,7 @@ msgstr ""
 msgid "The output from the extension could not be parsed."
 msgstr ""
 
-#: ../src/extension/implementation/script.cpp:909
+#: ../src/extension/implementation/script.cpp:907
 msgid ""
 "Inkscape has received additional data from the script executed.  The script "
 "did not return an error, but this may indicate the results will not be as "
@@ -5664,8 +5664,8 @@ msgstr ""
 #: ../src/ui/dialog/guides.cpp:187 ../src/ui/dialog/layer-properties.cpp:43
 #: ../src/ui/dialog/lpe-fillet-chamfer-properties.cpp:30
 #: ../src/ui/dialog/lpe-powerstroke-properties.cpp:36
-#: ../src/ui/interface.cpp:239 ../src/widgets/desktop-widget.cpp:891
-#: ../src/widgets/desktop-widget.cpp:935
+#: ../src/ui/interface.cpp:239 ../src/widgets/desktop-widget.cpp:894
+#: ../src/widgets/desktop-widget.cpp:938
 msgid "_Cancel"
 msgstr ""
 
@@ -5869,7 +5869,7 @@ msgstr ""
 #: ../src/extension/internal/filter/distort.h:97
 #: ../src/extension/internal/filter/distort.h:210
 #: ../src/extension/internal/filter/filter-file.cpp:113
-#: ../src/extension/internal/filter/filter.cpp:211
+#: ../src/extension/internal/filter/filter.cpp:210
 #: ../src/extension/internal/filter/image.h:63
 #: ../src/extension/internal/filter/morphology.h:77
 #: ../src/extension/internal/filter/morphology.h:208
@@ -6946,7 +6946,7 @@ msgstr ""
 #: ../src/extension/internal/filter/distort.h:79
 #: ../src/extension/internal/filter/textures.h:77
 #: ../src/ui/widget/selected-style.cpp:130
-#: ../src/ui/widget/style-swatch.cpp:121
+#: ../src/ui/widget/style-swatch.cpp:123
 msgid "Stroke:"
 msgstr ""
 
@@ -7184,7 +7184,7 @@ msgid "Erosion 2"
 msgstr ""
 
 #: ../src/extension/internal/filter/morphology.h:197
-#: ../src/live_effects/lpe-roughen.cpp:37 ../share/ui/dialog-trace.glade:476
+#: ../src/live_effects/lpe-roughen.cpp:36 ../share/ui/dialog-trace.glade:476
 msgid "Smooth"
 msgstr ""
 
@@ -7334,8 +7334,8 @@ msgid "Convert image to an engraving made of vertical and horizontal lines"
 msgstr ""
 
 #: ../src/extension/internal/filter/paint.h:341
-#: ../src/ui/dialog/align-and-distribute.cpp:1072
-#: ../src/widgets/desktop-widget.cpp:1656
+#: ../src/ui/dialog/align-and-distribute.cpp:1079
+#: ../src/widgets/desktop-widget.cpp:1660
 msgid "Drawing"
 msgstr ""
 
@@ -8007,40 +8007,40 @@ msgstr ""
 msgid "PovRay Raytracer File"
 msgstr ""
 
-#: ../src/extension/internal/svg.cpp:726
+#: ../src/extension/internal/svg.cpp:722
 msgid "SVG Input"
 msgstr ""
 
-#: ../src/extension/internal/svg.cpp:732
+#: ../src/extension/internal/svg.cpp:728
 msgid "Scalable Vector Graphic (*.svg)"
 msgstr ""
 
-#: ../src/extension/internal/svg.cpp:733
+#: ../src/extension/internal/svg.cpp:729
 msgid "Inkscape native file format and W3C standard"
 msgstr ""
 
-#: ../src/extension/internal/svg.cpp:741
+#: ../src/extension/internal/svg.cpp:737
 msgid "SVG Output Inkscape"
 msgstr ""
 
-#: ../src/extension/internal/svg.cpp:746
+#: ../src/extension/internal/svg.cpp:742
 msgid "Inkscape SVG (*.svg)"
 msgstr ""
 
-#: ../src/extension/internal/svg.cpp:747
+#: ../src/extension/internal/svg.cpp:743
 msgid "SVG format with Inkscape extensions"
 msgstr ""
 
-#: ../src/extension/internal/svg.cpp:755
+#: ../src/extension/internal/svg.cpp:751
 #: ../share/extensions/output_scour.inx:37
 msgid "SVG Output"
 msgstr ""
 
-#: ../src/extension/internal/svg.cpp:760
+#: ../src/extension/internal/svg.cpp:756
 msgid "Plain SVG (*.svg)"
 msgstr ""
 
-#: ../src/extension/internal/svg.cpp:761
+#: ../src/extension/internal/svg.cpp:757
 msgid "Scalable Vector Graphics format as defined by the W3C"
 msgstr ""
 
@@ -8410,16 +8410,16 @@ msgstr ""
 msgid "en"
 msgstr ""
 
-#: ../src/file.cpp:1166 ../src/ui/dialog/inkscape-preferences.cpp:2160
+#: ../src/file.cpp:1167 ../src/ui/dialog/inkscape-preferences.cpp:2160
 msgid "Import"
 msgstr ""
 
-#: ../src/file.cpp:1169 ../src/inkscape-application.cpp:831
+#: ../src/file.cpp:1170 ../src/inkscape-application.cpp:831
 #, c-format
 msgid "Failed to load the requested file %s"
 msgstr ""
 
-#: ../src/file.cpp:1216
+#: ../src/file.cpp:1217
 msgid "Select file to import"
 msgstr ""
 
@@ -8592,105 +8592,105 @@ msgstr ""
 msgid "Delete swatch"
 msgstr ""
 
-#: ../src/gradient-drag.cpp:90 ../src/ui/tools/gradient-tool.cpp:86
+#: ../src/gradient-drag.cpp:91 ../src/ui/tools/gradient-tool.cpp:86
 #: ../src/ui/tools/mesh-tool.cpp:100
 msgid "Linear gradient <b>start</b>"
 msgstr ""
 
-#: ../src/gradient-drag.cpp:91 ../src/ui/tools/gradient-tool.cpp:87
+#: ../src/gradient-drag.cpp:92 ../src/ui/tools/gradient-tool.cpp:87
 #: ../src/ui/tools/mesh-tool.cpp:101
 msgid "Linear gradient <b>end</b>"
 msgstr ""
 
-#: ../src/gradient-drag.cpp:92 ../src/ui/tools/gradient-tool.cpp:88
+#: ../src/gradient-drag.cpp:93 ../src/ui/tools/gradient-tool.cpp:88
 #: ../src/ui/tools/mesh-tool.cpp:102
 msgid "Linear gradient <b>mid stop</b>"
 msgstr ""
 
-#: ../src/gradient-drag.cpp:93 ../src/ui/tools/gradient-tool.cpp:89
+#: ../src/gradient-drag.cpp:94 ../src/ui/tools/gradient-tool.cpp:89
 #: ../src/ui/tools/mesh-tool.cpp:103
 msgid "Radial gradient <b>center</b>"
 msgstr ""
 
-#: ../src/gradient-drag.cpp:94 ../src/gradient-drag.cpp:95
+#: ../src/gradient-drag.cpp:95 ../src/gradient-drag.cpp:96
 #: ../src/ui/tools/gradient-tool.cpp:90 ../src/ui/tools/gradient-tool.cpp:91
 #: ../src/ui/tools/mesh-tool.cpp:104 ../src/ui/tools/mesh-tool.cpp:105
 msgid "Radial gradient <b>radius</b>"
 msgstr ""
 
-#: ../src/gradient-drag.cpp:96 ../src/ui/tools/gradient-tool.cpp:92
+#: ../src/gradient-drag.cpp:97 ../src/ui/tools/gradient-tool.cpp:92
 #: ../src/ui/tools/mesh-tool.cpp:106
 msgid "Radial gradient <b>focus</b>"
 msgstr ""
 
-#: ../src/gradient-drag.cpp:97 ../src/gradient-drag.cpp:98
+#: ../src/gradient-drag.cpp:98 ../src/gradient-drag.cpp:99
 #: ../src/ui/tools/gradient-tool.cpp:93 ../src/ui/tools/gradient-tool.cpp:94
 #: ../src/ui/tools/mesh-tool.cpp:107 ../src/ui/tools/mesh-tool.cpp:108
 msgid "Radial gradient <b>mid stop</b>"
 msgstr ""
 
-#: ../src/gradient-drag.cpp:99 ../src/ui/tools/gradient-tool.cpp:95
+#: ../src/gradient-drag.cpp:100 ../src/ui/tools/gradient-tool.cpp:95
 #: ../src/ui/tools/mesh-tool.cpp:109
 msgid "Mesh gradient <b>corner</b>"
 msgstr ""
 
-#: ../src/gradient-drag.cpp:100 ../src/ui/tools/gradient-tool.cpp:96
+#: ../src/gradient-drag.cpp:101 ../src/ui/tools/gradient-tool.cpp:96
 #: ../src/ui/tools/mesh-tool.cpp:110
 msgid "Mesh gradient <b>handle</b>"
 msgstr ""
 
-#: ../src/gradient-drag.cpp:101 ../src/ui/tools/gradient-tool.cpp:97
+#: ../src/gradient-drag.cpp:102 ../src/ui/tools/gradient-tool.cpp:97
 #: ../src/ui/tools/mesh-tool.cpp:111
 msgid "Mesh gradient <b>tensor</b>"
 msgstr ""
 
-#: ../src/gradient-drag.cpp:546
+#: ../src/gradient-drag.cpp:548
 msgid "Added patch row or column"
 msgstr ""
 
-#: ../src/gradient-drag.cpp:785
+#: ../src/gradient-drag.cpp:787
 msgid "Merge gradient handles"
 msgstr ""
 
-#: ../src/gradient-drag.cpp:1100
+#: ../src/gradient-drag.cpp:1102
 msgid "Move gradient handle"
 msgstr ""
 
-#: ../src/gradient-drag.cpp:1159
+#: ../src/gradient-drag.cpp:1161
 msgid "Delete gradient stop"
 msgstr ""
 
-#: ../src/gradient-drag.cpp:1435
+#: ../src/gradient-drag.cpp:1437
 #, c-format
 msgid ""
 "%s %d for: %s%s; drag with <b>Ctrl</b> to snap offset; click with <b>Ctrl"
 "+Alt</b> to delete stop"
 msgstr ""
 
-#: ../src/gradient-drag.cpp:1439 ../src/gradient-drag.cpp:1448
-#: ../src/gradient-drag.cpp:1455
+#: ../src/gradient-drag.cpp:1441 ../src/gradient-drag.cpp:1450
+#: ../src/gradient-drag.cpp:1457
 msgid " (stroke)"
 msgstr ""
 
-#: ../src/gradient-drag.cpp:1445
+#: ../src/gradient-drag.cpp:1447
 #, c-format
 msgid "%s for: %s%s"
 msgstr ""
 
-#: ../src/gradient-drag.cpp:1452
+#: ../src/gradient-drag.cpp:1454
 #, c-format
 msgid ""
 "%s for: %s%s; drag with <b>Ctrl</b> to snap angle, with <b>Ctrl+Alt</b> to "
 "preserve angle, with <b>Ctrl+Shift</b> to scale around center"
 msgstr ""
 
-#: ../src/gradient-drag.cpp:1460
+#: ../src/gradient-drag.cpp:1462
 msgid ""
 "Radial gradient <b>center</b> and <b>focus</b>; drag with <b>Shift</b> to "
 "separate focus"
 msgstr ""
 
-#: ../src/gradient-drag.cpp:1463
+#: ../src/gradient-drag.cpp:1465
 #, c-format
 msgid ""
 "Gradient point shared by <b>%d</b> gradient; drag with <b>Shift</b> to "
@@ -8701,15 +8701,15 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../src/gradient-drag.cpp:2737
+#: ../src/gradient-drag.cpp:2739
 msgid "Move gradient handle(s)"
 msgstr ""
 
-#: ../src/gradient-drag.cpp:2770
+#: ../src/gradient-drag.cpp:2772
 msgid "Move gradient mid stop(s)"
 msgstr ""
 
-#: ../src/gradient-drag.cpp:3123
+#: ../src/gradient-drag.cpp:3125
 msgid "Delete gradient stop(s)"
 msgstr ""
 
@@ -9133,7 +9133,7 @@ msgstr ""
 msgid "Fixup broken links"
 msgstr ""
 
-#: ../src/knot.cpp:329
+#: ../src/knot.cpp:334
 msgid "Node or handle drag canceled."
 msgstr ""
 
@@ -9698,47 +9698,47 @@ msgstr ""
 msgid "No effect"
 msgstr ""
 
-#: ../src/live_effects/effect.cpp:1552 ../src/live_effects/effect.cpp:1640
+#: ../src/live_effects/effect.cpp:1566 ../src/live_effects/effect.cpp:1654
 msgid "<b>Default value:</b> "
 msgstr ""
 
-#: ../src/live_effects/effect.cpp:1553 ../src/live_effects/effect.cpp:1626
+#: ../src/live_effects/effect.cpp:1567 ../src/live_effects/effect.cpp:1640
 msgid "<b>Default value overridden:</b> "
 msgstr ""
 
-#: ../src/live_effects/effect.cpp:1555 ../src/live_effects/effect.cpp:1622
+#: ../src/live_effects/effect.cpp:1569 ../src/live_effects/effect.cpp:1636
 #: ../share/ui/dialog-trace.glade:994
 msgid "Update"
 msgstr ""
 
-#: ../src/live_effects/effect.cpp:1556 ../src/live_effects/effect.cpp:1625
+#: ../src/live_effects/effect.cpp:1570 ../src/live_effects/effect.cpp:1639
 msgid "<b>Default value:</b> <s>"
 msgstr ""
 
-#: ../src/live_effects/effect.cpp:1558 ../src/live_effects/effect.cpp:1637
+#: ../src/live_effects/effect.cpp:1572 ../src/live_effects/effect.cpp:1651
 msgid "Set"
 msgstr ""
 
-#: ../src/live_effects/effect.cpp:1559 ../src/live_effects/effect.cpp:1641
+#: ../src/live_effects/effect.cpp:1573 ../src/live_effects/effect.cpp:1655
 msgid "<b>Default value overridden:</b> None\n"
 msgstr ""
 
-#: ../src/live_effects/effect.cpp:1578
+#: ../src/live_effects/effect.cpp:1592
 #: ../share/extensions/image_attributes.inx:22
 #: ../share/extensions/image_attributes.inx:48
 msgid "Unset"
 msgstr ""
 
-#: ../src/live_effects/effect.cpp:1593
+#: ../src/live_effects/effect.cpp:1607
 msgid "</b>: Set default parameters"
 msgstr ""
 
-#: ../src/live_effects/effect.cpp:1712
+#: ../src/live_effects/effect.cpp:1726
 #, c-format
 msgid "Editing parameter <b>%s</b>."
 msgstr ""
 
-#: ../src/live_effects/effect.cpp:1717
+#: ../src/live_effects/effect.cpp:1731
 msgid "None of the applied path effect's parameters can be edited on-canvas."
 msgstr ""
 
@@ -9879,101 +9879,101 @@ msgstr ""
 msgid "Change the width"
 msgstr ""
 
-#: ../src/live_effects/lpe-bool.cpp:41
+#: ../src/live_effects/lpe-bool.cpp:48
 msgid "union"
 msgstr ""
 
-#: ../src/live_effects/lpe-bool.cpp:42
+#: ../src/live_effects/lpe-bool.cpp:49
 msgid "intersection"
 msgstr ""
 
-#: ../src/live_effects/lpe-bool.cpp:43
+#: ../src/live_effects/lpe-bool.cpp:50
 msgid "difference"
 msgstr ""
 
-#: ../src/live_effects/lpe-bool.cpp:44
+#: ../src/live_effects/lpe-bool.cpp:51
 msgid "symmetric difference"
 msgstr ""
 
-#: ../src/live_effects/lpe-bool.cpp:45
+#: ../src/live_effects/lpe-bool.cpp:52
 msgid "division"
 msgstr ""
 
-#: ../src/live_effects/lpe-bool.cpp:49
+#: ../src/live_effects/lpe-bool.cpp:56
 msgid "cut"
 msgstr ""
 
+#: ../src/live_effects/lpe-bool.cpp:57
+msgid "cut inside"
+msgstr ""
+
 #: ../src/live_effects/lpe-bool.cpp:58
+msgid "cut outside"
+msgstr ""
+
+#: ../src/live_effects/lpe-bool.cpp:64
 msgid "even-odd"
 msgstr ""
 
-#: ../src/live_effects/lpe-bool.cpp:59
+#: ../src/live_effects/lpe-bool.cpp:65
 msgid "non-zero"
 msgstr ""
 
-#: ../src/live_effects/lpe-bool.cpp:60
+#: ../src/live_effects/lpe-bool.cpp:66
 msgid "positive"
 msgstr ""
 
-#: ../src/live_effects/lpe-bool.cpp:61
+#: ../src/live_effects/lpe-bool.cpp:67
 msgid "take from object"
 msgstr ""
 
-#: ../src/live_effects/lpe-bool.cpp:68
+#: ../src/live_effects/lpe-bool.cpp:74
 msgid "Operand path:"
 msgstr ""
 
-#: ../src/live_effects/lpe-bool.cpp:68
+#: ../src/live_effects/lpe-bool.cpp:74
 msgid "Operand for the boolean operation"
 msgstr ""
 
-#: ../src/live_effects/lpe-bool.cpp:69
+#: ../src/live_effects/lpe-bool.cpp:75
 msgid "Operation:"
 msgstr ""
 
-#: ../src/live_effects/lpe-bool.cpp:69
+#: ../src/live_effects/lpe-bool.cpp:75
 msgid "Boolean Operation"
 msgstr ""
 
-#: ../src/live_effects/lpe-bool.cpp:70
+#: ../src/live_effects/lpe-bool.cpp:76
 msgid "Swap operands"
 msgstr ""
 
-#: ../src/live_effects/lpe-bool.cpp:70
+#: ../src/live_effects/lpe-bool.cpp:76
 msgid "Swap operands (useful e.g. for difference)"
 msgstr ""
 
-#: ../src/live_effects/lpe-bool.cpp:71
-msgid "Hide Linked"
-msgstr ""
-
-#: ../src/live_effects/lpe-bool.cpp:71
-msgid "Hide linked path"
-msgstr ""
-
-#: ../src/live_effects/lpe-bool.cpp:73
+#: ../src/live_effects/lpe-bool.cpp:78
 msgid "Remove inner"
 msgstr ""
 
-#: ../src/live_effects/lpe-bool.cpp:74
+#: ../src/live_effects/lpe-bool.cpp:79
 msgid ""
 "For cut operations: remove inner (non-contour) lines of cutting path to "
 "avoid invisible extra points"
 msgstr ""
 
-#: ../src/live_effects/lpe-bool.cpp:76
+#: ../src/live_effects/lpe-bool.cpp:81
 msgid "Fill type this:"
 msgstr ""
 
-#: ../src/live_effects/lpe-bool.cpp:76
+#: ../src/live_effects/lpe-bool.cpp:81
 msgid "Fill type (winding mode) for this path"
 msgstr ""
 
-#: ../src/live_effects/lpe-bool.cpp:78
+#: ../src/live_effects/lpe-bool.cpp:83
 msgid "Fill type operand:"
 msgstr ""
 
-#: ../src/live_effects/lpe-bool.cpp:78
+#: ../src/live_effects/lpe-bool.cpp:83
 msgid "Fill type (winding mode) for operand path"
 msgstr ""
 
@@ -12262,7 +12262,7 @@ msgid ""
 "amount"
 msgstr ""
 
-#: ../src/live_effects/lpe-roughen.cpp:30 ../share/extensions/addnodes.inx:7
+#: ../src/live_effects/lpe-roughen.cpp:29 ../share/extensions/addnodes.inx:7
 msgid "By number of segments"
 msgstr ""
 
@@ -12270,87 +12270,87 @@ msgstr ""
 msgid "By max. segment size"
 msgstr ""
 
-#: ../src/live_effects/lpe-roughen.cpp:34
+#: ../src/live_effects/lpe-roughen.cpp:33
 msgid "Along nodes"
 msgstr ""
 
-#: ../src/live_effects/lpe-roughen.cpp:35
+#: ../src/live_effects/lpe-roughen.cpp:34
 msgid "Rand"
 msgstr ""
 
-#: ../src/live_effects/lpe-roughen.cpp:36
+#: ../src/live_effects/lpe-roughen.cpp:35
 msgid "Retract"
 msgstr ""
 
-#: ../src/live_effects/lpe-roughen.cpp:44
+#: ../src/live_effects/lpe-roughen.cpp:41
 msgid "Method"
 msgstr ""
 
-#: ../src/live_effects/lpe-roughen.cpp:44
+#: ../src/live_effects/lpe-roughen.cpp:41
 msgid "Division method"
 msgstr ""
 
-#: ../src/live_effects/lpe-roughen.cpp:45
+#: ../src/live_effects/lpe-roughen.cpp:42
 msgid "Max. segment size"
 msgstr ""
 
-#: ../src/live_effects/lpe-roughen.cpp:46
+#: ../src/live_effects/lpe-roughen.cpp:43
 msgid "Number of segments"
 msgstr ""
 
-#: ../src/live_effects/lpe-roughen.cpp:47
+#: ../src/live_effects/lpe-roughen.cpp:44
 msgid "Max. displacement in X"
 msgstr ""
 
-#: ../src/live_effects/lpe-roughen.cpp:48
+#: ../src/live_effects/lpe-roughen.cpp:45
 msgid "Max. displacement in Y"
 msgstr ""
 
-#: ../src/live_effects/lpe-roughen.cpp:49
+#: ../src/live_effects/lpe-roughen.cpp:46
 msgid "Global randomize"
 msgstr ""
 
-#: ../src/live_effects/lpe-roughen.cpp:50
+#: ../src/live_effects/lpe-roughen.cpp:47
 msgid "Handles"
 msgstr ""
 
-#: ../src/live_effects/lpe-roughen.cpp:50
+#: ../src/live_effects/lpe-roughen.cpp:47
 msgid "Handles options"
 msgstr ""
 
-#: ../src/live_effects/lpe-roughen.cpp:51 ../share/extensions/jitternodes.inx:9
+#: ../src/live_effects/lpe-roughen.cpp:48 ../share/extensions/jitternodes.inx:9
 msgid "Shift nodes"
 msgstr ""
 
-#: ../src/live_effects/lpe-roughen.cpp:52
+#: ../src/live_effects/lpe-roughen.cpp:49
 msgid "Fixed displacement"
 msgstr ""
 
-#: ../src/live_effects/lpe-roughen.cpp:52
+#: ../src/live_effects/lpe-roughen.cpp:49
 msgid "Fixed displacement, 1/3 of segment length"
 msgstr ""
 
-#: ../src/live_effects/lpe-roughen.cpp:54
+#: ../src/live_effects/lpe-roughen.cpp:51
 msgid "Spray Tool friendly"
 msgstr ""
 
-#: ../src/live_effects/lpe-roughen.cpp:54
+#: ../src/live_effects/lpe-roughen.cpp:51
 msgid "For use with spray tool in copy mode"
 msgstr ""
 
-#: ../src/live_effects/lpe-roughen.cpp:171
+#: ../src/live_effects/lpe-roughen.cpp:147
 msgid "<b>Add nodes</b> Subdivide each segment"
 msgstr ""
 
-#: ../src/live_effects/lpe-roughen.cpp:179
+#: ../src/live_effects/lpe-roughen.cpp:155
 msgid "<b>Jitter nodes</b> Move nodes/handles"
 msgstr ""
 
-#: ../src/live_effects/lpe-roughen.cpp:187
+#: ../src/live_effects/lpe-roughen.cpp:163
 msgid "<b>Extra roughen</b> Add an extra layer of rough"
 msgstr ""
 
-#: ../src/live_effects/lpe-roughen.cpp:195
+#: ../src/live_effects/lpe-roughen.cpp:171
 msgid "<b>Options</b> Modify options to rough"
 msgstr ""
 
@@ -12915,11 +12915,11 @@ msgstr ""
 msgid "Change font button parameter"
 msgstr ""
 
-#: ../src/live_effects/parameter/item.cpp:133
+#: ../src/live_effects/parameter/item.cpp:155
 msgid "Link to item on clipboard"
 msgstr ""
 
-#: ../src/live_effects/parameter/item.cpp:247
+#: ../src/live_effects/parameter/item.cpp:269
 msgid "Link item parameter to path"
 msgstr ""
 
@@ -13274,26 +13274,26 @@ msgstr ""
 msgid "Ungroup"
 msgstr ""
 
-#: ../src/object/sp-item.cpp:1047 ../src/verbs.cpp:220
+#: ../src/object/sp-item.cpp:1048 ../src/verbs.cpp:220
 msgid "Object"
 msgstr ""
 
-#: ../src/object/sp-item.cpp:1059
+#: ../src/object/sp-item.cpp:1060
 #, c-format
 msgid "%s; <i>clipped</i>"
 msgstr ""
 
-#: ../src/object/sp-item.cpp:1065
+#: ../src/object/sp-item.cpp:1066
 #, c-format
 msgid "%s; <i>masked</i>"
 msgstr ""
 
-#: ../src/object/sp-item.cpp:1075
+#: ../src/object/sp-item.cpp:1076
 #, c-format
 msgid "%s; <i>filtered (%s)</i>"
 msgstr ""
 
-#: ../src/object/sp-item.cpp:1077
+#: ../src/object/sp-item.cpp:1078
 #, c-format
 msgid "%s; <i>filtered</i>"
 msgstr ""
@@ -13302,7 +13302,7 @@ msgstr ""
 msgid "Line"
 msgstr ""
 
-#: ../src/object/sp-lpe-item.cpp:270 ../src/object/sp-lpe-item.cpp:1002
+#: ../src/object/sp-lpe-item.cpp:270 ../src/object/sp-lpe-item.cpp:1003
 msgid "An exception occurred during execution of the Path Effect."
 msgstr ""
 
@@ -14652,40 +14652,40 @@ msgstr ""
 msgid "Nothing was copied."
 msgstr ""
 
-#: ../src/ui/clipboard.cpp:394 ../src/ui/clipboard.cpp:610
-#: ../src/ui/clipboard.cpp:638 ../src/ui/clipboard.cpp:679
+#: ../src/ui/clipboard.cpp:394 ../src/ui/clipboard.cpp:611
+#: ../src/ui/clipboard.cpp:639 ../src/ui/clipboard.cpp:680
 msgid "Nothing on the clipboard."
 msgstr ""
 
-#: ../src/ui/clipboard.cpp:454
+#: ../src/ui/clipboard.cpp:455
 msgid "Select <b>object(s)</b> to paste style to."
 msgstr ""
 
-#: ../src/ui/clipboard.cpp:465 ../src/ui/clipboard.cpp:482
+#: ../src/ui/clipboard.cpp:466 ../src/ui/clipboard.cpp:483
 msgid "No style on the clipboard."
 msgstr ""
 
-#: ../src/ui/clipboard.cpp:507
+#: ../src/ui/clipboard.cpp:508
 msgid "Select <b>object(s)</b> to paste size to."
 msgstr ""
 
-#: ../src/ui/clipboard.cpp:515
+#: ../src/ui/clipboard.cpp:516
 msgid "No size on the clipboard."
 msgstr ""
 
-#: ../src/ui/clipboard.cpp:571
+#: ../src/ui/clipboard.cpp:572
 msgid "Select <b>object(s)</b> to paste live path effect to."
 msgstr ""
 
-#: ../src/ui/clipboard.cpp:597
+#: ../src/ui/clipboard.cpp:598
 msgid "No effect on the clipboard."
 msgstr ""
 
-#: ../src/ui/clipboard.cpp:616 ../src/ui/clipboard.cpp:662
+#: ../src/ui/clipboard.cpp:617 ../src/ui/clipboard.cpp:663
 msgid "Clipboard does not contain a path."
 msgstr ""
 
-#: ../src/ui/clipboard.cpp:709
+#: ../src/ui/clipboard.cpp:710
 msgid "Clipboard does not contain any objects of type \"%1\"."
 msgstr ""
 
@@ -14873,271 +14873,271 @@ msgstr ""
 msgid "Open _Recent"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:210
-#: ../src/ui/dialog/align-and-distribute.cpp:928
+#: ../src/ui/dialog/align-and-distribute.cpp:217
+#: ../src/ui/dialog/align-and-distribute.cpp:935
 msgid "Align"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:396
-#: ../src/ui/dialog/align-and-distribute.cpp:929
+#: ../src/ui/dialog/align-and-distribute.cpp:403
+#: ../src/ui/dialog/align-and-distribute.cpp:936
 msgid "Distribute"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:471
+#: ../src/ui/dialog/align-and-distribute.cpp:478
 msgid "Minimum horizontal gap (in px units) between bounding boxes"
 msgstr ""
 
 #. TRANSLATORS: "H:" stands for horizontal gap
-#: ../src/ui/dialog/align-and-distribute.cpp:473
+#: ../src/ui/dialog/align-and-distribute.cpp:480
 msgctxt "Gap"
 msgid "_H:"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:481
+#: ../src/ui/dialog/align-and-distribute.cpp:488
 msgid "Minimum vertical gap (in px units) between bounding boxes"
 msgstr ""
 
 #. TRANSLATORS: Vertical gap
-#: ../src/ui/dialog/align-and-distribute.cpp:483
+#: ../src/ui/dialog/align-and-distribute.cpp:490
 msgctxt "Gap"
 msgid "_V:"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:513
-#: ../src/ui/dialog/align-and-distribute.cpp:931
+#: ../src/ui/dialog/align-and-distribute.cpp:520
+#: ../src/ui/dialog/align-and-distribute.cpp:938
 #: ../src/ui/toolbar/connector-toolbar.cpp:155
 msgid "Remove overlaps"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:545
+#: ../src/ui/dialog/align-and-distribute.cpp:552
 #: ../src/ui/toolbar/connector-toolbar.cpp:364
 msgid "Arrange connector network"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:635
+#: ../src/ui/dialog/align-and-distribute.cpp:642
 msgid "Exchange Positions"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:670
+#: ../src/ui/dialog/align-and-distribute.cpp:677
 msgid "Unclump"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:738
+#: ../src/ui/dialog/align-and-distribute.cpp:745
 msgid "Randomize positions"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:832
+#: ../src/ui/dialog/align-and-distribute.cpp:839
 msgid "Distribute text baselines"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:897
+#: ../src/ui/dialog/align-and-distribute.cpp:904
 msgid "Align text baselines"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:930
+#: ../src/ui/dialog/align-and-distribute.cpp:937
 msgid "Rearrange"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:932
+#: ../src/ui/dialog/align-and-distribute.cpp:939
 #: ../src/ui/toolbar/snap-toolbar.cpp:89
 msgid "Nodes"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:938
-#: ../src/ui/dialog/align-and-distribute.cpp:939
+#: ../src/ui/dialog/align-and-distribute.cpp:945
+#: ../src/ui/dialog/align-and-distribute.cpp:946
 msgid "Relative to: "
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:945 ../src/verbs.cpp:3280
+#: ../src/ui/dialog/align-and-distribute.cpp:952 ../src/verbs.cpp:3280
 #: ../src/verbs.cpp:3281
 msgid "Align right edges of objects to the left edge of the anchor"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:948 ../src/verbs.cpp:3283
+#: ../src/ui/dialog/align-and-distribute.cpp:955 ../src/verbs.cpp:3283
 #: ../src/verbs.cpp:3284
 msgid "Align left edges"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:951 ../src/verbs.cpp:3285
+#: ../src/ui/dialog/align-and-distribute.cpp:958 ../src/verbs.cpp:3285
 #: ../src/verbs.cpp:3286
 msgid "Center on vertical axis"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:954 ../src/verbs.cpp:3287
+#: ../src/ui/dialog/align-and-distribute.cpp:961 ../src/verbs.cpp:3287
 #: ../src/verbs.cpp:3288
 msgid "Align right sides"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:957 ../src/verbs.cpp:3290
+#: ../src/ui/dialog/align-and-distribute.cpp:964 ../src/verbs.cpp:3290
 #: ../src/verbs.cpp:3291
 msgid "Align left edges of objects to the right edge of the anchor"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:960 ../src/verbs.cpp:3294
+#: ../src/ui/dialog/align-and-distribute.cpp:967 ../src/verbs.cpp:3294
 #: ../src/verbs.cpp:3295
 msgid "Align bottom edges of objects to the top edge of the anchor"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:963 ../src/verbs.cpp:3297
+#: ../src/ui/dialog/align-and-distribute.cpp:970 ../src/verbs.cpp:3297
 msgid "Align top edges"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:966 ../src/verbs.cpp:3299
+#: ../src/ui/dialog/align-and-distribute.cpp:973 ../src/verbs.cpp:3299
 #: ../src/verbs.cpp:3300
 msgid "Center on horizontal axis"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:969 ../src/verbs.cpp:3301
+#: ../src/ui/dialog/align-and-distribute.cpp:976 ../src/verbs.cpp:3301
 #: ../src/verbs.cpp:3302
 msgid "Align bottom edges"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:972 ../src/verbs.cpp:3304
+#: ../src/ui/dialog/align-and-distribute.cpp:979 ../src/verbs.cpp:3304
 #: ../src/verbs.cpp:3305
 msgid "Align top edges of objects to the bottom edge of the anchor"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:977
+#: ../src/ui/dialog/align-and-distribute.cpp:984
 msgid "Align baseline anchors of texts horizontally"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:980
+#: ../src/ui/dialog/align-and-distribute.cpp:987
 msgid "Align baselines of texts"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:985
+#: ../src/ui/dialog/align-and-distribute.cpp:992
 msgid "Make horizontal gaps between objects equal"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:989
+#: ../src/ui/dialog/align-and-distribute.cpp:996
 msgid "Distribute left edges equidistantly"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:992
+#: ../src/ui/dialog/align-and-distribute.cpp:999
 msgid "Distribute centers equidistantly horizontally"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:995
+#: ../src/ui/dialog/align-and-distribute.cpp:1002
 msgid "Distribute right edges equidistantly"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:999
+#: ../src/ui/dialog/align-and-distribute.cpp:1006
 msgid "Make vertical gaps between objects equal"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:1003
+#: ../src/ui/dialog/align-and-distribute.cpp:1010
 msgid "Distribute top edges equidistantly"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:1006
+#: ../src/ui/dialog/align-and-distribute.cpp:1013
 msgid "Distribute centers equidistantly vertically"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:1009
+#: ../src/ui/dialog/align-and-distribute.cpp:1016
 msgid "Distribute bottom edges equidistantly"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:1014
+#: ../src/ui/dialog/align-and-distribute.cpp:1021
 msgid "Distribute baseline anchors of texts horizontally"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:1017
+#: ../src/ui/dialog/align-and-distribute.cpp:1024
 msgid "Distribute baselines of texts vertically"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:1023
+#: ../src/ui/dialog/align-and-distribute.cpp:1030
 #: ../src/ui/toolbar/connector-toolbar.cpp:125
 msgid "Nicely arrange selected connector network"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:1026
+#: ../src/ui/dialog/align-and-distribute.cpp:1033
 msgid "Exchange positions of selected objects - selection order"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:1029
+#: ../src/ui/dialog/align-and-distribute.cpp:1036
 msgid "Exchange positions of selected objects - stacking order"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:1032
+#: ../src/ui/dialog/align-and-distribute.cpp:1039
 msgid "Exchange positions of selected objects - clockwise rotate"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:1037
+#: ../src/ui/dialog/align-and-distribute.cpp:1044
 msgid "Randomize centers in both dimensions"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:1040
+#: ../src/ui/dialog/align-and-distribute.cpp:1047
 msgid "Unclump objects: try to equalize edge-to-edge distances"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:1045
+#: ../src/ui/dialog/align-and-distribute.cpp:1052
 msgid ""
 "Move objects as little as possible so that their bounding boxes do not "
 "overlap"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:1053
+#: ../src/ui/dialog/align-and-distribute.cpp:1060
 msgid "Align selected nodes to a common horizontal line"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:1056
+#: ../src/ui/dialog/align-and-distribute.cpp:1063
 msgid "Align selected nodes to a common vertical line"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:1059
+#: ../src/ui/dialog/align-and-distribute.cpp:1066
 msgid "Distribute selected nodes horizontally"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:1062
+#: ../src/ui/dialog/align-and-distribute.cpp:1069
 msgid "Distribute selected nodes vertically"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:1067
-#: ../src/ui/dialog/align-and-distribute.cpp:1077
+#: ../src/ui/dialog/align-and-distribute.cpp:1074
+#: ../src/ui/dialog/align-and-distribute.cpp:1084
 msgid "Last selected"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:1068
-#: ../src/ui/dialog/align-and-distribute.cpp:1078
+#: ../src/ui/dialog/align-and-distribute.cpp:1075
+#: ../src/ui/dialog/align-and-distribute.cpp:1085
 msgid "First selected"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:1069
+#: ../src/ui/dialog/align-and-distribute.cpp:1076
 msgid "Biggest object"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:1070
+#: ../src/ui/dialog/align-and-distribute.cpp:1077
 msgid "Smallest object"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:1071
+#: ../src/ui/dialog/align-and-distribute.cpp:1078
 #: ../src/ui/dialog/document-properties.cpp:149
-#: ../src/widgets/desktop-widget.cpp:1652
+#: ../src/widgets/desktop-widget.cpp:1656
 #: ../share/extensions/voronoi2svg.inx:15
 msgid "Page"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:1073
+#: ../src/ui/dialog/align-and-distribute.cpp:1080
 msgid "Selection Area"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:1079
+#: ../src/ui/dialog/align-and-distribute.cpp:1086
 msgid "Middle of selection"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:1080
+#: ../src/ui/dialog/align-and-distribute.cpp:1087
 msgid "Min value"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:1081
+#: ../src/ui/dialog/align-and-distribute.cpp:1088
 msgid "Max value"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:1091
+#: ../src/ui/dialog/align-and-distribute.cpp:1098
 msgid "Treat selection as group"
 msgstr ""
 
-#: ../src/ui/dialog/align-and-distribute.cpp:1105
+#: ../src/ui/dialog/align-and-distribute.cpp:1112
 msgid "Enable on-canvas alignment handles."
 msgstr ""
 
@@ -15206,7 +15206,7 @@ msgstr ""
 #: ../src/ui/dialog/calligraphic-profile-rename.cpp:60
 #: ../src/ui/dialog/export.cpp:1306
 #: ../src/ui/dialog/filedialogimpl-gtkmm.cpp:566 ../src/ui/dialog/input.cpp:906
-#: ../src/verbs.cpp:2590 ../src/widgets/desktop-widget.cpp:892
+#: ../src/verbs.cpp:2590 ../src/widgets/desktop-widget.cpp:895
 msgid "_Save"
 msgstr ""
 
@@ -16941,7 +16941,7 @@ msgid "Value(s):"
 msgstr ""
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:2777
-#: ../src/widgets/desktop-widget.cpp:417
+#: ../src/widgets/desktop-widget.cpp:390
 msgid "R:"
 msgstr ""
 
@@ -17606,57 +17606,57 @@ msgstr ""
 msgid "Search offset objects"
 msgstr ""
 
-#: ../src/ui/dialog/find.cpp:953
+#: ../src/ui/dialog/find.cpp:952
 msgid "Nothing to replace"
 msgstr ""
 
 #. TRANSLATORS: "%s" is replaced with "exact" or "partial" when this string is displayed
-#: ../src/ui/dialog/find.cpp:995
+#: ../src/ui/dialog/find.cpp:994
 #, c-format
 msgid "<b>%d</b> object found (out of <b>%d</b>), %s match."
 msgid_plural "<b>%d</b> objects found (out of <b>%d</b>), %s match."
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../src/ui/dialog/find.cpp:998
+#: ../src/ui/dialog/find.cpp:997
 msgid "exact"
 msgstr ""
 
-#: ../src/ui/dialog/find.cpp:998
+#: ../src/ui/dialog/find.cpp:997
 msgid "partial"
 msgstr ""
 
 #. TRANSLATORS: "%1" is replaced with the number of matches
-#: ../src/ui/dialog/find.cpp:1001
+#: ../src/ui/dialog/find.cpp:1000
 msgid "%1 match replaced"
 msgid_plural "%1 matches replaced"
 msgstr[0] ""
 msgstr[1] ""
 
 #. TRANSLATORS: "%1" is replaced with the number of matches
-#: ../src/ui/dialog/find.cpp:1005
+#: ../src/ui/dialog/find.cpp:1004
 msgid "%1 object found"
 msgid_plural "%1 objects found"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../src/ui/dialog/find.cpp:1019
+#: ../src/ui/dialog/find.cpp:1018
 msgid "Replace text or property"
 msgstr ""
 
-#: ../src/ui/dialog/find.cpp:1023
+#: ../src/ui/dialog/find.cpp:1022
 msgid "Nothing found"
 msgstr ""
 
-#: ../src/ui/dialog/find.cpp:1028
+#: ../src/ui/dialog/find.cpp:1027
 msgid "No objects found"
 msgstr ""
 
-#: ../src/ui/dialog/find.cpp:1049
+#: ../src/ui/dialog/find.cpp:1048
 msgid "Select an object type"
 msgstr ""
 
-#: ../src/ui/dialog/find.cpp:1067
+#: ../src/ui/dialog/find.cpp:1066
 msgid "Select a property"
 msgstr ""
 
@@ -18654,7 +18654,7 @@ msgstr ""
 #: ../src/ui/dialog/object-attributes.cpp:57
 #: ../src/ui/dialog/object-attributes.cpp:65
 #: ../src/ui/toolbar/node-toolbar.cpp:263 ../src/ui/widget/page-sizer.cpp:57
-#: ../src/widgets/desktop-widget.cpp:402
+#: ../src/widgets/desktop-widget.cpp:375
 msgid "X:"
 msgstr ""
 
@@ -18666,7 +18666,7 @@ msgstr ""
 #: ../src/ui/dialog/object-attributes.cpp:58
 #: ../src/ui/dialog/object-attributes.cpp:66
 #: ../src/ui/toolbar/node-toolbar.cpp:278 ../src/ui/widget/page-sizer.cpp:58
-#: ../src/widgets/desktop-widget.cpp:403
+#: ../src/widgets/desktop-widget.cpp:376
 msgid "Y:"
 msgstr ""
 
@@ -18961,7 +18961,7 @@ msgid "LPE Tool"
 msgstr ""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:345
-#: ../src/widgets/desktop-widget.cpp:341
+#: ../src/widgets/desktop-widget.cpp:314
 msgid "Zoom"
 msgstr ""
 
@@ -22173,73 +22173,73 @@ msgstr ""
 msgid "Nothing found! Please try again with different search terms."
 msgstr ""
 
-#: ../src/ui/dialog/livepatheffect-editor.cpp:120
+#: ../src/ui/dialog/livepatheffect-editor.cpp:122
 msgid "Add path effect"
 msgstr ""
 
-#: ../src/ui/dialog/livepatheffect-editor.cpp:124
+#: ../src/ui/dialog/livepatheffect-editor.cpp:126
 msgid "Delete current path effect"
 msgstr ""
 
-#: ../src/ui/dialog/livepatheffect-editor.cpp:128
+#: ../src/ui/dialog/livepatheffect-editor.cpp:130
 msgid "Raise the current path effect"
 msgstr ""
 
-#: ../src/ui/dialog/livepatheffect-editor.cpp:132
+#: ../src/ui/dialog/livepatheffect-editor.cpp:134
 msgid "Lower the current path effect"
 msgstr ""
 
-#: ../src/ui/dialog/livepatheffect-editor.cpp:304
+#: ../src/ui/dialog/livepatheffect-editor.cpp:306
 msgid "Unknown effect is applied"
 msgstr ""
 
-#: ../src/ui/dialog/livepatheffect-editor.cpp:307
+#: ../src/ui/dialog/livepatheffect-editor.cpp:309
 msgid "Click button to add an effect"
 msgstr ""
 
-#: ../src/ui/dialog/livepatheffect-editor.cpp:322
+#: ../src/ui/dialog/livepatheffect-editor.cpp:324
 msgid "Click add button to convert clone"
 msgstr ""
 
-#: ../src/ui/dialog/livepatheffect-editor.cpp:327
-#: ../src/ui/dialog/livepatheffect-editor.cpp:331
-#: ../src/ui/dialog/livepatheffect-editor.cpp:340
+#: ../src/ui/dialog/livepatheffect-editor.cpp:329
+#: ../src/ui/dialog/livepatheffect-editor.cpp:333
+#: ../src/ui/dialog/livepatheffect-editor.cpp:342
 msgid "Select a path or shape"
 msgstr ""
 
-#: ../src/ui/dialog/livepatheffect-editor.cpp:336
+#: ../src/ui/dialog/livepatheffect-editor.cpp:338
 msgid "Only one item can be selected"
 msgstr ""
 
-#: ../src/ui/dialog/livepatheffect-editor.cpp:368
+#: ../src/ui/dialog/livepatheffect-editor.cpp:370
 msgid "Unknown effect"
 msgstr ""
 
-#: ../src/ui/dialog/livepatheffect-editor.cpp:437
+#: ../src/ui/dialog/livepatheffect-editor.cpp:439
 msgid "Create and apply path effect"
 msgstr ""
 
-#: ../src/ui/dialog/livepatheffect-editor.cpp:477
+#: ../src/ui/dialog/livepatheffect-editor.cpp:479
 msgid "Create and apply Clone original path effect"
 msgstr ""
 
-#: ../src/ui/dialog/livepatheffect-editor.cpp:500
+#: ../src/ui/dialog/livepatheffect-editor.cpp:502
 msgid "Remove path effect"
 msgstr ""
 
-#: ../src/ui/dialog/livepatheffect-editor.cpp:518
+#: ../src/ui/dialog/livepatheffect-editor.cpp:520
 msgid "Move path effect up"
 msgstr ""
 
-#: ../src/ui/dialog/livepatheffect-editor.cpp:541
+#: ../src/ui/dialog/livepatheffect-editor.cpp:543
 msgid "Move path effect down"
 msgstr ""
 
-#: ../src/ui/dialog/livepatheffect-editor.cpp:611
+#: ../src/ui/dialog/livepatheffect-editor.cpp:613
 msgid "Activate path effect"
 msgstr ""
 
-#: ../src/ui/dialog/livepatheffect-editor.cpp:611
+#: ../src/ui/dialog/livepatheffect-editor.cpp:613
 msgid "Deactivate path effect"
 msgstr ""
 
@@ -22779,7 +22779,7 @@ msgid "Failed to set CairoRenderContext"
 msgstr ""
 
 #: ../src/ui/dialog/save-template-dialog.cpp:46
-#: ../src/ui/dialog/selectorsdialog.cpp:1086
+#: ../src/ui/dialog/selectorsdialog.cpp:1084
 msgid "Cancel"
 msgstr ""
 
@@ -22787,20 +22787,20 @@ msgstr ""
 msgid "Save"
 msgstr ""
 
-#: ../src/ui/dialog/selectorsdialog.cpp:648
-#: ../src/ui/dialog/styledialog.cpp:1169
+#: ../src/ui/dialog/selectorsdialog.cpp:646
+#: ../src/ui/dialog/styledialog.cpp:1167
 msgid "Edited style element."
 msgstr ""
 
-#: ../src/ui/dialog/selectorsdialog.cpp:1084
+#: ../src/ui/dialog/selectorsdialog.cpp:1082
 msgid "CSS selector"
 msgstr ""
 
-#: ../src/ui/dialog/selectorsdialog.cpp:1087
+#: ../src/ui/dialog/selectorsdialog.cpp:1085
 msgid "Add"
 msgstr ""
 
-#: ../src/ui/dialog/selectorsdialog.cpp:1094
+#: ../src/ui/dialog/selectorsdialog.cpp:1092
 msgid "Invalid CSS selector."
 msgstr ""
 
@@ -22892,25 +22892,25 @@ msgstr ""
 msgid "Fix spelling"
 msgstr ""
 
-#: ../src/ui/dialog/styledialog.cpp:511 ../src/ui/dialog/styledialog.cpp:698
-#: ../src/ui/dialog/styledialog.cpp:840
+#: ../src/ui/dialog/styledialog.cpp:509 ../src/ui/dialog/styledialog.cpp:696
+#: ../src/ui/dialog/styledialog.cpp:838
 msgid "property"
 msgstr ""
 
-#: ../src/ui/dialog/styledialog.cpp:523 ../src/ui/dialog/styledialog.cpp:711
-#: ../src/ui/dialog/styledialog.cpp:852
+#: ../src/ui/dialog/styledialog.cpp:521 ../src/ui/dialog/styledialog.cpp:709
+#: ../src/ui/dialog/styledialog.cpp:850
 msgid "value"
 msgstr ""
 
-#: ../src/ui/dialog/styledialog.cpp:779
+#: ../src/ui/dialog/styledialog.cpp:777
 msgid "This value is commented out."
 msgstr ""
 
-#: ../src/ui/dialog/styledialog.cpp:967
+#: ../src/ui/dialog/styledialog.cpp:965
 msgid "Invalid property set"
 msgstr ""
 
-#: ../src/ui/dialog/styledialog.cpp:969
+#: ../src/ui/dialog/styledialog.cpp:967
 msgid "Used in %1"
 msgstr ""
 
@@ -23162,7 +23162,7 @@ msgid "Too large for preview"
 msgstr ""
 
 #: ../src/ui/dialog/swatches.cpp:204 ../src/ui/tools/gradient-tool.cpp:355
-#: ../src/ui/tools/gradient-tool.cpp:441
+#: ../src/ui/tools/gradient-tool.cpp:452
 msgid "Add gradient stop"
 msgstr ""
 
@@ -24756,7 +24756,7 @@ msgid "Avoid"
 msgstr ""
 
 #: ../src/ui/toolbar/connector-toolbar.cpp:77
-#: ../src/ui/tools/connector-tool.cpp:1360
+#: ../src/ui/tools/connector-tool.cpp:1359
 msgid "Make connectors avoid selected objects"
 msgstr ""
 
@@ -24765,7 +24765,7 @@ msgid "Ignore"
 msgstr ""
 
 #: ../src/ui/toolbar/connector-toolbar.cpp:85
-#: ../src/ui/tools/connector-tool.cpp:1361
+#: ../src/ui/tools/connector-tool.cpp:1360
 msgid "Make connectors ignore selected objects"
 msgstr ""
 
@@ -27059,31 +27059,31 @@ msgstr ""
 msgid "Draw calligraphic stroke"
 msgstr ""
 
-#: ../src/ui/tools/connector-tool.cpp:508
+#: ../src/ui/tools/connector-tool.cpp:507
 msgid "Creating new connector"
 msgstr ""
 
-#: ../src/ui/tools/connector-tool.cpp:749
+#: ../src/ui/tools/connector-tool.cpp:748
 msgid "Connector endpoint drag cancelled."
 msgstr ""
 
-#: ../src/ui/tools/connector-tool.cpp:795
+#: ../src/ui/tools/connector-tool.cpp:794
 msgid "Reroute connector"
 msgstr ""
 
-#: ../src/ui/tools/connector-tool.cpp:943
+#: ../src/ui/tools/connector-tool.cpp:942
 msgid "Create connector"
 msgstr ""
 
-#: ../src/ui/tools/connector-tool.cpp:962
+#: ../src/ui/tools/connector-tool.cpp:961
 msgid "Finishing connector"
 msgstr ""
 
-#: ../src/ui/tools/connector-tool.cpp:1220
+#: ../src/ui/tools/connector-tool.cpp:1219
 msgid "<b>Connector endpoint</b>: drag to reroute or connect to new shapes"
 msgstr ""
 
-#: ../src/ui/tools/connector-tool.cpp:1355
+#: ../src/ui/tools/connector-tool.cpp:1354
 msgid "Select <b>at least one non-connector object</b>."
 msgstr ""
 
@@ -27254,34 +27254,34 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../src/ui/tools/gradient-tool.cpp:421
+#: ../src/ui/tools/gradient-tool.cpp:432
 msgid "Simplify gradient"
 msgstr ""
 
-#: ../src/ui/tools/gradient-tool.cpp:492
+#: ../src/ui/tools/gradient-tool.cpp:503
 msgid "Create default gradient"
 msgstr ""
 
-#: ../src/ui/tools/gradient-tool.cpp:551 ../src/ui/tools/mesh-tool.cpp:656
+#: ../src/ui/tools/gradient-tool.cpp:562 ../src/ui/tools/mesh-tool.cpp:656
 msgid "<b>Draw around</b> handles to select them"
 msgstr ""
 
-#: ../src/ui/tools/gradient-tool.cpp:672
+#: ../src/ui/tools/gradient-tool.cpp:683
 msgid "<b>Ctrl</b>: snap gradient angle"
 msgstr ""
 
-#: ../src/ui/tools/gradient-tool.cpp:673
+#: ../src/ui/tools/gradient-tool.cpp:684
 msgid "<b>Shift</b>: draw gradient around the starting point"
 msgstr ""
 
-#: ../src/ui/tools/gradient-tool.cpp:841 ../src/ui/tools/mesh-tool.cpp:1021
+#: ../src/ui/tools/gradient-tool.cpp:852 ../src/ui/tools/mesh-tool.cpp:1021
 #, c-format
 msgid "<b>Gradient</b> for %d object; with <b>Ctrl</b> to snap angle"
 msgid_plural "<b>Gradient</b> for %d objects; with <b>Ctrl</b> to snap angle"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../src/ui/tools/gradient-tool.cpp:845 ../src/ui/tools/mesh-tool.cpp:1025
+#: ../src/ui/tools/gradient-tool.cpp:856 ../src/ui/tools/mesh-tool.cpp:1025
 msgid "Select <b>objects</b> on which to create gradient."
 msgstr ""
 
@@ -28202,14 +28202,14 @@ msgstr ""
 #: ../src/ui/widget/fill-style.cpp:694 ../src/ui/widget/selected-style.cpp:232
 #: ../src/ui/widget/selected-style.cpp:288
 #: ../src/ui/widget/selected-style.cpp:542
-#: ../src/ui/widget/style-swatch.cpp:306
+#: ../src/ui/widget/style-swatch.cpp:308
 msgid "Unset fill"
 msgstr ""
 
 #: ../src/ui/widget/fill-style.cpp:694 ../src/ui/widget/selected-style.cpp:232
 #: ../src/ui/widget/selected-style.cpp:288
 #: ../src/ui/widget/selected-style.cpp:558
-#: ../src/ui/widget/style-swatch.cpp:306
+#: ../src/ui/widget/style-swatch.cpp:308
 msgid "Unset stroke"
 msgstr ""
 
@@ -28832,7 +28832,7 @@ msgstr ""
 
 #: ../src/ui/widget/paint-selector.cpp:164
 #: ../src/ui/widget/selected-style.cpp:189
-#: ../src/ui/widget/style-swatch.cpp:280
+#: ../src/ui/widget/style-swatch.cpp:282
 msgid "Pattern"
 msgstr ""
 
@@ -28956,7 +28956,7 @@ msgid ""
 msgstr ""
 
 #: ../src/ui/widget/selected-style.cpp:129
-#: ../src/ui/widget/style-swatch.cpp:120
+#: ../src/ui/widget/style-swatch.cpp:122
 msgid "Fill:"
 msgstr ""
 
@@ -28995,12 +28995,12 @@ msgid "No stroke, middle-click for black stroke"
 msgstr ""
 
 #: ../src/ui/widget/selected-style.cpp:191
-#: ../src/ui/widget/style-swatch.cpp:282
+#: ../src/ui/widget/style-swatch.cpp:284
 msgid "Pattern (fill)"
 msgstr ""
 
 #: ../src/ui/widget/selected-style.cpp:191
-#: ../src/ui/widget/style-swatch.cpp:282
+#: ../src/ui/widget/style-swatch.cpp:284
 msgid "Pattern (stroke)"
 msgstr ""
 
@@ -29021,12 +29021,12 @@ msgid "<b>L</b>"
 msgstr ""
 
 #: ../src/ui/widget/selected-style.cpp:199
-#: ../src/ui/widget/style-swatch.cpp:274
+#: ../src/ui/widget/style-swatch.cpp:276
 msgid "Linear gradient (fill)"
 msgstr ""
 
 #: ../src/ui/widget/selected-style.cpp:199
-#: ../src/ui/widget/style-swatch.cpp:274
+#: ../src/ui/widget/style-swatch.cpp:276
 msgid "Linear gradient (stroke)"
 msgstr ""
 
@@ -29035,12 +29035,12 @@ msgid "<b>R</b>"
 msgstr ""
 
 #: ../src/ui/widget/selected-style.cpp:208
-#: ../src/ui/widget/style-swatch.cpp:278
+#: ../src/ui/widget/style-swatch.cpp:280
 msgid "Radial gradient (fill)"
 msgstr ""
 
 #: ../src/ui/widget/selected-style.cpp:208
-#: ../src/ui/widget/style-swatch.cpp:278
+#: ../src/ui/widget/style-swatch.cpp:280
 msgid "Radial gradient (stroke)"
 msgstr ""
 
@@ -29069,7 +29069,7 @@ msgid "Different strokes"
 msgstr ""
 
 #: ../src/ui/widget/selected-style.cpp:230
-#: ../src/ui/widget/style-swatch.cpp:304
+#: ../src/ui/widget/style-swatch.cpp:306
 msgid "<b>Unset</b>"
 msgstr ""
 
@@ -29397,50 +29397,50 @@ msgstr ""
 msgid "Set marker color"
 msgstr ""
 
-#: ../src/ui/widget/style-swatch.cpp:272
+#: ../src/ui/widget/style-swatch.cpp:274
 msgid "L Gradient"
 msgstr ""
 
-#: ../src/ui/widget/style-swatch.cpp:276
+#: ../src/ui/widget/style-swatch.cpp:278
 msgid "R Gradient"
-msgstr ""
-
-#: ../src/ui/widget/style-swatch.cpp:292
-#, c-format
-msgid "Fill: %06x/%.3g"
 msgstr ""
 
 #: ../src/ui/widget/style-swatch.cpp:294
 #, c-format
+msgid "Fill: %06x/%.3g"
+msgstr ""
+
+#: ../src/ui/widget/style-swatch.cpp:296
+#, c-format
 msgid "Stroke: %06x/%.3g"
 msgstr ""
 
-#: ../src/ui/widget/style-swatch.cpp:299
+#: ../src/ui/widget/style-swatch.cpp:301
 msgctxt "Fill and stroke"
 msgid "<i>None</i>"
 msgstr ""
 
-#: ../src/ui/widget/style-swatch.cpp:301
+#: ../src/ui/widget/style-swatch.cpp:303
 msgctxt "Fill and stroke"
 msgid "No fill"
 msgstr ""
 
-#: ../src/ui/widget/style-swatch.cpp:301
+#: ../src/ui/widget/style-swatch.cpp:303
 msgctxt "Fill and stroke"
 msgid "No stroke"
 msgstr ""
 
-#: ../src/ui/widget/style-swatch.cpp:326
+#: ../src/ui/widget/style-swatch.cpp:328
 #, c-format
 msgid "Stroke width: %.5g%s"
 msgstr ""
 
-#: ../src/ui/widget/style-swatch.cpp:342
+#: ../src/ui/widget/style-swatch.cpp:344
 #, c-format
 msgid "O: %2.0f"
 msgstr ""
 
-#: ../src/ui/widget/style-swatch.cpp:347
+#: ../src/ui/widget/style-swatch.cpp:349
 #, c-format
 msgid "Opacity: %2.1f %%"
 msgstr ""
@@ -29493,7 +29493,7 @@ msgstr[1] ""
 msgid "File"
 msgstr ""
 
-#: ../src/verbs.cpp:182 ../src/widgets/desktop-widget.cpp:1660
+#: ../src/verbs.cpp:182 ../src/widgets/desktop-widget.cpp:1664
 #: ../share/extensions/printing_marks.inx:18
 msgid "Selection"
 msgstr ""
@@ -31920,61 +31920,61 @@ msgstr ""
 msgid "Center on horizontal and vertical axis"
 msgstr ""
 
-#: ../src/widgets/desktop-widget.cpp:331
+#: ../src/widgets/desktop-widget.cpp:304
 msgid ""
 "<b>Welcome to Inkscape!</b> Use shape or freehand tools to create objects; "
 "use selector (arrow) to move or transform them."
 msgstr ""
 
-#: ../src/widgets/desktop-widget.cpp:371
+#: ../src/widgets/desktop-widget.cpp:344
 msgid "Rotation. (Also Ctrl+Shift+Scroll)"
 msgstr ""
 
-#: ../src/widgets/desktop-widget.cpp:401
+#: ../src/widgets/desktop-widget.cpp:374
 msgid "Cursor coordinates"
 msgstr ""
 
-#: ../src/widgets/desktop-widget.cpp:415
+#: ../src/widgets/desktop-widget.cpp:388
 msgid "Z:"
 msgstr ""
 
-#: ../src/widgets/desktop-widget.cpp:533
+#: ../src/widgets/desktop-widget.cpp:536
 msgid "outline"
 msgstr ""
 
-#: ../src/widgets/desktop-widget.cpp:535
+#: ../src/widgets/desktop-widget.cpp:538
 msgid "no filters"
 msgstr ""
 
-#: ../src/widgets/desktop-widget.cpp:537
+#: ../src/widgets/desktop-widget.cpp:540
 msgid "visible hairlines"
 msgstr ""
 
-#: ../src/widgets/desktop-widget.cpp:546
+#: ../src/widgets/desktop-widget.cpp:549
 msgid "grayscale"
 msgstr ""
 
-#: ../src/widgets/desktop-widget.cpp:548
+#: ../src/widgets/desktop-widget.cpp:551
 msgid "print colors preview"
 msgstr ""
 
-#: ../src/widgets/desktop-widget.cpp:807
+#: ../src/widgets/desktop-widget.cpp:810
 msgid "Locked all guides"
 msgstr ""
 
-#: ../src/widgets/desktop-widget.cpp:809
+#: ../src/widgets/desktop-widget.cpp:812
 msgid "Unlocked all guides"
 msgstr ""
 
-#: ../src/widgets/desktop-widget.cpp:827
+#: ../src/widgets/desktop-widget.cpp:830
 msgid "Color-managed display is <b>enabled</b> in this window"
 msgstr ""
 
-#: ../src/widgets/desktop-widget.cpp:829
+#: ../src/widgets/desktop-widget.cpp:832
 msgid "Color-managed display is <b>disabled</b> in this window"
 msgstr ""
 
-#: ../src/widgets/desktop-widget.cpp:876
+#: ../src/widgets/desktop-widget.cpp:879
 #, c-format
 msgid ""
 "<span weight=\"bold\" size=\"larger\">Save changes to document \"%s\" before "
@@ -31983,11 +31983,11 @@ msgid ""
 "If you close without saving, your changes will be discarded."
 msgstr ""
 
-#: ../src/widgets/desktop-widget.cpp:887 ../src/widgets/desktop-widget.cpp:931
+#: ../src/widgets/desktop-widget.cpp:890 ../src/widgets/desktop-widget.cpp:934
 msgid "Close _without saving"
 msgstr ""
 
-#: ../src/widgets/desktop-widget.cpp:920
+#: ../src/widgets/desktop-widget.cpp:923
 #, c-format
 msgid ""
 "<span weight=\"bold\" size=\"larger\">The file \"%s\" was saved with a "
@@ -31996,19 +31996,19 @@ msgid ""
 "Do you want to save this file as Inkscape SVG?"
 msgstr ""
 
-#: ../src/widgets/desktop-widget.cpp:937
+#: ../src/widgets/desktop-widget.cpp:940
 msgid "_Save as Inkscape SVG"
 msgstr ""
 
-#: ../src/widgets/desktop-widget.cpp:1129
+#: ../src/widgets/desktop-widget.cpp:1132
 msgid "Note:"
 msgstr ""
 
-#: ../src/widgets/desktop-widget.cpp:1664
+#: ../src/widgets/desktop-widget.cpp:1668
 msgid "Centre Page"
 msgstr ""
 
-#: ../src/widgets/desktop-widget.cpp:2019
+#: ../src/widgets/desktop-widget.cpp:2023
 msgid "Create guide"
 msgstr ""
 
@@ -32082,6 +32082,34 @@ msgstr ""
 
 #: ../share/ui/dialog-livepatheffect-effect.glade:113
 msgid "Experimental"
+msgstr ""
+
+#: ../share/ui/dialog-macros.glade:24
+msgid "Create Macro"
+msgstr ""
+
+#: ../share/ui/dialog-macros.glade:41
+msgid "Delete macro"
+msgstr ""
+
+#: ../share/ui/dialog-macros.glade:58
+msgid "Import Macro"
+msgstr ""
+
+#: ../share/ui/dialog-macros.glade:75
+msgid "Export Macro"
+msgstr ""
+
+#: ../share/ui/dialog-macros.glade:114
+msgid "Record Macro"
+msgstr ""
+
+#: ../share/ui/dialog-macros.glade:131
+msgid "Execute Macro"
+msgstr ""
+
+#: ../share/ui/dialog-macros.glade:148
+msgid "Edit step"
 msgstr ""
 
 #: ../share/ui/dialog-save-template.glade:9
@@ -39536,6 +39564,184 @@ msgstr ""
 msgid "Main application window"
 msgstr ""
 
+#: ../org.inkscape.Inkscape.appdata.xml.in:45
+msgid "Inkscape 1.0"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:47
+msgid "Theming support and more new customization options"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:48
+msgid "Better HiDPI (high resolution) screen support"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:49
+msgid "Native support for macOS with a signed and notarized .dmg file"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:50
+msgid "Coordinate origin in top left corner by default"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:51
+msgid "Canvas rotation and mirroring"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:52
+msgid "On-Canvas alignment of objects"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:53
+msgid "Split view and X-Ray modes"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:54
+msgid ""
+"PowerPencil for drawing editable, variable width strokes with a pressure "
+"sensitive graphics tablet"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:55
+msgid "New PNG export options"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:56
+msgid "Integrated centerline tracing for vectorizing line drawings"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:57
+msgid "Searchable Symbols dialog"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:58
+msgid "New Live Path Effect (LPE) selection dialog"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:59
+msgid ""
+"New Corners (Fillet/chamfer) LPE, (lossless) Boolean Operation LPE "
+"(experimental), Offset LPE and Measure Segments LPE (and more!)"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:60
+msgid ""
+"Path operations, deselection of a large number of paths as well as grouping/"
+"ungrouping are much faster now"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:61
+msgid "Much improved text line-height settings"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:62
+msgid ""
+"Variable fonts support (only if compiled with pango library version &gt;= "
+"1.41.1)"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:63
+msgid "Browser-compatible flowed text"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:64
+msgid ""
+"Extensions programming interface updated, with many new options - Note: this "
+"introduces breaking changes, some third-party extensions will have to be "
+"updated to work with Inkscape 1.0"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:65
+msgid "Python 3 support for extensions"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:73
+msgid "Bugfix release"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:74
+msgid "More python3 compatibility for extensions"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:81
+#: ../org.inkscape.Inkscape.appdata.xml.in:94
+#: ../org.inkscape.Inkscape.appdata.xml.in:107
+msgid "New 0.92.x bugfix release."
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:83
+msgid "Improvements to the align and distribute tool"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:84
+msgid "Support for piping standard input and output"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:85
+msgid "The color slider can be constrained to stepped values"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:86
+msgid "Performance improvements"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:87
+#: ../org.inkscape.Inkscape.appdata.xml.in:100
+msgid "And many more bugfixes"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:96
+msgid "New command-line options to control page size when exporting to SVG"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:97
+msgid "Support for left-to-right languages in the text tool"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:98
+msgid "Improvements to the circle/ellipse/arc tool"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:99
+msgid "Support for multi-line text when exporting to PDF+LaTeX"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:109
+msgid "Better importing and exporting"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:110
+msgid "Greater stability when printing on Windows"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:111
+msgid "Improved fill and stroke HSL color selection"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:112
+msgid "Greater stability when reverting and saving files"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:113
+msgid "An additional handle at the center of shapes"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:114
+msgid "A command line option for updating the file's DPI"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:115
+msgid "Improvements to user-defined shortcuts"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:116
+msgid "Migration to Gitlab to make contribution easier"
+msgstr ""
+
+#: ../org.inkscape.Inkscape.appdata.xml.in:117
+msgid "And many more bugfixes!"
+msgstr ""
+
 #: ../org.inkscape.Inkscape.desktop.template:8
 msgid "Create and edit Scalable Vector Graphics images"
 msgstr ""
@@ -39544,12 +39750,12 @@ msgstr ""
 msgid "image;editor;vector;drawing;"
 msgstr ""
 
-#: ../org.inkscape.Inkscape.desktop.template:17
-msgid "${INKSCAPE_ICONPATH}"
+#: ../org.inkscape.Inkscape.desktop.template:22
+msgid "New Drawing"
 msgstr ""
 
-#: ../org.inkscape.Inkscape.desktop.template:21
-msgid "New Drawing"
+#: ../org.inkscape.Inkscape.desktop.template:27
+msgid "Open a New Window"
 msgstr ""
 
 #: ../share/ui/menus.xml:51

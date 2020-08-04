@@ -121,6 +121,7 @@ set(ui_SRC
 	dialog/livepatheffect-editor.cpp
 	dialog/lpe-fillet-chamfer-properties.cpp
 	dialog/lpe-powerstroke-properties.cpp
+	dialog/macros.cpp
 	dialog/memory.cpp
 	dialog/messages.cpp
 	dialog/new-from-template.cpp
@@ -294,6 +295,7 @@ set(ui_SRC
 	dialog/livepatheffect-editor.h
 	dialog/lpe-fillet-chamfer-properties.h
 	dialog/lpe-powerstroke-properties.h
+	dialog/macros.h
 	dialog/memory.h
 	dialog/messages.h
 	dialog/new-from-template.h
