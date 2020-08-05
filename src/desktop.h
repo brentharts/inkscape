@@ -316,7 +316,6 @@ public:
     Inkscape::ColorMode _display_color_mode;
     Inkscape::ColorMode getColorMode() const { return _display_color_mode; }
 
-    Inkscape::UI::Widget::Dock* getDock();
     Inkscape::UI::Dialog::DialogContainer *getContainer();
 
     void set_active (bool new_active);
