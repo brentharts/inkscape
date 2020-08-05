@@ -17,21 +17,19 @@
 # include "config.h"  // only include where actually required!
 #endif
 
-#include <vector>
-#include <set>
-
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
 #include <gtkmm/buttonbox.h>
 #include <gtkmm/comboboxtext.h>
+#include <gtkmm/liststore.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/separator.h>
-#include <gtkmm/liststore.h>
 #include <gtkmm/treeview.h>
-
-#include "ui/widget/panel.h"
+#include <set>
+#include <vector>
 
 #include "text-editing.h"
+#include "ui/dialog/dialog-base.h"
 
 #if WITH_GSPELL
 #include <gspell/gspell.h>
@@ -57,7 +55,8 @@ using LanguagePair = std::pair<std::string, std::string>;
  * Uses gspell and one of the languages set in the users preference file
  *
  */
-class SpellCheck : public Widget::Panel {
+class SpellCheck : public DialogBase
+{
 public:
     SpellCheck ();
     ~SpellCheck () override;
@@ -167,7 +166,7 @@ private:
     /**
      * Can be invoked for setting the desktop. Currently not used.
      */
-    void setDesktop(SPDesktop *desktop) override;
+    void update() override;
 
     SPObject *_root;
 
@@ -270,9 +269,7 @@ private:
         Gtk::TreeModelColumn<Glib::ustring> suggestions;
     };
     TreeColumns tree_columns;
-
 };
-
 }
 }
 }

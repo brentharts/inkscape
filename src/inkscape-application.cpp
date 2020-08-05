@@ -39,7 +39,6 @@
 
 #include "ui/interface.h"         // sp_ui_error_dialog
 #include "ui/dialog/font-substitution.h"  // Warn user about font substitution.
-#include "ui/widget/panel.h"      // Panel prep
 #include "widgets/desktop-widget.h" // Close without saving dialog
 
 #include "util/units.h"           // Redimension window
@@ -710,7 +709,6 @@ ConcreteInkscapeApplication<Gtk::Application>::on_startup2()
 
     // ========================= GUI Init =========================
     Gtk::Window::set_default_icon_name("org.inkscape.Inkscape");
-    Inkscape::UI::Widget::Panel::prep();
 
     // ========================= Builder ==========================
     // App menus deprecated in 3.32. This whole block of code should be

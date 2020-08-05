@@ -43,8 +43,9 @@ class TraceDialogImpl2 : public TraceDialog {
   public:
     TraceDialogImpl2();
     ~TraceDialogImpl2() override;
+    void update() override;
 
-  private:
+private:
     Inkscape::Trace::Tracer tracer;
     void traceProcess(bool do_i_trace);
     void abort();
@@ -54,8 +55,6 @@ class TraceDialogImpl2 : public TraceDialog {
     void traceCallback();
     void onSelectionModified(guint flags);
     void onSetDefaults();
-
-    void setDesktop(SPDesktop *desktop) override;
 
     sigc::connection selectChangedConn;
     sigc::connection selectModifiedConn;
@@ -76,9 +75,18 @@ class TraceDialogImpl2 : public TraceDialog {
     Gtk::DrawingArea *previewArea;
 };
 
-void TraceDialogImpl2::setDesktop(SPDesktop *desktop)
+void TraceDialogImpl2::update()
 {
-    Panel::setDesktop(desktop);
+    if (!_app) {
+        std::cerr << "TraceDialogImpl2::update(): _app is null" << std::endl;
+        return;
+    }
+
+    SPDesktop *desktop = getDesktop();
+
+    if (!desktop) {
+        return;
+    }
 
     {
         {
@@ -144,7 +152,7 @@ void TraceDialogImpl2::traceProcess(bool do_i_trace)
       use_autotrace = true;
       ate.opts->color_count = (int)MS_scans->get_value() + 1;
     }
-    else 
+    else
     {
       g_warning("Should not happen!");
     }
@@ -221,7 +229,7 @@ bool TraceDialogImpl2::previewResize(const Cairo::RefPtr<Cairo::Context>& cr)
 }
 
 void TraceDialogImpl2::abort()
-{ 
+{
      SPDesktop *desktop = SP_ACTIVE_DESKTOP;
      if (desktop)
          desktop->clearWaitingCursor();
@@ -335,7 +343,7 @@ TraceDialogImpl2::TraceDialogImpl2()
     GET_W(previewArea)
 #undef GET_W
 #undef GET_O
-    _getContents()->add(*mainBox);
+    add(*mainBox);
     // show_all_children();
 
     B_Update->signal_clicked().connect(sigc::mem_fun(*this, &TraceDialogImpl2::previewCallback));
@@ -343,6 +351,8 @@ TraceDialogImpl2::TraceDialogImpl2()
     B_STOP->signal_clicked().connect(sigc::mem_fun(*this, &TraceDialogImpl2::abort));
     B_RESET->signal_clicked().connect(sigc::mem_fun(*this, &TraceDialogImpl2::onSetDefaults));
     previewArea->signal_draw().connect(sigc::mem_fun(*this, &TraceDialogImpl2::previewResize));
+
+    update();
 }
 
 

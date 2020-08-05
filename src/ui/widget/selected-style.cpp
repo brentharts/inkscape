@@ -42,9 +42,9 @@
 #include "svg/css-ostringstream.h"
 #include "svg/svg-color.h"
 
-#include "ui/dialog/dialog-manager.h"
+#include "ui/dialog/dialog-container.h"
+#include "ui/dialog/dialog-base.h"
 #include "ui/dialog/fill-and-stroke.h"
-#include "ui/dialog/panel-dialog.h"
 #include "ui/tools/tool-base.h"
 #include "ui/widget/canvas.h"   // Forced redraws.
 #include "ui/widget/color-preview.h"
@@ -1456,16 +1456,7 @@ RotateableStrokeWidth::do_scroll(double by, guint modifier) {
 
 Dialog::FillAndStroke *get_fill_and_stroke_panel(SPDesktop *desktop)
 {
-    if (Dialog::PanelDialogBase *panel_dialog =
-        dynamic_cast<Dialog::PanelDialogBase *>(desktop->_dlg_mgr->getDialog("FillAndStroke"))) {
-        try {
-            Dialog::FillAndStroke &fill_and_stroke =
-                dynamic_cast<Dialog::FillAndStroke &>(panel_dialog->getPanel());
-            return &fill_and_stroke;
-        } catch (std::exception &e) { }
-    }
-
-    return nullptr;
+    return dynamic_cast<Dialog::FillAndStroke *>(desktop->getContainer()->get_dialog("DialogFillStroke"));
 }
 
 } // namespace Widget
