@@ -13,15 +13,15 @@
 #ifndef SP_EXPORT_H
 #define SP_EXPORT_H
 
-#include <gtkmm/progressbar.h>
+#include <gtkmm/checkbutton.h>
+#include <gtkmm/comboboxtext.h>
 #include <gtkmm/expander.h>
 #include <gtkmm/grid.h>
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/checkbutton.h>
+#include <gtkmm/progressbar.h>
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/spinbutton.h>
 
-#include "ui/widget/panel.h"
+#include "ui/dialog/dialog-base.h"
 
 namespace Inkscape {
 namespace UI {
@@ -45,7 +45,8 @@ enum selection_type {
  * shows it to the user. If the dialog has already been created, it simply shows the window.
  *
  */
-class Export : public Widget::Panel {
+class Export : public DialogBase
+{
 public:
     Export ();
     ~Export () override;
@@ -207,7 +208,12 @@ private:
     /**
      * Can be invoked for setting the desktop. Currently not used.
      */
-    void setDesktop(SPDesktop *desktop) override;
+    void setDesktop(SPDesktop *desktop);
+
+    /**
+     * Update active window.
+     */
+    void update() override;
 
     /**
      * Creates progress dialog for batch exporting.
@@ -266,7 +272,7 @@ private:
     /*
      * Flag to stop simultaneous updates
      */
-    bool update;
+    bool update_flag;
 
     /* Area selection radio buttons */
     Gtk::HBox togglebox;

@@ -40,7 +40,6 @@
 #include "ui/interface.h"         // sp_ui_error_dialog
 #include "ui/dialog/font-substitution.h"  // Warn user about font substitution.
 #include "ui/shortcuts.h"         // Shortcuts... init
-#include "ui/widget/panel.h"      // Panel prep
 #include "widgets/desktop-widget.h" // Close without saving dialog
 
 #include "util/units.h"           // Redimension window
@@ -718,8 +717,6 @@ ConcreteInkscapeApplication<Gtk::Application>::on_startup2()
     // such as dialog title bars are not updated when change in the Inkscape Preferences dialog.)
     // Shortcuts for actions can be set before the actions are created.
     Inkscape::Shortcuts::getInstance().init();
-
-    Inkscape::UI::Widget::Panel::prep();
 
     // ========================= Builder ==========================
     // App menus deprecated in 3.32. This whole block of code should be
