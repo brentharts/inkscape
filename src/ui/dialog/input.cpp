@@ -590,8 +590,6 @@ InputDialogImpl::InputDialogImpl() :
     testDetector(),
     cfgPanel()
 {
-    set_orientation(Gtk::ORIENTATION_VERTICAL);
-
     treeScroller.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
     treeScroller.set_shadow_type(Gtk::SHADOW_IN);
     treeScroller.add(deviceTree);
