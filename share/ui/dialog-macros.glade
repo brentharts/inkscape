@@ -5,43 +5,36 @@
   <object class="GtkImage" id="create-icon">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="tooltip_text" translatable="yes">Create Macro</property>
     <property name="icon_name">add</property>
   </object>
   <object class="GtkImage" id="delete-icon">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="tooltip_text" translatable="yes">Delete macro</property>
     <property name="icon_name">edit-delete</property>
   </object>
   <object class="GtkImage" id="edit-icon">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="tooltip_text" translatable="yes">Edit step</property>
     <property name="icon_name">edit</property>
   </object>
   <object class="GtkImage" id="export-icon">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="tooltip_text" translatable="yes">Export Macro</property>
     <property name="icon_name">document-export</property>
   </object>
   <object class="GtkImage" id="import-icon">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="tooltip_text" translatable="yes">Import Macro</property>
     <property name="icon_name">document-import-ocal</property>
   </object>
   <object class="GtkImage" id="play-icon">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="tooltip_text" translatable="yes">Execute Macro</property>
     <property name="icon_name">media-play</property>
   </object>
   <object class="GtkImage" id="record-icon">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="tooltip_text" translatable="yes">Record Macro</property>
     <property name="icon_name">media-record</property>
   </object>
   <object class="GtkBox" id="MacrosBase">
@@ -66,6 +59,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Create Macro</property>
                 <property name="image">create-icon</property>
                 <style>
                   <class name="flat"/>
@@ -84,6 +78,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Delete macro</property>
                 <property name="image">delete-icon</property>
                 <style>
                   <class name="flat"/>
@@ -102,6 +97,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Import Macro</property>
                 <property name="image">import-icon</property>
                 <style>
                   <class name="flat"/>
@@ -120,6 +116,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Export Macro</property>
                 <property name="image">export-icon</property>
                 <style>
                   <class name="flat"/>
@@ -150,6 +147,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Record Macro</property>
                 <property name="image">record-icon</property>
                 <style>
                   <class name="flat"/>
@@ -168,6 +166,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Play Macro</property>
                 <property name="image">play-icon</property>
                 <style>
                   <class name="flat"/>
@@ -186,6 +185,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Edit step</property>
                 <property name="image">edit-icon</property>
                 <style>
                   <class name="flat"/>
