@@ -2067,6 +2067,7 @@ SPDesktop::show_dialogs()
     mapVerbPreference.insert(std::make_pair ("Memory", "/dialogs/memory") );
     mapVerbPreference.insert(std::make_pair ("LivePathEffect", "/dialogs/livepatheffect") );
     mapVerbPreference.insert(std::make_pair ("UndoHistory", "/dialogs/undo-history") );
+    mapVerbPreference.insert(std::make_pair ("Macros", "/dialogs/macros") );
     mapVerbPreference.insert(std::make_pair ("Transformation", "/dialogs/transformation") );
     mapVerbPreference.insert(std::make_pair ("Swatches", "/dialogs/swatches") );
     mapVerbPreference.insert(std::make_pair ("IconPreviewPanel", "/dialogs/iconpreview") );

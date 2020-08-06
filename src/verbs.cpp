@@ -2173,6 +2173,9 @@ void DialogVerb::perform(SPAction *action, void *data)
         case SP_VERB_DIALOG_PAINT:
             dt->_dlg_mgr->showDialog("PaintServers");
             break;
+        case SP_VERB_DIALOG_MACROS:
+            dt->_dlg_mgr->showDialog("Macros");
+            break;
         case SP_VERB_DIALOG_TRANSFORM:
             dt->_dlg_mgr->showDialog("Transformation");
             break;
@@ -3129,6 +3132,9 @@ Verb *Verb::_base_verbs[] = {
     new DialogVerb(SP_VERB_DIALOG_PAINT, "DialogPaintServers", N_("_Paint Servers..."),
                    // FIXME missing Inkscape Paint Server Icon
                    N_("Select paint server from a collection"), INKSCAPE_ICON("symbols")),
+    new DialogVerb(SP_VERB_DIALOG_MACROS, "DialogMacros", N_("_Macros..."),
+                   // FIXME: Macros icon
+                   N_("Grouped operations for easy repetition"), INKSCAPE_ICON("dialog-transform")),
     new DialogVerb(SP_VERB_DIALOG_TRANSFORM, "DialogTransform", N_("Transfor_m..."),
                    N_("Precisely control objects' transformations"), INKSCAPE_ICON("dialog-transform")),
     new DialogVerb(SP_VERB_DIALOG_ALIGN_DISTRIBUTE, "DialogAlignDistribute", N_("_Align and Distribute..."),

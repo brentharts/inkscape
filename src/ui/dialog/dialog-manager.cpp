@@ -27,6 +27,7 @@
 #include "ui/dialog/inkscape-preferences.h"
 #include "ui/dialog/input.h"
 #include "ui/dialog/livepatheffect-editor.h"
+#include "ui/dialog/macros.h"
 #include "ui/dialog/memory.h"
 #include "ui/dialog/messages.h"
 #include "ui/dialog/paint-servers.h"
@@ -121,6 +122,7 @@ DialogManager::DialogManager() {
         registerFactory("LayersPanel",         &create<LayersPanel,          FloatingBehavior>);
         registerFactory("ObjectsPanel",        &create<ObjectsPanel,         FloatingBehavior>);
         registerFactory("LivePathEffect",      &create<LivePathEffectEditor, FloatingBehavior>);
+        registerFactory("Macros",              &create<Macros,               FloatingBehavior>);
         registerFactory("Memory",              &create<Memory,               FloatingBehavior>);
         registerFactory("Messages",            &create<Messages,             FloatingBehavior>);
         registerFactory("ObjectAttributes",    &create<ObjectAttributes,     FloatingBehavior>);
@@ -164,6 +166,7 @@ DialogManager::DialogManager() {
         registerFactory("LayersPanel",         &create<LayersPanel,          DockBehavior>);
         registerFactory("ObjectsPanel",        &create<ObjectsPanel,         DockBehavior>);
         registerFactory("LivePathEffect",      &create<LivePathEffectEditor, DockBehavior>);
+        registerFactory("Macros",              &create<Macros,               DockBehavior>);
         registerFactory("Memory",              &create<Memory,               DockBehavior>);
         registerFactory("Messages",            &create<Messages,             DockBehavior>);
         registerFactory("ObjectAttributes",    &create<ObjectAttributes,     DockBehavior>);

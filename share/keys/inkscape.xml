@@ -571,6 +571,8 @@ override) the bindings in the main default.xml.
 
   <bind key="f" modifiers="Primary" action="DialogFind" display="true" />
 
+  <bind key="m" modifiers="Primary,Alt" action="DialogMacros" display="true" />
+
   <bind key="m" modifiers="Primary,Shift" action="DialogTransform" display="true" />
 
   <bind key="o" modifiers="Primary,Shift" action="DialogObjectProperties" display="true" />

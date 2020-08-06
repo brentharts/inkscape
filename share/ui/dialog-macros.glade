@@ -2,7 +2,50 @@
 <!-- Generated with glade 3.36.0 -->
 <interface>
   <requires lib="gtk+" version="3.22"/>
-  <object class="GtkBox">
+  <object class="GtkImage" id="create-icon">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="tooltip_text" translatable="yes">Create Macro</property>
+    <property name="icon_name">add</property>
+  </object>
+  <object class="GtkImage" id="delete-icon">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="tooltip_text" translatable="yes">Delete macro</property>
+    <property name="icon_name">edit-delete</property>
+  </object>
+  <object class="GtkImage" id="edit-icon">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="tooltip_text" translatable="yes">Edit step</property>
+    <property name="icon_name">edit</property>
+  </object>
+  <object class="GtkImage" id="export-icon">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="tooltip_text" translatable="yes">Export Macro</property>
+    <property name="icon_name">document-export</property>
+  </object>
+  <object class="GtkImage" id="import-icon">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="tooltip_text" translatable="yes">Import Macro</property>
+    <property name="icon_name">document-import-ocal</property>
+  </object>
+  <object class="GtkImage" id="play-icon">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="tooltip_text" translatable="yes">Execute Macro</property>
+    <property name="icon_name">media-play</property>
+  </object>
+  <object class="GtkImage" id="record-icon">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="tooltip_text" translatable="yes">Record Macro</property>
+    <property name="icon_name">media-record</property>
+  </object>
+  <object class="GtkBox" id="MacrosBase">
+    <property name="height_request">300</property>
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="orientation">vertical</property>
@@ -14,75 +57,80 @@
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <child>
-          <object class="GtkBox">
+          <object class="GtkButtonBox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="layout_style">start</property>
             <child>
-              <object class="GtkImage" id="MacroAdd">
+              <object class="GtkButton" id="MacrosCreate">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="tooltip_text" translatable="yes">Create Macro</property>
-                <property name="margin_start">10</property>
-                <property name="margin_end">10</property>
-                <property name="margin_top">10</property>
-                <property name="margin_bottom">10</property>
-                <property name="icon_name">add</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="image">create-icon</property>
+                <style>
+                  <class name="flat"/>
+                  <class name="image-button"/>
+                </style>
               </object>
               <packing>
                 <property name="expand">False</property>
-                <property name="fill">True</property>
+                <property name="fill">False</property>
                 <property name="position">0</property>
+                <property name="non_homogeneous">True</property>
               </packing>
             </child>
             <child>
-              <object class="GtkImage" id="MacroDelete">
+              <object class="GtkButton" id="MacrosDelete">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="tooltip_text" translatable="yes">Delete macro</property>
-                <property name="margin_start">10</property>
-                <property name="margin_end">10</property>
-                <property name="margin_top">10</property>
-                <property name="margin_bottom">10</property>
-                <property name="icon_name">edit-delete</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="image">delete-icon</property>
+                <style>
+                  <class name="flat"/>
+                  <class name="image-button"/>
+                </style>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="position">1</property>
+                <property name="non_homogeneous">True</property>
               </packing>
             </child>
             <child>
-              <object class="GtkImage" id="MacroImport">
+              <object class="GtkButton" id="MacrosImport">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="tooltip_text" translatable="yes">Import Macro</property>
-                <property name="margin_start">10</property>
-                <property name="margin_end">10</property>
-                <property name="margin_top">10</property>
-                <property name="margin_bottom">10</property>
-                <property name="icon_name">document-import-ocal</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="image">import-icon</property>
+                <style>
+                  <class name="flat"/>
+                  <class name="image-button"/>
+                </style>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="position">2</property>
+                <property name="non_homogeneous">True</property>
               </packing>
             </child>
             <child>
-              <object class="GtkImage" id="MacroExport">
+              <object class="GtkButton" id="MacrosExport">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="tooltip_text" translatable="yes">Export Macro</property>
-                <property name="margin_start">10</property>
-                <property name="margin_end">10</property>
-                <property name="margin_top">10</property>
-                <property name="margin_bottom">10</property>
-                <property name="icon_name">document-export</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="image">export-icon</property>
+                <style>
+                  <class name="flat"/>
+                  <class name="image-button"/>
+                </style>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="position">3</property>
+                <property name="non_homogeneous">True</property>
               </packing>
             </child>
           </object>
@@ -93,69 +141,62 @@
           </packing>
         </child>
         <child>
-          <object class="GtkSeparator">
+          <object class="GtkButtonBox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="layout_style">start</property>
             <child>
-              <object class="GtkImage" id="MacroRecord">
+              <object class="GtkButton" id="MacrosRecord">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="tooltip_text" translatable="yes">Record Macro</property>
-                <property name="margin_start">10</property>
-                <property name="margin_end">10</property>
-                <property name="margin_top">10</property>
-                <property name="margin_bottom">10</property>
-                <property name="icon_name">media-record</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="image">record-icon</property>
+                <style>
+                  <class name="flat"/>
+                  <class name="image-button"/>
+                </style>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="position">0</property>
+                <property name="non_homogeneous">True</property>
               </packing>
             </child>
             <child>
-              <object class="GtkImage" id="MacroPlay">
+              <object class="GtkButton" id="MacrosPlay">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="tooltip_text" translatable="yes">Execute Macro</property>
-                <property name="margin_start">10</property>
-                <property name="margin_end">10</property>
-                <property name="margin_top">10</property>
-                <property name="margin_bottom">10</property>
-                <property name="icon_name">media-play</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="image">play-icon</property>
+                <style>
+                  <class name="flat"/>
+                  <class name="image-button"/>
+                </style>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="position">1</property>
+                <property name="non_homogeneous">True</property>
               </packing>
             </child>
             <child>
-              <object class="GtkImage" id="MacroEdit">
+              <object class="GtkButton" id="MacrosEdit">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="tooltip_text" translatable="yes">Edit step</property>
-                <property name="margin_start">10</property>
-                <property name="margin_end">10</property>
-                <property name="margin_top">10</property>
-                <property name="margin_bottom">10</property>
-                <property name="icon_name">edit</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="image">edit-icon</property>
+                <style>
+                  <class name="flat"/>
+                  <class name="image-button"/>
+                </style>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="position">2</property>
+                <property name="non_homogeneous">True</property>
               </packing>
             </child>
           </object>
@@ -163,7 +204,7 @@
             <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="pack_type">end</property>
-            <property name="position">2</property>
+            <property name="position">1</property>
           </packing>
         </child>
       </object>
