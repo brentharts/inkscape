@@ -13,9 +13,11 @@
 
 #include "macros.h"
 
+#include <glib/gi18n.h>
 #include <gtkmm/box.h>
 #include <gtkmm/builder.h>
 #include <gtkmm/button.h>
+#include <gtkmm/enums.h>
 #include <iostream>
 #include <sigc++/functors/mem_fun.h>
 
@@ -58,6 +60,8 @@ Macros::Macros()
     builder->get_widget("MacrosRecord", _MacrosRecord);
     builder->get_widget("MacrosPlay", _MacrosPlay);
     builder->get_widget("MacrosEdit", _MacrosEdit);
+
+    builder->get_widget("record-icon", _record_button_icon);
 
     // Adding signals
     _MacrosCreate->signal_clicked().connect(sigc::mem_fun(*this, &Macros::on_macro_create));
@@ -112,7 +116,20 @@ void Macros::on_macro_export()
 
 void Macros::on_macro_record()
 {
-    std::cout << "Macro record not implemented" << std::endl;
+    // Add recording logic
+    if (_is_recording) {
+        // In recording, stop and change button to Record
+        _MacrosRecord->set_tooltip_text(_("Record"));
+        _record_button_icon->set_from_icon_name("media-record", Gtk::ICON_SIZE_BUTTON);
+
+        _is_recording = false;
+        return;
+    }
+
+    // Not recording , start recording and change button to Record
+    _MacrosRecord->set_tooltip_text(_("Stop Recording"));
+    _record_button_icon->set_from_icon_name("media-playback-stop", Gtk::ICON_SIZE_BUTTON);
+    _is_recording = true;
 }
 
 void Macros::on_macro_play()

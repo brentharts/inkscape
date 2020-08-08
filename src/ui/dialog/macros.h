@@ -88,8 +88,7 @@ private:
      */
     void on_macro_edit();
 
-private:
-    // Variables
+private: // Variables
 
     // Widgets
     Gtk::Button *_MacrosCreate;
@@ -100,7 +99,12 @@ private:
     Gtk::Button *_MacrosPlay;
     Gtk::Button *_MacrosEdit;
 
+    Gtk::Image* _record_button_icon;
+
     Gtk::Box *_MacrosBase;
+
+    // states
+    bool _is_recording = false;
 };
 
 } // namespace Dialog
