@@ -43,7 +43,25 @@
     <property name="can_focus">False</property>
     <property name="orientation">vertical</property>
     <child>
-      <placeholder/>
+      <object class="GtkScrolledWindow" id="MacrosScrolled">
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="shadow_type">in</property>
+        <child>
+          <object class="GtkTreeView" id="MacrosTree">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <child internal-child="selection">
+              <object class="GtkTreeSelection"/>
+            </child>
+          </object>
+        </child>
+      </object>
+      <packing>
+        <property name="expand">True</property>
+        <property name="fill">True</property>
+        <property name="position">0</property>
+      </packing>
     </child>
     <child>
       <object class="GtkBox">

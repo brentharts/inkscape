@@ -17,6 +17,8 @@
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
 #include <gtkmm/image.h>
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/treeview.h>
 
 #include "ui/widget/panel.h"
 
@@ -89,7 +91,6 @@ private:
     void on_macro_edit();
 
 private: // Variables
-
     // Widgets
     Gtk::Button *_MacrosCreate;
     Gtk::Button *_MacrosDelete;
@@ -99,9 +100,12 @@ private: // Variables
     Gtk::Button *_MacrosPlay;
     Gtk::Button *_MacrosEdit;
 
-    Gtk::Image* _record_button_icon;
+    Gtk::Image *_record_button_icon;
+
+    Gtk::TreeView *_MacrosTree;
 
     Gtk::Box *_MacrosBase;
+    Gtk::ScrolledWindow *_MacroScrolled;
 
     // states
     bool _is_recording = false;
