@@ -17,7 +17,10 @@
 #include <gtkmm/box.h>
 #include <gtkmm/builder.h>
 #include <gtkmm/button.h>
+#include <gtkmm/comboboxtext.h>
+#include <gtkmm/dialog.h>
 #include <gtkmm/enums.h>
+#include <gtkmm/hvbox.h>
 #include <iostream>
 #include <sigc++/functors/mem_fun.h>
 
@@ -96,7 +99,44 @@ Macros::~Macros() {}
 // Listeners
 void Macros::on_macro_create()
 {
-    std::cout << "Macro create not implemented" << std::endl;
+    Gtk::Dialog dialog;
+    Gtk::VBox box;
+    Gtk::Entry name_entry;
+    Gtk::ComboBoxText group_combo(true);
+    Gtk::Label name_label(_("Macro name"));
+    Gtk::Label group_label(_("Group"));
+
+    // Test Data
+    group_combo.append("111");
+    group_combo.append("222");
+    group_combo.append("333");
+    // Test Data
+
+    dialog.set_title(_("Create new Macro"));
+
+    name_label.set_alignment(0);
+    group_label.set_alignment(0);
+
+    box.pack_start(name_label);
+    box.pack_start(name_entry);
+    box.pack_start(group_label);
+    box.pack_start(group_combo);
+
+    box.set_valign(Gtk::ALIGN_START);
+
+    dialog.get_content_area()->pack_start(box);
+
+    dialog.add_button(_("Cancel"), Gtk::RESPONSE_CANCEL);
+    dialog.add_button(_("Create"), Gtk::RESPONSE_OK);
+
+    dialog.show_all();
+
+    int result = dialog.run();
+
+    if (result == Gtk::RESPONSE_OK) {
+        Glib::ustring macro_name = name_label.get_text();
+        Glib::ustring macro_group = group_label.get_text();
+    }
 }
 
 void Macros::on_macro_delete()
