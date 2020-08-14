@@ -78,7 +78,7 @@ private:
     std::multimap<int, DialogBase *> dialogs;
 
     DialogBase *dialog_factory(Glib::ustring name);
-    Gtk::Widget *create_notebook_tab(Glib::ustring label, Glib::ustring image);
+    Gtk::Widget *create_notebook_tab(Glib::ustring label, Glib::ustring image, unsigned int shortcut);
 
     // Signal connections
     std::vector<sigc::connection> connections;
