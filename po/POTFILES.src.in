@@ -261,6 +261,7 @@
 ../src/ui/dialog/livepatheffect-editor.cpp
 ../src/ui/dialog/lpe-fillet-chamfer-properties.cpp
 ../src/ui/dialog/lpe-powerstroke-properties.cpp
+../src/ui/dialog/macros.cpp
 ../src/ui/dialog/memory.cpp
 ../src/ui/dialog/messages.cpp
 ../src/ui/dialog/new-from-template.cpp
