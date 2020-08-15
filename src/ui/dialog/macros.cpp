@@ -95,7 +95,12 @@ Macros::Macros()
     {
         const bool is_vertical = _prefs->getBool("/dialogs/macros/orientation", true);
         _MacrosPanedVertical->set_active(is_vertical);
-        _MacrosPaned->set_orientation(is_vertical ? Gtk::ORIENTATION_VERTICAL : Gtk::ORIENTATION_HORIZONTAL);
+        paned_set_vertical(_MacrosPaned, is_vertical);
+        if (is_vertical) {
+            _MacrosPanedVertical->set_active();
+        } else {
+            _MacrosPanedHorizontal->set_active();
+        }
     }
     _MacrosPanedVertical->signal_toggled().connect(sigc::mem_fun(*this, &Macros::on_toggle_direction));
 
