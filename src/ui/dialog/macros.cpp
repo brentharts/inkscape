@@ -25,8 +25,23 @@
 #include <sigc++/functors/mem_fun.h>
 
 #include "io/resource.h"
+#include "preferences.h"
 #include "ui/widget/panel.h"
 #include "verbs.h"
+
+namespace {
+/**
+ * Set the orientation of `paned` to vertical or horizontal, and make the first child resizable
+ * if vertical, and the second child resizable if horizontal.
+ * @pre `paned` has two children
+ */
+void paned_set_vertical(Gtk::Paned *paned, bool vertical)
+{
+    paned->child_property_resize(*paned->get_child1()) = vertical;
+    assert(paned.child_property_resize(*paned->get_child2()));
+    paned->set_orientation(vertical ? Gtk::ORIENTATION_VERTICAL : Gtk::ORIENTATION_HORIZONTAL);
+}
+} // namespace
 
 namespace Inkscape {
 namespace UI {
@@ -34,14 +49,7 @@ namespace Dialog {
 
 Macros::Macros()
     : UI::Widget::Panel("/dialogs/macros", SP_VERB_DIALOG_MACROS)
-/* , _MacroCreate(nullptr) */
-/* , _MacroDelete(nullptr) */
-/* , _MacroImport(nullptr) */
-/* , _MacroExport(nullptr) */
-/* , _MacroRecord(nullptr) */
-/* , _MacroPlay(nullptr) */
-/* , _MacroEdit(nullptr) */
-/* , _MacroBase(nullptr) */
+    , _prefs(Inkscape::Preferences::get())
 {
     std::string gladefile = IO::Resource::get_filename_string(Inkscape::IO::Resource::UIS, "dialog-macros.glade");
     Glib::RefPtr<Gtk::Builder> builder;
@@ -53,8 +61,6 @@ Macros::Macros()
     }
 
     // Linking UI
-    builder->get_widget("MacrosBase", _MacrosBase);
-
     builder->get_widget("MacrosCreate", _MacrosCreate);
     builder->get_widget("MacrosDelete", _MacrosDelete);
     builder->get_widget("MacrosImport", _MacrosImport);
@@ -62,9 +68,39 @@ Macros::Macros()
 
     builder->get_widget("MacrosRecord", _MacrosRecord);
     builder->get_widget("MacrosPlay", _MacrosPlay);
-    builder->get_widget("MacrosEdit", _MacrosEdit);
+
+    builder->get_widget("MacrosStepAdd", _MacrosStepAdd);
+    builder->get_widget("MacrosStepRemove", _MacrosStepRemove);
+    builder->get_widget("MacrosStepEdit", _MacrosStepEdit);
+
+    builder->get_widget("MacrosPanedHorizontal", _MacrosPanedHorizontal);
+    builder->get_widget("MacrosPanedVertical", _MacrosPanedVertical);
+
+    builder->get_widget("MacrosTree", _MacrosTree);
+    builder->get_widget("MacrosTree", _MacrosStepsTree);
 
     builder->get_widget("record-icon", _record_button_icon);
+
+    builder->get_widget("MacrosBase", _MacrosBase);
+    builder->get_widget("MacrosPaned", _MacrosPaned);
+    builder->get_widget("MacrosScrolled", _MacrosScrolled);
+
+    /* builder->get_widget("MacrosTreeStore", _MacrosTreeStore); */
+    /* builder->get_widget("MacrosStepsStore", _MacrosStepsStore); */
+
+    // Setup panes
+    {
+        const bool is_vertical = _prefs->getBool("/dialogs/macros/orientation", true);
+        _MacrosPanedVertical->set_active(is_vertical);
+        _MacrosPaned->set_orientation(is_vertical ? Gtk::ORIENTATION_VERTICAL : Gtk::ORIENTATION_HORIZONTAL);
+    }
+    _MacrosPanedVertical->signal_toggled().connect(sigc::mem_fun(*this, &Macros::on_toggle_direction));
+
+    {
+        int panedpos = _prefs->getInt("/dialogs/macros/panedpos", 180);
+        _MacrosPaned->property_position() = panedpos;
+    }
+    _MacrosPaned->property_position().signal_changed().connect(sigc::mem_fun(*this, &Macros::on_resize));
 
     // Adding signals
     _MacrosCreate->signal_clicked().connect(sigc::mem_fun(*this, &Macros::on_macro_create));
@@ -74,7 +110,7 @@ Macros::Macros()
 
     _MacrosRecord->signal_clicked().connect(sigc::mem_fun(*this, &Macros::on_macro_record));
     _MacrosPlay->signal_clicked().connect(sigc::mem_fun(*this, &Macros::on_macro_play));
-    _MacrosEdit->signal_clicked().connect(sigc::mem_fun(*this, &Macros::on_macro_edit));
+    _MacrosStepEdit->signal_clicked().connect(sigc::mem_fun(*this, &Macros::on_macro_edit));
 
     // TODO: Initialize Marcos tree (actual macros)
 
@@ -180,6 +216,19 @@ void Macros::on_macro_play()
 void Macros::on_macro_edit()
 {
     std::cout << "Macro edit not implemented" << std::endl;
+}
+
+void Macros::on_toggle_direction()
+{
+    const bool is_vertical = _MacrosPanedVertical->get_active();
+    _prefs->setBool("/dialogs/macros/orientation", is_vertical);
+    paned_set_vertical(_MacrosPaned, is_vertical);
+    _prefs->setInt("/dialogs/macros/panedpos", _MacrosPaned->property_position());
+}
+
+void Macros::on_resize()
+{
+    _prefs->setInt("/dialogs/macros/panedpos", _MacrosPaned->property_position());
 }
 
 } // namespace Dialog

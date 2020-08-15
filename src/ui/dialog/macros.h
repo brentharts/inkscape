@@ -17,9 +17,13 @@
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
 #include <gtkmm/image.h>
+#include <gtkmm/paned.h>
+#include <gtkmm/radiobutton.h>
 #include <gtkmm/scrolledwindow.h>
+#include <gtkmm/treestore.h>
 #include <gtkmm/treeview.h>
 
+#include "preferences.h"
 #include "ui/widget/panel.h"
 
 namespace Inkscape {
@@ -90,25 +94,54 @@ private:
      */
     void on_macro_edit();
 
+    /**
+     * called when pane orientation needs to be switched
+     */
+    void on_toggle_direction();
+    /**
+     * Will be called when pane partitions are resized
+     * It remebers the partition sizes using preferences
+     */
+    void on_resize();
+    /**
+     * toggle steps
+     */
+    void on_toggle_steps();
+
 private: // Variables
     // Widgets
     Gtk::Button *_MacrosCreate;
     Gtk::Button *_MacrosDelete;
     Gtk::Button *_MacrosImport;
     Gtk::Button *_MacrosExport;
+
     Gtk::Button *_MacrosRecord;
     Gtk::Button *_MacrosPlay;
-    Gtk::Button *_MacrosEdit;
+
+    Gtk::Button *_MacrosStepAdd;
+    Gtk::Button *_MacrosStepRemove;
+    Gtk::Button *_MacrosStepEdit;
+
+    Gtk::RadioButton *_MacrosPanedHorizontal;
+    Gtk::RadioButton *_MacrosPanedVertical;
+
+    Gtk::TreeView *_MacrosTree;
+    Gtk::TreeView *_MacrosStepsTree;
 
     Gtk::Image *_record_button_icon;
 
-    Gtk::TreeView *_MacrosTree;
-
     Gtk::Box *_MacrosBase;
-    Gtk::ScrolledWindow *_MacroScrolled;
+    Gtk::Paned *_MacrosPaned;
+    Gtk::ScrolledWindow *_MacrosScrolled;
+
+    Gtk::TreeStore *_MacrosTreeStore;
+    Gtk::TreeStore *_MacrosStepsStore;
 
     // states
     bool _is_recording = false;
+
+    // others
+    Inkscape::Preferences *_prefs;
 };
 
 } // namespace Dialog
