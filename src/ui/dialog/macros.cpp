@@ -21,6 +21,8 @@
 #include <gtkmm/dialog.h>
 #include <gtkmm/enums.h>
 #include <gtkmm/hvbox.h>
+#include <gtkmm/treeselection.h>
+#include <gtkmm/treestore.h>
 #include <iostream>
 #include <sigc++/functors/mem_fun.h>
 
@@ -85,8 +87,9 @@ Macros::Macros()
     builder->get_widget("MacrosPaned", _MacrosPaned);
     builder->get_widget("MacrosScrolled", _MacrosScrolled);
 
-    /* builder->get_widget("MacrosTreeStore", _MacrosTreeStore); */
-    /* builder->get_widget("MacrosStepsStore", _MacrosStepsStore); */
+    _MacrosTreeStore = Glib::RefPtr<Gtk::TreeStore>::cast_dynamic(builder->get_object("MacrosTreeStore"));
+    _MacrosStepStore = Glib::RefPtr<Gtk::TreeStore>::cast_dynamic(builder->get_object("MacrosStepStore"));
+    _MacrosTreeSelection = Glib::RefPtr<Gtk::TreeSelection>::cast_dynamic(builder->get_object("MacrosTreeSelection"));
 
     // Setup panes
     {
@@ -112,7 +115,13 @@ Macros::Macros()
     _MacrosPlay->signal_clicked().connect(sigc::mem_fun(*this, &Macros::on_macro_play));
     _MacrosStepEdit->signal_clicked().connect(sigc::mem_fun(*this, &Macros::on_macro_edit));
 
+    _MacrosTree->signal_row_expanded().connect(
+        sigc::bind(sigc::mem_fun(*this, &Macros::on_tree_row_expanded_collapsed), true));
+    _MacrosTree->signal_row_collapsed().connect(
+        sigc::bind(sigc::mem_fun(*this, &Macros::on_tree_row_expanded_collapsed), false));
+
     // TODO: Initialize Marcos tree (actual macros)
+    load_macros();
 
     _setContents(_MacrosBase);
     show_all_children();
@@ -229,6 +238,28 @@ void Macros::on_toggle_direction()
 void Macros::on_resize()
 {
     _prefs->setInt("/dialogs/macros/panedpos", _MacrosPaned->property_position());
+}
+
+void Macros::on_tree_row_expanded_collapsed(const Gtk::TreeIter &expanded_row, const Gtk::TreePath &tree_path,
+                                            const bool is_expanded)
+{
+    (*expanded_row)[_tree_columns.icon] = is_expanded ? "folder-open" : "folder";
+}
+
+void Macros::load_macros()
+{
+    // Test Data
+    auto row = *(_MacrosTreeStore->append());
+    row[_tree_columns.icon] = "folder";
+    row[_tree_columns.name] = "Default";
+
+    Gtk::TreeModel::Row childrow = *(_MacrosTreeStore->append(row.children()));
+    childrow[_tree_columns.icon] = "system-run";
+    childrow[_tree_columns.name] = "Set text background";
+    childrow = *(_MacrosTreeStore->append(row.children()));
+    childrow[_tree_columns.icon] = "system-run";
+    childrow[_tree_columns.name] = "Set text theme";
+    // Test Data
 }
 
 } // namespace Dialog

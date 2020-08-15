@@ -20,6 +20,10 @@
 #include <gtkmm/paned.h>
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/scrolledwindow.h>
+#include <gtkmm/treeiter.h>
+#include <gtkmm/treemodelcolumn.h>
+#include <gtkmm/treepath.h>
+#include <gtkmm/treeselection.h>
 #include <gtkmm/treestore.h>
 #include <gtkmm/treeview.h>
 
@@ -59,6 +63,22 @@ public:
 protected:
     /* void _apply() override; */
     /* void _handleResponse(int response_id) override; */
+
+    class MacrosModelColumns : public Gtk::TreeModel::ColumnRecord
+    {
+    public:
+        MacrosModelColumns()
+        {
+            // Order should be same as in glade file
+            add(icon);
+            add(name);
+        }
+        // Order should be same as in glade file
+        Gtk::TreeModelColumn<Glib::ustring> icon;
+        Gtk::TreeModelColumn<Glib::ustring> name;
+    };
+
+    MacrosModelColumns _tree_columns;
 
 private:
     // Event Handlers
@@ -108,6 +128,20 @@ private:
      */
     void on_toggle_steps();
 
+    /**
+     * Called when rows expanded/collapsed changes group icon to match
+     * folder-open when expanded
+     * folder      when closed
+     */
+    void on_tree_row_expanded_collapsed(const Gtk::TreeIter &expanded_row, const Gtk::TreePath &tree_path,
+                                        const bool is_expanded);
+
+    // Workers
+    /**
+     * load the XML file and read to get macros data
+     */
+    void load_macros();
+
 private: // Variables
     // Widgets
     Gtk::Button *_MacrosCreate;
@@ -134,8 +168,9 @@ private: // Variables
     Gtk::Paned *_MacrosPaned;
     Gtk::ScrolledWindow *_MacrosScrolled;
 
-    Gtk::TreeStore *_MacrosTreeStore;
-    Gtk::TreeStore *_MacrosStepsStore;
+    Glib::RefPtr<Gtk::TreeStore> _MacrosTreeStore;
+    Glib::RefPtr<Gtk::TreeStore> _MacrosStepStore;
+    Glib::RefPtr<Gtk::TreeSelection> _MacrosTreeSelection;
 
     // states
     bool _is_recording = false;
