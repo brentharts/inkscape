@@ -491,7 +491,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkSwitch" id="MacrosStepsSwitch">
+              <object class="GtkSwitch" id="MacrosPanedSwitch">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="halign">start</property>

@@ -20,6 +20,7 @@
 #include <gtkmm/paned.h>
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/scrolledwindow.h>
+#include <gtkmm/switch.h>
 #include <gtkmm/treeiter.h>
 #include <gtkmm/treemodelcolumn.h>
 #include <gtkmm/treepath.h>
@@ -126,7 +127,7 @@ private:
     /**
      * toggle steps
      */
-    void on_toggle_steps();
+    void on_toggle_steps_pane();
 
     /**
      * Called when rows expanded/collapsed changes group icon to match
@@ -158,6 +159,7 @@ private: // Variables
 
     Gtk::RadioButton *_MacrosPanedHorizontal;
     Gtk::RadioButton *_MacrosPanedVertical;
+    Gtk::Switch *_MacrosPanedSwitch;
 
     Gtk::TreeView *_MacrosTree;
     Gtk::TreeView *_MacrosStepsTree;
@@ -166,6 +168,7 @@ private: // Variables
 
     Gtk::Box *_MacrosBase;
     Gtk::Paned *_MacrosPaned;
+    Gtk::Box *_MacrosSteps;
     Gtk::ScrolledWindow *_MacrosScrolled;
 
     Glib::RefPtr<Gtk::TreeStore> _MacrosTreeStore;

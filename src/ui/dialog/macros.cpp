@@ -43,6 +43,12 @@ void paned_set_vertical(Gtk::Paned *paned, bool vertical)
     assert(paned.child_property_resize(*paned->get_child2()));
     paned->set_orientation(vertical ? Gtk::ORIENTATION_VERTICAL : Gtk::ORIENTATION_HORIZONTAL);
 }
+
+template <typename T>
+void debug_print(T var)
+{
+    std::cerr << var << std::endl;
+}
 } // namespace
 
 namespace Inkscape {
@@ -77,6 +83,7 @@ Macros::Macros()
 
     builder->get_widget("MacrosPanedHorizontal", _MacrosPanedHorizontal);
     builder->get_widget("MacrosPanedVertical", _MacrosPanedVertical);
+    builder->get_widget("MacrosPanedSwitch", _MacrosPanedSwitch);
 
     builder->get_widget("MacrosTree", _MacrosTree);
     builder->get_widget("MacrosTree", _MacrosStepsTree);
@@ -85,6 +92,7 @@ Macros::Macros()
 
     builder->get_widget("MacrosBase", _MacrosBase);
     builder->get_widget("MacrosPaned", _MacrosPaned);
+    builder->get_widget("MacrosSteps", _MacrosSteps);
     builder->get_widget("MacrosScrolled", _MacrosScrolled);
 
     _MacrosTreeStore = Glib::RefPtr<Gtk::TreeStore>::cast_dynamic(builder->get_object("MacrosTreeStore"));
@@ -94,21 +102,20 @@ Macros::Macros()
     // Setup panes
     {
         const bool is_vertical = _prefs->getBool("/dialogs/macros/orientation", true);
-        _MacrosPanedVertical->set_active(is_vertical);
         paned_set_vertical(_MacrosPaned, is_vertical);
         if (is_vertical) {
             _MacrosPanedVertical->set_active();
         } else {
             _MacrosPanedHorizontal->set_active();
         }
-    }
-    _MacrosPanedVertical->signal_toggled().connect(sigc::mem_fun(*this, &Macros::on_toggle_direction));
 
-    {
-        int panedpos = _prefs->getInt("/dialogs/macros/panedpos", 180);
+        const bool show_steps = _prefs->getBool("/dialogs/macros/showsteps", true);
+        _MacrosPanedSwitch->set_state(show_steps);
+        on_toggle_steps_pane();
+
+        const int panedpos = _prefs->getInt("/dialogs/macros/panedpos", 180);
         _MacrosPaned->property_position() = panedpos;
     }
-    _MacrosPaned->property_position().signal_changed().connect(sigc::mem_fun(*this, &Macros::on_resize));
 
     // Adding signals
     _MacrosCreate->signal_clicked().connect(sigc::mem_fun(*this, &Macros::on_macro_create));
@@ -119,6 +126,10 @@ Macros::Macros()
     _MacrosRecord->signal_clicked().connect(sigc::mem_fun(*this, &Macros::on_macro_record));
     _MacrosPlay->signal_clicked().connect(sigc::mem_fun(*this, &Macros::on_macro_play));
     _MacrosStepEdit->signal_clicked().connect(sigc::mem_fun(*this, &Macros::on_macro_edit));
+
+    _MacrosPanedVertical->signal_toggled().connect(sigc::mem_fun(*this, &Macros::on_toggle_direction));
+    _MacrosPanedSwitch->property_active().signal_changed().connect(sigc::mem_fun(*this, &Macros::on_toggle_steps_pane));
+    _MacrosPaned->property_position().signal_changed().connect(sigc::mem_fun(*this, &Macros::on_resize));
 
     _MacrosTree->signal_row_expanded().connect(
         sigc::bind(sigc::mem_fun(*this, &Macros::on_tree_row_expanded_collapsed), true));
@@ -243,6 +254,17 @@ void Macros::on_toggle_direction()
 void Macros::on_resize()
 {
     _prefs->setInt("/dialogs/macros/panedpos", _MacrosPaned->property_position());
+}
+
+void Macros::on_toggle_steps_pane()
+{
+    const bool show_steps = _MacrosPanedSwitch->get_state();
+    _prefs->setBool("/dialogs/macros/showsteps", show_steps);
+    if (show_steps) {
+        _MacrosSteps->show_all();
+        return;
+    }
+    _MacrosSteps->hide();
 }
 
 void Macros::on_tree_row_expanded_collapsed(const Gtk::TreeIter &expanded_row, const Gtk::TreePath &tree_path,
