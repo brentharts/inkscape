@@ -21,6 +21,7 @@
 #include <gtkmm/dialog.h>
 #include <gtkmm/enums.h>
 #include <gtkmm/hvbox.h>
+#include <gtkmm/messagedialog.h>
 #include <gtkmm/treeselection.h>
 #include <gtkmm/treestore.h>
 #include <iostream>
@@ -202,7 +203,20 @@ void Macros::on_macro_create()
 
 void Macros::on_macro_delete()
 {
-    std::cout << "Macro delete not implemented" << std::endl;
+    // TODO: Determine the selection first
+    Gtk::MessageDialog dialog(_("Delete selected macros?"), true, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_OK_CANCEL);
+    dialog.set_secondary_text(_("Selected Macros will be deleted permanently."));
+    dialog.set_title(_("Confirm"));
+    int result = dialog.run();
+    switch (result) {
+        case Gtk::RESPONSE_OK:
+            // TODO: Delete selected macros
+            break;
+        case Gtk::RESPONSE_CANCEL:
+            break;
+        default:
+            break;
+    }
 }
 
 void Macros::on_macro_import()
