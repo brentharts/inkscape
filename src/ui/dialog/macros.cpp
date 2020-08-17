@@ -219,15 +219,20 @@ void Macros::on_macro_delete()
     Gtk::MessageDialog dialog(_("Delete selected macros?"), true, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_OK_CANCEL);
     dialog.set_secondary_text(_("Selected Macros will be deleted permanently."));
     dialog.set_title(_("Confirm"));
+
     int result = dialog.run();
-    switch (result) {
-        case Gtk::RESPONSE_OK:
-            // TODO: Delete selected macros
-            break;
-        case Gtk::RESPONSE_CANCEL:
-            break;
-        default:
-            break;
+    if (result == Gtk::RESPONSE_OK) {
+        // TODO: Support multiple deletions
+        auto iter = _MacrosTreeSelection->get_selected();
+        auto parent = iter->parent();
+        _MacrosTreeStore->erase(iter);
+
+        // colapse(change icon to collapsed) parent(group) if no child left
+        if (parent->children().empty()) {
+            (*parent)[_tree_columns.icon] = "folder";
+        }
+
+        // TODO: Also remove from macro tree
     }
 }
 
