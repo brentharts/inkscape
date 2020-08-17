@@ -169,11 +169,10 @@ void Macros::on_macro_create()
     Gtk::Label name_label(_("Macro name"));
     Gtk::Label group_label(_("Group"));
 
-    // Test Data
-    group_combo.append("111");
-    group_combo.append("222");
-    group_combo.append("333");
-    // Test Data
+    // pick groups from macro tree
+    for (auto iter = _MacrosTreeStore->get_iter("0"); iter; ++iter) {
+        group_combo.append((*iter)[_tree_columns.name]);
+    }
 
     dialog.set_title(_("Create new Macro"));
 
