@@ -199,8 +199,17 @@ void Macros::on_macro_create()
     int result = dialog.run();
 
     if (result == Gtk::RESPONSE_OK) {
-        Glib::ustring macro_name = name_label.get_text();
-        Glib::ustring macro_group = group_label.get_text();
+        Glib::ustring macro_name = name_entry.get_text();
+
+        // Set folder as "Default" if combo box is empty
+        Glib::ustring macro_group =
+            (not group_combo.get_entry_text().empty() ? group_combo.get_entry_text() : _("Default"));
+
+        auto macro_iter = create_macro(macro_name, macro_group);
+        // TODO: Also create in XML tree
+
+        _MacrosTree->expand_to_path(_MacrosTreeStore->get_path(macro_iter));
+        _MacrosTreeSelection->select(macro_iter);
     }
 }
 
