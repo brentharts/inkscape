@@ -14,6 +14,7 @@
 #ifndef INKSCAPE_UI_DIALOG_MACROS_H
 #define INKSCAPE_UI_DIALOG_MACROS_H
 
+#include <glibmm/ustring.h>
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
 #include <gtkmm/image.h>
@@ -142,6 +143,26 @@ private:
      * load the XML file and read to get macros data
      */
     void load_macros();
+
+    /**
+     * If the group name exist returns an iterator to it
+     */
+    Gtk::TreeIter find_group(const Glib::ustring &group_name);
+    /**
+     * same as find, but create the group if it doesn't exist
+     */
+    Gtk::TreeIter create_group(const Glib::ustring &group_name);
+
+    /**
+     * Finds macro of given name in the group, and returns iterator to it
+     */
+    Gtk::TreeIter find_macro(const Glib::ustring &macro_name, Gtk::TreeIter group_iter);
+    Gtk::TreeIter find_macro(const Glib::ustring &macro_name, const Glib::ustring &group_name);
+
+    /**
+     * Creates a new macro and return an iterator to it
+     */
+    Gtk::TreeIter create_macro(const Glib::ustring &macro_name, const Glib::ustring &group_name);
 
 private: // Variables
     // Widgets

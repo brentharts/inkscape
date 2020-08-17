@@ -22,6 +22,7 @@
 #include <gtkmm/enums.h>
 #include <gtkmm/hvbox.h>
 #include <gtkmm/messagedialog.h>
+#include <gtkmm/treepath.h>
 #include <gtkmm/treeselection.h>
 #include <gtkmm/treestore.h>
 #include <iostream>
@@ -186,6 +187,9 @@ void Macros::on_macro_create()
 
     box.set_valign(Gtk::ALIGN_START);
 
+    box.set_size_request(300);
+    box.property_margin() = 12;
+
     dialog.get_content_area()->pack_start(box);
 
     dialog.add_button(_("Cancel"), Gtk::RESPONSE_CANCEL);
@@ -290,17 +294,72 @@ void Macros::on_tree_row_expanded_collapsed(const Gtk::TreeIter &expanded_row, c
 void Macros::load_macros()
 {
     // Test Data
+    create_group("Default");
+    create_macro("Set text background", "Default");
+    create_macro("Text raibow", "Default");
+
+    create_group("Forbidden");
+    create_macro("CIA docs creator", "Forbidden");
+    create_macro("Legit Conspiracy theories creator", "Forbidden");
+    // Test Data
+}
+
+Gtk::TreeIter Macros::create_group(const Glib::ustring &group_name)
+{
+    if (auto group_iter = find_group(group_name); group_iter) {
+        return group_iter;
+    }
+
     auto row = *(_MacrosTreeStore->append());
     row[_tree_columns.icon] = "folder";
-    row[_tree_columns.name] = "Default";
+    row[_tree_columns.name] = group_name;
 
-    Gtk::TreeModel::Row childrow = *(_MacrosTreeStore->append(row.children()));
-    childrow[_tree_columns.icon] = "system-run";
-    childrow[_tree_columns.name] = "Set text background";
-    childrow = *(_MacrosTreeStore->append(row.children()));
-    childrow[_tree_columns.icon] = "system-run";
-    childrow[_tree_columns.name] = "Set text theme";
-    // Test Data
+    return row;
+}
+
+Gtk::TreeIter Macros::find_group(const Glib::ustring &group_name)
+{
+    auto iter = _MacrosTreeStore->get_iter("0");
+
+    while (iter) {
+        if ((*iter)[_tree_columns.name] == group_name) {
+            break;
+        }
+        ++iter;
+    }
+    return iter;
+}
+
+Gtk::TreeIter Macros::find_macro(const Glib::ustring &macro_name, Gtk::TreeIter group_iter)
+{
+    auto group_children = group_iter->children();
+    for (auto child : group_children) {
+        if (child[_tree_columns.name] == macro_name) {
+            return child;
+        }
+    }
+    return Gtk::TreeIter();
+}
+
+Gtk::TreeIter Macros::find_macro(const Glib::ustring &macro_name, const Glib::ustring &group_name)
+{
+    return find_macro(macro_name, find_group(group_name));
+}
+
+Gtk::TreeIter Macros::create_macro(const Glib::ustring &macro_name, const Glib::ustring &group_name)
+{
+    // create_group will work same as find if the group exists
+    auto group_iter = create_group(group_name);
+
+    if (auto macro = find_macro(macro_name, group_iter); macro) {
+        return macro;
+    }
+
+    auto macro = *(_MacrosTreeStore->append(group_iter->children()));
+    macro[_tree_columns.icon] = "system-run";
+    macro[_tree_columns.name] = macro_name;
+
+    return macro;
 }
 
 } // namespace Dialog
