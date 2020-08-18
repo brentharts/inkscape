@@ -36,6 +36,8 @@ namespace Inkscape {
 namespace UI {
 namespace Dialog {
 
+class MacrosDragAndDropStore;
+
 class Macros : public UI::Widget::Panel
 {
 public:
@@ -65,22 +67,6 @@ public:
 protected:
     /* void _apply() override; */
     /* void _handleResponse(int response_id) override; */
-
-    class MacrosModelColumns : public Gtk::TreeModel::ColumnRecord
-    {
-    public:
-        MacrosModelColumns()
-        {
-            // Order should be same as in glade file
-            add(icon);
-            add(name);
-        }
-        // Order should be same as in glade file
-        Gtk::TreeModelColumn<Glib::ustring> icon;
-        Gtk::TreeModelColumn<Glib::ustring> name;
-    };
-
-    MacrosModelColumns _tree_columns;
 
 private:
     // Event Handlers
@@ -192,7 +178,7 @@ private: // Variables
     Gtk::Box *_MacrosSteps;
     Gtk::ScrolledWindow *_MacrosScrolled;
 
-    Glib::RefPtr<Gtk::TreeStore> _MacrosTreeStore;
+    Glib::RefPtr<MacrosDragAndDropStore> _MacrosTreeStore;
     Glib::RefPtr<Gtk::TreeStore> _MacrosStepStore;
     Glib::RefPtr<Gtk::TreeSelection> _MacrosTreeSelection;
 
@@ -201,6 +187,39 @@ private: // Variables
 
     // others
     Inkscape::Preferences *_prefs;
+};
+
+class MacrosDragAndDropStore : public Gtk::TreeStore
+{
+protected:
+    MacrosDragAndDropStore();
+
+public:
+    // FIXME: Playing safe for now make it private once final
+
+    class MacrosModelColumns : public Gtk::TreeModel::ColumnRecord
+    {
+    public:
+        MacrosModelColumns()
+        {
+            // Order should be same as in glade file
+            add(icon);
+            add(name);
+        }
+        // Order should be same as in glade file
+        Gtk::TreeModelColumn<Glib::ustring> icon;
+        Gtk::TreeModelColumn<Glib::ustring> name;
+    };
+
+    MacrosModelColumns _tree_columns;
+
+    static Glib::RefPtr<MacrosDragAndDropStore> create();
+
+protected:
+    // Overridden virtual functions:
+    bool row_draggable_vfunc(const Gtk::TreeModel::Path &path) const override;
+    bool row_drop_possible_vfunc(const Gtk::TreeModel::Path &dest,
+                                 const Gtk::SelectionData &selection_data) const override;
 };
 
 } // namespace Dialog

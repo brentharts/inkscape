@@ -97,9 +97,15 @@ Macros::Macros()
     builder->get_widget("MacrosSteps", _MacrosSteps);
     builder->get_widget("MacrosScrolled", _MacrosScrolled);
 
-    _MacrosTreeStore = Glib::RefPtr<Gtk::TreeStore>::cast_dynamic(builder->get_object("MacrosTreeStore"));
+    _MacrosTreeStore = MacrosDragAndDropStore::create();
+
     _MacrosStepStore = Glib::RefPtr<Gtk::TreeStore>::cast_dynamic(builder->get_object("MacrosStepStore"));
     _MacrosTreeSelection = Glib::RefPtr<Gtk::TreeSelection>::cast_dynamic(builder->get_object("MacrosTreeSelection"));
+
+    _MacrosTree->set_model(_MacrosTreeStore);
+    // enable drag and drop
+    _MacrosTree->enable_model_drag_dest();
+    _MacrosTree->enable_model_drag_source();
 
     // Setup panes
     {
@@ -138,7 +144,7 @@ Macros::Macros()
     _MacrosTree->signal_row_collapsed().connect(
         sigc::bind(sigc::mem_fun(*this, &Macros::on_tree_row_expanded_collapsed), false));
 
-    // TODO: Initialize Marcos tree (actual macros)
+    // Initialize marcos tree (actual macros)
     load_macros();
 
     _setContents(_MacrosBase);
@@ -171,7 +177,7 @@ void Macros::on_macro_create()
 
     // pick groups from macro tree
     for (auto iter = _MacrosTreeStore->get_iter("0"); iter; ++iter) {
-        group_combo.append((*iter)[_tree_columns.name]);
+        group_combo.append((*iter)[_MacrosTreeStore->_tree_columns.name]);
     }
 
     dialog.set_title(_("Create new Macro"));
@@ -229,7 +235,7 @@ void Macros::on_macro_delete()
 
         // colapse(change icon to collapsed) parent(group) if no child left
         if (parent->children().empty()) {
-            (*parent)[_tree_columns.icon] = "folder";
+            (*parent)[_MacrosTreeStore->_tree_columns.icon] = "folder";
         }
 
         // TODO: Also remove from macro tree
@@ -301,7 +307,7 @@ void Macros::on_toggle_steps_pane()
 void Macros::on_tree_row_expanded_collapsed(const Gtk::TreeIter &expanded_row, const Gtk::TreePath &tree_path,
                                             const bool is_expanded)
 {
-    (*expanded_row)[_tree_columns.icon] = is_expanded ? "folder-open" : "folder";
+    (*expanded_row)[_MacrosTreeStore->_tree_columns.icon] = is_expanded ? "folder-open" : "folder";
 }
 
 void Macros::load_macros()
@@ -324,8 +330,8 @@ Gtk::TreeIter Macros::create_group(const Glib::ustring &group_name)
     }
 
     auto row = *(_MacrosTreeStore->append());
-    row[_tree_columns.icon] = "folder";
-    row[_tree_columns.name] = group_name;
+    row[_MacrosTreeStore->_tree_columns.icon] = "folder";
+    row[_MacrosTreeStore->_tree_columns.name] = group_name;
 
     return row;
 }
@@ -335,7 +341,7 @@ Gtk::TreeIter Macros::find_group(const Glib::ustring &group_name)
     auto iter = _MacrosTreeStore->get_iter("0");
 
     while (iter) {
-        if ((*iter)[_tree_columns.name] == group_name) {
+        if ((*iter)[_MacrosTreeStore->_tree_columns.name] == group_name) {
             break;
         }
         ++iter;
@@ -347,7 +353,7 @@ Gtk::TreeIter Macros::find_macro(const Glib::ustring &macro_name, Gtk::TreeIter 
 {
     auto group_children = group_iter->children();
     for (auto child : group_children) {
-        if (child[_tree_columns.name] == macro_name) {
+        if (child[_MacrosTreeStore->_tree_columns.name] == macro_name) {
             return child;
         }
     }
@@ -369,10 +375,61 @@ Gtk::TreeIter Macros::create_macro(const Glib::ustring &macro_name, const Glib::
     }
 
     auto macro = *(_MacrosTreeStore->append(group_iter->children()));
-    macro[_tree_columns.icon] = "system-run";
-    macro[_tree_columns.name] = macro_name;
+    macro[_MacrosTreeStore->_tree_columns.icon] = "system-run";
+    macro[_MacrosTreeStore->_tree_columns.name] = macro_name;
 
     return macro;
+}
+
+// MacrosDragAndDropStore ------------------------------------------------------------
+MacrosDragAndDropStore::MacrosDragAndDropStore()
+{
+    // We can't just call Gtk::TreeModel(m_Columns) in the initializer list
+    // because m_Columns does not exist when the base class constructor runs.
+    // And we can't have a static m_Columns instance, because that would be
+    // instantiated before the gtkmm type system.
+    // So, we use this method, which should only be used just after creation:
+    set_column_types(_tree_columns);
+}
+
+Glib::RefPtr<MacrosDragAndDropStore> MacrosDragAndDropStore::create()
+{
+    return Glib::RefPtr<MacrosDragAndDropStore>(new MacrosDragAndDropStore());
+}
+
+bool MacrosDragAndDropStore::row_draggable_vfunc(const Gtk::TreeModel::Path &path) const
+{
+    // TODO: Add a const version of get_iter to TreeModel:
+    auto unconstThis = const_cast<MacrosDragAndDropStore *>(this);
+    const_iterator iter = unconstThis->get_iter(path);
+    // const_iterator iter = get_iter(path);
+    if (iter) {
+        // if iter depth is atleast 1 it's a macro and hence can be drag between folders/groups
+        return iter_depth(iter) == 1;
+    }
+
+    return Gtk::TreeStore::row_draggable_vfunc(path);
+}
+
+bool MacrosDragAndDropStore::row_drop_possible_vfunc(const Gtk::TreeModel::Path &dest,
+                                                     const Gtk::SelectionData &selection_data) const
+{
+    Gtk::TreeModel::Path dest_parent = dest;
+
+    // Restrict dropping on top level, only allow dropping in groups
+    if (dest_parent.empty() or not dest_parent.up()) {
+        return false;
+    }
+
+    auto unconstThis = const_cast<MacrosDragAndDropStore *>(this);
+    const_iterator iter_dest_parent = unconstThis->get_iter(dest_parent);
+    // const_iterator iter_dest_parent = get_iter(dest);
+    if (iter_dest_parent) {
+        // iter depth is 0 means resides in root hence is a folder/group
+        return iter_depth(iter_dest_parent) == 0;
+    }
+
+    return false;
 }
 
 } // namespace Dialog
