@@ -19,6 +19,7 @@
 #include <gtkmm/button.h>
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/dialog.h>
+#include <gtkmm/entry.h>
 #include <gtkmm/enums.h>
 #include <gtkmm/hvbox.h>
 #include <gtkmm/messagedialog.h>
@@ -72,6 +73,7 @@ Macros::Macros()
 
     // Linking UI
     builder->get_widget("MacrosCreate", _MacrosCreate);
+    builder->get_widget("MacrosNewGroup", _MacrosNewGroup);
     builder->get_widget("MacrosDelete", _MacrosDelete);
     builder->get_widget("MacrosImport", _MacrosImport);
     builder->get_widget("MacrosExport", _MacrosExport);
@@ -127,6 +129,7 @@ Macros::Macros()
 
     // Adding signals
     _MacrosCreate->signal_clicked().connect(sigc::mem_fun(*this, &Macros::on_macro_create));
+    _MacrosNewGroup->signal_clicked().connect(sigc::mem_fun(*this, &Macros::on_macro_new_group));
     _MacrosDelete->signal_clicked().connect(sigc::mem_fun(*this, &Macros::on_macro_delete));
     _MacrosImport->signal_clicked().connect(sigc::mem_fun(*this, &Macros::on_macro_import));
     _MacrosExport->signal_clicked().connect(sigc::mem_fun(*this, &Macros::on_macro_export));
@@ -216,6 +219,29 @@ void Macros::on_macro_create()
 
         _MacrosTree->expand_to_path(_MacrosTreeStore->get_path(macro_iter));
         _MacrosTreeSelection->select(macro_iter);
+    }
+}
+
+void Macros::on_macro_new_group()
+{
+    Gtk::Dialog dialog(_("Create new group"), Gtk::DIALOG_MODAL | Gtk::DIALOG_USE_HEADER_BAR);
+
+    Gtk::Entry group_name_entry;
+
+    dialog.get_content_area()->pack_start(group_name_entry);
+    dialog.set_size_request(300);
+    dialog.get_content_area()->property_margin() = 12;
+
+    dialog.add_button(_("Cancel"), Gtk::RESPONSE_CANCEL);
+    dialog.add_button(_("Create"), Gtk::RESPONSE_OK);
+
+    dialog.show_all();
+
+    int result = dialog.run();
+    if (result == Gtk::RESPONSE_OK and not group_name_entry.get_text().empty()) {
+        // TODO: create in XML too
+        auto iter = create_group(group_name_entry.get_text());
+        _MacrosTreeSelection->select(iter);
     }
 }
 

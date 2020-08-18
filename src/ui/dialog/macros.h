@@ -76,6 +76,11 @@ private:
     void on_macro_create();
 
     /**
+     * creates a new group in the macro tree and asks name
+     */
+    void on_macro_new_group();
+
+    /**
      * deletes selected macro via a confirmation dialog
      */
     void on_macro_delete();
@@ -153,6 +158,7 @@ private:
 private: // Variables
     // Widgets
     Gtk::Button *_MacrosCreate;
+    Gtk::Button *_MacrosNewGroup;
     Gtk::Button *_MacrosDelete;
     Gtk::Button *_MacrosImport;
     Gtk::Button *_MacrosExport;
