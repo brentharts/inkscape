@@ -104,10 +104,20 @@ Macros::Macros()
     _MacrosStepStore = Glib::RefPtr<Gtk::TreeStore>::cast_dynamic(builder->get_object("MacrosStepStore"));
     _MacrosTreeSelection = Glib::RefPtr<Gtk::TreeSelection>::cast_dynamic(builder->get_object("MacrosTreeSelection"));
 
+    // Initialize marcos tree (actual macros)
+    load_macros(); // First load into tree store for performace avoid frequent updates of tree
     _MacrosTree->set_model(_MacrosTreeStore);
+
     // enable drag and drop
     _MacrosTree->enable_model_drag_dest();
     _MacrosTree->enable_model_drag_source();
+
+    // Search
+    _MacrosTree->set_enable_search();
+    _MacrosTree->set_search_column(_MacrosTreeStore->_tree_columns.name);
+
+    // Cosmetics
+    _MacrosTree->set_enable_tree_lines();
 
     // Setup panes
     {
@@ -146,9 +156,6 @@ Macros::Macros()
         sigc::bind(sigc::mem_fun(*this, &Macros::on_tree_row_expanded_collapsed), true));
     _MacrosTree->signal_row_collapsed().connect(
         sigc::bind(sigc::mem_fun(*this, &Macros::on_tree_row_expanded_collapsed), false));
-
-    // Initialize marcos tree (actual macros)
-    load_macros();
 
     _setContents(_MacrosBase);
     show_all_children();
