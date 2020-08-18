@@ -362,31 +362,35 @@ Gtk::TreeIter Macros::create_group(const Glib::ustring &group_name)
     return row;
 }
 
-Gtk::TreeIter Macros::find_group(const Glib::ustring &group_name)
+Gtk::TreeIter Macros::find_group(const Glib::ustring &group_name) const
 {
-    auto iter = _MacrosTreeStore->get_iter("0");
+    auto groups = _MacrosTreeStore->children();
 
-    while (iter) {
-        if ((*iter)[_MacrosTreeStore->_tree_columns.name] == group_name) {
-            break;
+    // FIXME: Use std::find
+    for (const auto &group : groups) {
+        if (group[_MacrosTreeStore->_tree_columns.name] == group_name) {
+            return group;
         }
-        ++iter;
     }
-    return iter;
+
+    return Gtk::TreeIter(); // invalid
 }
 
-Gtk::TreeIter Macros::find_macro(const Glib::ustring &macro_name, Gtk::TreeIter group_iter)
+Gtk::TreeIter Macros::find_macro(const Glib::ustring &macro_name, Gtk::TreeIter group_iter) const
 {
     auto group_children = group_iter->children();
-    for (auto child : group_children) {
+
+    // FIXME: Use std::find
+    for (const auto &child : group_children) {
         if (child[_MacrosTreeStore->_tree_columns.name] == macro_name) {
             return child;
         }
     }
-    return Gtk::TreeIter();
+
+    return Gtk::TreeIter(); // invalid
 }
 
-Gtk::TreeIter Macros::find_macro(const Glib::ustring &macro_name, const Glib::ustring &group_name)
+Gtk::TreeIter Macros::find_macro(const Glib::ustring &macro_name, const Glib::ustring &group_name) const
 {
     return find_macro(macro_name, find_group(group_name));
 }

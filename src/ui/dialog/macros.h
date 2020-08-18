@@ -138,7 +138,7 @@ private:
     /**
      * If the group name exist returns an iterator to it
      */
-    Gtk::TreeIter find_group(const Glib::ustring &group_name);
+    Gtk::TreeIter find_group(const Glib::ustring &group_name) const;
     /**
      * same as find, but create the group if it doesn't exist
      */
@@ -147,8 +147,8 @@ private:
     /**
      * Finds macro of given name in the group, and returns iterator to it
      */
-    Gtk::TreeIter find_macro(const Glib::ustring &macro_name, Gtk::TreeIter group_iter);
-    Gtk::TreeIter find_macro(const Glib::ustring &macro_name, const Glib::ustring &group_name);
+    Gtk::TreeIter find_macro(const Glib::ustring &macro_name, Gtk::TreeIter group_iter) const;
+    Gtk::TreeIter find_macro(const Glib::ustring &macro_name, const Glib::ustring &group_name) const;
 
     /**
      * Creates a new macro and return an iterator to it
