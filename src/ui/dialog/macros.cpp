@@ -171,34 +171,34 @@ Macros::~Macros() {}
 // Listeners
 void Macros::on_macro_create()
 {
-    Gtk::Dialog dialog;
-    Gtk::VBox box;
+    Gtk::Dialog dialog(_("Create new Macro"), Gtk::DIALOG_MODAL | Gtk::DIALOG_USE_HEADER_BAR);
     Gtk::Entry name_entry;
     Gtk::ComboBoxText group_combo(true);
-    Gtk::Label name_label(_("Macro name"));
-    Gtk::Label group_label(_("Group"));
 
     // pick groups from macro tree
-    for (auto iter = _MacrosTreeStore->get_iter("0"); iter; ++iter) {
-        group_combo.append((*iter)[_MacrosTreeStore->_tree_columns.name]);
+    for (const auto &iter : _MacrosTreeStore->children()) {
+        group_combo.append(iter[_MacrosTreeStore->_tree_columns.name]);
     }
 
-    dialog.set_title(_("Create new Macro"));
+    auto box = dialog.get_content_area();
 
-    name_label.set_alignment(0);
-    group_label.set_alignment(0);
+    name_entry.set_placeholder_text(_("Enter macro name"));
+    name_entry.property_margin_bottom() = 12;
 
-    box.pack_start(name_label);
-    box.pack_start(name_entry);
-    box.pack_start(group_label);
-    box.pack_start(group_combo);
+    group_combo.get_entry()->set_placeholder_text(_("Enter or select group name"));
 
-    box.set_valign(Gtk::ALIGN_START);
+    Gtk::Label name_label(_("Macro name"), Gtk::ALIGN_START);
+    box->pack_start(name_label);
+    box->pack_start(name_entry);
 
-    box.set_size_request(300);
-    box.property_margin() = 12;
+    Gtk::Label group_label(_("Group name"), Gtk::ALIGN_START);
+    box->pack_start(group_label);
+    box->pack_start(group_combo);
 
-    dialog.get_content_area()->pack_start(box);
+    box->set_valign(Gtk::ALIGN_START);
+
+    box->set_size_request(300);
+    box->property_margin() = 12;
 
     dialog.add_button(_("Cancel"), Gtk::RESPONSE_CANCEL);
     dialog.add_button(_("Create"), Gtk::RESPONSE_OK);
@@ -207,7 +207,7 @@ void Macros::on_macro_create()
 
     int result = dialog.run();
 
-    if (result == Gtk::RESPONSE_OK) {
+    if (result == Gtk::RESPONSE_OK and not name_entry.get_text().empty()) {
         Glib::ustring macro_name = name_entry.get_text();
 
         // Set folder as "Default" if combo box is empty
