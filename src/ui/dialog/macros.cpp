@@ -319,10 +319,19 @@ void Macros::on_toggle_steps_pane()
     const bool show_steps = _MacrosPanedSwitch->get_state();
     _prefs->setBool("/dialogs/macros/showsteps", show_steps);
     if (show_steps) {
+        _MacrosSteps->set_no_show_all(false);
         _MacrosSteps->show_all();
+
+        _MacrosPanedVertical->set_sensitive();
+        _MacrosPanedHorizontal->set_sensitive();
+
         return;
     }
+    _MacrosSteps->set_no_show_all();
     _MacrosSteps->hide();
+
+    _MacrosPanedVertical->set_sensitive(false);
+    _MacrosPanedHorizontal->set_sensitive(false);
 }
 
 void Macros::on_tree_row_expanded_collapsed(const Gtk::TreeIter &expanded_row, const Gtk::TreePath &tree_path,
@@ -427,10 +436,10 @@ bool MacrosDragAndDropStore::row_draggable_vfunc(const Gtk::TreeModel::Path &pat
     return path.size() == 2; // Row nested in rows, macros in groups/folder
 }
 
-bool MacrosDragAndDropStore::row_drop_possible_vfunc(const Gtk::TreeModel::Path &dest,
+bool MacrosDragAndDropStore::row_drop_possible_vfunc(const Gtk::TreeModel::Path &dest_path,
                                                      const Gtk::SelectionData &selection_data) const
 {
-    return dest.size() == 2; // not root
+    return dest_path.size() == 2; // withing folder here dest path means, path achieved when drop successful
 }
 
 } // namespace Dialog

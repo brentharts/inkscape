@@ -463,23 +463,17 @@
             <property name="can_focus">False</property>
             <property name="layout_style">start</property>
             <child>
-              <object class="GtkRadioButton" id="MacrosPanedHorizontal">
+              <object class="GtkSwitch" id="MacrosPanedSwitch">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="receives_default">False</property>
-                <property name="tooltip_text" translatable="yes">Set orientation horizontal</property>
-                <property name="image">paned-horizontal-icon</property>
+                <property name="tooltip_text" translatable="yes">Show Macro steps</property>
+                <property name="halign">start</property>
+                <property name="valign">center</property>
                 <property name="active">True</property>
-                <property name="draw_indicator">False</property>
-                <property name="group">MacrosPanedVertical</property>
-                <style>
-                  <class name="flat"/>
-                  <class name="image-button"/>
-                </style>
               </object>
               <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
                 <property name="position">0</property>
                 <property name="non_homogeneous">True</property>
               </packing>
@@ -505,17 +499,23 @@
               </packing>
             </child>
             <child>
-              <object class="GtkSwitch" id="MacrosPanedSwitch">
+              <object class="GtkRadioButton" id="MacrosPanedHorizontal">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="halign">start</property>
-                <property name="valign">center</property>
-                <property name="margin_start">7</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Set orientation horizontal</property>
+                <property name="image">paned-horizontal-icon</property>
                 <property name="active">True</property>
+                <property name="draw_indicator">False</property>
+                <property name="group">MacrosPanedVertical</property>
+                <style>
+                  <class name="flat"/>
+                  <class name="image-button"/>
+                </style>
               </object>
               <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
                 <property name="position">2</property>
                 <property name="non_homogeneous">True</property>
               </packing>
