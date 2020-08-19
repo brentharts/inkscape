@@ -424,37 +424,13 @@ Glib::RefPtr<MacrosDragAndDropStore> MacrosDragAndDropStore::create()
 
 bool MacrosDragAndDropStore::row_draggable_vfunc(const Gtk::TreeModel::Path &path) const
 {
-    // TODO: Add a const version of get_iter to TreeModel:
-    auto unconstThis = const_cast<MacrosDragAndDropStore *>(this);
-    const_iterator iter = unconstThis->get_iter(path);
-    // const_iterator iter = get_iter(path);
-    if (iter) {
-        // if iter depth is atleast 1 it's a macro and hence can be drag between folders/groups
-        return iter_depth(iter) == 1;
-    }
-
-    return Gtk::TreeStore::row_draggable_vfunc(path);
+    return path.size() == 2; // Row nested in rows, macros in groups/folder
 }
 
 bool MacrosDragAndDropStore::row_drop_possible_vfunc(const Gtk::TreeModel::Path &dest,
                                                      const Gtk::SelectionData &selection_data) const
 {
-    Gtk::TreeModel::Path dest_parent = dest;
-
-    // Restrict dropping on top level, only allow dropping in groups
-    if (dest_parent.empty() or not dest_parent.up()) {
-        return false;
-    }
-
-    auto unconstThis = const_cast<MacrosDragAndDropStore *>(this);
-    const_iterator iter_dest_parent = unconstThis->get_iter(dest_parent);
-    // const_iterator iter_dest_parent = get_iter(dest);
-    if (iter_dest_parent) {
-        // iter depth is 0 means resides in root hence is a folder/group
-        return iter_depth(iter_dest_parent) == 0;
-    }
-
-    return false;
+    return not dest.empty(); // not root
 }
 
 } // namespace Dialog
