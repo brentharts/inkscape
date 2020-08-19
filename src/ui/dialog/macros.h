@@ -108,6 +108,11 @@ private:
     void on_toggle_steps_pane();
 
     /**
+     * When selection changed make buttons active/inactive accordingly etc
+     */
+    void on_selection_changed();
+
+    /**
      * Called when rows expanded/collapsed changes group icon to match
      * folder-open when expanded
      * folder      when closed

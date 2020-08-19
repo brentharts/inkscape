@@ -157,6 +157,10 @@ Macros::Macros()
     _MacrosTree->signal_row_collapsed().connect(
         sigc::bind(sigc::mem_fun(*this, &Macros::on_tree_row_expanded_collapsed), false));
 
+    // disable till something is selected
+    _MacrosDelete->set_sensitive(false);
+    _MacrosTreeSelection->signal_changed().connect(sigc::mem_fun(*this, &Macros::on_selection_changed));
+
     _setContents(_MacrosBase);
     show_all_children();
 }
@@ -334,6 +338,16 @@ void Macros::on_toggle_steps_pane()
     _MacrosPanedHorizontal->set_sensitive(false);
 }
 
+void Macros::on_selection_changed()
+{
+    const auto iter = _MacrosTreeSelection->get_selected();
+    if (iter) { // something is selected
+        _MacrosDelete->set_sensitive();
+        return;
+    }
+    _MacrosDelete->set_sensitive(false);
+}
+
 void Macros::on_tree_row_expanded_collapsed(const Gtk::TreeIter &expanded_row, const Gtk::TreePath &tree_path,
                                             const bool is_expanded)
 {
@@ -439,7 +453,7 @@ bool MacrosDragAndDropStore::row_draggable_vfunc(const Gtk::TreeModel::Path &pat
 bool MacrosDragAndDropStore::row_drop_possible_vfunc(const Gtk::TreeModel::Path &dest_path,
                                                      const Gtk::SelectionData &selection_data) const
 {
-    return dest_path.size() == 2; // withing folder here dest path means, path achieved when drop successful
+    return dest_path.size() == 2; // within folder: here dest path means, path achieved when drop successful
 }
 
 } // namespace Dialog
