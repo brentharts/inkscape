@@ -53,21 +53,7 @@ public:
      */
     static Macros &getInstance() { return *new Macros(); }
 
-    /* void present() override; */
-    /* void setDesktop(SPDesktop *desktop) override; */
-
-    /* Signal accessors */
-    /* sigc::signal<void, int> &signalResponse() override; */
-    /* sigc::signal<void> &signalPresent() override; */
-
-    /* sigc::signal<void, SPDesktop *, SPDocument *> &signalDocumentReplaced() override; */
-    /* sigc::signal<void, SPDesktop *> &signalActivateDesktop() override; */
-    /* sigc::signal<void, SPDesktop *> &signalDeactiveDesktop() override; */
-
 protected:
-    /* void _apply() override; */
-    /* void _handleResponse(int response_id) override; */
-
 private:
     // Event Handlers
     /**

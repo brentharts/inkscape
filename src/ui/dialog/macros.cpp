@@ -163,18 +163,6 @@ Macros::Macros()
 
 Macros::~Macros() {}
 
-// Overrides
-/* void Macros::_apply() */
-/* { */
-/*     return; */
-/* } */
-
-/* void Macros::setDesktop(SPDesktop *desktop) */
-/* { */
-/*     Panel::setDesktop(desktop); */
-/*     return; */
-/* } */
-
 // Listeners
 void Macros::on_macro_create()
 {
