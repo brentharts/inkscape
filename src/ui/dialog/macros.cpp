@@ -430,7 +430,7 @@ bool MacrosDragAndDropStore::row_draggable_vfunc(const Gtk::TreeModel::Path &pat
 bool MacrosDragAndDropStore::row_drop_possible_vfunc(const Gtk::TreeModel::Path &dest,
                                                      const Gtk::SelectionData &selection_data) const
 {
-    return not dest.empty(); // not root
+    return dest.size() == 2; // not root
 }
 
 } // namespace Dialog
