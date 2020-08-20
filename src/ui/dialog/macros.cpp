@@ -391,12 +391,12 @@ void Macros::load_macros()
 
     auto group = root->firstChild();
     while (group) {
-        auto group_tree_iter = create_group(group->attribute("name"));
+        auto group_tree_iter = create_group(group->attribute("name"), false);
 
         // Read macros
         auto macro = group->firstChild();
         while (macro) {
-            create_macro(macro->attribute("name"), group_tree_iter);
+            create_macro(macro->attribute("name"), group_tree_iter, false);
             macro = macro->next();
         }
 
@@ -404,7 +404,12 @@ void Macros::load_macros()
     }
 }
 
-Gtk::TreeIter Macros::create_group(const Glib::ustring &group_name)
+bool Macros::save_xml()
+{
+    return sp_repr_save_file(_macros_xml, _macros_data_filename.c_str());
+}
+
+Gtk::TreeIter Macros::create_group(const Glib::ustring &group_name, bool create_in_xml)
 {
     if (auto group_iter = find_group(group_name); group_iter) {
         return group_iter;
@@ -413,6 +418,17 @@ Gtk::TreeIter Macros::create_group(const Glib::ustring &group_name)
     auto row = *(_MacrosTreeStore->append());
     row[_MacrosTreeStore->_tree_columns.icon] = "folder";
     row[_MacrosTreeStore->_tree_columns.name] = group_name;
+
+    // add in XML file
+    if (create_in_xml) {
+        auto group = _macros_xml->createElement("group");
+        group->setAttribute("name", group_name);
+
+        _macros_xml->root()->appendChild(group);
+        Inkscape::GC::release(group);
+
+        save_xml();
+    }
 
     return row;
 }
@@ -450,7 +466,7 @@ Gtk::TreeIter Macros::find_macro(const Glib::ustring &macro_name, const Glib::us
     return find_macro(macro_name, find_group(group_name));
 }
 
-Gtk::TreeIter Macros::create_macro(const Glib::ustring &macro_name, Gtk::TreeIter group_iter)
+Gtk::TreeIter Macros::create_macro(const Glib::ustring &macro_name, Gtk::TreeIter group_iter, bool create_in_xml)
 {
     if (auto macro = find_macro(macro_name, group_iter); macro) {
         return macro;
@@ -460,13 +476,32 @@ Gtk::TreeIter Macros::create_macro(const Glib::ustring &macro_name, Gtk::TreeIte
     macro[_MacrosTreeStore->_tree_columns.icon] = "system-run";
     macro[_MacrosTreeStore->_tree_columns.name] = macro_name;
 
-    return macro;
-}
+    // add in XML file
+    if (create_in_xml) {
+        auto macro_node = _macros_xml->createElement("macro");
+        macro_node->setAttribute("name", macro_name);
 
-Gtk::TreeIter Macros::create_macro(const Glib::ustring &macro_name, const Glib::ustring &group_name)
+        // find the group to append to
+        auto group = _macros_xml->root()->firstChild();
+        for (; group; group = group->next()) {
+            if (group->attribute("name") == (*group_iter)[_MacrosTreeStore->_tree_columns.name]) {
+                break;
+            }
+        }
+
+        group->appendChild(macro_node);
+        Inkscape::GC::release(macro_node);
+
+        save_xml();
+    }
+
+    return macro;
+} // namespace Dialog
+
+Gtk::TreeIter Macros::create_macro(const Glib::ustring &macro_name, const Glib::ustring &group_name, bool create_in_xml)
 {
     // create_group will work same as find if the group exists
-    return create_macro(macro_name, create_group(group_name));
+    return create_macro(macro_name, create_group(group_name), create_in_xml);
 }
 
 // MacrosDragAndDropStore ------------------------------------------------------------

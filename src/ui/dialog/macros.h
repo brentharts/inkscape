@@ -132,13 +132,18 @@ private:
     void load_macros();
 
     /**
+     * Saves macro xml to the macros data file
+     */
+    bool save_xml();
+
+    /**
      * If the group name exist returns an iterator to it
      */
     Gtk::TreeIter find_group(const Glib::ustring &group_name) const;
     /**
-     * same as find, but create the group if it doesn't exist
+     * same as find, but create the group if it doesn't exist, if create_in_xml false only tree is updated
      */
-    Gtk::TreeIter create_group(const Glib::ustring &group_name);
+    Gtk::TreeIter create_group(const Glib::ustring &group_name, bool create_in_xml = true);
 
     /**
      * Finds macro of given name in the group, and returns iterator to it
@@ -147,10 +152,11 @@ private:
     Gtk::TreeIter find_macro(const Glib::ustring &macro_name, const Glib::ustring &group_name) const;
 
     /**
-     * Creates a new macro and return an iterator to it
+     * Creates a new macro and return an iterator to it, if create_in_xml false only tree is updated
      */
-    Gtk::TreeIter create_macro(const Glib::ustring &macro_name, Gtk::TreeIter group_iter);
-    Gtk::TreeIter create_macro(const Glib::ustring &macro_name, const Glib::ustring &group_name);
+    Gtk::TreeIter create_macro(const Glib::ustring &macro_name, Gtk::TreeIter group_iter, bool create_in_xml = true);
+    Gtk::TreeIter create_macro(const Glib::ustring &macro_name, const Glib::ustring &group_name,
+                               bool create_in_xml = true);
 
 private: // Variables
     // Widgets
