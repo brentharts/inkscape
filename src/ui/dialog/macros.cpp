@@ -29,10 +29,13 @@
 #include <iostream>
 #include <sigc++/functors/mem_fun.h>
 
+#include "gc-anchored.h"
 #include "io/resource.h"
 #include "preferences.h"
 #include "ui/widget/panel.h"
 #include "verbs.h"
+#include "xml/repr.h"
+#include "xml/simple-document.h"
 
 namespace {
 /**
@@ -61,6 +64,8 @@ namespace Dialog {
 Macros::Macros()
     : UI::Widget::Panel("/dialogs/macros", SP_VERB_DIALOG_MACROS)
     , _prefs(Inkscape::Preferences::get())
+    , _macros_data_filename(IO::Resource::get_path_string(IO::Resource::USER, IO::Resource::NONE,
+                                                          "macros-data.xml")) // ~/.config/inkscape/doc/
 {
     std::string gladefile = IO::Resource::get_filename_string(Inkscape::IO::Resource::UIS, "dialog-macros.glade");
     Glib::RefPtr<Gtk::Builder> builder;
@@ -104,8 +109,11 @@ Macros::Macros()
     _MacrosStepStore = Glib::RefPtr<Gtk::TreeStore>::cast_dynamic(builder->get_object("MacrosStepStore"));
     _MacrosTreeSelection = Glib::RefPtr<Gtk::TreeSelection>::cast_dynamic(builder->get_object("MacrosTreeSelection"));
 
+    // XML loading
+    load_xml();
+
     // Initialize marcos tree (actual macros)
-    load_macros(); // First load into tree store for performace avoid frequent updates of tree
+    load_macros(); // First load into tree store for performace, avoiding frequent updates of tree
     _MacrosTree->set_model(_MacrosTreeStore);
 
     // enable drag and drop
@@ -354,17 +362,46 @@ void Macros::on_tree_row_expanded_collapsed(const Gtk::TreeIter &expanded_row, c
     (*expanded_row)[_MacrosTreeStore->_tree_columns.icon] = is_expanded ? "folder-open" : "folder";
 }
 
+void Macros::load_xml()
+{
+    auto doc = sp_repr_read_file(_macros_data_filename.c_str(), nullptr);
+    if (not doc) {
+        debug_print("Creating new file");
+        doc = sp_repr_document_new("macros");
+
+        // Add the default group
+        auto group_default = doc->createElement("group");
+        group_default->setAttribute("name", "default");
+
+        // Just a pointer, we don't own it, don't free/release/delete
+        auto root = doc->root();
+        root->appendChild(group_default);
+
+        // This was created by new
+        Inkscape::GC::release(group_default);
+
+        sp_repr_save_file(doc, _macros_data_filename.c_str());
+    }
+    _macros_xml = doc;
+}
+
 void Macros::load_macros()
 {
-    // Test Data
-    create_group("Default");
-    create_macro("Set text background", "Default");
-    create_macro("Text raibow", "Default");
+    auto root = _macros_xml->root();
 
-    create_group("Forbidden");
-    create_macro("CIA docs creator", "Forbidden");
-    create_macro("Legit Conspiracy theories creator", "Forbidden");
-    // Test Data
+    auto group = root->firstChild();
+    while (group) {
+        auto group_tree_iter = create_group(group->attribute("name"));
+
+        // Read macros
+        auto macro = group->firstChild();
+        while (macro) {
+            create_macro(macro->attribute("name"), group_tree_iter);
+            macro = macro->next();
+        }
+
+        group = group->next();
+    }
 }
 
 Gtk::TreeIter Macros::create_group(const Glib::ustring &group_name)
@@ -413,11 +450,8 @@ Gtk::TreeIter Macros::find_macro(const Glib::ustring &macro_name, const Glib::us
     return find_macro(macro_name, find_group(group_name));
 }
 
-Gtk::TreeIter Macros::create_macro(const Glib::ustring &macro_name, const Glib::ustring &group_name)
+Gtk::TreeIter Macros::create_macro(const Glib::ustring &macro_name, Gtk::TreeIter group_iter)
 {
-    // create_group will work same as find if the group exists
-    auto group_iter = create_group(group_name);
-
     if (auto macro = find_macro(macro_name, group_iter); macro) {
         return macro;
     }
@@ -427,6 +461,12 @@ Gtk::TreeIter Macros::create_macro(const Glib::ustring &macro_name, const Glib::
     macro[_MacrosTreeStore->_tree_columns.name] = macro_name;
 
     return macro;
+}
+
+Gtk::TreeIter Macros::create_macro(const Glib::ustring &macro_name, const Glib::ustring &group_name)
+{
+    // create_group will work same as find if the group exists
+    return create_macro(macro_name, create_group(group_name));
 }
 
 // MacrosDragAndDropStore ------------------------------------------------------------

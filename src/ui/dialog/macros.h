@@ -31,6 +31,7 @@
 
 #include "preferences.h"
 #include "ui/widget/panel.h"
+#include "xml/document.h"
 
 namespace Inkscape {
 namespace UI {
@@ -122,7 +123,11 @@ private:
 
     // Workers
     /**
-     * load the XML file and read to get macros data
+     * load the XML file to create xml doc
+     */
+    void load_xml();
+    /**
+     * generate macros tree from XML doc
      */
     void load_macros();
 
@@ -144,6 +149,7 @@ private:
     /**
      * Creates a new macro and return an iterator to it
      */
+    Gtk::TreeIter create_macro(const Glib::ustring &macro_name, Gtk::TreeIter group_iter);
     Gtk::TreeIter create_macro(const Glib::ustring &macro_name, const Glib::ustring &group_name);
 
 private: // Variables
@@ -178,6 +184,10 @@ private: // Variables
     Glib::RefPtr<MacrosDragAndDropStore> _MacrosTreeStore;
     Glib::RefPtr<Gtk::TreeStore> _MacrosStepStore;
     Glib::RefPtr<Gtk::TreeSelection> _MacrosTreeSelection;
+
+    // TODO: Change to RefPtr
+    Inkscape::XML::Document *_macros_xml;
+    std::string _macros_data_filename;
 
     // states
     bool _is_recording = false;
