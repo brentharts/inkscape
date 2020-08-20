@@ -255,9 +255,8 @@ void Macros::on_macro_new_group()
 void Macros::on_macro_delete()
 {
     // TODO: Determine the selection first
-    Gtk::MessageDialog dialog(_("Delete selected macros?"), true, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_OK_CANCEL);
-    dialog.set_secondary_text(_("Selected Macros will be deleted permanently."));
-    dialog.set_title(_("Confirm"));
+    Gtk::MessageDialog dialog(_("Delete selected macros permanently?"), true, Gtk::MESSAGE_QUESTION,
+                              Gtk::BUTTONS_OK_CANCEL);
 
     int result = dialog.run();
     if (result == Gtk::RESPONSE_OK) {
