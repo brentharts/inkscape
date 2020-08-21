@@ -275,8 +275,8 @@ void Macros::on_macro_delete()
             _macros_tree_xml->remove_macro((*iter)[_MacrosTreeStore->_tree_columns.name],
                                            (*parent)[_MacrosTreeStore->_tree_columns.name]);
 
-            // colapse(change icon to collapsed) parent(group) if no child left
-            if (parent and parent->children().empty()) {
+            // colapse(change icon to collapsed) parent(group) if it's the only child left
+            if (parent->children().size() == 1) {
                 (*parent)[_MacrosTreeStore->_tree_columns.icon] = "folder";
             }
         }
