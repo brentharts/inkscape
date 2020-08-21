@@ -104,7 +104,7 @@ Macros::Macros()
     builder->get_widget("MacrosSteps", _MacrosSteps);
     builder->get_widget("MacrosScrolled", _MacrosScrolled);
 
-    _MacrosTreeStore = MacrosDragAndDropStore::create();
+    _MacrosTreeStore = MacrosDragAndDropStore::create(_macros_tree_xml);
 
     _MacrosStepStore = Glib::RefPtr<Gtk::TreeStore>::cast_dynamic(builder->get_object("MacrosStepStore"));
     _MacrosTreeSelection = Glib::RefPtr<Gtk::TreeSelection>::cast_dynamic(builder->get_object("MacrosTreeSelection"));
@@ -575,7 +575,8 @@ XML::Node *MacrosXML::get_root()
 }
 
 // MacrosDragAndDropStore ------------------------------------------------------------
-MacrosDragAndDropStore::MacrosDragAndDropStore()
+MacrosDragAndDropStore::MacrosDragAndDropStore(std::shared_ptr<MacrosXML> &&macros_tree_xml)
+    : _macros_tree_xml(macros_tree_xml)
 {
     // We can't just call Gtk::TreeModel(m_Columns) in the initializer list
     // because m_Columns does not exist when the base class constructor runs.
@@ -585,9 +586,9 @@ MacrosDragAndDropStore::MacrosDragAndDropStore()
     set_column_types(_tree_columns);
 }
 
-Glib::RefPtr<MacrosDragAndDropStore> MacrosDragAndDropStore::create()
+Glib::RefPtr<MacrosDragAndDropStore> MacrosDragAndDropStore::create(std::shared_ptr<MacrosXML> macros_tree_xml)
 {
-    return Glib::RefPtr<MacrosDragAndDropStore>(new MacrosDragAndDropStore());
+    return Glib::RefPtr<MacrosDragAndDropStore>(new MacrosDragAndDropStore(std::move(macros_tree_xml)));
 }
 
 bool MacrosDragAndDropStore::row_draggable_vfunc(const Gtk::TreeModel::Path &path) const

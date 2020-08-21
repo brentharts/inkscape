@@ -228,7 +228,7 @@ private:
 class MacrosDragAndDropStore : public Gtk::TreeStore
 {
 protected:
-    MacrosDragAndDropStore();
+    MacrosDragAndDropStore(std::shared_ptr<MacrosXML> &&macros_tree_xml);
 
 public:
     // FIXME: Playing safe for now make it private once final
@@ -248,8 +248,9 @@ public:
     };
 
     MacrosModelColumns _tree_columns;
+    std::shared_ptr<MacrosXML> _macros_tree_xml;
 
-    static Glib::RefPtr<MacrosDragAndDropStore> create();
+    static Glib::RefPtr<MacrosDragAndDropStore> create(std::shared_ptr<MacrosXML> macros_tree_xml);
 
 protected:
     // Overridden virtual functions:
