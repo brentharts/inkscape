@@ -136,6 +136,10 @@ private:
      */
     bool save_xml();
 
+    XML::Node *find_macro_in_xml(const Glib::ustring &macro_name, const Glib::ustring &group_name) const;
+    XML::Node *find_macro_in_xml(const Glib::ustring &macro_name, XML::Node *group_ptr) const;
+    XML::Node *find_group_in_xml(const Glib::ustring &group_name) const;
+
     /**
      * If the group name exist returns an iterator to it
      */

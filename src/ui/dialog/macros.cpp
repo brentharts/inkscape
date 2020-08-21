@@ -256,7 +256,9 @@ void Macros::on_macro_delete()
 {
     auto iter = _MacrosTreeSelection->get_selected();
 
-    if (_MacrosTreeStore->iter_depth(iter) == 0 and not iter->children().empty()) { // folder is not empty
+    const bool is_group = _MacrosTreeStore->iter_depth(iter) == 0;
+
+    if (is_group and not iter->children().empty()) { // folder is not empty
         Gtk::MessageDialog dialog(_("Only empty groups can be deleted for now"), false, Gtk::MESSAGE_ERROR,
                                   Gtk::BUTTONS_CLOSE, true);
         dialog.run();
@@ -268,13 +270,29 @@ void Macros::on_macro_delete()
     int result = dialog.run();
     if (result == Gtk::RESPONSE_OK) {
         // TODO: Support multiple deletions
-        auto parent = iter->parent();
-        _MacrosTreeStore->erase(iter);
+        if (is_group) {
+            if (auto group = find_group_in_xml((*iter)[_MacrosTreeStore->_tree_columns.name]); group) {
+                // removes child from immediate parent, father/mother and not grand-father/grand-mother
+                _macros_xml->root()->removeChild(group);
+                save_xml();
+            }
+        } else {
+            const auto parent = iter->parent();
+            const auto group = find_group_in_xml((*parent)[_MacrosTreeStore->_tree_columns.name]);
+            auto macro = find_macro_in_xml((*iter)[_MacrosTreeStore->_tree_columns.name], group);
 
-        // colapse(change icon to collapsed) parent(group) if no child left
-        if (parent->children().empty()) {
-            (*parent)[_MacrosTreeStore->_tree_columns.icon] = "folder";
+            if (group and macro) {
+                group->removeChild(macro);
+            }
+            save_xml();
+
+            // colapse(change icon to collapsed) parent(group) if no child left
+            if (parent and parent->children().empty()) {
+                (*parent)[_MacrosTreeStore->_tree_columns.icon] = "folder";
+            }
         }
+
+        _MacrosTreeStore->erase(iter);
     }
 }
 
@@ -412,6 +430,36 @@ bool Macros::save_xml()
     return sp_repr_save_file(_macros_xml, _macros_data_filename.c_str());
 }
 
+XML::Node *Macros::find_macro_in_xml(const Glib::ustring &macro_name, const Glib::ustring &group_name) const
+{
+    return find_macro_in_xml(macro_name, find_group_in_xml(group_name));
+}
+
+XML::Node *Macros::find_macro_in_xml(const Glib::ustring &macro_name, XML::Node *group_ptr) const
+{
+    if (group_ptr) {
+        auto macro_xml_iter = group_ptr->firstChild();
+        for (; macro_xml_iter; macro_xml_iter = macro_xml_iter->next()) {
+            if (macro_name == macro_xml_iter->attribute("name")) {
+                break;
+            }
+        }
+        return macro_xml_iter;
+    }
+    return nullptr;
+}
+
+XML::Node *Macros::find_group_in_xml(const Glib::ustring &group_name) const
+{
+    auto group_xml_iter = _macros_xml->root()->firstChild();
+    for (; group_xml_iter; group_xml_iter = group_xml_iter->next()) {
+        if (group_name == group_xml_iter->attribute("name")) {
+            break;
+        }
+    }
+    return group_xml_iter;
+}
+
 Gtk::TreeIter Macros::create_group(const Glib::ustring &group_name, bool create_in_xml)
 {
     if (auto group_iter = find_group(group_name); group_iter) {
@@ -428,9 +476,9 @@ Gtk::TreeIter Macros::create_group(const Glib::ustring &group_name, bool create_
         group->setAttribute("name", group_name);
 
         _macros_xml->root()->appendChild(group);
-        Inkscape::GC::release(group);
-
         save_xml();
+
+        Inkscape::GC::release(group);
     }
 
     return row;
@@ -485,17 +533,14 @@ Gtk::TreeIter Macros::create_macro(const Glib::ustring &macro_name, Gtk::TreeIte
         macro_node->setAttribute("name", macro_name);
 
         // find the group to append to
-        auto group = _macros_xml->root()->firstChild();
-        for (; group; group = group->next()) {
-            if (group->attribute("name") == (*group_iter)[_MacrosTreeStore->_tree_columns.name]) {
-                break;
-            }
+        auto group = find_group_in_xml((*group_iter)[_MacrosTreeStore->_tree_columns.name]);
+
+        if (group) {
+            group->appendChild(macro_node);
+            save_xml();
         }
 
-        group->appendChild(macro_node);
         Inkscape::GC::release(macro_node);
-
-        save_xml();
     }
 
     return macro;
