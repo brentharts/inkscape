@@ -29,6 +29,7 @@
 #include <gtkmm/treestore.h>
 #include <gtkmm/treeview.h>
 
+#include "io/resource.h"
 #include "preferences.h"
 #include "ui/widget/panel.h"
 #include "xml/document.h"
@@ -37,7 +38,9 @@ namespace Inkscape {
 namespace UI {
 namespace Dialog {
 
+// Forward decaration as they are defined below
 class MacrosDragAndDropStore;
+class MacrosXML;
 
 class Macros : public UI::Widget::Panel
 {
@@ -123,22 +126,9 @@ private:
 
     // Workers
     /**
-     * load the XML file to create xml doc
-     */
-    void load_xml();
-    /**
      * generate macros tree from XML doc
      */
     void load_macros();
-
-    /**
-     * Saves macro xml to the macros data file
-     */
-    bool save_xml();
-
-    XML::Node *find_macro_in_xml(const Glib::ustring &macro_name, const Glib::ustring &group_name) const;
-    XML::Node *find_macro_in_xml(const Glib::ustring &macro_name, XML::Node *group_ptr) const;
-    XML::Node *find_group_in_xml(const Glib::ustring &group_name) const;
 
     /**
      * If the group name exist returns an iterator to it
@@ -195,15 +185,44 @@ private: // Variables
     Glib::RefPtr<Gtk::TreeStore> _MacrosStepStore;
     Glib::RefPtr<Gtk::TreeSelection> _MacrosTreeSelection;
 
-    // TODO: Change to RefPtr
-    Inkscape::XML::Document *_macros_xml;
-    std::string _macros_data_filename;
+    // Shared ownership with tree store for drag and drop feature
+    std::shared_ptr<MacrosXML> _macros_tree_xml;
 
     // states
     bool _is_recording = false;
 
     // others
     Inkscape::Preferences *_prefs;
+};
+
+/**
+ * This manages XML for macros dialog
+ */
+class MacrosXML
+{
+public:
+    MacrosXML();
+    /**
+     * Saves macro xml to the macros data file
+     */
+    bool save_xml();
+
+    XML::Node *find_macro(const Glib::ustring &macro_name, const Glib::ustring &group_name) const;
+    XML::Node *find_macro(const Glib::ustring &macro_name, XML::Node *group_ptr) const;
+    XML::Node *find_group(const Glib::ustring &group_name) const;
+
+    XML::Node *create_macro(const Glib::ustring &macro_name, const Glib::ustring &group_name);
+    XML::Node *create_macro(const Glib::ustring &macro_name, XML::Node *group_ptr);
+    XML::Node *create_group(const Glib::ustring &group_name);
+
+    bool remove_group(const Glib::ustring &group_name);
+    bool remove_macro(const Glib::ustring &macro_name, const Glib::ustring &group_name);
+
+    XML::Node *get_root();
+
+private:
+    Inkscape::XML::Document *_xml_doc;
+    std::string _macros_data_filename;
 };
 
 class MacrosDragAndDropStore : public Gtk::TreeStore

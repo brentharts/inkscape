@@ -27,6 +27,7 @@
 #include <gtkmm/treeselection.h>
 #include <gtkmm/treestore.h>
 #include <iostream>
+#include <memory>
 #include <sigc++/functors/mem_fun.h>
 
 #include "gc-anchored.h"
@@ -64,8 +65,7 @@ namespace Dialog {
 Macros::Macros()
     : UI::Widget::Panel("/dialogs/macros", SP_VERB_DIALOG_MACROS)
     , _prefs(Inkscape::Preferences::get())
-    , _macros_data_filename(IO::Resource::get_path_string(IO::Resource::USER, IO::Resource::NONE,
-                                                          "macros-data.xml")) // ~/.config/inkscape/doc/
+    , _macros_tree_xml(std::make_shared<MacrosXML>())
 {
     std::string gladefile = IO::Resource::get_filename_string(Inkscape::IO::Resource::UIS, "dialog-macros.glade");
     Glib::RefPtr<Gtk::Builder> builder;
@@ -108,9 +108,6 @@ Macros::Macros()
 
     _MacrosStepStore = Glib::RefPtr<Gtk::TreeStore>::cast_dynamic(builder->get_object("MacrosStepStore"));
     _MacrosTreeSelection = Glib::RefPtr<Gtk::TreeSelection>::cast_dynamic(builder->get_object("MacrosTreeSelection"));
-
-    // XML loading
-    load_xml();
 
     // Initialize marcos tree (actual macros)
     load_macros(); // First load into tree store for performace, avoiding frequent updates of tree
@@ -271,20 +268,12 @@ void Macros::on_macro_delete()
     if (result == Gtk::RESPONSE_OK) {
         // TODO: Support multiple deletions
         if (is_group) {
-            if (auto group = find_group_in_xml((*iter)[_MacrosTreeStore->_tree_columns.name]); group) {
-                // removes child from immediate parent, father/mother and not grand-father/grand-mother
-                _macros_xml->root()->removeChild(group);
-                save_xml();
-            }
+            _macros_tree_xml->remove_group((*iter)[_MacrosTreeStore->_tree_columns.name]);
         } else {
             const auto parent = iter->parent();
-            const auto group = find_group_in_xml((*parent)[_MacrosTreeStore->_tree_columns.name]);
-            auto macro = find_macro_in_xml((*iter)[_MacrosTreeStore->_tree_columns.name], group);
 
-            if (group and macro) {
-                group->removeChild(macro);
-            }
-            save_xml();
+            _macros_tree_xml->remove_macro((*iter)[_MacrosTreeStore->_tree_columns.name],
+                                           (*parent)[_MacrosTreeStore->_tree_columns.name]);
 
             // colapse(change icon to collapsed) parent(group) if no child left
             if (parent and parent->children().empty()) {
@@ -383,81 +372,18 @@ void Macros::on_tree_row_expanded_collapsed(const Gtk::TreeIter &expanded_row, c
     (*expanded_row)[_MacrosTreeStore->_tree_columns.icon] = is_expanded ? "folder-open" : "folder";
 }
 
-void Macros::load_xml()
-{
-    auto doc = sp_repr_read_file(_macros_data_filename.c_str(), nullptr);
-    if (not doc) {
-        debug_print("Creating new file");
-        doc = sp_repr_document_new("macros");
-
-        // Add the default group
-        auto group_default = doc->createElement("group");
-        group_default->setAttribute("name", "default");
-
-        // Just a pointer, we don't own it, don't free/release/delete
-        auto root = doc->root();
-        root->appendChild(group_default);
-
-        // This was created by new
-        Inkscape::GC::release(group_default);
-
-        sp_repr_save_file(doc, _macros_data_filename.c_str());
-    }
-    _macros_xml = doc;
-}
-
 void Macros::load_macros()
 {
-    auto root = _macros_xml->root();
+    // needed for iterations
+    const auto root = _macros_tree_xml->get_root();
 
-    auto group = root->firstChild();
-    while (group) {
+    for (auto group = root->firstChild(); group; group = group->next()) {
         auto group_tree_iter = create_group(group->attribute("name"), false);
-
-        // Read macros
-        auto macro = group->firstChild();
-        while (macro) {
+        for (auto macro = group->firstChild(); macro; macro = macro->next()) {
+            // Read macros
             create_macro(macro->attribute("name"), group_tree_iter, false);
-            macro = macro->next();
-        }
-
-        group = group->next();
+        };
     }
-}
-
-bool Macros::save_xml()
-{
-    return sp_repr_save_file(_macros_xml, _macros_data_filename.c_str());
-}
-
-XML::Node *Macros::find_macro_in_xml(const Glib::ustring &macro_name, const Glib::ustring &group_name) const
-{
-    return find_macro_in_xml(macro_name, find_group_in_xml(group_name));
-}
-
-XML::Node *Macros::find_macro_in_xml(const Glib::ustring &macro_name, XML::Node *group_ptr) const
-{
-    if (group_ptr) {
-        auto macro_xml_iter = group_ptr->firstChild();
-        for (; macro_xml_iter; macro_xml_iter = macro_xml_iter->next()) {
-            if (macro_name == macro_xml_iter->attribute("name")) {
-                break;
-            }
-        }
-        return macro_xml_iter;
-    }
-    return nullptr;
-}
-
-XML::Node *Macros::find_group_in_xml(const Glib::ustring &group_name) const
-{
-    auto group_xml_iter = _macros_xml->root()->firstChild();
-    for (; group_xml_iter; group_xml_iter = group_xml_iter->next()) {
-        if (group_name == group_xml_iter->attribute("name")) {
-            break;
-        }
-    }
-    return group_xml_iter;
 }
 
 Gtk::TreeIter Macros::create_group(const Glib::ustring &group_name, bool create_in_xml)
@@ -472,13 +398,7 @@ Gtk::TreeIter Macros::create_group(const Glib::ustring &group_name, bool create_
 
     // add in XML file
     if (create_in_xml) {
-        auto group = _macros_xml->createElement("group");
-        group->setAttribute("name", group_name);
-
-        _macros_xml->root()->appendChild(group);
-        save_xml();
-
-        Inkscape::GC::release(group);
+        _macros_tree_xml->create_group(group_name);
     }
 
     return row;
@@ -529,18 +449,7 @@ Gtk::TreeIter Macros::create_macro(const Glib::ustring &macro_name, Gtk::TreeIte
 
     // add in XML file
     if (create_in_xml) {
-        auto macro_node = _macros_xml->createElement("macro");
-        macro_node->setAttribute("name", macro_name);
-
-        // find the group to append to
-        auto group = find_group_in_xml((*group_iter)[_MacrosTreeStore->_tree_columns.name]);
-
-        if (group) {
-            group->appendChild(macro_node);
-            save_xml();
-        }
-
-        Inkscape::GC::release(macro_node);
+        _macros_tree_xml->create_macro(macro_name, (*group_iter)[_MacrosTreeStore->_tree_columns.name]);
     }
 
     return macro;
@@ -550,6 +459,119 @@ Gtk::TreeIter Macros::create_macro(const Glib::ustring &macro_name, const Glib::
 {
     // create_group will work same as find if the group exists
     return create_macro(macro_name, create_group(group_name), create_in_xml);
+}
+
+// MacrosXML ------------------------------------------------------------------------
+MacrosXML::MacrosXML()
+    : _macros_data_filename(IO::Resource::get_path_string(IO::Resource::USER, IO::Resource::NONE,
+                                                          "macros-data.xml")) // ~/.config/inkscape/doc/
+{
+    auto doc = sp_repr_read_file(_macros_data_filename.c_str(), nullptr);
+    if (not doc) {
+        debug_print("Creating new file");
+        doc = sp_repr_document_new("macros");
+
+        // Add the default group
+        auto group_default = doc->createElement("group");
+        group_default->setAttribute("name", "default");
+
+        // Just a pointer, we don't own it, don't free/release/delete
+        auto root = doc->root();
+        root->appendChild(group_default);
+
+        // This was created by new
+        Inkscape::GC::release(group_default);
+
+        sp_repr_save_file(doc, _macros_data_filename.c_str());
+    }
+    _xml_doc = doc;
+}
+
+bool MacrosXML::save_xml()
+{
+    return sp_repr_save_file(_xml_doc, _macros_data_filename.c_str());
+}
+
+XML::Node *MacrosXML::find_macro(const Glib::ustring &macro_name, const Glib::ustring &group_name) const
+{
+    return find_macro(macro_name, find_group(group_name));
+}
+XML::Node *MacrosXML::find_macro(const Glib::ustring &macro_name, XML::Node *group_ptr) const
+{
+    if (group_ptr) {
+        auto macro_xml_iter = group_ptr->firstChild();
+        for (; macro_xml_iter; macro_xml_iter = macro_xml_iter->next()) {
+            if (macro_name == macro_xml_iter->attribute("name")) {
+                break;
+            }
+        }
+        return macro_xml_iter;
+    }
+    return nullptr;
+}
+
+XML::Node *MacrosXML::find_group(const Glib::ustring &group_name) const
+{
+    auto group_xml_iter = _xml_doc->root()->firstChild();
+    for (; group_xml_iter; group_xml_iter = group_xml_iter->next()) {
+        if (group_name == group_xml_iter->attribute("name")) {
+            break;
+        }
+    }
+    return group_xml_iter;
+}
+XML::Node *MacrosXML::create_macro(const Glib::ustring &macro_name, const Glib::ustring &group_name)
+{
+    if (auto group_ptr = find_group(group_name); group_ptr) {
+        return create_macro(macro_name, group_ptr);
+    }
+    return create_macro(macro_name, create_group(group_name));
+}
+XML::Node *MacrosXML::create_macro(const Glib::ustring &macro_name, XML::Node *group_ptr)
+{
+    auto macro = _xml_doc->createElement("macro");
+    macro->setAttribute("name", macro_name);
+
+    group_ptr->appendChild(macro);
+    save_xml();
+
+    return Inkscape::GC::release(macro);
+}
+
+XML::Node *MacrosXML::create_group(const Glib::ustring &group_name)
+{
+    // not checking if group exists in XML already, as it's done already by the dialog
+    auto group = _xml_doc->createElement("group");
+    group->setAttribute("name", group_name);
+
+    _xml_doc->root()->appendChild(group);
+    save_xml();
+
+    return Inkscape::GC::release(group);
+}
+bool MacrosXML::remove_group(const Glib::ustring &group_name)
+{
+    if (auto group = find_group(group_name); group) {
+        _xml_doc->root()->removeChild(group);
+        save_xml();
+        return true;
+    }
+    return false;
+}
+bool MacrosXML::remove_macro(const Glib::ustring &macro_name, const Glib::ustring &group_name)
+{
+    if (auto group = find_group(group_name); group) {
+        if (auto macro = find_macro(macro_name, group); macro) {
+            group->removeChild(macro);
+            save_xml();
+            return true;
+        }
+    }
+    return false;
+}
+XML::Node *MacrosXML::get_root()
+{
+    return _xml_doc->root();
 }
 
 // MacrosDragAndDropStore ------------------------------------------------------------
