@@ -254,14 +254,20 @@ void Macros::on_macro_new_group()
 
 void Macros::on_macro_delete()
 {
-    // TODO: Determine the selection first
+    auto iter = _MacrosTreeSelection->get_selected();
+
+    if (_MacrosTreeStore->iter_depth(iter) == 0 and not iter->children().empty()) { // folder is not empty
+        Gtk::MessageDialog dialog(_("Only empty groups can be deleted for now"), false, Gtk::MESSAGE_ERROR,
+                                  Gtk::BUTTONS_CLOSE, true);
+        dialog.run();
+        return;
+    }
     Gtk::MessageDialog dialog(_("Delete selected macros permanently?"), true, Gtk::MESSAGE_QUESTION,
                               Gtk::BUTTONS_OK_CANCEL);
 
     int result = dialog.run();
     if (result == Gtk::RESPONSE_OK) {
         // TODO: Support multiple deletions
-        auto iter = _MacrosTreeSelection->get_selected();
         auto parent = iter->parent();
         _MacrosTreeStore->erase(iter);
 
@@ -269,8 +275,6 @@ void Macros::on_macro_delete()
         if (parent->children().empty()) {
             (*parent)[_MacrosTreeStore->_tree_columns.icon] = "folder";
         }
-
-        // TODO: Also remove from macro tree
     }
 }
 
