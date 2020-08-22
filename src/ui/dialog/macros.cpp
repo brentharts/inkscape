@@ -66,7 +66,6 @@ namespace Dialog {
 Macros::Macros()
     : UI::Widget::Panel("/dialogs/macros", SP_VERB_DIALOG_MACROS)
     , _prefs(Inkscape::Preferences::get())
-    , _macros_tree_xml(std::make_shared<MacrosXML>())
 {
     std::string gladefile = IO::Resource::get_filename_string(Inkscape::IO::Resource::UIS, "dialog-macros.glade");
     Glib::RefPtr<Gtk::Builder> builder;
@@ -105,7 +104,7 @@ Macros::Macros()
     builder->get_widget("MacrosSteps", _MacrosSteps);
     builder->get_widget("MacrosScrolled", _MacrosScrolled);
 
-    _MacrosTreeStore = MacrosDragAndDropStore::create(_macros_tree_xml);
+    _MacrosTreeStore = MacrosDragAndDropStore::create();
 
     _MacrosStepStore = Glib::RefPtr<Gtk::TreeStore>::cast_dynamic(builder->get_object("MacrosStepStore"));
     _MacrosTreeSelection = Glib::RefPtr<Gtk::TreeSelection>::cast_dynamic(builder->get_object("MacrosTreeSelection"));
@@ -269,12 +268,12 @@ void Macros::on_macro_delete()
     if (result == Gtk::RESPONSE_OK) {
         // TODO: Support multiple deletions
         if (is_group) {
-            _macros_tree_xml->remove_group((*iter)[_MacrosTreeStore->_tree_columns.name]);
+            _macros_tree_xml.remove_group((*iter)[_MacrosTreeStore->_tree_columns.name]);
         } else {
             const auto parent = iter->parent();
 
-            _macros_tree_xml->remove_macro((*iter)[_MacrosTreeStore->_tree_columns.name],
-                                           (*parent)[_MacrosTreeStore->_tree_columns.name]);
+            _macros_tree_xml.remove_macro((*iter)[_MacrosTreeStore->_tree_columns.name],
+                                          (*parent)[_MacrosTreeStore->_tree_columns.name]);
 
             // colapse(change icon to collapsed) parent(group) if it's the only child left
             if (parent->children().size() == 1) {
@@ -376,7 +375,7 @@ void Macros::on_tree_row_expanded_collapsed(const Gtk::TreeIter &expanded_row, c
 void Macros::load_macros()
 {
     // needed for iterations
-    const auto root = _macros_tree_xml->get_root();
+    const auto root = _macros_tree_xml.get_root();
 
     for (auto group = root->firstChild(); group; group = group->next()) {
         auto group_tree_iter = create_group(group->attribute("name"), false);
@@ -399,7 +398,7 @@ Gtk::TreeIter Macros::create_group(const Glib::ustring &group_name, bool create_
 
     // add in XML file
     if (create_in_xml) {
-        _macros_tree_xml->create_group(group_name);
+        _macros_tree_xml.create_group(group_name);
     }
 
     return row;
@@ -450,7 +449,7 @@ Gtk::TreeIter Macros::create_macro(const Glib::ustring &macro_name, Gtk::TreeIte
 
     // add in XML file
     if (create_in_xml) {
-        _macros_tree_xml->create_macro(macro_name, (*group_iter)[_MacrosTreeStore->_tree_columns.name]);
+        _macros_tree_xml.create_macro(macro_name, (*group_iter)[_MacrosTreeStore->_tree_columns.name]);
     }
 
     return macro;
@@ -576,8 +575,7 @@ XML::Node *MacrosXML::get_root()
 }
 
 // MacrosDragAndDropStore ------------------------------------------------------------
-MacrosDragAndDropStore::MacrosDragAndDropStore(std::shared_ptr<MacrosXML> &&macros_tree_xml)
-    : _macros_tree_xml(macros_tree_xml)
+MacrosDragAndDropStore::MacrosDragAndDropStore()
 {
     // We can't just call Gtk::TreeModel(m_Columns) in the initializer list
     // because m_Columns does not exist when the base class constructor runs.
@@ -587,9 +585,9 @@ MacrosDragAndDropStore::MacrosDragAndDropStore(std::shared_ptr<MacrosXML> &&macr
     set_column_types(_tree_columns);
 }
 
-Glib::RefPtr<MacrosDragAndDropStore> MacrosDragAndDropStore::create(std::shared_ptr<MacrosXML> macros_tree_xml)
+Glib::RefPtr<MacrosDragAndDropStore> MacrosDragAndDropStore::create()
 {
-    return Glib::RefPtr<MacrosDragAndDropStore>(new MacrosDragAndDropStore(std::move(macros_tree_xml)));
+    return Glib::RefPtr<MacrosDragAndDropStore>(new MacrosDragAndDropStore());
 }
 
 bool MacrosDragAndDropStore::row_draggable_vfunc(const Gtk::TreeModel::Path &path) const
