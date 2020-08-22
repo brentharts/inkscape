@@ -257,6 +257,11 @@ protected:
     bool row_draggable_vfunc(const Gtk::TreeModel::Path &path) const override;
     bool row_drop_possible_vfunc(const Gtk::TreeModel::Path &dest,
                                  const Gtk::SelectionData &selection_data) const override;
+
+    bool drag_data_get_vfunc(const Gtk::TreeModel::Path &path, Gtk::SelectionData &selection_data) const override;
+    bool drag_data_delete_vfunc(const Gtk::TreeModel::Path &path) override;
+
+    bool drag_data_received_vfunc(const Gtk::TreeModel::Path &dest, const Gtk::SelectionData &selection_data) override;
 };
 
 } // namespace Dialog

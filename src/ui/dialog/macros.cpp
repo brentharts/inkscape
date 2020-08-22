@@ -23,6 +23,7 @@
 #include <gtkmm/enums.h>
 #include <gtkmm/hvbox.h>
 #include <gtkmm/messagedialog.h>
+#include <gtkmm/treedragdest.h>
 #include <gtkmm/treepath.h>
 #include <gtkmm/treeselection.h>
 #include <gtkmm/treestore.h>
@@ -602,6 +603,20 @@ bool MacrosDragAndDropStore::row_drop_possible_vfunc(const Gtk::TreeModel::Path 
     return dest_path.size() == 2; // within folder: here dest path means, path achieved when drop successful
 }
 
+bool MacrosDragAndDropStore::drag_data_get_vfunc(const Gtk::TreeModel::Path &path,
+                                                 Gtk::SelectionData &selection_data) const
+{
+    return Gtk::TreeDragSource::drag_data_get_vfunc(path, selection_data);
+}
+bool MacrosDragAndDropStore::drag_data_delete_vfunc(const Gtk::TreeModel::Path &path)
+{
+    return Gtk::TreeDragSource::drag_data_delete_vfunc(path);
+}
+bool MacrosDragAndDropStore::drag_data_received_vfunc(const Gtk::TreeModel::Path &dest,
+                                                      const Gtk::SelectionData &selection_data)
+{
+    return Gtk::TreeDragDest::drag_data_received_vfunc(dest, selection_data);
+}
 } // namespace Dialog
 } // namespace UI
 } // namespace Inkscape
