@@ -14,6 +14,7 @@
 #ifndef INKSCAPE_UI_DIALOG_MACROS_H
 #define INKSCAPE_UI_DIALOG_MACROS_H
 
+#include <glibmm/refptr.h>
 #include <glibmm/ustring.h>
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
@@ -28,6 +29,7 @@
 #include <gtkmm/treeselection.h>
 #include <gtkmm/treestore.h>
 #include <gtkmm/treeview.h>
+#include <sigc++/signal.h>
 
 #include "io/resource.h"
 #include "preferences.h"
@@ -73,6 +75,10 @@ private:
 
 class Macros : public UI::Widget::Panel
 {
+    static constexpr auto MACRO_ICON_NAME = "system-run";
+    static constexpr auto CLOSED_GROUP_ICON_NAME = "folder";
+    static constexpr auto OPEN_GROUP_ICON_NAME = "folder-open";
+
 public:
     Macros();
     ~Macros() override;
@@ -153,6 +159,10 @@ private:
     void on_tree_row_expanded_collapsed(const Gtk::TreeIter &expanded_row, const Gtk::TreePath &tree_path,
                                         const bool is_expanded);
 
+    bool on_macro_drag_recieved(const Gtk::TreeModel::Path &dest, Gtk::TreeModel::Path &source_path);
+    bool on_macro_drag_delete(const Gtk::TreeModel::Path &source_path);
+    void on_macro_drag_end(const Glib::RefPtr<Gdk::DragContext> &context);
+
     // Workers
     /**
      * generate macros tree from XML doc
@@ -219,6 +229,9 @@ private: // Variables
     // states
     bool _is_recording = false;
 
+    // data
+    Gtk::TreeModel::Path _new_drag_path;
+
     // others
     Inkscape::Preferences *_prefs;
 };
@@ -243,10 +256,18 @@ private:
         Gtk::TreeModelColumn<Glib::ustring> name;
     };
 
+    sigc::signal<bool, const Gtk::TreeModel::Path &, Gtk::TreeModel::Path &> _macro_drag_recieved_signal;
+    sigc::signal<bool, const Gtk::TreeModel::Path &> _macro_drag_delete_signal;
+
 public:
     MacrosModelColumns _tree_columns;
 
     static Glib::RefPtr<MacrosDragAndDropStore> create();
+    sigc::signal<bool, const Gtk::TreeModel::Path &, Gtk::TreeModel::Path &> macro_drag_recieved_signal()
+    {
+        return _macro_drag_recieved_signal;
+    }
+    sigc::signal<bool, const Gtk::TreeModel::Path &> macro_drag_delete_signal() { return _macro_drag_delete_signal; }
 
 protected:
     // Overridden virtual functions:

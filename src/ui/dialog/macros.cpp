@@ -14,6 +14,7 @@
 #include "macros.h"
 
 #include <glib/gi18n.h>
+#include <glibmm/ustring.h>
 #include <gtkmm/box.h>
 #include <gtkmm/builder.h>
 #include <gtkmm/button.h>
@@ -113,9 +114,12 @@ Macros::Macros()
     load_macros(); // First load into tree store for performace, avoiding frequent updates of tree
     _MacrosTree->set_model(_MacrosTreeStore);
 
-    // enable drag and drop
+    // Drag and Drop
     _MacrosTree->enable_model_drag_dest();
     _MacrosTree->enable_model_drag_source();
+    _MacrosTreeStore->macro_drag_recieved_signal().connect(sigc::mem_fun(*this, &Macros::on_macro_drag_recieved));
+    _MacrosTreeStore->macro_drag_delete_signal().connect(sigc::mem_fun(*this, &Macros::on_macro_drag_delete));
+    _MacrosTree->signal_drag_end().connect(sigc::mem_fun(*this, &Macros::on_macro_drag_end));
 
     // Search
     _MacrosTree->set_enable_search();
@@ -277,7 +281,7 @@ void Macros::on_macro_delete()
 
             // colapse(change icon to collapsed) parent(group) if it's the only child left
             if (parent->children().size() == 1) {
-                (*parent)[_MacrosTreeStore->_tree_columns.icon] = "folder";
+                (*parent)[_MacrosTreeStore->_tree_columns.icon] = CLOSED_GROUP_ICON_NAME;
             }
         }
 
@@ -369,7 +373,50 @@ void Macros::on_selection_changed()
 void Macros::on_tree_row_expanded_collapsed(const Gtk::TreeIter &expanded_row, const Gtk::TreePath &tree_path,
                                             const bool is_expanded)
 {
-    (*expanded_row)[_MacrosTreeStore->_tree_columns.icon] = is_expanded ? "folder-open" : "folder";
+    (*expanded_row)[_MacrosTreeStore->_tree_columns.icon] = is_expanded ? OPEN_GROUP_ICON_NAME : CLOSED_GROUP_ICON_NAME;
+}
+
+bool Macros::on_macro_drag_recieved(const Gtk::TreeModel::Path &dest, Gtk::TreeModel::Path &source_path)
+{
+    _new_drag_path = dest; // Using it in Macros::on_macro_drag_delete(...)
+    return true;
+}
+
+bool Macros::on_macro_drag_delete(const Gtk::TreeModel::Path &source_path)
+{
+    // Get old group name and macro name
+    Gtk::TreeModel::Path old_group_path(source_path);
+    old_group_path.up();
+
+    const auto old_parent_row = *(_MacrosTreeStore->get_iter(old_group_path)); // should never fail
+
+    // When in Rome, change icon to closed icon it's the only child left
+    if (old_parent_row->children().size() == 1) {
+        // only single child left, which will be deleted
+        old_parent_row[_MacrosTreeStore->_tree_columns.icon] = CLOSED_GROUP_ICON_NAME;
+    }
+
+    const auto macro_row = *(_MacrosTreeStore->get_iter(source_path)); // should never fail
+
+    Glib::ustring old_group_name = old_parent_row[_MacrosTreeStore->_tree_columns.name];
+    Glib::ustring macro_name = macro_row[_MacrosTreeStore->_tree_columns.name];
+
+    // Get new group name
+    Gtk::TreeModel::Path new_group_path(_new_drag_path);
+    new_group_path.up();
+
+    const auto new_group_row = *(_MacrosTreeStore->get_iter(new_group_path)); // should never fail
+    Glib::ustring new_group_name = macro_row[_MacrosTreeStore->_tree_columns.name];
+
+    // TODO: Call related XML updating fucntion to move macro to new folder
+
+    return true;
+}
+
+void Macros::on_macro_drag_end(const Glib::RefPtr<Gdk::DragContext> &context)
+{
+    _MacrosTree->expand_to_path(_new_drag_path);
+    _MacrosTreeSelection->select(_new_drag_path);
 }
 
 void Macros::load_macros()
@@ -393,7 +440,7 @@ Gtk::TreeIter Macros::create_group(const Glib::ustring &group_name, bool create_
     }
 
     auto row = *(_MacrosTreeStore->append());
-    row[_MacrosTreeStore->_tree_columns.icon] = "folder";
+    row[_MacrosTreeStore->_tree_columns.icon] = CLOSED_GROUP_ICON_NAME;
     row[_MacrosTreeStore->_tree_columns.name] = group_name;
 
     // add in XML file
@@ -444,7 +491,7 @@ Gtk::TreeIter Macros::create_macro(const Glib::ustring &macro_name, Gtk::TreeIte
     }
 
     auto macro = *(_MacrosTreeStore->append(group_iter->children()));
-    macro[_MacrosTreeStore->_tree_columns.icon] = "system-run";
+    macro[_MacrosTreeStore->_tree_columns.icon] = MACRO_ICON_NAME;
     macro[_MacrosTreeStore->_tree_columns.name] = macro_name;
 
     // add in XML file
@@ -608,11 +655,16 @@ bool MacrosDragAndDropStore::drag_data_get_vfunc(const Gtk::TreeModel::Path &pat
 }
 bool MacrosDragAndDropStore::drag_data_delete_vfunc(const Gtk::TreeModel::Path &path)
 {
+    _macro_drag_delete_signal.emit(path);
     return Gtk::TreeDragSource::drag_data_delete_vfunc(path);
 }
 bool MacrosDragAndDropStore::drag_data_received_vfunc(const Gtk::TreeModel::Path &dest,
                                                       const Gtk::SelectionData &selection_data)
 {
+    Gtk::TreeModel::Path p;
+    Gtk::TreeModel::Path::get_from_selection_data(selection_data, p);
+
+    _macro_drag_recieved_signal.emit(dest, p);
     return Gtk::TreeDragDest::drag_data_received_vfunc(dest, selection_data);
 }
 } // namespace Dialog
