@@ -406,9 +406,10 @@ bool Macros::on_macro_drag_delete(const Gtk::TreeModel::Path &source_path)
     new_group_path.up();
 
     const auto new_group_row = *(_MacrosTreeStore->get_iter(new_group_path)); // should never fail
-    Glib::ustring new_group_name = macro_row[_MacrosTreeStore->_tree_columns.name];
+    Glib::ustring new_group_name = new_group_row[_MacrosTreeStore->_tree_columns.name];
 
     // TODO: Call related XML updating fucntion to move macro to new folder
+    _macros_tree_xml.move_macro(macro_name, old_group_name, new_group_name);
 
     return true;
 }
@@ -616,6 +617,23 @@ bool MacrosXML::remove_macro(const Glib::ustring &macro_name, const Glib::ustrin
     }
     return false;
 }
+bool MacrosXML::move_macro(const Glib::ustring &macro_name, const Glib::ustring &old_group_name,
+                           const Glib::ustring &new_group_name)
+{
+    auto old_group_ptr = find_group(old_group_name);
+    auto new_group_ptr = find_group(new_group_name);
+    auto macro_ptr = find_macro(macro_name, old_group_ptr);
+
+    auto dup_macro_ptr = macro_ptr->duplicate(_xml_doc);
+    old_group_ptr->removeChild(macro_ptr);
+
+    new_group_ptr->appendChild(dup_macro_ptr);
+    Inkscape::GC::release(dup_macro_ptr);
+
+    save_xml();
+    return true;
+}
+
 XML::Node *MacrosXML::get_root()
 {
     return _xml_doc->root();

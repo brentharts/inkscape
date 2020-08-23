@@ -66,6 +66,9 @@ public:
     bool remove_group(const Glib::ustring &group_name);
     bool remove_macro(const Glib::ustring &macro_name, const Glib::ustring &group_name);
 
+    bool move_macro(const Glib::ustring &macro_name, const Glib::ustring &old_group_name,
+                    const Glib::ustring &new_group_name);
+
     XML::Node *get_root();
 
 private:
