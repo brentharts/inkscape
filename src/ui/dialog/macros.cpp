@@ -610,10 +610,6 @@ XML::Node *MacrosXML::move_macro(XML::Node *macro_ptr, XML::Node *new_group_ptr)
 {
     auto dup_macro_ptr = macro_ptr->duplicate(_xml_doc);
 
-    if (not dup_macro_ptr) {
-        debug_print("boom");
-    }
-
     new_group_ptr->appendChild(dup_macro_ptr);
     macro_ptr->parent()->removeChild(macro_ptr);
 
