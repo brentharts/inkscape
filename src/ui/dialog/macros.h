@@ -63,11 +63,23 @@ public:
     XML::Node *create_macro(const Glib::ustring &macro_name, XML::Node *group_ptr);
     XML::Node *create_group(const Glib::ustring &group_name);
 
+    /**
+     * Removes the group or macro from XML, prefer when pointer is available and valid
+     */
+    bool remove_node(XML::Node *node);
+
+    /**
+     * Removes the group from XML, slower due to search
+     */
     bool remove_group(const Glib::ustring &group_name);
+    /**
+     * Removes the macro from XML, slower due to search
+     */
     bool remove_macro(const Glib::ustring &macro_name, const Glib::ustring &group_name);
 
-    bool move_macro(const Glib::ustring &macro_name, const Glib::ustring &old_group_name,
-                    const Glib::ustring &new_group_name);
+    XML::Node *move_macro(const Glib::ustring &macro_name, const Glib::ustring &old_group_name,
+                          const Glib::ustring &new_group_name);
+    XML::Node *move_macro(XML::Node *macro_ptr, XML::Node *new_group_ptr);
 
     XML::Node *get_root();
 
@@ -253,10 +265,10 @@ private:
     public:
         MacrosModelColumns()
         {
-            // Order should be same as in glade file
+            // Order should be same as colums in glade file, and extras can be appended
             add(icon);
             add(name);
-	    add(node);
+            add(node);
         }
         // Order should be same as in glade file
         Gtk::TreeModelColumn<Glib::ustring> icon;
@@ -265,7 +277,6 @@ private:
     };
 
     sigc::signal<bool, const Gtk::TreeModel::Path &, Gtk::TreeModel::Path &> _macro_drag_recieved_signal;
-    sigc::signal<bool, const Gtk::TreeModel::Path &> _macro_drag_delete_signal;
 
 public:
     MacrosModelColumns _tree_columns;
@@ -275,16 +286,12 @@ public:
     {
         return _macro_drag_recieved_signal;
     }
-    sigc::signal<bool, const Gtk::TreeModel::Path &> macro_drag_delete_signal() { return _macro_drag_delete_signal; }
 
 protected:
     // Overridden virtual functions:
     bool row_draggable_vfunc(const Gtk::TreeModel::Path &path) const override;
     bool row_drop_possible_vfunc(const Gtk::TreeModel::Path &dest,
                                  const Gtk::SelectionData &selection_data) const override;
-
-    bool drag_data_get_vfunc(const Gtk::TreeModel::Path &path, Gtk::SelectionData &selection_data) const override;
-    bool drag_data_delete_vfunc(const Gtk::TreeModel::Path &path) override;
 
     bool drag_data_received_vfunc(const Gtk::TreeModel::Path &dest, const Gtk::SelectionData &selection_data) override;
 };

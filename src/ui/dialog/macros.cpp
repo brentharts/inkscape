@@ -118,7 +118,6 @@ Macros::Macros()
     _MacrosTree->enable_model_drag_dest();
     _MacrosTree->enable_model_drag_source();
     _MacrosTreeStore->macro_drag_recieved_signal().connect(sigc::mem_fun(*this, &Macros::on_macro_drag_recieved));
-    _MacrosTreeStore->macro_drag_delete_signal().connect(sigc::mem_fun(*this, &Macros::on_macro_drag_delete));
     _MacrosTree->signal_drag_end().connect(sigc::mem_fun(*this, &Macros::on_macro_drag_end));
 
     // Search
@@ -223,7 +222,6 @@ void Macros::on_macro_create()
             (not group_combo.get_entry_text().empty() ? group_combo.get_entry_text() : _("Default"));
 
         auto macro_iter = create_macro(macro_name, macro_group);
-        // TODO: Also create in XML tree
 
         _MacrosTree->expand_to_path(_MacrosTreeStore->get_path(macro_iter));
         _MacrosTreeSelection->select(macro_iter);
@@ -247,45 +245,35 @@ void Macros::on_macro_new_group()
 
     int result = dialog.run();
     if (result == Gtk::RESPONSE_OK and not group_name_entry.get_text().empty()) {
-        // TODO: create in XML too
-        auto iter = create_group(group_name_entry.get_text());
+        const auto iter = create_group(group_name_entry.get_text());
         _MacrosTreeSelection->select(iter);
     }
 }
 
 void Macros::on_macro_delete()
 {
-    auto iter = _MacrosTreeSelection->get_selected();
-
-    const bool is_group = _MacrosTreeStore->iter_depth(iter) == 0;
-
-    if (is_group and not iter->children().empty()) { // folder is not empty
-        Gtk::MessageDialog dialog(_("Only empty groups can be deleted for now"), false, Gtk::MESSAGE_ERROR,
-                                  Gtk::BUTTONS_CLOSE, true);
-        dialog.run();
-        return;
-    }
-    Gtk::MessageDialog dialog(_("Delete selected macros permanently?"), true, Gtk::MESSAGE_QUESTION,
+    Gtk::MessageDialog dialog(_("Delete selected macro/group permanently?"), true, Gtk::MESSAGE_QUESTION,
                               Gtk::BUTTONS_OK_CANCEL);
 
     int result = dialog.run();
     if (result == Gtk::RESPONSE_OK) {
         // TODO: Support multiple deletions
-        if (is_group) {
-            _macros_tree_xml.remove_group((*iter)[_MacrosTreeStore->_tree_columns.name]);
-        } else {
-            const auto parent = iter->parent();
+        const auto iter = _MacrosTreeSelection->get_selected();
+        const auto parent = iter->parent();
 
-            _macros_tree_xml.remove_macro((*iter)[_MacrosTreeStore->_tree_columns.name],
-                                          (*parent)[_MacrosTreeStore->_tree_columns.name]);
+        const bool is_group = _MacrosTreeStore->iter_depth(iter) == 0;
 
-            // colapse(change icon to collapsed) parent(group) if it's the only child left
-            if (parent->children().size() == 1) {
+        // only update the tree when updating the XML was successful
+        if (_macros_tree_xml.remove_node((*iter)[_MacrosTreeStore->_tree_columns.node])) {
+            _MacrosTreeStore->erase(iter);
+        }
+
+        if (not is_group) {
+            // colapse(change icon to collapsed) parent(group) if empty
+            if (parent->children().size() == 0) {
                 (*parent)[_MacrosTreeStore->_tree_columns.icon] = CLOSED_GROUP_ICON_NAME;
             }
         }
-
-        _MacrosTreeStore->erase(iter);
     }
 }
 
@@ -378,13 +366,9 @@ void Macros::on_tree_row_expanded_collapsed(const Gtk::TreeIter &expanded_row, c
 
 bool Macros::on_macro_drag_recieved(const Gtk::TreeModel::Path &dest, Gtk::TreeModel::Path &source_path)
 {
-    _new_drag_path = dest; // Using it in Macros::on_macro_drag_delete(...)
-    return true;
-}
+    _new_drag_path = dest; // Using it in Macros::on_macro_drag_end(...)
 
-bool Macros::on_macro_drag_delete(const Gtk::TreeModel::Path &source_path)
-{
-    // Get old group name and macro name
+    // colapse old change old group icon to closed if no child left
     Gtk::TreeModel::Path old_group_path(source_path);
     old_group_path.up();
 
@@ -396,28 +380,25 @@ bool Macros::on_macro_drag_delete(const Gtk::TreeModel::Path &source_path)
         old_parent_row[_MacrosTreeStore->_tree_columns.icon] = CLOSED_GROUP_ICON_NAME;
     }
 
-    const auto macro_row = *(_MacrosTreeStore->get_iter(source_path)); // should never fail
-
-    Glib::ustring old_group_name = old_parent_row[_MacrosTreeStore->_tree_columns.name];
-    Glib::ustring macro_name = macro_row[_MacrosTreeStore->_tree_columns.name];
-
-    // Get new group name
-    Gtk::TreeModel::Path new_group_path(_new_drag_path);
-    new_group_path.up();
-
-    const auto new_group_row = *(_MacrosTreeStore->get_iter(new_group_path)); // should never fail
-    Glib::ustring new_group_name = new_group_row[_MacrosTreeStore->_tree_columns.name];
-
-    // TODO: Call related XML updating fucntion to move macro to new folder
-    _macros_tree_xml.move_macro(macro_name, old_group_name, new_group_name);
-
     return true;
 }
 
-void Macros::on_macro_drag_end(const Glib::RefPtr<Gdk::DragContext> &context)
+void Macros::on_macro_drag_end(const Glib::RefPtr<Gdk::DragContext> & /*context*/)
 {
     _MacrosTree->expand_to_path(_new_drag_path);
     _MacrosTreeSelection->select(_new_drag_path);
+
+    Gtk::TreeRow macro_row = (*(_MacrosTreeStore->get_iter(_new_drag_path)));
+
+    _new_drag_path.up(); // VERY IMPORTANT, now pointing to new group
+    Gtk::TreeRow new_group_row = (*(_MacrosTreeStore->get_iter(_new_drag_path)));
+
+    // Pickup xml pointers from tree
+    XML::Node *macro_xml_ptr = macro_row[_MacrosTreeStore->_tree_columns.node];
+    XML::Node *new_group_xml_ptr = new_group_row[_MacrosTreeStore->_tree_columns.node];
+
+    // updating with new pointer
+    macro_row[_MacrosTreeStore->_tree_columns.node] = _macros_tree_xml.move_macro(macro_xml_ptr, new_group_xml_ptr);
 }
 
 void Macros::load_macros()
@@ -596,41 +577,48 @@ XML::Node *MacrosXML::create_group(const Glib::ustring &group_name)
 
     return Inkscape::GC::release(group);
 }
-bool MacrosXML::remove_group(const Glib::ustring &group_name)
+
+bool MacrosXML::remove_node(XML::Node *node)
 {
-    if (auto group = find_group(group_name); group) {
-        _xml_doc->root()->removeChild(group);
+    if (node) {
+        node->parent()->removeChild(node);
         save_xml();
         return true;
     }
     return false;
 }
+
+bool MacrosXML::remove_group(const Glib::ustring &group_name)
+{
+    return remove_node(find_group(group_name));
+}
 bool MacrosXML::remove_macro(const Glib::ustring &macro_name, const Glib::ustring &group_name)
 {
-    if (auto group = find_group(group_name); group) {
-        if (auto macro = find_macro(macro_name, group); macro) {
-            group->removeChild(macro);
-            save_xml();
-            return true;
-        }
-    }
-    return false;
+    return remove_node(find_macro(macro_name, group_name));
 }
-bool MacrosXML::move_macro(const Glib::ustring &macro_name, const Glib::ustring &old_group_name,
-                           const Glib::ustring &new_group_name)
-{
-    auto old_group_ptr = find_group(old_group_name);
-    auto new_group_ptr = find_group(new_group_name);
-    auto macro_ptr = find_macro(macro_name, old_group_ptr);
 
+XML::Node *MacrosXML::move_macro(const Glib::ustring &macro_name, const Glib::ustring &old_group_name,
+                                 const Glib::ustring &new_group_name)
+{
+    auto new_group_ptr = find_group(new_group_name);
+    auto macro_ptr = find_macro(macro_name, old_group_name);
+
+    return move_macro(macro_ptr, new_group_ptr);
+}
+
+XML::Node *MacrosXML::move_macro(XML::Node *macro_ptr, XML::Node *new_group_ptr)
+{
     auto dup_macro_ptr = macro_ptr->duplicate(_xml_doc);
-    old_group_ptr->removeChild(macro_ptr);
+
+    if (not dup_macro_ptr) {
+        debug_print("boom");
+    }
 
     new_group_ptr->appendChild(dup_macro_ptr);
-    Inkscape::GC::release(dup_macro_ptr);
+    macro_ptr->parent()->removeChild(macro_ptr);
 
     save_xml();
-    return true;
+    return Inkscape::GC::release(dup_macro_ptr);
 }
 
 XML::Node *MacrosXML::get_root()
@@ -665,23 +653,13 @@ bool MacrosDragAndDropStore::row_drop_possible_vfunc(const Gtk::TreeModel::Path 
     return dest_path.size() == 2; // within folder: here dest path means, path achieved when drop successful
 }
 
-bool MacrosDragAndDropStore::drag_data_get_vfunc(const Gtk::TreeModel::Path &path,
-                                                 Gtk::SelectionData &selection_data) const
-{
-    return Gtk::TreeDragSource::drag_data_get_vfunc(path, selection_data);
-}
-bool MacrosDragAndDropStore::drag_data_delete_vfunc(const Gtk::TreeModel::Path &path)
-{
-    _macro_drag_delete_signal.emit(path);
-    return Gtk::TreeDragSource::drag_data_delete_vfunc(path);
-}
 bool MacrosDragAndDropStore::drag_data_received_vfunc(const Gtk::TreeModel::Path &dest,
                                                       const Gtk::SelectionData &selection_data)
 {
-    Gtk::TreeModel::Path p;
-    Gtk::TreeModel::Path::get_from_selection_data(selection_data, p);
+    Gtk::TreeModel::Path source_path;
+    Gtk::TreeModel::Path::get_from_selection_data(selection_data, source_path);
 
-    _macro_drag_recieved_signal.emit(dest, p);
+    _macro_drag_recieved_signal.emit(dest, source_path);
     return Gtk::TreeDragDest::drag_data_received_vfunc(dest, selection_data);
 }
 } // namespace Dialog
