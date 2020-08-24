@@ -426,15 +426,15 @@ void Macros::load_macros()
     const auto root = _macros_tree_xml.get_root();
 
     for (auto group = root->firstChild(); group; group = group->next()) {
-        auto group_tree_iter = create_group(group->attribute("name"), false);
+        auto group_tree_iter = create_group(group->attribute("name"), group);
         for (auto macro = group->firstChild(); macro; macro = macro->next()) {
             // Read macros
-            create_macro(macro->attribute("name"), group_tree_iter, false);
+            create_macro(macro->attribute("name"), group_tree_iter, macro);
         };
     }
 }
 
-Gtk::TreeIter Macros::create_group(const Glib::ustring &group_name, bool create_in_xml)
+Gtk::TreeIter Macros::create_group(const Glib::ustring &group_name, XML::Node *xml_node)
 {
     if (auto group_iter = find_group(group_name); group_iter) {
         return group_iter;
@@ -444,10 +444,8 @@ Gtk::TreeIter Macros::create_group(const Glib::ustring &group_name, bool create_
     row[_MacrosTreeStore->_tree_columns.icon] = CLOSED_GROUP_ICON_NAME;
     row[_MacrosTreeStore->_tree_columns.name] = group_name;
 
-    // add in XML file
-    if (create_in_xml) {
-        _macros_tree_xml.create_group(group_name);
-    }
+    // add in XML file if xml_node, append the relevant node pointer to me
+    row[_MacrosTreeStore->_tree_columns.node] = (xml_node ? xml_node : _macros_tree_xml.create_group(group_name));
 
     return row;
 }
@@ -485,7 +483,7 @@ Gtk::TreeIter Macros::find_macro(const Glib::ustring &macro_name, const Glib::us
     return find_macro(macro_name, find_group(group_name));
 }
 
-Gtk::TreeIter Macros::create_macro(const Glib::ustring &macro_name, Gtk::TreeIter group_iter, bool create_in_xml)
+Gtk::TreeIter Macros::create_macro(const Glib::ustring &macro_name, Gtk::TreeIter group_iter, XML::Node *xml_node)
 {
     if (auto macro = find_macro(macro_name, group_iter); macro) {
         return macro;
@@ -496,17 +494,18 @@ Gtk::TreeIter Macros::create_macro(const Glib::ustring &macro_name, Gtk::TreeIte
     macro[_MacrosTreeStore->_tree_columns.name] = macro_name;
 
     // add in XML file
-    if (create_in_xml) {
-        _macros_tree_xml.create_macro(macro_name, (*group_iter)[_MacrosTreeStore->_tree_columns.name]);
-    }
+    macro[_MacrosTreeStore->_tree_columns.node] =
+        (xml_node ? xml_node
+                  : _macros_tree_xml.create_macro(macro_name, (*group_iter)[_MacrosTreeStore->_tree_columns.node]));
 
     return macro;
 } // namespace Dialog
 
-Gtk::TreeIter Macros::create_macro(const Glib::ustring &macro_name, const Glib::ustring &group_name, bool create_in_xml)
+Gtk::TreeIter Macros::create_macro(const Glib::ustring &macro_name, const Glib::ustring &group_name,
+                                   XML::Node *xml_node)
 {
     // create_group will work same as find if the group exists
-    return create_macro(macro_name, create_group(group_name), create_in_xml);
+    return create_macro(macro_name, create_group(group_name), xml_node);
 }
 
 // MacrosXML ------------------------------------------------------------------------

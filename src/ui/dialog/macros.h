@@ -177,9 +177,11 @@ private:
      */
     Gtk::TreeIter find_group(const Glib::ustring &group_name) const;
     /**
-     * same as find, but create the group if it doesn't exist, if create_in_xml false only tree is updated
+     * same as find, but create the group if it doesn't exist, if no xml_node is provided a new node will be created in
+     * XML xml_node is generally provided when Gtk::TreeView is being field using XML xml_node is not provided when
+     * creating a group/macro not already in XML file as in on_macro_create and in on_macro_new_group
      */
-    Gtk::TreeIter create_group(const Glib::ustring &group_name, bool create_in_xml = true);
+    Gtk::TreeIter create_group(const Glib::ustring &group_name, XML::Node *xml_node = nullptr);
 
     /**
      * Finds macro of given name in the group, and returns iterator to it
@@ -190,9 +192,10 @@ private:
     /**
      * Creates a new macro and return an iterator to it, if create_in_xml false only tree is updated
      */
-    Gtk::TreeIter create_macro(const Glib::ustring &macro_name, Gtk::TreeIter group_iter, bool create_in_xml = true);
+    Gtk::TreeIter create_macro(const Glib::ustring &macro_name, Gtk::TreeIter group_iter,
+                               XML::Node *xml_node = nullptr);
     Gtk::TreeIter create_macro(const Glib::ustring &macro_name, const Glib::ustring &group_name,
-                               bool create_in_xml = true);
+                               XML::Node *xml_node = nullptr);
 
 private: // Variables
     // Widgets
@@ -253,10 +256,12 @@ private:
             // Order should be same as in glade file
             add(icon);
             add(name);
+	    add(node);
         }
         // Order should be same as in glade file
         Gtk::TreeModelColumn<Glib::ustring> icon;
         Gtk::TreeModelColumn<Glib::ustring> name;
+        Gtk::TreeModelColumn<XML::Node *> node;
     };
 
     sigc::signal<bool, const Gtk::TreeModel::Path &, Gtk::TreeModel::Path &> _macro_drag_recieved_signal;
