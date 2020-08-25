@@ -572,7 +572,7 @@ MacrosXML::MacrosXML()
 
         // Add the default group
         auto group_default = doc->createElement("group");
-        group_default->setAttribute("name", "default");
+        group_default->setAttribute("name", _("Default"));
 
         // Just a pointer, we don't own it, don't free/release/delete
         auto root = doc->root();
