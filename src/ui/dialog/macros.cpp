@@ -13,6 +13,7 @@
 
 #include "macros.h"
 
+#include <functional>
 #include <glib/gi18n.h>
 #include <glibmm/ustring.h>
 #include <gtkmm/box.h>
@@ -388,25 +389,29 @@ void Macros::on_group_macro_name_edited(const Glib::ustring &path_string, const 
         return;
     }
 
-    if (_MacrosTreeStore->iter_depth(edited_row_iter) == 0) { // Row is of a group
-        if (find_group(new_text)) {
-            warn(_("Group of this name already exists"));
-            return;
-        }
+    bool is_group = _MacrosTreeStore->iter_depth(edited_row_iter) == 0;
+    // determine function used for, checking name aready exists, different for macros and groups
+    const auto finding_func =
+        (is_group
+             ? std::function<Gtk::TreeIter(const Glib::ustring &)>(
+                   [this](const Glib::ustring &name) { return find_group(name); })
+             : std::function<Gtk::TreeIter(const Glib::ustring &)>([this, &edited_row_iter](const Glib::ustring &name) {
+                   return find_macro(name, edited_row_iter->parent());
+               }));
 
-        if (_macros_tree_xml.rename_node((*edited_row_iter)[_MacrosTreeStore->_tree_columns.node], new_text)) {
-            (*edited_row_iter)[_MacrosTreeStore->_tree_columns.name] = new_text;
-        }
-        return;
+    auto new_name = new_text;
+    if (finding_func(new_name)) {
+        int name_tries = 1;
+        do {
+            new_name = new_text + "(" + std::to_string(name_tries) + ")";
+            name_tries++;
+        } while (finding_func(new_name));
     }
-    // Only macros left to process now
-    if (find_macro(new_text, edited_row_iter->parent())) {
-        warn(_("Macro of this name already exists in the group"));
-        return;
+
+    if (_macros_tree_xml.rename_node((*edited_row_iter)[_MacrosTreeStore->_tree_columns.node], new_name)) {
+        (*edited_row_iter)[_MacrosTreeStore->_tree_columns.name] = new_name;
     }
-    if (_macros_tree_xml.rename_node((*edited_row_iter)[_MacrosTreeStore->_tree_columns.node], new_text)) {
-        (*edited_row_iter)[_MacrosTreeStore->_tree_columns.name] = new_text;
-    }
+    return;
 }
 
 bool Macros::on_macro_drag_recieved(const Gtk::TreeModel::Path &dest, Gtk::TreeModel::Path &source_path)
