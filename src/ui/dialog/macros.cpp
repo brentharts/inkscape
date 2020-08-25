@@ -30,6 +30,7 @@
 #include <gtkmm/treestore.h>
 #include <iostream>
 #include <memory>
+#include <sigc++/adaptors/bind.h>
 #include <sigc++/functors/mem_fun.h>
 
 #include "gc-anchored.h"
@@ -46,6 +47,12 @@ namespace {
  * if vertical, and the second child resizable if horizontal.
  * @pre `paned` has two children
  */
+int warn(const Glib::ustring &message)
+{
+    Gtk::MessageDialog warn_empty(message, false, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_OK, true);
+    return warn_empty.run();
+};
+
 void paned_set_vertical(Gtk::Paned *paned, bool vertical)
 {
     paned->child_property_resize(*paned->get_child1()) = vertical;
@@ -106,9 +113,10 @@ Macros::Macros()
     builder->get_widget("MacrosScrolled", _MacrosScrolled);
 
     _MacrosTreeStore = MacrosDragAndDropStore::create();
-
     _MacrosStepStore = Glib::RefPtr<Gtk::TreeStore>::cast_dynamic(builder->get_object("MacrosStepStore"));
     _MacrosTreeSelection = Glib::RefPtr<Gtk::TreeSelection>::cast_dynamic(builder->get_object("MacrosTreeSelection"));
+
+    _CRName = Glib::RefPtr<Gtk::CellRendererText>::cast_dynamic(builder->get_object("CRName"));
 
     // Initialize marcos tree (actual macros)
     load_macros(); // First load into tree store for performace, avoiding frequent updates of tree
@@ -164,6 +172,8 @@ Macros::Macros()
         sigc::bind(sigc::mem_fun(*this, &Macros::on_tree_row_expanded_collapsed), true));
     _MacrosTree->signal_row_collapsed().connect(
         sigc::bind(sigc::mem_fun(*this, &Macros::on_tree_row_expanded_collapsed), false));
+
+    _CRName->signal_edited().connect(sigc::mem_fun(*this, &Macros::on_group_macro_name_edited));
 
     // disable till something is selected
     _MacrosDelete->set_sensitive(false);
@@ -362,6 +372,41 @@ void Macros::on_tree_row_expanded_collapsed(const Gtk::TreeIter &expanded_row, c
                                             const bool is_expanded)
 {
     (*expanded_row)[_MacrosTreeStore->_tree_columns.icon] = is_expanded ? OPEN_GROUP_ICON_NAME : CLOSED_GROUP_ICON_NAME;
+}
+
+void Macros::on_group_macro_name_edited(const Glib::ustring &path_string, const Glib::ustring &new_text)
+{
+    Gtk::TreeIter edited_row_iter = _MacrosTreeStore->get_iter(path_string);
+
+    // is there no change?
+    if (new_text == (*edited_row_iter)[_MacrosTreeStore->_tree_columns.name]) {
+        return;
+    }
+
+    if (new_text.empty()) {
+        warn(_("New name can't be empty"));
+        return;
+    }
+
+    if (_MacrosTreeStore->iter_depth(edited_row_iter) == 0) { // Row is of a group
+        if (find_group(new_text)) {
+            warn(_("Group of this name already exists"));
+            return;
+        }
+
+        if (_macros_tree_xml.rename_node((*edited_row_iter)[_MacrosTreeStore->_tree_columns.node], new_text)) {
+            (*edited_row_iter)[_MacrosTreeStore->_tree_columns.name] = new_text;
+        }
+        return;
+    }
+    // Only macros left to process now
+    if (find_macro(new_text, edited_row_iter->parent())) {
+        warn(_("Macro of this name already exists in the group"));
+        return;
+    }
+    if (_macros_tree_xml.rename_node((*edited_row_iter)[_MacrosTreeStore->_tree_columns.node], new_text)) {
+        (*edited_row_iter)[_MacrosTreeStore->_tree_columns.name] = new_text;
+    }
 }
 
 bool Macros::on_macro_drag_recieved(const Gtk::TreeModel::Path &dest, Gtk::TreeModel::Path &source_path)
@@ -576,6 +621,16 @@ XML::Node *MacrosXML::create_group(const Glib::ustring &group_name)
     save_xml();
 
     return Inkscape::GC::release(group);
+}
+
+bool MacrosXML::rename_node(XML::Node *node, const Glib::ustring &new_name)
+{
+    if (node) {
+        node->setAttribute("name", new_name);
+        save_xml();
+        return true;
+    }
+    return false;
 }
 
 bool MacrosXML::remove_node(XML::Node *node)

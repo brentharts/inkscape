@@ -63,6 +63,7 @@ public:
     XML::Node *create_macro(const Glib::ustring &macro_name, XML::Node *group_ptr);
     XML::Node *create_group(const Glib::ustring &group_name);
 
+    bool rename_node(XML::Node *node, const Glib::ustring &new_name);
     /**
      * Removes the group or macro from XML, prefer when pointer is available and valid
      */
@@ -173,6 +174,7 @@ private:
      */
     void on_tree_row_expanded_collapsed(const Gtk::TreeIter &expanded_row, const Gtk::TreePath &tree_path,
                                         const bool is_expanded);
+    void on_group_macro_name_edited(const Glib::ustring &path_string, const Glib::ustring &new_text);
 
     bool on_macro_drag_recieved(const Gtk::TreeModel::Path &dest, Gtk::TreeModel::Path &source_path);
     bool on_macro_drag_delete(const Gtk::TreeModel::Path &source_path);
@@ -241,6 +243,8 @@ private: // Variables
     Glib::RefPtr<MacrosDragAndDropStore> _MacrosTreeStore;
     Glib::RefPtr<Gtk::TreeStore> _MacrosStepStore;
     Glib::RefPtr<Gtk::TreeSelection> _MacrosTreeSelection;
+
+    Glib::RefPtr<Gtk::CellRendererText> _CRName;
 
     MacrosXML _macros_tree_xml;
 

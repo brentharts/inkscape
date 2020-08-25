@@ -101,7 +101,7 @@
                   <object class="GtkTreeSelection" id="MacrosTreeSelection"/>
                 </child>
                 <child>
-                  <object class="GtkTreeViewColumn" id="Icon">
+                  <object class="GtkTreeViewColumn" id="IconColumn">
                     <property name="title" translatable="yes">Icon</property>
                     <child>
                       <object class="GtkCellRendererPixbuf" id="CRIcon">
@@ -114,10 +114,12 @@
                   </object>
                 </child>
                 <child>
-                  <object class="GtkTreeViewColumn" id="Name">
+                  <object class="GtkTreeViewColumn" id="NameColumn">
                     <property name="title" translatable="yes">Name</property>
                     <child>
-                      <object class="GtkCellRendererText" id="CRName"/>
+                      <object class="GtkCellRendererText" id="CRName">
+                        <property name="editable">True</property>
+                      </object>
                       <attributes>
                         <attribute name="text">1</attribute>
                       </attributes>
