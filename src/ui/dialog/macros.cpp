@@ -380,7 +380,9 @@ void Macros::on_group_macro_name_edited(const Glib::ustring &path_string, const 
     Gtk::TreeIter edited_row_iter = _MacrosTreeStore->get_iter(path_string);
 
     // is there no change?
-    if (new_text == (*edited_row_iter)[_MacrosTreeStore->_tree_columns.name]) {
+    const auto &old_name = (*edited_row_iter)[_MacrosTreeStore->_tree_columns.name];
+
+    if (new_text == old_name) {
         return;
     }
 
@@ -403,7 +405,26 @@ void Macros::on_group_macro_name_edited(const Glib::ustring &path_string, const 
     if (finding_func(new_name)) {
         int name_tries = 1;
         do {
-            new_name = new_text + "(" + std::to_string(name_tries) + ")";
+            new_name = new_text + " (" + std::to_string(name_tries) + ")";
+            if (new_name == old_name) {
+                // this is for fixing a bug when an the name is already a renamed duplicate of a name
+                // example:
+                // a group has has children
+                //
+                // group
+                //   - a
+                //   - a(1)
+                //   - a(2)
+                //
+                // if we rename a(2) to a, it will be renamed to a(3) finding_func searches in TreeStore where a(2)
+                // still exists hence we get
+                //
+                // group
+                //   - a
+                //   - a(1)
+                //   - a(3)
+                return;
+            }
             name_tries++;
         } while (finding_func(new_name));
     }
