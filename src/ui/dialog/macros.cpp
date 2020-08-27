@@ -439,16 +439,43 @@ bool Macros::on_macro_drag_recieved(const Gtk::TreeModel::Path &dest, Gtk::TreeM
 {
     _new_drag_path = dest; // Using it in Macros::on_macro_drag_end(...)
 
-    // colapse old change old group icon to closed if no child left
-    Gtk::TreeModel::Path old_group_path(source_path);
-    old_group_path.up();
+    const Gtk::TreeIter macro_iter = _MacrosTreeStore->get_iter(source_path);
 
-    const auto old_parent_row = *(_MacrosTreeStore->get_iter(old_group_path)); // should never fail
+    // colapse old, change old group icon to closed if no child left
+    {
+        if (const auto old_parent_row = *(macro_iter->parent()); old_parent_row->children().size() == 1) {
+            // only single child left, which will be deleted
+            old_parent_row[_MacrosTreeStore->_tree_columns.icon] = CLOSED_GROUP_ICON_NAME;
+        }
+    }
 
-    // When in Rome, change icon to closed icon it's the only child left
-    if (old_parent_row->children().size() == 1) {
-        // only single child left, which will be deleted
-        old_parent_row[_MacrosTreeStore->_tree_columns.icon] = CLOSED_GROUP_ICON_NAME;
+    auto new_parent_path(_new_drag_path);
+    new_parent_path.up();
+
+    Gtk::TreeIter new_group_iter = _MacrosTreeStore->get_iter(new_parent_path);
+
+    // Pickup xml pointers from tree
+    XML::Node *macro_xml_ptr = macro_iter->get_value(_MacrosTreeStore->_tree_columns.node);
+    XML::Node *new_group_xml_ptr = new_group_iter->get_value(_MacrosTreeStore->_tree_columns.node);
+
+    // updating with new pointer
+    macro_iter->set_value(_MacrosTreeStore->_tree_columns.node,
+                          _macros_tree_xml.move_macro(macro_xml_ptr, new_group_xml_ptr));
+
+    // TODO: rename to avoid name conflicts in the group
+    Glib::ustring new_name;
+    if (find_macro(macro_iter->get_value(_MacrosTreeStore->_tree_columns.name), new_group_iter)) {
+        int name_tries = 1;
+        do {
+            new_name =
+                macro_iter->get_value(_MacrosTreeStore->_tree_columns.name) + " (" + std::to_string(name_tries) + ")";
+            name_tries++;
+        } while (find_macro(new_name, new_group_iter));
+    }
+
+    if (not new_name.empty() and
+        _macros_tree_xml.rename_node(macro_iter->get_value(_MacrosTreeStore->_tree_columns.node), new_name)) {
+        macro_iter->set_value(_MacrosTreeStore->_tree_columns.name, new_name);
     }
 
     return true;
@@ -458,18 +485,6 @@ void Macros::on_macro_drag_end(const Glib::RefPtr<Gdk::DragContext> & /*context*
 {
     _MacrosTree->expand_to_path(_new_drag_path);
     _MacrosTreeSelection->select(_new_drag_path);
-
-    Gtk::TreeRow macro_row = (*(_MacrosTreeStore->get_iter(_new_drag_path)));
-
-    _new_drag_path.up(); // VERY IMPORTANT, now pointing to new group
-    Gtk::TreeRow new_group_row = (*(_MacrosTreeStore->get_iter(_new_drag_path)));
-
-    // Pickup xml pointers from tree
-    XML::Node *macro_xml_ptr = macro_row[_MacrosTreeStore->_tree_columns.node];
-    XML::Node *new_group_xml_ptr = new_group_row[_MacrosTreeStore->_tree_columns.node];
-
-    // updating with new pointer
-    macro_row[_MacrosTreeStore->_tree_columns.node] = _macros_tree_xml.move_macro(macro_xml_ptr, new_group_xml_ptr);
 }
 
 void Macros::load_macros()
