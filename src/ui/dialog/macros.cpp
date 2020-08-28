@@ -427,18 +427,20 @@ bool Macros::on_macro_drag_recieved(const Gtk::TreeModel::Path &dest, Gtk::TreeM
 
     const Gtk::TreeIter macro_iter = _MacrosTreeStore->get_iter(source_path);
 
-    // colapse old, change old group icon to closed if no child left
-    {
-        if (const auto old_parent_row = *(macro_iter->parent()); old_parent_row->children().size() == 1) {
-            // only single child left, which will be deleted
-            old_parent_row[_MacrosTreeStore->_tree_columns.icon] = CLOSED_GROUP_ICON_NAME;
-        }
-    }
-
     auto new_parent_path(_new_drag_path);
     new_parent_path.up();
-
     Gtk::TreeIter new_group_iter = _MacrosTreeStore->get_iter(new_parent_path);
+
+    // new and old parents are same, dragged in the same group
+    if (new_group_iter.equal(macro_iter->parent())) {
+        return false;
+    }
+
+    // colapse old, change old group icon to closed if it was the last child left
+    if (const auto old_parent_row = *(macro_iter->parent()); old_parent_row->children().size() == 1) {
+        // only single child left, which will be deleted
+        old_parent_row[_MacrosTreeStore->_tree_columns.icon] = CLOSED_GROUP_ICON_NAME;
+    }
 
     // Pickup xml pointers from tree
     XML::Node *macro_xml_ptr = macro_iter->get_value(_MacrosTreeStore->_tree_columns.node);
@@ -448,19 +450,10 @@ bool Macros::on_macro_drag_recieved(const Gtk::TreeModel::Path &dest, Gtk::TreeM
     macro_iter->set_value(_MacrosTreeStore->_tree_columns.node,
                           _macros_tree_xml.move_macro(macro_xml_ptr, new_group_xml_ptr));
 
-    // TODO: rename to avoid name conflicts in the group
-    Glib::ustring new_name;
-    if (find_macro(macro_iter->get_value(_MacrosTreeStore->_tree_columns.name), new_group_iter)) {
-        int name_tries = 1;
-        do {
-            new_name =
-                macro_iter->get_value(_MacrosTreeStore->_tree_columns.name) + " (" + std::to_string(name_tries) + ")";
-            name_tries++;
-        } while (find_macro(new_name, new_group_iter));
-    }
+    Glib::ustring new_name =
+        find_available_name(macro_iter->get_value(_MacrosTreeStore->_tree_columns.name), "", new_group_iter);
 
-    if (not new_name.empty() and
-        _macros_tree_xml.rename_node(macro_iter->get_value(_MacrosTreeStore->_tree_columns.node), new_name)) {
+    if (not new_name.empty() and _macros_tree_xml.rename_node(macro_xml_ptr, new_name)) {
         macro_iter->set_value(_MacrosTreeStore->_tree_columns.name, new_name);
     }
 
