@@ -411,13 +411,14 @@ bool Macros::on_macro_drag_recieved(const Gtk::TreeModel::Path &dest, Gtk::TreeM
     XML::Node *new_group_xml_ptr = new_group_iter->get_value(_MacrosTreeStore->_tree_columns.node);
 
     // updating with new pointer
-    macro_iter->set_value(_MacrosTreeStore->_tree_columns.node,
-                          _macros_tree_xml.move_macro(macro_xml_ptr, new_group_xml_ptr));
+    macro_xml_ptr = _macros_tree_xml.move_macro(macro_xml_ptr, new_group_xml_ptr);
+    macro_iter->set_value(_MacrosTreeStore->_tree_columns.node, macro_xml_ptr);
 
-    Glib::ustring new_name =
-        find_available_name(macro_iter->get_value(_MacrosTreeStore->_tree_columns.name), "", new_group_iter);
+    const Glib::ustring &old_name = macro_iter->get_value(_MacrosTreeStore->_tree_columns.name);
+    Glib::ustring new_name = find_available_name(old_name, "", new_group_iter);
 
-    if (not new_name.empty() and _macros_tree_xml.rename_node(macro_xml_ptr, new_name)) {
+    // if name not changed no need to rename
+    if (new_name != old_name and _macros_tree_xml.rename_node(macro_xml_ptr, new_name)) {
         macro_iter->set_value(_MacrosTreeStore->_tree_columns.name, new_name);
     }
 
