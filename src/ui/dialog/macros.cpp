@@ -377,43 +377,7 @@ void Macros::on_group_macro_name_edited(const Glib::ustring &path_string, const 
         return;
     }
 
-    bool is_group = _MacrosTreeStore->iter_depth(edited_row_iter) == 0;
-    // determine function used for, checking name aready exists, different for macros and groups
-    const auto finding_func =
-        (is_group
-             ? std::function<Gtk::TreeIter(const Glib::ustring &)>(
-                   [this](const Glib::ustring &name) { return find_group(name); })
-             : std::function<Gtk::TreeIter(const Glib::ustring &)>([this, &edited_row_iter](const Glib::ustring &name) {
-                   return find_macro(name, edited_row_iter->parent());
-               }));
-
-    auto new_name = new_text;
-    if (finding_func(new_name)) {
-        int name_tries = 1;
-        do {
-            new_name = new_text + " (" + std::to_string(name_tries) + ")";
-            if (new_name == old_name) {
-                // this is for fixing a bug when an the name is already a renamed duplicate of a name
-                // example:
-                // a group has has children
-                //
-                // group
-                //   - a
-                //   - a(1)
-                //   - a(2)
-                //
-                // if we rename a(2) to a, it will be renamed to a(3) finding_func searches in TreeStore where a(2)
-                // still exists hence we get
-                //
-                // group
-                //   - a
-                //   - a(1)
-                //   - a(3)
-                return;
-            }
-            name_tries++;
-        } while (finding_func(new_name));
-    }
+    Glib::ustring new_name = find_available_name(new_text, old_name, edited_row_iter->parent());
 
     if (_macros_tree_xml.rename_node((*edited_row_iter)[_MacrosTreeStore->_tree_columns.node], new_name)) {
         (*edited_row_iter)[_MacrosTreeStore->_tree_columns.name] = new_name;
