@@ -211,6 +211,12 @@ private:
     Gtk::TreeIter create_macro(const Glib::ustring &macro_name, const Glib::ustring &group_name,
                                XML::Node *xml_node = nullptr);
 
+    /**
+     * If parent iter is not provided then it's a group
+     */
+    Glib::ustring find_available_name(const Glib::ustring &new_name, const Glib::ustring &old_name = "",
+                                      Gtk::TreeIter parent_iter = Gtk::TreeIter());
+
 private: // Variables
     // Widgets
     Gtk::Button *_MacrosCreate;

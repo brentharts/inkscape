@@ -29,6 +29,7 @@
 #include <gtkmm/treepath.h>
 #include <gtkmm/treeselection.h>
 #include <gtkmm/treestore.h>
+#include <gtkmm/treeviewcolumn.h>
 #include <iostream>
 #include <memory>
 #include <sigc++/adaptors/bind.h>
@@ -241,24 +242,9 @@ void Macros::on_macro_create()
 
 void Macros::on_macro_new_group()
 {
-    Gtk::Dialog dialog(_("Create new group"), Gtk::DIALOG_MODAL | Gtk::DIALOG_USE_HEADER_BAR);
-
-    Gtk::Entry group_name_entry;
-
-    dialog.get_content_area()->pack_start(group_name_entry);
-    dialog.set_size_request(300);
-    dialog.get_content_area()->property_margin() = 12;
-
-    dialog.add_button(_("Cancel"), Gtk::RESPONSE_CANCEL);
-    dialog.add_button(_("Create"), Gtk::RESPONSE_OK);
-
-    dialog.show_all();
-
-    int result = dialog.run();
-    if (result == Gtk::RESPONSE_OK and not group_name_entry.get_text().empty()) {
-        const auto iter = create_group(group_name_entry.get_text());
-        _MacrosTreeSelection->select(iter);
-    }
+    const auto new_group_name = find_available_name("group");
+    const auto iter = create_group(new_group_name);
+    _MacrosTree->set_cursor(_MacrosTreeStore->get_path(iter), *_MacrosTree->get_column(1), true);
 }
 
 void Macros::on_macro_delete()
@@ -573,6 +559,47 @@ Gtk::TreeIter Macros::create_macro(const Glib::ustring &macro_name, const Glib::
 {
     // create_group will work same as find if the group exists
     return create_macro(macro_name, create_group(group_name), xml_node);
+}
+
+Glib::ustring Macros::find_available_name(const Glib::ustring &new_name_hint, const Glib::ustring &old_name,
+                                          Gtk::TreeIter parent_iter)
+{
+    // determine function used for, checking name aready exists, different for macros and groups
+    const auto finding_func =
+        not parent_iter
+            ? std::function<Gtk::TreeIter(const Glib::ustring &)>(
+                  [this](const Glib::ustring &name) { return find_group(name); })
+            : std::function<Gtk::TreeIter(const Glib::ustring &)>(
+                  [this, &parent_iter](const Glib::ustring &name) { return find_macro(name, parent_iter); });
+
+    auto new_name = new_name_hint;
+    if (finding_func(new_name)) {
+        int name_tries = 1;
+        do {
+            new_name = new_name_hint + " (" + std::to_string(name_tries) + ")";
+            if (new_name == old_name) {
+                // this is for fixing a bug when an the name is already a renamed duplicate of a name of other entry
+                // example:
+                // a group has has children
+                //
+                // group
+                //   - a
+                //   - a(1)
+                //   - a(2)
+                //
+                // if we rename a(2) to a, it will be renamed to a(3) finding_func searches in TreeStore where a(2)
+                // still exists hence we get
+                //
+                // group
+                //   - a
+                //   - a(1)
+                //   - a(3)
+                return old_name;
+            }
+            name_tries++;
+        } while (finding_func(new_name));
+    }
+    return new_name;
 }
 
 // MacrosXML ------------------------------------------------------------------------
