@@ -187,6 +187,14 @@ private:
     void load_macros();
 
     /**
+     * Removes children from the vector if parent is aready in the vector
+     * @param paths sorted vector of tree paths
+     * @param all_siblings_equal_parent, cosiders parent is selected all macros of a group selected
+     */
+    std::vector<Gtk::TreePath> remove_children_if_contains_parent(const std::vector<Gtk::TreePath> &paths,
+                                                                  bool all_siblings_equal_parent = false);
+
+    /**
      * If the group name exist returns an iterator to it
      */
     Gtk::TreeIter find_group(const Glib::ustring &group_name) const;

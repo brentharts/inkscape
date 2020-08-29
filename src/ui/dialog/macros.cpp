@@ -35,6 +35,7 @@
 #include <memory>
 #include <sigc++/adaptors/bind.h>
 #include <sigc++/functors/mem_fun.h>
+#include <vector>
 
 #include "gc-anchored.h"
 #include "io/resource.h"
@@ -256,7 +257,7 @@ void Macros::on_macro_delete()
 
     int result = dialog.run();
     if (result == Gtk::RESPONSE_OK) {
-        const auto selected_paths = _MacrosTreeSelection->get_selected_rows();
+        const auto selected_paths = remove_children_if_contains_parent(_MacrosTreeSelection->get_selected_rows());
 
         // For multiple deletions, we need to delete multiple rows, iterators become invalid when and preceding row is
         // deleted so iterating in reverse order
@@ -353,7 +354,8 @@ void Macros::on_toggle_steps_pane()
 void Macros::on_selection_changed()
 {
     const auto selected_paths = _MacrosTreeSelection->get_selected_rows();
-    if (not selected_paths.empty()) { // something is selected
+    if (not selected_paths.empty()) {
+        // something is selected
         _MacrosDelete->set_sensitive();
         return;
     }
@@ -448,6 +450,36 @@ void Macros::load_macros()
             create_macro(macro->attribute("name"), group_tree_iter, macro);
         };
     }
+}
+
+std::vector<Gtk::TreePath> Macros::remove_children_if_contains_parent(const std::vector<Gtk::TreePath> &paths,
+                                                                      bool all_siblings_equal_parent)
+{
+    // TODO: Implement all_siblings_equal_parent functionality
+    std::vector<Gtk::TreePath> filtered_paths;
+    filtered_paths.reserve(paths.size());
+
+    Gtk::TreePath current_parent_group;
+    for (const auto &path : paths) {
+        if (not current_parent_group) {
+            // We haven't encountered any group that can be parent of following rows
+            if (path.size() == 1) {
+                // This can be a potential parent group
+                current_parent_group = path;
+            }
+            // push in filtered_paths as it has no parent
+            filtered_paths.push_back(path);
+        } else {
+            // we have a candidate for parent of following rows
+            if (not current_parent_group.is_ancestor(path)) {
+                current_parent_group.clear();
+                filtered_paths.push_back(path);
+            }
+        }
+    }
+
+    filtered_paths.shrink_to_fit();
+    return filtered_paths;
 }
 
 Gtk::TreeIter Macros::create_group(const Glib::ustring &group_name, XML::Node *xml_node)
