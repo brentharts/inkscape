@@ -534,7 +534,7 @@ Glib::ustring Macros::find_available_name(const Glib::ustring &new_name_hint, co
     if (finding_func(new_name)) {
         int name_tries = 1;
         do {
-            new_name = new_name_hint + " (" + std::to_string(name_tries) + ")";
+            new_name = new_name_hint + " " + std::to_string(name_tries);
             if (new_name == old_name) {
                 // this is for fixing a bug when an the name is already a renamed duplicate of a name of other entry
                 // example:
