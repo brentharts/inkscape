@@ -13,6 +13,7 @@
 
 #include "macros.h"
 
+#include <boost/range/adaptor/reversed.hpp>
 #include <functional>
 #include <glib/gi18n.h>
 #include <glibmm/ustring.h>
@@ -136,6 +137,7 @@ Macros::Macros()
 
     // Cosmetics
     _MacrosTree->set_enable_tree_lines();
+    _MacrosTreeSelection->set_mode(Gtk::SELECTION_MULTIPLE);
 
     // Setup panes
     {
@@ -249,26 +251,29 @@ void Macros::on_macro_new_group()
 
 void Macros::on_macro_delete()
 {
-    Gtk::MessageDialog dialog(_("Delete selected macro/group permanently?"), true, Gtk::MESSAGE_QUESTION,
+    Gtk::MessageDialog dialog(_("Delete selected macros and groups permanently?"), true, Gtk::MESSAGE_QUESTION,
                               Gtk::BUTTONS_OK_CANCEL);
 
     int result = dialog.run();
     if (result == Gtk::RESPONSE_OK) {
-        // TODO: Support multiple deletions
-        const auto iter = _MacrosTreeSelection->get_selected();
-        const auto parent = iter->parent();
+        const auto selected_paths = _MacrosTreeSelection->get_selected_rows();
 
-        const bool is_group = _MacrosTreeStore->iter_depth(iter) == 0;
+        // For multiple deletions, we need to delete multiple rows, iterators become invalid when and preceding row is
+        // deleted so iterating in reverse order
+        for (const auto &selected_path : boost::adaptors::reverse(selected_paths)) {
+            const auto iter = _MacrosTreeStore->get_iter(selected_path);
+            const auto parent = iter->parent();
+            const bool is_group = _MacrosTreeStore->iter_depth(iter) == 0;
 
-        // only update the tree when updating the XML was successful
-        if (_macros_tree_xml.remove_node((*iter)[_MacrosTreeStore->_tree_columns.node])) {
-            _MacrosTreeStore->erase(iter);
-        }
+            // only update the tree when updating the XML was successful
+            if (_macros_tree_xml.remove_node(iter->get_value(_MacrosTreeStore->_tree_columns.node))) {
+                _MacrosTreeStore->erase(iter);
+            }
 
-        if (not is_group) {
-            // colapse(change icon to collapsed) parent(group) if empty
-            if (parent->children().size() == 0) {
-                (*parent)[_MacrosTreeStore->_tree_columns.icon] = CLOSED_GROUP_ICON_NAME;
+            if (not is_group and parent->children().empty()) {
+                // colapse(change icon to closed parent(group) if empty
+                parent->get_value(_MacrosTreeStore->_tree_columns.icon) = CLOSED_GROUP_ICON_NAME;
+                // FIXME: can't use set value because ICON_name is const char * and not ustring
             }
         }
     }
@@ -347,8 +352,8 @@ void Macros::on_toggle_steps_pane()
 
 void Macros::on_selection_changed()
 {
-    const auto iter = _MacrosTreeSelection->get_selected();
-    if (iter) { // something is selected
+    const auto selected_paths = _MacrosTreeSelection->get_selected_rows();
+    if (not selected_paths.empty()) { // something is selected
         _MacrosDelete->set_sensitive();
         return;
     }
