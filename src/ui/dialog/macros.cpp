@@ -39,6 +39,7 @@
 
 #include "gc-anchored.h"
 #include "io/resource.h"
+#include "io/sys.h"
 #include "preferences.h"
 #include "ui/widget/panel.h"
 #include "verbs.h"
@@ -599,21 +600,21 @@ Glib::ustring Macros::find_available_name(const Glib::ustring &new_name_hint, co
 
 // MacrosXML ------------------------------------------------------------------------
 MacrosXML::MacrosXML()
-    : _macros_data_filename(IO::Resource::get_path_string(IO::Resource::USER, IO::Resource::NONE,
-                                                          "macros-data.xml")) // ~/.config/inkscape/doc/
+    : _macros_data_filename(Inkscape::IO::Resource::profile_path("macros-data.xml"))
 {
-    auto doc = sp_repr_read_file(_macros_data_filename.c_str(), nullptr);
+    Inkscape::XML::Document *doc = nullptr;
+    if (Inkscape::IO::file_test(_macros_data_filename.c_str(), G_FILE_TEST_EXISTS)) {
+        doc = sp_repr_read_file(_macros_data_filename.c_str(), nullptr);
+    }
     if (not doc) {
-        debug_print("Creating new file");
+        // some error in parsing, create new
         doc = sp_repr_document_new("macros");
 
         // Add the default group
         auto group_default = doc->createElement("group");
         group_default->setAttribute("name", _("Default"));
 
-        // Just a pointer, we don't own it, don't free/release/delete
-        auto root = doc->root();
-        root->appendChild(group_default);
+        doc->root()->appendChild(group_default);
 
         // This was created by new
         Inkscape::GC::release(group_default);
