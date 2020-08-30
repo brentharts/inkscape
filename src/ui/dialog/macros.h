@@ -43,13 +43,25 @@ namespace Dialog {
 // Forward decaration as they are defined below
 class MacrosDragAndDropStore;
 
+// Read only, create only or something else
+enum MacrosXMLFileMODE
+{
+    CREATE = 1,
+    READ = 2
+};
 /**
  * This manages XML for macros dialog
  */
 class MacrosXML
 {
 public:
-    MacrosXML();
+    MacrosXML(std::string &&macros_data_filename, unsigned file_mode);
+
+    /**
+     * For testing if creation was successful
+     */
+    operator bool() const { return _xml_doc; }
+
     /**
      * Saves macro xml to the macros data file
      */

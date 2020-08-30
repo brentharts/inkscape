@@ -79,6 +79,7 @@ namespace Dialog {
 Macros::Macros()
     : UI::Widget::Panel("/dialogs/macros", SP_VERB_DIALOG_MACROS)
     , _prefs(Inkscape::Preferences::get())
+    , _macros_tree_xml(Inkscape::IO::Resource::profile_path("macros-data.xml"), CREATE | READ)
 {
     std::string gladefile = IO::Resource::get_filename_string(Inkscape::IO::Resource::UIS, "dialog-macros.glade");
     Glib::RefPtr<Gtk::Builder> builder;
@@ -599,14 +600,17 @@ Glib::ustring Macros::find_available_name(const Glib::ustring &new_name_hint, co
 }
 
 // MacrosXML ------------------------------------------------------------------------
-MacrosXML::MacrosXML()
+MacrosXML::MacrosXML(std::string &&macro_file_data_name, unsigned file_mode)
     : _macros_data_filename(Inkscape::IO::Resource::profile_path("macros-data.xml"))
 {
     Inkscape::XML::Document *doc = nullptr;
-    if (Inkscape::IO::file_test(_macros_data_filename.c_str(), G_FILE_TEST_EXISTS)) {
+    // If read mode then execute this
+    if (file_mode & READ and Inkscape::IO::file_test(_macros_data_filename.c_str(), G_FILE_TEST_EXISTS)) {
         doc = sp_repr_read_file(_macros_data_filename.c_str(), nullptr);
     }
-    if (not doc) {
+
+    // If create mode then execute this
+    if (file_mode & CREATE and not doc) {
         // some error in parsing, create new
         doc = sp_repr_document_new("macros");
 
@@ -621,6 +625,7 @@ MacrosXML::MacrosXML()
 
         sp_repr_save_file(doc, _macros_data_filename.c_str());
     }
+    // will be null if READ failed
     _xml_doc = doc;
 }
 
