@@ -607,6 +607,11 @@ MacrosXML::MacrosXML(std::string &&macro_file_data_name, unsigned file_mode)
     // If read mode then execute this
     if (file_mode & READ and Inkscape::IO::file_test(_macros_data_filename.c_str(), G_FILE_TEST_EXISTS)) {
         doc = sp_repr_read_file(_macros_data_filename.c_str(), nullptr);
+        // make sure it's a macro file
+        if (not strcmp(doc->root()->name(), "macros")) {
+            GC::release(doc);
+            doc = nullptr;
+        }
     }
 
     // If create mode then execute this
