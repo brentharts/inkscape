@@ -289,24 +289,73 @@ void Macros::on_macro_delete()
 
 void Macros::on_macro_import()
 {
-    std::cout << "Macro import not implemented" << std::endl;
+    Glib::ustring open_path = _prefs->getString("/dialogs/macros/importpath");
+    debug_print(open_path);
+
+    const auto import_dialog = std::unique_ptr<Inkscape::UI::Dialog::FileOpenDialog>(
+        // clang-format off
+            FileOpenDialog::create(
+                *(SP_ACTIVE_DESKTOP->getToplevel()),
+                open_path.substr(0, open_path.find_last_of('/')),
+                CUSTOM_TYPE,
+                _("Select a file to import macros")
+            )
+        // clang-format on
+    );
+    import_dialog->addFilterMenu(_("Inkscape macros (*.xml)"), "*.xml");
+
+    bool result = import_dialog->show();
+    if (not result) {
+        return;
+    }
+    Glib::ustring file_name = import_dialog->getFilename();
+
+    _prefs->setString("/dialogs/macros/importpath", file_name);
+    debug_print(file_name);
+
+    // must return withing if block
+    if (MacrosXML import_xml = MacrosXML(file_name, READ)) {
+        for (auto group_ptr = import_xml.get_root()->firstChild(); group_ptr; group_ptr = group_ptr->next()) {
+            if (find_group(group_ptr->attribute("name"))) {
+                // group with same name already exists
+                // TODO:
+                // provide options MERGE, RENAME, OVERWRITE?
+
+            } else {
+                // This also duplicates all children of the group
+                auto duplicate_group = group_ptr->duplicate(_macros_tree_xml.get_doc());
+                _macros_tree_xml.get_root()->appendChild(duplicate_group);
+
+                // Only link to concerned XML::Node*
+                auto created_group_itr = create_group(duplicate_group->attribute("name"), duplicate_group);
+                for (auto macro_ptr = duplicate_group->firstChild(); macro_ptr; macro_ptr = macro_ptr->next()) {
+                    create_macro(macro_ptr->attribute("name"), created_group_itr, macro_ptr);
+                }
+
+                GC::release(duplicate_group);
+            }
+        }
+
+        return;
+    }
+    warn(_("Selected file invalid"));
 }
 
 void Macros::on_macro_export() const
 {
     Glib::ustring open_path = _prefs->getString("/dialogs/macros/exportpath");
 
-    const auto save_dialog =
+    const auto export_dialog =
         std::unique_ptr<Inkscape::UI::Dialog::FileSaveDialog>(Inkscape::UI::Dialog::FileSaveDialog::create(
             *(SP_ACTIVE_DESKTOP->getToplevel()), open_path, Inkscape::UI::Dialog::CUSTOM_TYPE,
             _("Select a filename for exporting"), "", "", Inkscape::Extension::FILE_SAVE_METHOD_EXPORT));
-    save_dialog->addFileType(_("Inkscape macros (*.xml)"), ".xml");
+    export_dialog->addFileType(_("Inkscape macros (*.xml)"), "*.xml");
 
-    bool result = save_dialog->show();
+    bool result = export_dialog->show();
     if (not result) {
         return;
     }
-    Glib::ustring file_name = save_dialog->getFilename();
+    Glib::ustring file_name = export_dialog->getFilename();
 
     _prefs->setString("/dialogs/macros/exportpath", file_name);
     MacrosXML export_xml(file_name, CREATE);
