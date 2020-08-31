@@ -96,7 +96,7 @@ public:
     XML::Node *move_macro(XML::Node *macro_ptr, XML::Node *new_group_ptr);
 
     XML::Node *get_root();
-    XML::Document *get_doc(); 
+    XML::Document *get_doc();
 
 private:
     Inkscape::XML::Document *_xml_doc;

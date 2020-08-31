@@ -280,7 +280,7 @@ void Macros::on_macro_delete()
 
             if (not is_group and parent->children().empty()) {
                 // colapse(change icon to closed parent(group) if empty
-                parent->get_value(_MacrosTreeStore->_tree_columns.icon) = CLOSED_GROUP_ICON_NAME;
+                (*parent)[_MacrosTreeStore->_tree_columns.icon] = CLOSED_GROUP_ICON_NAME;
                 // FIXME: can't use set value because ICON_name is const char * and not ustring
             }
         }
@@ -551,7 +551,7 @@ Gtk::TreeIter Macros::create_group(const Glib::ustring &group_name, XML::Node *x
 
     auto row_iter = _MacrosTreeStore->append();
     // FIXME: can't set_value when const char * for Glib::ustring param
-    row_iter->get_value(_MacrosTreeStore->_tree_columns.icon) = CLOSED_GROUP_ICON_NAME;
+    (*row_iter)[_MacrosTreeStore->_tree_columns.icon] = CLOSED_GROUP_ICON_NAME;
     row_iter->set_value(_MacrosTreeStore->_tree_columns.name, group_name);
 
     // add in XML file if xml_node, append the relevant node pointer to me
@@ -601,7 +601,7 @@ Gtk::TreeIter Macros::create_macro(const Glib::ustring &macro_name, Gtk::TreeIte
     }
 
     auto macro_iter = _MacrosTreeStore->append(group_iter->children());
-    macro_iter->get_value(_MacrosTreeStore->_tree_columns.icon) = MACRO_ICON_NAME;
+    (*macro_iter)[_MacrosTreeStore->_tree_columns.icon] = MACRO_ICON_NAME;
     macro_iter->set_value(_MacrosTreeStore->_tree_columns.name, macro_name);
 
     // add in XML file
