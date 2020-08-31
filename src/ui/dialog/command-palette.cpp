@@ -4,8 +4,9 @@
  * Dialog for adding a live path effect.
  *
  * Author:
+ * Abhay Raj Singh <abhayonlyone@gmail.com>
  *
- * Copyright (C) 2012 Authors
+ * Copyright (C) 2020 Authors
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
