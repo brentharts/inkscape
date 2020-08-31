@@ -549,14 +549,16 @@ Gtk::TreeIter Macros::create_group(const Glib::ustring &group_name, XML::Node *x
         return group_iter;
     }
 
-    auto row = *(_MacrosTreeStore->append());
-    row[_MacrosTreeStore->_tree_columns.icon] = CLOSED_GROUP_ICON_NAME;
-    row[_MacrosTreeStore->_tree_columns.name] = group_name;
+    auto row_iter = _MacrosTreeStore->append();
+    // FIXME: can't set_value when const char * for Glib::ustring param
+    row_iter->get_value(_MacrosTreeStore->_tree_columns.icon) = CLOSED_GROUP_ICON_NAME;
+    row_iter->set_value(_MacrosTreeStore->_tree_columns.name, group_name);
 
     // add in XML file if xml_node, append the relevant node pointer to me
-    row[_MacrosTreeStore->_tree_columns.node] = (xml_node ? xml_node : _macros_tree_xml.create_group(group_name));
+    row_iter->set_value(_MacrosTreeStore->_tree_columns.node,
+                        (xml_node ? xml_node : _macros_tree_xml.create_group(group_name)));
 
-    return row;
+    return row_iter;
 }
 
 Gtk::TreeIter Macros::find_group(const Glib::ustring &group_name) const
@@ -598,16 +600,17 @@ Gtk::TreeIter Macros::create_macro(const Glib::ustring &macro_name, Gtk::TreeIte
         return macro;
     }
 
-    auto macro = *(_MacrosTreeStore->append(group_iter->children()));
-    macro[_MacrosTreeStore->_tree_columns.icon] = MACRO_ICON_NAME;
-    macro[_MacrosTreeStore->_tree_columns.name] = macro_name;
+    auto macro_iter = _MacrosTreeStore->append(group_iter->children());
+    macro_iter->get_value(_MacrosTreeStore->_tree_columns.icon) = MACRO_ICON_NAME;
+    macro_iter->set_value(_MacrosTreeStore->_tree_columns.name, macro_name);
 
     // add in XML file
-    macro[_MacrosTreeStore->_tree_columns.node] =
-        (xml_node ? xml_node
-                  : _macros_tree_xml.create_macro(macro_name, (*group_iter)[_MacrosTreeStore->_tree_columns.node]));
+    macro_iter->set_value(_MacrosTreeStore->_tree_columns.node,
+                          (xml_node ? xml_node
+                                    : _macros_tree_xml.create_macro(
+                                          macro_name, group_iter->get_value(_MacrosTreeStore->_tree_columns.node))));
 
-    return macro;
+    return macro_iter;
 } // namespace Dialog
 
 Gtk::TreeIter Macros::create_macro(const Glib::ustring &macro_name, const Glib::ustring &group_name,
