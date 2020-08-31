@@ -51,7 +51,6 @@
 #include "io/resource.h"
 #include "object/uri.h"
 #include "preferences.h"
-#include "ui/dialog/align-and-distribute.h"
 #include "ui/interface.h"
 #include "verbs.h"
 
