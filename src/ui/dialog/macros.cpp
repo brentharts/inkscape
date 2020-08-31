@@ -245,6 +245,7 @@ void Macros::on_macro_create()
         auto macro_iter = create_macro(macro_name, macro_group);
 
         _MacrosTree->expand_to_path(_MacrosTreeStore->get_path(macro_iter));
+        _MacrosTreeSelection->unselect_all();
         _MacrosTreeSelection->select(macro_iter);
     }
 }
@@ -494,6 +495,7 @@ bool Macros::on_macro_drag_recieved(const Gtk::TreeModel::Path &dest, Gtk::TreeM
 void Macros::on_macro_drag_end(const Glib::RefPtr<Gdk::DragContext> & /*context*/)
 {
     _MacrosTree->expand_to_path(_new_drag_path);
+    _MacrosTreeSelection->unselect_all();
     _MacrosTreeSelection->select(_new_drag_path);
 }
 
