@@ -55,7 +55,8 @@ enum MacrosXMLFileMODE
 class MacrosXML
 {
 public:
-    MacrosXML(std::string &&macros_data_filename, unsigned file_mode);
+    MacrosXML(std::string &&file_name, unsigned file_mode);
+    ~MacrosXML();
 
     /**
      * For testing if creation was successful
@@ -95,6 +96,7 @@ public:
     XML::Node *move_macro(XML::Node *macro_ptr, XML::Node *new_group_ptr);
 
     XML::Node *get_root();
+    XML::Document *get_doc(); 
 
 private:
     Inkscape::XML::Document *_xml_doc;
@@ -145,7 +147,7 @@ private:
     /**
      * Pops a file dialog to export a macro file
      */
-    void on_macro_export();
+    void on_macro_export() const;
 
     /**
      * Record new steps after currently selected operation in macro
@@ -204,7 +206,7 @@ private:
      * @param all_siblings_equal_parent, cosiders parent is selected all macros of a group selected
      */
     std::vector<Gtk::TreePath> remove_children_if_contains_parent(const std::vector<Gtk::TreePath> &paths,
-                                                                  bool all_siblings_equal_parent = false);
+                                                                  bool all_siblings_equal_parent = false) const;
 
     /**
      * If the group name exist returns an iterator to it

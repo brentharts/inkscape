@@ -16,6 +16,7 @@
 #include <boost/range/adaptor/reversed.hpp>
 #include <functional>
 #include <glib/gi18n.h>
+#include <glibmm/convert.h>
 #include <glibmm/ustring.h>
 #include <gtkmm/box.h>
 #include <gtkmm/builder.h>
@@ -38,9 +39,11 @@
 #include <vector>
 
 #include "gc-anchored.h"
+#include "inkscape.h"
 #include "io/resource.h"
 #include "io/sys.h"
 #include "preferences.h"
+#include "ui/dialog/filedialog.h"
 #include "ui/widget/panel.h"
 #include "verbs.h"
 #include "xml/repr.h"
@@ -184,6 +187,7 @@ Macros::Macros()
 
     // disable till something is selected
     _MacrosDelete->set_sensitive(false);
+    _MacrosExport->set_sensitive(false);
     _MacrosTreeSelection->signal_changed().connect(sigc::mem_fun(*this, &Macros::on_selection_changed));
 
     _setContents(_MacrosBase);
@@ -287,9 +291,60 @@ void Macros::on_macro_import()
     std::cout << "Macro import not implemented" << std::endl;
 }
 
-void Macros::on_macro_export()
+void Macros::on_macro_export() const
 {
-    std::cout << "Macro export not implemented" << std::endl;
+    Glib::ustring open_path = _prefs->getString("/dialogs/macros/exportpath");
+
+    const auto save_dialog =
+        std::unique_ptr<Inkscape::UI::Dialog::FileSaveDialog>(Inkscape::UI::Dialog::FileSaveDialog::create(
+            *(SP_ACTIVE_DESKTOP->getToplevel()), open_path, Inkscape::UI::Dialog::CUSTOM_TYPE,
+            _("Select a filename for exporting"), "", "", Inkscape::Extension::FILE_SAVE_METHOD_EXPORT));
+    save_dialog->addFileType(_("Inkscape macros (*.xml)"), ".xml");
+
+    bool result = save_dialog->show();
+    if (not result) {
+        return;
+    }
+    Glib::ustring file_name = save_dialog->getFilename();
+
+    _prefs->setString("/dialogs/macros/exportpath", file_name);
+    MacrosXML export_xml(file_name, CREATE);
+
+    const auto selected_paths = remove_children_if_contains_parent(_MacrosTreeSelection->get_selected_rows());
+
+    Gtk::TreePath _last_macros_parent_path;
+    XML::Node *_last_macros_new_doc_xml_ptr = nullptr;
+    for (const auto &selected_path : selected_paths) {
+        const auto row = *(_MacrosTreeStore->get_iter(selected_path));
+        if (selected_path.size() == 1) {
+            // group there won't be any children of thies group, remove_children_if_contains_parent filters them out
+            XML::Node *group_xml_ptr = row[_MacrosTreeStore->_tree_columns.node];
+            XML::Node *duplicate_group = group_xml_ptr->duplicate(export_xml.get_doc());
+
+            export_xml.get_root()->appendChild(duplicate_group);
+            GC::release(duplicate_group);
+        } else {
+            // macro
+            if (_last_macros_parent_path.empty() or not _last_macros_parent_path.is_ancestor(selected_path)) {
+                _last_macros_parent_path = selected_path;
+                _last_macros_parent_path.up();
+
+                const auto parent_row = *(_MacrosTreeStore->get_iter(_last_macros_parent_path));
+
+                // create new group of same name to avoid copying children too
+                _last_macros_new_doc_xml_ptr =
+                    export_xml.create_group(parent_row[_MacrosTreeStore->_tree_columns.name]);
+            }
+
+            XML::Node *macro_xml_ptr = row[_MacrosTreeStore->_tree_columns.node];
+            XML::Node *duplicate_macro = macro_xml_ptr->duplicate(export_xml.get_doc());
+
+            _last_macros_new_doc_xml_ptr->appendChild(duplicate_macro);
+
+            GC::release(duplicate_macro);
+        }
+    }
+    export_xml.save_xml();
 }
 
 void Macros::on_macro_record()
@@ -359,9 +414,11 @@ void Macros::on_selection_changed()
     if (not selected_paths.empty()) {
         // something is selected
         _MacrosDelete->set_sensitive();
+        _MacrosExport->set_sensitive();
         return;
     }
     _MacrosDelete->set_sensitive(false);
+    _MacrosExport->set_sensitive(false);
 }
 
 void Macros::on_tree_row_expanded_collapsed(const Gtk::TreeIter &expanded_row, const Gtk::TreePath &tree_path,
@@ -455,7 +512,7 @@ void Macros::load_macros()
 }
 
 std::vector<Gtk::TreePath> Macros::remove_children_if_contains_parent(const std::vector<Gtk::TreePath> &paths,
-                                                                      bool all_siblings_equal_parent)
+                                                                      bool all_siblings_equal_parent) const
 {
     // TODO: Implement all_siblings_equal_parent functionality
     std::vector<Gtk::TreePath> filtered_paths;
@@ -600,15 +657,15 @@ Glib::ustring Macros::find_available_name(const Glib::ustring &new_name_hint, co
 }
 
 // MacrosXML ------------------------------------------------------------------------
-MacrosXML::MacrosXML(std::string &&macro_file_data_name, unsigned file_mode)
-    : _macros_data_filename(Inkscape::IO::Resource::profile_path("macros-data.xml"))
+MacrosXML::MacrosXML(std::string &&file_name, unsigned file_mode)
+    : _macros_data_filename(file_name)
 {
     Inkscape::XML::Document *doc = nullptr;
     // If read mode then execute this
     if (file_mode & READ and Inkscape::IO::file_test(_macros_data_filename.c_str(), G_FILE_TEST_EXISTS)) {
         doc = sp_repr_read_file(_macros_data_filename.c_str(), nullptr);
         // make sure it's a macro file
-        if (not strcmp(doc->root()->name(), "macros")) {
+        if (strcmp(doc->root()->name(), "macros")) {
             GC::release(doc);
             doc = nullptr;
         }
@@ -619,19 +676,26 @@ MacrosXML::MacrosXML(std::string &&macro_file_data_name, unsigned file_mode)
         // some error in parsing, create new
         doc = sp_repr_document_new("macros");
 
-        // Add the default group
-        auto group_default = doc->createElement("group");
-        group_default->setAttribute("name", _("Default"));
+        // Add the default group when its read mode as in Macros::_macros_tree_xml
+        if (file_mode & READ) {
+            auto group_default = doc->createElement("group");
+            group_default->setAttribute("name", _("Default"));
 
-        doc->root()->appendChild(group_default);
+            doc->root()->appendChild(group_default);
 
-        // This was created by new
-        Inkscape::GC::release(group_default);
+            // This was created by new
+            Inkscape::GC::release(group_default);
 
-        sp_repr_save_file(doc, _macros_data_filename.c_str());
+            sp_repr_save_file(doc, _macros_data_filename.c_str());
+        }
     }
     // will be null if READ failed
     _xml_doc = doc;
+}
+
+MacrosXML::~MacrosXML()
+{
+    Inkscape::GC::release(_xml_doc);
 }
 
 bool MacrosXML::save_xml()
@@ -750,7 +814,10 @@ XML::Node *MacrosXML::get_root()
 {
     return _xml_doc->root();
 }
-
+XML::Document *MacrosXML::get_doc()
+{
+    return _xml_doc;
+}
 // MacrosDragAndDropStore ------------------------------------------------------------
 MacrosDragAndDropStore::MacrosDragAndDropStore()
 {
