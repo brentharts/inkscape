@@ -314,24 +314,64 @@ void Macros::on_macro_import()
     // must return withing if block
     if (MacrosXML import_xml = MacrosXML(file_name, READ)) {
         for (auto group_ptr = import_xml.get_root()->firstChild(); group_ptr; group_ptr = group_ptr->next()) {
-            if (find_group(group_ptr->attribute("name"))) {
+            bool rename_group = false;
+            // This also duplicates all children of the group
+            const auto duplicate_group = group_ptr->duplicate(_macros_tree_xml.get_doc());
+
+            if (auto group_iter_tree = find_group(group_ptr->attribute("name"))) {
                 // group with same name already exists
                 // TODO:
                 // provide options MERGE, RENAME, OVERWRITE?
+                Gtk::MessageDialog conflict_resolution_dialog(
+                    _("A group of this name already exists in your macros") +
+                        (": <b>" + group_iter_tree->get_value(_MacrosTreeStore->_tree_columns.name) + "</b> "),
+                    true, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_NONE, true);
+                enum
+                {
+                    CRD_SKIP,
+                    CRD_MERGE,
+                    CRD_RENAME,
+                    CRD_OVERWRITE
+                };
+                conflict_resolution_dialog.add_button(_("Skip"), CRD_SKIP);
+                conflict_resolution_dialog.add_button(_("Merge"), CRD_MERGE);
+                conflict_resolution_dialog.add_button(_("Rename"), CRD_RENAME);
+                conflict_resolution_dialog.add_button(_("Overwrite"), CRD_OVERWRITE);
 
-            } else {
-                // This also duplicates all children of the group
-                auto duplicate_group = group_ptr->duplicate(_macros_tree_xml.get_doc());
-                _macros_tree_xml.get_root()->appendChild(duplicate_group);
-
-                // Only link to concerned XML::Node*
-                auto created_group_itr = create_group(duplicate_group->attribute("name"), duplicate_group);
-                for (auto macro_ptr = duplicate_group->firstChild(); macro_ptr; macro_ptr = macro_ptr->next()) {
-                    create_macro(macro_ptr->attribute("name"), created_group_itr, macro_ptr);
+                int response = conflict_resolution_dialog.run();
+                switch (response) {
+                    case CRD_SKIP:
+                        GC::release(duplicate_group); // cleanup
+                        continue;                     // Go to next group
+                    case CRD_RENAME: {
+                        const Glib::ustring new_name = find_available_name(duplicate_group->attribute("name"));
+                        duplicate_group->setAttribute("name", new_name);
+                        rename_group = true;
+                    } break;
+                    case CRD_OVERWRITE:
+                        // Remove the old group put new in
+                        if (_macros_tree_xml.remove_node(
+                                group_iter_tree->get_value(_MacrosTreeStore->_tree_columns.node))) {
+                            _MacrosTreeStore->erase(group_iter_tree);
+                        }
+                        break;
                 }
-
-                GC::release(duplicate_group);
             }
+            _macros_tree_xml.get_root()->appendChild(duplicate_group);
+            // Only link to concerned XML::Node*
+            auto created_group_iter = create_group(duplicate_group->attribute("name"), duplicate_group);
+            for (auto macro_ptr = duplicate_group->firstChild(); macro_ptr; macro_ptr = macro_ptr->next()) {
+                create_macro(macro_ptr->attribute("name"), created_group_iter, macro_ptr);
+            }
+
+            if (rename_group) {
+                _MacrosTree->set_cursor(_MacrosTreeStore->get_path(created_group_iter), *_MacrosTree->get_column(1),
+                                        true);
+                rename_group = false;
+            }
+
+            _macros_tree_xml.save_xml();
+            GC::release(duplicate_group);
         }
 
         return;
