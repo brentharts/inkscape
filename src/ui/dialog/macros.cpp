@@ -290,7 +290,6 @@ void Macros::on_macro_delete()
 void Macros::on_macro_import()
 {
     Glib::ustring open_path = _prefs->getString("/dialogs/macros/importpath");
-    debug_print(open_path);
 
     const auto import_dialog = std::unique_ptr<Inkscape::UI::Dialog::FileOpenDialog>(
         // clang-format off
@@ -311,7 +310,6 @@ void Macros::on_macro_import()
     Glib::ustring file_name = import_dialog->getFilename();
 
     _prefs->setString("/dialogs/macros/importpath", file_name);
-    debug_print(file_name);
 
     // must return withing if block
     if (MacrosXML import_xml = MacrosXML(file_name, READ)) {
