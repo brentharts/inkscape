@@ -227,8 +227,7 @@ CommandPalette::CommandPalette()
 
     // History managment
     {
-        auto file_name = Inkscape::IO::Resource::get_path_ustring(Inkscape::IO::Resource::USER,
-                                                                  Inkscape::IO::Resource::UIS, "cpaction.history");
+        auto file_name = Inkscape::IO::Resource::profile_path("cp.history");
         auto file = Gio::File::create_for_path(file_name);
         if (file->query_exists()) {
             char *contents = nullptr;
@@ -258,10 +257,7 @@ CommandPalette::CommandPalette()
             }
 
             g_free(contents);
-        } else {
-            std::cerr << "WARNING: file not found: " << file_name << ", creating new one!";
         }
-
         _history_file_output_stream = file->append_to();
     }
 }
@@ -709,7 +705,7 @@ bool CommandPalette::ask_action_parameter(const ActionPtrName &action_ptr_name)
 bool CommandPalette::match_search(const Glib::ustring &subject, const Glib::ustring &search)
 {
     // TODO: Better matching algorithm take inspiration from VS code
-    if (subject.lowercase().find(search) != -1) {
+    if (subject.lowercase().find(search.lowercase()) != -1) {
         return true;
     }
     return false;
