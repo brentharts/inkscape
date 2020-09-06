@@ -28,7 +28,6 @@ enum class ParamType
     STRING,
 };
 
-<<<<<<< HEAD
 class InkActionExtraDatum {
 public:
     InkActionExtraDatum(Glib::ustring& label, Glib::ustring& section, Glib::ustring& tooltip)
@@ -47,40 +46,9 @@ private:
     Glib::ustring action_section;
     Glib::ustring action_tooltip;
 };
-=======
-struct ParamDetails
+
+class InkActionExtraData
 {
-    Glib::ustring name;
-    Glib::ustring description;
-    ParamType type;
-};
-
-using Parameters = std::vector<ParamDetails>;
-class InkActionExtraDatum
-{
-public:
-    InkActionExtraDatum(Glib::ustring &&label, Glib::ustring &&section, Glib::ustring &&tooltip,
-                        Parameters &&parameters = {})
-        : _action_label(label)
-        , _action_section(section)
-        , _action_tooltip(tooltip)
-        , _parameters(parameters)
-    {}
-
-    Glib::ustring get_label() { return _action_label; }
-    Glib::ustring get_section() { return _action_section; }
-    Glib::ustring get_tooltip() { return _action_tooltip; }
-
-private:
-    Glib::ustring _action_label;
-    Glib::ustring _action_section;
-    Glib::ustring _action_tooltip;
->>>>>>> 4dfbce63a3...  Added feature to add parameter descriptions and modified existing action extra data to comply
-
-    Parameters _parameters;
-};
-
-<<<<<<< HEAD
 public:
     InkActionExtraData() = default;
 
@@ -91,19 +59,6 @@ public:
     Glib::ustring get_label_for_action(Glib::ustring const &action_name);
     Glib::ustring get_section_for_action(Glib::ustring const &action_name);
     Glib::ustring get_tooltip_for_action(Glib::ustring const &action_name);
-=======
-class InkActionExtraData
-{
-public:
-    InkActionExtraData() = default;
-
-    void add_data(std::vector<std::pair<Glib::ustring, InkActionExtraDatum>> &raw_data);
-
-    Glib::ustring get_label_for_action(Glib::ustring &action_name);
-    Glib::ustring get_section_for_action(Glib::ustring &action_name);
-    Glib::ustring get_tooltip_for_action(Glib::ustring &action_name);
-    ParamDetails get_parameters_for_action(Glib::ustring &action_name);
->>>>>>> 4dfbce63a3...  Added feature to add parameter descriptions and modified existing action extra data to comply
 
 private:
     std::map<Glib::ustring, InkActionExtraDatum> data;
