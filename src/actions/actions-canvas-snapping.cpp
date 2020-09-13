@@ -180,7 +180,7 @@ canvas_snapping_toggle(SPDocument* document, const SPAttr option)
 
 }
 
-std::vector<std::pair<Glib::ustring, InkActionExtraDatum>> raw_data_canvas_snapping =
+std::vector<std::vector<Glib::ustring>> raw_data_canvas_snapping =
 {
     {"doc.snap-global-toggle",        N_("Snapping"),                          "Snap",  N_("Toggle snapping on/off.")                             },
 

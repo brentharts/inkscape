@@ -138,7 +138,7 @@ object_simplify_path(InkscapeApplication *app)
 }
 
 
-std::vector<std::pair<Glib::ustring, InkActionExtraDatum>> raw_data_object =
+std::vector<std::vector<Glib::ustring>> raw_data_object =
 {
     // clang-format off
     {"app.object-set-attribute",      N_("Set Attribute"),         "Object",     N_("Set or update an attribute on selected objects. Usage: object-set-attribute:attribute name, attribute value;")},

@@ -49,7 +49,7 @@ window_close(InkscapeApplication *app)
     app->window_close_active();
 }
 
-std::vector<std::pair<Glib::ustring, InkActionExtraDatum>> raw_data_window =
+std::vector<std::vector<Glib::ustring>> raw_data_window =
 {
     // clang-format off
     {"app.window-open",           N_("Window Open"),     "Window",     N_("Open a window for the active document. GUI only.")   },

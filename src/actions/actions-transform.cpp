@@ -84,7 +84,7 @@ transform_remove(InkscapeApplication *app)
 }
 
 // SHOULD REALLY BE DOC LEVEL ACTIONS
-std::vector<std::pair<Glib::ustring, InkActionExtraDatum>> raw_data_transform =
+std::vector<std::vector<Glib::ustring>> raw_data_transform =
 {
     // clang-format off
     {"app.transform-translate",   N_("Translate"),          "Transform",  N_("Translate selected objects (dx,dy).")                 },
