@@ -324,6 +324,7 @@ void CommandPalette::focus_current_chapter()
             _CPFilter->set_text(action_data.get_label_for_action(name));
         } break;
         case HistoryType::OPEN_FILE:
+            [[fallthrough]];
         case HistoryType::IMPORT_FILE: {
             auto uri = _current_chapter->second;
             bool is_import = _current_chapter->first == HistoryType::IMPORT_FILE;
@@ -354,6 +355,7 @@ void CommandPalette::repeat_current_chapter()
         } break;
 
         case HistoryType::OPEN_FILE:
+            [[fallthrough]];
         case HistoryType::IMPORT_FILE: {
             auto uri = _current_chapter->second;
             operate_recent_file(uri, _current_chapter->first == HistoryType::IMPORT_FILE);
@@ -522,6 +524,7 @@ bool CommandPalette::on_key_press_cpfilter_input_mode(GdkEventKey *evt, const Ac
 {
     switch (evt->keyval) {
         case GDK_KEY_Return:
+            [[fallthrough]];
         case GDK_KEY_Linefeed:
             execute_action(action_ptr_name, _CPFilter->get_text());
             close();
@@ -549,6 +552,7 @@ bool CommandPalette::on_key_press_cpfilter_history_mode(GdkEventKey *evt)
             }
             return true;
         case GDK_KEY_Return:
+            [[fallthrough]];
         case GDK_KEY_Linefeed:
             repeat_current_chapter();
             return true;
