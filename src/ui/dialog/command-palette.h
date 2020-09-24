@@ -117,11 +117,9 @@ private: // Signal handlers
      */
     void show_suggestions();
 
-    bool on_clicked_operation_action(GdkEventButton *evt, const ActionPtrName &action);
-    bool on_key_press_operation_action(GdkEventKey *evt, const ActionPtrName &action);
+    void on_row_activated(Gtk::ListBoxRow *activated_row);
 
-    bool on_clicked_operation_recent_file(GdkEventButton *evt, Glib::ustring const &uri, bool const import);
-    bool on_key_press_operation_recent_file(GdkEventKey *evt, Glib::ustring const &uri, bool const import);
+    bool operate_recent_file(Glib::ustring const &uri, bool const import);
 
     void on_action_fullname_clicked(const Glib::ustring &action_fullname);
 
@@ -135,12 +133,13 @@ private: // Signal handlers
      * Executes Action
      */
     bool ask_action_parameter(const ActionPtrName &action);
+    static ActionPtrName get_action_ptr_name(const Glib::ustring &full_action_name);
     static bool execute_action(const ActionPtrName &action, const Glib::ustring &value);
 
     static TypeOfVariant get_action_variant_type(const ActionPtr &action_ptr);
 
     static std::pair<Gtk::Label *, Gtk::Label *> get_name_desc(Gtk::ListBoxRow *child);
-    Gtk::Button *get_full_action_name_label(Gtk::ListBoxRow *child);
+    Gtk::Button *get_full_action_name(Gtk::ListBoxRow *child);
 
 private: // variables
     // Widgets

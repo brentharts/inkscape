@@ -199,12 +199,7 @@ CommandPalette::CommandPalette()
             // Add to suggestions
             _CPSuggestions->append(*CPOperation);
 
-            CPOperation->signal_button_press_event().connect(sigc::bind<ActionPtrName>(
-                sigc::mem_fun(*this, &CommandPalette::on_clicked_operation_action), action_ptr_name));
-
             // Requires CPOperation added to _CPSuggestions
-            CPOperation->get_parent()->signal_key_press_event().connect(sigc::bind<ActionPtrName>(
-                sigc::mem_fun(*this, &CommandPalette::on_key_press_operation_action), action_ptr_name));
             CPActionFullName->signal_clicked().connect(
                 sigc::bind<Glib::ustring>(sigc::mem_fun(*this, &CommandPalette::on_action_fullname_clicked),
                                           action_ptr_name.second),
@@ -275,6 +270,7 @@ CommandPalette::CommandPalette()
         }
         _history_file_output_stream = file->append_to();
     }
+    _CPSuggestions->signal_row_activated().connect(sigc::mem_fun(*this, &CommandPalette::on_row_activated));
 }
 
 void CommandPalette::open()
@@ -352,31 +348,15 @@ void CommandPalette::focus_current_chapter()
 
 void CommandPalette::repeat_current_chapter()
 {
-    static auto app = dynamic_cast<Gtk::Application *>(Gio::Application::get_default().get());
-    static auto win = dynamic_cast<InkscapeWindow *>(app->get_active_window());
-    static auto doc = win->get_document()->getActionGroup();
-
     switch (_current_chapter->first) {
         case HistoryType::ACTION: {
-            auto action_domain_string =
-                _current_chapter->second.substr(0, _current_chapter->second.find('.')); // app, win, doc
-            auto action_name = _current_chapter->second.substr(_current_chapter->second.find('.') + 1);
-
-            ActionPtr action_ptr;
-            if (action_domain_string == "app") {
-                action_ptr = app->lookup_action(action_name);
-            } else if (action_domain_string == "win") {
-                action_ptr = win->lookup_action(action_name);
-            } else if (action_domain_string == "doc") {
-                action_ptr = doc->lookup_action(action_name);
-            }
-            ask_action_parameter({action_ptr, _current_chapter->second});
+            ask_action_parameter(get_action_ptr_name(_current_chapter->second));
         } break;
 
         case HistoryType::OPEN_FILE:
         case HistoryType::IMPORT_FILE: {
             auto uri = _current_chapter->second;
-            on_clicked_operation_recent_file(nullptr, uri, _current_chapter->first == HistoryType::IMPORT_FILE);
+            operate_recent_file(uri, _current_chapter->first == HistoryType::IMPORT_FILE);
         } break;
 
         default:
@@ -446,16 +426,8 @@ void CommandPalette::append_recent_file_operation(Glib::RefPtr<Gtk::RecentInfo> 
     }
 
     _CPSuggestions->append(*CPOperation);
-
-    CPOperation->signal_button_press_event().connect(
-        sigc::bind<Glib::ustring, bool const>(sigc::mem_fun(*this, &CommandPalette::on_clicked_operation_recent_file),
-                                              recent_file->get_uri_display(), is_import));
-
     // Requires CPOperation added to _CPSuggestions
-    CPOperation->get_parent()->signal_key_press_event().connect(
-        sigc::bind<Glib::ustring, bool const>(sigc::mem_fun(*this, &CommandPalette::on_key_press_operation_recent_file),
-                                              recent_file->get_uri_display(), is_import));
-};
+}
 
 void CommandPalette::on_search()
 {
@@ -489,7 +461,7 @@ bool CommandPalette::on_filter_general(Gtk::ListBoxRow *child)
 
 bool CommandPalette::on_filter_full_action_name(Gtk::ListBoxRow *child)
 {
-    if (auto CPActionFullName = get_full_action_name_label(child);
+    if (auto CPActionFullName = get_full_action_name(child);
         CPActionFullName and _search_text == CPActionFullName->get_label()) {
         return true;
     }
@@ -498,7 +470,7 @@ bool CommandPalette::on_filter_full_action_name(Gtk::ListBoxRow *child)
 
 bool CommandPalette::on_filter_recent_file(Gtk::ListBoxRow *child, bool const is_import)
 {
-    auto CPActionFullName = get_full_action_name_label(child);
+    auto CPActionFullName = get_full_action_name(child);
     if (is_import) {
         if (CPActionFullName and CPActionFullName->get_label() == "import") {
             auto [CPName, CPDescription] = get_name_desc(child);
@@ -605,21 +577,20 @@ void CommandPalette::on_action_fullname_clicked(const Glib::ustring &action_full
     clipboard->store();
 }
 
-bool CommandPalette::on_clicked_operation_action(GdkEventButton * /*evt*/, const ActionPtrName &action_ptr_name)
+void CommandPalette::on_row_activated(Gtk::ListBoxRow *activated_row)
 {
-    ask_action_parameter(action_ptr_name);
-    return true;
-}
-
-bool CommandPalette::on_key_press_operation_action(GdkEventKey *evt, const ActionPtrName &action_ptr_name)
-{
-    if (evt->keyval == GDK_KEY_Return || evt->keyval == GDK_KEY_Return) {
-        return on_clicked_operation_action(nullptr, action_ptr_name);
+    // this is set to import/export or full action name
+    const auto full_action_name = get_full_action_name(activated_row)->get_label();
+    if (full_action_name == "import" or full_action_name == "open") {
+        const auto [name, description] = get_name_desc(activated_row);
+        operate_recent_file(description->get_text(), full_action_name == "import");
+    } else {
+        ask_action_parameter(get_action_ptr_name(full_action_name));
+        // this is an action
     }
-    return false;
 }
 
-bool CommandPalette::on_clicked_operation_recent_file(GdkEventButton *evt, Glib::ustring const &uri, bool const import)
+bool CommandPalette::operate_recent_file(Glib::ustring const &uri, bool const import)
 {
     static auto prefs = Inkscape::Preferences::get();
 
@@ -651,13 +622,6 @@ bool CommandPalette::on_clicked_operation_recent_file(GdkEventButton *evt, Glib:
     return true;
 }
 
-bool CommandPalette::on_key_press_operation_recent_file(GdkEventKey *evt, Glib::ustring const &uri, bool const import)
-{
-    if (auto key = evt->keyval; key == GDK_KEY_Linefeed or key == GDK_KEY_Return) {
-        return on_clicked_operation_recent_file(nullptr, uri, import);
-    }
-    return false;
-}
 /**
  * Maybe replaced by: Temporary arrangement may be replaced by snippets
  * This can help us provide parameters for multiple argument function
@@ -807,6 +771,26 @@ void CommandPalette::set_cp_fiter_mode(CPFilterMode mode)
 /**
  * Calls actions with parameters
  */
+CommandPalette::ActionPtrName CommandPalette::get_action_ptr_name(const Glib::ustring &full_action_name)
+{
+    static auto app = dynamic_cast<Gtk::Application *>(Gio::Application::get_default().get());
+    static auto win = dynamic_cast<InkscapeWindow *>(app->get_active_window());
+    static auto doc = win->get_document()->getActionGroup();
+    auto action_domain_string = full_action_name.substr(0, full_action_name.find('.')); // app, win, doc
+    auto action_name = full_action_name.substr(full_action_name.find('.') + 1);
+
+    ActionPtr action_ptr;
+    if (action_domain_string == "app") {
+        action_ptr = app->lookup_action(action_name);
+    } else if (action_domain_string == "win") {
+        action_ptr = win->lookup_action(action_name);
+    } else if (action_domain_string == "doc") {
+        action_ptr = doc->lookup_action(action_name);
+    }
+
+    return {action_ptr, full_action_name};
+}
+
 bool CommandPalette::execute_action(const ActionPtrName &action_ptr_name, const Glib::ustring &value)
 {
     auto [action_ptr, action_name] = action_ptr_name;
@@ -883,7 +867,7 @@ std::pair<Gtk::Label *, Gtk::Label *> CommandPalette::get_name_desc(Gtk::ListBox
     return std::pair(nullptr, nullptr);
 }
 
-Gtk::Button *CommandPalette::get_full_action_name_label(Gtk::ListBoxRow *child)
+Gtk::Button *CommandPalette::get_full_action_name(Gtk::ListBoxRow *child)
 {
     auto event_box = dynamic_cast<Gtk::EventBox *>(child->get_child());
     if (event_box) {
