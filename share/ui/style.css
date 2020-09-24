@@ -183,16 +183,8 @@ iconview *:hover {
     border-radius: 5px;
 }
 
-#CPBase list row {
-    padding: 10px;
-}
-
 #CPBase list row:not(:last-child) {
     border-bottom: 1px solid @bg_color5;
-}
-
-#CPSynapseBox *:not(:last-child) {
-    padding-right: 10px;
 }
 
 /* LPE Dialog add */

@@ -93,7 +93,7 @@ private: // Helpers
     void focus_current_chapter();
     void repeat_current_chapter();
 
-    void append_rencent_file_operation(Glib::RefPtr<Gtk::RecentInfo> recent_file, bool is_import = true);
+    void append_recent_file_operation(Glib::RefPtr<Gtk::RecentInfo> recent_file, bool is_import = true);
 
 private: // Signal handlers
     void on_search();
@@ -123,7 +123,7 @@ private: // Signal handlers
     bool on_clicked_operation_recent_file(GdkEventButton *evt, Glib::ustring const &uri, bool const import);
     bool on_key_press_operation_recent_file(GdkEventKey *evt, Glib::ustring const &uri, bool const import);
 
-    bool on_action_fullname_clicked(GdkEventButton *evt, const Glib::ustring &action_fullname);
+    void on_action_fullname_clicked(const Glib::ustring &action_fullname);
 
     /**
      * Implements text matching logic
@@ -139,8 +139,8 @@ private: // Signal handlers
 
     static TypeOfVariant get_action_variant_type(const ActionPtr &action_ptr);
 
-    static std::tuple<Gtk::Label *, Gtk::Label *, Gtk::Label *> get_name_utranslated_name_desc(Gtk::ListBoxRow *child);
-    Gtk::Label *get_full_action_name_label(Gtk::ListBoxRow *child);
+    static std::pair<Gtk::Label *, Gtk::Label *> get_name_desc(Gtk::ListBoxRow *child);
+    Gtk::Button *get_full_action_name_label(Gtk::ListBoxRow *child);
 
 private: // variables
     // Widgets
