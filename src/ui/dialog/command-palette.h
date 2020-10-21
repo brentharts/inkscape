@@ -50,7 +50,7 @@ enum class TypeOfVariant
     STRING,
 };
 
-enum class CPFilterMode
+enum class CPMode
 {
     SEARCH,
     INPUT, // Input arguments
@@ -93,7 +93,8 @@ private: // Helpers
     void focus_current_chapter();
     void repeat_current_chapter();
 
-    void append_recent_file_operation(Glib::RefPtr<Gtk::RecentInfo> recent_file, bool is_import = true);
+    void append_recent_file_operation(const Glib::ustring &path, bool is_suggestion, bool is_import = true);
+    bool generate_action_operation(const ActionPtrName &action_ptr_name, const bool is_suggestion);
 
 private: // Signal handlers
     void on_search();
@@ -127,7 +128,7 @@ private: // Signal handlers
      * Implements text matching logic
      */
     bool match_search(const Glib::ustring &subject, const Glib::ustring &search);
-    void set_cp_fiter_mode(CPFilterMode mode);
+    void set_mode(CPMode mode);
 
     /**
      * Executes Action
@@ -147,15 +148,19 @@ private: // variables
 
     Gtk::Box *_CPBase;
     Gtk::Box *_CPHeader;
-    Gtk::ScrolledWindow *_CPScrolled;
-    Gtk::Viewport *_CPViewPort;
+    Gtk::Box *_CPListBase;
 
     Gtk::SearchBar *_CPSearchBar;
     Gtk::SearchEntry *_CPFilter;
+
     Gtk::ListBox *_CPSuggestions;
+    Gtk::ListBox *_CPHistory;
+
+    Gtk::ScrolledWindow *_CPSuggestionsScroll;
+    Gtk::ScrolledWindow *_CPHistoryScroll;
 
     // Data
-    int _max_height_requestable = 360;
+    const int _max_height_requestable = 360;
     Glib::ustring _search_text;
 
     // States
@@ -170,13 +175,13 @@ private: // variables
     Glib::RefPtr<Gio::FileOutputStream> _history_file_output_stream;
     /**
      * Remember the mode we are in helps in unecessary signal disconnection and reconnection
-     * Used by set_cp_fiter_mode()
+     * Used by set_mode()
      */
-    CPFilterMode _mode = CPFilterMode::SHELL;
+    CPMode _mode = CPMode::SHELL;
     // Default value other than SEARCH required
-    // set_cp_fiter_mode() switches between mode hence checks if it already in the target mode.
+    // set_mode() switches between mode hence checks if it already in the target mode.
     // Constructed value is sometimes SEARCH being the first Item for now
-    // set_cp_fiter_mode() never attaches the on search listener then
+    // set_mode() never attaches the on search listener then
     // This initialising value can be any thing ohter than the initial required mode
     // Example currently it's open in search mode
 
