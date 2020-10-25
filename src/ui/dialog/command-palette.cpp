@@ -167,22 +167,16 @@ CommandPalette::CommandPalette()
             if (length != 0 and contents != nullptr) {
                 // most recent first
                 std::istringstream lines(contents);
-                History full_history;
                 for (std::string line; std::getline(lines, line, '\n');) {
                     auto type = line.substr(0, line.find(':'));
                     auto data = line.substr(line.find(':') + 1);
 
                     if (type == "ACTION") {
-                        _history.emplace_back(HistoryType::ACTION, data);
                         generate_action_operation(get_action_ptr_name(data), false);
                     } else if (type == "OPEN_FILE") {
-                        _history.emplace_back(HistoryType::OPEN_FILE, data);
                         append_recent_file_operation(data, false, false);
                     } else if (type == "IMPORT_FILE") {
-                        _history.emplace_back(HistoryType::IMPORT_FILE, data);
                         append_recent_file_operation(data, false, true);
-                    } else if (type == "LPE") {
-                        _history.emplace_back(HistoryType::LPE, data);
                     }
                 }
             }
@@ -221,70 +215,6 @@ void CommandPalette::toggle()
         return;
     } else {
         close();
-    }
-}
-
-/**
- * Highlights the current chapter
- * Set text to readable operation name
- * Highlights the ListBoxRow of the operation
- */
-void CommandPalette::focus_current_chapter()
-{
-    static InkActionExtraData &action_data =
-        dynamic_cast<InkscapeApplication *>(Gio::Application::get_default().get())->get_action_extra_data();
-    switch (_current_chapter->first) {
-        case HistoryType::ACTION: {
-            _CPSuggestions->unset_filter_func();
-            _CPSuggestions->set_filter_func(sigc::mem_fun(*this, &CommandPalette::on_filter_full_action_name));
-
-            _search_text = _current_chapter->second;
-            _CPSuggestions->invalidate_filter();
-
-            Glib::ustring name = _current_chapter->second;
-            _CPFilter->set_text(action_data.get_label_for_action(name));
-        } break;
-        case HistoryType::OPEN_FILE:
-            [[fallthrough]];
-        case HistoryType::IMPORT_FILE: {
-            auto uri = _current_chapter->second;
-            bool is_import = _current_chapter->first == HistoryType::IMPORT_FILE;
-
-            _CPSuggestions->unset_filter_func();
-            _CPSuggestions->set_filter_func(
-                sigc::bind<bool>(sigc::mem_fun(*this, &CommandPalette::on_filter_recent_file), is_import));
-
-            _search_text = uri;
-            _CPSuggestions->invalidate_filter();
-
-            {
-                Glib::ustring method = (is_import ? N_("Import") : N_("Open"));
-                Glib::ustring file_name = Glib::filename_display_basename(uri);
-                _CPFilter->set_text(method + " > " + file_name);
-            }
-        } break;
-        default:
-            break;
-    }
-}
-
-void CommandPalette::repeat_current_chapter()
-{
-    switch (_current_chapter->first) {
-        case HistoryType::ACTION: {
-            ask_action_parameter(get_action_ptr_name(_current_chapter->second));
-        } break;
-
-        case HistoryType::OPEN_FILE:
-            [[fallthrough]];
-        case HistoryType::IMPORT_FILE: {
-            auto uri = _current_chapter->second;
-            operate_recent_file(uri, _current_chapter->first == HistoryType::IMPORT_FILE);
-        } break;
-
-        default:
-            close();
-            break;
     }
 }
 
@@ -532,10 +462,18 @@ bool CommandPalette::on_key_press_cpfilter_search_mode(GdkEventKey *evt)
         }
         return true;
     } else if (key == GDK_KEY_Up) {
-        if (not _history.empty()) {
+        if (not _CPHistory->get_children().empty()) {
             set_mode(CPMode::HISTORY);
             return true;
         }
+    }
+    return false;
+}
+
+bool CommandPalette::on_key_press_cpfilter_history_mode(GdkEventKey *evt)
+{
+    if (evt->keyval == GDK_KEY_BackSpace) {
+        return true;
     }
     return false;
 }
@@ -553,36 +491,6 @@ bool CommandPalette::on_key_press_cpfilter_input_mode(GdkEventKey *evt, const Ac
             close();
             return true;
     }
-    return false;
-}
-
-bool CommandPalette::on_key_press_cpfilter_history_mode(GdkEventKey *evt)
-{
-    // perform the previous action again
-    switch (evt->keyval) {
-        case GDK_KEY_Up:
-            if (_current_chapter != _history.begin()) {
-                _current_chapter--;
-                focus_current_chapter();
-            }
-            return true;
-        case GDK_KEY_Down:
-            if (_current_chapter != _history.end()) {
-                _current_chapter++;
-                focus_current_chapter();
-            } else {
-                set_mode(CPMode::SEARCH);
-            }
-            return true;
-        case GDK_KEY_Return:
-            [[fallthrough]];
-        case GDK_KEY_Linefeed:
-            repeat_current_chapter();
-            return true;
-        default:
-            break;
-    }
-
     return false;
 }
 
@@ -617,18 +525,41 @@ void CommandPalette::on_row_activated(Gtk::ListBoxRow *activated_row)
     }
 }
 
+void CommandPalette::on_history_selection_changed(Gtk::ListBoxRow *lb)
+{
+    // set the search box text to current selection
+    if (const auto name_label = get_name_desc(lb).first; name_label) {
+        _CPFilter->set_text(name_label->get_text());
+    }
+}
+
 bool CommandPalette::operate_recent_file(Glib::ustring const &uri, bool const import)
 {
     static auto prefs = Inkscape::Preferences::get();
 
+    bool write_to_history = true;
+
+    // if the last element in CPHistory is already this, don't update history file
+    if (_CPHistory->get_children().empty()) {
+        const auto last_of_history = _CPHistory->get_row_at_index(_CPHistory->get_children().size() - 1);
+
+        // picks from action button contains either import or export or full_action_name
+        const auto last_operation_import_export_indicator = get_full_action_name(last_of_history)->get_label();
+        // uri is stored in description field
+        const auto last_description = get_name_desc(last_of_history).second->get_text();
+        if (last_description == uri) {
+            // uri is the same as last operation
+            // we only want to store to history, if last operation was different from the one we are going to execute
+            // so we only want to store a import if last operation was an export and vice-versa, for the same file
+            write_to_history = not import xor last_operation_import_export_indicator == "import";
+        }
+    }
     if (import) {
         prefs->setBool("/options/onimport", true);
         file_import(SP_ACTIVE_DOCUMENT, uri, nullptr);
         prefs->setBool("/options/onimport", true);
 
-        if (_history.empty() or
-            not(_history.back().first == HistoryType::IMPORT_FILE and _history.back().second == uri)) {
-            _history.emplace_back(HistoryType::IMPORT_FILE, uri);
+        if (write_to_history) {
             _history_file_output_stream->write("IMPORT_FILE:" + uri + "\n");
         }
 
@@ -640,8 +571,7 @@ bool CommandPalette::operate_recent_file(Glib::ustring const &uri, bool const im
     auto app = &(ConcreteInkscapeApplication<Gtk::Application>::get_instance());
     Glib::RefPtr<Gio::File> file = Gio::File::create_for_path(uri);
     app->create_window(file);
-    if (_history.empty() or not(_history.back().first == HistoryType::OPEN_FILE and _history.back().second == uri)) {
-        _history.emplace_back(HistoryType::OPEN_FILE, uri);
+    if (write_to_history) {
         _history_file_output_stream->write("OPEN_FILE:" + uri + "\n");
     }
 
@@ -657,9 +587,13 @@ bool CommandPalette::operate_recent_file(Glib::ustring const &uri, bool const im
 bool CommandPalette::ask_action_parameter(const ActionPtrName &action_ptr_name)
 {
     // Avoid writing same last action again
-    if (_history.empty() or _history.back().second != action_ptr_name.second) {
-        _history.emplace_back(HistoryType::ACTION, action_ptr_name.second);
-        _history_file_output_stream->write("ACTION:" + action_ptr_name.second + "\n");
+    if (_CPHistory->get_children().empty()) {
+        const auto last_of_history = _CPHistory->get_row_at_index(_CPHistory->get_children().size() - 1);
+        const auto last_full_action_name = get_full_action_name(last_of_history)->get_label();
+        if (last_full_action_name == action_ptr_name.second) {
+            // last action is the same
+            _history_file_output_stream->write("ACTION:" + action_ptr_name.second + "\n");
+        }
     }
 
     // Checking if action has handleable parameter type
@@ -786,6 +720,10 @@ void CommandPalette::set_mode(CPMode mode)
                 return;
             }
 
+            if (_CPHistory->get_children().empty()) {
+                return;
+            }
+
             // Show history instead of suggestions
             _CPSuggestionsScroll->set_no_show_all();
             _CPHistoryScroll->set_no_show_all(false);
@@ -798,13 +736,25 @@ void CommandPalette::set_mode(CPMode mode)
             _cpfilter_search_connection.disconnect();
             _cpfilter_key_press_connection.disconnect();
 
-            _current_chapter = _history.end() - 1;
-            focus_current_chapter();
-
             _cpfilter_key_press_connection = _CPFilter->signal_key_press_event().connect(
                 sigc::mem_fun(*this, &CommandPalette::on_key_press_cpfilter_history_mode), false);
 
-            _CPHistory->get_children().back()->grab_focus();
+            _CPHistory->signal_row_selected().connect(
+                sigc::mem_fun(*this, &CommandPalette::on_history_selection_changed));
+            _CPHistory->signal_row_activated().connect(sigc::mem_fun(*this, &CommandPalette::on_row_activated));
+
+            {
+                // select last row
+                const auto last_row = _CPHistory->get_row_at_index(_CPHistory->get_children().size() - 1);
+                _CPHistory->select_row(*last_row);
+                last_row->grab_focus();
+            }
+
+            {
+                // FIXME: scroll to bottom
+                const auto adjustment = _CPHistoryScroll->get_vadjustment();
+                adjustment->set_value(adjustment->get_upper());
+            }
 
             break;
     }

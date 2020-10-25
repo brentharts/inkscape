@@ -90,9 +90,6 @@ private: // Helpers
      */
     std::vector<ActionPtrName> list_all_actions();
 
-    void focus_current_chapter();
-    void repeat_current_chapter();
-
     void append_recent_file_operation(const Glib::ustring &path, bool is_suggestion, bool is_import = true);
     bool generate_action_operation(const ActionPtrName &action_ptr_name, const bool is_suggestion);
 
@@ -119,6 +116,7 @@ private: // Signal handlers
     void show_suggestions();
 
     void on_row_activated(Gtk::ListBoxRow *activated_row);
+    void on_history_selection_changed(Gtk::ListBoxRow* lb);
 
     bool operate_recent_file(Glib::ustring const &uri, bool const import);
 
@@ -167,11 +165,6 @@ private: // variables
     bool _is_open = false;
 
     // History
-    using Chapter = std::pair<HistoryType, std::string>;
-    using History = std::vector<Chapter>;
-    History _history;
-    History::iterator _current_chapter;
-
     Glib::RefPtr<Gio::FileOutputStream> _history_file_output_stream;
     /**
      * Remember the mode we are in helps in unecessary signal disconnection and reconnection
