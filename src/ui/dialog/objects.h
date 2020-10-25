@@ -33,13 +33,39 @@ class SPGroup;
 struct SPColorSelector;
 
 namespace Inkscape {
-
 namespace UI {
 
 class SelectedColor;
 
 namespace Dialog {
 
+/* Custom cell renderer for type icon */
+class CellRendererItemIcon : public Gtk::CellRendererPixbuf {
+public:
+  
+    CellRendererItemIcon() :
+        Glib::ObjectBase(typeid(CellRendererPixbuf)),
+        Gtk::CellRendererPixbuf(),
+        _property_icon(*this, "icon", Glib::RefPtr<Gdk::Pixbuf>(nullptr))
+        //_property_item(*this, "item", 0)
+    { } 
+     
+    //Glib::PropertyProxy<Glib::RefPtr<SPItem>> 
+    //property_item() { return _property_item.get_proxy(); }
+  
+protected:
+    void render_vfunc(const Cairo::RefPtr<Cairo::Context>& cr, 
+                      Gtk::Widget& widget,
+                      const Gdk::Rectangle& background_area,
+                      const Gdk::Rectangle& cell_area,
+                      Gtk::CellRendererState flags) override;
+private:
+  
+    Glib::Property<Glib::RefPtr<Gdk::Pixbuf> > _property_icon;
+    //Glib::Property<Glib::RefPtr<SPItem> > _property_item;
+    std::map<const unsigned int, Glib::RefPtr<Gdk::Pixbuf> > _icon_cache;
+  
+};
 
 /**
  * A panel that displays objects.
@@ -133,6 +159,7 @@ private:
     std::vector<Gtk::Widget*> _watchingNonBottom;
 
     Gtk::TreeView _tree;
+    CellRendererItemIcon *_icon_renderer;
     Gtk::CellRendererText *_text_renderer;
     Gtk::TreeView::Column *_name_column;
     Gtk::Box _buttonsRow;
@@ -142,19 +169,6 @@ private:
     Gtk::Menu _popupMenu;
     Inkscape::UI::Widget::SpinButton _spinBtn;
     Gtk::Box _page;
-
-    Gtk::Label _visibleHeader;
-    Gtk::Label _lockHeader;
-    Gtk::Label _typeHeader;
-    Gtk::Label _clipmaskHeader;
-    Gtk::Label _highlightHeader;
-    Gtk::Label _nameHeader;
-
-    /* Composite Settings (blend, blur, opacity). */
-    Inkscape::UI::Widget::SimpleFilterModifier _filter_modifier;
-
-    Gtk::Dialog _colorSelectorDialog;
-    std::unique_ptr<Inkscape::UI::SelectedColor> _selectedColor;
 
     //Methods:
 
@@ -199,10 +213,6 @@ private:
     bool _noSelection( Glib::RefPtr<Gtk::TreeModel> const & model, Gtk::TreeModel::Path const & path, bool b );
     bool _rowSelectFunction( Glib::RefPtr<Gtk::TreeModel> const & model, Gtk::TreeModel::Path const & path, bool b );
 
-    void _compositingChanged( const Gtk::TreeModel::iterator& iter, bool *setValues );
-    void _updateComposite();
-    void _setCompositingValues(SPItem *item);
-
     bool _findInTreeCache(SPItem* item, Gtk::TreeModel::iterator &tree_iter);
     void _updateObject(SPObject *obj, bool recurse);
 
@@ -216,20 +226,6 @@ private:
     bool _processQueue();
     void _queueObject(SPObject* obj, Gtk::TreeModel::Row* parentRow);
     void _addObjectToTree(SPItem* item, const Gtk::TreeModel::Row &parentRow, bool expanded);
-
-    void _isolationChangedIter(const Gtk::TreeIter &iter);
-    void _isolationValueChanged();
-
-    void _opacityChangedIter(const Gtk::TreeIter& iter);
-    void _opacityValueChanged();
-
-    void _blendChangedIter(const Gtk::TreeIter &iter);
-    void _blendValueChanged();
-
-    void _blurChangedIter(const Gtk::TreeIter& iter, double blur);
-    void _blurValueChanged();
-
-    void _highlightPickerColorMod();
 };
 
 
