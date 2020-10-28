@@ -109,6 +109,25 @@ void CellRendererItemIcon::render_vfunc(const Cairo::RefPtr<Cairo::Context>& cr,
 }
 
 
+class ObjectsPanel::ModelColumns : public Gtk::TreeModel::ColumnRecord
+{
+public:
+    ModelColumns()
+    {
+        add(_colObject);
+        add(_colVisible);
+        add(_colLocked);
+        add(_colLabel);
+        add(_colPrevSelectionState);
+    }
+    ~ModelColumns() override = default;
+    Gtk::TreeModelColumn<SPItem*> _colObject;
+    Gtk::TreeModelColumn<Glib::ustring> _colLabel;
+    Gtk::TreeModelColumn<bool> _colVisible;
+    Gtk::TreeModelColumn<bool> _colLocked;
+    Gtk::TreeModelColumn<bool> _colPrevSelectionState;
+};
+
 /**
  * Gets an instance of the Objects panel
  */
@@ -117,14 +136,8 @@ ObjectsPanel& ObjectsPanel::getInstance()
     return *new ObjectsPanel();
 }
 
-/**
- * Column enumeration
- */
-enum {
-    COL_LABEL,
-    COL_VISIBLE,
-    COL_LOCKED,
-};
+// GtkTreeView Column enumeration
+enum { COL_LABEL, COL_VISIBLE, COL_LOCKED };
 
 /**
  * Button enumeration
@@ -146,7 +159,6 @@ enum {
     BUTTON_UNLOCK_ALL,
     BUTTON_SETCLIP,
     BUTTON_CLIPGROUP,
-//    BUTTON_SETINVCLIP,
     BUTTON_UNSETCLIP,
     BUTTON_SETMASK,
     BUTTON_UNSETMASK,
@@ -157,92 +169,144 @@ enum {
     UPDATE_TREE
 };
 
-/**
- * Xml node observer for observing objects in the document
- */
 class ObjectsPanel::ObjectWatcher : public Inkscape::XML::NodeObserver {
 public:
     /**
-     * Creates a new object watcher
-     * @param pnl The panel to which the object watcher belongs
+     * Creates a new ObjectWatcher, a gtk TreeView interated watching device.
+     *
+     * @param panel The panel to which the object watcher belongs
      * @param obj The object to watch
+     * @param iter The optional list store iter for the item, if not provided,
+     *             assumes this is the root 'document' object.
      */
-    ObjectWatcher(ObjectsPanel* pnl, SPObject* obj) :
-        _pnl(pnl),
-        _obj(obj),
-        _repr(obj->getRepr()),
-        _highlightAttr(g_quark_from_string("inkscape:highlight-color")),
+    ObjectWatcher(ObjectsPanel* panel, SPObject* obj, Gtk::TreeRow *row) :
+        panel(panel),
+        row_ref(nullptr),
+        object(obj),
         _lockedAttr(g_quark_from_string("sodipodi:insensitive")),
         _labelAttr(g_quark_from_string("inkscape:label")),
         _groupAttr(g_quark_from_string("inkscape:groupmode")),
-        _styleAttr(g_quark_from_string("style")),
-        _clipAttr(g_quark_from_string("clip-path")),
-        _maskAttr(g_quark_from_string("mask"))
+        _styleAttr(g_quark_from_string("style"))
     {
-        _repr->addObserver(*this);
-    }
-
-    ~ObjectWatcher() override {
-        _repr->removeObserver(*this);
-    }
-
-    void notifyChildAdded( Node &/*node*/, Node &/*child*/, Node */*prev*/ ) override
-    {
-        if ( _pnl && _obj ) {
-            _pnl->_objectsChangedWrapper( _obj );
+        g_warning("Creating ObjectWatcher: %s", obj->getId());
+        if(row != nullptr) {
+            auto path = panel->_store->get_path(*row);
+            row_ref = new Gtk::TreeModel::RowReference(panel->_store, path);
+            updateRowInfo();
         }
-    }
-    void notifyChildRemoved( Node &/*node*/, Node &/*child*/, Node */*prev*/ ) override
-    {
-        if ( _pnl && _obj ) {
-            _pnl->_objectsChangedWrapper( _obj );
-        }
-    }
-    void notifyChildOrderChanged( Node &/*node*/, Node &/*child*/, Node */*old_prev*/, Node */*new_prev*/ ) override
-    {
-        if ( _pnl && _obj ) {
-            _pnl->_objectsChangedWrapper( _obj );
-        }
-    }
-    void notifyContentChanged( Node &/*node*/, Util::ptr_shared /*old_content*/, Util::ptr_shared /*new_content*/ ) override {}
-    void notifyAttributeChanged( Node &node, GQuark name, Util::ptr_shared /*old_value*/, Util::ptr_shared /*new_value*/ ) override {
-        /* Weird things happen on undo! we get notified about the child being removed, but after that we still get
-         * notified for attributes being changed on this XML node! In that case the corresponding SPObject might already
-         * have been deleted and the pointer to might be invalid, leading to a segfault if we're not careful.
-         * So after we initiated the update of the treeview using _objectsChangedWrapper() in notifyChildRemoved(), the
-         * _pending_update flag is set, and we will no longer process any notifyAttributeChanged()
-         * Reproducing the crash: new document -> open objects panel -> draw freehand line -> undo -> segfault (but only
-         * if we don't check for _pending_update) */
-        if ( _pnl && (!_pnl->_pending_update) && _obj ) {
-            if ( name == _lockedAttr || name == _labelAttr || name == _highlightAttr || name == _groupAttr || name == _styleAttr || name == _clipAttr || name == _maskAttr ) {
-                _pnl->_updateObject(_obj, name == _highlightAttr);
+        object->getRepr()->addObserver(*this);
+        for (auto& child: object->children) {
+            if (dynamic_cast<SPItem *>(&child)) {
+                addChild(&child, nullptr);
             }
         }
     }
 
+    ~ObjectWatcher() override {
+        object->getRepr()->removeObserver(*this);
+        if (row_ref) {
+            auto iter = panel->_store->get_iter(row_ref->get_path());
+            panel->_store->erase(iter);
+            row_ref = nullptr;
+        }
+        child_watchers.clear();
+    }
+
+
     /**
-     * Objects panel to which this watcher belongs
+     * Update the information in the row from the stored object (sync)
      */
-    ObjectsPanel* _pnl;
-    
+    void updateRowInfo() {
+        auto item = dynamic_cast<SPItem *>(object);
+        auto row = *panel->_store->get_iter(row_ref->get_path());
+
+        if (item) {
+            gchar const * label = item->label() ? item->label() : item->getId();
+            row[panel->_model->_colObject] = item;
+            row[panel->_model->_colLabel] = label ? label : item->defaultLabel();
+            row[panel->_model->_colVisible] = !item->isHidden();
+            row[panel->_model->_colLocked] = !item->isSensitive();
+        } else {
+            g_warning("No item for object hmmmm");
+        }
+    }
+
     /**
-     * The object that is being observed
+     * Add the child object next to the given sibling (or at the end)
+     *
+     * @param child - SVG Object to be added
+     * @param sibling - Optional sibling Object to add next to
      */
-    SPObject* _obj;
-    
+    void addChild(SPObject *child, SPObject *sibling) {
+        auto parent_iter = getParentRow();
+        //auto sibling_iter = getChildIter(sibling);
+        Gtk::TreeModel::Row row = *(panel->_store->append((*parent_iter)->children()));
+        child_watchers.emplace_back(new ObjectWatcher(panel, child, &row));
+    }
+
     /**
-     * The xml representation of the object that is being observed
+     * Get the parent TreeRow to this object
      */
-    Inkscape::XML::Node* _repr;
+    const Gtk::TreeRow *getParentRow() {
+        if (row_ref) {
+            return &(*panel->_store->get_iter(row_ref->get_path()));
+        }
+        return &(*panel->_store->get_iter("0"));
+    }
+
+    /**
+     * Convert SVG Object to TreeView Row, assuming the object is a child.
+     *
+     * @param child - The child object to find in this branch
+     */
+    const Gtk::TreeRow* getChildIter(SPObject *child) {
+        for (auto &iter : (*getParentRow())->children()) {
+            Gtk::TreeModel::Row row = *iter;
+            if(row[panel->_model->_colObject] == child) {
+                return &(*iter);
+            }
+        }
+        return nullptr;
+    }
+
+    void notifyChildAdded( Node &node, Node &child, Node *prev ) override
+    {
+        addChild(panel->_document->getObjectByRepr(&child),
+                 panel->_document->getObjectByRepr(prev));
+    }
+    void notifyChildRemoved( Node &/*node*/, Node &child, Node* /*prev*/ ) override
+    {
+        g_warning("Child removed...");
+        auto child_obj = panel->_document->getObjectByRepr(&child);
+        auto iter = child_watchers.begin();
+        while (iter != child_watchers.end()) {
+            if((*iter)->object == child_obj) {
+                child_watchers.erase(iter);
+            } else {
+                iter++;
+            }
+        }
+    }
+    void notifyChildOrderChanged( Node &/*node*/, Node &/*child*/, Node */*old_prev*/, Node */*new_prev*/ ) override
+    {
+    }
+    void notifyContentChanged( Node &/*node*/, Util::ptr_shared /*old_content*/, Util::ptr_shared /*new_content*/ ) override {}
+    void notifyAttributeChanged( Node &node, GQuark name, Util::ptr_shared /*old_value*/, Util::ptr_shared /*new_value*/ ) override {
+        if ( name == _lockedAttr || name == _labelAttr || name == _groupAttr || name == _styleAttr ) {
+            //updateRowInfo();
+        }
+    }
+
+    std::vector<std::unique_ptr<ObjectWatcher>> child_watchers;
+    Gtk::TreeModel::RowReference* row_ref;
+    ObjectsPanel* panel;
+    SPObject* object;
     
     /* These are quarks which define the attributes that we are observing */
-    GQuark _highlightAttr;
     GQuark _lockedAttr;
     GQuark _labelAttr;
     GQuark _groupAttr;
     GQuark _styleAttr;
-    GQuark _clipAttr;
-    GQuark _maskAttr;
 };
 
 class ObjectsPanel::InternalUIBounce
@@ -250,27 +314,6 @@ class ObjectsPanel::InternalUIBounce
 public:
     int _actionCode;
     sigc::connection _signal;
-};
-
-class ObjectsPanel::ModelColumns : public Gtk::TreeModel::ColumnRecord
-{
-public:
-
-    ModelColumns()
-    {
-        add(_colObject);
-        add(_colVisible);
-        add(_colLocked);
-        add(_colLabel);
-        add(_colPrevSelectionState);
-    }
-    ~ModelColumns() override = default;
-
-    Gtk::TreeModelColumn<SPItem*> _colObject;
-    Gtk::TreeModelColumn<Glib::ustring> _colLabel;
-    Gtk::TreeModelColumn<bool> _colVisible;
-    Gtk::TreeModelColumn<bool> _colLocked;
-    Gtk::TreeModelColumn<bool> _colPrevSelectionState;
 };
 
 /**
@@ -323,228 +366,6 @@ Gtk::MenuItem& ObjectsPanel::_addPopupItem( SPDesktop *desktop, unsigned int cod
 }
 
 /**
- * Attach a watcher to the XML node of an item, which will signal us in case of changes to that item or node
- * @param item The item of which the XML node is to be watched
- */
-void ObjectsPanel::_addWatcher(SPItem *item) {
-    bool used = true; // Any newly created watcher is obviously being used
-    auto iter = _objectWatchers.find(item);
-    if (iter == _objectWatchers.end()) { // If not found then watcher doesn't exist yet
-        ObjectsPanel::ObjectWatcher *w = new ObjectsPanel::ObjectWatcher(this, item);
-        _objectWatchers.emplace(item, std::make_pair(w, used));
-    } else { // Found; no need to create a new watcher; just flag it as "in use"
-        (*iter).second.second = used;
-    }
-}
-
-/**
- * Delete the watchers, which signal us in case of changes to the item being watched
- * @param only_unused Only delete those watchers that are no longer in use
- */
-void ObjectsPanel::_removeWatchers(bool only_unused = false) {
-    // Delete all watchers (optionally only those which are not in use)
-    auto iter = _objectWatchers.begin();
-    while (iter != _objectWatchers.end()) {
-        bool used = (*iter).second.second;
-        bool delete_watcher = (!only_unused) || (only_unused && !used);
-        if ( delete_watcher ) {
-            ObjectsPanel::ObjectWatcher *w = (*iter).second.first;
-            delete w;
-            iter = _objectWatchers.erase(iter);
-        } else {
-            // It must be in use, so the used "field" should be set to true;
-            // However, when _removeWatchers is being called, we will already have processed the complete queue ...
-            g_assert(_tree_update_queue.empty());
-            // .. and we can preemptively flag it as unused for the processing of the next queue
-            (*iter).second.second = false; // It will be set to true again by _addWatcher, if in use
-            iter++;
-        }
-    }
-    if (!only_unused) {
-        //Delete the root watcher
-        if (_rootWatcher) {
-            _rootWatcher->_repr->removeObserver(*_rootWatcher);
-            delete _rootWatcher;
-            _rootWatcher = nullptr;
-        }
-    }
-}
-/**
- * Call function for asynchronous invocation of _objectsChanged
- */
-void ObjectsPanel::_objectsChangedWrapper(SPObject */*obj*/) {
-    // We used to call _objectsChanged with a reference to _obj,
-    // but since _obj wasn't used, I'm dropping that for now
-    _takeAction(UPDATE_TREE);
-}
-
-/**
- * Callback function for when an object changes.  Essentially refreshes the entire tree
- * @param obj Object which was changed (currently not used as the entire tree is recreated)
- */
-void ObjectsPanel::_objectsChanged(SPObject */*obj*/)
-{
-    if (auto document = getDocument()) {
-        if (auto root = document->getRoot()) {
-            _selectedConnection.block(); // Will be unblocked after the queue has been processed fully
-
-            //Clear the tree store
-            _store->clear(); // This will increment it's stamp, making all old iterators
-            _tree_cache.clear(); // invalid. So we will also clear our own cache, as well
-            _tree_update_queue.clear(); // as any remaining update queue
-
-            // Temporarily detach the TreeStore from the TreeView to slightly reduce flickering, and to speed up
-            // Note: if we truly want to eliminate the flickering, we should implement double buffering on the _store,
-            // but maybe this is a bit too much effort/bloat for too little gain?
-            _tree.unset_model();
-
-            //Add all items recursively; we will do this asynchronously, by first filling a queue, which is rather fast
-            _queueObject( root, nullptr );
-            //However, the processing of this queue is slow, so this is done at a low priority and in small chunks. Using
-            //only small chunks keeps Inkscape responsive, for example while using the spray tool. After processing each
-            //of the chunks, Inkscape will check if there are other tasks with a high priority, for example when user is
-            //spraying. If so, the sprayed objects will be added first, and the whole updating will be restarted before
-            //it even finished.
-            _paths_to_be_expanded.clear();
-            _processQueue_sig.disconnect(); // Might be needed in case objectsChanged is called directly, and not through objectsChangedWrapper()
-            _processQueue_sig = Glib::signal_timeout().connect( sigc::mem_fun(*this, &ObjectsPanel::_processQueue), 0, Glib::PRIORITY_DEFAULT_IDLE+100);
-        }
-    }
-}
-
-/**
- * Recursively adds the children of the given item to the tree
- * @param obj Root object to add to the tree
- * @param parentRow Parent tree row (or NULL if adding to tree root)
- */
-void ObjectsPanel::_queueObject(SPObject* obj, Gtk::TreeModel::Row* parentRow)
-{
-    bool already_expanded = false;
-
-    for(auto& child: obj->children) {
-        if (SP_IS_ITEM(&child)) {
-            //Add the item to the tree, basically only creating an empty row in the tree view
-            Gtk::TreeModel::iterator iter = parentRow ? _store->prepend(parentRow->children()) : _store->prepend();
-
-            //Add the item to a queue, so we can fill in the data in each row asynchronously
-            //at a later stage. See the comments in _objectsChanged() for more details
-            bool expand = SP_IS_GROUP(obj) && SP_GROUP(obj)->expanded() && (not already_expanded);
-            _tree_update_queue.emplace_back(SP_ITEM(&child), iter, expand);
-
-            already_expanded = expand || already_expanded; // We need to expand only a single child in each group
-
-            //If the item is a group, recursively add its children
-            if (SP_IS_GROUP(&child)) {
-                Gtk::TreeModel::Row row = *iter;
-                _queueObject(&child, &row);
-            }
-        }
-    }
-}
-
-/**
- * Walks through the queue in small chunks, and fills in the rows in the tree view accordingly
- * @return False if the queue has been fully emptied
- */
-bool ObjectsPanel::_processQueue() {
-    auto desktop = getDesktop();
-    if (!desktop) {
-        return false;
-    }
-
-    auto queue_iter = _tree_update_queue.begin();
-    auto queue_end  = _tree_update_queue.end();
-    int count = 0;
-
-    while (queue_iter != queue_end) {
-        //The queue is a list of tuples; expand the tuples
-        SPItem *item                    = std::get<0>(*queue_iter);
-        Gtk::TreeModel::iterator iter   = std::get<1>(*queue_iter);
-        bool expanded                   = std::get<2>(*queue_iter);
-        //Add the object to the tree view and tree cache
-        _addObjectToTree(item, *iter, expanded);
-        _tree_cache.emplace(item, *iter);
-
-        /* Update the watchers; No watcher shall be deleted before the processing of the queue has
-         * finished; we need to keep watching for items that might have been deleted while the queue,
-         * which is being processed on idle, was not yet empty. This is because when an item is deleted, the
-         * queue is still holding a pointer to it. The NotifyChildRemoved method of the watcher will stop the
-         * processing of the queue and prevent a segmentation fault, but only if there is a watcher in place*/
-        _addWatcher(item);
-
-        queue_iter = _tree_update_queue.erase(queue_iter);
-        count++;
-        if (count == 100 && (!_tree_update_queue.empty())) {
-            return true; // we have not yet reached the end of the queue, so return true to keep the timeout signal alive
-        }
-    }
-
-    //We have reached the end of the queue, and it is safe to remove any watchers
-    _removeWatchers(true); // ... but only remove those that are no longer in use
-
-    // Now we can bring the tree view back to life safely
-    _tree.set_model(_store); // Attach the store again to the tree view this sets search columns as -1
-    _tree.set_search_column(_model->_colLabel);//set search column again 
-
-    // Expand the tree; this is kept outside of _addObjectToTree() and _processQueue() to allow
-    // temporarily detaching the store from the tree, which slightly reduces flickering
-    for (auto path: _paths_to_be_expanded) {
-        _tree.expand_to_path(path);
-        _tree.collapse_row(path);
-    }
-
-    _blockAllSignals(false);
-    _objectsSelected(desktop->selection); //Set the tree selection; will also invoke _checkTreeSelection()
-    _pending_update = false;
-    return false; // Return false to kill the timeout signal that kept calling _processQueue
-}
-
-/**
- * Fills in the details of an item in the already existing row of the tree view
- * @param item Item of which the name, visibility, lock status, etc, will be filled in
- * @param row Row where the item is residing
- * @param expanded True if the item is part of a group that is shown as expanded in the tree view
- */
-void ObjectsPanel::_addObjectToTree(SPItem* item, const Gtk::TreeModel::Row &row, bool expanded)
-{
-    row[_model->_colObject] = item;
-    gchar const * label = item->label() ? item->label() : item->getId();
-    row[_model->_colLabel] = label ? label : item->defaultLabel();
-    row[_model->_colVisible] = !item->isHidden();
-    row[_model->_colLocked] = !item->isSensitive();
-    //If our parent object is a group and it's expanded, expand the tree
-    if (expanded) {
-        _paths_to_be_expanded.emplace_back(_store->get_path(row));
-    }
-}
-
-/**
- * Updates an item in the tree and optionally recursively updates the item's children
- * @param obj The item to update in the tree
- * @param recurse Whether to recurse through the item's children
- */
-void ObjectsPanel::_updateObject( SPObject *obj, bool recurse ) {
-    Gtk::TreeModel::iterator tree_iter;
-    if (_findInTreeCache(SP_ITEM(obj), tree_iter)) {
-        Gtk::TreeModel::Row row = *tree_iter;
-
-        //We found our item in the tree; now update it!
-        SPItem * item = SP_IS_ITEM(obj) ? SP_ITEM(obj) : nullptr;
-
-        gchar const * label = obj->label() ? obj->label() : obj->getId();
-        row[_model->_colLabel] = label ? label : obj->defaultLabel();
-        row[_model->_colVisible] = item ? !item->isHidden() : false;
-        row[_model->_colLocked] = item ? !item->isSensitive() : false;
-
-        if (recurse){
-            for (auto& iter: obj->children) {
-                _updateObject(&iter, recurse);
-            }
-        }
-    }
-}
-
-/**
  * Occurs when the current desktop selection changes
  * @param sel The current selection
  */
@@ -571,43 +392,6 @@ void ObjectsPanel::_objectsSelected( Selection *sel ) {
     _checkTreeSelection();
 }
 
-// See the comment in objects.h for _tree_cache
-/**
- * Find the specified item in the tree cache
- * @param iter Current tree item
- * @param tree_iter Tree_iter will point to the row in which the tree item was found
- * @return True if found
- */
-bool ObjectsPanel::_findInTreeCache(SPItem* item, Gtk::TreeModel::iterator &tree_iter) {
-    if (not item) {
-        return false;
-    }
-
-    try {
-        tree_iter = _tree_cache.at(item);
-    }
-    catch (std::out_of_range) {
-        // Apparently, item cannot be found in the tree_cache, which could mean that
-        // - the tree and/or tree_cache are out-dated or in the process of being updated.
-        // - a layer is selected, which is not visible in the objects panel (see _objectsSelected())
-        // Anyway, this doesn't seem all that critical, so no warnings; just return false
-        return false;
-    }
-
-    /* If the row in the tree has been deleted, and an old tree_cache is being used, then we will
-     * get a segmentation fault crash somewhere here; so make sure iters don't linger around!
-     * We can only check the validity as done below, but this is rather slow according to the
-     * documentation (adds 0.25 s for a 2k long tree). But better safe than sorry
-     */
-    if (not _store->iter_is_valid(tree_iter)) {
-        g_critical("Invalid iterator to Gtk::tree in objects panel; just prevented a segfault!");
-        return false;
-    }
-
-    return true;
-}
-
-
 /**
  * Find the specified item in the tree store and (de)select it, optionally scrolling to the item
  * @param item Item to select in the tree
@@ -616,7 +400,7 @@ bool ObjectsPanel::_findInTreeCache(SPItem* item, Gtk::TreeModel::iterator &tree
  */
 void ObjectsPanel::_updateObjectSelected(SPItem* item, bool scrollto, bool expand)
 {
-    Gtk::TreeModel::iterator tree_iter;
+    /*Gtk::TreeModel::iterator tree_iter;
     if (_findInTreeCache(item, tree_iter)) {
         Gtk::TreeModel::Row row = *tree_iter;
 
@@ -635,7 +419,7 @@ void ObjectsPanel::_updateObjectSelected(SPItem* item, bool scrollto, bool expan
             //Scroll to the item in the tree
             _tree.scroll_to_row(path, 0.5);
         }
-    }
+    }*/
 }
 
 /**
@@ -840,7 +624,7 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
 {
     static unsigned doubleclick = 0;
     static bool overVisible = false;
-    auto desktop = getDesktop();
+    Gtk::TreeModel::Path _defer_target;
 
     //Right mouse button was clicked, launch the pop-up menu
     if ( (event->type == GDK_BUTTON_PRESS) && (event->button == 3) ) {
@@ -1007,20 +791,6 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
     }
    
     return false;
-}
-
-/**
- * Stores items in the highlight target vector to manipulate with the color selector
- * @param iter Current tree item to store
- */
-void ObjectsPanel::_storeHighlightTarget(const Gtk::TreeModel::iterator& iter)
-{
-    Gtk::TreeModel::Row row = *iter;
-    SPItem* item = row[_model->_colObject];
-    if (item)
-    {
-        _highlight_target.push_back(item);
-    }
 }
 
 /*
@@ -1212,26 +982,21 @@ void ObjectsPanel::_fireAction( unsigned int code )
     }
 }
 
-bool ObjectsPanel::_executeUpdate() {
-    _objectsChanged(nullptr);
-    return false;
-}
-
 /**
  * Executes the given button action during the idle time
  */
 void ObjectsPanel::_takeAction( int val )
 {
     if (val == UPDATE_TREE) {
-        _pending_update = true;
+        // XXX RIP IT UP!
+        //_pending_update = true;
         // We might already have been updating the tree, but new data is available now
         // so we will then first cancel the old update before scheduling a new one
-        _processQueue_sig.disconnect();
-        _executeUpdate_sig.disconnect();
-        _blockAllSignals(true);
-        //_store->clear();
-        _tree_cache.clear();
-        _executeUpdate_sig = Glib::signal_timeout().connect( sigc::mem_fun(*this, &ObjectsPanel::_executeUpdate), 500, Glib::PRIORITY_DEFAULT_IDLE+50);
+        //_processQueue_sig.disconnect();
+        //_executeUpdate_sig.disconnect();
+        //_blockAllSignals(true);
+        //_tree_cache.clear();
+        //_executeUpdate_sig = Glib::signal_timeout().connect( sigc::mem_fun(*this, &ObjectsPanel::_executeUpdate), 500, Glib::PRIORITY_DEFAULT_IDLE+50);
         // In the spray tool, updating the tree competes in priority with the redrawing of the canvas,
         // see SPCanvas::addIdle(), which is set to UPDATE_PRIORITY (=G_PRIORITY_DEFAULT_IDLE). We
         // should take a lower priority (= higher value) to keep the spray tool updating longer, and to prevent
@@ -1253,7 +1018,6 @@ bool ObjectsPanel::_executeAction()
     if ( _document && _pending) 
     {
         int val = _pending->_actionCode;
-//        SPObject* target = _pending->_target;
 
         auto selection = getSelection();
         int val = _pending->_actionCode;
@@ -1393,7 +1157,6 @@ bool ObjectsPanel::_executeAction()
                         _setCollapsed(SP_GROUP(&obj));
                     }
                 }
-                _objectsChanged(document->getRoot());
             }
             break;
             case DRAGNDROP:
@@ -1545,7 +1308,6 @@ ObjectsPanel::ObjectsPanel() :
     _pending(nullptr),
     _pending_update(false),
     _toggleEvent(nullptr),
-    _defer_target(),
     _page(Gtk::ORIENTATION_VERTICAL)
 {
     //Create the tree model and store
@@ -1704,7 +1466,7 @@ ObjectsPanel::ObjectsPanel() :
 
     //Set up the pop-up menu
     // -------------------------------------------------------
-    {
+    /* XXX MOVE TO setDesktop {
         Inkscape::Preferences *prefs = Inkscape::Preferences::get();
         _show_contextmenu_icons = prefs->getBool("/theme/menuIcons_objects", true);
 
@@ -1755,12 +1517,12 @@ ObjectsPanel::ObjectsPanel() :
 
         // Install CSS to shift icons into the space reserved for toggles (i.e. check and radio items).
         _popupMenu.signal_map().connect(sigc::bind<Gtk::MenuShell *>(sigc::ptr_fun(shift_icons), &_popupMenu));
-    }
+    }*/
 
     // -------------------------------------------------------
 
     //Set initial sensitivity of buttons
-    for (auto & it : _watching) {
+    /*for (auto & it : _watching) {
         it->set_sensitive( false );
     }
     for (auto & it : _watchingNonTop) {
@@ -1768,7 +1530,7 @@ ObjectsPanel::ObjectsPanel() :
     }
     for (auto & it : _watchingNonBottom) {
         it->set_sensitive( false );
-    }
+    }*/
 
     setDesktop( targetDesktop );
 
@@ -1780,13 +1542,10 @@ ObjectsPanel::ObjectsPanel() :
  */
 ObjectsPanel::~ObjectsPanel()
 {
-    // Never being called, not even when closing Inkscape?
-
     //Set the desktop to null, which will disconnect all object watchers
     setDesktop(nullptr);
 
-    if ( _model )
-    {
+    if (_model) {
         delete _model;
         _model = nullptr;
     }
@@ -1796,7 +1555,7 @@ ObjectsPanel::~ObjectsPanel()
         _pending = nullptr;
     }
 
-    if (_toggleEvent) {
+    if (_toggleEvent){
         gdk_event_free(_toggleEvent);
         _toggleEvent = nullptr;
     }
@@ -1805,27 +1564,19 @@ ObjectsPanel::~ObjectsPanel()
 /**
  * Sets the current document
  */
-void ObjectsPanel::documentReplaced()
+void ObjectsPanel::setDocument(SPDesktop* desktop, SPDocument* document)
 {
-    //Clear all object watchers
-    _removeWatchers();
+    g_assert(desktop == _desktop);
 
-    //Delete the root watcher
-    if (_rootWatcher)
-    {
-        _rootWatcher->_repr->removeObserver(*_rootWatcher);
+    if (_rootWatcher) {
         delete _rootWatcher;
-        _rootWatcher = nullptr;
     }
 
     _document = document;
+    _rootWatcher = nullptr;
 
-    if (document && document->getRoot() && document->getRoot()->getRepr())
-    {
-        //Create a new root watcher for the document and then call _objectsChanged to fill the tree
-        _rootWatcher = new ObjectsPanel::ObjectWatcher(this, document->getRoot());
-        document->getRoot()->getRepr()->addObserver(*_rootWatcher);
-        _objectsChanged(document->getRoot());
+    if (document && document->getRoot()) {
+        _rootWatcher = new ObjectsPanel::ObjectWatcher(this, document->getRoot(), nullptr);
     }
 }
 
@@ -1848,16 +1599,12 @@ void ObjectsPanel::setDesktop( SPDesktop* desktop )
         if ( _desktop ) {
             //Connect desktop signals
             _documentChangedConnection = _desktop->connectDocumentReplaced( sigc::mem_fun(*this, &ObjectsPanel::setDocument));
-
-            _documentChangedCurrentLayer = _desktop->connectCurrentLayerChanged( sigc::mem_fun(*this, &ObjectsPanel::_objectsChangedWrapper));
-
+            // XXX _documentChangedCurrentLayer = _desktop->connectCurrentLayerChanged( sigc::mem_fun(*this, &ObjectsPanel::_objectsChangedWrapper));
             _selectionChangedConnection = _desktop->selection->connectChanged( sigc::mem_fun(*this, &ObjectsPanel::_objectsSelected));
-
             _desktopDestroyedConnection = _desktop->connectDestroy( sigc::mem_fun(*this, &ObjectsPanel::_desktopDestroyed));
-
             setDocument(_desktop, _desktop->doc());
         } else {
-            setDocument(nullptr, nullptr);
+            setDocument(_desktop, nullptr);
         }
     }
 }
@@ -1865,45 +1612,6 @@ void ObjectsPanel::setDesktop( SPDesktop* desktop )
 } //namespace Dialogs
 } //namespace UI
 } //namespace Inkscape
-
-//should be okay to put these here because they are never referenced anywhere else
-using namespace Inkscape::UI::Tools;
-
-void SPItem::setHighlightColor(guint32 const color)
-{
-    g_free(_highlightColor);
-    if (color & 0x000000ff)
-    {
-        _highlightColor = g_strdup_printf("%u", color);
-    }
-    else
-    {
-        _highlightColor = nullptr;
-    }
-    
-    NodeTool *tool = nullptr;
-    if (SP_ACTIVE_DESKTOP ) {
-        Inkscape::UI::Tools::ToolBase *ec = SP_ACTIVE_DESKTOP->event_context;
-        if (INK_IS_NODE_TOOL(ec)) {
-            tool = static_cast<NodeTool*>(ec);
-            set_active_tool(tool->getDesktop(), "Node");
-        }
-    }
-}
-
-void SPItem::unsetHighlightColor()
-{
-    g_free(_highlightColor);
-    _highlightColor = nullptr;
-    NodeTool *tool = nullptr;
-    if (SP_ACTIVE_DESKTOP ) {
-        Inkscape::UI::Tools::ToolBase *ec = SP_ACTIVE_DESKTOP->event_context;
-        if (INK_IS_NODE_TOOL(ec)) {
-            tool = static_cast<NodeTool*>(ec);
-            set_active_tool(tool->getDesktop(), "Node");
-        }
-    }
-}
 
 /*
   Local Variables:

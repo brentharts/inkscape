@@ -90,9 +90,18 @@ private:
 
     //Document root watcher
     ObjectsPanel::ObjectWatcher* _rootWatcher;
+    
+    //Connection for when the desktop is destroyed (I.e. its deconstructor is called)
+    sigc::connection _desktopDestroyedConnection;
 
-    //All object watchers
-    std::map<SPItem*, std::pair<ObjectsPanel::ObjectWatcher*, bool> > _objectWatchers;
+    //Connection for when the document changes
+    sigc::connection _documentChangedConnection;
+
+    //Connection for when the active layer changes
+    sigc::connection _documentChangedCurrentLayer;
+
+    //Connection for when the active selection in the document changes
+    sigc::connection _selectionChangedConnection;
 
     //Connection for when the selection in the dialog changes
     sigc::connection _selectedConnection;
@@ -139,20 +148,8 @@ private:
     //GUI Members:
 
     GdkEvent* _toggleEvent;
-
-    Gtk::TreeModel::Path _defer_target;
-
+    
     Glib::RefPtr<Gtk::TreeStore> _store;
-    std::list<std::tuple<SPItem*, Gtk::TreeModel::iterator, bool> > _tree_update_queue;
-    //When the user selects an item in the document, we need to find that item in the tree view
-    //and highlight it. When looking up a specific item in the tree though, we don't want to have
-    //to iterate through the whole list, as this would take too long if the list is very long. So
-    //we will use a std::map for this instead, which is much faster (and call it _tree_cache). It
-    //would have been cleaner to create our own custom tree model, as described here
-    //https://en.wikibooks.org/wiki/GTK%2B_By_Example/Tree_View/Tree_Models
-    std::map<SPItem*, Gtk::TreeModel::iterator> _tree_cache;
-    std::list<SPItem *> _selected_objects_order; // ordered by time of selection
-    std::list<Gtk::TreePath> _paths_to_be_expanded;
 
     std::vector<Gtk::Widget*> _watching;
     std::vector<Gtk::Widget*> _watchingNonTop;
@@ -213,19 +210,8 @@ private:
     bool _noSelection( Glib::RefPtr<Gtk::TreeModel> const & model, Gtk::TreeModel::Path const & path, bool b );
     bool _rowSelectFunction( Glib::RefPtr<Gtk::TreeModel> const & model, Gtk::TreeModel::Path const & path, bool b );
 
-    bool _findInTreeCache(SPItem* item, Gtk::TreeModel::iterator &tree_iter);
-    void _updateObject(SPObject *obj, bool recurse);
-
     void _objectsSelected(Selection *sel);
     void _updateObjectSelected(SPItem* item, bool scrollto, bool expand);
-
-    void _removeWatchers(bool only_unused);
-    void _addWatcher(SPItem* item);
-    void _objectsChangedWrapper(SPObject *obj);
-    void _objectsChanged(SPObject *obj);
-    bool _processQueue();
-    void _queueObject(SPObject* obj, Gtk::TreeModel::Row* parentRow);
-    void _addObjectToTree(SPItem* item, const Gtk::TreeModel::Row &parentRow, bool expanded);
 };
 
 

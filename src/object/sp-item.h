@@ -185,9 +185,6 @@ public:
     bool isHighlightSet() const;
     guint32 highlight_color() const;
 
-    void setHighlightColor(guint32 color);
-
-    void unsetHighlightColor();
     //====================
 
     bool isEvaluated() const;
