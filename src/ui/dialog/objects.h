@@ -17,16 +17,11 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/dialog.h>
-#include <gtkmm/scale.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/treestore.h>
-#include <gtkmm/treeview.h>
+
+#include "ui/widget/panel.h"
+#include "ui/widget/style-subject.h"
 
 #include "selection.h"
-#include "ui/dialog/dialog-base.h"
-#include "ui/widget/filter-effect-chooser.h"
-#include "ui/widget/spinbutton.h"
-#include "ui/widget/style-subject.h"
 
 class SPObject;
 class SPGroup;
@@ -164,7 +159,6 @@ private:
     Gtk::Box _buttonsSecondary;
     Gtk::ScrolledWindow _scroller;
     Gtk::Menu _popupMenu;
-    Inkscape::UI::Widget::SpinButton _spinBtn;
     Gtk::Box _page;
 
     //Methods:
@@ -212,6 +206,7 @@ private:
 
     void _objectsSelected(Selection *sel);
     void _updateObjectSelected(SPItem* item, bool scrollto, bool expand);
+    void connectPopupItems();
 };
 
 

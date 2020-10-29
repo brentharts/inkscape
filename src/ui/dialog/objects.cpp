@@ -19,6 +19,7 @@
 #include <gtkmm/imagemenuitem.h>
 #include <gtkmm/separatormenuitem.h>
 #include <glibmm/main.h>
+#include <glibmm/i18n.h>
 
 #include "desktop-style.h"
 #include "desktop.h"
@@ -165,8 +166,7 @@ enum {
     BUTTON_GROUP,
     BUTTON_UNGROUP,
     BUTTON_COLLAPSE_ALL,
-    DRAGNDROP,
-    UPDATE_TREE
+    DRAGNDROP
 };
 
 class ObjectsPanel::ObjectWatcher : public Inkscape::XML::NodeObserver {
@@ -182,31 +182,36 @@ public:
     ObjectWatcher(ObjectsPanel* panel, SPObject* obj, Gtk::TreeRow *row) :
         panel(panel),
         row_ref(nullptr),
-        object(obj),
+        node(obj->getRepr()),
         _lockedAttr(g_quark_from_string("sodipodi:insensitive")),
         _labelAttr(g_quark_from_string("inkscape:label")),
         _groupAttr(g_quark_from_string("inkscape:groupmode")),
         _styleAttr(g_quark_from_string("style"))
     {
-        g_warning("Creating ObjectWatcher: %s", obj->getId());
         if(row != nullptr) {
             auto path = panel->_store->get_path(*row);
             row_ref = new Gtk::TreeModel::RowReference(panel->_store, path);
             updateRowInfo();
         }
-        object->getRepr()->addObserver(*this);
-        for (auto& child: object->children) {
+        node->addObserver(*this);
+        for (auto& child: obj->children) {
+            // Check the object is a visible SPItem
             if (dynamic_cast<SPItem *>(&child)) {
-                addChild(&child, nullptr);
+                addChild(&child);
             }
         }
     }
 
     ~ObjectWatcher() override {
-        object->getRepr()->removeObserver(*this);
+        node->removeObserver(*this);
         if (row_ref) {
-            auto iter = panel->_store->get_iter(row_ref->get_path());
-            panel->_store->erase(iter);
+            auto path = row_ref->get_path();
+            if (path) {
+                auto iter = panel->_store->get_iter(path);
+                if(iter) {
+                    panel->_store->erase(iter);
+                }
+            }
             row_ref = nullptr;
         }
         child_watchers.clear();
@@ -214,10 +219,10 @@ public:
 
 
     /**
-     * Update the information in the row from the stored object (sync)
+     * Update the information in the row from the stored node
      */
     void updateRowInfo() {
-        auto item = dynamic_cast<SPItem *>(object);
+        auto item = dynamic_cast<SPItem *>(getObject(node));
         auto row = *panel->_store->get_iter(row_ref->get_path());
 
         if (item) {
@@ -232,35 +237,59 @@ public:
     }
 
     /**
-     * Add the child object next to the given sibling (or at the end)
+     * Add the child object to this node.
      *
-     * @param child - SVG Object to be added
-     * @param sibling - Optional sibling Object to add next to
+     * @param child - SPObject to be added
      */
-    void addChild(SPObject *child, SPObject *sibling) {
-        auto parent_iter = getParentRow();
-        //auto sibling_iter = getChildIter(sibling);
-        Gtk::TreeModel::Row row = *(panel->_store->append((*parent_iter)->children()));
+    void addChild(SPObject *child)
+    {
+        Gtk::TreeModel::Row row = *(panel->_store->append(getParentIter()));
         child_watchers.emplace_back(new ObjectWatcher(panel, child, &row));
     }
 
     /**
-     * Get the parent TreeRow to this object
+     * Move the child to just after the given sibling
+     *
+     * @param child - SPObject to be moved
+     * @param sibling - Optional sibling Object to add next to, if nullptr the
+     *                  object is moved to BEFORE the first item.
      */
-    const Gtk::TreeRow *getParentRow() {
-        if (row_ref) {
-            return &(*panel->_store->get_iter(row_ref->get_path()));
+    void moveChild(SPObject *child, SPObject *sibling)
+    {
+        auto child_iter = getChildIter(child);
+        auto sibling_iter = getChildIter(sibling);
+        auto child_const = const_cast<GtkTreeIter*>(child_iter->get_gobject_if_not_end());
+        GtkTreeIter* sibling_const = nullptr;
+        if (sibling_iter) {
+            sibling_const = const_cast<GtkTreeIter*>(sibling_iter->get_gobject_if_not_end());
         }
-        return &(*panel->_store->get_iter("0"));
+        // Gtkmm can move to before, but not move to 'after'
+        gtk_tree_store_move_after(panel->_store->gobj(), child_const, sibling_const);
     }
 
     /**
-     * Convert SVG Object to TreeView Row, assuming the object is a child.
+     * Get the parent TreeRow's children iterator to this object
+     *
+     * @returns Gtk Tree Node Children iterator
+     */
+    Gtk::TreeNodeChildren getParentIter()
+    {
+        if (row_ref) {
+            const Gtk::TreeRow row = **panel->_store->get_iter(row_ref->get_path());
+            return row->children();
+        }
+        return panel->_store->children();
+    }
+
+    /**
+     * Convert SPObject to TreeView Row, assuming the object is a child.
      *
      * @param child - The child object to find in this branch
+     * @returns Gtk TreeRow for the child, or nullptr if not found
      */
-    const Gtk::TreeRow* getChildIter(SPObject *child) {
-        for (auto &iter : (*getParentRow())->children()) {
+    const Gtk::TreeRow* getChildIter(SPObject *child)
+    {
+        for (auto &iter : getParentIter()) {
             Gtk::TreeModel::Row row = *iter;
             if(row[panel->_model->_colObject] == child) {
                 return &(*iter);
@@ -268,39 +297,55 @@ public:
         }
         return nullptr;
     }
+    /**
+      * Get the object from the node.
+      *
+      * @param node - XML Node involved in the signal.
+      * @returns SPObject matching the node, returns nullptr if not found.
+      */
+    SPObject *getObject(Node *node) {
+        if (node != nullptr)
+            return panel->_document->getObjectByRepr(node);
+        return nullptr;
+    }
 
     void notifyChildAdded( Node &node, Node &child, Node *prev ) override
     {
-        addChild(panel->_document->getObjectByRepr(&child),
-                 panel->_document->getObjectByRepr(prev));
+        addChild(getObject(&child));
+        moveChild(getObject(&child), getObject(prev));
     }
     void notifyChildRemoved( Node &/*node*/, Node &child, Node* /*prev*/ ) override
     {
-        g_warning("Child removed...");
-        auto child_obj = panel->_document->getObjectByRepr(&child);
         auto iter = child_watchers.begin();
         while (iter != child_watchers.end()) {
-            if((*iter)->object == child_obj) {
+            // child doesn't have a valid SPObject, so comparing Nodes
+            auto node1 = (*iter)->node;
+            auto node2 = &child;
+            if (!node1 || !node2) continue;
+            if(node1 == node2) {
+                // It's VERY important this is done so ghost attribute signals are
+                // stopped before they are emitted and cause crashes (object is gone)
                 child_watchers.erase(iter);
             } else {
                 iter++;
             }
         }
     }
-    void notifyChildOrderChanged( Node &/*node*/, Node &/*child*/, Node */*old_prev*/, Node */*new_prev*/ ) override
+    void notifyChildOrderChanged( Node &parent, Node &child, Node */*old_prev*/, Node *new_prev ) override
     {
+        moveChild(getObject(&child), getObject(new_prev));
     }
     void notifyContentChanged( Node &/*node*/, Util::ptr_shared /*old_content*/, Util::ptr_shared /*new_content*/ ) override {}
     void notifyAttributeChanged( Node &node, GQuark name, Util::ptr_shared /*old_value*/, Util::ptr_shared /*new_value*/ ) override {
         if ( name == _lockedAttr || name == _labelAttr || name == _groupAttr || name == _styleAttr ) {
-            //updateRowInfo();
+            updateRowInfo();
         }
     }
 
     std::vector<std::unique_ptr<ObjectWatcher>> child_watchers;
     Gtk::TreeModel::RowReference* row_ref;
     ObjectsPanel* panel;
-    SPObject* object;
+    Node* node;
     
     /* These are quarks which define the attributes that we are observing */
     GQuark _lockedAttr;
@@ -469,13 +514,13 @@ bool ObjectsPanel::_selectItemCallback(const Gtk::TreeModel::iterator& iter, boo
          */
         if (*first_pass == row[_model->_colPrevSelectionState]) {
             SPItem *item = row[_model->_colObject];
-            if (!SP_IS_GROUP(item) || SP_GROUP(item)->layerMode() != SPGroup::LAYER) {
-                //If the item is not a layer, then select it and set the current layer to its parent (if it's the first item)
-                if (desktop->selection->isEmpty()) {
-                    desktop->setCurrentLayer(item->parent);
-                }
-                desktop->selection->add(item);
-            } else {
+            //If the item is not a layer, then select it and set the current layer to its parent (if it's the first item)
+            if (_desktop->selection->isEmpty()) {
+                _desktop->setCurrentLayer(item->parent);
+            }
+            _desktop->selection->add(item);
+
+            if (SP_IS_GROUP(item) && SP_GROUP(item)->layerMode() != SPGroup::LAYER) {
                 //If the item is a layer, set the current layer
                 if (desktop->selection->isEmpty()) {
                     desktop->setCurrentLayer(item);
@@ -987,26 +1032,9 @@ void ObjectsPanel::_fireAction( unsigned int code )
  */
 void ObjectsPanel::_takeAction( int val )
 {
-    if (val == UPDATE_TREE) {
-        // XXX RIP IT UP!
-        //_pending_update = true;
-        // We might already have been updating the tree, but new data is available now
-        // so we will then first cancel the old update before scheduling a new one
-        //_processQueue_sig.disconnect();
-        //_executeUpdate_sig.disconnect();
-        //_blockAllSignals(true);
-        //_tree_cache.clear();
-        //_executeUpdate_sig = Glib::signal_timeout().connect( sigc::mem_fun(*this, &ObjectsPanel::_executeUpdate), 500, Glib::PRIORITY_DEFAULT_IDLE+50);
-        // In the spray tool, updating the tree competes in priority with the redrawing of the canvas,
-        // see SPCanvas::addIdle(), which is set to UPDATE_PRIORITY (=G_PRIORITY_DEFAULT_IDLE). We
-        // should take a lower priority (= higher value) to keep the spray tool updating longer, and to prevent
-        // the objects-panel from clogging the processor; however, once the spraying slows down, the tree might
-        // get updated anyway.
-    } else if ( !_pending ) {
-        _pending = new InternalUIBounce();
-        _pending->_actionCode = val;
-        _pending->_signal = Glib::signal_timeout().connect( sigc::mem_fun(*this, &ObjectsPanel::_executeAction), 0 );
-    }
+    _pending = new InternalUIBounce();
+    _pending->_actionCode = val;
+    _pending->_signal = Glib::signal_timeout().connect( sigc::mem_fun(*this, &ObjectsPanel::_executeAction), 0 );
 }
 
 /**
@@ -1464,74 +1492,6 @@ ObjectsPanel::ObjectsPanel() :
     _buttonsRow.pack_start(_buttonsSecondary, Gtk::PACK_EXPAND_WIDGET);
     _buttonsRow.pack_end(_buttonsPrimary, Gtk::PACK_EXPAND_WIDGET);
 
-    //Set up the pop-up menu
-    // -------------------------------------------------------
-    /* XXX MOVE TO setDesktop {
-        Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-        _show_contextmenu_icons = prefs->getBool("/theme/menuIcons_objects", true);
-
-        _watching.push_back( &_addPopupItem( targetDesktop, SP_VERB_LAYER_RENAME, (int)BUTTON_RENAME ) );
-        _watching.push_back( &_addPopupItem( targetDesktop, SP_VERB_LAYER_NEW, (int)BUTTON_NEW ) );
-
-        _popupMenu.append(*Gtk::manage(new Gtk::SeparatorMenuItem()));
-
-        _watching.push_back( &_addPopupItem( targetDesktop, SP_VERB_LAYER_SOLO, (int)BUTTON_SOLO ) );
-        _watching.push_back( &_addPopupItem( targetDesktop, SP_VERB_LAYER_SHOW_ALL, (int)BUTTON_SHOW_ALL ) );
-        _watching.push_back( &_addPopupItem( targetDesktop, SP_VERB_LAYER_HIDE_ALL, (int)BUTTON_HIDE_ALL ) );
-
-        _popupMenu.append(*Gtk::manage(new Gtk::SeparatorMenuItem()));
-
-        _watching.push_back( &_addPopupItem( targetDesktop, SP_VERB_LAYER_LOCK_OTHERS, (int)BUTTON_LOCK_OTHERS ) );
-        _watching.push_back( &_addPopupItem( targetDesktop, SP_VERB_LAYER_LOCK_ALL, (int)BUTTON_LOCK_ALL ) );
-        _watching.push_back( &_addPopupItem( targetDesktop, SP_VERB_LAYER_UNLOCK_ALL, (int)BUTTON_UNLOCK_ALL ) );
-
-        _popupMenu.append(*Gtk::manage(new Gtk::SeparatorMenuItem()));
-
-        _watchingNonTop.push_back( &_addPopupItem(targetDesktop, SP_VERB_SELECTION_STACK_UP, (int)BUTTON_UP) );
-        _watchingNonBottom.push_back( &_addPopupItem(targetDesktop, SP_VERB_SELECTION_STACK_DOWN, (int)BUTTON_DOWN) );
-
-        _popupMenu.append(*Gtk::manage(new Gtk::SeparatorMenuItem()));
-        
-        _watching.push_back( &_addPopupItem( targetDesktop, SP_VERB_SELECTION_GROUP, (int)BUTTON_GROUP ) );
-        _watching.push_back( &_addPopupItem( targetDesktop, SP_VERB_SELECTION_UNGROUP, (int)BUTTON_UNGROUP ) );
-        
-        _popupMenu.append(*Gtk::manage(new Gtk::SeparatorMenuItem()));
-        
-        _watching.push_back( &_addPopupItem( targetDesktop, SP_VERB_OBJECT_SET_CLIPPATH, (int)BUTTON_SETCLIP ) );
-        
-        _watching.push_back( &_addPopupItem( targetDesktop, SP_VERB_OBJECT_CREATE_CLIP_GROUP, (int)BUTTON_CLIPGROUP ) );
-
-        //will never be implemented
-        //_watching.push_back( &_addPopupItem( targetDesktop, SP_VERB_OBJECT_SET_INVERSE_CLIPPATH, (int)BUTTON_SETINVCLIP ) );
-        _watching.push_back( &_addPopupItem( targetDesktop, SP_VERB_OBJECT_UNSET_CLIPPATH, (int)BUTTON_UNSETCLIP ) );
-
-        _popupMenu.append(*Gtk::manage(new Gtk::SeparatorMenuItem()));
-        
-        _watching.push_back( &_addPopupItem( targetDesktop, SP_VERB_OBJECT_SET_MASK, (int)BUTTON_SETMASK ) );
-        _watching.push_back( &_addPopupItem( targetDesktop, SP_VERB_OBJECT_UNSET_MASK, (int)BUTTON_UNSETMASK ) );
-
-        _watching.push_back( &_addPopupItem( targetDesktop, SP_VERB_EDIT_DUPLICATE, (int)BUTTON_DUPLICATE ) );
-        _watching.push_back( &_addPopupItem( targetDesktop, SP_VERB_EDIT_DELETE, (int)BUTTON_DELETE ) );
-
-        _popupMenu.show_all_children();
-
-        // Install CSS to shift icons into the space reserved for toggles (i.e. check and radio items).
-        _popupMenu.signal_map().connect(sigc::bind<Gtk::MenuShell *>(sigc::ptr_fun(shift_icons), &_popupMenu));
-    }*/
-
-    // -------------------------------------------------------
-
-    //Set initial sensitivity of buttons
-    /*for (auto & it : _watching) {
-        it->set_sensitive( false );
-    }
-    for (auto & it : _watchingNonTop) {
-        it->set_sensitive( false );
-    }
-    for (auto & it : _watchingNonBottom) {
-        it->set_sensitive( false );
-    }*/
-
     setDesktop( targetDesktop );
 
     show_all_children();
@@ -1603,10 +1563,77 @@ void ObjectsPanel::setDesktop( SPDesktop* desktop )
             _selectionChangedConnection = _desktop->selection->connectChanged( sigc::mem_fun(*this, &ObjectsPanel::_objectsSelected));
             _desktopDestroyedConnection = _desktop->connectDestroy( sigc::mem_fun(*this, &ObjectsPanel::_desktopDestroyed));
             setDocument(_desktop, _desktop->doc());
+            connectPopupItems();
         } else {
             setDocument(_desktop, nullptr);
         }
     }
+}
+
+void ObjectsPanel::connectPopupItems()
+{
+    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+    _show_contextmenu_icons = prefs->getBool("/theme/menuIcons_objects", true);
+
+    _watching.push_back( &_addPopupItem( _desktop, SP_VERB_LAYER_RENAME, (int)BUTTON_RENAME ) );
+    _watching.push_back( &_addPopupItem( _desktop, SP_VERB_LAYER_NEW, (int)BUTTON_NEW ) );
+
+    _popupMenu.append(*Gtk::manage(new Gtk::SeparatorMenuItem()));
+
+    _watching.push_back( &_addPopupItem( _desktop, SP_VERB_LAYER_SOLO, (int)BUTTON_SOLO ) );
+    _watching.push_back( &_addPopupItem( _desktop, SP_VERB_LAYER_SHOW_ALL, (int)BUTTON_SHOW_ALL ) );
+    _watching.push_back( &_addPopupItem( _desktop, SP_VERB_LAYER_HIDE_ALL, (int)BUTTON_HIDE_ALL ) );
+
+    _popupMenu.append(*Gtk::manage(new Gtk::SeparatorMenuItem()));
+
+    _watching.push_back( &_addPopupItem( _desktop, SP_VERB_LAYER_LOCK_OTHERS, (int)BUTTON_LOCK_OTHERS ) );
+    _watching.push_back( &_addPopupItem( _desktop, SP_VERB_LAYER_LOCK_ALL, (int)BUTTON_LOCK_ALL ) );
+    _watching.push_back( &_addPopupItem( _desktop, SP_VERB_LAYER_UNLOCK_ALL, (int)BUTTON_UNLOCK_ALL ) );
+
+    _popupMenu.append(*Gtk::manage(new Gtk::SeparatorMenuItem()));
+
+    _watchingNonTop.push_back( &_addPopupItem(_desktop, SP_VERB_SELECTION_STACK_UP, (int)BUTTON_UP) );
+    _watchingNonBottom.push_back( &_addPopupItem(_desktop, SP_VERB_SELECTION_STACK_DOWN, (int)BUTTON_DOWN) );
+
+    _popupMenu.append(*Gtk::manage(new Gtk::SeparatorMenuItem()));
+    
+    _watching.push_back( &_addPopupItem( _desktop, SP_VERB_SELECTION_GROUP, (int)BUTTON_GROUP ) );
+    _watching.push_back( &_addPopupItem( _desktop, SP_VERB_SELECTION_UNGROUP, (int)BUTTON_UNGROUP ) );
+    
+    _popupMenu.append(*Gtk::manage(new Gtk::SeparatorMenuItem()));
+    
+    _watching.push_back( &_addPopupItem( _desktop, SP_VERB_OBJECT_SET_CLIPPATH, (int)BUTTON_SETCLIP ) );
+    
+    _watching.push_back( &_addPopupItem( _desktop, SP_VERB_OBJECT_CREATE_CLIP_GROUP, (int)BUTTON_CLIPGROUP ) );
+
+    //will never be implemented
+    //_watching.push_back( &_addPopupItem( _desktop, SP_VERB_OBJECT_SET_INVERSE_CLIPPATH, (int)BUTTON_SETINVCLIP ) );
+    _watching.push_back( &_addPopupItem( _desktop, SP_VERB_OBJECT_UNSET_CLIPPATH, (int)BUTTON_UNSETCLIP ) );
+
+    _popupMenu.append(*Gtk::manage(new Gtk::SeparatorMenuItem()));
+    
+    _watching.push_back( &_addPopupItem( _desktop, SP_VERB_OBJECT_SET_MASK, (int)BUTTON_SETMASK ) );
+    _watching.push_back( &_addPopupItem( _desktop, SP_VERB_OBJECT_UNSET_MASK, (int)BUTTON_UNSETMASK ) );
+
+    _watching.push_back( &_addPopupItem( _desktop, SP_VERB_EDIT_DUPLICATE, (int)BUTTON_DUPLICATE ) );
+    _watching.push_back( &_addPopupItem( _desktop, SP_VERB_EDIT_DELETE, (int)BUTTON_DELETE ) );
+
+    _popupMenu.show_all_children();
+
+    // Install CSS to shift icons into the space reserved for toggles (i.e. check and radio items).
+    _popupMenu.signal_map().connect(sigc::bind<Gtk::MenuShell *>(sigc::ptr_fun(shift_icons), &_popupMenu));
+
+    //Set initial sensitivity of buttons
+    for (auto & it : _watching) {
+        it->set_sensitive( false );
+    }
+    for (auto & it : _watchingNonTop) {
+        it->set_sensitive( false );
+    }
+    for (auto & it : _watchingNonBottom) {
+        it->set_sensitive( false );
+    }
+
 }
 
 } //namespace Dialogs
