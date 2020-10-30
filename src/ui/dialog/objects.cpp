@@ -993,25 +993,6 @@ void ObjectsPanel::_doTreeMove()
 }
 
 /**
- * Prevents the treeview from emitting and responding to most signals; needed when it's not up to date
- */
-void ObjectsPanel::_blockAllSignals(bool should_block = true) {
-
-    // incoming signals
-    _isolationConnection.block(should_block);
-    _opacityConnection.block(should_block);
-    _blendConnection.block(should_block);
-    _blurConnection.block(should_block);
-    if (_pending && should_block) {
-        // Kill any pending UI event, e.g. a delete or drag 'n drop action, which could
-        // become unpredictable after the tree has been updated
-        _pending->_signal.disconnect();
-    }
-    // outgoing signal
-    _selectedConnection.block(should_block);
-}
-
-/**
  * Fires the action verb
  */
 void ObjectsPanel::_fireAction( unsigned int code )
@@ -1572,6 +1553,11 @@ void ObjectsPanel::setDesktop( SPDesktop* desktop )
 
 void ObjectsPanel::connectPopupItems()
 {
+    _watching.clear();
+    _watchingNonTop.clear();
+    _watchingNonBottom.clear();
+    _popupMenu = Gtk::Menu();
+
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     _show_contextmenu_icons = prefs->getBool("/theme/menuIcons_objects", true);
 

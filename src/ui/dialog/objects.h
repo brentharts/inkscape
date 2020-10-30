@@ -193,7 +193,6 @@ private:
 
     void _checkTreeSelection();
 
-    void _blockAllSignals(bool should_block);
     void _takeAction( int val );
     bool _executeAction();
     bool _executeUpdate();
