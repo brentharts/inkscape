@@ -296,8 +296,27 @@ void SPGroup::print(SPPrintContext *ctx) {
     }
 }
 
+const char *SPGroup::typeName() const {
+    switch (_layer_mode) {
+        case SPGroup::LAYER:
+            return "layer";
+        case SPGroup::MASK_HELPER:
+        case SPGroup::GROUP:
+        default:
+            return "group";
+    }
+}
+
 const char *SPGroup::displayName() const {
-    return _("Group");
+    switch (_layer_mode) {
+        case SPGroup::LAYER:
+            return _("Layer");
+        case SPGroup::MASK_HELPER:
+            return _("Mask Helper");
+        case SPGroup::GROUP:
+        default:
+            return _("Group");
+    }
 }
 
 gchar *SPGroup::description() const {

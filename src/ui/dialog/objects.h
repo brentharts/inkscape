@@ -41,12 +41,12 @@ public:
     CellRendererItemIcon() :
         Glib::ObjectBase(typeid(CellRendererPixbuf)),
         Gtk::CellRendererPixbuf(),
-        _property_icon(*this, "icon", Glib::RefPtr<Gdk::Pixbuf>(nullptr))
-        //_property_item(*this, "item", 0)
+        _property_icon(*this, "icon", Glib::RefPtr<Gdk::Pixbuf>(nullptr)),
+        _property_shape_type(*this, "shape_type", "unknown")
     { } 
      
-    //Glib::PropertyProxy<Glib::RefPtr<SPItem>> 
-    //property_item() { return _property_item.get_proxy(); }
+    Glib::PropertyProxy<std::string>
+        property_shape_type() { return _property_shape_type.get_proxy(); }
   
 protected:
     void render_vfunc(const Cairo::RefPtr<Cairo::Context>& cr, 
@@ -57,8 +57,8 @@ protected:
 private:
   
     Glib::Property<Glib::RefPtr<Gdk::Pixbuf> > _property_icon;
-    //Glib::Property<Glib::RefPtr<SPItem> > _property_item;
-    std::map<const unsigned int, Glib::RefPtr<Gdk::Pixbuf> > _icon_cache;
+    Glib::Property<std::string> _property_shape_type;
+    std::map<const std::string, Glib::RefPtr<Gdk::Pixbuf> > _icon_cache;
   
 };
 

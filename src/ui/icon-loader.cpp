@@ -82,6 +82,33 @@ Glib::RefPtr<Gdk::Pixbuf> sp_get_icon_pixbuf(Glib::ustring icon_name, gint size)
     return _icon_pixbuf;
 }
 
+/**
+ * Get the shape icon for this named shape type. For example 'rect'. These icons
+ * are always symbolic icons no matter the theme in order to be coloured by the highlight
+ * color.
+ *
+ * @param shape_type - A string id for the shape from SPItem->typeName()
+ * @param color - The fg color of the shape icon
+ * @param size - The icon size to generate
+ */
+Glib::RefPtr<Gdk::Pixbuf> sp_get_shape_icon(Glib::ustring shape_type, Gdk::RGBA color, gint size)
+{
+    Glib::RefPtr<Gdk::Display> display = Gdk::Display::get_default();
+    Glib::RefPtr<Gdk::Screen>  screen = display->get_default_screen();
+    Glib::RefPtr<Gtk::IconTheme> icon_theme = Gtk::IconTheme::get_for_screen(screen);
+
+    Gtk::IconInfo iconinfo = icon_theme->lookup_icon("shape-" + shape_type + "-symbolic",
+                                                     size, Gtk::ICON_LOOKUP_FORCE_SIZE);
+    if (!iconinfo) {
+        iconinfo = icon_theme->lookup_icon("shape-unknown-symbolic", size, Gtk::ICON_LOOKUP_FORCE_SIZE);
+        // We know this could fail, but it should exist, so persist.
+    }
+    // Gtkmm requires all colours, even though gtk does not
+    auto other = Gdk::RGBA("black");
+    bool was_symbolic = false;
+    return iconinfo.load_symbolic(color, other, other, other, was_symbolic);
+}
+
 Glib::RefPtr<Gdk::Pixbuf> sp_get_icon_pixbuf(Glib::ustring icon_name, Gtk::IconSize icon_size)
 {
     int width, height;

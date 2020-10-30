@@ -25,5 +25,6 @@ Glib::RefPtr<Gdk::Pixbuf> sp_get_icon_pixbuf(Glib::ustring icon_name, Gtk::IconS
 Glib::RefPtr<Gdk::Pixbuf> sp_get_icon_pixbuf(Glib::ustring icon_name, Gtk::BuiltinIconSize icon_size);
 Glib::RefPtr<Gdk::Pixbuf> sp_get_icon_pixbuf(Glib::ustring icon_name, GtkIconSize icon_size);
 Glib::RefPtr<Gdk::Pixbuf> sp_get_icon_pixbuf(Glib::ustring icon_name, gchar const *prefs_sice);
+Glib::RefPtr<Gdk::Pixbuf> sp_get_shape_icon(Glib::ustring shape_type, Gdk::RGBA color, gint size);
 
 #endif // SEEN_INK_ICON_LOADER_H

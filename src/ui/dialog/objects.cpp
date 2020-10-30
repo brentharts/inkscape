@@ -77,32 +77,16 @@ void CellRendererItemIcon::render_vfunc(const Cairo::RefPtr<Cairo::Context>& cr,
                                       const Gdk::Rectangle& cell_area,
                                       Gtk::CellRendererState flags)
 {
-    unsigned int item_type = 1;
-     //_property_item->get_type();
+    std::string shape_type = _property_shape_type.get_value();
+    std::string highlight = "red"; // getHighlightColor
+    std::string cache_id = shape_type + "-" + highlight;
 
     // if the icon isn't cached, render it to a pixbuf
-    if ( !_icon_cache[item_type] ) { 
-  
-        // Get icon for item type...
-        //Glib::ustring image_name = "gtk-missing";
-        Glib::ustring image_name = Inkscape::Verb::get(SP_VERB_LAYER_DELETE)->get_image();
-        Gtk::Image* icon = Gtk::manage(new Gtk::Image());
-        icon = sp_get_icon_image(image_name, Gtk::ICON_SIZE_MENU);
-  
-        if (icon) {
-            // check icon type (inkscape, gtk, none)
-            if ( GTK_IS_IMAGE(icon->gobj()) ) {
-                _property_icon = sp_get_icon_pixbuf(image_name, 16);
-                property_pixbuf() = _icon_cache[item_type] = _property_icon.get_value  ();
-                delete icon;
-            } else {
-                delete icon;
-                return;
-            }
-        }
-
+    if ( !_icon_cache[cache_id] ) { 
+        _property_icon = sp_get_shape_icon(shape_type, Gdk::RGBA(highlight), 16);
+        property_pixbuf() = _icon_cache[cache_id] = _property_icon.get_value();
     } else {
-        property_pixbuf() = _icon_cache[item_type];
+        property_pixbuf() = _icon_cache[cache_id];
     }
   
     Gtk::CellRendererPixbuf::render_vfunc(cr, widget, background_area,
@@ -116,6 +100,7 @@ public:
     ModelColumns()
     {
         add(_colObject);
+        add(_colType);
         add(_colVisible);
         add(_colLocked);
         add(_colLabel);
@@ -124,6 +109,7 @@ public:
     ~ModelColumns() override = default;
     Gtk::TreeModelColumn<SPItem*> _colObject;
     Gtk::TreeModelColumn<Glib::ustring> _colLabel;
+    Gtk::TreeModelColumn<Glib::ustring> _colType;
     Gtk::TreeModelColumn<bool> _colVisible;
     Gtk::TreeModelColumn<bool> _colLocked;
     Gtk::TreeModelColumn<bool> _colPrevSelectionState;
@@ -229,10 +215,9 @@ public:
             gchar const * label = item->label() ? item->label() : item->getId();
             row[panel->_model->_colObject] = item;
             row[panel->_model->_colLabel] = label ? label : item->defaultLabel();
+            row[panel->_model->_colType] = item->typeName();
             row[panel->_model->_colVisible] = !item->isHidden();
             row[panel->_model->_colLocked] = !item->isSensitive();
-        } else {
-            g_warning("No item for object hmmmm");
         }
     }
 
@@ -1344,7 +1329,7 @@ ObjectsPanel::ObjectsPanel() :
     name_column->pack_start(*_icon_renderer, false);
     name_column->pack_start(*_text_renderer, true);
     name_column->add_attribute(_text_renderer->property_text(), _model->_colLabel);
-    //_name_column->add_attribute(_icon_renderer->property_item(), _model->_colObject);
+    name_column->add_attribute(_icon_renderer->property_shape_type(), _model->_colType);
 
     //Visible
     auto *eyeRenderer = Gtk::manage( new Inkscape::UI::Widget::ImageToggler(INKSCAPE_ICON("object-visible"), INKSCAPE_ICON("object-hidden")) );

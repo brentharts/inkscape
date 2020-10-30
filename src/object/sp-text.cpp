@@ -326,6 +326,10 @@ void SPText::hide(unsigned int key) {
     }
 }
 
+const char* SPText::typeName() const {
+    return "text";
+}
+
 const char* SPText::displayName() const {
     if (has_inline_size()) {
         return _("Auto-wrapped text");

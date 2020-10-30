@@ -1056,6 +1056,20 @@ void SPItem::invoke_print(SPPrintContext *ctx)
     }
 }
 
+/**
+ * The item's type name, not node tag name. NOT translated.
+ *
+ * @return The item's type name (default: 'item')
+ */
+const char* SPItem::typeName() const {
+    return "item";
+}
+
+/**
+ * The item's type name as a translated human string.
+ *
+ * Translated string for UI display.
+ */
 const char* SPItem::displayName() const {
     return _("Object");
 }

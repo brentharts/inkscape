@@ -417,7 +417,8 @@ public:
 
 	virtual Geom::OptRect bbox(Geom::Affine const &transform, SPItem::BBoxType type) const;
 	virtual void print(SPPrintContext *ctx);
-    virtual const char* displayName() const;
+        virtual const char* typeName() const;
+        virtual const char* displayName() const;
 	virtual char* description() const;
 	virtual Inkscape::DrawingItem* show(Inkscape::Drawing &drawing, unsigned int key, unsigned int flags);
 	virtual void hide(unsigned int key);
