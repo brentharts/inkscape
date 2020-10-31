@@ -183,7 +183,7 @@ public:
     };
 
     bool isHighlightSet() const;
-    guint32 highlight_color() const;
+    virtual guint32 highlight_color() const;
 
     //====================
 

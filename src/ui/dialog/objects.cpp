@@ -78,7 +78,7 @@ void CellRendererItemIcon::render_vfunc(const Cairo::RefPtr<Cairo::Context>& cr,
                                       Gtk::CellRendererState flags)
 {
     std::string shape_type = _property_shape_type.get_value();
-    std::string highlight = "red"; // getHighlightColor
+    std::string highlight = SPColor(_property_color.get_value()).toString();
     std::string cache_id = shape_type + "-" + highlight;
 
     // if the icon isn't cached, render it to a pixbuf
@@ -101,6 +101,7 @@ public:
     {
         add(_colObject);
         add(_colType);
+        add(_colColor);
         add(_colVisible);
         add(_colLocked);
         add(_colLabel);
@@ -110,6 +111,7 @@ public:
     Gtk::TreeModelColumn<SPItem*> _colObject;
     Gtk::TreeModelColumn<Glib::ustring> _colLabel;
     Gtk::TreeModelColumn<Glib::ustring> _colType;
+    Gtk::TreeModelColumn<unsigned int> _colColor;
     Gtk::TreeModelColumn<bool> _colVisible;
     Gtk::TreeModelColumn<bool> _colLocked;
     Gtk::TreeModelColumn<bool> _colPrevSelectionState;
@@ -168,11 +170,7 @@ public:
     ObjectWatcher(ObjectsPanel* panel, SPObject* obj, Gtk::TreeRow *row) :
         panel(panel),
         row_ref(nullptr),
-        node(obj->getRepr()),
-        _lockedAttr(g_quark_from_string("sodipodi:insensitive")),
-        _labelAttr(g_quark_from_string("inkscape:label")),
-        _groupAttr(g_quark_from_string("inkscape:groupmode")),
-        _styleAttr(g_quark_from_string("style"))
+        node(obj->getRepr())
     {
         if(row != nullptr) {
             auto path = panel->_store->get_path(*row);
@@ -216,6 +214,7 @@ public:
             row[panel->_model->_colObject] = item;
             row[panel->_model->_colLabel] = label ? label : item->defaultLabel();
             row[panel->_model->_colType] = item->typeName();
+            row[panel->_model->_colColor] = item->highlight_color();
             row[panel->_model->_colVisible] = !item->isHidden();
             row[panel->_model->_colLocked] = !item->isSensitive();
         }
@@ -322,21 +321,14 @@ public:
     }
     void notifyContentChanged( Node &/*node*/, Util::ptr_shared /*old_content*/, Util::ptr_shared /*new_content*/ ) override {}
     void notifyAttributeChanged( Node &node, GQuark name, Util::ptr_shared /*old_value*/, Util::ptr_shared /*new_value*/ ) override {
-        if ( name == _lockedAttr || name == _labelAttr || name == _groupAttr || name == _styleAttr ) {
-            updateRowInfo();
-        }
+        // Almost anything could change the icon, so update upon any change.
+        updateRowInfo();
     }
 
     std::vector<std::unique_ptr<ObjectWatcher>> child_watchers;
     Gtk::TreeModel::RowReference* row_ref;
     ObjectsPanel* panel;
     Node* node;
-    
-    /* These are quarks which define the attributes that we are observing */
-    GQuark _lockedAttr;
-    GQuark _labelAttr;
-    GQuark _groupAttr;
-    GQuark _styleAttr;
 };
 
 class ObjectsPanel::InternalUIBounce
@@ -1330,6 +1322,7 @@ ObjectsPanel::ObjectsPanel() :
     name_column->pack_start(*_text_renderer, true);
     name_column->add_attribute(_text_renderer->property_text(), _model->_colLabel);
     name_column->add_attribute(_icon_renderer->property_shape_type(), _model->_colType);
+    name_column->add_attribute(_icon_renderer->property_color(), _model->_colColor);
 
     //Visible
     auto *eyeRenderer = Gtk::manage( new Inkscape::UI::Widget::ImageToggler(INKSCAPE_ICON("object-visible"), INKSCAPE_ICON("object-hidden")) );

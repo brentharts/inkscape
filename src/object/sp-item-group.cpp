@@ -929,6 +929,21 @@ sp_group_perform_patheffect(SPGroup *group, SPGroup *top_group, Inkscape::LivePa
     }
 }
 
+/**
+ * Generate a highlight colour if one isn't set and return it.
+ */
+guint32 SPGroup::highlight_color() const {
+    // Parent must not be a layer (root, or similar) and this group must also be a layer
+    if (!_highlightColor && !SP_IS_LAYER(parent) && this->_layer_mode == SPGroup::LAYER) {
+        char const * oid = defaultLabel();
+        if (oid) {
+            // Color based on the last few bits of the label or object id.
+            return default_highlights[oid[(strlen(oid) - 1)] & 0x07];
+        }
+    }
+    return SPItem::highlight_color();
+}
+
 /*
   Local Variables:
   mode:c++

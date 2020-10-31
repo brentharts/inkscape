@@ -42,11 +42,14 @@ public:
         Glib::ObjectBase(typeid(CellRendererPixbuf)),
         Gtk::CellRendererPixbuf(),
         _property_icon(*this, "icon", Glib::RefPtr<Gdk::Pixbuf>(nullptr)),
-        _property_shape_type(*this, "shape_type", "unknown")
+        _property_shape_type(*this, "shape_type", "unknown"),
+        _property_color(*this, "color", 0)
     { } 
      
     Glib::PropertyProxy<std::string>
         property_shape_type() { return _property_shape_type.get_proxy(); }
+    Glib::PropertyProxy<unsigned int>
+        property_color() { return _property_color.get_proxy(); }
   
 protected:
     void render_vfunc(const Cairo::RefPtr<Cairo::Context>& cr, 
@@ -58,6 +61,7 @@ private:
   
     Glib::Property<Glib::RefPtr<Gdk::Pixbuf> > _property_icon;
     Glib::Property<std::string> _property_shape_type;
+    Glib::Property<unsigned int> _property_color;
     std::map<const std::string, Glib::RefPtr<Gdk::Pixbuf> > _icon_cache;
   
 };

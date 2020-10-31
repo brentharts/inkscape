@@ -191,18 +191,13 @@ bool SPItem::isHighlightSet() const {
 }
 
 guint32 SPItem::highlight_color() const {
-    if (_highlightColor)
-    {
+    if (_highlightColor) {
         return atoi(_highlightColor) | 0x00000000;
-    }
-    else {
+    } else {
         SPItem const *item = dynamic_cast<SPItem const *>(parent);
-        if (parent && (parent != this) && item)
-        {
+        if (parent && (parent != this) && item) {
             return item->highlight_color();
-        }
-        else
-        {
+        } else {
             static Inkscape::Preferences *prefs = Inkscape::Preferences::get();
             return prefs->getInt("/tools/nodes/highlight_color", 0xff0000ff);
         }

@@ -17,6 +17,12 @@
 #include <map>
 #include "sp-lpe-item.h"
 
+// A list of default highlight colours to use when one isn't set.
+const unsigned int default_highlights[8] = {
+    0xad7fa8ff, 0x729fcfff, 0xbabdb6ff, 0xdb2828ff,
+    0x73b92fff, 0xedd400ff, 0xfcaf3eff, 0xbabdb6ff,
+};
+
 namespace Inkscape {
 
 class Drawing;
@@ -89,6 +95,8 @@ public:
     void snappoints(std::vector<Inkscape::SnapCandidatePoint> &p, Inkscape::SnapPreferences const *snapprefs) const override;
 
     void update_patheffect(bool write) override;
+
+    guint32 highlight_color() const override;
 };
 
 
