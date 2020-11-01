@@ -69,7 +69,7 @@ enum class HistoryType
 struct History
 {
     HistoryType history_type;
-    Glib::ustring data;
+    std::string data;
 };
 
 class CPHistoryXML
@@ -78,24 +78,29 @@ public:
     // constructors, asssignment, destructor
     CPHistoryXML();
 
+    // Handy wrappers for code clearity
     void add_action(const std::string &full_action_name);
 
     void add_import(const std::string &uri);
     void add_open(const std::string &uri);
 
-    // Remember parameter of action
+    // Remember parameter for action
     void add_action_parameter(const std::string &full_action_name, const std::string &param);
 
-    std::vector<History> get_operation_history();
+    // To construct _CPHistory
+    std::vector<History> get_operation_history() const;
+    // To get parameter history when an action is selected, LIFO stack like so more recent first
+    std::vector<std::string> get_action_parameter_history(const std::string& full_action_name) const;
 
 private:
-    void save();
+    void save() const;
 
     void add_operation(const HistoryType history_type, const std::string &data);
 
     const std::string _file_path;
 
     Inkscape::XML::Document *_xml_doc;
+    // handy for xml doc child
     Inkscape::XML::Node *_operations;
     Inkscape::XML::Node *_params;
 };

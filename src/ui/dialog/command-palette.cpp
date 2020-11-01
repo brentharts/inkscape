@@ -1017,8 +1017,46 @@ void CPHistoryXML::add_action_parameter(const std::string &full_action_name, con
     Inkscape::GC::release(action_node);
     Inkscape::GC::release(parameter_node);
 }
+std::vector<History> CPHistoryXML::get_operation_history() const
+{
+    std::vector<History> history;
+    for (auto operation_iter = _operations->firstChild(); operation_iter; operation_iter->next()) {
+        const std::string operation_type_name = operation_iter->name();
 
-void CPHistoryXML::save()
+        HistoryType ht;
+        if (operation_type_name == "action") {
+            ht = HistoryType::ACTION;
+        } else if (operation_type_name == "import") {
+            ht = HistoryType::IMPORT_FILE;
+        } else if (operation_type_name == "open") {
+            ht = HistoryType::OPEN_FILE;
+        } else {
+            // unknown history_type
+            continue;
+        }
+        history.emplace_back(ht, operation_iter->content());
+    }
+    return history;
+}
+
+std::vector<std::string> CPHistoryXML::get_action_parameter_history(const std::string &full_action_name) const
+{
+    std::vector<std::string> params;
+    for (auto action_iter = _params->firstChild(); action_iter; action_iter = action_iter->prev()) {
+        // If this action's node already exists
+        if (full_action_name == action_iter->attribute("name")) {
+            // lastChild and prev for LIFO order
+            for (auto param_iter = _params->lastChild(); param_iter; param_iter = param_iter->prev()) {
+                params.emplace_back(param_iter->content());
+            }
+            return params;
+        }
+    }
+    // action not used previously so no params;
+    return {};
+}
+
+void CPHistoryXML::save() const
 {
     sp_repr_save_file(_xml_doc, _file_path.c_str());
 }
