@@ -19,7 +19,7 @@ namespace Inkscape {
 namespace UI {
 namespace Widget {
 
-class ImageToggler : public Gtk::CellRendererPixbuf {
+class ImageToggler : public Gtk::CellRenderer {
 public:
     ImageToggler( char const *on, char const *off);
     ~ImageToggler() override = default;;
@@ -56,6 +56,7 @@ protected:
 
 
 private:
+    int _size;
     Glib::ustring _pixOnName;
     Glib::ustring _pixOffName;
 
