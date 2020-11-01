@@ -162,13 +162,11 @@ public:
 
     ~ObjectWatcher() override {
         node->removeObserver(*this);
-        if (bool(row_ref) && row_ref.get_path()) {
-            auto path = row_ref.get_path();
-            if (path) {
-                auto iter = panel->_store->get_iter(path);
-                if(iter) {
-                    panel->_store->erase(iter);
-                }
+        Gtk::TreeModel::Path path;
+        if (bool(row_ref) && (path = row_ref.get_path())) {
+            auto iter = panel->_store->get_iter(path);
+            if(iter) {
+                panel->_store->erase(iter);
             }
         }
         child_watchers.clear();
@@ -221,10 +219,10 @@ public:
         if (!child_iter)
             return; // This means the child was never added, probably not an SPItem.
         auto sibling_iter = getChildIter(sibling);
-        auto child_const = const_cast<GtkTreeIter*>(child_iter->get_gobject_if_not_end());
+        auto child_const = const_cast<GtkTreeIter*>(child_iter.get_gobject_if_not_end());
         GtkTreeIter* sibling_const = nullptr;
         if (sibling_iter) {
-            sibling_const = const_cast<GtkTreeIter*>(sibling_iter->get_gobject_if_not_end());
+            sibling_const = const_cast<GtkTreeIter*>(sibling_iter.get_gobject_if_not_end());
         }
         // Gtkmm can move to before, but not move to 'after'
         gtk_tree_store_move_after(panel->_store->gobj(), child_const, sibling_const);
@@ -237,8 +235,9 @@ public:
      */
     Gtk::TreeNodeChildren getParentIter()
     {
-        if (bool(row_ref) && row_ref.get_path()) {
-            const Gtk::TreeRow row = **panel->_store->get_iter(row_ref.get_path());
+        Gtk::TreeModel::Path path;
+        if (row_ref && (path = row_ref.get_path())) {
+            const Gtk::TreeRow row = **panel->_store->get_iter(path);
             return row->children();
         }
         return panel->_store->children();
@@ -250,15 +249,16 @@ public:
      * @param child - The child object to find in this branch
      * @returns Gtk TreeRow for the child, or nullptr if not found
      */
-    const Gtk::TreeRow* getChildIter(SPObject *child)
+    const Gtk::TreeRow getChildIter(SPObject *child)
     {
+        Gtk::TreeRow ret;
         for (auto &iter : getParentIter()) {
             Gtk::TreeModel::Row row = *iter;
             if(row[panel->_model->_colObject] == child) {
-                return &(*iter);
+                ret = *iter;
             }
         }
-        return nullptr;
+        return ret;
     }
     /**
      * Get the object from the node.
