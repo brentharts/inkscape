@@ -376,15 +376,14 @@ Inkscape::XML::Node *SPGenericEllipse::write(Inkscape::XML::Document *xml_doc, I
 
 const char *SPGenericEllipse::typeName() const
 {
-    switch ( type ) {
+    switch (type) {
         case SP_GENERIC_ELLIPSE_UNDEFINED:
         case SP_GENERIC_ELLIPSE_ARC:
             return "arc";
         case SP_GENERIC_ELLIPSE_CIRCLE:
-            return "circle";
         case SP_GENERIC_ELLIPSE_ELLIPSE:
         default:
-            return "ellipse";
+            return "circle"; //
     }
 }
 
