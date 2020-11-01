@@ -66,6 +66,40 @@ enum class HistoryType
     IMPORT_FILE,
 };
 
+struct History
+{
+    HistoryType history_type;
+    Glib::ustring data;
+};
+
+class CPHistoryXML
+{
+public:
+    // constructors, asssignment, destructor
+    CPHistoryXML();
+
+    void add_action(const std::string &full_action_name);
+
+    void add_import(const std::string &uri);
+    void add_open(const std::string &uri);
+
+    // Remember parameter of action
+    void add_action_parameter(const std::string &full_action_name, const std::string &param);
+
+    std::vector<History> get_operation_history();
+
+private:
+    void save();
+
+    void add_operation(const HistoryType history_type, const std::string &data);
+
+    const std::string _file_path;
+
+    Inkscape::XML::Document *_xml_doc;
+    Inkscape::XML::Node *_operations;
+    Inkscape::XML::Node *_params;
+};
+
 class CommandPalette
 {
 public: // API
@@ -116,7 +150,7 @@ private: // Signal handlers
     void show_suggestions();
 
     void on_row_activated(Gtk::ListBoxRow *activated_row);
-    void on_history_selection_changed(Gtk::ListBoxRow* lb);
+    void on_history_selection_changed(Gtk::ListBoxRow *lb);
 
     bool operate_recent_file(Glib::ustring const &uri, bool const import);
 

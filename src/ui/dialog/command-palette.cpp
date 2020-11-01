@@ -46,6 +46,7 @@
 
 #include "actions/actions-extra-data.h"
 #include "file.h"
+#include "gc-anchored.h"
 #include "inkscape-application.h"
 #include "inkscape-window.h"
 #include "inkscape.h"
@@ -54,6 +55,7 @@
 #include "preferences.h"
 #include "ui/interface.h"
 #include "verbs.h"
+#include "xml/repr.h"
 
 namespace Inkscape {
 namespace UI {
@@ -155,7 +157,7 @@ CommandPalette::CommandPalette()
 
     // History managment
     {
-        auto file_name = Inkscape::IO::Resource::profile_path("cp.history");
+        auto file_name = Inkscape::IO::Resource::profile_path("cphistory.xml");
         auto file = Gio::File::create_for_path(file_name);
         if (file->query_exists()) {
             char *contents = nullptr;
@@ -922,6 +924,126 @@ std::vector<CommandPalette::ActionPtrName> CommandPalette::list_all_actions()
 Gtk::Box *CommandPalette::get_base_widget()
 {
     return _CPBase;
+}
+
+// CPHistoryXML ---------------------------------------------------------------
+CPHistoryXML::CPHistoryXML()
+    : _file_path(IO::Resource::profile_path("cphistory.xml"))
+{
+    _xml_doc = sp_repr_read_file(_file_path.c_str(), nullptr);
+    if (not _xml_doc) {
+        _xml_doc = sp_repr_document_new("cphistory");
+
+        /* STRUCTURE EXAMPLE ------------------ Illustration 1
+        <cphistory>
+            <operations>
+                <action> full.action_name </action>
+                <import> uri </import>
+                <export> uri </export>
+            </operations>
+            <params>
+                <action name="app.transfor-rotate">
+                    <param> 30 </param>
+                    <param> 23.5 </param>
+                </action>
+            </params>
+        </cphistory>
+        */
+
+        // Just a pointer, we don't own it, don't free/release/delete
+        auto root = _xml_doc->root();
+
+        // add operation history in this element
+        auto operations = _xml_doc->createElement("operations");
+        root->appendChild(operations);
+
+        // add param history in this element
+        auto params = _xml_doc->createElement("params");
+        root->appendChild(params);
+
+        // This was created by allocated
+        Inkscape::GC::release(operations);
+        Inkscape::GC::release(params);
+
+        // only save if created new
+        save();
+    }
+
+    // Only two children :) check and ensure Illustration 1
+    _operations = _xml_doc->firstChild();
+    _params = _xml_doc->lastChild();
+}
+
+void CPHistoryXML::add_action(const std::string &full_action_name)
+{
+    add_operation(HistoryType::ACTION, full_action_name);
+}
+
+void CPHistoryXML::add_import(const std::string &uri)
+{
+    add_operation(HistoryType::IMPORT_FILE, uri);
+}
+void CPHistoryXML::add_open(const std::string &uri)
+{
+    add_operation(HistoryType::OPEN_FILE, uri);
+}
+
+void CPHistoryXML::add_action_parameter(const std::string &full_action_name, const std::string &param)
+{
+    const auto parameter_node = _xml_doc->createElement("param");
+    parameter_node->setContent(param.c_str());
+
+    for (auto action_iter = _params->firstChild(); action_iter; action_iter = action_iter->next()) {
+        // If this action's node already exists
+        if (full_action_name == action_iter->attribute("name")) {
+            // If the last parameter was the same don't do anything
+            if (action_iter->lastChild()->content() == param) {
+                Inkscape::GC::release(parameter_node);
+                return;
+            }
+
+            // If last current than parameter is different, add current
+            action_iter->appendChild(parameter_node);
+            Inkscape::GC::release(parameter_node);
+            return;
+        }
+    }
+
+    // only encountered when the actions element doesn't already exists,so we create that action's element
+    const auto action_node = _xml_doc->createElement("action");
+    action_node->setAttribute("name", full_action_name.c_str());
+    action_node->appendChild(parameter_node);
+
+    Inkscape::GC::release(action_node);
+    Inkscape::GC::release(parameter_node);
+}
+
+void CPHistoryXML::save()
+{
+    sp_repr_save_file(_xml_doc, _file_path.c_str());
+}
+
+void CPHistoryXML::add_operation(const HistoryType history_type, const std::string &data)
+{
+    std::string operation_type_name;
+    switch (history_type) {
+        // see Illustration 1
+        case HistoryType::ACTION:
+            operation_type_name = "action";
+        case HistoryType::IMPORT_FILE:
+            operation_type_name = "import";
+        case HistoryType::OPEN_FILE:
+            operation_type_name = "open";
+        default:
+            return;
+    }
+    auto operation_to_add = _xml_doc->createElement(operation_type_name.c_str());
+    operation_to_add->setContent(data.c_str());
+
+    _operations->appendChild(operation_to_add);
+    Inkscape::GC::release(operation_to_add);
+
+    save();
 }
 
 } // namespace Dialog
