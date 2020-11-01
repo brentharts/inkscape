@@ -59,6 +59,7 @@
 #include "ui/widget/imagetoggler.h"
 #include "ui/widget/insertordericon.h"
 #include "ui/widget/layertypeicon.h"
+#include "ui/widget/shapeicon.h"
 
 #include "xml/node-observer.h"
 
@@ -69,30 +70,6 @@ namespace UI {
 namespace Dialog {
 
 using Inkscape::XML::Node;
-
-/* Rendering functions for custom cell renderers */
-void CellRendererItemIcon::render_vfunc(const Cairo::RefPtr<Cairo::Context>& cr, 
-                                      Gtk::Widget& widget,
-                                      const Gdk::Rectangle& background_area,
-                                      const Gdk::Rectangle& cell_area,
-                                      Gtk::CellRendererState flags)
-{
-    std::string shape_type = _property_shape_type.get_value();
-    std::string highlight = SPColor(_property_color.get_value()).toString();
-    std::string cache_id = shape_type + "-" + highlight;
-
-    // if the icon isn't cached, render it to a pixbuf
-    if ( !_icon_cache[cache_id] ) { 
-        _property_icon = sp_get_shape_icon(shape_type, Gdk::RGBA(highlight), 16);
-        property_pixbuf() = _icon_cache[cache_id] = _property_icon.get_value();
-    } else {
-        property_pixbuf() = _icon_cache[cache_id];
-    }
-  
-    Gtk::CellRendererPixbuf::render_vfunc(cr, widget, background_area,
-                                          cell_area, flags);
-}
-
 
 class ObjectsPanel::ModelColumns : public Gtk::TreeModel::ColumnRecord
 {
@@ -169,34 +146,30 @@ public:
      */
     ObjectWatcher(ObjectsPanel* panel, SPObject* obj, Gtk::TreeRow *row) :
         panel(panel),
-        row_ref(nullptr),
+        row_ref(),
         node(obj->getRepr())
     {
         if(row != nullptr) {
             auto path = panel->_store->get_path(*row);
-            row_ref = new Gtk::TreeModel::RowReference(panel->_store, path);
+            row_ref = Gtk::TreeModel::RowReference(panel->_store, path);
             updateRowInfo();
         }
         node->addObserver(*this);
         for (auto& child: obj->children) {
-            // Check the object is a visible SPItem
-            if (dynamic_cast<SPItem *>(&child)) {
-                addChild(&child);
-            }
+            addChild(*(child.getRepr()));
         }
     }
 
     ~ObjectWatcher() override {
         node->removeObserver(*this);
-        if (row_ref) {
-            auto path = row_ref->get_path();
+        if (bool(row_ref) && row_ref.get_path()) {
+            auto path = row_ref.get_path();
             if (path) {
                 auto iter = panel->_store->get_iter(path);
                 if(iter) {
                     panel->_store->erase(iter);
                 }
             }
-            row_ref = nullptr;
         }
         child_watchers.clear();
     }
@@ -207,7 +180,7 @@ public:
      */
     void updateRowInfo() {
         auto item = dynamic_cast<SPItem *>(getObject(node));
-        auto row = *panel->_store->get_iter(row_ref->get_path());
+        auto row = *panel->_store->get_iter(row_ref.get_path());
 
         if (item) {
             gchar const * label = item->label() ? item->label() : item->getId();
@@ -225,10 +198,14 @@ public:
      *
      * @param child - SPObject to be added
      */
-    void addChild(SPObject *child)
+    void addChild(Node &node)
     {
+        auto obj = getObject(&node);
+        if (!obj || !dynamic_cast<SPItem *>(obj))
+            return; // Object must be a viable SPItem.
         Gtk::TreeModel::Row row = *(panel->_store->append(getParentIter()));
-        child_watchers.emplace_back(new ObjectWatcher(panel, child, &row));
+        auto watcher = new ObjectWatcher(panel, obj, &row);
+        child_watchers.insert(std::make_pair(&node, watcher));
     }
 
     /**
@@ -241,6 +218,8 @@ public:
     void moveChild(SPObject *child, SPObject *sibling)
     {
         auto child_iter = getChildIter(child);
+        if (!child_iter)
+            return; // This means the child was never added, probably not an SPItem.
         auto sibling_iter = getChildIter(sibling);
         auto child_const = const_cast<GtkTreeIter*>(child_iter->get_gobject_if_not_end());
         GtkTreeIter* sibling_const = nullptr;
@@ -258,8 +237,8 @@ public:
      */
     Gtk::TreeNodeChildren getParentIter()
     {
-        if (row_ref) {
-            const Gtk::TreeRow row = **panel->_store->get_iter(row_ref->get_path());
+        if (bool(row_ref) && row_ref.get_path()) {
+            const Gtk::TreeRow row = **panel->_store->get_iter(row_ref.get_path());
             return row->children();
         }
         return panel->_store->children();
@@ -282,11 +261,11 @@ public:
         return nullptr;
     }
     /**
-      * Get the object from the node.
-      *
-      * @param node - XML Node involved in the signal.
-      * @returns SPObject matching the node, returns nullptr if not found.
-      */
+     * Get the object from the node.
+     *
+     * @param node - XML Node involved in the signal.
+     * @returns SPObject matching the node, returns nullptr if not found.
+     */
     SPObject *getObject(Node *node) {
         if (node != nullptr)
             return panel->_document->getObjectByRepr(node);
@@ -295,25 +274,12 @@ public:
 
     void notifyChildAdded( Node &node, Node &child, Node *prev ) override
     {
-        addChild(getObject(&child));
+        addChild(child);
         moveChild(getObject(&child), getObject(prev));
     }
     void notifyChildRemoved( Node &/*node*/, Node &child, Node* /*prev*/ ) override
     {
-        auto iter = child_watchers.begin();
-        while (iter != child_watchers.end()) {
-            // child doesn't have a valid SPObject, so comparing Nodes
-            auto node1 = (*iter)->node;
-            auto node2 = &child;
-            if (!node1 || !node2) continue;
-            if(node1 == node2) {
-                // It's VERY important this is done so ghost attribute signals are
-                // stopped before they are emitted and cause crashes (object is gone)
-                child_watchers.erase(iter);
-            } else {
-                iter++;
-            }
-        }
+        child_watchers.erase(&child);
     }
     void notifyChildOrderChanged( Node &parent, Node &child, Node */*old_prev*/, Node *new_prev ) override
     {
@@ -322,11 +288,12 @@ public:
     void notifyContentChanged( Node &/*node*/, Util::ptr_shared /*old_content*/, Util::ptr_shared /*new_content*/ ) override {}
     void notifyAttributeChanged( Node &node, GQuark name, Util::ptr_shared /*old_value*/, Util::ptr_shared /*new_value*/ ) override {
         // Almost anything could change the icon, so update upon any change.
+        // XXX This causes way too many updates, each attribute touched in a single operation.
         updateRowInfo();
     }
 
-    std::vector<std::unique_ptr<ObjectWatcher>> child_watchers;
-    Gtk::TreeModel::RowReference* row_ref;
+    std::unordered_map<Node const*, std::unique_ptr<ObjectWatcher>> child_watchers;
+    Gtk::TreeModel::RowReference row_ref;
     ObjectsPanel* panel;
     Node* node;
 };
@@ -1313,16 +1280,16 @@ ObjectsPanel::ObjectsPanel() :
     //Label
     auto name_column = Gtk::manage(new Gtk::TreeViewColumn());
     _text_renderer = Gtk::manage(new Gtk::CellRendererText());
-    _icon_renderer = Gtk::manage(new CellRendererItemIcon());
-    _icon_renderer->property_xpad() = 2;
-    _icon_renderer->property_width() = 24;
+    auto icon_renderer = Gtk::manage(new Inkscape::UI::Widget::CellRendererItemIcon());
+    icon_renderer->property_xpad() = 2;
+    icon_renderer->property_width() = 24;
     _tree.append_column(*name_column);
     name_column->set_expand(true);
-    name_column->pack_start(*_icon_renderer, false);
+    name_column->pack_start(*icon_renderer, false);
     name_column->pack_start(*_text_renderer, true);
     name_column->add_attribute(_text_renderer->property_text(), _model->_colLabel);
-    name_column->add_attribute(_icon_renderer->property_shape_type(), _model->_colType);
-    name_column->add_attribute(_icon_renderer->property_color(), _model->_colColor);
+    name_column->add_attribute(icon_renderer->property_shape_type(), _model->_colType);
+    name_column->add_attribute(icon_renderer->property_color(), _model->_colColor);
 
     //Visible
     auto *eyeRenderer = Gtk::manage( new Inkscape::UI::Widget::ImageToggler(INKSCAPE_ICON("object-visible"), INKSCAPE_ICON("object-hidden")) );

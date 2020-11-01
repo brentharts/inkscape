@@ -34,38 +34,6 @@ class SelectedColor;
 
 namespace Dialog {
 
-/* Custom cell renderer for type icon */
-class CellRendererItemIcon : public Gtk::CellRendererPixbuf {
-public:
-  
-    CellRendererItemIcon() :
-        Glib::ObjectBase(typeid(CellRendererPixbuf)),
-        Gtk::CellRendererPixbuf(),
-        _property_icon(*this, "icon", Glib::RefPtr<Gdk::Pixbuf>(nullptr)),
-        _property_shape_type(*this, "shape_type", "unknown"),
-        _property_color(*this, "color", 0)
-    { } 
-     
-    Glib::PropertyProxy<std::string>
-        property_shape_type() { return _property_shape_type.get_proxy(); }
-    Glib::PropertyProxy<unsigned int>
-        property_color() { return _property_color.get_proxy(); }
-  
-protected:
-    void render_vfunc(const Cairo::RefPtr<Cairo::Context>& cr, 
-                      Gtk::Widget& widget,
-                      const Gdk::Rectangle& background_area,
-                      const Gdk::Rectangle& cell_area,
-                      Gtk::CellRendererState flags) override;
-private:
-  
-    Glib::Property<Glib::RefPtr<Gdk::Pixbuf> > _property_icon;
-    Glib::Property<std::string> _property_shape_type;
-    Glib::Property<unsigned int> _property_color;
-    std::map<const std::string, Glib::RefPtr<Gdk::Pixbuf> > _icon_cache;
-  
-};
-
 /**
  * A panel that displays objects.
  */
@@ -155,7 +123,6 @@ private:
     std::vector<Gtk::Widget*> _watchingNonBottom;
 
     Gtk::TreeView _tree;
-    CellRendererItemIcon *_icon_renderer;
     Gtk::CellRendererText *_text_renderer;
     Gtk::TreeView::Column *_name_column;
     Gtk::Box _buttonsRow;
