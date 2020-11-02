@@ -70,6 +70,11 @@ struct History
 {
     HistoryType history_type;
     std::string data;
+
+    History(HistoryType ht, std::string &&data)
+        : history_type(ht)
+        , data(data)
+    {}
 };
 
 class CPHistoryXML
@@ -77,6 +82,7 @@ class CPHistoryXML
 public:
     // constructors, asssignment, destructor
     CPHistoryXML();
+    ~CPHistoryXML();
 
     // Handy wrappers for code clearity
     void add_action(const std::string &full_action_name);
@@ -87,15 +93,19 @@ public:
     // Remember parameter for action
     void add_action_parameter(const std::string &full_action_name, const std::string &param);
 
+    std::optional<History> get_last_operation();
+
     // To construct _CPHistory
     std::vector<History> get_operation_history() const;
     // To get parameter history when an action is selected, LIFO stack like so more recent first
-    std::vector<std::string> get_action_parameter_history(const std::string& full_action_name) const;
+    std::vector<std::string> get_action_parameter_history(const std::string &full_action_name) const;
 
 private:
     void save() const;
 
     void add_operation(const HistoryType history_type, const std::string &data);
+
+    static std::optional<HistoryType> _get_operation_type(Inkscape::XML::Node *operation);
 
     const std::string _file_path;
 
@@ -204,7 +214,7 @@ private: // variables
     bool _is_open = false;
 
     // History
-    Glib::RefPtr<Gio::FileOutputStream> _history_file_output_stream;
+    CPHistoryXML _history_xml;
     /**
      * Remember the mode we are in helps in unecessary signal disconnection and reconnection
      * Used by set_mode()

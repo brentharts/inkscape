@@ -38,6 +38,7 @@
 #include <iostream>
 #include <iterator>
 #include <memory>
+#include <optional>
 #include <ostream>
 #include <readline/history.h>
 #include <sigc++/adaptors/bind.h>
@@ -150,42 +151,30 @@ CommandPalette::CommandPalette()
                 }
 
                 append_recent_file_operation(recent_file->get_uri_display(), true, false); // open
-                append_recent_file_operation(recent_file->get_uri_display(), true, true);
+                append_recent_file_operation(recent_file->get_uri_display(), true, true);  // import
             }
         }
     }
 
     // History managment
     {
-        auto file_name = Inkscape::IO::Resource::profile_path("cphistory.xml");
-        auto file = Gio::File::create_for_path(file_name);
-        if (file->query_exists()) {
-            char *contents = nullptr;
-            gsize length = 0;
+        const auto history = _history_xml.get_operation_history();
 
-            file->load_contents(contents, length);
-            // length is set by the function ignoring last '\0' hence contents[length] is '\0'
-
-            if (length != 0 and contents != nullptr) {
-                // most recent first
-                std::istringstream lines(contents);
-                for (std::string line; std::getline(lines, line, '\n');) {
-                    auto type = line.substr(0, line.find(':'));
-                    auto data = line.substr(line.find(':') + 1);
-
-                    if (type == "ACTION") {
-                        generate_action_operation(get_action_ptr_name(data), false);
-                    } else if (type == "OPEN_FILE") {
-                        append_recent_file_operation(data, false, false);
-                    } else if (type == "IMPORT_FILE") {
-                        append_recent_file_operation(data, false, true);
-                    }
-                }
+        for (const auto &page : history) {
+            switch (page.history_type) {
+                case HistoryType::ACTION:
+                    generate_action_operation(get_action_ptr_name(page.data), false);
+                    break;
+                case HistoryType::IMPORT_FILE:
+                    append_recent_file_operation(page.data, false, true);
+                    break;
+                case HistoryType::OPEN_FILE:
+                    append_recent_file_operation(page.data, false, false);
+                    break;
+                default:
+                    continue;
             }
-
-            g_free(contents);
         }
-        _history_file_output_stream = file->append_to();
     }
     _CPSuggestions->signal_row_activated().connect(sigc::mem_fun(*this, &CommandPalette::on_row_activated));
 }
@@ -490,6 +479,7 @@ bool CommandPalette::on_key_press_cpfilter_input_mode(GdkEventKey *evt, const Ac
             [[fallthrough]];
         case GDK_KEY_Linefeed:
             execute_action(action_ptr_name, _CPFilter->get_text());
+            _history_xml.add_action_parameter(action_ptr_name.second, _CPFilter->get_text());
             close();
             return true;
     }
@@ -542,27 +532,30 @@ bool CommandPalette::operate_recent_file(Glib::ustring const &uri, bool const im
     bool write_to_history = true;
 
     // if the last element in CPHistory is already this, don't update history file
-    if (_CPHistory->get_children().empty()) {
-        const auto last_of_history = _CPHistory->get_row_at_index(_CPHistory->get_children().size() - 1);
-
-        // picks from action button contains either import or export or full_action_name
-        const auto last_operation_import_export_indicator = get_full_action_name(last_of_history)->get_label();
-        // uri is stored in description field
-        const auto last_description = get_name_desc(last_of_history).second->get_text();
-        if (last_description == uri) {
-            // uri is the same as last operation
-            // we only want to store to history, if last operation was different from the one we are going to execute
-            // so we only want to store a import if last operation was an export and vice-versa, for the same file
-            write_to_history = not import xor last_operation_import_export_indicator == "import";
+    if (not _CPHistory->get_children().empty()) {
+        if (const auto last_operation = _history_xml.get_last_operation(); last_operation.has_value()) {
+            if (uri == last_operation.value().data) {
+                bool last_operation_was_import = last_operation.value().history_type == HistoryType::IMPORT_FILE;
+                // As previous uri is verfied to be the same as current uri we can write to history if current and
+                // previous operation are not the same.
+                // For example: if we want to import and previous operation was import (with same uri) we should not
+                // write ot history, similarly if current is open and previous was open to then dont WTH.
+                // But in case previous operation was open and current is import and vice-versa we should write to
+                // history.
+                if (not(import xor last_operation_was_import)) {
+                    write_to_history = false;
+                }
+            }
         }
     }
+
     if (import) {
         prefs->setBool("/options/onimport", true);
         file_import(SP_ACTIVE_DOCUMENT, uri, nullptr);
         prefs->setBool("/options/onimport", true);
 
         if (write_to_history) {
-            _history_file_output_stream->write("IMPORT_FILE:" + uri + "\n");
+            _history_xml.add_import(uri);
         }
 
         close();
@@ -574,12 +567,12 @@ bool CommandPalette::operate_recent_file(Glib::ustring const &uri, bool const im
     Glib::RefPtr<Gio::File> file = Gio::File::create_for_path(uri);
     app->create_window(file);
     if (write_to_history) {
-        _history_file_output_stream->write("OPEN_FILE:" + uri + "\n");
+        _history_xml.add_open(uri);
     }
 
     close();
     return true;
-}
+} // namespace Dialog
 
 /**
  * Maybe replaced by: Temporary arrangement may be replaced by snippets
@@ -594,7 +587,7 @@ bool CommandPalette::ask_action_parameter(const ActionPtrName &action_ptr_name)
         const auto last_full_action_name = get_full_action_name(last_of_history)->get_label();
         if (last_full_action_name == action_ptr_name.second) {
             // last action is the same
-            _history_file_output_stream->write("ACTION:" + action_ptr_name.second + "\n");
+            _history_xml.add_action(action_ptr_name.second);
         }
     }
 
@@ -974,6 +967,10 @@ CPHistoryXML::CPHistoryXML()
     _params = _xml_doc->lastChild();
 }
 
+CPHistoryXML::~CPHistoryXML()
+{
+    Inkscape::GC::release(_xml_doc);
+}
 void CPHistoryXML::add_action(const std::string &full_action_name)
 {
     add_operation(HistoryType::ACTION, full_action_name);
@@ -1017,24 +1014,25 @@ void CPHistoryXML::add_action_parameter(const std::string &full_action_name, con
     Inkscape::GC::release(action_node);
     Inkscape::GC::release(parameter_node);
 }
+
+std::optional<History> CPHistoryXML::get_last_operation()
+{
+    auto last_child = _operations->lastChild();
+    if (last_child) {
+        if (const auto operation_type = _get_operation_type(last_child); operation_type.has_value()) {
+            return History{operation_type.value(), last_child->content()};
+        }
+    }
+    return std::nullopt;
+}
 std::vector<History> CPHistoryXML::get_operation_history() const
 {
+    // TODO: add max history
     std::vector<History> history;
     for (auto operation_iter = _operations->firstChild(); operation_iter; operation_iter->next()) {
-        const std::string operation_type_name = operation_iter->name();
-
-        HistoryType ht;
-        if (operation_type_name == "action") {
-            ht = HistoryType::ACTION;
-        } else if (operation_type_name == "import") {
-            ht = HistoryType::IMPORT_FILE;
-        } else if (operation_type_name == "open") {
-            ht = HistoryType::OPEN_FILE;
-        } else {
-            // unknown history_type
-            continue;
+        if (const auto operation_type = _get_operation_type(operation_iter); operation_type.has_value()) {
+            history.emplace_back(operation_type.value(), operation_iter->content());
         }
-        history.emplace_back(ht, operation_iter->content());
     }
     return history;
 }
@@ -1082,6 +1080,21 @@ void CPHistoryXML::add_operation(const HistoryType history_type, const std::stri
     Inkscape::GC::release(operation_to_add);
 
     save();
+}
+std::optional<HistoryType> CPHistoryXML::_get_operation_type(Inkscape::XML::Node *operation)
+{
+    const std::string operation_type_name = operation->name();
+
+    if (operation_type_name == "action") {
+        return HistoryType::ACTION;
+    } else if (operation_type_name == "import") {
+        return HistoryType::IMPORT_FILE;
+    } else if (operation_type_name == "open") {
+        return HistoryType::OPEN_FILE;
+    } else {
+        return std::nullopt;
+        // unknown HistoryType
+    }
 }
 
 } // namespace Dialog
