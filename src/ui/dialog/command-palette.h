@@ -182,7 +182,7 @@ private: // Signal handlers
      */
     bool ask_action_parameter(const ActionPtrName &action);
     static ActionPtrName get_action_ptr_name(const Glib::ustring &full_action_name);
-    static bool execute_action(const ActionPtrName &action, const Glib::ustring &value);
+    bool execute_action(const ActionPtrName &action, const Glib::ustring &value);
 
     static TypeOfVariant get_action_variant_type(const ActionPtr &action_ptr);
 

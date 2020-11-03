@@ -479,7 +479,6 @@ bool CommandPalette::on_key_press_cpfilter_input_mode(GdkEventKey *evt, const Ac
             [[fallthrough]];
         case GDK_KEY_Linefeed:
             execute_action(action_ptr_name, _CPFilter->get_text());
-            _history_xml.add_action_parameter(action_ptr_name.second, _CPFilter->get_text());
             close();
             return true;
     }
@@ -582,13 +581,19 @@ bool CommandPalette::operate_recent_file(Glib::ustring const &uri, bool const im
 bool CommandPalette::ask_action_parameter(const ActionPtrName &action_ptr_name)
 {
     // Avoid writing same last action again
-    if (_CPHistory->get_children().empty()) {
-        const auto last_of_history = _CPHistory->get_row_at_index(_CPHistory->get_children().size() - 1);
-        const auto last_full_action_name = get_full_action_name(last_of_history)->get_label();
-        if (last_full_action_name == action_ptr_name.second) {
-            // last action is the same
-            _history_xml.add_action(action_ptr_name.second);
+    // TODO: Merge the if else parts
+    if (const auto last_of_history = _history_xml.get_last_operation(); last_of_history.has_value()) {
+        // operation history is not empty
+        const auto last_full_action_name = last_of_history.value().data;
+        if (last_full_action_name != action_ptr_name.second) {
+            // last action is not the same so write this one
+            _history_xml.add_action(action_ptr_name.second);   // to history file
+            generate_action_operation(action_ptr_name, false); // to _CPHistory
         }
+    } else {
+        // History is empty so no need to check
+        _history_xml.add_action(action_ptr_name.second);   // to history file
+        generate_action_operation(action_ptr_name, false); // to _CPHistory
     }
 
     // Checking if action has handleable parameter type
@@ -781,6 +786,9 @@ CommandPalette::ActionPtrName CommandPalette::get_action_ptr_name(const Glib::us
 
 bool CommandPalette::execute_action(const ActionPtrName &action_ptr_name, const Glib::ustring &value)
 {
+    if (not value.empty()) {
+        _history_xml.add_action_parameter(action_ptr_name.second, value);
+    }
     auto [action_ptr, action_name] = action_ptr_name;
 
     switch (get_action_variant_type(action_ptr)) {
@@ -963,8 +971,8 @@ CPHistoryXML::CPHistoryXML()
     }
 
     // Only two children :) check and ensure Illustration 1
-    _operations = _xml_doc->firstChild();
-    _params = _xml_doc->lastChild();
+    _operations = _xml_doc->root()->firstChild();
+    _params = _xml_doc->root()->lastChild();
 }
 
 CPHistoryXML::~CPHistoryXML()
@@ -987,14 +995,29 @@ void CPHistoryXML::add_open(const std::string &uri)
 
 void CPHistoryXML::add_action_parameter(const std::string &full_action_name, const std::string &param)
 {
+    /* Creates
+     *  <params>
+     * +1 <action name="full.action-name">
+     * +    <param>30</param>
+     * +    <param>60</param>
+     * +    <param>90</param>
+     * +1 <action name="full.action-name">
+     *   <params>
+     *
+     * + : generally creates
+     * +1: creates once
+     */
     const auto parameter_node = _xml_doc->createElement("param");
-    parameter_node->setContent(param.c_str());
+    const auto parameter_text = _xml_doc->createTextNode(param.c_str());
+
+    parameter_node->appendChild(parameter_text);
+    Inkscape::GC::release(parameter_text);
 
     for (auto action_iter = _params->firstChild(); action_iter; action_iter = action_iter->next()) {
         // If this action's node already exists
         if (full_action_name == action_iter->attribute("name")) {
-            // If the last parameter was the same don't do anything
-            if (action_iter->lastChild()->content() == param) {
+            // If the last parameter was the same don't do anything, inner text is also a node hence 2 times last child
+            if (action_iter->lastChild()->lastChild()->content() == param) {
                 Inkscape::GC::release(parameter_node);
                 return;
             }
@@ -1002,6 +1025,8 @@ void CPHistoryXML::add_action_parameter(const std::string &full_action_name, con
             // If last current than parameter is different, add current
             action_iter->appendChild(parameter_node);
             Inkscape::GC::release(parameter_node);
+
+            save();
             return;
         }
     }
@@ -1010,6 +1035,9 @@ void CPHistoryXML::add_action_parameter(const std::string &full_action_name, con
     const auto action_node = _xml_doc->createElement("action");
     action_node->setAttribute("name", full_action_name.c_str());
     action_node->appendChild(parameter_node);
+
+    _params->appendChild(action_node);
+    save();
 
     Inkscape::GC::release(action_node);
     Inkscape::GC::release(parameter_node);
@@ -1020,18 +1048,19 @@ std::optional<History> CPHistoryXML::get_last_operation()
     auto last_child = _operations->lastChild();
     if (last_child) {
         if (const auto operation_type = _get_operation_type(last_child); operation_type.has_value()) {
-            return History{operation_type.value(), last_child->content()};
+            // inner text is a text Node thus last child
+            return History{operation_type.value(), last_child->lastChild()->content()};
         }
     }
     return std::nullopt;
 }
 std::vector<History> CPHistoryXML::get_operation_history() const
 {
-    // TODO: add max history
+    // TODO: add max items in history
     std::vector<History> history;
-    for (auto operation_iter = _operations->firstChild(); operation_iter; operation_iter->next()) {
+    for (auto operation_iter = _operations->firstChild(); operation_iter; operation_iter = operation_iter->next()) {
         if (const auto operation_type = _get_operation_type(operation_iter); operation_type.has_value()) {
-            history.emplace_back(operation_type.value(), operation_iter->content());
+            history.emplace_back(operation_type.value(), operation_iter->firstChild()->content());
         }
     }
     return history;
@@ -1066,17 +1095,24 @@ void CPHistoryXML::add_operation(const HistoryType history_type, const std::stri
         // see Illustration 1
         case HistoryType::ACTION:
             operation_type_name = "action";
+            break;
         case HistoryType::IMPORT_FILE:
             operation_type_name = "import";
+            break;
         case HistoryType::OPEN_FILE:
             operation_type_name = "open";
+            break;
         default:
             return;
     }
-    auto operation_to_add = _xml_doc->createElement(operation_type_name.c_str());
-    operation_to_add->setContent(data.c_str());
+    auto operation_to_add = _xml_doc->createElement(operation_type_name.c_str()); // action, import, open
+    auto operation_data = _xml_doc->createTextNode(data.c_str());
+    operation_data->setContent(data.c_str());
 
+    operation_to_add->appendChild(operation_data);
     _operations->appendChild(operation_to_add);
+
+    Inkscape::GC::release(operation_data);
     Inkscape::GC::release(operation_to_add);
 
     save();
