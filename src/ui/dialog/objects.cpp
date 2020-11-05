@@ -61,15 +61,11 @@
 #include "ui/widget/layertypeicon.h"
 #include "ui/widget/shapeicon.h"
 
-#include "xml/node-observer.h"
-
 //#define DUMP_LAYERS 1
 
 namespace Inkscape {
 namespace UI {
 namespace Dialog {
-
-using Inkscape::XML::Node;
 
 class ObjectsPanel::ModelColumns : public Gtk::TreeModel::ColumnRecord
 {
@@ -102,9 +98,6 @@ ObjectsPanel& ObjectsPanel::getInstance()
     return *new ObjectsPanel();
 }
 
-// GtkTreeView Column enumeration
-enum { COL_LABEL, COL_VISIBLE, COL_LOCKED };
-
 /**
  * Button enumeration
  */
@@ -134,169 +127,185 @@ enum {
     DRAGNDROP
 };
 
-class ObjectsPanel::ObjectWatcher : public Inkscape::XML::NodeObserver {
-public:
-    /**
-     * Creates a new ObjectWatcher, a gtk TreeView interated watching device.
-     *
-     * @param panel The panel to which the object watcher belongs
-     * @param obj The object to watch
-     * @param iter The optional list store iter for the item, if not provided,
-     *             assumes this is the root 'document' object.
-     */
-    ObjectWatcher(ObjectsPanel* panel, SPObject* obj, Gtk::TreeRow *row) :
-        panel(panel),
-        row_ref(),
-        node(obj->getRepr())
-    {
-        if(row != nullptr) {
-            auto path = panel->_store->get_path(*row);
-            row_ref = Gtk::TreeModel::RowReference(panel->_store, path);
-            updateRowInfo();
-        }
-        node->addObserver(*this);
-        for (auto& child: obj->children) {
-            addChild(*(child.getRepr()));
-        }
+
+/**
+ * Creates a new ObjectWatcher, a gtk TreeView interated watching device.
+ *
+ * @param panel The panel to which the object watcher belongs
+ * @param obj The object to watch
+ * @param iter The optional list store iter for the item, if not provided,
+ *             assumes this is the root 'document' object.
+ */
+ObjectWatcher::ObjectWatcher(ObjectsPanel* panel, SPObject* obj, Gtk::TreeRow *row) :
+    panel(panel),
+    row_ref(),
+    node(obj->getRepr())
+{
+    if(row != nullptr) {
+        auto path = panel->_store->get_path(*row);
+        row_ref = Gtk::TreeModel::RowReference(panel->_store, path);
+        updateRowInfo();
     }
-
-    ~ObjectWatcher() override {
-        node->removeObserver(*this);
-        Gtk::TreeModel::Path path;
-        if (bool(row_ref) && (path = row_ref.get_path())) {
-            auto iter = panel->_store->get_iter(path);
-            if(iter) {
-                panel->_store->erase(iter);
-            }
-        }
-        child_watchers.clear();
+    node->addObserver(*this);
+    for (auto& child: obj->children) {
+        addChild(*(child.getRepr()));
     }
-
-
-    /**
-     * Update the information in the row from the stored node
-     */
-    void updateRowInfo() {
-        auto item = dynamic_cast<SPItem *>(getObject(node));
-        auto row = *panel->_store->get_iter(row_ref.get_path());
-
-        if (item) {
-            gchar const * label = item->label() ? item->label() : item->getId();
-            row[panel->_model->_colObject] = item;
-            row[panel->_model->_colLabel] = label ? label : item->defaultLabel();
-            row[panel->_model->_colType] = item->typeName();
-            row[panel->_model->_colColor] = item->highlight_color();
-            row[panel->_model->_colVisible] = !item->isHidden();
-            row[panel->_model->_colLocked] = !item->isSensitive();
+}
+ObjectWatcher::~ObjectWatcher()
+{
+    node->removeObserver(*this);
+    Gtk::TreeModel::Path path;
+    if (bool(row_ref) && (path = row_ref.get_path())) {
+        auto iter = panel->_store->get_iter(path);
+        if(iter) {
+            panel->_store->erase(iter);
         }
     }
+    child_watchers.clear();
+}
 
-    /**
-     * Add the child object to this node.
-     *
-     * @param child - SPObject to be added
-     */
-    void addChild(Node &node)
-    {
-        auto obj = getObject(&node);
-        if (!obj || !dynamic_cast<SPItem *>(obj))
-            return; // Object must be a viable SPItem.
-        Gtk::TreeModel::Row row = *(panel->_store->append(getParentIter()));
-        auto watcher = new ObjectWatcher(panel, obj, &row);
-        child_watchers.insert(std::make_pair(&node, watcher));
+/**
+ * Update the information in the row from the stored node
+ */
+void ObjectWatcher::updateRowInfo() {
+    auto item = dynamic_cast<SPItem *>(panel->getObject(node));
+    auto row = *panel->_store->get_iter(row_ref.get_path());
+
+    if (item) {
+        gchar const * label = item->label() ? item->label() : item->getId();
+        row[panel->_model->_colObject] = item;
+        row[panel->_model->_colLabel] = label ? label : item->defaultLabel();
+        row[panel->_model->_colType] = item->typeName();
+        row[panel->_model->_colColor] = item->highlight_color();
+        row[panel->_model->_colVisible] = !item->isHidden();
+        row[panel->_model->_colLocked] = !item->isSensitive();
     }
+}
 
-    /**
-     * Move the child to just after the given sibling
-     *
-     * @param child - SPObject to be moved
-     * @param sibling - Optional sibling Object to add next to, if nullptr the
-     *                  object is moved to BEFORE the first item.
-     */
-    void moveChild(SPObject *child, SPObject *sibling)
-    {
-        auto child_iter = getChildIter(child);
-        if (!child_iter)
-            return; // This means the child was never added, probably not an SPItem.
-        auto sibling_iter = getChildIter(sibling);
-        auto child_const = const_cast<GtkTreeIter*>(child_iter.get_gobject_if_not_end());
-        GtkTreeIter* sibling_const = nullptr;
-        if (sibling_iter) {
-            sibling_const = const_cast<GtkTreeIter*>(sibling_iter.get_gobject_if_not_end());
-        }
-        // Gtkmm can move to before, but not move to 'after'
-        gtk_tree_store_move_after(panel->_store->gobj(), child_const, sibling_const);
+/**
+ * Add the child object to this node.
+ *
+ * @param child - SPObject to be added
+ */
+void ObjectWatcher::addChild(Node &node)
+{
+    auto obj = panel->getObject(&node);
+    if (!obj || !dynamic_cast<SPItem *>(obj))
+        return; // Object must be a viable SPItem.
+    Gtk::TreeModel::Row row = *(panel->_store->append(getParentIter()));
+    auto watcher = new ObjectWatcher(panel, obj, &row);
+    child_watchers.insert(std::make_pair(&node, watcher));
+}
+
+/**
+ * Move the child to just after the given sibling
+ *
+ * @param child - SPObject to be moved
+ * @param sibling - Optional sibling Object to add next to, if nullptr the
+ *                  object is moved to BEFORE the first item.
+ */
+void ObjectWatcher::moveChild(SPObject *child, SPObject *sibling)
+{
+    auto child_iter = getChildIter(child);
+    if (!child_iter)
+        return; // This means the child was never added, probably not an SPItem.
+    auto sibling_iter = getChildIter(sibling);
+    auto child_const = const_cast<GtkTreeIter*>(child_iter.get_gobject_if_not_end());
+    GtkTreeIter* sibling_const = nullptr;
+    if (sibling_iter) {
+        sibling_const = const_cast<GtkTreeIter*>(sibling_iter.get_gobject_if_not_end());
     }
+    // Gtkmm can move to before, but not move to 'after'
+    gtk_tree_store_move_after(panel->_store->gobj(), child_const, sibling_const);
+}
 
-    /**
-     * Get the parent TreeRow's children iterator to this object
-     *
-     * @returns Gtk Tree Node Children iterator
-     */
-    Gtk::TreeNodeChildren getParentIter()
-    {
-        Gtk::TreeModel::Path path;
-        if (row_ref && (path = row_ref.get_path())) {
-            const Gtk::TreeRow row = **panel->_store->get_iter(path);
-            return row->children();
-        }
-        return panel->_store->children();
+/**
+ * Get the parent TreeRow's children iterator to this object
+ *
+ * @returns Gtk Tree Node Children iterator
+ */
+Gtk::TreeNodeChildren ObjectWatcher::getParentIter()
+{
+    Gtk::TreeModel::Path path;
+    if (row_ref && (path = row_ref.get_path())) {
+        const Gtk::TreeRow row = **panel->_store->get_iter(path);
+        return row->children();
     }
+    return panel->_store->children();
+}
 
-    /**
-     * Convert SPObject to TreeView Row, assuming the object is a child.
-     *
-     * @param child - The child object to find in this branch
-     * @returns Gtk TreeRow for the child, or nullptr if not found
-     */
-    const Gtk::TreeRow getChildIter(SPObject *child)
-    {
-        Gtk::TreeRow ret;
-        for (auto &iter : getParentIter()) {
+/**
+ * Convert SPObject to TreeView Row, assuming the object is a child.
+ *
+ * @param child - The child object to find in this branch
+ * @returns Gtk TreeRow for the child, or nullptr if not found
+ */
+const Gtk::TreeRow ObjectWatcher::getChildIter(SPObject *child)
+{
+    Gtk::TreeRow ret;
+    for (auto &iter : getParentIter()) {
+        if (iter) {
             Gtk::TreeModel::Row row = *iter;
             if(row[panel->_model->_colObject] == child) {
                 ret = *iter;
             }
         }
-        return ret;
     }
-    /**
-     * Get the object from the node.
-     *
-     * @param node - XML Node involved in the signal.
-     * @returns SPObject matching the node, returns nullptr if not found.
-     */
-    SPObject *getObject(Node *node) {
-        if (node != nullptr)
-            return panel->_document->getObjectByRepr(node);
-        return nullptr;
-    }
+    return ret;
+}
 
-    void notifyChildAdded( Node &node, Node &child, Node *prev ) override
-    {
-        addChild(child);
-        moveChild(getObject(&child), getObject(prev));
-    }
-    void notifyChildRemoved( Node &/*node*/, Node &child, Node* /*prev*/ ) override
-    {
-        child_watchers.erase(&child);
-    }
-    void notifyChildOrderChanged( Node &parent, Node &child, Node */*old_prev*/, Node *new_prev ) override
-    {
-        moveChild(getObject(&child), getObject(new_prev));
-    }
-    void notifyContentChanged( Node &/*node*/, Util::ptr_shared /*old_content*/, Util::ptr_shared /*new_content*/ ) override {}
-    void notifyAttributeChanged( Node &node, GQuark name, Util::ptr_shared /*old_value*/, Util::ptr_shared /*new_value*/ ) override {
-        // Almost anything could change the icon, so update upon any change.
-        // XXX This causes way too many updates, each attribute touched in a single operation.
-        updateRowInfo();
-    }
+void ObjectWatcher::notifyChildAdded( Node &node, Node &child, Node *prev )
+{
+    addChild(child);
+    moveChild(panel->getObject(&child), panel->getObject(prev));
+}
+void ObjectWatcher::notifyChildRemoved( Node &/*node*/, Node &child, Node* /*prev*/ )
+{
+    child_watchers.erase(&child);
+}
+void ObjectWatcher::notifyChildOrderChanged( Node &parent, Node &child, Node */*old_prev*/, Node *new_prev )
+{
+    moveChild(panel->getObject(&child), panel->getObject(new_prev));
+}
+void ObjectWatcher::notifyAttributeChanged( Node &node, GQuark name, Util::ptr_shared /*old_value*/, Util::ptr_shared /*new_value*/ )
+{
+    // Almost anything could change the icon, so update upon any change, defer for lots of updates.
+    updateRowInfo();
+}
 
-    std::unordered_map<Node const*, std::unique_ptr<ObjectWatcher>> child_watchers;
-    Gtk::TreeModel::RowReference row_ref;
-    ObjectsPanel* panel;
-    Node* node;
-};
+
+/**
+ * Get the object from the node.
+ *
+ * @param node - XML Node involved in the signal.
+ * @returns SPObject matching the node, returns nullptr if not found.
+ */
+SPObject *ObjectsPanel::getObject(Node *node) {
+    if (node != nullptr)
+        return _document->getObjectByRepr(node);
+    return nullptr;
+}
+
+/**
+ * Get the object watcher from the xml node (reverse lookup), it uses a ancesstor
+ * recursive pattern to match up with the root_watcher.
+ *
+ * @param node - The node to look up.
+ * @return the ObjectWatcher object if it's possible to find.
+ */
+ObjectWatcher* ObjectsPanel::getWatcher(Node *node)
+{
+    if (root_watcher->node == node) {
+        return root_watcher;
+    } else if (node->parent()) {
+        auto parent_watcher = getWatcher(node->parent());
+        if (parent_watcher) {
+            return &(*parent_watcher->child_watchers[node]);
+        }
+    }
+    g_warning("Can't find node in reverse lookup.");
+    return nullptr;
+}
 
 class ObjectsPanel::InternalUIBounce
 {
@@ -354,160 +363,6 @@ Gtk::MenuItem& ObjectsPanel::_addPopupItem( SPDesktop *desktop, unsigned int cod
     return *item;
 }
 
-/**
- * Occurs when the current desktop selection changes
- * @param sel The current selection
- */
-void ObjectsPanel::_objectsSelected( Selection *sel ) {
-
-    _selectedConnection.block();
-
-    _tree.get_selection()->unselect_all();
-    _store->foreach_iter(sigc::mem_fun(*this, &ObjectsPanel::_clearPrevSelectionState));
-
-    SPItem *item = nullptr;
-    auto items = sel->items();
-    for(auto i=items.begin(); i!=items.end(); ++i){
-        item = *i;
-        _updateObjectSelected(item, (*i)==items.back(), false);
-    }
-    if (!item) {
-        if (_desktop->currentLayer() && SP_IS_ITEM(_desktop->currentLayer())) {
-            item = SP_ITEM(_desktop->currentLayer());
-            _updateObjectSelected(item, false, true);
-        }
-    }
-    _selectedConnection.unblock();
-    _checkTreeSelection();
-}
-
-/**
- * Find the specified item in the tree store and (de)select it, optionally scrolling to the item
- * @param item Item to select in the tree
- * @param scrollto Whether to scroll to the item
- * @param expand If true, the path in the tree towards item will be expanded
- */
-void ObjectsPanel::_updateObjectSelected(SPItem* item, bool scrollto, bool expand)
-{
-    /*Gtk::TreeModel::iterator tree_iter;
-    if (_findInTreeCache(item, tree_iter)) {
-        Gtk::TreeModel::Row row = *tree_iter;
-
-        //We found the item! Expand to the path and select it in the tree.
-        Gtk::TreePath path = _store->get_path(tree_iter);
-        _tree.expand_to_path( path );
-        if (!expand)
-            // but don't expand itself, just the path
-            _tree.collapse_row(path);
-
-        Glib::RefPtr<Gtk::TreeSelection> select = _tree.get_selection();
-
-        select->select(tree_iter);
-        row[_model->_colPrevSelectionState] = true;
-        if (scrollto) {
-            //Scroll to the item in the tree
-            _tree.scroll_to_row(path, 0.5);
-        }
-    }*/
-}
-
-/**
- * Pushes the current tree selection to the canvas
- */
-void ObjectsPanel::_pushTreeSelectionToCurrent()
-{
-    if (auto selection = getSelection()) {
-        //Clear the selection and then iterate over the tree selection, pushing each item to the desktop
-        selection->clear();
-        if (_tree.get_selection()->count_selected_rows() == 0) {
-            _store->foreach_iter(sigc::mem_fun(*this, &ObjectsPanel::_clearPrevSelectionState));
-        }
-        bool setOpacity = true;
-        bool first_pass = true;
-        _store->foreach_iter(sigc::bind<bool *>(sigc::mem_fun(*this, &ObjectsPanel::_selectItemCallback), &setOpacity, &first_pass));
-        first_pass = false;
-        _store->foreach_iter(sigc::bind<bool *>(sigc::mem_fun(*this, &ObjectsPanel::_selectItemCallback), &setOpacity, &first_pass));
-
-        _checkTreeSelection();
-    }
-}
-
-/**
- * Helper function for pushing the current tree selection to the current desktop
- * @param iter Current tree item
- * @param setCompositingValues Whether to set the compositing values
- */
-bool ObjectsPanel::_selectItemCallback(const Gtk::TreeModel::iterator& iter, bool *setCompositingValues, bool *first_pass)
-{
-    auto desktop = getDesktop();
-    if (!desktop)
-        return false;
-    Gtk::TreeModel::Row row = *iter;
-    bool selected = _tree.get_selection()->is_selected(iter);
-    if (selected) { // All items selected in the treeview will be added to the current selection
-        /* Adding/removing only the items that were selected or deselected since the previous call to _pushTreeSelectionToCurrent()
-         * is very slow on large documents, because desktop->selection->remove(item) needs to traverse the whole ObjectSet to find
-         * the item to be removed. When all N objects are selected in a document, clearing the whole selection would require O(N^2)
-         * That's why we simply clear the complete selection using desktop->selection->clear(), and re-add all items one by one.
-         * This is much faster.
-         */
-
-        /* On the first pass, we will add only the items that were selected before too. Then, on the second pass, we will add the
-         * newly selected items such that the last selected items will be actually last. This is needed for example when the user
-         * wants to align relative to the last selected item.
-         */
-        if (*first_pass == row[_model->_colPrevSelectionState]) {
-            SPItem *item = row[_model->_colObject];
-            //If the item is not a layer, then select it and set the current layer to its parent (if it's the first item)
-            if (_desktop->selection->isEmpty()) {
-                _desktop->setCurrentLayer(item->parent);
-            }
-            _desktop->selection->add(item);
-
-            if (SP_IS_GROUP(item) && SP_GROUP(item)->layerMode() != SPGroup::LAYER) {
-                //If the item is a layer, set the current layer
-                if (desktop->selection->isEmpty()) {
-                    desktop->setCurrentLayer(item);
-                }
-            }
-        }
-    }
-
-    if (not *first_pass) {
-        row[_model->_colPrevSelectionState] = selected;
-    }
-
-    return false;
-}
-
-bool ObjectsPanel::_clearPrevSelectionState( const Gtk::TreeModel::iterator& iter) {
-    Gtk::TreeModel::Row row = *iter;
-    row[_model->_colPrevSelectionState] = false;
-    return false;
-}
-
-/**
- * Handles button sensitivity
- */
-void ObjectsPanel::_checkTreeSelection()
-{
-    bool sensitive = _tree.get_selection()->count_selected_rows() > 0;
-    //TODO: top/bottom sensitivity
-    bool sensitiveNonTop = true;
-    bool sensitiveNonBottom = true;
-
-    for (auto & it : _watching) {
-        it->set_sensitive( sensitive );
-    }
-    for (auto & it : _watchingNonTop) {
-        it->set_sensitive( sensitiveNonTop );
-    }
-    for (auto & it : _watchingNonBottom) {
-        it->set_sensitive( sensitiveNonBottom );
-    }
-
-    _tree.set_reorderable(sensitive); // Reorderable means that we allow drag-and-drop, but we only allow that when at least one row is selected
-}
 
 /**
  * Sets visibility of items in the tree
@@ -562,9 +417,6 @@ bool ObjectsPanel::_handleKeyEvent(GdkEventKey *event)
         case GDK_KEY_f:
             if (shortcut.get_mod() | Gdk::CONTROL_MASK) return false;
             break;
-        // shall we slurp ctrl+w to close panel?
-
-        // defocus:
         case GDK_KEY_Escape:
             if (desktop->canvas) {
                 desktop->canvas->grab_focus();
@@ -574,13 +426,8 @@ bool ObjectsPanel::_handleKeyEvent(GdkEventKey *event)
     }
 
     // invoke user defined shortcuts first
-    bool done = Inkscape::Shortcuts::getInstance().invoke_verb(event, desktop);
-    if (done) {
+    if (Inkscape::Shortcuts::getInstance().invoke_verb(event, _desktop))
         return true;
-    }
-
-    // handle events for the treeview
-    //  bool empty = desktop->selection->isEmpty();
 
     switch (Inkscape::UI::Tools::get_latin_keyval(event)) {
         case GDK_KEY_Return:
@@ -615,13 +462,12 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
     static bool overVisible = false;
     Gtk::TreeModel::Path _defer_target;
 
-    //Right mouse button was clicked, launch the pop-up menu
-    if ( (event->type == GDK_BUTTON_PRESS) && (event->button == 3) ) {
+    // Right mouse button was clicked, launch the pop-up menu
+    if ((event->type == GDK_BUTTON_PRESS) && (event->button == 3)) {
         Gtk::TreeModel::Path path;
         int x = static_cast<int>(event->x);
         int y = static_cast<int>(event->y);
         if ( _tree.get_path_at_pos( x, y, path ) ) {
-            _checkTreeSelection();
             _popupMenu.popup_at_pointer(reinterpret_cast<GdkEvent *>(event));
 
             if (_tree.get_selection()->is_selected(path)) {
@@ -651,23 +497,15 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
                 //Click on an icon column, eat this event to keep row selection
                 return true;
             } else if ( !(event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK)) & _tree.get_selection()->is_selected(path) ) {
-                //Click on a selected item with no modifiers, defer selection to the mouse-up by
-                //setting the select function to _noSelection
-                _tree.get_selection()->set_select_function(sigc::mem_fun(*this, &ObjectsPanel::_noSelection));
                 _defer_target = path;
             }
         }
     }
 
-    //Restore the selection function to allow tree selection on mouse button release
-    if ( event->type == GDK_BUTTON_RELEASE) {
-        _tree.get_selection()->set_select_function(sigc::mem_fun(*this, &ObjectsPanel::_rowSelectFunction));
-    }
-    
     //CellRenderers do not have good support for dealing with multiple items, so
     //we handle all events on them here
-    if ( (event->type == GDK_BUTTON_RELEASE) && (event->button == 1)) {
-
+    if ((event->type == GDK_BUTTON_RELEASE) && (event->button == 1))
+    {
         Gtk::TreeModel::Path path;
         Gtk::TreeViewColumn* col = nullptr;
         int x = static_cast<int>(event->x);
@@ -778,162 +616,8 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
             grab_focus();
         }
     }
-   
+
     return false;
-}
-
-/*
- * Drag and drop within the tree
- */
-bool ObjectsPanel::_handleDragDrop(const Glib::RefPtr<Gdk::DragContext>& /*context*/, int x, int y, guint /*time*/)
-{
-    //Set up our defaults and clear the source vector
-    _dnd_into = false;
-    _dnd_target = nullptr;
-    _dnd_source.clear();
-    _dnd_source_includes_layer = false;
-
-    //Add all selected items to the source vector
-    _tree.get_selection()->selected_foreach_iter(sigc::mem_fun(*this, &ObjectsPanel::_storeDragSource));
-
-    bool cancel_dnd = false;
-    bool dnd_to_top_at_end = false;
-
-    Gtk::TreeModel::Path target_path;
-    Gtk::TreeViewDropPosition pos;
-    if (_tree.get_dest_row_at_pos(x, y, target_path, pos)) {
-        // SPItem::moveTo() will be used to move the selected items to their new position, but
-        // moveTo() can only "drop before"; we therefore need to find the next path and drop
-        // the selection just before it, instead of "dropping after" the target path
-        if (pos == Gtk::TREE_VIEW_DROP_AFTER) {
-            Gtk::TreeModel::Path next_path = target_path;
-            if (_tree.row_expanded(next_path)) {
-                next_path.down(); // The next path is at a lower level in the hierarchy, i.e. in a layer or group
-            } else {
-                next_path.next(); // The next path is at the same level
-            }
-            // A next path might however not be present, if we're dropping at the end of the tree view
-            if (_store->iter_is_valid(_store->get_iter(next_path))) {
-                target_path = next_path;
-            } else {
-                // Dragging to the "end" of the treeview ; we'll get the parent group or layer of the last
-                // item, and drop into that parent
-                Gtk::TreeModel::Path up_path = target_path;
-                up_path.up();
-                if (_store->iter_is_valid(_store->get_iter(up_path))) {
-                    // Drop into the parent of the last item
-                    target_path = up_path;
-                    _dnd_into = true;
-                } else {
-                    // Drop into the top level, completely at the end of the treeview;
-                    dnd_to_top_at_end = true;
-                }
-            }
-        }
-
-        if (dnd_to_top_at_end) {
-            g_assert(_dnd_target == nullptr);
-        } else {
-            // Find the SPItem corresponding to the target_path/row at which we're dropping our selection
-            Gtk::TreeModel::iterator iter = _store->get_iter(target_path);
-            if (_store->iter_is_valid(iter)) {
-                Gtk::TreeModel::Row row = *iter;
-                _dnd_target = row[_model->_colObject]; //Set the drop target
-                if ((pos == Gtk::TREE_VIEW_DROP_INTO_OR_BEFORE) || (pos == Gtk::TREE_VIEW_DROP_INTO_OR_AFTER)) {
-                    // Trying to drop into a layer or group
-                    if (SP_IS_GROUP(_dnd_target)) {
-                        _dnd_into = true;
-                    } else {
-                        // If the target is not a group (or layer), then we cannot drop into it (unless we
-                        // would create a group on the fly), so we will cancel the drag and drop action.
-                        cancel_dnd = true;
-                    }
-                }
-                // If the source selection contains a layer however, then it can not be dropped ...
-                bool c1 = target_path.size() > 1;                   // .. below the top-level
-                bool c2 = SP_IS_GROUP(_dnd_target) && _dnd_into;   // .. or in any group (at the top level)
-                if (SP_IS_GROUP(_dnd_target) && SP_GROUP(_dnd_target)->layerMode() != SPGroup::LAYER && 
-                    _dnd_source_includes_layer && 
-                    (c1 || c2)) 
-                {
-                    cancel_dnd = true;
-                }
-            } else {
-                cancel_dnd = true;
-            }
-        }
-    }
-
-    if (not cancel_dnd) {
-        _takeAction(DRAGNDROP);
-    }
-
-    return true; // If True: then we're signaling here that nothing needs to be done by the TreeView; we're updating ourselves..
-}
-
-/**
- * Stores all selected items as the drag source
- * @param iter Current tree item
- */
-void ObjectsPanel::_storeDragSource(const Gtk::TreeModel::iterator& iter)
-{
-    Gtk::TreeModel::Row row = *iter;
-    SPItem* item = row[_model->_colObject];
-    if (item) {
-        _dnd_source.push_back(item);
-        if (SP_IS_GROUP(item) && (SP_GROUP(item)->layerMode() == SPGroup::LAYER)) {
-            _dnd_source_includes_layer = true;
-        }
-    }
-}
-
-/*
- * Move a selection of items in response to a drag & drop action
- */
-void ObjectsPanel::_doTreeMove()
-{
-    auto desktop = getDesktop();
-    auto document = getDocument();
-    if (!document)
-        return;
-
-    std::vector<gchar *> idvector;
-
-    //Clear the desktop selection
-    desktop->selection->clear();
-    while (!_dnd_source.empty())
-    {
-        SPItem *obj = _dnd_source.back();
-        _dnd_source.pop_back();
-
-        if (obj != _dnd_target) {
-            //Store the object id (for selection later) and move the object
-            idvector.push_back(g_strdup(obj->getId()));
-            obj->moveTo(_dnd_target, _dnd_into);
-        }
-    }
-    //Select items
-    while (!idvector.empty()) {
-        //Grab the id from the vector, get the item in the document and select it
-        gchar * id = idvector.back();
-        idvector.pop_back();
-        SPObject *obj = document->getObjectById(id);
-        g_free(id);
-        if (obj && SP_IS_ITEM(obj)) {
-            SPItem *item = SP_ITEM(obj);
-            if (!SP_IS_GROUP(item) || SP_GROUP(item)->layerMode() != SPGroup::LAYER)
-            {
-                if (desktop->selection->isEmpty()) desktop->setCurrentLayer(item->parent);
-                desktop->selection->add(item);
-            }
-            else
-            {
-                if (desktop->selection->isEmpty()) desktop->setCurrentLayer(item);
-            }
-        }
-    }
-
-    DocumentUndo::done(document, SP_VERB_NONE, _("Moved objects"));
 }
 
 /**
@@ -968,7 +652,7 @@ void ObjectsPanel::_takeAction( int val )
 bool ObjectsPanel::_executeAction()
 {
     // Make sure selected layer hasn't changed since the action was triggered
-    if ( _document && _pending) 
+    if ( _document && _pending)
     {
         int val = _pending->_actionCode;
 
@@ -976,147 +660,102 @@ bool ObjectsPanel::_executeAction()
         int val = _pending->_actionCode;
         switch ( val ) {
             case BUTTON_NEW:
-            {
                 _fireAction( SP_VERB_LAYER_NEW );
-            }
             break;
             case BUTTON_RENAME:
-            {
                 _fireAction( SP_VERB_LAYER_RENAME );
-            }
             break;
             case BUTTON_TOP:
-            {
-                if (selection->isEmpty()) {
+                if (_desktop->selection->isEmpty()) {
                     _fireAction( SP_VERB_LAYER_TO_TOP );
                 } else {
                     _fireAction( SP_VERB_SELECTION_TO_FRONT);
                 }
-            }
             break;
             case BUTTON_BOTTOM:
-            {
-                if (selection->isEmpty()) {
+                if (_desktop->selection->isEmpty()) {
                     _fireAction( SP_VERB_LAYER_TO_BOTTOM );
                 } else {
                     _fireAction( SP_VERB_SELECTION_TO_BACK);
                 }
-            }
             break;
             case BUTTON_UP:
-            {
-                if (selection->isEmpty()) {
+                if (_desktop->selection->isEmpty()) {
                     _fireAction( SP_VERB_LAYER_RAISE );
                 } else {
                     _fireAction( SP_VERB_SELECTION_STACK_UP );
                 }
-            }
             break;
             case BUTTON_DOWN:
-            {
-                if (selection->isEmpty()) {
+                if (_desktop->selection->isEmpty()) {
                     _fireAction( SP_VERB_LAYER_LOWER );
                 } else {
                     _fireAction( SP_VERB_SELECTION_STACK_DOWN );
                 }
-            }
             break;
             case BUTTON_DUPLICATE:
-            {
-                if (selection->isEmpty()) {
+                if (_desktop->selection->isEmpty()) {
                     _fireAction( SP_VERB_LAYER_DUPLICATE );
                 } else {
                     _fireAction( SP_VERB_EDIT_DUPLICATE );
                 }
-            }
             break;
             case BUTTON_DELETE:
-            {
-                if (selection->isEmpty()) {
+                if (_desktop->selection->isEmpty())
+                {
                     _fireAction( SP_VERB_LAYER_DELETE );
                 } else {
                     _fireAction( SP_VERB_EDIT_DELETE );
                 }
-            }
             break;
             case BUTTON_SOLO:
-            {
                 _fireAction( SP_VERB_LAYER_SOLO );
-            }
             break;
             case BUTTON_SHOW_ALL:
-            {
                 _fireAction( SP_VERB_LAYER_SHOW_ALL );
-            }
             break;
             case BUTTON_HIDE_ALL:
-            {
                 _fireAction( SP_VERB_LAYER_HIDE_ALL );
-            }
             break;
             case BUTTON_LOCK_OTHERS:
-            {
                 _fireAction( SP_VERB_LAYER_LOCK_OTHERS );
-            }
             break;
             case BUTTON_LOCK_ALL:
-            {
                 _fireAction( SP_VERB_LAYER_LOCK_ALL );
-            }
             break;
             case BUTTON_UNLOCK_ALL:
-            {
                 _fireAction( SP_VERB_LAYER_UNLOCK_ALL );
-            }
             break;
             case BUTTON_CLIPGROUP:
-            {
                _fireAction ( SP_VERB_OBJECT_CREATE_CLIP_GROUP );
-            }
             case BUTTON_SETCLIP:
-            {
                 _fireAction( SP_VERB_OBJECT_SET_CLIPPATH );
-            }
             break;
             case BUTTON_UNSETCLIP:
-            {
                 _fireAction( SP_VERB_OBJECT_UNSET_CLIPPATH );
-            }
             break;
             case BUTTON_SETMASK:
-            {
                 _fireAction( SP_VERB_OBJECT_SET_MASK );
-            }
             break;
             case BUTTON_UNSETMASK:
-            {
                 _fireAction( SP_VERB_OBJECT_UNSET_MASK );
-            }
             break;
             case BUTTON_GROUP:
-            {
                 _fireAction( SP_VERB_SELECTION_GROUP );
-            }
             break;
             case BUTTON_UNGROUP:
-            {
                 _fireAction( SP_VERB_SELECTION_UNGROUP );
-            }
             break;
             case BUTTON_COLLAPSE_ALL:
-            {
-                for (auto& obj: document->getRoot()->children) {
+                for (auto& obj: _document->getRoot()->children) {
                     if (SP_IS_GROUP(&obj)) {
                         _setCollapsed(SP_GROUP(&obj));
                     }
                 }
-            }
             break;
             case DRAGNDROP:
-            {
-                _doTreeMove( );
+                //_doTreeMove( );
                 // The notifyChildOrderChanged signal will ensure that the TreeView gets updated
-            }
             break;
         }
 
@@ -1171,43 +810,18 @@ void ObjectsPanel::_renameObject(Gtk::TreeModel::Row row, const Glib::ustring& n
 }
 
 /**
- * A row selection function used by the tree that doesn't allow any new items to be selected.
- * Currently, this is used to allow multi-item drag & drop.
+ * Take over the select row functionality from the TreeView, this is because
+ * we have two selections (layer and object selection) and require a custom
+ * method of rendering the result to the treeview.
  */
-bool ObjectsPanel::_noSelection( Glib::RefPtr<Gtk::TreeModel> const & /*model*/, Gtk::TreeModel::Path const & /*path*/, bool /*currentlySelected*/ )
+bool ObjectsPanel::select_row( Glib::RefPtr<Gtk::TreeModel> const & /*model*/, Gtk::TreeModel::Path const &path, bool /*sel*/ )
 {
-    return false;
-}
+    auto row = *_store->get_iter(path);
+    if (row) {
+        SPItem *item = row[_model->_colObject];
 
-/**
- * Default row selection function taken from the layers dialog
- */
-bool ObjectsPanel::_rowSelectFunction( Glib::RefPtr<Gtk::TreeModel> const & /*model*/, Gtk::TreeModel::Path const & /*path*/, bool currentlySelected )
-{
-    bool val = true;
-    if ( !currentlySelected && _toggleEvent )
-    {
-        GdkEvent* event = gtk_get_current_event();
-        if ( event ) {
-            // (keep these checks separate, so we know when to call gdk_event_free()
-            if ( event->type == GDK_BUTTON_PRESS ) {
-                GdkEventButton const* target = reinterpret_cast<GdkEventButton const*>(_toggleEvent);
-                GdkEventButton const* evtb = reinterpret_cast<GdkEventButton const*>(event);
-
-                if ( (evtb->window == target->window)
-                     && (evtb->send_event == target->send_event)
-                     && (evtb->time == target->time)
-                     && (evtb->state == target->state)
-                    )
-                {
-                    // Ooooh! It's a magic one
-                    val = false;
-                }
-            }
-            gdk_event_free(event);
-        }
     }
-    return val;
+    return false;
 }
 
 /**
@@ -1216,13 +830,13 @@ bool ObjectsPanel::_rowSelectFunction( Glib::RefPtr<Gtk::TreeModel> const & /*mo
  */
 void ObjectsPanel::_setCollapsed(SPGroup * group)
 {
-    group->setExpanded(false);
+    /*group->setExpanded(false);
     group->updateRepr(SP_OBJECT_WRITE_NO_CHILDREN | SP_OBJECT_WRITE_EXT);
     for (auto& iter: group->children) {
         if (SP_IS_GROUP(&iter)) {
             _setCollapsed(SP_GROUP(&iter));
         }
-    }
+    }*/
 }
 
 /**
@@ -1232,7 +846,7 @@ void ObjectsPanel::_setCollapsed(SPGroup * group)
  */
 void ObjectsPanel::_setExpanded(const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path& /*path*/, bool isexpanded)
 {
-    Gtk::TreeModel::Row row = *iter;
+    /*Gtk::TreeModel::Row row = *iter;
 
     SPItem* item = row[_model->_colObject];
     if (item && SP_IS_GROUP(item))
@@ -1248,7 +862,7 @@ void ObjectsPanel::_setExpanded(const Gtk::TreeModel::iterator& iter, const Gtk:
             //If we're collapsing, we need to recursively collapse, so call our helper function
             _setCollapsed(SP_GROUP(item));
         }
-    }
+    }*/
 }
 
 /**
@@ -1256,7 +870,9 @@ void ObjectsPanel::_setExpanded(const Gtk::TreeModel::iterator& iter, const Gtk:
  */
 ObjectsPanel::ObjectsPanel() :
     UI::Widget::Panel("/dialogs/objects", SP_VERB_DIALOG_OBJECTS),
-    _rootWatcher(nullptr),
+    root_watcher(nullptr),
+    _desktop(nullptr),
+    _document(nullptr),
     _model(nullptr),
     _pending(nullptr),
     _pending_update(false),
@@ -1310,7 +926,7 @@ ObjectsPanel::ObjectsPanel() :
     if ( col ) {
         col->add_attribute( renderer->property_active(), _model->_colLocked );
     }
-    
+
     //Set the expander and search columns
     _tree.set_expander_column( *name_column );
     _tree.set_search_column(_model->_colLabel);
@@ -1319,14 +935,13 @@ ObjectsPanel::ObjectsPanel() :
 
     //Set up the tree selection
     _tree.get_selection()->set_mode(Gtk::SELECTION_MULTIPLE);
-    _selectedConnection = _tree.get_selection()->signal_changed().connect( sigc::mem_fun(*this, &ObjectsPanel::_pushTreeSelectionToCurrent) );
-    _tree.get_selection()->set_select_function( sigc::mem_fun(*this, &ObjectsPanel::_rowSelectFunction) );
+    //_selectedConnection = _tree.get_selection()->signal_changed().connect( sigc::mem_fun(*this, &ObjectsPanel::_pushTreeSelectionToCurrent) );
+    _tree.get_selection()->set_select_function( sigc::mem_fun(*this, &ObjectsPanel::select_row) );
 
     //Set up tree signals
     _tree.signal_button_press_event().connect( sigc::mem_fun(*this, &ObjectsPanel::_handleButtonEvent), false );
     _tree.signal_button_release_event().connect( sigc::mem_fun(*this, &ObjectsPanel::_handleButtonEvent), false );
     _tree.signal_key_press_event().connect( sigc::mem_fun(*this, &ObjectsPanel::_handleKeyEvent), false );
-    _tree.signal_drag_drop().connect( sigc::mem_fun(*this, &ObjectsPanel::_handleDragDrop), false);
     _tree.signal_row_collapsed().connect( sigc::bind<bool>(sigc::mem_fun(*this, &ObjectsPanel::_setExpanded), false));
     _tree.signal_row_expanded().connect( sigc::bind<bool>(sigc::mem_fun(*this, &ObjectsPanel::_setExpanded), true));
 
@@ -1382,15 +997,15 @@ ObjectsPanel::ObjectsPanel() :
     btn->signal_clicked().connect( sigc::bind( sigc::mem_fun(*this, &ObjectsPanel::_takeAction), (int)BUTTON_BOTTOM) );
     _watchingNonBottom.push_back( btn );
     _buttonsPrimary.pack_end(*btn, Gtk::PACK_SHRINK);
-    
-    //Move down    
+
+    //Move down
     btn = Gtk::manage( new Gtk::Button() );
     _styleButton(*btn, INKSCAPE_ICON("go-down"), _("Move Down"));
     btn->set_relief(Gtk::RELIEF_NONE);
     btn->signal_clicked().connect( sigc::bind( sigc::mem_fun(*this, &ObjectsPanel::_takeAction), (int)BUTTON_DOWN) );
     _watchingNonBottom.push_back( btn );
     _buttonsPrimary.pack_end(*btn, Gtk::PACK_SHRINK);
-    
+
     //Move up
     btn = Gtk::manage( new Gtk::Button() );
     _styleButton(*btn, INKSCAPE_ICON("go-up"), _("Move Up"));
@@ -1398,7 +1013,7 @@ ObjectsPanel::ObjectsPanel() :
     btn->signal_clicked().connect( sigc::bind( sigc::mem_fun(*this, &ObjectsPanel::_takeAction), (int)BUTTON_UP) );
     _watchingNonTop.push_back( btn );
     _buttonsPrimary.pack_end(*btn, Gtk::PACK_SHRINK);
-    
+
     //Move to top
     btn = Gtk::manage( new Gtk::Button() );
     _styleButton(*btn, INKSCAPE_ICON("go-top"), _("Move To Top"));
@@ -1406,7 +1021,7 @@ ObjectsPanel::ObjectsPanel() :
     btn->signal_clicked().connect( sigc::bind( sigc::mem_fun(*this, &ObjectsPanel::_takeAction), (int)BUTTON_TOP) );
     _watchingNonTop.push_back( btn );
     _buttonsPrimary.pack_end(*btn, Gtk::PACK_SHRINK);
-    
+
     //Collapse all
     btn = Gtk::manage( new Gtk::Button() );
     _styleButton(*btn, INKSCAPE_ICON("format-indent-less"), _("Collapse All"));
@@ -1414,7 +1029,7 @@ ObjectsPanel::ObjectsPanel() :
     btn->signal_clicked().connect( sigc::bind( sigc::mem_fun(*this, &ObjectsPanel::_takeAction), (int)BUTTON_COLLAPSE_ALL) );
     _watchingNonBottom.push_back( btn );
     _buttonsPrimary.pack_end(*btn, Gtk::PACK_SHRINK);
-    
+
     _buttonsRow.pack_start(_buttonsSecondary, Gtk::PACK_EXPAND_WIDGET);
     _buttonsRow.pack_end(_buttonsPrimary, Gtk::PACK_EXPAND_WIDGET);
 
@@ -1454,15 +1069,15 @@ void ObjectsPanel::setDocument(SPDesktop* desktop, SPDocument* document)
 {
     g_assert(desktop == _desktop);
 
-    if (_rootWatcher) {
-        delete _rootWatcher;
+    if (root_watcher) {
+        delete root_watcher;
     }
 
     _document = document;
-    _rootWatcher = nullptr;
+    root_watcher = nullptr;
 
     if (document && document->getRoot()) {
-        _rootWatcher = new ObjectsPanel::ObjectWatcher(this, document->getRoot(), nullptr);
+        root_watcher = new ObjectWatcher(this, document->getRoot(), nullptr);
     }
 }
 
@@ -1474,25 +1089,51 @@ void ObjectsPanel::setDesktop( SPDesktop* desktop )
     Panel::setDesktop(desktop);
 
     if ( desktop != _desktop ) {
-        _documentChangedConnection.disconnect();
-        _documentChangedCurrentLayer.disconnect();
-        _selectionChangedConnection.disconnect();
+        document_changed.disconnect();
+        selection_changed.disconnect();
+        layer_changed.disconnect();
         if ( _desktop ) {
             _desktop = nullptr;
         }
 
         _desktop = Panel::getDesktop();
         if ( _desktop ) {
-            //Connect desktop signals
-            _documentChangedConnection = _desktop->connectDocumentReplaced( sigc::mem_fun(*this, &ObjectsPanel::setDocument));
-            // XXX _documentChangedCurrentLayer = _desktop->connectCurrentLayerChanged( sigc::mem_fun(*this, &ObjectsPanel::_objectsChangedWrapper));
-            _selectionChangedConnection = _desktop->selection->connectChanged( sigc::mem_fun(*this, &ObjectsPanel::_objectsSelected));
-            _desktopDestroyedConnection = _desktop->connectDestroy( sigc::mem_fun(*this, &ObjectsPanel::_desktopDestroyed));
+            document_changed = _desktop->connectDocumentReplaced( sigc::mem_fun(*this, &ObjectsPanel::setDocument));
+            selection_changed = _desktop->selection->connectChanged( sigc::mem_fun(*this, &ObjectsPanel::setSelection));
+            layer_changed = _desktop->connectCurrentLayerChanged( sigc::mem_fun(*this, &ObjectsPanel::setLayer));
             setDocument(_desktop, _desktop->doc());
             connectPopupItems();
         } else {
             setDocument(_desktop, nullptr);
         }
+    }
+}
+
+/**
+ * Occurs when the current desktop selection changes
+ *
+ * @param sel The current selection
+ */
+void ObjectsPanel::setSelection(Selection *sel)
+{
+    for (auto item : selected) {
+        auto watcher = getWatcher(item->getRepr());
+        if (watcher) {
+        // XXX watcher->setNodeSelected();
+        }
+    }
+}
+
+/**
+ * Happens when the layer selected is changed.
+ *
+ * @param layer - The layer now selected
+ */
+void ObjectsPanel::setLayer(SPObject *layer)
+{
+    auto watcher = getWatcher(layer->getRepr());
+    if(watcher) {
+        // XXX watcher->setLayerSelected();
     }
 }
 
@@ -1527,14 +1168,14 @@ void ObjectsPanel::connectPopupItems()
     _watchingNonBottom.push_back( &_addPopupItem(_desktop, SP_VERB_SELECTION_STACK_DOWN, (int)BUTTON_DOWN) );
 
     _popupMenu.append(*Gtk::manage(new Gtk::SeparatorMenuItem()));
-    
+
     _watching.push_back( &_addPopupItem( _desktop, SP_VERB_SELECTION_GROUP, (int)BUTTON_GROUP ) );
     _watching.push_back( &_addPopupItem( _desktop, SP_VERB_SELECTION_UNGROUP, (int)BUTTON_UNGROUP ) );
-    
+
     _popupMenu.append(*Gtk::manage(new Gtk::SeparatorMenuItem()));
-    
+
     _watching.push_back( &_addPopupItem( _desktop, SP_VERB_OBJECT_SET_CLIPPATH, (int)BUTTON_SETCLIP ) );
-    
+
     _watching.push_back( &_addPopupItem( _desktop, SP_VERB_OBJECT_CREATE_CLIP_GROUP, (int)BUTTON_CLIPGROUP ) );
 
     //will never be implemented
@@ -1542,7 +1183,7 @@ void ObjectsPanel::connectPopupItems()
     _watching.push_back( &_addPopupItem( _desktop, SP_VERB_OBJECT_UNSET_CLIPPATH, (int)BUTTON_UNSETCLIP ) );
 
     _popupMenu.append(*Gtk::manage(new Gtk::SeparatorMenuItem()));
-    
+
     _watching.push_back( &_addPopupItem( _desktop, SP_VERB_OBJECT_SET_MASK, (int)BUTTON_SETMASK ) );
     _watching.push_back( &_addPopupItem( _desktop, SP_VERB_OBJECT_UNSET_MASK, (int)BUTTON_UNSETMASK ) );
 

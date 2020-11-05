@@ -18,10 +18,14 @@
 #include <gtkmm/box.h>
 #include <gtkmm/dialog.h>
 
+#include "xml/node-observer.h"
+
 #include "ui/widget/panel.h"
 #include "ui/widget/style-subject.h"
 
 #include "selection.h"
+
+using Inkscape::XML::Node;
 
 class SPObject;
 class SPGroup;
@@ -29,10 +33,37 @@ struct SPColorSelector;
 
 namespace Inkscape {
 namespace UI {
-
-class SelectedColor;
-
 namespace Dialog {
+
+class ObjectsPanel;
+
+enum {COL_LABEL, COL_VISIBLE, COL_LOCKED};
+
+class ObjectWatcher : public Inkscape::XML::NodeObserver
+{
+public:
+
+    ObjectWatcher(ObjectsPanel* panel, SPObject* obj, Gtk::TreeRow *row);
+    ~ObjectWatcher() override;
+
+    void updateRowInfo();
+    void addChild(Node &node);
+    void moveChild(SPObject *child, SPObject *sibling);
+
+    Gtk::TreeNodeChildren getParentIter();
+    const Gtk::TreeRow getChildIter(SPObject *child);
+
+    void notifyChildAdded( Node &node, Node &child, Node *prev ) override;
+    void notifyChildRemoved( Node &/*node*/, Node &child, Node* /*prev*/ ) override;
+    void notifyChildOrderChanged( Node &parent, Node &child, Node */*old_prev*/, Node *new_prev ) override;
+    void notifyAttributeChanged( Node &node, GQuark name, Util::ptr_shared /*old_value*/, Util::ptr_shared /*new_value*/ ) override;
+
+    Node* node;
+    std::unordered_map<Node const*, std::unique_ptr<ObjectWatcher>> child_watchers;
+private:
+    Gtk::TreeModel::RowReference row_ref;
+    ObjectsPanel* panel;
+};
 
 /**
  * A panel that displays objects.
@@ -43,54 +74,34 @@ public:
     ObjectsPanel();
     ~ObjectsPanel() override;
 
+    class ModelColumns;
     static ObjectsPanel& getInstance();
 
-    void documentReplaced() override;
+    void update() override;
+    void setDocument(SPDesktop* desktop, SPDocument* document);
+    void setSelection(Selection *sel);
+    void setLayer(SPObject *obj);
+
+    SPObject* getObject(Node *node);
+    ObjectWatcher* getWatcher(Node *node);
+
+    Glib::RefPtr<Gtk::TreeStore> _store;
+    ModelColumns* _model;
 
 private:
     //Internal Classes:
-    class ModelColumns;
     class InternalUIBounce;
-    class ObjectWatcher;
 
-    //Connections, Watchers, Trackers:
-
-    //Document root watcher
-    ObjectsPanel::ObjectWatcher* _rootWatcher;
+    ObjectWatcher* root_watcher;
     
-    //Connection for when the desktop is destroyed (I.e. its deconstructor is called)
-    sigc::connection _desktopDestroyedConnection;
+    sigc::connection document_changed;
+    sigc::connection selection_changed;
+    sigc::connection layer_changed;
 
-    //Connection for when the document changes
-    sigc::connection _documentChangedConnection;
-
-    //Connection for when the active layer changes
-    sigc::connection _documentChangedCurrentLayer;
-
-    //Connection for when the active selection in the document changes
-    sigc::connection _selectionChangedConnection;
-
-    //Connection for when the selection in the dialog changes
-    sigc::connection _selectedConnection;
-
-    //Connections for when the opacity/blend/blur of the active selection in the document changes
-    sigc::connection _isolationConnection;
-    sigc::connection _opacityConnection;
-    sigc::connection _blendConnection;
-    sigc::connection _blurConnection;
-
-    sigc::connection _processQueue_sig;
-    sigc::connection _executeUpdate_sig;
-
-    //Members:
-
-    //Tree data model
-    ModelColumns* _model;
-
-    //Prevents the composite controls from updating
-    bool _blockCompositeUpdate;
-
-    //
+    //The current desktop, document, tree-data
+    SPDesktop* _desktop;
+    SPDocument* _document;
+    
     InternalUIBounce* _pending;
     bool _pending_update;
 
@@ -115,8 +126,6 @@ private:
     //GUI Members:
 
     GdkEvent* _toggleEvent;
-    
-    Glib::RefPtr<Gtk::TreeStore> _store;
 
     std::vector<Gtk::Widget*> _watching;
     std::vector<Gtk::Widget*> _watchingNonTop;
@@ -147,22 +156,11 @@ private:
 
     bool _handleButtonEvent(GdkEventButton *event);
     bool _handleKeyEvent(GdkEventKey *event);
-
-    void _storeHighlightTarget(const Gtk::TreeModel::iterator& iter);
-    void _storeDragSource(const Gtk::TreeModel::iterator& iter);
-    bool _handleDragDrop(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, guint time);
+    
     void _handleEdited(const Glib::ustring& path, const Glib::ustring& new_text);
     void _handleEditingCancelled();
 
-    void _doTreeMove();
     void _renameObject(Gtk::TreeModel::Row row, const Glib::ustring& name);
-
-    void _pushTreeSelectionToCurrent();
-    bool _selectItemCallback(const Gtk::TreeModel::iterator& iter, bool *setOpacity, bool *first_pass);
-    bool _clearPrevSelectionState(const Gtk::TreeModel::iterator& iter);
-    void _desktopDestroyed(SPDesktop* desktop);
-
-    void _checkTreeSelection();
 
     void _takeAction( int val );
     bool _executeAction();
@@ -170,12 +168,9 @@ private:
 
     void _setExpanded( const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path& path, bool isexpanded );
     void _setCollapsed(SPGroup * group);
+    
+    bool select_row( Glib::RefPtr<Gtk::TreeModel> const & model, Gtk::TreeModel::Path const & path, bool b );
 
-    bool _noSelection( Glib::RefPtr<Gtk::TreeModel> const & model, Gtk::TreeModel::Path const & path, bool b );
-    bool _rowSelectFunction( Glib::RefPtr<Gtk::TreeModel> const & model, Gtk::TreeModel::Path const & path, bool b );
-
-    void _objectsSelected(Selection *sel);
-    void _updateObjectSelected(SPItem* item, bool scrollto, bool expand);
     void connectPopupItems();
 };
 
