@@ -24,6 +24,7 @@
 #include "ui/widget/style-subject.h"
 
 #include "selection.h"
+#include "color-rgba.h"
 
 using Inkscape::XML::Node;
 
@@ -49,6 +50,8 @@ public:
     void updateRowInfo();
     void addChild(Node &node);
     void moveChild(SPObject *child, SPObject *sibling);
+    void setLayerSelected();
+    void setNodeSelected();
 
     Gtk::TreeNodeChildren getParentIter();
     const Gtk::TreeRow getChildIter(SPObject *child);

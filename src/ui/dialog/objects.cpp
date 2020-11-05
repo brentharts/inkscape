@@ -74,7 +74,8 @@ public:
     {
         add(_colObject);
         add(_colType);
-        add(_colColor);
+        add(_colIconColor);
+        add(_colBgColor);
         add(_colVisible);
         add(_colLocked);
         add(_colLabel);
@@ -84,7 +85,8 @@ public:
     Gtk::TreeModelColumn<SPItem*> _colObject;
     Gtk::TreeModelColumn<Glib::ustring> _colLabel;
     Gtk::TreeModelColumn<Glib::ustring> _colType;
-    Gtk::TreeModelColumn<unsigned int> _colColor;
+    Gtk::TreeModelColumn<unsigned int> _colIconColor;
+    Gtk::TreeModelColumn<Gdk::RGBA> _colBgColor;
     Gtk::TreeModelColumn<bool> _colVisible;
     Gtk::TreeModelColumn<bool> _colLocked;
     Gtk::TreeModelColumn<bool> _colPrevSelectionState;
@@ -176,10 +178,33 @@ void ObjectWatcher::updateRowInfo() {
         row[panel->_model->_colObject] = item;
         row[panel->_model->_colLabel] = label ? label : item->defaultLabel();
         row[panel->_model->_colType] = item->typeName();
-        row[panel->_model->_colColor] = item->highlight_color();
+        row[panel->_model->_colIconColor] = item->highlight_color();
         row[panel->_model->_colVisible] = !item->isHidden();
         row[panel->_model->_colLocked] = !item->isSensitive();
     }
+}
+
+/**
+ * Set that this watcher's node is currently the selected layer
+ */
+void ObjectWatcher::setLayerSelected() {
+    auto row = *panel->_store->get_iter(row_ref.get_path());
+    if (row) {
+        auto color = ColorRGBA(row[panel->_model->_colIconColor]);
+        auto gdk_color = Gdk::RGBA();
+        gdk_color.set_red(color[0]);
+        gdk_color.set_green(color[1]);
+        gdk_color.set_blue(color[2]);
+        gdk_color.set_alpha(color[3] / 4); // 25% alpha
+        row[panel->_model->_colBgColor] = gdk_color;
+    }
+}
+
+/**
+ * Set that this watcher's node is in the current selection
+ */
+void ObjectWatcher::setNodeSelected() {
+    g_warning("SELECTING");
 }
 
 /**
@@ -904,8 +929,10 @@ ObjectsPanel::ObjectsPanel() :
     name_column->pack_start(*icon_renderer, false);
     name_column->pack_start(*_text_renderer, true);
     name_column->add_attribute(_text_renderer->property_text(), _model->_colLabel);
+    name_column->add_attribute(_text_renderer->property_cell_background_rgba(), _model->_colBgColor);
     name_column->add_attribute(icon_renderer->property_shape_type(), _model->_colType);
-    name_column->add_attribute(icon_renderer->property_color(), _model->_colColor);
+    name_column->add_attribute(icon_renderer->property_color(), _model->_colIconColor);
+    name_column->add_attribute(icon_renderer->property_cell_background_rgba(), _model->_colBgColor);
 
     //Visible
     auto *eyeRenderer = Gtk::manage( new Inkscape::UI::Widget::ImageToggler(INKSCAPE_ICON("object-visible"), INKSCAPE_ICON("object-hidden")) );
@@ -915,6 +942,7 @@ ObjectsPanel::ObjectsPanel() :
     Gtk::TreeViewColumn* col = _tree.get_column(visibleColNum);
     if ( col ) {
         col->add_attribute( eyeRenderer->property_active(), _model->_colVisible );
+        col->add_attribute( eyeRenderer->property_cell_background_rgba(), _model->_colBgColor);
     }
 
     //Locked
@@ -925,6 +953,7 @@ ObjectsPanel::ObjectsPanel() :
     col = _tree.get_column(lockedColNum);
     if ( col ) {
         col->add_attribute( renderer->property_active(), _model->_colLocked );
+        col->add_attribute( renderer->property_cell_background_rgba(), _model->_colBgColor);
     }
 
     //Set the expander and search columns
@@ -1114,12 +1143,12 @@ void ObjectsPanel::setDesktop( SPDesktop* desktop )
  *
  * @param sel The current selection
  */
-void ObjectsPanel::setSelection(Selection *sel)
+void ObjectsPanel::setSelection(Selection *selected)
 {
-    for (auto item : selected) {
+    for (auto item : selected->items()) {
         auto watcher = getWatcher(item->getRepr());
         if (watcher) {
-        // XXX watcher->setNodeSelected();
+            watcher->setNodeSelected();
         }
     }
 }
@@ -1133,7 +1162,7 @@ void ObjectsPanel::setLayer(SPObject *layer)
 {
     auto watcher = getWatcher(layer->getRepr());
     if(watcher) {
-        // XXX watcher->setLayerSelected();
+        watcher->setLayerSelected();
     }
 }
 
