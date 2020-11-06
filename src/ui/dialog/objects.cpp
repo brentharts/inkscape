@@ -75,7 +75,6 @@ public:
         add(_colObject);
         add(_colLabel);
         add(_colType);
-        add(_colSelection);
         add(_colIconColor);
         add(_colBgColor);
         add(_colVisible);
@@ -85,7 +84,6 @@ public:
     Gtk::TreeModelColumn<SPItem*> _colObject;
     Gtk::TreeModelColumn<Glib::ustring> _colLabel;
     Gtk::TreeModelColumn<Glib::ustring> _colType;
-    Gtk::TreeModelColumn<unsigned int> _colSelection;
     Gtk::TreeModelColumn<unsigned int> _colIconColor;
     Gtk::TreeModelColumn<Gdk::RGBA> _colBgColor;
     Gtk::TreeModelColumn<bool> _colVisible;
@@ -192,7 +190,7 @@ void ObjectWatcher::updateRowBg()
 {
     auto row = *panel->_store->get_iter(row_ref.get_path());
     if (row) {
-        auto alpha = SELECTED_ALPHA[row[panel->_model->_colSelection]];
+        auto alpha = SELECTED_ALPHA[selection_state];
         if (alpha == 0.0) {
             row[panel->_model->_colBgColor] = Gdk::RGBA();
             return;
@@ -214,18 +212,18 @@ void ObjectWatcher::updateRowBg()
  * @param mask - The selection bit to set or unset
  * @param enabled - If the bit should be set or unset
  */
-void ObjectWatcher::setSelectedBit(int mask, bool enabled) {
+void ObjectWatcher::setSelectedBit(SelectionState mask, bool enabled) {
     auto row = *panel->_store->get_iter(row_ref.get_path());
     if (row) {
-        int value = row[panel->_model->_colSelection];
-        int original = value;
+        SelectionState value = selection_state;
+        SelectionState original = value;
         if (enabled) {
             value |= mask;
         } else {
             value &= ~mask;
         }
         if (value != original) {
-            row[panel->_model->_colSelection] = value;
+            selection_state = value;
             updateRowBg();
         }
     }
@@ -245,6 +243,10 @@ void ObjectWatcher::addChild(Node &node)
     Gtk::TreeModel::Row row = *(panel->_store->append(getParentIter()));
     auto watcher = new ObjectWatcher(panel, obj, &row);
     child_watchers.insert(std::make_pair(&node, watcher));
+    // Make sure new children have the right focus set.
+    if ((selection_state & LAYER_FOCUSED) != 0) {
+        watcher->setSelectedBit(LAYER_FOCUS_CHILD, true);
+    }
 }
 
 /**
