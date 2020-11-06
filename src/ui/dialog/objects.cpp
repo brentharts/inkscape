@@ -871,7 +871,7 @@ bool ObjectsPanel::select_row( Glib::RefPtr<Gtk::TreeModel> const & /*model*/, G
     auto row = *_store->get_iter(path);
     if (row) {
         SPItem *item = row[_model->_colObject];
-
+        _getSelection()->add(item);
     }
     return false;
 }
