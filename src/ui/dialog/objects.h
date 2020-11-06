@@ -40,6 +40,15 @@ class ObjectsPanel;
 
 enum {COL_LABEL, COL_VISIBLE, COL_LOCKED};
 
+enum {
+    SELECTED_NOT = 0,     // Object is NOT in desktop's selection
+    SELECTED_OBJECT = 1,  // Object is in the desktop's selection
+    LAYER_FOCUSED = 2,    // This layer is the desktop's focused layer
+    LAYER_FOCUS_CHILD = 4 // This object is a child of the focused layer
+};
+// Factor to reduce the alpha by for this selection combination
+static double SELECTED_ALPHA[8] = {0.0, 2.5, 4.0, 2.0, 6.0, 2.5, 1.0, 1.0};
+
 class ObjectWatcher : public Inkscape::XML::NodeObserver
 {
 public:
@@ -48,10 +57,10 @@ public:
     ~ObjectWatcher() override;
 
     void updateRowInfo();
+    void updateRowBg();
+    void setSelectedBit(int mask, bool enabled);
     void addChild(Node &node);
     void moveChild(SPObject *child, SPObject *sibling);
-    void setLayerSelected();
-    void setNodeSelected();
 
     Gtk::TreeNodeChildren getParentIter();
     const Gtk::TreeRow getChildIter(SPObject *child);
@@ -104,6 +113,8 @@ private:
     //The current desktop, document, tree-data
     SPDesktop* _desktop;
     SPDocument* _document;
+    SPObject *_layer;
+    ObjectSet selection;
     
     InternalUIBounce* _pending;
     bool _pending_update;

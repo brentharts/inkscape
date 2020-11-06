@@ -73,23 +73,23 @@ public:
     ModelColumns()
     {
         add(_colObject);
+        add(_colLabel);
         add(_colType);
+        add(_colSelection);
         add(_colIconColor);
         add(_colBgColor);
         add(_colVisible);
         add(_colLocked);
-        add(_colLabel);
-        add(_colPrevSelectionState);
     }
     ~ModelColumns() override = default;
     Gtk::TreeModelColumn<SPItem*> _colObject;
     Gtk::TreeModelColumn<Glib::ustring> _colLabel;
     Gtk::TreeModelColumn<Glib::ustring> _colType;
+    Gtk::TreeModelColumn<unsigned int> _colSelection;
     Gtk::TreeModelColumn<unsigned int> _colIconColor;
     Gtk::TreeModelColumn<Gdk::RGBA> _colBgColor;
     Gtk::TreeModelColumn<bool> _colVisible;
     Gtk::TreeModelColumn<bool> _colLocked;
-    Gtk::TreeModelColumn<bool> _colPrevSelectionState;
 };
 
 /**
@@ -181,31 +181,56 @@ void ObjectWatcher::updateRowInfo() {
         row[panel->_model->_colIconColor] = item->highlight_color();
         row[panel->_model->_colVisible] = !item->isHidden();
         row[panel->_model->_colLocked] = !item->isSensitive();
+        updateRowBg();
     }
 }
 
 /**
- * Set that this watcher's node is currently the selected layer
+ * Updates the row's background colour as indicated by it's selection.
  */
-void ObjectWatcher::setLayerSelected() {
+void ObjectWatcher::updateRowBg()
+{
     auto row = *panel->_store->get_iter(row_ref.get_path());
     if (row) {
+        auto alpha = SELECTED_ALPHA[row[panel->_model->_colSelection]];
+        if (alpha == 0.0) {
+            row[panel->_model->_colBgColor] = Gdk::RGBA();
+            return;
+        }
+
         auto color = ColorRGBA(row[panel->_model->_colIconColor]);
         auto gdk_color = Gdk::RGBA();
         gdk_color.set_red(color[0]);
         gdk_color.set_green(color[1]);
         gdk_color.set_blue(color[2]);
-        gdk_color.set_alpha(color[3] / 4); // 25% alpha
+        gdk_color.set_alpha(color[3] / alpha);
         row[panel->_model->_colBgColor] = gdk_color;
     }
 }
 
 /**
- * Set that this watcher's node is in the current selection
+ * Flip the selected state bit on or off as needed, calls updateRowBg if changed.
+ *
+ * @param mask - The selection bit to set or unset
+ * @param enabled - If the bit should be set or unset
  */
-void ObjectWatcher::setNodeSelected() {
-    g_warning("SELECTING");
+void ObjectWatcher::setSelectedBit(int mask, bool enabled) {
+    auto row = *panel->_store->get_iter(row_ref.get_path());
+    if (row) {
+        int value = row[panel->_model->_colSelection];
+        int original = value;
+        if (enabled) {
+            value |= mask;
+        } else {
+            value &= ~mask;
+        }
+        if (value != original) {
+            row[panel->_model->_colSelection] = value;
+            updateRowBg();
+        }
+    }
 }
+
 
 /**
  * Add the child object to this node.
@@ -899,6 +924,7 @@ ObjectsPanel::ObjectsPanel() :
     _desktop(nullptr),
     _document(nullptr),
     _model(nullptr),
+    _layer(nullptr),
     _pending(nullptr),
     _pending_update(false),
     _toggleEvent(nullptr),
@@ -1145,11 +1171,19 @@ void ObjectsPanel::setDesktop( SPDesktop* desktop )
  */
 void ObjectsPanel::setSelection(Selection *selected)
 {
+    for (auto item : selection.items()) {
+        auto watcher = getWatcher(item->getRepr());
+        if (watcher) {
+            watcher->setSelectedBit(SELECTED_OBJECT, false);
+        }
+    }
+    selection.clear();
     for (auto item : selected->items()) {
         auto watcher = getWatcher(item->getRepr());
         if (watcher) {
-            watcher->setNodeSelected();
+            watcher->setSelectedBit(SELECTED_OBJECT, true);
         }
+        selection.add(item);
     }
 }
 
@@ -1160,10 +1194,21 @@ void ObjectsPanel::setSelection(Selection *selected)
  */
 void ObjectsPanel::setLayer(SPObject *layer)
 {
-    auto watcher = getWatcher(layer->getRepr());
-    if(watcher) {
-        watcher->setLayerSelected();
+    if (_layer) {
+        auto old_watcher = getWatcher(_layer->getRepr());
+        old_watcher->setSelectedBit(LAYER_FOCUSED, false);
+        for (const auto &iter : old_watcher->child_watchers) {
+            iter.second->setSelectedBit(LAYER_FOCUS_CHILD, false);
+        }
     }
+    auto watcher = getWatcher(layer->getRepr());
+    if (watcher) {
+        watcher->setSelectedBit(LAYER_FOCUSED, true);
+        for (const auto &iter : watcher->child_watchers) {
+            iter.second->setSelectedBit(LAYER_FOCUS_CHILD, true);
+        }
+    }
+    _layer = layer;
 }
 
 void ObjectsPanel::connectPopupItems()
