@@ -118,30 +118,8 @@ private:
     SPObject *_layer;
     ObjectSet selection;
     
-    InternalUIBounce* _pending;
-    bool _pending_update;
-
-    //Whether the drag & drop was dragged into an item
-    gboolean _dnd_into;
-
-    //List of drag & drop source items
-    std::vector<SPItem*> _dnd_source;
-
-    //Drag & drop target item
-    SPItem* _dnd_target;
-
-    // Whether the drag sources include a layer
-    bool _dnd_source_includes_layer;
-
-    //List of items to change the highlight on
-    std::vector<SPItem*> _highlight_target;
-
     //Show icons in the context menu
     bool _show_contextmenu_icons;
-
-    //GUI Members:
-
-    GdkEvent* _toggleEvent;
 
     std::vector<Gtk::Widget*> _watching;
     std::vector<Gtk::Widget*> _watchingNonTop;
@@ -162,26 +140,20 @@ private:
     ObjectsPanel(ObjectsPanel const &) = delete; // no copy
     ObjectsPanel &operator=(ObjectsPanel const &) = delete; // no assign
 
-    void _styleButton( Gtk::Button& btn, char const* iconName, char const* tooltip );
+    void _addBarButton(char const* iconName, char const* tooltip, int verb_id);
     void _fireAction( unsigned int code );
-
-    Gtk::MenuItem& _addPopupItem( SPDesktop *desktop, unsigned int code, int id );
-
-    void _setVisibleIter( const Gtk::TreeModel::iterator& iter, const bool visible );
-    void _setLockedIter( const Gtk::TreeModel::iterator& iter, const bool locked );
-
+    
+    Gtk::MenuItem& _addPopupItem(SPDesktop *desktop, unsigned int code);
+    
+    void toggleVisible(const Glib::ustring& path);
+    void toggleLocked(const Glib::ustring& path);
+    
     bool _handleButtonEvent(GdkEventButton *event);
     bool _handleKeyEvent(GdkEventKey *event);
     
     void _handleEdited(const Glib::ustring& path, const Glib::ustring& new_text);
-    void _handleEditingCancelled();
 
-    void _renameObject(Gtk::TreeModel::Row row, const Glib::ustring& name);
-
-    void _takeAction( int val );
-    bool _executeAction();
-    bool _executeUpdate();
-
+    void _takeAction(int val);
     void _setExpanded( const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path& path, bool isexpanded );
     void _setCollapsed(SPGroup * group);
     
