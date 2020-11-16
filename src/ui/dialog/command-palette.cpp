@@ -112,18 +112,12 @@ CommandPalette::CommandPalette()
     _CPSuggestions->set_activate_on_single_click();
     _CPSuggestions->set_selection_mode(Gtk::SELECTION_SINGLE);
 
-    // Preferences load
-    auto prefs = Inkscape::Preferences::get();
-    const auto app = Gio::Application::get_default();
-    const auto iapp = dynamic_cast<InkscapeApplication *>(app.get());
-    const auto gapp = dynamic_cast<Gtk::Application *>(app.get());
-
     // Setup operations [actions, verbs, extenstions]
     {
         auto all_actions_ptr_name = list_all_actions();
 
-        // setup actions - can’t do const
-        for (/*const*/ auto &action_ptr_name : all_actions_ptr_name) {
+        // setup actions
+        for (const auto &action_ptr_name : all_actions_ptr_name) {
             generate_action_operation(action_ptr_name, true);
         }
 
@@ -278,8 +272,8 @@ void CommandPalette::append_recent_file_operation(const Glib::ustring &path, boo
 
 bool CommandPalette::generate_action_operation(const ActionPtrName &action_ptr_name, bool is_suggestion)
 {
-    static const auto app = dynamic_cast<InkscapeApplication *>(Gio::Application::get_default().get());
-    static const auto gapp = dynamic_cast<Gtk::Application *>(Gio::Application::get_default().get());
+    static const auto app = InkscapeApplication::instance();
+    static const auto gapp = app->gtk_app();
     static InkActionExtraData &action_data = app->get_action_extra_data();
     static const bool show_full_action_name =
         Inkscape::Preferences::get()->getBool("/options/commandpalette/showfullactionname/value");
@@ -314,7 +308,7 @@ bool CommandPalette::generate_action_operation(const ActionPtrName &action_ptr_n
     operation_builder->get_widget("CPActionFullName", CPActionFullName);
     operation_builder->get_widget("CPDescription", CPDescription);
 
-    CPGroup->set_text(action_data.get_section_for_action(action_ptr_name.second));
+    CPGroup->set_text(action_data.get_section_for_action(Glib::ustring(action_ptr_name.second)));
 
     // Setting CPName
     {
@@ -562,11 +556,11 @@ bool CommandPalette::operate_recent_file(Glib::ustring const &uri, bool const im
     }
 
     // open
-    auto app = &(ConcreteInkscapeApplication<Gtk::Application>::get_instance());
-    Glib::RefPtr<Gio::File> file = Gio::File::create_for_path(uri);
-    app->create_window(file);
-    if (write_to_history) {
-        _history_xml.add_open(uri);
+    {
+        get_action_ptr_name("app.file-open").first->activate(uri);
+        if (write_to_history) {
+            _history_xml.add_open(uri);
+        }
     }
 
     close();
@@ -766,19 +760,22 @@ void CommandPalette::set_mode(CPMode mode)
  */
 CommandPalette::ActionPtrName CommandPalette::get_action_ptr_name(const Glib::ustring &full_action_name)
 {
-    static auto app = dynamic_cast<Gtk::Application *>(Gio::Application::get_default().get());
-    static auto win = dynamic_cast<InkscapeWindow *>(app->get_active_window());
-    static auto doc = win->get_document()->getActionGroup();
+    static auto gapp = InkscapeApplication::instance()->gtk_app();
+    static auto win = InkscapeApplication::instance()->get_active_window();
     auto action_domain_string = full_action_name.substr(0, full_action_name.find('.')); // app, win, doc
     auto action_name = full_action_name.substr(full_action_name.find('.') + 1);
 
     ActionPtr action_ptr;
     if (action_domain_string == "app") {
-        action_ptr = app->lookup_action(action_name);
+        action_ptr = gapp->lookup_action(action_name);
     } else if (action_domain_string == "win") {
         action_ptr = win->lookup_action(action_name);
     } else if (action_domain_string == "doc") {
-        action_ptr = doc->lookup_action(action_name);
+        if (auto doc = win->get_document(); doc) {
+            if (auto map = doc->getActionGroup(); map) {
+                action_ptr = doc->getActionGroup()->lookup_action(action_name);
+            }
+        }
     }
 
     return {action_ptr, full_action_name};
@@ -881,32 +878,27 @@ Gtk::Button *CommandPalette::get_full_action_name(Gtk::ListBoxRow *child)
 
 // Get a list of all actions (application, window, and document), properly prefixed.
 // We need to do this ourselves as Gtk::Application does not have a function for this.
-// TODO: Remove when Shortcuts branch merge
-// NOTE: It has deviated a bit from the shortcuts branch code to fit the needs discuss with @Tavmjong
-//       and @rathod-sahaab regarding this.
 std::vector<CommandPalette::ActionPtrName> CommandPalette::list_all_actions()
 {
-    auto app = dynamic_cast<Gtk::Application *>(Gio::Application::get_default().get());
+    auto gapp = InkscapeApplication::instance()->gtk_app();
     std::vector<ActionPtrName> all_actions_info;
 
-    std::vector<Glib::ustring> actions = app->list_actions();
+    std::vector<Glib::ustring> actions = gapp->list_actions();
     std::sort(actions.begin(), actions.end());
 
     for (auto action : actions) {
-        all_actions_info.emplace_back(app->lookup_action(action), "app." + action);
+        all_actions_info.emplace_back(gapp->lookup_action(action), "app." + action);
     }
 
-    auto gwindow = app->get_active_window();
-    auto window = dynamic_cast<InkscapeWindow *>(gwindow);
-    if (window) {
+    // FIXME: doesn't work because used before window is intantiated so window always null
+    if (auto window = InkscapeApplication::instance()->get_active_window(); window) {
         std::vector<Glib::ustring> actions = window->list_actions();
         std::sort(actions.begin(), actions.end());
         for (auto action : actions) {
             all_actions_info.emplace_back(window->lookup_action(action), "win." + action);
         }
 
-        auto document = window->get_document();
-        if (document) {
+        if (auto document = window->get_document(); document) {
             auto map = document->getActionGroup();
             if (map) {
                 std::vector<Glib::ustring> actions = map->list_actions();
@@ -1016,7 +1008,8 @@ void CPHistoryXML::add_action_parameter(const std::string &full_action_name, con
     for (auto action_iter = _params->firstChild(); action_iter; action_iter = action_iter->next()) {
         // If this action's node already exists
         if (full_action_name == action_iter->attribute("name")) {
-            // If the last parameter was the same don't do anything, inner text is also a node hence 2 times last child
+            // If the last parameter was the same don't do anything, inner text is also a node hence 2 times last
+            // child
             if (action_iter->lastChild()->lastChild()->content() == param) {
                 Inkscape::GC::release(parameter_node);
                 return;
