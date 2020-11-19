@@ -460,6 +460,7 @@ ObjectsPanel::~ObjectsPanel()
     selection_changed.disconnect();
     layer_changed.disconnect();
 
+    _desktop = nullptr;
     setDocument(nullptr, nullptr);
 
     if (_model) {
@@ -503,11 +504,9 @@ void ObjectsPanel::update()
         document_changed.disconnect();
         selection_changed.disconnect();
         layer_changed.disconnect();
-        if (_desktop ) {
-            _desktop = nullptr;
-        }
 
-        _desktop = getDesktop();
+        _desktop = desktop;
+
         if (_desktop ) {
             document_changed = _desktop->connectDocumentReplaced( sigc::mem_fun(*this, &ObjectsPanel::setDocument));
             selection_changed = _desktop->selection->connectChanged( sigc::mem_fun(*this, &ObjectsPanel::setSelection));
