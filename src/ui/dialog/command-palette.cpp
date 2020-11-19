@@ -762,6 +762,7 @@ CommandPalette::ActionPtrName CommandPalette::get_action_ptr_name(const Glib::us
 {
     static auto gapp = InkscapeApplication::instance()->gtk_app();
     static auto win = InkscapeApplication::instance()->get_active_window();
+    auto doc = InkscapeApplication::instance()->get_active_document();
     auto action_domain_string = full_action_name.substr(0, full_action_name.find('.')); // app, win, doc
     auto action_name = full_action_name.substr(full_action_name.find('.') + 1);
 
@@ -771,7 +772,7 @@ CommandPalette::ActionPtrName CommandPalette::get_action_ptr_name(const Glib::us
     } else if (action_domain_string == "win") {
         action_ptr = win->lookup_action(action_name);
     } else if (action_domain_string == "doc") {
-        if (auto doc = win->get_document(); doc) {
+        if (doc) {
             if (auto map = doc->getActionGroup(); map) {
                 action_ptr = doc->getActionGroup()->lookup_action(action_name);
             }
