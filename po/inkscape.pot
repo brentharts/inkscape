@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
-"POT-Creation-Date: 2020-11-19 11:20+0100\n"
+"POT-Creation-Date: 2020-11-19 11:58+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -4654,220 +4654,196 @@ msgstr ""
 msgid "Simplify paths, reducing node counts."
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:226 ../src/actions/actions-output.cpp:257
+#: ../src/actions/actions-output.cpp:225
 msgid "Export Type"
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:226 ../src/actions/actions-output.cpp:257
+#: ../src/actions/actions-output.cpp:225
 msgid "Export file type."
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:227 ../src/actions/actions-output.cpp:261
+#: ../src/actions/actions-output.cpp:226
 msgid "Export File Name"
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:227 ../src/actions/actions-output.cpp:261
+#: ../src/actions/actions-output.cpp:226
 msgid "Export file name."
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:228
+#: ../src/actions/actions-output.cpp:227
 msgid "Export Overwrite"
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:228 ../src/actions/actions-output.cpp:265
+#: ../src/actions/actions-output.cpp:227
 msgid "Export over-write file."
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:230 ../src/actions/actions-output.cpp:270
+#: ../src/actions/actions-output.cpp:229
 msgid "Export Area"
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:230 ../src/actions/actions-output.cpp:270
+#: ../src/actions/actions-output.cpp:229
 msgid "Export area."
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:231
+#: ../src/actions/actions-output.cpp:230
 msgid "Export Area Drawing"
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:231 ../src/actions/actions-output.cpp:274
+#: ../src/actions/actions-output.cpp:230
 msgid "Export drawing area."
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:232
+#: ../src/actions/actions-output.cpp:231
 msgid "Export Area Page"
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:232 ../src/actions/actions-output.cpp:278
+#: ../src/actions/actions-output.cpp:231
 msgid "Export page area."
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:233 ../src/actions/actions-output.cpp:282
+#: ../src/actions/actions-output.cpp:232
 msgid "Export Margin"
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:233 ../src/actions/actions-output.cpp:282
+#: ../src/actions/actions-output.cpp:232
 msgid "Export margin."
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:234 ../src/actions/actions-output.cpp:286
+#: ../src/actions/actions-output.cpp:233
 msgid "Export Area Snap"
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:234 ../src/actions/actions-output.cpp:286
+#: ../src/actions/actions-output.cpp:233
 msgid "Export snap area to integer values."
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:235 ../src/actions/actions-output.cpp:290
+#: ../src/actions/actions-output.cpp:234
 msgid "Export Width"
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:235 ../src/actions/actions-output.cpp:290
+#: ../src/actions/actions-output.cpp:234
 msgid "Export width."
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:236 ../src/actions/actions-output.cpp:294
+#: ../src/actions/actions-output.cpp:235
 msgid "Export Height"
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:236 ../src/actions/actions-output.cpp:294
+#: ../src/actions/actions-output.cpp:235
 msgid "Export height."
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:238 ../src/actions/actions-output.cpp:299
+#: ../src/actions/actions-output.cpp:237
 msgid "Export ID"
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:238 ../src/actions/actions-output.cpp:299
+#: ../src/actions/actions-output.cpp:237
 msgid "Export id(s)."
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:239 ../src/actions/actions-output.cpp:303
+#: ../src/actions/actions-output.cpp:238
 msgid "Export ID Only"
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:239 ../src/actions/actions-output.cpp:303
+#: ../src/actions/actions-output.cpp:238
 msgid "Export id(s) only."
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:241 ../src/actions/actions-output.cpp:308
+#: ../src/actions/actions-output.cpp:240
 msgid "Export Plain SVG"
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:241 ../src/actions/actions-output.cpp:308
+#: ../src/actions/actions-output.cpp:240
 msgid "Export as plain SVG."
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:242 ../src/actions/actions-output.cpp:312
+#: ../src/actions/actions-output.cpp:241
 msgid "Export DPI"
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:242 ../src/actions/actions-output.cpp:312
+#: ../src/actions/actions-output.cpp:241
 msgid "Export DPI."
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:243 ../src/actions/actions-output.cpp:316
+#: ../src/actions/actions-output.cpp:242
 msgid "Export Ignore Filters"
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:243 ../src/actions/actions-output.cpp:316
+#: ../src/actions/actions-output.cpp:242
 msgid "Export ignore filters."
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:244
+#: ../src/actions/actions-output.cpp:243
 msgid "Export Text to Path"
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:244 ../src/actions/actions-output.cpp:320
+#: ../src/actions/actions-output.cpp:243
 msgid "Export convert text to paths."
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:245 ../src/actions/actions-output.cpp:324
+#: ../src/actions/actions-output.cpp:244
 msgid "Export PS Level"
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:245 ../src/actions/actions-output.cpp:324
+#: ../src/actions/actions-output.cpp:244
 msgid "Export PostScript level."
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:246 ../src/actions/actions-output.cpp:328
+#: ../src/actions/actions-output.cpp:245
 msgid "Export PDF Version"
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:246 ../src/actions/actions-output.cpp:328
+#: ../src/actions/actions-output.cpp:245
 msgid "Export PDF version."
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:247 ../src/actions/actions-output.cpp:332
+#: ../src/actions/actions-output.cpp:246
 msgid "Export LaTeX"
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:247 ../src/actions/actions-output.cpp:332
+#: ../src/actions/actions-output.cpp:246
 msgid "Export LaTeX."
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:248 ../src/actions/actions-output.cpp:336
+#: ../src/actions/actions-output.cpp:247
 msgid "Export Use Hints"
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:248 ../src/actions/actions-output.cpp:336
+#: ../src/actions/actions-output.cpp:247
 msgid "Export using saved hints."
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:249
+#: ../src/actions/actions-output.cpp:248
 msgid "Export Background"
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:249 ../src/actions/actions-output.cpp:340
+#: ../src/actions/actions-output.cpp:248
 msgid "Export background color."
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:250 ../src/actions/actions-output.cpp:344
+#: ../src/actions/actions-output.cpp:249
 msgid "Export Background Opacity"
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:250 ../src/actions/actions-output.cpp:344
+#: ../src/actions/actions-output.cpp:249
 msgid "Export background opacity."
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:251
+#: ../src/actions/actions-output.cpp:250
 msgid "Export PNG Color Mode"
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:251
+#: ../src/actions/actions-output.cpp:250
 msgid "Export png color mode."
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:253
+#: ../src/actions/actions-output.cpp:252
 msgid "Do Export"
 msgstr ""
 
-#: ../src/actions/actions-output.cpp:253 ../src/actions/actions-output.cpp:349
+#: ../src/actions/actions-output.cpp:252
 msgid "Do export."
-msgstr ""
-
-#: ../src/actions/actions-output.cpp:265
-msgid "Export Over Write"
-msgstr ""
-
-#: ../src/actions/actions-output.cpp:274
-msgid "Export Drawing Area"
-msgstr ""
-
-#: ../src/actions/actions-output.cpp:278
-msgid "Export Page Area"
-msgstr ""
-
-#: ../src/actions/actions-output.cpp:320
-msgid "Export Text To Path"
-msgstr ""
-
-#: ../src/actions/actions-output.cpp:340
-msgid "Export Background Color"
-msgstr ""
-
-#: ../src/actions/actions-output.cpp:349
-msgid "Export Do"
 msgstr ""
 
 #: ../src/actions/actions-selection.cpp:239
@@ -7781,8 +7757,7 @@ msgid "Outer"
 msgstr ""
 
 #: ../src/extension/internal/filter/morphology.h:65
-#: ../src/ui/dialog/command-palette.cpp:332
-#: ../src/ui/dialog/command-palette.cpp:417
+#: ../src/ui/dialog/command-palette.cpp:255
 #: ../src/ui/widget/preferences-widget.cpp:929
 msgid "Open"
 msgstr ""
@@ -9096,8 +9071,7 @@ msgstr ""
 msgid "en"
 msgstr ""
 
-#: ../src/file.cpp:1172 ../src/ui/dialog/command-palette.cpp:332
-#: ../src/ui/dialog/command-palette.cpp:413
+#: ../src/file.cpp:1172 ../src/ui/dialog/command-palette.cpp:255
 #: ../src/ui/dialog/inkscape-preferences.cpp:2663
 msgid "Import"
 msgstr ""
@@ -16633,7 +16607,7 @@ msgstr ""
 msgid "Set fill color from swatch"
 msgstr ""
 
-#: ../src/ui/dialog/command-palette.cpp:782
+#: ../src/ui/dialog/command-palette.cpp:729
 msgid "History mode"
 msgstr ""
 
@@ -18086,7 +18060,7 @@ msgid "Sele_ction"
 msgstr ""
 
 #: ../src/ui/dialog/find.cpp:66 ../share/ui/dialog-text-edit.glade:119
-#: ../share/ui/menus.xml:274
+#: ../share/ui/menus.xml:275
 msgid "_Text"
 msgstr ""
 
@@ -22370,6 +22344,8 @@ msgid "Keyboard file:"
 msgstr ""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2741
+#: ../share/ui/command-palette-operation-next-full-action.glade:81
+#: ../share/ui/command-palette-operation-next.glade:81
 msgid "Shortcut"
 msgstr ""
 
@@ -32784,6 +32760,28 @@ msgstr ""
 msgid "Style of Paint Bucket fill objects"
 msgstr ""
 
+#: ../share/ui/command-palette-operation-compact.glade:54
+#: ../share/ui/command-palette-operation-next-full-action.glade:60
+msgid "action.full-name"
+msgstr ""
+
+#: ../share/ui/command-palette-operation-compact.glade:58
+msgid "Click to copy"
+msgstr ""
+
+#: ../share/ui/command-palette-operation-next-full-action.glade:63
+msgid "Click to Copy"
+msgstr ""
+
+#: ../share/ui/command-palette-operation-next-full-action.glade:86
+#: ../share/ui/command-palette-operation-next.glade:86
+msgid "Ctrl+F"
+msgstr ""
+
+#: ../share/ui/command-palette-operation-next.glade:64
+msgid "action.full-name : Click to copy"
+msgstr ""
+
 #: ../share/ui/dialog-livepatheffect-add.glade:8
 msgid "Live Path Effects Selector"
 msgstr ""
@@ -33177,7 +33175,7 @@ msgstr ""
 msgid "Version Copied!"
 msgstr ""
 
-#: ../share/ui/inkscape-application.glade:22 ../share/ui/menus.xml:304
+#: ../share/ui/inkscape-application.glade:22 ../share/ui/menus.xml:305
 msgid "_Help"
 msgstr ""
 
@@ -40535,39 +40533,39 @@ msgstr ""
 msgid "Sh_ow/Hide"
 msgstr ""
 
-#: ../share/ui/menus.xml:173
+#: ../share/ui/menus.xml:174
 msgid "_Layer"
 msgstr ""
 
-#: ../share/ui/menus.xml:197
+#: ../share/ui/menus.xml:198
 msgid "_Object"
 msgstr ""
 
-#: ../share/ui/menus.xml:210
+#: ../share/ui/menus.xml:211
 msgid "Cli_p"
 msgstr ""
 
-#: ../share/ui/menus.xml:215
+#: ../share/ui/menus.xml:216
 msgid "Mas_k"
 msgstr ""
 
-#: ../share/ui/menus.xml:220
+#: ../share/ui/menus.xml:221
 msgid "Patter_n"
 msgstr ""
 
-#: ../share/ui/menus.xml:245
+#: ../share/ui/menus.xml:246
 msgid "_Path"
 msgstr ""
 
-#: ../share/ui/menus.xml:290
+#: ../share/ui/menus.xml:291
 msgid "Filter_s"
 msgstr ""
 
-#: ../share/ui/menus.xml:296
+#: ../share/ui/menus.xml:297
 msgid "Exte_nsions"
 msgstr ""
 
-#: ../share/ui/menus.xml:308
+#: ../share/ui/menus.xml:309
 msgid "Tutorials"
 msgstr ""
 
