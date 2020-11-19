@@ -342,7 +342,7 @@ public:
  * Constructor
  */
 ObjectsPanel::ObjectsPanel() :
-    UI::Widget::Panel("/dialogs/objects", SP_VERB_DIALOG_OBJECTS),
+    DialogBase("/dialogs/objects", SP_VERB_DIALOG_OBJECTS),
     root_watcher(nullptr),
     _desktop(nullptr),
     _document(nullptr),
@@ -435,7 +435,7 @@ ObjectsPanel::ObjectsPanel() :
 
     _page.pack_start( _scroller, Gtk::PACK_EXPAND_WIDGET );
     _page.pack_end(_buttonsRow, Gtk::PACK_SHRINK);
-    _getContents()->pack_start(_page, Gtk::PACK_EXPAND_WIDGET);
+    pack_start(_page, Gtk::PACK_EXPAND_WIDGET);
 
     _addBarButton(INKSCAPE_ICON("list-add"), _("Add layer..."), (int)SP_VERB_LAYER_NEW);
     _addBarButton(INKSCAPE_ICON("list-remove"), _("Remove object"), (int)SP_VERB_EDIT_DELETE);
@@ -447,7 +447,7 @@ ObjectsPanel::ObjectsPanel() :
     _buttonsRow.pack_start(_buttonsSecondary, Gtk::PACK_EXPAND_WIDGET);
     _buttonsRow.pack_end(_buttonsPrimary, Gtk::PACK_EXPAND_WIDGET);
 
-    setDesktop(getDesktop());
+    update();
     show_all_children();
 }
 
@@ -456,8 +456,12 @@ ObjectsPanel::ObjectsPanel() :
  */
 ObjectsPanel::~ObjectsPanel()
 {
-    //Set the desktop to null, which will disconnect all object watchers
-    setDesktop(nullptr);
+    document_changed.disconnect();
+    selection_changed.disconnect();
+    layer_changed.disconnect();
+
+    setDocument(nullptr, nullptr);
+
     if (_model) {
         delete _model;
         _model = nullptr;
@@ -487,9 +491,13 @@ void ObjectsPanel::setDocument(SPDesktop* desktop, SPDocument* document)
 /**
  * Set the current panel desktop
  */
-void ObjectsPanel::setDesktop( SPDesktop* desktop )
+void ObjectsPanel::update()
 {
-    Panel::setDesktop(desktop);
+    if (!_app) {
+        std::cerr << "ObjectsPanel::update(): _app is null" << std::endl;
+        return;
+    }
+    SPDesktop *desktop = getDesktop();
 
     if ( desktop != _desktop ) {
         document_changed.disconnect();
@@ -499,7 +507,7 @@ void ObjectsPanel::setDesktop( SPDesktop* desktop )
             _desktop = nullptr;
         }
 
-        _desktop = Panel::getDesktop();
+        _desktop = getDesktop();
         if (_desktop ) {
             document_changed = _desktop->connectDocumentReplaced( sigc::mem_fun(*this, &ObjectsPanel::setDocument));
             selection_changed = _desktop->selection->connectChanged( sigc::mem_fun(*this, &ObjectsPanel::setSelection));
@@ -683,7 +691,7 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
             return true;
         }
 
-        auto selection = _getSelection();
+        auto selection = SP_ACTIVE_DESKTOP->getSelection();
         auto row = *_store->get_iter(path);
         if (!row) return false;
         SPItem *item = row[_model->_colObject];
