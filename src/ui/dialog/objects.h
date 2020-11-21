@@ -37,6 +37,7 @@ namespace UI {
 namespace Dialog {
 
 class ObjectsPanel;
+class ObjectWatcher;
 
 enum {COL_LABEL, COL_VISIBLE, COL_LOCKED};
 
@@ -46,37 +47,6 @@ enum SelectionStates : SelectionState {
     SELECTED_OBJECT = 1,  // Object is in the desktop's selection
     LAYER_FOCUSED = 2,    // This layer is the desktop's focused layer
     LAYER_FOCUS_CHILD = 4 // This object is a child of the focused layer
-};
-
-static double SELECTED_ALPHA[8] = {0.0, 2.5, 4.0, 2.0, 8.0, 2.5, 1.0, 1.0};
-
-class ObjectWatcher : public Inkscape::XML::NodeObserver
-{
-public:
-
-    ObjectWatcher(ObjectsPanel* panel, SPObject* obj, Gtk::TreeRow *row);
-    ~ObjectWatcher() override;
-
-    void updateRowInfo();
-    void updateRowBg();
-    void addChild(Node &node);
-    void setSelectedBit(SelectionState mask, bool enabled);
-    void moveChild(SPObject *child, SPObject *sibling);
-
-    Gtk::TreeNodeChildren getParentIter();
-    const Gtk::TreeRow getChildIter(SPObject *child);
-
-    void notifyChildAdded( Node &node, Node &child, Node *prev ) override;
-    void notifyChildRemoved( Node &/*node*/, Node &child, Node* /*prev*/ ) override;
-    void notifyChildOrderChanged( Node &parent, Node &child, Node */*old_prev*/, Node *new_prev ) override;
-    void notifyAttributeChanged( Node &node, GQuark name, Util::ptr_shared /*old_value*/, Util::ptr_shared /*new_value*/ ) override;
-
-    Node* node;
-    std::unordered_map<Node const*, std::unique_ptr<ObjectWatcher>> child_watchers;
-private:
-    Gtk::TreeModel::RowReference row_ref;
-    ObjectsPanel* panel;
-    SelectionState selection_state;
 };
 
 /**
@@ -98,16 +68,29 @@ public:
 
     SPObject* getObject(Node *node);
     ObjectWatcher* getWatcher(Node *node);
+    ObjectWatcher *getRootWatcher() const { return root_watcher; };
+
+    Node *getRepr(Gtk::TreeModel::Row const &row) const;
+    SPItem *getItem(Gtk::TreeModel::Row const &row) const;
+
+    bool isDummy(Gtk::TreeModel::Row const &row) const { return getRepr(row) == nullptr; }
+    bool hasDummyChildren(Gtk::TreeModel::Row const &row) const;
+    bool removeDummyChildren(Gtk::TreeModel::Row const &row);
 
     Glib::RefPtr<Gtk::TreeStore> _store;
     ModelColumns* _model;
+
+    bool isObserverBlocked() const { return observer_blocked != 0; }
 
 private:
     //Internal Classes:
     class InternalUIBounce;
 
     ObjectWatcher* root_watcher;
-    
+
+    Gtk::TreeModel::Path dragging_path;
+    unsigned observer_blocked = 0;
+
     sigc::connection document_changed;
     sigc::connection selection_changed;
     sigc::connection layer_changed;
@@ -116,7 +99,6 @@ private:
     SPDesktop* _desktop;
     SPDocument* _document;
     SPObject *_layer;
-    ObjectSet selection;
     
     //Show icons in the context menu
     bool _show_contextmenu_icons;
@@ -160,6 +142,9 @@ private:
     bool select_row( Glib::RefPtr<Gtk::TreeModel> const & model, Gtk::TreeModel::Path const & path, bool b );
 
     void connectPopupItems();
+
+    bool on_drag_motion(const Glib::RefPtr<Gdk::DragContext> &, int, int, guint);
+    bool on_drag_drop(const Glib::RefPtr<Gdk::DragContext> &, int, int, guint);
 };
 
 

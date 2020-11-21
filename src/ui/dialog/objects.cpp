@@ -61,18 +61,79 @@
 #include "ui/widget/layertypeicon.h"
 #include "ui/widget/shapeicon.h"
 
+static double const SELECTED_ALPHA[8] = {0.0, 2.5, 4.0, 2.0, 8.0, 2.5, 1.0, 1.0};
+
 //#define DUMP_LAYERS 1
 
 namespace Inkscape {
 namespace UI {
 namespace Dialog {
 
+class ObjectWatcher : public Inkscape::XML::NodeObserver
+{
+public:
+    ObjectWatcher() = delete;
+    ObjectWatcher(ObjectsPanel *panel, SPItem *, Gtk::TreeRow *row);
+    ~ObjectWatcher() override;
+
+    void updateRowInfo();
+    void updateRowBg();
+
+    void addDummyChild();
+    void addChild(SPItem *);
+    void addChildren();
+    void setSelectedBit(SelectionState mask, bool enabled);
+    void setSelectedBitRecursive(SelectionState mask, bool enabled);
+    void moveChild(Node &child, Node *sibling);
+
+    Gtk::TreeNodeChildren getChildren() const;
+    Gtk::TreeIter getChildIter(Node *) const;
+
+    void notifyChildAdded(Node &, Node &, Node *) override;
+    void notifyChildRemoved(Node &, Node &, Node *) override;
+    void notifyChildOrderChanged(Node &, Node &child, Node *, Node *) override;
+    void notifyAttributeChanged(Node &, GQuark, Util::ptr_shared, Util::ptr_shared) override;
+
+    /// Associate this watcher with a tree row
+    void setRow(const Gtk::TreeModel::Path &path)
+    {
+        assert(path);
+        row_ref = Gtk::TreeModel::RowReference(panel->_store, path);
+    }
+    void setRow(const Gtk::TreeModel::Row &row) { setRow(panel->_store->get_path(row)); }
+
+    /// True if this watchr has a valid row reference.
+    bool hasRow() const { return bool(row_ref); }
+
+    /// Transfer a child watcher to its new parent
+    void transferChild(Node *childnode)
+    {
+        auto *target = panel->getWatcher(childnode->parent());
+        assert(target != this);
+        auto nh = child_watchers.extract(childnode);
+        assert(nh);
+        bool inserted = target->child_watchers.insert(std::move(nh)).inserted;
+        assert(inserted);
+    }
+
+    /// The XML node associated with this watcher.
+    Node *getRepr() const { return node; }
+
+    std::unordered_map<Node const *, std::unique_ptr<ObjectWatcher>> child_watchers;
+
+private:
+    Node *node;
+    Gtk::TreeModel::RowReference row_ref;
+    ObjectsPanel *panel;
+    SelectionState selection_state;
+};
+
 class ObjectsPanel::ModelColumns : public Gtk::TreeModel::ColumnRecord
 {
 public:
     ModelColumns()
     {
-        add(_colObject);
+        add(_colNode);
         add(_colLabel);
         add(_colType);
         add(_colIconColor);
@@ -81,7 +142,7 @@ public:
         add(_colLocked);
     }
     ~ModelColumns() override = default;
-    Gtk::TreeModelColumn<SPItem*> _colObject;
+    Gtk::TreeModelColumn<Node*> _colNode;
     Gtk::TreeModelColumn<Glib::ustring> _colLabel;
     Gtk::TreeModelColumn<Glib::ustring> _colType;
     Gtk::TreeModelColumn<unsigned int> _colIconColor;
@@ -106,20 +167,39 @@ ObjectsPanel& ObjectsPanel::getInstance()
  * @param iter The optional list store iter for the item, if not provided,
  *             assumes this is the root 'document' object.
  */
-ObjectWatcher::ObjectWatcher(ObjectsPanel* panel, SPObject* obj, Gtk::TreeRow *row) :
+ObjectWatcher::ObjectWatcher(ObjectsPanel* panel, SPItem* obj, Gtk::TreeRow *row) :
     panel(panel),
     row_ref(),
     selection_state(0),
     node(obj->getRepr())
 {
     if(row != nullptr) {
-        auto path = panel->_store->get_path(*row);
-        row_ref = Gtk::TreeModel::RowReference(panel->_store, path);
+        assert(row->children().empty());
+        setRow(*row);
         updateRowInfo();
     }
     node->addObserver(*this);
-    for (auto& child: obj->children) {
-        addChild(*(child.getRepr()));
+
+    // Only show children for groups (and their subclasses like SPAnchor or SPRoot)
+    if (!dynamic_cast<SPGroup const*>(obj)) {
+        return;
+    }
+
+    // We'll add children for the root node (row == NULL), for all other
+    // nodes we'll just add a dummy child and wait until the user expands
+    // the row.
+
+    if (!row) {
+        addChildren();
+    } else {
+        for (auto &child : obj->children) {
+            if (dynamic_cast<SPItem const *>(&child)) {
+                addDummyChild();
+
+                // one dummy child is enough to make the group expandable
+                break;
+            }
+        }
     }
 }
 ObjectWatcher::~ObjectWatcher()
@@ -140,12 +220,19 @@ ObjectWatcher::~ObjectWatcher()
  */
 void ObjectWatcher::updateRowInfo() {
     auto item = dynamic_cast<SPItem *>(panel->getObject(node));
-    auto row = *panel->_store->get_iter(row_ref.get_path());
+    assert(item);
 
     if (item) {
-        gchar const * label = item->label() ? item->label() : item->getId();
-        row[panel->_model->_colObject] = item;
-        row[panel->_model->_colLabel] = label ? label : item->defaultLabel();
+        assert(row_ref);
+        assert(row_ref.get_path());
+
+        auto row = *panel->_store->get_iter(row_ref.get_path());
+        row[panel->_model->_colNode] = node;
+
+        // show ids without "#"
+        char const *id = item->getId();
+        row[panel->_model->_colLabel] = (id && !item->label()) ? id : item->defaultLabel();
+
         row[panel->_model->_colType] = item->typeName();
         row[panel->_model->_colIconColor] = item->highlight_color();
         row[panel->_model->_colVisible] = !item->isHidden();
@@ -158,6 +245,7 @@ void ObjectWatcher::updateRowInfo() {
  */
 void ObjectWatcher::updateRowBg()
 {
+    assert(row_ref);
     auto row = *panel->_store->get_iter(row_ref.get_path());
     if (row) {
         auto alpha = SELECTED_ALPHA[selection_state];
@@ -184,8 +272,7 @@ void ObjectWatcher::updateRowBg()
  */
 void ObjectWatcher::setSelectedBit(SelectionState mask, bool enabled) {
     if (!row_ref) return;
-    auto row = *panel->_store->get_iter(row_ref.get_path());
-    if (row) {
+    {
         SelectionState value = selection_state;
         SelectionState original = value;
         if (enabled) {
@@ -200,23 +287,61 @@ void ObjectWatcher::setSelectedBit(SelectionState mask, bool enabled) {
     }
 }
 
+/**
+ * Flip the selected state bit on or off as needed, on this watcher and all
+ * its direct and indirect children.
+ */
+void ObjectWatcher::setSelectedBitRecursive(SelectionState mask, bool enabled)
+{
+    setSelectedBit(mask, enabled);
+
+    for (auto &pair : child_watchers) {
+        pair.second->setSelectedBitRecursive(mask, enabled);
+    }
+}
+
+void ObjectWatcher::addDummyChild()
+{
+    auto const children = getChildren();
+    assert(!children || children.empty());
+    auto const iter = panel->_store->append(children);
+    assert(panel->isDummy(*iter));
+}
 
 /**
  * Add the child object to this node.
  *
  * @param child - SPObject to be added
  */
-void ObjectWatcher::addChild(Node &node)
+void ObjectWatcher::addChild(SPItem *child)
 {
-    auto obj = panel->getObject(&node);
-    if (!obj || !dynamic_cast<SPItem *>(obj))
-        return; // Object must be a viable SPItem.
-    Gtk::TreeModel::Row row = *(panel->_store->append(getParentIter()));
-    auto watcher = new ObjectWatcher(panel, obj, &row);
-    child_watchers.insert(std::make_pair(&node, watcher));
+    auto *node = child->getRepr();
+    assert(node);
+    Gtk::TreeModel::Row row = *(panel->_store->append(getChildren()));
+
+    auto &watcher = child_watchers[node];
+    assert(!watcher);
+    watcher.reset(new ObjectWatcher(panel, child, &row));
+
     // Make sure new children have the right focus set.
     if ((selection_state & LAYER_FOCUSED) != 0) {
         watcher->setSelectedBit(LAYER_FOCUS_CHILD, true);
+    }
+}
+
+/**
+ * Add all SPItem children as child rows.
+ */
+void ObjectWatcher::addChildren()
+{
+    assert(child_watchers.empty());
+
+    auto obj = panel->getObject(node);
+
+    for (auto it = obj->children.rbegin(), it_end = obj->children.rend(); it != it_end; ++it) {
+        if (auto child = dynamic_cast<SPItem *>(&*it)) {
+            addChild(child);
+        }
     }
 }
 
@@ -227,33 +352,27 @@ void ObjectWatcher::addChild(Node &node)
  * @param sibling - Optional sibling Object to add next to, if nullptr the
  *                  object is moved to BEFORE the first item.
  */
-void ObjectWatcher::moveChild(SPObject *child, SPObject *sibling)
+void ObjectWatcher::moveChild(Node &child, Node *sibling)
 {
-    auto child_iter = getChildIter(child);
+    auto child_iter = getChildIter(&child);
     if (!child_iter)
         return; // This means the child was never added, probably not an SPItem.
     auto sibling_iter = getChildIter(sibling);
-    auto child_const = const_cast<GtkTreeIter*>(child_iter.get_gobject_if_not_end());
-    GtkTreeIter* sibling_const = nullptr;
-    if (sibling_iter) {
-        sibling_const = const_cast<GtkTreeIter*>(sibling_iter.get_gobject_if_not_end());
-    }
-    // Gtkmm can move to before, but not move to 'after'
-    gtk_tree_store_move_after(panel->_store->gobj(), child_const, sibling_const);
+    panel->_store->move(child_iter, sibling_iter);
 }
 
 /**
- * Get the parent TreeRow's children iterator to this object
+ * Get the TreeRow's children iterator
  *
  * @returns Gtk Tree Node Children iterator
  */
-Gtk::TreeNodeChildren ObjectWatcher::getParentIter()
+Gtk::TreeNodeChildren ObjectWatcher::getChildren() const
 {
     Gtk::TreeModel::Path path;
     if (row_ref && (path = row_ref.get_path())) {
-        const Gtk::TreeRow row = **panel->_store->get_iter(path);
-        return row->children();
+        return panel->_store->get_iter(path)->children();
     }
+    assert(!row_ref);
     return panel->_store->children();
 }
 
@@ -261,38 +380,113 @@ Gtk::TreeNodeChildren ObjectWatcher::getParentIter()
  * Convert SPObject to TreeView Row, assuming the object is a child.
  *
  * @param child - The child object to find in this branch
- * @returns Gtk TreeRow for the child, or nullptr if not found
+ * @returns Gtk TreeRow for the child, or end() if not found
  */
-const Gtk::TreeRow ObjectWatcher::getChildIter(SPObject *child)
+Gtk::TreeIter ObjectWatcher::getChildIter(Node *node) const
 {
-    Gtk::TreeRow ret;
-    for (auto &iter : getParentIter()) {
-        if (iter) {
-            Gtk::TreeModel::Row row = *iter;
-            if(row[panel->_model->_colObject] == child) {
-                ret = *iter;
-            }
+    auto childrows = getChildren();
+
+    if (!node) {
+        return childrows.end();
+    }
+
+    // Note: TreeRow inherits from TreeIter, so this `row` variable is
+    // also an iterator and a valid return value.
+    for (auto &row : childrows) {
+        if (panel->getRepr(row) == node) {
+            return row;
         }
     }
-    return ret;
+
+    return childrows.begin();
 }
 
 void ObjectWatcher::notifyChildAdded( Node &node, Node &child, Node *prev )
 {
-    addChild(child);
-    moveChild(panel->getObject(&child), panel->getObject(prev));
+    assert(this->node == &node);
+
+    if (panel->isObserverBlocked()) {
+        return;
+    }
+
+    // Ignore XML nodes which are not displayable items
+    auto item = dynamic_cast<SPItem *>(panel->getObject(&child));
+    if (!item) {
+        return;
+    }
+
+    auto const childrows = getChildren();
+
+    if (childrows.empty()) {
+        addDummyChild();
+        return;
+    }
+
+    if (panel->isDummy(childrows[0])) {
+        return;
+    }
+
+    addChild(item);
+    moveChild(child, prev);
 }
-void ObjectWatcher::notifyChildRemoved( Node &/*node*/, Node &child, Node* /*prev*/ )
+void ObjectWatcher::notifyChildRemoved( Node &node, Node &child, Node* /*prev*/ )
 {
-    child_watchers.erase(&child);
+    assert(this->node == &node);
+
+    if (panel->isObserverBlocked()) {
+        return;
+    }
+
+    if (child_watchers.erase(&child) > 0) {
+        return;
+    }
+
+    if (node.firstChild() == nullptr) {
+        assert(row_ref);
+        auto iter = panel->_store->get_iter(row_ref.get_path());
+        panel->removeDummyChildren(*iter);
+    }
 }
 void ObjectWatcher::notifyChildOrderChanged( Node &parent, Node &child, Node */*old_prev*/, Node *new_prev )
 {
-    moveChild(panel->getObject(&child), panel->getObject(new_prev));
+    assert(this->node == &parent);
+
+    if (panel->isObserverBlocked()) {
+        return;
+    }
+
+    moveChild(child, new_prev);
 }
 void ObjectWatcher::notifyAttributeChanged( Node &node, GQuark name, Util::ptr_shared /*old_value*/, Util::ptr_shared /*new_value*/ )
 {
+    assert(this->node == &node);
+
+    if (panel->isObserverBlocked()) {
+        return;
+    }
+
+    // The root <svg> node doesn't have a row
+    if (this == panel->getRootWatcher()) {
+        return;
+    }
+
     // Almost anything could change the icon, so update upon any change, defer for lots of updates.
+
+    // examples of not-so-obvious cases:
+    // - width/height: Can change type "circle" to an "ellipse"
+
+    static std::set<GQuark> const excluded{
+        g_quark_from_static_string("transform"),
+        g_quark_from_static_string("x"),
+        g_quark_from_static_string("y"),
+        g_quark_from_static_string("d"),
+        g_quark_from_static_string("sodipodi:nodetypes"),
+    };
+
+    if (excluded.count(name)) {
+        return;
+    }
+
     updateRowInfo();
 }
 
@@ -318,15 +512,18 @@ SPObject *ObjectsPanel::getObject(Node *node) {
  */
 ObjectWatcher* ObjectsPanel::getWatcher(Node *node)
 {
-    if (root_watcher->node == node) {
+    assert(node);
+    if (root_watcher->getRepr() == node) {
         return root_watcher;
     } else if (node->parent()) {
         auto parent_watcher = getWatcher(node->parent());
         if (parent_watcher) {
-            return &(*parent_watcher->child_watchers[node]);
+            auto it = parent_watcher->child_watchers.find(node);
+            if (it != parent_watcher->child_watchers.end()) {
+                return it->second.get();
+            }
         }
     }
-    g_warning("Can't find node in reverse lookup.");
     return nullptr;
 }
 
@@ -368,6 +565,8 @@ ObjectsPanel::ObjectsPanel() :
     _name_column = Gtk::manage(new Gtk::TreeViewColumn());
     _text_renderer = Gtk::manage(new Gtk::CellRendererText());
     _text_renderer->property_editable() = true;
+    _text_renderer->property_ellipsize().set_value(Pango::ELLIPSIZE_END);
+
     auto icon_renderer = Gtk::manage(new Inkscape::UI::Widget::CellRendererItemIcon());
     icon_renderer->property_xpad() = 2;
     icon_renderer->property_width() = 24;
@@ -412,10 +611,24 @@ ObjectsPanel::ObjectsPanel() :
     _tree.get_selection()->set_mode(Gtk::SELECTION_NONE);
 
     //Set up tree signals
-    _tree.signal_button_release_event().connect( sigc::mem_fun(*this, &ObjectsPanel::_handleButtonEvent), false );
+    _tree.signal_button_press_event().connect(sigc::mem_fun(*this, &ObjectsPanel::_handleButtonEvent), false);
     _tree.signal_key_press_event().connect( sigc::mem_fun(*this, &ObjectsPanel::_handleKeyEvent), false );
     _tree.signal_row_collapsed().connect( sigc::bind<bool>(sigc::mem_fun(*this, &ObjectsPanel::_setExpanded), false));
     _tree.signal_row_expanded().connect( sigc::bind<bool>(sigc::mem_fun(*this, &ObjectsPanel::_setExpanded), true));
+
+    // Before expanding a row, replace the dummy child with the actual children
+    _tree.signal_test_expand_row().connect([this](const Gtk::TreeModel::iterator &iter, const Gtk::TreeModel::Path &) {
+        if (removeDummyChildren(*iter)) {
+            assert(iter);
+            assert(*iter);
+            getWatcher(getRepr(*iter))->addChildren();
+            setSelection(_desktop->selection);
+        }
+        return false;
+    });
+
+    _tree.signal_drag_motion().connect(sigc::mem_fun(*this, &ObjectsPanel::on_drag_motion), false);
+    _tree.signal_drag_drop().connect(sigc::mem_fun(*this, &ObjectsPanel::on_drag_drop), false);
 
     //Set up the label editing signals
     _text_renderer->signal_edited().connect( sigc::mem_fun(*this, &ObjectsPanel::_handleEdited));
@@ -526,19 +739,13 @@ void ObjectsPanel::update()
  */
 void ObjectsPanel::setSelection(Selection *selected)
 {
-    for (auto item : selection.items()) {
-        auto watcher = getWatcher(item->getRepr());
-        if (watcher) {
-            watcher->setSelectedBit(SELECTED_OBJECT, false);
-        }
-    }
-    selection.clear();
+    root_watcher->setSelectedBitRecursive(SELECTED_OBJECT, false);
+
     for (auto item : selected->items()) {
         auto watcher = getWatcher(item->getRepr());
         if (watcher) {
             watcher->setSelectedBit(SELECTED_OBJECT, true);
         }
-        selection.add(item);
     }
 }
 
@@ -549,16 +756,11 @@ void ObjectsPanel::setSelection(Selection *selected)
  */
 void ObjectsPanel::setLayer(SPObject *layer)
 {
-    if (_layer) {
-        auto old_watcher = getWatcher(_layer->getRepr());
-        old_watcher->setSelectedBit(LAYER_FOCUSED, false);
-        for (const auto &iter : old_watcher->child_watchers) {
-            iter.second->setSelectedBit(LAYER_FOCUS_CHILD, false);
-        }
-    }
+    root_watcher->setSelectedBitRecursive(LAYER_FOCUS_CHILD | LAYER_FOCUSED, false);
+
     if (!layer) return;
     auto watcher = getWatcher(layer->getRepr());
-    if (watcher) {
+    if (watcher && watcher != root_watcher) {
         watcher->setSelectedBit(LAYER_FOCUSED, true);
         for (const auto &iter : watcher->child_watchers) {
             iter.second->setSelectedBit(LAYER_FOCUS_CHILD, true);
@@ -627,7 +829,7 @@ Gtk::MenuItem& ObjectsPanel::_addPopupItem( SPDesktop *desktop, unsigned int cod
 void ObjectsPanel::toggleVisible(const Glib::ustring& path)
 {
     Gtk::TreeModel::Row row = *_store->get_iter(path);
-    SPItem* item = row[_model->_colObject];
+    SPItem* item = getItem(row);
     if (item) {
         item->setHidden(row[_model->_colVisible]);
     }
@@ -641,7 +843,7 @@ void ObjectsPanel::toggleVisible(const Glib::ustring& path)
 void ObjectsPanel::toggleLocked(const Glib::ustring& path)
 {
     Gtk::TreeModel::Row row = *_store->get_iter(path);
-    SPItem* item = row[_model->_colObject];
+    SPItem* item = getItem(row);
     if (item) {
         item->setLocked(!row[_model->_colLocked]);
     }
@@ -684,16 +886,18 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
     Gtk::TreeViewColumn* col = nullptr;
     int x, y;
     if (_tree.get_path_at_pos((int)event->x, (int)event->y, path, col, x, y)) {
+        dragging_path = path;
+
         // This doesn't work, it might be being eaten.
         if (event->type == GDK_2BUTTON_PRESS) {
             _tree.set_cursor(path, *col, true);
             return true;
         }
 
-        auto selection = SP_ACTIVE_DESKTOP->getSelection();
+        auto selection = _desktop->getSelection();
         auto row = *_store->get_iter(path);
         if (!row) return false;
-        SPItem *item = row[_model->_colObject];
+        SPItem *item = getItem(row);
         SPGroup *group = SP_GROUP(item);
 
         // Clicking on layers firstly switches to that layer.
@@ -738,7 +942,7 @@ void ObjectsPanel::_handleEdited(const Glib::ustring& path, const Glib::ustring&
 {
     auto row = *_store->get_iter(path);
     if (row && !new_text.empty()) {
-        SPItem *item = row[_model->_colObject];
+        SPItem *item = getItem(row);
         if (!item->label() || new_text != item->label()) {
             item->setLabel(new_text.c_str());
             DocumentUndo::done(_document, SP_VERB_NONE, _("Rename object"));
@@ -865,7 +1069,158 @@ void ObjectsPanel::connectPopupItems()
     for (auto & it : _watchingNonBottom) {
         it->set_sensitive( false );
     }
+}
 
+/**
+ * Get the XML node which is associated with a row. Can be NULL for dummy children.
+ */
+Node *ObjectsPanel::getRepr(Gtk::TreeModel::Row const &row) const
+{
+    return row[_model->_colNode];
+}
+
+/**
+ * Get the item which is associated with a row. If getRepr(row) is not NULL,
+ * then this call is expected to also not be NULL.
+ */
+SPItem *ObjectsPanel::getItem(Gtk::TreeModel::Row const &row) const
+{
+    auto const this_const = const_cast<ObjectsPanel *>(this);
+    return dynamic_cast<SPItem *>(this_const->getObject(getRepr(row)));
+}
+
+/**
+ * Return true if this row has dummy children.
+ */
+bool ObjectsPanel::hasDummyChildren(Gtk::TreeModel::Row const &row) const
+{
+    for (auto &c : row.children()) {
+        if (isDummy(c)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * If the given row has dummy children, remove them.
+ * @pre Eiter all, or no children are dummies
+ * @post If the function returns true, the row has no children
+ * @return False if there are children and they are not dummies
+ */
+bool ObjectsPanel::removeDummyChildren(Gtk::TreeModel::Row const &row)
+{
+    auto &children = row.children();
+    if (!children.empty()) {
+        Gtk::TreeStore::iterator child = children[0];
+        if (!isDummy(*child)) {
+            assert(!hasDummyChildren(row));
+            return false;
+        }
+
+        do {
+            assert(child->parent() == row);
+            assert(isDummy(*child));
+            child = _store->erase(child);
+        } while (child && child->parent() == row);
+    }
+    return true;
+}
+
+/**
+ * Signal handler for "drag-motion"
+ *
+ * Refuses drops into non-group items.
+ */
+bool ObjectsPanel::on_drag_motion(const Glib::RefPtr<Gdk::DragContext> &context, int x, int y, guint time)
+{
+    Gtk::TreeModel::Path path;
+    Gtk::TreeViewDropPosition pos;
+
+    auto dragging_iter = _store->get_iter(dragging_path);
+    Node *dragging_repr = dragging_iter ? getRepr(*dragging_iter) : nullptr;
+
+    if (!dragging_repr) {
+        goto finally;
+    }
+
+    _tree.get_dest_row_at_pos(x, y, path, pos);
+
+    if (path) {
+        auto iter = _store->get_iter(path);
+        auto repr = getRepr(*iter);
+
+        bool const drop_into = pos != Gtk::TREE_VIEW_DROP_BEFORE && //
+                               pos != Gtk::TREE_VIEW_DROP_AFTER;
+
+        // don't drop on self
+        if (repr == dragging_repr) {
+            goto finally;
+        }
+
+        auto item = getItem(*iter);
+
+        // only groups can have children
+        if (drop_into && !dynamic_cast<SPGroup const *>(item)) {
+            goto finally;
+        }
+
+        context->drag_status(Gdk::ACTION_MOVE, time);
+        return false;
+    }
+
+finally:
+    // remove drop highlight
+    _tree.unset_drag_dest_row();
+    context->drag_refuse(time);
+    return true;
+}
+
+/**
+ * Signal handler for "drag-drop".
+ *
+ * Do the actual work of drag-and-drop.
+ */
+bool ObjectsPanel::on_drag_drop(const Glib::RefPtr<Gdk::DragContext> &context, int x, int y, guint time)
+{
+    auto dragging_iter = _store->get_iter(dragging_path);
+    Node *dragging_repr = dragging_iter ? getRepr(*dragging_iter) : nullptr;
+
+    Gtk::TreeModel::Path path;
+    Gtk::TreeViewDropPosition pos;
+    _tree.get_dest_row_at_pos(x, y, path, pos);
+
+    if (dragging_repr && path) {
+        auto oset = ObjectSet(_document);
+        auto drop_repr = getRepr(*_store->get_iter(path));
+        bool const drop_into = pos != Gtk::TREE_VIEW_DROP_BEFORE && //
+                               pos != Gtk::TREE_VIEW_DROP_AFTER;
+
+        if (drop_into) {
+            oset.add(dragging_repr);
+            oset.toLayer(_document->getObjectByRepr(drop_repr));
+        } else {
+            if (drop_repr->parent() != dragging_repr->parent()) {
+                oset.add(dragging_repr);
+                oset.toLayer(_document->getObjectByRepr(drop_repr->parent()));
+
+                // Switching layers has invalidated the pointer
+                dragging_repr = oset.singleRepr();
+                assert(dragging_repr);
+            }
+
+            if (pos == Gtk::TREE_VIEW_DROP_AFTER) {
+                drop_repr = drop_repr->prev();
+            }
+
+            if (dragging_repr != drop_repr) {
+                dragging_repr->parent()->changeOrder(dragging_repr, drop_repr);
+            }
+        }
+
+    }
+
+    return true;
 }
 
 } //namespace Dialogs
