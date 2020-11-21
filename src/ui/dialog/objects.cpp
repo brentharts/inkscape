@@ -357,6 +357,13 @@ void ObjectWatcher::moveChild(Node &child, Node *sibling)
     auto child_iter = getChildIter(&child);
     if (!child_iter)
         return; // This means the child was never added, probably not an SPItem.
+
+    // sibling might not be an SPItem and thus not be represented in the
+    // TreeView. Find the closest SPItem and use that for the reordering.
+    while (sibling && !dynamic_cast<SPItem const *>(panel->getObject(sibling))) {
+        sibling = sibling->prev();
+    }
+
     auto sibling_iter = getChildIter(sibling);
     panel->_store->move(child_iter, sibling_iter);
 }
@@ -398,6 +405,7 @@ Gtk::TreeIter ObjectWatcher::getChildIter(Node *node) const
         }
     }
 
+    g_warning("%s cound not find child <%s %p>", __func__, node->name(), node);
     return childrows.begin();
 }
 
