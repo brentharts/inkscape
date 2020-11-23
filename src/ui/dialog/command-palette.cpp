@@ -34,13 +34,13 @@
 #include <gtkmm/enums.h>
 #include <gtkmm/eventbox.h>
 #include <gtkmm/label.h>
+#include <gtkmm/messagedialog.h>
 #include <gtkmm/recentinfo.h>
 #include <iostream>
 #include <iterator>
 #include <memory>
 #include <optional>
 #include <ostream>
-#include <readline/history.h>
 #include <sigc++/adaptors/bind.h>
 #include <sigc++/functors/mem_fun.h>
 #include <string>
@@ -52,6 +52,8 @@
 #include "inkscape-window.h"
 #include "inkscape.h"
 #include "io/resource.h"
+#include "message-context.h"
+#include "message-stack.h"
 #include "object/uri.h"
 #include "preferences.h"
 #include "ui/interface.h"
@@ -59,6 +61,7 @@
 #include "xml/repr.h"
 
 namespace Inkscape {
+class MessageStack;
 namespace UI {
 namespace Dialog {
 
@@ -806,10 +809,22 @@ bool CommandPalette::execute_action(const ActionPtrName &action_ptr_name, const 
             }
             break;
         case TypeOfVariant::INT:
-            action_ptr->activate(Glib::Variant<int>::create(std::stoi(value)));
+            try {
+                action_ptr->activate(Glib::Variant<int>::create(std::stoi(value)));
+            } catch (...) {
+                if (SPDesktop *dt = SP_ACTIVE_DESKTOP; dt) {
+                    dt->messageStack()->flash(ERROR_MESSAGE, _("Invalid input! enter an integer."));
+                }
+            }
             break;
         case TypeOfVariant::DOUBLE:
-            action_ptr->activate(Glib::Variant<double>::create(std::stod(value)));
+            try {
+                action_ptr->activate(Glib::Variant<double>::create(std::stod(value)));
+            } catch (...) {
+                if (SPDesktop *dt = SP_ACTIVE_DESKTOP; dt) {
+                    dt->messageStack()->flash(ERROR_MESSAGE, _("Invalid input! enter a rational number."));
+                }
+            }
             break;
         case TypeOfVariant::STRING:
             action_ptr->activate(Glib::Variant<Glib::ustring>::create(value));
