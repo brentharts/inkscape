@@ -117,12 +117,8 @@ CommandPalette::CommandPalette()
 
     // Setup operations [actions, verbs, extenstions]
     {
-        auto all_actions_ptr_name = list_all_actions();
-
-        // setup actions
-        for (const auto &action_ptr_name : all_actions_ptr_name) {
-            generate_action_operation(action_ptr_name, true);
-        }
+        // setup actions - win doc actions loaded in open()
+        load_app_actions();
 
         // setup recent files
         {
@@ -183,6 +179,11 @@ CommandPalette::CommandPalette()
 
 void CommandPalette::open()
 {
+    if (not _win_doc_actions_loaded) {
+        // win doc don't exist at construction so loading at first time opening Command Palette
+        load_win_doc_actions();
+        _win_doc_actions_loaded = true;
+    }
     _CPBase->show_all();
     _CPFilter->grab_focus();
     _is_open = true;
@@ -897,26 +898,22 @@ Gtk::Button *CommandPalette::get_full_action_name(Gtk::ListBoxRow *child)
     return nullptr;
 }
 
-// Get a list of all actions (application, window, and document), properly prefixed.
-// We need to do this ourselves as Gtk::Application does not have a function for this.
-std::vector<CommandPalette::ActionPtrName> CommandPalette::list_all_actions()
+void CommandPalette::load_app_actions()
 {
     auto gapp = InkscapeApplication::instance()->gtk_app();
     std::vector<ActionPtrName> all_actions_info;
 
     std::vector<Glib::ustring> actions = gapp->list_actions();
-    std::sort(actions.begin(), actions.end());
-
-    for (auto action : actions) {
-        all_actions_info.emplace_back(gapp->lookup_action(action), "app." + action);
+    for (const auto &action : actions) {
+        generate_action_operation(get_action_ptr_name(action), true);
     }
-
-    // FIXME: doesn't work because used before window is intantiated so window always null
+}
+void CommandPalette::load_win_doc_actions()
+{
     if (auto window = InkscapeApplication::instance()->get_active_window(); window) {
         std::vector<Glib::ustring> actions = window->list_actions();
-        std::sort(actions.begin(), actions.end());
         for (auto action : actions) {
-            all_actions_info.emplace_back(window->lookup_action(action), "win." + action);
+            generate_action_operation(get_action_ptr_name(action), true);
         }
 
         if (auto document = window->get_document(); document) {
@@ -924,15 +921,13 @@ std::vector<CommandPalette::ActionPtrName> CommandPalette::list_all_actions()
             if (map) {
                 std::vector<Glib::ustring> actions = map->list_actions();
                 for (auto action : actions) {
-                    all_actions_info.emplace_back(map->lookup_action(action), "doc." + action);
+                    generate_action_operation(get_action_ptr_name(action), true);
                 }
             } else {
                 std::cerr << "CommandPalette::list_all_actions: No document map!" << std::endl;
             }
         }
     }
-
-    return all_actions_info;
 }
 
 Gtk::Box *CommandPalette::get_base_widget()

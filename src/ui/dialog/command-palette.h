@@ -135,9 +135,10 @@ private: // Helpers
     using ActionPtrName = std::pair<ActionPtr, Glib::ustring>;
 
     /**
-     * Get a list of all actions
+     * Insert actions in _CPSuggestions
      */
-    std::vector<ActionPtrName> list_all_actions();
+    void load_app_actions();
+    void load_win_doc_actions();
 
     void append_recent_file_operation(const Glib::ustring &path, bool is_suggestion, bool is_import = true);
     bool generate_action_operation(const ActionPtrName &action_ptr_name, const bool is_suggestion);
@@ -212,6 +213,7 @@ private: // variables
 
     // States
     bool _is_open = false;
+    bool _win_doc_actions_loaded = false;
 
     // History
     CPHistoryXML _history_xml;
