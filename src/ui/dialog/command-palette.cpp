@@ -770,21 +770,20 @@ void CommandPalette::set_mode(CPMode mode)
 CommandPalette::ActionPtrName CommandPalette::get_action_ptr_name(const Glib::ustring &full_action_name)
 {
     static auto gapp = InkscapeApplication::instance()->gtk_app();
-    static auto win = InkscapeApplication::instance()->get_active_window();
-    auto doc = InkscapeApplication::instance()->get_active_document();
+    // TODO: Optimisation: only try to assign if null, make static
+    const auto win = InkscapeApplication::instance()->get_active_window();
+    const auto doc = InkscapeApplication::instance()->get_active_document();
     auto action_domain_string = full_action_name.substr(0, full_action_name.find('.')); // app, win, doc
     auto action_name = full_action_name.substr(full_action_name.find('.') + 1);
 
     ActionPtr action_ptr;
     if (action_domain_string == "app") {
         action_ptr = gapp->lookup_action(action_name);
-    } else if (action_domain_string == "win") {
+    } else if (action_domain_string == "win" and win) {
         action_ptr = win->lookup_action(action_name);
-    } else if (action_domain_string == "doc") {
-        if (doc) {
-            if (auto map = doc->getActionGroup(); map) {
-                action_ptr = doc->getActionGroup()->lookup_action(action_name);
-            }
+    } else if (action_domain_string == "doc" and doc) {
+        if (const auto map = doc->getActionGroup(); map) {
+            action_ptr = map->lookup_action(action_name);
         }
     }
 
@@ -905,7 +904,7 @@ void CommandPalette::load_app_actions()
 
     std::vector<Glib::ustring> actions = gapp->list_actions();
     for (const auto &action : actions) {
-        generate_action_operation(get_action_ptr_name(action), true);
+        generate_action_operation(get_action_ptr_name("app." + action), true);
     }
 }
 void CommandPalette::load_win_doc_actions()
@@ -913,7 +912,7 @@ void CommandPalette::load_win_doc_actions()
     if (auto window = InkscapeApplication::instance()->get_active_window(); window) {
         std::vector<Glib::ustring> actions = window->list_actions();
         for (auto action : actions) {
-            generate_action_operation(get_action_ptr_name(action), true);
+            generate_action_operation(get_action_ptr_name("win." + action), true);
         }
 
         if (auto document = window->get_document(); document) {
@@ -921,7 +920,7 @@ void CommandPalette::load_win_doc_actions()
             if (map) {
                 std::vector<Glib::ustring> actions = map->list_actions();
                 for (auto action : actions) {
-                    generate_action_operation(get_action_ptr_name(action), true);
+                    generate_action_operation(get_action_ptr_name("doc." + action), true);
                 }
             } else {
                 std::cerr << "CommandPalette::list_all_actions: No document map!" << std::endl;
