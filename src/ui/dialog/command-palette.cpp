@@ -535,8 +535,8 @@ bool CommandPalette::operate_recent_file(Glib::ustring const &uri, bool const im
     // if the last element in CPHistory is already this, don't update history file
     if (not _CPHistory->get_children().empty()) {
         if (const auto last_operation = _history_xml.get_last_operation(); last_operation.has_value()) {
-            if (uri == last_operation.value().data) {
-                bool last_operation_was_import = last_operation.value().history_type == HistoryType::IMPORT_FILE;
+            if (uri == last_operation->data) {
+                bool last_operation_was_import = last_operation->history_type == HistoryType::IMPORT_FILE;
                 // As previous uri is verfied to be the same as current uri we can write to history if current and
                 // previous operation are not the same.
                 // For example: if we want to import and previous operation was import (with same uri) we should not
@@ -586,7 +586,7 @@ bool CommandPalette::ask_action_parameter(const ActionPtrName &action_ptr_name)
     // TODO: Merge the if else parts
     if (const auto last_of_history = _history_xml.get_last_operation(); last_of_history.has_value()) {
         // operation history is not empty
-        const auto last_full_action_name = last_of_history.value().data;
+        const auto last_full_action_name = last_of_history->data;
         if (last_full_action_name != action_ptr_name.second) {
             // last action is not the same so write this one
             _history_xml.add_action(action_ptr_name.second);   // to history file
@@ -1057,7 +1057,7 @@ std::optional<History> CPHistoryXML::get_last_operation()
     if (last_child) {
         if (const auto operation_type = _get_operation_type(last_child); operation_type.has_value()) {
             // inner text is a text Node thus last child
-            return History{operation_type.value(), last_child->lastChild()->content()};
+            return History{*operation_type, last_child->lastChild()->content()};
         }
     }
     return std::nullopt;
@@ -1068,7 +1068,7 @@ std::vector<History> CPHistoryXML::get_operation_history() const
     std::vector<History> history;
     for (auto operation_iter = _operations->firstChild(); operation_iter; operation_iter = operation_iter->next()) {
         if (const auto operation_type = _get_operation_type(operation_iter); operation_type.has_value()) {
-            history.emplace_back(operation_type.value(), operation_iter->firstChild()->content());
+            history.emplace_back(*operation_type, operation_iter->firstChild()->content());
         }
     }
     return history;
