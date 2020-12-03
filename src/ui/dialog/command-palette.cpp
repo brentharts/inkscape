@@ -214,7 +214,7 @@ void CommandPalette::toggle()
 void CommandPalette::append_recent_file_operation(const Glib::ustring &path, bool is_suggestion, bool is_import)
 {
     static const auto gladefile =
-        get_filename_string(Inkscape::IO::Resource::UIS, "command-palette-operation-next-full-action.glade");
+        get_filename_string(Inkscape::IO::Resource::UIS, "command-palette-operation.glade");
     Glib::RefPtr<Gtk::Builder> operation_builder;
     try {
         operation_builder = Gtk::Builder::create_from_file(gladefile);
@@ -286,7 +286,7 @@ bool CommandPalette::generate_action_operation(const ActionPtrName &action_ptr_n
     static const bool show_full_action_name =
         Inkscape::Preferences::get()->getBool("/options/commandpalette/showfullactionname/value");
     static const auto gladefile =
-        get_filename_string(Inkscape::IO::Resource::UIS, "command-palette-operation-next-full-action.glade");
+        get_filename_string(Inkscape::IO::Resource::UIS, "command-palette-operation.glade");
 
     Glib::RefPtr<Gtk::Builder> operation_builder;
     try {
@@ -866,7 +866,7 @@ std::pair<Gtk::Label *, Gtk::Label *> CommandPalette::get_name_desc(Gtk::ListBox
 {
     auto event_box = dynamic_cast<Gtk::EventBox *>(child->get_child());
     if (event_box) {
-        // NOTE: These variables have same name as in the glade file command-operation-lite.glade
+        // NOTE: These variables have same name as in the glade file command-palette-operation.glade
         // FIXME: When structure of Gladefile of CPOperation changes, refactor this
         auto CPSynapseBox = dynamic_cast<Gtk::Box *>(event_box->get_child());
         if (CPSynapseBox) {
