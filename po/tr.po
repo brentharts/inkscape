@@ -5,6 +5,7 @@
 # Serdar Soytetir <sendirom@gmail.com>, 2005, 2010.
 # Hasan Kiran <sunder67@hotmail.com>, 2015.
 # Mustafa Levent Fidancı <mustafaleventfidanci@gmail.com> 2015, 2019
+# Emir SARI <bitigchi@me.com> 2020
 #
 msgid ""
 msgstr ""
