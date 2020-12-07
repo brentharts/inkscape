@@ -147,7 +147,7 @@ item_find_paths(const SPItem *item, Geom::PathVector& fill, Geom::PathVector& st
         auto bounds = Geom::bounds_fast(pathv);
         if (bounds) {
             double size = Geom::L2(bounds->dimensions());
-            origin->Simplify(size * 0.000005); // Polylines to Beziers
+            origin->Simplify(size * 0.000005, false); // Polylines to Beziers
         }
     }
 

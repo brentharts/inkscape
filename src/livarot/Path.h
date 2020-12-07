@@ -167,7 +167,7 @@ public:
 		      double miter);
 
   // polyline to cubic bezier patches
-  void Simplify (double treshhold);
+  void Simplify (double treshhold, bool auto_close = true);
 
   // description simplification
   void Coalesce (double tresh);
@@ -377,7 +377,7 @@ public:
             Geom::Point &origine,float width);
 
 
-  void DoSimplify(int off, int N, double treshhold);
+  void DoSimplify(int off, int N, double treshhold, bool auto_close = true);
   bool AttemptSimplify(int off, int N, double treshhold, PathDescrCubicTo &res, int &worstP);
   static bool FitCubic(Geom::Point const &start,
 		       PathDescrCubicTo &res,

@@ -47,7 +47,7 @@
 
 
 
-void Path::Simplify(double treshhold)
+void Path::Simplify(double treshhold, bool auto_close)
 {
     if (pts.size() <= 1) {
         return;
@@ -65,7 +65,7 @@ void Path::Simplify(double treshhold)
             lastP++;
         }
         
-        DoSimplify(lastM, lastP - lastM, treshhold);
+        DoSimplify(lastM, lastP - lastM, treshhold, auto_close);
 
         lastM = lastP;
     }
@@ -153,7 +153,7 @@ static double DistanceToCubic(Geom::Point const &start, PathDescrCubicTo res, Ge
  *    Simplification on a subpath.
  */
 
-void Path::DoSimplify(int off, int N, double treshhold)
+void Path::DoSimplify(int off, int N, double treshhold, bool auto_close)
 {
   // non-dichotomic method: grow an interval of points approximated by a curve, until you reach the treshhold, and repeat
     if (N <= 1) {
@@ -229,7 +229,7 @@ void Path::DoSimplify(int off, int N, double treshhold)
         curP = lastP;
     }
   
-    if (Geom::LInfty(endToPt - moveToPt) < 0.00001) {
+    if (auto_close && Geom::LInfty(endToPt - moveToPt) < 0.00001) {
         Close();
     }
   

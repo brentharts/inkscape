@@ -413,10 +413,6 @@ int Path::AddPoint(Geom::Point const &iPt, bool mvto)
         return AddPoint (iPt, -1, 0.0, mvto);
     }
   
-    if ( !mvto && !pts.empty() && pts.back().p == iPt ) {
-        return -1;
-    }
-    
     int const n = pts.size();
     pts.emplace_back(mvto ? polyline_moveto : polyline_lineto, iPt);
     return n;
@@ -439,10 +435,6 @@ int Path::AddPoint(Geom::Point const &iPt, int ip, double it, bool mvto)
 {
     if (! back) {
         return AddPoint (iPt, mvto);
-    }
-    
-    if ( !mvto && !pts.empty() && pts.back().p == iPt ) {
-        return -1;
     }
     
     int const n = pts.size();
