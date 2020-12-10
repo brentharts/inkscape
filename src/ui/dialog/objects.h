@@ -88,7 +88,6 @@ private:
 
     ObjectWatcher* root_watcher;
 
-    Gtk::TreeModel::Path dragging_path;
     unsigned observer_blocked = 0;
 
     sigc::connection document_changed;
@@ -145,6 +144,8 @@ private:
 
     bool on_drag_motion(const Glib::RefPtr<Gdk::DragContext> &, int, int, guint);
     bool on_drag_drop(const Glib::RefPtr<Gdk::DragContext> &, int, int, guint);
+    void on_drag_start(const Glib::RefPtr<Gdk::DragContext> &);
+    void on_drag_end(const Glib::RefPtr<Gdk::DragContext> &);
 };
 
 

@@ -100,6 +100,10 @@ public:
         assert(path);
         row_ref = Gtk::TreeModel::RowReference(panel->_store, path);
     }
+    // Get the patch out of this watcher
+    Gtk::TreeModel::Path getRow() const {
+        return row_ref.get_path();
+    }
     void setRow(const Gtk::TreeModel::Row &row) { setRow(panel->_store->get_path(row)); }
 
     /// True if this watchr has a valid row reference.
@@ -615,11 +619,10 @@ ObjectsPanel::ObjectsPanel() :
     _tree.set_search_column(_model->_colLabel);
     _tree.set_enable_search(true);
 
-    //_tree.get_selection()->set_select_function(sigc::mem_fun(*this, &ObjectsPanel::select_row));
     _tree.get_selection()->set_mode(Gtk::SELECTION_NONE);
 
     //Set up tree signals
-    _tree.signal_button_press_event().connect(sigc::mem_fun(*this, &ObjectsPanel::_handleButtonEvent), false);
+    _tree.signal_button_release_event().connect(sigc::mem_fun(*this, &ObjectsPanel::_handleButtonEvent), false);
     _tree.signal_key_press_event().connect( sigc::mem_fun(*this, &ObjectsPanel::_handleKeyEvent), false );
     _tree.signal_row_collapsed().connect( sigc::bind<bool>(sigc::mem_fun(*this, &ObjectsPanel::_setExpanded), false));
     _tree.signal_row_expanded().connect( sigc::bind<bool>(sigc::mem_fun(*this, &ObjectsPanel::_setExpanded), true));
@@ -637,6 +640,8 @@ ObjectsPanel::ObjectsPanel() :
 
     _tree.signal_drag_motion().connect(sigc::mem_fun(*this, &ObjectsPanel::on_drag_motion), false);
     _tree.signal_drag_drop().connect(sigc::mem_fun(*this, &ObjectsPanel::on_drag_drop), false);
+    _tree.signal_drag_begin().connect(sigc::mem_fun(*this, &ObjectsPanel::on_drag_start), false);
+    _tree.signal_drag_end().connect(sigc::mem_fun(*this, &ObjectsPanel::on_drag_end), false);
 
     //Set up the label editing signals
     _text_renderer->signal_edited().connect( sigc::mem_fun(*this, &ObjectsPanel::_handleEdited));
@@ -892,9 +897,9 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
 {
     Gtk::TreeModel::Path path;
     Gtk::TreeViewColumn* col = nullptr;
+
     int x, y;
     if (_tree.get_path_at_pos((int)event->x, (int)event->y, path, col, x, y)) {
-        dragging_path = path;
 
         // This doesn't work, it might be being eaten.
         if (event->type == GDK_2BUTTON_PRESS) {
@@ -965,7 +970,6 @@ void ObjectsPanel::_handleEdited(const Glib::ustring& path, const Glib::ustring&
  */
 bool ObjectsPanel::select_row( Glib::RefPtr<Gtk::TreeModel> const & /*model*/, Gtk::TreeModel::Path const &path, bool /*sel*/ )
 {
-    //g_warning("select_row!");
     auto row = *_store->get_iter(path);
     if (_desktop && row) {
     }
@@ -1145,10 +1149,7 @@ bool ObjectsPanel::on_drag_motion(const Glib::RefPtr<Gdk::DragContext> &context,
     Gtk::TreeModel::Path path;
     Gtk::TreeViewDropPosition pos;
 
-    auto dragging_iter = _store->get_iter(dragging_path);
-    Node *dragging_repr = dragging_iter ? getRepr(*dragging_iter) : nullptr;
-
-    if (!dragging_repr) {
+    if (!_desktop->getSelection()) {
         goto finally;
     }
 
@@ -1157,12 +1158,13 @@ bool ObjectsPanel::on_drag_motion(const Glib::RefPtr<Gdk::DragContext> &context,
     if (path) {
         auto iter = _store->get_iter(path);
         auto repr = getRepr(*iter);
+        auto obj = _document->getObjectByRepr(repr);
 
         bool const drop_into = pos != Gtk::TREE_VIEW_DROP_BEFORE && //
                                pos != Gtk::TREE_VIEW_DROP_AFTER;
 
         // don't drop on self
-        if (repr == dragging_repr) {
+        if (_desktop->getSelection()->includes(obj)) {
             goto finally;
         }
 
@@ -1191,26 +1193,29 @@ finally:
  */
 bool ObjectsPanel::on_drag_drop(const Glib::RefPtr<Gdk::DragContext> &context, int x, int y, guint time)
 {
-    auto dragging_iter = _store->get_iter(dragging_path);
-    Node *dragging_repr = dragging_iter ? getRepr(*dragging_iter) : nullptr;
+    //auto dragging_iter = _store->get_iter(dragging_path);
+    //Node *dragging_repr = dragging_iter ? getRepr(*dragging_iter) : nullptr;
 
     Gtk::TreeModel::Path path;
     Gtk::TreeViewDropPosition pos;
     _tree.get_dest_row_at_pos(x, y, path, pos);
 
-    if (dragging_repr && path) {
-        auto oset = ObjectSet(_document);
-        auto drop_repr = getRepr(*_store->get_iter(path));
-        bool const drop_into = pos != Gtk::TREE_VIEW_DROP_BEFORE && //
-                               pos != Gtk::TREE_VIEW_DROP_AFTER;
+    if (!path) {
+        return true;
+    }
 
+    auto oset = ObjectSet(_document);
+    auto drop_repr = getRepr(*_store->get_iter(path));
+    bool const drop_into = pos != Gtk::TREE_VIEW_DROP_BEFORE && //
+                           pos != Gtk::TREE_VIEW_DROP_AFTER;
+
+    for (auto item : _desktop->getSelection()->items()) {
+        auto dragging_repr = item->getRepr();
         if (drop_into) {
             oset.add(dragging_repr);
-            oset.toLayer(_document->getObjectByRepr(drop_repr));
         } else {
             if (drop_repr->parent() != dragging_repr->parent()) {
                 oset.add(dragging_repr);
-                oset.toLayer(_document->getObjectByRepr(drop_repr->parent()));
 
                 // Switching layers has invalidated the pointer
                 dragging_repr = oset.singleRepr();
@@ -1227,8 +1232,38 @@ bool ObjectsPanel::on_drag_drop(const Glib::RefPtr<Gdk::DragContext> &context, i
         }
 
     }
+    if (!oset.isEmpty()) {
+        if (drop_into) {
+            oset.toLayer(_document->getObjectByRepr(drop_repr));
+        } else {
+            oset.toLayer(_document->getObjectByRepr(drop_repr->parent()));
+        }
+    }
 
+    on_drag_end(context);
     return true;
+}
+
+void ObjectsPanel::on_drag_start(const Glib::RefPtr<Gdk::DragContext> &context)
+{
+    auto selection = _tree.get_selection();
+    selection->set_mode(Gtk::SELECTION_MULTIPLE);
+    selection->unselect_all();
+
+    for (auto item : _desktop->getSelection()->items()) {
+        auto watcher = getWatcher(item->getRepr());
+        if (watcher) {
+            auto path = watcher->getRow();
+            selection->select(path);
+        }
+    }
+}
+
+void ObjectsPanel::on_drag_end(const Glib::RefPtr<Gdk::DragContext> &context)
+{
+    auto selection = _tree.get_selection();
+    selection->unselect_all();
+    selection->set_mode(Gtk::SELECTION_NONE);
 }
 
 } //namespace Dialogs
