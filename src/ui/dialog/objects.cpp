@@ -53,12 +53,7 @@
 #include "ui/tools/node-tool.h"
 
 #include "ui/widget/canvas.h"
-#include "ui/widget/clipmaskicon.h"
-#include "ui/widget/color-notebook.h"
-#include "ui/widget/highlight-picker.h"
 #include "ui/widget/imagetoggler.h"
-#include "ui/widget/insertordericon.h"
-#include "ui/widget/layertypeicon.h"
 #include "ui/widget/shapeicon.h"
 
 static double const SELECTED_ALPHA[8] = {0.0, 2.5, 4.0, 2.0, 8.0, 2.5, 1.0, 1.0};
@@ -100,7 +95,7 @@ public:
         assert(path);
         row_ref = Gtk::TreeModel::RowReference(panel->_store, path);
     }
-    // Get the patch out of this watcher
+    // Get the path out of this watcher
     Gtk::TreeModel::Path getRow() const {
         return row_ref.get_path();
     }
