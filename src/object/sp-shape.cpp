@@ -838,6 +838,9 @@ void SPShape::update_patheffect(bool write)
                 repr->removeAttribute("d");
             }
         }
+        if (hasPathEffectRecursive() && pathEffectsEnabled()) {
+            finishPatheffectStack();
+        }
         this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
     }
 }

@@ -100,6 +100,7 @@ LPEBool::LPEBool(LivePathEffectObject *lpeobject)
 LPEBool::~LPEBool() {
     doOnRemove(nullptr);
 }
+
 bool cmp_cut_position(const Path::cut_position &a, const Path::cut_position &b)
 {
     return a.piece == b.piece ? a.t < b.t : a.piece < b.piece;

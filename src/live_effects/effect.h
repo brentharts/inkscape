@@ -8,15 +8,16 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
-#include "effect-enum.h"
-#include "parameter/bool.h"
-#include "parameter/hidden.h"
-#include "ui/widget/registry.h"
 #include <2geom/forward.h>
 #include <glibmm/ustring.h>
 #include <gtkmm/eventbox.h>
 #include <gtkmm/expander.h>
 
+#include "effect-enum.h"
+#include "parameter/bool.h"
+#include "parameter/hidden.h"
+#include "selection.h"
+#include "ui/widget/registry.h"
 
 #define  LPE_CONVERSION_TOLERANCE 0.01    // FIXME: find good solution for this.
 
@@ -68,25 +69,12 @@ public:
 
     //basically, to get this method called before the derived classes, a bit
     //of indirection is needed. We first call these methods, then the below.
-    void doAfterEffect_impl(SPLPEItem const *lpeitem, SPCurve *curve);
-    void doOnApply_impl(SPLPEItem const* lpeitem);
-    void doBeforeEffect_impl(SPLPEItem const* lpeitem);
+    
     void setCurrentZoom(double cZ);
     void setSelectedNodePoints(std::vector<Geom::Point> sNP);
     bool isNodePointSelected(Geom::Point const &nodePoint) const;
     bool isOnClipboard();
-    virtual void doOnApply (SPLPEItem const* lpeitem);
-    virtual void doBeforeEffect (SPLPEItem const* lpeitem);
 
-private:
-    virtual void transform_multiply(Geom::Affine const &postmul, bool set);
-
-public:
-    void transform_multiply(Geom::Affine const &postmul, SPLPEItem *);
-    virtual void doAfterEffect (SPLPEItem const* lpeitem, SPCurve *curve);
-    virtual void doOnException(SPLPEItem const *lpeitem);
-    virtual void doOnRemove (SPLPEItem const* lpeitem);
-    virtual void doOnVisibilityToggled(SPLPEItem const* lpeitem);
     void writeParamsToSVG();
 
     virtual void acceptParamPath (SPPath const* param_path);
@@ -104,7 +92,6 @@ public:
     inline bool isReady() const { return is_ready; }
     inline void setReady(bool ready = true) { is_ready = ready; }
 
-    virtual void doEffect (SPCurve * curve);
 
     virtual Gtk::Widget * newWidget();
     virtual Gtk::Widget * defaultParamSet();
@@ -122,6 +109,7 @@ public:
     void addHandles(KnotHolder *knotholder, SPItem *item);
     std::vector<Geom::PathVector> getCanvasIndicators(SPLPEItem const* lpeitem);
     void update_helperpath();
+    Inkscape::Selection *getSelection();
     bool has_exception;
 
     inline bool providesOwnFlashPaths() const {
@@ -142,6 +130,26 @@ public:
     inline bool isVisible() const { return is_visible; }
 
     void editNextParamOncanvas(SPItem * item, SPDesktop * desktop);
+
+    void doOnApply_impl(SPLPEItem const* lpeitem);
+    void doBeforeEffect_impl(SPLPEItem const* lpeitem);
+    void doOnFork_impl(SPLPEItem const* lpeitem, Glib::ustring lpeobjectid);
+    void doEffect_impl(SPCurve * curve);
+    void doAfterEffect_impl(SPLPEItem const *lpeitem, SPCurve *curve);
+    void doAfterAllEffects_impl(SPLPEItem const* lpeitem);
+    void transform_multiply_impl(Geom::Affine const &postmul, SPLPEItem *);
+    void doOnLoad_impl (SPLPEItem const* lpeitem);
+    void doOnCopy_impl (SPLPEItem const* lpeitem);
+    void doOnCut_impl (SPLPEItem const* lpeitem);
+    void doOnPaste_impl (SPLPEItem const* lpeitem);
+    void doOnDuple_impl (SPLPEItem const* lpeitem);
+    void doOnPreDuple_impl (SPLPEItem const* lpeitem);
+    void doOnStamp_impl (SPLPEItem const* lpeitem);
+    void doOnPreStamp_impl (SPLPEItem const* lpeitem);
+    void doOnException_impl (SPLPEItem const* lpeitem);
+    void doOnRemove_impl (SPLPEItem const* lpeitem);
+    void doOnVisibilityToggled_impl (SPLPEItem const* lpeitem);
+
     bool apply_to_clippath_and_mask;
     bool keep_paths; // set this to false allow retain extra generated objects, see measure line LPE
     bool is_load;
@@ -153,6 +161,7 @@ public:
     SPLPEItem *sp_lpe_item; // these get stored in doBeforeEffect_impl, and derived classes may do as they please with
                             // them.
     SPShape *current_shape; // these get stored in performPathEffects.
+    std::vector<Glib::ustring> items;
   protected:
     Effect(LivePathEffectObject *lpeobject);
 
@@ -184,11 +193,11 @@ public:
     Inkscape::UI::Widget::Registry wr;
 
     LivePathEffectObject *lpeobj;
+    Glib::ustring prevlpeobjid; //we store prev LPE id on forked LPE we need to check stuill exist before reuse
 
     // this boolean defaults to false, it concatenates the input path to one pwd2,
     // instead of normally 'splitting' the path into continuous pwd2 paths and calling doEffect_pwd2 for each.
     bool concatenate_before_pwd2;
-    std::vector<Glib::ustring> items;
     double current_zoom;
     std::vector<Geom::Point> selectedNodesPoints;
 
@@ -199,8 +208,26 @@ private:
     void unsetDefaultParam(Glib::ustring pref_path, Glib::ustring tooltip, Parameter *param, Gtk::Image *info,
                            Gtk::Button *set, Gtk::Button *unset);
     bool provides_own_flash_paths; // if true, the standard flash path is suppressed
-
+    virtual void doOnApply (SPLPEItem const* lpeitem);
+    virtual void doBeforeEffect (SPLPEItem const* lpeitem);
+    virtual void doOnFork (SPLPEItem const* lpeitem);
+    virtual void doEffect (SPCurve * curve);
+    virtual void doAfterEffect (SPLPEItem const* lpeitem, SPCurve *curve);
+    virtual void doAfterAllEffects (SPLPEItem const* sp_lpe_item);
+    virtual void transform_multiply(Geom::Affine const &postmul, bool set);
+    virtual void doOnLoad (SPLPEItem const* lpeitem);
+    virtual void doOnCopy (SPLPEItem const* lpeitem);
+    virtual void doOnCut (SPLPEItem const* lpeitem);
+    virtual void doOnDuple (SPLPEItem const* lpeitem);
+    virtual void doOnPreDuple (SPLPEItem const* lpeitem);
+    virtual void doOnPaste (SPLPEItem const* lpeitem);
+    virtual void doOnStamp (SPLPEItem const* lpeitem);
+    virtual void doOnPreStamp (SPLPEItem const* lpeitem);
+    virtual void doOnException (SPLPEItem const *lpeitem);
+    virtual void doOnRemove (SPLPEItem const* lpeitem);
+    virtual void doOnVisibilityToggled (SPLPEItem const* lpeitem);
     bool is_ready;
+    bool is_oncut;
     bool defaultsopen;
 };
 

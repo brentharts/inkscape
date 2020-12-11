@@ -317,7 +317,9 @@ LPESlice::cloneD(SPObject *orig, SPObject *dest, bool is_original)
         return;
     }
     SPItem *originalitem = dynamic_cast<SPItem *>(orig);
-    if ( SP_IS_GROUP(orig) && SP_IS_GROUP(dest) && SP_GROUP(orig)->getItemCount() == SP_GROUP(dest)->getItemCount() ) {
+    SPGroup *grouporig = dynamic_cast<SPGroup *>(orig);
+    SPGroup *groupdest = dynamic_cast<SPGroup *>(dest);
+    if ( grouporig && groupdest && grouporig->getItemCount() == groupdest->getItemCount() ) {
         if (reset) {
             cloneStyle(orig, dest);
         }
@@ -523,21 +525,118 @@ LPESlice::splititem(SPItem* item, SPCurve * curve, std::pair<Geom::Line, size_t>
             auto cpro = SPCurve::copy(shape->curve());
             if (cpro) {
                 if (!path && is_original) {
-                    //shape->setCurveInsync(std::move(cpro));
                     shape->bbox_vis_cache_is_valid = false;
                     shape->bbox_geom_cache_is_valid = false;
-                    cpro->set_pathvector(path_out);
-                    shape->setCurveInsync(std::move(cpro));
                 }
+                cpro->set_pathvector(path_out);
+                shape->setCurveInsync(std::move(cpro));
                 auto str = sp_svg_write_path(path_out);
                 if (!is_original && shape->hasPathEffectRecursive()) { 
-                    shape->getRepr()->setAttribute("inkscape:original-d", str);
+                    shape->setAttribute("inkscape:original-d", str);
                     sp_lpe_item_update_patheffect(shape, false, false);
                 } else {
-                    shape->getRepr()->setAttribute("d", str);
+                    shape->setAttribute("d", str);
                 }
             }
         }
+    }
+}
+
+void
+LPESlice::cleanSelection()
+{
+    auto *selection = getSelection();
+    if (selection) {
+        for (auto item:items) {
+            SPObject *elemref = getSPDoc()->getObjectById(item);
+            if (elemref) {
+                selection->remove(elemref);
+            }
+        }
+    }
+}
+
+void
+LPESlice::doOnPreDuple (SPLPEItem const* lpeitem)
+{
+    cleanSelection();
+}
+
+void
+LPESlice::doOnDuple (SPLPEItem const* lpeitem)
+{
+    forkData(lpeitem_action::duplelpe);
+}
+
+void
+LPESlice::doOnPreStamp (SPLPEItem const* lpeitem)
+{
+    cleanSelection();
+}
+
+void
+LPESlice::doOnStamp (SPLPEItem const* lpeitem)
+{
+    forkData(lpeitem_action::stamplpe);
+}
+void
+LPESlice::forkData(lpeitem_action action)
+{
+    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
+    Inkscape::Selection *selection = nullptr;
+    if (desktop) {
+        selection = desktop->selection;
+    }
+    LivePathEffectObject *prevlpeobj = dynamic_cast<LivePathEffectObject *>(getSPDoc()->getObjectById(prevlpeobjid.c_str()));
+    if (prevlpeobj) {
+        LPESlice *slice = dynamic_cast<LPESlice *>(prevlpeobj->get_lpe());
+        if (slice) {
+            size_t counter = 0;
+            std::vector<Glib::ustring> newitemstmp;
+            newitemstmp.assign(items.begin(), items.end());
+            for (auto item: slice->items) {
+                SPItem *elemref = dynamic_cast<SPItem *>(getSPDoc()->getObjectById(item));
+                if (elemref && newitemstmp.size() > counter) {
+                    SPItem *newone = dynamic_cast<SPItem *>(getSPDoc()->getObjectById(newitemstmp[counter]));
+                    if (newone) {
+                        newone->setAttribute("style", elemref->getAttribute("style"));
+                        newone->setAttribute("mask", elemref->getAttribute("mask"));
+                        newone->setAttribute("clip", elemref->getAttribute("clip"));
+                        Glib::ustring classes = newone->getId();
+                        classes += "-slice UnoptimicedTransforms";
+                        newone->setAttribute("class", classes);
+                        if (action == lpeitem_action::duplelpe) {
+                            newone->setAttribute("transform", elemref->getAttribute("transform"));
+                        }
+                        SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(newone);
+                        if (action == lpeitem_action::stamplpe) {
+                            newone->transform = elemref->transform;
+                        }
+                        if (lpeitem && elemref->getAttribute("inkscape:path-effect")) {
+                            lpeitem->setAttribute("inkscape:path-effect", elemref->getAttribute("inkscape:path-effect"));
+                            lpeitem->forkPathEffectsIfNecessary(1);
+                            sp_lpe_item_update_patheffect(lpeitem, true, true);
+                            switch(action) {
+                            case lpeitem_action::duplelpe:
+                                sp_lpe_item_onduple(lpeitem);
+                                break;
+                            case lpeitem_action::stamplpe:
+                                sp_lpe_item_onstamp(lpeitem);
+                                break;
+                            default:
+                                break;
+                            }
+                        }
+                        if (selection && action == lpeitem_action::duplelpe) {
+                            selection->add(newone);
+                        }
+                    }
+                }
+                counter++;
+            }
+            newitemstmp.clear();
+        }
+        sp_lpe_item_update_patheffect(sp_lpe_item, true, true);
     }
 }
 
@@ -685,13 +784,22 @@ LPESlice::doOnVisibilityToggled(SPLPEItem const* /*lpeitem*/)
 }
 
 void
-LPESlice::doOnRemove (SPLPEItem const* /*lpeitem*/)
+LPESlice::doOnRemove (SPLPEItem const* lpeitem)
 {
     //set "keep paths" hook on sp-lpe-item.cpp
     items.clear();
-    Glib::ustring theclass = sp_lpe_item->getId();
+    Glib::ustring theclass = lpeitem->getId();
     theclass += "-slice";
     for (auto item : getSPDoc()->getObjectsByClass(theclass)) {
+        theclass += " UnoptimicedTransforms";
+        if (item->getAttribute("class")) {
+            Glib::ustring classupd = item->getAttribute("class");
+            size_t pos = classupd.find(theclass);
+            if (pos != Glib::ustring::npos) {
+                classupd.replace(pos,theclass.size(),"");
+                item->setAttribute("class", classupd);
+            }
+        }
         items.emplace_back(item->getId());
     }
     if (keep_paths) {
@@ -699,7 +807,7 @@ LPESlice::doOnRemove (SPLPEItem const* /*lpeitem*/)
         items.clear();
         return;
     }
-    if (sp_lpe_item->countLPEOfType(SLICE) == 1) {
+    if (lpeitem->countLPEOfType(SLICE) == 1) {
         processObjects(LPE_ERASE);
     } else {
         for (auto item: items) {

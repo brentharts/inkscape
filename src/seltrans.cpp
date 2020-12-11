@@ -498,7 +498,7 @@ void Inkscape::SelTrans::ungrab()
 void Inkscape::SelTrans::stamp()
 {
     Inkscape::Selection *selection = _desktop->getSelection();
-
+    
     bool fixup = !_grabbed;
     if ( fixup && !_stamp_cache.empty() ) {
         // TODO - give a proper fix. Simple temporary work-around for the grab() issue
@@ -511,10 +511,20 @@ void Inkscape::SelTrans::stamp()
         if (!_stamp_cache.empty()) {
             l = _stamp_cache;
         } else {
+            std::vector<SPItem*> items_copy(selection->items().begin(), selection->items().end());
+            for (auto &item:items_copy) {
+                SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(item);
+                if (lpeitem) {
+                    sp_lpe_item_onprestamp(lpeitem);
+                }
+            }
             /* Build cache */
             l.insert(l.end(), selection->items().begin(), selection->items().end());
             sort(l.begin(), l.end(), sp_object_compare_position_bool);
             _stamp_cache = l;
+            for (auto &item:items_copy) {
+                selection->add(item);
+            }
         }
 
         for(auto original_item : l) {
@@ -540,16 +550,20 @@ void Inkscape::SelTrans::stamp()
                 new_affine = &original_item->transform;
             }
 
-            copy_item->doWriteTransform(*new_affine);
-
-            if ( copy_item->isCenterSet() && _center ) {
-                copy_item->setCenter(*_center * _current_relative_affine);
-            }
+            
             Inkscape::GC::release(copy_repr);
             SPLPEItem * lpeitem = dynamic_cast<SPLPEItem *>(copy_item);
             if(lpeitem && lpeitem->hasPathEffectRecursive()) {
                 lpeitem->forkPathEffectsIfNecessary(1);
                 sp_lpe_item_update_patheffect(lpeitem, true, true);
+            }
+            copy_item->doWriteTransform(*new_affine);
+
+            if ( copy_item->isCenterSet() && _center ) {
+                copy_item->setCenter(*_center * _current_relative_affine);
+            }
+            if(lpeitem && lpeitem->hasPathEffectRecursive()) {
+                sp_lpe_item_onstamp(lpeitem);
             }
         }
         DocumentUndo::done(_desktop->getDocument(), SP_VERB_CONTEXT_SELECT,

@@ -46,6 +46,10 @@ public:
     void doBeforeEffect (SPLPEItem const* lpeitem) override;
     void doAfterEffect (SPLPEItem const* lpeitem, SPCurve *curve) override;
     Geom::PathVector doEffect_path (Geom::PathVector const & path_in) override;
+    void doOnDuple (SPLPEItem const* lpeitem) override;
+    void doOnPreDuple (SPLPEItem const* lpeitem) override;
+    void doOnStamp (SPLPEItem const* lpeitem) override;
+    void doOnPreStamp (SPLPEItem const* lpeitem) override;
     void doOnRemove (SPLPEItem const* /*lpeitem*/) override;
     void doOnVisibilityToggled(SPLPEItem const* /*lpeitem*/) override;
     Gtk::Widget * newWidget() override;
@@ -56,6 +60,8 @@ public:
     void cloneD(SPObject *orig, SPObject *dest, bool is_original); 
     Inkscape::XML::Node *createPathBase(SPObject *elemref);
     Geom::PathVector cutter(Geom::PathVector const & path_in);
+    void forkData(lpeitem_action action);
+    void cleanSelection();
     void resetStyles();
     void centerVert();
     void centerHoriz();

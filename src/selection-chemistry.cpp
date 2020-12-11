@@ -445,6 +445,13 @@ static void add_ids_recursive(std::vector<const gchar *> &ids, SPObject *obj)
 
 void ObjectSet::duplicate(bool suppressDone, bool duplicateLayer)
 {
+    auto list= items();
+    for (auto itemlist=list.begin();itemlist!=list.end();++itemlist) {
+        SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(*itemlist);
+        if (lpeitem) {
+            sp_lpe_item_onpreduple(lpeitem);
+        }
+    }
     if(duplicateLayer && !desktop() ){
         //TODO: understand why layer management is tied to desktop and not to document.
         return;
@@ -610,6 +617,13 @@ void ObjectSet::duplicate(bool suppressDone, bool duplicateLayer)
         gchar* name = g_strdup_printf(_("%s copy"), new_layer->label());
         desktop()->layer_manager->renameLayer( new_layer, name, TRUE );
         g_free(name);
+    }
+    list= items();
+    for (auto itemlist=list.begin();itemlist!=list.end();++itemlist) {
+        SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(*itemlist);
+        if (lpeitem) {
+            sp_lpe_item_onduple(lpeitem);
+        }
     }
 }
 
@@ -1252,6 +1266,13 @@ sp_redo(SPDesktop *desktop, SPDocument *)
 
 void ObjectSet::cut()
 {
+    auto list= items();
+    for (auto itemlist=list.begin();itemlist!=list.end();++itemlist) {
+        SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(*itemlist);
+        if (lpeitem) {
+            sp_lpe_item_oncut(lpeitem);
+        }
+    }
     copy();
     deleteItems();
 }
@@ -1310,8 +1331,34 @@ take_style_from_item(SPObject *object)
 
 void ObjectSet::copy()
 {
+    // We want to fire oncopy on LPE items, mainly to alter selection
+    // after it instead copy to clipboard we duplicate the resulting selection
+    // to allow get forked LPE items as we want on the clipboard ready to paste into new docs
+    // If do not this way we need to work in the volatile clipboard with no garantee of final sucess
+    // So the steps are:
+    // PASTE: 
+    // 1:we store the selection 
+    // 2:we make a call to LPE items to allow applied make necesary tweaks to current selection
+    // 3:we duplicate the resulting selection firing LPE methods in duplicate to
+    // fork adecuate the lpe items
+    // 4: we copy to clipboard a good result, all forked and updated
+    // 5: we remove the selection duplicated
+    // 6: finaly we reselect original selection
+    std::vector<SPItem*> items_copy(items().begin(), items().end());
+    for (auto &item:items_copy) {
+        SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(item);
+        if (lpeitem) {
+            sp_lpe_item_oncopy(lpeitem);
+        }
+    }
+    duplicate();
     Inkscape::UI::ClipboardManager *cm = Inkscape::UI::ClipboardManager::get();
     cm->copy(this);
+    deleteItems();
+    //we resurrect selecton in case LPE change it
+    for (auto &item:items_copy) {
+        add(item);
+    }
 }
 
 void sp_selection_paste(SPDesktop *desktop, bool in_place)
@@ -1319,6 +1366,13 @@ void sp_selection_paste(SPDesktop *desktop, bool in_place)
     Inkscape::UI::ClipboardManager *cm = Inkscape::UI::ClipboardManager::get();
     if (cm->paste(desktop, in_place)) {
         DocumentUndo::done(desktop->getDocument(), SP_VERB_EDIT_PASTE, _("Paste"));
+    }
+    auto list= desktop->selection->items();
+    for (auto itemlist=list.begin();itemlist!=list.end();++itemlist) {
+        SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(*itemlist);
+        if (lpeitem) {
+            sp_lpe_item_onpaste(lpeitem);
+        }
     }
 }
 

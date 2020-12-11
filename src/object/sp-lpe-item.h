@@ -39,6 +39,18 @@ namespace Inkscape{
 
 typedef std::list<Inkscape::LivePathEffect::LPEObjectReference *> PathEffectList;
 
+enum lpeitem_action {
+    loadlpe,
+	cutlpe,
+	copylpe,
+	pastelpe,
+	preduplelpe,
+    duplelpe,
+    prestamplpe,
+	stamplpe
+};
+
+
 class SPLPEItem : public SPItem {
 public:
     SPLPEItem();
@@ -91,6 +103,7 @@ public:
 
     void downCurrentPathEffect();
     void upCurrentPathEffect();
+    void finishPatheffectStack();
     Inkscape::LivePathEffect::LPEObjectReference* getCurrentLPEReference();
     Inkscape::LivePathEffect::Effect* getCurrentLPE();
     Inkscape::LivePathEffect::LPEObjectReference* getPrevLPEReference(Inkscape::LivePathEffect::LPEObjectReference* lperef);
@@ -110,6 +123,14 @@ public:
 
     void editNextParamOncanvas(SPDesktop *dt);
 };
+void sp_lpe_item_onload (SPLPEItem *lpeitem);
+void sp_lpe_item_oncopy (SPLPEItem *lpeitem);
+void sp_lpe_item_oncut (SPLPEItem *lpeitem);
+void sp_lpe_item_onpaste (SPLPEItem *lpeitem);
+void sp_lpe_item_onduple (SPLPEItem *lpeitem);
+void sp_lpe_item_onpreduple (SPLPEItem *lpeitem);
+void sp_lpe_item_onstamp (SPLPEItem *lpeitem);
+void sp_lpe_item_onprestamp (SPLPEItem *lpeitem);
 void sp_lpe_item_update_patheffect (SPLPEItem *lpeitem, bool wholetree, bool write); // careful, class already has method with *very* similar name!
 void sp_lpe_item_enable_path_effects(SPLPEItem *lpeitem, bool enable);
 

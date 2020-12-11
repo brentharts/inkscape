@@ -13,6 +13,12 @@
 //#define LPE_ENABLE_TEST_EFFECTS //uncomment for toy effects
 
 // include effects:
+#include <cstdio>
+#include <cstring>
+#include <gtkmm/expander.h>
+#include <pangomm/layout.h>
+
+#include "display/curve.h"
 #include "live_effects/lpe-angle_bisector.h"
 #include "live_effects/lpe-attach-path.h"
 #include "live_effects/lpe-bendpath.h"
@@ -69,28 +75,18 @@
 #include "live_effects/lpe-text_label.h"
 #include "live_effects/lpe-transform_2pts.h"
 #include "live_effects/lpe-vonkoch.h"
-
 #include "live_effects/lpeobject.h"
-
-#include "xml/node-event-vector.h"
-#include "xml/sp-css-attr.h"
-
-#include "display/curve.h"
 #include "message-stack.h"
+#include "object/sp-defs.h"
+#include "object/sp-root.h"
+#include "object/sp-shape.h"
 #include "path-chemistry.h"
 #include "ui/icon-loader.h"
 #include "ui/tools-switch.h"
 #include "ui/tools/node-tool.h"
 #include "ui/tools/pen-tool.h"
-
-#include "object/sp-defs.h"
-#include "object/sp-root.h"
-#include "object/sp-shape.h"
-
-#include <cstdio>
-#include <cstring>
-#include <pangomm/layout.h>
-#include <gtkmm/expander.h>
+#include "xml/node-event-vector.h"
+#include "xml/sp-css-attr.h"
 
 namespace Inkscape {
 
@@ -676,7 +672,7 @@ const EnumEffectData<EffectType> LPETypeData[] = {
         true  ,//on_group
         false ,//on_image
         false ,//on_text
-        true ,//experimental
+        true  ,//experimental
     },
     {
         CIRCLE_WITH_RADIUS,
@@ -690,7 +686,7 @@ const EnumEffectData<EffectType> LPETypeData[] = {
         true  ,//on_group
         false ,//on_image
         false ,//on_text
-        true ,//experimental
+        true  ,//experimental
     },
     {
         CIRCLE_3PTS,
@@ -704,7 +700,7 @@ const EnumEffectData<EffectType> LPETypeData[] = {
         true  ,//on_group
         false ,//on_image
         false ,//on_text
-        true ,//experimental
+        true  ,//experimental
     },
     {
         EXTRUDE,
@@ -718,7 +714,7 @@ const EnumEffectData<EffectType> LPETypeData[] = {
         true  ,//on_group
         false ,//on_image
         false ,//on_text
-        true ,//experimental
+        true  ,//experimental
     },
     {
         LINE_SEGMENT,
@@ -732,7 +728,7 @@ const EnumEffectData<EffectType> LPETypeData[] = {
         true  ,//on_group
         false ,//on_image
         false ,//on_text
-        true ,//experimental
+        true  ,//experimental
     },
     {
         PARALLEL,
@@ -746,7 +742,7 @@ const EnumEffectData<EffectType> LPETypeData[] = {
         true  ,//on_group
         false ,//on_image
         false ,//on_text
-        true ,//experimental
+        true  ,//experimental
     },
     {
         PERP_BISECTOR,
@@ -760,7 +756,7 @@ const EnumEffectData<EffectType> LPETypeData[] = {
         true  ,//on_group
         false ,//on_image
         false ,//on_text
-        true ,//experimental
+        true  ,//experimental
     },
     {
         TANGENT_TO_CURVE,
@@ -774,7 +770,7 @@ const EnumEffectData<EffectType> LPETypeData[] = {
         true  ,//on_group
         false ,//on_image
         false ,//on_text
-        true ,//experimental
+        true  ,//experimental
     },
     /* 1.1 */
     {
@@ -786,7 +782,7 @@ const EnumEffectData<EffectType> LPETypeData[] = {
         N_("Slices the item into parts. It can also be applied multiple times.") ,//description
         true  ,//on_path
         true  ,//on_shape
-        true ,//on_group
+        true  ,//on_group
         false ,//on_image
         false ,//on_text
         false ,//experimental
@@ -804,7 +800,7 @@ const EnumEffectData<EffectType> LPETypeData[] = {
         true  ,//on_group
         false ,//on_image
         false ,//on_text
-        true ,//experimental
+        true  ,//experimental
     },
     {
         DYNASTROKE,
@@ -818,7 +814,7 @@ const EnumEffectData<EffectType> LPETypeData[] = {
         true  ,//on_group
         false ,//on_image
         false ,//on_text
-        true ,//experimental
+        true  ,//experimental
     },
     {
         LATTICE,
@@ -832,7 +828,7 @@ const EnumEffectData<EffectType> LPETypeData[] = {
         true  ,//on_group
         false ,//on_image
         false ,//on_text
-        true ,//experimental
+        true  ,//experimental
     },
     {
         PATH_LENGTH,
@@ -846,7 +842,7 @@ const EnumEffectData<EffectType> LPETypeData[] = {
         true  ,//on_group
         false ,//on_image
         false ,//on_text
-        true ,//experimental
+        true  ,//experimental
     },
     {
         RECURSIVE_SKELETON,
@@ -860,7 +856,7 @@ const EnumEffectData<EffectType> LPETypeData[] = {
         true  ,//on_group
         false ,//on_image
         false ,//on_text
-        true ,//experimental
+        true  ,//experimental
     },
     {
         TEXT_LABEL,
@@ -874,7 +870,7 @@ const EnumEffectData<EffectType> LPETypeData[] = {
         true  ,//on_group
         false ,//on_image
         false ,//on_text
-        true ,//experimental
+        true  ,//experimental
     },
     {
         EMBRODERY_STITCH,
@@ -1129,18 +1125,19 @@ Effect::Effect(LivePathEffectObject *lpeobject)
       lpeobj(lpeobject),
       concatenate_before_pwd2(false),
       sp_lpe_item(nullptr),
-      current_zoom(1),
+      current_zoom(0),
       refresh_widgets(false),
       current_shape(nullptr),
       provides_own_flash_paths(true), // is automatically set to false if providesOwnFlashPaths() is not overridden
       defaultsopen(false),
       is_ready(false),
-      is_applied(false)
+      is_oncut(false),
+      is_applied(false),
+      prevlpeobjid("")
 {
     registerParameter( dynamic_cast<Parameter *>(&is_visible) );
     registerParameter( dynamic_cast<Parameter *>(&lpeversion) );
     is_visible.widget_is_visible = false;
-    current_zoom = 0.0;
 }
 
 Effect::~Effect() = default;
@@ -1186,7 +1183,7 @@ void Effect::transform_multiply(Geom::Affine const &postmul, bool /*set*/) {}
  * FIXME Probably only makes sense if this effect is referenced by exactly one
  * item (`this->lpeobj->hrefList` contains exactly one element)?
  */
-void Effect::transform_multiply(Geom::Affine const &postmul, SPLPEItem *lpeitem)
+void Effect::transform_multiply_impl(Geom::Affine const &postmul, SPLPEItem *lpeitem)
 {
     assert("pre: effect is referenced by lpeitem" &&
            std::any_of(lpeobj->hrefList.begin(), lpeobj->hrefList.end(),
@@ -1240,9 +1237,11 @@ void
 Effect::processObjects(LPEAction lpe_action)
 {
     SPDocument *document = getSPDoc();
-    if (!document) {
+    sp_lpe_item = dynamic_cast<SPLPEItem *>(*getLPEObj()->hrefList.begin());
+    if (!document || !sp_lpe_item) {
         return;
     }
+    sp_lpe_item_enable_path_effects(sp_lpe_item, false);
     for (auto id : items) {
         if (id.empty()) {
             return;
@@ -1296,6 +1295,7 @@ Effect::processObjects(LPEAction lpe_action)
     if (lpe_action == LPE_ERASE || lpe_action == LPE_TO_OBJECTS) {
         items.clear();
     }
+    sp_lpe_item_enable_path_effects(sp_lpe_item, true);
 }
 
 /**
@@ -1306,6 +1306,80 @@ Effect::doBeforeEffect (SPLPEItem const*/*lpeitem*/)
 {
     //Do nothing for simple effects
 }
+
+/**
+ * Is performed each time lpe is load into document.
+ */
+void
+Effect::doOnLoad (SPLPEItem const*/*lpeitem*/)
+{
+    //Do nothing for simple effects
+}
+
+/**
+ * Is performed each time lpe item ic copy.
+ */
+void
+Effect::doOnCopy (SPLPEItem const*/*lpeitem*/)
+{
+    //Do nothing for simple effects
+}
+
+/**
+ * Is performed each time lpe item is cut.
+ */
+void
+Effect::doOnCut (SPLPEItem const*/*lpeitem*/)
+{
+    //Do nothing for simple effects
+}
+
+/**
+ * Is performed each time lpe item is pasted.
+ */
+void
+Effect::doOnPaste (SPLPEItem const*/*lpeitem*/)
+{
+    //Do nothing for simple effects
+}
+
+/**
+ * Is performed each time lpe item is dupled.
+ */
+void
+Effect::doOnDuple (SPLPEItem const*/*lpeitem*/)
+{
+    //Do nothing for simple effects
+}
+
+/**
+ * Is performed previously lpe item is dupled.
+ */
+void
+Effect::doOnPreDuple (SPLPEItem const*/*lpeitem*/)
+{
+    //Do nothing for simple effects
+}
+
+
+/**
+ * Is performed each time lpe item is stamped.
+ */
+void
+Effect::doOnStamp (SPLPEItem const*/*lpeitem*/)
+{
+    //Do nothing for simple effects
+}
+
+/**
+ * Is performed previously lpe item is stamped.
+ */
+void
+Effect::doOnPreStamp (SPLPEItem const*/*lpeitem*/)
+{
+    //Do nothing for simple effects
+}
+
 /**
  * Is performed at the end of the LPE only one time per "lpeitem"
  * in paths/shapes is called in middle of the effect so we add the
@@ -1318,6 +1392,19 @@ Effect::doBeforeEffect (SPLPEItem const*/*lpeitem*/)
 void Effect::doAfterEffect (SPLPEItem const* /*lpeitem*/, SPCurve *curve)
 {
     is_load = false;
+}
+/**
+ * Is performed at the end of all lpe`s stack
+ */
+void Effect::doAfterAllEffects (SPLPEItem const* /*lpeitem*/)
+{
+}
+
+/**
+ * Is performed at lpe`s fork
+ */
+void Effect::doOnFork (SPLPEItem const* /*lpeitem*/)
+{
 }
 
 void Effect::doOnException(SPLPEItem const * /*lpeitem*/)
@@ -1340,6 +1427,20 @@ void Effect::doAfterEffect_impl(SPLPEItem const *lpeitem, SPCurve *curve)
     is_load = false;
     is_applied = false;
 }
+
+void Effect::doOnFork_impl(SPLPEItem const *lpeitem, Glib::ustring lpeobjectid)
+{
+    is_load = true;
+    is_applied = false;
+    prevlpeobjid = lpeobjectid;
+    doOnFork(lpeitem);
+}
+
+void Effect::doAfterAllEffects_impl(SPLPEItem const* lpeitem)
+{
+    doAfterAllEffects(lpeitem);
+}
+
 void Effect::doOnApply_impl(SPLPEItem const* lpeitem)
 {
     sp_lpe_item = const_cast<SPLPEItem *>(lpeitem);
@@ -1350,7 +1451,7 @@ void Effect::doOnApply_impl(SPLPEItem const* lpeitem)
     // of only update this value per each LPE when changes.
     // and use the Inkscape release version that has this new LPE change
     // LPE without lpeversion are created in a inkscape lower than 1.0
-    lpeversion.param_setValue("1", true); 
+    lpeversion.param_setValue("1", true);
     doOnApply(lpeitem);
     setReady();
     has_exception = false;
@@ -1361,6 +1462,72 @@ void Effect::doBeforeEffect_impl(SPLPEItem const* lpeitem)
     sp_lpe_item = const_cast<SPLPEItem *>(lpeitem);
     doBeforeEffect(lpeitem);
     update_helperpath();
+}
+
+void Effect::doEffect_impl(SPCurve * curve)
+{
+    doEffect(curve);
+}
+
+void Effect::doOnLoad_impl (SPLPEItem const*lpeitem)
+{
+    doOnLoad(lpeitem);
+}
+
+void Effect::doOnCut_impl (SPLPEItem const*lpeitem)
+{
+    is_oncut = true;
+    doOnCut(lpeitem);
+}
+
+void Effect::doOnPaste_impl (SPLPEItem const*lpeitem)
+{
+    doOnPaste(lpeitem);
+}
+
+void Effect::doOnCopy_impl (SPLPEItem const*lpeitem)
+{
+    if (is_oncut) {
+        is_oncut = false;
+    } else {
+        doOnCopy(lpeitem);
+    }
+}
+
+void Effect::doOnDuple_impl (SPLPEItem const*lpeitem)
+{
+    doOnDuple(lpeitem);
+}
+
+void Effect::doOnPreDuple_impl (SPLPEItem const*lpeitem)
+{
+    doOnPreDuple(lpeitem);
+}
+
+void Effect::doOnStamp_impl (SPLPEItem const*lpeitem)
+{
+    doOnStamp(lpeitem);
+}
+
+void Effect::doOnPreStamp_impl (SPLPEItem const*lpeitem)
+{
+    doOnPreStamp(lpeitem);
+}
+
+void Effect::doOnRemove_impl (SPLPEItem const*lpeitem)
+{
+    doOnRemove(lpeitem);
+}
+
+void Effect::doOnVisibilityToggled_impl (SPLPEItem const*lpeitem)
+{
+    doOnVisibilityToggled(lpeitem);
+}
+
+
+void Effect::doOnException_impl (SPLPEItem const*lpeitem)
+{
+    doOnException(lpeitem);
 }
 
 void
@@ -1547,6 +1714,18 @@ Effect::update_helperpath() {
             Inkscape::UI::Tools::sp_update_helperpath(desktop);
         }
     }
+}
+
+/**
+ * Get selection
+ */
+Inkscape::Selection *Effect::getSelection()
+{
+    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
+    if (desktop) {
+        return desktop->getSelection();
+    }
+    return nullptr;
 }
 
 /**

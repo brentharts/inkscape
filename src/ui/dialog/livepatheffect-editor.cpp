@@ -617,7 +617,7 @@ void LivePathEffectEditor::on_visibility_toggled( Glib::ustring const& str )
             SPItem *item = sel->singleItem();
             SPLPEItem *lpeitem  = dynamic_cast<SPLPEItem *>(item);
             if ( lpeitem ) {
-                lpeobjref->lpeobject->get_lpe()->doOnVisibilityToggled(lpeitem);
+                lpeobjref->lpeobject->get_lpe()->doOnVisibilityToggled_impl(lpeitem);
             }
         }
         DocumentUndo::done( current_desktop->getDocument(), SP_VERB_DIALOG_LIVE_PATH_EFFECT,

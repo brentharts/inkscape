@@ -849,6 +849,7 @@ void SPGroup::update_patheffect(bool write) {
                 }
             }
         }
+        this->finishPatheffectStack();
     }
 }
 

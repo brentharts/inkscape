@@ -225,6 +225,28 @@ bool SPLPEItem::performPathEffect(SPCurve *curve, SPShape *current, bool is_clip
     return true;
 }
 
+void 
+SPLPEItem::finishPatheffectStack() {
+    if (this->hasPathEffect() && this->pathEffectsEnabled()) {
+        PathEffectList path_effect_list(*this->path_effect_list);
+        for (auto &lperef : path_effect_list) {
+            LivePathEffectObject *lpeobj = lperef->lpeobject;
+            if (!lpeobj) {
+                /** \todo Investigate the cause of this.
+                 * For example, this happens when copy pasting an object with LPE applied. Probably because the object is pasted while the effect is not yet pasted to defs, and cannot be found.
+                */
+                g_warning("SPLPEItem::performPathEffect - NULL lpeobj in list!");
+                return;
+            }
+
+            Inkscape::LivePathEffect::Effect *lpe = lpeobj->get_lpe();
+            if (lpe) {
+                lpe->doAfterAllEffects_impl(this);
+            }
+        }
+    }
+}
+
 /**
  * returns true when LPE was successful.
  */
@@ -250,17 +272,13 @@ bool SPLPEItem::performOnePathEffect(SPCurve *curve, SPShape *current, Inkscape:
             }
             // To Calculate BBox on shapes and nested LPE
             current->setCurveInsync(curve);
-            if (lpe->lpeversion.param_getSVGValue() != "0") { // we are on 1 or up
-                current->bbox_vis_cache_is_valid = false;
-                current->bbox_geom_cache_is_valid = false;
-            }
             // Groups have their doBeforeEffect called elsewhere
             if (!SP_IS_GROUP(this) && !is_clip_or_mask) {
                 lpe->doBeforeEffect_impl(this);
             }
 
             try {
-                lpe->doEffect(curve);
+                lpe->doEffect_impl(curve);
                 lpe->has_exception = false;
             }
 
@@ -270,7 +288,7 @@ bool SPLPEItem::performOnePathEffect(SPCurve *curve, SPShape *current, Inkscape:
                     SP_ACTIVE_DESKTOP->messageStack()->flash( Inkscape::WARNING_MESSAGE,
                                     _("An exception occurred during execution of the Path Effect.") );
                 }
-                lpe->doOnException(this);
+                lpe->doOnException_impl(this);
                 return false;
             }
 
@@ -282,6 +300,10 @@ bool SPLPEItem::performOnePathEffect(SPCurve *curve, SPShape *current, Inkscape:
                     lpe->pathvector_after_effect = curve->get_pathvector();
                 }
                 lpe->doAfterEffect_impl(this, curve);
+            }
+            if (lpe->lpeversion.param_getSVGValue() != "0") { // we are on 1 or up
+                current->bbox_vis_cache_is_valid = false;
+                current->bbox_geom_cache_is_valid = false;
             }
         }
     }
@@ -338,7 +360,8 @@ bool SPLPEItem::optimizeTransforms()
         }
     }
     g_free(classes);
-    return true;
+    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+    return true;//!prefs->getBool("/options/preservetransform/value", false);
 }
 
 /**
@@ -358,7 +381,7 @@ void SPLPEItem::notifyTransform(Geom::Affine const &postmul)
         if (lpeobj) {
             Inkscape::LivePathEffect::Effect *lpe = lpeobj->get_lpe();
             if (lpe && !lpe->is_load) {
-                lpe->transform_multiply(postmul, this);
+                lpe->transform_multiply_impl(postmul, this);
             }
         }
     }
@@ -367,6 +390,160 @@ void SPLPEItem::notifyTransform(Geom::Affine const &postmul)
 // CPPIFY: make pure virtual
 void SPLPEItem::update_patheffect(bool /*write*/) {
     //throw;
+}
+
+/**
+ * Calls lpe items actions from enum  lpeitem_action
+ */
+void
+sp_lpe_item_action (SPLPEItem *lpeitem, lpeitem_action action) 
+{
+#ifdef SHAPE_VERBOSE
+    g_message("sp_lpe_item_onload: %p\n", lpeitem);
+#endif
+    g_return_if_fail (lpeitem != nullptr);
+    g_return_if_fail (SP_IS_OBJECT (lpeitem));
+    g_return_if_fail (SP_IS_LPE_ITEM (lpeitem));
+    SPGroup * group = dynamic_cast<SPGroup *>(lpeitem);
+    if (group) {
+        std::vector<SPItem*> item_list = sp_item_group_item_list(group);
+        for (auto iter : item_list) {
+            SPLPEItem* subitem = dynamic_cast<SPLPEItem*>(iter);
+            if (subitem) {
+                sp_lpe_item_action(subitem, action);
+            }
+        }
+    }
+    PathEffectList path_effect_list(*lpeitem->path_effect_list);
+    for (auto &lperef : path_effect_list) {
+        if (!lperef) {
+            continue;
+        }
+        LivePathEffectObject *lpeobj = lperef->lpeobject;
+        if (lpeobj) {
+            Inkscape::LivePathEffect::Effect * lpe = lpeobj->get_lpe();
+            if (lpe) {
+                switch(action) {
+                case lpeitem_action::loadlpe:
+                    lpe->doOnLoad_impl(lpeitem);
+                    break;
+                case lpeitem_action::copylpe:
+                    lpe->doOnCopy_impl(lpeitem);
+                    break;
+                case lpeitem_action::cutlpe:
+                    lpe->doOnCut_impl(lpeitem);
+                    break;
+                case lpeitem_action::pastelpe:
+                    lpe->doOnPaste_impl(lpeitem);
+                    break;
+                case lpeitem_action::duplelpe:
+                    lpe->doOnDuple_impl(lpeitem);
+                    break;
+                case lpeitem_action::preduplelpe:
+                    lpe->doOnPreDuple_impl(lpeitem);
+                    break;
+                case lpeitem_action::stamplpe:
+                    lpe->doOnStamp_impl(lpeitem);
+                    break;
+                case lpeitem_action::prestamplpe:
+                    lpe->doOnPreStamp_impl(lpeitem);
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+    }
+}
+
+
+/**
+ * Calls on load LPE from existing documents
+ * This can be used by LPE thar need some kind of process on loading outside the whole stack
+ */
+void
+sp_lpe_item_onload (SPLPEItem *lpeitem) {
+#ifdef SHAPE_VERBOSE
+    g_message("sp_lpe_item_onload: %p\n", lpeitem);
+#endif
+    sp_lpe_item_action(lpeitem, lpeitem_action::loadlpe);
+}
+
+/**
+ * Calls on copy lpeitem
+ */
+void
+sp_lpe_item_oncopy (SPLPEItem *lpeitem) {
+#ifdef SHAPE_VERBOSE
+    g_message("sp_lpe_item_oncopy: %p\n", lpeitem);
+#endif
+    sp_lpe_item_action(lpeitem, lpeitem_action::copylpe);
+}
+
+/**
+ * Calls on cut lpeitem
+ */
+void
+sp_lpe_item_oncut (SPLPEItem *lpeitem) {
+#ifdef SHAPE_VERBOSE
+    g_message("sp_lpe_item_oncut: %p\n", lpeitem);
+#endif
+    sp_lpe_item_action(lpeitem, lpeitem_action::cutlpe);
+}
+
+/**
+ * Calls on paste lpeitem
+ */
+void
+sp_lpe_item_onpaste (SPLPEItem *lpeitem) {
+#ifdef SHAPE_VERBOSE
+    g_message("sp_lpe_item_onpaste: %p\n", lpeitem);
+#endif
+    sp_lpe_item_action(lpeitem, lpeitem_action::pastelpe);
+}
+
+/**
+ * Calls on previously to duple lpeitem
+ */
+void
+sp_lpe_item_onpreduple (SPLPEItem *lpeitem) {
+#ifdef SHAPE_VERBOSE
+    g_message("sp_lpe_item_onpreduple: %p\n", lpeitem);
+#endif
+    sp_lpe_item_action(lpeitem, lpeitem_action::preduplelpe);
+}
+
+/**
+ * Calls on duple lpeitem
+ */
+void
+sp_lpe_item_onduple (SPLPEItem *lpeitem) {
+#ifdef SHAPE_VERBOSE
+    g_message("sp_lpe_item_onduple: %p\n", lpeitem);
+#endif
+    sp_lpe_item_action(lpeitem, lpeitem_action::duplelpe);
+}
+
+/**
+ * Calls on before stamp lpeitem
+ */
+void
+sp_lpe_item_onprestamp (SPLPEItem *lpeitem) {
+#ifdef SHAPE_VERBOSE
+    g_message("sp_lpe_item_onprestamp: %p\n", lpeitem);
+#endif
+    sp_lpe_item_action(lpeitem, lpeitem_action::prestamplpe);
+}
+
+/**
+ * Calls on stamp lpeitem
+ */
+void
+sp_lpe_item_onstamp (SPLPEItem *lpeitem) {
+#ifdef SHAPE_VERBOSE
+    g_message("sp_lpe_item_onstamp: %p\n", lpeitem);
+#endif
+    sp_lpe_item_action(lpeitem, lpeitem_action::stamplpe);
 }
 
 /**
@@ -414,6 +591,8 @@ lpeobject_ref_modified(SPObject */*href*/, guint flags, SPLPEItem *lpeitem)
 #endif
     if (flags != 29 && flags != 253) {
         sp_lpe_item_update_patheffect (lpeitem, true, true);
+    } else if (flags == 29) {
+        sp_lpe_item_onload (lpeitem);
     }
 }
 
@@ -439,8 +618,8 @@ sp_lpe_item_create_original_path_recursive(SPLPEItem *lpeitem)
             sp_lpe_item_create_original_path_recursive(mask_data);
         }
     }
-    if (SP_IS_GROUP(lpeitem)) {
-        std::vector<SPItem*> item_list = sp_item_group_item_list(SP_GROUP(lpeitem));
+    if (SPGroup * group = dynamic_cast<SPGroup *>(lpeitem)) {
+        std::vector<SPItem*> item_list = sp_item_group_item_list(group);
         for (auto subitem : item_list) {
             if (SP_IS_LPE_ITEM(subitem)) {
                 sp_lpe_item_create_original_path_recursive(SP_LPE_ITEM(subitem));
@@ -687,7 +866,7 @@ void SPLPEItem::removeCurrentPathEffect(bool keep_paths)
     }
     if (Inkscape::LivePathEffect::Effect* effect_ = this->getCurrentLPE()) {
         effect_->keep_paths = keep_paths;
-        effect_->doOnRemove(this);
+        effect_->doOnRemove_impl(this);
         this->path_effect_list->remove(lperef); //current lpe ref is always our 'own' pointer from the path_effect_list
         this->setAttributeOrRemoveIfEmpty("inkscape:path-effect", patheffectlist_svg_string(*this->path_effect_list));
         if (!keep_paths) {
@@ -720,7 +899,7 @@ void SPLPEItem::removeAllPathEffects(bool keep_paths)
             Inkscape::LivePathEffect::Effect * lpe = lpeobj->get_lpe();
             if (lpe) {
                 lpe->keep_paths = keep_paths;
-                lpe->doOnRemove(this);
+                lpe->doOnRemove_impl(this);
             }
         }
     }
@@ -1358,7 +1537,11 @@ bool SPLPEItem::forkPathEffectsIfNecessary(unsigned int nr_of_allowed_users, boo
                 LivePathEffectObject *forked_lpeobj = lpeobj->fork_private_if_necessary(nr_of_allowed_users);
                 if (forked_lpeobj && forked_lpeobj != lpeobj) {
                     forked = true;
-                    forked_lpeobj->get_lpe()->is_load = true;
+                    Glib::ustring prevlpeid = "";
+                    if (lpeobj->getId()) {
+                        prevlpeid = lpeobj->getId();
+                    }
+                    forked_lpeobj->get_lpe()->doOnFork_impl(this, prevlpeid);
                     old_lpeobjs.push_back(lpeobj);
                     new_lpeobjs.push_back(forked_lpeobj);
                 }
@@ -1387,6 +1570,12 @@ void sp_lpe_item_enable_path_effects(SPLPEItem *lpeitem, bool enable)
 // Are the path effects enabled on this item ?
 bool SPLPEItem::pathEffectsEnabled() const
 {
+    // we supress on cliboard LPE calculations
+    Inkscape::XML::Node *root = this->document->getReprRoot();
+    Inkscape::XML::Node *clipnode = sp_repr_lookup_name(root, "inkscape:clipboard", 1);
+    if (clipnode) {
+        return false;
+    }
     return path_effects_enabled > 0;
 }
 
