@@ -87,6 +87,7 @@ private:
     class InternalUIBounce;
 
     ObjectWatcher* root_watcher;
+    SPItem *current_item;
 
     unsigned observer_blocked = 0;
 

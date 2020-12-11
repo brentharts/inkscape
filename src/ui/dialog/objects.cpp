@@ -623,6 +623,7 @@ ObjectsPanel::ObjectsPanel() :
     _tree.get_selection()->set_mode(Gtk::SELECTION_NONE);
 
     //Set up tree signals
+    _tree.signal_button_press_event().connect(sigc::mem_fun(*this, &ObjectsPanel::_handleButtonEvent), false);
     _tree.signal_button_release_event().connect(sigc::mem_fun(*this, &ObjectsPanel::_handleButtonEvent), false);
     _tree.signal_key_press_event().connect( sigc::mem_fun(*this, &ObjectsPanel::_handleKeyEvent), false );
     _tree.signal_row_collapsed().connect( sigc::bind<bool>(sigc::mem_fun(*this, &ObjectsPanel::_setExpanded), false));
@@ -890,7 +891,7 @@ bool ObjectsPanel::_handleKeyEvent(GdkEventKey *event)
 }
 
 /**
- * Handles mouse events
+ * Handles mouse up events
  * @param event Mouse event from GDK
  * @return whether to eat the event (om nom nom)
  */
@@ -914,18 +915,23 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
         SPItem *item = getItem(row);
         SPGroup *group = SP_GROUP(item);
 
-        // Clicking on layers firstly switches to that layer.
-        if (group && group->layerMode() == SPGroup::LAYER) {
-            if(selection->includes(item)) {
-                selection->clear();
-            } else if (_layer != item) {
-                selection->clear();
-                _desktop->setCurrentLayer(item);
+        // Select items on button release to not confuse drag
+        if (event->type == GDK_BUTTON_RELEASE) {
+            // Clicking on layers firstly switches to that layer.
+            if (group && group->layerMode() == SPGroup::LAYER) {
+                if(selection->includes(item)) {
+                    selection->clear();
+                } else if (_layer != item) {
+                    selection->clear();
+                    _desktop->setCurrentLayer(item);
+                }
+            } else if (event->state & GDK_SHIFT_MASK) {
+                selection->toggle(item);
+            } else {
+                selection->set(item);
             }
-        } else if (event->state & GDK_SHIFT_MASK) {
-            selection->toggle(item);
         } else {
-            selection->set(item);
+            current_item = item;
         }
     }
     return false;
@@ -1251,11 +1257,25 @@ void ObjectsPanel::on_drag_start(const Glib::RefPtr<Gdk::DragContext> &context)
     selection->set_mode(Gtk::SELECTION_MULTIPLE);
     selection->unselect_all();
 
-    for (auto item : _desktop->getSelection()->items()) {
-        auto watcher = getWatcher(item->getRepr());
+    auto obj_selection = _desktop->getSelection();
+
+    if (current_item && !obj_selection->includes(current_item)) {
+        // This means the item the user started to drag is not one that is selected
+        // So we'll deselect everything and start draging this item instead.
+        auto watcher = getWatcher(current_item->getRepr());
         if (watcher) {
             auto path = watcher->getRow();
             selection->select(path);
+            obj_selection->set(current_item);
+        }
+    } else {
+        // Drag all the items currently selected (multi-row)
+        for (auto item : obj_selection->items()) {
+            auto watcher = getWatcher(item->getRepr());
+            if (watcher) {
+                auto path = watcher->getRow();
+                selection->select(path);
+            }
         }
     }
 }
