@@ -38,21 +38,47 @@ void CellRendererItemIcon::render_vfunc(const Cairo::RefPtr<Cairo::Context>& cr,
     std::string cache_id = shape_type + "-" + highlight;
 
     // if the icon isn't cached, render it to a pixbuf
+    int scale = widget.get_scale_factor();
     if ( !_icon_cache[cache_id] ) { 
-        int scale = widget.get_scale_factor();
         _icon_cache[cache_id] = sp_get_shape_icon(shape_type, Gdk::RGBA(highlight), _size, scale);
     }
     g_return_if_fail(_icon_cache[cache_id]);
   
-    // Paint the pixbuf to a cairo surface to get HiDPI support
-    cairo_surface_t *surface = gdk_cairo_surface_create_from_pixbuf(
-            _icon_cache[cache_id]->gobj(), 0, widget.get_window()->gobj());
-    g_return_if_fail(surface);
-
     // Center the icon in the cell area
     int x = cell_area.get_x() + int((cell_area.get_width() - _size) * 0.5);
     int y = cell_area.get_y() + int((cell_area.get_height() - _size) * 0.5);
 
+    // Paint the pixbuf to a cairo surface to get HiDPI support
+    paint_icon(cr, widget, _icon_cache[cache_id], x, y);
+
+    // Create an overlay icon
+    int clipmask = _property_clipmask.get_value();
+    if (clipmask > 0) {
+        if (!_clip_overlay) {
+            _clip_overlay = sp_get_icon_pixbuf("overlay-clip", Gtk::ICON_SIZE_MENU, scale);
+        }
+        if (!_mask_overlay) {
+            _mask_overlay = sp_get_icon_pixbuf("overlay-mask", Gtk::ICON_SIZE_MENU, scale);
+        }
+
+        if (clipmask == OVERLAY_CLIP && _clip_overlay) {
+            paint_icon(cr, widget, _clip_overlay, x, y);
+        }
+        if (clipmask == OVERLAY_MASK && _mask_overlay) {
+            paint_icon(cr, widget, _mask_overlay, x, y);
+        }
+    }
+
+}
+
+void CellRendererItemIcon::paint_icon(const Cairo::RefPtr<Cairo::Context>& cr,
+                                      Gtk::Widget& widget,
+                                      Glib::RefPtr<Gdk::Pixbuf> pixbuf,
+                                      int x, int y)
+{
+    cairo_surface_t *surface = gdk_cairo_surface_create_from_pixbuf(
+            pixbuf->gobj(), 0, widget.get_window()->gobj());
+    if (!surface) return;
     cairo_set_source_surface(cr->cobj(), surface, x, y);
     cr->set_operator(Cairo::OPERATOR_ATOP);
     cr->rectangle(x, y, _size, _size);

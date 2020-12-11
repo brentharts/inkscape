@@ -136,6 +136,7 @@ public:
         add(_colLabel);
         add(_colType);
         add(_colIconColor);
+        add(_colClipMask);
         add(_colBgColor);
         add(_colVisible);
         add(_colLocked);
@@ -145,6 +146,7 @@ public:
     Gtk::TreeModelColumn<Glib::ustring> _colLabel;
     Gtk::TreeModelColumn<Glib::ustring> _colType;
     Gtk::TreeModelColumn<unsigned int> _colIconColor;
+    Gtk::TreeModelColumn<unsigned int> _colClipMask;
     Gtk::TreeModelColumn<Gdk::RGBA> _colBgColor;
     Gtk::TreeModelColumn<bool> _colVisible;
     Gtk::TreeModelColumn<bool> _colLocked;
@@ -234,6 +236,9 @@ void ObjectWatcher::updateRowInfo() {
 
         row[panel->_model->_colType] = item->typeName();
         row[panel->_model->_colIconColor] = item->highlight_color();
+        row[panel->_model->_colClipMask] = 0;
+            (item->getClipObject() ? Inkscape::UI::Widget::OVERLAY_CLIP : 0) |
+            (item->getMaskObject() ? Inkscape::UI::Widget::OVERLAY_MASK : 0);
         row[panel->_model->_colVisible] = !item->isHidden();
         row[panel->_model->_colLocked] = !item->isSensitive();
     }
@@ -585,6 +590,7 @@ ObjectsPanel::ObjectsPanel() :
     _name_column->add_attribute(_text_renderer->property_cell_background_rgba(), _model->_colBgColor);
     _name_column->add_attribute(icon_renderer->property_shape_type(), _model->_colType);
     _name_column->add_attribute(icon_renderer->property_color(), _model->_colIconColor);
+    _name_column->add_attribute(icon_renderer->property_clipmask(), _model->_colClipMask);
     _name_column->add_attribute(icon_renderer->property_cell_background_rgba(), _model->_colBgColor);
 
     //Visible
