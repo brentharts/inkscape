@@ -395,6 +395,7 @@ public:
     void toNextLayer(bool skip_undo = false);
     void toPrevLayer(bool skip_undo = false);
     void toLayer(SPObject *layer, bool skip_undo = false);
+    void toLayer(SPObject *layer, bool skip_undo, Inkscape::XML::Node *after);
 
     //clipboard management
     //in selection-chemistry.cpp

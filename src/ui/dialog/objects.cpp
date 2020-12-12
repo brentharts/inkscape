@@ -1200,9 +1200,6 @@ finally:
  */
 bool ObjectsPanel::on_drag_drop(const Glib::RefPtr<Gdk::DragContext> &context, int x, int y, guint time)
 {
-    //auto dragging_iter = _store->get_iter(dragging_path);
-    //Node *dragging_repr = dragging_iter ? getRepr(*dragging_iter) : nullptr;
-
     Gtk::TreeModel::Path path;
     Gtk::TreeViewDropPosition pos;
     _tree.get_dest_row_at_pos(x, y, path, pos);
@@ -1211,40 +1208,17 @@ bool ObjectsPanel::on_drag_drop(const Glib::RefPtr<Gdk::DragContext> &context, i
         return true;
     }
 
-    auto oset = ObjectSet(_document);
     auto drop_repr = getRepr(*_store->get_iter(path));
     bool const drop_into = pos != Gtk::TREE_VIEW_DROP_BEFORE && //
                            pos != Gtk::TREE_VIEW_DROP_AFTER;
 
-    for (auto item : _desktop->getSelection()->items()) {
-        auto dragging_repr = item->getRepr();
-        if (drop_into) {
-            oset.add(dragging_repr);
-        } else {
-            if (drop_repr->parent() != dragging_repr->parent()) {
-                oset.add(dragging_repr);
+    auto sele = _desktop->getSelection();
 
-                // Switching layers has invalidated the pointer
-                dragging_repr = oset.singleRepr();
-                assert(dragging_repr);
-            }
-
-            if (pos == Gtk::TREE_VIEW_DROP_AFTER) {
-                drop_repr = drop_repr->prev();
-            }
-
-            if (dragging_repr != drop_repr) {
-                dragging_repr->parent()->changeOrder(dragging_repr, drop_repr);
-            }
-        }
-
-    }
-    if (!oset.isEmpty()) {
-        if (drop_into) {
-            oset.toLayer(_document->getObjectByRepr(drop_repr));
-        } else {
-            oset.toLayer(_document->getObjectByRepr(drop_repr->parent()));
-        }
+    if (drop_into) {
+        sele->toLayer(_document->getObjectByRepr(drop_repr));
+    } else {
+        Node *after = (pos == Gtk::TREE_VIEW_DROP_BEFORE) ? drop_repr : drop_repr->prev();
+        sele->toLayer(_document->getObjectByRepr(drop_repr->parent()), false, after);
     }
 
     on_drag_end(context);
