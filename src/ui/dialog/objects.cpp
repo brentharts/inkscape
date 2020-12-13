@@ -917,16 +917,18 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
 
         // Select items on button release to not confuse drag
         if (event->type == GDK_BUTTON_RELEASE) {
-            // Clicking on layers firstly switches to that layer.
-            if (group && group->layerMode() == SPGroup::LAYER) {
+            if (event->state & GDK_SHIFT_MASK) {
+                selection->toggle(item);
+            } else if (group && group->layerMode() == SPGroup::LAYER) {
+                // Clicking on layers firstly switches to that layer.
                 if(selection->includes(item)) {
                     selection->clear();
                 } else if (_layer != item) {
                     selection->clear();
                     _desktop->setCurrentLayer(item);
+                } else {
+                    selection->set(item);
                 }
-            } else if (event->state & GDK_SHIFT_MASK) {
-                selection->toggle(item);
             } else {
                 selection->set(item);
             }
