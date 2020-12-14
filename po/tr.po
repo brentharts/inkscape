@@ -4026,7 +4026,7 @@ msgstr "LaTex LaTeX latex ızgaralı sunum"
 
 #: ../share/templates/templates.h:1
 msgid "Typography Canvas"
-msgstr "Tipografi Tuval"
+msgstr "Tipografi Tuvali"
 
 #: ../share/templates/templates.h:1
 msgid "Empty typography canvas with helping guidelines."
@@ -4038,7 +4038,7 @@ msgstr "kılavuz çizgileri tipografi tuval"
 
 #: ../share/templates/templates.h:1
 msgid "No Layers"
-msgstr "Katman Yok"
+msgstr "Katmansız"
 
 #: ../share/templates/templates.h:1
 msgid "Empty sheet with no layers"
@@ -4046,7 +4046,7 @@ msgstr "Katmansız boş sayfa"
 
 #: ../share/templates/templates.h:1
 msgid "no layers empty"
-msgstr "boş katman yok"
+msgstr "boş katmansız"
 
 #: ../src/actions/actions-base.cpp:224
 msgid "Print Inkscape version and exit."
@@ -6672,7 +6672,7 @@ msgstr "Sarı"
 
 #: ../src/extension/internal/filter/color.h:750
 msgid "Background blend mode:"
-msgstr "Arka plan karıştırma rengi:"
+msgstr "Arka plan karıştırma kipi:"
 
 #: ../src/extension/internal/filter/color.h:755
 msgid "Channel to alpha"
@@ -6892,7 +6892,7 @@ msgstr "Basit karışım"
 #: ../src/extension/internal/filter/paint.h:887
 #: ../src/ui/widget/filter-effect-chooser.cpp:47
 msgid "Blend mode:"
-msgstr "Harmanlama modu:"
+msgstr "Harmanlama kipi:"
 
 #: ../src/extension/internal/filter/color.h:1643 ../src/path/path-boolop.cpp:71
 #: ../src/ui/widget/filter-effect-chooser.cpp:32
@@ -7004,7 +7004,7 @@ msgid ""
 "Create a custom tritone palette with additional glow, blend modes and hue "
 "moving"
 msgstr ""
-"Ek parlaklık, karışım modları ve renk tonu ile özel bir üçlüton paleti "
+"Ek parlaklık, karışım kipleri ve renk tonu ile özel bir üçlüton paleti "
 "oluştur"
 
 #: ../src/extension/internal/filter/distort.h:69
@@ -7351,7 +7351,7 @@ msgstr "Kromolit"
 #: ../src/extension/internal/filter/paint.h:77
 #: ../share/extensions/jessyink_key_bindings.inx:21
 msgid "Drawing mode"
-msgstr "Çizim modu"
+msgstr "Çizim kipi"
 
 #: ../src/extension/internal/filter/paint.h:78
 msgid "Drawing blend:"
@@ -7372,7 +7372,7 @@ msgstr "Gren"
 
 #: ../src/extension/internal/filter/paint.h:94
 msgid "Grain mode"
-msgstr "Gren modu"
+msgstr "Gren kipi"
 
 #: ../src/extension/internal/filter/paint.h:99
 #: ../src/extension/internal/filter/transparency.h:217
@@ -9224,7 +9224,7 @@ msgstr "Tüm eylemleri/fiilleri çalıştırdıktan sonra grafik arabirimi kapat
 
 #: ../src/inkscape-application.cpp:656
 msgid "Start Inkscape in interactive shell mode"
-msgstr "Inkscape'i etkileşimli kabuk modunda başlat"
+msgstr "Inkscape'i etkileşimli kabuk kipinde başlat"
 
 #
 # File: ../src/inkscape-application.cpp, line: 611
@@ -9234,7 +9234,7 @@ msgstr "D-Bus"
 
 #: ../src/inkscape-application.cpp:660
 msgid "Enter a listening loop for D-Bus messages in console mode"
-msgstr "Konsol modunda D-Bus iletileri için bir dinleme döngüsü girin"
+msgstr "Konsol kipinde D-Bus iletileri için bir dinleme döngüsü girin"
 
 #: ../src/inkscape-application.cpp:661
 msgid "Specify the D-Bus name; default is 'org.inkscape'"
@@ -9469,7 +9469,7 @@ msgid ""
 "used directly on the canvas with the Spiro mode of the drawing tools."
 msgstr ""
 "Spiro B-Splines kullanarak yolu kablo gibi kıvır. Bu efekt genellikle çizim "
-"araçlarının Spiro moduyla doğrudan tuval üzerinde kullanılır."
+"araçlarının Spiro kipiyle doğrudan tuval üzerinde kullanılır."
 
 #: ../src/live_effects/effect.cpp:217
 msgid "Envelope Deformation"
@@ -9618,7 +9618,7 @@ msgid ""
 "used directly on the canvas with the BSpline mode of the drawing tools."
 msgstr ""
 "Yolun köşelerine kalıplanan bir açılı çizgi oluştur. Bu efekt genellikle "
-"çizim araçlarının açılı çizgi moduyla doğrudan tuval üzerinde kullanılır."
+"çizim araçlarının açılı çizgi kipiyle doğrudan tuval üzerinde kullanılır."
 
 #: ../src/live_effects/effect.cpp:429
 msgid "Join type"
@@ -10214,7 +10214,7 @@ msgstr "Bunu yazın:"
 
 #: ../src/live_effects/lpe-bool.cpp:81
 msgid "Fill type (winding mode) for this path"
-msgstr "Bu yol için doldurma türü (sarmal modu)"
+msgstr "Bu yol için doldurma türü (sarmal kipi)"
 
 #: ../src/live_effects/lpe-bool.cpp:83
 msgid "Fill type operand:"
@@ -10222,7 +10222,7 @@ msgstr "İşlenen dolgu türü:"
 
 #: ../src/live_effects/lpe-bool.cpp:83
 msgid "Fill type (winding mode) for operand path"
-msgstr "İşlenen yol için dolgu tipi (sarmal modu)"
+msgstr "İşlenen yol için dolgu tipi (sarmal kipi)"
 
 #: ../src/live_effects/lpe-bounding-box.cpp:20
 #: ../src/live_effects/lpe-fill-between-many.cpp:35
@@ -12793,7 +12793,7 @@ msgstr "Sprey Aracı dostu"
 
 #: ../src/live_effects/lpe-roughen.cpp:51
 msgid "For use with spray tool in copy mode"
-msgstr "Kopyalama modunda püskürtme aracıyla kullanım için"
+msgstr "Kopyalama kipinde püskürtme aracıyla kullanım için"
 
 #: ../src/live_effects/lpe-roughen.cpp:147
 msgid "<b>Add nodes</b> Subdivide each segment"
@@ -13259,7 +13259,7 @@ msgstr "Elastik"
 
 #: ../src/live_effects/lpe-transform_2pts.cpp:33
 msgid "Elastic transform mode"
-msgstr "Elastik dönüşüm modu"
+msgstr "Elastik dönüşüm kipi"
 
 #: ../src/live_effects/lpe-transform_2pts.cpp:34
 msgid "From original width"
@@ -16135,7 +16135,7 @@ msgid ""
 "Initial color for clones (works only if the original has unset fill or "
 "stroke or on spray tool in copy mode)"
 msgstr ""
-"Klonlar için başlangıç rengi (yalnızca, kopyalama modunda orijinalde "
+"Klonlar için başlangıç rengi (yalnızca, kopyalama kipinde orijinalde "
 "ayarlanmamış dolgu veya kontur veya sprey aracındaysa çalışır)"
 
 #: ../src/ui/dialog/clonetiler.cpp:696
@@ -16828,7 +16828,7 @@ msgstr "Betikleme"
 
 #: ../src/ui/dialog/document-properties.cpp:155
 msgid "Metadata"
-msgstr "Metaverisi"
+msgstr "Üstbilgi"
 
 #: ../src/ui/dialog/document-properties.cpp:156
 #: ../share/ui/inkscape-about.glade:226
@@ -17880,7 +17880,7 @@ msgid ""
 "The <b>feBlend</b> filter primitive provides 4 image blending modes: screen, "
 "multiply, darken and lighten."
 msgstr ""
-"<b>feBlend</b> filtre temeli 4 resim karıştırma modu sağlar: ekran, "
+"<b>feBlend</b> filtre temeli 4 resim karıştırma kipi sağlar: ekran, "
 "çoğaltım, koyu ve açık."
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:2888
@@ -17912,9 +17912,9 @@ msgid ""
 "standard. Porter-Duff blending modes are essentially logical operations "
 "between the corresponding pixel values of the images."
 msgstr ""
-"<b>feComposite</b> filtre temeli, Porter-Duff karışım modlarından birini "
-"veya SVG standardında açıklanan aritmetik modunu kullanarak iki görüntü "
-"karışımını kompoze eder. Porter-Duff harmanlama modları, esas olarak "
+"<b>feComposite</b> filtre temeli, Porter-Duff karışım kiplerinden birini "
+"veya SVG standardında açıklanan aritmetik kipini kullanarak iki görüntü "
+"karışımını kompoze eder. Porter-Duff harmanlama kipleri, esas olarak "
 "görüntülerin karşılık gelen piksel değerleri arasındaki mantıksal "
 "işlemlerdir."
 
@@ -17992,7 +17992,7 @@ msgid ""
 msgstr ""
 "<b>feMerge</b> filtre temeli, ilkel filtre içinde birkaç geçici görüntüyü "
 "tek bir görüntüye birleştirir. Bunun için normal alfa kompozisyonunu "
-"kullanır. Bu, 'normal' modda birkaç feBlend temeli veya 'over' modunda "
+"kullanır. Bu, 'normal' kipte birkaç feBlend temeli veya 'over' kipinde "
 "birkaç feComposite temeli kullanmaya eşdeğerdir."
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:2928
@@ -19944,7 +19944,7 @@ msgstr ""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:458
 msgid "Sketch mode"
-msgstr "Eskiz modu"
+msgstr "Eskiz kipi"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:460
 msgid ""
@@ -22314,7 +22314,7 @@ msgid ""
 msgstr ""
 "Modern donanımda, bu değerin artırılması (varsayılan değer 16'dır), "
 "çiziminizde filtrelenmiş nesnelere sahip geniş alanlar (bulanıklaştırma ve "
-"karışım modları dahil) olduğunda daha iyi performans elde etmenize yardımcı "
+"karışım kipleri dahil) olduğunda daha iyi performans elde etmenize yardımcı "
 "olabilir. Az sayıda donanım içeren çizimlerde, az veya hiç filtresiz veya "
 "çizimsiz ilgili alanlarda yakınlaştırma ve paning yapmak için değeri azaltın."
 
@@ -22409,7 +22409,7 @@ msgstr "Görüntüleme için filtre efektleri kalitesi"
 #: ../src/ui/dialog/inkscape-preferences.cpp:2136
 #: ../src/ui/dialog/print.cpp:107
 msgid "Rendering"
-msgstr "Renderleme"
+msgstr "İşleme"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2142 ../src/verbs.cpp:162
 msgid "Edit"
@@ -22507,7 +22507,7 @@ msgstr ""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2182
 msgid "Bitmap import/open mode:"
-msgstr "Biteşlem içe aktarma/açma modu:"
+msgstr "Biteşlem içe aktarma/açma kipi:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2186
 msgid "Include"
@@ -22515,11 +22515,11 @@ msgstr "Dahil"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2189
 msgid "SVG import mode:"
-msgstr "SVG içe aktarma modu:"
+msgstr "SVG içe aktarma kipi:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2196
 msgid "Image scale (image-rendering):"
-msgstr "Görüntü ölçeği (görüntü renderleme):"
+msgstr "Görüntü ölçeği (görüntü işleme):"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2201
 msgid "Default _import resolution:"
@@ -22548,8 +22548,8 @@ msgid ""
 "When active will render images while in outline mode instead of a red box "
 "with an x. This is useful for manual tracing."
 msgstr ""
-"Etkin olduğunda, x işaretli kırmızı kutu yerine anahat modundayken "
-"görüntüler renderlenir. Bu manuel izleme için kullanışlıdır."
+"Etkin olduğunda, x işaretli kırmızı kutu yerine anahat kipindeyken "
+"görüntüler işlenir. Bu manuel izleme için kullanışlıdır."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2212
 msgid "Imported Images"
@@ -23562,7 +23562,7 @@ msgstr "Nesne izolasyonunu ayarla"
 
 #: ../src/ui/dialog/objects.cpp:1786
 msgid "Set object blend mode"
-msgstr "Nesne harmanlama modunu ayarla"
+msgstr "Nesne harmanlama kipini ayarla"
 
 #: ../src/ui/dialog/objects.cpp:1825
 msgid "Set object blur"
@@ -27382,7 +27382,7 @@ msgid ""
 "advanced effects. In clone mode original fill or stroke colors must be unset."
 msgstr ""
 "Çizimden renk seçin. Gelişmiş efektler için klonlayıcı izleme iletişim "
-"kutusunu kullanabilirsiniz. Klon modunda, orijinal dolgu veya kontur "
+"kutusunu kullanabilirsiniz. Klon kipinde, orijinal dolgu veya kontur "
 "renklerinin ayarlanmamış olması gerekir."
 
 #: ../src/ui/toolbar/spray-toolbar.cpp:305
@@ -27398,7 +27398,7 @@ msgstr "Seçilen rengi kontura uygula"
 #: ../src/ui/toolbar/spray-toolbar.cpp:327
 #: ../src/ui/toolbar/spray-toolbar.cpp:328
 msgid "Inverted pick value, retaining color in advanced trace mode"
-msgstr "Gelişmiş izleme modunda rengi koruyarak ters seçim değeri"
+msgstr "Gelişmiş izleme kipinde rengi koruyarak ters seçim değeri"
 
 #: ../src/ui/toolbar/spray-toolbar.cpp:338
 #: ../src/ui/toolbar/spray-toolbar.cpp:339
@@ -27733,7 +27733,7 @@ msgstr "Dikey metin  — çizgiler: soldan sağa"
 
 #: ../src/ui/toolbar/text-toolbar.cpp:544
 msgid "Writing mode"
-msgstr "Yazma modu"
+msgstr "Yazma kipi"
 
 #: ../src/ui/toolbar/text-toolbar.cpp:545
 msgid "Block progression"
@@ -27817,7 +27817,7 @@ msgstr "Metin: Hizalanmayı değiştir"
 
 #: ../src/ui/toolbar/text-toolbar.cpp:1142
 msgid "Text: Change writing mode"
-msgstr "Metin: Yazma modunu değiştir"
+msgstr "Metin: Yazma kipini değiştir"
 
 #: ../src/ui/toolbar/text-toolbar.cpp:1197
 msgid "Text: Change orientation"
@@ -27891,7 +27891,7 @@ msgstr ""
 
 #: ../src/ui/toolbar/tweak-toolbar.cpp:102
 msgid "Move mode"
-msgstr "Taşıma modu"
+msgstr "Taşıma kipi"
 
 #: ../src/ui/toolbar/tweak-toolbar.cpp:103
 msgid "Move objects in any direction"
@@ -27899,7 +27899,7 @@ msgstr "Nesneleri herhangi bir yöne taşı"
 
 #: ../src/ui/toolbar/tweak-toolbar.cpp:107
 msgid "Move in/out mode"
-msgstr "İçe/dışa taşıma modu"
+msgstr "İçe/dışa taşıma kipi"
 
 #: ../src/ui/toolbar/tweak-toolbar.cpp:108
 msgid "Move objects towards cursor; with Shift from cursor"
@@ -27907,7 +27907,7 @@ msgstr "Nesneleri imlece doğru hareket ettir; imleçten dışa Shift ile"
 
 #: ../src/ui/toolbar/tweak-toolbar.cpp:112
 msgid "Move jitter mode"
-msgstr "Jitter modunu hareket ettir"
+msgstr "Jitter kipini hareket ettir"
 
 #: ../src/ui/toolbar/tweak-toolbar.cpp:113
 msgid "Move objects in random directions"
@@ -27915,7 +27915,7 @@ msgstr "Nesneleri rastgele yönlere taşı"
 
 #: ../src/ui/toolbar/tweak-toolbar.cpp:117
 msgid "Scale mode"
-msgstr "Ölçek modu"
+msgstr "Ölçek kipi"
 
 #: ../src/ui/toolbar/tweak-toolbar.cpp:118
 msgid "Shrink objects, with Shift enlarge"
@@ -27923,7 +27923,7 @@ msgstr "Nesneleri küçült, Shift ile büyüt"
 
 #: ../src/ui/toolbar/tweak-toolbar.cpp:122
 msgid "Rotate mode"
-msgstr "Döndürme modu"
+msgstr "Döndürme kipi"
 
 #: ../src/ui/toolbar/tweak-toolbar.cpp:123
 msgid "Rotate objects, with Shift counterclockwise"
@@ -27931,7 +27931,7 @@ msgstr "Nesneleri döndür, Shift ile saat yönünün tersine"
 
 #: ../src/ui/toolbar/tweak-toolbar.cpp:127
 msgid "Duplicate/delete mode"
-msgstr "Çoğalt/sil modu"
+msgstr "Çoğalt/sil kipi"
 
 #: ../src/ui/toolbar/tweak-toolbar.cpp:128
 msgid "Duplicate objects, with Shift delete"
@@ -27939,7 +27939,7 @@ msgstr "Nesneleri çoğalt, Shift ile sil"
 
 #: ../src/ui/toolbar/tweak-toolbar.cpp:132
 msgid "Push mode"
-msgstr "İtme modu"
+msgstr "İtme kipi"
 
 #: ../src/ui/toolbar/tweak-toolbar.cpp:133
 msgid "Push parts of paths in any direction"
@@ -27947,7 +27947,7 @@ msgstr "Yolların parçalarını herhangi bir yöne it"
 
 #: ../src/ui/toolbar/tweak-toolbar.cpp:137
 msgid "Shrink/grow mode"
-msgstr "Küçült/büyüt modu"
+msgstr "Küçült/büyüt kipi"
 
 #: ../src/ui/toolbar/tweak-toolbar.cpp:138
 msgid "Shrink (inset) parts of paths; with Shift grow (outset)"
@@ -27955,7 +27955,7 @@ msgstr "Yolların bölümlerini küçült (büz); Shift ile büyüt (şişir)"
 
 #: ../src/ui/toolbar/tweak-toolbar.cpp:142
 msgid "Attract/repel mode"
-msgstr "Çekme/itme modu"
+msgstr "Çekme/itme kipi"
 
 #: ../src/ui/toolbar/tweak-toolbar.cpp:143
 msgid "Attract parts of paths towards cursor; with Shift from cursor"
@@ -27963,7 +27963,7 @@ msgstr "İmleç yönünde yolların bazı kısımlarını çekin; imleçten Shif
 
 #: ../src/ui/toolbar/tweak-toolbar.cpp:147
 msgid "Roughen mode"
-msgstr "Pürüz modu"
+msgstr "Pürüz kipi"
 
 #: ../src/ui/toolbar/tweak-toolbar.cpp:148
 msgid "Roughen parts of paths"
@@ -27971,7 +27971,7 @@ msgstr "Yolların parçalarını pürüzlendir"
 
 #: ../src/ui/toolbar/tweak-toolbar.cpp:152
 msgid "Color paint mode"
-msgstr "Renk boya modu"
+msgstr "Renk boya kipi"
 
 #: ../src/ui/toolbar/tweak-toolbar.cpp:153
 msgid "Paint the tool's color upon selected objects"
@@ -27979,7 +27979,7 @@ msgstr "Seçili nesneleri aracın rengine boya"
 
 #: ../src/ui/toolbar/tweak-toolbar.cpp:157
 msgid "Color jitter mode"
-msgstr "Renk titreşimi modu"
+msgstr "Renk titreşimi kipi"
 
 #: ../src/ui/toolbar/tweak-toolbar.cpp:158
 msgid "Jitter the colors of selected objects"
@@ -27987,7 +27987,7 @@ msgstr "Seçili nesnelere renk titremesi"
 
 #: ../src/ui/toolbar/tweak-toolbar.cpp:162
 msgid "Blur mode"
-msgstr "Bulanıklık modu"
+msgstr "Bulanıklık kipi"
 
 #: ../src/ui/toolbar/tweak-toolbar.cpp:163
 msgid "Blur selected objects more; with Shift, blur less"
@@ -28025,7 +28025,7 @@ msgstr "H"
 
 #: ../src/ui/toolbar/tweak-toolbar.cpp:206
 msgid "In color mode, act on object's hue"
-msgstr "Renk modunda, nesnenin renk tonuna göre hareket et"
+msgstr "Renk kipinde, nesnenin renk tonuna göre hareket et"
 
 #. TRANSLATORS:  "S" here stands for saturation
 #: ../src/ui/toolbar/tweak-toolbar.cpp:212
@@ -28035,7 +28035,7 @@ msgstr "S"
 
 #: ../src/ui/toolbar/tweak-toolbar.cpp:213
 msgid "In color mode, act on object's saturation"
-msgstr "Renk modunda, nesnenin doygunluğuna göre hareket et"
+msgstr "Renk kipinde, nesnenin doygunluğuna göre hareket et"
 
 #. TRANSLATORS:  "S" here stands for saturation
 #: ../src/ui/toolbar/tweak-toolbar.cpp:219
@@ -28045,7 +28045,7 @@ msgstr "L"
 
 #: ../src/ui/toolbar/tweak-toolbar.cpp:220
 msgid "In color mode, act on object's lightness"
-msgstr "Renk modunda, nesnenin açıklığına göre hareket et"
+msgstr "Renk kipinde, nesnenin açıklığına göre hareket et"
 
 #. TRANSLATORS:  "O" here stands for opacity
 #: ../src/ui/toolbar/tweak-toolbar.cpp:226
@@ -28055,7 +28055,7 @@ msgstr "O"
 
 #: ../src/ui/toolbar/tweak-toolbar.cpp:227
 msgid "In color mode, act on object's opacity"
-msgstr "Renk modunda, nesnenin opaklığına göre hareket et"
+msgstr "Renk kipinde, nesnenin opaklığına göre hareket et"
 
 #: ../src/ui/tools-switch.cpp:90
 msgid ""
@@ -28129,7 +28129,7 @@ msgid ""
 "path, <b>Alt</b> activates sketch mode."
 msgstr ""
 "Serbest el çizgisi oluşturmak için <b>sürükleyin</b>. <b>Shift</b> seçilen "
-"yola eklenir, <b>Alt</b> çizim modunu etkinleştirir."
+"yola eklenir, <b>Alt</b> çizim kipini etkinleştirir."
 
 #: ../src/ui/tools-switch.cpp:100
 msgid ""
@@ -28139,7 +28139,7 @@ msgid ""
 msgstr ""
 "Bir yola başlamak için <b>tıklayın</b> veya <b>tıklayın ve sürükleyin</b>; "
 "seçilen yola eklemek için <b>Shift</b> ile. Tek noktalar oluşturmak için "
-"<b>Ctrl+tıklayın</b> (yalnızca düz çizgi modları)."
+"<b>Ctrl+tıklayın</b> (yalnızca düz çizgi kipleri)."
 
 #: ../src/ui/tools-switch.cpp:101
 msgid ""
@@ -28862,7 +28862,7 @@ msgid ""
 "<b>Sketch mode</b>: holding <b>Alt</b> interpolates between sketched paths. "
 "Release <b>Alt</b> to finalize."
 msgstr ""
-"<b>Eskiz modu</b>: <b>Alt</b> tuşunu basılı tutarak kabataslak yollar "
+"<b>Eskiz kipi</b>: <b>Alt</b> tuşunu basılı tutarak kabataslak yollar "
 "arasında ekleme yapar. Sonlandırmak için <b>Alt</b> tuşunu bırakın."
 
 #: ../src/ui/tools/pencil-tool.cpp:627
@@ -31832,7 +31832,7 @@ msgstr "_Konturdan Eski Yola"
 
 #: ../src/verbs.cpp:2812
 msgid "Convert selected object's stroke to paths legacy mode"
-msgstr "Seçilen nesnenin konturunu eski yol moduna dönüştür"
+msgstr "Seçilen nesnenin konturunu eski yol kipine dönüştür"
 
 #: ../src/verbs.cpp:2813
 msgid "Si_mplify"
@@ -32774,7 +32774,7 @@ msgstr "_Normal"
 
 #: ../src/verbs.cpp:3078
 msgid "Switch to normal display mode"
-msgstr "Normal ekran moduna geç"
+msgstr "Normal ekran kipine geç"
 
 #: ../src/verbs.cpp:3080
 msgid "No _Filters"
@@ -32790,7 +32790,7 @@ msgstr "_Anahat"
 
 #: ../src/verbs.cpp:3083
 msgid "Switch to outline (wireframe) display mode"
-msgstr "Anahat (tel kafes) ekran moduna geçin"
+msgstr "Anahat (tel kafes) ekran kipine geçin"
 
 #: ../src/verbs.cpp:3084
 msgid "Visible _Hairlines"
@@ -32806,11 +32806,11 @@ msgstr "_Geçiş"
 
 #: ../src/verbs.cpp:3087
 msgid "Toggle between normal and outline display modes"
-msgstr "Normal ve anahat görüntüleme modları arasında geçiş yap"
+msgstr "Normal ve anahat görüntüleme kipleri arasında geçiş yap"
 
 #: ../src/verbs.cpp:3089
 msgid "Switch to normal color display mode"
-msgstr "Normal renkli görüntüleme moduna geç"
+msgstr "Normal renkli görüntüleme kipine geç"
 
 #: ../src/verbs.cpp:3090
 msgid "_Grayscale"
@@ -32818,11 +32818,11 @@ msgstr "_Gri tonlama"
 
 #: ../src/verbs.cpp:3091
 msgid "Switch to grayscale display mode"
-msgstr "Gri tonlamalı görüntüleme moduna geç"
+msgstr "Gri tonlamalı görüntüleme kipine geç"
 
 #: ../src/verbs.cpp:3096
 msgid "Toggle between normal and grayscale color display modes"
-msgstr "Normal renkli ve gri tonlamalı görüntüleme modları arasında geçiş yap"
+msgstr "Normal renkli ve gri tonlamalı görüntüleme kipleri arasında geçiş yap"
 
 #: ../src/verbs.cpp:3098
 msgid "_Split View Mode"
@@ -36155,8 +36155,8 @@ msgstr ""
 "\n"
 "Oryantasyon noktaları, yolun dönüşümünü (ofset, ölçek, ayna, XY düzleminde "
 "dönüş) hesaplamak için kullanılır.\n"
-"Yalnızca 3 noktalı modu: Üçünü de bir satıra koymayın (bunun yerine 2 "
-"noktalı modunu kullanın).\n"
+"Yalnızca 3 noktalı kipi: Üçünü de bir satıra koymayın (bunun yerine 2 "
+"noktalı kipini kullanın).\n"
 "\n"
 "Z yüzeyini, Z derinlik değerlerini daha sonra metin aracını kullanarak "
 "değiştirebilirsiniz (3. koordinatlar).\n"
@@ -36247,8 +36247,8 @@ msgstr ""
 "\n"
 "Oryantasyon noktaları, yolun dönüşümünü (ofset, ölçek, ayna, XY düzleminde "
 "dönüş) hesaplamak için kullanılır.\n"
-"Yalnızca 3 noktalı modu: Üçünü de bir satıra koymayın (bunun yerine 2 "
-"noktalı modunu kullanın).\n"
+"Yalnızca 3 noktalı kipi: Üçünü de bir satıra koymayın (bunun yerine 2 "
+"noktalı kipini kullanın).\n"
 "\n"
 "Z yüzeyini, Z derinlik değerlerini daha sonra metin aracını kullanarak "
 "değiştirebilirsiniz (3. koordinatlar).\n"
