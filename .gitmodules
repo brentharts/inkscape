@@ -6,4 +6,4 @@
 	url = https://gitlab.com/inkscape/lib2geom.git
 [submodule "share/themes"]
 	path = share/themes
-	url = git@gitlab.com:inkscape/themes.git
+	url = https://gitlab.com/inkscape/themes.git
