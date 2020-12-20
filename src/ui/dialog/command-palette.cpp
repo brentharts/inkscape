@@ -213,8 +213,7 @@ void CommandPalette::toggle()
 
 void CommandPalette::append_recent_file_operation(const Glib::ustring &path, bool is_suggestion, bool is_import)
 {
-    static const auto gladefile =
-        get_filename_string(Inkscape::IO::Resource::UIS, "command-palette-operation.glade");
+    static const auto gladefile = get_filename_string(Inkscape::IO::Resource::UIS, "command-palette-operation.glade");
     Glib::RefPtr<Gtk::Builder> operation_builder;
     try {
         operation_builder = Gtk::Builder::create_from_file(gladefile);
@@ -265,8 +264,14 @@ void CommandPalette::append_recent_file_operation(const Glib::ustring &path, boo
         CPDescription->set_tooltip_text(path);
 
         {
-            auto mod_time = file->query_info()->get_modification_date_time();
+            Glib::DateTime mod_time;
+#if GLIB_CHECK_VERSION(2, 62, 0)
+            mod_time = file->query_info()->get_modification_date_time();
             // Using this to reduce instead of ActionFullName widget because fullname is searched
+#else
+            const auto mod_time_iso = file->query_info()->modification_time().as_iso8601();
+            mod_time.create_from_iso8601(mod_time_iso);
+#endif
             CPShortcut->set_text(mod_time.format("%d %b %R"));
         }
         // Add to suggestions
@@ -285,8 +290,7 @@ bool CommandPalette::generate_action_operation(const ActionPtrName &action_ptr_n
     static InkActionExtraData &action_data = app->get_action_extra_data();
     static const bool show_full_action_name =
         Inkscape::Preferences::get()->getBool("/options/commandpalette/showfullactionname/value");
-    static const auto gladefile =
-        get_filename_string(Inkscape::IO::Resource::UIS, "command-palette-operation.glade");
+    static const auto gladefile = get_filename_string(Inkscape::IO::Resource::UIS, "command-palette-operation.glade");
 
     Glib::RefPtr<Gtk::Builder> operation_builder;
     try {
