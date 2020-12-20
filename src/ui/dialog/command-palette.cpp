@@ -270,8 +270,7 @@ void CommandPalette::append_recent_file_operation(const Glib::ustring &path, boo
             mod_time = file->query_info()->get_modification_date_time();
             // Using this to reduce instead of ActionFullName widget because fullname is searched
 #else
-            const auto mod_time_iso = file->query_info()->modification_time().as_iso8601();
-            mod_time.create_from_iso8601(mod_time_iso);
+            mod_time.create_now_local(file->query_info()->modification_time());
 #endif
             CPShortcut->set_text(mod_time.format("%d %b %R"));
         }
