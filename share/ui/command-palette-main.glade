@@ -1,31 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.36.0 -->
+<!-- Generated with glade 3.38.1 -->
 <interface>
   <requires lib="gtk+" version="3.22"/>
   <object class="GtkBox" id="CPBase">
-    <property name="name">CPBase</property>
-    <property name="width_request">720</property>
+    <property name="name">CommandPaletteBase</property>
+    <property name="width-request">720</property>
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
+    <property name="can-focus">False</property>
     <property name="orientation">vertical</property>
     <child>
       <object class="GtkSearchBar" id="CPSearchBar">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="search_mode_enabled">True</property>
+        <property name="can-focus">False</property>
+        <property name="search-mode-enabled">True</property>
         <child>
           <object class="GtkBox" id="CPHeader">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can-focus">False</property>
             <child>
               <object class="GtkSearchEntry" id="CPFilter">
                 <property name="name">CPFilter</property>
-                <property name="width_request">696</property>
+                <property name="width-request">696</property>
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="primary_icon_name">edit-find-symbolic</property>
-                <property name="primary_icon_activatable">False</property>
-                <property name="primary_icon_sensitive">False</property>
+                <property name="can-focus">True</property>
+                <property name="primary-icon-name">edit-find-symbolic</property>
+                <property name="primary-icon-activatable">False</property>
+                <property name="primary-icon-sensitive">False</property>
                 <style>
                   <class name=".cpfilter"/>
                 </style>
@@ -47,24 +47,24 @@
     </child>
     <child>
       <object class="GtkBox" id="CPListBase">
-        <property name="height_request">300</property>
+        <property name="height-request">300</property>
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
+        <property name="can-focus">False</property>
         <child>
           <object class="GtkScrolledWindow" id="CPSuggestionsScroll">
-            <property name="height_request">300</property>
+            <property name="height-request">300</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="shadow_type">in</property>
+            <property name="can-focus">True</property>
+            <property name="shadow-type">in</property>
             <child>
               <object class="GtkViewport">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <child>
                   <object class="GtkListBox" id="CPSuggestions">
                     <property name="name">CPSuggestions</property>
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                   </object>
                 </child>
               </object>
@@ -78,18 +78,18 @@
         </child>
         <child>
           <object class="GtkScrolledWindow" id="CPHistoryScroll">
-            <property name="height_request">300</property>
+            <property name="height-request">300</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="shadow_type">in</property>
+            <property name="can-focus">True</property>
+            <property name="shadow-type">in</property>
             <child>
               <object class="GtkViewport">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <child>
                   <object class="GtkListBox" id="CPHistory">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                   </object>
                 </child>
               </object>
