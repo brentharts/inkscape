@@ -48,6 +48,7 @@
 #include "actions/actions-extra-data.h"
 #include "file.h"
 #include "gc-anchored.h"
+#include "include/glibmm_version.h"
 #include "inkscape-application.h"
 #include "inkscape-window.h"
 #include "inkscape.h"
@@ -265,7 +266,7 @@ void CommandPalette::append_recent_file_operation(const Glib::ustring &path, boo
 
         {
             Glib::DateTime mod_time;
-#if GLIB_CHECK_VERSION(2, 62, 0)
+#if GLIBMM_CHECK_VERSION(2, 62, 0)
             mod_time = file->query_info()->get_modification_date_time();
             // Using this to reduce instead of ActionFullName widget because fullname is searched
 #else
