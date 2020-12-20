@@ -803,9 +803,9 @@ bool CommandPalette::execute_action(const ActionPtrName &action_ptr_name, const 
 
     switch (get_action_variant_type(action_ptr)) {
         case TypeOfVariant::BOOL:
-            if (value == "1" || value == "true" || value == "t" || value == "T" || value.empty()) {
+            if (value == "1" || value == "t" || value == "true" || value.empty()) {
                 action_ptr->activate(Glib::Variant<bool>::create(true));
-            } else if (value == "0" || value == "false" || value == "f" || value == "F") {
+            } else if (value == "0" || value == "f" || value == "false") {
                 action_ptr->activate(Glib::Variant<bool>::create(false));
             } else {
                 std::cerr << "CommandPalette::execute_action: Invalid boolean value: " << action_name << ":" << value
