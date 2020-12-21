@@ -27,6 +27,7 @@
 #include FT_MULTIPLE_MASTERS_H
 
 #include <pango/pangoft2.h>
+#include <harfbuzz/hb.h>
 
 #include <glibmm/regex.h>
 
@@ -206,12 +207,17 @@ void font_instance::InitTheFace(bool loadgsub)
 #endif
 
 #ifndef USE_PANGO_WIN32
-        if (loadgsub) {
-            readOpenTypeGsubTable( theFace, openTypeTables );
-            fulloaded = true;
+        hb_font_t* hb_font = pango_font_get_hb_font(pFont); // Pango owns hb_font.
+        if (!hb_font) {
+            std::cerr << "font_instance::InitTheFace: Failed to get hb_font!" << std::endl;
+        } else {
+            if (loadgsub) {
+                readOpenTypeGsubTable (hb_font, openTypeTables);
+                fulloaded = true;
+            }
+            readOpenTypeSVGTable (hb_font, openTypeSVGGlyphs);
         }
         readOpenTypeFvarAxes(  theFace, openTypeVarAxes );
-        readOpenTypeSVGTable(  theFace, openTypeSVGGlyphs );
 
         if (openTypeSVGGlyphs.size() > 0 ) {
             fontHasSVG = true;
@@ -229,7 +235,6 @@ void font_instance::InitTheFace(bool loadgsub)
 
         char const *var = pango_font_description_get_variations( descr );
         if (var) {
-
             Glib::ustring variations(var);
 
             FT_MM_Var* mmvar = nullptr;
