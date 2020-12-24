@@ -23232,7 +23232,7 @@ msgstr "不能设置 CairoRenderContext"
 #: ../src/ui/dialog/save-template-dialog.cpp:22
 #, fuzzy
 msgid "Save Document as Template"
-msgstr "使用新名字保存文档"
+msgstr "文档另存为模板"
 
 #: ../src/ui/dialog/save-template-dialog.cpp:23
 msgid "Name: "
@@ -30161,7 +30161,7 @@ msgstr "退出 Inkscape"
 
 #: ../src/verbs.cpp:2547
 msgid "New from _Template..."
-msgstr "由模板新建(_T)..."
+msgstr "从模板新建(_T)..."
 
 #: ../src/verbs.cpp:2548
 msgid "Create new project from template"
@@ -32259,7 +32259,7 @@ msgstr "适合画布到绘图"
 
 #: ../src/verbs.cpp:3160
 msgid "_Resize Page to Selection"
-msgstr "页面设置为选区大小"
+msgstr "缩放页面到选区"
 
 #: ../src/verbs.cpp:3161
 msgid ""
