@@ -191,12 +191,7 @@ set(ui_SRC
 	widget/ink-flow-box.cpp
 	widget/ink-ruler.cpp
 	widget/ink-spinscale.cpp
-<<<<<<< HEAD
-	widget/insertordericon.cpp
 	widget/label-tool-item.cpp
-=======
-        widget/label-tool-item.cpp
->>>>>>> Cleanup unused CellRenderers
 	widget/labelled.cpp
 	widget/layer-selector.cpp
 	widget/licensor.cpp
