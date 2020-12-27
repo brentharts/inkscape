@@ -346,12 +346,13 @@ void SPFilter::update_filter_all_regions()
         return;
 
     // Combine all items into one region for updating.
-    Geom::Rect region;
+    Geom::OptRect opt_r;
     for (auto & obj : this->hrefList) {
         SPItem *item = dynamic_cast<SPItem *>(obj);
-        region.unionWith(this->get_automatic_filter_region(item));
+        opt_r.unionWith(this->get_automatic_filter_region(item));
     }
-    if (region.width() && region.height()) {
+    if (opt_r) {
+        Geom::Rect region = *opt_r;
         this->set_filter_region(region.left(), region.top(), region.width(), region.height());
     }
 }
