@@ -17,7 +17,7 @@
 #include <2geom/transforms.h>
 
 #include "canvas-item-ctrl.h"
-
+#include "color.h"
 #include "preferences.h"         // Default size. 
 #include "display/cairo-utils.h" // argb32_from_rgba()
 
@@ -319,16 +319,46 @@ void CanvasItemCtrl::render(Inkscape::CanvasItemBuffer *buf)
         work->flush();
         int strideb = work->get_stride();
         unsigned char *pxb = work->get_data();
+        // this code allow background become isolated from rendering so we can do things like outline overlay
+        double red = 0;
+        double green = 0;
+        double blue = 0;
+        double alpha = 0;
+        guint32 backcolor = 0;
+        cairo_pattern_t *pattern = _canvas->get_background_store()->cobj();
+        auto status = cairo_pattern_get_rgba(pattern, &red, &green, &blue, &alpha);
+        
+        if (status == CAIRO_STATUS_PATTERN_TYPE_MISMATCH) {
+            cairo_surface_t *surface;
+            status = cairo_pattern_get_surface (pattern, &surface);
+            if (status == CAIRO_STATUS_PATTERN_TYPE_MISMATCH ||
+                cairo_surface_get_type(surface) != CAIRO_SURFACE_TYPE_IMAGE) 
+            {
+                g_warning( "Invalid background pattern");
+                return;
+            }
+            unsigned char *pxbsurface =  cairo_image_surface_get_data(surface);
+            guint32 *pb = reinterpret_cast<guint32*>(pxbsurface);
+            backcolor = *pb;
+        } else {
+            // in ARGB32 format
+            backcolor = SP_RGBA32_F_COMPOSE(alpha, red, green, blue);
+        }
+        
         guint32 *p = _cache;
         for (int i = 0; i < height; ++i) {
             guint32 *pb = reinterpret_cast<guint32*>(pxb + i*strideb);
             for (int j = 0; j < width; ++j) {
+                guint32 base = *pb;
                 guint32 cc = *p++;
                 guint32 ac = cc & 0xff;
+                if (*pb == 0 && cc != 0) {
+                    base = backcolor;
+                }
                 if (ac == 0 && cc != 0) {
                     *pb++ = argb32_from_rgba(cc | 0x000000ff);
                 } else {
-                    EXTRACT_ARGB32(*pb, ab,rb,gb,bb)
+                    EXTRACT_ARGB32(base, ab,rb,gb,bb)
                     guint32 ro = compose_xor(rb, (cc & 0xff000000) >> 24, ac);
                     guint32 go = compose_xor(gb, (cc & 0x00ff0000) >> 16, ac);
                     guint32 bo = compose_xor(bb, (cc & 0x0000ff00) >>  8, ac);
