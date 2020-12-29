@@ -1881,6 +1881,34 @@ void ObjectSet::moveRelative(double dx, double dy)
 }
 
 /**
+ * Move the selected objects outwards from the center.
+ *
+ * @param center - The center point we want to move away from
+ * @param amount - The amount to move the items (negative means move inward)
+ */
+void ObjectSet::moveFromPoint(Geom::Point const &point, double amount)
+{
+    for (auto item : this->items()) {
+        ObjectSet* set = new ObjectSet(document());
+        set->add(item);
+
+        auto item_bbox = set->visualBounds();
+        if (!item_bbox) continue;
+        auto item_center = item_bbox->midpoint();
+
+        Geom::Ray ray(point, item_center);
+        set->moveRelative(ray.pointAt(1.0 + amount), false);
+    }
+}
+
+void ObjectSet::moveFromCenter(double amount)
+{
+    Geom::OptRect bbox = visualBounds();
+    if (!bbox) return;
+    moveFromPoint(bbox->midpoint(), amount);
+}
+
+/**
  * Rotates selected objects 90 degrees, either clock-wise or counter-clockwise, depending on the value of ccw.
  */
 void ObjectSet::rotate90(bool ccw)

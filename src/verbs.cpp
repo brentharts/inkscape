@@ -1155,7 +1155,8 @@ void SelectionVerb::perform(SPAction *action, void *data)
         {
             // FIXME these and the other grow/shrink they should use gobble_key_events.
             // the problem is how to get access to which key, if any, to gobble.
-            selection->scale(prefs->getDoubleLimited("/options/defaultscale/value", 2, 0, 1000));
+            selection->moveFromCenter(prefs->getDoubleLimited("/options/defaultscale/value", 2, 0, 1000)/2);
+            //selection->scale(prefs->getDoubleLimited("/options/defaultscale/value", 2, 0, 1000));
             break;
         }
         case SP_VERB_SELECTION_GROW_SCREEN:
@@ -1170,7 +1171,8 @@ void SelectionVerb::perform(SPAction *action, void *data)
         }
         case SP_VERB_SELECTION_SHRINK:
         {
-            selection->scale(-prefs->getDoubleLimited("/options/defaultscale/value", 2, 0, 1000));
+            selection->moveFromCenter(-prefs->getDoubleLimited("/options/defaultscale/value", 2, 0, 1000));
+            //selection->scale(-prefs->getDoubleLimited("/options/defaultscale/value", 2, 0, 1000));
             break;
         }
         case SP_VERB_SELECTION_SHRINK_SCREEN:

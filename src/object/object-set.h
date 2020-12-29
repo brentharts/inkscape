@@ -442,6 +442,8 @@ public:
     void skewRelative(const Geom::Point&, double, double);
     void moveRelative(const Geom::Point &move, bool compensate = true);
     void moveRelative(double dx, double dy);
+    void moveFromPoint(Geom::Point const &point, double amount);
+    void moveFromCenter(double amount);
     void rotate90(bool ccw);
     void rotate(double);
     void rotateScreen(double);
