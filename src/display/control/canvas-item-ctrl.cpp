@@ -17,7 +17,7 @@
 #include <2geom/transforms.h>
 
 #include "canvas-item-ctrl.h"
-#include "color.h"
+
 #include "preferences.h"         // Default size. 
 #include "display/cairo-utils.h" // argb32_from_rgba()
 
