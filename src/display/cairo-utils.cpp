@@ -1202,6 +1202,40 @@ guint32 ink_cairo_surface_average_color(cairo_surface_t *surface)
     return px;
 }
 
+guint32 ink_cairo_pattern_get_argb32(cairo_pattern_t *pattern, bool solid, size_t spotnumber)
+{
+    double red = 0;
+    double green = 0;
+    double blue = 0;
+    double alpha = 0;
+    auto status = cairo_pattern_get_rgba(pattern, &red, &green, &blue, &alpha);
+    if (status == CAIRO_STATUS_PATTERN_TYPE_MISMATCH) {
+        cairo_surface_t *surface;
+        status = cairo_pattern_get_surface (pattern, &surface);
+        if (status == CAIRO_STATUS_PATTERN_TYPE_MISMATCH) {
+            if (cairo_surface_get_type(surface) != CAIRO_SURFACE_TYPE_IMAGE) {
+                auto status = cairo_pattern_get_color_stop_rgba(pattern, spotnumber, nullptr, &red, &green, &blue, &alpha);
+                if (status == CAIRO_STATUS_PATTERN_TYPE_MISMATCH) {
+                    g_warning( "Invalid background pattern");
+                    return 0;
+                }
+                return SP_RGBA32_F_COMPOSE(alpha, red, green, blue);
+            }
+        }
+        if (solid) {
+            unsigned char *pxbsurface =  cairo_image_surface_get_data(surface);
+            guint32 *pb = reinterpret_cast<guint32*>(pxbsurface);
+            return *pb;
+        } else {
+            return ink_cairo_surface_average_color(surface);
+        }
+    } else {
+        // in ARGB32 format
+        return SP_RGBA32_F_COMPOSE(alpha, red, green, blue);
+    }
+
+}
+
 void ink_cairo_surface_average_color(cairo_surface_t *surface, double &r, double &g, double &b, double &a)
 {
     int count = ink_cairo_surface_average_color_internal(surface, r,g,b,a);

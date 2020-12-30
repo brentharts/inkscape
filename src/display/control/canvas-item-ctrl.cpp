@@ -319,32 +319,10 @@ void CanvasItemCtrl::render(Inkscape::CanvasItemBuffer *buf)
         work->flush();
         int strideb = work->get_stride();
         unsigned char *pxb = work->get_data();
+
         // this code allow background become isolated from rendering so we can do things like outline overlay
-        double red = 0;
-        double green = 0;
-        double blue = 0;
-        double alpha = 0;
-        guint32 backcolor = 0;
         cairo_pattern_t *pattern = _canvas->get_background_store()->cobj();
-        auto status = cairo_pattern_get_rgba(pattern, &red, &green, &blue, &alpha);
-        
-        if (status == CAIRO_STATUS_PATTERN_TYPE_MISMATCH) {
-            cairo_surface_t *surface;
-            status = cairo_pattern_get_surface (pattern, &surface);
-            if (status == CAIRO_STATUS_PATTERN_TYPE_MISMATCH ||
-                cairo_surface_get_type(surface) != CAIRO_SURFACE_TYPE_IMAGE) 
-            {
-                g_warning( "Invalid background pattern");
-                return;
-            }
-            unsigned char *pxbsurface =  cairo_image_surface_get_data(surface);
-            guint32 *pb = reinterpret_cast<guint32*>(pxbsurface);
-            backcolor = *pb;
-        } else {
-            // in ARGB32 format
-            backcolor = SP_RGBA32_F_COMPOSE(alpha, red, green, blue);
-        }
-        
+        guint32 backcolor = ink_cairo_pattern_get_argb32(pattern);
         guint32 *p = _cache;
         for (int i = 0; i < height; ++i) {
             guint32 *pb = reinterpret_cast<guint32*>(pxb + i*strideb);
