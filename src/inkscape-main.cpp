@@ -280,7 +280,7 @@ int main(int argc, char *argv[])
     _setmode(_fileno(stdout), _O_BINARY); // binary mode seems required for this to work properly
 #endif
 
-    //set_themes_env();
+    set_themes_env();
     set_extensions_env();
 
     auto ret = InkscapeApplication::singleton().gio_app()->run(argc, argv);
