@@ -197,7 +197,7 @@ bool StarTool::root_handler(GdkEvent* event) {
             gobble_motion_events(GDK_BUTTON1_MASK);
 
             ret = TRUE;
-        } else if (!this->sp_event_context_knot_mouseover()) {
+        } else if (!this->sp_event_context_knot_mouseover() && !this->space_panning) {
             SnapManager &m = desktop->namedview->snap_manager;
             m.setup(desktop);
 
