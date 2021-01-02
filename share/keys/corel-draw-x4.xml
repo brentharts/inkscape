@@ -155,7 +155,7 @@ See default.xml for more information.
 
 <!-- Toggle View -->
 
-  <bind gaction="win.canvas-display-mode-toggle" keys="&lt;shift&gt;F9"/>
+  <bind gaction="win.canvas-display-mode-cycle" keys="&lt;shift&gt;F9"/>
   <bind action="ViewColorModeToggle" />
   <bind action="ViewSplitModeToggle" />
   <bind action="ViewXRayToggle" />

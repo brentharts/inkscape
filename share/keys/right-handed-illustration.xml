@@ -220,7 +220,7 @@ Future improvements:
   <bind action="ViewModeOutline"/>
   <bind action="ViewModeOutlineOverlay" />
 
-  <bind gaction="win.canvas-color-mode" keys="&lt;primary&gt;KP_5, &lt;primary&gt;KP_Begin"/>
+  <bind gaction="win.canvas-display-mode-cycle" keys="&lt;primary&gt;KP_5, &lt;primary&gt;KP_Begin"/>
   <bind action="ViewColorModeToggle" />
   <bind action="ViewSplitModeToggle" />
   <bind action="ViewXRayToggle" />

@@ -295,7 +295,7 @@ Path -> Unsmooth - Ctrl+Alt+U
 -->
 
 <!-- Live Curve Editing is conceptually close to wireframe mode, thus using the verb -->
-  <bind gaction="win.canvas-display-mode-toggle" keys="&lt;ctrl&gt;&lt;alt&gt;l"/>
+  <bind gaction="win.canvas-display-mode-cycle" keys="&lt;ctrl&gt;&lt;alt&gt;l"/>
   <bind action="ViewColorModeToggle" />
   <bind action="ViewSplitModeToggle" />
   <bind action="ViewXRayToggle" />

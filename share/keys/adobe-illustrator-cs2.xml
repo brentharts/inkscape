@@ -83,7 +83,7 @@ See default.xml for more information.
   <bind gaction="doc.snap-global-toggle" keys="&lt;primary&gt;&lt;shift&gt;quotedbl, &lt;primary&gt;&lt;alt&gt;apostrophe"/>
 
   <!-- Toggle View -->
-  <bind gaction="win.canvas-display-mode-toggle" keys="&lt;primary&gt;y"/>
+  <bind gaction="win.canvas-display-mode-cycle" keys="&lt;primary&gt;y"/>
 
 <!-- Edit -->
 
