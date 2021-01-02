@@ -204,7 +204,7 @@ Hom/end keys-select minimum or maximum feather values
 
   <bind gaction="win.canvas-zoom-page" keys="&lt;primary&gt;&lt;shift&gt;p, 5, KP_5"/>
 
-  <bind gaction="win.canvas-zoom-width" keys="6"/>
+  <bind gaction="win.canvas-zoom-page-width" keys="6"/>
 
 
   <bind gaction="win.canvas-zoom-prev" keys="&lt;primary&gt;r, grave"/> <!-- ` -->
