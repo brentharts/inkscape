@@ -222,9 +222,9 @@ Small Caps - Ctrl+Shift+\
 Superscript - Ctrl+Shift+=
 Subscript - Ctrl+Shift+- -->
 
-  <bind key="bracketright" modifiers="Ctrl,Shift" action="org.inkscape.text.uppercase" display="true"/>
+  <bind key="braceleft" modifiers="Ctrl" action="org.inkscape.text.uppercase" display="true" />
 
-  <bind key="bracketleft" modifiers="Ctrl,Shift" action="org.inkscape.text.lowercase" display="true"/>
+  <bind key="braceright" modifiers="Ctrl" action="org.inkscape.text.lowercase" display="true" />
 
   <bind key="colon" modifiers="Ctrl" action="org.inkscape.text.title_case" display="true"/>
 
