@@ -184,6 +184,7 @@ set(ui_SRC
 	widget/font-variations.cpp
 	widget/frame.cpp
 	widget/gradient-image.cpp
+	widget/gradient-editor.cpp
 	widget/gradient-selector.cpp
 	widget/gradient-vector-selector.cpp
 	widget/highlight-picker.cpp
@@ -430,6 +431,7 @@ set(ui_SRC
 	widget/font-variations.h
 	widget/frame.h
 	widget/gradient-image.h
+	widget/gradient-editor.h
 	widget/gradient-selector.h
 	widget/gradient-vector-selector.h
 	widget/highlight-picker.h

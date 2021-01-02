@@ -19,7 +19,7 @@
 
 #include "object/sp-gradient-spread.h"
 #include "object/sp-gradient-units.h"
-
+#include "gradient-selector-interface.h"
 #include "ui/selected-color.h"
 
 class SPGradient;
@@ -124,7 +124,7 @@ class PaintSelector : public Gtk::Box {
     void set_style_buttons(Gtk::ToggleButton *active);
     void set_mode_multiple();
     void set_mode_none();
-    GradientSelector *getGradientFromData() const;
+    GradientSelectorInterface *getGradientFromData() const;
     void clear_frame();
     void set_mode_unset();
     void set_mode_color(PaintSelector::Mode mode);

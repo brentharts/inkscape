@@ -48,7 +48,7 @@ void
 GradientImage::size_request(GtkRequisition *requisition) const
 {
     requisition->width = 54;
-    requisition->height = 12;
+    requisition->height = _stop_size ? _stop_size : 12;
 }
 
 void
@@ -71,22 +71,96 @@ bool
 GradientImage::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
 {
     auto allocation = get_allocation();
-    
-    cairo_pattern_t *check = ink_cairo_pattern_create_checkerboard();
+
     auto ct = cr->cobj();
 
-    cairo_set_source(ct, check);
-    cairo_paint(ct);
-    cairo_pattern_destroy(check);
+    if (_stops_only) {
+        auto context = get_style_context();
+        Gdk::RGBA fg;
+        double alpha = 0.2;
+        if (context->lookup_color("theme_fg_color", fg)) {
+            cairo_set_source_rgba(ct, fg.get_red(), fg.get_green(), fg.get_blue(), alpha);
+        }
+        else {
+            cairo_set_source_rgba(ct, 0.5, 0.5, 0.5, alpha);
+        }
 
-    if (_gradient) {
-        auto p = _gradient->create_preview_pattern(allocation.get_width());
-        cairo_set_source(ct, p);
+        int w = allocation.get_width();
+        int h = allocation.get_height();
+
+        if (_gradient && _stop_size > 0 && w > _stop_size && h >= _stop_size) {
+            // draw stop positions
+            _gradient->ensureVector();
+            const auto& stops = _gradient->vector.stops;
+            double x = _stop_size / 2.0;
+            double y = _stop_size / 2.0;
+            int width = w - _stop_size;
+            double radius = _stop_size / 2.0;
+            auto pos = [=](double offset) { return round(x + width * offset); };
+
+            cairo_save(ct);
+            cairo_new_sub_path(ct);
+            for (const auto& stop : stops) {
+                int position = pos(stop.offset);
+                cairo_arc(ct, position, y, radius, 0, 2 * M_PI);
+            }
+            cairo_close_path(ct);
+            cairo_fill(ct);
+            cairo_restore(ct);
+
+            radius--;
+
+            cairo_save(ct);
+            // draw stops from the last to the first, that ensures right overlap, if there's any
+            for (auto it = rbegin(stops); it != rend(stops); ++it) {
+                int position = pos(it->offset);
+                cairo_new_sub_path(ct);
+                cairo_arc(ct, position, y, radius, 0, 2 * M_PI);
+                cairo_close_path(ct);
+                ink_cairo_set_source_color(ct, it->color, 1.0);
+                cairo_fill(ct);
+            }
+            cairo_restore(ct);
+
+            cairo_pattern_t* checkers = ink_cairo_pattern_create_checkerboard();
+            // now draw half-circles, this time in order
+            for (auto it = begin(stops); it != end(stops); ++it) {
+                int position = pos(it->offset);
+                cairo_new_sub_path(ct);
+                double deg90 = M_PI / 2;
+                cairo_arc(ct, position, y, radius, -deg90, deg90);
+                cairo_line_to(ct, position, y);
+                cairo_close_path(ct);
+                if (it->opacity < 1.0) {
+                    cairo_set_source(ct, checkers);
+                    cairo_fill_preserve(ct);
+                }
+                ink_cairo_set_source_rgba32(ct, it->color.toRGBA32(it->opacity));
+                cairo_fill(ct);
+            }
+            cairo_pattern_destroy(checkers);
+        }
+    } else {
+        cairo_pattern_t *check = ink_cairo_pattern_create_checkerboard();
+
+        cairo_set_source(ct, check);
         cairo_paint(ct);
-        cairo_pattern_destroy(p);
+        cairo_pattern_destroy(check);
+
+        if (_gradient) {
+            auto p = _gradient->create_preview_pattern(allocation.get_width());
+            cairo_set_source(ct, p);
+            cairo_paint(ct);
+            cairo_pattern_destroy(p);
+        }
     }
-    
     return true;
+}
+
+void GradientImage::draw_stops_only(bool enable, int size) {
+    _stops_only = enable;
+    _stop_size = size;
+    update();
 }
 
 void

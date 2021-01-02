@@ -48,6 +48,7 @@
 #include "ui/icon-names.h"
 #include "ui/widget/color-notebook.h"
 #include "ui/widget/gradient-selector.h"
+#include "ui/widget/gradient-editor.h"
 #include "ui/widget/swatch-selector.h"
 #include "ui/widget/scrollprotected.h"
 
@@ -130,16 +131,20 @@ static bool isPaintModeGradient(PaintSelector::Mode mode)
     return isGrad;
 }
 
-GradientSelector *PaintSelector::getGradientFromData() const
+GradientSelectorInterface *PaintSelector::getGradientFromData() const
 {
-    GradientSelector *grad = nullptr;
+    GradientSelectorInterface* grad = nullptr;
     if (_mode == PaintSelector::MODE_SWATCH) {
         auto swatchsel = dynamic_cast<SwatchSelector *>(_selector);
         if (swatchsel) {
             grad = swatchsel->getGradientSelector();
         }
     } else {
-        grad = dynamic_cast<GradientSelector *>(_selector);
+        auto edit = dynamic_cast<GradientEditor*>(_selector);
+		//   if (edit) {
+			//   grad = edit->get_selector();
+		//   }
+			grad = edit;
     }
     return grad;
 }
@@ -630,7 +635,8 @@ void PaintSelector::set_mode_gradient(PaintSelector::Mode mode)
     } else {
         clear_frame();
         /* Create new gradient selector */
-        auto new_gsel = Gtk::manage(new GradientSelector());
+      //   auto new_gsel = Gtk::manage(new GradientSelector());
+        auto new_gsel = Gtk::manage(new GradientEditor());
         new_gsel->show();
         new_gsel->signal_grabbed().connect(sigc::mem_fun(this, &PaintSelector::gradient_grabbed));
         new_gsel->signal_dragged().connect(sigc::mem_fun(this, &PaintSelector::gradient_dragged));
@@ -642,17 +648,20 @@ void PaintSelector::set_mode_gradient(PaintSelector::Mode mode)
     }
 
     // We should now have a valid GradientSelector so we can use it
-    auto gsel = dynamic_cast<GradientSelector *>(_selector);
+    auto gsel = dynamic_cast<GradientEditor*>(_selector);
 
-    if (!gsel) g_warning("No GradientSelector found");
+    if (!gsel) g_warning("No GradientEditor found");
+
+   //  auto gsel = edit; // ? edit->get_selector() : nullptr;
 
     /* Actually we have to set option menu history here */
     if (mode == PaintSelector::MODE_GRADIENT_LINEAR) {
-        gsel->setMode(GradientSelector::MODE_LINEAR);
+        if (gsel) gsel->setMode(GradientSelector::MODE_LINEAR);
         // sp_gradient_selector_set_mode(SP_GRADIENT_SELECTOR(gsel), SP_GRADIENT_SELECTOR_MODE_LINEAR);
         _label->set_markup(_("<b>Linear gradient</b>"));
+		  _label->hide();
     } else if (mode == PaintSelector::MODE_GRADIENT_RADIAL) {
-        gsel->setMode(GradientSelector::MODE_RADIAL);
+        if (gsel) gsel->setMode(GradientSelector::MODE_RADIAL);
         _label->set_markup(_("<b>Radial gradient</b>"));
     }
 
