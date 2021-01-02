@@ -189,15 +189,15 @@ and tooltips. Only one binding for each action may have this attribute.
 
   <bind gaction="win.canvas-zoom-out"              keys="&lt;primary&gt;minus, &lt;primary&gt;underscore, KP_Subtract" />
 
-  <bind gaction="win.canvas-zoom-1-1"              keys="KP_1, &lt;primary&gt;1" />
-  <bind gaction="win.canvas-zoom-1-2"              keys="KP_2, &lt;primary&gt;2" />
-  <bind gaction="win.canvas-zoom-selection"        keys="KP_3, &lt;primary&gt;3" />
-  <bind gaction="win.canvas-zoom-drawing"          keys="KP_4, &lt;primary&gt;4" />
-  <bind gaction="win.canvas-zoom-page"             keys="KP_5, &lt;primary&gt;5, KP_Begin" />
-  <bind gaction="win.canvas-zoom-page-width"       keys="KP_6, &lt;primary&gt;6, &lt;primary&gt;e" />
+  <bind gaction="win.canvas-zoom-1-1"              keys="&lt;primary&gt;1, KP_1" />
+  <bind gaction="win.canvas-zoom-1-2"              keys="&lt;primary&gt;2, KP_2" />
+  <bind gaction="win.canvas-zoom-selection"        keys="&lt;primary&gt;3, KP_3" />
+  <bind gaction="win.canvas-zoom-drawing"          keys="&lt;primary&gt;4, KP_4" />
+  <bind gaction="win.canvas-zoom-page"             keys="&lt;primary&gt;5, KP_Begin, KP_5" />
+  <bind gaction="win.canvas-zoom-page-width"       keys="&lt;primary&gt;6, &lt;primary&gt;e, KP_6" />
 
-  <bind gaction="win.canvas-zoom-next"             keys="KP_9, &lt;shift&gt;grave, &lt;shift&gt;asciitilde" /> <!-- ~ -->
-  <bind gaction="win.canvas-zoom-prev"             keys="KP_8, &lt;ctrl&gt;grave" /> <!-- ` -->
+  <bind gaction="win.canvas-zoom-next"             keys="&lt;shift&gt;grave, &lt;shift&gt;asciitilde, KP_9" /> <!-- ~ -->
+  <bind gaction="win.canvas-zoom-prev"             keys="&lt;ctrl&gt;grave, KP_8" /> <!-- ` -->
   
 <!-- View -->
 
