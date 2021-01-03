@@ -552,7 +552,7 @@ bool GradientTool::root_handler(GdkEvent* event) {
 
             ret = TRUE;
         } else {
-            if (!drag->mouseOver() && !selection->isEmpty()) {
+            if (!drag->mouseOver() && !selection->isEmpty()  && !this->space_panning) {
                 SnapManager &m = desktop->namedview->snap_manager;
                 m.setup(desktop);
 

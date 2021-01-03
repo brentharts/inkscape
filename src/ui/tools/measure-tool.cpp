@@ -622,7 +622,7 @@ bool MeasureTool::root_handler(GdkEvent* event)
 
                 if (event->motion.state & GDK_CONTROL_MASK) {
                     spdc_endpoint_snap_rotation(this, end_p, start_p, event->motion.state);
-                } else if (!(event->motion.state & GDK_SHIFT_MASK)) {
+                } else if (!(event->motion.state & GDK_SHIFT_MASK) && !this->space_panning) {
                     SnapManager &snap_manager = desktop->namedview->snap_manager;
                     snap_manager.setup(desktop);
                     Inkscape::SnapCandidatePoint scp(end_p, Inkscape::SNAPSOURCE_OTHER_HANDLE);

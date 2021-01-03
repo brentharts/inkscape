@@ -480,7 +480,7 @@ bool NodeTool::root_handler(GdkEvent* event) {
 
         // We will show a pre-snap indication for when the user adds a node through double-clicking
         // Adding a node will only work when a path has been selected; if that's not the case then snapping is useless
-        if (!this->desktop->selection->isEmpty()) {
+        if (!this->desktop->selection->isEmpty() && !this->space_panning) {
             if (!(event->motion.state & GDK_SHIFT_MASK)) {
                 m.setup(this->desktop);
                 Inkscape::SnapCandidatePoint scp(motion_dt, Inkscape::SNAPSOURCE_OTHER_HANDLE);

@@ -653,7 +653,7 @@ bool MeshTool::root_handler(GdkEvent* event) {
             // Not dragging
 
             // Do snapping
-            if (!drag->mouseOver() && !selection->isEmpty()) {
+            if (!drag->mouseOver() && !selection->isEmpty() && !this->space_panning) {
                 SnapManager &m = desktop->namedview->snap_manager;
                 m.setup(desktop);
 
