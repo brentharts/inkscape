@@ -28,6 +28,9 @@
 #include "ui/icon-names.h"
 #include "ui/icon-loader.h"
 #include "color-preview.h"
+#include "gradient-chemistry.h"
+#include "document-undo.h"
+#include "verbs.h"
 
 namespace Inkscape {
 namespace UI {
@@ -36,16 +39,11 @@ namespace Widget {
 using namespace Inkscape::IO;
 using Inkscape::UI::Widget::ColorNotebook;
 
-void set_button(Gtk::Button* btn, gchar const* pixmap, gchar const* tip) {
-	if (tip) {
-		btn->set_tooltip_text(tip);
-	}
-
+void set_icon(Gtk::Button& btn, gchar const* pixmap) {
 	if (Gtk::Image* img = sp_get_icon_image(pixmap, Gtk::ICON_SIZE_BUTTON)) {
-		btn->set_image(*img);
+		btn.set_image(*img);
 	}
-
-	// btn->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &PaintSelector::style_button_toggled), b));
+	// btn.signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &PaintSelector::style_button_toggled), b));
 }
 
 // draw solid color circle with black outline; right side is to show checkerboard if color's alpha is > 0
@@ -103,125 +101,126 @@ Glib::RefPtr<Gdk::Pixbuf> drawCircle(int size, guint32 rgba) {
 	return Glib::wrap(pixbuf);
 }
 
-template<class W> W* get_widget(Glib::RefPtr<Gtk::Builder>& builder, const char* id) {
+// get widget from builder or throw
+template<class W> W& get_widget(Glib::RefPtr<Gtk::Builder>& builder, const char* id) {
 	W* widget;
 	builder->get_widget(id, widget);
-	return widget;
+	if (!widget) {
+		throw std::runtime_error("Missing widget in a glade resource file");
+	}
+	return *widget;
 }
 
-GradientEditor::GradientEditor() :
-	_stepOffset("Offset", 0.0, 0.0, 1.0, 0.01, 0.1, 2)
-{
-	_selector = Gtk::manage(new GradientSelector());
-
+Glib::RefPtr<Gtk::Builder> create_builder() {
 	auto glade = Resource::get_filename(Resource::UIS, "gradient-edit.glade");
 	Glib::RefPtr<Gtk::Builder> builder;
 	try {
-		builder = Gtk::Builder::create_from_file(glade);
+		return Gtk::Builder::create_from_file(glade);
 	}
 	catch (Glib::Error& ex) {
 		g_error(("Cannot load glade file for gradient editor. " + ex.what()).c_str());
-		return;
+		throw;
 	}
+}
 
-	if (auto linear = get_widget<Gtk::ToggleButton>(builder, "linearBtn")) {
-		set_button(linear, INKSCAPE_ICON("paint-gradient-linear"), _("Linear gradient"));
-	}
+GradientEditor::GradientEditor() :
+	_builder(create_builder()),
+	_selector(Gtk::manage(new GradientSelector())),
+	// _stepOffset("Offset", 0.0, 0.0, 1.0, 0.01, 0.1, 2),
+	_repeatIcon(get_widget<Gtk::Image>(_builder, "repeatIco")),
+	_stopBox(get_widget<Gtk::Box>(_builder, "stopBox")),
+	_popover(get_widget<Gtk::Popover>(_builder, "libraryPopover")),
+	_stopTree(get_widget<Gtk::TreeView>(_builder, "stopList")),
+	_offsetBtn(get_widget<Gtk::SpinButton>(_builder, "offsetSpin")),
+	_showStopsList(get_widget<Gtk::Button>(_builder, "stopsBtn")),
+	_addStop(get_widget<Gtk::Button>(_builder, "stopAdd")),
+	_deleteStop(get_widget<Gtk::Button>(_builder, "stopDelete")),
+	_stopsGallery(get_widget<Gtk::Box>(_builder, "stopsGallery")),
+	_colorsBox(get_widget<Gtk::Box>(_builder, "colorsBox")),
+	_mainGrid(get_widget<Gtk::Grid>(_builder, "mainGrid"))
+{
 
-	if (auto radial = get_widget<Gtk::ToggleButton>(builder, "radialBtn")) {
-		set_button(radial, INKSCAPE_ICON("paint-gradient-radial"), _("Radial gradient"));
-	}
+	auto& linear = get_widget<Gtk::ToggleButton>(_builder, "linearBtn");
+	set_icon(linear, INKSCAPE_ICON("paint-gradient-linear"));
 
-	if (auto reverse = get_widget<Gtk::Button>(builder, "reverseBtn")) {
-		set_button(reverse, INKSCAPE_ICON("object-flip-horizontal"), _("Reverse gradient's direction"));
-	}
+	auto& radial = get_widget<Gtk::ToggleButton>(_builder, "radialBtn");
+	set_icon(radial, INKSCAPE_ICON("paint-gradient-radial"));
 
-	if (auto repeatIco = get_widget<Gtk::Image>(builder, "repeatIco")) {
-		_repeatIcon = repeatIco;
-		auto pix = sp_get_icon_pixbuf("paint-none", GTK_ICON_SIZE_BUTTON);
-		repeatIco->set(pix);
-	}
+	auto& reverse = get_widget<Gtk::Button>(_builder, "reverseBtn");
+	set_icon(reverse, INKSCAPE_ICON("object-flip-horizontal"));
+	reverse.signal_clicked().connect([=](){ reverse_gradient(); });
+
+	auto pix = sp_get_icon_pixbuf("paint-none", GTK_ICON_SIZE_BUTTON);
+	_repeatIcon.set(pix);
 
 	// if (auto repeat = get_widget<Gtk::MenuButton>(builder, "repeatMode")) {
 		//
 		// set_button(repeat, INKSCAPE_ICON("object-flip-horizontal"), _("Reverse gradient's direction"));
 	// }
 
-	if (auto box = get_widget<Gtk::Box>(builder, "gradientBox")) {
-		int dot_size = 8;
-		_gradientImage.show();
-		_gradientImage.set_margin_left(dot_size / 2);
-		_gradientImage.set_margin_right(dot_size / 2);
-		_gradientStops.draw_stops_only(true, dot_size);
-		_gradientStops.set_margin_top(1);
-		_gradientStops.set_size_request(-1, dot_size);
-		_gradientStops.show();
-		box->pack_start(_gradientImage, true, true, 0);
-		box->pack_start(_gradientStops, true, true, 0);
+	auto& gradBox = get_widget<Gtk::Box>(_builder, "gradientBox");
+	const int dot_size = 8;
+	_gradientImage.show();
+	_gradientImage.set_margin_left(dot_size / 2);
+	_gradientImage.set_margin_right(dot_size / 2);
+	_gradientStops.draw_stops_only(true, dot_size);
+	_gradientStops.set_margin_top(1);
+	_gradientStops.set_size_request(-1, dot_size);
+	_gradientStops.show();
+	gradBox.pack_start(_gradientImage, true, true, 0);
+	gradBox.pack_start(_gradientStops, true, true, 0);
+
+	// add color selector
+	Gtk::Widget* color_selector = Gtk::manage(new ColorNotebook(_selected_color));
+	color_selector->show();
+	_colorsBox.pack_start(*color_selector, true, true, 0);
+
+	// _stepOffset.show();
+	// _stopBox.pack_start(_stepOffset, true, true, 0);
+
+	// gradient library in a popup
+	_popover.add(*_selector);
+	_selector->show();
+
+	// construct store for a list of stops
+	_stopColumns.add(_stopObj);
+	_stopColumns.add(_stopID);
+	_stopColumns.add(_stopColor);
+	_stopListStore = Gtk::ListStore::create(_stopColumns);
+	_stopTree.set_model(_stopListStore);
+	_stopTree.append_column("n", _stopID); // 1-based step index
+	_stopTree.append_column("c", _stopColor); // and its color
+
+	auto selection = _stopTree.get_selection();
+	selection->signal_changed().connect(sigc::mem_fun(*this, &GradientEditor::stop_selected));
+
+	_showStopsList.signal_clicked().connect(sigc::mem_fun(this, &GradientEditor::toggle_stops));
+	update_stops_layout();
+
+	set_icon(_addStop, "list-add");
+	_addStop.signal_clicked().connect(sigc::mem_fun(this, &GradientEditor::add_stop));
+
+	set_icon(_deleteStop, "list-remove");
+	_deleteStop.signal_clicked().connect(sigc::mem_fun(this, &GradientEditor::delete_stop));
+
+	// connect gradient repeat modes menu
+	std::tuple<const char*, SPGradientSpread> repeats[3] = {
+		{"repeatNone", SP_GRADIENT_SPREAD_PAD},
+		{"repeatDirect", SP_GRADIENT_SPREAD_REPEAT},
+		{"repeatReflected", SP_GRADIENT_SPREAD_REFLECT}
+	};
+	for (auto& el : repeats) {
+		auto& item = get_widget<Gtk::MenuItem>(_builder, std::get<0>(el));
+		auto mode = std::get<1>(el);
+		item.signal_select().connect([=](){ set_repeat_mode(mode); });
 	}
 
-	if (auto colors = get_widget<Gtk::Box>(builder, "colorsBox")) {
-		// add color selector
-		Gtk::Widget* color_selector = Gtk::manage(new ColorNotebook(_selected_color));
-		color_selector->show();
-		colors->pack_start(*color_selector, true, true, 0);
-	}
-
-	if (auto stopBox = get_widget<Gtk::Box>(builder, "stopBox")) {
-		_stepOffset.show();
-		stopBox->pack_start(_stepOffset, true, true, 0);
-	}
-
-	if (auto popover = get_widget<Gtk::Popover>(builder, "libraryPopover")) {
-		_popover = popover;
-		_popover->add(*_selector);
-		_selector->show();
-	}
+	// auto& repeatNone = get_widget<Gtk::MenuItem>(_builder, "repeatNone");
+	// repeatNone.signal_select().connect([this](){ setRepeatMode(SP_GRADIENT_SPREAD_PAD); });
 	
-	if (auto stops = get_widget<Gtk::TreeView>(builder, "stopList")) {
-		_stopTree = stops;
-		_stopColumns.add(_stopObj);
-		_stopColumns.add(_stopID);
-		_stopColumns.add(_stopColor);
-		_stopListStore = Gtk::ListStore::create(_stopColumns);
-		stops->set_model(_stopListStore);
-		stops->append_column("n", _stopID); // 1-based step index
-		stops->append_column("c", _stopColor); // and its color
+	// _offsetBtn.set_range(0.0, 1.0);
 
-		auto sel = stops->get_selection();
-		sel->signal_changed().connect(sigc::mem_fun(*this, &GradientEditor::stop_selected));
-
-		// auto it = _stopListStore->append();
-		// it->set_value(_stopID, Glib::ustring("1."));
-		// it->set_value(_stopColor, drawCircle(28, 0xff000080));
-		// it = _stopListStore->append();
-		// it->set_value(_stopID, Glib::ustring("2."));
-		// it->set_value(_stopColor, drawCircle(28, 0x00ff0000));
-		// it = _stopListStore->append();
-		// it->set_value(_stopID, Glib::ustring("13."));
-		// it->set_value(_stopColor, drawCircle(28, 0xffff00ff));
-	}
-
-	if (_addStop = get_widget<Gtk::Button>(builder, "stopAdd")) {
-		set_button(_addStop, "list-add", nullptr);
-		_addStop->signal_clicked().connect(sigc::mem_fun(this, &GradientEditor::add_stop));
-	}
-	if (_deleteStop = get_widget<Gtk::Button>(builder, "stopDelete")) {
-		set_button(_deleteStop, "list-remove", nullptr);
-		_deleteStop->signal_clicked().connect(sigc::mem_fun(this, &GradientEditor::delete_stop));
-	}
-	if (_duplicateStop = get_widget<Gtk::Button>(builder, "stopDup")) {
-		set_button(_duplicateStop, "edit-copy", nullptr);
-		_duplicateStop->signal_clicked().connect(sigc::mem_fun(this, &GradientEditor::duplicate_stop));
-	}
-
-	// if (auto store = get_widget<Gtk::ListStore>(builder, "stopListStore")) {
-		//
-	// }
-
-	if (auto grid = get_widget<Gtk::Grid>(builder, "mainGrid")) {
-		pack_start(*grid);
-	}
+	pack_start(_mainGrid);
 }
 
 GradientEditor::~GradientEditor() {
@@ -232,7 +231,7 @@ GradientSelector* GradientEditor::get_selector() {
 }
 
 void GradientEditor::stop_selected() {
-	auto sel = _stopTree->get_selection();
+	auto sel = _stopTree.get_selection();
 	if (!sel) return;
 
 	auto it = sel->get_selected();
@@ -242,7 +241,8 @@ void GradientEditor::stop_selected() {
 		_selected_color.setColor(stop.color);
 		_selected_color.setAlpha(stop.opacity);
 
-		_stepOffset.set_value(stop.offset);
+		// _stepOffset.set_value(stop.offset);
+		_offsetBtn.set_value(stop.offset);
 	}
 }
 
@@ -254,15 +254,55 @@ void GradientEditor::delete_stop() {
 	//
 }
 
-void GradientEditor::duplicate_stop() {
+void GradientEditor::toggle_stops() {
+	_stopsListVisible = !_stopsListVisible;
+	update_stops_layout();
+}
+
+void GradientEditor::update_stops_layout() {
+	const int top = 3;
+
+	if (_stopsListVisible) {
+		// shrink color box
+		_mainGrid.remove(_colorsBox);
+		_mainGrid.attach(_colorsBox, 1, top);
+		set_icon(_showStopsList, "go-previous");
+		_stopsGallery.show();
+	}
+	else {
+		set_icon(_showStopsList, "go-next");
+		_stopsGallery.hide();
+		// expand color box
+		_mainGrid.remove(_colorsBox);
+		_mainGrid.attach(_colorsBox, 0, top, 2);
+	}
+}
+
+void GradientEditor::reverse_gradient() {
+	if (_document && _gradient) {
+		sp_gradient_reverse_vector(_gradient);
+		DocumentUndo::done(_document, SP_VERB_CONTEXT_GRADIENT, _("Reverse gradient"));
+	}
+}
+
+void GradientEditor::set_repeat_mode(SPGradientSpread mode) {
+	// g_warning("selected.");
 	//
 }
+
+void GradientEditor::set_repeat_icon(SPGradientSpread mode) {
+	auto pix = sp_get_icon_pixbuf("paint-none", GTK_ICON_SIZE_BUTTON);
+	_repeatIcon.set(pix);
+}
+
 
 SPGradient* GradientEditor::getVector() {
 	return _selector->getVector();
 }
 
 void GradientEditor::setVector(SPDocument* doc, SPGradient* vector) {
+	_document = doc;
+	_gradient = vector;
 	_selector->setVector(doc, vector);
 	set_gradient(vector);
 }
@@ -296,11 +336,12 @@ void GradientEditor::set_gradient(SPGradient* gradient) {
 	const auto& stops = gradient->vector.stops;
 
 	int index = 1;
+	const int size = 30;
 	for (const SPGradientStop& stop : stops) {
 		auto it = _stopListStore->append();
 		it->set_value(_stopObj, stop);
 		it->set_value(_stopID, Glib::ustring::compose("%1.", index++));
-		it->set_value(_stopColor, drawCircle(30, stop.color.toRGBA32(stop.opacity)));
+		it->set_value(_stopColor, drawCircle(size, stop.color.toRGBA32(stop.opacity)));
 	}
 
 	_gradientImage.set_gradient(gradient);

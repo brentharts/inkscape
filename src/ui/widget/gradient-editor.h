@@ -3,10 +3,14 @@
 #define SEEN_GRADIENT_EDITOR_H
 
 #include <gtkmm/box.h>
+#include <gtkmm/grid.h>
+#include <gtkmm/button.h>
+#include <gtkmm/spinbutton.h>
 #include <gtkmm/popover.h>
 #include <gtkmm/image.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/treemodelcolumn.h>
+#include <gtkmm/builder.h>
 
 #include "object/sp-gradient.h"
 #include "ui/selected-color.h"
@@ -53,23 +57,37 @@ private:
 	void add_stop();
 	void duplicate_stop();
 	void delete_stop();
+	void toggle_stops();
+	void update_stops_layout();
+	void set_repeat_mode(SPGradientSpread mode);
+	void set_repeat_icon(SPGradientSpread mode);
+	void reverse_gradient();
 
+	Glib::RefPtr<Gtk::Builder> _builder;
 	GradientSelector* _selector;
 	Inkscape::UI::SelectedColor _selected_color;
-	SpinScale _stepOffset;
-	Gtk::Popover* _popover = nullptr;
-	Gtk::Image* _repeatIcon = nullptr;
-	GradientImage _gradientImage = GradientImage(nullptr);
-	GradientImage _gradientStops = GradientImage(nullptr);
+	// SpinScale _stepOffset;
+	Gtk::Popover& _popover;
+	Gtk::Image& _repeatIcon;
+	GradientImage _gradientImage{nullptr};
+	GradientImage _gradientStops{nullptr};
 	Glib::RefPtr<Gtk::ListStore> _stopListStore;
 	Gtk::TreeModelColumnRecord _stopColumns;
 	Gtk::TreeModelColumn<SPGradientStop> _stopObj;
 	Gtk::TreeModelColumn<Glib::ustring> _stopID;
 	Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>> _stopColor;
-	Gtk::TreeView* _stopTree = nullptr;
-	Gtk::Button* _addStop;
-	Gtk::Button* _deleteStop;
-	Gtk::Button* _duplicateStop;
+	Gtk::TreeView& _stopTree;
+	Gtk::SpinButton& _offsetBtn;
+	Gtk::Button& _addStop;
+	Gtk::Button& _deleteStop;
+	Gtk::Button& _showStopsList;
+	bool _stopsListVisible = true;
+	Gtk::Box& _stopsGallery;
+	Gtk::Box& _stopBox;
+	Gtk::Box& _colorsBox;
+	Gtk::Grid& _mainGrid;
+	SPGradient* _gradient = nullptr;
+	SPDocument* _document = nullptr;
 };
 
 

@@ -894,6 +894,10 @@ void sp_item_gradient_reverse_vector(SPItem *item, Inkscape::PaintTarget fill_or
     g_message("sp_item_gradient_reverse_vector(%p, %d)", item, fill_or_stroke);
 #endif
     SPGradient *gradient = getGradient(item, fill_or_stroke);
+	 sp_gradient_reverse_vector(gradient);
+}
+
+void sp_gradient_reverse_vector(SPGradient* gradient) {
     if (!gradient || !SP_IS_GRADIENT(gradient))
         return;
 
