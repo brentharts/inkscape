@@ -15,13 +15,7 @@ See default.xml for more information.
 
 <!-- File -->
 
-  <bind key="s" modifiers="Primary" action="FileSave" display="true" />
-  <bind key="s" modifiers="Primary,Shift" action="FileSaveAs" display="true" />
-  <bind key="o" modifiers="Primary" action="FileOpen" display="true" />
-  <bind key="n" modifiers="Primary" action="FileNew" display="true" />
   <bind key="n" modifiers="Primary,Shift" action="FileTemplates" display="true" />
-  <bind key="p" modifiers="Primary" action="FilePrint" display="true" />
-  <bind key="q" modifiers="Primary" action="FileQuit" display="true" />
 
   <!-- Revert -->
   <bind key="z" modifiers="Primary,Alt" action="FileRevert" display="true" />
@@ -95,17 +89,8 @@ See default.xml for more information.
 
 <!-- Edit -->
 
-  <bind key="c" modifiers="Primary" action="EditCopy" display="true" />
-  <bind key="x" modifiers="Primary" action="EditCut" display="true" />
-  <bind key="v" modifiers="Primary" action="EditPaste" display="true" />
   <bind key="b" modifiers="Primary,Shift" action="EditPasteInPlace" display="true" />
-  <bind key="z" modifiers="Primary" action="EditUndo" display="true" />
-  <bind key="z" modifiers="Primary,Shift" action="EditRedo" display="true" />
-  <bind key="Delete" action="EditDelete" display="true" />
-  <bind key="a" modifiers="Primary" action="EditSelectAll" display="true" />
   <bind key="a" modifiers="Primary,Shift" action="EditDeselect" display="true"/>
-  <bind key="g" modifiers="Primary" action="SelectionGroup" display="true" />
-  <bind key="g" modifiers="Primary,Shift" action="SelectionUnGroup" display="true" />
 
   <!-- Swap fill and stroke -->
   <bind key="x" modifiers="Shift" action="EditSwapFillStroke" display="true" />
