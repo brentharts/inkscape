@@ -1394,6 +1394,12 @@ void sp_lpe_item_enable_path_effects(SPLPEItem *lpeitem, bool enable)
 // Are the path effects enabled on this item ?
 bool SPLPEItem::pathEffectsEnabled() const
 {
+    // we supress on cliboard LPE calculations
+    Inkscape::XML::Node *root = this->document->getReprRoot();
+    Inkscape::XML::Node *clipnode = sp_repr_lookup_name(root, "inkscape:clipboard", 1);
+    if (clipnode) {
+        return false;
+    }
     return path_effects_enabled > 0;
 }
 
