@@ -65,7 +65,7 @@ private:
 	void set_repeat_mode(SPGradientSpread mode);
 	void set_repeat_icon(SPGradientSpread mode);
 	void reverse_gradient();
-	void set_step_color(SPColor color, float opacity);
+	void set_stop_color(SPColor color, float opacity);
 	std::optional<Gtk::TreeRow> current_stop();
 
 	Glib::RefPtr<Gtk::Builder> _builder;
@@ -79,6 +79,7 @@ private:
 	Glib::RefPtr<Gtk::ListStore> _stopListStore;
 	Gtk::TreeModelColumnRecord _stopColumns;
 	Gtk::TreeModelColumn<SPStop*> _stopObj;
+	Gtk::TreeModelColumn<size_t> _stopIdx;
 	Gtk::TreeModelColumn<Glib::ustring> _stopID;
 	Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>> _stopColor;
 	Gtk::TreeView& _stopTree;
@@ -93,6 +94,7 @@ private:
 	Gtk::Grid& _mainGrid;
 	SPGradient* _gradient = nullptr;
 	SPDocument* _document = nullptr;
+	bool _update = false;
 };
 
 

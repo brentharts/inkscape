@@ -42,6 +42,20 @@ namespace Widget {
 using namespace Inkscape::IO;
 using Inkscape::UI::Widget::ColorNotebook;
 
+class scope {
+public:
+	scope(bool& flag): _flag(flag) {
+		flag = true;
+	}
+
+	~scope() {
+		_flag = false;
+	}
+
+private:
+	bool& _flag;
+};
+
 void set_icon(Gtk::Button& btn, gchar const* pixmap) {
 	if (Gtk::Image* img = sp_get_icon_image(pixmap, Gtk::ICON_SIZE_BUTTON)) {
 		btn.set_image(*img);
@@ -154,7 +168,6 @@ Glib::ustring get_repeat_icon(SPGradientSpread mode) {
 GradientEditor::GradientEditor() :
 	_builder(create_builder()),
 	_selector(Gtk::manage(new GradientSelector())),
-	// _stepOffset("Offset", 0.0, 0.0, 1.0, 0.01, 0.1, 2),
 	_repeatIcon(get_widget<Gtk::Image>(_builder, "repeatIco")),
 	_stopBox(get_widget<Gtk::Box>(_builder, "stopBox")),
 	_popover(get_widget<Gtk::Popover>(_builder, "libraryPopover")),
@@ -195,20 +208,18 @@ GradientEditor::GradientEditor() :
 	color_selector->show();
 	_colorsBox.pack_start(*color_selector, true, true, 0);
 
-	// _stepOffset.show();
-	// _stopBox.pack_start(_stepOffset, true, true, 0);
-
 	// gradient library in a popup
 	_popover.add(*_selector);
 	_selector->show();
 
 	// construct store for a list of stops
 	_stopColumns.add(_stopObj);
+	_stopColumns.add(_stopIdx);
 	_stopColumns.add(_stopID);
 	_stopColumns.add(_stopColor);
 	_stopListStore = Gtk::ListStore::create(_stopColumns);
 	_stopTree.set_model(_stopListStore);
-	_stopTree.append_column("n", _stopID); // 1-based step index
+	_stopTree.append_column("n", _stopID); // 1-based stop index
 	_stopTree.append_column("c", _stopColor); // and its color
 
 	auto selection = _stopTree.get_selection();
@@ -248,9 +259,13 @@ GradientEditor::GradientEditor() :
 
 	set_repeat_icon(SP_GRADIENT_SPREAD_PAD);
 	
-	_selected_color.signal_changed.connect([=](){
-		set_step_color(_selected_color.color(), _selected_color.alpha());
+	_selected_color.signal_changed.connect([=]() {
+		set_stop_color(_selected_color.color(), _selected_color.alpha());
 	});
+	_selected_color.signal_dragged.connect([=]() {
+		set_stop_color(_selected_color.color(), _selected_color.alpha());
+	});
+
 	// _offsetBtn.set_range(0.0, 1.0);
 
 	pack_start(_mainGrid);
@@ -263,7 +278,7 @@ GradientSelector* GradientEditor::get_selector() {
 	return _selector;
 }
 
-void set_gradient_step_color(SPDocument* document, SPStop* stop, SPColor color, double opacity) {
+void set_gradient_stop_color(SPDocument* document, SPStop* stop, SPColor color, double opacity) {
 	sp_repr_set_css_double(stop->getRepr(), "offset", stop->offset);
 	Inkscape::CSSOStringStream os;
 	os << "stop-color:" << color.toString() << ";stop-opacity:" << opacity <<";";
@@ -272,11 +287,15 @@ void set_gradient_step_color(SPDocument* document, SPStop* stop, SPColor color, 
 	DocumentUndo::done(document, SP_VERB_CONTEXT_GRADIENT, _("Change gradient stop color"));
 }
 
-void GradientEditor::set_step_color(SPColor color, float opacity) {
+void GradientEditor::set_stop_color(SPColor color, float opacity) {
+	if (_update) return;
+
 	if (auto row = current_stop()) {
 		SPStop* stop = row->get_value(_stopObj);
 		if (stop && _document) {
-			set_gradient_step_color(_document, stop, color, opacity);
+			scope block(_update);
+
+			set_gradient_stop_color(_document, stop, color, opacity);
 
 			// update list view too
 			row->set_value(_stopColor, get_stop_pixmap(stop));
@@ -286,23 +305,26 @@ void GradientEditor::set_step_color(SPColor color, float opacity) {
 
 std::optional<Gtk::TreeRow> GradientEditor::current_stop() {
 	auto sel = _stopTree.get_selection();
-	if (!sel) return std::nullopt;
-
 	auto it = sel->get_selected();
-	if (!it) return std::nullopt;
-
-	return *it;
+	if (!it) {
+		return std::nullopt;
+	}
+	else {
+		return *it;
+	}
 }
 
 void GradientEditor::stop_selected() {
-	// auto maybe_row = current_stop();
+	// if (_update) return;
+
 	if (auto row = current_stop()) {
 		SPStop* stop = row->get_value(_stopObj);
 		if (stop) {
+			scope block(_update); 
+
 			_selected_color.setColor(stop->getColor());
 			_selected_color.setAlpha(stop->getOpacity());
 
-			// _stepOffset.set_value(stop.offset);
 			_offsetBtn.set_value(stop->offset);
 		}
 	}
@@ -316,6 +338,7 @@ void GradientEditor::delete_stop() {
 	//
 }
 
+// collapse/expand list of stops in the UI
 void GradientEditor::toggle_stops() {
 	_stopsListVisible = !_stopsListVisible;
 	update_stops_layout();
@@ -353,7 +376,11 @@ void GradientEditor::reverse_gradient() {
 }
 
 void GradientEditor::set_repeat_mode(SPGradientSpread mode) {
+	if (_update) return;
+
 	if (_document && _gradient) {
+		scope block(_update);
+
 		// spread is set on a gradient reference, which is _gradient object
 		_gradient->setSpread(mode);
 		_gradient->updateRepr();
@@ -373,6 +400,7 @@ void GradientEditor::set_repeat_icon(SPGradientSpread mode) {
 
 
 void GradientEditor::setGradient(SPGradient* gradient) {
+	scope block(_update);
 	_gradient = gradient;
 	_document = gradient ? gradient->document : nullptr;
 	set_gradient(gradient);
@@ -383,17 +411,7 @@ SPGradient* GradientEditor::getVector() {
 }
 
 void GradientEditor::setVector(SPDocument* doc, SPGradient* vector) {
-	// if (auto* l = SP_LINEARGRADIENT(vector)) {
-	// 	//
-	// 	auto set = l->isSpreadSet();
-	// 	auto s = l->getSpread();
-	// 	g_warning("lin-grad: %s %d\n", set ? "spread" : "no spread", (int)s);
-	// }
-	// {
-	// 	auto set = _gradient->isSpreadSet();
-	// 	auto s = _gradient->getSpread();
-	// 	g_warning("grad: %s %d\n", set ? "spread" : "no spread", (int)s);
-	// }
+	scope block(_update);
 	_selector->setVector(doc, vector);
 }
 
@@ -410,7 +428,6 @@ SPGradientUnits GradientEditor::getUnits() {
 }
 
 void GradientEditor::setSpread(SPGradientSpread spread) {
-// g_warning("setSpread: %d\n", (int)spread);
 	_selector->setSpread(spread);
 }
 
@@ -419,6 +436,15 @@ SPGradientSpread GradientEditor::getSpread() {
 }
 
 void GradientEditor::set_gradient(SPGradient* gradient) {
+// g_warning("set grad\n");
+	size_t selected_stop_index = 0;
+	{
+		auto it = _stopTree.get_selection()->get_selected();
+		if (it) {
+			selected_stop_index = it->get_value(_stopIdx);
+		}
+	}
+
 	_stopListStore->clear();
 
 	SPGradient* vector = gradient ? gradient->getVector() : nullptr;
@@ -429,17 +455,17 @@ void GradientEditor::set_gradient(SPGradient* gradient) {
 
 	if (!vector || !vector->hasStops()) return;
 
-	// auto& stops = vector->vector.stops;
-
-	int index = 1;
-	const int size = 30;
+	size_t index = 0;
 	for (auto& child : vector->children) {
 		if (SP_IS_STOP(&child)) {
 			auto stop = SP_STOP(&child);
 			auto it = _stopListStore->append();
 			it->set_value(_stopObj, stop);
-			it->set_value(_stopID, Glib::ustring::compose("%1.", index++));
+			it->set_value(_stopIdx, index);
+			it->set_value(_stopID, Glib::ustring::compose("%1.", index + 1));
 			it->set_value(_stopColor, get_stop_pixmap(stop));
+
+			++index;
 		}
 	}
 
@@ -448,6 +474,12 @@ void GradientEditor::set_gradient(SPGradient* gradient) {
 
 	auto mode = gradient->isSpreadSet() ? gradient->getSpread() : SP_GRADIENT_SPREAD_PAD;
 	set_repeat_icon(mode);
+
+	if (index > 0) {
+		auto it = _stopTree.get_model()->children().begin();
+		std::advance(it, std::min(selected_stop_index, index - 1));
+		_stopTree.get_selection()->select(it);
+	}
 }
 
 
