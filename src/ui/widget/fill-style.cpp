@@ -204,15 +204,15 @@ void FillNStroke::performUpdate()
                         _psel->setSwatch(vector);
                     } else if (SP_IS_LINEARGRADIENT(server)) {
                         SPGradient *vector = SP_GRADIENT(server)->getVector();
-                        _psel->setGradientLinear(vector);
-
                         SPLinearGradient *lg = SP_LINEARGRADIENT(server);
+                        _psel->setGradientLinear(vector, lg);
+
                         _psel->setGradientProperties(lg->getUnits(), lg->getSpread());
                     } else if (SP_IS_RADIALGRADIENT(server)) {
                         SPGradient *vector = SP_GRADIENT(server)->getVector();
-                        _psel->setGradientRadial(vector);
-
                         SPRadialGradient *rg = SP_RADIALGRADIENT(server);
+                        _psel->setGradientRadial(vector, rg);
+
                         _psel->setGradientProperties(rg->getUnits(), rg->getSpread());
 #ifdef WITH_MESH
                     } else if (SP_IS_MESHGRADIENT(server)) {

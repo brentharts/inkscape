@@ -11,8 +11,10 @@
 #include <gtkmm/liststore.h>
 #include <gtkmm/treemodelcolumn.h>
 #include <gtkmm/builder.h>
+#include <optional>
 
 #include "object/sp-gradient.h"
+#include "object/sp-stop.h"
 #include "ui/selected-color.h"
 #include "spin-scale.h"
 #include "gradient-image.h"
@@ -27,7 +29,7 @@ class GradientSelector;
 class GradientEditor : public Gtk::Box, public GradientSelectorInterface {
 public:
 	GradientEditor();
-	~GradientEditor() override;
+	~GradientEditor() noexcept override;
 
 	GradientSelector* get_selector();
 
@@ -43,6 +45,7 @@ public:
 	decltype(_signal_dragged) signal_dragged() const { return _signal_dragged; }
 	decltype(_signal_released) signal_released() const { return _signal_released; }
 
+	void setGradient(SPGradient* gradient) override;
 	SPGradient* getVector() override;
 	void setVector(SPDocument* doc, SPGradient* vector) override;
 	void setMode(SelectorMode mode) override;
@@ -62,6 +65,8 @@ private:
 	void set_repeat_mode(SPGradientSpread mode);
 	void set_repeat_icon(SPGradientSpread mode);
 	void reverse_gradient();
+	void set_step_color(SPColor color, float opacity);
+	std::optional<Gtk::TreeRow> current_stop();
 
 	Glib::RefPtr<Gtk::Builder> _builder;
 	GradientSelector* _selector;
@@ -73,7 +78,7 @@ private:
 	GradientImage _gradientStops{nullptr};
 	Glib::RefPtr<Gtk::ListStore> _stopListStore;
 	Gtk::TreeModelColumnRecord _stopColumns;
-	Gtk::TreeModelColumn<SPGradientStop> _stopObj;
+	Gtk::TreeModelColumn<SPStop*> _stopObj;
 	Gtk::TreeModelColumn<Glib::ustring> _stopID;
 	Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>> _stopColor;
 	Gtk::TreeView& _stopTree;

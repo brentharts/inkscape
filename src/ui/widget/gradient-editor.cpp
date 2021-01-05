@@ -31,6 +31,9 @@
 #include "gradient-chemistry.h"
 #include "document-undo.h"
 #include "verbs.h"
+#include "object/sp-linear-gradient.h"
+#include "object/sp-gradient-vector.h"
+#include "svg/css-ostringstream.h"
 
 namespace Inkscape {
 namespace UI {
@@ -47,7 +50,7 @@ void set_icon(Gtk::Button& btn, gchar const* pixmap) {
 }
 
 // draw solid color circle with black outline; right side is to show checkerboard if color's alpha is > 0
-Glib::RefPtr<Gdk::Pixbuf> drawCircle(int size, guint32 rgba) {
+Glib::RefPtr<Gdk::Pixbuf> draw_circle(int size, guint32 rgba) {
 	int width = size;
 	int height = size;
 	gint w2 = width / 2;
@@ -101,6 +104,12 @@ Glib::RefPtr<Gdk::Pixbuf> drawCircle(int size, guint32 rgba) {
 	return Glib::wrap(pixbuf);
 }
 
+
+Glib::RefPtr<Gdk::Pixbuf> get_stop_pixmap(SPStop* stop) {
+	const int size = 30;
+	return draw_circle(size, stop->getColor().toRGBA32(stop->getOpacity()));
+}
+
 // get widget from builder or throw
 template<class W> W& get_widget(Glib::RefPtr<Gtk::Builder>& builder, const char* id) {
 	W* widget;
@@ -121,6 +130,25 @@ Glib::RefPtr<Gtk::Builder> create_builder() {
 		g_error(("Cannot load glade file for gradient editor. " + ex.what()).c_str());
 		throw;
 	}
+}
+
+Glib::ustring get_repeat_icon(SPGradientSpread mode) {
+	const char* ico = "";
+	switch (mode) {
+		case SP_GRADIENT_SPREAD_PAD:
+			ico = "gradient-spread-pad";
+			break;
+		case SP_GRADIENT_SPREAD_REPEAT:
+			ico = "gradient-spread-repeat";
+			break;
+		case SP_GRADIENT_SPREAD_REFLECT:
+			ico = "gradient-spread-reflect";
+			break;
+		default:
+			g_warning("Missing case in %s\n", __func__);
+			break;
+	}
+	return ico;
 }
 
 GradientEditor::GradientEditor() :
@@ -149,14 +177,6 @@ GradientEditor::GradientEditor() :
 	auto& reverse = get_widget<Gtk::Button>(_builder, "reverseBtn");
 	set_icon(reverse, INKSCAPE_ICON("object-flip-horizontal"));
 	reverse.signal_clicked().connect([=](){ reverse_gradient(); });
-
-	auto pix = sp_get_icon_pixbuf("paint-none", GTK_ICON_SIZE_BUTTON);
-	_repeatIcon.set(pix);
-
-	// if (auto repeat = get_widget<Gtk::MenuButton>(builder, "repeatMode")) {
-		//
-		// set_button(repeat, INKSCAPE_ICON("object-flip-horizontal"), _("Reverse gradient's direction"));
-	// }
 
 	auto& gradBox = get_widget<Gtk::Box>(_builder, "gradientBox");
 	const int dot_size = 8;
@@ -212,12 +232,25 @@ GradientEditor::GradientEditor() :
 	for (auto& el : repeats) {
 		auto& item = get_widget<Gtk::MenuItem>(_builder, std::get<0>(el));
 		auto mode = std::get<1>(el);
-		item.signal_select().connect([=](){ set_repeat_mode(mode); });
+		item.signal_activate().connect([=](){ set_repeat_mode(mode); });
+		// pack icon and text into MenuItem, since MenuImageItem is deprecated
+		auto text = item.get_label();
+		auto hbox = Gtk::manage(new Gtk::Box);
+		Gtk::Image* img = sp_get_icon_image(get_repeat_icon(mode), Gtk::ICON_SIZE_BUTTON);
+		hbox->pack_start(*img, false, true, 8);
+		auto label = Gtk::manage(new Gtk::Label);
+		label->set_label(text);
+		hbox->pack_start(*label, false, true, 0);
+		hbox->show_all();
+		item.remove();
+		item.add(*hbox);
 	}
 
-	// auto& repeatNone = get_widget<Gtk::MenuItem>(_builder, "repeatNone");
-	// repeatNone.signal_select().connect([this](){ setRepeatMode(SP_GRADIENT_SPREAD_PAD); });
+	set_repeat_icon(SP_GRADIENT_SPREAD_PAD);
 	
+	_selected_color.signal_changed.connect([=](){
+		set_step_color(_selected_color.color(), _selected_color.alpha());
+	});
 	// _offsetBtn.set_range(0.0, 1.0);
 
 	pack_start(_mainGrid);
@@ -230,19 +263,48 @@ GradientSelector* GradientEditor::get_selector() {
 	return _selector;
 }
 
-void GradientEditor::stop_selected() {
+void set_gradient_step_color(SPDocument* document, SPStop* stop, SPColor color, double opacity) {
+	sp_repr_set_css_double(stop->getRepr(), "offset", stop->offset);
+	Inkscape::CSSOStringStream os;
+	os << "stop-color:" << color.toString() << ";stop-opacity:" << opacity <<";";
+	stop->setAttribute("style", os.str());
+
+	DocumentUndo::done(document, SP_VERB_CONTEXT_GRADIENT, _("Change gradient stop color"));
+}
+
+void GradientEditor::set_step_color(SPColor color, float opacity) {
+	if (auto row = current_stop()) {
+		SPStop* stop = row->get_value(_stopObj);
+		if (stop && _document) {
+			set_gradient_step_color(_document, stop, color, opacity);
+
+			// update list view too
+			row->set_value(_stopColor, get_stop_pixmap(stop));
+		}
+	}
+}
+
+std::optional<Gtk::TreeRow> GradientEditor::current_stop() {
 	auto sel = _stopTree.get_selection();
-	if (!sel) return;
+	if (!sel) return std::nullopt;
 
 	auto it = sel->get_selected();
-	if (it) {
-		auto row = *it;
-		const SPGradientStop& stop = row[_stopObj];
-		_selected_color.setColor(stop.color);
-		_selected_color.setAlpha(stop.opacity);
+	if (!it) return std::nullopt;
 
-		// _stepOffset.set_value(stop.offset);
-		_offsetBtn.set_value(stop.offset);
+	return *it;
+}
+
+void GradientEditor::stop_selected() {
+	// auto maybe_row = current_stop();
+	if (auto row = current_stop()) {
+		SPStop* stop = row->get_value(_stopObj);
+		if (stop) {
+			_selected_color.setColor(stop->getColor());
+			_selected_color.setAlpha(stop->getOpacity());
+
+			// _stepOffset.set_value(stop.offset);
+			_offsetBtn.set_value(stop->offset);
+		}
 	}
 }
 
@@ -280,31 +342,59 @@ void GradientEditor::update_stops_layout() {
 
 void GradientEditor::reverse_gradient() {
 	if (_document && _gradient) {
-		sp_gradient_reverse_vector(_gradient);
-		DocumentUndo::done(_document, SP_VERB_CONTEXT_GRADIENT, _("Reverse gradient"));
+		// reverse works on a gradient definition, the one with stops:
+		SPGradient* vector = _gradient->getVector();
+
+		if (vector) {
+			sp_gradient_reverse_vector(vector);
+			DocumentUndo::done(_document, SP_VERB_CONTEXT_GRADIENT, _("Reverse gradient"));
+		}
 	}
 }
 
 void GradientEditor::set_repeat_mode(SPGradientSpread mode) {
-	// g_warning("selected.");
-	//
+	if (_document && _gradient) {
+		// spread is set on a gradient reference, which is _gradient object
+		_gradient->setSpread(mode);
+		_gradient->updateRepr();
+
+		DocumentUndo::done(_document, SP_VERB_CONTEXT_GRADIENT, _("Set gradient repeat"));
+
+		set_repeat_icon(mode);
+	}
 }
 
 void GradientEditor::set_repeat_icon(SPGradientSpread mode) {
-	auto pix = sp_get_icon_pixbuf("paint-none", GTK_ICON_SIZE_BUTTON);
-	_repeatIcon.set(pix);
+	auto ico = get_repeat_icon(mode);
+	if (!ico.empty()) {
+		_repeatIcon.set_from_icon_name(ico, Gtk::ICON_SIZE_BUTTON);
+	}
 }
 
+
+void GradientEditor::setGradient(SPGradient* gradient) {
+	_gradient = gradient;
+	_document = gradient ? gradient->document : nullptr;
+	set_gradient(gradient);
+}
 
 SPGradient* GradientEditor::getVector() {
 	return _selector->getVector();
 }
 
 void GradientEditor::setVector(SPDocument* doc, SPGradient* vector) {
-	_document = doc;
-	_gradient = vector;
+	// if (auto* l = SP_LINEARGRADIENT(vector)) {
+	// 	//
+	// 	auto set = l->isSpreadSet();
+	// 	auto s = l->getSpread();
+	// 	g_warning("lin-grad: %s %d\n", set ? "spread" : "no spread", (int)s);
+	// }
+	// {
+	// 	auto set = _gradient->isSpreadSet();
+	// 	auto s = _gradient->getSpread();
+	// 	g_warning("grad: %s %d\n", set ? "spread" : "no spread", (int)s);
+	// }
 	_selector->setVector(doc, vector);
-	set_gradient(vector);
 }
 
 void GradientEditor::setMode(SelectorMode mode) {
@@ -320,6 +410,7 @@ SPGradientUnits GradientEditor::getUnits() {
 }
 
 void GradientEditor::setSpread(SPGradientSpread spread) {
+// g_warning("setSpread: %d\n", (int)spread);
 	_selector->setSpread(spread);
 }
 
@@ -330,22 +421,33 @@ SPGradientSpread GradientEditor::getSpread() {
 void GradientEditor::set_gradient(SPGradient* gradient) {
 	_stopListStore->clear();
 
-	if (!gradient || !gradient->hasStops()) return;
+	SPGradient* vector = gradient ? gradient->getVector() : nullptr;
 
-	gradient->ensureVector();
-	const auto& stops = gradient->vector.stops;
+	if (vector) {
+		vector->ensureVector();
+	}
+
+	if (!vector || !vector->hasStops()) return;
+
+	// auto& stops = vector->vector.stops;
 
 	int index = 1;
 	const int size = 30;
-	for (const SPGradientStop& stop : stops) {
-		auto it = _stopListStore->append();
-		it->set_value(_stopObj, stop);
-		it->set_value(_stopID, Glib::ustring::compose("%1.", index++));
-		it->set_value(_stopColor, drawCircle(size, stop.color.toRGBA32(stop.opacity)));
+	for (auto& child : vector->children) {
+		if (SP_IS_STOP(&child)) {
+			auto stop = SP_STOP(&child);
+			auto it = _stopListStore->append();
+			it->set_value(_stopObj, stop);
+			it->set_value(_stopID, Glib::ustring::compose("%1.", index++));
+			it->set_value(_stopColor, get_stop_pixmap(stop));
+		}
 	}
 
-	_gradientImage.set_gradient(gradient);
-	_gradientStops.set_gradient(gradient);
+	_gradientImage.set_gradient(vector);
+	_gradientStops.set_gradient(vector);
+
+	auto mode = gradient->isSpreadSet() ? gradient->getSpread() : SP_GRADIENT_SPREAD_PAD;
+	set_repeat_icon(mode);
 }
 
 

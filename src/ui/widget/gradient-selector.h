@@ -124,6 +124,7 @@ class GradientSelector : public Gtk::Box, public GradientSelectorInterface {
     inline decltype(_signal_dragged) signal_dragged() const { return _signal_dragged; }
     inline decltype(_signal_released) signal_released() const { return _signal_released; }
 
+    void setGradient(SPGradient* gradient) override { /* no op */ }
     SPGradient *getVector() override;
     void setVector(SPDocument *doc, SPGradient *vector) override;
     void setMode(SelectorMode mode) override;

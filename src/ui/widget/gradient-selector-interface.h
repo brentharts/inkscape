@@ -9,6 +9,9 @@ class GradientSelectorInterface {
 public:
 	enum SelectorMode { MODE_LINEAR, MODE_RADIAL, MODE_SWATCH };
 
+	// pass gradient object (SPLinearGradient or SPRadialGradient)
+	virtual void setGradient(SPGradient* gradient) = 0;
+
 	virtual SPGradient* getVector() = 0;
 	virtual void setVector(SPDocument* doc, SPGradient* vector) = 0;
 	virtual void setMode(SelectorMode mode) = 0;

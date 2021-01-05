@@ -393,7 +393,7 @@ void PaintSelector::setSwatch(SPGradient *vector)
     }
 }
 
-void PaintSelector::setGradientLinear(SPGradient *vector)
+void PaintSelector::setGradientLinear(SPGradient *vector, SPLinearGradient* gradient)
 {
 #ifdef SP_PS_VERBOSE
     g_print("PaintSelector set GRADIENT LINEAR\n");
@@ -403,10 +403,11 @@ void PaintSelector::setGradientLinear(SPGradient *vector)
     auto gsel = getGradientFromData();
 
     gsel->setMode(GradientSelector::MODE_LINEAR);
+    gsel->setGradient(gradient);
     gsel->setVector((vector) ? vector->document : nullptr, vector);
 }
 
-void PaintSelector::setGradientRadial(SPGradient *vector)
+void PaintSelector::setGradientRadial(SPGradient *vector, SPRadialGradient* gradient)
 {
 #ifdef SP_PS_VERBOSE
     g_print("PaintSelector set GRADIENT RADIAL\n");
@@ -416,7 +417,7 @@ void PaintSelector::setGradientRadial(SPGradient *vector)
     auto gsel = getGradientFromData();
 
     gsel->setMode(GradientSelector::MODE_RADIAL);
-
+    gsel->setGradient(gradient);
     gsel->setVector((vector) ? vector->document : nullptr, vector);
 }
 

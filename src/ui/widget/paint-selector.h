@@ -23,6 +23,8 @@
 #include "ui/selected-color.h"
 
 class SPGradient;
+class SPLinearGradient;
+class SPRadialGradient;
 #ifdef WITH_MESH
 class SPMeshGradient;
 #endif
@@ -163,8 +165,8 @@ class PaintSelector : public Gtk::Box {
     void setFillrule(FillRule fillrule);
     void setColorAlpha(SPColor const &color, float alpha);
     void setSwatch(SPGradient *vector);
-    void setGradientLinear(SPGradient *vector);
-    void setGradientRadial(SPGradient *vector);
+    void setGradientLinear(SPGradient *vector, SPLinearGradient* gradient);
+    void setGradientRadial(SPGradient *vector, SPRadialGradient* gradient);
 #ifdef WITH_MESH
     void setGradientMesh(SPMeshGradient *array);
 #endif
