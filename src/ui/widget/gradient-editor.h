@@ -17,8 +17,9 @@
 #include "object/sp-stop.h"
 #include "ui/selected-color.h"
 #include "spin-scale.h"
-#include "gradient-image.h"
+#include "gradient-with-stops.h"
 #include "gradient-selector-interface.h"
+#include "ui/operation-blocker.h"
 
 namespace Inkscape {
 namespace UI {
@@ -74,8 +75,8 @@ private:
 	// SpinScale _stepOffset;
 	Gtk::Popover& _popover;
 	Gtk::Image& _repeatIcon;
-	GradientImage _gradientImage{nullptr};
-	GradientImage _gradientStops{nullptr};
+	GradientWithStops _gradientImage;//{nullptr};
+	// GradientWithStops _gradientStops;//{nullptr};
 	Glib::RefPtr<Gtk::ListStore> _stopListStore;
 	Gtk::TreeModelColumnRecord _stopColumns;
 	Gtk::TreeModelColumn<SPStop*> _stopObj;
@@ -94,7 +95,7 @@ private:
 	Gtk::Grid& _mainGrid;
 	SPGradient* _gradient = nullptr;
 	SPDocument* _document = nullptr;
-	bool _update = false;
+	OperationBlocker _update;
 };
 
 

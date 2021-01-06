@@ -16,6 +16,7 @@ set(ui_SRC
 	shape-editor-knotholders.cpp
 	simple-pref-pusher.cpp
 	shortcuts.cpp
+	svg-renderer.cpp
 	tool-factory.cpp
 	tools-switch.cpp
 	util.cpp
@@ -187,6 +188,7 @@ set(ui_SRC
 	widget/gradient-editor.cpp
 	widget/gradient-selector.cpp
 	widget/gradient-vector-selector.cpp
+	widget/gradient-with-stops.cpp
 	widget/highlight-picker.cpp
 	widget/imagetoggler.cpp
 	widget/ink-color-wheel.cpp

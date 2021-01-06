@@ -196,12 +196,12 @@ GradientEditor::GradientEditor() :
 	_gradientImage.show();
 	_gradientImage.set_margin_left(dot_size / 2);
 	_gradientImage.set_margin_right(dot_size / 2);
-	_gradientStops.draw_stops_only(true, dot_size);
-	_gradientStops.set_margin_top(1);
-	_gradientStops.set_size_request(-1, dot_size);
-	_gradientStops.show();
+	// _gradientStops.draw_stops_only(true, dot_size);
+	// _gradientStops.set_margin_top(1);
+	// _gradientStops.set_size_request(-1, dot_size);
+	// _gradientStops.show();
 	gradBox.pack_start(_gradientImage, true, true, 0);
-	gradBox.pack_start(_gradientStops, true, true, 0);
+	// gradBox.pack_start(_gradientStops, true, true, 0);
 
 	// add color selector
 	Gtk::Widget* color_selector = Gtk::manage(new ColorNotebook(_selected_color));
@@ -288,12 +288,12 @@ void set_gradient_stop_color(SPDocument* document, SPStop* stop, SPColor color, 
 }
 
 void GradientEditor::set_stop_color(SPColor color, float opacity) {
-	if (_update) return;
+	if (_update.pending()) return;
 
 	if (auto row = current_stop()) {
 		SPStop* stop = row->get_value(_stopObj);
 		if (stop && _document) {
-			scope block(_update);
+			auto scoped(_update.block());
 
 			set_gradient_stop_color(_document, stop, color, opacity);
 
@@ -320,7 +320,7 @@ void GradientEditor::stop_selected() {
 	if (auto row = current_stop()) {
 		SPStop* stop = row->get_value(_stopObj);
 		if (stop) {
-			scope block(_update); 
+			auto scoped(_update.block());
 
 			_selected_color.setColor(stop->getColor());
 			_selected_color.setAlpha(stop->getOpacity());
@@ -376,10 +376,10 @@ void GradientEditor::reverse_gradient() {
 }
 
 void GradientEditor::set_repeat_mode(SPGradientSpread mode) {
-	if (_update) return;
+	if (_update.pending()) return;
 
 	if (_document && _gradient) {
-		scope block(_update);
+		auto scoped(_update.block());
 
 		// spread is set on a gradient reference, which is _gradient object
 		_gradient->setSpread(mode);
@@ -400,7 +400,7 @@ void GradientEditor::set_repeat_icon(SPGradientSpread mode) {
 
 
 void GradientEditor::setGradient(SPGradient* gradient) {
-	scope block(_update);
+	auto scoped(_update.block());
 	_gradient = gradient;
 	_document = gradient ? gradient->document : nullptr;
 	set_gradient(gradient);
@@ -411,7 +411,7 @@ SPGradient* GradientEditor::getVector() {
 }
 
 void GradientEditor::setVector(SPDocument* doc, SPGradient* vector) {
-	scope block(_update);
+	auto scoped(_update.block());
 	_selector->setVector(doc, vector);
 }
 
@@ -470,7 +470,7 @@ void GradientEditor::set_gradient(SPGradient* gradient) {
 	}
 
 	_gradientImage.set_gradient(vector);
-	_gradientStops.set_gradient(vector);
+	// _gradientStops.set_gradient(vector);
 
 	auto mode = gradient->isSpreadSet() ? gradient->getSpread() : SP_GRADIENT_SPREAD_PAD;
 	set_repeat_icon(mode);
