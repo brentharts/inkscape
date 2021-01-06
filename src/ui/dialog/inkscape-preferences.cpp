@@ -61,6 +61,7 @@
 #include "ui/shortcuts.h"
 #include "ui/modifiers.h"
 #include "ui/widget/style-swatch.h"
+#include "ui/widget/canvas.h"
 
 #include "widgets/desktop-widget.h"
 
@@ -392,6 +393,32 @@ int InkscapePreferences::num_widgets_in_grid(Glib::ustring const &key, Gtk::Widg
         results += num_child;
     }
     return results;
+}
+
+
+void InkscapePreferences::on_outline_overlay_changed()
+{
+    g_timeout_add(100, &InkscapePreferences::_timeoutredrawdesktop, this);
+}
+
+gboolean InkscapePreferences::_timeoutredrawdesktop(gpointer data) {
+    InkscapePreferences *preferences = static_cast<InkscapePreferences *>(data);
+    if (preferences->_rendering_outline_overlay_opacity.get_text_length()) {
+        SPDesktop *desktop = SP_ACTIVE_DESKTOP;
+        if (desktop == nullptr)
+            return false;
+        GtkWindow *w =GTK_WINDOW(gtk_widget_get_toplevel( GTK_WIDGET(desktop->getCanvas()->gobj()) ));
+        if (w) {
+            gtk_window_present(w);
+            desktop->getCanvas()->grab_focus();
+        }
+        w =GTK_WINDOW(gtk_widget_get_toplevel( GTK_WIDGET(preferences->_rendering_outline_overlay_opacity.gobj()) ));
+        if (w) {
+            gtk_window_present(w);
+            preferences->_rendering_outline_overlay_opacity.grab_focus_without_selecting();
+        }
+    }
+    return false;
 }
 
 /**
@@ -2579,6 +2606,7 @@ void InkscapePreferences::initPageRendering()
 
     // rendering outline overlay opcaity
     _rendering_outline_overlay_opacity.init("/options/rendering/outline-overlay-opacity", 1.0, 100.0, 1.0, 5.0, 50.0, true, false);
+    _rendering_outline_overlay_opacity.signal_changed().connect(sigc::mem_fun(*this, &InkscapePreferences::on_outline_overlay_changed));
     _page_rendering.add_line( false, _("Outline overlay opacity:"), _rendering_outline_overlay_opacity, _("%"),
                              _("Opacity of the color on outline overlay render mode"), false);
 

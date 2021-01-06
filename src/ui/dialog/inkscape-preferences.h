@@ -616,6 +616,7 @@ protected:
     void on_reset_open_recent_clicked();
     void on_reset_prefs_clicked();
     void on_search_changed();
+    void on_outline_overlay_changed();
     void highlight_results(Glib::ustring const &key, Gtk::TreeModel::iterator &iter);
     void goto_first_result();
 
@@ -673,6 +674,7 @@ private:
   void get_highlight_colors(guint32 &colorsetbase, guint32 &colorsetsuccess, guint32 &colorsetwarning,
                             guint32 &colorseterror);
 
+  static int _timeoutredrawdesktop(gpointer data); ///< callback to redraw desktop when UI is bussy
   std::map<Glib::ustring, bool> dark_themes;
   InkscapePreferences();
   InkscapePreferences(InkscapePreferences const &d);
