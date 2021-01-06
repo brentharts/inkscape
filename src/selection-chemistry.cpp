@@ -839,9 +839,8 @@ void ObjectSet::popFromGroup(){
     }
     else {
         toNextLayer(true);
+        parent_group->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
     }
-
-    parent_group->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
 
     if(document())
         DocumentUndo::done(document(), SP_VERB_SELECTION_UNGROUP_POP_SELECTION,
