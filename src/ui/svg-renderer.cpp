@@ -7,15 +7,32 @@
 
 namespace Inkscape {
 
-const char* rgba_to_css_color(Gdk::RGBA color, char* buffer) {
+Glib::ustring rgba_to_css_color(double r, double g, double b) {
+	char buffer[16];
 	sprintf(buffer, "#%02x%02x%02x",
-		static_cast<int>(color.get_red() * 0xff),
-		static_cast<int>(color.get_green() * 0xff),
-		static_cast<int>(color.get_blue() * 0xff)
+		static_cast<int>(r * 0xff),
+		static_cast<int>(g * 0xff),
+		static_cast<int>(b * 0xff)
 	);
-	return buffer;
+	return Glib::ustring(buffer);
 }
 
+Glib::ustring rgba_to_css_color(const Gdk::RGBA& color) {
+	return rgba_to_css_color(color.get_red(), color.get_green(), color.get_blue());
+}
+
+Glib::ustring rgba_to_css_color(const SPColor& color) {
+	float rgb[3];
+	color.get_rgb_floatv(rgb);
+	return rgba_to_css_color(rgb[0], rgb[1], rgb[2]);
+}
+
+Glib::ustring double_to_css_value(double value) {
+	char buffer[32];
+	// arbitrarrily chosen precision
+	sprintf(buffer, "%.4f", value);
+	return Glib::ustring(buffer);
+}
 
 svg_renderer::svg_renderer(const char* svg_file_path) {
 
@@ -30,15 +47,23 @@ svg_renderer::svg_renderer(const char* svg_file_path) {
 	if (!_root) throw std::runtime_error("Cannot find root element in svg document");
 }
 
-size_t svg_renderer::set_style(const Glib::ustring& selector, const char* name, const char* value) {
+size_t svg_renderer::set_style(const Glib::ustring& selector, const char* name, const Glib::ustring& value) {
 	auto objects = _document->getObjectsBySelector(selector);
 	for (auto el : objects) {
 		SPCSSAttr* css = sp_repr_css_attr(el->getRepr(), "style");
-		sp_repr_css_set_property(css, name, value);
+		sp_repr_css_set_property(css, name, value.c_str());
 		el->changeCSS(css, "style");
 		sp_repr_css_attr_unref(css);
 	}
 	return objects.size();
+}
+
+double svg_renderer::get_width_px() const {
+	return _document->getWidth().value("px");
+}
+
+double svg_renderer::get_height_px() const {
+	return _document->getHeight().value("px");
 }
 
 Glib::RefPtr<Gdk::Pixbuf> svg_renderer::render(double scale) {

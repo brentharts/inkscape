@@ -4,6 +4,7 @@
 
 #include <gtkmm/widget.h>
 #include "ui/svg-renderer.h"
+#include "helper/auto-connection.h"
 
 class SPGradient;
 
@@ -29,6 +30,8 @@ private:
 
 	SPGradient* _gradient = nullptr;
 	svg_renderer _template;
+	auto_connection _release;
+	auto_connection _modified;
 };
 
 } // namespace Widget

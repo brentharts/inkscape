@@ -5,22 +5,32 @@
 #include <gdkmm/rgba.h>
 
 #include "document.h"
+#include "color.h"
 
 namespace Inkscape {
 
-const char* rgba_to_css_color(Gdk::RGBA color, char* buffer);
+// utilities for set_style: 
+// Gdk color to CSS rgb (no alpha)
+Glib::ustring rgba_to_css_color(const Gdk::RGBA& color);
+Glib::ustring rgba_to_css_color(const SPColor& color);
+// double to low precision string
+Glib::ustring double_to_css_value(double value);
 
 
 class svg_renderer
 {
 public:
+	// load SVG document from file (abs path)
 	svg_renderer(const char* svg_file_path);
 
-	// set inline style on selected elements; return number of elements found
-	size_t set_style(const Glib::ustring& selector, const char* name, const char* value);
+	// set inline style on selected elements; return number of elements modified
+	size_t set_style(const Glib::ustring& selector, const char* name, const Glib::ustring& value);
 
-	// render document
-	Glib::RefPtr<Gdk::Pixbuf> render(double scale = 1.0);
+	// render document at given scale
+	Glib::RefPtr<Gdk::Pixbuf> render(double scale);
+
+	double get_width_px() const;
+	double get_height_px() const;
 
 private:
 	std::unique_ptr<SPDocument> _document;
