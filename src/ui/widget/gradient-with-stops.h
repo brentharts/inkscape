@@ -3,6 +3,7 @@
 #define SEEN_GRADIENT_WITH_STOPS_H
 
 #include <gtkmm/widget.h>
+#include <gtkmm/button.h>
 #include "ui/svg-renderer.h"
 #include "helper/auto-connection.h"
 
@@ -12,7 +13,7 @@ namespace Inkscape {
 namespace UI {
 namespace Widget {
 
-class GradientWithStops : public Gtk::Widget {
+class GradientWithStops : public Gtk::DrawingArea {
 public:
 	GradientWithStops();
 
@@ -32,6 +33,7 @@ private:
 	svg_renderer _template;
 	auto_connection _release;
 	auto_connection _modified;
+// Gtk::Button _btn;
 };
 
 } // namespace Widget

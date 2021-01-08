@@ -3,13 +3,23 @@
 #include "gradient-with-stops.h"
 #include "object/sp-gradient.h"
 #include "display/cairo-utils.h"
+#include "io/resource.h"
+
+// need access to the main window to read its style
+#include "desktop.h"
+#include "inkscape.h"
+
+const int GRADIENT_WIDGET_HEIGHT = 32;
+const int GRADIENT_IMAGE_HEIGHT = 19;
 
 namespace Inkscape {
 namespace UI {
 namespace Widget {
 
+using namespace Inkscape::IO;
+
 std::string get_stop_template_path() {
-	return "/home/mike/Documents/gradient-stop.svg";
+	return Resource::get_filename(Resource::UIS, "gradient-stop.svg");
 }
 
 GradientWithStops::GradientWithStops():
@@ -28,7 +38,7 @@ void GradientWithStops::set_gradient(SPGradient* gradient) {
 
 void GradientWithStops::size_request(GtkRequisition* requisition) const {
 	requisition->width = 60;
-	requisition->height = 32;
+	requisition->height = GRADIENT_WIDGET_HEIGHT;
 }
 
 void GradientWithStops::get_preferred_width_vfunc(int& minimal_width, int& natural_width) const {
@@ -67,6 +77,21 @@ void draw_gradient(const Cairo::RefPtr<Cairo::Context>& cr, SPGradient* gradient
 	}
 }
 
+Gdk::RGBA get_background_color() {
+	Gdk::RGBA bg;
+	bg.set_grey(0.5);
+
+	auto desktop = SP_ACTIVE_DESKTOP;
+	if (desktop) {
+		Gtk::Window* window = desktop->getToplevel();
+		if (window) {
+			bg = window->get_style_context()->get_background_color();
+		}
+	}
+
+	return bg;
+}
+
 bool GradientWithStops::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
 	auto allocation = get_allocation();
 	auto context = get_style_context();
@@ -79,8 +104,11 @@ bool GradientWithStops::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
 	const int height = allocation.get_height();
 	if (width <= 0) return true;
 
+	context->render_background(cr, 0, 0, width, height);
+// context->render_frame(cr, 0, 0, width, height);
+
 	// empty gradient checkboard or gradient itself
-	cr->rectangle(x, 0, width, 19);
+	cr->rectangle(x, 0, width, GRADIENT_IMAGE_HEIGHT);
 	draw_gradient(cr, _gradient, x, width);
 
 	if (!_gradient) return true;
@@ -89,15 +117,8 @@ bool GradientWithStops::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
 
 	cr->begin_new_path();
 
-	Gdk::RGBA fg;
-	if (!context->lookup_color("theme_fg_color", fg)) {
-		fg.set_rgba(0.5, 0.5, 0.5);
-	}
-
-	Gdk::RGBA bg;
-	if (!context->lookup_color("theme_bg_color", bg)) {
-		bg.set_rgba(0.5, 0.5, 0.5);
-	}
+	Gdk::RGBA fg = context->get_color(get_state_flags());
+	Gdk::RGBA bg = get_background_color();
 
 	_gradient->ensureVector();
 
@@ -116,7 +137,7 @@ bool GradientWithStops::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
 		_template.set_style("path.opacity", "opacity", double_to_css_value(stop.opacity));
 
 		auto pix = _template.render(scale);
-		const auto y = 10 * scale;
+		const auto y = (GRADIENT_WIDGET_HEIGHT - _template.get_height_px()) * scale;
 
 		if (!pix) {
 			g_warning("Rendering gradient stop failed.");
