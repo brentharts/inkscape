@@ -196,6 +196,13 @@ GradientEditor::GradientEditor() :
 	_gradientImage.show();
 	_gradientImage.set_margin_left(dot_size / 2);
 	_gradientImage.set_margin_right(dot_size / 2);
+	// gradient stop selected in a gradient widget; sync list selection
+	_gradientImage.signal_stop_selected().connect([=](size_t index) {
+		select_stop(index);
+	});
+	_gradientImage.signal_stop_offset_changed().connect([=](size_t index, double offset) {
+		set_stop_offset(index, offset);
+	});
 	// _gradientStops.draw_stops_only(true, dot_size);
 	// _gradientStops.set_margin_top(1);
 	// _gradientStops.set_size_request(-1, dot_size);
@@ -312,6 +319,14 @@ std::optional<Gtk::TreeRow> GradientEditor::current_stop() {
 	else {
 		return *it;
 	}
+}
+
+SPStop* GradientEditor::get_nth_stop(size_t index) {
+	const auto& v = _stopListStore->children();
+	if (index < v.size()) {
+		return v[index]->get_value(_stopObj);
+	}
+	return nullptr;
 }
 
 void GradientEditor::stop_selected() {
@@ -470,18 +485,44 @@ void GradientEditor::set_gradient(SPGradient* gradient) {
 	}
 
 	_gradientImage.set_gradient(vector);
-	// _gradientStops.set_gradient(vector);
 
 	auto mode = gradient->isSpreadSet() ? gradient->getSpread() : SP_GRADIENT_SPREAD_PAD;
 	set_repeat_icon(mode);
 
+	// list not empty?
 	if (index > 0) {
-		auto it = _stopTree.get_model()->children().begin();
-		std::advance(it, std::min(selected_stop_index, index - 1));
-		_stopTree.get_selection()->select(it);
+		select_stop(std::min(selected_stop_index, index - 1));
 	}
 }
 
+void GradientEditor::set_stop_offset(size_t index, double offset) {
+	if (_update.pending()) return;
+
+	SPStop* stop = get_nth_stop(index);
+	if (stop) {
+		auto scoped(_update.block());
+
+		stop->offset = offset;
+		sp_repr_set_css_double(stop->getRepr(), "offset", stop->offset);
+
+		DocumentUndo::maybeDone(stop->document, "gradient:stop:offset", SP_VERB_CONTEXT_GRADIENT,
+			_("Change gradient stop offset"));
+	}
+}
+
+// select requested stop in a list view
+void GradientEditor::select_stop(size_t index) {
+	if (_gradient) {
+		const auto& items = _stopTree.get_model()->children();
+		if (index < items.size()) {
+			auto it = items.begin();
+			std::advance(it, index);
+			_stopTree.get_selection()->select(it);
+			auto path = _stopTree.get_model()->get_path(it);
+			_stopTree.scroll_to_cell(path, *_stopTree.get_column(0));
+		}
+	}
+}
 
 } // namespace Widget
 } // namespace UI

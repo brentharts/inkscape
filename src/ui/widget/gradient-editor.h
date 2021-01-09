@@ -68,15 +68,16 @@ private:
 	void reverse_gradient();
 	void set_stop_color(SPColor color, float opacity);
 	std::optional<Gtk::TreeRow> current_stop();
+	SPStop* get_nth_stop(size_t index);
+	void select_stop(size_t index);
+	void set_stop_offset(size_t index, double offset);
 
 	Glib::RefPtr<Gtk::Builder> _builder;
 	GradientSelector* _selector;
 	Inkscape::UI::SelectedColor _selected_color;
-	// SpinScale _stepOffset;
 	Gtk::Popover& _popover;
 	Gtk::Image& _repeatIcon;
-	GradientWithStops _gradientImage;//{nullptr};
-	// GradientWithStops _gradientStops;//{nullptr};
+	GradientWithStops _gradientImage;
 	Glib::RefPtr<Gtk::ListStore> _stopListStore;
 	Gtk::TreeModelColumnRecord _stopColumns;
 	Gtk::TreeModelColumn<SPStop*> _stopObj;
