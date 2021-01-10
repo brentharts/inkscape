@@ -170,7 +170,6 @@ void PaintServersDialog::update()
     }
 
     desktop = getDesktop();
-    load_current_document(desktop->getDocument()->getDefs(), 0);
 }
 
 PaintServersDialog::~PaintServersDialog() = default;
