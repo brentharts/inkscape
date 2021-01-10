@@ -7,7 +7,8 @@
 #include "ui/cursor-utils.h"
 
 // widget's height; it should take stop template's height into account
-const int GRADIENT_WIDGET_HEIGHT = 32;
+// current value is fine tuned to make stop handles overlap gradient image just the right amount
+const int GRADIENT_WIDGET_HEIGHT = 33;
 // gradient's image height (multiple of checkerboard tiles, they are 6x6)
 const int GRADIENT_IMAGE_HEIGHT = 3 * 6;
 
@@ -40,7 +41,11 @@ void GradientWithStops::set_gradient(SPGradient* gradient) {
 	_release  = gradient ? gradient->connectRelease([=](SPObject*){ set_gradient(nullptr); }) : sigc::connection();
 	_modified = gradient ? gradient->connectModified([=](SPObject*, guint){ update(); }) : sigc::connection();
 
+	// TODO: check selected stop index
+
 	update();
+
+	set_sensitive(gradient != nullptr);
 }
 
 void GradientWithStops::size_request(GtkRequisition* requisition) const {
@@ -179,8 +184,11 @@ int GradientWithStops::find_stop_at(double x, double y) const {
 }
 
 // this is range of offset adjustment for a given stop
-GradientWithStops::limits_t GradientWithStops::get_stop_limits(size_t index) const {
+GradientWithStops::limits_t GradientWithStops::get_stop_limits(int maybe_index) const {
 	if (!_gradient) return limits_t {};
+
+	// let negative index turn into a large out-of-range number
+	auto index = static_cast<size_t>(maybe_index);
 
 	_gradient->ensureVector();
 	const auto& v = _gradient->vector.stops;
@@ -204,38 +212,115 @@ GradientWithStops::limits_t GradientWithStops::get_stop_limits(size_t index) con
 				max = v[index + 1].offset;
 			}
 		}
-		return limits_t { .min_offset = min, .max_offset = max };
+		return limits_t { .min_offset = min, .max_offset = max, .offset = v[index].offset };
 	}
 	else {
 		return limits_t {};
 	}
 }
 
+bool GradientWithStops::on_focus_out_event(GdkEventFocus* event) {
+	// g_warning("focus out");
+	update();
+	return false;
+}
+
+bool GradientWithStops::on_focus_in_event(GdkEventFocus* event) {
+	// g_warning("focus in");
+	update();
+	// grab_focus();
+	return false;
+}
+
 bool GradientWithStops::on_focus(Gtk::DirectionType direction) {
+	// g_warning("on focus");
+
+	if (has_focus()) {
+		return false; // let focus go
+	}
+
+	grab_focus();
+	// TODO - add focus indicator frame?
 	return true;
+}
+
+bool GradientWithStops::on_key_press_event(GdkEventKey* key_event) {
+	bool consumed = false;
+	// currently all keyboard activity involves acting on focused stop handle; bail if nothing's selected
+	if (_focused_stop < 0) return consumed;
+
+	unsigned int key = 0;
+	auto modifier = static_cast<GdkModifierType>(key_event->state);
+	gdk_keymap_translate_keyboard_state(Gdk::Display::get_default()->get_keymap(),
+		key_event->hardware_keycode, modifier, 0, &key, nullptr, nullptr, nullptr);
+
+	auto delta = _stop_move_increment;
+	if (modifier & GDK_SHIFT_MASK) {
+		delta *= 10;
+	}
+
+	switch (key) {
+		case GDK_KEY_Left:
+		case GDK_KEY_KP_Left:
+			move_stop(_focused_stop, -delta);
+			consumed = true;
+			break;
+		case GDK_KEY_Right:
+		case GDK_KEY_KP_Right:
+			move_stop(_focused_stop, delta);
+			break;
+		case GDK_KEY_BackSpace:
+		case GDK_KEY_Delete:
+			_signal_delete_stop.emit(_focused_stop);
+			break;
+	}
+
+	return consumed;
 }
 
 bool GradientWithStops::on_button_press_event(GdkEventButton* event) {
 	// single button press selects stop and can start dragging it
 	constexpr auto LEFT_BTN = 1;
 	if (event->button == LEFT_BTN && _gradient && event->type == GDK_BUTTON_PRESS) {
+		_focused_stop = -1;
+
+		// find stop handle
 		auto index = find_stop_at(event->x, event->y);
 
 		if (index >= 0) {
+			_focused_stop = index;
+			update();
+			// fire stop selection, whether stop can be moved or not
 			_signal_stop_selected.emit(index);
 
-			_selected_stop = index;
 			auto limits = get_stop_limits(index);
 
+			// check if clicked stop can be moved
 			if (limits.min_offset < limits.max_offset) {
+				// TODO: to facilitate selecting stops without accidentally moving them,
+				// delay dragging mode until mouse cursor moves certain distance...
 				_dragging = true;
 				_pointer_x = event->x;
 				_stop_offset = _gradient->vector.stops.at(index).offset;
 
-				auto display = get_display();
+				// grab focus, so we can move selected stop with left/right keys
+				grab_focus();
+
 				if (_cursor_dragging) {
 					gdk_window_set_cursor(event->window, _cursor_dragging->gobj());
 				}
+			}
+		}
+	}
+	else if (event->button == LEFT_BTN && _gradient && event->type == GDK_2BUTTON_PRESS) {
+		// double-click may insert a new stop
+		auto index = find_stop_at(event->x, event->y);
+		if (index < 0) {
+			auto layout = get_layout();
+			if (layout.width > 0 && event->x > layout.x && event->x < layout.x + layout.width) {
+				double position = (event->x - layout.x) / layout.width;
+				// request new stop
+				_signal_add_stop_at.emit(position);
 			}
 		}
 	}
@@ -251,6 +336,19 @@ bool GradientWithStops::on_button_release_event(GdkEventButton* event) {
 	return false;
 }
 
+void GradientWithStops::move_stop(int stop_index, double offset_shift) {
+	auto layout = get_layout();
+	if (layout.width > 0) {
+		auto limits = get_stop_limits(stop_index);
+		if (limits.min_offset < limits.max_offset) {
+			auto new_offset = CLAMP(limits.offset + offset_shift, limits.min_offset, limits.max_offset);
+			if (new_offset != limits.offset) {
+				_signal_stop_offset_changed.emit(stop_index, new_offset);
+			}
+		}
+	}
+}
+
 bool GradientWithStops::on_motion_notify_event(GdkEventMotion* event) {
 	if (_dragging && _gradient) {
 		// move stop to a new position (adjust offset)
@@ -258,10 +356,10 @@ bool GradientWithStops::on_motion_notify_event(GdkEventMotion* event) {
 		auto layout = get_layout();
 		if (layout.width > 0) {
 			auto delta = dx / layout.width;
-			auto limits = get_stop_limits(_selected_stop);
+			auto limits = get_stop_limits(_focused_stop);
 			if (limits.min_offset < limits.max_offset) {
 				auto new_offset = CLAMP(_stop_offset + delta, limits.min_offset, limits.max_offset);
-				_signal_stop_offset_changed.emit(_selected_stop, new_offset);
+				_signal_stop_offset_changed.emit(_focused_stop, new_offset);
 			}
 		}
 	}
@@ -269,10 +367,8 @@ bool GradientWithStops::on_motion_notify_event(GdkEventMotion* event) {
 		GdkCursor* cursor = nullptr;
 		// check if mouse if over stop handle that we can adjust
 		auto index = find_stop_at(event->x, event->y);
-	// g_warning("idx: %d\n", int(index));
 		if (index >= 0) {
 			auto limits = get_stop_limits(index);
-	// g_warning("lim: %f %f\n", limits.min_offset, limits.max_offset);
 			if (limits.min_offset < limits.max_offset) {
 				cursor = _cursor_mouseover.get()->gobj();
 			}
@@ -292,7 +388,6 @@ bool GradientWithStops::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
 	if (layout.width <= 0) return true;
 
 	context->render_background(cr, 0, 0, allocation.get_width(), allocation.get_height());
-// context->render_frame(cr, 0, 0, width, height);
 
 	// empty gradient checkboard or gradient itself
 	cr->rectangle(layout.x, layout.y, layout.width, GRADIENT_IMAGE_HEIGHT);
@@ -311,16 +406,22 @@ bool GradientWithStops::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
 
 	const auto& stops = _gradient->vector.stops;
 
-	// stop handle outlines use theme colors:
-	_template.set_style("path.outer", "fill", rgba_to_css_color(fg));
-	_template.set_style("path.inner", "stroke", rgba_to_css_color(bg));
+	// stop handle outlines and selection indicator use theme colors:
+	_template.set_style(".outer", "fill", rgba_to_css_color(fg));
+	_template.set_style(".inner", "stroke", rgba_to_css_color(bg));
+	_template.set_style(".hole", "fill", rgba_to_css_color(bg));
 
 	for (size_t i = 0; i < stops.size(); ++i) {
 		const auto& stop = stops[i];
 
 		// stop handle shows stop color and opacity:
-		_template.set_style("path.color", "fill", rgba_to_css_color(stop.color));
-		_template.set_style("path.opacity", "opacity", double_to_css_value(stop.opacity));
+		_template.set_style(".color", "fill", rgba_to_css_color(stop.color));
+		_template.set_style(".opacity", "opacity", double_to_css_value(stop.opacity));
+
+		// show/hide selection indicator;
+		// showing selected handle only when we have focus to avoid visual distraction
+		const auto is_selected = has_focus() && _focused_stop == static_cast<int>(i);
+		_template.set_style(".selected", "opacity", double_to_css_value(is_selected ? 1 : 0));
 
 		// render stop handle
 		auto pix = _template.render(scale);

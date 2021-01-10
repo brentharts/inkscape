@@ -168,17 +168,17 @@ Glib::ustring get_repeat_icon(SPGradientSpread mode) {
 GradientEditor::GradientEditor() :
 	_builder(create_builder()),
 	_selector(Gtk::manage(new GradientSelector())),
-	_repeatIcon(get_widget<Gtk::Image>(_builder, "repeatIco")),
-	_stopBox(get_widget<Gtk::Box>(_builder, "stopBox")),
+	_repeat_icon(get_widget<Gtk::Image>(_builder, "repeatIco")),
+	// _stop_box(get_widget<Gtk::Box>(_builder, "stopBox")),
 	_popover(get_widget<Gtk::Popover>(_builder, "libraryPopover")),
-	_stopTree(get_widget<Gtk::TreeView>(_builder, "stopList")),
-	_offsetBtn(get_widget<Gtk::SpinButton>(_builder, "offsetSpin")),
-	_showStopsList(get_widget<Gtk::Button>(_builder, "stopsBtn")),
-	_addStop(get_widget<Gtk::Button>(_builder, "stopAdd")),
-	_deleteStop(get_widget<Gtk::Button>(_builder, "stopDelete")),
-	_stopsGallery(get_widget<Gtk::Box>(_builder, "stopsGallery")),
-	_colorsBox(get_widget<Gtk::Box>(_builder, "colorsBox")),
-	_mainGrid(get_widget<Gtk::Grid>(_builder, "mainGrid"))
+	_stop_tree(get_widget<Gtk::TreeView>(_builder, "stopList")),
+	_offset_btn(get_widget<Gtk::SpinButton>(_builder, "offsetSpin")),
+	_show_stops_list(get_widget<Gtk::Button>(_builder, "stopsBtn")),
+	_add_stop(get_widget<Gtk::Button>(_builder, "stopAdd")),
+	_delete_stop(get_widget<Gtk::Button>(_builder, "stopDelete")),
+	_stops_gallery(get_widget<Gtk::Box>(_builder, "stopsGallery")),
+	_colors_box(get_widget<Gtk::Box>(_builder, "colorsBox")),
+	_main_grid(get_widget<Gtk::Grid>(_builder, "mainGrid"))
 {
 
 	auto& linear = get_widget<Gtk::ToggleButton>(_builder, "linearBtn");
@@ -193,53 +193,60 @@ GradientEditor::GradientEditor() :
 
 	auto& gradBox = get_widget<Gtk::Box>(_builder, "gradientBox");
 	const int dot_size = 8;
-	_gradientImage.show();
-	_gradientImage.set_margin_left(dot_size / 2);
-	_gradientImage.set_margin_right(dot_size / 2);
+	_gradient_image.show();
+	_gradient_image.set_margin_left(dot_size / 2);
+	_gradient_image.set_margin_right(dot_size / 2);
 	// gradient stop selected in a gradient widget; sync list selection
-	_gradientImage.signal_stop_selected().connect([=](size_t index) {
+	_gradient_image.signal_stop_selected().connect([=](size_t index) {
 		select_stop(index);
 	});
-	_gradientImage.signal_stop_offset_changed().connect([=](size_t index, double offset) {
+	_gradient_image.signal_stop_offset_changed().connect([=](size_t index, double offset) {
 		set_stop_offset(index, offset);
 	});
-	// _gradientStops.draw_stops_only(true, dot_size);
-	// _gradientStops.set_margin_top(1);
-	// _gradientStops.set_size_request(-1, dot_size);
-	// _gradientStops.show();
-	gradBox.pack_start(_gradientImage, true, true, 0);
-	// gradBox.pack_start(_gradientStops, true, true, 0);
+	_gradient_image.signal_add_stop_at().connect([=](double offset) {
+		add_stop(offset);
+	});
+	_gradient_image.signal_delete_stop().connect([=](size_t index) {
+		delete_stop(index);
+	});
+
+	gradBox.pack_start(_gradient_image, true, true, 0);
 
 	// add color selector
 	Gtk::Widget* color_selector = Gtk::manage(new ColorNotebook(_selected_color));
 	color_selector->show();
-	_colorsBox.pack_start(*color_selector, true, true, 0);
+	_colors_box.pack_start(*color_selector, true, true, 0);
 
 	// gradient library in a popup
 	_popover.add(*_selector);
 	_selector->show();
 
 	// construct store for a list of stops
-	_stopColumns.add(_stopObj);
-	_stopColumns.add(_stopIdx);
-	_stopColumns.add(_stopID);
-	_stopColumns.add(_stopColor);
-	_stopListStore = Gtk::ListStore::create(_stopColumns);
-	_stopTree.set_model(_stopListStore);
-	_stopTree.append_column("n", _stopID); // 1-based stop index
-	_stopTree.append_column("c", _stopColor); // and its color
+	_stop_columns.add(_stopObj);
+	_stop_columns.add(_stopIdx);
+	_stop_columns.add(_stopID);
+	_stop_columns.add(_stop_color);
+	_stop_list_store = Gtk::ListStore::create(_stop_columns);
+	_stop_tree.set_model(_stop_list_store);
+	// _stop_tree.append_column("n", _stopID); // 1-based stop index
+	_stop_tree.append_column("c", _stop_color); // and its color
 
-	auto selection = _stopTree.get_selection();
+	auto selection = _stop_tree.get_selection();
 	selection->signal_changed().connect(sigc::mem_fun(*this, &GradientEditor::stop_selected));
 
-	_showStopsList.signal_clicked().connect(sigc::mem_fun(this, &GradientEditor::toggle_stops));
+	_show_stops_list.signal_clicked().connect(sigc::mem_fun(this, &GradientEditor::toggle_stops));
 	update_stops_layout();
 
-	set_icon(_addStop, "list-add");
-	_addStop.signal_clicked().connect(sigc::mem_fun(this, &GradientEditor::add_stop));
+	set_icon(_add_stop, "list-add");
+	_add_stop.signal_clicked().connect([=](){ add_stop(); });
 
-	set_icon(_deleteStop, "list-remove");
-	_deleteStop.signal_clicked().connect(sigc::mem_fun(this, &GradientEditor::delete_stop));
+	set_icon(_delete_stop, "list-remove");
+	_delete_stop.signal_clicked().connect([=]() {
+		if (auto row = current_stop()) {
+			auto index = row->get_value(_stopIdx);
+			delete_stop(static_cast<int>(index));
+		}
+	});
 
 	// connect gradient repeat modes menu
 	std::tuple<const char*, SPGradientSpread> repeats[3] = {
@@ -273,9 +280,9 @@ GradientEditor::GradientEditor() :
 		set_stop_color(_selected_color.color(), _selected_color.alpha());
 	});
 
-	// _offsetBtn.set_range(0.0, 1.0);
+	// _offset_btn.set_range(0.0, 1.0);
 
-	pack_start(_mainGrid);
+	pack_start(_main_grid);
 }
 
 GradientEditor::~GradientEditor() {
@@ -305,13 +312,13 @@ void GradientEditor::set_stop_color(SPColor color, float opacity) {
 			set_gradient_stop_color(_document, stop, color, opacity);
 
 			// update list view too
-			row->set_value(_stopColor, get_stop_pixmap(stop));
+			row->set_value(_stop_color, get_stop_pixmap(stop));
 		}
 	}
 }
 
 std::optional<Gtk::TreeRow> GradientEditor::current_stop() {
-	auto sel = _stopTree.get_selection();
+	auto sel = _stop_tree.get_selection();
 	auto it = sel->get_selected();
 	if (!it) {
 		return std::nullopt;
@@ -322,13 +329,14 @@ std::optional<Gtk::TreeRow> GradientEditor::current_stop() {
 }
 
 SPStop* GradientEditor::get_nth_stop(size_t index) {
-	const auto& v = _stopListStore->children();
+	const auto& v = _stop_list_store->children();
 	if (index < v.size()) {
 		return v[index]->get_value(_stopObj);
 	}
 	return nullptr;
 }
 
+// stop has been selected in a list view
 void GradientEditor::stop_selected() {
 	// if (_update) return;
 
@@ -340,41 +348,51 @@ void GradientEditor::stop_selected() {
 			_selected_color.setColor(stop->getColor());
 			_selected_color.setAlpha(stop->getOpacity());
 
-			_offsetBtn.set_value(stop->offset);
+			_offset_btn.set_value(stop->offset);
+
+			// int index = row->get_value(_stopIdx);
+			// _gradient_image.set_selected_stop(index);
 		}
 	}
 }
 
-void GradientEditor::add_stop() {
-	//
+void GradientEditor::add_stop(double offset) {
+	if (offset == 0.0) {
+		// add stop after selected one
+	}
+	else {
+		// offset requested; find before and after stops
+	}
+
+
 }
 
-void GradientEditor::delete_stop() {
+void GradientEditor::delete_stop(int index) {
 	//
 }
 
 // collapse/expand list of stops in the UI
 void GradientEditor::toggle_stops() {
-	_stopsListVisible = !_stopsListVisible;
+	_stops_list_visible = !_stops_list_visible;
 	update_stops_layout();
 }
 
 void GradientEditor::update_stops_layout() {
 	const int top = 3;
 
-	if (_stopsListVisible) {
+	if (_stops_list_visible) {
 		// shrink color box
-		_mainGrid.remove(_colorsBox);
-		_mainGrid.attach(_colorsBox, 1, top);
-		set_icon(_showStopsList, "go-previous");
-		_stopsGallery.show();
+		_main_grid.remove(_colors_box);
+		_main_grid.attach(_colors_box, 1, top);
+		set_icon(_show_stops_list, "go-previous");
+		_stops_gallery.show();
 	}
 	else {
-		set_icon(_showStopsList, "go-next");
-		_stopsGallery.hide();
+		set_icon(_show_stops_list, "go-next");
+		_stops_gallery.hide();
 		// expand color box
-		_mainGrid.remove(_colorsBox);
-		_mainGrid.attach(_colorsBox, 0, top, 2);
+		_main_grid.remove(_colors_box);
+		_main_grid.attach(_colors_box, 0, top, 2);
 	}
 }
 
@@ -409,7 +427,7 @@ void GradientEditor::set_repeat_mode(SPGradientSpread mode) {
 void GradientEditor::set_repeat_icon(SPGradientSpread mode) {
 	auto ico = get_repeat_icon(mode);
 	if (!ico.empty()) {
-		_repeatIcon.set_from_icon_name(ico, Gtk::ICON_SIZE_BUTTON);
+		_repeat_icon.set_from_icon_name(ico, Gtk::ICON_SIZE_BUTTON);
 	}
 }
 
@@ -454,13 +472,13 @@ void GradientEditor::set_gradient(SPGradient* gradient) {
 // g_warning("set grad\n");
 	size_t selected_stop_index = 0;
 	{
-		auto it = _stopTree.get_selection()->get_selected();
+		auto it = _stop_tree.get_selection()->get_selected();
 		if (it) {
 			selected_stop_index = it->get_value(_stopIdx);
 		}
 	}
 
-	_stopListStore->clear();
+	_stop_list_store->clear();
 
 	SPGradient* vector = gradient ? gradient->getVector() : nullptr;
 
@@ -474,17 +492,17 @@ void GradientEditor::set_gradient(SPGradient* gradient) {
 	for (auto& child : vector->children) {
 		if (SP_IS_STOP(&child)) {
 			auto stop = SP_STOP(&child);
-			auto it = _stopListStore->append();
+			auto it = _stop_list_store->append();
 			it->set_value(_stopObj, stop);
 			it->set_value(_stopIdx, index);
 			it->set_value(_stopID, Glib::ustring::compose("%1.", index + 1));
-			it->set_value(_stopColor, get_stop_pixmap(stop));
+			it->set_value(_stop_color, get_stop_pixmap(stop));
 
 			++index;
 		}
 	}
 
-	_gradientImage.set_gradient(vector);
+	_gradient_image.set_gradient(vector);
 
 	auto mode = gradient->isSpreadSet() ? gradient->getSpread() : SP_GRADIENT_SPREAD_PAD;
 	set_repeat_icon(mode);
@@ -513,13 +531,13 @@ void GradientEditor::set_stop_offset(size_t index, double offset) {
 // select requested stop in a list view
 void GradientEditor::select_stop(size_t index) {
 	if (_gradient) {
-		const auto& items = _stopTree.get_model()->children();
+		const auto& items = _stop_tree.get_model()->children();
 		if (index < items.size()) {
 			auto it = items.begin();
 			std::advance(it, index);
-			_stopTree.get_selection()->select(it);
-			auto path = _stopTree.get_model()->get_path(it);
-			_stopTree.scroll_to_cell(path, *_stopTree.get_column(0));
+			_stop_tree.get_selection()->select(it);
+			auto path = _stop_tree.get_model()->get_path(it);
+			_stop_tree.scroll_to_cell(path, *_stop_tree.get_column(0));
 		}
 	}
 }
