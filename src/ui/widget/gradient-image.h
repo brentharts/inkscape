@@ -33,8 +33,6 @@ namespace Widget {
 class GradientImage : public Gtk::Widget {
   private:
     SPGradient *_gradient;
-    bool _stops_only = false;
-    int _stop_size = 0;
 
     sigc::connection _release_connection;
     sigc::connection _modified_connection;
@@ -54,7 +52,6 @@ class GradientImage : public Gtk::Widget {
     ~GradientImage() override;
 
     void set_gradient(SPGradient *gr);
-    void draw_stops_only(bool enable, int size);
 };
 
 } // namespace Widget
