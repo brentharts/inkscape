@@ -78,7 +78,7 @@ Glib::RefPtr<Gdk::Pixbuf> draw_circle(int size, guint32 rgba) {
 	cairo_arc(cr, x + radius, y + radius, radius, 0, 2 * M_PI);
 	cairo_close_path(cr);
 	// semi-transparent black outline
-	cairo_set_source_rgba(cr, 0, 0, 0, 0.3);
+	cairo_set_source_rgba(cr, 0, 0, 0, 0.2);
 	cairo_fill(cr);
 
 	radius--;
@@ -231,7 +231,11 @@ GradientEditor::GradientEditor() :
 	_stop_tree.append_column("c", _stop_color); // and its color
 
 	auto selection = _stop_tree.get_selection();
-	selection->signal_changed().connect(sigc::mem_fun(*this, &GradientEditor::stop_selected));
+	selection->signal_changed().connect([=]() {
+		if (!_update.pending()) {
+			stop_selected();
+		}
+	});
 
 	_show_stops_list.signal_clicked().connect(sigc::mem_fun(this, &GradientEditor::toggle_stops));
 	update_stops_layout();
@@ -284,7 +288,6 @@ GradientEditor::GradientEditor() :
 		set_stop_color(_selected_color.color(), _selected_color.alpha());
 	});
 
-	// _offset_btn.set_range(0.0, 1.0);
 	_offset_btn.signal_changed().connect([=]() {
 		if (auto row = current_stop()) {
 			auto index = row->get_value(_stopIdx);
@@ -340,8 +343,6 @@ SPStop* GradientEditor::get_nth_stop(size_t index) {
 
 // stop has been selected in a list view
 void GradientEditor::stop_selected() {
-	if (_update.pending()) return;
-
 	if (auto row = current_stop()) {
 		SPStop* stop = row->get_value(_stopObj);
 		if (stop) {
@@ -364,6 +365,16 @@ void GradientEditor::stop_selected() {
 			// int index = row->get_value(_stopIdx);
 			// _gradient_image.set_selected_stop(index);
 		}
+	}
+	else {
+		// no selection
+		auto scoped(_update.block());
+
+		_selected_color.setColor(SPColor());
+
+		_offset_btn.set_range(0, 0);
+		_offset_btn.set_value(0);
+		_offset_btn.set_sensitive(false);
 	}
 }
 
@@ -533,18 +544,20 @@ void GradientEditor::set_gradient(SPGradient* gradient) {
 	// list not empty?
 	if (index > 0) {
 		select_stop(std::min(selected_stop_index, index - 1));
+		// update related widgets
+		stop_selected();
 	}
 }
 
 void GradientEditor::set_stop_offset(size_t index, double offset) {
 	if (_update.pending()) return;
 
+	// adjust stop's offset after user edits it in offset spin button or drags stop handle 
 	SPStop* stop = get_nth_stop(index);
 	if (stop) {
 		auto scoped(_update.block());
 
 		stop->offset = offset;
-		_offset_btn.set_value(stop->offset);
 		sp_repr_set_css_double(stop->getRepr(), "offset", stop->offset);
 
 		DocumentUndo::maybeDone(stop->document, "gradient:stop:offset", SP_VERB_CONTEXT_GRADIENT,

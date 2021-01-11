@@ -241,6 +241,7 @@
           <object class="GtkSpinButton" id="offsetSpin">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
+            <property name="tooltip-text" translatable="yes">Offset of selected stop</property>
             <property name="adjustment">offset</property>
             <property name="digits">2</property>
             <property name="numeric">True</property>
@@ -302,7 +303,8 @@
         <property name="focus-on-click">False</property>
         <property name="receives-default">True</property>
         <property name="margin-start">4</property>
-        <property name="margin-bottom">1</property>
+        <property name="margin-top">1</property>
+        <property name="margin-bottom">4</property>
         <property name="popover">libraryPopover</property>
         <child>
           <placeholder/>
@@ -354,7 +356,7 @@
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
-                <property name="tooltip-text" translatable="yes">Add gradient stop</property>
+                <property name="tooltip-text" translatable="yes">Insert new stop</property>
                 <property name="relief">none</property>
               </object>
               <packing>
@@ -368,7 +370,7 @@
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
-                <property name="tooltip-text" translatable="yes">Delete gradient stop</property>
+                <property name="tooltip-text" translatable="yes">Delete stop</property>
                 <property name="relief">none</property>
               </object>
               <packing>
