@@ -32,7 +32,7 @@ public:
 	GradientEditor();
 	~GradientEditor() noexcept override;
 
-	GradientSelector* get_selector();
+	// GradientSelector* get_selector();
 
 private:
 	sigc::signal<void> _signal_grabbed;

@@ -219,6 +219,11 @@ GradientEditor::GradientEditor() :
 	// gradient library in a popup
 	_popover.add(*_selector);
 	_selector->show();
+	// gradient changed is currently the only signal that GradientSelector can emit:
+	_selector->signal_changed().connect([=](SPGradient* gradient) {
+		// new gradient selected from the library
+		_signal_changed.emit(gradient);
+	});
 
 	// construct store for a list of stops
 	_stop_columns.add(_stopObj);
@@ -300,10 +305,6 @@ GradientEditor::GradientEditor() :
 }
 
 GradientEditor::~GradientEditor() {
-}
-
-GradientSelector* GradientEditor::get_selector() {
-	return _selector;
 }
 
 void GradientEditor::set_stop_color(SPColor color, float opacity) {
@@ -519,7 +520,6 @@ void GradientEditor::set_gradient(SPGradient* gradient) {
 		vector->ensureVector();
 	}
 
-// g_warning("grad %p", gradient);
 	_gradient_image.set_gradient(vector);
 
 	if (!vector || !vector->hasStops()) return;

@@ -140,11 +140,7 @@ GradientSelectorInterface *PaintSelector::getGradientFromData() const
             grad = swatchsel->getGradientSelector();
         }
     } else {
-        auto edit = dynamic_cast<GradientEditor*>(_selector);
-		//   if (edit) {
-			//   grad = edit->get_selector();
-		//   }
-			grad = edit;
+        grad = dynamic_cast<GradientEditor*>(_selector);
     }
     return grad;
 }
@@ -652,8 +648,6 @@ void PaintSelector::set_mode_gradient(PaintSelector::Mode mode)
     auto gsel = dynamic_cast<GradientEditor*>(_selector);
 
     if (!gsel) g_warning("No GradientEditor found");
-
-   //  auto gsel = edit; // ? edit->get_selector() : nullptr;
 
     /* Actually we have to set option menu history here */
     if (mode == PaintSelector::MODE_GRADIENT_LINEAR) {
