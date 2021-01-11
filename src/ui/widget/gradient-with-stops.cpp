@@ -2,6 +2,7 @@
 
 #include "gradient-with-stops.h"
 #include "object/sp-gradient.h"
+#include "object/sp-stop.h"
 #include "display/cairo-utils.h"
 #include "io/resource.h"
 #include "ui/cursor-utils.h"
@@ -37,15 +38,38 @@ GradientWithStops::GradientWithStops() : _template(get_stop_template_path().c_st
 void GradientWithStops::set_gradient(SPGradient* gradient) {
 	_gradient = gradient;
 
+// g_warning("vect %p", gradient);
 	// listen to release & changes
 	_release  = gradient ? gradient->connectRelease([=](SPObject*){ set_gradient(nullptr); }) : sigc::connection();
-	_modified = gradient ? gradient->connectModified([=](SPObject*, guint){ update(); }) : sigc::connection();
+	_modified = gradient ? gradient->connectModified([=](SPObject*, guint){ modified(); }) : sigc::connection();
 
 	// TODO: check selected stop index
 
-	update();
+	modified();
 
 	set_sensitive(gradient != nullptr);
+}
+
+void GradientWithStops::modified() {
+	// gradient has been modified
+
+	// if (_gradient) {
+		// _gradient->ensureVector();
+	// }
+
+	_stops.clear();
+
+	if (_gradient) {
+		SPStop* stop = _gradient->getFirstStop();
+		while (stop) {
+			_stops.push_back(stop_t {
+				.offset = stop->offset, .color = stop->getColor(), .opacity = stop->getOpacity()
+			});
+			stop = stop->getNextStop();
+		}
+	}
+
+	update();
 }
 
 void GradientWithStops::size_request(GtkRequisition* requisition) const {
@@ -103,9 +127,9 @@ void draw_gradient(const Cairo::RefPtr<Cairo::Context>& cr, SPGradient* gradient
 	}
 }
 
-// return on-screen positionn of the UI stop corresponding to gradient's color stop at 'index'
+// return on-screen position of the UI stop corresponding to the gradient's color stop at 'index'
 GradientWithStops::stop_pos_t GradientWithStops::get_stop_position(size_t index, const layout_t& layout) const {
-	if (!_gradient || index >= _gradient->vector.stops.size()) {
+	if (!_gradient || index >= _stops.size()) {
 		return stop_pos_t {};
 	}
 
@@ -113,7 +137,7 @@ GradientWithStops::stop_pos_t GradientWithStops::get_stop_position(size_t index,
 	const auto dx = round((_template.get_width_px() + 1) / 2);
 
 	auto pos = [&](double offset) { return round(layout.x + layout.width * CLAMP(offset, 0, 1)); };
-	const auto& v = _gradient->vector.stops;
+	const auto& v = _stops;
 
 	auto offset = pos(v[index].offset);
 	auto left = offset - dx;
@@ -167,8 +191,8 @@ GradientWithStops::layout_t GradientWithStops::get_layout() const {
 int GradientWithStops::find_stop_at(double x, double y) const {
 	if (!_gradient) return -1;
 
-	_gradient->ensureVector();
-	const auto& v = _gradient->vector.stops;
+	// _gradient->ensureVector();
+	const auto& v = _stops;
 
 	const auto& layout = get_layout();
 
@@ -190,8 +214,8 @@ GradientWithStops::limits_t GradientWithStops::get_stop_limits(int maybe_index) 
 	// let negative index turn into a large out-of-range number
 	auto index = static_cast<size_t>(maybe_index);
 
-	_gradient->ensureVector();
-	const auto& v = _gradient->vector.stops;
+	// _gradient->ensureVector();
+	const auto& v = _stops;
 
 	if (index < v.size()) {
 		double min = 0;
@@ -199,9 +223,17 @@ GradientWithStops::limits_t GradientWithStops::get_stop_limits(int maybe_index) 
 		// special cases:
 		if (index == 0) {
 			min = max = 0; // cannot move first stop
+			if (v.front().offset > 0) { // unless its offset is not zero (degenerate case)
+				max = std::min_element(begin(_stops), end(_stops),
+					[&](auto& s1, auto& s2) { return s1.offset < s2.offset; })->offset;
+			}
 		}
 		else if (index + 1 == v.size()) {
 			min = max = 1; // cannot move last stop
+			if (v.back().offset < 1) { // unless its offset is not 1 (degenerate case)
+				min = std::max_element(begin(_stops), end(_stops),
+					[&](auto& s1, auto& s2) { return s1.offset < s2.offset; })->offset;
+			}
 		}
 		else {
 			// stops "inside" gradient
@@ -210,6 +242,10 @@ GradientWithStops::limits_t GradientWithStops::get_stop_limits(int maybe_index) 
 			}
 			if (index + 1 < v.size()) {
 				max = v[index + 1].offset;
+			}
+
+			if (min > max) {
+				std::swap(min, max);
 			}
 		}
 		return limits_t { .min_offset = min, .max_offset = max, .offset = v[index].offset };
@@ -284,12 +320,17 @@ bool GradientWithStops::on_button_press_event(GdkEventButton* event) {
 	if (event->button == LEFT_BTN && _gradient && event->type == GDK_BUTTON_PRESS) {
 		_focused_stop = -1;
 
+		if (!has_focus()) {
+			// grab focus, so we can show selection indictor and move selected stop with left/right keys
+			grab_focus();
+		}
+		update();
+
 		// find stop handle
 		auto index = find_stop_at(event->x, event->y);
 
 		if (index >= 0) {
 			_focused_stop = index;
-			update();
 			// fire stop selection, whether stop can be moved or not
 			_signal_stop_selected.emit(index);
 
@@ -301,10 +342,7 @@ bool GradientWithStops::on_button_press_event(GdkEventButton* event) {
 				// delay dragging mode until mouse cursor moves certain distance...
 				_dragging = true;
 				_pointer_x = event->x;
-				_stop_offset = _gradient->vector.stops.at(index).offset;
-
-				// grab focus, so we can move selected stop with left/right keys
-				grab_focus();
+				_stop_offset = _stops.at(index).offset;
 
 				if (_cursor_dragging) {
 					gdk_window_set_cursor(event->window, _cursor_dragging->gobj());
@@ -402,17 +440,17 @@ bool GradientWithStops::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
 	Gdk::RGBA fg = context->get_color(get_state_flags());
 	Gdk::RGBA bg = _background_color;
 
-	_gradient->ensureVector();
+	// _gradient->ensureVector();
 
-	const auto& stops = _gradient->vector.stops;
+	// const auto& stops = _stops;
 
 	// stop handle outlines and selection indicator use theme colors:
 	_template.set_style(".outer", "fill", rgba_to_css_color(fg));
 	_template.set_style(".inner", "stroke", rgba_to_css_color(bg));
 	_template.set_style(".hole", "fill", rgba_to_css_color(bg));
 
-	for (size_t i = 0; i < stops.size(); ++i) {
-		const auto& stop = stops[i];
+	for (size_t i = 0; i < _stops.size(); ++i) {
+		const auto& stop = _stops[i];
 
 		// stop handle shows stop color and opacity:
 		_template.set_style(".color", "fill", rgba_to_css_color(stop.color));

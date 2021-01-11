@@ -60,7 +60,6 @@ void set_icon(Gtk::Button& btn, gchar const* pixmap) {
 	if (Gtk::Image* img = sp_get_icon_image(pixmap, Gtk::ICON_SIZE_BUTTON)) {
 		btn.set_image(*img);
 	}
-	// btn.signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &PaintSelector::style_button_toggled), b));
 }
 
 // draw solid color circle with black outline; right side is to show checkerboard if color's alpha is > 0
@@ -204,7 +203,7 @@ GradientEditor::GradientEditor() :
 		set_stop_offset(index, offset);
 	});
 	_gradient_image.signal_add_stop_at().connect([=](double offset) {
-		add_stop(offset);
+		add_stop_at(offset);
 	});
 	_gradient_image.signal_delete_stop().connect([=](size_t index) {
 		delete_stop(index);
@@ -238,7 +237,12 @@ GradientEditor::GradientEditor() :
 	update_stops_layout();
 
 	set_icon(_add_stop, "list-add");
-	_add_stop.signal_clicked().connect([=](){ add_stop(); });
+	_add_stop.signal_clicked().connect([=](){
+		if (auto row = current_stop()) {
+			SPStop* stop = row->get_value(_stopObj);
+			add_stop(stop);
+		}
+	});
 
 	set_icon(_delete_stop, "list-remove");
 	_delete_stop.signal_clicked().connect([=]() {
@@ -281,6 +285,13 @@ GradientEditor::GradientEditor() :
 	});
 
 	// _offset_btn.set_range(0.0, 1.0);
+	_offset_btn.signal_changed().connect([=]() {
+		if (auto row = current_stop()) {
+			auto index = row->get_value(_stopIdx);
+			double offset = _offset_btn.get_value();
+			set_stop_offset(index, offset);
+		}
+	});
 
 	pack_start(_main_grid);
 }
@@ -292,15 +303,6 @@ GradientSelector* GradientEditor::get_selector() {
 	return _selector;
 }
 
-void set_gradient_stop_color(SPDocument* document, SPStop* stop, SPColor color, double opacity) {
-	sp_repr_set_css_double(stop->getRepr(), "offset", stop->offset);
-	Inkscape::CSSOStringStream os;
-	os << "stop-color:" << color.toString() << ";stop-opacity:" << opacity <<";";
-	stop->setAttribute("style", os.str());
-
-	DocumentUndo::done(document, SP_VERB_CONTEXT_GRADIENT, _("Change gradient stop color"));
-}
-
 void GradientEditor::set_stop_color(SPColor color, float opacity) {
 	if (_update.pending()) return;
 
@@ -309,10 +311,10 @@ void GradientEditor::set_stop_color(SPColor color, float opacity) {
 		if (stop && _document) {
 			auto scoped(_update.block());
 
-			set_gradient_stop_color(_document, stop, color, opacity);
-
 			// update list view too
 			row->set_value(_stop_color, get_stop_pixmap(stop));
+
+			sp_set_gradient_stop_color(_document, stop, color, opacity);
 		}
 	}
 }
@@ -338,7 +340,7 @@ SPStop* GradientEditor::get_nth_stop(size_t index) {
 
 // stop has been selected in a list view
 void GradientEditor::stop_selected() {
-	// if (_update) return;
+	if (_update.pending()) return;
 
 	if (auto row = current_stop()) {
 		SPStop* stop = row->get_value(_stopObj);
@@ -348,6 +350,15 @@ void GradientEditor::stop_selected() {
 			_selected_color.setColor(stop->getColor());
 			_selected_color.setAlpha(stop->getOpacity());
 
+			auto stops = sp_get_before_after_stops(stop);
+			if (stops.first && stops.second) {
+				_offset_btn.set_range(stops.first->offset, stops.second->offset);
+				_offset_btn.set_sensitive();
+			}
+			else {
+				_offset_btn.set_range(stop->offset, stop->offset);
+				_offset_btn.set_sensitive(false);
+			}
 			_offset_btn.set_value(stop->offset);
 
 			// int index = row->get_value(_stopIdx);
@@ -356,19 +367,25 @@ void GradientEditor::stop_selected() {
 	}
 }
 
-void GradientEditor::add_stop(double offset) {
-	if (offset == 0.0) {
-		// add stop after selected one
+void GradientEditor::add_stop_at(double offset) {
+	if (SPGradient* vector = get_gradient_vector()) {
+		sp_gradient_add_stop_at(vector, offset);
 	}
-	else {
-		// offset requested; find before and after stops
+}
+
+void GradientEditor::add_stop(SPStop* current) {
+	if (SPGradient* vector = get_gradient_vector()) {
+		sp_gradient_add_stop(vector, current);
 	}
-
-
 }
 
 void GradientEditor::delete_stop(int index) {
-	//
+	if (SPGradient* vector = get_gradient_vector()) {
+		if (SPStop* stop = sp_get_stop_i(vector, index)) {
+			// try deleting a stop, if it can be
+			sp_gradient_delete_stop(vector, stop);
+		}
+	}
 }
 
 // collapse/expand list of stops in the UI
@@ -399,7 +416,7 @@ void GradientEditor::update_stops_layout() {
 void GradientEditor::reverse_gradient() {
 	if (_document && _gradient) {
 		// reverse works on a gradient definition, the one with stops:
-		SPGradient* vector = _gradient->getVector();
+		SPGradient* vector = get_gradient_vector();
 
 		if (vector) {
 			sp_gradient_reverse_vector(vector);
@@ -468,8 +485,13 @@ SPGradientSpread GradientEditor::getSpread() {
 	return _selector->getSpread();
 }
 
+SPGradient* GradientEditor::get_gradient_vector() {
+	return _gradient ? _gradient->getVector() : nullptr;
+}
+
 void GradientEditor::set_gradient(SPGradient* gradient) {
-// g_warning("set grad\n");
+	auto scoped(_update.block());
+
 	size_t selected_stop_index = 0;
 	{
 		auto it = _stop_tree.get_selection()->get_selected();
@@ -486,6 +508,9 @@ void GradientEditor::set_gradient(SPGradient* gradient) {
 		vector->ensureVector();
 	}
 
+// g_warning("grad %p", gradient);
+	_gradient_image.set_gradient(vector);
+
 	if (!vector || !vector->hasStops()) return;
 
 	size_t index = 0;
@@ -501,8 +526,6 @@ void GradientEditor::set_gradient(SPGradient* gradient) {
 			++index;
 		}
 	}
-
-	_gradient_image.set_gradient(vector);
 
 	auto mode = gradient->isSpreadSet() ? gradient->getSpread() : SP_GRADIENT_SPREAD_PAD;
 	set_repeat_icon(mode);
@@ -521,6 +544,7 @@ void GradientEditor::set_stop_offset(size_t index, double offset) {
 		auto scoped(_update.block());
 
 		stop->offset = offset;
+		_offset_btn.set_value(stop->offset);
 		sp_repr_set_css_double(stop->getRepr(), "offset", stop->offset);
 
 		DocumentUndo::maybeDone(stop->document, "gradient:stop:offset", SP_VERB_CONTEXT_GRADIENT,

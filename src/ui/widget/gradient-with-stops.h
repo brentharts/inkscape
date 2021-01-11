@@ -54,6 +54,7 @@ private:
 	bool on_focus_out_event(GdkEventFocus* event) override;
 	bool on_focus(Gtk::DirectionType direction) override;
 	void size_request(GtkRequisition* requisition) const;
+	void modified();
 	// repaint widget
 	void update();
 	// index of gradient stop handle under (x, y) or -1
@@ -79,6 +80,12 @@ private:
 	limits_t get_stop_limits(int index) const;
 
 	SPGradient* _gradient = nullptr;
+	struct stop_t {
+		double offset;
+		SPColor color;
+		double opacity;
+	};
+	std::vector<stop_t> _stops;
 	svg_renderer _template;
 	auto_connection _release;
 	auto_connection _modified;

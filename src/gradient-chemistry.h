@@ -66,12 +66,18 @@ SPGradient *sp_gradient_get_forked_vector_if_necessary(SPGradient *gradient, boo
 
 SPStop* sp_last_stop(SPGradient *gradient);
 SPStop* sp_get_stop_i(SPGradient *gradient, unsigned int i);
+std::pair<SPStop*, SPStop*> sp_get_before_after_stops(SPStop* stop);
 unsigned int sp_number_of_stops(SPGradient const *gradient);
 unsigned int sp_number_of_stops_before_stop(SPGradient const *gradient, SPStop *target);
 
 guint32 average_color(guint32 c1, guint32 c2, double p = 0.5);
 
 SPStop *sp_vector_add_stop(SPGradient *vector, SPStop* prev_stop, SPStop* next_stop, gfloat offset);
+
+void sp_gradient_delete_stop(SPGradient* gradient, SPStop* stop);
+void sp_gradient_add_stop(SPGradient* gradient, SPStop* current);
+void sp_gradient_add_stop_at(SPGradient* gradient, double offset);
+void sp_set_gradient_stop_color(SPDocument* document, SPStop* stop, SPColor color, double opacity);
 
 void sp_gradient_transform_multiply(SPGradient *gradient, Geom::Affine postmul, bool set);
 

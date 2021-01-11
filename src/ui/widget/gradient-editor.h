@@ -58,7 +58,8 @@ public:
 private:
 	void set_gradient(SPGradient* gradient);
 	void stop_selected();
-	void add_stop(double offset = 0);
+	void add_stop_at(double offset);
+	void add_stop(SPStop* current);
 	void duplicate_stop();
 	void delete_stop(int index);
 	void toggle_stops();
@@ -71,6 +72,7 @@ private:
 	SPStop* get_nth_stop(size_t index);
 	void select_stop(size_t index);
 	void set_stop_offset(size_t index, double offset);
+	SPGradient* get_gradient_vector();
 
 	Glib::RefPtr<Gtk::Builder> _builder;
 	GradientSelector* _selector;
