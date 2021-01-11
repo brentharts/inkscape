@@ -125,7 +125,7 @@ void PencilTool::_endpointSnap(Geom::Point &p, guint const state) {
         if (!(state & GDK_SHIFT_MASK)) { //SHIFT disables all snapping, except the angular snapping above
                                          //After all, the user explicitly asked for angular snapping by
                                          //pressing CTRL
-            boost::optional<Geom::Point> origin = this->_npoints > 0 ? this->p[0] : boost::optional<Geom::Point>();
+            std::optional<Geom::Point> origin = this->_npoints > 0 ? this->p[0] : std::optional<Geom::Point>();
             spdc_endpoint_snap_free(this, p, origin, state);
         }
     }
@@ -170,7 +170,7 @@ bool PencilTool::root_handler(GdkEvent* event) {
 
 bool PencilTool::_handleButtonPress(GdkEventButton const &bevent) {
     bool ret = false;
-    if ( bevent.button == 1  && !this->space_panning) {
+    if ( bevent.button == 1) {
         Inkscape::Selection *selection = desktop->getSelection();
 
         if (Inkscape::have_viable_layer(desktop, defaultMessageContext()) == false) {
@@ -265,7 +265,7 @@ bool PencilTool::_handleMotionNotify(GdkEventMotion const &mevent) {
     }
     bool ret = false;
 
-    if (this->space_panning || (mevent.state & GDK_BUTTON2_MASK) || (mevent.state & GDK_BUTTON3_MASK)) {
+    if ((mevent.state & GDK_BUTTON2_MASK) || (mevent.state & GDK_BUTTON3_MASK)) {
         // allow scrolling
         return ret;
     }
@@ -390,7 +390,7 @@ bool PencilTool::_handleButtonRelease(GdkEventButton const &revent) {
 
     set_high_motion_precision(false);
 
-    if ( revent.button == 1 && this->_is_drawing && !this->space_panning) {
+    if ( revent.button == 1 && this->_is_drawing) {
         this->_is_drawing = false;
 
         /* Find desktop coordinates */
@@ -980,7 +980,7 @@ void PencilTool::_interpolate() {
                 if (!tablet_enabled || c != n_segs - 1) {
                     this->green_curve->curveto(b[4 * c + 1], b[4 * c + 2], b[4 * c + 3]);
                 } else {
-                    boost::optional<Geom::Point> finalp = this->green_curve->last_point();
+                    std::optional<Geom::Point> finalp = this->green_curve->last_point();
                     if (this->green_curve->nodes_in_path() > 4 && Geom::are_near(*finalp, b[4 * c + 3], 10.0)) {
                         this->green_curve->backspace();
                         this->green_curve->curveto(*finalp, b[4 * c + 3], b[4 * c + 3]);

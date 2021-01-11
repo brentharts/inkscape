@@ -213,7 +213,7 @@ void PenTool::_endpointSnap(Geom::Point &p, guint const state) {
         if (this->npoints > 0) {
             spdc_endpoint_snap_rotation(this, p, this->p[0], state);
         } else {
-            boost::optional<Geom::Point> origin = boost::optional<Geom::Point>();
+            std::optional<Geom::Point> origin = std::optional<Geom::Point>();
             spdc_endpoint_snap_free(this, p, origin, state);
         }
     } else {
@@ -225,7 +225,7 @@ void PenTool::_endpointSnap(Geom::Point &p, guint const state) {
             this->_setToNearestHorizVert(p, state);
         } else {
             // snap freely
-            boost::optional<Geom::Point> origin = this->npoints > 0 ? this->p[0] : boost::optional<Geom::Point>();
+            std::optional<Geom::Point> origin = this->npoints > 0 ? this->p[0] : std::optional<Geom::Point>();
             spdc_endpoint_snap_free(this, p, origin, state); // pass the origin, to allow for perpendicular / tangential snapping
         }
     }
@@ -242,7 +242,7 @@ void PenTool::_endpointSnapHandle(Geom::Point &p, guint const state) {
         spdc_endpoint_snap_rotation(this, p, this->p[this->npoints - 2], state);
     } else {
         if (!(state & GDK_SHIFT_MASK)) { //SHIFT disables all snapping, except the angular snapping above
-            boost::optional<Geom::Point> origin = this->p[this->npoints - 2];
+            std::optional<Geom::Point> origin = this->p[this->npoints - 2];
             spdc_endpoint_snap_free(this, p, origin, state);
         }
     }
@@ -333,7 +333,7 @@ bool PenTool::_handleButtonPress(GdkEventButton const &bevent) {
     } 
     
     bool ret = false;
-    if (bevent.button == 1 && !this->space_panning
+    if (bevent.button == 1
         // make sure this is not the last click for a waiting LPE (otherwise we want to finish the path)
         && this->expecting_clicks_for_LPE != 1) {
 
@@ -497,7 +497,7 @@ bool PenTool::_handleButtonPress(GdkEventButton const &bevent) {
 bool PenTool::_handleMotionNotify(GdkEventMotion const &mevent) {
     bool ret = false;
 
-    if (this->space_panning || mevent.state & GDK_BUTTON2_MASK || mevent.state & GDK_BUTTON3_MASK) {
+    if (mevent.state & GDK_BUTTON2_MASK || mevent.state & GDK_BUTTON3_MASK) {
         // allow scrolling
         return false;
     }
@@ -667,7 +667,7 @@ bool PenTool::_handleButtonRelease(GdkEventButton const &revent) {
 
     bool ret = false;
 
-    if (revent.button == 1 && !this->space_panning) {
+    if (revent.button == 1) {
         Geom::Point const event_w(revent.x, revent.y);
 
         // Find desktop coordinates

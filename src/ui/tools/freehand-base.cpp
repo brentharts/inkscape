@@ -202,9 +202,9 @@ bool FreehandBase::root_handler(GdkEvent* event) {
     return ret;
 }
 
-boost::optional<Geom::Point> FreehandBase::red_curve_get_last_point()
+std::optional<Geom::Point> FreehandBase::red_curve_get_last_point()
 {
-    boost::optional<Geom::Point> p;
+    std::optional<Geom::Point> p;
     if (!red_curve->is_empty()) {
         p = red_curve->last_point();
     }
@@ -480,7 +480,7 @@ static void spdc_check_for_and_apply_waiting_LPE(FreehandBase *dc, SPItem *item,
                 //points[0] *= i2anc_affine(static_cast<SPItem *>(item->parent), NULL).inverse();
                 spdc_apply_powerstroke_shape(points, dc, item);
 
-                shape_applied = true;
+                shape_applied = false;
                 break;
             }
             case TRIANGLE_OUT:
@@ -493,7 +493,7 @@ static void spdc_check_for_and_apply_waiting_LPE(FreehandBase *dc, SPItem *item,
                 points[0][Geom::X] = (double)curve_length;
                 spdc_apply_powerstroke_shape(points, dc, item);
 
-                shape_applied = true;
+                shape_applied = false;
                 break;
             }
             case ELLIPSE:
@@ -721,7 +721,7 @@ void spdc_endpoint_snap_rotation(ToolBase* const ec, Geom::Point &p, Geom::Point
         m.snapprefs.setSnapEnabledGlobally(false);
     }
 
-    Inkscape::SnappedPoint dummy = m.constrainedAngularSnap(Inkscape::SnapCandidatePoint(p, Inkscape::SNAPSOURCE_NODE_HANDLE), boost::optional<Geom::Point>(), o, snaps);
+    Inkscape::SnappedPoint dummy = m.constrainedAngularSnap(Inkscape::SnapCandidatePoint(p, Inkscape::SNAPSOURCE_NODE_HANDLE), std::optional<Geom::Point>(), o, snaps);
     p = dummy.getPoint();
 
     if (state & GDK_SHIFT_MASK) {
@@ -732,7 +732,7 @@ void spdc_endpoint_snap_rotation(ToolBase* const ec, Geom::Point &p, Geom::Point
 }
 
 
-void spdc_endpoint_snap_free(ToolBase* const ec, Geom::Point& p, boost::optional<Geom::Point> &start_of_line, guint const /*state*/)
+void spdc_endpoint_snap_free(ToolBase* const ec, Geom::Point& p, std::optional<Geom::Point> &start_of_line, guint const /*state*/)
 {
     const SPDesktop *dt = ec->getDesktop();
     SnapManager &m = dt->namedview->snap_manager;

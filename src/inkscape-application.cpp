@@ -961,7 +961,7 @@ InkscapeApplication::on_activate()
         document = document_open (s);
         output = "-";
 
-    } else if(prefs->getBool("/options/boot/enabled", true)) {
+    } else if(prefs->getBool("/options/boot/enabled", true) && !_use_shell) {
 
         Inkscape::UI::Dialog::StartScreen start_screen;
 
@@ -1151,7 +1151,7 @@ InkscapeApplication::shell()
     std::cout << "Inkscape interactive shell mode. Type 'action-list' to list all actions. "
               << "Type 'quit' to quit." << std::endl;
     std::cout << " Input of the form:" << std::endl;
-    std::cout << " action1:arg1; action2;arg2; verb1; verb2; ..." << std::endl;
+    std::cout << " action1:arg1; action2:arg2; verb1; verb2; ..." << std::endl;
     if (!_with_gui) {
         std::cout << "Only verbs that don't require a desktop may be used." << std::endl;
     }
