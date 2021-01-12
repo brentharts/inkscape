@@ -13,7 +13,7 @@ msgstr ""
 "Project-Id-Version: bg\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
 "POT-Creation-Date: 2019-12-02 14:57+0100\n"
-"PO-Revision-Date: 2020-06-12 15:00+0300\n"
+"PO-Revision-Date: 2021-01-12 21:42+0200\n"
 "Last-Translator: GIMP <vdachev@gmail.com>\n"
 "Language-Team: Bulgarian <bg@li.org>\n"
 "Language: bg\n"
@@ -21,7 +21,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.2.3\n"
+"X-Generator: Poedit 2.4.2\n"
 
 #: ../share/filters/filters.svg.h:2
 msgid "Smart Jelly"
@@ -15577,7 +15577,7 @@ msgstr "Най-малкия обект"
 #: ../src/widgets/desktop-widget.cpp:1985
 #: ../share/extensions/voronoi2svg.inx:15
 msgid "Page"
-msgstr "Документа"
+msgstr "Документ"
 
 #: ../src/ui/dialog/align-and-distribute.cpp:1073
 msgid "Selection Area"
