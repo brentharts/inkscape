@@ -21,7 +21,7 @@ public:
 	void set_gradient(SPGradient* gradient);
 
 	// set selected stop handle (or pass -1 to deselect)
-	// void set_selected_stop(int index);
+	void set_focused_stop(int index);
 
 	// stop has been selected
 	sigc::signal<void (size_t)>& signal_stop_selected() {

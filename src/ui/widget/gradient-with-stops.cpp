@@ -490,6 +490,18 @@ bool GradientWithStops::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
 	return true;
 }
 
+// focused/selected stop indicator
+void GradientWithStops::set_focused_stop(int index) {
+	if (_focused_stop != index) {
+		_focused_stop = index;
+
+		if (has_focus()) {
+			update();
+		}
+	}
+}
+
+
 } // namespace Widget
 } // namespace UI
 } // namespace Inkscape

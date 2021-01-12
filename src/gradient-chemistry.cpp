@@ -649,6 +649,20 @@ static std::pair<SPStop*, SPStop*> get_before_after_stops(SPGradient* gradient, 
 	return std::make_pair(before, after);
 }
 
+guint sp_number_of_stops_before_stop(SPGradient* gradient, SPStop* target) {
+    if (!gradient) return 0;
+
+    guint n = 0;
+    for (SPStop* stop = gradient->getFirstStop(); stop != nullptr; stop = stop->getNextStop()) {
+        if (stop == target) {
+            return n;
+		  }
+        n++;
+    }
+    return n;
+} 
+
+
 SPStop *sp_get_stop_i(SPGradient *gradient, guint stop_i)
 {
     SPStop *stop = gradient->getFirstStop();
@@ -789,12 +803,12 @@ static bool verify_grad(SPGradient* gradient) {
 }
 
 // add new stop to a gradient; function lifted from gradient-vector.cpp
-void sp_gradient_add_stop(SPGradient* gradient, SPStop* current) {
-    if (!gradient || !current) return;
+SPStop* sp_gradient_add_stop(SPGradient* gradient, SPStop* current) {
+    if (!gradient || !current) return nullptr;
 
     if (verify_grad(gradient)) {
         // gradient has been fixed by adding stop(s), don't insert another one
-        return;
+        return nullptr;
     }
 
     SPStop *stop = current;
@@ -836,10 +850,12 @@ void sp_gradient_add_stop(SPGradient* gradient, SPStop* current) {
     Inkscape::GC::release(new_stop_repr);
     DocumentUndo::done(gradient->document, SP_VERB_CONTEXT_GRADIENT,
                        _("Add gradient stop"));
+
+    return newstop;
 }
 
-void sp_gradient_add_stop_at(SPGradient* gradient, double offset) {
-    if (!gradient) return;
+SPStop* sp_gradient_add_stop_at(SPGradient* gradient, double offset) {
+    if (!gradient) return nullptr;
 
     verify_grad(gradient);
 
@@ -848,7 +864,10 @@ void sp_gradient_add_stop_at(SPGradient* gradient, double offset) {
 	std::pair<SPStop*, SPStop*> stops = get_before_after_stops(gradient, offset);
 
 	if (stops.first && stops.second) {
-		sp_vector_add_stop(gradient, stops.first, stops.second, offset);
+		return sp_vector_add_stop(gradient, stops.first, stops.second, offset);
+	}
+	else {
+		return nullptr;
 	}
 }
 
