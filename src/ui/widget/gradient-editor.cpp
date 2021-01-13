@@ -507,12 +507,10 @@ SPGradient* GradientEditor::get_gradient_vector() {
 void GradientEditor::set_gradient(SPGradient* gradient) {
 	auto scoped(_update.block());
 
+	// remember which stop is selected, so we can restore it
 	size_t selected_stop_index = 0;
-	{
-		auto it = _stop_tree.get_selection()->get_selected();
-		if (it) {
-			selected_stop_index = it->get_value(_stopIdx);
-		}
+	if (auto it = _stop_tree.get_selection()->get_selected()) {
+		selected_stop_index = it->get_value(_stopIdx);
 	}
 
 	_stop_list_store->clear();

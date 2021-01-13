@@ -1,3 +1,15 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+/**
+ * Gradient image widget with stop handles
+ *
+ * Author:
+ *   Michael Kowalski
+ *
+ * Copyright (C) 2020-2021 Michael Kowalski
+ *
+ * Released under GNU GPL v2+, read the file 'COPYING' for more information.
+ */
+
 #include <string>
 
 #include "gradient-with-stops.h"
@@ -8,7 +20,7 @@
 #include "ui/cursor-utils.h"
 
 // widget's height; it should take stop template's height into account
-// current value is fine tuned to make stop handles overlap gradient image just the right amount
+// current value is fine-tuned to make stop handles overlap gradient image just the right amount
 const int GRADIENT_WIDGET_HEIGHT = 33;
 // gradient's image height (multiple of checkerboard tiles, they are 6x6)
 const int GRADIENT_IMAGE_HEIGHT = 3 * 6;
@@ -38,12 +50,11 @@ GradientWithStops::GradientWithStops() : _template(get_stop_template_path().c_st
 void GradientWithStops::set_gradient(SPGradient* gradient) {
 	_gradient = gradient;
 
-// g_warning("vect %p", gradient);
 	// listen to release & changes
 	_release  = gradient ? gradient->connectRelease([=](SPObject*){ set_gradient(nullptr); }) : sigc::connection();
 	_modified = gradient ? gradient->connectModified([=](SPObject*, guint){ modified(); }) : sigc::connection();
 
-	// TODO: check selected stop index
+	// TODO: check selected/focused stop index
 
 	modified();
 
@@ -53,10 +64,7 @@ void GradientWithStops::set_gradient(SPGradient* gradient) {
 void GradientWithStops::modified() {
 	// gradient has been modified
 
-	// if (_gradient) {
-		// _gradient->ensureVector();
-	// }
-
+	// read all stops
 	_stops.clear();
 
 	if (_gradient) {
@@ -187,16 +195,14 @@ GradientWithStops::layout_t GradientWithStops::get_layout() const {
 	};
 }
 
-// check if stop handle is under (x, y) location, return its index or -1 is not hit
+// check if stop handle is under (x, y) location, return its index or -1 if not hit
 int GradientWithStops::find_stop_at(double x, double y) const {
 	if (!_gradient) return -1;
 
-	// _gradient->ensureVector();
 	const auto& v = _stops;
-
 	const auto& layout = get_layout();
 
-	// binary search would be nice... find stop handle at (x, y) position
+	// find stop handle at (x, y) position; note: stops may not be ordered by offsets
 	for (size_t i = 0; i < v.size(); ++i) {
 		auto pos = get_stop_position(i, layout);
 		if (x >= pos.left && x <= pos.right && y >= pos.top && y <= pos.bottom) {
@@ -214,7 +220,6 @@ GradientWithStops::limits_t GradientWithStops::get_stop_limits(int maybe_index) 
 	// let negative index turn into a large out-of-range number
 	auto index = static_cast<size_t>(maybe_index);
 
-	// _gradient->ensureVector();
 	const auto& v = _stops;
 
 	if (index < v.size()) {
@@ -256,21 +261,16 @@ GradientWithStops::limits_t GradientWithStops::get_stop_limits(int maybe_index) 
 }
 
 bool GradientWithStops::on_focus_out_event(GdkEventFocus* event) {
-	// g_warning("focus out");
 	update();
 	return false;
 }
 
 bool GradientWithStops::on_focus_in_event(GdkEventFocus* event) {
-	// g_warning("focus in");
 	update();
-	// grab_focus();
 	return false;
 }
 
 bool GradientWithStops::on_focus(Gtk::DirectionType direction) {
-	// g_warning("on focus");
-
 	if (has_focus()) {
 		return false; // let focus go
 	}
@@ -374,6 +374,7 @@ bool GradientWithStops::on_button_release_event(GdkEventButton* event) {
 	return false;
 }
 
+// move stop by a given amount (delta)
 void GradientWithStops::move_stop(int stop_index, double offset_shift) {
 	auto layout = get_layout();
 	if (layout.width > 0) {
@@ -439,10 +440,6 @@ bool GradientWithStops::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
 
 	Gdk::RGBA fg = context->get_color(get_state_flags());
 	Gdk::RGBA bg = _background_color;
-
-	// _gradient->ensureVector();
-
-	// const auto& stops = _stops;
 
 	// stop handle outlines and selection indicator use theme colors:
 	_template.set_style(".outer", "fill", rgba_to_css_color(fg));
