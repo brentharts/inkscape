@@ -34,6 +34,7 @@
 #include "object/sp-linear-gradient.h"
 #include "object/sp-gradient-vector.h"
 #include "svg/css-ostringstream.h"
+#include "preferences.h"
 
 namespace Inkscape {
 namespace UI {
@@ -164,7 +165,7 @@ Glib::ustring get_repeat_icon(SPGradientSpread mode) {
 	return ico;
 }
 
-GradientEditor::GradientEditor() :
+GradientEditor::GradientEditor(const char* prefs) :
 	_builder(create_builder()),
 	_selector(Gtk::manage(new GradientSelector())),
 	_repeat_icon(get_widget<Gtk::Image>(_builder, "repeatIco")),
@@ -177,7 +178,10 @@ GradientEditor::GradientEditor() :
 	_delete_stop(get_widget<Gtk::Button>(_builder, "stopDelete")),
 	_stops_gallery(get_widget<Gtk::Box>(_builder, "stopsGallery")),
 	_colors_box(get_widget<Gtk::Box>(_builder, "colorsBox")),
-	_main_grid(get_widget<Gtk::Grid>(_builder, "mainGrid"))
+	_linear_btn(get_widget<Gtk::Button>(_builder, "linearBtn")),
+	_radial_btn(get_widget<Gtk::Button>(_builder, "radialBtn")),
+	_main_grid(get_widget<Gtk::Grid>(_builder, "mainGrid")),
+	_prefs(prefs)
 {
 
 	auto& linear = get_widget<Gtk::ToggleButton>(_builder, "linearBtn");
@@ -243,7 +247,6 @@ GradientEditor::GradientEditor() :
 	});
 
 	_show_stops_list.signal_clicked().connect(sigc::mem_fun(this, &GradientEditor::toggle_stops));
-	update_stops_layout();
 
 	set_icon(_add_stop, "list-add");
 	_add_stop.signal_clicked().connect([=](){
@@ -302,6 +305,10 @@ GradientEditor::GradientEditor() :
 	});
 
 	pack_start(_main_grid);
+
+	// restore visibility of the stop list view
+	_stops_list_visible = Inkscape::Preferences::get()->getBool(_prefs + "/stoplist", true);
+	update_stops_layout();
 }
 
 GradientEditor::~GradientEditor() {
@@ -408,24 +415,17 @@ void GradientEditor::delete_stop(int index) {
 void GradientEditor::toggle_stops() {
 	_stops_list_visible = !_stops_list_visible;
 	update_stops_layout();
+	Inkscape::Preferences::get()->setBool(_prefs + "/stoplist", _stops_list_visible);
 }
 
 void GradientEditor::update_stops_layout() {
-	const int top = 3;
-
 	if (_stops_list_visible) {
-		// shrink color box
-		_main_grid.remove(_colors_box);
-		_main_grid.attach(_colors_box, 1, top);
 		set_icon(_show_stops_list, "go-previous");
 		_stops_gallery.show();
 	}
 	else {
 		set_icon(_show_stops_list, "go-next");
 		_stops_gallery.hide();
-		// expand color box
-		_main_grid.remove(_colors_box);
-		_main_grid.attach(_colors_box, 0, top, 2);
 	}
 }
 
@@ -463,7 +463,6 @@ void GradientEditor::set_repeat_icon(SPGradientSpread mode) {
 		_repeat_icon.set_from_icon_name(ico, Gtk::ICON_SIZE_BUTTON);
 	}
 }
-
 
 void GradientEditor::setGradient(SPGradient* gradient) {
 	auto scoped(_update.block());

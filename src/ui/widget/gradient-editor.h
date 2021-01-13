@@ -29,10 +29,8 @@ class GradientSelector;
 
 class GradientEditor : public Gtk::Box, public GradientSelectorInterface {
 public:
-	GradientEditor();
+	GradientEditor(const char* prefs);
 	~GradientEditor() noexcept override;
-
-	// GradientSelector* get_selector();
 
 private:
 	sigc::signal<void> _signal_grabbed;
@@ -94,10 +92,13 @@ private:
 	bool _stops_list_visible = true;
 	Gtk::Box& _stops_gallery;
 	Gtk::Box& _colors_box;
+	Gtk::Button& _linear_btn;
+	Gtk::Button& _radial_btn;
 	Gtk::Grid& _main_grid;
 	SPGradient* _gradient = nullptr;
 	SPDocument* _document = nullptr;
 	OperationBlocker _update;
+	Glib::ustring _prefs;
 };
 
 

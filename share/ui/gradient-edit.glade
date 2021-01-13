@@ -61,30 +61,19 @@
     <property name="hexpand">True</property>
     <property name="column-spacing">4</property>
     <child>
-      <object class="GtkLabel">
-        <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <property name="halign">start</property>
-        <property name="margin-start">4</property>
-        <property name="label" translatable="yes">Gradient:</property>
-      </object>
-      <packing>
-        <property name="left-attach">0</property>
-        <property name="top-attach">0</property>
-      </packing>
-    </child>
-    <child>
       <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
         <property name="hexpand">True</property>
         <child>
-          <object class="GtkToggleButton" id="linearBtn">
+          <object class="GtkLabel">
+            <property name="width-request">65</property>
             <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">True</property>
-            <property name="tooltip-text" translatable="yes">Linear gradient</property>
-            <property name="relief">none</property>
+            <property name="can-focus">False</property>
+            <property name="halign">start</property>
+            <property name="margin-start">4</property>
+            <property name="margin-end">4</property>
+            <property name="label" translatable="yes">Gradient:</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -93,17 +82,33 @@
           </packing>
         </child>
         <child>
-          <object class="GtkToggleButton" id="radialBtn">
-            <property name="visible">True</property>
+          <object class="GtkToggleButton" id="linearBtn">
+            <property name="sensitive">False</property>
             <property name="can-focus">True</property>
             <property name="receives-default">True</property>
-            <property name="tooltip-text" translatable="yes">Radial gradient</property>
+            <property name="no-show-all">True</property>
+            <property name="tooltip-text" translatable="yes">Linear gradient</property>
             <property name="relief">none</property>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkToggleButton" id="radialBtn">
+            <property name="sensitive">False</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+            <property name="no-show-all">True</property>
+            <property name="tooltip-text" translatable="yes">Radial gradient</property>
+            <property name="relief">none</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
           </packing>
         </child>
         <child>
@@ -117,7 +122,7 @@
           <packing>
             <property name="expand">True</property>
             <property name="fill">True</property>
-            <property name="position">2</property>
+            <property name="position">3</property>
           </packing>
         </child>
         <child>
@@ -132,7 +137,7 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">3</property>
+            <property name="position">4</property>
           </packing>
         </child>
         <child>
@@ -145,7 +150,7 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">4</property>
+            <property name="position">5</property>
           </packing>
         </child>
         <child>
@@ -158,7 +163,7 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">5</property>
+            <property name="position">6</property>
           </packing>
         </child>
         <child>
@@ -178,13 +183,14 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">6</property>
+            <property name="position">7</property>
           </packing>
         </child>
       </object>
       <packing>
-        <property name="left-attach">1</property>
+        <property name="left-attach">0</property>
         <property name="top-attach">0</property>
+        <property name="width">2</property>
       </packing>
     </child>
     <child>
@@ -260,28 +266,12 @@
       </packing>
     </child>
     <child>
-      <object class="GtkBox" id="colorsBox">
-        <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <property name="hexpand">True</property>
-        <property name="vexpand">True</property>
-        <property name="orientation">vertical</property>
-        <child>
-          <placeholder/>
-        </child>
-      </object>
-      <packing>
-        <property name="left-attach">1</property>
-        <property name="top-attach">3</property>
-      </packing>
-    </child>
-    <child>
       <object class="GtkBox" id="gradientBox">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
-        <property name="margin-start">2</property>
         <property name="margin-end">2</property>
         <property name="margin-top">2</property>
+        <property name="hexpand">True</property>
         <property name="orientation">vertical</property>
         <child>
           <placeholder/>
@@ -297,7 +287,7 @@
     </child>
     <child>
       <object class="GtkMenuButton" id="libraryBtn">
-        <property name="width-request">65</property>
+        <property name="width-request">60</property>
         <property name="visible">True</property>
         <property name="can-focus">True</property>
         <property name="focus-on-click">False</property>
@@ -316,62 +306,81 @@
       </packing>
     </child>
     <child>
-      <object class="GtkBox" id="stopsGallery">
+      <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
-        <property name="margin-start">4</property>
-        <property name="orientation">vertical</property>
+        <property name="hexpand">True</property>
+        <property name="vexpand">True</property>
         <child>
-          <object class="GtkScrolledWindow">
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="margin-top">1</property>
-            <property name="margin-bottom">1</property>
-            <property name="shadow-type">in</property>
-            <child>
-              <object class="GtkTreeView" id="stopList">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="border-width">1</property>
-                <property name="headers-visible">False</property>
-                <property name="enable-search">False</property>
-                <child internal-child="selection">
-                  <object class="GtkTreeSelection"/>
-                </child>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox" id="stopButtons">
+          <object class="GtkBox" id="stopsGallery">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
+            <property name="no-show-all">True</property>
+            <property name="margin-left">4</property>
+            <property name="margin-start">4</property>
+            <property name="orientation">vertical</property>
             <child>
-              <object class="GtkButton" id="stopAdd">
+              <object class="GtkScrolledWindow">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
-                <property name="tooltip-text" translatable="yes">Insert new stop</property>
-                <property name="relief">none</property>
+                <property name="margin-top">1</property>
+                <property name="margin-bottom">1</property>
+                <property name="shadow-type">in</property>
+                <child>
+                  <object class="GtkTreeView" id="stopList">
+                    <property name="width-request">65</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="border-width">1</property>
+                    <property name="headers-visible">False</property>
+                    <property name="enable-search">False</property>
+                    <child internal-child="selection">
+                      <object class="GtkTreeSelection"/>
+                    </child>
+                  </object>
+                </child>
               </object>
               <packing>
-                <property name="expand">False</property>
+                <property name="expand">True</property>
                 <property name="fill">True</property>
                 <property name="position">0</property>
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="stopDelete">
+              <object class="GtkBox" id="stopButtons">
                 <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
-                <property name="tooltip-text" translatable="yes">Delete stop</property>
-                <property name="relief">none</property>
+                <property name="can-focus">False</property>
+                <child>
+                  <object class="GtkButton" id="stopAdd">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                    <property name="tooltip-text" translatable="yes">Insert new stop</property>
+                    <property name="relief">none</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="stopDelete">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                    <property name="tooltip-text" translatable="yes">Delete stop</property>
+                    <property name="relief">none</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -379,6 +388,20 @@
                 <property name="position">1</property>
               </packing>
             </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox" id="colorsBox">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="hexpand">True</property>
+            <property name="vexpand">True</property>
+            <property name="orientation">vertical</property>
             <child>
               <placeholder/>
             </child>
@@ -393,6 +416,7 @@
       <packing>
         <property name="left-attach">0</property>
         <property name="top-attach">3</property>
+        <property name="width">2</property>
       </packing>
     </child>
   </object>

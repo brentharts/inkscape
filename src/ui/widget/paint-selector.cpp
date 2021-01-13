@@ -292,6 +292,7 @@ void PaintSelector::setMode(Mode mode)
 {
     if (_mode != mode) {
         _update = true;
+        _label->show();
 #ifdef SP_PS_VERBOSE
         g_print("Mode change %d -> %d   %s -> %s\n", _mode, mode, modeStrings[_mode], modeStrings[mode]);
 #endif
@@ -633,7 +634,7 @@ void PaintSelector::set_mode_gradient(PaintSelector::Mode mode)
         clear_frame();
         /* Create new gradient selector */
       //   auto new_gsel = Gtk::manage(new GradientSelector());
-        auto new_gsel = Gtk::manage(new GradientEditor());
+        auto new_gsel = Gtk::manage(new GradientEditor("/gradient-edit"));
         new_gsel->show();
         new_gsel->signal_grabbed().connect(sigc::mem_fun(this, &PaintSelector::gradient_grabbed));
         new_gsel->signal_dragged().connect(sigc::mem_fun(this, &PaintSelector::gradient_dragged));
@@ -653,11 +654,12 @@ void PaintSelector::set_mode_gradient(PaintSelector::Mode mode)
     if (mode == PaintSelector::MODE_GRADIENT_LINEAR) {
         if (gsel) gsel->setMode(GradientSelector::MODE_LINEAR);
         // sp_gradient_selector_set_mode(SP_GRADIENT_SELECTOR(gsel), SP_GRADIENT_SELECTOR_MODE_LINEAR);
-        _label->set_markup(_("<b>Linear gradient</b>"));
-		  _label->hide();
+      //   _label->set_markup(_("<b>Linear gradient</b>"));
+        _label->hide();
     } else if (mode == PaintSelector::MODE_GRADIENT_RADIAL) {
         if (gsel) gsel->setMode(GradientSelector::MODE_RADIAL);
-        _label->set_markup(_("<b>Radial gradient</b>"));
+      //   _label->set_markup(_("<b>Radial gradient</b>"));
+        _label->hide();
     }
 
 #ifdef SP_PS_VERBOSE
