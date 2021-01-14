@@ -169,7 +169,6 @@ GradientEditor::GradientEditor(const char* prefs) :
 	_builder(create_builder()),
 	_selector(Gtk::manage(new GradientSelector())),
 	_repeat_icon(get_widget<Gtk::Image>(_builder, "repeatIco")),
-	// _stop_box(get_widget<Gtk::Box>(_builder, "stopBox")),
 	_popover(get_widget<Gtk::Popover>(_builder, "libraryPopover")),
 	_stop_tree(get_widget<Gtk::TreeView>(_builder, "stopList")),
 	_offset_btn(get_widget<Gtk::SpinButton>(_builder, "offsetSpin")),
@@ -178,17 +177,14 @@ GradientEditor::GradientEditor(const char* prefs) :
 	_delete_stop(get_widget<Gtk::Button>(_builder, "stopDelete")),
 	_stops_gallery(get_widget<Gtk::Box>(_builder, "stopsGallery")),
 	_colors_box(get_widget<Gtk::Box>(_builder, "colorsBox")),
-	_linear_btn(get_widget<Gtk::Button>(_builder, "linearBtn")),
-	_radial_btn(get_widget<Gtk::Button>(_builder, "radialBtn")),
+	_linear_btn(get_widget<Gtk::ToggleButton>(_builder, "linearBtn")),
+	_radial_btn(get_widget<Gtk::ToggleButton>(_builder, "radialBtn")),
 	_main_grid(get_widget<Gtk::Grid>(_builder, "mainGrid")),
 	_prefs(prefs)
 {
-
-	auto& linear = get_widget<Gtk::ToggleButton>(_builder, "linearBtn");
-	set_icon(linear, INKSCAPE_ICON("paint-gradient-linear"));
-
-	auto& radial = get_widget<Gtk::ToggleButton>(_builder, "radialBtn");
-	set_icon(radial, INKSCAPE_ICON("paint-gradient-radial"));
+	// gradient type buttons; not currently used, hidden, WIP
+	set_icon(_linear_btn, INKSCAPE_ICON("paint-gradient-linear"));
+	set_icon(_radial_btn, INKSCAPE_ICON("paint-gradient-radial"));
 
 	auto& reverse = get_widget<Gtk::Button>(_builder, "reverseBtn");
 	set_icon(reverse, INKSCAPE_ICON("object-flip-horizontal"));
@@ -207,7 +203,7 @@ GradientEditor::GradientEditor(const char* prefs) :
 		set_stop_offset(index, offset);
 	});
 	_gradient_image.signal_add_stop_at().connect([=](double offset) {
-		add_stop_at(offset);
+		insert_stop_at(offset);
 	});
 	_gradient_image.signal_delete_stop().connect([=](size_t index) {
 		delete_stop(index);
@@ -236,6 +232,7 @@ GradientEditor::GradientEditor(const char* prefs) :
 	_stop_columns.add(_stop_color);
 	_stop_list_store = Gtk::ListStore::create(_stop_columns);
 	_stop_tree.set_model(_stop_list_store);
+	// indices in the stop list view; currently hidden
 	// _stop_tree.append_column("n", _stopID); // 1-based stop index
 	_stop_tree.append_column("c", _stop_color); // and its color
 
@@ -386,11 +383,14 @@ void GradientEditor::stop_selected() {
 	}
 }
 
-void GradientEditor::add_stop_at(double offset) {
+void GradientEditor::insert_stop_at(double offset) {
 	if (SPGradient* vector = get_gradient_vector()) {
-		SPStop* stop = sp_gradient_add_stop_at(vector, offset);
-		// just select next stop; newly added stop will be in a list view after selection refresh (on idle)
-		select_stop(sp_number_of_stops_before_stop(vector, stop));
+		// only insert new stop if there are some stops present
+		if (vector->hasStops()) {
+			SPStop* stop = sp_gradient_add_stop_at(vector, offset);
+			// just select next stop; newly added stop will be in a list view after selection refresh (on idle)
+			select_stop(sp_number_of_stops_before_stop(vector, stop));
+		}
 	}
 }
 

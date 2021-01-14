@@ -56,7 +56,7 @@ public:
 private:
 	void set_gradient(SPGradient* gradient);
 	void stop_selected();
-	void add_stop_at(double offset);
+	void insert_stop_at(double offset);
 	void add_stop(SPStop* current);
 	void duplicate_stop();
 	void delete_stop(int index);
@@ -92,8 +92,8 @@ private:
 	bool _stops_list_visible = true;
 	Gtk::Box& _stops_gallery;
 	Gtk::Box& _colors_box;
-	Gtk::Button& _linear_btn;
-	Gtk::Button& _radial_btn;
+	Gtk::ToggleButton& _linear_btn;
+	Gtk::ToggleButton& _radial_btn;
 	Gtk::Grid& _main_grid;
 	SPGradient* _gradient = nullptr;
 	SPDocument* _document = nullptr;

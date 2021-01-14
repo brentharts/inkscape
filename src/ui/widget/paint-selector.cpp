@@ -633,16 +633,21 @@ void PaintSelector::set_mode_gradient(PaintSelector::Mode mode)
     } else {
         clear_frame();
         /* Create new gradient selector */
-      //   auto new_gsel = Gtk::manage(new GradientSelector());
-        auto new_gsel = Gtk::manage(new GradientEditor("/gradient-edit"));
-        new_gsel->show();
-        new_gsel->signal_grabbed().connect(sigc::mem_fun(this, &PaintSelector::gradient_grabbed));
-        new_gsel->signal_dragged().connect(sigc::mem_fun(this, &PaintSelector::gradient_dragged));
-        new_gsel->signal_released().connect(sigc::mem_fun(this, &PaintSelector::gradient_released));
-        new_gsel->signal_changed().connect(sigc::mem_fun(this, &PaintSelector::gradient_changed));
-        /* Pack everything to frame */
-        _frame->add(*new_gsel);
-        _selector = new_gsel;
+        try {
+            auto new_gsel = Gtk::manage(new GradientEditor("/gradient-edit"));
+            new_gsel->show();
+            new_gsel->signal_grabbed().connect(sigc::mem_fun(this, &PaintSelector::gradient_grabbed));
+            new_gsel->signal_dragged().connect(sigc::mem_fun(this, &PaintSelector::gradient_dragged));
+            new_gsel->signal_released().connect(sigc::mem_fun(this, &PaintSelector::gradient_released));
+            new_gsel->signal_changed().connect(sigc::mem_fun(this, &PaintSelector::gradient_changed));
+            /* Pack everything to frame */
+            _frame->add(*new_gsel);
+            _selector = new_gsel;
+        }
+        catch (std::exception& ex) {
+          g_error("Creation of GradientEditor widget failed: %s.", ex.what());
+          throw;
+        }
     }
 
     // We should now have a valid GradientSelector so we can use it
