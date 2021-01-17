@@ -500,6 +500,18 @@ SPGradientSpread GradientEditor::getSpread() {
 	return _selector->getSpread();
 }
 
+void GradientEditor::selectStop(SPStop* selected) {
+	// request from the outside to sync stop selection
+	const auto& items = _stop_tree.get_model()->children();
+	auto it = std::find_if(items.begin(), items.end(), [=](const auto& row) {
+		SPStop* stop = row->get_value(_stopObj);
+		return stop == selected; 
+	});
+	if (it != items.end()) {
+		this->select_stop(std::distance(items.begin(), it));
+	}
+}
+
 SPGradient* GradientEditor::get_gradient_vector() {
 	return _gradient ? _gradient->getVector() : nullptr;
 }

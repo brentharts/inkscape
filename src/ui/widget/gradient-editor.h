@@ -52,6 +52,7 @@ public:
 	SPGradientUnits getUnits() override;
 	void setSpread(SPGradientSpread spread) override;
 	SPGradientSpread getSpread() override;
+	void selectStop(SPStop* selected) override;
 
 private:
 	void set_gradient(SPGradient* gradient);

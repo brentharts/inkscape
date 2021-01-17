@@ -36,6 +36,7 @@
 #include "object/sp-pattern.h"
 #include "object/sp-radial-gradient.h"
 #include "object/sp-text.h"
+#include "object/sp-stop.h"
 #include "style.h"
 
 #include "ui/widget/canvas.h"  // Forced redraws
@@ -139,7 +140,6 @@ void FillNStroke::eventContextCB(SPDesktop * /*desktop*/, Inkscape::UI::Tools::T
     performUpdate();
 }
 
-
 /**
  * Gets the active fill or stroke style property, then sets the appropriate
  * color, alpha, gradient, pattern, etc. for the paint-selector.
@@ -171,6 +171,8 @@ void FillNStroke::performUpdate()
 
     SPIPaint &targPaint = *query.getFillOrStroke(kind == FILL);
     SPIScale24 &targOpacity = *(kind == FILL ? query.fill_opacity.upcast() : query.stroke_opacity.upcast());
+    auto stop = dynamic_cast<SPStop*>(targPaint.getTag());
+	 auto paintServer = dynamic_cast<SPPaintServer*>(stop ? stop->parent : nullptr);
 
     switch (result) {
         case QUERY_STYLE_NOTHING: {
@@ -183,7 +185,7 @@ void FillNStroke::performUpdate()
         case QUERY_STYLE_MULTIPLE_AVERAGED: // TODO: treat this slightly differently, e.g. display "averaged" somewhere
                                             // in paint selector
         case QUERY_STYLE_MULTIPLE_SAME: {
-            auto pselmode = UI::Widget::PaintSelector::getModeForStyle(query, kind);
+            auto pselmode = UI::Widget::PaintSelector::getModeForStyle(query, kind, paintServer);
             _psel->setMode(pselmode);
 
             if (kind == FILL) {
@@ -192,11 +194,13 @@ void FillNStroke::performUpdate()
                                    : UI::Widget::PaintSelector::FILLRULE_EVENODD);
             }
 
-            if (targPaint.set && targPaint.isColor()) {
+            if (targPaint.set && targPaint.isColor() && !paintServer) {
                 _psel->setColorAlpha(targPaint.value.color, SP_SCALE24_TO_FLOAT(targOpacity.value));
-            } else if (targPaint.set && targPaint.isPaintserver()) {
-
-                SPPaintServer *server = (kind == FILL) ? query.getFillPaintServer() : query.getStrokePaintServer();
+            } else if (targPaint.set && targPaint.isPaintserver() || paintServer) {
+                SPPaintServer* server = paintServer;
+					 if (!server) {
+                    server =  (kind == FILL) ? query.getFillPaintServer() : query.getStrokePaintServer();
+					 }
 
                 if (server) {
                     if (SP_IS_GRADIENT(server) && SP_GRADIENT(server)->getVector()->isSwatch()) {
@@ -205,13 +209,13 @@ void FillNStroke::performUpdate()
                     } else if (SP_IS_LINEARGRADIENT(server)) {
                         SPGradient *vector = SP_GRADIENT(server)->getVector();
                         SPLinearGradient *lg = SP_LINEARGRADIENT(server);
-                        _psel->setGradientLinear(vector, lg);
+                        _psel->setGradientLinear(vector, lg, stop);
 
                         _psel->setGradientProperties(lg->getUnits(), lg->getSpread());
                     } else if (SP_IS_RADIALGRADIENT(server)) {
                         SPGradient *vector = SP_GRADIENT(server)->getVector();
                         SPRadialGradient *rg = SP_RADIALGRADIENT(server);
-                        _psel->setGradientRadial(vector, rg);
+                        _psel->setGradientRadial(vector, rg, stop);
 
                         _psel->setGradientProperties(rg->getUnits(), rg->getSpread());
 #ifdef WITH_MESH

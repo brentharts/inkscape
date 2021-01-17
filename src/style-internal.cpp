@@ -1660,6 +1660,7 @@ SPIPaint::reset( bool init ) {
     colorSet = false;
     noneSet = false;
     value.color.set( false );
+    tag = nullptr;
     if (value.href){
         if (value.href->getObject()) {
             value.href->detach();

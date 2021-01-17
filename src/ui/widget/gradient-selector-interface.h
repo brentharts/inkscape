@@ -19,6 +19,7 @@ public:
 	virtual SPGradientUnits getUnits() = 0;
 	virtual void setSpread(SPGradientSpread spread) = 0;
 	virtual SPGradientSpread getSpread() = 0;
+	virtual void selectStop(SPStop* selected) {};
 };
 
 #endif

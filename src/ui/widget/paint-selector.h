@@ -161,12 +161,12 @@ class PaintSelector : public Gtk::Box {
     inline decltype(_signal_changed) signal_changed() const { return _signal_changed; }
 
     void setMode(Mode mode);
-    static Mode getModeForStyle(SPStyle const &style, FillOrStroke kind);
+    static Mode getModeForStyle(SPStyle const &style, FillOrStroke kind, SPPaintServer* selected);
     void setFillrule(FillRule fillrule);
     void setColorAlpha(SPColor const &color, float alpha);
     void setSwatch(SPGradient *vector);
-    void setGradientLinear(SPGradient *vector, SPLinearGradient* gradient);
-    void setGradientRadial(SPGradient *vector, SPRadialGradient* gradient);
+    void setGradientLinear(SPGradient *vector, SPLinearGradient* gradient, SPStop* selected);
+    void setGradientRadial(SPGradient *vector, SPRadialGradient* gradient, SPStop* selected);
 #ifdef WITH_MESH
     void setGradientMesh(SPMeshGradient *array);
 #endif

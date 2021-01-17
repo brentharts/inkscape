@@ -390,7 +390,7 @@ void PaintSelector::setSwatch(SPGradient *vector)
     }
 }
 
-void PaintSelector::setGradientLinear(SPGradient *vector, SPLinearGradient* gradient)
+void PaintSelector::setGradientLinear(SPGradient *vector, SPLinearGradient* gradient, SPStop* selected)
 {
 #ifdef SP_PS_VERBOSE
     g_print("PaintSelector set GRADIENT LINEAR\n");
@@ -402,9 +402,10 @@ void PaintSelector::setGradientLinear(SPGradient *vector, SPLinearGradient* grad
     gsel->setMode(GradientSelector::MODE_LINEAR);
     gsel->setGradient(gradient);
     gsel->setVector((vector) ? vector->document : nullptr, vector);
+    gsel->selectStop(selected);
 }
 
-void PaintSelector::setGradientRadial(SPGradient *vector, SPRadialGradient* gradient)
+void PaintSelector::setGradientRadial(SPGradient *vector, SPRadialGradient* gradient, SPStop* selected)
 {
 #ifdef SP_PS_VERBOSE
     g_print("PaintSelector set GRADIENT RADIAL\n");
@@ -416,6 +417,7 @@ void PaintSelector::setGradientRadial(SPGradient *vector, SPRadialGradient* grad
     gsel->setMode(GradientSelector::MODE_RADIAL);
     gsel->setGradient(gradient);
     gsel->setVector((vector) ? vector->document : nullptr, vector);
+    gsel->selectStop(selected);
 }
 
 #ifdef WITH_MESH
@@ -1398,15 +1400,15 @@ void PaintSelector::setFlatColor(SPDesktop *desktop, gchar const *color_property
     sp_repr_css_attr_unref(css);
 }
 
-PaintSelector::Mode PaintSelector::getModeForStyle(SPStyle const &style, FillOrStroke kind)
+PaintSelector::Mode PaintSelector::getModeForStyle(SPStyle const &style, FillOrStroke kind, SPPaintServer* selected)
 {
     Mode mode = MODE_UNSET;
     SPIPaint const &target = *style.getFillOrStroke(kind == FILL);
 
     if (!target.set) {
         mode = MODE_UNSET;
-    } else if (target.isPaintserver()) {
-        SPPaintServer const *server = (kind == FILL) ? style.getFillPaintServer() : style.getStrokePaintServer();
+    } else if (selected || target.isPaintserver()) {
+        SPPaintServer const *server = selected ? selected : (kind == FILL ? style.getFillPaintServer() : style.getStrokePaintServer());
 
 #ifdef SP_PS_VERBOSE
         g_message("PaintSelector::getModeForStyle(%p, %d)", &style, kind);

@@ -880,6 +880,44 @@ void sp_set_gradient_stop_color(SPDocument* document, SPStop* stop, SPColor colo
 	DocumentUndo::done(document, SP_VERB_CONTEXT_GRADIENT, _("Change gradient stop color"));
 }
 
+SPStop* sp_item_gradient_get_stop(SPItem *item, GrPointType point_type, guint point_i, Inkscape::PaintTarget fill_or_stroke) {
+    SPGradient *gradient = getGradient(item, fill_or_stroke);
+
+    if (!gradient || !SP_IS_GRADIENT(gradient)) {
+        return nullptr;
+    }
+
+    if (SP_IS_LINEARGRADIENT(gradient) || SP_IS_RADIALGRADIENT(gradient) ) {
+
+        SPGradient *vector = gradient->getVector();
+
+        if (!vector) // orphan!
+            return nullptr;
+
+        switch (point_type) {
+            case POINT_LG_BEGIN:
+            case POINT_RG_CENTER:
+            case POINT_RG_FOCUS:
+                return vector->getFirstStop();
+
+            case POINT_LG_END:
+            case POINT_RG_R1:
+            case POINT_RG_R2:
+                return sp_last_stop (vector);
+
+            case POINT_LG_MID:
+            case POINT_RG_MID1:
+            case POINT_RG_MID2:
+                return sp_get_stop_i (vector, point_i);
+
+            default:
+                g_warning( "Bad linear/radial gradient handle type" );
+                break;
+        }
+	 }
+    return nullptr;
+}
+
 guint32 sp_item_gradient_stop_query_style(SPItem *item, GrPointType point_type, guint point_i, Inkscape::PaintTarget fill_or_stroke)
 {
     SPGradient *gradient = getGradient(item, fill_or_stroke);
