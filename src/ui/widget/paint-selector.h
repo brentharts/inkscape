@@ -163,7 +163,7 @@ class PaintSelector : public Gtk::Box {
     inline decltype(_signal_stop_selected) signal_stop_selected() const { return _signal_stop_selected; }
 
     void setMode(Mode mode);
-    static Mode getModeForStyle(SPStyle const &style, FillOrStroke kind, SPPaintServer* selected);
+    static Mode getModeForStyle(SPStyle const &style, FillOrStroke kind);
     void setFillrule(FillRule fillrule);
     void setColorAlpha(SPColor const &color, float alpha);
     void setSwatch(SPGradient *vector);

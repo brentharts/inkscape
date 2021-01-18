@@ -169,13 +169,19 @@ void FillNStroke::performUpdate()
 
     // query style from desktop into it. This returns a result flag and fills query with the style of subselection, if
     // any, or selection
-    int result = sp_desktop_query_style(_desktop, &query,
-                                        (kind == FILL) ? QUERY_STYLE_PROPERTY_FILL : QUERY_STYLE_PROPERTY_STROKE);
-
+    const int property = kind == FILL ? QUERY_STYLE_PROPERTY_FILL : QUERY_STYLE_PROPERTY_STROKE;
+    int result = sp_desktop_query_style(_desktop, &query, property);
+    SPIPaint& paint = *query.getFillOrStroke(kind == FILL);
+    auto stop = dynamic_cast<SPStop*>(paint.getTag());
+    if (stop) {
+       // there's a stop selected, which is part of subselection, now query selection only to find selected gradient
+       if (_desktop->selection != nullptr) {
+          std::vector<SPItem*> vec(_desktop->selection->items().begin(), _desktop->selection->items().end());
+          result = sp_desktop_query_style_from_list(vec, &query, property);
+       }
+    }
     SPIPaint &targPaint = *query.getFillOrStroke(kind == FILL);
     SPIScale24 &targOpacity = *(kind == FILL ? query.fill_opacity.upcast() : query.stroke_opacity.upcast());
-    auto stop = dynamic_cast<SPStop*>(targPaint.getTag());
-	 auto paintServer = dynamic_cast<SPPaintServer*>(stop ? stop->parent : nullptr);
 
     switch (result) {
         case QUERY_STYLE_NOTHING: {
@@ -188,7 +194,7 @@ void FillNStroke::performUpdate()
         case QUERY_STYLE_MULTIPLE_AVERAGED: // TODO: treat this slightly differently, e.g. display "averaged" somewhere
                                             // in paint selector
         case QUERY_STYLE_MULTIPLE_SAME: {
-            auto pselmode = UI::Widget::PaintSelector::getModeForStyle(query, kind, paintServer);
+            auto pselmode = UI::Widget::PaintSelector::getModeForStyle(query, kind);
             _psel->setMode(pselmode);
 
             if (kind == FILL) {
@@ -197,13 +203,10 @@ void FillNStroke::performUpdate()
                                    : UI::Widget::PaintSelector::FILLRULE_EVENODD);
             }
 
-            if (targPaint.set && targPaint.isColor() && !paintServer) {
+            if (targPaint.set && targPaint.isColor()) {
                 _psel->setColorAlpha(targPaint.value.color, SP_SCALE24_TO_FLOAT(targOpacity.value));
-            } else if (targPaint.set && targPaint.isPaintserver() || paintServer) {
-                SPPaintServer* server = paintServer;
-					 if (!server) {
-                    server =  (kind == FILL) ? query.getFillPaintServer() : query.getStrokePaintServer();
-					 }
+            } else if (targPaint.set && targPaint.isPaintserver()) {
+                SPPaintServer* server = (kind == FILL) ? query.getFillPaintServer() : query.getStrokePaintServer();
 
                 if (server) {
                     if (SP_IS_GRADIENT(server) && SP_GRADIENT(server)->getVector()->isSwatch()) {

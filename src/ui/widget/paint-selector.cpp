@@ -1401,15 +1401,15 @@ void PaintSelector::setFlatColor(SPDesktop *desktop, gchar const *color_property
     sp_repr_css_attr_unref(css);
 }
 
-PaintSelector::Mode PaintSelector::getModeForStyle(SPStyle const &style, FillOrStroke kind, SPPaintServer* selected)
+PaintSelector::Mode PaintSelector::getModeForStyle(SPStyle const &style, FillOrStroke kind)
 {
     Mode mode = MODE_UNSET;
     SPIPaint const &target = *style.getFillOrStroke(kind == FILL);
 
     if (!target.set) {
         mode = MODE_UNSET;
-    } else if (selected || target.isPaintserver()) {
-        SPPaintServer const *server = selected ? selected : (kind == FILL ? style.getFillPaintServer() : style.getStrokePaintServer());
+    } else if (target.isPaintserver()) {
+        SPPaintServer const *server = kind == FILL ? style.getFillPaintServer() : style.getStrokePaintServer();
 
 #ifdef SP_PS_VERBOSE
         g_message("PaintSelector::getModeForStyle(%p, %d)", &style, kind);
