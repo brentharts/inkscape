@@ -408,8 +408,8 @@ bool GradientWithStops::on_motion_notify_event(GdkEventMotion* event) {
 		auto index = find_stop_at(event->x, event->y);
 		if (index >= 0) {
 			auto limits = get_stop_limits(index);
-			if (limits.min_offset < limits.max_offset) {
-				cursor = _cursor_mouseover.get()->gobj();
+			if (limits.min_offset < limits.max_offset && _cursor_mouseover) {
+				cursor = _cursor_mouseover->gobj();
 			}
 		}
 		gdk_window_set_cursor(event->window, cursor);
