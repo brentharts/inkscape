@@ -189,20 +189,16 @@ int main(int argc, char *argv[])
         if (g_str_has_suffix(program_dir, "Contents/MacOS")) {
 
             // Step 1
-            // Remove macOS session identifier from command line arguments.
-            // Code adopted from GIMP's app/main.c
+            // Overwrite "-psn_..." (process serial number) argument (that
+            // Finder may pass to the app) to "--psn" so it becomes a
+            // valid long_name that we can catch with add_main_option_entry()
+            // in InkscapeApplication::InkscapeApplication().
 
-            int new_argc = 0;
             for (int i = 0; i < argc; i++) {
-                // Rewrite argv[] without "-psn_..." argument.
-                if (!g_str_has_prefix(argv[i], "-psn_")) {
-                    argv[new_argc] = argv[i];
-                    new_argc++;
+                if (g_str_has_prefix(argv[i], "-psn_")) {
+                    g_strlcpy(argv[i], "--psn", sizeof(argv[i]));
+                    break;
                 }
-            }
-            if (argc > new_argc) {
-                argv[new_argc] = nullptr; // glib expects null-terminated array
-                argc = new_argc;
             }
 
             // Step 2

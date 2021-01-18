@@ -688,6 +688,13 @@ InkscapeApplication::InkscapeApplication()
     gapp->add_main_option_entry(T::OPTION_TYPE_BOOL,     "dbus-listen",           '\0', N_("Enter a listening loop for D-Bus messages in console mode"),                "");
     gapp->add_main_option_entry(T::OPTION_TYPE_STRING,   "dbus-name",             '\0', N_("Specify the D-Bus name; default is 'org.inkscape'"),            N_("BUS-NAME"));
 #endif // WITH_DBUS
+
+#ifdef __APPLE__
+    _start_main_option_section(_("macOS deprecated"));
+    // We need to catch this here to not cause errors, but it's supposed to be ignored.
+    gapp->add_main_option_entry(T::OPTION_TYPE_BOOL,     "psn",                   '\0', N_("inoperable; for CLI compatibility only"),                                   "");
+#endif
+
     // clang-format on
 
     gapp->signal_handle_local_options().connect(sigc::mem_fun(*this, &InkscapeApplication::on_handle_local_options));
