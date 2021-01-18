@@ -1,3 +1,15 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+/**
+ * SVG to Pixbuf renderer
+ *
+ * Author:
+ *   Michael Kowalski
+ *
+ * Copyright (C) 2020-2021 Michael Kowalski
+ *
+ * Released under GNU GPL v2+, read the file 'COPYING' for more information.
+ */
+
 #include "svg-renderer.h"
 #include "io/file.h"
 #include "xml/repr.h"

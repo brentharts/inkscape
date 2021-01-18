@@ -66,6 +66,9 @@ FillNStroke::FillNStroke(FillOrStroke k)
     _psel->signal_mode_changed().connect(sigc::mem_fun(*this, &FillNStroke::paintModeChangeCB));
     _psel->signal_dragged().connect(sigc::mem_fun(*this, &FillNStroke::dragFromPaint));
     _psel->signal_changed().connect(sigc::mem_fun(*this, &FillNStroke::paintChangedCB));
+    _psel->signal_stop_selected().connect([=](SPStop* stop) {
+       if (_desktop) { _desktop->emitToolSubselectionChangedEx(nullptr, stop); }
+    });
 
     if (kind == FILL) {
         _psel->signal_fillrule_changed().connect(sigc::mem_fun(*this, &FillNStroke::setFillrule));

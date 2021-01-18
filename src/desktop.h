@@ -245,10 +245,12 @@ public:
         return _query_style_signal.connect (slot);
     }
      // subselection is some sort of selection which is specific to the tool, such as a handle in gradient tool, or a text selection
-    sigc::connection connectToolSubselectionChanged(const sigc::slot<void, gpointer> & slot) {
-        return _tool_subselection_changed.connect(slot);
-    }
+    sigc::connection connectToolSubselectionChanged(const sigc::slot<void, gpointer> & slot);
+    sigc::connection connectToolSubselectionChangedEx(const sigc::slot<void, gpointer, SPObject*>& slot);
+
     void emitToolSubselectionChanged(gpointer data);
+    void emitToolSubselectionChangedEx(gpointer data, SPObject* object);
+
     sigc::connection connectCurrentLayerChanged(const sigc::slot<void, SPObject *> & slot) {
         return _layer_changed_signal.connect(slot);
     }
@@ -606,7 +608,7 @@ private:
     sigc::signal<void>                 _activate_signal;
     sigc::signal<void>                 _deactivate_signal;
     sigc::signal<void,SPDesktop*,Inkscape::UI::Tools::ToolBase*> _event_context_changed_signal;
-    sigc::signal<void, gpointer>       _tool_subselection_changed;
+    sigc::signal<void, gpointer, SPObject*> _tool_subselection_changed;
 
     sigc::connection _activate_connection;
     sigc::connection _deactivate_connection;

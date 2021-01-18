@@ -114,6 +114,7 @@ class PaintSelector : public Gtk::Box {
     sigc::signal<void> _signal_grabbed;
     sigc::signal<void> _signal_released;
     sigc::signal<void> _signal_changed;
+	 sigc::signal<void (SPStop*)> _signal_stop_selected;
 
     StyleToggleButton *style_button_add(gchar const *px, PaintSelector::Mode mode, gchar const *tip);
     void style_button_toggled(StyleToggleButton *tb);
@@ -159,6 +160,7 @@ class PaintSelector : public Gtk::Box {
     inline decltype(_signal_grabbed) signal_grabbed() const { return _signal_grabbed; }
     inline decltype(_signal_released) signal_released() const { return _signal_released; }
     inline decltype(_signal_changed) signal_changed() const { return _signal_changed; }
+    inline decltype(_signal_stop_selected) signal_stop_selected() const { return _signal_stop_selected; }
 
     void setMode(Mode mode);
     static Mode getModeForStyle(SPStyle const &style, FillOrStroke kind, SPPaintServer* selected);

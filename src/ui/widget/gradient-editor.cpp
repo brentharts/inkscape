@@ -198,6 +198,7 @@ GradientEditor::GradientEditor(const char* prefs) :
 	// gradient stop selected in a gradient widget; sync list selection
 	_gradient_image.signal_stop_selected().connect([=](size_t index) {
 		select_stop(index);
+		emit_stop_selected(get_current_stop());
 	});
 	_gradient_image.signal_stop_offset_changed().connect([=](size_t index, double offset) {
 		set_stop_offset(index, offset);
@@ -240,6 +241,7 @@ GradientEditor::GradientEditor(const char* prefs) :
 	selection->signal_changed().connect([=]() {
 		if (!_update.pending()) {
 			stop_selected();
+			emit_stop_selected(get_current_stop());
 		}
 	});
 
@@ -390,6 +392,7 @@ void GradientEditor::insert_stop_at(double offset) {
 			SPStop* stop = sp_gradient_add_stop_at(vector, offset);
 			// just select next stop; newly added stop will be in a list view after selection refresh (on idle)
 			select_stop(sp_number_of_stops_before_stop(vector, stop));
+			emit_stop_selected(stop);
 		}
 	}
 }
@@ -399,6 +402,7 @@ void GradientEditor::add_stop(SPStop* current) {
 		SPStop* stop = sp_gradient_add_stop(vector, current);
 		// just select next stop; newly added stop will be in a list view after selection refresh (on idle)
 		select_stop(sp_number_of_stops_before_stop(vector, stop));
+		emit_stop_selected(stop);
 	}
 }
 
@@ -559,6 +563,8 @@ void GradientEditor::set_gradient(SPGradient* gradient) {
 		select_stop(std::min(selected_stop_index, index - 1));
 		// update related widgets
 		stop_selected();
+		//
+		emit_stop_selected(get_current_stop());
 	}
 }
 
@@ -590,6 +596,14 @@ void GradientEditor::select_stop(size_t index) {
 		auto path = _stop_tree.get_model()->get_path(it);
 		_stop_tree.scroll_to_cell(path, *_stop_tree.get_column(0));
 	}
+}
+
+SPStop* GradientEditor::get_current_stop() {
+	if (auto row = current_stop()) {
+		SPStop* stop = row->get_value(_stopObj);
+		return stop;
+	}
+	return nullptr;
 }
 
 } // namespace Widget

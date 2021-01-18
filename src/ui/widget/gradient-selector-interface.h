@@ -20,6 +20,12 @@ public:
 	virtual void setSpread(SPGradientSpread spread) = 0;
 	virtual SPGradientSpread getSpread() = 0;
 	virtual void selectStop(SPStop* selected) {};
+
+	sigc::signal<void (SPStop*)>& signal_stop_selected() { return _signal_stop_selected; }
+	void emit_stop_selected(SPStop* stop) { _signal_stop_selected.emit(stop); }
+
+private:
+	sigc::signal<void (SPStop*)> _signal_stop_selected;
 };
 
 #endif

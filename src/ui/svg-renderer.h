@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
 #ifndef SEEN_SVG_RENDERER_H
 #define SEEN_SVG_RENDERER_H
 

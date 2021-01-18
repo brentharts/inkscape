@@ -642,6 +642,7 @@ void PaintSelector::set_mode_gradient(PaintSelector::Mode mode)
             new_gsel->signal_dragged().connect(sigc::mem_fun(this, &PaintSelector::gradient_dragged));
             new_gsel->signal_released().connect(sigc::mem_fun(this, &PaintSelector::gradient_released));
             new_gsel->signal_changed().connect(sigc::mem_fun(this, &PaintSelector::gradient_changed));
+            new_gsel->signal_stop_selected().connect([=](SPStop* stop) { _signal_stop_selected.emit(stop); });
             /* Pack everything to frame */
             _frame->add(*new_gsel);
             _selector = new_gsel;
