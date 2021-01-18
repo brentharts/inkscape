@@ -10,6 +10,7 @@
 # - ${INKSCAPE_BINARY_DIR}
 
 set(INKSCAPE_REVISION "unknown")
+set(INKSCAPE_BRANCH "unknown")
 
 if(EXISTS ${INKSCAPE_SOURCE_DIR}/.git)
     execute_process(COMMAND git rev-parse --short HEAD
@@ -19,6 +20,10 @@ if(EXISTS ${INKSCAPE_SOURCE_DIR}/.git)
     execute_process(COMMAND git log -n 1 --pretty=%cd --date=short
         WORKING_DIRECTORY ${INKSCAPE_SOURCE_DIR}
         OUTPUT_VARIABLE INKSCAPE_REVISION_DATE
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+    execute_process(COMMAND git branch --show-current
+        WORKING_DIRECTORY ${INKSCAPE_SOURCE_DIR}
+        OUTPUT_VARIABLE INKSCAPE_BRANCH
         OUTPUT_STRIP_TRAILING_WHITESPACE)
     set(INKSCAPE_REVISION "${INKSCAPE_REVISION_HASH}, ${INKSCAPE_REVISION_DATE}")
 
@@ -42,5 +47,6 @@ endif()
 
 if(NOT "${INKSCAPE_BINARY_DIR}" STREQUAL "")
     message("revision is " ${INKSCAPE_REVISION})
+    message("branch is " ${INKSCAPE_BRANCH})
     configure_file(${INKSCAPE_BINARY_DIR}/src/inkscape-version.cpp.in ${INKSCAPE_BINARY_DIR}/src/inkscape-version.cpp)
 endif()

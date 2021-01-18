@@ -43,7 +43,7 @@ bool show_copy_button(Gtk::Button *button, Gtk::Label *label) {
 }
 void copy_version(Gtk::Button *button, Gtk::Label *label) {
     auto clipboard = Gtk::Clipboard::get();
-    clipboard->set_text(Inkscape::version_string);
+    clipboard->set_text(Inkscape::version_string_with_branch);
     if (label) {
         reveal_widget(button, false);
         reveal_widget(label, true);
@@ -79,7 +79,7 @@ void AboutDialog::show_about() {
         builder->get_widget("version", version);
         builder->get_widget("version-copied", label);
         if(version) {
-            version->set_label(Inkscape::version_string);
+            version->set_label(Inkscape::version_string_with_branch);
             version->signal_clicked().connect(
                     sigc::bind(sigc::ptr_fun(&copy_version), version, label));
         }

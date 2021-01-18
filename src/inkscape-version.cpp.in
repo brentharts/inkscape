@@ -3,5 +3,7 @@
 namespace Inkscape {
     char const *version_string = "@INKSCAPE_VERSION@" " " "(${INKSCAPE_REVISION})";
     char const *version_string_without_revision = "@INKSCAPE_VERSION@";
+    char const *branch_string = "${INKSCAPE_BRANCH}";
+    char const *version_string_with_branch = "@INKSCAPE_VERSION@" " " "(branch: ${INKSCAPE_BRANCH})";
 }
 
