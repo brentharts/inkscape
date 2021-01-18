@@ -587,6 +587,7 @@ void Inkscape::SelTrans::_updateHandles()
     if ( _state == STATE_SCALE ) {
         _showHandles(HANDLE_STRETCH);
         _showHandles(HANDLE_SCALE);
+        _showHandles(HANDLE_CENTER);
     } else if(_state == STATE_ALIGN) {
        _showHandles(HANDLE_SIDE_ALIGN);
        _showHandles(HANDLE_CORNER_ALIGN);
@@ -636,6 +637,8 @@ void Inkscape::SelTrans::_showHandles(SPSelTransType type)
         Geom::Point p(_bbox->min() + (_bbox->dimensions() * Geom::Scale(bpos)));
         knots[i]->moveto(p);
         knots[i]->show();
+        knots[i]->selectKnot(false);
+        // XXX reset location of direction here
 
         // This controls the center handle's position, because the default can
         // be moved and needs to be remembered.
@@ -676,7 +679,7 @@ void Inkscape::SelTrans::_makeHandles()
             }
             case HANDLE_CENTER:
             {
-                auto tip = Glib::ustring::compose(_("<b>Center</b> of rotation and skewing: drag to reposition; scaling with %1 also uses this center"), center_mod);
+                auto tip = Glib::ustring::compose(_("<b>Center</b> of transformation: drag to reposition; scaling, rotation and skew with %1 also uses this center"), center_mod);
                 knots[i] = new SPKnot(_desktop, tip.c_str(), CANVAS_ITEM_CTRL_TYPE_ADJ_CENTER, "SelTrans");
                 break;
             }
@@ -701,8 +704,8 @@ void Inkscape::SelTrans::_makeHandles()
 
         knots[i]->setAnchor(hands[i].anchor);
         knots[i]->setMode(CANVAS_ITEM_CTRL_MODE_XOR);
-        knots[i]->setFill(DEF_COLOR[0], DEF_COLOR[1], DEF_COLOR[1], DEF_COLOR[1]);
-        knots[i]->setStroke(DEF_COLOR[2], DEF_COLOR[3], DEF_COLOR[3], DEF_COLOR[3]);
+        knots[i]->setFill(DEF_COLOR[0], DEF_COLOR[1], DEF_COLOR[1], DEF_COLOR[2]);
+        knots[i]->setStroke(DEF_COLOR[3], DEF_COLOR[4], DEF_COLOR[4], DEF_COLOR[4]);
 
         knots[i]->updateCtrl();
 
@@ -750,7 +753,7 @@ static void sp_sel_trans_handle_click(SPKnot *knot, guint state, SPSelTransHandl
         );
 }
 
-void Inkscape::SelTrans::handleClick(SPKnot */*knot*/, guint state, SPSelTransHandle const &handle)
+void Inkscape::SelTrans::handleClick(SPKnot *knot, guint state, SPSelTransHandle const &handle)
 {
     switch (handle.type) {
         case HANDLE_CENTER:
@@ -766,6 +769,23 @@ void Inkscape::SelTrans::handleClick(SPKnot */*knot*/, guint state, SPSelTransHa
                 }
                 DocumentUndo::done(_desktop->getDocument(), SP_VERB_CONTEXT_SELECT,
                                    _("Reset center"));
+            }
+            // no break, continue.
+        case HANDLE_STRETCH:
+        case HANDLE_SCALE:
+            {
+                // XXX handle.x is a value 0 to 1 from left to right
+                // XXX handle.y is a value 1 to 0 from top to bottom (reversed!)
+                // XXX CENTER always ends up as 0.5/0.5 no matter where it is places.
+                bool was_selected = knot->is_selected();
+                for (auto & child_knot : knots) {
+                    child_knot->selectKnot(false);
+                }
+                if (!was_selected) {
+                    knot->selectKnot(true);
+                }
+                // Select the knot's location for use later.
+                g_warning("Clicked: (%f,%f)", handle.x, handle.y);
             }
             break;
         case HANDLE_SIDE_ALIGN:
