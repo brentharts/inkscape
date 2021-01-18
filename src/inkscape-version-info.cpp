@@ -36,7 +36,7 @@ namespace Inkscape {
  * @return version string
  */
 std::string inkscape_version() {
-    return std::string("Inkscape ") + Inkscape::version_string;
+    return std::string("Inkscape ") + Inkscape::version_string_with_branch;
 }
 
 /**

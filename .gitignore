@@ -17,6 +17,7 @@ inkscape_devel_source.tar.bz2
 .uuid
 .clangd/
 compile_commands.json
+tags
 
 # Snap packaging specific rules
 /snap/.snapcraft/
