@@ -73,6 +73,7 @@ private:
 	void select_stop(size_t index);
 	void set_stop_offset(size_t index, double offset);
 	SPGradient* get_gradient_vector();
+	void fire_stop_selected(SPStop* stop);
 
 	Glib::RefPtr<Gtk::Builder> _builder;
 	GradientSelector* _selector;
@@ -100,6 +101,7 @@ private:
 	SPGradient* _gradient = nullptr;
 	SPDocument* _document = nullptr;
 	OperationBlocker _update;
+	OperationBlocker _notification;
 	Glib::ustring _prefs;
 };
 

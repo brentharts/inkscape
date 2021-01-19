@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
 #ifndef SEEN_GRADIENT_SELECTOR_INTERFACE_H
 #define SEEN_GRADIENT_SELECTOR_INTERFACE_H
 

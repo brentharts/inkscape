@@ -563,8 +563,7 @@ void PaintSelector::set_mode_color(PaintSelector::Mode /*mode*/)
 {
     using Inkscape::UI::Widget::ColorNotebook;
 
-    if ((_mode == PaintSelector::MODE_SWATCH) || (_mode == PaintSelector::MODE_GRADIENT_LINEAR) ||
-        (_mode == PaintSelector::MODE_GRADIENT_RADIAL)) {
+    if (_mode == PaintSelector::MODE_SWATCH) {
         auto gsel = getGradientFromData();
         if (gsel) {
             SPGradient *gradient = gsel->getVector();

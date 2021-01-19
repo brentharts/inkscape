@@ -198,7 +198,7 @@ GradientEditor::GradientEditor(const char* prefs) :
 	// gradient stop selected in a gradient widget; sync list selection
 	_gradient_image.signal_stop_selected().connect([=](size_t index) {
 		select_stop(index);
-		emit_stop_selected(get_current_stop());
+		fire_stop_selected(get_current_stop());
 	});
 	_gradient_image.signal_stop_offset_changed().connect([=](size_t index, double offset) {
 		set_stop_offset(index, offset);
@@ -241,7 +241,7 @@ GradientEditor::GradientEditor(const char* prefs) :
 	selection->signal_changed().connect([=]() {
 		if (!_update.pending()) {
 			stop_selected();
-			emit_stop_selected(get_current_stop());
+			fire_stop_selected(get_current_stop());
 		}
 	});
 
@@ -392,7 +392,7 @@ void GradientEditor::insert_stop_at(double offset) {
 			SPStop* stop = sp_gradient_add_stop_at(vector, offset);
 			// just select next stop; newly added stop will be in a list view after selection refresh (on idle)
 			select_stop(sp_number_of_stops_before_stop(vector, stop));
-			emit_stop_selected(stop);
+			fire_stop_selected(stop);
 		}
 	}
 }
@@ -402,7 +402,7 @@ void GradientEditor::add_stop(SPStop* current) {
 		SPStop* stop = sp_gradient_add_stop(vector, current);
 		// just select next stop; newly added stop will be in a list view after selection refresh (on idle)
 		select_stop(sp_number_of_stops_before_stop(vector, stop));
-		emit_stop_selected(stop);
+		fire_stop_selected(stop);
 	}
 }
 
@@ -470,6 +470,7 @@ void GradientEditor::set_repeat_icon(SPGradientSpread mode) {
 
 void GradientEditor::setGradient(SPGradient* gradient) {
 	auto scoped(_update.block());
+	auto scoped2(_notification.block());
 	_gradient = gradient;
 	_document = gradient ? gradient->document : nullptr;
 	set_gradient(gradient);
@@ -505,6 +506,7 @@ SPGradientSpread GradientEditor::getSpread() {
 }
 
 void GradientEditor::selectStop(SPStop* selected) {
+	auto scoped(_notification.block());
 	// request from the outside to sync stop selection
 	const auto& items = _stop_tree.get_model()->children();
 	auto it = std::find_if(items.begin(), items.end(), [=](const auto& row) {
@@ -564,7 +566,7 @@ void GradientEditor::set_gradient(SPGradient* gradient) {
 		// update related widgets
 		stop_selected();
 		//
-		emit_stop_selected(get_current_stop());
+		// emit_stop_selected(get_current_stop());
 	}
 }
 
@@ -604,6 +606,12 @@ SPStop* GradientEditor::get_current_stop() {
 		return stop;
 	}
 	return nullptr;
+}
+
+void GradientEditor::fire_stop_selected(SPStop* stop) {
+	if (!_notification.pending()) {
+		emit_stop_selected(stop);
+	}
 }
 
 } // namespace Widget

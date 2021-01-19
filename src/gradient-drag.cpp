@@ -224,6 +224,9 @@ Glib::ustring GrDrag::makeStopSafeColor( gchar const *str, bool &isNull )
 
 bool GrDrag::styleSet( const SPCSSAttr *css )
 {
+    // with gradient editor in F&S set style now applies to entire gradient, not selected stops
+    return false;
+
     if (selected.empty()) {
         return false;
     }
