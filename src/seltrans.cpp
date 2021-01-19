@@ -597,6 +597,21 @@ void Inkscape::SelTrans::_updateHandles()
         _showHandles(HANDLE_ROTATE);
         _showHandles(HANDLE_CENTER);
     }
+
+    // Set anchor point, 0.0 is always set if nothing is selected (top/left).
+    double anchor_x, anchor_y = 0.0;
+    for (int i = 0; i < NUMHANDS; i++) {
+        if (knots[i]->is_selected()) {
+            if (hands[i].type == HANDLE_CENTER) {
+                anchor_x = (_center->x() - _bbox->min()[Geom::X]) / _bbox->dimensions()[Geom::X];
+                anchor_y = (_center->y() - _bbox->min()[Geom::Y]) / _bbox->dimensions()[Geom::Y];
+            } else {
+                anchor_x = hands[i].x;
+                anchor_y = (hands[i].y - 0.5) * (-_desktop->yaxisdir()) + 0.5;
+            }
+        }
+    }
+    _desktop->selection->setAnchor(anchor_x, anchor_y);
 }
 
 void Inkscape::SelTrans::_updateVolatileState()
@@ -637,8 +652,6 @@ void Inkscape::SelTrans::_showHandles(SPSelTransType type)
         Geom::Point p(_bbox->min() + (_bbox->dimensions() * Geom::Scale(bpos)));
         knots[i]->moveto(p);
         knots[i]->show();
-        knots[i]->selectKnot(false);
-        // XXX reset location of direction here
 
         // This controls the center handle's position, because the default can
         // be moved and needs to be remembered.
@@ -774,9 +787,6 @@ void Inkscape::SelTrans::handleClick(SPKnot *knot, guint state, SPSelTransHandle
         case HANDLE_STRETCH:
         case HANDLE_SCALE:
             {
-                // XXX handle.x is a value 0 to 1 from left to right
-                // XXX handle.y is a value 1 to 0 from top to bottom (reversed!)
-                // XXX CENTER always ends up as 0.5/0.5 no matter where it is places.
                 bool was_selected = knot->is_selected();
                 for (auto & child_knot : knots) {
                     child_knot->selectKnot(false);
@@ -784,8 +794,7 @@ void Inkscape::SelTrans::handleClick(SPKnot *knot, guint state, SPSelTransHandle
                 if (!was_selected) {
                     knot->selectKnot(true);
                 }
-                // Select the knot's location for use later.
-                g_warning("Clicked: (%f,%f)", handle.x, handle.y);
+                _updateHandles();
             }
             break;
         case HANDLE_SIDE_ALIGN:

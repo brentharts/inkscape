@@ -167,6 +167,21 @@ public:
     }
 
     /**
+     * Set the anchor point of the selection, used for telling it how transforms
+     * should be anchored against.
+     */
+    void setAnchor(double x, double y){
+        if (anchor_x != x || anchor_y != y) {
+            anchor_x = x;
+            anchor_y = y;
+            this->_emitModified(SP_OBJECT_MODIFIED_FLAG);
+        }
+    }
+    // Allow the selection to specify a facus anchor (helps with transforming against this point)
+    double anchor_x;
+    double anchor_y;
+
+    /**
      * Connects a slot to be notified of selected object modifications.
      *
      * This method connects the given slot such that it will

@@ -300,23 +300,42 @@ SelectToolbar::any_value_changed(Glib::RefPtr<Gtk::Adjustment>& adj)
     Unit const *unit = _tracker->getActiveUnit();
     g_return_if_fail(unit != nullptr);
 
+    auto old_w = bbox_user->dimensions()[Geom::X];
+    auto old_h = bbox_user->dimensions()[Geom::Y];
+
     if (unit->type == Inkscape::Util::UNIT_TYPE_LINEAR) {
-        x0 = Quantity::convert(_adj_x->get_value(), unit, "px");
-        y0 = Quantity::convert(_adj_y->get_value(), unit, "px");
-        x1 = x0 + Quantity::convert(_adj_w->get_value(), unit, "px");
-        xrel = Quantity::convert(_adj_w->get_value(), unit, "px") / bbox_user->dimensions()[Geom::X];
-        y1 = y0 + Quantity::convert(_adj_h->get_value(), unit, "px");;
-        yrel = Quantity::convert(_adj_h->get_value(), unit, "px") / bbox_user->dimensions()[Geom::Y];
+        auto new_w = Quantity::convert(_adj_w->get_value(), unit, "px");
+        auto new_h = Quantity::convert(_adj_h->get_value(), unit, "px");
+        auto new_x = Quantity::convert(_adj_x->get_value(), unit, "px");
+        auto new_y = Quantity::convert(_adj_y->get_value(), unit, "px");
+
+        // Adjust depending on the selected anchor.
+        x0 = (new_x - (old_w * selection->anchor_x)) - ((new_w - old_w) * selection->anchor_x);
+        y0 = (new_y - (old_h * selection->anchor_y)) - ((new_h - old_h) * selection->anchor_y);
+
+        x1 = x0 + new_w;
+        xrel = new_w / old_w;
+        y1 = y0 + new_h;
+        yrel = new_h / old_h;
     } else {
-        double const x0_propn = _adj_x->get_value() / 100 / unit->factor;
-        x0 = bbox_user->min()[Geom::X] * x0_propn;
-        double const y0_propn = _adj_y->get_value() / 100 / unit->factor;
-        y0 = y0_propn * bbox_user->min()[Geom::Y];
-        xrel = _adj_w->get_value() / (100 / unit->factor);
-        x1 = x0 + xrel * bbox_user->dimensions()[Geom::X];
-        yrel = _adj_h->get_value() / (100 / unit->factor);
-        y1 = y0 + yrel * bbox_user->dimensions()[Geom::Y];
+        double const x_prop = _adj_x->get_value() / 100 / unit->factor;
+        double const y_prop = _adj_y->get_value() / 100 / unit->factor;
+        double const w_prop = _adj_w->get_value() / 100 / unit->factor;
+        double const h_prop = _adj_h->get_value() / 100 / unit->factor;
+
+        // TODO: This isn't right, because if anchor changes, then X/Y will change too.
+        x0 = bbox_user->min()[Geom::X] * x_prop;
+        y0 = bbox_user->min()[Geom::Y] * y_prop;
+        auto width = old_w * w_prop;
+        auto height = old_h * h_prop;
+
+        //xrel = _adj_w->get_value() / (100 / unit->factor);
+        //x1 = x0 + xrel * bbox_user->dimensions()[Geom::X];
+        //yrel = _adj_h->get_value() / (100 / unit->factor);
+        //y1 = y0 + yrel * bbox_user->dimensions()[Geom::Y];
+        g_error("Percent changed!");
     }
+
 
     // Keep proportions if lock is on
     if ( _lock_btn->get_active() ) {
@@ -402,12 +421,10 @@ SelectToolbar::layout_widget_update(Inkscape::Selection *sel)
             Unit const *unit = _tracker->getActiveUnit();
             g_return_if_fail(unit != nullptr);
 
-            struct { char const *key; double val; } const keyval[] = {
-                { "X", bbox->min()[X] },
-                { "Y", bbox->min()[Y] },
-                { "width", bbox->dimensions()[X] },
-                { "height", bbox->dimensions()[Y] }
-            };
+            auto width = bbox->dimensions()[X];
+            auto height = bbox->dimensions()[Y];
+            auto x = bbox->min()[X] + (width * sel->anchor_x);
+            auto y = bbox->min()[Y] + (height * sel->anchor_y);
 
             if (unit->type == Inkscape::Util::UNIT_TYPE_DIMENSIONLESS) {
                 double const val = unit->factor * 100;
@@ -415,15 +432,15 @@ SelectToolbar::layout_widget_update(Inkscape::Selection *sel)
                 _adj_y->set_value(val);
                 _adj_w->set_value(val);
                 _adj_h->set_value(val);
-                _tracker->setFullVal( _adj_x->gobj(), keyval[0].val );
-                _tracker->setFullVal( _adj_y->gobj(), keyval[1].val );
-                _tracker->setFullVal( _adj_w->gobj(), keyval[2].val );
-                _tracker->setFullVal( _adj_h->gobj(), keyval[3].val );
+                _tracker->setFullVal( _adj_x->gobj(), x );
+                _tracker->setFullVal( _adj_y->gobj(), y );
+                _tracker->setFullVal( _adj_w->gobj(), width );
+                _tracker->setFullVal( _adj_h->gobj(), height );
             } else {
-                _adj_x->set_value(Quantity::convert(keyval[0].val, "px", unit));
-                _adj_y->set_value(Quantity::convert(keyval[1].val, "px", unit));
-                _adj_w->set_value(Quantity::convert(keyval[2].val, "px", unit));
-                _adj_h->set_value(Quantity::convert(keyval[3].val, "px", unit));
+                _adj_x->set_value(Quantity::convert(x, "px", unit));
+                _adj_y->set_value(Quantity::convert(y, "px", unit));
+                _adj_w->set_value(Quantity::convert(width, "px", unit));
+                _adj_h->set_value(Quantity::convert(height, "px", unit));
             }
         }
     }
