@@ -291,51 +291,37 @@ SelectToolbar::any_value_changed(Glib::RefPtr<Gtk::Adjustment>& adj)
         return;
     }
 
-    gdouble x0 = 0;
-    gdouble y0 = 0;
-    gdouble x1 = 0;
-    gdouble y1 = 0;
-    gdouble xrel = 0;
-    gdouble yrel = 0;
     Unit const *unit = _tracker->getActiveUnit();
     g_return_if_fail(unit != nullptr);
 
-    auto old_w = bbox_user->dimensions()[Geom::X];
-    auto old_h = bbox_user->dimensions()[Geom::Y];
+    gdouble old_w = bbox_user->dimensions()[Geom::X];
+    gdouble old_h = bbox_user->dimensions()[Geom::Y];
+    gdouble new_w, new_h, new_x, new_y = 0;
 
     if (unit->type == Inkscape::Util::UNIT_TYPE_LINEAR) {
-        auto new_w = Quantity::convert(_adj_w->get_value(), unit, "px");
-        auto new_h = Quantity::convert(_adj_h->get_value(), unit, "px");
-        auto new_x = Quantity::convert(_adj_x->get_value(), unit, "px");
-        auto new_y = Quantity::convert(_adj_y->get_value(), unit, "px");
+        new_w = Quantity::convert(_adj_w->get_value(), unit, "px");
+        new_h = Quantity::convert(_adj_h->get_value(), unit, "px");
+        new_x = Quantity::convert(_adj_x->get_value(), unit, "px");
+        new_y = Quantity::convert(_adj_y->get_value(), unit, "px");
 
-        // Adjust depending on the selected anchor.
-        x0 = (new_x - (old_w * selection->anchor_x)) - ((new_w - old_w) * selection->anchor_x);
-        y0 = (new_y - (old_h * selection->anchor_y)) - ((new_h - old_h) * selection->anchor_y);
-
-        x1 = x0 + new_w;
-        xrel = new_w / old_w;
-        y1 = y0 + new_h;
-        yrel = new_h / old_h;
     } else {
-        double const x_prop = _adj_x->get_value() / 100 / unit->factor;
-        double const y_prop = _adj_y->get_value() / 100 / unit->factor;
-        double const w_prop = _adj_w->get_value() / 100 / unit->factor;
-        double const h_prop = _adj_h->get_value() / 100 / unit->factor;
+        gdouble old_x = bbox_user->min()[Geom::X] + (old_w * selection->anchor_x);
+        gdouble old_y = bbox_user->min()[Geom::Y] + (old_h * selection->anchor_y);
 
-        // TODO: This isn't right, because if anchor changes, then X/Y will change too.
-        x0 = bbox_user->min()[Geom::X] * x_prop;
-        y0 = bbox_user->min()[Geom::Y] * y_prop;
-        auto width = old_w * w_prop;
-        auto height = old_h * h_prop;
-
-        //xrel = _adj_w->get_value() / (100 / unit->factor);
-        //x1 = x0 + xrel * bbox_user->dimensions()[Geom::X];
-        //yrel = _adj_h->get_value() / (100 / unit->factor);
-        //y1 = y0 + yrel * bbox_user->dimensions()[Geom::Y];
-        g_error("Percent changed!");
+        new_x = old_x * (_adj_x->get_value() / 100 / unit->factor);
+        new_y = old_y * (_adj_y->get_value() / 100 / unit->factor);
+        new_w = old_w * (_adj_w->get_value() / 100 / unit->factor);
+        new_h = old_h * (_adj_h->get_value() / 100 / unit->factor);
     }
 
+    // Adjust depending on the selected anchor.
+    gdouble x0 = (new_x - (old_w * selection->anchor_x)) - ((new_w - old_w) * selection->anchor_x);
+    gdouble y0 = (new_y - (old_h * selection->anchor_y)) - ((new_h - old_h) * selection->anchor_y);
+
+    gdouble x1 = x0 + new_w;
+    gdouble xrel = new_w / old_w;
+    gdouble y1 = y0 + new_h;
+    gdouble yrel = new_h / old_h;
 
     // Keep proportions if lock is on
     if ( _lock_btn->get_active() ) {
