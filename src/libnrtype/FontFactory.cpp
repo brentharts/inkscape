@@ -34,6 +34,13 @@
 #include "libnrtype/font-instance.h"
 #include "libnrtype/OpenTypeUtil.h"
 
+# ifdef _WIN32
+
+#include <glibmm.h>
+#include <windows.h>
+
+#endif
+
 typedef std::unordered_map<PangoFontDescription*, font_instance*, font_descr_hash, font_descr_equal> FaceMapType;
 
 // need to avoid using the size field
@@ -779,6 +786,31 @@ void font_factory::AddInCache(font_instance *who)
     nbEnt++;
 }
 
+# ifdef _WIN32
+void font_factory::AddFontFilesWin32(char const * directory_path )
+{
+    Glib::Dir dir (directory_path);
+    std::list<std::string> allowed_ext = {"fon","fnt","ttf","ttc","fot","otf","mmm","pfb","pfm" };
+    for (Glib::DirIterator i=dir.begin(); i!=dir.end(); i++) {
+		Glib::ustring utf8str = Glib::filename_to_utf8(i.operator*());
+        for (std::string ext : allowed_ext) {
+            if (utf8str.length() >= 3) {
+                if (0 == utf8str.compare (utf8str.length() - 3, 3, ext)) {
+						utf8str = (std::string)directory_path +"\\"+ utf8str;
+                        int result = AddFontResourceExA(utf8str.c_str(),FR_PRIVATE,0);
+						if (result != 0 ){
+							g_info("Font File: %s added sucessfully.",utf8str.c_str());
+						} else {
+							g_warning("Font File: %s wasn't added sucessfully",utf8str.c_str());
+						}
+                }
+            }
+        }
+
+    }
+}
+# endif
+
 void font_factory::AddFontsDir(char const *utf8dir)
 {
 #ifdef USE_PANGO_WIN32
@@ -791,6 +823,7 @@ void font_factory::AddFontsDir(char const *utf8dir)
 
     gchar *dir;
 # ifdef _WIN32
+    AddFontFilesWin32(utf8dir);
     dir = g_win32_locale_filename_from_utf8(utf8dir);
 # else
     dir = g_filename_from_utf8(utf8dir, -1, nullptr, nullptr, nullptr);
