@@ -667,13 +667,22 @@ LPECopyRotate::doOnVisibilityToggled(SPLPEItem const* /*lpeitem*/)
 void 
 LPECopyRotate::doOnRemove (SPLPEItem const* lpeitem)
 {
-    //set "keep paths" hook on sp-lpe-item.cpp
-    if (keep_paths) {
-        processObjects(LPE_TO_OBJECTS);
-        items.clear();
-        return;
+    // set "keep paths" hook on sp-lpe-item.cpp
+    // use hreflist method to update sp_lpe_item because can be bad referenced
+    items.clear();
+    auto hreflist = getLPEObj()->hrefList;
+    if (hreflist.size()) {
+        sp_lpe_item = dynamic_cast<SPLPEItem *>(hreflist.back());
+        if (sp_lpe_item) {
+            //set "keep paths" hook on sp-lpe-item.cpp
+            if (keep_paths) {
+                processObjects(LPE_TO_OBJECTS);
+                items.clear();
+                return;
+            }
+            processObjects(LPE_ERASE);
+        }
     }
-    processObjects(LPE_ERASE);
 }
 
 } //namespace LivePathEffect

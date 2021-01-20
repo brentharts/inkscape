@@ -413,12 +413,20 @@ void
 LPEMirrorSymmetry::doOnRemove (SPLPEItem const* /*lpeitem*/)
 {
     //set "keep paths" hook on sp-lpe-item.cpp
-    if (keep_paths) {
-        processObjects(LPE_TO_OBJECTS);
-        items.clear();
-        return;
+    // use hreflist method to update sp_lpe_item because can be bad referenced
+    items.clear();
+    auto hreflist = getLPEObj()->hrefList;
+    if (hreflist.size()) {
+        sp_lpe_item = dynamic_cast<SPLPEItem *>(hreflist.back());
+        if (sp_lpe_item) {
+            if (keep_paths) {
+                processObjects(LPE_TO_OBJECTS);
+                items.clear();
+                return;
+            }
+            processObjects(LPE_ERASE);
+        }
     }
-    processObjects(LPE_ERASE);
 }
 
 void

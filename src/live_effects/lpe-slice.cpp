@@ -701,24 +701,32 @@ void
 LPESlice::doOnRemove (SPLPEItem const* /*lpeitem*/)
 {
     //set "keep paths" hook on sp-lpe-item.cpp
+    // use hreflist method to update sp_lpe_item because can be bad referenced
     items.clear();
-    Glib::ustring theclass = sp_lpe_item->getId();
-    theclass += "-slice";
-    for (auto item : getSPDoc()->getObjectsByClass(theclass)) {
-        items.emplace_back(item->getId());
-    }
-    if (keep_paths) {
-        processObjects(LPE_TO_OBJECTS);
-        items.clear();
-        return;
-    }
-    if (sp_lpe_item->countLPEOfType(SLICE) == 1) {
-        processObjects(LPE_ERASE);
-    } else {
-        for (auto item: items) {
-            SPItem *extraitem = dynamic_cast<SPItem *>(getSPDoc()->getObjectById(item.c_str()));
-            if (extraitem) {
-                extraitem->setHidden(true);
+    auto hreflist = getLPEObj()->hrefList;
+    if (hreflist.size()) {
+        sp_lpe_item = dynamic_cast<SPLPEItem *>(hreflist.back());
+        if (sp_lpe_item) {
+            items.clear();
+            Glib::ustring theclass = sp_lpe_item->getId();
+            theclass += "-slice";
+            for (auto item : getSPDoc()->getObjectsByClass(theclass)) {
+                items.emplace_back(item->getId());
+            }
+            if (keep_paths) {
+                processObjects(LPE_TO_OBJECTS);
+                items.clear();
+                return;
+            }
+            if (sp_lpe_item->countLPEOfType(SLICE) == 1) {
+                processObjects(LPE_ERASE);
+            } else {
+                for (auto item: items) {
+                    SPItem *extraitem = dynamic_cast<SPItem *>(getSPDoc()->getObjectById(item.c_str()));
+                    if (extraitem) {
+                        extraitem->setHidden(true);
+                    }
+                }
             }
         }
     }

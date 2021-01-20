@@ -667,15 +667,23 @@ void LPEBool::addCanvasIndicators(SPLPEItem const * /*lpeitem*/, std::vector<Geo
 void LPEBool::doOnRemove(SPLPEItem const * /*lpeitem*/)
 {
     // set "keep paths" hook on sp-lpe-item.cpp
-    SPItem *operand = dynamic_cast<SPItem *>(operand_path.getObject());
-    if (operand) {
-        if (keep_paths) {
-            if (is_visible) {
-                operand->deleteObject(true);
-            }
-        } else {
-            if (is_visible) {
-                remove_filter();
+    // use hreflist method to update sp_lpe_item because can be bad referenced
+    items.clear();
+    auto hreflist = getLPEObj()->hrefList;
+    if (hreflist.size()) {
+        sp_lpe_item = dynamic_cast<SPLPEItem *>(hreflist.back());
+        if (sp_lpe_item) {
+            SPItem *operand = dynamic_cast<SPItem *>(operand_path.getObject());
+            if (operand) {
+                if (keep_paths) {
+                    if (is_visible) {
+                        operand->deleteObject(true);
+                    }
+                } else {
+                    if (is_visible) {
+                        remove_filter();
+                    }
+                }
             }
         }
     }
