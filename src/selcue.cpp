@@ -214,7 +214,7 @@ void Inkscape::SelCue::_newItemLines()
             auto line = new Inkscape::CanvasItemGuideLine(_desktop->getCanvasGuides(), "", point, Geom::Point(!horz, horz));
             line->set_z_position(0);
             line->show();
-            line->set_stroke(0xddddaa33);
+            line->set_stroke(0xddddaa11);
             line->set_inverted(true);
             _item_lines.emplace_back(line);
         }

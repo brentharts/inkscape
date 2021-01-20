@@ -576,8 +576,10 @@ void Inkscape::SelTrans::_updateHandles()
     for (auto & knot : knots)
         knot->hide();
 
-    if ( !_show_handles || _empty )
+    if ( !_show_handles || _empty ) {
+        _desktop->selection->setAnchor(0.0, 0.0, false);
         return;
+    }
 
     if (!_center_is_set) {
         _center = _desktop->selection->center();
