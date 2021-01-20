@@ -70,6 +70,11 @@ Inkscape::SelCue::~SelCue()
     }
     _item_bboxes.clear();
 
+    for (auto & item : _item_lines) {
+        delete item;
+    }
+    _item_lines.clear();
+
     for (auto & item : _text_baselines) {
         delete item;
     }
