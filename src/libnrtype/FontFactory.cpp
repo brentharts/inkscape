@@ -790,7 +790,7 @@ void font_factory::AddInCache(font_instance *who)
 void font_factory::AddFontFilesWin32(char const * directory_path )
 {
     Glib::Dir dir (directory_path);
-    std::list<std::string> allowed_ext = {"fon","fnt","ttf","ttc","fot","otf","mmm","pfb","pfm" };
+    std::list<std::string> allowed_ext = {"ttf","otf" };
     for (Glib::DirIterator i=dir.begin(); i!=dir.end(); i++) {
 		Glib::ustring utf8str = Glib::filename_to_utf8(i.operator*());
         for (std::string ext : allowed_ext) {
