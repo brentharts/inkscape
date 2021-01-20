@@ -29,6 +29,7 @@
 #include <pango/pango-ot.h>
 
 #include "io/sys.h"
+#include "io/resource.h"
 
 #include "libnrtype/FontFactory.h"
 #include "libnrtype/font-instance.h"
