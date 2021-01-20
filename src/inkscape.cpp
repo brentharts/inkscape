@@ -634,7 +634,7 @@ Application::crash_handler (int /*signum*/)
             g_snprintf (c, 1024, "%.256s.%s.%d.svg", docname, sptstr, count);
 
             const char* document_uri = doc->getDocumentURI();
-            const char* document_base = nullptr;
+            char* document_base = nullptr;
             if (document_uri) {
                 document_base = g_path_get_dirname(document_uri);
             }
@@ -657,6 +657,9 @@ Application::crash_handler (int /*signum*/)
                     g_snprintf (c, 1024, "%s", filename); // we want the complete path to be stored in c (for reporting purposes)
                     break;
                 }
+            }
+            if (document_base) {
+                g_free(document_base);
             }
 
             // Save
