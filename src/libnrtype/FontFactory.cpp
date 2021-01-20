@@ -792,7 +792,7 @@ void font_factory::AddFontFilesWin32(char const * directory_path )
 {
     std::vector<const char *> allowed_ext = {"ttf","otf" };
     std::vector<Glib::ustring> files = {};
-    IO::Resource::get_filenames_from_path(files,directory_path, allowed_ext,(std::vector<const char *>) {});
+    Inkscape::IO::Resource::get_filenames_from_path(files,directory_path, allowed_ext,(std::vector<const char *>) {});
     for (auto file : files) {
         int result = AddFontResourceExA(file.c_str(),FR_PRIVATE,0);
         if (result != 0 ) {
