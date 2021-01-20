@@ -789,24 +789,16 @@ void font_factory::AddInCache(font_instance *who)
 # ifdef _WIN32
 void font_factory::AddFontFilesWin32(char const * directory_path )
 {
-    Glib::Dir dir (directory_path);
-    std::list<std::string> allowed_ext = {"ttf","otf" };
-    for (Glib::DirIterator i=dir.begin(); i!=dir.end(); i++) {
-		Glib::ustring utf8str = Glib::filename_to_utf8(i.operator*());
-        for (std::string ext : allowed_ext) {
-            if (utf8str.length() >= 3) {
-                if (0 == utf8str.compare (utf8str.length() - 3, 3, ext)) {
-						utf8str = (std::string)directory_path +"\\"+ utf8str;
-                        int result = AddFontResourceExA(utf8str.c_str(),FR_PRIVATE,0);
-						if (result != 0 ){
-							g_info("Font File: %s added sucessfully.",utf8str.c_str());
-						} else {
-							g_warning("Font File: %s wasn't added sucessfully",utf8str.c_str());
-						}
-                }
-            }
-        }
-
+    std::vector<const char *> allowed_ext = {"ttf","otf" };
+    std::vector<Glib::ustring> files = {};
+    IO::Resource::get_filenames_from_path(files,directory_path,{".ttf", ".otf"},(std::vector<const char *>){});
+    for (auto file : files){
+		int result = AddFontResourceExA(file.c_str(),FR_PRIVATE,0);
+		if (result != 0 ){
+			g_info("Font File: %s added sucessfully.",file.c_str());
+		} else {
+			g_warning("Font File: %s wasn't added sucessfully",file.c_str());
+		}
     }
 }
 # endif
