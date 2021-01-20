@@ -276,15 +276,10 @@ SelectToolbar::any_value_changed(Glib::RefPtr<Gtk::Adjustment>& adj)
     SPDocument *document = desktop->getDocument();
 
     document->ensureUpToDate ();
-    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
 
     Geom::OptRect bbox_vis = selection->visualBounds();
     Geom::OptRect bbox_geom = selection->geometricBounds();
-
-    int prefs_bbox = prefs->getInt("/tools/bounding_box");
-    SPItem::BBoxType bbox_type = (prefs_bbox == 0)?
-        SPItem::VISUAL_BBOX : SPItem::GEOMETRIC_BBOX;
-    Geom::OptRect bbox_user = selection->bounds(bbox_type);
+    Geom::OptRect bbox_user = selection->preferredBounds();
 
     if ( !bbox_user ) {
         _update = false;
@@ -361,11 +356,12 @@ SelectToolbar::any_value_changed(Glib::RefPtr<Gtk::Adjustment>& adj)
         // FIXME: fix for GTK breakage, see comment in SelectedStyle::on_opacity_changed
         desktop->getCanvas()->forced_redraws_start(0);
 
+        Inkscape::Preferences *prefs = Inkscape::Preferences::get();
         bool transform_stroke = prefs->getBool("/options/transform/stroke", true);
         bool preserve = prefs->getBool("/options/preservetransform/value", false);
 
         Geom::Affine scaler;
-        if (bbox_type == SPItem::VISUAL_BBOX) {
+        if (prefs->getInt("/tools/bounding_box") == 0) { // SPItem::VISUAL_BBOX
             scaler = get_scale_transform_for_variable_stroke (*bbox_vis, *bbox_geom, transform_stroke, preserve, x0, y0, x1, y1);
         } else {
             // 1) We could have use the newer get_scale_transform_for_variable_stroke() here, but to avoid regressions
@@ -394,15 +390,10 @@ SelectToolbar::layout_widget_update(Inkscape::Selection *sel)
     }
 
     _update = true;
-
-    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     using Geom::X;
     using Geom::Y;
     if ( sel && !sel->isEmpty() ) {
-        int prefs_bbox = prefs->getInt("/tools/bounding_box", 0);
-        SPItem::BBoxType bbox_type = (prefs_bbox ==0)?
-            SPItem::VISUAL_BBOX : SPItem::GEOMETRIC_BBOX;
-        Geom::OptRect const bbox(sel->bounds(bbox_type));
+        Geom::OptRect const bbox(sel->preferredBounds());
         if ( bbox ) {
             Unit const *unit = _tracker->getActiveUnit();
             g_return_if_fail(unit != nullptr);

@@ -599,9 +599,10 @@ void Inkscape::SelTrans::_updateHandles()
     }
 
     // Set anchor point, 0.0 is always set if nothing is selected (top/left).
-    double anchor_x, anchor_y = 0.0;
+    bool set = false;
     for (int i = 0; i < NUMHANDS; i++) {
         if (knots[i]->is_selected()) {
+            double anchor_x, anchor_y = 0.0;
             if (hands[i].type == HANDLE_CENTER) {
                 anchor_x = (_center->x() - _bbox->min()[Geom::X]) / _bbox->dimensions()[Geom::X];
                 anchor_y = (_center->y() - _bbox->min()[Geom::Y]) / _bbox->dimensions()[Geom::Y];
@@ -609,9 +610,12 @@ void Inkscape::SelTrans::_updateHandles()
                 anchor_x = hands[i].x;
                 anchor_y = (hands[i].y - 0.5) * (-_desktop->yaxisdir()) + 0.5;
             }
+            set = true;
+            _desktop->selection->setAnchor(anchor_x, anchor_y);
         }
     }
-    _desktop->selection->setAnchor(anchor_x, anchor_y);
+    if (!set)
+        _desktop->selection->setAnchor(0.0, 0.0, false);
 }
 
 void Inkscape::SelTrans::_updateVolatileState()
