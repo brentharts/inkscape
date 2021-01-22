@@ -506,6 +506,8 @@ SPGradientSpread GradientEditor::getSpread() {
 }
 
 void GradientEditor::selectStop(SPStop* selected) {
+	if (_notification.pending()) return;
+
 	auto scoped(_notification.block());
 	// request from the outside to sync stop selection
 	const auto& items = _stop_tree.get_model()->children();
@@ -594,8 +596,8 @@ void GradientEditor::select_stop(size_t index) {
 	if (index < items.size()) {
 		auto it = items.begin();
 		std::advance(it, index);
-		_stop_tree.get_selection()->select(it);
 		auto path = _stop_tree.get_model()->get_path(it);
+		_stop_tree.get_selection()->select(it);
 		_stop_tree.scroll_to_cell(path, *_stop_tree.get_column(0));
 	}
 }
@@ -610,6 +612,7 @@ SPStop* GradientEditor::get_current_stop() {
 
 void GradientEditor::fire_stop_selected(SPStop* stop) {
 	if (!_notification.pending()) {
+		auto scoped(_notification.block());
 		emit_stop_selected(stop);
 	}
 }

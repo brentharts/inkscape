@@ -861,14 +861,19 @@ SPStop* sp_gradient_add_stop_at(SPGradient* gradient, double offset) {
 
     // find stops before and after given offset
 
-	std::pair<SPStop*, SPStop*> stops = get_before_after_stops(gradient, offset);
+    std::pair<SPStop*, SPStop*> stops = get_before_after_stops(gradient, offset);
 
-	if (stops.first && stops.second) {
-		return sp_vector_add_stop(gradient, stops.first, stops.second, offset);
-	}
-	else {
-		return nullptr;
-	}
+    if (stops.first && stops.second) {
+        auto stop = sp_vector_add_stop(gradient, stops.first, stops.second, offset);
+        if (stop) {
+           DocumentUndo::done(gradient->document, SP_VERB_CONTEXT_GRADIENT,
+                       _("Add gradient stop"));
+        }
+        return stop;
+    }
+    else {
+        return nullptr;
+    }
 }
 
 void sp_set_gradient_stop_color(SPDocument* document, SPStop* stop, SPColor color, double opacity) {
