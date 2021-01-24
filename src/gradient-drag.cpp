@@ -140,11 +140,13 @@ static int gr_drag_style_query(SPStyle *style, int property, gpointer data)
         float cf[4];
         cf[0] = cf[1] = cf[2] = cf[3] = 0;
 
+        SPStop* selected = nullptr;
         int count = 0;
         for(auto d : drag->selected) { //for all selected draggers
             for(auto draggable : d->draggables) { //for all draggables of dragger
                 if (ret == QUERY_STYLE_NOTHING) {
                     ret = QUERY_STYLE_SINGLE;
+                    selected = sp_item_gradient_get_stop(draggable->item, draggable->point_type, draggable->point_i, draggable->fill_or_stroke);
                 } else if (ret == QUERY_STYLE_SINGLE) {
                     ret = QUERY_STYLE_MULTIPLE_AVERAGED;
                 }
@@ -169,9 +171,11 @@ static int gr_drag_style_query(SPStyle *style, int property, gpointer data)
             style->fill.clear();
             style->fill.setColor( cf[0], cf[1], cf[2] );
             style->fill.set = TRUE;
+            style->fill.setTag(selected);
             style->stroke.clear();
             style->stroke.setColor( cf[0], cf[1], cf[2] );
             style->stroke.set = TRUE;
+            style->stroke.setTag(selected);
 
             style->fill_opacity.value = SP_SCALE24_FROM_FLOAT (cf[3]);
             style->fill_opacity.set = TRUE;
@@ -220,6 +224,9 @@ Glib::ustring GrDrag::makeStopSafeColor( gchar const *str, bool &isNull )
 
 bool GrDrag::styleSet( const SPCSSAttr *css )
 {
+    // with gradient editor in F&S set style now applies to entire gradient, not selected stops
+    return false;
+
     if (selected.empty()) {
         return false;
     }

@@ -16,6 +16,7 @@ set(ui_SRC
 	shape-editor-knotholders.cpp
 	simple-pref-pusher.cpp
 	shortcuts.cpp
+	svg-renderer.cpp
 	tool-factory.cpp
 	tools-switch.cpp
 	util.cpp
@@ -103,6 +104,7 @@ set(ui_SRC
 	dialog/debug.cpp
 	dialog/dialog-base.cpp
 	dialog/dialog-container.cpp
+	dialog/dialog-manager.cpp
 	dialog/dialog-multipaned.cpp
 	dialog/dialog-notebook.cpp
 	dialog/dialog-window.cpp
@@ -183,8 +185,10 @@ set(ui_SRC
 	widget/font-variations.cpp
 	widget/frame.cpp
 	widget/gradient-image.cpp
+	widget/gradient-editor.cpp
 	widget/gradient-selector.cpp
 	widget/gradient-vector-selector.cpp
+	widget/gradient-with-stops.cpp
 	widget/highlight-picker.cpp
 	widget/imagetoggler.cpp
 	widget/ink-color-wheel.cpp
@@ -275,6 +279,7 @@ set(ui_SRC
 	dialog/debug.h
 	dialog/dialog-base.h
 	dialog/dialog-container.h
+	dialog/dialog-manager.h
 	dialog/dialog-multipaned.h
 	dialog/dialog-notebook.h
 	dialog/dialog-window.h
@@ -429,6 +434,7 @@ set(ui_SRC
 	widget/font-variations.h
 	widget/frame.h
 	widget/gradient-image.h
+	widget/gradient-editor.h
 	widget/gradient-selector.h
 	widget/gradient-vector-selector.h
 	widget/highlight-picker.h

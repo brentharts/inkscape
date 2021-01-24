@@ -730,6 +730,7 @@ public:
           colorSet(false),
           noneSet(false) {
         value.href = nullptr;
+        tag = nullptr;
         clear();
     }
 
@@ -788,6 +789,9 @@ public:
 
     void setNone() {noneSet = true; colorSet=false;}
 
+    void setTag(SPObject* tag) { this->tag = tag; }
+    SPObject* getTag() { return tag; }
+
   // To do: make private
 public:
     SPPaintOrigin paintOrigin : 2;
@@ -797,6 +801,7 @@ public:
          SPPaintServerReference *href;
          SPColor color;
     } value;
+    SPObject* tag;
 };
 
 
