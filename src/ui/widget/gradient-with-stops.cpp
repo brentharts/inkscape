@@ -31,12 +31,15 @@ namespace Widget {
 
 using namespace Inkscape::IO;
 
-std::string get_stop_template_path() {
-	// "stop handle" template file path
-	return Resource::get_filename(Resource::UIS, "gradient-stop.svg");
+std::string get_stop_template_path(const char* filename) {
+	// "stop handle" template files path
+	return Resource::get_filename(Resource::UIS, filename);
 }
 
-GradientWithStops::GradientWithStops() : _template(get_stop_template_path().c_str()) {
+GradientWithStops::GradientWithStops() :
+	_template(get_stop_template_path("gradient-stop.svg").c_str()),
+	_tip_template(get_stop_template_path("gradient-tip.svg").c_str())
+	{
 	// default color, it will be updated
 	_background_color.set_grey(0.5);
 	// for theming, but not used
@@ -276,7 +279,7 @@ bool GradientWithStops::on_focus(Gtk::DirectionType direction) {
 	}
 
 	grab_focus();
-	// TODO - add focus indicator frame?
+	// TODO - add focus indicator frame or some focus indicator
 	return true;
 }
 
@@ -295,11 +298,12 @@ bool GradientWithStops::on_key_press_event(GdkEventKey* key_event) {
 		delta *= 10;
 	}
 
+	consumed = true;
+
 	switch (key) {
 		case GDK_KEY_Left:
 		case GDK_KEY_KP_Left:
 			move_stop(_focused_stop, -delta);
-			consumed = true;
 			break;
 		case GDK_KEY_Right:
 		case GDK_KEY_KP_Right:
@@ -308,6 +312,9 @@ bool GradientWithStops::on_key_press_event(GdkEventKey* key_event) {
 		case GDK_KEY_BackSpace:
 		case GDK_KEY_Delete:
 			_signal_delete_stop.emit(_focused_stop);
+			break;
+		default:
+			consumed = false;
 			break;
 	}
 
@@ -446,6 +453,8 @@ bool GradientWithStops::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
 	_template.set_style(".inner", "stroke", rgba_to_css_color(bg));
 	_template.set_style(".hole", "fill", rgba_to_css_color(bg));
 
+	auto tip = _tip_template.render(scale);
+
 	for (size_t i = 0; i < _stops.size(); ++i) {
 		const auto& stop = _stops[i];
 
@@ -453,9 +462,8 @@ bool GradientWithStops::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
 		_template.set_style(".color", "fill", rgba_to_css_color(stop.color));
 		_template.set_style(".opacity", "opacity", double_to_css_value(stop.opacity));
 
-		// show/hide selection indicator;
-		// showing selected handle only when we have focus to avoid visual distraction
-		const auto is_selected = has_focus() && _focused_stop == static_cast<int>(i);
+		// show/hide selection indicator
+		const auto is_selected = _focused_stop == static_cast<int>(i);
 		_template.set_style(".selected", "opacity", double_to_css_value(is_selected ? 1 : 0));
 
 		// render stop handle
@@ -466,12 +474,26 @@ bool GradientWithStops::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
 			break;
 		}
 
+		auto pos = get_stop_position(i, layout);
+
+		// selected handle sports a 'tip' to make it easily noticable
+		if (is_selected && tip) {
+			if (auto surface = Gdk::Cairo::create_surface_from_pixbuf(tip, 1)) {
+				cr->save();
+				// scale back to physical pixels
+				cr->scale(1 / scale, 1 / scale);
+				// paint tip bitmap
+				cr->set_source(surface, round(pos.tip * scale - tip->get_width() / 2), layout.y * scale);
+				cr->paint();
+				cr->restore();
+			}
+		}
+
 		// surface from pixbuf *without* scaling (scale = 1)
 		auto surface = Gdk::Cairo::create_surface_from_pixbuf(pix, 1);
 		if (!surface) continue;
 
 		// calc space available for stop marker
-		auto pos = get_stop_position(i, layout);
 		cr->save();
 		cr->rectangle(pos.left, layout.y, pos.right - pos.left, layout.height);
 		cr->clip();

@@ -86,7 +86,10 @@ private:
 		double opacity;
 	};
 	std::vector<stop_t> _stops;
+	// handle stop SVG template
 	svg_renderer _template;
+	// selected handle indicator
+	svg_renderer _tip_template;
 	auto_connection _release;
 	auto_connection _modified;
 	Gdk::RGBA _background_color;

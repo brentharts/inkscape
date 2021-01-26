@@ -219,7 +219,16 @@ GradientEditor::GradientEditor(const char* prefs) :
 
 	// gradient library in a popup
 	_popover.add(*_selector);
+	const int h = 5;
+	const int v = 3;
+	_selector->set_margin_start(h);
+	_selector->set_margin_end(h);
+	_selector->set_margin_top(v);
+	_selector->set_margin_bottom(v);
 	_selector->show();
+	_selector->show_edit_button(false);
+	_selector->set_gradient_size(160, 20);
+	_selector->set_name_col_size(120);
 	// gradient changed is currently the only signal that GradientSelector can emit:
 	_selector->signal_changed().connect([=](SPGradient* gradient) {
 		// new gradient selected from the library

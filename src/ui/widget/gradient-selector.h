@@ -119,6 +119,10 @@ class GradientSelector : public Gtk::Box, public GradientSelectorInterface {
   public:
     GradientSelector();
 
+    void show_edit_button(bool show);
+    void set_name_col_size(int min_width);
+    void set_gradient_size(int width, int height);
+
     inline decltype(_signal_changed) signal_changed() const { return _signal_changed; }
     inline decltype(_signal_grabbed) signal_grabbed() const { return _signal_grabbed; }
     inline decltype(_signal_dragged) signal_dragged() const { return _signal_dragged; }
