@@ -417,7 +417,7 @@ void GradientEditor::add_stop(SPStop* current) {
 
 void GradientEditor::delete_stop(int index) {
 	if (SPGradient* vector = get_gradient_vector()) {
-		if (SPStop* stop = sp_get_stop_i(vector, index)) {
+		if (SPStop* stop = sp_get_nth_stop(vector, index)) {
 			// try deleting a stop, if it can be
 			sp_gradient_delete_stop(vector, stop);
 		}

@@ -621,32 +621,32 @@ SPStop *sp_last_stop(SPGradient *gradient)
 }
 
 std::pair<SPStop*, SPStop*> sp_get_before_after_stops(SPStop* stop) {
-	SPStop* before = nullptr;
-	SPStop* after = nullptr;
+   SPStop* before = nullptr;
+   SPStop* after = nullptr;
 
-	if (stop) {
-		before = stop->getPrevStop();
-		after = stop->getNextStop();
-	}
+   if (stop) {
+      before = stop->getPrevStop();
+      after = stop->getNextStop();
+   }
 
-	return std::make_pair(before, after);
+   return std::make_pair(before, after);
 }
 
 static std::pair<SPStop*, SPStop*> get_before_after_stops(SPGradient* gradient, double offset) {
-	SPStop* before = nullptr;
-	SPStop* after = nullptr;
+   SPStop* before = nullptr;
+   SPStop* after = nullptr;
 
-	SPStop* stop = gradient->getFirstStop();
-	while (stop && stop->offset < offset) {
-		before = stop;
-		stop = stop->getNextStop();
-	}
+   SPStop* stop = gradient->getFirstStop();
+   while (stop && stop->offset < offset) {
+      before = stop;
+      stop = stop->getNextStop();
+   }
 
-	if (stop && stop->offset > offset) {
-		after = stop;
-	}
+   if (stop && stop->offset > offset) {
+      after = stop;
+   }
 
-	return std::make_pair(before, after);
+   return std::make_pair(before, after);
 }
 
 guint sp_number_of_stops_before_stop(SPGradient* gradient, SPStop* target) {
@@ -656,11 +656,25 @@ guint sp_number_of_stops_before_stop(SPGradient* gradient, SPStop* target) {
     for (SPStop* stop = gradient->getFirstStop(); stop != nullptr; stop = stop->getNextStop()) {
         if (stop == target) {
             return n;
-		  }
+        }
         n++;
     }
     return n;
 } 
+
+
+SPStop* sp_get_nth_stop(SPGradient* gradient, guint index) {
+    SPStop* stop = gradient->getFirstStop();
+    if (!stop) return nullptr;
+
+    for (guint i = 0; i < index; ++i) {
+        if (!stop) return nullptr;
+
+        stop = stop->getNextStop();
+    }
+
+    return stop;
+}
 
 
 SPStop *sp_get_stop_i(SPGradient *gradient, guint stop_i)
@@ -703,17 +717,36 @@ SPStop *sp_vector_add_stop(SPGradient *vector, SPStop* prev_stop, SPStop* next_s
 #ifdef SP_GR_VERBOSE
     g_message("sp_vector_add_stop(%p, %p, %p, %f)", vector, prev_stop, next_stop, offset);
 #endif
+    SPStop* newstop = nullptr;
+    // this function doesn't deal with empty gradients
+    if (!prev_stop && !next_stop) return newstop;
 
+    guint cnew = 0; // new color
     Inkscape::XML::Node *new_stop_repr = nullptr;
-    new_stop_repr = prev_stop->getRepr()->duplicate(vector->getRepr()->document());
-    vector->getRepr()->addChild(new_stop_repr, prev_stop->getRepr());
 
-    SPStop *newstop = reinterpret_cast<SPStop *>(vector->document->getObjectByRepr(new_stop_repr));
+    if (!prev_stop || !next_stop) {
+       // inserting stop past next or before previous is supported
+       SPStop* stop = prev_stop ? prev_stop : next_stop;
+       auto repr = stop->getRepr();
+       new_stop_repr = repr->duplicate(vector->getRepr()->document());
+       vector->getRepr()->addChild(new_stop_repr, prev_stop ? repr : nullptr);
+
+       cnew = stop->get_rgba32();
+    }
+    else {
+        auto repr = prev_stop->getRepr();
+        new_stop_repr = repr->duplicate(vector->getRepr()->document());
+        vector->getRepr()->addChild(new_stop_repr, repr);
+
+        guint32 const c1 = prev_stop->get_rgba32();
+        guint32 const c2 = next_stop->get_rgba32();
+        cnew = average_color (c1, c2, (offset - prev_stop->offset) / (next_stop->offset - prev_stop->offset));
+    }
+
+    newstop = reinterpret_cast<SPStop *>(vector->document->getObjectByRepr(new_stop_repr));
     newstop->offset = offset;
     sp_repr_set_css_double( newstop->getRepr(), "offset", (double)offset);
-    guint32 const c1 = prev_stop->get_rgba32();
-    guint32 const c2 = next_stop->get_rgba32();
-    guint32 cnew = average_color (c1, c2, (offset - prev_stop->offset) / (next_stop->offset - prev_stop->offset));
+
     Inkscape::CSSOStringStream os;
     gchar c[64];
     sp_svg_write_color (c, sizeof(c), cnew);
@@ -725,30 +758,14 @@ SPStop *sp_vector_add_stop(SPGradient *vector, SPStop* prev_stop, SPStop* next_s
     return newstop;
 }
 
-// delete gradient's stop; function lifted from gradient-vector.cpp
+// delete gradient's stop
 void sp_gradient_delete_stop(SPGradient* gradient, SPStop* stop) {
 
     if (!stop || !gradient) {
         return;
     }
 
-    if (gradient->vector.stops.size() > 2) { // 2 is the minimum
-
-        // if we delete first or last stop, move the next/previous to the edge
-        if (stop->offset == 0) {
-            SPStop *next = stop->getNextStop();
-            if (next) {
-                next->offset = 0;
-                sp_repr_set_css_double(next->getRepr(), "offset", 0);
-            }
-        } else if (stop->offset == 1) {
-            SPStop *prev = stop->getPrevStop();
-            if (prev) {
-                prev->offset = 1;
-                sp_repr_set_css_double(prev->getRepr(), "offset", 1);
-            }
-        }
-
+    if (gradient->getStopCount() > 2) { // 2 is the minimum
         gradient->getRepr()->removeChild(stop->getRepr());
         DocumentUndo::done(gradient->document, SP_VERB_CONTEXT_GRADIENT,
                            _("Delete gradient stop"));
@@ -863,7 +880,7 @@ SPStop* sp_gradient_add_stop_at(SPGradient* gradient, double offset) {
 
     std::pair<SPStop*, SPStop*> stops = get_before_after_stops(gradient, offset);
 
-    if (stops.first && stops.second) {
+    if (stops.first || stops.second) {
         auto stop = sp_vector_add_stop(gradient, stops.first, stops.second, offset);
         if (stop) {
            DocumentUndo::done(gradient->document, SP_VERB_CONTEXT_GRADIENT,
@@ -877,12 +894,12 @@ SPStop* sp_gradient_add_stop_at(SPGradient* gradient, double offset) {
 }
 
 void sp_set_gradient_stop_color(SPDocument* document, SPStop* stop, SPColor color, double opacity) {
-	sp_repr_set_css_double(stop->getRepr(), "offset", stop->offset);
-	Inkscape::CSSOStringStream os;
-	os << "stop-color:" << color.toString() << ";stop-opacity:" << opacity <<";";
-	stop->setAttribute("style", os.str());
+   sp_repr_set_css_double(stop->getRepr(), "offset", stop->offset);
+   Inkscape::CSSOStringStream os;
+   os << "stop-color:" << color.toString() << ";stop-opacity:" << opacity <<";";
+   stop->setAttribute("style", os.str());
 
-	DocumentUndo::done(document, SP_VERB_CONTEXT_GRADIENT, _("Change gradient stop color"));
+   DocumentUndo::done(document, SP_VERB_CONTEXT_GRADIENT, _("Change gradient stop color"));
 }
 
 SPStop* sp_item_gradient_get_stop(SPItem *item, GrPointType point_type, guint point_i, Inkscape::PaintTarget fill_or_stroke) {
@@ -919,7 +936,7 @@ SPStop* sp_item_gradient_get_stop(SPItem *item, GrPointType point_type, guint po
                 g_warning( "Bad linear/radial gradient handle type" );
                 break;
         }
-	 }
+    }
     return nullptr;
 }
 
@@ -1135,7 +1152,7 @@ void sp_item_gradient_reverse_vector(SPItem *item, Inkscape::PaintTarget fill_or
     g_message("sp_item_gradient_reverse_vector(%p, %d)", item, fill_or_stroke);
 #endif
     SPGradient *gradient = getGradient(item, fill_or_stroke);
-	 sp_gradient_reverse_vector(gradient);
+    sp_gradient_reverse_vector(gradient);
 }
 
 void sp_gradient_reverse_vector(SPGradient* gradient) {

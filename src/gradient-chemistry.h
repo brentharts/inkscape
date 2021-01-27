@@ -66,6 +66,8 @@ SPGradient *sp_gradient_get_forked_vector_if_necessary(SPGradient *gradient, boo
 
 SPStop* sp_last_stop(SPGradient *gradient);
 SPStop* sp_get_stop_i(SPGradient *gradient, unsigned int i);
+// return n-th stop counting from 0; make no assumptions about offsets 
+SPStop* sp_get_nth_stop(SPGradient* gradient, unsigned int index);
 std::pair<SPStop*, SPStop*> sp_get_before_after_stops(SPStop* stop);
 unsigned int sp_number_of_stops(SPGradient const *gradient);
 unsigned int sp_number_of_stops_before_stop(SPGradient* gradient, SPStop *target);

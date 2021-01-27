@@ -228,32 +228,26 @@ GradientWithStops::limits_t GradientWithStops::get_stop_limits(int maybe_index) 
 	if (index < v.size()) {
 		double min = 0;
 		double max = 1;
-		// special cases:
-		if (index == 0) {
-			min = max = 0; // cannot move first stop
-			if (v.front().offset > 0) { // unless its offset is not zero (degenerate case)
-				max = std::min_element(begin(_stops), end(_stops),
-					[&](auto& s1, auto& s2) { return s1.offset < s2.offset; })->offset;
-			}
-		}
-		else if (index + 1 == v.size()) {
-			min = max = 1; // cannot move last stop
-			if (v.back().offset < 1) { // unless its offset is not 1 (degenerate case)
-				min = std::max_element(begin(_stops), end(_stops),
-					[&](auto& s1, auto& s2) { return s1.offset < s2.offset; })->offset;
-			}
-		}
-		else {
-			// stops "inside" gradient
-			if (index > 0) {
-				min = v[index - 1].offset;
-			}
-			if (index + 1 < v.size()) {
-				max = v[index + 1].offset;
-			}
 
-			if (min > max) {
-				std::swap(min, max);
+		if (v.size() > 1) {
+				std::vector<double> offsets;
+				offsets.reserve(v.size());
+				for (auto& s : _stops) {
+					offsets.push_back(s.offset);
+				}
+				std::sort(offsets.begin(), offsets.end());
+
+			// special cases:
+			if (index == 0) { // first stop
+				max = offsets[index + 1];
+			}
+			else if (index + 1 == v.size()) { // last stop
+				min = offsets[index - 1];
+			}
+			else {
+				// stops "inside" gradient
+				min = offsets[index - 1];
+				max = offsets[index + 1];
 			}
 		}
 		return limits_t { .min_offset = min, .max_offset = max, .offset = v[index].offset };
