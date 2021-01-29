@@ -53,10 +53,7 @@ Glib::ustring extract_tag( guint32 *tag ) {
 }
 
 
-// TODO: Ideally, we should use the HB_VERSION_ATLEAST macro here,
-// but this was only released in harfbuzz >= 0.9.30
-// #if HB_VERSION_ATLEAST(1,2,3)
-#if HB_VERSION_MAJOR*10000 + HB_VERSION_MINOR*100 + HB_VERSION_MICRO >= 10203
+#if HB_VERSION_ATLEAST(1,2,3)  // Released Feb 2016
 void get_glyphs( hb_font_t* font, hb_set_t* set, Glib::ustring& characters) {
 
     // There is a unicode to glyph mapping function but not the inverse!
@@ -136,10 +133,7 @@ void readOpenTypeGsubTable (hb_font_t* hb_font,
         }
     }
 
-// TODO: Ideally, we should use the HB_VERSION_ATLEAST macro here,
-// but this was only released in harfbuzz >= 0.9.30
-// #if HB_VERSION_ATLEAST(1,2,3)
-#if HB_VERSION_MAJOR*10000 + HB_VERSION_MINOR*100 + HB_VERSION_MICRO >= 10203
+#if HB_VERSION_ATLEAST(1,2,3)  // Released Feb 2016
     // Find glyphs in OpenType substitution tables ('gsub').
     // Note that pango's functions are just dummies. Must use harfbuzz.
 
