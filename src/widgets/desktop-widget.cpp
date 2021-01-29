@@ -80,6 +80,7 @@
 #include "spw-utilities.h"
 #include "toolbox.h"
 #include "widget-sizes.h"
+#include "ui/widget/color-palette.h"
 
 #ifdef GDK_WINDOWING_QUARTZ
 #include <gtkosxapplication.h>
@@ -205,9 +206,13 @@ SPDesktopWidget::SPDesktopWidget()
 
     /* Swatches panel */
     {
+        auto panel = Gtk::manage(new Inkscape::UI::Widget::ColorPalette());
+        auto sets = Inkscape::UI::Dialog::SwatchesPanel::getSwatchSets();
+      //   panel->set_vexpand(false);
         dtw->_panels = Gtk::manage(new Inkscape::UI::Dialog::SwatchesPanel("/embedded/swatches"));
         dtw->_panels->set_vexpand(false);
-        dtw->_vbox->pack_end(*dtw->_panels, false, true);
+      //   dtw->_vbox->pack_end(*dtw->_panels, false, true);
+        dtw->_vbox->pack_end(*panel, false, true);
     }
 
     /* DesktopHBox (Vertical toolboxes, canvas) */

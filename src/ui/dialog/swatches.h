@@ -45,6 +45,7 @@ public:
     ~SwatchesPanel() override;
 
     static SwatchesPanel& getInstance();
+    static std::vector<SwatchPage*> getSwatchSets();
 
     void update() override;
     virtual SPDesktop* getDesktop() {return _currentDesktop;}

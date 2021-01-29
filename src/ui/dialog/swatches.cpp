@@ -1297,6 +1297,13 @@ std::vector<SwatchPage*> SwatchesPanel::_getSwatchSets() const
     return tmp;
 }
 
+std::vector<SwatchPage*> SwatchesPanel::getSwatchSets() {
+    std::vector<SwatchPage*> tmp;
+    tmp.insert(tmp.end(), userSwatchPages.begin(), userSwatchPages.end());
+    tmp.insert(tmp.end(), systemSwatchPages.begin(), systemSwatchPages.end());
+    return tmp;
+}
+
 void SwatchesPanel::_updateFromSelection()
 {
     SwatchPage *docPalette = (docPalettes.find(_currentDocument) != docPalettes.end()) ? docPalettes[_currentDocument] : nullptr;
