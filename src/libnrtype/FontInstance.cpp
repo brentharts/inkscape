@@ -213,7 +213,7 @@ void font_instance::InitTheFace(bool loadgsub)
         // Pango has already created HarfBuzz font under-the-hood. No need to recreate.
         hb_font_t* hb_font = pango_font_get_hb_font(pFont); // Pango owns hb_font.
 #else
-        auto const hb_face = hb_ft_face_create(theFace, nullptr); We own.
+        auto const hb_face = hb_ft_face_create(theFace, nullptr); // We own.
         hb_font_t* hb_font = hb_font_create (hb_face);
 #endif
 
