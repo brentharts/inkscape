@@ -113,7 +113,7 @@ SPObject *next_layer(SPObject *root, SPObject *layer) {
     SPObject *sibling = next_sibling_layer(layer);
     if (sibling) {
         result = first_descendant_layer(sibling);
-    } else if ( layer->parent != root ) {
+    } else {
         result = layer->parent;
     }
 
