@@ -1298,6 +1298,7 @@ std::vector<SwatchPage*> SwatchesPanel::_getSwatchSets() const
 }
 
 std::vector<SwatchPage*> SwatchesPanel::getSwatchSets() {
+    load_palettes();
     std::vector<SwatchPage*> tmp;
     tmp.insert(tmp.end(), userSwatchPages.begin(), userSwatchPages.end());
     tmp.insert(tmp.end(), systemSwatchPages.begin(), systemSwatchPages.end());

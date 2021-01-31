@@ -2,6 +2,9 @@
 #include <gtkmm/popover.h>
 #include <gtkmm/scale.h>
 #include <gtkmm/cssprovider.h>
+#include <gtkmm/button.h>
+#include <gtkmm/scrollbar.h>
+#include <gtkmm/menu.h>
 
 #include "color-palette.h"
 #include "ui/builder-utils.h"
@@ -15,6 +18,8 @@ ColorPalette::ColorPalette():
 	_flowbox(get_widget<Gtk::FlowBox>(_builder, "flow-box")),
 	_menu(get_widget<Gtk::Menu>(_builder, "menu")),
 	_scroll_btn(get_widget<Gtk::FlowBox>(_builder, "scroll-buttons")),
+	_scroll_left(get_widget<Gtk::Button>(_builder, "btn-left")),
+	_scroll_right(get_widget<Gtk::Button>(_builder, "btn-right")),
 	_scroll(get_widget<Gtk::ScrolledWindow>(_builder, "scroll-wnd"))
 	{
 
@@ -26,44 +31,67 @@ ColorPalette::ColorPalette():
 	config.signal_activate().connect([=,&dlg](){
 		dlg.popup();
 	});
+
 	auto& size = get_widget<Gtk::Scale>(_builder, "size-slider");
 	size.signal_change_value().connect([=,&size](Gtk::ScrollType, double val) {
-		set_tile_size(static_cast<int>(val)); return true; });
+		set_tile_size(static_cast<int>(size.get_value())); return true; });
 
 	auto& border = get_widget<Gtk::Scale>(_builder, "border-slider");
 	border.signal_change_value().connect([=,&border](Gtk::ScrollType, double val) {
-		set_tile_border(static_cast<int>(val)); return true; });
+		set_tile_border(static_cast<int>(border.get_value())); return true; });
 
 	auto& rows = get_widget<Gtk::Scale>(_builder, "row-slider");
 	rows.signal_change_value().connect([=,&rows](Gtk::ScrollType, double val) {
-		set_rows(static_cast<int>(val)); return true; });
+		set_rows(static_cast<int>(rows.get_value())); return true; });
 
 	_scroll.set_min_content_height(1);
 
 	auto css_provider = Gtk::CssProvider::create();
 	css_provider->load_from_data(
-	"flowboxchild {"
+	"flowboxchild, flowbox, scrolledwindow {"
 	" padding: 0;"
-	" min-width: 0;"
-	" min-height: 0;"
-	"}"
-	"scrolledwindow {"
-	" padding: 0;"
-	// " min-content-height: 1px;"
-	"}"
-	"menubutton {"
-	" padding: 0;"
+	" border: 0;"
+	" margin: 0;"
+	" min-width: 1px;"
+	" min-height: 1px;"
+	"}\n"
+	// "flowbox { background: #ff0000; } "
+	// "scrolledwindow { background: #0000ff; } "
+	// "bin { background: #ffff00; } "
+	// "box.main-box { background: #ff4ff0; border: 1px solid #ff0000; } "
+	".small {"
+	" padding: 1px;"
+	" margin: 0;"
 	"}"
 	);
-	this->get_style_context()->add_provider(css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+	// this->get_style_context()->add_provider(css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
+	get_style_context()->add_provider_for_screen(this->get_screen(), css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+
+	get_widget<Gtk::Button>(_builder, "btn-down").signal_clicked().connect([=](){ scroll(0, _size + _border); });
+	get_widget<Gtk::Button>(_builder, "btn-up").signal_clicked().connect([=](){ scroll(0, -(_size + _border)); });
+
+	// free();
 	set_up_scrolling();
+	// auto vert = _scroll.get_vscrollbar();
+	// g_warning("vert: %p", vert);
+	// vert->s
+
+	set_valign(Gtk::ALIGN_START);
+	set_vexpand(false);
+	set_vexpand_set(true);
+}
+
+void ColorPalette::scroll(int dx, int dy) {
+	if (auto vert = _scroll.get_vscrollbar()) {
+		vert->set_value(vert->get_value() + dy);
+	}
 }
 
 void ColorPalette::set_tile_border(int border) {
 	if (border == _size) return;
 
-	if (border < 1 || border > 100) {
+	if (border < 0 || border > 100) {
 		g_warning("Unexpected tile border size of color palette: %d", border);
 		return;
 	}
@@ -99,16 +127,23 @@ void ColorPalette::set_rows(int rows) {
 void ColorPalette::set_up_scrolling() {
 	if (_rows == 1) {
 		// horizontal scrolling with single row
+		_flowbox.set_max_children_per_line(_count);
+		_flowbox.set_min_children_per_line(_count);
+		//
 		_scroll_btn.hide();
-		_scroll.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_NEVER);
-		int count = 0;
-		_flowbox.foreach([&](Gtk::Widget&){ ++count; });
-		_flowbox.set_min_children_per_line(std::max(1, count));
+		_scroll_left.show();
+		_scroll_right.show();
+// 'always' allocates space for scrollbar
+		_scroll.set_policy(Gtk::POLICY_EXTERNAL, Gtk::POLICY_NEVER);
 	}
 	else {
 		// vertical scrolling with multiple rows
+		// 'external' allows scrollbar to shrink vertically
 		_scroll.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_EXTERNAL);
 		_flowbox.set_min_children_per_line(1);
+		_flowbox.set_max_children_per_line(_count);
+		_scroll_left.hide();
+		_scroll_right.hide();
 		_scroll_btn.show();
 	}
 
@@ -116,8 +151,19 @@ void ColorPalette::set_up_scrolling() {
 }
 
 void ColorPalette::resize() {
-	int height = (_size + _border) * _rows;
-	_scroll.set_size_request(1, height);
+	if (_rows == 1) {
+		// auto size for single row to allocate space for scrollbar
+		_scroll.set_size_request(-1, -1);
+	}
+	else {
+		// exact size for multiple rows
+		int height = (_size + _border) * _rows - _border;
+		height += _flowbox.get_margin_top() + _flowbox.get_margin_bottom();
+		_scroll.set_size_request(1, height);
+	}
+
+	_flowbox.set_column_spacing(_border);
+	_flowbox.set_row_spacing(_border);
 
 	_flowbox.foreach([=](Gtk::Widget& w){
 		w.set_size_request(_size, _size);
@@ -134,6 +180,9 @@ void ColorPalette::free() {
 }
 
 void ColorPalette::set_colors(const std::vector<Gtk::Widget*>& swatches) {
+	_flowbox.freeze_notify();
+	_flowbox.freeze_child_notify();
+
 	free();
 
 	int count = 0;
@@ -144,11 +193,46 @@ void ColorPalette::set_colors(const std::vector<Gtk::Widget*>& swatches) {
 		}
 	}	
 
-	if (_rows == 1) {
-		_flowbox.set_min_children_per_line(std::max(1, count));
-	}
+	_flowbox.show_all();
+	_count = std::max(1, count);
+	// if (_rows == 1) {
+		// _flowbox.set_min_children_per_line(std::max(1, count));
+	// }
+	_flowbox.set_max_children_per_line(_count);
 
-	resize();
+	// resize();
+	set_up_scrolling();
+
+	_flowbox.thaw_child_notify();
+	_flowbox.thaw_notify();
+}
+
+void ColorPalette::set_palettes(const std::vector<Glib::ustring>& palettes) {
+	auto& menu = get_widget<Gtk::Menu>(_builder, "menu");
+	auto items = menu.get_children();
+	auto count = items.size();
+
+	int index = 0;
+	while (count > 2) {
+		if (auto item = items[index++]) {
+			menu.remove(*item);
+			delete item;
+		}
+		count--;
+	}
+// for (auto& name : palettes) menu.append(*Gtk::manage(new Gtk::MenuItem(name)));
+
+	for (auto it = palettes.rbegin(); it != palettes.rend(); ++it) {
+		auto& name = *it;
+		auto item = Gtk::manage(new Gtk::MenuItem(name));
+		item->signal_activate().connect([=](){ _signal_palette_selected.emit(name); });
+		item->show();
+		menu.prepend(*item);
+	}
+}
+
+sigc::signal<void, Glib::ustring>& ColorPalette::get_palette_selected_signal() {
+	return _signal_palette_selected;
 }
 
 }}} // namespace

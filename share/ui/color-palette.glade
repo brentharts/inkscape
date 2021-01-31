@@ -2,15 +2,14 @@
 <!-- Generated with glade 3.38.1 -->
 <interface>
   <requires lib="gtk+" version="3.24"/>
-  <!-- interface-css-provider-path test.css -->
   <object class="GtkAdjustment" id="adjustment-border">
-    <property name="upper">10</property>
+    <property name="upper">16</property>
     <property name="step-increment">1</property>
     <property name="page-increment">1</property>
   </object>
   <object class="GtkAdjustment" id="adjustment-rows">
     <property name="lower">1</property>
-    <property name="upper">10</property>
+    <property name="upper">16</property>
     <property name="value">1</property>
     <property name="step-increment">1</property>
     <property name="page-increment">1</property>
@@ -30,13 +29,24 @@
   <object class="GtkImage" id="image2">
     <property name="visible">True</property>
     <property name="can-focus">False</property>
-    <property name="icon-name">go-down</property>
+    <property name="pixbuf">go-down.svg</property>
+  </object>
+  <object class="GtkImage" id="image4">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <property name="icon-name">go-next</property>
+  </object>
+  <object class="GtkImage" id="image5">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <property name="icon-name">go-previous</property>
   </object>
   <object class="GtkMenu" id="menu">
     <property name="visible">True</property>
     <property name="can-focus">False</property>
     <child>
       <object class="GtkSeparatorMenuItem">
+        <property name="height-request">12</property>
         <property name="visible">True</property>
         <property name="can-focus">False</property>
       </object>
@@ -55,13 +65,13 @@
     <property name="can-focus">False</property>
     <child>
       <object class="GtkScrolledWindow" id="scroll-wnd">
-        <property name="height-request">32</property>
         <property name="visible">True</property>
         <property name="can-focus">True</property>
         <property name="valign">end</property>
         <property name="hexpand">True</property>
         <property name="vexpand">True</property>
-        <property name="vscrollbar-policy">external</property>
+        <property name="hscrollbar-policy">external</property>
+        <property name="vscrollbar-policy">never</property>
         <property name="min-content-width">1</property>
         <property name="min-content-height">1</property>
         <property name="overlay-scrolling">False</property>
@@ -76,142 +86,14 @@
                 <property name="can-focus">False</property>
                 <property name="halign">start</property>
                 <property name="valign">end</property>
+                <property name="margin-top">1</property>
+                <property name="margin-bottom">1</property>
                 <property name="homogeneous">True</property>
-                <property name="column-spacing">2</property>
-                <property name="row-spacing">2</property>
-                <property name="min-children-per-line">10</property>
-                <property name="max-children-per-line">70</property>
+                <property name="column-spacing">1</property>
+                <property name="row-spacing">1</property>
+                <property name="min-children-per-line">6</property>
+                <property name="max-children-per-line">6</property>
                 <property name="selection-mode">none</property>
-                <child>
-                  <object class="GtkFlowBoxChild">
-                    <property name="width-request">100</property>
-                    <property name="height-request">80</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="halign">start</property>
-                    <property name="valign">start</property>
-                    <child>
-                      <placeholder/>
-                    </child>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkFlowBoxChild">
-                    <property name="width-request">100</property>
-                    <property name="height-request">80</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="halign">start</property>
-                    <property name="valign">start</property>
-                    <child>
-                      <placeholder/>
-                    </child>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkFlowBoxChild">
-                    <property name="width-request">100</property>
-                    <property name="height-request">80</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="halign">start</property>
-                    <property name="valign">start</property>
-                    <child>
-                      <placeholder/>
-                    </child>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkFlowBoxChild">
-                    <property name="width-request">100</property>
-                    <property name="height-request">80</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="halign">start</property>
-                    <property name="valign">start</property>
-                    <child>
-                      <placeholder/>
-                    </child>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkFlowBoxChild">
-                    <property name="width-request">100</property>
-                    <property name="height-request">80</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="halign">start</property>
-                    <property name="valign">start</property>
-                    <child>
-                      <placeholder/>
-                    </child>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkFlowBoxChild">
-                    <property name="width-request">100</property>
-                    <property name="height-request">80</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="halign">start</property>
-                    <property name="valign">start</property>
-                    <child>
-                      <placeholder/>
-                    </child>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkFlowBoxChild">
-                    <property name="width-request">100</property>
-                    <property name="height-request">80</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="halign">start</property>
-                    <property name="valign">start</property>
-                    <child>
-                      <placeholder/>
-                    </child>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkFlowBoxChild">
-                    <property name="width-request">100</property>
-                    <property name="height-request">80</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="halign">start</property>
-                    <property name="valign">start</property>
-                    <child>
-                      <placeholder/>
-                    </child>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkFlowBoxChild">
-                    <property name="width-request">100</property>
-                    <property name="height-request">80</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="halign">start</property>
-                    <property name="valign">start</property>
-                    <child>
-                      <placeholder/>
-                    </child>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkFlowBoxChild">
-                    <property name="width-request">100</property>
-                    <property name="height-request">80</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="halign">start</property>
-                    <property name="valign">start</property>
-                    <child>
-                      <placeholder/>
-                    </child>
-                  </object>
-                </child>
               </object>
             </child>
           </object>
@@ -224,12 +106,52 @@
       </packing>
     </child>
     <child>
+      <object class="GtkButton" id="btn-left">
+        <property name="visible">True</property>
+        <property name="can-focus">True</property>
+        <property name="focus-on-click">False</property>
+        <property name="receives-default">True</property>
+        <property name="margin-start">1</property>
+        <property name="margin-end">1</property>
+        <property name="image">image5</property>
+        <property name="relief">none</property>
+        <style>
+          <class name="small"/>
+        </style>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">1</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkButton" id="btn-right">
+        <property name="visible">True</property>
+        <property name="can-focus">True</property>
+        <property name="focus-on-click">False</property>
+        <property name="receives-default">True</property>
+        <property name="margin-start">1</property>
+        <property name="margin-end">1</property>
+        <property name="image">image4</property>
+        <property name="relief">none</property>
+        <style>
+          <class name="small"/>
+        </style>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">2</property>
+      </packing>
+    </child>
+    <child>
       <object class="GtkFlowBox" id="scroll-buttons">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
         <property name="no-show-all">True</property>
         <property name="orientation">vertical</property>
-        <property name="homogeneous">True</property>
+        <property name="column-spacing">1</property>
         <property name="max-children-per-line">2</property>
         <property name="selection-mode">none</property>
         <child>
@@ -241,7 +163,7 @@
             <child>
               <object class="GtkButton" id="btn-up">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can-focus">True</property>
                 <property name="focus-on-click">False</property>
                 <property name="receives-default">True</property>
                 <property name="margin-start">1</property>
@@ -249,7 +171,7 @@
                 <property name="image">image1</property>
                 <property name="relief">none</property>
                 <style>
-                  <class name="test"/>
+                  <class name="small"/>
                 </style>
               </object>
             </child>
@@ -264,7 +186,7 @@
             <child>
               <object class="GtkButton" id="btn-down">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can-focus">True</property>
                 <property name="focus-on-click">False</property>
                 <property name="receives-default">True</property>
                 <property name="margin-start">1</property>
@@ -272,7 +194,7 @@
                 <property name="image">image2</property>
                 <property name="relief">none</property>
                 <style>
-                  <class name="test"/>
+                  <class name="small"/>
                 </style>
               </object>
             </child>
@@ -281,8 +203,8 @@
       </object>
       <packing>
         <property name="expand">False</property>
-        <property name="fill">True</property>
-        <property name="position">1</property>
+        <property name="fill">False</property>
+        <property name="position">3</property>
       </packing>
     </child>
     <child>
@@ -295,20 +217,24 @@
         <property name="margin-start">1</property>
         <property name="margin-end">1</property>
         <property name="popup">menu</property>
-        <property name="direction">left</property>
+        <property name="direction">none</property>
+        <property name="use-popover">False</property>
         <child>
           <placeholder/>
         </child>
         <style>
-          <class name="test"/>
+          <class name="small"/>
         </style>
       </object>
       <packing>
         <property name="expand">False</property>
         <property name="fill">False</property>
-        <property name="position">2</property>
+        <property name="position">4</property>
       </packing>
     </child>
+    <style>
+      <class name="main-box"/>
+    </style>
   </object>
   <object class="GtkPopover" id="config-popup">
     <property name="can-focus">False</property>
@@ -321,6 +247,7 @@
         <property name="can-focus">False</property>
         <property name="halign">start</property>
         <property name="valign">start</property>
+        <property name="border-width">12</property>
         <property name="row-spacing">7</property>
         <property name="column-spacing">8</property>
         <child>
@@ -410,13 +337,6 @@
           </packing>
         </child>
       </object>
-    </child>
-  </object>
-  <object class="GtkPopoverMenu" id="menux">
-    <property name="can-focus">False</property>
-    <property name="relative-to">btn-menu</property>
-    <child>
-      <placeholder/>
     </child>
   </object>
 </interface>

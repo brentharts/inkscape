@@ -80,7 +80,11 @@
 #include "spw-utilities.h"
 #include "toolbox.h"
 #include "widget-sizes.h"
+
 #include "ui/widget/color-palette.h"
+#include "ui/widget/preview.h"
+#include "ui/dialog/color-item.h"
+#include "widgets/ege-paint-def.h"
 
 #ifdef GDK_WINDOWING_QUARTZ
 #include <gtkosxapplication.h>
@@ -208,6 +212,34 @@ SPDesktopWidget::SPDesktopWidget()
     {
         auto panel = Gtk::manage(new Inkscape::UI::Widget::ColorPalette());
         auto sets = Inkscape::UI::Dialog::SwatchesPanel::getSwatchSets();
+		  std::vector<Widget*> vc;
+		  
+		  Inkscape::UI::Dialog::ColorItem rm(ege::PaintDef::NONE);
+		  vc.push_back(rm.createWidget());
+		  for (auto& c : sets[1]->_colors) {
+			  vc.push_back(c.createWidget());
+			//   getPreview(Inkscape::UI::Widget::PREVIEW_STYLE_ICON, Inkscape::UI::Widget::VIEW_TYPE_GRID,
+			//   Inkscape::UI::Widget::PREVIEW_SIZE_TINY, 100, 0));
+		  }
+		  panel->set_colors(vc);
+		  std::vector<Glib::ustring> names;
+		  for (auto& pal : sets) {
+			  names.push_back(pal->_name);
+		  }
+		  panel->set_palettes(names);
+		  panel->get_palette_selected_signal().connect([=](Glib::ustring name){
+				auto sets = Inkscape::UI::Dialog::SwatchesPanel::getSwatchSets();
+			  auto pal = std::find_if(sets.begin(), sets.end(), [&](auto& set){ return set->_name == name; });
+			  if (pal != sets.end()) {
+				  //
+		  std::vector<Widget*> vc;
+		  for (auto& c : (*pal)->_colors) {
+			  vc.push_back(c.getPreview(Inkscape::UI::Widget::PREVIEW_STYLE_ICON, Inkscape::UI::Widget::VIEW_TYPE_GRID,
+			  Inkscape::UI::Widget::PREVIEW_SIZE_TINY, 100, 0));
+		  }
+		  panel->set_colors(vc);
+			  }
+		  });
       //   panel->set_vexpand(false);
         dtw->_panels = Gtk::manage(new Inkscape::UI::Dialog::SwatchesPanel("/embedded/swatches"));
         dtw->_panels->set_vexpand(false);
