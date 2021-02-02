@@ -104,6 +104,7 @@ private:
 	double _stop_offset = 0;
 	Glib::RefPtr<Gdk::Cursor> _cursor_mouseover;
 	Glib::RefPtr<Gdk::Cursor> _cursor_dragging;
+	Glib::RefPtr<Gdk::Cursor> _cursor_insert;
 	// TODO: customize this amount or read prefs
 	double _stop_move_increment = 0.01;
 };

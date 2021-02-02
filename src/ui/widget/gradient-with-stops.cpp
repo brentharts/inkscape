@@ -111,11 +111,13 @@ void GradientWithStops::on_style_updated() {
 	if (auto wnd = dynamic_cast<Gtk::Window*>(this->get_toplevel())) {
 		_background_color = wnd->get_style_context()->get_background_color();
 	}
+
 	// load and cache cursors
 	auto wnd = get_window();
 	if (wnd && !_cursor_mouseover) {
-		_cursor_mouseover = load_svg_cursor(get_display(), wnd, "select-mouseover.svg");
-		_cursor_dragging  = load_svg_cursor(get_display(), wnd, "select-dragging.svg");
+		_cursor_mouseover = load_svg_cursor(get_display(), wnd, "gradient-over-stop.svg");
+		_cursor_dragging  = load_svg_cursor(get_display(), wnd, "gradient-drag-stop.svg");
+		_cursor_insert    = load_svg_cursor(get_display(), wnd, "gradient-add-stop.svg");
 		wnd->set_cursor();
 	}
 }
@@ -413,6 +415,11 @@ bool GradientWithStops::on_motion_notify_event(GdkEventMotion* event) {
 				cursor = _cursor_mouseover->gobj();
 			}
 		}
+        else {
+            if (_cursor_insert) {
+                cursor = _cursor_insert->gobj();
+            }
+        }
 		gdk_window_set_cursor(event->window, cursor);
 	}
 
