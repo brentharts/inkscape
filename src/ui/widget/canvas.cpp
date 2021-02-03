@@ -10,7 +10,7 @@
  *
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
-
+#include <thread>
 #include <iostream>
 
 #include <glibmm/i18n.h>
@@ -964,10 +964,10 @@ Canvas::on_idle()
     if (!_drawing) {
         return false; // Disconnect
     }
-
-    bool done = do_update();
+    bool done = false;
+    std::thread t([&] {done = Inkscape::UI::Widget::Canvas::do_update();});
+    t.join();
     int n_rects = _clean_region->get_num_rectangles();
-
     // If we've drawn everything then we should have just one clean rectangle, covering the entire canvas.
     if (n_rects == 0) {
         std::cerr << "Canvas::on_idle: clean region is empty!" << std::endl;
