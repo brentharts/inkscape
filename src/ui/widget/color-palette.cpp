@@ -124,28 +124,51 @@ void ColorPalette::set_rows(int rows) {
 	set_up_scrolling();
 }
 
+void ColorPalette::set_compact(bool compact) {
+    if (_compact != compact) {
+        _compact = compact;
+        set_up_scrolling();
+    }
+}
+
 void ColorPalette::set_up_scrolling() {
-	if (_rows == 1) {
-		// horizontal scrolling with single row
-		_flowbox.set_max_children_per_line(_count);
-		_flowbox.set_min_children_per_line(_count);
-		//
-		_scroll_btn.hide();
-		_scroll_left.show();
-		_scroll_right.show();
-// 'always' allocates space for scrollbar
-		_scroll.set_policy(Gtk::POLICY_EXTERNAL, Gtk::POLICY_NEVER);
-	}
-	else {
-		// vertical scrolling with multiple rows
-		// 'external' allows scrollbar to shrink vertically
-		_scroll.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_EXTERNAL);
-		_flowbox.set_min_children_per_line(1);
-		_flowbox.set_max_children_per_line(_count);
-		_scroll_left.hide();
-		_scroll_right.hide();
-		_scroll_btn.show();
-	}
+    if (_compact) {
+        // in compact mode scrollbars are hidden; they take up too much space
+
+        if (_rows == 1) {
+            // horizontal scrolling with single row
+            _flowbox.set_max_children_per_line(_count);
+            _flowbox.set_min_children_per_line(_count);
+
+            _scroll_btn.hide();
+            _scroll_left.show();
+            _scroll_right.show();
+
+            _scroll.set_policy(Gtk::POLICY_EXTERNAL, Gtk::POLICY_NEVER);
+        }
+        else {
+            // vertical scrolling with multiple rows
+            // 'external' allows scrollbar to shrink vertically
+            _scroll.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_EXTERNAL);
+            _flowbox.set_min_children_per_line(1);
+            _flowbox.set_max_children_per_line(_count);
+            _scroll_left.hide();
+            _scroll_right.hide();
+            _scroll_btn.show();
+        }
+    }
+    else {
+        // in normal mode use regular full-size scrollbars
+        _scroll_left.hide();
+        _scroll_right.hide();
+        _scroll_btn.hide();
+
+        _flowbox.set_min_children_per_line(1);
+        _flowbox.set_max_children_per_line(_count);
+
+        // 'always' allocates space for scrollbar
+        _scroll.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_ALWAYS);
+    }
 
 	resize();
 }

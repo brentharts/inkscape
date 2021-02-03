@@ -74,7 +74,7 @@ public:
 private:
     Gtk::Widget* _getPreview(UI::Widget::PreviewStyle style,
 		  UI::Widget::ViewType view, UI::Widget::PreviewSize size,
-		  guint ratio, guint border, bool push);
+		  guint ratio, guint border);
 
     static void _dropDataIn( GtkWidget *widget,
                              GdkDragContext *drag_context,

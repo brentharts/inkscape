@@ -27,10 +27,12 @@ class ColorPalette : public Gtk::Bin {
 public:
 	ColorPalette();
 
-	// 
+	// set colors presented in a palette
 	void set_colors(const std::vector<Gtk::Widget*>& swatches);
 	// list of palette names to present in the menu
 	void set_palettes(const std::vector<Glib::ustring>& palettes);
+    // enable compact mode (true) with mini-scroll buttons, or normal mode (false) with regular scrollbars
+    void set_compact(bool compact);
 
 	void set_tile_size(int size_px);
 	void set_tile_border(int border_px);
@@ -55,6 +57,7 @@ private:
 	int _border = 0;
 	int _rows = 1;
 	int _count = 1;
+    bool _compact = true;
 	sigc::signal<void, Glib::ustring> _signal_palette_selected;
 };
 
