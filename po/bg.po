@@ -13,7 +13,7 @@ msgstr ""
 "Project-Id-Version: bg\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
 "POT-Creation-Date: 2019-12-02 14:57+0100\n"
-"PO-Revision-Date: 2019-12-05 16:08+0200\n"
+"PO-Revision-Date: 2021-01-12 21:42+0200\n"
 "Last-Translator: GIMP <vdachev@gmail.com>\n"
 "Language-Team: Bulgarian <bg@li.org>\n"
 "Language: bg\n"
@@ -21,7 +21,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.2.3\n"
+"X-Generator: Poedit 2.4.2\n"
 
 #: ../share/filters/filters.svg.h:2
 msgid "Smart Jelly"
@@ -15126,23 +15126,20 @@ msgid "Fill and Stroke"
 msgstr "Запълване и очертание"
 
 #: ../src/ui/contextmenu.cpp:391
-#, fuzzy
 msgid "Fill Color"
-msgstr "Плътен цвят"
+msgstr "Цвят на запълване"
 
 #: ../src/ui/contextmenu.cpp:398
-#, fuzzy
 msgid "Stroke Color"
-msgstr "Задаване цвят на линията"
+msgstr "Цвят очертание"
 
 #: ../src/ui/contextmenu.cpp:405
 msgid "Stroke Style"
-msgstr ""
+msgstr "Стил на очертание"
 
 #: ../src/ui/contextmenu.cpp:412
-#, fuzzy
 msgid "Object Type"
-msgstr "Обект"
+msgstr "Вид на обект"
 
 #: ../src/ui/contextmenu.cpp:419
 msgid "_Move to Layer..."
@@ -15161,19 +15158,16 @@ msgid "Release Mask"
 msgstr "Освобждаване на маска"
 
 #: ../src/ui/contextmenu.cpp:474
-#, fuzzy
 msgid "Create Clip G_roup"
-msgstr "Създаване на _клонинг"
+msgstr "Създаване на група за _изрязване"
 
 #: ../src/ui/contextmenu.cpp:481
-#, fuzzy
 msgid "Set Cl_ip"
-msgstr "Премахване на запълване"
+msgstr "Задаване на _изрязване"
 
 #: ../src/ui/contextmenu.cpp:492
-#, fuzzy
 msgid "Release C_lip"
-msgstr "_Освобождаване"
+msgstr "Отменяне на _изрязване"
 
 #: ../src/ui/contextmenu.cpp:503 ../src/verbs.cpp:2667
 msgid "_Group"
@@ -15233,7 +15227,7 @@ msgstr "_Запълване и очертание…"
 
 #: ../src/ui/contextmenu.cpp:909 ../src/verbs.cpp:3068
 msgid "_Text and Font..."
-msgstr "_Текст и шрифтове…"
+msgstr "_Текст и шрифт…"
 
 #: ../src/ui/contextmenu.cpp:916 ../src/verbs.cpp:3078
 msgid "Check Spellin_g..."
@@ -15583,7 +15577,7 @@ msgstr "Най-малкия обект"
 #: ../src/widgets/desktop-widget.cpp:1985
 #: ../share/extensions/voronoi2svg.inx:15
 msgid "Page"
-msgstr "Документа"
+msgstr "Документ"
 
 #: ../src/ui/dialog/align-and-distribute.cpp:1073
 msgid "Selection Area"
@@ -17270,7 +17264,7 @@ msgstr "_Очертание"
 
 #: ../src/ui/dialog/fill-and-stroke.cpp:66
 msgid "Stroke st_yle"
-msgstr "_Стил на очертанието"
+msgstr "_Стил на очертание"
 
 #. TRANSLATORS: this dialog is accessible via menu Filters - Filter editor
 #: ../src/ui/dialog/filter-effects-dialog.cpp:513
@@ -24219,13 +24213,11 @@ msgstr ""
 
 #: ../src/ui/dialog/symbols.cpp:115
 msgid "All symbol sets"
-msgstr ""
+msgstr "Всички набори от знаци"
 
 #: ../src/ui/dialog/symbols.cpp:129
-#, fuzzy
-#| msgid "Symbol"
 msgid "Symbol set"
-msgstr "Символ"
+msgstr "Нобор от знаци"
 
 #: ../src/ui/dialog/symbols.cpp:158
 msgid "Return to start search."
