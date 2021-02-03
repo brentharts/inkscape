@@ -224,9 +224,6 @@ Glib::ustring GrDrag::makeStopSafeColor( gchar const *str, bool &isNull )
 
 bool GrDrag::styleSet( const SPCSSAttr *css )
 {
-    // with gradient editor in F&S set style now applies to entire gradient, not selected stops
-    return false;
-
     if (selected.empty()) {
         return false;
     }
@@ -298,6 +295,16 @@ bool GrDrag::styleSet( const SPCSSAttr *css )
 
     for(auto d : selected) { //for all selected draggers
         for(auto draggable : d->draggables) { //for all draggables of dragger
+            SPGradient* gradient = getGradient(draggable->item, draggable->fill_or_stroke);
+
+            // for linear and radial gradients F&S dialog deals with stops' colors;
+            // don't handle style notifications, or else it will not be possible to switch
+            // object style back to solid color
+            if (gradient && SP_IS_GRADIENT(gradient) &&
+                (SP_IS_LINEARGRADIENT(gradient) || SP_IS_RADIALGRADIENT(gradient))) {
+                continue;
+            }
+
             local_change = true;
             sp_item_gradient_stop_set_style(draggable->item, draggable->point_type, draggable->point_i, draggable->fill_or_stroke, stop);
         }
@@ -305,7 +312,7 @@ bool GrDrag::styleSet( const SPCSSAttr *css )
 
     //sp_repr_css_print(stop);
     sp_repr_css_attr_unref(stop);
-    return true;
+    return local_change; // true if handled
 }
 
 guint32 GrDrag::getColor()

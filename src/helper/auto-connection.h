@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+
 #ifndef SEEN_AUTO_CONNECTION_H
 #define SEEN_AUTO_CONNECTION_H
 
