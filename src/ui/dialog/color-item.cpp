@@ -504,7 +504,6 @@ Gtk::Widget* ColorItem::_getPreview(UI::Widget::PreviewStyle style,
         widget = preview;
     }
 
-
     return widget;
 }
 
