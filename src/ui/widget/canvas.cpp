@@ -10,7 +10,7 @@
  *
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
-#include <thread>
+
 #include <iostream>
 
 #include <glibmm/i18n.h>
@@ -30,7 +30,10 @@
 #include "display/control/canvas-item-group.h"
 
 #include "ui/tools/tool-base.h"      // Default cursor
-
+#include "ui/tools/select-tool.h"
+#include <atomic>
+#include <thread>
+#include <chrono>
 /*
  *   The canvas is responsible for rendering the SVG drawing with various "control"
  *   items below and on top of the drawing. Rendering is triggered by a call to one of:
@@ -89,6 +92,76 @@ struct PaintRectSetup {
     Geom::Point mouse_loc;
 };
 
+using clk = std::chrono::high_resolution_clock;
+using time_point = std::chrono::time_point<clk>;
+using dur_double = std::chrono::duration<double>;
+using std::chrono::duration_cast;
+
+class Timer {
+public:
+  Timer(const std::string &cmd) : _cmd{cmd}, _start{clk::now()} {};
+
+  double time_ns() {
+    auto duration = clk::now() - _start;
+    auto elapsed_s = duration_cast<dur_double>(duration).count();
+    return elapsed_s * 1000 /* * 1000 * 1000 */;
+  }
+
+  ~Timer(){};
+
+private:
+  std::string _cmd;
+  time_point _start;
+};
+
+// use other tool than select to non threaded measure
+// https://lemire.me/blog/2020/06/10/reusing-a-thread-in-c-for-better-performance/
+// https://github.com/lemire/Code-used-on-Daniel-Lemire-s-blog/tree/master/2020/06/10
+struct yield_worker {
+    yield_worker() = default;
+    inline ~yield_worker() { 
+        stop_thread();
+    }
+    inline void stop_thread() {
+        exiting.store(true);
+        has_work.store(false);
+        if (thread.joinable()) {
+            thread.join();
+        }
+    }
+
+    inline void work() {
+        has_work.store(true);
+    }
+
+    inline void finish() {
+        while (has_work.load()) {
+        }
+    }
+    Inkscape::UI::Widget::Canvas *canvas = nullptr;
+    std::atomic<bool> done{false};
+private:
+    std::atomic<bool> has_work{false};
+    std::atomic<bool> exiting{false};
+    std::atomic<bool> thread_started{false};
+    std::thread thread = std::thread([this] {
+        thread_started.store(true);
+        while (true) {
+            while (!has_work.load()) {
+                if (exiting.load()) {
+                    return;
+                }
+                std::this_thread::yield();
+            }
+            if (canvas) {
+                done.store(canvas->paint());
+            }
+            has_work.store(false);
+        }
+    });
+};
+
+yield_worker yw;
 
 namespace Inkscape {
 namespace UI {
@@ -135,7 +208,7 @@ Canvas::~Canvas()
     _in_destruction = true;
 
     remove_idle();
-
+    yw.stop_thread();
     // Remove entire CanvasItem tree.
     delete _canvas_item_root;
 }
@@ -935,6 +1008,8 @@ Canvas::add_idle()
     }
 
     if (get_realized() && !_idle_connection.connected()) {
+        std::thread::id this_id = std::this_thread::get_id();
+        std::cout << this_id << "::Main thread (Start iddle loop)::\n";
         Inkscape::Preferences *prefs = Inkscape::Preferences::get();
         guint redrawPriority = prefs->getIntLimited("/options/redrawpriority/value", G_PRIORITY_HIGH_IDLE, G_PRIORITY_HIGH_IDLE, G_PRIORITY_DEFAULT_IDLE);
         if (_in_full_redraw) {
@@ -964,9 +1039,13 @@ Canvas::on_idle()
     if (!_drawing) {
         return false; // Disconnect
     }
-    bool done = false;
-    std::thread t([&] {done = Inkscape::UI::Widget::Canvas::do_update();});
-    t.join();
+    auto t = Timer{__FUNCTION__};
+    bool done = do_update();
+    if (dynamic_cast<Inkscape::UI::Tools::SelectTool* >(SP_ACTIVE_DESKTOP->event_context)) {
+        std::cout << "duration: " << t.time_ns() << std::endl;
+    } else {
+        std::cout << "duration: "  << t.time_ns() << std::endl;
+    }
     int n_rects = _clean_region->get_num_rectangles();
     // If we've drawn everything then we should have just one clean rectangle, covering the entire canvas.
     if (n_rects == 0) {
@@ -1001,7 +1080,14 @@ Canvas::do_update()
             _canvas_item_root->update(_affine);
             _need_update = false;
         }
-        return paint();
+        if (dynamic_cast<Inkscape::UI::Tools::SelectTool* >(SP_ACTIVE_DESKTOP->event_context)) {
+            yw.canvas = this;
+            yw.work();   // issue the work
+            yw.finish();
+            return yw.done.load();
+        } else {
+            return paint();
+        }
     }
 
     // TODO: This makes no sense as normally we wouldn't reach here.
@@ -1024,7 +1110,12 @@ Canvas::paint()
     if (_need_update) {
         std::cerr << "Canvas::Paint: called while needing update!" << std::endl;
     }
-
+    std::thread::id this_id = std::this_thread::get_id();
+    if (dynamic_cast<Inkscape::UI::Tools::SelectTool* >(SP_ACTIVE_DESKTOP->event_context)) {
+        std::cout << this_id << "::Render thread (Select tool)::\n";
+    } else {
+        std::cout << this_id << "::Main thread (No select tool)::\n";
+    }
     Cairo::RectangleInt crect = { _x0, _y0, _allocation.get_width(), _allocation.get_height() };
     auto draw_region = Cairo::Region::create(crect);
     draw_region->subtract(_clean_region);
