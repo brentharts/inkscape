@@ -907,8 +907,17 @@ static void ungroup_impl(ObjectSet *set)
         if (groups.find(item) != groups.end()) {
             std::vector<SPItem*> children;
             sp_item_group_ungroup(dynamic_cast<SPGroup *>(obj), children, false);
+
             // add the items resulting from ungrouping to the selection
-            new_select.insert(new_select.end(),children.begin(),children.end());
+            for (auto child : children) {
+                SPUse *child_use = dynamic_cast<SPUse *>(child);
+                if (child_use && groups.find(child_use->get_original()) != groups.end()) {
+                    // This child was a clone which has been unlinked above, crash inkscape/-/issues/1793
+                    // TODO: Find way to keep selection, for now, we just deselect it to avoid the crash.
+                } else {
+                    new_select.push_back(child);
+                }
+            }
             item = NULL; // zero out the original pointer, which is no longer valid
         } else {
             // if not a group, keep in the selection
