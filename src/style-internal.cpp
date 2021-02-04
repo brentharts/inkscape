@@ -1960,7 +1960,8 @@ SPIFilter::read( gchar const *str ) {
             href->attach(Inkscape::URI(uri.c_str()));
         } catch (Inkscape::BadURIException &e) {
             std::cerr << "SPIFilter::read() " << e.what() << std::endl;
-            href->detach();
+            delete href;
+            href = nullptr;
         }
 
     } else {
