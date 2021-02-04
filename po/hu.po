@@ -9,7 +9,7 @@
 # Balázs Meskó <meskobalazs@mailbox.org>, 2018-2021
 # Gyuris Gellért <jobel@ujevangelizacio.hu>, 2017-2021.
 #
-#, fuzzy
+
 msgid ""
 msgstr ""
 "Project-Id-Version: hu\n"
