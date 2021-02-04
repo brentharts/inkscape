@@ -55,6 +55,7 @@
 #include "verbs.h"
 #include "gradient-chemistry.h"
 #include "helper/action.h"
+#include "ui/widget/color-palette.h"
 
 namespace Inkscape {
 namespace UI {
@@ -562,6 +563,9 @@ SwatchesPanel::SwatchesPanel(gchar const *prefsPath)
     , _currentDesktop(nullptr)
     , _currentDocument(nullptr)
 {
+    _palette = Gtk::manage(new Inkscape::UI::Widget::ColorPalette());
+    pack_start(*_palette);
+
     _holder = new PreviewHolder();
 
     _build_menu();
@@ -575,9 +579,11 @@ SwatchesPanel::SwatchesPanel(gchar const *prefsPath)
     auto box = Gtk::manage(new Gtk::Box());
 
     if (_prefs_path == "/dialogs/swatches") {
+        _palette->set_compact(false);
         box->set_orientation(Gtk::ORIENTATION_VERTICAL);
         box->pack_start(*menu_button, Gtk::PACK_SHRINK);
     } else {
+        _palette->set_compact(true);
         box->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
         box->pack_end(*menu_button, Gtk::PACK_SHRINK);
         _updateSettings(SWATCHES_SETTINGS_MODE, 1);
@@ -585,7 +591,7 @@ SwatchesPanel::SwatchesPanel(gchar const *prefsPath)
     }
 
     box->pack_start(*_holder, Gtk::PACK_EXPAND_WIDGET);
-    pack_start(*box);
+    // pack_start(*box);
 
     load_palettes();
 
@@ -636,7 +642,10 @@ SwatchesPanel::SwatchesPanel(gchar const *prefsPath)
 
         int i = 0;
         std::vector<SwatchPage*> swatchSets = _getSwatchSets();
+        std::vector<Glib::ustring> palettes;
+        palettes.reserve(swatchSets.size());
         for (auto curr : swatchSets) {
+            palettes.push_back(curr->_name);
             Gtk::RadioMenuItem* single = Gtk::manage(new Gtk::RadioMenuItem(groupOne, curr->_name));
             if ( curr == first ) {
                 hotItem = single;
@@ -645,13 +654,14 @@ SwatchesPanel::SwatchesPanel(gchar const *prefsPath)
 
             i++;
         }
+        _palette->set_palettes(palettes);
     }
 
     if ( hotItem ) {
         hotItem->set_active();
     }
 
-    show_all_children();
+    // show_all_children();
 }
 
 SwatchesPanel::~SwatchesPanel()
@@ -1398,10 +1408,15 @@ void SwatchesPanel::_rebuild()
     }
     _holder->freezeUpdates();
     // TODO restore once 'clear' works _holder->addPreview(_clear);
+    std::vector<Widget*> palette;
+    palette.reserve(curr->_colors.size() + 1);
+    palette.push_back(_remove->createWidget());
     _holder->addPreview(_remove);
     for (auto & _color : curr->_colors) {
-        _holder->addPreview(&_color);
+        // _holder->addPreview(&_color);
+        palette.push_back(_color.createWidget());
     }
+    _palette->set_colors(palette);
     _holder->thawUpdates();
 }
 

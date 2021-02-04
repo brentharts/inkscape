@@ -24,6 +24,10 @@ namespace UI {
 
 class PreviewHolder;
 
+namespace Widget {
+    class ColorPalette;
+}
+
 namespace Dialog {
 
 class ColorItem;
@@ -76,6 +80,7 @@ private:
     int _currentIndex;
     SPDesktop*  _currentDesktop;
     SPDocument* _currentDocument;
+    Inkscape::UI::Widget::ColorPalette* _palette;
 
     void _regItem(Gtk::MenuItem* item, int id);
 

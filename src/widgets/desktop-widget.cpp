@@ -210,8 +210,9 @@ SPDesktopWidget::SPDesktopWidget()
 
     /* Swatches panel */
     {
-        auto panel = Gtk::manage(new Inkscape::UI::Widget::ColorPalette());
-        auto sets = Inkscape::UI::Dialog::SwatchesPanel::getSwatchSets();
+        // auto panel = Gtk::manage(new Inkscape::UI::Widget::ColorPalette());
+        // auto sets = Inkscape::UI::Dialog::SwatchesPanel::getSwatchSets();
+    /*
 		  std::vector<Widget*> vc;
 		  
 		  Inkscape::UI::Dialog::ColorItem rm(ege::PaintDef::NONE);
@@ -240,11 +241,12 @@ SPDesktopWidget::SPDesktopWidget()
 		  panel->set_colors(vc);
 			  }
 		  });
+      */
       //   panel->set_vexpand(false);
         dtw->_panels = Gtk::manage(new Inkscape::UI::Dialog::SwatchesPanel("/embedded/swatches"));
         dtw->_panels->set_vexpand(false);
-      //   dtw->_vbox->pack_end(*dtw->_panels, false, true);
-        dtw->_vbox->pack_end(*panel, false, true);
+        dtw->_vbox->pack_end(*dtw->_panels, false, true);
+        // dtw->_vbox->pack_end(*panel, false, true);
     }
 
     /* DesktopHBox (Vertical toolboxes, canvas) */

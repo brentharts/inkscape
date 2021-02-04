@@ -72,14 +72,15 @@ ColorPalette::ColorPalette():
 	get_widget<Gtk::Button>(_builder, "btn-up").signal_clicked().connect([=](){ scroll(0, -(_size + _border)); });
 
 	// free();
+	set_vexpand_set(true);
 	set_up_scrolling();
 	// auto vert = _scroll.get_vscrollbar();
 	// g_warning("vert: %p", vert);
 	// vert->s
 
-	set_valign(Gtk::ALIGN_START);
-	set_vexpand(false);
-	set_vexpand_set(true);
+	// set_valign(Gtk::ALIGN_START);
+	// set_vexpand(false);
+	// set_vexpand_set(true);
 }
 
 void ColorPalette::scroll(int dx, int dy) {
@@ -134,6 +135,11 @@ void ColorPalette::set_compact(bool compact) {
 void ColorPalette::set_up_scrolling() {
     if (_compact) {
         // in compact mode scrollbars are hidden; they take up too much space
+        set_valign(Gtk::ALIGN_START);
+        set_vexpand(false);
+
+        _scroll.set_valign(Gtk::ALIGN_END);
+        _flowbox.set_valign(Gtk::ALIGN_END);
 
         if (_rows == 1) {
             // horizontal scrolling with single row
@@ -159,13 +165,18 @@ void ColorPalette::set_up_scrolling() {
     }
     else {
         // in normal mode use regular full-size scrollbars
+        set_valign(Gtk::ALIGN_FILL);
+        set_vexpand(true);
+
         _scroll_left.hide();
         _scroll_right.hide();
         _scroll_btn.hide();
 
+        _flowbox.set_valign(Gtk::ALIGN_START);
         _flowbox.set_min_children_per_line(1);
         _flowbox.set_max_children_per_line(_count);
 
+        _scroll.set_valign(Gtk::ALIGN_FILL);
         // 'always' allocates space for scrollbar
         _scroll.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_ALWAYS);
     }
@@ -174,7 +185,7 @@ void ColorPalette::set_up_scrolling() {
 }
 
 void ColorPalette::resize() {
-	if (_rows == 1) {
+	if (_rows == 1 || !_compact) {
 		// auto size for single row to allocate space for scrollbar
 		_scroll.set_size_request(-1, -1);
 	}
