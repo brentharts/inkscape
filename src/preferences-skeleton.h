@@ -251,7 +251,7 @@ static char const preferences_skeleton[] =
     <group id="nudgedistance" value="2px"/>
     <group id="rotationsnapsperpi" value="12"/>
     <group id="cursortolerance" value="8.0"/>
-    <group id="dragtolerance" value="8.0"/>
+    <group id="dragtolerance" value="4.0"/>
     <group id="grabsize" value="3"/>
     <group
        id="displayprofile"
