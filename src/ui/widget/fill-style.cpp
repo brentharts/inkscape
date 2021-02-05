@@ -251,13 +251,13 @@ void FillNStroke::performUpdate()
 /**
  * When the mode is changed, invoke a regular changed handler.
  */
-void FillNStroke::paintModeChangeCB(UI::Widget::PaintSelector::Mode /*mode*/)
+void FillNStroke::paintModeChangeCB(UI::Widget::PaintSelector::Mode /*mode*/, bool switch_style)
 {
 #ifdef SP_FS_VERBOSE
     g_message("paintModeChangeCB()");
 #endif
     if (!_update) {
-        updateFromPaint();
+        updateFromPaint(switch_style);
     }
 }
 
@@ -375,7 +375,7 @@ void FillNStroke::paintChangedCB()
     }
 }
 
-void FillNStroke::updateFromPaint()
+void FillNStroke::updateFromPaint(bool switch_style)
 {
     if (!_desktop) {
         return;
@@ -401,7 +401,7 @@ void FillNStroke::updateFromPaint()
             SPCSSAttr *css = sp_repr_css_attr_new();
             sp_repr_css_set_property(css, (kind == FILL) ? "fill" : "stroke", "none");
 
-            sp_desktop_set_style(_desktop, css);
+            sp_desktop_set_style(_desktop, css, true, true, switch_style);
 
             sp_repr_css_attr_unref(css);
             css = nullptr;

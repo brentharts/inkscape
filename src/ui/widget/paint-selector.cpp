@@ -276,7 +276,8 @@ StyleToggleButton *PaintSelector::style_button_add(gchar const *pixmap, PaintSel
 void PaintSelector::style_button_toggled(StyleToggleButton *tb)
 {
     if (!_update && tb->get_active()) {
-        setMode(tb->get_style());
+        // button toggled: explicit user action where fill/stroke style change is initiated/requested
+        set_mode_ex(tb->get_style(), true);
     }
 }
 
@@ -288,8 +289,11 @@ void PaintSelector::fillrule_toggled(FillRuleRadioButton *tb)
     }
 }
 
-void PaintSelector::setMode(Mode mode)
-{
+void PaintSelector::setMode(Mode mode) {
+    set_mode_ex(mode, false);
+}
+
+void PaintSelector::set_mode_ex(Mode mode, bool switch_style) {
     if (_mode != mode) {
         _update = true;
         _label->show();
@@ -335,7 +339,7 @@ void PaintSelector::setMode(Mode mode)
                 break;
         }
         _mode = mode;
-        _signal_mode_changed.emit(_mode);
+        _signal_mode_changed.emit(_mode, switch_style);
         _update = false;
     }
 }

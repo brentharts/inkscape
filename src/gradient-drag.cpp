@@ -222,7 +222,7 @@ Glib::ustring GrDrag::makeStopSafeColor( gchar const *str, bool &isNull )
     return colorStr;
 }
 
-bool GrDrag::styleSet( const SPCSSAttr *css )
+bool GrDrag::styleSet( const SPCSSAttr *css, bool switch_style)
 {
     if (selected.empty()) {
         return false;
@@ -300,7 +300,7 @@ bool GrDrag::styleSet( const SPCSSAttr *css )
             // for linear and radial gradients F&S dialog deals with stops' colors;
             // don't handle style notifications, or else it will not be possible to switch
             // object style back to solid color
-            if (gradient && SP_IS_GRADIENT(gradient) &&
+            if (switch_style && gradient && SP_IS_GRADIENT(gradient) &&
                 (SP_IS_LINEARGRADIENT(gradient) || SP_IS_RADIALGRADIENT(gradient))) {
                 continue;
             }
@@ -627,7 +627,7 @@ GrDrag::GrDrag(SPDesktop *desktop) :
             (gpointer)this )
         );
 
-    style_set_connection = desktop->connectSetStyle( sigc::mem_fun(*this, &GrDrag::styleSet) );
+    style_set_connection = desktop->connectSetStyleEx( sigc::mem_fun(*this, &GrDrag::styleSet) );
 
     style_query_connection = desktop->connectQueryStyle(
         sigc::bind(

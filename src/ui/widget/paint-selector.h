@@ -110,11 +110,11 @@ class PaintSelector : public Gtk::Box {
   private:
     sigc::signal<void, FillRule> _signal_fillrule_changed;
     sigc::signal<void> _signal_dragged;
-    sigc::signal<void, Mode> _signal_mode_changed;
+    sigc::signal<void, Mode, bool> _signal_mode_changed;
     sigc::signal<void> _signal_grabbed;
     sigc::signal<void> _signal_released;
     sigc::signal<void> _signal_changed;
-	 sigc::signal<void (SPStop*)> _signal_stop_selected;
+    sigc::signal<void (SPStop*)> _signal_stop_selected;
 
     StyleToggleButton *style_button_add(gchar const *px, PaintSelector::Mode mode, gchar const *tip);
     void style_button_toggled(StyleToggleButton *tb);
@@ -138,6 +138,7 @@ class PaintSelector : public Gtk::Box {
     void set_mode_pattern(PaintSelector::Mode mode);
     void set_mode_hatch(PaintSelector::Mode mode);
     void set_mode_swatch(PaintSelector::Mode mode);
+    void set_mode_ex(Mode mode, bool switch_style);
 
     void gradient_grabbed();
     void gradient_dragged();

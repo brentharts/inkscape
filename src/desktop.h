@@ -215,7 +215,7 @@ public:
     sigc::signal<void, sp_verb_t>      _tool_changed;
     sigc::signal<void, unsigned int, bool> _menu_update;
     sigc::signal<void, SPObject *>     _layer_changed_signal;
-    sigc::signal<bool, const SPCSSAttr *>::accumulated<StopOnTrue> _set_style_signal;
+    sigc::signal<bool, const SPCSSAttr *, bool>::accumulated<StopOnTrue> _set_style_signal;
     sigc::signal<int, SPStyle *, int>::accumulated<StopOnNonZero> _query_style_signal;
 
     /// Emitted when the zoom factor changes (not emitted when scrolling).
@@ -238,7 +238,11 @@ public:
     }
     sigc::connection connectSetStyle (const sigc::slot<bool, const SPCSSAttr *> & slot)
     {
-        return _set_style_signal.connect (slot);
+        return _set_style_signal.connect([=](const SPCSSAttr* css, bool) { return slot(css); });
+    }
+    sigc::connection connectSetStyleEx(const sigc::slot<bool, const SPCSSAttr *, bool> & slot)
+    {
+        return _set_style_signal.connect(slot);
     }
     sigc::connection connectQueryStyle (const sigc::slot<int, SPStyle *, int> & slot)
     {
