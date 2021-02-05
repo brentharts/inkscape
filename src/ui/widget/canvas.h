@@ -69,7 +69,7 @@ public:
     void redraw_now();                                // Draw areas needing update immediately.
     void request_update();                            // Draw after updating canvas items.
     void scroll_to(Geom::Point const &c, bool clear);
-
+    bool paint();
     void set_background_color(guint32 rgba);
     void set_background_checkerboard(guint32 rgba = 0xC4C4C4FF);
 
@@ -157,7 +157,7 @@ private:
 
     // In order they are called in painting.
     bool do_update();
-    bool paint();
+    
     bool paint_rect(Cairo::RectangleInt& rect);
     bool paint_rect_internal(PaintRectSetup const *setup, Geom::IntRect const &this_rect);
     void paint_single_buffer(Geom::IntRect const &paint_rect, Geom::IntRect const &canvas_rect,
