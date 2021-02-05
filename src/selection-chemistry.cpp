@@ -3020,7 +3020,7 @@ void ObjectSet::cloneOriginalPathLPE(bool allow_transforms)
             Inkscape::GC::release(clone);
             SPObject *clone_obj = document()->getObjectById(clone->attribute("id"));
             SPLPEItem *clone_lpeitem = dynamic_cast<SPLPEItem *>(clone_obj);
-            if (clone_lpeitem) {
+            if (clone_obj) {
                 clone_lpeitem->addPathEffect(lpe_id_href, false);
             }
             if (multiple) {
