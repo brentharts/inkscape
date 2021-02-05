@@ -75,6 +75,7 @@
 
 #include "xml/croco-node-iface.h"
 #include "xml/rebase-hrefs.h"
+#include "xml/simple-document.h"
 
 using Inkscape::DocumentUndo;
 using Inkscape::Util::unit_table;
@@ -472,6 +473,26 @@ SPDocument *SPDocument::createDoc(Inkscape::XML::Document *rdoc,
     set_actions_canvas_snapping(document);
 
     return document;
+}
+
+/**
+ * Create a copy of the document, useful for modifying during save & export.
+ */
+SPDocument *SPDocument::copy()
+{
+    // Comments and PI nodes are not included in this duplication
+    Inkscape::XML::Document *new_rdoc = new Inkscape::XML::SimpleDocument();
+
+    // Get a new xml repr for the svg root node
+    Inkscape::XML::Node *root = rdoc->root()->duplicate(new_rdoc);
+
+    // Add the duplicated svg node as the document's rdoc
+    new_rdoc->appendChild(root);
+    Inkscape::GC::release(root);
+
+    auto doc = createDoc(new_rdoc, document_uri, document_base, document_name, keepalive, nullptr);
+    Inkscape::GC::release(new_rdoc);
+    return doc;
 }
 
 /**
