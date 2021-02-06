@@ -10,15 +10,15 @@ msgstr ""
 "Project-Id-Version: greek translation of inkscape-0.48\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
 "POT-Creation-Date: 2019-10-09 15:17+0200\n"
-"PO-Revision-Date: 2019-11-03 20:03+0200\n"
-"Last-Translator: Dimitris Spingos (Δημήτρης Σπίγγος) <dmtrs32@gmail.com>\n"
-"Language-Team: team@lists.gnome.gr\n"
+"PO-Revision-Date: 2021-02-06 21:50+0000\n"
+"Last-Translator: Michalis <michalisntovas@yahoo.gr>\n"
+"Language-Team: Greek <https://hosted.weblate.org/projects/inkscape/app/el/>\n"
 "Language: el\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.0.6\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 4.5-dev\n"
 "X-Poedit-Bookmarks: -1,-1,-1,-1,-1,-1,-1,1797,-1,-1\n"
 
 #: ../share/filters/filters.svg.h:2
@@ -5602,14 +5602,14 @@ msgstr "από %i"
 #: ../src/ui/dialog/ocaldialogs.cpp:1085 ../src/ui/interface.cpp:240
 #: ../src/widgets/desktop-widget.cpp:1162 ../src/widgets/desktop-widget.cpp:1209
 msgid "_Cancel"
-msgstr "A_κύρωση"
+msgstr "_Ακύρωση"
 
 #: ../src/extension/internal/cdr-input.cpp:156
 #: ../src/extension/internal/pdfinput/pdf-input.cpp:106
 #: ../src/extension/internal/vsd-input.cpp:156
 #: ../src/extension/prefdialog/prefdialog.cpp:73 ../src/ui/dialog/guides.cpp:177
 msgid "_OK"
-msgstr "Ε_ντάξει"
+msgstr "_Εντάξει"
 
 #: ../src/extension/internal/cdr-input.cpp:227
 #: ../src/extension/internal/vsd-input.cpp:227 ../src/ui/dialog/svg-preview.cpp:301
@@ -17919,17 +17919,17 @@ msgstr "Μεταδεδομένα"
 #: ../src/ui/dialog/document-metadata.cpp:76
 #: ../src/ui/dialog/document-properties.cpp:156
 msgid "License"
-msgstr "Άδεια χρήσης"
+msgstr "Άδεια"
 
 #: ../src/ui/dialog/document-metadata.cpp:114
 #: ../src/ui/dialog/document-properties.cpp:961
 msgid "<b>Dublin Core Entities</b>"
-msgstr "<b>Dublin Core Entities</b>"
+msgstr "<b>Dublin Core οντότητες</b>"
 
 #: ../src/ui/dialog/document-metadata.cpp:142
 #: ../src/ui/dialog/document-properties.cpp:1004
 msgid "<b>License</b>"
-msgstr "<b>Άδεια Χρήσης</b>"
+msgstr "<b>Άδεια</b>"
 
 #: ../src/ui/dialog/document-properties.cpp:103
 msgid "Use antialiasing"
@@ -40832,7 +40832,7 @@ msgstr "https://inkscape.org/doc/inkscape-man.html"
 
 #: ../share/extensions/inkscape_help_faq.inx:3
 msgid "FAQ"
-msgstr "Συχνές Ερωτήσεις"
+msgstr "Συχνές ερωτήσεις"
 
 #: ../share/extensions/inkscape_help_keys.inx:3
 msgid "Keys and Mouse Reference"

@@ -12,16 +12,17 @@ msgstr ""
 "Project-Id-Version: inkscape\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
 "POT-Creation-Date: 2020-08-06 18:06+0300\n"
-"PO-Revision-Date: 2020-12-05 22:30+0300\n"
-"Last-Translator: Emir SARI <bitigchi@me.com>\n"
-"Language-Team: https://gitlab.com/bitigchi/inkscape\n"
-"Language: tr_TR\n"
+"PO-Revision-Date: 2021-02-03 02:41+0000\n"
+"Last-Translator: Oğuz Ersen <oguzersen@protonmail.com>\n"
+"Language-Team: Turkish <https://hosted.weblate.org/projects/inkscape/app/tr/>"
+"\n"
+"Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: Weblate 4.5-dev\n"
 "X-Poedit-SourceCharset: UTF-8\n"
-"X-Generator: Poedit 2.2\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: ../share/filters/filters.svg.h:2
 msgid "Smart Jelly"
@@ -1637,7 +1638,7 @@ msgstr "Temel Resim Çizimi"
 
 #: ../share/filters/filters.svg.h:660
 msgid "Enhance and redraw color edges in 1 bit black and white"
-msgstr "1 bit siyah beyaz renk kenarlarını geliştirme ve yeniden çizme"
+msgstr "1 bit siyah beyaz olarak renk kenarlarını iyileştir ve yeniden çiz"
 
 #: ../share/filters/filters.svg.h:662
 msgid "Poster Draw"
@@ -1645,8 +1646,7 @@ msgstr "Poster Çizimi"
 
 #: ../share/filters/filters.svg.h:664
 msgid "Enhance and redraw edges around posterized areas"
-msgstr ""
-"Posterlenmiş alanların etrafındaki kenarları iyileştirin ve yeniden çizin"
+msgstr "Posterlenmiş alanların etrafındaki kenarları iyileştir ve yeniden çiz"
 
 #: ../share/filters/filters.svg.h:666
 msgid "Cross Noise Poster"
@@ -2118,7 +2118,7 @@ msgstr "Mavi (#0000FF)"
 #: ../share/palettes/palettes.h:26
 msgctxt "Palette"
 msgid "Purple (#800080)"
-msgstr "Mor  (#800080)"
+msgstr "Mor (#800080)"
 
 #: ../share/palettes/palettes.h:27
 msgctxt "Palette"
@@ -2713,7 +2713,7 @@ msgstr "orta arduvaz mavi (#7B68EE)"
 #: ../share/palettes/palettes.h:145
 msgctxt "Palette"
 msgid "mediumpurple (#9370DB)"
-msgstr "orta mor  (#9370DB)"
+msgstr "orta mor (#9370DB)"
 
 #: ../share/palettes/palettes.h:146
 msgctxt "Palette"
@@ -3027,7 +3027,7 @@ msgstr "Şerit 1:10"
 
 #: ../share/paint/patterns.svg.h:1
 msgid "Stripes 1:10 white"
-msgstr "Şerit  1:10 beyaz"
+msgstr "Şerit 1:10 beyaz"
 
 #: ../share/paint/patterns.svg.h:1
 msgid "Stripes 1:16"
@@ -4174,7 +4174,7 @@ msgstr "Şablon kullanarak yeni belge aç."
 
 #: ../src/actions/actions-file.cpp:102
 msgid "Close active document."
-msgstr "Etkin belgeyi kapat"
+msgstr "Etkin belgeyi kapat."
 
 #: ../src/actions/actions-object.cpp:144
 msgid ""
@@ -4194,7 +4194,7 @@ msgstr ""
 
 #: ../src/actions/actions-object.cpp:146
 msgid "Unlink clones and symbols."
-msgstr "Klonların ve sembollerin bağlantılarını kaldır"
+msgstr "Klonların ve sembollerin bağlantılarını kaldır."
 
 #: ../src/actions/actions-object.cpp:147
 msgid "Convert shapes to paths."
@@ -4278,7 +4278,7 @@ msgstr "PostScript düzeyini dışa aktar."
 
 #: ../src/actions/actions-output.cpp:237
 msgid "Export PDF version."
-msgstr "PDF sürümünü dışa aktar.:"
+msgstr "PDF sürümünü dışa aktar."
 
 #: ../src/actions/actions-output.cpp:238
 msgid "Export LaTeX."
@@ -4360,7 +4360,7 @@ msgstr "Seçili nesneleri çevir (dx,dy)."
 
 #: ../src/actions/actions-transform.cpp:91
 msgid "Rotate selected objects by degrees."
-msgstr "Seçili nesneleri açıyı kullanarak döndür"
+msgstr "Seçili nesneleri açıyı kullanarak döndür."
 
 #: ../src/actions/actions-transform.cpp:92
 msgid "Scale selected objects by scale factor."
@@ -5242,11 +5242,11 @@ msgstr "Seçilen bitmap(ler)i kabart; 3B efekti ile kenarları vurgulayarak"
 
 #: ../src/extension/internal/bitmap/enhance.cpp:37
 msgid "Enhance"
-msgstr "Arttır"
+msgstr "İyileştir"
 
 #: ../src/extension/internal/bitmap/enhance.cpp:44
 msgid "Enhance selected bitmap(s); minimize noise"
-msgstr "Seçili bitmap(ler)i geliştir; gürültüyü azaltarak"
+msgstr "Seçili bitmap(ler)i iyileştir; gürültüyü azaltarak"
 
 #: ../src/extension/internal/bitmap/equalize.cpp:37
 msgid "Equalize"
@@ -5678,7 +5678,7 @@ msgstr "Kenar boşluğu (mm)"
 #: ../src/extension/internal/cairo-ps-out.cpp:395
 #: ../share/extensions/eps_input.inx:11
 msgid "Encapsulated PostScript (*.eps)"
-msgstr "Encapsulated PostScript (*.eps)"
+msgstr "İçerikli PostScript (*.eps)"
 
 #: ../src/extension/internal/cairo-ps-out.cpp:396
 msgid "Encapsulated PostScript File"
@@ -5802,11 +5802,11 @@ msgstr "EMF Girdi"
 
 #: ../src/extension/internal/emf-inout.cpp:3644
 msgid "Enhanced Metafiles (*.emf)"
-msgstr "Enhanced Metafiles (*.emf)"
+msgstr "İyileştirilmiş Meta Dosyalar (*.emf)"
 
 #: ../src/extension/internal/emf-inout.cpp:3645
 msgid "Enhanced Metafiles"
-msgstr "Enhanced Metafiles"
+msgstr "İyileştirilmiş Meta Dosyalar"
 
 #: ../src/extension/internal/emf-inout.cpp:3655
 msgid "EMF Output"
@@ -5820,17 +5820,17 @@ msgstr "Metinleri yollara dönüştür"
 #: ../src/extension/internal/emf-inout.cpp:3658
 #: ../src/extension/internal/wmf-inout.cpp:3234
 msgid "Map Unicode to Symbol font"
-msgstr "Map Unicode'dan Symbol font'a"
+msgstr "Unicode'u Symbol yazı tipine eşle"
 
 #: ../src/extension/internal/emf-inout.cpp:3659
 #: ../src/extension/internal/wmf-inout.cpp:3235
 msgid "Map Unicode to Wingdings"
-msgstr "Map Unicode'tan Wingdings'e"
+msgstr "Unicode'u Sarmallara (winding) eşle"
 
 #: ../src/extension/internal/emf-inout.cpp:3660
 #: ../src/extension/internal/wmf-inout.cpp:3236
 msgid "Map Unicode to Zapf Dingbats"
-msgstr "Map Unicode'tan Zapf Dingbats'e"
+msgstr "Unicode'u Zapf Sembollerine eşle"
 
 #: ../src/extension/internal/emf-inout.cpp:3661
 #: ../src/extension/internal/wmf-inout.cpp:3237
@@ -5866,11 +5866,11 @@ msgstr "Görüntü döndürmelerini yok say"
 
 #: ../src/extension/internal/emf-inout.cpp:3671
 msgid "Enhanced Metafile (*.emf)"
-msgstr "Enhanced Metafile (*.emf)"
+msgstr "İyileştirilmiş Meta Dosya (*.emf)"
 
 #: ../src/extension/internal/emf-inout.cpp:3672
 msgid "Enhanced Metafile"
-msgstr "Enhanced Metafile"
+msgstr "İyileştirilmiş Meta Dosya"
 
 #: ../src/extension/internal/filter/bevels.h:55
 msgid "Diffuse Light"
@@ -6784,7 +6784,7 @@ msgstr "Ofset"
 
 #: ../src/extension/internal/filter/color.h:1175
 msgid "Modify lights and shadows separately"
-msgstr "Işıkları ve gölgeleri ayrı ayrı değiştirme"
+msgstr "Işıkları ve gölgeleri ayrı ayrı değiştir"
 
 #: ../src/extension/internal/filter/color.h:1238
 msgid "Lightness-Contrast"
@@ -6961,7 +6961,7 @@ msgstr "Üçlü Ton"
 
 #: ../src/extension/internal/filter/color.h:1821
 msgid "Enhance hue"
-msgstr "Ton tonunu iyileştir"
+msgstr "Tonu iyileştir"
 
 #: ../src/extension/internal/filter/color.h:1822
 msgid "Phosphorescence"
@@ -7671,15 +7671,15 @@ msgstr "Özel kontur seçenekleri"
 
 #: ../src/extension/internal/filter/textures.h:86
 msgid "k1:"
-msgstr "k1"
+msgstr "k1:"
 
 #: ../src/extension/internal/filter/textures.h:87
 msgid "k2:"
-msgstr "k1"
+msgstr "k2:"
 
 #: ../src/extension/internal/filter/textures.h:88
 msgid "k3:"
-msgstr "k3"
+msgstr "k3:"
 
 #: ../src/extension/internal/filter/textures.h:96
 msgid "Inkblot on tissue or rough paper"
@@ -8185,7 +8185,7 @@ msgstr "VSD Girdi"
 
 #: ../src/extension/internal/vsd-input.cpp:332
 msgid "Microsoft Visio Diagram (*.vsd)"
-msgstr "Microsoft Visio Diagram (*.vsd)"
+msgstr "Microsoft Visio Diyagramı (*.vsd)"
 
 #: ../src/extension/internal/vsd-input.cpp:333
 msgid "File format used by Microsoft Visio 6 and later"
@@ -8197,7 +8197,7 @@ msgstr "VDX Girdi"
 
 #: ../src/extension/internal/vsd-input.cpp:345
 msgid "Microsoft Visio XML Diagram (*.vdx)"
-msgstr "Microsoft Visio XML Diagram (*.vdx)"
+msgstr "Microsoft Visio XML Diyagramı (*.vdx)"
 
 #: ../src/extension/internal/vsd-input.cpp:346
 msgid "File format used by Microsoft Visio 2010 and later"
@@ -8209,7 +8209,7 @@ msgstr "VSDM Girdi"
 
 #: ../src/extension/internal/vsd-input.cpp:358
 msgid "Microsoft Visio 2013 drawing (*.vsdm)"
-msgstr "Microsoft Visio 2013 drawing (*.vsdm)"
+msgstr "Microsoft Visio 2013 çizimi (*.vsdm)"
 
 #: ../src/extension/internal/vsd-input.cpp:359
 #: ../src/extension/internal/vsd-input.cpp:372
@@ -8222,7 +8222,7 @@ msgstr "VSDX Girdi"
 
 #: ../src/extension/internal/vsd-input.cpp:371
 msgid "Microsoft Visio 2013 drawing (*.vsdx)"
-msgstr "Microsoft Visio 2013 drawing (*.vsdx)"
+msgstr "Microsoft Visio 2013 çizimi (*.vsdx)"
 
 #: ../src/extension/internal/wmf-inout.cpp:3217
 msgid "WMF Input"
@@ -8230,11 +8230,11 @@ msgstr "WMF giriş"
 
 #: ../src/extension/internal/wmf-inout.cpp:3222
 msgid "Windows Metafiles (*.wmf)"
-msgstr "Windows Metafiles (*.wmf)"
+msgstr "Windows Meta Dosyaları (*.wmf)"
 
 #: ../src/extension/internal/wmf-inout.cpp:3223
 msgid "Windows Metafiles"
-msgstr "Windows Metafiles"
+msgstr "Windows Meta Dosyaları"
 
 #: ../src/extension/internal/wmf-inout.cpp:3231
 msgid "WMF Output"
@@ -8246,11 +8246,11 @@ msgstr "Tüm dolgu desenlerini standart WMF tarama çizgilerine eşle"
 
 #: ../src/extension/internal/wmf-inout.cpp:3245
 msgid "Windows Metafile (*.wmf)"
-msgstr "Windows Metafile (*.wmf)"
+msgstr "Windows Meta Dosyası (*.wmf)"
 
 #: ../src/extension/internal/wmf-inout.cpp:3246
 msgid "Windows Metafile"
-msgstr "Windows Metafile"
+msgstr "Windows Meta Dosyası"
 
 #: ../src/extension/internal/wpg-input.cpp:159
 msgid "WPG Input"
@@ -8282,7 +8282,7 @@ msgstr "Mevcut klasörü seç"
 
 #: ../src/extension/prefdialog/parameter-path.cpp:205
 msgid "Choose file name"
-msgstr "Dosya adı seç:"
+msgstr "Dosya adı seç"
 
 #: ../src/extension/prefdialog/parameter-path.cpp:208
 msgid "Choose folder name"
@@ -8727,17 +8727,17 @@ msgstr "Renk örneğini sil"
 #: ../src/gradient-drag.cpp:91 ../src/ui/tools/gradient-tool.cpp:86
 #: ../src/ui/tools/mesh-tool.cpp:100
 msgid "Linear gradient <b>start</b>"
-msgstr "Doğrusal renk geçişi başlangıcı"
+msgstr "Doğrusal renk geçişi <b>başlangıcı</b>"
 
 #: ../src/gradient-drag.cpp:92 ../src/ui/tools/gradient-tool.cpp:87
 #: ../src/ui/tools/mesh-tool.cpp:101
 msgid "Linear gradient <b>end</b>"
-msgstr "Doğrusal renk geçişi sonu"
+msgstr "Doğrusal renk geçişi <b>sonu</b>"
 
 #: ../src/gradient-drag.cpp:93 ../src/ui/tools/gradient-tool.cpp:88
 #: ../src/ui/tools/mesh-tool.cpp:102
 msgid "Linear gradient <b>mid stop</b>"
-msgstr "Doğrusal renk geçişi orta durma noktası"
+msgstr "Doğrusal renk geçişi <b>orta durma noktası</b>"
 
 #: ../src/gradient-drag.cpp:94 ../src/ui/tools/gradient-tool.cpp:89
 #: ../src/ui/tools/mesh-tool.cpp:103
@@ -8952,8 +8952,8 @@ msgid ""
 "Method used to convert pre-0.92 document dpi, if needed: [none|scale-viewbox|"
 "scale-document]"
 msgstr ""
-"Yöntem, pre-0.92 belge dpi dönüştürmek için kullanıldı, eğer istenirse: "
-"[none|scale-viewbox|scale-document]."
+"İhtiyaç duyulursa, pre-0.92 belgesinin dpi değerini dönüştürmek için "
+"kullanılan yöntem: [none|scale-viewbox|scale-document]"
 
 #: ../src/inkscape-application.cpp:593
 msgid "METHOD"
@@ -8961,8 +8961,7 @@ msgstr "YÖNTEM"
 
 #: ../src/inkscape-application.cpp:594
 msgid "Do not fix pre-0.92 document's text baseline spacing on opening"
-msgstr ""
-"Açılışta pre-0.92 belgesinin metin taban çizgisi aralığını düzeltmeyin."
+msgstr "Açılışta pre-0.92 belgesinin metin taban çizgisi aralığını düzeltmeyin"
 
 #: ../src/inkscape-application.cpp:597
 msgid "File export"
@@ -9055,7 +9054,7 @@ msgstr "KENAR BOŞLUĞU"
 
 #: ../src/inkscape-application.cpp:614
 msgid "Export options"
-msgstr "Seçenekleri dışa aktar:"
+msgstr "Seçenekleri dışa aktar"
 
 #: ../src/inkscape-application.cpp:615
 msgid "ID(s) of object(s) to export"
@@ -9110,7 +9109,7 @@ msgid ""
 "id"
 msgstr ""
 "--export-id tarafından seçilen nesneyi dışa aktarırken depolanan dosya adını "
-"ve DPI ipuçlarını kullanın."
+"ve DPI ipuçlarını kullanın"
 
 #: ../src/inkscape-application.cpp:624
 msgid "Background color for exported bitmaps (any SVG color string)"
@@ -9171,11 +9170,11 @@ msgstr "Gelişmiş dosya işleme"
 
 #: ../src/inkscape-application.cpp:638
 msgid "Remove unused definitions from the <defs> section(s) of document"
-msgstr "Kullanılmayan tanımları belgenin <defs> bölümlerinden kaldırın."
+msgstr "Kullanılmayan tanımları belgenin <defs> bölümlerinden kaldırın"
 
 #: ../src/inkscape-application.cpp:639
 msgid "Select objects: comma-separated list of IDs"
-msgstr "Nesneleri seç: Virgülle ayrılmış kimlik listesi."
+msgstr "Nesneleri seç: Virgülle ayrılmış kimlik listesi"
 
 #: ../src/inkscape-application.cpp:643
 msgid "List of actions (with optional arguments) to execute"
@@ -9238,7 +9237,7 @@ msgstr "Konsol kipinde D-Bus iletileri için bir dinleme döngüsü girin"
 
 #: ../src/inkscape-application.cpp:661
 msgid "Specify the D-Bus name; default is 'org.inkscape'"
-msgstr "D-Bus adını belirtin (varsayılan 'org.inkscape')."
+msgstr "D-Bus adını belirtin; öntanımlı değer: 'org.inkscape'"
 
 #: ../src/inkscape-application.cpp:661
 msgid "BUS-NAME"
@@ -9513,8 +9512,8 @@ msgid ""
 "Add ruler marks to the object in adjustable intervals, using the object's "
 "stroke style."
 msgstr ""
-"Yolun kontur stilini kullanarak yola ayarlanabilir aralıklarla cetvel imleri "
-"ekle"
+"Nesnenin kontur stilini kullanarak nesneye ayarlanabilir aralıklarla cetvel "
+"imleri ekle."
 
 #: ../src/live_effects/effect.cpp:288
 msgid "Power stroke"
@@ -10190,7 +10189,7 @@ msgstr "Boolean İşlemi"
 
 #: ../src/live_effects/lpe-bool.cpp:76
 msgid "Swap operands"
-msgstr "Takas işlenenleri:"
+msgstr "Takas işlenenleri"
 
 #: ../src/live_effects/lpe-bool.cpp:76
 msgid "Swap operands (useful e.g. for difference)"
@@ -11585,7 +11584,7 @@ msgid ""
 "180° to disable merging"
 msgstr ""
 "Üst üste gelen boyut çizgilerinin tek bir taneye birleştirileceği en küçük "
-"açı, birleştirmeyi devre dışı bırakmak için 180° kullanın."
+"açı, birleştirmeyi devre dışı bırakmak için 180° kullanın"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:74
 #: ../share/extensions/frame.inx:13
@@ -11836,7 +11835,7 @@ msgstr "Yalnızca sınırlayıcı kutu"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:101
 msgid "Measure only the geometrical bounding box"
-msgstr " Yalnızca sınırlayıcı geometrik kutuyu ölç"
+msgstr "Yalnızca sınırlayıcı geometrik kutuyu ölç"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:102
 msgid "Add object center"
@@ -13761,12 +13760,12 @@ msgstr "Grup"
 #: ../src/object/sp-item-group.cpp:306 ../src/object/sp-switch.cpp:70
 #, c-format
 msgid "of <b>%d</b> object"
-msgstr "<b>% d </b> nesnesinin"
+msgstr "<b>%d</b> nesnenin"
 
 #: ../src/object/sp-item-group.cpp:306 ../src/object/sp-switch.cpp:70
 #, c-format
 msgid "of <b>%d</b> objects"
-msgstr "<b>% d </b> nesnelerinin"
+msgstr "<b>%d</b> nesnenin"
 
 #: ../src/object/sp-item-group.cpp:639 ../src/selection-chemistry.cpp:925
 msgid "Ungroup"
@@ -14699,7 +14698,7 @@ msgstr ""
 msgid ""
 "The object you're trying to select is <b>not visible</b> (it is in &lt;"
 "defs&gt;)"
-msgstr "Seçmeye çalıştığınız nesne görünür değil (içinde &lt;defs&gt;)"
+msgstr "Seçmeye çalıştığınız nesne <b>görünür değil</b> (&lt;defs&gt; içinde)"
 
 #: ../src/selection-chemistry.cpp:2973
 msgid "Select path(s) to fill."
@@ -14974,8 +14973,8 @@ msgid ""
 "<b>Align</b> objects to the side clicked; <b>Shift</b> click to invert side; "
 "<b>Ctrl</b> to group whole selection."
 msgstr ""
-"Tıklayıp nesneleri kenara <b>hizala</b>; kenarı ters çevirmek için "
-"<b>Shift</b> düğmesini basılı tutarak tıkla; <b>Ctrl</b> ile tüm seçimi grupla"
+"Tıklayıp nesneleri kenara <b>hizala</b>; kenarı ters çevirmek için <b>Shift</"
+"b> tuşuna basılı tutarak tıkla; <b>Ctrl</b> ile tüm seçimi grupla."
 
 #
 # File: ../src/seltrans-handles.cpp, line: 24
@@ -14984,8 +14983,8 @@ msgid ""
 "<b>Align</b> objects to center; <b>Shift</b> click to center vertically "
 "instead of horizontally."
 msgstr ""
-"Nesneleri ortaya <b>hizala</b>; Yatay yerine dikey hizalamak için <b>Shift</b>"
-"düğmesini basılı tutarak tıkla"
+"Nesneleri ortaya <b>hizala</b>; Yatay yerine dikey hizalamak için <b>Shift</"
+"b> tuşuna basılı tutarak tıkla."
 
 #: ../src/seltrans.cpp:500 ../src/ui/dialog/transformation.cpp:898
 msgid "Skew"
@@ -15034,8 +15033,8 @@ msgid ""
 "<b>Move</b> by %s, %s; with <b>Ctrl</b> to restrict to horizontal/vertical; "
 "with <b>Shift</b> to disable snapping"
 msgstr ""
-"<b> Taşı </b> ile % s,% s; yatay / dikey sınırlamak için <b> Ctrl </b> ile; "
-"yapışmayı devre dışı bırakmak için <b> Shift </b> ile"
+"%s,%s <b>taşı</b>; <b>Ctrl</b> ile yatay/dikey sınırlandır; <b>Shift</b> ile "
+"yapışmayı devre dışı bırak"
 
 #: ../src/shortcuts.cpp:428 ../src/ui/dialog/export.cpp:1307
 #: ../src/ui/dialog/export.cpp:1334
@@ -15693,7 +15692,7 @@ msgstr "Seçime grup gibi davran"
 # File: ../src/ui/dialog/align-and-distribute.cpp, line: 1107
 #: ../src/ui/dialog/align-and-distribute.cpp:1109
 msgid "Enable on-canvas alignment handles."
-msgstr "Tuval üstü hizalama tutaçlarını etkinleştir"
+msgstr "Tuval üstü hizalama tutaçlarını etkinleştir."
 
 #: ../src/ui/dialog/attrdialog.cpp:103 ../src/ui/tools/text-tool.cpp:1860
 msgid "Type text"
@@ -16200,7 +16199,7 @@ msgstr "_Vektörize"
 
 #: ../src/ui/dialog/clonetiler.cpp:805
 msgid "Trace the drawing under the clones/sprayed items"
-msgstr "Çizimi  klonların/püskürtme ögelerinin altında vektörize et"
+msgstr "Çizimi klonların/püskürtme ögelerinin altında vektörize et"
 
 #: ../src/ui/dialog/clonetiler.cpp:809
 msgid ""
@@ -16534,7 +16533,7 @@ msgstr "Kayıt iletilerini çıkar"
 
 #: ../src/ui/dialog/dialog-multipaned.cpp:246
 msgid "You can drop dockable dialogs here."
-msgstr "Yuvalanabilir iletişim kutularını buraya bırakabilirsiniz"
+msgstr "Yuvalanabilir iletişim kutularını buraya bırakabilirsiniz."
 
 #: ../src/ui/dialog/dialog-notebook.cpp:59
 msgid "Close Tab"
@@ -17078,7 +17077,7 @@ msgid ""
 "(caution, overwrites without asking!)"
 msgstr ""
 "Eğer varsa dışa aktarma ipuçlarını kullanarak, seçilen her nesneyi kendi PNG "
-"dosyasına aktar  (dikkat, sormadan üzerine yazar!)"
+"dosyasına aktar (dikkat, sormadan üzerine yazar!)"
 
 #: ../src/ui/dialog/export.cpp:195
 msgid "In the exported image, hide all objects except those that are selected"
@@ -17279,7 +17278,7 @@ msgstr "Tüm Dosyalar"
 #: ../src/ui/dialog/filedialogimpl-gtkmm.cpp:307
 #: ../src/ui/dialog/filedialogimpl-win32.cpp:268
 msgid "All Inkscape Files"
-msgstr "Tüm Inkscape  Dosyaları"
+msgstr "Tüm Inkscape Dosyaları"
 
 #: ../src/ui/dialog/filedialogimpl-gtkmm.cpp:300
 #: ../src/ui/dialog/filedialogimpl-gtkmm.cpp:313
@@ -18354,8 +18353,8 @@ msgstr[1] "%1 eşleşmeler değişti"
 #: ../src/ui/dialog/find.cpp:1008
 msgid "%1 object found"
 msgid_plural "%1 objects found"
-msgstr[0] "%1  nesne bulundu"
-msgstr[1] "%1  nesneler bulundu"
+msgstr[0] "%1 nesne bulundu"
+msgstr[1] "%1 nesne bulundu"
 
 #: ../src/ui/dialog/find.cpp:1022
 msgid "Replace text or property"
@@ -19099,7 +19098,7 @@ msgstr "Çeşitli Semboller"
 
 #: ../src/ui/dialog/glyphs.cpp:308
 msgid "Dingbats"
-msgstr "Dingbats"
+msgstr "Semboller (Dingbats)"
 
 #: ../src/ui/dialog/glyphs.cpp:309
 msgid "Miscellaneous Mathematical Symbols-A"
@@ -20326,7 +20325,7 @@ msgstr "Manipuri (mni)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:979
 msgid "Manipuri in Bengali script (mni@beng)"
-msgstr "Manipuri in Bengali script (mni@beng)"
+msgstr "Bengali alfabesinde Manipuri (mni@beng)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:979
 msgid "Marathi (mr)"
@@ -20386,7 +20385,7 @@ msgstr "Santali (sat)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:984
 msgid "Santali in Devanagari script (sat@deva)"
-msgstr "Santali in Devanagari script (sat@deva)"
+msgstr "Devanagari alfabesinde Santali (sat@deva)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:984
 msgid "Serbian (sr)"
@@ -20402,7 +20401,7 @@ msgstr "Sindhi (sd)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:985
 msgid "Sindhi in Devanagari script (sd@deva)"
-msgstr "Sindhi in Devanagari script (sd@deva)"
+msgstr "Devanagari alfabesinde Sindhi (sd@deva)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:985
 msgid "Slovak (sk)"
@@ -20752,9 +20751,9 @@ msgid ""
 "display icons in menus. (requires restart)"
 msgstr ""
 "Menülerdeki tüm simgeleri etkinleştirebilir veya devre dışı "
-"bırakabilirsiniz. Öntanımlı olarak tema, 'menus.xml' dosyasındaki 'show-"
-"icons' özelliği simgelerin görüntülenip görüntülenmeyeceğini belirler "
-"(yeniden başlatma gerektirir)."
+"bırakabilirsiniz. Öntanımlı olarak, 'menus.xml' dosyasındaki 'show-icons' "
+"ayarı menülerde simgelerin görüntülenip görüntülenmeyeceğini belirler. ("
+"yeniden başlatma gerektirir)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1302
 msgid "Themeing"
@@ -21019,7 +21018,7 @@ msgstr "Ana (vurgulanmış) ızgara çizgileri için kullanılan renk"
 #: ../src/ui/dialog/inkscape-preferences.cpp:1425
 #: ../src/ui/dialog/inkscape-preferences.cpp:1450
 msgid "Major grid line every:"
-msgstr "Her  ana ızgara çizgisi:"
+msgstr "Her ana ızgara çizgisi:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1426
 msgid "Show dots instead of lines"
@@ -21085,8 +21084,8 @@ msgid ""
 "How close on the screen you need to be to an object to be able to grab it "
 "with mouse (in screen pixels)"
 msgstr ""
-"Ekrana ne kadar yakınsa, fare ile yakalayabilmesi için bir nesneye ihtiyacı "
-"var (ekran pikselleriyle)."
+"Bir nesneyi fareyle yakalayabilmek için ona ekranda ne kadar yakın olmanız "
+"gerektiği (ekran pikselleri olarak)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1520
 msgid "_Click/drag threshold:"
@@ -21369,14 +21368,15 @@ msgstr "SVG 2 oluşturmayanlar için geri dönüş seçenekleri ekler."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1610
 msgid "Adds a JavaScript polyfill for rendering meshes in web browsers."
-msgstr "Kafesleri web tarayıcılarında görüntüleyebilmek için bir JavaScript "
-"poli-dolgusu ekler"
+msgstr ""
+"Kafesleri web tarayıcılarında görüntüleyebilmek için bir JavaScript poli-"
+"dolgusu ekler."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1611
 msgid "Adds a JavaScript polyfill for rendering hatches in web browsers."
 msgstr ""
 "Tarama çizgilerini web tarayıcılarında görüntüleyebilmek için bir JavaScript "
-"poli-dolgusu ekler"
+"poli-dolgusu ekler."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1614
 msgid "SVG 2 to SVG 1.1"
@@ -21938,7 +21938,7 @@ msgid ""
 msgstr ""
 "Birden çok yapışma çözümü bulunduğunda, Inkscape en yakın dönüşümü (0 olarak "
 "ayarlandığında) veya ilk olarak işaretçiye en yakın olan düğümü (1 olarak "
-"ayarlandığında) tercih edebilir."
+"ayarlandığında) tercih edebilir"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1918
 msgid "Snap the mouse pointer when dragging a constrained knot"
@@ -23350,7 +23350,7 @@ msgstr "İşlev:"
 #. For situations where the nature/role alone isn't enough, this offers an additional URI defining the purpose of the link.
 #: ../src/ui/dialog/object-attributes.cpp:45
 msgid "Arcrole:"
-msgstr "Arcrole:"
+msgstr "Ek rol (arcrole):"
 
 #: ../src/ui/dialog/object-attributes.cpp:48
 #: ../share/extensions/polyhedron_3d.inx:76
@@ -23987,7 +23987,7 @@ msgstr ""
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:462
 msgid "Units per em:"
-msgstr "Em başına birim"
+msgstr "Em başına birim:"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:462
 msgid ""
@@ -24031,7 +24031,7 @@ msgstr "x Yüksekliği:"
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:466
 msgid ""
 "The height of a lower-case letter above the baseline like the letter 'x'"
-msgstr "'x' harfi gibi taban çizgisinin üstündeki küçük harfin yüksekliği."
+msgstr "'x' harfi gibi taban çizgisinin üstündeki küçük harfin yüksekliği"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:542
 msgid "glyph"
@@ -24771,10 +24771,10 @@ msgid ""
 "\n"
 "The file already exists in \"%s\". Replacing it will overwrite its contents."
 msgstr ""
-"<span weight=\"bold\" size=\"larger\"> \"%s\" adlı dosya zaten var. "
-"Değiştirmek istiyor musunuz? </span>\n"
+"<span weight=\"bold\" size=\"larger\">\"%s\" adlı bir dosya zaten var. "
+"Değiştirmek istiyor musunuz?</span>\n"
 "\n"
-"Dosya zaten \"% s\" içinde var. Değiştirilmesi, var olan içeriğin üzerine "
+"Dosya \"%s\" içinde zaten var. Değiştirilmesi, var olan içeriğin üzerine "
 "yazacaktır."
 
 #: ../src/ui/interface.cpp:236 ../share/extensions/web_set_att.inx:25
@@ -25215,8 +25215,8 @@ msgid ""
 "<b>BSpline node handle</b> (%.3g power): Shift-drag to move, double-click to "
 "reset. (more: %s)"
 msgstr ""
-"<b>Açılı düğüm tutacı</b> (%.3g kuvveti): Sürüklemek için Shift'e, "
-"sıfırlamak için çift tıkla (ek bilgi: %s)."
+"<b>Açılı düğüm tutacı</b> (%.3g kuvveti): Sürüklemek için Shift tuşuna bas, "
+"sıfırlamak için çift tıkla. (ek bilgi: %s)"
 
 #: ../src/ui/tool/node.cpp:736
 msgctxt "Path handle tip"
@@ -25275,8 +25275,8 @@ msgid ""
 "<b>BSpline node</b> (%.3g power): drag to shape the path. (more: Shift, "
 "Ctrl, Alt)"
 msgstr ""
-"<b>Açılı düğüm</b> (%.3g kuvveti): Yolu şekillendirmek için sürükle (ek "
-"bilgi: Shift, Ctrl, Alt)."
+"<b>Açılı düğüm</b> (%.3g kuvveti): Yolu şekillendirmek için sürükle. (ek "
+"bilgi: Shift, Ctrl, Alt)"
 
 #: ../src/ui/tool/node.cpp:1650
 #, c-format
@@ -25396,7 +25396,7 @@ msgid ""
 "<b>Shift+Ctrl</b>: rotate around the opposite corner and snap angle to %f° "
 "increments"
 msgstr ""
-"<b>Shift+Ctrl</b>: karşı köşenin etrafında dödür ve açıya % f° artışlarla "
+"<b>Shift+Ctrl</b>: karşı köşenin etrafında döndür ve açıya %f° artışlarla "
 "yapış"
 
 #: ../src/ui/tool/transform-handle-set.cpp:459
@@ -26471,7 +26471,7 @@ msgstr "Bikübik"
 
 #: ../src/ui/toolbar/mesh-toolbar.cpp:333
 msgid "Smoothing"
-msgstr "Düzleme:"
+msgstr "Düzleme"
 
 #. TRANSLATORS: Type of Smoothing. See https://en.wikipedia.org/wiki/Coons_patch
 #: ../src/ui/toolbar/mesh-toolbar.cpp:335
@@ -26971,8 +26971,8 @@ msgid ""
 "Now <b>gradients</b> remain <b>fixed</b> when objects are transformed "
 "(moved, scaled, rotated, or skewed)."
 msgstr ""
-"Artık nesneler dönüştürüldüğünde <b>renk geçişleri</b> sabit kalır "
-"(taşınmış, ölçeklendirilmiş, döndürülmüş veya eğriltilmiş)."
+"Nesneler dönüştürüldüğünde <b>renk geçişleri</b> artık <b>sabit</b> kalır ("
+"taşınmış, ölçeklendirilmiş, döndürülmüş veya eğriltilmiş)."
 
 #: ../src/ui/toolbar/select-toolbar.cpp:503
 msgid ""
@@ -27721,7 +27721,7 @@ msgstr "Dikey — SA"
 
 #: ../src/ui/toolbar/text-toolbar.cpp:533
 msgid "Vertical text — lines: right to left"
-msgstr "Dikey metin  — çizgiler: sağdan sola"
+msgstr "Dikey metin — çizgiler: sağdan sola"
 
 #: ../src/ui/toolbar/text-toolbar.cpp:538
 msgid "Vertical — LR"
@@ -27729,7 +27729,7 @@ msgstr "Dikey — SO"
 
 #: ../src/ui/toolbar/text-toolbar.cpp:539
 msgid "Vertical text — lines: left to right"
-msgstr "Dikey metin  — çizgiler: soldan sağa"
+msgstr "Dikey metin — çizgiler: soldan sağa"
 
 #: ../src/ui/toolbar/text-toolbar.cpp:544
 msgid "Writing mode"
@@ -28408,17 +28408,16 @@ msgid ""
 msgid_plural ""
 "Area filled, path with <b>%d</b> nodes created and unioned with selection."
 msgstr[0] ""
-"Alan dolu, <b>% d</b> düğümü olan yol oluşturuldu ve seçim ile birleştirildi."
+"Alan dolu, <b>%d</b> düğümü olan yol oluşturuldu ve seçim ile birleştirildi."
 msgstr[1] ""
-"Alan dolu, <b>% d</b> düğümleri olan yol oluşturuldu ve seçim ile "
-"birleştirildi."
+"Alan dolu, <b>%d</b> düğümü olan yol oluşturuldu ve seçim ile birleştirildi."
 
 #: ../src/ui/tools/flood-tool.cpp:480
 #, c-format
 msgid "Area filled, path with <b>%d</b> node created."
 msgid_plural "Area filled, path with <b>%d</b> nodes created."
-msgstr[0] "Alan dolu, <b>% d</b> düğümü olan yol oluşturuldu."
-msgstr[1] "Alan dolu, <b>% d</b> düğümleri olan yol oluşturuldu."
+msgstr[0] "Alan dolu, <b>%d</b> düğümü olan yol oluşturuldu."
+msgstr[1] "Alan dolu, <b>%d</b> düğümü olan yol oluşturuldu."
 
 #: ../src/ui/tools/flood-tool.cpp:751 ../src/ui/tools/flood-tool.cpp:1056
 msgid "<b>Area is not bounded</b>, cannot fill."
@@ -28487,8 +28486,8 @@ msgstr[1] " %d renk geçişi tutaçları dışında kaldı"
 #, c-format
 msgid " on %d selected object"
 msgid_plural " on %d selected objects"
-msgstr[0] " % d seçili nesne üzerinde"
-msgstr[1] " % d seçili nesneler üzerinde"
+msgstr[0] " %d seçili nesne üzerinde"
+msgstr[1] " %d seçili nesne üzerinde"
 
 #. TRANSLATORS: This is a part of a compound message (out of two more indicating: grandint handle count & object count)
 #: ../src/ui/tools/gradient-tool.cpp:128 ../src/ui/tools/mesh-tool.cpp:146
@@ -28615,8 +28614,8 @@ msgstr "Geçit %lu"
 #, c-format
 msgid " out of %d mesh handle"
 msgid_plural " out of %d mesh handles"
-msgstr[0] " % d kafesi tutacı dışında"
-msgstr[1] " % d kafesi tutaçları dışında"
+msgstr[0] " %d kafes tutacı içerisinden"
+msgstr[1] " %d kafes tutacı içerisinden"
 
 #: ../src/ui/tools/mesh-tool.cpp:156
 #, c-format
@@ -28630,8 +28629,8 @@ msgstr[1] "<b>%d</b> %d dışında seçilen kafes tutaçları"
 #, c-format
 msgid "<b>No</b> mesh handles selected out of %d on %d selected object"
 msgid_plural "<b>No</b> mesh handles selected out of %d on %d selected objects"
-msgstr[0] "%d seçili nesnedeki %d ögesinden hiçbir kafes tutacı seçilmedi"
-msgstr[1] "%d seçili nesnelerdeki %d ögesinden hiçbir kafes tutacı seçilmedi"
+msgstr[0] "%d ögeden %d seçili nesnedeki <b>hiçbir</b> kafes tutacı seçilmedi"
+msgstr[1] "%d ögeden %d seçili nesnedeki <b>hiçbir</b> kafes tutacı seçilmedi"
 
 #: ../src/ui/tools/mesh-tool.cpp:291
 msgid "Split mesh row/column"
@@ -29655,7 +29654,7 @@ msgstr "Üst simge"
 #: ../src/ui/widget/font-variants.cpp:165
 msgctxt "Font feature"
 msgid "Capitals"
-msgstr "Başlıklar"
+msgstr "Büyük harfler"
 
 #: ../src/ui/widget/font-variants.cpp:167
 msgctxt "Font feature"
@@ -29680,12 +29679,12 @@ msgstr "Hepsi ufak"
 #: ../src/ui/widget/font-variants.cpp:171
 msgctxt "Font feature"
 msgid "Unicase"
-msgstr "Tektip"
+msgstr "Tek tip"
 
 #: ../src/ui/widget/font-variants.cpp:172
 msgctxt "Font feature"
 msgid "Titling"
-msgstr "Titling"
+msgstr "Başlık"
 
 #: ../src/ui/widget/font-variants.cpp:174
 msgctxt "Font feature"
@@ -30673,8 +30672,8 @@ msgid ""
 "to adjust lightness"
 msgstr ""
 "<b>Ton</b> ayarlama: önce %.3g, şimdi <b>%.3g</b> (fark %.3g); <b>Shift</b> "
-"ile doygunluğu ayarla, tonu ayarlamak için değiştiriciler olmadan <b>Alt</b> "
-"ile alfayı ayarla"
+"ile doygunluğu ayarla, <b>Alt</b> ile alfayı ayarla, <b>Ctrl</b> ile "
+"açıklığı ayarla"
 
 #: ../src/ui/widget/selected-style.cpp:1426
 #: ../src/ui/widget/selected-style.cpp:1440
@@ -31129,8 +31128,8 @@ msgid ""
 "Remove unused definitions (such as gradients or clipping paths) from the &lt;"
 "defs&gt; of the document"
 msgstr ""
-"Belgenin kullanılmayan tanımları (renk geçişleri veya kırpma yolları gibi)  "
-"&lt;defs&gt; 'den kaldırın"
+"Belgenin kullanılmayan tanımlarını (renk geçişleri veya kırpma yolları gibi) "
+"&lt;defs&gt;'ten kaldırın"
 
 #: ../src/verbs.cpp:2599
 msgid "_Import..."
@@ -33616,37 +33615,34 @@ msgstr ""
 "  Bu iletişim kutusu, taramalı bir grafiği kendiliğinden vektör yollara "
 "dönüştürmenize izin verir. Farklı kullanım gereklilikleri için çeşitli "
 "seçenekler mevcuttur:\n"
-" * \"Parlaklık kesme\", eşik değerinden daha koyu olan alanları algılar "
-"ve onları çevreleyen bir yol oluşturur (potrace kullanarak).\n"
-" * \"Kenar algılama\", verilen eşik değerinden daha büyük olan değişiklikleri "
-"renk örneklerinin parlaklığında algılar ve onları ayırmak için yollar "
-"oluşturur (potrace kullanarak).\n"
+" * \"Parlaklık kesme\", eşik değerinden daha koyu olan alanları algılar ve "
+"onları çevreleyen bir yol oluşturur (potrace kullanarak).\n"
+" * \"Kenar algılama\", verilen eşik değerinden daha büyük olan "
+"değişiklikleri renk örneklerinin parlaklığında algılar ve onları ayırmak "
+"için yollar oluşturur (potrace kullanarak).\n"
 " * \"Renk nicemlemesi\", görseli verilen renk sayısına ayırır ve onları bir "
 "yol ile ayırır (potrace kullanarak).\n"
 " * \"Otomatik izle\", verilen seçenek ile otomatik izleme algoritmasını "
 "kullanır.\n"
-" * \"Merkez hat izleme\", bir çizgiyi vektörleştirmeye çalışır (otomatik izle "
-"ile).\n"
+" * \"Merkez hat izleme\", bir çizgiyi vektörleştirmeye çalışır (otomatik "
+"izle ile).\n"
 " * \"Çoklu taramalar\", görseli belirli bir sayıda taramaya ayırır, bunlar "
 "parlaklık, renk ayrımı veya gri düzeyleridir (potrace kullanarak); ek olarak "
-"otomatik izleme algoritması da kullanılabilir (bunlar için birkaç yol "
+"otomatik izleme algoritması da kullanılabilir, bunlar için birkaç yol "
 "oluşturur.\n"
 " * \"Piksel sanatı\" sekmesi, piksel tanıması için bir algoritma kullanımına "
 "izin verir veya piksel sanatı görsellerin vektörleştirilebilmesi için "
 "kullanılır.\n"
 "\n"
 " * NOT:\n"
-"  1) İzleme öncesi çalışmanızı kaydedin"
-"  2) Piksel sayınıza dikkat edin: \"Piksel sanatını izle\", piksel başına bir "
-"yol oluşturur. Piksel sanatı olmayan görseller için önerilmez.\n"
-"  3) Otomatik izleme potrace'den daha yavaştır, büyük görseller için önerilmez"
-". Karşıtlığı artırmak için görsellerinizi ön işlemeye tabi tutmanız önerilir."
-"\n"
-"  4) Eğer amacınız yalnızca birkaç düğüm ve yüksek keskinlik içinse, el ile"
+"  1) İzleme öncesi çalışmanızı kaydedin.\n"
+"  2) Piksel sayınıza dikkat edin: \"Piksel sanatını izle\", piksel başına "
+"bir yol oluşturur. Piksel sanatı olmayan görseller için önerilmez.\n"
+"  3) Otomatik izleme potrace'den daha yavaştır, büyük görseller için "
+"önerilmez. Karşıtlığı artırmak için görsellerinizi ön işlemeye tabi tutmanız "
+"önerilir.\n"
+"  4) Eğer amacınız yalnızca birkaç düğüm ve yüksek keskinlik içinse, el ile "
 "izleme her zaman en iyisidir.\n"
-
-
-
 
 #: ../share/ui/dialog-trace.glade:136
 msgid "Create a single path or create a group of paths"
@@ -33951,7 +33947,7 @@ msgstr ""
 
 #: ../share/extensions/generate_voronoi.py:77
 msgid "Please select an object"
-msgstr "Lütfen bir  nesne seçin"
+msgstr "Lütfen bir nesne seçin"
 
 #: ../share/extensions/gimp_xcf.py:114
 msgid "This extension requires at least one non empty layer."
@@ -35238,7 +35234,7 @@ msgstr "Masaüstü Kesici Plotter (AutoCAD DXF R14) (*.dxf)"
 
 #: ../share/extensions/dxf_outlines.inx:50
 msgid "Desktop Cutting Plotter"
-msgstr "Desktop Cutting Plotter"
+msgstr "Masaüstü Kesim Çizicisi"
 
 #: ../share/extensions/edge3d.inx:3
 msgid "Edge 3D"
@@ -35254,7 +35250,7 @@ msgstr "Gölgeler:"
 
 #: ../share/extensions/edge3d.inx:7
 msgid "Only black and white:"
-msgstr "Yalnızca siyah ve beyaz"
+msgstr "Yalnızca siyah ve beyaz:"
 
 #: ../share/extensions/edge3d.inx:9
 msgid "Blur stdDeviation:"
@@ -35403,11 +35399,11 @@ msgstr "X aralığını 2*pi ile çarp"
 
 #: ../share/extensions/funcplot.inx:10
 msgid "Y value of rectangle's bottom:"
-msgstr "Dikdörtgenin altındaki Y değeri:"
+msgstr "Dikdörtgenin alt kısmının Y değeri:"
 
 #: ../share/extensions/funcplot.inx:11
 msgid "Y value of rectangle's top:"
-msgstr "Dikdörtgenin üstündeki Y  değeri:"
+msgstr "Dikdörtgenin üst kısmının Y değeri:"
 
 #: ../share/extensions/funcplot.inx:12
 msgid "Number of samples:"
@@ -35569,23 +35565,23 @@ msgid ""
 "Gcodetools ver. 1.7\n"
 msgstr ""
 "\n"
-"Gcodetools eklentisi: yolları Gcode'a dönüştürür (dairesel enterpolasyon "
-"kullanarak), ofset yollarını yapar ve koni kesiciler kullanarak keskin "
-"köşeleri kazır.\n"
+"Gcodetools eklentisi:\n"
+"Yolları Gcode'a dönüştürür (dairesel enterpolasyon kullanarak), ofset "
+"yollarını yapar ve koni kesiciler kullanarak keskin köşeleri kazır.\n"
 "Bu eklenti, gerektiğinde dairesel enterpolasyon veya doğrusal hareket "
 "kullanan yollar için Gcode'u hesaplar.\n"
 "\n"
-"Rehberler, kılavuzlar ve destek adresinde bulunabilir.\n"
+"Rehberler, kılavuzlar ve destek aşağıdaki adreslerde bulunabilir:\n"
 "İngilizce destek forumu:\n"
-"\thttp://www.cnc-club.ru/gcodetools\n"
+"    http://www.cnc-club.ru/gcodetools\n"
 "\t\n"
 "ve Rusça destek forumu:\n"
-"\thttp://www.cnc-club.ru/gcodetoolsru\n"
+"    http://www.cnc-club.ru/gcodetoolsru\n"
 "\n"
 "Katkıda bulunanlar: Nick Drobchenko, Vladimir Kalyaev, John Brooker, Henry "
 "Nicolas, Chris Lusby Taylor.\n"
 "\n"
-"Gcodetools ver. 1.7\n"
+"Gcodetools 1.7 sürümü\n"
 
 #
 # File: ../share/extensions/gcodetools_about.inx, line: 47
@@ -35643,13 +35639,13 @@ msgid ""
 msgstr ""
 "\n"
 "\"Alan ofseti oluştur\": orijinal yol alanını \"Alan yarıçapı\" değerine "
-"kadar doldurmak için birkaç Inkscape yol ofseti oluşturur. \n"
+"kadar doldurmak için birkaç Inkscape yol ofseti oluşturur.\n"
 "\n"
 "Ana hatları \"1/2 D\" den \"Alan genişliği\" toplam genişliğine kadar başlar "
 "ve D en yakın takım tanımından (\"Takım çapı\" değeri) \"D\" adımlarla "
 "alınır.\n"
 "\"Alan genişliği\", \"1/2 D\" ye eşitse, yalnızca bir ofset oluşturulur.\n"
-"\t\t\t"
+"            "
 
 #: ../share/extensions/gcodetools_area.inx:21
 msgid "Fill area"
@@ -35709,13 +35705,13 @@ msgid ""
 "            "
 msgstr ""
 "\n"
-"Kullanım: \n"
-"1. Tüm Alan Ofsetlerini Seç (gri anahatlar)\n"
-"2. Nesne/Grubu çöz (Shift+Ctrl+G)\n"
-"3. Uygula'ya basın\n"
+"Kullanım:\n"
+"1. Tüm Alan Ofsetlerini seçin (gri ana hatlar)\n"
+"2. Nesne/Grubu çözün (Shift+Ctrl+G)\n"
+"3. Uygula düğmesine basın\n"
 "\n"
 "Şüphelenilen küçük nesneler renkli oklarla işaretlenecektir.\n"
-"\t\t\t"
+"            "
 
 #: ../share/extensions/gcodetools_area.inx:48
 #: ../share/extensions/gcodetools_lathe.inx:28
@@ -35994,14 +35990,14 @@ msgid ""
 msgstr ""
 "\n"
 "\n"
-"Seçilen nesneleri delme noktalarına dönüştür (dxf_import eklentisi gibi). "
-"Ayrıca orijinal şekli kaydedebilirsiniz. Her eğrinin yalnızca başlangıç "
-"noktası kullanılacaktır.\n"
+"Seçilen nesneleri delme noktalarına dönüştür (dxf_import eklentisinin "
+"yaptığı gibi). Ayrıca orijinal şekli kaydedebilirsiniz. Her eğrinin yalnızca "
+"başlangıç noktası kullanılacaktır.\n"
 "\n"
-"Ayrıca, nesneyi manuel olarak seçebilir, XML editörünü (Shift + Ctrl + X) "
-"açabilir ve 'dxfpoint' XML etiketini herhangi bir değerle ekleyebilir veya "
+"Ayrıca nesneyi elle seçebilir, XML düzenleyiciyi açabilir (Shift + Ctrl + X) "
+"ve 'dxfpoint' XML etiketini herhangi bir değerle ekleyebilir veya "
 "kaldırabilirsiniz.\n"
-"\t\t  "
+"          "
 
 #: ../share/extensions/gcodetools_dxf_points.inx:15
 msgid "Convert selection:"
@@ -36168,7 +36164,7 @@ msgstr ""
 "\n"
 "Şimdi kontrol noktaları oluşturmak için uygula düğmesine basın (her katman "
 "için bağımsız ayar).\n"
-"\t\t\t"
+"            "
 
 #: ../share/extensions/gcodetools_lathe.inx:4
 #: ../share/extensions/gcodetools_lathe.inx:8
@@ -36220,9 +36216,9 @@ msgid ""
 "        "
 msgstr ""
 "\n"
-"\t\t\tBu fonksiyon yolu değiştirir, böylece dikdörtgen bir kesici ile "
+"            Bu fonksiyon yolu değiştirir, böylece dikdörtgen bir kesici ile "
 "kesilmesi mümkün olur.\n"
-"\t\t"
+"        "
 
 #: ../share/extensions/gcodetools_orientation_points.inx:4
 msgid "Orientation points"
@@ -36249,18 +36245,14 @@ msgstr ""
 "dönüş) hesaplamak için kullanılır.\n"
 "Yalnızca 3 noktalı kipi: Üçünü de bir satıra koymayın (bunun yerine 2 "
 "noktalı kipini kullanın).\n"
-"\n"
 "Z yüzeyini, Z derinlik değerlerini daha sonra metin aracını kullanarak "
 "değiştirebilirsiniz (3. koordinatlar).\n"
-"\n"
 "Geçerli katmanın içinde yönlendirme noktaları yoksa, üst katmandan alınır.\n"
-"\n"
 "Yönlendirme noktalarının gruplarını çözmeyin! Grubun içinden seçim yapmak "
 "için çift tıklamayla veya Ctrl+Tık ile bunları seçebilirsiniz.\n"
-"\n"
 "Şimdi kontrol noktaları oluşturmak için uygula düğmesine basın (her katman "
 "için bağımsız ayar).\n"
-"\t\t\t"
+"      "
 
 #: ../share/extensions/gcodetools_orientation_points.inx:35
 msgid ""
@@ -36411,14 +36403,14 @@ msgid ""
 "            "
 msgstr ""
 "\n"
-"Seçilen takım tipi uygun varsayılan değerleri doldurur. Bu değerleri daha "
+"Seçilen takım tipi uygun öntanımlı değerleri doldurur. Bu değerleri daha "
 "sonra Metin aracını kullanarak değiştirebilirsiniz.\n"
 "\n"
 "Etkin katmandaki en üstteki (z sırası) aracı kullanılır. Geçerli katmanın "
 "içinde hiçbir araç yoksa, üst katmandan alınır.\n"
 "\n"
-"Yeni bir araç oluşturmak için Uygula tuşuna basın.\n"
-"\t\t\t"
+"Yeni bir araç oluşturmak için Uygula düğmesine basın.\n"
+"            "
 
 #: ../share/extensions/gcodetools_tools_library.inx:34
 msgid ""
@@ -36481,7 +36473,7 @@ msgid ""
 "join of the pattern at the edges. Use a negative border to reduce the size "
 "of the pattern and get an empty border."
 msgstr ""
-"Rastgele bir Voronoi hücreleri  deseni oluşturun. Desene Dolgu ve Kontur "
+"Rastgele bir Voronoi hücreleri deseni oluşturun. Desen, Dolgu ve Kontur "
 "iletişim kutusunda erişilebilir olacak. Bir nesne veya grup seçmelisiniz.\n"
 "\n"
 "Kenarlık sıfırsa, desen kenarlarında süreksiz olacaktır. Kenarlardaki "
@@ -36685,7 +36677,7 @@ msgstr "Majör Bölüm Kalınlığı (px):"
 
 #: ../share/extensions/grid_isometric.inx:11
 msgid "Minor Division Thickness (px):"
-msgstr "Minör Bölüm Kalınlığı (px)"
+msgstr "Minör Bölüm Kalınlığı (px):"
 
 #: ../share/extensions/grid_isometric.inx:12
 msgid "Subminor Division Thickness (px):"
@@ -36954,7 +36946,7 @@ msgstr "Hershey Betik 1-kontur"
 # File: ../share/extensions/hershey.inx, line: 34
 #: ../share/extensions/hershey.inx:31
 msgid "Hershey Script medium"
-msgstr "Hershey Script orta"
+msgstr "Hershey Betik orta"
 
 #: ../share/extensions/hershey.inx:33
 msgid "Hershey Gothic English"
@@ -37078,7 +37070,7 @@ msgid ""
 msgstr ""
 "\n"
 "\n"
-"Yazıtipi tablosu oluşturulurken kullanılacak örnek metin"
+"Yazı tipi tablosu oluşturulurken kullanılacak örnek metin:"
 
 #: ../share/extensions/hershey.inx:75
 #: ../share/extensions/render_alphabetsoup.inx:6
@@ -37153,14 +37145,16 @@ msgid ""
 "distribution.\n"
 msgstr ""
 "\n"
-"Klasik Hershey yazıtipleri, Dr. A. V. Hershey'in işlerinden\n"
-"derlenmişlerdir.\n"
+"Klasik Hershey yazı tipleri, Dr. A. V. Hershey'in işlerinden\n"
+"derlenmiştir.\n"
 "\n"
-"Bu dağıtımdaki ek çağdaş \"EMS\" yazıtipleri ise SIL lisansı\n"
-"ile lisanslanmış yazıtiplerinden derlenmiş işlerdir.\n"
+"Bu dağıtımdaki ek çağdaş \"EMS\" yazı tipleri ise SIL Açık\n"
+"Yazı Tipi Lisansı ile lisanslanmış yazı tiplerinden derlenmiş\n"
+"işlerdir.\n"
 "\n"
-"Tam telif ve lisans bilgisi için lütfen bu dağıtımda içerilen\n"
-"SVG yazıtiplerine iliştirilen telif hakkı bilgisi bölümüne bakın.\n"
+"Tam telif ve lisans bilgileri için lütfen bu dağıtımda\n"
+"bulunan SVG yazı tiplerine iliştirilen telif hakkı bilgisi\n"
+"bölümüne bakın.\n"
 
 #: ../share/extensions/hpgl_input.inx:3
 msgid "HPGL Input"
@@ -37217,7 +37211,7 @@ msgstr ""
 
 #: ../share/extensions/hpgl_input.inx:14 ../share/extensions/hpgl_output.inx:39
 msgid "HP Graphics Language file (*.hpgl)"
-msgstr "HP Graphics Language file (*.hpgl)"
+msgstr "HP Grafik Dili dosyası (*.hpgl)"
 
 #: ../share/extensions/hpgl_input.inx:15
 msgid "Import an HP Graphics Language file"
@@ -37239,7 +37233,7 @@ msgstr ""
 
 #: ../share/extensions/hpgl_output.inx:9 ../share/extensions/plotter.inx:67
 msgid "Plotter Settings"
-msgstr "Çizici Ayarları "
+msgstr "Çizici Ayarları"
 
 #: ../share/extensions/hpgl_output.inx:12 ../share/extensions/plotter.inx:70
 msgid "Pen number:"
@@ -37263,7 +37257,7 @@ msgstr ""
 
 #: ../share/extensions/hpgl_output.inx:14 ../share/extensions/plotter.inx:72
 msgid "Pen speed (cm/s or mm/s):"
-msgstr "Kalem hızı (cm/s veya mm/s)"
+msgstr "Kalem hızı (cm/s veya mm/s):"
 
 #: ../share/extensions/hpgl_output.inx:14
 msgid ""
@@ -37323,7 +37317,7 @@ msgstr ""
 
 #: ../share/extensions/hpgl_output.inx:27 ../share/extensions/plotter.inx:85
 msgid "Plot Features"
-msgstr "Çizdirme Özellikleri "
+msgstr "Çizdirme Özellikleri"
 
 #: ../share/extensions/hpgl_output.inx:28 ../share/extensions/plotter.inx:86
 msgid "Overcut (mm):"
@@ -38217,7 +38211,7 @@ msgstr "Boyutlar"
 
 #: ../share/extensions/layer2png.inx:9
 msgid "Layer with Slices:"
-msgstr "Dilimli Katman"
+msgstr "Dilimli Katman:"
 
 #: ../share/extensions/layer2png.inx:10
 msgid "Overwrite existing exports"
@@ -38388,9 +38382,9 @@ msgstr ""
 "    * Sayfa kenar boşlukları: Her sayfa etrafında fazladan boşluk.\n"
 "    * Düzen satır ve sütunları.\n"
 "    * Düzen boyutu: En ve boy, 0 ise otomatik olarak hesaplanır.\n"
-"    * Otomatik yerleşim boyutunu hesapla: Düzenin her kısmı etrafındaki "
-"beyaz boşluk.\n"
-"    * Kenar boşlukları düzeni: Düzenin her kısmı için iç dolgu.\n"
+"    * Düzen boyutunu otomatik hesapla: Düzen boyutu değerlerini kullanma.\n"
+"    * Düzen kenar boşlukları: Düzenin her kısmı etrafındaki beyaz boşluk.\n"
+"    * Düzen dolgusu: Düzenin her kısmı için iç dolgu.\n"
 "      "
 
 #: ../share/extensions/layout_nup.inx:65
@@ -38622,7 +38616,7 @@ msgstr "Merkez (Orta)"
 
 #: ../share/extensions/measure.inx:28
 msgid "Right (End)"
-msgstr "Sağ (Son):"
+msgstr "Sağ (Son)"
 
 #: ../share/extensions/measure.inx:31
 msgid "Fixed Text"
@@ -39385,11 +39379,13 @@ msgid ""
 msgstr ""
 "Bu eklenti, aşağıdaki seçeneklere göre seçimin düğümlerini numaralı "
 "noktalarla değiştirir:\n"
-"    * Yazıtipi boyutu: Düğüm numarası etiketlerinin boyutu (20px, 12pt...).\n"
+"    * Yazı tipi boyutu: Düğüm numarası etiketlerinin boyutu (20px, 12pt...)."
+"\n"
 "    * Nokta boyutu: Düğüm noktalarına yerleştirilen noktaların çapı (10px, "
 "2mm...).\n"
-"    * Başlangıç nokta numarası: İki düğüm arasındaki numaralandırma "
-"adımı.    + Adım: İki düğüm arasındaki numaralandırma adımı."
+"    * Başlangıç nokta numarası: Yolun ilk düğümüne atanan, dizideki ilk "
+"numara.\n"
+"    * Adım: İki düğüm arasındaki numaralandırma adımı."
 
 #: ../share/extensions/path_to_absolute.inx:3
 msgid "To Absolute"
@@ -39512,7 +39508,7 @@ msgstr "LaTeX girdisi:"
 
 #: ../share/extensions/pdflatex.inx:7
 msgid "Additional packages (comma-separated):"
-msgstr "Ek paketler (virgülle ayrılmış): "
+msgstr "Ek paketler (virgülle ayrılmış):"
 
 #: ../share/extensions/pdflatex.inx:12
 msgid "Mathematics"
@@ -39532,7 +39528,7 @@ msgstr "Kitap Genişliği (inç):"
 
 #: ../share/extensions/perfectboundcover.inx:7
 msgid "Book Height (inches):"
-msgstr "Kitap Boyu (inç)"
+msgstr "Kitap Boyu (inç):"
 
 #: ../share/extensions/perfectboundcover.inx:8
 msgid "Number of Pages:"
@@ -39609,7 +39605,7 @@ msgid ""
 msgstr ""
 "Seçili yolları, görselleri ve dörtgenleri piksel sınırlarına yapıştır. Tek "
 "sıfırdan farklı konturlar düzgünce hizalanmaları için orta noktalara "
-"yapıştırılır."
+"yapıştırılır"
 
 #
 # File: ../share/extensions/pixelsnap.inx, line: 8
@@ -40165,7 +40161,7 @@ msgstr "H (Yaklaşık %30)"
 
 #: ../share/extensions/render_barcode_qrcode.inx:33
 msgid "Invert QR code:"
-msgstr "QR kodunu ters çevir"
+msgstr "QR kodunu ters çevir:"
 
 #: ../share/extensions/render_barcode_qrcode.inx:34
 msgid "Square size (px):"
@@ -40821,7 +40817,7 @@ msgstr "74mm x 52mm (A8)"
 
 #: ../share/extensions/template_business_card.inx:8
 msgid "85mm x 55mm (Europe)"
-msgstr "85mm x 55mm (Europe)"
+msgstr "85mm x 55mm (Avrupa)"
 
 #: ../share/extensions/template_business_card.inx:9
 msgid "90mm x 55mm (Australia, India, ...)"
@@ -40849,7 +40845,7 @@ msgstr "Kartvizit..."
 
 #: ../share/extensions/template_business_card.inx:23
 msgid "Business card of chosen size."
-msgstr "Özel boyutlu kartvizit.:"
+msgstr "Seçilen boyutta kartvizit."
 
 #: ../share/extensions/template_business_card.inx:25
 msgid "business card"
@@ -40871,7 +40867,7 @@ msgstr "Masaüstü..."
 # File: ../share/extensions/empty_desktop.inx, line: 34
 #: ../share/extensions/template_desktop.inx:35
 msgid "Empty desktop of chosen size."
-msgstr "Seçili boyuttaki masaüstünü boşalt"
+msgstr "Seçilen boyutta boş masaüstü."
 
 #: ../share/extensions/template_desktop.inx:37
 msgid "empty desktop"
@@ -40913,7 +40909,7 @@ msgstr "DVD Kapağı..."
 # File: ../share/extensions/empty_dvd_cover.inx, line: 23
 #: ../share/extensions/template_dvd_cover.inx:22
 msgid "DVD cover of chosen size."
-msgstr "Seçili boyuttaki DVD kapağı."
+msgstr "Seçilen boyutta DVD kapağı."
 
 #
 # File: ../share/extensions/empty_dvd_cover.inx, line: 25
@@ -40931,7 +40927,7 @@ msgstr "Zarf..."
 
 #: ../share/extensions/template_envelope.inx:18
 msgid "Blank envelope of chosen size."
-msgstr "Özel boyutlu boş zarf."
+msgstr "Seçilen boyutta boş zarf."
 
 #: ../share/extensions/template_envelope.inx:20
 msgid "empty envelope dl no10"
@@ -40983,7 +40979,7 @@ msgstr "Genel Tuval..."
 
 #: ../share/extensions/template_generic.inx:34
 msgid "Generic canvas of chosen size."
-msgstr "Özel boyutlu genel tuval."
+msgstr "Seçilen boyutta genel tuval."
 
 #: ../share/extensions/template_generic.inx:36
 msgid "empty generic canvas"
@@ -41005,7 +41001,7 @@ msgstr "Simge..."
 # File: ../share/extensions/empty_icon.inx, line: 16
 #: ../share/extensions/template_icon.inx:16
 msgid "Empty icon of chosen size."
-msgstr "Seçili boyuttaki simgeyi boşalt"
+msgstr "Seçilen boyutta boş simge."
 
 #: ../share/extensions/template_icon.inx:18
 msgid "empty icon"
@@ -41043,7 +41039,7 @@ msgstr "Boş Sayfa..."
 # File: ../share/extensions/empty_page.inx, line: 35
 #: ../share/extensions/template_page.inx:36
 msgid "Empty page of chosen size."
-msgstr "Seçili boyuttaki sayfayı boşalt"
+msgstr "Seçilen boyutta boş sayfa."
 
 #: ../share/extensions/template_page.inx:38
 msgid ""
@@ -41071,7 +41067,7 @@ msgstr "Dikişsiz Desen..."
 
 #: ../share/extensions/template_seamless_pattern.inx:16
 msgid "Create seamless patterns."
-msgstr "Dikişsiz desenler oluştur"
+msgstr "Dikişsiz desenler oluştur."
 
 #: ../share/extensions/template_seamless_pattern.inx:18
 msgid "live seamless patterns"
@@ -41093,7 +41089,7 @@ msgstr "Video..."
 # File: ../share/extensions/empty_video.inx, line: 27
 #: ../share/extensions/template_video.inx:28
 msgid "Video screen of chosen size."
-msgstr "Seçili boyutun video ekranı."
+msgstr "Seçilen boyutta video ekranı."
 
 #
 # File: ../share/extensions/empty_video.inx, line: 29
