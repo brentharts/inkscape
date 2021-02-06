@@ -18,6 +18,7 @@
 #include <boost/operators.hpp>
 #include <boost/utility.hpp>
 #include <boost/intrusive/list.hpp>
+#include "display/drawing-surface.h"
 #include <exception>
 #include <list>
 
@@ -139,6 +140,8 @@ public:
 
     void update(Geom::IntRect const &area = Geom::IntRect::infinite(), UpdateContext const &ctx = UpdateContext(), unsigned flags = STATE_ALL, unsigned reset = 0);
     unsigned render(DrawingContext &dc, Geom::IntRect const &area, unsigned flags = 0, DrawingItem *stop_at = nullptr);
+    unsigned renderItem(DrawingSurface &intermediate, Geom::OptIntRect const &carea, Geom::OptIntRect const &iarea, int device_scale, unsigned flags, DrawingItem *stop_at);
+    void prerender(Geom::OptIntRect const &area);
     void clip(DrawingContext &dc, Geom::IntRect const &area);
     DrawingItem *pick(Geom::Point const &p, double delta, unsigned flags = 0);
 

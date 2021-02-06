@@ -935,6 +935,7 @@ Canvas::add_idle()
     }
 
     if (get_realized() && !_idle_connection.connected()) {
+        start = std::chrono::system_clock::now();
         Inkscape::Preferences *prefs = Inkscape::Preferences::get();
         guint redrawPriority = prefs->getIntLimited("/options/redrawpriority/value", G_PRIORITY_HIGH_IDLE, G_PRIORITY_HIGH_IDLE, G_PRIORITY_DEFAULT_IDLE);
         if (_in_full_redraw) {
@@ -975,7 +976,13 @@ Canvas::on_idle()
 
     if (n_rects > 1) {
         done = false;
+    } else if (done) {
+        std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();
+        Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+        const gchar *rendering = prefs->getBool("/options/threading/precaching", false) ? "multithread::" : "normal::";
+        std::cout << "Render time " << rendering << ((std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()) /1000.0) << " ms " << std::endl;
     }
+
 
     return !done;
 }

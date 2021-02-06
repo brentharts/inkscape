@@ -220,7 +220,7 @@ void
 DrawingCache::markClean(Geom::IntRect const &area)
 {
     Geom::OptIntRect r = Geom::intersect(area, pixelArea());
-    if (!r) return;
+    if (!r || !_clean_region) return;
     cairo_rectangle_int_t clean = _convertRect(*r);
     cairo_region_union_rectangle(_clean_region, &clean);
 }
@@ -336,6 +336,37 @@ void DrawingCache::paintFromCache(DrawingContext &dc, Geom::OptIntRect &area, bo
         dc.fill();
     }
     cairo_region_destroy(cache_region);
+}
+
+/**
+ * Modifies the @a area
+ * parameter to the bounds of the region that must be repainted.
+ */
+void DrawingCache::getPaintAreaCache(Geom::OptIntRect &area, bool is_filter)
+{
+    if (!area) return;
+
+    // We subtract the clean region from the area, then get the bounds
+    // of the resulting region. This is the area that needs to be repainted
+    // by the item.
+    // Then we subtract the area that needs to be repainted from the
+    // original area and paint the resulting region from cache.
+    cairo_rectangle_int_t area_c = _convertRect(*area);
+    cairo_region_t *dirty_region = cairo_region_create_rectangle(&area_c);
+    cairo_region_subtract(dirty_region, _clean_region);
+
+    if (is_filter && !cairo_region_is_empty(dirty_region)) { // To allow fast panning on high zoom on filters
+        return;
+    }
+    if (cairo_region_is_empty(dirty_region)) {
+        area = Geom::OptIntRect();
+    } else {
+        cairo_rectangle_int_t to_repaint;
+        cairo_region_get_extents(dirty_region, &to_repaint);
+        area = _convertRect(to_repaint);
+        markDirty(*area);
+    }
+    cairo_region_destroy(dirty_region);
 }
 
 // debugging utility

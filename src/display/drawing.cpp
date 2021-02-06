@@ -22,6 +22,9 @@
 #include "cairo-templates.h"
 #include "drawing-context.h"
 
+// yeld_worker class
+#include <atomic>
+#include <thread>
 
 namespace Inkscape {
 
@@ -33,16 +36,112 @@ static const gdouble grayscale_value_matrix[20] = {
     0   , 0   , 0    , 1, 0
 };
 
+// https://lemire.me/blog/2020/06/10/reusing-a-thread-in-c-for-better-performance/
+// https://github.com/lemire/Code-used-on-Daniel-Lemire-s-blog/tree/master/2020/06/10
+class yield_worker {
+public:
+    yield_worker() = default;
+    inline ~yield_worker() { 
+        stop_threads();
+    }
+    inline void stop_threads() {
+        for (int i = 0; i < num_cpus; i++) {
+            has_works.store(0);
+        }
+        exitings.store(true);
+        for (int i = 0; i < num_cpus; i++) {
+            if (threads[i].joinable()) {
+                threads[i].join();
+            }
+        }
+    }
+
+    inline void finish() {
+        while (has_works.load() > 0) {
+        }
+    }
+    inline void work(std::vector<Inkscape::DrawingItem *> ditems) {
+        int amount = ditems.size()/num_cpus;
+        has_works.store(-1);
+        for (int i = 0; i < num_cpus; i++) {
+            std::vector<DrawingItem *> work;
+            for (size_t j = 0;j < (amount) + 1;j++) {
+                size_t  current = (i * (j + 1)) + j;
+                if (current < ditems.size()) {
+                    work.push_back(ditems[current]);
+                }
+            }
+            work_on.push_back(work);
+        }
+        has_works.store(num_cpus);
+        if (!is_started.load()) {
+            run();
+        }
+    }
+    
+
+    inline unsigned run() {
+        threads.reserve(num_cpus);
+        work_on.reserve(num_cpus);
+        for (unsigned i = 0; i < num_cpus; ++i) {
+            is_started.store(true);
+            threads.push_back(std::thread([this, i] {
+                while (true) {
+                    while (has_works.load() < 1 || !num_cpus) {
+                        if (exitings.load()) {
+                            return 0;
+                        }
+                        std::this_thread::yield();
+                    }
+                    int remaining = has_works.load();
+                    if (remaining > 0) {
+                        if (!work_on[i].empty()) {
+                            for(auto ditem:work_on[i]) {
+                                ditem->prerender(area);
+                            }
+                        }
+                        has_works.store(remaining - 1);
+                    }
+                }
+            }));
+        }
+        return 0;
+    }
+
+    unsigned num_cpus = 0;
+    Geom::OptIntRect area = Geom::OptIntRect();
+    std::atomic<bool> is_started{false};
+    std::atomic<int> has_works{0};
+private:
+    std::vector<std::thread> threads;
+    std::vector< std::vector<DrawingItem *> > work_on;
+    std::atomic<bool> exitings{false};
+};
+
 Drawing::Drawing(Inkscape::CanvasItemDrawing *canvas_item_drawing)
     : _canvas_item_drawing(canvas_item_drawing)
     , _grayscale_colormatrix(std::vector<gdouble>(grayscale_value_matrix, grayscale_value_matrix + 20))
 {
+    yw = new yield_worker();
     // _canvas_item_drawing can be null. Used this way by Eraser tool.
 }
 
 Drawing::~Drawing()
 {
+    if (yw->is_started.load()) {
+        yw->stop_threads();
+        delete yw;
+        yw = nullptr;
+    }
     delete _root;
+}
+
+void 
+Drawing::resetYW() 
+{
+    if (yw) {
+        yw->has_works.store(-1);
+    }
 }
 
 void
@@ -201,6 +300,61 @@ Drawing::render(DrawingContext &dc, Geom::IntRect const &area, unsigned flags, i
     }
 }
 
+void
+Drawing::prerender(Geom::IntRect const &area)
+{
+    std::vector<DrawingItem *> ditems;
+    for (auto ditem: _cached_items) {
+    // If we are invisible, return immediately
+        DrawingImage * di = dynamic_cast<DrawingImage *>(ditem);
+        DrawingShape * ds = dynamic_cast<DrawingShape *>(ditem);
+        DrawingText  * dt = dynamic_cast<DrawingText *> (ditem);
+        if (!dt && !di && !ds) {
+            continue;
+        }
+        if (!ditem->_visible) {
+            continue;
+        }
+        if (ditem->_ctm.isSingular(1e-18)) {
+            continue;
+        }
+        // TODO convert outline rendering to a separate virtual function
+        if (outline()) {
+            continue;
+        }
+        // carea is the area to paint
+        Geom::OptIntRect carea = Geom::intersect(area, ditem->_drawbox);
+        if (!carea) {
+            continue;
+        }
+
+        if (!ditem->_cached) {
+            continue;
+        }
+        
+        if (renderFilters() && ditem->_filter) {
+            continue;
+        }
+        
+        ditems.push_back(ditem);
+    }
+    if (!num_cpus) {
+        num_cpus = std::thread::hardware_concurrency();
+        Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+        int prefsthreadnum = prefs->getIntLimited("/options/threading/numthreads", num_cpus, 1, 256);
+        if (prefsthreadnum < num_cpus) {
+            num_cpus = prefsthreadnum;
+        }
+    }
+
+    if (ditems.size() && yw->has_works.load() == 0) {
+        yw->area = area;
+        yw->num_cpus = num_cpus;
+        yw->work(ditems);   // issue the work
+    }
+    ditems.clear();
+}    
+
 DrawingItem *
 Drawing::pick(Geom::Point const &p, double delta, unsigned flags)
 {
@@ -253,7 +407,6 @@ Drawing::average_color(Geom::IntRect const &area, double &R, double &G, double &
 
     ink_cairo_surface_average_color_premul(surface->cobj(), R, G, B, A);
 }
-
 
 } // end namespace Inkscape
 

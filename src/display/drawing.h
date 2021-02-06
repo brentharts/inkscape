@@ -20,6 +20,9 @@
 #include <sigc++/sigc++.h>
 
 #include "display/drawing-item.h"
+#include "display/drawing-text.h"
+#include "display/drawing-shape.h"
+#include "display/drawing-image.h"
 #include "display/rendermode.h"
 #include "nr-filter-gaussian.h" // BLUR_QUALITY_BEST
 #include "nr-filter-colormatrix.h"
@@ -30,6 +33,7 @@ namespace Inkscape {
 
 class DrawingItem;
 class CanvasItemDrawing;
+class yield_worker;
 
 class Drawing
     : boost::noncopyable
@@ -78,8 +82,9 @@ public:
                 unsigned reset = 0);
 
     void render(DrawingContext &dc, Geom::IntRect const &area, unsigned flags = 0, int antialiasing = -1);
+    void prerender(Geom::IntRect const &area);
     DrawingItem *pick(Geom::Point const &p, double delta, unsigned flags);
-
+    void resetYW();
     void average_color(Geom::IntRect const &area, double &R, double &G, double &B, double &A);
 
     sigc::signal<void, DrawingItem *> signal_request_update;
@@ -88,7 +93,8 @@ public:
 
 private:
     void _pickItemsForCaching();
-
+    Inkscape::yield_worker *yw;
+    int num_cpus = 0;
     typedef std::list<CacheRecord> CandidateList;
     bool _outline_sensitive = false;
     DrawingItem *_root = nullptr;
