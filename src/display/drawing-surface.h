@@ -73,6 +73,7 @@ public:
     void scheduleTransform(Geom::IntRect const &new_area, Geom::Affine const &trans);
     void prepare();
     void paintFromCache(DrawingContext &dc, Geom::OptIntRect &area, bool is_filter);
+    void getPaintAreaCache(Geom::OptIntRect &area, bool is_filter);
 
   protected:
     cairo_region_t *_clean_region;

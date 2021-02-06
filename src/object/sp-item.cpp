@@ -1696,7 +1696,7 @@ sp_item_view_list_remove(SPItemView *list, SPItemView *view)
         while (prev->next != view) prev = prev->next;
         prev->next = view->next;
     }
-
+    view->arenaitem->drawing().resetYW();
     delete view->arenaitem;
     g_free(view);
 

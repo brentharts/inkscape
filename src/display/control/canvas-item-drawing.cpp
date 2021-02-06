@@ -191,6 +191,10 @@ void CanvasItemDrawing::render(Inkscape::CanvasItemBuffer *buf)
 
     Inkscape::DrawingContext dc(buf->cr->cobj(), buf->rect.min());
     _drawing->update();
+    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+    if (prefs->getBool("/options/threading/precaching", false)) {
+        _drawing->prerender(buf->rect);
+    }
     _drawing->render(dc, buf->rect);
 }
 

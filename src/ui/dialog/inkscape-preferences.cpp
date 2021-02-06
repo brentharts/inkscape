@@ -2501,9 +2501,13 @@ void InkscapePreferences::initPageRendering()
     _filter_multi_threaded.init("/options/threading/numthreads", 1.0, 8.0, 1.0, 2.0, 4.0, true, false);
     _page_rendering.add_line( false, _("Number of _Threads:"), _filter_multi_threaded, _("(requires restart)"),
                            _("Configure number of processors/threads to use when rendering filters"), false);
-
+    
+    /* threaded precaching*/ //related comments/widgets/functions should be renamed and option should be moved elsewhere when inkscape is fully multi-threaded
+    _cache_multi_threaded.init ( _("Experimental thread precache"), "/options/threading/precaching", false);
+    _page_rendering.add_line(  false, "", _cache_multi_threaded, "",
+                               _("Esperimental threading based precaching not filtered elements"));
     // rendering cache
-    _rendering_cache_size.init("/options/renderingcache/size", 0.0, 4096.0, 1.0, 32.0, 64.0, true, false);
+    _rendering_cache_size.init("/options/renderingcache/size", 0.0, 32768.0, 1.0, 32.0, 512.0, true, false);
     _page_rendering.add_line( false, _("Rendering _cache size:"), _rendering_cache_size, C_("mebibyte (2^20 bytes) abbreviation","MiB"), _("Set the amount of memory per document which can be used to store rendered parts of the drawing for later reuse; set to zero to disable caching"), false);
 
     // rendering tile multiplier

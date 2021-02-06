@@ -16,7 +16,6 @@
 #include "display/drawing-group.h"
 #include "display/drawing-item.h"
 #include "display/drawing-pattern.h"
-#include "display/drawing-surface.h"
 #include "display/drawing-text.h"
 #include "display/drawing.h"
 
@@ -718,7 +717,7 @@ DrawingItem::render(DrawingContext &dc, Geom::IntRect const &area, unsigned flag
     if (!iarea) {
         return RENDER_OK;
     }
-    
+
     // Device scale for HiDPI screens (typically 1 or 2)
     int device_scale = dc.surface()->device_scale();
 
@@ -788,10 +787,64 @@ DrawingItem::render(DrawingContext &dc, Geom::IntRect const &area, unsigned flag
         dc.setOperator(ink_css_blend_to_cairo_operator(SP_CSS_BLEND_NORMAL));
         return _renderItem(dc, *iarea, flags & ~RENDER_FILTER_BACKGROUND, stop_at);
     }
-
-
+    
+    unsigned render_result = RENDER_OK;
     DrawingSurface intermediate(*iarea, device_scale);
+    render_result = renderItem(intermediate, carea, iarea, device_scale, flags, stop_at);
+    dc.rectangle(*carea);
+    dc.setSource(&intermediate);
+    // 7. Render blend mode
+    dc.setOperator(ink_css_blend_to_cairo_operator(_mix_blend_mode));
+    dc.fill();
+    dc.setSource(0,0,0,0);
+    // Web isolation only works if parent doesnt have transform
+
+
+    // the call above is to clear a ref on the intermediate surface held by dc
+
+    return render_result;
+}
+
+void
+DrawingItem::prerender(Geom::OptIntRect const &area)
+{
+    // we check correcness of item previously on OMP launch
+    // carea is the area to paint
+    if (!area) {
+        return;
+    }
+    Geom::OptIntRect carea = Geom::intersect(area,_cacheRect());
+    if (!carea) {
+        return;
+    }
+
+    // Device scale for HiDPI screens (typically 1 or 2)
+    int device_scale = drawing().getCanvasItemDrawing()->get_canvas()->get_scale_factor();
+
+    static int counter = 0;
+    if (!_cache) {
+        
+        // There is no cache. This could be because caching of this item
+        // was just turned on after the last update phase, or because
+        // we were previously outside of the canvas.
+        _cache = new DrawingCache(*carea, device_scale);
+    } else {
+        _cache->prepare();
+    }
+    _cache->getPaintAreaCache(carea, false);
+    _cached_persistent = true;
+    if (carea) {
+        unsigned render_result = RENDER_OK;
+        DrawingSurface intermediate(*carea, device_scale);
+        render_result = renderItem(intermediate,carea, carea, device_scale, 0, nullptr);
+    }
+}
+
+unsigned
+DrawingItem::renderItem(DrawingSurface &intermediate, Geom::OptIntRect const &carea, Geom::OptIntRect const &iarea, int device_scale, unsigned flags, DrawingItem *stop_at)
+{
     DrawingContext ict(intermediate);
+    bool render_filters = _drawing.renderFilters();
 
     // This path fails for patterns/hatches when stepping the pattern to handle overflows.
     // The offsets are applied to drawing context (dc) but they are not copied to the
@@ -884,20 +937,10 @@ DrawingItem::render(DrawingContext &dc, Geom::IntRect const &area, unsigned flag
             _cache->markClean(*iarea);
         }
     }
-
-    dc.rectangle(*carea);
-    dc.setSource(&intermediate);
-    // 7. Render blend mode
-    dc.setOperator(ink_css_blend_to_cairo_operator(_mix_blend_mode));
-    dc.fill();
-    dc.setSource(0,0,0,0);
-    // Web isolation only works if parent doesnt have transform
-
-
-    // the call above is to clear a ref on the intermediate surface held by dc
-
+    
     return render_result;
 }
+
 
 void
 DrawingItem::_renderOutline(DrawingContext &dc, Geom::IntRect const &area, unsigned flags)

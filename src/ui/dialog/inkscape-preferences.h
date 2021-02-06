@@ -330,6 +330,7 @@ protected:
     UI::Widget::PrefSpinButton  _rendering_outline_overlay_opacity;
     UI::Widget::PrefCombo       _rendering_redraw_priority;
     UI::Widget::PrefSpinButton  _filter_multi_threaded;
+    UI::Widget::PrefCheckButton  _cache_multi_threaded;
 
     UI::Widget::PrefCheckButton _trans_scale_stroke;
     UI::Widget::PrefCheckButton _trans_scale_corner;

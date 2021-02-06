@@ -23,6 +23,7 @@
 #include "preferences.h" // Update canvas_item_ctrl sizes.
 
 #include "display/rendermode.h"
+#include <chrono>
 
 class SPDesktop;
 
@@ -199,7 +200,7 @@ private:
     bool     _all_enter_events      = false;    ///< Keep all enter events. Only set true in connector-tool.cpp.
     bool     _is_dragging           = false;    ///< Used in selection-chemistry to block undo/redo.
     int      _state                 = 0;        ///< Last know modifier state (SHIFT, CTRL, etc.).
-
+    std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
     Inkscape::CanvasItem *_current_canvas_item     = nullptr;  ///< Item containing cursor, nullptr if none.
     Inkscape::CanvasItem *_current_canvas_item_new = nullptr;  ///< Item to become _current_item, nullptr if none.
     Inkscape::CanvasItem *_grabbed_canvas_item     = nullptr;  ///< Item that holds a pointer grab; nullptr if none.
