@@ -27,7 +27,6 @@
  *class.
  */
 
-#include <math.h>
 #include "string.h"
 #include "cr-tknzr.h"
 #include "cr-doc-handler.h"
@@ -245,6 +244,26 @@ static enum CRStatus cr_tknzr_parse_num (CRTknzr * a_this,
 /**********************************
  *PRIVATE methods
  **********************************/
+
+/**
+ * Helper function to exponentiate 10 by a certain amount.
+ * Used for SVG2's exponential number handling.
+ *
+ * @param exp_by what to exponentiate 10 by
+ * @return a number which 10**(exp_by)
+ */
+float pow_ten(gdouble exp_by, int sign){
+    float res = 1;
+    int i;
+    for(i=0;i<exp_by;i++){
+        if(sign < 0){
+            res /= 10;
+        } else {
+            res *= 10;
+        }
+    }
+    return res;
+}
 
 /**
  *Parses a "w" as defined by the css spec at [4.1.1]:
@@ -1481,19 +1500,21 @@ cr_tknzr_parse_num (CRTknzr * a_this,
         enum CRStatus status = CR_PARSING_ERROR;
         enum CRNumType val_type = NUM_GENERIC;
         gboolean parsing_dec,  /* true iff seen decimal point. */
-                parsed, /* true iff the substring seen so far is a valid CSS
+                parsed; /* true iff the substring seen so far is a valid CSS
                            number, i.e. `[0-9]+|[0-9]*\.[0-9]+'. */
-                parsing_exp,   /* true if seen an exponential */
-                just_found_exp; /* Set to true if the previous character
+#ifdef WITH_SVG2
+        gboolean parsing_exp = FALSE,   /* true if seen an exponential */
+                just_found_exp = FALSE; /* Set to true if the previous character
                                    an exponent. Used for potential signing*/
+        gdouble exponent = 0;       /* Start off the exponent at 0 */
+        int exp_sign = 1;
+#endif
         guint32 cur_char = 0,
                 next_char = 0;
         gdouble numerator, denominator = 1;
-        gdouble exponent = 0;       /* Start off the exponent at 0 */
         CRInputPos init_pos;
-        CRParsingLocation location = {0,0,0} ;
+        CRParsingLocation location = {0,0,0};
         int sign = 1;
-        int exp_sign = 1;
 
         g_return_val_if_fail (a_this && PRIVATE (a_this)
                               && PRIVATE (a_this)->input, 
@@ -1508,7 +1529,6 @@ cr_tknzr_parse_num (CRTknzr * a_this,
                 }
                 READ_NEXT_CHAR (a_this, &cur_char);
         }
-        parsing_exp = FALSE;
         if (IS_NUM (cur_char)) {
                 numerator = (cur_char - '0');
                 parsing_dec = FALSE;
@@ -1540,6 +1560,7 @@ cr_tknzr_parse_num (CRTknzr * a_this,
                         parsing_dec = TRUE;
                         parsed = FALSE;  /* In CSS, there must be at least
                                             one digit after `.'. */
+#ifdef WITH_SVG2
                 } else if(next_char == 'E' || next_char == 'e'){
                         if(parsing_exp){
                             /* Only return an error if it's an E, as lowercase
@@ -1565,11 +1586,13 @@ cr_tknzr_parse_num (CRTknzr * a_this,
                         READ_NEXT_CHAR (a_this, &cur_char);
                         just_found_exp = FALSE;
                         if (cur_char == '-') {
-                                exp_sign = -1;
+                            exp_sign = -1;
                         }
+#endif
                 } else if (IS_NUM (next_char)) {
                         READ_NEXT_CHAR (a_this, &cur_char);
                         parsed = TRUE;
+#ifdef WITH_SVG2
                         just_found_exp = FALSE;
                         if(parsing_exp){
                             if(exponent == 0){
@@ -1577,7 +1600,9 @@ cr_tknzr_parse_num (CRTknzr * a_this,
                             } else {
                                 exponent = exponent * 10 + (cur_char - '0');
                             }
-                        } else {
+                        } else
+#endif
+                        {
                             numerator = numerator * 10 + (cur_char - '0');
                             if (parsing_dec) {
                                     denominator *= 10;
@@ -1596,7 +1621,11 @@ cr_tknzr_parse_num (CRTknzr * a_this,
          *Now, set the output param values.
          */
         if (status == CR_OK) {
-                gdouble val = ((numerator / denominator) * sign) * pow(10, exponent * exp_sign);
+#ifdef WITH_SVG2
+                gdouble val = ((numerator / denominator) * sign) * pow_ten(exponent, exp_sign);
+#else
+                gdouble val = (numerator / denominator) * sign;
+#endif
                 if (*a_num == NULL) {
                         *a_num = cr_num_new_with_val (val, val_type);
 
