@@ -654,13 +654,15 @@ int CommandPalette::match_search(const Glib::ustring &subject, const Glib::ustri
     std::string subject_string = subject.lowercase();
     std::string search_string = search.lowercase();
 
-    int j = 0;
     int compair_value = 1; // Less value - Better match 
     bool first_coccur = false;
 
-    for(int i=0;i<search_string.length();i++) {
+    for(int j = 0 ,i = 0; i < search_string.length(); i++) {
+        
         if(search_string[i]==' ')  continue;
+        
         bool alphabet_present = false;
+        
         while(j<subject_string.length()){
             if(search_string[i]==subject_string[j]){
                 if(!first_coccur)   first_coccur = true;
@@ -673,6 +675,7 @@ int CommandPalette::match_search(const Glib::ustring &subject, const Glib::ustri
             }
             j++;
         }
+        
         if(!alphabet_present) {
             return 0; // if not present
         }
