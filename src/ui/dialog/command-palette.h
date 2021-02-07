@@ -146,7 +146,7 @@ private: // Helpers
 private: // Signal handlers
     void on_search();
 
-    bool on_filter_general(Gtk::ListBoxRow *child);
+    int on_filter_general(Gtk::ListBoxRow *child);
     bool on_filter_full_action_name(Gtk::ListBoxRow *child);
     bool on_filter_recent_file(Gtk::ListBoxRow *child, bool const is_import);
 
@@ -175,7 +175,7 @@ private: // Signal handlers
     /**
      * Implements text matching logic
      */
-    bool match_search(const Glib::ustring &subject, const Glib::ustring &search);
+    int match_search(const Glib::ustring &subject, const Glib::ustring &search);
     void set_mode(CPMode mode);
 
     /**

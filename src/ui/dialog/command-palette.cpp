@@ -389,7 +389,7 @@ void CommandPalette::on_search()
     }
 }
 
-bool CommandPalette::on_filter_general(Gtk::ListBoxRow *child)
+int CommandPalette::on_filter_general(Gtk::ListBoxRow *child)
 {
     if (_search_text.empty()) {
         return true;
@@ -397,17 +397,19 @@ bool CommandPalette::on_filter_general(Gtk::ListBoxRow *child)
 
     auto [CPName, CPDescription] = get_name_desc(child);
 
-    if (CPName && match_search(CPName->get_text(), _search_text)) {
-        return true;
+    int compair_value= 0;
+    
+    if(CPName){
+        compair_value = match_search(CPName->get_text(), _search_text);
+        if(compair_value)   return compair_value;
+        compair_value = match_search(CPName->get_tooltip_text(), _search_text);
+        if(compair_value)   return compair_value;
     }
-    if (CPName && match_search(CPName->get_tooltip_text(), _search_text)) {
-        // untranslated name
-        return true;
+    if (CPDescription) {
+        compair_value = match_search(CPDescription->get_text(), _search_text);
     }
-    if (CPDescription && match_search(CPDescription->get_text(), _search_text)) {
-        return true;
-    }
-    return false;
+
+    return compair_value;
 }
 
 bool CommandPalette::on_filter_full_action_name(Gtk::ListBoxRow *child)
@@ -647,13 +649,36 @@ bool CommandPalette::ask_action_parameter(const ActionPtrName &action_ptr_name)
     return true;
 }
 
-bool CommandPalette::match_search(const Glib::ustring &subject, const Glib::ustring &search)
+int CommandPalette::match_search(const Glib::ustring &subject, const Glib::ustring &search)
 {
-    // TODO: Better matching algorithm take inspiration from VS code
-    if (subject.lowercase().find(search.lowercase()) != -1) {
-        return true;
+    std::string subject_string = subject.lowercase();
+    std::string search_string = search.lowercase();
+
+    int j = 0;
+    int compair_value = 1; // Less value - Better match 
+    bool first_coccur = false;
+
+    for(int i=0;i<search_string.length();i++) {
+        if(search_string[i]==' ')  continue;
+        bool alphabet_present = false;
+        while(j<subject_string.length()){
+            if(search_string[i]==subject_string[j]){
+                if(!first_coccur)   first_coccur = true;
+                alphabet_present = true;
+                j++;
+                break;
+            }
+            if(first_coccur){
+                compair_value++;
+            }
+            j++;
+        }
+        if(!alphabet_present) {
+            return 0; // if not present
+        }
     }
-    return false;
+
+    return  compair_value;
 }
 
 void CommandPalette::set_mode(CPMode mode)
