@@ -478,7 +478,7 @@ SPDocument *SPDocument::createDoc(Inkscape::XML::Document *rdoc,
 /**
  * Create a copy of the document, useful for modifying during save & export.
  */
-SPDocument *SPDocument::copy()
+std::unique_ptr<SPDocument> SPDocument::copy()
 {
     // Comments and PI nodes are not included in this duplication
     Inkscape::XML::Document *new_rdoc = new Inkscape::XML::SimpleDocument();
@@ -492,7 +492,8 @@ SPDocument *SPDocument::copy()
 
     auto doc = createDoc(new_rdoc, document_uri, document_base, document_name, keepalive, nullptr);
     Inkscape::GC::release(new_rdoc);
-    return doc;
+
+    return std::unique_ptr<SPDocument>(doc);
 }
 
 /**
@@ -616,7 +617,12 @@ std::unique_ptr<SPDocument> SPDocument::doRef()
 /// guaranteed not to return nullptr
 Inkscape::Util::Unit const* SPDocument::getDisplayUnit() const
 {
-    SPNamedView const* nv = sp_document_namedview(this, nullptr);
+    // The document may not have a namedview (cleaned) so don't crash if it doesn't exist.
+    auto nv_repr = sp_repr_lookup_name (rroot, "sodipodi:namedview");
+    if (!nv_repr) {
+        return unit_table.getUnit("px");
+    }
+    auto nv = dynamic_cast<SPNamedView *> (getObjectByRepr(nv_repr));
     return nv ? nv->getDisplayUnit() : unit_table.getUnit("px");
 }
 

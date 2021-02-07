@@ -1012,7 +1012,6 @@ Svg::save(Inkscape::Extension::Output *mod, SPDocument *doc, gchar const *filena
                                    m_detachbase ? nullptr : filename)) {
         throw Inkscape::Extension::Output::save_failed();
     }
-    return;
 }
 
 } } }  /* namespace inkscape, module, implementation */

@@ -128,7 +128,7 @@ public:
            SPDocument *createChildDoc(std::string const &uri);
 
     // Make a copy, you are responsible for the copy.
-    SPDocument *copy();
+    std::unique_ptr<SPDocument> copy();
 
     // Document status --------------------
     void setVirgin(bool Virgin) { virgin = Virgin; }
