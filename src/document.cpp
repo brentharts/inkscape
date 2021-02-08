@@ -478,7 +478,7 @@ SPDocument *SPDocument::createDoc(Inkscape::XML::Document *rdoc,
 /**
  * Create a copy of the document, useful for modifying during save & export.
  */
-std::unique_ptr<SPDocument> SPDocument::copy()
+std::unique_ptr<SPDocument> SPDocument::copy() const
 {
     // Comments and PI nodes are not included in this duplication
     Inkscape::XML::Document *new_rdoc = new Inkscape::XML::SimpleDocument();
