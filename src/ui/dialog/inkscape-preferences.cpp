@@ -2666,7 +2666,7 @@ void InkscapePreferences::initKeyboardShortcuts(Gtk::TreeModel::iterator iter_ui
     auto tooltip =
         Glib::ustring::compose(_("Select a file of predefined shortcuts and modifiers to use. Any customizations you "
                                  "create will be added separately to %1"),
-                               IO::Resource::get_path(IO::Resource::USER, IO::Resource::KEYS, "default.xml"););
+                               IO::Resource::get_path(IO::Resource::USER, IO::Resource::KEYS, "default.xml"));
 
     _page_keyshortcuts.add_line( false, _("Keyboard file:"), _kb_filelist, "", tooltip.c_str(), false);
 
