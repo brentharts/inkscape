@@ -982,7 +982,7 @@ void InkscapePreferences::initPageTools()
         _font_dialog.init(_("Show font substitution warning dialog"), "/options/font/substitutedlg", false);
         _page_text.add_line( false, "", _font_dialog, "", _("Show font substitution warning dialog when requested fonts are not available on the system"));
         _font_sample.init("/tools/text/font_sample", true);
-        _page_text.add_line( false, _("Font sample"), _font_sample, "", _("Edit font sample for the family in text tool controls"), true);
+        _page_text.add_line( false, _("Font sample"), _font_sample, "", _("Change font preview sample text"), true);
 
         cb = Gtk::manage(new PrefCheckButton);
         cb->init ( _("Use SVG2 auto-flowed text"),  "/tools/text/use_svg2", true);
@@ -1582,7 +1582,7 @@ void InkscapePreferences::initPageUI()
 
     _ui_rotationlock.init(_("Lock canvas rotation by default"), "/options/rotationlock", false);
     _page_ui.add_line(false, "", _ui_rotationlock, "",
-                       _("When enabled, common actions which normally rotate the canvas no longer do so by default"), true);
+                       _("Prevent accidental canvas rotation by disabling on-canvas keyboard and mouse actions for rotation"), true);
 
     _page_ui.add_group_header(_("Handle size"));
         _mouse_grabsize.init("/options/grabsize/value", 1, 15, 1, 2, 3, 0);
@@ -1769,7 +1769,7 @@ void InkscapePreferences::initPageUI()
     _win_native.init ( _("Native open/save dialogs"), "/options/desktopintegration/value", 1, true, nullptr);
     _win_gtk.init ( _("GTK open/save dialogs"), "/options/desktopintegration/value", 0, false, &_win_native);
 
-    _win_show_boot.init ( _("Start screen shows when loaded"), "/options/boot/enabled", true);
+    _win_show_boot.init ( _("Show Welcome dialog"), "/options/boot/enabled", true);
     _win_hide_task.init ( _("Dialogs are hidden in taskbar"), "/options/dialogsskiptaskbar/value", true);
     _win_save_viewport.init ( _("Save and restore documents viewport"), "/options/savedocviewport/value", true);
     _win_zoom_resize.init ( _("Zoom when window is resized"), "/options/stickyzoom/value", false);
@@ -1836,13 +1836,13 @@ void InkscapePreferences::initPageUI()
 #endif
 
     _page_windows.add_group_header( _("Dialog labels behavior (requires restart)"));
-    _page_windows.add_line( true, "", _win_dialogs_labels_auto, "", _("Dialogs' name labels will hide or show according to the space"));
-    _page_windows.add_line( true, "", _win_dialogs_labels_off, "", _("Dialogs' name labels will allways be hidden"));
+    _page_windows.add_line( true, "", _win_dialogs_labels_auto, "", _("Dialog names will be displayed when there is enough space"));
+    _page_windows.add_line( true, "", _win_dialogs_labels_off, "", _("Only show dialog icons"));
 
     _page_windows.add_group_header( _("Miscellaneous"));
 
     _page_windows.add_line( true, "", _win_show_boot, "",
-                            _("Whether the boot/startup screen will be shown."));
+                            _("Whether the Welcome dialog will be shown when Inkscape starts."));
 #ifndef _WIN32 // FIXME: Temporary Win32 special code to enable transient dialogs
     _page_windows.add_line( true, "", _win_hide_task, "",
                             _("Whether dialog windows are to be hidden in the window manager taskbar"));
@@ -2073,9 +2073,9 @@ void InkscapePreferences::initPageIO()
 
     // SVG 2 Fallbacks
     _page_svgexport.add_group_header( _("SVG 2"));
-    _svgexport_insert_text_fallback.init( _("Insert SVG 1.1 fallback in text."),                                     "/options/svgexport/text_insertfallback",    true );
-    _svgexport_insert_mesh_polyfill.init( _("Insert JavaScript code for mesh gradients."),                            "/options/svgexport/mesh_insertpolyfill",    true );
-    _svgexport_insert_hatch_polyfill.init( _("Insert JavaScript code for SVG2 hatches."),                       "/options/svgexport/hatch_insertpolyfill",   true );
+    _svgexport_insert_text_fallback.init( _("Insert SVG 1.1 fallback in text"),                                     "/options/svgexport/text_insertfallback",    true );
+    _svgexport_insert_mesh_polyfill.init( _("Insert JavaScript code for mesh gradients"),                            "/options/svgexport/mesh_insertpolyfill",    true );
+    _svgexport_insert_hatch_polyfill.init( _("Insert JavaScript code for SVG2 hatches"),                       "/options/svgexport/hatch_insertpolyfill",   true );
 
     _page_svgexport.add_line( false, "", _svgexport_insert_text_fallback,  "", _("Adds fallback options for non-SVG 2 renderers."), false);
     _page_svgexport.add_line( false, "", _svgexport_insert_mesh_polyfill,  "", _("Adds a JavaScript polyfill for rendering meshes in web browsers."), false);
@@ -2084,8 +2084,8 @@ void InkscapePreferences::initPageIO()
     // SVG Export Options (SVG 2 -> SVG 1)
     _page_svgexport.add_group_header( _("SVG 2 to SVG 1.1"));
 
-    _svgexport_remove_marker_auto_start_reverse.init( _("Use correct marker direction in SVG 1.1 renderers."),               "/options/svgexport/marker_autostartreverse", false);
-    _svgexport_remove_marker_context_paint.init(      _("Use correct marker colors in SVG 1.1 renderers."), "/options/svgexport/marker_contextpaint",     false);
+    _svgexport_remove_marker_auto_start_reverse.init( _("Use correct marker direction in SVG 1.1 renderers"),               "/options/svgexport/marker_autostartreverse", false);
+    _svgexport_remove_marker_context_paint.init(      _("Use correct marker colors in SVG 1.1 renderers"), "/options/svgexport/marker_contextpaint",     false);
 
     _page_svgexport.add_line( false, "", _svgexport_remove_marker_auto_start_reverse, "", _("SVG 2 allows markers to automatically be reversed at the start of a path with 'auto_start_reverse'. This adds a rotated duplicate of the marker's definition."), false);
     _page_svgexport.add_line( false, "", _svgexport_remove_marker_context_paint,      "", _("SVG 2 allows markers to automatically match the stroke color by using 'context_paint' or 'context_fill'. This adjusts the markers own colors."),           false);
@@ -2211,7 +2211,7 @@ void InkscapePreferences::initPageIO()
         // Show the default fallback "tmp dir" if autosave path is not set.
         _save_autosave_path.set_text(Glib::build_filename(Glib::get_user_cache_dir(), "inkscape"));
     }
-    _page_autosave.add_line(false, C_("Filesystem", "Autosave _directory:"), _save_autosave_path, "", _("The directory where autosaves will be written. This should be an absolute path (starts with / on UNIX or a drive letter such as C: on Windows). "), false);
+    _page_autosave.add_line(false, C_("Filesystem", "Autosave _directory:"), _save_autosave_path, "", _("The directory where autosaves will be written. This should be an absolute path (starts with / on UNIX or a drive letter such as C: on Windows)."), false);
     _save_autosave_interval.init("/options/autosave/interval", 1.0, 10800.0, 1.0, 10.0, 10.0, true, false);
     _page_autosave.add_line(false, _("_Interval (in minutes):"), _save_autosave_interval, "", _("Interval (in minutes) at which document will be autosaved"), false);
     _save_autosave_max.init("/options/autosave/max", 1.0, 100.0, 1.0, 10.0, 10.0, true, false);
@@ -2394,7 +2394,7 @@ void InkscapePreferences::initPageBehavior()
                           _("Zoom tool click, +/- keys, and middle click zoom in and out by this multiplier"), false);
     _middle_mouse_zoom.init ( _("Zoom with middle mouse click"), "/options/middlemousezoom/value", true);
     _page_steps.add_line( true, "", _middle_mouse_zoom, "",
-                            _("When on, clicking the middle mouse button (usually the mouse wheel) makes zoom."));
+                            _("When activated, clicking the middle mouse button (usually the mouse wheel) zooms."));
     _steps_rotate.init ( "/options/rotateincrement/value", 1, 90, 1.0, 5.0, 15, false, false);
     _page_steps.add_line( false, _("_Rotate canvas by:"), _steps_rotate, _("degrees"),
                           _("Rotate canvas clockwise and counter-clockwise by this amount."), false);
@@ -2514,7 +2514,7 @@ void InkscapePreferences::initPageRendering()
     _rendering_outline_overlay_opacity.init("/options/rendering/outline-overlay-opacity", 1.0, 100.0, 1.0, 5.0, 50.0, true, false);
     _rendering_outline_overlay_opacity.signal_focus_out_event().connect(sigc::mem_fun(*this, &InkscapePreferences::on_outline_overlay_changed));
     _page_rendering.add_line( false, _("Outline overlay opacity:"), _rendering_outline_overlay_opacity, _("%"),
-                             _("Opacity of the color on outline overlay render mode"), false);
+                             _("Opacity of the color in outline overlay view mode"), false);
 
     {
         // if these GTK constants ever change, consider adding a compatibility shim to SPCanvas::addIdle()
@@ -2614,10 +2614,10 @@ void InkscapePreferences::initPageBitmaps()
                                       "/options/svgoutput/usesodipodiabsref", false);
     _page_bitmaps.add_line(
         true, "", _svgoutput_usesodipodiabsref, "",
-        _("By default image links are stored as relative paths whenever possible. If this option is enabled Inkscape "
-          "will additionally add an absolute path ('sodipody:absref' attribute) to the image, which is used as a "
-          "fall-back for locating the linked image, for example if the SVG document is moved on disk. Note that this "
-          "will expose your directory structure which can include personal information like your username."),
+        _("By default, image links are stored as relative paths whenever possible. If this option is enabled, Inkscape "
+          "will additionally add an absolute path ('sodipody:absref' attribute) to the image. This is used as a "
+          "fall-back for locating the linked image, for example if the SVG document has been moved on disk. Note that this "
+          "will expose your directory structure in the file's source code, which can include personal information like your username."),
         false);
 
     {
@@ -2663,8 +2663,10 @@ void InkscapePreferences::initKeyboardShortcuts(Gtk::TreeModel::iterator iter_ui
     auto labels_and_names = Inkscape::Shortcuts::get_file_names();
     _kb_filelist.init( "/options/kbshortcuts/shortcutfile", labels_and_names, labels_and_names[0].second);
 
-    Glib::ustring tooltip(_("Select a file of predefined shortcuts and modifiers to use. Any customizations you create will be added separately to "));
-    tooltip += Glib::ustring(IO::Resource::get_path(IO::Resource::USER, IO::Resource::KEYS, "default.xml"));
+    auto tooltip =
+        Glib::ustring::compose(_("Select a file of predefined shortcuts and modifiers to use. Any customizations you "
+                                 "create will be added separately to %1"),
+                               IO::Resource::get_path(IO::Resource::USER, IO::Resource::KEYS, "default.xml"););
 
     _page_keyshortcuts.add_line( false, _("Keyboard file:"), _kb_filelist, "", tooltip.c_str(), false);
 
