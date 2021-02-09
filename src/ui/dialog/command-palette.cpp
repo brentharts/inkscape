@@ -73,6 +73,17 @@ void debug_print(T variable)
 }
 } // namespace
 
+
+int s_len =0;
+    int max(int a,int b){
+        if(a>b) return a;
+        return b;
+    }
+    int min(int a,int b){
+        if(a<b) return a;
+        return b;
+    }
+
 // constructor
 CommandPalette::CommandPalette()
 {
@@ -389,29 +400,6 @@ void CommandPalette::on_search()
     }
 }
 
-int CommandPalette::on_filter_general(Gtk::ListBoxRow *child)
-{
-    if (_search_text.empty()) {
-        return true;
-    } // Every operation is visible if search text is empty
-
-    auto [CPName, CPDescription] = get_name_desc(child);
-
-    int compair_value= 0;
-    
-    if(CPName){
-        compair_value = match_search(CPName->get_text(), _search_text);
-        if(compair_value)   return compair_value;
-        compair_value = match_search(CPName->get_tooltip_text(), _search_text);
-        if(compair_value)   return compair_value;
-    }
-    if (CPDescription) {
-        compair_value = match_search(CPDescription->get_text(), _search_text);
-    }
-
-    return compair_value;
-}
-
 bool CommandPalette::on_filter_full_action_name(Gtk::ListBoxRow *child)
 {
     if (auto CPActionFullName = get_full_action_name(child);
@@ -649,12 +637,11 @@ bool CommandPalette::ask_action_parameter(const ActionPtrName &action_ptr_name)
     return true;
 }
 
-int CommandPalette::match_search(const Glib::ustring &subject, const Glib::ustring &search)
+bool CommandPalette::fuzzy_search(const Glib::ustring &subject, const Glib::ustring &search)
 {
     std::string subject_string = subject.lowercase();
     std::string search_string = search.lowercase();
 
-    int compair_value = 1; // Less value - Better match 
     bool first_coccur = false;
 
     for(int j = 0 ,i = 0; i < search_string.length(); i++) {
@@ -670,18 +657,213 @@ int CommandPalette::match_search(const Glib::ustring &subject, const Glib::ustri
                 j++;
                 break;
             }
-            if(first_coccur){
-                compair_value++;
-            }
             j++;
         }
         
         if(!alphabet_present) {
-            return 0; // if not present
+            return false; // if not present
         }
     }
 
-    return  compair_value;
+    return  true;
+}
+int CommandPalette::fuzzy_points(const Glib::ustring &subject, const Glib::ustring &search){
+    
+    const int adj_bonus = 5;            // bonus for adjacent matches
+    const int first_occur_bonus = 5;          // bonus if the first letter is matched
+    const int leading_letter_penalty = -1;      // penalty applied for every letter in str before the first match
+    const int max_leading_letter_penalty = -5; // maximum penalty for leading letters
+    const int unmatched_letter_penalty = -1;    // penalty for every letter that doesn't matter
+
+    int cost =1;
+
+    std::string subject_string = subject.lowercase();
+    std::string search_string = search.lowercase();
+
+    s_len = subject_string.length();
+    if(search_string=="")   return 0;
+    std::cout<<search_string<<" == "<<subject_string<<"\n";
+    int total_points = 0;
+    int total_adj_bonus =0;
+    int total_adj_panelty = 0;
+    int total_unmatched_letter_panelty =0;
+
+    int last_idx =0;
+
+    for(int j = 0 ,i = 0; i < search_string.length(); i++) {
+        
+        if(search_string[i]==' ')  continue;
+        
+        bool alphabet_present = false;
+        bool first_coccur = false;
+
+        while(j<subject_string.length()){
+            if(subject_string[j]==' '){  
+                j++;
+                continue;
+            }
+            if(search_string[i]==subject_string[j]){
+                if(!first_coccur)   first_coccur = true,total_points += first_occur_bonus;
+                // if(first_coccur && j==0)   total_points += first_occur_bonus;
+                if(last_idx == j-1)     total_adj_bonus+=adj_bonus;
+                alphabet_present = true;
+                last_idx = j;
+                break;
+            }else{
+                if(!first_coccur)   cost+=2;
+                else    cost++;
+                // if(last_idx == j-1)     total_adj_panelty += leading_letter_penalty;
+                // else        total_unmatched_letter_panelty += unmatched_letter_penalty;    
+            }
+            j++;
+        }
+    }
+    
+    if(total_adj_panelty>max_leading_letter_penalty)    total_adj_panelty = max_leading_letter_penalty;
+
+    total_points += total_unmatched_letter_panelty + 
+            total_adj_bonus + total_adj_panelty;
+    if(search_string==subject_string)    return 500;
+    // if(total_points<0)  return 0;
+    return cost;
+}
+
+int CommandPalette::on_filter_general(Gtk::ListBoxRow *child)
+{
+
+    if (_search_text.empty()) {
+        return true;
+    } // Every operation is visible if search text is empty
+
+    auto [CPName, CPDescription] = get_name_desc(child);
+    
+    if(CPName){
+        if(fuzzy_search(CPName->get_text(), _search_text)){
+            int a = fuzzy_points(CPName->get_text(), _search_text);
+            std::cout<<" ==> 1 ==  "<<a<<"\n";
+            return a;        
+        }
+        if(fuzzy_search(CPName->get_tooltip_text(), _search_text)){
+            // int a = max(fuzzy_points(CPName->get_tooltip_text(), _search_text) -10,2);
+            int a =  fuzzy_points(CPName->get_tooltip_text(), _search_text);
+            a+=200;
+            std::cout<<" ==> 2  ==  "<<a<<"\n";
+            return a;        
+        }
+    }
+    if (CPDescription && fuzzy_search(CPDescription->get_text(), _search_text)){
+        // int a = max(fuzzy_points(CPDescription->get_text(), _search_text) -20,1);
+        int a = fuzzy_points(CPDescription->get_text(), _search_text);
+        a+=500;
+        std::cout<<"3  ==>  ==  "<<a<<"\n";
+        return a;    
+    }
+
+        std::cout<<" :() ==> 0\n";
+
+    return 0;
+}
+
+int CommandPalette::oon_sort(Gtk::ListBoxRow *row1,Gtk::ListBoxRow *row2){
+    
+    
+    int a = on_filter_general(row1);
+    int a_len = s_len;
+    int b = on_filter_general(row2);
+    int b_len = s_len;
+
+    if(a<b) return -1;
+    if(a==b){
+        if(a_len<b_len)   return -1;
+        else if (a_len==b_len)    return 0;
+        return 1;
+    }
+    return 1;
+    
+
+/*-----------------------------------------------------*/
+    // if (_search_text.empty()) {
+    //     return true;
+    // } // Every operation is visible if search text is empty
+
+    // auto x = get_name_desc(row1);
+
+    // auto CPName1 = x.first,CPDescription1 = x.second;
+
+    // auto [CPName, CPDescription] = get_name_desc(row2);
+
+    // auto CPName2 = CPName,CPDescription2 = CPDescription;
+
+
+    //     int a=0,b=0;
+    // if(CPName1 && CPName2){
+    //     if(fuzzy_search(CPName1->get_text(), _search_text)){
+    //         a = fuzzy_points(CPName1->get_text(), _search_text);
+    //         // std::cout<<" ==> 1 ==  "<<a<<"\n";
+    //         // return a;        
+    //     }
+    //     if(fuzzy_search(CPName2->get_text(), _search_text)){
+    //         b = fuzzy_points(CPName2->get_text(), _search_text);
+    //         // std::cout<<" ==> 1 ==  "<<a<<"\n";
+    //         // return a;        
+    //     }
+        
+    //     if(a && b){
+    //         if(a<b) return -1;
+    //         return 1;
+    //     }
+
+    //     if(a==0 && b)    return 1;
+    //     if(b==0 && a)    return -1;
+
+    //     if(fuzzy_search(CPName1->get_tooltip_text(), _search_text)){
+    //         // int a = max(fuzzy_points(CPName->get_tooltip_text(), _search_text) -10,2);
+    //         a =  fuzzy_points(CPName1->get_tooltip_text(), _search_text);
+    //         // a+=200;
+    //         // std::cout<<" ==> 2  ==  "<<a<<"\n";
+    //         // return a;        
+    //     }
+    //     if(fuzzy_search(CPName2->get_tooltip_text(), _search_text)){
+    //         // int a = max(fuzzy_points(CPName->get_tooltip_text(), _search_text) -10,2);
+    //         b =  fuzzy_points(CPName2->get_tooltip_text(), _search_text);
+    //         // a+=200;
+    //         // std::cout<<" ==> 2  ==  "<<a<<"\n";
+    //         // return a;        
+    //     }
+
+    //     if(a && b){
+    //         if(a<b) return -1;
+    //         return 1;
+    //     }
+
+    //     if(a==0 && b)    return 1;
+    //     if(b==0 && a)    return -1;
+
+    // }
+    // if (CPDescription1 && fuzzy_search(CPDescription1->get_text(), _search_text)){
+    //     // int a = max(fuzzy_points(CPDescription->get_text(), _search_text) -20,1);
+    //      a = fuzzy_points(CPDescription1->get_text(), _search_text);
+    //     // a+=500;
+    //     // std::cout<<"3  ==>  ==  "<<a<<"\n";
+    //     // return a;    
+    // }
+    // if (CPDescription2 && fuzzy_search(CPDescription2->get_text(), _search_text)){
+    //     // int a = max(fuzzy_points(CPDescription->get_text(), _search_text) -20,1);
+    //      b = fuzzy_points(CPDescription2->get_text(), _search_text);
+    //     // a+=500;
+    //     // std::cout<<"3  ==>  ==  "<<a<<"\n";
+    //     // return a;    
+    // }
+
+    // if(a && b){
+    //     if(a<b) return -1;
+    //     return 1;
+    // }
+
+    // if(a==0 && b)    return 1;
+    // if(b==0 && a)    return -1;
+
+    // return 0;
 }
 
 void CommandPalette::set_mode(CPMode mode)
@@ -706,7 +888,9 @@ void CommandPalette::set_mode(CPMode mode)
             _CPSuggestionsScroll->show_all();
 
             _CPSuggestions->unset_filter_func();
+            _CPSuggestions->unset_sort_func();
             _CPSuggestions->set_filter_func(sigc::mem_fun(*this, &CommandPalette::on_filter_general));
+            _CPSuggestions->set_sort_func(sigc::mem_fun(*this, &CommandPalette::oon_sort));
 
             _cpfilter_search_connection.disconnect(); // to be sure
             _cpfilter_key_press_connection.disconnect();
