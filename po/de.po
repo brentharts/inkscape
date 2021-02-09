@@ -939,7 +939,7 @@ msgstr "Wachsdruck-auf-Stoff-Textur"
 
 #: ../share/filters/filters.svg.h:366
 msgid "Watercolor"
-msgstr "Wasserfarbe"
+msgstr "Aquarell"
 
 #: ../share/filters/filters.svg.h:368
 msgid "Cloudy watercolor effect"
@@ -957,7 +957,7 @@ msgstr ""
 
 #: ../share/filters/filters.svg.h:374
 msgid "Ink Paint"
-msgstr "Wasserfarbe"
+msgstr "Wasserfarben"
 
 #: ../share/filters/filters.svg.h:376
 msgid "Ink paint on paper with some turbulent color shift"
