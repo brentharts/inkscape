@@ -177,8 +177,8 @@ private: // Signal handlers
      * Implements text matching logic
      */
     bool fuzzy_search(const Glib::ustring &subject, const Glib::ustring &search);
-    int fuzzy_points(const Glib::ustring &subject, const Glib::ustring &search);
-    int oon_sort(Gtk::ListBoxRow *row1,Gtk::ListBoxRow *row2);
+    int  fuzzy_points(const Glib::ustring &subject, const Glib::ustring &search);
+    int  on_sort(Gtk::ListBoxRow *row1,Gtk::ListBoxRow *row2);
     void set_mode(CPMode mode);
 
     /**
