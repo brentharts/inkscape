@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.2 
+<!-- Generated with glade 3.22.2
 
 Copyright (C) Martin Owens
 
@@ -319,7 +319,7 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
         <col id="5">148mm x 210mm</col>
       </row>
       <row>
-        <col id="0" translatable="yes">Business Card Aus/NZ (Landscape)</col>
+        <col id="0" translatable="yes">Business Card AU/NZ (Landscape)</col>
         <col id="1">resources/template_businesscard_landscape.svg</col>
         <col id="2">-</col>
         <col id="3">90mm</col>
@@ -327,7 +327,7 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
         <col id="5">90mm x 55mm</col>
       </row>
       <row>
-        <col id="0" translatable="yes">Business Card Aus/NZ (Portrait)</col>
+        <col id="0" translatable="yes">Business Card AU/NZ (Portrait)</col>
         <col id="1">resources/template_businesscard_portrait.svg</col>
         <col id="2">-</col>
         <col id="3">55mm</col>
@@ -651,7 +651,7 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
         <col id="5">1536px x 768px</col>
       </row>
       <row>
-        <col id="0" translatable="yes">LinkedIn dynamic ads</col>
+        <col id="0" translatable="yes">LinkedIn dynamic ad</col>
         <col id="1">resources/template_social_square.svg</col>
         <col id="2">-</col>
         <col id="3">100px</col>
@@ -1504,7 +1504,7 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
                 <property name="margin_right">30</property>
                 <property name="margin_top">10</property>
                 <property name="margin_bottom">10</property>
-                <property name="label" translatable="yes">&lt;big&gt;&lt;b&gt;The Inkscape project is supported by users like you&lt;/b&gt;, through our collective time, money and skill we have made this software for everyone in the world to enjoy free from restrictions and free from costs. &lt;b&gt;
+                <property name="label" translatable="yes">&lt;big&gt;&lt;b&gt;The Inkscape project is supported by users like you.&lt;/b&gt; Through our collective time, money and skill, we have made this software for everyone in the world to enjoy free from restrictions and free from costs. &lt;b&gt;
 If you would like to get involved and make the next version of Inkscape even better, please consider joining the Inkscape project today.&lt;/b&gt;&lt;/big&gt;</property>
                 <property name="use_markup">True</property>
                 <property name="wrap">True</property>
