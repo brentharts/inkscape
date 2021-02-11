@@ -3305,64 +3305,64 @@ void InkscapePreferences::initPageSystem()
     Gtk::Button* reset_prefs = Gtk::manage(new Gtk::Button(_("Reset Preferences")));
     reset_prefs->signal_clicked().connect(sigc::mem_fun(*this, &InkscapePreferences::on_reset_prefs_clicked));
 
-    _page_system.add_line(true, _("User preferences: "), _sys_user_prefs, "",
+    _page_system.add_line(true, _("User preferences:"), _sys_user_prefs, "",
                           _("Location of the user’s preferences file"), true, reset_prefs);
 
     _sys_user_config.init((char const *)Inkscape::IO::Resource::profile_path(""), _("Open preferences folder"));
-    _page_system.add_line(true, _("User config: "), _sys_user_config, "", _("Location of users configuration"), true);
+    _page_system.add_line(true, _("User config:"), _sys_user_config, "", _("Location of users configuration"), true);
 
     auto extensions_folder = IO::Resource::get_path_string(IO::Resource::USER, IO::Resource::EXTENSIONS);
     _sys_user_extension_dir.init(extensions_folder,
                                  _("Open extensions folder"));
-    _page_system.add_line(true, _("User extensions: "), _sys_user_extension_dir, "",
+    _page_system.add_line(true, _("User extensions:"), _sys_user_extension_dir, "",
                           _("Location of the user’s extensions"), true);
 
     _sys_user_fonts_dir.init((char const *)IO::Resource::get_path(IO::Resource::USER, IO::Resource::FONTS, ""),
                              _("Open fonts folder"));
-    _page_system.add_line(true, _("User fonts: "), _sys_user_fonts_dir, "", _("Location of the user’s fonts"), true);
+    _page_system.add_line(true, _("User fonts:"), _sys_user_fonts_dir, "", _("Location of the user’s fonts"), true);
 
     _sys_user_themes_dir.init(g_build_filename(g_get_user_data_dir(), "themes", NULL), _("Open themes folder"));
-    _page_system.add_line(true, _("User themes: "), _sys_user_themes_dir, "", _("Location of the user’s themes"), true);
+    _page_system.add_line(true, _("User themes:"), _sys_user_themes_dir, "", _("Location of the user’s themes"), true);
 
     _sys_user_icons_dir.init((char const *)IO::Resource::get_path(IO::Resource::USER, IO::Resource::ICONS, ""),
                              _("Open icons folder"));
-    _page_system.add_line(true, _("User icons: "), _sys_user_icons_dir, "", _("Location of the user’s icons"), true);
+    _page_system.add_line(true, _("User icons:"), _sys_user_icons_dir, "", _("Location of the user’s icons"), true);
 
     _sys_user_templates_dir.init((char const *)IO::Resource::get_path(IO::Resource::USER, IO::Resource::TEMPLATES, ""),
                                  _("Open templates folder"));
-    _page_system.add_line(true, _("User templates: "), _sys_user_templates_dir, "",
+    _page_system.add_line(true, _("User templates:"), _sys_user_templates_dir, "",
                           _("Location of the user’s templates"), true);
 
     _sys_user_symbols_dir.init((char const *)IO::Resource::get_path(IO::Resource::USER, IO::Resource::SYMBOLS, ""),
                                _("Open symbols folder"));
 
-    _page_system.add_line(true, _("User symbols: "), _sys_user_symbols_dir, "", _("Location of the user’s symbols"),
+    _page_system.add_line(true, _("User symbols:"), _sys_user_symbols_dir, "", _("Location of the user’s symbols"),
                           true);
 
     _sys_user_paint_servers_dir.init((char const *)IO::Resource::get_path(IO::Resource::USER, IO::Resource::PAINT, ""),
                                 _("Open paint servers folder"));
 
-    _page_system.add_line(true, _("User paint servers: "), _sys_user_paint_servers_dir, "",
+    _page_system.add_line(true, _("User paint servers:"), _sys_user_paint_servers_dir, "",
                         _("Location of the user’s paint servers"), true);
 
     _sys_user_palettes_dir.init((char const *)IO::Resource::get_path(IO::Resource::USER, IO::Resource::PALETTES, ""),
                                 _("Open palettes folder"));
-    _page_system.add_line(true, _("User palettes: "), _sys_user_palettes_dir, "", _("Location of the user’s palettes"),
+    _page_system.add_line(true, _("User palettes:"), _sys_user_palettes_dir, "", _("Location of the user’s palettes"),
                           true);
 
     _sys_user_keys_dir.init((char const *)IO::Resource::get_path(IO::Resource::USER, IO::Resource::KEYS, ""),
                             _("Open keyboard shortcuts folder"));
-    _page_system.add_line(true, _("User keys: "), _sys_user_keys_dir, "",
+    _page_system.add_line(true, _("User keys:"), _sys_user_keys_dir, "",
                           _("Location of the user’s keyboard mapping files"), true);
 
     _sys_user_ui_dir.init((char const *)IO::Resource::get_path(IO::Resource::USER, IO::Resource::UIS, ""),
                           _("Open user interface folder"));
-    _page_system.add_line(true, _("User UI: "), _sys_user_ui_dir, "",
+    _page_system.add_line(true, _("User UI:"), _sys_user_ui_dir, "",
                           _("Location of the user’s user interface description files"), true);
 
     _sys_user_cache.set_text(g_get_user_cache_dir());
     _sys_user_cache.set_editable(false);
-    _page_system.add_line(true, _("User cache: "), _sys_user_cache, "", _("Location of user’s cache"), true);
+    _page_system.add_line(true, _("User cache:"), _sys_user_cache, "", _("Location of user’s cache"), true);
 
     Glib::ustring tmp_dir = prefs->getString("/options/autosave/path");
     if (tmp_dir.empty()) {
@@ -3370,16 +3370,16 @@ void InkscapePreferences::initPageSystem()
     }
     _sys_tmp_files.set_text(tmp_dir);
     _sys_tmp_files.set_editable(false);
-    _page_system.add_line(true, _("Temporary files: "), _sys_tmp_files, "", _("Location of the temporary files used for autosave"), true);
+    _page_system.add_line(true, _("Temporary files:"), _sys_tmp_files, "", _("Location of the temporary files used for autosave"), true);
 
     _sys_data.set_text(get_inkscape_datadir());
     _sys_data.set_editable(false);
-    _page_system.add_line(true, _("Inkscape data: "), _sys_data, "", _("Location of Inkscape data"), true);
+    _page_system.add_line(true, _("Inkscape data:"), _sys_data, "", _("Location of Inkscape data"), true);
 
     extensions_folder = IO::Resource::get_path_string(IO::Resource::SYSTEM, IO::Resource::EXTENSIONS);
     _sys_extension_dir.set_text(extensions_folder);
     _sys_extension_dir.set_editable(false);
-    _page_system.add_line(true, _("Inkscape extensions: "), _sys_extension_dir, "", _("Location of the Inkscape extensions"), true);
+    _page_system.add_line(true, _("Inkscape extensions:"), _sys_extension_dir, "", _("Location of the Inkscape extensions"), true);
 
     Glib::ustring tmp;
     auto system_data_dirs = Glib::get_system_data_dirs();
@@ -3390,7 +3390,7 @@ void InkscapePreferences::initPageSystem()
     _sys_systemdata_scroll.set_size_request(100, 80);
     _sys_systemdata_scroll.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
     _sys_systemdata_scroll.set_shadow_type(Gtk::SHADOW_IN);
-    _page_system.add_line(true,  _("System data: "), _sys_systemdata_scroll, "", _("Locations of system data"), true);
+    _page_system.add_line(true,  _("System data:"), _sys_systemdata_scroll, "", _("Locations of system data"), true);
 
     _sys_fontdirs_custom.init("/options/font/custom_fontdirs", 50);
     _page_system.add_line(true, _("Custom Font directories"), _sys_fontdirs_custom, "", _("Load additional fonts from custom locations (one path per line)"), true);
@@ -3405,7 +3405,7 @@ void InkscapePreferences::initPageSystem()
     _sys_icon_scroll.set_size_request(100, 80);
     _sys_icon_scroll.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
     _sys_icon_scroll.set_shadow_type(Gtk::SHADOW_IN);
-    _page_system.add_line(true,  _("Icon theme: "), _sys_icon_scroll, "", _("Locations of icon themes"), true);
+    _page_system.add_line(true,  _("Icon theme:"), _sys_icon_scroll, "", _("Locations of icon themes"), true);
 
     this->AddPage(_page_system, _("System"), PREFS_PAGE_SYSTEM);
 }
