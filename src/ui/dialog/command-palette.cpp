@@ -382,6 +382,8 @@ bool CommandPalette::generate_action_operation(const ActionPtrName &action_ptr_n
 
 void CommandPalette::on_search()
 {
+    _CPSuggestions->unset_sort_func();
+    _CPSuggestions->set_sort_func(sigc::mem_fun(*this, &CommandPalette::on_sort));
     _search_text = _CPFilter->get_text();
     _CPSuggestions->invalidate_filter(); // Remove old filter constraint and apply new one
     if (auto top_row = _CPSuggestions->get_row_at_y(0); top_row) {
@@ -658,8 +660,8 @@ bool CommandPalette::fuzzy_search(const Glib::ustring &subject, const Glib::ustr
 }
 int CommandPalette::fuzzy_points(const Glib::ustring &subject, const Glib::ustring &search){
     
-    int starting_charecters_no_match = 2;
-    int charecters_no_match = 1;
+    int starting_charecters_no_match = 5;
+    int charecters_no_match = 2;
     int cost =1;
 
     std::string subject_string = subject.lowercase();
@@ -814,8 +816,6 @@ void CommandPalette::set_mode(CPMode mode)
             _CPSuggestionsScroll->show_all();
 
             _CPSuggestions->unset_filter_func();
-            _CPSuggestions->unset_sort_func();
-            _CPSuggestions->set_sort_func(sigc::mem_fun(*this, &CommandPalette::on_sort));
             _CPSuggestions->set_filter_func(sigc::mem_fun(*this, &CommandPalette::on_filter_general));
 
             _cpfilter_search_connection.disconnect(); // to be sure
