@@ -1540,32 +1540,29 @@ cr_tknzr_parse_num (CRTknzr * a_this,
                                             one digit after `.'. */
                 } else if (!parsing_exp && (next_char == 'E' || next_char == 'e')) {
                         PEEK_BYTE(a_this, 2, &next_char)
-                        if(!(IS_NUM(next_char) || next_char == '+' || next_char == '-')){
-                            break;
+                        if (next_char == '+') {
+                                READ_NEXT_CHAR (a_this, &cur_char);
+                        } else if (next_char == '-') {
+                                exp_sign = -1;
+                                READ_NEXT_CHAR (a_this, &cur_char);
+                        } else if (!IS_NUM (next_char)) {
+                                break;
                         }
+
                         READ_NEXT_CHAR (a_this, &cur_char);
                         parsing_exp = TRUE;
                         parsed = FALSE;
-                        
-                        if (next_char == '+') {
-                            READ_NEXT_CHAR (a_this, &cur_char);
-                        } else if (next_char == '-') {
-                            exp_sign = -1;
-                            READ_NEXT_CHAR (a_this, &cur_char);
-                        } else if (!IS_NUM (next_char)) {
-                            break;
-                        }
                 } else if (IS_NUM (next_char)) {
                         READ_NEXT_CHAR (a_this, &cur_char);
                         parsed = TRUE;
                         
                         if (parsing_exp) {
-                            exponent = exponent * 10 + (cur_char - '0');
+                                exponent = exponent * 10 + (cur_char - '0');
                         } else {
-                            numerator = numerator * 10 + (cur_char - '0');
-                            if (parsing_dec) {
-                                    denominator *= 10;
-                            }
+                                numerator = numerator * 10 + (cur_char - '0');
+                                if (parsing_dec) {
+                                        denominator *= 10;
+                                }
                         }
                 } else {
                         break;
