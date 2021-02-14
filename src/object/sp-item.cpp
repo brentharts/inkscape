@@ -698,7 +698,8 @@ void SPItem::update(SPCtx* ctx, guint flags) {
     }
     /* Update bounding box in user space, used for filter and objectBoundingBox units */
     if (style->filter.set && display) {
-        Geom::OptRect item_bbox = geometricBounds();
+        // The visualBounds are needed to include marker and stroke widths
+        Geom::OptRect item_bbox = visualBounds();
         SPItemView *itemview = display;
         do {
             if (itemview->arenaitem)
@@ -812,13 +813,9 @@ Geom::OptRect SPItem::visualBounds(Geom::Affine const &transform, bool wfilter, 
 
     Geom::OptRect bbox;
 
-
     SPFilter *filter = style ? style->getFilter() : nullptr;
     if (filter && wfilter) {
-        // call the subclass method
-    	// CPPIFY
-    	//bbox = this->bbox(Geom::identity(), SPItem::VISUAL_BBOX);
-    	bbox = const_cast<SPItem*>(this)->bbox(Geom::identity(), SPItem::GEOMETRIC_BBOX); // see LP Bug 1229971
+    	bbox = const_cast<SPItem*>(this)->bbox(Geom::identity(), SPItem::VISUAL_BBOX);
 
         // default filer area per the SVG spec:
         SVGLength x, y, w, h;
@@ -860,9 +857,6 @@ Geom::OptRect SPItem::visualBounds(Geom::Affine const &transform, bool wfilter, 
         bbox = Geom::OptRect(minp, maxp);
         *bbox *= transform;
     } else {
-        // call the subclass method
-    	// CPPIFY
-    	//bbox = this->bbox(transform, SPItem::VISUAL_BBOX);
     	bbox = const_cast<SPItem*>(this)->bbox(transform, SPItem::VISUAL_BBOX);
     }
     if (clip_ref && clip_ref->getObject() && wclip) {
@@ -1196,7 +1190,7 @@ Inkscape::DrawingItem *SPItem::invoke_show(Inkscape::Drawing &drawing, unsigned 
             }
         }
         ai->setItem(this);
-        ai->setItemBounds(geometricBounds());
+        ai->setItemBounds(visualBounds());
     }
 
     return ai;

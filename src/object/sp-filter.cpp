@@ -30,6 +30,7 @@
 #include "document.h"
 #include "sp-filter-reference.h"
 #include "filters/sp-filter-primitive.h"
+#include "object/sp-shape.h"
 #include "uri.h"
 #include "xml/repr.h"
 
@@ -380,14 +381,10 @@ void SPFilter::update_filter_region(SPItem *item)
  */
 Geom::Rect SPFilter::get_automatic_filter_region(SPItem *item)
 {
-    Geom::OptRect bbox = item->desktopGeometricBounds();
-    if (!bbox)
-        return Geom::Rect(); // No adjustment for dead box
+    Geom::OptRect bbox = item->bbox(Geom::identity(), SPItem::VISUAL_BBOX);
+    if (!bbox) return Geom::Rect(); // No adjustment for dead box
 
-    // Turn bbox into real box and shrink it to units used in filters.
     Geom::Rect inbox = *bbox;
-    inbox *= item->i2dt_affine().inverse();
-
     Geom::Rect outbox = inbox;
     for(auto& primitive_obj: this->children) {
         auto primitive = dynamic_cast<SPFilterPrimitive *>(&primitive_obj);
