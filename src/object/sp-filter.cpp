@@ -30,7 +30,6 @@
 #include "document.h"
 #include "sp-filter-reference.h"
 #include "filters/sp-filter-primitive.h"
-#include "object/sp-shape.h"
 #include "uri.h"
 #include "xml/repr.h"
 
