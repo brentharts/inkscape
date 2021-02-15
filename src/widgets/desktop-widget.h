@@ -93,7 +93,7 @@ public:
     SPDesktop *desktop = nullptr;
 
     Gtk::Window *window = nullptr;
-    Gtk::MenuBar *_menubar;  // TEMP
+    Gtk::MenuBar *_menubar;
 private:
     // Flags for ruler event handling
     bool _ruler_clicked = false; ///< True if the ruler has been clicked
