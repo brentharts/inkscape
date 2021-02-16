@@ -218,6 +218,7 @@ if(WIN32)
     ${MINGW_LIB}/girepository-1.0/GModule-2.0.typelib
     ${MINGW_LIB}/girepository-1.0/GObject-2.0.typelib
     ${MINGW_LIB}/girepository-1.0/Gtk-3.0.typelib
+    ${MINGW_LIB}/girepository-1.0/HarfBuzz-0.0.typelib
     ${MINGW_LIB}/girepository-1.0/Pango-1.0.typelib
     ${MINGW_LIB}/girepository-1.0/PangoCairo-1.0.typelib
     DESTINATION lib/girepository-1.0)
@@ -286,7 +287,9 @@ if(WIN32)
 
   set(site_packages "lib/python${python_version}/site-packages")
   # Python packages installed via pacman
-  set(packages "python-lxml" "python-numpy" "python-pillow" "python-six" "python-cairo" "python-gobject")
+  set(packages
+      "python-lxml" "python-numpy" "python-pillow" "python-six" "python-cairo"
+      "python-gobject" "python-coverage" "python-pyserial" "scour")
   foreach(package ${packages})
     list_files_pacman(${package} paths)
     install_list(FILES ${paths}
@@ -296,8 +299,9 @@ if(WIN32)
       EXCLUDE ".pyc$"
     )
   endforeach()
+
   # Python packages installed via pip
-  set(packages "coverage" "pyserial" "scour")
+  set(packages "")
   foreach(package ${packages})
     list_files_pip(${package} paths)
     install_list(FILES ${paths}
@@ -308,6 +312,7 @@ if(WIN32)
       EXCLUDE ".pyc$"
     )
   endforeach()
+
   install(CODE
     "MESSAGE(\"Pre-compiling Python distribution to byte-code (.pyc files)\")
      execute_process(COMMAND \${CMAKE_INSTALL_PREFIX}/bin/python -m compileall -qq \${CMAKE_INSTALL_PREFIX}/lib/python${python_version})"
