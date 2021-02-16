@@ -392,7 +392,7 @@ Geom::Rect SPFilter::get_automatic_filter_region(SPItem *item)
     // take account of the visualBox, so even if the filter does NOTHING to the
     // size of an object, we must add the difference between the geometric and
     // visual boxes ourselves or find them cut off by renderers of all kinds.
-    Geom::Rect inbox = *g_box;
+    Geom::Rect inbox = *v_box;
     Geom::Rect outbox = *v_box;
     for(auto& primitive_obj: this->children) {
         auto primitive = dynamic_cast<SPFilterPrimitive *>(&primitive_obj);
