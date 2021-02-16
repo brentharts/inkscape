@@ -402,9 +402,10 @@ Geom::Rect SPFilter::get_automatic_filter_region(SPItem *item)
         }
     }
 
-    // Include the original bounding-box in the result
-    outbox.unionWith(inbox);
-    // Scale outbox to width/height scale of input.
+    // Include the original visual bounding-box in the result
+    outbox.unionWith(v_box);
+    // Scale outbox to width/height scale of input, this scales the geometric
+    // into the visual bounding box requiring any changes to it to re-run this.
     outbox *= Geom::Translate(-inbox.left(), -inbox.top());
     outbox *= Geom::Scale(1/inbox.width(), 1/inbox.height());
     return outbox;
