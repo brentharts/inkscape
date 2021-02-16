@@ -538,10 +538,6 @@ void Application::add_gtk_css(bool only_providers)
         g_critical("CSSProviderError::load_from_data(): failed to load '%s'\n(%s)", css_str.c_str(), ex.what().c_str());
     }
     Gtk::StyleContext::add_provider_for_screen(screen, colorizeprovider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-    const gchar *nowarntnum =  "* {font-feature-settings: \"tnum=1\";}";
-    auto tnumprovider = Gtk::CssProvider::create();
-    gtk_css_provider_load_from_data (tnumprovider->gobj(), nowarntnum, -1, nullptr);
-    Gtk::StyleContext::add_provider_for_screen(screen, tnumprovider, GTK_STYLE_PROVIDER_PRIORITY_SETTINGS);
 }
 
 /** Sets the keyboard modifier to map to Alt.
