@@ -34,6 +34,7 @@
 #include <gtkmm/notebook.h>
 #include <gtkmm/textbuffer.h>
 #include <gtkmm/textview.h>
+#include <pango/pangocairo.h>
 
 #ifdef WITH_GSPELL
 # include <gspell/gspell.h>
@@ -126,6 +127,13 @@ TextEdit::TextEdit()
 #endif
 
     add(*contents);
+
+    /* Force fontconfig usage here.*/
+    PangoFontMap* ft_fontmap = pango_cairo_font_map_new_for_font_type(CAIRO_FONT_TYPE_FT);
+    PangoContext* p_context = preview_label->get_pango_context()->gobj();
+    pango_context_set_font_map (p_context,ft_fontmap);
+    p_context = preview_label2->get_pango_context()->gobj();
+    pango_context_set_font_map (p_context,ft_fontmap);
 
     /* Signal handlers */
     text_buffer->signal_changed().connect(sigc::mem_fun(*this, &TextEdit::onChange));

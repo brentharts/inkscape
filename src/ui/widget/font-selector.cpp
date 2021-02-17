@@ -20,6 +20,7 @@
 #include "inkscape.h"
 #include "desktop.h"
 #include "object/sp-text.h"
+#include <pango/pangocairo.h>
 
 namespace Inkscape {
 namespace UI {
@@ -36,6 +37,11 @@ FontSelector::FontSelector (bool with_size, bool with_variations)
 {
 
     Inkscape::FontLister* font_lister = Inkscape::FontLister::get_instance();
+
+    /* Force fontconfig usage here.*/
+    PangoFontMap* ft_fontmap = pango_cairo_font_map_new_for_font_type(CAIRO_FONT_TYPE_FT);
+    PangoContext* p_context = family_treeview.get_pango_context()->gobj();
+    pango_context_set_font_map (p_context,ft_fontmap);
 
     // Font family
     family_treecolumn.pack_start (family_cell, false);
@@ -115,7 +121,6 @@ FontSelector::FontSelector (bool with_size, bool with_variations)
     // Initialize font family lists. (May already be done.) Should be done on document change.
     font_lister->update_font_list(SP_ACTIVE_DESKTOP->getDocument());
 }
-
 void
 FontSelector::set_sizes ()
 {
