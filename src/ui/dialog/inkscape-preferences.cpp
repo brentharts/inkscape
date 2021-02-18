@@ -2819,7 +2819,7 @@ void InkscapePreferences::initKeyboardShortcuts(Gtk::TreeModel::iterator iter_ui
     Gtk::TreeStore::iterator iter_mods = _mod_store->append();
     (*iter_mods)[_mod_columns.name] = _("Loading ...");
     (*iter_group)[_mod_columns.id] = "";
-    (*iter_group)[_mod_columns.description] = _("It should have loaded by now. Hmmm.");
+    (*iter_group)[_mod_columns.description] = _("Unable to load keyboard modifier list.");
     (*iter_group)[_mod_columns.and_modifiers] = "";
 }
 
