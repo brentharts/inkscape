@@ -56,10 +56,9 @@
 #include "ui/widget/unit-menu.h"
 #include "ui/widget/scrollprotected.h"
 #include "ui/dialog/dialog-notebook.h"
+#include "ui/dialog/filedialogimpl-gtkmm.h"
 
 #include "extension/db.h"
-#include "extension/output.h"
-
 
 #ifdef _WIN32
 #include <windows.h>
@@ -989,6 +988,11 @@ void Export::onHideExceptSelected ()
 /// Called when export button is clicked
 void Export::onExport ()
 {
+    _export_raster(nullptr);
+}
+
+void Export::_export_raster (Inkscape::Extension::Output *extension)
+{
     SPDesktop *desktop = SP_ACTIVE_DESKTOP;
     if (!desktop) return;
 
@@ -1163,25 +1167,27 @@ void Export::onExport ()
         auto area = Geom::Rect(Geom::Point(x0, y0), Geom::Point(x1, y1)) * desktop->dt2doc();
         bool overwrite = false;
 
-        // Select a raster output extension if not a png file, this can be unpicked
-        // At some future point so png is just another type of internal output extension
-        Inkscape::Extension::Output *extension = nullptr;
-        auto png_filename = std::string(path.c_str());
-        if (!Glib::str_has_suffix(filename, ".png")) {
+        // Select a raster output extension if not a png file (manual filename)
+        if (!extension && !Glib::str_has_suffix(filename, ".png")) {
             Inkscape::Extension::DB::OutputList extension_list;
             Inkscape::Extension::db.get_output_list(extension_list);
             for (auto output_ext : extension_list) {
                 if (output_ext->deactivated() || !output_ext->is_raster())
                     continue;
                 if(Glib::str_has_suffix(path.c_str(), output_ext->get_extension())) {
-                    // Select the extension and set the filename to a temporary file
-                    int tempfd_out = Glib::file_open_tmp(png_filename, "ink_ext_");
-                    overwrite = true;
-                    close(tempfd_out);
+                    // Select the extension
                     extension = output_ext;
                     break;
                 }
             }
+        }
+
+        auto png_filename = std::string(path.c_str());
+        if (extension) {
+            // Select the extension and set the filename to a temporary file
+            int tempfd_out = Glib::file_open_tmp(png_filename, "ink_ext_");
+            overwrite = true;
+            close(tempfd_out);
         }
 
         /* Do export */
@@ -1361,6 +1367,35 @@ void Export::onBrowse ()
 
     fs.set_modal(true);
 
+    // FileFilter can select the raster extension to use
+    std::map<Glib::RefPtr<Gtk::FileFilter>, Inkscape::Extension::Output *> filters;
+
+    auto png_filter = Gtk::FileFilter::create();
+    png_filter->set_name("PNG File (*.png)");
+    png_filter->add_pattern("*.png");
+    fs.add_filter(png_filter);
+    filters[png_filter] = nullptr;
+
+    // Add raster export options to the browse filter
+    Inkscape::Extension::DB::OutputList extension_list;
+    Inkscape::Extension::db.get_output_list(extension_list);
+    for (auto mod : extension_list)
+    {
+        if (mod->deactivated() || !mod->is_raster())
+            continue;
+
+        Glib::ustring upattern("*");
+        Glib::ustring extension = mod->get_extension();
+        fileDialogExtensionToPattern(upattern, extension);
+
+        auto filter = Gtk::FileFilter::create();
+        filter->set_name(mod->get_filetypename(true));
+        filter->add_pattern(upattern);
+        filter->add_mime_type(mod->get_mimetype());
+        fs.add_filter(filter);
+        filters[filter] = mod;
+    }
+
     std::string filename = Glib::filename_from_utf8(filename_entry.get_text());
 
     if (filename.empty()) {
@@ -1442,7 +1477,7 @@ void Export::onBrowse ()
 #endif
 
     if (accept) {
-        onExport();
+        _export_raster(filters[fs.get_filter()]);
     }
 } // end of sp_export_browse_clicked()
 

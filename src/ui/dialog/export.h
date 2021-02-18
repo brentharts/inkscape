@@ -24,6 +24,8 @@
 #include "ui/dialog/dialog-base.h"
 #include "ui/widget/scrollprotected.h"
 
+#include "extension/output.h"
+
 namespace Inkscape {
 namespace UI {
 namespace Dialog {
@@ -127,6 +129,7 @@ private:
      * Export button callback
      */
     void onExport ();
+    void _export_raster (Inkscape::Extension::Output *extension);
 
     /**
      * File Browse button callback
