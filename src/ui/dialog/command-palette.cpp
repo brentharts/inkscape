@@ -629,66 +629,107 @@ bool CommandPalette::ask_action_parameter(const ActionPtrName &action_ptr_name)
 }
 
 /*
-* Searching the search_string on another string
-*/
+ * Searching the search_string on another string
+ */
 bool CommandPalette::fuzzy_search(const Glib::ustring &subject, const Glib::ustring &search)
 {
     std::string subject_string = subject.lowercase();
     std::string search_string = search.lowercase();
 
-    for(int j = 0 , i = 0 ; i < search_string.length() ; i++) {
-        
-        if(search_string[i] == ' ') { 
-            continue;
-        }
-        
-        bool alphabet_present = false;
-        
-        while(j<subject_string.length()){
-            if (search_string[i] == subject_string[j]) {
-                alphabet_present = true;
-                j++;
-                break;
+    if (search_string.length() > 7) {
+        for (int j = 0, i = 0; i < search_string.length(); i++) {
+            if (search_string[i] == ' ') {
+                continue;
             }
-            j++;
+
+            bool alphabet_present = false;
+
+            while (j < subject_string.length()) {
+                if (search_string[i] == subject_string[j]) {
+                    alphabet_present = true;
+                    j++;
+                    break;
+                }
+                j++;
+            }
+
+            if (!alphabet_present) {
+                return false; // If not present
+            }
         }
-        
-        if(!alphabet_present) {
-            return false; // If not present
+    } else {
+        std::map<char, int> subject_string_character, search_string_character;
+        for (auto character : subject_string) {
+            subject_string_character[character]++;
+        }
+        for (auto character : search_string) {
+            search_string_character[character]++;
+        }
+
+        for (auto x : search_string_character) {
+            if (subject_string_character[x.first] < x.second) {
+                return false;
+            }
         }
     }
-
-    return  true;
+    return true;
 }
 
 /*
-* Calculates the fuzzy_point
-*/
+ * Searching the full search_text in the subject string
+ * used for CPDescription text
+ */
+bool CommandPalette::normal_search(const Glib::ustring &subject, const Glib::ustring &search)
+{
+    if (subject.lowercase().find(search.lowercase()) != -1) {
+        return true;
+    }
+    return false;
+}
+
+/*
+ * Calculates the fuzzy_point
+ */
 int CommandPalette::fuzzy_points(const Glib::ustring &subject, const Glib::ustring &search)
-{    
+{
     int starting_characters_no_match = 5;
-    int charecters_no_match = 2;
-    int cost = 1;    // Taking initial cost as 1
+    int character_no_match = 2;
+    int cost = 1; // Taking initial cost as 1
 
     std::string subject_string = subject.lowercase();
     std::string search_string = search.lowercase();
+    if (search_string.length() > 7) {
+        for (int j = 0, i = 0; i < search_string.length(); i++) {
+            if (search_string[i] == ' ') {
+                continue;
+            }
 
-    for(int j = 0 ,i = 0; i < search_string.length(); i++) {
-        
-        if(search_string[i]==' ') { 
-            continue;
+            while (j < subject_string.length()) {
+                if (subject_string[j] == ' ' && search_string[i] != subject_string[j]) {
+                    if (i == 0) {
+                        cost += starting_characters_no_match;
+                    } else {
+                        cost += character_no_match;
+                    }
+                }
+                j++;
+            }
+        }
+    } else {
+        std::map<char, int> search_string_character;
+
+        for (auto character : search_string) {
+            search_string_character[character]++;
         }
 
-        while(j<subject_string.length()){
-            if (subject_string[j] == ' ' && search_string[i] != subject_string[j])
-            {
-                if (i == 0) {
-                    cost += starting_characters_no_match;
-                } else {        
-                    cost += charecters_no_match;
+        for (auto character : search_string_character) {
+            auto [alphabet, occurrence] = character;
+            for (int i = 0; i < subject_string.length() && occurrence; i++) {
+                if (subject_string[i] == alphabet) {
+                    cost += i;
+                    occurrence--;
                 }
             }
-            j++;
         }
     }
 
@@ -702,16 +743,16 @@ int CommandPalette::on_filter_general(Gtk::ListBoxRow *child)
     } // Every operation is visible if search text is empty
 
     auto [CPName, CPDescription] = get_name_desc(child);
-    
+
     if (CPName) {
         if (fuzzy_search(CPName->get_text(), _search_text)) {
-            return fuzzy_points(CPName->get_text(), _search_text);  
+            return fuzzy_points(CPName->get_text(), _search_text);
         }
         if (fuzzy_search(CPName->get_tooltip_text(), _search_text)) {
-            return fuzzy_points(CPName->get_tooltip_text(), _search_text);   
+            return fuzzy_points(CPName->get_tooltip_text(), _search_text);
         }
     }
-    if (CPDescription && fuzzy_search(CPDescription->get_text(), _search_text)) {
+    if (CPDescription && normal_search(CPDescription->get_text(), _search_text)) {
         return fuzzy_points(CPDescription->get_text(), _search_text);
     }
 
@@ -719,23 +760,23 @@ int CommandPalette::on_filter_general(Gtk::ListBoxRow *child)
 }
 
 /*
-* Compair different rows for order of display 
-* priority of comparison
-* 1) CPName->get_text()
-* 2) CPName->get_tooltip_text()
-* 3) CPDescription->get_text()
-*/
-int CommandPalette::on_sort(Gtk::ListBoxRow *row1,Gtk::ListBoxRow *row2)
-{    
+ * Compair different rows for order of display
+ * priority of comparison
+ * 1) CPName->get_text()
+ * 2) CPName->get_tooltip_text()
+ * 3) CPDescription->get_text()
+ */
+int CommandPalette::on_sort(Gtk::ListBoxRow *row1, Gtk::ListBoxRow *row2)
+{
     if (_search_text.empty()) {
         return -1;
     } // No change in the order
 
-    auto [cp_name_1,cp_description_1] = get_name_desc(row1);
-    auto [cp_name_2,cp_description_2] = get_name_desc(row2);
+    auto [cp_name_1, cp_description_1] = get_name_desc(row1);
+    auto [cp_name_2, cp_description_2] = get_name_desc(row2);
 
-    int fuzzy_points_count_1=0,fuzzy_points_count_2=0;
-    int text_len_1=0,text_len_2=0;
+    int fuzzy_points_count_1 = 0, fuzzy_points_count_2 = 0;
+    int text_len_1 = 0, text_len_2 = 0;
 
     if (cp_name_1 && cp_name_2) {
         if (fuzzy_search(cp_name_1->get_text(), _search_text)) {
@@ -746,12 +787,12 @@ int CommandPalette::on_sort(Gtk::ListBoxRow *row1,Gtk::ListBoxRow *row2)
             text_len_2 = cp_name_2->get_text().length();
             fuzzy_points_count_2 = fuzzy_points(cp_name_2->get_text(), _search_text);
         }
-        
+
         if (fuzzy_points_count_1 && fuzzy_points_count_2) {
-            if (fuzzy_points_count_1<fuzzy_points_count_2) { 
+            if (fuzzy_points_count_1 < fuzzy_points_count_2) {
                 return -1;
-            } else if (fuzzy_points_count_1==fuzzy_points_count_2) {
-                if (text_len_1>text_len_2) { 
+            } else if (fuzzy_points_count_1 == fuzzy_points_count_2) {
+                if (text_len_1 > text_len_2) {
                     return 1;
                 } else {
                     return -1;
@@ -761,27 +802,27 @@ int CommandPalette::on_sort(Gtk::ListBoxRow *row1,Gtk::ListBoxRow *row2)
             }
         }
 
-        if (fuzzy_points_count_1==0 && fuzzy_points_count_2) {    
+        if (fuzzy_points_count_1 == 0 && fuzzy_points_count_2) {
             return 1;
         }
-        if (fuzzy_points_count_2==0 && fuzzy_points_count_1) {    
+        if (fuzzy_points_count_2 == 0 && fuzzy_points_count_1) {
             return -1;
         }
 
         if (fuzzy_search(cp_name_1->get_tooltip_text(), _search_text)) {
             text_len_1 = cp_name_1->get_tooltip_text().length();
-            fuzzy_points_count_1 =  fuzzy_points(cp_name_1->get_tooltip_text(), _search_text);     
+            fuzzy_points_count_1 = fuzzy_points(cp_name_1->get_tooltip_text(), _search_text);
         }
         if (fuzzy_search(cp_name_2->get_tooltip_text(), _search_text)) {
             text_len_2 = cp_name_2->get_tooltip_text().length();
-            fuzzy_points_count_2 =  fuzzy_points(cp_name_2->get_tooltip_text(), _search_text);  
+            fuzzy_points_count_2 = fuzzy_points(cp_name_2->get_tooltip_text(), _search_text);
         }
 
         if (fuzzy_points_count_1 && fuzzy_points_count_2) {
             if (fuzzy_points_count_1 < fuzzy_points_count_2) {
                 return -1;
             } else if (fuzzy_points_count_1 == fuzzy_points_count_2) {
-                if (text_len_1>text_len_2) {
+                if (text_len_1 > text_len_2) {
                     return 1;
                 } else {
                     return -1;
@@ -791,25 +832,25 @@ int CommandPalette::on_sort(Gtk::ListBoxRow *row1,Gtk::ListBoxRow *row2)
             }
         }
 
-        if (fuzzy_points_count_1==0 && fuzzy_points_count_2) {    
+        if (fuzzy_points_count_1 == 0 && fuzzy_points_count_2) {
             return 1;
         }
-        if (fuzzy_points_count_2==0 && fuzzy_points_count_1) {  
+        if (fuzzy_points_count_2 == 0 && fuzzy_points_count_1) {
             return -1;
         }
     }
-    
-    if (cp_description_1 && fuzzy_search(cp_description_1->get_text(), _search_text)) {
+
+    if (cp_description_1 && normal_search(cp_description_1->get_text(), _search_text)) {
         text_len_1 = cp_description_1->get_text().length();
         fuzzy_points_count_1 = fuzzy_points(cp_description_1->get_text(), _search_text);
     }
-    if (cp_description_2 && fuzzy_search(cp_description_2->get_text() , _search_text)) {
+    if (cp_description_2 && normal_search(cp_description_2->get_text(), _search_text)) {
         text_len_2 = cp_description_2->get_text().length();
-        fuzzy_points_count_2 = fuzzy_points(cp_description_2->get_text(), _search_text);    
+        fuzzy_points_count_2 = fuzzy_points(cp_description_2->get_text(), _search_text);
     }
 
-    if (fuzzy_points_count_1 && fuzzy_points_count_2) {        
-        if (fuzzy_points_count_1 < fuzzy_points_count_2) { 
+    if (fuzzy_points_count_1 && fuzzy_points_count_2) {
+        if (fuzzy_points_count_1 < fuzzy_points_count_2) {
             return -1;
         } else if (fuzzy_points_count_1 == fuzzy_points_count_2) {
             if (text_len_1 > text_len_2) {
@@ -818,14 +859,14 @@ int CommandPalette::on_sort(Gtk::ListBoxRow *row1,Gtk::ListBoxRow *row2)
                 return -1;
             }
         } else {
-           return 1;
+            return 1;
         }
     }
 
-    if (fuzzy_points_count_1==0 && fuzzy_points_count_2) {
+    if (fuzzy_points_count_1 == 0 && fuzzy_points_count_2) {
         return 1;
     }
-    if (fuzzy_points_count_2==0 && fuzzy_points_count_1) {    
+    if (fuzzy_points_count_2 == 0 && fuzzy_points_count_1) {
         return -1;
     }
 

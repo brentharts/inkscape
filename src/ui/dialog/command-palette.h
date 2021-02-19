@@ -139,7 +139,6 @@ private: // Helpers
      */
     void load_app_actions();
     void load_win_doc_actions();
-    static bool fuzzy_search(Glib::ustring const, Glib::ustring const, float);
 
     void append_recent_file_operation(const Glib::ustring &path, bool is_suggestion, bool is_import = true);
     bool generate_action_operation(const ActionPtrName &action_ptr_name, const bool is_suggestion);
@@ -177,6 +176,7 @@ private: // Signal handlers
      * Implements text matching logic
      */
     bool fuzzy_search(const Glib::ustring &subject, const Glib::ustring &search);
+    bool normal_search(const Glib::ustring &subject, const Glib::ustring &search);
     int  fuzzy_points(const Glib::ustring &subject, const Glib::ustring &search);
     int  on_sort(Gtk::ListBoxRow *row1,Gtk::ListBoxRow *row2);
     void set_mode(CPMode mode);
