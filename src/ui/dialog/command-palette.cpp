@@ -666,8 +666,9 @@ bool CommandPalette::fuzzy_search(const Glib::ustring &subject, const Glib::ustr
             search_string_character[character]++;
         }
 
-        for (auto x : search_string_character) {
-            if (subject_string_character[x.first] < x.second) {
+        for (auto character : search_string_character) {
+            auto [alphabet, occurrence] = character;
+            if (subject_string_character[alphabet] < occurrence) {
                 return false;
             }
         }
