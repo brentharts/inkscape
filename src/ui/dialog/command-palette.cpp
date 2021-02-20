@@ -628,7 +628,68 @@ bool CommandPalette::ask_action_parameter(const ActionPtrName &action_ptr_name)
     return true;
 }
 
-/*
+/**
+ * Color removal
+ */
+void CommandPalette::remove_color(Gtk::Label *label, const Glib::ustring &subject)
+{
+    if (label->get_use_markup()) {
+        Glib::ustring text = subject;
+        label->set_text(text);
+    }
+}
+
+/**
+ * Color addition
+ */
+void CommandPalette::add_color(Gtk::Label *label, const Glib::ustring &search, const Glib::ustring &subject)
+{
+    Glib::ustring text = "";
+    std::string subject_string = subject.lowercase();
+    std::string search_string = search.lowercase();
+    int j = 0;
+
+    if (search_string.length() > 7) {
+        for (int i = 0; i < search_string.length(); i++) {
+            if (search_string[i] == ' ') {
+                continue;
+            }
+            while (j < subject_string.length()) {
+                if (search_string[i] == subject_string[j]) {
+                    text += "<span color=\"#22d1ee\" weight=\"bold\">" +
+                            Glib::Markup::escape_text(subject.substr(j, 1)) + "</span>";
+                    j++;
+                    break;
+                } else {
+                    text += subject_string[j];
+                }
+                j++;
+            }
+        }
+        if (j < subject_string.length())
+            text += Glib::Markup::escape_text(subject.substr(j));
+    } else {
+        std::map<char, int> search_string_character;
+
+        for (auto character : search_string) {
+            search_string_character[character]++;
+        }
+
+        for (int i = 0; i < subject_string.length(); i++) {
+            if (search_string_character[subject_string[i]]) {
+                search_string_character[subject_string[i]]--;
+                text += "<span color=\"#22d1ee\" weight=\"bold\">" + Glib::Markup::escape_text(subject.substr(i, 1)) +
+                        "</span>";
+            } else {
+                text += subject_string[i];
+            }
+        }
+    }
+
+    label->set_markup(text);
+}
+
+/**
  * Searching the search_string on another string
  */
 bool CommandPalette::fuzzy_search(const Glib::ustring &subject, const Glib::ustring &search)
@@ -676,7 +737,7 @@ bool CommandPalette::fuzzy_search(const Glib::ustring &subject, const Glib::ustr
     return true;
 }
 
-/*
+/**
  * Searching the full search_text in the subject string
  * used for CPDescription text
  */
@@ -688,7 +749,7 @@ bool CommandPalette::normal_search(const Glib::ustring &subject, const Glib::ust
     return false;
 }
 
-/*
+/**
  * Calculates the fuzzy_point
  */
 int CommandPalette::fuzzy_points(const Glib::ustring &subject, const Glib::ustring &search)
@@ -739,28 +800,38 @@ int CommandPalette::fuzzy_points(const Glib::ustring &subject, const Glib::ustri
 
 int CommandPalette::on_filter_general(Gtk::ListBoxRow *child)
 {
+    auto [CPName, CPDescription] = get_name_desc(child);
+    if (CPName) {
+        remove_color(CPName, CPName->get_text());
+        remove_color(CPName, CPName->get_tooltip_text());
+    }
+    if (CPDescription) {
+        remove_color(CPDescription, CPDescription->get_text());
+    }
+
     if (_search_text.empty()) {
         return 1;
     } // Every operation is visible if search text is empty
 
-    auto [CPName, CPDescription] = get_name_desc(child);
-
     if (CPName) {
         if (fuzzy_search(CPName->get_text(), _search_text)) {
+            add_color(CPName, _search_text, CPName->get_text());
             return fuzzy_points(CPName->get_text(), _search_text);
         }
         if (fuzzy_search(CPName->get_tooltip_text(), _search_text)) {
+            add_color(CPName, _search_text, CPName->get_tooltip_text());
             return fuzzy_points(CPName->get_tooltip_text(), _search_text);
         }
     }
     if (CPDescription && normal_search(CPDescription->get_text(), _search_text)) {
+        add_color(CPDescription, _search_text, CPDescription->get_text());
         return fuzzy_points(CPDescription->get_text(), _search_text);
     }
 
     return 0;
 }
 
-/*
+/**
  * Compair different rows for order of display
  * priority of comparison
  * 1) CPName->get_text()

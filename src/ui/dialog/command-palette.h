@@ -177,9 +177,15 @@ private: // Signal handlers
      */
     bool fuzzy_search(const Glib::ustring &subject, const Glib::ustring &search);
     bool normal_search(const Glib::ustring &subject, const Glib::ustring &search);
-    int  fuzzy_points(const Glib::ustring &subject, const Glib::ustring &search);
-    int  on_sort(Gtk::ListBoxRow *row1,Gtk::ListBoxRow *row2);
+    int fuzzy_points(const Glib::ustring &subject, const Glib::ustring &search);
+    int on_sort(Gtk::ListBoxRow *row1, Gtk::ListBoxRow *row2);
     void set_mode(CPMode mode);
+
+    /**
+     * Color addition in searched character
+     */
+    void add_color(Gtk::Label *label, const Glib::ustring &search, const Glib::ustring &subject);
+    void remove_color(Gtk::Label *label, const Glib::ustring &subject);
 
     /**
      * Executes Action
