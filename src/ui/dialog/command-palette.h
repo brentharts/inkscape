@@ -186,6 +186,7 @@ private: // Signal handlers
      */
     void add_color(Gtk::Label *label, const Glib::ustring &search, const Glib::ustring &subject);
     void remove_color(Gtk::Label *label, const Glib::ustring &subject);
+    void add_color_description(Gtk::Label *label, const Glib::ustring &search);
 
     /**
      * Executes Action

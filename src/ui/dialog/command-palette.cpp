@@ -690,6 +690,27 @@ void CommandPalette::add_color(Gtk::Label *label, const Glib::ustring &search, c
 }
 
 /**
+ * Color addition for description text
+ * Coloring complete consecutive search text in the description text
+ */
+void CommandPalette::add_color_description(Gtk::Label *label, const Glib::ustring &search)
+{
+    Glib::ustring subject = label->get_text();
+
+    Glib::ustring const subject_normalize = subject.lowercase().normalize();
+    Glib::ustring const search_normalize = search.lowercase().normalize();
+
+    auto const position = subject_normalize.find(search_normalize);
+    auto const search_length = search_normalize.size();
+
+    subject = Glib::Markup::escape_text(subject.substr(0, position)) + "<span color=\"#22d1ee\" weight=\"bold\">" +
+              Glib::Markup::escape_text(subject.substr(position, search_length)) + "</span>" +
+              Glib::Markup::escape_text(subject.substr(position + search_length));
+
+    label->set_markup(subject);
+}
+
+/**
  * Searching the search_string on another string
  */
 bool CommandPalette::fuzzy_search(const Glib::ustring &subject, const Glib::ustring &search)
@@ -824,7 +845,7 @@ int CommandPalette::on_filter_general(Gtk::ListBoxRow *child)
         }
     }
     if (CPDescription && normal_search(CPDescription->get_text(), _search_text)) {
-        add_color(CPDescription, _search_text, CPDescription->get_text());
+        add_color_description(CPDescription, _search_text);
         return fuzzy_points(CPDescription->get_text(), _search_text);
     }
 
