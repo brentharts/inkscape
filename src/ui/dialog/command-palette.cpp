@@ -650,12 +650,12 @@ void CommandPalette::add_color(Gtk::Label *label, const Glib::ustring &search, c
     int j = 0;
 
     if (search_string.length() > 7) {
-        for (int i = 0; i < search_string.length(); i++) {
-            if (search_string[i] == ' ') {
+        for (char i : search_string) {
+            if (i == ' ') {
                 continue;
             }
             while (j < subject_string.length()) {
-                if (search_string[i] == subject_string[j]) {
+                if (i == subject_string[j]) {
                     text += "<span color=\"#22d1ee\" weight=\"bold\">" +
                             Glib::Markup::escape_text(subject.substr(j, 1)) + "</span>";
                     j++;
