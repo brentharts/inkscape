@@ -103,7 +103,7 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
         <col id="1">default</col>
       </row>
       <row>
-        <col id="0" translatable="yes">Filled by code</col>
+        <col id="0" translatable="no">Filled by code</col>
         <col id="1">nope</col>
       </row>
     </data>
