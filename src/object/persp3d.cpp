@@ -196,52 +196,6 @@ void Persp3D::update(SPCtx *ctx, guint flags) {
     SPObject::update(ctx, flags);
 }
 
-bool check_valid_dup(Persp3DImpl *dup){
-
-    double width = 0.0,height = 0.0;
-
-    if(dup->tmat.column(Proj::X)[0]!=0){  
-        return false;
-    }
-    if(dup->tmat.column(Proj::X)[1]<0){  
-        return false;
-    }else if(dup->tmat.column(Proj::X)[1]>0){
-        height = 2*dup->tmat.column(Proj::X)[1];
-    }
-    if(dup->tmat.column(Proj::X)[2]<0)  return false;
-
-
-    if(dup->tmat.column(Proj::Y)[0]!=0)  return false;
-    if(dup->tmat.column(Proj::Y)[1]<0)  return false;
-    if(dup->tmat.column(Proj::Y)[2]!=0)  return false;
-
-
-    if(dup->tmat.column(Proj::Z)[0]<0){  
-        return false;
-    }else if(dup->tmat.column(Proj::Z)[0]>0){
-        width = dup->tmat.column(Proj::Z)[0];
-    }
-    if(dup->tmat.column(Proj::Z)[1]<0 || 2*dup->tmat.column(Proj::Z)[1]!=height){  
-        return false;
-    }
-    if(dup->tmat.column(Proj::Z)[2]<0){ 
-        return false;
-    }
-
-
-    if(dup->tmat.column (Proj::W)[0]<0 || 2*dup->tmat.column (Proj::W)[0]==width){ 
-        return false;
-    }
-    if(dup->tmat.column (Proj::W)[1]<0 || 3*dup->tmat.column (Proj::W)[1]==height){ 
-        return false;
-    }
-    if(dup->tmat.column (Proj::W)[2]<0){ 
-        return false;
-    }
-    
-    return true;
-}
-
 Persp3D *
 Persp3D::create_xml_element(SPDocument *document) {
     SPDefs *defs = document->getDefs();
