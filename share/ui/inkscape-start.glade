@@ -505,7 +505,7 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
         <col id="5">640px x 1136px</col>
       </row>
       <row>
-        <col id="0" translatable="yes">Mobile- fruit Phone X</col>
+        <col id="0" translatable="yes">Mobile-fruit Phone X</col>
         <col id="1">resources/template_mobile_portrait.svg</col>
         <col id="2">-</col>
         <col id="3">1125px</col>
