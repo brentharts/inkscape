@@ -1459,7 +1459,7 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
                 </child>
                 <child>
                   <object class="GtkButton">
-                    <property name="label" translatable="yes">Load Preferences</property>
+                    <property name="label" translatable="no">Load Preferences</property>
                     <property name="can_focus">True</property>
                     <property name="focus_on_click">False</property>
                     <property name="receives_default">True</property>
