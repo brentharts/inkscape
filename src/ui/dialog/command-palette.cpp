@@ -642,6 +642,11 @@ void CommandPalette::remove_color(Gtk::Label *label, const Glib::ustring &subjec
 /**
  * Color addition
  */
+Glib::ustring CommandPalette::make_bold(Glib::ustring search)
+{
+    return "<span color=\"#22d1ee\" weight=\"bold\">" + search + "</span>";
+}
+
 void CommandPalette::add_color(Gtk::Label *label, const Glib::ustring &search, const Glib::ustring &subject)
 {
     Glib::ustring text = "";
@@ -656,8 +661,7 @@ void CommandPalette::add_color(Gtk::Label *label, const Glib::ustring &search, c
             }
             while (j < subject_string.length()) {
                 if (i == subject_string[j]) {
-                    text += "<span color=\"#22d1ee\" weight=\"bold\">" +
-                            Glib::Markup::escape_text(subject.substr(j, 1)) + "</span>";
+                    text += make_bold(Glib::Markup::escape_text(subject.substr(j, 1)));
                     j++;
                     break;
                 } else {
@@ -678,8 +682,7 @@ void CommandPalette::add_color(Gtk::Label *label, const Glib::ustring &search, c
         for (int i = 0; i < subject_string.length(); i++) {
             if (search_string_character[subject_string[i]]) {
                 search_string_character[subject_string[i]]--;
-                text += "<span color=\"#22d1ee\" weight=\"bold\">" + Glib::Markup::escape_text(subject.substr(i, 1)) +
-                        "</span>";
+                text += make_bold(Glib::Markup::escape_text(subject.substr(i, 1)));
             } else {
                 text += subject_string[i];
             }
@@ -703,8 +706,8 @@ void CommandPalette::add_color_description(Gtk::Label *label, const Glib::ustrin
     auto const position = subject_normalize.find(search_normalize);
     auto const search_length = search_normalize.size();
 
-    subject = Glib::Markup::escape_text(subject.substr(0, position)) + "<span color=\"#22d1ee\" weight=\"bold\">" +
-              Glib::Markup::escape_text(subject.substr(position, search_length)) + "</span>" +
+    subject = Glib::Markup::escape_text(subject.substr(0, position)) +
+              make_bold(Glib::Markup::escape_text(subject.substr(position, search_length))) +
               Glib::Markup::escape_text(subject.substr(position + search_length));
 
     label->set_markup(subject);
