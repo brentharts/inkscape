@@ -644,7 +644,7 @@ void CommandPalette::remove_color(Gtk::Label *label, const Glib::ustring &subjec
  */
 Glib::ustring CommandPalette::make_bold(Glib::ustring search)
 {
-    return "<span color=\"#22d1ee\" weight=\"bold\">" + search + "</span>";
+    return "<span weight=\"bold\">" + search + "</span>";
 }
 
 void CommandPalette::add_color(Gtk::Label *label, const Glib::ustring &search, const Glib::ustring &subject)
