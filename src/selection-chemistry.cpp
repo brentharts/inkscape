@@ -1386,6 +1386,17 @@ void ObjectSet::removeFilter()
     sp_repr_css_unset_property(css, "filter");
     sp_desktop_set_style(this, desktop(), css);
     sp_repr_css_attr_unref(css);
+    if (SPDesktop *d = desktop()) {
+        d->currentLayer()->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+
+        /* a tool may have set up private information in it's selection context
+         * that depends on desktop items.  I think the only sane way to deal with
+         * this currently is to reset the current tool, which will reset it's
+         * associated selection context.  For example: deleting an object
+         * while moving it around the canvas.
+         */
+        tools_switch( d, tools_active( d ) );
+    }
     if(document())
         DocumentUndo::done(document(), SP_VERB_EDIT_REMOVE_FILTER,
                        _("Remove filter"));
