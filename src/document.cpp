@@ -75,6 +75,7 @@
 
 #include "xml/croco-node-iface.h"
 #include "xml/rebase-hrefs.h"
+#include "xml/simple-document.h"
 
 using Inkscape::DocumentUndo;
 using Inkscape::Util::unit_table;
@@ -475,6 +476,28 @@ SPDocument *SPDocument::createDoc(Inkscape::XML::Document *rdoc,
 }
 
 /**
+ * Create a copy of the document, useful for modifying during save & export.
+ */
+std::unique_ptr<SPDocument> SPDocument::copy() const
+{
+    // Comments and PI nodes are not included in this duplication
+    Inkscape::XML::Document *new_rdoc = new Inkscape::XML::SimpleDocument();
+
+    // Get a new xml repr for the svg root node
+    Inkscape::XML::Node *root = rdoc->root()->duplicate(new_rdoc);
+
+    // Add the duplicated svg node as the document's rdoc
+    new_rdoc->appendChild(root);
+    Inkscape::GC::release(root);
+
+    auto doc = createDoc(new_rdoc, document_uri, document_base, document_name, keepalive, nullptr);
+    doc->_original_document = this->doRef();
+    Inkscape::GC::release(new_rdoc);
+
+    return std::unique_ptr<SPDocument>(doc);
+}
+
+/**
  * Fetches a document and attaches it to the current document as a child href
  */
 SPDocument *SPDocument::createChildDoc(std::string const &document_uri)
@@ -591,11 +614,20 @@ std::unique_ptr<SPDocument> SPDocument::doRef()
     Inkscape::GC::anchor(this);
     return std::unique_ptr<SPDocument>(this);
 }
+std::unique_ptr<SPDocument const> SPDocument::doRef() const
+{
+    return const_cast<SPDocument*>(this)->doRef();
+}
 
 /// guaranteed not to return nullptr
 Inkscape::Util::Unit const* SPDocument::getDisplayUnit() const
 {
-    SPNamedView const* nv = sp_document_namedview(this, nullptr);
+    // The document may not have a namedview (cleaned) so don't crash if it doesn't exist.
+    auto nv_repr = sp_repr_lookup_name (rroot, "sodipodi:namedview");
+    if (!nv_repr) {
+        return unit_table.getUnit("px");
+    }
+    auto nv = dynamic_cast<SPNamedView *> (getObjectByRepr(nv_repr));
     return nv ? nv->getDisplayUnit() : unit_table.getUnit("px");
 }
 
@@ -1001,14 +1033,21 @@ SPObject *SPDocument::getObjectById(gchar const *id) const
 void _getObjectsByClassRecursive(Glib::ustring const &klass, SPObject *parent, std::vector<SPObject *> &objects)
 {
     if (parent) {
-        Glib::ustring class_attribute;
         char const *temp = parent->getAttribute("class");
         if (temp) {
-            class_attribute = temp;
-        }
-
-        if (class_attribute.find( klass ) != std::string::npos) {
-            objects.push_back( parent );
+            std::istringstream classes(temp);
+            Glib::ustring token;
+            while (classes >> token) {
+                // we can have multiple class
+                if (classes.str() == " ") {
+                    token = "";
+                    continue;
+                }
+                if (token == klass) {
+                    objects.push_back(parent);
+                    break;
+                }
+            }
         }
 
         // Check children

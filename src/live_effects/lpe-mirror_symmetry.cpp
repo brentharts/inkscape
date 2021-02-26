@@ -62,7 +62,7 @@ LPEMirrorSymmetry::LPEMirrorSymmetry(LivePathEffectObject *lpeobject) :
     fuse_paths(_("Fuse paths"), _("Fuse original path and mirror image into a single path"), "fuse_paths", &wr, this, false),
     oposite_fuse(_("Fuse opposite sides"), _("Picks the part on the other side of the mirror line as the original."), "oposite_fuse", &wr, this, false),
     split_items(_("Split elements"), _("Split original and mirror image into separate paths, so each can have its own style."), "split_items", &wr, this, false),
-    split_open(_("Keep open paths on split"), _("Allow keep paths open over the split line."), "split_open", &wr, this, false),
+    split_open(_("Keep open paths on split"), _("Do not automatically close paths along the split line."), "split_open", &wr, this, false),
     start_point(_("Mirror line start"), _("Start point of mirror line"), "start_point", &wr, this, _("Adjust start point of mirror line")),
     end_point(_("Mirror line end"), _("End point of mirror line"), "end_point", &wr, this, _("Adjust end point of mirror line")),
     center_point(_("Mirror line mid"), _("Center point of mirror line"), "center_point", &wr, this, _("Adjust center point of mirror line"))
@@ -124,7 +124,7 @@ LPEMirrorSymmetry::newWidget()
             Parameter *param = *it;
             Gtk::Widget *widg = dynamic_cast<Gtk::Widget *>(param->param_newWidget());
             Glib::ustring *tip = param->param_getTooltip();
-            if (widg) {
+            if (widg && param->param_key != "split_open") {
                 vbox->pack_start(*widg, true, true, 2);
                 if (tip) {
                     widg->set_tooltip_text(*tip);
@@ -198,10 +198,12 @@ LPEMirrorSymmetry::doBeforeEffect (SPLPEItem const* lpeitem)
         if (mode == MT_Y) {
             point_a = Geom::Point(boundingbox_X.min(),center_point[Y]);
             point_b = Geom::Point(boundingbox_X.max(),center_point[Y]);
+            center_point.param_setValue(Geom::middle_point((Geom::Point)point_a, (Geom::Point)point_b));
         }
         if (mode == MT_X) {
             point_a = Geom::Point(center_point[X],boundingbox_Y.min());
             point_b = Geom::Point(center_point[X],boundingbox_Y.max());
+            center_point.param_setValue(Geom::middle_point((Geom::Point)point_a, (Geom::Point)point_b));
         }
         if ((Geom::Point)start_point == (Geom::Point)end_point) {
             start_point.param_setValue(point_a);

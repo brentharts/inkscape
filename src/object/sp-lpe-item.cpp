@@ -253,6 +253,10 @@ bool SPLPEItem::performOnePathEffect(SPCurve *curve, SPShape *current, Inkscape:
             // To Calculate BBox on shapes and nested LPE
             current->setCurveInsync(curve);
             // Groups have their doBeforeEffect called elsewhere
+            if (lpe->lpeversion.param_getSVGValue() != "0") { // we are on 1 or up
+                current->bbox_vis_cache_is_valid = false;
+                current->bbox_geom_cache_is_valid = false;
+            }
             if (!SP_IS_GROUP(this) && !is_clip_or_mask) {
                 lpe->doBeforeEffect_impl(this);
             }
@@ -281,7 +285,8 @@ bool SPLPEItem::performOnePathEffect(SPCurve *curve, SPShape *current, Inkscape:
                 }
                 lpe->doAfterEffect_impl(this, curve);
             }
-            if (lpe->lpeversion.param_getSVGValue() != "0") { // we are on 1 or up
+            // we need this on slice LPE to calulate correcly effects
+            if (dynamic_cast<Inkscape::LivePathEffect::LPESlice *>(lpe)) { // we are on 1 or up
                 current->bbox_vis_cache_is_valid = false;
                 current->bbox_geom_cache_is_valid = false;
             }
@@ -694,6 +699,7 @@ void SPLPEItem::removeCurrentPathEffect(bool keep_paths)
     }
     if (Inkscape::LivePathEffect::Effect* effect_ = this->getCurrentLPE()) {
         effect_->keep_paths = keep_paths;
+        effect_->on_remove_all = false;
         effect_->doOnRemove(this);
         this->path_effect_list->remove(lperef); //current lpe ref is always our 'own' pointer from the path_effect_list
         this->setAttributeOrRemoveIfEmpty("inkscape:path-effect", patheffectlist_svg_string(*this->path_effect_list));
@@ -727,6 +733,7 @@ void SPLPEItem::removeAllPathEffects(bool keep_paths)
             Inkscape::LivePathEffect::Effect * lpe = lpeobj->get_lpe();
             if (lpe) {
                 lpe->keep_paths = keep_paths;
+                lpe->on_remove_all = true;
                 lpe->doOnRemove(this);
             }
         }

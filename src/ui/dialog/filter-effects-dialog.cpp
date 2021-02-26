@@ -478,7 +478,7 @@ private:
 
             for(int i = 0; i < cols; ++i) {
                 _tree.append_column_numeric_editable("", _columns.cols[i], "%.2f");
-                dynamic_cast<Gtk::CellRendererText*>(
+                static_cast<Gtk::CellRendererText*>(
                     _tree.get_column_cell_renderer(i))->signal_edited().connect(
                         sigc::mem_fun(*this, &MatrixAttr::rebind));
             }
@@ -575,8 +575,10 @@ public:
         const Widget* w = get_child();
         if(w == &_label)
             return "";
-        else
-            return dynamic_cast<const AttrWidget*>(w)->get_as_attribute();
+        if (auto attrw = dynamic_cast<const AttrWidget *>(w))
+            return attrw->get_as_attribute();
+        g_assert_not_reached();
+        return "";
     }
 
     void clear_store()
@@ -2588,7 +2590,7 @@ void FilterEffectsDialog::PrimitiveList::on_drag_end(const Glib::RefPtr<Gdk::Dra
 bool FilterEffectsDialog::PrimitiveList::on_scroll_timeout()
 {
     if(_autoscroll_y) {
-        auto a = dynamic_cast<Gtk::ScrolledWindow*>(get_parent())->get_vadjustment();
+        auto a = static_cast<Gtk::ScrolledWindow*>(get_parent())->get_vadjustment();
         double v = a->get_value() + _autoscroll_y;
 
 	if(v < 0)
@@ -2603,7 +2605,7 @@ bool FilterEffectsDialog::PrimitiveList::on_scroll_timeout()
 
 
     if(_autoscroll_x) {
-        auto a_h = dynamic_cast<Gtk::ScrolledWindow*>(get_parent())->get_hadjustment();
+        auto a_h = static_cast<Gtk::ScrolledWindow*>(get_parent())->get_hadjustment();
         double h = a_h->get_value() + _autoscroll_x;
 
 	if(h < 0)
@@ -2773,7 +2775,7 @@ void FilterEffectsDialog::init_settings_widgets()
     _settings_initialized = true;
 
     _filter_general_settings->type(0);
-    _filter_general_settings->add_checkbutton(true, SPAttr::AUTO_REGION, _("Automatic Region"), "true", "false", _("If unset the coordinates and dimensions won't be automatically updated."));
+    _filter_general_settings->add_checkbutton(true, SPAttr::AUTO_REGION, _("Automatic Region"), "true", "false", _("If unset, the coordinates and dimensions won't be updated automatically."));
     _filter_general_settings->add_multispinbutton(/*default x:*/ (double) -0.1, /*default y:*/ (double) -0.1, SPAttr::X, SPAttr::Y, _("Coordinates:"), -100, 100, 0.01, 0.1, 2, _("X coordinate of the left corners of filter effects region"), _("Y coordinate of the upper corners of filter effects region"));
     _filter_general_settings->add_multispinbutton(/*default width:*/ (double) 1.2, /*default height:*/ (double) 1.2, SPAttr::WIDTH, SPAttr::HEIGHT, _("Dimensions:"), 0, 1000, 0.01, 0.1, 2, _("Width of filter effects region"), _("Height of filter effects region"));
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.2 
+<!-- Generated with glade 3.22.2
 
 Copyright (C) Martin Owens
 
@@ -319,7 +319,7 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
         <col id="5">148mm x 210mm</col>
       </row>
       <row>
-        <col id="0" translatable="yes">Business Card Aus/NZ (Landscape)</col>
+        <col id="0" translatable="yes">Business Card AU/NZ (Landscape)</col>
         <col id="1">resources/template_businesscard_landscape.svg</col>
         <col id="2">-</col>
         <col id="3">90mm</col>
@@ -327,7 +327,7 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
         <col id="5">90mm x 55mm</col>
       </row>
       <row>
-        <col id="0" translatable="yes">Business Card Aus/NZ (Portrait)</col>
+        <col id="0" translatable="yes">Business Card AU/NZ (Portrait)</col>
         <col id="1">resources/template_businesscard_portrait.svg</col>
         <col id="2">-</col>
         <col id="3">55mm</col>
@@ -651,7 +651,7 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
         <col id="5">1536px x 768px</col>
       </row>
       <row>
-        <col id="0" translatable="yes">LinkedIn dynamic ads</col>
+        <col id="0" translatable="yes">LinkedIn dynamic ad</col>
         <col id="1">resources/template_social_square.svg</col>
         <col id="2">-</col>
         <col id="3">100px</col>
@@ -892,6 +892,8 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
       <column type="gboolean"/>
       <!-- column-name small_icons -->
       <column type="gboolean"/>
+      <!-- column-name available -->
+      <column type="gboolean"/>
     </columns>
     <data>
       <row>
@@ -906,6 +908,7 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
         <col id="8">False</col>
         <col id="9">False</col>
         <col id="10">False</col>
+        <col id="11">False</col>
       </row>
       <row>
         <col id="0">symbolic</col>
@@ -919,6 +922,7 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
         <col id="8">False</col>
         <col id="9">True</col>
         <col id="10">True</col>
+        <col id="11">False</col>
       </row>
       <row>
         <col id="0">dark-color</col>
@@ -932,6 +936,7 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
         <col id="8">True</col>
         <col id="9">True</col>
         <col id="10">True</col>
+        <col id="11">False</col>
       </row>
       <row>
         <col id="0">light-color</col>
@@ -945,6 +950,7 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
         <col id="8">False</col>
         <col id="9">True</col>
         <col id="10">True</col>
+        <col id="11">False</col>
       </row>
       <row>
         <col id="0">dark-grey</col>
@@ -958,6 +964,7 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
         <col id="8">True</col>
         <col id="9">True</col>
         <col id="10">True</col>
+        <col id="11">False</col>
       </row>
       <row>
         <col id="0">light-min</col>
@@ -971,6 +978,7 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
         <col id="8">False</col>
         <col id="9">True</col>
         <col id="10">True</col>
+        <col id="11">False</col>
       </row>
     </data>
   </object>
@@ -1016,19 +1024,19 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
                 </child>
                 <child>
                   <object class="GtkLabel">
-                    <property name="width_request">100</property>
-                    <property name="height_request">80</property>
+                    <property name="width_request">150</property>
+                    <property name="height_request">120</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Welcome to</property>
+                    <property name="label" translatable="yes">Welcome</property>
                     <attributes>
                       <attribute name="font-desc" value="Linux Libertine Display 52"/>
                       <attribute name="foreground" value="#fffff1f18d8d"/>
                     </attributes>
                   </object>
                   <packing>
-                    <property name="x">78</property>
-                    <property name="y">20</property>
+                    <property name="x">75</property>
+                    <property name="y">35</property>
                   </packing>
                 </child>
                 <child>
@@ -1037,7 +1045,7 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
                     <property name="height_request">80</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Drawing you to freedom</property>
+                    <property name="label" translatable="yes" comments="This is a pun in English. You can translate it as 'Introducing you to freedom' or similar.">Drawing you to freedom</property>
                     <attributes>
                       <attribute name="font-desc" value="Euphoria Script 27.599609375"/>
                       <attribute name="foreground" value="#ffffffffffff"/>
@@ -1116,6 +1124,7 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
     </child>
     <child>
       <object class="GtkNotebook" id="tabs">
+        <property name="name">startscreennotebook</property>
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <property name="show_border">False</property>
@@ -1218,6 +1227,7 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
                         <child>
                           <object class="GtkCellRendererText" id="theme_namerenderer"/>
                           <attributes>
+                            <attribute name="sensitive">11</attribute>
                             <attribute name="text">1</attribute>
                           </attributes>
                         </child>
@@ -1494,7 +1504,7 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
                 <property name="margin_right">30</property>
                 <property name="margin_top">10</property>
                 <property name="margin_bottom">10</property>
-                <property name="label" translatable="yes">&lt;big&gt;&lt;b&gt;The Inkscape project is supported by users like you&lt;/b&gt;, through our collective time, money and skill we have made this software for everyone in the world to enjoy free from restrictions and free from costs. &lt;b&gt;
+                <property name="label" translatable="yes">&lt;big&gt;&lt;b&gt;The Inkscape project is supported by users like you.&lt;/b&gt; Through our collective time, money and skill, we have made this software for everyone in the world to enjoy free from restrictions and free from costs. &lt;b&gt;
 If you would like to get involved and make the next version of Inkscape even better, please consider joining the Inkscape project today.&lt;/b&gt;&lt;/big&gt;</property>
                 <property name="use_markup">True</property>
                 <property name="wrap">True</property>
@@ -1730,7 +1740,7 @@ Fund Inkscape</property>
                         </child>
                         <child>
                           <object class="GtkTreeViewColumn" id="recent_name">
-                            <property name="title" translatable="yes">Recent Files</property>
+                            <property name="title" translatable="yes" context="Welcome dialog">Recent Files</property>
                             <property name="reorderable">True</property>
                             <property name="sort_indicator">True</property>
                             <child>
@@ -1749,7 +1759,7 @@ Fund Inkscape</property>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Existing Files</property>
+                    <property name="label" translatable="yes" context="Welcome dialog">Existing Files</property>
                   </object>
                   <packing>
                     <property name="tab_fill">False</property>
@@ -1806,7 +1816,7 @@ Fund Inkscape</property>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Print</property>
+                    <property name="label" translatable="yes" context="Document format category">Print</property>
                   </object>
                   <packing>
                     <property name="position">1</property>
@@ -1865,7 +1875,7 @@ Fund Inkscape</property>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Screen</property>
+                    <property name="label" translatable="yes" context="Document format category">Screen</property>
                   </object>
                   <packing>
                     <property name="position">2</property>
@@ -1923,7 +1933,7 @@ Fund Inkscape</property>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Video</property>
+                    <property name="label" translatable="yes" context="Document format category">Video</property>
                   </object>
                   <packing>
                     <property name="position">3</property>
@@ -1981,7 +1991,7 @@ Fund Inkscape</property>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Social</property>
+                    <property name="label" translatable="yes" context="Document format category" comments="Social Media">Social</property>
                   </object>
                   <packing>
                     <property name="position">4</property>
@@ -2039,7 +2049,7 @@ Fund Inkscape</property>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Other</property>
+                    <property name="label" translatable="yes" context="Document format category">Other</property>
                   </object>
                   <packing>
                     <property name="position">5</property>

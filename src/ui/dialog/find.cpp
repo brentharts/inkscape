@@ -151,7 +151,7 @@ Find::Find()
     check_include_locked.set_tooltip_text(_("Include locked objects in search"));
     check_include_locked.set_active(false);
     check_ids.set_use_underline();
-    check_ids.set_tooltip_text(_("Search id name"));
+    check_ids.set_tooltip_text(_("Search ID name"));
     check_ids.set_active(true);
     check_attributename.set_use_underline();
     check_attributename.set_tooltip_text(_("Search attribute name"));
@@ -864,7 +864,7 @@ bool Find::item_type_match (SPItem *item)
         return (all || check_texts.get_active());
 
     } else if (dynamic_cast<SPGroup *>(item) &&
-               !dynamic_cast<SPDesktop *>(_app->get_active_view())->isLayer(item)) { // never select layers!
+               !getDesktop()->isLayer(item)) { // never select layers!
         return (all || check_groups.get_active());
 
     } else if (dynamic_cast<SPUse *>(item)) {

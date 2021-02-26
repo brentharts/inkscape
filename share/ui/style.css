@@ -75,6 +75,10 @@
     * "..combobright" Combo bright
     */
 
+*{
+    font-feature-settings: "tnum=1";
+}
+
 *:disabled image {
     opacity: 0.4;
 }
@@ -171,6 +175,12 @@ iconview *:hover {
 
 .dark iconview *:hover {
     border-color: @theme_bg_color;
+}
+
+#startscreennotebook iconview *:hover{
+    background-color:@theme_selected_bg_color;
+    border-radius:5px;
+    border-width:0;
 }
 
 .inksmall {
@@ -469,6 +479,21 @@ treeview.view:drop(active).after,
 treeview.view:drop(active).before {
     border-width: 4px;
     border-radius: 10px;
+}
+
+button.close-button{
+    background-image: none;
+    padding: 0px;
+    min-height: 1px;
+    min-width: 1px;
+    border: none;
+    opacity: 0.5;
+    box-shadow: none;
+}
+
+button.close-button:hover{
+    box-shadow: none;
+    opacity: 1;
 }
 
 /*

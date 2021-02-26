@@ -672,7 +672,8 @@ static void sp_edit_select_all_full(SPDesktop *dt, bool force_all_layers, bool i
 
     Inkscape::Selection *selection = dt->getSelection();
 
-    g_return_if_fail(dynamic_cast<SPGroup *>(dt->currentLayer()));
+    auto layer = dynamic_cast<SPGroup *>(dt->currentLayer());
+    g_return_if_fail(layer);
 
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     PrefsSelectionContext inlayer = (PrefsSelectionContext) prefs->getInt("/options/kbselection/inlayer", PREFS_SELECTION_LAYER);
@@ -691,11 +692,10 @@ static void sp_edit_select_all_full(SPDesktop *dt, bool force_all_layers, bool i
 
     switch (inlayer) {
         case PREFS_SELECTION_LAYER: {
-        if ( (onlysensitive && dynamic_cast<SPItem *>(dt->currentLayer())->isLocked()) ||
-             (onlyvisible && dt->itemIsHidden(dynamic_cast<SPItem *>(dt->currentLayer()))) )
+        if ((onlysensitive && layer->isLocked()) || (onlyvisible && dt->itemIsHidden(layer)))
         return;
 
-        std::vector<SPItem*> all_items = sp_item_group_item_list(dynamic_cast<SPGroup *>(dt->currentLayer()));
+        std::vector<SPItem*> all_items = sp_item_group_item_list(layer);
 
         for (std::vector<SPItem*>::const_reverse_iterator i=all_items.rbegin();i!=all_items.rend();++i) {
             SPItem *item = *i;
@@ -784,7 +784,9 @@ Inkscape::XML::Node* ObjectSet::group() {
             Geom::Affine item_t(Geom::identity());
             if (t_str)
                 sp_svg_transform_read(t_str, &item_t);
-            item_t *= dynamic_cast<SPItem *>(doc->getObjectByRepr(current->parent()))->i2doc_affine();
+            auto parent_item = dynamic_cast<SPItem *>(doc->getObjectByRepr(current->parent()));
+            assert(parent_item);
+            item_t *= parent_item->i2doc_affine();
             // FIXME: when moving both clone and original from a transformed group (either by
             // grouping into another parent, or by cut/paste) the transform from the original's
             // parent becomes embedded into original itself, and this affects its clones. Fix
@@ -823,37 +825,32 @@ Inkscape::XML::Node* ObjectSet::group() {
     return group;
 }
 
-
-static bool clone_depth_descending(gconstpointer a, gconstpointer b) {
-    SPUse *use_a = static_cast<SPUse *>(const_cast<gpointer>(a));
-    SPUse *use_b = static_cast<SPUse *>(const_cast<gpointer>(b));
-    int depth_a = use_a->cloneDepth();
-    int depth_b = use_b->cloneDepth();
-    return (depth_a==depth_b)?(a<b):(depth_a>depth_b);
-}
-
 void ObjectSet::popFromGroup(){
     if (isEmpty()) {
         selection_display_message(desktop(), Inkscape::WARNING_MESSAGE, _("<b>No objects selected</b> to pop out of group."));
         return;
     }
 
-    auto item = items().begin(); // leaving this because it will be useful for
-                                                                        // future implementation of complex pop ungrouping
-    SPItem *obj = *item;
-    SPItem *parent_group = static_cast<SPItem*>(obj->parent);
-    if (!SP_IS_GROUP(parent_group) || SP_IS_LAYER(parent_group)) {
-        selection_display_message(desktop(), Inkscape::WARNING_MESSAGE, _("Selection <b>not in a group</b>."));
+    std::set<SPObject*> grandparents;
+
+    for (auto *obj : items()) {
+        auto parent_group = dynamic_cast<SPGroup *>(obj->parent);
+        if (!parent_group || !parent_group->parent || SP_IS_LAYER(parent_group)) {
+            selection_display_message(desktop(), Inkscape::WARNING_MESSAGE, _("Selection <b>not in a group</b>."));
+            return;
+        }
+        grandparents.insert(parent_group->parent);
+    }
+
+    assert(!grandparents.empty());
+
+    if (grandparents.size() > 1) {
+        selection_display_message(desktop(), Inkscape::WARNING_MESSAGE,
+                                  _("Objects in selection must have the same grandparents."));
         return;
     }
-    if (parent_group->firstChild()->getNext() == nullptr) {
-        std::vector<SPItem*> children;
-        sp_item_group_ungroup(static_cast<SPGroup*>(parent_group), children, false);
-    }
-    else {
-        toNextLayer(true);
-        parent_group->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
-    }
+
+    toLayer(*grandparents.begin(), true);
 
     if(document())
         DocumentUndo::done(document(), SP_VERB_SELECTION_UNGROUP_POP_SELECTION,
@@ -861,61 +858,64 @@ void ObjectSet::popFromGroup(){
 
 }
 
-static void ungroup_impl(ObjectSet *set)
+/**
+ * Finds the first clone in `objects` which references an item in `groups`.
+ * The search is recursive, the children of `objects` are searched as well.
+ * Return NULL if no such clone is found.
+ */
+template <typename Objects>
+static SPUse *find_clone_to_group(Objects const &objects, std::set<SPGroup *> const &groups)
 {
-    std::set<SPObject*> groups(set->groups().begin(),set->groups().end());
+    assert(!groups.count(nullptr));
 
-    std::vector<SPItem*> new_select;
-    auto old_select = set->items();
-    std::vector<SPItem*> items(old_select.begin(), old_select.end());
-
-    // If any of the clones refer to the groups, unlink them and replace them with successors
-    // in the items list.
-    std::vector<SPUse*> clones_to_unlink;
-    for (auto item : items) {
-        SPUse *use = dynamic_cast<SPUse *>(item);
-
-        SPItem *original = use;
-        while (dynamic_cast<SPUse *>(original)) {
-            original = dynamic_cast<SPUse *>(original)->get_original();
+    for (auto *obj : objects) {
+        if (auto *use = dynamic_cast<SPUse *>(obj)) {
+            if (auto root = use->root()) {
+                if (groups.count(static_cast<SPGroup *>(root->clone_original))) {
+                    return use;
+                }
+            }
         }
 
-        if (groups.find(original) !=  groups.end()) {
-            clones_to_unlink.push_back(use);
+        if (auto *use = find_clone_to_group(obj->childList(false), groups)) {
+            return use;
         }
     }
 
-    // Unlink clones beginning from those with highest clone depth.
-    // This way we can be sure than no additional automatic unlinking happens,
-    // and the items in the list remain valid
-    std::sort(clones_to_unlink.begin(),clones_to_unlink.end(),clone_depth_descending);
-
-    for (auto use:clones_to_unlink) {
-        std::vector<SPItem*>::iterator items_node = std::find(items.begin(),items.end(), use);
-        *items_node = use->unlink();
-    }
-
-    // do the actual work
-    for (auto & item : items) {
-        SPItem *obj = item;
-
-        // ungroup only the groups marked earlier
-        if (groups.find(item) != groups.end()) {
-            std::vector<SPItem*> children;
-            sp_item_group_ungroup(dynamic_cast<SPGroup *>(obj), children, false);
-            // add the items resulting from ungrouping to the selection
-            new_select.insert(new_select.end(),children.begin(),children.end());
-            item = NULL; // zero out the original pointer, which is no longer valid
-        } else {
-            // if not a group, keep in the selection
-            new_select.push_back(item);
-        }
-    }
-
-    set->setList(new_select);
+    return nullptr;
 }
 
-void ObjectSet::ungroup()
+/**
+ * Ungroup all groups in an object set.
+ *
+ * Clones of ungrouped groups will be unlinked.
+ *
+ * Children of groups will not be ungrouped (operation is not recursive).
+ *
+ * Unlinked clones and children of ungrouped groups will be added to the object set.
+ */
+static void ungroup_impl(ObjectSet *set)
+{
+    std::set<SPGroup *> const groups(set->groups().begin(), set->groups().end());
+
+    while (auto *use = find_clone_to_group(set->items(), groups)) {
+        bool const readd = set->includes(use);
+        auto const unlinked = use->unlink();
+        if (readd) {
+            set->add(unlinked, true);
+        }
+    }
+
+    std::vector<SPItem *> children;
+
+    for (auto *group : groups) {
+        sp_item_group_ungroup(group, children, false);
+    }
+
+    set->addList(children);
+}
+
+void ObjectSet::ungroup(bool skip_undo)
 {
     if (isEmpty()) {
         if(desktop())
@@ -930,7 +930,8 @@ void ObjectSet::ungroup()
     }
 
     ungroup_impl(this);
-    if(document())
+
+    if(document() && !skip_undo)
         DocumentUndo::done(document(), SP_VERB_SELECTION_UNGROUP,
                        _("Ungroup"));
 }
@@ -1657,10 +1658,12 @@ void ObjectSet::applyAffine(Geom::Affine const &affine, bool set_i2d, bool compe
                                              && includes( sp_textpath_get_path_item(dynamic_cast<SPTextPath *>(item->firstChild())) ));
 
         // ...both a flowtext and its frame?
-        bool transform_flowtext_with_frame = (dynamic_cast<SPFlowtext *>(item) && includes( dynamic_cast<SPFlowtext *>(item)->get_frame(nullptr))); // (only the first frame is checked so far)
+        auto flowtext = dynamic_cast<SPFlowtext *>(item);
+        bool transform_flowtext_with_frame = flowtext && includes(flowtext->get_frame(nullptr)); // (only the first frame is checked so far)
 
         // ...both an offset and its source?
-        bool transform_offset_with_source = (dynamic_cast<SPOffset *>(item) && dynamic_cast<SPOffset *>(item)->sourceHref) && includes( sp_offset_get_source(dynamic_cast<SPOffset *>(item)) );
+        auto offset = dynamic_cast<SPOffset *>(item);
+        bool transform_offset_with_source = offset && offset->sourceHref && includes(sp_offset_get_source(offset));
 
         // If we're moving a connector, we want to detach it
         // from shapes that aren't part of the selection, but
@@ -2053,20 +2056,23 @@ std::vector<SPItem*> sp_get_same_fill_or_stroke_color(SPItem *sel, std::vector<S
                 SPPaintServer *iter_server =
                     (type == SP_FILL_COLOR) ? iter->style->getFillPaintServer() : iter->style->getStrokePaintServer();
 
-                if ((dynamic_cast<SPLinearGradient *>(sel_server) || dynamic_cast<SPRadialGradient *>(sel_server) ||
-                     (dynamic_cast<SPGradient *>(sel_server) && dynamic_cast<SPGradient *>(sel_server)->getVector()->isSwatch()))
-                    &&
-                    (dynamic_cast<SPLinearGradient *>(iter_server) || dynamic_cast<SPRadialGradient *>(iter_server) ||
-                     (dynamic_cast<SPGradient *>(iter_server) && dynamic_cast<SPGradient *>(iter_server)->getVector()->isSwatch()))) {
-                    SPGradient *sel_vector = dynamic_cast<SPGradient *>(sel_server)->getVector();
-                    SPGradient *iter_vector = dynamic_cast<SPGradient *>(iter_server)->getVector();
+                SPGradient *sel_gradient, *iter_gradient;
+                SPPattern *sel_pattern, *iter_pattern;
+
+                if ((sel_gradient = dynamic_cast<SPGradient *>(sel_server)) &&
+                    (iter_gradient = dynamic_cast<SPGradient *>(iter_server)) &&
+                    sel_gradient->getVector()->isSwatch() && //
+                    iter_gradient->getVector()->isSwatch()) {
+                    SPGradient *sel_vector = sel_gradient->getVector();
+                    SPGradient *iter_vector = iter_gradient->getVector();
                     if (sel_vector == iter_vector) {
                         match = true;
                     }
 
-                } else if (dynamic_cast<SPPattern *>(sel_server) && dynamic_cast<SPPattern *>(iter_server)) {
-                    SPPattern *sel_pat = dynamic_cast<SPPattern *>(sel_server)->rootPattern();
-                    SPPattern *iter_pat = dynamic_cast<SPPattern *>(iter_server)->rootPattern();
+                } else if ((sel_pattern = dynamic_cast<SPPattern *>(sel_server)) &&
+                           (iter_pattern = dynamic_cast<SPPattern *>(iter_server))) {
+                    SPPattern *sel_pat = sel_pattern->rootPattern();
+                    SPPattern *iter_pat = iter_pattern->rootPattern();
                     if (sel_pat == iter_pat) {
                         match = true;
                     }
@@ -2810,7 +2816,7 @@ bool ObjectSet::unlinkRecursive(const bool skip_undo, const bool force) {
     bool pathoperationsunlink = prefs->getBool("/options/pathoperationsunlink/value", true);
     if (!force && !pathoperationsunlink) {
         if (desktop() && !pathoperationsunlink) {
-            desktop()->messageStack()->flash(Inkscape::WARNING_MESSAGE, _("Coulden't unlink see preference path operation unlink value."));
+            desktop()->messageStack()->flash(Inkscape::WARNING_MESSAGE, _("Unable to unlink. Check the setting for 'Unlinking Clones' in your preferences."));
         }
         return false;
     }
@@ -2998,7 +3004,7 @@ void ObjectSet::cloneOriginalPathLPE(bool allow_transforms)
             // create the new path
             clone = xml_doc->createElement("svg:path");
             clone->setAttribute("d", "M 0 0");
-                
+
         }
         if (clone) {
             // add the new clone to the top of the original's parent

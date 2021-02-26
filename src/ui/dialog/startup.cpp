@@ -24,6 +24,7 @@
 #include "io/resource.h"
 #include "ui/shortcuts.h"
 #include "ui/util.h"
+#include "ui/themes.h"
 
 #include "object/sp-namedview.h"
 
@@ -100,6 +101,7 @@ class ThemeCols: public Gtk::TreeModel::ColumnRecord {
             this->add(this->dark);
             this->add(this->symbolic);
             this->add(this->smallicons);
+            this->add(this->enabled);
         }
         Gtk::TreeModelColumn<Glib::ustring> id;
         Gtk::TreeModelColumn<Glib::ustring> name;
@@ -112,6 +114,7 @@ class ThemeCols: public Gtk::TreeModel::ColumnRecord {
         Gtk::TreeModelColumn<bool> dark;
         Gtk::TreeModelColumn<bool> symbolic;
         Gtk::TreeModelColumn<bool> smallicons;
+        Gtk::TreeModelColumn<bool> enabled;
 };
 
 /**
@@ -186,6 +189,7 @@ StartScreen::StartScreen()
     // Setup the lists of items
     enlist_recent_files();
     enlist_keys();
+    filter_themes();
     set_active_combo("themes", prefs->getString("/options/boot/theme"));
     set_active_combo("canvas", prefs->getString("/options/boot/canvas"));
 
@@ -208,7 +212,7 @@ StartScreen::StartScreen()
         }
         auto template_list = dynamic_cast<Gtk::IconView *>(widget);
         if (template_list) {
-            template_list->signal_item_activated().connect(sigc::hide(sigc::mem_fun(*this, &StartScreen::load_now)));
+            template_list->signal_selection_changed().connect(sigc::mem_fun(*this, &StartScreen::load_now));
         }
     }
 
@@ -313,8 +317,10 @@ StartScreen::enlist_recent_files()
             || item->has_application("inkscape")
             || item->has_application("inkscape.exe")
            ) {
-            std::string path = Glib::filename_from_uri(item->get_uri());
-            if (Glib::file_test(path, Glib::FILE_TEST_IS_REGULAR)
+            // This uri is a GVFS uri, so parse it with that or it will fail.
+            auto file = Gio::File::create_for_uri(item->get_uri());
+            std::string path = file->get_path();
+            if (!path.empty() && Glib::file_test(path, Glib::FILE_TEST_IS_REGULAR)
                 && item->get_mime_type() == "image/svg+xml") {
                 Gtk::TreeModel::Row row = *(store->append());
                 row[cols.col_name] = item->get_display_name();
@@ -585,6 +591,20 @@ StartScreen::canvas_changed()
 
     } catch(int e) {
         g_warning("Couldn't find canvas value.");
+    }
+}
+
+void
+StartScreen::filter_themes()
+{
+    ThemeCols cols;
+    // We need to disable themes which aren't available.
+    auto store = Glib::wrap(GTK_LIST_STORE(gtk_combo_box_get_model(themes->gobj())));
+    auto available = get_available_themes();
+
+    for(auto row : store->children()) {
+        Glib::ustring theme = row[cols.theme];
+        row[cols.enabled] = available.find(theme) != available.end();
     }
 }
 

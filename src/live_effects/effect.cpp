@@ -1126,6 +1126,7 @@ Effect::Effect(LivePathEffectObject *lpeobject)
       show_orig_path(false),
       keep_paths(false),
       is_load(true),
+      on_remove_all(false),
       lpeobj(lpeobject),
       concatenate_before_pwd2(false),
       sp_lpe_item(nullptr),
@@ -1156,6 +1157,15 @@ Effect::getName() const
 EffectType
 Effect::effectType() const {
     return lpeobj->effecttype;
+}
+
+SPLPEItem* 
+Effect::getLastLPEItem() const {
+    auto hreflist = getLPEObj()->hrefList;
+    if (hreflist.size()) {
+        return dynamic_cast<SPLPEItem *>(hreflist.back());
+    }
+    return nullptr;
 }
 
 /**
@@ -1249,6 +1259,7 @@ Effect::processObjects(LPEAction lpe_action)
     sp_lpe_item_enable_path_effects(sp_lpe_item, false);
     for (auto id : items) {
         if (id.empty()) {
+            sp_lpe_item_enable_path_effects(sp_lpe_item, true);
             return;
         }
         SPObject *elemref = nullptr;
@@ -1500,6 +1511,12 @@ Effect::addHandles(KnotHolder *knotholder, SPItem *item) {
     // add handles provided by the effect's parameters (if any)
     for (auto & p : param_vector) {
         p->addKnotHolderEntities(knotholder, item);
+    }    
+    if (is_load) {
+        SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(item);
+        if (lpeitem) {
+            sp_lpe_item_update_patheffect(lpeitem, false, false);
+        }
     }
 }
 

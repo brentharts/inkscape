@@ -28,6 +28,7 @@
 #include "object/sp-namedview.h"  // TODO Remove need for this!
 
 #include "ui/dialog/dialog-container.h"
+#include "ui/dialog/dialog-manager.h"
 #include "ui/dialog/dialog-window.h"
 #include "ui/drag-and-drop.h"  // Move to canvas?
 #include "ui/interface.h" // main menu, sp_ui_close_view()
@@ -43,6 +44,7 @@
 
 #include "widgets/desktop-widget.h"
 
+using Inkscape::UI::Dialog::DialogManager;
 using Inkscape::UI::Dialog::DialogContainer;
 using Inkscape::UI::Dialog::DialogWindow;
 
@@ -106,7 +108,11 @@ InkscapeWindow::InkscapeWindow(SPDocument* document)
     setup_view();
 
     // Show dialogs after the main window, otherwise dialogs may be associated as the main window of the program.
-    _desktop->getContainer()->load_container_state();
+    if (_app) {
+        // restore short-lived floating dialogs state if this is the first window being opened
+        bool include_short_lived = _app->get_number_of_windows() == 0;
+        DialogManager::singleton().restore_dialogs_state(_desktop->getContainer(), include_short_lived);
+    }
 
     // ========= Update text for Accellerators =======
     Inkscape::Shortcuts::getInstance().update_gui_text_recursive(this);

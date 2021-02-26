@@ -12,6 +12,7 @@
 #include <iomanip>
 #include <cerrno>  // History file
 #include <regex>
+#include <numeric>
 
 #include <glibmm/i18n.h>  // Internationalization
 
@@ -43,6 +44,7 @@
 #include "ui/dialog/font-substitution.h"  // Warn user about font substitution.
 #include "ui/shortcuts.h"         // Shortcuts... init
 #include "widgets/desktop-widget.h" // Close without saving dialog
+#include "ui/dialog/dialog-manager.h" // save state
 
 #include "util/units.h"           // Redimension window
 
@@ -419,6 +421,11 @@ InkscapeApplication::window_close(InkscapeWindow* window)
             if (it != _documents.end()) {
                 auto it2 = std::find(it->second.begin(), it->second.end(), window);
                 if (it2 != it->second.end()) {
+                    if (get_number_of_windows() == 1) {
+                        // persist layout of docked and floating dialogs before deleting the last window
+                        Inkscape::UI::Dialog::DialogManager::singleton().save_dialogs_state(
+                           window->get_desktop_widget()->getContainer());
+                    }
                     it->second.erase(it2);
                     delete window; // Results in call to SPDesktop::destroy()
                 } else {
@@ -649,7 +656,8 @@ InkscapeApplication::InkscapeApplication()
     gapp->add_main_option_entry(T::OPTION_TYPE_BOOL,     "export-ignore-filters", '\0', N_("Render objects without filters instead of rasterizing (PS/EPS/PDF)"),       ""); // xxP
     gapp->add_main_option_entry(T::OPTION_TYPE_BOOL,     "export-use-hints",       't', N_("Use stored filename and DPI hints when exporting object selected by --export-id"), ""); // Bxx
     gapp->add_main_option_entry(T::OPTION_TYPE_STRING,   "export-background",      'b', N_("Background color for exported bitmaps (any SVG color string)"),         N_("COLOR")); // Bxx
-    gapp->add_main_option_entry(T::OPTION_TYPE_DOUBLE,   "export-background-opacity", 'y', N_("Background opacity for exported bitmaps (0.0 to 1.0, or 1 to 255)"), N_("VALUE")); // Bxx
+    // FIXME: Opacity should really be a DOUBLE, but an upstream bug means 0.0 is detected as NULL
+    gapp->add_main_option_entry(T::OPTION_TYPE_STRING,   "export-background-opacity", 'y', N_("Background opacity for exported bitmaps (0.0 to 1.0, or 1 to 255)"), N_("VALUE")); // Bxx
     gapp->add_main_option_entry(T::OPTION_TYPE_STRING,   "export-png-color-mode", '\0', N_("Color mode (bit depth and color type) for exported bitmaps (Gray_1/Gray_2/Gray_4/Gray_8/Gray_16/RGB_8/RGB_16/GrayAlpha_8/GrayAlpha_16/RGBA_8/RGBA_16)"), N_("COLOR-MODE")); // Bxx
 
     // Query - Geometry
@@ -1496,9 +1504,13 @@ InkscapeApplication::on_handle_local_options(const Glib::RefPtr<Glib::VariantDic
         options->lookup_value("export-background",_file_export.export_background);
     }
 
+    // FIXME: Upstream bug means DOUBLE is ignored if set to 0.0 so doesn't exist in options
     if (options->contains("export-background-opacity")) {
-        options->lookup_value("export-background-opacity", _file_export.export_background_opacity);
+        Glib::ustring opacity;
+        options->lookup_value("export-background-opacity", opacity);
+        _file_export.export_background_opacity = atof(opacity.c_str());
     }
+
     if (options->contains("export-png-color-mode")) {
         options->lookup_value("export-png-color-mode", _file_export.export_png_color_mode);
     }
@@ -1571,6 +1583,17 @@ static gboolean osx_quit_callback(GtkosxApplication *, InkscapeApplication *app)
     return true;
 }
 #endif
+
+/**
+ * Return number of open Inkscape Windows (irrespective of number of documents)
+.*/
+int InkscapeApplication::get_number_of_windows() const {
+    if (_with_gui) {
+        return std::accumulate(_documents.begin(), _documents.end(), 0,
+          [&](int sum, auto& v){ return sum + static_cast<int>(v.second.size()); });
+    }
+    return 0;
+}
 
 /*
   Local Variables:
