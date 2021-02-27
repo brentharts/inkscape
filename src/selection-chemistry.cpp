@@ -1388,8 +1388,8 @@ void ObjectSet::removeFilter()
     sp_repr_css_attr_unref(css);
     if (SPDesktop *d = desktop()) {
         d->currentLayer()->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
-        // Refreshing the current tool (by switching to same tool) 
-        // will refresh tool's private information in it's selection context that 
+        // Refreshing the current tool (by switching to same tool)
+        // will refresh tool's private information in it's selection context that
         // depends on desktop items.
         tools_switch(d, tools_active(d));
     }
