@@ -76,6 +76,7 @@ set(TEST_SOURCES
     curve-test
     2geom-characterization-test
     lpe-bool-test
+    lpe-bendpath-test
     xml-test
     sp-item-group-test)
 
