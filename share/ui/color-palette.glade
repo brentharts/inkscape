@@ -94,6 +94,9 @@
                 <property name="min-children-per-line">6</property>
                 <property name="max-children-per-line">6</property>
                 <property name="selection-mode">none</property>
+                <style>
+                  <class name="color-palette"/>
+                </style>
               </object>
             </child>
           </object>
@@ -235,7 +238,7 @@
       </packing>
     </child>
     <style>
-      <class name="main-box"/>
+      <class name="color-palette-main-box"/>
     </style>
   </object>
   <object class="GtkPopover" id="config-popup">

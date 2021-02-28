@@ -25,40 +25,51 @@ namespace Widget {
 
 class ColorPalette : public Gtk::Bin {
 public:
-	ColorPalette();
+    ColorPalette();
 
-	// set colors presented in a palette
-	void set_colors(const std::vector<Gtk::Widget*>& swatches);
-	// list of palette names to present in the menu
-	void set_palettes(const std::vector<Glib::ustring>& palettes);
+    // set colors presented in a palette
+    void set_colors(const std::vector<Gtk::Widget*>& swatches);
+    // list of palette names to present in the menu
+    void set_palettes(const std::vector<Glib::ustring>& palettes);
     // enable compact mode (true) with mini-scroll buttons, or normal mode (false) with regular scrollbars
     void set_compact(bool compact);
 
-	void set_tile_size(int size_px);
-	void set_tile_border(int border_px);
-	void set_rows(int rows);
+    void set_tile_size(int size_px);
+    void set_tile_border(int border_px);
+    void set_rows(int rows);
 
-	sigc::signal<void, Glib::ustring>& get_palette_selected_signal();
+    int get_tile_size() const;
+    int get_tile_border() const;
+    int get_rows() const;
+
+    sigc::signal<void, Glib::ustring>& get_palette_selected_signal();
+    sigc::signal<void>& get_settings_changed_signal();
 
 private:
-	void resize();
-	void set_up_scrolling();
-	void free();
-	void scroll(int dx, int dy);
+    void resize();
+    void set_up_scrolling();
+    void free();
+    void scroll(int dx, int dy);
+    void _set_tile_size(int size_px);
+    void _set_tile_border(int border_px);
+    void _set_rows(int rows);
 
-	Glib::RefPtr<Gtk::Builder> _builder;
-	Gtk::FlowBox& _flowbox;
-	Gtk::ScrolledWindow& _scroll;
-	Gtk::FlowBox& _scroll_btn;
-	Gtk::Button& _scroll_left;
-	Gtk::Button& _scroll_right;
-	Gtk::Menu& _menu;
-	int _size = 10;
-	int _border = 0;
-	int _rows = 1;
-	int _count = 1;
+    Glib::RefPtr<Gtk::Builder> _builder;
+    Gtk::FlowBox& _flowbox;
+    Gtk::ScrolledWindow& _scroll;
+    Gtk::FlowBox& _scroll_btn;
+    Gtk::Button& _scroll_up;
+    Gtk::Button& _scroll_down;
+    Gtk::Button& _scroll_left;
+    Gtk::Button& _scroll_right;
+    Gtk::Menu& _menu;
+    int _size = 10;
+    int _border = 0;
+    int _rows = 1;
+    int _count = 1;
     bool _compact = true;
-	sigc::signal<void, Glib::ustring> _signal_palette_selected;
+    sigc::signal<void, Glib::ustring> _signal_palette_selected;
+    sigc::signal<void> _signal_settings_changed;
 };
 
 }}} // namespace

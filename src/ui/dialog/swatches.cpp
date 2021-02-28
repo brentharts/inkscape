@@ -817,7 +817,28 @@ SwatchesPanel::SwatchesPanel(gchar const *prefsPath)
 
             i++;
         }
+        Inkscape::Preferences* prefs = Inkscape::Preferences::get();
+        _palette->set_tile_size(prefs->getInt(_prefs_path + "/tile_size", 16));
+        _palette->set_tile_border(prefs->getInt(_prefs_path + "/tile_border", 1));
+        _palette->set_rows(prefs->getInt(_prefs_path + "/rows", 1));
+        _palette->get_settings_changed_signal().connect([=](){
+            prefs->setInt(_prefs_path + "/tile_size", _palette->get_tile_size());
+            prefs->setInt(_prefs_path + "/tile_border", _palette->get_tile_border());
+            prefs->setInt(_prefs_path + "/rows", _palette->get_rows());
+        });
+
         _palette->set_palettes(palettes);
+
+        _palette->get_palette_selected_signal().connect([=](Glib::ustring name) {
+            std::vector<SwatchPage*> pages = _getSwatchSets();
+            auto it = std::find_if(pages.begin(), pages.end(), [&](auto el){ return el->_name == name; });
+            if (it != pages.end()) {
+                _currentIndex = static_cast<int>(it - pages.begin());
+                Inkscape::Preferences* prefs = Inkscape::Preferences::get();
+                prefs->setString(_prefs_path + "/palette", pages[_currentIndex]->_name);
+                _rebuild();
+            }
+        });
     }
 
     if ( hotItem ) {
