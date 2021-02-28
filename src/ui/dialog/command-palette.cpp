@@ -715,14 +715,28 @@ void CommandPalette::add_color_description(Gtk::Label *label, const Glib::ustrin
 }
 
 /**
- * Searching the search_string on another string
+ * The Searching algorithm consists of fuzzy search and fuzzy points.
+ *
+ * Ever search of the label can contain up to three subjects to search
+ * CPName text,CPName tooltip text,CPDescription text
+ *
+ * Fuzzy search searches the search text in these subjects and returns a boolean
+ * Searching of a search text as a subsequence of the subject
+ *
+ * Fuzzy points give an integer of a particular search text concerning a particular subject.
+ * Less the fuzzy point more is the precedence.
+ *
+ * Special case for CPDescription text search by searching text as a substring of the subject
+ *
+ * TODO: Adding more conditions in fuzzy points and fuzzy search for creating better user experience
  */
+
 bool CommandPalette::fuzzy_search(const Glib::ustring &subject, const Glib::ustring &search)
 {
     std::string subject_string = subject.lowercase();
     std::string search_string = search.lowercase();
 
-    if (search_string.length() > 7) {
+    if (search_string.length() > 7) { // Not applying tolarence
         for (int j = 0, i = 0; i < search_string.length(); i++) {
             if (search_string[i] == ' ') {
                 continue;
@@ -743,7 +757,7 @@ bool CommandPalette::fuzzy_search(const Glib::ustring &subject, const Glib::ustr
                 return false; // If not present
             }
         }
-    } else {
+    } else { // Applying tolarence
         std::map<char, int> subject_string_character, search_string_character;
         for (const auto &character : subject_string) {
             subject_string_character[character]++;
@@ -785,7 +799,7 @@ int CommandPalette::fuzzy_points(const Glib::ustring &subject, const Glib::ustri
 
     std::string subject_string = subject.lowercase();
     std::string search_string = search.lowercase();
-    if (search_string.length() > 7) {
+    if (search_string.length() > 7) { // Not applying tolarence
         for (int j = 0, i = 0; i < search_string.length(); i++) {
             if (search_string[i] == ' ') {
                 continue;
@@ -793,7 +807,7 @@ int CommandPalette::fuzzy_points(const Glib::ustring &subject, const Glib::ustri
 
             while (j < subject_string.length()) {
                 if (subject_string[j] == ' ' && search_string[i] != subject_string[j]) {
-                    if (i == 0) {
+                    if (i == 0) { // starting characters no match
                         cost += starting_characters_no_match;
                     } else {
                         cost += character_no_match;
@@ -802,7 +816,7 @@ int CommandPalette::fuzzy_points(const Glib::ustring &subject, const Glib::ustri
                 j++;
             }
         }
-    } else {
+    } else { // Applying tolarence
         std::map<char, int> search_string_character;
 
         for (const auto &character : search_string) {
