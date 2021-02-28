@@ -77,6 +77,7 @@ set(TEST_SOURCES
     2geom-characterization-test
     lpe-bool-test
     lpe-bendpath-test
+    lpe-bspline-test
     lpe-patternalongpath-test
     xml-test
     sp-item-group-test)
