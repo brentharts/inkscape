@@ -205,7 +205,6 @@ TEST_F(LPEAttachPathTest, attachpath_MM_1_02)
      inkscape:path-effect="#path-effect3912"
      inkscape:original-d="m 175.34365,56.032408 c -3.94641,27.626442 -7.89308,55.253152 -11.84002,82.880122 12.08708,1.23308 24.17363,2.4664 36.26006,3.7 0.98691,-22.69319 1.9736,-45.386993 2.96,-68.080093 9.86683,2.219711 19.73363,4.43974 29.60004,6.660009" />
 </svg>
-
 )"""";
 
    SPDocument *doc = SPDocument::createNewDocFromMem(svg.c_str(), svg.size(), true);
