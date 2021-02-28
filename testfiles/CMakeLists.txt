@@ -75,10 +75,11 @@ set(TEST_SOURCES
     svg-extension-test
     curve-test
     2geom-characterization-test
-    lpe-bool-test
     lpe-bendpath-test
+    lpe-bool-test
     lpe-bspline-test
     lpe-patternalongpath-test
+    lpe-spiro-test
     xml-test
     sp-item-group-test)
 
