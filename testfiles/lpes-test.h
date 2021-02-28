@@ -22,7 +22,7 @@ class LPESTest : public ::testing::Test {
          // setup hidden dependency
          Application::create(false);
       }
-      void pathCompare(const gchar *a, const gchar *b) {
+      void pathCompare(const gchar *a, const gchar *b, double precission = 0.001) {
          Geom::PathVector apv = sp_svg_read_pathv(a);
          Geom::PathVector bpv = sp_svg_read_pathv(b);
          size_t totala = apv.curveCount();
@@ -36,12 +36,12 @@ class LPESTest : public ::testing::Test {
             Geom::Point pointd = bpv.pointAt(float(i)+0.4);
             Geom::Point pointe = apv.pointAt(float(i));
             Geom::Point pointf = bpv.pointAt(float(i));
-            ASSERT_NEAR(pointa[Geom::X], pointb[Geom::X], 0.001);
-            ASSERT_NEAR(pointa[Geom::Y], pointb[Geom::Y], 0.001);
-            ASSERT_NEAR(pointc[Geom::X], pointd[Geom::X], 0.001);
-            ASSERT_NEAR(pointc[Geom::Y], pointd[Geom::Y], 0.001);
-            ASSERT_NEAR(pointe[Geom::X], pointf[Geom::X], 0.001);
-            ASSERT_NEAR(pointe[Geom::Y], pointf[Geom::Y], 0.001);
+            ASSERT_NEAR(pointa[Geom::X], pointb[Geom::X], precission);
+            ASSERT_NEAR(pointa[Geom::Y], pointb[Geom::Y], precission);
+            ASSERT_NEAR(pointc[Geom::X], pointd[Geom::X], precission);
+            ASSERT_NEAR(pointc[Geom::Y], pointd[Geom::Y], precission);
+            ASSERT_NEAR(pointe[Geom::X], pointf[Geom::X], precission);
+            ASSERT_NEAR(pointe[Geom::Y], pointf[Geom::Y], precission);
          }
       }
 };
