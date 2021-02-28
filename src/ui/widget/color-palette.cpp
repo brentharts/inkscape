@@ -192,6 +192,9 @@ void ColorPalette::set_compact(bool compact) {
     if (_compact != compact) {
         _compact = compact;
         set_up_scrolling();
+
+        get_widget<Gtk::Scale>(_builder, "row-slider").set_visible(compact);
+        get_widget<Gtk::Label>(_builder, "row-label").set_visible(compact);
     }
 }
 
