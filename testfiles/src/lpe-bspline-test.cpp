@@ -35,7 +35,7 @@ TEST_F(LPEBSplineTest, mixed_0_92_5)
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="250mm"
    height="250mm"
-   viewBox="0 0 250 250.00001"
+   viewBox="0 0 250 250"
    version="1.1"
    id="svg8"
    inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)">
@@ -165,7 +165,6 @@ TEST_F(LPEBSplineTest, mixed_0_92_5)
    pathCompare(d02, lpeitem02->getAttribute("d"), 0.2);
    pathCompare(d03, lpeitem03->getAttribute("d"), 0.2);
 }
-
 
 // INKSCAPE 1.0.2
 

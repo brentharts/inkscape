@@ -75,6 +75,7 @@ set(TEST_SOURCES
     svg-extension-test
     curve-test
     2geom-characterization-test
+    lpe-attachpath-test
     lpe-bendpath-test
     lpe-bool-test
     lpe-bspline-test

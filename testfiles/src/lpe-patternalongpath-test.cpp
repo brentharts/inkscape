@@ -530,7 +530,7 @@ TEST_F(LPEPatternalongpathTest, multiple_PX_1_02)
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="250"
    height="250"
-   viewBox="0 0 250 250.00001"
+   viewBox="0 0 250 250"
    version="1.1"
    id="svg8"
    inkscape:version="1.0.2 (e86c870879, 2021-01-15)">
