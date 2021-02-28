@@ -642,7 +642,7 @@ void CommandPalette::remove_color(Gtk::Label *label, const Glib::ustring &subjec
 /**
  * Color addition
  */
-Glib::ustring CommandPalette::make_bold(Glib::ustring search)
+Glib::ustring make_bold(const Glib::ustring &search)
 {
     // TODO: Add a CSS class that changes the color of the search
     return "<span weight=\"bold\">" + search + "</span>";
@@ -662,7 +662,7 @@ void CommandPalette::add_color(Gtk::Label *label, const Glib::ustring &search, c
             }
             while (j < subject_string.length()) {
                 if (i == subject_string[j]) {
-                    text += make_bold(Glib::Markup::escape_text(subject.substr(j, 1)));
+                    text += make_bold(std::move(Glib::Markup::escape_text(subject.substr(j, 1))));
                     j++;
                     break;
                 } else {
@@ -676,14 +676,14 @@ void CommandPalette::add_color(Gtk::Label *label, const Glib::ustring &search, c
     } else {
         std::map<char, int> search_string_character;
 
-        for (auto character : search_string) {
+        for (const auto &character : search_string) {
             search_string_character[character]++;
         }
 
         for (int i = 0; i < subject_string.length(); i++) {
             if (search_string_character[subject_string[i]]) {
                 search_string_character[subject_string[i]]--;
-                text += make_bold(Glib::Markup::escape_text(subject.substr(i, 1)));
+                text += make_bold(std::move(Glib::Markup::escape_text(subject.substr(i, 1))));
             } else {
                 text += subject_string[i];
             }
@@ -708,7 +708,7 @@ void CommandPalette::add_color_description(Gtk::Label *label, const Glib::ustrin
     auto const search_length = search_normalize.size();
 
     subject = Glib::Markup::escape_text(subject.substr(0, position)) +
-              make_bold(Glib::Markup::escape_text(subject.substr(position, search_length))) +
+              make_bold(std::move(Glib::Markup::escape_text(subject.substr(position, search_length)))) +
               Glib::Markup::escape_text(subject.substr(position + search_length));
 
     label->set_markup(subject);
@@ -745,14 +745,14 @@ bool CommandPalette::fuzzy_search(const Glib::ustring &subject, const Glib::ustr
         }
     } else {
         std::map<char, int> subject_string_character, search_string_character;
-        for (auto character : subject_string) {
+        for (const auto &character : subject_string) {
             subject_string_character[character]++;
         }
-        for (auto character : search_string) {
+        for (const auto &character : search_string) {
             search_string_character[character]++;
         }
 
-        for (auto character : search_string_character) {
+        for (const auto &character : search_string_character) {
             auto [alphabet, occurrence] = character;
             if (subject_string_character[alphabet] < occurrence) {
                 return false;
@@ -805,11 +805,11 @@ int CommandPalette::fuzzy_points(const Glib::ustring &subject, const Glib::ustri
     } else {
         std::map<char, int> search_string_character;
 
-        for (auto character : search_string) {
+        for (const auto &character : search_string) {
             search_string_character[character]++;
         }
 
-        for (auto character : search_string_character) {
+        for (const auto &character : search_string_character) {
             auto [alphabet, occurrence] = character;
             for (int i = 0; i < subject_string.length() && occurrence; i++) {
                 if (subject_string[i] == alphabet) {
