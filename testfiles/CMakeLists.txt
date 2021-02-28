@@ -76,6 +76,7 @@ set(TEST_SOURCES
     curve-test
     2geom-characterization-test
     lpe-attachpath-test
+    lpe-boundingbox-test
     lpe-bendpath-test
     lpe-bool-test
     lpe-bspline-test
