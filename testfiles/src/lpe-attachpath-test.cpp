@@ -83,6 +83,7 @@ TEST_F(LPEAttachPathTest, mixed_0_92_5)
        apply_with_weight="true"
        only_selected="false" />
   </defs>
+  <g id="t" transform="scale(0.445)">
   <path
      style="fill:none;stroke:#ff0000;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
      d="m 45.880067,45.7597 c 27.626658,49.086649 55.253363,98.17338 75.110133,97.92656 19.85677,-0.24682 31.94343,-49.826801 31.30256,-72.472701 C 151.65189,48.567658 138.87385,52.666275 118.52344,73.263322 98.173027,93.86037 70.54699,130.85953 42.920062,167.85988"
@@ -105,6 +106,7 @@ TEST_F(LPEAttachPathTest, mixed_0_92_5)
      inkscape:connector-curvature="0"
      inkscape:path-effect="#path-effect3912"
      inkscape:original-d="m 164.28024,36.879686 c -3.94641,27.626442 -7.89308,55.253151 -11.84002,82.880124 12.08708,1.23308 24.17363,2.4664 36.26006,3.7 0.98691,-22.69319 1.9736,-45.386995 2.96,-68.080095 9.86683,2.219711 19.73363,4.43974 29.60004,6.660009" />
+   </g>
 </svg>
 )"""";
 
@@ -183,6 +185,7 @@ TEST_F(LPEAttachPathTest, attachpath_MM_1_02)
        apply_with_weight="true"
        only_selected="false" />
   </defs>
+  <g id="t" transform="scale(0.445)">
   <path
      style="fill:none;stroke:#ff0000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
      d="m 39.183448,43.45239 c 27.626658,49.086649 55.253364,98.17338 75.110132,97.92656 19.85677,-0.24682 31.94343,-49.826801 31.30256,-72.472701 C 144.95527,46.260348 132.17723,50.358965 111.82682,70.956012 91.476408,91.55306 63.850371,128.55222 36.223443,165.55257"
@@ -204,6 +207,7 @@ TEST_F(LPEAttachPathTest, attachpath_MM_1_02)
      inkscape:connector-curvature="0"
      inkscape:path-effect="#path-effect3912"
      inkscape:original-d="m 175.34365,56.032408 c -3.94641,27.626442 -7.89308,55.253152 -11.84002,82.880122 12.08708,1.23308 24.17363,2.4664 36.26006,3.7 0.98691,-22.69319 1.9736,-45.386993 2.96,-68.080093 9.86683,2.219711 19.73363,4.43974 29.60004,6.660009" />
+   </g>
 </svg>
 )"""";
 
@@ -286,6 +290,7 @@ TEST_F(LPEAttachPathTest, attachpath_PX_1_02)
        only_selected="false"
        lpeversion="0" />
   </defs>
+  <g id="t" transform="scale(0.445)">
   <path
      style="fill:none;stroke:#ff0000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
      d="m 39.183448,43.45239 c 27.626658,49.086649 55.253364,98.17338 75.110132,97.92656 19.85677,-0.24682 31.94343,-49.826801 31.30256,-72.472701 C 144.95527,46.260348 132.17723,50.358965 111.82682,70.956012 91.476408,91.55306 63.850371,128.55222 36.223443,165.55257"
@@ -307,6 +312,7 @@ TEST_F(LPEAttachPathTest, attachpath_PX_1_02)
      inkscape:connector-curvature="0"
      inkscape:path-effect="#path-effect3912"
      inkscape:original-d="m 175.34365,56.032408 c -3.94641,27.626442 -7.89308,55.253152 -11.84002,82.880122 12.08708,1.23308 24.17363,2.4664 36.26006,3.7 0.98691,-22.69319 1.9736,-45.386993 2.96,-68.080093 9.86683,2.219711 19.73363,4.43974 29.60004,6.660009" />
+   </g>
 </svg>
 )"""";
 
