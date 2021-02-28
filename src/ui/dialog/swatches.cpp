@@ -56,6 +56,7 @@
 #include "gradient-chemistry.h"
 #include "helper/action.h"
 #include "ui/widget/color-palette.h"
+#include "widgets/ege-paint-def.h"
 
 namespace Inkscape {
 namespace UI {
@@ -728,7 +729,7 @@ SwatchesPanel::SwatchesPanel(gchar const *prefsPath)
 {
     _palette = Gtk::manage(new Inkscape::UI::Widget::ColorPalette());
     pack_start(*_palette);
-
+/*
     _holder = new PreviewHolder();
 
     _build_menu();
@@ -740,25 +741,25 @@ SwatchesPanel::SwatchesPanel(gchar const *prefsPath)
     menu_button->set_popup(*_menu);
 
     auto box = Gtk::manage(new Gtk::Box());
-
+*/
     if (_prefs_path == "/dialogs/swatches") {
         _palette->set_compact(false);
-        box->set_orientation(Gtk::ORIENTATION_VERTICAL);
-        box->pack_start(*menu_button, Gtk::PACK_SHRINK);
+        // box->set_orientation(Gtk::ORIENTATION_VERTICAL);
+        // box->pack_start(*menu_button, Gtk::PACK_SHRINK);
     } else {
         _palette->set_compact(true);
-        box->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
-        box->pack_end(*menu_button, Gtk::PACK_SHRINK);
-        _updateSettings(SWATCHES_SETTINGS_MODE, 1);
-        _holder->setOrientation(SP_ANCHOR_SOUTH);
+        // box->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
+        // box->pack_end(*menu_button, Gtk::PACK_SHRINK);
+        // _updateSettings(SWATCHES_SETTINGS_MODE, 1);
+        // _holder->setOrientation(SP_ANCHOR_SOUTH);
     }
 
-    box->pack_start(*_holder, Gtk::PACK_EXPAND_WIDGET);
+    // box->pack_start(*_holder, Gtk::PACK_EXPAND_WIDGET);
     // pack_start(*box);
 
     load_palettes();
 
-    Gtk::RadioMenuItem* hotItem = nullptr;
+    // Gtk::RadioMenuItem* hotItem = nullptr;
     _clear = new ColorItem( ege::PaintDef::CLEAR );
     _remove = new ColorItem( ege::PaintDef::NONE );
 
@@ -799,51 +800,70 @@ SwatchesPanel::SwatchesPanel(gchar const *prefsPath)
             _currentIndex = index;
         }
 
-        _rebuild();
+        // _rebuild();
 
-        Gtk::RadioMenuItem::Group groupOne;
+        // Gtk::RadioMenuItem::Group groupOne;
 
-        int i = 0;
+        // int i = 0;
         std::vector<SwatchPage*> swatchSets = _getSwatchSets();
-        std::vector<Glib::ustring> palettes;
+        std::vector<Inkscape::UI::Widget::ColorPalette::palette_t> palettes;
         palettes.reserve(swatchSets.size());
         for (auto curr : swatchSets) {
-            palettes.push_back(curr->_name);
-            Gtk::RadioMenuItem* single = Gtk::manage(new Gtk::RadioMenuItem(groupOne, curr->_name));
-            if ( curr == first ) {
-                hotItem = single;
+            Inkscape::UI::Widget::ColorPalette::palette_t palette;
+            palette.name = curr->_name;
+            for (const auto& color : curr->_colors) {
+                if (color.def.getType() == ege::PaintDef::RGB) {
+                    auto& c = color.def;
+                    palette.colors.push_back(
+                        Inkscape::UI::Widget::ColorPalette::rgb_t { c.getR() / 255.0, c.getG() / 255.0, c.getB() / 255.0 });
+                }
             }
-            _regItem(single, i);
+            palettes.push_back(palette);
+            // Gtk::RadioMenuItem* single = Gtk::manage(new Gtk::RadioMenuItem(groupOne, curr->_name));
+            // if ( curr == first ) {
+            //     hotItem = single;
+            // }
+            // _regItem(single, i);
 
-            i++;
+            // i++;
         }
+
+        // pass list of available palettes
+        _palette->set_palettes(palettes);
+        _rebuild();
+
+        // restore palette settings
         Inkscape::Preferences* prefs = Inkscape::Preferences::get();
         _palette->set_tile_size(prefs->getInt(_prefs_path + "/tile_size", 16));
         _palette->set_tile_border(prefs->getInt(_prefs_path + "/tile_border", 1));
         _palette->set_rows(prefs->getInt(_prefs_path + "/rows", 1));
+        // save settings when they change
         _palette->get_settings_changed_signal().connect([=](){
             prefs->setInt(_prefs_path + "/tile_size", _palette->get_tile_size());
             prefs->setInt(_prefs_path + "/tile_border", _palette->get_tile_border());
             prefs->setInt(_prefs_path + "/rows", _palette->get_rows());
         });
 
-        _palette->set_palettes(palettes);
 
+        // switch swatch palettes
         _palette->get_palette_selected_signal().connect([=](Glib::ustring name) {
             std::vector<SwatchPage*> pages = _getSwatchSets();
             auto it = std::find_if(pages.begin(), pages.end(), [&](auto el){ return el->_name == name; });
             if (it != pages.end()) {
-                _currentIndex = static_cast<int>(it - pages.begin());
-                Inkscape::Preferences* prefs = Inkscape::Preferences::get();
-                prefs->setString(_prefs_path + "/palette", pages[_currentIndex]->_name);
-                _rebuild();
+                auto index = static_cast<int>(it - pages.begin());
+                if (_currentIndex != index) {
+                    _currentIndex = index;
+                    Inkscape::Preferences* prefs = Inkscape::Preferences::get();
+                    prefs->setString(_prefs_path + "/palette", pages[_currentIndex]->_name);
+                    _rebuild();
+                }
             }
         });
     }
 
-    if ( hotItem ) {
-        hotItem->set_active();
-    }
+    // if ( hotItem ) {
+        // hotItem->set_active();
+    // }
 
     // show_all_children();
 }
@@ -867,13 +887,14 @@ SwatchesPanel::~SwatchesPanel()
     if ( _remove ) {
         delete _remove;
     }
-    if ( _holder ) {
-        delete _holder;
-    }
+    // if ( _holder ) {
+    //     delete _holder;
+    // }
 
-    delete _menu;
+    // delete _menu;
 }
 
+/*
 void SwatchesPanel::_build_menu()
 {
     guint panel_size = 0, panel_mode = 0, panel_ratio = 100, panel_border = 0;
@@ -1034,6 +1055,7 @@ void SwatchesPanel::_build_menu()
     _updateSettings(SWATCHES_SETTINGS_WRAP, panel_wrap);
     _updateSettings(SWATCHES_SETTINGS_BORDER, panel_border);
 }
+*/
 
 void SwatchesPanel::update()
 {
@@ -1076,6 +1098,7 @@ void SwatchesPanel::update()
 
 void SwatchesPanel::_updateSettings(int settings, int value)
 {
+/*
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
 
     switch (settings) {
@@ -1176,8 +1199,10 @@ void SwatchesPanel::_updateSettings(int settings, int value)
     default:
         break;
     }
+*/
 }
 
+/*
 void SwatchesPanel::_wrapToggled(Gtk::CheckMenuItem* toggler)
 {
     if (toggler) {
@@ -1191,6 +1216,7 @@ void SwatchesPanel::_regItem(Gtk::MenuItem* item, int id)
     item->signal_activate().connect(sigc::bind<int, int>(sigc::mem_fun(*this, &SwatchesPanel::_updateSettings), SWATCHES_SETTINGS_PALETTE, id));
     item->show();
 }
+*/
 
 void SwatchesPanel::_setDocument( SPDocument *document )
 {
@@ -1431,23 +1457,24 @@ void SwatchesPanel::_rebuild()
 {
     std::vector<SwatchPage*> pages = _getSwatchSets();
     SwatchPage* curr = pages[_currentIndex];
-    _holder->clear();
+    // _holder->clear();
 
-    if ( curr->_prefWidth > 0 ) {
-        _holder->setColumnPref( curr->_prefWidth );
-    }
-    _holder->freezeUpdates();
+    // if ( curr->_prefWidth > 0 ) {
+    //     _holder->setColumnPref( curr->_prefWidth );
+    // }
+    // _holder->freezeUpdates();
     // TODO restore once 'clear' works _holder->addPreview(_clear);
     std::vector<Widget*> palette;
     palette.reserve(curr->_colors.size() + 1);
     palette.push_back(_remove->createWidget());
-    _holder->addPreview(_remove);
+    // _holder->addPreview(_remove);
     for (auto & _color : curr->_colors) {
         // _holder->addPreview(&_color);
         palette.push_back(_color.createWidget());
     }
     _palette->set_colors(palette);
-    _holder->thawUpdates();
+    _palette->set_selected(curr->_name);
+    // _holder->thawUpdates();
 }
 
 } //namespace Dialog

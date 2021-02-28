@@ -18,6 +18,7 @@
 #include <gtkmm/flowbox.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/menu.h>
+#include <vector>
 
 namespace Inkscape {
 namespace UI {
@@ -27,10 +28,13 @@ class ColorPalette : public Gtk::Bin {
 public:
     ColorPalette();
 
+    struct rgb_t { double r; double g; double b; };
+    struct palette_t { Glib::ustring name; std::vector<rgb_t> colors; };
+
     // set colors presented in a palette
     void set_colors(const std::vector<Gtk::Widget*>& swatches);
-    // list of palette names to present in the menu
-    void set_palettes(const std::vector<Glib::ustring>& palettes);
+    // list of palettes to present in the menu
+    void set_palettes(const std::vector<palette_t>& palettes);
     // enable compact mode (true) with mini-scroll buttons, or normal mode (false) with regular scrollbars
     void set_compact(bool compact);
 
@@ -41,6 +45,8 @@ public:
     int get_tile_size() const;
     int get_tile_border() const;
     int get_rows() const;
+
+    void set_selected(const Glib::ustring& name);
 
     sigc::signal<void, Glib::ustring>& get_palette_selected_signal();
     sigc::signal<void>& get_settings_changed_signal();
@@ -70,6 +76,7 @@ private:
     bool _compact = true;
     sigc::signal<void, Glib::ustring> _signal_palette_selected;
     sigc::signal<void> _signal_settings_changed;
+    bool _in_update = false;
 };
 
 }}} // namespace

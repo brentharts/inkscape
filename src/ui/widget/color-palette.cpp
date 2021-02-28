@@ -304,26 +304,78 @@ void ColorPalette::set_colors(const std::vector<Gtk::Widget*>& swatches) {
     _flowbox.thaw_notify();
 }
 
-void ColorPalette::set_palettes(const std::vector<Glib::ustring>& palettes) {
-    auto& menu = get_widget<Gtk::Menu>(_builder, "menu");
-    auto items = menu.get_children();
+class CustomMenuItem : public Gtk::RadioMenuItem {
+public:
+    CustomMenuItem(Gtk::RadioMenuItem::Group& group, const Glib::ustring& label, std::vector<ColorPalette::rgb_t> colors):
+        Gtk::RadioMenuItem(group, label), _colors(colors) {
+
+        set_margin_bottom(2);
+    }
+private:
+    bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr) override;
+    std::vector<ColorPalette::rgb_t> _colors;
+};
+
+bool CustomMenuItem::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
+    RadioMenuItem::on_draw(cr);
+    if (_colors.empty()) return false;
+
+    auto allocation = get_allocation();
+    auto x = 0;
+    auto y = 0;
+    auto width = allocation.get_width();
+    auto height = allocation.get_height();
+    auto left = x + height;
+    auto right = x + width - height;
+    auto dx = 1;
+    auto dy = 2;
+    auto px = left;
+    auto py = y + height - dy;
+    auto w = right - left;
+    if (w <= 0) return false;
+
+    for (int i = 0; i < w; ++i) {
+        if (px >= right) break;
+
+        int index = i * _colors.size() / w;
+        auto& color = _colors.at(index);
+
+        cr->set_source_rgb(color.r, color.g, color.b);
+        cr->rectangle(px, py, dx, dy);
+        cr->fill();
+
+        px += dx;
+    }
+
+    return false;
+}
+
+void ColorPalette::set_palettes(const std::vector<ColorPalette::palette_t>& palettes) {
+    auto items = _menu.get_children();
     auto count = items.size();
-    
+
     int index = 0;
     while (count > 2) {
         if (auto item = items[index++]) {
-            menu.remove(*item);
+            _menu.remove(*item);
             delete item;
         }
         count--;
     }
 
+    Gtk::RadioMenuItem::Group group;
     for (auto it = palettes.rbegin(); it != palettes.rend(); ++it) {
-        auto& name = *it;
-        auto item = Gtk::manage(new Gtk::RadioMenuItem(name));
-        item->signal_activate().connect([=](){ _signal_palette_selected.emit(name); });
+        auto& name = it->name;
+        auto item = Gtk::manage(new CustomMenuItem(group, name, it->colors));
+        item->signal_activate().connect([=](){
+            if (!_in_update) {
+                _in_update = true;
+                _signal_palette_selected.emit(name);
+                _in_update = false;
+            }
+        });
         item->show();
-        menu.prepend(*item);
+        _menu.prepend(*item);
     }
 }
 
@@ -333,6 +385,17 @@ sigc::signal<void, Glib::ustring>& ColorPalette::get_palette_selected_signal() {
 
 sigc::signal<void>& ColorPalette::get_settings_changed_signal() {
     return _signal_settings_changed;
+}
+
+void ColorPalette::set_selected(const Glib::ustring& name) {
+    auto items = _menu.get_children();
+    _in_update = true;
+    for (auto item : items) {
+        if (auto radio = dynamic_cast<Gtk::RadioMenuItem*>(item)) {
+            radio->set_active(radio->get_label() == name);
+        }
+    }
+    _in_update = false;
 }
 
 }}} // namespace

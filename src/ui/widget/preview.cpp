@@ -156,7 +156,7 @@ Preview::size_request(GtkRequisition* req) const
             width = 1;
         }
     }
-width = height = 2;
+
     req->width = width;
     req->height = height;
 }
