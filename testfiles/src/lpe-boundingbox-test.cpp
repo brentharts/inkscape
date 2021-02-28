@@ -48,6 +48,7 @@ TEST_F(LPEBoundingBoxTest, mixed_0_92_5)
        linkedpath="#rect41"
        visualbounds="false" />
   </defs>
+  <g id="t" transform="scale(0.445)">
   <path
      style="fill:#00ff00;stroke:#ff0000;stroke-width:0.26458332"
      d="M 89.540131,102.43796 H 211.6403 v 136.481 H 89.540131 Z"
@@ -60,6 +61,7 @@ TEST_F(LPEBoundingBoxTest, mixed_0_92_5)
      id="rect41"
      inkscape:connector-curvature="0"
      sodipodi:nodetypes="ccccc" />
+     </g>
 </svg>
 )"""";
 
@@ -103,6 +105,7 @@ TEST_F(LPEBoundingBoxTest, bbox_MM_1_02)
        linkedpath="#rect41"
        visualbounds="false" />
   </defs>
+  <g id="t" transform="scale(0.445)">
   <path
      style="fill:#00ff00;stroke:#ff0000;stroke-width:0.26458332"
      d="M 89.540131,102.43796 H 211.6403 v 136.481 H 89.540131 Z"
@@ -115,6 +118,7 @@ TEST_F(LPEBoundingBoxTest, bbox_MM_1_02)
      id="rect41"
      inkscape:connector-curvature="0"
      sodipodi:nodetypes="ccccc" />
+     </g>
 </svg>
 )"""";
 
@@ -158,6 +162,7 @@ TEST_F(LPEBoundingBoxTest, bbox_PX_1_02)
        visualbounds="false"
        lpeversion="0" />
   </defs>
+  <g id="t" transform="scale(0.445)">
   <path
      style="fill:#00ff00;stroke:#ff0000;stroke-width:0.264583"
      d="M 89.540131,102.43796 H 211.6403 v 136.481 H 89.540131 Z"
@@ -170,6 +175,7 @@ TEST_F(LPEBoundingBoxTest, bbox_PX_1_02)
      id="rect41"
      inkscape:connector-curvature="0"
      sodipodi:nodetypes="ccccc" />
+     </g>
 </svg>
 )"""";
 
