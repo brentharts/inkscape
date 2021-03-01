@@ -356,13 +356,13 @@ public:
 
     virtual void addFileType(Glib::ustring name, Glib::ustring pattern);
 
-    /// Create a filter menu for this type of dialog
-    void createFilterMenu();
-
 private:
 	/// A handle to the title label and edit box
     HWND _title_label;
     HWND _title_edit;
+
+    /// Create a filter menu for this type of dialog
+    void createFilterMenu();
 
     /// The controller function for the thread which calls
     /// GetSaveFileName

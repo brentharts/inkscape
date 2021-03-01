@@ -1371,9 +1371,6 @@ void Export::onBrowse ()
               _("Select a filename for exporting"), "", "",
               Inkscape::Extension::FILE_SAVE_METHOD_EXPORT);
 
-    dialog->addFileType(_("Portable Network Graphic (*.png)"), "*.png");
-    dialog->createFilterMenu();
-
     if (dialog->show()) {
         auto file = dialog->getFilename();
         filename_entry.set_text(Glib::filename_to_utf8(file));

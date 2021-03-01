@@ -513,6 +513,8 @@ FileSaveDialogImplGtk::FileSaveDialogImplGtk(Gtk::Window &parentWindow, const Gl
     fileTypeComboBox.set_size_request(200, 40);
     fileTypeComboBox.signal_changed().connect(sigc::mem_fun(*this, &FileSaveDialogImplGtk::fileTypeChangedCallback));
 
+    if (_dialogType != CUSTOM_TYPE)
+        createFilterMenu();
 
     childBox.pack_start(checksBox);
     childBox.pack_end(fileTypeComboBox);
