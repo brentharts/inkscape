@@ -634,8 +634,7 @@ bool CommandPalette::ask_action_parameter(const ActionPtrName &action_ptr_name)
 void CommandPalette::remove_color(Gtk::Label *label, const Glib::ustring &subject)
 {
     if (label->get_use_markup()) {
-        Glib::ustring text = subject;
-        label->set_text(text);
+        label->set_text(subject);
     }
 }
 
@@ -662,7 +661,7 @@ void CommandPalette::add_color(Gtk::Label *label, const Glib::ustring &search, c
             }
             while (j < subject_string.length()) {
                 if (i == subject_string[j]) {
-                    text += make_bold(std::move(Glib::Markup::escape_text(subject.substr(j, 1))));
+                    text += make_bold(Glib::Markup::escape_text(subject.substr(j, 1)));
                     j++;
                     break;
                 } else {
@@ -683,7 +682,7 @@ void CommandPalette::add_color(Gtk::Label *label, const Glib::ustring &search, c
         for (int i = 0; i < subject_string.length(); i++) {
             if (search_string_character[subject_string[i]]) {
                 search_string_character[subject_string[i]]--;
-                text += make_bold(std::move(Glib::Markup::escape_text(subject.substr(i, 1))));
+                text += make_bold(Glib::Markup::escape_text(subject.substr(i, 1)));
             } else {
                 text += subject_string[i];
             }
@@ -708,7 +707,7 @@ void CommandPalette::add_color_description(Gtk::Label *label, const Glib::ustrin
     auto const search_length = search_normalize.size();
 
     subject = Glib::Markup::escape_text(subject.substr(0, position)) +
-              make_bold(std::move(Glib::Markup::escape_text(subject.substr(position, search_length)))) +
+              make_bold(Glib::Markup::escape_text(subject.substr(position, search_length))) +
               Glib::Markup::escape_text(subject.substr(position + search_length));
 
     label->set_markup(subject);
