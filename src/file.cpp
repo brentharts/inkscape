@@ -660,6 +660,7 @@ sp_file_save_dialog(Gtk::Window &parentWindow, SPDocument *doc, Inkscape::Extens
             save_method
             );
 
+    saveDialog->createFilterMenu();
     saveDialog->setSelectionType(extension);
 
     bool success = saveDialog->show();

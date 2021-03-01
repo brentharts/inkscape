@@ -56,7 +56,7 @@
 #include "ui/widget/unit-menu.h"
 #include "ui/widget/scrollprotected.h"
 #include "ui/dialog/dialog-notebook.h"
-#include "ui/dialog/filedialogimpl-gtkmm.h"
+#include "ui/dialog/filedialog.h"
 
 #include "extension/db.h"
 
@@ -1353,49 +1353,10 @@ void Export::_export_raster (Inkscape::Extension::Output *extension)
 } // end of Export::onExport()
 
 /// Called when Browse button is clicked
-/// @todo refactor this code to use ui/dialog/filedialog.cpp
 void Export::onBrowse ()
 {
-    bool accept = false;
-    Gtk::FileChooserDialog fs(_("Select a filename for exporting"),
-                              Gtk::FILE_CHOOSER_ACTION_SAVE);
-    fs.add_button(_("_Cancel"), Gtk::RESPONSE_CANCEL);
-    fs.add_button(_("_Save"),   Gtk::RESPONSE_ACCEPT);
-    fs.set_local_only(false);
-
-    sp_transientize(GTK_WIDGET(fs.gobj()));
-
-    fs.set_modal(true);
-
-    // FileFilter can select the raster extension to use
-    std::map<Glib::RefPtr<Gtk::FileFilter>, Inkscape::Extension::Output *> filters;
-
-    auto png_filter = Gtk::FileFilter::create();
-    png_filter->set_name("PNG File (*.png)");
-    png_filter->add_pattern("*.png");
-    fs.add_filter(png_filter);
-    filters[png_filter] = nullptr;
-
-    // Add raster export options to the browse filter
-    Inkscape::Extension::DB::OutputList extension_list;
-    Inkscape::Extension::db.get_output_list(extension_list);
-    for (auto mod : extension_list)
-    {
-        if (mod->deactivated() || !mod->is_raster())
-            continue;
-
-        Glib::ustring upattern("*");
-        Glib::ustring extension = mod->get_extension();
-        fileDialogExtensionToPattern(upattern, extension);
-
-        auto filter = Gtk::FileFilter::create();
-        filter->set_name(mod->get_filetypename(true));
-        filter->add_pattern(upattern);
-        filter->add_mime_type(mod->get_mimetype());
-        fs.add_filter(filter);
-        filters[filter] = mod;
-    }
-
+    // Create and show the dialog
+    Gtk::Window* window = _app->get_active_window();
     std::string filename = Glib::filename_from_utf8(filename_entry.get_text());
 
     if (filename.empty()) {
@@ -1403,83 +1364,23 @@ void Export::onBrowse ()
         filename = create_filepath_from_id(tmp, tmp);
     }
 
-    fs.set_filename(filename);
+    Inkscape::UI::Dialog::FileSaveDialog *dialog =
+        Inkscape::UI::Dialog::FileSaveDialog::create(
+              *window, filename,
+              Inkscape::UI::Dialog::RASTER_TYPES,
+              _("Select a filename for exporting"), "", "",
+              Inkscape::Extension::FILE_SAVE_METHOD_EXPORT);
 
-#ifdef _WIN32
-    // code in this section is borrowed from ui/dialogs/filedialogimpl-win32.cpp
-    OPENFILENAMEW opf;
-    WCHAR filter_string[20];
-    wcsncpy(filter_string, L"PNG#*.png##", 11);
-    filter_string[3] = L'\0';
-    filter_string[9] = L'\0';
-    filter_string[10] = L'\0';
-    WCHAR* title_string = (WCHAR*)g_utf8_to_utf16(_("Select a filename for exporting"), -1, NULL, NULL, NULL);
-    WCHAR* extension_string = (WCHAR*)g_utf8_to_utf16("*.png", -1, NULL, NULL, NULL);
-    // Copy the selected file name, converting from UTF-8 to UTF-16
-    std::string dirname = Glib::path_get_dirname(filename);
-    if ( !Glib::file_test(dirname, Glib::FILE_TEST_EXISTS) ||
-            Glib::file_test(filename, Glib::FILE_TEST_IS_DIR) ||
-            dirname.empty() )
-    {
-        Glib::ustring tmp;
-        filename = create_filepath_from_id(tmp, tmp);
-    }
-    WCHAR _filename[_MAX_PATH + 1];
-    memset(_filename, 0, sizeof(_filename));
-    gunichar2* utf16_path_string = g_utf8_to_utf16(filename.c_str(), -1, NULL, NULL, NULL);
-    wcsncpy(_filename, reinterpret_cast<wchar_t*>(utf16_path_string), _MAX_PATH);
-    g_free(utf16_path_string);
+    dialog->addFileType(_("Portable Network Graphic (*.png)"), "*.png");
+    dialog->createFilterMenu();
 
-    auto desktop = getDesktop();
-    Glib::RefPtr<const Gdk::Window> parentWindow = desktop->getToplevel()->get_window();
-    g_assert(parentWindow->gobj() != NULL);
-
-    opf.hwndOwner = (HWND)gdk_win32_window_get_handle((GdkWindow*)parentWindow->gobj());
-    opf.lpstrFilter = filter_string;
-    opf.lpstrCustomFilter = 0;
-    opf.nMaxCustFilter = 0L;
-    opf.nFilterIndex = 1L;
-    opf.lpstrFile = _filename;
-    opf.nMaxFile = _MAX_PATH;
-    opf.lpstrFileTitle = NULL;
-    opf.nMaxFileTitle=0;
-    opf.lpstrInitialDir = 0;
-    opf.lpstrTitle = title_string;
-    opf.nFileOffset = 0;
-    opf.nFileExtension = 2;
-    opf.lpstrDefExt = extension_string;
-    opf.lpfnHook = NULL;
-    opf.lCustData = 0;
-    opf.Flags = OFN_PATHMUSTEXIST;
-    opf.lStructSize = sizeof(OPENFILENAMEW);
-    if (GetSaveFileNameW(&opf) != 0)
-    {
-        // Copy the selected file name, converting from UTF-16 to UTF-8
-        gchar *utf8string = g_utf16_to_utf8((const gunichar2*)opf.lpstrFile, _MAX_PATH, NULL, NULL, NULL);
-        filename_entry.set_text(utf8string);
+    if (dialog->show()) {
+        auto file = dialog->getFilename();
+        filename_entry.set_text(Glib::filename_to_utf8(file));
         filename_entry.set_position(-1);
-        accept = true;
-        g_free(utf8string);
+        _export_raster(dynamic_cast<Inkscape::Extension::Output *>(dialog->getSelectionType()));
     }
-    g_free(extension_string);
-    g_free(title_string);
-
-#else
-    if (fs.run() == Gtk::RESPONSE_ACCEPT)
-    {
-        auto file = fs.get_filename();
-
-        auto utf8file = Glib::filename_to_utf8(file);
-        filename_entry.set_text(utf8file);
-        filename_entry.set_position(-1);
-        accept = true;
-    }
-#endif
-
-    if (accept) {
-        _export_raster(filters[fs.get_filter()]);
-    }
-} // end of sp_export_browse_clicked()
+}
 
 // TODO: Move this to nr-rect-fns.h.
 bool Export::bbox_equal(Geom::Rect const &one, Geom::Rect const &two)

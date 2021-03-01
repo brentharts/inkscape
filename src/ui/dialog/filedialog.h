@@ -48,6 +48,7 @@ enum FileDialogType {
     SVG_TYPES,
     IMPORT_TYPES,
     EXPORT_TYPES,
+    RASTER_TYPES,
     EXE_TYPES,
     SWATCH_TYPES,
     CUSTOM_TYPE
@@ -212,6 +213,7 @@ public:
     virtual Glib::ustring getCurrentDirectory() = 0;
 
     virtual void addFileType(Glib::ustring name, Glib::ustring pattern) = 0;
+    virtual void createFilterMenu() = 0;
 
 protected:
 

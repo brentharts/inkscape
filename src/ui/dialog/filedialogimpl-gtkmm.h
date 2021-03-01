@@ -233,8 +233,13 @@ public:
     Inkscape::Extension::Extension *getSelectionType() override;
     void setSelectionType( Inkscape::Extension::Extension * key ) override;
 
-	Glib::ustring getCurrentDirectory() override;
-	void addFileType(Glib::ustring name, Glib::ustring pattern) override;
+    Glib::ustring getCurrentDirectory() override;
+    void addFileType(Glib::ustring name, Glib::ustring pattern) override;
+
+    /**
+     *  Create a filter menu for this type of dialog
+     */
+    void createFilterMenu();
 
 private:
     //void change_title(const Glib::ustring& title);
@@ -274,12 +279,6 @@ private:
      * Callback for user input into fileNameEntry
      */
     void fileTypeChangedCallback();
-
-    /**
-     *  Create a filter menu for this type of dialog
-     */
-    void createFileTypeMenu();
-
 
     /**
      * The extension to use to write this file
