@@ -21,10 +21,9 @@
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/spinbutton.h>
 
+#include "extension/output.h"
 #include "ui/dialog/dialog-base.h"
 #include "ui/widget/scrollprotected.h"
-
-#include "extension/output.h"
 
 namespace Inkscape {
 namespace UI {
@@ -129,7 +128,7 @@ private:
      * Export button callback
      */
     void onExport ();
-    void _export_raster (Inkscape::Extension::Output *extension);
+    void _export_raster(Inkscape::Extension::Output *extension);
 
     /**
      * File Browse button callback

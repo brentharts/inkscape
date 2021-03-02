@@ -991,7 +991,7 @@ void Export::onExport ()
     _export_raster(nullptr);
 }
 
-void Export::_export_raster (Inkscape::Extension::Output *extension)
+void Export::_export_raster(Inkscape::Extension::Output *extension)
 {
     SPDesktop *desktop = SP_ACTIVE_DESKTOP;
     if (!desktop) return;
@@ -1356,7 +1356,7 @@ void Export::_export_raster (Inkscape::Extension::Output *extension)
 void Export::onBrowse ()
 {
     // Create and show the dialog
-    Gtk::Window* window = _app->get_active_window();
+    Gtk::Window *window = _app->get_active_window();
     std::string filename = Glib::filename_from_utf8(filename_entry.get_text());
 
     if (filename.empty()) {
@@ -1364,12 +1364,9 @@ void Export::onBrowse ()
         filename = create_filepath_from_id(tmp, tmp);
     }
 
-    Inkscape::UI::Dialog::FileSaveDialog *dialog =
-        Inkscape::UI::Dialog::FileSaveDialog::create(
-              *window, filename,
-              Inkscape::UI::Dialog::RASTER_TYPES,
-              _("Select a filename for exporting"), "", "",
-              Inkscape::Extension::FILE_SAVE_METHOD_EXPORT);
+    Inkscape::UI::Dialog::FileSaveDialog *dialog = Inkscape::UI::Dialog::FileSaveDialog::create(
+        *window, filename, Inkscape::UI::Dialog::RASTER_TYPES, _("Select a filename for exporting"), "", "",
+        Inkscape::Extension::FILE_SAVE_METHOD_EXPORT);
 
     if (dialog->show()) {
         auto file = dialog->getFilename();

@@ -16,8 +16,9 @@
 #define EXTENSION_INTERNAL_PNG_OUTPUT_H
 
 #include <glib.h>
-#include "extension/implementation/implementation.h"
+
 #include "extension/extension.h"
+#include "extension/implementation/implementation.h"
 #include "extension/output.h"
 #include "extension/system.h"
 
@@ -27,28 +28,20 @@ namespace Internal {
 
 class PngOutput : public Inkscape::Extension::Implementation::Implementation
 {
-
 public:
+    PngOutput(){};
 
-    PngOutput() {};
-    
-    bool check (Inkscape::Extension::Extension * module) override { return true; };
+    bool check(Inkscape::Extension::Extension *module) override { return true; };
 
-    void export_raster(
-        Inkscape::Extension::Output *module,
-        std::string const png_file,
-        gchar const *filename
-    ) override;
+    void export_raster(Inkscape::Extension::Output *module, std::string const png_file, gchar const *filename) override;
 
     static void init();
-	
+
 private:
-
-
 };
 
-}  // namespace Internal
-}  // namespace Extension
-}  // namespace Inkscape
+} // namespace Internal
+} // namespace Extension
+} // namespace Inkscape
 
 #endif /* EXTENSION_INTERNAL_PNG_OUTPUT_H */

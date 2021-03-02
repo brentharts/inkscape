@@ -14,23 +14,21 @@
 
 #include "png-output.h"
 
-#include "locale.h"
-#include "clear-n_.h"
-
-#include <fstream>
-#include <iostream>
-#include <ios>
+#include <clocale>
 #include <cstdio>
+#include <fstream>
+#include <ios>
+#include <iostream>
 #include <string>
+
+#include "clear-n_.h"
 
 namespace Inkscape {
 namespace Extension {
 namespace Internal {
 
-void PngOutput::export_raster(
-    Inkscape::Extension::Output * /*module*/,
-    std::string const png_file,
-    gchar const * filename)
+void PngOutput::export_raster(Inkscape::Extension::Output * /*module*/, std::string const png_file,
+                              gchar const *filename)
 {
     // We want to move the png file to the new location
     std::ifstream in(png_file.c_str(), std::ios::in | std::ios::binary);
@@ -39,9 +37,7 @@ void PngOutput::export_raster(
     std::remove(png_file.c_str());
 }
 
-
-void
-PngOutput::init()
+void PngOutput::init()
 {
     // clang-format off
     Inkscape::Extension::build_from_mem(
@@ -59,10 +55,9 @@ PngOutput::init()
     // clang-format on
 }
 
-}  // namespace Internal
-}  // namespace Extension
-}  // namespace Inkscape
-
+} // namespace Internal
+} // namespace Extension
+} // namespace Inkscape
 
 /*
   Local Variables:
