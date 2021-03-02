@@ -1155,17 +1155,7 @@ void Export::_export_raster(Inkscape::Extension::Output *extension)
         }
 
         auto fn = Glib::path_get_basename(path);
-
-        /* TRANSLATORS: %1 will be the filename, %2 the width, and %3 the height of the image */
-        prog_dlg = create_progress_dialog (Glib::ustring::compose(_("Exporting %1 (%2 x %3)"), fn, width, height));
-        prog_dlg->set_export_panel(this);
-        setExporting(true, Glib::ustring::compose(_("Exporting %1 (%2 x %3)"), fn, width, height));
-
-        prog_dlg->set_current(0);
-        prog_dlg->set_total(0);
-
         auto area = Geom::Rect(Geom::Point(x0, y0), Geom::Point(x1, y1)) * desktop->dt2doc();
-        bool overwrite = false;
 
         // Select a raster output extension if not a png file (manual filename)
         if (!extension && !Glib::str_has_suffix(filename, ".png")) {
@@ -1182,13 +1172,26 @@ void Export::_export_raster(Inkscape::Extension::Output *extension)
             }
         }
 
+        bool overwrite = false;
         auto png_filename = std::string(path.c_str());
         if (extension) {
             // Select the extension and set the filename to a temporary file
             int tempfd_out = Glib::file_open_tmp(png_filename, "ink_ext_");
+            // Do the over-write protection now, since the png is just a temp file.
+            if (!sp_ui_overwrite_file(filename.c_str())) {
+                return;
+            }
             overwrite = true;
             close(tempfd_out);
         }
+
+        /* TRANSLATORS: %1 will be the filename, %2 the width, and %3 the height of the image */
+        prog_dlg = create_progress_dialog (Glib::ustring::compose(_("Exporting %1 (%2 x %3)"), fn, width, height));
+        prog_dlg->set_export_panel(this);
+        setExporting(true, Glib::ustring::compose(_("Exporting %1 (%2 x %3)"), fn, width, height));
+
+        prog_dlg->set_current(0);
+        prog_dlg->set_total(0);
 
         /* Do export */
         std::vector<SPItem*> x;
@@ -1223,6 +1226,8 @@ void Export::_export_raster(Inkscape::Extension::Output *extension)
                     } catch (Inkscape::Extension::Output::save_failed &e) {
                         exportSuccessful = false;
                     }
+                } else {
+                    exportSuccessful = false;
                 }
             }
 

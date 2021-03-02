@@ -23,6 +23,10 @@
 
 #include "clear-n_.h"
 
+// Replace with C++17, see notes in file-export-cmd.cpp
+#include <boost/filesystem.hpp>
+namespace filesystem = boost::filesystem;
+
 namespace Inkscape {
 namespace Extension {
 namespace Internal {
@@ -31,10 +35,10 @@ void PngOutput::export_raster(Inkscape::Extension::Output * /*module*/, std::str
                               gchar const *filename)
 {
     // We want to move the png file to the new location
-    std::ifstream in(png_file.c_str(), std::ios::in | std::ios::binary);
-    std::ofstream out(filename, std::ios::out | std::ios::binary);
-    out << in.rdbuf();
-    std::remove(png_file.c_str());
+    auto input_fn = filesystem::path(png_file);
+    auto output_fn = filesystem::path(filename);
+    filesystem::copy_file(input_fn, output_fn, filesystem::copy_option::overwrite_if_exists);
+    boost::filesystem::remove(input_fn);
 }
 
 void PngOutput::init()
