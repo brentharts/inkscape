@@ -624,7 +624,9 @@ void Export::updateCheckbuttons ()
         batch_export.set_active (false);
         batch_export.set_sensitive(false);
     }
-    batch_export.set_label(g_strdup_printf (ngettext("B_atch export %d selected object","B_atch export %d selected objects",num), num));
+    gchar *l = g_strdup_printf(ngettext("B_atch export %d selected object","B_atch export %d selected objects",num), num);
+    batch_export.set_label(l);
+    g_free(l);
 
     //hide_export.set_sensitive (num > 0);
 }
