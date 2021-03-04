@@ -62,6 +62,7 @@ cp /etc/fonts/fonts.conf etc/fonts/
 # Bundle Python
 PY_VER=3.8
 apt_bundle \
+    libimagequant0 \
     libpython${PY_VER}-stdlib \
     libpython${PY_VER}-minimal \
     python${PY_VER} \
