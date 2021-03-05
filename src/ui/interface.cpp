@@ -221,6 +221,80 @@ sp_ui_overwrite_file(gchar const *filename)
     return return_value;
 }
 
+std::string
+sp_ui_overwrite_file_batch(std::set<std::string>& conflicting_paths)
+{
+    //0 means no conflicting paths hence take no action.
+    if(conflicting_paths.size()<1)
+        return "NO_CONFLICTING_PATHS";
+    
+    //get space separated list of paths for printing in dialog
+    std::string path_list = "";
+    for(auto& path:conflicting_paths)
+        path_list = path_list + path + " ";
+    
+    //get suffix if want copy. suffix also act as return value.
+    std::string suffix;
+
+    bool suffix_found;
+    std::string temp_path = "";
+    //To prevent infinite loop if happens. Currently only 100 iterations allowed
+    for(int i=0;i<100;i++)
+    {
+        suffix_found = true;
+        suffix = "_" + std::to_string(i);
+        for(auto& path: conflicting_paths)
+        {
+            temp_path = path + suffix;
+            if (Inkscape::IO::file_test(temp_path.c_str(), G_FILE_TEST_EXISTS))
+            {
+                suffix_found = false;
+                break;
+            }
+        }
+        if(suffix_found)
+            break;
+    }
+
+    if(!suffix_found)
+        suffix = "NO_SUFFIX_FOUND";
+
+
+    //dialog creation. reference taken from sp_ui_overwrite_file
+    Gtk::Window *window = SP_ACTIVE_DESKTOP->getToplevel();
+    GtkWidget* dialog = gtk_message_dialog_new_with_markup( window->gobj(),
+                                                                (GtkDialogFlags)(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
+                                                                GTK_MESSAGE_QUESTION,
+                                                                GTK_BUTTONS_NONE,
+                                                                _( "<span weight=\"bold\" size=\"larger\">Files already exists.</span>\n\n"
+                                                                   "Files: \"%s\"\n"
+                                                                   "Replacing files will overwrite their contents. You can also skip these files.\n"
+                                                                   "Click add suffix to add \"%s\" as suffix to the file names." ),
+                                                                path_list.c_str(),
+                                                                suffix.c_str()
+            );
+    
+    gtk_dialog_add_buttons( GTK_DIALOG(dialog),
+                                _("_Cancel"), GTK_RESPONSE_CANCEL,
+                                _("Overwrite"), GTK_RESPONSE_YES,
+                                _("SKIP FILES"), GTK_RESPONSE_OK,
+                                _("ADD SUFFIX"), GTK_RESPONSE_APPLY,
+                                NULL );
+    gtk_dialog_set_default_response( GTK_DIALOG(dialog), GTK_RESPONSE_YES );
+
+    auto stat = gtk_dialog_run( GTK_DIALOG(dialog) );
+
+    if (  stat == GTK_RESPONSE_YES ) {
+        suffix = "OVERWRITE";
+    } else if( stat == GTK_RESPONSE_OK ) {
+        suffix = "SKIP";
+    } else if( stat == GTK_RESPONSE_CANCEL ) {
+        suffix = "CANCEL";
+    }
+    gtk_widget_destroy(dialog);
+    return suffix;
+}
+
 /*
   Local Variables:
   mode:c++

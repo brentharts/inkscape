@@ -1028,6 +1028,42 @@ void Export::onExport ()
         gint export_count = 0;
 
         auto itemlist= desktop->getSelection()->items();
+        
+        //Get set of items which have existing filename
+        std::set<std::string> conflicting_paths;
+        for(auto i = itemlist.begin();i!=itemlist.end() && !interrupted ;++i)
+        {
+            SPItem *item = *i;
+            std::string path;
+            const gchar *filename = item->getRepr()->attribute("inkscape:export-filename");
+            if (!filename)
+            {
+                auto id = item->getId();
+                if (!id)
+                {
+                    g_warning("object has no id");
+                    continue;
+                }
+                path = create_filepath_from_id(id, filename_entry.get_text());
+            }
+            else
+            {
+                path = absolutize_path_from_document_location(doc, filename);
+            }
+            if (Inkscape::IO::file_test(path.c_str(), G_FILE_TEST_EXISTS))
+            {
+                conflicting_paths.insert(path);
+            }
+        }
+
+        //get a common suffix for all conflicting path
+        //should every conflicting file have its own suffix?
+        std::string suffix = sp_ui_overwrite_file_batch(conflicting_paths);
+
+        //If export is cancelled by user set interrupt
+        if(suffix == "CANCEL")
+            interrupted = true;
+
         for(auto i = itemlist.begin();i!=itemlist.end() && !interrupted ;++i){
             SPItem *item = *i;
 
@@ -1048,6 +1084,10 @@ void Export::onExport ()
             } else {
                 path = absolutize_path_from_document_location(doc, filename);
             }
+
+            //if skip is choosed
+            if(conflicting_paths.count(path) && suffix == "SKIP")
+                continue;
 
             // retrieve export dpi hints
             const gchar *dpi_hint = item->getRepr()->attribute("inkscape:export-xdpi"); // only xdpi, ydpi is always the same now
@@ -1074,6 +1114,10 @@ void Export::onExport ()
                                                    _("Exporting file <b>%s</b>..."), safeFile), desktop);
                     std::vector<SPItem*> x;
                     std::vector<SPItem*> selected(desktop->getSelection()->items().begin(), desktop->getSelection()->items().end());
+
+                    if(conflicting_paths.count(path) && suffix != "OVERWRITE")
+                        path = path + suffix; //buggy part as suffix is added after extension.
+                        
                     if (!sp_export_png_file (doc, path.c_str(),
                                              *area, width, height, pHYs, pHYs,
                                              nv->pagecolor,

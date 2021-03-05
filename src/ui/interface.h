@@ -20,6 +20,10 @@
 
 #include <glibmm/ustring.h>
 
+//Added for sp_ui_overwrite_file_batch
+#include<string>
+#include<set>
+
 typedef struct _GtkWidget GtkWidget;
 
 namespace Inkscape {
@@ -59,6 +63,7 @@ Glib::ustring getLayoutPrefPath( Inkscape::UI::View::View *view );
  */
 void sp_ui_error_dialog (char const* message);
 bool sp_ui_overwrite_file (char const* filename);
+std::string sp_ui_overwrite_file_batch(std::set<std::string> &conflicting_paths);
 
 #endif // SEEN_SP_INTERFACE_H
 
