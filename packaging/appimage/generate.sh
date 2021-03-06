@@ -50,8 +50,7 @@ sed -i -e 's|/usr|/xxx|g' lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
 
 # Bundle Gdk pixbuf loaders without which the bundled Gtk does not work;
 # this should eventually be done by linuxdeployqt
-apt_bundle librsvg2-common libgdk-pixbuf2.0-0 libimagequant0
-cp /usr/lib/x86_64-linux-gnu/libimagequant.* usr/lib/x86_64-linux-gnu/
+apt_bundle librsvg2-common libgdk-pixbuf2.0-0
 cp /usr/lib/x86_64-linux-gnu/gdk-pixbuf-*/*/loaders/* usr/lib/x86_64-linux-gnu/gdk-pixbuf-*/*/loaders/
 cp /usr/lib/x86_64-linux-gnu/gdk-pixbuf-*/*/loaders.cache usr/lib/x86_64-linux-gnu/gdk-pixbuf-*/*/
 sed -i -e 's|/usr/lib/x86_64-linux-gnu/gdk-pixbuf-.*/.*/loaders/||g' usr/lib/x86_64-linux-gnu/gdk-pixbuf-*/*/loaders.cache
