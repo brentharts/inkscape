@@ -25,7 +25,6 @@
 #include "ui/widget/scrollprotected.h"
 
 //For set<> in batch export
-#include<string>
 #include<set>
 
 namespace Inkscape {

@@ -578,6 +578,23 @@ Glib::RefPtr<Gtk::Adjustment> Export::createSpinbutton( gchar const * /*key*/,
 } // end of createSpinbutton()
 
 
+//moved up because there was no declaration in header file. Should we add?
+static std::string absolutize_path_from_document_location(SPDocument *doc, const std::string &filename)
+{
+    std::string path;
+    //Make relative paths go from the document location, if possible:
+    if (!Glib::path_is_absolute(filename) && doc->getDocumentURI()) {
+        auto dirname = Glib::path_get_dirname(doc->getDocumentURI());
+        if (!dirname.empty()) {
+            path = Glib::build_filename(dirname, filename);
+        }
+    }
+    if (path.empty()) {
+        path = filename;
+    }
+    return path;
+}
+
 std::string create_filepath_from_id(Glib::ustring id, const Glib::ustring &file_entry_text)
 {
     if (id.empty())
@@ -604,6 +621,39 @@ std::string create_filepath_from_id(Glib::ustring id, const Glib::ustring &file_
     }
 
     return Glib::build_filename(directory, Glib::filename_from_utf8(id) + ".png");
+}
+
+std::string
+create_filepath_from_id_with_suffix(gchar const* id, const Glib::ustring &file_entry_text,const gchar *filename,SPDocument *doc)
+{
+
+    std::string path = "";
+    std::string temp_id;
+    std::string temp_filename;
+    for(int i=0;i<100;i++)
+    {
+        if (!filename) {
+            if (!id) {
+                g_warning("object has no id");
+                path = "";
+                return path;
+            }
+            temp_id = id;
+            path = create_filepath_from_id(temp_id + "_" + std::to_string(i), file_entry_text);
+        } else {
+            temp_filename = filename;
+            path = absolutize_path_from_document_location(doc, temp_filename + "_" + std::to_string(i));
+        }
+
+        if (!Inkscape::IO::file_test(path.c_str(), G_FILE_TEST_EXISTS))
+        {
+            return path;
+        }
+    }
+
+    //if not found return empty path
+    path = "";
+    return path;
 }
 
 void Export::onBatchClicked ()
@@ -959,22 +1009,6 @@ Export::create_progress_dialog(Glib::ustring progress_text)
     return dlg;
 }
 
-static std::string absolutize_path_from_document_location(SPDocument *doc, const std::string &filename)
-{
-    std::string path;
-    //Make relative paths go from the document location, if possible:
-    if (!Glib::path_is_absolute(filename) && doc->getDocumentURI()) {
-        auto dirname = Glib::path_get_dirname(doc->getDocumentURI());
-        if (!dirname.empty()) {
-            path = Glib::build_filename(dirname, filename);
-        }
-    }
-    if (path.empty()) {
-        path = filename;
-    }
-    return path;
-}
-
 // Called when unit is changed
 void Export::onUnitChanged()
 {
@@ -1058,10 +1092,10 @@ void Export::onExport ()
 
         //get a common suffix for all conflicting path
         //should every conflicting file have its own suffix?
-        std::string suffix = sp_ui_overwrite_file_batch(conflicting_paths);
+        auto conflict_response = sp_ui_overwrite_file_batch(conflicting_paths);
 
         //If export is cancelled by user set interrupt
-        if(suffix == "CANCEL")
+        if(conflict_response == -1)
             interrupted = true;
 
         for(auto i = itemlist.begin();i!=itemlist.end() && !interrupted ;++i){
@@ -1086,7 +1120,7 @@ void Export::onExport ()
             }
 
             //if skip is choosed
-            if(conflicting_paths.count(path) && suffix == "SKIP")
+            if(conflicting_paths.count(path) && conflict_response == 0)
                 continue;
 
             // retrieve export dpi hints
@@ -1115,8 +1149,14 @@ void Export::onExport ()
                     std::vector<SPItem*> x;
                     std::vector<SPItem*> selected(desktop->getSelection()->items().begin(), desktop->getSelection()->items().end());
 
-                    if(conflicting_paths.count(path) && suffix != "OVERWRITE")
-                        path = path + suffix; //buggy part as suffix is added after extension.
+                    //if response was add suffix
+                    if(conflicting_paths.count(path) && conflict_response == 2)
+                    {
+                        path = create_filepath_from_id_with_suffix(item->getId(), filename_entry.get_text(),filename,doc);                        
+                        if(path.empty())
+                            continue;
+                    }
+
                         
                     if (!sp_export_png_file (doc, path.c_str(),
                                              *area, width, height, pHYs, pHYs,
