@@ -330,13 +330,9 @@ Glib::ustring Application::get_symbolic_colors()
     sp_svg_write_color(colornamederror, sizeof(colornamederror), colorseterror);
     colorsetbase_inverse = colorsetbase ^ 0xffffff00;
     sp_svg_write_color(colornamed_inverse, sizeof(colornamed_inverse), colorsetbase_inverse);
-    css_str += "*{-gtk-icon-palette: success ";
-    css_str += colornamedsuccess;
-    css_str += ", warning ";
-    css_str += colornamedwarning;
-    css_str += ", error ";
-    css_str += colornamederror;
-    css_str += ";}";
+    css_str += "@define-color warning_color " + Glib::ustring(colornamedwarning) + ";\n";
+    css_str += "@define-color error_color " + Glib::ustring(colornamederror) + ";\n";
+    css_str += "@define-color success_color " + Glib::ustring(colornamedsuccess) + ";\n";
     css_str += "#InkRuler,";
     /* ":not(.rawstyle) > image" works only on images in first level of widget container
     if in the future we use a complex widget with more levels and we dont want to tweak the color
