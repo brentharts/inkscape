@@ -1110,10 +1110,8 @@ void Export::_export_raster(Inkscape::Extension::Output *extension)
                                               _("Exporting file <b>%s</b>..."), safeFile), desktop);
                     MessageCleaner msgFlashCleanup(desktop->messageStack()->flashF(Inkscape::IMMEDIATE_MESSAGE,
                                                    _("Exporting file <b>%s</b>..."), safeFile), desktop);
-                    
                     std::vector<SPItem*> x;
                     std::vector<SPItem*> selected(desktop->getSelection()->items().begin(), desktop->getSelection()->items().end());
-                        
                     if (!sp_export_png_file (doc, path.c_str(),
                                              *area, width, height, pHYs, pHYs,
                                              nv->pagecolor,
@@ -1138,9 +1136,9 @@ void Export::_export_raster(Inkscape::Extension::Output *extension)
 
             n++;
         }
-        
+
         desktop->messageStack()->flashF(Inkscape::INFORMATION_MESSAGE,
-                                    _("Successfully exported <b>%d</b> files from <b>%d</b> selected items."), export_count, num);
+                                        _("Successfully exported <b>%d</b> files from <b>%d</b> selected items."), export_count, num);
 
         setExporting(false);
         delete prog_dlg;

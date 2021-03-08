@@ -221,7 +221,6 @@ sp_ui_overwrite_file(gchar const *filename)
     return return_value;
 }
 
-
 /*
   Local Variables:
   mode:c++

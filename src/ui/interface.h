@@ -20,7 +20,6 @@
 
 #include <glibmm/ustring.h>
 
-
 typedef struct _GtkWidget GtkWidget;
 
 namespace Inkscape {
