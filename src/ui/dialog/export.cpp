@@ -605,6 +605,35 @@ std::string create_filepath_from_id(Glib::ustring id, const Glib::ustring &file_
     return Glib::build_filename(directory, Glib::filename_from_utf8(id) + ".png");
 }
 
+std::string
+create_filepath_from_id_with_suffix(Glib::ustring id, const Glib::ustring &file_entry_text)
+{
+
+    std::string path = "";
+    std::string temp_id;
+    path = create_filepath_from_id(id, file_entry_text);
+    if (!Inkscape::IO::file_test(path.c_str(), G_FILE_TEST_EXISTS))
+    {
+        return path;
+    }
+
+    unsigned int i=1;
+    while(i<100)
+    {
+        path = create_filepath_from_id(id + "_" + std::to_string(i), file_entry_text);
+        if (!Inkscape::IO::file_test(path.c_str(), G_FILE_TEST_EXISTS))
+        {
+            return path;
+        }
+        i++;
+    }
+
+
+    //if not found return empty path
+    path = "";
+    return path;
+}
+
 void Export::onBatchClicked ()
 {
     if (batch_export.get_active()) {
@@ -1040,18 +1069,20 @@ void Export::_export_raster(Inkscape::Extension::Output *extension)
             onProgressCallback(0.0, prog_dlg);
 
             // retrieve export filename hint
-            const gchar *filename = item->getRepr()->attribute("inkscape:export-filename");
+            // temporary disabled as filename is preventing adding suffix
+            // const gchar *filename = item->getRepr()->attribute("inkscape:export-filename");
+            
             std::string path;
-            if (!filename) {
-                auto id = item->getId();
-                if (!id) {
-                    g_warning("object has no id");
-                    continue;
-                }
-                path = create_filepath_from_id(id, filename_entry.get_text());
-            } else {
-                path = absolutize_path_from_document_location(doc, filename);
+            
+            //creating path only from id. TODO: create path from filename + id.
+            auto id = item->getId();
+            if (!id) {
+                g_warning("object has no id");
+                continue;
             }
+            path = create_filepath_from_id_with_suffix(id, filename_entry.get_text());
+            if(path.empty())
+                continue;
 
             // retrieve export dpi hints
             const gchar *dpi_hint = item->getRepr()->attribute("inkscape:export-xdpi"); // only xdpi, ydpi is always the same now
@@ -1076,6 +1107,7 @@ void Export::_export_raster(Inkscape::Extension::Output *extension)
                                               _("Exporting file <b>%s</b>..."), safeFile), desktop);
                     MessageCleaner msgFlashCleanup(desktop->messageStack()->flashF(Inkscape::IMMEDIATE_MESSAGE,
                                                    _("Exporting file <b>%s</b>..."), safeFile), desktop);
+                    
                     std::vector<SPItem*> x;
                     std::vector<SPItem*> selected(desktop->getSelection()->items().begin(), desktop->getSelection()->items().end());
                     if (!sp_export_png_file (doc, path.c_str(),
@@ -1102,9 +1134,15 @@ void Export::_export_raster(Inkscape::Extension::Output *extension)
 
             n++;
         }
+<<<<<<< HEAD
 
         desktop->messageStack()->flashF(Inkscape::INFORMATION_MESSAGE,
                                         _("Successfully exported <b>%d</b> files from <b>%d</b> selected items."), export_count, num);
+=======
+        
+        desktop->messageStack()->flashF(Inkscape::INFORMATION_MESSAGE,
+                                    _("Successfully exported <b>%d</b> files from <b>%d</b> selected items."), export_count, num);
+>>>>>>> 156f7eb34e... Temporary default add suffix batch export
 
         setExporting(false);
         delete prog_dlg;
