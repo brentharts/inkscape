@@ -20,8 +20,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: inkscape\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
-"POT-Creation-Date: 2021-03-07 13:49+0900\n"
-"PO-Revision-Date: 2021-03-07 14:36+0900\n"
+"POT-Creation-Date: 2021-03-08 15:45+0900\n"
+"PO-Revision-Date: 2021-03-08 15:47+0900\n"
 "Last-Translator: Masato Hashimoto <cabezon.hashimoto@gmail.com>\n"
 "Language-Team: Japanese <inkscape-translator@lists.sourceforge.net>\n"
 "Language: ja\n"
@@ -18236,28 +18236,24 @@ msgstr "値:"
 
 #. TRANSLATORS: Abbreviation for red color channel in RGBA
 #: ../src/ui/dialog/filter-effects-dialog.cpp:2792
-#| msgid "R:"
 msgctxt "color"
 msgid "R:"
 msgstr "R:"
 
 #. TRANSLATORS: Abbreviation for green color channel in RGBA
 #: ../src/ui/dialog/filter-effects-dialog.cpp:2794
-#| msgid "G:"
 msgctxt "color"
 msgid "G:"
 msgstr "G:"
 
 #. TRANSLATORS: Abbreviation for blue color channel in RGBA
 #: ../src/ui/dialog/filter-effects-dialog.cpp:2796
-#| msgid "B:"
 msgctxt "color"
 msgid "B:"
 msgstr "B:"
 
 #. TRANSLATORS: Abbreviation for alpha channel in RGBA
 #: ../src/ui/dialog/filter-effects-dialog.cpp:2798
-#| msgid "A:"
 msgctxt "color"
 msgid "A:"
 msgstr "A:"
@@ -21268,7 +21264,7 @@ msgstr ""
 "に設定されているときにはカーソルの拡大縮小がおかしくなることがあります。"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1596
-#: ../share/ui/inkscape-start.glade:1180
+#: ../share/ui/inkscape-start.glade:1194
 msgid "Theme"
 msgstr "テーマ"
 
@@ -23357,7 +23353,7 @@ msgid "Export custom keyboard shortcuts to a file"
 msgstr "カスタムキーボードショートカットをファイルにエクスポートします"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2814
-#: ../share/ui/inkscape-start.glade:1210
+#: ../share/ui/inkscape-start.glade:1224
 msgid "Keyboard"
 msgstr "キーボード"
 
@@ -25682,7 +25678,7 @@ msgstr "オブジェクトの変形時にスナップを無効"
 msgid "No Category"
 msgstr "カテゴリーなし"
 
-#: ../src/ui/modifiers.cpp:60 ../share/ui/inkscape-start.glade:1195
+#: ../src/ui/modifiers.cpp:60 ../share/ui/inkscape-start.glade:1209
 #: ../share/extensions/printing_marks.inx:17
 msgid "Canvas"
 msgstr "キャンバス"
@@ -29114,6 +29110,10 @@ msgstr "コネクターを作成"
 #: ../src/ui/tools/connector-tool.cpp:950
 msgid "Finishing connector"
 msgstr "コネクターを終了"
+
+#: ../src/ui/tools/connector-tool.cpp:976
+msgid "Click to join at this point"
+msgstr "クリックでこの結節点につなぎます"
 
 #: ../src/ui/tools/connector-tool.cpp:1203
 msgid "<b>Connector endpoint</b>: drag to reroute or connect to new shapes"
@@ -33971,14 +33971,12 @@ msgstr "カーソル座標"
 
 #. TRANSLATORS: Abbreviation for canvas zoom level
 #: ../src/widgets/desktop-widget.cpp:360
-#| msgid "Z:"
 msgctxt "canvas"
 msgid "Z:"
 msgstr "Z:"
 
 #. TRANSLATORS: Abbreviation for canvas rotation
 #: ../src/widgets/desktop-widget.cpp:363
-#| msgid "R:"
 msgctxt "canvas"
 msgid "R:"
 msgstr "R:"
@@ -34934,51 +34932,55 @@ msgid "Symbolic Adwaita"
 msgstr "シンボル風 Adwaita"
 
 #: ../share/ui/inkscape-start.glade:929
+msgid "Symbolic Adwaita Dark"
+msgstr "シンボル風 Adwaita ダーク"
+
+#: ../share/ui/inkscape-start.glade:943
 msgid "Colorful Darkness"
 msgstr "カラフルなダークテーマ"
 
-#: ../share/ui/inkscape-start.glade:943
+#: ../share/ui/inkscape-start.glade:957
 msgid "Colorful Lightness"
 msgstr "カラフルなライトテーマ"
 
-#: ../share/ui/inkscape-start.glade:957
+#: ../share/ui/inkscape-start.glade:971
 msgid "Careful Darkness"
 msgstr "無駄のないダークテーマ"
 
-#: ../share/ui/inkscape-start.glade:971
+#: ../share/ui/inkscape-start.glade:985
 msgid "Compacted (Small Screens)"
 msgstr "コンパクト (スクリーン小)"
 
-#: ../share/ui/inkscape-start.glade:991
+#: ../share/ui/inkscape-start.glade:1005
 msgid "Inkscape 1.1"
 msgstr "Inkscape 1.1"
 
-#: ../share/ui/inkscape-start.glade:1031
+#: ../share/ui/inkscape-start.glade:1045
 msgid "Welcome"
 msgstr "ようこそ"
 
 #. This is a pun in English. You can translate it as 'Introducing you to freedom' or similar.
-#: ../share/ui/inkscape-start.glade:1048
+#: ../share/ui/inkscape-start.glade:1062
 msgid "Drawing you to freedom"
 msgstr "Drawing you to freedom"
 
-#: ../share/ui/inkscape-start.glade:1107
+#: ../share/ui/inkscape-start.glade:1121
 msgid "Draw Freely."
 msgstr "Draw Freely."
 
-#: ../share/ui/inkscape-start.glade:1166
+#: ../share/ui/inkscape-start.glade:1180
 msgid "Quick Setup"
 msgstr "クイックセットアップ"
 
-#: ../share/ui/inkscape-start.glade:1379
+#: ../share/ui/inkscape-start.glade:1393
 msgid "Select the default color background for the canvas"
 msgstr "キャンバスのデフォルトの背景色を選択します"
 
-#: ../share/ui/inkscape-start.glade:1487
+#: ../share/ui/inkscape-start.glade:1501
 msgid "Welcome!"
 msgstr "ようこそ！"
 
-#: ../share/ui/inkscape-start.glade:1507
+#: ../share/ui/inkscape-start.glade:1521
 msgid ""
 "<big><b>The Inkscape project is supported by users like you.</b> Through our "
 "collective time, money and skill, we have made this software for everyone in "
@@ -34994,7 +34996,7 @@ msgstr ""
 "お考えなら、今日にでも Inksape プロジェクトに参加することを考えてみてくださ"
 "い。</b></big>"
 
-#: ../share/ui/inkscape-start.glade:1568
+#: ../share/ui/inkscape-start.glade:1582
 msgid ""
 "Learn how to\n"
 "Contribute Time"
@@ -35002,7 +35004,7 @@ msgstr ""
 "活動に参加する\n"
 "方法を学ぶ"
 
-#: ../share/ui/inkscape-start.glade:1626
+#: ../share/ui/inkscape-start.glade:1640
 msgid ""
 "Learn how to\n"
 "Fund Inkscape"
@@ -35010,59 +35012,59 @@ msgstr ""
 "資金提供の\n"
 "方法を学ぶ"
 
-#: ../share/ui/inkscape-start.glade:1674
+#: ../share/ui/inkscape-start.glade:1688
 msgid "Thanks!"
 msgstr "どうも！"
 
-#: ../share/ui/inkscape-start.glade:1708
+#: ../share/ui/inkscape-start.glade:1722
 msgid "Supported by You"
 msgstr "サポートしよう"
 
-#: ../share/ui/inkscape-start.glade:1743
+#: ../share/ui/inkscape-start.glade:1757
 msgctxt "Welcome dialog"
 msgid "Recent Files"
 msgstr "最近開いたファイル"
 
-#: ../share/ui/inkscape-start.glade:1762
+#: ../share/ui/inkscape-start.glade:1776
 msgctxt "Welcome dialog"
 msgid "Existing Files"
 msgstr "既存のファイル"
 
-#: ../share/ui/inkscape-start.glade:1819
+#: ../share/ui/inkscape-start.glade:1833
 msgctxt "Document format category"
 msgid "Print"
 msgstr "プリント"
 
-#: ../share/ui/inkscape-start.glade:1878
+#: ../share/ui/inkscape-start.glade:1892
 msgctxt "Document format category"
 msgid "Screen"
 msgstr "スクリーン"
 
-#: ../share/ui/inkscape-start.glade:1936
+#: ../share/ui/inkscape-start.glade:1950
 msgctxt "Document format category"
 msgid "Video"
 msgstr "動画"
 
 #. Social Media
-#: ../share/ui/inkscape-start.glade:1994
+#: ../share/ui/inkscape-start.glade:2008
 msgctxt "Document format category"
 msgid "Social"
 msgstr "ソーシャル"
 
-#: ../share/ui/inkscape-start.glade:2052
+#: ../share/ui/inkscape-start.glade:2066
 msgctxt "Document format category"
 msgid "Other"
 msgstr "その他"
 
-#: ../share/ui/inkscape-start.glade:2075
+#: ../share/ui/inkscape-start.glade:2089
 msgid "Load"
 msgstr "開く"
 
-#: ../share/ui/inkscape-start.glade:2091
+#: ../share/ui/inkscape-start.glade:2105
 msgid "Show this every time"
 msgstr "毎回表示する"
 
-#: ../share/ui/inkscape-start.glade:2123
+#: ../share/ui/inkscape-start.glade:2137
 msgid "Time to Draw"
 msgstr "絵を描く"
 
