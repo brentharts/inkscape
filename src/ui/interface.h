@@ -20,9 +20,6 @@
 
 #include <glibmm/ustring.h>
 
-//Added for sp_ui_overwrite_file_batch
-#include<set>
-#include<string>
 
 typedef struct _GtkWidget GtkWidget;
 

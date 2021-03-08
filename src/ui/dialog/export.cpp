@@ -135,6 +135,7 @@ class ExportProgressDialog : public Gtk::Dialog {
 };
 
 static std::string create_filepath_from_id(Glib::ustring, const Glib::ustring &);
+static std::string absolutize_path_from_document_location(SPDocument *doc, const std::string &filename);
 
 /** A list of strings that is used both in the preferences, and in the
     data fields to describe the various values of \c selection_type. */
@@ -577,7 +578,7 @@ Glib::RefPtr<Gtk::Adjustment> Export::createSpinbutton( gchar const * /*key*/,
 } // end of createSpinbutton()
 
 
-//moved up because there was no declaration in header file. Should we add?
+
 static std::string absolutize_path_from_document_location(SPDocument *doc, const std::string &filename)
 {
     std::string path;

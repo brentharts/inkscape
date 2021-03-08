@@ -221,45 +221,6 @@ sp_ui_overwrite_file(gchar const *filename)
     return return_value;
 }
 
-/* THIS FUNCTION IS NOT USED FOR THE TIME BEING.
-int
-sp_ui_overwrite_file_batch(std::set<std::string>& conflicting_paths)
-{
-    //0 means no conflicting paths hence take no action.
-    if(conflicting_paths.size()<1)
-        return 1;
-    
-    //get space separated list of paths for printing in dialog
-    Glib::ustring sec_message = "These files already exists:\n";
-    for(auto& path:conflicting_paths)
-        sec_message = sec_message + "- " + path + "\n";
-    sec_message = sec_message + "You can also skip these files or make a copy with suitable suffix";    
-
-    //dialog creation. reference taken from sp_ui_overwrite_file
-    Gtk::Window *window = SP_ACTIVE_DESKTOP->getToplevel();
-
-    Gtk::MessageDialog *dialog = new Gtk::MessageDialog(*window,
-                                    "",
-                                    true,
-                                    Gtk::MESSAGE_WARNING,
-                                    Gtk::BUTTONS_NONE,
-                                    true
-                                );
-
-    dialog->set_message("Files already exists. Do you want to replace them?");
-    dialog->set_secondary_text(sec_message);
-    //Don't use -4 as it is reserved for Gtk::RESPONSE::DELETE_EVENT
-    dialog->add_button(_("_Cancel"), -1);
-    dialog->add_button(_("Skip"), 0);
-    dialog->add_button(_("Replace"), 1);
-    dialog->add_button(_("Add Suffix"), 2);
-    dialog->set_default_response(1);
-    auto response = dialog->run();
- 
-    delete dialog;
-    return response;
-}
-*/
 
 /*
   Local Variables:
