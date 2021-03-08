@@ -577,6 +577,23 @@ Glib::RefPtr<Gtk::Adjustment> Export::createSpinbutton( gchar const * /*key*/,
 } // end of createSpinbutton()
 
 
+//moved up because there was no declaration in header file. Should we add?
+static std::string absolutize_path_from_document_location(SPDocument *doc, const std::string &filename)
+{
+    std::string path;
+    //Make relative paths go from the document location, if possible:
+    if (!Glib::path_is_absolute(filename) && doc->getDocumentURI()) {
+        auto dirname = Glib::path_get_dirname(doc->getDocumentURI());
+        if (!dirname.empty()) {
+            path = Glib::build_filename(dirname, filename);
+        }
+    }
+    if (path.empty()) {
+        path = filename;
+    }
+    return path;
+}
+
 std::string create_filepath_from_id(Glib::ustring id, const Glib::ustring &file_entry_text)
 {
     if (id.empty())
@@ -618,9 +635,9 @@ create_filepath_from_id_with_suffix(Glib::ustring id, const Glib::ustring &file_
     }
 
     unsigned int i=1;
-    while(i<100)
+    while(i<UINT_MAX)
     {
-        path = create_filepath_from_id(id + "_" + std::to_string(i), file_entry_text);
+        path = create_filepath_from_id(id + "_copy_" + std::to_string(i), file_entry_text);
         if (!Inkscape::IO::file_test(path.c_str(), G_FILE_TEST_EXISTS))
         {
             return path;
@@ -987,22 +1004,6 @@ Export::create_progress_dialog(Glib::ustring progress_text)
     return dlg;
 }
 
-static std::string absolutize_path_from_document_location(SPDocument *doc, const std::string &filename)
-{
-    std::string path;
-    //Make relative paths go from the document location, if possible:
-    if (!Glib::path_is_absolute(filename) && doc->getDocumentURI()) {
-        auto dirname = Glib::path_get_dirname(doc->getDocumentURI());
-        if (!dirname.empty()) {
-            path = Glib::build_filename(dirname, filename);
-        }
-    }
-    if (path.empty()) {
-        path = filename;
-    }
-    return path;
-}
-
 // Called when unit is changed
 void Export::onUnitChanged()
 {
@@ -1061,6 +1062,7 @@ void Export::_export_raster(Inkscape::Extension::Output *extension)
         gint export_count = 0;
 
         auto itemlist= desktop->getSelection()->items();
+
         for(auto i = itemlist.begin();i!=itemlist.end() && !interrupted ;++i){
             SPItem *item = *i;
 
@@ -1110,6 +1112,7 @@ void Export::_export_raster(Inkscape::Extension::Output *extension)
                     
                     std::vector<SPItem*> x;
                     std::vector<SPItem*> selected(desktop->getSelection()->items().begin(), desktop->getSelection()->items().end());
+                        
                     if (!sp_export_png_file (doc, path.c_str(),
                                              *area, width, height, pHYs, pHYs,
                                              nv->pagecolor,
@@ -1134,15 +1137,9 @@ void Export::_export_raster(Inkscape::Extension::Output *extension)
 
             n++;
         }
-<<<<<<< HEAD
-
-        desktop->messageStack()->flashF(Inkscape::INFORMATION_MESSAGE,
-                                        _("Successfully exported <b>%d</b> files from <b>%d</b> selected items."), export_count, num);
-=======
         
         desktop->messageStack()->flashF(Inkscape::INFORMATION_MESSAGE,
                                     _("Successfully exported <b>%d</b> files from <b>%d</b> selected items."), export_count, num);
->>>>>>> 156f7eb34e... Temporary default add suffix batch export
 
         setExporting(false);
         delete prog_dlg;

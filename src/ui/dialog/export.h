@@ -25,6 +25,9 @@
 #include "ui/dialog/dialog-base.h"
 #include "ui/widget/scrollprotected.h"
 
+//For set<> in batch export
+#include<set>
+
 namespace Inkscape {
 namespace UI {
 namespace Dialog {
