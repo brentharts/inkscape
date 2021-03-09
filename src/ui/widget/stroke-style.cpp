@@ -494,7 +494,7 @@ void StrokeStyle::unitChangedCB()
 {
     // If the unit selector is set to hairline, don't do the normal conversion.
     if (isHairlineSelected()) {
-        scaleLine();
+        scaleLine(STROKE_UPDATE_WIDTH);
         return;
     }
 
@@ -824,7 +824,7 @@ static inline double calcScaleLineWidth(const double width_typed, SPItem *const 
  * Sets line properties like width, dashes, markers, etc. on all currently selected items.
  */
 void
-StrokeStyle::scaleLine()
+StrokeStyle::scaleLine(StrokeUpdateType update_type)
 {
     if (!desktop) {
         return;
@@ -854,39 +854,41 @@ StrokeStyle::scaleLine()
         dashSelector->get_dash(&ndash, &dash, &offset);
 
         for(auto i=items.begin();i!=items.end();++i){
+            double width = (*i)->style->stroke_width.computed;
+
             /* Set stroke width */
-            const double width = calcScaleLineWidth(width_typed, (*i), unit);
+            if (update_type == STROKE_UPDATE_WIDTH) {
+                width = calcScaleLineWidth(width_typed, (*i), unit);
 
-            /* For renderers that don't understand -inkscape-stroke:hairline, fall back to 1px non-scaling */
-            if (isHairlineSelected()) {
-                const double width1px = calcScaleLineWidth(1, (*i), unit);
-                Inkscape::CSSOStringStream os_width;
-                os_width << width1px;
-                sp_repr_css_set_property(css, "stroke-width", os_width.str().c_str());
-                sp_repr_css_set_property(css, "vector-effect", "non-scaling-stroke");
-                sp_repr_css_set_property(css, "-inkscape-stroke", "hairline");
-            } else {
-                Inkscape::CSSOStringStream os_width;
-                os_width << width;
-                sp_repr_css_set_property(css, "stroke-width", os_width.str().c_str());
-                sp_repr_css_unset_property(css, "vector-effect");
-                sp_repr_css_unset_property(css, "-inkscape-stroke");
-            }
-
-            {
+                /* For renderers that don't understand -inkscape-stroke:hairline, fall back to 1px non-scaling */
+                if (isHairlineSelected()) {
+                    const double width1px = calcScaleLineWidth(1, (*i), unit);
+                    Inkscape::CSSOStringStream os_width;
+                    os_width << width1px;
+                    sp_repr_css_set_property(css, "stroke-width", os_width.str().c_str());
+                    sp_repr_css_set_property(css, "vector-effect", "non-scaling-stroke");
+                    sp_repr_css_set_property(css, "-inkscape-stroke", "hairline");
+                } else {
+                    Inkscape::CSSOStringStream os_width;
+                    os_width << width;
+                    sp_repr_css_set_property(css, "stroke-width", os_width.str().c_str());
+                    sp_repr_css_unset_property(css, "vector-effect");
+                    sp_repr_css_unset_property(css, "-inkscape-stroke");
+                }
+            } else if (update_type == STROKE_UPDATE_MITER) {
                 Inkscape::CSSOStringStream os_ml;
                 os_ml << miterlimit;
                 sp_repr_css_set_property(css, "stroke-miterlimit", os_ml.str().c_str());
-            }
-
-            /* Set dash */
-            Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-            gboolean scale = prefs->getBool("/options/dash/scale", true);
-            if (scale) {
-                setScaledDash(css, ndash, dash, offset, width);
-            }
-            else {
-                setScaledDash(css, ndash, dash, offset, document->getDocumentScale()[0]);
+            } else if (update_type == STROKE_UPDATE_DASH) {
+                /* Set dash */
+                Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+                gboolean scale = prefs->getBool("/options/dash/scale", true);
+                if (scale) {
+                    setScaledDash(css, ndash, dash, offset, width);
+                }
+                else {
+                    setScaledDash(css, ndash, dash, offset, document->getDocumentScale()[0]);
+                }
             }
             sp_desktop_apply_css_recursive ((*i), css, true);
         }
@@ -934,7 +936,7 @@ StrokeStyle::widthChangedCB()
         return;
     }
 
-    scaleLine();
+    scaleLine(STROKE_UPDATE_WIDTH);
 }
 
 /**
@@ -948,7 +950,7 @@ StrokeStyle::miterLimitChangedCB()
         return;
     }
 
-    scaleLine();
+    scaleLine(STROKE_UPDATE_MITER);
 }
 
 /**
@@ -963,7 +965,7 @@ StrokeStyle::lineDashChangedCB()
         return;
     }
 
-    scaleLine();
+    scaleLine(STROKE_UPDATE_DASH);
 }
 
 /**
