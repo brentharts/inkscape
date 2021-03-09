@@ -629,25 +629,26 @@ create_filepath_from_id_with_suffix(Glib::ustring id, const Glib::ustring &file_
 
     std::string path = "";
     std::string temp_id;
+    // If file does not exist already return path without suffix
     path = create_filepath_from_id(id, file_entry_text);
     if (!Inkscape::IO::file_test(path.c_str(), G_FILE_TEST_EXISTS))
     {
         return path;
     }
 
-    unsigned int i=1;
-    while(i<UINT_MAX)
+    // Check if filename ($id_copy_$i) exist. If not, then return that path
+    // UINT_MAX to check for maximum value of i and also prevent infinite loop.
+    for(unsigned int i=1; i<UINT_MAX; i++)
     {
         path = create_filepath_from_id(id + "_copy_" + std::to_string(i), file_entry_text);
         if (!Inkscape::IO::file_test(path.c_str(), G_FILE_TEST_EXISTS))
         {
             return path;
         }
-        i++;
     }
 
 
-    //if not found return empty path
+    //if no suitable suffix found return empty path
     path = "";
     return path;
 }
