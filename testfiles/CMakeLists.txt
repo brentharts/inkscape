@@ -80,6 +80,7 @@ set(TEST_SOURCES
     lpe-bendpath-test
     lpe-bool-test
     lpe-bspline-test
+    lpe-cloneoriginal-test
     lpe-patternalongpath-test
     lpe-spiro-test
     xml-test
