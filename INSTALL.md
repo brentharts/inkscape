@@ -13,7 +13,7 @@ typical libraries you may need to install are:
 Make sure you got the submodules code when fetching the code 
 (either by using `--recurse-submodules` on the git clone command, as recommended on the [Getting started]
 (https://inkscape.org/develop/getting-started/#fetching-the-source-code) page, 
-or by running `git submodule init && git submodule update` if you "forgot")
+or by running `git submodule init && git submodule update`)
 
 Please see [the wiki page on compiling Inkscape](http://wiki.inkscape.org/wiki/index.php/CompilingInkscape) for the
 most current dependencies, including links to the source tarballs. 
