@@ -9,7 +9,7 @@ install, if they are not already present on your system. The most
 typical libraries you may need to install are: 
 [Boehm-GC](http://www.hboehm.info/gc/), 
 [libsigc++](https://github.com/libsigcplusplus/libsigcplusplus), 
-[gtkmm](https://www.gtkmm.org/).(space, space)
+[gtkmm](https://www.gtkmm.org/).
 
 Make sure you got the submodules code when fetching the code 
 (either by using `--recurse-submodules` on the git clone command, as recommended on the [Getting started](https://inkscape.org/develop/getting-started/#fetching-the-source-code) page, or by running `git submodule init && git submodule update`)
