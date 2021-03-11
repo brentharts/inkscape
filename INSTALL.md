@@ -10,6 +10,7 @@ typical libraries you may need to install are:
 [Boehm-GC](http://www.hboehm.info/gc/), 
 [libsigc++](https://github.com/libsigcplusplus/libsigcplusplus), 
 [gtkmm](https://www.gtkmm.org/).
+Make sure you got the submodules code when fetching the code (either by using --recurse-submodules on the git clone command, as recommended on the Getting started page, or by running git submodule init && git submodule update if you "forgot")
 
 Please see [the wiki page on compiling Inkscape](http://wiki.inkscape.org/wiki/index.php/CompilingInkscape) for the
 most current dependencies, including links to the source tarballs. 
