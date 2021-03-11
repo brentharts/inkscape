@@ -100,7 +100,6 @@ class ThemeCols: public Gtk::TreeModel::ColumnRecord {
             this->add(this->error);
             this->add(this->dark);
             this->add(this->symbolic);
-            this->add(this->smallicons);
             this->add(this->enabled);
         }
         Gtk::TreeModelColumn<Glib::ustring> id;
@@ -113,7 +112,6 @@ class ThemeCols: public Gtk::TreeModel::ColumnRecord {
         Gtk::TreeModelColumn<Glib::ustring> error;
         Gtk::TreeModelColumn<bool> dark;
         Gtk::TreeModelColumn<bool> symbolic;
-        Gtk::TreeModelColumn<bool> smallicons;
         Gtk::TreeModelColumn<bool> enabled;
 };
 
@@ -175,7 +173,10 @@ StartScreen::StartScreen()
     builder->get_widget("thanks", thanks);
     builder->get_widget("show_toggle", show_toggle);
     builder->get_widget("load", load);
-
+    builder->get_widget("compact", compact);
+    builder->get_widget("smallicons", smallicons);
+    builder->get_widget("iconrowsmall", iconrowsmall);
+    builder->get_widget("iconrow", iconrow);
     // Unparent to move to our dialog window.
     auto parent = banners->get_parent();
     parent->remove(*banners);
@@ -190,6 +191,21 @@ StartScreen::StartScreen()
     enlist_recent_files();
     enlist_keys();
     filter_themes();
+    if (prefs->getString("/options/boot/theme") == "") {
+        compact->set_sensitive(false);
+    }
+    Glib::ustring gtkthemename = prefs->getString("/theme/gtkTheme");
+    if (gtkthemename == "Minwaita") {
+        compact->set_active(true);
+    }
+    if (prefs->getBool("/toolbox/tools/small",false)) {
+        smallicons->set_active(true);
+        iconrowsmall->show();
+        iconrow->hide();
+    } else {
+        iconrow->show();
+        iconrowsmall->hide();
+    }
     set_active_combo("themes", prefs->getString("/options/boot/theme"));
     set_active_combo("canvas", prefs->getString("/options/boot/canvas"));
 
@@ -197,6 +213,8 @@ StartScreen::StartScreen()
     canvas->signal_changed().connect(sigc::mem_fun(*this, &StartScreen::canvas_changed));
     keys->signal_changed().connect(sigc::mem_fun(*this, &StartScreen::keyboard_changed));
     themes->signal_changed().connect(sigc::mem_fun(*this, &StartScreen::theme_changed));
+    compact->property_active().signal_changed().connect(sigc::mem_fun(*this, &StartScreen::theme_changed));
+    smallicons->property_active().signal_changed().connect(sigc::mem_fun(*this, &StartScreen::theme_changed));
     save->signal_clicked().connect(sigc::bind<Gtk::Button *>(sigc::mem_fun(*this, &StartScreen::notebook_next), save));
 
     // "Supported by You" tab
@@ -490,10 +508,36 @@ StartScreen::refresh_theme(Glib::ustring theme_name)
     auto settings = Gtk::Settings::get_default();
 
     auto prefs = Inkscape::Preferences::get();
-
-    settings->property_gtk_theme_name() = theme_name;
-    settings->property_gtk_application_prefer_dark_theme() = prefs->getBool("/theme/darkTheme", true);
-    settings->property_gtk_icon_theme_name() = prefs->getString("/theme/iconTheme");
+    if (theme_name == "") {
+        theme_name = prefs->getString("/theme/defaultTheme");
+        bool preferDarkTheme = prefs->getBool("/theme/defaultPreferDarkTheme", false);
+        prefs->setBool("/theme/preferDarkTheme", preferDarkTheme);
+        settings->property_gtk_application_prefer_dark_theme() = preferDarkTheme;
+        settings->property_gtk_theme_name() = theme_name;
+        bool dark = Glib::ustring(theme_name).find(":dark") != std::string::npos;
+        if (!dark) {
+            Glib::RefPtr<Gtk::StyleContext> stylecontext = get_style_context();
+            Gdk::RGBA rgba;
+            bool background_set = stylecontext->lookup_color("theme_bg_color", rgba);
+            if (background_set && (0.299 * rgba.get_red() + 0.587 * rgba.get_green() + 0.114 * rgba.get_blue()) < 0.5) {
+                dark = true;
+            }
+        }
+        prefs->setBool("/theme/darkTheme", dark);
+        Glib::RefPtr<Gdk::Display> display = Gdk::Display::get_default();
+        Glib::RefPtr<Gdk::Screen>  screen = display->get_default_screen();
+        Glib::RefPtr<Gtk::IconTheme> icon_theme = Gtk::IconTheme::get_for_screen(screen);
+        Gtk::IconInfo iconinfo = icon_theme->lookup_icon("tool-pointer", 22, Gtk::ICON_LOOKUP_FORCE_SIZE);
+        prefs->setBool("/theme/symbolicIcons", iconinfo.is_symbolic());
+    } else {
+        settings->property_gtk_theme_name() = theme_name;
+        settings->property_gtk_application_prefer_dark_theme() = prefs->getBool("/theme/preferDarkTheme", false);
+    }
+    Glib::ustring themeiconname = prefs->getString("/theme/iconTheme");
+    if (themeiconname == "") {
+        themeiconname = prefs->getString("/theme/defaultIconTheme");
+    }
+    settings->property_gtk_icon_theme_name() = themeiconname;
 
     if (prefs->getBool("/theme/symbolicIcons", false)) {
         get_style_context()->add_class("symbolic");
@@ -537,8 +581,25 @@ StartScreen::theme_changed()
 
         // Update theme from combo.
         Glib::ustring icons = row[cols.icons];
-        prefs->setBool("/toolbox/tools/small", row[cols.smallicons]);
-        prefs->setString("/theme/gtkTheme", row[cols.theme]);
+        if (smallicons->get_active()) {
+            smallicons->set_active(true);
+            iconrowsmall->show();
+            iconrow->hide();
+        } else {
+            iconrow->show();
+            iconrowsmall->hide();
+        }
+        prefs->setBool("/toolbox/tools/small", smallicons->get_active());
+        if (row[cols.theme] == "") {
+            compact->set_sensitive(false);
+        } else {
+            compact->set_sensitive(has_minwaita);
+        }
+        if (compact->get_active()) {
+            prefs->setString("/theme/gtkTheme", "Minwaita");
+        } else {
+            prefs->setString("/theme/gtkTheme", row[cols.theme]);
+        }
         prefs->setString("/theme/iconTheme", icons);
         prefs->setBool("/theme/preferDarkTheme", row[cols.dark]);
         prefs->setBool("/theme/darkTheme", row[cols.dark]);
@@ -557,8 +618,7 @@ StartScreen::theme_changed()
             prefs->setUInt(prefix + "/symbolicWarningColor", get_color_value(row[cols.warn]));
             prefs->setUInt(prefix + "/symbolicErrorColor", get_color_value(row[cols.error]));
         }
-
-        refresh_theme(row[cols.theme]);
+        refresh_theme(prefs->getString("/theme/gtkTheme"));
     } catch(int e) {
         g_warning("Couldn't find theme value.");
     }
@@ -602,11 +662,17 @@ StartScreen::filter_themes()
     // We need to disable themes which aren't available.
     auto store = Glib::wrap(GTK_LIST_STORE(gtk_combo_box_get_model(themes->gobj())));
     auto available = get_available_themes();
-
     for(auto row : store->children()) {
         Glib::ustring theme = row[cols.theme];
-        row[cols.enabled] = available.find(theme) != available.end();
+            
+        if (theme == "") {
+            row[cols.enabled] = true;
+        } else {
+            row[cols.enabled] = available.find(theme) != available.end();
+        }
     }
+    has_minwaita = available.find("Minwaita") != available.end();
+    compact->set_sensitive(has_minwaita);
 }
 
 void

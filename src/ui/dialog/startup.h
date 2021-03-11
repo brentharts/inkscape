@@ -39,7 +39,6 @@ private:
     void filter_themes();
     void keyboard_changed();
     void notebook_switch(Gtk::Widget *tab, guint page_num);
-
     void theme_changed();
     void canvas_changed();
     void refresh_theme(Glib::ustring theme_name);
@@ -55,7 +54,11 @@ private:
     Gtk::Fixed    *banners = nullptr;
     Gtk::ComboBox *themes  = nullptr;
     Gtk::TreeView *recent_treeview = nullptr;
-
+    Gtk::Switch *smallicons = nullptr;
+    Gtk::Switch *compact = nullptr;
+    Gtk::Box *iconrowsmall = nullptr;
+    Gtk::Box *iconrow = nullptr;
+    bool has_minwaita = false;
     SPDocument* _document = nullptr;
 };
 

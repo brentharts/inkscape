@@ -890,17 +890,28 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
       <column type="gboolean"/>
       <!-- column-name symbolic_icons -->
       <column type="gboolean"/>
-      <!-- column-name small_icons -->
-      <column type="gboolean"/>
       <!-- column-name available -->
       <column type="gboolean"/>
     </columns>
     <data>
       <row>
+        <col id="0" translatable="yes">default</col>
+        <col id="1" translatable="yes">User Default</col>
+        <col id="2" translatable="yes"></col>
+        <col id="3" translatable="yes"></col>
+        <col id="4" translatable="yes">0</col>
+        <col id="5" translatable="yes">0</col>
+        <col id="6" translatable="yes">0</col>
+        <col id="7" translatable="yes">0</col>
+        <col id="8">False</col>
+        <col id="9">False</col>
+        <col id="10">False</col>
+      </row>
+      <row>
         <col id="0">classic</col>
         <col id="1" translatable="yes">Classic Adwaita</col>
         <col id="2">Adwaita</col>
-        <col id="3">hicolor</col>
+        <col id="3">Adwaita</col>
         <col id="4">0</col>
         <col id="5">0</col>
         <col id="6">0</col>
@@ -908,13 +919,12 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
         <col id="8">False</col>
         <col id="9">False</col>
         <col id="10">False</col>
-        <col id="11">False</col>
       </row>
       <row>
         <col id="0">symbolic</col>
         <col id="1" translatable="yes">Symbolic Adwaita</col>
         <col id="2">Adwaita</col>
-        <col id="3">hicolor</col>
+        <col id="3">Adwaita</col>
         <col id="4">0</col>
         <col id="5">0</col>
         <col id="6">0</col>
@@ -922,13 +932,12 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
         <col id="8">False</col>
         <col id="9">True</col>
         <col id="10">False</col>
-        <col id="11">False</col>
       </row>
       <row>
         <col id="0">symbolic-dark</col>
         <col id="1" translatable="yes">Symbolic Adwaita Dark</col>
         <col id="2">Adwaita</col>
-        <col id="3">hicolor</col>
+        <col id="3">Adwaita</col>
         <col id="4">0</col>
         <col id="5">0</col>
         <col id="6">0</col>
@@ -936,7 +945,6 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
         <col id="8">True</col>
         <col id="9">True</col>
         <col id="10">False</col>
-        <col id="11">False</col>
       </row>
       <row>
         <col id="0">dark-color</col>
@@ -950,7 +958,6 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
         <col id="8">True</col>
         <col id="9">True</col>
         <col id="10">False</col>
-        <col id="11">False</col>
       </row>
       <row>
         <col id="0">light-color</col>
@@ -964,7 +971,6 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
         <col id="8">False</col>
         <col id="9">True</col>
         <col id="10">False</col>
-        <col id="11">False</col>
       </row>
       <row>
         <col id="0">dark-grey</col>
@@ -978,21 +984,6 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
         <col id="8">True</col>
         <col id="9">True</col>
         <col id="10">False</col>
-        <col id="11">False</col>
-      </row>
-      <row>
-        <col id="0">light-min</col>
-        <col id="1" translatable="yes">Compacted (Small Screens)</col>
-        <col id="2">Minwaita</col>
-        <col id="3">multicolor</col>
-        <col id="4">#000000</col>
-        <col id="5">#00990a</col>
-        <col id="6">#ff1990</col>
-        <col id="7">#0099e6</col>
-        <col id="8">False</col>
-        <col id="9">True</col>
-        <col id="10">True</col>
-        <col id="11">False</col>
       </row>
     </data>
   </object>
@@ -1241,7 +1232,7 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
                         <child>
                           <object class="GtkCellRendererText" id="theme_namerenderer"/>
                           <attributes>
-                            <attribute name="sensitive">11</attribute>
+                            <attribute name="sensitive">10</attribute>
                             <attribute name="text">1</attribute>
                           </attributes>
                         </child>
@@ -1271,19 +1262,119 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkBox" id="iconrow">
+                      <object class="GtkBox">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="margin_top">4</property>
-                        <property name="margin_bottom">4</property>
-                        <property name="spacing">3</property>
-                        <property name="homogeneous">True</property>
+                        <property name="orientation">vertical</property>
                         <child>
-                          <object class="GtkImage">
-                            <property name="visible">True</property>
+                          <object class="GtkBox" id="iconrow">
                             <property name="can_focus">False</property>
-                            <property name="icon_name">tool-pointer</property>
-                            <property name="icon_size">3</property>
+                            <property name="margin_top">4</property>
+                            <property name="margin_bottom">4</property>
+                            <property name="spacing">3</property>
+                            <property name="homogeneous">True</property>
+                            <child>
+                              <object class="GtkImage">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="icon_name">tool-pointer</property>
+                                <property name="icon_size">5</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkImage">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="icon_name">tool-node-editor</property>
+                                <property name="icon_size">5</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSeparator">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="halign">center</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkImage">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="icon_name">draw-rectangle</property>
+                                <property name="icon_size">5</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">3</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkImage">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="icon_name">draw-polygon-star</property>
+                                <property name="icon_size">5</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">4</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSeparator">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="halign">center</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">5</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkImage">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="icon_name">draw-path</property>
+                                <property name="icon_size">5</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">6</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkImage">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="icon_name">draw-freehand</property>
+                                <property name="icon_size">5</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">7</property>
+                              </packing>
+                            </child>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1292,11 +1383,152 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkImage">
+                          <object class="GtkBox" id="iconrowsmall">
+                            <property name="can_focus">False</property>
+                            <property name="no-show-all">True</property>
+                            <property name="margin_top">4</property>
+                            <property name="margin_bottom">4</property>
+                            <property name="spacing">3</property>
+                            <property name="homogeneous">True</property>
+                            <child>
+                              <object class="GtkImage">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="icon_name">tool-pointer</property>
+                                <property name="icon_size">3</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkImage">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="icon_name">tool-node-editor</property>
+                                <property name="icon_size">3</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSeparator">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="halign">center</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkImage">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="icon_name">draw-rectangle</property>
+                                <property name="icon_size">3</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">3</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkImage">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="icon_name">draw-polygon-star</property>
+                                <property name="icon_size">3</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">4</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSeparator">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="halign">center</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">5</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkImage">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="icon_name">draw-path</property>
+                                <property name="icon_size">3</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">6</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkImage">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="icon_name">draw-freehand</property>
+                                <property name="icon_size">3</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">7</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top-attach">5</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <child>
+                          <object class="GtkLabel">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="icon_name">tool-node-editor</property>
-                            <property name="icon_size">3</property>
+                            <property name="margin_right">8</property>
+                            <property name="label" translatable="yes">Compact</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkSwitch" id="compact">
+                            <property name="name">compactSwitch</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="halign">center</property>
+                            <property name="valign">center</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1305,10 +1537,12 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkSeparator">
+                          <object class="GtkLabel">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="halign">center</property>
+                            <property name="margin_left">8</property>
+                            <property name="margin_right">8</property>
+                            <property name="label" translatable="yes">Small icons</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1317,67 +1551,17 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkImage">
+                          <object class="GtkSwitch" id="smallicons">
+                            <property name="name">smalliconsSwitch</property>
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="icon_name">draw-rectangle</property>
-                            <property name="icon_size">3</property>
+                            <property name="can_focus">True</property>
+                            <property name="halign">center</property>
+                            <property name="valign">center</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
                             <property name="position">3</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkImage">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="icon_name">draw-polygon-star</property>
-                            <property name="icon_size">3</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">4</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkSeparator">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="halign">center</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">5</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkImage">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="icon_name">draw-path</property>
-                            <property name="icon_size">3</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">6</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkImage">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="icon_name">draw-freehand</property>
-                            <property name="icon_size">3</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">7</property>
                           </packing>
                         </child>
                       </object>
