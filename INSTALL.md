@@ -26,6 +26,7 @@ For Linux based Free Desktops, Inkscape version 0.92 and newer can be built usin
 mkdir build
 cd build
 cmake ..
+git submodule init && git submodule update //if the cmake command exits with errors then run these commands 
 make
 make install
 ```
