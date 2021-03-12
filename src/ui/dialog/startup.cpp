@@ -194,6 +194,7 @@ StartScreen::StartScreen()
     filter_themes();
     set_active_combo("themes", prefs->getString("/options/boot/theme"));
     set_active_combo("canvas", prefs->getString("/options/boot/canvas"));
+    dark_toggle->set_active(prefs->getBool("/theme/darkTheme", false));
 
     // Welcome! tab
     canvas->signal_changed().connect(sigc::mem_fun(*this, &StartScreen::canvas_changed));
