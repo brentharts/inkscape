@@ -925,7 +925,7 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
         <col id="11">False</col>
       </row>
       <row>
-        <col id="0">colorful</col>
+        <col id="0">dark-color</col>
         <col id="1" translatable="yes">Colorful</col>
         <col id="2">Adwaita</col>
         <col id="3">multicolor</col>
@@ -939,7 +939,7 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
         <col id="11">False</col>
       </row>
       <row>
-        <col id="0">grayscale</col>
+        <col id="0">dark-grey</col>
         <col id="1" translatable="yes">Grayscale</col>
         <col id="2">Adwaita</col>
         <col id="3">multicolor</col>
@@ -953,7 +953,8 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
         <col id="11">False</col>
       </row>
       <row>
-        <col id="0">compacted</col>
+
+        <col id="0">light-min</col>
         <col id="1" translatable="yes">Compacted (Small Screens)</col>
         <col id="2">Minwaita</col>
         <col id="3">hicolor</col>
@@ -1238,7 +1239,7 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Appearance</property>
+                        <property name="label" translatable="yes">Style</property>
                         <property name="xalign">0</property>
                         <attributes>
                           <attribute name="scale" value="1.2"/>
