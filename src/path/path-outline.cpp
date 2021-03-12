@@ -193,7 +193,7 @@ void item_to_outline_add_marker_child( SPItem const *item, Geom::Affine marker_t
         // recurse through all childs:
         for (auto& o: item->children) {
             if ( SP_IS_ITEM(&o) ) {
-                item_to_outline_add_marker_child(SP_ITEM(&o), tr, pathv_in);
+                item_to_outline_add_marker_child(dynamic_cast<SPItem const*>(reinterpret_cast<SPObject const*>(&o)), tr, pathv_in);
             }
         }
     } else {

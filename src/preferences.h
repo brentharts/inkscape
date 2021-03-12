@@ -137,7 +137,13 @@ public:
             , cached_double(false)
             , cached_unit(false)
             , cached_color(false)
-            , cached_style(false) {} // needed to enable use in maps
+            , cached_style(false)
+            , value_bool(false)
+            , value_int(0)
+            , value_uint(0)
+            , value_double(0.)
+            , value_color(0)
+            , value_style(nullptr) {} // needed to enable use in maps
         Entry(Entry const &other) = default;
 
         /**
@@ -266,7 +272,13 @@ public:
             , cached_double(false)
             , cached_unit(false)
             , cached_color(false)
-            , cached_style(false) {}
+            , cached_style(false)
+            , value_bool(false)
+            , value_int(0)
+            , value_uint(0)
+            , value_double(0.)
+            , value_color(0)
+            , value_style(nullptr) {}
 
         Glib::ustring _pref_path;
         void const *_value;
@@ -735,7 +747,7 @@ inline double Preferences::Entry::getDoubleLimited(double def, double min, doubl
     if (!this->isValid()) {
         return def;
     } else {
-        double val = def;
+        double val;
         if (unit.length() == 0) {
             val = Inkscape::Preferences::get()->_extractDouble(*this);
         } else {

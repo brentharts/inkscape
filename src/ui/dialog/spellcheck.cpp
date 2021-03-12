@@ -279,8 +279,8 @@ SpellCheck::textIsValid (SPObject *root, SPItem *text)
 
 bool SpellCheck::compareTextBboxes (gconstpointer a, gconstpointer b)//returns a<b
 {
-    SPItem *i1 = SP_ITEM(a);
-    SPItem *i2 = SP_ITEM(b);
+    SPItem *i1 = SP_ITEM(const_cast<void*>(a));
+    SPItem *i2 = SP_ITEM(const_cast<void*>(b));
 
     Geom::OptRect bbox1 = i1->documentVisualBounds();
     Geom::OptRect bbox2 = i2->documentVisualBounds();

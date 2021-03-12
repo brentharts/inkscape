@@ -69,7 +69,7 @@ LPESimplify::doBeforeEffect (SPLPEItem const* lpeitem)
     if(!hp.empty()) {
         hp.clear();
     }
-    bbox = SP_ITEM(lpeitem)->visualBounds();
+    bbox = dynamic_cast<SPItem const*>(reinterpret_cast<SPObject const*>(lpeitem))->visualBounds();
     radius_helper_nodes = helper_size;
 }
 

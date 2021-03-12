@@ -79,7 +79,7 @@ void LPEShowHandles::doOnApply(SPLPEItem const* lpeitem)
 
 void LPEShowHandles::doBeforeEffect (SPLPEItem const* lpeitem)
 {
-    SPItem const* item = SP_ITEM(lpeitem);
+    SPItem const* item = dynamic_cast<SPItem const*>(reinterpret_cast<SPObject const*>(lpeitem));
     stroke_width = item->style->stroke_width.computed;
 }
 

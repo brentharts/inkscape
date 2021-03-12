@@ -119,7 +119,7 @@ public:
     Geom::Affine i2vp;
 };
 
-#define SP_ITEM(obj) (dynamic_cast<SPItem*>((SPObject*)obj))
+#define SP_ITEM(obj) (dynamic_cast<SPItem*>(reinterpret_cast<SPObject*>(obj)))
 #define SP_IS_ITEM(obj) (dynamic_cast<const SPItem*>((SPObject*)obj) != NULL)
 
 /**
@@ -454,8 +454,8 @@ int sp_item_repr_compare_position(SPItem const *first, SPItem const *second);
 
 inline bool sp_item_repr_compare_position_bool(SPObject const *first, SPObject const *second)
 {
-    return sp_repr_compare_position(((SPItem*)first)->getRepr(),
-            ((SPItem*)second)->getRepr())<0;
+    return sp_repr_compare_position((static_cast<const SPItem*>(first))->getRepr(),
+            (static_cast<const SPItem*>(second))->getRepr())<0;
 }
 
 
