@@ -655,7 +655,17 @@ StartScreen::keyboard_changed()
     try {
         auto row = active_combo("keys");
         auto prefs = Inkscape::Preferences::get();
-        prefs->setString("/options/kbshortcuts/shortcutfile", row[cols.col_id]);
+        Glib::ustring set_to = row[cols.col_id];
+        prefs->setString("/options/kbshortcuts/shortcutfile", set_to);
+
+        Gtk::InfoBar* keys_warning;
+        builder->get_widget("keys_warning", keys_warning);
+        if (set_to != "inkscape.xml") {
+            keys_warning->set_message_type(Gtk::MessageType::MESSAGE_WARNING);
+            keys_warning->show();
+        } else {
+            keys_warning->hide();
+        }
     } catch(int e) {
         g_warning("Couldn't find keys value.");
     }
