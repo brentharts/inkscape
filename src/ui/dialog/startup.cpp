@@ -615,9 +615,30 @@ StartScreen::filter_themes()
     auto store = Glib::wrap(GTK_LIST_STORE(gtk_combo_box_get_model(themes->gobj())));
     auto available = get_available_themes();
 
+    // Detect use of custom theme here, detect defaults used in many systems.
+    auto settings = Gtk::Settings::get_default();
+    Glib::ustring theme_name = settings->property_gtk_theme_name();
+    Glib::ustring icons_name = settings->property_gtk_icon_theme_name();
+
+    bool has_system_theme = false;
+    if (theme_name != "Adwaita" || icons_name != "hicolor") {
+        has_system_theme = true;
+        /* Enable if/when we want custom to be the default.
+        if (prefs->getString("/options/boot/theme").empty()) {
+            prefs->setString("/options/boot/theme", "system")
+            theme_changed();
+        }*/
+    }
+
     for(auto row : store->children()) {
         Glib::ustring theme = row[cols.theme];
-        row[cols.enabled] = available.find(theme) != available.end();
+        if (!row[cols.enabled]) {
+            // Available themes; We only "enable" them, we don't disable them.
+            row[cols.enabled] = available.find(theme) != available.end();
+        } else if(row[cols.id] == "system" && !has_system_theme) {
+            // Disable system theme option if not available.
+            row[cols.enabled] = false;
+        }
     }
 }
 

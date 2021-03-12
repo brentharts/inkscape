@@ -925,7 +925,7 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
         <col id="11">False</col>
       </row>
       <row>
-        <col id="0">dark-color</col>
+        <col id="0">colorful</col>
         <col id="1" translatable="yes">Colorful</col>
         <col id="2">Adwaita</col>
         <col id="3">multicolor</col>
@@ -939,7 +939,7 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
         <col id="11">False</col>
       </row>
       <row>
-        <col id="0">dark-grey</col>
+        <col id="0">grayscale</col>
         <col id="1" translatable="yes">Grayscale</col>
         <col id="2">Adwaita</col>
         <col id="3">multicolor</col>
@@ -953,8 +953,7 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
         <col id="11">False</col>
       </row>
       <row>
-
-        <col id="0">light-min</col>
+        <col id="0">compacted</col>
         <col id="1" translatable="yes">Compacted (Small Screens)</col>
         <col id="2">Minwaita</col>
         <col id="3">hicolor</col>
@@ -966,6 +965,20 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
         <col id="9">True</col>
         <col id="10">True</col>
         <col id="11">False</col>
+      </row>
+      <row>
+        <col id="0">system</col>
+        <col id="1" translatable="yes">System Default</col>
+        <col id="2"></col>
+        <col id="3"></col>
+        <col id="4">0</col>
+        <col id="5">0</col>
+        <col id="6">0</col>
+        <col id="7">0</col>
+        <col id="8">0</col>
+        <col id="9">False</col>
+        <col id="10">False</col>
+        <col id="11">True</col>
       </row>
     </data>
   </object>
