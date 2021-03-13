@@ -454,8 +454,8 @@ int sp_item_repr_compare_position(SPItem const *first, SPItem const *second);
 
 inline bool sp_item_repr_compare_position_bool(SPObject const *first, SPObject const *second)
 {
-    return sp_repr_compare_position((static_cast<const SPItem*>(first))->getRepr(),
-            (static_cast<const SPItem*>(second))->getRepr())<0;
+    return sp_repr_compare_position(first->getRepr(),
+            second->getRepr())<0;
 }
 
 
