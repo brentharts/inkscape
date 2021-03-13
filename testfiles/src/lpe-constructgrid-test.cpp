@@ -118,7 +118,7 @@ TEST_F(LPEConstructGridTest, mixed_0_92_5)
 
 // INKSCAPE 1.0.2
 
-TEST_F(LPEConstructGridTest, constructgrid_MM_1_02)
+TEST_F(LPEConstructGridTest, constructgrid_MM_1_0_2)
 {
    std::string svg = R""""(<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
@@ -208,7 +208,7 @@ TEST_F(LPEConstructGridTest, constructgrid_MM_1_02)
 
 // INKSCAPE 1.0.2
 
-TEST_F(LPEConstructGridTest, constructgrid_PX_1_02)
+TEST_F(LPEConstructGridTest, constructgrid_PX_1_0_2)
 {
    std::string svg = R""""(<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
