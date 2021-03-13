@@ -481,7 +481,7 @@ TEST_F(LPEBendpathTest, multiGroup_1_02)
    pathCompare(d08, lpeitem08->getAttribute("d"));
 }
 
-TEST_F(LPEBendpathTest, stackNested_MM_1_02)
+TEST_F(LPEBendpathTest, stackNested_MM_1_0_2)
 {
    std::string svg = R""""(<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
@@ -626,7 +626,7 @@ TEST_F(LPEBendpathTest, stackNested_MM_1_02)
    pathCompare(d02, lpeitem02->getAttribute("d"));
 }
 
-TEST_F(LPEBendpathTest, stackNested_PX_1_02)
+TEST_F(LPEBendpathTest, stackNested_PX_1_0_2)
 {
    std::string svg = R""""(<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
