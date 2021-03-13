@@ -81,6 +81,7 @@ set(TEST_SOURCES
     lpe-bool-test
     lpe-bspline-test
     lpe-cloneoriginal-test
+    lpe-constructgrid-test
     lpe-patternalongpath-test
     lpe-spiro-test
     xml-test
