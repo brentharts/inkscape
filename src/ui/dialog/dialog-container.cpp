@@ -446,10 +446,13 @@ bool recreate_dialogs_from_state(const Glib::KeyFile *keyfile)
             }
         }
 
-        dialog_window->update_window_size_to_fit_children();
         if (has_position) {
             dm_restore_window_position(*dialog_window, pos);
         }
+        else {
+            dialog_window->update_window_size_to_fit_children();
+        }
+        dialog_window->show_all();
         restored = true;
     }
 
@@ -553,6 +556,11 @@ void DialogContainer::link_dialog(DialogBase *dialog)
     DialogWindow *window = dynamic_cast<DialogWindow *>(get_toplevel());
     if (window) {
         window->update_dialogs();
+    }
+    else {
+        // dialog without DialogWindow has been docked; remove it's floating state
+        // so if user closes and reopens it, it shows up docked again, not floating
+        DialogManager::singleton().remove_dialog_floating_state(dialog->getVerb());
     }
 }
 
@@ -702,10 +710,13 @@ void DialogContainer::load_container_state(Glib::KeyFile *keyfile, bool include_
         }
 
         if (dialog_window) {
-            dialog_window->update_window_size_to_fit_children();
             if (has_position) {
                 dm_restore_window_position(*dialog_window, pos);
             }
+            else {
+                dialog_window->update_window_size_to_fit_children();
+            }
+            dialog_window->show_all();
         }
     }
 }
