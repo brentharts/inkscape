@@ -84,6 +84,7 @@ set(TEST_SOURCES
     lpe-constructgrid-test
     lpe-ellipse5pts-test
     lpe-envelopedeformation-test
+    lpe-fillbetweenmany-test
     lpe-patternalongpath-test
     lpe-spiro-test
     xml-test
