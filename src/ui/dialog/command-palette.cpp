@@ -794,13 +794,13 @@ int CommandPalette::fuzzy_points(const Glib::ustring &subject, const Glib::ustri
 {
     int fuzzy_cost = 100; // Taking initial fuzzy_cost as 100
 
-    const int sequential_bonus = -15;           // bonus for adjacent matches
-    const int separator_bonus = -30;            // bonus if search occurs after a separator
-    const int camel_bonus = -30;                // bonus if search is uppercase and subject is lower
-    const int first_letter_bonus = -15;         // bonus if the first letter is matched
-    const int leading_letter_penalty = +5;      // penalty applied for every letter in subject before the first match
-    const int max_leading_letter_penalty = +15; // maximum penalty for leading letters
-    const int unmatched_letter_penalty = +1;    // penalty for every letter that doesn't matter
+    constexpr int SEQUENTIAL_BONUS = -15;           // bonus for adjacent matches
+    constexpr int SEPARATOR_BONUS = -30;            // bonus if search occurs after a separator
+    constexpr int CAMEL_BONUS = -30;                // bonus if search is uppercase and subject is lower
+    constexpr int FIRST_LETTET_BONUS = -15;         // bonus if the first letter is matched
+    constexpr int LEADING_LETTER_PENALTY = +5;      // penalty applied for every letter in subject before the first match
+    constexpr int MAX_LEADING_LETTER_PENALTY = +15; // maximum penalty for leading letters
+    constexpr int UNMATCHED_LETTER_PENALTY = +1;    // penalty for every letter that doesn't matter
 
     std::string subject_string = subject.lowercase();
     std::string search_string = search.lowercase();
@@ -814,12 +814,12 @@ int CommandPalette::fuzzy_points(const Glib::ustring &subject, const Glib::ustri
         if (search_string[i] != subject_string[j]) {
             j++;
             sequential_compair = false;
-            fuzzy_cost += unmatched_letter_penalty;
+            fuzzy_cost += UNMATCHED_LETTER_PENALTY;
 
             if (leading_letter) {
-                if (total_leading_letter_penalty < max_leading_letter_penalty) {
-                    fuzzy_cost += leading_letter_penalty;
-                    total_leading_letter_penalty += leading_letter_penalty;
+                if (total_leading_letter_penalty < MAX_LEADING_LETTER_PENALTY) {
+                    fuzzy_cost += LEADING_LETTER_PENALTY;
+                    total_leading_letter_penalty += LEADING_LETTER_PENALTY;
                 }
             }
 
@@ -830,19 +830,19 @@ int CommandPalette::fuzzy_points(const Glib::ustring &subject, const Glib::ustri
             leading_letter = false;
 
             if (j > 0 && subject_string[j - 1] == ' ') {
-                fuzzy_cost += separator_bonus;
+                fuzzy_cost += SEPARATOR_BONUS;
             }
 
             if (i == 0 && j == 0) {
-                fuzzy_cost += first_letter_bonus;
+                fuzzy_cost += FIRST_LETTET_BONUS;
             }
 
             if (search[i] == subject_string[j]) {
-                fuzzy_cost += camel_bonus;
+                fuzzy_cost += CAMEL_BONUS;
             }
 
             if (sequential_compair) {
-                fuzzy_cost += sequential_bonus;
+                fuzzy_cost += SEQUENTIAL_BONUS;
             }
 
             sequential_compair = true;
@@ -856,7 +856,7 @@ int CommandPalette::fuzzy_points(const Glib::ustring &subject, const Glib::ustri
 int CommandPalette::fuzzy_tolerance_points(const Glib::ustring &subject, const Glib::ustring &search)
 {
     int fuzzy_cost = 200;               // Taking initial fuzzy_cost as 200
-    const int first_letter_bonus = -15; // bonus if the first letter is matched
+    constexpr int FIRST_LETTET_BONUS = -15; // bonus if the first letter is matched
 
     std::string subject_string = subject.lowercase();
     std::string search_string = search.lowercase();
@@ -872,7 +872,7 @@ int CommandPalette::fuzzy_tolerance_points(const Glib::ustring &subject, const G
         for (int i = 0; i < subject_string.length() && occurrence; i++) {
             if (subject_string[i] == alphabet) {
                 if (i == 0)
-                    fuzzy_cost += first_letter_bonus;
+                    fuzzy_cost += FIRST_LETTET_BONUS;
                 fuzzy_cost += i;
                 occurrence--;
             }
