@@ -21,9 +21,6 @@ using namespace Inkscape::LivePathEffect;
 class LPEEllipse5ptsTest : public LPESTest {};
 
 // INKSCAPE 0.92.5
-// ISSUES FOUND WITH 1.0 and UP: 
-// 1) LPE on clippath broken removed from test 
-// 2) Rounding issues in two cases decrease precission to to pass 
 
 TEST_F(LPEEllipse5ptsTest, path_0_92_5)
 {
