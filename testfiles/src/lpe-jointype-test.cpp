@@ -22,7 +22,6 @@ class LPEJoinTypeTest : public LPESTest {};
 
 // INKSCAPE 0.92.5
 // fail tests
-std::cout << "LPEJoinTypeTest, path_0_92_5 FAIL TEST, SKIPED"
 /* TEST_F(LPEJoinTypeTest, path_0_92_5)
 {
    std::string svg = R""""(<?xml version="1.0" encoding="UTF-8" standalone="no"?>
