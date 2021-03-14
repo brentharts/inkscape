@@ -101,7 +101,7 @@ TEST_F(LPEFillBetweenManyTest, multi_0_92_5)
 
     auto lpeitem01 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path01"));
     auto lpeitem02 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path02"));
-    auto lpeitem03 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path04"));
+    auto lpeitem03 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path03"));
     auto lpeitem04 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path04"));
 
     ASSERT_TRUE(lpeitem01 != nullptr);
@@ -302,9 +302,6 @@ TEST_F(LPEFillBetweenManyTest, multi_MM_1_0_2)
 {
    std::string svg = R""""(<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
