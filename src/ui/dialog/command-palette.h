@@ -175,21 +175,21 @@ private: // Signal handlers
     /**
      * Implements text matching logic
      */
-    bool fuzzy_search(const Glib::ustring &subject, const Glib::ustring &search);
-    bool normal_search(const Glib::ustring &subject, const Glib::ustring &search);
-    bool fuzzy_tolerance_search(const Glib::ustring &subject, const Glib::ustring &search);
-    int fuzzy_points(const Glib::ustring &subject, const Glib::ustring &search);
-    int fuzzy_tolerance_points(const Glib::ustring &subject, const Glib::ustring &search);
-    int fuzzy_points_compair(int fuzzy_points_count_1, int fuzzy_points_count_2, int text_len_1, int text_len_2);
+    static bool fuzzy_search(const Glib::ustring &subject, const Glib::ustring &search);
+    static bool normal_search(const Glib::ustring &subject, const Glib::ustring &search);
+    static bool fuzzy_tolerance_search(const Glib::ustring &subject, const Glib::ustring &search);
+    static int fuzzy_points(const Glib::ustring &subject, const Glib::ustring &search);
+    static int fuzzy_tolerance_points(const Glib::ustring &subject, const Glib::ustring &search);
+    static int fuzzy_points_compair(int fuzzy_points_count_1, int fuzzy_points_count_2, int text_len_1, int text_len_2);
     int on_sort(Gtk::ListBoxRow *row1, Gtk::ListBoxRow *row2);
     void set_mode(CPMode mode);
 
     /**
      * Color addition in searched character
      */
-    void add_color(Gtk::Label *label, const Glib::ustring &search, const Glib::ustring &subject);
-    void remove_color(Gtk::Label *label, const Glib::ustring &subject);
-    void add_color_description(Gtk::Label *label, const Glib::ustring &search);
+    static void add_color(Gtk::Label *label, const Glib::ustring &search, const Glib::ustring &subject);
+    static void remove_color(Gtk::Label *label, const Glib::ustring &subject);
+    static void add_color_description(Gtk::Label *label, const Glib::ustring &search);
 
     /**
      * Executes Action

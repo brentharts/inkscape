@@ -794,11 +794,11 @@ int CommandPalette::fuzzy_points(const Glib::ustring &subject, const Glib::ustri
 {
     int fuzzy_cost = 100; // Taking initial fuzzy_cost as 100
 
-    constexpr int SEQUENTIAL_BONUS = -15;           // bonus for adjacent matches
-    constexpr int SEPARATOR_BONUS = -30;            // bonus if search occurs after a separator
-    constexpr int CAMEL_BONUS = -30;                // bonus if search is uppercase and subject is lower
-    constexpr int FIRST_LETTET_BONUS = -15;         // bonus if the first letter is matched
-    constexpr int LEADING_LETTER_PENALTY = +5;      // penalty applied for every letter in subject before the first match
+    constexpr int SEQUENTIAL_BONUS = -15;      // bonus for adjacent matches
+    constexpr int SEPARATOR_BONUS = -30;       // bonus if search occurs after a separator
+    constexpr int CAMEL_BONUS = -30;           // bonus if search is uppercase and subject is lower
+    constexpr int FIRST_LETTET_BONUS = -15;    // bonus if the first letter is matched
+    constexpr int LEADING_LETTER_PENALTY = +5; // penalty applied for every letter in subject before the first match
     constexpr int MAX_LEADING_LETTER_PENALTY = +15; // maximum penalty for leading letters
     constexpr int UNMATCHED_LETTER_PENALTY = +1;    // penalty for every letter that doesn't matter
 
@@ -855,7 +855,7 @@ int CommandPalette::fuzzy_points(const Glib::ustring &subject, const Glib::ustri
 
 int CommandPalette::fuzzy_tolerance_points(const Glib::ustring &subject, const Glib::ustring &search)
 {
-    int fuzzy_cost = 200;               // Taking initial fuzzy_cost as 200
+    int fuzzy_cost = 200;                   // Taking initial fuzzy_cost as 200
     constexpr int FIRST_LETTET_BONUS = -15; // bonus if the first letter is matched
 
     std::string subject_string = subject.lowercase();
@@ -962,6 +962,26 @@ int CommandPalette::fuzzy_points_compair(int fuzzy_points_count_1, int fuzzy_poi
  */
 int CommandPalette::on_sort(Gtk::ListBoxRow *row1, Gtk::ListBoxRow *row2)
 {
+    // tests for fuzz_search
+    assert(fuzzy_search("Export background", "ebo") == true);
+    assert(fuzzy_search("Query y", "qyy") == true);
+    assert(fuzzy_search("window close", "wc") == true);
+
+    // tests for fuzz_points
+    assert(fuzzy_points("Export background", "ebo") == -22);
+    assert(fuzzy_points("Query y", "qyy") == -16);
+    assert(fuzzy_points("window close", "wc") == 2);
+
+    // tests for fuzzy_tolerance_search
+    assert(fuzzy_tolerance_search("object to path", "ebo") == true);
+    assert(fuzzy_tolerance_search("execute verb", "vec") == true);
+    assert(fuzzy_tolerance_search("color mode", "moco") == true);
+
+    // tests for fuzzy_tolerance_points
+    assert(fuzzy_tolerance_points("object to path", "ebo") == 189);
+    assert(fuzzy_tolerance_points("execute verb", "vec") == 196);
+    assert(fuzzy_tolerance_points("color mode", "moco") == 195);
+
     if (_search_text.empty()) {
         return -1;
     } // No change in the order
