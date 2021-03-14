@@ -779,7 +779,7 @@ const EnumEffectData<EffectType> LPETypeData[] = {
     /* 1.1 */
     {
         SLICE,
-        N_("Slice") ,//label
+        NC_("path effect", "Slice") ,//label
         "slice" ,//key
         "slice" ,//icon
         "Slice" ,//untranslated name
@@ -1159,13 +1159,17 @@ Effect::effectType() const {
     return lpeobj->effecttype;
 }
 
-SPLPEItem* 
-Effect::getLastLPEItem() const {
+std::vector<SPLPEItem *> 
+Effect::getCurrrentLPEItems() const {
+    std::vector<SPLPEItem *> result;
     auto hreflist = getLPEObj()->hrefList;
-    if (hreflist.size()) {
-        return dynamic_cast<SPLPEItem *>(hreflist.back());
+    for (auto item : hreflist) {
+        SPLPEItem * lpeitem = dynamic_cast<SPLPEItem *>(item);
+        if (lpeitem) {
+            result.push_back(lpeitem);
+        }
     }
-    return nullptr;
+    return result;
 }
 
 /**

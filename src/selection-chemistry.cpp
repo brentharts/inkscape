@@ -60,6 +60,7 @@
 #include "live_effects/effect.h"
 #include "live_effects/parameter/originalpath.h"
 
+#include "filter-chemistry.h"
 #include "object/box3d.h"
 #include "object/object-set.h"
 #include "object/persp3d.h"
@@ -498,6 +499,15 @@ void ObjectSet::duplicate(bool suppressDone, bool duplicateLayer)
 
         if (!duplicateLayer || sp_repr_is_def(old_repr)) {
             parent->appendChild(copy);
+            // 1.1 COPYPASTECLONESTAMPLPEBUG
+            SPItem *newitem = dynamic_cast<SPItem *>(doc->getObjectByRepr(copy));
+            if (_desktop && newitem) {
+                remove_hidder_filter(newitem);
+                gchar * id = strdup(copy->attribute("id"));
+                copy = sp_lpe_item_remove_autoflatten(newitem, id)->getRepr();
+                g_free(id);
+            }
+            // END 1.1 COPYPASTECLONESTAMPLPEBUG fix
         } else if (sp_repr_is_layer(old_repr)) {
             parent->addChild(copy, old_repr);
         } else {
@@ -1386,6 +1396,12 @@ void ObjectSet::removeFilter()
     sp_repr_css_unset_property(css, "filter");
     sp_desktop_set_style(this, desktop(), css);
     sp_repr_css_attr_unref(css);
+    if (SPDesktop *d = desktop()) {
+        // Refreshing the current tool (by switching to same tool)
+        // will refresh tool's private information in it's selection context that
+        // depends on desktop items.
+        tools_switch(d, tools_active(d));
+    }
     if(document())
         DocumentUndo::done(document(), SP_VERB_EDIT_REMOVE_FILTER,
                        _("Remove filter"));
@@ -1616,13 +1632,14 @@ void ObjectSet::applyAffine(Geom::Affine const &affine, bool set_i2d, bool compe
         persp = (Persp3D *) i;
 
         if (!persp->has_all_boxes_in_selection (this)) {
+            // create a new perspective as a copy of the current one
+            transf_persp = Persp3D::create_xml_element (persp->document);
+
             std::list<SPBox3D *> selboxes = box3DList(persp);
 
-            // create a new perspective as a copy of the current one and link the selected boxes to it
-            transf_persp = Persp3D::create_xml_element (persp->document, persp->perspective_impl);
-
-            for (auto & selboxe : selboxes)
+            for (auto & selboxe : selboxes) {
                 selboxe->switch_perspectives(persp, transf_persp);
+            }
         } else {
             transf_persp = persp;
         }
