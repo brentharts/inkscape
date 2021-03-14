@@ -137,7 +137,7 @@ TEST_F(LPEGearsTest, multi_PX_1_0_2)
 
     sp_lpe_item_update_patheffect (lpeitem01, false, true);
 
-    pathCompare(d01, lpeitem01->getAttribute("d"), 0.01);
+    pathCompare(d01, lpeitem01->getAttribute("d"));
 }
 
 TEST_F(LPEGearsTest, multi_MM_1_0_2)
@@ -195,5 +195,5 @@ TEST_F(LPEGearsTest, multi_MM_1_0_2)
 
     sp_lpe_item_update_patheffect (lpeitem01, false, true);
 
-    pathCompare(d01, lpeitem01->getAttribute("d"), 0.01);
+    pathCompare(d01, lpeitem01->getAttribute("d"));
 }

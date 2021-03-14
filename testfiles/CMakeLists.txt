@@ -88,6 +88,7 @@ set(TEST_SOURCES
     lpe-fillbetweenstrokes-test
     lpe-gears-test
     lpe-patternalongpath-test
+    lpe-roughhatches-test
     lpe-spiro-test
     xml-test
     sp-item-group-test)
