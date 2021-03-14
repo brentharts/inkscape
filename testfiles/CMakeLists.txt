@@ -86,6 +86,7 @@ set(TEST_SOURCES
     lpe-envelopedeformation-test
     lpe-fillbetweenmany-test
     lpe-fillbetweenstrokes-test
+    lpe-gears-test
     lpe-patternalongpath-test
     lpe-spiro-test
     xml-test
