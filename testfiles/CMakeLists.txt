@@ -88,6 +88,7 @@ set(TEST_SOURCES
     lpe-fillbetweenstrokes-test
     lpe-gears-test
     lpe-interpolatesubpaths-test
+    lpe-interpolatepoints-test
     lpe-patternalongpath-test
     lpe-roughhatches-test
     lpe-spiro-test
