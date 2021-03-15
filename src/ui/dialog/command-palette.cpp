@@ -971,12 +971,12 @@ int CommandPalette::fuzzy_points_compair(int fuzzy_points_count_1, int fuzzy_poi
  */
 int CommandPalette::on_sort(Gtk::ListBoxRow *row1, Gtk::ListBoxRow *row2)
 {
-    // tests for fuzz_search
+    // tests for fuzzy_search
     assert(fuzzy_search("Export background", "ebo") == true);
     assert(fuzzy_search("Query y", "qyy") == true);
     assert(fuzzy_search("window close", "wc") == true);
 
-    // tests for fuzz_points
+    // tests for fuzzy_points
     assert(fuzzy_points("Export background", "ebo") == -22);
     assert(fuzzy_points("Query y", "qyy") == -16);
     assert(fuzzy_points("window close", "wc") == 2);
