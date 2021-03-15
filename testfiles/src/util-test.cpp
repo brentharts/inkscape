@@ -15,7 +15,8 @@
 #include "gtest/gtest.h"
 #include "util/longest-common-suffix.h"
 
-TEST(UtilTest, NearestCommonAncestor)
+    
+TEST(UtilTest, nearest_common_ancestor)
 {
     // TODO change name of implementation to `nearest_common_ancestor`
     // TODO remove `pred` argument
