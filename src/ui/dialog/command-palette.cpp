@@ -974,7 +974,7 @@ int CommandPalette::on_sort(Gtk::ListBoxRow *row1, Gtk::ListBoxRow *row2)
     // tests for fuzzy_search
     assert(fuzzy_search("Export background", "ebo") == true);
     assert(fuzzy_search("Query y", "qyy") == true);
-    assert(fuzzy_search("window close", "wc") == true);
+    assert(fuzzy_search("window close", "qt") == false);
 
     // tests for fuzzy_points
     assert(fuzzy_points("Export background", "ebo") == -22);
@@ -983,7 +983,7 @@ int CommandPalette::on_sort(Gtk::ListBoxRow *row1, Gtk::ListBoxRow *row2)
 
     // tests for fuzzy_tolerance_search
     assert(fuzzy_tolerance_search("object to path", "ebo") == true);
-    assert(fuzzy_tolerance_search("execute verb", "vec") == true);
+    assert(fuzzy_tolerance_search("execute verb", "qyy") == false);
     assert(fuzzy_tolerance_search("color mode", "moco") == true);
 
     // tests for fuzzy_tolerance_points
