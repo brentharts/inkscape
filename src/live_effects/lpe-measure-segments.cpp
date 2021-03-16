@@ -389,7 +389,8 @@ LPEMeasureSegments::createArrowMarker(Glib::ustring mode)
         arrow_path->setAttribute("style", style);
         arrow->addChild(arrow_path, nullptr);
         Inkscape::GC::release(arrow_path);
-        elemref = SP_OBJECT(document->getDefs()->appendChildRepr(arrow));
+        SPObject *layer = sp_lpe_item->parent;
+        elemref = layer ? layer->appendChildRepr(arrow) : document->getDefs()->appendChildRepr(arrow);
         Inkscape::GC::release(arrow);
     }
     items.push_back(mode);
@@ -446,7 +447,8 @@ LPEMeasureSegments::createTextLabel(Geom::Point pos, size_t counter, double leng
         rtspan->setAttribute("sodipodi:role", "line");
         rtspan->removeAttribute("x");
         rtspan->removeAttribute("y");
-        elemref = document->getRoot()->appendChildRepr(rtext);
+        SPObject *layer = sp_lpe_item->parent;
+        elemref = layer ? layer->appendChildRepr(rtext) : document->getRoot()->appendChildRepr(rtext);
         Inkscape::GC::release(rtext);
         rtext->addChild(rtspan, nullptr);
         Inkscape::GC::release(rtspan);
@@ -650,7 +652,8 @@ LPEMeasureSegments::createLine(Geom::Point start,Geom::Point end, Glib::ustring 
     sp_repr_css_write_string(css,css_str);
     line->setAttributeOrRemoveIfEmpty("style", css_str);
     if (!elemref) {
-        elemref = document->getRoot()->appendChildRepr(line);
+        SPObject *layer = sp_lpe_item->parent;
+        elemref = layer ? layer->appendChildRepr(line) : document->getRoot()->appendChildRepr(line);
         Inkscape::GC::release(line);
     }
 }
