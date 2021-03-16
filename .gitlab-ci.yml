@@ -53,7 +53,6 @@ workflow:
       when: never
     - if: '$CI_COMMIT_BRANCH'
 
-
 .run_MR: &run_for_MR
   if: '$CI_MERGE_REQUEST_ID'
 
@@ -61,13 +60,12 @@ workflow:
   if: '$CI_MERGE_REQUEST_ID'
   when: never
 
-.exclude_from_schedules: &exclude_from_schedules
+.run_no_schedules: &do_not_run_for_schedules
   if: '$CI_PIPELINE_SOURCE == "schedule"'
   when: never
 
 .run_otherwise: &run_otherwise
-  if: '$CI'
-
+  when: on_success
 
 
 #######################
@@ -81,7 +79,7 @@ workflow:
 inkscape:linux:
   stage: build
   rules:
-    - *exclude_from_schedules
+    - *do_not_run_for_schedules
     - *run_otherwise
   cache:
     key: "cache-linux"
@@ -104,7 +102,7 @@ inkscape:linux:
 appimage:linux:
   stage: build
   rules:
-    - *exclude_from_schedules
+    - *do_not_run_for_schedules
     - *run_otherwise
   cache:
     key: "cache-appimage"
@@ -125,7 +123,7 @@ inkscape:mac:
     - mac
   rules:
     - *do_not_run_for_MR
-    - *exclude_from_schedules
+    - *do_not_run_for_schedules
     - if: '$CI_PROJECT_NAMESPACE == "inkscape"'
     - if: '$CI_PROJECT_NAMESPACE == "dehesselle"'
   variables:
@@ -149,7 +147,7 @@ inkscape:mac:
 test:linux:
   stage: test
   rules:
-    - *exclude_from_schedules
+    - *do_not_run_for_schedules
     - *run_otherwise
   dependencies:
     - inkscape:linux
@@ -180,7 +178,7 @@ codequality:
   stage: test
   needs: []
   rules:
-    - *exclude_from_schedules
+    - *do_not_run_for_schedules
     - *run_for_MR
   script:
     - git fetch $CI_MERGE_REQUEST_PROJECT_URL.git $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
@@ -200,7 +198,7 @@ codeprotect:
   stage: test
   needs: []
   rules:
-    - *exclude_from_schedules
+    - *do_not_run_for_schedules
     - *run_for_MR
   script:
     - git fetch $CI_MERGE_REQUEST_PROJECT_URL.git $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
@@ -213,7 +211,7 @@ check-license-headers:
   stage: test
   needs: []
   rules:
-    - *exclude_from_schedules
+    - *do_not_run_for_schedules
     - *run_for_MR
   script:
     - python3 buildtools/check_license_headers.py
@@ -229,7 +227,7 @@ translations:
   stage: test
   needs: []
   rules:
-    - *exclude_from_schedules
+    - *do_not_run_for_schedules
     - *run_otherwise
   script:
     # make sure dependencies for inkscape.pot are up-to-date
@@ -264,7 +262,7 @@ clangtidy:linux:
   stage: test
   needs: []
   rules:
-    - *exclude_from_schedules
+    - *do_not_run_for_schedules
     - *run_for_MR
   script:
     - git fetch $CI_MERGE_REQUEST_PROJECT_URL.git $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
@@ -280,8 +278,10 @@ clangtidyfull:linux:
   needs: []
   rules:
     - *do_not_run_for_MR
-    - *exclude_from_schedules
-    - *run_otherwise
+    - *do_not_run_for_schedules
+    - <<: *run_otherwise
+      changes:
+      - src/*
   cache:
     key: "cache-clang"
     paths:
