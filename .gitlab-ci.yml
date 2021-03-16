@@ -54,7 +54,7 @@ workflow:
     - if: '$CI_COMMIT_BRANCH'
 
 .run_always: &run_always
-  if: '$CI_COMMIT_BRANCH'
+  if: '$CI'
 
 .run_MR: &run_for_MR
   if: '$CI_MERGE_REQUEST_ID'
@@ -125,6 +125,7 @@ inkscape:mac:
   rules:
     - if: '$CI_PROJECT_NAMESPACE == "inkscape"'
     - if: '$CI_PROJECT_NAMESPACE == "dehesselle"'
+    - *do_not_run_for_MR
     - *exclude_from_schedules
   variables:
     SDKROOT: /opt/sdks/MacOSX10.11.sdk
