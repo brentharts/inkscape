@@ -53,8 +53,6 @@ workflow:
       when: never
     - if: '$CI_COMMIT_BRANCH'
 
-.run_always: &run_always
-  if: '$CI'
 
 .run_MR: &run_for_MR
   if: '$CI_MERGE_REQUEST_ID'
@@ -66,6 +64,9 @@ workflow:
 .exclude_from_schedules: &exclude_from_schedules
   if: '$CI_PIPELINE_SOURCE == "schedule"'
   when: never
+
+.run_otherwise: &run_otherwise
+  if: '$CI'
 
 
 
@@ -80,8 +81,8 @@ workflow:
 inkscape:linux:
   stage: build
   rules:
-    - *run_always
     - *exclude_from_schedules
+    - *run_otherwise
   cache:
     key: "cache-linux"
     paths:
@@ -103,8 +104,8 @@ inkscape:linux:
 appimage:linux:
   stage: build
   rules:
-    - *run_always
     - *exclude_from_schedules
+    - *run_otherwise
   cache:
     key: "cache-appimage"
     paths:
@@ -123,10 +124,10 @@ inkscape:mac:
   tags:
     - mac
   rules:
-    - if: '$CI_PROJECT_NAMESPACE == "inkscape"'
-    - if: '$CI_PROJECT_NAMESPACE == "dehesselle"'
     - *do_not_run_for_MR
     - *exclude_from_schedules
+    - if: '$CI_PROJECT_NAMESPACE == "inkscape"'
+    - if: '$CI_PROJECT_NAMESPACE == "dehesselle"'
   variables:
     SDKROOT: /opt/sdks/MacOSX10.11.sdk
   before_script:
@@ -148,8 +149,8 @@ inkscape:mac:
 test:linux:
   stage: test
   rules:
-    - *run_always
     - *exclude_from_schedules
+    - *run_otherwise
   dependencies:
     - inkscape:linux
   needs: ["inkscape:linux"]
@@ -179,8 +180,8 @@ codequality:
   stage: test
   needs: []
   rules:
-    - *run_for_MR
     - *exclude_from_schedules
+    - *run_for_MR
   script:
     - git fetch $CI_MERGE_REQUEST_PROJECT_URL.git $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
     - echo "Your commit does not comply exactly with the clang-format style checker.\nPlease review the following diff or apply it with\n \$ git apply <<EOF"
@@ -199,8 +200,8 @@ codeprotect:
   stage: test
   needs: []
   rules:
-    - *run_for_MR
     - *exclude_from_schedules
+    - *run_for_MR
   script:
     - git fetch $CI_MERGE_REQUEST_PROJECT_URL.git $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
     - git diff $CI_MERGE_REQUEST_DIFF_BASE_SHA -U0 --no-color src/3rdparty | tee forbidden
@@ -212,8 +213,8 @@ check-license-headers:
   stage: test
   needs: []
   rules:
-    - *run_for_MR
     - *exclude_from_schedules
+    - *run_for_MR
   script:
     - python3 buildtools/check_license_headers.py
 
@@ -228,8 +229,8 @@ translations:
   stage: test
   needs: []
   rules:
-    - *run_always
     - *exclude_from_schedules
+    - *run_otherwise
   script:
     # make sure dependencies for inkscape.pot are up-to-date
   - mkdir build && cd build && cmake .. && make inkscape_pot && cd .. || exit 1
@@ -263,8 +264,8 @@ clangtidy:linux:
   stage: test
   needs: []
   rules:
-    - *run_for_MR
     - *exclude_from_schedules
+    - *run_for_MR
   script:
     - git fetch $CI_MERGE_REQUEST_PROJECT_URL.git $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
     # "borrow" a 3rdparty file to dump header includes
@@ -278,9 +279,9 @@ clangtidyfull:linux:
   stage: test
   needs: []
   rules:
-    - *run_always
     - *do_not_run_for_MR
     - *exclude_from_schedules
+    - *run_otherwise
   cache:
     key: "cache-clang"
     paths:
