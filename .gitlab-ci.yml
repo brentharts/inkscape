@@ -4,7 +4,7 @@
 image: registry.gitlab.com/inkscape/inkscape-ci-docker/master
 
 
-# This file is structured in four parts: 
+# This file is structured in four parts:
 # I) definitions
 # II) build jobs
 # III) checks that are run on merge requests
@@ -43,20 +43,30 @@ variables:
 - cd build
 - cmake .. -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX:PATH=$PWD/install_dir/ -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
-.MR: &run_for_MR
+# basic workflow setup:
+# - run pipelines for all branches without an open MR
+# - run MR pipeline only as soon as an MR is opened
+workflow:
   rules:
-    - if: $CI_MERGE_REQUEST_ID
-
-.master: &run_for_master
-  rules:
-    - if: $CI_COMMIT_BRANCH == "master"
-
-.both: &run_for_both
-  rules:
-    - if: $CI_MERGE_REQUEST_ID
-    - if: $CI_COMMIT_BRANCH == "master"
-    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
       when: never
+    - if: '$CI_COMMIT_BRANCH'
+
+.run_always: &run_always
+  if: '$CI_COMMIT_BRANCH'
+
+.run_MR: &run_for_MR
+  if: '$CI_MERGE_REQUEST_ID'
+
+.run_no_MR: &do_not_run_for_MR
+  if: '$CI_MERGE_REQUEST_ID'
+  when: never
+
+.exclude_from_schedules: &exclude_from_schedules
+  if: '$CI_PIPELINE_SOURCE == "schedule"'
+  when: never
+
 
 
 #######################
@@ -70,9 +80,8 @@ variables:
 inkscape:linux:
   stage: build
   rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-      when: never
-    - when: always
+    - *run_always
+    - *exclude_from_schedules
   cache:
     key: "cache-linux"
     paths:
@@ -93,7 +102,9 @@ inkscape:linux:
 
 appimage:linux:
   stage: build
-  <<: *run_for_both
+  rules:
+    - *run_always
+    - *exclude_from_schedules
   cache:
     key: "cache-appimage"
     paths:
@@ -114,6 +125,7 @@ inkscape:mac:
   rules:
     - if: '$CI_PROJECT_NAMESPACE == "inkscape"'
     - if: '$CI_PROJECT_NAMESPACE == "dehesselle"'
+    - *exclude_from_schedules
   variables:
     SDKROOT: /opt/sdks/MacOSX10.11.sdk
   before_script:
@@ -135,9 +147,8 @@ inkscape:mac:
 test:linux:
   stage: test
   rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-      when: never
-    - when: always
+    - *run_always
+    - *exclude_from_schedules
   dependencies:
     - inkscape:linux
   needs: ["inkscape:linux"]
@@ -165,8 +176,10 @@ test:linux:
 
 codequality:
   stage: test
-  <<: *run_for_MR
   needs: []
+  rules:
+    - *run_for_MR
+    - *exclude_from_schedules
   script:
     - git fetch $CI_MERGE_REQUEST_PROJECT_URL.git $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
     - echo "Your commit does not comply exactly with the clang-format style checker.\nPlease review the following diff or apply it with\n \$ git apply <<EOF"
@@ -183,8 +196,10 @@ codequality:
 # Ideally, we should remove all this code and use them as packaged libraries. Unfortunately this check only works for merge requests.
 codeprotect:
   stage: test
-  <<: *run_for_MR
   needs: []
+  rules:
+    - *run_for_MR
+    - *exclude_from_schedules
   script:
     - git fetch $CI_MERGE_REQUEST_PROJECT_URL.git $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
     - git diff $CI_MERGE_REQUEST_DIFF_BASE_SHA -U0 --no-color src/3rdparty | tee forbidden
@@ -195,7 +210,9 @@ codeprotect:
 check-license-headers:
   stage: test
   needs: []
-  <<: *run_for_MR
+  rules:
+    - *run_for_MR
+    - *exclude_from_schedules
   script:
     - python3 buildtools/check_license_headers.py
 
@@ -208,21 +225,23 @@ check-license-headers:
 
 translations:
   stage: test
-  <<: *run_for_both
   needs: []
+  rules:
+    - *run_always
+    - *exclude_from_schedules
   script:
     # make sure dependencies for inkscape.pot are up-to-date
   - mkdir build && cd build && cmake .. && make inkscape_pot && cd .. || exit 1
   - cd po/
-  
+
   # update POTFILES.*.in
   - ./generate_POTFILES.sh
-  
+
   # update inkscape.pot and sync all .po files
   - rm -f inkscape.pot
   - cd ../build && make inkscape_pot && cd ../po || exit 1
   - ./update_po_files.sh
-  
+
   # check if POTFILES.*.in should be updated in the repo (shall we automate this?)
   - 'if [ -n "$(git diff POTFILES.*.in)" ]; then
       git diff POTFILES.*.in;
@@ -241,8 +260,10 @@ translations:
 # ... here only on modified files
 clangtidy:linux:
   stage: test
-  <<: *run_for_MR
   needs: []
+  rules:
+    - *run_for_MR
+    - *exclude_from_schedules
   script:
     - git fetch $CI_MERGE_REQUEST_PROJECT_URL.git $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
     # "borrow" a 3rdparty file to dump header includes
@@ -254,16 +275,16 @@ clangtidy:linux:
 # ... here on master commits
 clangtidyfull:linux:
   stage: test
+  needs: []
+  rules:
+    - *run_always
+    - *do_not_run_for_MR
+    - *exclude_from_schedules
   cache:
     key: "cache-clang"
     paths:
       - ccache/
   <<: *ccache_init
-  rules:
-  - if: $CI_COMMIT_BRANCH == "master"
-    changes: 
-    - src/*
-  needs: []
   script:
     - bash buildtools/clangtidy-helper.sh
 
@@ -280,7 +301,7 @@ clangtidyfull:linux:
 scan-build:
   stage: test
   rules:
-  - if: $SCHEDULED_JOB_NAME == "clang"
+    - if: $SCHEDULED_JOB_NAME == "clang"
   needs: []
   script:
     - apt-get update -yqq && apt-get install -y clang
@@ -296,7 +317,7 @@ scan-build:
 source-doc:
   stage: build
   rules:
-  - if: $SCHEDULED_JOB_NAME == "source-doc"
+    - if: $SCHEDULED_JOB_NAME == "source-doc"
   script:
     - cd buildtools
     - doxygen Doxyfile
@@ -312,8 +333,8 @@ source-doc:
 pages:
   stage: deploy
   rules:
-  - if: $SCHEDULED_JOB_NAME == "clang"
-  - if: $SCHEDULED_JOB_NAME == "source-doc"
+    - if: $SCHEDULED_JOB_NAME == "clang"
+    - if: $SCHEDULED_JOB_NAME == "source-doc"
   cache:
     key: "cache-pages"
     paths:
