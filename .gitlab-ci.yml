@@ -122,7 +122,6 @@ inkscape:mac:
   tags:
     - mac
   rules:
-    - *do_not_run_for_MR
     - *do_not_run_for_schedules
     - if: '$CI_PROJECT_NAMESPACE == "inkscape"'
     - if: '$CI_PROJECT_NAMESPACE == "dehesselle"'
