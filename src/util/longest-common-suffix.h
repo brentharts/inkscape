@@ -40,7 +40,7 @@ ForwardIterator longest_common_suffix(ForwardIterator a, ForwardIterator b,
 
 template <typename ForwardIterator, typename BinaryPredicate>
 ForwardIterator longest_common_suffix(ForwardIterator a, ForwardIterator b,
-                                      ForwardIterator end, BinaryPredicate pred)
+                                      ForwardIterator end)
 {
     if ( a == end || b == end ) {
         return end;
