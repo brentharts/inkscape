@@ -32,7 +32,7 @@ namespace Algorithms {
 
 template <typename ForwardIterator>
 ForwardIterator longest_common_suffix(ForwardIterator a, ForwardIterator b,
-                                      ForwardIterator end, BinaryPredicate )
+                                      ForwardIterator end)
 {
     typedef typename std::iterator_traits<ForwardIterator>::value_type value_type;
     return longest_common_suffix(a, b, end, std::equal_to<value_type>());
