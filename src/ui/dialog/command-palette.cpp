@@ -646,7 +646,10 @@ void CommandPalette::remove_color(Gtk::Label *label, const Glib::ustring &subjec
 Glib::ustring make_bold(const Glib::ustring &search)
 {
     // TODO: Add a CSS class that changes the color of the search
+<<<<<<< HEAD
     // replacement of  return "<span color=\"blue\" weight=\"bold\">" + search + "</span>";
+=======
+>>>>>>> Command Palette fuzzy search improvement
     return "<span weight=\"bold\">" + search + "</span>";
 }
 
