@@ -83,7 +83,7 @@ ForwardIterator longest_common_suffix(ForwardIterator a, ForwardIterator b,
     ForwardIterator longest_common(end);
 
     while ( !suffixes[0].empty() && !suffixes[1].empty() &&
-            pred(*(suffixes[0].back()), *(suffixes[1].back())) )
+            (*(suffixes[0].back()), *(suffixes[1].back())) )
     {
         longest_common = suffixes[0].back();
         suffixes[0].pop_back();
