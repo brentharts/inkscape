@@ -644,14 +644,14 @@ void CommandPalette::remove_color(Gtk::Label *label, const Glib::ustring &subjec
 Glib::ustring make_bold(const Glib::ustring &search)
 {
     // TODO: Add a CSS class that changes the color of the search
-    return "<span weight=\"bold\">" + search + "</span>";
+    return "<span color=\"#46c3db\" weight=\"bold\">" + search + "</span>";
 }
 
 void CommandPalette::add_color(Gtk::Label *label, const Glib::ustring &search, const Glib::ustring &subject)
 {
     Glib::ustring text = "";
-    std::string subject_string = subject.lowercase();
-    std::string search_string = search.lowercase();
+    Glib::ustring subject_string = subject.lowercase();
+    Glib::ustring search_string = search.lowercase();
     int j = 0;
 
     if (search_string.length() > 7) {
@@ -732,8 +732,8 @@ void CommandPalette::add_color_description(Gtk::Label *label, const Glib::ustrin
 
 bool CommandPalette::fuzzy_tolerance_search(const Glib::ustring &subject, const Glib::ustring &search)
 {
-    std::string subject_string = subject.lowercase();
-    std::string search_string = search.lowercase();
+    Glib::ustring subject_string = subject.lowercase();
+    Glib::ustring search_string = search.lowercase();
     std::map<char, int> subject_string_character, search_string_character;
     for (const auto &character : subject_string) {
         subject_string_character[character]++;
@@ -752,8 +752,8 @@ bool CommandPalette::fuzzy_tolerance_search(const Glib::ustring &subject, const 
 
 bool CommandPalette::fuzzy_search(const Glib::ustring &subject, const Glib::ustring &search)
 {
-    std::string subject_string = subject.lowercase();
-    std::string search_string = search.lowercase();
+    Glib::ustring subject_string = subject.lowercase();
+    Glib::ustring search_string = search.lowercase();
 
     for (int j = 0, i = 0; i < search_string.length(); i++) {
         bool alphabet_present = false;
@@ -802,10 +802,10 @@ int CommandPalette::fuzzy_points(const Glib::ustring &subject, const Glib::ustri
     constexpr int MAX_LEADING_LETTER_PENALTY = +15; // maximum penalty for leading letters
     constexpr int UNMATCHED_LETTER_PENALTY = +1;    // penalty for every letter that doesn't matter
 
-    std::string subject_string = subject.lowercase();
-    std::string search_string = search.lowercase();
+    Glib::ustring subject_string = subject.lowercase();
+    Glib::ustring search_string = search.lowercase();
 
-    bool sequential_compair = false;
+    bool sequential_compare = false;
     bool leading_letter = true;
     int total_leading_letter_penalty = 0;
     int j = 0, i = 0;
@@ -813,7 +813,7 @@ int CommandPalette::fuzzy_points(const Glib::ustring &subject, const Glib::ustri
     while (i < search_string.length() && j < subject_string.length()) {
         if (search_string[i] != subject_string[j]) {
             j++;
-            sequential_compair = false;
+            sequential_compare = false;
             fuzzy_cost += UNMATCHED_LETTER_PENALTY;
 
             if (leading_letter) {
@@ -841,11 +841,11 @@ int CommandPalette::fuzzy_points(const Glib::ustring &subject, const Glib::ustri
                 fuzzy_cost += CAMEL_BONUS;
             }
 
-            if (sequential_compair) {
+            if (sequential_compare) {
                 fuzzy_cost += SEQUENTIAL_BONUS;
             }
 
-            sequential_compair = true;
+            sequential_compare = true;
             i++;
         }
     }
@@ -858,8 +858,8 @@ int CommandPalette::fuzzy_tolerance_points(const Glib::ustring &subject, const G
     int fuzzy_cost = 200;                   // Taking initial fuzzy_cost as 200
     constexpr int FIRST_LETTET_BONUS = -15; // bonus if the first letter is matched
 
-    std::string subject_string = subject.lowercase();
-    std::string search_string = search.lowercase();
+    Glib::ustring subject_string = subject.lowercase();
+    Glib::ustring search_string = search.lowercase();
 
     std::map<char, int> search_string_character;
 
@@ -926,7 +926,7 @@ int CommandPalette::on_filter_general(Gtk::ListBoxRow *child)
     return 0;
 }
 
-int CommandPalette::fuzzy_points_compair(int fuzzy_points_count_1, int fuzzy_points_count_2, int text_len_1,
+int CommandPalette::fuzzy_points_compare(int fuzzy_points_count_1, int fuzzy_points_count_2, int text_len_1,
                                          int text_len_2)
 {
     if (fuzzy_points_count_1 && fuzzy_points_count_2) {
@@ -954,7 +954,7 @@ int CommandPalette::fuzzy_points_compair(int fuzzy_points_count_1, int fuzzy_poi
 }
 
 /**
- * Compair different rows for order of display
+ * compare different rows for order of display
  * priority of comparison
  * 1) CPName->get_text()
  * 2) CPName->get_tooltip_text()
@@ -991,7 +991,10 @@ int CommandPalette::on_sort(Gtk::ListBoxRow *row1, Gtk::ListBoxRow *row2)
 
     int fuzzy_points_count_1 = 0, fuzzy_points_count_2 = 0;
     int text_len_1 = 0, text_len_2 = 0;
-    int points_compair = 0;
+    int points_compare = 0;
+
+    constexpr int TOOLTIP_PENALTY = 100;
+    constexpr int DESCRIPTION_PENALTY = 500;
 
     if (cp_name_1 && cp_name_2) {
         if (fuzzy_search(cp_name_1->get_text(), _search_text)) {
@@ -1003,9 +1006,9 @@ int CommandPalette::on_sort(Gtk::ListBoxRow *row1, Gtk::ListBoxRow *row2)
             fuzzy_points_count_2 = fuzzy_points(cp_name_2->get_text(), _search_text);
         }
 
-        points_compair = fuzzy_points_compair(fuzzy_points_count_1, fuzzy_points_count_2, text_len_1, text_len_2);
-        if (points_compair != 0) {
-            return points_compair;
+        points_compare = fuzzy_points_compare(fuzzy_points_count_1, fuzzy_points_count_2, text_len_1, text_len_2);
+        if (points_compare != 0) {
+            return points_compare;
         }
 
         if (fuzzy_tolerance_search(cp_name_1->get_text(), _search_text)) {
@@ -1017,55 +1020,55 @@ int CommandPalette::on_sort(Gtk::ListBoxRow *row1, Gtk::ListBoxRow *row2)
             fuzzy_points_count_2 = fuzzy_tolerance_points(cp_name_2->get_text(), _search_text);
         }
 
-        points_compair = fuzzy_points_compair(fuzzy_points_count_1, fuzzy_points_count_2, text_len_1, text_len_2);
-        if (points_compair != 0) {
-            return points_compair;
+        points_compare = fuzzy_points_compare(fuzzy_points_count_1, fuzzy_points_count_2, text_len_1, text_len_2);
+        if (points_compare != 0) {
+            return points_compare;
         }
 
         if (fuzzy_search(cp_name_1->get_tooltip_text(), _search_text)) {
             text_len_1 = cp_name_1->get_tooltip_text().length();
-            fuzzy_points_count_1 = fuzzy_points(cp_name_1->get_tooltip_text(), _search_text) + 100;
+            fuzzy_points_count_1 = fuzzy_points(cp_name_1->get_tooltip_text(), _search_text) + TOOLTIP_PENALTY;
         }
         if (fuzzy_search(cp_name_2->get_tooltip_text(), _search_text)) {
             text_len_2 = cp_name_2->get_tooltip_text().length();
-            fuzzy_points_count_2 = fuzzy_points(cp_name_2->get_tooltip_text(), _search_text) + 100;
+            fuzzy_points_count_2 = fuzzy_points(cp_name_2->get_tooltip_text(), _search_text) + TOOLTIP_PENALTY;
         }
 
-        points_compair = fuzzy_points_compair(fuzzy_points_count_1, fuzzy_points_count_2, text_len_1, text_len_2);
-        if (points_compair != 0) {
-            return points_compair;
+        points_compare = fuzzy_points_compare(fuzzy_points_count_1, fuzzy_points_count_2, text_len_1, text_len_2);
+        if (points_compare != 0) {
+            return points_compare;
         }
 
         if (fuzzy_tolerance_search(cp_name_1->get_tooltip_text(), _search_text)) {
             text_len_1 = cp_name_1->get_tooltip_text().length();
             fuzzy_points_count_1 = fuzzy_tolerance_points(cp_name_1->get_tooltip_text(), _search_text) +
-                                   100; // Adding a constant intiger to decrease the prefrence
+                                   TOOLTIP_PENALTY; // Adding a constant intiger to decrease the prefrence
         }
         if (fuzzy_tolerance_search(cp_name_2->get_tooltip_text(), _search_text)) {
             text_len_2 = cp_name_2->get_tooltip_text().length();
             fuzzy_points_count_2 = fuzzy_tolerance_points(cp_name_2->get_tooltip_text(), _search_text) +
-                                   100; // Adding a constant intiger to decrease the prefrence
+                                   TOOLTIP_PENALTY; // Adding a constant intiger to decrease the prefrence
         }
-        points_compair = fuzzy_points_compair(fuzzy_points_count_1, fuzzy_points_count_2, text_len_1, text_len_2);
-        if (points_compair != 0) {
-            return points_compair;
+        points_compare = fuzzy_points_compare(fuzzy_points_count_1, fuzzy_points_count_2, text_len_1, text_len_2);
+        if (points_compare != 0) {
+            return points_compare;
         }
     }
 
     if (cp_description_1 && normal_search(cp_description_1->get_text(), _search_text)) {
         text_len_1 = cp_description_1->get_text().length();
         fuzzy_points_count_1 = fuzzy_points(cp_description_1->get_text(), _search_text) +
-                               500; // Adding a constant intiger to decrease the prefrence
+                               DESCRIPTION_PENALTY; // Adding a constant intiger to decrease the prefrence
     }
     if (cp_description_2 && normal_search(cp_description_2->get_text(), _search_text)) {
         text_len_2 = cp_description_2->get_text().length();
         fuzzy_points_count_2 = fuzzy_points(cp_description_2->get_text(), _search_text) +
-                               500; // Adding a constant intiger to decrease the prefrence
+                               DESCRIPTION_PENALTY; // Adding a constant intiger to decrease the prefrence
     }
 
-    points_compair = fuzzy_points_compair(fuzzy_points_count_1, fuzzy_points_count_2, text_len_1, text_len_2);
-    if (points_compair != 0) {
-        return points_compair;
+    points_compare = fuzzy_points_compare(fuzzy_points_count_1, fuzzy_points_count_2, text_len_1, text_len_2);
+    if (points_compare != 0) {
+        return points_compare;
     }
     return 0;
 }
