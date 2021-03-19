@@ -36,6 +36,7 @@
 #include "sp-guide.h"
 #include "sp-hatch.h"
 #include "sp-item-rm-unsatisfied-cns.h"
+#include "satisfied-guide-cns.h"
 #include "sp-mask.h"
 #include "sp-pattern.h"
 #include "sp-rect.h"
@@ -128,6 +129,29 @@ SPAvoidRef &SPItem::getAvoidRef()
         avoidRef = new SPAvoidRef(this);
     }
     return *avoidRef;
+}
+
+void SPItem::updateCns(SPDesktop const &desktop)
+{
+    std::vector<Inkscape::SnapCandidatePoint> snappoints;
+    this->getSnappoints(snappoints, nullptr);
+    /* TODO: Implement the ordering. */
+    std::vector<SPGuideConstraint> found_cns;
+    satisfied_guide_cns(desktop, snappoints, found_cns);
+    /* effic: It might be nice to avoid an n^2 algorithm, but in practice n will be
+       small enough that it's still usually more efficient. */
+
+    for (auto cn : found_cns)
+    {
+        if ( std::find(this->constraints.begin(),
+                       this->constraints.end(),
+                       cn)
+             == this->constraints.end() )
+        {
+            this->constraints.push_back(cn);
+            cn.g->attached_items.emplace_back(this, cn.snappoint_ix);
+        }
+    }
 }
 
 bool SPItem::isVisibleAndUnlocked() const {
