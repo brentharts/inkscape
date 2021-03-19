@@ -652,8 +652,8 @@ Glib::ustring make_bold(const Glib::ustring &search)
 void CommandPalette::add_color(Gtk::Label *label, const Glib::ustring &search, const Glib::ustring &subject, bool tooltip)
 {
     Glib::ustring text = "";
-    std::string subject_string = subject.lowercase();
-    std::string search_string = search.lowercase();
+    Glib::ustring subject_string = subject.lowercase();
+    Glib::ustring search_string = search.lowercase();
     int j = 0;
 
     if (search_string.length() > 7) {
