@@ -91,6 +91,7 @@ set(TEST_SOURCES
     lpe-interpolatepoints-test
     lpe-jointype-test
     lpe-knot-test
+    lpe-lattice2-test
     lpe-patternalongpath-test
     lpe-roughhatches-test
     lpe-spiro-test
