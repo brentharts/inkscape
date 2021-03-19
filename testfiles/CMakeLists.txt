@@ -92,6 +92,7 @@ set(TEST_SOURCES
     lpe-jointype-test
     lpe-knot-test
     lpe-lattice2-test
+    lpe-mirrorsymmetry-test
     lpe-patternalongpath-test
     lpe-roughhatches-test
     lpe-spiro-test
