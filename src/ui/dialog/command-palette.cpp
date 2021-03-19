@@ -667,13 +667,14 @@ void CommandPalette::add_color(Gtk::Label *label, const Glib::ustring &search, c
                     j++;
                     break;
                 } else {
-                    text += subject_string[j];
+                    text += subject[j];
                 }
                 j++;
             }
         }
-        if (j < subject_string.length())
+        if (j < subject.length()) {
             text += Glib::Markup::escape_text(subject.substr(j));
+        }
     } else {
         std::map<char, int> search_string_character;
 
@@ -686,7 +687,7 @@ void CommandPalette::add_color(Gtk::Label *label, const Glib::ustring &search, c
                 search_string_character[subject_string[i]]--;
                 text += make_bold(Glib::Markup::escape_text(subject.substr(i, 1)));
             } else {
-                text += subject_string[i];
+                text += subject[i];
             }
         }
     }
