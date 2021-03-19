@@ -1664,7 +1664,7 @@ void ObjectSet::applyAffine(Geom::Affine const &affine, bool set_i2d, bool compe
 
 #if 0 /* Re-enable this once persistent guides have a graphical indication.
          At the time of writing, this is the only place to re-enable. */
-        sp_item_update_cns(*item, desktop());
+        item->updateCns(*desktop());
 #endif
 
         // we're moving both a clone and its original or any ancestor in clone chain?

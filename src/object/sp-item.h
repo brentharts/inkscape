@@ -40,6 +40,7 @@ class SPMask;
 class SPMaskReference;
 class SPAvoidRef;
 class SPPattern;
+class SPDesktop;
 struct SPPrintContext;
 typedef unsigned int guint32;
 
@@ -163,6 +164,11 @@ public:
     SPMaskReference &getMaskRef();
 
     SPAvoidRef &getAvoidRef();
+
+#ifndef SEEN_SP_ITEM_UPDATE_CNS_H
+#define SEEN_SP_ITEM_UPDATE_CNS_H
+    void updateCns(SPDesktop const &desktop);
+#endif
 
   private:
     SPClipPathReference *clip_ref;
