@@ -10,6 +10,7 @@
 # Mingye Wang <arthur200126@gmail.com>, 2015.
 # Aron Xu <happyaron.xu@gmail.com>, 2016.
 # 驿窗 <classenu@163.com>, 2020.
+# Rong "Mantle" Bao <mantlejonse@foxmail.com>, 2021.
 #
 msgid ""
 msgstr ""
