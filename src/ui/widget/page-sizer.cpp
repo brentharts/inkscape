@@ -27,6 +27,14 @@
 #include "object/sp-root.h"
 #include "io/resource.h"
 
+std::string sp_shortcut_get_label() {
+#if __APPLE__
+    return "Command";
+#else
+    return "Ctrl";
+#endif
+}
+
 namespace Inkscape {
 namespace UI {
 namespace Widget {
@@ -217,7 +225,10 @@ PageSizer::PageSizer(Registry & _wr)
 
     //### fit page to drawing button
     _fitPageButton.set_use_underline();
-    _fitPageButton.set_label(_("_Resize page to drawing or selection (Ctrl+Shift+R)"));
+
+    std::string pageButtonLabel = "_Resize page to drawing or selection (" + sp_shortcut_get_label() + "+Shift+R)";
+    _fitPageButton.set_label(_(pageButtonLabel.c_str()));
+
     _fitPageButton.set_tooltip_text(_("Resize the page to fit the current selection, or the entire drawing if there is no selection"));
 
     _fitPageButton.set_hexpand();
