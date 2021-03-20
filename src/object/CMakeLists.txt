@@ -33,7 +33,6 @@ set(object_SRC
   sp-hatch.cpp
   sp-image.cpp
   sp-item-group.cpp
-  sp-item-rm-unsatisfied-cns.cpp
   sp-item-transform.cpp
   sp-item.cpp
   sp-line.cpp
@@ -121,7 +120,6 @@ set(object_SRC
   sp-hatch.h
   sp-image.h
   sp-item-group.h
-  sp-item-rm-unsatisfied-cns.h
   sp-item-transform.h
   sp-item.h
   sp-line.h

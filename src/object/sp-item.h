@@ -170,6 +170,11 @@ public:
     void updateCns(SPDesktop const &desktop);
 #endif
 
+#ifndef SEEN_SP_ITEM_RM_UNSATISFIED_CNS_H
+#define SEEN_SP_ITEM_RM_UNSATISFIED_CNS_H
+    void rmUnsatisfiedCns();
+#endif
+
   private:
     SPClipPathReference *clip_ref;
     SPMaskReference *mask_ref;
