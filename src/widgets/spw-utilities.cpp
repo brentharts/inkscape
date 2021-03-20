@@ -148,6 +148,31 @@ GtkWidget *sp_search_by_value_recursive(GtkWidget *w, gchar *key, gchar *value)
     return nullptr;
 }
 
+Gtk::Widget* sp_traverse_widget_tree(Gtk::Widget* widget, const std::function<bool (Gtk::Widget*)>& eval) {
+    if (!widget) return nullptr;
+
+    if (eval(widget)) return widget;
+
+    if (auto bin = dynamic_cast<Gtk::Bin*>(widget)) {
+        return sp_traverse_widget_tree(bin->get_child(), eval);
+    }
+
+    if (auto container = dynamic_cast<Gtk::Container*>(widget)) {
+        auto children = container->get_children();
+        for (auto child : children) {
+            if (auto found = sp_traverse_widget_tree(child, eval)) {
+                return found;
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+Gtk::Widget* sp_find_focusable_widget(Gtk::Widget* widget) {
+    return sp_traverse_widget_tree(widget, [](Gtk::Widget* w) { return w->get_can_focus(); });
+}
+
 /*
   Local Variables:
   mode:c++
