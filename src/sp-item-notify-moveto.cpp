@@ -18,7 +18,6 @@
 
 #include "object/sp-guide.h"
 #include "object/sp-item.h"
-#include "object/sp-item-rm-unsatisfied-cns.h"
 
 #define return_if_fail(test) if (!(test)) { printf("WARNING: assertion '%s' failed", #test); return; }
 
@@ -65,7 +64,7 @@ void sp_item_notify_moveto(SPItem &item, SPGuide const &mv_g, int const snappoin
             item.doWriteTransform(item.transform);
         }
 
-        sp_item_rm_unsatisfied_cns(item);
+        item.rmUnsatisfiedCns();
 #if 0 /* nyi */
         move_cn_to_front(mv_g, snappoint_ix, item.constraints);
         /** \note If the guideline is connected to multiple snappoints of
