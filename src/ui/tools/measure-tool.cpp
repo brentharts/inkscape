@@ -306,8 +306,8 @@ void createAngleDisplayCurve(SPDesktop *desktop,
          * by zooming in as much as possible in the GUI, using the measurement tool and
          * trying to get as close to 180 or 0 degrees as possible.
          * Smallest value I was able to get was around 1e-5, and then I added some zeroes for good measure.
-        */
-        if ( !((ax * by - ay * bx < 0.00000000001) && (ax * by - ay * bx > -0.00000000001)) ) {
+         */
+        if (!((ax * by - ay * bx < 0.00000000001) && (ax * by - ay * bx > -0.00000000001))) {
             k2 = (4.0 / 3.0) * (std::sqrt(2 * q1 * q2) - q2) / ((ax * by) - (ay * bx));
         } else {
             // If the denominator is 0, there are 2 cases:
@@ -316,9 +316,9 @@ void createAngleDisplayCurve(SPDesktop *desktop,
                 // Now there are also 2 cases, where inkscape thinks it is 180 degrees, or -180 degrees.
                 // Adjust the value of k2 accordingly
                 if (angle > 0) {
-                    k2 = -4.0/3.0;
+                    k2 = -4.0 / 3.0;
                 } else {
-                    k2 = 4.0/3.0;
+                    k2 = 4.0 / 3.0;
                 }
             } else {
                 // if the angle is (almost) 0, k2 is equal to 0
