@@ -165,15 +165,8 @@ public:
 
     SPAvoidRef &getAvoidRef();
 
-#ifndef SEEN_SP_ITEM_UPDATE_CNS_H
-#define SEEN_SP_ITEM_UPDATE_CNS_H
     void updateCns(SPDesktop const &desktop);
-#endif
-
-#ifndef SEEN_SP_ITEM_RM_UNSATISFIED_CNS_H
-#define SEEN_SP_ITEM_RM_UNSATISFIED_CNS_H
     void rmUnsatisfiedCns();
-#endif
 
   private:
     SPClipPathReference *clip_ref;
@@ -423,6 +416,10 @@ private:
     static void mask_ref_changed(SPObject *old_clip, SPObject *clip, SPItem *item);
     static void fill_ps_ref_changed(SPObject *old_clip, SPObject *clip, SPItem *item);
     static void stroke_ps_ref_changed(SPObject *old_clip, SPObject *clip, SPItem *item);
+    static void satisfiedGuideCns(SPDesktop const &desktop,
+                           std::vector<Inkscape::SnapCandidatePoint> const &snappoints,
+                           std::vector<SPGuideConstraint> &cns);
+
 
 public:
         void rotate_rel(Geom::Rotate const &rotation);
