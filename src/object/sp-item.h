@@ -165,7 +165,6 @@ public:
 
     SPAvoidRef &getAvoidRef();
 
-    void updateCns(SPDesktop const &desktop);
     void rmUnsatisfiedCns();
 
   private:
@@ -416,10 +415,6 @@ private:
     static void mask_ref_changed(SPObject *old_clip, SPObject *clip, SPItem *item);
     static void fill_ps_ref_changed(SPObject *old_clip, SPObject *clip, SPItem *item);
     static void stroke_ps_ref_changed(SPObject *old_clip, SPObject *clip, SPItem *item);
-    static void satisfiedGuideCns(SPDesktop const &desktop,
-                           std::vector<Inkscape::SnapCandidatePoint> const &snappoints,
-                           std::vector<SPGuideConstraint> &cns);
-
 
 public:
         void rotate_rel(Geom::Rotate const &rotation);
