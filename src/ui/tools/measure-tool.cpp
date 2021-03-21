@@ -311,7 +311,7 @@ void createAngleDisplayCurve(SPDesktop *desktop,
             k2 = (4.0 / 3.0) * (std::sqrt(2 * q1 * q2) - q2) / ((ax * by) - (ay * bx));
         }
         else{
-            // If the numerator is 0, there are 2 cases:
+            // If the denominator is 0, there are 2 cases:
             // Either the angle is (almost) +-180 degrees, in which case the limit of k2 tends to -+4.0/3.0.
             if(angle > 3.14 || angle < -3.14){ // The angle is in radians
                 // Now there are also 2 cases, where inkscape thinks it is 180 degrees, or -180 degrees.
