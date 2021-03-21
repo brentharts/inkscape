@@ -63,7 +63,6 @@ set(inkscape_SRC
   rdf.cpp
   removeoverlap.cpp
   rubberband.cpp
-  satisfied-guide-cns.cpp
   selcue.cpp
   selection-chemistry.cpp
   selection-describer.cpp
@@ -164,7 +163,6 @@ set(inkscape_SRC
   remove-last.h
   removeoverlap.h
   rubberband.h
-  satisfied-guide-cns.h
   selcue.h
   selection-chemistry.h
   selection-describer.h

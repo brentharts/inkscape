@@ -32,7 +32,6 @@
 #include "filter-chemistry.h"
 
 #include "remove-last.h"
-#include "satisfied-guide-cns.h"
 #include "sp-clippath.h"
 #include "sp-desc.h"
 #include "sp-guide.h"
@@ -137,7 +136,7 @@ void SPItem::updateCns(SPDesktop const &desktop)
     this->getSnappoints(snappoints, nullptr);
     /* TODO: Implement the ordering. */
     std::vector<SPGuideConstraint> found_cns;
-    satisfied_guide_cns(desktop, snappoints, found_cns);
+    satisfiedGuideCns(desktop, snappoints, found_cns);
     /* effic: It might be nice to avoid an n^2 algorithm, but in practice n will be
        small enough that it's still usually more efficient. */
 
@@ -693,6 +692,21 @@ void SPItem::stroke_ps_ref_changed(SPObject *old_ps, SPObject *ps, SPItem *item)
             v->arenaitem->setStrokePattern(pi);
             if (pi) {
                 new_stroke_ps->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+            }
+        }
+    }
+}
+
+void SPItem::satisfiedGuideCns(SPDesktop const &desktop,
+                               std::vector<Inkscape::SnapCandidatePoint> const &snappoints,
+                               std::vector<SPGuideConstraint> &cns)
+{
+    SPNamedView const &nv = *desktop.getNamedView();
+    for(auto guide : nv.guides) {
+        SPGuide &g = *guide;
+        for (unsigned int i = 0; i < snappoints.size(); ++i) {
+            if (Geom::are_near(g.getDistanceFrom(snappoints[i].getPoint()), 0, 1e-2)) {
+                cns.emplace_back(&g, i);
             }
         }
     }
