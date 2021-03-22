@@ -31,7 +31,6 @@
 #include "verbs.h"
 
 #include "sp-guide.h"
-#include "sp-item-notify-moveto.h"
 #include "sp-namedview.h"
 #include "sp-root.h"
 
