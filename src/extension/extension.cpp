@@ -563,6 +563,7 @@ void Extension::set_environment() {
     Glib::unsetenv("INKEX_GETTEXT_DOMAIN");
     Glib::unsetenv("INKEX_GETTEXT_DIRECTORY");
 
+    Glib::setenv("INKSCAPE_PROFILE_DIR", std::string(Inkscape::IO::Resource::profile_path()));
     if (_translationdomain) {
         Glib::setenv("INKEX_GETTEXT_DOMAIN", std::string(_translationdomain));
     }
