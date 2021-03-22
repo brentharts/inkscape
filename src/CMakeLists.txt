@@ -75,7 +75,6 @@ set(inkscape_SRC
   snapped-line.cpp
   snapped-point.cpp
   snapper.cpp
-  sp-item-notify-moveto.cpp 
   style-internal.cpp
   style.cpp
   text-chemistry.cpp
@@ -179,7 +178,6 @@ set(inkscape_SRC
   snapper.h
   sp-guide-attachment.h
   sp-guide-constraint.h
-  sp-item-notify-moveto.h
   streq.h
   strneq.h
   style-enums.h

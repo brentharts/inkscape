@@ -201,7 +201,7 @@ namespace XML {}
  *   - SPFlowline [\ref sp-flowdiv.cpp, \ref sp-flowdiv.h]
  *   - SPFlowregionbreak [\ref sp-flowdiv.cpp, \ref sp-flowdiv.h]
  *   - SPGuide [\ref sp-guide.cpp, \ref sp-guide.h]
- *   - SPItem [\ref sp-item.cpp, \ref sp-item.h, \ref sp-item-notify-moveto.cpp, \ref sp-item-transform.cpp, ]
+ *   - SPItem [\ref sp-item.cpp, \ref sp-item.h, \ref sp-item-transform.cpp, ]
  *     - SPFlowdiv [\ref sp-flowdiv.cpp, \ref sp-flowdiv.h]
  *     - SPFlowpara [\ref sp-flowdiv.cpp, \ref sp-flowdiv.h]
  *     - SPFlowregion [\ref sp-flowregion.cpp, \ref sp-flowregion.h]
