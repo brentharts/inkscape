@@ -165,8 +165,6 @@ public:
 
     SPAvoidRef &getAvoidRef();
 
-    void rmUnsatisfiedCns();
-
   private:
     SPClipPathReference *clip_ref;
     SPMaskReference *mask_ref;
