@@ -130,30 +130,6 @@ SPAvoidRef &SPItem::getAvoidRef()
     return *avoidRef;
 }
 
-void SPItem::rmUnsatisfiedCns()
-{
-    if (this->constraints.empty()) {
-        return;
-    }
-    std::vector<Inkscape::SnapCandidatePoint> snappoints;
-    this->getSnappoints(snappoints, nullptr);
-    for (unsigned i = this->constraints.size(); i--;) {
-        g_assert( i < this->constraints.size() );
-        SPGuideConstraint const &cn = this->constraints[i];
-        int const snappoint_ix = cn.snappoint_ix;
-        g_assert( snappoint_ix < int(snappoints.size()) );
-
-        if (!Geom::are_near(cn.g->getDistanceFrom(snappoints[snappoint_ix].getPoint()), 0, 1e-2)) {
-
-            remove_last(cn.g->attached_items, SPGuideAttachment(this, cn.snappoint_ix));
-
-            g_assert( i < this->constraints.size() );
-
-            this->constraints.erase(this->constraints.begin() + i);
-        }
-    }
-}
-
 bool SPItem::isVisibleAndUnlocked() const {
     return (!isHidden() && !isLocked());
 }
@@ -1617,7 +1593,6 @@ void SPItem::set_item_transform(Geom::Affine const &transform_matrix)
         /* The SP_OBJECT_USER_MODIFIED_FLAG_B is used to mark the fact that it's only a
            transformation.  It's apparently not used anywhere else. */
         requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_USER_MODIFIED_FLAG_B);
-        this->rmUnsatisfiedCns();
     }
 }
 
