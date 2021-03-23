@@ -1083,6 +1083,14 @@ bool SPItem::isFiltered() const {
 	return (style && style->filter.href && style->filter.href->getObject());
 }
 
+SPObject* SPItem::isInMask() const {
+    SPObject* parent = this->parent;
+    while (parent && !dynamic_cast<SPMask *>(parent)) {
+        parent = parent->parent;
+    }
+    return parent;
+}
+
 SPObject* SPItem::isInClipPath() const {
     SPObject* parent = this->parent;
     while (parent && !dynamic_cast<SPClipPath *>(parent)) {
