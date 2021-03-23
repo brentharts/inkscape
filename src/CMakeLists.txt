@@ -159,7 +159,6 @@ set(inkscape_SRC
   proj_pt.h
   pure-transform.h
   rdf.h
-  remove-last.h
   removeoverlap.h
   rubberband.h
   selcue.h
@@ -176,8 +175,6 @@ set(inkscape_SRC
   snapped-line.h
   snapped-point.h
   snapper.h
-  sp-guide-attachment.h
-  sp-guide-constraint.h
   streq.h
   strneq.h
   style-enums.h

@@ -26,7 +26,6 @@
 #include "document-undo.h"
 #include "helper-fns.h"
 #include "inkscape.h"
-#include "remove-last.h"
 #include "verbs.h"
 
 #include "sp-guide.h"
@@ -525,15 +524,6 @@ char* SPGuide::description(bool const verbose) const
 void sp_guide_remove(SPGuide *guide)
 {
     g_assert(SP_IS_GUIDE(guide));
-
-    for (std::vector<SPGuideAttachment>::const_iterator i(guide->attached_items.begin()),
-             iEnd(guide->attached_items.end());
-         i != iEnd; ++i)
-    {
-        SPGuideAttachment const &att = *i;
-        remove_last(att.item->constraints, SPGuideConstraint(guide, att.snappoint_ix));
-    }
-    guide->attached_items.clear();
 
     //XML Tree being used directly while it shouldn't be.
     sp_repr_unparent(guide->getRepr());
