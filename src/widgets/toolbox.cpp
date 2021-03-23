@@ -230,8 +230,8 @@ static struct {
 
 static Glib::RefPtr<Gtk::ActionGroup> create_or_fetch_actions( SPDesktop* desktop );
 
-static void setup_tool_toolbox(GtkWidget *toolbox, SPDesktop *desktop);
-static void update_tool_toolbox(SPDesktop *desktop, ToolBase *eventcontext, GtkWidget *toolbox);
+// static void setup_tool_toolbox(GtkWidget *toolbox, SPDesktop *desktop);
+// static void update_tool_toolbox(SPDesktop *desktop, ToolBase *eventcontext, GtkWidget *toolbox);
 
 static void setup_aux_toolbox(GtkWidget *toolbox, SPDesktop *desktop);
 static void update_aux_toolbox(SPDesktop *desktop, ToolBase *eventcontext, GtkWidget *toolbox);
@@ -387,13 +387,49 @@ static GtkWidget* toolboxNewCommon( GtkWidget* tb, BarId id, GtkPositionType /*h
     return hb;
 }
 
+// GtkWidget *ToolboxFactory::createToolToolbox()
+// {
+//     auto tb = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+//     gtk_widget_set_name(tb, "ToolToolbox");
+//     gtk_box_set_homogeneous(GTK_BOX(tb), FALSE);
+
+//     return toolboxNewCommon( tb, BAR_TOOL, GTK_POS_TOP );
+// }
+
 GtkWidget *ToolboxFactory::createToolToolbox()
 {
     auto tb = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_name(tb, "ToolToolbox");
     gtk_box_set_homogeneous(GTK_BOX(tb), FALSE);
 
-    return toolboxNewCommon( tb, BAR_TOOL, GTK_POS_TOP );
+    Glib::ustring tool_toolbar_builder_file = get_filename(UIS, "tool-toolbar.ui");
+    auto builder = Gtk::Builder::create();
+    try
+    {
+        builder->add_from_file(tool_toolbar_builder_file);
+    }
+    catch (const Glib::Error& ex)
+    {
+        std::cerr << "ToolboxFactor::createToolToolbox: " << tool_toolbar_builder_file << " file not read! " << ex.what() << std::endl;
+    }
+
+    Gtk::Toolbar* toolbar = nullptr;
+    builder->get_widget("tool-toolbar", toolbar);
+    if (!toolbar) {
+        std::cerr << "InkscapeWindow: Failed to load tool toolbar!" << std::endl;
+    } else {
+        gtk_box_pack_start(GTK_BOX(tb), GTK_WIDGET(toolbar->gobj()), false, false, 0);
+
+        Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+        if ( prefs->getBool("/toolbox/icononly", true) ) {
+            toolbar->set_toolbar_style( Gtk::TOOLBAR_ICONS );
+        }
+
+        GtkIconSize toolboxSize = ToolboxFactory::prefToSize("/toolbox/primary", 1);
+        toolbar->set_icon_size (static_cast<Gtk::IconSize>(toolboxSize));
+    }
+
+    return toolboxNewCommon( tb, BAR_TOOL, GTK_POS_LEFT );
 }
 
 GtkWidget *ToolboxFactory::createAuxToolbox()
@@ -466,8 +502,8 @@ void ToolboxFactory::setToolboxDesktop(GtkWidget *toolbox, SPDesktop *desktop)
 
     switch (id) {
         case BAR_TOOL:
-            setup_func = setup_tool_toolbox;
-            update_func = update_tool_toolbox;
+            setup_func = nullptr; // setup_tool_toolbox;
+            update_func = nullptr; // update_tool_toolbox;
             break;
 
         case BAR_AUX:
@@ -530,6 +566,7 @@ static void setupToolboxCommon( GtkWidget *toolbox,
     gtk_ui_manager_insert_action_group( mgr, mainActions->gobj(), 0 );
 
     Glib::ustring filename = get_filename(UIS, ui_file);
+    std::cout << "setupToolboxCommon: " << toolbarName << "  file: " << filename << std::endl;
     gtk_ui_manager_add_ui_from_file( mgr, filename.c_str(), &err );
     if(err) {
         g_warning("Failed to load %s: %s", filename.c_str(), err->message);
@@ -543,6 +580,7 @@ static void setupToolboxCommon( GtkWidget *toolbox,
     }
 
     GtkIconSize toolboxSize = ToolboxFactory::prefToSize(sizePref);
+    std::cout << "setupToolboxCommon: " << toolbarName << "  size: " << sizePref << std::endl;
     gtk_toolbar_set_icon_size( GTK_TOOLBAR(toolBar), static_cast<GtkIconSize>(toolboxSize) );
 
     GtkPositionType pos = static_cast<GtkPositionType>(GPOINTER_TO_INT(g_object_get_data( G_OBJECT(toolbox), HANDLE_POS_MARK )));
@@ -635,29 +673,29 @@ void ToolboxFactory::setOrientation(GtkWidget* toolbox, GtkOrientation orientati
     }
 }
 
-void setup_tool_toolbox(GtkWidget *toolbox, SPDesktop *desktop)
-{
-    setupToolboxCommon(toolbox, desktop, "toolbar-tool.ui", "/ui/ToolToolbar", "/toolbox/tools/small");
-}
+// void setup_tool_toolbox(GtkWidget *toolbox, SPDesktop *desktop)
+// {
+//     setupToolboxCommon(toolbox, desktop, "toolbar-tool.ui", "/ui/ToolToolbar", "/toolbox/tools/small");
+// }
 
-void update_tool_toolbox( SPDesktop *desktop, ToolBase *eventcontext, GtkWidget * /*toolbox*/ )
-{
-    gchar const *const tname = ( eventcontext
-                                 ? eventcontext->getPrefsPath().c_str() //g_type_name(G_OBJECT_TYPE(eventcontext))
-                                 : nullptr );
-    Glib::RefPtr<Gtk::ActionGroup> mainActions = create_or_fetch_actions( desktop );
+// void update_tool_toolbox( SPDesktop *desktop, ToolBase *eventcontext, GtkWidget * /*toolbox*/ )
+// {
+//     gchar const *const tname = ( eventcontext
+//                                  ? eventcontext->getPrefsPath().c_str() //g_type_name(G_OBJECT_TYPE(eventcontext))
+//                                  : nullptr );
+//     Glib::RefPtr<Gtk::ActionGroup> mainActions = create_or_fetch_actions( desktop );
 
-    for (int i = 0 ; tools[i].type_name ; i++ ) {
-        Glib::RefPtr<Gtk::Action> act = mainActions->get_action( Inkscape::Verb::get(tools[i].verb)->get_id() );
-        if ( act ) {
-            bool setActive = tname && !strcmp(tname, tools[i].type_name);
-            Glib::RefPtr<VerbAction> verbAct = Glib::RefPtr<VerbAction>::cast_dynamic(act);
-            if ( verbAct ) {
-                verbAct->set_active(setActive);
-            }
-        }
-    }
-}
+//     for (int i = 0 ; tools[i].type_name ; i++ ) {
+//         Glib::RefPtr<Gtk::Action> act = mainActions->get_action( Inkscape::Verb::get(tools[i].verb)->get_id() );
+//         if ( act ) {
+//             bool setActive = tname && !strcmp(tname, tools[i].type_name);
+//             Glib::RefPtr<VerbAction> verbAct = Glib::RefPtr<VerbAction>::cast_dynamic(act);
+//             if ( verbAct ) {
+//                 verbAct->set_active(setActive);
+//             }
+//         }
+//     }
+// }
 
 /**
  * \brief Generate the auxiliary toolbox
