@@ -31,7 +31,6 @@
 #include "conditions.h"
 #include "filter-chemistry.h"
 
-#include "remove-last.h"
 #include "sp-clippath.h"
 #include "sp-desc.h"
 #include "sp-guide.h"
@@ -47,7 +46,6 @@
 #include "sp-use.h"
 
 #include "style.h"
-#include "uri.h"
 
 
 #include "util/find-last-if.h"
@@ -897,8 +895,6 @@ Geom::OptRect SPItem::documentPreferredBounds() const
     }
 }
 
-
-
 Geom::OptRect SPItem::documentGeometricBounds() const
 {
     return geometricBounds(i2doc_affine());
@@ -1085,15 +1081,6 @@ gchar *SPItem::detailedDescription() const {
 
 bool SPItem::isFiltered() const {
 	return (style && style->filter.href && style->filter.href->getObject());
-}
-
-
-SPObject* SPItem::isInMask() const {
-    SPObject* parent = this->parent;
-    while (parent && !dynamic_cast<SPMask *>(parent)) {
-        parent = parent->parent;
-    }
-    return parent;
 }
 
 SPObject* SPItem::isInClipPath() const {
@@ -1538,7 +1525,8 @@ void SPItem::doWriteTransform(Geom::Affine const &transform, Geom::Affine const 
              (!preserve && // user did not chose to preserve all transforms
              (!clip_ref || !clip_ref->getObject()) && // the object does not have a clippath
              (!mask_ref || !mask_ref->getObject()) && // the object does not have a mask
-             !(!transform.isTranslation() && style && style->getFilter())) // the object does not have a filter, or the transform is translation (which is supposed to not affect filters)
+             !(!transform.isTranslation() && style && style->getFilter()))
+                // the object does not have a filter, or the transform is translation (which is supposed to not affect filters)
         )
     {
         transform_attr = this->set_transform(transform);

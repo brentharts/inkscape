@@ -30,7 +30,6 @@
 #include "snap-preferences.h"
 #include "snap-candidate.h"
 
-//class SPGuideConstraint;
 #include "sp-guide-constraint.h"
 #include "xml/repr.h"
 
@@ -40,7 +39,6 @@ class SPMask;
 class SPMaskReference;
 class SPAvoidRef;
 class SPPattern;
-class SPDesktop;
 struct SPPrintContext;
 typedef unsigned int guint32;
 
