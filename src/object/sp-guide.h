@@ -18,7 +18,6 @@
 #include <vector>
 
 #include "sp-object.h"
-#include "sp-guide-attachment.h"
 
 typedef unsigned int guint32;
 extern "C" {
@@ -26,8 +25,6 @@ extern "C" {
 }
 
 class SPDesktop;
-struct SPCanvasGroup;
-struct SPGuideLine;
 #define SP_GUIDE(obj) (dynamic_cast<SPGuide*>((SPObject*)obj))
 #define SP_IS_GUIDE(obj) (dynamic_cast<const SPGuide*>((SPObject*)obj) != NULL)
 
@@ -96,8 +93,6 @@ protected:
 
     guint32 color;
     guint32 hicolor;
-public:
-    std::vector<SPGuideAttachment> attached_items; // unused
 };
 
 // These functions rightfully belong to SPDesktop. What gives?!
