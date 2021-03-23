@@ -157,6 +157,14 @@ UndoHistory::UndoHistory()
 
 UndoHistory::~UndoHistory()
 {
+    if(_event_log)
+    {
+        // Fix issue #2297
+        // Removing call back here is important as after dialog is
+        // destroyed `this` points to a deleted memory but its not nullptr
+        // and hence `if` block in callback can't verify it.
+        _event_log->remove_destroy_notify_callback(this);
+    }
     _connectDocument(nullptr, nullptr);
 }
 
