@@ -157,8 +157,7 @@ UndoHistory::UndoHistory()
 
 UndoHistory::~UndoHistory()
 {
-    if(_event_log)
-    {
+    if (_event_log) {
         // Fix issue #2297
         // Removing call back here is important as after dialog is
         // destroyed `this` points to a deleted memory but its not nullptr
@@ -167,7 +166,6 @@ UndoHistory::~UndoHistory()
     }
     _connectDocument(nullptr, nullptr);
 }
-
 
 void UndoHistory::update()
 {
