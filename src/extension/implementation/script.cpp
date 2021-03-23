@@ -454,7 +454,7 @@ void Script::save(Inkscape::Extension::Output *module,
 {
     std::list<std::string> params;
     module->paramListString(params);
-    module->set_environment();
+    module->set_environment(doc);
 
     std::string tempfilename_in;
     int tempfd_in = 0;
@@ -579,7 +579,7 @@ void Script::effect(Inkscape::Extension::Effect *module,
 
     std::list<std::string> params;
     module->paramListString(params);
-    module->set_environment();
+    module->set_environment(desktop->getDocument());
 
     parent_window = module->get_execution_env()->get_working_dialog();
 
