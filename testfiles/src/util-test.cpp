@@ -17,8 +17,6 @@
 
 TEST(UtilTest, NearestCommonAncestor)
 {
-    // TODO change name of implementation to `nearest_common_ancestor`
-    // TODO remove `pred` argument
 #define nearest_common_ancestor(a, b, c) \
     Inkscape::Algorithms::nearest_common_ancestor(a, b, c)
 
