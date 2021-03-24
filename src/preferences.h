@@ -127,23 +127,7 @@ public:
     friend class Preferences; // Preferences class has to access _value
     public:
         ~Entry() = default;
-        Entry()
-            : _pref_path("")
-            , _value(nullptr)
-            , cached_bool(false)
-            , cached_point(false)
-            , cached_int(false)
-            , cached_uint(false)
-            , cached_double(false)
-            , cached_unit(false)
-            , cached_color(false)
-            , cached_style(false)
-            , value_bool(false)
-            , value_int(0)
-            , value_uint(0)
-            , value_double(0.)
-            , value_color(0)
-            , value_style(nullptr) {} // needed to enable use in maps
+        Entry() {} // needed to enable use in maps
         Entry(Entry const &other) = default;
 
         /**
@@ -264,42 +248,28 @@ public:
     private:
         Entry(Glib::ustring path, void const *v)
             : _pref_path(std::move(path))
-            , _value(v)
-            , cached_bool(false)
-            , cached_point(false)
-            , cached_int(false)
-            , cached_uint(false)
-            , cached_double(false)
-            , cached_unit(false)
-            , cached_color(false)
-            , cached_style(false)
-            , value_bool(false)
-            , value_int(0)
-            , value_uint(0)
-            , value_double(0.)
-            , value_color(0)
-            , value_style(nullptr) {}
+            , _value(v) {}
 
-        Glib::ustring _pref_path;
-        void const *_value;
+        Glib::ustring _pref_path = "";
+        void const *_value = nullptr;
 
-        mutable bool value_bool;
+        mutable bool value_bool = false;
         mutable Geom::Point value_point;
-        mutable int value_int;
-        mutable unsigned int value_uint;
-        mutable double value_double;
+        mutable int value_int = 0;
+        mutable unsigned int value_uint = 0;
+        mutable double value_double = 0.;
         mutable Glib::ustring value_unit;
-        mutable guint32 value_color;
-        mutable SPCSSAttr* value_style;
+        mutable guint32 value_color = 0;
+        mutable SPCSSAttr* value_style = nullptr;
 
-        mutable bool cached_bool;
-        mutable bool cached_point;
-        mutable bool cached_int;
-        mutable bool cached_uint;
-        mutable bool cached_double;
-        mutable bool cached_unit;
-        mutable bool cached_color;
-        mutable bool cached_style;
+        mutable bool cached_bool = false;
+        mutable bool cached_point = false;
+        mutable bool cached_int = false;
+        mutable bool cached_uint = false;
+        mutable bool cached_double = false;
+        mutable bool cached_unit = false;
+        mutable bool cached_color = false;
+        mutable bool cached_style = false;
     };
 
     // disable copying
