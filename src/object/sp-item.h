@@ -119,7 +119,7 @@ public:
     Geom::Affine i2vp;
 };
 
-#define SP_ITEM(obj) (dynamic_cast<SPItem*>(reinterpret_cast<SPObject*>(obj)))
+#define SP_ITEM(obj) (static_cast<SPItem*>(dynamic_cast<SPObject*>(obj)))
 #define SP_IS_ITEM(obj) (dynamic_cast<const SPItem*>((SPObject*)obj) != NULL)
 
 /**
