@@ -1285,10 +1285,10 @@ void MeasureTool::showCanvasItems(bool to_guides, bool to_item, bool to_phantom,
         angle -= baseAngle;
 
         // make sure that the angle is between -pi and pi.
-        if(angle > M_PI) {
+        if (angle > M_PI) {
             angle -= 2 * M_PI;
         }
-        if(angle < -M_PI) {
+        if (angle < -M_PI) {
             angle += 2 * M_PI;
         }
     }
