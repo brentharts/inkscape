@@ -79,8 +79,7 @@ void LPEShowHandles::doOnApply(SPLPEItem const* lpeitem)
 
 void LPEShowHandles::doBeforeEffect (SPLPEItem const* lpeitem)
 {
-    SPItem const* item = dynamic_cast<SPItem const*>(reinterpret_cast<SPObject const*>(lpeitem));
-    stroke_width = item->style->stroke_width.computed;
+    stroke_width = lpeitem->style->stroke_width.computed;
 }
 
 Geom::PathVector LPEShowHandles::doEffect_path (Geom::PathVector const & path_in)
