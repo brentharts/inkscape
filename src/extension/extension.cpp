@@ -559,7 +559,7 @@ const char *Extension::get_translation(const char *msgid, const char *msgctxt) c
   * Currently sets the environment variables INKEX_GETTEXT_DOMAIN and INKEX_GETTEXT_DIRECTORY
   * to make the "translationdomain" accessible to child processes spawned by this extension's Implementation.
   *
-  * @param   doc   Optional document, if provided sets the DOCUMENT_URI from the document's save location.
+  * @param   doc   Optional document, if provided sets the DOCUMENT_PATH from the document's save location.
   */
 void Extension::set_environment(const SPDocument *doc) {
     Glib::unsetenv("INKEX_GETTEXT_DOMAIN");
@@ -570,11 +570,11 @@ void Extension::set_environment(const SPDocument *doc) {
 
     // This is needed so files can be saved relative to their document location (see image-extract)
     if (doc) {
-        auto uri = doc->getDocumentURI();
-        if (!uri) {
-            uri = ""; // Set to blank string so extensions know the difference between old inkscape and not-saved document.
+        auto path = doc->getDocumentURI();
+        if (!path) {
+            path = ""; // Set to blank string so extensions know the difference between old inkscape and not-saved document.
         }
-        Glib::setenv("DOCUMENT_URI", std::string(uri));
+        Glib::setenv("DOCUMENT_PATH", std::string(path));
     }
 
     if (_translationdomain) {
