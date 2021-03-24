@@ -25,7 +25,7 @@ namespace Algorithms {
  *
  * The case of sharing a common successor is handled in O(1) time.
  *
- * If \a a is the longest common suffix, then runs in O(len(rest of b)) time.
+ * If \a a is the nearest common ancestor, then runs in O(len(rest of b)) time.
  *
  * Otherwise, runs in O(len(a) + len(b)) time.
  */
