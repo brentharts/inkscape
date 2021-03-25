@@ -90,11 +90,7 @@ void AboutDialog::show_about() {
         builder->get_widget("version", version);
         builder->get_widget("version-copied", label);
         if(version) {
-<<<<<<< HEAD
             version->set_label(Inkscape::inkscape_version());
-=======
-            version->set_label(Inkscape::version_string_with_branch);
->>>>>>> added git branch info to the about page
             version->signal_clicked().connect(
                     sigc::bind(sigc::ptr_fun(&copy_version), version, label));
         }
