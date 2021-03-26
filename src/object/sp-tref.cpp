@@ -228,7 +228,8 @@ gchar* SPTRef::description() const {
             child_desc = g_strdup("");
         }
 
-        char *ret = g_strdup_printf("%s%s", _(" from "), child_desc);
+        char *ret = g_strdup_printf("%s%s",
+            (SP_IS_ITEM(referred) ? _(" from ") : ""), child_desc);
         g_free(child_desc);
 
         return ret;
