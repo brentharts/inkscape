@@ -441,12 +441,6 @@ void Application::add_gtk_css(bool only_providers)
         Glib::ustring gtkthemename = prefs->getString("/theme/gtkTheme");
         if (gtkthemename != "") {
             g_object_set(settings, "gtk-theme-name", gtkthemename.c_str(), NULL);
-        } else {
-            Glib::RefPtr<Gdk::Display> display = Gdk::Display::get_default();
-            Glib::RefPtr<Gdk::Screen>  screen = display->get_default_screen();
-            Glib::RefPtr<Gtk::IconTheme> icon_theme = Gtk::IconTheme::get_for_screen(screen);
-            Gtk::IconInfo iconinfo = icon_theme->lookup_icon("tool-pointer", 22, Gtk::ICON_LOOKUP_FORCE_SIZE);
-            prefs->setBool("/theme/symbolicIcons", iconinfo.is_symbolic());
         }
         bool preferdarktheme = prefs->getBool("/theme/preferDarkTheme", false);
         if (preferdarktheme) {
