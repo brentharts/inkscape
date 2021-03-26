@@ -235,15 +235,18 @@ Export::Export()
         t->set_row_spacing(4);
         t->set_column_spacing(4);
 
+        SPDocument *doc;
+        doc = SP_ACTIVE_DESKTOP->getDocument();
+        
         x0_adj = createSpinbutton ( "x0", 0.0, -1000000.0, 1000000.0, 0.1, 1.0,
                                     t, 0, 0, _("_x0:"), "", EXPORT_COORD_PRECISION, 1,
                                     &Export::onAreaX0Change);
 
-        x1_adj = createSpinbutton ( "x1", 0.0, -1000000.0, 1000000.0, 0.1, 1.0,
+        x1_adj = createSpinbutton ( "x1", doc->getWidth().value("mm"), -1000000.0, 1000000.0, 0.1, 1.0,
                                     t, 0, 1, _("x_1:"), "", EXPORT_COORD_PRECISION, 1,
                                     &Export::onAreaX1Change);
 
-        width_adj = createSpinbutton ( "width", 0.0, 0.0, PNG_UINT_31_MAX, 0.1, 1.0,
+        width_adj = createSpinbutton ( "width", doc->getWidth().value("mm"), 0.0, PNG_UINT_31_MAX, 0.1, 1.0,
                                        t, 0, 2, _("Wid_th:"), "", EXPORT_COORD_PRECISION, 1,
                                        &Export::onAreaWidthChange);
 
@@ -251,11 +254,11 @@ Export::Export()
                                     t, 2, 0, _("_y0:"), "", EXPORT_COORD_PRECISION, 1,
                                     &Export::onAreaY0Change);
 
-        y1_adj = createSpinbutton ( "y1", 0.0, -1000000.0, 1000000.0, 0.1, 1.0,
+        y1_adj = createSpinbutton ( "y1", doc->getHeight().value("mm"), -1000000.0, 1000000.0, 0.1, 1.0,
                                     t, 2, 1, _("y_1:"), "", EXPORT_COORD_PRECISION, 1,
                                     &Export::onAreaY1Change);
 
-        height_adj = createSpinbutton ( "height", 0.0, 0.0, PNG_UINT_31_MAX, 0.1, 1.0,
+        height_adj = createSpinbutton ( "height", doc->getHeight().value("mm"), 0.0, PNG_UINT_31_MAX, 0.1, 1.0,
                                         t, 2, 2, _("Hei_ght:"), "", EXPORT_COORD_PRECISION, 1,
                                         &Export::onAreaHeightChange);
 
@@ -270,6 +273,9 @@ Export::Export()
 
     /* Bitmap size frame */
     {
+        SPDocument *doc;
+        doc = SP_ACTIVE_DESKTOP->getDocument();
+
         size_box.set_border_width(3);
         bm_label = new Gtk::Label(_("<b>Image size</b>"), Gtk::ALIGN_START);
         bm_label->set_use_markup(true);
@@ -281,7 +287,7 @@ Export::Export()
 
         size_box.pack_start(*t);
 
-        bmwidth_adj = createSpinbutton ( "bmwidth", 16.0, 1.0, 1000000.0, 1.0, 10.0,
+        bmwidth_adj = createSpinbutton ( "bmwidth", doc->getWidth().value("px"), 1.0, 1000000.0, 1.0, 10.0,
                                          t, 0, 0,
                                          _("_Width:"), _("pixels at"), 0, 1,
                                          &Export::onBitmapWidthChange);
@@ -292,7 +298,7 @@ Export::Export()
                                       "", _("dp_i"), 2, 1,
                                       &Export::onExportXdpiChange);
 
-        bmheight_adj = createSpinbutton ( "bmheight", 16.0, 1.0, 1000000.0, 1.0, 10.0,
+        bmheight_adj = createSpinbutton ( "bmheight", doc->getHeight().value("px"), 1.0, 1000000.0, 1.0, 10.0,
                                           t, 0, 1,
                                           _("_Height:"), _("pixels at"), 0, 1,
                                           &Export::onBitmapHeightChange);
@@ -657,7 +663,7 @@ inline void Export::findDefaultSelection()
     }
 
     if (key == SELECTION_NUMBER_OF) {
-        key = SELECTION_SELECTION;
+        key = SELECTION_PAGE;
     }
 
     current_key = key;
