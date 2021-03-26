@@ -219,9 +219,14 @@ const char* SPTRef::displayName() const {
 gchar* SPTRef::description() const {
     SPObject const *referred = this->getObjectReferredTo();
 
-    auto *item = dynamic_cast<SPItem const*>(referred);
-    if (item) {
-        char *child_desc = item->detailedDescription();
+    if (referred) {
+        char *child_desc;
+
+        if (SP_IS_ITEM(referred)) {
+             child_desc = SP_ITEM(referred)->detailedDescription();
+        } else {
+            child_desc = g_strdup("");
+        }
 
         char *ret = g_strdup_printf("%s%s", _(" from "), child_desc);
         g_free(child_desc);

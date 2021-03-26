@@ -250,7 +250,7 @@ public:
             : _pref_path(std::move(path))
             , _value(v) {}
 
-        Glib::ustring _pref_path = "";
+        Glib::ustring _pref_path;
         void const *_value = nullptr;
 
         mutable bool value_bool = false;
