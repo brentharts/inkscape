@@ -2987,8 +2987,8 @@ void GrDrag::deleteSelected(bool just_one)
                         lg->y1.computed = newbegin[Geom::Y];
 
                         Inkscape::XML::Node *repr = stopinfo->gradient->getRepr();
-                        sp_repr_set_svg_double(repr, "x1", lg->x1.computed);
-                        sp_repr_set_svg_double(repr, "y1", lg->y1.computed);
+                        repr->setAttributeSvgDouble("x1", lg->x1.computed);
+                        repr->setAttributeSvgDouble("y1", lg->y1.computed);
                         stop->offset = 0;
                         sp_repr_set_css_double(stop->getRepr(), "offset", 0);
 
@@ -3016,8 +3016,8 @@ void GrDrag::deleteSelected(bool just_one)
                         lg->y2.computed = newend[Geom::Y];
 
                         Inkscape::XML::Node *repr = stopinfo->gradient->getRepr();
-                        sp_repr_set_svg_double(repr, "x2", lg->x2.computed);
-                        sp_repr_set_svg_double(repr, "y2", lg->y2.computed);
+                        repr->setAttributeSvgDouble("x2", lg->x2.computed);
+                        repr->setAttributeSvgDouble("y2", lg->y2.computed);
                         laststop->offset = 1;
                         sp_repr_set_css_double(laststop->getRepr(), "offset", 1);
 
@@ -3054,7 +3054,7 @@ void GrDrag::deleteSelected(bool just_one)
                         rg->r.computed = newradius;
 
                         Inkscape::XML::Node *repr = rg->getRepr();
-                        sp_repr_set_svg_double(repr, "r", rg->r.computed);
+                        repr->setAttributeSvgDouble("r", rg->r.computed);
                         laststop->offset = 1;
                         sp_repr_set_css_double(laststop->getRepr(), "offset", 1);
 

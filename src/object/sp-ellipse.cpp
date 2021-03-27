@@ -295,8 +295,8 @@ Inkscape::XML::Node *SPGenericEllipse::write(Inkscape::XML::Document *xml_doc, I
 
                 // write start and end only if they are non-trivial; otherwise remove
                 if (_isSlice()) {
-                    sp_repr_set_svg_double(repr, "sodipodi:start", start);
-                    sp_repr_set_svg_double(repr, "sodipodi:end", end);
+                    repr->setAttributeSvgDouble("sodipodi:start", start);
+                    repr->setAttributeSvgDouble("sodipodi:end", end);
 
                     switch ( arc_type ) {
                         case SP_GENERIC_ELLIPSE_ARC_TYPE_SLICE:

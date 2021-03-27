@@ -568,23 +568,6 @@ unsigned int sp_repr_set_css_double(Inkscape::XML::Node *repr, gchar const *key,
     return true;
 }
 
-/**
- * For attributes where an exponent is allowed.
- *
- * Not suitable for property attributes (fill-opacity, font-size etc.).
- */
-unsigned int sp_repr_set_svg_double(Inkscape::XML::Node *repr, gchar const *key, double val)
-{
-    g_return_val_if_fail(repr != nullptr, FALSE);
-    g_return_val_if_fail(key != nullptr, FALSE);
-    g_return_val_if_fail(val==val, FALSE);//tests for nan
-
-    Inkscape::SVGOStringStream os;
-    os << val;
-
-    repr->setAttribute(key, os.str());
-    return true;
-}
 
 unsigned int sp_repr_set_svg_non_default_double(Inkscape::XML::Node *repr, gchar const *key, double val, double default_value)
 {
@@ -592,7 +575,7 @@ unsigned int sp_repr_set_svg_non_default_double(Inkscape::XML::Node *repr, gchar
         repr->removeAttribute(key);
         return true;
     }
-    return sp_repr_set_svg_double(repr, key, val);
+    return repr->setAttributeSvgDouble(key, val);
 }
 
 /**

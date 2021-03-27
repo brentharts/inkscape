@@ -410,9 +410,9 @@ document_interface_polygon (DocumentInterface *doc_interface, int cx, int cy,
     sp_repr_set_int(newNode, "sodipodi:r2", radius);
     sp_repr_set_int(newNode, "sodipodi:sides", sides);
     sp_repr_set_int(newNode, "inkscape:randomized", 0);
-    sp_repr_set_svg_double(newNode, "sodipodi:arg1", rot);
-    sp_repr_set_svg_double(newNode, "sodipodi:arg2", rot);
-    sp_repr_set_svg_double(newNode, "inkscape:rounded", 0);
+    newNode->setAttributeSvgDouble("sodipodi:arg1", rot);
+    newNode->setAttributeSvgDouble("sodipodi:arg2", rot);
+    newNode->setAttributeSvgDouble("inkscape:rounded", 0);
 
     return finish_create_shape (doc_interface, error, newNode, (gchar *)"create polygon");
 }
@@ -431,9 +431,9 @@ document_interface_star (DocumentInterface *doc_interface, int cx, int cy,
     sp_repr_set_int(newNode, "sodipodi:r2", r2);
     sp_repr_set_int(newNode, "sodipodi:sides", sides);
     sp_repr_set_int(newNode, "inkscape:randomized", 0);
-    sp_repr_set_svg_double(newNode, "sodipodi:arg1", arg1);
-    sp_repr_set_svg_double(newNode, "sodipodi:arg2", arg2);
-    sp_repr_set_svg_double(newNode, "inkscape:rounded", rounded);
+    newNode->setAttributeSvgDouble("sodipodi:arg1", arg1);
+    newNode->setAttributeSvgDouble("sodipodi:arg2", arg2);
+    newNode->setAttributeSvgDouble("inkscape:rounded", rounded);
 
     return finish_create_shape (doc_interface, error, newNode, (gchar *)"create star");
 }
@@ -679,7 +679,7 @@ document_interface_set_double_attribute (DocumentInterface *doc_interface,
     if (!newNode)
         return FALSE;
     
-    sp_repr_set_svg_double (newNode, attribute, newval);
+    newNode->setAttributeSvgDouble(attribute, newval);
     return TRUE;
 }
 

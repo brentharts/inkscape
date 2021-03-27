@@ -463,10 +463,10 @@ PageSizer::fire_fit_canvas_to_selection_or_drawing()
         && (nv = sp_document_namedview(doc, nullptr))
         && (nv_repr = nv->getRepr())) {
         _lockMarginUpdate = true;
-        sp_repr_set_svg_double(nv_repr, "fit-margin-top", _marginTop.getValue());
-        sp_repr_set_svg_double(nv_repr, "fit-margin-left", _marginLeft.getValue());
-        sp_repr_set_svg_double(nv_repr, "fit-margin-right", _marginRight.getValue());
-        sp_repr_set_svg_double(nv_repr, "fit-margin-bottom", _marginBottom.getValue());
+        nv_repr->setAttributeSvgDouble("fit-margin-top", _marginTop.getValue());
+        nv_repr->setAttributeSvgDouble("fit-margin-left", _marginLeft.getValue());
+        nv_repr->setAttributeSvgDouble("fit-margin-right", _marginRight.getValue());
+        nv_repr->setAttributeSvgDouble("fit-margin-bottom", _marginBottom.getValue());
         _lockMarginUpdate = false;
     }
 

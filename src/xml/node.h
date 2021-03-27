@@ -21,6 +21,7 @@
 #include "gc-anchored.h"
 #include "inkgc/gc-alloc.h"
 #include "util/const_char_ptr.h"
+#include "svg/stringstream.h"
 
 namespace Inkscape {
 namespace XML {
@@ -212,6 +213,24 @@ public:
     {
         this->setAttributeImpl(key.data(), value.data());
     }
+
+    /**
+     * For attributes where an exponent is allowed.
+     *
+     * Not suitable for property attributes (fill-opacity, font-size etc.).
+     */
+    unsigned int setAttributeSvgDouble(gchar const *key, double val)
+    {
+        g_return_val_if_fail(key != nullptr, FALSE);
+        g_return_val_if_fail(val==val, FALSE);//tests for nan
+
+        Inkscape::SVGOStringStream os;
+        os << val;
+
+        this->setAttribute(key, os.str());
+        return true;
+    }
+
 
     /**
      * @brief Change an attribute of this node. Empty string deletes the attribute.

@@ -295,8 +295,7 @@ StarToolbar::magnitude_value_changed()
                 (gint)_magnitude_adj->get_value());
             double arg1 = 0.5;
             sp_repr_get_double(repr, "sodipodi:arg1", &arg1);
-            sp_repr_set_svg_double(repr, "sodipodi:arg2",
-                                   (arg1 + M_PI / (gint)_magnitude_adj->get_value()));
+            repr->setAttributeSvgDouble("sodipodi:arg2", (arg1 + M_PI / (gint)_magnitude_adj->get_value()));
             item->updateRepr();
             modmade = true;
         }
@@ -341,11 +340,9 @@ StarToolbar::proportion_value_changed()
             sp_repr_get_double(repr, "sodipodi:r1", &r1);
             sp_repr_get_double(repr, "sodipodi:r2", &r2);
             if (r2 < r1) {
-                sp_repr_set_svg_double(repr, "sodipodi:r2",
-                r1*_spoke_adj->get_value());
+                repr->setAttributeSvgDouble("sodipodi:r2", r1*_spoke_adj->get_value());
             } else {
-                sp_repr_set_svg_double(repr, "sodipodi:r1",
-                r2*_spoke_adj->get_value());
+                repr->setAttributeSvgDouble("sodipodi:r1", r2*_spoke_adj->get_value());
             }
 
             item->updateRepr();
@@ -385,8 +382,7 @@ StarToolbar::rounded_value_changed()
         SPItem *item = *i;
         if (SP_IS_STAR(item)) {
             Inkscape::XML::Node *repr = item->getRepr();
-            sp_repr_set_svg_double(repr, "inkscape:rounded",
-                (gdouble) _roundedness_adj->get_value());
+            repr->setAttributeSvgDouble("inkscape:rounded", (gdouble) _roundedness_adj->get_value());
             item->updateRepr();
             modmade = true;
         }
@@ -424,8 +420,7 @@ StarToolbar::randomized_value_changed()
         SPItem *item = *i;
         if (SP_IS_STAR(item)) {
             Inkscape::XML::Node *repr = item->getRepr();
-            sp_repr_set_svg_double(repr, "inkscape:randomized",
-                (gdouble) _randomization_adj->get_value());
+            repr->setAttributeSvgDouble("inkscape:randomized", (gdouble) _randomization_adj->get_value());
             item->updateRepr();
             modmade = true;
         }

@@ -344,10 +344,10 @@ int InkFileExportCmd::do_export_svg(SPDocument *doc, std::string const &filename
         SPNamedView *nv;
         Inkscape::XML::Node *nv_repr;
         if ((nv = sp_document_namedview(doc, nullptr)) && (nv_repr = nv->getRepr())) {
-            sp_repr_set_svg_double(nv_repr, "fit-margin-top", margin);
-            sp_repr_set_svg_double(nv_repr, "fit-margin-left", margin);
-            sp_repr_set_svg_double(nv_repr, "fit-margin-right", margin);
-            sp_repr_set_svg_double(nv_repr, "fit-margin-bottom", margin);
+            nv_repr->setAttributeSvgDouble("fit-margin-top", margin);
+            nv_repr->setAttributeSvgDouble("fit-margin-left", margin);
+            nv_repr->setAttributeSvgDouble("fit-margin-right", margin);
+            nv_repr->setAttributeSvgDouble("fit-margin-bottom", margin);
         }
     }
 

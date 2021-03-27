@@ -2240,12 +2240,12 @@ void CloneTiler::apply()
             y0 = scale_units*r->min()[Geom::Y];
             center = scale_units*desktop->dt2doc(item->getCenter());
 
-            sp_repr_set_svg_double(obj_repr, "inkscape:tile-cx", center[Geom::X]);
-            sp_repr_set_svg_double(obj_repr, "inkscape:tile-cy", center[Geom::Y]);
-            sp_repr_set_svg_double(obj_repr, "inkscape:tile-w", w);
-            sp_repr_set_svg_double(obj_repr, "inkscape:tile-h", h);
-            sp_repr_set_svg_double(obj_repr, "inkscape:tile-x0", x0);
-            sp_repr_set_svg_double(obj_repr, "inkscape:tile-y0", y0);
+            obj_repr->setAttributeSvgDouble("inkscape:tile-cx", center[Geom::X]);
+            obj_repr->setAttributeSvgDouble("inkscape:tile-cy", center[Geom::Y]);
+            obj_repr->setAttributeSvgDouble("inkscape:tile-w", w);
+            obj_repr->setAttributeSvgDouble("inkscape:tile-h", h);
+            obj_repr->setAttributeSvgDouble("inkscape:tile-x0", x0);
+            obj_repr->setAttributeSvgDouble("inkscape:tile-y0", y0);
         } else {
             center = Geom::Point(0, 0);
             w = h = 0;

@@ -1995,8 +1995,8 @@ TextKnotHolderEntityShapeInside::knot_set(Geom::Point const &p, Geom::Point cons
     sp_repr_get_double (rectangle, "y",      &y);
     double width  = s[Geom::X] - x;
     double height = s[Geom::Y] - y;
-    sp_repr_set_svg_double (rectangle, "width",  width);
-    sp_repr_set_svg_double (rectangle, "height", height);
+    rectangle->setAttributeSvgDouble("width", width);
+    rectangle->setAttributeSvgDouble("height", height);
     text->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
     text->updateRepr();
 }

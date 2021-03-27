@@ -183,8 +183,7 @@ SpiralToolbar::value_changed(Glib::RefPtr<Gtk::Adjustment> &adj,
         SPItem *item = *i;
         if (SP_IS_SPIRAL(item)) {
             Inkscape::XML::Node *repr = item->getRepr();
-            sp_repr_set_svg_double( repr, namespaced_name,
-                adj->get_value() );
+            repr->setAttributeSvgDouble(namespaced_name, adj->get_value() );
             item->updateRepr();
             modmade = true;
         }
