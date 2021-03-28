@@ -294,7 +294,7 @@ StarToolbar::magnitude_value_changed()
             sp_repr_set_int(repr,"sodipodi:sides",
                 (gint)_magnitude_adj->get_value());
             double arg1 = 0.5;
-            sp_repr_get_double(repr, "sodipodi:arg1", &arg1);
+            repr->getAttributeDouble("sodipodi:arg1", &arg1);
             repr->setAttributeSvgDouble("sodipodi:arg2", (arg1 + M_PI / (gint)_magnitude_adj->get_value()));
             item->updateRepr();
             modmade = true;
@@ -337,8 +337,8 @@ StarToolbar::proportion_value_changed()
 
             gdouble r1 = 1.0;
             gdouble r2 = 1.0;
-            sp_repr_get_double(repr, "sodipodi:r1", &r1);
-            sp_repr_get_double(repr, "sodipodi:r2", &r2);
+            repr->getAttributeDouble("sodipodi:r1", &r1);
+            repr->getAttributeDouble("sodipodi:r2", &r2);
             if (r2 < r1) {
                 repr->setAttributeSvgDouble("sodipodi:r2", r1*_spoke_adj->get_value());
             } else {
@@ -531,11 +531,11 @@ StarToolbar::event_attr_changed(Inkscape::XML::Node *repr, gchar const *name,
 
     if (!strcmp(name, "inkscape:randomized")) {
         double randomized = 0.0;
-        sp_repr_get_double(repr, "inkscape:randomized", &randomized);
+        repr->getAttributeDouble("inkscape:randomized", &randomized);
         toolbar->_randomization_adj->set_value(randomized);
     } else if (!strcmp(name, "inkscape:rounded")) {
         double rounded = 0.0;
-        sp_repr_get_double(repr, "inkscape:rounded", &rounded);
+        repr->getAttributeDouble("inkscape:rounded", &rounded);
         toolbar->_roundedness_adj->set_value(rounded);
     } else if (!strcmp(name, "inkscape:flatsided")) {
         char const *flatsides = repr->attribute("inkscape:flatsided");
@@ -551,8 +551,8 @@ StarToolbar::event_attr_changed(Inkscape::XML::Node *repr, gchar const *name,
     } else if ((!strcmp(name, "sodipodi:r1") || !strcmp(name, "sodipodi:r2")) && (!isFlatSided) ) {
         gdouble r1 = 1.0;
         gdouble r2 = 1.0;
-        sp_repr_get_double(repr, "sodipodi:r1", &r1);
-        sp_repr_get_double(repr, "sodipodi:r2", &r2);
+        repr->getAttributeDouble("sodipodi:r1", &r1);
+        repr->getAttributeDouble("sodipodi:r2", &r2);
         if (r2 < r1) {
             toolbar->_spoke_adj->set_value(r2/r1);
         } else {

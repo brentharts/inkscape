@@ -413,7 +413,7 @@ ConnectorToolbar::event_attr_changed(Inkscape::XML::Node *repr,
     if ( !toolbar->_freeze
          && (strcmp(name, "inkscape:connector-spacing") == 0) ) {
         gdouble spacing = defaultConnSpacing;
-        sp_repr_get_double(repr, "inkscape:connector-spacing", &spacing);
+        repr->getAttributeDouble("inkscape:connector-spacing", &spacing);
 
         toolbar->_spacing_adj->set_value(spacing);
 

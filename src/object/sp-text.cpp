@@ -1128,10 +1128,10 @@ Geom::OptRect SPText::get_frame()
             double y = 0.0;
             double width = 0.0;
             double height = 0.0;
-            sp_repr_get_double (rectangle, "x",      &x);
-            sp_repr_get_double (rectangle, "y",      &y);
-            sp_repr_get_double (rectangle, "width",  &width);
-            sp_repr_get_double (rectangle, "height", &height);
+            rectangle->getAttributeDouble("x", &x);
+            rectangle->getAttributeDouble("y", &y);
+            rectangle->getAttributeDouble("width", &width);
+            rectangle->getAttributeDouble("height", &height);
             frame = Geom::Rect::from_xywh( x, y, width, height);
             opt_frame = frame;
         }

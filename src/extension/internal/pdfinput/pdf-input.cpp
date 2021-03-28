@@ -762,7 +762,7 @@ PdfInput::open(::Inkscape::Extension::Input * /*mod*/, const gchar * uri) {
         // Apply crop settings
         _POPPLER_CONST PDFRectangle *clipToBox = nullptr;
         double crop_setting = -1.0;
-        sp_repr_get_double(prefs, "cropTo", &crop_setting);
+        prefs->getAttributeDouble("cropTo", &crop_setting);
 
         if ( crop_setting >= 0.0 ) {    // Do page clipping
             int crop_choice = (int)crop_setting;
@@ -793,7 +793,7 @@ PdfInput::open(::Inkscape::Extension::Input * /*mod*/, const gchar * uri) {
 
         // Set up approximation precision for parser. Used for converting Mesh Gradients into tiles.
         double color_delta = 2.0;
-        sp_repr_get_double(prefs, "approximationPrecision", &color_delta);
+        prefs->getAttributeDouble("approximationPrecision", &color_delta);
         if ( color_delta <= 0.0 ) {
             color_delta = 1.0 / 2.0;
         } else {

@@ -1991,8 +1991,8 @@ TextKnotHolderEntityShapeInside::knot_set(Geom::Point const &p, Geom::Point cons
     Inkscape::XML::Node* rectangle = text->get_first_rectangle();
     double x = 0.0;
     double y = 0.0;
-    sp_repr_get_double (rectangle, "x",      &x);
-    sp_repr_get_double (rectangle, "y",      &y);
+    rectangle->getAttributeDouble("x", &x);
+    rectangle->getAttributeDouble("y", &y);
     double width  = s[Geom::X] - x;
     double height = s[Geom::Y] - y;
     rectangle->setAttributeSvgDouble("width", width);

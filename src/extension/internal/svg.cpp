@@ -396,8 +396,8 @@ static void insert_text_fallback( Inkscape::XML::Node *repr, const SPDocument *o
 
             double text_x = 0.0;
             double text_y = 0.0;
-            sp_repr_get_double(repr, "x", &text_x);
-            sp_repr_get_double(repr, "y", &text_y);
+            repr->getAttributeDouble("x", &text_x);
+            repr->getAttributeDouble("y", &text_y);
             // std::cout << "text_x: " << text_x << " text_y: " << text_y << std::endl;
 
             // Loop over all lines in layout.

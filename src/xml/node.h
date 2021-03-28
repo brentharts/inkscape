@@ -262,6 +262,21 @@ public:
         return FALSE;
     }
 
+    unsigned int getAttributeDouble(gchar const *key, double *val)
+    {
+        g_return_val_if_fail(key != nullptr, FALSE);
+        g_return_val_if_fail(val != nullptr, FALSE);
+
+        gchar const *v = this->attribute(key);
+
+        if (v != nullptr) {
+            *val = g_ascii_strtod(v, nullptr);
+            return TRUE;
+        }
+
+        return FALSE;
+    }
+
     /**
      * For attributes where an exponent is allowed.
      *

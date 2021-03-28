@@ -463,22 +463,6 @@ bool sp_repr_is_meta_element(const Inkscape::XML::Node *node)
     return false;
 }
 
-unsigned int sp_repr_get_double(Inkscape::XML::Node *repr, gchar const *key, double *val)
-{
-    g_return_val_if_fail(repr != nullptr, FALSE);
-    g_return_val_if_fail(key != nullptr, FALSE);
-    g_return_val_if_fail(val != nullptr, FALSE);
-
-    gchar const *v = repr->attribute(key);
-
-    if (v != nullptr) {
-        *val = g_ascii_strtod(v, nullptr);
-        return TRUE;
-    }
-
-    return FALSE;
-}
-
 unsigned int sp_repr_set_boolean(Inkscape::XML::Node *repr, gchar const *key, unsigned int val)
 {
     g_return_val_if_fail(repr != nullptr, FALSE);
