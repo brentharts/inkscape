@@ -462,31 +462,6 @@ bool sp_repr_is_meta_element(const Inkscape::XML::Node *node)
     return false;
 }
 
-unsigned int sp_repr_get_point(Inkscape::XML::Node *repr, gchar const *key, Geom::Point *val)
-{
-    g_return_val_if_fail(repr != nullptr, FALSE);
-    g_return_val_if_fail(key != nullptr, FALSE);
-    g_return_val_if_fail(val != nullptr, FALSE);
-
-    gchar const *v = repr->attribute(key);
-
-    g_return_val_if_fail(v != nullptr, FALSE);
-
-    gchar ** strarray = g_strsplit(v, ",", 2);
-
-    if (strarray && strarray[0] && strarray[1]) {
-        double newx, newy;
-        newx = g_ascii_strtod(strarray[0], nullptr);
-        newy = g_ascii_strtod(strarray[1], nullptr);
-        g_strfreev (strarray);
-        *val = Geom::Point(newx, newy);
-        return TRUE;
-    }
-
-    g_strfreev (strarray);
-    return FALSE;
-}
-
 /*
   Local Variables:
   mode:c++

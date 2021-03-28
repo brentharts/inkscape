@@ -17,6 +17,7 @@
 #include <vector>
 #include <glibmm/ustring.h>
 #include <list>
+#include <2geom/point.h>
 
 #include "gc-anchored.h"
 #include "inkgc/gc-alloc.h"
@@ -363,6 +364,30 @@ public:
 
         this->setAttribute(key, os.str());
         return true;
+    }
+
+    unsigned int getAttributePoint(gchar const *key, Geom::Point *val)
+    {
+        g_return_val_if_fail(key != nullptr, FALSE);
+        g_return_val_if_fail(val != nullptr, FALSE);
+
+        gchar const *v = this->attribute(key);
+
+        g_return_val_if_fail(v != nullptr, FALSE);
+
+        gchar ** strarray = g_strsplit(v, ",", 2);
+
+        if (strarray && strarray[0] && strarray[1]) {
+            double newx, newy;
+            newx = g_ascii_strtod(strarray[0], nullptr);
+            newy = g_ascii_strtod(strarray[1], nullptr);
+            g_strfreev (strarray);
+            *val = Geom::Point(newx, newy);
+            return TRUE;
+        }
+
+        g_strfreev (strarray);
+        return FALSE;
     }
 
     /**

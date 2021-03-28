@@ -110,10 +110,6 @@ inline void sp_repr_unparent(Inkscape::XML::Node *repr) {
 
 bool sp_repr_is_meta_element(const Inkscape::XML::Node *node);
 
-/* Convenience */
-unsigned Inkscape::XML::Node *repr->setAttributePoint(char const *key, Geom::Point const & val);
-unsigned sp_repr_get_point(Inkscape::XML::Node *repr, char const *key, Geom::Point *val);
-
 //c++-style comparison : returns (bool)(a<b)
 int sp_repr_compare_position(Inkscape::XML::Node const *first, Inkscape::XML::Node const *second);
 bool sp_repr_compare_position_bool(Inkscape::XML::Node const *first, Inkscape::XML::Node const *second);

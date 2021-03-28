@@ -641,8 +641,8 @@ bool ClipboardManagerImpl::pasteSize(ObjectSet *set, bool separately, bool apply
     if (clipnode) {
         Geom::Point min, max;
         bool visual_bbox = !Inkscape::Preferences::get()->getInt("/tools/bounding_box");
-        sp_repr_get_point(clipnode, (visual_bbox ? "min" : "geom-min"), &min);
-        sp_repr_get_point(clipnode, (visual_bbox ? "max" : "geom-max"), &max);
+        clipnode->getAttributePoint((visual_bbox ? "min" : "geom-min"), &min);
+        clipnode->getAttributePoint((visual_bbox ? "max" : "geom-max"), &max);
 
         // resize each object in the selection
         if (separately) {

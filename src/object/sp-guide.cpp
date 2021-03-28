@@ -234,7 +234,7 @@ SPGuide *SPGuide::createSPGuide(SPDocument *doc, Geom::Point const &pt1, Geom::P
         }
     }
 
-    repr, "position"->setAttributePoint(Geom::Point( newx, newy ));
+    repr->setAttributePoint("position", Geom::Point( newx, newy ));
     repr->setAttributePoint("orientation", n);
 
     SPNamedView *namedview = sp_document_namedview(doc, nullptr);
@@ -398,7 +398,7 @@ void SPGuide::moveto(Geom::Point const point_on_line, bool const commit)
         }
 
         //XML Tree being used here directly while it shouldn't be.
-        getRepr(), "position"->setAttributePoint(Geom::Point(newx, newy) );
+        getRepr()->setAttributePoint("position", Geom::Point(newx, newy) );
     }
 }
 
