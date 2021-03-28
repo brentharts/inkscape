@@ -72,27 +72,14 @@ DialogBase::DialogBase(gchar const *prefs_path, int verb_num)
 }
 
 bool DialogBase::on_key_press_event(GdkEventKey* key_event) {
-    bool ret = false;
     auto copy = *key_event;
     switch (Inkscape::UI::Tools::get_latin_keyval(&copy)) {
         case GDK_KEY_Escape:
-            if (auto wnd = dynamic_cast<Gtk::Window*>(get_toplevel())) {
-                // defocus floating dialog
-                sp_dialog_defocus_cpp(wnd);
-                // for docked dialogs, move focus to canvas
-                if (auto desktop = getDesktop()) {
-                    desktop->getCanvas()->grab_focus();
-                }
-            }
-            ret = true;
-            break;
+            defocus_dialog();
+            return true;
     }
 
-    if (!ret) {
-        ret = parent_type::on_key_press_event(key_event);
-    }
-
-    return ret;
+    return parent_type::on_key_press_event(key_event);
 }
 
 
@@ -126,6 +113,18 @@ void DialogBase::focus_dialog() {
         // find first focusable widget
         if (auto child = sp_find_focusable_widget(this)) {
             child->grab_focus();
+        }
+    }
+}
+
+void DialogBase::defocus_dialog() {
+    if (auto wnd = dynamic_cast<Gtk::Window*>(get_toplevel())) {
+        // defocus floating dialog:
+        sp_dialog_defocus_cpp(wnd);
+
+        // for docked dialogs, move focus to canvas
+        if (auto desktop = getDesktop()) {
+            desktop->getCanvas()->grab_focus();
         }
     }
 }

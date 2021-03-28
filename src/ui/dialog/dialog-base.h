@@ -64,6 +64,8 @@ public:
     void blink();
     // find focusable widget to grab focus
     void focus_dialog();
+    // return focus back to canvas
+    void defocus_dialog();
 
 protected:
     Glib::ustring _name;             // Gtk widget name (must be set!)
