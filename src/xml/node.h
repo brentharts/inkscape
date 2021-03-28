@@ -245,6 +245,23 @@ public:
         }
     }
 
+    unsigned int getAttributeInt(gchar const *key, int *val)
+    {
+        gchar const *v;
+
+        g_return_val_if_fail(key != nullptr, FALSE);
+        g_return_val_if_fail(val != nullptr, FALSE);
+
+        v = this->attribute(key);
+
+        if (v != nullptr) {
+            *val = atoi(v);
+            return TRUE;
+        }
+
+        return FALSE;
+    }
+
     /**
      * For attributes where an exponent is allowed.
      *
