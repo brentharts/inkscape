@@ -25,7 +25,6 @@
 
 #include <2geom/point.h>
 #include "svg/stringstream.h"
-#include "svg/css-ostringstream.h"
 #include "svg/svg-length.h"
 
 #include "xml/repr.h"
@@ -462,24 +461,6 @@ bool sp_repr_is_meta_element(const Inkscape::XML::Node *node)
     if (!std::strcmp(name, "svg:metadata")) return true;
     return false;
 }
-
-/**
- * Set a property attribute to \a val [slightly rounded], in the format
- * required for CSS properties: in particular, it never uses exponent
- * notation.
- */
-unsigned int sp_repr_set_css_double(Inkscape::XML::Node *repr, gchar const *key, double val)
-{
-    g_return_val_if_fail(repr != nullptr, FALSE);
-    g_return_val_if_fail(key != nullptr, FALSE);
-
-    Inkscape::CSSOStringStream os;
-    os << val;
-
-    repr->setAttribute(key, os.str());
-    return true;
-}
-
 
 unsigned int sp_repr_set_svg_non_default_double(Inkscape::XML::Node *repr, gchar const *key, double val, double default_value)
 {

@@ -849,7 +849,7 @@ void SvgBuilder::_addStopToGradient(Inkscape::XML::Node *gradient, double offset
 
     sp_repr_css_change(stop, css, "style");
     sp_repr_css_attr_unref(css);
-    sp_repr_set_css_double(stop, "offset", offset);
+    stop->setAttributeCssDouble("offset", offset);
 
     gradient->appendChild(stop);
     Inkscape::GC::release(stop);

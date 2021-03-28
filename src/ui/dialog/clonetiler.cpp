@@ -2464,7 +2464,7 @@ void CloneTiler::apply()
             clone->setAttributeOrRemoveIfEmpty("transform", sp_svg_transform_write(t));
 
             if (opacity < 1.0) {
-                sp_repr_set_css_double(clone, "opacity", opacity);
+                clone->setAttributeCssDouble("opacity", opacity);
             }
 
             if (*color_string) {

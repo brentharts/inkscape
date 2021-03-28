@@ -273,7 +273,7 @@ Inkscape::XML::Node* SPMarker::write(Inkscape::XML::Document *xml_doc, Inkscape:
             } else if (this->orient_mode == MARKER_ORIENT_AUTO_START_REVERSE) {
                 repr->setAttribute("orient", "auto-start-reverse");
             } else {
-                sp_repr_set_css_double(repr, "orient", this->orient.computed);
+                repr->setAttributeCssDouble("orient", this->orient.computed);
             }
 	} else {
             repr->removeAttribute("orient");

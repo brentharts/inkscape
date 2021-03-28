@@ -323,7 +323,7 @@ ConnectorToolbar::spacing_changed()
     // in turn, prevent listener from responding
     _freeze = true;
 
-    sp_repr_set_css_double(repr, "inkscape:connector-spacing", _spacing_adj->get_value());
+    repr->setAttributeCssDouble("inkscape:connector-spacing", _spacing_adj->get_value());
     _desktop->namedview->updateRepr();
     bool modmade = false;
 

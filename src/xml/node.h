@@ -22,6 +22,7 @@
 #include "inkgc/gc-alloc.h"
 #include "util/const_char_ptr.h"
 #include "svg/stringstream.h"
+#include "svg/css-ostringstream.h"
 
 namespace Inkscape {
 namespace XML {
@@ -294,6 +295,22 @@ public:
         g_snprintf(c, 32, "%d", val);
 
         this->setAttribute(key, c);
+        return true;
+    }
+
+    /**
+     * Set a property attribute to \a val [slightly rounded], in the format
+     * required for CSS properties: in particular, it never uses exponent
+     * notation.
+     */
+    unsigned int setAttributeCssDouble(gchar const *key, double val)
+    {
+        g_return_val_if_fail(key != nullptr, FALSE);
+
+        Inkscape::CSSOStringStream os;
+        os << val;
+
+        this->setAttribute(key, os.str());
         return true;
     }
 

@@ -1114,7 +1114,7 @@ static void gr_knot_clicked_handler(SPKnot */*knot*/, guint state, gpointer data
                         SPStop *next = stop->getNextStop();
                         if (next) {
                             next->offset = 0;
-                            sp_repr_set_css_double(next->getRepr(), "offset", 0);
+                            next->getRepr()->setAttributeCssDouble("offset", 0);
                         }
                     }
                     break;
@@ -1127,7 +1127,7 @@ static void gr_knot_clicked_handler(SPKnot */*knot*/, guint state, gpointer data
                         SPStop *prev = stop->getPrevStop();
                         if (prev) {
                             prev->offset = 1;
-                            sp_repr_set_css_double(prev->getRepr(), "offset", 1);
+                            prev->getRepr()->setAttributeCssDouble("offset", 1);
                         }
                     }
                     break;
@@ -2990,14 +2990,14 @@ void GrDrag::deleteSelected(bool just_one)
                         repr->setAttributeSvgDouble("x1", lg->x1.computed);
                         repr->setAttributeSvgDouble("y1", lg->y1.computed);
                         stop->offset = 0;
-                        sp_repr_set_css_double(stop->getRepr(), "offset", 0);
+                        stop->getRepr()->setAttributeCssDouble("offset", 0);
 
                         // iterate through midstops to set new offset values such that they won't move on canvas.
                         SPStop *laststop = sp_last_stop(stopinfo->vector);
                         stop = stop->getNextStop();
                         while ( stop != laststop ) {
                             stop->offset = (stop->offset - offset)/(1 - offset);
-                            sp_repr_set_css_double(stop->getRepr(), "offset", stop->offset);
+                            stop->getRepr()->setAttributeCssDouble("offset", stop->offset);
                             stop = stop->getNextStop();
                         }
                     }
@@ -3019,14 +3019,14 @@ void GrDrag::deleteSelected(bool just_one)
                         repr->setAttributeSvgDouble("x2", lg->x2.computed);
                         repr->setAttributeSvgDouble("y2", lg->y2.computed);
                         laststop->offset = 1;
-                        sp_repr_set_css_double(laststop->getRepr(), "offset", 1);
+                        laststop->getRepr()->setAttributeCssDouble("offset", 1);
 
                         // iterate through midstops to set new offset values such that they won't move on canvas.
                         SPStop *stop = stopinfo->vector->getFirstStop();
                         stop = stop->getNextStop();
                         while ( stop != laststop ) {
                             stop->offset = stop->offset / offset;
-                            sp_repr_set_css_double(stop->getRepr(), "offset", stop->offset);
+                            stop->getRepr()->setAttributeCssDouble("offset", stop->offset);
                             stop = stop->getNextStop();
                         }
                     }
@@ -3036,7 +3036,7 @@ void GrDrag::deleteSelected(bool just_one)
                         SPStop *newfirst = stopinfo->spstop->getNextStop();
                         if (newfirst) {
                             newfirst->offset = 0;
-                            sp_repr_set_css_double(newfirst->getRepr(), "offset", 0);
+                            newfirst->getRepr()->setAttributeCssDouble("offset", 0);
                         }
                         stopinfo->vector->getRepr()->removeChild(stopinfo->spstop->getRepr());
                     }
@@ -3056,14 +3056,14 @@ void GrDrag::deleteSelected(bool just_one)
                         Inkscape::XML::Node *repr = rg->getRepr();
                         repr->setAttributeSvgDouble("r", rg->r.computed);
                         laststop->offset = 1;
-                        sp_repr_set_css_double(laststop->getRepr(), "offset", 1);
+                        laststop->getRepr()->setAttributeCssDouble("offset", 1);
 
                         // iterate through midstops to set new offset values such that they won't move on canvas.
                         SPStop *stop = stopinfo->vector->getFirstStop();
                         stop = stop->getNextStop();
                         while ( stop != laststop ) {
                             stop->offset = stop->offset / offset;
-                            sp_repr_set_css_double(stop->getRepr(), "offset", stop->offset);
+                            stop->getRepr()->setAttributeCssDouble("offset", stop->offset);
                             stop = stop->getNextStop();
                         }
                     }

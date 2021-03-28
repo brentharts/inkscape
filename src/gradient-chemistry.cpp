@@ -667,7 +667,7 @@ SPStop *sp_vector_add_stop(SPGradient *vector, SPStop* prev_stop, SPStop* next_s
 
     SPStop *newstop = reinterpret_cast<SPStop *>(vector->document->getObjectByRepr(new_stop_repr));
     newstop->offset = offset;
-    sp_repr_set_css_double( newstop->getRepr(), "offset", (double)offset);
+    newstop->getRepr()->setAttributeCssDouble("offset", (double)offset);
     guint32 const c1 = prev_stop->get_rgba32();
     guint32 const c2 = next_stop->get_rgba32();
     guint32 cnew = average_color (c1, c2, (offset - prev_stop->offset) / (next_stop->offset - prev_stop->offset));
@@ -1051,7 +1051,7 @@ void sp_item_gradient_set_coords(SPItem *item, GrPointType point_type, guint poi
                 SPStop* stopi = sp_get_stop_i(vector, point_i);
                 stopi->offset = offset;
                 if (write_repr) {
-                    sp_repr_set_css_double(stopi->getRepr(), "offset", stopi->offset);
+                    stopi->getRepr()->setAttributeCssDouble("offset", stopi->offset);
                 } else {
                     stopi->requestModified(SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_STYLE_MODIFIED_FLAG);
                 }
@@ -1146,7 +1146,7 @@ void sp_item_gradient_set_coords(SPItem *item, GrPointType point_type, guint poi
                 SPStop* stopi = sp_get_stop_i(vector, point_i);
                 stopi->offset = offset;
                 if (write_repr) {
-                    sp_repr_set_css_double(stopi->getRepr(), "offset", stopi->offset);
+                    stopi->getRepr()->setAttributeCssDouble("offset", stopi->offset);
                 } else {
                     stopi->requestModified(SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_STYLE_MODIFIED_FLAG);
                 }
@@ -1163,7 +1163,7 @@ void sp_item_gradient_set_coords(SPItem *item, GrPointType point_type, guint poi
                 SPStop* stopi = sp_get_stop_i(vector, point_i);
                 stopi->offset = offset;
                 if (write_repr) {
-                    sp_repr_set_css_double(stopi->getRepr(), "offset", stopi->offset);
+                    stopi->getRepr()->setAttributeCssDouble("offset", stopi->offset);
                 } else {
                     stopi->requestModified(SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_STYLE_MODIFIED_FLAG);
                 }
