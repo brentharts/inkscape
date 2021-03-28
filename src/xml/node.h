@@ -277,6 +277,14 @@ public:
         return FALSE;
     }
 
+    unsigned int setAttributeBoolean(gchar const *key, unsigned int val)
+    {
+        g_return_val_if_fail(key != nullptr, FALSE);
+
+        this->setAttribute(key, (val) ? "true" : "false");
+        return true;
+    }
+
     /**
      * For attributes where an exponent is allowed.
      *

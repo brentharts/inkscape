@@ -1005,7 +1005,7 @@ void sp_namedview_toggle_guides(SPDocument *doc, SPNamedView *namedview)
 
     bool saved = DocumentUndo::getUndoSensitive(doc);
     DocumentUndo::setUndoSensitive(doc, false);
-    sp_repr_set_boolean(repr, "showguides", v);
+    repr->setAttributeBoolean("showguides", v);
     DocumentUndo::setUndoSensitive(doc, saved);
     SPDesktop *desktop = SP_ACTIVE_DESKTOP;
     if (desktop) {
@@ -1030,7 +1030,7 @@ void sp_namedview_guides_toggle_lock(SPDocument *doc, SPNamedView * namedview)
 
     bool saved = DocumentUndo::getUndoSensitive(doc);
     DocumentUndo::setUndoSensitive(doc, false);
-    sp_repr_set_boolean(repr, "inkscape:lockguides", v);
+    repr->setAttributeBoolean("inkscape:lockguides", v);
     sp_namedview_lock_guides(namedview);
     DocumentUndo::setUndoSensitive(doc, saved);
     doc->setModifiedSinceSave();
@@ -1045,7 +1045,7 @@ void sp_namedview_show_grids(SPNamedView * namedview, bool show, bool dirty_docu
 
     bool saved = DocumentUndo::getUndoSensitive(doc);
     DocumentUndo::setUndoSensitive(doc, false);
-    sp_repr_set_boolean(repr, "showgrid", namedview->grids_visible);
+    repr->setAttributeBoolean("showgrid", namedview->grids_visible);
     DocumentUndo::setUndoSensitive(doc, saved);
 
     /* we don't want the document to get dirty on startup; that's when
@@ -1132,8 +1132,8 @@ SPNamedView const *sp_document_namedview(SPDocument const *document, const gchar
 void SPNamedView::setGuides(bool v)
 {
     g_assert(this->getRepr() != nullptr);
-    sp_repr_set_boolean(this->getRepr(), "showguides", v);
-    sp_repr_set_boolean(this->getRepr(), "inkscape:guide-bbox", v);
+    this->getRepr()->setAttributeBoolean("showguides", v);
+    this->getRepr()->setAttributeBoolean("inkscape:guide-bbox", v);
 }
 
 bool SPNamedView::getGuides()
