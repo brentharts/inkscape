@@ -462,15 +462,6 @@ bool sp_repr_is_meta_element(const Inkscape::XML::Node *node)
     return false;
 }
 
-unsigned int sp_repr_set_svg_non_default_double(Inkscape::XML::Node *repr, gchar const *key, double val, double default_value)
-{
-    if (val==default_value){
-        repr->removeAttribute(key);
-        return true;
-    }
-    return repr->setAttributeSvgDouble(key, val);
-}
-
 /**
  * For attributes where an exponent is allowed.
  *

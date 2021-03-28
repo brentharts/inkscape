@@ -331,6 +331,14 @@ public:
         return true;
     }
 
+    unsigned int setAttributeSvgNonDefaultDouble(gchar const *key, double val, double default_value)
+    {
+        if (val==default_value){
+            this->removeAttribute(key);
+            return true;
+        }
+        return this->setAttributeSvgDouble(key, val);
+    }
 
     /**
      * @brief Change an attribute of this node. Empty string deletes the attribute.
