@@ -17,14 +17,10 @@
  */
 
 #include <cstring>
-#include <cstdlib>
-
 
 #include <glib.h>
 #include <glibmm.h>
 
-#include <2geom/point.h>
-#include "svg/stringstream.h"
 #include "svg/svg-length.h"
 
 #include "xml/repr.h"

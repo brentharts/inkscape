@@ -404,8 +404,8 @@ void ClipboardManagerImpl::copySymbol(Inkscape::XML::Node* symbol, gchar const* 
     _root->appendChild(use);
 
     // This min and max sets offsets, we don't have any so set to zero.
-    _clipnode, "min"->setAttributePoint(Geom::Point(0, 0));
-    _clipnode, "max"->setAttributePoint(Geom::Point(0, 0));
+    _clipnode->setAttributePoint("min", Geom::Point(0, 0));
+    _clipnode->setAttributePoint("max", Geom::Point(0, 0));
 
     fit_canvas_to_drawing(_clipboardSPDoc.get());
     _setClipboardTargets();

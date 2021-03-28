@@ -1968,7 +1968,7 @@ SPDesktopWidget::on_ruler_box_button_release_event(GdkEventButton *event, Gtk::W
                 newx = newx * root->viewBox.width()  / root->width.computed;
                 newy = newy * root->viewBox.height() / root->height.computed;
             }
-            repr, "position"->setAttributePoint(Geom::Point( newx, newy ));
+            repr->setAttributePoint("position", Geom::Point( newx, newy ));
             repr->setAttributePoint("orientation", _normal);
             desktop->namedview->appendChild(repr);
             Inkscape::GC::release(repr);
