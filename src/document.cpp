@@ -341,7 +341,7 @@ SPDocument *SPDocument::createDoc(Inkscape::XML::Document *rdoc,
     document->document_filename = prepend_current_dir_if_relative(filename);
 #else
     // FIXME: it may be that prepend_current_dir_if_relative works OK on windows too, test!
-    document->filename = filename? g_strdup(filename) : NULL;
+    document->document_filename = filename? g_strdup(filename) : NULL;
 #endif
 
     // base is simply the part of the path before filename; e.g. when running "inkscape ../file.svg" the base is "../"
