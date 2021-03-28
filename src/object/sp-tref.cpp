@@ -220,19 +220,19 @@ gchar* SPTRef::description() const {
     SPObject const *referred = this->getObjectReferredTo();
 
     if (referred) {
-        char *child_desc;
+	char *child_desc;
 
-        if (SP_IS_ITEM(referred)) {
-             child_desc = SP_ITEM(referred)->detailedDescription();
-        } else {
-            child_desc = g_strdup("");
-        }
+	if (SP_IS_ITEM(referred)) {
+	    child_desc = SP_ITEM(referred)->detailedDescription();
+	} else {
+	    child_desc = g_strdup("");
+	}
 
-        char *ret = g_strdup_printf("%s%s",
-            (SP_IS_ITEM(referred) ? _(" from ") : ""), child_desc);
-        g_free(child_desc);
+	char *ret = g_strdup_printf("%s%s",
+	    (SP_IS_ITEM(referred) ? _(" from ") : ""), child_desc);
+	g_free(child_desc);
 
-        return ret;
+	return ret;
     }
 
     return g_strdup(_("[orphaned]"));
