@@ -157,13 +157,6 @@ UndoHistory::UndoHistory()
 
 UndoHistory::~UndoHistory()
 {
-    if (_event_log) {
-        // Fix https://gitlab.com/inkscape/inkscape/-/issues/2297
-        // Removing call back here is important as after dialog is
-        // destroyed `this` points to a deleted memory but its not nullptr
-        // and hence `if` block in callback can't verify it.
-        _event_log->remove_destroy_notify_callback(this);
-    }
     _connectDocument(nullptr, nullptr);
 }
 
@@ -199,6 +192,7 @@ void UndoHistory::_connectDocument(SPDesktop* desktop, SPDocument * /*document*/
     // disconnect from prior
     if (_event_log) {
         _event_log->removeDialogConnection(&_event_list_view, &_callback_connections);
+        _event_log->remove_destroy_notify_callback(this);
     }
 
     SignalBlocker blocker(&_callback_connections[EventLog::CALLB_SELECTION_CHANGE]);
