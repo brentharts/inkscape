@@ -996,7 +996,7 @@ void sp_namedview_toggle_guides(SPDocument *doc, SPNamedView *namedview)
 {
     unsigned int v;
     Inkscape::XML::Node *repr = namedview->getRepr();
-    unsigned int set = sp_repr_get_boolean(repr, "showguides", &v);
+    unsigned int set = repr->getAttributeBoolean("showguides", &v);
     if (!set) { // hide guides if not specified, for backwards compatibility
         v = FALSE;
     } else {
@@ -1021,7 +1021,7 @@ void sp_namedview_guides_toggle_lock(SPDocument *doc, SPNamedView * namedview)
 {
     unsigned int v;
     Inkscape::XML::Node *repr = namedview->getRepr();
-    unsigned int set = sp_repr_get_boolean(repr, "inkscape:lockguides", &v);
+    unsigned int set = repr->getAttributeBoolean("inkscape:lockguides", &v);
     if (!set) { // hide guides if not specified, for backwards compatibility
         v = true;
     } else {
@@ -1140,7 +1140,7 @@ bool SPNamedView::getGuides()
 {
     g_assert(this->getRepr() != nullptr);
     unsigned int v;
-    unsigned int set = sp_repr_get_boolean(this->getRepr(), "showguides", &v);
+    unsigned int set = this->getRepr()->getAttributeBoolean("showguides", &v);
     if (!set) { // show guides if not specified, for backwards compatibility
         v = TRUE;
     }

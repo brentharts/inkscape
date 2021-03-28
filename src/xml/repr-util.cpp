@@ -463,37 +463,6 @@ bool sp_repr_is_meta_element(const Inkscape::XML::Node *node)
     return false;
 }
 
-/**
- * Parses the boolean value of an attribute "key" in repr and sets val accordingly, or to FALSE if
- * the attr is not set.
- *
- * \return TRUE if the attr was set, FALSE otherwise.
- */
-unsigned int sp_repr_get_boolean(Inkscape::XML::Node *repr, gchar const *key, unsigned int *val)
-{
-    gchar const *v;
-
-    g_return_val_if_fail(repr != nullptr, FALSE);
-    g_return_val_if_fail(key != nullptr, FALSE);
-    g_return_val_if_fail(val != nullptr, FALSE);
-
-    v = repr->attribute(key);
-
-    if (v != nullptr) {
-        if (!g_ascii_strcasecmp(v, "true") ||
-            !g_ascii_strcasecmp(v, "yes" ) ||
-            !g_ascii_strcasecmp(v, "y"   ) ||
-            (atoi(v) != 0)) {
-            *val = TRUE;
-        } else {
-            *val = FALSE;
-        }
-        return TRUE;
-    } else {
-        *val = FALSE;
-        return FALSE;
-    }
-}
 
 unsigned int sp_repr_get_int(Inkscape::XML::Node *repr, gchar const *key, int *val)
 {

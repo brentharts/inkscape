@@ -215,6 +215,37 @@ public:
     }
 
     /**
+     * Parses the boolean value of an attribute "key" in repr and sets val accordingly, or to FALSE if
+     * the attr is not set.
+     *
+     * \return TRUE if the attr was set, FALSE otherwise.
+     */
+    unsigned int getAttributeBoolean(gchar const *key, unsigned int *val)
+    {
+        gchar const *v;
+
+        g_return_val_if_fail(key != nullptr, FALSE);
+        g_return_val_if_fail(val != nullptr, FALSE);
+
+        v = this->attribute(key);
+
+        if (v != nullptr) {
+            if (!g_ascii_strcasecmp(v, "true") ||
+                !g_ascii_strcasecmp(v, "yes" ) ||
+                !g_ascii_strcasecmp(v, "y"   ) ||
+                (atoi(v) != 0)) {
+                *val = TRUE;
+            } else {
+                *val = FALSE;
+            }
+            return TRUE;
+        } else {
+            *val = FALSE;
+            return FALSE;
+        }
+    }
+
+    /**
      * For attributes where an exponent is allowed.
      *
      * Not suitable for property attributes (fill-opacity, font-size etc.).
