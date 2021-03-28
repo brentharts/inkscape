@@ -72,8 +72,7 @@ DialogBase::DialogBase(gchar const *prefs_path, int verb_num)
 }
 
 bool DialogBase::on_key_press_event(GdkEventKey* key_event) {
-    auto copy = *key_event;
-    switch (Inkscape::UI::Tools::get_latin_keyval(&copy)) {
+    switch (Inkscape::UI::Tools::get_latin_keyval(key_event)) {
         case GDK_KEY_Escape:
             defocus_dialog();
             return true;
