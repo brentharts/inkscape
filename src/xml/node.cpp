@@ -1,3 +1,16 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+
+/** @file
+ * @brief
+ *
+ * Authors: see git history
+ *   Osama Ahmad
+ *
+ * Copyright (c) 2021 Osama Ahmad, Authors
+ *
+ * Released under GNU GPL v2+, read the file 'COPYING' for more information.
+ */
+
 #include <2geom/point.h>
 
 #include "node.h"
@@ -8,79 +21,60 @@
 namespace Inkscape{
 namespace XML {
 
-void Node::setAttribute(Inkscape::Util::const_char_ptr key, Inkscape::Util::const_char_ptr value)
+void Node::setAttribute(Util::const_char_ptr key, Util::const_char_ptr value)
 {
     this->setAttributeImpl(key.data(), value.data());
 }
 
-unsigned int Node::getAttributeBoolean(gchar const *key, unsigned int *val)
+bool Node::getAttributeBoolean(Util::const_char_ptr key, bool *val) const
 {
-    gchar const *v;
+    auto v = this->attribute(key.data());
+    if (v == nullptr) {
+        return false;
+    }
 
-    g_return_val_if_fail(key != nullptr, FALSE);
-    g_return_val_if_fail(val != nullptr, FALSE);
-
-    v = this->attribute(key);
-
-    if (v != nullptr) {
-        if (!g_ascii_strcasecmp(v, "true") || !g_ascii_strcasecmp(v, "yes") || !g_ascii_strcasecmp(v, "y") ||
-            (atoi(v) != 0)) {
-            *val = TRUE;
-        } else {
-            *val = FALSE;
-        }
-        return TRUE;
+    if (!g_ascii_strcasecmp(v, "true") ||
+        !g_ascii_strcasecmp(v, "yes") ||
+        !g_ascii_strcasecmp(v, "y") ||
+        (atoi(v) != 0))
+    {
+        *val = true;
     } else {
-        *val = FALSE;
-        return FALSE;
+        *val = false;
     }
+    return true;
 }
 
-unsigned int Node::getAttributeInt(gchar const *key, int *val)
+bool Node::getAttributeInt(Util::const_char_ptr key, int *val) const
 {
-    gchar const *v;
-
-    g_return_val_if_fail(key != nullptr, FALSE);
-    g_return_val_if_fail(val != nullptr, FALSE);
-
-    v = this->attribute(key);
-
-    if (v != nullptr) {
-        *val = atoi(v);
-        return TRUE;
+    auto v = this->attribute(key.data());
+    if (v == nullptr) {
+        return false;
     }
-
-    return FALSE;
+    *val = atoi(v);
+    return true;
 }
 
-unsigned int Node::getAttributeDouble(gchar const *key, double *val)
+bool Node::getAttributeDouble(Util::const_char_ptr key, double *val) const
 {
-    g_return_val_if_fail(key != nullptr, FALSE);
-    g_return_val_if_fail(val != nullptr, FALSE);
-
-    gchar const *v = this->attribute(key);
-
-    if (v != nullptr) {
-        *val = g_ascii_strtod(v, nullptr);
-        return TRUE;
+    auto v = this->attribute(key.data());
+    if (v == nullptr) {
+        return false;
     }
 
-    return FALSE;
+    *val = g_ascii_strtod(v, nullptr);
+    return true;
 }
 
-unsigned int Node::setAttributeBoolean(gchar const *key, unsigned int val)
+bool Node::setAttributeBoolean(Util::const_char_ptr key, bool val)
 {
-    g_return_val_if_fail(key != nullptr, FALSE);
-
     this->setAttribute(key, (val) ? "true" : "false");
     return true;
 }
 
-unsigned int Node::setAttributeInt(gchar const *key, int val)
+bool Node::setAttributeInt(Util::const_char_ptr key, int val)
 {
     gchar c[32];
-
-    g_return_val_if_fail(key != nullptr, FALSE);
 
     g_snprintf(c, 32, "%d", val);
 
@@ -88,10 +82,8 @@ unsigned int Node::setAttributeInt(gchar const *key, int val)
     return true;
 }
 
-unsigned int Node::setAttributeCssDouble(gchar const *key, double val)
+bool Node::setAttributeCssDouble(Util::const_char_ptr key, double val)
 {
-    g_return_val_if_fail(key != nullptr, FALSE);
-
     Inkscape::CSSOStringStream os;
     os << val;
 
@@ -99,10 +91,9 @@ unsigned int Node::setAttributeCssDouble(gchar const *key, double val)
     return true;
 }
 
-unsigned int Node::setAttributeSvgDouble(gchar const *key, double val)
+bool Node::setAttributeSvgDouble(Util::const_char_ptr key, double val)
 {
-    g_return_val_if_fail(key != nullptr, FALSE);
-    g_return_val_if_fail(val == val, FALSE); // tests for nan
+    g_return_val_if_fail(val == val, false); // tests for nan
 
     Inkscape::SVGOStringStream os;
     os << val;
@@ -111,7 +102,7 @@ unsigned int Node::setAttributeSvgDouble(gchar const *key, double val)
     return true;
 }
 
-unsigned int Node::setAttributeSvgNonDefaultDouble(gchar const *key, double val, double default_value)
+bool Node::setAttributeSvgNonDefaultDouble(Util::const_char_ptr key, double val, double default_value)
 {
     if (val == default_value) {
         this->removeAttribute(key);
@@ -120,18 +111,14 @@ unsigned int Node::setAttributeSvgNonDefaultDouble(gchar const *key, double val,
     return this->setAttributeSvgDouble(key, val);
 }
 
-unsigned int Node::setAttributeSvgLength(gchar const *key, SVGLength &val)
+bool Node::setAttributeSvgLength(Util::const_char_ptr key, SVGLength const &val)
 {
-    g_return_val_if_fail(key != nullptr, FALSE);
-
     this->setAttribute(key, val.write());
     return true;
 }
 
-unsigned Node::setAttributePoint(gchar const *key, Geom::Point const &val)
+bool Node::setAttributePoint(Util::const_char_ptr key, Geom::Point const &val)
 {
-    g_return_val_if_fail(key != nullptr, FALSE);
-
     Inkscape::SVGOStringStream os;
     os << val[Geom::X] << "," << val[Geom::Y];
 
@@ -139,14 +126,14 @@ unsigned Node::setAttributePoint(gchar const *key, Geom::Point const &val)
     return true;
 }
 
-unsigned int Node::getAttributePoint(gchar const *key, Geom::Point *val)
+bool Node::getAttributePoint(Util::const_char_ptr key, Geom::Point *val) const
 {
-    g_return_val_if_fail(key != nullptr, FALSE);
-    g_return_val_if_fail(val != nullptr, FALSE);
+    g_return_val_if_fail(val != nullptr, false);
 
-    gchar const *v = this->attribute(key);
-
-    g_return_val_if_fail(v != nullptr, FALSE);
+    auto v = this->attribute(key.data());
+    if (v == nullptr) {
+        return false;
+    }
 
     gchar **strarray = g_strsplit(v, ",", 2);
 
@@ -156,11 +143,11 @@ unsigned int Node::getAttributePoint(gchar const *key, Geom::Point *val)
         newy = g_ascii_strtod(strarray[1], nullptr);
         g_strfreev(strarray);
         *val = Geom::Point(newx, newy);
-        return TRUE;
+        return true;
     }
 
     g_strfreev(strarray);
-    return FALSE;
+    return false;
 }
 
 void Node::setAttributeOrRemoveIfEmpty(Inkscape::Util::const_char_ptr key, Inkscape::Util::const_char_ptr value)

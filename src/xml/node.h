@@ -210,45 +210,46 @@ public:
      * @param is_interactive Ignored
      */
 
-    void setAttribute(Inkscape::Util::const_char_ptr key, Inkscape::Util::const_char_ptr value);
+    void setAttribute(Util::const_char_ptr key, Util::const_char_ptr value);
 
     /**
-     * Parses the boolean value of an attribute "key" in repr and sets val accordingly, or to FALSE if
+     * Parses the boolean value of an attribute "key" in repr and sets val accordingly, or to false if
      * the attr is not set.
      *
-     * \return TRUE if the attr was set, FALSE otherwise.
+     * \return true if the attr was set, false otherwise.
      */
-    unsigned int getAttributeBoolean(gchar const *key, unsigned int *val);
+    bool getAttributeBoolean(Util::const_char_ptr key, bool *val) const;
 
-    unsigned int getAttributeInt(gchar const *key, int *val);
+    bool getAttributeInt(Util::const_char_ptr key, int *val) const;
 
-    unsigned int getAttributeDouble(gchar const *key, double *val);
+    bool getAttributeDouble(Util::const_char_ptr key, double *val) const;
 
-    unsigned int setAttributeBoolean(gchar const *key, unsigned int val);
+    bool setAttributeBoolean(Util::const_char_ptr key, bool val);
 
-    unsigned int setAttributeInt(gchar const *key, int val);
+    bool setAttributeInt(Util::const_char_ptr key, int val);
 
     /**
      * Set a property attribute to \a val [slightly rounded], in the format
      * required for CSS properties: in particular, it never uses exponent
      * notation.
      */
-    unsigned int setAttributeCssDouble(gchar const *key, double val);
+    bool setAttributeCssDouble(Util::const_char_ptr key, double val);
 
     /**
      * For attributes where an exponent is allowed.
      *
      * Not suitable for property attributes (fill-opacity, font-size etc.).
      */
-    unsigned int setAttributeSvgDouble(gchar const *key, double val);
+    bool setAttributeSvgDouble(Util::const_char_ptr key, double val);
 
-    unsigned int setAttributeSvgNonDefaultDouble(gchar const *key, double val, double default_value);
+    bool setAttributeSvgNonDefaultDouble(Util::const_char_ptr key,
+                                         double val, double default_value);
 
-    unsigned int setAttributeSvgLength(gchar const *key, SVGLength &val);
+    bool setAttributeSvgLength(Util::const_char_ptr key, SVGLength const &val);
 
-    unsigned setAttributePoint(gchar const *key, Geom::Point const & val);
+    bool setAttributePoint(Util::const_char_ptr key, Geom::Point const &val);
 
-    unsigned int getAttributePoint(gchar const *key, Geom::Point *val);
+    bool getAttributePoint(Util::const_char_ptr key, Geom::Point *val) const;
 
     /**
      * @brief Change an attribute of this node. Empty string deletes the attribute.

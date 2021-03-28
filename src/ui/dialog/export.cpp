@@ -1272,7 +1272,7 @@ void Export::_export_raster(Inkscape::Extension::Output *extension)
                 modified = true;
             }
             temp_string = repr->attribute("inkscape:export-xdpi");
-j           if (temp_string == nullptr || xdpi != g_ascii_strtod(temp_string, nullptr)) {
+           if (temp_string == nullptr || xdpi != g_ascii_strtod(temp_string, nullptr)) {
                 repr->setAttributeSvgDouble("inkscape:export-xdpi", xdpi);
                 modified = true;
             }
