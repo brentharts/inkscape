@@ -462,20 +462,6 @@ bool sp_repr_is_meta_element(const Inkscape::XML::Node *node)
     return false;
 }
 
-/**
- * For attributes where an exponent is allowed.
- *
- * Not suitable for property attributes.
- */
-unsigned int sp_repr_set_svg_length(Inkscape::XML::Node *repr, gchar const *key, SVGLength &val)
-{
-    g_return_val_if_fail(repr != nullptr, FALSE);
-    g_return_val_if_fail(key != nullptr, FALSE);
-
-    repr->setAttribute(key, val.write());
-    return true;
-}
-
 unsigned sp_repr_set_point(Inkscape::XML::Node *repr, gchar const *key, Geom::Point const & val)
 {
     g_return_val_if_fail(repr != nullptr, FALSE);

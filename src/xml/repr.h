@@ -111,7 +111,6 @@ inline void sp_repr_unparent(Inkscape::XML::Node *repr) {
 bool sp_repr_is_meta_element(const Inkscape::XML::Node *node);
 
 /* Convenience */
-unsigned sp_repr_set_svg_length(Inkscape::XML::Node *repr, char const *key, SVGLength &val);
 unsigned sp_repr_set_point(Inkscape::XML::Node *repr, char const *key, Geom::Point const & val);
 unsigned sp_repr_get_point(Inkscape::XML::Node *repr, char const *key, Geom::Point *val);
 
