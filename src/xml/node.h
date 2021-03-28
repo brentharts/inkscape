@@ -354,6 +354,17 @@ public:
         return true;
     }
 
+    unsigned setAttributePoint(gchar const *key, Geom::Point const & val)
+    {
+        g_return_val_if_fail(key != nullptr, FALSE);
+
+        Inkscape::SVGOStringStream os;
+        os << val[Geom::X] << "," << val[Geom::Y];
+
+        this->setAttribute(key, os.str());
+        return true;
+    }
+
     /**
      * @brief Change an attribute of this node. Empty string deletes the attribute.
      *

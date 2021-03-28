@@ -462,18 +462,6 @@ bool sp_repr_is_meta_element(const Inkscape::XML::Node *node)
     return false;
 }
 
-unsigned sp_repr_set_point(Inkscape::XML::Node *repr, gchar const *key, Geom::Point const & val)
-{
-    g_return_val_if_fail(repr != nullptr, FALSE);
-    g_return_val_if_fail(key != nullptr, FALSE);
-
-    Inkscape::SVGOStringStream os;
-    os << val[Geom::X] << "," << val[Geom::Y];
-
-    repr->setAttribute(key, os.str());
-    return true;
-}
-
 unsigned int sp_repr_get_point(Inkscape::XML::Node *repr, gchar const *key, Geom::Point *val)
 {
     g_return_val_if_fail(repr != nullptr, FALSE);

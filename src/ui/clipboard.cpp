@@ -404,8 +404,8 @@ void ClipboardManagerImpl::copySymbol(Inkscape::XML::Node* symbol, gchar const* 
     _root->appendChild(use);
 
     // This min and max sets offsets, we don't have any so set to zero.
-    sp_repr_set_point(_clipnode, "min", Geom::Point(0,0));
-    sp_repr_set_point(_clipnode, "max", Geom::Point(0,0));
+    _clipnode, "min"->setAttributePoint(Geom::Point(0, 0));
+    _clipnode, "max"->setAttributePoint(Geom::Point(0, 0));
 
     fit_canvas_to_drawing(_clipboardSPDoc.get());
     _setClipboardTargets();
@@ -944,12 +944,12 @@ void ClipboardManagerImpl::_copySelection(ObjectSet *selection)
     }
 
     if (Geom::OptRect size = selection->visualBounds()) {
-        sp_repr_set_point(_clipnode, "min", size->min());
-        sp_repr_set_point(_clipnode, "max", size->max());
+        _clipnode->setAttributePoint("min", size->min());
+        _clipnode->setAttributePoint("max", size->max());
     }
     if (Geom::OptRect geom_size = selection->geometricBounds()) {
-        sp_repr_set_point(_clipnode, "geom-min", geom_size->min());
-        sp_repr_set_point(_clipnode, "geom-max", geom_size->max());
+        _clipnode->setAttributePoint("geom-min", geom_size->min());
+        _clipnode->setAttributePoint("geom-max", geom_size->max());
     }
 }
 
