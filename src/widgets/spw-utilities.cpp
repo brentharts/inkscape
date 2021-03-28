@@ -184,7 +184,7 @@ Gtk::Widget* sp_traverse_widget_tree(Gtk::Widget* widget, const std::function<bo
  *
  * \param[in] widget The widget to start traversal from - top of the tree
  *
- * \return The first focusable widget or nullptr is none are focusable.
+ * \return The first focusable widget or nullptr if none are focusable.
  */
 Gtk::Widget* sp_find_focusable_widget(Gtk::Widget* widget) {
     return sp_traverse_widget_tree(widget, [](Gtk::Widget* w) { return w->get_can_focus(); });
