@@ -57,6 +57,7 @@
 
 #include "svg/svg-color.h"
 
+#include "ui/desktop/menubar.h"
 #include "ui/interface.h"
 #include "ui/shortcuts.h"
 #include "ui/modifiers.h"
@@ -1352,7 +1353,7 @@ void InkscapePreferences::symbolicThemeCheck()
         }
     }
     if (themeiconname != "Adwaita") {
-        
+
         auto folders = get_foldernames(ICONS, { "application" });
         for (auto &folder : folders) {
             auto path = folder;
@@ -1637,7 +1638,7 @@ void InkscapePreferences::initPageUI()
         Glib::ustring default_theme_label = _("Use system theme");
         default_theme_label += " (" + default_theme + ")";
         labels.emplace_back(default_theme_label);
-        
+
         _gtk_theme.init("/theme/gtkTheme", labels, values, "");
         _page_theme.add_line(false, _("Change GTK theme:"), _gtk_theme, "", "", false);
         _gtk_theme.signal_changed().connect(sigc::mem_fun(*this, &InkscapePreferences::themeChange));
@@ -1679,7 +1680,7 @@ void InkscapePreferences::initPageUI()
             }
             // we want use Adwaita intead fallback hicolor theme
             if (folder == default_icon_theme ||
-                (folder == "hicolor" && default_icon_theme == "Adwaita")) 
+                (folder == "hicolor" && default_icon_theme == "Adwaita"))
             {
                 continue;
             }
@@ -3300,6 +3301,15 @@ void InkscapePreferences::onKBListKeyboardShortcuts()
     for (auto win : gapp->get_windows()) {
         shortcuts.update_gui_text_recursive(win);
     }
+
+    // Update all GUI text
+    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
+    InkscapeWindow *window = desktop->getInkscapeWindow();
+    if (window) { // during load, SP_ACTIVE_DESKTOP may be !nullptr, but parent might still be nullptr
+        SPDesktopWidget *dtw = window->get_desktop_widget();
+        reload_menu(desktop, dtw->_menubar);
+    }
+
 }
 
 void InkscapePreferences::initPageSpellcheck()
