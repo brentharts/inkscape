@@ -35,6 +35,7 @@
 #include <gtkmm/treeview.h>
 #include <gtkmm/label.h>
 #include <gtkmm/comboboxtext.h>
+#include <pango/pangocairo.h>
 
 #include "ui/widget/font-variations.h"
 #include "ui/widget/scrollprotected.h"
@@ -67,7 +68,6 @@ public:
      * Constructor
      */
     FontSelector (bool with_size = true, bool with_variations = true);
-
 protected:
 
     // Font family
