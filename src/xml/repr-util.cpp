@@ -463,19 +463,6 @@ bool sp_repr_is_meta_element(const Inkscape::XML::Node *node)
     return false;
 }
 
-unsigned int sp_repr_set_int(Inkscape::XML::Node *repr, gchar const *key, int val)
-{
-    gchar c[32];
-
-    g_return_val_if_fail(repr != nullptr, FALSE);
-    g_return_val_if_fail(key != nullptr, FALSE);
-
-    g_snprintf(c, 32, "%d", val);
-
-    repr->setAttribute(key, c);
-    return true;
-}
-
 /**
  * Set a property attribute to \a val [slightly rounded], in the format
  * required for CSS properties: in particular, it never uses exponent

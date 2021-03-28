@@ -241,7 +241,7 @@ StarToolbar::side_mode_changed(int mode)
             if (flat) {
                 gint sides = (gint)_magnitude_adj->get_value();
                 if (sides < 3) {
-                    sp_repr_set_int(repr, "sodipodi:sides", 3);
+                    repr->setAttributeInt("sodipodi:sides", 3);
                 }
             }
             repr->setAttribute("inkscape:flatsided", flat ? "true" : "false" );
@@ -291,8 +291,7 @@ StarToolbar::magnitude_value_changed()
         SPItem *item = *i;
         if (SP_IS_STAR(item)) {
             Inkscape::XML::Node *repr = item->getRepr();
-            sp_repr_set_int(repr,"sodipodi:sides",
-                (gint)_magnitude_adj->get_value());
+            repr->setAttributeInt("sodipodi:sides", (gint)_magnitude_adj->get_value());
             double arg1 = 0.5;
             repr->getAttributeDouble("sodipodi:arg1", &arg1);
             repr->setAttributeSvgDouble("sodipodi:arg2", (arg1 + M_PI / (gint)_magnitude_adj->get_value()));

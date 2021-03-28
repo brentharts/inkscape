@@ -906,11 +906,11 @@ void sp_namedview_document_from_window(SPDesktop *desktop)
     if (save_geometry_in_file) {
         gint w, h, x, y;
         desktop->getWindowGeometry(x, y, w, h);
-        sp_repr_set_int(view, "inkscape:window-width", w);
-        sp_repr_set_int(view, "inkscape:window-height", h);
-        sp_repr_set_int(view, "inkscape:window-x", x);
-        sp_repr_set_int(view, "inkscape:window-y", y);
-        sp_repr_set_int(view, "inkscape:window-maximized", desktop->is_maximized());
+        view->setAttributeInt("inkscape:window-width", w);
+        view->setAttributeInt("inkscape:window-height", h);
+        view->setAttributeInt("inkscape:window-x", x);
+        view->setAttributeInt("inkscape:window-y", y);
+        view->setAttributeInt("inkscape:window-maximized", desktop->is_maximized());
     }
 
     view->setAttribute("inkscape:current-layer", desktop->currentLayer()->getId());

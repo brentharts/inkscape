@@ -285,6 +285,18 @@ public:
         return true;
     }
 
+    unsigned int setAttributeInt(gchar const *key, int val)
+    {
+        gchar c[32];
+
+        g_return_val_if_fail(key != nullptr, FALSE);
+
+        g_snprintf(c, 32, "%d", val);
+
+        this->setAttribute(key, c);
+        return true;
+    }
+
     /**
      * For attributes where an exponent is allowed.
      *
