@@ -111,7 +111,9 @@ void DialogBase::blink()
         sigc::slot<bool> slot = sigc::mem_fun(*this, &DialogBase::blink_off);
         sigc::connection connection = Glib::signal_timeout().connect(slot, 1000); // msec
     }
+}
 
+void DialogBase::focus_dialog() {
     if (auto window = dynamic_cast<Gtk::Window*>(get_toplevel())) {
         window->present();
     }

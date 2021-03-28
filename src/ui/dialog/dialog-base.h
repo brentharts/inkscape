@@ -62,6 +62,8 @@ public:
     SPDesktop *getDesktop();
 
     void blink();
+    // find focusable widget to grab focus
+    void focus_dialog();
 
 protected:
     Glib::ustring _name;             // Gtk widget name (must be set!)
