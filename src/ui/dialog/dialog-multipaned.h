@@ -59,10 +59,15 @@ public:
     ~MyHandle() override = default;
 
     bool on_enter_notify_event(GdkEventCrossing *crossing_event) override;
+    bool on_button_press_event(GdkEventButton* button_event) override;
+    bool on_button_release_event(GdkEventButton *event) override;
+    void on_drag_end(const Glib::RefPtr<Gdk::DragContext>& context) override;
+    bool on_motion_notify_event(GdkEventMotion* motion_event) override;
 private:
     int _cross_size;
     Gtk::Widget *_child;
     void resize_handler(Gtk::Allocation &allocation);
+    bool _click = false;
 };
 
 /* ============ MULTIPANE ============ */
@@ -98,6 +103,7 @@ public:
     // UI functions
     void set_dropzone_sizes(int start, int end);
     void toggle_multipaned_children();
+    void children_toggled();
 
 protected:
     // Overrides

@@ -113,6 +113,74 @@ bool MyHandle::on_enter_notify_event(GdkEventCrossing *crossing_event)
     return false;
 }
 
+bool MyHandle::on_button_press_event(GdkEventButton* button_event) {
+    // detect single-clicks
+    _click = button_event->button == 1 && button_event->type == GDK_BUTTON_PRESS;
+    // g_warning("btn press %d %d", (int)button_event->type, button_event->button);
+    return false;
+}
+
+bool MyHandle::on_button_release_event(GdkEventButton* event) {
+    // g_warning("btn release %d %d", (int)event->type, event->button);
+    // single-click?
+    if (_click && event->type == GDK_BUTTON_RELEASE && event->button == 1) {
+        _click = false;
+        // handle clicked
+        // g_warning("handle click");
+        if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL) {
+            if (auto panel = dynamic_cast<DialogMultipaned*>(get_parent())) {
+                // g_warning("toggle dock %p", panel);
+                auto children = panel->get_children();
+                Gtk::Widget* multi = nullptr;
+                bool left_side = true;
+                size_t i = 0;
+                for (auto widget : children) {
+                    if (dynamic_cast<Inkscape::UI::Widget::CanvasGrid*>(widget)) {
+                        left_side = false;
+                    }
+                    if (widget == this) {
+                        if (left_side && i > 0) {
+                            multi = dynamic_cast<DialogMultipaned*>(children[i - 1]);
+                        }
+                        else if (!left_side && i + 1 < children.size()) {
+                            multi = dynamic_cast<DialogMultipaned*>(children[i + 1]);
+                        }
+
+                        if (multi) {
+                g_warning("toggle dock %p in %p", multi, panel);
+                            if (multi->is_visible()) {
+                                multi->hide();
+                            }
+                            else {
+                                multi->show();
+                            }
+                            // resize parent
+                            panel->children_toggled();
+                        }
+                        break;
+                    }
+                    i++;
+                }
+                // auto it = children
+                // panel->toggle_multipaned_children();
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
+void MyHandle::on_drag_end(const Glib::RefPtr<Gdk::DragContext>& context) {
+    // g_warning("drg end %p", this);
+}
+
+bool MyHandle::on_motion_notify_event(GdkEventMotion* motion_event) {
+    // motion invalidates click; it activates resizing
+    _click = false;
+    // g_warning("motion %p", this);
+    return false;
+}
+
 /**
  * This allocation handler function is used to add/remove handle icons in order to be able
  * to hide completely a transversal handle into the sides of a DialogMultipaned.
@@ -373,8 +441,16 @@ void DialogMultipaned::set_dropzone_sizes(int start, int end)
  */
 void DialogMultipaned::toggle_multipaned_children()
 {
+    g_warning("toggle child %p", this);
     hide_multipaned = !hide_multipaned;
     queue_allocate();
+    queue_draw();
+    queue_resize();
+    if (auto parent = get_parent()) {
+        parent->queue_allocate();
+        parent->queue_draw();
+        parent->queue_resize();
+    }
 }
 
 // ****************** OVERRIDES ******************
@@ -470,6 +546,12 @@ void DialogMultipaned::get_preferred_height_for_width_vfunc(int width, int &mini
     }
 }
 
+
+void DialogMultipaned::children_toggled() {
+    handle = -1;
+    queue_resize();
+}
+
 /**
  * This function allocates the sizes of the children widgets (be them internal or not) from
  * the container's allocated size.
@@ -480,6 +562,8 @@ void DialogMultipaned::get_preferred_height_for_width_vfunc(int width, int &mini
  */
 void DialogMultipaned::on_size_allocate(Gtk::Allocation &allocation)
 {
+    g_warning("on_size_alloc %p handle %d", this, handle);
+
     set_allocation(allocation);
     bool horizontal = get_orientation() == Gtk::ORIENTATION_HORIZONTAL;
 
@@ -488,7 +572,7 @@ void DialogMultipaned::on_size_allocate(Gtk::Allocation &allocation)
         children[handle - 1]->size_allocate(allocation1);
         children[handle]->size_allocate(allocationh);
         children[handle + 1]->size_allocate(allocation2);
-    } else {
+    } {
         std::vector<bool> expandables;              // Is child expandable?
         std::vector<int> sizes_minimums;            // Difference between allocated space and minimum space.
         std::vector<int> sizes_naturals;            // Difference between allocated space and natural space.
@@ -588,11 +672,11 @@ void DialogMultipaned::on_size_allocate(Gtk::Allocation &allocation)
         // Allocate
         for (int i = 0; i < (int)children.size(); ++i) {
             Gtk::Allocation child_allocation = children[i]->get_allocation();
-
             child_allocation.set_x(current_x);
             child_allocation.set_y(current_y);
 
             int size = sizes[i];
+g_warning("idx: %d  x: %d y: %d w: %d h: %d", i, current_x, current_y, size, allocation.get_height());
 
             if (horizontal) {
                 child_allocation.set_width(size);
