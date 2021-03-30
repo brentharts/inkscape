@@ -926,7 +926,7 @@ int CommandPalette::on_filter_general(Gtk::ListBoxRow *child)
         }
 
         if (fuzzy_tolerance_search(CPName->get_tooltip_text(), _search_text)) {
-            add_color(CPName, _search_text, CPName->get_tooltip_text());
+            add_color(CPName, _search_text, CPName->get_tooltip_text(), true);
             return fuzzy_tolerance_points(CPName->get_tooltip_text(), _search_text);
         }
     }
