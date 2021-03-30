@@ -59,11 +59,11 @@ public:
     ~MyHandle() override = default;
 
     bool on_enter_notify_event(GdkEventCrossing *crossing_event) override;
+private:
     bool on_button_press_event(GdkEventButton* button_event) override;
     bool on_button_release_event(GdkEventButton *event) override;
-    void on_drag_end(const Glib::RefPtr<Gdk::DragContext>& context) override;
     bool on_motion_notify_event(GdkEventMotion* motion_event) override;
-private:
+    void toggle_multipaned();
     int _cross_size;
     Gtk::Widget *_child;
     void resize_handler(Gtk::Allocation &allocation);
@@ -130,7 +130,8 @@ private:
     std::vector<Gtk::Widget *> children;
 
     // Values used when dragging handle.
-    int handle = -1; // Child number of active handle
+    int _handle = -1; // Child number of active handle
+    int _drag_handle = -1;
     Gtk::Allocation start_allocation1;
     Gtk::Allocation start_allocationh;
     Gtk::Allocation start_allocation2;

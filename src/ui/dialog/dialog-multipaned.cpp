@@ -23,6 +23,7 @@
 
 #include "ui/dialog/dialog-notebook.h"
 #include "ui/widget/canvas-grid.h"
+#include "dialog-window.h"
 
 #define DROPZONE_SIZE 16
 #define HANDLE_SIZE 12
@@ -116,68 +117,73 @@ bool MyHandle::on_enter_notify_event(GdkEventCrossing *crossing_event)
 bool MyHandle::on_button_press_event(GdkEventButton* button_event) {
     // detect single-clicks
     _click = button_event->button == 1 && button_event->type == GDK_BUTTON_PRESS;
-    // g_warning("btn press %d %d", (int)button_event->type, button_event->button);
     return false;
 }
 
 bool MyHandle::on_button_release_event(GdkEventButton* event) {
-    // g_warning("btn release %d %d", (int)event->type, event->button);
     // single-click?
     if (_click && event->type == GDK_BUTTON_RELEASE && event->button == 1) {
         _click = false;
         // handle clicked
-        // g_warning("handle click");
         if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL) {
-            if (auto panel = dynamic_cast<DialogMultipaned*>(get_parent())) {
-                // g_warning("toggle dock %p", panel);
-                auto children = panel->get_children();
-                Gtk::Widget* multi = nullptr;
-                bool left_side = true;
-                size_t i = 0;
-                for (auto widget : children) {
-                    if (dynamic_cast<Inkscape::UI::Widget::CanvasGrid*>(widget)) {
-                        left_side = false;
-                    }
-                    if (widget == this) {
-                        if (left_side && i > 0) {
-                            multi = dynamic_cast<DialogMultipaned*>(children[i - 1]);
-                        }
-                        else if (!left_side && i + 1 < children.size()) {
-                            multi = dynamic_cast<DialogMultipaned*>(children[i + 1]);
-                        }
-
-                        if (multi) {
-                g_warning("toggle dock %p in %p", multi, panel);
-                            if (multi->is_visible()) {
-                                multi->hide();
-                            }
-                            else {
-                                multi->show();
-                            }
-                            // resize parent
-                            panel->children_toggled();
-                        }
-                        break;
-                    }
-                    i++;
-                }
-                // auto it = children
-                // panel->toggle_multipaned_children();
-            }
+            toggle_multipaned();
+            return true;
         }
-        return true;
     }
+
+    _click = false;
     return false;
 }
 
-void MyHandle::on_drag_end(const Glib::RefPtr<Gdk::DragContext>& context) {
-    // g_warning("drg end %p", this);
+void MyHandle::toggle_multipaned() {
+    // visibility toggle of multipaned in a floating dialog window doesn't make sense; skip
+    if (dynamic_cast<DialogWindow*>(get_toplevel())) return;
+
+    auto panel = dynamic_cast<DialogMultipaned*>(get_parent());
+    if (!panel) return;
+
+    auto children = panel->get_children();
+    Gtk::Widget* multi = nullptr; // multipaned widget to toggle
+    bool left_side = true; // panels to the left of canvas
+    size_t i = 0;
+
+    // find multipaned widget to resize; it is adjacent (sibling) to 'this' handle in widget hierarchy
+    for (auto widget : children) {
+        if (dynamic_cast<Inkscape::UI::Widget::CanvasGrid*>(widget)) {
+            // widget past canvas are on the right side (of canvas)
+            left_side = false;
+        }
+
+        if (widget == this) {
+            if (left_side && i > 0) {
+                // handle to the left of canvas toggles preceeding panel
+                multi = dynamic_cast<DialogMultipaned*>(children[i - 1]);
+            }
+            else if (!left_side && i + 1 < children.size()) {
+                // handle to the right of canvas toggles next panel
+                multi = dynamic_cast<DialogMultipaned*>(children[i + 1]);
+            }
+
+            if (multi) {
+                if (multi->is_visible()) {
+                    multi->hide();
+                }
+                else {
+                    multi->show();
+                }
+                // resize parent
+                panel->children_toggled();
+            }
+            break;
+        }
+
+        ++i;
+    }
 }
 
 bool MyHandle::on_motion_notify_event(GdkEventMotion* motion_event) {
     // motion invalidates click; it activates resizing
     _click = false;
-    // g_warning("motion %p", this);
     return false;
 }
 
@@ -441,16 +447,10 @@ void DialogMultipaned::set_dropzone_sizes(int start, int end)
  */
 void DialogMultipaned::toggle_multipaned_children()
 {
-    g_warning("toggle child %p", this);
+    _handle = -1;
+    _drag_handle = -1;
     hide_multipaned = !hide_multipaned;
     queue_allocate();
-    queue_draw();
-    queue_resize();
-    if (auto parent = get_parent()) {
-        parent->queue_allocate();
-        parent->queue_draw();
-        parent->queue_resize();
-    }
 }
 
 // ****************** OVERRIDES ******************
@@ -548,8 +548,10 @@ void DialogMultipaned::get_preferred_height_for_width_vfunc(int width, int &mini
 
 
 void DialogMultipaned::children_toggled() {
-    handle = -1;
-    queue_resize();
+    _handle = -1;
+    _drag_handle = -1;
+    queue_allocate();
+    // queue_resize();
 }
 
 /**
@@ -562,17 +564,18 @@ void DialogMultipaned::children_toggled() {
  */
 void DialogMultipaned::on_size_allocate(Gtk::Allocation &allocation)
 {
-    g_warning("on_size_alloc %p handle %d", this, handle);
-
     set_allocation(allocation);
     bool horizontal = get_orientation() == Gtk::ORIENTATION_HORIZONTAL;
 
-    if (handle != -1) { // Exchange allocation between the widgets on either side of moved handle
+    if (_drag_handle != -1) { // Exchange allocation between the widgets on either side of moved handle
         // Allocation values calculated in on_drag_update();
-        children[handle - 1]->size_allocate(allocation1);
-        children[handle]->size_allocate(allocationh);
-        children[handle + 1]->size_allocate(allocation2);
-    } {
+        children[_drag_handle - 1]->size_allocate(allocation1);
+        children[_drag_handle]->size_allocate(allocationh);
+        children[_drag_handle + 1]->size_allocate(allocation2);
+        _drag_handle = -1;
+    }
+    
+    {
         std::vector<bool> expandables;              // Is child expandable?
         std::vector<int> sizes_minimums;            // Difference between allocated space and minimum space.
         std::vector<int> sizes_naturals;            // Difference between allocated space and natural space.
@@ -676,7 +679,6 @@ void DialogMultipaned::on_size_allocate(Gtk::Allocation &allocation)
             child_allocation.set_y(current_y);
 
             int size = sizes[i];
-g_warning("idx: %d  x: %d y: %d w: %d h: %d", i, current_x, current_y, size, allocation.get_height());
 
             if (horizontal) {
                 child_allocation.set_width(size);
@@ -796,46 +798,143 @@ void DialogMultipaned::on_drag_begin(double start_x, double start_y)
     gesture->set_state(Gtk::EVENT_SEQUENCE_CLAIMED);
 
     // Save for use in on_drag_update().
-    handle = child_number;
-    start_allocation1 = children[handle - 1]->get_allocation();
-    start_allocationh = children[handle]->get_allocation();
-    start_allocation2 = children[handle + 1]->get_allocation();
+    _handle = child_number;
+    start_allocation1 = children[_handle - 1]->get_allocation();
+    if (!children[_handle - 1]->is_visible()) {
+        start_allocation1.set_width(0);
+        start_allocation1.set_height(0);
+    }
+    start_allocationh = children[_handle]->get_allocation();
+    start_allocation2 = children[_handle + 1]->get_allocation();
+    if (!children[_handle + 1]->is_visible()) {
+        start_allocation2.set_width(0);
+        start_allocation2.set_height(0);
+    }
 }
 
 void DialogMultipaned::on_drag_end(double offset_x, double offset_y)
 {
     gesture->set_state(Gtk::EVENT_SEQUENCE_DENIED);
-    handle = -1;
+    _handle = -1;
+    _drag_handle = -1;
+}
+
+bool can_collapse(Gtk::Widget* widget, Gtk::Widget* handle) {
+    // can only collapse DialogMultipaned widgets
+    if (dynamic_cast<DialogMultipaned*>(widget) == nullptr) return false;
+
+    auto parent = handle->get_parent();
+    if (!parent) return false;
+
+    // find where the resizing handle is in relation to canvas area: left or right side;
+    // next, find where the panel is in relation to the handle: on its left or right
+    bool left_side = true;
+    bool left_handle = false;
+    size_t panel_index = 0;
+    size_t handle_index = 0;
+    size_t i = 0;
+    for (auto child : parent->get_children()) {
+        if (dynamic_cast<Inkscape::UI::Widget::CanvasGrid*>(child)) {
+            left_side = false;
+        }
+        else if (child == handle) {
+            left_handle = left_side;
+            handle_index = i;
+        }
+        else if (child == widget) {
+            panel_index = i;
+        }
+        ++i;
+    }
+
+    if (left_handle && panel_index < handle_index) {
+        return true;
+    }
+    if (!left_handle && panel_index > handle_index) {
+        return true;
+    }
+
+    return false;
+}
+
+int get_min_width(Gtk::Widget* widget) {
+    bool hidden = !widget->is_visible();
+    if (hidden) widget->show();
+    int minimum_size = 0;
+    int natural_size = 0;
+    widget->get_preferred_width(minimum_size, natural_size);
+    if (hidden) widget->hide();
+    return minimum_size;
 }
 
 void DialogMultipaned::on_drag_update(double offset_x, double offset_y)
 {
-    allocation1 = children[handle - 1]->get_allocation();
-    allocationh = children[handle]->get_allocation();
-    allocation2 = children[handle + 1]->get_allocation();
+    auto child1 = children[_handle - 1];
+    auto child2 = children[_handle + 1];
+    allocation1 = children[_handle - 1]->get_allocation();
+    allocationh = children[_handle]->get_allocation();
+    allocation2 = children[_handle + 1]->get_allocation();
     int minimum_size;
-    int natural_size;
+    bool collapsed = false;
 
     // HACK: The bias prevents erratic resizing when dragging the handle fast, outside the bounds of the app.
     const int BIAS = 1;
 
     if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL) {
-        children[handle - 1]->get_preferred_width(minimum_size, natural_size);
-        if (start_allocation1.get_width() + offset_x < minimum_size)
-            offset_x = -(start_allocation1.get_width() - minimum_size) + BIAS;
-        children[handle + 1]->get_preferred_width(minimum_size, natural_size);
-        if (start_allocation2.get_width() - offset_x < minimum_size)
-            offset_x = start_allocation2.get_width() - minimum_size - BIAS;
+        auto handle = children[_handle];
+        minimum_size = get_min_width(child1);
+        auto width = start_allocation1.get_width() + offset_x;
+    //   g_warning("min1 %d %d %d %f %f", minimum_size, can_collapse(child1, handle)?1:0, start_allocation1.get_width(), offset_x, width);
+        if (!child1->is_visible()) {
+            collapsed = true;
+            if (width > minimum_size / 2 && can_collapse(child1, handle)) {
+                child1->show();
+                collapsed = false;
+            }
+        }
+        if (!collapsed && width < minimum_size) {
+            if (width <= minimum_size / 2 && can_collapse(child1, handle)) {
+                child1->hide();
+                collapsed = true;
+            }
+            else {
+                offset_x = -(start_allocation1.get_width() - minimum_size) + BIAS;
+            }
+        }
 
-        allocation1.set_width(start_allocation1.get_width() + offset_x);
-        allocationh.set_x(start_allocationh.get_x() + offset_x);
-        allocation2.set_x(start_allocation2.get_x() + offset_x);
-        allocation2.set_width(start_allocation2.get_width() - offset_x);
+        minimum_size = get_min_width(child2);
+        width = start_allocation2.get_width() - offset_x;
+    //   g_warning("min2 %d %d %d %f %f", minimum_size, can_collapse(child2, handle)?1:0, start_allocation2.get_width(), offset_x, width);
+        if (!child2->is_visible()) {
+            collapsed = true;
+            if (width > minimum_size / 2 && can_collapse(child2, handle)) {
+                child2->show();
+                collapsed = false;
+            }
+        }
+        if (!collapsed && width < minimum_size) {
+            if (width < minimum_size / 2 && can_collapse(child2, handle)) {
+                // collapse child2
+                child2->hide();
+                collapsed = true;
+            }
+            else {
+                offset_x = start_allocation2.get_width() - minimum_size - BIAS;
+            }
+        }
+
+        if (!collapsed) {
+            allocation1.set_width(start_allocation1.get_width() + offset_x);
+            allocationh.set_x(start_allocationh.get_x() + offset_x);
+            allocation2.set_x(start_allocation2.get_x() + offset_x);
+            allocation2.set_width(start_allocation2.get_width() - offset_x);
+        }
     } else {
-        children[handle - 1]->get_preferred_height(minimum_size, natural_size);
+        int natural_size;
+        children[_handle - 1]->get_preferred_height(minimum_size, natural_size);
         if (start_allocation1.get_height() + offset_y < minimum_size)
             offset_y = -(start_allocation1.get_height() - minimum_size) + BIAS;
-        children[handle + 1]->get_preferred_height(minimum_size, natural_size);
+        children[_handle + 1]->get_preferred_height(minimum_size, natural_size);
         if (start_allocation2.get_height() - offset_y < minimum_size)
             offset_y = start_allocation2.get_height() - minimum_size - BIAS;
 
@@ -846,14 +945,15 @@ void DialogMultipaned::on_drag_update(double offset_x, double offset_y)
     }
 
     if (hide_multipaned) {
-        DialogMultipaned *left = dynamic_cast<DialogMultipaned *>(children[handle - 1]);
-        DialogMultipaned *right = dynamic_cast<DialogMultipaned *>(children[handle + 1]);
+        DialogMultipaned *left = dynamic_cast<DialogMultipaned *>(children[_handle - 1]);
+        DialogMultipaned *right = dynamic_cast<DialogMultipaned *>(children[_handle + 1]);
 
         if (left || right) {
             return;
         }
     }
 
+    _drag_handle = collapsed ? -1 : _handle;
     queue_allocate(); // Relayout DialogMultipaned content.
 }
 
