@@ -3300,9 +3300,15 @@ void InkscapePreferences::onKBListKeyboardShortcuts()
 
     // Update text of each desktop to correct Shortcuts
     for(SPDesktop *desktop: listbuf) {
-      InkscapeWindow *window = desktop->getInkscapeWindow();
-      SPDesktopWidget *dtw = window->get_desktop_widget();
-      reload_menu(desktop, dtw->_menubar);
+      // Caution: Checking if pointers are not NULL
+      if(desktop) {
+        InkscapeWindow *window = desktop->getInkscapeWindow();
+        if(window) {
+          SPDesktopWidget *dtw = window->get_desktop_widget();
+          if(dtw)
+            reload_menu(desktop, dtw->_menubar);
+        }
+      }
     }
 }
 
