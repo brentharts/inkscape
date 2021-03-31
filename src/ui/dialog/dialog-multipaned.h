@@ -132,6 +132,10 @@ private:
     // Values used when dragging handle.
     int _handle = -1; // Child number of active handle
     int _drag_handle = -1;
+    Gtk::Widget* _resizing_widget1 = nullptr;
+    Gtk::Widget* _resizing_widget2 = nullptr;
+    Gtk::Widget* _hide_widget1 = nullptr;
+    Gtk::Widget* _hide_widget2 = nullptr;
     Gtk::Allocation start_allocation1;
     Gtk::Allocation start_allocationh;
     Gtk::Allocation start_allocation2;

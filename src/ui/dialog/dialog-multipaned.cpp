@@ -551,7 +551,6 @@ void DialogMultipaned::children_toggled() {
     _handle = -1;
     _drag_handle = -1;
     queue_allocate();
-    // queue_resize();
 }
 
 /**
@@ -574,7 +573,7 @@ void DialogMultipaned::on_size_allocate(Gtk::Allocation &allocation)
         children[_drag_handle + 1]->size_allocate(allocation2);
         _drag_handle = -1;
     }
-    
+
     {
         std::vector<bool> expandables;              // Is child expandable?
         std::vector<int> sizes_minimums;            // Difference between allocated space and minimum space.
@@ -605,6 +604,13 @@ void DialogMultipaned::on_size_allocate(Gtk::Allocation &allocation)
                 Gtk::Requisition req_minimum;
                 Gtk::Requisition req_natural;
                 child->get_preferred_size(req_minimum, req_natural);
+                if (child == _resizing_widget1 || child == _resizing_widget2) {
+                    // ignore limits for widget being resized interactively and user their current size
+                    req_minimum.width = req_minimum.height = 0;
+                    auto alloc = child->get_allocation();
+                    req_natural.width = alloc.get_width();
+                    req_natural.height = alloc.get_height();
+                }
 
                 sizes_minimums.push_back(visible ? horizontal ? req_minimum.width : req_minimum.height : 0);
                 sizes_naturals.push_back(visible ? horizontal ? req_natural.width : req_natural.height : 0);
@@ -624,9 +630,11 @@ void DialogMultipaned::on_size_allocate(Gtk::Allocation &allocation)
         if (sum_naturals <= left) {
             sizes = sizes_naturals;
             left -= sum_naturals;
+// g_warning("natural: %d", left);
         } else if (sum_minimums <= left && left < sum_naturals) {
             sizes = sizes_minimums;
             left -= sum_minimums;
+// g_warning("minimum: %d", left);
         }
 
         if (canvas_index >= 0) { // give remaining space to canvas element
@@ -693,6 +701,9 @@ void DialogMultipaned::on_size_allocate(Gtk::Allocation &allocation)
             children[i]->size_allocate(child_allocation);
         }
     }
+
+    _resizing_widget1 = nullptr;
+    _resizing_widget2 = nullptr;
 }
 
 void DialogMultipaned::forall_vfunc(gboolean, GtkCallback callback, gpointer callback_data)
@@ -763,6 +774,8 @@ void DialogMultipaned::on_remove(Gtk::Widget *child)
 
 void DialogMultipaned::on_drag_begin(double start_x, double start_y)
 {
+    _hide_widget1 = _hide_widget2 = nullptr;
+    _resizing_widget1 = _resizing_widget2 = nullptr;
     // We clicked on handle.
     bool found = false;
     int child_number = 0;
@@ -817,6 +830,18 @@ void DialogMultipaned::on_drag_end(double offset_x, double offset_y)
     gesture->set_state(Gtk::EVENT_SEQUENCE_DENIED);
     _handle = -1;
     _drag_handle = -1;
+    if (_hide_widget1) {
+        _hide_widget1->hide();
+    }
+    if (_hide_widget2) {
+        _hide_widget2->hide();
+    }
+    _hide_widget1 = nullptr;
+    _hide_widget2 = nullptr;
+    _resizing_widget1 = nullptr;
+    _resizing_widget2 = nullptr;
+
+    queue_allocate(); // reimpose limits if any were bent during interactive resizing
 }
 
 bool can_collapse(Gtk::Widget* widget, Gtk::Widget* handle) {
@@ -867,6 +892,26 @@ int get_min_width(Gtk::Widget* widget) {
     return minimum_size;
 }
 
+double ease_inout(double val, double size) {
+    if (size > 0 && val <= size && val >= 0) {
+        // slow start and end (1/4 * x), faster in the middle (4 * x)
+        auto x = val / size;
+        auto pos = x;
+        if (x <= 0.4) {
+            pos = x * 0.25;
+        }
+        else if (x >= 0.6) {
+            pos = x * 0.25 + 0.75;
+        }
+        else {
+            pos = x * 4 - 1.5;
+        }
+        // g_warning("val: %f size: %f, pos: %f, new: %f", val, size, pos, size*pos);
+        return size * pos;
+    }
+    return val;
+}
+
 void DialogMultipaned::on_drag_update(double offset_x, double offset_y)
 {
     auto child1 = children[_handle - 1];
@@ -875,7 +920,8 @@ void DialogMultipaned::on_drag_update(double offset_x, double offset_y)
     allocationh = children[_handle]->get_allocation();
     allocation2 = children[_handle + 1]->get_allocation();
     int minimum_size;
-    bool collapsed = false;
+    _resizing_widget1 = nullptr;
+    _resizing_widget2 = nullptr;
 
     // HACK: The bias prevents erratic resizing when dragging the handle fast, outside the bounds of the app.
     const int BIAS = 1;
@@ -885,17 +931,18 @@ void DialogMultipaned::on_drag_update(double offset_x, double offset_y)
         minimum_size = get_min_width(child1);
         auto width = start_allocation1.get_width() + offset_x;
     //   g_warning("min1 %d %d %d %f %f", minimum_size, can_collapse(child1, handle)?1:0, start_allocation1.get_width(), offset_x, width);
-        if (!child1->is_visible()) {
-            collapsed = true;
-            if (width > minimum_size / 2 && can_collapse(child1, handle)) {
-                child1->show();
-                collapsed = false;
-            }
+
+        if (!child1->is_visible() && can_collapse(child1, handle)) {
+            child1->show();
+            _resizing_widget1 = child1;
         }
-        if (!collapsed && width < minimum_size) {
-            if (width <= minimum_size / 2 && can_collapse(child1, handle)) {
-                child1->hide();
-                collapsed = true;
+
+        if (width < minimum_size) {
+            _resizing_widget1 = child1;
+            if (can_collapse(child1, handle)) {
+                auto w = ease_inout(width, minimum_size);
+                offset_x = w - start_allocation1.get_width();
+                _hide_widget1 = width <= minimum_size / 2 ? child1 : nullptr;
             }
             else {
                 offset_x = -(start_allocation1.get_width() - minimum_size) + BIAS;
@@ -905,30 +952,29 @@ void DialogMultipaned::on_drag_update(double offset_x, double offset_y)
         minimum_size = get_min_width(child2);
         width = start_allocation2.get_width() - offset_x;
     //   g_warning("min2 %d %d %d %f %f", minimum_size, can_collapse(child2, handle)?1:0, start_allocation2.get_width(), offset_x, width);
-        if (!child2->is_visible()) {
-            collapsed = true;
-            if (width > minimum_size / 2 && can_collapse(child2, handle)) {
-                child2->show();
-                collapsed = false;
-            }
+
+        if (!child2->is_visible() && can_collapse(child2, handle)) {
+            child2->show();
+            _resizing_widget2 = child2;
         }
-        if (!collapsed && width < minimum_size) {
-            if (width < minimum_size / 2 && can_collapse(child2, handle)) {
-                // collapse child2
-                child2->hide();
-                collapsed = true;
+
+        if (width < minimum_size) {
+            _resizing_widget2 = child2;
+            if (can_collapse(child2, handle)) {
+                auto w = ease_inout(width, minimum_size);
+                offset_x = start_allocation2.get_width() - w;
+                _hide_widget2 = width <= minimum_size / 2 ? child2 : nullptr;
             }
             else {
                 offset_x = start_allocation2.get_width() - minimum_size - BIAS;
             }
         }
 
-        if (!collapsed) {
-            allocation1.set_width(start_allocation1.get_width() + offset_x);
-            allocationh.set_x(start_allocationh.get_x() + offset_x);
-            allocation2.set_x(start_allocation2.get_x() + offset_x);
-            allocation2.set_width(start_allocation2.get_width() - offset_x);
-        }
+        allocation1.set_width(start_allocation1.get_width() + offset_x);
+        allocationh.set_x(start_allocationh.get_x() + offset_x);
+        allocation2.set_x(start_allocation2.get_x() + offset_x);
+        allocation2.set_width(start_allocation2.get_width() - offset_x);
+        //   g_warning("offset: %f width1: %d  width2: %d", offset_x, allocation1.get_width(), allocation2.get_width());
     } else {
         int natural_size;
         children[_handle - 1]->get_preferred_height(minimum_size, natural_size);
@@ -953,7 +999,7 @@ void DialogMultipaned::on_drag_update(double offset_x, double offset_y)
         }
     }
 
-    _drag_handle = collapsed ? -1 : _handle;
+    _drag_handle = _handle;
     queue_allocate(); // Relayout DialogMultipaned content.
 }
 
