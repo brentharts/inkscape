@@ -66,6 +66,7 @@ private:
     BoolParam whitelist;
     BoolParam showindex;
     BoolParam arrows_outside;
+    BoolParam root_node;
     BoolParam flip_side;
     BoolParam scale_sensitive;
     BoolParam local_locale;

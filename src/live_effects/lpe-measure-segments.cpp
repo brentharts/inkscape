@@ -84,6 +84,7 @@ LPEMeasureSegments::LPEMeasureSegments(LivePathEffectObject *lpeobject) :
     whitelist(_("Invert blacklist"), _("Use the blacklist as whitelist"), "whitelist", &wr, this, false),
     showindex(_("Show segment index"), _("Display the index of the segments in the text label for easier blacklisting"), "showindex", &wr, this, false),
     arrows_outside(_("Arrows outside"), _("Draw arrows pointing in the opposite direction outside the dimension line"), "arrows_outside", &wr, this, false),
+    root_node(_("Add to Root Node"), _("Draw draw the measure segments in the root node"), "root_node", &wr, this, false),
     flip_side(_("Flip side"), _("Draw dimension lines and labels on the other side of the path"), "flip_side", &wr, this, false),
     scale_sensitive(_("Scale sensitive"), _("When the path is grouped and the group is then scaled, adjust the dimensions."), "scale_sensitive", &wr, this, true),
     local_locale(_("Localize number format"), _("Use localized number formatting, e.g. '1,0' instead of '1.0' with German locale"), "local_locale", &wr, this, true),
@@ -122,6 +123,7 @@ LPEMeasureSegments::LPEMeasureSegments(LivePathEffectObject *lpeobject) :
     registerParameter(&whitelist);
     registerParameter(&showindex);
     registerParameter(&arrows_outside);
+    registerParameter(&root_node);
     registerParameter(&flip_side);
     registerParameter(&scale_sensitive);
     registerParameter(&local_locale);
@@ -389,8 +391,12 @@ LPEMeasureSegments::createArrowMarker(Glib::ustring mode)
         arrow_path->setAttribute("style", style);
         arrow->addChild(arrow_path, nullptr);
         Inkscape::GC::release(arrow_path);
-        SPObject *layer = sp_lpe_item->parent;
-        elemref = layer ? layer->appendChildRepr(arrow) : document->getDefs()->appendChildRepr(arrow);
+        if (root_node) 
+            elemref = document->getRoot()->appendChildRepr(arrow);
+        else {
+            SPObject *layer = sp_lpe_item->parent;
+            elemref = layer ? layer->appendChildRepr(arrow) : document->getDefs()->appendChildRepr(arrow);
+        }
         Inkscape::GC::release(arrow);
     }
     items.push_back(mode);
@@ -447,8 +453,12 @@ LPEMeasureSegments::createTextLabel(Geom::Point pos, size_t counter, double leng
         rtspan->setAttribute("sodipodi:role", "line");
         rtspan->removeAttribute("x");
         rtspan->removeAttribute("y");
-        SPObject *layer = sp_lpe_item->parent;
-        elemref = layer ? layer->appendChildRepr(rtext) : document->getRoot()->appendChildRepr(rtext);
+        if (root_node)
+            elemref = document->getRoot()->appendChildRepr(rtext);
+        else {
+            SPObject *layer = sp_lpe_item->parent;
+            elemref = layer ? layer->appendChildRepr(rtext) : document->getRoot()->appendChildRepr(rtext);
+        }
         Inkscape::GC::release(rtext);
         rtext->addChild(rtspan, nullptr);
         Inkscape::GC::release(rtspan);
@@ -652,8 +662,12 @@ LPEMeasureSegments::createLine(Geom::Point start,Geom::Point end, Glib::ustring 
     sp_repr_css_write_string(css,css_str);
     line->setAttributeOrRemoveIfEmpty("style", css_str);
     if (!elemref) {
-        SPObject *layer = sp_lpe_item->parent;
-        elemref = layer ? layer->appendChildRepr(line) : document->getRoot()->appendChildRepr(line);
+        if (root_node)
+            elemref = document->getRoot()->appendChildRepr(line);
+        else {
+            SPObject *layer = sp_lpe_item->parent;
+            elemref = layer ? layer->appendChildRepr(line) : document->getRoot()->appendChildRepr(line);
+        }
         Inkscape::GC::release(line);
     }
 }
