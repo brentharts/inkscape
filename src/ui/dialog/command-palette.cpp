@@ -647,7 +647,7 @@ void CommandPalette::remove_color(Gtk::Label *label, const Glib::ustring &subjec
 Glib::ustring make_bold(const Glib::ustring &search)
 {
     // TODO: Add a CSS class that changes the color of the search
-    return "<span color=\"#46c3db\" weight=\"bold\">" + search + "</span>";
+    return "<span weight=\"bold\">" + search + "</span>";
 }
 
 void CommandPalette::add_color(Gtk::Label *label, const Glib::ustring &search, const Glib::ustring &subject, bool tooltip)
@@ -658,7 +658,7 @@ void CommandPalette::add_color(Gtk::Label *label, const Glib::ustring &search, c
     int j = 0;
 
     if (search_string.length() > 7) {
-        for (char i : search_string) {
+        for (gunichar i : search_string) {
             if (i == ' ') {
                 continue;
             }
@@ -676,7 +676,7 @@ void CommandPalette::add_color(Gtk::Label *label, const Glib::ustring &search, c
         if (j < subject_string.length())
             text += Glib::Markup::escape_text(subject.substr(j));
     } else {
-        std::map<char, int> search_string_character;
+        std::map<gunichar, int> search_string_character;
 
         for (const auto &character : search_string) {
             search_string_character[character]++;
@@ -741,7 +741,7 @@ bool CommandPalette::fuzzy_tolerance_search(const Glib::ustring &subject, const 
 {
     Glib::ustring subject_string = subject.lowercase();
     Glib::ustring search_string = search.lowercase();
-    std::map<char, int> subject_string_character, search_string_character;
+    std::map<gunichar, int> subject_string_character, search_string_character;
     for (const auto &character : subject_string) {
         subject_string_character[character]++;
     }
@@ -868,7 +868,7 @@ int CommandPalette::fuzzy_tolerance_points(const Glib::ustring &subject, const G
     Glib::ustring subject_string = subject.lowercase();
     Glib::ustring search_string = search.lowercase();
 
-    std::map<char, int> search_string_character;
+    std::map<gunichar, int> search_string_character;
 
     for (const auto &character : search_string) {
         search_string_character[character]++;
