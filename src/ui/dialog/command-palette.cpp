@@ -646,11 +646,7 @@ void CommandPalette::remove_color(Gtk::Label *label, const Glib::ustring &subjec
 Glib::ustring make_bold(const Glib::ustring &search)
 {
     // TODO: Add a CSS class that changes the color of the search
-<<<<<<< HEAD
-    // replacement of  return "<span color=\"blue\" weight=\"bold\">" + search + "</span>";
-=======
->>>>>>> Command Palette fuzzy search improvement
-    return "<span weight=\"bold\">" + search + "</span>";
+    return "<span color=\"#46c3db\" weight=\"bold\">" + search + "</span>";
 }
 
 void CommandPalette::add_color(Gtk::Label *label, const Glib::ustring &search, const Glib::ustring &subject, bool tooltip)
@@ -926,7 +922,7 @@ int CommandPalette::on_filter_general(Gtk::ListBoxRow *child)
         }
 
         if (fuzzy_tolerance_search(CPName->get_tooltip_text(), _search_text)) {
-            add_color(CPName, _search_text, CPName->get_tooltip_text(), true);
+            add_color(CPName, _search_text, CPName->get_tooltip_text());
             return fuzzy_tolerance_points(CPName->get_tooltip_text(), _search_text);
         }
     }
