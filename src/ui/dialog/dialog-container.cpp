@@ -332,6 +332,11 @@ void DialogContainer::new_dialog(unsigned int code, DialogNotebook *notebook)
 
     // Add dialog
     notebook->add_page(*dialog, *tab, dialog->get_name());
+
+    if (auto panel = dynamic_cast<DialogMultipaned*>(notebook->get_parent())) {
+        // if panel is collapsed, show it now, or else new dialog will be mysteriously missing
+        panel->show();
+    }
 }
 
 // recreate dialogs hosted (docked) in a floating DialogWindow; window will be created

@@ -892,6 +892,52 @@ int get_min_width(Gtk::Widget* widget) {
     return minimum_size;
 }
 
+// easing function for revealing collapsed panels
+double reveal_curve(double val, double size) {
+    if (size > 0 && val <= size && val >= 0) {
+        // slow start and then quick reveal
+        auto x = val / size;
+        auto pos = x;
+        if (x <= 0.2) {
+            pos = x * 0.25;
+        }
+        else {
+            // pos = x * 4.5 - 0.8;
+            pos = x * 9.5 - 1.85;
+            if (pos > 1) pos = 1;
+        }
+        // g_warning("val: %f size: %f, pos: %f, new: %f", val, size, pos, size*pos);
+        return size * pos;
+    }
+
+    return val;
+}
+
+// easing function for collapsing panels
+double collapse_curve(double val, double size) {
+    if (size > 0 && val <= size && val >= 0) {
+        // slow start and then quick reveal
+        auto x = val / size;
+        auto pos = x;
+        if (x <= 0.6) {
+            pos = 0;
+        }
+        else if (x < 0.7) {
+            pos = x * 9.5 - 5.7;
+        }
+        else if (x < 0.8) {
+            pos = 0.95;
+        }
+        else {
+            pos = x * 0.25 + 0.75;
+        }
+        // g_warning("val: %f size: %f, pos: %f, new: %f", val, size, pos, size*pos);
+        return size * pos;
+    }
+
+    return val;
+}
+
 double ease_inout(double val, double size) {
     if (size > 0 && val <= size && val >= 0) {
         // slow start and end (1/4 * x), faster in the middle (4 * x)
@@ -919,63 +965,57 @@ void DialogMultipaned::on_drag_update(double offset_x, double offset_y)
     allocation1 = children[_handle - 1]->get_allocation();
     allocationh = children[_handle]->get_allocation();
     allocation2 = children[_handle + 1]->get_allocation();
-    int minimum_size;
-    _resizing_widget1 = nullptr;
-    _resizing_widget2 = nullptr;
 
     // HACK: The bias prevents erratic resizing when dragging the handle fast, outside the bounds of the app.
     const int BIAS = 1;
 
     if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL) {
+
         auto handle = children[_handle];
-        minimum_size = get_min_width(child1);
-        auto width = start_allocation1.get_width() + offset_x;
-    //   g_warning("min1 %d %d %d %f %f", minimum_size, can_collapse(child1, handle)?1:0, start_allocation1.get_width(), offset_x, width);
 
-        if (!child1->is_visible() && can_collapse(child1, handle)) {
-            child1->show();
-            _resizing_widget1 = child1;
-        }
+        auto resize_fn = [](Gtk::Widget* handle, Gtk::Widget* child, int start_width, double& offset_x) {
+            int minimum_size = get_min_width(child);
+            auto width = start_width + offset_x;
+            bool resizing = false;
+            bool hide = false;
 
-        if (width < minimum_size) {
-            _resizing_widget1 = child1;
-            if (can_collapse(child1, handle)) {
-                auto w = ease_inout(width, minimum_size);
-                offset_x = w - start_allocation1.get_width();
-                _hide_widget1 = width <= minimum_size / 2 ? child1 : nullptr;
+            if (!child->is_visible() && can_collapse(child, handle)) {
+                child->show();
+                resizing = true;
             }
-            else {
-                offset_x = -(start_allocation1.get_width() - minimum_size) + BIAS;
-            }
-        }
 
-        minimum_size = get_min_width(child2);
-        width = start_allocation2.get_width() - offset_x;
-    //   g_warning("min2 %d %d %d %f %f", minimum_size, can_collapse(child2, handle)?1:0, start_allocation2.get_width(), offset_x, width);
-
-        if (!child2->is_visible() && can_collapse(child2, handle)) {
-            child2->show();
-            _resizing_widget2 = child2;
-        }
-
-        if (width < minimum_size) {
-            _resizing_widget2 = child2;
-            if (can_collapse(child2, handle)) {
-                auto w = ease_inout(width, minimum_size);
-                offset_x = start_allocation2.get_width() - w;
-                _hide_widget2 = width <= minimum_size / 2 ? child2 : nullptr;
+            if (width < minimum_size) {
+                resizing = true;
+                if (can_collapse(child, handle)) {
+                    auto w = start_width == 0 ? reveal_curve(width, minimum_size) : collapse_curve(width, minimum_size);
+                    offset_x = w - start_width;
+                    auto threshold = start_width == 0 ? minimum_size * 0.2 : minimum_size * 0.7;
+                    hide = width <= threshold ? child : nullptr;
+                }
+                else {
+                    offset_x = -(start_width - minimum_size) + BIAS;
+                }
             }
-            else {
-                offset_x = start_allocation2.get_width() - minimum_size - BIAS;
-            }
-        }
+
+            return std::make_pair(resizing, hide);
+        };
+
+        auto action1 = resize_fn(handle, child1, start_allocation1.get_width(), offset_x);
+        _resizing_widget1 = action1.first ? child1 : nullptr;
+        _hide_widget1 = action1.second ? child1 : nullptr;
+
+        offset_x = -offset_x;
+        auto action2 = resize_fn(handle, child2, start_allocation2.get_width(), offset_x);
+        _resizing_widget2 = action2.first ? child2 : nullptr;
+        _hide_widget2 = action2.second ? child2 : nullptr;
+        offset_x = -offset_x;
 
         allocation1.set_width(start_allocation1.get_width() + offset_x);
         allocationh.set_x(start_allocationh.get_x() + offset_x);
         allocation2.set_x(start_allocation2.get_x() + offset_x);
         allocation2.set_width(start_allocation2.get_width() - offset_x);
-        //   g_warning("offset: %f width1: %d  width2: %d", offset_x, allocation1.get_width(), allocation2.get_width());
     } else {
+        int minimum_size;
         int natural_size;
         children[_handle - 1]->get_preferred_height(minimum_size, natural_size);
         if (start_allocation1.get_height() + offset_y < minimum_size)
