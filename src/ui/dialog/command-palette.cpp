@@ -682,9 +682,10 @@ void CommandPalette::add_color(Gtk::Label *label, const Glib::ustring &search, c
             search_string_character[character]++;
         }
 
-        for (int i = 0; i < subject_string.length(); i++) {
-            if (search_string_character[subject_string[i]]) {
-                search_string_character[subject_string[i]]--;
+        int subject_length = subject_string.length();
+
+        for (int i = 0; i < subject_length; i++) {
+            if (search_string_character[subject_string[i]]--) {
                 text += make_bold(Glib::Markup::escape_text(subject.substr(i, 1)));
             } else {
                 text += subject[i];
