@@ -277,7 +277,6 @@ StartScreen::StartScreen()
     set_default_size(700, 360);
 
     show();
-    std::cout.flush();
 }
 
 StartScreen::~StartScreen()
