@@ -195,12 +195,11 @@ StartScreen::StartScreen()
     filter_themes();
     set_active_combo("themes", prefs->getString("/options/boot/theme"));
     set_active_combo("canvas", prefs->getString("/options/boot/canvas"));
-    
+
     auto settings = Gtk::Settings::get_default();
     Gtk::Container *window = get_toplevel();
     bool dark = settings->property_gtk_application_prefer_dark_theme().get_value();
-    if(settings && window)
-    {
+    if (settings && window) {
         if (!dark) {
             Glib::RefPtr<Gtk::StyleContext> stylecontext = window->get_style_context();
             Gdk::RGBA rgba;
