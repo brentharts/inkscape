@@ -628,41 +628,33 @@ SPAction *Verb::make_action_helper(Inkscape::ActionContext const & context, void
  * removed.  Also, if the view being created is based on the same
  * document as a view already created, the sensitivity should be the
  * same as views on that document.  A view with the same document is
- * looked for, and the sensitivity is matched.  Unfortunately, this is
- * currently a linear search.
+ * looked for, and the sensitivity is matched.
  *
  * @param  context  The action context which this action relates to.
  * @return The action, or NULL if there is an error.
  */
 SPAction *Verb::get_action(Inkscape::ActionContext const & context)
 {
-    SPAction *action = nullptr;
-
     if ( _actions == nullptr ) {
         _actions = new ActionTable;
     }
-    ActionTable::iterator action_found = _actions->find(context.getView());
 
-    if (action_found != _actions->end()) {
-        action = action_found->second;
-    } else {
+    SPAction *action = _actions->findByView(context.getView());
+
+    if (action == nullptr) {
         action = this->make_action(context);
 
         if (action == nullptr) printf("Hmm, NULL in %s\n", _name);
         if (!_default_sensitive) {
             sp_action_set_sensitive(action, 0);
         } else {
-            for (ActionTable::iterator cur_action = _actions->begin();
-                 cur_action != _actions->end() && context.getView() != nullptr;
-                 ++cur_action) {
-                if (cur_action->first != nullptr && cur_action->first->doc() == context.getDocument()) {
-                    sp_action_set_sensitive(action, cur_action->second->sensitive);
-                    break;
-                }
+            SPAction *already_created = _actions->findByDocument(context.getDocument());
+            if (already_created != nullptr) {
+                sp_action_set_sensitive(action, already_created->sensitive);
             }
         }
 
-        _actions->insert(ActionTable::value_type(context.getView(), action));
+        _actions->insert(context.getView(), action);
     }
 
     return action;
@@ -682,7 +674,7 @@ void Verb::sensitive(SPDocument *in_doc, bool in_sensitive)
 {
     // printf("Setting sensitivity of \"%s\" to %d\n", _name, in_sensitive);
     if (_actions != nullptr) {
-        for (auto & _action : *_actions) {
+        for (auto & _action : _actions->getActions()) {
             if (in_doc == nullptr || (_action.first != nullptr && _action.first->doc() == in_doc)) {
                 sp_action_set_sensitive(_action.second, in_sensitive ? 1 : 0);
             }
@@ -727,7 +719,7 @@ void
 Verb::name(SPDocument *in_doc, Glib::ustring in_name)
 {
     if (_actions != nullptr) {
-        for (auto & _action : *_actions) {
+        for (auto & _action : _actions->getActions()) {
             if (in_doc == nullptr || (_action.first != nullptr && _action.first->doc() == in_doc)) {
                 sp_action_set_name(_action.second, in_name);
             }
@@ -755,11 +747,8 @@ void Verb::delete_view(Inkscape::UI::View::View *view)
     std::cout << count++ << std::endl;
 #endif
 
-    ActionTable::iterator action_found = _actions->find(view);
-
-    if (action_found != _actions->end()) {
-        SPAction *action = action_found->second;
-        _actions->erase(action_found);
+    SPAction *action = _actions->erase(view);
+    if (action != nullptr) {
         g_object_unref(action);
     }
 

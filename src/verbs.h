@@ -413,6 +413,8 @@ char *sp_action_get_title (const SPAction *action);
 #include <map>
 #include <vector>
 
+#include "action-table.h"
+
 namespace Inkscape {
 
 /**
@@ -453,8 +455,6 @@ private:
     /** Quick lookup of verbs by ID */
     static VerbIDTable _verb_ids;
 
-    /** A simple typedef to make using the action table easier. */
-    typedef std::map<Inkscape::UI::View::View *, SPAction *> ActionTable;
     /** A list of all the actions that have been created for this
                verb.  It is referenced by the view that they are created for. */
     ActionTable * _actions;
