@@ -195,7 +195,31 @@ StartScreen::StartScreen()
     filter_themes();
     set_active_combo("themes", prefs->getString("/options/boot/theme"));
     set_active_combo("canvas", prefs->getString("/options/boot/canvas"));
-    dark_toggle->set_active(prefs->getBool("/theme/darkTheme", false));
+    
+    auto settings = Gtk::Settings::get_default();
+    Gtk::Container *window = get_toplevel();
+    bool dark = settings->property_gtk_application_prefer_dark_theme().get_value();
+    if(settings && window)
+    {
+        if (!dark) {
+            Glib::RefPtr<Gtk::StyleContext> stylecontext = window->get_style_context();
+            Gdk::RGBA rgba;
+            bool background_set = stylecontext->lookup_color("theme_bg_color", rgba);
+            if (background_set && (0.299 * rgba.get_red() + 0.587 * rgba.get_green() + 0.114 * rgba.get_blue()) < 0.5) {
+                dark = true;
+            }
+        }
+        if (dark) {
+            prefs->setBool("/theme/darkTheme", true);
+            window->get_style_context()->add_class("dark");
+            window->get_style_context()->remove_class("bright");
+        } else {
+            prefs->setBool("/theme/darkTheme", false);
+            window->get_style_context()->add_class("bright");
+            window->get_style_context()->remove_class("dark");
+        }
+    }
+    dark_toggle->set_active(prefs->getBool("/theme/darkTheme", dark));
 
     // Welcome! tab
     std::string welcome_text_file = Resource::get_filename_string(Resource::SCREENS, "start-welcome-text.svg", true);
@@ -254,6 +278,7 @@ StartScreen::StartScreen()
     set_default_size(700, 360);
 
     show();
+    std::cout.flush();
 }
 
 StartScreen::~StartScreen()
