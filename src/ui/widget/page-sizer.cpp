@@ -221,9 +221,8 @@ PageSizer::PageSizer(Registry & _wr)
     Verb *verb = Verb::get(SP_VERB_FIT_CANVAS_TO_SELECTION_OR_DRAWING);
     Gtk::AccelKey shortcut_key = Inkscape::Shortcuts::getInstance().get_shortcut_from_verb(verb);
     Glib::ustring label_string = Inkscape::Shortcuts::get_label(shortcut_key);
-    _fitPageButton.set_label(_(("_Resize page to drawing or selection (" + label_string + ")").c_str()));
-    Glib::ustring tooltipText = Glib::ustring::compose(_("_Resize page to drawing or selection (%1)"), label_string);
-    _fitPageButton.set_tooltip_text(tooltipText);
+    _fitPageButton.set_label(Glib::ustring::compose(_("_Resize page to drawing or selection (%1)"), label_string));
+    _fitPageButton.set_tooltip_text(_("Resize the page to fit the current selection, or the entire drawing if there is no selection"));
 
     _fitPageButton.set_hexpand();
     _fitPageButton.set_halign(Gtk::ALIGN_CENTER);
