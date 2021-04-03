@@ -94,6 +94,7 @@ set(TEST_SOURCES
     lpe-lattice2-test
     lpe-mirrorsymmetry-test
     lpe-patternalongpath-test
+    lpe-perspectiveenvelope-test
     lpe-roughhatches-test
     lpe-spiro-test
     xml-test
