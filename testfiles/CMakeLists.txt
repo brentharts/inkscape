@@ -95,6 +95,7 @@ set(TEST_SOURCES
     lpe-mirrorsymmetry-test
     lpe-patternalongpath-test
     lpe-perspectiveenvelope-test
+    lpe-powerstroke-test
     lpe-roughhatches-test
     lpe-spiro-test
     xml-test
