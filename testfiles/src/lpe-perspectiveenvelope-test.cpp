@@ -18,11 +18,11 @@
 using namespace Inkscape;
 using namespace Inkscape::LivePathEffect;
 
-class LPEPerspectiveenvelopeTest : public LPESTest {};
+class LPEPerspectiveEnvelopeTest : public LPESTest {};
 
 // INKSCAPE 0.92.5
 
-TEST_F(LPEPerspectiveenvelopeTest, mixed_0_92_5)
+TEST_F(LPEPerspectiveEnvelopeTest, mixed_0_92_5)
 {
    std::string svg = R""""(<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
@@ -253,7 +253,7 @@ TEST_F(LPEPerspectiveenvelopeTest, mixed_0_92_5)
 
 // INKSCAPE 1.0.2
 
-TEST_F(LPEPerspectiveenvelopeTest, multi_mm_1_02)
+TEST_F(LPEPerspectiveEnvelopeTest, multi_mm_1_02)
 {
    std::string svg = R""""(<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
@@ -449,7 +449,7 @@ TEST_F(LPEPerspectiveenvelopeTest, multi_mm_1_02)
 
 // INKSCAPE 1.0.2
 
-TEST_F(LPEPerspectiveenvelopeTest, multi_px_1_02)
+TEST_F(LPEPerspectiveEnvelopeTest, multi_px_1_02)
 {
    std::string svg = R""""(<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
