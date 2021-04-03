@@ -194,7 +194,10 @@ StartScreen::StartScreen()
     filter_themes();
     set_active_combo("themes", prefs->getString("/options/boot/theme"));
     set_active_combo("canvas", prefs->getString("/options/boot/canvas"));
-    dark_toggle->set_active(prefs->getBool("/theme/darkTheme", false));
+
+    auto settings = Gtk::Settings::get_default();
+    bool initial_dark = settings->property_gtk_application_prefer_dark_theme();
+    dark_toggle->set_active(prefs->getBool("/theme/darkTheme", initial_dark));
 
     // Welcome! tab
     canvas->signal_changed().connect(sigc::mem_fun(*this, &StartScreen::canvas_changed));
