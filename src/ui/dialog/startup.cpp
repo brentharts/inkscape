@@ -198,15 +198,13 @@ StartScreen::StartScreen()
 
     auto settings = Gtk::Settings::get_default();
     Gtk::Container *window = get_toplevel();
-    bool dark = settings->property_gtk_application_prefer_dark_theme().get_value();
+    bool dark;
     if (settings && window) {
-        if (!dark) {
-            Glib::RefPtr<Gtk::StyleContext> stylecontext = window->get_style_context();
-            Gdk::RGBA rgba;
-            bool background_set = stylecontext->lookup_color("theme_bg_color", rgba);
-            if (background_set && (0.299 * rgba.get_red() + 0.587 * rgba.get_green() + 0.114 * rgba.get_blue()) < 0.5) {
-                dark = true;
-            }
+        Glib::RefPtr<Gtk::StyleContext> stylecontext = window->get_style_context();
+        Gdk::RGBA rgba;
+        bool background_set = stylecontext->lookup_color("theme_bg_color", rgba);
+        if (background_set && (0.299 * rgba.get_red() + 0.587 * rgba.get_green() + 0.114 * rgba.get_blue()) < 0.5) {
+            dark = true;
         }
         if (dark) {
             prefs->setBool("/theme/darkTheme", true);
@@ -218,7 +216,7 @@ StartScreen::StartScreen()
             window->get_style_context()->remove_class("dark");
         }
     }
-    dark_toggle->set_active(prefs->getBool("/theme/darkTheme", dark));
+    dark_toggle->set_active(prefs->getBool("/theme/darkTheme", false));
 
     // Welcome! tab
     std::string welcome_text_file = Resource::get_filename_string(Resource::SCREENS, "start-welcome-text.svg", true);
