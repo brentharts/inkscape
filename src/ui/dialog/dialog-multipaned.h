@@ -102,7 +102,7 @@ public:
 
     // UI functions
     void set_dropzone_sizes(int start, int end);
-    void toggle_multipaned_children();
+    void toggle_multipaned_children(bool show);
     void children_toggled();
 
 protected:
@@ -160,7 +160,7 @@ private:
     void add_empty_widget();
     void remove_empty_widget();
     std::vector<sigc::connection> _connections;
-    bool hide_multipaned;
+    // bool hide_multipaned;
 };
 
 } // namespace Dialog

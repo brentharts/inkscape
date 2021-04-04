@@ -216,7 +216,7 @@ DialogMultipaned::DialogMultipaned(Gtk::Orientation orientation)
     , Gtk::Orientable()
     , Gtk::Container()
     , _empty_widget(nullptr)
-    , hide_multipaned(false)
+    // , hide_multipaned(false)
 {
     set_name("DialogMultipaned");
     set_orientation(orientation);
@@ -443,14 +443,24 @@ void DialogMultipaned::set_dropzone_sizes(int start, int end)
 }
 
 /**
- * Hide all children of this container that are of type multipaned by setting their allocation on the main axis to 0.
+ * Show/hide as requested all children of this container that are of type multipaned
  */
-void DialogMultipaned::toggle_multipaned_children()
+void DialogMultipaned::toggle_multipaned_children(bool show)
 {
     _handle = -1;
     _drag_handle = -1;
-    hide_multipaned = !hide_multipaned;
-    queue_allocate();
+    // hide_multipaned = !hide_multipaned;
+    // queue_allocate();
+    for (auto child : children) {
+        if (auto panel = dynamic_cast<DialogMultipaned*>(child)) {
+            if (show) {
+                panel->show();
+            }
+            else {
+                panel->hide();
+            }
+        }
+    }
 }
 
 // ****************** OVERRIDES ******************
@@ -592,12 +602,13 @@ void DialogMultipaned::on_size_allocate(Gtk::Allocation &allocation)
             if (canvas) {
                 canvas_index = index;
             }
-            if (hide_multipaned && paned) {
-                visible = false;
-                expandables.push_back(false);
-                sizes_minimums.push_back(0);
-                sizes_naturals.push_back(0);
-            } else {
+            // if (hide_multipaned && paned) {
+            //     visible = false;
+            //     expandables.push_back(false);
+            //     sizes_minimums.push_back(0);
+            //     sizes_naturals.push_back(0);
+            // } else 
+            {
                 visible = child->get_visible();
                 expandables.push_back(child->compute_expand(get_orientation()));
 
@@ -960,6 +971,8 @@ double ease_inout(double val, double size) {
 
 void DialogMultipaned::on_drag_update(double offset_x, double offset_y)
 {
+    if (_handle < 0) return;
+
     auto child1 = children[_handle - 1];
     auto child2 = children[_handle + 1];
     allocation1 = children[_handle - 1]->get_allocation();
@@ -1030,14 +1043,14 @@ void DialogMultipaned::on_drag_update(double offset_x, double offset_y)
         allocation2.set_height(start_allocation2.get_height() - offset_y);
     }
 
-    if (hide_multipaned) {
-        DialogMultipaned *left = dynamic_cast<DialogMultipaned *>(children[_handle - 1]);
-        DialogMultipaned *right = dynamic_cast<DialogMultipaned *>(children[_handle + 1]);
+    // if (hide_multipaned) {
+    //     DialogMultipaned *left = dynamic_cast<DialogMultipaned *>(children[_handle - 1]);
+    //     DialogMultipaned *right = dynamic_cast<DialogMultipaned *>(children[_handle + 1]);
 
-        if (left || right) {
-            return;
-        }
-    }
+    //     if (left || right) {
+    //         return;
+    //     }
+    // }
 
     _drag_handle = _handle;
     queue_allocate(); // Relayout DialogMultipaned content.
