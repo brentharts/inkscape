@@ -11,8 +11,7 @@ LPES_TESTS_EXE=$1
 exit_status=0
 test=$2
 testname=$(basename $test)
-filedata=echo "$(cat my_file.txt)"
 
-${LPES_TESTS_EXE} $(filedata) #2>/dev/null >/dev/null
+echo "$(cat $test)" | ${LPES_TESTS_EXE} #2>/dev/null >/dev/null
 
 exit $exit_status
