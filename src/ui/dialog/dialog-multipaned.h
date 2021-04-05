@@ -160,7 +160,6 @@ private:
     void add_empty_widget();
     void remove_empty_widget();
     std::vector<sigc::connection> _connections;
-    // bool hide_multipaned;
 };
 
 } // namespace Dialog

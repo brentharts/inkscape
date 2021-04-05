@@ -216,7 +216,6 @@ DialogMultipaned::DialogMultipaned(Gtk::Orientation orientation)
     , Gtk::Orientable()
     , Gtk::Container()
     , _empty_widget(nullptr)
-    // , hide_multipaned(false)
 {
     set_name("DialogMultipaned");
     set_orientation(orientation);
@@ -449,8 +448,7 @@ void DialogMultipaned::toggle_multipaned_children(bool show)
 {
     _handle = -1;
     _drag_handle = -1;
-    // hide_multipaned = !hide_multipaned;
-    // queue_allocate();
+
     for (auto child : children) {
         if (auto panel = dynamic_cast<DialogMultipaned*>(child)) {
             if (show) {
@@ -602,12 +600,7 @@ void DialogMultipaned::on_size_allocate(Gtk::Allocation &allocation)
             if (canvas) {
                 canvas_index = index;
             }
-            // if (hide_multipaned && paned) {
-            //     visible = false;
-            //     expandables.push_back(false);
-            //     sizes_minimums.push_back(0);
-            //     sizes_naturals.push_back(0);
-            // } else 
+
             {
                 visible = child->get_visible();
                 expandables.push_back(child->compute_expand(get_orientation()));
@@ -616,7 +609,7 @@ void DialogMultipaned::on_size_allocate(Gtk::Allocation &allocation)
                 Gtk::Requisition req_natural;
                 child->get_preferred_size(req_minimum, req_natural);
                 if (child == _resizing_widget1 || child == _resizing_widget2) {
-                    // ignore limits for widget being resized interactively and user their current size
+                    // ignore limits for widget being resized interactively and use their current size
                     req_minimum.width = req_minimum.height = 0;
                     auto alloc = child->get_allocation();
                     req_natural.width = alloc.get_width();
@@ -641,11 +634,9 @@ void DialogMultipaned::on_size_allocate(Gtk::Allocation &allocation)
         if (sum_naturals <= left) {
             sizes = sizes_naturals;
             left -= sum_naturals;
-// g_warning("natural: %d", left);
         } else if (sum_minimums <= left && left < sum_naturals) {
             sizes = sizes_minimums;
             left -= sum_minimums;
-// g_warning("minimum: %d", left);
         }
 
         if (canvas_index >= 0) { // give remaining space to canvas element
@@ -855,6 +846,8 @@ void DialogMultipaned::on_drag_end(double offset_x, double offset_y)
     queue_allocate(); // reimpose limits if any were bent during interactive resizing
 }
 
+// docking panels in application window can be collapsed (to left or right side) to make more
+// room for canvas; this functionality is only meaningful in app window, not in floating dialogs
 bool can_collapse(Gtk::Widget* widget, Gtk::Widget* handle) {
     // can only collapse DialogMultipaned widgets
     if (!widget || dynamic_cast<DialogMultipaned*>(widget) == nullptr) return false;
@@ -896,6 +889,7 @@ bool can_collapse(Gtk::Widget* widget, Gtk::Widget* handle) {
     return false;
 }
 
+// return minimum widget size; this fn works for hidden widgets too
 int get_min_width(Gtk::Widget* widget) {
     bool hidden = !widget->is_visible();
     if (hidden) widget->show();
@@ -906,21 +900,22 @@ int get_min_width(Gtk::Widget* widget) {
     return minimum_size;
 }
 
+// Different docking resizing activities use easing functions to speed up or slow down certain phases of resizing
+// Below are two picewise linear functions used for that purpose
+
 // easing function for revealing collapsed panels
 double reveal_curve(double val, double size) {
     if (size > 0 && val <= size && val >= 0) {
-        // slow start and then quick reveal
+        // slow start (resistance to opening) and then quick reveal
         auto x = val / size;
         auto pos = x;
         if (x <= 0.2) {
             pos = x * 0.25;
         }
         else {
-            // pos = x * 4.5 - 0.8;
             pos = x * 9.5 - 1.85;
             if (pos > 1) pos = 1;
         }
-        // g_warning("val: %f size: %f, pos: %f, new: %f", val, size, pos, size*pos);
         return size * pos;
     }
 
@@ -930,45 +925,28 @@ double reveal_curve(double val, double size) {
 // easing function for collapsing panels
 double collapse_curve(double val, double size) {
     if (size > 0 && val <= size && val >= 0) {
-        // slow start and then quick reveal
+        // slow start (resistance), short pause and then quick collapse
         auto x = val / size;
         auto pos = x;
         if (x <= 0.6) {
+            // panel collapsed
             pos = 0;
         }
         else if (x < 0.7) {
+            // fast collapsing
             pos = x * 9.5 - 5.7;
         }
         else if (x < 0.8) {
+            // pause
             pos = 0.95;
         }
         else {
+            // resistance to collapsing
             pos = x * 0.25 + 0.75;
         }
-        // g_warning("val: %f size: %f, pos: %f, new: %f", val, size, pos, size*pos);
         return size * pos;
     }
 
-    return val;
-}
-
-double ease_inout(double val, double size) {
-    if (size > 0 && val <= size && val >= 0) {
-        // slow start and end (1/4 * x), faster in the middle (4 * x)
-        auto x = val / size;
-        auto pos = x;
-        if (x <= 0.4) {
-            pos = x * 0.25;
-        }
-        else if (x >= 0.6) {
-            pos = x * 0.25 + 0.75;
-        }
-        else {
-            pos = x * 4 - 1.5;
-        }
-        // g_warning("val: %f size: %f, pos: %f, new: %f", val, size, pos, size*pos);
-        return size * pos;
-    }
     return val;
 }
 
@@ -989,6 +967,7 @@ void DialogMultipaned::on_drag_update(double offset_x, double offset_y)
 
         auto handle = children[_handle];
 
+        // function to resize panel
         auto resize_fn = [](Gtk::Widget* handle, Gtk::Widget* child, int start_width, double& offset_x) {
             int minimum_size = get_min_width(child);
             auto width = start_width + offset_x;
@@ -1005,6 +984,8 @@ void DialogMultipaned::on_drag_update(double offset_x, double offset_y)
                 if (can_collapse(child, handle)) {
                     auto w = start_width == 0 ? reveal_curve(width, minimum_size) : collapse_curve(width, minimum_size);
                     offset_x = w - start_width;
+                    // facilitate closing/opening panels: users don't have to drag handle all the
+                    // way to collapse/expand a panel, they just need to move it fraction of the way
                     auto threshold = start_width == 0 ? minimum_size * 0.2 : minimum_size * 0.7;
                     hide = width <= threshold ? child : nullptr;
                 }
@@ -1016,21 +997,26 @@ void DialogMultipaned::on_drag_update(double offset_x, double offset_y)
             return std::make_pair(resizing, hide);
         };
 
+        // panel on the left
         auto action1 = resize_fn(handle, child1, start_allocation1.get_width(), offset_x);
         _resizing_widget1 = action1.first ? child1 : nullptr;
         _hide_widget1 = action1.second ? child1 : nullptr;
 
+        // panel on the right (needs reversing offset_x, so it can use the same logic)
         offset_x = -offset_x;
         auto action2 = resize_fn(handle, child2, start_allocation2.get_width(), offset_x);
         _resizing_widget2 = action2.first ? child2 : nullptr;
         _hide_widget2 = action2.second ? child2 : nullptr;
         offset_x = -offset_x;
 
+        // set new sizes; they may temporarily violate min size panel requirements
+        // GTK is not happy about 0-size allocations
         allocation1.set_width(start_allocation1.get_width() + offset_x);
         allocationh.set_x(start_allocationh.get_x() + offset_x);
         allocation2.set_x(start_allocation2.get_x() + offset_x);
         allocation2.set_width(start_allocation2.get_width() - offset_x);
     } else {
+        // nothing fancy about resizing in vertical direction; no panel collapsing happens here
         int minimum_size;
         int natural_size;
         children[_handle - 1]->get_preferred_height(minimum_size, natural_size);
@@ -1045,15 +1031,6 @@ void DialogMultipaned::on_drag_update(double offset_x, double offset_y)
         allocation2.set_y(start_allocation2.get_y() + offset_y);
         allocation2.set_height(start_allocation2.get_height() - offset_y);
     }
-
-    // if (hide_multipaned) {
-    //     DialogMultipaned *left = dynamic_cast<DialogMultipaned *>(children[_handle - 1]);
-    //     DialogMultipaned *right = dynamic_cast<DialogMultipaned *>(children[_handle + 1]);
-
-    //     if (left || right) {
-    //         return;
-    //     }
-    // }
 
     _drag_handle = _handle;
     queue_allocate(); // Relayout DialogMultipaned content.

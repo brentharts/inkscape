@@ -502,7 +502,7 @@ bool recreate_dialogs_from_state(const Glib::KeyFile *keyfile)
 }
 
 /**
- * Add a new floating dialog (or reuse existing one if it's already)
+ * Add a new floating dialog (or reuse existing one if it's already up)
  */
 DialogWindow *DialogContainer::new_floating_dialog(unsigned int code)
 {

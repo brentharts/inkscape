@@ -83,7 +83,7 @@ void DialogManager::set_floating_dialog_visibility(DialogWindow* wnd, bool show)
     if (show) {
         if (wnd->is_visible()) return;
 
-        // wnd->present();
+        // wnd->present(); - not sure which one is better, show or present...
         wnd->show();
         _hidden_dlg_windows.erase(wnd);
         // re-add it to application; hiding removed it
