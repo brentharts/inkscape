@@ -58,17 +58,7 @@ TEST_F(LPEEllipse5ptsTest, path_0_92_5)
   </g>
 </svg>
 )"""";
-    SPDocument *doc = SPDocument::createNewDocFromMem(svg.c_str(), svg.size(), true);
-    doc->ensureUpToDate();
-
-    auto lpeitem01 = dynamic_cast<SPLPEItem *>(doc->getObjectById("rect01"));
-
-    ASSERT_TRUE(lpeitem01 != nullptr);
-
-    const gchar *d01 = lpeitem01->getAttribute("d");
-
-    sp_lpe_item_update_patheffect (lpeitem01, false, true);
-    pathCompare(d01, lpeitem01->getAttribute("d"));
+    testDoc(svg);
 }
 
 
@@ -106,17 +96,7 @@ TEST_F(LPEEllipse5ptsTest, ellipse_PX_1_0_2)
 </svg>
 )"""";
 
-   SPDocument *doc = SPDocument::createNewDocFromMem(svg.c_str(), svg.size(), true);
-   doc->ensureUpToDate();
-
-   auto lpeitem01 = dynamic_cast<SPLPEItem *>(doc->getObjectById("rect01"));
-
-   ASSERT_TRUE(lpeitem01 != nullptr);
-
-   const gchar *d01 = lpeitem01->getAttribute("d");
-
-   sp_lpe_item_update_patheffect (lpeitem01, false, true);
-   pathCompare(d01, lpeitem01->getAttribute("d"));
+   testDoc(svg);
 }
 
 
@@ -154,15 +134,5 @@ TEST_F(LPEEllipse5ptsTest, ellipse_MM_1_0_2)
 </svg>
 )"""";
 
-   SPDocument *doc = SPDocument::createNewDocFromMem(svg.c_str(), svg.size(), true);
-   doc->ensureUpToDate();
-
-   auto lpeitem01 = dynamic_cast<SPLPEItem *>(doc->getObjectById("rect01"));
-
-   ASSERT_TRUE(lpeitem01 != nullptr);
-
-   const gchar *d01 = lpeitem01->getAttribute("d");
-
-   sp_lpe_item_update_patheffect (lpeitem01, false, true);
-   pathCompare(d01, lpeitem01->getAttribute("d"));
+   testDoc(svg);
 }

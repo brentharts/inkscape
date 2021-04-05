@@ -37,7 +37,8 @@ TEST_F(LPEEnvelopeDeformationTest, multi_0_92_5)
    viewBox="0 0 210 297"
    version="1.1"
    id="svg33"
-   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)">
+   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)"
+   inkscape:test-threshold="0.2">
   <defs
      id="defs27">
     <inkscape:path-effect
@@ -97,7 +98,7 @@ TEST_F(LPEEnvelopeDeformationTest, multi_0_92_5)
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1">
-    <path
+    <!--<path
        id="ellipse05"
        style="fill:none;stroke:#ff0000;stroke-width:0.26458332"
        transform="translate(-4.5357143,-12.85119)"
@@ -108,7 +109,7 @@ TEST_F(LPEEnvelopeDeformationTest, multi_0_92_5)
        sodipodi:rx="50.270832"
        sodipodi:ry="41.577377"
        d="m 144.36332,70.144797 c -0.68283,3.073884 -3.16747,5.666966 -6.57595,7.754234 -4.61102,2.819085 -10.51889,4.588785 -16.58812,6.506228 -7.34473,2.301614 -14.01802,4.467248 -19.98958,8.420503 -4.620139,3.041664 -8.30537,6.860906 -11.484761,11.862278 10e-7,0 -3e-6,1e-5 -3e-6,1e-5 -1.620115,2.58373 -3.013152,5.35908 -4.285564,8.32993 -1.507554,3.46274 -2.773515,7.09315 -4.034002,10.84392 -0.493334,1.45062 -1.178266,3.51233 -1.671599,4.96295 -2.188358,6.55929 -4.658635,12.51962 -8.242581,17.40277 -1.229628,1.66666 -2.560864,3.17145 -3.997455,4.47424 -2.85496,2.58823 -6.136635,4.26945 -9.475851,4.4573 -0.186494,0.0105 -0.372841,0.0163 -0.558954,0.0173 -1.088816,0.006 -2.166818,-0.15196 -3.215178,-0.48581 -1.887186,-0.59991 -3.616938,-1.73898 -5.114029,-3.27749 -1.559509,-1.60166 -2.845993,-3.60249 -3.927768,-5.83143 -2.471729,-5.08116 -3.820583,-11.24842 -5.092593,-17.25138 0,0 -2e-6,0 -2e-6,0 -0.577476,-2.76599 -1.079966,-5.29885 -1.665,-7.95647 0,0 -10e-7,-1e-5 -10e-7,-1e-5 -0.573516,-2.64348 -1.1701,-5.14208 -1.861829,-7.53362 -0.429498,-1.45449 -0.890013,-2.85203 -1.393271,-4.20235 -1.644859,-4.47982 -3.705714,-8.1321 -6.314624,-11.353543 -0.845665,-1.046108 -1.729816,-2.019139 -2.644741,-2.936225 -0.550732,-0.55732 -1.109582,-1.093177 -1.673909,-1.611068 0,0 -4e-6,-4e-6 -4e-6,-4e-6 C 21.831423,90.245514 18.881196,88.178586 16.406136,86.297211 15.860137,85.883317 15.336332,85.479226 14.83121,85.074964 11.972121,82.76775 10.005026,80.747302 8.79912,78.059802 7.9243966,76.129631 7.5471748,73.976637 7.5478057,71.697855 c 8.27e-5,-0.298787 0.00682,-0.598675 0.020049,-0.898486 0.1227358,-2.778931 0.7810345,-5.492074 2.2317946,-7.729072 1.485996,-2.361003 3.673809,-4.242845 6.588946,-6.040116 1.794332,-1.110778 3.710262,-2.119497 5.755372,-3.237328 0.932482,-0.500365 1.885254,-1.009292 2.820987,-1.526844 -10e-7,0 3e-6,-2e-6 3e-6,-2e-6 1.620302,-0.907178 3.218512,-1.857146 4.756464,-2.931056 2.952091,-2.053421 5.46374,-4.389099 7.693337,-7.551063 1.820171,-2.548116 3.334439,-5.379011 4.831929,-8.658072 -1e-6,0 2e-6,-5e-6 2e-6,-5e-6 0.919109,-1.995512 1.777573,-4.04315 2.678732,-6.199408 10e-7,-2e-6 10e-7,-3e-6 2e-6,-5e-6 2.036142,-4.820765 4.019034,-9.731131 6.75007,-14.019752 1.181386,-1.86185 2.456623,-3.5382444 3.889401,-5.006328 1.371157,-1.4063848 2.862,-2.5868747 4.462305,-3.5225577 0.889263,-0.5198584 1.808086,-0.961824 2.745068,-1.3194519 0.160272,-0.061173 0.321073,-0.1198771 0.482352,-0.1760842 2.877536,-1.0029019 5.867804,-1.1853606 8.75054,-0.3384962 1.455079,0.4230919 2.867867,1.0947288 4.227678,2.0129033 4.011422,2.7207477 7.073527,7.2926707 9.463099,12.6385787 0.603833,1.312045 1.170968,2.656718 1.721294,3.995987 2.398439,5.902032 4.095149,10.831992 7.285563,15.26294 0,0 3e-6,5e-6 3e-6,5e-6 4.145393,5.803649 9.513194,9.091366 17.383454,12.098742 8.14504,3.173609 18.35504,5.447704 25.481,10.055201 4.36261,2.800064 7.19417,6.449754 6.96594,10.323792 -0.024,0.408743 -0.0811,0.813392 -0.16987,1.21292 0,0 0,0 0,0 z" />
-    <path
+    --><path
        id="path04"
        d="m 94.647955,202.87019 c -1.827588,-1.45751 -3.711362,-2.89715 -5.571521,-4.2717 -2.328628,-1.70235 -4.620711,-3.26669 -6.707399,-4.51589 -1.587422,-0.91905 -2.933465,-1.65494 -3.865672,-2.08902 -0.703586,-0.32902 -1.123174,-0.70449 -1.197029,-1.16762 -0.0879,-0.54575 -0.251412,-1.23222 -0.555231,-2.1502 -0.184234,-0.46122 -0.406301,-0.92169 -0.67534,-1.38444 -0.3259,-0.55536 -0.717911,-1.11038 -1.190324,-1.67044 -0.55228,-0.64681 -1.146714,-1.26591 -1.796774,-1.85809 -0.82232,0.55607 -1.717798,1.16509 -2.615892,1.77558 -0.549712,0.37389 -1.104355,0.75629 -1.663873,1.14636 -4.151352,2.88706 -9.401811,6.74372 -14.161432,10.18035 0,0 -2e-6,0 -2e-6,0 -6.454756,4.67725 -12.486469,8.99305 -19.247985,13.47428 0,0 -2e-6,0 -2e-6,0 -0.635334,0.42111 -1.270552,0.83924 -1.906304,1.25473 4.081891,-7.66467 7.013715,-14.43175 9.027738,-20.23064 0.312357,-0.89869 0.604312,-1.77859 0.876648,-2.64011 1.521149,-4.90644 2.477391,-9.15444 2.968386,-12.58132 0,0 1e-6,0 1e-6,0 0.256484,-1.70486 0.476381,-3.18014 0.73089,-4.68006 -0.832921,-0.19719 -1.675398,-0.38161 -2.530317,-0.55779 0,0 -1e-6,0 -1e-6,0 -1.391414,-0.29026 -2.795436,-0.55272 -4.240208,-0.81284 0,0 -1e-6,0 -1e-6,0 -4.569955,-0.87191 -9.343627,-1.92172 -14.320558,-3.75887 -1.002628,-0.37291 -2.015311,-0.77506 -3.037666,-1.21243 0,0 -2e-6,0 -2e-6,0 -4.668944,-2.04608 -9.493523,-4.70468 -14.1874257,-8.44301 5.8909097,0.45452 11.9223927,-0.0959 17.6611007,-1.36228 0,0 2e-6,0 2e-6,0 6.70498,-1.47224 12.964442,-3.89372 18.871811,-6.78666 0,0 3e-6,0 3e-6,0 4.100014,-2.00733 7.987235,-4.21984 11.727765,-6.47 1.103046,-3.57681 2.112968,-7.46035 3.045658,-11.71714 0.440033,-2.01474 0.8596,-4.09886 1.26112,-6.26287 2.710424,-14.42319 3.841157,-27.977921 5.933283,-48.939718 2.102254,3.870523 4.000342,7.909287 5.747574,12.027252 2.517235,5.953359 4.577933,11.909345 6.362334,18.022786 1.551357,5.31268 2.6607,10.37831 3.444514,15.42916 10e-7,1e-5 10e-7,1e-5 10e-7,1e-5 0.221039,1.5821 0.407546,3.11052 0.562731,4.59173 0.275165,2.71016 0.446203,5.2204 0.536756,7.55259 0.0123,0.35463 0.02805,0.70529 0.04735,1.05213 0.101171,0.0591 0.456054,0.10205 1.034097,0.0969 0.900791,0.0493 2.180617,0.50377 3.835444,1.19639 2.166875,0.96627 4.540823,2.28008 7.196273,3.72225 0,0 10e-7,0 10e-7,0 8.00818,4.45089 17.74375,8.83663 30.5888,9.68085 -4.50794,6.00992 -10.37387,9.55975 -17.64839,12.28815 0,0 0,0 0,0 -3.28977,1.17947 -6.64336,2.08486 -10.110566,2.92557 -1.570845,0.39546 -3.123344,0.80208 -4.644945,1.25058 0,0 -2e-6,0 -2e-6,0 -0.246903,0.0712 -0.492726,0.14443 -0.737453,0.21989 0.614902,2.68084 0.957256,5.37823 1.111515,8.37859 0,0 0,0 0,0 0.05245,0.99538 0.0627,2.01946 0.04348,3.08557 -0.05384,3.02283 -0.368401,6.32682 -0.565787,10.04332 0,0 0,1e-5 0,1e-5 -0.273938,4.63674 -0.397937,9.94954 0.562822,16.16811 z"
        inkscape:transform-center-y="-3.8375164"
@@ -117,7 +118,7 @@ TEST_F(LPEEnvelopeDeformationTest, multi_0_92_5)
        inkscape:connector-curvature="0"
        inkscape:path-effect="#path-effect29"
        inkscape:original-d="M 93.738085,209.30952 61.705799,195.44847 32.127798,213.97786 35.411919,179.23004 8.6493148,156.82559 42.711304,149.2113 l 13.037801,-32.3761 17.767346,30.04193 34.820399,2.39492 -23.081156,26.18122 z" />
-    <g
+     <g
        id="g03"
        inkscape:path-effect="#path-effect24">
       <path
@@ -137,35 +138,7 @@ TEST_F(LPEEnvelopeDeformationTest, multi_0_92_5)
   </g>
 </svg>
 )"""";
-    SPDocument *doc = SPDocument::createNewDocFromMem(svg.c_str(), svg.size(), true);
-    doc->ensureUpToDate();
-
-    auto lpeitem01 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path01"));
-    auto lpeitem02 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path02"));
-    auto lpeitem03 = dynamic_cast<SPLPEItem *>(doc->getObjectById("g03"));
-    auto lpeitem04 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path04"));
-    auto lpeitem05 = dynamic_cast<SPLPEItem *>(doc->getObjectById("ellipse05"));
-
-    ASSERT_TRUE(lpeitem01 != nullptr);
-    ASSERT_TRUE(lpeitem02 != nullptr);
-    ASSERT_TRUE(lpeitem03 != nullptr);
-    ASSERT_TRUE(lpeitem04 != nullptr);
-    ASSERT_TRUE(lpeitem05 != nullptr);
-
-    const gchar *d01 = lpeitem01->getAttribute("d");
-    const gchar *d02 = lpeitem02->getAttribute("d");
-    const gchar *d04 = lpeitem04->getAttribute("d");
-    //const gchar *d05 = lpeitem05->getAttribute("d");
-
-    sp_lpe_item_update_patheffect (lpeitem03, false, true);
-    sp_lpe_item_update_patheffect (lpeitem04, false, true);
-    sp_lpe_item_update_patheffect (lpeitem05, false, true);
-    sp_lpe_item_update_patheffect (lpeitem05, false, true);
-
-    pathCompare(d01, lpeitem01->getAttribute("d"), 0.01);
-    pathCompare(d02, lpeitem02->getAttribute("d"), 0.01);
-    pathCompare(d04, lpeitem04->getAttribute("d"), 0.01);
-    //pathCompare(d05, lpeitem05->getAttribute("d"), 0.01);
+    testDoc(svg);
 }
 
 
@@ -321,45 +294,7 @@ TEST_F(LPEEnvelopeDeformationTest, multi_PX_1_0_2)
 </svg>
 )"""";
 
-    SPDocument *doc = SPDocument::createNewDocFromMem(svg.c_str(), svg.size(), true);
-    doc->ensureUpToDate();
-
-    auto lpeitem01 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path01"));
-    auto lpeitem02 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path02"));
-    auto lpeitem03 = dynamic_cast<SPLPEItem *>(doc->getObjectById("g03"));
-    auto lpeitem04 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path04"));
-    auto lpeitem05 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path05"));
-    auto lpeitem06 = dynamic_cast<SPLPEItem *>(doc->getObjectById("g06"));
-    auto lpeitem07 = dynamic_cast<SPLPEItem *>(doc->getObjectById("g07"));
-    auto lpeitem08 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path08"));
-    auto lpeitem09 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path09"));
-
-    ASSERT_TRUE(lpeitem01 != nullptr);
-    ASSERT_TRUE(lpeitem02 != nullptr);
-    ASSERT_TRUE(lpeitem03 != nullptr);
-    ASSERT_TRUE(lpeitem04 != nullptr);
-    ASSERT_TRUE(lpeitem05 != nullptr);
-    ASSERT_TRUE(lpeitem06 != nullptr);
-    ASSERT_TRUE(lpeitem07 != nullptr);
-    ASSERT_TRUE(lpeitem08 != nullptr);
-    ASSERT_TRUE(lpeitem09 != nullptr);
-
-    const gchar *d01 = lpeitem01->getAttribute("d");
-    const gchar *d02 = lpeitem02->getAttribute("d");
-    const gchar *d04 = lpeitem04->getAttribute("d");
-    const gchar *d05 = lpeitem05->getAttribute("d");
-    const gchar *d08 = lpeitem08->getAttribute("d");
-    const gchar *d09 = lpeitem09->getAttribute("d");
-
-    sp_lpe_item_update_patheffect (lpeitem08, false, true);
-    sp_lpe_item_update_patheffect (lpeitem09, false, true);
-    sp_lpe_item_update_patheffect (lpeitem07, false, true);
-    pathCompare(d01, lpeitem01->getAttribute("d"));
-    pathCompare(d02, lpeitem02->getAttribute("d"));
-    pathCompare(d04, lpeitem04->getAttribute("d"));
-    pathCompare(d05, lpeitem05->getAttribute("d"));
-    pathCompare(d08, lpeitem08->getAttribute("d"));
-    pathCompare(d09, lpeitem09->getAttribute("d"));
+    testDoc(svg);
 }
 
 TEST_F(LPEEnvelopeDeformationTest, multi_MM_1_0_2)
@@ -508,43 +443,5 @@ TEST_F(LPEEnvelopeDeformationTest, multi_MM_1_0_2)
 </svg>
 )"""";
 
-   SPDocument *doc = SPDocument::createNewDocFromMem(svg.c_str(), svg.size(), true);
-    doc->ensureUpToDate();
-
-    auto lpeitem01 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path01"));
-    auto lpeitem02 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path02"));
-    auto lpeitem03 = dynamic_cast<SPLPEItem *>(doc->getObjectById("g03"));
-    auto lpeitem04 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path04"));
-    auto lpeitem05 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path05"));
-    auto lpeitem06 = dynamic_cast<SPLPEItem *>(doc->getObjectById("g06"));
-    auto lpeitem07 = dynamic_cast<SPLPEItem *>(doc->getObjectById("g07"));
-    auto lpeitem08 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path08"));
-    auto lpeitem09 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path09"));
-
-    ASSERT_TRUE(lpeitem01 != nullptr);
-    ASSERT_TRUE(lpeitem02 != nullptr);
-    ASSERT_TRUE(lpeitem03 != nullptr);
-    ASSERT_TRUE(lpeitem04 != nullptr);
-    ASSERT_TRUE(lpeitem05 != nullptr);
-    ASSERT_TRUE(lpeitem06 != nullptr);
-    ASSERT_TRUE(lpeitem07 != nullptr);
-    ASSERT_TRUE(lpeitem08 != nullptr);
-    ASSERT_TRUE(lpeitem09 != nullptr);
-
-    const gchar *d01 = lpeitem01->getAttribute("d");
-    const gchar *d02 = lpeitem02->getAttribute("d");
-    const gchar *d04 = lpeitem04->getAttribute("d");
-    const gchar *d05 = lpeitem05->getAttribute("d");
-    const gchar *d08 = lpeitem08->getAttribute("d");
-    const gchar *d09 = lpeitem09->getAttribute("d");
-
-    sp_lpe_item_update_patheffect (lpeitem08, false, true);
-    sp_lpe_item_update_patheffect (lpeitem09, false, true);
-    sp_lpe_item_update_patheffect (lpeitem07, false, true);
-    pathCompare(d01, lpeitem01->getAttribute("d"));
-    pathCompare(d02, lpeitem02->getAttribute("d"));
-    pathCompare(d04, lpeitem04->getAttribute("d"));
-    pathCompare(d05, lpeitem05->getAttribute("d"));
-    pathCompare(d08, lpeitem08->getAttribute("d"));
-    pathCompare(d09, lpeitem09->getAttribute("d"));
+   testDoc(svg);
 }

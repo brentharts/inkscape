@@ -35,7 +35,8 @@ TEST_F(LPEPatternalongpathTest, mixed_0_92_5)
    viewBox="0 0 210 297"
    version="1.1"
    id="svg30"
-   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)">
+   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)"
+   inkscape:test-threshold="0.2">
   <defs
      id="defs24">
     <inkscape:path-effect
@@ -98,7 +99,7 @@ TEST_F(LPEPatternalongpathTest, mixed_0_92_5)
        prop_units="false"
        vertical_pattern="false"
        fuse_tolerance="0" />
-    <clipPath
+    <!--<clipPath
        clipPathUnits="userSpaceOnUse"
        id="clipPath106">
       <path
@@ -107,7 +108,7 @@ TEST_F(LPEPatternalongpathTest, mixed_0_92_5)
          id="path04"
          inkscape:connector-curvature="0"
          inkscape:original-d="m 161.01785,263.64749 a 34.256705,27.30487 0 0 1 -34.2567,27.30488 34.256705,27.30487 0 0 1 -34.25671,-27.30488 34.256705,27.30487 0 0 1 34.25671,-27.30487 34.256705,27.30487 0 0 1 34.2567,27.30487 z" />
-    </clipPath>
+    </clipPath>-->
   </defs>
   <g id="t" transform="scale(0.445)">
   <g
@@ -129,47 +130,20 @@ TEST_F(LPEPatternalongpathTest, mixed_0_92_5)
        inkscape:path-effect="#path-effect03;#path-effect04"
        inkscape:original-d="M -69.547617,188.14285 52.160714,308.33927 154.97024,187.3869 38.27795,127.97145"
        transform="translate(-80.023759,-16.422809)" />
-    <path
+   <!-- <path
        style="fill:#000000;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 88.624459,234.40415 c 0.03307,0.0149 0.06484,0.0349 0.09596,0.0603 0.0301,0.0247 0.05929,0.0543 0.08758,0.0888 0,0 0,0 0,0 0.05637,0.0688 0.109193,0.157 0.158587,0.26436 0,0 0,0 0,0 0,0 0,0 0,0 0.09809,0.21312 0.182629,0.50132 0.255207,0.86227 0,0 0,0 0,0 0,0 0,0 0,0 0.143743,0.71488 0.237908,1.6968 0.308246,2.95577 0,0 0,0 0,0 0.134896,2.41443 0.143814,5.79692 0.473042,10.11228 0,0 0,0 0,0 0.121958,1.59859 0.293144,3.31339 0.545766,5.11382 0.578815,4.16747 1.68085,9.60527 5.093494,15.23333 2.244579,3.6226 5.891623,7.46882 11.860323,10.21825 0.24682,0.10215 0.49545,0.20198 0.74581,0.29944 0,0 0,0 0,0 4.63604,1.80381 10.04368,2.8633 15.58041,2.53996 5.59257,-0.2476 11.05304,-1.17955 15.83353,-2.50357 4.92472,-1.28607 9.55331,-2.82419 13.65862,-4.3081 0,0 0,0 0,0 -0.0119,0.004 0.6707,-0.24502 0.65876,-0.24067 0,0 0,0 0,0 3.6821,-1.33758 7.13912,-2.64018 10.08981,-4.0362 0,0 0,0 0,0 1.0064,-0.4998 1.71784,-0.81608 2.07376,-1.09602 0,0 0,0 0,0 0.10356,-0.0995 0.0245,-0.0123 -0.27612,0.24439 0,0 0,0 0,0 -1e-5,0 -1e-5,10e-6 -1e-5,10e-6 l 0,0 c -0.28439,0.1691 -0.68635,0.78373 -1.33273,1.89955 v 0 c 0,10e-6 -1e-5,2e-5 -1e-5,3e-5 l 0,0 c -0.47815,1.29497 -0.72117,2.02128 -0.59588,2.17785 0,0 1e-5,10e-6 1e-5,10e-6 0.0217,0.22915 0.006,0.37648 -0.0152,0.14733 -0.0983,-0.47981 -0.42547,-1.05632 -0.84343,-1.81138 -0.0398,-0.0719 -0.0803,-0.14523 -0.12156,-0.22028 -1.52257,-2.60835 -3.63843,-5.09438 -5.72482,-7.53916 0,0 0,0 0,0 -6.28389,-7.30974 -13.95437,-14.97114 -19.69072,-20.8341 0,0 0,0 0,0 -8.14171,-8.31736 -14.73513,-15.07937 -19.61586,-20.55578 0,0 0,0 0,0 -2.64842,-2.97167 -4.67686,-5.43862 -5.94236,-7.29698 0,0 0,0 0,0 -0.65662,-0.96422 -1.11039,-1.76815 -1.34247,-2.39824 0,0 0,0 0,0 -0.11783,-0.31991 -0.17861,-0.59535 -0.18,-0.82451 0,0 0,0 0,-1e-5 0,0 0,0 0,0 -6.6e-4,-0.11535 0.0137,-0.21907 0.0434,-0.31086 0,0 0,0 0,0 0,0 0,0 0,0 0.0756,-0.11295 0.11049,-0.17353 0.1264,-0.20619 0.0156,-0.0321 0.0126,-0.0365 0.0123,-0.0368 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 -10e-6,-1e-5 -10e-6,-1e-5 -10e-6,-1e-5 0,0 0,0 10e-6,1e-5 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 3.6e-4,2.3e-4 0.005,0.003 0.0364,-0.0167 0.0315,-0.0195 0.0898,-0.0611 0.19738,-0.14947 0,0 0,0 0,0 0,0 0,0 0,0 0.0919,-0.0416 0.1986,-0.0706 0.31995,-0.0872 0,0 0,0 0,0 0,0 0,0 0,0 0.24094,-0.033 0.53925,-0.0171 0.89254,0.0464 0,0 0,0 0,0 0.69595,0.12512 1.60539,0.43511 2.70722,0.9211 0,0 0,0 0,0 2.12259,0.93621 4.97515,2.53324 8.36951,4.73419 0,0 0,0 0,0 6.15976,3.99382 13.97936,9.87817 22.66396,17.65192 0,0 0,0 0,0 6.66601,5.9613 13.59439,12.70255 20.62788,20.85005 0,0 0,0 0,0 2.17454,2.50374 4.48035,5.26997 6.56369,8.42982 0.0564,0.0825 0.11323,0.1669 0.17046,0.25328 0.59917,0.90426 1.24347,2.02864 1.80552,3.39577 0.22155,0.49922 0.43482,1.23395 0.57853,2.20029 0,0 1e-5,2e-5 1e-5,2e-5 0.1865,0.65708 0.0782,1.82258 -0.49193,3.5155 0,0 -2e-5,4e-5 -2e-5,4e-5 -0.74055,1.52197 -1.56228,2.644 -2.32112,3.27915 0,0 0,0 0,0 -1e-5,0 -2e-5,10e-6 -2e-5,10e-6 0,0 0,0 0,0 -0.94766,0.89088 -1.79134,1.55709 -2.45994,1.98556 0,0 -1e-5,10e-6 -1e-5,10e-6 -1.92279,1.27747 -3.67392,2.219 -5.14274,2.90672 0,0 0,0 0,0 -1.02211,0.49619 -2.05135,0.97546 -3.08716,1.43887 -3.83648,1.736 -7.84096,3.24472 -11.94146,4.60562 0,0 0,0 0,0 -1.13141,0.3786 -2.28198,0.74993 -3.45019,1.1115 -5.35277,1.77377 -11.8659,3.1578 -18.83234,3.83992 -7.23928,0.82142 -14.75285,-0.32549 -21.60338,-2.70952 -6.252659,-2.55244 -10.614646,-5.86876 -13.659996,-9.22853 0,0 0,0 0,0 -1.080217,-1.19102 -2.014511,-2.41022 -2.820106,-3.63753 0,0 -10e-7,0 -10e-7,0 -4.582955,-7.22147 -5.782062,-13.69919 -6.034646,-18.72557 -0.283535,-4.81909 0.07711,-9.00447 0.570917,-12.26229 0,0 0,0 0,0 0.618389,-4.08044 1.547844,-7.36731 2.290307,-9.35924 0,0 0,0 0,0 0.401243,-1.07647 0.783181,-1.87686 1.121523,-2.3786 0,0 0,0 0,0 0,0 10e-7,0 10e-7,0 0.172566,-0.25591 0.334965,-0.43624 0.485794,-0.53901 0,0 0,0 0,0 0,0 1e-6,0 1e-6,0 0.07599,-0.0517 0.149048,-0.0839 0.219078,-0.096 0,0 0,0 0,0 0.03515,-0.006 0.06953,-0.007 0.103133,-0.003 0.03474,0.004 0.06832,0.0134 0.101394,0.0283 z"
        id="path01"
        inkscape:connector-curvature="0"
        inkscape:path-effect="#path-effect01;#path-effect02"
        inkscape:original-d="m 82.398808,230.47619 c 0,0 52.916662,49.89284 58.964282,46.86905 6.04762,-3.02381 1.07286,-84.75943 1.07286,-84.75943 v 0 0 0 0"
-       clip-path="url(#clipPath106)" />
+       clip-path="url(#clipPath106)" />-->
   </g>
   </g>
 </svg>
 )"""";
 
-   SPDocument *doc = SPDocument::createNewDocFromMem(svg.c_str(), svg.size(), true);
-   doc->ensureUpToDate();
-   // removed LPE clipath not pass 
-   //auto lpeitem01 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path01"));
-   auto lpeitem02 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path02"));
-   auto lpeitem03 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path03"));
-   // Clippath
-   //auto lpeitem04 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path04"));
-
-   //ASSERT_TRUE(lpeitem01 != nullptr);
-   ASSERT_TRUE(lpeitem02 != nullptr);
-   ASSERT_TRUE(lpeitem03 != nullptr);
-   //ASSERT_TRUE(lpeitem04 != nullptr);
-
-   //const gchar *d01 = lpeitem01->getAttribute("d");
-   const gchar *d02 = lpeitem02->getAttribute("d");
-   const gchar *d03 = lpeitem03->getAttribute("d");
-   //const gchar *d04 = lpeitem04->getAttribute("d");
-
-
-   //sp_lpe_item_update_patheffect (lpeitem01, false, true);
-   sp_lpe_item_update_patheffect (lpeitem02, false, true);
-   sp_lpe_item_update_patheffect (lpeitem03, false, true);
-
-   // pathCompare(d01, lpeitem01->getAttribute("d"));
-   // extra threshold from 0.001 to 0.2
-   pathCompare(d02, lpeitem02->getAttribute("d"),0.2);
-   pathCompare(d03, lpeitem03->getAttribute("d"),0.2);
+   testDoc(svg);
 }
 
 // INKSCAPE 1.0.2
@@ -223,17 +197,7 @@ TEST_F(LPEPatternalongpathTest, shape_1_02)
 </svg>
 )"""";
 
-   SPDocument *doc = SPDocument::createNewDocFromMem(svg.c_str(), svg.size(), true);
-   doc->ensureUpToDate();
-
-   auto lpeitem01 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path01"));
-   
-   ASSERT_TRUE(lpeitem01 != nullptr);
-   
-   const gchar *d01 = lpeitem01->getAttribute("d");
-   sp_lpe_item_update_patheffect (lpeitem01, false, true);
-   
-   pathCompare(d01, lpeitem01->getAttribute("d"));
+   testDoc(svg);
 }
 
 // INKSCAPE 1.0.2
@@ -329,28 +293,7 @@ TEST_F(LPEPatternalongpathTest, path_1_02)
 </svg>
 )"""";
 
-   SPDocument *doc = SPDocument::createNewDocFromMem(svg.c_str(), svg.size(), true);
-   doc->ensureUpToDate();
-
-   auto lpeitem01 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path01"));
-   auto lpeitem02 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path02"));
-   auto lpeitem03 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path03"));
-   
-   ASSERT_TRUE(lpeitem01 != nullptr);
-   ASSERT_TRUE(lpeitem02 != nullptr);
-   ASSERT_TRUE(lpeitem03 != nullptr);
-   
-   const gchar *d01 = lpeitem01->getAttribute("d");
-   const gchar *d02 = lpeitem02->getAttribute("d");
-   const gchar *d03 = lpeitem03->getAttribute("d");
-
-   sp_lpe_item_update_patheffect (lpeitem01, false, true);
-   sp_lpe_item_update_patheffect (lpeitem02, false, true);
-   sp_lpe_item_update_patheffect (lpeitem03, false, true);
-   
-   pathCompare(d01, lpeitem01->getAttribute("d"));
-   pathCompare(d02, lpeitem02->getAttribute("d"));
-   pathCompare(d03, lpeitem03->getAttribute("d"));
+   testDoc(svg);
 }
 
 // INKSCAPE 1.0.2
@@ -459,28 +402,7 @@ TEST_F(LPEPatternalongpathTest, multiple_MM_1_0_2)
 </svg>
 )"""";
 
-   SPDocument *doc = SPDocument::createNewDocFromMem(svg.c_str(), svg.size(), true);
-   doc->ensureUpToDate();
-
-   auto lpeitem01 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path01"));
-   auto lpeitem02 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path02"));
-   auto lpeitem03 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path03"));
-   
-   ASSERT_TRUE(lpeitem01 != nullptr);
-   ASSERT_TRUE(lpeitem02 != nullptr);
-   ASSERT_TRUE(lpeitem03 != nullptr);
-   
-   const gchar *d01 = lpeitem01->getAttribute("d");
-   const gchar *d02 = lpeitem02->getAttribute("d");
-   const gchar *d03 = lpeitem03->getAttribute("d");
-
-   sp_lpe_item_update_patheffect (lpeitem01, false, true);
-   sp_lpe_item_update_patheffect (lpeitem02, false, true);
-   sp_lpe_item_update_patheffect (lpeitem03, false, true);
-   
-   pathCompare(d01, lpeitem01->getAttribute("d"));
-   pathCompare(d02, lpeitem02->getAttribute("d"));
-   pathCompare(d03, lpeitem03->getAttribute("d"));
+   testDoc(svg);
 }
 
 // INKSCAPE 1.0.2
@@ -589,26 +511,5 @@ TEST_F(LPEPatternalongpathTest, multiple_PX_1_0_2)
 </svg>
 )"""";
 
-   SPDocument *doc = SPDocument::createNewDocFromMem(svg.c_str(), svg.size(), true);
-   doc->ensureUpToDate();
-
-   auto lpeitem01 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path01"));
-   auto lpeitem02 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path02"));
-   auto lpeitem03 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path03"));
-   
-   ASSERT_TRUE(lpeitem01 != nullptr);
-   ASSERT_TRUE(lpeitem02 != nullptr);
-   ASSERT_TRUE(lpeitem03 != nullptr);
-   
-   const gchar *d01 = lpeitem01->getAttribute("d");
-   const gchar *d02 = lpeitem02->getAttribute("d");
-   const gchar *d03 = lpeitem03->getAttribute("d");
-
-   sp_lpe_item_update_patheffect (lpeitem01, false, true);
-   sp_lpe_item_update_patheffect (lpeitem02, false, true);
-   sp_lpe_item_update_patheffect (lpeitem03, false, true);
-   
-   pathCompare(d01, lpeitem01->getAttribute("d"));
-   pathCompare(d02, lpeitem02->getAttribute("d"));
-   pathCompare(d03, lpeitem03->getAttribute("d"));
+   testDoc(svg);
 }
