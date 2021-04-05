@@ -857,7 +857,10 @@ void DialogMultipaned::on_drag_end(double offset_x, double offset_y)
 
 bool can_collapse(Gtk::Widget* widget, Gtk::Widget* handle) {
     // can only collapse DialogMultipaned widgets
-    if (dynamic_cast<DialogMultipaned*>(widget) == nullptr) return false;
+    if (!widget || dynamic_cast<DialogMultipaned*>(widget) == nullptr) return false;
+
+    // collapsing is not supported in floating dialogs
+    if (dynamic_cast<DialogWindow*>(widget->get_toplevel())) return false;
 
     auto parent = handle->get_parent();
     if (!parent) return false;
