@@ -18,11 +18,11 @@
 using namespace Inkscape;
 using namespace Inkscape::LivePathEffect;
 
-class LPELattice2Test : public LPESTest {};
+class LPEMirrorSymmetryTest : public LPESTest {};
 
 // INKSCAPE 0.92.5
 
-TEST_F(LPELattice2Test, path_0_92_5)
+TEST_F(LPEMirrorSymmetryTest, path_0_92_5)
 {
    std::string svg = R""""(<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
@@ -35,7 +35,8 @@ TEST_F(LPELattice2Test, path_0_92_5)
    viewBox="0 0 210 297"
    version="1.1"
    id="svg8"
-   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)">
+   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)"
+   inkscape:test-threshold="0.2">
   <defs
      id="defs2">
     <inkscape:path-effect
@@ -151,7 +152,7 @@ TEST_F(LPELattice2Test, path_0_92_5)
        id="path13"
        style="fill:#ffff00;stroke:#000000;stroke-width:3;stroke-miterlimit:4;stroke-dasharray:none"
        transform="translate(-0.75595238,-9.827381)" />
-    <path
+    <!-- dont pass <path
        style="fill:#ffff00;stroke:#000000;stroke-width:3;stroke-miterlimit:4;stroke-dasharray:none"
        id="path12"
        transform="translate(-0.75595238,88.446429)"
@@ -161,7 +162,7 @@ TEST_F(LPELattice2Test, path_0_92_5)
        sodipodi:cy="57.741074"
        sodipodi:rx="41.199402"
        sodipodi:ry="36.663689"
-       d="m 91.470234,57.741074 c 0,10.474759 -4.936083,19.923557 -12.85119,26.60479 -7.915107,-6.681233 -12.85119,-16.130031 -12.85119,-26.60479 v 0 c 0,-10.474759 4.936083,-19.923557 12.85119,-26.604791 7.915107,6.681234 12.85119,16.130032 12.85119,26.604791 z m -15.119048,0 c 0,10.474759 4.936083,19.923557 12.85119,26.60479 7.915107,-6.681233 12.851194,-16.130031 12.851194,-26.60479 v 0 c 0,-10.474759 -4.936087,-19.923557 -12.851194,-26.604791 -7.915107,6.681234 -12.85119,16.130032 -12.85119,26.604791 z" />
+       d="m 91.470234,57.741074 c 0,10.474759 -4.936083,19.923557 -12.85119,26.60479 -7.915107,-6.681233 -12.85119,-16.130031 -12.85119,-26.60479 v 0 c 0,-10.474759 4.936083,-19.923557 12.85119,-26.604791 7.915107,6.681234 12.85119,16.130032 12.85119,26.604791 z m -15.119048,0 c 0,10.474759 4.936083,19.923557 12.85119,26.60479 7.915107,-6.681233 12.851194,-16.130031 12.851194,-26.60479 v 0 c 0,-10.474759 -4.936087,-19.923557 -12.851194,-26.604791 -7.915107,6.681234 -12.85119,16.130032 -12.85119,26.604791 z" />-->
     <path
        style="fill:#ffff00;stroke:#000000;stroke-width:3;stroke-miterlimit:4;stroke-dasharray:none"
        d="m 45.357143,218.38095 c 18.362916,4.39316 28.244165,24.538 52.160715,18.61727 23.916552,5.92073 33.797802,-14.22411 52.160712,-18.61727 l 0,46.86905 C 132.34833,260.11929 115.7964,250.05918 97.517858,250.93435 79.239313,250.05918 62.68739,260.11929 45.357143,265.25 Z m 128.511897,0 c -18.36292,4.39316 -28.24417,24.538 -52.16072,18.61727 -23.916548,5.92073 -33.797797,-14.22411 -52.160713,-18.61727 l 0,46.86905 c 17.330247,-5.13071 33.882173,-15.19082 52.160713,-14.31565 18.27855,-0.87517 34.83047,9.18494 52.16072,14.31565 z"
@@ -233,63 +234,13 @@ TEST_F(LPELattice2Test, path_0_92_5)
 </svg>
 )"""";
 
-    SPDocument *doc = SPDocument::createNewDocFromMem(svg.c_str(), svg.size(), true);
-    doc->ensureUpToDate();
-
-    auto lpeitem01 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path01"));
-    auto lpeitem02 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path02"));
-    auto lpeitem04 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path04"));
-    auto lpeitem05 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path05"));
-    auto lpeitem07 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path07"));
-    auto lpeitem08 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path08"));
-    auto lpeitem10 = dynamic_cast<SPLPEItem *>(doc->getObjectById("g10"));
-    auto lpeitem11 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path11"));
-    // Dont pass
-    // auto lpeitem12 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path12"));
-    auto lpeitem13 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path13"));
-
-    ASSERT_TRUE(lpeitem01 != nullptr);
-    ASSERT_TRUE(lpeitem02 != nullptr);
-    ASSERT_TRUE(lpeitem04 != nullptr);
-    ASSERT_TRUE(lpeitem05 != nullptr);
-    ASSERT_TRUE(lpeitem07 != nullptr);
-    ASSERT_TRUE(lpeitem08 != nullptr);
-    ASSERT_TRUE(lpeitem10 != nullptr);
-    ASSERT_TRUE(lpeitem11 != nullptr);
-    // ASSERT_TRUE(lpeitem12 != nullptr);
-    ASSERT_TRUE(lpeitem13 != nullptr);
-    
-    const gchar *d01 = lpeitem01->getAttribute("d");
-    const gchar *d02 = lpeitem02->getAttribute("d");
-    const gchar *d04 = lpeitem04->getAttribute("d");
-    const gchar *d05 = lpeitem05->getAttribute("d");
-    const gchar *d07 = lpeitem07->getAttribute("d");
-    const gchar *d08 = lpeitem08->getAttribute("d");
-    const gchar *d11 = lpeitem11->getAttribute("d");
-    // const gchar *d12 = lpeitem12->getAttribute("d");
-    const gchar *d13 = lpeitem13->getAttribute("d");
-
-    sp_lpe_item_update_patheffect (lpeitem10, false, true);
-    sp_lpe_item_update_patheffect (lpeitem11, false, true);
-    // sp_lpe_item_update_patheffect (lpeitem12, false, true);
-    sp_lpe_item_update_patheffect (lpeitem13, false, true);
-    
-
-    pathCompare(d01, lpeitem01->getAttribute("d"), 0.2);
-    pathCompare(d02, lpeitem02->getAttribute("d"), 0.2);
-    pathCompare(d04, lpeitem04->getAttribute("d"), 0.2);
-    pathCompare(d05, lpeitem05->getAttribute("d"), 0.2);
-    pathCompare(d07, lpeitem07->getAttribute("d"), 0.2);
-    pathCompare(d08, lpeitem08->getAttribute("d"), 0.2);
-    pathCompare(d11, lpeitem11->getAttribute("d"), 0.2);
-    // pathCompare(d12, lpeitem12->getAttribute("d"), 0.2);
-    pathCompare(d13, lpeitem13->getAttribute("d"), 0.2);
+   testDoc(svg);
 }
 
 
 // INKSCAPE 1.0.2
 
-TEST_F(LPELattice2Test, multi_PX_1_0_2)
+TEST_F(LPEMirrorSymmetryTest, multi_PX_1_0_2)
 {
    std::string svg = R""""(<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
@@ -559,67 +510,10 @@ TEST_F(LPELattice2Test, multi_PX_1_0_2)
 </svg>
 )"""";
 
-    SPDocument *doc = SPDocument::createNewDocFromMem(svg.c_str(), svg.size(), true);
-    doc->ensureUpToDate();
-
-    auto lpeitem01 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path01"));
-    auto lpeitem02 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path02"));
-    auto lpeitem04 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path04"));
-    auto lpeitem05 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path05"));
-    auto lpeitem07 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path07"));
-    auto lpeitem08 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path08"));
-    auto lpeitem10 = dynamic_cast<SPLPEItem *>(doc->getObjectById("g10"));
-    auto lpeitem11 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path11"));
-    auto lpeitem12 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path12"));
-    auto lpeitem13 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path13"));
-    auto lpeitem14 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path14"));
-    auto lpeitem15 = dynamic_cast<SPLPEItem *>(doc->getObjectById("mirror-path-effect834"));
-
-    ASSERT_TRUE(lpeitem01 != nullptr);
-    ASSERT_TRUE(lpeitem02 != nullptr);
-    ASSERT_TRUE(lpeitem04 != nullptr);
-    ASSERT_TRUE(lpeitem05 != nullptr);
-    ASSERT_TRUE(lpeitem07 != nullptr);
-    ASSERT_TRUE(lpeitem08 != nullptr);
-    ASSERT_TRUE(lpeitem10 != nullptr);
-    ASSERT_TRUE(lpeitem11 != nullptr);
-    ASSERT_TRUE(lpeitem12 != nullptr);
-    ASSERT_TRUE(lpeitem13 != nullptr);
-    ASSERT_TRUE(lpeitem14 != nullptr);
-    ASSERT_TRUE(lpeitem15 != nullptr);
-    
-    const gchar *d01 = lpeitem01->getAttribute("d");
-    const gchar *d02 = lpeitem02->getAttribute("d");
-    const gchar *d04 = lpeitem04->getAttribute("d");
-    const gchar *d05 = lpeitem05->getAttribute("d");
-    const gchar *d07 = lpeitem07->getAttribute("d");
-    const gchar *d08 = lpeitem08->getAttribute("d");
-    const gchar *d11 = lpeitem11->getAttribute("d");
-    const gchar *d12 = lpeitem12->getAttribute("d");
-    const gchar *d13 = lpeitem13->getAttribute("d");
-    const gchar *d14 = lpeitem14->getAttribute("d");
-    const gchar *d15 = lpeitem15->getAttribute("d");
-
-    sp_lpe_item_update_patheffect (lpeitem10, false, true);
-    sp_lpe_item_update_patheffect (lpeitem11, false, true);
-    sp_lpe_item_update_patheffect (lpeitem12, false, true);
-    sp_lpe_item_update_patheffect (lpeitem13, false, true);
-    sp_lpe_item_update_patheffect (lpeitem14, false, true);
-
-    pathCompare(d01, lpeitem01->getAttribute("d"));
-    pathCompare(d02, lpeitem02->getAttribute("d"));
-    pathCompare(d04, lpeitem04->getAttribute("d"));
-    pathCompare(d05, lpeitem05->getAttribute("d"));
-    pathCompare(d07, lpeitem07->getAttribute("d"));
-    pathCompare(d08, lpeitem08->getAttribute("d"));
-    pathCompare(d11, lpeitem11->getAttribute("d"));
-    pathCompare(d12, lpeitem12->getAttribute("d"));
-    pathCompare(d13, lpeitem13->getAttribute("d"));
-    pathCompare(d14, lpeitem14->getAttribute("d"));
-    pathCompare(d15, lpeitem15->getAttribute("d"));
+   testDoc(svg);
 }
 
-TEST_F(LPELattice2Test, multi_MM_1_0_2)
+TEST_F(LPEMirrorSymmetryTest, multi_MM_1_0_2)
 {
    std::string svg = R""""(<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
@@ -889,62 +783,5 @@ TEST_F(LPELattice2Test, multi_MM_1_0_2)
 </svg>
 )"""";
 
-    SPDocument *doc = SPDocument::createNewDocFromMem(svg.c_str(), svg.size(), true);
-    doc->ensureUpToDate();
-
-    auto lpeitem01 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path01"));
-    auto lpeitem02 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path02"));
-    auto lpeitem04 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path04"));
-    auto lpeitem05 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path05"));
-    auto lpeitem07 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path07"));
-    auto lpeitem08 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path08"));
-    auto lpeitem10 = dynamic_cast<SPLPEItem *>(doc->getObjectById("g10"));
-    auto lpeitem11 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path11"));
-    auto lpeitem12 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path12"));
-    auto lpeitem13 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path13"));
-    auto lpeitem14 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path14"));
-    auto lpeitem15 = dynamic_cast<SPLPEItem *>(doc->getObjectById("mirror-path-effect834"));
-
-    ASSERT_TRUE(lpeitem01 != nullptr);
-    ASSERT_TRUE(lpeitem02 != nullptr);
-    ASSERT_TRUE(lpeitem04 != nullptr);
-    ASSERT_TRUE(lpeitem05 != nullptr);
-    ASSERT_TRUE(lpeitem07 != nullptr);
-    ASSERT_TRUE(lpeitem08 != nullptr);
-    ASSERT_TRUE(lpeitem10 != nullptr);
-    ASSERT_TRUE(lpeitem11 != nullptr);
-    ASSERT_TRUE(lpeitem12 != nullptr);
-    ASSERT_TRUE(lpeitem13 != nullptr);
-    ASSERT_TRUE(lpeitem14 != nullptr);
-    ASSERT_TRUE(lpeitem15 != nullptr);
-    
-    const gchar *d01 = lpeitem01->getAttribute("d");
-    const gchar *d02 = lpeitem02->getAttribute("d");
-    const gchar *d04 = lpeitem04->getAttribute("d");
-    const gchar *d05 = lpeitem05->getAttribute("d");
-    const gchar *d07 = lpeitem07->getAttribute("d");
-    const gchar *d08 = lpeitem08->getAttribute("d");
-    const gchar *d11 = lpeitem11->getAttribute("d");
-    const gchar *d12 = lpeitem12->getAttribute("d");
-    const gchar *d13 = lpeitem13->getAttribute("d");
-    const gchar *d14 = lpeitem14->getAttribute("d");
-    const gchar *d15 = lpeitem15->getAttribute("d");
-
-    sp_lpe_item_update_patheffect (lpeitem10, false, true);
-    sp_lpe_item_update_patheffect (lpeitem11, false, true);
-    sp_lpe_item_update_patheffect (lpeitem12, false, true);
-    sp_lpe_item_update_patheffect (lpeitem13, false, true);
-    sp_lpe_item_update_patheffect (lpeitem14, false, true);
-
-    pathCompare(d01, lpeitem01->getAttribute("d"));
-    pathCompare(d02, lpeitem02->getAttribute("d"));
-    pathCompare(d04, lpeitem04->getAttribute("d"));
-    pathCompare(d05, lpeitem05->getAttribute("d"));
-    pathCompare(d07, lpeitem07->getAttribute("d"));
-    pathCompare(d08, lpeitem08->getAttribute("d"));
-    pathCompare(d11, lpeitem11->getAttribute("d"));
-    pathCompare(d12, lpeitem12->getAttribute("d"));
-    pathCompare(d13, lpeitem13->getAttribute("d"));
-    pathCompare(d14, lpeitem14->getAttribute("d"));
-    pathCompare(d15, lpeitem15->getAttribute("d"));
+   testDoc(svg);
 }

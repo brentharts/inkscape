@@ -107,18 +107,7 @@ TEST_F(LPEAttachPathTest, mixed_0_92_5)
 </svg>
 )"""";
 
-   SPDocument *doc = SPDocument::createNewDocFromMem(svg.c_str(), svg.size(), true);
-   doc->ensureUpToDate();
-
-   auto lpeitem01 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path01"));
-
-   ASSERT_TRUE(lpeitem01 != nullptr);
-
-   const gchar *d01 = lpeitem01->getAttribute("d");
-
-   sp_lpe_item_update_patheffect (lpeitem01, false, true);
-
-   pathCompare(d01, lpeitem01->getAttribute("d"));
+   testDoc(svg);
 }
 
 
@@ -208,18 +197,7 @@ TEST_F(LPEAttachPathTest, attachpath_MM_1_0_2)
 </svg>
 )"""";
 
-   SPDocument *doc = SPDocument::createNewDocFromMem(svg.c_str(), svg.size(), true);
-   doc->ensureUpToDate();
-
-   auto lpeitem01 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path01"));
-
-   ASSERT_TRUE(lpeitem01 != nullptr);
-
-   const gchar *d01 = lpeitem01->getAttribute("d");
-
-   sp_lpe_item_update_patheffect (lpeitem01, false, true);
-
-   pathCompare(d01, lpeitem01->getAttribute("d"));
+   testDoc(svg);
 }
 
 // INKSCAPE 1.0.2
@@ -313,16 +291,5 @@ TEST_F(LPEAttachPathTest, attachpath_PX_1_0_2)
 </svg>
 )"""";
 
-   SPDocument *doc = SPDocument::createNewDocFromMem(svg.c_str(), svg.size(), true);
-   doc->ensureUpToDate();
-
-   auto lpeitem01 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path01"));
-
-   ASSERT_TRUE(lpeitem01 != nullptr);
-
-   const gchar *d01 = lpeitem01->getAttribute("d");
-
-   sp_lpe_item_update_patheffect (lpeitem01, false, true);
-
-   pathCompare(d01, lpeitem01->getAttribute("d"));
+   testDoc(svg);
 }

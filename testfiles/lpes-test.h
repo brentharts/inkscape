@@ -12,6 +12,8 @@
 #include <gtest/gtest.h>
 #include <src/svg/svg.h>
 #include <src/inkscape.h>
+#include <src/object/sp-root.h>
+#include <src/helper-fns.h>
 
 using namespace Inkscape;
 
@@ -22,7 +24,9 @@ class LPESTest : public ::testing::Test {
          // setup hidden dependency
          Application::create(false);
       }
-      void pathCompare(const gchar *a, const gchar *b, double precission = 0.001) {
+
+      void pathCompare(const gchar *a, const gchar *b, const gchar *id, double precission = 0.001) {
+         failed.push_back(id);
          Geom::PathVector apv = sp_svg_read_pathv(a);
          Geom::PathVector bpv = sp_svg_read_pathv(b);
          size_t totala = apv.curveCount();
@@ -43,7 +47,75 @@ class LPESTest : public ::testing::Test {
             ASSERT_NEAR(pointe[Geom::X], pointf[Geom::X], precission);
             ASSERT_NEAR(pointe[Geom::Y], pointf[Geom::Y], precission);
          }
+         failed.pop_back();
       }
+
+      void TearDown( ) { 
+         Glib::ustring ids = "";
+         for (auto fail : failed) {
+            if (ids != "") {
+               ids += ",";
+            }
+            ids += fail;
+         }
+         if (ids != "") {
+            FAIL() << "[FAILED IDS] " << ids; 
+         }
+      }
+
+      // you can override custom threshold from svg file using in 
+      // root svg from global and override with per shape "inkscape:test-threshold"
+      void testDoc(Glib::ustring svg, double precission = 0.001) {
+         SPDocument *doc = SPDocument::createNewDocFromMem(svg.c_str(), svg.size(), true);
+         doc->ensureUpToDate();
+         std::vector< SPObject *> objs;
+         std::vector<const gchar *> ds;
+         for (auto obj : doc->getObjectsByElement("path")) {
+            if (obj->getAttribute("d")) {
+               ds.push_back(obj->getAttribute("d"));
+               objs.push_back(obj);
+            }
+         }
+         for (auto obj : doc->getObjectsByElement("ellipse")) {
+            if (obj->getAttribute("d")) {
+               ds.push_back(obj->getAttribute("d"));
+               objs.push_back(obj);
+            }
+         }
+         for (auto obj : doc->getObjectsByElement("circle")) {
+            if (obj->getAttribute("d")) {
+               ds.push_back(obj->getAttribute("d"));
+               objs.push_back(obj);
+            }
+         }
+         for (auto obj : doc->getObjectsByElement("rect")) {
+            if (obj->getAttribute("d")) {
+               ds.push_back(obj->getAttribute("d"));
+               objs.push_back(obj);
+            }
+         }
+         SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(doc->getRoot());
+         sp_lpe_item_update_patheffect (lpeitem, false, true);
+         if (lpeitem->getAttribute("inkscape:test-threshold")) {
+            precission = helperfns_read_number(lpeitem->getAttribute("inkscape:test-threshold"));
+         }
+         if (doc->getObjectsByElement("clipPath").size() || doc->getObjectsByElement("mask").size()) {
+            // we need to double update because clippaths
+            sp_lpe_item_update_patheffect (lpeitem, false, true);
+         }
+
+         size_t index = 0;
+         for (auto obj : objs) {
+            if (obj->getAttribute("inkscape:test-threshold")) {
+               precission = helperfns_read_number(obj->getAttribute("inkscape:test-threshold"));
+            }
+            if (!obj->getAttribute("inkscape:test-ignore")) {
+               pathCompare(ds[index], obj->getAttribute("d"), obj->getAttribute("id"), precission);
+            }
+            index++;
+         }
+      }
+      std::vector< const gchar *> failed;
 };
 
 /*

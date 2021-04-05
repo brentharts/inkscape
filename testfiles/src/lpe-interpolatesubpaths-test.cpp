@@ -35,7 +35,8 @@ TEST_F(LPEInterpolateSubPathsTest, path_0_92_5)
    viewBox="0 0 210 297"
    version="1.1"
    id="svg8"
-   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)">
+   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)"
+   inkscape:test-threshold="0.01">
   <defs
      id="defs2">
     <inkscape:path-effect
@@ -63,18 +64,7 @@ TEST_F(LPEInterpolateSubPathsTest, path_0_92_5)
 </svg>
 )"""";
 
-    SPDocument *doc = SPDocument::createNewDocFromMem(svg.c_str(), svg.size(), true);
-    doc->ensureUpToDate();
-
-    auto lpeitem01 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path01"));
-
-    ASSERT_TRUE(lpeitem01 != nullptr);
-
-    const gchar *d01 = lpeitem01->getAttribute("d");
-
-    sp_lpe_item_update_patheffect (lpeitem01, false, true);
-
-    pathCompare(d01, lpeitem01->getAttribute("d"), 0.01);
+   testDoc(svg);
 }
 
 
@@ -143,18 +133,7 @@ TEST_F(LPEInterpolateSubPathsTest, multi_PX_1_0_2)
 </svg>
 )"""";
 
-    SPDocument *doc = SPDocument::createNewDocFromMem(svg.c_str(), svg.size(), true);
-    doc->ensureUpToDate();
-
-    auto lpeitem01 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path01"));
-
-    ASSERT_TRUE(lpeitem01 != nullptr);
-
-    const gchar *d01 = lpeitem01->getAttribute("d");
-
-    sp_lpe_item_update_patheffect (lpeitem01, false, true);
-
-    pathCompare(d01, lpeitem01->getAttribute("d"));
+   testDoc(svg);
 }
 
 TEST_F(LPEInterpolateSubPathsTest, multi_MM_1_0_2)
@@ -220,16 +199,5 @@ TEST_F(LPEInterpolateSubPathsTest, multi_MM_1_0_2)
 </svg>
 )"""";
 
-    SPDocument *doc = SPDocument::createNewDocFromMem(svg.c_str(), svg.size(), true);
-    doc->ensureUpToDate();
-
-    auto lpeitem01 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path01"));
-
-    ASSERT_TRUE(lpeitem01 != nullptr);
-
-    const gchar *d01 = lpeitem01->getAttribute("d");
-
-    sp_lpe_item_update_patheffect (lpeitem01, false, true);
-
-    pathCompare(d01, lpeitem01->getAttribute("d"));
+   testDoc(svg);
 }

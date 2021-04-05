@@ -35,7 +35,8 @@ TEST_F(LPEConstructGridTest, mixed_0_92_5)
    viewBox="0 0 210 297"
    version="1.1"
    id="svg8"
-   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)">
+   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)"
+   inkscape:test-threshold="0.2">
   <defs
      id="defs2">
     <inkscape:path-effect
@@ -88,29 +89,7 @@ TEST_F(LPEConstructGridTest, mixed_0_92_5)
 </svg>
 )"""";
 
-   SPDocument *doc = SPDocument::createNewDocFromMem(svg.c_str(), svg.size(), true);
-   doc->ensureUpToDate();
-
-   auto lpeitem01 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path01"));
-   auto lpeitem02 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path02"));
-
-   // ASSERT_TRUE(lpeitem01 != nullptr);
-   ASSERT_TRUE(lpeitem01 != nullptr);
-   ASSERT_TRUE(lpeitem02 != nullptr);
-
-   //const gchar *d01 = lpeitem01->getAttribute("d");
-   const gchar *d01 = lpeitem01->getAttribute("d");
-   const gchar *d02 = lpeitem02->getAttribute("d");
-
-
-   // sp_lpe_item_update_patheffect (lpeitem01, false, true);
-   sp_lpe_item_update_patheffect (lpeitem01, false, true);
-   sp_lpe_item_update_patheffect (lpeitem02, false, true);
-   
-   
-   // pathCompare(d01, lpeitem01->getAttribute("d"),0.2);
-   pathCompare(d01, lpeitem01->getAttribute("d"), 0.2);
-   pathCompare(d02, lpeitem02->getAttribute("d"), 0.2);
+   testDoc(svg);
 }
 
 // INKSCAPE 1.0.2
@@ -128,7 +107,8 @@ TEST_F(LPEConstructGridTest, constructgrid_MM_1_0_2)
    viewBox="0 0 250 250"
    version="1.1"
    id="svg8"
-   inkscape:version="1.0.2 (e86c870879, 2021-01-15)">
+   inkscape:version="1.0.2 (e86c870879, 2021-01-15)"
+   inkscape:test-threshold="0.2">
   <defs
      id="defs2">
     <inkscape:path-effect
@@ -178,29 +158,7 @@ TEST_F(LPEConstructGridTest, constructgrid_MM_1_0_2)
 </svg>
 )"""";
 
-   SPDocument *doc = SPDocument::createNewDocFromMem(svg.c_str(), svg.size(), true);
-   doc->ensureUpToDate();
-
-   auto lpeitem01 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path01"));
-   auto lpeitem02 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path02"));
-
-   // ASSERT_TRUE(lpeitem01 != nullptr);
-   ASSERT_TRUE(lpeitem01 != nullptr);
-   ASSERT_TRUE(lpeitem02 != nullptr);
-
-   //const gchar *d01 = lpeitem01->getAttribute("d");
-   const gchar *d01 = lpeitem01->getAttribute("d");
-   const gchar *d02 = lpeitem02->getAttribute("d");
-
-
-   // sp_lpe_item_update_patheffect (lpeitem01, false, true);
-   sp_lpe_item_update_patheffect (lpeitem01, false, true);
-   sp_lpe_item_update_patheffect (lpeitem02, false, true);
-   
-   
-   // pathCompare(d01, lpeitem01->getAttribute("d"),0.2);
-   pathCompare(d01, lpeitem01->getAttribute("d"), 0.2);
-   pathCompare(d02, lpeitem02->getAttribute("d"), 0.2);
+   testDoc(svg);
 }
 
 // INKSCAPE 1.0.2
@@ -218,7 +176,8 @@ TEST_F(LPEConstructGridTest, constructgrid_PX_1_0_2)
    viewBox="0 0 250 250"
    version="1.1"
    id="svg8"
-   inkscape:version="1.0.2 (e86c870879, 2021-01-15)">
+   inkscape:version="1.0.2 (e86c870879, 2021-01-15)"
+   inkscape:test-threshold="0.2">
   <defs
      id="defs2">
     <inkscape:path-effect
@@ -268,26 +227,5 @@ TEST_F(LPEConstructGridTest, constructgrid_PX_1_0_2)
 </svg>
 )"""";
 
-   SPDocument *doc = SPDocument::createNewDocFromMem(svg.c_str(), svg.size(), true);
-   doc->ensureUpToDate();
-
-   auto lpeitem01 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path01"));
-   auto lpeitem02 = dynamic_cast<SPLPEItem *>(doc->getObjectById("path02"));
-
-   // ASSERT_TRUE(lpeitem01 != nullptr);
-   ASSERT_TRUE(lpeitem01 != nullptr);
-   ASSERT_TRUE(lpeitem02 != nullptr);
-
-   //const gchar *d01 = lpeitem01->getAttribute("d");
-   const gchar *d01 = lpeitem01->getAttribute("d");
-   const gchar *d02 = lpeitem02->getAttribute("d");
-
-
-   // sp_lpe_item_update_patheffect (lpeitem01, false, true);
-   sp_lpe_item_update_patheffect (lpeitem01, false, true);
-   sp_lpe_item_update_patheffect (lpeitem02, false, true);
-
-   // pathCompare(d01, lpeitem01->getAttribute("d"),0.2);
-   pathCompare(d01, lpeitem01->getAttribute("d"), 0.2);
-   pathCompare(d02, lpeitem02->getAttribute("d"), 0.2);
+   testDoc(svg);
 }
