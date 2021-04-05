@@ -75,30 +75,7 @@ set(TEST_SOURCES
     svg-extension-test
     curve-test
     2geom-characterization-test
-    lpe-attachpath-test
-    lpe-boundingbox-test
-    lpe-bendpath-test
-    lpe-bool-test
-    lpe-bspline-test
-    lpe-cloneoriginal-test
-    lpe-constructgrid-test
-    lpe-ellipse5pts-test
-    lpe-envelopedeformation-test
-    lpe-fillbetweenmany-test
-    lpe-fillbetweenstrokes-test
-    lpe-gears-test
-    lpe-interpolatesubpaths-test
-    lpe-interpolatepoints-test
-    lpe-jointype-test
-    lpe-knot-test
-    lpe-lattice2-test
-    lpe-mirrorsymmetry-test
-    lpe-patternalongpath-test
-    lpe-perspectiveenvelope-test
-    lpe-powerstroke-test
-    lpe-rotatecopies-test
-    lpe-roughhatches-test
-    lpe-spiro-test
+    lpes-test
     xml-test
     sp-item-group-test)
 
@@ -120,6 +97,7 @@ endforeach()
 ### CLI and rendering tests
 add_subdirectory(cli_tests)
 add_subdirectory(rendering_tests)
+add_subdirectory(lpe_tests)
 
 
 ### Fuzz test
