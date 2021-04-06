@@ -296,10 +296,6 @@ void DialogContainer::new_dialog(unsigned int code)
     }
 
     if (DialogBase* dialog = find_existing_dialog(code)) {
-        // make sure parent window is not hidden/collapsed
-        if (auto panel = get_dialog_parent(dialog)) {
-            panel->show();
-        }
         dialog->focus_dialog();
     }
 }
@@ -328,6 +324,10 @@ void DialogContainer::new_dialog(unsigned int code, DialogNotebook *notebook)
 
     // Limit each container to containing one of any type of dialog.
     if (DialogBase* existing_dialog = find_existing_dialog(code)) {
+        // make sure parent window is not hidden/collapsed
+        if (auto panel = get_dialog_parent(existing_dialog)) {
+            panel->show();
+        }
         // found existing dialog; blink & exit
         existing_dialog->blink();
         return;
