@@ -260,7 +260,6 @@ void CommandPalette::append_recent_file_operation(const Glib::ustring &path, boo
         CPActionFullName->hide();
 
         CPName->set_text((is_import ? _("Import") : _("Open")) + (": " + file_name));
-        CPName->set_tooltip_text((is_import ? ("Import") : ("Open")) + (": " + file_name));
         CPDescription->set_text(path);
         CPDescription->set_tooltip_text(path);
 
