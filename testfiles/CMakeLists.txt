@@ -97,6 +97,7 @@ set(TEST_SOURCES
     lpe-perspectiveenvelope-test
     lpe-powerstroke-test
     lpe-rotatecopies-test
+    lpe-roughen-test
     lpe-roughhatches-test
     lpe-spiro-test
     xml-test
