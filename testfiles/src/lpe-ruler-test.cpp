@@ -18,11 +18,11 @@
 using namespace Inkscape;
 using namespace Inkscape::LivePathEffect;
 
-class LPERoughenTest : public LPESTest {};
+class LPERulerTest : public LPESTest {};
 
 // INKSCAPE 0.92.5
 
-TEST_F(LPERoughenTest, path_0_92_5)
+TEST_F(LPERulerTest, path_0_92_5)
 {
    // path10 not pass skiped
    std::string svg = R""""(<?xml version="1.0" encoding="UTF-8" standalone="no"?>
@@ -166,7 +166,7 @@ TEST_F(LPERoughenTest, path_0_92_5)
 
 // INKSCAPE 1.0.2
 
-TEST_F(LPERoughenTest, multi_PX_1_0_2)
+TEST_F(LPERulerTest, multi_PX_1_0_2)
 {
    std::string svg = R""""(<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
@@ -308,7 +308,7 @@ TEST_F(LPERoughenTest, multi_PX_1_0_2)
    testDoc(svg);
 }
 
-TEST_F(LPERoughenTest, multi_MM_1_0_2)
+TEST_F(LPERulerTest, multi_MM_1_0_2)
 {
    std::string svg = R""""(<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
