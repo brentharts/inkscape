@@ -102,7 +102,9 @@ set(TEST_SOURCES
     lpe-ruler-test
     lpe-showhandles-test
     lpe-simplify-test
+    lpe-sketch-test
     lpe-spiro-test
+    lpe-stitchsubpaths-test
     xml-test
     sp-item-group-test)
 

@@ -11,9 +11,7 @@
 
 #include <gtest/gtest.h>
 #include <testfiles/lpes-test.h>
-#include <src/document.h>
 #include <src/inkscape.h>
-#include <src/object/sp-lpe-item.h>
 
 using namespace Inkscape;
 using namespace Inkscape::LivePathEffect;
