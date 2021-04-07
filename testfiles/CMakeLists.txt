@@ -105,6 +105,8 @@ set(TEST_SOURCES
     lpe-sketch-test
     lpe-spiro-test
     lpe-stitchsubpaths-test
+    lpe-taperstroke-test
+    lpe-transform2points-test
     xml-test
     sp-item-group-test)
 
