@@ -738,48 +738,48 @@ void CommandPalette::add_color_description(Gtk::Label *label, const Glib::ustrin
  * TODO: Adding more conditions in fuzzy points and fuzzy search for creating better user experience
  */
 
+bool CommandPalette::fuzzy_tolerance_search(const Glib::ustring &subject, const Glib::ustring &search)
+{
+    std::string subject_string = subject.lowercase();
+    std::string search_string = search.lowercase();
+    std::map<char, int> subject_string_character, search_string_character;
+    for (const auto &character : subject_string) {
+        subject_string_character[character]++;
+    }
+    for (const auto &character : search_string) {
+        search_string_character[character]++;
+    }
+    for (const auto &character : search_string_character) {
+        auto [alphabet, occurrence] = character;
+        if (subject_string_character[alphabet] < occurrence) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool CommandPalette::fuzzy_search(const Glib::ustring &subject, const Glib::ustring &search)
 {
     std::string subject_string = subject.lowercase();
     std::string search_string = search.lowercase();
 
-    if (search_string.length() > 7) { // Not applying tolarence
-        for (int j = 0, i = 0; i < search_string.length(); i++) {
-            if (search_string[i] == ' ') {
-                continue;
-            }
+    for (int j = 0, i = 0; i < search_string.length(); i++) {
+        bool alphabet_present = false;
 
-            bool alphabet_present = false;
-
-            while (j < subject_string.length()) {
-                if (search_string[i] == subject_string[j]) {
-                    alphabet_present = true;
-                    j++;
-                    break;
-                }
+        while (j < subject_string.length()) {
+            if (search_string[i] == subject_string[j]) {
+                alphabet_present = true;
                 j++;
+                break;
             }
-
-            if (!alphabet_present) {
-                return false; // If not present
-            }
-        }
-    } else { // Applying tolarence
-        std::map<gunichar, int> subject_string_character, search_string_character;
-        for (const auto &character : subject_string) {
-            subject_string_character[character]++;
-        }
-        for (const auto &character : search_string) {
-            search_string_character[character]++;
+            j++;
         }
 
-        for (const auto &character : search_string_character) {
-            auto [alphabet, occurrence] = character;
-            if (subject_string_character[alphabet] < occurrence) {
-                return false;
-            }
+        if (!alphabet_present) {
+            return false; // If not present
         }
     }
+
     return true;
 }
 
@@ -800,48 +800,94 @@ bool CommandPalette::normal_search(const Glib::ustring &subject, const Glib::ust
  */
 int CommandPalette::fuzzy_points(const Glib::ustring &subject, const Glib::ustring &search)
 {
-    int starting_characters_no_match = 5;
-    int character_no_match = 2;
-    int cost = 1; // Taking initial cost as 1
+    int fuzzy_cost = 100; // Taking initial fuzzy_cost as 100
+
+    const int sequential_bonus = -15;           // bonus for adjacent matches
+    const int separator_bonus = -30;            // bonus if search occurs after a separator
+    const int camel_bonus = -30;                // bonus if search is uppercase and subject is lower
+    const int first_letter_bonus = -15;         // bonus if the first letter is matched
+    const int leading_letter_penalty = +5;      // penalty applied for every letter in subject before the first match
+    const int max_leading_letter_penalty = +15; // maximum penalty for leading letters
+    const int unmatched_letter_penalty = +1;    // penalty for every letter that doesn't matter
 
     std::string subject_string = subject.lowercase();
     std::string search_string = search.lowercase();
-    if (search_string.length() > 7) { // Not applying tolarence
-        for (int j = 0, i = 0; i < search_string.length(); i++) {
-            if (search_string[i] == ' ') {
-                continue;
+
+    bool sequential_compair = false;
+    bool leading_letter = true;
+    int  total_leading_letter_penalty = 0;
+    int  j = 0, i = 0;
+
+    while (i < search_string.length() && j < subject_string.length()) {
+        if (search_string[i] != subject_string[j]) {
+            j++;
+            sequential_compair = false;
+            fuzzy_cost += unmatched_letter_penalty;
+
+            if (leading_letter) {
+                if (total_leading_letter_penalty < max_leading_letter_penalty) {
+                    fuzzy_cost += leading_letter_penalty;
+                    total_leading_letter_penalty += leading_letter_penalty;
+                }
             }
 
-            while (j < subject_string.length()) {
-                if (subject_string[j] == ' ' && search_string[i] != subject_string[j]) {
-                    if (i == 0) { // starting characters no match
-                        cost += starting_characters_no_match;
-                    } else {
-                        cost += character_no_match;
-                    }
-                }
-                j++;
+            continue;
+        }
+
+        if (search_string[i] == subject_string[j]) {
+            leading_letter = false;
+
+            if (j > 0 && subject_string[j - 1] == ' ') {
+                fuzzy_cost += separator_bonus;
             }
-        }
-    } else { // Applying tolarence
-        std::map<gunichar, int> search_string_character;
 
-        for (const auto &character : search_string) {
-            search_string_character[character]++;
-        }
+            if (i == 0 && j == 0) {
+                fuzzy_cost += first_letter_bonus;
+            }
 
-        for (const auto &character : search_string_character) {
-            auto [alphabet, occurrence] = character;
-            for (int i = 0; i < subject_string.length() && occurrence; i++) {
-                if (subject_string[i] == alphabet) {
-                    cost += i;
-                    occurrence--;
-                }
+            if (search[i] == subject_string[j]) {
+                fuzzy_cost += camel_bonus;
+            }
+
+            if (sequential_compair) {
+                fuzzy_cost += sequential_bonus;
+            }
+
+            sequential_compair = true;
+            i++;
+        }
+    }
+
+    return fuzzy_cost;
+}
+
+int CommandPalette::fuzzy_tolerance_points(const Glib::ustring &subject, const Glib::ustring &search)
+{
+    int fuzzy_cost = 200;                     // Taking initial fuzzy_cost as 200
+    const int first_letter_bonus = -15; // bonus if the first letter is matched
+
+    std::string subject_string = subject.lowercase();
+    std::string search_string = search.lowercase();
+
+    std::map<char, int> search_string_character;
+
+    for (const auto &character : search_string) {
+        search_string_character[character]++;
+    }
+
+    for (const auto &character : search_string_character) {
+        auto [alphabet, occurrence] = character;
+        for (int i = 0; i < subject_string.length() && occurrence; i++) {
+            if (subject_string[i] == alphabet) {
+                if (i == 0)
+                    fuzzy_cost += first_letter_bonus;
+                fuzzy_cost += i;
+                occurrence--;
             }
         }
     }
 
-    return cost;
+    return fuzzy_cost;
 }
 
 int CommandPalette::on_filter_general(Gtk::ListBoxRow *child)
@@ -864,14 +910,53 @@ int CommandPalette::on_filter_general(Gtk::ListBoxRow *child)
             add_color(CPName, _search_text, CPName->get_text());
             return fuzzy_points(CPName->get_text(), _search_text);
         }
+
         if (fuzzy_search(CPName->get_tooltip_text(), _search_text)) {
             add_color(CPName, _search_text, CPName->get_tooltip_text(), true);
             return fuzzy_points(CPName->get_tooltip_text(), _search_text);
+        }
+
+        if (fuzzy_tolerance_search(CPName->get_text(), _search_text)) {
+            add_color(CPName, _search_text, CPName->get_text());
+            return fuzzy_tolerance_points(CPName->get_text(), _search_text);
+        }
+
+        if (fuzzy_tolerance_search(CPName->get_tooltip_text(), _search_text)) {
+            add_color(CPName, _search_text, CPName->get_tooltip_text());
+            return fuzzy_tolerance_points(CPName->get_tooltip_text(), _search_text);
         }
     }
     if (CPDescription && normal_search(CPDescription->get_text(), _search_text)) {
         add_color_description(CPDescription, _search_text);
         return fuzzy_points(CPDescription->get_text(), _search_text);
+    }
+
+    return 0;
+}
+
+int CommandPalette::fuzzy_points_compair(int fuzzy_points_count_1, int fuzzy_points_count_2, int text_len_1, int text_len_2)
+{
+    if (fuzzy_points_count_1 && fuzzy_points_count_2) {
+        if (fuzzy_points_count_1 < fuzzy_points_count_2) {
+            return -1;
+        } else if (fuzzy_points_count_1 == fuzzy_points_count_2) {
+            if (text_len_1 > text_len_2) {
+                return 1;
+            } else {
+                return -1;
+            }
+        } else {
+            return 1;
+        }
+        if (1) {
+        }
+    }
+
+    if (fuzzy_points_count_1 == 0 && fuzzy_points_count_2) {
+        return 1;
+    }m
+    if (fuzzy_points_count_2 == 0 && fuzzy_points_count_1) {
+        return -1;
     }
 
     return 0;
@@ -895,6 +980,7 @@ int CommandPalette::on_sort(Gtk::ListBoxRow *row1, Gtk::ListBoxRow *row2)
 
     int fuzzy_points_count_1 = 0, fuzzy_points_count_2 = 0;
     int text_len_1 = 0, text_len_2 = 0;
+    int points_compair = 0;
 
     if (cp_name_1 && cp_name_2) {
         if (fuzzy_search(cp_name_1->get_text(), _search_text)) {
@@ -906,88 +992,66 @@ int CommandPalette::on_sort(Gtk::ListBoxRow *row1, Gtk::ListBoxRow *row2)
             fuzzy_points_count_2 = fuzzy_points(cp_name_2->get_text(), _search_text);
         }
 
-        if (fuzzy_points_count_1 && fuzzy_points_count_2) {
-            if (fuzzy_points_count_1 < fuzzy_points_count_2) {
-                return -1;
-            } else if (fuzzy_points_count_1 == fuzzy_points_count_2) {
-                if (text_len_1 > text_len_2) {
-                    return 1;
-                } else {
-                    return -1;
-                }
-            } else {
-                return 1;
-            }
+        points_compair = fuzzy_points_compair(fuzzy_points_count_1, fuzzy_points_count_2, text_len_1, text_len_2);
+        if (points_compair != 0) {
+            return points_compair;
         }
 
-        if (fuzzy_points_count_1 == 0 && fuzzy_points_count_2) {
-            return 1;
+        if (fuzzy_tolerance_search(cp_name_1->get_text(), _search_text)) {
+            text_len_1 = cp_name_1->get_text().length();
+            fuzzy_points_count_1 = fuzzy_tolerance_points(cp_name_1->get_text(), _search_text);
         }
-        if (fuzzy_points_count_2 == 0 && fuzzy_points_count_1) {
-            return -1;
+        if (fuzzy_tolerance_search(cp_name_2->get_text(), _search_text)) {
+            text_len_2 = cp_name_2->get_text().length();
+            fuzzy_points_count_2 = fuzzy_tolerance_points(cp_name_2->get_text(), _search_text);
+        }
+
+        points_compair = fuzzy_points_compair(fuzzy_points_count_1, fuzzy_points_count_2, text_len_1, text_len_2);
+        if (points_compair != 0) {
+            return points_compair;
         }
 
         if (fuzzy_search(cp_name_1->get_tooltip_text(), _search_text)) {
             text_len_1 = cp_name_1->get_tooltip_text().length();
-            fuzzy_points_count_1 = fuzzy_points(cp_name_1->get_tooltip_text(), _search_text);
+            fuzzy_points_count_1 = fuzzy_points(cp_name_1->get_tooltip_text(), _search_text) + 100;
         }
         if (fuzzy_search(cp_name_2->get_tooltip_text(), _search_text)) {
             text_len_2 = cp_name_2->get_tooltip_text().length();
-            fuzzy_points_count_2 = fuzzy_points(cp_name_2->get_tooltip_text(), _search_text);
+            fuzzy_points_count_2 = fuzzy_points(cp_name_2->get_tooltip_text(), _search_text) + 100;
         }
 
-        if (fuzzy_points_count_1 && fuzzy_points_count_2) {
-            if (fuzzy_points_count_1 < fuzzy_points_count_2) {
-                return -1;
-            } else if (fuzzy_points_count_1 == fuzzy_points_count_2) {
-                if (text_len_1 > text_len_2) {
-                    return 1;
-                } else {
-                    return -1;
-                }
-            } else {
-                return 1;
-            }
+        points_compair = fuzzy_points_compair(fuzzy_points_count_1, fuzzy_points_count_2, text_len_1, text_len_2);
+        if (points_compair != 0) {
+            return points_compair;
         }
 
-        if (fuzzy_points_count_1 == 0 && fuzzy_points_count_2) {
-            return 1;
+        if (fuzzy_tolerance_search(cp_name_1->get_tooltip_text(), _search_text)) {
+            text_len_1 = cp_name_1->get_tooltip_text().length();
+            fuzzy_points_count_1 = fuzzy_tolerance_points(cp_name_1->get_tooltip_text(), _search_text) + 100;
         }
-        if (fuzzy_points_count_2 == 0 && fuzzy_points_count_1) {
-            return -1;
+        if (fuzzy_tolerance_search(cp_name_2->get_tooltip_text(), _search_text)) {
+            text_len_2 = cp_name_2->get_tooltip_text().length();
+            fuzzy_points_count_2 = fuzzy_tolerance_points(cp_name_2->get_tooltip_text(), _search_text) + 100;
+        }
+        points_compair = fuzzy_points_compair(fuzzy_points_count_1, fuzzy_points_count_2, text_len_1, text_len_2);
+        if (points_compair != 0) {
+            return points_compair;
         }
     }
 
     if (cp_description_1 && normal_search(cp_description_1->get_text(), _search_text)) {
         text_len_1 = cp_description_1->get_text().length();
-        fuzzy_points_count_1 = fuzzy_points(cp_description_1->get_text(), _search_text);
+        fuzzy_points_count_1 = fuzzy_points(cp_description_1->get_text(), _search_text) + 500;
     }
     if (cp_description_2 && normal_search(cp_description_2->get_text(), _search_text)) {
         text_len_2 = cp_description_2->get_text().length();
-        fuzzy_points_count_2 = fuzzy_points(cp_description_2->get_text(), _search_text);
+        fuzzy_points_count_2 = fuzzy_points(cp_description_2->get_text(), _search_text) + 500;
     }
 
-    if (fuzzy_points_count_1 && fuzzy_points_count_2) {
-        if (fuzzy_points_count_1 < fuzzy_points_count_2) {
-            return -1;
-        } else if (fuzzy_points_count_1 == fuzzy_points_count_2) {
-            if (text_len_1 > text_len_2) {
-                return 1;
-            } else {
-                return -1;
-            }
-        } else {
-            return 1;
-        }
+    points_compair = fuzzy_points_compair(fuzzy_points_count_1, fuzzy_points_count_2, text_len_1, text_len_2);
+    if (points_compair != 0) {
+        return points_compair;
     }
-
-    if (fuzzy_points_count_1 == 0 && fuzzy_points_count_2) {
-        return 1;
-    }
-    if (fuzzy_points_count_2 == 0 && fuzzy_points_count_1) {
-        return -1;
-    }
-
     return 0;
 }
 
