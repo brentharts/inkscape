@@ -101,6 +101,7 @@ set(TEST_SOURCES
     lpe-roughhatches-test
     lpe-ruler-test
     lpe-showhandles-test
+    lpe-simplify-test
     lpe-spiro-test
     xml-test
     sp-item-group-test)
