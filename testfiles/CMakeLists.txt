@@ -99,6 +99,7 @@ set(TEST_SOURCES
     lpe-rotatecopies-test
     lpe-roughen-test
     lpe-roughhatches-test
+    lpe-ruler-test
     lpe-spiro-test
     xml-test
     sp-item-group-test)
