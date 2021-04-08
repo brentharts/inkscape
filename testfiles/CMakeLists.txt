@@ -112,7 +112,9 @@ set(TEST_SOURCES
     lpe-transform2points-test
     lpe-voncoch-test
     #1.0 LPEs
-    lpe-measuresegments-test)
+    lpe-measuresegments-test
+    lpe-filletchamfer-test
+    lpe-powerclip-test)
 
 add_library(cpp_test_static_library SHARED unittest.cpp doc-per-case-test.cpp lpes-test.h)
 target_link_libraries(cpp_test_static_library PUBLIC ${GTEST_LIBRARIES} inkscape_base)
