@@ -75,6 +75,9 @@ set(TEST_SOURCES
     svg-extension-test
     curve-test
     2geom-characterization-test
+    xml-test
+    sp-item-group-test
+    #0.92 LPEs
     lpe-attachpath-test
     lpe-boundingbox-test
     lpe-bendpath-test
@@ -108,8 +111,8 @@ set(TEST_SOURCES
     lpe-taperstroke-test
     lpe-transform2points-test
     lpe-voncoch-test
-    xml-test
-    sp-item-group-test)
+    #1.0 LPEs
+    lpe-measuresegments-test)
 
 add_library(cpp_test_static_library SHARED unittest.cpp doc-per-case-test.cpp lpes-test.h)
 target_link_libraries(cpp_test_static_library PUBLIC ${GTEST_LIBRARIES} inkscape_base)

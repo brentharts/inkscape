@@ -73,13 +73,9 @@ OriginalPathArrayParam::OriginalPathArrayParam( const Glib::ustring& label,
         _vector()
 {    
     initui();
-
-    
-    
     oncanvas_editable = true;
     _from_original_d = false;
     _allow_only_bspline_spiro = false;
-    
 }
 
 OriginalPathArrayParam::~OriginalPathArrayParam()
