@@ -68,30 +68,30 @@ class LPESTest : public ::testing::Test {
       void testDoc(Glib::ustring svg, double precission = 0.001) {
          SPDocument *doc = SPDocument::createNewDocFromMem(svg.c_str(), svg.size(), true);
          doc->ensureUpToDate();
-         std::vector< SPObject *> objs;
+         std::vector<SPObject *> objs;
+         std::vector<const gchar *> ids;
          std::vector<const gchar *> ds;
          for (auto obj : doc->getObjectsByElement("path")) {
-            if (obj->getAttribute("d")) {
-               ds.push_back(obj->getAttribute("d"));
-               objs.push_back(obj);
-            }
+            objs.push_back(obj);
          }
          for (auto obj : doc->getObjectsByElement("ellipse")) {
-            if (obj->getAttribute("d")) {
-               ds.push_back(obj->getAttribute("d"));
-               objs.push_back(obj);
-            }
+            objs.push_back(obj);
          }
          for (auto obj : doc->getObjectsByElement("circle")) {
-            if (obj->getAttribute("d")) {
-               ds.push_back(obj->getAttribute("d"));
-               objs.push_back(obj);
-            }
+            objs.push_back(obj);
          }
          for (auto obj : doc->getObjectsByElement("rect")) {
-            if (obj->getAttribute("d")) {
+            objs.push_back(obj);
+         }
+         for (auto obj : objs) {
+            if (obj->getAttribute("d") && 
+            g_strcmp0(obj->getAttribute("d"), "M 0,0") && 
+            obj->getAttribute("id")) 
+            {
                ds.push_back(obj->getAttribute("d"));
-               objs.push_back(obj);
+               ids.push_back(obj->getAttribute("id"));
+            } else {
+               std::cout << "Some items coulden`t be checked" << std::endl;
             }
          }
          SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(doc->getRoot());
@@ -105,12 +105,19 @@ class LPESTest : public ::testing::Test {
          }
 
          size_t index = 0;
-         for (auto obj : objs) {
-            if (obj->getAttribute("inkscape:test-threshold")) {
-               precission = helperfns_read_number(obj->getAttribute("inkscape:test-threshold"));
-            }
-            if (!obj->getAttribute("inkscape:test-ignore")) {
-               pathCompare(ds[index], obj->getAttribute("d"), obj->getAttribute("id"), precission);
+         for (auto id : ids) {
+            SPObject *obj = doc->getObjectById(id);
+            if (obj) {
+               if (obj->getAttribute("inkscape:test-threshold")) {
+                  precission = helperfns_read_number(obj->getAttribute("inkscape:test-threshold"));
+               }
+               if (!obj->getAttribute("inkscape:test-ignore")) {
+                  pathCompare(ds[index], obj->getAttribute("d"), obj->getAttribute("id"), precission);
+               } else {
+                  std::cout << "The item " << obj->getAttribute("d") << " is ignored by inkscape:test-ignore";
+               }
+            } else {
+               std::cout << "Some items removed on apply LPE";
             }
             index++;
          }
