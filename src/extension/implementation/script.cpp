@@ -272,6 +272,13 @@ bool Script::check(Inkscape::Extension::Extension *module)
         child_repr = child_repr->next();
     }
 
+    // This check disables the extensions manager in the preferences.
+    auto prefs = Inkscape::Preferences::get();
+    if (!g_strcmp0(module->get_id(), "org.inkscape.extensions.manager")
+        && !prefs->getBool("/extensions/enable_user_extensions", true)) {
+        return false;
+    }
+
     if (script_count == 0) {
         return false;
     }

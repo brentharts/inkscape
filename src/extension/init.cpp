@@ -267,6 +267,10 @@ init()
 void
 load_user_extensions()
 {
+    auto prefs = Inkscape::Preferences::get();
+    if (!prefs->getBool("/extensions/enable_user_extensions", true)) {
+        return; // User extensions disabled.
+    }
     // There's no need to ask for SYSTEM extensions, just ask for user extensions.
     for(auto &filename: get_filenames(USER, EXTENSIONS, {SP_MODULE_EXTENSION})) {
         bool exist = false;
