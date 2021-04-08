@@ -196,27 +196,8 @@ StartScreen::StartScreen()
     set_active_combo("themes", prefs->getString("/options/boot/theme"));
     set_active_combo("canvas", prefs->getString("/options/boot/canvas"));
 
-    auto settings = Gtk::Settings::get_default();
-    Gtk::Container *window = get_toplevel();
-    bool dark;
-    if (settings && window) {
-        Glib::RefPtr<Gtk::StyleContext> stylecontext = window->get_style_context();
-        Gdk::RGBA rgba;
-        bool background_set = stylecontext->lookup_color("theme_bg_color", rgba);
-        if (background_set && (0.299 * rgba.get_red() + 0.587 * rgba.get_green() + 0.114 * rgba.get_blue()) < 0.5) {
-            dark = true;
-        }
-        if (dark) {
-            prefs->setBool("/theme/darkTheme", true);
-            window->get_style_context()->add_class("dark");
-            window->get_style_context()->remove_class("bright");
-        } else {
-            prefs->setBool("/theme/darkTheme", false);
-            window->get_style_context()->add_class("bright");
-            window->get_style_context()->remove_class("dark");
-        }
-    }
-    dark_toggle->set_active(prefs->getBool("/theme/darkTheme", false));
+    // initalise dark depending on prefs and background
+    refresh_dark_switch();
 
     // Welcome! tab
     std::string welcome_text_file = Resource::get_filename_string(Resource::SCREENS, "start-welcome-text.svg", true);
@@ -556,7 +537,7 @@ StartScreen::refresh_theme(Glib::ustring theme_name)
     auto prefs = Inkscape::Preferences::get();
 
     settings->property_gtk_theme_name() = theme_name;
-    settings->property_gtk_application_prefer_dark_theme() = prefs->getBool("/theme/darkTheme", true);
+    settings->property_gtk_application_prefer_dark_theme() = prefs->getBool("/theme/preferDarkTheme", true);
     settings->property_gtk_icon_theme_name() = prefs->getString("/theme/iconTheme");
 
     if (prefs->getBool("/theme/symbolicIcons", false)) {
@@ -581,6 +562,9 @@ StartScreen::refresh_theme(Glib::ustring theme_name)
         Gtk::StyleContext::add_provider_for_screen(screen, INKSCAPE.colorizeprovider,
                                                 GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
     }
+    // set dark switch and disable if there is no prefer option for dark
+    refresh_dark_switch();
+    
     INKSCAPE.signal_change_theme.emit();
 }
 
@@ -611,12 +595,13 @@ StartScreen::theme_changed()
         bool is_dark = dark_toggle->get_active();
         prefs->setBool("/theme/preferDarkTheme", is_dark);
         prefs->setBool("/theme/darkTheme", is_dark);
-
         // Symbolic icon colours
         if (get_color_value(row[cols.base]) == 0) {
             prefs->setBool("/theme/symbolicDefaultBaseColors", true);
             prefs->setBool("/theme/symbolicDefaultHighColors", true);
-        } else {
+        }
+        else
+        {
             Glib::ustring prefix = "/theme/" + icons;
             prefs->setBool("/theme/symbolicDefaultBaseColors", false);
             prefs->setBool("/theme/symbolicDefaultHighColors", false);
@@ -630,7 +615,7 @@ StartScreen::theme_changed()
             prefs->setUInt(prefix + "/symbolicErrorColor", get_color_value(row[cols.error]));
         }
 
-        refresh_theme(row[cols.theme]);
+        refresh_theme(prefs->getString("/theme/gtkTheme",prefs->getString("/theme/defaultGtkTheme","")));
     } catch(int e) {
         g_warning("Couldn't find theme value.");
     }
@@ -752,6 +737,30 @@ StartScreen::keyboard_changed()
     } catch(int e) {
         g_warning("Couldn't find keys value.");
     }
+}
+
+void StartScreen::refresh_dark_switch()
+{
+    auto prefs = Inkscape::Preferences::get();
+
+    Gtk::Container *window = dynamic_cast<Gtk::Container *>(get_toplevel());
+    bool dark = isCurrentThemeDark(window);
+    prefs->setBool("/theme/preferDarkTheme", dark);
+    prefs->setBool("/theme/darkTheme", dark);
+
+    auto themes = get_available_themes();
+    Glib::ustring current_theme = prefs->getString("/theme/gtkTheme",prefs->getString("/theme/defaultGtkTheme", ""));
+
+    Gtk::Switch *dark_toggle = nullptr;
+    builder->get_widget("dark_toggle", dark_toggle);
+ 
+    if (!themes[current_theme]) {
+        dark_toggle->set_sensitive(false);
+    }
+    else {
+        dark_toggle->set_sensitive(true);
+    }
+    dark_toggle->set_active(dark);
 }
 
 } // namespace Dialog

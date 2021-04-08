@@ -20,11 +20,13 @@
 #include <vector>
 
 #include <glibmm.h>
+#include <gtkmm.h>
 
 // Name of theme -> has dark theme
 typedef std::map<Glib::ustring, bool> gtkThemeList;
 
 gtkThemeList get_available_themes();
+bool isCurrentThemeDark(Gtk::Container *window);
 
 #endif /* !UI_THEMES_H_SEEN */
 
