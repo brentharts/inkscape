@@ -26,6 +26,8 @@
 typedef std::map<Glib::ustring, bool> gtkThemeList;
 
 gtkThemeList get_available_themes();
+
+// True if current theme (applied one) is dark
 bool isCurrentThemeDark(Gtk::Container *window);
 
 #endif /* !UI_THEMES_H_SEEN */

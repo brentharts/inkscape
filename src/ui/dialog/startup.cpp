@@ -739,6 +739,11 @@ StartScreen::keyboard_changed()
     }
 }
 
+/**
+ * Set Dark Switch based on current selected theme.
+ * We will disable switch if current theme doesn't have prefer dark theme option. 
+ */
+
 void StartScreen::refresh_dark_switch()
 {
     auto prefs = Inkscape::Preferences::get();
