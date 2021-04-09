@@ -939,7 +939,7 @@ int CommandPalette::fuzzy_points_compare(int fuzzy_points_count_1, int fuzzy_poi
 {
     if (fuzzy_points_count_1 && fuzzy_points_count_2) {
         if (fuzzy_points_count_1 < fuzzy_points_count_2) {
-            return -1;6?
+            return -1;
         } else if (fuzzy_points_count_1 == fuzzy_points_count_2) {
             if (text_len_1 > text_len_2) {
                 return 1;
