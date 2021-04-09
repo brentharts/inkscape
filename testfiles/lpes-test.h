@@ -114,10 +114,10 @@ class LPESTest : public ::testing::Test {
                if (!obj->getAttribute("inkscape:test-ignore")) {
                   pathCompare(ds[index], obj->getAttribute("d"), obj->getAttribute("id"), precission);
                } else {
-                  std::cout << "The item " << obj->getAttribute("d") << " is ignored by inkscape:test-ignore";
+                  std::cout << "Item with id:" << obj->getAttribute("id") << " ignored by inkscape:test-ignore" << std::endl;
                }
             } else {
-               std::cout << "Some items removed on apply LPE";
+               std::cout << "Item with id:" << id << " removed on apply LPE" << std::endl;
             }
             index++;
          }
