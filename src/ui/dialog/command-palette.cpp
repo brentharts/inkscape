@@ -260,6 +260,7 @@ void CommandPalette::append_recent_file_operation(const Glib::ustring &path, boo
         CPActionFullName->hide();
 
         CPName->set_text((is_import ? _("Import") : _("Open")) + (": " + file_name));
+        CPName->set_tooltip_text((is_import ? ("Import") : ("Open")) + (": " + file_name)); // Tooltip_text are not translatable
         CPDescription->set_text(path);
         CPDescription->set_tooltip_text(path);
 
@@ -938,7 +939,7 @@ int CommandPalette::fuzzy_points_compare(int fuzzy_points_count_1, int fuzzy_poi
 {
     if (fuzzy_points_count_1 && fuzzy_points_count_2) {
         if (fuzzy_points_count_1 < fuzzy_points_count_2) {
-            return -1;
+            return -1;6?
         } else if (fuzzy_points_count_1 == fuzzy_points_count_2) {
             if (text_len_1 > text_len_2) {
                 return 1;
