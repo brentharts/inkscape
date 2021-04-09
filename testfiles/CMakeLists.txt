@@ -123,7 +123,7 @@ set(TEST_SOURCES
     lpe-booleanoperation-test
     lpe-slice-test)
 
-add_library(cpp_test_static_library SHARED unittest.cpp doc-per-case-test.cpp lpes-test.h)
+add_library(cpp_test_static_library SHARED unittest.cpp doc-per-case-test.cpp lpespaths-test.h)
 target_link_libraries(cpp_test_static_library PUBLIC ${GTEST_LIBRARIES} inkscape_base)
 
 add_custom_target(tests)

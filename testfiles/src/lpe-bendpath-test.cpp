@@ -10,7 +10,7 @@
  */
 
 #include <gtest/gtest.h>
-#include <testfiles/lpes-test.h>
+#include <testfiles/lpespaths-test.h>
 #include <src/file.h>
 #include <src/document.h>
 #include <src/inkscape.h>
@@ -19,7 +19,7 @@
 using namespace Inkscape;
 using namespace Inkscape::LivePathEffect;
 
-class LPEBendpathTest : public LPESTest {};
+class LPEBendpathTest : public LPESPathsTest {};
 
 // INKSCAPE 0.92.5
 

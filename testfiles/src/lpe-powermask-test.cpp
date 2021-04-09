@@ -10,13 +10,13 @@
  */
 
 #include <gtest/gtest.h>
-#include <testfiles/lpes-test.h>
+#include <testfiles/lpespaths-test.h>
 #include <src/inkscape.h>
 
 using namespace Inkscape;
 using namespace Inkscape::LivePathEffect;
 
-class LPEPowerMaskTest : public LPESTest {};
+class LPEPowerMaskTest : public LPESPathsTest {};
 // INKSCAPE 1.0.2
 
 TEST_F(LPEPowerMaskTest, multi_PX_1_0_2)

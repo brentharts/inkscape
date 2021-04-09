@@ -10,13 +10,13 @@
  */
 
 #include <gtest/gtest.h>
-#include <testfiles/lpes-test.h>
+#include <testfiles/lpespaths-test.h>
 #include <src/inkscape.h>
 
 using namespace Inkscape;
 using namespace Inkscape::LivePathEffect;
 
-class LPEBooleanOperationTest : public LPESTest {};
+class LPEBooleanOperationTest : public LPESPathsTest {};
 
 // TEST fails if multiple simplify on stack
 

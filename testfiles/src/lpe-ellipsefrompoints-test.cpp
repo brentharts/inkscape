@@ -10,13 +10,13 @@
  */
 
 #include <gtest/gtest.h>
-#include <testfiles/lpes-test.h>
+#include <testfiles/lpespaths-test.h>
 #include <src/inkscape.h>
 
 using namespace Inkscape;
 using namespace Inkscape::LivePathEffect;
 
-class LPEEllipseFromPointsTest : public LPESTest {};
+class LPEEllipseFromPointsTest : public LPESPathsTest {};
 
 
 // INKSCAPE 1.0.2
