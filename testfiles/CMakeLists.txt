@@ -120,7 +120,8 @@ set(TEST_SOURCES
     lpe-offset-test
     lpe-dashedstroke-test
     #1.1 LPEs
-    lpe-booleanoperation-test)
+    lpe-booleanoperation-test
+    lpe-slice-test)
 
 add_library(cpp_test_static_library SHARED unittest.cpp doc-per-case-test.cpp lpes-test.h)
 target_link_libraries(cpp_test_static_library PUBLIC ${GTEST_LIBRARIES} inkscape_base)
