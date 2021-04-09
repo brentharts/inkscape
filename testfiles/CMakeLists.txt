@@ -77,7 +77,7 @@ set(TEST_SOURCES
     2geom-characterization-test
     xml-test
     sp-item-group-test
-    #0.92 LPEs
+    #0.92 or lower LPEs
     lpe-attachpath-test
     lpe-boundingbox-test
     lpe-bendpath-test
