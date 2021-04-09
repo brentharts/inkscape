@@ -84,14 +84,13 @@ class LPESTest : public ::testing::Test {
             objs.push_back(obj);
          }
          for (auto obj : objs) {
-            if (obj->getAttribute("d") && 
-            g_strcmp0(obj->getAttribute("d"), "M 0,0") && 
-            obj->getAttribute("id")) 
-            {
+            if (!g_strcmp0(obj->getAttribute("d"), "M 0,0")) {
+               if (obj->getAttribute("id")) {
+                  std::cout << "Item with id:" << obj->getAttribute("id") << " has empty path data" << std::endl;
+               }
+            } else if (obj->getAttribute("d") && obj->getAttribute("id"))  {
                ds.push_back(obj->getAttribute("d"));
                ids.push_back(obj->getAttribute("id"));
-            } else {
-               std::cout << "Some items coulden`t be checked" << std::endl;
             }
          }
          SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(doc->getRoot());

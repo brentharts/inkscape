@@ -117,7 +117,8 @@ set(TEST_SOURCES
     lpe-powerclip-test
     lpe-powermask-test
     lpe-ellipsefrompoints-test
-    lpe-offset-test)
+    lpe-offset-test
+    lpe-dashedstroke-test)
 
 add_library(cpp_test_static_library SHARED unittest.cpp doc-per-case-test.cpp lpes-test.h)
 target_link_libraries(cpp_test_static_library PUBLIC ${GTEST_LIBRARIES} inkscape_base)
