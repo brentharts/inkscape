@@ -962,6 +962,14 @@ InkscapeApplication::on_activate()
     SPDocument *document = nullptr;
     auto prefs = Inkscape::Preferences::get();
 
+    bool is_process_file = false;
+    for (auto action: _command_line_actions) {
+        if (_gio_application->has_action(action.first)) {
+            is_process_file = true;
+            break;
+        }
+    }
+
     if (_use_pipe) {
 
         // Create document from pipe in.
@@ -970,7 +978,7 @@ InkscapeApplication::on_activate()
         document = document_open (s);
         output = "-";
 
-    } else if(prefs->getBool("/options/boot/enabled", true) && !_use_shell) {
+    } else if(prefs->getBool("/options/boot/enabled", true) && !_use_shell && !is_process_file) {
 
         Inkscape::UI::Dialog::StartScreen start_screen;
 
