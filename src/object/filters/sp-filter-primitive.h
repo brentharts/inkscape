@@ -52,7 +52,7 @@ public:
         virtual Geom::Rect calculate_region(Geom::Rect region);
 
         /* Return true if the object should be allowed to use this filter */
-        virtual bool valid_for(SPObject *obj) {
+        virtual bool valid_for(SPObject const *obj) const {
             // This is used by feImage to stop infinate loops.
             return true;
         };

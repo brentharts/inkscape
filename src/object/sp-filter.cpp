@@ -430,10 +430,10 @@ void SPFilter::set_filter_region(double x, double y, double width, double height
 /**
  * Check each filter primative for conflicts with this object.
  */
-bool SPFilter::valid_for(SPObject *obj)
+bool SPFilter::valid_for(SPObject const *obj) const
 {
     for(auto& primitive_obj: this->children) {
-        auto primitive = dynamic_cast<SPFilterPrimitive *>(&primitive_obj);
+        auto primitive = dynamic_cast<SPFilterPrimitive const *>(&primitive_obj);
         if (primitive && !primitive->valid_for(obj)) {
             return false;
         }
