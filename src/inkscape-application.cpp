@@ -962,14 +962,6 @@ InkscapeApplication::on_activate()
     SPDocument *document = nullptr;
     auto prefs = Inkscape::Preferences::get();
 
-    bool is_process_file = false;
-    for (auto action: _command_line_actions) {
-        if (_gio_application->has_action(action.first)) {
-            is_process_file = true;
-            break;
-        }
-    }
-
     if (_use_pipe) {
 
         // Create document from pipe in.
@@ -978,7 +970,7 @@ InkscapeApplication::on_activate()
         document = document_open (s);
         output = "-";
 
-    } else if(prefs->getBool("/options/boot/enabled", true) && !_use_shell && !is_process_file) {
+    } else if (prefs->getBool("/options/boot/enabled", true) && !_use_shell && !_use_command_line_argument) {
 
         Inkscape::UI::Dialog::StartScreen start_screen;
 
@@ -1273,31 +1265,37 @@ InkscapeApplication::on_handle_local_options(const Glib::RefPtr<Glib::VariantDic
     // ===================== QUERY =====================
     // These are processed first as they result in immediate program termination.
     if (options->contains("version")) {
+        _use_command_line_argument = true;
         gapp->activate_action("inkscape-version");
         return EXIT_SUCCESS;
     }
     
     if (options->contains("debug-info")) {
+        _use_command_line_argument = true;
         gapp->activate_action("debug-info");
         return EXIT_SUCCESS;
     }
 
     if (options->contains("system-data-directory")) {
+        _use_command_line_argument = true;
         gapp->activate_action("system-data-directory");
         return EXIT_SUCCESS;
     }
 
     if (options->contains("user-data-directory")) {
+        _use_command_line_argument = true;
         gapp->activate_action("user-data-directory");
         return EXIT_SUCCESS;
     }
 
     if (options->contains("verb-list")) {
+        _use_command_line_argument = true;
         gapp->activate_action("verb-list");
         return EXIT_SUCCESS;
     }
 
     if (options->contains("action-list")) {
+        _use_command_line_argument = true;
         gapp->activate_action("action-list");
         return EXIT_SUCCESS;
     }
@@ -1352,17 +1350,28 @@ InkscapeApplication::on_handle_local_options(const Glib::RefPtr<Glib::VariantDic
         options->contains("shell")
         ) {
         _with_gui = false;
+        _use_command_line_argument = true;
     }
 
     if (options->contains("with-gui")        ||
         options->contains("batch-process")
         ) {
         _with_gui = true; // Override turning GUI off
+        _use_command_line_argument = true;
     }
 
-    if (options->contains("batch-process"))  _batch_process = true;
-    if (options->contains("shell"))          _use_shell = true;
-    if (options->contains("pipe"))           _use_pipe  = true;
+    if (options->contains("batch-process"))  {
+        _batch_process = true;
+        _use_command_line_argument = true;
+    }
+    if (options->contains("shell")) {
+        _use_shell = true;
+        _use_command_line_argument = true;
+    }
+    if (options->contains("pipe")) {
+        _use_pipe  = true;
+        _use_command_line_argument = true;
+    }
 
 
     // Enable auto-export
@@ -1372,6 +1381,7 @@ InkscapeApplication::on_handle_local_options(const Glib::RefPtr<Glib::VariantDic
         options->contains("export-use-hints")
         ) {
         _auto_export = true;
+        _use_command_line_argument = true;
     }
 
     // ==================== ACTIONS ====================
@@ -1381,6 +1391,7 @@ InkscapeApplication::on_handle_local_options(const Glib::RefPtr<Glib::VariantDic
     if (options->contains("actions")) {
         options->lookup_value("actions", actions);
         parse_actions(actions, _command_line_actions);
+        _use_command_line_argument = true;
     }
 
 
@@ -1388,11 +1399,13 @@ InkscapeApplication::on_handle_local_options(const Glib::RefPtr<Glib::VariantDic
 
     if (options->contains("pdf-poppler")) {
         _pdf_poppler = true;
+        _use_command_line_argument = true;
     }
     if (options->contains("pdf-page")) {   // Maybe useful for other file types?
         int page = 0;
         options->lookup_value("pdf-page", page);
         _pdf_page = page;
+        _use_command_line_argument = true;
     }
 
     if (options->contains("convert-dpi-method")) {
@@ -1402,9 +1415,13 @@ InkscapeApplication::on_handle_local_options(const Glib::RefPtr<Glib::VariantDic
             _command_line_actions.push_back(
                 std::make_pair("convert-dpi-method", Glib::Variant<Glib::ustring>::create(method)));
         }
+        _use_command_line_argument = true;
     }
 
-    if (options->contains("no-convert-text-baseline-spacing")) _command_line_actions.push_back(std::make_pair("no-convert-baseline", base));
+    if (options->contains("no-convert-text-baseline-spacing")) {
+        _command_line_actions.push_back(std::make_pair("no-convert-baseline", base));
+        _use_command_line_argument = true;
+    }
 
 
     // ===================== QUERY =====================
@@ -1417,20 +1434,39 @@ InkscapeApplication::on_handle_local_options(const Glib::RefPtr<Glib::VariantDic
             _command_line_actions.push_back(
                 std::make_pair("select-by-id", Glib::Variant<Glib::ustring>::create(query_id)));
         }
+        _use_command_line_argument = true;
     }
 
-    if (options->contains("query-all"))    _command_line_actions.push_back(std::make_pair("query-all",   base));
-    if (options->contains("query-x"))      _command_line_actions.push_back(std::make_pair("query-x",     base));
-    if (options->contains("query-y"))      _command_line_actions.push_back(std::make_pair("query-y",     base));
-    if (options->contains("query-width"))  _command_line_actions.push_back(std::make_pair("query-width", base));
-    if (options->contains("query-height")) _command_line_actions.push_back(std::make_pair("query-height",base));
+    if (options->contains("query-all")) {
+        _command_line_actions.push_back(std::make_pair("query-all",   base));
+        _use_command_line_argument = true;
+    }
+    if (options->contains("query-x")) {
+        _command_line_actions.push_back(std::make_pair("query-x",     base));
+        _use_command_line_argument = true;
+    }
+    if (options->contains("query-y")) {
+        _command_line_actions.push_back(std::make_pair("query-y",     base));
+        _use_command_line_argument = true;
+    }
+    if (options->contains("query-width")) {
+        _command_line_actions.push_back(std::make_pair("query-width", base));
+        _use_command_line_argument = true;
+    }
+    if (options->contains("query-height")) {
+        _command_line_actions.push_back(std::make_pair("query-height",base));
+        _use_command_line_argument = true;
+    }
 
 
     // =================== PROCESS =====================
 
     // Note: this won't work with --verb="FileSave,FileClose" unless some additional verb changes the file. FIXME
     // One can use --verb="FileVacuum,FileSave,FileClose".
-    if (options->contains("vacuum-defs"))  _command_line_actions.push_back(std::make_pair("vacuum-defs", base));
+    if (options->contains("vacuum-defs")) {
+        _command_line_actions.push_back(std::make_pair("vacuum-defs", base));
+        _use_command_line_argument = true;
+    }
 
     if (options->contains("select")) {
         Glib::ustring select;
@@ -1439,6 +1475,7 @@ InkscapeApplication::on_handle_local_options(const Glib::RefPtr<Glib::VariantDic
             _command_line_actions.push_back(
                 std::make_pair("select", Glib::Variant<Glib::ustring>::create(select)));
         }
+        _use_command_line_argument = true;
     }
 
     if (options->contains("verb")) {
@@ -1448,74 +1485,117 @@ InkscapeApplication::on_handle_local_options(const Glib::RefPtr<Glib::VariantDic
             _command_line_actions.push_back(
                 std::make_pair("verb", Glib::Variant<Glib::ustring>::create(verb)));
         }
+        _use_command_line_argument = true;
     }
 
 
     // ==================== EXPORT =====================
     if (options->contains("export-filename")) {
         options->lookup_value("export-filename",  _file_export.export_filename);
+        _use_command_line_argument = true;
     }
 
     if (options->contains("export-type")) {
         options->lookup_value("export-type",      _file_export.export_type);
+        _use_command_line_argument = true;
     }
     if (options->contains("export-extension")) {
         options->lookup_value("export-extension", _file_export.export_extension);
         _file_export.export_extension = _file_export.export_extension.lowercase();
+        _use_command_line_argument = true;
     }
 
-    if (options->contains("export-overwrite"))    _file_export.export_overwrite    = true;
+    if (options->contains("export-overwrite")) {
+        _file_export.export_overwrite = true;
+        _use_command_line_argument = true;
+    }
 
     // Export - Geometry
     if (options->contains("export-area")) {
-        options->lookup_value("export-area",      _file_export.export_area);
+        options->lookup_value("export-area", _file_export.export_area);
+        _use_command_line_argument = true;
     }
 
-    if (options->contains("export-area-drawing")) _file_export.export_area_drawing = true;
-    if (options->contains("export-area-page"))    _file_export.export_area_page    = true;
+    if (options->contains("export-area-drawing")) {
+        _file_export.export_area_drawing = true;
+        _use_command_line_argument = true;
+    }
+    if (options->contains("export-area-page")) {
+        _file_export.export_area_page = true;
+        _use_command_line_argument = true;
+    }
 
     if (options->contains("export-margin")) {
-        options->lookup_value("export-margin",    _file_export.export_margin);
+        options->lookup_value("export-margin", _file_export.export_margin);
+        _use_command_line_argument = true;
     }
 
-    if (options->contains("export-area-snap"))    _file_export.export_area_snap    = true;
+    if (options->contains("export-area-snap")) {
+        _file_export.export_area_snap = true;
+        _use_command_line_argument = true;
+    }
 
     if (options->contains("export-width")) {
-        options->lookup_value("export-width",     _file_export.export_width);
+        options->lookup_value("export-width", _file_export.export_width);
+        _use_command_line_argument = true;
     }
 
     if (options->contains("export-height")) {
-        options->lookup_value("export-height",    _file_export.export_height);
+        options->lookup_value("export-height", _file_export.export_height);
+        _use_command_line_argument = true;
     }
 
     // Export - Options
     if (options->contains("export-id")) {
-        options->lookup_value("export-id",        _file_export.export_id);
+        options->lookup_value("export-id", _file_export.export_id);
+        _use_command_line_argument = true;
     }
 
-    if (options->contains("export-id-only"))      _file_export.export_id_only     = true;
-    if (options->contains("export-plain-svg"))    _file_export.export_plain_svg      = true;
+    if (options->contains("export-id-only")) {
+        _file_export.export_id_only = true;
+        _use_command_line_argument = true;
+    }
+    if (options->contains("export-plain-svg")) {
+        _file_export.export_plain_svg = true;
+        _use_command_line_argument = true;
+    }
 
     if (options->contains("export-dpi")) {
-        options->lookup_value("export-dpi",       _file_export.export_dpi);
+        options->lookup_value("export-dpi", _file_export.export_dpi);
+        _use_command_line_argument = true;
     }
 
-    if (options->contains("export-ignore-filters")) _file_export.export_ignore_filters = true;
-    if (options->contains("export-text-to-path"))   _file_export.export_text_to_path   = true;
+    if (options->contains("export-ignore-filters")) {
+        _file_export.export_ignore_filters = true;
+        _use_command_line_argument = true;
+    }
+    if (options->contains("export-text-to-path")) {
+        _file_export.export_text_to_path = true;
+        _use_command_line_argument = true;
+    }
 
     if (options->contains("export-ps-level")) {
-        options->lookup_value("export-ps-level",  _file_export.export_ps_level);
+        options->lookup_value("export-ps-level", _file_export.export_ps_level);
+        _use_command_line_argument = true;
     }
 
     if (options->contains("export-pdf-version")) {
         options->lookup_value("export-pdf-version", _file_export.export_pdf_level);
+        _use_command_line_argument = true;
     }
 
-    if (options->contains("export-latex"))        _file_export.export_latex       = true;
-    if (options->contains("export-use-hints"))    _file_export.export_use_hints   = true;
+    if (options->contains("export-latex")) {
+        _file_export.export_latex = true;
+        _use_command_line_argument = true;
+    }
+    if (options->contains("export-use-hints")) {
+        _file_export.export_use_hints = true;
+        _use_command_line_argument = true;
+    }
 
     if (options->contains("export-background")) {
         options->lookup_value("export-background",_file_export.export_background);
+        _use_command_line_argument = true;
     }
 
     // FIXME: Upstream bug means DOUBLE is ignored if set to 0.0 so doesn't exist in options
@@ -1523,10 +1603,12 @@ InkscapeApplication::on_handle_local_options(const Glib::RefPtr<Glib::VariantDic
         Glib::ustring opacity;
         options->lookup_value("export-background-opacity", opacity);
         _file_export.export_background_opacity = Glib::Ascii::strtod(opacity);
+        _use_command_line_argument = true;
     }
 
     if (options->contains("export-png-color-mode")) {
         options->lookup_value("export-png-color-mode", _file_export.export_png_color_mode);
+        _use_command_line_argument = true;
     }
 
 
@@ -1540,6 +1622,7 @@ InkscapeApplication::on_handle_local_options(const Glib::RefPtr<Glib::VariantDic
         if (!dbus_name.empty()) {
             Inkscape::Extension::Dbus::dbus_set_bus_name(dbus_name.c_str());
         }
+        _use_command_line_argument = true;
     }
 #endif
 
