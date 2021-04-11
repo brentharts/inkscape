@@ -48,7 +48,7 @@ using Inkscape::UI::Dialog::DialogManager;
 using Inkscape::UI::Dialog::DialogContainer;
 using Inkscape::UI::Dialog::DialogWindow;
 
-gboolean _resize_children(Gtk::Window *win)
+static gboolean _resize_children(Gtk::Window *win)
 {
     win->resize_children();
     return false;
