@@ -62,7 +62,7 @@ private:
     void calcCanInsert();
     void insertText();
 
-    SPDesktop* _desktop;
+    SPDesktop* _desktop = nullptr;
     Glib::RefPtr<Gtk::ListStore> store;
     Gtk::IconView *iconView;
     Glib::RefPtr<Gtk::Entry> entry;
