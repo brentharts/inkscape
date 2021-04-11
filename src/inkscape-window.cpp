@@ -48,6 +48,13 @@ using Inkscape::UI::Dialog::DialogManager;
 using Inkscape::UI::Dialog::DialogContainer;
 using Inkscape::UI::Dialog::DialogWindow;
 
+gboolean _resize_children(Gtk::Window *win)
+{
+    win->resize_children();
+    return false;
+}
+
+
 InkscapeWindow::InkscapeWindow(SPDocument* document)
     : _document(document)
     , _app(nullptr)
@@ -113,9 +120,9 @@ InkscapeWindow::InkscapeWindow(SPDocument* document)
         bool include_short_lived = _app->get_number_of_windows() == 0;
         DialogManager::singleton().restore_dialogs_state(_desktop->getContainer(), include_short_lived);
 
-        // This pokes the window to request the right size for the dialogs.
+        // This pokes the window to request the right size for the dialogs once loaded.
         Gtk::Window *win = _desktop->getToplevel();
-        win->resize_children();
+        g_idle_add(GSourceFunc(&_resize_children), win);
     }
 
     // ========= Update text for Accellerators =======
