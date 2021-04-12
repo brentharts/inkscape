@@ -163,6 +163,11 @@ bool CurveDragPoint::clicked(GdkEventButton *event)
         _pm._selection.clear();
         _pm._selection.insert(first.ptr());
         _pm._selection.insert(second.ptr());
+        if (held_alt(*event)) {
+            _pm.setSegmentType(Inkscape::UI::SEGMENT_STRAIGHT);
+            _pm.update(true);
+            _pm._commit(_("Straighten segments"));
+        }
     }
     return true;
 }
