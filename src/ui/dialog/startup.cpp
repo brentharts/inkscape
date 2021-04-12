@@ -208,7 +208,7 @@ StartScreen::StartScreen()
     thanks->signal_clicked().connect(sigc::bind<Gtk::Button *>(sigc::mem_fun(*this, &StartScreen::notebook_next), thanks));
 
     // "Time to Draw" tab
-    recent_treeview->signal_row_activated().connect(sigc::hide(sigc::hide((sigc::mem_fun(*this, &StartScreen::new_now)))));
+    recent_treeview->signal_row_activated().connect(sigc::hide(sigc::hide((sigc::mem_fun(*this, &StartScreen::load_now)))));
     recent_treeview->get_selection()->signal_changed().connect(sigc::mem_fun(*this, &StartScreen::on_recent_changed));
     kinds->signal_switch_page().connect(sigc::mem_fun(*this, &StartScreen::on_kind_changed));
 
@@ -713,6 +713,7 @@ StartScreen::keyboard_changed()
         auto prefs = Inkscape::Preferences::get();
         Glib::ustring set_to = row[cols.col_id];
         prefs->setString("/options/kbshortcuts/shortcutfile", set_to);
+        Inkscape::Shortcuts::getInstance().init();
 
         Gtk::InfoBar* keys_warning;
         builder->get_widget("keys_warning", keys_warning);
