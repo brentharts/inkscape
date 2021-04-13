@@ -163,7 +163,7 @@ bool CurveDragPoint::clicked(GdkEventButton *event)
         _pm._selection.clear();
         _pm._selection.insert(first.ptr());
         _pm._selection.insert(second.ptr());
-        if (held_alt(*event)) {
+        if (held_control(*event)) {
             _pm.setSegmentType(Inkscape::UI::SEGMENT_STRAIGHT);
             _pm.update(true);
             _pm._commit(_("Straighten segments"));
@@ -205,6 +205,10 @@ Glib::ustring CurveDragPoint::_getTip(unsigned state) const
     if (state_held_control(state) && state_held_alt(state)) {
         return C_("Path segment tip",
             "<b>Ctrl+Alt</b>: click to insert a node");
+    }
+    if (state_held_control(state)) {
+        return C_("Path segment tip",
+            "<b>Ctrl</b>: click to change line type");
     }
     if(_pm._isBSpline()){
         return C_("Path segment tip",
