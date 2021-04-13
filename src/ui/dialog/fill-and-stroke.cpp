@@ -102,9 +102,7 @@ void FillAndStroke::setDesktop(SPDesktop *desktop)
         if (strokeStyleWdgt) {
             strokeStyleWdgt->setDesktop(desktop);
         }
-        if (desktop) {
-            _subject.setDesktop(desktop);
-        }
+        _subject.setDesktop(desktop);
     }
 }
 
