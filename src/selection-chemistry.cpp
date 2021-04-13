@@ -3706,8 +3706,8 @@ void ObjectSet::createBitmapCopy()
 
     // Build the complete path by adding document base dir, if set, otherwise home dir
     gchar *directory = nullptr;
-    if ( doc->getDocumentURI() ) {
-        directory = g_path_get_dirname( doc->getDocumentURI() );
+    if ( doc->getDocumentFilename() ) {
+        directory = g_path_get_dirname( doc->getDocumentFilename() );
     }
     if (directory == nullptr) {
         directory = Inkscape::IO::Resource::homedir_path(nullptr);
@@ -4089,8 +4089,8 @@ void ObjectSet::setClipGroup()
 
 
     gchar const *attributeName = apply_clip_path ? "clip-path" : "mask";
-    for (std::vector<SPItem*>::const_reverse_iterator i = apply_to_items.rbegin(); i != apply_to_items.rend(); ++i) {
-        SPItem *item = reinterpret_cast<SPItem *>(*i);
+    for (auto i = apply_to_items.rbegin(); i != apply_to_items.rend(); ++i) {
+        SPItem *item = *i;
         std::vector<Inkscape::XML::Node*> mask_items_dup;
         std::map<Inkscape::XML::Node*, Geom::Affine> dup_transf;
         for (auto & mask_item : mask_items) {
@@ -4099,7 +4099,7 @@ void ObjectSet::setClipGroup()
             dup_transf[dup] = mask_item.second;
         }
 
-        Inkscape::XML::Node *current = SP_OBJECT(*i)->getRepr();
+        Inkscape::XML::Node *current = item->getRepr();
         // Node to apply mask to
         Inkscape::XML::Node *apply_mask_to = current;
 
@@ -4116,8 +4116,9 @@ void ObjectSet::setClipGroup()
 
             // Apply clip/mask to group instead
             apply_mask_to = group;
+            item = dynamic_cast<SPItem*>(doc->getObjectByRepr(group));
 
-            items_to_select.push_back((SPItem*)doc->getObjectByRepr(group));
+            items_to_select.push_back(item);
             Inkscape::GC::release(spnew);
             Inkscape::GC::release(group);
         }
