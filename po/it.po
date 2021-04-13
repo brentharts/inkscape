@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: Inkscape 1.0\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
 "POT-Creation-Date: 2021-03-14 20:46+0000\n"
-"PO-Revision-Date: 2021-04-13 11:09+0200\n"
+"PO-Revision-Date: 2021-04-13 19:20+0200\n"
 "Last-Translator: Firas Hanife <firashanife@gmail.com>\n"
 "Language-Team: \n"
 "Language: it\n"
@@ -4030,16 +4030,12 @@ msgid "no layers empty"
 msgstr "no livelli vuoto"
 
 #: ../src/actions/actions-base.cpp:225
-#, fuzzy
-#| msgid "Print Inkscape version"
 msgid "Inkscape Version"
-msgstr "Mostra la versione di Inkscape"
+msgstr "Versione di Inkscape"
 
 #: ../src/actions/actions-base.cpp:225
-#, fuzzy
-#| msgid "Print Inkscape version"
 msgid "Print Inkscape version and exit"
-msgstr "Mostra la versione di Inkscape"
+msgstr "Mostra la versione di Inkscape ed esce"
 
 #: ../src/actions/actions-base.cpp:226
 #, fuzzy
@@ -4098,22 +4094,16 @@ msgid "Execute verb(s)"
 msgstr "Esegue la vettorizzazione"
 
 #: ../src/actions/actions-base.cpp:231
-#, fuzzy
-#| msgid "Clean up document"
 msgid "Clean up Document"
 msgstr "Pulisci documento"
 
 #: ../src/actions/actions-base.cpp:231
-#, fuzzy
-#| msgid "No unused definitions in &lt;defs&gt;."
 msgid "Remove unused definitions (gradients, etc.)"
-msgstr "Nessuna definizione inutilizzata in &lt;defs&gt;."
+msgstr "Rimuove le definizioni inutilizzate (gradienti, ecc.)"
 
 #: ../src/actions/actions-base.cpp:232
-#, fuzzy
-#| msgid "_Quit"
 msgid "Quit"
-msgstr "_Esci"
+msgstr "Esci"
 
 #: ../src/actions/actions-base.cpp:232
 #, fuzzy
@@ -4747,8 +4737,6 @@ msgid "Flip canvas vertically"
 msgstr "Riflette verticalmente il canvas"
 
 #: ../src/actions/actions-canvas-transform.cpp:219 ../share/ui/menu-view.ui:118
-#, fuzzy
-#| msgid "Reset Flip"
 msgid "Reset Flipping"
 msgstr "Reimposta riflessione"
 
@@ -4759,10 +4747,8 @@ msgid "Reset canvas flipping"
 msgstr "Rimuovi fissaggio"
 
 #: ../src/actions/actions-canvas-transform.cpp:221 ../share/ui/menu-view.ui:103
-#, fuzzy
-#| msgid "Rotation"
 msgid "Lock Rotation"
-msgstr "Rotazione"
+msgstr "Blocca rotazione"
 
 #: ../src/actions/actions-canvas-transform.cpp:221 ../src/verbs.cpp:2791
 #, fuzzy
@@ -9879,16 +9865,12 @@ msgid "Print Inkscape version"
 msgstr "Mostra la versione di Inkscape"
 
 #: ../src/inkscape-application.cpp:618
-#, fuzzy
-#| msgid "Print system extension directory"
 msgid "Print system data directory"
-msgstr "Mostra la posizione delle estensioni nel sistema"
+msgstr "Mostra la posizione dei dati di sistema"
 
 #: ../src/inkscape-application.cpp:619
-#, fuzzy
-#| msgid "Print system extension directory"
 msgid "Print user data directory"
-msgstr "Mostra la posizione delle estensioni nel sistema"
+msgstr "Mostra la posizione dei dati utente"
 
 #: ../src/inkscape-application.cpp:622
 msgid "File import"
@@ -9926,7 +9908,7 @@ msgstr ""
 
 #: ../src/inkscape-application.cpp:626
 msgid "METHOD"
-msgstr ""
+msgstr "METODO"
 
 #
 # File: ../src/inkscape-application.cpp, line: 545
@@ -9951,10 +9933,8 @@ msgid ""
 msgstr "Nome file di output (il tipo è rilevato dall'estensione)"
 
 #: ../src/inkscape-application.cpp:631
-#, fuzzy
-#| msgid "EXPORT-FILENAME"
 msgid "FILENAME"
-msgstr "NOMEFILE-ESPORTATO"
+msgstr "NOMEFILE"
 
 #: ../src/inkscape-application.cpp:632
 msgid "Overwrite input file (otherwise add '_out' suffix if type doesn't change"
@@ -9967,7 +9947,7 @@ msgstr "Tipo(i) file da esportare: [svg,png,ps,eps,pdf,emf,wmf,xaml]"
 
 #: ../src/inkscape-application.cpp:633
 msgid "TYPE[,TYPE]*"
-msgstr ""
+msgstr "TIPO[,TIPO]*"
 
 #: ../src/inkscape-application.cpp:634
 msgid "Extension ID to use for exporting"
@@ -10033,16 +10013,14 @@ msgstr "ALTEZZA"
 #
 # File: ../src/inkscape-application.cpp, line: 562
 #: ../src/inkscape-application.cpp:645
-#, fuzzy
-#| msgid "Margin around export area: units of page size for SVG, mm for PS/EPS/PDF"
 msgid "Margin around export area: units of page size for SVG, mm for PS/PDF"
 msgstr ""
 "Margine attorno all'area esportata: unità della dimensione pagina per SVG, mm per "
-"PS/EPS/PDF"
+"PS/PDF"
 
 #: ../src/inkscape-application.cpp:645
 msgid "MARGIN"
-msgstr ""
+msgstr "MARGINE"
 
 #: ../src/inkscape-application.cpp:648
 msgid "Export options"
@@ -10076,21 +10054,17 @@ msgstr "Livello Postscript (2 o 3) (predefinito 3)"
 
 #: ../src/inkscape-application.cpp:652
 msgid "LEVEL"
-msgstr ""
+msgstr "LIVELLO"
 
 #
 # File: ../src/inkscape-application.cpp, line: 570
 #: ../src/inkscape-application.cpp:653
-#, fuzzy
-#| msgid "PDF version (1.4 or 1.5)"
 msgid "PDF version (1.4 or 1.5); default is 1.5"
-msgstr "Versione PDF (1.4 o 1.5)"
+msgstr "Versione PDF (1.4 o 1.5) (predefinito 1.5)"
 
 #: ../src/inkscape-application.cpp:653
-#, fuzzy
-#| msgid "PDF-VERSION"
 msgid "VERSION"
-msgstr "VERSIONE-PDF"
+msgstr "VERSIONE"
 
 #: ../src/inkscape-application.cpp:654
 msgid "Convert text to paths (PS/EPS/PDF/SVG)"
@@ -10291,8 +10265,6 @@ msgid "Inkview - An SVG File Viewer"
 msgstr "Inkview - Visualizzatore file SVG"
 
 #: ../src/inkview-application.cpp:69
-#, fuzzy
-#| msgid "path1 [path2 pathN]]"
 msgid "path1 [path2 [pathN]]"
 msgstr "percorso1 [percorso2 percorsoN]]"
 
@@ -18643,32 +18615,24 @@ msgstr "Valore:"
 
 #. TRANSLATORS: Abbreviation for red color channel in RGBA
 #: ../src/ui/dialog/filter-effects-dialog.cpp:2792
-#, fuzzy
-#| msgid "R:"
 msgctxt "color"
 msgid "R:"
 msgstr "R:"
 
 #. TRANSLATORS: Abbreviation for green color channel in RGBA
 #: ../src/ui/dialog/filter-effects-dialog.cpp:2794
-#, fuzzy
-#| msgid "G:"
 msgctxt "color"
 msgid "G:"
 msgstr "G:"
 
 #. TRANSLATORS: Abbreviation for blue color channel in RGBA
 #: ../src/ui/dialog/filter-effects-dialog.cpp:2796
-#, fuzzy
-#| msgid "B:"
 msgctxt "color"
 msgid "B:"
 msgstr "B:"
 
 #. TRANSLATORS: Abbreviation for alpha channel in RGBA
 #: ../src/ui/dialog/filter-effects-dialog.cpp:2798
-#, fuzzy
-#| msgid "A:"
 msgctxt "color"
 msgid "A:"
 msgstr "A:"
@@ -18962,16 +18926,12 @@ msgid "Add filter primitive"
 msgstr "Aggiungi primitiva filtro"
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:2900
-#, fuzzy
-#| msgid ""
-#| "The <b>feBlend</b> filter primitive provides 4 image blending modes: screen, "
-#| "multiply, darken and lighten."
 msgid ""
 "The <b>feBlend</b> filter primitive provides different image blending modes, such "
 "as screen, multiply, darken and lighten."
 msgstr ""
-"Il filtro <b>feBlend</b> fornisce 4 modalità per miscelare immagini: scherma, "
-"moltiplica, scurisci e illumina."
+"Il filtro <b>feBlend</b> fornisce diverse modalità per miscelare immagini come "
+"scherma, moltiplica, scurisci e illumina."
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:2904
 msgid ""
@@ -19223,15 +19183,12 @@ msgid "F_ont"
 msgstr "C_arattere"
 
 #: ../src/ui/dialog/find.cpp:83
-#, fuzzy
 msgid "_Desc"
-msgstr "Discendente:"
+msgstr "_Descrizione"
 
 #: ../src/ui/dialog/find.cpp:84
-#, fuzzy
-#| msgid "Title:"
 msgid "Title"
-msgstr "Titolo:"
+msgstr "Titolo"
 
 #: ../src/ui/dialog/find.cpp:85
 msgid "Properties"
@@ -19342,10 +19299,8 @@ msgid "Include locked objects in search"
 msgstr "Include gli oggetti bloccati nella ricerca"
 
 #: ../src/ui/dialog/find.cpp:155
-#, fuzzy
-#| msgid "Search id name"
 msgid "Search ID name"
-msgstr "Cerca nome id"
+msgstr "Cerca nome ID"
 
 #: ../src/ui/dialog/find.cpp:158
 msgid "Search attribute name"
@@ -19364,16 +19319,12 @@ msgid "Search fonts"
 msgstr "Cerca caratteri"
 
 #: ../src/ui/dialog/find.cpp:170
-#, fuzzy
-#| msgid "Set object description"
 msgid "Search description"
-msgstr "Imposta descrizione oggetto"
+msgstr "Cerca descrizione"
 
 #: ../src/ui/dialog/find.cpp:173
-#, fuzzy
-#| msgid "Search style"
 msgid "Search title"
-msgstr "Cerca stile"
+msgstr "Cerca titolo"
 
 #: ../src/ui/dialog/find.cpp:176
 msgid "Search all object types"
@@ -21085,16 +21036,12 @@ msgstr ""
 "non sono disponibili nel sistema"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:985
-#, fuzzy
-#| msgid "Font style"
 msgid "Font sample"
-msgstr "Stile carattere"
+msgstr "Esempio carattere"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:985
-#, fuzzy
-#| msgid "Change point parameter"
 msgid "Change font preview sample text"
-msgstr "Modifica parametri del punto"
+msgstr "Modifica testo d'esempio dell'anteprima carattere"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:988
 msgid "Use SVG2 auto-flowed text"
@@ -21588,10 +21535,8 @@ msgstr ""
 "lista"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1560
-#, fuzzy
-#| msgid "_Zoom correction factor (in %):"
 msgid "_Zoom correction factor (in %)"
-msgstr "Fattore di correzione _ingrandimento (in %):"
+msgstr "Fattore di correzione _ingrandimento (in %)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1561
 msgid ""
@@ -21692,10 +21637,8 @@ msgid ""
 msgstr ""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1603
-#, fuzzy
-#| msgid "_Handle size:"
 msgid "Handle size"
-msgstr "_Dimensione maniglia:"
+msgstr "Dimensione maniglia"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1605
 msgid "Set the relative size of node handles"
@@ -21734,10 +21677,8 @@ msgid "Use system theme"
 msgstr "Utilizza tema predefinito"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1642
-#, fuzzy
-#| msgid "Change Gtk theme:"
 msgid "Change GTK theme:"
-msgstr "Cambia tema Gtk:"
+msgstr "Cambia tema GTK:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1645
 #: ../src/ui/dialog/inkscape-preferences.cpp:3362
@@ -21757,20 +21698,16 @@ msgid "Location of the user’s themes"
 msgstr "Posizione dei temi"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1650
-#, fuzzy
-#| msgid "Contrast"
 msgid "_Contrast:"
-msgstr "Contrasto"
+msgstr "_Contrasto:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1651
 msgid "Make background brighter or darker to reduce contrast"
 msgstr ""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1664
-#, fuzzy
-#| msgid "Icon"
 msgid "Icons"
-msgstr "Icona"
+msgstr "Icone"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1699
 msgid "Use system icons"
@@ -22783,10 +22720,8 @@ msgid "Color management"
 msgstr "Gestione del colore"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2239
-#, fuzzy
-#| msgid "Enable preview"
 msgid "Enable autosave"
-msgstr "Attiva anteprima"
+msgstr "Attiva salvataggio automatico"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2240
 msgid ""
@@ -23574,14 +23509,12 @@ msgid ""
 msgstr ""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2548
-#, fuzzy
-#| msgid "Inner radius:"
 msgid "X-ray radius:"
-msgstr "Raggio interno:"
+msgstr "Raggio Raggi X:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2549
 msgid "Radius of the circular area around the mouse cursor in X-ray mode"
-msgstr ""
+msgstr "Raggio dell'area circolare attorno al puntatore mouse in modalità Raggi X"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2554
 #, fuzzy
@@ -23845,10 +23778,8 @@ msgid "ID"
 msgstr "ID"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2756
-#, fuzzy
-#| msgid "Shortcut"
 msgid "Shortcuts"
-msgstr "Scorciatoia"
+msgstr "Scorciatoie"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2763
 #: ../src/ui/dialog/template-load-tab.cpp:47
@@ -23909,10 +23840,8 @@ msgstr "Esporta scorciatoie da tastiera personalizzate in un file"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2846
 #: ../share/ui/inkscape-start.glade:1224
-#, fuzzy
-#| msgid "Keyboard Shortcuts"
 msgid "Keyboard"
-msgstr "Scorciatoie da tastiera"
+msgstr "Tastiera"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2850
 #: ../src/ui/dialog/inkscape-preferences.cpp:2858
@@ -24005,10 +23934,8 @@ msgid "Reset Preferences"
 msgstr "Reimposta preferenze"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3346
-#, fuzzy
-#| msgid "User preferences: "
 msgid "User preferences:"
-msgstr "Preferenze: "
+msgstr "Preferenze:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3347
 msgid "Location of the user’s preferences file"
@@ -24019,10 +23946,8 @@ msgid "Open preferences folder"
 msgstr "Apre la cartella delle preferenze"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3350
-#, fuzzy
-#| msgid "User config: "
 msgid "User config:"
-msgstr "Configurazione: "
+msgstr "Configurazione:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3350
 msgid "Location of users configuration"
@@ -24033,10 +23958,8 @@ msgid "Open extensions folder"
 msgstr "Apre cartella delle estensioni"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3355
-#, fuzzy
-#| msgid "User extensions: "
 msgid "User extensions:"
-msgstr "Estensioni: "
+msgstr "Estensioni:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3356
 msgid "Location of the user’s extensions"
@@ -24061,20 +23984,16 @@ msgid "Location of the user’s fonts"
 msgstr "Posizione delle icone"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3367
-#, fuzzy
-#| msgid "User icons: "
 msgid "User icons:"
-msgstr "Icone: "
+msgstr "Icone:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3370
 msgid "Open templates folder"
 msgstr "Apre la cartella dei modelli"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3371
-#, fuzzy
-#| msgid "User templates: "
 msgid "User templates:"
-msgstr "Modelli: "
+msgstr "Modelli:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3372
 msgid "Location of the user’s templates"
@@ -24085,10 +24004,8 @@ msgid "Open symbols folder"
 msgstr "Apre la cartella dei simboli"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3377
-#, fuzzy
-#| msgid "User symbols: "
 msgid "User symbols:"
-msgstr "Simboli: "
+msgstr "Simboli:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3377
 msgid "Location of the user’s symbols"
@@ -24113,10 +24030,8 @@ msgid "Open palettes folder"
 msgstr "Apre la cartella delle palette"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3388
-#, fuzzy
-#| msgid "User palettes: "
 msgid "User palettes:"
-msgstr "Palette: "
+msgstr "Palette:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3388
 msgid "Location of the user’s palettes"
@@ -24141,10 +24056,8 @@ msgid "Open user interface folder"
 msgstr "Apre la cartella della interfaccia utente"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3398
-#, fuzzy
-#| msgid "User UI: "
 msgid "User UI:"
-msgstr "UI: "
+msgstr "UI:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3399
 msgid "Location of the user’s user interface description files"
@@ -24161,10 +24074,8 @@ msgid "Location of user’s cache"
 msgstr "Posizione della cache"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3411
-#, fuzzy
-#| msgid "Temporary files: "
 msgid "Temporary files:"
-msgstr "File temporanei: "
+msgstr "File temporanei:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3411
 msgid "Location of the temporary files used for autosave"
@@ -24181,20 +24092,16 @@ msgid "Location of Inkscape data"
 msgstr "Posizione dei dati di Inkscape"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3420
-#, fuzzy
-#| msgid "Inkscape extensions: "
 msgid "Inkscape extensions:"
-msgstr "Estensioni di Inkscape: "
+msgstr "Estensioni di Inkscape:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3420
 msgid "Location of the Inkscape extensions"
 msgstr "Posizione delle estensioni di Inkscape"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3431
-#, fuzzy
-#| msgid "System data: "
 msgid "System data:"
-msgstr "Dati sistema: "
+msgstr "Dati di sistema:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3431
 msgid "Locations of system data"
@@ -26210,10 +26117,8 @@ msgid "Rotate the canvas with scroll wheel"
 msgstr "Ruota il canvas in senso orario"
 
 #: ../src/ui/modifiers.cpp:38
-#, fuzzy
-#| msgid "Middle of selection"
 msgid "Add to selection"
-msgstr "Metà selezione"
+msgstr "Aggiungi alla selezione"
 
 #: ../src/ui/modifiers.cpp:38
 #, fuzzy
@@ -26222,10 +26127,8 @@ msgid "Add items to existing selection"
 msgstr "Spruzza copie della selezione iniziale"
 
 #: ../src/ui/modifiers.cpp:39
-#, fuzzy
-#| msgid "Select existing folders"
 msgid "Select inside groups"
-msgstr "Seleziona cartelle esistenti"
+msgstr "Seleziona all'interno dei gruppi"
 
 #: ../src/ui/modifiers.cpp:39
 #, fuzzy
@@ -30395,16 +30298,13 @@ msgid "Create rectangle"
 msgstr "Crea rettangolo"
 
 #: ../src/ui/tools/select-tool.cpp:134
-#, fuzzy, c-format
-#| msgid ""
-#| "No objects selected. Click, Shift+click, Alt+scroll mouse on top of objects, "
-#| "or drag around objects to select."
+#, c-format
 msgid ""
 "No objects selected. Click, %s+click, %s+scroll mouse on top of objects, or drag "
 "around objects to select."
 msgstr ""
-"Nessun oggetto selezionato. Clicca, Maiusc+Clic, Alt+scorrimento mouse sugli "
-"oggetti, o trascina attorno agli oggetti per selezionare."
+"Nessun oggetto selezionato. Clic, %s +Clic, %s +scorrimento mouse sugli oggetti, "
+"o trascina attorno agli oggetti per selezionare."
 
 #: ../src/ui/tools/select-tool.cpp:140
 #, fuzzy
@@ -31840,16 +31740,12 @@ msgid "No stroke, middle-click for black stroke"
 msgstr "Nessun contorno, tasto centrale per colorarlo di nero"
 
 #: ../src/ui/widget/selected-style.cpp:186 ../src/ui/widget/style-swatch.cpp:284
-#, fuzzy
-#| msgid "Pattern fill"
 msgid "Pattern (fill)"
-msgstr "Motivo del riempimento"
+msgstr "Motivo (riempimento)"
 
 #: ../src/ui/widget/selected-style.cpp:186 ../src/ui/widget/style-swatch.cpp:284
-#, fuzzy
-#| msgid "Pattern stroke"
 msgid "Pattern (stroke)"
-msgstr "Motivo del contorno"
+msgstr "Motivo (contorno)"
 
 #: ../src/ui/widget/selected-style.cpp:188
 #, fuzzy
@@ -31871,48 +31767,36 @@ msgid "<b>L</b>"
 msgstr "<b>L</b>"
 
 #: ../src/ui/widget/selected-style.cpp:194 ../src/ui/widget/style-swatch.cpp:276
-#, fuzzy
-#| msgid "Linear gradient fill"
 msgid "Linear gradient (fill)"
-msgstr "Gradiente lineare di riempimento"
+msgstr "Gradiente lineare (riempimento)"
 
 #: ../src/ui/widget/selected-style.cpp:194 ../src/ui/widget/style-swatch.cpp:276
-#, fuzzy
-#| msgid "Linear gradient stroke"
 msgid "Linear gradient (stroke)"
-msgstr "Gradiente lineare di contorno"
+msgstr "Gradiente lineare (contorno)"
 
 #: ../src/ui/widget/selected-style.cpp:202
 msgid "<b>R</b>"
 msgstr "<b>R</b>"
 
 #: ../src/ui/widget/selected-style.cpp:204 ../src/ui/widget/style-swatch.cpp:280
-#, fuzzy
-#| msgid "Radial gradient fill"
 msgid "Radial gradient (fill)"
-msgstr "Gradiente radiale di riempimento"
+msgstr "Gradiente radiale (riempimento)"
 
 #: ../src/ui/widget/selected-style.cpp:204 ../src/ui/widget/style-swatch.cpp:280
-#, fuzzy
-#| msgid "Radial gradient stroke"
 msgid "Radial gradient (stroke)"
-msgstr "Gradiente radiale di contorno"
+msgstr "Gradiente radiale (contorno)"
 
 #: ../src/ui/widget/selected-style.cpp:213
 msgid "<b>M</b>"
 msgstr "<b>M</b>"
 
 #: ../src/ui/widget/selected-style.cpp:215
-#, fuzzy
-#| msgid "Mesh gradient fill"
 msgid "Mesh gradient (fill)"
-msgstr "Gradiente a maglia di riempimento"
+msgstr "Gradiente a maglia (riempimento)"
 
 #: ../src/ui/widget/selected-style.cpp:215
-#, fuzzy
-#| msgid "Mesh gradient stroke"
 msgid "Mesh gradient (stroke)"
-msgstr "Gradiente a maglia di contorno"
+msgstr "Gradiente a maglia (contorno)"
 
 #: ../src/ui/widget/selected-style.cpp:224
 msgid "≠"
@@ -31931,16 +31815,12 @@ msgid "<b>Unset</b>"
 msgstr "<b>Non impostato</b>"
 
 #: ../src/ui/widget/selected-style.cpp:233
-#, fuzzy
-#| msgid "Flat color fill"
 msgid "Flat color (fill)"
-msgstr "Riempimento con colore uniforme"
+msgstr "Colore uniforme (riempimento)"
 
 #: ../src/ui/widget/selected-style.cpp:233
-#, fuzzy
-#| msgid "Flat color stroke"
 msgid "Flat color (stroke)"
-msgstr "Contorno con colore uniforme"
+msgstr "Colore uniforme (contorno)"
 
 #. TRANSLATORS: A means "Averaged"
 #: ../src/ui/widget/selected-style.cpp:236
@@ -32059,7 +31939,7 @@ msgstr "Modifica larghezza contorno"
 
 #: ../src/ui/widget/selected-style.cpp:1006
 msgid ", drag to adjust, middle-click to remove"
-msgstr ""
+msgstr ", trascina per modificare, tasto centrale per rimuovere"
 
 #: ../src/ui/widget/selected-style.cpp:1074 ../src/ui/widget/selected-style.cpp:1075
 #: ../src/ui/widget/stroke-style.cpp:165 ../src/ui/widget/style-swatch.cpp:316
@@ -34180,10 +34060,8 @@ msgid "Open a new window with the same document"
 msgstr "Apre lo stesso documento in una nuova finestra"
 
 #: ../src/verbs.cpp:2817
-#, fuzzy
-#| msgid "Ico_n Preview..."
 msgid "Icon Preview"
-msgstr "Anteprima ico_na..."
+msgstr "Anteprima icona"
 
 #: ../src/verbs.cpp:2817
 #, fuzzy
@@ -34200,10 +34078,8 @@ msgid "Prototype Dialog"
 msgstr ""
 
 #: ../src/verbs.cpp:2822
-#, fuzzy
-#| msgid "Preferences"
 msgid "P_references"
-msgstr "Preferenze"
+msgstr "P_referenze"
 
 #: ../src/verbs.cpp:2822
 msgid "Edit global Inkscape preferences"
@@ -35777,13 +35653,11 @@ msgstr ""
 
 #: ../share/ui/inkscape-start.glade:1180
 msgid "Quick Setup"
-msgstr ""
+msgstr "Impostazioni rapide"
 
 #: ../share/ui/inkscape-start.glade:1393
-#, fuzzy
-#| msgid "If set, use a colored checkerboard for the canvas background"
 msgid "Select the default color background for the canvas"
-msgstr "Se attivo, usa una scacchiera colorata come sfondo"
+msgstr "Seleziona il colore di sfondo predefinito dell'area di lavoro"
 
 #: ../share/ui/inkscape-start.glade:1501
 msgid "Welcome!"
@@ -35814,73 +35688,55 @@ msgstr ""
 
 #: ../share/ui/inkscape-start.glade:1688
 msgid "Thanks!"
-msgstr ""
+msgstr "Grazie!"
 
 #: ../share/ui/inkscape-start.glade:1722
 msgid "Supported by You"
-msgstr ""
+msgstr "Supportato da Voi"
 
 #: ../share/ui/inkscape-start.glade:1757
-#, fuzzy
-#| msgid "_Remove Filters"
 msgctxt "Welcome dialog"
 msgid "Recent Files"
-msgstr "_Rimuovi filtri"
+msgstr "File recenti"
 
 #: ../share/ui/inkscape-start.glade:1776
-#, fuzzy
-#| msgid "Exporting %1 files"
 msgctxt "Welcome dialog"
 msgid "Existing Files"
-msgstr "Esportazione di %1 file"
+msgstr "File esistenti"
 
 #: ../share/ui/inkscape-start.glade:1833
-#, fuzzy
-#| msgid "Print"
 msgctxt "Document format category"
 msgid "Print"
 msgstr "Stampa"
 
 #: ../share/ui/inkscape-start.glade:1892
-#, fuzzy
-#| msgid "Screen"
 msgctxt "Document format category"
 msgid "Screen"
-msgstr "Scherma"
+msgstr "Schermo"
 
 #: ../share/ui/inkscape-start.glade:1950
-#, fuzzy
-#| msgid "Video"
 msgctxt "Document format category"
 msgid "Video"
 msgstr "Video"
 
 #. Social Media
 #: ../share/ui/inkscape-start.glade:2008
-#, fuzzy
-#| msgid "Specials"
 msgctxt "Document format category"
 msgid "Social"
-msgstr "Speciali"
+msgstr "Social"
 
 #: ../share/ui/inkscape-start.glade:2066
-#, fuzzy
-#| msgid "Other"
 msgctxt "Document format category"
 msgid "Other"
 msgstr "Altro"
 
 #: ../share/ui/inkscape-start.glade:2089
-#, fuzzy
-#| msgid "Loaded"
 msgid "Load"
-msgstr "Caricato"
+msgstr "Carica"
 
 #: ../share/ui/inkscape-start.glade:2105
-#, fuzzy
-#| msgid "Show outer style"
 msgid "Show this every time"
-msgstr "Mostra stile complessivo"
+msgstr "Mostra ad ogni avvio"
 
 #: ../share/ui/inkscape-start.glade:2137
 #, fuzzy
@@ -35905,10 +35761,8 @@ msgid "Zoom Previous"
 msgstr "Riduce l'ingrandimento"
 
 #: ../share/ui/menu-view.ui:87
-#, fuzzy
-#| msgid "Orientation"
 msgid "_Orientation"
-msgstr "Orientamento"
+msgstr "_Orientamento"
 
 #: ../share/ui/menu-view.ui:95
 msgid "Rotate Counter-Clockwise"
@@ -35927,16 +35781,12 @@ msgid "_Display Mode"
 msgstr "Modalità _visualizzazione"
 
 #: ../share/ui/menu-view.ui:139
-#, fuzzy
-#| msgid "No _Filters"
 msgid "No Filters"
-msgstr "Nessun _filtro"
+msgstr "Nessun filtro"
 
 #: ../share/ui/menu-view.ui:144
-#, fuzzy
-#| msgid "Visible _Hairlines"
 msgid "Visible Hairlines"
-msgstr "Tratti _fini visibili"
+msgstr "Tratti fini visibili"
 
 #: ../share/ui/menu-view.ui:149
 #, fuzzy
@@ -35946,33 +35796,25 @@ msgstr "Sovrapponi"
 
 #: ../share/ui/menu-view.ui:154
 msgid "Cycle"
-msgstr ""
+msgstr "Cicla"
 
 #: ../share/ui/menu-view.ui:158
-#, fuzzy
-#| msgid "_Toggle"
 msgid "Toggle"
-msgstr "Al_terna"
+msgstr "Alterna"
 
 #: ../share/ui/menu-view.ui:165
-#, fuzzy
-#| msgid "_Split View Mode"
 msgid "_Split Mode"
-msgstr "Modalità _Split View"
+msgstr "Modalità _separata"
 
 #: ../share/ui/menu-view.ui:174
-#, fuzzy
-#| msgid "Split:"
 msgid "Split"
-msgstr "Dividi:"
+msgstr "Separa"
 
 #: ../share/ui/menu-view.ui:179
 msgid "X-Ray"
-msgstr ""
+msgstr "Raggi X"
 
 #: ../share/ui/menu-view.ui:187
-#, fuzzy
-#| msgid "Grayscale"
 msgid "Gray Scale"
 msgstr "Scala di grigi"
 
@@ -36347,10 +36189,9 @@ msgstr ""
 "rimossa.\n"
 
 #: ../share/extensions/jessyink_summary.py:37
-#, fuzzy, python-brace-format
-#| msgid "JessyInk script version {0} installed."
+#, python-brace-format
 msgid "JessyInk script version {version} installed."
-msgstr "Installata versione {0} dello script JessyInk."
+msgstr "Installata versione {version} dello script JessyInk."
 
 #: ../share/extensions/jessyink_summary.py:39
 msgid "JessyInk script installed."
@@ -36373,34 +36214,27 @@ msgstr ""
 "Diapositiva {0!s}:"
 
 #: ../share/extensions/jessyink_summary.py:62
-#, fuzzy, python-brace-format
-#| msgid "{0}Layer name: {1}"
+#, python-brace-format
 msgid "{prefix}Layer name: {node.label}"
-msgstr "{0}Nome del livello: {1}"
+msgstr "{prefix}Nome del livello: {node.label}"
 
 #: ../share/extensions/jessyink_summary.py:75
-#, fuzzy
-#| msgid "{0}Transition in: {1} ({2!s} s)"
 msgid "{prefix}Transition {transition}: {name} ({length!s} s)"
-msgstr "{0}Transizione in entrata: {1} ({2!s} s)"
+msgstr "{prefix}Transizione {transition}: {name} ({length!s} s)"
 
 #: ../share/extensions/jessyink_summary.py:77
-#, fuzzy, python-brace-format
-#| msgid "{0}Transition in: {1}"
+#, python-brace-format
 msgid "{prefix}Transition {transition}: {name}"
-msgstr "{0}Transizione in entrata: {1}"
+msgstr "{prefix}Transizione in entrata {transition}: {name}"
 
 #: ../share/extensions/jessyink_summary.py:84
-#, fuzzy, python-brace-format
-#| msgid ""
-#| "\n"
-#| "{0}Auto-texts:"
+#, python-brace-format
 msgid ""
 "\n"
 "{prefix}Auto-texts:"
 msgstr ""
 "\n"
-"{0}Testi automatici:"
+"{prefix}Testi automatici:"
 
 #: ../share/extensions/jessyink_summary.py:89
 #, fuzzy, python-brace-format
@@ -36410,28 +36244,21 @@ msgid ""
 msgstr "{0}\t\"{1}\" (id oggetto \"{2}\") sarà sostituito da \"{3}\"."
 
 #: ../share/extensions/jessyink_summary.py:99
-#, fuzzy, python-brace-format
-#| msgid ""
-#| "\n"
-#| "{0}Initial effect (order number {1}):"
+#, python-brace-format
 msgid ""
 "\n"
 "{prefix}Initial effect (order number {order}):"
 msgstr ""
 "\n"
-"{0}Effetto iniziale (numero ordine {1}):"
+"{prefix}Effetto iniziale (numero ordine {order}):"
 
 #: ../share/extensions/jessyink_summary.py:101
-#, fuzzy
-#| msgid ""
-#| "\n"
-#| "{0}Effect {1!s} (order number {2}):"
 msgid ""
 "\n"
 "{prefix}Effect {enum!s} (order number {order}):"
 msgstr ""
 "\n"
-"{0}Effetto {1!s} (numero ordine {2}):"
+"{prefix}Effetto {enum!s} (numero ordine {order}):"
 
 #: ../share/extensions/jessyink_summary.py:106
 #, python-brace-format
@@ -36439,10 +36266,9 @@ msgid "{prefix}\tView will be set according to object \"{eid}\""
 msgstr ""
 
 #: ../share/extensions/jessyink_summary.py:108
-#, fuzzy, python-brace-format
-#| msgid "{0}\tObject \"{1}\""
+#, python-brace-format
 msgid "{prefix}\tObject \"{eid}\""
-msgstr "{0}\tOggetto \"{1}\""
+msgstr "{prefix}\tOggetto \"{eid}\""
 
 #: ../share/extensions/jessyink_summary.py:111
 msgid " will appear"
@@ -36645,10 +36471,8 @@ msgid "You must give a directory to export the slices."
 msgstr ""
 
 #: ../share/extensions/webslicer_export.py:52
-#, fuzzy
-#| msgid "Can't create \"%s\"."
 msgid "Can't create '{}': {}."
-msgstr "Impossibile creare \"%s\"."
+msgstr "Impossibile creare '{}': {}."
 
 #: ../share/extensions/webslicer_export.py:54
 msgid "Dir doesn't exist '{}'."
@@ -36996,7 +36820,6 @@ msgid "DPI 90 to 96"
 msgstr "DPI da 90 a 96"
 
 #: ../share/extensions/dpi90to96.inx:6
-#, fuzzy
 msgid "DPI Switch from 90 to 96"
 msgstr "Cambia DPI da 90 a 96"
 
@@ -37005,7 +36828,6 @@ msgid "DPI 96 to 90"
 msgstr "DPI da 96 a 90"
 
 #: ../share/extensions/dpi96to90.inx:6
-#, fuzzy
 msgid "DPI Switch from 96 to 90"
 msgstr "Cambia DPI da 96 a 90"
 
@@ -37218,9 +37040,8 @@ msgid "Desktop Cutting Plotter (AutoCAD DXF R12) (*.dxf)"
 msgstr "Desktop Cutting Plotter (AutoCAD DXF R14) (*.dxf)"
 
 #: ../share/extensions/dxf12_outlines.inx:10
-#, fuzzy
 msgid "DXF R12 Output"
-msgstr "Output DXF"
+msgstr "Output DXF R12"
 
 #: ../share/extensions/dxf_input.inx:3
 msgid "DXF Input"
@@ -37502,10 +37323,8 @@ msgid "Exports the colors of this document as GIMP Palette"
 msgstr "Esporta i colori di questo documento come tavolozza di GIMP"
 
 #: ../share/extensions/extension-manager-bootstrap.inx:3
-#, fuzzy
-#| msgid "_Extensions..."
 msgid "Manage Extensions..."
-msgstr "_Estensioni..."
+msgstr "Gestisci Estensioni..."
 
 #: ../share/extensions/extension-manager-bootstrap.inx:7
 #, fuzzy
@@ -37604,8 +37423,6 @@ msgid "Fill Color:"
 msgstr "Colore riempimento:"
 
 #: ../share/extensions/frame.inx:19
-#, fuzzy
-#| msgid "Width(px)"
 msgid "Width (px)"
 msgstr "Larghezza (px)"
 
@@ -39097,7 +38914,6 @@ msgstr ""
 "Testo Hershey\n"
 
 #: ../share/extensions/hershey.inx:13
-#, fuzzy
 msgid ""
 "A tool to replace text with stroke fonts\n"
 "\n"
@@ -39107,7 +38923,7 @@ msgid ""
 msgstr ""
 "Strumento per sostituire il testo con tratti\n"
 "\n"
-"Versione 3.0.2, 2019-09-07\n"
+"Versione 3.0.4, 2020-06-01\n"
 "\n"
 "\n"
 
