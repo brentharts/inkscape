@@ -175,7 +175,13 @@ bool CurveDragPoint::clicked(GdkEventButton *event)
 bool CurveDragPoint::doubleclicked(GdkEventButton *event)
 {
     if (event->button != 1 || !first || !first.next()) return false;
-    _insertNode(true);
+    if (held_control(*event)) {
+        _pm.deleteSegments();
+        _pm.update(true);
+        _pm._commit(_("Remove segment"));
+    } else {
+        _insertNode(true);
+    }
     return true;
 }
 
