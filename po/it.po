@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: Inkscape 1.0\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
 "POT-Creation-Date: 2021-03-14 20:46+0000\n"
-"PO-Revision-Date: 2021-04-13 19:20+0200\n"
+"PO-Revision-Date: 2021-04-14 13:11+0200\n"
 "Last-Translator: Firas Hanife <firashanife@gmail.com>\n"
 "Language-Team: \n"
 "Language: it\n"
@@ -4325,46 +4325,32 @@ msgid "Snapping"
 msgstr "Aggancio"
 
 #: ../src/actions/actions-canvas-snapping.cpp:185
-#, fuzzy
-#| msgid "Toggle snapping on or off"
 msgid "Toggle snapping on/off"
 msgstr "Attiva o disattiva l'aggancio"
 
 #: ../src/actions/actions-canvas-snapping.cpp:187
-#, fuzzy
-#| msgid "Snap bounding boxes"
 msgid "Snap Bounding Boxes"
-msgstr "Aggancia angoli riquadri"
+msgstr "Aggancia riquadri"
 
 #: ../src/actions/actions-canvas-snapping.cpp:187
-#, fuzzy
-#| msgid "Snapping centers of bounding boxes"
 msgid "Toggle snapping to bounding boxes (global)"
-msgstr "Aggancia a e con i centri dei riquadri"
+msgstr "Aggancia ai riquadri (globale)"
 
 #: ../src/actions/actions-canvas-snapping.cpp:188
-#, fuzzy
-#| msgid "Snap bounding boxes"
 msgid "Snap Bounding Box Edges"
-msgstr "Aggancia angoli riquadri"
+msgstr "Aggancia lati riquadri"
 
 #: ../src/actions/actions-canvas-snapping.cpp:188
-#, fuzzy
-#| msgid "Snap midpoints of bounding box edges"
 msgid "Toggle snapping to bounding-box edges"
-msgstr "Aggancia a e con le metà dei bordi dei riquadri"
+msgstr "Aggancia ai lati dei riquadri"
 
 #: ../src/actions/actions-canvas-snapping.cpp:189
-#, fuzzy
-#| msgid "Snap bounding box corners"
 msgid "Snap Bounding Box Corners"
 msgstr "Aggancia angoli riquadri"
 
 #: ../src/actions/actions-canvas-snapping.cpp:189
-#, fuzzy
-#| msgid "Snap bounding box corners"
 msgid "Toggle snapping to bounding-box corners"
-msgstr "Aggancia angoli riquadri"
+msgstr "Aggancia agli angoli dei riquadri"
 
 #: ../src/actions/actions-canvas-snapping.cpp:190
 #, fuzzy
@@ -4487,38 +4473,28 @@ msgid "Toggle snapping to object midpoint"
 msgstr "Attiva o disattiva l'aggancio"
 
 #: ../src/actions/actions-canvas-snapping.cpp:202
-#, fuzzy
-#| msgid "Rotation Centers"
 msgid "Snap Rotation Center"
-msgstr "Centro di rotazione"
+msgstr "Aggancia centro di rotazione"
 
 #: ../src/actions/actions-canvas-snapping.cpp:202
-#, fuzzy
-#| msgid "object rotation center"
 msgid "Toggle snapping to object rotation center"
-msgstr "centro di rotazione oggetto"
+msgstr "Aggancia al centro di rotazione dell'oggetto"
 
 #: ../src/actions/actions-canvas-snapping.cpp:203
-#, fuzzy
-#| msgid "Text baseline"
 msgid "Snap Text Baselines"
-msgstr "Linea base del testo"
+msgstr "Aggancia linea base del testo"
 
 #: ../src/actions/actions-canvas-snapping.cpp:203
 msgid "Toggle snapping to text baseline and text anchors"
-msgstr ""
+msgstr "Aggancia alla linea base e ancore del testo"
 
 #: ../src/actions/actions-canvas-snapping.cpp:205
-#, fuzzy
-#| msgid "Page border"
 msgid "Snap Page Border"
-msgstr "Bordo pagina"
+msgstr "Aggancia bordo pagina"
 
 #: ../src/actions/actions-canvas-snapping.cpp:205
-#, fuzzy
-#| msgid "Toggle snapping on or off"
 msgid "Toggle snapping to page border"
-msgstr "Attiva o disattiva l'aggancio"
+msgstr "Aggancia ai bordi della pagina"
 
 #: ../src/actions/actions-canvas-snapping.cpp:206
 #, fuzzy
@@ -4585,108 +4561,84 @@ msgid "Zoom out"
 msgstr "Riduce l'ingrandimento"
 
 #: ../src/actions/actions-canvas-transform.cpp:202
-#, fuzzy
-#| msgid "Zoom 1:_1"
 msgid "Zoom 1:1"
-msgstr "Ingrandimento 1:_1"
+msgstr "Ingrandimento 1:1"
 
 #: ../src/actions/actions-canvas-transform.cpp:202 ../share/ui/menu-view.ui:27
 msgid "Zoom to 1:1"
 msgstr "Ingrandisce a 1:1"
 
 #: ../src/actions/actions-canvas-transform.cpp:203
-#, fuzzy
-#| msgid "Zoom 1:_2"
 msgid "Zoom 1:2"
-msgstr "Ingrandimento 1:_2"
+msgstr "Ingrandimento 1:2"
 
 #: ../src/actions/actions-canvas-transform.cpp:203 ../share/ui/menu-view.ui:32
 msgid "Zoom to 1:2"
 msgstr "Ingrandisce a 1:2"
 
 #: ../src/actions/actions-canvas-transform.cpp:204
-#, fuzzy
-#| msgid "_Zoom 2:1"
 msgid "Zoom 2:1"
-msgstr "In_grandimento 2:1"
+msgstr "Ingrandimento 2:1"
 
 #: ../src/actions/actions-canvas-transform.cpp:204 ../share/ui/menu-view.ui:37
 msgid "Zoom to 2:1"
 msgstr "Ingrandisce a 2:1"
 
 #: ../src/actions/actions-canvas-transform.cpp:205 ../share/ui/menu-view.ui:45
-#, fuzzy
-#| msgid "Selection"
 msgid "Zoom Selection"
-msgstr "Selezione"
+msgstr "Ingrandimento a selezione"
 
 #: ../src/actions/actions-canvas-transform.cpp:205
 msgid "Zoom to fit selection in window"
 msgstr "Ingrandisce per adattare la selezione alla finestra"
 
 #: ../src/actions/actions-canvas-transform.cpp:206 ../share/ui/menu-view.ui:50
-#, fuzzy
-#| msgid "Box Drawing"
 msgid "Zoom Drawing"
-msgstr "Disegno linee/scatola"
+msgstr "Ingrandimento a disegno"
 
 #: ../src/actions/actions-canvas-transform.cpp:206
 msgid "Zoom to fit drawing in window"
 msgstr "Ingrandisce per adattare il disegno alla finestra"
 
 #: ../src/actions/actions-canvas-transform.cpp:207 ../share/ui/menu-view.ui:55
-#, fuzzy
-#| msgid "Zoom In"
 msgid "Zoom Page"
-msgstr "Ingrandisci"
+msgstr "Ingrandimento a pagina"
 
 #: ../src/actions/actions-canvas-transform.cpp:207
 msgid "Zoom to fit page in window"
 msgstr "Ingrandisce per adattare la pagina alla finestra"
 
 #: ../src/actions/actions-canvas-transform.cpp:208 ../share/ui/menu-view.ui:60
-#, fuzzy
-#| msgid "Page _Width"
 msgid "Zoom Page Width"
-msgstr "Larg_hezza pagina"
+msgstr "Ingrandimento a larghezza pagina"
 
 #: ../src/actions/actions-canvas-transform.cpp:208
 msgid "Zoom to fit page width in window"
 msgstr "Ingrandisce per adattare la larghezza della pagina alla finestra"
 
 #: ../src/actions/actions-canvas-transform.cpp:209
-#, fuzzy
-#| msgid "_Center Page"
 msgid "Zoom Center Page"
-msgstr "_Centra pagina"
+msgstr "Ingrandimento a centro pagina"
 
 #: ../src/actions/actions-canvas-transform.cpp:209
 msgid "Center page in window"
 msgstr "Centra pagina nella finestra"
 
 #: ../src/actions/actions-canvas-transform.cpp:210
-#, fuzzy
-#| msgid "Zoom Preferences"
 msgid "Zoom Prev"
-msgstr "Preferenze ingranditore"
+msgstr "Ingrandimento precedente"
 
 #: ../src/actions/actions-canvas-transform.cpp:210
-#, fuzzy
-#| msgid "Previous zoom (from the history of zooms)"
 msgid "Go back to previous zoom (from the history of zooms)"
-msgstr "Ingrandimento precedente (dalla cronologia degli zoom)"
+msgstr "Ritorna all'ingrandimento precedente (dalla cronologia degli ingrandimenti)"
 
 #: ../src/actions/actions-canvas-transform.cpp:211 ../share/ui/menu-view.ui:78
-#, fuzzy
-#| msgid "Zoom Out"
 msgid "Zoom Next"
-msgstr "Riduci"
+msgstr "Ingrandimento successivo"
 
 #: ../src/actions/actions-canvas-transform.cpp:211
-#, fuzzy
-#| msgid "Next zoom (from the history of zooms)"
 msgid "Go to next zoom (from the history of zooms)"
-msgstr "Ingrandimento successivo (dalla cronologia degli zoom)"
+msgstr "Ritorna all'ingrandimento successivo (dalla cronologia degli ingrandimenti)"
 
 #: ../src/actions/actions-canvas-transform.cpp:213 ../share/ui/menu-view.ui:91
 msgid "Rotate Clockwise"
@@ -4717,20 +4669,16 @@ msgid "Reset canvas rotation"
 msgstr "Reimposta la rotazione del canvas a zero"
 
 #: ../src/actions/actions-canvas-transform.cpp:217
-#, fuzzy
-#| msgid "Flip _Horizontal"
 msgid "Flip Horizontal"
-msgstr "Rifletti _orizzontalmente"
+msgstr "Rifletti orizzontalmente"
 
 #: ../src/actions/actions-canvas-transform.cpp:217
 msgid "Flip canvas horizontally"
 msgstr "Riflette orizzontalmente il canvas"
 
 #: ../src/actions/actions-canvas-transform.cpp:218
-#, fuzzy
-#| msgid "Flip _Vertical"
 msgid "Flip Vertical"
-msgstr "Rifletti _verticalmente"
+msgstr "Rifletti verticalmente"
 
 #: ../src/actions/actions-canvas-transform.cpp:218
 msgid "Flip canvas vertically"
@@ -23756,10 +23704,8 @@ msgstr ""
 "creata sarà aggiunta separatamente a "
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2709
-#, fuzzy
-#| msgid "Preload files"
 msgid "Keyboard file:"
-msgstr "Carica in anticipo i file"
+msgstr "File tastiera:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2723
 #: ../share/ui/command-palette-operation.glade:81
@@ -26278,15 +26224,12 @@ msgid "Selection"
 msgstr "Selezione"
 
 #: ../src/ui/modifiers.cpp:62
-#, fuzzy
 msgid "Movement"
-msgstr "Muovi gradiente"
+msgstr "Movimento"
 
 #: ../src/ui/modifiers.cpp:63
-#, fuzzy
-#| msgid "Transformation"
 msgid "Transformations"
-msgstr "Trasformazione"
+msgstr "Trasformazioni"
 
 #: ../src/ui/shape-editor-knotholders.cpp:563
 msgid ""
@@ -33977,10 +33920,8 @@ msgid "Show or hide guides (drag from a ruler to create a guide)"
 msgstr "Mostra o nasconde le guide (trascina dal righello per creare una guida)"
 
 #: ../src/verbs.cpp:2790
-#, fuzzy
-#| msgid "Location:"
 msgid "Lock rotation"
-msgstr "Posizione:"
+msgstr "Blocca rotazione"
 
 #: ../src/verbs.cpp:2792
 msgid "_Commands Bar"
@@ -34355,10 +34296,8 @@ msgid "SVG 1.1 Specification"
 msgstr "Specifiche SVG 1.1"
 
 #: ../src/verbs.cpp:2917
-#, fuzzy
-#| msgid "SVG 1.1 Specification"
 msgid "SVG 2 Specification"
-msgstr "Specifiche SVG 1.1"
+msgstr "Specifiche SVG 2"
 
 #: ../src/verbs.cpp:2921
 msgid "Inkscape: _Basic"
@@ -35191,29 +35130,20 @@ msgid "Version Copied!"
 msgstr "Ricollega alla copia"
 
 #: ../share/ui/inkscape-start.glade:57
-#, fuzzy
-#| msgid "Darken"
 msgid "Dark"
-msgstr "Scurisci"
+msgstr "Scuro"
 
 #: ../share/ui/inkscape-start.glade:66
-#, fuzzy
-#| msgid "Checkerboard"
 msgid "Light Checkerboard"
-msgstr "Scacchiera"
+msgstr "Scacchiera chiara"
 
 #: ../share/ui/inkscape-start.glade:75
-#, fuzzy
-#| msgid "Checkerboard"
 msgid "Dark Checkerboard"
-msgstr "Scacchiera"
+msgstr "Scacchiera scura"
 
 #: ../share/ui/inkscape-start.glade:84
-#, fuzzy
-#| msgctxt "Palette"
-#| msgid "Snowy White"
 msgid "Solid White"
-msgstr "Bianco neve"
+msgstr "Bianco"
 
 #: ../share/ui/inkscape-start.glade:102
 #, fuzzy
@@ -35264,16 +35194,12 @@ msgid "A4 (Landscape)"
 msgstr "A4 (Orizzontale)"
 
 #: ../share/ui/inkscape-start.glade:226
-#, fuzzy
-#| msgid "Letter:"
 msgid "US Letter"
-msgstr "Lettere:"
+msgstr "Letter"
 
 #: ../share/ui/inkscape-start.glade:234
-#, fuzzy
-#| msgid "Horizontal (Landscape)"
 msgid "US Letter (Landscape)"
-msgstr "Orizzontale"
+msgstr "Letter (Orizzontale)"
 
 #: ../share/ui/inkscape-start.glade:242
 msgid "A0"
@@ -35316,210 +35242,173 @@ msgid "A5 (Landscape)"
 msgstr "A5 (Orizzontale)"
 
 #: ../share/ui/inkscape-start.glade:322
-#, fuzzy
-#| msgid "Business card size:"
 msgid "Business Card AU/NZ (Landscape)"
-msgstr "Dimensione biglietto da visita:"
+msgstr "Biglietto da visita AU/NZ (Orizzontale)"
 
 #: ../share/ui/inkscape-start.glade:330
-#, fuzzy
-#| msgid "Business Card"
 msgid "Business Card AU/NZ (Portrait)"
-msgstr "Biglietto da visita"
+msgstr "Biglietto da visita AU/NZ (Verticale)"
 
 #: ../share/ui/inkscape-start.glade:338
-#, fuzzy
-#| msgid "Business card size:"
 msgid "Business Card EU (Landscape)"
-msgstr "Dimensione biglietto da visita:"
+msgstr "Biglietto da visita EU (Orizzontale)"
 
 #: ../share/ui/inkscape-start.glade:346
-#, fuzzy
-#| msgid "Business Card"
 msgid "Business Card EU (Portrait)"
-msgstr "Biglietto da visita"
+msgstr "Biglietto da visita EU (Verticale)"
 
 #: ../share/ui/inkscape-start.glade:354
-#, fuzzy
-#| msgid "Business Card"
 msgid "Business Card EU (Square)"
-msgstr "Biglietto da visita"
+msgstr "Biglietto da visita EU (Quadrato)"
 
 #: ../share/ui/inkscape-start.glade:362
-#, fuzzy
-#| msgid "Business card size:"
 msgid "Business Card US (Landscape)"
-msgstr "Dimensione biglietto da visita:"
+msgstr "Biglietto da visita US (Orizzontale)"
 
 #: ../share/ui/inkscape-start.glade:370
-#, fuzzy
-#| msgid "Business Card"
 msgid "Business Card US (Portrait)"
-msgstr "Biglietto da visita"
+msgstr "Biglietto da visita US (Verticale)"
 
 #: ../share/ui/inkscape-start.glade:378
-#, fuzzy
-#| msgid "Business Card"
 msgid "Business Card US (Square)"
-msgstr "Biglietto da visita"
+msgstr "Biglietto da visita US (Quadrato)"
 
 #: ../share/ui/inkscape-start.glade:386
-#, fuzzy
-#| msgid "Envelope"
 msgid "DL Envelope"
-msgstr "Busta"
+msgstr "Busta DL"
 
 #: ../share/ui/inkscape-start.glade:394
 msgid "Ledger/Tabloid"
-msgstr ""
+msgstr "Tabloid"
 
 #: ../share/ui/inkscape-start.glade:402
-#, fuzzy
-#| msgid "Envelope"
 msgid "US #10 Envelope"
-msgstr "Busta"
+msgstr "Busta #10"
 
 #: ../share/ui/inkscape-start.glade:410
 msgid "US Executive"
-msgstr ""
+msgstr "Executive"
 
 #: ../share/ui/inkscape-start.glade:418
 msgid "US Executive (Landscape)"
-msgstr ""
+msgstr "Executive (Orizzontale)"
 
 #: ../share/ui/inkscape-start.glade:426
 msgid "US Legal"
-msgstr ""
+msgstr "Legal"
 
 #: ../share/ui/inkscape-start.glade:434
-#, fuzzy
-#| msgid "Horizontal (Landscape)"
 msgid "US Legal (Landscape)"
-msgstr "Orizzontale"
+msgstr "Legal (Orizzontale)"
 
 #: ../share/ui/inkscape-start.glade:460
-#, fuzzy
-#| msgid "Desktop"
 msgid "Desktop 1080p"
-msgstr "Desktop"
+msgstr "Desktop 1080p"
 
 #: ../share/ui/inkscape-start.glade:468
-#, fuzzy
-#| msgid "Desktop"
 msgid "Desktop 2K"
-msgstr "Desktop"
+msgstr "Desktop 2K"
 
 #: ../share/ui/inkscape-start.glade:476
-#, fuzzy
-#| msgid "Desktop"
 msgid "Desktop 4K"
-msgstr "Desktop"
+msgstr "Desktop 4K"
 
 #: ../share/ui/inkscape-start.glade:484
-#, fuzzy
-#| msgid "Desktop"
 msgid "Desktop 720p"
-msgstr "Desktop"
+msgstr "Desktop 720p"
 
 #: ../share/ui/inkscape-start.glade:492
-#, fuzzy
-#| msgid "Desktop"
 msgid "Desktop SD"
-msgstr "Desktop"
+msgstr "Desktop SD"
 
 #: ../share/ui/inkscape-start.glade:500
 msgid "Mobile-fruit Phone 5"
-msgstr ""
+msgstr "Mobile-fruit Phone 5"
 
 #: ../share/ui/inkscape-start.glade:508
 msgid "Mobile-fruit Phone X"
-msgstr ""
+msgstr "Mobile-fruit Phone X"
 
 #: ../share/ui/inkscape-start.glade:516
 msgid "Mobile-smallest"
-msgstr ""
+msgstr "Mobile-più-piccolo"
 
 #: ../share/ui/inkscape-start.glade:524
 msgid "Tablet-fruit Pad Pro"
-msgstr ""
+msgstr "Tabelt-fruit Pad Pro"
 
 #: ../share/ui/inkscape-start.glade:532
 msgid "Tablet-smallest"
-msgstr ""
+msgstr "Tablet-più-piccolo"
 
 #: ../share/ui/inkscape-start.glade:558
 msgid "Facebook cover photo"
-msgstr ""
+msgstr "Facebook foto cover"
 
 #: ../share/ui/inkscape-start.glade:566
 msgid "Facebook event image"
-msgstr ""
+msgstr "Facebook immagine evento"
 
 #: ../share/ui/inkscape-start.glade:574
 msgid "Facebook image post"
-msgstr ""
+msgstr "Facebook immagine post"
 
 #: ../share/ui/inkscape-start.glade:582
 msgid "Facebook link image"
-msgstr ""
+msgstr "Facebook immagine collegamento"
 
 #: ../share/ui/inkscape-start.glade:590
 msgid "Facebook profile picture"
-msgstr ""
+msgstr "Facebook immagine profilo"
 
 #: ../share/ui/inkscape-start.glade:598
 msgid "Facebook video"
-msgstr ""
+msgstr "Facebook video"
 
 #: ../share/ui/inkscape-start.glade:606
 msgid "Instagram landscape"
-msgstr ""
+msgstr "Instagram orizzontale"
 
 #: ../share/ui/inkscape-start.glade:614
-#, fuzzy
-#| msgid "Internal import"
 msgid "Instagram portrait"
-msgstr "Importa con libreria interna"
+msgstr "Instagram verticale"
 
 #: ../share/ui/inkscape-start.glade:622
-#, fuzzy
-#| msgid "Em square"
 msgid "Instagram square"
-msgstr "Riquadro Em"
+msgstr "Instagram quadrato"
 
 #: ../share/ui/inkscape-start.glade:630
 msgid "LinkedIn business banner image"
-msgstr ""
+msgstr "LinkedIn business immagine banner"
 
 #: ../share/ui/inkscape-start.glade:638
 msgid "LinkedIn company logo"
-msgstr ""
+msgstr "LinkedIn logo azienda"
 
 #: ../share/ui/inkscape-start.glade:646
 msgid "LinkedIn cover photo"
-msgstr ""
+msgstr "LinkedIn foto cover"
 
 #: ../share/ui/inkscape-start.glade:654
 msgid "LinkedIn dynamic ad"
-msgstr ""
+msgstr "LinkedIn ad dinamico"
 
 #: ../share/ui/inkscape-start.glade:662
-#, fuzzy
-#| msgid "Invert image"
 msgid "LinkedIn hero image"
-msgstr "Inverti immagine"
+msgstr "Inverti immagine hero"
 
 #: ../share/ui/inkscape-start.glade:670
 msgid "LinkedIn sponsored content image"
-msgstr ""
+msgstr "LinkedIn immagine contenuto sponsorizzato"
 
 #: ../share/ui/inkscape-start.glade:678
 msgid "Snapchat advertisement"
-msgstr ""
+msgstr "Snapchat pubblicità"
 
 #: ../share/ui/inkscape-start.glade:686
+#, fuzzy
 msgid "Twitter card image"
-msgstr ""
+msgstr "Twitter "
 
 #: ../share/ui/inkscape-start.glade:694
 #, fuzzy
@@ -35528,34 +35417,32 @@ msgid "Twitter header"
 msgstr "Sfalsa nodi"
 
 #: ../share/ui/inkscape-start.glade:702
-#, fuzzy
-#| msgid "Invert image"
 msgid "Twitter post image"
-msgstr "Inverti immagine"
+msgstr "Twitter immagine post"
 
 #: ../share/ui/inkscape-start.glade:710
 msgid "Twitter profile picture"
-msgstr ""
+msgstr "Twitter immagine profilo"
 
 #: ../share/ui/inkscape-start.glade:718
 msgid "Twitter video landscape"
-msgstr ""
+msgstr "Twitter video orizzontale"
 
 #: ../share/ui/inkscape-start.glade:726
 msgid "Twitter video portrait"
-msgstr ""
+msgstr "Twitter video verticale"
 
 #: ../share/ui/inkscape-start.glade:734
 msgid "Twitter video square"
-msgstr ""
+msgstr "Twitter video quadrato"
 
 #: ../share/ui/inkscape-start.glade:760
 msgid "Video DCI 2k (Full Frame)"
-msgstr ""
+msgstr "Video DCI 2k (Full Frame)"
 
 #: ../share/ui/inkscape-start.glade:768
 msgid "Video DCI 4k (Full Frame)"
-msgstr ""
+msgstr "Video DCI 4k (Full Frame)"
 
 #: ../share/ui/inkscape-start.glade:776
 msgid "Video HD 1080p"
@@ -35567,47 +35454,42 @@ msgstr "Video HD 720p"
 
 #: ../share/ui/inkscape-start.glade:792
 msgid "Video SD / NTSC"
-msgstr ""
+msgstr "Video SD / NTSC"
 
 #: ../share/ui/inkscape-start.glade:800
 msgid "Video SD / PAL"
-msgstr ""
+msgstr "Video SD / PAL"
 
 #: ../share/ui/inkscape-start.glade:808
-#, fuzzy
-#| msgid "Video Screen"
 msgid "Video SD-Widescreen / NTSC"
-msgstr "Video screen"
+msgstr "Video SD-Widescreen / NTSC"
 
 #: ../share/ui/inkscape-start.glade:816
-#, fuzzy
-#| msgid "Video Screen"
 msgid "Video SD-Widescreen / PAL"
-msgstr "Video screen"
+msgstr "Video SD-Widescreen / PAL"
 
 #: ../share/ui/inkscape-start.glade:824
 msgid "Video UHD 4k"
-msgstr ""
+msgstr "Video UHD 4k"
 
 #: ../share/ui/inkscape-start.glade:832
 msgid "Video UHD 8k"
-msgstr ""
+msgstr "Video UHD 8k"
 
 #: ../share/ui/inkscape-start.glade:901
 #, fuzzy
-#| msgid "Classic"
 msgid "Classic Adwaita"
-msgstr "Classico"
+msgstr "Adwaita Classico"
 
 #: ../share/ui/inkscape-start.glade:915
 #, fuzzy
-#| msgid "Symbolic"
 msgid "Symbolic Adwaita"
-msgstr "Simbolico"
+msgstr "Adwaita Simbolico"
 
 #: ../share/ui/inkscape-start.glade:929
+#, fuzzy
 msgid "Symbolic Adwaita Dark"
-msgstr ""
+msgstr "Adwaita Simbolico Scuro"
 
 #: ../share/ui/inkscape-start.glade:943
 #, fuzzy
@@ -35661,7 +35543,7 @@ msgstr "Seleziona il colore di sfondo predefinito dell'area di lavoro"
 
 #: ../share/ui/inkscape-start.glade:1501
 msgid "Welcome!"
-msgstr ""
+msgstr "Benvenuto!"
 
 #: ../share/ui/inkscape-start.glade:1521
 msgid ""
@@ -35671,14 +35553,17 @@ msgid ""
 "If you would like to get involved and make the next version of Inkscape even "
 "better, please consider joining the Inkscape project today.</b></big>"
 msgstr ""
+"<big><b>Il progetto di Inkscape è supportato da utenti come te.</b> Con il nostro "
+"tempo, denaro e abilità abbiamo reso disponibile questo software a tutti nel "
+"mondo per poterlo utilizzare senza alcuna restrizione o costo. <b>\n"
+"Se vuoi prendere parte alla creazione della prossima e migliore versione di "
+"Inkscape, considera di unirti al progetto oggi.</b></big>"
 
 #: ../share/ui/inkscape-start.glade:1582
-#, fuzzy
-#| msgid "Search attribute name"
 msgid ""
 "Learn how to\n"
 "Contribute Time"
-msgstr "Cerca nome attributo"
+msgstr ""
 
 #: ../share/ui/inkscape-start.glade:1640
 msgid ""
@@ -35739,26 +35624,20 @@ msgid "Show this every time"
 msgstr "Mostra ad ogni avvio"
 
 #: ../share/ui/inkscape-start.glade:2137
-#, fuzzy
-#| msgid "Neon Draw"
 msgid "Time to Draw"
-msgstr "Neon"
+msgstr "Disegna"
 
 #: ../share/ui/menu-view.ui:10
 msgid "_Zoom"
 msgstr "_Ingrandimento"
 
 #: ../share/ui/menu-view.ui:65
-#, fuzzy
-#| msgid "_Center Page"
 msgid "Center Page"
-msgstr "_Centra pagina"
+msgstr "Centra pagina"
 
 #: ../share/ui/menu-view.ui:73
-#, fuzzy
-#| msgid "Zoom out"
 msgid "Zoom Previous"
-msgstr "Riduce l'ingrandimento"
+msgstr "Ingrandimento precedente"
 
 #: ../share/ui/menu-view.ui:87
 msgid "_Orientation"
