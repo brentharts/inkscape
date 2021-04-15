@@ -57,6 +57,7 @@
 
 #include "svg/svg-color.h"
 
+#include "ui/desktop/menubar.h"
 #include "ui/interface.h"
 #include "ui/shortcuts.h"
 #include "ui/modifiers.h"
@@ -1138,7 +1139,7 @@ void InkscapePreferences::resetIconsColors(bool themechange)
             base_color = _symbolic_base_color.get_style_context()->get_background_color();
         }
         SPColor base_color_sp(base_color.get_red(), base_color.get_green(), base_color.get_blue());
-        //we copy higlight to not use
+        //we copy highlight to not use
         guint32 colorsetbase = base_color_sp.toRGBA32(base_color.get_alpha());
         guint32 colorsetsuccess = colorsetbase;
         guint32 colorsetwarning = colorsetbase;
@@ -1353,7 +1354,7 @@ void InkscapePreferences::symbolicThemeCheck()
     }
     // we always show symbolic in default theme (relays in hicolor theme)
     if (themeiconname != prefs->getString("/theme/defaultIconTheme", "")) {
-        
+
         auto folders = get_foldernames(ICONS, { "application" });
         for (auto &folder : folders) {
             auto path = folder;
@@ -1638,7 +1639,7 @@ void InkscapePreferences::initPageUI()
         Glib::ustring default_theme_label = _("Use system theme");
         default_theme_label += " (" + default_theme + ")";
         labels.emplace_back(default_theme_label);
-        
+
         _gtk_theme.init("/theme/gtkTheme", labels, values, "");
         _page_theme.add_line(false, _("Change GTK theme:"), _gtk_theme, "", "", false);
         _gtk_theme.signal_changed().connect(sigc::mem_fun(*this, &InkscapePreferences::themeChange));
@@ -1708,7 +1709,7 @@ void InkscapePreferences::initPageUI()
     _symbolic_base_colors.init(_("Use default base color for icons"), "/theme/symbolicDefaultBaseColors", true);
     _symbolic_base_colors.signal_clicked().connect(sigc::mem_fun(*this, &InkscapePreferences::resetIconsColorsWrapper));
     _page_theme.add_line(true, "", _symbolic_base_colors, "", "", true);
-    _symbolic_highlight_colors.init(_("Use default higlight colors for icons"), "/theme/symbolicDefaultHighColors", true);
+    _symbolic_highlight_colors.init(_("Use default highlight colors for icons"), "/theme/symbolicDefaultHighColors", true);
     _symbolic_highlight_colors.signal_clicked().connect(sigc::mem_fun(*this, &InkscapePreferences::resetIconsColorsWrapper));
     _page_theme.add_line(true, "", _symbolic_highlight_colors, "", "", true);
     _symbolic_base_color.init(_("Color for symbolic icons:"), "/theme/" + themeiconname + "/symbolicBaseColor",
@@ -3290,6 +3291,24 @@ void InkscapePreferences::onKBListKeyboardShortcuts()
     // Update all GUI text that includes shortcuts.
     for (auto win : gapp->get_windows()) {
         shortcuts.update_gui_text_recursive(win);
+    }
+
+    // Update all GUI text
+    std::list< SPDesktop* > listbuf;
+    // Get list of all available desktops
+    INKSCAPE.get_all_desktops(listbuf);
+
+    // Update text of each desktop to correct Shortcuts
+    for(SPDesktop *desktop: listbuf) {
+      // Caution: Checking if pointers are not NULL
+      if(desktop) {
+        InkscapeWindow *window = desktop->getInkscapeWindow();
+        if(window) {
+          SPDesktopWidget *dtw = window->get_desktop_widget();
+          if(dtw)
+            reload_menu(desktop, dtw->_menubar);
+        }
+      }
     }
 }
 
