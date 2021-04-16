@@ -375,6 +375,7 @@ protected:
     UI::Widget::PrefSpinButton  _misc_gradientangle;
     UI::Widget::PrefCheckButton _misc_scripts;
     UI::Widget::PrefCheckButton _misc_namedicon_delay;
+    UI::Widget::PrefCheckButton _misc_user_extensions;
 
     // System page
     UI::Widget::PrefSpinButton  _misc_latency_skew;

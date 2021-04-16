@@ -3347,6 +3347,9 @@ void InkscapePreferences::initPageSystem()
     _misc_namedicon_delay.init( _("Pre-render named icons"), "/options/iconrender/named_nodelay", false);
     _page_system.add_line( false, "", _misc_namedicon_delay, "",
                            _("When on, named icons will be rendered before displaying the ui. This is for working around bugs in GTK+ named icon notification"), true);
+    _misc_user_extensions.init( _("Enable user extensions (requires restart)"), "/extensions/enable_user_extensions", true);
+    _page_system.add_line( false, "", _misc_user_extensions, "",
+                           _("If turned off, the user extensions will be ignored, preventing custom software being run."), true);
 
     _page_system.add_group_header( _("System info"));
 
