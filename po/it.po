@@ -5,7 +5,7 @@
 # Alessio Frusciante <algol@firenze.linux.it>, 2002-2003.
 # Luca Ferretti <elle.uca@infinito.it>, 2005.
 # Luca Bruno <lucab@debian.org>, 2005-2009.
-# Firas Hanife <FirasHanife@gmail.com>, 2014-2020.
+# Firas Hanife <FirasHanife@gmail.com>, 2014-2021.
 # Germano Gasparini <grigio60@gmail.com>, 2019.
 # Marco Riva <oelimar@mail.com>, 2019.
 #
@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: Inkscape 1.0\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
 "POT-Creation-Date: 2021-03-14 20:46+0000\n"
-"PO-Revision-Date: 2021-04-14 13:11+0200\n"
+"PO-Revision-Date: 2021-04-16 12:30+0200\n"
 "Last-Translator: Firas Hanife <firashanife@gmail.com>\n"
 "Language-Team: \n"
 "Language: it\n"
@@ -4038,36 +4038,28 @@ msgid "Print Inkscape version and exit"
 msgstr "Mostra la versione di Inkscape ed esce"
 
 #: ../src/actions/actions-base.cpp:226
-#, fuzzy
 msgid "System Directory"
-msgstr "Cartella:"
+msgstr "Cartella sistema"
 
 #: ../src/actions/actions-base.cpp:226
-#, fuzzy
-#| msgid "Print system extension directory"
 msgid "Print system data directory and exit"
-msgstr "Mostra la posizione delle estensioni nel sistema"
+msgstr "Mostra la cartella di sistema ed esce"
 
 #: ../src/actions/actions-base.cpp:227
-#, fuzzy
 msgid "User Directory"
-msgstr "Cartella:"
+msgstr "Cartella utente"
 
 #: ../src/actions/actions-base.cpp:227
-#, fuzzy
-#| msgid "Print system extension directory"
 msgid "Print user data directory and exit"
-msgstr "Mostra la posizione delle estensioni nel sistema"
+msgstr "Mostra la cartella utente ed esce"
 
 #: ../src/actions/actions-base.cpp:228
-#, fuzzy
-#| msgid "Action:"
 msgid "List Actions"
-msgstr "Azione:"
+msgstr "Elenca azioni"
 
 #: ../src/actions/actions-base.cpp:228
 msgid "Print a list of actions and exit"
-msgstr ""
+msgstr "Mostra la lista delle azioni ed esce"
 
 #: ../src/actions/actions-base.cpp:229
 msgid "List Verbs"
@@ -4106,22 +4098,16 @@ msgid "Quit"
 msgstr "Esci"
 
 #: ../src/actions/actions-base.cpp:232
-#, fuzzy
-#| msgid "Quit Inkscape"
 msgid "Immediately quit Inkscape"
-msgstr "Chiude Inkscape"
+msgstr "Chiude Inkscape immediatamente"
 
 #: ../src/actions/actions-base.cpp:234
-#, fuzzy
-#| msgid "Integer Number"
 msgid "Import Page Number"
-msgstr "Numero intero"
+msgstr "Importa numero pagina"
 
 #: ../src/actions/actions-base.cpp:234
-#, fuzzy
-#| msgid "PDF page number to import"
 msgid "Select PDF page number to import"
-msgstr "Numero pagina PDF da importare"
+msgstr "Seleziona il numero di pagina del PDF da importare"
 
 #: ../src/actions/actions-base.cpp:235
 msgid "Import DPI Method"
@@ -4286,10 +4272,8 @@ msgid "Render part of the canvas in outline mode"
 msgstr ""
 
 #: ../src/actions/actions-canvas-mode.cpp:258
-#, fuzzy
-#| msgid "_Split View Mode"
 msgid "Split Mode: X-Ray"
-msgstr "Modalità _Split View"
+msgstr "Modalità separata: Raggi-X"
 
 #: ../src/actions/actions-canvas-mode.cpp:258
 msgid "Render a circular area in outline mode"
@@ -4334,7 +4318,7 @@ msgstr "Aggancia riquadri"
 
 #: ../src/actions/actions-canvas-snapping.cpp:187
 msgid "Toggle snapping to bounding boxes (global)"
-msgstr "Aggancia ai riquadri (globale)"
+msgstr "Attiva o disattiva l'aggancio ai riquadri (globale)"
 
 #: ../src/actions/actions-canvas-snapping.cpp:188
 msgid "Snap Bounding Box Edges"
@@ -4353,124 +4337,84 @@ msgid "Toggle snapping to bounding-box corners"
 msgstr "Aggancia agli angoli dei riquadri"
 
 #: ../src/actions/actions-canvas-snapping.cpp:190
-#, fuzzy
-#| msgid "Bounding box side midpoint"
 msgid "Snap Bounding Box Edge Midpoints"
-msgstr "Metà lato riquadro"
+msgstr "Aggancia metà lato riquadri"
 
 #: ../src/actions/actions-canvas-snapping.cpp:190
-#, fuzzy
-#| msgid "bounding box side midpoint"
 msgid "Toggle snapping to bounding-box edge mid-points"
-msgstr "metà lato riquadro"
+msgstr "Aggancia a metà lato dei riquadri"
 
 #: ../src/actions/actions-canvas-snapping.cpp:191
-#, fuzzy
-#| msgid "Snap bounding box corners"
 msgid "Snap Bounding Box Centers"
-msgstr "Aggancia angoli riquadri"
+msgstr "Aggancia centri riquadri"
 
 #: ../src/actions/actions-canvas-snapping.cpp:191
-#, fuzzy
-#| msgid "Snapping centers of bounding boxes"
 msgid "Toggle snapping to bounding-box centers"
-msgstr "Aggancia a e con i centri dei riquadri"
+msgstr "Aggancia ai centri dei riquadri"
 
 #: ../src/actions/actions-canvas-snapping.cpp:193
-#, fuzzy
-#| msgid "Snap guides"
 msgid "Snap Nodes"
-msgstr "Aggancia alle guide"
+msgstr "Aggancia nodi"
 
 #: ../src/actions/actions-canvas-snapping.cpp:193
-#, fuzzy
-#| msgid "Toggle snapping on or off"
 msgid "Toggle snapping to nodes (global)"
-msgstr "Attiva o disattiva l'aggancio"
+msgstr "Attiva o disattiva l'aggancio ai nodi (globale)"
 
 #: ../src/actions/actions-canvas-snapping.cpp:194
-#, fuzzy
-#| msgid "Snap to paths"
 msgid "Snap Paths"
+msgstr "Aggancia tracciati"
+
+#: ../src/actions/actions-canvas-snapping.cpp:194
+msgid "Toggle snapping to paths"
 msgstr "Aggancia ai tracciati"
 
-#: ../src/actions/actions-canvas-snapping.cpp:194
-#, fuzzy
-#| msgid "Toggle snapping on or off"
-msgid "Toggle snapping to paths"
-msgstr "Attiva o disattiva l'aggancio"
-
 #: ../src/actions/actions-canvas-snapping.cpp:195
-#, fuzzy
-#| msgid "Snap to path intersections"
 msgid "Snap Path Intersections"
-msgstr "Aggancia alle intersezioni dei tracciati"
+msgstr "Aggancia intersezioni tracciati"
 
 #: ../src/actions/actions-canvas-snapping.cpp:195
-#, fuzzy
-#| msgid "Snap to path intersections"
 msgid "Toggle snapping to path intersections"
 msgstr "Aggancia alle intersezioni dei tracciati"
 
 #: ../src/actions/actions-canvas-snapping.cpp:196
-#, fuzzy
-#| msgid "Snap to cusp nodes"
 msgid "Snap Cusp Nodes"
-msgstr "Aggancia ai nodi angolari"
+msgstr "Aggancia nodi angolari"
 
 #: ../src/actions/actions-canvas-snapping.cpp:196
-#, fuzzy
-#| msgid "Snap to cusp nodes, incl. rectangle corners"
 msgid "Toggle snapping to cusp nodes, including rectangle corners"
 msgstr "Aggancia ai nodi angolari, incl. angoli dei rettangoli"
 
 #: ../src/actions/actions-canvas-snapping.cpp:197
-#, fuzzy
-#| msgid "Smooth node"
 msgid "Snap Smooth Node"
-msgstr "Nodo curvo"
+msgstr "Aggancia nodo curvo"
 
 #: ../src/actions/actions-canvas-snapping.cpp:197
-#, fuzzy
-#| msgid "Snap smooth nodes, incl. quadrant points of ellipses"
 msgid "Toggle snapping to smooth nodes, including quadrant points of ellipses"
 msgstr "Aggancia ai nodi curvi, incl. punti cardinali delle ellissi"
 
 #: ../src/actions/actions-canvas-snapping.cpp:198
-#, fuzzy
-#| msgid "Line Midpoints"
 msgid "Snap Line Midpoints"
-msgstr "Metà linea"
+msgstr "Aggancia metà linea"
 
 #: ../src/actions/actions-canvas-snapping.cpp:198
-#, fuzzy
-#| msgid "Toggle snapping on or off"
 msgid "Toggle snapping to midpoints of lines"
-msgstr "Attiva o disattiva l'aggancio"
+msgstr "Aggancia a metà delle linee"
 
 #: ../src/actions/actions-canvas-snapping.cpp:200
-#, fuzzy
-#| msgid "Others"
 msgid "Snap Others"
-msgstr "Altri"
+msgstr "Aggancia altri"
 
 #: ../src/actions/actions-canvas-snapping.cpp:200
-#, fuzzy
-#| msgid "Toggle snapping on or off"
 msgid "Toggle snapping to misc. points (global)"
-msgstr "Attiva o disattiva l'aggancio"
+msgstr "Attiva o disattiva l'aggancio ad altri punti (globale)"
 
 #: ../src/actions/actions-canvas-snapping.cpp:201
-#, fuzzy
-#| msgid "Object midpoint"
 msgid "Snap Object Midpoint"
-msgstr "Baricentro oggetto"
+msgstr "Aggancia baricentro oggetto"
 
 #: ../src/actions/actions-canvas-snapping.cpp:201
-#, fuzzy
-#| msgid "Toggle snapping on or off"
 msgid "Toggle snapping to object midpoint"
-msgstr "Attiva o disattiva l'aggancio"
+msgstr "Aggancia al baricentro dell'oggetto"
 
 #: ../src/actions/actions-canvas-snapping.cpp:202
 msgid "Snap Rotation Center"
@@ -4497,52 +4441,36 @@ msgid "Toggle snapping to page border"
 msgstr "Aggancia ai bordi della pagina"
 
 #: ../src/actions/actions-canvas-snapping.cpp:206
-#, fuzzy
-#| msgid "Snap to grids"
 msgid "Snap Grids"
-msgstr "Aggancia alle griglie"
+msgstr "Aggancia griglie"
 
 #: ../src/actions/actions-canvas-snapping.cpp:206
-#, fuzzy
-#| msgid "Toggle snapping on or off"
 msgid "Toggle snapping to grids"
-msgstr "Attiva o disattiva l'aggancio"
+msgstr "Aggancia alle griglie"
 
 #: ../src/actions/actions-canvas-snapping.cpp:207
-#, fuzzy
-#| msgid "Add Guide Lines"
 msgid "Snap Guide Lines"
-msgstr "Aggiungi linee guida"
+msgstr "Aggancia linee guida"
 
 #: ../src/actions/actions-canvas-snapping.cpp:207
-#, fuzzy
-#| msgid "Relative snapping of guideline angles"
 msgid "Toggle snapping to guide lines"
-msgstr "Aggancio relativo degli angoli delle linee guida"
+msgstr "Aggancia alle linee guida"
 
 #: ../src/actions/actions-canvas-snapping.cpp:209
-#, fuzzy
-#| msgid "Snap to mask paths"
 msgid "Snap Mask Paths"
 msgstr "Aggancia tracciati maschere"
 
 #: ../src/actions/actions-canvas-snapping.cpp:209
-#, fuzzy
-#| msgid "Snap to mask paths"
 msgid "Toggle snapping to mask paths"
-msgstr "Aggancia tracciati maschere"
+msgstr "Aggancia ai tracciati delle maschere"
 
 #: ../src/actions/actions-canvas-snapping.cpp:210
-#, fuzzy
-#| msgid "Snap to clip paths"
 msgid "Snap Clip Paths"
-msgstr "Aggancia tracciati fissaggi"
+msgstr "Aggancia tracciati fissaggio"
 
 #: ../src/actions/actions-canvas-snapping.cpp:210
-#, fuzzy
-#| msgid "Snap to clip paths"
 msgid "Toggle snapping to clip paths"
-msgstr "Aggancia tracciati fissaggi"
+msgstr "Aggancia ai tracciati di fissaggio"
 
 #: ../src/actions/actions-canvas-transform.cpp:200
 msgid "Zoom In"
@@ -4753,10 +4681,8 @@ msgid "Distribute"
 msgstr "Distribuzione"
 
 #: ../src/actions/actions-object-align.cpp:356
-#, fuzzy
-#| msgid "Hide objects"
 msgid "Align objects"
-msgstr "Nascondi oggetti"
+msgstr "Allinea oggetti"
 
 #: ../src/actions/actions-object-align.cpp:356
 msgid ""
@@ -4765,10 +4691,8 @@ msgid ""
 msgstr ""
 
 #: ../src/actions/actions-object-align.cpp:357
-#, fuzzy
-#| msgid "Distribute nodes"
 msgid "Distribute objects"
-msgstr "Distribuisci nodi"
+msgstr "Distribuisci oggetti"
 
 #: ../src/actions/actions-object-align.cpp:357
 msgid ""
@@ -4801,10 +4725,8 @@ msgid ""
 msgstr ""
 
 #: ../src/actions/actions-object.cpp:146
-#, fuzzy
-#| msgid "Unlin_k Clone"
 msgid "Unlink Clones"
-msgstr "Scolle_ga clone"
+msgstr "Scollega cloni"
 
 #: ../src/actions/actions-object.cpp:146
 #, fuzzy
@@ -4813,109 +4735,76 @@ msgid "Unlink clones and symbols"
 msgstr "Scollega clone"
 
 #: ../src/actions/actions-object.cpp:147
-#, fuzzy
-#| msgid "_Object to Path"
 msgid "Object To Path"
-msgstr "Da _oggetto a tracciato"
+msgstr "Oggetto a tracciato"
 
 #: ../src/actions/actions-object.cpp:147
-#, fuzzy
-#| msgid "Convert texts to paths"
 msgid "Convert shapes to paths"
-msgstr "Converti testo in tracciato"
+msgstr "Converte le forme in tracciati"
 
 #: ../src/actions/actions-object.cpp:148
-#, fuzzy
-#| msgid "_Stroke to Path"
 msgid "Stroke to Path"
-msgstr "Da _contorno a tracciato"
+msgstr "Contorno a tracciato"
 
 #: ../src/actions/actions-object.cpp:148
-#, fuzzy
-#| msgid "Convert stroke to path"
 msgid "Convert strokes to paths"
-msgstr "Converti contorno in tracciato"
+msgstr "Converte i contorni in tracciati"
 
 #: ../src/actions/actions-object.cpp:149
-#, fuzzy
-#| msgid "Simplifying paths:"
 msgid "Simplify Path"
-msgstr "Semplificazione tracciati:"
+msgstr "Semplifica tracciato"
 
 #: ../src/actions/actions-object.cpp:149
 msgid "Simplify paths, reducing node counts"
-msgstr ""
+msgstr "Semplifica i tracciati riducendo il numero di nodi"
 
 #: ../src/actions/actions-output.cpp:225
-#, fuzzy
-#| msgid "Export"
 msgid "Export Type"
-msgstr "Esporta"
+msgstr "Tipo esportazione"
 
 #: ../src/actions/actions-output.cpp:225
-#, fuzzy
-#| msgid "Select file to open"
 msgid "Set export file type"
-msgstr "Seleziona il file da aprire"
+msgstr "Imposta il tipo di file da esportare"
 
 #: ../src/actions/actions-output.cpp:226
-#, fuzzy
-#| msgid "Export geometry"
 msgid "Export File Name"
-msgstr "Geometria esportazione"
+msgstr "Nome file esportato"
 
 #: ../src/actions/actions-output.cpp:226
-#, fuzzy
-#| msgid "Area to export is page"
 msgid "Set export file name"
-msgstr "Esporta l'area dell'intera pagina"
+msgstr "Imposta il nome del file da esportare"
 
 #: ../src/actions/actions-output.cpp:227
-#, fuzzy
-#| msgid "Export aborted."
 msgid "Export Overwrite"
-msgstr "Esportazione fallita."
+msgstr "Sovrascrivi esportazione"
 
 #: ../src/actions/actions-output.cpp:227
-#, fuzzy
 msgid "Allow to overwrite existing files during export"
-msgstr "Cancella tracciato esistente"
+msgstr "Permette di sovrascrivere i file esistenti durante l'esportazione"
 
 #: ../src/actions/actions-output.cpp:229
-#, fuzzy
-#| msgid "Export"
 msgid "Export Area"
-msgstr "Esporta"
+msgstr "Esporta area"
 
 #: ../src/actions/actions-output.cpp:229
-#, fuzzy
-#| msgid "Area to export is page"
 msgid "Set export area"
-msgstr "Esporta l'area dell'intera pagina"
+msgstr "Imposta l'area da esportare"
 
 #: ../src/actions/actions-output.cpp:230
-#, fuzzy
-#| msgid "Entire drawing"
 msgid "Export Area Drawing"
-msgstr "Tutto il disegno"
+msgstr "Esporta area disegno"
 
 #: ../src/actions/actions-output.cpp:230
-#, fuzzy
-#| msgid "Export in progress"
 msgid "Export drawing area"
-msgstr "Esportazione in avanzamento"
+msgstr "Esporta l'area del disegno"
 
 #: ../src/actions/actions-output.cpp:231
-#, fuzzy
-#| msgid "Export as GIMP Palette"
 msgid "Export Area Page"
-msgstr "Esporta come tavolozza di GIMP"
+msgstr "Esporta area pagina"
 
 #: ../src/actions/actions-output.cpp:231
-#, fuzzy
-#| msgid "<b>Export area</b>"
 msgid "Export page area"
-msgstr "<b>Area da esportare</b>"
+msgstr "Esporta l'area della pagina"
 
 #: ../src/actions/actions-output.cpp:232
 #, fuzzy
@@ -4940,45 +4829,32 @@ msgid "Snap export area to integer values"
 msgstr "Aggancia l'area esterna di esportazione bitmap al valore intero più vicino"
 
 #: ../src/actions/actions-output.cpp:234
-#, fuzzy
-#| msgid "Export"
 msgid "Export Width"
-msgstr "Esporta"
+msgstr "Esporta larghezza"
 
 #: ../src/actions/actions-output.cpp:234
-#, fuzzy
-#| msgid "Set width:"
 msgid "Set export width"
-msgstr "Imposta larghezza:"
+msgstr "Imposta la larghezza dell'esportazione"
 
 #: ../src/actions/actions-output.cpp:235
-#, fuzzy
 msgid "Export Height"
-msgstr "Altezza della minuscola:"
+msgstr "Esporta altezza"
 
 #: ../src/actions/actions-output.cpp:235
-#, fuzzy
-#| msgid "Source height"
 msgid "Set export height"
-msgstr "Altezza sorgente"
+msgstr "Imposta l'altezza dell'esportare"
 
 #: ../src/actions/actions-output.cpp:237
-#, fuzzy
-#| msgid "Export"
 msgid "Export ID"
-msgstr "Esporta"
+msgstr "Esporta ID"
 
 #: ../src/actions/actions-output.cpp:237
-#, fuzzy
-#| msgid "Not selected"
 msgid "Export selected ID(s)"
-msgstr "Non selezionato"
+msgstr "Esporta gli ID selezionati"
 
 #: ../src/actions/actions-output.cpp:238
-#, fuzzy
-#| msgid "Export"
 msgid "Export ID Only"
-msgstr "Esporta"
+msgstr "Esporta solo ID"
 
 #: ../src/actions/actions-output.cpp:238
 msgid "Hide any objects not given in export-id option"
@@ -4997,16 +4873,12 @@ msgid "Export as plain SVG"
 msgstr "Opzioni esportazione"
 
 #: ../src/actions/actions-output.cpp:241
-#, fuzzy
-#| msgid "Export"
 msgid "Export DPI"
-msgstr "Esporta"
+msgstr "Esporta DPI"
 
 #: ../src/actions/actions-output.cpp:241
-#, fuzzy
-#| msgid "SVG export"
 msgid "Set export DPI"
-msgstr "Esportazione SVG"
+msgstr "Imposta i DPI dell'esportazione"
 
 #: ../src/actions/actions-output.cpp:242
 #, fuzzy
@@ -5033,34 +4905,24 @@ msgid "Convert texts to paths in the exported file"
 msgstr "Converti testo in tracciato"
 
 #: ../src/actions/actions-output.cpp:244
-#, fuzzy
-#| msgid "PS-Level"
 msgid "Export PS Level"
-msgstr "LVL-PS"
+msgstr "Esporta livello PS"
 
 #: ../src/actions/actions-output.cpp:244
-#, fuzzy
-#| msgid "PostScript level 3"
 msgid "Set PostScript level"
-msgstr "PostScript livello 3"
+msgstr "Imposta il livello PostScript"
 
 #: ../src/actions/actions-output.cpp:245
-#, fuzzy
-#| msgid "Export presentation:"
 msgid "Export PDF Version"
-msgstr "Esporta presentazione:"
+msgstr "Esporta versione PDF"
 
 #: ../src/actions/actions-output.cpp:245
-#, fuzzy
-#| msgid "Restrict to PDF version:"
 msgid "Set PDF version"
-msgstr "Limita alla versione PDF:"
+msgstr "Imposta la versione PDF"
 
 #: ../src/actions/actions-output.cpp:246
-#, fuzzy
-#| msgid "Export aborted."
 msgid "Export LaTeX"
-msgstr "Esportazione fallita."
+msgstr "Esporta LaTeX"
 
 #: ../src/actions/actions-output.cpp:247
 #, fuzzy
@@ -5075,24 +4937,20 @@ msgid "Export using saved hints"
 msgstr "Esportazione di %1 file"
 
 #: ../src/actions/actions-output.cpp:248
-#, fuzzy
-#| msgid "Background"
 msgid "Export Background"
-msgstr "Sfondo"
+msgstr "Esporta sfondo"
 
 #: ../src/actions/actions-output.cpp:248
 msgid "Include background color in exported file"
-msgstr ""
+msgstr "Include il colore di sfondo nel file esportato"
 
 #: ../src/actions/actions-output.cpp:249
-#, fuzzy
-#| msgid "Background opacity"
 msgid "Export Background Opacity"
-msgstr "Opacità sfondo"
+msgstr "Esporta opacità sfondo"
 
 #: ../src/actions/actions-output.cpp:249
 msgid "Include background opacity in exported file"
-msgstr ""
+msgstr "Include l'opacità dello sfondo nel file esportato"
 
 #: ../src/actions/actions-output.cpp:250
 msgid "Export PNG Color Mode"
@@ -5137,41 +4995,31 @@ msgstr "Seleziona"
 
 #: ../src/actions/actions-selection.cpp:240
 msgid "Select by ID (deprecated)"
-msgstr ""
+msgstr "Seleziona per ID (deprecato)"
 
 #: ../src/actions/actions-selection.cpp:241
-#, fuzzy
-#| msgid "D_eselect"
 msgid "Deselect"
-msgstr "D_eseleziona"
+msgstr "Deseleziona"
 
 #: ../src/actions/actions-selection.cpp:241
 msgid "Deselect by ID (deprecated)"
-msgstr ""
+msgstr "Deseleziona per ID (deprecato)"
 
 #: ../src/actions/actions-selection.cpp:242
-#, fuzzy
-#| msgid "Select"
 msgid "Select by ID"
-msgstr "Seleziona"
+msgstr "Seleziona per ID"
 
 #: ../src/actions/actions-selection.cpp:243
-#, fuzzy
-#| msgid "D_eselect"
 msgid "Deselect by ID"
-msgstr "D_eseleziona"
+msgstr "Deseleziona per ID"
 
 #: ../src/actions/actions-selection.cpp:244
-#, fuzzy
-#| msgid "Select in all layers"
 msgid "Select by Class"
-msgstr "Seleziona tutto in ogni livello"
+msgstr "Seleziona per classe"
 
 #: ../src/actions/actions-selection.cpp:244
-#, fuzzy
-#| msgid "Select in all layers"
 msgid "Select by class"
-msgstr "Seleziona tutto in ogni livello"
+msgstr "Seleziona per classe"
 
 #: ../src/actions/actions-selection.cpp:245
 #, fuzzy
@@ -5198,10 +5046,8 @@ msgid "Select by CSS selector"
 msgstr "Selettore CSS"
 
 #: ../src/actions/actions-selection.cpp:247
-#, fuzzy
-#| msgid "Select Al_l"
 msgid "Select All"
-msgstr "Se_leziona tutto"
+msgstr "Seleziona tutto"
 
 #: ../src/actions/actions-selection.cpp:247
 msgid ""
@@ -5211,10 +5057,8 @@ msgid ""
 msgstr ""
 
 #: ../src/actions/actions-selection.cpp:248
-#, fuzzy
-#| msgid "In_vert Selection"
 msgid "Invert Selection"
-msgstr "In_verti selezione"
+msgstr "Inverti selezione"
 
 #: ../src/actions/actions-selection.cpp:248
 msgid ""
@@ -5223,16 +5067,12 @@ msgid ""
 msgstr ""
 
 #: ../src/actions/actions-selection.cpp:249
-#, fuzzy
-#| msgid "Selection"
 msgid "List Selection"
-msgstr "Selezione"
+msgstr "Elenca selezione"
 
 #: ../src/actions/actions-selection.cpp:249
-#, fuzzy
-#| msgid "Limit search to the current selection"
 msgid "Print a list of objects in current selection"
-msgstr "Limita la ricerca alla selezione attuale"
+msgstr "Elenca la lista degli oggetti attualmente selezionati"
 
 #: ../src/actions/actions-transform.cpp:90
 #, fuzzy
@@ -5253,9 +5093,8 @@ msgstr "Ruota"
 
 #: ../src/actions/actions-transform.cpp:91
 #, fuzzy
-#| msgid "Make selected objects bigger"
 msgid "Rotate selected objects by degrees"
-msgstr "Ingrandisce gli oggetti selezionati"
+msgstr "Ruota gli oggetti selezionati in gradi"
 
 #: ../src/actions/actions-transform.cpp:92
 #: ../src/live_effects/lpe-measure-segments.cpp:79
@@ -23988,10 +23827,8 @@ msgid "Open keyboard shortcuts folder"
 msgstr "Apre la cartella delle scorciatoie da tastiera"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3393
-#, fuzzy
-#| msgid "User keys: "
 msgid "User keys:"
-msgstr "Scorciatoie: "
+msgstr "Tastiere:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3394
 msgid "Location of the user’s keyboard mapping files"
@@ -24010,10 +23847,8 @@ msgid "Location of the user’s user interface description files"
 msgstr "Posizione del file di descrizione dell'interfaccia dell'utente"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3403
-#, fuzzy
-#| msgid "User cache: "
 msgid "User cache:"
-msgstr "Cache: "
+msgstr "Cache:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3403
 msgid "Location of user’s cache"
@@ -24028,10 +23863,8 @@ msgid "Location of the temporary files used for autosave"
 msgstr "Posizione dei file temporanei usati per l'autosalvataggio"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3415
-#, fuzzy
-#| msgid "Inkscape data: "
 msgid "Inkscape data:"
-msgstr "Dati Inkscape: "
+msgstr "Dati Inkscape:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3415
 msgid "Location of Inkscape data"
@@ -24060,10 +23893,8 @@ msgid "Custom Font directories"
 msgstr "Cartelle caratteri"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3446
-#, fuzzy
-#| msgid "Icon theme: "
 msgid "Icon theme:"
-msgstr "Tema icone: "
+msgstr "Temi icone:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3446
 msgid "Locations of icon themes"
@@ -24075,7 +23906,7 @@ msgstr "Sistema"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3518
 msgid "<span size='large'><b>No Results</b></span>"
-msgstr ""
+msgstr "<span size='large'><b>Nessun risultato</b></span>"
 
 #: ../src/ui/dialog/input.cpp:349 ../src/ui/dialog/input.cpp:370
 #: ../src/ui/dialog/input.cpp:1458
