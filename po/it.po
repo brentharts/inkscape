@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: Inkscape 1.0\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
 "POT-Creation-Date: 2021-03-14 20:46+0000\n"
-"PO-Revision-Date: 2021-04-16 12:30+0200\n"
+"PO-Revision-Date: 2021-04-17 12:27+0200\n"
 "Last-Translator: Firas Hanife <firashanife@gmail.com>\n"
 "Language-Team: \n"
 "Language: it\n"
@@ -4577,10 +4577,8 @@ msgid "Rotate canvas clockwise"
 msgstr "Ruota il canvas in senso orario"
 
 #: ../src/actions/actions-canvas-transform.cpp:214
-#, fuzzy
-#| msgid "Rotate Counter-Clockwise"
 msgid "Rotate Counter-CW"
-msgstr "Ruota in senso antiorario"
+msgstr "Ruota senso antiorario"
 
 #: ../src/actions/actions-canvas-transform.cpp:214
 msgid "Rotate canvas counter-clockwise"
@@ -4591,10 +4589,8 @@ msgid "Reset Rotation"
 msgstr "Reimposta rotazione"
 
 #: ../src/actions/actions-canvas-transform.cpp:215
-#, fuzzy
-#| msgid "Reset canvas rotation to zero"
 msgid "Reset canvas rotation"
-msgstr "Reimposta la rotazione del canvas a zero"
+msgstr "Reimposta la rotazione del canvas"
 
 #: ../src/actions/actions-canvas-transform.cpp:217
 msgid "Flip Horizontal"
@@ -4617,56 +4613,40 @@ msgid "Reset Flipping"
 msgstr "Reimposta riflessione"
 
 #: ../src/actions/actions-canvas-transform.cpp:219
-#, fuzzy
-#| msgid "Release clipping path"
 msgid "Reset canvas flipping"
-msgstr "Rimuovi fissaggio"
+msgstr "Reimposta la riflessione del canvas"
 
 #: ../src/actions/actions-canvas-transform.cpp:221 ../share/ui/menu-view.ui:103
 msgid "Lock Rotation"
 msgstr "Blocca rotazione"
 
 #: ../src/actions/actions-canvas-transform.cpp:221 ../src/verbs.cpp:2791
-#, fuzzy
-#| msgid "_Canvas Orientation"
 msgid "Lock canvas rotation"
-msgstr "Orientamento _canvas"
+msgstr "Blocca la rotazione del canvas"
 
 #: ../src/actions/actions-file.cpp:100
-#, fuzzy
-#| msgid "Open"
 msgid "File Open"
-msgstr "Aperta"
+msgstr "File apri"
 
 #: ../src/actions/actions-file.cpp:100
-#, fuzzy
-#| msgid "Open end"
 msgid "Open file"
-msgstr "Apri fine"
+msgstr "Apre un file"
 
 #: ../src/actions/actions-file.cpp:101
-#, fuzzy
-#| msgid "File"
 msgid "File New"
-msgstr "File"
+msgstr "File nuovo"
 
 #: ../src/actions/actions-file.cpp:101
-#, fuzzy
-#| msgid "Save Document as Template"
 msgid "Open new document using template"
-msgstr "Salva il documento come modello"
+msgstr "Apre un nuovo documento da modello"
 
 #: ../src/actions/actions-file.cpp:102
-#, fuzzy
-#| msgid "Title Case"
 msgid "File Close"
-msgstr "Iniziali Maiuscole"
+msgstr "File chiudi"
 
 #: ../src/actions/actions-file.cpp:102
-#, fuzzy
-#| msgid "Trace: No active document"
 msgid "Close active document"
-msgstr "Vettorizza: Nessun documento attivo"
+msgstr "Chiude il documento corrente"
 
 #: ../src/actions/actions-object-align.cpp:206
 #: ../src/ui/dialog/align-and-distribute.cpp:216
@@ -4689,6 +4669,9 @@ msgid ""
 "Align selected objects; usage: [[left|hcenter|right] || [top|vcenter|bottom]] "
 "[last|first|biggest|smallest|page|drawing|selection]? group? anchor?"
 msgstr ""
+"Allinea gli oggetti selezionati; utilizzo: [[sinistra|centro-orizz|destra] || "
+"[alto|centro-vert|basso]] [ultimo|primo|piùgrande|piùpiccolo|pagina|disegno|"
+"selezione]?"
 
 #: ../src/actions/actions-object-align.cpp:357
 msgid "Distribute objects"
@@ -4713,10 +4696,8 @@ msgid ""
 msgstr ""
 
 #: ../src/actions/actions-object.cpp:145
-#, fuzzy
-#| msgid "Select a property"
 msgid "Set Property"
-msgstr "Seleziona una proprietà"
+msgstr "Imposta Proprietà"
 
 #: ../src/actions/actions-object.cpp:145
 msgid ""
@@ -4807,14 +4788,12 @@ msgid "Export page area"
 msgstr "Esporta l'area della pagina"
 
 #: ../src/actions/actions-output.cpp:232
-#, fuzzy
-#| msgid "Month Margin:"
 msgid "Export Margin"
-msgstr "Margine del mese:"
+msgstr "Esporta margine"
 
 #: ../src/actions/actions-output.cpp:232
 msgid "Set additional export margin"
-msgstr ""
+msgstr "Imposta un margine aggiuntivo all'esportazione"
 
 #: ../src/actions/actions-output.cpp:233
 #, fuzzy
@@ -4861,16 +4840,12 @@ msgid "Hide any objects not given in export-id option"
 msgstr ""
 
 #: ../src/actions/actions-output.cpp:240
-#, fuzzy
-#| msgid "Export options"
 msgid "Export Plain SVG"
-msgstr "Opzioni esportazione"
+msgstr "Esporta SVG puro"
 
 #: ../src/actions/actions-output.cpp:240
-#, fuzzy
-#| msgid "Export options"
 msgid "Export as plain SVG"
-msgstr "Opzioni esportazione"
+msgstr "Esporta come SVG puro"
 
 #: ../src/actions/actions-output.cpp:241
 msgid "Export DPI"
@@ -4963,27 +4938,20 @@ msgid "Set color mode for PNG export"
 msgstr "Seleziona il nome del file per l'esportazione"
 
 #: ../src/actions/actions-output.cpp:252
-#, fuzzy
-#| msgid "Export"
 msgid "Do Export"
 msgstr "Esporta"
 
 #: ../src/actions/actions-output.cpp:252
-#, fuzzy
-#| msgid "SVG export"
 msgid "Do export"
-msgstr "Esportazione SVG"
+msgstr "Esporta"
 
 #: ../src/actions/actions-selection.cpp:239
-#, fuzzy
-#| msgid "In_vert Selection"
 msgid "Clear Selection"
-msgstr "In_verti selezione"
+msgstr "Deseleziona"
 
 #: ../src/actions/actions-selection.cpp:239
-#, fuzzy
 msgid "Clear selection"
-msgstr "Converti selezione:"
+msgstr "Deseleziona"
 
 #: ../src/actions/actions-selection.cpp:240
 #: ../src/extension/prefdialog/parameter-path.cpp:214
@@ -5075,16 +5043,12 @@ msgid "Print a list of objects in current selection"
 msgstr "Elenca la lista degli oggetti attualmente selezionati"
 
 #: ../src/actions/actions-transform.cpp:90
-#, fuzzy
-#| msgid "Translate X"
 msgid "Translate"
-msgstr "Spostamento X"
+msgstr "Muovi"
 
 #: ../src/actions/actions-transform.cpp:90
-#, fuzzy
-#| msgid "Arrange selected objects"
 msgid "Translate selected objects (dx,dy)"
-msgstr "Riordina gli oggetti selezionati"
+msgstr "Muove gli oggetti selezionati (dx,dy)"
 
 #: ../src/actions/actions-transform.cpp:91 ../src/selection-chemistry.cpp:1946
 #: ../src/seltrans.cpp:466 ../src/ui/dialog/transformation.cpp:802
@@ -5092,7 +5056,6 @@ msgid "Rotate"
 msgstr "Ruota"
 
 #: ../src/actions/actions-transform.cpp:91
-#, fuzzy
 msgid "Rotate selected objects by degrees"
 msgstr "Ruota gli oggetti selezionati in gradi"
 
@@ -5105,46 +5068,32 @@ msgid "Scale"
 msgstr "Ridimensiona"
 
 #: ../src/actions/actions-transform.cpp:92
-#, fuzzy
-#| msgid "Make selected objects smaller"
 msgid "Scale selected objects by scale factor"
-msgstr "Riduce gli oggetti selezionati"
+msgstr "Ridimensiona gli oggetti selezionati di un fattore di scala"
 
 #: ../src/actions/actions-transform.cpp:93
-#, fuzzy
-#| msgid "Remove transform"
 msgid "Remove Transforms"
-msgstr "Rimuovi trasformazione"
+msgstr "Rimuovi trasformazioni"
 
 #: ../src/actions/actions-transform.cpp:93
-#, fuzzy
-#| msgid "Remove any filters from selected objects"
 msgid "Remove any transforms from selected objects"
-msgstr "Rimuove tutti i filtri dagli oggetti selezionati"
+msgstr "Rimuove tutte le trasformazioni dagli oggetti selezionati"
 
 #: ../src/actions/actions-window.cpp:55
-#, fuzzy
-#| msgid "Window"
 msgid "Window Open"
-msgstr "Finestra"
+msgstr "Apri finestra"
 
 #: ../src/actions/actions-window.cpp:55
-#, fuzzy
-#| msgid "Open a new window with the same document"
 msgid "Open a window for the active document; GUI only"
-msgstr "Apre lo stesso documento in una nuova finestra"
+msgstr "Apre una nuova finestra per lo stesso documento attivo; solo GUI"
 
 #: ../src/actions/actions-window.cpp:56
-#, fuzzy
-#| msgid "Windows"
 msgid "Window Close"
-msgstr "Finestre"
+msgstr "Chiudi finestra"
 
 #: ../src/actions/actions-window.cpp:56
-#, fuzzy
-#| msgid "Close this document window"
 msgid "Close the active window"
-msgstr "Chiude la finestra di questo documento"
+msgstr "Chiude la finestra attiva"
 
 #: ../src/auto-save.cpp:150
 msgid "Autosave failed! Could not find inkscape extension to save document."
@@ -7932,7 +7881,7 @@ msgstr "Esterna"
 #: ../src/ui/dialog/command-palette.cpp:262
 #: ../src/ui/widget/preferences-widget.cpp:930
 msgid "Open"
-msgstr "Aperta"
+msgstr "Apri"
 
 #: ../src/extension/internal/filter/morphology.h:67
 #: ../src/ui/tools/measure-tool.cpp:1242 ../src/ui/widget/page-sizer.cpp:59
@@ -8836,16 +8785,12 @@ msgid "Open files saved in Adobe Illustrator 9.0 and newer versions"
 msgstr "Apre file salvati con Adobe Illustrator 9.0 o più recenti"
 
 #: ../src/extension/internal/png-output.cpp:49
-#, fuzzy
-#| msgid "Scalable Vector Graphics"
 msgid "Portable Network Graphic"
-msgstr "Scalable Vector Graphics"
+msgstr "Portable Network Graphic"
 
 #: ../src/extension/internal/png-output.cpp:54
-#, fuzzy
-#| msgid "Scalable Vector Graphic (*.svg)"
 msgid "Portable Network Graphic (*.png)"
-msgstr "Scalable Vector Graphic (*.svg)"
+msgstr "Portable Network Graphic (*.png)"
 
 #: ../src/extension/internal/png-output.cpp:55
 #, fuzzy
@@ -9712,12 +9657,12 @@ msgstr "Esportazione file"
 #
 # File: ../src/inkscape-application.cpp, line: 549
 #: ../src/inkscape-application.cpp:631
-#, fuzzy
-#| msgid "Output file name (file type is guessed from extension)"
 msgid ""
 "Output file name (defaults to input filename; file type is guessed from extension "
 "if present; use '-' to write to stdout)"
-msgstr "Nome file di output (il tipo è rilevato dall'estensione)"
+msgstr ""
+"Nome file di output (predefinito al nome file in input; il tipo è rilevato "
+"dall'estensione se presente; usa '-' per scrivere a stdout)"
 
 #: ../src/inkscape-application.cpp:631
 msgid "FILENAME"
@@ -9726,11 +9671,13 @@ msgstr "NOMEFILE"
 #: ../src/inkscape-application.cpp:632
 msgid "Overwrite input file (otherwise add '_out' suffix if type doesn't change"
 msgstr ""
+"Sovrascrive il file in input (oppure aggiungi il suffisso '_out' se il tipo non "
+"cambia)"
 
 #
 #: ../src/inkscape-application.cpp:633
 msgid "File type(s) to export: [svg,png,ps,eps,pdf,emf,wmf,xaml]"
-msgstr "Tipo(i) file da esportare: [svg,png,ps,eps,pdf,emf,wmf,xaml]"
+msgstr "Tipi di file da esportare: [svg,png,ps,eps,pdf,emf,wmf,xaml]"
 
 #: ../src/inkscape-application.cpp:633
 msgid "TYPE[,TYPE]*"
@@ -10664,16 +10611,12 @@ msgstr ""
 "disabilitato sull'area di lavoro"
 
 #: ../src/live_effects/effect.cpp:1125
-#, fuzzy
-#| msgid "Erosion"
 msgid "Version"
-msgstr "Erosione"
+msgstr "Versione"
 
 #: ../src/live_effects/effect.cpp:1125
-#, fuzzy
-#| msgid "No inversion"
 msgid "LPE version"
-msgstr "Nessuna inversione"
+msgstr "Versione LPE"
 
 #: ../src/live_effects/effect.cpp:1154
 msgid "No effect"
@@ -10706,10 +10649,8 @@ msgid "</b>: Set default parameters"
 msgstr "</b>: Imposta parametri predefiniti"
 
 #: ../src/live_effects/effect.cpp:1743
-#, fuzzy
-#| msgid "<b>Default value:</b> "
 msgid "<b>Default value:</b> Default"
-msgstr "<b>Valore predefinito:</b> "
+msgstr "<b>Valore predefinito:</b> Predefinito"
 
 #: ../src/live_effects/effect.cpp:1814
 #, c-format
@@ -11937,9 +11878,8 @@ msgstr "Segni intersezione"
 
 #: ../src/live_effects/lpe-knot.cpp:373
 #, fuzzy
-#| msgid "Crossings signs"
 msgid "Crossing signs"
-msgstr "Segni intersezioni"
+msgstr "Segni intersezione"
 
 #: ../src/live_effects/lpe-knot.cpp:668
 msgid ""
@@ -21412,16 +21352,16 @@ msgid "When off, origin is at lower left corner and y-axis points up"
 msgstr "Quando disattivo, l'origine è in basso a sinistra con l'asse y verso l'alto"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1599
-#, fuzzy
-#| msgid "Reset canvas rotation to zero"
 msgid "Lock canvas rotation by default"
-msgstr "Reimposta la rotazione del canvas a zero"
+msgstr "Blocco rotazione canvas predefinito"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1601
 msgid ""
 "Prevent accidental canvas rotation by disabling on-canvas keyboard and mouse "
 "actions for rotation"
 msgstr ""
+"Previene la rotazione accidentale del canvas disabilitando le azioni di rotazione "
+"con tastiera e mouse"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1603
 msgid "Handle size"
@@ -21432,22 +21372,21 @@ msgid "Set the relative size of node handles"
 msgstr "Imposta la dimensione relativa delle maniglie"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1607
-#, fuzzy
-#| msgid "Custom size"
 msgid "Cursor size"
-msgstr "Personalizzata"
+msgstr "Dimensione cursore"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1608
-#, fuzzy
-#| msgid "Enable snapping"
 msgid "Enable cursor scaling"
-msgstr "Attiva aggancio"
+msgstr "Abilita ridimensionamento cursore"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1609
+#, fuzzy
 msgid ""
 "When off, cursor scaling is disabled. Cursor scaling may be broken when "
 "fractional scaling is enabled."
 msgstr ""
+"Quando disattivo, il ridimensionamento del cursore è disabilitato. Il "
+"ridimensionamento del cursore potrebbe essere"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1612
 #: ../share/ui/inkscape-start.glade:1194
@@ -21474,10 +21413,8 @@ msgstr "Apre la cartella dei temi"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1646
 #: ../src/ui/dialog/inkscape-preferences.cpp:3363
-#, fuzzy
-#| msgid "User themes: "
 msgid "User themes:"
-msgstr "Temi: "
+msgstr "Temi:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1646
 #: ../src/ui/dialog/inkscape-preferences.cpp:3363
@@ -21490,7 +21427,7 @@ msgstr "_Contrasto:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1651
 msgid "Make background brighter or darker to reduce contrast"
-msgstr ""
+msgstr "Schiarisci o scurisci lo sfondo per ridurre il contrasto"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1664
 msgid "Icons"
@@ -21523,34 +21460,24 @@ msgid "Use symbolic icons"
 msgstr "Utilizza icone simboliche"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1717
-#, fuzzy
-#| msgid "Use default colors for icons"
 msgid "Use default base color for icons"
-msgstr "Utilizza colori predefiniti per icone"
+msgstr "Utilizza colore base predefinito icone"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1720
-#, fuzzy
-#| msgid "Use default colors for icons"
 msgid "Use default higlight colors for icons"
-msgstr "Utilizza colori predefiniti per icone"
+msgstr "Utilizza colore evidenziazione predefinito icone"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1746
-#, fuzzy
-#| msgid "Icon color"
 msgid "Icon color base"
-msgstr "Colore icona"
+msgstr "Colore base icona"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1747
-#, fuzzy
-#| msgid "Use default colors for icons"
 msgid "Base color for icons"
-msgstr "Utilizza colori predefiniti per icone"
+msgstr "Colore base per le icone"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1753
-#, fuzzy
-#| msgid "Icon color"
 msgid "Icon color highlights"
-msgstr "Colore icona"
+msgstr "Colori evidenziazione icona"
 
 #
 # File: ../src/ui/dialog/inkscape-preferences.cpp, line: 1202
@@ -21610,35 +21537,24 @@ msgid "(requires restart)"
 msgstr "(richiede riapertura)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1770
-#, fuzzy
-#| msgid "Set the size for the tool icons (requires restart)"
 msgid "Set the size for the tool icons."
-msgstr "Imposta la dimensione delle icone degli strumenti (richiede riapertura)"
+msgstr "Imposta la dimensione delle icone degli strumenti"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1773
 msgid "Control bar icon size:"
 msgstr "Dimensione icone barra dei controlli:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1774
-#, fuzzy
-#| msgid ""
-#| "Set the size for the icons in tools' control bars to use (requires restart)"
 msgid "Set the size for the icons in tools' control bars."
-msgstr ""
-"Imposta la dimensione delle icone nella barra dei controlli degli strumenti "
-"(richiede riapertura)"
+msgstr "Imposta la dimensione delle icone nella barra dei controlli degli strumenti"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1777
 msgid "Secondary toolbar icon size:"
 msgstr "Dimensione icone barra secondaria:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1778
-#, fuzzy
-#| msgid ""
-#| "Set the size for the icons in secondary toolbars to use (requires restart)"
 msgid "Set the size for the icons in secondary toolbars."
-msgstr ""
-"Imposta la dimensione delle icone nella barre secondarie (richiede riapertura)"
+msgstr "Imposta la dimensione delle icone nella barre secondarie"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1781
 msgid "Yes"
@@ -21674,8 +21590,6 @@ msgstr ""
 "riapertura)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1788
-#, fuzzy
-#| msgid "Theme"
 msgid "Themeing"
 msgstr "Tema"
 
@@ -21718,10 +21632,8 @@ msgid "GTK open/save dialogs"
 msgstr "Finestre apri/salva GTK"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1804
-#, fuzzy
-#| msgid "Show or hide all open dialogs"
 msgid "Show Welcome dialog"
-msgstr "Mostra o nasconde tutte le sottofinestre attive"
+msgstr "Mostra la finestra di benvenuto"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1805
 msgid "Dialogs are hidden in taskbar"
@@ -21745,16 +21657,12 @@ msgid "Aggressive"
 msgstr "Aggressivo"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1812
-#, fuzzy
-#| msgid "Autotrace"
 msgid "Automatic"
-msgstr "Autotrace"
+msgstr "Automatico"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1813
-#, fuzzy
-#| msgid "Offset"
 msgid "Off"
-msgstr "Proiezione"
+msgstr "Disattivato"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1816
 msgctxt "Window size"
@@ -21810,22 +21718,14 @@ msgstr ""
 "geometria nel documento)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1838
-#, fuzzy
-#| msgid "Saving dialogs status"
 msgid "Saving dialogs' status"
 msgstr "Salvataggio stato sottofinestre"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1840
-#, fuzzy
-#| msgid "Don't save dialogs status"
 msgid "Don't save dialogs' status"
 msgstr "Non salvare lo stato delle sottofinestre"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1842
-#, fuzzy
-#| msgid ""
-#| "Save and restore dialogs status (the last open windows dialogs are saved when "
-#| "it closes)"
 msgid ""
 "Save and restore dialogs' status (the last open windows dialogs are saved when it "
 "closes)"
@@ -21866,20 +21766,16 @@ msgid "Same as Normal but may work better with some window managers"
 msgstr "Come Normale, ma funziona meglio con alcuni gestori di finestre"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1870
-#, fuzzy
-#| msgid "Dialog behavior (requires restart)"
 msgid "Dialog labels behavior (requires restart)"
-msgstr "Comportamento sottofinestre (richiede riapertura)"
+msgstr "Comportamento etichette sottofinestre (richiede riapertura)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1871
 msgid "Dialog names will be displayed when there is enough space"
-msgstr ""
+msgstr "I nomi delle sottofinestre saranno mostrati se lo spazio è sufficiente"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1872
-#, fuzzy
-#| msgid "Show dialog on startup"
 msgid "Only show dialog icons"
-msgstr "Mostra la finestra all'avvio"
+msgstr "Mostra solo le icone delle sottofinestre"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1874
 msgid "Miscellaneous"
@@ -21887,7 +21783,7 @@ msgstr "Varie"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1877
 msgid "Whether the Welcome dialog will be shown when Inkscape starts."
-msgstr ""
+msgstr "Mostra la finestra di benvenuto all'avvio di Inkscape"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1880
 msgid "Whether dialog windows are to be hidden in the window manager taskbar"
@@ -22021,10 +21917,8 @@ msgid "Also show the English names of the command"
 msgstr ""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1959
-#, fuzzy
-#| msgid "_Commands Bar"
 msgid "Command Palette"
-msgstr "Barra dei _comandi"
+msgstr "Palette comandi"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2008
 msgid "Input/Output"
@@ -33707,16 +33601,12 @@ msgid "Open Preferences for the LPETool tool"
 msgstr "Apre le preferenze per lo strumento «Effetto su tracciato»"
 
 #: ../src/verbs.cpp:2782
-#, fuzzy
-#| msgid "_Commands Bar"
 msgid "_Command Palette"
-msgstr "Barra dei _comandi"
+msgstr "Paletta _comandi"
 
 #: ../src/verbs.cpp:2782
-#, fuzzy
-#| msgid "Show or hide the color palette"
 msgid "Show or hide the on-canvas command palette"
-msgstr "Mostra o nasconde la paletta dei colori"
+msgstr "Mostra o nasconde la paletta dei comandi"
 
 #: ../src/verbs.cpp:2783
 msgid "_Rulers"
@@ -34930,10 +34820,12 @@ msgid ""
 "<big><b>See the full details about the Inkscape licenses <a href=\"https://"
 "inkscape.org/about/license/\">here</a>!</b></big>"
 msgstr ""
+"<big><b>Guarda tutti i dettagli sulle licenze di Inkscape <a href=\"https://"
+"inkscape.org/about/license/\">qui</a>!</b></big>"
 
 #: ../share/ui/inkscape-about.glade:223
 msgid "License file failed to load."
-msgstr ""
+msgstr "Caricamento file licenza fallito."
 
 #: ../share/ui/inkscape-about.glade:252
 msgid "Inkscape license"
@@ -34946,19 +34838,15 @@ msgstr "© 2021 Sviluppatori di Inkscape"
 
 #: ../share/ui/inkscape-about.glade:298
 msgid "Link to the official website"
-msgstr ""
+msgstr "Collegamento al sito ufficiale"
 
 #: ../share/ui/inkscape-about.glade:327
-#, fuzzy
-#| msgid "Copy selection to clipboard"
 msgid "Click to copy the version number to the clipboard"
-msgstr "Copia la selezione negli appunti"
+msgstr "Clicca per copiare la versione negli appunti"
 
 #: ../share/ui/inkscape-about.glade:348
-#, fuzzy
-#| msgid "Relink to Copied"
 msgid "Version Copied!"
-msgstr "Ricollega alla copia"
+msgstr "Versione copiata!"
 
 #: ../share/ui/inkscape-start.glade:57
 msgid "Dark"
@@ -34977,10 +34865,8 @@ msgid "Solid White"
 msgstr "Bianco"
 
 #: ../share/ui/inkscape-start.glade:102
-#, fuzzy
-#| msgid "None (default)"
 msgid "Inkscape (default)"
-msgstr "Nessuno (predefinito)"
+msgstr "Inkscape (predefinito)"
 
 #: ../share/ui/inkscape-start.glade:128
 #, fuzzy
@@ -35014,7 +34900,7 @@ msgstr "Icona 512x512"
 
 #: ../share/ui/inkscape-start.glade:184
 msgid "ID Card (ISO 7810)"
-msgstr ""
+msgstr "Carta d'identità (ISO 7810)"
 
 #: ../share/ui/inkscape-start.glade:210
 msgid "A4"
@@ -35308,17 +35194,14 @@ msgid "Video UHD 8k"
 msgstr "Video UHD 8k"
 
 #: ../share/ui/inkscape-start.glade:901
-#, fuzzy
 msgid "Classic Adwaita"
 msgstr "Adwaita Classico"
 
 #: ../share/ui/inkscape-start.glade:915
-#, fuzzy
 msgid "Symbolic Adwaita"
 msgstr "Adwaita Simbolico"
 
 #: ../share/ui/inkscape-start.glade:929
-#, fuzzy
 msgid "Symbolic Adwaita Dark"
 msgstr "Adwaita Simbolico Scuro"
 
@@ -35351,7 +35234,7 @@ msgstr "Inkscape 1.1"
 
 #: ../share/ui/inkscape-start.glade:1045
 msgid "Welcome"
-msgstr ""
+msgstr "Benvenuto"
 
 #. This is a pun in English. You can translate it as 'Introducing you to freedom' or similar.
 #: ../share/ui/inkscape-start.glade:1062
@@ -35362,7 +35245,7 @@ msgstr "Disegna un percorso a mano libera"
 
 #: ../share/ui/inkscape-start.glade:1121
 msgid "Draw Freely."
-msgstr ""
+msgstr "Disegna liberamente."
 
 #: ../share/ui/inkscape-start.glade:1180
 msgid "Quick Setup"
@@ -35395,12 +35278,16 @@ msgid ""
 "Learn how to\n"
 "Contribute Time"
 msgstr ""
+"Scopri come\n"
+"contribuire tempo"
 
 #: ../share/ui/inkscape-start.glade:1640
 msgid ""
 "Learn how to\n"
 "Fund Inkscape"
 msgstr ""
+"Scopri come\n"
+"finanziare Inkscape"
 
 #: ../share/ui/inkscape-start.glade:1688
 msgid "Thanks!"
@@ -35587,9 +35474,8 @@ msgid "Pen "
 msgstr "Inerzia pennino"
 
 #: ../share/extensions/hpgl_input.py:47
-#, fuzzy
 msgid "No HPGL data found."
-msgstr "Non arrotondato"
+msgstr "Nessun dato HPGL trovato."
 
 #: ../share/extensions/hpgl_input.py:55
 msgid ""
@@ -42056,7 +41942,7 @@ msgstr ""
 
 #: ../share/extensions/raster_output_jpeg.inx:33
 msgid "JPEG (*.jpeg)"
-msgstr ""
+msgstr "JPEG (*.jpeg)"
 
 #: ../share/extensions/raster_output_jpeg.inx:34
 msgid "Render to JPEG file format"
@@ -42208,7 +42094,7 @@ msgstr ""
 
 #: ../share/extensions/raster_output_tiff.inx:34
 msgid "TIFF (*.tiff)"
-msgstr ""
+msgstr "TIFF (*.tiff)"
 
 #: ../share/extensions/raster_output_tiff.inx:35
 msgid "Render to TIFF file format"
@@ -42270,7 +42156,7 @@ msgstr ""
 
 #: ../share/extensions/raster_output_webp.inx:31
 msgid "WebP (*.webp)"
-msgstr ""
+msgstr "WebP (*.webp)"
 
 #: ../share/extensions/raster_output_webp.inx:32
 msgid "Export to webp file format."
@@ -42647,31 +42533,27 @@ msgstr "Curvatura (%):"
 
 #: ../share/extensions/scribus_export_pdf.inx:3
 msgid "Export to PDF via Scribus"
-msgstr ""
+msgstr "Esporta in PDF via Scribus"
 
 #: ../share/extensions/scribus_export_pdf.inx:7
-#, fuzzy
-#| msgid "Restrict to PDF version:"
 msgid "PDF version:"
-msgstr "Limita alla versione PDF:"
+msgstr "Versione PDF:"
 
 #: ../share/extensions/scribus_export_pdf.inx:8
 msgid "PDF/X-1a"
-msgstr ""
+msgstr "PDF/X-1a"
 
 #: ../share/extensions/scribus_export_pdf.inx:9
 msgid "PDF/X-3"
-msgstr ""
+msgstr "PDF/X-3"
 
 #: ../share/extensions/scribus_export_pdf.inx:10
-#, fuzzy
-#| msgid "PDF 1.5"
 msgid "PDF 1.3"
-msgstr "PDF 1.5"
+msgstr "PDF 1.3"
 
 #: ../share/extensions/scribus_export_pdf.inx:14
 msgid "PDF title (mandatory for PDF/X):"
-msgstr ""
+msgstr "Titolo PDF (obbligatorio per PDF/X):"
 
 #: ../share/extensions/scribus_export_pdf.inx:15
 msgid "Bleed added around the document (mm):"
@@ -42702,13 +42584,11 @@ msgstr "Intento del dispositivo:"
 
 #: ../share/extensions/scribus_export_pdf.inx:34
 msgid "Scribus CMYK PDF (*.PDF)"
-msgstr ""
+msgstr "Scribus CMYK PDF (*.PDF)"
 
 #: ../share/extensions/scribus_export_pdf.inx:35
-#, fuzzy
-#| msgid "Export document to a PDF file"
 msgid "Exports the document to PDF using Scribus"
-msgstr "Esporta il documento come file PDF"
+msgstr "Esporta il documento in PDF utilizzando Scribus"
 
 #: ../share/extensions/setup_typography_canvas.inx:3
 msgid "1 - Setup Typography Canvas"
@@ -43846,15 +43726,13 @@ msgstr ""
 
 #: ../share/extensions/webslicer_create_group.inx:8
 #: ../share/extensions/webslicer_create_rect.inx:33
-#, fuzzy
 msgid "HTML id attribute:"
-msgstr "Imposta attributo"
+msgstr "Attributo id HTML:"
 
 #: ../share/extensions/webslicer_create_group.inx:9
 #: ../share/extensions/webslicer_create_rect.inx:34
-#, fuzzy
 msgid "HTML class attribute:"
-msgstr "Imposta attributo"
+msgstr "Attributo classe HTML:"
 
 #: ../share/extensions/webslicer_create_group.inx:10
 msgid "Width unit:"
