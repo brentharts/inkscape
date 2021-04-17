@@ -970,7 +970,7 @@ InkscapeApplication::on_activate()
         document = document_open (s);
         output = "-";
 
-    } else if(prefs->getBool("/options/boot/enabled", true) && !_use_shell) {
+    } else if(prefs->getBool("/options/boot/enabled", true) && !_use_command_line_argument) {
 
         Inkscape::UI::Dialog::StartScreen start_screen;
 
@@ -1534,6 +1534,14 @@ InkscapeApplication::on_handle_local_options(const Glib::RefPtr<Glib::VariantDic
         }
     }
 #endif
+
+    GVariantDict *options_copy = options->gobj_copy();
+    GVariant *options_var = g_variant_dict_end(options_copy);
+    if (g_variant_get_size(options_var) != 0) {
+        _use_command_line_argument = true;
+    }
+    g_variant_dict_unref(options_copy);
+    g_variant_unref(options_var);
 
     return -1; // Keep going
 }
