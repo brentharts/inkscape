@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: Inkscape 1.0\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
 "POT-Creation-Date: 2021-03-14 20:46+0000\n"
-"PO-Revision-Date: 2021-04-17 12:27+0200\n"
+"PO-Revision-Date: 2021-04-18 17:57+0200\n"
 "Last-Translator: Firas Hanife <firashanife@gmail.com>\n"
 "Language-Team: \n"
 "Language: it\n"
@@ -4063,27 +4063,21 @@ msgstr "Mostra la lista delle azioni ed esce"
 
 #: ../src/actions/actions-base.cpp:229
 msgid "List Verbs"
-msgstr ""
+msgstr "Elenca voci"
 
 #
 # File: ../src/inkscape-application.cpp, line: 599
 #: ../src/actions/actions-base.cpp:229
-#, fuzzy
-#| msgid "List of verbs to execute"
 msgid "Print a list of verbs and exit"
-msgstr "Elenca voci da eseguire"
+msgstr "Mostra la lista delle voci ed esce"
 
 #: ../src/actions/actions-base.cpp:230
-#, fuzzy
-#| msgid "Execute the trace"
 msgid "Execute Verb"
-msgstr "Esegue la vettorizzazione"
+msgstr "Esegui voce"
 
 #: ../src/actions/actions-base.cpp:230
-#, fuzzy
-#| msgid "Execute the trace"
 msgid "Execute verb(s)"
-msgstr "Esegue la vettorizzazione"
+msgstr "Esegue voci"
 
 #: ../src/actions/actions-base.cpp:231
 msgid "Clean up Document"
@@ -4111,23 +4105,23 @@ msgstr "Seleziona il numero di pagina del PDF da importare"
 
 #: ../src/actions/actions-base.cpp:235
 msgid "Import DPI Method"
-msgstr ""
+msgstr "Importa metodo DPI"
 
 #: ../src/actions/actions-base.cpp:235
-#, fuzzy
-#| msgid "Convert legacy Inkscape file"
 msgid "Set DPI conversion method for legacy Inkscape files"
-msgstr "Converti file versione precedente Inkscape"
+msgstr ""
+"Imposta la modalità di conversione DPI per i file delle versioni precedenti di "
+"Inkscape"
 
 #: ../src/actions/actions-base.cpp:236
 msgid "No Import Baseline Conversion"
-msgstr ""
+msgstr "Importa senza convertire linea base"
 
 #: ../src/actions/actions-base.cpp:236
-#, fuzzy
-#| msgid "Convert legacy Inkscape file"
 msgid "Do not convert text baselines in legacy Inkscape files"
-msgstr "Converti file versione precedente Inkscape"
+msgstr ""
+"Non converte le linee base del testo nei file delle versioni precedenti di "
+"Inkscape"
 
 #: ../src/actions/actions-base.cpp:238
 msgid "Query X"
@@ -4180,96 +4174,70 @@ msgid "Query 'x', 'y', 'width', and 'height'"
 msgstr ""
 
 #: ../src/actions/actions-canvas-mode.cpp:249
-#, fuzzy
-#| msgid "_Display Mode"
 msgid "Display Mode: Normal"
-msgstr "Modalità _visualizzazione"
+msgstr "Modalità visualizzazione: Normale"
 
 #: ../src/actions/actions-canvas-mode.cpp:249
-#, fuzzy
-#| msgid "Image Rendering Mode:"
 msgid "Use normal rendering mode"
-msgstr "Modalità rendering immagine:"
+msgstr "Usa modalità visualizzazione normale"
 
 #: ../src/actions/actions-canvas-mode.cpp:250
-#, fuzzy
-#| msgid "_Display Mode"
 msgid "Display Mode: Outline"
-msgstr "Modalità _visualizzazione"
+msgstr "Modalità visualizzazione: Contorno"
 
 #: ../src/actions/actions-canvas-mode.cpp:250
-#, fuzzy
-#| msgid "Show temporary path outline"
 msgid "Show only object outlines"
-msgstr "Mostra scheletro tracciato temporaneo"
+msgstr "Mostra solo i contorni degli oggetti"
 
 #: ../src/actions/actions-canvas-mode.cpp:251
-#, fuzzy
-#| msgid "_Display Mode"
 msgid "Display Mode: No Filters"
-msgstr "Modalità _visualizzazione"
+msgstr "Modalità visualizzazione: Nessun filtro"
 
 #: ../src/actions/actions-canvas-mode.cpp:251
 msgid "Do not render filters (for speed)"
-msgstr ""
+msgstr "Non applica i filtri (più veloce)"
 
 #: ../src/actions/actions-canvas-mode.cpp:252
-#, fuzzy
-#| msgid "Visible _Hairlines"
 msgid "Display Mode: Hairlines"
-msgstr "Tratti _fini visibili"
+msgstr "Modalità visualizzazione: Tratti fini visibili"
 
 #
 # File: ../share/extensions/image_attributes.inx, line: 17
 #: ../src/actions/actions-canvas-mode.cpp:252
-#, fuzzy
-#| msgid "Render images blocky"
 msgid "Render thin lines visibly"
-msgstr "Renderizza immagini a blocchi"
+msgstr "Rende i tratti fini visibili"
 
 #: ../src/actions/actions-canvas-mode.cpp:253
-#, fuzzy
-#| msgid "_Display Mode"
 msgid "Display Mode Cycle"
-msgstr "Modalità _visualizzazione"
+msgstr "Cicla modalità visualizzazione"
 
 #: ../src/actions/actions-canvas-mode.cpp:253
-#, fuzzy
-#| msgid "Switch to grayscale display mode"
 msgid "Cycle through display modes"
-msgstr "Passa alla modalità colore schermo in scala di grigi"
+msgstr "Cicla le modalità di visualizzazione"
 
 #: ../src/actions/actions-canvas-mode.cpp:254
-#, fuzzy
-#| msgid "_Display Mode"
 msgid "Display Mode Toggle"
-msgstr "Modalità _visualizzazione"
+msgstr "Alterna modalità visualizzazione"
 
 #: ../src/actions/actions-canvas-mode.cpp:254
-#, fuzzy
-#| msgid "Toggle between normal and grayscale color display modes"
 msgid "Toggle between normal and last non-normal mode"
-msgstr "Alterna tra le modalità colore schemo normale e in scala di grigi"
+msgstr "Alterna tra la modalità normale e l'ultima modalità alternativa utilizzata"
 
 #: ../src/actions/actions-canvas-mode.cpp:256
-#, fuzzy
-#| msgid "filterBlendMode|Normal"
 msgid "Split Mode: Normal"
-msgstr "Normale"
+msgstr "Modalità separata: Nessuno"
 
 #: ../src/actions/actions-canvas-mode.cpp:256
 msgid "Do not split canvas"
-msgstr ""
+msgstr "Non separare il canvas"
 
 #: ../src/actions/actions-canvas-mode.cpp:257
-#, fuzzy
-#| msgid "_Split View Mode"
 msgid "Split Mode: Split"
-msgstr "Modalità _Split View"
+msgstr "Modalità separata: Separa"
 
 #: ../src/actions/actions-canvas-mode.cpp:257
 msgid "Render part of the canvas in outline mode"
-msgstr ""
+msgstr "Visualizza parte del canvas in modalità Contorno"
 
 #: ../src/actions/actions-canvas-mode.cpp:258
 msgid "Split Mode: X-Ray"
@@ -4277,7 +4245,7 @@ msgstr "Modalità separata: Raggi-X"
 
 #: ../src/actions/actions-canvas-mode.cpp:258
 msgid "Render a circular area in outline mode"
-msgstr ""
+msgstr "Visualizza un'area circolare in modalità Contorno"
 
 #: ../src/actions/actions-canvas-mode.cpp:260
 #, fuzzy
@@ -4710,10 +4678,8 @@ msgid "Unlink Clones"
 msgstr "Scollega cloni"
 
 #: ../src/actions/actions-object.cpp:146
-#, fuzzy
-#| msgid "Unlink clone"
 msgid "Unlink clones and symbols"
-msgstr "Scollega clone"
+msgstr "Scollega cloni e simboli"
 
 #: ../src/actions/actions-object.cpp:147
 msgid "Object To Path"
@@ -4990,16 +4956,12 @@ msgid "Select by class"
 msgstr "Seleziona per classe"
 
 #: ../src/actions/actions-selection.cpp:245
-#, fuzzy
-#| msgid "Selected SVG Element"
 msgid "Select by Element"
-msgstr "Selezionato elemento SVG"
+msgstr "Seleziona per elemento"
 
 #: ../src/actions/actions-selection.cpp:245
-#, fuzzy
-#| msgid "Selected SVG Element"
 msgid "Select by SVG element (e.g. 'rect')"
-msgstr "Selezionato elemento SVG"
+msgstr "Seleziona per elemento SVG (e.g. 'rect')"
 
 #: ../src/actions/actions-selection.cpp:246
 #, fuzzy
@@ -9685,11 +9647,11 @@ msgstr "TIPO[,TIPO]*"
 
 #: ../src/inkscape-application.cpp:634
 msgid "Extension ID to use for exporting"
-msgstr ""
+msgstr "ID estensione da usare per l'esportazione"
 
 #: ../src/inkscape-application.cpp:634
 msgid "EXTENSION-ID"
-msgstr ""
+msgstr "ID-ESTENSIONE"
 
 #: ../src/inkscape-application.cpp:637
 msgid "Export geometry"
@@ -9842,12 +9804,12 @@ msgid ""
 "Color mode (bit depth and color type) for exported bitmaps (Gray_1/Gray_2/Gray_4/"
 "Gray_8/Gray_16/RGB_8/RGB_16/GrayAlpha_8/GrayAlpha_16/RGBA_8/RGBA_16)"
 msgstr ""
+"Modo colore (profondità bit e tipo colore) per le bitmap esportate (Gray_1/Gray_2/"
+"Gray_4/Gray_8/Gray_16/RGB_8/RGB_16/GrayAlpha_8/GrayAlpha_16/RGBA_8/RGBA_16)"
 
 #: ../src/inkscape-application.cpp:661
-#, fuzzy
-#| msgid "COLOR"
 msgid "COLOR-MODE"
-msgstr "COLORE"
+msgstr "MODO-COLORE"
 
 #
 # File: ../src/inkscape-application.cpp, line: 579
