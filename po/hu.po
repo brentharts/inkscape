@@ -7,7 +7,7 @@
 # Arpad Biro <biro.arpad gmail>, 2004-2006, 2007, 2008, 2009, 2010.
 # Peter Bojtos <ptr@ulx.hu>, 2015.
 # Balázs Meskó <meskobalazs@mailbox.org>, 2018-2021
-# Gyuris Gellért <jobel@ujevangelizacio.hu>, 2017-2021.
+# Gyuris Gellért <jobel@ujevangelizacio.hu>, 2017-2021
 #
 
 msgid ""
@@ -15,7 +15,7 @@ msgstr ""
 "Project-Id-Version: hu\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
 "POT-Creation-Date: 2021-03-14 20:46+0000\n"
-"PO-Revision-Date: 2021-04-18 19:22+0000\n"
+"PO-Revision-Date: 2021-04-18 22:31+0000\n"
 "Last-Translator: Gyuris Gellért <jobel@ujevangelizacio.hu>, 2021\n"
 "Language-Team: Hungarian (https://www.transifex.com/fsf-hu/teams/77907/hu/)\n"
 "Language: hu\n"
@@ -21563,6 +21563,7 @@ msgid "Use default base color for icons"
 msgstr "Alapértelmezett alapszínek alkalmazása az ikonok számára"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1720
+#, fuzzy
 msgid "Use default higlight colors for icons"
 msgstr "Alapértelmezett kiemelő színek alkalmazása az ikonok számára"
 
@@ -35392,28 +35393,33 @@ msgid "Video UHD 8k"
 msgstr "Videó UHD 8k"
 
 #: ../share/ui/inkscape-start.glade:901
+#, fuzzy
 msgid "Classic Adwaita"
-msgstr "Klasszikus Adwaita"
+msgstr "Klasszikus"
 
 #: ../share/ui/inkscape-start.glade:915
+#, fuzzy
 msgid "Symbolic Adwaita"
-msgstr "Szimbolikus Adwaita"
+msgstr "Szimbólum-gyűjtemény"
 
 #: ../share/ui/inkscape-start.glade:929
 msgid "Symbolic Adwaita Dark"
-msgstr "Sötét szimbolikus Adwaita"
+msgstr ""
 
 #: ../share/ui/inkscape-start.glade:943
+#, fuzzy
 msgid "Colorful Darkness"
-msgstr "Sötét színes"
+msgstr "Színjelölők"
 
 #: ../share/ui/inkscape-start.glade:957
+#, fuzzy
 msgid "Colorful Lightness"
-msgstr "Világos színes"
+msgstr "Színes éjszakák"
 
 #: ../share/ui/inkscape-start.glade:971
+#, fuzzy
 msgid "Careful Darkness"
-msgstr "Óvatos sötét"
+msgstr "Ívegyenletesség:"
 
 #: ../share/ui/inkscape-start.glade:985
 msgid "Compacted (Small Screens)"
@@ -35424,17 +35430,20 @@ msgid "Inkscape 1.1"
 msgstr "Inkscape 1.1"
 
 #: ../share/ui/inkscape-start.glade:1045
+#, fuzzy
 msgid "Welcome"
-msgstr "Üdvözlet"
+msgstr "Üdvözöljük!"
 
 #. This is a pun in English. You can translate it as 'Introducing you to freedom' or similar.
 #: ../share/ui/inkscape-start.glade:1062
+#, fuzzy
 msgid "Drawing you to freedom"
-msgstr "A szabadság megismertetése"
+msgstr "Szabadkézi útvonal rajzolása"
 
 #: ../share/ui/inkscape-start.glade:1121
+#, fuzzy
 msgid "Draw Freely."
-msgstr "Szabad rajzolás."
+msgstr "Inkscape. Rajzolj szabadon."
 
 #: ../share/ui/inkscape-start.glade:1180
 msgid "Quick Setup"
@@ -35729,6 +35738,7 @@ msgstr ""
 "használandó helyette."
 
 #: ../share/extensions/inkex/deprecated.py:136
+#, fuzzy
 msgid ""
 "{} is now a method in the SvgDocumentElement class.Use `self.svg.get_ids()` "
 "instead."
@@ -37027,24 +37037,27 @@ msgid "Exports the colors of this document as GIMP Palette"
 msgstr "Jelen dokumentum színeinek exportálása GIMP-palettaként"
 
 #: ../share/extensions/extension-manager-bootstrap.inx:3
+#, fuzzy
 msgid "Manage Extensions..."
-msgstr "Kiterjesztések kezelése…"
+msgstr "Kiterjesztések kezelése"
 
 #: ../share/extensions/extension-manager-bootstrap.inx:7
+#, fuzzy
 msgid "The Extensions Manager needs to be installed"
-msgstr "A kiterjesztéskezelőt telepíteni kell"
+msgstr "Nincs elmentést igénylő módosítás."
 
 #: ../share/extensions/extension-manager-bootstrap.inx:8
+#, fuzzy
 msgid "Version:"
-msgstr "Verzió:"
+msgstr "Verzió"
 
 #: ../share/extensions/extension-manager-bootstrap.inx:9
 msgid "Stable (normal)"
-msgstr "Stabil (normál)"
+msgstr ""
 
 #: ../share/extensions/extension-manager-bootstrap.inx:10
 msgid "Developing (git required)"
-msgstr "Fejlesztés (git szükséges)"
+msgstr ""
 
 #: ../share/extensions/extractimage.inx:3
 msgid "Extract Image"
@@ -38652,77 +38665,88 @@ msgid "Font face:"
 msgstr "Betűkészlet:"
 
 #: ../share/extensions/hershey.inx:21
+#, fuzzy
 msgid "Hershey Sans 1-stroke"
 msgstr "Hershey talpatlan 1 körvonal"
 
 #: ../share/extensions/hershey.inx:22
+#, fuzzy
 msgid "Hershey Sans medium"
-msgstr "Hershey talpatlan közepes"
+msgstr "Hershey írott közepes"
 
 #: ../share/extensions/hershey.inx:24
+#, fuzzy
 msgid "Hershey Serif medium"
-msgstr "Hershey talpas közepes"
+msgstr "Hershey írott közepes"
 
 #: ../share/extensions/hershey.inx:25
+#, fuzzy
 msgid "Hershey Serif medium italic"
 msgstr "Hershey talpas közepes dőlt"
 
 #: ../share/extensions/hershey.inx:27
+#, fuzzy
 msgid "Hershey Serif bold"
 msgstr "Hershey talpas félkövér"
 
 #: ../share/extensions/hershey.inx:28
+#, fuzzy
 msgid "Hershey Serif bold italic"
 msgstr "Hershey talpas félkövér dőlt"
 
 #: ../share/extensions/hershey.inx:30
+#, fuzzy
 msgid "Hershey Script 1-stroke"
 msgstr "Hershey írott 1 körvonal"
 
 #: ../share/extensions/hershey.inx:31
+#, fuzzy
 msgid "Hershey Script medium"
 msgstr "Hershey írott közepes"
 
 #: ../share/extensions/hershey.inx:33
 msgid "Hershey Gothic English"
-msgstr "Hershey gót angol"
+msgstr ""
 
 #. Block below this are derived from fonts licensed under SIL Open Font License
 #: ../share/extensions/hershey.inx:36
 msgid "EMS Allure"
-msgstr "EMS Allure"
+msgstr ""
 
 #: ../share/extensions/hershey.inx:38
 msgid "EMS Elfin"
-msgstr "EMS Elfin"
+msgstr ""
 
 #: ../share/extensions/hershey.inx:39
 msgid "EMS Felix"
-msgstr "EMS Felix"
+msgstr ""
 
 #: ../share/extensions/hershey.inx:41
 msgid "EMS Nixish"
-msgstr "EMS Nixish"
+msgstr ""
 
 #: ../share/extensions/hershey.inx:42
+#, fuzzy
 msgid "EMS Nixish Italic"
-msgstr "EMS Nixish Italic"
+msgstr "EMS Readability Italic"
 
 #: ../share/extensions/hershey.inx:44
 msgid "EMS Osmotron"
-msgstr "EMS Osmotron"
+msgstr ""
 
 #: ../share/extensions/hershey.inx:45
+#, fuzzy
 msgid "EMS Readability"
-msgstr "EMS Readability"
+msgstr "EMS Readability Italic"
 
 #: ../share/extensions/hershey.inx:46
+#, fuzzy
 msgid "EMS Readability Italic"
 msgstr "EMS Readability Italic"
 
 #: ../share/extensions/hershey.inx:47
 msgid "EMS Tech"
-msgstr "EMS Tech"
+msgstr ""
 
 #. Block above this are derived from fonts licensed under SIL Open Font License
 #: ../share/extensions/hershey.inx:50
@@ -39193,28 +39217,32 @@ msgstr "Hivatkozás követése"
 
 #. i18n. Please don't translate link unless the page exists in your language. Add your language code to the link this way: https://inkscape.org/[lang]/ask/
 #: ../share/extensions/inkscape_help_askaquestion.inx:6
+#, fuzzy
 msgid "https://inkscape.org/en/ask/"
-msgstr "https://inkscape.org/en/ask/"
+msgstr "https://inkscape.org/learn/jpg/"
 
 #. i18n. Please don't translate link unless the page exists in your language. Add your language code to the link this way: https://inkscape.org/doc/inkscape-man.[lang].html
 #: ../share/extensions/inkscape_help_commandline.inx:6
+#, fuzzy
 msgid "https://inkscape.org/doc/inkscape-man.html"
-msgstr "https://inkscape.org/doc/inkscape-man.html"
+msgstr "https://inkscape.org/learn/jpg/"
 
 #. i18n. Please don't translate link unless the page exists in your language. Add your language code to the link this way: https://inkscape.org/doc/keys.[lang].html
 #: ../share/extensions/inkscape_help_keys.inx:6
+#, fuzzy
 msgid "https://inkscape.org/doc/keys.html"
-msgstr "https://inkscape.org/doc/keys.hu.html"
+msgstr "https://inkscape.org/learn/jpg/"
 
 #. i18n. Please don't translate it unless a page exists in your language
 #: ../share/extensions/inkscape_help_manual.inx:6
 msgid "http://tavmjong.free.fr/INKSCAPE/MANUAL/html/index.php"
-msgstr "http://tavmjong.free.fr/INKSCAPE/MANUAL/html/index.php"
+msgstr ""
 
 #. i18n. Please don't translate link unless the page exists in your language. Add your language code to the link this way: https://inkscape.org/[lang]/release/1.0/
 #: ../share/extensions/inkscape_help_relnotes.inx:6
+#, fuzzy
 msgid "https://inkscape.org/release/1.0/"
-msgstr "https://inkscape.org/release/1.0/"
+msgstr "https://inkscape.org/learn/jpg/"
 
 #: ../share/extensions/interp.inx:3
 msgid "Interpolate"
@@ -41369,30 +41397,33 @@ msgid "Parallel port:"
 msgstr "Párhuzamos port:"
 
 #: ../share/extensions/plotter.inx:14
+#, fuzzy
 msgid ""
 "The port of your parallel connection, on Windows not currently supported, on "
 "Linux something like: '/dev/usb/lp2' (Default: /dev/usb/lp2)"
 msgstr ""
 "A párhuzamos kapcsolat portja, Windowson jelenleg nem támogatott, Linuxon "
-"valami ehhez hasonló: „/dev/usb/lp2”. (Alapértelmezett: /dev/usb/lp2)"
+"valami ehhez hasonló: „/dev/usb/lp2” (alapértelmezett: /dev/usb/lp2)"
 
 #: ../share/extensions/plotter.inx:15
 msgid "Serial port:"
 msgstr "Soros port:"
 
 #: ../share/extensions/plotter.inx:15
+#, fuzzy
 msgid ""
 "The port of your serial connection, on Windows something like 'COM1', on "
 "Linux something like: '/dev/ttyUSB0' (Default: COM1)"
 msgstr ""
 "A soros kapcsolat portja. Windowson valami ehhez hasonló: „COM1”, Linuxon: „/"
-"dev/ttyUSB0”. (Alapértelmezett: COM1)"
+"dev/ttyUSB0” (alapértelmezett: COM1)"
 
 #: ../share/extensions/plotter.inx:16
 msgid "Serial baud rate:"
 msgstr "Átviteli sebesség:"
 
 #: ../share/extensions/plotter.inx:16
+#, fuzzy
 msgid "The Baud rate of your serial connection (Default: 9600)"
 msgstr "A soros csatlakozás átviteli sebessége (alapértelmezett: 9600)"
 
@@ -41401,6 +41432,7 @@ msgid "Serial byte size:"
 msgstr "Soros bájtméret:"
 
 #: ../share/extensions/plotter.inx:33
+#, fuzzy
 msgid ""
 "The Byte size of your serial connection, 99% of all plotters use the default "
 "setting (Default: 8 Bits)"
@@ -41413,6 +41445,7 @@ msgid "Serial stop bits:"
 msgstr "Soros stop bitek:"
 
 #: ../share/extensions/plotter.inx:39
+#, fuzzy
 msgid ""
 "The Stop bits of your serial connection, 99% of all plotters use the default "
 "setting (Default: 1 Bit)"
@@ -41425,6 +41458,7 @@ msgid "Serial parity:"
 msgstr "Soros paritás:"
 
 #: ../share/extensions/plotter.inx:44
+#, fuzzy
 msgid ""
 "The Parity of your serial connection, 99% of all plotters use the default "
 "setting (Default: None)"
@@ -41437,6 +41471,7 @@ msgid "Serial flow control:"
 msgstr "Soros adatáramlás vezérlés:"
 
 #: ../share/extensions/plotter.inx:51
+#, fuzzy
 msgid ""
 "The Software / Hardware flow control of your serial connection (Default: "
 "Software)"
@@ -41461,6 +41496,7 @@ msgid "Command language:"
 msgstr "Parancsok nyelve:"
 
 #: ../share/extensions/plotter.inx:57
+#, fuzzy
 msgid "The command language to use (Default: HPGL)"
 msgstr "A használt parancsok nyelve (alapértelmezett: HPGL)"
 
@@ -41497,14 +41533,16 @@ msgid "Parallel (LPT) connections are not supported."
 msgstr "Párhuzamos (LPT) kapcsolódás nem támogatott."
 
 #: ../share/extensions/plotter.inx:70
+#, fuzzy
 msgid ""
 "The number of the pen (tool) to use (Standard: '1')Can also be defined in "
 "the layer name. eg. (Pen 1)"
 msgstr ""
 "A használandó toll (eszköz) száma (Szabványos: „1”) megadható a réteg "
-"nevében is, pl. (Pen 1)"
+"nevében, pl. (Pen 1)"
 
 #: ../share/extensions/plotter.inx:72
+#, fuzzy
 msgid ""
 "The speed the pen will move with in centimeters or millimeters per second "
 "(depending on your plotter model), set to 0 to omit command. Most plotters "
@@ -41514,14 +41552,14 @@ msgstr ""
 "A sebesség centiméter vagy milliméter per szekundumban, amellyel a toll "
 "mozogni fog (a plotter modelltől függően). Nullára állítva kihagyható a "
 "parancs, melyet a legtöbb plotter figyelmen kívül is hagy (alapértelmezett: "
-"0). Meghatározható a réteg nevében a toll számával együtt, pl. (Pen 3 Speed "
-"10)"
+"0). Meghatározható a réteg nevében a toll számával együtt, pl. (Pen3 Speed10)"
 
 #: ../share/extensions/plotter.inx:73
 msgid "Rotation (°, clockwise):"
 msgstr "Elforgatás (°, óramutató irányába):"
 
 #: ../share/extensions/plotter.inx:83
+#, fuzzy
 msgid ""
 "If you want to use multiple pens and speeds on your pen plotter create one "
 "layer for each pen number and speed value, name the layers \"Pen 1 Speed "
@@ -41847,8 +41885,9 @@ msgid "Learn more details about JPEG:"
 msgstr "További részletek a JPEG-ről:"
 
 #: ../share/extensions/raster_output_jpeg.inx:16
+#, fuzzy
 msgid "https://inkscape.org/learn/jpeg/"
-msgstr "https://inkscape.org/learn/jpeg/"
+msgstr "https://inkscape.org/learn/jpg/"
 
 #: ../share/extensions/raster_output_jpeg.inx:22
 #: ../share/extensions/raster_output_tiff.inx:23
@@ -41863,8 +41902,9 @@ msgstr "Minőség 0 és 100 között"
 
 #: ../share/extensions/raster_output_jpeg.inx:26
 #: ../share/extensions/raster_output_tiff.inx:27
+#, fuzzy
 msgid "Progressive:"
-msgstr "Progresszív:"
+msgstr "Progresszív"
 
 #: ../share/extensions/raster_output_jpeg.inx:26
 #: ../share/extensions/raster_output_tiff.inx:27
@@ -41872,8 +41912,9 @@ msgid "Store image as a progressive JPEG file."
 msgstr "Kép tárolása progresszív JPEG-fájlként."
 
 #: ../share/extensions/raster_output_jpeg.inx:33
+#, fuzzy
 msgid "JPEG (*.jpeg)"
-msgstr "JPEG (*.jpeg)"
+msgstr "JPEG (*.jpg)"
 
 #: ../share/extensions/raster_output_jpeg.inx:34
 msgid "Render to JPEG file format"
@@ -41924,16 +41965,19 @@ msgid "Lossy Options"
 msgstr "Veszteséges beállítások"
 
 #: ../share/extensions/raster_output_png.inx:22
+#, fuzzy
 msgid "Bit Depth"
 msgstr "Bitmélység"
 
 #: ../share/extensions/raster_output_png.inx:23
+#, fuzzy
 msgid "Color Type Reductions"
-msgstr "Színtípus csökkentések"
+msgstr "Színtípus csökkentés engedélyezése"
 
 #: ../share/extensions/raster_output_png.inx:24
+#, fuzzy
 msgid "Palette Reductions"
-msgstr "Paletta csökkentések"
+msgstr "Paletta csökkentés engedélyezése"
 
 #: ../share/extensions/raster_output_png.inx:31
 msgid "Optimized PNG (*.png)"
@@ -41966,7 +42010,7 @@ msgstr "Group 4"
 
 #: ../share/extensions/raster_output_tiff.inx:13
 msgid "Jpeg"
-msgstr "Jpeg"
+msgstr ""
 
 #: ../share/extensions/raster_output_tiff.inx:14
 msgid "Deflate"
@@ -41985,8 +42029,9 @@ msgid "Raw 16"
 msgstr "Raw 16"
 
 #: ../share/extensions/raster_output_tiff.inx:23
+#, fuzzy
 msgid "Quality between 0 and 95"
-msgstr "Minőség 0 és 95 között"
+msgstr "Minőség 0 és 100 között"
 
 #: ../share/extensions/raster_output_tiff.inx:34
 msgid "TIFF (*.tiff)"
@@ -42045,8 +42090,9 @@ msgid "WebP (*.webp)"
 msgstr "WebP (*.webp)"
 
 #: ../share/extensions/raster_output_webp.inx:32
+#, fuzzy
 msgid "Export to webp file format."
-msgstr "Exportálás WebP-fájl formátumba"
+msgstr "Exportálás WebP-fájl formátumba."
 
 #: ../share/extensions/render_alphabetsoup.inx:3
 msgid "Alphabet Soup"
@@ -43374,6 +43420,7 @@ msgid "element is loaded by browser"
 msgstr "elem betöltődött a böngészőben"
 
 #: ../share/extensions/web_interactive_mockup.inx:21
+#, fuzzy
 msgid ""
 "This effect allows you to create interactive elements in your drawing. These "
 "will react to user actions when the file is viewed in a web browser."
@@ -44125,3 +44172,177 @@ msgstr "fél em"
 #: ../share/ui/units.xml:99
 msgid "Half of font height"
 msgstr "A betűméret fele"
+
+#~ msgid "Fast Crop"
+#~ msgstr "Gyors levágás"
+
+#~ msgid "Does not filter but adds a filter region"
+#~ msgstr "Nem szűrő, de hozzáad egy szűrő területet"
+
+#~ msgid "Debug Info"
+#~ msgstr "Hibakeresési információ"
+
+#~ msgid "Print debugging information and exit"
+#~ msgstr "Hibakeresési információ kiírása és kilépés"
+
+#~ msgid "Print debugging information"
+#~ msgstr "Hibakeresési információ kiírása"
+
+#~ msgid "Actions"
+#~ msgstr "Műveletek"
+
+#~ msgid "Numpad"
+#~ msgstr "Numerikus billentyűzet"
+
+#~ msgid "No dictionaries installed"
+#~ msgstr "Nincsenek telepített szótárak"
+
+#~ msgid "Debug Info Copied!"
+#~ msgstr "Hibakeresési információ másolva!"
+
+#~ msgid "Click to copy debug info to the clipboard"
+#~ msgstr "Kattintás a hibakeresési információ vágólapra való másolásához"
+
+#~ msgid "Classic Inkscape (default)"
+#~ msgstr "Klasszikus Inkscape (alapértelmezett)"
+
+#~ msgid "Classic Symbolic"
+#~ msgstr "Klasszikus szimbolikus"
+
+#~ msgid "Colorful"
+#~ msgstr "Színes"
+
+#~ msgid "System Default"
+#~ msgstr "Rendszer-alapértelmezés"
+
+#~ msgid "../screens/start-welcome-text.svg"
+#~ msgstr "../screens/start-welcome-text.hu.svg"
+
+#~ msgid "Let's set up a few things..."
+#~ msgstr "Állítsunk be néhány dolgot!"
+
+#~ msgid ""
+#~ "<b>Warning:</b> Using a non-standard shortcut keyboard layout could make "
+#~ "it harder to follow tutorials."
+#~ msgstr ""
+#~ "<b>Figyelem:</b> Nem szabványos gyorsbillentyűkkel nehezebb lehet követni "
+#~ "az ismertetőket."
+
+#~ msgid "Appearance"
+#~ msgstr "Megjelenés"
+
+#~ msgid "Set to dark theme"
+#~ msgstr "Sötét téma beállítása"
+
+#~ msgid "New Document"
+#~ msgstr "Új dokumentum"
+
+#~ msgid ""
+#~ "The number of steps the plotter moves when it moves by 1 inch on the X "
+#~ "axis (default: 1016.0)"
+#~ msgstr ""
+#~ "A plotter által megtett lépések száma, ha 1 hüvelyket mozdul az X-"
+#~ "tengelyen (alapértelmezett: 1016.0)"
+
+#~ msgid ""
+#~ "The number of steps the plotter moves when it moves by 1 inch on the Y "
+#~ "axis (default: 1016.0)"
+#~ msgstr ""
+#~ "A plotter által megtett lépések száma, ha 1 hüvelyket mozdul az Y-"
+#~ "tengelyen (alapértelmezett: 1016.0)"
+
+#~ msgid ""
+#~ "The number of the pen (tool) to use (standard: '1'). Can also be defined "
+#~ "in the layer name (e.g. 'Pen 1')"
+#~ msgstr ""
+#~ "A használandó toll (eszköz) száma (szabványos: „1”). Megadható a réteg "
+#~ "nevében is (pl. „Pen 1”)"
+
+#~ msgid ""
+#~ "The force pushing down the pen in grams. Set to 0 to omit command; most "
+#~ "plotters ignore this command (default: 0)"
+#~ msgstr ""
+#~ "A erő grammban, amellyel a toll lefelé nyomódik. Nullára állítva "
+#~ "kihagyható a parancs, melyet a legtöbb plotter figyelmen kívül is hagy "
+#~ "(alapértelmezett: 0)."
+
+#~ msgid ""
+#~ "The speed the pen will move with in centimeters or millimeters per second "
+#~ "(depending on your plotter model). Set to 0 to omit command. Most "
+#~ "plotters ignore this command (default: 0). Can be defined in the layer "
+#~ "name together with the pen number (e.g. 'Pen 3 Speed 10')."
+#~ msgstr ""
+#~ "A sebesség centiméter vagy milliméter per szekundumban, amellyel a toll "
+#~ "mozogni fog (a plotter modelltől függően). Nullára állítva kihagyható a "
+#~ "parancs, melyet a legtöbb plotter figyelmen kívül is hagy "
+#~ "(alapértelmezett: 0). Meghatározható a réteg nevében a toll számával "
+#~ "együtt (pl. „Pen 3 Speed 10”)."
+
+#~ msgid "Rotation of the drawing (default: 0°)"
+#~ msgstr "Rajz elforgatása (alapértelmezett: 0°)"
+
+#~ msgid "Check this to mirror the X axis (default: Unchecked)"
+#~ msgstr ""
+#~ "Jelölje be az X-tengely tükrözéséhez (alapértelmezett: nincs bejelölve)"
+
+#~ msgid "Check this to mirror the Y axis (default: Unchecked)"
+#~ msgstr ""
+#~ "Jelölje be az Y-tengely tükrözéséhez (alapértelmezett: nincs bejelölve)"
+
+#~ msgid "Center origin"
+#~ msgstr "Kezdőpont középen"
+
+#~ msgid ""
+#~ "Check this if your plotter uses a centered origin (default: Unchecked)"
+#~ msgstr ""
+#~ "Jelölje ezt be, ha a plotter középre igazított kezdőponttal dolgozik "
+#~ "(alapértelmezett: nincs bejelölve)"
+
+#~ msgid ""
+#~ "The distance in mm that will be cut over the starting point of the path "
+#~ "to prevent open paths. Set to 0.0 to omit command (default: 1.00)."
+#~ msgstr ""
+#~ "A távolság mm-ben, amellyel körül lesz vágva az útvonal kezdőpontja, hogy "
+#~ "megőrizze a nyitott útvonalakat. Nullára állítva kihagyható a parancs "
+#~ "(alapértelmezett: 1.00)."
+
+#~ msgid "Tool (knife) offset correction (mm):"
+#~ msgstr "Eszköz (kés) eltolási korrekció (mm):"
+
+#~ msgid ""
+#~ "The offset from the tool tip to the tool axis in mm. Set to 0.0 to omit "
+#~ "command (default: 0.25)."
+#~ msgstr ""
+#~ "Az eszköz hegye és az eszköz tengelye közötti eltolás mm-ben. Nullára "
+#~ "állítva kihagyható a parancs (alapértelmezett: 0.25)."
+
+#~ msgid ""
+#~ "Check this to cut a small line to correctly align the tool orientation "
+#~ "before the real drawing starts (default: Checked)."
+#~ msgstr ""
+#~ "Jelölje be, ha a valódi rajz előtt csak egy rövid vonalat vágjon ki, hogy "
+#~ "így ellenőrzi lehessen az eszköz helyes tájolását (alapértelmezett: "
+#~ "bejelölve)"
+
+#~ msgid ""
+#~ "Curves are divided into lines. This number controls how fine the curves "
+#~ "will be reproduced, the smaller the finer (default: 1.2)."
+#~ msgstr ""
+#~ "Az ívek vonalakká vannak bontva. Ez a szám befolyásolja az  ívek "
+#~ "finomságát. A kisebb érték a finomabb (alapértelmezett: 1.2)."
+
+#~ msgid ""
+#~ "Check this to auto align the drawing to the origin (plus the tool offset "
+#~ "if used). If unchecked, you have to make sure that all parts of your "
+#~ "drawing are within the document border! (default: Checked)"
+#~ msgstr ""
+#~ "Jelölje be, hogy a rajz automatikusan a kezőpontra legyen igazítva (és ha "
+#~ "az eszközeltolás alkalmazásban van). Ha nincs bejelölve, akkor meg kell "
+#~ "győződni arról, hogy a rajz minden eleme a dokumentum szegélyén belül "
+#~ "van! (alapértelmezett: bejelölve)"
+
+#~ msgid "Allow bit depth reduction"
+#~ msgstr "Bitmélység csökkentés engedélyezése"
+
+#~ msgid "JPEG"
+#~ msgstr "JPEG"
