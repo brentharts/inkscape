@@ -70,17 +70,25 @@ FontLister::FontLister()
     , block (false)
 {
     font_list_store = Gtk::ListStore::create(FontList);
-    font_list_store->freeze_notify();
-    
+    style_list_store = Gtk::ListStore::create(FontStyleList);
+
     /* Create default styles for use when font-family is unknown on system. */
     default_styles = g_list_append(nullptr, new StyleNames("Normal"));
     default_styles = g_list_append(default_styles, new StyleNames("Italic"));
     default_styles = g_list_append(default_styles, new StyleNames("Bold"));
     default_styles = g_list_append(default_styles, new StyleNames("Bold Italic"));
 
+    refresh_font_list();
+}
+
+void FontLister::refresh_font_list() {
+    font_list_store->freeze_notify();
+    
+    font_list_store->clear();
+
     // Get sorted font families from Pango
     std::vector<PangoFontFamily *> familyVector;
-    font_factory::Default()->GetUIFamilies(familyVector);
+    font_factory::Default()->GetUIFamilies(familyVector, true);
 
     // Traverse through the family names and set up the list store
     for (auto & i : familyVector) {
@@ -105,8 +113,6 @@ FontLister::FontLister()
     }
 
     font_list_store->thaw_notify();
-
-    style_list_store = Gtk::ListStore::create(FontStyleList);
 
     // Initialize style store with defaults
     style_list_store->freeze_notify();

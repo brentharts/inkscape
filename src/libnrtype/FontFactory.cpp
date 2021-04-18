@@ -436,11 +436,14 @@ static bool ustringPairSort(std::pair<PangoFontFamily*, Glib::ustring> const& fi
     return first.second < second.second;
 }
 
-void font_factory::GetUIFamilies(std::vector<PangoFontFamily *>& out)
+void font_factory::GetUIFamilies(std::vector<PangoFontFamily *>& out, bool refresh)
 {
     // Gather the family names as listed by Pango
     PangoFontFamily** families = nullptr;
     int numFamilies = 0;
+    if (refresh) {
+        pango_fc_font_map_config_changed(PANGO_FC_FONT_MAP(fontServer));
+    }
     pango_font_map_list_families(fontServer, &families, &numFamilies);
     
     std::vector<std::pair<PangoFontFamily *, Glib::ustring> > sorted;
