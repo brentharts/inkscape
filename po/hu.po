@@ -35515,16 +35515,16 @@ msgid ""
 "Learn how to\n"
 "Contribute Time"
 msgstr ""
-"Információk\n"
-"idővel való hozzájáruláshoz"
+"Hozzájárulás\n"
+"idővel"
 
 #: ../share/ui/inkscape-start.glade:1697
 msgid ""
 "Learn how to\n"
 "Fund Inkscape"
 msgstr ""
-"Információk\n"
-"pénzügyi támogatáshoz"
+"Pénzügyi\n"
+"támogatás"
 
 #: ../share/ui/inkscape-start.glade:1745
 msgid "Thanks!"
