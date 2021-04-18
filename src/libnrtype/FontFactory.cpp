@@ -442,7 +442,11 @@ void font_factory::GetUIFamilies(std::vector<PangoFontFamily *>& out, bool refre
     PangoFontFamily** families = nullptr;
     int numFamilies = 0;
     if (refresh) {
+#if PANGO_VERSION_CHECK(1,38,0)
         pango_fc_font_map_config_changed(PANGO_FC_FONT_MAP(fontServer));
+#else
+        g_warning("Font refresh not available.");
+#endif
     }
     pango_font_map_list_families(fontServer, &families, &numFamilies);
     
