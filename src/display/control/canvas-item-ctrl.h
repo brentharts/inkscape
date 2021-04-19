@@ -67,6 +67,9 @@ public:
     void set_angle(double angle);
     void set_type(CanvasItemCtrlType type);
     void set_pixbuf(GdkPixbuf *pixbuf);
+    void getRed();
+    void getGreen();
+    void getBlue();
  
 protected:
     void build_cache(int device_scale);
