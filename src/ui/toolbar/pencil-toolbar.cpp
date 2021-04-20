@@ -213,8 +213,8 @@ PencilToolbar::mode_changed(int mode)
 Glib::ustring const
 PencilToolbar::freehand_tool_name()
 {
-    auto *pt = dynamic_cast<Inkscape::UI::Tools::PenTool *>(_desktop->event_context);
-    return ( pt ? "/tools/freehand/pen" : "/tools/freehand/pencil");
+    auto *pt = dynamic_cast<Inkscape::UI::Tools::PencilTool *>(_desktop->event_context);
+    return ( pt ? "/tools/freehand/pencil" : "/tools/freehand/pen");
 }
 
 void
