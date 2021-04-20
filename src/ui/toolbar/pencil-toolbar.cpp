@@ -440,7 +440,7 @@ PencilToolbar::add_advanced_shape_options(bool tool_is_pencil)
 
     /* power width setting */
     {
-        _shapescale_adj = Gtk::Adjustment::create(2.0, 0.0, 1000.0, 0.5, 1.0);
+        _shapescale_adj = Gtk::Adjustment::create(1.0, 0.0, 1000.0, 0.5, 1.0);
         _shapescale =
             Gtk::manage(new UI::Widget::SpinButtonToolItem("pencil-maxpressure", _("Scale:"), _shapescale_adj, 1, 2));
         _shapescale->set_tooltip_text(_("Scale of the width of the power stroke shape."));
@@ -488,13 +488,16 @@ PencilToolbar::update_width_value(int shape) {
         case Inkscape::UI::Tools::TRIANGLE_IN:
         case Inkscape::UI::Tools::TRIANGLE_OUT:
             width = prefs->getDouble("/live_effects/powerstroke/width", powerstrokedefsize);
+            _shapescale_adj->set_value(width);
             break;
         case Inkscape::UI::Tools::ELLIPSE:
         case Inkscape::UI::Tools::CLIPBOARD:
             width = prefs->getDouble("/live_effects/skeletal/width", 1.0);
+            _shapescale_adj->set_value(width);
             break;
         case Inkscape::UI::Tools::BEND_CLIPBOARD:
             width = prefs->getDouble("/live_effects/bend_path/width", 1.0);
+            _shapescale_adj->set_value(width);
             break;
         case Inkscape::UI::Tools::NONE: // Apply width from style?
         case Inkscape::UI::Tools::LAST_APPLIED:
@@ -502,7 +505,6 @@ PencilToolbar::update_width_value(int shape) {
             _shapescale->set_sensitive(false);
             break;
     }
-    _shapescale_adj->set_value(width);
 }
 
 void PencilToolbar::add_powerstroke_cap(bool tool_is_pencil)
