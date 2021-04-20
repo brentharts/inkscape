@@ -650,45 +650,54 @@ void Inkscape::SelTrans::_makeHandles()
         using Inkscape::Modifiers::Type;
         using Inkscape::Modifiers::Modifier;
 
-        auto confine_mod = Modifier::get(Type::TRANS_CONFINE)->get_label().c_str();
-        auto center_mod = Modifier::get(Type::TRANS_OFF_CENTER)->get_label().c_str();
-        auto increment_mod = Modifier::get(Type::TRANS_INCREMENT)->get_label().c_str();
-        char *tip;
+        auto confine_mod = Modifier::get(Type::TRANS_CONFINE)->get_label();
+        auto center_mod = Modifier::get(Type::TRANS_OFF_CENTER)->get_label();
+        auto increment_mod = Modifier::get(Type::TRANS_INCREMENT)->get_label();
 
         switch (hands[i].type) {
             case HANDLE_STRETCH:
             case HANDLE_SCALE:
-                sprintf(tip, _("<b>Scale</b> selection; with <b>%s</b> to scale uniformly; with <b>%s</b> to scale around rotation center"), confine_mod, center_mod);
-                knots[i] = new SPKnot(_desktop, tip, CANVAS_ITEM_CTRL_TYPE_ADJ_HANDLE, "SelTrans");
+            {
+                auto tip = Glib::ustring::compose(_("<b>Scale</b> selection; with <b>%1</b> to scale uniformly; with <b>%2</b> to scale around rotation center"), confine_mod, center_mod);
+                knots[i] = new SPKnot(_desktop, tip.c_str(), CANVAS_ITEM_CTRL_TYPE_ADJ_HANDLE, "SelTrans");
                 break;
+            }
             case HANDLE_SKEW:
-                sprintf(tip, _("<b>Skew</b> selection; with <b>%s</b> to snap angle; with <b>%s</b> to skew around the opposite side"), increment_mod, center_mod);
-                knots[i] = new SPKnot(_desktop, tip, CANVAS_ITEM_CTRL_TYPE_ADJ_SKEW, "SelTrans");
+            {
+                auto tip = Glib::ustring::compose(_("<b>Skew</b> selection; with <b>%1</b> to snap angle; with <b>%2</b> to skew around the opposite side"), increment_mod, center_mod);
+                knots[i] = new SPKnot(_desktop, tip.c_str(), CANVAS_ITEM_CTRL_TYPE_ADJ_SKEW, "SelTrans");
                 break;
+            }
             case HANDLE_ROTATE:
-                sprintf(tip, _("<b>Rotate</b> selection; with <b>%s</b> to snap angle; with <b>%s</b> to rotate around the opposite corner"), increment_mod, center_mod);
-                knots[i] = new SPKnot(_desktop, tip, CANVAS_ITEM_CTRL_TYPE_ADJ_ROTATE, "SelTrans");
+            {
+                auto tip = Glib::ustring::compose(_("<b>Rotate</b> selection; with <b>%1</b> to snap angle; with <b>%2</b> to rotate around the opposite corner"), increment_mod, center_mod);
+                knots[i] = new SPKnot(_desktop, tip.c_str(), CANVAS_ITEM_CTRL_TYPE_ADJ_ROTATE, "SelTrans");
                 break;
+            }
             case HANDLE_CENTER:
-                sprintf(tip, _("<b>Center</b> of rotation and skewing: drag to reposition; scaling with %s also uses this center"), center_mod);
-                knots[i] = new SPKnot(_desktop, tip, CANVAS_ITEM_CTRL_TYPE_ADJ_CENTER, "SelTrans");
+            {
+                auto tip = Glib::ustring::compose(_("<b>Center</b> of rotation and skewing: drag to reposition; scaling with %1 also uses this center"), center_mod);
+                knots[i] = new SPKnot(_desktop, tip.c_str(), CANVAS_ITEM_CTRL_TYPE_ADJ_CENTER, "SelTrans");
                 break;
+            }
             case HANDLE_SIDE_ALIGN:
-                tip = _("<b>Align</b> objects to the side clicked; <b>Shift</b> click to invert side; <b>Ctrl</b> to group whole selection.");
-                knots[i] = new SPKnot(_desktop, tip, CANVAS_ITEM_CTRL_TYPE_ADJ_SALIGN, "SelTrans");
+                knots[i] = new SPKnot(_desktop, 
+                    _("<b>Align</b> objects to the side clicked; <b>Shift</b> click to invert side; <b>Ctrl</b> to group whole selection."),
+                    CANVAS_ITEM_CTRL_TYPE_ADJ_SALIGN, "SelTrans");
                 break;
             case HANDLE_CORNER_ALIGN:
-                tip = _("<b>Align</b> objects to the corner clicked; <b>Shift</b> click to invert side; <b>Ctrl</b> to group whole selection.");
-                knots[i] = new SPKnot(_desktop, tip, CANVAS_ITEM_CTRL_TYPE_ADJ_CALIGN, "SelTrans");
+                knots[i] = new SPKnot(_desktop,
+                    _("<b>Align</b> objects to the corner clicked; <b>Shift</b> click to invert side; <b>Ctrl</b> to group whole selection."),
+                    CANVAS_ITEM_CTRL_TYPE_ADJ_CALIGN, "SelTrans");
                 break;
             case HANDLE_CENTER_ALIGN:
-                tip = _("<b>Align</b> objects to center; <b>Shift</b> click to center vertically instead of horizontally.");
-                knots[i] = new SPKnot(_desktop, tip, CANVAS_ITEM_CTRL_TYPE_ADJ_MALIGN, "SelTrans");
+                knots[i] = new SPKnot(_desktop,
+                    _("<b>Align</b> objects to center; <b>Shift</b> click to center vertically instead of horizontally."),
+                    CANVAS_ITEM_CTRL_TYPE_ADJ_MALIGN, "SelTrans");
                 break;
             default:
                 knots[i] = new SPKnot(_desktop, "", CANVAS_ITEM_CTRL_TYPE_ADJ_HANDLE, "SelTrans");
         }
-        g_strdup(tip);
 
         knots[i]->setAnchor(hands[i].anchor);
         knots[i]->setMode(CANVAS_ITEM_CTRL_MODE_XOR);
