@@ -247,6 +247,8 @@ Gtk::Widget *DialogContainer::create_notebook_tab(Glib::ustring label_str, Glib:
             tlabel.replace(pos, 1, "&amp;");
         }
         tab->set_tooltip_markup(label_str + " (<b>" + tlabel + "</b>)");
+    } else {
+        tab->set_tooltip_text(label_str);
     }
 
     return cover;
@@ -270,6 +272,19 @@ void DialogContainer::new_dialog(unsigned int code)
     } else {
         new_dialog(code, nullptr);
     }
+
+    if (DialogBase* dialog = find_existing_dialog(code)) {
+        dialog->focus_dialog();
+    }
+}
+
+
+DialogBase* DialogContainer::find_existing_dialog(unsigned int code) {
+    DialogBase *existing_dialog = get_dialog(code);
+    if (!existing_dialog) {
+        existing_dialog = DialogManager::singleton().find_floating_dialog(code);
+    }
+    return existing_dialog;
 }
 
 /**
@@ -286,11 +301,7 @@ void DialogContainer::new_dialog(unsigned int code, DialogNotebook *notebook)
     }
 
     // Limit each container to containing one of any type of dialog.
-    DialogBase *existing_dialog = get_dialog(code);
-    if (!existing_dialog) {
-        existing_dialog = DialogManager::singleton().find_floating_dialog(code);
-    }
-    if (existing_dialog) {
+    if (DialogBase* existing_dialog = find_existing_dialog(code)) {
         // found existing dialog; blink & exit
         existing_dialog->blink();
         return;
@@ -478,12 +489,7 @@ DialogWindow *DialogContainer::create_new_floating_dialog(unsigned int code, boo
     }
 
     // check if this dialog is already open
-    DialogBase *existing_dialog = get_dialog(code);
-    if (!existing_dialog) {
-        existing_dialog = DialogManager::singleton().find_floating_dialog(code);
-    }
-
-    if (existing_dialog) {
+    if (DialogBase* existing_dialog = find_existing_dialog(code)) {
         // found existing dialog; blink & exit
         if (blink) {
             existing_dialog->blink();
