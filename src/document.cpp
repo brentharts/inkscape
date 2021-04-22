@@ -486,13 +486,14 @@ std::unique_ptr<SPDocument> SPDocument::copy() const
     // Duplicate the svg root node AND any PI and COMMENT nodes, this should be put
     // into xml/simple-document.h at some point to fix it's duplicate implementation.
     for (Inkscape::XML::Node *child = rdoc->firstChild(); child; child = child->next()) {
+        if (child) {
+            // Get a new xml repr for the svg root node
+            Inkscape::XML::Node *new_child = child->duplicate(new_rdoc);
 
-        // Get a new xml repr for the svg root node
-        Inkscape::XML::Node *new_child = child->duplicate(new_rdoc);
-
-        // Add the duplicated svg node as the document's rdoc
-        new_rdoc->appendChild(new_child);
-        Inkscape::GC::release(new_child);
+            // Add the duplicated svg node as the document's rdoc
+            new_rdoc->appendChild(new_child);
+            Inkscape::GC::release(new_child);
+        }
     }
 
     auto doc = createDoc(new_rdoc, document_filename, document_base, document_name, keepalive, nullptr);
