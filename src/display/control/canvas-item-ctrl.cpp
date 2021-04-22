@@ -23,7 +23,7 @@
 
 #include "ui/widget/canvas.h"
 
-#define ab 100
+
 
 namespace Inkscape {
 
@@ -93,7 +93,7 @@ CanvasItemCtrl::CanvasItemCtrl(CanvasItemGroup *group, Inkscape::CanvasItemCtrlS
 /**
  * Set the postion. Point is in document coordinates.
  */
-void CanvasItemCtrl::getRed(const guint32 color, const guint32 background)
+/*void CanvasItemCtrl::getRed(const guint32 color, const guint32 background)
 {
  red=((ab/100)*255) * color +(1-(ab/100)) * background;
  return(red);
@@ -109,6 +109,7 @@ void CanvasItemCtrl::getBlue(const guint32 color, const guint32 background)
  blue=((ab/100)*255) * color +(1-(ab/100)) * background;
  return(blue);
 }
+*/
 void CanvasItemCtrl::set_position(Geom::Point const &position)
 {
     // std::cout << "CanvasItemCtrl::set_ctrl: " << _name << ": " << position << std::endl;
@@ -286,6 +287,12 @@ static inline guint32 compose_xor(guint32 bg, guint32 fg, guint32 a)
     return (c + 127) / 255;
 }
 
+static inline guint32 get_Channel(guint32 color, guint32 background)
+{
+   guint32 channel=((100/100)*255) * color +(1-(100/100)) * background;
+   return channel;
+} 
+
 /**
  * Render ctrl to screen via Cairo.
  */
@@ -356,15 +363,16 @@ void CanvasItemCtrl::render(Inkscape::CanvasItemBuffer *buf)
                 *pb++ = argb32_from_rgba(cc | 0x000000ff);
             } else if (_mode == CANVAS_ITEM_CTRL_MODE_XOR) {
             
-               int rb = getRed( guint32 cc, guint32 base);
-               int gb = getGreen( guint32 cc, guint32 base);
-               int bb = getBlue( guint32 cc, guint32 base);
+               EXTRACT_ARGB32(base, ac, rb, gb, bb)
+                rb = get_Channel( ac, rb);
+                gb = get_Channel( ac, gb);
+                bb = get_Channel( ac, bb);
                
-                EXTRACT_ARGB32(base, ab,rb,gb,bb)
+               
                 guint32 ro = compose_xor(rb, (cc & 0xff000000) >> 24, ac);
                 guint32 go = compose_xor(gb, (cc & 0x00ff0000) >> 16, ac);
                 guint32 bo = compose_xor(bb, (cc & 0x0000ff00) >>  8, ac);
-                ASSEMBLE_ARGB32(px, ab,ro,go,bo)
+                ASSEMBLE_ARGB32(px, ac,ro,go,bo)
                 *pb++ = px;
             } else {
                 if (ac == 0) {
@@ -1203,3 +1211,4 @@ void CanvasItemCtrl::build_cache(int device_scale)
   End:
 */
 // vim: filetype=cpp:expandtab:shiftwidth=4:tabstop=8:softtabstop=4 :
+
