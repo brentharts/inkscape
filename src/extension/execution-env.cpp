@@ -50,7 +50,13 @@ ExecutionEnv::ExecutionEnv (Effect * effect, Inkscape::UI::View::View * doc, Imp
     _effect(effect),
     _show_working(show_working)
 {
-    genObjectIDs(); // Make sure all selected objects have an ID attribute
+    SPDocument* document = _doc->doc();
+    if(document) {
+        Inkscape::DocumentUndo::setUndoSensitive(document, false);
+        document->enforceObjectIds(); // Make sure all selected objects have an ID attribute
+        Inkscape::DocumentUndo::setUndoSensitive(document, true);   
+    }
+    
     genDocCache();
 
     return;
@@ -94,39 +100,6 @@ ExecutionEnv::killDocCache () {
         // printf("Killed Doc Cache\n");
         delete _docCache;
         _docCache = nullptr;
-    }
-    return;
-}
-
-/** \brief  Assign IDS to selected objects that don't have an ID attribute
-
-    Checks if the object's id attribute is NULL. If it is, assign it a unique ID
-*/
-void
-ExecutionEnv::genObjectIDs () 
-{
-    SPDesktop *desktop = (SPDesktop *)_doc;
-    Inkscape::Selection *selection = desktop->getSelection();
-    bool showInfoDialog = false;
-    Glib::ustring msg = _("Selected objects require IDs.\nThe following IDs have been assigned:\n");
-    auto items = selection->items();
-    for (auto iter = items.begin(); iter != items.end(); ++iter) {
-        SPItem *item = *iter;
-        if(!item->getId())
-        {
-            // Selected object does not have an ID, so assign it a unique ID
-            gchar *id = sp_object_get_unique_id(item, nullptr);
-            item->setAttribute("id", id);
-            item->updateRepr();
-            msg += Glib::ustring::compose(_(" %1\n"), id);
-            g_free(id);
-            if(!showInfoDialog) {
-                showInfoDialog = true;
-            }
-        }
-    }
-    if(showInfoDialog) {
-        desktop->showInfoDialog(msg);
     }
     return;
 }

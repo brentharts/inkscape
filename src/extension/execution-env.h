@@ -102,7 +102,6 @@ private:
     void workingCanceled (const int resp);
     void genDocCache ();
     void killDocCache ();
-    void genObjectIDs ();
 };
 
 } }  /* namespace Inkscape, Extension */
