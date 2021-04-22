@@ -29,9 +29,9 @@ install(DIRECTORY extensions DESTINATION ${INKSCAPE_SHARE_INSTALL}
 )
 
 install(
-    COMPONENT extension_manager
     FILES extensions/extension-manager-bootstrap.py extensions/extension-manager-bootstrap.inx
     DESTINATION ${INKSCAPE_SHARE_INSTALL}
+    COMPONENT extension_manager
 )
 
 if(WIN32)
