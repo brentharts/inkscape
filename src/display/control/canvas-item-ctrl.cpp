@@ -23,6 +23,8 @@
 
 #include "ui/widget/canvas.h"
 
+#define ab 100
+
 namespace Inkscape {
 
 CanvasItemCtrl::~CanvasItemCtrl()
@@ -91,6 +93,22 @@ CanvasItemCtrl::CanvasItemCtrl(CanvasItemGroup *group, Inkscape::CanvasItemCtrlS
 /**
  * Set the postion. Point is in document coordinates.
  */
+void CanvasItemCtrl::getRed(const guint32 color, const guint32 background)
+{
+ red=((ab/100)*255) * color +(1-(ab/100)) * background;
+ return(red);
+}
+               
+void CanvasItemCtrl::getGreen(const guint32 color, const guint32 background)
+{
+ green=((ab/100)*255) * color +(1-(ab/100)) * background;
+ return(green);
+}
+void CanvasItemCtrl::getBlue(const guint32 color, const guint32 background)
+{
+ blue=((ab/100)*255) * color +(1-(ab/100)) * background;
+ return(blue);
+}
 void CanvasItemCtrl::set_position(Geom::Point const &position)
 {
     // std::cout << "CanvasItemCtrl::set_ctrl: " << _name << ": " << position << std::endl;
@@ -326,6 +344,8 @@ void CanvasItemCtrl::render(Inkscape::CanvasItemBuffer *buf)
     for (int i = 0; i < height; ++i) {
         guint32 *pb = reinterpret_cast<guint32*>(pxb + i*strideb);
         for (int j = 0; j < width; ++j) {
+            
+           
             guint32 base = *pb;
             guint32 cc = *p++;
             guint32 ac = cc & 0xff;
@@ -335,6 +355,11 @@ void CanvasItemCtrl::render(Inkscape::CanvasItemBuffer *buf)
             if (ac == 0 && cc != 0) {
                 *pb++ = argb32_from_rgba(cc | 0x000000ff);
             } else if (_mode == CANVAS_ITEM_CTRL_MODE_XOR) {
+            
+               int rb = getRed( guint32 cc, guint32 base);
+               int gb = getGreen( guint32 cc, guint32 base);
+               int bb = getBlue( guint32 cc, guint32 base);
+               
                 EXTRACT_ARGB32(base, ab,rb,gb,bb)
                 guint32 ro = compose_xor(rb, (cc & 0xff000000) >> 24, ac);
                 guint32 go = compose_xor(gb, (cc & 0x00ff0000) >> 16, ac);
