@@ -30,7 +30,7 @@ install(DIRECTORY extensions DESTINATION ${INKSCAPE_SHARE_INSTALL}
 
 install(
     FILES extensions/extension-manager-bootstrap.py extensions/extension-manager-bootstrap.inx
-    DESTINATION ${INKSCAPE_SHARE_INSTALL}
+    DESTINATION ${INKSCAPE_SHARE_INSTALL}/extensions
     COMPONENT extension_manager
 )
 
