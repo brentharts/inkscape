@@ -51,6 +51,7 @@
 #include "ui/tools-switch.h"
 #include "ui/dialog/guides.h"
 #include "ui/tools/tool-base.h"
+#include "ui/tools/node-tool.h"
 #include "ui/tools/select-tool.h"
 #include "ui/widget/canvas.h"  // Desktop hidden in g_object data.
 
@@ -115,7 +116,8 @@ bool sp_dt_guide_event(GdkEvent *event, Inkscape::CanvasItemGuideLine *guide_ite
         std::cerr << "sp_dt_guide_event: No desktop!" << std::endl;
     }
     // Limit to select tool only.
-    if (!dynamic_cast<Inkscape::UI::Tools::SelectTool *>(desktop->event_context)) {
+    if (!dynamic_cast<Inkscape::UI::Tools::SelectTool *>(desktop->event_context) &&
+        !dynamic_cast<Inkscape::UI::Tools::NodeTool *>(desktop->event_context)) {
         return false;
     }
 
