@@ -822,10 +822,11 @@ void ConnectorTool::_setSubsequentPoint(Geom::Point const p)
         Avoid::Router *router = desktop->getDocument()->getRouter();
         this->newConnRef = new Avoid::ConnRef(router);
         this->newConnRef->setEndpoint(Avoid::VertID::src, src);
-        if (this->isOrthogonal)
+        if (this->isOrthogonal) {
             this->newConnRef->setRoutingType(Avoid::ConnType_Orthogonal);
-        else
+        } else {
             this->newConnRef->setRoutingType(Avoid::ConnType_PolyLine);
+        }
     }
     // Set new endpoint.
     this->newConnRef->setEndpoint(Avoid::VertID::tar, dst);
