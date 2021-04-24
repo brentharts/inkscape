@@ -236,6 +236,14 @@ void _fix_pre_v1_empty_lines(SPObject *o)
     std::vector<SPObject *> cl = o->childList(false);
     bool begin = true;
     std::string cur_y = "";
+    // The attribute for "y" coordinate is shifted to "x" for top to bottom tspans
+    // see issue https://gitlab.com/inkscape/inkscape/-/issues/1227
+    std::string attr_y = "y";
+    if (o->style->writing_mode.computed == SP_CSS_WRITING_MODE_TB_RL
+        || o->style->writing_mode.computed == SP_CSS_WRITING_MODE_TB_LR) {
+        attr_y = "x";
+    }
+
     for (auto ci : cl) {
         if (!SP_IS_TSPAN(ci))
             continue;
@@ -243,7 +251,7 @@ void _fix_pre_v1_empty_lines(SPObject *o)
             continue;
         if (!ci->childList(false).empty()) {
             if (begin)
-                cur_y = ci->getAttribute("y") ? ci->getAttribute("y") : cur_y;
+                cur_y = ci->getAttribute(attr_y.c_str()) ? ci->getAttribute(attr_y.c_str()) : cur_y;
             begin = false;
         } else {
             ci->removeAttribute("style");
