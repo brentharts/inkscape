@@ -14,13 +14,12 @@
 #ifndef UI_THEMES_H_SEEN
 #define UI_THEMES_H_SEEN
 
-#include <map>
 #include <cstring>
-#include <utility>
-#include <vector>
-
 #include <glibmm.h>
 #include <gtkmm.h>
+#include <map>
+#include <utility>
+#include <vector>
 
 // Name of theme -> has dark theme
 typedef std::map<Glib::ustring, bool> gtkThemeList;

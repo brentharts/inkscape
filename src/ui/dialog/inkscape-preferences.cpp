@@ -1280,7 +1280,7 @@ void InkscapePreferences::themeChange()
 
         auto settings = Gtk::Settings::get_default();
         settings->property_gtk_theme_name() = current_theme;
-        bool dark = isCurrentThemeDark(dynamic_cast<Gtk::Container*> (window));
+        bool dark = isCurrentThemeDark(dynamic_cast<Gtk::Container *>(window));
         bool toggled = prefs->getBool("/theme/darkTheme", false) != dark;
         if (dark) {
             prefs->setBool("/theme/darkTheme", true);

@@ -564,7 +564,7 @@ StartScreen::refresh_theme(Glib::ustring theme_name)
     }
     // set dark switch and disable if there is no prefer option for dark
     refresh_dark_switch();
-    
+
     INKSCAPE.signal_change_theme.emit();
 }
 
@@ -599,9 +599,7 @@ StartScreen::theme_changed()
         if (get_color_value(row[cols.base]) == 0) {
             prefs->setBool("/theme/symbolicDefaultBaseColors", true);
             prefs->setBool("/theme/symbolicDefaultHighColors", true);
-        }
-        else
-        {
+        } else {
             Glib::ustring prefix = "/theme/" + icons;
             prefs->setBool("/theme/symbolicDefaultBaseColors", false);
             prefs->setBool("/theme/symbolicDefaultHighColors", false);
@@ -615,7 +613,7 @@ StartScreen::theme_changed()
             prefs->setUInt(prefix + "/symbolicErrorColor", get_color_value(row[cols.error]));
         }
 
-        refresh_theme(prefs->getString("/theme/gtkTheme",prefs->getString("/theme/defaultGtkTheme","")));
+        refresh_theme(prefs->getString("/theme/gtkTheme", prefs->getString("/theme/defaultGtkTheme", "")));
     } catch(int e) {
         g_warning("Couldn't find theme value.");
     }
@@ -741,7 +739,7 @@ StartScreen::keyboard_changed()
 
 /**
  * Set Dark Switch based on current selected theme.
- * We will disable switch if current theme doesn't have prefer dark theme option. 
+ * We will disable switch if current theme doesn't have prefer dark theme option.
  */
 
 void StartScreen::refresh_dark_switch()
@@ -754,15 +752,14 @@ void StartScreen::refresh_dark_switch()
     prefs->setBool("/theme/darkTheme", dark);
 
     auto themes = get_available_themes();
-    Glib::ustring current_theme = prefs->getString("/theme/gtkTheme",prefs->getString("/theme/defaultGtkTheme", ""));
+    Glib::ustring current_theme = prefs->getString("/theme/gtkTheme", prefs->getString("/theme/defaultGtkTheme", ""));
 
     Gtk::Switch *dark_toggle = nullptr;
     builder->get_widget("dark_toggle", dark_toggle);
- 
+
     if (!themes[current_theme]) {
         dark_toggle->set_sensitive(false);
-    }
-    else {
+    } else {
         dark_toggle->set_sensitive(true);
     }
     dark_toggle->set_active(dark);

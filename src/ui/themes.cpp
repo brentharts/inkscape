@@ -13,17 +13,16 @@
  */
 
 #include "themes.h"
-#include "preferences.h"
 
-#include <map>
 #include <cstring>
+#include <gio/gio.h>
+#include <glibmm.h>
+#include <gtkmm.h>
+#include <map>
 #include <utility>
 #include <vector>
 
-#include <gio/gio.h>
-#include <glibmm.h>
-
-#include <gtkmm.h>
+#include "preferences.h"
 
 /**
  * Inkscape fill gtk, taken from glib/gtk code with our own checks.
@@ -125,8 +124,7 @@ bool isCurrentThemeDark(Gtk::Container *window)
         Glib::ustring current_theme =
             prefs->getString("/theme/gtkTheme", prefs->getString("/theme/defaultGtkTheme", ""));
         auto settings = Gtk::Settings::get_default();
-        if(settings)
-        {
+        if (settings) {
             settings->property_gtk_application_prefer_dark_theme() = prefs->getBool("/theme/preferDarkTheme", false);
         }
         dark = current_theme.find(":dark") != std::string::npos;
