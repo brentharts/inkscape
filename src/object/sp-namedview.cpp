@@ -51,6 +51,7 @@ using Inkscape::Util::unit_table;
 #define DEFAULTGUIDEHICOLOR 0xff00007f
 #define DEFAULTBORDERCOLOR 0x000000ff
 #define DEFAULTPAGECOLOR 0xffffff00
+#define DEFAULTBLACKOUTCOLOR 0x00000000
 
 static void sp_namedview_setup_guides(SPNamedView * nv);
 static void sp_namedview_lock_guides(SPNamedView * nv);
@@ -81,6 +82,7 @@ SPNamedView::SPNamedView() : SPObjectGroup(), snap_manager(this) {
     this->window_height = 0;
     this->window_maximized = 0;
     this->bordercolor = 0;
+    blackoutcolor = 0;
 
     this->editable = TRUE;
     this->showguides = TRUE;
@@ -210,8 +212,10 @@ void SPNamedView::build(SPDocument *document, Inkscape::XML::Node *repr) {
     this->readAttr(SPAttr::BORDERCOLOR);
     this->readAttr(SPAttr::BORDEROPACITY);
     this->readAttr(SPAttr::PAGECOLOR);
+    this->readAttr(SPAttr::BLACKOUTCOLOR);
     this->readAttr(SPAttr::INKSCAPE_PAGECHECKERBOARD);
     this->readAttr(SPAttr::INKSCAPE_PAGEOPACITY);
+    this->readAttr(SPAttr::INKSCAPE_BLACKOUTOPACITY);
     this->readAttr(SPAttr::INKSCAPE_PAGESHADOW);
     this->readAttr(SPAttr::INKSCAPE_ZOOM);
     this->readAttr(SPAttr::INKSCAPE_ROTATION);
@@ -387,6 +391,13 @@ void SPNamedView::set(SPAttr key, const gchar* value) {
             }
             this->requestModified(SP_OBJECT_MODIFIED_FLAG);
             break;
+    case SPAttr::BLACKOUTCOLOR:
+            blackoutcolor = (blackoutcolor & 0xff) | (DEFAULTBLACKOUTCOLOR & 0xffffff00);
+            if (value) {
+                blackoutcolor = (blackoutcolor & 0xff) | sp_svg_read_color(value, blackoutcolor);
+            }
+            this->requestModified(SP_OBJECT_MODIFIED_FLAG);
+            break;
     case SPAttr::INKSCAPE_PAGECHECKERBOARD:
             this->pagecheckerboard = (value) ? sp_str_to_bool (value) : false;
             this->requestModified(SP_OBJECT_MODIFIED_FLAG);
@@ -394,6 +405,11 @@ void SPNamedView::set(SPAttr key, const gchar* value) {
     case SPAttr::INKSCAPE_PAGEOPACITY:
             this->pagecolor = (this->pagecolor & 0xffffff00) | (DEFAULTPAGECOLOR & 0xff);
             sp_nv_read_opacity(value, &this->pagecolor);
+            this->requestModified(SP_OBJECT_MODIFIED_FLAG);
+            break;
+    case SPAttr::INKSCAPE_BLACKOUTOPACITY:
+            blackoutcolor = (blackoutcolor & 0xffffff00) | (DEFAULTBLACKOUTCOLOR & 0xff);
+            sp_nv_read_opacity(value, &blackoutcolor);
             this->requestModified(SP_OBJECT_MODIFIED_FLAG);
             break;
     case SPAttr::INKSCAPE_PAGESHADOW:

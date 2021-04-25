@@ -127,6 +127,7 @@ protected:
     UI::Widget::RegisteredCheckButton _rcb_bord;
     UI::Widget::RegisteredCheckButton _rcb_shad;
     UI::Widget::RegisteredColorPicker _rcp_bg;
+    UI::Widget::RegisteredColorPicker _rcp_blkout;
     UI::Widget::RegisteredColorPicker _rcp_bord;
     UI::Widget::RegisteredUnitMenu    _rum_deflt;
     UI::Widget::PageSizer             _page_sizer;

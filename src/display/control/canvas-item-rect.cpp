@@ -21,6 +21,7 @@
 #include "color.h"    // SP_RGBA_x_F
 #include "inkscape.h" //
 #include "ui/widget/canvas.h"
+#include "display/cairo-utils.h"     // Checkerboard background.
 
 namespace Inkscape {
 
@@ -116,8 +117,10 @@ void CanvasItemRect::update(Geom::Affine const &affine)
 
     // Enlarge bbox by twice shadow size (to allow for shadow on any side with a 45deg rotation).
     _bounds = _rect;
+    // note: add shadow size before applying transformation, since get_shadow_size accounts for scale
+    _bounds.expandBy(2 * get_shadow_size());
     _bounds *= _affine;
-    _bounds.expandBy(2*_shadow_width + 2); // Room for stroke.
+    _bounds.expandBy(2); // Room for stroke.
 
     // Queue redraw of new area
     _canvas->redraw_area(_bounds);
@@ -159,6 +162,24 @@ void CanvasItemRect::render(Inkscape::CanvasItemBuffer *buf)
         rect_transformed[i] = _rect.corner(i) * _affine;
     }
 
+    // canvas scale; impacts shadow size
+    const auto scale = sqrt(_affine[0] * _affine[0] + _affine[1] * _affine[1]);
+
+    auto rect = _rect;
+
+    using Geom::X;
+    using Geom::Y;
+
+    if (axis_aligned) {
+        auto temp = _rect * _affine;
+        auto min = temp.min();
+        auto max = temp.max();
+        auto pixgrid = Geom::Rect(
+            Geom::Point(floor(min[X]) + 0.5, floor(min[Y]) + 0.5),
+            Geom::Point(floor(max[X]) + 0.5, floor(max[Y]) + 0.5));
+        rect = pixgrid * _affine.inverse();
+    }
+
     buf->cr->save();
     buf->cr->translate(-buf->rect.left(), -buf->rect.top());
 
@@ -167,46 +188,76 @@ void CanvasItemRect::render(Inkscape::CanvasItemBuffer *buf)
         cairo_set_operator(buf->cr->cobj(), CAIRO_OPERATOR_DIFFERENCE);
     }
 
-    using Geom::X;
-    using Geom::Y;
+    // fill background?
+    if (_background) {
+        buf->cr->save();
+        Cairo::Matrix m(_affine[0], _affine[1], _affine[2], _affine[3], _affine[4], _affine[5]);
+        buf->cr->transform(m);
+        buf->cr->rectangle(rect.corner(0)[X], rect.corner(0)[Y], rect.width(), rect.height());
+        // counter fill scaling (necessary for checkerboard pattern)
+        buf->cr->scale(1 / scale, 1 / scale);
+        buf->cr->set_source(_background);
+        buf->cr->fill();
+        buf->cr->restore();
+    }
 
     // Draw shadow first. Shadow extends under rectangle to reduce aliasing effects.
     if (_shadow_width > 0 && !_dashed) {
-
-        Geom::Point const * corners = rect_transformed;
-        double shadowydir = _affine.det() > 0 ? -1 : 1;
-
-        // Is the desktop y-axis downwards?
-        if (SP_ACTIVE_DESKTOP && SP_ACTIVE_DESKTOP->is_yaxisdown()) {
-            ++corners; // Need corners 1/2/3 instead of 0/1/2.
-            shadowydir *= -1;
+        // draw fake drop shadow built from gradients
+        const auto r = SP_RGBA32_R_F(_shadow_color);
+        const auto g = SP_RGBA32_G_F(_shadow_color);
+        const auto b = SP_RGBA32_B_F(_shadow_color);
+        const auto a = 0.5 + SP_RGBA32_A_F(_shadow_color) / 2;
+        buf->cr->save();
+        Cairo::Matrix m(_affine[0], _affine[1], _affine[2], _affine[3], _affine[4], _affine[5]);
+        buf->cr->transform(m);
+        const Geom::Point corners[] = {rect.corner(0), rect.corner(1), rect.corner(2), rect.corner(3) };
+        // space for gradient shadow
+        double sw = get_shadow_size();
+        double half = sw / 2;
+        auto grad_vert = Cairo::LinearGradient::create(corners[1][X], 0, corners[1][X] + sw, 0);
+        auto grad_horz = Cairo::LinearGradient::create(0, corners[2][Y], 0, corners[2][Y] + sw);
+        auto grad_corner = Cairo::RadialGradient::create(corners[2][X], corners[2][Y], 0, corners[2][X], corners[2][Y], sw);
+        auto grad_top_right = Cairo::RadialGradient::create(corners[1][X], corners[1][Y] + half, 0, corners[1][X], corners[1][Y] + half, sw);
+        auto grad_btm_left = Cairo::RadialGradient::create(corners[3][X] + half, corners[3][Y], 0, corners[3][X] + half, corners[3][Y], sw);
+        const int N = 15; // number of gradient stops; stops used to make it non-linear
+        for (int i = 0; i < N; ++i) {
+            // exponential decay for drop shadow - long tail, with values from 71% down to 1% opacity,
+            // cutting it off at the end
+            auto alpha = i + 1 < N ? exp(-(i + 1) * 0.333) : 0.0;
+            auto pos = static_cast<double>(i) / N;
+            grad_horz->add_color_stop_rgba(pos, r, g, b, alpha * a);
+            grad_vert->add_color_stop_rgba(pos, r, g, b, alpha * a);
+            grad_corner->add_color_stop_rgba(pos, r, g, b, alpha * a);
+            grad_top_right->add_color_stop_rgba(pos, r, g, b, alpha * a);
+            grad_btm_left->add_color_stop_rgba(pos, r, g, b, alpha * a);
         }
 
-        // Offset by half stroke width (_shadow_width is in window coordinates).
-        // Need to handle change in handedness with flips.
-        Geom::Point shadow( _shadow_width/2.0, shadowydir * _shadow_width/2.0 );
-        shadow *= Geom::Rotate( rotation );
+        buf->cr->rectangle(corners[1][X], corners[1][Y] + half, sw, std::max(corners[2][Y] - corners[1][Y] - half, 0.0));
+        buf->cr->set_source(grad_vert);
+        buf->cr->fill();
 
-        if (axis_aligned) {
-            // Snap to pixel grid (add 0.5 to center on pixel).
-            buf->cr->move_to(floor(corners[0][X] + shadow[X]+0.5) + 0.5,
-                             floor(corners[0][Y] + shadow[Y]+0.5) + 0.5 );
-            buf->cr->line_to(floor(corners[1][X] + shadow[X]+0.5) + 0.5,
-                             floor(corners[1][Y] + shadow[Y]+0.5) + 0.5 );
-            buf->cr->line_to(floor(corners[2][X] + shadow[X]+0.5) + 0.5,
-                             floor(corners[2][Y] + shadow[Y]+0.5) + 0.5 );
-        } else {
-            buf->cr->move_to(corners[0][X] + shadow[X], corners[0][Y] + shadow[Y] );
-            buf->cr->line_to(corners[1][X] + shadow[X], corners[1][Y] + shadow[Y] );
-            buf->cr->line_to(corners[2][X] + shadow[X], corners[2][Y] + shadow[Y] );
-        }               
+        buf->cr->rectangle(corners[0][X] + half, corners[2][Y], std::max(corners[1][X] - corners[0][X] - half, 0.0), sw);
+        buf->cr->set_source(grad_horz);
+        buf->cr->fill();
 
-        buf->cr->set_source_rgba(SP_RGBA32_R_F(_shadow_color), SP_RGBA32_G_F(_shadow_color),
-                                 SP_RGBA32_B_F(_shadow_color), SP_RGBA32_A_F(_shadow_color));
-        buf->cr->set_line_width(_shadow_width + 1);
-        buf->cr->stroke();
+        buf->cr->rectangle(corners[2][X], corners[2][Y], sw, sw);
+        buf->cr->set_source(grad_corner);
+        buf->cr->fill();
+
+        buf->cr->rectangle(corners[1][X], corners[1][Y] - half, sw, sw);
+        buf->cr->set_source(grad_top_right);
+        buf->cr->fill();
+
+        buf->cr->rectangle(corners[3][X] - half, corners[3][Y], sw, sw);
+        buf->cr->set_source(grad_btm_left);
+        // buf->cr->set_source_rgb(1, 0 , 0);
+        buf->cr->fill();
+        buf->cr->restore();
+
+        // g_warning("%f %f - %f %f - %f %f - %f %f, %f, rgba %x %f %f - %d %f", corners[0][X], corners[0][Y], corners[1][X], corners[1][Y], corners[2][X], corners[2][Y], corners[3][X], corners[3][Y], sw, _shadow_color, r, g, _shadow_width, sw);
     }
-    
+
     // Setup rectangle path
     if (axis_aligned) {
 
@@ -251,7 +302,7 @@ void CanvasItemRect::render(Inkscape::CanvasItemBuffer *buf)
     // Geom::Rect bounds = _bounds;
     // bounds.expandBy(-1);
     // bounds -= buf->rect.min();
-    // buf->cr->set_source_rgba(1.0, 0.0, 0.0, 1.0);
+    // buf->cr->set_source_rgba(1.0, 0.0, _shadow_width / 3.0, 1.0);
     // buf->cr->rectangle(bounds.min().x(), bounds.min().y(), bounds.width(), bounds.height());
     // buf->cr->stroke();
 
@@ -281,6 +332,41 @@ void CanvasItemRect::set_shadow(guint32 color, int width)
         _shadow_width = width;
         _canvas->redraw_area(_bounds);
     }
+}
+
+void CanvasItemRect::set_background(guint32 background) {
+    _set_background(Cairo::SolidPattern::create_rgba(SP_RGBA32_R_F(background), SP_RGBA32_G_F(background), SP_RGBA32_B_F(background), SP_RGBA32_A_F(background)));
+}
+
+void CanvasItemRect::_set_background(Cairo::RefPtr<Cairo::Pattern> background) {
+    if (_background != background) {
+        _background = background;
+        _canvas->redraw_area(_bounds);
+    }
+}
+
+double CanvasItemRect::get_scale() const {
+    return sqrt(_affine[0] * _affine[0] + _affine[1] * _affine[1]);
+}
+
+double CanvasItemRect::get_shadow_size() const {
+    // gradient drop shadow needs much more room then solid one, so inflating the size;
+    // fudge factor of 6 used to make sizes baked in svg documents work as steps:
+    // typical value of 2 will work out to 12 pixels which is a narrow shadow (b/c of exponential fall of)
+    auto size = _shadow_width * 6;
+    auto scale = get_scale();
+
+    // calculate space for gradient shadow; if divided by 'scale' it would be zoom independent (fixed in size);
+    // if 'scale' is not used, drop shadow will be getting smaller with document zoom;
+    // here hybrid approach is used: "unscaling" with square root of scale allows shadows to diminish
+    // more slowly at small zoom levels (so it's still perceptible) and grow more slowly at high mag (where it doesn't matter, b/c it's typically off-screen)
+    return size / (scale > 0 ? sqrt(scale) : 1);
+}
+
+void CanvasItemRect::set_background_checkerboard(guint32 rgba) {
+    auto pattern = ink_cairo_pattern_create_checkerboard(rgba);
+    auto background = Cairo::RefPtr<Cairo::Pattern>(new Cairo::Pattern(pattern));
+    _set_background(background);
 }
 
 } // namespace Inkscape

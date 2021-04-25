@@ -424,6 +424,8 @@ std::vector<AttributeInfo> getKnownAttrs()
         AttributeInfo("inkscape:original-d", true),
         AttributeInfo("inkscape:pagecheckerboard", true),
         AttributeInfo("inkscape:pageopacity", true),
+        AttributeInfo("inkscape:blackcolor", true),
+        AttributeInfo("inkscape:blackoutopacity", true),
         AttributeInfo("inkscape:pageshadow", true),
         AttributeInfo("inkscape:path-effect", true),
         AttributeInfo("inkscape:persp3d", true),
