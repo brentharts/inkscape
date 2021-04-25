@@ -86,6 +86,7 @@ apt_bundle \
 # AppRun has to export GSETTINGS_SCHEMA_DIR for this to work
 mkdir -p usr/share/glib-2.0/schemas/
 cp /usr/share/glib-2.0/schemas/org.gtk.Settings.FileChooser.gschema.xml usr/share/glib-2.0/schemas/
+cp /usr/share/glib-2.0/schemas/org.gnome.settings-daemon.plugins.xsettings.gschema.xml usr/share/glib-2.0/schemas/
 if [ -d usr/share/glib-2.0/schemas/ ] ; then
   ( cd usr/share/glib-2.0/schemas/ ; glib-compile-schemas . )
 fi
