@@ -785,8 +785,8 @@ Geom::Point Preferences::_extractPoint(Entry const &v)
     v.cached_point = true;
     gchar const *s = static_cast<gchar const *>(v._value);
     gchar ** strarray = g_strsplit(s, ",", 2);
-    double newx = atoi(strarray[0]);
-    double newy = atoi(strarray[1]);
+    double newx = atof(strarray[0]);
+    double newy = atof(strarray[1]);
     g_strfreev (strarray);
     return Geom::Point(newx, newy);
 }
