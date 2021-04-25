@@ -84,6 +84,7 @@ apt_bundle \
 
 # Compile GLib schemas if the subdirectory is present in the AppImage
 # AppRun has to export GSETTINGS_SCHEMA_DIR for this to work
+apt_bundle gnome-settings-daemon-schemas
 mkdir -p usr/share/glib-2.0/schemas/
 cp /usr/share/glib-2.0/schemas/org.gtk.Settings.FileChooser.gschema.xml usr/share/glib-2.0/schemas/
 cp /usr/share/glib-2.0/schemas/org.gnome.settings-daemon.plugins.xsettings.gschema.xml usr/share/glib-2.0/schemas/
