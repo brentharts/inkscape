@@ -47,6 +47,7 @@ namespace Widget {
 class FillRuleRadioButton;
 class StyleToggleButton;
 class GradientSelector;
+class GradientEditor;
 
 /**
  * Generic paint selector widget.
@@ -95,7 +96,7 @@ class PaintSelector : public Gtk::Box {
     Gtk::Box *_frame;
 
     Gtk::Box         *_selector_solid_color = nullptr;
-    GradientSelector *_selector_gradient = nullptr;
+    GradientEditor   *_selector_gradient = nullptr;
     Gtk::Box         *_selector_mesh = nullptr;
     Gtk::Box         *_selector_pattern = nullptr;
     SwatchSelector   *_selector_swatch = nullptr;

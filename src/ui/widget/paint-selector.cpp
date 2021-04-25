@@ -640,7 +640,7 @@ void PaintSelector::set_mode_gradient(PaintSelector::Mode mode)
         if (!_selector_gradient) {
             /* Create new gradient selector */
             try {
-                _selector_gradient = Gtk::manage(new GradientSelector());
+                _selector_gradient = Gtk::manage(new GradientEditor("/gradient-edit"));
                 _selector_gradient->show();
                 _selector_gradient->signal_grabbed().connect(sigc::mem_fun(this, &PaintSelector::gradient_grabbed));
                 _selector_gradient->signal_dragged().connect(sigc::mem_fun(this, &PaintSelector::gradient_dragged));
