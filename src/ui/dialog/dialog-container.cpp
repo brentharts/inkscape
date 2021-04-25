@@ -13,8 +13,10 @@
 
 #include "dialog-container.h"
 
+#include <glibmm/i18n.h>
 #include <giomm/file.h>
 #include <glibmm/keyfile.h>
+#include <gtkmm/box.h>
 #include <gtkmm/eventbox.h>
 #include <gtkmm/image.h>
 
@@ -155,8 +157,10 @@ DialogBase *DialogContainer::dialog_factory(unsigned int code)
             return &Inkscape::UI::Dialog::ObjectsPanel::getInstance();
         case SP_VERB_DIALOG_PAINT:
             return &Inkscape::UI::Dialog::PaintServersDialog::getInstance();
+#ifdef DEBUG
         case SP_VERB_DIALOG_PROTOTYPE:
             return &Inkscape::UI::Dialog::Prototype::getInstance();
+#endif
         case SP_VERB_DIALOG_SELECTORS:
             return &Inkscape::UI::Dialog::SelectorsDialog::getInstance();
 #if WITH_GSPELL
@@ -219,10 +223,17 @@ Gtk::Widget *DialogContainer::create_notebook_tab(Glib::ustring label_str, Glib:
 {
     Gtk::Label *label = Gtk::manage(new Gtk::Label(label_str));
     Gtk::Image *image = Gtk::manage(new Gtk::Image());
+    Gtk::Button *close = Gtk::manage(new Gtk::Button());
     image->set_from_icon_name(image_str, Gtk::ICON_SIZE_MENU);
     Gtk::Box *tab = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 2));
+    close->set_image_from_icon_name("window-close");
+    close->set_halign(Gtk::ALIGN_END);
+    close->set_tooltip_text(_("Close Tab"));
+    close->get_style_context()->add_class("close-button");
+
     tab->set_name(label_str);
     tab->pack_start(*image);
+    tab->pack_end(*close);
     tab->pack_end(*label);
     tab->show_all();
 
@@ -238,6 +249,8 @@ Gtk::Widget *DialogContainer::create_notebook_tab(Glib::ustring label_str, Glib:
             tlabel.replace(pos, 1, "&amp;");
         }
         tab->set_tooltip_markup(label_str + " (<b>" + tlabel + "</b>)");
+    } else {
+        tab->set_tooltip_text(label_str);
     }
 
     return cover;
@@ -261,6 +274,19 @@ void DialogContainer::new_dialog(unsigned int code)
     } else {
         new_dialog(code, nullptr);
     }
+
+    if (DialogBase* dialog = find_existing_dialog(code)) {
+        dialog->focus_dialog();
+    }
+}
+
+
+DialogBase* DialogContainer::find_existing_dialog(unsigned int code) {
+    DialogBase *existing_dialog = get_dialog(code);
+    if (!existing_dialog) {
+        existing_dialog = DialogManager::singleton().find_floating_dialog(code);
+    }
+    return existing_dialog;
 }
 
 /**
@@ -276,12 +302,10 @@ void DialogContainer::new_dialog(unsigned int code, DialogNotebook *notebook)
         return;
     }
 
+    columns->ensure_multipaned_children();
+
     // Limit each container to containing one of any type of dialog.
-    DialogBase *existing_dialog = get_dialog(code);
-    if (!existing_dialog) {
-        existing_dialog = DialogManager::singleton().find_floating_dialog(code);
-    }
-    if (existing_dialog) {
+    if (DialogBase* existing_dialog = find_existing_dialog(code)) {
         // found existing dialog; blink & exit
         existing_dialog->blink();
         return;
@@ -437,10 +461,13 @@ bool recreate_dialogs_from_state(const Glib::KeyFile *keyfile)
             }
         }
 
-        dialog_window->update_window_size_to_fit_children();
         if (has_position) {
             dm_restore_window_position(*dialog_window, pos);
         }
+        else {
+            dialog_window->update_window_size_to_fit_children();
+        }
+        dialog_window->show_all();
         restored = true;
     }
 
@@ -466,12 +493,7 @@ DialogWindow *DialogContainer::create_new_floating_dialog(unsigned int code, boo
     }
 
     // check if this dialog is already open
-    DialogBase *existing_dialog = get_dialog(code);
-    if (!existing_dialog) {
-        existing_dialog = DialogManager::singleton().find_floating_dialog(code);
-    }
-
-    if (existing_dialog) {
+    if (DialogBase* existing_dialog = find_existing_dialog(code)) {
         // found existing dialog; blink & exit
         if (blink) {
             existing_dialog->blink();
@@ -544,6 +566,11 @@ void DialogContainer::link_dialog(DialogBase *dialog)
     DialogWindow *window = dynamic_cast<DialogWindow *>(get_toplevel());
     if (window) {
         window->update_dialogs();
+    }
+    else {
+        // dialog without DialogWindow has been docked; remove it's floating state
+        // so if user closes and reopens it, it shows up docked again, not floating
+        DialogManager::singleton().remove_dialog_floating_state(dialog->getVerb());
     }
 }
 
@@ -693,10 +720,13 @@ void DialogContainer::load_container_state(Glib::KeyFile *keyfile, bool include_
         }
 
         if (dialog_window) {
-            dialog_window->update_window_size_to_fit_children();
             if (has_position) {
                 dm_restore_window_position(*dialog_window, pos);
             }
+            else {
+                dialog_window->update_window_size_to_fit_children();
+            }
+            dialog_window->show_all();
         }
     }
 }

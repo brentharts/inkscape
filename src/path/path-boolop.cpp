@@ -194,7 +194,7 @@ sp_pathvector_boolop(Geom::PathVector const &pathva, Geom::PathVector const &pat
         // just check it's an intersection on the path you want to cut, and keep it
         // the intersections you have found are then fed to ConvertPositionsToMoveTo() which will
         // make new subpath at each one of these positions
-        // inversion pour l'opration
+        // inversion pour l'opération
         {
             Path* swap=originaux[0];originaux[0]=originaux[1];originaux[1]=swap;
             int   swai=origWind[0];origWind[0]=origWind[1];origWind[1]=(fill_typ)swai;
@@ -416,13 +416,20 @@ BoolOpErrors Inkscape::ObjectSet::pathBoolOp(bool_op bop, const bool skip_undo, 
     int curOrig;
     {
         curOrig = 0;
-        for (std::vector<SPItem*>::const_iterator l = il.begin(); l != il.end(); l++)
+        for (auto item : il)
         {
             // apply live path effects prior to performing boolean operation
-            if (SP_IS_LPE_ITEM(*l)) {
-                SP_LPE_ITEM(*l)->removeAllPathEffects(true);
+            char const *id = item->getAttribute("id");
+            SPDocument * document = item->document;
+            SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(item);
+            if (lpeitem) {
+                SPObject *original = dynamic_cast<SPObject *>(item);
+                lpeitem->removeAllPathEffects(true);
+                SPObject *elemref = document->getObjectById(id);
+                if (elemref && elemref != original) {
+                    item = dynamic_cast<SPItem *>(elemref);
+                }
             }
-
             SPCSSAttr *css = sp_repr_css_attr(reinterpret_cast<SPObject *>(il[0])->getRepr(), "style");
             gchar const *val = sp_repr_css_property(css, "fill-rule", nullptr);
             if (val && strcmp(val, "nonzero") == 0) {
@@ -433,7 +440,7 @@ BoolOpErrors Inkscape::ObjectSet::pathBoolOp(bool_op bop, const bool skip_undo, 
                 origWind[curOrig]= fill_nonZero;
             }
 
-            originaux[curOrig] = Path_for_item(*l, true, true);
+            originaux[curOrig] = Path_for_item(item, true, true);
             if (originaux[curOrig] == nullptr || originaux[curOrig]->descr_cmd.size() <= 1)
             {
                 for (int i = curOrig; i >= 0; i--) delete originaux[i];
@@ -469,8 +476,8 @@ BoolOpErrors Inkscape::ObjectSet::pathBoolOp(bool_op bop, const bool skip_undo, 
         theShapeA->ConvertToShape(theShape, origWind[0]);
 
         curOrig = 1;
-        for (std::vector<SPItem*>::const_iterator l = il.begin(); l != il.end(); l++){
-            if(*l==il[0])continue;
+        for (auto item : il){
+            if(item==il[0])continue;
             originaux[curOrig]->ConvertWithBackData(0.1);
 
             originaux[curOrig]->Fill(theShape, curOrig);
@@ -570,7 +577,7 @@ BoolOpErrors Inkscape::ObjectSet::pathBoolOp(bool_op bop, const bool skip_undo, 
         // just check it's an intersection on the path you want to cut, and keep it
         // the intersections you have found are then fed to ConvertPositionsToMoveTo() which will
         // make new subpath at each one of these positions
-        // inversion pour l'opration
+        // inversion pour l'opération
         {
             Path* swap=originaux[0];originaux[0]=originaux[1];originaux[1]=swap;
             int   swai=origWind[0];origWind[0]=origWind[1];origWind[1]=(fill_typ)swai;

@@ -60,6 +60,7 @@
 #include "live_effects/effect.h"
 #include "live_effects/parameter/originalpath.h"
 
+#include "filter-chemistry.h"
 #include "object/box3d.h"
 #include "object/object-set.h"
 #include "object/persp3d.h"
@@ -498,6 +499,15 @@ void ObjectSet::duplicate(bool suppressDone, bool duplicateLayer)
 
         if (!duplicateLayer || sp_repr_is_def(old_repr)) {
             parent->appendChild(copy);
+            // 1.1 COPYPASTECLONESTAMPLPEBUG
+            SPItem *newitem = dynamic_cast<SPItem *>(doc->getObjectByRepr(copy));
+            if (_desktop && newitem) {
+                remove_hidder_filter(newitem);
+                gchar * id = strdup(copy->attribute("id"));
+                copy = sp_lpe_item_remove_autoflatten(newitem, id)->getRepr();
+                g_free(id);
+            }
+            // END 1.1 COPYPASTECLONESTAMPLPEBUG fix
         } else if (sp_repr_is_layer(old_repr)) {
             parent->addChild(copy, old_repr);
         } else {
@@ -825,15 +835,6 @@ Inkscape::XML::Node* ObjectSet::group() {
     return group;
 }
 
-
-static bool clone_depth_descending(gconstpointer a, gconstpointer b) {
-    SPUse *use_a = static_cast<SPUse *>(const_cast<gpointer>(a));
-    SPUse *use_b = static_cast<SPUse *>(const_cast<gpointer>(b));
-    int depth_a = use_a->cloneDepth();
-    int depth_b = use_b->cloneDepth();
-    return (depth_a==depth_b)?(a<b):(depth_a>depth_b);
-}
-
 void ObjectSet::popFromGroup(){
     if (isEmpty()) {
         selection_display_message(desktop(), Inkscape::WARNING_MESSAGE, _("<b>No objects selected</b> to pop out of group."));
@@ -867,58 +868,61 @@ void ObjectSet::popFromGroup(){
 
 }
 
+/**
+ * Finds the first clone in `objects` which references an item in `groups`.
+ * The search is recursive, the children of `objects` are searched as well.
+ * Return NULL if no such clone is found.
+ */
+template <typename Objects>
+static SPUse *find_clone_to_group(Objects const &objects, std::set<SPGroup *> const &groups)
+{
+    assert(!groups.count(nullptr));
+
+    for (auto *obj : objects) {
+        if (auto *use = dynamic_cast<SPUse *>(obj)) {
+            if (auto root = use->root()) {
+                if (groups.count(static_cast<SPGroup *>(root->clone_original))) {
+                    return use;
+                }
+            }
+        }
+
+        if (auto *use = find_clone_to_group(obj->childList(false), groups)) {
+            return use;
+        }
+    }
+
+    return nullptr;
+}
+
+/**
+ * Ungroup all groups in an object set.
+ *
+ * Clones of ungrouped groups will be unlinked.
+ *
+ * Children of groups will not be ungrouped (operation is not recursive).
+ *
+ * Unlinked clones and children of ungrouped groups will be added to the object set.
+ */
 static void ungroup_impl(ObjectSet *set)
 {
-    std::set<SPObject*> groups(set->groups().begin(),set->groups().end());
+    std::set<SPGroup *> const groups(set->groups().begin(), set->groups().end());
 
-    std::vector<SPItem*> new_select;
-    auto old_select = set->items();
-    std::vector<SPItem*> items(old_select.begin(), old_select.end());
-
-    // If any of the clones refer to the groups, unlink them and replace them with successors
-    // in the items list.
-    std::vector<SPUse*> clones_to_unlink;
-    for (auto item : items) {
-        SPUse *use = dynamic_cast<SPUse *>(item);
-
-        SPItem *original = use;
-        while (auto orig_use = dynamic_cast<SPUse *>(original)) {
-            original = orig_use->get_original();
-        }
-
-        if (groups.find(original) !=  groups.end()) {
-            clones_to_unlink.push_back(use);
+    while (auto *use = find_clone_to_group(set->items(), groups)) {
+        bool const readd = set->includes(use);
+        auto const unlinked = use->unlink();
+        if (readd) {
+            set->add(unlinked, true);
         }
     }
 
-    // Unlink clones beginning from those with highest clone depth.
-    // This way we can be sure than no additional automatic unlinking happens,
-    // and the items in the list remain valid
-    std::sort(clones_to_unlink.begin(),clones_to_unlink.end(),clone_depth_descending);
+    std::vector<SPItem *> children;
 
-    for (auto use:clones_to_unlink) {
-        std::vector<SPItem*>::iterator items_node = std::find(items.begin(),items.end(), use);
-        *items_node = use->unlink();
+    for (auto *group : groups) {
+        sp_item_group_ungroup(group, children, false);
     }
 
-    // do the actual work
-    for (auto & item : items) {
-        SPItem *obj = item;
-
-        // ungroup only the groups marked earlier
-        if (groups.find(item) != groups.end()) {
-            std::vector<SPItem*> children;
-            sp_item_group_ungroup(dynamic_cast<SPGroup *>(obj), children, false);
-            // add the items resulting from ungrouping to the selection
-            new_select.insert(new_select.end(),children.begin(),children.end());
-            item = NULL; // zero out the original pointer, which is no longer valid
-        } else {
-            // if not a group, keep in the selection
-            new_select.push_back(item);
-        }
-    }
-
-    set->setList(new_select);
+    set->addList(children);
 }
 
 void ObjectSet::ungroup(bool skip_undo)
@@ -1392,6 +1396,12 @@ void ObjectSet::removeFilter()
     sp_repr_css_unset_property(css, "filter");
     sp_desktop_set_style(this, desktop(), css);
     sp_repr_css_attr_unref(css);
+    if (SPDesktop *d = desktop()) {
+        // Refreshing the current tool (by switching to same tool)
+        // will refresh tool's private information in it's selection context that
+        // depends on desktop items.
+        tools_switch(d, tools_active(d));
+    }
     if(document())
         DocumentUndo::done(document(), SP_VERB_EDIT_REMOVE_FILTER,
                        _("Remove filter"));
@@ -1622,13 +1632,14 @@ void ObjectSet::applyAffine(Geom::Affine const &affine, bool set_i2d, bool compe
         persp = (Persp3D *) i;
 
         if (!persp->has_all_boxes_in_selection (this)) {
+            // create a new perspective as a copy of the current one
+            transf_persp = Persp3D::create_xml_element (persp->document);
+
             std::list<SPBox3D *> selboxes = box3DList(persp);
 
-            // create a new perspective as a copy of the current one and link the selected boxes to it
-            transf_persp = Persp3D::create_xml_element (persp->document, persp->perspective_impl);
-
-            for (auto & selboxe : selboxes)
+            for (auto & selboxe : selboxes) {
                 selboxe->switch_perspectives(persp, transf_persp);
+            }
         } else {
             transf_persp = persp;
         }
@@ -1650,11 +1661,6 @@ void ObjectSet::applyAffine(Geom::Affine const &affine, bool set_i2d, bool compe
         Geom::Point old_center(0,0);
         if (set_i2d && item->isCenterSet())
             old_center = item->getCenter();
-
-#if 0 /* Re-enable this once persistent guides have a graphical indication.
-         At the time of writing, this is the only place to re-enable. */
-        sp_item_update_cns(*item, desktop());
-#endif
 
         // we're moving both a clone and its original or any ancestor in clone chain?
         bool transform_clone_with_original = object_set_contains_original(item, this);
@@ -2822,7 +2828,7 @@ bool ObjectSet::unlinkRecursive(const bool skip_undo, const bool force) {
     bool pathoperationsunlink = prefs->getBool("/options/pathoperationsunlink/value", true);
     if (!force && !pathoperationsunlink) {
         if (desktop() && !pathoperationsunlink) {
-            desktop()->messageStack()->flash(Inkscape::WARNING_MESSAGE, _("Coulden't unlink see preference path operation unlink value."));
+            desktop()->messageStack()->flash(Inkscape::WARNING_MESSAGE, _("Unable to unlink. Check the setting for 'Unlinking Clones' in your preferences."));
         }
         return false;
     }
@@ -2857,7 +2863,8 @@ void ObjectSet::removeLPESRecursive(bool keep_paths) {
     }
 
     ObjectSet tmp_set(document());
-    std::vector<SPItem*> items_(items().begin(), items().end());
+    std::vector<SPItem *> items_(items().begin(), items().end());
+    std::vector<SPItem *> itemsdone_;
     for (auto& it:items_) {
         SPLPEItem *splpeitem = dynamic_cast<SPLPEItem *>(it);
         SPGroup *spgroup = dynamic_cast<SPGroup *>(it);
@@ -2865,11 +2872,23 @@ void ObjectSet::removeLPESRecursive(bool keep_paths) {
             std::vector<SPObject*> c = spgroup->childList(false);
             tmp_set.setList(c);
             tmp_set.removeLPESRecursive(keep_paths);
-        } else if (splpeitem) {
-            splpeitem->removeAllPathEffects(keep_paths);
         }
+        if (splpeitem) {
+            // Maybe the item is changed from SPShape to SPPath invalidating selection
+            // fix issue Inkscape#2321
+            char const *id = splpeitem->getAttribute("id");
+            SPDocument *document = splpeitem->document;
+            splpeitem->removeAllPathEffects(keep_paths);
+            SPItem *upditem = dynamic_cast<SPItem *>(document->getObjectById(id));
+            if (upditem) {
+                itemsdone_.push_back(upditem);
+            }
+        } else {
+            itemsdone_.push_back(it);
+        }
+        
     }
-    setList(items_);
+    setList(itemsdone_);
 }
 
 void ObjectSet::cloneOriginal()
@@ -2969,15 +2988,15 @@ void ObjectSet::cloneOriginalPathLPE(bool allow_transforms)
     SPObject * firstItem = nullptr;
     auto items_= items();
     bool multiple = false;
-    for (auto i=items_.begin();i!=items_.end();++i){
-        if (SP_IS_SHAPE(*i) || SP_IS_TEXT(*i) || SP_IS_GROUP(*i)) {
+    for (auto *item : items_) {
+        if (SP_IS_SHAPE(item) || SP_IS_TEXT(item) || SP_IS_GROUP(item)) {
             if (firstItem) {
                 os << "|";
                 multiple = true;
             } else {
-                firstItem = SP_ITEM(*i);
+                firstItem = item;
             }
-            os << '#' << SP_ITEM(*i)->getId() << ",0,1";
+            os << '#' << item->getId() << ",0,1";
         }
     }
     if (firstItem) {
@@ -3010,7 +3029,7 @@ void ObjectSet::cloneOriginalPathLPE(bool allow_transforms)
             // create the new path
             clone = xml_doc->createElement("svg:path");
             clone->setAttribute("d", "M 0 0");
-                
+
         }
         if (clone) {
             // add the new clone to the top of the original's parent
@@ -3065,7 +3084,7 @@ void ObjectSet::toMarker(bool apply)
     Geom::Affine parent_transform;
     {
         SPItem *parentItem = dynamic_cast<SPItem *>(parent);
-        if (parent) {
+        if (parentItem) {
             parent_transform = parentItem->i2doc_affine();
         } else {
             g_assert_not_reached();
@@ -3614,7 +3633,7 @@ void ObjectSet::getExportHints(Glib::ustring &filename, float *xdpi, float *ydpi
         if (xdpi_search) {
             dpi_string = repr->attribute("inkscape:export-xdpi");
             if (dpi_string != nullptr) {
-                *xdpi = atof(dpi_string);
+                *xdpi = g_ascii_strtod(dpi_string, nullptr);
                 xdpi_search = FALSE;
             }
         }
@@ -3622,7 +3641,7 @@ void ObjectSet::getExportHints(Glib::ustring &filename, float *xdpi, float *ydpi
         if (ydpi_search) {
             dpi_string = repr->attribute("inkscape:export-ydpi");
             if (dpi_string != nullptr) {
-                *ydpi = atof(dpi_string);
+                *ydpi = g_ascii_strtod(dpi_string, nullptr);
                 ydpi_search = FALSE;
             }
         }
@@ -3644,12 +3663,12 @@ void sp_document_get_export_hints(SPDocument *doc, Glib::ustring &filename, floa
     }
     gchar const *dpi_string = repr->attribute("inkscape:export-xdpi");
     if (dpi_string != nullptr) {
-        *xdpi = atof(dpi_string);
+        *xdpi = g_ascii_strtod(dpi_string, nullptr);
     }
 
     dpi_string = repr->attribute("inkscape:export-ydpi");
     if (dpi_string != nullptr) {
-        *ydpi = atof(dpi_string);
+        *ydpi = g_ascii_strtod(dpi_string, nullptr);
     }
 }
 
@@ -3700,8 +3719,8 @@ void ObjectSet::createBitmapCopy()
 
     // Build the complete path by adding document base dir, if set, otherwise home dir
     gchar *directory = nullptr;
-    if ( doc->getDocumentURI() ) {
-        directory = g_path_get_dirname( doc->getDocumentURI() );
+    if ( doc->getDocumentFilename() ) {
+        directory = g_path_get_dirname( doc->getDocumentFilename() );
     }
     if (directory == nullptr) {
         directory = Inkscape::IO::Resource::homedir_path(nullptr);
@@ -4083,8 +4102,8 @@ void ObjectSet::setClipGroup()
 
 
     gchar const *attributeName = apply_clip_path ? "clip-path" : "mask";
-    for (std::vector<SPItem*>::const_reverse_iterator i = apply_to_items.rbegin(); i != apply_to_items.rend(); ++i) {
-        SPItem *item = reinterpret_cast<SPItem *>(*i);
+    for (auto i = apply_to_items.rbegin(); i != apply_to_items.rend(); ++i) {
+        SPItem *item = *i;
         std::vector<Inkscape::XML::Node*> mask_items_dup;
         std::map<Inkscape::XML::Node*, Geom::Affine> dup_transf;
         for (auto & mask_item : mask_items) {
@@ -4093,7 +4112,7 @@ void ObjectSet::setClipGroup()
             dup_transf[dup] = mask_item.second;
         }
 
-        Inkscape::XML::Node *current = SP_OBJECT(*i)->getRepr();
+        Inkscape::XML::Node *current = item->getRepr();
         // Node to apply mask to
         Inkscape::XML::Node *apply_mask_to = current;
 
@@ -4110,8 +4129,9 @@ void ObjectSet::setClipGroup()
 
             // Apply clip/mask to group instead
             apply_mask_to = group;
+            item = dynamic_cast<SPItem*>(doc->getObjectByRepr(group));
 
-            items_to_select.push_back((SPItem*)doc->getObjectByRepr(group));
+            items_to_select.push_back(item);
             Inkscape::GC::release(spnew);
             Inkscape::GC::release(group);
         }

@@ -13,9 +13,8 @@
 #ifdef _WIN32
 #include <windows.h> // SetDllDirectoryW, SetConsoleOutputCP
 #include <fcntl.h> // _O_BINARY
+#include <boost/algorithm/string/join.hpp>
 #endif
-
-#include <sys/wait.h>
 
 #include "inkscape-application.h"
 #include "path-prefix.h"
@@ -68,13 +67,25 @@ static void set_extensions_env()
 static void set_themes_env()
 {
     std::string xdg_data_dirs = Glib::getenv("XDG_DATA_DIRS");
-    
+
     if (xdg_data_dirs.empty()) {
-        g_warning("Packaging error: XDG_DATA_DIRS must be set in order to use custom themes. Please package Inkscape so that XDG_DATA_DIRS is set when called.");
-    } else {
-        std::string xdg_inkscape_dir = Glib::build_filename(get_inkscape_datadir(), "inkscape");
-        Glib::setenv("XDG_DATA_DIRS", xdg_inkscape_dir + G_SEARCHPATH_SEPARATOR_S + xdg_data_dirs);
+        // initialize with reasonable defaults (should match what glib would do if the variable were unset!)
+#ifdef _WIN32
+        // g_get_system_data_dirs is actually not cached on Windows,
+        // so we can just call it directly and modify XDG_DATA_DIRS later
+        auto data_dirs = Glib::get_system_data_dirs();
+        xdg_data_dirs = boost::join(data_dirs, G_SEARCHPATH_SEPARATOR_S);
+#elif defined(__APPLE__)
+        // we don't know what the default is, differs for MacPorts, Homebrew, etc.
+        return;
+#else
+        // initialize with glib default (don't call g_get_system_data_dirs; it's cached!)
+        xdg_data_dirs = "/usr/local/share/:/usr/share/";
+#endif
     }
+
+    std::string inkscape_datadir = Glib::build_filename(get_inkscape_datadir(), "inkscape");
+    Glib::setenv("XDG_DATA_DIRS", xdg_data_dirs + G_SEARCHPATH_SEPARATOR_S + inkscape_datadir);
 }
 
 #ifdef __APPLE__

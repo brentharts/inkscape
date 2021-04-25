@@ -347,7 +347,7 @@ void GradientSelector::onTreeSelection()
     }
 
     if (obj) {
-        vector_set(SP_GRADIENT(obj));
+        vector_set(obj);
     }
 }
 

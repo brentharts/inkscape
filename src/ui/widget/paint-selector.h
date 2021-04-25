@@ -21,6 +21,8 @@
 #include "object/sp-gradient-units.h"
 #include "gradient-selector-interface.h"
 #include "ui/selected-color.h"
+#include "ui/widget/gradient-selector.h"
+#include "ui/widget/swatch-selector.h"
 
 class SPGradient;
 class SPLinearGradient;
@@ -91,7 +93,13 @@ class PaintSelector : public Gtk::Box {
     FillRuleRadioButton *_nonzero;
 
     Gtk::Box *_frame;
-    Gtk::Box *_selector = nullptr;
+
+    Gtk::Box         *_selector_solid_color = nullptr;
+    GradientSelector *_selector_gradient = nullptr;
+    Gtk::Box         *_selector_mesh = nullptr;
+    Gtk::Box         *_selector_pattern = nullptr;
+    SwatchSelector   *_selector_swatch = nullptr;
+
     Gtk::Label *_label;
     GtkWidget *_patternmenu = nullptr;
     bool _patternmenu_update = false;

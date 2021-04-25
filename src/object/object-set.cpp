@@ -218,8 +218,8 @@ SPItem *ObjectSet::_sizeistItem(bool sml, CompareSize compare) {
     gdouble max = sml ? 1e18 : 0;
     SPItem *ist = nullptr;
 
-    for (auto i = items.begin(); i != items.end(); ++i) {
-        Geom::OptRect obox = SP_ITEM(*i)->documentPreferredBounds();
+    for (auto *item : items) {
+        Geom::OptRect obox = item->documentPreferredBounds();
         if (!obox || obox.empty()) {
             continue;
         }
@@ -231,7 +231,7 @@ SPItem *ObjectSet::_sizeistItem(bool sml, CompareSize compare) {
         size = sml ? size : size * -1;
         if (size < max) {
             max = size;
-            ist = SP_ITEM(*i);
+            ist = item;
         }
     }
 
@@ -245,6 +245,25 @@ SPObjectRange ObjectSet::objects() {
 Inkscape::XML::Node *ObjectSet::singleRepr() {
     SPObject *obj = single();
     return obj ? obj->getRepr() : nullptr;
+}
+
+Inkscape::XML::Node *ObjectSet::topRepr() const
+{
+    auto const &nodes = const_cast<ObjectSet *>(this)->xmlNodes();
+
+    if (nodes.empty()) {
+        return nullptr;
+    }
+
+#ifdef __APPLE__
+    // workaround for
+    // static_assert(__is_cpp17_forward_iterator<_ForwardIterator>::value
+    auto const n = std::vector<Inkscape::XML::Node *>(nodes.begin(), nodes.end());
+#else
+    auto const& n = nodes;
+#endif
+
+    return *std::max_element(n.begin(), n.end(), sp_repr_compare_position_bool);
 }
 
 void ObjectSet::set(SPObject *object, bool persist_selection_context) {
@@ -294,8 +313,8 @@ Geom::OptRect ObjectSet::geometricBounds() const
     auto items = const_cast<ObjectSet *>(this)->items();
 
     Geom::OptRect bbox;
-    for (auto iter = items.begin(); iter != items.end(); ++iter) {
-        bbox.unionWith(SP_ITEM(*iter)->desktopGeometricBounds());
+    for (auto *item : items) {
+        bbox.unionWith(item->desktopGeometricBounds());
     }
     return bbox;
 }
@@ -305,8 +324,8 @@ Geom::OptRect ObjectSet::visualBounds() const
     auto items = const_cast<ObjectSet *>(this)->items();
 
     Geom::OptRect bbox;
-    for (auto iter = items.begin(); iter != items.end(); ++iter) {
-        bbox.unionWith(SP_ITEM(*iter)->desktopVisualBounds());
+    for (auto *item : items) {
+        bbox.unionWith(item->desktopVisualBounds());
     }
     return bbox;
 }
@@ -326,8 +345,7 @@ Geom::OptRect ObjectSet::documentBounds(SPItem::BBoxType type) const
     auto items = const_cast<ObjectSet *>(this)->items();
     if (items.empty()) return bbox;
 
-    for (auto iter = items.begin(); iter != items.end(); ++iter) {
-        SPItem *item = SP_ITEM(*iter);
+    for (auto *item : items) {
         bbox |= item->documentBounds(type);
     }
 

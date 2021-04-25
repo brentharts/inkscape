@@ -273,7 +273,9 @@ void sp_update_helperpath(SPDesktop *desktop)
 
     Inkscape::UI::Tools::NodeTool *nt = dynamic_cast<Inkscape::UI::Tools::NodeTool*>(desktop->event_context);
     if (!nt) {
-        std::cerr << "sp_update_helperpath called when Node Tool not active!" << std::endl;
+        // We remove this warning and just stop execution
+        // because we are updating helper paths also from LPE dialog so we not unsure the tool used
+        // std::cerr << "sp_update_helperpath called when Node Tool not active!" << std::endl;
         return;
     }
 
@@ -287,7 +289,7 @@ void sp_update_helperpath(SPDesktop *desktop)
     for (auto item : vec) {
         SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(item);
         if (lpeitem && lpeitem->hasPathEffectRecursive()) {
-            Inkscape::LivePathEffect::Effect *lpe = SP_LPE_ITEM(lpeitem)->getCurrentLPE();
+            Inkscape::LivePathEffect::Effect *lpe = lpeitem->getCurrentLPE();
             if (lpe && lpe->isVisible()/* && lpe->showOrigPath()*/) {
                 std::vector<Geom::Point> selectedNodesPositions;
                 if (nt->_selected_nodes) {
@@ -302,6 +304,7 @@ void sp_update_helperpath(SPDesktop *desktop)
                 auto c = std::make_unique<SPCurve>();
                 std::vector<Geom::PathVector> cs = lpe->getCanvasIndicators(lpeitem);
                 for (auto &p : cs) {
+                    p *= desktop->dt2doc();
                     c->append(p);
                 }
                 if (!c->is_empty()) {
@@ -399,10 +402,6 @@ void NodeTool::selection_changed(Inkscape::Selection *sel) {
     auto items= sel->items();
     for(auto i=items.begin();i!=items.end();++i){
         SPItem *item = *i;
-        SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(item);
-        if (lpeitem && lpeitem->hasPathEffectRecursive()) {
-            sp_lpe_item_update_patheffect(lpeitem, true, true);
-        }
         if (item) {
             gather_items(this, nullptr, item, SHAPE_ROLE_NORMAL, shapes);
         }

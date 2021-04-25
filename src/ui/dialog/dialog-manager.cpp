@@ -5,6 +5,8 @@
 #include <gdkmm/monitor.h>
 #include <limits>
 
+#include "io/resource.h"
+
 #include "dialog-base.h"
 #include "dialog-container.h"
 #include "dialog-window.h"
@@ -38,28 +40,13 @@ std::optional<window_position_t> dm_get_window_position(Gtk::Window &window)
 
 void dm_restore_window_position(Gtk::Window &window, const window_position_t &position)
 {
-    bool positioned = false;
-    if (auto display = window.get_display()) {
-        auto cx = position.x + position.width / 2;
-        auto cy = position.y + position.height / 2;
-        if (auto monitor = display->get_monitor_at_point(cx, cy)) {
-            Gdk::Rectangle rect;
-            monitor->get_workarea(rect);
-
-            window.property_gravity() = Gdk::GRAVITY_NORTH_WEST;
-
-            if (auto wnd = window.get_window()) {
-                // move_resize positions window on the screen making sure it is not clipped
-                wnd->move_resize(position.x, position.y, position.width, position.height);
-                positioned = true;
-            }
-        }
-    }
-
-    if (!positioned) {
-        // fallback action... center window
-        window.set_position(Gtk::WIN_POS_CENTER);
-    }
+    // note: Gtk window methods are recommended over low-level Gdk ones to resize and position window
+    window.property_gravity() = Gdk::GRAVITY_NORTH_WEST;
+    window.set_default_size(position.width, position.height);
+    // move & resize positions window on the screen making sure it is not clipped
+    // (meaning it is visible; this works with two monitors too)
+    window.move(position.x, position.y);
+    window.resize(position.width, position.height);
 }
 
 DialogManager &DialogManager::singleton()
@@ -143,11 +130,6 @@ void DialogManager::save_dialogs_state(DialogContainer *docking_container)
     if (save_state == PREFS_DIALOGS_STATE_NONE)
         return;
 
-    Glib::ustring path = Glib::build_filename(Glib::get_user_cache_dir(), "inkscape");
-    if (!Glib::file_test(path, Glib::FILE_TEST_IS_DIR)) {
-        Gio::File::create_for_path(path)->make_directory_with_parents();
-    }
-
     // save state of docked dialogs and currently open floating ones
     auto keyfile = docking_container->save_container_state();
 
@@ -166,7 +148,7 @@ void DialogManager::save_dialogs_state(DialogContainer *docking_container)
     }
     keyfile->set_integer(transient_group, "count", files.size());
 
-    Glib::ustring filename = Glib::build_filename(path, dialogs_state);
+    std::string filename = Glib::build_filename(Inkscape::IO::Resource::profile_path(), dialogs_state);
     try {
         keyfile->save_to_file(filename);
     } catch (Glib::FileError &error) {
@@ -204,8 +186,8 @@ void DialogManager::restore_dialogs_state(DialogContainer *docking_container, bo
 
     try {
         auto keyfile = std::make_unique<Glib::KeyFile>();
-        Glib::ustring filepath = Glib::build_filename(Glib::get_user_cache_dir(), "inkscape", dialogs_state);
-        if (keyfile->load_from_file(filepath)) {
+        std::string filename = Glib::build_filename(Inkscape::IO::Resource::profile_path(), dialogs_state);
+        if (keyfile->load_from_file(filename)) {
             // restore visible dialogs first; that state is up-to-date
             docking_container->load_container_state(keyfile.get(), include_floating);
 
@@ -220,6 +202,13 @@ void DialogManager::restore_dialogs_state(DialogContainer *docking_container, bo
         }
     } catch (Glib::Error &error) {
         std::cerr << G_STRFUNC << ": dialogs state not loaded - " << error.what() << std::endl;
+    }
+}
+
+void DialogManager::remove_dialog_floating_state(unsigned int code) {
+    auto it = floating_dialogs.find(code);
+    if (it != floating_dialogs.end()) {
+        floating_dialogs.erase(it);
     }
 }
 

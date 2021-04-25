@@ -456,6 +456,12 @@ void SPShape::modified(unsigned int flags) {
         }
     }
 
+    if (flags & SP_OBJECT_MODIFIED_FLAG && style->filter.set) {
+        if (auto filter = style->getFilter()) {
+            filter->update_filter_all_regions();
+        }
+    }
+
     if (!_curve) {
         sp_lpe_item_update_patheffect(this, true, false);
     }
@@ -823,7 +829,7 @@ void SPShape::update_patheffect(bool write)
 
         bool success = false;
         if (hasPathEffect() && pathEffectsEnabled()) {
-            success = this->performPathEffect(c_lpe.get(), SP_SHAPE(this));
+            success = this->performPathEffect(c_lpe.get(), this);
             if (success) {
                 this->setCurveInsync(c_lpe.get());
                 this->applyToClipPath(this);
