@@ -92,7 +92,6 @@ $ARCH-scour
 
 # install modules needed by extensions manager
 eval pacman -S $PACMAN_OPTIONS \
-$ARCH-python \
 $ARCH-python-appdirs \
 $ARCH-python-msgpack \
 $ARCH-python-lockfile \
