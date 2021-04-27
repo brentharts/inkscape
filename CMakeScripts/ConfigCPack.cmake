@@ -144,11 +144,13 @@ cpack_add_component_group(
 cpack_add_component(extensions
                     DISPLAY_NAME "Extensions"
                     DESCRIPTION "Inkscape extensions (including many import and export plugins)"
+                    DEPENDS "python"
                     GROUP "group_2_inkscape_data"
                     INSTALL_TYPES full compact)
 cpack_add_component(extension_manager
                     DISPLAY_NAME "Extension Manager"
                     DESCRIPTION "Extension manager allows user to install extensions from the inkscape website"
+                    DEPENDS "extensions"
                     GROUP "group_2_inkscape_data"
                     INSTALL_TYPES full compact)
 cpack_add_component(themes
