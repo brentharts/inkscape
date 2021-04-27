@@ -280,7 +280,9 @@ if(WIN32)
   # Python packages installed via pacman
   set(packages
       "python-lxml" "python-numpy" "python-pillow" "python-six" "python-cairo"
-      "python-gobject" "python-coverage" "python-pyserial" "scour")
+      "python-gobject" "python-coverage" "python-pyserial" "scour"
+      "python-appdirs" "python-msgpack" "python-lockfile" "python-cachecontrol"
+      "python-idna" "python-urllib3" "python-chardet" "python-certifi" "python-requests")
   foreach(package ${packages})
     list_files_pacman(${package} paths)
     install_list(FILES ${paths}
