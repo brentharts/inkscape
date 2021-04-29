@@ -107,7 +107,7 @@ boolop_display_error_message(SPDesktop *desktop, Glib::ustring const &msg)
     }
 }
 
-/*
+/**
  * Calculate the threshold for the given PathVector based
  * on it's bounding box.
  *
@@ -127,7 +127,7 @@ double get_threshold(Geom::PathVector const &path, double threshold)
     return threshold * (diagonal / 100);
 }
 
-/*
+/**
  * Calculate the threshold for the given SPItem/SPShape based
  * on it's bounding box (see PathVector get_threshold above)
  *
