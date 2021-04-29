@@ -202,11 +202,6 @@ sp_pathvector_boolop(Geom::PathVector const &pathva, Geom::PathVector const &pat
 
         // the cut path needs to have the highest pathID in the back data
         // that's how the Booleen() function knows it's an edge of the cut
-
-        // FIXME: this gives poor results, the final paths are full of extraneous nodes. Decreasing
-        // ConvertWithBackData parameter below simply increases the number of nodes, so for now I
-        // left it at 1.0. Investigate replacing this by a combination of difference and
-        // intersection of the same two paths. -- bb
         {
             Path* swap=originaux[0];originaux[0]=originaux[1];originaux[1]=swap;
             int   swai=origWind[0];origWind[0]=origWind[1];origWind[1]=(fill_typ)swai;
@@ -583,11 +578,6 @@ BoolOpErrors Inkscape::ObjectSet::pathBoolOp(bool_op bop, const bool skip_undo, 
 
         // the cut path needs to have the highest pathID in the back data
         // that's how the Booleen() function knows it's an edge of the cut
-
-        // FIXME: this gives poor results, the final paths are full of extraneous nodes. Decreasing
-        // ConvertWithBackData parameter below simply increases the number of nodes, so for now I
-        // left it at 1.0. Investigate replacing this by a combination of difference and
-        // intersection of the same two paths. -- bb
         {
             Path* swap=originaux[0];originaux[0]=originaux[1];originaux[1]=swap;
             int   swai=origWind[0];origWind[0]=origWind[1];origWind[1]=(fill_typ)swai;
