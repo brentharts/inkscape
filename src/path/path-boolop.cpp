@@ -233,11 +233,11 @@ sp_pathvector_boolop(Geom::PathVector const &pathva, Geom::PathVector const &pat
             Path* swap=originaux[0];originaux[0]=originaux[1];originaux[1]=swap;
             int   swai=origWind[0];origWind[0]=origWind[1];origWind[1]=(fill_typ)swai;
         }
-        originaux[0]->ConvertWithBackData(get_threshold(pathva, 1.0));
+        originaux[0]->ConvertWithBackData(get_threshold(pathva, 0.1));
 
         originaux[0]->Fill(theShapeA, 0,false,false,false); // don't closeIfNeeded
 
-        originaux[1]->ConvertWithBackData(get_threshold(pathvb, 1.0));
+        originaux[1]->ConvertWithBackData(get_threshold(pathvb, 0.1));
 
         originaux[1]->Fill(theShapeA, 1,true,false,false);// don't closeIfNeeded and just dump in the shape, don't reset it
 
@@ -582,13 +582,13 @@ BoolOpErrors Inkscape::ObjectSet::pathBoolOp(bool_op bop, const bool skip_undo, 
             Path* swap=originaux[0];originaux[0]=originaux[1];originaux[1]=swap;
             int   swai=origWind[0];origWind[0]=origWind[1];origWind[1]=(fill_typ)swai;
         }
-        originaux[0]->ConvertWithBackData(get_threshold(il[0], 1.0));
+        originaux[0]->ConvertWithBackData(get_threshold(il[0], 0.1));
 
         originaux[0]->Fill(theShape, 0);
 
         theShapeA->ConvertToShape(theShape, origWind[0]);
 
-        originaux[1]->ConvertWithBackData(get_threshold(il[1], 1.0));
+        originaux[1]->ConvertWithBackData(get_threshold(il[1], 0.1));
 
         if ((originaux[1]->pts.size() == 2) && originaux[1]->pts[0].isMoveTo && !originaux[1]->pts[1].isMoveTo)
             originaux[1]->Fill(theShape, 1,false,true,false); // see LP Bug 177956
@@ -612,11 +612,11 @@ BoolOpErrors Inkscape::ObjectSet::pathBoolOp(bool_op bop, const bool skip_undo, 
             Path* swap=originaux[0];originaux[0]=originaux[1];originaux[1]=swap;
             int   swai=origWind[0];origWind[0]=origWind[1];origWind[1]=(fill_typ)swai;
         }
-        originaux[0]->ConvertWithBackData(get_threshold(il[0], 1.0));
+        originaux[0]->ConvertWithBackData(get_threshold(il[0], 0.1));
 
         originaux[0]->Fill(theShapeA, 0,false,false,false); // don't closeIfNeeded
 
-        originaux[1]->ConvertWithBackData(get_threshold(il[1], 1.0));
+        originaux[1]->ConvertWithBackData(get_threshold(il[1], 0.1));
 
         originaux[1]->Fill(theShapeA, 1,true,false,false);// don't closeIfNeeded and just dump in the shape, don't reset it
 
