@@ -370,12 +370,11 @@ void GradientEditor::stop_selected() {
 			auto stops = sp_get_before_after_stops(stop);
 			if (stops.first && stops.second) {
 				_offset_btn.set_range(stops.first->offset, stops.second->offset);
-				_offset_btn.set_sensitive();
 			}
 			else {
-				_offset_btn.set_range(stop->offset, stop->offset);
-				_offset_btn.set_sensitive(false);
+				_offset_btn.set_range(stops.first ? stops.first->offset : 0, stops.second ? stops.second->offset : 1);
 			}
+            _offset_btn.set_sensitive();
 			_offset_btn.set_value(stop->offset);
 
 			int index = row->get_value(_stopIdx);
