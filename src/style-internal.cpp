@@ -157,6 +157,10 @@ void SPIBase::readIfUnset(gchar const *str, SPStyleSrc source)
     if (!str)
         return;
 
+    if (source == SPStyleSrc::ATTRIBUTE && id() == SPAttr::D) {
+        return;
+    }
+
     bool has_important = false;
     std::string stripped;
 
@@ -169,8 +173,8 @@ void SPIBase::readIfUnset(gchar const *str, SPStyleSrc source)
     }
 
     if (!set || (has_important && !important)) {
+        read(str); // clears style_src
         style_src = source;
-        read(str);
         if (set) {
             if (has_important) {
                 important = true;
@@ -1177,10 +1181,6 @@ SPIString::read( gchar const *str ) {
     if( !str ) return;
 
     clear();
-
-    if (style_src == SPStyleSrc::ATTRIBUTE && id() == SPAttr::D) {
-        return;
-    }
 
     if (!strcmp(str, "inherit")) {
         set = true;
