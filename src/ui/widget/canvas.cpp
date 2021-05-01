@@ -1704,7 +1704,7 @@ Canvas::emit_event(GdkEvent *event)
         }
 
         // Propogate the event up the canvas item hierarchy until handled.
-        while (item && !finished) {
+        while (item) {
             finished = item->handle_event(event_copy);
             item = item->get_parent();
         }
