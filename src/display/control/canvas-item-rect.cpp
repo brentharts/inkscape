@@ -221,11 +221,15 @@ void CanvasItemRect::render(Inkscape::CanvasItemBuffer *buf)
         auto grad_top_right = Cairo::RadialGradient::create(corners[1][X], corners[1][Y] + half, 0, corners[1][X], corners[1][Y] + half, sw);
         auto grad_btm_left = Cairo::RadialGradient::create(corners[3][X] + half, corners[3][Y], 0, corners[3][X] + half, corners[3][Y], sw);
         const int N = 15; // number of gradient stops; stops used to make it non-linear
-        for (int i = 0; i < N; ++i) {
-            // exponential decay for drop shadow - long tail, with values from 71% down to 1% opacity,
-            // cutting it off at the end
-            auto alpha = i + 1 < N ? exp(-(i + 1) * 0.333) : 0.0;
+        // using easing function here: (exp(a*(1-t)) - 1) / (exp(a) - 1)
+        const a = 4;
+        const denominator = exp(a) - 1;
+        for (int i = 0; i <= N; ++i) {
             auto pos = static_cast<double>(i) / N;
+            // exponential decay for drop shadow - long tail, with values from 100% down to 0% opacity
+            auto t = 1 - pos;
+            auto alpha = (exp(a * t) - 1) / denominator;
+            // auto alpha = i + 1 < N ? exp(-(i + 1) * 0.333) : 0.0;
             grad_horz->add_color_stop_rgba(pos, r, g, b, alpha * a);
             grad_vert->add_color_stop_rgba(pos, r, g, b, alpha * a);
             grad_corner->add_color_stop_rgba(pos, r, g, b, alpha * a);
