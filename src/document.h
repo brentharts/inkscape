@@ -449,7 +449,17 @@ public:
 namespace std {
 template <>
 struct default_delete<SPDocument> {
-    void operator()(SPDocument *ptr) const { Inkscape::GC::release(ptr); }
+    void operator()(SPDocument *ptr) const
+    {
+#ifdef __APPLE__
+        // unique_ptr should actually not call this with nullptr according to
+        // the spec ("If get() == nullptr there are no effects"). But on
+        // macOS 10.14, it's called anyway.
+        if (!ptr)
+            return;
+#endif
+        Inkscape::GC::release(ptr);
+    }
 };
 }; // namespace std
 
