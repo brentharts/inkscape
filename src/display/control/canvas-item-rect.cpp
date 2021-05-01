@@ -17,6 +17,7 @@
 #include <cairo/cairo.h>
 
 #include "canvas-item-rect.h"
+#include "display/cairo-utils.h"
 
 #include "color.h"    // SP_RGBA_x_F
 #include "inkscape.h" //
@@ -201,6 +202,10 @@ void CanvasItemRect::render(Inkscape::CanvasItemBuffer *buf)
         buf->cr->restore();
     }
 
+    cairo_pattern_t *pattern = _canvas->get_background_store()->cobj();
+    guint32 backcolor = ink_cairo_pattern_get_argb32(pattern);
+    EXTRACT_ARGB32(backcolor, ab,rb,gb,bb)
+
     // Draw shadow first. Shadow extends under rectangle to reduce aliasing effects.
     if (_shadow_width > 0 && !_dashed) {
         // draw fake drop shadow built from gradients
@@ -280,23 +285,23 @@ void CanvasItemRect::render(Inkscape::CanvasItemBuffer *buf)
         buf->cr->line_to(rect_transformed[3][X], rect_transformed[3][Y] );
         buf->cr->close_path();
     }
-
-    // Draw border (stroke).
-    buf->cr->set_source_rgba(SP_RGBA32_R_F(_stroke), SP_RGBA32_G_F(_stroke),
-                             SP_RGBA32_B_F(_stroke), SP_RGBA32_A_F(_stroke));
-    buf->cr->set_line_width(1);
-
     static std::valarray<double> dashes = {4.0, 4.0};
     if (_dashed) {
-        buf->cr->set_dash(dashes, 0);
+        buf->cr->set_dash(dashes, -0.5);
     }
+    // Draw border (stroke).
+    buf->cr->set_line_width(1);
+    // we maybe have painted the background, back to "normal" compositing
+    
+    buf->cr->set_source_rgba(SP_RGBA32_R_F(_stroke), SP_RGBA32_G_F(_stroke),
+                             SP_RGBA32_B_F(_stroke), SP_RGBA32_A_F(_stroke));
     buf->cr->stroke_preserve();
 
     // Highlight the border by drawing it in _shadow_color.
     if (_shadow_width == 1 && _dashed) {
+        buf->cr->set_dash(dashes, 3.5); // Dash offset by dash length.
         buf->cr->set_source_rgba(SP_RGBA32_R_F(_shadow_color), SP_RGBA32_G_F(_shadow_color),
                                  SP_RGBA32_B_F(_shadow_color), SP_RGBA32_A_F(_shadow_color));
-        buf->cr->set_dash(dashes, 4); // Dash offset by dash length.
         buf->cr->stroke_preserve();
     }
 
