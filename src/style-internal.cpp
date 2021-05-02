@@ -157,6 +157,10 @@ void SPIBase::readIfUnset(gchar const *str, SPStyleSrc source)
     if (!str)
         return;
 
+    if (source == SPStyleSrc::ATTRIBUTE && id() == SPAttr::D) {
+        return;
+    }
+
     bool has_important = false;
     std::string stripped;
 
@@ -169,8 +173,8 @@ void SPIBase::readIfUnset(gchar const *str, SPStyleSrc source)
     }
 
     if (!set || (has_important && !important)) {
+        read(str); // clears style_src
         style_src = source;
-        read(str);
         if (set) {
             if (has_important) {
                 important = true;
@@ -1178,10 +1182,6 @@ SPIString::read( gchar const *str ) {
 
     clear();
 
-    if (style_src == SPStyleSrc::ATTRIBUTE && id() == SPAttr::D) {
-        return;
-    }
-
     if (!strcmp(str, "inherit")) {
         set = true;
         inherit = true;
@@ -1951,7 +1951,7 @@ SPIFilter::read( gchar const *str ) {
             }
             // Do we have href now?
             if ( href ) {
-                href->changedSignal().connect(sigc::bind(sigc::ptr_fun(sp_style_filter_ref_changed), style));
+                style->filter_changed_connection = href->changedSignal().connect(sigc::bind(sigc::ptr_fun(sp_style_filter_ref_changed), style));
             } else {
                 std::cerr << "SPIFilter::read(): Could not allocate 'href'" << std::endl;
                 return;
