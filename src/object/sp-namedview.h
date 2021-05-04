@@ -73,8 +73,6 @@ public:
     
     GQuark default_layer_id;
 
-    double connector_spacing;
-
     guint32 guidecolor;
     guint32 guidehicolor;
 

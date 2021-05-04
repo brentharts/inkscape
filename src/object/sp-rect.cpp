@@ -647,6 +647,21 @@ void SPRect::convert_to_guides() const {
     sp_guide_pt_pairs_to_guides(this->document, pts);
 }
 
+/**
+ * Generate a list of virtual points for this rectangle.
+ */
+PointHints SPRect::getConnectionHints() const
+{
+    PointHints ret = {
+        {"top", Geom::Point(0.5, 0.0)},
+        {"right", Geom::Point(1.0, 0.5)},
+        {"bottom", Geom::Point(0.5, 1.0)},
+        {"left", Geom::Point(0.0, 0.5)},
+    };
+    return ret;
+}
+
+
 /*
   Local Variables:
   mode:c++

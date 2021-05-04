@@ -22,6 +22,7 @@
 #include "style.h"
 
 #include "live_effects/effect.h"
+#include "live_effects/lpe-connector-line.h"
 
 #include "object/box3d.h"
 #include "object/sp-marker.h"
@@ -41,6 +42,9 @@
 
 #include "ui/knot/knot-holder.h"
 #include "ui/knot/knot-holder-entity.h"
+#include "ui/tools/connector-tool-knotholders.h"
+
+using Inkscape::UI::Tools::ConnectorLineKnotHolder;
 
 class RectKnotHolder : public KnotHolder {
 public:
@@ -151,6 +155,8 @@ KnotHolder *createKnotHolder(SPItem *item, SPDesktop *desktop, double edit_rotat
         if (!is_on_path) {
             knotholder = new TextKnotHolder(desktop, item, nullptr);
         }
+    } else if (Inkscape::LivePathEffect::isConnector(item)) {
+        knotholder = new ConnectorLineKnotHolder(desktop, item, nullptr);
     } else {
         auto flowtext = cast<SPFlowtext>(item);
         if (flowtext && flowtext->has_internal_frame()) {

@@ -358,10 +358,9 @@ void NodeTool::selection_changed(Inkscape::Selection *sel) {
 
     std::set<ShapeRecord> shapes;
 
-    auto items= sel->items();
-    for(auto i=items.begin();i!=items.end();++i){
-        SPItem *item = *i;
-        if (item) {
+    for (auto item : sel->items()) {
+        auto lpeitem = cast<SPLPEItem>(item);
+        if (!(lpeitem && lpeitem->providesOwnKnotholder())) {
             gather_items(this, nullptr, item, SHAPE_ROLE_NORMAL, shapes);
         }
     }
@@ -481,6 +480,10 @@ bool NodeTool::root_handler(CanvasEvent const &event)
             auto shape = cast<SPShape>(over_item);
             if (!shape) {
                 return; // for now, handle only shapes
+            }
+            SPLPEItem *lpeitem = cast<SPLPEItem>(over_item);
+            if (lpeitem && lpeitem->providesOwnFlashPaths()) {
+                return; // item provides own flash path
             }
 
             flashed_item = over_item;
