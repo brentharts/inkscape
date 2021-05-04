@@ -75,9 +75,7 @@ OriginalItemArrayParam::~OriginalItemArrayParam()
         unlink(w);
         delete w;
     }
-    if (_model) {
-        delete _model;
-    }
+    delete _model;
 }
 
 void
