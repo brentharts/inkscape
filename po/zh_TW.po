@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: inkscape\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
 "POT-Creation-Date: 2019-09-11 00:46+0200\n"
-"PO-Revision-Date: 2020-02-02 20:48+0800\n"
+"PO-Revision-Date: 2021-05-05 18:45+0800\n"
 "Last-Translator: Dongjun Wu <ziyawu@gmail.com>\n"
 "Language-Team: Chinese <zh-l10n@linux.org.tw>\n"
 "Language: zh_TW\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Lokalize 19.12.1\n"
+"X-Generator: Poedit 2.4.1\n"
 
 #: ../share/filters/filters.svg.h:2
 msgid "Smart Jelly"
@@ -4027,7 +4027,9 @@ msgstr ""
 msgid ""
 "charcode <unsigned>: code of character to load from GF file, allowed are "
 "0..255; default is the first character in font."
-msgstr "字元碼 <unsigned>: 要從 GF 檔案載入的字元碼，範圍為 0..255；預設為字型中的第一個字元。"
+msgstr ""
+"字元碼 <unsigned>: 要從 GF 檔案載入的字元碼，範圍為 0..255；預設為字型中的第"
+"一個字元。"
 
 #: ../src/3rdparty/autotrace/autotrace.h:125
 msgid ""
@@ -4035,8 +4037,8 @@ msgid ""
 "does not work on grayscale, allowed are 1..256; default is 0, that means not "
 "color reduction is done."
 msgstr ""
-"色彩數量 <unsigned>: 彩色點陣圖要削減達到的顏色的數量，這對灰階圖片無效，"
-"數量可以為 1..256；預設為 0，表示不削減顏色。"
+"色彩數量 <unsigned>: 彩色點陣圖要削減達到的顏色的數量，這對灰階圖片無效，數量"
+"可以為 1..256；預設為 0，表示不削減顏色。"
 
 #: ../src/3rdparty/autotrace/autotrace.h:131
 msgid ""
@@ -4044,14 +4046,14 @@ msgid ""
 "than this, it is considered a corner, even if it is within `corner-surround' "
 "pixels of another corner; default is 60. "
 msgstr ""
-"始終頂點臨界值 <angle-in-degrees>：如果角度像素小於此數值，則會視為頂點，"
-"即使範圍在其他「頂點周圍」；預設值為 60。"
+"始終頂點臨界值 <angle-in-degrees>：如果角度像素小於此數值，則會視為頂點，即使"
+"範圍在其他「頂點周圍」；預設值為 60。 "
 
 #: ../src/3rdparty/autotrace/autotrace.h:137
 msgid ""
 "corner-surround <unsigned>: number of pixels on either side of a point to "
 "consider when determining if that point is a corner; default is 4. "
-msgstr "頂點周圍 <unsigned>：在點任一邊的像素值以決定是否為頂點；預設為 4。"
+msgstr "頂點周圍 <unsigned>：在點任一邊的像素值以決定是否為頂點；預設為 4。 "
 
 #: ../src/3rdparty/autotrace/autotrace.h:143
 msgid ""
@@ -4059,14 +4061,15 @@ msgid ""
 "successor(s) meet at an angle smaller than this, it's a corner; default is "
 "100. "
 msgstr ""
-"頂點臨界值 <angle-in-degrees>：如果是像素，且是原先設定並判定角度小於此項"
-"數值，那麼就為頂點；預設為 100。"
+"頂點臨界值 <angle-in-degrees>：如果是像素，且是原先設定並判定角度小於此項數"
+"值，那麼就為頂點；預設為 100。 "
 
 #: ../src/3rdparty/autotrace/autotrace.h:149
 msgid ""
 "error-threshold <real>: subdivide fitted curves that are off by more pixels "
 "than this; default is 2.0. "
-msgstr "錯誤臨界值 <real>：次細分與曲線相符合並像素數量大於此項數值；預設為 2.0。"
+msgstr ""
+"錯誤臨界值 <real>：次細分與曲線相符合並像素數量大於此項數值；預設為 2.0。 "
 
 #: ../src/3rdparty/autotrace/autotrace.h:154
 msgid ""
@@ -4080,8 +4083,8 @@ msgid ""
 "than this, weighted by the square of the curve length, keep it a straight "
 "line even if it is a list with curves; default is .01. "
 msgstr ""
-"直線反轉臨界值 <real>：如果雲形比此數值更靠近直線，根據曲線長度的平方"
-"計算權限，即使是曲線也維持直線狀態；預設值為 0.1。"
+"直線反轉臨界值 <real>：如果雲形比此數值更靠近直線，根據曲線長度的平方計算權"
+"限，即使是曲線也維持直線狀態；預設值為 0.1。 "
 
 #: ../src/3rdparty/autotrace/autotrace.h:165
 msgid ""
@@ -4090,7 +4093,7 @@ msgid ""
 "is 1. "
 msgstr ""
 "直線臨界值 <real>：如果雲形線由端點定義的直線未大於此數值，那麼會輸出為直線；"
-"預設值為 1。"
+"預設值為 1。 "
 
 #: ../src/3rdparty/autotrace/autotrace.h:171
 msgid ""
@@ -4118,7 +4121,7 @@ msgstr "雜訊移除 <real>: 1.0..0.0；預設值為 0.99。 "
 
 #: ../src/3rdparty/autotrace/autotrace.h:194
 msgid "centerline: trace a character's centerline, rather than its outline. "
-msgstr "中心線：描繪角色的中心線，而不是其輪廓。"
+msgstr "中心線：描繪角色的中心線，而不是其輪廓。 "
 
 #: ../src/3rdparty/autotrace/autotrace.h:198
 msgid ""
@@ -8203,7 +8206,8 @@ msgstr "在 &lt;defs&gt; 沒有未使用的定義。"
 msgid ""
 "No Inkscape extension found to save document (%s).  This may have been "
 "caused by an unknown filename extension."
-msgstr "找不到 Inkscape 擴充功能來儲存檔案 (%s) 。這可能是因不明的副檔名所導致。"
+msgstr ""
+"找不到 Inkscape 擴充功能來儲存檔案 (%s) 。這可能是因不明的副檔名所導致。"
 
 #: ../src/file.cpp:489 ../src/file.cpp:499 ../src/file.cpp:508
 #: ../src/file.cpp:515 ../src/file.cpp:520 ../src/file.cpp:532
@@ -9229,8 +9233,8 @@ msgid ""
 "Make the path curl like wire, using Spiro B-Splines. This effect is usually "
 "used directly on the canvas with the Spiro mode of the drawing tools."
 msgstr ""
-"建立像網線的捲曲路徑，使用螺旋貝氏雲行線。"
-"此特效通常搭配繪圖工具的螺旋線模式直接用於畫布。"
+"建立像網線的捲曲路徑，使用螺旋貝氏雲行線。此特效通常搭配繪圖工具的螺旋線模式"
+"直接用於畫布。"
 
 #: ../src/live_effects/effect.cpp:215
 msgid "Envelope Deformation"
@@ -9285,8 +9289,8 @@ msgid ""
 "This effect can also be used directly on the canvas with a pressure "
 "sensitive stylus and the Pencil tool."
 msgstr ""
-"建立書法式邊框並控制其可變化寬度與曲率。"
-"此特效也可用感壓筆型工具直接在畫布上繪畫。"
+"建立書法式邊框並控制其可變化寬度與曲率。此特效也可用感壓筆型工具直接在畫布上"
+"繪畫。"
 
 #: ../src/live_effects/effect.cpp:300 ../src/selection-chemistry.cpp:2957
 #| msgid "Clone original path"
@@ -9682,7 +9686,7 @@ msgstr "<b>預設值：</b> "
 
 #: ../src/live_effects/effect.cpp:1555 ../src/live_effects/effect.cpp:1619
 msgid "<b>Default value overridden:</b> "
-msgstr "<b>預設值覆蓋：</b>"
+msgstr "<b>預設值覆蓋：</b> "
 
 #: ../src/live_effects/effect.cpp:1557 ../src/live_effects/effect.cpp:1615
 #: ../share/ui/dialog-trace.glade:978
@@ -10501,11 +10505,11 @@ msgstr "不重新排序"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:31
 msgid "zig-zag"
-msgstr "Z 字形"
+msgstr "z 字形"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:32
 msgid "zig-zag, reverse first"
-msgstr "Z 字形，先反轉"
+msgstr "z 字形，先反轉"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:33
 #| msgid "Close"
@@ -10695,7 +10699,7 @@ msgstr "連結物件的 LPE："
 
 #: ../src/live_effects/lpe-fill-between-many.cpp:36
 msgid "LPE's on linked"
-msgstr "連結物件的 LPE："
+msgstr "連結物件的 LPE"
 
 #: ../src/live_effects/lpe-fill-between-many.cpp:37
 #: ../src/live_effects/lpe-fill-between-strokes.cpp:23
@@ -11086,8 +11090,8 @@ msgid ""
 "Drag to select a crossing, click to flip it, Shift + click to change all "
 "crossings, Ctrl + click to reset and change all crossings"
 msgstr ""
-"拖曳選擇交叉點，點擊滑鼠可翻轉，Shift + 滑鼠點擊可變更全部交叉點，"
-"Ctrl + 滑鼠點擊可重設並變更全部交叉點"
+"拖曳選擇交叉點，點擊滑鼠可翻轉，Shift + 滑鼠點擊可變更全部交叉點，Ctrl + 滑鼠"
+"點擊可重設並變更全部交叉點"
 
 #: ../src/live_effects/lpe-knot.cpp:710
 msgid "Change knot crossing"
@@ -11464,7 +11468,8 @@ msgstr "控制柄 32x33x34x35："
 msgid ""
 "Control 32x33x34x35 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along "
 "axes"
-msgstr "控制柄 32x33x34x35  - <b>Ctrl+Alt+點擊</b>：重設；<b>Ctrl</b>：沿著軸移動"
+msgstr ""
+"控制柄 32x33x34x35  - <b>Ctrl+Alt+點擊</b>：重設；<b>Ctrl</b>：沿著軸移動"
 
 #: ../src/live_effects/lpe-lattice2.cpp:230
 msgid "Reset grid"
@@ -11643,7 +11648,9 @@ msgstr "黑名單線段"
 msgid ""
 "Comma-separated list of indices of segments that should not be measured. You "
 "can use another LPE with different parameters to measure these."
-msgstr "將不要測量的線段用逗號分隔表列清單。你可以使用以其他測量不同參數使用其他 LPE。"
+msgstr ""
+"將不要測量的線段用逗號分隔表列清單。你可以使用以其他測量不同參數使用其他 "
+"LPE。"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:83
 #| msgid "Invert colors"
@@ -11903,11 +11910,11 @@ msgstr ""
 "顏色、精確度、標籤格式和顯示的選項\n"
 "\n"
 "<b><big>Tips</big></b>\n"
-"<b><i>自訂樣式：</i></b> 為了更進一步客製化樣式，請使用 XML 編輯器查詢類別"
-"或 ID，然後使用樣式對話窗套用新樣式。\n"
+"<b><i>自訂樣式：</i></b> 為了更進一步客製化樣式，請使用 XML 編輯器查詢類別或 "
+"ID，然後使用樣式對話窗套用新樣式。\n"
 "<b><i>黑名單：</i></b> 可隱藏某些線段或投影步驟。\n"
-"<b><i>多次測量即時路徑特效 (LPE)：</i></b> 在相同物件上與黑名單搭配，可讓"
-"其使用不同方向或額外投影的標籤和測量。\n"
+"<b><i>多次測量即時路徑特效 (LPE)：</i></b> 在相同物件上與黑名單搭配，可讓其使"
+"用不同方向或額外投影的標籤和測量。\n"
 "<b><i>設定預設值：</i></b> 可以在下面設定每個即時路徑特效的預設值 (LPE)。"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:279
@@ -11958,7 +11965,7 @@ msgstr "模式"
 msgid ""
 "Set mode of transformation. Either freely defined by mirror line or "
 "constrained to certain symmetry points."
-msgstr "設定變形模式。由鏡像線或限制中心對稱點定義"
+msgstr "設定變形模式。由鏡像線或限制中心對稱點定義。"
 
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:56
 msgid "Discard original path"
@@ -11987,7 +11994,7 @@ msgstr "選擇鏡像線另一側部分作為原始路徑。"
 msgid ""
 "Split original and mirror image into separate paths, so each can have its "
 "own style."
-msgstr "將原本與鏡像圖片打散為分離路徑，讓每一個項目都能有自己的樣式"
+msgstr "將原本與鏡像圖片打散為分離路徑，讓每一個項目都能有自己的樣式。"
 
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:60
 #| msgid "End mirror line"
@@ -12276,7 +12283,9 @@ msgstr "平面化裁剪，轉換為路徑後顯示填充規則"
 msgid ""
 "Use fill-rule evenodd on <b>fill and stroke</b> dialog if no flatten result "
 "after convert clip to paths."
-msgstr "若將裁剪轉換為路徑後沒有平面化的效果請在<b>填充與邊框</b>對話窗中設定使用填充規則奇偶。"
+msgstr ""
+"若將裁剪轉換為路徑後沒有平面化的效果請在<b>填充與邊框</b>對話窗中設定使用填充"
+"規則奇偶。"
 
 #: ../src/live_effects/lpe-powermask.cpp:37
 #| msgid "_Invert image"
@@ -14850,8 +14859,8 @@ msgid ""
 "<b>Align</b> objects to the side clicked; <b>Shift</b> click to invert side; "
 "<b>Ctrl</b> to group whole selection."
 msgstr ""
-"將物件<b>對齊</b>到點擊的邊；<b>Shift</b> 點擊可反轉邊；"
-"<b>Ctrl</b> 可群組整個選取範圍。"
+"將物件<b>對齊</b>到點擊的邊；<b>Shift</b> 點擊可反轉邊；<b>Ctrl</b> 可群組整"
+"個選取範圍。"
 
 #: ../src/seltrans-handles.cpp:24
 msgid ""
@@ -14954,7 +14963,8 @@ msgstr "其中一個物件<b>不是路徑</b>，無法執行布林運算。"
 msgid ""
 "Unable to determine the <b>z-order</b> of the objects selected for "
 "difference, XOR, division, or path cut."
-msgstr "無法決定選取物件的<b>排列順序</b>來進行差集﹑互斥 (XOR)﹑分割或剪切路徑。"
+msgstr ""
+"無法決定選取物件的<b>排列順序</b>來進行差集﹑互斥 (XOR)﹑分割或剪切路徑。"
 
 #: ../src/splivarot.cpp:1591
 msgid "Select <b>stroked path(s)</b> to convert stroke to path."
@@ -16382,7 +16392,8 @@ msgstr "使用已儲存的鋪排大小和位置"
 msgid ""
 "Pretend that the size and position of the tile are the same as the last time "
 "you tiled it (if any), instead of using the current size"
-msgstr "假定鋪排的大小和位置跟上一次使用鋪排時相同 (如果有的話)，而不是使用目前的大小"
+msgstr ""
+"假定鋪排的大小和位置跟上一次使用鋪排時相同 (如果有的話)，而不是使用目前的大小"
 
 #: ../src/ui/dialog/clonetiler.cpp:1129
 msgid " <b>_Create</b> "
@@ -17062,8 +17073,8 @@ msgid ""
 "Enables ADAM7 interlacing for PNG output. This results in slightly heavier "
 "images, but big images will look better sooner when loading the file"
 msgstr ""
-"啟用 PNG 輸出的 ADAM7 交錯。這會讓圖片檔案大一些，但是載入大圖片檔案時"
-"視覺體驗會更好"
+"啟用 PNG 輸出的 ADAM7 交錯。這會讓圖片檔案大一些，但是載入大圖片檔案時視覺體"
+"驗會更好"
 
 #: ../src/ui/dialog/export.cpp:171
 msgid "Once the export completes, close this dialog"
@@ -17141,7 +17152,8 @@ msgstr "進階"
 msgid ""
 "Will force-set the physical dpi for the png file. Set this to 72 if you're "
 "planning to work on your png with Photoshop"
-msgstr "png 檔案會強制設定物理 dpi。如果你預計會與 Photoshop 協作請將此上設定為 72"
+msgstr ""
+"讓 png 檔案強制設定物理 dpi。如果你預計會與 Photoshop 協作請將此上設定為 72"
 
 #: ../src/ui/dialog/export.cpp:492
 msgid "bitmap"
@@ -17235,7 +17247,7 @@ msgstr "啟用預覽"
 
 #: ../src/ui/dialog/filedialogimpl-gtkmm.cpp:129
 msgid "Export as SVG 1.1 per settings in Preference Dialog."
-msgstr "以偏好設定對話窗的設定值匯出 SVG 1.1"
+msgstr "以偏好設定對話窗的設定值匯出 SVG 1.1。"
 
 #: ../src/ui/dialog/filedialogimpl-gtkmm.cpp:252
 #| msgid "Open"
@@ -17927,7 +17939,8 @@ msgstr ""
 msgid ""
 "The <b>feImage</b> filter primitive fills the region with an external image "
 "or another part of the document."
-msgstr "此<b>圖片 (feImage) </b>濾鏡基元會用外部的影像或文件的其他部份來填充該區域。"
+msgstr ""
+"此<b>圖片 (feImage) </b>濾鏡基元會用外部的影像或文件的其他部份來填充該區域。"
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:2903
 msgid ""
@@ -19450,7 +19463,8 @@ msgstr "拖曳節點時更新輪廓"
 msgid ""
 "Update the outline when dragging or transforming nodes; if this is off, the "
 "outline will only update when completing a drag"
-msgstr "拖曳或變形節點時更新輪廓；若停用這選項，只有在完成拖曳動作時才會更新輪廓"
+msgstr ""
+"拖曳或變形節點時更新輪廓；若停用這選項，只有在完成拖曳動作時才會更新輪廓"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:382
 msgid "Update paths when dragging nodes"
@@ -19460,7 +19474,8 @@ msgstr "拖曳節點時更新路徑"
 msgid ""
 "Update paths when dragging or transforming nodes; if this is off, paths will "
 "only be updated when completing a drag"
-msgstr "拖曳或變形節點時更新路徑；若停用這選項，只有在完成拖曳動作時才會更新路徑"
+msgstr ""
+"拖曳或變形節點時更新路徑；若停用這選項，只有在完成拖曳動作時才會更新路徑"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:384
 msgid "Show path direction on outlines"
@@ -19566,7 +19581,8 @@ msgstr "草圖模式"
 msgid ""
 "If on, the sketch result will be the normal average of all sketches made, "
 "instead of averaging the old result with the new sketch"
-msgstr "若開啟，該草圖結果是全部草圖製作的普通平均值，而不是用新草圖平均之前的結果"
+msgstr ""
+"若開啟，該草圖結果是全部草圖製作的普通平均值，而不是用新草圖平均之前的結果"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:454
 #: ../src/ui/dialog/input.cpp:1302
@@ -20379,8 +20395,8 @@ msgid ""
 "determines which icons to display by using the 'show-icons' attribute in its "
 "'menus.xml' file. (requires restart)"
 msgstr ""
-"你可以啟用或停用選單上的全部圖示。預設會由主題「menus.xml」檔案的"
-"「show-icons」屬性決定是否顯示圖示。(需要重新啟動程式)"
+"你可以啟用或停用選單上的全部圖示。預設會由主題「menus.xml」檔案的「show-"
+"icons」屬性決定是否顯示圖示。(需要重新啟動程式)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1220
 msgid "Theme"
@@ -20769,7 +20785,8 @@ msgstr "使用命名顏色"
 msgid ""
 "If set, write the CSS name of the color when available (e.g. 'red' or "
 "'magenta') instead of the numeric value"
-msgstr "若設定，可用 (例如：'red' 或 'magenta') 時寫入顏色的 CSS 名稱而不是數值"
+msgstr ""
+"若設定，可用 (例如：'red' 或 'magenta') 時寫入顏色的 CSS 名稱而不是數值"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1468
 msgid "XML formatting"
@@ -20944,7 +20961,8 @@ msgstr "編輯階段"
 msgid ""
 "Check attributes and style properties while editing SVG files (may slow down "
 "Inkscape, mostly useful for debugging)"
-msgstr "編輯 SVG 檔案時檢查屬性值和樣式屬性 (可能會讓 Inkscape 變慢，大多用來除錯)"
+msgstr ""
+"編輯 SVG 檔案時檢查屬性值和樣式屬性 (可能會讓 Inkscape 變慢，大多用來除錯)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1528
 msgid "Writing"
@@ -21488,7 +21506,8 @@ msgstr "在新文件中啟用貼齊"
 msgid ""
 "Initial state of snapping in new documents and non-Inkscape SVGs. Snap "
 "status is subsequently saved per-document."
-msgstr "在新文件和非 Inkscape SVG 的貼齊初始狀態。貼齊狀態會隨後儲存在每份文件。"
+msgstr ""
+"在新文件和非 Inkscape SVG 的貼齊初始狀態。貼齊狀態會隨後儲存在每份文件。"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1844
 msgid "Snap indicator"
@@ -21547,7 +21566,8 @@ msgid ""
 "When dragging a knot along a constraint line, then snap the position of the "
 "mouse pointer instead of snapping the projection of the knot onto the "
 "constraint line"
-msgstr "沿著限定直線拖曳節點時，貼齊滑鼠游標的位置而不是向限定線來貼齊環結的突起部位"
+msgstr ""
+"沿著限定直線拖曳節點時，貼齊滑鼠游標的位置而不是向限定線來貼齊環結的突起部位"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1870
 msgid "Delayed snap"
@@ -21750,7 +21770,9 @@ msgstr "會與仿製物件取消連結的路徑操作"
 msgid ""
 "The following path operations will unlink clones: Stroke to path, Object to "
 "path, Boolean operations, Combine, Break apart"
-msgstr "下列的路徑操作都會與仿制物件取消連結：將邊框轉為路徑、將物件轉為路徑、布林運算、合併、拆解"
+msgstr ""
+"下列的路徑操作都會與仿制物件取消連結：將邊框轉為路徑、將物件轉為路徑、布林運"
+"算、合併、拆解"
 
 #. TRANSLATORS: Heading for the Inkscape Preferences "Clones" Page
 #: ../src/ui/dialog/inkscape-preferences.cpp:1948
@@ -21874,7 +21896,8 @@ msgstr "MiB"
 msgid ""
 "Set the amount of memory per document which can be used to store rendered "
 "parts of the drawing for later reuse; set to zero to disable caching"
-msgstr "設定每份文件存取稍候可重複使用的圖畫繪算部分記憶體容量；設定為零可停用快取"
+msgstr ""
+"設定每份文件存取稍候可重複使用的圖畫繪算部分記憶體容量；設定為零可停用快取"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2014
 msgid "Rendering tile multiplier:"
@@ -21888,9 +21911,9 @@ msgid ""
 "zooming and panning in relevant areas faster on low-end hardware in drawings "
 "with few or no filters."
 msgstr ""
-"於配備較高的硬體，增加此數值 (預設為 16) 在圖畫中有大面積多個濾鏡效果物件時"
-"能有較好的性能。降低此數值則在低配備硬體且圖畫中只有少量的濾鏡效果物件時，"
-"畫面縮放和平移時會更快。"
+"於配備較高的硬體，增加此數值 (預設為 16) 在圖畫中有大面積多個濾鏡效果物件時能"
+"有較好的性能。降低此數值則在低配備硬體且圖畫中只有少量的濾鏡效果物件時，畫面"
+"縮放和平移時會更快。"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2019
 #| msgid "Rendering _cache size:"
@@ -21935,7 +21958,8 @@ msgstr "高斯模糊顯示品質"
 msgid ""
 "Best quality, but display may be very slow at high zooms (bitmap export "
 "always uses best quality)"
-msgstr "最佳品質，於高倍畫面縮放時顯示也許會非常慢 (點陣圖匯出時會自動使用最佳品質)"
+msgstr ""
+"最佳品質，於高倍畫面縮放時顯示也許會非常慢 (點陣圖匯出時會自動使用最佳品質)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2038
 #: ../src/ui/dialog/inkscape-preferences.cpp:2062
@@ -22091,7 +22115,8 @@ msgstr "匯入的圖片"
 msgid ""
 "Select a file of predefined shortcuts to use. Any customized shortcuts you "
 "create will be added separately to "
-msgstr "選擇要使用的預先定義快捷鍵檔案。任何你建立的自訂快捷鍵都會個別加入到該檔案 "
+msgstr ""
+"選擇要使用的預先定義快捷鍵檔案。任何你建立的自訂快捷鍵都會個別加入到該檔案 "
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2151
 msgid "Shortcut file:"
@@ -22228,7 +22253,8 @@ msgstr "預先繪算命名圖示"
 msgid ""
 "When on, named icons will be rendered before displaying the ui. This is for "
 "working around bugs in GTK+ named icon notification"
-msgstr "開啟時，顯示使用介面前會繪算命名圖示。這是為了避開在 GTK+ 命名圖示通知的錯誤"
+msgstr ""
+"開啟時，顯示使用介面前會繪算命名圖示。這是為了避開在 GTK+ 命名圖示通知的錯誤"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2546
 msgid "System info"
@@ -23150,13 +23176,15 @@ msgstr "物件有套用裁剪或遮罩嗎？"
 msgid ""
 "Highlight color of outline in Node tool. Click to set. If alpha is zero, use "
 "inherited color."
-msgstr "節點工具中外框的高亮度顯示顏色。點擊可設定。如果透明值為零，使用繼承的顏色。"
+msgstr ""
+"節點工具中外框的高亮度顯示顏色。點擊可設定。如果透明值為零，使用繼承的顏色。"
 
 #: ../src/ui/dialog/objects.cpp:1733
 msgid ""
 "Layer/Group/Object label (inkscape:label). Double-click to set. Default "
 "value is object 'id'."
-msgstr "圖層/群組/物件標籤 (inkscape:label)。點擊兩下可設定。預設值是物件「識別碼」。"
+msgstr ""
+"圖層/群組/物件標籤 (inkscape:label)。點擊兩下可設定。預設值是物件「識別碼」。"
 
 #: ../src/ui/dialog/objects.cpp:1795
 msgid "Add layer..."
@@ -23557,7 +23585,7 @@ msgstr "水平。進階 X"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:457
 msgid "Average amount of horizontal space each letter takes up."
-msgstr "每個字母佔據的水平平均空間"
+msgstr "每個字母佔據的水平平均空間。"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:458
 #| msgid "Origin X:"
@@ -23577,7 +23605,7 @@ msgstr "水平。Y 原點"
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:459
 #| msgid "Alternate the rotation direction for each row"
 msgid "Average vertical origin location for each letter."
-msgstr "每個字母的垂直平均原點位置"
+msgstr "每個字母的垂直平均原點位置。"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:460
 #| msgid "Set Image Attributes"
@@ -24012,7 +24040,7 @@ msgstr "notitle_"
 
 #: ../src/ui/dialog/symbols.cpp:1224
 msgid "Symbol without title "
-msgstr "無標題符號"
+msgstr "無標題符號 "
 
 #: ../src/ui/dialog/template-widget.cpp:32
 msgid "More info"
@@ -24437,7 +24465,8 @@ msgstr "調整<b>垂直圓角</b>半徑；按著 <b>Ctrl</b> 可讓水平半徑�
 msgid ""
 "Adjust the <b>width and height</b> of the rectangle; with <b>Ctrl</b> to "
 "lock ratio or stretch in one dimension only"
-msgstr "調整矩形的<b>寬度和高度</b>；按著 <b>Ctrl</b> 可鎖定比例或只伸展單一尺寸"
+msgstr ""
+"調整矩形的<b>寬度和高度</b>；按著 <b>Ctrl</b> 可鎖定比例或只伸展單一尺寸"
 
 #: ../src/ui/shape-editor-knotholders.cpp:570
 msgid "Drag to move the rectangle"
@@ -24832,8 +24861,8 @@ msgid ""
 "<b>BSpline node handle</b> (%.3g power): Shift-drag to move, double-click to "
 "reset. (more: %s)"
 msgstr ""
-"<b>貝氏雲形線節點控制柄</b> (%.3g 力量)：Shift 鍵可以拖曳，滑鼠點擊兩下"
-"可以重設。(更多：%s)"
+"<b>貝氏雲形線節點控制柄</b> (%.3g 力量)：Shift 鍵可以拖曳，滑鼠點擊兩下可以重"
+"設。(更多：%s)"
 
 #: ../src/ui/tool/node.cpp:661
 #| msgid "Cusp node handle"
@@ -25988,7 +26017,8 @@ msgstr "橢圓化"
 msgid ""
 "Make selected sides elliptical by changing length of handles. Works best if "
 "handles already approximate ellipse."
-msgstr "變更控制柄長度以將選擇的邊橢圓化。若控制柄已經接近橢圓形的時候效果最好。"
+msgstr ""
+"變更控制柄長度以將選擇的邊橢圓化。若控制柄已經接近橢圓形的時候效果最好。"
 
 #: ../src/ui/toolbar/mesh-toolbar.cpp:293
 msgid "Pick colors:"
@@ -27598,7 +27628,8 @@ msgstr "<b>拖曳</b>、<b>點擊</b>或<b>滾動滑鼠滾輪</b>來噴灑選取
 msgid ""
 "<b>Drag</b> to create a rectangle. <b>Drag controls</b> to round corners and "
 "resize. <b>Click</b> to select."
-msgstr "<b>拖曳</b>可建立矩形。<b>拖曳控制點</b>可調整圓角及大小。<b>點擊</b>可選取。"
+msgstr ""
+"<b>拖曳</b>可建立矩形。<b>拖曳控制點</b>可調整圓角及大小。<b>點擊</b>可選取。"
 
 #: ../src/ui/tools-switch.cpp:94
 msgid ""
@@ -27620,7 +27651,8 @@ msgstr ""
 msgid ""
 "<b>Drag</b> to create a star. <b>Drag controls</b> to edit the star shape. "
 "<b>Click</b> to select."
-msgstr "<b>拖曳</b>可建立星形。<b>拖曳控制點</b>可編輯星形的形狀。<b>點擊</b>可選取。"
+msgstr ""
+"<b>拖曳</b>可建立星形。<b>拖曳控制點</b>可編輯星形的形狀。<b>點擊</b>可選取。"
 
 #: ../src/ui/tools-switch.cpp:97
 msgid ""
@@ -27747,8 +27779,8 @@ msgid ""
 "<b>Ellipse</b>: %s &#215; %s (constrained to golden ratio 1.618 : 1); with "
 "<b>Shift</b> to draw around the starting point"
 msgstr ""
-"<b>橢圓形</b>: %s &#215; %s (限定為黃金比例 1.618 : 1)；按著 <b>Shift</b> 可從"
-"起點周圍開始繪製"
+"<b>橢圓形</b>: %s &#215; %s (限定為黃金比例 1.618 : 1)；按著 <b>Shift</b> 可"
+"從起點周圍開始繪製"
 
 #: ../src/ui/tools/arc-tool.cpp:424
 #, c-format
@@ -27759,8 +27791,8 @@ msgid ""
 "<b>Ellipse</b>: %s &#215; %s (constrained to golden ratio 1 : 1.618); with "
 "<b>Shift</b> to draw around the starting point"
 msgstr ""
-"<b>橢圓形</b>：%s &#215; %s (限定為黃金比例 1 : 1.618)；按著 <b>Shift</b> 可從"
-"起點周圍開始繪製"
+"<b>橢圓形</b>：%s &#215; %s (限定為黃金比例 1 : 1.618)；按著 <b>Shift</b> 可"
+"從起點周圍開始繪製"
 
 #: ../src/ui/tools/arc-tool.cpp:429
 #, c-format
@@ -28303,7 +28335,8 @@ msgstr ""
 msgid ""
 "<b>Curve handle</b>: angle %3.2f&#176;, length %s; with <b>Ctrl</b> to snap "
 "angle"
-msgstr "<b>曲線控制點</b>：角度 %3.2f&#176;、長度 %s; 按著 <b>Ctrl</b> 可貼齊角度"
+msgstr ""
+"<b>曲線控制點</b>：角度 %3.2f&#176;、長度 %s; 按著 <b>Ctrl</b> 可貼齊角度"
 
 #: ../src/ui/tools/pen-tool.cpp:1844
 #, c-format
@@ -28399,8 +28432,8 @@ msgid ""
 "ratio, or golden-ratio rectangle; with <b>Shift</b> to draw around the "
 "starting point"
 msgstr ""
-"<b>矩形</b>：%s &#215; %s；按著 <b>Ctrl</b> 鍵可建立正方形、整數比例或"
-"黃金比例的矩形；按著 <b>Shift</b> 鍵可在起點四周繪製"
+"<b>矩形</b>：%s &#215; %s；按著 <b>Ctrl</b> 鍵可建立正方形、整數比例或黃金比"
+"例的矩形；按著 <b>Shift</b> 鍵可在起點四周繪製"
 
 #: ../src/ui/tools/rect-tool.cpp:469
 msgid "Create rectangle"
@@ -28668,7 +28701,8 @@ msgid ""
 msgid_plural ""
 "Type or edit flowed text (%d characters%s); <b>Enter</b> to start new "
 "paragraph."
-msgstr[0] "輸入或編輯流動文字 (%d 個字元%s)；按 <b>Enter</b> 鍵可開始新的段落。"
+msgstr[0] ""
+"輸入或編輯流動文字 (%d 個字元%s)；按 <b>Enter</b> 鍵可開始新的段落。"
 
 #: ../src/ui/tools/text-tool.cpp:1704
 #, c-format
@@ -28973,7 +29007,7 @@ msgstr "選擇所有屬於該字族的文字"
 #: ../src/ui/widget/font-selector-toolbar.cpp:146
 #| msgid "Font not found on system"
 msgid "Font not found on system: "
-msgstr "系統上找不到字型；"
+msgstr "系統上找不到字型："
 
 #: ../src/ui/widget/font-selector.cpp:30
 msgid "Font family"
@@ -30083,8 +30117,8 @@ msgid_plural ""
 "<b>Finite</b> vanishing point shared by <b>%d</b> boxes; drag with <b>Shift</"
 "b> to separate selected box(es)"
 msgstr[0] ""
-"由 <b>%d</b> 個立方體共用<b>有限</b>消逝點；按著 <b>Shift</b> 鍵拖曳可分離"
-"選取的立方體"
+"由 <b>%d</b> 個立方體共用<b>有限</b>消逝點；按著 <b>Shift</b> 鍵拖曳可分離選"
+"取的立方體"
 
 #: ../src/vanishing-point.cpp:338
 #, c-format
@@ -30094,8 +30128,8 @@ msgid_plural ""
 "<b>Infinite</b> vanishing point shared by <b>%d</b> boxes; drag with "
 "<b>Shift</b> to separate selected box(es)"
 msgstr[0] ""
-"由 <b>%d</b> 個立方體共用<b>無限</b>消逝點；按著 <b>Shift</b> 鍵拖"
-"曳可分離選取的立方體"
+"由 <b>%d</b> 個立方體共用<b>無限</b>消逝點；按著 <b>Shift</b> 鍵拖曳可分離選"
+"取的立方體"
 
 #: ../src/vanishing-point.cpp:349
 #, c-format
@@ -30107,7 +30141,8 @@ msgid ""
 msgid_plural ""
 "shared by <b>%d</b> boxes; drag with <b>Shift</b> to separate selected "
 "box(es)"
-msgstr[0] "由 <b>%d</b> 個立方體共用；按著 <b>Shift</b> 鍵拖曳可分離選取的立方體"
+msgstr[0] ""
+"由 <b>%d</b> 個立方體共用；按著 <b>Shift</b> 鍵拖曳可分離選取的立方體"
 
 #: ../src/verbs.cpp:140
 msgid "File"
@@ -33094,13 +33129,14 @@ msgid ""
 "always best.\n"
 msgstr ""
 "\n"
-"  此對話窗讓你可以自動將點陣圖轉換成向量圖形。"
-"不同用途有對應的選項可以調整：\n"
-" * \"亮度截止\" 偵測比臨界值更暗的區域並建立圍著該區域的路徑 (使用 potrace)。\n"
+"  此對話窗讓你可以自動將點陣圖轉換成向量圖形。不同用途有對應的選項可以調"
+"整：\n"
+" * \"亮度截止\" 偵測比臨界值更暗的區域並建立圍著該區域的路徑 (使用 "
+"potrace)。\n"
 " * \"偵測邊緣\" 偵測顏色亮度變化大於給定的臨界值的區塊並將這些區塊分成路徑 "
 "(使用 potrace)。\n"
-" * \"色彩量化\" 將影像分成給定的顏色數量，並將這些顏色分成路徑 "
-"(使用 potrace)。\n"
+" * \"色彩量化\" 將影像分成給定的顏色數量，並將這些顏色分成路徑 (使用 "
+"potrace)。\n"
 " * \"自動描繪\" 使用給定選項的自動描繪演算法。\n"
 " * \"中心線描繪\" 試著將描繪線向量化 (使用自動描繪)。\n"
 " * \"多次掃描\" 此選項會將影像分成多次掃描，掃描取決於亮度、顏色分離或灰階，"
@@ -33109,10 +33145,10 @@ msgstr ""
 "\n"
 " * 備註：\n"
 "  1) 描繪前請先儲存你的檔案\n"
-"  2) 注意你的像素數量：\"描繪像素圖案\" 每個像素都會建立一個路徑。"
-"不建議對非像素用途的圖片使用該項功能。\n"
-"  3) 自動描繪比 potrace 慢，不建議對大圖片使用自動描繪。"
-"建議先將你的圖片加大對比程度。\n"
+"  2) 注意你的像素數量：\"描繪像素圖案\" 每個像素都會建立一個路徑。不建議對非"
+"像素用途的圖片使用該項功能。\n"
+"  3) 自動描繪比 potrace 慢，不建議對大圖片使用自動描繪。建議先將你的圖片加大"
+"對比程度。\n"
 "  4) 如果你的目標是較少的節點且較為精確，手動描圖是最佳的方式。\n"
 
 #: ../share/ui/dialog-trace.glade:132
@@ -33418,9 +33454,8 @@ msgid ""
 "change `self.OptionParser.add_option` to `self.arg_parser.add_argument`; the "
 "arguments are similar."
 msgstr ""
-"{} 或 `optparse` 已棄用並用 `argparser` 取代。你必須將"
-"`self.OptionParser.add_option` 改為 `self.arg_parser.add_argument`；"
-"參數都類似。"
+"{} 或 `optparse` 已棄用並用 `argparser` 取代。你必須將`self.OptionParser."
+"add_option` 改為 `self.arg_parser.add_argument`；參數都類似。"
 
 #: ../share/extensions/inkex/deprecated.py:115
 msgid ""
@@ -33431,21 +33466,21 @@ msgstr "{} 方法現在為必要方法。縱使此方法為進行任何動作也
 #: ../share/extensions/inkex/deprecated.py:121
 msgid ""
 "{} is now a method in the svg. Use `self.svg.get_current_layer()` instead."
-msgstr "{} 現在為 svg 中的方法。請改用 `self.svg.get_current_layer()`。 "
+msgstr "{} 現在為 svg 中的方法。請改用 `self.svg.get_current_layer()`。"
 
 #: ../share/extensions/inkex/deprecated.py:127
 msgid ""
 "{} is now a method in the svg. Use `self.svg.get_center_position()` instead."
-msgstr "{} 現在為 svg 中的方法。請改用 `self.svg.get_center_position()`。 "
+msgstr "{} 現在為 svg 中的方法。請改用 `self.svg.get_center_position()`。"
 
 #: ../share/extensions/inkex/deprecated.py:132
 msgid "{} is now a dict in the svg. Use `self.svg.selected`."
-msgstr "{} 現在為 svg 中的字典。請使用 `self.svg.selected`。 "
+msgstr "{} 現在為 svg 中的字典。請使用 `self.svg.selected`。"
 
 #: ../share/extensions/inkex/deprecated.py:137
 msgid ""
 "{} is now a method in the svg document. Use `self.svg.get_ids()` instead."
-msgstr "{} 現在為 svg 文件中的方法。請改用 `self.svg.get_ids()`。 "
+msgstr "{} 現在為 svg 文件中的方法。請改用 `self.svg.get_ids()`。"
 
 #: ../share/extensions/inkex/deprecated.py:144
 msgid "Use `self.svg.get_ids()` instead of {} and `doc_ids`."
@@ -33458,7 +33493,7 @@ msgstr "{} 已被移除"
 #: ../share/extensions/inkex/deprecated.py:153
 msgid ""
 "{} is now a method in the svg. Use `self.svg.getElementById(eid)` instead."
-msgstr "{} 現在為 svg 中的方法。請改用 `self.svg.getElementById(eid)`。 "
+msgstr "{} 現在為 svg 中的方法。請改用 `self.svg.getElementById(eid)`。"
 
 #: ../share/extensions/inkex/deprecated.py:157
 msgid ""
@@ -33481,8 +33516,8 @@ msgid ""
 "{} is now a method of the namedview element object. Use `self.svg.namedview."
 "add(Guide().move_to(x, y, a))` instead"
 msgstr ""
-"{} 現在為 namedview 元件物件的方法。請改用 `self.svg.namedview.add(Guide().move_to(x, y,"
-" a))`。"
+"{} 現在為 namedview 元件物件的方法。請改用 `self.svg.namedview.add(Guide()."
+"move_to(x, y, a))`"
 
 #: ../share/extensions/inkex/deprecated.py:179
 msgid "{} is now `Effect.run()`. The `output` argument has changed."
@@ -33500,9 +33535,7 @@ msgstr "self.svg_file 現在為 self.options.input_file"
 msgid ""
 "{} is now a method in the svg document.  Use `self.svg."
 "get_unique_id(old_id)` instead."
-msgstr ""
-"{} 現在為 svg 文件中的方法。請改用 `self.svg."
-"get_unique_id(old_id)`。"
+msgstr "{} 現在為 svg 文件中的方法。請改用 `self.svg.get_unique_id(old_id)`。"
 
 #: ../share/extensions/inkex/deprecated.py:207
 msgid "{} is now a property of the svg document. Use `self.svg.width` instead."
@@ -33787,8 +33820,8 @@ msgid ""
 "this can be done with the command, sudo apt-get install python-numpy."
 msgstr ""
 "無法匯入 numpy 或 numpy.linalg 模組。此擴充功能需要這些模組。請安裝這些模組後"
-"再試一次。在 Debian-like 系統上可以執行 sudo apt-get install python-numpy 指令"
-"安裝模組。"
+"再試一次。在 Debian-like 系統上可以執行 sudo apt-get install python-numpy 指"
+"令安裝模組。"
 
 #: ../share/extensions/perspective.py:58
 #| msgid ""
@@ -34935,7 +34968,7 @@ msgstr "桌面..."
 
 #: ../share/extensions/empty_desktop.inx:34
 msgid "Empty desktop of chosen size."
-msgstr "選擇的空白桌面尺寸"
+msgstr "選擇的空白桌面尺寸。"
 
 #: ../share/extensions/empty_desktop.inx:36
 #| msgid "Desktop"
@@ -34977,7 +35010,7 @@ msgstr "DVD 封面..."
 
 #: ../share/extensions/empty_dvd_cover.inx:23
 msgid "DVD cover of chosen size."
-msgstr "選擇的 DVD 封面尺寸"
+msgstr "選擇的 DVD 封面尺寸。"
 
 #: ../share/extensions/empty_dvd_cover.inx:25
 msgid "dvd cover"
@@ -34999,7 +35032,7 @@ msgstr "信封..."
 
 #: ../share/extensions/empty_envelope.inx:19
 msgid "Blank envelope of chosen size."
-msgstr "選擇的空白信封尺寸"
+msgstr "選擇的空白信封尺寸。"
 
 #: ../share/extensions/empty_envelope.inx:21
 msgid "empty envelope dl no10"
@@ -35066,7 +35099,7 @@ msgstr "圖示..."
 
 #: ../share/extensions/empty_icon.inx:16
 msgid "Empty icon of chosen size."
-msgstr "選擇的空白圖示尺寸"
+msgstr "選擇的空白圖示尺寸。"
 
 #: ../share/extensions/empty_icon.inx:18
 msgid "empty icon"
@@ -35097,7 +35130,7 @@ msgstr "空白頁面..."
 
 #: ../share/extensions/empty_page.inx:37
 msgid "Empty page of chosen size."
-msgstr "選擇的空白頁面尺寸"
+msgstr "選擇的空白頁面尺寸。"
 
 #: ../share/extensions/empty_page.inx:39
 msgid ""
@@ -35119,7 +35152,7 @@ msgstr "影片..."
 
 #: ../share/extensions/empty_video.inx:27
 msgid "Video screen of chosen size."
-msgstr "選擇的影片螢幕尺寸"
+msgstr "選擇的影片螢幕尺寸。"
 
 #: ../share/extensions/empty_video.inx:29
 msgid "empty video"
@@ -35461,8 +35494,7 @@ msgid ""
 msgstr ""
 "\n"
 "Gcodetools 外掛模組: \n"
-"將路徑轉換成 Gcode (使用圓弧內插法), 產生偏移路徑和使用"
-"錐形刀的雕刻銳角。 \n"
+"將路徑轉換成 Gcode (使用圓弧內插法), 產生偏移路徑和使用錐形刀的雕刻銳角。 \n"
 "此外掛程式可用圓弧內插法或線性移動 (需要時) 計算路徑 Gcode 程式碼。\n"
 "\n"
 "可在下述網站找到教學、使用手冊和支援\n"
@@ -36250,9 +36282,8 @@ msgstr ""
 "錐形刀的雕刻銳角。 \n"
 "此外掛程式可用圓弧內插法或線性移動 (需要時) 計算路徑 Gcode 程式碼。\n"
 "\n"
-"可在下述網站找到教學、使用手冊和支援英語支援論壇：http://"
-"www.cnc-club.ru/gcodetools 以及俄語支援論壇：http://www.cnc-club.ru/"
-"gcodetoolsru\n"
+"可在下述網站找到教學、使用手冊和支援英語支援論壇：http://www.cnc-club.ru/"
+"gcodetools 以及俄語支援論壇：http://www.cnc-club.ru/gcodetoolsru\n"
 "\n"
 "開發團隊：Nick Drobchenko, Vladimir Kalyaev, John Brooker, Henry Nicolas, "
 "Chris Lusby Taylor。\n"
@@ -37286,7 +37317,8 @@ msgstr "刀具偏移校正 (公釐)："
 msgid ""
 "The offset from the tool tip to the tool axis in mm, set to 0.0 to omit "
 "command (Default: 0.25)"
-msgstr "刀具尖端到刀具軸的偏移，單位為公釐，設定為 0 表示省略指令 (預設:「0.25」)"
+msgstr ""
+"刀具尖端到刀具軸的偏移，單位為公釐，設定為 0 表示省略指令 (預設:「0.25」)"
 
 #: ../share/extensions/hpgl_output.inx:31 ../share/extensions/plotter.inx:89
 msgid "Precut"
@@ -37447,7 +37479,7 @@ msgstr "命令列選項"
 #: ../share/extensions/inkscape_help_commandline.inx:7
 #| msgid "http://inkscape.org/doc/inkscape-man.html"
 msgid "https://inkscape.org/doc/inkscape-man.html"
-msgstr " https://inkscape.org/doc/inkscape-man.zh_TW.html"
+msgstr "https://inkscape.org/doc/inkscape-man.zh_TW.html"
 
 #: ../share/extensions/inkscape_help_faq.inx:3
 msgid "FAQ"
@@ -37959,8 +37991,8 @@ msgid ""
 "This extension allows you customize the key bindings JessyInk uses. Please "
 "see code.google.com/p/jessyink for more details."
 msgstr ""
-"這個擴充功能可以讓你自訂 JessyInk 使用的按鍵對應。"
-"請訪問 code.google.com/p/jessyink 得知更多詳細資訊。"
+"這個擴充功能可以讓你自訂 JessyInk 使用的按鍵對應。請訪問 code.google.com/p/"
+"jessyink 得知更多詳細資訊。"
 
 #: ../share/extensions/jessyInk_masterSlide.inx:3
 msgid "Master slide"
@@ -38008,8 +38040,8 @@ msgid ""
 "This extension allows you customize the mouse handler JessyInk uses. Please "
 "see code.google.com/p/jessyink for more details."
 msgstr ""
-"這個擴充功能可以讓你自訂 JessyInk 使用的滑鼠控制功能。"
-"請訪問 code.google.com/p/jessyink 得知更多詳細資訊。"
+"這個擴充功能可以讓你自訂 JessyInk 使用的滑鼠控制功能。請訪問 code.google.com/"
+"p/jessyink 得知更多詳細資訊。"
 
 #: ../share/extensions/jessyInk_summary.inx:3
 msgid "Summary"
@@ -38403,10 +38435,10 @@ msgid ""
 "a shape (such as a path) is selected, the flowed text will flow into that "
 "shape instead of the page."
 msgstr ""
-"這個特效可以製作標準的「亂數假文 (Lorem Ipsum)」偽拉丁文佔位符號文稿。"
-"如果選取一個流動文字，Lorem Ipsum 會被加到裡面；否則會在新圖層建立新的"
-"流動文字物件 (頁面大小) 。如果先選取一個形狀，則流動文字會將內容加入到形"
-"狀中，而不是加入到頁面中。"
+"這個特效可以製作標準的「亂數假文 (Lorem Ipsum)」偽拉丁文佔位符號文稿。如果選"
+"取一個流動文字，Lorem Ipsum 會被加到裡面；否則會在新圖層建立新的流動文字物件 "
+"(頁面大小) 。如果先選取一個形狀，則流動文字會將內容加入到形狀中，而不是加入到"
+"頁面中。"
 
 #: ../share/extensions/markers_strokepaint.inx:3
 msgid "Color Markers"
@@ -39431,8 +39463,8 @@ msgid ""
 "Snap selected paths, images, and rectangles to pixel boundaries. Strokes "
 "with a non-zero odd width are snapped to midpoints, so they align correctly"
 msgstr ""
-"將選取的路徑、影像和矩形貼齊到像素邊緣。如果邊框寬度為非零的奇數則會"
-"貼齊中點，以便能正確地對齊。"
+"將選取的路徑、影像和矩形貼齊到像素邊緣。如果邊框寬度為非零的奇數則會貼齊中"
+"點，以便能正確地對齊"
 
 #: ../share/extensions/pixelsnap.inx:8
 msgid ""
@@ -39485,8 +39517,8 @@ msgid ""
 "The port of your parallel connection, on Windows not currently supported, on "
 "Linux something like: '/dev/usb/lp2' (Default: /dev/usb/lp2)"
 msgstr ""
-"你的平行連線連接埠，Windows 系統目前尚未支援，而 Linux 系統上則類似如下："
-"「/dev/usb/lp2」(預設：/dev/usb/lp2)"
+"你的平行連線連接埠，Windows 系統目前尚未支援，而 Linux 系統上則類似如下：「/"
+"dev/usb/lp2」(預設：/dev/usb/lp2)"
 
 #: ../share/extensions/plotter.inx:16
 msgid "Serial port:"
@@ -40021,7 +40053,7 @@ msgstr "平滑方形值 (0-1)："
 msgid ""
 "For Path: custom set the path in relative coordinates (0,0)=(left,up) square "
 "size 1.0 "
-msgstr "適用於路徑：用相對座標 (0,0)=(左,上) 方形尺寸 1.0 自訂設定路徑"
+msgstr "適用於路徑：用相對座標 (0,0)=(左,上) 方形尺寸 1.0 自訂設定路徑 "
 
 #: ../share/extensions/render_barcode_qrcode.inx:48
 msgid "Path string (Path: custom) or symbol #url:"
@@ -40939,12 +40971,12 @@ msgstr "此特效會在檢視器中加入如同網頁瀏覽程式的互動元件
 #: ../share/extensions/web_interactive_mockup.inx:23
 msgid ""
 "It creates a link effect by changing to viewbox from one position to another."
-msgstr "此會用將檢視框移動到另一個位置的方式建立連結特效"
+msgstr "此會用將檢視框移動到另一個位置的方式建立連結特效。"
 
 #: ../share/extensions/web_interactive_mockup.inx:24
 #| msgid "When scaling objects, scale the stroke width by the same proportion"
 msgid "When selecting object the last one is the one we jump to."
-msgstr "選取物件時會跳到最後選取的物件"
+msgstr "選取物件時會跳到最後選取的物件。"
 
 #: ../share/extensions/web_interactive_mockup.inx:30
 #: ../share/extensions/web_set_att.inx:43
@@ -41012,7 +41044,8 @@ msgstr "在所有其他裡將第一次選擇設定為屬性"
 msgid ""
 "This effect adds a feature visible (or usable) only on a SVG enabled web "
 "browser (like Firefox)."
-msgstr "這個特效增加的功能只可見 (或可用) 於支援 SVG 的網頁瀏覽器 (如 firefox)。"
+msgstr ""
+"這個特效增加的功能只可見 (或可用) 於支援 SVG 的網頁瀏覽器 (如 firefox)。"
 
 #: ../share/extensions/web_set_att.inx:36
 msgid ""
@@ -41057,7 +41090,8 @@ msgstr "第一個選擇傳輸到全部其他"
 msgid ""
 "This effect transmits one or more attributes from the first selected element "
 "to the second when an event occurs."
-msgstr "當一個事件發生時，這個特效傳輸一個或多個屬性從第一個選擇的元件到第二個。"
+msgstr ""
+"當一個事件發生時，這個特效傳輸一個或多個屬性從第一個選擇的元件到第二個。"
 
 #: ../share/extensions/web_transmit_att.inx:35
 msgid ""
