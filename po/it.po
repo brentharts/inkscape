@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: Inkscape 1.1\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
 "POT-Creation-Date: 2021-05-01 17:15+0000\n"
-"PO-Revision-Date: 2021-05-07 11:51+0200\n"
+"PO-Revision-Date: 2021-05-08 19:20+0200\n"
 "Last-Translator: Firas Hanife <firashanife@gmail.com>\n"
 "Language-Team: \n"
 "Language: it\n"
@@ -4240,7 +4240,7 @@ msgstr "Modalità separata: Nessuno"
 
 #: ../src/actions/actions-canvas-mode.cpp:256
 msgid "Do not split canvas"
-msgstr "Non separare il canvas"
+msgstr "Non separare l'area di lavoro"
 
 #: ../src/actions/actions-canvas-mode.cpp:257
 msgid "Split Mode: Split"
@@ -4248,7 +4248,7 @@ msgstr "Modalità separata: Separa"
 
 #: ../src/actions/actions-canvas-mode.cpp:257
 msgid "Render part of the canvas in outline mode"
-msgstr "Visualizza parte del canvas in modalità Contorno"
+msgstr "Visualizza parte dell'area di lavoro in modalità Contorno"
 
 #: ../src/actions/actions-canvas-mode.cpp:258
 msgid "Split Mode: X-Ray"
@@ -4545,7 +4545,7 @@ msgstr "Ruota in senso orario"
 
 #: ../src/actions/actions-canvas-transform.cpp:213
 msgid "Rotate canvas clockwise"
-msgstr "Ruota il canvas in senso orario"
+msgstr "Ruota l'area di lavoro in senso orario"
 
 #: ../src/actions/actions-canvas-transform.cpp:214
 msgid "Rotate Counter-CW"
@@ -4553,7 +4553,7 @@ msgstr "Ruota senso antiorario"
 
 #: ../src/actions/actions-canvas-transform.cpp:214
 msgid "Rotate canvas counter-clockwise"
-msgstr "Ruota il canvas in senso antiorario"
+msgstr "Ruota l'area di lavoro in senso antiorario"
 
 #: ../src/actions/actions-canvas-transform.cpp:215 ../share/ui/menu-view.ui:99
 msgid "Reset Rotation"
@@ -4561,7 +4561,7 @@ msgstr "Reimposta rotazione"
 
 #: ../src/actions/actions-canvas-transform.cpp:215
 msgid "Reset canvas rotation"
-msgstr "Reimposta la rotazione del canvas"
+msgstr "Reimposta la rotazione dell'area di lavoro"
 
 #: ../src/actions/actions-canvas-transform.cpp:217
 msgid "Flip Horizontal"
@@ -4569,7 +4569,7 @@ msgstr "Rifletti orizzontalmente"
 
 #: ../src/actions/actions-canvas-transform.cpp:217
 msgid "Flip canvas horizontally"
-msgstr "Riflette orizzontalmente il canvas"
+msgstr "Riflette orizzontalmente l'area di lavoro"
 
 #: ../src/actions/actions-canvas-transform.cpp:218
 msgid "Flip Vertical"
@@ -4577,7 +4577,7 @@ msgstr "Rifletti verticalmente"
 
 #: ../src/actions/actions-canvas-transform.cpp:218
 msgid "Flip canvas vertically"
-msgstr "Riflette verticalmente il canvas"
+msgstr "Riflette verticalmente l'area di lavoro"
 
 #: ../src/actions/actions-canvas-transform.cpp:219 ../share/ui/menu-view.ui:118
 msgid "Reset Flipping"
@@ -4585,7 +4585,7 @@ msgstr "Reimposta riflessione"
 
 #: ../src/actions/actions-canvas-transform.cpp:219
 msgid "Reset canvas flipping"
-msgstr "Reimposta la riflessione del canvas"
+msgstr "Reimposta la riflessione dell'area di lavoro"
 
 #: ../src/actions/actions-canvas-transform.cpp:221 ../share/ui/menu-view.ui:103
 msgid "Lock Rotation"
@@ -4593,7 +4593,7 @@ msgstr "Blocca rotazione"
 
 #: ../src/actions/actions-canvas-transform.cpp:221 ../src/verbs.cpp:2791
 msgid "Lock canvas rotation"
-msgstr "Blocca la rotazione del canvas"
+msgstr "Blocca la rotazione dell'area di lavoro"
 
 #: ../src/actions/actions-file.cpp:100
 msgid "File Open"
@@ -4657,15 +4657,16 @@ msgstr ""
 "centro-orizz | destra | distanza-vert | superiore | centro-vert | inferiore]"
 
 #: ../src/actions/actions-object.cpp:144
-#, fuzzy
 msgid "Set Attribute"
-msgstr "Imposta attributi"
+msgstr "Imposta attributo"
 
 #: ../src/actions/actions-object.cpp:144
 msgid ""
 "Set or update an attribute of selected objects; usage: object-set-attribute:"
 "attribute name, attribute value;"
 msgstr ""
+"Imposta o aggiorna un attributo degli oggetti selezionati; utilizzo: object-set-"
+"attribute: nome attributo, valore attributo;"
 
 #: ../src/actions/actions-object.cpp:145
 msgid "Set Property"
@@ -4676,6 +4677,8 @@ msgid ""
 "Set or update a property on selected objects; usage: object-set-property:property "
 "name, property value;"
 msgstr ""
+"Imposta o aggiorna una proprietà degli oggetti selezionati; utilizzo: object-set-"
+"property: nome proprietà, valore proprietà;"
 
 #: ../src/actions/actions-object.cpp:146
 msgid "Unlink Clones"
@@ -4805,7 +4808,7 @@ msgstr "Esporta solo ID"
 
 #: ../src/actions/actions-output.cpp:238
 msgid "Hide any objects not given in export-id option"
-msgstr ""
+msgstr "Nasconde tutti gli oggetti non specificati nell'opzione export-id"
 
 #: ../src/actions/actions-output.cpp:240
 msgid "Export Plain SVG"
@@ -4887,12 +4890,11 @@ msgstr "Include l'opacità dello sfondo nel file esportato"
 
 #: ../src/actions/actions-output.cpp:250
 msgid "Export PNG Color Mode"
-msgstr ""
+msgstr "Esporta modalità colore PNG"
 
 #: ../src/actions/actions-output.cpp:250
-#, fuzzy
 msgid "Set color mode for PNG export"
-msgstr "Seleziona il nome del file per l'esportazione"
+msgstr "Imposta la modalità colore per l'esportazione PNG"
 
 #: ../src/actions/actions-output.cpp:252
 msgid "Do Export"
@@ -4972,6 +4974,10 @@ msgid ""
 "layers' (top level objects in layers), 'groups' (all groups including layers), "
 "'no-groups' (all objects other than groups and layers, default)"
 msgstr ""
+"Seleziona tutto; opzioni: 'all' (tutti gli oggetti inclusi gruppi). 'layers', 'no-"
+"layers' (oggetti al livello superiore nei livelli), 'groups' (tutti i gruppi "
+"inclusi i livelli), 'no-groups' (tutti gli oggetti ad eccezione di gruppi e "
+"livelli, predefinito)"
 
 #: ../src/actions/actions-selection.cpp:248
 msgid "Invert Selection"
@@ -4982,6 +4988,8 @@ msgid ""
 "Invert selection; options: 'all', 'layers', 'no-layers', 'groups', 'no-"
 "groups' (default)"
 msgstr ""
+"Inverte selezione; opzioni: 'all', 'layers', 'no-layers', 'groups', 'no-"
+"groups' (predefinito)"
 
 #: ../src/actions/actions-selection.cpp:249
 msgid "List Selection"
@@ -5497,6 +5505,8 @@ msgid ""
 "Selected objects require IDs.\n"
 "The following IDs have been assigned:\n"
 msgstr ""
+"Gli oggetti selezionati richiedono un ID.\n"
+"Sono stati assegnati i seguenti ID:\n"
 
 #: ../src/document.cpp:1035
 msgid " %1\n"
@@ -6508,21 +6518,18 @@ msgstr "Converti testo in tracciato"
 
 #: ../src/extension/internal/emf-inout.cpp:3654
 #: ../src/extension/internal/wmf-inout.cpp:3230
-#, fuzzy
 msgid "Map Unicode to Symbol font"
-msgstr "Map Unicode a Symbol font"
+msgstr "Mappa Unicode a font Symbol"
 
 #: ../src/extension/internal/emf-inout.cpp:3655
 #: ../src/extension/internal/wmf-inout.cpp:3231
-#, fuzzy
 msgid "Map Unicode to Wingdings"
-msgstr "Map Unicode a Wingdings"
+msgstr "Mappa Unicode a Wingdings"
 
 #: ../src/extension/internal/emf-inout.cpp:3656
 #: ../src/extension/internal/wmf-inout.cpp:3232
-#, fuzzy
 msgid "Map Unicode to Zapf Dingbats"
-msgstr "Map Unicode a Zapf Dingbats"
+msgstr "Mappa Unicode a Zapf Dingbats"
 
 #: ../src/extension/internal/emf-inout.cpp:3657
 #: ../src/extension/internal/wmf-inout.cpp:3233
@@ -10794,9 +10801,8 @@ msgid "positive"
 msgstr "positivo"
 
 #: ../src/live_effects/lpe-bool.cpp:69
-#, fuzzy
 msgid "take from object"
-msgstr "Da oggetto"
+msgstr "da oggetto"
 
 #: ../src/live_effects/lpe-bool.cpp:76
 msgid "Operand path:"
@@ -10823,15 +10829,16 @@ msgid "Swap operands (useful e.g. for difference)"
 msgstr "Scambia operandi (utile per differenza)"
 
 #: ../src/live_effects/lpe-bool.cpp:80
-#, fuzzy
 msgid "Remove inner"
-msgstr "Rimuovi filtro"
+msgstr "Rimuovi interno"
 
 #: ../src/live_effects/lpe-bool.cpp:81
 msgid ""
 "For cut operations: remove inner (non-contour) lines of cutting path to avoid "
 "invisible extra points"
 msgstr ""
+"Per operazioni di taglio: rimuove linee interne (non contorni) del tracciato di "
+"taglio per evitare punti aggiuntivi invisibili"
 
 #: ../src/live_effects/lpe-bool.cpp:83
 msgid "Fill type this:"
@@ -10843,11 +10850,11 @@ msgstr "Regola dello riempimento per questo tracciato"
 
 #: ../src/live_effects/lpe-bool.cpp:85
 msgid "Fill type operand:"
-msgstr ""
+msgstr "Regola riempimento operando:"
 
 #: ../src/live_effects/lpe-bool.cpp:85
 msgid "Fill type (winding mode) for operand path"
-msgstr ""
+msgstr "Regola dello riempimento per questo tracciato operando"
 
 #: ../src/live_effects/lpe-bounding-box.cpp:20
 #: ../src/live_effects/lpe-fill-between-many.cpp:35
@@ -10958,31 +10965,32 @@ msgid "Shape"
 msgstr "Forma"
 
 #: ../src/live_effects/lpe-clone-original.cpp:45
-#, fuzzy
 msgid "Linked shape"
-msgstr "Proiezione collegata"
+msgstr "Forma collegata"
 
 #: ../src/live_effects/lpe-clone-original.cpp:46
-#, fuzzy
 msgid "Attributes"
-msgstr "_Attributi:"
+msgstr "Attributi"
 
 #: ../src/live_effects/lpe-clone-original.cpp:46
 msgid ""
 "Attributes of the original that the clone should copy, written as a comma-"
 "separated list; e.g. 'transform, X, Y'."
 msgstr ""
+"Attributi dell'originale copiati dal clone indicati come una lista separata da "
+"virgola; e.g. 'transform, X, Y'."
 
 #: ../src/live_effects/lpe-clone-original.cpp:48
-#, fuzzy
 msgid "CSS Properties"
-msgstr "Proprietà"
+msgstr "Proprietà CSS"
 
 #: ../src/live_effects/lpe-clone-original.cpp:49
 msgid ""
 "CSS properties of the original that the clone should copy, written as a comma-"
 "separated list; e.g. 'fill, filter, opacity'."
 msgstr ""
+"Proprietà CSS dell'originale copiati dal clone indicati come una lista separata "
+"da virgola; e.g. 'fill, filter, opacity'."
 
 #: ../src/live_effects/lpe-clone-original.cpp:51
 #: ../src/live_effects/lpe-slice.cpp:50
@@ -11093,14 +11101,14 @@ msgstr ""
 "intersezione"
 
 #: ../src/live_effects/lpe-copy_rotate.cpp:72
-#, fuzzy
 msgid "Distribute evenly"
-msgstr "Distribuzione"
+msgstr "Distribuisci uniformemente"
 
 #: ../src/live_effects/lpe-copy_rotate.cpp:72
 msgid ""
 "Angle between copies is 360°/number of copies (ignores rotation angle setting)"
 msgstr ""
+"L'angolo tra le copie è 360°/Numero di copie (Angolo di rotazione è ignorato)"
 
 #: ../src/live_effects/lpe-copy_rotate.cpp:73
 msgid "Mirror copies"
@@ -11212,9 +11220,8 @@ msgid "Number of dashes"
 msgstr "Numero di tratteggi"
 
 #: ../src/live_effects/lpe-dashed-stroke.cpp:19
-#, fuzzy
 msgid "Hole factor"
-msgstr "Selettore"
+msgstr "Fattore spaziatura"
 
 #: ../src/live_effects/lpe-dashed-stroke.cpp:20
 msgid "Use segments"
@@ -11229,20 +11236,20 @@ msgid "Start and end of each segment has half size"
 msgstr "Inizio e termine di ogni segmento hanno dimensione dimezzata"
 
 #: ../src/live_effects/lpe-dashed-stroke.cpp:22
-#, fuzzy
 msgid "Equalize dashes"
-msgstr "Equalizza"
+msgstr "Uniforma tratti"
 
 #: ../src/live_effects/lpe-dashed-stroke.cpp:22
 msgid ""
 "Global dash length is approximately the length of the dashes in the shortest path "
 "segment"
 msgstr ""
+"La lunghezza dei tratti globale è approssimativamente la lunghezza dei tratti nel "
+"segmento più corto"
 
 #: ../src/live_effects/lpe-dashed-stroke.cpp:24
-#, fuzzy
 msgid "Note"
-msgstr "Nota:"
+msgstr "Nota"
 
 #: ../src/live_effects/lpe-dashed-stroke.cpp:24
 #: ../src/live_effects/lpe-powerclip.cpp:33
@@ -16318,7 +16325,7 @@ msgstr "Gestisci selezione come gruppo"
 # File: ../src/ui/dialog/align-and-distribute.cpp, line: 1107
 #: ../src/ui/dialog/align-and-distribute.cpp:1117
 msgid "Enable on-canvas alignment handles."
-msgstr "Abilita maniglie di allineamento sul canvas"
+msgstr "Abilita maniglie di allineamento sul disegno"
 
 #: ../src/ui/dialog/attrdialog.cpp:105 ../src/ui/tools/text-tool.cpp:1836
 msgid "Type text"
@@ -21243,15 +21250,15 @@ msgstr "Quando disattivo, l'origine è in basso a sinistra con l'asse y verso l'
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1601
 msgid "Lock canvas rotation by default"
-msgstr "Blocco rotazione canvas predefinito"
+msgstr "Blocco rotazione area di lavoro predefinito"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1603
 msgid ""
 "Prevent accidental canvas rotation by disabling on-canvas keyboard and mouse "
 "actions for rotation"
 msgstr ""
-"Previene la rotazione accidentale del canvas disabilitando le azioni di rotazione "
-"con tastiera e mouse"
+"Previene la rotazione accidentale dell'area di lavoro disabilitando le azioni di "
+"rotazione con tastiera e mouse"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1605
 msgid "Handle size"
@@ -22605,7 +22612,7 @@ msgstr "Il mouse muove l'area di lavoro quando la barra spaziatrice è premuta"
 msgid "When on, pressing and holding Space and dragging pans canvas"
 msgstr ""
 "Quando attivo, tenendo premuta la barra spaziatrice e muovendo il mouse l'area di "
-"canvas visualizzata viene spostata concordemente"
+"lavoro visualizzata viene spostata concordemente"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2355
 msgid "Scrolling"
@@ -22804,20 +22811,23 @@ msgstr ""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2426
 msgid "Zoom with middle mouse click"
-msgstr ""
+msgstr "Ingrandimento con tasto centrale mouse"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2428
 msgid ""
 "When activated, clicking the middle mouse button (usually the mouse wheel) zooms."
 msgstr ""
+"Quando attivo, cliccando il tasto centrale del mouse (solitamente la rotella del "
+"mouse) ingrandisce."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2430
 msgid "_Rotate canvas by:"
-msgstr "_Ruota canvas di:"
+msgstr "_Ruota area di lavoro di:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2431
 msgid "Rotate canvas clockwise and counter-clockwise by this amount."
-msgstr "Ruota canvas a scatti di questa quantità in senso orario e antiorario."
+msgstr ""
+"Ruota l'area di lavoro a scatti di questa quantità in senso orario e antiorario."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2432
 msgid "Steps"
@@ -23078,11 +23088,12 @@ msgstr "Conservativo"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2560
 msgid "Redraw while editing:"
-msgstr ""
+msgstr "Ridisegna durante modifica"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2561
+#, fuzzy
 msgid "Set how quickly the canvas display is updated while editing objects"
-msgstr ""
+msgstr "Imposta la velocità di aggiornamento "
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2565
 #: ../src/ui/dialog/inkscape-preferences.cpp:2589
@@ -25572,74 +25583,64 @@ msgid "Node or handle drag canceled."
 msgstr "Nodo o maniglia cancellato."
 
 #: ../src/ui/modifiers.cpp:32
-#, fuzzy
 msgid "Vertical pan"
-msgstr "Spaziatura verticale:"
+msgstr "Scorrimento verticale"
 
 #: ../src/ui/modifiers.cpp:32
 msgid "Pan/Scroll up and down"
-msgstr ""
+msgstr "Scorre in alto e in basso"
 
 #: ../src/ui/modifiers.cpp:33
-#, fuzzy
 msgid "Horizontal pan"
-msgstr "Spaziatura orizzontale:"
+msgstr "Scorrimento orizzontale"
 
 #: ../src/ui/modifiers.cpp:33
 msgid "Pan/Scroll left and right"
-msgstr ""
+msgstr "Scorre a destra e a sinistra"
 
 #: ../src/ui/modifiers.cpp:34
-#, fuzzy
 msgid "Canvas zoom"
-msgstr "Tela"
+msgstr "Ingrandimento tela"
 
 #: ../src/ui/modifiers.cpp:34
 msgid "Zoom in and out with scroll wheel"
-msgstr ""
+msgstr "Ingrandisce e riduce con lo scorrimento mouse"
 
 #: ../src/ui/modifiers.cpp:35
-#, fuzzy
 msgid "Canvas rotate"
-msgstr "Orientamento _canvas"
+msgstr "Ruota tela"
 
 #: ../src/ui/modifiers.cpp:35
-#, fuzzy
 msgid "Rotate the canvas with scroll wheel"
-msgstr "Ruota il canvas in senso orario"
+msgstr "Ruota l'area di lavoro con lo scorrimento del mouse"
 
 #: ../src/ui/modifiers.cpp:38
 msgid "Add to selection"
 msgstr "Aggiungi alla selezione"
 
 #: ../src/ui/modifiers.cpp:38
-#, fuzzy
 msgid "Add items to existing selection"
-msgstr "Spruzza copie della selezione iniziale"
+msgstr "Aggiunge gli oggetti alla selezione attuale"
 
 #: ../src/ui/modifiers.cpp:39
 msgid "Select inside groups"
 msgstr "Seleziona all'interno dei gruppi"
 
 #: ../src/ui/modifiers.cpp:39
-#, fuzzy
 msgid "Ignore groups when selecting items"
-msgstr "Dividi gruppi creati quando viene impostato un fissaggio/maschera"
+msgstr "Ignora i gruppi nella selezione degli oggetti"
 
 #: ../src/ui/modifiers.cpp:40
-#, fuzzy
 msgid "Select with touch-path"
-msgstr "Seleziona nuovo tracciato"
+msgstr "Seleziona con tracciato"
 
 #: ../src/ui/modifiers.cpp:40
-#, fuzzy
 msgid "Draw a band around items to select them"
-msgstr "<b>Trascina</b> attorno alle maniglie per selezionarle"
+msgstr "Disegna un tracciato attorno agli oggetti per selezionarli"
 
 #: ../src/ui/modifiers.cpp:41
-#, fuzzy
 msgid "Select with box"
-msgstr "Seleziona nuovo tracciato"
+msgstr "Seleziona con riquadro"
 
 #: ../src/ui/modifiers.cpp:41
 msgid "Don't drag items, select more with a box"
@@ -25673,41 +25674,37 @@ msgid "Scroll through objects under the cursor"
 msgstr ""
 
 #: ../src/ui/modifiers.cpp:47
-#, fuzzy
 msgid "Move one axis only"
-msgstr "Muove i nodi verticalmente"
+msgstr "Muovi solo un asse"
 
 #: ../src/ui/modifiers.cpp:47
 msgid "When dragging items, confine to either x or y axis"
-msgstr ""
+msgstr "Blocca l'asse x o y durante il trascinamento degli oggetti"
 
 #: ../src/ui/modifiers.cpp:48
-#, fuzzy
 msgid "Move in increments"
-msgstr "Muovi gradiente"
+msgstr "Muovi per incrementi"
 
 #: ../src/ui/modifiers.cpp:48
 msgid "Move the objects by set increments when dragging"
-msgstr ""
+msgstr "Muove gli oggetti di incrementi predefiniti durante il trascinamento"
 
 #: ../src/ui/modifiers.cpp:49
-#, fuzzy
 msgid "No Move Snapping"
-msgstr "Aggancio"
+msgstr "Muovi senza agganciare"
 
 #: ../src/ui/modifiers.cpp:49
-#, fuzzy
 msgid "Disable snapping when moving objects"
-msgstr "Attiva aggancio nei nuovi documenti"
+msgstr "Disabilita l'aggancio durante lo spostamento degli oggetti"
 
 #: ../src/ui/modifiers.cpp:50
-#, fuzzy
 msgid "Keep aspect ratio"
-msgstr "Rapporto dimensione immagine"
+msgstr "Mantieni rapporto dimensione"
 
 #: ../src/ui/modifiers.cpp:50
 msgid "When resizing objects, confine the aspect ratio"
 msgstr ""
+"Mantiene il rapporto delle dimensioni durante il ridimensionamento degli oggetti"
 
 #: ../src/ui/modifiers.cpp:51
 #, fuzzy
@@ -38355,7 +38352,6 @@ msgid "HP Graphics Language file (*.hpgl)"
 msgstr "File HP Graphics Language (*.hpgl)"
 
 #: ../share/extensions/hpgl_input.inx:15
-#, fuzzy
 msgid "Import an HP Graphics Language file"
 msgstr "Importa un file HP Graphics Language"
 
@@ -38444,7 +38440,6 @@ msgid "Rotation of the drawing (Default: 0°)"
 msgstr "Rotazione del disegno (predefinito: 0°)"
 
 #: ../share/extensions/hpgl_output.inx:21 ../share/extensions/plotter.inx:79
-#, fuzzy
 msgid "Mirror X axis"
 msgstr "Rifletti asse X"
 
@@ -38456,7 +38451,6 @@ msgid "Check this to mirror the X axis (Default: Unchecked)"
 msgstr "Seleziona per riflettere sull'asse X (predefinito: non selezionato)"
 
 #: ../share/extensions/hpgl_output.inx:22 ../share/extensions/plotter.inx:80
-#, fuzzy
 msgid "Mirror Y axis"
 msgstr "Rifletti asse Y"
 
@@ -38468,7 +38462,6 @@ msgid "Check this to mirror the Y axis (Default: Unchecked)"
 msgstr "Seleziona per riflettere sull'asse Y (predefinito: non selezionato)"
 
 #: ../share/extensions/hpgl_output.inx:23
-#, fuzzy
 msgid "Center zero point"
 msgstr "Punto zero centrato"
 
@@ -38984,6 +38977,8 @@ msgid ""
 "Creates a zip file containing pdfs or pngs of all slides of a JessyInk "
 "presentation."
 msgstr ""
+"Crea un file zip contenente i pdf e le png di tutte le slide della presentazione "
+"JessyInk."
 
 #: ../share/extensions/jessyink_install.inx:3
 msgid "Install/update"
@@ -39384,14 +39379,12 @@ msgid "Export Layer Slices"
 msgstr ""
 
 #: ../share/extensions/layer2png.inx:7
-#, fuzzy
 msgid "Icon mode"
-msgstr "Modalità indice"
+msgstr "Modalità icona"
 
 #: ../share/extensions/layer2png.inx:8
-#, fuzzy
 msgid "Sizes"
-msgstr "Dimensione"
+msgstr "Dimensioni"
 
 #: ../share/extensions/layer2png.inx:9
 #, fuzzy
@@ -39779,19 +39772,16 @@ msgid "Text anchor:"
 msgstr "Ancoraggio testo:"
 
 #: ../share/extensions/measure.inx:26
-#, fuzzy
 msgid "Left (Start)"
-msgstr "Da sinistra a destra"
+msgstr "Sinistra (inizio)"
 
 #: ../share/extensions/measure.inx:27
-#, fuzzy
 msgid "Center (Middle)"
-msgstr "Centroide"
+msgstr "Centro (metà)"
 
 #: ../share/extensions/measure.inx:28
-#, fuzzy
 msgid "Right (End)"
-msgstr "Destra (px):"
+msgstr "Destra (fine)"
 
 #: ../share/extensions/measure.inx:31
 msgid "Fixed Text"
@@ -39852,9 +39842,8 @@ msgid "Offset (px):"
 msgstr "Scostamento (px):"
 
 #: ../share/extensions/measure.inx:52
-#, fuzzy
 msgid "Scale Factor (Real:Drawing Length):"
-msgstr "Fattore di riduzione (Disegno:Lughezza reale) = 1:"
+msgstr "Fattore di scala (Reale:Lughezza disegno):"
 
 #: ../share/extensions/measure.inx:53
 msgid "Length Unit:"
@@ -40220,12 +40209,10 @@ msgstr ""
 "file SVG un po' più grande."
 
 #: ../share/extensions/output_scour.inx:38
-#, fuzzy
 msgid "Document options"
 msgstr "Opzioni documento"
 
 #: ../share/extensions/output_scour.inx:41
-#, fuzzy
 msgid "Remove the XML declaration"
 msgstr "Rimuovi dichiarazione XML"
 
@@ -40240,7 +40227,6 @@ msgstr ""
 "in particolare se il documento contiene caratteri speciali)."
 
 #: ../share/extensions/output_scour.inx:44
-#, fuzzy
 msgid "Remove metadata"
 msgstr "Rimuovi metadati"
 
@@ -40257,7 +40243,6 @@ msgstr ""
 "SVG eccetera."
 
 #: ../share/extensions/output_scour.inx:47
-#, fuzzy
 msgid "Remove comments"
 msgstr "Rimuovi commenti"
 
@@ -40337,23 +40322,19 @@ msgstr ""
 "\"Output con a capo e indentazioni\" è disabilitato."
 
 #: ../share/extensions/output_scour.inx:62
-#, fuzzy
 msgid "Space"
 msgstr "Spazio"
 
 #: ../share/extensions/output_scour.inx:63
-#, fuzzy
 msgid "Tab"
 msgstr "Tabulazione"
 
 #: ../share/extensions/output_scour.inx:64
-#, fuzzy
 msgctxt "Indent"
 msgid "None"
 msgstr "Nessuno"
 
 #: ../share/extensions/output_scour.inx:68
-#, fuzzy
 msgid "Depth of indentation:"
 msgstr "Ampiezza indentazione:"
 
@@ -40444,7 +40425,6 @@ msgstr ""
 "SVG, compreso Inkscape) verranno rimossi o abbreviati."
 
 #: ../share/extensions/output_scour.inx:90
-#, fuzzy
 msgid "Preserve the following IDs:"
 msgstr "Mantieni gli ID seguenti:"
 
@@ -40469,7 +40449,6 @@ msgstr ""
 "mantenere \"flag-mx\", \"flag-pt\", eccetera)."
 
 #: ../share/extensions/output_scour.inx:101
-#, fuzzy
 msgid "Optimized SVG Output is provided by"
 msgstr "Output SVG ottimizzato fornito da"
 
@@ -40486,7 +40465,6 @@ msgid "https://github.com/scour-project/scour"
 msgstr "https://github.com/scour-project/scour"
 
 #: ../share/extensions/output_scour.inx:110
-#, fuzzy
 msgid "This version of the extension is designed for"
 msgstr "Questa versione dell'estensione è progettata per"
 
@@ -40574,52 +40552,46 @@ msgid "Envelope"
 msgstr "Busta"
 
 #: ../share/extensions/path_mesh_m2p.inx:3
-#, fuzzy
 msgid "Mesh-Gradient to Path"
-msgstr "Gradiente a maglia di contorno"
+msgstr "Gradiente a maglia a tracciato"
 
 #: ../share/extensions/path_mesh_m2p.inx:12
-#, fuzzy
 msgid "Patches"
-msgstr "Campione"
+msgstr "Aree"
 
 #: ../share/extensions/path_mesh_m2p.inx:13 ../share/extensions/polyhedron_3d.inx:77
 msgid "Faces"
 msgstr "Facce"
 
 #: ../share/extensions/path_mesh_m2p.inx:18
-#, fuzzy
 msgid "Mesh to path"
-msgstr "Da oggetto a tracciato"
+msgstr "Gradiente a maglia a tracciato"
 
 #: ../share/extensions/path_mesh_m2p.inx:19
-#, fuzzy
 msgid "Convert geometry of selected meshgradient to path data"
-msgstr "Converte in tracciati gli oggetti selezionati"
+msgstr "Converte la geometria del gradiente a maglia selezionato in tracciato"
 
 #: ../share/extensions/path_mesh_m2p.inx:28 ../share/extensions/path_mesh_p2m.inx:23
-#, fuzzy
 msgid "Mesh"
 msgstr "Gradiente a maglia"
 
 #: ../share/extensions/path_mesh_p2m.inx:3
-#, fuzzy
 msgid "Path to Mesh-Gradient"
-msgstr "Gradiente a maglia"
+msgstr "Tracciato a Gradiente a maglia"
 
 #: ../share/extensions/path_mesh_p2m.inx:9
-#, fuzzy
 msgid "Convert each selected path to 1x1 mesh"
-msgstr "Converte in tracciati gli oggetti selezionati"
+msgstr "Converte ogni tracciato selezionato in un gradiente a maglia 1x1"
 
 #: ../share/extensions/path_mesh_p2m.inx:13
-#, fuzzy
 msgid "Path to mesh"
-msgstr "Percorso a Gcode"
+msgstr "Tracciato a gradiente a maglia"
 
 #: ../share/extensions/path_mesh_p2m.inx:14
 msgid "Convert geometry of selected path (4 corners) to a meshgradient"
 msgstr ""
+"Converte la geometria del tracciato selezionato (4 angoli) in un gradiente a "
+"maglia"
 
 #: ../share/extensions/path_number_nodes.inx:3
 msgid "Number Nodes"
@@ -40896,32 +40868,27 @@ msgstr "Plot"
 #: ../share/extensions/plotter.inx:7
 msgid "Please make sure that all objects you want to plot are converted to paths."
 msgstr ""
-"Assicurarsi che tutti gli oggetti da disegnare sono convertiti in tracciati."
+"Assicurarsi che tutti gli oggetti da disegnare siano convertiti in tracciati."
 
 #: ../share/extensions/plotter.inx:9
-#, fuzzy
 msgid "Connection Settings"
-msgstr "Connessione"
+msgstr "Impostazioni connessione"
 
 #: ../share/extensions/plotter.inx:10
-#, fuzzy
 msgid "Port type:"
-msgstr "Tipo di porta:"
+msgstr "Tipo porta:"
 
 #: ../share/extensions/plotter.inx:11
-#, fuzzy
 msgid "Serial"
 msgstr "Seriale"
 
 #: ../share/extensions/plotter.inx:14
-#, fuzzy
 msgid "Parallel port:"
-msgstr "Parallela:"
+msgstr "Porta parallela:"
 
 #
 # File: ../share/extensions/plotter.inx, line: 15
 #: ../share/extensions/plotter.inx:14
-#, fuzzy
 msgid ""
 "The port of your parallel connection, on Windows not currently supported, on "
 "Linux something like: '/dev/usb/lp2' (default: /dev/usb/lp2)"
@@ -40930,14 +40897,12 @@ msgstr ""
 "del tipo: '/dev/usb/lp2' (predefinito: /dev/usb/lp2)"
 
 #: ../share/extensions/plotter.inx:15
-#, fuzzy
 msgid "Serial port:"
 msgstr "Porta seriale:"
 
 #
 # File: ../share/extensions/plotter.inx, line: 16
 #: ../share/extensions/plotter.inx:15
-#, fuzzy
 msgid ""
 "The port of your serial connection, on Windows something like 'COM1', on Linux "
 "something like: '/dev/ttyUSB0' (default: COM1)"
@@ -40946,74 +40911,64 @@ msgstr ""
 "del tipo: '/dev/ttyUSB0' (predefinito: COM1)"
 
 #: ../share/extensions/plotter.inx:16
-#, fuzzy
 msgid "Serial baud rate:"
-msgstr "Baud rate:"
+msgstr "Baud rate seriale:"
 
 #
 # File: ../share/extensions/plotter.inx, line: 17
 #: ../share/extensions/plotter.inx:16
-#, fuzzy
 msgid "The Baud rate of your serial connection (default: 9600)"
-msgstr "Baud rate della linea seriale (predefinito: 9600)"
+msgstr "Baud rate della connessione seriale (predefinito: 9600)"
 
 #: ../share/extensions/plotter.inx:33
-#, fuzzy
 msgid "Serial byte size:"
-msgstr "Dimensione byte"
+msgstr "Dimensione byte seriale:"
 
 #
 # File: ../share/extensions/plotter.inx, line: 34
 #: ../share/extensions/plotter.inx:33
-#, fuzzy
 msgid ""
 "The Byte size of your serial connection, 99% of all plotters use the default "
 "setting (default: 8 Bits)"
 msgstr ""
 "Dimensione del byte usato dal collegamento seriale, il 99% dei plotter usano il "
-"valore predefinito (8 bit)"
+"valore predefinito (predefinito: 8 Bits)"
 
 #: ../share/extensions/plotter.inx:39
-#, fuzzy
 msgid "Serial stop bits:"
-msgstr "Numero di bit di stop:"
+msgstr "Bt di stop seriale:"
 
 #
 # File: ../share/extensions/plotter.inx, line: 40
 #: ../share/extensions/plotter.inx:39
-#, fuzzy
 msgid ""
 "The Stop bits of your serial connection, 99% of all plotters use the default "
 "setting (default: 1 Bit)"
 msgstr ""
-"Numero di bit di stop usati dal collegamento seriale, il 99% dei plotter usano il "
-"valore predefinito (1 bit)"
+"Numero di Bit di stop usati dal collegamento seriale, il 99% dei plotter usano il "
+"valore predefinito (predefinito: 1 Bit)"
 
 #: ../share/extensions/plotter.inx:44
-#, fuzzy
 msgid "Serial parity:"
-msgstr "Parità:"
+msgstr "Parità seriale:"
 
 #
 # File: ../share/extensions/plotter.inx, line: 45
 #: ../share/extensions/plotter.inx:44
-#, fuzzy
 msgid ""
 "The Parity of your serial connection, 99% of all plotters use the default setting "
 "(default: None)"
 msgstr ""
 "Tipo di parità usata dal collegamento seriale, il 99% dei plotter usano il valore "
-"predefinito (nessuna)"
+"predefinito (predefinito: None)"
 
 #: ../share/extensions/plotter.inx:51
-#, fuzzy
 msgid "Serial flow control:"
-msgstr "Controllo di flusso:"
+msgstr "Controllo di flusso seriale:"
 
 #
 # File: ../share/extensions/plotter.inx, line: 52
 #: ../share/extensions/plotter.inx:51
-#, fuzzy
 msgid ""
 "The software / hardware flow control of your serial connection (default: Software)"
 msgstr ""
@@ -41033,14 +40988,12 @@ msgid "Hardware (DSR/DTR + RTS/CTS)"
 msgstr "Hardware (DSR/DTR + RTS/CTS)"
 
 #: ../share/extensions/plotter.inx:57
-#, fuzzy
 msgid "Command language:"
 msgstr "Linguaggio di comando:"
 
 #
 # File: ../share/extensions/plotter.inx, line: 58
 #: ../share/extensions/plotter.inx:57
-#, fuzzy
 msgid "The command language to use (default: HPGL)"
 msgstr "Linguaggio di comando utilizzato (predefinito: HPGL)"
 
@@ -41053,9 +41006,8 @@ msgid "DMPL"
 msgstr "DMPL"
 
 #: ../share/extensions/plotter.inx:60
-#, fuzzy
 msgid "KNK Plotter (HPGL variant)"
-msgstr "KNK Zing (variante HPGL)"
+msgstr "Plotter KNK (variante HPGL)"
 
 #: ../share/extensions/plotter.inx:63
 msgid ""
@@ -41133,7 +41085,6 @@ msgstr "Rotazione (°, oraria):"
 # File: ../share/extensions/hpgl_output.inx, line: 16
 # File: ../share/extensions/plotter.inx, line: 74
 #: ../share/extensions/plotter.inx:73
-#, fuzzy
 msgid "Rotation of the drawing (default: 0°)"
 msgstr "Rotazione del disegno (predefinito: 0°)"
 
@@ -41141,7 +41092,6 @@ msgstr "Rotazione del disegno (predefinito: 0°)"
 # File: ../share/extensions/hpgl_output.inx, line: 22
 # File: ../share/extensions/plotter.inx, line: 80
 #: ../share/extensions/plotter.inx:79
-#, fuzzy
 msgid "Check this to mirror the X axis (default: Unchecked)"
 msgstr "Seleziona per riflettere sull'asse X (predefinito: non selezionato)"
 
@@ -41149,20 +41099,17 @@ msgstr "Seleziona per riflettere sull'asse X (predefinito: non selezionato)"
 # File: ../share/extensions/hpgl_output.inx, line: 23
 # File: ../share/extensions/plotter.inx, line: 81
 #: ../share/extensions/plotter.inx:80
-#, fuzzy
 msgid "Check this to mirror the Y axis (default: Unchecked)"
 msgstr "Seleziona per riflettere sull'asse Y (predefinito: non selezionato)"
 
 #: ../share/extensions/plotter.inx:81
-#, fuzzy
 msgid "Center origin"
-msgstr "Clona originale"
+msgstr "Centra origine"
 
 #
 # File: ../share/extensions/hpgl_output.inx, line: 24
 # File: ../share/extensions/plotter.inx, line: 82
 #: ../share/extensions/plotter.inx:81
-#, fuzzy
 msgid "Check this if your plotter uses a centered origin (default: Unchecked)"
 msgstr ""
 "Selezionare se il plotter usa un punto zero centrato (predefinito: non "
@@ -41483,14 +41430,12 @@ msgid "PostScript Input"
 msgstr "Input PostScript"
 
 #: ../share/extensions/raster_output_jpg.inx:3
-#, fuzzy
 msgid "Export to JPEG"
-msgstr "Opzioni esportazione"
+msgstr "Esporta in JPEG"
 
 #: ../share/extensions/raster_output_jpg.inx:7
-#, fuzzy
 msgid "Low Quality Warning"
-msgstr "Qualità inferiore (veloce)"
+msgstr "Avviso qualità inferiore"
 
 #: ../share/extensions/raster_output_jpg.inx:8
 msgid ""
@@ -41498,29 +41443,33 @@ msgid ""
 "in logos and other flat vector images. Your artwork will lose visual quality and "
 "any transparency."
 msgstr ""
+"Il formato JPEG è adatto alle fotografie, ma crea artefatti e distorsioni nei "
+"loghi e nelle immagini vettoriali con aree piatte. Il disegno avrà una qualità "
+"visiva minore e non avrà trasparenze."
 
 #: ../share/extensions/raster_output_jpg.inx:10
 msgid "This is a high compression example for demonstration."
-msgstr ""
+msgstr "Questo esempio illustra il risultato di un'elevata compressione"
 
 #: ../share/extensions/raster_output_jpg.inx:12
 msgid "You put a lot of talent, time and energy into your work."
-msgstr ""
+msgstr "Hai dedicato molto talento, tempo ed energia nel tuo lavoro."
 
 #: ../share/extensions/raster_output_jpg.inx:13
 msgid ""
 "Your work deserves better, so you should consider exporting to PNG or WebP file "
 "formats with lossless compression instead."
 msgstr ""
+"Il tuo lavoro merita il meglio, considera di esportarlo nel formato PNG o WebP "
+"usando una compressione senza perdite."
 
 #: ../share/extensions/raster_output_jpg.inx:15
 msgid "Learn more details about JPEG:"
-msgstr ""
+msgstr "Ulteriori dettagli su JPEG:"
 
 #: ../share/extensions/raster_output_jpg.inx:16
-#, fuzzy
 msgid "https://inkscape.org/learn/jpg/"
-msgstr "https://inkscape.org/en/ask/"
+msgstr "https://inkscape.org/learn/jpg/"
 
 #: ../share/extensions/raster_output_jpg.inx:22
 #: ../share/extensions/raster_output_tiff.inx:23
@@ -41532,16 +41481,15 @@ msgstr "Qualità:"
 #: ../share/extensions/raster_output_jpg.inx:22
 #: ../share/extensions/raster_output_tiff.inx:23
 msgid "Quality between 0 and 100"
-msgstr ""
+msgstr "Qualità tra 0 e 100"
 
 #: ../share/extensions/raster_output_jpg.inx:26
-#, fuzzy
 msgid "Progressive"
-msgstr "Aggressivo"
+msgstr "Progressivo"
 
 #: ../share/extensions/raster_output_jpg.inx:26
 msgid "Store image as a progressive JPEG file."
-msgstr ""
+msgstr "Salva le immagini come JPEG progressivo"
 
 #: ../share/extensions/raster_output_jpg.inx:33
 msgid "JPEG (*.jpg)"
@@ -41552,27 +41500,24 @@ msgid "Render to JPEG file format"
 msgstr ""
 
 #: ../share/extensions/raster_output_png.inx:3
-#, fuzzy
 msgid "Optimized PNG"
-msgstr "Ottimizzato"
+msgstr "PNG ottimizzato"
 
 #: ../share/extensions/raster_output_png.inx:7
 msgid "Optimize PNG with 'optipng'"
-msgstr ""
+msgstr "PNG ottimizzato con 'optipng'"
 
 #: ../share/extensions/raster_output_png.inx:9
 msgid "Lossless"
-msgstr ""
+msgstr "Senza perdite"
 
 #: ../share/extensions/raster_output_png.inx:10
-#, fuzzy
 msgid "Interlaced"
-msgstr "Interfaccia"
+msgstr "Interlacciato"
 
 #: ../share/extensions/raster_output_png.inx:12
-#, fuzzy
 msgid "Level:"
-msgstr "Livello"
+msgstr "Livello:"
 
 #: ../share/extensions/raster_output_png.inx:13
 msgid "Minimal Effort"
@@ -41599,9 +41544,8 @@ msgid "Ten Compression Trials"
 msgstr "Compressione"
 
 #: ../share/extensions/raster_output_png.inx:21
-#, fuzzy
 msgid "Lossy Options"
-msgstr "Opzioni"
+msgstr "Opzioni con perdite"
 
 #: ../share/extensions/raster_output_png.inx:22
 #, fuzzy
@@ -41619,9 +41563,8 @@ msgid "Allow palette reduction"
 msgstr "Intersezione tracciati"
 
 #: ../share/extensions/raster_output_png.inx:31
-#, fuzzy
 msgid "Optimized PNG (*.png)"
-msgstr "SVG ottimizzato (*.svg)"
+msgstr "PNG ottimizzato (*.png)"
 
 #: ../share/extensions/raster_output_png.inx:32
 #, fuzzy
@@ -41629,33 +41572,29 @@ msgid "Optimize PNG output for file size."
 msgstr "Output SVG ottimizzato fornito da"
 
 #: ../share/extensions/raster_output_tiff.inx:3
-#, fuzzy
 msgid "Export to TIFF"
-msgstr "Opzioni esportazione"
+msgstr "Esporta in TIFF"
 
 #: ../share/extensions/raster_output_tiff.inx:8
 #: ../share/extensions/raster_output_webp.inx:16
-#, fuzzy
 msgid "Speed:"
-msgstr "_Velocità:"
+msgstr "Velocità:"
 
 #: ../share/extensions/raster_output_tiff.inx:10
 msgid "CCITT"
-msgstr ""
+msgstr "CCITT"
 
 #: ../share/extensions/raster_output_tiff.inx:11
-#, fuzzy
 msgid "Group 3"
-msgstr "Gruppo"
+msgstr "Gruppo 3"
 
 #: ../share/extensions/raster_output_tiff.inx:12
-#, fuzzy
 msgid "Group 4"
-msgstr "Gruppo"
+msgstr "Gruppo 4"
 
 #: ../share/extensions/raster_output_tiff.inx:13
 msgid "JPEG"
-msgstr ""
+msgstr "JPEG"
 
 #: ../share/extensions/raster_output_tiff.inx:14
 #, fuzzy
@@ -41664,15 +41603,15 @@ msgstr "Dilata"
 
 #: ../share/extensions/raster_output_tiff.inx:15
 msgid "SGI Log"
-msgstr ""
+msgstr "SGI Log"
 
 #: ../share/extensions/raster_output_tiff.inx:16
 msgid "SGI Log 24"
-msgstr ""
+msgstr "SGI Log 24"
 
 #: ../share/extensions/raster_output_tiff.inx:17
 msgid "Raw 16"
-msgstr ""
+msgstr "Raw 16"
 
 #: ../share/extensions/raster_output_tiff.inx:30
 msgid "TIFF (*.tiff)"
@@ -41683,53 +41622,48 @@ msgid "Render to TIFF file format"
 msgstr ""
 
 #: ../share/extensions/raster_output_webp.inx:3
-#, fuzzy
 msgid "Export to WebP"
-msgstr "Opzioni esportazione"
+msgstr "Esporta in WebP"
 
 #: ../share/extensions/raster_output_webp.inx:11
 msgid "Lossless:"
-msgstr ""
+msgstr "Senza perdite:"
 
 #: ../share/extensions/raster_output_webp.inx:11
 msgid "Do not use lossy compression."
-msgstr ""
+msgstr "Non usare compressione con perdite"
 
 #: ../share/extensions/raster_output_webp.inx:15
 msgid "Quality between 1 and 100"
-msgstr ""
+msgstr "Qualità tra 1 e 100"
 
 #: ../share/extensions/raster_output_webp.inx:17
-#, fuzzy
 msgid "Fastest"
-msgstr "Incolla"
+msgstr "Velocità massima"
 
 #: ../share/extensions/raster_output_webp.inx:18
-#, fuzzy
 msgid "Faster"
-msgstr "Bitmap"
+msgstr "Più veloce"
 
 #: ../share/extensions/raster_output_webp.inx:19
 msgid "Fast"
-msgstr ""
+msgstr "Veloce"
 
 #: ../share/extensions/raster_output_webp.inx:20
-#, fuzzy
 msgid "Balanced"
-msgstr "Brillantezza"
+msgstr "Bilanciato"
 
 #: ../share/extensions/raster_output_webp.inx:21
 msgid "Good"
-msgstr ""
+msgstr "Buona"
 
 #: ../share/extensions/raster_output_webp.inx:22
-#, fuzzy
 msgid "Better"
-msgstr "Lettere:"
+msgstr "Migliore"
 
 #: ../share/extensions/raster_output_webp.inx:23
 msgid "Best"
-msgstr ""
+msgstr "Massima"
 
 #: ../share/extensions/raster_output_webp.inx:31
 msgid "WebP (*.webp)"
@@ -41888,9 +41822,8 @@ msgid "Manually define the group ID. Leave blank to have it auto-generated."
 msgstr ""
 
 #: ../share/extensions/render_barcode_qrcode.inx:49
-#, fuzzy
 msgid "Group ID:"
-msgstr "Gruppo"
+msgstr "ID gruppo:"
 
 #: ../share/extensions/render_gear_rack.inx:3
 msgid "Rack Gear"
@@ -42133,22 +42066,22 @@ msgstr "Titolo PDF (obbligatorio per PDF/X):"
 
 #: ../share/extensions/scribus_export_pdf.inx:15
 msgid "Bleed added around the document (mm):"
-msgstr ""
+msgstr "Pagina al vivo aggiunta attorno al documento (mm):"
 
 #: ../share/extensions/scribus_export_pdf.inx:15
 msgid ""
 "Include an area of the given size around the Inkscape page in the final document."
 msgstr ""
+"Include un'area della dimensione specificata attorno alla pagina di Inkscape nel "
+"documento finale."
 
 #: ../share/extensions/scribus_export_pdf.inx:16
-#, fuzzy
 msgid "Show bleed marks"
-msgstr "Indicatori di taglio"
+msgstr "Mostra indicatori di taglio"
 
 #: ../share/extensions/scribus_export_pdf.inx:17
-#, fuzzy
 msgid "Show color reference"
-msgstr "Preferenze selettore"
+msgstr "Mostra riferimento colore"
 
 #: ../share/extensions/scribus_export_pdf.inx:19
 #, fuzzy
@@ -42480,9 +42413,8 @@ msgid "Convert SVG Font to Glyph Layers"
 msgstr "Converti SVG Font in livelli glifo"
 
 #: ../share/extensions/svgfont2layers.inx:5
-#, fuzzy
 msgid "Stop after (30 Recommended)"
-msgstr "Carica solo i primi 30 glifi (consigliato)"
+msgstr "Interrompi dopo (consigliato 30)"
 
 #: ../share/extensions/synfig_output.inx:3
 msgid "Synfig Output"
@@ -42643,7 +42575,7 @@ msgstr "busta dl no10"
 
 #: ../share/extensions/template_generic.inx:3
 msgid "Generic Canvas"
-msgstr "Canvas generico"
+msgstr "Tela generica"
 
 #: ../share/extensions/template_generic.inx:6
 msgid "Custom Width:"
@@ -42659,7 +42591,7 @@ msgstr "Unità SVG:"
 
 #: ../share/extensions/template_generic.inx:18
 msgid "Canvas background:"
-msgstr "Sfondo canvas:"
+msgstr "Sfondo tela:"
 
 #: ../share/extensions/template_generic.inx:20
 #: ../share/extensions/template_page.inx:22
@@ -42683,15 +42615,15 @@ msgstr "Nascondi bordi"
 
 #: ../share/extensions/template_generic.inx:32
 msgid "Generic canvas..."
-msgstr "Canvas generico..."
+msgstr "Tela generica..."
 
 #: ../share/extensions/template_generic.inx:34
 msgid "Generic canvas of chosen size."
-msgstr "Canvas generico della dimensione scelta."
+msgstr "Tela generica della dimensione scelta."
 
 #: ../share/extensions/template_generic.inx:36
 msgid "empty generic canvas"
-msgstr "canvas generico"
+msgstr "tela generico"
 
 #: ../share/extensions/template_icon.inx:3
 msgid "Icon"
@@ -43609,7 +43541,7 @@ msgstr "immagine;editor;vettoriale;disegno;"
 # File: ../org.inkscape.Inkscape.desktop.template, line: 17
 #: ../org.inkscape.Inkscape.desktop.template:17
 msgid "${INKSCAPE_ICONPATH}"
-msgstr ""
+msgstr "${INKSCAPE_ICONPATH}"
 
 #: ../org.inkscape.Inkscape.desktop.template:22
 msgid "New Drawing"
