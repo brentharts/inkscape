@@ -48,7 +48,6 @@
 #include "path-prefix.h"
 #include "print.h"
 #include "rdf.h"
-#include "selection-chemistry.h"
 #include "verbs.h"
 
 #include "extension/db.h"
@@ -56,11 +55,9 @@
 #include "extension/input.h"
 #include "extension/output.h"
 
-#include "helper/png-write.h"
-
 #include "io/file.h"
 #include "io/resource.h"
-#include "io/resource-manager.h"
+#include "io/fix-broken-links.h"
 #include "io/sys.h"
 
 #include "object/sp-defs.h"
@@ -69,7 +66,6 @@
 #include "object/sp-use.h"
 #include "style.h"
 
-#include "ui/dialog/font-substitution.h"
 #include "ui/dialog/filedialog.h"
 #include "ui/interface.h"
 #include "ui/tools/tool-base.h"
@@ -937,7 +933,7 @@ void sp_import_document(SPDesktop *desktop, SPDocument *clipdoc, bool in_place)
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
 
     auto *node_after = desktop->getSelection()->topRepr();
-    if (node_after && prefs->getBool("/options/pasteaboveselected")) {
+    if (node_after && prefs->getBool("/options/paste/aboveselected", true)) {
         target_parent = node_after->parent();
     } else {
         node_after = target_parent->lastChild();
@@ -1026,8 +1022,8 @@ void sp_import_document(SPDesktop *desktop, SPDocument *clipdoc, bool in_place)
         Inkscape::XML::Node *clipnode = sp_repr_lookup_name(root, "inkscape:clipboard", 1);
         if (clipnode) {
             Geom::Point min, max;
-            sp_repr_get_point(clipnode, "min", &min);
-            sp_repr_get_point(clipnode, "max", &max);
+            clipnode->getAttributePoint("min", &min);
+            clipnode->getAttributePoint("max", &max);
             pos_original = Geom::Point(min[Geom::X], max[Geom::Y]);
         }
         Geom::Point offset = pos_original - sel_bbox->corner(3);

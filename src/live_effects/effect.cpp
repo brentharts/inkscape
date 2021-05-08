@@ -98,6 +98,7 @@ namespace LivePathEffect {
 
 const EnumEffectData<EffectType> LPETypeData[] = {
     // {constant defined in effect-enum.h, N_("name of your effect"), "name of your effect in SVG"}
+    // please sync order with effect-enum.h
 /* 0.46 */
     {
         BEND_PATH,
@@ -581,20 +582,6 @@ const EnumEffectData<EffectType> LPETypeData[] = {
         false ,//experimental
     },
     {
-        BOOL_OP,
-        N_("Boolean operation") ,//label
-        "bool_op" ,//key
-        "bool-op" ,//icon
-        "Boolean operation" ,//untranslated name
-        N_("Cut, union, subtract, intersect and divide a path non-destructively with another path") ,//description
-        true  ,//on_path
-        true  ,//on_shape
-        true ,//on_group
-        false ,//on_image
-        false ,//on_text
-        false ,//experimental
-    },
-    {
         POWERCLIP,
         N_("Power clip") ,//label
         "powerclip" ,//key
@@ -664,6 +651,36 @@ const EnumEffectData<EffectType> LPETypeData[] = {
         false ,//on_text
         false ,//experimental
     },
+    /* 1.1 */
+    {
+        BOOL_OP,
+        N_("Boolean operation") ,//label
+        "bool_op" ,//key
+        "bool-op" ,//icon
+        "Boolean operation" ,//untranslated name
+        N_("Cut, union, subtract, intersect and divide a path non-destructively with another path") ,//description
+        true  ,//on_path
+        true  ,//on_shape
+        true ,//on_group
+        false ,//on_image
+        false ,//on_text
+        false ,//experimental
+    },
+    {
+        SLICE,
+        N_("Slice") ,//label
+        "slice" ,//key
+        "slice" ,//icon
+        "Slice" ,//untranslated name
+        N_("Slices the item into parts. It can also be applied multiple times.") ,//description
+        true  ,//on_path
+        true  ,//on_shape
+        true ,//on_group
+        false ,//on_image
+        false ,//on_text
+        false ,//experimental
+    },
+    // VISIBLE experimental LPE
     {
         ANGLE_BISECTOR,
         N_("Angle bisector") ,//label
@@ -775,21 +792,6 @@ const EnumEffectData<EffectType> LPETypeData[] = {
         false ,//on_image
         false ,//on_text
         true ,//experimental
-    },
-    /* 1.1 */
-    {
-        SLICE,
-        NC_("path effect", "Slice") ,//label
-        "slice" ,//key
-        "slice" ,//icon
-        "Slice" ,//untranslated name
-        N_("Slices the item into parts. It can also be applied multiple times.") ,//description
-        true  ,//on_path
-        true  ,//on_shape
-        true ,//on_group
-        false ,//on_image
-        false ,//on_text
-        false ,//experimental
     },
 #ifdef LPE_ENABLE_TEST_EFFECTS
     {
@@ -1262,28 +1264,24 @@ Effect::processObjects(LPEAction lpe_action)
     }
     sp_lpe_item_enable_path_effects(sp_lpe_item, false);
     for (auto id : items) {
-        if (id.empty()) {
-            sp_lpe_item_enable_path_effects(sp_lpe_item, true);
-            return;
-        }
         SPObject *elemref = nullptr;
         if ((elemref = document->getObjectById(id.c_str()))) {
             Inkscape::XML::Node * elemnode = elemref->getRepr();
             std::vector<SPItem*> item_list;
-            item_list.push_back(SP_ITEM(elemref));
+            auto item = dynamic_cast<SPItem *>(elemref);
+            item_list.push_back(item);
             std::vector<Inkscape::XML::Node*> item_to_select;
             std::vector<SPItem*> item_selected;
             SPCSSAttr *css;
             Glib::ustring css_str;
-            SPItem *item = SP_ITEM(elemref);
             switch (lpe_action){
             case LPE_TO_OBJECTS:
                 if (item->isHidden()) {
                     item->deleteObject(true);
                 } else {
                     elemnode->removeAttribute("sodipodi:insensitive");
-                    if (!SP_IS_DEFS(SP_ITEM(elemref)->parent)) {
-                        SP_ITEM(elemref)->moveTo(SP_ITEM(sp_lpe_item), false);
+                    if (!SP_IS_DEFS(item->parent)) {
+                        item->moveTo(sp_lpe_item, false);
                     }
                 }
                 break;
@@ -1650,17 +1648,14 @@ Effect::defaultParamSet()
             pref_path += key;
             bool valid = prefs->getEntry(pref_path).isValid();
             const gchar * set_or_upd;
-            Glib::ustring def = Glib::ustring(_("<b>Default value:</b> ")) + defvalue + pref_path;
-            Glib::ustring ove = Glib::ustring(_("<b>Default value overridden:</b> ")) +
-                                Glib::ustring(prefs->getString(pref_path)) + pref_path;
+            Glib::ustring def = Glib::ustring(_("<b>Default value:</b> ")) + defvalue;
+            Glib::ustring ove = Glib::ustring(_("<b>Default value overridden:</b> "));
             if (valid) {
                 set_or_upd = _("Update");
                 def = "";
-                // def = Glib::ustring(_("<b>Default value:</b> <s>")) + defvalue + Glib::ustring("</s>\n");
             } else {
                 set_or_upd = _("Set");
                 ove = "";
-                // ove = Glib::ustring(_("<b>Default value overridden:</b> None\n"));
             }
             Gtk::Box * vbox_param = Gtk::manage( new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL) );
             Gtk::Box *namedicon = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL));
@@ -1687,8 +1682,10 @@ Effect::defaultParamSet()
             if (!valid) {
                 unset->set_sensitive(false);
             }
-            vbox_param->pack_start(*set, true, true, 2);
-            vbox_param->pack_start(*unset, true, true, 2);
+            unset->set_size_request (90, -1);
+            set->set_size_request (90, -1);
+            vbox_param->pack_end(*unset, false, true, 2);
+            vbox_param->pack_end(*set, false, true, 2);
 
             vbox_expander->pack_start(*vbox_param, true, true, 2);
         }

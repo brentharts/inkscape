@@ -164,7 +164,6 @@ private:
     std::vector<SPCSSAttr*> te_selected_style;
     std::vector<unsigned> te_selected_style_positions;
     int nr_blocks = 0;
-    unsigned copied_style_length = 0;
 
 
     // we need a way to copy plain text AND remember its style;
@@ -405,8 +404,8 @@ void ClipboardManagerImpl::copySymbol(Inkscape::XML::Node* symbol, gchar const* 
     _root->appendChild(use);
 
     // This min and max sets offsets, we don't have any so set to zero.
-    sp_repr_set_point(_clipnode, "min", Geom::Point(0,0));
-    sp_repr_set_point(_clipnode, "max", Geom::Point(0,0));
+    _clipnode->setAttributePoint("min", Geom::Point(0, 0));
+    _clipnode->setAttributePoint("max", Geom::Point(0, 0));
 
     fit_canvas_to_drawing(_clipboardSPDoc.get());
     _setClipboardTargets();
@@ -436,16 +435,25 @@ bool ClipboardManagerImpl::paste(SPDesktop *desktop, bool in_place)
     if ( target == CLIPBOARD_GDK_PIXBUF_TARGET ) {
         return _pasteImage(desktop->doc());
     }
-    // if there's only text, paste it into a selected text object or create a new one
-    if ( target == CLIPBOARD_TEXT_TARGET ) {
-        return _pasteText(desktop);
+    if (target == CLIPBOARD_TEXT_TARGET ) {
+        // It was text, and we did paste it. If not, continue on.
+        if (_pasteText(desktop)) {
+            return true;
+        }
+        // If the clipboard conains text/plain, but is an svg document
+        // then we'll try and detect it and then paste it if possible.
     }
 
-    // otherwise, use the import extensions
     auto tempdoc = _retrieveClipboard(target);
+
     if ( tempdoc == nullptr ) {
-        _userWarn(desktop, _("Nothing on the clipboard."));
-        return false;
+        if (target == CLIPBOARD_TEXT_TARGET ) {
+            _userWarn(desktop, _("Can't paste text outside of the text tool."));
+            return false;
+        } else {
+            _userWarn(desktop, _("Nothing on the clipboard."));
+            return false;
+        }
     }
 
     /* Special paste nodes handle; only if:
@@ -633,8 +641,8 @@ bool ClipboardManagerImpl::pasteSize(ObjectSet *set, bool separately, bool apply
     if (clipnode) {
         Geom::Point min, max;
         bool visual_bbox = !Inkscape::Preferences::get()->getInt("/tools/bounding_box");
-        sp_repr_get_point(clipnode, (visual_bbox ? "min" : "geom-min"), &min);
-        sp_repr_get_point(clipnode, (visual_bbox ? "max" : "geom-max"), &max);
+        clipnode->getAttributePoint((visual_bbox ? "min" : "geom-min"), &min);
+        clipnode->getAttributePoint((visual_bbox ? "max" : "geom-max"), &max);
 
         // resize each object in the selection
         if (separately) {
@@ -936,12 +944,12 @@ void ClipboardManagerImpl::_copySelection(ObjectSet *selection)
     }
 
     if (Geom::OptRect size = selection->visualBounds()) {
-        sp_repr_set_point(_clipnode, "min", size->min());
-        sp_repr_set_point(_clipnode, "max", size->max());
+        _clipnode->setAttributePoint("min", size->min());
+        _clipnode->setAttributePoint("max", size->max());
     }
     if (Geom::OptRect geom_size = selection->geometricBounds()) {
-        sp_repr_set_point(_clipnode, "geom-min", geom_size->min());
-        sp_repr_set_point(_clipnode, "geom-max", geom_size->max());
+        _clipnode->setAttributePoint("geom-min", geom_size->min());
+        _clipnode->setAttributePoint("geom-max", geom_size->max());
     }
 }
 
@@ -1237,73 +1245,23 @@ bool ClipboardManagerImpl::_pasteText(SPDesktop *desktop)
     if (dynamic_cast<Inkscape::UI::Tools::TextTool *>(desktop->event_context)) {
         return Inkscape::UI::Tools::sp_text_paste_inline(desktop->event_context);
     }
-    return false;
-        /* return false;
-        //apply the saved style to pasted text
-        Glib::RefPtr<Gtk::Clipboard> refClipboard = Gtk::Clipboard::get();
-        Glib::ustring const clip_text = refClipboard->wait_for_text();
-        Glib::ustring text(clip_text);
-        if(text.length() == copied_style_length)
-        {
-            Inkscape::UI::Tools::TextTool *tc = SP_TEXT_CONTEXT(desktop->event_context);
-            // we realy only want to inherit container style (to act as 0.92 and faster performance)
-            // maybe for 1.0 we can make a special type of clipboard
-            // that handle layout or maybe we can use the last desktop text style
-            // so I comment unneded code.
-            Inkscape::Text::Layout const *layout = te_get_layout(tc->text);
-            Inkscape::Text::Layout::iterator it_next;
-            Inkscape::Text::Layout::iterator it = tc->text_sel_end;
-            SPText *textitem = dynamic_cast<SPText *>(tc->text);
-            if (textitem) {
-                textitem->rebuildLayout();
-            }
-            SPFlowtext *flowtext = dynamic_cast<SPFlowtext *>(tc->text);
-            if (flowtext) {
-                flowtext->rebuildLayout();
-            }
-            // we realy only want to inherit container style
-            SPCSSAttr *css = take_style_from_item(tc->text);
-            for (int i = 0; i < nr_blocks; ++i)
-            {
-                gchar const *w = sp_repr_css_property(css, "font-size", "0px");
 
-                // Don't set font-size if it wasn't set.
-                if (w && strcmp(w, "0px") != 0) {
-                    sp_repr_css_set_property(te_selected_style[i], "font-size", w);
-                }
-            }
-
-            for (unsigned int i = 0; i < text.length(); ++i)
-                it.prevCharacter();
-
-            it_next = layout->charIndexToIterator(layout->iteratorToCharIndex(it));
-
-            for (int i = 0; i < nr_blocks; ++i)
-            {
-                for (unsigned int j = te_selected_style_positions[i]; j < te_selected_style_positions[i+1]; ++j)
-                    it_next.nextCharacter();
-
-                // sp_te_apply_style(tc->text, it, it_next, te_selected_style[i]);
-                te_update_layout_now_recursive(tc->text);
-                tc->text_sel_end = it;
-                for (unsigned int j = te_selected_style_positions[i]; j < te_selected_style_positions[i+1]; ++j)
-                    it.nextCharacter();
-            }
+    // Parse the clipboard text as if it was a color string.
+    Glib::RefPtr<Gtk::Clipboard> clipboard = Gtk::Clipboard::get();
+    Glib::ustring const clip_text = clipboard->wait_for_text();
+    if (clip_text.length() < 30) {
+        // Zero makes it impossible to paste a 100% transparent black, but it's useful.
+        guint32 const rgb0 = sp_svg_read_color(clip_text.c_str(), 0x0);
+        if (rgb0) {
+            SPCSSAttr *color_css = sp_repr_css_attr_new();
+            sp_repr_css_set_property(color_css, "fill", SPColor(rgb0).toString().c_str());
+            // In the future this could parse opacity, but sp_svg_read_color lacks this.
+            sp_repr_css_set_property(color_css, "fill-opacity", "1.0");
+            sp_desktop_set_style(desktop, color_css);
+            return true;
         }
-        return true;
-
-    }
-    // old(try to parse the text as a color and, if successful, apply it as the current style)
-    // we realy only want to inherit container style
-    // maybe for 1.0 we can make a special type of clipboard
-    // that handle layout or maybe we can use the last desktop text style
-    SPCSSAttr *css = sp_repr_css_attr_parse_color_to_fill(_clipboard->wait_for_text());
-    if (css) {
-        sp_desktop_set_style(desktop, css);
-        return true;
     }
     return false;
-    */
 }
 
 
@@ -1404,7 +1362,7 @@ std::unique_ptr<SPDocument> ClipboardManagerImpl::_retrieveClipboard(Glib::ustri
 
     // there is no specific plain SVG input extension, so if we can paste the Inkscape SVG format,
     // we use the image/svg+xml mimetype to look up the input extension
-    if (target == "image/x-inkscape-svg") {
+    if (target == "image/x-inkscape-svg" || target == "text/plain") {
         target = "image/svg+xml";
     }
     // Use the EMF extension to import metafiles
@@ -1485,7 +1443,7 @@ void ClipboardManagerImpl::_onGet(Gtk::SelectionData &sel, guint /*info*/)
             }
             if (nv && nv->attribute("inkscape:pageopacity")) {
                 double opacity = 1.0;
-                sp_repr_get_double(nv, "inkscape:pageopacity", &opacity);
+                nv->getAttributeDouble("inkscape:pageopacity", &opacity);
                 bgcolor |= SP_COLOR_F_TO_U(opacity);
             }
             std::vector<SPItem*> x;
