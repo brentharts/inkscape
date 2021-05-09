@@ -384,18 +384,18 @@ void
 PageSizer::updateFitMarginsUI(Inkscape::XML::Node *nv_repr)
 {
     if (!_lockMarginUpdate) {
-        double value = 0.0;
+        double value;
         double nan = std::numeric_limits<double>::quiet_NaN();
-        if ((value = nv_repr->getAttributeDouble("fit-margin-top", nan)) != nan) {
+        if (!std::isnan(value = nv_repr->getAttributeDouble("fit-margin-top", nan))) {
             _marginTop.setValue(value);
         }
-        if ((value = nv_repr->getAttributeDouble("fit-margin-left", nan)) != nan) {
+        if (!std::isnan(value = nv_repr->getAttributeDouble("fit-margin-left", nan))) {
             _marginLeft.setValue(value);
         }
-        if ((value = nv_repr->getAttributeDouble("fit-margin-right", nan)) != nan) {
+        if (!std::isnan(value = nv_repr->getAttributeDouble("fit-margin-right", nan))) {
             _marginRight.setValue(value);
         }
-        if ((value = nv_repr->getAttributeDouble("fit-margin-bottom", nan)) != nan) {
+        if (!std::isnan(value = nv_repr->getAttributeDouble("fit-margin-bottom", nan))) {
             _marginBottom.setValue(value);
         }
     }

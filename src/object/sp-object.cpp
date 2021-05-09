@@ -1461,7 +1461,7 @@ bool SPObject::storeAsDouble( gchar const *key, double *val ) const
     g_assert(this->getRepr()!= nullptr);
     double nan = std::numeric_limits<double>::quiet_NaN();
     double temp_val = ((Inkscape::XML::Node *)(this->getRepr()))->getAttributeDouble(key, nan);
-    if (temp_val == nan) {
+    if (std::isnan(temp_val)) {
         return false;
     }
     *val = temp_val;

@@ -1129,10 +1129,8 @@ void SPNamedView::setGuides(bool v)
 bool SPNamedView::getGuides()
 {
     g_assert(this->getRepr() != nullptr);
-    bool v = this->getRepr()->getAttributeBoolean("showguides", true);
     // show guides if not specified, for backwards compatibility
-    unsigned int set = this->getRepr()->getAttributeBoolean("showguides", &v);
-    return v;
+    return this->getRepr()->getAttributeBoolean("showguides", true);
 }
 
 void SPNamedView::lockGuides()
