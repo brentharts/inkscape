@@ -221,7 +221,7 @@ public:
 
     int getAttributeInt(Util::const_char_ptr key, int default_value) const;
 
-    bool getAttributeDouble(Util::const_char_ptr key, double *val) const;
+    double getAttributeDouble(Util::const_char_ptr key, double default_value) const;
 
     bool setAttributeBoolean(Util::const_char_ptr key, bool val);
 

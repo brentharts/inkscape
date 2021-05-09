@@ -53,15 +53,14 @@ int Node::getAttributeInt(Util::const_char_ptr key, int default_value) const
     return atoi(v);
 }
 
-bool Node::getAttributeDouble(Util::const_char_ptr key, double *val) const
+double Node::getAttributeDouble(Util::const_char_ptr key, double default_value) const
 {
     auto v = this->attribute(key.data());
     if (v == nullptr) {
-        return false;
+        return default_value;
     }
 
-    *val = g_ascii_strtod(v, nullptr);
-    return true;
+    return g_ascii_strtod(v, nullptr);
 }
 
 bool Node::setAttributeBoolean(Util::const_char_ptr key, bool val)
