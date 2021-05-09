@@ -6,6 +6,7 @@
 # Luca Ferretti <elle.uca@infinito.it>, 2005.
 # Luca Bruno <lucab@debian.org>, 2005-2009.
 # Firas Hanife <FirasHanife@gmail.com>, 2014-2019.
+# Marco Riva <oelimar@mail.com>, 2019-
 #
 msgid ""
 msgstr ""
@@ -41,11 +42,11 @@ msgstr "Gelatina migliorata"
 #: ../src/extension/internal/filter/bevels.h:145
 #: ../src/extension/internal/filter/bevels.h:229
 msgid "Bevels"
-msgstr "Sfumature"
+msgstr "Smussi"
 
 #: ../share/filters/filters.svg.h:4
 msgid "Same as Matte jelly but with more controls"
-msgstr "Come Gelatina opaca, ma con più parametri"
+msgstr "Come per Gelatina opaca, ma con più parametri"
 
 #: ../share/filters/filters.svg.h:6
 msgid "Metal Casting"
@@ -71,7 +72,7 @@ msgstr "Sfocature"
 
 #: ../share/filters/filters.svg.h:12
 msgid "Edges are partly feathered out"
-msgstr "I bordi sono parzialmente spiumati"
+msgstr "I bordi sono parzialmente sfumati"
 
 #: ../share/filters/filters.svg.h:14
 msgid "Jigsaw Piece"
@@ -141,11 +142,11 @@ msgstr "Smussatura lieve a cuscino, con riflessi opachi"
 
 #: ../share/filters/filters.svg.h:34
 msgid "Ridged Border"
-msgstr "Bordo con cresta"
+msgstr "Bordo crestato"
 
 #: ../share/filters/filters.svg.h:36
 msgid "Ridged border with inner bevel"
-msgstr "Bordo truccato con smussatura interna"
+msgstr "Bordo crestato con smussatura interna"
 
 #: ../share/filters/filters.svg.h:38
 msgid "Ripple"
@@ -171,7 +172,7 @@ msgstr "Macchia"
 
 #: ../share/filters/filters.svg.h:44
 msgid "Fill object with sparse translucent specks"
-msgstr "Disegna l'oggetto con granelli traslucidi sparsi"
+msgstr "Disegna l'oggetto con macchie traslucide sparse"
 
 #: ../share/filters/filters.svg.h:46
 msgid "Oil Slick"
@@ -205,7 +206,7 @@ msgstr "Materiali"
 
 #: ../share/filters/filters.svg.h:56
 msgid "Leopard spots (loses object's own color)"
-msgstr "Macchie di leopardo (per il colore originario dell'oggetto)"
+msgstr "Macchie di leopardo (rimuove il colore originario dell'oggetto)"
 
 #: ../share/filters/filters.svg.h:58
 msgid "Zebra"
@@ -227,7 +228,7 @@ msgstr "Nuvole bianche sparse, soffici e rade"
 #: ../share/filters/filters.svg.h:66
 #: ../src/extension/internal/bitmap/sharpen.cpp:39
 msgid "Sharpen"
-msgstr "Nitidezza"
+msgstr "Rende nitido"
 
 #: ../share/filters/filters.svg.h:67 ../share/filters/filters.svg.h:71
 #: ../share/filters/filters.svg.h:87 ../share/filters/filters.svg.h:295
@@ -238,7 +239,7 @@ msgstr "Effetti immagine"
 
 #: ../share/filters/filters.svg.h:68
 msgid "Sharpen edges and boundaries within the object, force=0.15"
-msgstr "Affina bordi e riquadri interni all'oggetto, forza=0.15"
+msgstr "Affina bordi e contorni interni all'oggetto, forza=0.15"
 
 #: ../share/filters/filters.svg.h:70
 msgid "Sharpen More"
@@ -246,7 +247,7 @@ msgstr "Maggiore nitidezza"
 
 #: ../share/filters/filters.svg.h:72
 msgid "Sharpen edges and boundaries within the object, force=0.3"
-msgstr "Affina bordi e riquadri interni all'oggetto, forza=0.3"
+msgstr "Affina bordi e contorni interni all'oggetto, forza=0.3"
 
 #: ../share/filters/filters.svg.h:74
 msgid "Oil Painting"
@@ -279,11 +280,11 @@ msgstr "Simula lo stile dei dipinti ad olio"
 #: ../share/filters/filters.svg.h:78
 #: ../src/ui/dialog/inkscape-preferences.cpp:444
 msgid "Pencil"
-msgstr "Pastello"
+msgstr "matita"
 
 #: ../share/filters/filters.svg.h:80
 msgid "Detect color edges and retrace them in grayscale"
-msgstr "Rileva bordi colorati e li ridisegna in scala di grigi"
+msgstr "Rileva i bordi colorati e li ridisegna in scala di grigi"
 
 #: ../share/filters/filters.svg.h:82
 msgid "Blueprint"
@@ -328,7 +329,7 @@ msgstr "Filo spinato"
 
 #: ../share/filters/filters.svg.h:96
 msgid "Gray bevelled wires with drop shadows"
-msgstr "Filo grigio spigoloso, con ombreggiature"
+msgstr "Filo grigio smussati, con ombreggiature"
 
 #: ../share/filters/filters.svg.h:98
 msgid "Swiss Cheese"
@@ -403,7 +404,7 @@ msgstr "Sotto un vetro rotto"
 
 #: ../share/filters/filters.svg.h:130
 msgid "Bubbly Bumps"
-msgstr "Rughe a bolle"
+msgstr "Rigonfiamenti a bolle"
 
 #: ../share/filters/filters.svg.h:131 ../share/filters/filters.svg.h:307
 #: ../share/filters/filters.svg.h:311 ../share/filters/filters.svg.h:347
@@ -422,11 +423,11 @@ msgstr "Rughe a bolle"
 #: ../src/extension/internal/filter/bumps.h:143
 #: ../src/extension/internal/filter/bumps.h:363
 msgid "Bumps"
-msgstr "Rugosità"
+msgstr "Rigonfiamenti"
 
 #: ../share/filters/filters.svg.h:132
 msgid "Flexible bubbles effect with some displacement"
-msgstr "Bolle parametrizzate con una quantità di spostamento"
+msgstr "Bolle parametrizzate con un certo spostamento"
 
 #: ../share/filters/filters.svg.h:134
 msgid "Glowing Bubble"
@@ -530,8 +531,8 @@ msgstr "Cera d'api iridescente"
 #: ../share/filters/filters.svg.h:176
 msgid "Waxy texture which keeps its iridescence through color fill change"
 msgstr ""
-"Texture ondulata che mantiene l'iridescenza con cambiamenti del colore di "
-"riempimento"
+"trama ondulata che mantiene l'iridescenza indipendentemente dai cambiamenti "
+"del colore di riempimento"
 
 #: ../share/filters/filters.svg.h:178
 msgid "Eroded Metal"
@@ -539,7 +540,7 @@ msgstr "Metallo consumato"
 
 #: ../share/filters/filters.svg.h:180
 msgid "Eroded metal texture with ridges, grooves, holes and bumps"
-msgstr "Texture a metallo consumato con sporgenze, buchi, aloni e righe"
+msgstr "Trama di metallo consumato con sporgenze, buchi, aloni e rigonfiamenti"
 
 #: ../share/filters/filters.svg.h:182
 msgid "Cracked Lava"
@@ -547,7 +548,7 @@ msgstr "Magma frammentato"
 
 #: ../share/filters/filters.svg.h:184
 msgid "A volcanic texture, a little like leather"
-msgstr "Una texture magmatica, simile al cuoio"
+msgstr "Una trama magmatica, simile al cuoio"
 
 #: ../share/filters/filters.svg.h:186
 msgid "Bark"
@@ -555,7 +556,7 @@ msgstr "Corteccia"
 
 #: ../share/filters/filters.svg.h:188
 msgid "Bark texture, vertical; use with deep colors"
-msgstr "Texture a corteccia, verticale; usare con colori scuri"
+msgstr "Trama a corteccia, verticale; usare con colori scuri"
 
 #: ../share/filters/filters.svg.h:190
 msgid "Lizard Skin"
@@ -563,15 +564,15 @@ msgstr "Pelle di lucertola"
 
 #: ../share/filters/filters.svg.h:192
 msgid "Stylized reptile skin texture"
-msgstr "Texture stilizzata come pelle di rettile"
+msgstr "Trama stilizzata come pelle di rettile"
 
 #: ../share/filters/filters.svg.h:194
 msgid "Stone Wall"
-msgstr "Muro in pietra"
+msgstr "Muro di pietra"
 
 #: ../share/filters/filters.svg.h:196
 msgid "Stone wall texture to use with not too saturated colors"
-msgstr "Texture a muro di pietra, da usare con colori non troppo saturi"
+msgstr "Trama a muro di pietra, da usare con colori non troppo saturi"
 
 #: ../share/filters/filters.svg.h:198
 msgid "Silk Carpet"
@@ -579,7 +580,7 @@ msgstr "Tappeto di seta"
 
 #: ../share/filters/filters.svg.h:200
 msgid "Silk carpet texture, horizontal stripes"
-msgstr "Texture a tappeto di seta, con strisce orizzontali"
+msgstr "Trama a tappeto di seta, con strisce orizzontali"
 
 #: ../share/filters/filters.svg.h:202
 msgid "Refractive Gel A"
@@ -587,7 +588,7 @@ msgstr "Gel rifrangente A"
 
 #: ../share/filters/filters.svg.h:204
 msgid "Gel effect with light refraction"
-msgstr "Effetto gel con debole rifrazione"
+msgstr "Effetto gel con lieve rifrazione"
 
 #: ../share/filters/filters.svg.h:206
 msgid "Refractive Gel B"
@@ -621,7 +622,7 @@ msgstr "Bordo rialzato"
 
 #: ../share/filters/filters.svg.h:220
 msgid "Strongly raised border around a flat surface"
-msgstr "Bordo molto sporgente da una superficie piatta"
+msgstr "Bordo molto rialzato attorno ad una superficie piatta"
 
 #: ../share/filters/filters.svg.h:222
 msgid "Metallized Ridge"
@@ -629,7 +630,7 @@ msgstr "Cresta metallizzata"
 
 #: ../share/filters/filters.svg.h:224
 msgid "Gel Ridge metallized at its top"
-msgstr "Cresta gelatinosa con punta metallizzata"
+msgstr "Cresta gelatinosa con sommità metallizzata"
 
 #: ../share/filters/filters.svg.h:226
 msgid "Fat Oil"
@@ -669,7 +670,7 @@ msgstr "Strappi"
 
 #: ../share/filters/filters.svg.h:240
 msgid "Peeling painting on a wall"
-msgstr "Carta da parati strappata"
+msgstr "Vernice scrostata dal muro"
 
 #: ../share/filters/filters.svg.h:242
 msgid "Gold Splatter"
@@ -677,7 +678,7 @@ msgstr "Spruzzi dorati"
 
 #: ../share/filters/filters.svg.h:244
 msgid "Splattered cast metal, with golden highlights"
-msgstr "Stampo metallico a spruzzi, con riflessi dorati"
+msgstr "Spruzzi di metallo colato, con riflessi dorati"
 
 #: ../share/filters/filters.svg.h:246
 msgid "Gold Paste"
@@ -697,15 +698,15 @@ msgstr "Plastica spiegazzata opaca, con bordi fusi"
 
 #: ../share/filters/filters.svg.h:254
 msgid "Enamel Jewelry"
-msgstr "Gioielli smaltati"
+msgstr "Gioielleria smaltata"
 
 #: ../share/filters/filters.svg.h:256
 msgid "Slightly cracked enameled texture"
-msgstr "Texture smaltata con leggere striature"
+msgstr "Trama smaltata con leggere striature"
 
 #: ../share/filters/filters.svg.h:258
 msgid "Rough Paper"
-msgstr "Carta grezza"
+msgstr "Carta ruvida"
 
 #: ../share/filters/filters.svg.h:260
 msgid "Aquarelle paper effect which can be used for pictures as for objects"
@@ -713,7 +714,7 @@ msgstr "Carta acquarellata, usabile per oggetti o immagini"
 
 #: ../share/filters/filters.svg.h:262
 msgid "Rough and Glossy"
-msgstr "Grezza e patinata"
+msgstr "Ruvida e patinata"
 
 #: ../share/filters/filters.svg.h:264
 msgid ""
@@ -780,7 +781,7 @@ msgstr "Riempimento colorabile con flussi interni in trasparenza"
 
 #: ../share/filters/filters.svg.h:294
 msgid "Soft Focus Lens"
-msgstr "Lente focale leggera"
+msgstr "Lente per effetto Soft Focus"
 
 #: ../share/filters/filters.svg.h:296
 msgid "Glowing image content without blurring it"
@@ -804,36 +805,36 @@ msgstr "Vetro illuminato da sotto"
 
 #: ../share/filters/filters.svg.h:306
 msgid "HSL Bumps Alpha"
-msgstr "Rughe HSL e alpha"
+msgstr "Rigonfi HSL e alpha"
 
 #: ../share/filters/filters.svg.h:308
 msgid "Same as HSL Bumps but with transparent highlights"
-msgstr "Come Rughe HSL, ma con riflessi trasparenti"
+msgstr "Come Rigonfi HSL, ma con riflessi trasparenti"
 
 #: ../share/filters/filters.svg.h:310
 msgid "Bubbly Bumps Alpha"
-msgstr "Rughe a bolle, con trasparenza"
+msgstr "Rigonfiamenti a bolle, con trasparenza"
 
 #: ../share/filters/filters.svg.h:312
 msgid "Same as Bubbly Bumps but with transparent highlights"
-msgstr "Come Rughe a bolle, ma con riflessi trasparenti"
+msgstr "Come Rigonfiamenti a bolle, ma con riflessi trasparenti"
 
 #: ../share/filters/filters.svg.h:314 ../share/filters/filters.svg.h:362
 msgid "Torn Edges"
-msgstr "Contorni frastagliati"
+msgstr "Contorni strappati"
 
 #: ../share/filters/filters.svg.h:316 ../share/filters/filters.svg.h:364
 msgid ""
 "Displace the outside of shapes and pictures without altering their content"
-msgstr "Scosta l'esterno di forme e immagine senza alterare il contenuto"
+msgstr "Scosta l'esterno di forme e immagine senza alterarne il contenuto"
 
 #: ../share/filters/filters.svg.h:318
 msgid "Roughen Inside"
-msgstr "Interno nitido"
+msgstr "Interno grezzo"
 
 #: ../share/filters/filters.svg.h:320
 msgid "Roughen all inside shapes"
-msgstr "Interni delle forme più nitidi"
+msgstr "Interni delle forme più grezzi"
 
 #: ../share/filters/filters.svg.h:322
 msgid "Evanescent"
@@ -853,7 +854,7 @@ msgstr "Gesso e spugna"
 
 #: ../share/filters/filters.svg.h:328
 msgid "Low turbulence gives sponge look and high turbulence chalk"
-msgstr "Una bassa turbolenza per un effetto spugna, alta per effetto gesso"
+msgstr "Bassa turbolenza per un effetto spugna, alta per un effetto gesso"
 
 #: ../share/filters/filters.svg.h:330
 msgid "People"
@@ -861,15 +862,15 @@ msgstr "Persone"
 
 #: ../share/filters/filters.svg.h:332
 msgid "Colorized blotches, like a crowd of people"
-msgstr "Macchie colorate, simile a una folla di persone"
+msgstr "Macchie colorate, simili ad una folla di persone"
 
 #: ../share/filters/filters.svg.h:334
 msgid "Scotland"
-msgstr "Tartan"
+msgstr "Trama scozzese"
 
 #: ../share/filters/filters.svg.h:336
 msgid "Colorized mountain tops out of the fog"
-msgstr "Montagna colorata con la cima annuvolata"
+msgstr "Sommità colorata di una montagna che emerge dalla nebbia"
 
 #: ../share/filters/filters.svg.h:338
 msgid "Garden of Delights"
@@ -889,7 +890,7 @@ msgstr "Alone netto"
 #: ../share/filters/filters.svg.h:344
 msgid "In and out glow with a possible offset and colorizable flood"
 msgstr ""
-"Alone interno e esterno con riempimento colorabile ed eventuale spiazzamento"
+"Alone interno e esterno con riempimento colorabile ed eventuale scostamento"
 
 #: ../share/filters/filters.svg.h:346
 msgid "Dark Emboss"
@@ -901,11 +902,11 @@ msgstr "Rilievo: effetto 3D dove il bianco è rimpiazzato col nero"
 
 #: ../share/filters/filters.svg.h:350
 msgid "Bubbly Bumps Matte"
-msgstr "Rughe a bolle, opache"
+msgstr "Rigonfiamenti a bolle, opachi"
 
 #: ../share/filters/filters.svg.h:352
 msgid "Same as Bubbly Bumps but with a diffuse light instead of a specular one"
-msgstr "Come Rughe a bolle ma con un'illuminazione diffusa anziché speculare"
+msgstr "Come Rigonfiamenti a bolle ma con un'illuminazione diffusa anziché speculare"
 
 #: ../share/filters/filters.svg.h:354
 msgid "Blotting Paper"
@@ -917,11 +918,11 @@ msgstr "Macchie d'inchiostro su carta"
 
 #: ../share/filters/filters.svg.h:358
 msgid "Wax Print"
-msgstr "Stampa a cera"
+msgstr "Sigillo a cera"
 
 #: ../share/filters/filters.svg.h:360
 msgid "Wax print on tissue texture"
-msgstr "Texture stampa a cera su tessuto"
+msgstr "Sigillo a cera su tessuto"
 
 #: ../share/filters/filters.svg.h:366
 msgid "Watercolor"
@@ -929,7 +930,7 @@ msgstr "Colore ad acqua"
 
 #: ../share/filters/filters.svg.h:368
 msgid "Cloudy watercolor effect"
-msgstr "Effetto nuvola acquerellata"
+msgstr "Effetto acquerellato soffice"
 
 #: ../share/filters/filters.svg.h:370
 msgid "Felt"
@@ -939,7 +940,7 @@ msgstr "Feltro"
 msgid ""
 "Felt like texture with color turbulence and slightly darker at the edges"
 msgstr ""
-"Texture simile a feltro con turbolenza colorata e leggermente più scura ai "
+"Trama simile a feltro con turbolenza colorata e leggermente più scura ai "
 "bordi"
 
 #: ../share/filters/filters.svg.h:374
@@ -956,7 +957,7 @@ msgstr "Arcobaleno tinto"
 
 #: ../share/filters/filters.svg.h:380
 msgid "Smooth rainbow colors melted along the edges and colorizable"
-msgstr "Arcobaleno colorato fuso lungo i bordi e colorabile"
+msgstr "Delicati colori arcobaleno fusi lungo i bordi e colorabili"
 
 #: ../share/filters/filters.svg.h:382
 msgid "Melted Rainbow"
@@ -964,11 +965,11 @@ msgstr "Arcobaleno fuso"
 
 #: ../share/filters/filters.svg.h:384
 msgid "Smooth rainbow colors slightly melted along the edges"
-msgstr "Arcobaleno colorato leggermente fuso lungo i bordi"
+msgstr "Delicati colori arcobaleno leggermente fusi lungo i bordi"
 
 #: ../share/filters/filters.svg.h:386
 msgid "Flex Metal"
-msgstr "Metallo colato"
+msgstr "Metallo flessibile"
 
 #: ../share/filters/filters.svg.h:388
 msgid "Bright, polished uneven metal casting, colorizable"
@@ -976,7 +977,7 @@ msgstr "Colata metallica irregolare e brillante, colorabile"
 
 #: ../share/filters/filters.svg.h:390
 msgid "Wavy Tartan"
-msgstr "Tartan increspato"
+msgstr "Tartan ondulato"
 
 #: ../share/filters/filters.svg.h:392
 msgid "Tartan pattern with a wavy displacement and bevel around the edges"
@@ -996,7 +997,7 @@ msgstr "Legno 3D"
 
 #: ../share/filters/filters.svg.h:400
 msgid "3D warped, fibered wood texture"
-msgstr "Texture convoluta 3D, legno fibroso"
+msgstr "Trama 3D, legno fibroso e distorto"
 
 #: ../share/filters/filters.svg.h:402
 msgid "3D Mother of Pearl"
@@ -1004,7 +1005,7 @@ msgstr "Madreperla 3D"
 
 #: ../share/filters/filters.svg.h:404
 msgid "3D warped, iridescent pearly shell texture"
-msgstr "Texture convoluta 3D, perlaceo iridescente"
+msgstr "Trama 3D, conchiglia distorta, perlacea iridescente"
 
 #: ../share/filters/filters.svg.h:406
 msgid "Tiger Fur"
@@ -1103,19 +1104,19 @@ msgstr "Color gesso"
 
 #: ../share/filters/filters.svg.h:420
 msgid "Colored plaster emboss effect"
-msgstr "Effetto rilievo color gesso"
+msgstr "Effetto rilievo color gesso colorato"
 
 #: ../share/filters/filters.svg.h:422
 msgid "Velvet Bumps"
-msgstr "Rughe vellutate"
+msgstr "Pieghe vellutate"
 
 #: ../share/filters/filters.svg.h:424
 msgid "Gives Smooth Bumps velvet like"
-msgstr "Crea rughe soffici ad effetto velluto"
+msgstr "Crea pieghe soffici ad effetto velluto"
 
 #: ../share/filters/filters.svg.h:426
 msgid "Comics Cream"
-msgstr "Fumetto crema"
+msgstr "Crema Fumetto"
 
 #: ../share/filters/filters.svg.h:427 ../share/filters/filters.svg.h:727
 #: ../share/filters/filters.svg.h:731 ../share/filters/filters.svg.h:735
@@ -1161,7 +1162,7 @@ msgstr "Arcobaleno distorto"
 
 #: ../share/filters/filters.svg.h:440
 msgid "Smooth rainbow colors warped along the edges and colorizable"
-msgstr "Arcobaleno colorato deformato lungo i bordi e colorabile"
+msgstr "Delicati colori arcobaleno deformati lungo i bordi e colorabili"
 
 #: ../share/filters/filters.svg.h:442
 msgid "Rough and Dilate"
@@ -1218,11 +1219,11 @@ msgstr "Effetto pittura spessa con turbolenza"
 
 #: ../share/filters/filters.svg.h:466
 msgid "Burst"
-msgstr "Palloncino scoppiato"
+msgstr "Scoppio"
 
 #: ../share/filters/filters.svg.h:468
 msgid "Burst balloon texture crumpled and with holes"
-msgstr "Texture a palloncino scoppiato con pieghe e buchi"
+msgstr "Trama a palloncino scoppiato con pieghe e buchi"
 
 #: ../share/filters/filters.svg.h:470
 msgid "Embossed Leather"
@@ -1246,7 +1247,7 @@ msgstr "Macchie bianche simili a quelle della maschere di carnevale"
 
 #: ../share/filters/filters.svg.h:478
 msgid "Plastify"
-msgstr "Plastificato"
+msgstr "Plastifica"
 
 #: ../share/filters/filters.svg.h:480
 msgid ""
@@ -1274,15 +1275,14 @@ msgstr "Trasparenza grezza"
 #: ../share/filters/filters.svg.h:488
 msgid "Adds a turbulent transparency which displaces pixels at the same time"
 msgstr ""
-"Aggiunge una turbolenza trasparente che sposta vari pixel contemporaneamente"
-
+"Aggiunge una turbolenza trasparente che contemporaneamente sposta vari pixel"
 #: ../share/filters/filters.svg.h:490
 msgid "Gouache"
 msgstr "Guazzo"
 
 #: ../share/filters/filters.svg.h:492
 msgid "Partly opaque water color effect with bleed"
-msgstr "Effetto acqua colorata parzialmente opaca e con macchie"
+msgstr "Effetto acquarello parzialmente opaco con gocciolature"
 
 #: ../share/filters/filters.svg.h:494
 msgid "Alpha Engraving"
@@ -1306,11 +1306,11 @@ msgstr ""
 
 #: ../share/filters/filters.svg.h:502
 msgid "Liquid Drawing"
-msgstr "Pittura ad acqua"
+msgstr "Disegno liquido"
 
 #: ../share/filters/filters.svg.h:504
 msgid "Gives a fluid and wavy expressionist drawing effect to images"
-msgstr "Aggiunge un effetto espressionista fluido e ondulato alle immagini"
+msgstr "Aggiunge alle immagini un effetto espressionista fluido e ondulato"
 
 #: ../share/filters/filters.svg.h:506
 msgid "Marbled Ink"
@@ -1327,7 +1327,7 @@ msgstr "Acrilico denso"
 
 #: ../share/filters/filters.svg.h:512
 msgid "Thick acrylic paint texture with high texture depth"
-msgstr "Texture acrilico denso con forte profondità"
+msgstr "Trama acrilica densa con forte profondità"
 
 #: ../share/filters/filters.svg.h:514
 msgid "Alpha Engraving B"
@@ -1383,39 +1383,39 @@ msgstr "Crivellato"
 
 #: ../share/filters/filters.svg.h:532
 msgid "Riddle the surface and add bump to images"
-msgstr "Crivella la superficie e aggiunge rughe all'immagine"
+msgstr "Crivella la superficie e aggiunge rigonfiamenti all'immagine"
 
 #: ../share/filters/filters.svg.h:534
 msgid "Wrinkled Varnish"
-msgstr "Smalto rugoso"
+msgstr "Vernice rugosa"
 
 #: ../share/filters/filters.svg.h:536
 msgid "Thick glossy and translucent paint texture with high depth"
-msgstr "Texture di pittura traslucida spessa e con riflessi"
+msgstr "Trama di pittura traslucida spessa con riflessi"
 
 #: ../share/filters/filters.svg.h:538
 msgid "Canvas Bumps"
-msgstr "Tela rugosa"
+msgstr "Rigonfiamenti su tela"
 
 #: ../share/filters/filters.svg.h:540
 msgid "Canvas texture with an HSL sensitive height map"
-msgstr "Texture simile a tela con HSL dipendenti dalla mappa del rilievo"
+msgstr "Trama simile a tela con HSL dipendenti dalla mappa del rilievo"
 
 #: ../share/filters/filters.svg.h:542
 msgid "Canvas Bumps Matte"
-msgstr "Rughe della tela, opache"
+msgstr "Rigonfiamenti della tela, opachi"
 
 #: ../share/filters/filters.svg.h:544
 msgid "Same as Canvas Bumps but with a diffuse light instead of a specular one"
-msgstr "Come Tela rugosa, ma con un'illuminazione diffusa anziché speculare"
+msgstr "Come Rigonfiamenti su tela, ma con un'illuminazione diffusa anziché speculare"
 
 #: ../share/filters/filters.svg.h:546
 msgid "Canvas Bumps Alpha"
-msgstr "Rughe della tela, con alpha"
+msgstr "Rigonfiamenti della tela, con trasparenza"
 
 #: ../share/filters/filters.svg.h:548
 msgid "Same as Canvas Bumps but with transparent highlights"
-msgstr "Come Tela rugosa, ma con riflesso trasparente"
+msgstr "Come Rigonfiamenti su tela, ma con riflesso trasparente"
 
 #: ../share/filters/filters.svg.h:550
 msgid "Bright Metal"
@@ -1435,7 +1435,7 @@ msgstr "Plastica trasparente con colori scuri"
 
 #: ../share/filters/filters.svg.h:558
 msgid "Melted Jelly Matte"
-msgstr "Gelatina sciolta, opaca"
+msgstr "Gelatina fusa opaca"
 
 #: ../share/filters/filters.svg.h:560
 msgid "Matte bevel with blurred edges"
@@ -1443,7 +1443,7 @@ msgstr "Smussatura opaca con bordi sfumati"
 
 #: ../share/filters/filters.svg.h:562
 msgid "Melted Jelly"
-msgstr "Gelatina sciolta"
+msgstr "Gelatina fusa"
 
 #: ../share/filters/filters.svg.h:564
 msgid "Glossy bevel with blurred edges"
@@ -1482,7 +1482,7 @@ msgstr "Stampa in rilievo"
 #: ../share/filters/filters.svg.h:580
 msgid "Bumps effect with a bevel, color flood and complex lighting"
 msgstr ""
-"Effetto rugoso con smussatura, riempimento colorato e illuminazione avanzata"
+"Effetto rigonfi con smussatura, riempimento colorato e illuminazione avanzata"
 
 #: ../share/filters/filters.svg.h:582
 msgid "Growing Cells"
@@ -1514,7 +1514,7 @@ msgstr "Riduce o rimuove l'antialias attorno alle forme"
 
 #: ../share/filters/filters.svg.h:594
 msgid "Basic Diffuse Bump"
-msgstr "Rugosità diffusa basilare"
+msgstr "Rigonfiamenti diffusa basilare"
 
 #: ../share/filters/filters.svg.h:596
 msgid "Matte emboss effect"
@@ -1522,7 +1522,7 @@ msgstr "Effetto rilievo opaco"
 
 #: ../share/filters/filters.svg.h:598
 msgid "Basic Specular Bump"
-msgstr "Rugosità speculare basilare"
+msgstr "Rigonfiamenti speculari basici"
 
 #: ../share/filters/filters.svg.h:600
 msgid "Specular emboss effect"
@@ -1530,7 +1530,7 @@ msgstr "Effetto rilievo speculare"
 
 #: ../share/filters/filters.svg.h:602
 msgid "Basic Two Lights Bump"
-msgstr "Rugosità a doppia luce basilare"
+msgstr "Rigonfiamenti a doppia luce basica"
 
 #: ../share/filters/filters.svg.h:604
 msgid "Two types of lighting emboss effect"
@@ -1566,15 +1566,15 @@ msgstr "Effetto rilievo carta"
 
 #: ../share/filters/filters.svg.h:622
 msgid "Jelly Bump"
-msgstr "Rugosità gelatinosa"
+msgstr "Rigonfiamento gelatinoso"
 
 #: ../share/filters/filters.svg.h:624
 msgid "Convert pictures to thick jelly"
-msgstr "Converte le immagini in una densa gelatina"
+msgstr "Converte le immagini in una gelatina densa"
 
 #: ../share/filters/filters.svg.h:626
 msgid "Blend Opposites"
-msgstr "Miscela opposti"
+msgstr "Miscelazione opposti"
 
 #: ../share/filters/filters.svg.h:628
 msgid "Blend an image with its hue opposite"
@@ -1591,7 +1591,7 @@ msgstr "Schiarisce progressivamente la tonalità verso il bianco"
 #: ../share/filters/filters.svg.h:634
 #: ../src/extension/internal/bitmap/swirl.cpp:38
 msgid "Swirl"
-msgstr "Spirale"
+msgstr "Vortice"
 
 #: ../share/filters/filters.svg.h:636
 msgid ""
@@ -1614,11 +1614,11 @@ msgstr "Silhouette marmorea"
 
 #: ../share/filters/filters.svg.h:644
 msgid "Basic noise transparency texture"
-msgstr "Texture semplice con disturbo in trasparenza"
+msgstr "Trama semplice con disturbo trasparente"
 
 #: ../share/filters/filters.svg.h:646
 msgid "Fill Background"
-msgstr "Sfondo opaco"
+msgstr "Riempimento sfondo"
 
 #: ../share/filters/filters.svg.h:648
 msgid "Adds a colorizable opaque background"
@@ -7621,7 +7621,7 @@ msgstr "Griglie"
 
 #: ../src/extension/internal/grid.cpp:207
 msgid "Draw a path which is a grid"
-msgstr "Disegna un tracciato a forma di griglia"
+msgstr "Disegna un tracciato che formi una griglia"
 
 #: ../src/extension/internal/latex-pstricks-out.cpp:92
 msgid "LaTeX Output"
@@ -7641,7 +7641,7 @@ msgstr "Stampa LaTeX"
 
 #: ../src/extension/internal/odf.cpp:2083
 msgid "OpenDocument Drawing Output"
-msgstr "Output OpenDocument Drawing"
+msgstr "Output di OpenDocument Drawing"
 
 #: ../src/extension/internal/odf.cpp:2088
 msgid "OpenDocument drawing (*.odg)"
@@ -7659,11 +7659,11 @@ msgstr "riquadro contenuto"
 
 #: ../src/extension/internal/pdfinput/pdf-input.cpp:93
 msgid "crop box"
-msgstr "riquadro adattato"
+msgstr "ritaglia riquadro"
 
 #: ../src/extension/internal/pdfinput/pdf-input.cpp:94
 msgid "trim box"
-msgstr "riquadro ritaglio"
+msgstr "raffina ritaglio"
 
 #: ../src/extension/internal/pdfinput/pdf-input.cpp:95
 msgid "bleed box"
@@ -7691,7 +7691,7 @@ msgid ""
 "and slow performance."
 msgstr ""
 "<b>Nota</b>: impostare la precisione ad un valore troppo alto può comportare "
-"file SVG molto grossi e performance peggiori."
+"file SVG molto grossi e prestazioni peggiori."
 
 #: ../src/extension/internal/pdfinput/pdf-input.cpp:144
 msgid "Poppler/Cairo import"
@@ -8492,7 +8492,7 @@ msgstr "Muovi maniglia del gradiente"
 
 #: ../src/gradient-drag.cpp:1169 ../src/widgets/gradient-vector.cpp:779
 msgid "Delete gradient stop"
-msgstr "Cancella passaggio del gradiente"
+msgstr "Cancella nodo gradiente"
 
 #: ../src/gradient-drag.cpp:1461
 #, c-format
@@ -8500,8 +8500,8 @@ msgid ""
 "%s %d for: %s%s; drag with <b>Ctrl</b> to snap offset; click with <b>Ctrl"
 "+Alt</b> to delete stop"
 msgstr ""
-"%s %d per: %s%s; trascina con <b>Ctrl</b> per far scattare l'offset; con "
-"<b>Ctrl+Alt</b> per cancellare il passaggio"
+"%s %d per: %s%s; trascina con <b>Ctrl</b> per l'incremento fisso dell'offset; con "
+"<b>Ctrl+Alt</b> per cancellare il nodo gradiente"
 
 #: ../src/gradient-drag.cpp:1465 ../src/gradient-drag.cpp:1474
 #: ../src/gradient-drag.cpp:1481
@@ -8519,7 +8519,7 @@ msgid ""
 "%s for: %s%s; drag with <b>Ctrl</b> to snap angle, with <b>Ctrl+Alt</b> to "
 "preserve angle, with <b>Ctrl+Shift</b> to scale around center"
 msgstr ""
-"%s per: %s%s; trascina con <b>Ctrl</b> per far scattare l'angolo; con <b>Ctrl"
+"%s per: %s%s; trascina con <b>Ctrl</b> per l'incremento fisso dell'angolo; con <b>Ctrl"
 "+Alt</b> per mantenere l'angolo; con <b>Ctrl+Maiusc</b> per ridimensionare "
 "attorno al centro"
 
@@ -8540,10 +8540,10 @@ msgid_plural ""
 "Gradient point shared by <b>%d</b> gradients; drag with <b>Shift</b> to "
 "separate"
 msgstr[0] ""
-"Punto di gradiente condiviso da <b>%d</b> gradiente; trascina con <b>Maiusc</"
+"Nodo gradiente condiviso da <b>%d</b> gradiente; trascina con <b>Maiusc</"
 "b> per separare"
 msgstr[1] ""
-"Punto di gradiente condiviso da <b>%d</b> gradienti; trascina con <b>Maiusc</"
+"Nodo gradiente condiviso da <b>%d</b> gradienti; trascina con <b>Maiusc</"
 "b> per separare"
 
 #: ../src/gradient-drag.cpp:2767
@@ -8552,11 +8552,11 @@ msgstr "Muovi maniglia del gradiente"
 
 #: ../src/gradient-drag.cpp:2801
 msgid "Move gradient mid stop(s)"
-msgstr "Muovi passaggio intermedio del gradiente"
+msgstr "Muovi nodo intermedio del gradiente"
 
 #: ../src/gradient-drag.cpp:3090
 msgid "Delete gradient stop(s)"
-msgstr "Cancella passaggio del gradiente"
+msgstr "Cancella nodo del gradiente"
 
 #. TRANSLATORS: Please don't translate link unless the page exists in your language. Add your language code to
 #. the link this way: https://inkscape.org/[lang]/learn/tutorials/
@@ -10896,7 +10896,7 @@ msgstr "Punta"
 
 #: ../src/live_effects/lpe-jointype.cpp:59
 msgid "Thickness of the stroke"
-msgstr "Larghezza della linea"
+msgstr "Spessore della linea"
 
 #: ../src/live_effects/lpe-jointype.cpp:60
 msgid "Line cap"
@@ -10961,7 +10961,8 @@ msgstr "_In unità della larghezza contorno"
 msgid ""
 "Gap width is given in multiples of stroke width. When unchecked, document "
 "units are used."
-msgstr ""
+msgstr "La larghezza dello spazio è data in multipli dello spessore del contorno. "
+"Se l'opzione non è selezionata, si usano le unità di misura del documento"
 
 #: ../src/live_effects/lpe-knot.cpp:360
 #, fuzzy
@@ -10971,15 +10972,16 @@ msgstr "Area cuscinetto"
 #: ../src/live_effects/lpe-knot.cpp:360
 #, fuzzy
 msgid "Use gap in both intersection elements"
-msgstr "Aggancia alle intersezioni dei tracciati"
+msgstr "Lascia spazio alle intersezioni dei tracciati"
 
 #: ../src/live_effects/lpe-knot.cpp:361
 msgid "_Groups: Inverse"
-msgstr ""
+msgstr "_Gruppi: Inversi"
 
 #: ../src/live_effects/lpe-knot.cpp:361
 msgid "Use other stroke width, useful in groups with different stroke widths"
-msgstr ""
+msgstr "Usa la larghezza dell'altro contorno, utile in gruppi "
+"che hanno contorni di diverso spessore"
 
 #: ../src/live_effects/lpe-knot.cpp:367
 msgid "S_witcher size:"
@@ -11002,6 +11004,8 @@ msgid ""
 "Drag to select a crossing, click to flip it, Shift + click to change all "
 "crossings, Ctrl + click to reset and change all crossings"
 msgstr ""
+"Trascina per selezionare un'intersezione, click per ribaltarla, Maiusc+click per cambiare "
+"tutte le intersezioni, Ctrl + click per azzerare e cambiare tutte le intersezioni"
 
 #: ../src/live_effects/lpe-knot.cpp:710
 msgid "Change knot crossing"
@@ -11033,7 +11037,7 @@ msgstr "Controllo 0:"
 #: ../src/live_effects/lpe-lattice2.cpp:41
 msgid "Control 0 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controllo 0 - <b>Ctrl+Alt+Clic</b>: reimposta, <b>Ctrl</b>: muovi lungo gli "
+"Controllo 0 - <b>Ctrl+Alt+Clic</b>: azzera, <b>Ctrl</b>: muovi lungo gli "
 "assi"
 
 #: ../src/live_effects/lpe-lattice2.cpp:42
@@ -11043,7 +11047,7 @@ msgstr "Controllo 1:"
 #: ../src/live_effects/lpe-lattice2.cpp:42
 msgid "Control 1 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controllo 1 - <b>Ctrl+Alt+Clic</b>: reimposta, <b>Ctrl</b>: muovi lungo gli "
+"Controllo 1 - <b>Ctrl+Alt+Clic</b>: azzera, <b>Ctrl</b>: muovi lungo gli "
 "assi"
 
 #: ../src/live_effects/lpe-lattice2.cpp:43
@@ -11053,7 +11057,7 @@ msgstr "Controllo 2:"
 #: ../src/live_effects/lpe-lattice2.cpp:43
 msgid "Control 2 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controllo 2 - <b>Ctrl+Alt+Clic</b>: reimposta, <b>Ctrl</b>: muovi lungo gli "
+"Controllo 2 - <b>Ctrl+Alt+Clic</b>: azzera, <b>Ctrl</b>: muovi lungo gli "
 "assi"
 
 #: ../src/live_effects/lpe-lattice2.cpp:44
@@ -11063,7 +11067,7 @@ msgstr "Controllo 3:"
 #: ../src/live_effects/lpe-lattice2.cpp:44
 msgid "Control 3 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controllo 3 - <b>Ctrl+Alt+Clic</b>: reimposta, <b>Ctrl</b>: muovi lungo gli "
+"Controllo 3 - <b>Ctrl+Alt+Clic</b>: azzera, <b>Ctrl</b>: muovi lungo gli "
 "assi"
 
 #: ../src/live_effects/lpe-lattice2.cpp:45
@@ -11073,7 +11077,7 @@ msgstr "Controllo 4:"
 #: ../src/live_effects/lpe-lattice2.cpp:45
 msgid "Control 4 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controllo 4 - <b>Ctrl+Alt+Clic</b>: reimposta, <b>Ctrl</b>: muovi lungo gli "
+"Controllo 4 - <b>Ctrl+Alt+Clic</b>: azzera, <b>Ctrl</b>: muovi lungo gli "
 "assi"
 
 #: ../src/live_effects/lpe-lattice2.cpp:46
@@ -11083,7 +11087,7 @@ msgstr "Controllo 5:"
 #: ../src/live_effects/lpe-lattice2.cpp:46
 msgid "Control 5 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controllo 5 - <b>Ctrl+Alt+Clic</b>: reimposta, <b>Ctrl</b>: muovi lungo gli "
+"Controllo 5 - <b>Ctrl+Alt+Clic</b>: azzera, <b>Ctrl</b>: muovi lungo gli "
 "assi"
 
 #: ../src/live_effects/lpe-lattice2.cpp:47
@@ -11093,7 +11097,7 @@ msgstr "Controllo 6:"
 #: ../src/live_effects/lpe-lattice2.cpp:47
 msgid "Control 6 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controllo 6 - <b>Ctrl+Alt+Clic</b>: reimposta, <b>Ctrl</b>: muovi lungo gli "
+"Controllo 6 - <b>Ctrl+Alt+Clic</b>: azzera, <b>Ctrl</b>: muovi lungo gli "
 "assi"
 
 #: ../src/live_effects/lpe-lattice2.cpp:48
@@ -11103,7 +11107,7 @@ msgstr "Controllo 7:"
 #: ../src/live_effects/lpe-lattice2.cpp:48
 msgid "Control 7 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controllo 7 - <b>Ctrl+Alt+Clic</b>: reimposta, <b>Ctrl</b>: muovi lungo gli "
+"Controllo 7 - <b>Ctrl+Alt+Clic</b>: azzera, <b>Ctrl</b>: muovi lungo gli "
 "assi"
 
 #: ../src/live_effects/lpe-lattice2.cpp:49
@@ -11114,7 +11118,7 @@ msgstr "Controllo 8x9:"
 msgid ""
 "Control 8x9 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controllo 8x9 - <b>Ctrl+Alt+Clic</b>: reimposta, <b>Ctrl</b>: muovi lungo "
+"Controllo 8x9 - <b>Ctrl+Alt+Clic</b>: azzera, <b>Ctrl</b>: muovi lungo "
 "gli assi"
 
 #: ../src/live_effects/lpe-lattice2.cpp:50
@@ -11125,7 +11129,7 @@ msgstr "Controllo 10x11:"
 msgid ""
 "Control 10x11 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controllo 10x11 - <b>Ctrl+Alt+Clic</b>: reimposta, <b>Ctrl</b>: muovi lungo "
+"Controllo 10x11 - <b>Ctrl+Alt+Clic</b>: azzera, <b>Ctrl</b>: muovi lungo "
 "gli assi"
 
 #: ../src/live_effects/lpe-lattice2.cpp:51
@@ -11135,7 +11139,7 @@ msgstr "Controllo 12:"
 #: ../src/live_effects/lpe-lattice2.cpp:51
 msgid "Control 12 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controllo 12 - <b>Ctrl+Alt+Clic</b>: reimposta, <b>Ctrl</b>: muovi lungo gli "
+"Controllo 12 - <b>Ctrl+Alt+Clic</b>: azzera, <b>Ctrl</b>: muovi lungo gli "
 "assi"
 
 #: ../src/live_effects/lpe-lattice2.cpp:52
@@ -11145,7 +11149,7 @@ msgstr "Controllo 13:"
 #: ../src/live_effects/lpe-lattice2.cpp:52
 msgid "Control 13 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controllo 13 - <b>Ctrl+Alt+Clic</b>: reimposta, <b>Ctrl</b>: muovi lungo gli "
+"Controllo 13 - <b>Ctrl+Alt+Clic</b>: azzera, <b>Ctrl</b>: muovi lungo gli "
 "assi"
 
 #: ../src/live_effects/lpe-lattice2.cpp:53
@@ -11155,7 +11159,7 @@ msgstr "Controllo 14:"
 #: ../src/live_effects/lpe-lattice2.cpp:53
 msgid "Control 14 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controllo 14 - <b>Ctrl+Alt+Clic</b>: reimposta, <b>Ctrl</b>: muovi lungo gli "
+"Controllo 14 - <b>Ctrl+Alt+Clic</b>: azzera, <b>Ctrl</b>: muovi lungo gli "
 "assi"
 
 #: ../src/live_effects/lpe-lattice2.cpp:54
@@ -11165,7 +11169,7 @@ msgstr "Controllo 15:"
 #: ../src/live_effects/lpe-lattice2.cpp:54
 msgid "Control 15 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controllo 15- <b>Ctrl+Alt+Clic</b>: reimposta, <b>Ctrl</b>: muovi lungo gli "
+"Controllo 15- <b>Ctrl+Alt+Clic</b>: azzera, <b>Ctrl</b>: muovi lungo gli "
 "assi"
 
 #: ../src/live_effects/lpe-lattice2.cpp:55
@@ -11175,7 +11179,7 @@ msgstr "Controllo 16:"
 #: ../src/live_effects/lpe-lattice2.cpp:55
 msgid "Control 16 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controllo 16 - <b>Ctrl+Alt+Clic</b>: reimposta, <b>Ctrl</b>: muovi lungo gli "
+"Controllo 16 - <b>Ctrl+Alt+Clic</b>: azzera, <b>Ctrl</b>: muovi lungo gli "
 "assi"
 
 #: ../src/live_effects/lpe-lattice2.cpp:56
@@ -11185,7 +11189,7 @@ msgstr "Controllo 17:"
 #: ../src/live_effects/lpe-lattice2.cpp:56
 msgid "Control 17 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controllo 17 - <b>Ctrl+Alt+Clic</b>: reimposta, <b>Ctrl</b>: muovi lungo gli "
+"Controllo 17 - <b>Ctrl+Alt+Clic</b>: azzera, <b>Ctrl</b>: muovi lungo gli "
 "assi"
 
 #: ../src/live_effects/lpe-lattice2.cpp:57
@@ -11195,7 +11199,7 @@ msgstr "Controllo 18:"
 #: ../src/live_effects/lpe-lattice2.cpp:57
 msgid "Control 18 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controllo 18 - <b>Ctrl+Alt+Clic</b>: reimposta, <b>Ctrl</b>: muovi lungo gli "
+"Controllo 18 - <b>Ctrl+Alt+Clic</b>: azzera, <b>Ctrl</b>: muovi lungo gli "
 "assi"
 
 #: ../src/live_effects/lpe-lattice2.cpp:58
@@ -11205,7 +11209,7 @@ msgstr "Controllo 19:"
 #: ../src/live_effects/lpe-lattice2.cpp:58
 msgid "Control 19 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controllo 19 - <b>Ctrl+Alt+Clic</b>: reimposta, <b>Ctrl</b>: muovi lungo gli "
+"Controllo 19 - <b>Ctrl+Alt+Clic</b>: azzera, <b>Ctrl</b>: muovi lungo gli "
 "assi"
 
 #: ../src/live_effects/lpe-lattice2.cpp:59
@@ -11216,7 +11220,7 @@ msgstr "Controllo 20x21:"
 msgid ""
 "Control 20x21 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controllo 20x21 - <b>Ctrl+Alt+Clic</b>: reimposta, <b>Ctrl</b>: muovi lungo "
+"Controllo 20x21 - <b>Ctrl+Alt+Clic</b>: azzera, <b>Ctrl</b>: muovi lungo "
 "gli assi"
 
 #: ../src/live_effects/lpe-lattice2.cpp:60
@@ -11227,7 +11231,7 @@ msgstr "Controllo 22x23:"
 msgid ""
 "Control 22x23 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controllo 22x23 - <b>Ctrl+Alt+Clic</b>: reimposta, <b>Ctrl</b>: muovi lungo "
+"Controllo 22x23 - <b>Ctrl+Alt+Clic</b>: azzera, <b>Ctrl</b>: muovi lungo "
 "gli assi"
 
 #: ../src/live_effects/lpe-lattice2.cpp:61
@@ -11832,7 +11836,7 @@ msgstr "Modifica punto finale della linea di riflessione"
 
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:62
 msgid "Mirror line mid"
-msgstr "Metà linea riflessione"
+msgstr "Mediana della linea di riflessione"
 
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:62
 msgid "Center point of mirror line"
@@ -11862,27 +11866,27 @@ msgstr "Aggiorna durante lo spostamento dei punti (può rallentare)"
 
 #: ../src/live_effects/lpe-offset.cpp:450
 msgid "Offset point"
-msgstr "Punto di proiezione"
+msgstr "Punto di scostamento"
 
 #: ../src/live_effects/lpe-parallel.cpp:50
 msgid "Adjust the offset"
-msgstr "Modifica la proiezione"
+msgstr "Modifica lo scostamento"
 
 #: ../src/live_effects/lpe-parallel.cpp:51
 msgid "Specifies the left end of the parallel"
-msgstr "Specifica il termine sinistro del parallelo"
+msgstr "Specifica il margine sinistro del parallelo"
 
 #: ../src/live_effects/lpe-parallel.cpp:52
 msgid "Specifies the right end of the parallel"
-msgstr "Specifica il termine destro del parallelo"
+msgstr "Specifica il margine destro del parallelo"
 
 #: ../src/live_effects/lpe-parallel.cpp:107
 msgid "Adjust the \"left\" end of the parallel"
-msgstr "Modifica il termine \"sinistro\" del parallelo"
+msgstr "Modifica il margine \"sinistro\" del parallelo"
 
 #: ../src/live_effects/lpe-parallel.cpp:113
 msgid "Adjust the \"right\" end of the parallel"
-msgstr "Modifica il termine \"destro\" del parallelo"
+msgstr "Modifica il margine \"destro\" del parallelo"
 
 #: ../src/live_effects/lpe-patternalongpath.cpp:65
 #: ../share/extensions/pathalongpath.inx:10
@@ -17360,7 +17364,7 @@ msgstr "Rimuovi primitiva filtro"
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:2442
 msgid "Remove merge node"
-msgstr "Rimuovi nodo unito"
+msgstr "Rimuovi il nodo di fusione"
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:2565
 msgid "Reorder filter primitive"
@@ -26089,32 +26093,32 @@ msgstr ""
 
 #: ../src/ui/toolbar/gradient-toolbar.cpp:483
 msgid "No stops"
-msgstr "Nessun passaggio"
+msgstr "Nessun nodo"
 
 #: ../src/ui/toolbar/gradient-toolbar.cpp:489
 msgid "Stops"
-msgstr "Passaggi"
+msgstr "Nodi"
 
 #: ../src/ui/toolbar/gradient-toolbar.cpp:508
 #: ../src/widgets/gradient-vector.cpp:849
 msgctxt "Gradient"
 msgid "Offset:"
-msgstr "Posizione:"
+msgstr "Scostamento:"
 
 #: ../src/ui/toolbar/gradient-toolbar.cpp:509
 msgid "Offset of selected stop"
-msgstr "Posizione del passaggio selezionato"
+msgstr "Scostamento del nodo selezionato"
 
 #: ../src/ui/toolbar/gradient-toolbar.cpp:518
 #: ../src/ui/toolbar/gradient-toolbar.cpp:519
 msgid "Insert new stop"
-msgstr "Inserisci nuovo passaggio"
+msgstr "Inserisci nuovo nodo"
 
 #: ../src/ui/toolbar/gradient-toolbar.cpp:528
 #: ../src/ui/toolbar/gradient-toolbar.cpp:529
 #: ../src/widgets/gradient-vector.cpp:835
 msgid "Delete stop"
-msgstr "Cancella passaggio"
+msgstr "Cancella nodo"
 
 #: ../src/ui/toolbar/gradient-toolbar.cpp:595
 msgid "Assign gradient to object"
@@ -26127,16 +26131,16 @@ msgstr "Imposta riperizione gradiente"
 #: ../src/ui/toolbar/gradient-toolbar.cpp:772
 #: ../src/widgets/gradient-vector.cpp:672
 msgid "Change gradient stop offset"
-msgstr "Cambia offset del passaggio del gradiente"
+msgstr "Cambia scostamento del nodo del gradiente"
 
 #: ../src/ui/toolbar/gradient-toolbar.cpp:991
 #: ../src/widgets/gradient-vector.cpp:566
 msgid "No stops in gradient"
-msgstr "Nessun passaggio nel gradiente"
+msgstr "Nessun nodo nel gradiente"
 
 #: ../src/ui/toolbar/gradient-toolbar.cpp:1117
 msgid "Multiple stops"
-msgstr "Più passaggi"
+msgstr "Nodi multipli"
 
 #: ../src/ui/toolbar/lpe-toolbar.cpp:74
 msgid "All inactive"
@@ -26148,7 +26152,7 @@ msgstr "Nessuno strumento geometrico attivo"
 
 #: ../src/ui/toolbar/lpe-toolbar.cpp:105
 msgid "Show limiting bounding box"
-msgstr "Mostra riquadro limite"
+msgstr "Mostra riquadro di selezione"
 
 #: ../src/ui/toolbar/lpe-toolbar.cpp:106
 msgid "Show bounding box (used to cut infinite lines)"
@@ -33941,15 +33945,15 @@ msgstr ""
 
 #: ../share/extensions/hpgl_output.py:55
 msgid "No paths where found. Please convert objects you want into paths."
-msgstr ""
+msgstr "Nessun tracciato. Prego convertire gli oggetti in tracciati"
 
 #: ../share/extensions/inkex/bezier.py:406
 msgid "Area is zero, cannot calculate Center of Mass"
-msgstr ""
+msgstr "L'area è zero, impossibile calcolare il Cdentro di Massa"
 
 #: ../share/extensions/inkex/deprecated.py:84
 msgid "{} is deprecated and should be removed"
-msgstr ""
+msgstr "{} è obsoleto e dovrebbe essere rimosso"
 
 #
 # File: ../share/extensions/inkex/deprecated.py, line: 93
@@ -34558,7 +34562,7 @@ msgstr "Aggiungi nodi"
 
 #: ../share/extensions/addnodes.inx:6
 msgid "Division method:"
-msgstr "Metodo di divisione:"
+msgstr "Metodo di suddivisione:"
 
 #: ../share/extensions/addnodes.inx:7
 msgid "By max. segment length"
@@ -36740,12 +36744,12 @@ msgstr "Lunghezza tracciato"
 #: ../share/extensions/gcodetools_prepare_path_for_plasma.inx:12
 #, fuzzy
 msgid "In-out path max distance to reference point:"
-msgstr "Preferenze gradiente"
+msgstr "Massima distanza dal tracciato in-out al punto di riferimento"
 
 #: ../share/extensions/gcodetools_prepare_path_for_plasma.inx:13
 #, fuzzy
 msgid "In-out path type:"
-msgstr "Tipo interpolazione:"
+msgstr "Tipo di tracciato in-out:"
 
 #: ../share/extensions/gcodetools_prepare_path_for_plasma.inx:15
 msgid "Perpendicular"
@@ -36764,12 +36768,12 @@ msgstr ""
 #: ../share/extensions/gcodetools_prepare_path_for_plasma.inx:19
 #, fuzzy
 msgid "Replace original path"
-msgstr "Sostituisci testo"
+msgstr "Sostituisci il tracciato originale"
 
 #: ../share/extensions/gcodetools_prepare_path_for_plasma.inx:20
 #, fuzzy
 msgid "Do not add in-out reference points"
-msgstr "Preferenze gradiente"
+msgstr "Non aggiungere punti di riferimento in-out"
 
 #: ../share/extensions/gcodetools_prepare_path_for_plasma.inx:22
 msgid "-------------------------------------------------"
@@ -39679,17 +39683,17 @@ msgstr ""
 #: ../share/extensions/output_scour.inx:110
 #, fuzzy
 msgid "This version of the extension is designed for"
-msgstr "l'estensione è stata programmata solo per Windows."
+msgstr "l'estensione è stata programmata per"
 
 #: ../share/extensions/output_scour.inx:111
 msgid "Scour 0.31+"
-msgstr ""
+msgstr "Scour 0.31+"
 
 #
 # File: ../share/extensions/output_scour.inx, line: 109
 #: ../share/extensions/output_scour.inx:115
 msgid "Show warnings for older versions of Scour"
-msgstr ""
+msgstr "Mostra avvisi per versioni di Scour più vecchie"
 
 #: ../share/extensions/output_scour.inx:122
 msgid "Optimized SVG (*.svg)"
@@ -45293,7 +45297,7 @@ msgstr ""
 #~ msgstr[1] "<b>%i</b> oggetti di <b>%i</b> tipi"
 
 #~ msgid "<b>Image with bad reference</b>: %s"
-#~ msgstr "<b>Immagine con un descrittore sbagliato</b>: %s"
+#~ msgstr "<b>Immagine con un riferimento sbagliato</b>: %s"
 
 #~ msgid "<b>Linked offset</b>, %s by %f pt"
 #~ msgstr "<b>Proiezione collegata</b>, %s di %f pt"
@@ -45410,7 +45414,7 @@ msgstr ""
 
 #, fuzzy
 #~ msgid "_Mid Markers:"
-#~ msgstr "Delimitatore metà:"
+#~ msgstr "Delimitatore mediano:"
 
 #, fuzzy
 #~ msgid "_End Markers:"
@@ -47087,13 +47091,13 @@ msgstr ""
 #~ msgstr "Solido 3D: attiva punto di fuga"
 
 #~ msgid "Angle of infinite vanishing point in X direction"
-#~ msgstr "Angolazione del punto di fuga all'infinito sulla direzione X"
+#~ msgstr "Angolazione del punto di fuga infinito sulla direzione X"
 
 #~ msgid "Angle of infinite vanishing point in Y direction"
-#~ msgstr "Angolazione del punto di fuga all'infinito sulla direzione Y"
+#~ msgstr "Angolazione del punto di fuga infinito sulla direzione Y"
 
 #~ msgid "Angle of infinite vanishing point in Z direction"
-#~ msgstr "Angolazione del punto di fuga all'infinito sulla direzione Z"
+#~ msgstr "Angolazione del punto di fuga infinito sulla direzione Z"
 
 #~ msgid "%s at %s"
 #~ msgstr "%s in %s"
@@ -47117,7 +47121,7 @@ msgstr ""
 #~ "indipendentemente dalla distanza"
 
 #~ msgid "<b>Global snapping toggle</b>"
-#~ msgstr "<b>Aggancio globale</b>"
+#~ msgstr "<b>Alterna aggancio globale</b>"
 
 #~ msgid "Print _Direct"
 #~ msgstr "Stampa _diretta"
@@ -47138,10 +47142,10 @@ msgstr ""
 #~ msgstr "Tipo di griglia"
 
 #~ msgid "Display Calibration"
-#~ msgstr "Calibrazione del display"
+#~ msgstr "Calibrazione dello schermo"
 
 #~ msgid "Enable display calibration"
-#~ msgstr "Abilita la calibrazione del display"
+#~ msgstr "Abilita la calibrazione dello schermo"
 
 #~ msgid "Enables application of the display using an ICC profile."
-#~ msgstr "Abilita la calibrazione del display usando un profilo ICC."
+#~ msgstr "Abilita la calibrazione dello schermo usando un profilo ICC."
