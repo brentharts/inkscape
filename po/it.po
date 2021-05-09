@@ -22325,7 +22325,7 @@ msgstr ""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2055
 msgid "Filter effects quality for display"
-msgstr "Qualità degli effetti in visualizzazione"
+msgstr "Qualità visiva degli effetti del filtro"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2067
 #: ../src/ui/dialog/print.cpp:107
@@ -23992,7 +23992,7 @@ msgstr "Altezza della maiuscola:"
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:465
 msgid ""
 "The height of a capital letter above the baseline like the letter 'H' or 'I'."
-msgstr ""
+msgstr "L'altezza di una lettera maiuscola sopra la linea di base, come per le lettere 'H' o 'I'"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:466
 #, fuzzy
@@ -28443,8 +28443,8 @@ msgstr "%s selezionato"
 #, c-format
 msgid " out of %d gradient handle"
 msgid_plural " out of %d gradient handles"
-msgstr[0] " con %d maniglia di gradiente"
-msgstr[1] " con %d maniglie di gradiente"
+msgstr[0] " su %d maniglia di gradiente"
+msgstr[1] " su %d maniglie di gradiente"
 
 #. TRANSLATORS: Mind the space in front. (Refers to gradient handles selected). This is part of a compound message
 #: ../src/ui/tools/gradient-tool.cpp:123 ../src/ui/tools/gradient-tool.cpp:132
