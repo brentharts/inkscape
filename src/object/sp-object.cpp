@@ -794,8 +794,7 @@ void SPObject::invoke_build(SPDocument *document, Inkscape::XML::Node *repr, uns
 
 int SPObject::getIntAttribute(char const *key, int def)
 {
-    getRepr()->getAttributeInt(key, &def);
-    return def;
+    return getRepr()->getAttributeInt(key, def);
 }
 
 unsigned SPObject::getPosition(){

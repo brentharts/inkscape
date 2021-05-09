@@ -217,9 +217,9 @@ public:
      *
      * \return true if the attr was set, false otherwise.
      */
-    bool getAttributeBoolean(Util::const_char_ptr key, bool *val) const;
+    bool getAttributeBoolean(Util::const_char_ptr key, bool default_value) const;
 
-    bool getAttributeInt(Util::const_char_ptr key, int *val) const;
+    int getAttributeInt(Util::const_char_ptr key, int default_value) const;
 
     bool getAttributeDouble(Util::const_char_ptr key, double *val) const;
 
@@ -248,7 +248,7 @@ public:
 
     bool setAttributePoint(Util::const_char_ptr key, Geom::Point const &val);
 
-    bool getAttributePoint(Util::const_char_ptr key, Geom::Point *val) const;
+    Geom::Point getAttributePoint(Util::const_char_ptr key, Geom::Point default_value) const;
 
     /**
      * @brief Change an attribute of this node. Empty string deletes the attribute.

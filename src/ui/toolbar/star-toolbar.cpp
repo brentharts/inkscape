@@ -558,8 +558,7 @@ StarToolbar::event_attr_changed(Inkscape::XML::Node *repr, gchar const *name,
             toolbar->_spoke_adj->set_value(r1/r2);
         }
     } else if (!strcmp(name, "sodipodi:sides")) {
-        int sides = 0;
-        repr->getAttributeInt("sodipodi:sides", &sides);
+        int sides = repr->getAttributeInt("sodipodi:sides", 0);
         toolbar->_magnitude_adj->set_value(sides);
     }
 
