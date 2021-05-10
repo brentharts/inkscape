@@ -110,7 +110,7 @@
     background-color: alpha(@theme_selected_bg_color,0.5);
     background-image: image(alpha(@theme_selected_bg_color,0.5));
     caret-color: @theme_bg_color;
-    border-radius:4px;
+    border-radius: 3.5pt;
     -gtk-secondary-caret-color: @theme_fg_color;
 }
 
@@ -157,7 +157,7 @@ notebook.blink > header > tabs > tab:checked {
 
 /* atribute dialog popup size */
 .attrpop textview {
-    font-size: 13px;
+    font-size: 11pt;
 }
 
 /* 
@@ -187,7 +187,7 @@ iconview *:hover {
     border-width: 1px;
     border-color: @theme_fg_color;
     border-style: solid;
-    border-radius: 4px;
+    border-radius: 3.5pt;
 }
 
 .dark iconview *:hover {
@@ -196,18 +196,18 @@ iconview *:hover {
 
 #startscreennotebook iconview *:hover{
     background-color:@theme_selected_bg_color;
-    border-radius:5px;
+    border-radius: 4pt;
     border-width:0;
 }
 
 .inksmall {
-    font-size: 11px;
+    font-size: 9.5pt;
 }
 
 #CommandPaletteBase {
     background-color: @theme_base_color; /* some themes don't seem to have a background color for list rows defined and would end up transparent otherwise */
-    border: 5px solid @theme_bg_color;
-    border-radius: 5px;
+    border: 4pt solid @theme_bg_color;
+    border-radius: 4pt;
 }
 
 #CommandPaletteBase list row:not(:last-child) {
@@ -217,12 +217,12 @@ iconview *:hover {
 /* LPE Dialog add */
 #LPESelectorFlowBox GtkFlowBoxChild,
 #LPESelectorFlowBox flowboxchild {
-    border-width: 0px;
-    border-radius: 6px;
-    margin: 10px;
-    padding: 10px;
-    margin-bottom: 0px;
-    padding-bottom: 10px;
+    border-width: 0;
+    border-radius: 5pt;
+    margin: 8.5pt;
+    padding: 8.5pt;
+    margin-bottom: 0;
+    padding-bottom: 8.5pt;
     outline: none;
 }
 
@@ -247,13 +247,13 @@ iconview *:hover {
 }
 
 #LPESelectorFlowBox .lpename {
-    font-size: 16px;
-    margin-bottom: 5px;
+    font-size: 13.5pt;
+    margin-bottom: 4pt;
 }
 
 #LPESelectorFlowBox .lpeinfo {
-    font-size: 16px;
-    padding: 20px;
+    font-size: 13.5pt;
+    padding: 16pt;
 }
 
 #LPESelectorFlowBox .lpedisabled {
@@ -261,24 +261,24 @@ iconview *:hover {
 }
 
 #LPESelectorEffectInfoPop {
-    padding: 15px;
+    padding: 13pt;
 }
 
 #LPESelectorEffectInfoName {
     font-weight: bold;
-    padding: 15px;
+    padding: 13pt;
 }
 
 #LPEDialogSelector .lpeinfo {
-    padding: 8px;
+    padding: 7pt;
     background-color: @theme_bg_color;
     color: @theme_selected_fg_color;
     border-color: @theme_selected_bg_color;
     border-style: solid;
-    margin: 0px 0px 10px 0px;
-    border-radius: 0px;
+    margin: 0 0 8.5pt 0;
+    border-radius: 0;
     border-width: 0 0 1px 0;
-    padding:5px;
+    padding: 4pt;
 }
 
 #LPESelectorFlowBox image{
@@ -297,16 +297,16 @@ iconview *:hover {
 }
 
 #LPEDialogSelector.LPEPackMore flowboxchild {
-margin:5px 1px 0px;
-padding:3px 3px 10px 3px;
+margin: 4pt 1pt 0;
+padding: 2.5pt 2.5pt 8.5pt 2.5pt;
 }
 
 #LPEDialogSelector.LPEPackMore flowboxchild label {
-font-size:14px;
+font-size: 12pt;
 }
 
 #LPEDialogSelector.LPEPackMore #LPESelectorEffectInfoPop label{
-font-size:13px;
+font-size: 11pt;
 }
 
 #LPEDialogSelector.LPEList .lpename {
@@ -315,8 +315,8 @@ font-size:13px;
 }
 
 #LPEDialogSelector.LPEList flowboxchild {
-    padding:3px 1px 3px 10px;
-    margin:1px 0px 1px;
+    padding: 2.5pt 1pt 2.5pt 8.5pt;
+    margin: 1pt 0 1pt;
     border-radius:0;
     border-style:dotted;
     border-color:@theme_fg_color;
@@ -325,8 +325,8 @@ font-size:13px;
 
 #LPEDialogSelector.LPEList flowboxchild:selected {
     border-style:none;
-    margin:-3px 0px 0px;
-    padding:4px 1px 4px 10px;
+    margin: -2.5pt 0 0;
+    padding: 3pt 1pt 3pt 8.5pt;
 }
 
 #LPEDialogSelector.LPEList #LPESelectorFlowBox *:selected #LPESelectorEffectFavTop,
@@ -336,17 +336,17 @@ font-size:13px;
 
 /* Selector and XML dialog */
 #SelectorsAndStyleDialog button {
-    padding: 4px;
-    min-height: 16px;
-    margin: 2px;
-    padding: 2px;
+    padding: 3pt;
+    min-height: 13.5pt;
+    margin: 1.5pt;
+    padding: 1.5pt;
 }
 
 #XMLAndAttributesDialog .toggle,
 #SelectorsAndStyleDialog .toggle {
-    min-width: 18px;
-    padding-left: 6px;
-    padding-right: 6px;
+    min-width: 15pt;
+    padding-left: 5pt;
+    padding-right: 5pt;
     padding-top: 0;
     padding-bottom: 0;
 }
@@ -354,24 +354,24 @@ font-size:13px;
 #XMLAndAttributesDialog .radio.image-button,
 #SelectorsAndStyleDialog .radio.image-button {
     margin: 0;
-    padding: 0px;
-    border-radius: 2px 0 0 2px;
+    padding: 0;
+    border-radius: 1.5pt 0 0 1.5pt;
 }
 
 #XMLAndAttributesDialog .radio.image-button:last-child,
 #SelectorsAndStyleDialog .radio.image-button:last-child {
-    border-radius: 0 2px 2px 0;
+    border-radius: 0 1.5pt 1.5pt 0;
     border-left-width: 0;
 }
 
 #SelectorsAndStyleDialog treeview button {
     border-width: 0;
-    margin: 0 0 1px 0;
+    margin: 0 0 1pt 0;
 }
 
 #SelectorsAndStyleDialog treeview button:nth-child(3),
 #SelectorsAndStyleDialog treeview.style_sheet button:nth-child(4) {
-    border-width: 0 0 0 2px;
+    border-width: 0 0 0 1.5pt;
     border-color: @theme_fg_color;
     border-style: solid;
     opacity: 0.5;
@@ -382,8 +382,8 @@ font-size:13px;
 }
 
 #SelectorsAndStyleDialog treeview button {
-    min-height: 3px;
-    font-size: 1px;
+    min-height: 2.5pt;
+    font-size: 1pt;
 }
 
 #InkRuler {
@@ -407,13 +407,13 @@ SPCanvas {
 
 /* Keep palette scrollbar from generating warnings. */
 #PreviewHolderScroller .vertical slider {
-    min-height: 15px;
+    min-height: 13pt;
 }
 
 /* Override minimum size of container children for palette. */
 #ColorItemPreview {
-    min-height: 5px;
-    min-width: 5px;
+    min-height: 4pt;
+    min-width: 4pt;
 }
 
 /* Reduce width of Fill and Stroke dialog */
@@ -426,17 +426,17 @@ SPCanvas {
 #InkSpinScale {
     background: @theme_bg_color;
     border: 1px black;
-    border-radius: 3px;
-    padding: 0px;
+    border-radius: 2.5pt;
+    padding: 0;
 }
 
 #InkSpinScale spinbutton {
     border-color: #eee;
     border-width: 0 0 0 0;
-    border-radius: 0 3px 3px 0;
+    border-radius: 0 2.5pt 2.5pt 0;
     box-shadow: none;
     padding: 0 0 0 1px;
-    min-height: 10px;
+    min-height: 8.5pt;
 }
 
 
@@ -445,10 +445,10 @@ SPCanvas {
     background: none;
     border: none;
     outline: none;
-    min-width: 0px;
-    min-height: 0px;
-    padding: 0px;
-    margin: 0px;
+    min-width: 0;
+    min-height: 0;
+    padding: 0;
+    margin: 0;
 }
 
 #InkSpinScale slider,
@@ -458,11 +458,11 @@ SPCanvas {
 }
 
 #InkSpinScale scale {
-    padding: 0px;
+    padding: 0;
 }
 
 #InkSpinScale trough {
-    min-height: 30px;
+    min-height: 25pt;
 }
 
 #InkSpinScale box.active {
@@ -475,13 +475,13 @@ SPCanvas {
 }
 
 #UnicodeIconView {
-    font-size: 16px;
+    font-size: 13.5pt;
 }
 
 /* GtkTreeView: clarify drop locations (especially important for XML editor) */
 treeview.view:drop(active) {
     border-style: solid;
-    border-width: 2px;
+    border-width: 1.5pt;
 }
 
 treeview.view:drop(active).after {
@@ -494,13 +494,13 @@ treeview.view:drop(active).before {
 
 treeview.view:drop(active).after,
 treeview.view:drop(active).before {
-    border-width: 4px;
-    border-radius: 10px;
+    border-width: 3.5pt;
+    border-radius: 8.5pt;
 }
 
 button.close-button{
     background-image: none;
-    padding: 0px;
+    padding: 0;
     min-height: 1px;
     min-width: 1px;
     border: none;
