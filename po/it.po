@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: Inkscape 1.1\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
 "POT-Creation-Date: 2021-05-01 17:15+0000\n"
-"PO-Revision-Date: 2021-05-08 19:20+0200\n"
+"PO-Revision-Date: 2021-05-11 11:36+0200\n"
 "Last-Translator: Firas Hanife <firashanife@gmail.com>\n"
 "Language-Team: \n"
 "Language: it\n"
@@ -5530,7 +5530,6 @@ msgid "Dependency"
 msgstr "Dipendenza"
 
 #: ../src/extension/dependency.cpp:340
-#, fuzzy
 msgid "type"
 msgstr "tipo"
 
@@ -5540,7 +5539,6 @@ msgid "location"
 msgstr "posizione"
 
 #: ../src/extension/dependency.cpp:342
-#, fuzzy
 msgid "string"
 msgstr "stringa"
 
@@ -8759,9 +8757,8 @@ msgid "Portable Network Graphic (*.png)"
 msgstr "Portable Network Graphic (*.png)"
 
 #: ../src/extension/internal/png-output.cpp:55
-#, fuzzy
 msgid "Default raster graphic export"
-msgstr "Impostazione interfaccia predefinita"
+msgstr "Esportazione raster predefinita"
 
 #: ../src/extension/internal/pov-out.cpp:713
 msgid "PovRay Output"
@@ -31183,19 +31180,16 @@ msgid "Pattern (stroke)"
 msgstr "Motivo (contorno)"
 
 #: ../src/ui/widget/selected-style.cpp:188
-#, fuzzy
 msgid "Hatch"
-msgstr "Campione"
+msgstr "Trama"
 
 #: ../src/ui/widget/selected-style.cpp:190
-#, fuzzy
 msgid "Hatch (fill)"
-msgstr "Riempimento campione"
+msgstr "Trama (riempimento)"
 
 #: ../src/ui/widget/selected-style.cpp:190
-#, fuzzy
 msgid "Hatch (stroke)"
-msgstr "Contorno campione"
+msgstr "Trama (contorno)"
 
 #: ../src/ui/widget/selected-style.cpp:192
 msgid "<b>L</b>"
@@ -31379,9 +31373,8 @@ msgstr ", trascina per modificare, tasto centrale per rimuovere"
 #: ../src/ui/widget/selected-style.cpp:1074 ../src/ui/widget/selected-style.cpp:1075
 #: ../src/ui/widget/stroke-style.cpp:165 ../src/ui/widget/style-swatch.cpp:316
 #: ../src/ui/widget/style-swatch.cpp:317
-#, fuzzy
 msgid "Hairline"
-msgstr "(tratto finissimo)"
+msgstr "Tratto fino"
 
 #: ../src/ui/widget/selected-style.cpp:1075 ../src/ui/widget/style-swatch.cpp:317
 msgid "Stroke width: %1"
@@ -31667,23 +31660,21 @@ msgstr[0] ""
 "<b>Maiusc</b> per separare il solido selezionato"
 msgstr[1] ""
 "Punto di fuga <b>a finito</b> condiviso da <b>%d</b> solidi; trascina con "
-"<b>Maiusc</b> per separare ii solidi selezionati"
+"<b>Maiusc</b> per separare i solidi selezionati"
 
 #: ../src/vanishing-point.cpp:330
-#, fuzzy, c-format
+#, c-format
 msgid "<b>Infinite</b> vanishing point shared by the box"
 msgid_plural ""
 "<b>Infinite</b> vanishing point shared by <b>%d</b> boxes; drag with <b>Shift</b> "
 "to separate selected box(es)"
-msgstr[0] ""
-"Punto di fuga <b>a infinito</b> condiviso da <b>%d</b> solido; trascina con "
-"<b>Maiusc</b> per separare il solido selezionato"
+msgstr[0] "Punto di fuga <b>a infinito</b> condiviso dal solido"
 msgstr[1] ""
 "Punto di fuga <b>a infinito</b> condiviso da <b>%d</b> solidi; trascina con "
 "<b>Maiusc</b> per separare i solidi selezionati"
 
 #: ../src/vanishing-point.cpp:339
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Collection of <b>%d</b> vanishing points shared by the box; drag with <b>Shift</"
 "b> to separate"
@@ -31691,11 +31682,11 @@ msgid_plural ""
 "Collection of <b>%d</b> vanishing points shared by <b>%d</b> boxes; drag with "
 "<b>Shift</b> to separate"
 msgstr[0] ""
-"Punto di gradiente condiviso da <b>%d</b> gradiente; trascina con <b>Maiusc</b> "
-"per separare"
+"Collezione di <b>%d</b> punti di fuga condivisi dal solido; trascina con "
+"<b>Maiusc</b> per separare"
 msgstr[1] ""
-"Punto di gradiente condiviso da <b>%d</b> gradienti; trascina con <b>Maiusc</b> "
-"per separare"
+"Collezione di <b>%d</b> punti di fuga condivisi da <b>%d</b> solidi; trascina con "
+"<b>Maiusc</b> per separare"
 
 #: ../src/verbs.cpp:145
 msgid "File"
@@ -34176,18 +34167,16 @@ msgid "Show Experimental"
 msgstr "Mostra sperimentali"
 
 #: ../share/ui/dialog-livepatheffect-add.glade:290
-#, fuzzy
 msgid "Message"
-msgstr "Messaggi"
+msgstr "Messaggio"
 
 #: ../share/ui/dialog-livepatheffect-effect.glade:77
-#, fuzzy
 msgid "LPEName"
-msgstr "Nome"
+msgstr "NomeLPE"
 
 #: ../share/ui/dialog-livepatheffect-effect.glade:113
 msgid "Experimental"
-msgstr ""
+msgstr "Sperimentale"
 
 #: ../share/ui/dialog-save-template.glade:9
 msgid "Save Document as Template"
@@ -34602,9 +34591,8 @@ msgid "Inkscape (default)"
 msgstr "Inkscape (predefinito)"
 
 #: ../share/ui/inkscape-start.glade:128
-#, fuzzy
 msgid "About Screen"
-msgstr "Video screen"
+msgstr "Finestra informazioni"
 
 #: ../share/ui/inkscape-start.glade:136
 msgid "Icon 120x120"
@@ -35741,7 +35729,7 @@ msgstr "Impossibile creare '{}': {}."
 
 #: ../share/extensions/webslicer_export.py:54
 msgid "Dir doesn't exist '{}'."
-msgstr ""
+msgstr "Cartella inesistente '{}'."
 
 #: ../share/extensions/webslicer_export.py:58
 #, fuzzy
@@ -35750,7 +35738,7 @@ msgstr "Nessun livello attuale."
 
 #: ../share/extensions/webslicer_export.py:319
 msgid "You must install the ImageMagick to get JPG and GIF."
-msgstr ""
+msgstr "Occorre installare ImageMagick per JPG e GIF"
 
 #: ../share/extensions/addnodes.inx:3
 msgid "Add Nodes"
@@ -35929,9 +35917,8 @@ msgid "Less Saturation"
 msgstr "Minor saturazione"
 
 #: ../share/extensions/color_list.inx:3
-#, fuzzy
 msgid "List All"
-msgstr "Elenco"
+msgstr "Elenca tutti"
 
 #: ../share/extensions/color_morehue.inx:3
 msgid "More Hue"
@@ -36001,18 +35988,16 @@ msgid "Color to replace"
 msgstr "Colore da rimpiazzare"
 
 #: ../share/extensions/color_replace.inx:7
-#, fuzzy
 msgid "From color"
-msgstr "Rilascia colore"
+msgstr "Da colore"
 
 #: ../share/extensions/color_replace.inx:9
 msgid "New color"
 msgstr "Nuovo colore"
 
 #: ../share/extensions/color_replace.inx:10
-#, fuzzy
 msgid "To color"
-msgstr "Colore icona"
+msgstr "A colore"
 
 #: ../share/extensions/color_rgbbarrel.inx:3
 msgid "RGB Barrel"
@@ -37705,7 +37690,6 @@ msgid "Size of Border (px):"
 msgstr "Dimensione bordo (px):"
 
 #: ../share/extensions/generate_voronoi.inx:12
-#, fuzzy
 msgid ""
 "Generate a random pattern of Voronoi cells. The pattern will be accessible in the "
 "Fill and Stroke dialog. You must select an object or a group.\n"
@@ -37716,7 +37700,7 @@ msgid ""
 "get an empty border."
 msgstr ""
 "Genera un motivo di celle di Voronoi casuale. Il motivo sarà accessibile dalla "
-"finestra «Riempimento e contorni». Devi selezionare un oggetto o un gruppo.\n"
+"finestra Riempimento e contorni. Devi selezionare un oggetto o un gruppo.\n"
 "\n"
 "Se il bordo è zero, il motivo sarà discontinuo lungo gli spigoli. Usa un bordo "
 "positivo, preferibilmente maggiore della dimensione della cella, per ottenere un "
@@ -39854,9 +39838,8 @@ msgid "Compressed Inkscape SVG with media export"
 msgstr "Inkscape SVG compresso con altri media"
 
 #: ../share/extensions/media_zip.inx:6
-#, fuzzy
 msgid "Image zip directory:"
-msgstr "Cartella di lavoro non valida: %s"
+msgstr "Cartella immagini zip:"
 
 #: ../share/extensions/media_zip.inx:7
 msgid "Add font list"
@@ -39875,7 +39858,7 @@ msgstr ""
 
 #: ../share/extensions/merge_styles.inx:3
 msgid "Merge Styles into CSS"
-msgstr ""
+msgstr "Unisci Stili in CSS"
 
 #: ../share/extensions/merge_styles.inx:6
 msgid ""
@@ -39884,17 +39867,19 @@ msgid ""
 "attributes. Please use a name which best describes the kinds of objects and their "
 "common context for best effect."
 msgstr ""
+"Tutti i nodi selezionati saranno raggruppati e i loro attributi di stile comuni "
+"creeranno una nuova classe che sostituirà gli esistenti attributi di stile. Si "
+"consiglia di utilizzare un nome significativo."
 
 #
 # File: ../share/extensions/merge_styles.inx, line: 9
 #: ../share/extensions/merge_styles.inx:8
 msgid "New Class Name:"
-msgstr ""
+msgstr "Nome nuova classe:"
 
 #: ../share/extensions/merge_styles.inx:13
-#, fuzzy
 msgid "Stylesheet"
-msgstr "_Stile"
+msgstr "Stile"
 
 #: ../share/extensions/motion.inx:3
 msgid "Motion"
@@ -40112,7 +40097,6 @@ msgstr ""
 "rappresentata come 124."
 
 #: ../share/extensions/output_scour.inx:14
-#, fuzzy
 msgid "Shorten color values"
 msgstr "Abbrevia i valori dei colori"
 
@@ -40126,7 +40110,6 @@ msgstr ""
 "possibile)."
 
 #: ../share/extensions/output_scour.inx:17
-#, fuzzy
 msgid "Convert CSS attributes to XML attributes"
 msgstr "Converte gli attributi CSS in attributi XML"
 
@@ -40137,7 +40120,6 @@ msgid ""
 msgstr "Converte i tag style e le dichiarazioni style=\"\" in attributi XML."
 
 #: ../share/extensions/output_scour.inx:21
-#, fuzzy
 msgid "Collapse groups"
 msgstr "Unisci i gruppi"
 
@@ -40147,10 +40129,9 @@ msgid ""
 "unused IDs\" to be set."
 msgstr ""
 "Rimuove i gruppi inutili, promuovendo di un livello il loro contenuto. Richiede "
-"l'opzione \"Rimouvi ID non utilizzati\"."
+"l'opzione \"Rimuovi ID non utilizzati\"."
 
 #: ../share/extensions/output_scour.inx:24
-#, fuzzy
 msgid "Create groups for similar attributes"
 msgstr "Crea gruppi per attributi simili"
 
@@ -40268,7 +40249,6 @@ msgstr ""
 "codificate in Base64."
 
 #: ../share/extensions/output_scour.inx:53
-#, fuzzy
 msgid "Enable viewboxing"
 msgstr "Attiva anteprima"
 
@@ -40307,7 +40287,6 @@ msgstr ""
 "del file a scapito della leggibilità."
 
 #: ../share/extensions/output_scour.inx:61
-#, fuzzy
 msgid "Indentation characters:"
 msgstr "Caratteri di indentazione:"
 
@@ -41381,9 +41360,8 @@ msgid "View Previous Glyph"
 msgstr "Visualizza glifo precedente"
 
 #: ../share/extensions/print_win32_vector.inx:3
-#, fuzzy
 msgid "Win32 Vector Print"
-msgstr "Stampa Windows 32-bit"
+msgstr "Stampa vettoriale Win32"
 
 #: ../share/extensions/printing_marks.inx:3
 msgid "Printing Marks"
@@ -41445,7 +41423,7 @@ msgid ""
 msgstr ""
 "Il formato JPEG è adatto alle fotografie, ma crea artefatti e distorsioni nei "
 "loghi e nelle immagini vettoriali con aree piatte. Il disegno avrà una qualità "
-"visiva minore e non avrà trasparenze."
+"visiva inferiore e non avrà trasparenze."
 
 #: ../share/extensions/raster_output_jpg.inx:10
 msgid "This is a high compression example for demonstration."
@@ -41453,7 +41431,7 @@ msgstr "Questo esempio illustra il risultato di un'elevata compressione"
 
 #: ../share/extensions/raster_output_jpg.inx:12
 msgid "You put a lot of talent, time and energy into your work."
-msgstr "Hai dedicato molto talento, tempo ed energia nel tuo lavoro."
+msgstr "Hai dedicato molto talento, tempo ed energia al tuo lavoro."
 
 #: ../share/extensions/raster_output_jpg.inx:13
 msgid ""
@@ -41497,7 +41475,7 @@ msgstr "JPEG (*.jpg)"
 
 #: ../share/extensions/raster_output_jpg.inx:34
 msgid "Render to JPEG file format"
-msgstr ""
+msgstr "Renderizza in formato JPEG"
 
 #: ../share/extensions/raster_output_png.inx:3
 msgid "Optimized PNG"
@@ -41521,55 +41499,47 @@ msgstr "Livello:"
 
 #: ../share/extensions/raster_output_png.inx:13
 msgid "Minimal Effort"
-msgstr ""
+msgstr "Minor sforzo"
 
 #: ../share/extensions/raster_output_png.inx:14
-#, fuzzy
 msgid "Single Compression Trial"
-msgstr "Compressione"
+msgstr "1 tentativo compressione"
 
 #: ../share/extensions/raster_output_png.inx:15
-#, fuzzy
 msgid "Two Compression Trials"
-msgstr "Compressione"
+msgstr "2 tentativi compressione"
 
 #: ../share/extensions/raster_output_png.inx:16
-#, fuzzy
 msgid "Five Compression Trials"
-msgstr "Compressione"
+msgstr "5 tentativi compressione"
 
 #: ../share/extensions/raster_output_png.inx:17
-#, fuzzy
 msgid "Ten Compression Trials"
-msgstr "Compressione"
+msgstr "10 tentativi compressione"
 
 #: ../share/extensions/raster_output_png.inx:21
 msgid "Lossy Options"
 msgstr "Opzioni con perdite"
 
 #: ../share/extensions/raster_output_png.inx:22
-#, fuzzy
 msgid "Allow bit depth reduction"
-msgstr "Riduzione rumore"
+msgstr "Permetti riduzione profondità bit"
 
 #: ../share/extensions/raster_output_png.inx:23
-#, fuzzy
 msgid "Allow color type reduction"
-msgstr "Riduzione rumore"
+msgstr "Premetti riduzione tipo colore"
 
 #: ../share/extensions/raster_output_png.inx:24
-#, fuzzy
 msgid "Allow palette reduction"
-msgstr "Intersezione tracciati"
+msgstr "Permetti riduzione palette"
 
 #: ../share/extensions/raster_output_png.inx:31
 msgid "Optimized PNG (*.png)"
 msgstr "PNG ottimizzato (*.png)"
 
 #: ../share/extensions/raster_output_png.inx:32
-#, fuzzy
 msgid "Optimize PNG output for file size."
-msgstr "Output SVG ottimizzato fornito da"
+msgstr "Ottimizza dimensione file PNG."
 
 #: ../share/extensions/raster_output_tiff.inx:3
 msgid "Export to TIFF"
@@ -41597,9 +41567,8 @@ msgid "JPEG"
 msgstr "JPEG"
 
 #: ../share/extensions/raster_output_tiff.inx:14
-#, fuzzy
 msgid "Deflate"
-msgstr "Dilata"
+msgstr "Deflate"
 
 #: ../share/extensions/raster_output_tiff.inx:15
 msgid "SGI Log"
@@ -41619,7 +41588,7 @@ msgstr "TIFF (*.tiff)"
 
 #: ../share/extensions/raster_output_tiff.inx:31
 msgid "Render to TIFF file format"
-msgstr ""
+msgstr "Renderizza in formato TIFF"
 
 #: ../share/extensions/raster_output_webp.inx:3
 msgid "Export to WebP"
@@ -41639,7 +41608,7 @@ msgstr "Qualità tra 1 e 100"
 
 #: ../share/extensions/raster_output_webp.inx:17
 msgid "Fastest"
-msgstr "Velocità massima"
+msgstr "Velocissima"
 
 #: ../share/extensions/raster_output_webp.inx:18
 msgid "Faster"
@@ -41757,51 +41726,44 @@ msgid "Square size (px):"
 msgstr "Dimensione quadretto (px):"
 
 #: ../share/extensions/render_barcode_qrcode.inx:35
-#, fuzzy
 msgid "Drawing type:"
-msgstr "Miscela disegno:"
+msgstr "Tipo disegno:"
 
 #: ../share/extensions/render_barcode_qrcode.inx:36
-#, fuzzy
 msgid "Smooth: neutral"
-msgstr "Nodo curvo"
+msgstr "Smussato: neutro"
 
 #: ../share/extensions/render_barcode_qrcode.inx:37
-#, fuzzy
 msgid "Smooth: greedy"
-msgstr "Smussata"
+msgstr "Smussato: medio"
 
 #: ../share/extensions/render_barcode_qrcode.inx:38
-#, fuzzy
 msgid "Smooth: proud"
-msgstr "Nodo curvo"
+msgstr "Smussato: aggressivo"
 
 #: ../share/extensions/render_barcode_qrcode.inx:39
-#, fuzzy
 msgid "Path: simple"
-msgstr "Percorso: "
+msgstr "Tracciato: semplice"
 
 #: ../share/extensions/render_barcode_qrcode.inx:40
-#, fuzzy
 msgid "Path: circle"
-msgstr "Cerchi impacchettati"
+msgstr "Tracciato: cerchio"
 
 #: ../share/extensions/render_barcode_qrcode.inx:41
-#, fuzzy
 msgid "Path: custom"
-msgstr "Percorso: "
+msgstr "Tracciato: personalizzato"
 
 #
 # File: ../share/extensions/render_barcode_qrcode.inx, line: 44
 #: ../share/extensions/render_barcode_qrcode.inx:43
 msgid "Square sharp: obsolete"
-msgstr ""
+msgstr "Quadrato vivo: obsoleto"
 
 #
 # File: ../share/extensions/render_barcode_qrcode.inx, line: 46
 #: ../share/extensions/render_barcode_qrcode.inx:45
 msgid "Smooth square value (0-1):"
-msgstr ""
+msgstr "Valore smussatura (0-1):"
 
 #
 # File: ../share/extensions/render_barcode_qrcode.inx, line: 47
@@ -41810,16 +41772,18 @@ msgid ""
 "For Path: custom set the path in relative coordinates (0,0)=(left,up) square size "
 "1.0 "
 msgstr ""
+"Per Tracciato: imposta il tracciato in coordinate relative (0,0)=(sinistra,alto) "
+"dimensione quadrato 1.0 "
 
 #
 # File: ../share/extensions/render_barcode_qrcode.inx, line: 48
 #: ../share/extensions/render_barcode_qrcode.inx:47
 msgid "Path string (Path: custom) or symbol #url:"
-msgstr ""
+msgstr "Tracciato come stringa (Tracciato: personalizzato= o simbolo #url:"
 
 #: ../share/extensions/render_barcode_qrcode.inx:48
 msgid "Manually define the group ID. Leave blank to have it auto-generated."
-msgstr ""
+msgstr "Definisci manualmente"
 
 #: ../share/extensions/render_barcode_qrcode.inx:49
 msgid "Group ID:"
