@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: Inkscape 1.1\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
 "POT-Creation-Date: 2021-05-01 17:15+0000\n"
-"PO-Revision-Date: 2021-05-11 11:36+0200\n"
+"PO-Revision-Date: 2021-05-11 18:54+0200\n"
 "Last-Translator: Firas Hanife <firashanife@gmail.com>\n"
 "Language-Team: \n"
 "Language: it\n"
@@ -41,7 +41,7 @@ msgstr "Riempimento e trasparenza"
 
 #: ../share/filters/filters.svg.h:4
 msgid "Does not filter but adds a filter region"
-msgstr ""
+msgstr "Non filtra ma aggiunge una regione filtro"
 
 #: ../share/filters/filters.svg.h:6
 msgid "Smart Jelly"
@@ -792,7 +792,7 @@ msgstr "Lente focale leggera"
 
 #: ../share/filters/filters.svg.h:300
 msgid "Glowing image content without blurring it"
-msgstr "Aggiunge bagliore all'immagine senza sfuocarla"
+msgstr "Aggiunge bagliore all'immagine senza sfocarla"
 
 #: ../share/filters/filters.svg.h:302
 msgid "Stained Glass"
@@ -1962,7 +1962,7 @@ msgstr "Sfocatura posterizzata"
 
 #: ../share/filters/filters.svg.h:844
 msgid "Converts blurred contour to posterized steps"
-msgstr "Converte contorno sfuocato in passaggi posterizzati"
+msgstr "Converte contorno sfocato in passaggi posterizzati"
 
 #: ../share/filters/filters.svg.h:846
 msgid "Contouring Discrete"
@@ -6818,7 +6818,7 @@ msgstr "Applica una maschera di sfocatura al bordo senza alterare il contenuto"
 
 #: ../src/extension/internal/filter/blurs.h:343
 msgid "Out of Focus"
-msgstr "Sfuocato"
+msgstr "Sfocato"
 
 #: ../src/extension/internal/filter/blurs.h:349
 #: ../src/extension/internal/filter/distort.h:77
@@ -11340,7 +11340,7 @@ msgstr "Lunghezza punto"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:60
 msgid "Divide path into straight segments of given length (in user units)"
-msgstr ""
+msgstr "Divide il tracciato in segmenti lineari di data lunghezza (in unità utente)"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:61
 msgid "Minimum stitch length [%]"
@@ -11349,6 +11349,7 @@ msgstr "Lunghezza minima punto [%]"
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:61
 msgid "Merge stitches that are shorter than this percentage of the stitch length"
 msgstr ""
+"Unisce i punti di lunghezza inferiore a questa percentuale della lunghezza punto"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:62
 msgid "Stitch pattern"
@@ -11373,7 +11374,6 @@ msgid "Show stitch gap"
 msgstr "Spaziatura punti"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:64
-#, fuzzy
 msgid "Length of the gap between stitches when showing stitches"
 msgstr "Spaziatura tra i punti quando vengono mostrati i punti"
 
@@ -11531,12 +11531,10 @@ msgid "Unit"
 msgstr "Unità"
 
 #: ../src/live_effects/lpe-fillet-chamfer.cpp:46
-#, fuzzy
 msgid "Method to calculate the fillet or chamfer"
 msgstr "Modalità di calcolo della bordatura"
 
 #: ../src/live_effects/lpe-fillet-chamfer.cpp:48
-#, fuzzy
 msgid "Mode, e.g. fillet or chamfer"
 msgstr "Modalità bordatura"
 
@@ -11784,9 +11782,8 @@ msgid "Overrides the miter limit and forces a join."
 msgstr "Sovrascrive la lunghezza massima dello spigolo e lo forza."
 
 #: ../src/live_effects/lpe-knot.cpp:359
-#, fuzzy
 msgid "_Gap length:"
-msgstr "Lunghezza p_rincipali:"
+msgstr "Lunghezza _spaziatura:"
 
 #: ../src/live_effects/lpe-knot.cpp:359
 msgid "Size of hidden region of lower string"
@@ -11801,23 +11798,26 @@ msgid ""
 "Gap width is given in multiples of stroke width. When unchecked, document units "
 "are used."
 msgstr ""
+"La lunghezza spaziatura è definita in multipli della larghezza del contorno. Se "
+"disattivata, è utilizzata l'unità del documento."
 
 #: ../src/live_effects/lpe-knot.cpp:365
-#, fuzzy
 msgid "_Gaps in both"
-msgstr "Lunghezza p_rincipali:"
+msgstr "Spaziatura su entrambe"
 
 #: ../src/live_effects/lpe-knot.cpp:365
 msgid "At path intersections, both parts will have a gap"
-msgstr ""
+msgstr "Nelle intersezioni del tracciato entrambe le parti avranno la spaziatura"
 
 #: ../src/live_effects/lpe-knot.cpp:366
 msgid "_Groups: Inverse"
-msgstr ""
+msgstr "_Gruppi: Inverti"
 
 #: ../src/live_effects/lpe-knot.cpp:366
 msgid "Use other stroke width, useful in groups with different stroke widths"
 msgstr ""
+"Usa altra larghezza del contorno, utile nel caso di gruppi con più larghezze di "
+"contorno"
 
 #: ../src/live_effects/lpe-knot.cpp:372
 msgid "S_witcher size:"
@@ -11832,15 +11832,17 @@ msgid "Crossing Signs"
 msgstr "Segni intersezione"
 
 #: ../src/live_effects/lpe-knot.cpp:373
-#, fuzzy
 msgid "Crossing signs"
-msgstr "Segni intersezione"
+msgstr "Segni d'intersezione"
 
 #: ../src/live_effects/lpe-knot.cpp:668
 msgid ""
 "Drag to select a crossing, click to flip it, Shift + click to change all "
 "crossings, Ctrl + click to reset and change all crossings"
 msgstr ""
+"Trascina per selezionare un'intersezione, clicca per rovesciarla, Maiusc + Clic "
+"per cambiare tutte le intersezioni, Ctrl + Clic per reimpostare e modificare "
+"tutte le intersezioni"
 
 #: ../src/live_effects/lpe-knot.cpp:715
 msgid "Change knot crossing"
@@ -11857,9 +11859,8 @@ msgid "Mirror movements in vertical"
 msgstr "Rispecchia i movimenti verticalmente"
 
 #: ../src/live_effects/lpe-lattice2.cpp:39
-#, fuzzy
 msgid "Use only perimeter"
-msgstr "Modifica parametri booleani"
+msgstr "Usa solo perimetro"
 
 #: ../src/live_effects/lpe-lattice2.cpp:40
 msgid "Update while moving knots (maybe slow)"
@@ -12523,6 +12524,26 @@ msgid ""
 "<b><i>Set Defaults:</i></b> For every LPE, default values can be set at the "
 "bottom."
 msgstr ""
+"<b><big>Generale</big></b>\n"
+"Visualizzazione e posizione delle linee di misurazione e del testo\n"
+"\n"
+"<b><big>Proiezione</big></b>\n"
+"Mostra una linea con le misurazioni degli oggetti selezionati\n"
+"\n"
+"<b><big>Opzioni</big></b>\n"
+"Opzioni su colore, precisione, formato testo e visualizzazione\n"
+"\n"
+"<b><big>Consigli</big></b>\n"
+"<b><i>Stile personalizzato:</i></b> Per personalizzare ulteriormente gli stili "
+"trova la classe o l'ID con l'editor XML, poi usa Stili per applicare un nuovo "
+"stile.\n"
+"<b><i>Segmenti esclusi:</i></b> Permette di nascondere alcuni segmenti o parti di "
+"proiezione.\n"
+"<b><i>Misure multiple LPE:</i></b> Permette di aggiungere testo e misure sullo "
+"stesso oggetto, assieme ai segmenti esclusi, a diversi angoli o proiezioni "
+"aggiuntive.\n"
+"<b><i>Imposta predefiniti:</i></b> Per ogni LPE, i valori predefiniti possono "
+"essere impostati in basso."
 
 #: ../src/live_effects/lpe-measure-segments.cpp:297 ../src/ui/dialog/find.cpp:76
 msgid "General"
@@ -12535,7 +12556,7 @@ msgstr "Proiezione"
 #: ../src/live_effects/lpe-measure-segments.cpp:518
 #, fuzzy
 msgid "Non Uniform Scale"
-msgstr "Disturbo uniforme"
+msgstr "Scala non uniforme"
 
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:48
 msgid "Vertical page center"
@@ -15902,9 +15923,8 @@ msgid "Unlock Objects Below"
 msgstr "Blocca oggetti sottostanti"
 
 #: ../src/ui/contextmenu.cpp:164
-#, fuzzy
 msgid "Enter group %1"
-msgstr "Modifica gruppo #%1"
+msgstr "Modifica gruppo %1"
 
 #: ../src/ui/contextmenu.cpp:178
 msgid "_Pop selection out of group"
@@ -17160,13 +17180,12 @@ msgid "History mode"
 msgstr ""
 
 #: ../src/ui/dialog/command-palette.cpp:1154
-#, fuzzy
 msgid "Invalid input! Enter an integer number."
-msgstr "Input non valido!"
+msgstr "Input non valido! Inserisci un numero intero."
 
 #: ../src/ui/dialog/command-palette.cpp:1163
 msgid "Invalid input! Enter a decimal number."
-msgstr ""
+msgstr "Input non valido! Inserisci un numero decimale."
 
 #: ../src/ui/dialog/debug.cpp:66
 msgid "Messages"
@@ -17181,32 +17200,29 @@ msgid "Release log messages"
 msgstr "Ignora i messaggi di log"
 
 #: ../src/ui/dialog/dialog-container.cpp:229 ../src/ui/dialog/dialog-notebook.cpp:68
-#, fuzzy
 msgid "Close Tab"
-msgstr "Chiudi tracciato"
+msgstr "Chiudi pannello"
 
 #: ../src/ui/dialog/dialog-multipaned.cpp:282
+#, fuzzy
 msgid "You can drop dockable dialogs here."
-msgstr ""
+msgstr "Trascina sottofinestre qui."
 
 #: ../src/ui/dialog/dialog-notebook.cpp:74
-#, fuzzy
 msgid "Close Notebook"
-msgstr "Chiude questo pannello"
+msgstr "Chiudi raccolta pannelli"
 
 #: ../src/ui/dialog/dialog-notebook.cpp:80
-#, fuzzy
 msgid "Move Tab to New Window"
-msgstr "Sposta oggetto in basso"
+msgstr "Sposta pannello a nuova finestra"
 
 #: ../src/ui/dialog/dialog-notebook.cpp:90
-#, fuzzy
 msgid "Labels: automatic"
-msgstr "Formato testo"
+msgstr "Etichette: automatico"
 
 #: ../src/ui/dialog/dialog-notebook.cpp:93
 msgid "Labels: always off"
-msgstr ""
+msgstr "Etichette: disattivato"
 
 #: ../src/ui/dialog/dialog-window.cpp:55
 #, fuzzy
@@ -17593,9 +17609,8 @@ msgid "New"
 msgstr "Nuovo"
 
 #: ../src/ui/dialog/document-properties.cpp:870
-#, fuzzy
 msgid "Script ID"
-msgstr "Testo: "
+msgstr "ID script"
 
 #: ../src/ui/dialog/document-properties.cpp:876
 msgid "<b>Content:</b>"
@@ -17732,14 +17747,13 @@ msgstr ""
 "Nasconde tutti gli oggetti nell'immagine esportata tranne quelli selezionati"
 
 #: ../src/ui/dialog/export.cpp:197
-#, fuzzy
 msgid ""
 "Enables ADAM7 interlacing for PNG output. This results in slightly larger image "
 "files, but big images can already be displayed (slightly blurry) while still "
 "loading."
 msgstr ""
 "Abilita l'interlacciamento ADAM7 per le PNG. Risulta un'immagine leggermente più "
-"pesante ma meglio visibile durante il caricamento"
+"pesante ma meglio visibile (leggermente sfocata) durante il caricamento."
 
 #: ../src/ui/dialog/export.cpp:199
 msgid "Once the export completes, close this dialog"
@@ -18189,13 +18203,13 @@ msgid "Filter General Settings"
 msgstr "Impostazioni generali filtri"
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:2772
-#, fuzzy
 msgid "Automatic Region"
-msgstr "Allineamento"
+msgstr "Regione automatica"
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:2772
 msgid "If unset, the coordinates and dimensions won't be updated automatically."
 msgstr ""
+"Se attivo, le coordinate e le dimensioni saranno aggiornate automaticamente."
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:2773
 msgid "Coordinates:"
@@ -28811,7 +28825,7 @@ msgstr "Modalità sfocatura"
 
 #: ../src/ui/toolbar/tweak-toolbar.cpp:163
 msgid "Blur selected objects more; with Shift, blur less"
-msgstr "Sfuoca gli oggetti selezionati; con Maiusc, riduce la sfocatura"
+msgstr "Sfoca gli oggetti selezionati; con Maiusc, riduce la sfocatura"
 
 #: ../src/ui/toolbar/tweak-toolbar.cpp:182
 msgid "(rough, simplified)"
