@@ -589,7 +589,9 @@ void GradientEditor::set_stop_offset(size_t index, double offset) {
         auto scoped(_update.block());
 
         stop->offset = offset;
-        sp_repr_set_css_double(stop->getRepr(), "offset", stop->offset);
+        if (auto repr = stop->getRepr()) {
+            repr->setAttributeCssDouble("offset", stop->offset);
+        }
 
         DocumentUndo::maybeDone(stop->document, "gradient:stop:offset", SP_VERB_CONTEXT_GRADIENT,
             _("Change gradient stop offset"));

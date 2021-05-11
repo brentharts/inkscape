@@ -366,11 +366,11 @@ SPGradient *sp_gradient_reset_to_userspace(SPGradient *gr, SPItem *item)
     Geom::Point const center = bbox->midpoint();
 
     if (SP_IS_RADIALGRADIENT(gr)) {
-        sp_repr_set_svg_double(repr, "cx", center[Geom::X]);
-        sp_repr_set_svg_double(repr, "cy", center[Geom::Y]);
-        sp_repr_set_svg_double(repr, "fx", center[Geom::X]);
-        sp_repr_set_svg_double(repr, "fy", center[Geom::Y]);
-        sp_repr_set_svg_double(repr, "r", width/2);
+        repr->setAttributeSvgDouble("cx", center[Geom::X]);
+        repr->setAttributeSvgDouble("cy", center[Geom::Y]);
+        repr->setAttributeSvgDouble("fx", center[Geom::X]);
+        repr->setAttributeSvgDouble("fy", center[Geom::Y]);
+        repr->setAttributeSvgDouble("r", width/2);
 
         // we want it to be elliptic, not circular
         Geom::Affine squeeze = Geom::Translate (-center) *
@@ -414,17 +414,17 @@ SPGradient *sp_gradient_reset_to_userspace(SPGradient *gr, SPItem *item)
 
         }
 
-        sp_repr_set_svg_double(repr, "x1", pStart[Geom::X]);
-        sp_repr_set_svg_double(repr, "y1", pStart[Geom::Y]);
-        sp_repr_set_svg_double(repr, "x2", pEnd[Geom::X]);
-        sp_repr_set_svg_double(repr, "y2", pEnd[Geom::Y]);
+        repr->setAttributeSvgDouble("x1", pStart[Geom::X]);
+        repr->setAttributeSvgDouble("y1", pStart[Geom::Y]);
+        repr->setAttributeSvgDouble("x2", pEnd[Geom::X]);
+        repr->setAttributeSvgDouble("y2", pEnd[Geom::Y]);
 
     } else {
         // Mesh
         // THIS IS BEING CALLED TWICE WHENEVER A NEW GRADIENT IS CREATED, WRITING HERE CAUSES PROBLEMS
         // IN SPMeshNodeArray::create()
-        //sp_repr_set_svg_double(repr, "x", bbox->min()[Geom::X]);
-        //sp_repr_set_svg_double(repr, "y", bbox->min()[Geom::Y]);
+        //repr->setAttributeSvgDouble("x", bbox->min()[Geom::X]);
+        //repr->setAttributeSvgDouble("y", bbox->min()[Geom::Y]);
 
         // We don't create a shared array gradient.
         SPMeshGradient* mg = SP_MESHGRADIENT( gr );
@@ -518,10 +518,10 @@ SPGradient *sp_gradient_convert_to_userspace(SPGradient *gr, SPItem *item, gchar
             Geom::Point p1_u = p1_b * point_convert;
             Geom::Point p2_u = p2_b * point_convert;
 
-            sp_repr_set_svg_double(repr, "x1", p1_u[Geom::X]);
-            sp_repr_set_svg_double(repr, "y1", p1_u[Geom::Y]);
-            sp_repr_set_svg_double(repr, "x2", p2_u[Geom::X]);
-            sp_repr_set_svg_double(repr, "y2", p2_u[Geom::Y]);
+            repr->setAttributeSvgDouble("x1", p1_u[Geom::X]);
+            repr->setAttributeSvgDouble("y1", p1_u[Geom::Y]);
+            repr->setAttributeSvgDouble("x2", p2_u[Geom::X]);
+            repr->setAttributeSvgDouble("y2", p2_u[Geom::Y]);
 
             // set the gradientUnits
             repr->setAttribute("gradientUnits", "userSpaceOnUse");
@@ -539,11 +539,11 @@ SPGradient *sp_gradient_convert_to_userspace(SPGradient *gr, SPItem *item, gchar
             Geom::Point f_u = f_b * point_convert;
             double r_u = r_b * point_convert.descrim();
 
-            sp_repr_set_svg_double(repr, "cx", c_u[Geom::X]);
-            sp_repr_set_svg_double(repr, "cy", c_u[Geom::Y]);
-            sp_repr_set_svg_double(repr, "fx", f_u[Geom::X]);
-            sp_repr_set_svg_double(repr, "fy", f_u[Geom::Y]);
-            sp_repr_set_svg_double(repr, "r", r_u);
+            repr->setAttributeSvgDouble("cx", c_u[Geom::X]);
+            repr->setAttributeSvgDouble("cy", c_u[Geom::Y]);
+            repr->setAttributeSvgDouble("fx", f_u[Geom::X]);
+            repr->setAttributeSvgDouble("fy", f_u[Geom::Y]);
+            repr->setAttributeSvgDouble("r", r_u);
 
             // set the gradientUnits
             repr->setAttribute("gradientUnits", "userSpaceOnUse");
@@ -712,6 +712,12 @@ guint32 average_color(guint32 c1, guint32 c2, gdouble p)
     return SP_RGBA32_U_COMPOSE(r, g, b, a);
 }
 
+void sp_repr_set_css_double(Inkscape::XML::Node* node, const char* key, double value) {
+    if (node) {
+        node->setAttributeCssDouble(key, value);
+    }
+}
+
 SPStop *sp_vector_add_stop(SPGradient *vector, SPStop* prev_stop, SPStop* next_stop, gfloat offset)
 {
 #ifdef SP_GR_VERBOSE
@@ -745,8 +751,7 @@ SPStop *sp_vector_add_stop(SPGradient *vector, SPStop* prev_stop, SPStop* next_s
 
     newstop = reinterpret_cast<SPStop *>(vector->document->getObjectByRepr(new_stop_repr));
     newstop->offset = offset;
-    sp_repr_set_css_double( newstop->getRepr(), "offset", (double)offset);
-
+    newstop->getRepr()->setAttributeCssDouble("offset", (double)offset);
     Inkscape::CSSOStringStream os;
     gchar c[64];
     sp_svg_write_color (c, sizeof(c), cnew);
@@ -1176,7 +1181,7 @@ void sp_gradient_reverse_vector(SPGradient* gradient) {
         child_reprs.push_back(child.getRepr());
         child_objects.push_back(&child);
         offset=0;
-        sp_repr_get_double(child.getRepr(), "offset", &offset);
+        child.getRepr()->getAttributeDouble("offset", &offset);
         offsets.push_back(offset);
     }
 
@@ -1194,7 +1199,7 @@ void sp_gradient_reverse_vector(SPGradient* gradient) {
     std::vector<double>::reverse_iterator o_it = offsets.rbegin();
     for (auto c_it = child_copies.rbegin(); c_it != child_copies.rend(); ++c_it, ++o_it) {
         vector->appendChildRepr(*c_it);
-        sp_repr_set_svg_double (*c_it, "offset", 1 - *o_it);
+        (*c_it)->setAttributeSvgDouble("offset", 1 - *o_it);
         Inkscape::GC::release(*c_it);
     }
 }
@@ -1274,11 +1279,11 @@ void sp_item_gradient_set_coords(SPItem *item, GrPointType point_type, guint poi
                 lg->y1.computed = p[Geom::Y];
                 if (write_repr) {
                     if (scale) {
-                        sp_repr_set_svg_double(repr, "x2", lg->x2.computed);
-                        sp_repr_set_svg_double(repr, "y2", lg->y2.computed);
+                        repr->setAttributeSvgDouble("x2", lg->x2.computed);
+                        repr->setAttributeSvgDouble("y2", lg->y2.computed);
                     }
-                    sp_repr_set_svg_double(repr, "x1", lg->x1.computed);
-                    sp_repr_set_svg_double(repr, "y1", lg->y1.computed);
+                    repr->setAttributeSvgDouble("x1", lg->x1.computed);
+                    repr->setAttributeSvgDouble("y1", lg->y1.computed);
                 } else {
                     gradient->requestModified(SP_OBJECT_MODIFIED_FLAG);
                 }
@@ -1292,11 +1297,11 @@ void sp_item_gradient_set_coords(SPItem *item, GrPointType point_type, guint poi
                 lg->y2.computed = p[Geom::Y];
                 if (write_repr) {
                     if (scale) {
-                        sp_repr_set_svg_double(repr, "x1", lg->x1.computed);
-                        sp_repr_set_svg_double(repr, "y1", lg->y1.computed);
+                        repr->setAttributeSvgDouble("x1", lg->x1.computed);
+                        repr->setAttributeSvgDouble("y1", lg->y1.computed);
                     }
-                    sp_repr_set_svg_double(repr, "x2", lg->x2.computed);
-                    sp_repr_set_svg_double(repr, "y2", lg->y2.computed);
+                    repr->setAttributeSvgDouble("x2", lg->x2.computed);
+                    repr->setAttributeSvgDouble("y2", lg->y2.computed);
                 } else {
                     gradient->requestModified(SP_OBJECT_MODIFIED_FLAG);
                 }
@@ -1313,7 +1318,7 @@ void sp_item_gradient_set_coords(SPItem *item, GrPointType point_type, guint poi
                 SPStop* stopi = sp_get_stop_i(vector, point_i);
                 stopi->offset = offset;
                 if (write_repr) {
-                    sp_repr_set_css_double(stopi->getRepr(), "offset", stopi->offset);
+                    stopi->getRepr()->setAttributeCssDouble("offset", stopi->offset);
                 } else {
                     stopi->requestModified(SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_STYLE_MODIFIED_FLAG);
                 }
@@ -1341,10 +1346,10 @@ void sp_item_gradient_set_coords(SPItem *item, GrPointType point_type, guint poi
                 rg->cx.computed = p[Geom::X];
                 rg->cy.computed = p[Geom::Y];
                 if (write_repr) {
-                    sp_repr_set_svg_double(repr, "fx", rg->fx.computed);
-                    sp_repr_set_svg_double(repr, "fy", rg->fy.computed);
-                    sp_repr_set_svg_double(repr, "cx", rg->cx.computed);
-                    sp_repr_set_svg_double(repr, "cy", rg->cy.computed);
+                    repr->setAttributeSvgDouble("fx", rg->fx.computed);
+                    repr->setAttributeSvgDouble("fy", rg->fy.computed);
+                    repr->setAttributeSvgDouble("cx", rg->cx.computed);
+                    repr->setAttributeSvgDouble("cy", rg->cy.computed);
                 } else {
                     gradient->requestModified(SP_OBJECT_MODIFIED_FLAG);
                 }
@@ -1353,8 +1358,8 @@ void sp_item_gradient_set_coords(SPItem *item, GrPointType point_type, guint poi
                 rg->fx.computed = p[Geom::X];
                 rg->fy.computed = p[Geom::Y];
                 if (write_repr) {
-                    sp_repr_set_svg_double(repr, "fx", rg->fx.computed);
-                    sp_repr_set_svg_double(repr, "fy", rg->fy.computed);
+                    repr->setAttributeSvgDouble("fx", rg->fx.computed);
+                    repr->setAttributeSvgDouble("fy", rg->fy.computed);
                 } else {
                     gradient->requestModified(SP_OBJECT_MODIFIED_FLAG);
                 }
@@ -1408,7 +1413,7 @@ void sp_item_gradient_set_coords(SPItem *item, GrPointType point_type, guint poi
                 SPStop* stopi = sp_get_stop_i(vector, point_i);
                 stopi->offset = offset;
                 if (write_repr) {
-                    sp_repr_set_css_double(stopi->getRepr(), "offset", stopi->offset);
+                    stopi->getRepr()->setAttributeCssDouble("offset", stopi->offset);
                 } else {
                     stopi->requestModified(SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_STYLE_MODIFIED_FLAG);
                 }
@@ -1425,7 +1430,7 @@ void sp_item_gradient_set_coords(SPItem *item, GrPointType point_type, guint poi
                 SPStop* stopi = sp_get_stop_i(vector, point_i);
                 stopi->offset = offset;
                 if (write_repr) {
-                    sp_repr_set_css_double(stopi->getRepr(), "offset", stopi->offset);
+                    stopi->getRepr()->setAttributeCssDouble("offset", stopi->offset);
                 } else {
                     stopi->requestModified(SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_STYLE_MODIFIED_FLAG);
                 }

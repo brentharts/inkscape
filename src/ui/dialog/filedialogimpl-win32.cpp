@@ -1028,14 +1028,10 @@ bool FileOpenDialogImplWin32::set_svg_preview()
     const double scaleFactorY = PreviewSize / svgHeight_px;
     const double scaleFactor = (scaleFactorX > scaleFactorY) ? scaleFactorY : scaleFactorX;
 
-    // Now get the resized values
-    const int scaledSvgWidth  = round(scaleFactor * svgWidth_px);
-    const int scaledSvgHeight = round(scaleFactor * svgHeight_px);
-
-    const double dpi = 96*scaleFactor;
+    const double dpi = 96 * scaleFactor;
+    Geom::Rect area(0, 0, svgWidth_px, svgHeight_px);
     Inkscape::Pixbuf *pixbuf =
-        sp_generate_internal_bitmap(svgDoc.get(), NULL, 0, 0, svgWidth_px, svgHeight_px, scaledSvgWidth,
-                                    scaledSvgHeight, dpi, dpi, (guint32)0xffffff00, NULL);
+        sp_generate_internal_bitmap(svgDoc.get(), area, dpi);
 
     // Tidy up
     if (pixbuf == NULL) {
@@ -1048,8 +1044,8 @@ bool FileOpenDialogImplWin32::set_svg_preview()
     delete pixbuf;
     _preview_document_width = svgWidth_px;
     _preview_document_height = svgHeight_px;
-    _preview_image_width = scaledSvgWidth;
-    _preview_image_height = scaledSvgHeight;
+    _preview_image_width = round(scaleFactor * svgWidth_px);
+    _preview_image_height = round(scaleFactor * svgHeight_px);
     _mutex->unlock();
 
     return true;

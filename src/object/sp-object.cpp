@@ -224,6 +224,16 @@ gchar const* SPObject::getId() const {
     return id;
 }
 
+/**
+ * Returns the id as a url param, in the form 'url(#{id})'
+ */
+std::string SPObject::getUrl() const {
+    if (id) {
+        return std::string("url(#") + id + ")";
+    }
+    return "";
+}
+
 Inkscape::XML::Node * SPObject::getRepr() {
     return repr;
 }
@@ -784,7 +794,7 @@ void SPObject::invoke_build(SPDocument *document, Inkscape::XML::Node *repr, uns
 
 int SPObject::getIntAttribute(char const *key, int def)
 {
-    sp_repr_get_int(getRepr(),key,&def);
+    getRepr()->getAttributeInt(key, &def);
     return def;
 }
 
@@ -1449,7 +1459,7 @@ void SPObject::removeAttribute(gchar const *key, SPException *ex)
 bool SPObject::storeAsDouble( gchar const *key, double *val ) const
 {
     g_assert(this->getRepr()!= nullptr);
-    return sp_repr_get_double(((Inkscape::XML::Node *)(this->getRepr())),key,val);
+    return ((Inkscape::XML::Node *)(this->getRepr()))->getAttributeDouble(key, val);
 }
 
 /** Helper */

@@ -21,21 +21,21 @@ Glib::ustring double_to_css_value(double value);
 class svg_renderer
 {
 public:
-	// load SVG document from file (abs path)
-	svg_renderer(const char* svg_file_path);
+    // load SVG document from file (abs path)
+    svg_renderer(const char* svg_file_path);
 
-	// set inline style on selected elements; return number of elements modified
-	size_t set_style(const Glib::ustring& selector, const char* name, const Glib::ustring& value);
+    // set inline style on selected elements; return number of elements modified
+    size_t set_style(const Glib::ustring& selector, const char* name, const Glib::ustring& value);
 
-	// render document at given scale
-	Glib::RefPtr<Gdk::Pixbuf> render(double scale);
+    // render document at given scale
+    Glib::RefPtr<Gdk::Pixbuf> render(double scale);
 
-	double get_width_px() const;
-	double get_height_px() const;
+    double get_width_px() const;
+    double get_height_px() const;
 
 private:
-	std::unique_ptr<SPDocument> _document;
-	SPRoot* _root = nullptr;
+    std::unique_ptr<SPDocument> _document;
+    SPRoot* _root = nullptr;
 };
 
 }
