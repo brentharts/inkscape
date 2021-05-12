@@ -7,32 +7,32 @@
 
 class OperationBlocker {
 public:
-	OperationBlocker() = default;
-	
-	bool pending() const {
-		return _counter > 0;
-	}
+    OperationBlocker() = default;
+    
+    bool pending() const {
+        return _counter > 0;
+    }
 
-	class scoped_block {
-	public:
-		scoped_block(unsigned int& counter): _c(counter) {
-			++_c;
-		}
+    class scoped_block {
+    public:
+        scoped_block(unsigned int& counter): _c(counter) {
+            ++_c;
+        }
 
-		~scoped_block() {
-			--_c;
-		}
+        ~scoped_block() {
+            --_c;
+        }
 
-	private:
-		unsigned int& _c;
-	};
+    private:
+        unsigned int& _c;
+    };
 
-	scoped_block block() {
-		return scoped_block(_counter);
-	}
+    scoped_block block() {
+        return scoped_block(_counter);
+    }
 
 private:
-	unsigned int _counter = 0;
+    unsigned int _counter = 0;
 };
 
 #endif
