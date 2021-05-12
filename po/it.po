@@ -27003,23 +27003,23 @@ msgstr ""\
 \
 #: ../src/ui/toolbar/snap-toolbar.cpp:46\
 msgid "Bounding box"\
-msgstr "Riquadri"\
+msgstr "Riquadri di selezione"\
 \
 #: ../src/ui/toolbar/snap-toolbar.cpp:47\
 msgid "Snap bounding boxes"\
-msgstr "Aggancia angoli riquadri"\
+msgstr "Aggancia gli angoli dei riquadri di selezione"\
 \
 #: ../src/ui/toolbar/snap-toolbar.cpp:54\
 msgid "Bounding box edges"\
-msgstr "Margini riquadri"\
+msgstr "Lati dei riquadri di selezione"\
 \
 #: ../src/ui/toolbar/snap-toolbar.cpp:55\
 msgid "Snap to edges of a bounding box"\
-msgstr "Aggancia ai bordi dei riquadri"\
+msgstr "Aggancia ai bordi dei riquadri di selezione"\
 \
 #: ../src/ui/toolbar/snap-toolbar.cpp:62\
 msgid "Bounding box corners"\
-msgstr "Angoli riquadri"\
+msgstr "Angoli dei riquadri di selezione"\
 \
 #: ../src/ui/toolbar/snap-toolbar.cpp:63\
 msgid "Snap bounding box corners"\
@@ -27027,7 +27027,7 @@ msgstr "Aggancia angoli riquadri"\
 \
 #: ../src/ui/toolbar/snap-toolbar.cpp:70\
 msgid "BBox Edge Midpoints"\
-msgstr "Met\'e0 margine riquadro"\
+msgstr "Met\'e0 margine riquadro di selezione"\
 \
 #: ../src/ui/toolbar/snap-toolbar.cpp:71\
 msgid "Snap midpoints of bounding box edges"\
@@ -27035,7 +27035,7 @@ msgstr "Aggancia a e con le met\'e0 dei bordi dei riquadri"\
 \
 #: ../src/ui/toolbar/snap-toolbar.cpp:78\
 msgid "BBox Centers"\
-msgstr "Centri riquadri"\
+msgstr "Centri dei riquadri di selezione"\
 \
 #: ../src/ui/toolbar/snap-toolbar.cpp:79\
 msgid "Snapping centers of bounding boxes"\
@@ -32731,7 +32731,7 @@ msgstr "Caratteri _Unicode..."\
 \
 #: ../src/verbs.cpp:3055\
 msgid "Select Unicode characters from a palette"\
-msgstr "Seleziona i caratteri Unicode da una paletta"\
+msgstr "Seleziona i caratteri Unicode da una lista"\
 \
 #. TRANSLATORS: "Swatches" means: color samples\
 #: ../src/verbs.cpp:3058\
@@ -32740,7 +32740,7 @@ msgstr "Campio_ni..."\
 \
 #: ../src/verbs.cpp:3059\
 msgid "Select colors from a swatches palette"\
-msgstr "Seleziona i colori da una paletta di campioni"\
+msgstr "Seleziona i colori da una lista"\
 \
 #: ../src/verbs.cpp:3060\
 msgid "S_ymbols..."\
@@ -32748,17 +32748,17 @@ msgstr "S_imboli..."\
 \
 #: ../src/verbs.cpp:3061\
 msgid "Select symbol from a symbols palette"\
-msgstr "Seleziona simbolo da una paletta di simboli"\
+msgstr "Seleziona simbolo da una lista"\
 \
 #: ../src/verbs.cpp:3062\
 #, fuzzy\
 msgid "_Paint Servers..."\
-msgstr "Dispositivi di _input..."\
+msgstr "Server di Stam_pa..."\
 \
 #: ../src/verbs.cpp:3064\
 #, fuzzy\
 msgid "Select paint server from a collection"\
-msgstr "Cancella oggetti spruzzati dalla selezione"\
+msgstr "Seleziona dalla lista il server di stampa"\
 \
 #: ../src/verbs.cpp:3065\
 msgid "Transfor_m..."\
@@ -36122,7 +36122,7 @@ msgstr "Riempie aree delimitate"\
 #: ../share/extensions/gcodetools_area.inx:23\
 #, fuzzy\
 msgid "Area fill angle"\
-msgstr "Angolo sinistro"\
+msgstr "Angolo di riempimento area"\
 \
 #: ../share/extensions/gcodetools_area.inx:24\
 #: ../share/extensions/gcodetools_area.inx:25\
@@ -36137,19 +36137,19 @@ msgstr "Metodo di divisione"\
 \
 #: ../share/extensions/gcodetools_area.inx:27\
 msgid "Zig zag"\
-msgstr ""\
+msgstr "Zigzag"\
 \
 #\
 # File: ../share/extensions/gcodetools_area.inx, line: 32\
 #: ../share/extensions/gcodetools_area.inx:32\
 msgid "Area artifacts"\
-msgstr ""\
+msgstr "Area dell'oggetto"\
 \
 #\
 # File: ../share/extensions/gcodetools_area.inx, line: 33\
 #: ../share/extensions/gcodetools_area.inx:33\
 msgid "Artifact diameter:"\
-msgstr ""\
+msgstr "Diametro dell'oggetto"\
 \
 #: ../share/extensions/gcodetools_area.inx:34\
 #: ../share/extensions/hershey.inx:70\
@@ -36159,12 +36159,12 @@ msgstr "Azione:"\
 \
 #: ../share/extensions/gcodetools_area.inx:35\
 msgid "mark with an arrow"\
-msgstr ""\
+msgstr "Segna con una freccia"\
 \
 #: ../share/extensions/gcodetools_area.inx:36\
 #, fuzzy\
 msgid "mark with style"\
-msgstr "Stile campioni"\
+msgstr "Segna con uno stile"\
 \
 #: ../share/extensions/gcodetools_area.inx:37\
 #, fuzzy\
@@ -36218,27 +36218,27 @@ msgstr "Margini di stampa"\
 #: ../share/extensions/gcodetools_lathe.inx:33\
 #: ../share/extensions/gcodetools_path_to_gcode.inx:13\
 msgid "Subpath by subpath"\
-msgstr ""\
+msgstr "Sottotracciato per sottotracciato"\
 \
 #: ../share/extensions/gcodetools_area.inx:54\
 #: ../share/extensions/gcodetools_lathe.inx:34\
 #: ../share/extensions/gcodetools_path_to_gcode.inx:14\
 #, fuzzy\
 msgid "Path by path"\
-msgstr "Incolla tracciato"\
+msgstr "Tracciato per tracciato"\
 \
 #: ../share/extensions/gcodetools_area.inx:55\
 #: ../share/extensions/gcodetools_lathe.inx:35\
 #: ../share/extensions/gcodetools_path_to_gcode.inx:15\
 msgid "Pass by Pass"\
-msgstr ""\
+msgstr "Passaggio per passaggio"\
 \
 #: ../share/extensions/gcodetools_area.inx:58\
 #: ../share/extensions/gcodetools_lathe.inx:38\
 #: ../share/extensions/gcodetools_path_to_gcode.inx:18\
 #, fuzzy\
 msgid "Depth function:"\
-msgstr "Funzione rosso"\
+msgstr "Funzione profondità"\
 \
 #\
 # File: ../share/extensions/gcodetools_area.inx, line: 59\
@@ -36248,7 +36248,7 @@ msgstr "Funzione rosso"\
 #: ../share/extensions/gcodetools_lathe.inx:39\
 #: ../share/extensions/gcodetools_path_to_gcode.inx:19\
 msgid "Sort paths to reduce rapid distance"\
-msgstr ""\
+msgstr "Ordina i tracciati per minimizzarne la distanza"\
 \
 #\
 # File: ../share/extensions/gcodetools_area.inx, line: 61\
@@ -36284,7 +36284,7 @@ msgstr "Unit\'e0 di lunghezza dell'asse Z"\
 #: ../share/extensions/gcodetools_path_to_gcode.inx:30\
 #, fuzzy\
 msgid "Offset along Z axis:"\
-msgstr "Unit\'e0 di lunghezza dell'asse Z"\
+msgstr "Unit\'e0 di scostamento dall'asse Z"\
 \
 #: ../share/extensions/gcodetools_area.inx:71\
 #: ../share/extensions/gcodetools_engraving.inx:29\
@@ -36293,7 +36293,7 @@ msgstr "Unit\'e0 di lunghezza dell'asse Z"\
 #: ../share/extensions/gcodetools_path_to_gcode.inx:31\
 #, fuzzy\
 msgid "Select all paths if nothing is selected"\
-msgstr "Nessuna selezione"\
+msgstr "Seleziona tutti i tracciati se non è selezionato niente"\
 \
 #: ../share/extensions/gcodetools_area.inx:72\
 #: ../share/extensions/gcodetools_engraving.inx:30\
@@ -36302,7 +36302,7 @@ msgstr "Nessuna selezione"\
 #: ../share/extensions/gcodetools_path_to_gcode.inx:32\
 #, fuzzy\
 msgid "Minimum arc radius:"\
-msgstr "Raggio interno:"\
+msgstr "Raggio minimo dell'arco:"\
 \
 #\
 # File: ../share/extensions/gcodetools_area.inx, line: 73\
@@ -36316,7 +36316,7 @@ msgstr "Raggio interno:"\
 #: ../share/extensions/gcodetools_lathe.inx:53\
 #: ../share/extensions/gcodetools_path_to_gcode.inx:33\
 msgid "Comment Gcode:"\
-msgstr ""\
+msgstr "Commento GCode"\
 \
 #\
 # File: ../share/extensions/gcodetools_area.inx, line: 74\
@@ -36330,7 +36330,7 @@ msgstr ""\
 #: ../share/extensions/gcodetools_lathe.inx:54\
 #: ../share/extensions/gcodetools_path_to_gcode.inx:34\
 msgid "Get additional comments from object's properties"\
-msgstr ""\
+msgstr "Ricava commenti aggiuntivi dalle proprietà dell'ogggetto."\
 \
 #: ../share/extensions/gcodetools_area.inx:79\
 #: ../share/extensions/gcodetools_dxf_points.inx:25\
@@ -36374,7 +36374,7 @@ msgstr "Cartella:"\
 #: ../share/extensions/gcodetools_lathe.inx:64\
 #: ../share/extensions/gcodetools_path_to_gcode.inx:44\
 msgid "Z safe height for G00 move over blank:"\
-msgstr ""\
+msgstr "Altezza di sicurezza Z per movimento G00 sopra zona libera:"\
 \
 #: ../share/extensions/gcodetools_area.inx:85\
 #: ../share/extensions/gcodetools_dxf_points.inx:31\
@@ -36395,7 +36395,7 @@ msgstr "Unit\'e0 (mm o in):"\
 #: ../share/extensions/gcodetools_path_to_gcode.inx:49\
 #, fuzzy\
 msgid "Post-processor:"\
-msgstr "Processo"\
+msgstr "Postprocessamento"\
 \
 #: ../share/extensions/gcodetools_area.inx:90\
 #: ../share/extensions/gcodetools_dxf_points.inx:36\
@@ -36415,7 +36415,7 @@ msgstr "Nessuno"\
 #: ../share/extensions/gcodetools_path_to_gcode.inx:51\
 #, fuzzy\
 msgid "Parameterize Gcode"\
-msgstr "Parametri"\
+msgstr "Parametrizzazione GCode"\
 \
 #: ../share/extensions/gcodetools_area.inx:92\
 #: ../share/extensions/gcodetools_dxf_points.inx:38\
@@ -36424,7 +36424,7 @@ msgstr "Parametri"\
 #: ../share/extensions/gcodetools_lathe.inx:72\
 #: ../share/extensions/gcodetools_path_to_gcode.inx:52\
 msgid "Flip y axis and parameterize Gcode"\
-msgstr ""\
+msgstr "Ribalta l'asse Y e parametrizza GCode"\
 \
 #: ../share/extensions/gcodetools_area.inx:93\
 #: ../share/extensions/gcodetools_dxf_points.inx:39\
@@ -36433,7 +36433,7 @@ msgstr ""\
 #: ../share/extensions/gcodetools_lathe.inx:73\
 #: ../share/extensions/gcodetools_path_to_gcode.inx:53\
 msgid "Round all values to 4 digits"\
-msgstr ""\
+msgstr "Arrotonda tutti i valori alle 4 cifre decimali"\
 \
 #: ../share/extensions/gcodetools_area.inx:94\
 #: ../share/extensions/gcodetools_dxf_points.inx:40\
@@ -36442,7 +36442,7 @@ msgstr ""\
 #: ../share/extensions/gcodetools_lathe.inx:74\
 #: ../share/extensions/gcodetools_path_to_gcode.inx:54\
 msgid "Fast pre-penetrate"\
-msgstr ""\
+msgstr "Pre-penetrazione rapida"\
 \
 #\
 # File: ../share/extensions/gcodetools_area.inx, line: 96\
@@ -36458,7 +36458,7 @@ msgstr ""\
 #: ../share/extensions/gcodetools_lathe.inx:76\
 #: ../share/extensions/gcodetools_path_to_gcode.inx:56\
 msgid "Additional post-processor:"\
-msgstr ""\
+msgstr "Postprocessore addizionale"\
 \
 #: ../share/extensions/gcodetools_area.inx:99\
 #: ../share/extensions/gcodetools_dxf_points.inx:45\
@@ -36669,28 +36669,28 @@ msgstr ""\
 #: ../share/extensions/gcodetools_lathe.inx:9\
 #, fuzzy\
 msgid "Lathe"\
-msgstr "Cuoio"\
+msgstr "Tornio"\
 \
 #: ../share/extensions/gcodetools_lathe.inx:10\
 #: ../share/extensions/gcodetools_lathe.inx:25\
 #, fuzzy\
 msgid "Lathe width:"\
-msgstr "Imposta larghezza:"\
+msgstr "Larghezza tornio:"\
 \
 #: ../share/extensions/gcodetools_lathe.inx:11\
 #, fuzzy\
 msgid "Fine cut width:"\
-msgstr "Imposta larghezza:"\
+msgstr "Imposta larghezza taglio di rifinitura:"\
 \
 #: ../share/extensions/gcodetools_lathe.inx:12\
 #, fuzzy\
 msgid "Fine cut count:"\
-msgstr "Bottone"\
+msgstr "Conteggio taglio di rifinitura"\
 \
 #: ../share/extensions/gcodetools_lathe.inx:13\
 #, fuzzy\
 msgid "Create fine cut using:"\
-msgstr "Crea nuovi oggetti con:"\
+msgstr "Crea taglio con:"\
 \
 #: ../share/extensions/gcodetools_lathe.inx:14\
 #, fuzzy\
@@ -36699,19 +36699,19 @@ msgstr "Muovi motivi"\
 \
 #: ../share/extensions/gcodetools_lathe.inx:15\
 msgid "Offset path"\
-msgstr "Tracciato estruso"\
+msgstr "Scostamento tracciato"\
 \
 #\
 # File: ../share/extensions/gcodetools_lathe.inx, line: 17\
 #: ../share/extensions/gcodetools_lathe.inx:17\
 msgid "Lathe X axis remap:"\
-msgstr ""\
+msgstr "Rimappatura asse X tornio:"\
 \
 #\
 # File: ../share/extensions/gcodetools_lathe.inx, line: 18\
 #: ../share/extensions/gcodetools_lathe.inx:18\
 msgid "Lathe Z axis remap:"\
-msgstr ""\
+msgstr "Rimappatura asse Z tornio:"\
 \
 #: ../share/extensions/gcodetools_lathe.inx:21\
 #, fuzzy\
@@ -36775,13 +36775,13 @@ msgstr ""\
 \
 #: ../share/extensions/gcodetools_prepare_path_for_plasma.inx:4\
 msgid "Prepare path for plasma"\
-msgstr ""\
+msgstr "Prepara per plasma"\
 \
 #\
 # File: ../share/extensions/gcodetools_prepare_path_for_plasma.inx, line: 9\
 #: ../share/extensions/gcodetools_prepare_path_for_plasma.inx:9\
 msgid "Prepare path for plasma or laser cutters"\
-msgstr ""\
+msgstr "Prepara il tracciato per plasma o taglio laser"\
 \
 #: ../share/extensions/gcodetools_prepare_path_for_plasma.inx:10\
 #, fuzzy\
@@ -36791,7 +36791,7 @@ msgstr "Crea tracciato Spiro"\
 #: ../share/extensions/gcodetools_prepare_path_for_plasma.inx:11\
 #, fuzzy\
 msgid "In-out path length:"\
-msgstr "Lunghezza tracciato"\
+msgstr "Lunghezza tracciato in-out"\
 \
 #: ../share/extensions/gcodetools_prepare_path_for_plasma.inx:12\
 #, fuzzy\
@@ -38196,7 +38196,7 @@ msgid ""\
 "JessyInk presentation. Please see code.google.com/p/jessyink for more "\
 "details."\
 msgstr ""\
-"Questa estensione permette di installate, aggiornare o rimuovere i testi "\
+"Questa estensione permette di installare, aggiornare o rimuovere i testi "\
 "automatici per una presentazione JessyInk. Visita google.com/p/jessyink per "\
 "ulteriori dettagli."\
 \
@@ -40059,7 +40059,7 @@ msgstr "Margine (in):"\
 \
 #: ../share/extensions/perfectboundcover.inx:30\
 msgid "Note: Bond Weight # calculations are a best-guess estimate."\
-msgstr "Nota: i calcoli sul peso dichiaro sono frutto di una stima empirica."\
+msgstr "Nota: i calcoli sul peso dichiaro sono frutto di una stima approssimata."\
 \
 #: ../share/extensions/pixelsnap.inx:3\
 msgid "PixelSnap"\
