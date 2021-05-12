@@ -466,8 +466,9 @@ void DialogMultipaned::toggle_multipaned_children(bool show)
  */
 void DialogMultipaned::ensure_multipaned_children()
 {
-    hide_multipaned = false;
-    queue_allocate();
+    toggle_multipaned_children(true);
+    // hide_multipaned = false;
+    // queue_allocate();
 }
 
 // ****************** OVERRIDES ******************
