@@ -1130,10 +1130,10 @@ bool SPNamedView::getGuides()
 {
     g_assert(this->getRepr() != nullptr);
     // show guides if not specified, for backwards compatibility
-    return this->getRepr()->getAttributeBoolean("showguides", true);
+    return this->getRepr()->getAttributeBoolean("showguides", false);
 }
 
-void SPNamedView::lockGuides()
+void SPNamedView::unlockGuides()
 {
     sp_namedview_lock_guides(this);
 }
