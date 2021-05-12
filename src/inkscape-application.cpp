@@ -630,7 +630,7 @@ InkscapeApplication::InkscapeApplication()
     // Export - File and File Type
     _start_main_option_section(_("File export"));
     gapp->add_main_option_entry(T::OPTION_TYPE_FILENAME, "export-filename",        'o', N_("Output file name (defaults to input filename; file type is guessed from extension if present; use '-' to write to stdout)"), N_("FILENAME"));
-    gapp->add_main_option_entry(T::OPTION_TYPE_BOOL,     "export-overwrite",      '\0', N_("Overwrite input file (otherwise add '_out' suffix if type doesn't change"), "");
+    gapp->add_main_option_entry(T::OPTION_TYPE_BOOL,     "export-overwrite",      '\0', N_("Overwrite input file (otherwise add '_out' suffix if type doesn't change)"), "");
     gapp->add_main_option_entry(T::OPTION_TYPE_STRING,   "export-type",           '\0', N_("File type(s) to export: [svg,png,ps,eps,pdf,emf,wmf,xaml]"), N_("TYPE[,TYPE]*"));
     gapp->add_main_option_entry(T::OPTION_TYPE_STRING,   "export-extension",      '\0', N_("Extension ID to use for exporting"),                         N_("EXTENSION-ID"));
 
@@ -970,7 +970,7 @@ InkscapeApplication::on_activate()
         document = document_open (s);
         output = "-";
 
-    } else if(prefs->getBool("/options/boot/enabled", true) && !_use_shell) {
+    } else if(prefs->getBool("/options/boot/enabled", true) && !_use_command_line_argument) {
 
         Inkscape::UI::Dialog::StartScreen start_screen;
 
@@ -1514,7 +1514,7 @@ InkscapeApplication::on_handle_local_options(const Glib::RefPtr<Glib::VariantDic
     if (options->contains("export-background-opacity")) {
         Glib::ustring opacity;
         options->lookup_value("export-background-opacity", opacity);
-        _file_export.export_background_opacity = atof(opacity.c_str());
+        _file_export.export_background_opacity = Glib::Ascii::strtod(opacity);
     }
 
     if (options->contains("export-png-color-mode")) {
@@ -1534,6 +1534,14 @@ InkscapeApplication::on_handle_local_options(const Glib::RefPtr<Glib::VariantDic
         }
     }
 #endif
+
+    GVariantDict *options_copy = options->gobj_copy();
+    GVariant *options_var = g_variant_dict_end(options_copy);
+    if (g_variant_get_size(options_var) != 0) {
+        _use_command_line_argument = true;
+    }
+    g_variant_dict_unref(options_copy);
+    g_variant_unref(options_var);
 
     return -1; // Keep going
 }

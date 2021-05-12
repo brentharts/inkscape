@@ -480,15 +480,21 @@ SPDocument *SPDocument::createDoc(Inkscape::XML::Document *rdoc,
  */
 std::unique_ptr<SPDocument> SPDocument::copy() const
 {
-    // Comments and PI nodes are not included in this duplication
+    // New SimpleDocument object where we will put all the same data
     Inkscape::XML::Document *new_rdoc = new Inkscape::XML::SimpleDocument();
 
-    // Get a new xml repr for the svg root node
-    Inkscape::XML::Node *root = rdoc->root()->duplicate(new_rdoc);
+    // Duplicate the svg root node AND any PI and COMMENT nodes, this should be put
+    // into xml/simple-document.h at some point to fix it's duplicate implementation.
+    for (Inkscape::XML::Node *child = rdoc->firstChild(); child; child = child->next()) {
+        if (child) {
+            // Get a new xml repr for the svg root node
+            Inkscape::XML::Node *new_child = child->duplicate(new_rdoc);
 
-    // Add the duplicated svg node as the document's rdoc
-    new_rdoc->appendChild(root);
-    Inkscape::GC::release(root);
+            // Add the duplicated svg node as the document's rdoc
+            new_rdoc->appendChild(new_child);
+            Inkscape::GC::release(new_child);
+        }
+    }
 
     auto doc = createDoc(new_rdoc, document_filename, document_base, document_name, keepalive, nullptr);
     doc->_original_document = this->doRef();
@@ -1005,6 +1011,37 @@ void SPDocument::bindObjectToId(gchar const *id, SPObject *object) {
     }
 }
 
+/**  
+ * Assign IDs to selected objects that don't have an ID attribute
+ * Checks if the object's id attribute is NULL. If it is, assign it a unique ID
+ */
+void SPDocument::enforceObjectIds()
+{
+    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
+    Inkscape::Selection *selection = desktop->getSelection();
+    bool showInfoDialog = false;
+    Glib::ustring msg = _("Selected objects require IDs.\nThe following IDs have been assigned:\n");
+    auto items = selection->items();
+    for (auto iter = items.begin(); iter != items.end(); ++iter) {
+        SPItem *item = *iter;
+        if(!item->getId())
+        {
+            // Selected object does not have an ID, so assign it a unique ID
+            gchar *id = sp_object_get_unique_id(item, nullptr);
+            item->setAttribute("id", id);
+            item->updateRepr();
+            msg += Glib::ustring::compose(_(" %1\n"), id);
+            g_free(id);
+            showInfoDialog = true;
+        }
+    }
+    if(showInfoDialog) {
+        desktop->showInfoDialog(msg);
+        setModifiedSinceSave(true);
+    }
+    return;
+}
+
 SPObject *SPDocument::getObjectById(Glib::ustring const &id) const
 {
     if (iddef.empty()) {
@@ -1014,6 +1051,8 @@ SPObject *SPDocument::getObjectById(Glib::ustring const &id) const
     std::map<std::string, SPObject *>::const_iterator rv = iddef.find(id);
     if (rv != iddef.end()) {
         return (rv->second);
+    } else if (_parent_document) {
+        return _parent_document->getObjectById(id);
     } else {
         return nullptr;
     }
@@ -1171,6 +1210,23 @@ std::vector<Glib::ustring> SPDocument::getLanguages() const
             document_languages.emplace_back(rdf_language_stripped);
         }
         g_free(rdf_language_stripped);
+    }
+
+    // add languages from parent document
+    if (_parent_document) {
+        auto parent_languages = _parent_document->getLanguages();
+
+        // return parent languages directly if we aren't contributing any
+        if (document_languages.empty()) {
+            return parent_languages;
+        }
+
+        // otherwise append parent's languages to what we already have
+        std::move(parent_languages.begin(), parent_languages.end(),
+                  std::back_insert_iterator(document_languages));
+
+        // don't add languages from locale; parent already did that
+        return document_languages;
     }
 
     // get language from system locale (will also match the interface language preference as we set LANG accordingly)
@@ -1506,7 +1562,7 @@ static SPItem *find_group_at_point(unsigned int dkey, SPGroup *group, Geom::Poin
 std::vector<SPItem*> SPDocument::getItemsInBox(unsigned int dkey, Geom::Rect const &box, bool take_hidden, bool take_insensitive, bool take_groups, bool enter_groups) const
 {
     std::vector<SPItem*> x;
-    return find_items_in_area(x, SP_GROUP(this->root), dkey, box, is_within, take_hidden, take_insensitive, take_groups, enter_groups);
+    return find_items_in_area(x, this->root, dkey, box, is_within, take_hidden, take_insensitive, take_groups, enter_groups);
 }
 
 /**
@@ -1523,7 +1579,7 @@ std::vector<SPItem*> SPDocument::getItemsInBox(unsigned int dkey, Geom::Rect con
 std::vector<SPItem*> SPDocument::getItemsPartiallyInBox(unsigned int dkey, Geom::Rect const &box, bool take_hidden, bool take_insensitive, bool take_groups, bool enter_groups) const
 {
     std::vector<SPItem*> x;
-    return find_items_in_area(x, SP_GROUP(this->root), dkey, box, overlaps, take_hidden, take_insensitive, take_groups, enter_groups);
+    return find_items_in_area(x, this->root, dkey, box, overlaps, take_hidden, take_insensitive, take_groups, enter_groups);
 }
 
 std::vector<SPItem*> SPDocument::getItemsAtPoints(unsigned const key, std::vector<Geom::Point> points, bool all_layers, size_t limit) const
@@ -1540,7 +1596,7 @@ std::vector<SPItem*> SPDocument::getItemsAtPoints(unsigned const key, std::vecto
     // Cache a flattened SVG DOM to speed up selection.
     if(!_node_cache_valid){
         _node_cache.clear();
-        build_flat_item_list(key, SP_GROUP(this->root), true);
+        build_flat_item_list(key, this->root, true);
         _node_cache_valid=true;
     }
     SPObject *current_layer = nullptr;
@@ -1578,11 +1634,11 @@ SPItem *SPDocument::getItemAtPoint( unsigned const key, Geom::Point const &p,
     std::deque<SPItem*> bak(_node_cache);
     if(!into_groups){
         _node_cache.clear();
-        build_flat_item_list(key, SP_GROUP(this->root), into_groups);
+        build_flat_item_list(key, this->root, into_groups);
     }
     if(!_node_cache_valid && into_groups){
         _node_cache.clear();
-        build_flat_item_list(key, SP_GROUP(this->root), true);
+        build_flat_item_list(key, this->root, true);
         _node_cache_valid=true;
     }
 
@@ -1594,7 +1650,7 @@ SPItem *SPDocument::getItemAtPoint( unsigned const key, Geom::Point const &p,
 
 SPItem *SPDocument::getGroupAtPoint(unsigned int key, Geom::Point const &p) const
 {
-    return find_group_at_point(key, SP_GROUP(this->root), p);
+    return find_group_at_point(key, this->root, p);
 }
 
 // Resource management

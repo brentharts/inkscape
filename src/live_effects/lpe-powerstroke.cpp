@@ -185,7 +185,7 @@ LPEPowerStroke::LPEPowerStroke(LivePathEffectObject *lpeobject) :
     registerParameter(&miter_limit);
     registerParameter(&scale_width);
     registerParameter(&end_linecap_type);
-    scale_width.param_set_range(0.0, Geom::infinity());
+    scale_width.param_set_range(0.0, std::numeric_limits<double>::max());
     scale_width.param_set_increments(0.1, 0.1);
     scale_width.param_set_digits(4);
     recusion_limit = 0;
@@ -253,8 +253,11 @@ LPEPowerStroke::doOnApply(SPLPEItem const* lpeitem)
 
 void LPEPowerStroke::doOnRemove(SPLPEItem const* lpeitem)
 {
-    if (SP_IS_SHAPE(lpeitem) && !keep_paths) {
-        lpe_shape_revert_stroke_and_fill(SP_SHAPE(lpeitem), offset_points.median_width()*2);
+    auto lpeitem_mutable = const_cast<SPLPEItem *>(lpeitem);
+    auto shape = dynamic_cast<SPShape *>(lpeitem_mutable);
+
+    if (shape && !keep_paths) {
+        lpe_shape_revert_stroke_and_fill(shape, offset_points.median_width() * 2);
     }
 }
 

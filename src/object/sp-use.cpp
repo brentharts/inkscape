@@ -167,8 +167,8 @@ Inkscape::XML::Node* SPUse::write(Inkscape::XML::Document *xml_doc, Inkscape::XM
 
     SPItem::write(xml_doc, repr, flags);
 
-    sp_repr_set_svg_double(repr, "x", this->x.computed);
-    sp_repr_set_svg_double(repr, "y", this->y.computed);
+    repr->setAttributeSvgDouble("x", this->x.computed);
+    repr->setAttributeSvgDouble("y", this->y.computed);
     repr->setAttribute("width", sp_svg_length_write_with_units(this->width));
     repr->setAttribute("height", sp_svg_length_write_with_units(this->height));
 
@@ -524,7 +524,7 @@ void SPUse::href_changed() {
                 this->attach(this->child, this->lastChild());
                 sp_object_unref(this->child, this);
 
-                this->child->invoke_build(this->document, childrepr, TRUE);
+                this->child->invoke_build(refobj->document, childrepr, TRUE);
 
                 for (SPItemView *v = this->display; v != nullptr; v = v->next) {
                     Inkscape::DrawingItem *ai = this->child->invoke_show(v->arenaitem->drawing(), v->key, v->flags);

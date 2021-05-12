@@ -375,37 +375,39 @@ std::string sp_get_contrasted_color(std::string const &cssstring, std::string co
 
 std::string sp_tweak_background_colors(std::string cssstring, double crossfade)
 {
-    std::regex r("(\n[^\n]*(engine|image/|-gtk-icon-source|resource)[^\n]*)");
+    static std::regex re_no_affect("(inherit|unset|initial|none|url)");
+    static std::regex re_background_color("background-color( ){0,3}:(.*?);");
+    static std::regex re_background_image("background-image( ){0,3}:(.*?\\)) *?;");
     std::string sub = "";
-    cssstring = std::regex_replace(cssstring, r, sub);
-    std::regex f("background-color *?:(?!( *?|)(inherit|unset|initial|none))(.*?);");
-    sub = "background-color:shade($3," + Glib::ustring::format(crossfade) + ");";
-    cssstring = std::regex_replace(cssstring, f, sub);
-    std::regex g("background-image *?:(?!( *?|)(inherit|unset|initial|none))(.*?\\)) *?;");
-    if (crossfade > 1) {
-        crossfade = std::clamp((int)((2 - crossfade) * 80), 0, 100);
-        sub = "background-image:cross-fade(" + Glib::ustring::format(crossfade) + "% image($3), image(@theme_bg_color));";
+    std::smatch m;
+    std::regex_search(cssstring, m, re_no_affect);
+    if (m.size() == 0) {
+        if (cssstring.find("background-color") != std::string::npos) {
+            sub = "background-color:shade($2," + Glib::ustring::format(crossfade) + ");";
+            cssstring = std::regex_replace(cssstring, re_background_color, sub);
+        } else if (cssstring.find("background-image") != std::string::npos) {
+            if (crossfade > 1) {
+                crossfade = std::clamp((int)((2 - crossfade) * 80), 0, 100);
+                sub = "background-image:cross-fade(" + Glib::ustring::format(crossfade) + "% image($2), image(@theme_bg_color));";
+            } else {
+                crossfade = std::clamp((int)((1 - crossfade) * 80), 0 , 100);
+                sub = "background-image:cross-fade(" + Glib::ustring::format(crossfade) + "% image(@theme_bg_color), image($2));";
+            }
+            cssstring = std::regex_replace(cssstring, re_background_image, sub);
+        }
     } else {
-        crossfade = std::clamp((int)((1 - crossfade) * 80), 0 , 100);
-        sub = "background-image:cross-fade(" + Glib::ustring::format(crossfade) + "% image(@theme_bg_color), image($3));";
-    }  
-    
-    return  std::regex_replace(cssstring, g, sub);
+        cssstring = "";
+    }
+    return cssstring;
 }
 
-/* static void
-show_parsing_error (GtkCssProvider        *provider,
-                    GtkCssSection         *section,
-                    GError                *error,
-                    void *)
+static void
+show_parsing_error(const Glib::RefPtr<const Gtk::CssSection>& section, const Glib::Error& error)
 {
-
-  if (g_error_matches (error, GTK_CSS_PROVIDER_ERROR, GTK_CSS_PROVIDER_ERROR_DEPRECATED)) {
-      std::cout << "Gtk WARNING :: There is a warning parsing theme CSS:: " << error->message << std::endl;
-  } else {
-      std::cout << "Gtk ERROR :: There is a error parsing theme CSS:: " << error->message << std::endl;
-  }
-} */
+#ifndef NDEBUG
+  g_warning("There is a warning parsing theme CSS:: %s", error.what().c_str());
+#endif
+}
 
 /**
  * \brief Add our CSS style sheets
@@ -440,9 +442,7 @@ void Application::add_gtk_css(bool only_providers)
             prefs->setBool("/theme/symbolicIcons", iconinfo.is_symbolic());
         }
         bool preferdarktheme = prefs->getBool("/theme/preferDarkTheme", false);
-        if (preferdarktheme) {
-            g_object_set(settings, "gtk-application-prefer-dark-theme", true, NULL);
-        }
+        g_object_set(settings, "gtk-application-prefer-dark-theme", preferdarktheme, NULL);
         themeiconname = prefs->getString("/theme/iconTheme");
         // legacy cleanup
         if (themeiconname == prefs->getString("/theme/defaultIconTheme")) {
@@ -459,7 +459,7 @@ void Application::add_gtk_css(bool only_providers)
     if (!contrastthemeprovider) {
         contrastthemeprovider = Gtk::CssProvider::create();
         // We can uncoment this line to remove warnings and errors on the theme
-        //g_signal_connect (G_OBJECT(themeprovider->gobj()), "parsing-error", G_CALLBACK (show_parsing_error), nullptr);
+        contrastthemeprovider->signal_parsing_error().connect(sigc::ptr_fun(show_parsing_error));
     }
     // we use contast only if is setup (!= 10)
     if (themecontrast < 10) {
@@ -467,8 +467,10 @@ void Application::add_gtk_css(bool only_providers)
         double contrast = (10 - themecontrast) / 40.0;
         double shade = 1 - contrast;
         const gchar *variant = nullptr;
-        if (prefs->getBool("/theme/darkTheme", false)) {
+        if (prefs->getBool("/theme/preferDarkTheme", false)) {
             variant = "dark";
+        }
+        if (prefs->getBool("/theme/darkTheme", false)) {
             contrast *= 2.5;
             shade = 1 + contrast;
         }
@@ -476,16 +478,36 @@ void Application::add_gtk_css(bool only_providers)
         GtkCssProvider *currentthemeprovider =
             gtk_css_provider_get_named(current_theme.c_str(), variant);
         std::string cssstring = gtk_css_provider_to_string(currentthemeprovider);
-        std::string appenddefined = ""; 
         if (contrast) {
-            appenddefined  = sp_get_contrasted_color(cssstring, "theme_bg_color", "theme_fg_color", contrast);
-            appenddefined += sp_get_contrasted_color(cssstring, "theme_base_color", "theme_text_color", contrast);
-            appenddefined += sp_get_contrasted_color(cssstring, "theme_selected_bg_color", "theme_selected_fg_color", contrast);
-            cssstring = sp_tweak_background_colors(cssstring, shade);
-            cssstring = cssstring + appenddefined;
+            std::string cssdefined = ""; 
+            std::string appenddefined = ""; 
+            std::string colorsdefined = "";
+            // we do this way to fix issue Inkscape#2345
+            // windows seem crash if text length > 2000;
+            std::istringstream f(cssstring);
+            std::string line;    
+            while (std::getline(f, line)) {
+                if (line.find("@define-color") != std::string::npos) {
+                    colorsdefined += line;
+                    colorsdefined += "\n";
+                }
+                // here we ignore most of class to parse because is in additive mode
+                // so stiles not applyed are set on previous context style
+                if (line.find(";") != std::string::npos &&
+                    line.find("background-image") == std::string::npos &&
+                    line.find("background-color") == std::string::npos)
+                {
+                    continue;
+                }
+                cssdefined += sp_tweak_background_colors(line, shade);
+                cssdefined += "\n";
+            }
+            appenddefined  = sp_get_contrasted_color(colorsdefined, "theme_bg_color", "theme_fg_color", contrast);
+            appenddefined += sp_get_contrasted_color(colorsdefined, "theme_base_color", "theme_text_color", contrast);
+            appenddefined += sp_get_contrasted_color(colorsdefined, "theme_selected_bg_color", "theme_selected_fg_color", contrast);
+            cssstring = cssdefined + appenddefined;
         }
         if (!cssstring.empty()) {
-            // std::cout << cssstring << std::endl;
             // Use c format allow parse with errors or warnings
             gtk_css_provider_load_from_data (contrastthemeprovider->gobj(), cssstring.c_str(), -1, nullptr);
             Gtk::StyleContext::add_provider_for_screen(screen, contrastthemeprovider, GTK_STYLE_PROVIDER_PRIORITY_SETTINGS);

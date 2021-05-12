@@ -246,7 +246,7 @@ LPEMirrorSymmetry::doBeforeEffect (SPLPEItem const* lpeitem)
         } else if ( mode == MT_V){
             SPDocument *document = getSPDoc();
             if (document) {
-                Geom::Affine transform = i2anc_affine(SP_OBJECT(lpeitem), nullptr).inverse();
+                Geom::Affine transform = i2anc_affine(lpeitem, nullptr).inverse();
                 Geom::Point sp = Geom::Point(document->getWidth().value("px")/2.0, 0) * transform;
                 start_point.param_setValue(sp);
                 Geom::Point ep = Geom::Point(document->getWidth().value("px")/2.0, document->getHeight().value("px")) * transform;
@@ -256,7 +256,7 @@ LPEMirrorSymmetry::doBeforeEffect (SPLPEItem const* lpeitem)
         } else { //horizontal page
             SPDocument *document = getSPDoc();
             if (document) {
-                Geom::Affine transform = i2anc_affine(SP_OBJECT(lpeitem), nullptr).inverse();
+                Geom::Affine transform = i2anc_affine(lpeitem, nullptr).inverse();
                 Geom::Point sp = Geom::Point(0, document->getHeight().value("px")/2.0) * transform;
                 start_point.param_setValue(sp);
                 Geom::Point ep = Geom::Point(document->getWidth().value("px"), document->getHeight().value("px")/2.0) * transform;
@@ -383,7 +383,7 @@ LPEMirrorSymmetry::toMirror(Geom::Affine transform)
         elemref->parent->reorder(elemref, sp_lpe_item);
         Inkscape::GC::release(phantom);
     }
-    cloneD(SP_OBJECT(sp_lpe_item), elemref);
+    cloneD(sp_lpe_item, elemref);
     reset = false;
     elemref->getRepr()->setAttributeOrRemoveIfEmpty("transform", sp_svg_transform_write(transform));
     if (elemref->parent != container) {
@@ -446,6 +446,7 @@ LPEMirrorSymmetry::doOnApply (SPLPEItem const* lpeitem)
     end_point.param_update_default(point_b);
     center_point.param_setValue(point_c, true);
     previous_center = center_point;
+    //we bump to 1.1 because prevous 1.0.2 take no effect because a bug on 1.0.2
     lpeversion.param_setValue("1.1", true);
 }
 
@@ -583,7 +584,7 @@ LPEMirrorSymmetry::doEffect_path (Geom::PathVector const & path_in)
                             } else {
                                 tmp_pathvector.push_back(portion);
                             }
-                            if (lpeversion.param_getSVGValue() <= "1.0.1") {
+                            if (lpeversion.param_getSVGValue() < "1.1") {
                                 tmp_pathvector[0].close();
                             }
                         }
@@ -591,7 +592,7 @@ LPEMirrorSymmetry::doEffect_path (Geom::PathVector const & path_in)
                     }
                 }
             }
-            if (!split_open && lpeversion.param_getSVGValue() > "1.0.1" && original.closed()) {
+            if (!split_open && lpeversion.param_getSVGValue() >= "1.1" && original.closed()) {
                 for (auto &path : tmp_pathvector) {
                     if (!path.closed()) {
                         path.close();

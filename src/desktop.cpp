@@ -530,6 +530,9 @@ SPDesktop::change_document (SPDocument *theDocument)
     /* unselect everything before switching documents */
     selection->clear();
 
+    // Reset any tool actions currently in progress.
+    setEventContext(event_context->getPrefsPath());
+
     setDocument (theDocument);
 
     /* update the rulers, connect the desktop widget's signal to the new namedview etc.
@@ -541,6 +544,7 @@ SPDesktop::change_document (SPDocument *theDocument)
     if (dtw) {
         dtw->desktop = this;
         dtw->updateNamedview();
+        dtw->updateDocument();
     } else {
         std::cerr << "SPDesktop::change_document: failed to get desktop widget!" << std::endl;
     }

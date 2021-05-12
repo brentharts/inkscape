@@ -104,6 +104,7 @@ public:
     void set_dropzone_sizes(int start, int end);
     void toggle_multipaned_children(bool show);
     void children_toggled();
+    void ensure_multipaned_children();
 
 protected:
     // Overrides

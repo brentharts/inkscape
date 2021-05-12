@@ -379,8 +379,8 @@ const gchar *SPPattern::produce(const std::vector<Inkscape::XML::Node *> &reprs,
 
     Inkscape::XML::Node *repr = xml_doc->createElement("svg:pattern");
     repr->setAttribute("patternUnits", "userSpaceOnUse");
-    sp_repr_set_svg_double(repr, "width", bounds.dimensions()[Geom::X]);
-    sp_repr_set_svg_double(repr, "height", bounds.dimensions()[Geom::Y]);
+    repr->setAttributeSvgDouble("width", bounds.dimensions()[Geom::X]);
+    repr->setAttributeSvgDouble("height", bounds.dimensions()[Geom::Y]);
     repr->setAttributeOrRemoveIfEmpty("patternTransform", sp_svg_transform_write(transform));
     defsrepr->appendChild(repr);
     const gchar *pat_id = repr->attribute("id");
@@ -528,7 +528,7 @@ cairo_pattern_t *SPPattern::pattern_new(cairo_t *base_ct, Geom::OptRect const &b
 
     for (SPPattern *pat_i = this; pat_i != nullptr; pat_i = pat_i->ref ? pat_i->ref->getObject() : nullptr) {
         // find the first one with item children
-        if (pat_i && SP_IS_OBJECT(pat_i) && pat_i->_hasItemChildren()) {
+        if (pat_i && pat_i->_hasItemChildren()) {
             shown = pat_i;
             break; // do not go further up the chain if children are found
         }

@@ -1,16 +1,7 @@
 if(WIN32)
   install(FILES
-    AUTHORS
-    COPYING
     NEWS.md
     README.md
-    TRANSLATORS
-	LICENSES/GPL-2.0.txt
-	LICENSES/GPL-3.0.txt
-	LICENSES/LGPL-2.1.txt
-    DESTINATION .)
-
-  install(DIRECTORY doc
     DESTINATION .)
 
   # mingw-w64 dlls
@@ -295,6 +286,20 @@ if(WIN32)
     install_list(FILES ${paths}
       ROOT ${MINGW_PATH}
       COMPONENT python
+      INCLUDE ${site_packages} # only include content from "site-packages" (we might consider to install everything)
+      EXCLUDE ".pyc$"
+    )
+  endforeach()
+
+  # Python packages for the extensions manager, and clipart importer extensions
+  set(packages
+      "python-appdirs" "python-msgpack" "python-lockfile" "python-cachecontrol"
+      "python-idna" "python-urllib3" "python-chardet" "python-certifi" "python-requests")
+  foreach(package ${packages})
+    list_files_pacman(${package} paths)
+    install_list(FILES ${paths}
+      ROOT ${MINGW_PATH}
+      COMPONENT extension_manager
       INCLUDE ${site_packages} # only include content from "site-packages" (we might consider to install everything)
       EXCLUDE ".pyc$"
     )

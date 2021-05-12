@@ -1114,7 +1114,7 @@ static void gr_knot_clicked_handler(SPKnot */*knot*/, guint state, gpointer data
                         SPStop *next = stop->getNextStop();
                         if (next) {
                             next->offset = 0;
-                            sp_repr_set_css_double(next->getRepr(), "offset", 0);
+                            next->getRepr()->setAttributeCssDouble("offset", 0);
                         }
                     }
                     break;
@@ -1127,7 +1127,7 @@ static void gr_knot_clicked_handler(SPKnot */*knot*/, guint state, gpointer data
                         SPStop *prev = stop->getPrevStop();
                         if (prev) {
                             prev->offset = 1;
-                            sp_repr_set_css_double(prev->getRepr(), "offset", 1);
+                            prev->getRepr()->setAttributeCssDouble("offset", 1);
                         }
                     }
                     break;
@@ -2365,15 +2365,14 @@ void GrDrag::updateDraggers()
 
         if (style && (style->fill.isPaintserver())) {
             SPPaintServer *server = style->getFillPaintServer();
-            if ( server && SP_IS_GRADIENT( server ) ) {
-                if ( server->isSolid()
-                     || (SP_GRADIENT(server)->getVector() && SP_GRADIENT(server)->getVector()->isSolid())) {
+            if (auto gradient = dynamic_cast<SPGradient *>(server)) {
+                if (gradient->isSolid() || (gradient->getVector() && gradient->getVector()->isSolid())) {
                     // Suppress "gradientness" of solid paint
-                } else if ( SP_IS_LINEARGRADIENT(server) ) {
+                } else if (SP_IS_LINEARGRADIENT(server)) {
                     addDraggersLinear( SP_LINEARGRADIENT(server), item, Inkscape::FOR_FILL );
-                } else if ( SP_IS_RADIALGRADIENT(server) ) {
+                } else if (SP_IS_RADIALGRADIENT(server)) {
                     addDraggersRadial( SP_RADIALGRADIENT(server), item, Inkscape::FOR_FILL );
-                } else if ( SP_IS_MESHGRADIENT(server) ) {
+                } else if (SP_IS_MESHGRADIENT(server)) {
                     addDraggersMesh(   SP_MESHGRADIENT(server),   item, Inkscape::FOR_FILL );
                 }
             }
@@ -2381,15 +2380,14 @@ void GrDrag::updateDraggers()
 
         if (style && (style->stroke.isPaintserver())) {
             SPPaintServer *server = style->getStrokePaintServer();
-            if ( server && SP_IS_GRADIENT( server ) ) {
-                if ( server->isSolid()
-                     || (SP_GRADIENT(server)->getVector() && SP_GRADIENT(server)->getVector()->isSolid())) {
+            if (auto gradient = dynamic_cast<SPGradient *>(server)) {
+                if (gradient->isSolid() || (gradient->getVector() && gradient->getVector()->isSolid())) {
                     // Suppress "gradientness" of solid paint
-                } else if ( SP_IS_LINEARGRADIENT(server) ) {
+                } else if (SP_IS_LINEARGRADIENT(server)) {
                     addDraggersLinear( SP_LINEARGRADIENT(server), item, Inkscape::FOR_STROKE );
-                } else if ( SP_IS_RADIALGRADIENT(server) ) {
+                } else if (SP_IS_RADIALGRADIENT(server)) {
                     addDraggersRadial( SP_RADIALGRADIENT(server), item, Inkscape::FOR_STROKE );
-                } else if ( SP_IS_MESHGRADIENT(server) ) {
+                } else if (SP_IS_MESHGRADIENT(server)) {
                     addDraggersMesh(   SP_MESHGRADIENT(server),   item, Inkscape::FOR_STROKE );
                 }
             }
@@ -2475,18 +2473,16 @@ void GrDrag::updateLines()
 
         if (style && (style->fill.isPaintserver())) {
             SPPaintServer *server = item->style->getFillPaintServer();
-            if ( server && SP_IS_GRADIENT( server ) ) {
-                if ( server->isSolid()
-                     || (SP_GRADIENT(server)->getVector() && SP_GRADIENT(server)->getVector()->isSolid())) {
+            if (auto gradient = dynamic_cast<SPGradient *>(server)) {
+                if (gradient->isSolid() || (gradient->getVector() && gradient->getVector()->isSolid())) {
                     // Suppress "gradientness" of solid paint
-                } else if ( SP_IS_LINEARGRADIENT(server) ) {
+                } else if (SP_IS_LINEARGRADIENT(server)) {
                     addLine(item, getGradientCoords(item, POINT_LG_BEGIN, 0, Inkscape::FOR_FILL), getGradientCoords(item, POINT_LG_END, 0, Inkscape::FOR_FILL), Inkscape::FOR_FILL);
-                } else if ( SP_IS_RADIALGRADIENT(server) ) {
+                } else if (SP_IS_RADIALGRADIENT(server)) {
                     Geom::Point center = getGradientCoords(item, POINT_RG_CENTER, 0, Inkscape::FOR_FILL);
                     addLine(item, center, getGradientCoords(item, POINT_RG_R1, 0, Inkscape::FOR_FILL), Inkscape::FOR_FILL);
                     addLine(item, center, getGradientCoords(item, POINT_RG_R2, 0, Inkscape::FOR_FILL), Inkscape::FOR_FILL);
-                } else if ( SP_IS_MESHGRADIENT(server) ) {
-
+                } else if (SP_IS_MESHGRADIENT(server)) {
                     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
                     bool edit_fill    = (prefs->getBool("/tools/mesh/edit_fill",    true));
 
@@ -2551,24 +2547,22 @@ void GrDrag::updateLines()
                         }
                     }
                     }
-                }                        
+                }
             }
         }
 
         if (style && (style->stroke.isPaintserver())) {
             SPPaintServer *server = item->style->getStrokePaintServer();
-            if ( server && SP_IS_GRADIENT( server ) ) {
-                if ( server->isSolid()
-                     || (SP_GRADIENT(server)->getVector() && SP_GRADIENT(server)->getVector()->isSolid())) {
+            if (auto gradient = dynamic_cast<SPGradient *>(server)) {
+                if (gradient->isSolid() || (gradient->getVector() && gradient->getVector()->isSolid())) {
                     // Suppress "gradientness" of solid paint
-                } else if ( SP_IS_LINEARGRADIENT(server) ) {
+                } else if (SP_IS_LINEARGRADIENT(server)) {
                     addLine(item, getGradientCoords(item, POINT_LG_BEGIN, 0, Inkscape::FOR_STROKE), getGradientCoords(item, POINT_LG_END, 0, Inkscape::FOR_STROKE), Inkscape::FOR_STROKE);
-                } else if ( SP_IS_RADIALGRADIENT(server) ) {
+                } else if (SP_IS_RADIALGRADIENT(server)) {
                     Geom::Point center = getGradientCoords(item, POINT_RG_CENTER, 0, Inkscape::FOR_STROKE);
                     addLine(item, center, getGradientCoords(item, POINT_RG_R1, 0, Inkscape::FOR_STROKE), Inkscape::FOR_STROKE);
                     addLine(item, center, getGradientCoords(item, POINT_RG_R2, 0, Inkscape::FOR_STROKE), Inkscape::FOR_STROKE);
-                } else if ( SP_IS_MESHGRADIENT(server) ) {
-
+                } else if (SP_IS_MESHGRADIENT(server)) {
                     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
                     bool edit_stroke   = (prefs->getBool("/tools/mesh/edit_stroke",   true));
 
@@ -2993,17 +2987,17 @@ void GrDrag::deleteSelected(bool just_one)
                         lg->y1.computed = newbegin[Geom::Y];
 
                         Inkscape::XML::Node *repr = stopinfo->gradient->getRepr();
-                        sp_repr_set_svg_double(repr, "x1", lg->x1.computed);
-                        sp_repr_set_svg_double(repr, "y1", lg->y1.computed);
+                        repr->setAttributeSvgDouble("x1", lg->x1.computed);
+                        repr->setAttributeSvgDouble("y1", lg->y1.computed);
                         stop->offset = 0;
-                        sp_repr_set_css_double(stop->getRepr(), "offset", 0);
+                        stop->getRepr()->setAttributeCssDouble("offset", 0);
 
                         // iterate through midstops to set new offset values such that they won't move on canvas.
                         SPStop *laststop = sp_last_stop(stopinfo->vector);
                         stop = stop->getNextStop();
                         while ( stop != laststop ) {
                             stop->offset = (stop->offset - offset)/(1 - offset);
-                            sp_repr_set_css_double(stop->getRepr(), "offset", stop->offset);
+                            stop->getRepr()->setAttributeCssDouble("offset", stop->offset);
                             stop = stop->getNextStop();
                         }
                     }
@@ -3022,17 +3016,17 @@ void GrDrag::deleteSelected(bool just_one)
                         lg->y2.computed = newend[Geom::Y];
 
                         Inkscape::XML::Node *repr = stopinfo->gradient->getRepr();
-                        sp_repr_set_svg_double(repr, "x2", lg->x2.computed);
-                        sp_repr_set_svg_double(repr, "y2", lg->y2.computed);
+                        repr->setAttributeSvgDouble("x2", lg->x2.computed);
+                        repr->setAttributeSvgDouble("y2", lg->y2.computed);
                         laststop->offset = 1;
-                        sp_repr_set_css_double(laststop->getRepr(), "offset", 1);
+                        laststop->getRepr()->setAttributeCssDouble("offset", 1);
 
                         // iterate through midstops to set new offset values such that they won't move on canvas.
                         SPStop *stop = stopinfo->vector->getFirstStop();
                         stop = stop->getNextStop();
                         while ( stop != laststop ) {
                             stop->offset = stop->offset / offset;
-                            sp_repr_set_css_double(stop->getRepr(), "offset", stop->offset);
+                            stop->getRepr()->setAttributeCssDouble("offset", stop->offset);
                             stop = stop->getNextStop();
                         }
                     }
@@ -3042,7 +3036,7 @@ void GrDrag::deleteSelected(bool just_one)
                         SPStop *newfirst = stopinfo->spstop->getNextStop();
                         if (newfirst) {
                             newfirst->offset = 0;
-                            sp_repr_set_css_double(newfirst->getRepr(), "offset", 0);
+                            newfirst->getRepr()->setAttributeCssDouble("offset", 0);
                         }
                         stopinfo->vector->getRepr()->removeChild(stopinfo->spstop->getRepr());
                     }
@@ -3060,16 +3054,16 @@ void GrDrag::deleteSelected(bool just_one)
                         rg->r.computed = newradius;
 
                         Inkscape::XML::Node *repr = rg->getRepr();
-                        sp_repr_set_svg_double(repr, "r", rg->r.computed);
+                        repr->setAttributeSvgDouble("r", rg->r.computed);
                         laststop->offset = 1;
-                        sp_repr_set_css_double(laststop->getRepr(), "offset", 1);
+                        laststop->getRepr()->setAttributeCssDouble("offset", 1);
 
                         // iterate through midstops to set new offset values such that they won't move on canvas.
                         SPStop *stop = stopinfo->vector->getFirstStop();
                         stop = stop->getNextStop();
                         while ( stop != laststop ) {
                             stop->offset = stop->offset / offset;
-                            sp_repr_set_css_double(stop->getRepr(), "offset", stop->offset);
+                            stop->getRepr()->setAttributeCssDouble("offset", stop->offset);
                             stop = stop->getNextStop();
                         }
                     }

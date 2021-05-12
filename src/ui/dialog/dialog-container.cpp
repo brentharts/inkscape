@@ -161,8 +161,10 @@ DialogBase *DialogContainer::dialog_factory(unsigned int code)
             return &Inkscape::UI::Dialog::ObjectsPanel::getInstance();
         case SP_VERB_DIALOG_PAINT:
             return &Inkscape::UI::Dialog::PaintServersDialog::getInstance();
+#ifdef DEBUG
         case SP_VERB_DIALOG_PROTOTYPE:
             return &Inkscape::UI::Dialog::Prototype::getInstance();
+#endif
         case SP_VERB_DIALOG_SELECTORS:
             return &Inkscape::UI::Dialog::SelectorsDialog::getInstance();
 #if WITH_GSPELL
@@ -323,6 +325,8 @@ void DialogContainer::new_dialog(unsigned int code, DialogNotebook *notebook)
     if (!verb) {
         return;
     }
+
+    columns->ensure_multipaned_children();
 
     // Limit each container to containing one of any type of dialog.
     if (DialogBase* existing_dialog = find_existing_dialog(code)) {

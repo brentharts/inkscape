@@ -86,7 +86,7 @@ void SPRoot::build(SPDocument *document, Inkscape::XML::Node *repr)
     }
 
     // clear transform, if any was read in - SVG does not allow transform= on <svg>
-    SP_ITEM(this)->transform = Geom::identity();
+    this->transform = Geom::identity();
 }
 
 void SPRoot::release()
@@ -321,11 +321,11 @@ Inkscape::XML::Node *SPRoot::write(Inkscape::XML::Document *xml_doc, Inkscape::X
     }
 
     if (fabs(this->x.computed) > 1e-9) {
-        sp_repr_set_svg_double(repr, "x", this->x.computed);
+        repr->setAttributeSvgDouble("x", this->x.computed);
     }
 
     if (fabs(this->y.computed) > 1e-9) {
-        sp_repr_set_svg_double(repr, "y", this->y.computed);
+        repr->setAttributeSvgDouble("y", this->y.computed);
     }
 
     /* Unlike all other SPObject, here we want to preserve absolute units too (and only here,
