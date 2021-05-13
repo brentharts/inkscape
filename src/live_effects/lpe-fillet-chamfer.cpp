@@ -653,7 +653,12 @@ LPEFilletChamfer::doEffect_path(Geom::PathVector const &path_in)
                 case INVERSE_FILLET:
                     {
                         if (eliptical) {
-                            tmp_path.appendNew<Geom::EllipticalArc>(rx, ry, arc_angle, 0, ccw_toggle, end_arc_point);
+                            gint side = false;
+                            if (helperpath && !SP_ACTIVE_DOCUMENT->is_yaxisdown()) {
+                                side = true;
+                                ccw_toggle = ccw_toggle ? false : true;
+                            }
+                            tmp_path.appendNew<Geom::EllipticalArc>(rx, ry, arc_angle, side, ccw_toggle, end_arc_point);
                         } else {
                             tmp_path.appendNew<Geom::CubicBezier>(inverse_handle_1, inverse_handle_2, end_arc_point);
                         }
@@ -662,8 +667,13 @@ LPEFilletChamfer::doEffect_path(Geom::PathVector const &path_in)
                 default: //fillet
                     {
                         if (eliptical) {
-                            ccw_toggle = ccw_toggle ? false : true;
-                            tmp_path.appendNew<Geom::EllipticalArc>(rx, ry, arc_angle, 0, ccw_toggle, end_arc_point);
+                            gint side = false;
+                            if (helperpath && !SP_ACTIVE_DOCUMENT->is_yaxisdown()) {
+                                side = true;
+                            } else {
+                                ccw_toggle = ccw_toggle ? false : true;
+                            }
+                            tmp_path.appendNew<Geom::EllipticalArc>(rx, ry, arc_angle, side, ccw_toggle, end_arc_point);
                         } else {
                             tmp_path.appendNew<Geom::CubicBezier>(handle_1, handle_2, end_arc_point);
                         }
