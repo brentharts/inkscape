@@ -240,7 +240,7 @@ msgstr "Nuvole"
 
 #: ../share/filters/filters.svg.h:68
 msgid "Airy, fluffy, sparse white clouds"
-msgstr "Nuvole bianche, sparse e rade"
+msgstr "Nuvole bianche sparse, soffici e rade"
 
 #: ../share/filters/filters.svg.h:70 ../src/extension/internal/bitmap/sharpen.cpp:40
 msgid "Sharpen"
@@ -664,7 +664,7 @@ msgstr "Morfologia"
 
 #: ../share/filters/filters.svg.h:236
 msgid "Creates a black light inside and outside"
-msgstr "Crea una luce scura interna ed esterna"
+msgstr "Crea una luce scura all'interno e all'esterno"
 
 #: ../share/filters/filters.svg.h:238
 msgid "Cubes"
@@ -688,7 +688,7 @@ msgstr "Spruzzi dorati"
 
 #: ../share/filters/filters.svg.h:248
 msgid "Splattered cast metal, with golden highlights"
-msgstr "Stampo metallico a spruzzi, con riflessi dorati"
+msgstr "Spruzzi di metallo colato, con riflessi dorati"
 
 #: ../share/filters/filters.svg.h:250
 msgid "Gold Paste"
@@ -769,7 +769,7 @@ msgstr "Microscopio elettronico"
 #: ../share/filters/filters.svg.h:288
 msgid "Bevel, crude light, discoloration and glow like in electronic microscopy"
 msgstr ""
-"Luce fredda, opaca, scolorazioni e luminescenze come in un microscopio elettronico"
+"Luce fredda, opaca, scolorata e smussature come in un microscopio elettronico"
 
 #: ../share/filters/filters.svg.h:290
 msgid "Tartan"
@@ -821,15 +821,15 @@ msgstr "Come Bozzellature HSL, ma con riflessi trasparenti"
 
 #: ../share/filters/filters.svg.h:314
 msgid "Bubbly Bumps Alpha"
-msgstr "Rughe a bolle, con trasparenza"
+msgstr "Rigonfiamenti a bolle, con trasparenza"
 
 #: ../share/filters/filters.svg.h:316
 msgid "Same as Bubbly Bumps but with transparent highlights"
-msgstr "Come Rughe a bolle, ma con riflessi trasparenti"
+msgstr "Come Rigonfiamenti a bolle, ma con riflessi trasparenti"
 
 #: ../share/filters/filters.svg.h:318 ../share/filters/filters.svg.h:366
 msgid "Torn Edges"
-msgstr "Contorni frastagliati"
+msgstr "Contorni strappati"
 
 #: ../share/filters/filters.svg.h:320 ../share/filters/filters.svg.h:368
 msgid "Displace the outside of shapes and pictures without altering their content"
@@ -869,7 +869,7 @@ msgstr "Persone"
 
 #: ../share/filters/filters.svg.h:336
 msgid "Colorized blotches, like a crowd of people"
-msgstr "Macchie colorate, simili a una folla di persone"
+msgstr "Macchie colorate, simili ad una folla di persone"
 
 #: ../share/filters/filters.svg.h:338
 msgid "Scotland"
@@ -896,7 +896,7 @@ msgstr "Alone netto"
 #: ../share/filters/filters.svg.h:348
 msgid "In and out glow with a possible offset and colorizable flood"
 msgstr ""
-"Alone interno e esterno con riempimento colorabile ed eventuale spiazzamento"
+"Alone interno e esterno con riempimento colorabile ed eventuale scostamento"
 
 #: ../share/filters/filters.svg.h:350
 msgid "Dark Emboss"
@@ -908,11 +908,11 @@ msgstr "Rilievo: effetto 3D dove il bianco è rimpiazzato col nero"
 
 #: ../share/filters/filters.svg.h:354
 msgid "Bubbly Bumps Matte"
-msgstr "Rughe a bolle, opache"
+msgstr "Rigonfiamenti a bolle, opachi"
 
 #: ../share/filters/filters.svg.h:356
 msgid "Same as Bubbly Bumps but with a diffuse light instead of a specular one"
-msgstr "Come Rughe a bolle ma con un'illuminazione diffusa anziché speculare"
+msgstr "Come Rigonfiamenti a bolle ma con un'illuminazione diffusa anziché speculare"
 
 #: ../share/filters/filters.svg.h:358
 msgid "Blotting Paper"
@@ -1217,11 +1217,11 @@ msgstr "Effetto pittura spessa con turbolenza"
 
 #: ../share/filters/filters.svg.h:470
 msgid "Burst"
-msgstr "Palloncino scoppiato"
+msgstr "Scoppio"
 
 #: ../share/filters/filters.svg.h:472
 msgid "Burst balloon texture crumpled and with holes"
-msgstr "Texture a palloncino scoppiato con pieghe e buchi"
+msgstr "Trama a palloncino scoppiato con pieghe e buchi"
 
 #: ../share/filters/filters.svg.h:474
 msgid "Embossed Leather"
@@ -1245,7 +1245,7 @@ msgstr "Macchie bianche simili a quelle della maschere di carnevale"
 
 #: ../share/filters/filters.svg.h:482
 msgid "Plastify"
-msgstr "Plastificato"
+msgstr "Plastifica"
 
 #: ../share/filters/filters.svg.h:484
 msgid ""
@@ -1272,7 +1272,7 @@ msgstr "Trasparenza grezza"
 #: ../share/filters/filters.svg.h:492
 msgid "Adds a turbulent transparency which displaces pixels at the same time"
 msgstr ""
-"Aggiunge una turbolenza trasparente che sposta vari pixel contemporaneamente"
+"Aggiunge una turbolenza trasparente che contemporaneamente sposta vari pixel"
 
 #: ../share/filters/filters.svg.h:494
 msgid "Gouache"
@@ -1280,7 +1280,7 @@ msgstr "Guazzo"
 
 #: ../share/filters/filters.svg.h:496
 msgid "Partly opaque water color effect with bleed"
-msgstr "Effetto acqua colorata parzialmente opaca e con macchie"
+msgstr "Effetto acquarello, parzialmente opaco, con gocciolature"
 
 #: ../share/filters/filters.svg.h:498
 msgid "Alpha Engraving"
@@ -1303,11 +1303,11 @@ msgstr ""
 
 #: ../share/filters/filters.svg.h:506
 msgid "Liquid Drawing"
-msgstr "Pittura ad acqua"
+msgstr "Disegno liquido"
 
 #: ../share/filters/filters.svg.h:508
 msgid "Gives a fluid and wavy expressionist drawing effect to images"
-msgstr "Aggiunge un effetto espressionista fluido e ondulato alle immagini"
+msgstr "Aggiunge alle immagini un effetto espressionista fluido e ondulato"
 
 #: ../share/filters/filters.svg.h:510
 msgid "Marbled Ink"
@@ -1323,7 +1323,7 @@ msgstr "Acrilico denso"
 
 #: ../share/filters/filters.svg.h:516
 msgid "Thick acrylic paint texture with high texture depth"
-msgstr "Texture acrilico denso con forte profondità"
+msgstr "Trama acrilica densa con forte profondità"
 
 #: ../share/filters/filters.svg.h:518
 msgid "Alpha Engraving B"
@@ -1367,15 +1367,15 @@ msgstr "Crivellato"
 
 #: ../share/filters/filters.svg.h:536
 msgid "Riddle the surface and add bump to images"
-msgstr "Crivella la superficie e aggiunge rughe all'immagine"
+msgstr "Crivella la superficie e aggiunge rigonfiamenti all'immagine"
 
 #: ../share/filters/filters.svg.h:538
 msgid "Wrinkled Varnish"
-msgstr "Smalto rugoso"
+msgstr "Vernice rugosa"
 
 #: ../share/filters/filters.svg.h:540
 msgid "Thick glossy and translucent paint texture with high depth"
-msgstr "Texture di pittura traslucida spessa e con riflessi"
+msgstr "Trama di pittura traslucida spessa con riflessi"
 
 #: ../share/filters/filters.svg.h:542
 msgid "Canvas Bumps"
@@ -1419,7 +1419,7 @@ msgstr "Plastica trasparente con colori scuri"
 
 #: ../share/filters/filters.svg.h:562
 msgid "Melted Jelly Matte"
-msgstr "Gelatina sciolta, opaca"
+msgstr "Gelatina fusa opaca"
 
 #: ../share/filters/filters.svg.h:564
 msgid "Matte bevel with blurred edges"
@@ -1427,7 +1427,7 @@ msgstr "Smussatura opaca con bordi sfumati"
 
 #: ../share/filters/filters.svg.h:566
 msgid "Melted Jelly"
-msgstr "Gelatina sciolta"
+msgstr "Gelatina fusa"
 
 #: ../share/filters/filters.svg.h:568
 msgid "Glossy bevel with blurred edges"
@@ -1552,7 +1552,7 @@ msgstr "Rugosità gelatinosa"
 
 #: ../share/filters/filters.svg.h:628
 msgid "Convert pictures to thick jelly"
-msgstr "Converte le immagini in una densa gelatina"
+msgstr "Converte le immagini in una gelatina densa"
 
 #: ../share/filters/filters.svg.h:630
 msgid "Blend Opposites"
@@ -1594,11 +1594,11 @@ msgstr "Silhouette marmorea"
 
 #: ../share/filters/filters.svg.h:648
 msgid "Basic noise transparency texture"
-msgstr "Texture semplice con disturbo in trasparenza"
+msgstr "Trama semplice con disturbo trasparente"
 
 #: ../share/filters/filters.svg.h:650
 msgid "Fill Background"
-msgstr "Sfondo opaco"
+msgstr "Riempimento sfondo"
 
 #: ../share/filters/filters.svg.h:652
 msgid "Adds a colorizable opaque background"
@@ -2258,7 +2258,7 @@ msgstr "cioccolato (#D2691E)"
 #: ../share/palettes/palettes.h:56
 msgctxt "Palette"
 msgid "saddlebrown (#8B4513)"
-msgstr "marrone sella (#8B4513)"
+msgstr "marrone cuoio (#8B4513)"
 
 #: ../share/palettes/palettes.h:57
 msgctxt "Palette"
@@ -2338,7 +2338,7 @@ msgstr "grano (#F5DEB3)"
 #: ../share/palettes/palettes.h:72
 msgctxt "Palette"
 msgid "oldlace (#FDF5E6)"
-msgstr "vecchio merletto (#FDF5E6)"
+msgstr "vecchio laccio (#FDF5E6)"
 
 #: ../share/palettes/palettes.h:73
 msgctxt "Palette"
@@ -5160,18 +5160,18 @@ msgstr "Angolo dell'asse Z"
 #: ../src/display/control/canvas-axonomgrid.cpp:290
 #: ../src/display/control/canvas-grid.cpp:620
 msgid "Minor grid line _color:"
-msgstr "_Colore delle linee minori della griglia:"
+msgstr "_Colore delle linee secondarie della griglia:"
 
 #: ../src/display/control/canvas-axonomgrid.cpp:290
 #: ../src/display/control/canvas-grid.cpp:620
 #: ../src/ui/dialog/inkscape-preferences.cpp:1884
 msgid "Minor grid line color"
-msgstr "Colore delle linee minori della griglia"
+msgstr "Colore delle linee secondarie della griglia"
 
 #: ../src/display/control/canvas-axonomgrid.cpp:290
 #: ../src/display/control/canvas-grid.cpp:620
 msgid "Color of the minor grid lines"
-msgstr "Colore delle linee minori della griglia"
+msgstr "Colore delle linee secondarie della griglia"
 
 #: ../src/display/control/canvas-axonomgrid.cpp:293
 #: ../src/display/control/canvas-grid.cpp:624
@@ -7397,7 +7397,7 @@ msgstr "Bianco"
 
 #: ../src/extension/internal/filter/color.h:864
 msgid "Fade to black or white"
-msgstr "Schiarisci verso nero o bianco"
+msgstr "Sfuma verso il nero o il bianco"
 
 #: ../src/extension/internal/filter/color.h:933
 msgid "Greyscale"
@@ -7485,7 +7485,7 @@ msgstr "Luminosità-Contrasto"
 
 #: ../src/extension/internal/filter/color.h:1249
 msgid "Modify lightness and contrast separately"
-msgstr "Modifica luminosità e contrasto separatamente"
+msgstr "Modifica separatamente luminosità e contrasto"
 
 #: ../src/extension/internal/filter/color.h:1321
 msgid "Nudge RGB"
@@ -7553,7 +7553,7 @@ msgstr "Sposta i canali CMY separatamente e gli miscela in diversi tipi di sfond
 
 #: ../src/extension/internal/filter/color.h:1547
 msgid "Quadritone Fantasy"
-msgstr "Fantasia in quattro torni"
+msgstr "Fantasia in quattro toni"
 
 #: ../src/extension/internal/filter/color.h:1549
 msgid "Hue distribution (°)"
@@ -8117,7 +8117,7 @@ msgstr "Colore riempimento"
 #: ../src/extension/internal/filter/paint.h:361
 #: ../src/extension/internal/filter/paint.h:736
 msgid "Image on fill"
-msgstr "Immagine sullo riempimento"
+msgstr "Immagine sul riempimento"
 
 #: ../src/extension/internal/filter/paint.h:364
 #: ../share/extensions/markers_strokepaint.inx:23
@@ -8655,7 +8655,7 @@ msgid ""
 "slow performance."
 msgstr ""
 "<b>Nota</b>: impostare la precisione ad un valore troppo alto può comportare file "
-"SVG molto grossi e performance peggiori."
+"SVG molto grossi e prestazioni peggiori."
 
 #: ../src/extension/internal/pdfinput/pdf-input.cpp:141
 msgid "Poppler/Cairo import"
@@ -11817,8 +11817,8 @@ msgstr "_Gruppi: Inverti"
 #: ../src/live_effects/lpe-knot.cpp:366
 msgid "Use other stroke width, useful in groups with different stroke widths"
 msgstr ""
-"Usa altra larghezza del contorno, utile nel caso di gruppi con più larghezze di "
-"contorno"
+"Usa la larghezza dell'altro contorno, utile in gruppi che hanno contorni di "
+"diverso spessore"
 
 #: ../src/live_effects/lpe-knot.cpp:372
 msgid "S_witcher size:"
@@ -11834,7 +11834,7 @@ msgstr "Segni intersezione"
 
 #: ../src/live_effects/lpe-knot.cpp:373
 msgid "Crossing signs"
-msgstr "Segni d'intersezione"
+msgstr "Segni intersezioni"
 
 #: ../src/live_effects/lpe-knot.cpp:668
 msgid ""
