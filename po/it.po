@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: Inkscape 1.1\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
 "POT-Creation-Date: 2021-05-01 17:15+0000\n"
-"PO-Revision-Date: 2021-05-11 18:54+0200\n"
+"PO-Revision-Date: 2021-05-13 19:14+0200\n"
 "Last-Translator: Firas Hanife <firashanife@gmail.com>\n"
 "Language-Team: \n"
 "Language: it\n"
@@ -62,11 +62,11 @@ msgstr "Gelatina migliorata"
 #: ../src/extension/internal/filter/bevels.h:148
 #: ../src/extension/internal/filter/bevels.h:234
 msgid "Bevels"
-msgstr "Sfumature"
+msgstr "Smussi"
 
 #: ../share/filters/filters.svg.h:8
 msgid "Same as Matte jelly but with more controls"
-msgstr "Come Gelatina Opaca, ma con più parametri"
+msgstr "Come per Gelatina Opaca, ma con più parametri"
 
 #: ../share/filters/filters.svg.h:10
 msgid "Metal Casting"
@@ -160,11 +160,11 @@ msgstr "Smussatura lieve a cuscino, con riflessi opachi"
 
 #: ../share/filters/filters.svg.h:38
 msgid "Ridged Border"
-msgstr "Bordo rialzato"
+msgstr "Bordo crestato"
 
 #: ../share/filters/filters.svg.h:40
 msgid "Ridged border with inner bevel"
-msgstr "Bordo rialzato con smussatura interna"
+msgstr "Bordo crestato con smussatura interna"
 
 #: ../share/filters/filters.svg.h:42
 msgid "Ripple"
@@ -189,11 +189,11 @@ msgstr "Macchia"
 
 #: ../share/filters/filters.svg.h:48
 msgid "Fill object with sparse translucent specks"
-msgstr "Riempi l'oggetto con granelli traslucidi sparsi"
+msgstr "Disegna l'oggetto con macchie traslucide sparse"
 
 #: ../share/filters/filters.svg.h:50
 msgid "Oil Slick"
-msgstr "Effetto oleoso"
+msgstr "Macchia oleosa"
 
 #: ../share/filters/filters.svg.h:52
 msgid "Rainbow-colored semitransparent oily splotches"
@@ -209,7 +209,7 @@ msgstr "Macchie bianche simili a fiocchi di neve"
 
 #: ../share/filters/filters.svg.h:58
 msgid "Leopard Fur"
-msgstr "Effetto leopardato"
+msgstr "Pelliccia di leopardo"
 
 #: ../share/filters/filters.svg.h:59 ../share/filters/filters.svg.h:179
 #: ../share/filters/filters.svg.h:183 ../share/filters/filters.svg.h:187
@@ -223,7 +223,7 @@ msgstr "Materiali"
 
 #: ../share/filters/filters.svg.h:60
 msgid "Leopard spots (loses object's own color)"
-msgstr "Macchie di leopardo (rimuove il colore originario)"
+msgstr "Macchie di leopardo (rimuove il colore originale dell'oggetto)"
 
 #: ../share/filters/filters.svg.h:62
 msgid "Zebra"
@@ -231,7 +231,8 @@ msgstr "Zebra"
 
 #: ../share/filters/filters.svg.h:64
 msgid "Irregular vertical dark stripes (loses object's own color)"
-msgstr "Strisce scure verticali irregolari (rimuove il colore originario)"
+msgstr ""
+"Irregolari strisce scure verticali (rimuove il colore originale dell'oggetto)"
 
 #: ../share/filters/filters.svg.h:66
 msgid "Clouds"
@@ -239,11 +240,11 @@ msgstr "Nuvole"
 
 #: ../share/filters/filters.svg.h:68
 msgid "Airy, fluffy, sparse white clouds"
-msgstr "Soffici nuvole bianche"
+msgstr "Nuvole bianche, sparse e rade"
 
 #: ../share/filters/filters.svg.h:70 ../src/extension/internal/bitmap/sharpen.cpp:40
 msgid "Sharpen"
-msgstr "Nitidezza"
+msgstr "Rende nitido"
 
 #: ../share/filters/filters.svg.h:71 ../share/filters/filters.svg.h:75
 #: ../share/filters/filters.svg.h:91 ../share/filters/filters.svg.h:299
@@ -253,7 +254,7 @@ msgstr "Effetti immagine"
 
 #: ../share/filters/filters.svg.h:72
 msgid "Sharpen edges and boundaries within the object, force=0.15"
-msgstr "Affina bordi e riquadri interni all'oggetto, forza=0.15"
+msgstr "Affina bordi e contorni interni all'oggetto, forza=0.15"
 
 #: ../share/filters/filters.svg.h:74
 msgid "Sharpen More"
@@ -261,7 +262,7 @@ msgstr "Maggiore nitidezza"
 
 #: ../share/filters/filters.svg.h:76
 msgid "Sharpen edges and boundaries within the object, force=0.3"
-msgstr "Affina bordi e riquadri interni all'oggetto, forza=0.3"
+msgstr "Affina bordi e contorni interni all'oggetto, forza=0.3"
 
 #: ../share/filters/filters.svg.h:78
 msgid "Oil Painting"
@@ -289,7 +290,7 @@ msgstr "Colore e pittura immagine"
 
 #: ../share/filters/filters.svg.h:80
 msgid "Simulate oil painting style"
-msgstr "Simula effetto ad olio"
+msgstr "Simula lo stile dei dipinti ad olio"
 
 #: ../share/filters/filters.svg.h:82 ../src/ui/dialog/inkscape-preferences.cpp:832
 msgid "Pencil"
@@ -297,7 +298,7 @@ msgstr "Matita"
 
 #: ../share/filters/filters.svg.h:84
 msgid "Detect color edges and retrace them in grayscale"
-msgstr "Rileva bordi colorati e li ridisegna in scala di grigi"
+msgstr "Rileva i bordi colorati e li ridisegna in scala di grigi"
 
 #: ../share/filters/filters.svg.h:86
 msgid "Blueprint"
@@ -309,7 +310,7 @@ msgstr "Rileva bordi colorati e li ridisegna in blu"
 
 #: ../share/filters/filters.svg.h:90
 msgid "Age"
-msgstr "Invecchiamento"
+msgstr "Invecchiato"
 
 #: ../share/filters/filters.svg.h:92
 msgid "Imitate aged photograph"
@@ -350,7 +351,7 @@ msgstr "Gruviera"
 
 #: ../share/filters/filters.svg.h:104
 msgid "Random inner-bevel holes"
-msgstr "Buchi casuali interni"
+msgstr "Buchi casuali interni agli spigoli"
 
 #: ../share/filters/filters.svg.h:106
 msgid "Blue Cheese"
@@ -358,7 +359,7 @@ msgstr "Gorgonzola"
 
 #: ../share/filters/filters.svg.h:108
 msgid "Marble-like bluish speckles"
-msgstr "Marmorizzazione bluastra"
+msgstr "Chiazze bluastre simili a marmo"
 
 #: ../share/filters/filters.svg.h:110
 msgid "Button"
@@ -366,7 +367,7 @@ msgstr "Bottone"
 
 #: ../share/filters/filters.svg.h:112
 msgid "Soft bevel, slightly depressed middle"
-msgstr "Leggera smussatura con lieve depressione mediana"
+msgstr "Leggera smussatura, lieve depressione intermedia"
 
 #: ../share/filters/filters.svg.h:114
 msgid "Inset"
@@ -439,11 +440,11 @@ msgstr "Rigonfiamenti"
 
 #: ../share/filters/filters.svg.h:136
 msgid "Flexible bubbles effect with some displacement"
-msgstr "Effetto bolle con dispersione"
+msgstr "Bolle parametrizzate con un certo spostamento"
 
 #: ../share/filters/filters.svg.h:138
 msgid "Glowing Bubble"
-msgstr "Bolle luminose"
+msgstr "Bolle con alone"
 
 #: ../share/filters/filters.svg.h:139 ../share/filters/filters.svg.h:159
 #: ../share/filters/filters.svg.h:163 ../share/filters/filters.svg.h:207
@@ -462,7 +463,7 @@ msgstr "Neon"
 
 #: ../share/filters/filters.svg.h:144
 msgid "Neon light effect"
-msgstr "Effetto luce al neon"
+msgstr "Luce neon"
 
 #: ../share/filters/filters.svg.h:146
 msgid "Molten Metal"
@@ -541,8 +542,8 @@ msgstr "Cera d'api iridescente"
 #: ../share/filters/filters.svg.h:180
 msgid "Waxy texture which keeps its iridescence through color fill change"
 msgstr ""
-"Texture ondulata che mantiene l'iridescenza con cambiamenti del colore di "
-"riempimento"
+"Trama ondulata che mantiene l'iridescenza indipendentemente dai cambiamenti del "
+"colore di riempimento"
 
 #: ../share/filters/filters.svg.h:182
 msgid "Eroded Metal"
@@ -550,7 +551,7 @@ msgstr "Metallo consumato"
 
 #: ../share/filters/filters.svg.h:184
 msgid "Eroded metal texture with ridges, grooves, holes and bumps"
-msgstr "Texture a metallo consumato con sporgenze, buchi, aloni e rigonfiamenti"
+msgstr "Trama di metallo consumato con sporgenze, buchi, aloni e rigonfiamenti"
 
 #: ../share/filters/filters.svg.h:186
 msgid "Cracked Lava"
@@ -558,7 +559,7 @@ msgstr "Magma frammentato"
 
 #: ../share/filters/filters.svg.h:188
 msgid "A volcanic texture, a little like leather"
-msgstr "Una texture magmatica, simile al cuoio"
+msgstr "Una trama magmatica, simile al cuoio"
 
 #: ../share/filters/filters.svg.h:190
 msgid "Bark"
@@ -566,7 +567,7 @@ msgstr "Corteccia"
 
 #: ../share/filters/filters.svg.h:192
 msgid "Bark texture, vertical; use with deep colors"
-msgstr "Texture a corteccia, verticale; usare con colori scuri"
+msgstr "Trama a corteccia, verticale; usare con colori scuri"
 
 #: ../share/filters/filters.svg.h:194
 msgid "Lizard Skin"
@@ -574,7 +575,7 @@ msgstr "Pelle di lucertola"
 
 #: ../share/filters/filters.svg.h:196
 msgid "Stylized reptile skin texture"
-msgstr "Texture a pelle di rettile stilizzata"
+msgstr "Trama stilizzata come pelle di rettile"
 
 #: ../share/filters/filters.svg.h:198
 msgid "Stone Wall"
@@ -582,7 +583,7 @@ msgstr "Muro di pietra"
 
 #: ../share/filters/filters.svg.h:200
 msgid "Stone wall texture to use with not too saturated colors"
-msgstr "Texture a muro di pietra, da usare con colori non troppo saturi"
+msgstr "Trama a muro di pietra, da usare con colori non troppo saturi"
 
 #: ../share/filters/filters.svg.h:202
 msgid "Silk Carpet"
@@ -590,7 +591,7 @@ msgstr "Tappeto di seta"
 
 #: ../share/filters/filters.svg.h:204
 msgid "Silk carpet texture, horizontal stripes"
-msgstr "Texture a tappeto di seta, con strisce orizzontali"
+msgstr "Trama a tappeto di seta, con strisce orizzontali"
 
 #: ../share/filters/filters.svg.h:206
 msgid "Refractive Gel A"
@@ -598,7 +599,7 @@ msgstr "Gel rifrangente A"
 
 #: ../share/filters/filters.svg.h:208
 msgid "Gel effect with light refraction"
-msgstr "Effetto gel con debole rifrazione"
+msgstr "Effetto gel con lieve rifrazione"
 
 #: ../share/filters/filters.svg.h:210
 msgid "Refractive Gel B"
@@ -623,7 +624,7 @@ msgstr "Confetti"
 
 #: ../share/filters/filters.svg.h:220
 msgid "Gel Ridge with a pearlescent look"
-msgstr "Cresta gelatinosa con effetto perlaceo"
+msgstr "Cresta gelatinosa con un effetto perlaceo"
 
 #: ../share/filters/filters.svg.h:222
 msgid "Raised Border"
@@ -631,15 +632,15 @@ msgstr "Bordo rialzato"
 
 #: ../share/filters/filters.svg.h:224
 msgid "Strongly raised border around a flat surface"
-msgstr "Bordo molto sporgente attorno una superficie piatta"
+msgstr "Bordo molto rialzato attorno ad una superficie piatta"
 
 #: ../share/filters/filters.svg.h:226
 msgid "Metallized Ridge"
-msgstr "Bordo metallizzato"
+msgstr "Cresta metallizzata"
 
 #: ../share/filters/filters.svg.h:228
 msgid "Gel Ridge metallized at its top"
-msgstr "Bordo gelatinoso con sommità metallizzata"
+msgstr "Cresta gelatinosa con sommità metallizzata"
 
 #: ../share/filters/filters.svg.h:230
 msgid "Fat Oil"
@@ -647,7 +648,7 @@ msgstr "Copertura oleosa"
 
 #: ../share/filters/filters.svg.h:232
 msgid "Fat oil with some adjustable turbulence"
-msgstr "Copertura oleosa con turbolenza regolabile"
+msgstr "Copertura oleosa con turbolenza variabile"
 
 #: ../share/filters/filters.svg.h:234
 msgid "Black Hole"
@@ -671,7 +672,7 @@ msgstr "Cubi"
 
 #: ../share/filters/filters.svg.h:240
 msgid "Scattered cubes; adjust the Morphology primitive to vary size"
-msgstr "Cubi sparsi la cui dimensione è regolabile tramite il filtro Morfologia"
+msgstr "Cubi sparsi; dimensione regolabile tramite il filtro Morfologia"
 
 #: ../share/filters/filters.svg.h:242
 msgid "Peel Off"
@@ -711,7 +712,7 @@ msgstr "Gioielli smaltati"
 
 #: ../share/filters/filters.svg.h:260
 msgid "Slightly cracked enameled texture"
-msgstr "Texture smaltata con leggera venatura"
+msgstr "Trama smaltata con leggere striature"
 
 #: ../share/filters/filters.svg.h:262
 msgid "Rough Paper"
@@ -719,7 +720,7 @@ msgstr "Carta ruvida"
 
 #: ../share/filters/filters.svg.h:264
 msgid "Aquarelle paper effect which can be used for pictures as for objects"
-msgstr "Carta acquarellata, usabile sia per oggetti che per immagini"
+msgstr "Carta acquarellata, usabile per oggetti o immagini"
 
 #: ../share/filters/filters.svg.h:266
 msgid "Rough and Glossy"
@@ -923,11 +924,11 @@ msgstr "Macchie d'inchiostro su carta"
 
 #: ../share/filters/filters.svg.h:362
 msgid "Wax Print"
-msgstr "Stampa a cera"
+msgstr "Sigillo a cera"
 
 #: ../share/filters/filters.svg.h:364
 msgid "Wax print on tissue texture"
-msgstr "Texture stampa a cera su tessuto"
+msgstr "Sigillo a cera su tessuto"
 
 #: ../share/filters/filters.svg.h:370
 msgid "Watercolor"
@@ -944,7 +945,7 @@ msgstr "Feltro"
 #: ../share/filters/filters.svg.h:376
 msgid "Felt like texture with color turbulence and slightly darker at the edges"
 msgstr ""
-"Texture simile a feltro con turbolenza colorata e leggermente più scura ai bordi"
+"Trama simile a feltro con turbolenza colorata e leggermente più scura ai bordi"
 
 #: ../share/filters/filters.svg.h:378
 msgid "Ink Paint"
@@ -1107,11 +1108,11 @@ msgstr "Effetto rilievo color gesso"
 
 #: ../share/filters/filters.svg.h:426
 msgid "Velvet Bumps"
-msgstr "Rughe vellutate"
+msgstr "Pieghe vellutate"
 
 #: ../share/filters/filters.svg.h:428
 msgid "Gives Smooth Bumps velvet like"
-msgstr "Crea rughe soffici ad effetto velluto"
+msgstr "Crea pieghe soffici ad effetto velluto"
 
 #: ../share/filters/filters.svg.h:430
 msgid "Comics Cream"
