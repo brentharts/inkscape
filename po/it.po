@@ -14140,7 +14140,7 @@ msgstr "Visibile"
 #: ../src/live_effects/parameter/originalpatharray.cpp:145
 #: ../src/live_effects/parameter/path.cpp:572
 msgid "Link path parameter to path"
-msgstr "Lega il parametro del tracciato al parametro"
+msgstr "Lega il parametro del tracciato al tracciato"
 
 #: ../src/live_effects/parameter/originalpatharray.cpp:158
 msgid "Toggle path parameter visibility"
@@ -14165,7 +14165,7 @@ msgstr "Rimuovi tracciato"
 #: ../src/live_effects/parameter/originalpatharray.cpp:339
 #, fuzzy
 msgid "Link patharray parameter to path"
-msgstr "Lega il parametro del tracciato al parametro"
+msgstr "Lega il parametro del tracciato al tracciato"
 
 #: ../src/live_effects/parameter/path.cpp:222
 msgid "Edit on-canvas"
@@ -14693,7 +14693,7 @@ msgstr "Inverti tracciato"
 
 #: ../src/path-chemistry.cpp:618
 msgid "<b>No paths</b> to reverse in the selection."
-msgstr "<b>Nessun tracciato</b> nella selezione da invertire."
+msgstr "<b>Nessun tracciato</b> da invertire nella selezione."
 
 #: ../src/path/path-boolop.cpp:59
 msgid "Union"
@@ -15101,7 +15101,7 @@ msgstr "Seleziona un <b>gruppo</b> da dividere."
 
 #: ../src/selection-chemistry.cpp:938
 msgid "<b>No groups</b> to ungroup in the selection."
-msgstr "<b>Nessun gruppo</b> nella selezione da dividere."
+msgstr "<b>Nessun gruppo</b> da dividere nella selezione."
 
 #: ../src/selection-chemistry.cpp:1027 ../src/selection-chemistry.cpp:1078
 msgid "Select <b>object(s)</b> to raise."
@@ -15312,7 +15312,7 @@ msgstr "Seleziona i <b>cloni</b> da ricollegare."
 
 #: ../src/selection-chemistry.cpp:2707
 msgid "Copy an <b>object</b> to clipboard to relink clones to."
-msgstr "Copiare un <b>oggetto</b> negli appunti per ricollegargli i cloni."
+msgstr "Copia un <b>oggetto</b> negli appunti per ricollegargli i cloni."
 
 #: ../src/selection-chemistry.cpp:2727
 msgid "<b>No clones to relink</b> in the selection."
@@ -15349,7 +15349,7 @@ msgid ""
 "to its source. Select a <b>text on path</b> to go to the path. Select a <b>flowed "
 "text</b> to go to its frame."
 msgstr ""
-"Seleziona un <b>clone</b> per andare al suo originale. Seleziona una "
+"Seleziona un <b>clone</b> per visualizzare il suo originale. Seleziona una "
 "<b>proiezione collegata</b> per andare alla sua fonte. Seleziona un <b>testo su "
 "tracciato</b> per andare al tracciato. Seleziona un <b>testo dinamico</b> per "
 "andare al suo riquadro."
@@ -15508,7 +15508,7 @@ msgstr "Adatta pagina alla selezione o al disegno"
 
 #: ../src/selection-describer.cpp:119
 msgid "root"
-msgstr "(base)"
+msgstr "base"
 
 #: ../src/selection-describer.cpp:121 ../src/widgets/ege-paint-def.cpp:64
 #: ../src/widgets/ege-paint-def.cpp:88
@@ -16522,7 +16522,7 @@ msgstr ""
 
 #: ../src/ui/dialog/clonetiler.cpp:212
 msgid "Randomize the horizontal shift by this percentage"
-msgstr "Rende casuale di questa percentuale lo spostamento orizzontale"
+msgstr "Rende casuale lo spostamento orizzontale entro questa percentuale"
 
 #. TRANSLATORS: "shift" means: the tiles will be shifted (offset) vertically by this amount
 #: ../src/ui/dialog/clonetiler.cpp:222
@@ -16542,7 +16542,7 @@ msgstr "Lo spostamento verticale per ogni colonna (in % sull'altezza del clone)"
 
 #: ../src/ui/dialog/clonetiler.cpp:246
 msgid "Randomize the vertical shift by this percentage"
-msgstr "Rende casuale di questa percentuale lo spostamento verticale"
+msgstr "Rende casuale lo spostamento verticale entro questa percentuale"
 
 #: ../src/ui/dialog/clonetiler.cpp:254 ../src/ui/dialog/clonetiler.cpp:406
 msgid "<b>Exponent:</b>"
@@ -16551,14 +16551,14 @@ msgstr "<b>Esponente:</b>"
 #: ../src/ui/dialog/clonetiler.cpp:262
 msgid "Whether rows are spaced evenly (1), converge (<1) or diverge (>1)"
 msgstr ""
-"Specifica se le righe sono a spaziatura costante (1), convergente (<1) o "
-"divergente (>1)"
+"Specifica se le righe sono a spaziatura costante (1), convergenti (<1) o "
+"divergenti (>1)"
 
 #: ../src/ui/dialog/clonetiler.cpp:269
 msgid "Whether columns are spaced evenly (1), converge (<1) or diverge (>1)"
 msgstr ""
-"Specifica se le colonne sono a spaziatura costante (1), convergente (<1) o "
-"divergente (>1)"
+"Specifica se le colonne sono a spaziatura costante (1), convergenti (<1) o "
+"divergenti (>1)"
 
 #. TRANSLATORS: "Alternate" is a verb here
 #: ../src/ui/dialog/clonetiler.cpp:277 ../src/ui/dialog/clonetiler.cpp:448
@@ -16583,11 +16583,11 @@ msgstr "<small>Accumula:</small>"
 
 #: ../src/ui/dialog/clonetiler.cpp:303
 msgid "Cumulate the shifts for each row"
-msgstr "Somma lo spostamento per ogni riga"
+msgstr "Accumula lo spostamento per ogni riga"
 
 #: ../src/ui/dialog/clonetiler.cpp:308
 msgid "Cumulate the shifts for each column"
-msgstr "Somma lo spostamento per ogni colonna"
+msgstr "Accumula lo spostamento per ogni colonna"
 
 #. TRANSLATORS: "Cumulate" is a verb here
 #: ../src/ui/dialog/clonetiler.cpp:315
@@ -16624,7 +16624,8 @@ msgstr ""
 
 #: ../src/ui/dialog/clonetiler.cpp:367
 msgid "Randomize the horizontal scale by this percentage"
-msgstr "Rende casuale il ridimensionamento orizzontale in questa percentuale"
+msgstr ""
+"Rende casuale il ridimensionamento orizzontale entro questa percentuale"
 
 #: ../src/ui/dialog/clonetiler.cpp:375
 msgid "<b>Scale Y:</b>"
@@ -16643,7 +16644,7 @@ msgstr ""
 
 #: ../src/ui/dialog/clonetiler.cpp:398
 msgid "Randomize the vertical scale by this percentage"
-msgstr "Rende casuale il ridimensionamento verticale in questa percentuale"
+msgstr "Rende casuale il ridimensionamento verticale entro questa percentuale"
 
 #: ../src/ui/dialog/clonetiler.cpp:413
 msgid "Whether row scaling is uniform (1), converge (<1) or diverge (>1)"
@@ -16677,11 +16678,11 @@ msgstr "Alterna il segno del ridimensionamento per ogni colonna"
 
 #: ../src/ui/dialog/clonetiler.cpp:474
 msgid "Cumulate the scales for each row"
-msgstr "Somma il ridimensionamento per ogni riga"
+msgstr "Accumula il ridimensionamento per ogni riga"
 
 #: ../src/ui/dialog/clonetiler.cpp:479
 msgid "Cumulate the scales for each column"
-msgstr "Somma il ridimensionamento per ogni colonna"
+msgstr "Accumula il ridimensionamento per ogni colonna"
 
 #: ../src/ui/dialog/clonetiler.cpp:488
 msgid "_Rotation"
@@ -16703,7 +16704,7 @@ msgstr "Ruota i cloni di questo angolo per ogni colonna"
 
 #: ../src/ui/dialog/clonetiler.cpp:519
 msgid "Randomize the rotation angle by this percentage"
-msgstr "Rende casuale in questa percentuale l'angolo di rotazione"
+msgstr "Rende casuale l'angolo di rotazione entro questa percentuale"
 
 #: ../src/ui/dialog/clonetiler.cpp:534
 msgid "Alternate the rotation direction for each row"
@@ -16715,11 +16716,11 @@ msgstr "Alterna la direzione della rotazione per ogni colonna"
 
 #: ../src/ui/dialog/clonetiler.cpp:553
 msgid "Cumulate the rotation for each row"
-msgstr "Somma la rotazione per ogni riga"
+msgstr "Accumula la rotazione per ogni riga"
 
 #: ../src/ui/dialog/clonetiler.cpp:558
 msgid "Cumulate the rotation for each column"
-msgstr "Somma la rotazione per ogni colonna"
+msgstr "Accumula la rotazione per ogni colonna"
 
 #: ../src/ui/dialog/clonetiler.cpp:567
 msgid "_Blur & opacity"
@@ -16739,7 +16740,7 @@ msgstr "Sfoca i cloni di questa percentuale per ogni colonna"
 
 #: ../src/ui/dialog/clonetiler.cpp:595
 msgid "Randomize the tile blur by this percentage"
-msgstr "Rende casuale la sfocatura del clone in questa percentuale"
+msgstr "Rende casuale la sfocatura del clone entro questa percentuale"
 
 #: ../src/ui/dialog/clonetiler.cpp:610
 msgid "Alternate the sign of blur change for each row"
@@ -16755,15 +16756,15 @@ msgstr "<b>Opacità:</b>"
 
 #: ../src/ui/dialog/clonetiler.cpp:631
 msgid "Decrease tile opacity by this percentage for each row"
-msgstr "Riduce l'opacità dei cloni in questa percentuale per ogni riga"
+msgstr "Riduce l'opacità dei cloni di questa percentuale per ogni riga"
 
 #: ../src/ui/dialog/clonetiler.cpp:637
 msgid "Decrease tile opacity by this percentage for each column"
-msgstr "Riduce l'opacità dei cloni in questa percentuale per ogni colonna"
+msgstr "Riduce l'opacità dei cloni di questa percentuale per ogni colonna"
 
 #: ../src/ui/dialog/clonetiler.cpp:643
 msgid "Randomize the tile opacity by this percentage"
-msgstr "Rende casuale l'opacità dei cloni in questa percentuale"
+msgstr "Rende casuale l'opacità dei cloni entro questa percentuale'9"
 
 #: ../src/ui/dialog/clonetiler.cpp:658
 msgid "Alternate the sign of opacity change for each row"
@@ -16799,15 +16800,15 @@ msgstr "<b>H:</b>"
 
 #: ../src/ui/dialog/clonetiler.cpp:703
 msgid "Change the tile hue by this percentage for each row"
-msgstr "Cambia di questa percentuale per ogni riga l'opacità dei cloni"
+msgstr "Cambia di questa percentuale l'opacità dei cloni per ogni riga"
 
 #: ../src/ui/dialog/clonetiler.cpp:709
 msgid "Change the tile hue by this percentage for each column"
-msgstr "Cambia di questa percentuale per ogni colonna l'opacità dei cloni"
+msgstr "Cambia di questa percentuale l'opacità dei cloni per ogni colonna"
 
 #: ../src/ui/dialog/clonetiler.cpp:715
 msgid "Randomize the tile hue by this percentage"
-msgstr "Rende casuale l'opacità del clone in questa percentuale"
+msgstr "Rende casuale l'opacità del clone entro questa percentuale"
 
 #: ../src/ui/dialog/clonetiler.cpp:724
 msgid "<b>S:</b>"
@@ -16815,15 +16816,16 @@ msgstr "<b>S:</b>"
 
 #: ../src/ui/dialog/clonetiler.cpp:731
 msgid "Change the color saturation by this percentage for each row"
-msgstr "Cambia la saturazione del colore di questa percentuale per ogni riga"
+msgstr "Cambia di questa percentuale la saturazione del colore per ogni riga"
 
 #: ../src/ui/dialog/clonetiler.cpp:737
 msgid "Change the color saturation by this percentage for each column"
-msgstr "Cambia la saturazione del colore di questa percentuale per ogni colonna"
+msgstr ""
+"Cambia di questa percentuale la saturazione del colore per ogni colonna"
 
 #: ../src/ui/dialog/clonetiler.cpp:743
 msgid "Randomize the color saturation by this percentage"
-msgstr "Rende casuale la saturazione del clone fino a questa percentuale"
+msgstr "Rende casuale di questa percentuale la saturazione del clone"
 
 #: ../src/ui/dialog/clonetiler.cpp:751
 msgid "<b>L:</b>"
@@ -16831,15 +16833,16 @@ msgstr "<b>L:</b>"
 
 #: ../src/ui/dialog/clonetiler.cpp:758
 msgid "Change the color lightness by this percentage for each row"
-msgstr "Riduce la luminosità dei cloni di questa percentuale per ogni riga"
+msgstr "Riduce di questa percentuale la luminosità dei cloni per ogni riga"
 
 #: ../src/ui/dialog/clonetiler.cpp:764
 msgid "Change the color lightness by this percentage for each column"
-msgstr "Riduce la luminosità dei cloni di questa percentuale per ogni colonna"
+msgstr ""
+"Riduce di questa percentuale la luminosità dei cloni per ogni colonna"
 
 #: ../src/ui/dialog/clonetiler.cpp:770
 msgid "Randomize the color lightness by this percentage"
-msgstr "Rende casuale la luminosità del clone in questa percentuale"
+msgstr "Rende casuale la luminosità del clone entro questa percentuale"
 
 #: ../src/ui/dialog/clonetiler.cpp:785
 msgid "Alternate the sign of color changes for each row"
@@ -17032,7 +17035,7 @@ msgstr "Riempie la larghezza e l'altezza specificata con i cloni"
 
 #: ../src/ui/dialog/clonetiler.cpp:1121
 msgid "Use saved size and position of the tile"
-msgstr "Usa la dimensione e la posizione salvata per la serie"
+msgstr "Usa la dimensione e la posizione salvata del clone"
 
 #: ../src/ui/dialog/clonetiler.cpp:1124
 msgid ""
@@ -17848,7 +17851,7 @@ msgstr[1] "Esporta separatamente %d oggetti selezionati"
 
 #: ../src/ui/dialog/export.cpp:936
 msgid "Export in progress"
-msgstr "Esportazione in avanzamento"
+msgstr "Esportazione in corso"
 
 #: ../src/ui/dialog/export.cpp:1017
 msgid "No items selected."
@@ -18064,11 +18067,11 @@ msgstr "Sorgente d'illuminazione:"
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:1182
 msgid "Direction angle for the light source on the XY plane, in degrees"
-msgstr "Angolo di incidenza della sorgente luminosa sul piano XY, in gradi"
+msgstr "Angolo di incidenza in gradi della sorgente luminosa sul piano XY"
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:1183
 msgid "Direction angle for the light source on the YZ plane, in degrees"
-msgstr "Angolo di incidenza della sorgente luminosa sul piano YZ, in gradi"
+<smsgstr "Angolo di incidenza in gradi della sorgente luminosa sul piano YZ"
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:1186
 #: ../src/ui/dialog/filter-effects-dialog.cpp:1189
@@ -18218,11 +18221,12 @@ msgstr "Coordinate:"
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:2773
 msgid "X coordinate of the left corners of filter effects region"
-msgstr "Coordinata X dell'angolo sinistro della regione affetta dal filtro"
+msgstr "Coordinata X dell'angolo sinistro della regione interessata dal filtro"
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:2773
 msgid "Y coordinate of the upper corners of filter effects region"
-msgstr "Coordinata Y dell'angolo superiore della regione affetta dal filtro"
+msgstr ""
+"Coordinata Y dell'angolo superiore della regione interessata dal filtro"
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:2774
 msgid "Dimensions:"
@@ -18332,7 +18336,7 @@ msgid ""
 "X coordinate of the target point in the convolve matrix. The convolution is "
 "applied to pixels around this point."
 msgstr ""
-"Coordinata X del punto affetto dalla matrice di convoluzione. La convoluzione "
+"Coordinata X del punto interessato dalla matrice di convoluzione. La convoluzione "
 "viene applicata ai pixel attorno a questo punto."
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:2804
@@ -18340,7 +18344,7 @@ msgid ""
 "Y coordinate of the target point in the convolve matrix. The convolution is "
 "applied to pixels around this point."
 msgstr ""
-"Coordinata Y del punto affetto dalla matrice di convoluzione. La convoluzione "
+"Coordinata Y del punto interessato dalla matrice di convoluzione. La convoluzione "
 "viene applicata ai pixel attorno a questo punto."
 
 #. TRANSLATORS: for info on "Kernel", see http://en.wikipedia.org/wiki/Kernel_(matrix)
@@ -18374,8 +18378,8 @@ msgid ""
 "is the sum of all the matrix values tends to have an evening effect on the "
 "overall color intensity of the result."
 msgstr ""
-"Dopo aver applicato la kernelMatrix all'immagine in input per ottenere un numero, "
-"esso viene diviso per il divisore per ottenere il valore del colore finale. Un "
+"Dopo aver applicato la kernelMatrix all'immagine in ingresso per ottenere un numero, "
+"questo viene diviso per il divisore per ottenere il valore del colore finale. Un "
 "divisore che è la somma di tutti i valori della matrice tende ad avere un effetto "
 "scurente sull'intensità complessiva del colore risultante."
 
