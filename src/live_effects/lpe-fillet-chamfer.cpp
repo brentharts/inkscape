@@ -631,7 +631,7 @@ LPEFilletChamfer::doEffect_path(Geom::PathVector const &path_in)
                         path_chamfer.start(tmp_path.finalPoint());
                         if (eliptical) {
                             ccw_toggle = ccw_toggle ? false : true;
-                            path_chamfer.appendNew<Geom::EllipticalArc>(rx, ry, arc_angle, 0, ccw_toggle, end_arc_point);
+                            path_chamfer.appendNew<Geom::EllipticalArc>(rx, ry, arc_angle, false, ccw_toggle, end_arc_point);
                         } else {
                             path_chamfer.appendNew<Geom::CubicBezier>(handle_1, handle_2, end_arc_point);
                         }
@@ -643,7 +643,7 @@ LPEFilletChamfer::doEffect_path(Geom::PathVector const &path_in)
                         Geom::Path path_chamfer;
                         path_chamfer.start(tmp_path.finalPoint());
                         if (eliptical) {
-                            path_chamfer.appendNew<Geom::EllipticalArc>(rx, ry, arc_angle, 0, ccw_toggle, end_arc_point);
+                            path_chamfer.appendNew<Geom::EllipticalArc>(rx, ry, arc_angle, false, ccw_toggle, end_arc_point);
                         } else {
                             path_chamfer.appendNew<Geom::CubicBezier>(inverse_handle_1, inverse_handle_2, end_arc_point);
                         }
@@ -654,7 +654,7 @@ LPEFilletChamfer::doEffect_path(Geom::PathVector const &path_in)
                     {
                         if (eliptical) {
                             gint side = false;
-                            if (helperpath && !SP_ACTIVE_DOCUMENT->is_yaxisdown()) {
+                            if (helperpath && !getSPDoc()->is_yaxisdown()) {
                                 side = true;
                                 ccw_toggle = ccw_toggle ? false : true;
                             }
@@ -668,7 +668,7 @@ LPEFilletChamfer::doEffect_path(Geom::PathVector const &path_in)
                     {
                         if (eliptical) {
                             gint side = false;
-                            if (helperpath && !SP_ACTIVE_DOCUMENT->is_yaxisdown()) {
+                            if (helperpath && !getSPDoc()->is_yaxisdown()) {
                                 side = true;
                             } else {
                                 ccw_toggle = ccw_toggle ? false : true;
