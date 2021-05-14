@@ -128,6 +128,7 @@ bool isCurrentThemeDark(Gtk::Container *window)
             settings->property_gtk_application_prefer_dark_theme() = prefs->getBool("/theme/preferDarkTheme", false);
         }
         dark = current_theme.find(":dark") != std::string::npos;
+        dark = dark || (prefs->getInt("/theme/contrast", 10) != 10 && prefs->getBool("/theme/preferDarkTheme", false));
         if (!dark) {
             Glib::RefPtr<Gtk::StyleContext> stylecontext = window->get_style_context();
             Gdk::RGBA rgba;
