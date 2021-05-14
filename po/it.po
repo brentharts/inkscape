@@ -16764,7 +16764,7 @@ msgstr "Riduce l'opacità dei cloni di questa percentuale per ogni colonna"
 
 #: ../src/ui/dialog/clonetiler.cpp:643
 msgid "Randomize the tile opacity by this percentage"
-msgstr "Rende casuale l'opacità dei cloni entro questa percentuale'9"
+msgstr "Rende casuale l'opacità dei cloni entro questa percentuale"
 
 #: ../src/ui/dialog/clonetiler.cpp:658
 msgid "Alternate the sign of opacity change for each row"
@@ -18071,7 +18071,7 @@ msgstr "Angolo di incidenza in gradi della sorgente luminosa sul piano XY"
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:1183
 msgid "Direction angle for the light source on the YZ plane, in degrees"
-<smsgstr "Angolo di incidenza in gradi della sorgente luminosa sul piano YZ"
+msgstr "Angolo di incidenza in gradi della sorgente luminosa sul piano YZ"
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:1186
 #: ../src/ui/dialog/filter-effects-dialog.cpp:1189
