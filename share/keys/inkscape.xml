@@ -485,7 +485,7 @@ override) the bindings in the main default.xml.
   <bind gaction="doc.snap-global-toggle"           keys="percent"/>
 
   <!-- Tools -->
-  <bind gaction="win.tool-switch('Select')"        keys="s,   F1"/>       
+  <bind gaction="win.tool-switch('Select')"        keys="s,   F1"/>
   <bind gaction="win.tool-switch('Node')"          keys="n,   F2"/>
 
   <bind gaction="win.tool-switch('Rect')"          keys="r,   F4"/>
@@ -506,7 +506,7 @@ override) the bindings in the main default.xml.
 
   <bind gaction="win.tool-switch('Tweak')"         keys="w,   &lt;shift&gt;F2"/>
   <bind gaction="win.tool-switch('Spray')"         keys="a,   &lt;shift&gt;F3"/>
-  <bind gaction="win.tool-switch('Eraser')"        keys="e"/>
+  <bind gaction="win.tool-switch('Eraser')"        keys="     &lt;primary&gt;e"/>
   <bind gaction="win.tool-switch('Connector')"     keys="o,   &lt;primary&gt;F2"/>
   <bind gaction="win.tool-switch('LPETool')"       keys=""/>
 

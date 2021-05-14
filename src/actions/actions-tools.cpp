@@ -117,7 +117,6 @@ get_active_tool(InkscapeWindow *win)
 
     saction->get_state(state);
 
-    std::cout << "get_active_tool: " << state << std::endl;
     return state;
 }
 
@@ -179,7 +178,6 @@ set_active_tool(InkscapeWindow *win, SPItem *item, Geom::Point const p)
 void
 tool_switch(Glib::ustring const &tool, InkscapeWindow *win)
 {
-    std::cout << "tool_switch: " << tool << std::endl;
     // Valid tool?
     auto tool_it = tool_data.find(tool);
     if (tool_it == tool_data.end()) {
@@ -187,45 +185,12 @@ tool_switch(Glib::ustring const &tool, InkscapeWindow *win)
         return;
     }
 
+    // Have desktop?
     SPDesktop* dt = win->get_desktop();
     if (!dt) {
         std::cerr << "tool_switch: no desktop!" << std::endl;
         return;
     }
-
-    static std::chrono::time_point old_time = std::chrono::high_resolution_clock::now();
-    static Glib::ustring old_tool;
-
-    if (tool == old_tool) {
-        /*
-         * This happens under two circumstances:
-         * 1. The user double clicks a tool. In this case we pop-up the Preference Dialog opened to the
-         *    tool's page. (This only works if the Preference Dialog was not open.)
-         * 2. The user is switching tools. This happens as a RadioButton triggers the action both when
-         *    toggling on and when toggling off. We want to ignore the toggling off event.
-         *    Note, if a user clicks on two different tool buttons quickly, it will trigger the opening
-         *    the first tool's preference page. If this is a problem, we could connect to
-         *    the "button_pressed" signal of the buttons via code, but this would be messier.
-         */
-        auto current_time =  std::chrono::high_resolution_clock::now();
-        std::chrono::duration<double> elapsed_seconds = current_time - old_time; // In seconds
-        std::cout << "  elapased time: " << elapsed_seconds.count() << std::endl;
-        if (elapsed_seconds.count() < 0.3) {
-            // User double clicked
-            auto prefs = Inkscape::Preferences::get();
-            prefs->setInt("/dialogs/preferences/page", tool_it->second.pref);
-            // dt->_dlg_mgr->showDialog("InkscapePreferences");
-            Inkscape::UI::Dialog::DialogContainer* container = dt->getContainer();
-            container->new_floating_dialog(SP_VERB_DIALOG_PREFERENCES); // TEMP Until we replace verbs in new_floating_dialog().
-        }
-
-        old_time = std::chrono::high_resolution_clock::now(); // Allows double click on already selected too.
-
-        return;
-    }
-
-    old_time = std::chrono::high_resolution_clock::now();
-    old_tool = tool;
 
     auto action = win->lookup_action("tool-switch");
     if (!action) {
@@ -239,6 +204,43 @@ tool_switch(Glib::ustring const &tool, InkscapeWindow *win)
         return;
     }
 
+    // Get current state
+    Glib::ustring current_tool;
+    saction->get_state(current_tool);
+
+    // Initialize time to zero.
+    static std::chrono::time_point old_time = std::chrono::time_point<std::chrono::high_resolution_clock>();
+
+    if (tool == current_tool) {
+        /*
+         * This happens under two circumstances:
+         * 1. The user double clicks a tool. In this case we pop-up the Preference Dialog opened to the
+         *    tool's page. (This only works if the Preference Dialog was not open.)
+         * 2. The user is switching tools. This happens as a RadioButton triggers the action both when
+         *    toggling on and when toggling off. We want to ignore the toggling off event.
+         *    Note, if a user clicks on two different tool buttons quickly, it will trigger opening
+         *    the first tool's preference page. If this is a problem, we could connect to
+         *    the "button_pressed" signal of the buttons via code, but this would be messier.
+         */
+        auto current_time =  std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> elapsed_seconds = current_time - old_time; // In seconds
+        // std::cout << "  elapased time: " << elapsed_seconds.count() << std::endl;
+        auto settings = Gtk::Settings::get_default();
+        Glib::PropertyProxy<int> double_click_time = settings->property_gtk_double_click_time(); // In ms. Default: 400ms.
+        if (elapsed_seconds.count() * 1000 < double_click_time.get_value()) {
+            // User double clicked!
+            auto prefs = Inkscape::Preferences::get();
+            prefs->setInt("/dialogs/preferences/page", tool_it->second.pref);
+            Inkscape::UI::Dialog::DialogContainer* container = dt->getContainer();
+            container->new_floating_dialog(SP_VERB_DIALOG_PREFERENCES); // TEMP Until we replace verbs in new_floating_dialog().
+        }
+
+        old_time = current_time; // So if tool is already open, double clicking will still work.
+        return;
+    }
+
+    old_time = std::chrono::high_resolution_clock::now();
+
     // Update button states.
     saction->set_enabled(false); // Avoid infinite loop when called by tool_toogle().
     saction->change_state(tool);
@@ -251,9 +253,6 @@ tool_switch(Glib::ustring const &tool, InkscapeWindow *win)
 
     dt->setEventContext(tool_data[tool].pref_path);
     INKSCAPE.eventcontext_set(dt->getEventContext());
-
-    std::cout << "tool_switch: switch to " << tool << std::endl;
-    get_active_tool(win); // TEMP TEMP TEMP
 }
 
 /**
@@ -323,29 +322,29 @@ std::vector<std::vector<Glib::ustring>> raw_data_tools =
     // clang-format off
     {"win.tool-switch('Select')",       N_("Tool: Select"),       "Tool Switch",   N_("Select and transform objects.")                  },
     {"win.tool-switch('Node')",         N_("Tool: Node"),         "Tool Switch",   N_("Edit paths by nodes.")                           },
-                                                                                                                                        
+
     {"win.tool-switch('Rect')",         N_("Tool: Rectangle"),    "Tool Switch",   N_("Create rectangles and squares.")                 },
     {"win.tool-switch('Arc')",          N_("Tool: Circle/Arc"),   "Tool Switch",   N_("Create circles, ellipses and arcs.")             },
     {"win.tool-switch('Star')",         N_("Tool: Star/Polygon"), "Tool Switch",   N_("Create stars and polygons.")                     },
     {"win.tool-switch('3DBox')",        N_("Tool: 3D Box"),       "Tool Switch",   N_("Create 3D Boxes.")                               },
     {"win.tool-switch('Spiral')",       N_("Tool: Spiral"),       "Tool Switch",   N_("Create spirals.")                                },
-                                                                                                                                        
+
     {"win.tool-switch('Pen')",          N_("Tool: Pen"),          "Tool Switch",   N_("Draw Bezier curves and straight lines.")         },
     {"win.tool-switch('Pencil')",       N_("Tool: Pencil"),       "Tool Switch",   N_("Draw freehand lines.")                           },
     {"win.tool-switch('Caligraphic')",  N_("Tool: Caligraphy"),   "Tool Switch",   N_("Draw calligraphic or brush strokes.")            },
     {"win.tool-switch('Text')",         N_("Tool: Text"),         "Tool Switch",   N_("Create and edit text objects.")                  },
-                                                                                                                                        
+
     {"win.tool-switch('Gradient')",     N_("Tool: Gradient"),     "Tool Switch",   N_("Create and edit gradients.")                     },
     {"win.tool-switch('Mesh')",         N_("Tool: Mesh"),         "Tool Switch",   N_("Create and edit meshes.")                        },
     {"win.tool-switch('Dropper')",      N_("Tool: Dropper"),      "Tool Switch",   N_("Pick colors from image.")                        },
     {"win.tool-switch('PaintBucket')",  N_("Tool: Paint Bucket"), "Tool Switch",   N_("Fill bounded areas.")                            },
-                                                                                                                                        
+
     {"win.tool-switch('Tweak')",        N_("Tool: Tweak"),        "Tool Switch",   N_("Tweak objects by sculpting or painting.")        },
     {"win.tool-switch('Spray')",        N_("Tool: Spray"),        "Tool Switch",   N_("Spray objects by sculpting or painting.")        },
     {"win.tool-switch('Eraser')",       N_("Tool: Eraser"),       "Tool Switch",   N_("Erase objects or paths.")                        },
     {"win.tool-switch('Connector')",    N_("Tool: Connector"),    "Tool Switch",   N_("Create diagram connectors.")                     },
     {"win.tool-switch('LPETool')",      N_("Tool: LPE Tool"),     "Tool Switch",   N_("Do geometric constructions.")                    },
-                                                                                                                                        
+
     {"win.tool-switch('Zoom')",         N_("Tool: Zoom"),         "Tool Switch",   N_("Zoom in or out.")                                },
     {"win.tool-switch('Measure')",      N_("Tool: Measure"),      "Tool Switch",   N_("Measure objects.")                               },
 
@@ -357,7 +356,6 @@ std::vector<std::vector<Glib::ustring>> raw_data_tools =
 void
 add_actions_tools(InkscapeWindow* win)
 {
-    std::cout << "add_actions_tools" << std::endl;
     // clang-format off
     win->add_action_radio_string ( "tool-switch",        sigc::bind<InkscapeWindow*>(sigc::ptr_fun(&tool_switch),  win), "Select");
     win->add_action(               "tool-toggle",        sigc::bind<InkscapeWindow*>(sigc::ptr_fun(&tool_toggle),  win)          );

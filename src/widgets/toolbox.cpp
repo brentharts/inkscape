@@ -230,9 +230,6 @@ static struct {
 
 static Glib::RefPtr<Gtk::ActionGroup> create_or_fetch_actions( SPDesktop* desktop );
 
-// static void setup_tool_toolbox(GtkWidget *toolbox, SPDesktop *desktop);
-// static void update_tool_toolbox(SPDesktop *desktop, ToolBase *eventcontext, GtkWidget *toolbox);
-
 static void setup_aux_toolbox(GtkWidget *toolbox, SPDesktop *desktop);
 static void update_aux_toolbox(SPDesktop *desktop, ToolBase *eventcontext, GtkWidget *toolbox);
 
@@ -425,7 +422,8 @@ GtkWidget *ToolboxFactory::createToolToolbox()
             toolbar->set_toolbar_style( Gtk::TOOLBAR_ICONS );
         }
 
-        GtkIconSize toolboxSize = ToolboxFactory::prefToSize("/toolbox/primary", 1);
+        // TODO: Change preference path!
+        GtkIconSize toolboxSize = ToolboxFactory::prefToSize("/toolbox/tools/small", 1);
         toolbar->set_icon_size (static_cast<Gtk::IconSize>(toolboxSize));
     }
 
@@ -566,7 +564,6 @@ static void setupToolboxCommon( GtkWidget *toolbox,
     gtk_ui_manager_insert_action_group( mgr, mainActions->gobj(), 0 );
 
     Glib::ustring filename = get_filename(UIS, ui_file);
-    std::cout << "setupToolboxCommon: " << toolbarName << "  file: " << filename << std::endl;
     gtk_ui_manager_add_ui_from_file( mgr, filename.c_str(), &err );
     if(err) {
         g_warning("Failed to load %s: %s", filename.c_str(), err->message);
@@ -580,7 +577,6 @@ static void setupToolboxCommon( GtkWidget *toolbox,
     }
 
     GtkIconSize toolboxSize = ToolboxFactory::prefToSize(sizePref);
-    std::cout << "setupToolboxCommon: " << toolbarName << "  size: " << sizePref << std::endl;
     gtk_toolbar_set_icon_size( GTK_TOOLBAR(toolBar), static_cast<GtkIconSize>(toolboxSize) );
 
     GtkPositionType pos = static_cast<GtkPositionType>(GPOINTER_TO_INT(g_object_get_data( G_OBJECT(toolbox), HANDLE_POS_MARK )));
@@ -672,30 +668,6 @@ void ToolboxFactory::setOrientation(GtkWidget* toolbox, GtkOrientation orientati
         }
     }
 }
-
-// void setup_tool_toolbox(GtkWidget *toolbox, SPDesktop *desktop)
-// {
-//     setupToolboxCommon(toolbox, desktop, "toolbar-tool.ui", "/ui/ToolToolbar", "/toolbox/tools/small");
-// }
-
-// void update_tool_toolbox( SPDesktop *desktop, ToolBase *eventcontext, GtkWidget * /*toolbox*/ )
-// {
-//     gchar const *const tname = ( eventcontext
-//                                  ? eventcontext->getPrefsPath().c_str() //g_type_name(G_OBJECT_TYPE(eventcontext))
-//                                  : nullptr );
-//     Glib::RefPtr<Gtk::ActionGroup> mainActions = create_or_fetch_actions( desktop );
-
-//     for (int i = 0 ; tools[i].type_name ; i++ ) {
-//         Glib::RefPtr<Gtk::Action> act = mainActions->get_action( Inkscape::Verb::get(tools[i].verb)->get_id() );
-//         if ( act ) {
-//             bool setActive = tname && !strcmp(tname, tools[i].type_name);
-//             Glib::RefPtr<VerbAction> verbAct = Glib::RefPtr<VerbAction>::cast_dynamic(act);
-//             if ( verbAct ) {
-//                 verbAct->set_active(setActive);
-//             }
-//         }
-//     }
-// }
 
 /**
  * \brief Generate the auxiliary toolbox
