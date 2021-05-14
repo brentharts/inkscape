@@ -653,7 +653,7 @@ LPEFilletChamfer::doEffect_path(Geom::PathVector const &path_in)
                 case INVERSE_FILLET:
                     {
                         if (eliptical) {
-                            gint side = false;
+                            bool side = false;
                             if (helperpath && !getSPDoc()->is_yaxisdown()) {
                                 side = true;
                                 ccw_toggle = ccw_toggle ? false : true;
@@ -667,7 +667,7 @@ LPEFilletChamfer::doEffect_path(Geom::PathVector const &path_in)
                 default: //fillet
                     {
                         if (eliptical) {
-                            gint side = false;
+                            bool side = false;
                             if (helperpath && !getSPDoc()->is_yaxisdown()) {
                                 side = true;
                             } else {
