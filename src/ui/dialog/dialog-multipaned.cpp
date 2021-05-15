@@ -933,26 +933,28 @@ double reveal_curve(double val, double size) {
 }
 
 // easing function for collapsing panels
+// note: factors for x dictate how fast resizing happens when moving mouse (with 1 being at the same speed);
+// other constants are to make this fn produce values in 0..1 range and seamlessly connect three segments
 double collapse_curve(double val, double size) {
     if (size > 0 && val <= size && val >= 0) {
         // slow start (resistance), short pause and then quick collapse
         auto x = val / size;
         auto pos = x;
-        if (x <= 0.6) {
-            // panel collapsed
-            pos = 0;
-        }
-        else if (x < 0.7) {
+        if (x < 0.5) {
             // fast collapsing
-            pos = x * 9.5 - 5.7;
+            pos = x * 10 - 5 + 0.92;
+            if (pos < 0) {
+                // panel collapsed
+                pos = 0;
+            }
         }
-        else if (x < 0.8) {
+        else if (x < 0.6) {
             // pause
-            pos = 0.95;
+            pos = 0.2 * 0.6 + 0.8; // = 0.92;
         }
         else {
-            // resistance to collapsing
-            pos = x * 0.25 + 0.75;
+            // resistance to collapsing (move slow, x 0.2 decrease)
+            pos = x * 0.2 + 0.8;
         }
         return size * pos;
     }
@@ -990,13 +992,14 @@ void DialogMultipaned::on_drag_update(double offset_x, double offset_y)
             }
 
             if (width < minimum_size) {
-                resizing = true;
                 if (can_collapse(child, handle)) {
+                    resizing = true;
                     auto w = start_width == 0 ? reveal_curve(width, minimum_size) : collapse_curve(width, minimum_size);
                     offset_x = w - start_width;
                     // facilitate closing/opening panels: users don't have to drag handle all the
-                    // way to collapse/expand a panel, they just need to move it fraction of the way
-                    auto threshold = start_width == 0 ? minimum_size * 0.2 : minimum_size * 0.7;
+                    // way to collapse/expand a panel, they just need to move it fraction of the way;
+                    // note: those thresholds correspond to the easing functions used
+                    auto threshold = start_width == 0 ? minimum_size * 0.20 : minimum_size * 0.42;
                     hide = width <= threshold ? child : nullptr;
                 }
                 else {
