@@ -59,15 +59,24 @@ public:
     ~MyHandle() override = default;
 
     bool on_enter_notify_event(GdkEventCrossing *crossing_event) override;
+    void set_dragging(bool dragging);
 private:
+    bool on_leave_notify_event(GdkEventCrossing* crossing_event) override;
     bool on_button_press_event(GdkEventButton* button_event) override;
     bool on_button_release_event(GdkEventButton *event) override;
     bool on_motion_notify_event(GdkEventMotion* motion_event) override;
     void toggle_multipaned();
+    void update_click_indicator(double x, double y);
+    void show_click_indicator(bool show);
+    bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr) override;
+    Cairo::Rectangle get_active_click_zone();
     int _cross_size;
     Gtk::Widget *_child;
     void resize_handler(Gtk::Allocation &allocation);
+    bool is_click_resize_active() const;
     bool _click = false;
+    bool _click_indicator = false;
+    bool _dragging = false;
 };
 
 /* ============ MULTIPANE ============ */

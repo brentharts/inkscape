@@ -78,6 +78,8 @@ MyHandle::MyHandle(Gtk::Orientation orientation, int size = HANDLE_SIZE)
     set_name("MultipanedHandle");
     set_orientation(orientation);
 
+    add_events(Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::POINTER_MOTION_MASK);
+
     Gtk::Image *image = Gtk::manage(new Gtk::Image());
     if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL) {
         image->set_from_icon_name("view-more-symbolic", Gtk::ICON_SIZE_SMALL_TOOLBAR);
@@ -93,6 +95,54 @@ MyHandle::MyHandle(Gtk::Orientation orientation, int size = HANDLE_SIZE)
     signal_size_allocate().connect(sigc::mem_fun(*this, &MyHandle::resize_handler));
 
     show_all();
+}
+
+void rounded_rectangle(const Cairo::RefPtr<Cairo::Context>& cr, double x, double y, double w, double h, double r) {
+    cr->begin_new_sub_path();
+    cr->arc(x + r, y + r, r, M_PI, 3 * M_PI / 2);
+    cr->arc(x + w - r, y + r, r, 3 *M_PI / 2, 2 * M_PI);
+    cr->arc(x + w - r, y + h - r, r, 0, M_PI / 2);
+    cr->arc(x + r, y + h - r, r, M_PI / 2, M_PI);
+    cr->close_path();
+}
+
+// part of the handle where clicking makes it automatically collapse/expand docked dialogs
+Cairo::Rectangle MyHandle::get_active_click_zone() {
+    const Gtk::Allocation& allocation = get_allocation();
+    double width = allocation.get_width();
+    double height = allocation.get_height();
+    double h = height / 3;
+
+    Cairo::Rectangle rect = { .x = 0, .y = h, .width = width, .height = h };
+    return rect;
+}
+
+bool MyHandle::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
+    bool ret = EventBox::on_draw(cr);
+
+    // show click indicator/highlight?
+    if (_click_indicator && is_click_resize_active() && !_dragging) {
+        auto rect = get_active_click_zone();
+
+        if (rect.width > 4 && rect.height > 0) {
+            Glib::RefPtr<Gtk::StyleContext> style_context = get_style_context();
+            Gdk::RGBA fg = style_context->get_color(get_state_flags());
+            rounded_rectangle(cr, rect.x + 2, rect.y, rect.width - 4, rect.height, 3);
+            cr->set_source_rgba(fg.get_red(), fg.get_green(), fg.get_blue(), 0.18);
+            cr->fill();
+        }
+    }
+
+    return ret;
+}
+
+void MyHandle::set_dragging(bool dragging) {
+    if (_dragging != dragging) {
+        _dragging = dragging;
+        if (_click_indicator) {
+            queue_draw();
+        }
+    }
 }
 
 /**
@@ -111,7 +161,38 @@ bool MyHandle::on_enter_notify_event(GdkEventCrossing *crossing_event)
         window->set_cursor(cursor);
     }
 
+    update_click_indicator(crossing_event->x, crossing_event->y);
+
     return false;
+}
+
+bool MyHandle::on_leave_notify_event(GdkEventCrossing* crossing_event) {
+    show_click_indicator(false);
+    return false;
+}
+
+void MyHandle::show_click_indicator(bool show) {
+    if (!is_click_resize_active()) return;
+
+    if (show != _click_indicator) {
+        _click_indicator = show;
+        this->queue_draw();
+    }
+}
+
+void MyHandle::update_click_indicator(double x, double y) {
+    if (!is_click_resize_active()) return;
+
+    auto rect = get_active_click_zone();
+    bool inside =
+        x >= rect.x && x < rect.x + rect.width &&
+        y >= rect.y && y < rect.y + rect.height;
+
+    show_click_indicator(inside);
+}
+
+bool MyHandle::is_click_resize_active() const {
+    return get_orientation() == Gtk::ORIENTATION_HORIZONTAL;
 }
 
 bool MyHandle::on_button_press_event(GdkEventButton* button_event) {
@@ -121,11 +202,12 @@ bool MyHandle::on_button_press_event(GdkEventButton* button_event) {
 }
 
 bool MyHandle::on_button_release_event(GdkEventButton* event) {
-    // single-click?
-    if (_click && event->type == GDK_BUTTON_RELEASE && event->button == 1) {
+    // single-click on active zone?
+    if (_click && event->type == GDK_BUTTON_RELEASE && event->button == 1 && _click_indicator) {
         _click = false;
+        _dragging = false;
         // handle clicked
-        if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL) {
+        if (is_click_resize_active()) {
             toggle_multipaned();
             return true;
         }
@@ -184,6 +266,8 @@ void MyHandle::toggle_multipaned() {
 bool MyHandle::on_motion_notify_event(GdkEventMotion* motion_event) {
     // motion invalidates click; it activates resizing
     _click = false;
+    // show_click_indicator(false);
+    update_click_indicator(motion_event->x, motion_event->y);
     return false;
 }
 
@@ -803,6 +887,7 @@ void DialogMultipaned::on_drag_begin(double start_x, double start_y)
             if (x < start_x && start_x < x + child_allocation.get_width() && y < start_y &&
                 start_y < y + child_allocation.get_height()) {
                 found = true;
+                my_handle->set_dragging(true);
                 break;
             }
         }
@@ -839,6 +924,12 @@ void DialogMultipaned::on_drag_begin(double start_x, double start_y)
 
 void DialogMultipaned::on_drag_end(double offset_x, double offset_y)
 {
+    if (_handle >= 0 && _handle < children.size()) {
+        if (auto my_handle = dynamic_cast<MyHandle*>(children[_handle])) {
+            my_handle->set_dragging(false);
+        }
+    }
+
     gesture->set_state(Gtk::EVENT_SEQUENCE_DENIED);
     _handle = -1;
     _drag_handle = -1;
