@@ -111,9 +111,9 @@ Cairo::Rectangle MyHandle::get_active_click_zone() {
     const Gtk::Allocation& allocation = get_allocation();
     double width = allocation.get_width();
     double height = allocation.get_height();
-    double h = height / 3;
+    double h = height / 4;
 
-    Cairo::Rectangle rect = { .x = 0, .y = h, .width = width, .height = h };
+    Cairo::Rectangle rect = { .x = 0, .y = (height - h) / 2, .width = width, .height = h };
     return rect;
 }
 
