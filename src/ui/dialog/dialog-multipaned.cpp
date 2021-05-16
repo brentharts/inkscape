@@ -97,10 +97,11 @@ MyHandle::MyHandle(Gtk::Orientation orientation, int size = HANDLE_SIZE)
     show_all();
 }
 
+// draw rectangle with rounded corners
 void rounded_rectangle(const Cairo::RefPtr<Cairo::Context>& cr, double x, double y, double w, double h, double r) {
     cr->begin_new_sub_path();
     cr->arc(x + r, y + r, r, M_PI, 3 * M_PI / 2);
-    cr->arc(x + w - r, y + r, r, 3 *M_PI / 2, 2 * M_PI);
+    cr->arc(x + w - r, y + r, r, 3 * M_PI / 2, 2 * M_PI);
     cr->arc(x + w - r, y + h - r, r, 0, M_PI / 2);
     cr->arc(x + r, y + h - r, r, M_PI / 2, M_PI);
     cr->close_path();
@@ -111,7 +112,7 @@ Cairo::Rectangle MyHandle::get_active_click_zone() {
     const Gtk::Allocation& allocation = get_allocation();
     double width = allocation.get_width();
     double height = allocation.get_height();
-    double h = height / 4;
+    double h = height / 5;
 
     Cairo::Rectangle rect = { .x = 0, .y = (height - h) / 2, .width = width, .height = h };
     return rect;
