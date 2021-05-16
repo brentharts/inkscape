@@ -33,6 +33,7 @@
 #include "object/sp-text.h"
 
 #include "ui/dialog/dialog-container.h"
+#include "ui/dialog/dialog-manager.h"
 #include "ui/dialog/inkscape-preferences.h"
 #include "ui/tools/connector-tool.h"
 #include "ui/tools/text-tool.h"
@@ -232,7 +233,18 @@ tool_switch(Glib::ustring const &tool, InkscapeWindow *win)
             auto prefs = Inkscape::Preferences::get();
             prefs->setInt("/dialogs/preferences/page", tool_it->second.pref);
             Inkscape::UI::Dialog::DialogContainer* container = dt->getContainer();
+
+            // Create dialog if it doesn't exist (also sets page if dialog not already in opened tab).
             container->new_floating_dialog(SP_VERB_DIALOG_PREFERENCES); // TEMP Until we replace verbs in new_floating_dialog().
+
+            // Find dialog and explicitly set page (in case not set in previous line).
+            auto dialog = Inkscape::UI::Dialog::DialogManager::singleton().find_floating_dialog(SP_VERB_DIALOG_PREFERENCES);
+            if (dialog) {
+                auto pref_dialog = dynamic_cast<Inkscape::UI::Dialog::InkscapePreferences *>(dialog);
+                if (pref_dialog) {
+                    pref_dialog->showPage(); // Switch to page indicated in preferences file (set above).
+                }
+            }
         }
 
         old_time = current_time; // So if tool is already open, double clicking will still work.
