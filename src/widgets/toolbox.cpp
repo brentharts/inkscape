@@ -384,15 +384,6 @@ static GtkWidget* toolboxNewCommon( GtkWidget* tb, BarId id, GtkPositionType /*h
     return hb;
 }
 
-// GtkWidget *ToolboxFactory::createToolToolbox()
-// {
-//     auto tb = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-//     gtk_widget_set_name(tb, "ToolToolbox");
-//     gtk_box_set_homogeneous(GTK_BOX(tb), FALSE);
-
-//     return toolboxNewCommon( tb, BAR_TOOL, GTK_POS_TOP );
-// }
-
 GtkWidget *ToolboxFactory::createToolToolbox()
 {
     auto tb = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
