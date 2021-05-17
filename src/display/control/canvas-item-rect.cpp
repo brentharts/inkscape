@@ -388,6 +388,13 @@ double CanvasItemRect::get_shadow_size() const {
     // fudge factor of 6 used to make sizes baked in svg documents work as steps:
     // typical value of 2 will work out to 12 pixels which is a narrow shadow (b/c of exponential fall of)
     auto size = _shadow_width * 6;
+    if (size < 0) {
+        size = 0;
+    }
+    else if (size > 120) {
+        // arbitrarily selected max size, so Cairo gradient doesn't blow up if document has bogus shadow values
+        size = 120;
+    }
     auto scale = get_scale();
 
     // calculate space for gradient shadow; if divided by 'scale' it would be zoom independent (fixed in size);
