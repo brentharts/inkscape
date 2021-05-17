@@ -301,19 +301,27 @@ void LPEFilletChamfer::updateSatelliteType(SatelliteType satellitetype)
 }
 
 void LPEFilletChamfer::setSelected(PathVectorSatellites *_pathvector_satellites){
-    Geom::PathVector const pathv = _pathvector_satellites->getPathVector();
-    Satellites satellites = _pathvector_satellites->getSatellites();
-    for (size_t i = 0; i < satellites.size(); ++i) {
-        for (size_t j = 0; j < satellites[i].size(); ++j) {
-            Geom::Curve const &curve_in = pathv[i][j];
-            if (only_selected && isNodePointSelected(curve_in.initialPoint()) ){
-                satellites[i][j].setSelected(true);
-            } else {
-                satellites[i][j].setSelected(false);
+    std::vector<SPLPEItem *> lpeitems = getCurrrentLPEItems();
+    if (lpeitems.size() == 1) {
+        sp_lpe_item = lpeitems[0];
+        if (!_pathvector_satellites) {
+            sp_lpe_item_update_patheffect(sp_lpe_item, false, false);
+        } else {
+            Geom::PathVector const pathv = _pathvector_satellites->getPathVector();
+            Satellites satellites = _pathvector_satellites->getSatellites();
+            for (size_t i = 0; i < satellites.size(); ++i) {
+                for (size_t j = 0; j < satellites[i].size(); ++j) {
+                    Geom::Curve const &curve_in = pathv[i][j];
+                    if (only_selected && isNodePointSelected(curve_in.initialPoint()) ){
+                        satellites[i][j].setSelected(true);
+                    } else {
+                        satellites[i][j].setSelected(false);
+                    }
+                }
             }
+            _pathvector_satellites->setSatellites(satellites);
         }
     }
-    _pathvector_satellites->setSatellites(satellites);
 }
 
 void LPEFilletChamfer::doBeforeEffect(SPLPEItem const *lpeItem)
@@ -623,7 +631,7 @@ LPEFilletChamfer::doEffect_path(Geom::PathVector const &path_in)
                         path_chamfer.start(tmp_path.finalPoint());
                         if (eliptical) {
                             ccw_toggle = ccw_toggle ? false : true;
-                            path_chamfer.appendNew<Geom::EllipticalArc>(rx, ry, arc_angle, 0, ccw_toggle, end_arc_point);
+                            path_chamfer.appendNew<Geom::EllipticalArc>(rx, ry, arc_angle, false, ccw_toggle, end_arc_point);
                         } else {
                             path_chamfer.appendNew<Geom::CubicBezier>(handle_1, handle_2, end_arc_point);
                         }
@@ -635,7 +643,7 @@ LPEFilletChamfer::doEffect_path(Geom::PathVector const &path_in)
                         Geom::Path path_chamfer;
                         path_chamfer.start(tmp_path.finalPoint());
                         if (eliptical) {
-                            path_chamfer.appendNew<Geom::EllipticalArc>(rx, ry, arc_angle, 0, ccw_toggle, end_arc_point);
+                            path_chamfer.appendNew<Geom::EllipticalArc>(rx, ry, arc_angle, false, ccw_toggle, end_arc_point);
                         } else {
                             path_chamfer.appendNew<Geom::CubicBezier>(inverse_handle_1, inverse_handle_2, end_arc_point);
                         }
@@ -645,7 +653,12 @@ LPEFilletChamfer::doEffect_path(Geom::PathVector const &path_in)
                 case INVERSE_FILLET:
                     {
                         if (eliptical) {
-                            tmp_path.appendNew<Geom::EllipticalArc>(rx, ry, arc_angle, 0, ccw_toggle, end_arc_point);
+                            bool side = false;
+                            if (helperpath && !getSPDoc()->is_yaxisdown()) {
+                                side = true;
+                                ccw_toggle = ccw_toggle ? false : true;
+                            }
+                            tmp_path.appendNew<Geom::EllipticalArc>(rx, ry, arc_angle, side, ccw_toggle, end_arc_point);
                         } else {
                             tmp_path.appendNew<Geom::CubicBezier>(inverse_handle_1, inverse_handle_2, end_arc_point);
                         }
@@ -654,8 +667,13 @@ LPEFilletChamfer::doEffect_path(Geom::PathVector const &path_in)
                 default: //fillet
                     {
                         if (eliptical) {
-                            ccw_toggle = ccw_toggle ? false : true;
-                            tmp_path.appendNew<Geom::EllipticalArc>(rx, ry, arc_angle, 0, ccw_toggle, end_arc_point);
+                            bool side = false;
+                            if (helperpath && !getSPDoc()->is_yaxisdown()) {
+                                side = true;
+                            } else {
+                                ccw_toggle = ccw_toggle ? false : true;
+                            }
+                            tmp_path.appendNew<Geom::EllipticalArc>(rx, ry, arc_angle, side, ccw_toggle, end_arc_point);
                         } else {
                             tmp_path.appendNew<Geom::CubicBezier>(handle_1, handle_2, end_arc_point);
                         }

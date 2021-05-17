@@ -17,10 +17,12 @@
 #include <vector>
 #include <glibmm/ustring.h>
 #include <list>
+#include <2geom/point.h>
 
 #include "gc-anchored.h"
 #include "inkgc/gc-alloc.h"
 #include "util/const_char_ptr.h"
+#include "svg/svg-length.h"
 
 namespace Inkscape {
 namespace XML {
@@ -56,7 +58,7 @@ enum class NodeType
  * class used for interfacing with Inkscape's documents. Everything that has to be stored
  * in the SVG has to go through this class at some point.
  *
- * Each node unconditionally has to belong to a document. There no "documentless" nodes,
+ * Each node unconditionally has to belong to a document. There are no "documentless" nodes,
  * and it's not possible to move nodes between documents - they have to be duplicated.
  * Each node can only refer to the nodes in the same document. Name of the node is immutable,
  * it cannot be changed after its creation. Same goes for the type of the node. To simplify
@@ -69,8 +71,7 @@ enum class NodeType
  * To create new nodes, use the methods of the Inkscape::XML::Document class. You can obtain
  * the nodes' document using the document() method. To destroy a node, just unparent it
  * by calling sp_repr_unparent() or node->parent->removeChild() and release any references
- * to it. The garbage collector will reclaim the memory in the next pass. There are additional
- * convenience functions defined in @ref xml/repr.h
+ * to it. The garbage collector will reclaim the memory in the next pass.
  *
  * In addition to regular DOM manipulations, you can register observer objects that will
  * receive notifications about changes made to the node. See the NodeObserver class.
@@ -208,10 +209,46 @@ public:
      * @param is_interactive Ignored
      */
 
-    void setAttribute(Inkscape::Util::const_char_ptr key, Inkscape::Util::const_char_ptr value)
-    {
-        this->setAttributeImpl(key.data(), value.data());
-    }
+    void setAttribute(Util::const_char_ptr key, Util::const_char_ptr value);
+
+    /**
+     * Parses the boolean value of an attribute "key" in repr and sets val accordingly, or to false if
+     * the attr is not set.
+     *
+     * \return true if the attr was set, false otherwise.
+     */
+    bool getAttributeBoolean(Util::const_char_ptr key, bool default_value = false) const;
+
+    int getAttributeInt(Util::const_char_ptr key, int default_value = 0) const;
+
+    double getAttributeDouble(Util::const_char_ptr key, double default_value = 0.0) const;
+
+    bool setAttributeBoolean(Util::const_char_ptr key, bool val);
+
+    bool setAttributeInt(Util::const_char_ptr key, int val);
+
+    /**
+     * Set a property attribute to \a val [slightly rounded], in the format
+     * required for CSS properties: in particular, it never uses exponent
+     * notation.
+     */
+    bool setAttributeCssDouble(Util::const_char_ptr key, double val);
+
+    /**
+     * For attributes where an exponent is allowed.
+     *
+     * Not suitable for property attributes (fill-opacity, font-size etc.).
+     */
+    bool setAttributeSvgDouble(Util::const_char_ptr key, double val);
+
+    bool setAttributeSvgNonDefaultDouble(Util::const_char_ptr key,
+                                         double val, double default_value);
+
+    bool setAttributeSvgLength(Util::const_char_ptr key, SVGLength const &val);
+
+    bool setAttributePoint(Util::const_char_ptr key, Geom::Point const &val);
+
+    Geom::Point getAttributePoint(Util::const_char_ptr key, Geom::Point default_value = {}) const;
 
     /**
      * @brief Change an attribute of this node. Empty string deletes the attribute.
@@ -220,11 +257,7 @@ public:
      * @param value The new value of the attribute
      *
      */
-    void setAttributeOrRemoveIfEmpty(Inkscape::Util::const_char_ptr key, Inkscape::Util::const_char_ptr value)
-    {
-        this->setAttributeImpl(key.data(),
-                               (value.data() == nullptr || value.data()[0] == '\0') ? nullptr : value.data());
-    }
+    void setAttributeOrRemoveIfEmpty(Inkscape::Util::const_char_ptr key, Inkscape::Util::const_char_ptr value);
 
     /**
      * @brief Remove an attribute of this node

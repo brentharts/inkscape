@@ -346,6 +346,7 @@ protected:
     UI::Widget::PrefRadioButton _sel_recursive;
     UI::Widget::PrefCheckButton _sel_hidden;
     UI::Widget::PrefCheckButton _sel_locked;
+    UI::Widget::PrefCheckButton _sel_inlayer_same;
     UI::Widget::PrefCheckButton _sel_layer_deselects;
     UI::Widget::PrefCheckButton _sel_cycle;
 
@@ -663,6 +664,7 @@ protected:
 private:
   Gtk::TreeModel::iterator searchRows(char const* srch, Gtk::TreeModel::iterator& iter, Gtk::TreeModel::Children list_model_childern);
   void themeChange();
+  void comboThemeChange();
   void preferDarkThemeChange();
   bool contrastChange(GdkEventButton* button_event);
   void symbolicThemeCheck();

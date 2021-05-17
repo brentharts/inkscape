@@ -911,22 +911,22 @@ void sp_namedview_document_from_window(SPDesktop *desktop)
     DocumentUndo::setUndoSensitive(desktop->getDocument(), false);
 
     if (save_viewport_in_file) {
-        sp_repr_set_svg_double(view, "inkscape:zoom", desktop->current_zoom());
+        view->setAttributeSvgDouble("inkscape:zoom", desktop->current_zoom());
         double rotation = ::round(desktop->current_rotation() * 180.0 / M_PI);
-        sp_repr_set_svg_non_default_double(view, "inkscape:rotation", rotation, 0.0);
+        view->setAttributeSvgNonDefaultDouble("inkscape:rotation", rotation, 0.0);
         Geom::Point center = desktop->current_center();
-        sp_repr_set_svg_double(view, "inkscape:cx", center.x());
-        sp_repr_set_svg_double(view, "inkscape:cy", center.y());
+        view->setAttributeSvgDouble("inkscape:cx", center.x());
+        view->setAttributeSvgDouble("inkscape:cy", center.y());
     }
 
     if (save_geometry_in_file) {
         gint w, h, x, y;
         desktop->getWindowGeometry(x, y, w, h);
-        sp_repr_set_int(view, "inkscape:window-width", w);
-        sp_repr_set_int(view, "inkscape:window-height", h);
-        sp_repr_set_int(view, "inkscape:window-x", x);
-        sp_repr_set_int(view, "inkscape:window-y", y);
-        sp_repr_set_int(view, "inkscape:window-maximized", desktop->is_maximized());
+        view->setAttributeInt("inkscape:window-width", w);
+        view->setAttributeInt("inkscape:window-height", h);
+        view->setAttributeInt("inkscape:window-x", x);
+        view->setAttributeInt("inkscape:window-y", y);
+        view->setAttributeInt("inkscape:window-maximized", desktop->is_maximized());
     }
 
     view->setAttribute("inkscape:current-layer", desktop->currentLayer()->getId());
@@ -1010,18 +1010,13 @@ static void sp_namedview_lock_single_guide(SPGuide* guide, bool locked)
 
 void sp_namedview_toggle_guides(SPDocument *doc, SPNamedView *namedview)
 {
-    unsigned int v;
     Inkscape::XML::Node *repr = namedview->getRepr();
-    unsigned int set = sp_repr_get_boolean(repr, "showguides", &v);
-    if (!set) { // hide guides if not specified, for backwards compatibility
-        v = FALSE;
-    } else {
-        v = !v;
-    }
+    bool v = repr->getAttributeBoolean("showguides", true);
+    v = !v;
 
     bool saved = DocumentUndo::getUndoSensitive(doc);
     DocumentUndo::setUndoSensitive(doc, false);
-    sp_repr_set_boolean(repr, "showguides", v);
+    repr->setAttributeBoolean("showguides", v);
     DocumentUndo::setUndoSensitive(doc, saved);
     SPDesktop *desktop = SP_ACTIVE_DESKTOP;
     if (desktop) {
@@ -1035,18 +1030,13 @@ void sp_namedview_toggle_guides(SPDocument *doc, SPNamedView *namedview)
 
 void sp_namedview_guides_toggle_lock(SPDocument *doc, SPNamedView * namedview)
 {
-    unsigned int v;
     Inkscape::XML::Node *repr = namedview->getRepr();
-    unsigned int set = sp_repr_get_boolean(repr, "inkscape:lockguides", &v);
-    if (!set) { // hide guides if not specified, for backwards compatibility
-        v = true;
-    } else {
-        v = !v;
-    }
+    bool v = repr->getAttributeBoolean("inkscape:lockguides", false);
+    v = !v;
 
     bool saved = DocumentUndo::getUndoSensitive(doc);
     DocumentUndo::setUndoSensitive(doc, false);
-    sp_repr_set_boolean(repr, "inkscape:lockguides", v);
+    repr->setAttributeBoolean("inkscape:lockguides", v);
     sp_namedview_lock_guides(namedview);
     DocumentUndo::setUndoSensitive(doc, saved);
     doc->setModifiedSinceSave();
@@ -1061,7 +1051,7 @@ void sp_namedview_show_grids(SPNamedView * namedview, bool show, bool dirty_docu
 
     bool saved = DocumentUndo::getUndoSensitive(doc);
     DocumentUndo::setUndoSensitive(doc, false);
-    sp_repr_set_boolean(repr, "showgrid", namedview->grids_visible);
+    repr->setAttributeBoolean("showgrid", namedview->grids_visible);
     DocumentUndo::setUndoSensitive(doc, saved);
 
     /* we don't want the document to get dirty on startup; that's when
@@ -1073,9 +1063,7 @@ void sp_namedview_show_grids(SPNamedView * namedview, bool show, bool dirty_docu
 
 gchar const *SPNamedView::getName() const
 {
-    SPException ex;
-    SP_EXCEPTION_INIT(&ex);
-    return this->getAttribute("id", &ex);
+    return this->getAttribute("id");
 }
 
 guint SPNamedView::getViewCount()
@@ -1148,20 +1136,15 @@ SPNamedView const *sp_document_namedview(SPDocument const *document, const gchar
 void SPNamedView::setGuides(bool v)
 {
     g_assert(this->getRepr() != nullptr);
-    sp_repr_set_boolean(this->getRepr(), "showguides", v);
-    sp_repr_set_boolean(this->getRepr(), "inkscape:guide-bbox", v);
+    this->getRepr()->setAttributeBoolean("showguides", v);
+    this->getRepr()->setAttributeBoolean("inkscape:guide-bbox", v);
 }
 
 bool SPNamedView::getGuides()
 {
     g_assert(this->getRepr() != nullptr);
-    unsigned int v;
-    unsigned int set = sp_repr_get_boolean(this->getRepr(), "showguides", &v);
-    if (!set) { // show guides if not specified, for backwards compatibility
-        v = TRUE;
-    }
-
-    return v;
+    // show guides if not specified, for backwards compatibility
+    return this->getRepr()->getAttributeBoolean("showguides", true);
 }
 
 void SPNamedView::lockGuides()

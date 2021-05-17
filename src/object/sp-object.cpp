@@ -19,6 +19,7 @@
 #include <cstring>
 #include <string>
 #include <vector>
+#include <limits>
 
 #include <boost/range/adaptor/transformed.hpp>
 
@@ -224,6 +225,16 @@ gchar const* SPObject::getId() const {
     return id;
 }
 
+/**
+ * Returns the id as a url param, in the form 'url(#{id})'
+ */
+std::string SPObject::getUrl() const {
+    if (id) {
+        return std::string("url(#") + id + ")";
+    }
+    return "";
+}
+
 Inkscape::XML::Node * SPObject::getRepr() {
     return repr;
 }
@@ -283,9 +294,8 @@ void SPObject::unhrefObject(SPObject* owner)
 
     if (!owner || !owner->cloned) {
         hrefcount--;
+        _updateTotalHRefCount(-1);
     }
-
-    _updateTotalHRefCount(-1);
 
     if(owner)
         hrefList.remove(owner);
@@ -785,8 +795,7 @@ void SPObject::invoke_build(SPDocument *document, Inkscape::XML::Node *repr, uns
 
 int SPObject::getIntAttribute(char const *key, int def)
 {
-    sp_repr_get_int(getRepr(),key,&def);
-    return def;
+    return getRepr()->getAttributeInt(key, def);
 }
 
 unsigned SPObject::getPosition(){
@@ -906,7 +915,7 @@ void SPObject::set(SPAttr key, gchar const* value) {
 
 #ifdef OBJECT_TRACE
     std::stringstream temp;
-    temp << "SPObject::set: " << key  << " " << (value?value:"null");
+    temp << "SPObject::set: " << sp_attribute_name(key)  << " " << (value?value:"null");
     objectTrace( temp.str() );
 #endif
 
@@ -1398,26 +1407,18 @@ void SPObject::emitModified(unsigned int flags)
 #endif
 }
 
-gchar const *SPObject::getTagName(SPException *ex) const
+gchar const *SPObject::getTagName() const
 {
     g_assert(repr != nullptr);
-    /* If exception is not clear, return */
-    if (!SP_EXCEPTION_IS_OK(ex)) {
-        return nullptr;
-    }
 
     /// \todo fixme: Exception if object is NULL? */
     //XML Tree being used here.
     return getRepr()->name();
 }
 
-gchar const *SPObject::getAttribute(gchar const *key, SPException *ex) const
+gchar const *SPObject::getAttribute(gchar const *key) const
 {
     g_assert(this->repr != nullptr);
-    /* If exception is not clear, return */
-    if (!SP_EXCEPTION_IS_OK(ex)) {
-        return nullptr;
-    }
 
     /// \todo fixme: Exception if object is NULL? */
     //XML Tree being used here.
@@ -1425,11 +1426,9 @@ gchar const *SPObject::getAttribute(gchar const *key, SPException *ex) const
 }
 
 void SPObject::setAttribute(Inkscape::Util::const_char_ptr key,
-                            Inkscape::Util::const_char_ptr value, SPException *ex)
+                            Inkscape::Util::const_char_ptr value)
 {
     g_assert(this->repr != nullptr);
-    /* If exception is not clear, return */
-    g_return_if_fail(SP_EXCEPTION_IS_OK(ex));
 
     /// \todo fixme: Exception if object is NULL? */
     //XML Tree being used here.
@@ -1437,11 +1436,8 @@ void SPObject::setAttribute(Inkscape::Util::const_char_ptr key,
 }
 
 
-void SPObject::removeAttribute(gchar const *key, SPException *ex)
+void SPObject::removeAttribute(gchar const *key)
 {
-    /* If exception is not clear, return */
-    g_return_if_fail(SP_EXCEPTION_IS_OK(ex));
-
     /// \todo fixme: Exception if object is NULL? */
     //XML Tree being used here.
     getRepr()->removeAttribute(key);
@@ -1450,7 +1446,13 @@ void SPObject::removeAttribute(gchar const *key, SPException *ex)
 bool SPObject::storeAsDouble( gchar const *key, double *val ) const
 {
     g_assert(this->getRepr()!= nullptr);
-    return sp_repr_get_double(((Inkscape::XML::Node *)(this->getRepr())),key,val);
+    double nan = std::numeric_limits<double>::quiet_NaN();
+    double temp_val = ((Inkscape::XML::Node *)(this->getRepr()))->getAttributeDouble(key, nan);
+    if (std::isnan(temp_val)) {
+        return false;
+    }
+    *val = temp_val;
+    return true;
 }
 
 /** Helper */

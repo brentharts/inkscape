@@ -1258,6 +1258,18 @@ bool InkscapePreferences::contrastChange(GdkEventButton *button_event)
     return true;
 }
 
+void InkscapePreferences::comboThemeChange()
+{
+    //we reset theming on combo change
+    _dark_theme.set_active(false);
+    _symbolic_base_colors.set_active(true);
+    if (_contrast_theme.getSpinButton()->get_value() != 10.0){
+        _contrast_theme.getSpinButton()->set_value(10.0);
+    } else {
+        themeChange();
+    }
+}
+
 void InkscapePreferences::themeChange()
 {
     Gtk::Window *window = SP_ACTIVE_DESKTOP->getToplevel();
@@ -1315,7 +1327,15 @@ void InkscapePreferences::preferDarkThemeChange()
         }
         INKSCAPE.signal_change_theme.emit();
         INKSCAPE.add_gtk_css(true);
-        resetIconsColors(toggled);
+        // we avoid switched base colors
+        if (!_symbolic_base_colors.get_active()) {
+            prefs->setBool("/theme/symbolicDefaultBaseColors", true);
+            resetIconsColors(false);
+            _symbolic_base_colors.set_sensitive(true);
+            prefs->setBool("/theme/symbolicDefaultBaseColors", false);
+        } else {
+            resetIconsColors(toggled);
+        }
     }
 }
 
@@ -1621,7 +1641,7 @@ void InkscapePreferences::initPageUI()
 
         _gtk_theme.init("/theme/gtkTheme", labels, values, "");
         _page_theme.add_line(false, _("Change GTK theme:"), _gtk_theme, "", "", false);
-        _gtk_theme.signal_changed().connect(sigc::mem_fun(*this, &InkscapePreferences::themeChange));
+        _gtk_theme.signal_changed().connect(sigc::mem_fun(*this, &InkscapePreferences::comboThemeChange));
     }
     _sys_user_themes_dir_copy.init(g_build_filename(g_get_user_data_dir(), "themes", NULL), _("Open themes folder"));
     _page_theme.add_line(true, _("User themes:"), _sys_user_themes_dir_copy, "", _("Location of the user’s themes"), true, Gtk::manage(new Gtk::Box()));
@@ -1629,7 +1649,7 @@ void InkscapePreferences::initPageUI()
     Gtk::Widget *space = new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL);
     space->set_size_request(_sb_width / 3, -1);
     _page_theme.add_line(false, _("_Contrast:"), _contrast_theme, "",
-                         _("Make background brighter or darker to reduce contrast"), true, space);
+                         _("Make background brighter or darker to adjust contrast"), true, space);
     _contrast_theme.getSlider()->signal_value_changed().connect(sigc::mem_fun(*this, &InkscapePreferences::themeChange));
     _contrast_theme.getSpinButton()->signal_value_changed().connect(sigc::mem_fun(*this, &InkscapePreferences::themeChange));
     _page_theme.add_line(true, "", _dark_theme, "", _("Use dark theme"), true);
@@ -2250,6 +2270,8 @@ void InkscapePreferences::initPageBehavior()
     _sel_recursive.init ( _("Select in current layer and sublayers"), "/options/kbselection/inlayer", PREFS_SELECTION_LAYER_RECURSIVE, false, &_sel_all);
     _sel_hidden.init ( _("Ignore hidden objects and layers"), "/options/kbselection/onlyvisible", true);
     _sel_locked.init ( _("Ignore locked objects and layers"), "/options/kbselection/onlysensitive", true);
+    _sel_inlayer_same.init ( _("Select same behaves like select all"), "/options/selection/samelikeall", false);
+
     _sel_layer_deselects.init ( _("Deselect upon layer change"), "/options/selection/layerdeselect", true);
 
     _page_select.add_line( false, "", _sel_layer_deselects, "",
@@ -2266,6 +2288,8 @@ void InkscapePreferences::initPageBehavior()
                            _("Uncheck this to be able to select objects that are hidden (either by themselves or by being in a hidden layer)"));
     _page_select.add_line( true, "", _sel_locked, "",
                            _("Uncheck this to be able to select objects that are locked (either by themselves or by being in a locked layer)"));
+    _page_select.add_line( true, "", _sel_inlayer_same, "",
+                           _("Check this to make the 'select same' functions work like the select all functions, restricting to current layer only."));
 
     _sel_cycle.init ( _("Wrap when cycling objects in z-order"), "/options/selection/cycleWrap", true);
 

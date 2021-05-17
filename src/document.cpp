@@ -383,9 +383,6 @@ SPDocument *SPDocument::createDoc(Inkscape::XML::Document *rdoc,
     nv->setDefaultAttribute("pagecolor",                 "/template/base/pagecolor", "");
     nv->setDefaultAttribute("bordercolor",               "/template/base/bordercolor", "");
     nv->setDefaultAttribute("borderopacity",             "/template/base/borderopacity", "");
-    nv->setDefaultAttribute("objecttolerance",           "/template/base/objecttolerance", "10.0");
-    nv->setDefaultAttribute("gridtolerance",             "/template/base/gridtolerance", "10.0");
-    nv->setDefaultAttribute("guidetolerance",            "/template/base/guidetolerance", "10.0");
     nv->setDefaultAttribute("inkscape:pageshadow",       "/template/base/pageshadow", "2");
     nv->setDefaultAttribute("inkscape:pageopacity",      "/template/base/pageopacity", "0.0");
     nv->setDefaultAttribute("inkscape:pagecheckerboard", "/template/base/pagecheckerboard", "0");
@@ -1013,37 +1010,6 @@ void SPDocument::bindObjectToId(gchar const *id, SPObject *object) {
     }
 }
 
-/**  
- * Assign IDs to selected objects that don't have an ID attribute
- * Checks if the object's id attribute is NULL. If it is, assign it a unique ID
- */
-void SPDocument::enforceObjectIds()
-{
-    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
-    Inkscape::Selection *selection = desktop->getSelection();
-    bool showInfoDialog = false;
-    Glib::ustring msg = _("Selected objects require IDs.\nThe following IDs have been assigned:\n");
-    auto items = selection->items();
-    for (auto iter = items.begin(); iter != items.end(); ++iter) {
-        SPItem *item = *iter;
-        if(!item->getId())
-        {
-            // Selected object does not have an ID, so assign it a unique ID
-            gchar *id = sp_object_get_unique_id(item, nullptr);
-            item->setAttribute("id", id);
-            item->updateRepr();
-            msg += Glib::ustring::compose(_(" %1\n"), id);
-            g_free(id);
-            showInfoDialog = true;
-        }
-    }
-    if(showInfoDialog) {
-        desktop->showInfoDialog(msg);
-        setModifiedSinceSave(true);
-    }
-    return;
-}
-
 SPObject *SPDocument::getObjectById(Glib::ustring const &id) const
 {
     if (iddef.empty()) {
@@ -1053,6 +1019,8 @@ SPObject *SPDocument::getObjectById(Glib::ustring const &id) const
     std::map<std::string, SPObject *>::const_iterator rv = iddef.find(id);
     if (rv != iddef.end()) {
         return (rv->second);
+    } else if (_parent_document) {
+        return _parent_document->getObjectById(id);
     } else {
         return nullptr;
     }
@@ -1210,6 +1178,23 @@ std::vector<Glib::ustring> SPDocument::getLanguages() const
             document_languages.emplace_back(rdf_language_stripped);
         }
         g_free(rdf_language_stripped);
+    }
+
+    // add languages from parent document
+    if (_parent_document) {
+        auto parent_languages = _parent_document->getLanguages();
+
+        // return parent languages directly if we aren't contributing any
+        if (document_languages.empty()) {
+            return parent_languages;
+        }
+
+        // otherwise append parent's languages to what we already have
+        std::move(parent_languages.begin(), parent_languages.end(),
+                  std::back_insert_iterator(document_languages));
+
+        // don't add languages from locale; parent already did that
+        return document_languages;
     }
 
     // get language from system locale (will also match the interface language preference as we set LANG accordingly)

@@ -194,6 +194,9 @@ public:
 
     std::vector<Glib::ustring> getLanguages() const;
 
+    SPDocument *getParent() { return _parent_document; }
+    SPDocument const *getParent() const { return _parent_document; }
+
     // Styling
     CRCascade    *getStyleCascade() { return style_cascade; }
 
@@ -237,7 +240,6 @@ public:
 
     // Find items -----------------------------
     void bindObjectToId(char const *id, SPObject *object);
-    void enforceObjectIds(); 
     SPObject *getObjectById(Glib::ustring const &id) const;
     SPObject *getObjectById(char const *id) const;
 
