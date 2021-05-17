@@ -506,15 +506,17 @@ Shortcuts::is_user_set(Glib::ustring& action)
 bool
 Shortcuts::invoke_verb(GdkEventKey const *event, UI::View::View *view)
 {
-    // std::cout << "Shortcuts::invoke_verb: "
-    //           << std::hex << event->keyval << " "
-    //           << std::hex << event->state << std::endl;
+    std::cout << "Shortcuts::invoke_verb: "
+              << std::hex << event->keyval << " "
+              << std::hex << event->state << std::endl;
     Gtk::AccelKey shortcut = get_from_event(event);
 
     Verb* verb = get_verb_from_shortcut(shortcut);
+   g_warning("verb: %p\n", verb);
     if (verb) {
         SPAction *action = verb->get_action(Inkscape::ActionContext(view));
         if (action) {
+   g_warning("action: %p\n", action);
             sp_action_perform(action, nullptr);
             return true;
         }
