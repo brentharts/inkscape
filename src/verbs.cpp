@@ -2919,7 +2919,7 @@ Verb *Verb::_base_verbs[] = {
                     N_("New in This Version"), nullptr),
     new HelpUrlVerb(SP_VERB_HELP_URL_REPORT_BUG, "HelpUrlReportBug", N_("Report a Bug"), N_("Report a Bug"), nullptr),
     new HelpUrlVerb(SP_VERB_HELP_URL_MANUAL, "HelpUrlManual", N_("Inkscape Manual"), N_("Inkscape Manual"), nullptr),
-    new HelpUrlVerb(SP_VERB_HELP_URL_DONATE, "HelpUrlDonate","Donate", "Donate to Inkscape", nullptr),
+    new HelpUrlVerb(SP_VERB_HELP_URL_DONATE, "HelpUrlDonate",N_("Donate"), N_("Donate to Inkscape"), nullptr),
     new HelpUrlVerb(SP_VERB_HELP_URL_SVG11_SPEC, "HelpUrlSvg11Spec", N_("SVG 1.1 Specification"),
                     N_("SVG 1.1 Specification"), nullptr),
     new HelpUrlVerb(SP_VERB_HELP_URL_SVG2_SPEC, "HelpUrlSvg2Spec", N_("SVG 2 Specification"), N_("SVG 2 Specification"),
