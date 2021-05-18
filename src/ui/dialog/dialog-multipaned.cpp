@@ -1102,6 +1102,13 @@ void DialogMultipaned::on_drag_update(double offset_x, double offset_y)
             return std::make_pair(resizing, hide);
         };
 
+        /*
+        TODO NOTE:
+        Resizing should ideally take into account all columns, not just adjacent ones (left and right here).
+        Without it, expanding second collapsed column does not work, since first one may already have min width,
+        and cannot be shrunk anymore. Instead it should be pushed out of the way (canvas should be shrunk).
+        */
+
         // panel on the left
         auto action1 = resize_fn(handle, child1, start_allocation1.get_width(), offset_x);
         _resizing_widget1 = action1.first ? child1 : nullptr;
