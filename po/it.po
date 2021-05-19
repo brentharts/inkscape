@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: Inkscape 1.1\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
 "POT-Creation-Date: 2021-05-09 14:58+0000\n"
-"PO-Revision-Date: 2021-05-19 09:56+0200\n"
+"PO-Revision-Date: 2021-05-19 12:19+0200\n"
 "Last-Translator: Firas Hanife <firashanife@gmail.com>\n"
 "Language-Team: \n"
 "Language: it\n"
@@ -4859,14 +4859,12 @@ msgid "Export LaTeX"
 msgstr "Esporta LaTeX"
 
 #: ../src/actions/actions-output.cpp:247
-#, fuzzy
 msgid "Export Use Hints"
-msgstr "Opzioni esportazione"
+msgstr ""
 
 #: ../src/actions/actions-output.cpp:247
-#, fuzzy
 msgid "Export using saved hints"
-msgstr "Esportazione di %1 file"
+msgstr ""
 
 #: ../src/actions/actions-output.cpp:248
 msgid "Export Background"
@@ -24678,17 +24676,15 @@ msgstr "Valore"
 
 #: ../src/ui/dialog/styledialog.cpp:781
 msgid "This value is commented out."
-msgstr ""
+msgstr "Il valore è commentato"
 
 #: ../src/ui/dialog/styledialog.cpp:969
-#, fuzzy
 msgid "Current value"
-msgstr "Livello attuale"
+msgstr "Valore attuale"
 
 #: ../src/ui/dialog/styledialog.cpp:971
-#, fuzzy
 msgid "Used in %1"
-msgstr " in %s"
+msgstr "Usato in %s"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:148
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:221
@@ -24700,102 +24696,87 @@ msgid "Adjust kerning value"
 msgstr "Modifica valore crenatura"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:459
-#, fuzzy
 msgid "Font Attributes"
-msgstr "Imposta attributi"
+msgstr "Attributi Font"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:460
-#, fuzzy
 msgid "Horiz. Advance X:"
-msgstr "Avanzamento orizzontale"
+msgstr "Avanzamento orizzontale X:"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:460
-#, fuzzy
 msgid "Default glyph width for horizontal text"
-msgstr "Direzione testo per testo disposto orizzontalmente."
+msgstr "Larghezza glifo predefinita per testo disposto orizzontalmente"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:461
-#, fuzzy
 msgid "Horiz. Origin X:"
-msgstr "Origine X:"
+msgstr "Origine orizzontale X:"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:461
 msgid "Default X-coordinate of the origin of a glyph (for horizontal text)"
-msgstr ""
+msgstr "Coordinata X predefinita dell'origine di un glifo (per testo orizzontale)"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:462
-#, fuzzy
 msgid "Horiz. Origin Y:"
-msgstr "Origine Y"
+msgstr "Origine orizzontale Y:"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:462
 msgid "Default Y-coordinate of the origin of a glyph (for horizontal text)"
-msgstr ""
+msgstr "Coordinata Y predefinita dell'origine di un glifo (per testo orizzontale)"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:463
-#, fuzzy
 msgid "Font Face Attributes"
-msgstr "Imposta attributi"
+msgstr "Attributi Font Face"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:464
 msgid "Family Name:"
 msgstr "Famiglia:"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:464
-#, fuzzy
 msgid ""
 "Name of the font as it appears in font selectors and css font-family properties"
-msgstr "Nome del font come compare nei selettori e nella proprietà css font-family."
+msgstr "Nome del font come compare nei selettori e nella proprietà css font-family"
+
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:465
+msgid "Units per em:"
+msgstr "Unità per em:"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:465
 #, fuzzy
-msgid "Units per em:"
-msgstr "Unità per em"
-
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:465
 msgid "Display units per <italic>em</italic> (nominally width of 'M' character)"
-msgstr ""
+msgstr "Mostra unità per em (larghezza del carattere 'M')"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:466
-#, fuzzy
 msgid "Ascent:"
 msgstr "Ascendente:"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:466
-#, fuzzy
 msgid "Amount of space taken up by ascenders like the tall line on the letter 'h'"
 msgstr ""
-"Spazio occupato dalle linee ascendenti come la linea lunga della lettera 'h'."
+"Spazio occupato dalle linee ascendenti come la linea lunga della lettera 'h'"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:467
-#, fuzzy
 msgid "Descent:"
 msgstr "Discendente:"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:467
-#, fuzzy
 msgid "Amount of space taken up by descenders like the tail on the letter 'g'"
-msgstr "Spazio occupato dalle linee discendenti come il ricciolo della lettera 'g'."
+msgstr "Spazio occupato dalle linee discendenti come il ricciolo della lettera 'g'"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:468
-#, fuzzy
 msgid "Cap Height:"
 msgstr "Altezza della maiuscola:"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:468
-#, fuzzy
 msgid "The height of a capital letter above the baseline like the letter 'H' or 'I'"
-msgstr "Altezza delle lettere maiuscole sulla linea base come le lettere 'H' o 'I'."
+msgstr "Altezza delle lettere maiuscole sulla linea base come le lettere 'H' o 'I'"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:469
-#, fuzzy
 msgid "x Height:"
 msgstr "Altezza della minuscola:"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:469
-#, fuzzy
 msgid "The height of a lower-case letter above the baseline like the letter 'x'"
-msgstr "Altezza delle lettere minuscole sulla linea base come la lettera 'x'."
+msgstr "Altezza delle lettere minuscole sulla linea base come la lettera 'x'"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:545
 msgid "glyph"
@@ -24837,9 +24818,8 @@ msgid "Set glyph unicode"
 msgstr "Imposta unicode glifo"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:734
-#, fuzzy
 msgid "Set glyph advance"
-msgstr "Imposta unicode glifo"
+msgstr "Imposta avanzamento glifo"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:749
 msgid "Remove font"
@@ -24870,9 +24850,8 @@ msgid "Matching string"
 msgstr "Stringa corrispondente"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:816
-#, fuzzy
 msgid "Advance"
-msgstr "Cancella"
+msgstr "Avanzamento"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:818
 msgid "Add Glyph"
@@ -24907,7 +24886,6 @@ msgid "Second Unicode range"
 msgstr "Secondo intervallo Unicode"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:915
-#, fuzzy
 msgid "Kerning Value:"
 msgstr "Valore crenatura:"
 
@@ -24924,9 +24902,8 @@ msgid "Add font"
 msgstr "Aggiungi font"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:1021
-#, fuzzy
 msgid "_Fonts"
-msgstr "_Carattere"
+msgstr "_Font"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:1027
 msgid "_Global Settings"
@@ -25653,34 +25630,31 @@ msgstr "Seleziona con riquadro"
 
 #: ../src/ui/modifiers.cpp:41
 msgid "Don't drag items, select more with a box"
-msgstr ""
+msgstr "Non trascina gli oggetti, ne seleziona altri con un riquadro"
 
 #: ../src/ui/modifiers.cpp:42
-#, fuzzy
 msgid "Select the first"
-msgstr "_Seleziona questo"
+msgstr "Seleziona il primo"
 
 #: ../src/ui/modifiers.cpp:42
 msgid "Drag the first item the mouse hits"
-msgstr ""
+msgstr "Trascina il primo oggetto selezionato dal puntatore"
 
 #: ../src/ui/modifiers.cpp:43
-#, fuzzy
 msgid "Forced Drag"
-msgstr "Forza arco"
+msgstr "Trascina forzato"
 
 #: ../src/ui/modifiers.cpp:43
 msgid "Drag objects even if the mouse isn't over them"
-msgstr ""
+msgstr "Trascina gli oggetti anche se il puntatore non è sopra di essi"
 
 #: ../src/ui/modifiers.cpp:44
-#, fuzzy
 msgid "Cycle through objects"
-msgstr "Fissa da oggetti"
+msgstr "Cicla oggetti"
 
 #: ../src/ui/modifiers.cpp:44
 msgid "Scroll through objects under the cursor"
-msgstr ""
+msgstr "Scrolla gli oggetti sotto al puntatore"
 
 #: ../src/ui/modifiers.cpp:47
 msgid "Move one axis only"
@@ -25716,38 +25690,36 @@ msgstr ""
 "Mantiene il rapporto delle dimensioni durante il ridimensionamento degli oggetti"
 
 #: ../src/ui/modifiers.cpp:51
-#, fuzzy
 msgid "Transform in increments"
-msgstr "Trasforma gradienti"
+msgstr "Trasforma per incrementi"
 
 #: ../src/ui/modifiers.cpp:51
 msgid "Scale, rotate or skew by set increments"
-msgstr ""
+msgstr "Ridimensiona, ruota o distorci di incrementi predefiniti"
 
 #: ../src/ui/modifiers.cpp:52
-#, fuzzy
 msgid "Transform around center"
-msgstr "Trasforma gradienti"
+msgstr "Trasforma attorno al centro"
 
 #: ../src/ui/modifiers.cpp:52
 msgid ""
 "When scaling, scale selection symmetrically around its rotation center. When "
 "rotating/skewing, transform relative to opposite corner/edge."
 msgstr ""
+"Ridimensiona la selezione simmetricamente attorno al suo centro. Ruota rispetto "
+"all'angolo opposto. Distorce rispetto al lato opposto."
 
 #: ../src/ui/modifiers.cpp:53
-#, fuzzy
 msgid "No Transform Snapping"
-msgstr "Trasformazione"
+msgstr "Trasforma senza agganciare"
 
 #: ../src/ui/modifiers.cpp:53
-#, fuzzy
 msgid "Disable snapping when transforming object."
-msgstr "Seleziona e trasforma oggetti"
+msgstr "Disabilita l'aggancio durante la trasformazione degli oggetti"
 
 #: ../src/ui/modifiers.cpp:59
 msgid "No Category"
-msgstr ""
+msgstr "Nessuna categoria"
 
 #: ../src/ui/modifiers.cpp:60 ../share/ui/inkscape-start.glade:1225
 #: ../share/extensions/printing_marks.inx:17
@@ -34407,9 +34379,8 @@ msgid "Avoid single disconnected pixels"
 msgstr ""
 
 #: ../share/ui/dialog-trace.glade:730
-#, fuzzy
 msgid "Islands (weight)"
-msgstr "Altezza barre:"
+msgstr ""
 
 #: ../share/ui/dialog-trace.glade:741 ../share/ui/dialog-trace.glade:754
 msgid "Favors connections that are part of foreground color"
@@ -34432,9 +34403,8 @@ msgid "The heuristic computed vote will be multiplied by this value"
 msgstr ""
 
 #: ../share/ui/dialog-trace.glade:782
-#, fuzzy
 msgid "A constant vote value"
-msgstr "Angolo di rotazione"
+msgstr ""
 
 #: ../share/ui/dialog-trace.glade:796
 msgid "The radius of the window analyzed"
@@ -34465,9 +34435,8 @@ msgid "Preserve staircasing artifacts"
 msgstr ""
 
 #: ../share/ui/dialog-trace.glade:905
-#, fuzzy
 msgid "Pixel art"
-msgstr "Sbaffi di pixel"
+msgstr ""
 
 #: ../share/ui/dialog-trace.glade:990
 msgid "SIOX"
@@ -35726,9 +35695,8 @@ msgid "Dir doesn't exist '{}'."
 msgstr "Cartella inesistente '{}'."
 
 #: ../share/extensions/webslicer_export.py:58
-#, fuzzy
 msgid "No slicer layer found."
-msgstr "Nessun livello attuale."
+msgstr ""
 
 #: ../share/extensions/webslicer_export.py:319
 msgid "You must install the ImageMagick to get JPG and GIF."
@@ -42902,9 +42870,8 @@ msgstr ""
 "del diagramma di Voronoi. Oggetti di testo non sono gestiti."
 
 #: ../share/extensions/web_interactive_mockup.inx:3
-#, fuzzy
 msgid "Interactive Mockup"
-msgstr "_Interazione"
+msgstr ""
 
 #: ../share/extensions/web_interactive_mockup.inx:8
 msgid "click"
@@ -43199,9 +43166,8 @@ msgstr ""
 #: ../share/extensions/webslicer_create_group.inx:30
 #: ../share/extensions/webslicer_create_rect.inx:64
 #: ../share/extensions/webslicer_export.inx:20
-#, fuzzy
 msgid "Slicer"
-msgstr "Sciame"
+msgstr ""
 
 #: ../share/extensions/webslicer_create_rect.inx:3
 #, fuzzy
