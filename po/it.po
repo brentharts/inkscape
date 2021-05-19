@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: Inkscape 1.1\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
 "POT-Creation-Date: 2021-05-09 14:58+0000\n"
-"PO-Revision-Date: 2021-05-19 12:19+0200\n"
+"PO-Revision-Date: 2021-05-19 19:27+0200\n"
 "Last-Translator: Firas Hanife <firashanife@gmail.com>\n"
 "Language-Team: \n"
 "Language: it\n"
@@ -5519,7 +5519,6 @@ msgid "_Redo"
 msgstr "_Ripeti"
 
 #: ../src/extension/dependency.cpp:339
-#, fuzzy
 msgid "Dependency"
 msgstr "Dipendenza"
 
@@ -5528,7 +5527,6 @@ msgid "type"
 msgstr "tipo"
 
 #: ../src/extension/dependency.cpp:341
-#, fuzzy
 msgid "location"
 msgstr "posizione"
 
@@ -11360,6 +11358,8 @@ msgid ""
 "Creates gaps between stitches (use only for preview, deactivate for use with "
 "embroidery machines)"
 msgstr ""
+"Crea delle spaziature tra i punti (utile per la visualizzazione, disattiva per "
+"l'utilizzo su macchine per ricamo)"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:64
 msgid "Show stitch gap"
@@ -11371,11 +11371,11 @@ msgstr "Spaziatura tra i punti quando vengono mostrati i punti"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:65
 msgid "Jump if longer"
-msgstr ""
+msgstr "Salta se più lunga"
 
 #: ../src/live_effects/lpe-embrodery-stitch.cpp:65
 msgid "Jump connection if longer than"
-msgstr ""
+msgstr "Salta se la connessione è più lunga di"
 
 #: ../src/live_effects/lpe-envelope.cpp:18
 msgid "Top bend path:"
@@ -11434,7 +11434,6 @@ msgid "Defines the direction and magnitude of the extrusion"
 msgstr "Definisce la direzione e la grandezza dell'estrusione"
 
 #: ../src/live_effects/lpe-fill-between-many.cpp:27
-#, fuzzy
 msgid "Without LPEs"
 msgstr "Senza LPE"
 
@@ -11443,7 +11442,6 @@ msgid "With Spiro or BSpline"
 msgstr "Con Spiro o BSpline"
 
 #: ../src/live_effects/lpe-fill-between-many.cpp:29
-#, fuzzy
 msgid "With all LPEs"
 msgstr "Con LPE"
 
@@ -11453,11 +11451,12 @@ msgstr "Tracciati da cui ottenere i dati tracciato originali"
 
 #: ../src/live_effects/lpe-fill-between-many.cpp:36
 msgid "LPEs:"
-msgstr ""
+msgstr "LPE:"
 
 #: ../src/live_effects/lpe-fill-between-many.cpp:36
 msgid "Which LPEs of the linked paths should be considered"
 msgstr ""
+"Quali LPE (Effetti su tracciato) dei tracciati collegati devono essere considerati"
 
 #: ../src/live_effects/lpe-fill-between-many.cpp:37
 #: ../src/live_effects/lpe-fill-between-strokes.cpp:23
@@ -12632,7 +12631,6 @@ msgid "Start point of mirror line"
 msgstr "Punto iniziale della linea di riflessione"
 
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:66
-#, fuzzy
 msgid "Adjust start point of mirror line"
 msgstr "Modifica punto iniziale della linea di riflessione"
 
@@ -12928,15 +12926,16 @@ msgid "Offset points"
 msgstr "Punti proiezione"
 
 #: ../src/live_effects/lpe-powerstroke.cpp:161
-#, fuzzy
 msgid "No jumping handles"
-msgstr "Mostra maniglie"
+msgstr "Non agganciare maniglie"
 
 #: ../src/live_effects/lpe-powerstroke.cpp:161
 msgid ""
 "Allow to move handles along the path without them automatically attaching to the "
 "nearest path segment"
 msgstr ""
+"Permette di muovere le maniglie lungo il tracciato senza agganciarle "
+"automaticamente al segmento di tracciato più vicino"
 
 #: ../src/live_effects/lpe-powerstroke.cpp:162
 msgid "Sort points"
@@ -12959,14 +12958,12 @@ msgstr ""
 "morbida"
 
 #: ../src/live_effects/lpe-powerstroke.cpp:165
-#, fuzzy
 msgid "Width factor:"
-msgstr "Fattore _peso:"
+msgstr "Fattore larghezza:"
 
 #: ../src/live_effects/lpe-powerstroke.cpp:165
-#, fuzzy
 msgid "Scale the stroke's width uniformly along the whole path"
-msgstr "Ridimensiona la larghezza del tracciato di cucitura"
+msgstr "Ridimensiona la larghezza del tracciato uniformemente sull'intero tracciato"
 
 #: ../src/live_effects/lpe-powerstroke.cpp:166
 msgid "Start cap:"
@@ -13024,7 +13021,6 @@ msgstr "Inellisse di Steiner"
 #
 # File: ../src/live_effects/lpe-pts2ellipse.cpp, line: 54
 #: ../src/live_effects/lpe-pts2ellipse.cpp:54
-#, fuzzy
 msgid ""
 "Methods to generate the ellipse\n"
 "- Auto ellipse: fits a circle (2, 3 or 4 nodes in the path) or an ellipse (at "
@@ -13036,14 +13032,14 @@ msgid ""
 "- Steiner inellipse: (3 nodes) ellipse inside a triangle"
 msgstr ""
 "Metodi per generare l'ellisse:\n"
-"- Ellisse automatica: adatta un cerchio (da 2 a 4 punti) o un'ellisse (almeno 5 "
-"punti)\n"
-"- Forza cerchio: adatta sempre un cerchio (almeno 2 punti)\n"
-"- Cerchio isometrico: usa i primi due lati (3 punti)\n"
+"- Ellisse automatica: adatta un cerchio (da 2 a 4 nodi) o un'ellisse (almeno 5 "
+"nodi)\n"
+"- Forza cerchio: adatta sempre un cerchio (almeno 2 nodi)\n"
+"- Cerchio isometrico: usa i primi due lati come assi (3 nodi)\n"
 "- Cerchio in prospettiva: disegna un cerchio contenuto in un quadrato in "
-"prospettiva (4 punti)\n"
-"- Ellisse di Steiner: disegna un'ellisse su un triangolo (3 punti)\n"
-"- Inellisse di Steiner: disegna un'ellisse all'interno di un triangolo (3 punti)"
+"prospettiva (4 nodi)\n"
+"- Ellisse di Steiner: disegna un'ellisse su un triangolo (3 nodi)\n"
+"- Inellisse di Steiner: disegna un'ellisse all'interno di un triangolo (3 nodi)"
 
 #: ../src/live_effects/lpe-pts2ellipse.cpp:59
 msgid "_Frame (isometric rectangle)"
@@ -13074,13 +13070,12 @@ msgstr "_Arco"
 #
 # File: ../src/live_effects/lpe-pts2ellipse.cpp, line: 66
 #: ../src/live_effects/lpe-pts2ellipse.cpp:66
-#, fuzzy
 msgid ""
 "Generate open arc (open ellipse) based on first and last node\n"
 "(only for methods \"Auto ellipse\" and \"Force circle\")"
 msgstr ""
-"Genera un arco aperto (ellisse aperta) secondo il primo e ultimo punto\n"
-"(solo per \"Ellisse automatica\" e \"Forza cerchio\"))"
+"Genera un arco aperto (ellisse aperta) secondo il primo e ultimo nodo\n"
+"(solo per \"Ellisse automatica\" e \"Forza cerchio\")"
 
 #: ../src/live_effects/lpe-pts2ellipse.cpp:69
 msgid "_Other arc side"
@@ -13095,9 +13090,8 @@ msgid "_Slice arc"
 msgstr "_Seziona arco"
 
 #: ../src/live_effects/lpe-pts2ellipse.cpp:70
-#, fuzzy
 msgid "Create a circle / ellipse segment"
-msgstr "Crea cerchi, ellissi e archi"
+msgstr "Crea un cerchio / segmento di ellisse"
 
 #: ../src/live_effects/lpe-pts2ellipse.cpp:71
 msgid "A_xes"
@@ -13861,24 +13855,20 @@ msgid "Join type for non-smooth nodes"
 msgstr "Collegamento dei nodi non curvi"
 
 #: ../src/live_effects/lpe-taperstroke.cpp:95
-#, fuzzy
 msgid "Start direction:"
-msgstr "Direzione tacche:"
+msgstr "Direzione inizio:"
 
 #: ../src/live_effects/lpe-taperstroke.cpp:95
-#, fuzzy
 msgid "Direction of the taper at the path start"
-msgstr "Determina la forma dell'estremità iniziale del tracciato"
+msgstr "Direzione della rastrematura all'inizio del tracciato"
 
 #: ../src/live_effects/lpe-taperstroke.cpp:96
-#, fuzzy
 msgid "End direction:"
-msgstr "Espandi direzione"
+msgstr "Espandi fine:"
 
 #: ../src/live_effects/lpe-taperstroke.cpp:96
-#, fuzzy
 msgid "Direction of the taper at the path end"
-msgstr "Determina la forma dell'estremità finale del tracciato"
+msgstr "Direzione della rastrematura alla fine del tracciato"
 
 #: ../src/live_effects/lpe-taperstroke.cpp:97
 msgid "Limit for miter joins"
@@ -15484,14 +15474,12 @@ msgid "Swap fill and stroke of an object"
 msgstr "Inverti riempimento e contorno di un oggetto"
 
 #: ../src/selection-chemistry.cpp:4427
-#, fuzzy
 msgid "Select <b>path(s)</b> to create fill between."
-msgstr "Seleziona il <b>tracciato</b> da invertire."
+msgstr "Seleziona i <b>tracciati</b> da riempire."
 
 #: ../src/selection-chemistry.cpp:4482
-#, fuzzy
 msgid "Create linked fill object between paths"
-msgstr "Crea un'unione dei tracciati selezionati"
+msgstr "Crea riempimento collegato tra tracciati"
 
 #: ../src/selection-chemistry.cpp:4510 ../src/verbs.cpp:2953
 msgid "Fit Page to Drawing"
@@ -21779,23 +21767,24 @@ msgid "Display Options"
 msgstr "Opzioni visualizzazione"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1925
-#, fuzzy
 msgid "Show command line argument names"
-msgstr "Mostra icone nei menu:"
+msgstr "Mostra nomi argomento linea di comando"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1926
 msgid ""
 "Show action argument names in the command palette suggestions, most useful for "
 "using them on the command line"
 msgstr ""
+"Mostra i nomi degli argomenti delle azioni nei suggerimenti della paletta "
+"comandi, molto utile per l'utilizzo sulla linea di comando"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1928
 msgid "Show untranslated (English) names"
-msgstr ""
+msgstr "Mostra nomi non tradotti (Inglese)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1929
 msgid "Also show the English names of the command"
-msgstr ""
+msgstr "Mostra anche il nome inglese del comando"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1931
 msgid "Command Palette"
@@ -34920,6 +34909,8 @@ msgid ""
 "<b>Warning:</b> Using a non-standard shortcut keyboard layout could make it "
 "harder to follow tutorials."
 msgstr ""
+"<b>Attenzione:</b> Utilizzare delle scorciatoie da tastiera non standard potrebbe "
+"rendere più difficile la fruizione dei tutorial."
 
 #: ../share/ui/inkscape-start.glade:1210
 msgid "Appearance"
@@ -35153,7 +35144,7 @@ msgstr "Nessun tracciato trovato. Convertire gli oggetti desiderati in tracciati
 
 #: ../share/extensions/image_embed.py:66
 msgid "Attribute \"xlink:href\" not set on node {}."
-msgstr ""
+msgstr "Attributo \"xlink:href\" non impostato sul nodo {}."
 
 #: ../share/extensions/image_embed.py:81
 msgid "File not found \"{}\". Unable to embed image."
@@ -35517,24 +35508,26 @@ msgid " in {0!s} s"
 msgstr " in {0!s} s"
 
 #: ../share/extensions/jessyink_transitions.py:39
-#, fuzzy
 msgid "Please enter a layer name."
-msgstr "Inserisci il nome di un livello.\n"
+msgstr "Inserisci il nome di un livello."
 
 #: ../share/extensions/jessyink_transitions.py:44
 #, python-brace-format
 msgid "Layer '{self.options.layerName}' not found."
-msgstr ""
+msgstr "'{self.options.layerName}' del livello non trovato."
 
 #: ../share/extensions/jessyink_video.py:37
 msgid "Could not obtain the selected layer for inclusion of the video element."
 msgstr ""
+"Impossibile ottenere il livello selezionato per l'inclusione dell'elemento video."
 
 #: ../share/extensions/jessyink_video.py:42
 msgid ""
 "Could not obtain the selected layer for inclusion of the video element.\n"
 "\n"
 msgstr ""
+"Could not obtain the selected layer for inclusion of the video element.\n"
+"\n"
 
 #: ../share/extensions/jessyink_view.py:38
 msgid ""
@@ -36170,7 +36163,6 @@ msgid "Draw Isotomic Conjugate"
 msgstr "Disegna il coniugato isotomico"
 
 #: ../share/extensions/draw_from_triangle.inx:42
-#, fuzzy
 msgid ""
 "This extension draws constructions about a triangle defined by the first 3 nodes "
 "of a selected path. You may select one of preset objects or create your own "
@@ -39297,7 +39289,7 @@ msgstr ""
 
 #: ../share/extensions/layer2png.inx:3
 msgid "Export Layer Slices"
-msgstr ""
+msgstr "Esporta Fette Livello"
 
 #: ../share/extensions/layer2png.inx:7
 msgid "Icon mode"
@@ -39308,23 +39300,20 @@ msgid "Sizes"
 msgstr "Dimensioni"
 
 #: ../share/extensions/layer2png.inx:9
-#, fuzzy
 msgid "Layer with Slices:"
-msgstr "Spruzza copie"
+msgstr "Livello con Fette:"
 
 #: ../share/extensions/layer2png.inx:10
-#, fuzzy
 msgid "Overwrite existing exports"
-msgstr "Cancella tracciato esistente"
+msgstr "Sovrascrivi esportazioni esistenti"
 
 #: ../share/extensions/layer2png.inx:11
 msgid "Directory"
-msgstr "Cartella:"
+msgstr "Cartella"
 
 #: ../share/extensions/layer2png.inx:15
-#, fuzzy
 msgid "Layer Slicer"
-msgstr "Spruzza copie"
+msgstr "Affetta Livello"
 
 #: ../share/extensions/layer2png.inx:16
 msgid ""
@@ -39332,6 +39321,9 @@ msgid ""
 "extension will export a PNG file for each rectangle into the directory with the "
 "name of the {rectangle ID}.png (use Object Properties to set this)."
 msgstr ""
+"Se si crea un livello (nome predefinito \"slices\") contente dei rettangoli, "
+"questa estensione esporterà un file PNG per ogni rettangolo nella Cartella con il "
+"nome {ID rettangolo}.png (imposta in Proprietà oggetto)."
 
 #: ../share/extensions/layer2png.inx:17
 msgid ""
@@ -39340,12 +39332,19 @@ msgid ""
 "previously generated, it will color the rectangle RED. For new exports that did "
 "not previously exist, the rectangle will be GREEN."
 msgstr ""
+"Se l'esportazione è già presente, il rettangolo verrà saltato e colorato in "
+"GRIGIO. Se l'opzione \"Sovrascrivi esportazioni esistenti\" è selezionata ed i "
+"file sono già stati generati, colorerà il rettangolo in ROSSO. Per le nuove "
+"esportazioni non precedentemente generate, il rettangolo sarà VERDE."
 
 #: ../share/extensions/layer2png.inx:18
 msgid ""
 "If you want to create (square) icons at different sizes, select \"Icon mode\". "
 "Icon mode will create a square export for each dimension in \"Sizes\"."
 msgstr ""
+"Per creare icone (quadrate) di differenti dimensioni, seleziona \"Modalità icona"
+"\". Questa modalità creerà delle esportazioni quadrate per ogni dimensione in "
+"\"Dimensioni\"."
 
 #: ../share/extensions/layers2svgfont.inx:3
 msgid "3 - Convert Glyph Layers to SVG Font"
@@ -39362,7 +39361,7 @@ msgstr "Tipografia"
 
 #: ../share/extensions/layout_nup.inx:3
 msgid "N-up layout"
-msgstr ""
+msgstr "Layout N-up"
 
 #: ../share/extensions/layout_nup.inx:6
 msgid "Page dimensions"
@@ -39829,9 +39828,8 @@ msgid "2 - Add Glyph Layer"
 msgstr "2 - Aggiungi livello glifo"
 
 #: ../share/extensions/new_glyph_layer.inx:5
-#, fuzzy
 msgid "Unicode character:"
-msgstr "Inserisci carattere Unicode"
+msgstr "Carattere Unicode:"
 
 #: ../share/extensions/next_glyph_layer.inx:3
 msgid "View Next Glyph"
@@ -39839,7 +39837,7 @@ msgstr "Visualizza glifo successivo"
 
 #: ../share/extensions/nicechart.inx:29
 msgid "NiceCharts"
-msgstr ""
+msgstr "NiceChart"
 
 #
 # File: ../share/extensions/nicechart.inx, line: 31
@@ -40451,6 +40449,8 @@ msgid ""
 "This extension creates a parametric plot of a vector valued function (in variable "
 "t)."
 msgstr ""
+"Questa estensione crea un tracciato parametrico di una funzione con valori "
+"vettoriali (nella variabile t)"
 
 #: ../share/extensions/param_curves.inx:48
 msgid "X-Function:"
@@ -40541,9 +40541,8 @@ msgstr ""
 "    * Incremento: incremento numerazione tra due nodi."
 
 #: ../share/extensions/path_to_absolute.inx:3
-#, fuzzy
 msgid "To Absolute"
-msgstr "Assoluto"
+msgstr "Ad assoluto"
 
 #: ../share/extensions/pathalongpath.inx:3
 msgid "Pattern along Path"
@@ -41985,9 +41984,8 @@ msgid "Show color reference"
 msgstr "Mostra riferimento colore"
 
 #: ../share/extensions/scribus_export_pdf.inx:19
-#, fuzzy
 msgid "Rendering intent:"
-msgstr "Intento del dispositivo:"
+msgstr "Destinazione rendering:"
 
 #: ../share/extensions/scribus_export_pdf.inx:34
 msgid "Scribus CMYK PDF (*.PDF)"
@@ -43400,6 +43398,10 @@ msgid ""
 "Inkscape uses the standardized SVG file format as its main format, which is "
 "supported by many other applications including web browsers."
 msgstr ""
+"L'utilizzo della grafica vettoriale permette stampe definite e rendering a "
+"risoluzioni illimitate non essendo vincolate ad un numero fisso di pixel come per "
+"le grafiche raster. Inkscape utilizza il formato file SVG standardizzato come "
+"formato principale che è supportato da molte applicazioni inclusi i browser web."
 
 #: ../org.inkscape.Inkscape.appdata.xml.in:19
 msgid ""
