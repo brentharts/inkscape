@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: Inkscape 1.1\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
 "POT-Creation-Date: 2021-05-09 14:58+0000\n"
-"PO-Revision-Date: 2021-05-19 19:27+0200\n"
+"PO-Revision-Date: 2021-05-20 12:21+0200\n"
 "Last-Translator: Firas Hanife <firashanife@gmail.com>\n"
 "Language-Team: \n"
 "Language: it\n"
@@ -21780,7 +21780,7 @@ msgstr ""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1928
 msgid "Show untranslated (English) names"
-msgstr "Mostra nomi non tradotti (Inglese)"
+msgstr "Mostra nomi non tradotti (in inglese)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1929
 msgid "Also show the English names of the command"
@@ -22100,27 +22100,30 @@ msgstr "SVG 2"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2080
 msgid "Insert SVG 1.1 fallback in text"
-msgstr ""
+msgstr "Inserisci alternativa SVG 1.1 nel testo"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2081
 msgid "Insert JavaScript code for mesh gradients"
-msgstr ""
+msgstr "Inserisci codice JavaScript per i gradienti a maglia"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2082
 msgid "Insert JavaScript code for SVG2 hatches"
-msgstr ""
+msgstr "Inserisci codice JavaScript per le trame (hatch) SVG 2"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2084
 msgid "Adds fallback options for non-SVG 2 renderers."
-msgstr ""
+msgstr "Aggiunge opzioni alternative per i render non SVG 2"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2085
 msgid "Adds a JavaScript polyfill for rendering meshes in web browsers."
 msgstr ""
+"Aggiunge un polyfill JavaScript per renderizzare i gradienti a maglia nei browser "
+"web"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2086
 msgid "Adds a JavaScript polyfill for rendering hatches in web browsers."
 msgstr ""
+"Aggiunge un polyfill JavaScript per renderizzare le trame (hatch) nei browser web"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2089
 msgid "SVG 2 to SVG 1.1"
@@ -22128,23 +22131,29 @@ msgstr "SVG 2 a SVG 1.1"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2091
 msgid "Use correct marker direction in SVG 1.1 renderers"
-msgstr ""
+msgstr "Usa direzione esatta delimitatore in renderer SVG 1.1"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2092
 msgid "Use correct marker colors in SVG 1.1 renderers"
-msgstr ""
+msgstr "Usa colori esatti delimitatori in renderer SVG 1.1"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2094
 msgid ""
 "SVG 2 allows markers to automatically be reversed at the start of a path with "
 "'auto_start_reverse'. This adds a rotated duplicate of the marker's definition."
 msgstr ""
+"SVG 2 permette di invertire automaticamente i delimitatori all'inizio di un "
+"tracciato con 'auto-reverse-start'. Questa opzione aggiunge un duplicato ruotato "
+"del delimitatore definito."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2095
 msgid ""
 "SVG 2 allows markers to automatically match the stroke color by using "
 "'context_paint' or 'context_fill'. This adjusts the markers own colors."
 msgstr ""
+"SVG 2 permette di accoppiare automaticamente i delimitatori con il colore del "
+"contorno utilizzando 'context-paint' o 'context-fill'. Questa opzione modifica i "
+"colori dei delimitatori."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2097
 msgid "SVG export"
@@ -22321,9 +22330,8 @@ msgid "Autosave"
 msgstr "Salvataggio automatico"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2232
-#, fuzzy
 msgid "No matches were found, try another search!"
-msgstr "Nessun file soddisfa la ricerca"
+msgstr "Nessuna corrispondenza trovata, prova un altro termine di ricerca!"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2237
 msgid "Behavior"
@@ -22441,9 +22449,8 @@ msgid "Wrap around at start and end when cycling objects in z-order"
 msgstr "Seleziona ciclicamente all'inizio e alla fine in ordine di altezza"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2277
-#, fuzzy
 msgid "Paste above selection instead of layer-top"
-msgstr "Sposta selezione al livello"
+msgstr "Incolla sopra selezione invece di cima livello"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2279
 msgid ""
@@ -22451,6 +22458,9 @@ msgid ""
 "the current selection (z-order). Otherwise, insertion happens on top of all "
 "objects in the current layer."
 msgstr ""
+"Se attivo, gli oggetti incollati ed i documenti importati saranno inseriti "
+"immediatamente sopra alla selezione attuale (ordine z). Se disattivato, "
+"l'inserimento sarà effettuato in cima al livello corrente."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2282
 msgid "Selecting"
@@ -23039,9 +23049,8 @@ msgstr ""
 "renderizzate per un successivo riuso; imposta a zero per disabilitare l'opzione"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2516
-#, fuzzy
 msgid "Rendering tile multiplier:"
-msgstr "Dimensione _cache rendering:"
+msgstr "Moltiplicatore tile rendering:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2517
 msgid ""
@@ -23051,6 +23060,11 @@ msgid ""
 "zooming and panning in relevant areas faster on low-end hardware in drawings with "
 "few or no filters."
 msgstr ""
+"Incrementare questo valore (predefinito 16) su hardware recenti aiuta a "
+"migliorare le prestazioni in caso di grandi aree con oggetti filtrati nel disegno "
+"(incluse sfocature e modalità miscela). Con hardware meno recenti o meno "
+"performanti riducendo il valore si velocizza l'ingrandimento e lo spostamento del "
+"disegno nel caso di pochi o nessun filtro."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2520
 msgid "X-ray radius:"
@@ -23081,9 +23095,10 @@ msgid "Redraw while editing:"
 msgstr "Ridisegna durante la modifica:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2540
-#, fuzzy
 msgid "Set how quickly the canvas display is updated while editing objects"
-msgstr "Imposta la velocità di aggiornamento "
+msgstr ""
+"Imposta la velocità di aggiornamento dell'area di lavoro durante la modifica "
+"degli oggetti"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2544
 #: ../src/ui/dialog/inkscape-preferences.cpp:2568
@@ -23479,7 +23494,7 @@ msgstr "Preferenze:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3339
 msgid "Location of the user’s preferences file"
-msgstr "Posizione del file delle preferenze"
+msgstr "Posizione del file delle preferenze dell'utente"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3341
 msgid "Open preferences folder"
@@ -23491,7 +23506,7 @@ msgstr "Configurazione:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3342
 msgid "Location of users configuration"
-msgstr "Posizione della configurazione"
+msgstr "Posizione della configurazione dell'utente"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3346
 msgid "Open extensions folder"
@@ -23503,7 +23518,7 @@ msgstr "Estensioni:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3348
 msgid "Location of the user’s extensions"
-msgstr "Posizione delle estensioni"
+msgstr "Posizione delle estensioni dell'utente"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3351
 msgid "Open fonts folder"
@@ -23514,9 +23529,8 @@ msgid "User fonts:"
 msgstr "Caratteri:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3352
-#, fuzzy
 msgid "Location of the user’s fonts"
-msgstr "Posizione delle icone"
+msgstr "Posizione dei caratteri dell'utente"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3359
 msgid "User icons:"
@@ -23532,7 +23546,7 @@ msgstr "Modelli:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3364
 msgid "Location of the user’s templates"
-msgstr "Posizione dei modelli"
+msgstr "Posizione dei modelli dell'utente"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3367
 msgid "Open symbols folder"
@@ -23544,16 +23558,15 @@ msgstr "Simboli:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3369
 msgid "Location of the user’s symbols"
-msgstr "Posizione dei simboli"
+msgstr "Posizione dei simboli dell'utente"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3373
 msgid "Open paint servers folder"
 msgstr "Apre la cartella delle trame"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3375
-#, fuzzy
 msgid "User paint servers:"
-msgstr "Trame: "
+msgstr "Trame:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3376
 msgid "Location of the user’s paint servers"
@@ -23581,7 +23594,7 @@ msgstr "Tastiere:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3386
 msgid "Location of the user’s keyboard mapping files"
-msgstr "Posizione dei file di mappatura delle scorciatoie da tastiera"
+msgstr "Posizione dei file di mappatura delle scorciatoie da tastiera dell'utente"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3389
 msgid "Open user interface folder"
@@ -23601,7 +23614,7 @@ msgstr "Cache:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3395
 msgid "Location of user’s cache"
-msgstr "Posizione della cache"
+msgstr "Posizione della cache dell'utente"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3403
 msgid "Temporary files:"
@@ -23636,9 +23649,8 @@ msgid "Locations of system data"
 msgstr "Posizione dei dati di sistema"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3426
-#, fuzzy
 msgid "Custom Font directories"
-msgstr "Cartelle caratteri"
+msgstr "Cartelle caratteri personalizzate"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3438
 msgid "Icon theme:"
@@ -23675,7 +23687,6 @@ msgid "Test Area"
 msgstr "Area di prova"
 
 #: ../src/ui/dialog/input.cpp:582
-#, fuzzy
 msgid "Axis"
 msgstr "Asse"
 
@@ -23688,9 +23699,8 @@ msgid "Hardware"
 msgstr "Hardware"
 
 #: ../src/ui/dialog/input.cpp:659
-#, fuzzy
 msgid "Link:"
-msgstr "Linea"
+msgstr "Collegamento:"
 
 #: ../src/ui/dialog/input.cpp:661 ../src/ui/dialog/input.cpp:662
 #: ../src/ui/dialog/input.cpp:1388 ../src/ui/widget/color-scales.cpp:49
@@ -23704,9 +23714,8 @@ msgid "Axes count:"
 msgstr "Numero assi:"
 
 #: ../src/ui/dialog/input.cpp:674
-#, fuzzy
 msgid "axis:"
-msgstr "Raggio:"
+msgstr "asse:"
 
 #: ../src/ui/dialog/input.cpp:687
 msgid "Button count:"
@@ -23718,7 +23727,7 @@ msgstr "Tablet"
 
 #: ../src/ui/dialog/input.cpp:862 ../src/ui/dialog/input.cpp:1746
 msgid "pad"
-msgstr ""
+msgstr "pad"
 
 #: ../src/ui/dialog/input.cpp:903
 msgid "_Use pressure-sensitive tablet (requires restart)"
@@ -23730,7 +23739,7 @@ msgstr "Assi"
 
 #: ../src/ui/dialog/input.cpp:909
 msgid "Keys"
-msgstr ""
+msgstr "Tasti"
 
 #: ../src/ui/dialog/input.cpp:987
 msgid ""
@@ -23909,23 +23918,22 @@ msgstr "Cima"
 #
 # File: ../src/ui/dialog/livepatheffect-add.cpp, line: 472
 #: ../src/ui/dialog/livepatheffect-add.cpp:617
-#, fuzzy
 msgid ""
 "You don't have any favorites yet. Click on the favorites star again to see all "
 "LPEs."
-msgstr "Non hai ancora nessun favorito, disattiva la selezione dei favoriti"
+msgstr ""
+"Non hai ancora nessun favorito. Clicca sulla stella dei favoriti per visualizzare "
+"tutti gli effetti su tracciato."
 
 #: ../src/ui/dialog/livepatheffect-add.cpp:621
-#, fuzzy
 msgid "These are your favorite effects"
-msgstr "Effetti favoriti"
+msgstr "I tuoi effetti favoriti"
 
 #: ../src/ui/dialog/livepatheffect-add.cpp:626
 #: ../src/ui/dialog/livepatheffect-add.cpp:638
 #: ../src/ui/dialog/livepatheffect-add.cpp:647
-#, fuzzy
 msgid "Nothing found! Please try again with different search terms."
-msgstr "Prova un termine di ricerca differente."
+msgstr "Nessuna occorrenza trovata! Prova un termine di ricerca differente."
 
 #: ../src/ui/dialog/livepatheffect-editor.cpp:123
 msgid "Add path effect"
@@ -25503,51 +25511,50 @@ msgstr ""
 
 #. TRANSLATORS: This refers to the pattern that's inside the object
 #: ../src/ui/knot/knot-holder.cpp:359
-#, fuzzy
 msgid "<b>Move</b> the stroke's pattern inside the object"
-msgstr "<b>Muovi</b> il motivo di riempimento all'interno dell'oggetto"
+msgstr "<b>Muovi</b> il motivo del contorno all'interno dell'oggetto"
 
 #: ../src/ui/knot/knot-holder.cpp:362
-#, fuzzy
 msgid "<b>Scale</b> the stroke's pattern; uniformly if with <b>Ctrl</b>"
 msgstr ""
-"<b>Ridimensiona</b> il motivo di riempimento; in maniera uniforme con <b>Ctrl</b>"
+"<b>Ridimensiona</b> il motivo del contorno; in maniera uniforme con <b>Ctrl</b>"
 
 #: ../src/ui/knot/knot-holder.cpp:365
-#, fuzzy
 msgid "<b>Rotate</b> the stroke's pattern; with <b>Ctrl</b> to snap angle"
-msgstr ""
-"<b>Ruota</b> il motivo di riempimento; <b>Ctrl</b> per far scattare l'angolo"
+msgstr "<b>Ruota</b> il motivo del contorno; <b>Ctrl</b> per far scattare l'angolo"
 
 #. TRANSLATORS: This refers to the hatch that's inside the object
 #: ../src/ui/knot/knot-holder.cpp:381
 msgid "<b>Move</b> the hatch fill inside the object"
-msgstr "<b>Muovi</b> il riempimento a tratteggi all'interno dell'oggetto"
+msgstr "<b>Muovi</b> la trama (hatch) di riempimento all'interno dell'oggetto"
 
 #: ../src/ui/knot/knot-holder.cpp:384
 msgid "<b>Scale</b> the hatch fill; uniformly if with <b>Ctrl</b>"
 msgstr ""
-"<b>Ridimensiona</b> lo riempimento a tratteggi; in maniera uniforme con <b>Ctrl</"
-"b>"
+"<b>Ridimensiona</b> la trama (hatch) di riempimento; in maniera uniforme con "
+"<b>Ctrl</b>"
 
 #: ../src/ui/knot/knot-holder.cpp:387
 msgid "<b>Rotate</b> the hatch fill; with <b>Ctrl</b> to snap angle"
 msgstr ""
-"<b>Ruota</b> lo riempimento a tratteggi; <b>Ctrl</b> per far scattare l'angolo"
+"<b>Ruota</b> la trama (hatch) di riempimento; <b>Ctrl</b> per far scattare "
+"l'angolo"
 
 #. TRANSLATORS: This refers to the pattern that's inside the object
 #: ../src/ui/knot/knot-holder.cpp:400
 msgid "<b>Move</b> the hatch stroke inside the object"
-msgstr "<b>Muovi</b> il contorno a tratteggi all'interno dell'oggetto"
+msgstr "<b>Muovi</b> la trama (hatch) del contorno all'interno dell'oggetto"
 
 #: ../src/ui/knot/knot-holder.cpp:403
 msgid "<b>Scale</b> the hatch stroke; uniformly if with <b>Ctrl</b>"
 msgstr ""
-"<b>Ridimensiona</b> il contorno a tratteggi; in maniera uniforme con <b>Ctrl</b>"
+"<b>Ridimensiona</b> la trama (hatch) del contorno; in maniera uniforme con "
+"<b>Ctrl</b>"
 
 #: ../src/ui/knot/knot-holder.cpp:406
 msgid "<b>Rotate</b> the hatch stroke; with <b>Ctrl</b> to snap angle"
-msgstr "<b>Ruota</b> il contorno a tratteggi; <b>Ctrl</b> per far scattare l'angolo"
+msgstr ""
+"<b>Ruota</b> la trama (hatch) del contorno; <b>Ctrl</b> per far scattare l'angolo"
 
 #: ../src/ui/knot/knot-holder.cpp:419 ../src/ui/knot/knot-holder.cpp:421
 msgid "<b>Resize</b> the filter effect region"
@@ -35526,7 +35533,8 @@ msgid ""
 "Could not obtain the selected layer for inclusion of the video element.\n"
 "\n"
 msgstr ""
-"Could not obtain the selected layer for inclusion of the video element.\n"
+"Impossibile ottenere il livello selezionato per l'inclusione dell'elemento "
+"video.\n"
 "\n"
 
 #: ../share/extensions/jessyink_view.py:38
