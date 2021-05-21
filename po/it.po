@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: Inkscape 1.1\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
 "POT-Creation-Date: 2021-05-09 14:58+0000\n"
-"PO-Revision-Date: 2021-05-20 12:21+0200\n"
+"PO-Revision-Date: 2021-05-21 11:07+0200\n"
 "Last-Translator: Firas Hanife <firashanife@gmail.com>\n"
 "Language-Team: \n"
 "Language: it\n"
@@ -4770,9 +4770,8 @@ msgid "Export Area Snap"
 msgstr "Esporta Area Aggancio"
 
 #: ../src/actions/actions-output.cpp:233
-#, fuzzy
 msgid "Snap export area to integer values"
-msgstr "Aggancia l'area esterna di esportazione bitmap al valore intero più vicino"
+msgstr "Aggancia l'area di esportazione al valore intero più vicino"
 
 #: ../src/actions/actions-output.cpp:234
 msgid "Export Width"
@@ -4860,11 +4859,11 @@ msgstr "Esporta LaTeX"
 
 #: ../src/actions/actions-output.cpp:247
 msgid "Export Use Hints"
-msgstr ""
+msgstr "Esporta usa parametri"
 
 #: ../src/actions/actions-output.cpp:247
 msgid "Export using saved hints"
-msgstr ""
+msgstr "Esporta usando i parametri salvati"
 
 #: ../src/actions/actions-output.cpp:248
 msgid "Export Background"
@@ -6547,7 +6546,7 @@ msgstr "Usa gradienti lineari rettangolari nativi"
 
 #: ../src/extension/internal/emf-inout.cpp:3662
 msgid "Map all fill patterns to standard EMF hatches"
-msgstr ""
+msgstr "Mappa tutti i motivi di riempimento a hatch EMF standard"
 
 #: ../src/extension/internal/emf-inout.cpp:3663
 msgid "Ignore image rotations"
@@ -8907,7 +8906,7 @@ msgstr "Output WMF"
 
 #: ../src/extension/internal/wmf-inout.cpp:3237
 msgid "Map all fill patterns to standard WMF hatches"
-msgstr ""
+msgstr "Mappa tutti i motivi di riempimento a hatch WMF standard"
 
 #: ../src/extension/internal/wmf-inout.cpp:3241
 msgid "Windows Metafile (*.wmf)"
@@ -9271,12 +9270,10 @@ msgid "Default"
 msgstr "Predefinito"
 
 #: ../src/filter-enums.cpp:76
-#, fuzzy
 msgid "Clear"
-msgstr "Pulisci"
+msgstr "Clear"
 
 #: ../src/filter-enums.cpp:77
-#, fuzzy
 msgid "Copy"
 msgstr "Copia"
 
@@ -10488,14 +10485,13 @@ msgstr ""
 "arbitrariamente lungo il tracciato"
 
 #: ../src/live_effects/effect.cpp:782
-#, fuzzy
 msgctxt "path effect"
 msgid "Slice"
-msgstr "Sezione"
+msgstr "Seziona"
 
 #: ../src/live_effects/effect.cpp:786
 msgid "Slices the item into parts. It can also be applied multiple times."
-msgstr ""
+msgstr "Seziona l'oggetto in parti. Può anche essere applicato più volte."
 
 #: ../src/live_effects/effect.cpp:797
 msgid "doEffect stack test"
@@ -11474,9 +11470,8 @@ msgid "Close path"
 msgstr "Chiudi tracciato"
 
 #: ../src/live_effects/lpe-fill-between-many.cpp:39
-#, fuzzy
 msgid "Autoreverse"
-msgstr "Inverti"
+msgstr "Inverti automaticamente"
 
 #: ../src/live_effects/lpe-fill-between-strokes.cpp:21
 msgid "Second path:"
@@ -12547,7 +12542,6 @@ msgid "Projection"
 msgstr "Proiezione"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:518
-#, fuzzy
 msgid "Non Uniform Scale"
 msgstr "Scala non uniforme"
 
@@ -12616,11 +12610,11 @@ msgstr ""
 
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:65
 msgid "Keep open paths on split"
-msgstr ""
+msgstr "Mantieni tracciati aperti sulla divisione"
 
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:65
 msgid "Do not automatically close paths along the split line."
-msgstr ""
+msgstr "Non chiude automaticamente i tracciati lungo la linea di divisione."
 
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:66
 msgid "Mirror line start"
@@ -12874,13 +12868,14 @@ msgid "Inverse clip"
 msgstr "Inverti fissaggio"
 
 #: ../src/live_effects/lpe-powerclip.cpp:31
-#, fuzzy
 msgid "Flatten clip"
-msgstr "Semplifica fissaggio"
+msgstr "Appiattisci fissaggio"
 
 #: ../src/live_effects/lpe-powerclip.cpp:31
 msgid "Flatten clip, see fill rule once convert to paths"
 msgstr ""
+"Appiattisci fissaggio, guarda le regole di riempimento una volta convertita in "
+"tracciato"
 
 #: ../src/live_effects/lpe-powerclip.cpp:33
 msgid "Info Box"
@@ -12891,6 +12886,9 @@ msgid ""
 "Use fill-rule evenodd on <b>fill and stroke</b> dialog if no flatten result after "
 "convert clip to paths."
 msgstr ""
+"Usa la regola di riempimento (fill-rule) evenodd in <b>Riempimento e contorni</b> "
+"se non si ottiene un risultato appiattendo il fissaggio una volta convertito in "
+"tracciato."
 
 #: ../src/live_effects/lpe-powermask.cpp:37
 msgid "Invert mask"
@@ -13399,9 +13397,8 @@ msgid "<b>Jitter nodes</b> Move nodes/handles"
 msgstr "<b>Sfalsa nodi</b> Muovi nodi/maniglie"
 
 #: ../src/live_effects/lpe-roughen.cpp:158
-#, fuzzy
 msgid "<b>Extra roughen</b> Add an extra layer of rough"
-msgstr "<b>Maggior increspatura</b> Aumenta l'irregolarità"
+msgstr "<b>Maggior increspatura</b> Aggiungi un altro livello di irregolarità"
 
 #: ../src/live_effects/lpe-roughen.cpp:166
 msgid "<b>Options</b> Modify options to rough"
@@ -13711,49 +13708,40 @@ msgid "max curvature"
 msgstr "curvatura massima"
 
 #: ../src/live_effects/lpe-slice.cpp:51
-#, fuzzy
 msgid "Slice line start"
-msgstr "Inizio linea riflessione"
+msgstr "Inizio linea taglio"
 
 #: ../src/live_effects/lpe-slice.cpp:51
-#, fuzzy
 msgid "Start point of slice line"
-msgstr "Punto iniziale della linea di riflessione"
+msgstr "Punto iniziale della linea di taglio"
 
 #: ../src/live_effects/lpe-slice.cpp:51
-#, fuzzy
 msgid "Adjust start point of slice line"
-msgstr "Modifica punto iniziale della linea di riflessione"
+msgstr "Modifica punto iniziale della linea di taglio"
 
 #: ../src/live_effects/lpe-slice.cpp:52
-#, fuzzy
 msgid "Slice line end"
-msgstr "Fine linea riflessione"
+msgstr "Fine linea taglio"
 
 #: ../src/live_effects/lpe-slice.cpp:52
-#, fuzzy
 msgid "End point of slice line"
-msgstr "Punto finale della linea di riflessione"
+msgstr "Punto finale della linea di taglio"
 
 #: ../src/live_effects/lpe-slice.cpp:52
-#, fuzzy
 msgid "Adjust end point of slice line"
-msgstr "Modifica punto finale della linea di riflessione"
+msgstr "Modifica punto finale della linea di taglio"
 
 #: ../src/live_effects/lpe-slice.cpp:53
-#, fuzzy
 msgid "Slice line mid"
-msgstr "Metà linea riflessione"
+msgstr "Metà linea taglio"
 
 #: ../src/live_effects/lpe-slice.cpp:53
-#, fuzzy
 msgid "Center point of slice line"
-msgstr "Punto centrale della linea di riflessione"
+msgstr "Punto centrale della linea di taglio"
 
 #: ../src/live_effects/lpe-slice.cpp:53
-#, fuzzy
 msgid "Adjust center point of slice line"
-msgstr "Modifica punto centrale della linea di riflessione"
+msgstr "Modifica punto centrale della linea di taglio"
 
 #: ../src/live_effects/lpe-tangent_to_curve.cpp:60
 #: ../src/ui/toolbar/calligraphy-toolbar.cpp:193
@@ -14570,7 +14558,7 @@ msgstr "%s (%s, %s)"
 
 #: ../src/object/sp-tref.cpp:216
 msgid "Cloned Character Data"
-msgstr ""
+msgstr "Dati carattere clonato"
 
 #: ../src/object/sp-tref.cpp:232
 msgid " from "
@@ -16350,9 +16338,8 @@ msgid "Value"
 msgstr "Valore"
 
 #: ../src/ui/dialog/attrdialog.cpp:197
-#, fuzzy
 msgid "Shift+Return for a new line"
-msgstr "Maiusc+Enter nuova linea"
+msgstr "Maiusc+Invio per una nuova linea"
 
 #: ../src/ui/dialog/attrdialog.cpp:437
 msgid "<b>Click</b> attribute to edit."
@@ -17208,9 +17195,8 @@ msgid "Labels: always off"
 msgstr "Etichette: disattivato"
 
 #: ../src/ui/dialog/dialog-window.cpp:55
-#, fuzzy
 msgid "Dialog Window"
-msgstr "Duplic_a finestra"
+msgstr "Finestra"
 
 #: ../src/ui/dialog/document-properties.cpp:101
 msgid "Use antialiasing"
@@ -18072,23 +18058,20 @@ msgid "Z coordinate"
 msgstr "Coordinata X"
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:1192
-#, fuzzy
 msgid "Points at:"
-msgstr "Punta a"
+msgstr "Punta a:"
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:1193
-#, fuzzy
 msgid "Specular Exponent:"
-msgstr "Esponente speculare"
+msgstr "Esponente speculare:"
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:1193
 msgid "Exponent value controlling the focus for the light source"
 msgstr "Valore esponenziale per il controllo del fuoco della sorgente luminosa"
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:1195
-#, fuzzy
 msgid "Cone Angle:"
-msgstr "Angolo del cono"
+msgstr "Angolo del cono:"
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:1195
 msgid ""
@@ -18471,7 +18454,6 @@ msgid "The standard deviation for the blur operation."
 msgstr "La deviazione standard per l'operazione di sfocatura."
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:2836
-#, fuzzy
 msgid ""
 "Erode: performs \"thinning\" of input image.\n"
 "Dilate: performs \"fattening\" of input image."
@@ -19069,11 +19051,11 @@ msgstr "tutti"
 
 #: ../src/ui/dialog/glyphs.cpp:57
 msgid "common"
-msgstr ""
+msgstr "common"
 
 #: ../src/ui/dialog/glyphs.cpp:58
 msgid "inherited"
-msgstr ""
+msgstr "inherited"
 
 #: ../src/ui/dialog/glyphs.cpp:59 ../src/ui/dialog/glyphs.cpp:242
 msgid "Arabic"
@@ -19397,11 +19379,11 @@ msgstr "Aramaico imperiale"
 
 #: ../src/ui/dialog/glyphs.cpp:139
 msgid "Inscriptional Pahlavi"
-msgstr ""
+msgstr "Inscriptional Pahlavi"
 
 #: ../src/ui/dialog/glyphs.cpp:140
 msgid "Inscriptional Parthian"
-msgstr ""
+msgstr "Inscriptional Parthian"
 
 #: ../src/ui/dialog/glyphs.cpp:141 ../src/ui/dialog/glyphs.cpp:358
 msgid "Javanese"
@@ -19592,14 +19574,12 @@ msgid "Old Hungarian"
 msgstr "Ungherese antico"
 
 #: ../src/ui/dialog/glyphs.cpp:188
-#, fuzzy
 msgid "Signwriting"
-msgstr "Script"
+msgstr "Signwriting"
 
 #: ../src/ui/dialog/glyphs.cpp:226
-#, fuzzy
 msgid "Basic Plane"
-msgstr "Latino di base"
+msgstr ""
 
 #: ../src/ui/dialog/glyphs.cpp:227
 msgid "Extended Multilingual Plane"
@@ -19977,9 +19957,8 @@ msgid "Specials"
 msgstr "Speciali"
 
 #: ../src/ui/dialog/glyphs.cpp:382
-#, fuzzy
 msgid "Miscellaneous Symbols and Pictographs"
-msgstr "Vari Simboli e Frecce"
+msgstr "Vari Simboli e Pittogrammi"
 
 #: ../src/ui/dialog/glyphs.cpp:383
 msgid "Emoticons"
@@ -20002,7 +19981,6 @@ msgid "Geometric Shapes Extended"
 msgstr "Forme geometriche esteso"
 
 #: ../src/ui/dialog/glyphs.cpp:388
-#, fuzzy
 msgid "Supplemental Arrows-C"
 msgstr "Supplemento Frecce C"
 
@@ -20016,7 +19994,7 @@ msgstr "Simboli scacchi"
 
 #: ../src/ui/dialog/glyphs.cpp:391
 msgid "Symbols and Pictographs Extended-A"
-msgstr ""
+msgstr "Simboli e Pittogrammi esteso A"
 
 #: ../src/ui/dialog/glyphs.cpp:453
 msgid "Script: "
@@ -21267,13 +21245,13 @@ msgid "Enable cursor scaling"
 msgstr "Abilita ridimensionamento cursore"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1590
-#, fuzzy
 msgid ""
 "When off, cursor scaling is disabled. Cursor scaling may be broken when "
 "fractional scaling is enabled."
 msgstr ""
-"Quando disattivo, il ridimensionamento del cursore è disabilitato. Il "
-"ridimensionamento del cursore potrebbe essere"
+"Quando disattivato, il ridimensionamento del cursore è disabilitato. Il "
+"ridimensionamento del cursore potrebbe non funzionare correttamente quando un "
+"ridimensionamento frazionato è attivo."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1593
 msgid "Theme"
@@ -21374,11 +21352,8 @@ msgstr "Colori di evidenziazione utilizzati da alcuni temi di icone simboliche"
 #
 # File: ../src/ui/dialog/inkscape-preferences.cpp, line: 1208
 #: ../src/ui/dialog/inkscape-preferences.cpp:1732
-#, fuzzy
 msgid "Reset theme colors for some symbolic icon themes"
-msgstr ""
-"Reimposta i colori del tema utilizzati da alcuni temi di icone simboliche. Alcune "
-"icone richiedono riapertura"
+msgstr "Reimposta i colori del tema per alcuni temi di icone simboliche"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1735
 msgctxt "Icon size"
@@ -24188,6 +24163,18 @@ msgid ""
 "Note that the specification of this property is not finalized. Support and "
 "interpretation of these values varies between renderers."
 msgstr ""
+"La proprietà 'image-rendering' può influenzare il ridimensionamento delle "
+"bitmap:\n"
+"\t• 'auto': nessuna preferenza (l'immagine ridimensionata è solitamente fluida ma "
+"sfocata)\n"
+"\t• 'optimizeQuality': preferisce la qualità di rendering (solitamente fluida ma "
+"sfocata)\n"
+"\t• 'optimizeSpeed': preferisce la velocità di rendering (solitamente "
+"quadrettato)\n"
+"\t• 'crisp-edges': ridimensiona senza sfocare i lati (spesso quadrettato)\n"
+"\t• 'pixelated': renderizza quadrettato\n"
+"Nota che la specifica di questa proprietà non è finalizzata. Il supporto e "
+"l'interpretazione di questi valori varia tra i diversi renderer."
 
 #: ../src/ui/dialog/object-properties.cpp:245
 msgid "Check to make the object invisible"
@@ -24305,9 +24292,8 @@ msgid "Set object opacity"
 msgstr "Imposta opacità oggetto"
 
 #: ../src/ui/dialog/objects.cpp:1760
-#, fuzzy
 msgid "Set object isolation"
-msgstr "Imposta descrizione oggetto"
+msgstr "Imposta isolamento oggetto"
 
 #: ../src/ui/dialog/objects.cpp:1791
 msgid "Set object blend mode"
@@ -24738,9 +24724,8 @@ msgid "Units per em:"
 msgstr "Unità per em:"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:465
-#, fuzzy
 msgid "Display units per <italic>em</italic> (nominally width of 'M' character)"
-msgstr "Mostra unità per em (larghezza del carattere 'M')"
+msgstr "Mostra unità per em (nominalmente la larghezza del carattere 'M')"
 
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:466
 msgid "Ascent:"
@@ -25049,9 +25034,8 @@ msgid "Symbol set"
 msgstr "Set simboli"
 
 #: ../src/ui/dialog/symbols.cpp:145
-#, fuzzy
 msgid "Press 'Return' to start search."
-msgstr "Inizia una nuova ricerca."
+msgstr "Premi 'Invio' per iniziare la ricerca."
 
 #: ../src/ui/dialog/symbols.cpp:247
 msgid "Add Symbol from the current document."
@@ -30980,7 +30964,7 @@ msgid ""
 "evenodd)"
 msgstr ""
 "Qualsiasi autointersezione del tracciato o sottotracciati crea vuoti nel "
-"riempimento (fill-rule:evenodd)"
+"riempimento (fill-rule: evenodd)"
 
 #. TRANSLATORS: for info, see http://www.w3.org/TR/2000/CR-SVG-20000802/painting.html#FillRuleProperty
 #: ../src/ui/widget/paint-selector.cpp:196
@@ -35142,7 +35126,7 @@ msgid ""
 "The HPGL data contained unknown (unsupported) commands, there is a possibility "
 "that the drawing is missing some content."
 msgstr ""
-"I dati HPGL contengono comandi sconosciuti (non supportati), è  possibile che nel "
+"I dati HPGL contengono comandi sconosciuti (non supportati), è possibile che nel "
 "disegno manchino alcuni contenuti."
 
 #: ../share/extensions/hpgl_output.py:56
@@ -40278,12 +40262,10 @@ msgid ""
 msgstr ""
 
 #: ../share/extensions/output_scour.inx:73
-#, fuzzy
 msgid "IDs"
 msgstr "ID"
 
 #: ../share/extensions/output_scour.inx:76
-#, fuzzy
 msgid "Remove unused IDs"
 msgstr "Rimuovi ID non utilizzati"
 
@@ -40309,7 +40291,7 @@ msgid ""
 "become \"a\" if it is the most used element."
 msgstr ""
 "Minimizza la lunghezza degli ID usando solo lettere minuscole e assegnando i nomi "
-"più brevi agli elementi più referenziati. Per esempio,  \"linearGradient5621\" "
+"più brevi agli elementi più referenziati. Per esempio, \"linearGradient5621\" "
 "diventerà \"a\" se è l'elemento più utilizzato."
 
 #
