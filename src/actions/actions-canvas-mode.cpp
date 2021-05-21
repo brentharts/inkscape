@@ -9,7 +9,6 @@
  */
 
 #include <iostream>
-#include <functional>
 
 #include <giomm.h>  // Not <gtkmm.h>! To eventually allow a headless version!
 #include <glibmm/i18n.h>
@@ -37,6 +36,10 @@ canvas_set_display_mode(Inkscape::RenderMode value, InkscapeWindow *win, Glib::R
 {
     g_assert(value != Inkscape::RenderMode::size);
     saction->change_state((int)value);
+
+    // Save value as a preference
+    Inkscape::Preferences *pref = Inkscape::Preferences::get();
+    pref->setInt("/options/displaymode", (int)value);
 
     SPDesktop* dt = win->get_desktop();
     auto canvas = dt->getCanvas();
@@ -148,6 +151,13 @@ canvas_split_mode(int value, InkscapeWindow *win)
     if (!saction) {
         std::cerr << "canvas_split_mode: action 'canvas-split-mode' not SimpleAction!" << std::endl;
         return;
+    }
+
+    // If split mode is already set to the reqested mode, turn it off.
+    int old_value = -1;
+    saction->get_state(old_value);
+    if (value == old_value) {
+        value = (int)Inkscape::SplitMode::NORMAL;
     }
 
     saction->change_state(value);
@@ -262,15 +272,13 @@ std::vector<std::vector<Glib::ustring>> raw_data_canvas_mode =
     // clang-format on
 };
 
-using namespace std::placeholders;
-
 void
 add_actions_canvas_mode(InkscapeWindow* win)
 {
     // Sync action with desktop variables. TODO: Remove!
     auto prefs = Inkscape::Preferences::get();
 
-    int  display_mode = 0;
+    int  display_mode = prefs->getIntLimited("/options/displaymode", 0, 0, 4);  // Default, minimum, maximum
     bool color_manage = prefs->getBool("/options/displayprofile/enable");
 
     SPDesktop* dt = win->get_desktop();

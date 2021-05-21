@@ -58,7 +58,7 @@ enum class NodeType
  * class used for interfacing with Inkscape's documents. Everything that has to be stored
  * in the SVG has to go through this class at some point.
  *
- * Each node unconditionally has to belong to a document. There no "documentless" nodes,
+ * Each node unconditionally has to belong to a document. There are no "documentless" nodes,
  * and it's not possible to move nodes between documents - they have to be duplicated.
  * Each node can only refer to the nodes in the same document. Name of the node is immutable,
  * it cannot be changed after its creation. Same goes for the type of the node. To simplify
@@ -71,8 +71,7 @@ enum class NodeType
  * To create new nodes, use the methods of the Inkscape::XML::Document class. You can obtain
  * the nodes' document using the document() method. To destroy a node, just unparent it
  * by calling sp_repr_unparent() or node->parent->removeChild() and release any references
- * to it. The garbage collector will reclaim the memory in the next pass. There are additional
- * convenience functions defined in @ref xml/repr.h
+ * to it. The garbage collector will reclaim the memory in the next pass.
  *
  * In addition to regular DOM manipulations, you can register observer objects that will
  * receive notifications about changes made to the node. See the NodeObserver class.
@@ -218,11 +217,11 @@ public:
      *
      * \return true if the attr was set, false otherwise.
      */
-    bool getAttributeBoolean(Util::const_char_ptr key, bool *val) const;
+    bool getAttributeBoolean(Util::const_char_ptr key, bool default_value = false) const;
 
-    bool getAttributeInt(Util::const_char_ptr key, int *val) const;
+    int getAttributeInt(Util::const_char_ptr key, int default_value = 0) const;
 
-    bool getAttributeDouble(Util::const_char_ptr key, double *val) const;
+    double getAttributeDouble(Util::const_char_ptr key, double default_value = 0.0) const;
 
     bool setAttributeBoolean(Util::const_char_ptr key, bool val);
 
@@ -249,7 +248,7 @@ public:
 
     bool setAttributePoint(Util::const_char_ptr key, Geom::Point const &val);
 
-    bool getAttributePoint(Util::const_char_ptr key, Geom::Point *val) const;
+    Geom::Point getAttributePoint(Util::const_char_ptr key, Geom::Point default_value = {}) const;
 
     /**
      * @brief Change an attribute of this node. Empty string deletes the attribute.

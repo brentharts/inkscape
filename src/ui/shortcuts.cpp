@@ -296,7 +296,12 @@ Shortcuts::_read(XML::Node const &keysnode, bool user_set)
         gchar const *keys    = iter->attribute("keys");
         if (gaction && keys) {
 
-            std::vector<Glib::ustring> key_vector = Glib::Regex::split_simple("\\s*,\\s*", keys);
+            // Trim leading spaces
+            Glib::ustring Keys = keys;
+            auto p = Keys.find_first_not_of(" ");
+            Keys = Keys.erase(0, p);
+
+            std::vector<Glib::ustring> key_vector = Glib::Regex::split_simple("\\s*,\\s*", Keys);
             // Set one shortcut at a time so we can check if it has been previously used.
             for (auto key : key_vector) {
                 add_shortcut(gaction, key, user_set);
@@ -988,8 +993,23 @@ Shortcuts::update_gui_text_recursive(Gtk::Widget* widget)
     if (is_actionable) {
         const gchar* gaction = gtk_actionable_get_action_name(GTK_ACTIONABLE(gwidget));
         if (gaction) {
-
             Glib::ustring action = gaction;
+
+            Glib::ustring variant;
+            GVariant* gvariant = gtk_actionable_get_action_target_value(GTK_ACTIONABLE(gwidget));
+            if (gvariant) {
+                Glib::ustring type = g_variant_get_type_string(gvariant);
+                if (type == "s") {
+                    variant = g_variant_get_string(gvariant, nullptr);
+                    action += "('" + variant + "')";
+                } else if (type == "i") {
+                    variant = std::to_string(g_variant_get_int32(gvariant));
+                    action += "(" + variant + ")";
+                } else {
+                    std::cerr << "Shortcuts::update_gui_text_recursive: unhandled variant type: " << type << std::endl;
+                }
+            }
+
             std::vector<Glib::ustring> accels = app->get_accels_for_action(action);
 
             Glib::ustring tooltip;

@@ -230,8 +230,7 @@ ConnectorToolbar::orthogonal_toggled()
         SPItem *item = *i;
 
         if (Inkscape::UI::Tools::cc_item_is_connector(item)) {
-            item->setAttribute( "inkscape:connector-type",
-                    value, nullptr);
+            item->setAttribute( "inkscape:connector-type", value);
             item->getAvoidRef().handleSettingChange();
             modmade = true;
         }
@@ -277,8 +276,7 @@ ConnectorToolbar::curvature_changed()
         SPItem *item = *i;
 
         if (Inkscape::UI::Tools::cc_item_is_connector(item)) {
-            item->setAttribute( "inkscape:connector-curvature",
-                    value, nullptr);
+            item->setAttribute( "inkscape:connector-curvature", value);
             item->getAvoidRef().handleSettingChange();
             modmade = true;
         }
@@ -412,8 +410,7 @@ ConnectorToolbar::event_attr_changed(Inkscape::XML::Node *repr,
 
     if ( !toolbar->_freeze
          && (strcmp(name, "inkscape:connector-spacing") == 0) ) {
-        gdouble spacing = defaultConnSpacing;
-        repr->getAttributeDouble("inkscape:connector-spacing", &spacing);
+        gdouble spacing = repr->getAttributeDouble("inkscape:connector-spacing", defaultConnSpacing);
 
         toolbar->_spacing_adj->set_value(spacing);
 

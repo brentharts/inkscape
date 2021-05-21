@@ -383,9 +383,6 @@ SPDocument *SPDocument::createDoc(Inkscape::XML::Document *rdoc,
     nv->setDefaultAttribute("pagecolor",                 "/template/base/pagecolor", "");
     nv->setDefaultAttribute("bordercolor",               "/template/base/bordercolor", "");
     nv->setDefaultAttribute("borderopacity",             "/template/base/borderopacity", "");
-    nv->setDefaultAttribute("objecttolerance",           "/template/base/objecttolerance", "10.0");
-    nv->setDefaultAttribute("gridtolerance",             "/template/base/gridtolerance", "10.0");
-    nv->setDefaultAttribute("guidetolerance",            "/template/base/guidetolerance", "10.0");
     nv->setDefaultAttribute("inkscape:pageshadow",       "/template/base/pageshadow", "2");
     nv->setDefaultAttribute("inkscape:pageopacity",      "/template/base/pageopacity", "0.0");
     nv->setDefaultAttribute("inkscape:pagecheckerboard", "/template/base/pagecheckerboard", "0");
@@ -1009,37 +1006,6 @@ void SPDocument::bindObjectToId(gchar const *id, SPObject *object) {
             id_changed_signals.erase(pos);
         }
     }
-}
-
-/**  
- * Assign IDs to selected objects that don't have an ID attribute
- * Checks if the object's id attribute is NULL. If it is, assign it a unique ID
- */
-void SPDocument::enforceObjectIds()
-{
-    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
-    Inkscape::Selection *selection = desktop->getSelection();
-    bool showInfoDialog = false;
-    Glib::ustring msg = _("Selected objects require IDs.\nThe following IDs have been assigned:\n");
-    auto items = selection->items();
-    for (auto iter = items.begin(); iter != items.end(); ++iter) {
-        SPItem *item = *iter;
-        if(!item->getId())
-        {
-            // Selected object does not have an ID, so assign it a unique ID
-            gchar *id = sp_object_get_unique_id(item, nullptr);
-            item->setAttribute("id", id);
-            item->updateRepr();
-            msg += Glib::ustring::compose(_(" %1\n"), id);
-            g_free(id);
-            showInfoDialog = true;
-        }
-    }
-    if(showInfoDialog) {
-        desktop->showInfoDialog(msg);
-        setModifiedSinceSave(true);
-    }
-    return;
 }
 
 SPObject *SPDocument::getObjectById(Glib::ustring const &id) const

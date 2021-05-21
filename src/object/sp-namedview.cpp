@@ -994,14 +994,9 @@ static void sp_namedview_lock_single_guide(SPGuide* guide, bool locked)
 
 void sp_namedview_toggle_guides(SPDocument *doc, SPNamedView *namedview)
 {
-    bool v;
     Inkscape::XML::Node *repr = namedview->getRepr();
-    unsigned int set = repr->getAttributeBoolean("showguides", &v);
-    if (!set) { // hide guides if not specified, for backwards compatibility
-        v = FALSE;
-    } else {
-        v = !v;
-    }
+    bool v = repr->getAttributeBoolean("showguides", true);
+    v = !v;
 
     bool saved = DocumentUndo::getUndoSensitive(doc);
     DocumentUndo::setUndoSensitive(doc, false);
@@ -1019,14 +1014,9 @@ void sp_namedview_toggle_guides(SPDocument *doc, SPNamedView *namedview)
 
 void sp_namedview_guides_toggle_lock(SPDocument *doc, SPNamedView * namedview)
 {
-    bool v;
     Inkscape::XML::Node *repr = namedview->getRepr();
-    unsigned int set = repr->getAttributeBoolean("inkscape:lockguides", &v);
-    if (!set) { // hide guides if not specified, for backwards compatibility
-        v = true;
-    } else {
-        v = !v;
-    }
+    bool v = repr->getAttributeBoolean("inkscape:lockguides", false);
+    v = !v;
 
     bool saved = DocumentUndo::getUndoSensitive(doc);
     DocumentUndo::setUndoSensitive(doc, false);
@@ -1057,9 +1047,7 @@ void sp_namedview_show_grids(SPNamedView * namedview, bool show, bool dirty_docu
 
 gchar const *SPNamedView::getName() const
 {
-    SPException ex;
-    SP_EXCEPTION_INIT(&ex);
-    return this->getAttribute("id", &ex);
+    return this->getAttribute("id");
 }
 
 guint SPNamedView::getViewCount()
@@ -1139,13 +1127,8 @@ void SPNamedView::setGuides(bool v)
 bool SPNamedView::getGuides()
 {
     g_assert(this->getRepr() != nullptr);
-    bool v;
-    unsigned int set = this->getRepr()->getAttributeBoolean("showguides", &v);
-    if (!set) { // show guides if not specified, for backwards compatibility
-        v = TRUE;
-    }
-
-    return v;
+    // show guides if not specified, for backwards compatibility
+    return this->getRepr()->getAttributeBoolean("showguides", true);
 }
 
 void SPNamedView::lockGuides()
