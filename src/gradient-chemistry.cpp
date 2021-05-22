@@ -1242,6 +1242,23 @@ void sp_item_gradient_invert_vector_color(SPItem *item, Inkscape::PaintTarget fi
     }
 }
 
+// HACK: linear and radial gradients may have first and/or last stops moved from their default positions
+// of 0 and 1 respectively; this is not what gradient tool was built to handle; instead of making extensive
+// changes to try to fix it, this hack just makes sure that midpoint draggers don't move to the true 0/1 limits;
+// with that, code relying on sp_get_stop_i will work correctly
+double midpoint_offset_hack(double offset) {
+    const double EPS = 0.0001;
+
+    if (offset <= 0) {
+        offset = EPS;
+    }
+    else if (offset >= 1) {
+        offset = 1 - EPS;
+    }
+
+    return offset;
+}
+
 /**
 Set the position of point point_type of the gradient applied to item (either fill_or_stroke) to
 p_w (in desktop coordinates). Write_repr if you want the change to become permanent.
@@ -1311,6 +1328,7 @@ void sp_item_gradient_set_coords(SPItem *item, GrPointType point_type, guint poi
                 Geom::Point begin(lg->x1.computed, lg->y1.computed);
                 Geom::Point end(lg->x2.computed, lg->y2.computed);
                 double offset = Geom::LineSegment(begin, end).nearestTime(p);
+                offset = midpoint_offset_hack(offset);
                 SPGradient *vector = sp_gradient_get_forked_vector_if_necessary (lg, false);
                 lg->ensureVector();
                 lg->vector.stops.at(point_i).offset = offset;
@@ -1407,6 +1425,7 @@ void sp_item_gradient_set_coords(SPItem *item, GrPointType point_type, guint poi
                 Geom::Point start = Geom::Point (rg->cx.computed, rg->cy.computed);
                 Geom::Point end   = Geom::Point (rg->cx.computed + rg->r.computed, rg->cy.computed);
                 double offset = Geom::LineSegment(start, end).nearestTime(p);
+                offset = midpoint_offset_hack(offset);
                 SPGradient *vector = sp_gradient_get_forked_vector_if_necessary (rg, false);
                 rg->ensureVector();
                 rg->vector.stops.at(point_i).offset = offset;
@@ -1425,6 +1444,7 @@ void sp_item_gradient_set_coords(SPItem *item, GrPointType point_type, guint poi
                 Geom::Point start = Geom::Point (rg->cx.computed, rg->cy.computed);
                 Geom::Point end   = Geom::Point (rg->cx.computed, rg->cy.computed - rg->r.computed);
                 double offset = Geom::LineSegment(start, end).nearestTime(p);
+                offset = midpoint_offset_hack(offset);
                 SPGradient *vector = sp_gradient_get_forked_vector_if_necessary(rg, false);
                 rg->ensureVector();
                 rg->vector.stops.at(point_i).offset = offset;
