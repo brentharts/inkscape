@@ -259,8 +259,8 @@ GradientEditor::GradientEditor(const char* prefs) :
     set_icon(_add_stop, "list-add");
     _add_stop.signal_clicked().connect([=](){
         if (auto row = current_stop()) {
-            SPStop* stop = row->get_value(_stopObj);
-            add_stop(stop);
+            auto index = row->get_value(_stopIdx);
+            add_stop(static_cast<int>(index));
         }
     });
 
@@ -325,8 +325,12 @@ GradientEditor::~GradientEditor() {
 void GradientEditor::set_stop_color(SPColor color, float opacity) {
     if (_update.pending()) return;
 
+    SPGradient* vector = get_gradient_vector();
+    if (!vector) return;
+
     if (auto row = current_stop()) {
-        SPStop* stop = row->get_value(_stopObj);
+        auto index = row->get_value(_stopIdx);
+        SPStop* stop = sp_get_nth_stop(vector, index);
         if (stop && _document) {
             auto scoped(_update.block());
 
@@ -350,9 +354,8 @@ std::optional<Gtk::TreeRow> GradientEditor::current_stop() {
 }
 
 SPStop* GradientEditor::get_nth_stop(size_t index) {
-    const auto& v = _stop_list_store->children();
-    if (index < v.size()) {
-        return v[index]->get_value(_stopObj);
+    if (SPGradient* vector = get_gradient_vector()) {
+        return sp_get_nth_stop(vector, index);
     }
     return nullptr;
 }
@@ -405,12 +408,14 @@ void GradientEditor::insert_stop_at(double offset) {
     }
 }
 
-void GradientEditor::add_stop(SPStop* current) {
+void GradientEditor::add_stop(int index) {
     if (SPGradient* vector = get_gradient_vector()) {
-        SPStop* stop = sp_gradient_add_stop(vector, current);
-        // just select next stop; newly added stop will be in a list view after selection refresh (on idle)
-        select_stop(sp_number_of_stops_before_stop(vector, stop));
-        fire_stop_selected(stop);
+        if (SPStop* current = sp_get_nth_stop(vector, index)) {
+            SPStop* stop = sp_gradient_add_stop(vector, current);
+            // just select next stop; newly added stop will be in a list view after selection refresh (on idle)
+            select_stop(sp_number_of_stops_before_stop(vector, stop));
+            fire_stop_selected(stop);
+        }
     }
 }
 
@@ -529,7 +534,8 @@ void GradientEditor::selectStop(SPStop* selected) {
 }
 
 SPGradient* GradientEditor::get_gradient_vector() {
-    return _gradient ? _gradient->getVector() : nullptr;
+    if (!_gradient) return nullptr;
+    return sp_gradient_get_forked_vector_if_necessary(_gradient, false);
 }
 
 void GradientEditor::set_gradient(SPGradient* gradient) {

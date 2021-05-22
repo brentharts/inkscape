@@ -58,7 +58,7 @@ private:
     void set_gradient(SPGradient* gradient);
     void stop_selected();
     void insert_stop_at(double offset);
-    void add_stop(SPStop* current);
+    void add_stop(int index);
     void duplicate_stop();
     void delete_stop(int index);
     void toggle_stops();
