@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: Inkscape 1.1\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
 "POT-Creation-Date: 2021-05-09 14:58+0000\n"
-"PO-Revision-Date: 2021-05-21 11:07+0200\n"
+"PO-Revision-Date: 2021-05-22 12:48+0200\n"
 "Last-Translator: Firas Hanife <firashanife@gmail.com>\n"
 "Language-Team: \n"
 "Language: it\n"
@@ -5393,14 +5393,12 @@ msgid "text baseline"
 msgstr "linea base del testo"
 
 #: ../src/display/control/snap-indicator.cpp:172
-#, fuzzy
 msgid "constrained angle"
-msgstr "Angolo di rotazione"
+msgstr "angolo vincolato"
 
 #: ../src/display/control/snap-indicator.cpp:175
-#, fuzzy
 msgid "constraint"
-msgstr "Costante"
+msgstr "vincolo"
 
 #: ../src/display/control/snap-indicator.cpp:189
 msgid "Bounding box corner"
@@ -9046,6 +9044,27 @@ msgid ""
 "More information about this change are available in the <a href='https://inkscape."
 "org/en/learn/faq#dpi_change'>Inkscape FAQ</a></small>"
 msgstr ""
+"<small>Inkscape è stato aggiornato per seguire gli standard CSS a 96 DPI per una "
+"miglior compatibilità nei browser invece dei precedenti 90 DPI. I progetti "
+"destinati agli schermi\n"
+"saranno convertiti a 96 DPI senza ridimensionare e non dovrebbe causare "
+"alterazioni.\n"
+"I progetti disegnati a 90 DPI per una specifica dimensione fisica saranno troppo "
+"piccoli se convertiti a 96 DPI senza applicare alcun ridimensionamento. Sono "
+"disponibili due metodi di ridimensionamento:\n"
+"\n"
+"<b>Ridimensiona l'intero documento:</b> Il metodo più sicuro che preserva "
+"l'aspetto del disegno inclusi i filtri, la posizione delle maschere, ecc. \n"
+"La scala del disegno rispetto alla dimensione del documento potrebbe non essere "
+"accurata.\n"
+"\n"
+"<b>Ridimensiona elementi singoli nel progetto:</b> Questo metodo è meno "
+"affidabile e può causare delle modifiche all'aspetto del disegno, \n"
+"ma è più adatto per output fisici che necessitano di dimensioni e posizioni "
+"precise (come per la stampa 3D).\n"
+"\n"
+"Ulteriori informazioni su questo aggiornamento sono disponibili nelle <a "
+"href='https://inkscape.org/en/learn/faq#dpi_change'>FAQ di Inkscape</a></small>"
 
 #: ../src/file-update.cpp:460
 msgid "OK"
@@ -14009,27 +14028,24 @@ msgid "Change bool parameter"
 msgstr "Modifica parametri booleani"
 
 #: ../src/live_effects/parameter/colorpicker.cpp:123
-#, fuzzy
 msgid "Change color button parameter"
-msgstr "Cambia bottone parametro"
+msgstr "Modifica parametri bottone colore"
 
 #: ../src/live_effects/parameter/enum.h:53
 msgid "Change enumeration parameter"
-msgstr "Cambia parametri enumerazione"
+msgstr "Modifica parametri enumerazione"
 
 #: ../src/live_effects/parameter/fontbutton.cpp:79
-#, fuzzy
 msgid "Change font button parameter"
-msgstr "Cambia bottone parametro"
+msgstr "Modifica parametri bottone carattere"
 
 #: ../src/live_effects/parameter/item.cpp:156
 msgid "Link to item on clipboard"
 msgstr "Collega a oggetto negli appunti"
 
 #: ../src/live_effects/parameter/item.cpp:289
-#, fuzzy
 msgid "Link item parameter to path"
-msgstr "Lega il parametro del tracciato al parametro"
+msgstr "Collega parametro oggetto a tracciato"
 
 #: ../src/live_effects/parameter/originalitem.cpp:61
 #: ../src/live_effects/parameter/originalitemarray.cpp:145
@@ -14056,9 +14072,8 @@ msgid "Name"
 msgstr "Nome"
 
 #: ../src/live_effects/parameter/originalitemarray.cpp:120
-#, fuzzy
 msgid "Link item parameter to item"
-msgstr "Lega il parametro dell'oggetto all'oggetto"
+msgstr "Collega parametro oggetto a oggetto"
 
 #: ../src/live_effects/parameter/originalitemarray.cpp:157
 msgid "Remove Item"
@@ -14089,9 +14104,8 @@ msgid "Remove item"
 msgstr "Rimuovi oggetto"
 
 #: ../src/live_effects/parameter/originalitemarray.cpp:305
-#, fuzzy
 msgid "Link itemarray parameter to item"
-msgstr "Lega il parametro del tracciato al parametro"
+msgstr "Collega parametro array-oggetto a oggetto"
 
 #: ../src/live_effects/parameter/originalpath.cpp:64
 #: ../src/live_effects/parameter/originalpatharray.cpp:183
@@ -14134,9 +14148,8 @@ msgid "Remove path"
 msgstr "Rimuovi tracciato"
 
 #: ../src/live_effects/parameter/originalpatharray.cpp:339
-#, fuzzy
 msgid "Link patharray parameter to path"
-msgstr "Lega il parametro del tracciato al tracciato"
+msgstr "Collega parametro array-tracciato a tracciato"
 
 #: ../src/live_effects/parameter/path.cpp:222
 msgid "Edit on-canvas"
@@ -14526,14 +14539,12 @@ msgid "Conditional Group"
 msgstr "Gruppo condizionale"
 
 #: ../src/object/sp-text.cpp:331
-#, fuzzy
 msgid "Auto-wrapped text"
-msgstr "Aggiungi testo"
+msgstr "Testo avvolto automaticamente"
 
 #: ../src/object/sp-text.cpp:333
-#, fuzzy
 msgid "Text in-a-shape"
-msgstr "Fluisci testo in struttura"
+msgstr "Testo in struttura"
 
 #: ../src/object/sp-text.cpp:335 ../src/verbs.cpp:355
 #: ../share/extensions/hershey.inx:125 ../share/extensions/lorem_ipsum.inx:19
@@ -14569,9 +14580,8 @@ msgid "[orphaned]"
 msgstr "[orfano]"
 
 #: ../src/object/sp-tspan.cpp:235
-#, fuzzy
 msgid "Text Span"
-msgstr "Input testo"
+msgstr ""
 
 #: ../src/object/sp-use.cpp:234 ../share/extensions/render_barcode_qrcode.inx:42
 msgid "Symbol"
@@ -15060,7 +15070,7 @@ msgstr "Selezione <b>non in un gruppo</b>."
 
 #: ../src/selection-chemistry.cpp:859
 msgid "Objects in selection must have the same grandparents."
-msgstr ""
+msgstr "Gli oggetti nella selezione devono avere gli stessi genitori."
 
 #: ../src/selection-chemistry.cpp:867
 msgid "Pop selection from group"
@@ -17886,7 +17896,6 @@ msgid "Enable preview"
 msgstr "Attiva anteprima"
 
 #: ../src/ui/dialog/filedialogimpl-gtkmm.cpp:129
-#, fuzzy
 msgid "Export as SVG 1.1 per settings in Preferences dialog"
 msgstr "Esporta come SVG 1.1 secondo le impostazioni in Preferenze"
 
@@ -18000,14 +18009,12 @@ msgid "This SVG filter effect is not yet implemented in Inkscape."
 msgstr "Questo filtro SVG non è ancora implementato in Inkscape."
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:1026
-#, fuzzy
 msgid "Slope"
-msgstr "Imbusta"
+msgstr "Pendenza"
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:1027
-#, fuzzy
 msgid "Intercept"
-msgstr "Interfaccia"
+msgstr "Intercetta"
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:1030
 msgid "Amplitude"
@@ -18018,9 +18025,8 @@ msgid "Exponent"
 msgstr "Esponente"
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:1127
-#, fuzzy
 msgid "New transfer function type"
-msgstr "Tipo operazione booleana"
+msgstr "Nuovo tipo funzione trasferimento"
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:1162
 msgid "Light Source:"
@@ -19579,15 +19585,15 @@ msgstr "Signwriting"
 
 #: ../src/ui/dialog/glyphs.cpp:226
 msgid "Basic Plane"
-msgstr ""
+msgstr "Basic Plane"
 
 #: ../src/ui/dialog/glyphs.cpp:227
 msgid "Extended Multilingual Plane"
-msgstr ""
+msgstr "Extended Multilingual Plane"
 
 #: ../src/ui/dialog/glyphs.cpp:228
 msgid "Supplementary Ideographic Plane"
-msgstr ""
+msgstr "Supplementary Ideographic Plane"
 
 #: ../src/ui/dialog/glyphs.cpp:230
 msgid "Basic Latin"
@@ -19922,19 +19928,16 @@ msgid "Arabic Presentation Forms-A"
 msgstr ""
 
 #: ../src/ui/dialog/glyphs.cpp:372
-#, fuzzy
 msgid "Variation Selectors"
-msgstr "Adatta pagina alla selezione"
+msgstr ""
 
 #: ../src/ui/dialog/glyphs.cpp:373
-#, fuzzy
 msgid "Vertical Forms"
-msgstr "Raggio verticale"
+msgstr "Forme verticali"
 
 #: ../src/ui/dialog/glyphs.cpp:374
-#, fuzzy
 msgid "Combining Half Marks"
-msgstr "Margini di stampa"
+msgstr ""
 
 #: ../src/ui/dialog/glyphs.cpp:375
 msgid "CJK Compatibility Forms"
@@ -25114,7 +25117,6 @@ msgid "Unnamed Symbols"
 msgstr "Simboli senza nome"
 
 #: ../src/ui/dialog/symbols.cpp:928
-#, fuzzy
 msgid "notitle_"
 msgstr "nessunTitolo_"
 
@@ -25318,16 +25320,15 @@ msgid "Rotate in a clockwise direction"
 msgstr "Ruota in senso orario"
 
 #: ../src/ui/dialog/transformation.cpp:353
-#, fuzzy
 msgid "E and F units"
-msgstr "Unità della griglia"
+msgstr "Unità E e F"
 
 #: ../src/ui/dialog/transformation.cpp:818 ../src/ui/dialog/transformation.cpp:829
 #: ../src/ui/dialog/transformation.cpp:846 ../src/ui/dialog/transformation.cpp:866
 #: ../src/ui/dialog/transformation.cpp:877 ../src/ui/dialog/transformation.cpp:890
 #: ../src/ui/dialog/transformation.cpp:914
 msgid "Transform matrix is singular, <b>not used</b>."
-msgstr ""
+msgstr "La matrice di trasformazione è singolare, <b>non utilizzata</b>."
 
 #: ../src/ui/dialog/transformation.cpp:930
 msgid "Edit transformation matrix"
@@ -27737,9 +27738,8 @@ msgid "Shape of new paths drawn by this tool"
 msgstr "Forma dei nuovi tracciati disegnati con questo strumento"
 
 #: ../src/ui/toolbar/pencil-toolbar.cpp:446
-#, fuzzy
 msgid "Scale of the width of the power stroke shape."
-msgstr "Ridimensiona la larghezza del tracciato di cucitura"
+msgstr "Ridimensiona la larghezza della forma del contorno evoluto"
 
 #: ../src/ui/toolbar/pencil-toolbar.cpp:515
 msgctxt "Cap"
@@ -29383,7 +29383,7 @@ msgstr "Non selezionato"
 
 #: ../src/ui/tools/measure-tool.cpp:1218
 msgid "Press 'CTRL' to measure into group"
-msgstr ""
+msgstr "Premi 'Ctrl' per misurare all'interno del gruppo"
 
 #: ../src/ui/tools/measure-tool.cpp:1420 ../src/ui/tools/measure-tool.cpp:1422
 #, c-format
@@ -30780,9 +30780,8 @@ msgid "None"
 msgstr "Nessuno"
 
 #: ../src/ui/widget/object-composite-settings.cpp:143
-#, fuzzy
 msgid "Change blur/blend filter"
-msgstr "Modifica sfocatura"
+msgstr "Modifica filtro sfocatura/miscela"
 
 #: ../src/ui/widget/object-composite-settings.cpp:175
 #: ../src/ui/widget/selected-style.cpp:872 ../src/ui/widget/selected-style.cpp:1180
@@ -30790,9 +30789,8 @@ msgid "Change opacity"
 msgstr "Modifica opacità"
 
 #: ../src/ui/widget/object-composite-settings.cpp:205
-#, fuzzy
 msgid "Change isolation"
-msgstr "Modifica definizione colore"
+msgstr "Modifica isolamento"
 
 #: ../src/ui/widget/page-sizer.cpp:44
 msgid "U_nits:"
@@ -34105,7 +34103,6 @@ msgstr "Clicca per copiare"
 #
 # File: ../src/ui/tool/node.cpp, line: 611
 #: ../share/ui/command-palette-operation.glade:86
-#, fuzzy
 msgid "Ctrl+F"
 msgstr "Ctrl+F"
 
@@ -34198,6 +34195,34 @@ msgid ""
 "  4) If your goal is to get few nodes and good precision, manual tracing is "
 "always best.\n"
 msgstr ""
+"\n"
+"  Questa finestra permette di convertire automaticamente una grafica raster in "
+"tracciati vettoriali. Sono disponibili diverse opzioni a seconda delle "
+"necessità:\n"
+" * \"Soglia luminosità\" rileva le aree più scure della soglia e crea un "
+"tracciato che le racchiuda (usando potrace).\n"
+" * \"Rilevamento bordo\" rileva cambiamenti maggiori alla soglia indicata nella "
+"luminosità delle aree di colore e crea dei tracciati per separarle (usando "
+"potrace).\n"
+" * \"Quantizzazione colore\" separa l'immagine nel numero di colori indicato e li "
+"separa con un tracciato (usando potrace).\n"
+" * \"Autotrace\" usa l'algoritmo autotrace con le opzioni indicate.\n"
+" * \"Traccia linea centrale\" tenta di vettorizzare un disegno lineare (con "
+"autotrace).\n"
+" * \"Scansioni multiple\" offre opzioni per separare l'immagine in un numero di "
+"scansioni a seconda di luminosità, colori o livelli di grigio (usando potrace), o "
+"usando l'algoritmo autotrace, e ne crea diversi tracciati.\n"
+" *  \"Pixel art\" permette di usare un algoritmo per il riconoscimento dei pixel "
+"o uno per rimuovere l'effetto pixel per vettorizzare immagini pixel art.\n"
+"\n"
+" * NOTE:\n"
+"  1) Salva il progetto prima di procedere.\n"
+"  2) Controlla il numero di pixel: \"Pixel art\" può generare fino ad un "
+"tracciato per pixel. Non è consigliato per immagini non pixel art.\n"
+"  3) Autotrace è più lento di potrace, non è consigliato per grandi immagini. "
+"Aumentare prima il contrasto delle immagini è consigliato.\n"
+"  4) Se l'obiettivo è quello di avere pochi nodi e una buona precisione, il "
+"tracciamento manuale è sempre migliore.\n"
 
 #: ../share/ui/dialog-trace.glade:135
 msgid "Create a single path or create a group of paths"
@@ -34348,43 +34373,47 @@ msgstr ""
 
 #: ../share/ui/dialog-trace.glade:717
 msgid "Favors connections that are part of a long curve"
-msgstr ""
+msgstr "Favorisce le connessioni parte di una lunga curva"
 
 #: ../share/ui/dialog-trace.glade:718
 msgid "Curves (multiplier)"
-msgstr ""
+msgstr "Curve (moltiplicatore)"
 
 #: ../share/ui/dialog-trace.glade:729
 msgid "Avoid single disconnected pixels"
-msgstr ""
+msgstr "Evita i pixel singoli disconnessi"
 
 #: ../share/ui/dialog-trace.glade:730
 msgid "Islands (weight)"
-msgstr ""
+msgstr "Aree (peso)"
 
 #: ../share/ui/dialog-trace.glade:741 ../share/ui/dialog-trace.glade:754
 msgid "Favors connections that are part of foreground color"
-msgstr ""
+msgstr "Favorisce le connessioni parte del colore in primo piano"
 
 #: ../share/ui/dialog-trace.glade:742
 msgid ""
 "Sparse pixels\n"
 "(window radius)"
 msgstr ""
+"Pixel sparsi\n"
+"(raggio finestra)"
 
 #: ../share/ui/dialog-trace.glade:755
 msgid ""
 "Sparse pixels\n"
 "(multiplier)"
 msgstr ""
+"Pixel sparsi\n"
+"(moltiplicatore)"
 
 #: ../share/ui/dialog-trace.glade:767 ../share/ui/dialog-trace.glade:810
 msgid "The heuristic computed vote will be multiplied by this value"
-msgstr ""
+msgstr "Il valore euristico calcolato sarà moltiplicato per questo valore"
 
 #: ../share/ui/dialog-trace.glade:782
 msgid "A constant vote value"
-msgstr ""
+msgstr "Un valore costante"
 
 #: ../share/ui/dialog-trace.glade:796
 msgid "The radius of the window analyzed"
@@ -34404,7 +34433,7 @@ msgstr "Voronoi"
 
 #: ../share/ui/dialog-trace.glade:866
 msgid "Output composed of straight lines"
-msgstr ""
+msgstr "L'output è composto da linee dritte"
 
 #: ../share/ui/dialog-trace.glade:879
 msgid "B-splines"
@@ -34412,11 +34441,11 @@ msgstr "BSpline"
 
 #: ../share/ui/dialog-trace.glade:883
 msgid "Preserve staircasing artifacts"
-msgstr ""
+msgstr "Evita artefatti a gradini"
 
 #: ../share/ui/dialog-trace.glade:905
 msgid "Pixel art"
-msgstr ""
+msgstr "Pixel art"
 
 #: ../share/ui/dialog-trace.glade:990
 msgid "SIOX"
@@ -34432,7 +34461,7 @@ msgstr "Inkscape. Draw freely."
 
 #: ../share/ui/inkscape-about.glade:55
 msgid "Official splash artwork of this version"
-msgstr ""
+msgstr "Artwork ufficiale di questa versione"
 
 #: ../share/ui/inkscape-about.glade:57 ../share/extensions/gcodetools_about.inx:4
 #: ../share/extensions/gcodetools_about.inx:8
@@ -35113,9 +35142,8 @@ msgid "Movements"
 msgstr "Movimenti"
 
 #: ../share/extensions/hpgl_decoder.py:41
-#, fuzzy
 msgid "Pen "
-msgstr "Inerzia pennino"
+msgstr ""
 
 #: ../share/extensions/hpgl_input.py:47
 msgid "No HPGL data found."
@@ -35201,10 +35229,8 @@ msgstr ""
 "get_center_position()` al suo posto."
 
 #: ../share/extensions/inkex/deprecated.py:132
-#, fuzzy
 msgid "{} is now a dict in the SvgDocumentElement class. Use `self.svg.selected`."
-msgstr ""
-"{} ora è un metodo del documento svg. Usare `self.svg.get_ids()` al suo posto."
+msgstr "{} ora è un dict della classe SvgDocumentElement. Usa `self.svg.selected`."
 
 #: ../share/extensions/inkex/deprecated.py:137
 msgid ""
@@ -35261,13 +35287,12 @@ msgstr ""
 "namedview` per accedere a questo elemento."
 
 #: ../share/extensions/inkex/deprecated.py:175
-#, fuzzy
 msgid ""
 "{} is now a method of the namedview element object. Use `self.svg.namedview."
 "add(Guide().move_to(x, y, a))` instead."
 msgstr ""
 "{} ora è un metodo dell'oggetto namedview element. Usare `self.svg.namedview."
-"add(Guide().move_to(x, y, a))` al suo posto"
+"add(Guide().move_to(x, y, a))` al suo posto."
 
 #
 # File: ../share/extensions/inkex/deprecated.py, line: 178
@@ -35349,9 +35374,8 @@ msgid "Bad values for a number field: {}, {}."
 msgstr "Valore non valido per un campo numerico: {}, {}."
 
 #: ../share/extensions/interp_att_g.py:113
-#, fuzzy
 msgid "You selected 'Other'. Please enter an attribute to interpolate."
-msgstr "Tutti quelli selezionati impostano un attributo all'ultimo"
+msgstr ""
 
 #: ../share/extensions/interp_att_g.py:134
 msgid "There is no selection to interpolate"
@@ -35474,7 +35498,7 @@ msgstr ""
 #: ../share/extensions/jessyink_summary.py:106
 #, python-brace-format
 msgid "{prefix}\tView will be set according to object \"{eid}\""
-msgstr ""
+msgstr "{prefix}\tLa vista sarà impostata secondo l'oggetto \"{eid}\""
 
 #: ../share/extensions/jessyink_summary.py:108
 #, python-brace-format
@@ -35526,6 +35550,8 @@ msgid ""
 "No object selected. Please select the object you want to assign a view to and "
 "then press apply.\n"
 msgstr ""
+"Nessun oggetto selezionato. Seleziona l'oggetto a cui vuoi assegnare la vista e "
+"premi applica.\n"
 
 #: ../share/extensions/markers_strokepaint.py:88
 #, python-format
@@ -35567,7 +35593,7 @@ msgstr ""
 
 #: ../share/extensions/path_envelope.py:66
 msgid "The points for the selected envelope must not all be in a line."
-msgstr ""
+msgstr "I punti per la busta selezionata non devono essere tutti in linea."
 
 #: ../share/extensions/pathscatter.py:180
 msgid "This extension requires two selected paths."
@@ -36218,14 +36244,12 @@ msgstr ""
 "            "
 
 #: ../share/extensions/dxf12_outlines.inx:3
-#, fuzzy
 msgid "Desktop Cutting Plotter R12"
-msgstr "Desktop Cutting Plotter"
+msgstr "Desktop Cutting Plotter R12"
 
 #: ../share/extensions/dxf12_outlines.inx:9
-#, fuzzy
 msgid "Desktop Cutting Plotter (AutoCAD DXF R12) (*.dxf)"
-msgstr "Desktop Cutting Plotter (AutoCAD DXF R14) (*.dxf)"
+msgstr "Desktop Cutting Plotter (AutoCAD DXF R12) (*.dxf)"
 
 #: ../share/extensions/dxf12_outlines.inx:10
 msgid "DXF R12 Output"
@@ -36242,24 +36266,20 @@ msgid "Method of Scaling:"
 msgstr ""
 
 #: ../share/extensions/dxf_input.inx:8
-#, fuzzy
 msgid "Manual scale"
-msgstr "Altrimenti, usa un fattore di scala manuale"
+msgstr ""
 
 #: ../share/extensions/dxf_input.inx:9
-#, fuzzy
 msgid "Automatic scaling to size A4"
-msgstr "Usa ridimensionamento automatico ad A4"
+msgstr ""
 
 #: ../share/extensions/dxf_input.inx:10
-#, fuzzy
 msgid "Read from file"
-msgstr "Carica da file"
+msgstr ""
 
 #: ../share/extensions/dxf_input.inx:12
-#, fuzzy
 msgid "Manual scale factor:"
-msgstr "Altrimenti, usa un fattore di scala manuale"
+msgstr ""
 
 #
 # File: ../share/extensions/dxf_input.inx, line: 14
@@ -36274,9 +36294,8 @@ msgid "Manual y-axis origin (mm):"
 msgstr ""
 
 #: ../share/extensions/dxf_input.inx:15
-#, fuzzy
 msgid "Text scale factor:"
-msgstr "Altrimenti, usa un fattore di scala manuale"
+msgstr ""
 
 #
 # File: ../share/extensions/dxf_input.inx, line: 16
@@ -36287,15 +36306,13 @@ msgstr ""
 #: ../share/extensions/dxf_input.inx:18
 #: ../share/extensions/render_barcode_qrcode.inx:27
 msgid "Character encoding:"
-msgstr "Codifica caratteri"
+msgstr "Codifica caratteri:"
 
 #: ../share/extensions/dxf_input.inx:25
-#, fuzzy
 msgid "Text Font:"
-msgstr "Carattere testo:"
+msgstr ""
 
 #: ../share/extensions/dxf_input.inx:28
-#, fuzzy
 msgid ""
 "- AutoCAD Release 13 and newer.\n"
 "- for manual scaling, assume dxf drawing is in mm.\n"
@@ -36307,12 +36324,6 @@ msgid ""
 "- layers are preserved only on File->Open, not Import.\n"
 "- limited support for BLOCKS, use AutoCAD Explode Blocks instead, if needed."
 msgstr ""
-"- AutoCAD versione 13 e successive. \n"
-"- si assume che il disegno dxf sia in mm. \n"
-"- si assume che il disegno svg sia in pixel, a 90 dpi \n"
-"- i livelli sono preservati solo tramite File → Apri, non con Importa \n"
-"- supporto ai BLOCKS ancora limitato, se necessario usa la funzione «Esplodi "
-"blocchi» di AutoCAD."
 
 #: ../share/extensions/dxf_input.inx:42
 msgid "AutoCAD DXF R13 (*.dxf)"
@@ -36323,24 +36334,20 @@ msgid "Import AutoCAD's Document Exchange Format"
 msgstr "Importa AutoCAD's Document Exchange Format"
 
 #: ../share/extensions/dxf_outlines.inx:3
-#, fuzzy
 msgid "Desktop Cutting Plotter R14"
-msgstr "Desktop Cutting Plotter"
+msgstr "Desktop Cutting Plotter R14"
 
 #: ../share/extensions/dxf_outlines.inx:8
-#, fuzzy
 msgid "use ROBO-Master type of spline output"
-msgstr "abilita output ROBO-Master"
+msgstr ""
 
 #: ../share/extensions/dxf_outlines.inx:9
-#, fuzzy
 msgid "use LWPOLYLINE type of line output"
-msgstr "abilita output ROBO-Master"
+msgstr ""
 
 #: ../share/extensions/dxf_outlines.inx:10
-#, fuzzy
 msgid "Base unit:"
-msgstr "Frequenza base:"
+msgstr "Unità base:"
 
 #: ../share/extensions/dxf_outlines.inx:11
 msgid "pt"
@@ -36393,36 +36400,30 @@ msgid "ft"
 msgstr "ft"
 
 #: ../share/extensions/dxf_outlines.inx:20
-#, fuzzy
 msgid "Character Encoding:"
-msgstr "Codifica caratteri"
+msgstr ""
 
 #: ../share/extensions/dxf_outlines.inx:27
-#, fuzzy
 msgid "Layer export selection:"
-msgstr "Elimina la selezione"
+msgstr ""
 
 #: ../share/extensions/dxf_outlines.inx:28
-#, fuzzy
 msgid "All (default)"
-msgstr "(predefinito)"
+msgstr ""
 
 #: ../share/extensions/dxf_outlines.inx:29
-#, fuzzy
 msgid "Visible only"
-msgstr "Colori visibili"
+msgstr ""
 
 #: ../share/extensions/dxf_outlines.inx:30
 msgid "By name match"
 msgstr ""
 
 #: ../share/extensions/dxf_outlines.inx:32
-#, fuzzy
 msgid "Layer match name:"
-msgstr "Nome del livello:"
+msgstr ""
 
 #: ../share/extensions/dxf_outlines.inx:35
-#, fuzzy
 msgid ""
 "- AutoCAD Release 14 DXF format.\n"
 "- The base unit parameter specifies in what unit the coordinates are output (96 "
@@ -36438,12 +36439,6 @@ msgid ""
 "- You can choose to export all layers, only visible ones or by name match (case "
 "insensitive and use comma ',' as separator)"
 msgstr ""
-"- Formato AutoCAD Release 13.\n"
-"- si assume che le unità svg siano in pixel, a 90 dpi.\n"
-"- si assume che le unità dxf siano in mm.\n"
-"- sono supportati solo elementi LWPOLYLINE e SPLINE.\n"
-"- l'opzione ROBO-Master genere una spline interpretabile solo da ROBO-Master e "
-"lettori AutoDesk, non da Inkscape."
 
 #: ../share/extensions/dxf_outlines.inx:49
 msgid "Desktop Cutting Plotter (AutoCAD DXF R14) (*.dxf)"
@@ -36624,7 +36619,6 @@ msgid "Use"
 msgstr "Uso"
 
 #: ../share/extensions/funcplot.inx:18
-#, fuzzy
 msgid ""
 "Select a rectangle before calling the extension,\n"
 "it will determine X and Y scales. If you wish to fill the area, then add x-axis "
@@ -36641,8 +36635,8 @@ msgstr ""
 "seleziona Aggiungi estremi asse x.\n"
 "\n"
 "In caso di coordinate polari:\n"
-"  I valori iniziali e finali della X definiscono l'intervallo dell'angolo (in "
-"radianti).\n"
+"  I valori iniziali e finali della X definiscono l'intervallo dell'angolo in "
+"radianti.\n"
 "  La scala X è impostata in modo tale che i margini sinistro e destro del "
 "rettangolo sono a +/-1. \n"
 "  Il ridimensionamento isotropico è disabilitato.\n"
@@ -36654,7 +36648,7 @@ msgstr "Funzioni"
 
 #: ../share/extensions/funcplot.inx:28 ../share/extensions/param_curves.inx:23
 msgid "Standard Python math functions are available:"
-msgstr ""
+msgstr "Le funzioni matematiche standard di Python sono disponibili:"
 
 #: ../share/extensions/funcplot.inx:42 ../share/extensions/param_curves.inx:37
 msgid "The constants pi, e and tau are also available."
@@ -36667,9 +36661,8 @@ msgid ""
 msgstr ""
 
 #: ../share/extensions/funcplot.inx:48
-#, fuzzy
 msgid "This extension creates a plot of a function (in variable x)."
-msgstr "Questa estensione richiede almeno un livello non vuoto."
+msgstr ""
 
 #: ../share/extensions/funcplot.inx:50 ../share/extensions/param_curves.inx:45
 msgid ""
@@ -36781,14 +36774,12 @@ msgid "Area"
 msgstr "Area"
 
 #: ../share/extensions/gcodetools_area.inx:9
-#, fuzzy
 msgid "Maximum area cutting curves:"
-msgstr "Semplificazione tracciati:"
+msgstr ""
 
 #: ../share/extensions/gcodetools_area.inx:10
-#, fuzzy
 msgid "Area width:"
-msgstr "Larghezza area:"
+msgstr ""
 
 #
 # File: ../share/extensions/gcodetools_area.inx, line: 12
@@ -36811,25 +36802,21 @@ msgid ""
 msgstr ""
 
 #: ../share/extensions/gcodetools_area.inx:21
-#, fuzzy
 msgid "Fill area"
-msgstr "Riempie aree delimitate"
+msgstr ""
 
 #: ../share/extensions/gcodetools_area.inx:22
-#, fuzzy
 msgid "Area fill angle"
-msgstr "Angolo sinistro"
+msgstr ""
 
 #: ../share/extensions/gcodetools_area.inx:23
 #: ../share/extensions/gcodetools_area.inx:24
-#, fuzzy
 msgid "Area fill shift"
-msgstr "Angolo sinistro"
+msgstr ""
 
 #: ../share/extensions/gcodetools_area.inx:25
-#, fuzzy
 msgid "Filling method"
-msgstr "Metodo di divisione"
+msgstr ""
 
 #: ../share/extensions/gcodetools_area.inx:26
 msgid "Zig zag"
@@ -36882,23 +36869,20 @@ msgstr ""
 #: ../share/extensions/gcodetools_lathe.inx:28
 #: ../share/extensions/gcodetools_path_to_gcode.inx:4
 #: ../share/extensions/gcodetools_path_to_gcode.inx:8
-#, fuzzy
 msgid "Path to Gcode"
-msgstr "Percorso a Gcode"
+msgstr ""
 
 #: ../share/extensions/gcodetools_area.inx:49
 #: ../share/extensions/gcodetools_lathe.inx:29
 #: ../share/extensions/gcodetools_path_to_gcode.inx:9
-#, fuzzy
 msgid "Biarc interpolation tolerance:"
-msgstr "Passi d'interpolazione"
+msgstr ""
 
 #: ../share/extensions/gcodetools_area.inx:50
 #: ../share/extensions/gcodetools_lathe.inx:30
 #: ../share/extensions/gcodetools_path_to_gcode.inx:10
-#, fuzzy
 msgid "Maximum splitting depth:"
-msgstr "Semplificazione tracciati:"
+msgstr ""
 
 #: ../share/extensions/gcodetools_area.inx:51
 #: ../share/extensions/gcodetools_lathe.inx:31
@@ -36927,9 +36911,8 @@ msgstr ""
 #: ../share/extensions/gcodetools_area.inx:57
 #: ../share/extensions/gcodetools_lathe.inx:37
 #: ../share/extensions/gcodetools_path_to_gcode.inx:17
-#, fuzzy
 msgid "Depth function:"
-msgstr "Funzione rosso"
+msgstr ""
 
 #
 # File: ../share/extensions/gcodetools_area.inx, line: 59
@@ -36979,18 +36962,16 @@ msgstr "Scostamento punto l’asse Z:"
 #: ../share/extensions/gcodetools_graffiti.inx:57
 #: ../share/extensions/gcodetools_lathe.inx:50
 #: ../share/extensions/gcodetools_path_to_gcode.inx:30
-#, fuzzy
 msgid "Select all paths if nothing is selected"
-msgstr "Nessuna selezione"
+msgstr ""
 
 #: ../share/extensions/gcodetools_area.inx:71
 #: ../share/extensions/gcodetools_engraving.inx:29
 #: ../share/extensions/gcodetools_graffiti.inx:58
 #: ../share/extensions/gcodetools_lathe.inx:51
 #: ../share/extensions/gcodetools_path_to_gcode.inx:31
-#, fuzzy
 msgid "Minimum arc radius:"
-msgstr "Raggio interno:"
+msgstr ""
 
 #
 # File: ../share/extensions/gcodetools_area.inx, line: 73
@@ -37081,9 +37062,8 @@ msgstr "Unità (mm o in):"
 #: ../share/extensions/gcodetools_graffiti.inx:75
 #: ../share/extensions/gcodetools_lathe.inx:68
 #: ../share/extensions/gcodetools_path_to_gcode.inx:48
-#, fuzzy
 msgid "Post-processor:"
-msgstr "Processo"
+msgstr ""
 
 #: ../share/extensions/gcodetools_area.inx:89
 #: ../share/extensions/gcodetools_dxf_points.inx:35
@@ -37101,9 +37081,8 @@ msgstr "Nessuno"
 #: ../share/extensions/gcodetools_graffiti.inx:77
 #: ../share/extensions/gcodetools_lathe.inx:70
 #: ../share/extensions/gcodetools_path_to_gcode.inx:50
-#, fuzzy
 msgid "Parameterize Gcode"
-msgstr "Parametri"
+msgstr ""
 
 #: ../share/extensions/gcodetools_area.inx:91
 #: ../share/extensions/gcodetools_dxf_points.inx:37
@@ -37256,9 +37235,8 @@ msgid "Maximum segment length:"
 msgstr "Lunghezza massima del segmento (px):"
 
 #: ../share/extensions/gcodetools_graffiti.inx:10
-#, fuzzy
 msgid "Minimal connector radius:"
-msgstr "Raggio interno:"
+msgstr ""
 
 #: ../share/extensions/gcodetools_graffiti.inx:11
 msgid "Start position (x;y):"
@@ -37269,18 +37247,16 @@ msgid "Create preview"
 msgstr "Crea anteprima"
 
 #: ../share/extensions/gcodetools_graffiti.inx:13
-#, fuzzy
 msgid "Create linearization preview"
-msgstr "Crea gradiente lineare"
+msgstr ""
 
 #: ../share/extensions/gcodetools_graffiti.inx:14
 msgid "Preview's size (px):"
 msgstr "Dimensione anteprima (px):"
 
 #: ../share/extensions/gcodetools_graffiti.inx:15
-#, fuzzy
 msgid "Preview's paint emmit (pts/s):"
-msgstr "Dimensione anteprima (px):"
+msgstr ""
 
 #: ../share/extensions/gcodetools_graffiti.inx:20
 #: ../share/extensions/gcodetools_orientation_points.inx:9
@@ -37348,29 +37324,24 @@ msgstr "Tornio"
 
 #: ../share/extensions/gcodetools_lathe.inx:9
 #: ../share/extensions/gcodetools_lathe.inx:24
-#, fuzzy
 msgid "Lathe width:"
-msgstr "Imposta larghezza:"
+msgstr ""
 
 #: ../share/extensions/gcodetools_lathe.inx:10
-#, fuzzy
 msgid "Fine cut width:"
-msgstr "Imposta larghezza:"
+msgstr ""
 
 #: ../share/extensions/gcodetools_lathe.inx:11
-#, fuzzy
 msgid "Fine cut count:"
-msgstr "Bottone"
+msgstr ""
 
 #: ../share/extensions/gcodetools_lathe.inx:12
-#, fuzzy
 msgid "Create fine cut using:"
-msgstr "Crea nuovi oggetti con:"
+msgstr ""
 
 #: ../share/extensions/gcodetools_lathe.inx:13
-#, fuzzy
 msgid "Move path"
-msgstr "Muovi motivi"
+msgstr ""
 
 #: ../share/extensions/gcodetools_lathe.inx:14
 msgid "Offset path"
@@ -37389,9 +37360,8 @@ msgid "Lathe Z axis remap:"
 msgstr ""
 
 #: ../share/extensions/gcodetools_lathe.inx:20
-#, fuzzy
 msgid "Lathe modify path"
-msgstr "Modifica tracciato"
+msgstr ""
 
 #
 # File: ../share/extensions/gcodetools_lathe.inx, line: 22
@@ -37404,9 +37374,8 @@ msgid ""
 msgstr ""
 
 #: ../share/extensions/gcodetools_orientation_points.inx:4
-#, fuzzy
 msgid "Orientation points"
-msgstr "Orientamento"
+msgstr ""
 
 #
 # File: ../share/extensions/gcodetools_orientation_points.inx, line: 25
@@ -37459,24 +37428,20 @@ msgid "Prepare path for plasma or laser cutters"
 msgstr ""
 
 #: ../share/extensions/gcodetools_prepare_path_for_plasma.inx:9
-#, fuzzy
 msgid "Create in-out paths"
-msgstr "Crea tracciato Spiro"
+msgstr ""
 
 #: ../share/extensions/gcodetools_prepare_path_for_plasma.inx:10
-#, fuzzy
 msgid "In-out path length:"
-msgstr "Lunghezza tracciato"
+msgstr ""
 
 #: ../share/extensions/gcodetools_prepare_path_for_plasma.inx:11
-#, fuzzy
 msgid "In-out path max distance to reference point:"
-msgstr "Preferenze gradiente"
+msgstr ""
 
 #: ../share/extensions/gcodetools_prepare_path_for_plasma.inx:12
-#, fuzzy
 msgid "In-out path type:"
-msgstr "Tipo interpolazione:"
+msgstr ""
 
 #: ../share/extensions/gcodetools_prepare_path_for_plasma.inx:14
 msgid "Perpendicular"
@@ -37497,9 +37462,8 @@ msgid "Replace original path"
 msgstr "Sostituisci il tracciato originale"
 
 #: ../share/extensions/gcodetools_prepare_path_for_plasma.inx:19
-#, fuzzy
 msgid "Do not add in-out reference points"
-msgstr "Preferenze gradiente"
+msgstr ""
 
 #: ../share/extensions/gcodetools_prepare_path_for_plasma.inx:21
 msgid "-------------------------------------------------"
@@ -37510,9 +37474,8 @@ msgid "Prepare corners"
 msgstr "Prepara gli angoli"
 
 #: ../share/extensions/gcodetools_prepare_path_for_plasma.inx:23
-#, fuzzy
 msgid "Stepout distance for corners:"
-msgstr "Aggancia angoli riquadri"
+msgstr ""
 
 #
 # File: ../share/extensions/gcodetools_prepare_path_for_plasma.inx, line: 25
@@ -38478,7 +38441,6 @@ msgstr ""
 "informazioni consultare il manuale o il sito web del plotter."
 
 #: ../share/extensions/hpgl_output.inx:40
-#, fuzzy
 msgid "Export an HP Graphics Language file"
 msgstr "Esporta un file HP Graphics Language"
 
@@ -38558,9 +38520,8 @@ msgid "Apply attribute to parent group of selection"
 msgstr "Applica la trasformazione alla selezione"
 
 #: ../share/extensions/image_attributes.inx:59
-#, fuzzy
 msgid "Apply attribute to SVG root"
-msgstr "Attributo da impostare:"
+msgstr ""
 
 #: ../share/extensions/image_embed.inx:3
 msgid "Embed Images"
@@ -38600,7 +38561,6 @@ msgid "HTML 5 canvas code"
 msgstr "Codice HTML 5 canvas"
 
 #: ../share/extensions/inkscape_follow_link.inx:3
-#, fuzzy
 msgid "Follow Link"
 msgstr "Segui collegamento"
 
@@ -39424,27 +39384,22 @@ msgid "Cutting marks"
 msgstr "Segni di stampa"
 
 #: ../share/extensions/layout_nup.inx:42
-#, fuzzy
 msgid "Padding guide"
-msgstr "Muovi guida"
+msgstr "Guida padding"
 
 #: ../share/extensions/layout_nup.inx:43
-#, fuzzy
 msgid "Margin guide"
-msgstr "Muovi guida"
+msgstr "Guida margine"
 
 #: ../share/extensions/layout_nup.inx:44
-#, fuzzy
 msgid "Padding box"
-msgstr "Riquadri"
+msgstr "Riquadro padding"
 
 #: ../share/extensions/layout_nup.inx:45
-#, fuzzy
 msgid "Margin box"
-msgstr "riquadro immagine"
+msgstr "Riquadro margine"
 
 #: ../share/extensions/layout_nup.inx:48
-#, fuzzy
 msgid ""
 "\n"
 "Parameters:\n"
@@ -39459,6 +39414,16 @@ msgid ""
 msgstr ""
 "\n"
 "Parametri:\n"
+"    * Dimensioni pagina: larghezza e altezza.\n"
+"    * Margini pagina: spazio aggiuntivo attorno ad ogni pagina.\n"
+"    * Layout righe e colonne.\n"
+"    * Dimensioni layout: larghezza e altezza, calcolata automaticamente se una è "
+"0.\n"
+"    * Calcola automaticamente dimensione layout: non usa i valori di dimensione "
+"layout.\n"
+"    * Margini layout: spazio bianco attorno ad ogni parte del layout.\n"
+"    * Padding layout: padding interno per ogni parte del layout.\n"
+"      "
 
 #: ../share/extensions/layout_nup.inx:65
 #: ../share/extensions/perfectboundcover.inx:34
@@ -39503,7 +39468,6 @@ msgid "Randomize angle (%):"
 msgstr "Casualità angolo (%):"
 
 #: ../share/extensions/lindenmayer.inx:17
-#, fuzzy
 msgid ""
 "\n"
 "The path is generated by applying the \n"
@@ -39547,6 +39511,10 @@ msgstr ""
 "[: memorizza punto \n"
 "\n"
 "]: ritorna al punto memorizzato\n"
+"\n"
+"Regole multiple possono essere fornite \n"
+"separandole con il punto e virgola (;).\n"
+"\n"
 
 #: ../share/extensions/lorem_ipsum.inx:3
 msgid "Lorem ipsum"
@@ -39565,9 +39533,8 @@ msgid "Paragraph length fluctuation (sentences):"
 msgstr "Lunghezza paragrafo (numero frasi):"
 
 #: ../share/extensions/lorem_ipsum.inx:10
-#, fuzzy
 msgid "Use SVG2 flowed text"
-msgstr "Usa testo dinamico automatico SVG2"
+msgstr "Usa testo dinamico SVG2"
 
 #: ../share/extensions/lorem_ipsum.inx:13
 msgid ""
@@ -39619,9 +39586,8 @@ msgid "Assign stroke color"
 msgstr "Assegna colore contorno"
 
 #: ../share/extensions/markers_strokepaint.inx:28
-#, fuzzy
 msgid "Modify in Place"
-msgstr "Modifica tracciato"
+msgstr ""
 
 #: ../share/extensions/measure.inx:3
 msgid "Measure Path"
@@ -40159,9 +40125,8 @@ msgid "Remove all XML comments from output."
 msgstr "Rimuove tutti i commenti XML."
 
 #: ../share/extensions/output_scour.inx:50
-#, fuzzy
 msgid "Embed raster images"
-msgstr "Incorpora immagini grezze"
+msgstr "Incorpora immagini raster"
 
 #
 # File: ../share/extensions/output_scour.inx, line: 50
@@ -40189,7 +40154,6 @@ msgstr ""
 "del disegno."
 
 #: ../share/extensions/output_scour.inx:55
-#, fuzzy
 msgid "Pretty-printing"
 msgstr "Formattazione"
 
@@ -41051,13 +41015,10 @@ msgstr ""
 # File: ../share/extensions/hpgl_output.inx, line: 34
 # File: ../share/extensions/plotter.inx, line: 94
 #: ../share/extensions/plotter.inx:88
-#, fuzzy
 msgid ""
 "Check this to cut a small line to correctly align the tool orientation before the "
 "real drawing starts (default: Checked)."
 msgstr ""
-"Selezionare per convertire automaticamente (in modo non distruttivo) tutti gli "
-"oggetti in tracciati prima del plot (Predefinito: Selezionato)"
 
 #: ../share/extensions/plotter.inx:89
 msgid ""
@@ -42890,19 +42851,16 @@ msgid "move cursor into object"
 msgstr ""
 
 #: ../share/extensions/web_interactive_mockup.inx:15
-#, fuzzy
 msgid "move cursor within object"
-msgstr "Rimuove le trasformazioni dall'oggetto"
+msgstr ""
 
 #: ../share/extensions/web_interactive_mockup.inx:16
-#, fuzzy
 msgid "move cursor out of object"
-msgstr "Rimuove le trasformazioni dall'oggetto"
+msgstr ""
 
 #: ../share/extensions/web_interactive_mockup.inx:17
-#, fuzzy
 msgid "element is loaded by browser"
-msgstr "al caricamento oggetto"
+msgstr ""
 
 #: ../share/extensions/web_interactive_mockup.inx:21
 msgid ""
@@ -43155,12 +43113,11 @@ msgstr ""
 #: ../share/extensions/webslicer_create_rect.inx:64
 #: ../share/extensions/webslicer_export.inx:20
 msgid "Slicer"
-msgstr ""
+msgstr "Taglio"
 
 #: ../share/extensions/webslicer_create_rect.inx:3
-#, fuzzy
 msgid "Create a slicer rectangle"
-msgstr "Crea rettangolo"
+msgstr "Crea un rettangolo di taglio"
 
 #: ../share/extensions/webslicer_create_rect.inx:12
 msgid "DPI:"
@@ -43305,7 +43262,7 @@ msgstr "Basso e destra"
 
 #: ../share/extensions/webslicer_export.inx:3
 msgid "Export layout pieces and HTML+CSS code"
-msgstr ""
+msgstr "Esporta parti layout e codice HTML+CSS"
 
 #: ../share/extensions/webslicer_export.inx:8
 msgid "Directory path to export:"
@@ -43324,6 +43281,8 @@ msgid ""
 "All sliced images, and optionally - code, will be generated as you had configured "
 "and saved to one directory."
 msgstr ""
+"Tutte le immagini tagliate, e opzionalmente il codice, saranno generate come "
+"configurate e salvate in una cartella."
 
 #: ../share/extensions/whirl.inx:3
 msgid "Whirl"
