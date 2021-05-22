@@ -1314,12 +1314,13 @@ void sp_item_gradient_set_coords(SPItem *item, GrPointType point_type, guint poi
                 SPGradient *vector = sp_gradient_get_forked_vector_if_necessary (lg, false);
                 lg->ensureVector();
                 lg->vector.stops.at(point_i).offset = offset;
-                SPStop* stopi = sp_get_stop_i(vector, point_i);
-                stopi->offset = offset;
-                if (write_repr) {
-                    stopi->getRepr()->setAttributeCssDouble("offset", stopi->offset);
-                } else {
-                    stopi->requestModified(SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_STYLE_MODIFIED_FLAG);
+                if (SPStop* stopi = sp_get_stop_i(vector, point_i)) {
+                    stopi->offset = offset;
+                    if (write_repr) {
+                        stopi->getRepr()->setAttributeCssDouble("offset", stopi->offset);
+                    } else {
+                        stopi->requestModified(SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_STYLE_MODIFIED_FLAG);
+                    }
                 }
             }
             break;
@@ -1409,12 +1410,13 @@ void sp_item_gradient_set_coords(SPItem *item, GrPointType point_type, guint poi
                 SPGradient *vector = sp_gradient_get_forked_vector_if_necessary (rg, false);
                 rg->ensureVector();
                 rg->vector.stops.at(point_i).offset = offset;
-                SPStop* stopi = sp_get_stop_i(vector, point_i);
-                stopi->offset = offset;
-                if (write_repr) {
-                    stopi->getRepr()->setAttributeCssDouble("offset", stopi->offset);
-                } else {
-                    stopi->requestModified(SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_STYLE_MODIFIED_FLAG);
+                if (SPStop* stopi = sp_get_stop_i(vector, point_i)) {
+                    stopi->offset = offset;
+                    if (write_repr) {
+                        stopi->getRepr()->setAttributeCssDouble("offset", stopi->offset);
+                    } else {
+                        stopi->requestModified(SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_STYLE_MODIFIED_FLAG);
+                    }
                 }
                 break;
             }
@@ -1426,12 +1428,13 @@ void sp_item_gradient_set_coords(SPItem *item, GrPointType point_type, guint poi
                 SPGradient *vector = sp_gradient_get_forked_vector_if_necessary(rg, false);
                 rg->ensureVector();
                 rg->vector.stops.at(point_i).offset = offset;
-                SPStop* stopi = sp_get_stop_i(vector, point_i);
-                stopi->offset = offset;
-                if (write_repr) {
-                    stopi->getRepr()->setAttributeCssDouble("offset", stopi->offset);
-                } else {
-                    stopi->requestModified(SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_STYLE_MODIFIED_FLAG);
+                if (SPStop* stopi = sp_get_stop_i(vector, point_i)) {
+                    stopi->offset = offset;
+                    if (write_repr) {
+                        stopi->getRepr()->setAttributeCssDouble("offset", stopi->offset);
+                    } else {
+                        stopi->requestModified(SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_STYLE_MODIFIED_FLAG);
+                    }
                 }
                 break;
             }
