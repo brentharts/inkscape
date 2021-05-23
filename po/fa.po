@@ -43872,11 +43872,11 @@ msgstr ""
 
 #, fuzzy
 #~ msgid "on:"
-#~ msgstr "ف_صل مشترک"
+#~ msgstr "فصل مشترک"
 
 #, fuzzy
 #~ msgid "Select:"
-#~ msgstr "انت_خاب"
+#~ msgstr "انتخاب"
 
 #, fuzzy
 #~ msgid "Select a stop for the current gradient"
@@ -44127,63 +44127,63 @@ msgstr ""
 
 #, fuzzy
 #~ msgid "Angle 120"
-#~ msgstr "قدمت‌دار"
+#~ msgstr "زاویه 120 درجه"
 
 #, fuzzy
 #~ msgid "Angle 135"
-#~ msgstr "قدمت‌دار"
+#~ msgstr "زاویه 135 درجه"
 
 #, fuzzy
 #~ msgid "Angle 150"
-#~ msgstr "قدمت‌دار"
+#~ msgstr "زاویه 150 درجه"
 
 #, fuzzy
 #~ msgid "Angle 180"
-#~ msgstr "قدمت‌دار"
+#~ msgstr "زاویه 180 درجه"
 
 #, fuzzy
 #~ msgid "Angle 210"
-#~ msgstr "قدمت‌دار"
+#~ msgstr "زاویه 210 درجه"
 
 #, fuzzy
 #~ msgid "Angle 225"
-#~ msgstr "قدمت‌دار"
+#~ msgstr "زاویه 225 درجه"
 
 #, fuzzy
 #~ msgid "Angle 240"
-#~ msgstr "قدمت‌دار"
+#~ msgstr "زاویه 240 درجه"
 
 #, fuzzy
 #~ msgid "Angle 270"
-#~ msgstr "قدمت‌دار"
+#~ msgstr "زاویه 270 درجه"
 
 #, fuzzy
 #~ msgid "Angle 30"
-#~ msgstr "قدمت‌دار"
+#~ msgstr "زاویه 30 درجه"
 
 #, fuzzy
 #~ msgid "Angle 300"
-#~ msgstr "قدمت‌دار"
+#~ msgstr "زاویه 300 درجه"
 
 #, fuzzy
 #~ msgid "Angle 315"
-#~ msgstr "قدمت‌دار"
+#~ msgstr "زاویه 315 درجه"
 
 #, fuzzy
 #~ msgid "Angle 330"
-#~ msgstr "قدمت‌دار"
+#~ msgstr "زاویه 330 درجه"
 
 #, fuzzy
 #~ msgid "Angle 45"
-#~ msgstr "قدمت‌دار"
+#~ msgstr "زاویه 45 درجه"
 
 #, fuzzy
 #~ msgid "Angle 60"
-#~ msgstr "قدمت‌دار"
+#~ msgstr "زاویه 60 درجه"
 
 #, fuzzy
 #~ msgid "Angle 90"
-#~ msgstr "قدمت‌دار"
+#~ msgstr "زاویه 90 درجه"
 
 #, fuzzy
 #~ msgid "Display Format: "
@@ -44506,57 +44506,57 @@ msgstr ""
 #, fuzzy
 #~ msgctxt "Palette"
 #~ msgid "Blue2"
-#~ msgstr "محو کردن"
+#~ msgstr "آبی 2"
 
 #, fuzzy
 #~ msgctxt "Palette"
 #~ msgid "Blue3"
-#~ msgstr "محو کردن"
+#~ msgstr "آبی 3"
 
 #, fuzzy
 #~ msgctxt "Palette"
 #~ msgid "Red1"
-#~ msgstr "_تکرار اقدام اخیر"
+#~ msgstr "قرمز 1"
 
 #, fuzzy
 #~ msgctxt "Palette"
 #~ msgid "Red2"
-#~ msgstr "_تکرار اقدام اخیر"
+#~ msgstr "قرمز 2"
 
 #, fuzzy
 #~ msgctxt "Palette"
 #~ msgid "Red3"
-#~ msgstr "_تکرار اقدام اخیر"
+#~ msgstr "قرمز 3"
 
 #, fuzzy
 #~ msgctxt "Palette"
 #~ msgid "Orange1"
-#~ msgstr "مرتب سازی"
+#~ msgstr "نارنجی 1"
 
 #, fuzzy
 #~ msgctxt "Palette"
 #~ msgid "Orange2"
-#~ msgstr "مرتب سازی"
+#~ msgstr "نارنجی 2"
 
 #, fuzzy
 #~ msgctxt "Palette"
 #~ msgid "Orange3"
-#~ msgstr "مرتب سازی"
+#~ msgstr "نارنجی 3"
 
 #, fuzzy
 #~ msgctxt "Palette"
 #~ msgid "Purple1"
-#~ msgstr "مردم"
+#~ msgstr "بنفش 1"
 
 #, fuzzy
 #~ msgctxt "Palette"
 #~ msgid "Purple2"
-#~ msgstr "مردم"
+#~ msgstr "بنفش 2"
 
 #, fuzzy
 #~ msgctxt "Palette"
 #~ msgid "Purple3"
-#~ msgstr "مردم"
+#~ msgstr "بنفش 3"
 
 #, fuzzy
 #~ msgctxt "Palette"
@@ -44591,7 +44591,7 @@ msgstr ""
 #, fuzzy
 #~ msgctxt "Palette"
 #~ msgid "Yellow"
-#~ msgstr "درخشش"
+#~ msgstr "زرد"
 
 #, fuzzy
 #~ msgctxt "Palette"
