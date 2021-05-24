@@ -37157,8 +37157,8 @@ msgid "Exports the colors of this document as GIMP Palette"
 msgstr "Exporta as cores do desenho como Paleta do GIMP"
 
 #: ../share/extensions/extension-manager-bootstrap.inx:3
-msgid "Manage Extensions..."
-msgstr "Gerenciar Extensões..."
+msgid "Manage Extensions"
+msgstr "Gerenciar Extensões"
 
 #: ../share/extensions/extrude.inx:6
 msgid "Lines"
