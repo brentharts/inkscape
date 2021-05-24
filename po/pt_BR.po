@@ -562,7 +562,7 @@ msgstr "Metal Erodido"
 
 #: ../share/filters/filters.svg.h:184
 msgid "Eroded metal texture with ridges, grooves, holes and bumps"
-msgstr "Textura de metal erosada com sulcos, ranhuras, buracos e saliênciasg"
+msgstr "Textura de metal erosada com sulcos, ranhuras, buracos e saliências"
 
 #: ../share/filters/filters.svg.h:186
 msgid "Cracked Lava"
@@ -1529,7 +1529,7 @@ msgstr "Reduza ou remova suavização em torno das formas"
 
 #: ../share/filters/filters.svg.h:598
 msgid "Basic Diffuse Bump"
-msgstr "Saliência Difusa Básica"
+msgstr "Relevo Difuso Básico"
 
 #: ../share/filters/filters.svg.h:600
 msgid "Matte emboss effect"
@@ -1537,7 +1537,7 @@ msgstr "Efeito fosco em relevo"
 
 #: ../share/filters/filters.svg.h:602
 msgid "Basic Specular Bump"
-msgstr "Saliência Especular Básica"
+msgstr "Relevo Especular Básico"
 
 #: ../share/filters/filters.svg.h:604
 msgid "Specular emboss effect"
@@ -1573,7 +1573,7 @@ msgstr "Pintura em Tela Áspera"
 
 #: ../share/filters/filters.svg.h:622
 msgid "Paper Bump"
-msgstr "Saliência de Papel"
+msgstr "Relevo em Papel"
 
 #: ../share/filters/filters.svg.h:624
 msgid "Paper like emboss effect"
@@ -1581,7 +1581,7 @@ msgstr "Efeito de relevo semelhante ao papel"
 
 #: ../share/filters/filters.svg.h:626
 msgid "Jelly Bump"
-msgstr "Saliência de Geleia"
+msgstr "Relevo de Geleia"
 
 #: ../share/filters/filters.svg.h:628
 msgid "Convert pictures to thick jelly"
@@ -1933,7 +1933,7 @@ msgstr "Efeito cromatoctográfico antigo"
 
 #: ../share/filters/filters.svg.h:810
 msgid "Convoluted Bump"
-msgstr "Saliência Erodada"
+msgstr "Relevo Complexo"
 
 #: ../share/filters/filters.svg.h:812
 msgid "Convoluted emboss effect"
@@ -30955,7 +30955,7 @@ msgstr "Alfa (transparência)"
 
 #: ../src/ui/widget/color-notebook.cpp:152
 msgid "Color Managed"
-msgstr "Gerenciamento de Cores"
+msgstr "Gestão de cores"
 
 #: ../src/ui/widget/color-notebook.cpp:159
 msgid "Out of gamut!"
