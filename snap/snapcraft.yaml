@@ -67,7 +67,6 @@ parts:
       - pkg-config
       - zlib1g-dev
     stage-packages:
-      - git # For master extension manager, remove before releasing
       - libatkmm-1.6-1v5
       - libboost-filesystem1.71.0
       - libcairomm-1.0-1v5
@@ -101,6 +100,7 @@ parts:
       - python3-gi-cairo
     prime:
       - -lib/inkscape/*.a
+      - -share/inkscape/extensions/extension-manager* # Writes executables to config directory, which doesn't work on snaps
     override-build: |
       sed -i.bak -e 's|Icon=${INKSCAPE_ICONPATH}|Icon=${SNAP}/share/inkscape/branding/inkscape.svg|g' $SNAPCRAFT_PART_SRC/org.inkscape.Inkscape.desktop.template
       snapcraftctl build
@@ -114,6 +114,7 @@ parts:
       - lxml
       - numpy
       - pip
+      - pillow
       - pyserial
       - scour
       - virtualenv
@@ -138,10 +139,9 @@ parts:
       - gnome-themes-standard
       - shared-mime-info
       - libgtk-3-0
-      - libgtk2.0-0
-      - libgdk-pixbuf2.0-0
-      - libglib2.0-bin
       - libgtk-3-bin
+      - libcanberra-gtk-module
+      - libglib2.0-bin
       - unity-gtk3-module
       - libappindicator3-1
       - locales-all
@@ -149,6 +149,9 @@ parts:
       - ibus-gtk3
       - libibus-1.0-5
       - fcitx-frontend-gtk3
+    override-prime: |
+      snapcraftctl prime
+      glib-compile-schemas ${SNAPCRAFT_PRIME}/usr/share/glib-2.0/schemas/
 
 apps:
   inkscape:
@@ -162,12 +165,10 @@ apps:
       - x11
       - unity7
       - dot-config-inkscape
+      - raw-usb # plotter support
 # TODO: Remove with portals
       - home
-      - cups-control
       - removable-media
-      - raw-usb # plotter support
-      - network # extension maanager
     slots:
       - inkscape-dbus
     desktop: share/applications/org.inkscape.Inkscape.desktop
@@ -185,7 +186,6 @@ apps:
       - dot-config-inkscape
 # TODO: Remove with portals
       - home
-      - cups-control
       - removable-media
 
 hooks:
