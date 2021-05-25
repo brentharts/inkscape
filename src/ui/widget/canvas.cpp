@@ -976,9 +976,9 @@ Canvas::on_idle()
     int n_rects = _clean_region->get_num_rectangles();
 
     // If we've drawn everything then we should have just one clean rectangle, covering the entire canvas.
-    if (n_rects == 0) {
-        std::cerr << "Canvas::on_idle: clean region is empty!" << std::endl;
-    }
+    // if (n_rects == 0) {
+    //     std::cerr << "Canvas::on_idle: clean region is empty!" << std::endl;
+    // }
 
     if (n_rects > 1) {
         done = false;
