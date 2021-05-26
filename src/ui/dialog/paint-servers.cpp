@@ -28,7 +28,6 @@
 #include "paint-servers.h"
 #include "path-prefix.h"
 #include "style.h"
-#include "verbs.h"
 
 #include "io/resource.h"
 #include "object/sp-defs.h"

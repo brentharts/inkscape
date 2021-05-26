@@ -37,7 +37,6 @@
 #include "inkscape-window.h"
 #include "preferences.h"
 #include "selection-chemistry.h"
-#include "verbs.h"
 
 // required to set status message after export
 #include "desktop.h"

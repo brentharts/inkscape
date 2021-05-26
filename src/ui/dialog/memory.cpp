@@ -21,7 +21,6 @@
 
 #include "inkgc/gc-core.h"
 #include "debug/heap.h"
-#include "verbs.h"
 
 namespace Inkscape {
 namespace UI {
