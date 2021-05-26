@@ -18,7 +18,6 @@ set(ui_SRC
 	svg-renderer.cpp
 	themes.cpp
 	tool-factory.cpp
-	tools-switch.cpp
 	util.cpp
 	uxmanager.cpp
 	modifiers.cpp
@@ -258,7 +257,6 @@ set(ui_SRC
 	shortcuts.h
 	themes.h
 	tool-factory.h
-	tools-switch.h
 	util.h
 	uxmanager.h
 	modifiers.h
