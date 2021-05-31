@@ -14,7 +14,7 @@
 #include <glibmm.h>
 #include <2geom/point.h>
 
-enum dialogs_enum {
+enum DialogType {
     DIALOG_INVALID,
     DIALOG_ALIGN_DISTRIBUTE,
     DIALOG_ATTR,

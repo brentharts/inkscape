@@ -246,6 +246,7 @@
 ../src/ui/dialog/debug.cpp
 ../src/ui/dialog/dialog-base.cpp
 ../src/ui/dialog/dialog-container.cpp
+../src/ui/dialog/dialog-data.h
 ../src/ui/dialog/dialog-multipaned.cpp
 ../src/ui/dialog/dialog-notebook.cpp
 ../src/ui/dialog/dialog-window.cpp

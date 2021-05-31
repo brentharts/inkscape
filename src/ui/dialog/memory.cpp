@@ -204,7 +204,7 @@ void Memory::Private::stop_update_task() {
 }
 
 Memory::Memory()
-    : DialogBase("/dialogs/memory", SP_VERB_HELP_MEMORY)
+    : DialogBase("/dialogs/memory", "Memory")
     , _private(*(new Memory::Private()))
 {
     // Private conf

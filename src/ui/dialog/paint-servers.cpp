@@ -69,7 +69,7 @@ PaintServersColumns *PaintServersDialog::getColumns() { return new PaintServersC
 
 // Constructor
 PaintServersDialog::PaintServersDialog()
-    : DialogBase("/dialogs/paint", SP_VERB_DIALOG_PAINT)
+    : DialogBase("/dialogs/paint", "PaintServers")
     , desktop(SP_ACTIVE_DESKTOP)
     , target_selected(true)
     , ALLDOCS(_("All paint servers"))
