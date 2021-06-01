@@ -6109,9 +6109,7 @@ msgstr "Negativo"
 #: ../src/extension/internal/bitmap/negate.cpp:45
 msgid "Negate (take inverse) selected bitmap(s)"
 msgstr ""
-"Obter negativo do(s) bitmaps(s) selecionado(s)\n"
-"\n"
-"Negar (inverter) bitmap(s) selecionado(s)"
+"Obter negativo do(s) bitmaps(s) selecionado(s)"
 
 #: ../src/extension/internal/bitmap/normalize.cpp:38
 msgid "Normalize"
@@ -9065,7 +9063,7 @@ msgstr "Escolha o nome da pasta"
 #: ../src/extension/prefdialog/prefdialog.cpp:71
 #: ../src/ui/dialog/knot-properties.cpp:37 ../src/verbs.cpp:2375
 msgid "_Close"
-msgstr "Fe_char"
+msgstr "_Fechar"
 
 #: ../src/extension/prefdialog/prefdialog.cpp:72
 #: ../src/ui/dialog/transformation.cpp:154
@@ -9269,7 +9267,7 @@ msgid ""
 "The following additional information was returned by the output extension:\n"
 "'%s'"
 msgstr ""
-"Não foi possível salvar o arquivo% s.\n"
+"Não foi possível salvar o arquivo%s.\n"
 "\n"
 "As seguintes informações adicionais foram retornadas pela extensão de "
 "saída:\n"
@@ -12763,25 +12761,25 @@ msgid ""
 "<b><i>Set Defaults:</i></b> For every LPE, default values can be set at the "
 "bottom."
 msgstr ""
-"<b><big>Geral</big> </b>\n"
+"<b><big>Geral</big></b>\n"
 "Exibir e posicionar linhas de dimensão e rótulos\n"
 "\n"
-"<b><big>Projeção</big> </b>\n"
+"<b><big>Projeção</big></b>\n"
 "Mostra uma linha com medidas baseadas nos itens selecionados\n"
 "\n"
-"<b><big>Opções</big> </b>\n"
+"<b><big>Opções</big></b>\n"
 "Opções de cor, precisão, formatação de etiqueta e exibição\n"
 "\n"
-"<b><big>Dicas</big> </b>\n"
-"<b> <i> Estilo personalizado: </i> </b> para personalizar ainda mais os "
+"<b><big>Dicas</big></b>\n"
+"<b><i> Estilo personalizado: </i></b> para personalizar ainda mais os "
 "estilos, use o editor XML para descobrir a classe ou ID e, em seguida, use a "
 "caixa de diálogo Estilo para aplicar um novo estilo.\n"
-"<b><i>Listas pretas:</i> </b> permite ocultar alguns segmentos ou etapas de "
+"<b><i>Listas pretas:</i></b> permite ocultar alguns segmentos ou etapas de "
 "projeção.\n"
-"<b> <i> Múltiplas medidas LPEs: </i> </b> No mesmo objeto, em conjunto com "
+"<b><i> Múltiplas medidas LPEs: </i></b> No mesmo objeto, em conjunto com "
 "listas negras, isso permite rótulos e medidas com diferentes orientações ou "
 "projeções adicionais.\n"
-"<b> <i> Definir padrões: </i> </b> para cada LPE, os valores padrão podem "
+"<b><i> Definir padrões: </i></b> para cada LPE, os valores padrão podem "
 "ser definidos na parte inferior."
 
 #: ../src/live_effects/lpe-measure-segments.cpp:297
@@ -13083,7 +13081,7 @@ msgstr "Superior Direito"
 #: ../src/live_effects/lpe-perspective-envelope.cpp:51
 msgid "Top Right - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Superior direito - <b>Ctrl+Alt+Clique </b>: redefinir, <b>Ctrl</b>: mover ao "
+"Superior direito - <b>Ctrl+Alt+Clique</b>: redefinir, <b>Ctrl</b>: mover ao "
 "longo dos eixos"
 
 #: ../src/live_effects/lpe-perspective-envelope.cpp:52
@@ -13093,7 +13091,7 @@ msgstr "Inferior Esquerdo"
 #: ../src/live_effects/lpe-perspective-envelope.cpp:52
 msgid "Down Left - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Inferior esquerdo - <b> Ctrl+Alt+Clique </b>: redefinir, <b>Ctrl</b>: mover "
+"Inferior esquerdo - <b>Ctrl+Alt+Clique</b>: redefinir, <b>Ctrl</b>: mover "
 "ao longo dos eixos"
 
 #: ../src/live_effects/lpe-perspective-envelope.cpp:53
@@ -13103,7 +13101,7 @@ msgstr "Inferior Direito"
 #: ../src/live_effects/lpe-perspective-envelope.cpp:53
 msgid "Down Right - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Inferior direito - <b>Ctrl+Alt+Clique </b>: redefinir, <b>Ctrl</b>: mover ao "
+"Inferior direito - <b>Ctrl+Alt+Clique</b>: redefinir, <b>Ctrl</b>: mover ao "
 "longo dos eixos"
 
 #: ../src/live_effects/lpe-perspective-envelope.cpp:288
@@ -14479,7 +14477,7 @@ msgid ""
 "dialog, <b>Ctrl+Alt+Click</b> resets"
 msgstr ""
 "<b>Chanfro</b>: <b>Ctrl+Clique</b> alterna o tipo, <b>Shift+Clique</b> abre "
-"a caixa de diálogo, <b>Ctrl+Alt+Clique </b> redefine"
+"a caixa de diálogo, <b>Ctrl+Alt+Clique</b> redefine"
 
 #: ../src/live_effects/parameter/satellitesarray.cpp:476
 msgid ""
@@ -15432,7 +15430,7 @@ msgstr "Colar"
 
 #: ../src/selection-chemistry.cpp:1340
 msgid "Paste style"
-msgstr "Colar Estilo"
+msgstr "Colar estilo"
 
 #: ../src/selection-chemistry.cpp:1349
 msgid "Paste live path effect"
@@ -18857,7 +18855,7 @@ msgid ""
 "standard. Porter-Duff blending modes are essentially logical operations "
 "between the corresponding pixel values of the images."
 msgstr ""
-"A primitiva de filtro <b> feComposite</b> compõe duas imagens usando um dos "
+"A primitiva de filtro <b>feComposite</b> compõe duas imagens usando um dos "
 "modos de combinação Porter-Duff ou o modo aritmético descrito no padrão SVG. "
 "Os modos de mesclagem Porter-Duff são operações essencialmente lógicas entre "
 "os valores de pixel correspondentes das imagens."
@@ -25679,11 +25677,11 @@ msgstr ""
 
 #: ../src/ui/dialog/transformation.cpp:114
 msgid "_Scale"
-msgstr "_Escala"
+msgstr "_Escalar"
 
 #: ../src/ui/dialog/transformation.cpp:118
 msgid "_Rotate"
-msgstr "_Girar"
+msgstr "_Rotacionar"
 
 #: ../src/ui/dialog/transformation.cpp:122
 msgid "Ske_w"
@@ -25691,7 +25689,7 @@ msgstr "_Inclinar"
 
 #: ../src/ui/dialog/transformation.cpp:126
 msgid "Matri_x"
-msgstr "Matri_z"
+msgstr "_Matriz"
 
 #: ../src/ui/dialog/transformation.cpp:149
 msgid "Reset the values on the current tab to defaults"
@@ -25721,7 +25719,7 @@ msgstr "Unidades E e F"
 #: ../src/ui/dialog/transformation.cpp:890
 #: ../src/ui/dialog/transformation.cpp:914
 msgid "Transform matrix is singular, <b>not used</b>."
-msgstr "A matriz de transformação é singular, <b> não usada </b>."
+msgstr "A matriz de transformação é singular, <b>não usada</b>."
 
 #: ../src/ui/dialog/transformation.cpp:930
 msgid "Edit transformation matrix"
@@ -29501,7 +29499,7 @@ msgid ""
 "<b>Ellipse</b>: %s &#215; %s (constrained to golden ratio 1.618 : 1); with "
 "<b>Shift</b> to draw around the starting point"
 msgstr ""
-"<b>Elipse</b>: %s &#215; %s (razão restrita a áurea 1,618: 1); com <b> Shift "
+"<b>Elipse</b>: %s &#215; %s (razão restrita a áurea 1,618: 1); com <b>Shift "
 "</b> para desenhar em torno do ponto de partida"
 
 #: ../src/ui/tools/arc-tool.cpp:410
@@ -29536,7 +29534,7 @@ msgstr "Alterar perspectiva (ângulo das linhas de planos)"
 
 #: ../src/ui/tools/box3d-tool.cpp:551
 msgid "<b>3D Box</b>; with <b>Shift</b> to extrude along the Z axis"
-msgstr "<b>Caixa 3D </b>; pressione <b>Shift</b> para mover ao longo do eixo Z"
+msgstr "<b>Caixa 3D</b>; pressione <b>Shift</b> para mover ao longo do eixo Z"
 
 #: ../src/ui/tools/box3d-tool.cpp:577
 msgid "Create 3D box"
@@ -29952,7 +29950,7 @@ msgstr "<b>Shift</b>: arraste para adicionar nós à seleção"
 msgid "<b>%u of %u</b> node selected."
 msgid_plural "<b>%u of %u</b> nodes selected."
 msgstr[0] "<b>%u de %u</b> nó selecionado."
-msgstr[1] "<b>%u de %u </b> nós selecionados."
+msgstr[1] "<b>%u de %u</b> nós selecionados."
 
 #: ../src/ui/tools/node-tool.cpp:674
 msgid "Angle: %1°."
@@ -30214,7 +30212,7 @@ msgid ""
 "<b>Draw over</b> objects to select them; release <b>%s</b> to switch to "
 "rubberband selection"
 msgstr ""
-"<b>Desenhe sobre </b> os objetos para selecioná-los; libere <b>% s </b> para "
+"<b>Desenhe sobre</b> os objetos para selecioná-los; libere <b>%s</b> para "
 "mudar para a seleção elástica"
 
 #: ../src/ui/tools/select-tool.cpp:632
@@ -30223,7 +30221,7 @@ msgid ""
 "<b>Drag near</b> objects to select them; press <b>%s</b> to switch to touch "
 "selection"
 msgstr ""
-"<b> Arraste perto </b> dos objetos para selecioná-los; pressione <b>% s </b> "
+"<b>Arraste perto</b> dos objetos para selecioná-los; pressione <b>%s</b> "
 "para mudar para a seleção de toque"
 
 #: ../src/ui/tools/select-tool.cpp:635
@@ -30232,7 +30230,7 @@ msgid ""
 "<b>Drag around</b> objects to select them; press <b>%s</b> to switch to "
 "touch selection"
 msgstr ""
-"<b> Arraste </b> objetos para selecioná-los; pressione <b>% s </b> para "
+"<b>Arraste</b> objetos para selecioná-los; pressione <b>%s</b> para "
 "mudar para a seleção de toque"
 
 #: ../src/ui/tools/select-tool.cpp:1055
@@ -30285,7 +30283,7 @@ msgid ""
 "%s. Drag, click or click and scroll to spray <b>clones</b> of the initial "
 "selection."
 msgstr ""
-"% s. Arraste, clique ou clique e role para espalhar <b>cópias</b> da seleção "
+"%s. Arraste, clique ou clique e role para espalhar <b>cópias</b> da seleção "
 "inicial."
 
 #: ../src/ui/tools/spray-tool.cpp:212
@@ -30508,7 +30506,7 @@ msgstr "%s. Arraste ou clique para <b>mover aleatoriamente</b>."
 #, c-format
 msgid "%s. Drag or click to <b>scale down</b>; with Shift to <b>scale up</b>."
 msgstr ""
-"%s. Arraste ou clique para <b> diminuir</b>; com Shift para <b>aumentar</b>."
+"%s. Arraste ou clique para <b>diminuir</b>; com Shift para <b>aumentar</b>."
 
 #: ../src/ui/tools/tweak-tool.cpp:164
 #, c-format
@@ -30516,25 +30514,25 @@ msgid ""
 "%s. Drag or click to <b>rotate clockwise</b>; with Shift, "
 "<b>counterclockwise</b>."
 msgstr ""
-"%s. Arraste ou clique para <b> girar no sentido horário</b>; com Shift para "
-"<b> sentido anti-horário</b>."
+"%s. Arraste ou clique para <b>girar no sentido horário</b>; com Shift para "
+"<b>sentido anti-horário</b>."
 
 #: ../src/ui/tools/tweak-tool.cpp:172
 #, c-format
 msgid "%s. Drag or click to <b>duplicate</b>; with Shift, <b>delete</b>."
 msgstr ""
-"%s. Arraste ou clique para <b>duplicar</b>; com Shift para <b> excluir</b>."
+"%s. Arraste ou clique para <b>duplicar</b>; com Shift para <b>excluir</b>."
 
 #: ../src/ui/tools/tweak-tool.cpp:180
 #, c-format
 msgid "%s. Drag to <b>push paths</b>."
-msgstr "%s. Arraste para <b> mover os caminhos </b>."
+msgstr "%s. Arraste para <b>mover os caminhos</b>."
 
 #: ../src/ui/tools/tweak-tool.cpp:184
 #, c-format
 msgid "%s. Drag or click to <b>inset paths</b>; with Shift to <b>outset</b>."
 msgstr ""
-"%s. Arraste ou clique para <b>inserir caminhos</b>; com Shift para <b> "
+"%s. Arraste ou clique para <b>inserir caminhos</b>; com Shift para <b>"
 "reiniciar</b>."
 
 #: ../src/ui/tools/tweak-tool.cpp:192
@@ -30547,7 +30545,7 @@ msgstr ""
 #: ../src/ui/tools/tweak-tool.cpp:200
 #, c-format
 msgid "%s. Drag or click to <b>roughen paths</b>."
-msgstr "%s. Arraste ou clique para <b> enrugar os caminhos</b>."
+msgstr "%s. Arraste ou clique para <b>enrugar os caminhos</b>."
 
 #: ../src/ui/tools/tweak-tool.cpp:204
 #, c-format
@@ -31909,8 +31907,8 @@ msgid ""
 "b> to adjust lightness, with <b>Shift</b> to adjust saturation, without "
 "modifiers to adjust hue"
 msgstr ""
-"Ajustando <b>alfa</b>: era %.3g, agora <b>%.3g </b> (diff %.3g); com <b> "
-"Ctrl </b> para ajustar a luminosidade, com <b> Shift </b> para ajustar a "
+"Ajustando <b>alfa</b>: era %.3g, agora <b>%.3g</b> (diff %.3g); com <b>"
+"Ctrl</b> para ajustar a luminosidade, com <b>Shift</b> para ajustar a "
 "saturação, sem modificadores para ajustar o matiz"
 
 #: ../src/ui/widget/selected-style.cpp:1304
@@ -31924,7 +31922,7 @@ msgid ""
 "<b>Ctrl</b> to adjust lightness, with <b>Alt</b> to adjust alpha, without "
 "modifiers to adjust hue"
 msgstr ""
-"Ajustando a <b>saturação</b>: era %.3g, agora <b>%.3g </b> (diff %.3g); com "
+"Ajustando a <b>saturação</b>: era %.3g, agora <b>%.3g</b> (diff %.3g); com "
 "<b>Ctrl</b> para ajustar a luminosidade, com <b>Alt</b> para ajustar alfa, "
 "sem modificadores para ajustar o matiz"
 
@@ -32373,7 +32371,7 @@ msgstr "Salvar documento com outro nome"
 
 #: ../src/verbs.cpp:2356
 msgid "Save a Cop_y..."
-msgstr "Salvar uma Cóp_ia..."
+msgstr "Salvar uma Có_pia..."
 
 #: ../src/verbs.cpp:2357
 msgid "Save a copy of the document under a new name"
@@ -32397,7 +32395,7 @@ msgstr "Imprimir documento"
 
 #: ../src/verbs.cpp:2364
 msgid "Clean _Up Document"
-msgstr "Limpar _documento"
+msgstr "_Limpar Documento"
 
 #: ../src/verbs.cpp:2365
 msgid ""
@@ -32485,7 +32483,7 @@ msgstr "Cola objetos ou texto da área de transferência para a posição do mou
 
 #: ../src/verbs.cpp:2390
 msgid "Paste _Style"
-msgstr "Colar e_stilo"
+msgstr "Colar _Estilo"
 
 #: ../src/verbs.cpp:2391
 msgid "Apply the style of the copied object to selection"
@@ -34590,7 +34588,7 @@ msgid ""
 "\n"
 "Do you want to save this file as Inkscape SVG?"
 msgstr ""
-"<span weight = \"bold\" size = \"maior\"> O arquivo \"% s\" foi salvo com um "
+"<span weight = \"bold\" size = \"maior\"> O arquivo \"%s\" foi salvo com um "
 "formato que pode causar perda de dados! </span>\n"
 "\n"
 "Você deseja salvar este arquivo como Inkscape SVG?"
@@ -44748,7 +44746,7 @@ msgstr "Metade da altura da fonte"
 
 #~ msgid "Select only one <b>symbol</b> in Symbol dialog to convert to group."
 #~ msgstr ""
-#~ "Selecione apenas um <b> símbolo</b> da caixa de diálogo Símbolo para "
+#~ "Selecione apenas um <b>símbolo</b> da caixa de diálogo Símbolo para "
 #~ "convertê-lo em grupo."
 
 #~ msgid "_Contrast:"
@@ -44870,7 +44868,7 @@ msgstr "Metade da altura da fonte"
 
 #~ msgid "<b>Scale</b> the pattern stroke; uniformly if with <b>Ctrl</b>"
 #~ msgstr ""
-#~ "<b>Dimensionar</b> o padrão do contorno; uniformemente se com <b> Ctrl </"
+#~ "<b>Dimensionar</b> o padrão do contorno; uniformemente se com <b>Ctrl </"
 #~ "b>"
 
 #~ msgid "<b>Rotate</b> the pattern stroke; with <b>Ctrl</b> to snap angle"
