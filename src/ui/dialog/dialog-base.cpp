@@ -52,7 +52,7 @@ DialogBase::DialogBase(gchar const *prefs_path, Glib::ustring dialog_type)
     if (it != dialog_data.end()) {
 
         // get translated verb name
-        _name = it->second.label;
+        _name = _(it->second.label.c_str());
 
         // remove ellipsis and mnemonics
         int pos = _name.find("...", 0);
