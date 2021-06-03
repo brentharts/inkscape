@@ -496,8 +496,8 @@ void GradientSelector::add_vector_clicked()
     if (gr) {
         repr = gr->getRepr()->duplicate(xml_doc);
         // Rename the new gradients id to be similar to the cloned gradients
-        Glib::ustring old_id = gr->getId();
-        rename_id(gr, old_id);
+        auto new_id = generate_unique_id(doc, gr->getId());
+        gr->setAttribute("id", new_id.c_str());
         doc->getDefs()->getRepr()->addChild(repr, nullptr);
     } else {
         repr = xml_doc->createElement("svg:linearGradient");
@@ -518,6 +518,9 @@ void GradientSelector::add_vector_clicked()
     _vectors->set_gradient(doc, gr);
 
     selectGradientInTree(gr);
+
+    // assign gradient to selection
+    vector_set(gr);
 
     Inkscape::GC::release(repr);
 }

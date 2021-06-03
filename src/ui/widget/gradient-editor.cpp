@@ -529,7 +529,7 @@ void GradientEditor::selectStop(SPStop* selected) {
         return stop == selected; 
     });
     if (it != items.end()) {
-        this->select_stop(std::distance(items.begin(), it));
+        select_stop(std::distance(items.begin(), it));
     }
 }
 
