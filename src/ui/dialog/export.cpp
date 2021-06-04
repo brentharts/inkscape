@@ -160,7 +160,7 @@ Export::Export()
     try {
         builder = Gtk::Builder::create_from_file(gladefile);
     } catch (const Glib::Error &ex) {
-        g_error("Glade file loading failed for boot screen");
+        g_error("Glade file loading failed for export screen");
         return;
     }
     Gtk::Box *contents;
