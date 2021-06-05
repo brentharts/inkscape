@@ -180,6 +180,37 @@ canvas_snapping_toggle(SPDocument* document, const SPAttr option)
 
 }
 
+std::vector<std::pair<Glib::ustring, SPAttr>> snap_bbox = {
+    { "snap-bbox",               SPAttr::INKSCAPE_SNAP_BBOX },
+    { "snap-bbox-edge",          SPAttr::INKSCAPE_SNAP_BBOX_EDGE },
+    { "snap-bbox-corner",        SPAttr::INKSCAPE_SNAP_BBOX_CORNER },
+    { "snap-bbox-edge-midpoint", SPAttr::INKSCAPE_SNAP_BBOX_EDGE_MIDPOINT },
+};
+
+enum class SimpleSnap { BBox, Nodes, Alignment };
+void simple_snap_toggle(SPDocument* document, SimpleSnap option) {
+    Inkscape::XML::Node* repr = document->getReprNamedView();
+
+    if (repr == nullptr) {
+        std::cerr << "canvas_snapping_toggle: namedview XML repr missing!" << std::endl;
+        return;
+    }
+
+    SPObject* obj = document->getObjectByRepr(repr);
+    SPNamedView* nv = dynamic_cast<SPNamedView*>(obj);
+    if (nv == nullptr) {
+        std::cerr << "canvas_snapping_toggle: no namedview!" << std::endl;
+        return;
+    }
+
+    switch (option) {
+    case SimpleSnap::BBox:
+        bool v = nv->snap_manager.snapprefs.isTargetSnappable(Inkscape::SNAPTARGET_BBOX_CATEGORY);
+        g_warning("snap: %d", v?1:0);
+        break;
+    }
+}
+
 std::vector<std::vector<Glib::ustring>> raw_data_canvas_snapping =
 {
     {"doc.snap-global-toggle",        N_("Snapping"),                          "Snap",  N_("Toggle snapping on/off")                             },
@@ -208,6 +239,10 @@ std::vector<std::vector<Glib::ustring>> raw_data_canvas_snapping =
 
     {"doc.snap-path-mask",            N_("Snap Mask Paths"),                   "Snap",  N_("Toggle snapping to mask paths")                      },
     {"doc.snap-path-clip",            N_("Snap Clip Paths"),                   "Snap",  N_("Toggle snapping to clip paths")                      },
+
+    {"doc.simple-snap-bbox",          N_("Snap bounding boxes"),               "Snap",  N_("Toggle snapping to bounding boxes")                  },
+    {"doc.simple-snap-nodes",         N_("Snap nodes"),                        "Snap",  N_("Toggle snapping to nodes")                           },
+    {"doc.simple-snap-alignment",     N_("Snap alignment"),                    "Snap",  N_("Toggle alignment snapping")                          },
 };
 
 void
@@ -217,11 +252,15 @@ add_actions_canvas_snapping(SPDocument* document)
 
     map->add_action_bool( "snap-global-toggle",      sigc::bind<SPDocument*, SPAttr>(sigc::ptr_fun(&canvas_snapping_toggle),  document, SPAttr::INKSCAPE_SNAP_GLOBAL));
 
-    map->add_action_bool( "snap-bbox",               sigc::bind<SPDocument*, SPAttr>(sigc::ptr_fun(&canvas_snapping_toggle),  document, SPAttr::INKSCAPE_SNAP_BBOX));
-    map->add_action_bool( "snap-bbox-edge",          sigc::bind<SPDocument*, SPAttr>(sigc::ptr_fun(&canvas_snapping_toggle),  document, SPAttr::INKSCAPE_SNAP_BBOX_EDGE));
-    map->add_action_bool( "snap-bbox-corner",        sigc::bind<SPDocument*, SPAttr>(sigc::ptr_fun(&canvas_snapping_toggle),  document, SPAttr::INKSCAPE_SNAP_BBOX_CORNER));
-    map->add_action_bool( "snap-bbox-edge-midpoint", sigc::bind<SPDocument*, SPAttr>(sigc::ptr_fun(&canvas_snapping_toggle),  document, SPAttr::INKSCAPE_SNAP_BBOX_EDGE_MIDPOINT));
-    map->add_action_bool( "snap-bbox-center",        sigc::bind<SPDocument*, SPAttr>(sigc::ptr_fun(&canvas_snapping_toggle),  document, SPAttr::INKSCAPE_SNAP_BBOX_MIDPOINT));
+    for (auto&& pair : snap_bbox) {
+        map->add_action_bool(pair.first, [=](){ canvas_snapping_toggle(document, pair.second); });
+    }
+
+    // map->add_action_bool( "snap-bbox",               sigc::bind<SPDocument*, SPAttr>(sigc::ptr_fun(&canvas_snapping_toggle),  document, SPAttr::INKSCAPE_SNAP_BBOX));
+    // map->add_action_bool( "snap-bbox-edge",          sigc::bind<SPDocument*, SPAttr>(sigc::ptr_fun(&canvas_snapping_toggle),  document, SPAttr::INKSCAPE_SNAP_BBOX_EDGE));
+    // map->add_action_bool( "snap-bbox-corner",        sigc::bind<SPDocument*, SPAttr>(sigc::ptr_fun(&canvas_snapping_toggle),  document, SPAttr::INKSCAPE_SNAP_BBOX_CORNER));
+    // map->add_action_bool( "snap-bbox-edge-midpoint", sigc::bind<SPDocument*, SPAttr>(sigc::ptr_fun(&canvas_snapping_toggle),  document, SPAttr::INKSCAPE_SNAP_BBOX_EDGE_MIDPOINT));
+    // map->add_action_bool( "snap-bbox-center",        sigc::bind<SPDocument*, SPAttr>(sigc::ptr_fun(&canvas_snapping_toggle),  document, SPAttr::INKSCAPE_SNAP_BBOX_MIDPOINT));
 
     map->add_action_bool( "snap-node-category",      sigc::bind<SPDocument*, SPAttr>(sigc::ptr_fun(&canvas_snapping_toggle),  document, SPAttr::INKSCAPE_SNAP_NODE));
     map->add_action_bool( "snap-path",               sigc::bind<SPDocument*, SPAttr>(sigc::ptr_fun(&canvas_snapping_toggle),  document, SPAttr::INKSCAPE_SNAP_PATH));
@@ -242,6 +281,11 @@ add_actions_canvas_snapping(SPDocument* document)
     // Not used in toolbar
     map->add_action_bool( "snap-path-mask",          sigc::bind<SPDocument*, SPAttr>(sigc::ptr_fun(&canvas_snapping_toggle),  document, SPAttr::INKSCAPE_SNAP_PATH_MASK));
     map->add_action_bool( "snap-path-clip",          sigc::bind<SPDocument*, SPAttr>(sigc::ptr_fun(&canvas_snapping_toggle),  document, SPAttr::INKSCAPE_SNAP_PATH_CLIP));
+
+    // Simple snapping popover
+    map->add_action_bool("simple-snap-bbox",      [=](){ simple_snap_toggle(document, SimpleSnap::BBox); });
+    map->add_action_bool("simple-snap-nodes",     [=](){ simple_snap_toggle(document, SimpleSnap::Nodes); });
+    map->add_action_bool("simple-snap-alignment", [=](){ simple_snap_toggle(document, SimpleSnap::Alignment); });
 
     // Check if there is already an application instance (GUI or non-GUI).
     auto app = InkscapeApplication::instance();

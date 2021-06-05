@@ -424,6 +424,37 @@ GtkWidget *ToolboxFactory::createSnapToolbox()
         toolbar->set_icon_size (static_cast<Gtk::IconSize>(toolboxSize));
     }
 
+    Gtk::ToolItem* item_simple = nullptr;
+    Gtk::ToolItem* item_advanced = nullptr;
+    Gtk::MenuButton* btn_simple = nullptr;
+    Gtk::MenuButton* btn_advanced = nullptr;
+    Gtk::LinkButton* simple = nullptr;
+    Gtk::LinkButton* advanced = nullptr;
+    builder->get_widget("simple-link", simple);
+    builder->get_widget("advanced-link", advanced);
+    builder->get_widget("tool-item-advanced", item_advanced);
+    builder->get_widget("tool-item-simple", item_simple);
+    builder->get_widget("btn-simple", btn_simple);
+    builder->get_widget("btn-advanced", btn_advanced);
+    if (simple && advanced && item_simple && item_advanced && btn_simple && btn_advanced) {
+            // g_warning("connct");
+        simple->signal_activate_link().connect([=](){
+            g_warning("sim");
+            item_advanced->hide();
+            item_simple->show();
+            // btn_simple->show();
+            btn_simple->get_popover()->show();
+            return true;
+        }, false);
+        advanced->signal_activate_link().connect([=](){
+            g_warning("adv");
+            item_simple->hide();
+            item_advanced->show();
+            btn_advanced->get_popover()->show();
+            return true;
+        }, false);
+    }
+
     return toolboxNewCommon( tb, BAR_SNAP, GTK_POS_LEFT );
 }
 
