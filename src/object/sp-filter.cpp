@@ -297,25 +297,25 @@ Inkscape::XML::Node* SPFilter::write(Inkscape::XML::Document *doc, Inkscape::XML
     }
 
     if (this->x._set) {
-        sp_repr_set_svg_double(repr, "x", this->x.computed);
+        repr->setAttributeSvgDouble("x", this->x.computed);
     } else {
         repr->removeAttribute("x");
     }
 
     if (this->y._set) {
-        sp_repr_set_svg_double(repr, "y", this->y.computed);
+        repr->setAttributeSvgDouble("y", this->y.computed);
     } else {
         repr->removeAttribute("y");
     }
 
     if (this->width._set) {
-        sp_repr_set_svg_double(repr, "width", this->width.computed);
+        repr->setAttributeSvgDouble("width", this->width.computed);
     } else {
         repr->removeAttribute("width");
     }
 
     if (this->height._set) {
-        sp_repr_set_svg_double(repr, "height", this->height.computed);
+        repr->setAttributeSvgDouble("height", this->height.computed);
     } else {
         repr->removeAttribute("height");
     }
@@ -420,11 +420,25 @@ void SPFilter::set_filter_region(double x, double y, double width, double height
     {
         // TODO: set it in UserSpaceOnUse instead?
         auto repr = this->getRepr();
-        sp_repr_set_svg_double(repr, "x", x);
-        sp_repr_set_svg_double(repr, "y", y);
-        sp_repr_set_svg_double(repr, "width", width);
-        sp_repr_set_svg_double(repr, "height", height);
+        repr->setAttributeSvgDouble("x", x);
+        repr->setAttributeSvgDouble("y", y);
+        repr->setAttributeSvgDouble("width", width);
+        repr->setAttributeSvgDouble("height", height);
     }
+}
+
+/**
+ * Check each filter primative for conflicts with this object.
+ */
+bool SPFilter::valid_for(SPObject const *obj) const
+{
+    for(auto& primitive_obj: this->children) {
+        auto primitive = dynamic_cast<SPFilterPrimitive const *>(&primitive_obj);
+        if (primitive && !primitive->valid_for(obj)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 /**

@@ -35,17 +35,17 @@
 #include "text-editing.h"
 #include "unclump.h"
 #include "verbs.h"
+
+#include "actions/actions-tools.h"
 #include "live_effects/effect-enum.h"
 #include "object/sp-flowtext.h"
 #include "object/sp-item-transform.h"
 #include "object/sp-root.h"
 #include "object/sp-text.h"
-
 #include "ui/icon-loader.h"
 #include "ui/icon-names.h"
 #include "ui/tool/control-point-selection.h"
 #include "ui/tool/multi-path-manipulator.h"
-#include "ui/tools-switch.h"
 #include "ui/tools/node-tool.h"
 #include "ui/widget/spinbutton.h"
 
@@ -141,10 +141,10 @@ void ActionAlign::do_action(SPDesktop *desktop, int index)
     switch (AlignTarget(prefs->getInt("/dialogs/align/align-to", 6)))
     {
     case LAST:
-        focus = SP_ITEM(selected.back());
+        focus = selected.back();
         break;
     case FIRST:
-        focus = SP_ITEM(selected.front());
+        focus = selected.front();
         break;
     case BIGGEST:
         focus = selection->largestItem(horiz);
@@ -847,10 +847,10 @@ private :
             switch (AlignTarget(prefs->getInt("/dialogs/align/align-to", 6)))
             {
                 case LAST:
-                    focus = SP_ITEM(selected.back());
+                    focus = selected.back();
                     break;
                 case FIRST:
-                    focus = SP_ITEM(selected.front());
+                    focus = selected.front();
                     break;
                 case BIGGEST:
                     focus = selection->largestItem(Selection::AREA);
@@ -911,7 +911,7 @@ static void on_tool_changed(AlignAndDistribute *daad)
 {
     SPDesktop *desktop = SP_ACTIVE_DESKTOP;
     if (desktop && desktop->getEventContext())
-        daad->setMode(tools_active(desktop) == TOOLS_NODES);
+        daad->setMode(get_active_tool(desktop) == "Node");
     else
         daad->setMode(false);
 
@@ -925,7 +925,7 @@ static void on_selection_changed(AlignAndDistribute *daad)
 /////////////////////////////////////////////////////////
 
 AlignAndDistribute::AlignAndDistribute()
-    : DialogBase("/dialogs/align", SP_VERB_DIALOG_ALIGN_DISTRIBUTE)
+    : DialogBase("/dialogs/align", "AlignDistribute")
     , randomize_bbox()
     , _alignFrame(_("Align"))
     , _distributeFrame(_("Distribute"))

@@ -29,8 +29,9 @@
 #include "layer-manager.h"
 #include "verbs.h"
 
+#include "actions/actions-tools.h"
+
 #include "helper/action.h"
-#include "ui/icon-loader.h"
 
 #include "include/gtkmm_version.h"
 
@@ -43,11 +44,11 @@
 #include "style.h"
 
 #include "ui/dialog-events.h"
+#include "ui/icon-loader.h"
 #include "ui/icon-names.h"
 #include "ui/selected-color.h"
 #include "ui/shortcuts.h"
 #include "ui/desktop/menu-icon-shift.h"
-#include "ui/tools-switch.h"
 #include "ui/tools/node-tool.h"
 
 #include "ui/widget/canvas.h"
@@ -1227,7 +1228,7 @@ bool ObjectsPanel::_handleDragDrop(const Glib::RefPtr<Gdk::DragContext>& /*conte
             if (_store->iter_is_valid(iter)) {
                 Gtk::TreeModel::Row row = *iter;
                 _dnd_target = row[_model->_colObject]; //Set the drop target
-                if ((pos == Gtk::TREE_VIEW_DROP_INTO_OR_BEFORE) or (pos == Gtk::TREE_VIEW_DROP_INTO_OR_AFTER)) {
+                if ((pos == Gtk::TREE_VIEW_DROP_INTO_OR_BEFORE) || (pos == Gtk::TREE_VIEW_DROP_INTO_OR_AFTER)) {
                     // Trying to drop into a layer or group
                     if (SP_IS_GROUP(_dnd_target)) {
                         _dnd_into = true;
@@ -1239,8 +1240,11 @@ bool ObjectsPanel::_handleDragDrop(const Glib::RefPtr<Gdk::DragContext>& /*conte
                 }
                 // If the source selection contains a layer however, then it can not be dropped ...
                 bool c1 = target_path.size() > 1;                   // .. below the top-level
-                bool c2 = SP_IS_GROUP(_dnd_target) and _dnd_into;   // .. or in any group (at the top level)
-                if (_dnd_source_includes_layer and (c1 or c2)) {
+                bool c2 = SP_IS_GROUP(_dnd_target) && _dnd_into;   // .. or in any group (at the top level)
+                if (SP_IS_GROUP(_dnd_target) && SP_GROUP(_dnd_target)->layerMode() != SPGroup::LAYER && 
+                    _dnd_source_includes_layer && 
+                    (c1 || c2)) 
+                {
                     cancel_dnd = true;
                 }
             } else {
@@ -1881,7 +1885,7 @@ void ObjectsPanel::_blurChangedIter(const Gtk::TreeIter& iter, double blur)
  * Constructor
  */
 ObjectsPanel::ObjectsPanel() :
-    DialogBase("/dialogs/objects", SP_VERB_DIALOG_OBJECTS),
+    DialogBase("/dialogs/objects", "Objects"),
     _rootWatcher(nullptr),
     _desktop(nullptr),
     _document(nullptr),
@@ -2334,7 +2338,7 @@ void SPItem::setHighlightColor(guint32 const color)
         Inkscape::UI::Tools::ToolBase *ec = SP_ACTIVE_DESKTOP->event_context;
         if (INK_IS_NODE_TOOL(ec)) {
             tool = static_cast<NodeTool*>(ec);
-            tools_switch(tool->getDesktop(), TOOLS_NODES);
+            set_active_tool(tool->getDesktop(), "Node");
         }
     }
 }
@@ -2348,7 +2352,7 @@ void SPItem::unsetHighlightColor()
         Inkscape::UI::Tools::ToolBase *ec = SP_ACTIVE_DESKTOP->event_context;
         if (INK_IS_NODE_TOOL(ec)) {
             tool = static_cast<NodeTool*>(ec);
-            tools_switch(tool->getDesktop(), TOOLS_NODES);
+            set_active_tool(tool->getDesktop(), "Node");
         }
     }
 }

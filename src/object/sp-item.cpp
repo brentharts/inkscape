@@ -35,7 +35,6 @@
 #include "sp-desc.h"
 #include "sp-guide.h"
 #include "sp-hatch.h"
-#include "sp-item-rm-unsatisfied-cns.h"
 #include "sp-mask.h"
 #include "sp-pattern.h"
 #include "sp-rect.h"
@@ -47,7 +46,6 @@
 #include "sp-use.h"
 
 #include "style.h"
-#include "uri.h"
 
 
 #include "util/find-last-if.h"
@@ -409,8 +407,11 @@ void SPItem::moveTo(SPItem *target, bool intoafter) {
 }
 
 void SPItem::build(SPDocument *document, Inkscape::XML::Node *repr) {
-	SPItem* object = this;
+#ifdef OBJECT_TRACE
+    objectTrace( "SPItem::build");
+#endif
 
+    SPItem* object = this;
     object->readAttr(SPAttr::STYLE);
     object->readAttr(SPAttr::TRANSFORM);
     object->readAttr(SPAttr::CLIP_PATH);
@@ -423,6 +424,9 @@ void SPItem::build(SPDocument *document, Inkscape::XML::Node *repr) {
     object->readAttr(SPAttr::INKSCAPE_HIGHLIGHT_COLOR);
 
     SPObject::build(document, repr);
+#ifdef OBJECT_TRACE
+    objectTrace( "SPItem::build", false);
+#endif
 }
 
 void SPItem::release() {
@@ -457,6 +461,11 @@ void SPItem::release() {
 }
 
 void SPItem::set(SPAttr key, gchar const* value) {
+#ifdef OBJECT_TRACE
+    std::stringstream temp;
+    temp << "SPItem::set: " << sp_attribute_name(key)  << " " << (value?value:"null");
+    objectTrace( temp.str() );
+#endif
     SPItem *item = this;
     SPItem* object = item;
 
@@ -533,13 +542,20 @@ void SPItem::set(SPAttr key, gchar const* value) {
             }
         default:
             if (SP_ATTRIBUTE_IS_CSS(key)) {
-                style->clear(key);
+                // FIXME: See if this is really necessary. Also, check after modifying SPIPaint to preserve
+                // non-#abcdef color formats.
+
+                // Propergate the property change to all clones
+                style->readFromObject(object);
                 object->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_STYLE_MODIFIED_FLAG);
             } else {
                 SPObject::set(key, value);
             }
             break;
     }
+#ifdef OBJECT_TRACE
+    objectTrace( "SPItem::set", false);
+#endif
 }
 
 void SPItem::clip_ref_changed(SPObject *old_clip, SPObject *clip, SPItem *item)
@@ -753,13 +769,13 @@ Inkscape::XML::Node* SPItem::write(Inkscape::XML::Document *xml_doc, Inkscape::X
     if (flags & SP_OBJECT_WRITE_EXT) {
         repr->setAttribute("sodipodi:insensitive", ( item->sensitive ? nullptr : "true" ));
         if (item->transform_center_x != 0)
-            sp_repr_set_svg_double (repr, "inkscape:transform-center-x", item->transform_center_x);
+            repr->setAttributeSvgDouble("inkscape:transform-center-x", item->transform_center_x);
         else
             repr->removeAttribute("inkscape:transform-center-x");
         if (item->transform_center_y != 0) {
             auto y = item->transform_center_y;
             y *= -document->yaxisdir();
-            sp_repr_set_svg_double (repr, "inkscape:transform-center-y", y);
+            repr->setAttributeSvgDouble("inkscape:transform-center-y", y);
         } else
             repr->removeAttribute("inkscape:transform-center-y");
     }
@@ -896,8 +912,6 @@ Geom::OptRect SPItem::documentPreferredBounds() const
         return documentBounds(SPItem::GEOMETRIC_BBOX);
     }
 }
-
-
 
 Geom::OptRect SPItem::documentGeometricBounds() const
 {
@@ -1086,7 +1100,6 @@ gchar *SPItem::detailedDescription() const {
 bool SPItem::isFiltered() const {
 	return (style && style->filter.href && style->filter.href->getObject());
 }
-
 
 SPObject* SPItem::isInMask() const {
     SPObject* parent = this->parent;
@@ -1538,7 +1551,8 @@ void SPItem::doWriteTransform(Geom::Affine const &transform, Geom::Affine const 
              (!preserve && // user did not chose to preserve all transforms
              (!clip_ref || !clip_ref->getObject()) && // the object does not have a clippath
              (!mask_ref || !mask_ref->getObject()) && // the object does not have a mask
-             !(!transform.isTranslation() && style && style->getFilter())) // the object does not have a filter, or the transform is translation (which is supposed to not affect filters)
+             !(!transform.isTranslation() && style && style->getFilter()))
+                // the object does not have a filter, or the transform is translation (which is supposed to not affect filters)
         )
     {
         transform_attr = this->set_transform(transform);
@@ -1593,7 +1607,6 @@ void SPItem::set_item_transform(Geom::Affine const &transform_matrix)
         /* The SP_OBJECT_USER_MODIFIED_FLAG_B is used to mark the fact that it's only a
            transformation.  It's apparently not used anywhere else. */
         requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_USER_MODIFIED_FLAG_B);
-        sp_item_rm_unsatisfied_cns(*this);
     }
 }
 

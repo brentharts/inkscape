@@ -40,7 +40,7 @@ namespace UI {
 namespace Dialog {
 
 FillAndStroke::FillAndStroke()
-    : DialogBase("/dialogs/fillstroke", SP_VERB_DIALOG_FILL_STROKE)
+    : DialogBase("/dialogs/fillstroke", "FillStroke")
     , _page_fill(Gtk::manage(new UI::Widget::NotebookPage(1, 1, true, true)))
     , _page_stroke_paint(Gtk::manage(new UI::Widget::NotebookPage(1, 1, true, true)))
     , _page_stroke_style(Gtk::manage(new UI::Widget::NotebookPage(1, 1, true, true)))
@@ -76,10 +76,7 @@ FillAndStroke::FillAndStroke()
 
 FillAndStroke::~FillAndStroke()
 {
-    fillWdgt->setDesktop(nullptr);
-    strokeWdgt->setDesktop(nullptr);
-    strokeStyleWdgt->setDesktop(nullptr);
-    _subject.setDesktop(nullptr);
+    setDesktop(nullptr);
 }
 
 void FillAndStroke::update()
@@ -89,8 +86,11 @@ void FillAndStroke::update()
         return;
     }
 
-    SPDesktop *desktop = getDesktop();
+    setDesktop(getDesktop());
+}
 
+void FillAndStroke::setDesktop(SPDesktop *desktop)
+{
     if (targetDesktop != desktop) {
         targetDesktop = desktop;
         if (fillWdgt) {
@@ -102,9 +102,7 @@ void FillAndStroke::update()
         if (strokeStyleWdgt) {
             strokeStyleWdgt->setDesktop(desktop);
         }
-        if (desktop) {
-            _subject.setDesktop(desktop);
-        }
+        _subject.setDesktop(desktop);
     }
 }
 
@@ -141,7 +139,6 @@ FillAndStroke::_layoutPageStrokeStyle()
     strokeStyleWdgt = Gtk::manage(new UI::Widget::StrokeStyle());
     strokeStyleWdgt->set_hexpand();
     strokeStyleWdgt->set_halign(Gtk::ALIGN_START);
-
     _page_stroke_style->table().attach(*strokeStyleWdgt, 0, 0, 1, 1);
 }
 

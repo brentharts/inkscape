@@ -421,7 +421,7 @@ bool ConnectorTool::item_handler(SPItem* item, GdkEvent* event)
         if (cc_item_is_shape(item)) {
             this->_setActiveShape(item);
         }
-        ret = true;
+        ret = false;
         break;
     }
     default:
@@ -818,14 +818,16 @@ void ConnectorTool::_setSubsequentPoint(Geom::Point const p)
     Avoid::Point src(o[Geom::X], o[Geom::Y]);
     Avoid::Point dst(d[Geom::X], d[Geom::Y]);
 
-    Avoid::Router *router = desktop->getDocument()->getRouter();
-    this->newConnRef = new Avoid::ConnRef(router);
-    this->newConnRef->setEndpoint(Avoid::VertID::src, src);
-    if (this->isOrthogonal)
-        this->newConnRef->setRoutingType(Avoid::ConnType_Orthogonal);
-    else
-        this->newConnRef->setRoutingType(Avoid::ConnType_PolyLine);
-    
+    if (!this->newConnRef) {
+        Avoid::Router *router = desktop->getDocument()->getRouter();
+        this->newConnRef = new Avoid::ConnRef(router);
+        this->newConnRef->setEndpoint(Avoid::VertID::src, src);
+        if (this->isOrthogonal) {
+            this->newConnRef->setRoutingType(Avoid::ConnType_Orthogonal);
+        } else {
+            this->newConnRef->setRoutingType(Avoid::ConnType_PolyLine);
+        }
+    }
     // Set new endpoint.
     this->newConnRef->setEndpoint(Avoid::VertID::tar, dst);
     // Immediately generate new routes for connector.
@@ -890,9 +892,9 @@ void ConnectorTool::_flushWhite(SPCurve *c)
 
         bool connection = false;
         this->newconn->setAttribute( "inkscape:connector-type",
-                                   this->isOrthogonal ? "orthogonal" : "polyline", nullptr );
+                                   this->isOrthogonal ? "orthogonal" : "polyline");
         this->newconn->setAttribute( "inkscape:connector-curvature",
-                                   Glib::Ascii::dtostr(this->curvature).c_str(), nullptr );
+                                   Glib::Ascii::dtostr(this->curvature).c_str());
         if (this->shref) {
             connection = true;
             this->newconn->setAttribute( "inkscape:connection-start", this->shref);

@@ -152,30 +152,30 @@ LPEMeasureSegments::LPEMeasureSegments(LivePathEffectObject *lpeobject) :
     precision.param_set_range(0, 100);
     precision.param_set_increments(1, 1);
     precision.param_set_digits(0);
-    precision.param_make_integer(true);
+    precision.param_make_integer();
     fix_overlaps.param_set_range(0, 180);
     fix_overlaps.param_set_increments(1, 1);
     fix_overlaps.param_set_digits(0);
-    fix_overlaps.param_make_integer(true);
-    position.param_set_range(-999999.0, 999999.0);
+    fix_overlaps.param_make_integer();
+    position.param_set_range(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
     position.param_set_increments(1, 1);
     position.param_set_digits(2);
-    scale.param_set_range(-999999.0, 999999.0);
+    scale.param_set_range(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
     scale.param_set_increments(1, 1);
     scale.param_set_digits(4);
-    text_top_bottom.param_set_range(-999999.0, 999999.0);
+    text_top_bottom.param_set_range(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
     text_top_bottom.param_set_increments(1, 1);
     text_top_bottom.param_set_digits(2);
-    line_width.param_set_range(0, 999999.0);
+    line_width.param_set_range(0, std::numeric_limits<double>::max());
     line_width.param_set_increments(0.1, 0.1);
     line_width.param_set_digits(2);
-    helpline_distance.param_set_range(-999999.0, 999999.0);
+    helpline_distance.param_set_range(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
     helpline_distance.param_set_increments(1, 1);
     helpline_distance.param_set_digits(2);
-    helpline_overlap.param_set_range(-999999.0, 999999.0);
+    helpline_overlap.param_set_range(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
     helpline_overlap.param_set_increments(1, 1);
     helpline_overlap.param_set_digits(2);
-    distance_projection.param_set_range(-999999.0, 999999.0);
+    distance_projection.param_set_range(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
     distance_projection.param_set_increments(1, 1);
     distance_projection.param_set_digits(5);
     angle_projection.param_set_range(0.0, 360.0);
@@ -389,7 +389,7 @@ LPEMeasureSegments::createArrowMarker(Glib::ustring mode)
         arrow_path->setAttribute("style", style);
         arrow->addChild(arrow_path, nullptr);
         Inkscape::GC::release(arrow_path);
-        elemref = SP_OBJECT(document->getDefs()->appendChildRepr(arrow));
+        elemref = document->getDefs()->appendChildRepr(arrow);
         Inkscape::GC::release(arrow);
     }
     items.push_back(mode);
@@ -416,8 +416,8 @@ LPEMeasureSegments::createTextLabel(Geom::Point pos, size_t counter, double leng
     elemref = document->getObjectById(id.c_str());
     if (elemref) {
         rtext = elemref->getRepr();
-        sp_repr_set_svg_double(rtext, "x", pos[Geom::X]);
-        sp_repr_set_svg_double(rtext, "y", pos[Geom::Y]);
+        rtext->setAttributeSvgDouble("x", pos[Geom::X]);
+        rtext->setAttributeSvgDouble("y", pos[Geom::Y]);
         rtext->setAttribute("sodipodi:insensitive", "true");
         rtext->removeAttribute("transform");
         rtspan = rtext->firstChild();
@@ -440,8 +440,8 @@ LPEMeasureSegments::createTextLabel(Geom::Point pos, size_t counter, double leng
         rtext->setAttribute("class", classlabel);
         rtext->setAttribute("sodipodi:insensitive", "true");
         rtext->removeAttribute("transform");
-        sp_repr_set_svg_double(rtext, "x", pos[Geom::X]);
-        sp_repr_set_svg_double(rtext, "y", pos[Geom::Y]);
+        rtext->setAttributeSvgDouble("x", pos[Geom::X]);
+        rtext->setAttributeSvgDouble("y", pos[Geom::Y]);
         rtspan = xml_doc->createElement("svg:tspan");
         rtspan->setAttribute("sodipodi:role", "line");
         rtspan->removeAttribute("x");
@@ -522,7 +522,7 @@ LPEMeasureSegments::createTextLabel(Geom::Point pos, size_t counter, double leng
     Geom::OptRect bounds = SP_ITEM(elemref)->geometricBounds();
     if (bounds) {
         anotation_width = bounds->width();
-        sp_repr_set_svg_double(rtext, "x", pos[Geom::X] - (anotation_width / 2.0));
+        rtext->setAttributeSvgDouble("x", pos[Geom::X] - (anotation_width / 2.0));
         rtspan->removeAttribute("style");
     }
 
@@ -847,8 +847,8 @@ LPEMeasureSegments::doBeforeEffect (SPLPEItem const* lpeitem)
         return;
     }
     //Avoid crashes on previews
-    Geom::Affine parentaffinetransform = i2anc_affine(SP_OBJECT(lpeitem->parent), SP_OBJECT(document->getRoot()));
-    Geom::Affine affinetransform = i2anc_affine(SP_OBJECT(lpeitem), SP_OBJECT(document->getRoot()));
+    Geom::Affine parentaffinetransform = i2anc_affine(lpeitem->parent, document->getRoot());
+    Geom::Affine affinetransform = i2anc_affine(lpeitem, document->getRoot());
     Geom::Affine itemtransform = affinetransform * parentaffinetransform.inverse();
     //Projection prepare
     Geom::PathVector pathvector;
@@ -869,7 +869,7 @@ LPEMeasureSegments::doBeforeEffect (SPLPEItem const* lpeitem)
                 if (iter->ref.isAttached() &&  iter->actived && (obj = iter->ref.getObject()) && SP_IS_ITEM(obj)) {
                     SPItem * item = dynamic_cast<SPItem *>(obj);
                     if (item) {
-                        Geom::Affine affinetransform_sub = i2anc_affine(SP_OBJECT(item), SP_OBJECT(document->getRoot()));
+                        Geom::Affine affinetransform_sub = i2anc_affine(item, document->getRoot());
                         Geom::Affine transform = affinetransform_sub ;
                         transform *= Geom::Translate(-mid);
                         transform *= Geom::Rotate(angle).inverse();
@@ -1154,14 +1154,6 @@ LPEMeasureSegments::doBeforeEffect (SPLPEItem const* lpeitem)
                         createTextLabel(pos, counter, length, angle, remove, true);
                     }
                     arrow_gap = 8 * Inkscape::Util::Quantity::convert(line_width, unit.get_abbreviation(), display_unit.c_str());
-                    SPCSSAttr *css = sp_repr_css_attr_new();
-
-                    setlocale (LC_NUMERIC, "C");
-                    double width_line =  atof(sp_repr_css_property(css,"stroke-width","-1"));
-                    setlocale (LC_NUMERIC, locale_base);
-                    if (width_line > -0.0001) {
-                         arrow_gap = 8 * Inkscape::Util::Quantity::convert(width_line, unit.get_abbreviation(), display_unit.c_str());
-                    }
                     if(flip_side) {
                        arrow_gap *= -1;
                     }

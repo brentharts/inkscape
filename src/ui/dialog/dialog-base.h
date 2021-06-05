@@ -33,15 +33,17 @@ namespace Dialog {
  *
  * DialogsBase derived classes' instances live in DialogNotebook classes and are managed by
  * DialogContainer classes. DialogContainer instances can have at most one type of dialog,
- * differentiated by the associated verb.
+ * differentiated by the associated type.
  */
 class DialogBase : public Gtk::Box
 {
     using parent_type = Gtk::Box;
 
 public:
-    DialogBase(gchar const *prefs_path = nullptr, int verb_num = 0);
-    ~DialogBase() override{};
+    DialogBase(gchar const *prefs_path = nullptr, Glib::ustring dialog_type = "");
+    ~DialogBase() override{
+        ensure_size();
+    };
 
     /**
      * The update() method is essential to state management. DialogBase implementations get updated whenever
@@ -54,23 +56,39 @@ public:
         update();
         parent_type::on_map();
     }
+    /*
+     * Often the dialog won't request the right size until the window has
+     * been pushed to resize all it's children. We do this on dialog creation
+     * and destruction.
+     */
+    void ensure_size()
+    {
+        if (auto desktop = getDesktop()) {
+            desktop->getToplevel()->resize_children();
+        }
+    }
 
     // Getters and setters
-    std::string get_name() { return _name; };
+    Glib::ustring get_name() { return _name; };
     gchar const *getPrefsPath() const { return _prefs_path.data(); }
-    int const &getVerb() const { return _verb_num; }
+    Glib::ustring const &get_type() const { return _dialog_type; }
     SPDesktop *getDesktop();
 
     void blink();
+    // find focusable widget to grab focus
+    void focus_dialog();
+    // return focus back to canvas
+    void defocus_dialog();
 
 protected:
-    std::string _name;               // Gtk widget name (must be set!)
+    Glib::ustring _name;             // Gtk widget name (must be set!)
     Glib::ustring const _prefs_path; // Stores characteristic path for loading/saving the dialog position.
-    int _verb_num;                   // Dialog associated verb value
+    Glib::ustring const _dialog_type; // Type of dialog (we could just use _pref_path?).
     InkscapeApplication *_app; // Used for state management
 
 private:
     bool blink_off(); // timer callback
+    bool on_key_press_event(GdkEventKey* key_event) override;
 };
 
 } // namespace Dialog

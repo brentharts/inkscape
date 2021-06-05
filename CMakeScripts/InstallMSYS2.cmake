@@ -1,16 +1,7 @@
 if(WIN32)
   install(FILES
-    AUTHORS
-    COPYING
     NEWS.md
     README.md
-    TRANSLATORS
-	LICENSES/GPL-2.0.txt
-	LICENSES/GPL-3.0.txt
-	LICENSES/LGPL-2.1.txt
-    DESTINATION .)
-
-  install(DIRECTORY doc
     DESTINATION .)
 
   # mingw-w64 dlls
@@ -71,6 +62,7 @@ if(WIN32)
     ${MINGW_BIN}/libicuuc[0-9]*.dll
     ${MINGW_BIN}/libidn2-[0-9]*.dll
     ${MINGW_BIN}/libintl-[0-9]*.dll
+    ${MINGW_BIN}/libjbig-[0-9]*.dll
     ${MINGW_BIN}/libjpeg-[0-9]*.dll
     ${MINGW_BIN}/liblcms2-[0-9]*.dll
     ${MINGW_BIN}/liblqr-1-[0-9]*.dll
@@ -300,6 +292,20 @@ if(WIN32)
     )
   endforeach()
 
+  # Python packages for the extensions manager, and clipart importer extensions
+  set(packages
+      "python-appdirs" "python-msgpack" "python-lockfile" "python-cachecontrol"
+      "python-idna" "python-urllib3" "python-chardet" "python-certifi" "python-requests")
+  foreach(package ${packages})
+    list_files_pacman(${package} paths)
+    install_list(FILES ${paths}
+      ROOT ${MINGW_PATH}
+      COMPONENT extension_manager
+      INCLUDE ${site_packages} # only include content from "site-packages" (we might consider to install everything)
+      EXCLUDE ".pyc$"
+    )
+  endforeach()
+
   # Python packages installed via pip
   set(packages "")
   foreach(package ${packages})
@@ -330,6 +336,13 @@ if(WIN32)
     PATTERN "*.pyc" EXCLUDE)
   install(FILES
     packaging/win32/gdb_create_backtrace.bat
-    packaging/win32/inkscape-gtk-inspector.bat
     DESTINATION bin)
+    
+  # convenience launchers
+  install(FILES
+    "packaging/win32/Run Inkscape !.bat"
+    "packaging/win32/Run Inkscape and create debug trace.bat"
+    "packaging/win32/Run Inkscape with GTK Inspector.bat"
+    DESTINATION .)
+  
 endif()

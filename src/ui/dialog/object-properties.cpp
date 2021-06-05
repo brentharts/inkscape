@@ -50,7 +50,7 @@ namespace UI {
 namespace Dialog {
 
 ObjectProperties::ObjectProperties()
-    : DialogBase("/dialogs/object/", SP_VERB_DIALOG_ITEM)
+    : DialogBase("/dialogs/object/", "ObjectProperties")
     , _blocked(false)
     , _current_item(nullptr)
     , _label_id(_("_ID:"), true)
@@ -421,10 +421,8 @@ void ObjectProperties::_labelChanged()
     } else if (SP_ACTIVE_DOCUMENT->getObjectById(id) != nullptr) {
         _label_id.set_text(_("Id exists! "));
     } else {
-        SPException ex;
         _label_id.set_markup_with_mnemonic(_("_ID:") + Glib::ustring(" "));
-        SP_EXCEPTION_INIT(&ex);
-        item->setAttribute("id", id, &ex);
+        item->setAttribute("id", id);
         DocumentUndo::done(SP_ACTIVE_DOCUMENT, SP_VERB_DIALOG_ITEM, _("Set object ID"));
     }
     g_free(id);

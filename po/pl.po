@@ -7634,7 +7634,7 @@ msgstr "niewygładzony"
 #: ../src/extension/internal/pdfinput/pdf-input.cpp:166
 msgid "Replace PDF fonts by closest-named installed fonts"
 msgstr ""
-"Zastąp czcionki PDF najbliższym odpowiednikiem z pośród zainstalowanych czcionek"
+"Zastąp czcionki PDF najbliższym odpowiednikiem spośród zainstalowanych czcionek"
 
 #: ../src/extension/internal/pdfinput/pdf-input.cpp:168
 msgid "Embed images"
@@ -8945,7 +8945,7 @@ msgstr "Błąd"
 msgid "No (valid) files to open."
 msgstr "Brak (nieprawidłowy) pliki do otwarcia."
 
-#: ../src/io/resource-manager.cpp:383
+#: ../src/io/fix-broken-links.cpp:383
 msgid "Fixup broken links"
 msgstr "Napraw uszkodzone linki"
 

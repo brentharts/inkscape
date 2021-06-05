@@ -192,7 +192,7 @@ InkFileExportCmd::do_export(SPDocument* doc, std::string filename_in)
                 extension_for_fn_exists = true;
                 exts_for_fn.emplace_back(oext->get_id());
                 if (!export_extension_forced ||
-                    (export_extension_forced && export_extension == Glib::ustring(oext->get_id()).lowercase())) {
+                    (export_extension == Glib::ustring(oext->get_id()).lowercase())) {
                     if (type == "svg") {
                         do_export_svg(doc, filename_in, *oext);
                     } else if (type == "ps") {
@@ -344,10 +344,10 @@ int InkFileExportCmd::do_export_svg(SPDocument *doc, std::string const &filename
         SPNamedView *nv;
         Inkscape::XML::Node *nv_repr;
         if ((nv = sp_document_namedview(doc, nullptr)) && (nv_repr = nv->getRepr())) {
-            sp_repr_set_svg_double(nv_repr, "fit-margin-top", margin);
-            sp_repr_set_svg_double(nv_repr, "fit-margin-left", margin);
-            sp_repr_set_svg_double(nv_repr, "fit-margin-right", margin);
-            sp_repr_set_svg_double(nv_repr, "fit-margin-bottom", margin);
+            nv_repr->setAttributeSvgDouble("fit-margin-top", margin);
+            nv_repr->setAttributeSvgDouble("fit-margin-left", margin);
+            nv_repr->setAttributeSvgDouble("fit-margin-right", margin);
+            nv_repr->setAttributeSvgDouble("fit-margin-bottom", margin);
         }
     }
 
@@ -436,8 +436,7 @@ guint32 InkFileExportCmd::get_bgcolor(SPDocument *doc) {
     } else {
         Inkscape::XML::Node *nv = doc->getReprNamedView();
         if (nv && nv->attribute("inkscape:pageopacity")){
-            double opacity = 1.0;
-            sp_repr_get_double (nv, "inkscape:pageopacity", &opacity);
+            double opacity = nv->getAttributeDouble("inkscape:pageopacity", 1.0);
             bgcolor |= SP_COLOR_F_TO_U(opacity);
         } // else it's transparent
     }
@@ -519,7 +518,7 @@ InkFileExportCmd::do_export_png(SPDocument *doc, std::string const &filename_in)
                               << "(--export-dpi, --export-width, or --export-height). "
                               << "DPI hint " << dpi_hint << " is ignored." << std::endl;
                 } else {
-                    dpi = atof(dpi_hint);
+                    dpi = g_ascii_strtod(dpi_hint, nullptr);
                 }
             } else {
                 std::cerr << "InkFileExport::do_export_png: "
@@ -538,8 +537,8 @@ InkFileExportCmd::do_export_png(SPDocument *doc, std::string const &filename_in)
 
         if (filename_from_hint) {
             //Make relative paths go from the document location, if possible:
-            if (!Glib::path_is_absolute(filename_out) && doc->getDocumentURI()) {
-                std::string dirname = Glib::path_get_dirname(doc->getDocumentURI());
+            if (!Glib::path_is_absolute(filename_out) && doc->getDocumentFilename()) {
+                std::string dirname = Glib::path_get_dirname(doc->getDocumentFilename());
                 if (!dirname.empty()) {
                     filename_out = Glib::build_filename(dirname, filename_out);
                 }
@@ -718,7 +717,7 @@ InkFileExportCmd::do_export_png(SPDocument *doc, std::string const &filename_in)
  *  \param mime MIME type to export as.
  */
 int
-InkFileExportCmd::do_export_ps_pdf(SPDocument* doc, std::string const &filename_in, std::string mime_type)
+InkFileExportCmd::do_export_ps_pdf(SPDocument* doc, std::string const &filename_in, std::string const & mime_type)
 {
     // Check if we support mime type.
     Inkscape::Extension::DB::OutputList o;
@@ -743,7 +742,7 @@ InkFileExportCmd::do_export_ps_pdf(SPDocument* doc, std::string const &filename_
  *  \param mime MIME type to export as.
  *  \param Extension used for exporting
  */
-int InkFileExportCmd::do_export_ps_pdf(SPDocument *doc, std::string const &filename_in, std::string mime_type,
+int InkFileExportCmd::do_export_ps_pdf(SPDocument *doc, std::string const &filename_in, std::string const & mime_type,
                                        Inkscape::Extension::Output &extension)
 {
     // check if the passed extension conforms to the mime type.

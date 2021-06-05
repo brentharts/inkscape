@@ -60,7 +60,7 @@ namespace UI {
 namespace Dialog {
 
 XmlTree::XmlTree()
-    : DialogBase("/dialogs/xml/", SP_VERB_DIALOG_XML_EDITOR)
+    : DialogBase("/dialogs/xml/", "XMLEditor")
     , blocked(0)
     , _message_stack(nullptr)
     , _message_context(nullptr)
@@ -336,8 +336,9 @@ void XmlTree::set_tree_document(SPDocument *document)
     current_document = document;
     if (current_document) {
 
-        document_uri_set_connection = current_document->connectURISet(sigc::bind(sigc::ptr_fun(&on_document_uri_set), current_document));
-        on_document_uri_set( current_document->getDocumentURI(), current_document );
+        document_uri_set_connection =
+            current_document->connectFilenameSet(sigc::bind(sigc::ptr_fun(&on_document_uri_set), current_document));
+        on_document_uri_set(current_document->getDocumentFilename(), current_document );
         set_tree_repr(current_document->getReprRoot());
     } else {
         set_tree_repr(nullptr);

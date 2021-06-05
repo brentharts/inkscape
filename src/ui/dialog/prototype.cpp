@@ -10,6 +10,8 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
+#ifdef DEBUG
+
 #include "prototype.h"
 
 #include "document.h"
@@ -24,7 +26,7 @@ namespace UI {
 namespace Dialog {
 
 Prototype::Prototype()
-    : DialogBase("/dialogs/prototype", SP_VERB_DIALOG_PROTOTYPE)
+    : DialogBase("/dialogs/prototype", "Prototype")
 {
     // A widget for demonstration that displays the current SVG's id.
     _label = Gtk::manage(new Gtk::Label(_name));
@@ -106,6 +108,8 @@ void Prototype::on_click()
 } // namespace Dialog
 } // namespace UI
 } // namespace Inkscape
+
+#endif // DEBUG
 
 /*
   Local Variables:

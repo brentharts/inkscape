@@ -55,7 +55,7 @@
 #include "helper/action-context.h"
 #include "helper/action.h" //sp_action_perform
 
-#include "io/resource-manager.h"
+#include "io/fix-broken-links.h"
 
 #include "object/sp-namedview.h"
 #include "object/sp-root.h"
@@ -113,7 +113,6 @@ SPDesktop::SPDesktop()
     , selection(nullptr)
     , event_context(nullptr)
     , layer_manager(nullptr)
-    , event_log(nullptr)
     , temporary_item_list(nullptr)
     , snapindicator(nullptr)
     , current(nullptr)  // current style
@@ -153,7 +152,6 @@ SPDesktop::init (SPNamedView *nv, Inkscape::UI::Widget::Canvas *acanvas, SPDeskt
 
     // Temporary workaround for link order issues:
     Inkscape::DeviceManager::getManager().getDevices();
-    Inkscape::ResourceManager::getManager();
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
 
     _guides_message_context = std::unique_ptr<Inkscape::MessageContext>(new Inkscape::MessageContext(messageStack()));
@@ -531,6 +529,9 @@ SPDesktop::change_document (SPDocument *theDocument)
     /* unselect everything before switching documents */
     selection->clear();
 
+    // Reset any tool actions currently in progress.
+    setEventContext(event_context->getPrefsPath());
+
     setDocument (theDocument);
 
     /* update the rulers, connect the desktop widget's signal to the new namedview etc.
@@ -542,6 +543,7 @@ SPDesktop::change_document (SPDocument *theDocument)
     if (dtw) {
         dtw->desktop = this;
         dtw->updateNamedview();
+        dtw->updateDocument();
     } else {
         std::cerr << "SPDesktop::change_document: failed to get desktop widget!" << std::endl;
     }
@@ -1594,21 +1596,6 @@ SPDesktop::setDocument (SPDocument *doc)
     layers->setDocument(doc);
     selection->setDocument(doc);
 
-    if (event_log) {
-        // Remove it from the replaced document. This prevents Inkscape from
-        // crashing since we access it in the replaced document's destructor
-        // which results in an undefined behavior. (See also: bug #1670688)
-        if (this->doc()) {
-            this->doc()->removeUndoObserver(*event_log);
-        }
-        delete event_log;
-        event_log = nullptr;
-    }
-
-    /* setup EventLog */
-    event_log = new Inkscape::EventLog(doc);
-    doc->addUndoObserver(*event_log);
-
     _commit_connection.disconnect();
     _commit_connection = doc->connectCommit(sigc::mem_fun(*this, &SPDesktop::updateNow));
 
@@ -1653,9 +1640,9 @@ SPDesktop::onStatusMessage
 }
 
 void
-SPDesktop::onDocumentURISet (gchar const* uri)
+SPDesktop::onDocumentFilenameSet (gchar const* filename)
 {
-    _widget->updateTitle(uri);
+    _widget->updateTitle(filename);
 }
 
 /**

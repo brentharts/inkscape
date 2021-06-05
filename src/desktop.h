@@ -67,7 +67,6 @@ typedef struct _GdkEventWindowState GdkEventWindowState;
 struct InkscapeApplication;
 
 namespace Inkscape {
-    class EventLog;
     class LayerManager;
     class LayerModel;
     class MessageContext;
@@ -143,7 +142,6 @@ public:
     Inkscape::Selection       *selection;
     Inkscape::UI::Tools::ToolBase            *event_context;
     Inkscape::LayerManager    *layer_manager;
-    Inkscape::EventLog        *event_log;
     DocumentInterface *dbus_document_interface;
     Inkscape::Display::TemporaryItemList *temporary_item_list;
     Inkscape::Display::SnapIndicator *snapindicator;
@@ -620,7 +618,7 @@ private:
     void onResized (double, double) override;
     void onRedrawRequested() override;
     void onStatusMessage (Inkscape::MessageType type, gchar const *message) override;
-    void onDocumentURISet (gchar const* uri) override;
+    void onDocumentFilenameSet(gchar const* filename) override;
     void onDocumentResized (double, double) override;
 
     static void _onActivate (SPDesktop* dt);

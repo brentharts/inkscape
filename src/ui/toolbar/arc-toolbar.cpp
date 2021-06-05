@@ -276,8 +276,8 @@ ArcToolbar::value_changed(Glib::RefPtr<Gtk::Adjustment>&  adj,
             }
 
             ge->normalize();
-            (SP_OBJECT(ge))->updateRepr();
-            (SP_OBJECT(ge))->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+            ge->updateRepr();
+            ge->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
 
             modmade = true;
         }
@@ -326,8 +326,8 @@ ArcToolbar::startend_value_changed(Glib::RefPtr<Gtk::Adjustment>&  adj,
             }
 
             ge->normalize();
-            (SP_OBJECT(ge))->updateRepr();
-            (SP_OBJECT(ge))->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+            ge->updateRepr();
+            ge->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
 
             modmade = true;
         }
@@ -516,10 +516,8 @@ ArcToolbar::event_attr_changed(Inkscape::XML::Node *repr, gchar const * /*name*/
         toolbar->_ry_adj->set_value(Quantity::convert(ry, "px", unit));
     }
 
-    gdouble start = 0.;
-    gdouble end = 0.;
-    sp_repr_get_double(repr, "sodipodi:start", &start);
-    sp_repr_get_double(repr, "sodipodi:end", &end);
+    gdouble start = repr->getAttributeDouble("sodipodi:start", 0.0);;
+    gdouble end = repr->getAttributeDouble("sodipodi:end", 0.0);
 
     toolbar->_start_adj->set_value(mod360((start * 180)/M_PI));
     toolbar->_end_adj->set_value(mod360((end * 180)/M_PI));

@@ -44,7 +44,9 @@ Selection::Selection(LayerModel *layers, SPDesktop *desktop):
     _layers(layers),
     _selection_context(nullptr),
     _flags(0),
-    _idle(0)
+    _idle(0),
+    anchor_x(0.0),
+    anchor_y(0.0)
 {
 }
 
@@ -205,6 +207,9 @@ Selection::setBackup ()
     auto items = const_cast<Selection *>(this)->items();
     for (auto iter = items.begin(); iter != items.end(); ++iter) {
         SPItem *item = *iter;
+        if(!item->getId()) {
+            continue;
+        }
         std::string selected_id;
         selected_id += "--id=";
         selected_id += item->getId();

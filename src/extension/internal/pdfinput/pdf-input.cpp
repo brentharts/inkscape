@@ -396,7 +396,7 @@ bool PdfImportDialog::getImportMethod() {
  *        for determining the behaviour desired by the user
  */
 void PdfImportDialog::getImportSettings(Inkscape::XML::Node *prefs) {
-    sp_repr_set_svg_double(prefs, "selectedPage", (double)_current_page);
+    prefs->setAttributeSvgDouble("selectedPage", (double)_current_page);
     if (_cropCheck->get_active()) {
         Glib::ustring current_choice = _cropTypeCombo->get_active_text();
         int num_crop_choices = sizeof(crop_setting_choices) / sizeof(crop_setting_choices[0]);
@@ -406,12 +406,11 @@ void PdfImportDialog::getImportSettings(Inkscape::XML::Node *prefs) {
                 break;
             }
         }
-        sp_repr_set_svg_double(prefs, "cropTo", (double)i);
+        prefs->setAttributeSvgDouble("cropTo", (double)i);
     } else {
-        sp_repr_set_svg_double(prefs, "cropTo", -1.0);
+        prefs->setAttributeSvgDouble("cropTo", -1.0);
     }
-    sp_repr_set_svg_double(prefs, "approximationPrecision",
-                           _fallbackPrecisionSlider->get_value());
+    prefs->setAttributeSvgDouble("approximationPrecision", _fallbackPrecisionSlider->get_value());
     if (_localFontsCheck->get_active()) {
         prefs->setAttribute("localFonts", "1");
     } else {
@@ -762,8 +761,7 @@ PdfInput::open(::Inkscape::Extension::Input * /*mod*/, const gchar * uri) {
 
         // Apply crop settings
         _POPPLER_CONST PDFRectangle *clipToBox = nullptr;
-        double crop_setting = -1.0;
-        sp_repr_get_double(prefs, "cropTo", &crop_setting);
+        double crop_setting = prefs->getAttributeDouble("cropTo", -1.0);
 
         if ( crop_setting >= 0.0 ) {    // Do page clipping
             int crop_choice = (int)crop_setting;
@@ -793,8 +791,7 @@ PdfInput::open(::Inkscape::Extension::Input * /*mod*/, const gchar * uri) {
                                               page->getResourceDict(), page->getCropBox(), clipToBox);
 
         // Set up approximation precision for parser. Used for converting Mesh Gradients into tiles.
-        double color_delta = 2.0;
-        sp_repr_get_double(prefs, "approximationPrecision", &color_delta);
+        double color_delta = prefs->getAttributeDouble("approximationPrecision", 2.0);
         if ( color_delta <= 0.0 ) {
             color_delta = 1.0 / 2.0;
         } else {

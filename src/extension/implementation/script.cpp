@@ -410,7 +410,7 @@ SPDocument *Script::open(Inkscape::Extension::Input *module,
 
     if (mydoc != nullptr) {
         mydoc->setDocumentBase(nullptr);
-        mydoc->changeUriAndHrefs(filenameArg);
+        mydoc->changeFilenameAndHrefs(filenameArg);
     }
 
     // make sure we don't leak file descriptors from Glib::file_open_tmp
@@ -454,7 +454,7 @@ void Script::save(Inkscape::Extension::Output *module,
 {
     std::list<std::string> params;
     module->paramListString(params);
-    module->set_environment();
+    module->set_environment(doc);
 
     std::string tempfilename_in;
     int tempfd_in = 0;
@@ -502,7 +502,8 @@ void Script::save(Inkscape::Extension::Output *module,
 
 
 void Script::export_raster(Inkscape::Extension::Output *module,
-             const std::string png_file,
+             const SPDocument *doc,
+             const std::string &png_file,
              const gchar *filenameArg)
 {
     if(!module->is_raster()) {
@@ -512,7 +513,7 @@ void Script::export_raster(Inkscape::Extension::Output *module,
 
     std::list<std::string> params;
     module->paramListString(params);
-    module->set_environment();
+    module->set_environment(doc);
 
     file_listener fileout;
     int data_read = execute(command, params, png_file, fileout);
@@ -579,7 +580,7 @@ void Script::effect(Inkscape::Extension::Effect *module,
 
     std::list<std::string> params;
     module->paramListString(params);
-    module->set_environment();
+    module->set_environment(desktop->getDocument());
 
     parent_window = module->get_execution_env()->get_working_dialog();
 
@@ -591,10 +592,12 @@ void Script::effect(Inkscape::Extension::Effect *module,
         file_listener outfile;
         execute(command, params, empty, outfile);
 
-        if (module->refresh_ext) {
-            /* Initialize the extensions */
-           Inkscape::Extension::refresh_user_extensions();
-           InkscapeWindow *window = desktop->getInkscapeWindow();
+        // Hack to allow for extension manager to reload extensions
+        // TODO: Find a better way to do this, e.g. implement an action and have extensions (or users)
+        //       call that instead when there's a change that requires extensions to reload
+        if (!g_strcmp0(module->get_id(), "org.inkscape.extensions.manager")) {
+            Inkscape::Extension::refresh_user_extensions();
+            InkscapeWindow *window = desktop->getInkscapeWindow();
             if (window) { // during load, SP_ACTIVE_DESKTOP may be !nullptr, but parent might still be nullptr
                 SPDesktopWidget *dtw = window->get_desktop_widget();
                 reload_menu(desktop, dtw->_menubar);
@@ -655,7 +658,7 @@ void Script::effect(Inkscape::Extension::Effect *module,
         SPDocument* vd=doc->doc();
         if (vd != nullptr)
         {
-            mydoc->changeUriAndHrefs(vd->getDocumentURI());
+            mydoc->changeFilenameAndHrefs(vd->getDocumentFilename());
 
             vd->emitReconstructionStart();
             copy_doc(vd->getReprRoot(), mydoc->getReprRoot());

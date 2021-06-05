@@ -718,7 +718,7 @@ void SwatchesPanel::_trackDocument( SwatchesPanel *panel, SPDocument *document )
  * Constructor
  */
 SwatchesPanel::SwatchesPanel(gchar const *prefsPath)
-    : DialogBase(prefsPath, SP_VERB_DIALOG_SWATCHES)
+    : DialogBase(prefsPath, "Swatches")
     , _menu(nullptr)
     , _holder(nullptr)
     , _clear(nullptr)
@@ -1072,6 +1072,7 @@ void SwatchesPanel::update()
                 conn.disconnect();
             }
         }
+        _desktopConnections.clear();
 
         _currentDesktop = desktop;
 
@@ -1217,6 +1218,16 @@ void SwatchesPanel::_regItem(Gtk::MenuItem* item, int id)
     item->show();
 }
 */
+
+/**
+ * Set the document if the swatches dialog is closed
+ */
+void SwatchesPanel::setDocumentIfClosed( SPDocument *document )
+{
+    if (_desktopConnections.empty()) {
+        _setDocument(document);
+    }
+}
 
 void SwatchesPanel::_setDocument( SPDocument *document )
 {

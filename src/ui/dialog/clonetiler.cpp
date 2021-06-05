@@ -96,7 +96,7 @@ static gdouble trace_zoom;
 static SPDocument *trace_doc = nullptr;
 
 CloneTiler::CloneTiler()
-    : DialogBase("/dialogs/clonetiler/", SP_VERB_DIALOG_CLONETILER)
+    : DialogBase("/dialogs/clonetiler/", "CloneTiler")
     , table_row_labels(nullptr)
 {
     set_spacing(0);
@@ -2218,16 +2218,14 @@ void CloneTiler::apply()
         obj_repr->attribute("inkscape:tile-cx") &&
         obj_repr->attribute("inkscape:tile-cy")) {
 
-        double cx = 0;
-        double cy = 0;
-        sp_repr_get_double (obj_repr, "inkscape:tile-cx", &cx);
-        sp_repr_get_double (obj_repr, "inkscape:tile-cy", &cy);
+        double cx = obj_repr->getAttributeDouble("inkscape:tile-cx", 0);
+        double cy = obj_repr->getAttributeDouble("inkscape:tile-cy", 0);
         center = Geom::Point (cx, cy);
 
-        sp_repr_get_double (obj_repr, "inkscape:tile-w", &w);
-        sp_repr_get_double (obj_repr, "inkscape:tile-h", &h);
-        sp_repr_get_double (obj_repr, "inkscape:tile-x0", &x0);
-        sp_repr_get_double (obj_repr, "inkscape:tile-y0", &y0);
+        w = obj_repr->getAttributeDouble("inkscape:tile-w", w);
+        h = obj_repr->getAttributeDouble("inkscape:tile-h", h);
+        x0 = obj_repr->getAttributeDouble("inkscape:tile-x0", x0);
+        y0 = obj_repr->getAttributeDouble("inkscape:tile-y0", y0);
     } else {
         bool prefs_bbox = prefs->getBool("/tools/bounding_box", false);
         SPItem::BBoxType bbox_type = ( !prefs_bbox ?
@@ -2240,12 +2238,12 @@ void CloneTiler::apply()
             y0 = scale_units*r->min()[Geom::Y];
             center = scale_units*desktop->dt2doc(item->getCenter());
 
-            sp_repr_set_svg_double(obj_repr, "inkscape:tile-cx", center[Geom::X]);
-            sp_repr_set_svg_double(obj_repr, "inkscape:tile-cy", center[Geom::Y]);
-            sp_repr_set_svg_double(obj_repr, "inkscape:tile-w", w);
-            sp_repr_set_svg_double(obj_repr, "inkscape:tile-h", h);
-            sp_repr_set_svg_double(obj_repr, "inkscape:tile-x0", x0);
-            sp_repr_set_svg_double(obj_repr, "inkscape:tile-y0", y0);
+            obj_repr->setAttributeSvgDouble("inkscape:tile-cx", center[Geom::X]);
+            obj_repr->setAttributeSvgDouble("inkscape:tile-cy", center[Geom::Y]);
+            obj_repr->setAttributeSvgDouble("inkscape:tile-w", w);
+            obj_repr->setAttributeSvgDouble("inkscape:tile-h", h);
+            obj_repr->setAttributeSvgDouble("inkscape:tile-x0", x0);
+            obj_repr->setAttributeSvgDouble("inkscape:tile-y0", y0);
         } else {
             center = Geom::Point(0, 0);
             w = h = 0;
@@ -2464,7 +2462,7 @@ void CloneTiler::apply()
             clone->setAttributeOrRemoveIfEmpty("transform", sp_svg_transform_write(t));
 
             if (opacity < 1.0) {
-                sp_repr_set_css_double(clone, "opacity", opacity);
+                clone->setAttributeCssDouble("opacity", opacity);
             }
 
             if (*color_string) {

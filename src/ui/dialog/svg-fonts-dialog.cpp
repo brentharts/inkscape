@@ -585,7 +585,7 @@ SvgFontsDialog::flip_coordinate_system(Geom::PathVector pathv){
     for (auto& obj: get_selected_spfont()->children) {
         if (SP_IS_FONTFACE(&obj)){
             //XML Tree being directly used here while it shouldn't be.
-            sp_repr_get_double(obj.getRepr(), "units-per-em", &units_per_em);
+            units_per_em = obj.getRepr()->getAttributeDouble("units-per-em", units_per_em);
         }
     }
     double baseline_offset = units_per_em - get_selected_spfont()->horiz_origin_y;
@@ -996,7 +996,7 @@ void SvgFontsDialog::add_font(){
 }
 
 SvgFontsDialog::SvgFontsDialog()
- : DialogBase("/dialogs/svgfonts", SP_VERB_DIALOG_SVG_FONTS)
+ : DialogBase("/dialogs/svgfonts", "SVGFonts")
  , _add(_("_New"), true)
  , _font_settings(Gtk::ORIENTATION_VERTICAL)
  , global_vbox(Gtk::ORIENTATION_VERTICAL)

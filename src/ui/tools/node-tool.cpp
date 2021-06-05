@@ -50,9 +50,7 @@
 #include "ui/tool/multi-path-manipulator.h"
 #include "ui/tool/path-manipulator.h"
 #include "ui/tool/selector.h"
-#include "ui/tools-switch.h"
 #include "ui/tools/node-tool.h"
-#include "ui/tools/tool-base.h"
 
 /** @struct NodeTool
  *
@@ -289,7 +287,7 @@ void sp_update_helperpath(SPDesktop *desktop)
     for (auto item : vec) {
         SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(item);
         if (lpeitem && lpeitem->hasPathEffectRecursive()) {
-            Inkscape::LivePathEffect::Effect *lpe = SP_LPE_ITEM(lpeitem)->getCurrentLPE();
+            Inkscape::LivePathEffect::Effect *lpe = lpeitem->getCurrentLPE();
             if (lpe && lpe->isVisible()/* && lpe->showOrigPath()*/) {
                 std::vector<Geom::Point> selectedNodesPositions;
                 if (nt->_selected_nodes) {
@@ -304,6 +302,7 @@ void sp_update_helperpath(SPDesktop *desktop)
                 auto c = std::make_unique<SPCurve>();
                 std::vector<Geom::PathVector> cs = lpe->getCanvasIndicators(lpeitem);
                 for (auto &p : cs) {
+                    p *= desktop->dt2doc();
                     c->append(p);
                 }
                 if (!c->is_empty()) {
@@ -720,11 +719,24 @@ void NodeTool::select_area(Geom::Rect const &sel, GdkEventButton *event) {
         std::vector<SPItem*> items = this->desktop->getDocument()->getItemsInBox(this->desktop->dkey, sel_doc);
         selection->setList(items);
     } else {
-        if (!held_shift(*event)) {
+        bool shift = held_shift(*event);
+        bool ctrl = held_control(*event);
+
+        if (!shift) {
+            // A/C. No modifier, selects all nodes, or selects all other nodes.
             this->_selected_nodes->clear();
         }
-
-        this->_selected_nodes->selectArea(sel);
+        if (shift && ctrl) {
+            // D. Shift+Ctrl pressed, removes nodes under box from existing selection.
+            this->_selected_nodes->selectArea(sel, true);
+        } else {
+            // A/B/C. Adds nodes under box to existing selection.
+            this->_selected_nodes->selectArea(sel);
+            if (ctrl) {
+                // C. Selects the inverse of all nodes under the box.
+                this->_selected_nodes->invertSelection();
+            }
+        }
     }
 }
 

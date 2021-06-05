@@ -52,14 +52,15 @@ public:
     static std::vector<SwatchPage*> getSwatchSets();
 
     void update() override;
+    void setDocumentIfClosed( SPDocument *document );
 
     virtual int getSelectedIndex() {return _currentIndex;} // temporary
 
 protected:
     static void handleGradientsChange(SPDocument *document);
 
-    virtual void _updateFromSelection();
     virtual void _setDocument( SPDocument *document );
+    virtual void _updateFromSelection();
     virtual void _rebuild();
 
     virtual std::vector<SwatchPage*> _getSwatchSets() const;

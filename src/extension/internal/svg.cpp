@@ -394,10 +394,8 @@ static void insert_text_fallback( Inkscape::XML::Node *repr, const SPDocument *o
             // For round-tripping, xml:space (or 'white-space:pre') must be set.
             repr->setAttribute("xml:space", "preserve");
 
-            double text_x = 0.0;
-            double text_y = 0.0;
-            sp_repr_get_double(repr, "x", &text_x);
-            sp_repr_get_double(repr, "y", &text_y);
+            double text_x = repr->getAttributeDouble("x", 0.0);
+            double text_y = repr->getAttributeDouble("y", 0.0);
             // std::cout << "text_x: " << text_x << " text_y: " << text_y << std::endl;
 
             // Loop over all lines in layout.
@@ -429,19 +427,19 @@ static void insert_text_fallback( Inkscape::XML::Node *repr, const SPDocument *o
                         if (text->has_inline_size()) {
                             // We use text_x as this is the reference for 'text-anchor'
                             // (line_x is the start of the line which gives wrong position when 'text-anchor' not start).
-                            sp_repr_set_svg_double(line_tspan, "x", text_x);
+                            line_tspan->setAttributeSvgDouble("x", text_x);
                         } else {
                             // shape-inside (we don't have to worry about 'text-anchor').
-                            sp_repr_set_svg_double(line_tspan, "x", line_x);
+                            line_tspan->setAttributeSvgDouble("x", line_x);
                         }
-                        sp_repr_set_svg_double(line_tspan, "y", line_y); // FIXME: this will pick up the wrong end of counter-directional runs
+                        line_tspan->setAttributeSvgDouble("y", line_y); // FIXME: this will pick up the wrong end of counter-directional runs
                     } else {
                         // std::cout << "  vertical:   " << line_anchor_point[Geom::X] << " " << text_y << std::endl;
-                        sp_repr_set_svg_double(line_tspan, "x", line_x); // FIXME: this will pick up the wrong end of counter-directional runs
+                        line_tspan->setAttributeSvgDouble("x", line_x); // FIXME: this will pick up the wrong end of counter-directional runs
                         if (text->has_inline_size()) {
-                            sp_repr_set_svg_double(line_tspan, "y", text_y);
+                            line_tspan->setAttributeSvgDouble("y", text_y);
                         } else {
-                            sp_repr_set_svg_double(line_tspan, "y", line_y);
+                            line_tspan->setAttributeSvgDouble("y", line_y);
                         }
                     }
                 }
@@ -544,9 +542,9 @@ static void insert_text_fallback( Inkscape::XML::Node *repr, const SPDocument *o
                     // Set either 'x' or 'y' to force a new text chunk. To do: this really should
                     // be positioned at the end of the line (overhanging).
                     if (text->is_horizontal()) {
-                        sp_repr_set_svg_double(space_tspan, "y", line_y);
+                        space_tspan->setAttributeSvgDouble("y", line_y);
                     } else {
-                        sp_repr_set_svg_double(space_tspan, "x", line_x);
+                        space_tspan->setAttributeSvgDouble("x", line_x);
                     }
                     Inkscape::XML::Node *space = repr->document()->createTextNode(trailing_whitespace.c_str());
                     space_tspan->appendChild(space);
@@ -733,7 +731,6 @@ Svg::init()
                 "<mimetype>image/svg+xml</mimetype>\n"
                 "<filetypename>" N_("Scalable Vector Graphic (*.svg)") "</filetypename>\n"
                 "<filetypetooltip>" N_("Inkscape native file format and W3C standard") "</filetypetooltip>\n"
-                "<output_extension>" SP_MODULE_KEY_OUTPUT_SVG_INKSCAPE "</output_extension>\n"
             "</input>\n"
         "</inkscape-extension>", new Svg());
 

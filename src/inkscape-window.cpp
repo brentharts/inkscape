@@ -24,6 +24,8 @@
 
 #include "actions/actions-canvas-mode.h"
 #include "actions/actions-canvas-transform.h"
+#include "actions/actions-dialogs.h"
+#include "actions/actions-tools.h"
 
 #include "object/sp-namedview.h"  // TODO Remove need for this!
 
@@ -43,10 +45,18 @@
 #include "ui/shortcuts.h"
 
 #include "widgets/desktop-widget.h"
+#include "ui/widget/canvas.h"
 
 using Inkscape::UI::Dialog::DialogManager;
 using Inkscape::UI::Dialog::DialogContainer;
 using Inkscape::UI::Dialog::DialogWindow;
+
+static gboolean _resize_children(Gtk::Window *win)
+{
+    win->resize_children();
+    return false;
+}
+
 
 InkscapeWindow::InkscapeWindow(SPDocument* document)
     : _document(document)
@@ -82,6 +92,8 @@ InkscapeWindow::InkscapeWindow(SPDocument* document)
     // After canvas has been constructed.. move to canvas proper.
     add_actions_canvas_transform(this);    // Actions to transform canvas view.
     add_actions_canvas_mode(this);         // Actions to change canvas display mode.
+    add_actions_dialogs(this);             // Actions to open dialogs.
+    add_actions_tools(this);               // Actions to switch between tools.
 
     // ========== Drag and Drop of Documents =========
     ink_drag_setup(_desktop_widget);
@@ -112,6 +124,10 @@ InkscapeWindow::InkscapeWindow(SPDocument* document)
         // restore short-lived floating dialogs state if this is the first window being opened
         bool include_short_lived = _app->get_number_of_windows() == 0;
         DialogManager::singleton().restore_dialogs_state(_desktop->getContainer(), include_short_lived);
+
+        // This pokes the window to request the right size for the dialogs once loaded.
+        Gtk::Window *win = _desktop->getToplevel();
+        g_idle_add(GSourceFunc(&_resize_children), win);
     }
 
     // ========= Update text for Accellerators =======
@@ -182,7 +198,7 @@ InkscapeWindow::on_key_press_event(GdkEventKey* event)
 #ifdef EVENT_DEBUG
     ui_dump_event(reinterpret_cast<GdkEvent *>(event), "\nInkscapeWindow::on_key_press_event");
 #endif
-
+    bool canvas_focused = false;
     // Key press and release events are normally sent first to Gtk::Window for processing as
     // accelerators and menomics before bubbling up from the "grab" or "focus" widget (unlike other
     // events which always bubble up). This would means that key combinations used for accelerators
@@ -197,6 +213,16 @@ InkscapeWindow::on_key_press_event(GdkEventKey* event)
         if (focus->event(reinterpret_cast<GdkEvent *>(event))) {
             return true;
         }
+
+        // is canvas focused?
+        canvas_focused = !!dynamic_cast<Inkscape::UI::Widget::Canvas*>(focus);
+    }
+
+    if (canvas_focused) {
+        // if canvas is focused, then promote shortcuts or else docked dialogs may steal them
+        if (Inkscape::Shortcuts::getInstance().invoke_verb(event, _desktop)) {
+            return true;
+        }
     }
 
     // Intercept Cmd-Q on macOS to not bypass confirmation dialog
@@ -204,8 +230,13 @@ InkscapeWindow::on_key_press_event(GdkEventKey* event)
         return true;
     }
 
-    // Verbs get last crack at events.
-    return Inkscape::Shortcuts::getInstance().invoke_verb(event, _desktop);
+    if (!canvas_focused) {
+        // Verbs get last crack at events.
+        return Inkscape::Shortcuts::getInstance().invoke_verb(event, _desktop);
+    }
+
+    // not handled
+    return false;
 }
 
 /**
