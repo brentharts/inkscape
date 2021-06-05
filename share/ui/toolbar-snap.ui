@@ -12,7 +12,7 @@
         <property name="halign">start</property>
         <property name="valign">start</property>
         <property name="margin-start">8</property>
-        <property name="margin-end">8</property>
+        <property name="margin-end">16</property>
         <property name="margin-top">8</property>
         <property name="margin-bottom">8</property>
         <child>
@@ -827,7 +827,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">True</property>
-            <property name="action-name">simple-snap-nodes</property>
+            <property name="action-name">doc.simple-snap-nodes</property>
             <property name="image">image2</property>
           </object>
           <packing>
@@ -852,7 +852,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">True</property>
-            <property name="action-name">simple-snap-alignment</property>
+            <property name="action-name">doc.simple-snap-alignment</property>
             <property name="image">image3</property>
           </object>
           <packing>
