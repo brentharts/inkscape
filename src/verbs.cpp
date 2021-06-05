@@ -40,6 +40,7 @@
 #include "gradient-drag.h"
 #include "help.h"
 #include "inkscape.h"
+#include "inkscape-version.h"
 #include "layer-fns.h"
 #include "layer-manager.h"
 #include "message-stack.h"
@@ -2057,30 +2058,36 @@ void HelpUrlVerb::perform(SPAction *action, void *data)
     // get URL
     Glib::ustring url;
 
-    static const char *lang = _("en");      // TODO: strip /en/ for English version?
-    static const char *version = "-master"; // TODO: make this auto-updating?
+    static const char *lang = _("en"); // TODO: strip /en/ for English version?
+    static const char *version = Inkscape::version_string_without_revision;
+    static const bool development_version = g_str_has_suffix(version, "-dev"); // this detection is not perfect but should be close enough
+    static const Glib::ustring branch = development_version ? "master" :
+        Glib::ustring::compose("%1.%2.x", Inkscape::version_major,  Inkscape::version_major);
 
     switch (reinterpret_cast<std::size_t>(data)) {
         case SP_VERB_HELP_URL_ASK_QUESTION:
-            url = Glib::ustring::compose("https://inkscape.org/%1/community/", lang, version);
+            url = Glib::ustring::compose("https://inkscape.org/%1/community/", lang);
             break;
         case SP_VERB_HELP_URL_MAN:
-            url = Glib::ustring::compose("https://inkscape.org/%1/doc/inkscape-man%2.html", lang, version);
+            url = Glib::ustring::compose("https://inkscape.org/%1/doc/inkscape-man-%2.html", lang, branch);
             break;
         case SP_VERB_HELP_URL_FAQ:
             url = Glib::ustring::compose("https://inkscape.org/%1/learn/faq/", lang);
             break;
         case SP_VERB_HELP_URL_KEYS:
-            url = Glib::ustring::compose("https://inkscape.org/%1/doc/keys%2.html", lang, version);
+            url = Glib::ustring::compose("https://inkscape.org/%1/doc/keys-%2.html", lang, branch);
             break;
         case SP_VERB_HELP_URL_RELEASE_NOTES:
-            url = Glib::ustring::compose("https://inkscape.org/%1/release/inkscape%2", lang, version);
+            url = Glib::ustring::compose("https://inkscape.org/%1/release/inkscape-%2", lang, development_version ? "master" : version);
             break;
         case SP_VERB_HELP_URL_REPORT_BUG:
             url = Glib::ustring::compose("https://inkscape.org/%1/contribute/report-bugs/", lang);
             break;
         case SP_VERB_HELP_URL_MANUAL:
             url = "http://tavmjong.free.fr/INKSCAPE/MANUAL/html/index.php";
+            break;
+        case SP_VERB_HELP_URL_DONATE:
+            url = Glib::ustring::compose("https://inkscape.org/%1/donate#lang=%1&version=%2", lang, version);
             break;
         case SP_VERB_HELP_URL_SVG11_SPEC:
             url = "http://www.w3.org/TR/SVG11/";
@@ -2915,6 +2922,7 @@ Verb *Verb::_base_verbs[] = {
                     N_("New in This Version"), nullptr),
     new HelpUrlVerb(SP_VERB_HELP_URL_REPORT_BUG, "HelpUrlReportBug", N_("Report a Bug"), N_("Report a Bug"), nullptr),
     new HelpUrlVerb(SP_VERB_HELP_URL_MANUAL, "HelpUrlManual", N_("Inkscape Manual"), N_("Inkscape Manual"), nullptr),
+    new HelpUrlVerb(SP_VERB_HELP_URL_DONATE, "HelpUrlDonate", N_("Donate"), N_("Donate to Inkscape"), nullptr),
     new HelpUrlVerb(SP_VERB_HELP_URL_SVG11_SPEC, "HelpUrlSvg11Spec", N_("SVG 1.1 Specification"),
                     N_("SVG 1.1 Specification"), nullptr),
     new HelpUrlVerb(SP_VERB_HELP_URL_SVG2_SPEC, "HelpUrlSvg2Spec", N_("SVG 2 Specification"), N_("SVG 2 Specification"),
