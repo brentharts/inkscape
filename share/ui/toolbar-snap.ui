@@ -5,7 +5,7 @@
   <object class="GtkPopover" id="advanced">
     <property name="can-focus">False</property>
     <child>
-      <!-- n-columns=3 n-rows=30 -->
+      <!-- n-columns=3 n-rows=32 -->
       <object class="GtkGrid">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
@@ -271,7 +271,7 @@
           </object>
           <packing>
             <property name="left-attach">0</property>
-            <property name="top-attach">24</property>
+            <property name="top-attach">26</property>
             <property name="width">2</property>
           </packing>
         </child>
@@ -287,7 +287,7 @@
           </object>
           <packing>
             <property name="left-attach">0</property>
-            <property name="top-attach">25</property>
+            <property name="top-attach">27</property>
             <property name="width">2</property>
           </packing>
         </child>
@@ -303,7 +303,7 @@
           </object>
           <packing>
             <property name="left-attach">0</property>
-            <property name="top-attach">26</property>
+            <property name="top-attach">28</property>
             <property name="width">2</property>
           </packing>
         </child>
@@ -348,7 +348,7 @@
           </object>
           <packing>
             <property name="left-attach">1</property>
-            <property name="top-attach">20</property>
+            <property name="top-attach">22</property>
           </packing>
         </child>
         <child>
@@ -358,11 +358,12 @@
             <property name="can-focus">True</property>
             <property name="receives-default">False</property>
             <property name="halign">start</property>
+            <property name="action-name">doc.snap-alignment</property>
             <property name="draw-indicator">True</property>
           </object>
           <packing>
             <property name="left-attach">0</property>
-            <property name="top-attach">21</property>
+            <property name="top-attach">23</property>
             <property name="width">2</property>
           </packing>
         </child>
@@ -374,7 +375,7 @@
           </object>
           <packing>
             <property name="left-attach">1</property>
-            <property name="top-attach">23</property>
+            <property name="top-attach">25</property>
           </packing>
         </child>
         <child>
@@ -384,11 +385,12 @@
             <property name="can-focus">True</property>
             <property name="receives-default">False</property>
             <property name="halign">start</property>
+            <property name="action-name">doc.snap-alignment-self</property>
             <property name="draw-indicator">True</property>
           </object>
           <packing>
             <property name="left-attach">1</property>
-            <property name="top-attach">22</property>
+            <property name="top-attach">24</property>
           </packing>
         </child>
         <child>
@@ -402,7 +404,7 @@
           </object>
           <packing>
             <property name="left-attach">1</property>
-            <property name="top-attach">28</property>
+            <property name="top-attach">30</property>
             <property name="width">2</property>
           </packing>
         </child>
@@ -414,7 +416,7 @@
           </object>
           <packing>
             <property name="left-attach">1</property>
-            <property name="top-attach">27</property>
+            <property name="top-attach">29</property>
           </packing>
         </child>
         <child>
@@ -583,7 +585,7 @@
           </object>
           <packing>
             <property name="left-attach">2</property>
-            <property name="top-attach">24</property>
+            <property name="top-attach">26</property>
           </packing>
         </child>
         <child>
@@ -596,7 +598,7 @@
           </object>
           <packing>
             <property name="left-attach">2</property>
-            <property name="top-attach">25</property>
+            <property name="top-attach">27</property>
           </packing>
         </child>
         <child>
@@ -609,7 +611,7 @@
           </object>
           <packing>
             <property name="left-attach">2</property>
-            <property name="top-attach">26</property>
+            <property name="top-attach">28</property>
           </packing>
         </child>
         <child>
@@ -622,6 +624,46 @@
             <property name="left-attach">0</property>
             <property name="top-attach">2</property>
           </packing>
+        </child>
+        <child>
+          <object class="GtkCheckButton">
+            <property name="label" translatable="yes">Path mask</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">False</property>
+            <property name="action-name">doc.snap-path-mask</property>
+            <property name="draw-indicator">True</property>
+          </object>
+          <packing>
+            <property name="left-attach">1</property>
+            <property name="top-attach">20</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkCheckButton">
+            <property name="label" translatable="yes">Path clip</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">False</property>
+            <property name="action-name">doc.snap-path-clip</property>
+            <property name="draw-indicator">True</property>
+          </object>
+          <packing>
+            <property name="left-attach">1</property>
+            <property name="top-attach">21</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
         </child>
         <child>
           <placeholder/>
@@ -1000,6 +1042,7 @@
       <object class="GtkToolItem" id="tool-item-advanced">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
+        <property name="no-show-all">True</property>
         <child>
           <object class="GtkMenuButton" id="btn-advanced">
             <property name="visible">True</property>
@@ -1021,7 +1064,9 @@
     </child>
     <child>
       <object class="GtkToolItem" id="tool-item-simple">
+        <property name="visible">True</property>
         <property name="can-focus">False</property>
+        <property name="no-show-all">True</property>
         <child>
           <object class="GtkMenuButton" id="btn-simple">
             <property name="visible">True</property>

@@ -45,7 +45,7 @@
 #include "include/gtkmm_version.h"
 
 #include "io/resource.h"
-
+#include "actions/actions-canvas-snapping.h"
 #include "object/sp-namedview.h"
 
 #include "ui/icon-names.h"
@@ -391,6 +391,12 @@ GtkWidget *ToolboxFactory::createCommandsToolbox()
     return toolboxNewCommon( tb, BAR_COMMANDS, GTK_POS_LEFT );
 }
 
+int show_popover(void* button) {
+    auto btn = static_cast<Gtk::MenuButton*>(button);
+    btn->get_popover()->show();
+    return false;
+}
+
 GtkWidget *ToolboxFactory::createSnapToolbox()
 {
     auto tb = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
@@ -408,6 +414,7 @@ GtkWidget *ToolboxFactory::createSnapToolbox()
         std::cerr << "ToolboxFactor::createSnapToolbox: " << snap_toolbar_builder_file << " file not read! " << ex.what() << std::endl;
     }
 
+    bool simple_snap = true;
     Gtk::Toolbar* toolbar = nullptr;
     builder->get_widget("snap-toolbar", toolbar);
     if (!toolbar) {
@@ -419,6 +426,7 @@ GtkWidget *ToolboxFactory::createSnapToolbox()
         if ( prefs->getBool("/toolbox/icononly", true) ) {
             toolbar->set_toolbar_style( Gtk::TOOLBAR_ICONS );
         }
+        simple_snap = prefs->getBool("/toolbox/simplesnap", simple_snap);
 
         GtkIconSize toolboxSize = ToolboxFactory::prefToSize("/toolbox/secondary", 1);
         toolbar->set_icon_size (static_cast<Gtk::IconSize>(toolboxSize));
@@ -437,13 +445,24 @@ GtkWidget *ToolboxFactory::createSnapToolbox()
     builder->get_widget("btn-simple", btn_simple);
     builder->get_widget("btn-advanced", btn_advanced);
     if (simple && advanced && item_simple && item_advanced && btn_simple && btn_advanced) {
+        // keep only one popup button visible
+        if (simple_snap) {
+            item_simple->show();
+            item_advanced->hide();
+        }
+        else {
+            item_advanced->show();
+            item_simple->hide();
+        }
+
         // switch to simple mode
         simple->signal_activate_link().connect([=](){
             item_advanced->hide();
             item_simple->show();
-            // btn_simple->show();
-            btn_simple->get_popover()->show();
-            //TODO - adjust snapping options when transitioning to simple scheme, since most are hidden
+            g_timeout_add(250, &show_popover, btn_simple);
+            Inkscape::Preferences::get()->setBool("/toolbox/simplesnap", true);
+            // adjust snapping options when transitioning to simple scheme, since most are hidden
+            transition_to_simple_snapping();
             return true;
         }, false);
 
@@ -451,7 +470,8 @@ GtkWidget *ToolboxFactory::createSnapToolbox()
         advanced->signal_activate_link().connect([=](){
             item_simple->hide();
             item_advanced->show();
-            btn_advanced->get_popover()->show();
+            g_timeout_add(250, &show_popover, btn_advanced);
+            Inkscape::Preferences::get()->setBool("/toolbox/simplesnap", false);
             return true;
         }, false);
     }

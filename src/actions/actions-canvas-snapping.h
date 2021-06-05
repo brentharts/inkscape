@@ -20,6 +20,8 @@ void set_actions_canvas_snapping(SPDocument* document);
 
 std::vector<std::vector<Glib::ustring>> get_extra_data_canvas_snapping();
 
+void transition_to_simple_snapping();
+
 #endif // INK_ACTIONS_CANVAS_SNAPPING_H
 
 /*
