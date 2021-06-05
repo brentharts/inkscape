@@ -800,7 +800,8 @@
         <child>
           <object class="GtkToggleButton" id="simple-snap-bbox">
             <property name="visible">True</property>
-            <property name="can-focus">True</property>
+            <property name="can-focus">False</property>
+            <property name="focus-on-click">False</property>
             <property name="receives-default">True</property>
             <property name="action-name">doc.simple-snap-bbox</property>
             <property name="image">image1</property>
@@ -825,7 +826,8 @@
         <child>
           <object class="GtkToggleButton" id="simple-snap-nodes">
             <property name="visible">True</property>
-            <property name="can-focus">True</property>
+            <property name="can-focus">False</property>
+            <property name="focus-on-click">False</property>
             <property name="receives-default">True</property>
             <property name="action-name">doc.simple-snap-nodes</property>
             <property name="image">image2</property>
@@ -850,7 +852,8 @@
         <child>
           <object class="GtkToggleButton" id="align-snap">
             <property name="visible">True</property>
-            <property name="can-focus">True</property>
+            <property name="can-focus">False</property>
+            <property name="focus-on-click">False</property>
             <property name="receives-default">True</property>
             <property name="action-name">doc.simple-snap-alignment</property>
             <property name="image">image3</property>

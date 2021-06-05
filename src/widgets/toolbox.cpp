@@ -437,17 +437,18 @@ GtkWidget *ToolboxFactory::createSnapToolbox()
     builder->get_widget("btn-simple", btn_simple);
     builder->get_widget("btn-advanced", btn_advanced);
     if (simple && advanced && item_simple && item_advanced && btn_simple && btn_advanced) {
-            // g_warning("connct");
+        // switch to simple mode
         simple->signal_activate_link().connect([=](){
-            g_warning("sim");
             item_advanced->hide();
             item_simple->show();
             // btn_simple->show();
             btn_simple->get_popover()->show();
+            //TODO - adjust snapping options when transitioning to simple scheme, since most are hidden
             return true;
         }, false);
+
+        // switch to advanced mode
         advanced->signal_activate_link().connect([=](){
-            g_warning("adv");
             item_simple->hide();
             item_advanced->show();
             btn_advanced->get_popover()->show();
