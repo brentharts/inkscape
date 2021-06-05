@@ -654,10 +654,30 @@
           </packing>
         </child>
         <child>
-          <placeholder/>
+          <object class="GtkImage">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="halign">start</property>
+            <property name="valign">center</property>
+            <property name="icon-name">path-mask-edit</property>
+          </object>
+          <packing>
+            <property name="left-attach">2</property>
+            <property name="top-attach">20</property>
+          </packing>
         </child>
         <child>
-          <placeholder/>
+          <object class="GtkImage">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="halign">start</property>
+            <property name="valign">center</property>
+            <property name="icon-name">path-clip-edit</property>
+          </object>
+          <packing>
+            <property name="left-attach">2</property>
+            <property name="top-attach">21</property>
+          </packing>
         </child>
         <child>
           <placeholder/>
