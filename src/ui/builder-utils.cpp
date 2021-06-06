@@ -11,7 +11,7 @@ Glib::RefPtr<Gtk::Builder> create_builder(const char* filename) {
 		return Gtk::Builder::create_from_file(glade);
 	}
 	catch (Glib::Error& ex) {
-		g_error(("Cannot load glade file for gradient editor. " + ex.what()).c_str());
+		g_error("Cannot load glade file: %s", ex.what().c_str());
 		throw;
 	}
 }

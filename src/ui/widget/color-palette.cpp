@@ -358,7 +358,7 @@ void ColorPalette::resize() {
     else {
         // exact size for multiple rows
         int height = (get_tile_height() + _border) * _rows - _border;
-        height += _flowbox.get_margin_top() + _flowbox.get_margin_bottom();
+        height += _flowbox.get_margin_top(); // + _flowbox.get_margin_bottom();
         _scroll.set_size_request(1, height);
     }
 
