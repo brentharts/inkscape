@@ -835,15 +835,18 @@ SwatchesPanel::SwatchesPanel(gchar const *prefsPath)
         // restore palette settings
         Inkscape::Preferences* prefs = Inkscape::Preferences::get();
         _palette->set_tile_size(prefs->getInt(_prefs_path + "/tile_size", 16));
+        _palette->set_aspect(prefs->getDoubleLimited(_prefs_path + "/tile_aspect", 0.0, -2, 2));
         _palette->set_tile_border(prefs->getInt(_prefs_path + "/tile_border", 1));
         _palette->set_rows(prefs->getInt(_prefs_path + "/rows", 1));
+        _palette->enable_scrollbar(prefs->getBool(_prefs_path + "/scrollbar", true));
         // save settings when they change
         _palette->get_settings_changed_signal().connect([=](){
             prefs->setInt(_prefs_path + "/tile_size", _palette->get_tile_size());
+            prefs->setDouble(_prefs_path + "/tile_aspect", _palette->get_aspect());
             prefs->setInt(_prefs_path + "/tile_border", _palette->get_tile_border());
             prefs->setInt(_prefs_path + "/rows", _palette->get_rows());
+            prefs->setBool(_prefs_path + "/scrollbar", _palette->is_scrollbar_enabled());
         });
-
 
         // switch swatch palettes
         _palette->get_palette_selected_signal().connect([=](Glib::ustring name) {

@@ -42,10 +42,14 @@ public:
     void set_tile_size(int size_px);
     void set_tile_border(int border_px);
     void set_rows(int rows);
+    void set_aspect(double aspect);
+    void enable_scrollbar(bool show);
 
     int get_tile_size() const;
     int get_tile_border() const;
     int get_rows() const;
+    double get_aspect() const;
+    bool is_scrollbar_enabled() const;
 
     void set_selected(const Glib::ustring& name);
 
@@ -60,8 +64,14 @@ private:
     void _set_tile_size(int size_px);
     void _set_tile_border(int border_px);
     void _set_rows(int rows);
+    void _set_aspect(double aspect);
+    void _enable_scrollbar(bool show);
     static gboolean check_scrollbar(gpointer self);
-    void _check_scrollbar();
+    // void _check_scrollbar();
+    void update_checkbox();
+    int get_tile_size(bool horz) const;
+    int get_tile_width() const;
+    int get_tile_height() const;
 
     Glib::RefPtr<Gtk::Builder> _builder;
     Gtk::FlowBox& _flowbox;
@@ -75,12 +85,14 @@ private:
     int _size = 10;
     int _border = 0;
     int _rows = 1;
+    double _aspect = 0.0;
     int _count = 1;
     bool _compact = true;
     sigc::signal<void, Glib::ustring> _signal_palette_selected;
     sigc::signal<void> _signal_settings_changed;
     bool _in_update = false;
-    guint _active_timeout = 0;
+    // guint _active_timeout = 0;
+    bool _force_scrollbar = true;
 };
 
 }}} // namespace

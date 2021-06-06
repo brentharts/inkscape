@@ -2,6 +2,12 @@
 <!-- Generated with glade 3.38.1 -->
 <interface>
   <requires lib="gtk+" version="3.24"/>
+  <object class="GtkAdjustment" id="adjustment-aspect">
+    <property name="lower">-2</property>
+    <property name="upper">2</property>
+    <property name="step-increment">0.1</property>
+    <property name="page-increment">0.2</property>
+  </object>
   <object class="GtkAdjustment" id="adjustment-border">
     <property name="upper">16</property>
     <property name="step-increment">1</property>
@@ -246,7 +252,7 @@
     <property name="relative-to">btn-menu</property>
     <property name="position">left</property>
     <child>
-      <!-- n-columns=2 n-rows=3 -->
+      <!-- n-columns=2 n-rows=5 -->
       <object class="GtkGrid" id="main-grid">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
@@ -281,7 +287,7 @@
           </object>
           <packing>
             <property name="left-attach">1</property>
-            <property name="top-attach">1</property>
+            <property name="top-attach">2</property>
           </packing>
         </child>
         <child>
@@ -293,7 +299,7 @@
           </object>
           <packing>
             <property name="left-attach">0</property>
-            <property name="top-attach">1</property>
+            <property name="top-attach">2</property>
           </packing>
         </child>
         <child>
@@ -321,7 +327,7 @@
           </object>
           <packing>
             <property name="left-attach">0</property>
-            <property name="top-attach">2</property>
+            <property name="top-attach">3</property>
           </packing>
         </child>
         <child>
@@ -338,8 +344,51 @@
           </object>
           <packing>
             <property name="left-attach">1</property>
-            <property name="top-attach">2</property>
+            <property name="top-attach">3</property>
           </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="row-label1">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="halign">start</property>
+            <property name="label" translatable="yes">Aspect:</property>
+          </object>
+          <packing>
+            <property name="left-attach">0</property>
+            <property name="top-attach">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkScale" id="aspect-slider">
+            <property name="width-request">180</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="adjustment">adjustment-aspect</property>
+            <property name="show-fill-level">True</property>
+            <property name="fill-level">50</property>
+            <property name="value-pos">right</property>
+          </object>
+          <packing>
+            <property name="left-attach">1</property>
+            <property name="top-attach">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkCheckButton" id="use-sb">
+            <property name="label" translatable="yes">Use scrollbar</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">False</property>
+            <property name="draw-indicator">True</property>
+          </object>
+          <packing>
+            <property name="left-attach">1</property>
+            <property name="top-attach">4</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
         </child>
       </object>
     </child>

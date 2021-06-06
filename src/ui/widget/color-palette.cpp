@@ -43,6 +43,13 @@ ColorPalette::ColorPalette():
         return true;
     });
 
+    auto& aspect = get_widget<Gtk::Scale>(_builder, "aspect-slider");
+    aspect.signal_change_value().connect([=,&aspect](Gtk::ScrollType, double val) {
+        _set_aspect(aspect.get_value());
+        _signal_settings_changed.emit();
+        return true;
+    });
+
     auto& border = get_widget<Gtk::Scale>(_builder, "border-slider");
     border.signal_change_value().connect([=,&border](Gtk::ScrollType, double val) {
         _set_tile_border(static_cast<int>(border.get_value()));
@@ -56,6 +63,14 @@ ColorPalette::ColorPalette():
         _signal_settings_changed.emit();
         return true;
     });
+
+    auto& sb = get_widget<Gtk::CheckButton>(_builder, "use-sb");
+    sb.set_active(_force_scrollbar);
+    sb.signal_toggled().connect([=,&sb](){
+        _enable_scrollbar(sb.get_active());
+        _signal_settings_changed.emit();
+    });
+    update_checkbox();
 
     _scroll.set_min_content_height(1);
 
@@ -76,10 +91,10 @@ ColorPalette::ColorPalette():
         }
     }
 
-    _scroll_down.signal_clicked().connect([=](){ scroll(0, _size + _border); });
-    _scroll_up.signal_clicked().connect([=](){ scroll(0, -(_size + _border)); });
-    _scroll_left.signal_clicked().connect([=](){ scroll(-10 * (_size + _border), 0); });
-    _scroll_right.signal_clicked().connect([=](){ scroll(10 * (_size + _border), 0); });
+    _scroll_down.signal_clicked().connect([=](){ scroll(0, get_tile_height() + _border); });
+    _scroll_up.signal_clicked().connect([=](){ scroll(0, -(get_tile_height() + _border)); });
+    _scroll_left.signal_clicked().connect([=](){ scroll(-10 * (get_tile_width() + _border), 0); });
+    _scroll_right.signal_clicked().connect([=](){ scroll(10 * (get_tile_width() + _border), 0); });
 
     {
         auto css_provider = Gtk::CssProvider::create();
@@ -116,9 +131,9 @@ ColorPalette::ColorPalette():
 }
 
 ColorPalette::~ColorPalette() {
-    if (_active_timeout) {
-        g_source_remove(_active_timeout);
-    }
+    // if (_active_timeout) {
+    //     g_source_remove(_active_timeout);
+    // }
 }
 
 void ColorPalette::scroll(int dx, int dy) {
@@ -142,6 +157,10 @@ int ColorPalette::get_rows() const {
     return _rows;
 }
 
+double ColorPalette::get_aspect() const {
+    return _aspect;
+}
+
 void ColorPalette::set_tile_border(int border) {
     _set_tile_border(border);
     auto& slider = get_widget<Gtk::Scale>(_builder, "border-slider");
@@ -157,7 +176,7 @@ void ColorPalette::_set_tile_border(int border) {
     }
 
     _border = border;
-    resize();
+    set_up_scrolling();
 }
 
 void ColorPalette::set_tile_size(int size) {
@@ -175,7 +194,25 @@ void ColorPalette::_set_tile_size(int size) {
     }
 
     _size = size;
-    resize();
+    set_up_scrolling();
+}
+
+void ColorPalette::set_aspect(double aspect) {
+    _set_aspect(aspect);
+    auto& slider = get_widget<Gtk::Scale>(_builder, "aspect-slider");
+    slider.set_value(aspect);
+}
+
+void ColorPalette::_set_aspect(double aspect) {
+    if (aspect == _aspect) return;
+
+    if (aspect < -2.0 || aspect > 2.0) {
+        g_warning("Unexpected aspect ratio for color palette: %f", aspect);
+        return;
+    }
+
+    _aspect = aspect;
+    set_up_scrolling();
 }
 
 void ColorPalette::set_rows(int rows) {
@@ -193,7 +230,14 @@ void ColorPalette::_set_rows(int rows) {
     }
 
     _rows = rows;
+    update_checkbox();
     set_up_scrolling();
+}
+
+void ColorPalette::update_checkbox() {
+    auto& sb = get_widget<Gtk::CheckButton>(_builder, "use-sb");
+    // scrollbar can only be applied to single-row layouts
+    sb.set_sensitive(_rows == 1);
 }
 
 void ColorPalette::set_compact(bool compact) {
@@ -206,20 +250,21 @@ void ColorPalette::set_compact(bool compact) {
     }
 }
 
-gboolean ColorPalette::check_scrollbar(gpointer self) {
-    static_cast<ColorPalette*>(self)->_check_scrollbar();
-    return false; // stop
+bool ColorPalette::is_scrollbar_enabled() const {
+    return _force_scrollbar;
 }
 
-void ColorPalette::_check_scrollbar() {
-    _active_timeout = 0;
+void ColorPalette::enable_scrollbar(bool show) {
+    auto& sb = get_widget<Gtk::CheckButton>(_builder, "use-sb");
+    sb.set_active(show);
+    _enable_scrollbar(show);
+}
 
-    if (!_compact) return;
+void ColorPalette::_enable_scrollbar(bool show) {
+    if (_force_scrollbar == show) return;
 
-    auto width = _scroll.get_allocated_width();
-    int req_width = (_size + _border) * _count - _border;
-    req_width += _flowbox.get_margin_left() + _flowbox.get_margin_right();
-    _scroll.set_policy(req_width >= width ? Gtk::POLICY_ALWAYS : Gtk::POLICY_EXTERNAL, Gtk::POLICY_NEVER);
+    _force_scrollbar = show;
+    set_up_scrolling();
 }
 
 void ColorPalette::set_up_scrolling() {
@@ -237,16 +282,19 @@ void ColorPalette::set_up_scrolling() {
             _flowbox.set_min_children_per_line(_count);
 
             _scroll_btn.hide();
-            _scroll_left.show();
-            _scroll_right.show();
 
-            // postpone this check until after flowbox layout is complete
-            _active_timeout = g_timeout_add(200, &ColorPalette::check_scrollbar, this);
-            // note: ideally I'd like to use POLICY_AUTOMATIC to show scrollbar, but in
-            // some themes (like under KDE), scrollbars overlap with content and obscure tiles;
-            // another option is to completely disable scrollbars
-            _scroll.set_policy(Gtk::POLICY_EXTERNAL, Gtk::POLICY_NEVER);
-            // _scroll.set_overlay_scrolling(true);
+            if (_force_scrollbar) {
+                _scroll_left.hide();
+                _scroll_right.hide();
+            }
+            else {
+                _scroll_left.show();
+                _scroll_right.show();
+            }
+
+            // ideally we should be able to use POLICY_AUTOMATIC, but on some themes this leads to a scrollbar
+            // that obscures color tiles (it overlaps them); thus resorting to manual scrollbar selection
+            _scroll.set_policy(_force_scrollbar ? Gtk::POLICY_ALWAYS : Gtk::POLICY_EXTERNAL, Gtk::POLICY_NEVER);
         }
         else {
             // vertical scrolling with multiple rows
@@ -280,6 +328,28 @@ void ColorPalette::set_up_scrolling() {
     resize();
 }
 
+int ColorPalette::get_tile_size(bool horz) const {
+    double aspect = horz ? _aspect : -_aspect;
+
+    if (aspect > 0) {
+        return static_cast<int>(round((1.0 + aspect) * _size));
+    }
+    else if (aspect < 0) {
+        return static_cast<int>(round((1.0 / (1.0 - aspect)) * _size));
+    }
+    else {
+        return _size;
+    }
+}
+
+int ColorPalette::get_tile_width() const {
+    return get_tile_size(true);
+}
+
+int ColorPalette::get_tile_height() const {
+    return get_tile_size(false);
+}
+
 void ColorPalette::resize() {
     if (_rows == 1 || !_compact) {
         // auto size for single row to allocate space for scrollbar
@@ -287,7 +357,7 @@ void ColorPalette::resize() {
     }
     else {
         // exact size for multiple rows
-        int height = (_size + _border) * _rows - _border;
+        int height = (get_tile_height() + _border) * _rows - _border;
         height += _flowbox.get_margin_top() + _flowbox.get_margin_bottom();
         _scroll.set_size_request(1, height);
     }
@@ -295,8 +365,10 @@ void ColorPalette::resize() {
     _flowbox.set_column_spacing(_border);
     _flowbox.set_row_spacing(_border);
 
+    int width = get_tile_width();
+    int height = get_tile_height();
     _flowbox.foreach([=](Gtk::Widget& w){
-        w.set_size_request(_size, _size);
+        w.set_size_request(width, height);
     });
 }
 
