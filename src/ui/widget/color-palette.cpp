@@ -111,6 +111,14 @@ ColorPalette::ColorPalette():
 
     set_vexpand_set(true);
     set_up_scrolling();
+
+    signal_size_allocate().connect([=](Gtk::Allocation& a){ set_up_scrolling(); });
+}
+
+ColorPalette::~ColorPalette() {
+    if (_active_timeout) {
+        g_source_remove(_active_timeout);
+    }
 }
 
 void ColorPalette::scroll(int dx, int dy) {
@@ -198,6 +206,22 @@ void ColorPalette::set_compact(bool compact) {
     }
 }
 
+gboolean ColorPalette::check_scrollbar(gpointer self) {
+    static_cast<ColorPalette*>(self)->_check_scrollbar();
+    return false; // stop
+}
+
+void ColorPalette::_check_scrollbar() {
+    _active_timeout = 0;
+
+    if (!_compact) return;
+
+    auto width = _scroll.get_allocated_width();
+    int req_width = (_size + _border) * _count - _border;
+    req_width += _flowbox.get_margin_left() + _flowbox.get_margin_right();
+    _scroll.set_policy(req_width >= width ? Gtk::POLICY_ALWAYS : Gtk::POLICY_EXTERNAL, Gtk::POLICY_NEVER);
+}
+
 void ColorPalette::set_up_scrolling() {
     if (_compact) {
         // in compact mode scrollbars are hidden; they take up too much space
@@ -216,7 +240,13 @@ void ColorPalette::set_up_scrolling() {
             _scroll_left.show();
             _scroll_right.show();
 
+            // postpone this check until after flowbox layout is complete
+            _active_timeout = g_timeout_add(200, &ColorPalette::check_scrollbar, this);
+            // note: ideally I'd like to use POLICY_AUTOMATIC to show scrollbar, but in
+            // some themes (like under KDE), scrollbars overlap with content and obscure tiles;
+            // another option is to completely disable scrollbars
             _scroll.set_policy(Gtk::POLICY_EXTERNAL, Gtk::POLICY_NEVER);
+            // _scroll.set_overlay_scrolling(true);
         }
         else {
             // vertical scrolling with multiple rows

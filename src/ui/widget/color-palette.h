@@ -27,6 +27,7 @@ namespace Widget {
 class ColorPalette : public Gtk::Bin {
 public:
     ColorPalette();
+    virtual ~ColorPalette();
 
     struct rgb_t { double r; double g; double b; };
     struct palette_t { Glib::ustring name; std::vector<rgb_t> colors; };
@@ -59,6 +60,8 @@ private:
     void _set_tile_size(int size_px);
     void _set_tile_border(int border_px);
     void _set_rows(int rows);
+    static gboolean check_scrollbar(gpointer self);
+    void _check_scrollbar();
 
     Glib::RefPtr<Gtk::Builder> _builder;
     Gtk::FlowBox& _flowbox;
@@ -77,6 +80,7 @@ private:
     sigc::signal<void, Glib::ustring> _signal_palette_selected;
     sigc::signal<void> _signal_settings_changed;
     bool _in_update = false;
+    guint _active_timeout = 0;
 };
 
 }}} // namespace

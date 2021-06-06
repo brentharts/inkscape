@@ -76,7 +76,7 @@
         <property name="min-content-height">1</property>
         <property name="overlay-scrolling">False</property>
         <child>
-          <object class="GtkViewport">
+          <object class="GtkViewport" id="view-port">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="shadow-type">none</property>
