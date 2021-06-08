@@ -208,87 +208,13 @@ void CanvasItemRect::render(Inkscape::CanvasItemBuffer *buf)
 
     // Draw shadow first. Shadow extends under rectangle to reduce aliasing effects.
     if (_shadow_width > 0 && !_dashed) {
-        // draw fake drop shadow built from gradients
-        const auto r = SP_RGBA32_R_F(_shadow_color);
-        const auto g = SP_RGBA32_G_F(_shadow_color);
-        const auto b = SP_RGBA32_B_F(_shadow_color);
         // there's only one UI knob to adjust border and shadow color, so instead of using border color
         // transparency as is, it is boosted by this function, since shadow attenuates it
         const auto a = (exp(-3 * SP_RGBA32_A_F(_shadow_color)) - 1) / (exp(-3) - 1);
         buf->cr->save();
         Cairo::Matrix m(_affine[0], _affine[1], _affine[2], _affine[3], _affine[4], _affine[5]);
         buf->cr->transform(m);
-        const Geom::Point corners[] = { rect.corner(0), rect.corner(1), rect.corner(2), rect.corner(3) };
-        // space for gradient shadow
-        double sw = get_shadow_size();
-        double half = sw / 2;
-        // 8 gradients total: 4 sides + 4 corners
-        auto grad_top    = Cairo::LinearGradient::create(0, corners[0][Y] + half, 0, corners[0][Y] - half);
-        auto grad_right  = Cairo::LinearGradient::create(corners[1][X], 0, corners[1][X] + sw, 0);
-        auto grad_bottom = Cairo::LinearGradient::create(0, corners[2][Y], 0, corners[2][Y] + sw);
-        auto grad_left   = Cairo::LinearGradient::create(corners[0][X] + half, 0, corners[0][X] - half, 0);
-        auto grad_btm_right = Cairo::RadialGradient::create(corners[2][X], corners[2][Y], 0, corners[2][X], corners[2][Y], sw);
-        auto grad_top_right = Cairo::RadialGradient::create(corners[1][X], corners[1][Y] + half, 0, corners[1][X], corners[1][Y] + half, sw);
-        auto grad_btm_left  = Cairo::RadialGradient::create(corners[3][X] + half, corners[3][Y], 0, corners[3][X] + half, corners[3][Y], sw);
-        auto grad_top_left  = Cairo::RadialGradient::create(corners[0][X], corners[0][Y], 0, corners[0][X], corners[0][Y], half);
-        const int N = 15; // number of gradient stops; stops used to make it non-linear
-        // using easing function here: (exp(a*(1-t)) - 1) / (exp(a) - 1);
-        // it has a nice property of growing from 0 to 1 for t in [0..1]
-        const auto A = 4.0; // this coefficient changes how steep the curve is and controls shadow drop-off
-        const auto denominator = exp(A) - 1;
-        for (int i = 0; i <= N; ++i) {
-            auto pos = static_cast<double>(i) / N;
-            // exponential decay for drop shadow - long tail, with values from 100% down to 0% opacity
-            auto t = 1 - pos; // reverse 't' so alpha drops from 1 to 0
-            auto alpha = (exp(A * t) - 1) / denominator;
-            grad_top->add_color_stop_rgba(pos, r, g, b, alpha * a);
-            grad_bottom->add_color_stop_rgba(pos, r, g, b, alpha * a);
-            grad_right->add_color_stop_rgba(pos, r, g, b, alpha * a);
-            grad_left->add_color_stop_rgba(pos, r, g, b, alpha * a);
-            grad_btm_right->add_color_stop_rgba(pos, r, g, b, alpha * a);
-            grad_top_right->add_color_stop_rgba(pos, r, g, b, alpha * a);
-            grad_btm_left->add_color_stop_rgba(pos, r, g, b, alpha * a);
-            // this left/top corner is just a silver of the shadow: half of it is "hidden" beneath the page
-            if (pos >= 0.5) {
-                grad_top_left->add_color_stop_rgba(2 * (pos - 0.5), r, g, b, alpha * a);
-            }
-        }
-
-        // shadow at the top (faint)
-        buf->cr->rectangle(corners[0][X], corners[0][Y] - half, std::max(corners[1][X] - corners[0][X], 0.0), half);
-        buf->cr->set_source(grad_top);
-        buf->cr->fill();
-
-        // right side
-        buf->cr->rectangle(corners[1][X], corners[1][Y] + half, sw, std::max(corners[2][Y] - corners[1][Y] - half, 0.0));
-        buf->cr->set_source(grad_right);
-        buf->cr->fill();
-
-        // bottom side
-        buf->cr->rectangle(corners[0][X] + half, corners[2][Y], std::max(corners[1][X] - corners[0][X] - half, 0.0), sw);
-        buf->cr->set_source(grad_bottom);
-        buf->cr->fill();
-
-        // left side (faint)
-        buf->cr->rectangle(corners[0][X] - half, corners[0][Y], half, std::max(corners[2][Y] - corners[1][Y], 0.0));
-        buf->cr->set_source(grad_left);
-        buf->cr->fill();
-
-        buf->cr->rectangle(corners[2][X], corners[2][Y], sw, sw);
-        buf->cr->set_source(grad_btm_right);
-        buf->cr->fill();
-
-        buf->cr->rectangle(corners[1][X], corners[1][Y] - half, sw, sw);
-        buf->cr->set_source(grad_top_right);
-        buf->cr->fill();
-
-        buf->cr->rectangle(corners[3][X] - half, corners[3][Y], sw, sw);
-        buf->cr->set_source(grad_btm_left);
-        buf->cr->fill();
-
-        buf->cr->rectangle(corners[0][X] - half, corners[0][Y] - half, half, half);
-        buf->cr->set_source(grad_top_left);
-        buf->cr->fill();
+        ink_cairo_draw_drop_shadow(buf->cr, rect, get_shadow_size(), _shadow_color, a);
         buf->cr->restore();
     }
 
