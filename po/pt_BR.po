@@ -677,7 +677,7 @@ msgstr "Morfologia"
 
 #: ../share/filters/filters.svg.h:236
 msgid "Creates a black light inside and outside"
-msgstr "Cria uma luz negra no interior e no exterior"
+msgstr "Cria uma luz escura no interior e no exterior"
 
 #: ../share/filters/filters.svg.h:238
 msgid "Cubes"
@@ -1040,7 +1040,7 @@ msgstr "Padrão de pele de tigre com dobras e chanfro nas bordas"
 
 #: ../share/filters/filters.svg.h:414
 msgid "Black Light"
-msgstr "Luz Negra"
+msgstr "Luz Escura"
 
 #: ../share/filters/filters.svg.h:415 ../share/filters/filters.svg.h:579
 #: ../share/filters/filters.svg.h:591 ../share/filters/filters.svg.h:631
@@ -1111,11 +1111,11 @@ msgstr "Cor"
 
 #: ../share/filters/filters.svg.h:416
 msgid "Light areas turn to black"
-msgstr "Áreas iluminadas tornam-se negras"
+msgstr "Áreas iluminadas tornam-se escuras"
 
 #: ../share/filters/filters.svg.h:418
 msgid "Film Grain"
-msgstr "Grão de Filme"
+msgstr "Granulado de Filme"
 
 #: ../share/filters/filters.svg.h:420
 msgid "Adds a small scale graininess"
@@ -4033,16 +4033,16 @@ msgstr "Folheto A4 3 vezes"
 
 #: ../share/templates/templates.h:1
 msgid "CD Label 120mmx120mm "
-msgstr "Etiqueta de CD 120mmx120mm "
+msgstr "Rótulo de CD 120mmx120mm "
 
 #: ../share/templates/templates.h:1
 msgid "Simple CD Label template with disc's pattern."
-msgstr "Modelo de Etiqueta simples de CD com padrões do disco."
+msgstr "Modelo de Rótulo simples de CD com padrões do disco."
 
 # disc disk? é isso mesmo? me pareceu redundante e/ou errado! --VictorW
 #: ../share/templates/templates.h:1
 msgid "CD label 120x120 disc disk"
-msgstr "Etiqueta de Disco de CD 120x120"
+msgstr "Rótulo de Disco de CD 120x120"
 
 #: ../share/templates/templates.h:1
 msgid "LaTeX Beamer"
@@ -4577,11 +4577,11 @@ msgstr "Vá para o próximo zoom (a partir do histórico de zooms)"
 
 #: ../src/actions/actions-canvas-transform.cpp:213 ../share/ui/menu-view.ui:91
 msgid "Rotate Clockwise"
-msgstr "Girar no Sentido Horário"
+msgstr "Rotacionar no Sentido Horário"
 
 #: ../src/actions/actions-canvas-transform.cpp:213
 msgid "Rotate canvas clockwise"
-msgstr "Girar tela no sentido horário"
+msgstr "Rotacionar tela no sentido horário"
 
 #: ../src/actions/actions-canvas-transform.cpp:214
 msgid "Rotate Counter-CW"
@@ -4589,7 +4589,7 @@ msgstr "Rotacionar no Sentido Horário"
 
 #: ../src/actions/actions-canvas-transform.cpp:214
 msgid "Rotate canvas counter-clockwise"
-msgstr "Girar tela no sentido anti-horário"
+msgstr "Rotacionar tela no sentido anti-horário"
 
 #: ../src/actions/actions-canvas-transform.cpp:215 ../share/ui/menu-view.ui:99
 msgid "Reset Rotation"
@@ -5041,7 +5041,7 @@ msgstr "Traduzir objetos selecionados (dx, dy)"
 #: ../src/actions/actions-transform.cpp:91 ../src/selection-chemistry.cpp:1946
 #: ../src/seltrans.cpp:466 ../src/ui/dialog/transformation.cpp:802
 msgid "Rotate"
-msgstr "Girar"
+msgstr "Rotacionar"
 
 #: ../src/actions/actions-transform.cpp:91
 msgid "Rotate selected objects by degrees"
@@ -7296,7 +7296,7 @@ msgstr "Mudança (°)"
 
 #: ../src/extension/internal/filter/color.h:355
 msgid "Rotate and desaturate hue"
-msgstr "Girar e remover a saturação de matiz"
+msgstr "Rotacionar e remover a saturação de matiz"
 
 #: ../src/extension/internal/filter/color.h:415
 msgid "Harsh light"
@@ -8845,11 +8845,11 @@ msgstr "Abrir arquivos salvos com o Adobe Illustrator 9.0 e versões mais novas"
 
 #: ../src/extension/internal/png-output.cpp:49
 msgid "Portable Network Graphic"
-msgstr "Gráfico de Rede Portátil"
+msgstr "Portable Network Graphics"
 
 #: ../src/extension/internal/png-output.cpp:54
 msgid "Portable Network Graphic (*.png)"
-msgstr "Gráfico de Rede Portátil (*.png)"
+msgstr "Portable Network Graphics (*.png)"
 
 #: ../src/extension/internal/png-output.cpp:55
 msgid "Default raster graphic export"
@@ -10709,7 +10709,7 @@ msgstr "Desenhe um caminho recursivamente"
 
 #: ../src/live_effects/effect.cpp:867
 msgid "Text label"
-msgstr "Etiqueta de Texto"
+msgstr "Rótulo de Texto"
 
 #: ../src/live_effects/effect.cpp:871
 msgid "Add a label for the object"
@@ -11416,7 +11416,7 @@ msgstr "Mensagens importantes"
 #: ../src/live_effects/lpe-dashed-stroke.cpp:25
 msgid "Add <b>\"Fill Between Many LPE\"</b> to add fill."
 msgstr ""
-"Adicione <b>\"Preencher entre muitos Efeitos de Caminho\"</b> para adicionar "
+"Adicione <b>\"Preencher Entre Muitos</b> (Efeitos de Caminho)\" para adicionar "
 "preenchimento."
 
 #: ../src/live_effects/lpe-ellipse_5pts.cpp:75
@@ -11758,7 +11758,7 @@ msgstr "Chanfro"
 #: ../src/live_effects/lpe-fillet-chamfer.cpp:252
 #: ../src/ui/dialog/lpe-fillet-chamfer-properties.cpp:66
 msgid "Inverse chamfer"
-msgstr "Inverter chanfro"
+msgstr "Chanfro invertido"
 
 #: ../src/live_effects/lpe-gears.cpp:206
 msgid "_Teeth:"
@@ -12428,7 +12428,7 @@ msgstr "Distância da linha de dimensão do caminho"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:75
 msgid "Label position"
-msgstr "Posição da etiqueta"
+msgstr "Posição da rótulo"
 
 #
 # File: ../src/live_effects/lpe-measure-segments.cpp, line: 74
@@ -12470,17 +12470,17 @@ msgstr "Fator de escala"
 #. TRANSLATORS: Don't translate "{measure}" and "{unit}" variables.
 #: ../src/live_effects/lpe-measure-segments.cpp:82
 msgid "Label format"
-msgstr "Formato da etiqueta"
+msgstr "Formato do rótulo"
 
 #
 # File: ../src/live_effects/lpe-measure-segments.cpp, line: 81
 #: ../src/live_effects/lpe-measure-segments.cpp:82
 msgid "Label text format, available variables: {measure}, {unit}"
-msgstr "Formato do texto da etiqueta, variáveis disponíveis: {measure}, {unit}"
+msgstr "Formato do texto do rótulo, variáveis disponíveis: {measure}, {unit}"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:83
 msgid "Blacklist segments"
-msgstr "Segmentos da lista negra"
+msgstr "Segmentos ocultados"
 
 #
 # File: ../src/live_effects/lpe-measure-segments.cpp, line: 82
@@ -12495,16 +12495,16 @@ msgstr ""
 
 #: ../src/live_effects/lpe-measure-segments.cpp:84
 msgid "Invert blacklist"
-msgstr "Inverter lista negra"
+msgstr "Inverter lista oculta"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:84
 msgid "Use the blacklist as whitelist"
-msgstr "Usar a lista negra como lista de permissões"
+msgstr "Usar a lista oculta como lista de permissões"
 
 # Peguei uma definição mais aplicável aqui >> http://www.thefreedictionary.com/cue
 #: ../src/live_effects/lpe-measure-segments.cpp:85
 msgid "Show segment index"
-msgstr "Mostrar índice de segmento"
+msgstr "Exibir índice de segmento"
 
 #
 # File: ../src/live_effects/lpe-measure-segments.cpp, line: 84
@@ -12512,8 +12512,8 @@ msgstr "Mostrar índice de segmento"
 msgid ""
 "Display the index of the segments in the text label for easier blacklisting"
 msgstr ""
-"Exibe o índice dos segmentos na etiqueta de texto para facilitar a lista "
-"negra"
+"Exibe o índice dos segmentos no rótulo de texto para facilitar"
+" a lista oculta"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:86
 msgid "Arrows outside"
@@ -12565,7 +12565,7 @@ msgstr ""
 
 #: ../src/live_effects/lpe-measure-segments.cpp:90
 msgid "Rotate labels"
-msgstr "Girar rótulos"
+msgstr "Rotacionar rótulos"
 
 #
 # File: ../src/live_effects/lpe-measure-segments.cpp, line: 89
@@ -12768,16 +12768,16 @@ msgstr ""
 "Mostra uma linha com medidas baseadas nos itens selecionados\n"
 "\n"
 "<b><big>Opções</big></b>\n"
-"Opções de cor, precisão, formatação de etiqueta e exibição\n"
+"Opções de cor, precisão, formatação de rótulo e exibição\n"
 "\n"
 "<b><big>Dicas</big></b>\n"
 "<b><i> Estilo personalizado: </i></b> para personalizar ainda mais os "
 "estilos, use o editor XML para descobrir a classe ou ID e, em seguida, use a "
 "caixa de diálogo Estilo para aplicar um novo estilo.\n"
-"<b><i>Listas pretas:</i></b> permite ocultar alguns segmentos ou etapas de "
+"<b><i>Listas ocultas:</i></b> permite ocultar alguns segmentos ou etapas de "
 "projeção.\n"
 "<b><i> Múltiplas medidas LPEs: </i></b> No mesmo objeto, em conjunto com "
-"listas negras, isso permite rótulos e medidas com diferentes orientações ou "
+"listas ocultas, isso permite rótulos e medidas com diferentes orientações ou "
 "projeções adicionais.\n"
 "<b><i> Definir padrões: </i></b> para cada LPE, os valores padrão podem "
 "ser definidos na parte inferior."
@@ -12789,7 +12789,7 @@ msgstr "Geral"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:298
 msgid "Projection"
-msgstr "Projection"
+msgstr "Projeção"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:518
 msgid "Non Uniform Scale"
@@ -13032,7 +13032,7 @@ msgstr "Padrão é _vertical"
 
 #: ../src/live_effects/lpe-patternalongpath.cpp:95
 msgid "Rotate pattern 90 deg before applying"
-msgstr "Girar o padrão 90 graus antes de aplicar"
+msgstr "Rotacionar o padrão 90 graus antes de aplicar"
 
 #: ../src/live_effects/lpe-patternalongpath.cpp:98
 msgid "_Fuse nearby ends:"
@@ -14364,7 +14364,7 @@ msgstr "Vincular parâmetro de matriz de item a item"
 #: ../src/live_effects/parameter/originalpatharray.cpp:183
 #: ../src/live_effects/parameter/path.cpp:257
 msgid "Link to path in clipboard"
-msgstr "Vínculo para o caminho na área de transferência"
+msgstr "Vínculr com caminho na área de transferência"
 
 #: ../src/live_effects/parameter/originalpatharray.cpp:89
 #: ../src/ui/toolbar/gradient-toolbar.cpp:438
@@ -14623,7 +14623,7 @@ msgid ""
 "<b>Shift+drag</b> to rotate, <b>Ctrl+drag</b> to move origin, <b>Del</b> to "
 "delete"
 msgstr ""
-"<b>Shift+arrastar</b> para girar, <b>Ctrl+arrastar</b> para mover a origem, "
+"<b>Shift+arrastar</b> para rotacionar, <b>Ctrl+arrastar</b> para mover a origem, "
 "<b>Del</b> para excluir"
 
 #: ../src/object/sp-guide.cpp:527
@@ -15503,15 +15503,15 @@ msgstr "Remover transformações"
 
 #: ../src/selection-chemistry.cpp:1926
 msgid "Rotate 90° CCW"
-msgstr "Girar 90° (sentido anti-horário)"
+msgstr "Rotacionar 90° (sentido anti-horário)"
 
 #: ../src/selection-chemistry.cpp:1926
 msgid "Rotate 90° CW"
-msgstr "Girar 90° (sentido horário)"
+msgstr "Rotacionar 90° (sentido horário)"
 
 #: ../src/selection-chemistry.cpp:2293
 msgid "Rotate by pixels"
-msgstr "Girar por pixels"
+msgstr "Rotacionar por pixels"
 
 #: ../src/selection-chemistry.cpp:2348
 msgid "Scale by whole factor"
@@ -15875,8 +15875,8 @@ msgid ""
 "<b>Rotate</b> selection; with <b>%1</b> to snap angle; with <b>%2</b> to "
 "rotate around the opposite corner"
 msgstr ""
-"Seleção <b>Girar</b>; com <b>%1</b> para ajustar o ângulo; com <b>%2</b> "
-"para girar ao redor do canto oposto"
+"<b>Rotacionar</b> seleção; com <b>%1</b> para ajustar o ângulo; com <b>%2</b> "
+"para rotacionar ao redor do canto oposto"
 
 #: ../src/seltrans.cpp:680
 msgid ""
@@ -15939,7 +15939,7 @@ msgstr "<b>Inclinação</b>: %0.2f&#176;; com <b>Ctrl</b> para ajustar o ângulo
 #: ../src/seltrans.cpp:1342
 #, c-format
 msgid "<b>Rotate</b>: %0.2f&#176;; with <b>Ctrl</b> to snap angle"
-msgstr "<b>Girar</b>: %0.2f#176;; com <b>Ctrl</b> para ajustar o ângulo"
+msgstr "<b>Rotacionar</b>: %0.2f#176;; com <b>Ctrl</b> para ajustar o ângulo"
 
 #: ../src/seltrans.cpp:1379
 #, c-format
@@ -16938,12 +16938,12 @@ msgstr "<b>Ângulo:</b>"
 #: ../src/ui/dialog/clonetiler.cpp:505
 #, no-c-format
 msgid "Rotate tiles by this angle for each row"
-msgstr "Girar ladrilhos por este ângulo para cada linha"
+msgstr "Rotacionar ladrilhos por este ângulo para cada linha"
 
 #: ../src/ui/dialog/clonetiler.cpp:513
 #, no-c-format
 msgid "Rotate tiles by this angle for each column"
-msgstr "Girar ladrilhos por este ângulo para cada coluna"
+msgstr "Rotacionar ladrilhos por este ângulo para cada coluna"
 
 #: ../src/ui/dialog/clonetiler.cpp:519
 msgid "Randomize the rotation angle by this percentage"
@@ -23100,7 +23100,7 @@ msgid ""
 "Rotating with Ctrl pressed snaps every that much degrees; also, pressing "
 "[ or ] rotates by this amount"
 msgstr ""
-"Pressionando a tecla Ctrl ao girar um objeto, a rotação é alinhada à "
+"Pressionando a tecla Ctrl ao rotacionar um objeto, a rotação é alinhada à "
 "frequência de graus definida aqui"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2399
@@ -23112,7 +23112,7 @@ msgid ""
 "When on, the snap angles when rotating a guideline will be relative to the "
 "original angle"
 msgstr ""
-"Quando ativado, os ângulos de encaixe ao girar uma linha-guia serão "
+"Quando ativado, os ângulos de encaixe ao rotacionar uma linha-guia serão "
 "relativos ao ângulo original"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2403
@@ -24698,7 +24698,7 @@ msgstr "HS"
 
 #: ../src/ui/dialog/objects.cpp:1901
 msgid "Label"
-msgstr "Etiqueta"
+msgstr "Rótulo"
 
 #: ../src/ui/dialog/objects.cpp:1931
 msgid "Toggle visibility of Layer, Group, or Object."
@@ -24869,7 +24869,7 @@ msgstr "Ângulo X/Y:"
 
 #: ../src/ui/dialog/polar-arrange-tab.cpp:121
 msgid "Rotate objects"
-msgstr "Girar objetos"
+msgstr "Rotacionar objetos"
 
 #: ../src/ui/dialog/polar-arrange-tab.cpp:302
 msgid "Couldn't find an ellipse in selection"
@@ -25701,11 +25701,11 @@ msgstr "Aplicar transformação à seleção"
 
 #: ../src/ui/dialog/transformation.cpp:294
 msgid "Rotate in a counterclockwise direction"
-msgstr "Girar no sentido anti-horário"
+msgstr "Rotacionar no sentido anti-horário"
 
 #: ../src/ui/dialog/transformation.cpp:301
 msgid "Rotate in a clockwise direction"
-msgstr "Girar no sentido horário"
+msgstr "Rotacionar no sentido horário"
 
 #: ../src/ui/dialog/transformation.cpp:353
 msgid "E and F units"
@@ -25885,7 +25885,7 @@ msgstr ""
 #: ../src/ui/knot/knot-holder.cpp:346
 msgid "<b>Rotate</b> the pattern fill; with <b>Ctrl</b> to snap angle"
 msgstr ""
-"<b>Girar</b> o padrão do preenchimento; com <b>Ctrl</b> para ajustar o ângulo"
+"<b>Rotacionar</b> o padrão do preenchimento; com <b>Ctrl</b> para ajustar o ângulo"
 
 #. TRANSLATORS: This refers to the pattern that's inside the object
 #: ../src/ui/knot/knot-holder.cpp:359
@@ -25915,7 +25915,7 @@ msgstr ""
 #: ../src/ui/knot/knot-holder.cpp:387
 msgid "<b>Rotate</b> the hatch fill; with <b>Ctrl</b> to snap angle"
 msgstr ""
-"<b>Girar</b> o preenchimento de hachuras; com <b>Ctrl</b> para ajustar o "
+"<b>Rotacionar</b> o preenchimento de hachuras; com <b>Ctrl</b> para ajustar o "
 "ângulo"
 
 #. TRANSLATORS: This refers to the pattern that's inside the object
@@ -25931,7 +25931,7 @@ msgstr ""
 #: ../src/ui/knot/knot-holder.cpp:406
 msgid "<b>Rotate</b> the hatch stroke; with <b>Ctrl</b> to snap angle"
 msgstr ""
-"<b>Girar</b> o contorno de hachuras; com <b>Ctrl</b> para ajustar o ângulo"
+"<b>Rotacionar</b> o contorno de hachuras; com <b>Ctrl</b> para ajustar o ângulo"
 
 #: ../src/ui/knot/knot-holder.cpp:419 ../src/ui/knot/knot-holder.cpp:421
 msgid "<b>Resize</b> the filter effect region"
@@ -26079,7 +26079,7 @@ msgid ""
 "rotating/skewing, transform relative to opposite corner/edge."
 msgstr ""
 "Ao dimensionar, dimensione a seleção simetricamente em torno de seu centro "
-"de rotação. Ao girar / inclinar, transforme em relação ao canto/borda oposta."
+"de rotação. Ao rotacionar / inclinar, transforme em relação ao canto/borda oposta."
 
 #: ../src/ui/modifiers.cpp:53
 msgid "No Transform Snapping"
@@ -26242,7 +26242,7 @@ msgid ""
 "with <b>Shift</b> to scale/rotate; with <b>Alt</b> to lock radius"
 msgstr ""
 "Role/Desenrole a espiral <b>de fora</b>; com <b>Ctrl</b> para ajustar o "
-"ângulo; com <b>Shift</b> para dimensionar/girar; com <b>Alt</b> para "
+"ângulo; com <b>Shift</b> para dimensionar/rotacionar; com <b>Alt</b> para "
 "bloquear o raio"
 
 #: ../src/ui/shape-editor-knotholders.cpp:1670
@@ -26383,7 +26383,7 @@ msgstr "Mover nós verticalmente"
 #: ../src/ui/tool/multi-path-manipulator.cpp:803
 #: ../src/ui/tool/multi-path-manipulator.cpp:806
 msgid "Rotate nodes"
-msgstr "Girar nós"
+msgstr "Rotacionar nós"
 
 #: ../src/ui/tool/multi-path-manipulator.cpp:810
 #: ../src/ui/tool/multi-path-manipulator.cpp:816
@@ -26773,14 +26773,14 @@ msgid ""
 "<b>Rotation handle</b>: drag to rotate the selection around the rotation "
 "center"
 msgstr ""
-"<b>Alça de rotação</b>: arraste para girar a seleção em torno do centro de "
+"<b>Alça de rotação</b>: arraste para rotacionar a seleção em torno do centro de "
 "rotação"
 
 #: ../src/ui/tool/transform-handle-set.cpp:449
 #, c-format
 msgctxt "Transform handle tip"
 msgid "Rotate by %.2f°"
-msgstr "Girar por %.2f°"
+msgstr "Rotacionar por %.2f°"
 
 #: ../src/ui/tool/transform-handle-set.cpp:565
 #, c-format
@@ -27617,7 +27617,7 @@ msgstr "Tamanho da Fonte:"
 
 #: ../src/ui/toolbar/measure-toolbar.cpp:76
 msgid "The font size to be used in the measurement labels"
-msgstr "O tamanho da fonte a ser usado nas etiquetas de medição"
+msgstr "O tamanho da fonte a ser usado nos rótulos de medição"
 
 #: ../src/ui/toolbar/measure-toolbar.cpp:86 ../share/extensions/measure.inx:51
 msgid "Precision:"
@@ -30428,11 +30428,11 @@ msgstr "Diminuir Kern"
 
 #: ../src/ui/tools/text-tool.cpp:1129
 msgid "Rotate counterclockwise"
-msgstr "Girar no sentido anti-horário"
+msgstr "Rotacionar no sentido anti-horário"
 
 #: ../src/ui/tools/text-tool.cpp:1149
 msgid "Rotate clockwise"
-msgstr "Girar no sentido horário"
+msgstr "Rotacionar no sentido horário"
 
 #: ../src/ui/tools/text-tool.cpp:1165
 msgid "Contract line spacing"
@@ -30514,7 +30514,7 @@ msgid ""
 "%s. Drag or click to <b>rotate clockwise</b>; with Shift, "
 "<b>counterclockwise</b>."
 msgstr ""
-"%s. Arraste ou clique para <b>girar no sentido horário</b>; com Shift para "
+"%s. Arraste ou clique para <b>rotacionar no sentido horário</b>; com Shift para "
 "<b>sentido anti-horário</b>."
 
 #: ../src/ui/tools/tweak-tool.cpp:172
@@ -33175,7 +33175,7 @@ msgstr "Organizar os objetos selecionados em uma mesa ou círculo"
 
 #: ../src/verbs.cpp:2600
 msgid "Fill between paths"
-msgstr "Preencher entre caminhos"
+msgstr "Preencher Entre Caminhos"
 
 #: ../src/verbs.cpp:2601
 msgid "Create a fill object using the selected paths"
@@ -33187,7 +33187,7 @@ msgstr "_Adicionar Camada..."
 
 #: ../src/verbs.cpp:2603
 msgid "Create a new layer"
-msgstr "Criar nova camada"
+msgstr "Criar uma nova camada"
 
 #: ../src/verbs.cpp:2605
 msgid "Re_name Layer..."
@@ -33352,19 +33352,19 @@ msgstr "Acionar visibilidade da camada atual"
 
 #: ../src/verbs.cpp:2644
 msgid "Rotate _90° CW"
-msgstr "Girar _90° (sentido horário)"
+msgstr "Rotacionar _90° (sentido horário)"
 
 #: ../src/verbs.cpp:2647
 msgid "Rotate selection 90° clockwise"
-msgstr "Girar a seleção 90° graus no sentido hórario"
+msgstr "Rotacionar a seleção 90° graus no sentido hórario"
 
 #: ../src/verbs.cpp:2648
 msgid "Rotate 9_0° CCW"
-msgstr "Girar _90° (sentido anti-horário)"
+msgstr "Rotacionar _90° (sentido anti-horário)"
 
 #: ../src/verbs.cpp:2651
 msgid "Rotate selection 90° counter-clockwise"
-msgstr "Girar a seleção 90° graus no sentido anti-horário"
+msgstr "Rotacionar a seleção 90° graus no sentido anti-horário"
 
 #: ../src/verbs.cpp:2652
 msgid "Remove _Transformations"
@@ -35636,7 +35636,7 @@ msgstr "_Orientação"
 
 #: ../share/ui/menu-view.ui:95
 msgid "Rotate Counter-Clockwise"
-msgstr "Girar no Sentido Anti-horário"
+msgstr "Rotacionar no Sentido Anti-horário"
 
 #: ../share/ui/menu-view.ui:110
 msgid "Flip Horizontally"
@@ -37114,7 +37114,7 @@ msgstr "Plotter de recorte (AutoCAD DXF R14) (* .dxf)"
 
 #: ../share/extensions/dxf_outlines.inx:50
 msgid "Desktop Cutting Plotter"
-msgstr "Plotter de Recorte"
+msgstr "Plotter de Recorte de Mesa"
 
 #: ../share/extensions/edge3d.inx:3
 msgid "Edge 3D"
@@ -37386,7 +37386,7 @@ msgid ""
 "    Lathes\n"
 "    Laser and Plasma cutters and engravers\n"
 "    Mill engravers\n"
-"    Plotters\n"
+"    Plotadoras\n"
 "    etc.\n"
 "\n"
 "To get more info visit developers page at http://www.cnc-club.ru/gcodetools"
@@ -37399,9 +37399,9 @@ msgstr ""
 "Ele pode ser usado com vários tipos de máquina:\n"
 "     Fresadoras\n"
 "     Tornos\n"
-"     Cortadores e gravadores a laser e Plasma\n"
+"     Cortadores e gravadores a Laser e Plasma\n"
 "     Gravadoras de fresa\n"
-"     Plotters\n"
+"     Plotadoras\n"
 "     etc.\n"
 "\n"
 "Para obter mais informações, visite a página de desenvolvedores em http://"
@@ -38050,12 +38050,12 @@ msgstr "Tipo de Orientação:"
 #: ../share/extensions/gcodetools_graffiti.inx:21
 #: ../share/extensions/gcodetools_orientation_points.inx:10
 msgid "2-points mode (move and rotate, maintained aspect ratio X/Y)"
-msgstr "Modo de 2 pontos (mover e girar, relação de aspecto mantida X/Y)"
+msgstr "Modo de 2 pontos (mover e rotacionar, relação de aspecto mantida X/Y)"
 
 #: ../share/extensions/gcodetools_graffiti.inx:25
 #: ../share/extensions/gcodetools_orientation_points.inx:11
 msgid "3-points mode (move, rotate and mirror, different X/Y scale)"
-msgstr "Modo de 3 pontos (mover, girar e espelhar, escala X/Y diferente)"
+msgstr "Modo de 3 pontos (mover, rotacionar e espelhar, escala X/Y diferente)"
 
 #: ../share/extensions/gcodetools_graffiti.inx:29
 #: ../share/extensions/gcodetools_orientation_points.inx:12
@@ -38321,11 +38321,11 @@ msgstr "Ângulo máximo por canto (0-180 graus):"
 #: ../share/extensions/gcodetools_tools_library.inx:4
 #: ../share/extensions/gcodetools_tools_library.inx:8
 msgid "Tools library"
-msgstr "Ferramenta biblioteca"
+msgstr "Biblioteca Ferramentas"
 
 #: ../share/extensions/gcodetools_tools_library.inx:10
 msgid "Tools type:"
-msgstr "Tipo de Ferramentas:"
+msgstr "Tipos de Ferramentas:"
 
 #: ../share/extensions/gcodetools_tools_library.inx:11
 msgid "default"
@@ -38560,7 +38560,7 @@ msgstr "Logarítmico X Subdiv. (Base fornecida pela entrada acima)"
 
 #: ../share/extensions/grid_cartesian.inx:25
 msgid "Subsubdivs. per X Subdivision:"
-msgstr "Subsubdivs. por X Subdivisão:"
+msgstr "Subsubdivs. Por X Subdivisão:"
 
 #
 # File: ../share/extensions/grid_cartesian.inx, line: 27
@@ -38612,7 +38612,7 @@ msgstr "Logarítmico Y Subdiv. (Base fornecida pela entrada acima)"
 
 #: ../share/extensions/grid_cartesian.inx:48
 msgid "Subsubdivs. per Y Subdivision:"
-msgstr "Subsubdivs. por subdivisão Y:"
+msgstr "Subsubdivs. Por subdivisão Y:"
 
 #
 # File: ../share/extensions/grid_cartesian.inx, line: 50
@@ -39109,7 +39109,7 @@ msgid ""
 "The amount of steps the plotter moves if it moves for 1 inch on the X axis "
 "(Default: 1016.0)"
 msgstr ""
-"O total de passos que o plotter moverá se ela se mover mais de 1 polegada do "
+"O total de passos que a plotadora moverá se ela se mover mais de 1 polegada do "
 "eixo Y (Padrão: 1016.0)"
 
 #: ../share/extensions/hpgl_input.inx:9 ../share/extensions/hpgl_output.inx:11
@@ -39122,7 +39122,7 @@ msgid ""
 "The amount of steps the plotter moves if it moves for 1 inch on the Y axis "
 "(Default: 1016.0)"
 msgstr ""
-"O total de passos que o plotter moverá se se mover mais de 1 polegada do "
+"O total de passos que a plotadora moverá se se mover mais de 1 polegada do "
 "eixo Y (Padrão: 1016.0)"
 
 #: ../share/extensions/hpgl_input.inx:10
@@ -39152,16 +39152,16 @@ msgid ""
 "serial connection."
 msgstr ""
 "Certifique-se de que todos os objetos que deseja salvar sejam convertidos em "
-"caminhos. Use a extensão da plotadora (menu Extensões) para plotar "
+"caminhos. Use a extensão de plotagem (menu Extensões) para plotar "
 "diretamente em uma conexão serial."
 
 #: ../share/extensions/hpgl_output.inx:9 ../share/extensions/plotter.inx:67
 msgid "Plotter Settings"
-msgstr "Configurações do Plotter"
+msgstr "Configurações da Plotadora"
 
 #: ../share/extensions/hpgl_output.inx:12 ../share/extensions/plotter.inx:70
 msgid "Pen number:"
-msgstr "Número da caneta:"
+msgstr "Número da Caneta:"
 
 #: ../share/extensions/hpgl_output.inx:12
 msgid ""
@@ -39169,11 +39169,11 @@ msgid ""
 "layer name. eg. (Pen 1)"
 msgstr ""
 "O número da caneta (ferramenta) a ser usada (Padrão: '1') Pode ser definido "
-"no nome da camada. por exemplo. (Caneta 1)"
+"no nome da camada. Por exemplo. (Caneta 1)"
 
 #: ../share/extensions/hpgl_output.inx:13 ../share/extensions/plotter.inx:71
 msgid "Pen force (g):"
-msgstr "Força da caneta (g):"
+msgstr "Força da Caneta (g):"
 
 #: ../share/extensions/hpgl_output.inx:13
 msgid ""
@@ -39181,11 +39181,11 @@ msgid ""
 "most plotters ignore this command (Default: 0)"
 msgstr ""
 "A quantidade de força aplicada na caneta em gramas, deixe como 0 para omitir "
-"o comando; a maioria das plotters ignoram este comando (Padrão: 0)"
+"o comando; a maioria das plotadoras ignoram este comando (Padrão: 0)"
 
 #: ../share/extensions/hpgl_output.inx:14 ../share/extensions/plotter.inx:72
 msgid "Pen speed (cm/s or mm/s):"
-msgstr "Velocidade da caneta (cm/s ou mm/s)"
+msgstr "Velocidade da Caneta (cm/s ou mm/s)"
 
 #: ../share/extensions/hpgl_output.inx:14
 msgid ""
@@ -39197,12 +39197,12 @@ msgstr ""
 "A velocidade com que a caneta se moverá em centímetros ou milímetros por "
 "segundo (dependendo do modelo da plotadora), defina como 0 para omitir o "
 "comando; a maioria das plotadoras ignora este comando (Padrão: 0) Pode ser "
-"definido no nome da camada junto com o número da caneta. por exemplo. "
+"definido no nome da camada junto com o número da caneta. Por exemplo. "
 "(Caneta3 Velocidade10)"
 
 #: ../share/extensions/hpgl_output.inx:15
 msgid "Rotation (°, Clockwise):"
-msgstr "Girar (°, Sentido horário):"
+msgstr "Rotacionar (°, Sentido horário):"
 
 #: ../share/extensions/hpgl_output.inx:15
 msgid "Rotation of the drawing (Default: 0°)"
@@ -39214,7 +39214,7 @@ msgstr "Espelhar - Eixo X"
 
 #: ../share/extensions/hpgl_output.inx:21
 msgid "Check this to mirror the X axis (Default: Unchecked)"
-msgstr "Ative para espelhar o eixo X (Padrão: desativado)"
+msgstr "Marque para espelhar o eixo X (Padrão: Desmarcado)"
 
 #: ../share/extensions/hpgl_output.inx:22 ../share/extensions/plotter.inx:80
 msgid "Mirror Y axis"
@@ -39222,7 +39222,7 @@ msgstr "Espelhar - Eixo Y"
 
 #: ../share/extensions/hpgl_output.inx:22
 msgid "Check this to mirror the Y axis (Default: Unchecked)"
-msgstr "Ative para espelhar o eixo Y (Padrão: desativado)"
+msgstr "MArque para espelhar o eixo Y (Padrão: Desmarcado)"
 
 #: ../share/extensions/hpgl_output.inx:23
 msgid "Center zero point"
@@ -39249,7 +39249,7 @@ msgstr ""
 
 #: ../share/extensions/hpgl_output.inx:27 ../share/extensions/plotter.inx:85
 msgid "Plot Features"
-msgstr "Recursos do Plotter"
+msgstr "Recursos da Plotadora"
 
 #
 # File: ../share/extensions/hpgl_output.inx, line: 29
@@ -39298,7 +39298,7 @@ msgid ""
 msgstr ""
 "Marque esta opção para cortar uma pequena linha antes que o desenho real "
 "comece a alinhar corretamente\n"
-"a orientação da ferramenta. (Padrão: verificado)"
+"a orientação da ferramenta. (Padrão: Marcado)"
 
 #: ../share/extensions/hpgl_output.inx:31 ../share/extensions/plotter.inx:89
 msgid "Curve flatness:"
@@ -39338,8 +39338,8 @@ msgid ""
 "All these settings depend on the plotter you use, for more information "
 "please consult the manual or homepage for your plotter."
 msgstr ""
-"Todas essas configurações dependem do plotter que você usa, para obter mais "
-"informações, consulte o manual ou a página inicial do seu plotter."
+"Todas essas configurações dependem da plotadora que você usa, para obter mais "
+"informações, consulte o manual ou a página inicial do sua plotadora."
 
 #: ../share/extensions/hpgl_output.inx:40
 msgid "Export an HP Graphics Language file"
@@ -40799,7 +40799,7 @@ msgstr "Dados:"
 
 #: ../share/extensions/nicechart.inx:50
 msgid "Labels"
-msgstr "Etiquetas"
+msgstr "Rótulos"
 
 #: ../share/extensions/nicechart.inx:51
 msgid "Font:"
@@ -41454,7 +41454,7 @@ msgid ""
 msgstr ""
 "Esta extensão substitui os nós da seleção por pontos numerados de acordo com "
 "as seguintes opções:\n"
-"     * Tamanho da fonte: tamanho das etiquetas do número do nó (20px, "
+"     * Tamanho da fonte: tamanho dos rótulos do número do nó (20px, "
 "12pt ...).\n"
 "     * Tamanho do ponto: diâmetro dos pontos colocados nos nós do caminho "
 "(10px, 2 mm ...).\n"
@@ -41568,7 +41568,7 @@ msgstr "Esticar espaços para caber o comprimento do esqueleto"
 
 #: ../share/extensions/pathscatter.inx:13
 msgid "Rotate pattern 90° clockwise"
-msgstr "Girar padrão 90° no sentido horário"
+msgstr "Rotacionar padrão 90° no sentido horário"
 
 #: ../share/extensions/pathscatter.inx:14
 msgid "Original pattern will be:"
@@ -41762,7 +41762,7 @@ msgstr "Inclinação máxima a considerar reta (%)"
 
 #: ../share/extensions/plotter.inx:3
 msgid "Plot"
-msgstr "Plottar"
+msgstr "Plotar"
 
 #: ../share/extensions/plotter.inx:7
 msgid ""
@@ -41773,11 +41773,11 @@ msgstr ""
 
 #: ../share/extensions/plotter.inx:9
 msgid "Connection Settings"
-msgstr "Conexão com o Plotter"
+msgstr "Configurações da Conexão"
 
 #: ../share/extensions/plotter.inx:10
 msgid "Port type:"
-msgstr "Tipo de porta:"
+msgstr "Tipo de Porta:"
 
 #: ../share/extensions/plotter.inx:11
 msgid "Serial"
@@ -41785,7 +41785,7 @@ msgstr "Serial"
 
 #: ../share/extensions/plotter.inx:14
 msgid "Parallel port:"
-msgstr "Porta paralela:"
+msgstr "Porta Paralela:"
 
 #
 # File: ../share/extensions/plotter.inx, line: 15
@@ -41799,7 +41799,7 @@ msgstr ""
 
 #: ../share/extensions/plotter.inx:15
 msgid "Serial port:"
-msgstr "Porta serial:"
+msgstr "Porta Serial:"
 
 #
 # File: ../share/extensions/plotter.inx, line: 16
@@ -41808,8 +41808,8 @@ msgid ""
 "The port of your serial connection, on Windows something like 'COM1', on "
 "Linux something like: '/dev/ttyUSB0' (default: COM1)"
 msgstr ""
-"A porta de sua conexão serial, no Windows algo como 'COM1', no Linux algo "
-"como: '/ dev / ttyUSB0' (padrão: COM1)"
+"A porta de sua conexão serial, no Windows algo como 'COM1', "
+"no Linux algo como: '/dev/ttyUSB0' (padrão: COM1)"
 
 #: ../share/extensions/plotter.inx:16
 msgid "Serial baud rate:"
@@ -41823,7 +41823,7 @@ msgstr "A taxa de transmissão de sua conexão serial (padrão: 9600)"
 
 #: ../share/extensions/plotter.inx:33
 msgid "Serial byte size:"
-msgstr "Tamanho do byte serial:"
+msgstr "Tamanho do Byte serial:"
 
 #
 # File: ../share/extensions/plotter.inx, line: 34
@@ -41978,7 +41978,7 @@ msgstr ""
 
 #: ../share/extensions/plotter.inx:73
 msgid "Rotation (°, clockwise):"
-msgstr "Girar (°, sentido horário):"
+msgstr "Rotacionar (°, sentido horário):"
 
 #: ../share/extensions/plotter.inx:73
 msgid "Rotation of the drawing (default: 0°)"
@@ -41994,7 +41994,7 @@ msgstr "Marque para espelhar o eixo Y (padrão: Desmarcado)"
 
 #: ../share/extensions/plotter.inx:81
 msgid "Center origin"
-msgstr "Origem do centro"
+msgstr "Origem no \"Centro\""
 
 #: ../share/extensions/plotter.inx:81
 msgid "Check this if your plotter uses a centered origin (default: Unchecked)"
@@ -42076,7 +42076,7 @@ msgstr ""
 "Marque esta opção para alinhar automaticamente o desenho à origem (mais o "
 "deslocamento da ferramenta, se usado). Se desmarcado, você deve se "
 "certificar de que todas as partes do desenho estão dentro da borda do "
-"documento! (padrão: marcado)"
+"documento! (padrão: Marcado)"
 
 #: ../share/extensions/polyhedron_3d.inx:3
 msgid "3D Polyhedron"
@@ -42180,7 +42180,7 @@ msgstr "Objeto chega no sentido horário"
 
 #: ../share/extensions/polyhedron_3d.inx:33
 msgid "Rotate around:"
-msgstr "Girar em volta:"
+msgstr "Rotacionar em volta:"
 
 #: ../share/extensions/polyhedron_3d.inx:34
 #: ../share/extensions/polyhedron_3d.inx:39
@@ -44413,7 +44413,7 @@ msgstr "Quantidade de torção:"
 
 #: ../share/extensions/whirl.inx:6
 msgid "Rotation is clockwise"
-msgstr "Girar no sentido horário"
+msgstr "Rotacionar no sentido horário"
 
 #: ../share/extensions/wireframe_sphere.inx:3
 msgid "Wireframe Sphere"
@@ -44873,7 +44873,7 @@ msgstr "Metade da altura da fonte"
 
 #~ msgid "<b>Rotate</b> the pattern stroke; with <b>Ctrl</b> to snap angle"
 #~ msgstr ""
-#~ "<b>Girar</b> o padrão do contorno; com <b>Ctrl</b> para encaixar o ângulo"
+#~ "<b>Rotacionar</b> o padrão do contorno; com <b>Ctrl</b> para encaixar o ângulo"
 
 #~ msgid ""
 #~ "Please specify a parameter path for the LPE '%s' with %d mouse clicks"
@@ -45057,14 +45057,14 @@ msgstr "Metade da altura da fonte"
 #~ msgstr "_Tempo da animação de mudança de opacidade:"
 
 #~ msgid "Add label comments to printing output"
-#~ msgstr "Adicionar etiqueta de comentários à saída de impressão"
+#~ msgstr "Adicionar rótulo de comentários à saída de impressão"
 
 #~ msgid ""
 #~ "When on, a comment will be added to the raw print output, marking the "
 #~ "rendered output for an object with its label"
 #~ msgstr ""
 #~ "Se ativado, um comentário será adicionado à saída de impressão padrão, "
-#~ "marcando a saída restituída para um objeto com esta etiqueta"
+#~ "marcando a saída restituída para um objeto com esta rótulo"
 
 #~ msgid "Insert Mesh Gradient JavaScript polyfill."
 #~ msgstr "Inserir polyfill JavaScript da Malha de Gradiente ."
@@ -46000,7 +46000,7 @@ msgstr "Metade da altura da fonte"
 
 #, fuzzy
 #~ msgid "Label:"
-#~ msgstr "_Etiqueta:"
+#~ msgstr "_Rótulo:"
 
 #, fuzzy
 #~ msgid "Text label attached to the path"
@@ -50833,7 +50833,7 @@ msgstr "Metade da altura da fonte"
 #~ msgstr ""
 #~ "<b>Alça do nó</b>: arraste para mudar a forma da curva; com <b>Ctrl</b> "
 #~ "para ajustar o ângulo; com <b>Alt</b> para travar o comprimento; com "
-#~ "<b>Shift</b> para girar ambas as alças"
+#~ "<b>Shift</b> para rotacionar ambas as alças"
 
 #~ msgid "Break path"
 #~ msgstr "Quebrar caminho"
@@ -50867,7 +50867,7 @@ msgstr "Metade da altura da fonte"
 #~ msgstr ""
 #~ "<b>Alça do nó</b>: ângulo %0.2f°, comprimento %s; com <b>Ctrl</b> para "
 #~ "ajustar o ângulo; com <b>Alt</b> para travar o comprimento; com <b>Shift</"
-#~ "b> para girar ambas as alças"
+#~ "b> para rotacionar ambas as alças"
 
 #~ msgid "Cannot scale nodes when all are at the same location."
 #~ msgstr ""
@@ -50904,7 +50904,7 @@ msgstr "Metade da altura da fonte"
 #~ msgstr ""
 #~ "<b>Arrastar</b> nós ou alças dos nós; <b>Alt+arrastar</b> nós para "
 #~ "esculpir; <b>setas</b> para mover os nós, <b>&lt; &gt;</b> para escalar, "
-#~ "<b>[ ]</b> para girar"
+#~ "<b>[ ]</b> para rotacionar"
 
 #~ msgid ""
 #~ "<b>Drag</b> the node or its handles; <b>arrow</b> keys to move the node"
