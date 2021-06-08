@@ -42,6 +42,7 @@ private:
     Glib::RefPtr<Gtk::Adjustment>  _adj_h;
     Gtk::ToggleToolButton         *_lock_btn;
     Gtk::ToggleToolButton         *_select_touch_btn;
+    Gtk::ToggleToolButton         *_align_distribute_btn;
     Gtk::ToggleToolButton         *_transform_stroke_btn;
     Gtk::ToggleToolButton         *_transform_corners_btn;
     Gtk::ToggleToolButton         *_transform_gradient_btn;
