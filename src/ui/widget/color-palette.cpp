@@ -310,7 +310,7 @@ void ColorPalette::set_up_scrolling() {
         _scroll.set_valign(Gtk::ALIGN_END);
         _flowbox.set_valign(Gtk::ALIGN_END);
 
-        if (_rows == 1) {
+        if (_rows == 1 && _force_scrollbar) {
             // horizontal scrolling with single row
             _flowbox.set_max_children_per_line(_count);
             _flowbox.set_min_children_per_line(_count);
@@ -387,7 +387,7 @@ int ColorPalette::get_tile_height() const {
 }
 
 void ColorPalette::resize() {
-    if (_rows == 1 || !_compact) {
+    if (_rows == 1 && _force_scrollbar || !_compact) {
         // auto size for single row to allocate space for scrollbar
         _scroll.set_size_request(-1, -1);
     }

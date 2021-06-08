@@ -43,7 +43,9 @@ public:
     void set_tile_border(int border_px);
     void set_rows(int rows);
     void set_aspect(double aspect);
+    // show horizontal scrollbar when only 1 row is set
     void enable_scrollbar(bool show);
+    // allow tile stretching (horizontally)
     void enable_stretch(bool enable);
 
     int get_tile_size() const;
@@ -95,7 +97,7 @@ private:
     sigc::signal<void> _signal_settings_changed;
     bool _in_update = false;
     // guint _active_timeout = 0;
-    bool _force_scrollbar = true;
+    bool _force_scrollbar = false;
     bool _stretch_tiles = false;
 };
 
