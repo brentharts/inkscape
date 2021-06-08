@@ -24508,11 +24508,11 @@ msgstr "_Interatividade"
 msgid ""
 "The id= attribute (only letters, digits, and the characters .-_: allowed)"
 msgstr ""
-"O id= atributo (apenas letras, dígitos, e caractéres .- são permitidos)"
+"Atributo id= (apenas letras, dígitos, e os caractéres .-_: são permitidos)"
 
 #: ../src/ui/dialog/object-properties.cpp:138
 msgid "A freeform label for the object"
-msgstr "Um rótulo do objeto (formatação livre)"
+msgstr "Um rótulo para o objeto (formatação livre)"
 
 #: ../src/ui/dialog/object-properties.cpp:170
 msgid "_Description:"
