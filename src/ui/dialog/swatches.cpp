@@ -839,6 +839,7 @@ SwatchesPanel::SwatchesPanel(gchar const *prefsPath)
         _palette->set_tile_border(prefs->getInt(_prefs_path + "/tile_border", 1));
         _palette->set_rows(prefs->getInt(_prefs_path + "/rows", 1));
         _palette->enable_scrollbar(prefs->getBool(_prefs_path + "/scrollbar", true));
+        _palette->enable_stretch(prefs->getBool(_prefs_path + "/tile_stretch", false));
         // save settings when they change
         _palette->get_settings_changed_signal().connect([=](){
             prefs->setInt(_prefs_path + "/tile_size", _palette->get_tile_size());
@@ -846,6 +847,7 @@ SwatchesPanel::SwatchesPanel(gchar const *prefsPath)
             prefs->setInt(_prefs_path + "/tile_border", _palette->get_tile_border());
             prefs->setInt(_prefs_path + "/rows", _palette->get_rows());
             prefs->setBool(_prefs_path + "/scrollbar", _palette->is_scrollbar_enabled());
+            prefs->setBool(_prefs_path + "/tile_stretch", _palette->is_stretch_enabled());
         });
 
         // switch swatch palettes

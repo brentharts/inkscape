@@ -72,6 +72,14 @@ ColorPalette::ColorPalette():
     });
     update_checkbox();
 
+    auto& stretch = get_widget<Gtk::CheckButton>(_builder, "stretch");
+    stretch.set_active(_force_scrollbar);
+    stretch.signal_toggled().connect([=,&stretch](){
+        _enable_stretch(stretch.get_active());
+        _signal_settings_changed.emit();
+    });
+    update_stretch();
+
     _scroll.set_min_content_height(1);
 
     // set style for small buttons; we need them reasonably small, since they impact min height of color palette strip
@@ -254,6 +262,32 @@ bool ColorPalette::is_scrollbar_enabled() const {
     return _force_scrollbar;
 }
 
+bool ColorPalette::is_stretch_enabled() const {
+    return _stretch_tiles;
+}
+
+void ColorPalette::enable_stretch(bool enable) {
+    auto& stretch = get_widget<Gtk::CheckButton>(_builder, "stretch");
+    stretch.set_active(enable);
+    _enable_stretch(enable);
+}
+
+void ColorPalette::_enable_stretch(bool enable) {
+    if (_stretch_tiles == enable) return;
+
+    _stretch_tiles = enable;
+    _flowbox.set_halign(enable ? Gtk::ALIGN_FILL : Gtk::ALIGN_START);
+    update_stretch();
+    set_up_scrolling();
+}
+
+void ColorPalette::update_stretch() {
+    auto& aspect = get_widget<Gtk::Scale>(_builder, "aspect-slider");
+    aspect.set_sensitive(!_stretch_tiles);
+    auto& label = get_widget<Gtk::Label>(_builder, "aspect-label");
+    label.set_sensitive(!_stretch_tiles);
+}
+
 void ColorPalette::enable_scrollbar(bool show) {
     auto& sb = get_widget<Gtk::CheckButton>(_builder, "use-sb");
     sb.set_active(show);
@@ -329,6 +363,8 @@ void ColorPalette::set_up_scrolling() {
 }
 
 int ColorPalette::get_tile_size(bool horz) const {
+    if (_stretch_tiles) return _size;
+
     double aspect = horz ? _aspect : -_aspect;
 
     if (aspect > 0) {

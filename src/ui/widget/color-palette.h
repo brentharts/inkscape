@@ -44,12 +44,14 @@ public:
     void set_rows(int rows);
     void set_aspect(double aspect);
     void enable_scrollbar(bool show);
+    void enable_stretch(bool enable);
 
     int get_tile_size() const;
     int get_tile_border() const;
     int get_rows() const;
     double get_aspect() const;
     bool is_scrollbar_enabled() const;
+    bool is_stretch_enabled() const;
 
     void set_selected(const Glib::ustring& name);
 
@@ -66,9 +68,10 @@ private:
     void _set_rows(int rows);
     void _set_aspect(double aspect);
     void _enable_scrollbar(bool show);
+    void _enable_stretch(bool enable);
     static gboolean check_scrollbar(gpointer self);
-    // void _check_scrollbar();
     void update_checkbox();
+    void update_stretch();
     int get_tile_size(bool horz) const;
     int get_tile_width() const;
     int get_tile_height() const;
@@ -93,6 +96,7 @@ private:
     bool _in_update = false;
     // guint _active_timeout = 0;
     bool _force_scrollbar = true;
+    bool _stretch_tiles = false;
 };
 
 }}} // namespace

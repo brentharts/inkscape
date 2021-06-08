@@ -252,7 +252,7 @@
     <property name="relative-to">btn-menu</property>
     <property name="position">left</property>
     <child>
-      <!-- n-columns=2 n-rows=5 -->
+      <!-- n-columns=2 n-rows=6 -->
       <object class="GtkGrid" id="main-grid">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
@@ -266,7 +266,7 @@
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="halign">start</property>
-            <property name="label" translatable="yes">Size:</property>
+            <property name="label" translatable="yes">Tile size:</property>
           </object>
           <packing>
             <property name="left-attach">0</property>
@@ -287,7 +287,7 @@
           </object>
           <packing>
             <property name="left-attach">1</property>
-            <property name="top-attach">2</property>
+            <property name="top-attach">3</property>
           </packing>
         </child>
         <child>
@@ -299,7 +299,7 @@
           </object>
           <packing>
             <property name="left-attach">0</property>
-            <property name="top-attach">2</property>
+            <property name="top-attach">3</property>
           </packing>
         </child>
         <child>
@@ -327,7 +327,7 @@
           </object>
           <packing>
             <property name="left-attach">0</property>
-            <property name="top-attach">3</property>
+            <property name="top-attach">4</property>
           </packing>
         </child>
         <child>
@@ -344,11 +344,11 @@
           </object>
           <packing>
             <property name="left-attach">1</property>
-            <property name="top-attach">3</property>
+            <property name="top-attach">4</property>
           </packing>
         </child>
         <child>
-          <object class="GtkLabel" id="row-label1">
+          <object class="GtkLabel" id="aspect-label">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="halign">start</property>
@@ -380,12 +380,30 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">False</property>
+            <property name="halign">start</property>
             <property name="draw-indicator">True</property>
           </object>
           <packing>
             <property name="left-attach">1</property>
-            <property name="top-attach">4</property>
+            <property name="top-attach">5</property>
           </packing>
+        </child>
+        <child>
+          <object class="GtkCheckButton" id="stretch">
+            <property name="label" translatable="yes">Stretch to fill</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">False</property>
+            <property name="halign">start</property>
+            <property name="draw-indicator">True</property>
+          </object>
+          <packing>
+            <property name="left-attach">1</property>
+            <property name="top-attach">2</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
         </child>
         <child>
           <placeholder/>
