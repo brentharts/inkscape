@@ -28,6 +28,7 @@
 #include "rdf.h"
 #include "verbs.h"
 
+#include "actions/actions-tools.h"
 #include "display/control/canvas-grid.h"
 #include "document-properties.h"
 #include "helper/action.h"
@@ -39,7 +40,6 @@
 #include "ui/icon-loader.h"
 #include "ui/icon-names.h"
 #include "ui/shape-editor.h"
-#include "ui/tools-switch.h"
 #include "ui/widget/entity-entry.h"
 #include "ui/widget/notebook-page.h"
 #include "xml/node-event-vector.h"
@@ -87,7 +87,7 @@ DocumentProperties& DocumentProperties::getInstance()
 }
 
 DocumentProperties::DocumentProperties()
-    : DialogBase("/dialogs/documentoptions", SP_VERB_DIALOG_DOCPROPERTIES)
+    : DialogBase("/dialogs/documentoptions", "DocumentProperties")
     , _page_page(Gtk::manage(new UI::Widget::NotebookPage(1, 1, true, true)))
     , _page_guides(Gtk::manage(new UI::Widget::NotebookPage(1, 1)))
     , _page_snap(Gtk::manage(new UI::Widget::NotebookPage(1, 1)))
@@ -1620,8 +1620,8 @@ void DocumentProperties::onDocUnitChange()
     }
 
     // TODO: Fix bug in nodes tool instead of switching away from it
-    if (tools_active(getDesktop()) == TOOLS_NODES) {
-        tools_switch(getDesktop(), TOOLS_SELECT);
+    if (get_active_tool(get_desktop()) == "Node") {
+        set_active_tool(get_desktop(), "Select");
     }
 
     // Scale and translate objects

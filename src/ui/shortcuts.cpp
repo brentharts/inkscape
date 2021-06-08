@@ -383,13 +383,14 @@ Shortcuts::write(Glib::RefPtr<Gio::File> file, What what) {
 
     // Legacy verbs
     for (auto entry : shortcut_to_verb_map) {
+        Gtk::AccelKey shortcut = entry.first;
         Verb *verb = entry.second;
-        if ( what == All                        ||
-            (what == System && !user_set[verb]) ||
-            (what == User   &&  user_set[verb]) )  
+        if ( what == All                               ||
+            (what == System && !is_user_set(shortcut)) ||
+            (what == User   &&  is_user_set(shortcut)) )
         {
-            unsigned int      key_val = entry.first.get_key();
-            Gdk::ModifierType mod_val = entry.first.get_mod();
+            unsigned int      key_val = shortcut.get_key();
+            Gdk::ModifierType mod_val = shortcut.get_mod();
 
             gchar *key = gdk_keyval_name (key_val);
             Glib::ustring mod = get_modifiers_verb (mod_val);
@@ -399,7 +400,7 @@ Shortcuts::write(Glib::RefPtr<Gio::File> file, What what) {
             node->setAttribute("key", key);
             node->setAttributeOrRemoveIfEmpty("modifiers", mod);
             node->setAttribute("action", id);
-            if (primary[verb].get_key() == entry.first.get_key() && primary[verb].get_mod() == entry.first.get_mod()) {
+            if (primary[verb].get_key() == shortcut.get_key() && primary[verb].get_mod() == shortcut.get_mod()) {
                 node->setAttribute("display", "true");
             }
             document->root()->appendChild(node);
@@ -461,13 +462,11 @@ Shortcuts::write(Glib::RefPtr<Gio::File> file, What what) {
 Gtk::AccelKey
 Shortcuts::get_shortcut_from_verb(Verb *verb)
 {
-    for (auto const& it : shortcut_to_verb_map) {
-        if (it.second == verb) {
-            return primary[verb];
-        }
+    if (auto it = primary.find(verb); it != primary.end()) {
+        return it->second;
+    } else {
+        return Gtk::AccelKey();
     }
-
-    return (Gtk::AccelKey());
 }
 
 
@@ -485,14 +484,9 @@ Shortcuts::get_verb_from_shortcut(const Gtk::AccelKey& shortcut)
 
 // Return if user set shortcut for verb.
 bool
-Shortcuts::is_user_set(Verb *verb)
+Shortcuts::is_user_set(Gtk::AccelKey verb_shortcut)
 {
-    auto it = user_set.find(verb);
-    if (it != user_set.end()) {
-        return user_set[verb];
-    } else {
-        return false;
-    }
+    return (user_set.find(verb_shortcut) != user_set.end());
 }
 
 // Return if user set shortcut for Gio::Action.
@@ -594,10 +588,17 @@ Shortcuts::add_shortcut(Glib::ustring name, const Gtk::AccelKey& shortcut, bool 
     // Try verb first
     Verb* verb = Verb::getbyid(name.c_str(), false); // false => no error message
     if (verb) {
+        if (shortcut.is_null()) {
+            // should we return false?
+            // currently just used as an early return
+            return true;
+        }
         shortcut_to_verb_map[shortcut] = verb;
         if (is_primary) {
             primary[verb] = shortcut;
-            user_set[verb] = user;
+        }
+        if (user) {
+            user_set.insert(shortcut);
         }
         return true;
     }
@@ -653,11 +654,15 @@ Glib::ustring
 Shortcuts::remove_shortcut(const Gtk::AccelKey& shortcut)
 {
     // Try verb first
-    Verb *verb = shortcut_to_verb_map[shortcut];
-    if (verb) {
-        shortcut_to_verb_map.erase(shortcut);
-        primary[verb] = Gtk::AccelKey();
-        user_set[verb] = false;
+    if (auto it = shortcut_to_verb_map.find(shortcut); it != shortcut_to_verb_map.end()) {
+        auto verb = it->second;
+        shortcut_to_verb_map.erase(it);
+        auto primary_shortcut = get_shortcut_from_verb(verb);
+        // if primary shortcut is still in shortcut_to_verb_map, it is a different shortcut
+        if (shortcut_to_verb_map.find(primary_shortcut) == shortcut_to_verb_map.end()) {
+            primary.erase(verb);
+        }
+        user_set.erase(shortcut);
         return verb->get_id();
     }
 
@@ -692,8 +697,8 @@ Shortcuts::remove_shortcut(Glib::ustring name)
     if (verb) {
         Gtk::AccelKey shortcut = get_shortcut_from_verb(verb);
         shortcut_to_verb_map.erase(shortcut);
-        primary[verb] = Gtk::AccelKey();
-        user_set[verb] = false;
+        primary.erase(verb);
+        user_set.erase(shortcut);
         return true;
     }
 
@@ -718,7 +723,8 @@ Shortcuts::remove_user_shortcut(Glib::ustring name)
     bool user_shortcut = false;
     Verb *verb = Verb::getbyid(name.c_str(), false); // Not verbose
     if (verb) {
-        user_shortcut = is_user_set(verb);
+        auto primary_shortcut = get_shortcut_from_verb(verb);
+        user_shortcut = (!primary_shortcut.is_null()) && is_user_set(primary_shortcut);
     } else {
         user_shortcut = is_user_set(name);
     }
@@ -827,7 +833,7 @@ Gtk::AccelKey
 Shortcuts::accelerator_to_shortcut(const Glib::ustring& accelerator)
 {
     Gdk::ModifierType modval = Gdk::ModifierType(0);
-    std::vector<Glib::ustring> parts = Glib::Regex::split_simple("<(<.*?>)", accelerator);
+    std::vector<Glib::ustring> parts = Glib::Regex::split_simple("(<.*?>)", accelerator);
     for (auto part : parts) {
         if (part == "<Ctrl>")  modval |= Gdk::CONTROL_MASK;
         if (part == "<Shift>") modval |= Gdk::SHIFT_MASK;
@@ -885,10 +891,13 @@ Shortcuts::get_from_event(GdkEventKey const *event, bool fix)
         keyval = event->keyval;
     }
 
+    auto unused_modifiers = Gdk::ModifierType((initial_modifiers &~ consumed_modifiers)
+                                                                 & GDK_MODIFIER_MASK);
+
     // std::cout << "Shortcuts::get_from_event: End:   "
     //           << " Key: " << std::hex << keyval << " (" << (char)keyval << ")"
-    //           << " Mod: " << std::hex << (initial_modifiers &~ consumed_modifiers) << std::endl;
-    return (Gtk::AccelKey(keyval, Gdk::ModifierType(initial_modifiers &~ consumed_modifiers)));
+    //           << " Mod: " << std::hex << unused_modifiers << std::endl;
+    return (Gtk::AccelKey(keyval, unused_modifiers));
 }
 
 

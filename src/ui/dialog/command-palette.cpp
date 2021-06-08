@@ -57,7 +57,6 @@
 #include "object/uri.h"
 #include "preferences.h"
 #include "ui/interface.h"
-#include "verbs.h"
 #include "xml/repr.h"
 
 namespace Inkscape {
@@ -110,6 +109,8 @@ CommandPalette::CommandPalette()
 
     _CPFilter->signal_key_press_event().connect(sigc::mem_fun(*this, &CommandPalette::on_key_press_cpfilter_escape),
                                                 false);
+    _CPSuggestions->signal_key_press_event().connect(sigc::mem_fun(*this, &CommandPalette::on_key_press_cpfilter_escape), false);
+    _CPHistory->signal_key_press_event().connect(sigc::mem_fun(*this, &CommandPalette::on_key_press_cpfilter_escape), false);
     set_mode(CPMode::SEARCH);
 
     _CPSuggestions->set_activate_on_single_click();

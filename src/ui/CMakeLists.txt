@@ -17,7 +17,6 @@ set(ui_SRC
 	shortcuts.cpp
 	themes.cpp
 	tool-factory.cpp
-	tools-switch.cpp
 	util.cpp
 	uxmanager.cpp
 	modifiers.cpp
@@ -255,7 +254,6 @@ set(ui_SRC
 	shortcuts.h
 	themes.h
 	tool-factory.h
-	tools-switch.h
 	util.h
 	uxmanager.h
 	modifiers.h
@@ -276,6 +274,7 @@ set(ui_SRC
 	dialog/debug.h
 	dialog/dialog-base.h
 	dialog/dialog-container.h
+	dialog/dialog-data.h
 	dialog/dialog-manager.h
 	dialog/dialog-multipaned.h
 	dialog/dialog-notebook.h

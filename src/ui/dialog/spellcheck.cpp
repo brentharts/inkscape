@@ -40,7 +40,6 @@
 
 #include "ui/dialog/dialog-container.h"
 #include "ui/dialog/inkscape-preferences.h" // for PREFS_PAGE_SPELLCHECK
-#include "ui/tools-switch.h"
 #include "ui/tools/text-tool.h"
 
 #include <glibmm/i18n.h>
@@ -83,7 +82,7 @@ static void show_spellcheck_preferences_dialog()
 }
 
 SpellCheck::SpellCheck()
-    : DialogBase("/dialogs/spellcheck/", SP_VERB_DIALOG_SPELLCHECK)
+    : DialogBase("/dialogs/spellcheck/", "Spellcheck")
     , _text(nullptr)
     , _layout(nullptr)
     , _stops(0)
