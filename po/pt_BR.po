@@ -5975,7 +5975,7 @@ msgstr "Relevo"
 
 #: ../src/extension/internal/bitmap/emboss.cpp:49
 msgid "Emboss selected bitmap(s); highlight edges with 3D effect"
-msgstr "Gravar bitmap(s) selecionado(s); destacando bordas com efeito 3D"
+msgstr "Bitmap selecionado(s) em relevo; destacando bordas com efeito 3D"
 
 #: ../src/extension/internal/bitmap/enhance.cpp:37
 msgid "Enhance"
@@ -6200,12 +6200,12 @@ msgstr ""
 
 #: ../src/extension/internal/bitmap/shade.cpp:42
 msgid "Shade"
-msgstr "Sombra"
+msgstr "Sombrear"
 
 #: ../src/extension/internal/bitmap/shade.cpp:44
 #: ../src/ui/dialog/filter-effects-dialog.cpp:1182
 msgid "Azimuth:"
-msgstr "Ângulo de Visão:"
+msgstr "Azimute:"
 
 #: ../src/extension/internal/bitmap/shade.cpp:45
 #: ../src/ui/dialog/filter-effects-dialog.cpp:1183
@@ -6283,7 +6283,7 @@ msgstr ""
 
 #: ../src/extension/internal/bitmap/wave.cpp:40
 msgid "Wave"
-msgstr "Onda"
+msgstr "Ondular"
 
 #: ../src/extension/internal/bitmap/wave.cpp:42
 msgid "Amplitude:"
@@ -6291,7 +6291,7 @@ msgstr "Amplitude:"
 
 #: ../src/extension/internal/bitmap/wave.cpp:43
 msgid "Wavelength:"
-msgstr "Comprimento de onda:"
+msgstr "Comprimento da onda:"
 
 #: ../src/extension/internal/bitmap/wave.cpp:49
 msgid "Alter selected bitmap(s) along sine wave"
@@ -10233,7 +10233,7 @@ msgstr ""
 
 #: ../src/live_effects/effect.cpp:217
 msgid "Envelope Deformation"
-msgstr "Deformação do Envelope"
+msgstr "Deformação de Envelope"
 
 #: ../src/live_effects/effect.cpp:221
 msgid "Adjust the shape of an object by transforming paths on its four sides"
@@ -10361,7 +10361,7 @@ msgstr "Dimensione, estique e rotacione um objeto por duas alças"
 #: ../src/live_effects/lpe-show_handles.cpp:31
 #: ../src/ui/toolbar/mesh-toolbar.cpp:265
 msgid "Show handles"
-msgstr "Exibir Alças"
+msgstr "Mostrar Alças"
 
 #: ../src/live_effects/effect.cpp:391
 msgid ""
@@ -11270,7 +11270,7 @@ msgstr ""
 
 #: ../src/live_effects/lpe-copy_rotate.cpp:73
 msgid "Mirror copies"
-msgstr "Cópias {espelhadas"
+msgstr "Cópias espelhadas"
 
 #: ../src/live_effects/lpe-copy_rotate.cpp:73
 msgid "Mirror between copies"
@@ -11386,7 +11386,7 @@ msgstr "Usar segmentos"
 
 #: ../src/live_effects/lpe-dashed-stroke.cpp:21
 msgid "Half start/end"
-msgstr "Meio começo/fim"
+msgstr "Metade começo/fim"
 
 #: ../src/live_effects/lpe-dashed-stroke.cpp:21
 msgid "Start and end of each segment has half size"
@@ -11554,7 +11554,7 @@ msgstr "Saltar se for mais longo; saltar a conexão se for mais longo que"
 
 #: ../src/live_effects/lpe-envelope.cpp:18
 msgid "Top bend path:"
-msgstr "Caminho de dobra superior:"
+msgstr "Caminho de ajuste superior:"
 
 #: ../src/live_effects/lpe-envelope.cpp:18
 msgid "Top path along which to bend the original path"
@@ -11562,15 +11562,15 @@ msgstr "Caminho superior ao longo do qual dobrar o caminho original"
 
 #: ../src/live_effects/lpe-envelope.cpp:19
 msgid "Right bend path:"
-msgstr "Caminho de curva à direita:"
+msgstr "Caminho de ajuste direito:"
 
 #: ../src/live_effects/lpe-envelope.cpp:19
 msgid "Right path along which to bend the original path"
-msgstr "Caminho certo ao longo do qual dobrar o caminho original"
+msgstr "Caminho direito ao longo do qual dobrar o caminho original"
 
 #: ../src/live_effects/lpe-envelope.cpp:20
 msgid "Bottom bend path:"
-msgstr "Caminho de curvatura inferior:"
+msgstr "Caminho de ajuste inferior:"
 
 #: ../src/live_effects/lpe-envelope.cpp:20
 msgid "Bottom path along which to bend the original path"
@@ -11578,7 +11578,7 @@ msgstr "Caminho inferior ao longo do qual dobrar o caminho original"
 
 #: ../src/live_effects/lpe-envelope.cpp:21
 msgid "Left bend path:"
-msgstr "Caminho da curva à esquerda:"
+msgstr "Caminho de ajuste esquerdo:"
 
 #: ../src/live_effects/lpe-envelope.cpp:21
 msgid "Left path along which to bend the original path"
@@ -11586,7 +11586,7 @@ msgstr "Caminho esquerdo ao longo do qual dobrar o caminho original"
 
 #: ../src/live_effects/lpe-envelope.cpp:22
 msgid "_Enable left &amp; right paths"
-msgstr "_Ativar à esquerda &amp; caminhos certos"
+msgstr "_Ativar caminhos esquerdo e direito"
 
 #: ../src/live_effects/lpe-envelope.cpp:22
 msgid "Enable the left and right deformation paths"
@@ -11594,7 +11594,7 @@ msgstr "Habilite os caminhos de deformação esquerdo e direito"
 
 #: ../src/live_effects/lpe-envelope.cpp:23
 msgid "_Enable top &amp; bottom paths"
-msgstr "_Ativar o &amp; superior; caminhos de fundo"
+msgstr "_Ativar caminhos superior e inferior"
 
 #: ../src/live_effects/lpe-envelope.cpp:23
 msgid "Enable the top and bottom deformation paths"
@@ -11717,7 +11717,7 @@ msgstr "Passos de chanfro"
 
 #: ../src/live_effects/lpe-fillet-chamfer.cpp:54
 msgid "Radius in %"
-msgstr "Raio em%"
+msgstr "Raio em <b>%</b>"
 
 #: ../src/live_effects/lpe-fillet-chamfer.cpp:54
 msgid "Flexible radius size (%)"
@@ -11919,7 +11919,7 @@ msgstr "Pontudo"
 
 #: ../src/live_effects/lpe-jointype.cpp:62
 msgid "Thickness of the stroke"
-msgstr "Espessura do contorno"
+msgstr "Largura do contorno"
 
 #: ../src/live_effects/lpe-jointype.cpp:63
 msgid "Line cap"
@@ -12051,7 +12051,7 @@ msgstr "Usar apenas perímetro"
 
 #: ../src/live_effects/lpe-lattice2.cpp:40
 msgid "Update while moving knots (maybe slow)"
-msgstr "Atualizar ao mover os nós (talvez devagar)"
+msgstr "Atualizar ao mover os nós (talvez lento)"
 
 #: ../src/live_effects/lpe-lattice2.cpp:41
 msgid "Control 0:"
@@ -13704,7 +13704,7 @@ msgstr "Fim"
 
 #: ../src/live_effects/lpe-ruler.cpp:39
 msgid "_Mark distance:"
-msgstr "_Marcar distância:"
+msgstr "_Distância da marca:"
 
 #: ../src/live_effects/lpe-ruler.cpp:39
 msgid "Distance between successive ruler marks"
@@ -13712,7 +13712,7 @@ msgstr "Distância entre marcas sucessivas da régua"
 
 #: ../src/live_effects/lpe-ruler.cpp:41
 msgid "Ma_jor length:"
-msgstr "Ma_ior comprimento:"
+msgstr "Comprimento ma_ior:"
 
 #: ../src/live_effects/lpe-ruler.cpp:41
 msgid "Length of major ruler marks"
@@ -13720,15 +13720,15 @@ msgstr "Comprimento das marcas da régua principal"
 
 #: ../src/live_effects/lpe-ruler.cpp:42
 msgid "Mino_r length:"
-msgstr "Meno_r comprimento:"
+msgstr "Comprimento meno_r:"
 
 #: ../src/live_effects/lpe-ruler.cpp:42
 msgid "Length of minor ruler marks"
-msgstr "Comprimento da régua menor"
+msgstr "Comprimento da menor marca de régua "
 
 #: ../src/live_effects/lpe-ruler.cpp:43
 msgid "Major steps_:"
-msgstr "Principais passos_:"
+msgstr "Passos_ principais:"
 
 #: ../src/live_effects/lpe-ruler.cpp:43
 msgid "Draw a major mark every ... steps"
@@ -13736,11 +13736,11 @@ msgstr "Desenhe uma marca principal a cada ... passos"
 
 #: ../src/live_effects/lpe-ruler.cpp:44
 msgid "Shift marks _by:"
-msgstr "Marcas de deslocamento _por:"
+msgstr "Deslocar marcas _por:"
 
 #: ../src/live_effects/lpe-ruler.cpp:44
 msgid "Shift marks by this many steps"
-msgstr "Marcas de deslocamento por muitas etapas"
+msgstr "Marcas deslocadas por muitas etapas"
 
 #: ../src/live_effects/lpe-ruler.cpp:45
 msgid "Mark direction:"
@@ -14070,7 +14070,7 @@ msgstr "Centro"
 #: ../src/live_effects/lpe-taperstroke.cpp:89 ../share/extensions/edge3d.inx:8
 #: ../share/extensions/nicechart.inx:61
 msgid "Stroke width:"
-msgstr "Espessura do contorno:"
+msgstr "Largura do contorno:"
 
 #: ../src/live_effects/lpe-taperstroke.cpp:89
 msgid "The (non-tapered) width of the path"
@@ -14294,7 +14294,7 @@ msgstr "Alterar o parâmetro do botão da fonte"
 
 #: ../src/live_effects/parameter/item.cpp:156
 msgid "Link to item on clipboard"
-msgstr "Link para o item na área de transferência"
+msgstr "Link para o item na Área de Transferência"
 
 #: ../src/live_effects/parameter/item.cpp:289
 msgid "Link item parameter to path"
@@ -14364,7 +14364,7 @@ msgstr "Vincular parâmetro de matriz de item a item"
 #: ../src/live_effects/parameter/originalpatharray.cpp:183
 #: ../src/live_effects/parameter/path.cpp:257
 msgid "Link to path in clipboard"
-msgstr "Vínculr com caminho na área de transferência"
+msgstr "Vincular com caminho na Área de Transferência"
 
 #: ../src/live_effects/parameter/originalpatharray.cpp:89
 #: ../src/ui/toolbar/gradient-toolbar.cpp:438
@@ -15558,7 +15558,7 @@ msgstr "Selecione os <b>clones</b> a revincular."
 #: ../src/selection-chemistry.cpp:2707
 msgid "Copy an <b>object</b> to clipboard to relink clones to."
 msgstr ""
-"Copia um <b>objeto</b> para área de transferência para revincular clones."
+"Copia um <b>objeto</b> para Área de Transferência para revincular clones."
 
 #: ../src/selection-chemistry.cpp:2727
 msgid "<b>No clones to relink</b> in the selection."
@@ -16115,7 +16115,7 @@ msgstr "Não é possível colar texto fora da ferramenta de texto."
 #: ../src/ui/clipboard.cpp:454 ../src/ui/clipboard.cpp:730
 #: ../src/ui/clipboard.cpp:758 ../src/ui/clipboard.cpp:799
 msgid "Nothing on the clipboard."
-msgstr "Nada na área de transferência."
+msgstr "Nada na Área de Transferência."
 
 #: ../src/ui/clipboard.cpp:572
 msgid "Select <b>object(s)</b> to paste style to."
@@ -16123,7 +16123,7 @@ msgstr "Selecione <b>os objetos</b> aos quais será colado o estilo."
 
 #: ../src/ui/clipboard.cpp:583 ../src/ui/clipboard.cpp:600
 msgid "No style on the clipboard."
-msgstr "Não há estilo na área de transferência."
+msgstr "Não há estilo na Área de Transferência."
 
 #: ../src/ui/clipboard.cpp:625
 msgid "Select <b>object(s)</b> to paste size to."
@@ -16131,7 +16131,7 @@ msgstr "Selecione <b>o(s) objeto(s)</b> para onde será colado o tamanho."
 
 #: ../src/ui/clipboard.cpp:633
 msgid "No size on the clipboard."
-msgstr "Não há tamanho na área de transferência."
+msgstr "Não há tamanho na Área de Transferência."
 
 #: ../src/ui/clipboard.cpp:690
 msgid "Select <b>object(s)</b> to paste live path effect to."
@@ -16139,7 +16139,7 @@ msgstr "Selecione <b>objeto(s)</b> para colar caminhos de efeito ao vivo."
 
 #: ../src/ui/clipboard.cpp:717
 msgid "No effect on the clipboard."
-msgstr "Não há efeitos na área de transferência."
+msgstr "Não há efeitos na Área de Transferência."
 
 #: ../src/ui/clipboard.cpp:736 ../src/ui/clipboard.cpp:782
 msgid "Clipboard does not contain a path."
@@ -16147,7 +16147,7 @@ msgstr "Área de Transferência não contém caminho."
 
 #: ../src/ui/clipboard.cpp:829
 msgid "Clipboard does not contain any objects of type \"%1\"."
-msgstr "A área de transferência não contém nenhum objeto do tipo \"%1\"."
+msgstr "A Área de Transferência não contém nenhum objeto do tipo \"%1\"."
 
 #: ../src/ui/contextmenu.cpp:74
 msgid "Go to parent"
@@ -20509,12 +20509,12 @@ msgstr "Ctrl+click tamanho do _ponto:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:712
 msgid "times current stroke width"
-msgstr "vezes a espessura atual do contorno"
+msgstr "vezes a largura atual do contorno"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:713
 msgid "Size of dots created with Ctrl+click (relative to current stroke width)"
 msgstr ""
-"Tamanho dos pontos criados com Ctrl+click (relativo à espessura atual do "
+"Tamanho dos pontos criados com Ctrl+click (relativo à largura atual do "
 "contorno)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:721
@@ -20667,7 +20667,7 @@ msgstr "Tamanho Visual"
 #: ../src/ui/dialog/inkscape-preferences.cpp:853
 msgid "This bounding box includes stroke width, markers, filter margins, etc."
 msgstr ""
-"Este modo considera espessuras de contornos, marcadores, margens de filtros, "
+"Este modo considera larguras de contornos, marcadores, margens de filtros, "
 "etc."
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:854
@@ -22801,7 +22801,7 @@ msgstr "Preservada"
 #: ../src/ui/toolbar/select-toolbar.cpp:194
 msgid "When scaling objects, scale the stroke width by the same proportion"
 msgstr ""
-"Ao redimensionar objetos, a espessura do contorno será ajustada "
+"Ao redimensionar objetos, a largura do contorno será ajustada "
 "proporcionalmente"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2295
@@ -26999,7 +26999,7 @@ msgstr "Adicionar ou editar perfil caligráfico"
 #: ../src/ui/toolbar/calligraphy-toolbar.cpp:103
 #: ../src/ui/toolbar/eraser-toolbar.cpp:99
 msgid "(hairline)"
-msgstr "(espessura mínima)"
+msgstr "(contorno mínimo)"
 
 #: ../src/ui/toolbar/calligraphy-toolbar.cpp:103
 #: ../src/ui/toolbar/calligraphy-toolbar.cpp:189
@@ -27021,11 +27021,11 @@ msgstr "(padrão)"
 #: ../src/ui/toolbar/calligraphy-toolbar.cpp:103
 #: ../src/ui/toolbar/eraser-toolbar.cpp:99
 msgid "(broad stroke)"
-msgstr "(espessura ampla)"
+msgstr "(largura ampla)"
 
 #: ../src/ui/toolbar/calligraphy-toolbar.cpp:110
 msgid "The width of the calligraphic pen (relative to the visible canvas area)"
-msgstr "A espessura da caneta caligráfica (relativo a área visível do desenho)"
+msgstr "A largura da caneta caligráfica (relativo a área visível do desenho)"
 
 #: ../src/ui/toolbar/calligraphy-toolbar.cpp:131
 #: ../src/ui/toolbar/eraser-toolbar.cpp:117
@@ -27048,7 +27048,7 @@ msgstr ""
 #: ../src/ui/toolbar/calligraphy-toolbar.cpp:154
 #: ../src/ui/toolbar/eraser-toolbar.cpp:128
 msgid "(speed blows up stroke)"
-msgstr "(velocidade de expensão da espessura)"
+msgstr "(velocidade de expensão da largura)"
 
 #: ../src/ui/toolbar/calligraphy-toolbar.cpp:154
 #: ../src/ui/toolbar/eraser-toolbar.cpp:128
@@ -27058,7 +27058,7 @@ msgstr "(leve expansão)"
 #: ../src/ui/toolbar/calligraphy-toolbar.cpp:154
 #: ../src/ui/toolbar/eraser-toolbar.cpp:128
 msgid "(constant width)"
-msgstr "(espessura constante)"
+msgstr "(largura constante)"
 
 #: ../src/ui/toolbar/calligraphy-toolbar.cpp:154
 #: ../src/ui/toolbar/eraser-toolbar.cpp:128
@@ -27068,7 +27068,7 @@ msgstr "(Leve diminuição, padrão)"
 #: ../src/ui/toolbar/calligraphy-toolbar.cpp:154
 #: ../src/ui/toolbar/eraser-toolbar.cpp:128
 msgid "(speed deflates stroke)"
-msgstr "(velocidade de redução da espessura)"
+msgstr "(velocidade de redução da largura)"
 
 #: ../src/ui/toolbar/calligraphy-toolbar.cpp:158
 #: ../src/ui/toolbar/eraser-toolbar.cpp:132
@@ -27397,9 +27397,9 @@ msgid ""
 "How much velocity thins the stroke (> 0 makes fast strokes thinner, < 0 "
 "makes them broader, 0 makes width independent of velocity)"
 msgstr ""
-"Variação da espessura:\n"
-"Valor maior que 0, a espessura será reduzida em altas velocidades;\n"
-"Valor menor que 0, a espessura será expandida em altas velocidades"
+"Variação da largura:\n"
+"Valor maior que 0, a largura será reduzida em altas velocidades;\n"
+"Valor menor que 0, a largura será expandida em altas velocidades"
 
 #: ../src/ui/toolbar/eraser-toolbar.cpp:191
 msgid "Increase to make the eraser drag behind, as if slowed by inertia"
@@ -28176,11 +28176,11 @@ msgstr "Saída triangular"
 
 #: ../src/ui/toolbar/pencil-toolbar.cpp:418
 msgid "From clipboard"
-msgstr "Da área de transferência"
+msgstr "Da Área de Transferência"
 
 #: ../src/ui/toolbar/pencil-toolbar.cpp:419
 msgid "Bend from clipboard"
-msgstr "Curva da área de transferência"
+msgstr "Curva da Área de Transferência"
 
 #: ../src/ui/toolbar/pencil-toolbar.cpp:420
 msgid "Last applied"
@@ -29141,8 +29141,7 @@ msgstr "Força da ação"
 #: ../src/ui/toolbar/tweak-toolbar.cpp:89
 msgid "Use the pressure of the input device to alter the force of tweak action"
 msgstr ""
-"Usar a pressão de um dispositivo de entrada para ajustar a espessura da "
-"caneta"
+"Use a pressão do dispositivo de entrada para alterar a força da ação de ajuste"
 
 #: ../src/ui/toolbar/tweak-toolbar.cpp:102
 msgid "Move mode"
@@ -29449,7 +29448,7 @@ msgstr ""
 "<b>Clique</b> para ajustar a cor de preenchimento. <b>Clique com Shift</b> "
 "para ajustar a cor do contorno. <b>Clique e arraste</b> para escolher a cor "
 "média de uma área. Use<b>Ctrl+C</b> para copiar a cor sob o mouse para a "
-"área de transferência"
+"Área de Transferência"
 
 #: ../src/ui/tools-switch.cpp:108
 msgid "<b>Click and drag</b> between shapes to create a connector."
@@ -31861,7 +31860,7 @@ msgstr "Colar contorno"
 
 #: ../src/ui/widget/selected-style.cpp:899
 msgid "Change stroke width"
-msgstr "Alterar espessura do contorno"
+msgstr "Alterar largura do contorno"
 
 #: ../src/ui/widget/selected-style.cpp:1006
 msgid ", drag to adjust, middle-click to remove"
@@ -31872,7 +31871,7 @@ msgstr ", arraste para ajustar, clique com o botão do meio para remover"
 #: ../src/ui/widget/stroke-style.cpp:165 ../src/ui/widget/style-swatch.cpp:316
 #: ../src/ui/widget/style-swatch.cpp:317
 msgid "Hairline"
-msgstr "Espessura Mínima"
+msgstr "Contorno Mínimo"
 
 #: ../src/ui/widget/selected-style.cpp:1075
 #: ../src/ui/widget/style-swatch.cpp:317
@@ -31882,7 +31881,7 @@ msgstr "Largura do contorno: %1"
 #: ../src/ui/widget/selected-style.cpp:1095
 #, c-format
 msgid "Stroke width: %.5g%s%s"
-msgstr "Espessura do contorno: %.5g%s%s"
+msgstr "Largura do contorno: %.5g%s%s"
 
 #: ../src/ui/widget/selected-style.cpp:1099
 msgid " (averaged)"
@@ -31959,13 +31958,13 @@ msgstr ""
 #: ../src/ui/widget/selected-style.cpp:1422
 #: ../src/ui/widget/selected-style.cpp:1436
 msgid "Adjust stroke width"
-msgstr "Ajustar espessura do contorno"
+msgstr "Ajustar largura do contorno"
 
 #: ../src/ui/widget/selected-style.cpp:1423
 #, c-format
 msgid "Adjusting <b>stroke width</b>: was %.3g, now <b>%.3g</b> (diff %.3g)"
 msgstr ""
-"Ajustando <b>espessura do contorno</b>: valor inicial %.3g alterado para <b>"
+"Ajustando <b>largura do contorno</b>: valor inicial %.3g alterado para <b>"
 "%.3g</b> (diferença de %.3g)"
 
 #. TRANSLATORS: "Link" means to _link_ two sliders together
@@ -32122,7 +32121,7 @@ msgstr "Sem contorno"
 #: ../src/ui/widget/style-swatch.cpp:333
 #, c-format
 msgid "Stroke width: %.5g%s"
-msgstr "Espessura do contorno: %.5g%s"
+msgstr "Largura do contorno: %.5g%s"
 
 #: ../src/ui/widget/style-swatch.cpp:350
 #, c-format
@@ -32463,7 +32462,7 @@ msgstr "Cor_tar"
 
 #: ../src/verbs.cpp:2385
 msgid "Cut selection to clipboard"
-msgstr "Corta a seleção para a área de transferência"
+msgstr "Corta a seleção para a Área de Transferência"
 
 #: ../src/verbs.cpp:2386
 msgid "_Copy"
@@ -32471,7 +32470,7 @@ msgstr "_Copiar"
 
 #: ../src/verbs.cpp:2386
 msgid "Copy selection to clipboard"
-msgstr "Copia a seleção para a área de transferência"
+msgstr "Copia a seleção para a Área de Transferência"
 
 #: ../src/verbs.cpp:2388
 msgid "_Paste"
@@ -32479,7 +32478,7 @@ msgstr "Co_lar"
 
 #: ../src/verbs.cpp:2389
 msgid "Paste objects from clipboard to mouse point, or paste text"
-msgstr "Cola objetos ou texto da área de transferência para a posição do mouse"
+msgstr "Cola objetos ou texto da Área de Transferência para a posição do mouse"
 
 #: ../src/verbs.cpp:2390
 msgid "Paste _Style"
@@ -32554,7 +32553,7 @@ msgstr "Colar _no Lugar"
 #: ../src/verbs.cpp:2410
 msgid "Paste objects from clipboard to the original location"
 msgstr ""
-"Cola os objetos da área de transferência para o lugar original de onde foram "
+"Cola os objetos da Área de Transferência para o lugar original de onde foram "
 "copiados"
 
 #: ../src/verbs.cpp:2411
@@ -32628,7 +32627,7 @@ msgstr "Revincular ao Copiado"
 #: ../src/verbs.cpp:2430
 msgid "Relink the selected clones to the object currently on the clipboard"
 msgstr ""
-"Revincula os clones selecionados para o atual objeto na área de transferência"
+"Revincula os clones selecionados para o atual objeto na Área de Transferência"
 
 #: ../src/verbs.cpp:2432
 msgid "Select _Original"
@@ -34014,7 +34013,7 @@ msgid ""
 "Edit objects' colors, gradients, arrowheads, and other fill and stroke "
 "properties..."
 msgstr ""
-"Editar cores de objetos, gradientes, espessuras de contornos, padrões..."
+"Editar cores de objetos, gradientes, larguras de contornos, padrões..."
 
 #: ../src/verbs.cpp:2836
 msgid "_Unicode Characters..."
@@ -35107,7 +35106,7 @@ msgstr "Link para o site oficial"
 
 #: ../share/ui/inkscape-about.glade:332
 msgid "Click to copy the version number to the clipboard"
-msgstr "Clique para copiar o número da versão para a área de transferência"
+msgstr "Clique para copiar o número da versão para a Área de Transferência"
 
 #: ../share/ui/inkscape-about.glade:353
 msgid "Version Copied!"
@@ -35120,7 +35119,7 @@ msgstr "Informações de depuração copiadas!"
 #: ../share/ui/inkscape-about.glade:393
 msgid "Click to copy debug info to the clipboard"
 msgstr ""
-"Clique para copiar as informações de depuração para a área de transferência"
+"Clique para copiar as informações de depuração para a Área de Transferência"
 
 #: ../share/ui/inkscape-start.glade:57 ../share/ui/inkscape-start.glade:1446
 msgid "Dark"
@@ -38526,11 +38525,11 @@ msgstr "Grade Cartesiana"
 
 #: ../share/extensions/grid_cartesian.inx:6
 msgid "Border Thickness:"
-msgstr "Espessura da Borda:"
+msgstr "Largura da Borda:"
 
 #: ../share/extensions/grid_cartesian.inx:7
 msgid "Border Thickness Unit:"
-msgstr "Unidade de Espessura de Borda:"
+msgstr "Unidade de Largura de Borda:"
 
 #: ../share/extensions/grid_cartesian.inx:14
 msgid "X Axis"
