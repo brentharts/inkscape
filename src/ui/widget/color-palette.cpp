@@ -7,6 +7,7 @@
 #include <gtkmm/menu.h>
 #include <gtkmm/radiomenuitem.h>
 #include <gtkmm/menubutton.h>
+#include <gtkmm/adjustment.h>
 
 #include "color-palette.h"
 #include "ui/builder-utils.h"
@@ -99,10 +100,10 @@ ColorPalette::ColorPalette():
         }
     }
 
-    _scroll_down.signal_clicked().connect([=](){ scroll(0, get_tile_height() + _border); });
-    _scroll_up.signal_clicked().connect([=](){ scroll(0, -(get_tile_height() + _border)); });
-    _scroll_left.signal_clicked().connect([=](){ scroll(-10 * (get_tile_width() + _border), 0); });
-    _scroll_right.signal_clicked().connect([=](){ scroll(10 * (get_tile_width() + _border), 0); });
+    _scroll_down.signal_clicked().connect([=](){ scroll(0, get_tile_height() + _border, true, true); });
+    _scroll_up.signal_clicked().connect([=](){ scroll(0, -(get_tile_height() + _border), true, true); });
+    _scroll_left.signal_clicked().connect([=](){ scroll(-10 * (get_tile_width() + _border), 0, false, false); });
+    _scroll_right.signal_clicked().connect([=](){ scroll(10 * (get_tile_width() + _border), 0, false, false); });
 
     {
         auto css_provider = Gtk::CssProvider::create();
@@ -139,14 +140,78 @@ ColorPalette::ColorPalette():
 }
 
 ColorPalette::~ColorPalette() {
-    // if (_active_timeout) {
-    //     g_source_remove(_active_timeout);
-    // }
+    if (_active_timeout) {
+        g_source_remove(_active_timeout);
+    }
 }
 
-void ColorPalette::scroll(int dx, int dy) {
+void ColorPalette::do_scroll(int dx, int dy) {
     if (auto vert = _scroll.get_vscrollbar()) {
         vert->set_value(vert->get_value() + dy);
+    }
+    if (auto horz = _scroll.get_hscrollbar()) {
+        horz->set_value(horz->get_value() + dx);
+    }
+}
+
+std::pair<double, double> get_range(Gtk::Scrollbar& sb) {
+    auto adj = sb.get_adjustment();
+    return std::make_pair(adj->get_lower(), adj->get_upper() - adj->get_page_size());
+}
+
+gboolean ColorPalette::scroll_cb(gpointer self) {
+    auto ptr = static_cast<ColorPalette*>(self);
+    bool fire_again = false;
+
+    if (auto vert = ptr->_scroll.get_vscrollbar()) {
+        auto value = vert->get_value();
+        // is this the final adjustment step?
+        if (fabs(ptr->_scroll_final - value) < fabs(ptr->_scroll_step)) {
+            vert->set_value(ptr->_scroll_final);
+            fire_again = false; // cancel timer
+        }
+        else {
+            auto pos = value + ptr->_scroll_step;
+            vert->set_value(pos);
+            auto range = get_range(*vert);
+            if (pos > range.first && pos < range.second) {
+                // not yet done
+                fire_again = true; // fire this callback again
+                // g_warning("pos %f, reaL: %f, %f .. %f, stp: %f, fin: %f", pos, vert->get_value(), range.first, range.second, ptr->_scroll_step, ptr->_scroll_final);
+            }
+        }
+    }
+
+    if (!fire_again) {
+        ptr->_active_timeout = 0;
+    }
+
+    return fire_again;
+}
+
+void ColorPalette::scroll(int dx, int dy, bool snap, bool smooth) {
+    if (auto vert = _scroll.get_vscrollbar()) {
+        if (smooth && dy != 0.0) {
+            _scroll_final = vert->get_value() + dy;
+            if (snap) {
+                // round it to whole 'dy' increments
+                _scroll_final -= fmod(_scroll_final, dy);
+            }
+            auto range = get_range(*vert);
+            if (_scroll_final < range.first) {
+                _scroll_final = range.first;
+            }
+            else if (_scroll_final > range.second) {
+                _scroll_final = range.second;
+            }
+            _scroll_step = dy / 4.0;
+            if (!_active_timeout && vert->get_value() != _scroll_final) {
+                _active_timeout = g_timeout_add(1000 / 50, &ColorPalette::scroll_cb, this);
+            }
+        }
+        else {
+            vert->set_value(vert->get_value() + dy);
+        }
     }
     if (auto horz = _scroll.get_hscrollbar()) {
         horz->set_value(horz->get_value() + dx);
@@ -394,7 +459,7 @@ void ColorPalette::resize() {
     else {
         // exact size for multiple rows
         int height = (get_tile_height() + _border) * _rows - _border;
-        height += _flowbox.get_margin_top(); // + _flowbox.get_margin_bottom();
+        // height += _flowbox.get_margin_top(); // + _flowbox.get_margin_bottom();
         _scroll.set_size_request(1, height);
     }
 

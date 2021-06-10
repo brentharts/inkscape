@@ -64,7 +64,9 @@ private:
     void resize();
     void set_up_scrolling();
     void free();
-    void scroll(int dx, int dy);
+    void scroll(int dx, int dy, bool snap, bool smooth);
+    void do_scroll(int dx, int dy);
+    static gboolean scroll_cb(gpointer self);
     void _set_tile_size(int size_px);
     void _set_tile_border(int border_px);
     void _set_rows(int rows);
@@ -96,9 +98,11 @@ private:
     sigc::signal<void, Glib::ustring> _signal_palette_selected;
     sigc::signal<void> _signal_settings_changed;
     bool _in_update = false;
-    // guint _active_timeout = 0;
+    guint _active_timeout = 0;
     bool _force_scrollbar = false;
     bool _stretch_tiles = false;
+    double _scroll_step = 0.0; // smooth scrolling step
+    double _scroll_final = 0.0; // smooth scroll final value
 };
 
 }}} // namespace
