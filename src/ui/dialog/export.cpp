@@ -43,7 +43,7 @@ Export::Export()
     add(*container);
     show_all_children();
     initialise_all();
-    removeScrollEvent(dynamic_cast<Gtk::Widget *>(left_sb));
+    removeScrollEvents();
     export_notebook->signal_map().connect(sigc::mem_fun(*this, &Export::onNotebookVisible));
 }
 
@@ -113,9 +113,28 @@ void Export::onNotebookVisible()
 void Export::removeScrollEvent(Gtk::Widget* widget){
     if(widget){
         Gdk::EventMask event_masks = widget->get_events();
-        Gdk::EventMask new_masks = event_masks & ~Gdk::EventMask::SCROLL_MASK;
+        Gdk::EventMask new_masks = event_masks & ~(Gdk::EventMask::SCROLL_MASK | ~Gdk::EventMask::SMOOTH_SCROLL_MASK);
         widget->set_events(new_masks);
+        std::cout << "Removed\n";
+    }else{
+        std::cout << "Not Removed\n";
     }
+    std::cout.flush();
+    return;
+}
+
+void Export::removeScrollEvents(){
+    removeScrollEvent(dynamic_cast<Gtk::Widget *>(left_sb));
+    removeScrollEvent(dynamic_cast<Gtk::Widget *>(right_sb));
+    removeScrollEvent(dynamic_cast<Gtk::Widget *>(top_sb));
+    removeScrollEvent(dynamic_cast<Gtk::Widget *>(bottom_sb));
+    removeScrollEvent(dynamic_cast<Gtk::Widget *>(height_sb));
+    removeScrollEvent(dynamic_cast<Gtk::Widget *>(width_sb));
+    removeScrollEvent(dynamic_cast<Gtk::Widget *>(units));
+    removeScrollEvent(dynamic_cast<Gtk::Widget *>(extension));
+    removeScrollEvent(dynamic_cast<Gtk::Widget *>(img_height_sb));
+    removeScrollEvent(dynamic_cast<Gtk::Widget *>(img_width_sb));
+
     return;
 }
 

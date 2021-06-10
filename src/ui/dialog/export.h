@@ -74,6 +74,7 @@ private:
 
     //signals callback
     void removeScrollEvent(Gtk::Widget* widget);
+    void removeScrollEvents();
     void onNotebookVisible();
 
 };
