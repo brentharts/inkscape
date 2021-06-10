@@ -22,9 +22,9 @@ namespace Inkscape {
 Glib::ustring rgba_to_css_color(double r, double g, double b) {
     char buffer[16];
     sprintf(buffer, "#%02x%02x%02x",
-        static_cast<int>(r * 0xff),
-        static_cast<int>(g * 0xff),
-        static_cast<int>(b * 0xff)
+        static_cast<int>(r * 0xff + 0.5),
+        static_cast<int>(g * 0xff + 0.5),
+        static_cast<int>(b * 0xff + 0.5)
     );
     return Glib::ustring(buffer);
 }
@@ -41,7 +41,7 @@ Glib::ustring rgba_to_css_color(const SPColor& color) {
 
 Glib::ustring double_to_css_value(double value) {
     char buffer[32];
-    // arbitrarrily chosen precision
+    // arbitrarily chosen precision
     sprintf(buffer, "%.4f", value);
     return Glib::ustring(buffer);
 }
@@ -62,10 +62,11 @@ svg_renderer::svg_renderer(const char* svg_file_path) {
 size_t svg_renderer::set_style(const Glib::ustring& selector, const char* name, const Glib::ustring& value) {
     auto objects = _document->getObjectsBySelector(selector);
     for (auto el : objects) {
-        SPCSSAttr* css = sp_repr_css_attr(el->getRepr(), "style");
+        if (SPCSSAttr* css = sp_repr_css_attr(el->getRepr(), "style")) {
             sp_repr_css_set_property(css, name, value.c_str());
-        el->changeCSS(css, "style");
-        sp_repr_css_attr_unref(css);
+            el->changeCSS(css, "style");
+            sp_repr_css_attr_unref(css);
+        }
     }
     return objects.size();
 }
