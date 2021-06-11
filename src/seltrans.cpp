@@ -187,20 +187,32 @@ Inkscape::SelTrans::~SelTrans()
 
 void Inkscape::SelTrans::resetState()
 {
+    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+    if(prefs->getBool("/tools/select/align_box", false)){
+        _state = STATE_ALIGN;
+    }
+    else{
     _state = STATE_SCALE;
+    }
 }
 
 void Inkscape::SelTrans::increaseState()
 {
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    bool show_align = prefs->getBool("/dialogs/align/oncanvas", false);
-        
-    if (_state == STATE_SCALE) {
-        _state = STATE_ROTATE;
-    } else if (_state == STATE_ROTATE && show_align) {
+    bool show_align = prefs->getBool("/dialogs/align/oncanvas", false);      
+
+    if(prefs->getBool("/tools/select/align_box", false)){
         _state = STATE_ALIGN;
-    } else {
+    }
+
+    else{
+        if (_state == STATE_SCALE) {
+        _state = STATE_ROTATE;
+        } else if (_state == STATE_ROTATE && show_align) {
+        _state = STATE_ALIGN;
+        } else {
         _state = STATE_SCALE;
+        }
     }
 
     _center_is_set = true; // no need to reread center

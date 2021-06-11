@@ -60,6 +60,7 @@ private:
     void on_inkscape_selection_changed(Inkscape::Selection *selection);
     void toggle_lock();
     void toggle_touch();
+    void toggle_align();
     void toggle_stroke();
     void toggle_corners();
     void toggle_gradient();

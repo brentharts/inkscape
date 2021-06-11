@@ -59,7 +59,6 @@ SelectToolbar::SelectToolbar(SPDesktop *desktop) :
     _update(false),
     _lock_btn(Gtk::manage(new Gtk::ToggleToolButton())),
     _select_touch_btn(Gtk::manage(new Gtk::ToggleToolButton())),
-    // _select_touch_btn(Gtk::manage(new Gtk::ToggleToolButton())),
     _align_distribute_btn(Gtk::manage(new Gtk::ToggleToolButton())),
     _transform_stroke_btn(Gtk::manage(new Gtk::ToggleToolButton())),
     _transform_corners_btn(Gtk::manage(new Gtk::ToggleToolButton())),
@@ -84,8 +83,8 @@ SelectToolbar::SelectToolbar(SPDesktop *desktop) :
     _align_distribute_btn->set_label(_("On Canvas Alignment"));
     _align_distribute_btn->set_tooltip_text(_("Aligns the objects with respect to the bounding box"));
     _align_distribute_btn->set_icon_name(INKSCAPE_ICON("align-distribute"));
-    _align_distribute_btn->set_active(prefs->getBool("/tools/select/touch_box", false));
-    _align_distribute_btn->signal_toggled().connect(sigc::mem_fun(*this, &SelectToolbar::toggle_touch));
+    _align_distribute_btn->set_active(prefs->getBool("/tools/select/align_box", false));
+    _align_distribute_btn->signal_toggled().connect(sigc::mem_fun(*this, &SelectToolbar::toggle_align));
 
     add(*_align_distribute_btn);
 
@@ -478,6 +477,13 @@ SelectToolbar::toggle_touch()
 {
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     prefs->setBool("/tools/select/touch_box", _select_touch_btn->get_active());
+}
+
+void
+SelectToolbar::toggle_align()
+{
+    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+    prefs->setBool("/tools/select/align_box", _align_distribute_btn->get_active());
 }
 
 void
