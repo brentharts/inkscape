@@ -206,6 +206,7 @@ void ColorPalette::scroll(int dx, int dy, bool snap, bool smooth) {
             }
             _scroll_step = dy / 4.0;
             if (!_active_timeout && vert->get_value() != _scroll_final) {
+                // limit refresh to 50 fps, in practice it will be slower
                 _active_timeout = g_timeout_add(1000 / 50, &ColorPalette::scroll_cb, this);
             }
         }
