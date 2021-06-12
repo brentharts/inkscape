@@ -20,8 +20,6 @@
 #include "ui/icon-loader.h"
 #include "util/signal-blocker.h"
 
-#include "desktop.h"
-
 
 namespace Inkscape {
 namespace UI {
@@ -34,32 +32,31 @@ void CellRendererSPIcon::render_vfunc(const Cairo::RefPtr<Cairo::Context>& cr,
                                       const Gdk::Rectangle& cell_area,
                                       Gtk::CellRendererState flags)
 {
-    // if this event type doesn't have an icon...
-    if ( !Inkscape::Verb::get(_property_event_type)->get_image() ) return;
+    // if there is no icon name.
+    if ( _property_icon_name == "") return;
 
     // if the icon isn't cached, render it to a pixbuf
-    if ( !_icon_cache[_property_event_type] ) {
+    if ( !_icon_cache[_property_icon_name] ) {
 
-        Glib::ustring image_name = Inkscape::Verb::get(_property_event_type)->get_image();
         Gtk::Image* icon = Gtk::manage(new Gtk::Image());
-        icon = sp_get_icon_image(image_name, Gtk::ICON_SIZE_MENU);
+        icon = sp_get_icon_image(_property_icon_name, Gtk::ICON_SIZE_MENU);
 
         if (icon) {
 
             // check icon type (inkscape, gtk, none)
             if ( GTK_IS_IMAGE(icon->gobj()) ) {
-                _property_icon = sp_get_icon_pixbuf(image_name, 16);
+                _property_icon = sp_get_icon_pixbuf(_property_icon_name, 16);
             } else {
                 delete icon;
                 return;
             }
 
             delete icon;
-            property_pixbuf() = _icon_cache[_property_event_type] = _property_icon.get_value();
+            property_pixbuf() = _icon_cache[_property_icon_name] = _property_icon.get_value();
         }
 
     } else {
-        property_pixbuf() = _icon_cache[_property_event_type];
+        property_pixbuf() = _icon_cache[_property_icon_name];
     }
 
     Gtk::CellRendererPixbuf::render_vfunc(cr, widget, background_area,
@@ -92,7 +89,6 @@ UndoHistory& UndoHistory::getInstance()
 UndoHistory::UndoHistory()
     : DialogBase("/dialogs/undo-history", "UndoHistory"),
       _document_replaced_connection(),
-      _desktop(nullptr),
       _document(nullptr),
       _event_log(nullptr),
       _scrolled_window(),
@@ -116,7 +112,7 @@ UndoHistory::UndoHistory()
     int cols_count = _event_list_view.append_column("Icon", *icon_renderer);
 
     Gtk::TreeView::Column* icon_column = _event_list_view.get_column(cols_count-1);
-    icon_column->add_attribute(icon_renderer->property_event_type(), _columns->type);
+    icon_column->add_attribute(icon_renderer->property_icon_name(), _columns->icon_name);
 
     CellRendererInt* children_renderer = Gtk::manage(new CellRendererInt(greater_than_1));
     children_renderer->property_weight() = 600; // =Pango::WEIGHT_SEMIBOLD (not defined in old versions of pangomm)
@@ -157,9 +153,14 @@ UndoHistory::UndoHistory()
 
 UndoHistory::~UndoHistory()
 {
-    _connectDocument(nullptr, nullptr);
+    // disconnect from prior
+    if (_event_log) {
+        _event_log->removeDialogConnection(&_event_list_view, &_callback_connections);
+        _event_log->remove_destroy_notify_callback(this);
+    }
 }
 
+// Required for floating dialogs.
 void UndoHistory::update()
 {
     if (!_app) {
@@ -167,28 +168,16 @@ void UndoHistory::update()
         return;
     }
 
-    SPDesktop *desktop = getDesktop();
-
-    if (!desktop) {
-        return;
-    }
-
-    EventLog *newEventLog = desktop ? desktop->event_log : nullptr;
-    if ((_desktop == desktop) && (_event_log == newEventLog)) {
-        // same desktop set
-    }
-    else
-    {
-        _connectDocument(desktop, _app->get_active_document());
-    }
-
-    if (_app->get_active_document()) {
-        _handleDocumentReplaced(desktop, _app->get_active_document());
+    if (_document != _app->get_active_document()) {
+        _connectDocument(_app->get_active_document());
     }
 }
 
-void UndoHistory::_connectDocument(SPDesktop* desktop, SPDocument * /*document*/)
+void UndoHistory::_connectDocument(SPDocument *document)
 {
+    g_assert (document != nullptr);
+    g_assert (document->get_event_log() != nullptr);
+
     // disconnect from prior
     if (_event_log) {
         _event_log->removeDialogConnection(&_event_list_view, &_callback_connections);
@@ -199,10 +188,9 @@ void UndoHistory::_connectDocument(SPDesktop* desktop, SPDocument * /*document*/
 
     _event_list_view.unset_model();
 
-    // connect to new EventLog/Desktop
-    _desktop = desktop;
-    _event_log = desktop ? desktop->event_log : nullptr;
-    _document = desktop ? desktop->doc() : nullptr;
+    // connect to new EventLog
+    _document = document;
+    _event_log = document->get_event_log();
     _connectEventLog();
 }
 
@@ -216,13 +204,6 @@ void UndoHistory::_connectEventLog()
 
         _event_log->addDialogConnection(&_event_list_view, &_callback_connections);
         _event_list_view.scroll_to_row(_event_list_store->get_path(_event_list_selection->get_selected()));
-    }
-}
-
-void UndoHistory::_handleDocumentReplaced(SPDesktop* desktop, SPDocument *document)
-{
-    if ((desktop != _desktop) || (document != _document)) {
-        _connectDocument(desktop, document);
     }
 }
 

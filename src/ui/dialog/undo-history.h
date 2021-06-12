@@ -24,7 +24,6 @@
 #include "event-log.h"
 #include "ui/dialog/dialog-base.h"
 
-class SPDesktop;
 
 namespace Inkscape {
 namespace UI {
@@ -36,15 +35,15 @@ namespace Dialog {
 class CellRendererSPIcon : public Gtk::CellRendererPixbuf {
 public:
 
-    CellRendererSPIcon() :
-        Glib::ObjectBase(typeid(CellRendererPixbuf)),
-        Gtk::CellRendererPixbuf(),
-        _property_icon(*this, "icon", Glib::RefPtr<Gdk::Pixbuf>(nullptr)),
-        _property_event_type(*this, "event_type", 0)
+    CellRendererSPIcon()
+        : Glib::ObjectBase(typeid(CellRendererPixbuf))
+        , Gtk::CellRendererPixbuf()
+        , _property_icon(*this, "icon", Glib::RefPtr<Gdk::Pixbuf>(nullptr))
+        , _property_icon_name(*this, "our-icon-name", "inkscape-logo") // icon-name/icon_name used by Gtk
     { }
 
-    Glib::PropertyProxy<unsigned int>
-    property_event_type() { return _property_event_type.get_proxy(); }
+    Glib::PropertyProxy<Glib::ustring>
+    property_icon_name() { return _property_icon_name.get_proxy(); }
 
 protected:
     void render_vfunc(const Cairo::RefPtr<Cairo::Context>& cr,
@@ -55,8 +54,8 @@ protected:
 private:
 
     Glib::Property<Glib::RefPtr<Gdk::Pixbuf> > _property_icon;
-    Glib::Property<unsigned int> _property_event_type;
-    std::map<const unsigned int, Glib::RefPtr<Gdk::Pixbuf> > _icon_cache;
+    Glib::Property<Glib::ustring> _property_icon_name;
+    std::map<Glib::ustring, Glib::RefPtr<Gdk::Pixbuf> > _icon_cache;
 
 };
 
@@ -115,7 +114,6 @@ public:
 
 protected:
 
-    SPDesktop *_desktop;
     SPDocument *_document;
     EventLog *_event_log;
 
@@ -129,9 +127,8 @@ protected:
 
     static void *_handleEventLogDestroyCB(void *data);
 
-    void _connectDocument(SPDesktop* desktop, SPDocument *document);
+    void _connectDocument(SPDocument *document);
     void _connectEventLog();
-    void _handleDocumentReplaced(SPDesktop* desktop, SPDocument *document);
     void *_handleEventLogDestroy();
     void _onListSelectionChange();
     void _onExpandEvent(const Gtk::TreeModel::iterator &iter, const Gtk::TreeModel::Path &path);
