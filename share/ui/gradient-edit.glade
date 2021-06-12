@@ -131,6 +131,7 @@
             <property name="can-focus">False</property>
             <property name="focus-on-click">False</property>
             <property name="receives-default">True</property>
+            <property name="tooltip-text" translatable="yes">Reverse the direction of the gradient</property>
             <property name="margin-end">16</property>
             <property name="relief">none</property>
           </object>
