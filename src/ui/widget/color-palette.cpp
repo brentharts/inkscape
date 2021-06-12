@@ -368,7 +368,10 @@ void ColorPalette::_enable_scrollbar(bool show) {
 }
 
 void ColorPalette::set_up_scrolling() {
+    auto& box = get_widget<Gtk::Box>(_builder, "palette-box");
+
     if (_compact) {
+        box.set_orientation(Gtk::ORIENTATION_HORIZONTAL);
         // in compact mode scrollbars are hidden; they take up too much space
         set_valign(Gtk::ALIGN_START);
         set_vexpand(false);
@@ -408,6 +411,7 @@ void ColorPalette::set_up_scrolling() {
         }
     }
     else {
+        box.set_orientation(Gtk::ORIENTATION_VERTICAL);
         // in normal mode use regular full-size scrollbars
         set_valign(Gtk::ALIGN_FILL);
         set_vexpand(true);
