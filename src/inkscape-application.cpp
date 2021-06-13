@@ -109,12 +109,6 @@ InkscapeApplication::document_new(const std::string &Template)
     SPDocument *document = ink_file_new(Template);
     if (document) {
         document_add(document);
-
-        // Set viewBox if it doesn't exist.
-        if (!document->getRoot()->viewBox_set) {
-            document->setViewBox();
-        }
-
     } else {
         std::cerr << "InkscapeApplication::new_document: failed to open new document!" << std::endl;
     }
