@@ -10,6 +10,7 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
+#include <gtkmm.h>
 #include "scroll-utils.h"
 
 namespace Inkscape {
@@ -31,6 +32,10 @@ class ScrollProtected : public Base
 {
 public:
     using Base::Base;
+    using typename Base::BaseObjectType;
+    ScrollProtected() : Base(){}
+    ScrollProtected(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refGlade):Base(cobject){};
+    virtual ~ScrollProtected(){};
 
 protected:
     /**

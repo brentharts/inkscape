@@ -30,202 +30,90 @@ namespace Dialog {
 
 Export::Export()
     : DialogBase("/dialogs/export/", "Export")
-    , container(Gtk::ORIENTATION_VERTICAL, 0)
-    , single_image(Gtk::ORIENTATION_VERTICAL, 0)
-
 {
-    createSingleImage();
-    createBatch();
-    attachLabels();
-    createRadioGroups();
-    setupSpinButtons();
-    container.pack_start(notebook, true, true);
-    add(container);
-    show_all_children();
+    std::string gladefile = get_filename_string(Inkscape::IO::Resource::UIS, "dialog-export.glade");
 
-    select_page.set_active();
+    try {
+        builder = Gtk::Builder::create_from_file(gladefile);
+    } catch (const Glib::Error &ex) {
+        g_error("Glade file loading failed for export screen");
+        return;
+    }
+    builder->get_widget("Export Dialog Box", container);
+    add(*container);
+    show_all_children();
+    initialise_all();
+    units->setUnitType(Inkscape::Util::UNIT_TYPE_LINEAR);
+
+    export_notebook->signal_map().connect(sigc::mem_fun(*this, &Export::onNotebookVisible));
 }
 
 Export::~Export() {}
 
-void Export::createSingleImage()
+void Export::initialise_all()
 {
-    notebook.append_page(single_image, "Single Image");
-
-    { // Setup Scrolled Window
-        single_image.pack_start(si_scrolled, true, true);
-        si_scrolled.set_propagate_natural_width();
-        si_scrolled.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-        si_scrolled.set_vexpand();
-        si_scrolled.add(si_scrolled_grid);
-        { // Setup Scrolled Grid
-
-            int row = 0;
-
-            si_scrolled_grid.set_column_spacing(10);
-            si_scrolled_grid.set_row_spacing(5);
-
-            { // Setup selection box
-                si_scrolled_grid.attach(si_selection_box, 0, row, 8, 1);
-                si_selection_box.pack_start(select_document, true, true);
-                si_selection_box.pack_start(select_page, true, true);
-                si_selection_box.pack_start(select_selection, true, true);
-                si_selection_box.pack_start(select_custom, true, true);
-                si_selection_box.set_homogeneous();
-                si_selection_box.set_hexpand();
-                si_selection_box.set_layout(Gtk::BUTTONBOX_EXPAND);
-                row = row + 1;
-            }
-            {// Setup Corrdinates Box
-             {auto x0_label = Gtk::make_managed<Gtk::Label>("Left", Gtk::ALIGN_START);
-            si_scrolled_grid.attach(*x0_label, 1, row, 1, 1);
-            si_scrolled_grid.attach(x0_sb, 2, row, 1, 1);
-
-            auto x1_label = Gtk::make_managed<Gtk::Label>("Right", Gtk::ALIGN_START);
-            si_scrolled_grid.attach(*x1_label, 4, row, 1, 1);
-            si_scrolled_grid.attach(x1_sb, 5, row, 1, 1);
-
-            row = row + 1;
-        }
+    if (builder) {
+        // Notebook Start
         {
-            auto y0_label = Gtk::make_managed<Gtk::Label>("Top", Gtk::ALIGN_START);
-            si_scrolled_grid.attach(*y0_label, 1, row, 1, 1);
-            si_scrolled_grid.attach(y0_sb, 2, row, 1, 1);
+            builder->get_widget("Export Notebook", export_notebook);
+            // Single Image Start
+            {
+                builder->get_widget("Single Image", single_image);
 
-            auto y1_label = Gtk::make_managed<Gtk::Label>("Bottom", Gtk::ALIGN_START);
-            si_scrolled_grid.attach(*y1_label, 4, row, 1, 1);
-            si_scrolled_grid.attach(y1_sb, 5, row, 1, 1);
+                builder->get_widget("si_s_document", select_document);
+                builder->get_widget("si_s_page", select_page);
+                builder->get_widget("si_s_selection", select_selection);
+                builder->get_widget("si_s_custom", select_custom);
 
-            row = row + 1;
-        }
-        {
-            auto width_label = Gtk::make_managed<Gtk::Label>("Width", Gtk::ALIGN_START);
-            si_scrolled_grid.attach(*width_label, 1, row, 1, 1);
-            si_scrolled_grid.attach(width_sb, 2, row, 1, 1);
+                builder->get_widget_derived("si_left_sb", left_sb);
+                builder->get_widget_derived("si_right_sb", right_sb);
+                builder->get_widget_derived("si_top_sb", top_sb);
+                builder->get_widget_derived("si_bottom_sb", bottom_sb);
+                builder->get_widget_derived("si_height_sb", height_sb);
+                builder->get_widget_derived("si_width_sb", width_sb);
 
-            auto height_label = Gtk::make_managed<Gtk::Label>("Height", Gtk::ALIGN_START);
-            si_scrolled_grid.attach(*height_label, 4, row, 1, 1);
-            si_scrolled_grid.attach(height_sb, 5, row, 1, 1);
+                builder->get_widget_derived("si_img_height_sb", img_height_sb);
+                builder->get_widget_derived("si_img_width_sb", img_width_sb);
+                builder->get_widget_derived("si_dpi_sb", dpi_sb);
 
-            row = row + 1;
-        }
+                builder->get_widget("si_show_export_area", show_export_area);
+                builder->get_widget_derived("si_units", units);
+
+                builder->get_widget("si_hide_all", hide_all);
+                builder->get_widget("si_preview_box", si_preview_box);
+                builder->get_widget("si_show_preview", si_show_preview);
+
+                builder->get_widget("si_extention", extension);
+                builder->get_widget("si_filename", filename);
+                builder->get_widget("si_export", si_export);
+            } // Single Image End
+
+            // Batch Export Start
+            {
+                builder->get_widget("Batch Export", batch_export);
+            } // Batch Export End
+
+        } // Notebook End
     }
-    { // Setup Units Box
-        auto units_box = Gtk::make_managed<Gtk::Box>();
-        si_scrolled_grid.attach(*units_box, 1, row, 5, 1);
-
-        units_box->pack_start(show_export_area, true, true, 0);
-
-        unit_selector.setUnitType(Inkscape::Util::UNIT_TYPE_LINEAR);
-        units_box->pack_end(unit_selector, false, false, 0);
-
-        auto unit_label = Gtk::make_managed<Gtk::Label>("Unit", Gtk::ALIGN_START);
-        units_box->pack_end(*unit_label, false, false, 0);
-
-        units_box->set_spacing(5);
-        units_box->set_hexpand();
-        row = row + 1;
-    }
-    { // Setup Image Box
-        {
-            auto img_label = Gtk::make_managed<Gtk::Label>("Image Size", Gtk::ALIGN_START);
-            si_scrolled_grid.attach(*img_label, 1, row, 2, 1);
-            row = row + 1;
-        }
-        {
-            auto bmwidth_label = Gtk::make_managed<Gtk::Label>("Width", Gtk::ALIGN_START);
-            si_scrolled_grid.attach(*bmwidth_label, 1, row, 1, 1);
-            si_scrolled_grid.attach(bmwidth_sb, 2, row, 1, 1);
-
-            auto bmheight_label = Gtk::make_managed<Gtk::Label>("Height", Gtk::ALIGN_START);
-            si_scrolled_grid.attach(*bmheight_label, 4, row, 1, 1);
-            si_scrolled_grid.attach(bmheight_sb, 5, row, 1, 1);
-
-            row = row + 1;
-        }
-        {
-            auto dpi_label = Gtk::make_managed<Gtk::Label>("DPI", Gtk::ALIGN_START);
-            si_scrolled_grid.attach(*dpi_label, 1, row, 1, 1);
-            si_scrolled_grid.attach(dpi_sb, 2, row, 1, 1);
-
-            row = row + 1;
-        }
-        { // Options Box
-            auto options_box = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL);
-            si_scrolled_grid.attach(*options_box, 1, row, 2, 3);
-            options_box->pack_start(hide_all, true, true, 0);
-            options_box->pack_start(preview, true, true, 0);
-            options_box->set_spacing(5);
-            row = row + 3;
-        }
-    }
+    return;
 }
+
+/**
+ * Set current page based on preference/last visited page
+ */
+
+void Export::onNotebookVisible()
+{
+    if (export_notebook && batch_export) {
+        auto page_num = export_notebook->page_num(*batch_export);
+        export_notebook->set_current_page(page_num);
+    }
+    return;
+}
+
+
+
 } // namespace Dialog
-
-{ // Setup Bottom Grid
-    single_image.pack_end(si_bottom_grid, false, true);
-    si_bottom_grid.attach(si_filename, 0, 0, 1, 1);
-    si_bottom_grid.attach(si_extention, 1, 0, 1, 1);
-    si_bottom_grid.attach(si_export, 2, 0, 1, 1);
-    si_filename.set_hexpand();
-}
-} // namespace UI
-
-void Export::createBatch()
-{
-    notebook.append_page(batch, "Batch Export");
-}
-
-void Export::attachLabels()
-{
-    select_document.set_label("Document");
-    select_page.set_label("Page");
-    select_selection.set_label("Selection");
-    select_custom.set_label("Custom");
-    si_export.set_label("Export");
-
-    show_export_area.set_label("Show Export Area on Canvas");
-
-    hide_all.set_label("Hide all except selected");
-    preview.set_label("Preview");
-}
-
-void Export::createRadioGroups()
-{
-    { // single image selection group
-        auto group = select_document.get_group();
-        select_page.set_group(group);
-        select_selection.set_group(group);
-        select_custom.set_group(group);
-    }
-    removeIndicators();
-}
-
-void Export::removeIndicators()
-{
-    {
-        select_document.set_mode(false);
-        select_page.set_mode(false);
-        select_selection.set_mode(false);
-        select_custom.set_mode(false);
-    }
-}
-
-void Export::setupSpinButtons()
-{
-    { // Coordinate sp
-        auto adj = Gtk::Adjustment::create(0, 0.0, 1000.0, 0.1, 1.0, 0);
-        x0_sb.configure(adj,1.0,3);
-        x0_sb.set_width_chars(7);
-        x0_sb.set_sensitive (true);
-
-        x1_sb.configure(adj,1.0,3);
-        x1_sb.set_width_chars(7);
-        x1_sb.set_sensitive (true);
-    }
-}
-
-} // namespace Inkscape
 } // namespace UI
 } // namespace Inkscape
 

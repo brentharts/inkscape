@@ -15,10 +15,11 @@
 
 #include <gtkmm.h>
 
+#include "ui/dialog/dialog-base.h"
 #include "ui/widget/scrollprotected.h"
 #include "ui/widget/unit-menu.h"
 
-#include "ui/dialog/dialog-base.h"
+
 
 namespace Inkscape {
 namespace UI {
@@ -42,50 +43,42 @@ public:
     static Export &getInstance() { return *new Export(); }
 
 private:
-    Gtk::Box container;
-    Gtk::Notebook notebook;
-    Gtk::Box single_image;
-    Gtk::Box batch;
+    // builder and its object ( in order )
+    Glib::RefPtr<Gtk::Builder> builder;
+    Gtk::Box *container = nullptr;
+    Gtk::Notebook *export_notebook = nullptr;
 
-    
-    Gtk::ScrolledWindow si_scrolled;
-    Gtk::Grid si_scrolled_grid;
-    
-    Gtk::ButtonBox si_selection_box;
-    Gtk::RadioButton select_document;
-    Gtk::RadioButton select_page;
-    Gtk::RadioButton select_selection;
-    Gtk::RadioButton select_custom;
+    Gtk::Box *single_image = nullptr;
+    Gtk::RadioButton *select_document = nullptr;
+    Gtk::RadioButton *select_page = nullptr;
+    Gtk::RadioButton *select_selection = nullptr;
+    Gtk::RadioButton *select_custom = nullptr;
+    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> *left_sb = nullptr;
+    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> *right_sb = nullptr;
+    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> *top_sb = nullptr;
+    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> *bottom_sb = nullptr;
+    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> *height_sb = nullptr;
+    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> *width_sb = nullptr;
+    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> *img_height_sb = nullptr;
+    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> *img_width_sb = nullptr;
+    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> *dpi_sb = nullptr;
+    Gtk::CheckButton *show_export_area = nullptr;
+    Inkscape::UI::Widget::UnitMenu *units = nullptr;
+    Gtk::CheckButton *hide_all = nullptr;
+    Gtk::Box *si_preview_box = nullptr;
+    Gtk::CheckButton *si_show_preview = nullptr;
+    Gtk::ComboBoxText *extension = nullptr;
+    Gtk::Entry *filename = nullptr;
+    Gtk::Button *si_export = nullptr;
 
-    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> x0_sb;
-    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> x1_sb;
-    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> y0_sb;
-    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> y1_sb;
-    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> width_sb;
-    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> height_sb;
+    Gtk::Box *batch_export = nullptr;
 
-    Gtk::CheckButton show_export_area;
-    Inkscape::UI::Widget::UnitMenu unit_selector;
+    // Initialise all objects from builder
+    void initialise_all();
 
-    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> bmwidth_sb;
-    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> bmheight_sb;
-    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> dpi_sb;
+    //signals callback
+    void onNotebookVisible();
 
-    Gtk::CheckButton hide_all;
-    Gtk::CheckButton preview;
-
-    Gtk::Grid si_bottom_grid;
-    Gtk::Entry si_filename;
-    Gtk::ComboBoxText si_extention;
-    Gtk::Button si_export;
-
-
-    void createSingleImage();
-    void createBatch();
-    void attachLabels();
-    void createRadioGroups();
-    void removeIndicators();
-    void setupSpinButtons();
 };
 } // namespace Dialog
 } // namespace UI
