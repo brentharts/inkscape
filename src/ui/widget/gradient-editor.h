@@ -8,6 +8,7 @@
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/popover.h>
 #include <gtkmm/image.h>
+#include <gtkmm/expander.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/treemodelcolumn.h>
 #include <gtkmm/builder.h>
@@ -61,7 +62,7 @@ private:
     void add_stop(int index);
     void duplicate_stop();
     void delete_stop(int index);
-    void toggle_stops();
+    void show_stops(bool visible);
     void update_stops_layout();
     void set_repeat_mode(SPGradientSpread mode);
     void set_repeat_icon(SPGradientSpread mode);
@@ -91,7 +92,7 @@ private:
     Gtk::SpinButton& _offset_btn;
     Gtk::Button& _add_stop;
     Gtk::Button& _delete_stop;
-    Gtk::Button& _show_stops_list;
+    Gtk::Expander& _show_stops_list;
     bool _stops_list_visible = true;
     Gtk::Box& _stops_gallery;
     Gtk::Box& _colors_box;

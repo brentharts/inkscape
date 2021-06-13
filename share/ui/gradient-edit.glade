@@ -2,12 +2,15 @@
 <!-- Generated with glade 3.38.1 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
-  <object class="GtkImage" id="collapse">
-    <property name="visible">True</property>
+  <object class="GtkPopover" id="libraryPopover">
+    <property name="width-request">360</property>
+    <property name="height-request">440</property>
     <property name="can-focus">False</property>
-    <property name="halign">start</property>
-    <property name="valign">center</property>
-    <property name="icon-name">go-next</property>
+    <property name="position">bottom</property>
+    <property name="constrain-to">none</property>
+    <child>
+      <placeholder/>
+    </child>
   </object>
   <object class="GtkAdjustment" id="offset">
     <property name="upper">1</property>
@@ -42,17 +45,6 @@
       </object>
     </child>
   </object>
-  <object class="GtkPopover" id="libraryPopover">
-    <property name="width-request">360</property>
-    <property name="height-request">440</property>
-    <property name="can-focus">False</property>
-    <property name="relative-to">libraryBtn</property>
-    <property name="position">bottom</property>
-    <property name="constrain-to">none</property>
-    <child>
-      <placeholder/>
-    </child>
-  </object>
   <!-- n-columns=2 n-rows=4 -->
   <object class="GtkGrid" id="mainGrid">
     <property name="name">mainGrid</property>
@@ -72,13 +64,37 @@
             <property name="can-focus">False</property>
             <property name="halign">start</property>
             <property name="margin-start">4</property>
-            <property name="margin-end">4</property>
             <property name="label" translatable="yes">Gradient:</property>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkMenuButton" id="libraryBtn">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="focus-on-click">False</property>
+            <property name="receives-default">True</property>
+            <property name="tooltip-text" translatable="yes">Gradient library</property>
+            <property name="valign">center</property>
+            <property name="margin-left">4</property>
+            <property name="margin-start">4</property>
+            <property name="popover">libraryPopover</property>
+            <child>
+              <object class="GtkImage">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="icon-name">gradient-library</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
           </packing>
         </child>
         <child>
@@ -93,7 +109,7 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">1</property>
+            <property name="position">2</property>
           </packing>
         </child>
         <child>
@@ -108,7 +124,7 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">2</property>
+            <property name="position">3</property>
           </packing>
         </child>
         <child>
@@ -122,7 +138,7 @@
           <packing>
             <property name="expand">True</property>
             <property name="fill">True</property>
-            <property name="position">3</property>
+            <property name="position">4</property>
           </packing>
         </child>
         <child>
@@ -138,7 +154,7 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">4</property>
+            <property name="position">5</property>
           </packing>
         </child>
         <child>
@@ -151,7 +167,7 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">5</property>
+            <property name="position">6</property>
           </packing>
         </child>
         <child>
@@ -164,7 +180,7 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">6</property>
+            <property name="position">7</property>
           </packing>
         </child>
         <child>
@@ -184,7 +200,7 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">7</property>
+            <property name="position">8</property>
           </packing>
         </child>
       </object>
@@ -203,13 +219,20 @@
         <property name="margin-bottom">3</property>
         <property name="hexpand">True</property>
         <child>
-          <object class="GtkButton" id="stopsBtn">
+          <object class="GtkExpander" id="stopsBtn">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="receives-default">True</property>
+            <property name="can-focus">True</property>
             <property name="valign">center</property>
-            <property name="image">collapse</property>
-            <property name="relief">none</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child type="label">
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">Stops</property>
+              </object>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -218,16 +241,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkLabel">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="label" translatable="yes">Stops</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
+          <placeholder/>
         </child>
         <child>
           <object class="GtkLabel">
@@ -281,32 +295,9 @@
         </child>
       </object>
       <packing>
-        <property name="left-attach">1</property>
-        <property name="top-attach">1</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkMenuButton" id="libraryBtn">
-        <property name="width-request">60</property>
-        <property name="visible">True</property>
-        <property name="can-focus">True</property>
-        <property name="focus-on-click">False</property>
-        <property name="receives-default">True</property>
-        <property name="tooltip-text" translatable="yes">Gradient library</property>
-        <property name="valign">center</property>
-        <property name="margin-start">4</property>
-        <property name="popover">libraryPopover</property>
-        <child>
-          <object class="GtkImage">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="icon-name">gradient-library</property>
-          </object>
-        </child>
-      </object>
-      <packing>
         <property name="left-attach">0</property>
         <property name="top-attach">1</property>
+        <property name="width">2</property>
       </packing>
     </child>
     <child>

@@ -172,7 +172,7 @@ GradientEditor::GradientEditor(const char* prefs) :
     _popover(get_widget<Gtk::Popover>(_builder, "libraryPopover")),
     _stop_tree(get_widget<Gtk::TreeView>(_builder, "stopList")),
     _offset_btn(get_widget<Gtk::SpinButton>(_builder, "offsetSpin")),
-    _show_stops_list(get_widget<Gtk::Button>(_builder, "stopsBtn")),
+    _show_stops_list(get_widget<Gtk::Expander>(_builder, "stopsBtn")),
     _add_stop(get_widget<Gtk::Button>(_builder, "stopAdd")),
     _delete_stop(get_widget<Gtk::Button>(_builder, "stopDelete")),
     _stops_gallery(get_widget<Gtk::Box>(_builder, "stopsGallery")),
@@ -254,7 +254,9 @@ GradientEditor::GradientEditor(const char* prefs) :
         }
     });
 
-    _show_stops_list.signal_clicked().connect(sigc::mem_fun(this, &GradientEditor::toggle_stops));
+    _show_stops_list.property_expanded().signal_changed().connect(
+        [&](){ show_stops(_show_stops_list.get_expanded()); }
+    );
 
     set_icon(_add_stop, "list-add");
     _add_stop.signal_clicked().connect([=](){
@@ -316,6 +318,7 @@ GradientEditor::GradientEditor(const char* prefs) :
 
     // restore visibility of the stop list view
     _stops_list_visible = Inkscape::Preferences::get()->getBool(_prefs + "/stoplist", true);
+    _show_stops_list.set_expanded(_stops_list_visible);
     update_stops_layout();
 }
 
@@ -429,19 +432,17 @@ void GradientEditor::delete_stop(int index) {
 }
 
 // collapse/expand list of stops in the UI
-void GradientEditor::toggle_stops() {
-    _stops_list_visible = !_stops_list_visible;
+void GradientEditor::show_stops(bool visible) {
+    _stops_list_visible = visible;
     update_stops_layout();
     Inkscape::Preferences::get()->setBool(_prefs + "/stoplist", _stops_list_visible);
 }
 
 void GradientEditor::update_stops_layout() {
     if (_stops_list_visible) {
-        set_icon(_show_stops_list, "go-previous");
         _stops_gallery.show();
     }
     else {
-        set_icon(_show_stops_list, "go-next");
         _stops_gallery.hide();
     }
 }
