@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
 #include <gtkmm/box.h>
 #include <gtkmm/popover.h>
 #include <gtkmm/scale.h>
