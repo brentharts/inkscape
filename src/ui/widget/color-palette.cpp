@@ -177,7 +177,6 @@ gboolean ColorPalette::scroll_cb(gpointer self) {
             if (pos > range.first && pos < range.second) {
                 // not yet done
                 fire_again = true; // fire this callback again
-                // g_warning("pos %f, reaL: %f, %f .. %f, stp: %f, fin: %f", pos, vert->get_value(), range.first, range.second, ptr->_scroll_step, ptr->_scroll_final);
             }
         }
     }
@@ -469,7 +468,6 @@ void ColorPalette::resize() {
     else {
         // exact size for multiple rows
         int height = (get_tile_height() + _border) * _rows - _border;
-        // height += _flowbox.get_margin_top(); // + _flowbox.get_margin_bottom();
         _scroll.set_size_request(1, height);
     }
 
@@ -508,9 +506,6 @@ void ColorPalette::set_colors(const std::vector<Gtk::Widget*>& swatches) {
 
     _flowbox.show_all();
     _count = std::max(1, count);
-    // if (_rows == 1) {
-        // _flowbox.set_min_children_per_line(std::max(1, count));
-    // }
     _flowbox.set_max_children_per_line(_count);
 
     // resize();
