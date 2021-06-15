@@ -1545,7 +1545,7 @@ msgstr "Efeito de relevo especular"
 
 #: ../share/filters/filters.svg.h:606
 msgid "Basic Two Lights Bump"
-msgstr "Dois Relevo Básicos Iluminados"
+msgstr "Relevo Básico duplamente iluminado"
 
 #: ../share/filters/filters.svg.h:608
 msgid "Two types of lighting emboss effect"
@@ -4913,11 +4913,11 @@ msgstr "Incluir cor de fundo no arquivo exportado"
 
 #: ../src/actions/actions-output.cpp:249
 msgid "Export Background Opacity"
-msgstr "Exportar Opacidade de Fundo"
+msgstr "Exportar Transparência de Fundo"
 
 #: ../src/actions/actions-output.cpp:249
 msgid "Include background opacity in exported file"
-msgstr "Incluir opacidade de fundo no arquivo exportado"
+msgstr "Incluir transparência de fundo no arquivo exportado"
 
 #: ../src/actions/actions-output.cpp:250
 msgid "Export PNG Color Mode"
@@ -5814,7 +5814,7 @@ msgstr "Raio:"
 #: ../src/extension/internal/bitmap/sharpen.cpp:43
 #: ../src/extension/internal/bitmap/unsharpmask.cpp:46
 msgid "Sigma:"
-msgstr "Sigma:"
+msgstr "Dispersão:"
 
 #: ../src/extension/internal/bitmap/blur.cpp:49
 msgid "Blur selected bitmap(s)"
@@ -5866,7 +5866,7 @@ msgstr "Canal Preto"
 #: ../src/extension/internal/bitmap/channel.cpp:60
 #: ../src/extension/internal/bitmap/levelChannel.cpp:64
 msgid "Opacity Channel"
-msgstr "Canal de Opacidade"
+msgstr "Canal de Transparência"
 
 #: ../src/extension/internal/bitmap/channel.cpp:61
 #: ../src/extension/internal/bitmap/levelChannel.cpp:65
@@ -5895,7 +5895,7 @@ msgstr "Colorizar"
 msgid "Colorize selected bitmap(s) with specified color, using given opacity"
 msgstr ""
 "Colorizar bitmap(s) selecionado(s) com uma cor específica, usando uma dada "
-"opacidade"
+"transparência"
 
 #: ../src/extension/internal/bitmap/contrast.cpp:42
 #: ../src/extension/internal/filter/color.h:1241
@@ -5905,11 +5905,11 @@ msgstr "Contraste"
 
 #: ../src/extension/internal/bitmap/contrast.cpp:44
 msgid "Adjust:"
-msgstr "Ajustar:"
+msgstr "Ajuste:"
 
 #: ../src/extension/internal/bitmap/contrast.cpp:50
 msgid "Increase or decrease contrast in bitmap(s)"
-msgstr "Aumentar ou diminuir o contraste no bitmap(s)"
+msgstr "Aumentar ou diminuir o contraste em bitmap(s)"
 
 #: ../src/extension/internal/bitmap/crop.cpp:69
 #: ../src/extension/internal/filter/bumps.h:88
@@ -5946,7 +5946,7 @@ msgstr "Alternar Mapa de Cores"
 #: ../src/extension/internal/bitmap/unsharpmask.cpp:47
 #: ../src/ui/toolbar/spray-toolbar.cpp:142
 msgid "Amount:"
-msgstr "Quantidade:"
+msgstr "Quantia:"
 
 #: ../src/extension/internal/bitmap/cycleColormap.cpp:47
 msgid "Cycle colormap(s) of selected bitmap(s)"
@@ -5971,7 +5971,7 @@ msgstr "Acender limites do(s) bitmap(s) selecionado(s)"
 
 #: ../src/extension/internal/bitmap/emboss.cpp:40
 msgid "Emboss"
-msgstr "Relevo"
+msgstr "Moldar"
 
 #: ../src/extension/internal/bitmap/emboss.cpp:49
 msgid "Emboss selected bitmap(s); highlight edges with 3D effect"
@@ -6002,7 +6002,7 @@ msgstr "Desfoque Gaussiano"
 #: ../src/extension/internal/bitmap/implode.cpp:41
 #: ../src/extension/internal/bitmap/solarize.cpp:43
 msgid "Factor:"
-msgstr "Fator:"
+msgstr "Tamanho:"
 
 #: ../src/extension/internal/bitmap/gaussianBlur.cpp:49
 msgid "Gaussian blur selected bitmap(s)"
@@ -6138,32 +6138,32 @@ msgstr ""
 #: ../src/ui/dialog/clonetiler.cpp:839 ../src/ui/dialog/clonetiler.cpp:971
 #: ../share/extensions/interp_att_g.inx:14
 msgid "Opacity"
-msgstr "Opacidade"
+msgstr "Transparência"
 
 #: ../src/extension/internal/bitmap/opacity.cpp:42
 #: ../src/ui/dialog/filter-effects-dialog.cpp:2827
 #: ../src/ui/toolbar/dropper-toolbar.cpp:68
 msgid "Opacity:"
-msgstr "Opacidade:"
+msgstr "Transparência:"
 
 #: ../src/extension/internal/bitmap/opacity.cpp:48
 msgid "Modify opacity channel(s) of selected bitmap(s)"
-msgstr "Modificar canal(is) de opacidade do(s) bitmap(s) selecionado(s)"
+msgstr "Modificar canal(is) de transparência do(s) bitmap(s) selecionado(s)"
 
 #: ../src/extension/internal/bitmap/raise.cpp:42
 msgid "Raise"
-msgstr "Levantar"
+msgstr "Elevar"
 
 #: ../src/extension/internal/bitmap/raise.cpp:46
 msgid "Raised"
-msgstr "Levantado"
+msgstr "Elevado"
 
 #: ../src/extension/internal/bitmap/raise.cpp:52
 msgid ""
 "Alter lightness the edges of selected bitmap(s) to create a raised appearance"
 msgstr ""
 "Altere a luminosidade das bordas do(s) bitmap(s) selecionado(s) para criar "
-"uma aparência elevada"
+"um aspecto de elevação"
 
 #: ../src/extension/internal/bitmap/reduceNoise.cpp:42
 msgid "Reduce Noise"
@@ -6253,7 +6253,7 @@ msgstr "Graus:"
 #: ../src/extension/internal/bitmap/swirl.cpp:47
 msgid "Swirl selected bitmap(s) around center point"
 msgstr ""
-"Fazer redemoinhp com bitmap(s) selecionado(s) ao redor de um ponto central"
+"Fazer redemoinho com bitmap(s) selecionado(s) ao redor de um ponto central"
 
 #. TRANSLATORS: see http://docs.gimp.org/en/gimp-tool-threshold.html
 #: ../src/extension/internal/bitmap/threshold.cpp:40
@@ -8016,11 +8016,11 @@ msgstr "Suavizar"
 
 #: ../src/extension/internal/filter/morphology.h:201
 msgid "Fill opacity:"
-msgstr "Opacidade do preenchimento:"
+msgstr "Transparência do preenchimento:"
 
 #: ../src/extension/internal/filter/morphology.h:202
 msgid "Stroke opacity:"
-msgstr "Opacidade do contorno:"
+msgstr "Transparência do contorno:"
 
 #: ../src/extension/internal/filter/morphology.h:212
 msgid "Adds a colorizable outline"
@@ -8485,7 +8485,7 @@ msgstr "Apagador Leve"
 #: ../src/extension/internal/filter/transparency.h:219
 #: ../src/extension/internal/filter/transparency.h:297
 msgid "Global opacity"
-msgstr "Opacidade global"
+msgstr "Transparência global"
 
 #: ../src/extension/internal/filter/transparency.h:228
 msgid "Make the lightest parts of the object progressively transparent"
@@ -8493,7 +8493,7 @@ msgstr "Tornar as partes mais claras do objeto progressivamente transparentes"
 
 #: ../src/extension/internal/filter/transparency.h:305
 msgid "Set opacity and strength of opacity boundaries"
-msgstr "Defina a opacidade e a intensidade dos limites de opacidade"
+msgstr "Defina a transparência e a intensidade dos limites de transparência"
 
 #: ../src/extension/internal/filter/transparency.h:359
 msgid "Silhouette"
@@ -9926,7 +9926,7 @@ msgstr "COR"
 
 #: ../src/inkscape-application.cpp:661
 msgid "Background opacity for exported bitmaps (0.0 to 1.0, or 1 to 255)"
-msgstr "Opacidade de fundo para bitmaps exportados (0,0 a 1,0, ou 1 a 255)"
+msgstr "Transparência de fundo para bitmaps exportados (0,0 a 1,0, ou 1 a 255)"
 
 #: ../src/inkscape-application.cpp:661
 msgid "VALUE"
@@ -11145,7 +11145,7 @@ msgid ""
 "comma-separated list; e.g. 'fill, filter, opacity'."
 msgstr ""
 "Propriedades CSS do original que o clone deve copiar, escritas como uma "
-"lista separada por vírgulas; por exemplo. 'preencher, filtrar, opacidade'."
+"lista separada por vírgulas; por exemplo. 'preencher, filtrar, transparência'."
 
 #: ../src/live_effects/lpe-clone-original.cpp:51
 #: ../src/live_effects/lpe-slice.cpp:50
@@ -12382,11 +12382,11 @@ msgstr "Orientação da linha e rótulos"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:70
 msgid "Color and opacity"
-msgstr "Cor e opacidade"
+msgstr "Cor e transparência"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:70
 msgid "Set color and opacity of the dimensions"
-msgstr "Defina a cor e a opacidade das dimensões"
+msgstr "Defina a cor e a transparência das dimensões"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:71
 msgid "Font"
@@ -13155,11 +13155,11 @@ msgstr "Adicionar fundo à máscara"
 
 #: ../src/live_effects/lpe-powermask.cpp:41
 msgid "Background color and opacity"
-msgstr "Cor e opacidade de fundo"
+msgstr "Cor e transparência de fundo"
 
 #: ../src/live_effects/lpe-powermask.cpp:41
 msgid "Set color and opacity of the background"
-msgstr "Defina a cor e a opacidade do fundo"
+msgstr "Defina a cor e a transparência do fundo"
 
 #: ../src/live_effects/lpe-powerstroke.cpp:131
 msgid "CubicBezierSmooth"
@@ -16965,7 +16965,7 @@ msgstr "Acumular a rotação para cada coluna"
 
 #: ../src/ui/dialog/clonetiler.cpp:567
 msgid "_Blur & opacity"
-msgstr "_Desfoque & opacidade"
+msgstr "_Desfoque & transparência"
 
 #: ../src/ui/dialog/clonetiler.cpp:576
 msgid "<b>Blur:</b>"
@@ -16993,27 +16993,27 @@ msgstr "Alternar o sinal do desfoque para cada coluna"
 
 #: ../src/ui/dialog/clonetiler.cpp:624
 msgid "<b>Opacity:</b>"
-msgstr "<b>Opacidade:</b>"
+msgstr "<b>Transparência:</b>"
 
 #: ../src/ui/dialog/clonetiler.cpp:631
 msgid "Decrease tile opacity by this percentage for each row"
-msgstr "Diminuir a opacidade do ladrilho por esta porcentagem para cada linha"
+msgstr "Diminuir a transparência do ladrilho por esta porcentagem para cada linha"
 
 #: ../src/ui/dialog/clonetiler.cpp:637
 msgid "Decrease tile opacity by this percentage for each column"
-msgstr "Diminuir a opacidade do ladrilho por esta porcentagem para cada coluna"
+msgstr "Diminuir a transparência do ladrilho por esta porcentagem para cada coluna"
 
 #: ../src/ui/dialog/clonetiler.cpp:643
 msgid "Randomize the tile opacity by this percentage"
-msgstr "Randomizar a opacidade do ladrilho por esta porcentagem"
+msgstr "Randomizar a transparência do ladrilho por esta porcentagem"
 
 #: ../src/ui/dialog/clonetiler.cpp:658
 msgid "Alternate the sign of opacity change for each row"
-msgstr "Alternar o sinal da mudança da opacidade para cada linha"
+msgstr "Alternar o sinal da mudança da transparência para cada linha"
 
 #: ../src/ui/dialog/clonetiler.cpp:663
 msgid "Alternate the sign of opacity change for each column"
-msgstr "Alternar o sinal da mudança da opacidade para cada coluna"
+msgstr "Alternar o sinal da mudança da transparência para cada coluna"
 
 #: ../src/ui/dialog/clonetiler.cpp:671
 msgid "Co_lor"
@@ -17113,11 +17113,11 @@ msgstr "1. Capturar do desenho:"
 
 #: ../src/ui/dialog/clonetiler.cpp:833
 msgid "Pick the visible color and opacity"
-msgstr "Escolha a cor visível e a opacidade"
+msgstr "Escolha a cor visível e a transparência"
 
 #: ../src/ui/dialog/clonetiler.cpp:840
 msgid "Pick the total accumulated opacity"
-msgstr "Capturar a opacidade total acumulada"
+msgstr "Capturar a transparência total acumulada"
 
 #: ../src/ui/dialog/clonetiler.cpp:846
 msgid "R"
@@ -17233,7 +17233,7 @@ msgstr ""
 
 #: ../src/ui/dialog/clonetiler.cpp:974
 msgid "Each clone's opacity is determined by the picked value in that point"
-msgstr "A opacidade de cada clone é determinada pelo valor captado neste ponto"
+msgstr "A transparência de cada clone é determinada pelo valor captado neste ponto"
 
 #: ../src/ui/dialog/clonetiler.cpp:988
 msgid "Apply to tiled clones:"
@@ -17322,7 +17322,7 @@ msgid ""
 "Reset all shifts, scales, rotates, opacity and color changes in the dialog "
 "to zero"
 msgstr ""
-"Restaurar todas as modificações, escalas, rotações, opacidade e mudanças de "
+"Restaurar todas as modificações, escalas, rotações, transparência e mudanças de "
 "cores na caixa de diálogo para zero"
 
 #: ../src/ui/dialog/clonetiler.cpp:1234
@@ -17525,7 +17525,7 @@ msgid ""
 "Color of the canvas background. Note: opacity is ignored except when "
 "exporting to bitmap."
 msgstr ""
-"Cor do fundo da tela. Nota: a opacidade é ignorada, exceto ao exportar para "
+"Cor do fundo da tela. Nota: a transparência é ignorada, exceto ao exportar para "
 "bitmap."
 
 #: ../src/ui/dialog/document-properties.cpp:107
@@ -18882,8 +18882,8 @@ msgid ""
 msgstr ""
 "As primitivas de filtro <b>feDiffuseLighting</b> e feSpecularLighting criam "
 "sombras \"em relevo\". O canal alfa da entrada é usado para fornecer "
-"informações de profundidade: as áreas de maior opacidade são elevadas em "
-"direção ao visualizador e as áreas de menor opacidade recuam do visualizador."
+"informações de profundidade: as áreas de maior transparência são elevadas em "
+"direção ao visualizador e as áreas de menor transparência recuam do visualizador."
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:2919
 msgid ""
@@ -18904,7 +18904,7 @@ msgid ""
 "a graphic."
 msgstr ""
 "A primitiva de filtro <b>feFlood</b> preenche a região com uma determinada "
-"cor e opacidade. Geralmente é usado como uma entrada para outros filtros "
+"cor e transparência. Geralmente é usado como uma entrada para outros filtros "
 "para aplicar cor a um gráfico."
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:2927
@@ -18965,8 +18965,8 @@ msgid ""
 msgstr ""
 "As primitivas de filtro <b>feDiffuseLighting</b> e <b>feSpecularLighting</b> "
 "criam sombras \"em relevo\". O canal alfa da entrada é usado para fornecer "
-"informações de profundidade: as áreas de maior opacidade são elevadas em "
-"direção ao visualizador e as áreas de menor opacidade recuam do visualizador."
+"informações de profundidade: as áreas de maior transparência são elevadas em "
+"direção ao visualizador e as áreas de menor transparência recuam do visualizador."
 
 #: ../src/ui/dialog/filter-effects-dialog.cpp:2951
 msgid ""
@@ -23397,11 +23397,11 @@ msgstr "Raio da área circular ao redor do cursor do mouse no modo de Raio-X"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2526
 msgid "Outline overlay opacity:"
-msgstr "Opacidade de sobreposição de caminho:"
+msgstr "Transparência de sobreposição de caminho:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2527
 msgid "Opacity of the color in outline overlay view mode"
-msgstr "Opacidade da cor no modo de visualização de Sobreposição de Caminho"
+msgstr "Transparência da cor no modo de visualização de Sobreposição de Caminho"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2534
 msgid "Responsive"
@@ -24655,7 +24655,7 @@ msgstr "Definir a cor de destaque do objeto"
 
 #: ../src/ui/dialog/objects.cpp:1733
 msgid "Set object opacity"
-msgstr "Definir a opacidade do objeto"
+msgstr "Definir a transparência do objeto"
 
 #: ../src/ui/dialog/objects.cpp:1760
 msgid "Set object isolation"
@@ -27339,7 +27339,7 @@ msgstr "Mudar espaçamento do conector"
 # Este é uma opção do conta gotas, veja a descrição da mesma para entender porque adicionei mais um termo
 #: ../src/ui/toolbar/dropper-toolbar.cpp:69
 msgid "Pick"
-msgstr "Capturar opacidade"
+msgstr "Capturar transparência"
 
 # Não há necessidade de traduzir isso "premultiplied by alpha", se entender bem a funcionalidade da opção vai entender
 #: ../src/ui/toolbar/dropper-toolbar.cpp:70
@@ -27352,7 +27352,7 @@ msgstr ""
 
 #: ../src/ui/toolbar/dropper-toolbar.cpp:72
 msgid "Assign"
-msgstr "Atribuir opacidade"
+msgstr "Atribuir transparência"
 
 #: ../src/ui/toolbar/dropper-toolbar.cpp:73
 msgid ""
@@ -29311,7 +29311,7 @@ msgstr "O"
 
 #: ../src/ui/toolbar/tweak-toolbar.cpp:227
 msgid "In color mode, act on object's opacity"
-msgstr "No modo de cor, atua na opacidade do objeto"
+msgstr "No modo de cor, atua na transparência do objeto"
 
 #: ../src/ui/tools-switch.cpp:90
 msgid ""
@@ -30852,7 +30852,7 @@ msgstr "Desfoque (%)"
 #: ../src/ui/widget/selected-style.cpp:1052
 #: ../src/ui/widget/selected-style.cpp:1053
 msgid "Opacity (%)"
-msgstr "Opacidade (%)"
+msgstr "Transparência (%)"
 
 #: ../src/ui/widget/font-selector-toolbar.cpp:144
 msgid "Select all text with this text family"
@@ -31312,7 +31312,7 @@ msgstr "Alterar filtro de desfoque/mistura"
 #: ../src/ui/widget/selected-style.cpp:872
 #: ../src/ui/widget/selected-style.cpp:1180
 msgid "Change opacity"
-msgstr "Alterar opacidade"
+msgstr "Alterar transparência"
 
 #: ../src/ui/widget/object-composite-settings.cpp:205
 msgid "Change isolation"
@@ -31899,7 +31899,7 @@ msgstr "100% (opaco)"
 
 #: ../src/ui/widget/selected-style.cpp:1298
 msgid "Adjust alpha"
-msgstr "Ajustar opacidade"
+msgstr "Ajustar transparência"
 
 #: ../src/ui/widget/selected-style.cpp:1300
 #, c-format
@@ -32133,7 +32133,7 @@ msgstr "O: %2.0f"
 #: ../src/ui/widget/style-swatch.cpp:355
 #, c-format
 msgid "Opacity: %2.1f %%"
-msgstr "Opacidade: %2.1f %%"
+msgstr "Transparência: %2.1f %%"
 
 #: ../src/ui/widget/swatch-selector.cpp:101
 msgid "Change swatch color"
@@ -34619,7 +34619,7 @@ msgstr "Ajustar atributo"
 
 #: ../src/widgets/toolbox.cpp:184
 msgid "Color/opacity used for color tweaking"
-msgstr "Opacidade/cor usada para ajuste de cor"
+msgstr "Transparência/cor usada para ajuste de cor"
 
 #: ../src/widgets/toolbox.cpp:193
 msgid "Style of new stars"
@@ -36552,7 +36552,7 @@ msgstr "Intervalo de luminosidade (%)"
 
 #: ../share/extensions/color_randomize.inx:10
 msgid "Opacity range (%)"
-msgstr "Intervalo de opacidade (%)"
+msgstr "Intervalo de transparência (%)"
 
 #: ../share/extensions/color_randomize.inx:13
 msgid ""
@@ -36560,8 +36560,8 @@ msgid ""
 "only for objects and groups). Change the range values to limit the distance "
 "between the original color and the randomized one."
 msgstr ""
-"Randomiza matiz, saturação, luminosidade e/ou opacidade (randomização de "
-"opacidade apenas para objetos e grupos). Altere os valores do intervalo para "
+"Randomiza matiz, saturação, luminosidade e/ou transparência (randomização de "
+"transparência apenas para objetos e grupos). Altere os valores do intervalo para "
 "limitar a distância entre a cor original e a cor aleatória."
 
 #: ../share/extensions/color_removeblue.inx:3
@@ -40508,7 +40508,7 @@ msgstr "Inverter preenchimento e cores de contorno"
 
 #: ../share/extensions/markers_strokepaint.inx:13
 msgid "Assign alpha"
-msgstr "Atribuir opacidade"
+msgstr "Atribuir transparência"
 
 #: ../share/extensions/markers_strokepaint.inx:18
 msgid "Assign fill color"
@@ -40979,7 +40979,7 @@ msgid ""
 "(e.g. fill-color, stroke-opacity, ...)."
 msgstr ""
 "Criar grupos para execuções de elementos com pelo menos um atributo em comum "
-"(por exemplo, cor de preenchimento, opacidade do traço, ...)."
+"(por exemplo, cor de preenchimento, transparência do traço, ...)."
 
 #
 # File: ../share/extensions/output_scour.inx, line: 28
@@ -42245,11 +42245,11 @@ msgstr "Preencher cor, Azul:"
 
 #: ../share/extensions/polyhedron_3d.inx:69
 msgid "Fill opacity (%):"
-msgstr "Opacidade do preenchimento(%):"
+msgstr "Transparência do preenchimento(%):"
 
 #: ../share/extensions/polyhedron_3d.inx:70
 msgid "Stroke opacity (%):"
-msgstr "Opacidade do contorno (%):"
+msgstr "Transparência do contorno (%):"
 
 #: ../share/extensions/polyhedron_3d.inx:71
 msgid "Stroke width (px):"
@@ -42742,13 +42742,15 @@ msgstr ""
 msgid "Group ID:"
 msgstr "ID do Grupo:"
 
+
 #: ../share/extensions/render_gear_rack.inx:3
 msgid "Rack Gear"
-msgstr "Cremalheira"
+msgstr "Barra Dentada"
+# Cremalheira
 
 #: ../share/extensions/render_gear_rack.inx:5
 msgid "Rack Length:"
-msgstr "Comprimento da Cremalheira:"
+msgstr "Comprimento da Barra:"
 
 #: ../share/extensions/render_gear_rack.inx:6
 msgid "Tooth Spacing:"
@@ -45047,13 +45049,13 @@ msgstr "Metade da altura da fonte"
 #~ msgstr "Transparência das Janelas de Diálogo"
 
 #~ msgid "_Opacity when focused:"
-#~ msgstr "_Opacidade ao focar:"
+#~ msgstr "_Transparência ao focar:"
 
 #~ msgid "Opacity when _unfocused:"
-#~ msgstr "Opacidade ao _deixar o foco:"
+#~ msgstr "Transparência ao _deixar o foco:"
 
 #~ msgid "_Time of opacity change animation:"
-#~ msgstr "_Tempo da animação de mudança de opacidade:"
+#~ msgstr "_Tempo da animação de mudança de transparência:"
 
 #~ msgid "Add label comments to printing output"
 #~ msgstr "Adicionar rótulo de comentários à saída de impressão"
@@ -46068,7 +46070,7 @@ msgstr "Metade da altura da fonte"
 
 #, fuzzy
 #~ msgid "Adjustable ☠"
-#~ msgstr "Ajustar opacidade"
+#~ msgstr "Ajustar transparência"
 
 #, fuzzy
 #~ msgid "Line Spacing Mode"
@@ -47651,10 +47653,10 @@ msgstr "Metade da altura da fonte"
 #~ msgstr "Mudar desfoque"
 
 #~ msgid "Pick opacity"
-#~ msgstr "Capturar opacidade"
+#~ msgstr "Capturar transparência"
 
 #~ msgid "Assign opacity"
-#~ msgstr "Atribuir opacidade"
+#~ msgstr "Atribuir transparência"
 
 #~ msgid "Type text in a text node"
 #~ msgstr "Digitar texto em um nó de texto"
@@ -49191,7 +49193,7 @@ msgstr "Metade da altura da fonte"
 #~ "As primitivas feDiffuseLighting e <b>feSpecularLighting</b> criam efeitos "
 #~ "de iluminação e sombreamentos em alto-relevo. O canal alfa da entrada é "
 #~ "utilizado para prover informação sobre a altura do relevo: áreas de maior "
-#~ "opacidade representam superfícies mais projetadas na direção do "
+#~ "transparência representam superfícies mais projetadas na direção do "
 #~ "observador."
 
 #~ msgid "Allow relative coordinates"
@@ -49592,7 +49594,7 @@ msgstr "Metade da altura da fonte"
 
 #, fuzzy
 #~ msgid "_Opacity (%):"
-#~ msgstr "Opacidade (%)"
+#~ msgstr "Transparência (%)"
 
 #~ msgid "Import a document from Open Clip Art Library"
 #~ msgstr "Importar um documento da Biblioteca Open Clip Art"
@@ -49939,7 +49941,7 @@ msgstr "Metade da altura da fonte"
 
 #, fuzzy
 #~ msgid "Opacity (%):"
-#~ msgstr "Opacidade (%)"
+#~ msgstr "Transparência (%)"
 
 # Antes estava "Aplica sombra preta e desfocada" achei um pouco "robotizada"
 #~ msgid "Black, blurred drop shadow"
@@ -50655,7 +50657,7 @@ msgstr "Metade da altura da fonte"
 
 #, fuzzy
 #~ msgid "Color/opacity used for color spraying"
-#~ msgstr "Opacidade/cor usada para ajuste de cor"
+#~ msgstr "Transparência/cor usada para ajuste de cor"
 
 #~ msgid "Show next path effect parameter for editing"
 #~ msgstr "Exibir o próximo parâmetro de efeito de caminho para edição"
