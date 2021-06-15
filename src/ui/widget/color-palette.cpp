@@ -206,8 +206,8 @@ void ColorPalette::scroll(int dx, int dy, bool snap, bool smooth) {
             }
             _scroll_step = dy / 4.0;
             if (!_active_timeout && vert->get_value() != _scroll_final) {
-                // limit refresh to 50 fps, in practice it will be slower
-                _active_timeout = g_timeout_add(1000 / 50, &ColorPalette::scroll_cb, this);
+                // limit refresh to 60 fps, in practice it will be slower
+                _active_timeout = g_timeout_add(1000 / 60, &ColorPalette::scroll_cb, this);
             }
         }
         else {
@@ -406,6 +406,7 @@ void ColorPalette::set_up_scrolling() {
             // vertical scrolling with multiple rows
             // 'external' allows scrollbar to shrink vertically
             _scroll.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_EXTERNAL);
+            // _scroll.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_ALWAYS);
             _flowbox.set_min_children_per_line(1);
             _flowbox.set_max_children_per_line(_count);
             _scroll_left.hide();
