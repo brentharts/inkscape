@@ -78,6 +78,7 @@ private:
         double min_offset, max_offset, offset;
     };
     limits_t get_stop_limits(int index) const;
+    GdkCursor* get_cursor(double x, double y) const;
 
     SPGradient* _gradient = nullptr;
     struct stop_t {

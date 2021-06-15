@@ -115,9 +115,14 @@ void GradientWithStops::on_style_updated() {
     // load and cache cursors
     auto wnd = get_window();
     if (wnd && !_cursor_mouseover) {
-        _cursor_mouseover = load_svg_cursor(get_display(), wnd, "gradient-over-stop.svg");
-        _cursor_dragging  = load_svg_cursor(get_display(), wnd, "gradient-drag-stop.svg");
-        _cursor_insert    = load_svg_cursor(get_display(), wnd, "gradient-add-stop.svg");
+        // use standard cursors:
+        _cursor_mouseover = Gdk::Cursor::create(get_display(), "grab");
+        _cursor_dragging =  Gdk::Cursor::create(get_display(), "grabbing");
+        _cursor_insert =    Gdk::Cursor::create(get_display(), "crosshair");
+        // or custom cursors:
+        // _cursor_mouseover = load_svg_cursor(get_display(), wnd, "gradient-over-stop.svg");
+        // _cursor_dragging  = load_svg_cursor(get_display(), wnd, "gradient-drag-stop.svg");
+        // _cursor_insert    = load_svg_cursor(get_display(), wnd, "gradient-add-stop.svg");
         wnd->set_cursor();
     }
 }
@@ -370,9 +375,9 @@ bool GradientWithStops::on_button_press_event(GdkEventButton* event) {
 }
 
 bool GradientWithStops::on_button_release_event(GdkEventButton* event) {
-    if (_dragging) {
-        gdk_window_set_cursor(event->window, nullptr);
-    }
+    GdkCursor* cursor = get_cursor(event->x, event->y);
+    gdk_window_set_cursor(event->window, cursor);
+
     _dragging = false;
     return false;
 }
@@ -406,9 +411,18 @@ bool GradientWithStops::on_motion_notify_event(GdkEventMotion* event) {
         }
     }
     else if (!_dragging && _gradient) {
-        GdkCursor* cursor = nullptr;
+        GdkCursor* cursor = get_cursor(event->x, event->y);
+        gdk_window_set_cursor(event->window, cursor);
+    }
+
+    return false;
+}
+
+GdkCursor* GradientWithStops::get_cursor(double x, double y) const {
+    GdkCursor* cursor = nullptr;
+    if (_gradient) {
         // check if mouse if over stop handle that we can adjust
-        auto index = find_stop_at(event->x, event->y);
+        auto index = find_stop_at(x, y);
         if (index >= 0) {
             auto limits = get_stop_limits(index);
             if (limits.min_offset < limits.max_offset && _cursor_mouseover) {
@@ -420,10 +434,8 @@ bool GradientWithStops::on_motion_notify_event(GdkEventMotion* event) {
                 cursor = _cursor_insert->gobj();
             }
         }
-        gdk_window_set_cursor(event->window, cursor);
     }
-
-    return false;
+    return cursor;
 }
 
 bool GradientWithStops::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
