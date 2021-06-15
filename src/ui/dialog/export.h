@@ -18,6 +18,8 @@
 #include "ui/dialog/dialog-base.h"
 #include "ui/widget/scrollprotected.h"
 #include "ui/widget/unit-menu.h"
+#include "extension/output.h"
+
 
 namespace Inkscape {
 namespace UI {
@@ -38,8 +40,8 @@ enum sb_type
 
 enum selection_mode
 {
-    SELECTION_SELECTION = 0,
-    SELECTION_PAGE,
+    SELECTION_PAGE = 0, // Default is alaways placed first
+    SELECTION_SELECTION,
     SELECTION_DRAWING,
     SELECTION_CUSTOM
 };
@@ -88,7 +90,7 @@ private:
     Gtk::CheckButton *hide_all = nullptr;
     Gtk::Box *si_preview_box = nullptr;
     Gtk::CheckButton *si_show_preview = nullptr;
-    Gtk::ComboBoxText *extension = nullptr;
+    Gtk::ComboBoxText *extension_cb = nullptr;
     Gtk::Entry *filename = nullptr;
     Gtk::Button *si_export = nullptr;
 
@@ -98,11 +100,13 @@ private:
     Inkscape::Preferences *prefs = nullptr;
     std::map<selection_mode, Glib::ustring> selection_names;
     selection_mode current_key;
+    std::map<Glib::ustring, Inkscape::Extension::Output*> extension_list;
 
     // Initialise all objects from builder
     void initialise_all();
     // Add units from db
     void setupUnits();
+    void setupExtensionList();
 
     // change range and callbacks to spinbuttons
     void setupSpinButtons();
@@ -113,7 +117,6 @@ private:
     // setup default values of widgets
     void setDefaultNotebookPage();
     void setDefaultSelectionMode();
-    void setDefaultSpinValues();
 
     // Utils Functions
     void areaXChange(sb_type type);
@@ -125,6 +128,7 @@ private:
     void blockSpinConns(bool status);
 
     void refreshArea();
+    void setArea(double x0, double y0, double x1, double y1);
 
     // signals callback
     void onContainerVisible();
@@ -132,6 +136,17 @@ private:
     void onAreaYChange(sb_type type);
     void onDpiChange(sb_type type);
     void onAreaTypeToggle(selection_mode key);
+    void onUnitChanged();
+    /**
+     * Inkscape selection change callback
+     */
+    void onSelectionChanged();
+    void onSelectionModified(guint flags);
+
+    /**
+     * Update active window.
+     */
+    void update() override;
 
     // signals
     sigc::connection selectChangedConn;

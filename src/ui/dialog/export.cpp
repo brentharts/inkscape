@@ -20,8 +20,29 @@
 #include <gtkmm.h>
 #include <png.h>
 
+#include "document-undo.h"
+#include "document.h"
+#include "file.h"
+#include "inkscape-window.h"
 #include "inkscape.h"
+#include "preferences.h"
+#include "selection-chemistry.h"
+
+// required to set status message after export
+#include "desktop.h"
+#include "extension/db.h"
+#include "helper/png-write.h"
 #include "io/resource.h"
+#include "io/sys.h"
+#include "message-stack.h"
+#include "object/sp-namedview.h"
+#include "object/sp-root.h"
+#include "ui/dialog-events.h"
+#include "ui/dialog/dialog-notebook.h"
+#include "ui/dialog/filedialog.h"
+#include "ui/interface.h"
+#include "ui/widget/scrollprotected.h"
+#include "ui/widget/unit-menu.h"
 
 #ifdef _WIN32
 
@@ -63,9 +84,11 @@ Export::Export()
     setupUnits();
 
     setupSpinButtons();
+    setupExtensionList();
 
     // Callback when container is dinally mapped on window. All intialisation like set active is done inside it.
     container->signal_map().connect(sigc::mem_fun(*this, &Export::onContainerVisible));
+    units->signal_changed().connect(sigc::mem_fun(*this, &Export::onUnitChanged));
     for (auto [key, button] : selection_buttons) {
         button->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &Export::onAreaTypeToggle), key));
     }
@@ -76,6 +99,69 @@ Export::~Export()
     selectModifiedConn.disconnect();
     subselChangedConn.disconnect();
     selectChangedConn.disconnect();
+}
+
+void Export::update()
+{
+    if (!_app) {
+        std::cerr << "Export::update(): _app is null" << std::endl;
+        return;
+    }
+
+    onSelectionChanged();
+    onSelectionModified(0);
+#if 0
+    setDesktop(getDesktop());
+#endif
+}
+
+void Export::onSelectionChanged()
+{
+    Inkscape::Selection *selection = SP_ACTIVE_DESKTOP->getSelection();
+    if (selection->isEmpty()) {
+        selection_buttons[SELECTION_SELECTION]->set_sensitive(false);
+        if (current_key == SELECTION_SELECTION) {
+            selection_buttons[(selection_mode)0]->set_active(true); // This causes refresh area
+            // return otherwise refreshArea will be called again
+            return;
+        }
+    } else {
+        selection_buttons[SELECTION_SELECTION]->set_sensitive(true);
+    }
+    refreshArea();
+}
+
+void Export::onSelectionModified(guint /*flags*/)
+{
+    if (SP_ACTIVE_DESKTOP) {
+        Geom::OptRect bbox;
+
+        switch (current_key) {
+            case SELECTION_DRAWING:
+                SPDocument *doc;
+                doc = SP_ACTIVE_DESKTOP->getDocument();
+                bbox = doc->getRoot()->desktopVisualBounds();
+                if (bbox) {
+                    setArea(bbox->left(), bbox->top(), bbox->right(), bbox->bottom());
+                }
+                break;
+            case SELECTION_SELECTION:
+                Inkscape::Selection *Sel;
+                Sel = SP_ACTIVE_DESKTOP->getSelection();
+                if (Sel->isEmpty() == false) {
+                    bbox = Sel->visualBounds();
+                    if (bbox) {
+                        setArea(bbox->left(), bbox->top(), bbox->right(), bbox->bottom());
+                    }
+                }
+                break;
+            default:
+                /* Do nothing for page or for custom */
+                break;
+        }
+    }
+
+    return;
 }
 
 void Export::initialise_all()
@@ -118,7 +204,7 @@ void Export::initialise_all()
                 builder->get_widget("si_preview_box", si_preview_box);
                 builder->get_widget("si_show_preview", si_show_preview);
 
-                builder->get_widget("si_extention", extension);
+                builder->get_widget("si_extention", extension_cb);
                 builder->get_widget("si_filename", filename);
                 builder->get_widget("si_export", si_export);
             } // Single Image End
@@ -142,6 +228,32 @@ void Export::setupUnits()
             units->setUnit(desktop->getNamedView()->display_units->abbr);
         }
     }
+}
+
+void Export::setupExtensionList()
+{
+    Inkscape::Extension::DB::OutputList extensions;
+    Inkscape::Extension::db.get_output_list(extensions);
+    Glib::ustring extension;
+
+    for (auto omod : extensions) {
+        // FIXME: would be nice to grey them out instead of not listing them
+        if (omod->deactivated() || (omod->is_raster() != true))
+            continue;
+
+        extension = omod->get_extension();
+        extension_cb->append(extension);
+        extension_list[extension] = omod;
+    }
+
+    // add extentions manually
+    Inkscape::Extension::Output *manual_omod;
+    manual_omod = dynamic_cast<Inkscape::Extension::Output *>(Inkscape::Extension::db.get(SP_MODULE_KEY_OUTPUT_SVG));
+    extension = manual_omod->get_extension();
+    extension_cb->append(extension);
+    extension_list[extension] = manual_omod;
+
+    extension_cb->set_active(0);
 }
 
 void Export::setupSpinButtons()
@@ -348,60 +460,92 @@ void Export::blockSpinConns(bool status = true)
 
 void Export::setDefaultNotebookPage()
 {
-    if (export_notebook && batch_export) {
-        auto page_num = export_notebook->page_num(*batch_export);
-        export_notebook->set_current_page(page_num);
-    }
+    // if (export_notebook && batch_export) {
+    //     auto page_num = export_notebook->page_num(*batch_export);
+    //     export_notebook->set_current_page(page_num);
+    // }
 }
 
 void Export::setDefaultSelectionMode()
 {
-    { // Single Image Selection Mode
+    if (SP_ACTIVE_DESKTOP) {
+        { // Single Image Selection Mode
 
-        current_key = SELECTION_PAGE; // Page is default key
-        Glib::ustring pref_key_name = prefs->getString("/dialogs/export/exportarea/value");
-        for (auto [key, name] : selection_names) {
-            if (pref_key_name == name) {
-                current_key = key;
-                break;
+            current_key = (selection_mode)0; // default key
+            Glib::ustring pref_key_name = prefs->getString("/dialogs/export/exportarea/value");
+            for (auto [key, name] : selection_names) {
+                if (pref_key_name == name) {
+                    current_key = key;
+                    break;
+                }
             }
+            if (current_key == SELECTION_SELECTION && (SP_ACTIVE_DESKTOP->getSelection())->isEmpty()) {
+                current_key = (selection_mode)0;
+            }
+            if ((SP_ACTIVE_DESKTOP->getSelection())->isEmpty()) {
+                selection_buttons[SELECTION_SELECTION]->set_sensitive(false);
+            }
+            selection_buttons[current_key]->set_active(true);
         }
-        if (current_key == SELECTION_SELECTION && (SP_ACTIVE_DESKTOP->getSelection())->isEmpty()) {
-            current_key = SELECTION_PAGE;
+
+        { // Batch Export Selection Mode
         }
-        selection_buttons[current_key]->set_active(true);
     }
-
-    { // Batch Export Selection Mode
-    }
-}
-
-void Export::setDefaultSpinValues()
-{
-    blockSpinConns(true);
-
-    blockSpinConns(false);
 }
 
 void Export::refreshArea()
 {
-    SPDocument *doc;
-    Geom::OptRect bbox;
-    bbox = Geom::Rect(Geom::Point(0.0, 0.0), Geom::Point(0.0, 0.0));
-    doc = SP_ACTIVE_DESKTOP->getDocument();
+    if (SP_ACTIVE_DESKTOP) {
+        SPDocument *doc;
+        Geom::OptRect bbox;
+        doc = SP_ACTIVE_DESKTOP->getDocument();
 
-    switch (current_key) {
-        case SELECTION_SELECTION:
-            break;
-        case SELECTION_PAGE:
-            break;
-        case SELECTION_DRAWING:
-            break;
-        case SELECTION_CUSTOM:
-            break;
-        default:
-            break;
+        switch (current_key) {
+            case SELECTION_SELECTION:
+                if ((SP_ACTIVE_DESKTOP->getSelection())->isEmpty() == false) {
+                    bbox = SP_ACTIVE_DESKTOP->getSelection()->visualBounds();
+                    break;
+                }
+            case SELECTION_DRAWING:
+                bbox = doc->getRoot()->desktopVisualBounds();
+                if (bbox) {
+                    break;
+                }
+            case SELECTION_PAGE:
+                bbox = Geom::Rect(Geom::Point(0.0, 0.0),
+                                  Geom::Point(doc->getWidth().value("px"), doc->getHeight().value("px")));
+                break;
+            case SELECTION_CUSTOM:
+                break;
+            default:
+                break;
+        }
+        if (current_key != SELECTION_CUSTOM && bbox) {
+            setArea(bbox->min()[Geom::X], bbox->min()[Geom::Y], bbox->max()[Geom::X], bbox->max()[Geom::Y]);
+        }
     }
+
+    // TODO: FilenameModified
+}
+
+void Export::setArea(double x0, double y0, double x1, double y1)
+{
+    blockSpinConns(true);
+
+    auto x0_adj = x0_sb->get_adjustment();
+    auto x1_adj = x1_sb->get_adjustment();
+    auto y0_adj = y0_sb->get_adjustment();
+    auto y1_adj = y1_sb->get_adjustment();
+
+    setValuePx(x1_adj, x1);
+    setValuePx(y1_adj, y1);
+    setValuePx(x0_adj, x0);
+    setValuePx(y0_adj, y0);
+
+    areaXChange(SPIN_X1);
+    areaYChange(SPIN_Y1);
+
+    blockSpinConns(false);
 }
 
 /**
@@ -414,7 +558,6 @@ void Export::onContainerVisible()
 {
     setDefaultNotebookPage();
     setDefaultSelectionMode();
-    setDefaultSpinValues();
 }
 
 void Export::onAreaXChange(sb_type type)
@@ -446,6 +589,12 @@ void Export::onAreaTypeToggle(selection_mode key)
     // call will change values)
 
     current_key = key;
+    prefs->setString("/dialogs/export/exportarea/value", selection_names[current_key]);
+    refreshArea();
+}
+
+void Export::onUnitChanged()
+{
     refreshArea();
 }
 
