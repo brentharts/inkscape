@@ -19,11 +19,30 @@
 #include "ui/widget/scrollprotected.h"
 #include "ui/widget/unit-menu.h"
 
-
-
 namespace Inkscape {
 namespace UI {
 namespace Dialog {
+
+enum sb_type
+{
+    SPIN_X0 = 0,
+    SPIN_X1,
+    SPIN_Y0,
+    SPIN_Y1,
+    SPIN_WIDTH,
+    SPIN_HEIGHT,
+    SPIN_BMWIDTH,
+    SPIN_BMHEIGHT,
+    SPIN_DPI
+};
+
+enum selection_mode
+{
+    SELECTION_SELECTION = 0,
+    SELECTION_PAGE,
+    SELECTION_DRAWING,
+    SELECTION_CUSTOM
+};
 
 class ExportProgressDialog;
 
@@ -49,21 +68,23 @@ private:
     Gtk::Notebook *export_notebook = nullptr;
 
     Gtk::Box *single_image = nullptr;
-    Gtk::RadioButton *select_document = nullptr;
-    Gtk::RadioButton *select_page = nullptr;
-    Gtk::RadioButton *select_selection = nullptr;
-    Gtk::RadioButton *select_custom = nullptr;
-    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> *left_sb = nullptr;
-    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> *right_sb = nullptr;
-    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> *top_sb = nullptr;
-    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> *bottom_sb = nullptr;
+
+    std::map<selection_mode, Gtk::RadioButton *> selection_buttons;
+
+    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> *x0_sb = nullptr;
+    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> *x1_sb = nullptr;
+    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> *y0_sb = nullptr;
+    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> *y1_sb = nullptr;
     Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> *height_sb = nullptr;
     Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> *width_sb = nullptr;
-    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> *img_height_sb = nullptr;
-    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> *img_width_sb = nullptr;
+
+    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> *bmheight_sb = nullptr;
+    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> *bmwidth_sb = nullptr;
     Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> *dpi_sb = nullptr;
+
     Gtk::CheckButton *show_export_area = nullptr;
     Inkscape::UI::Widget::UnitMenu *units = nullptr;
+
     Gtk::CheckButton *hide_all = nullptr;
     Gtk::Box *si_preview_box = nullptr;
     Gtk::CheckButton *si_show_preview = nullptr;
@@ -73,12 +94,50 @@ private:
 
     Gtk::Box *batch_export = nullptr;
 
+    // Utils Variables
+    Inkscape::Preferences *prefs = nullptr;
+    std::map<selection_mode, Glib::ustring> selection_names;
+    selection_mode current_key;
+
     // Initialise all objects from builder
     void initialise_all();
+    // Add units from db
+    void setupUnits();
 
-    //signals callback
-    void onNotebookVisible();
+    // change range and callbacks to spinbuttons
+    void setupSpinButtons();
+    template <typename T>
+    void setupSpinButton(Gtk::SpinButton *sb, double val, double min, double max, double step, double page, int digits,
+                         bool sensitive, void (Export::*cb)(T), T param);
 
+    // setup default values of widgets
+    void setDefaultNotebookPage();
+    void setDefaultSelectionMode();
+    void setDefaultSpinValues();
+
+    // Utils Functions
+    void areaXChange(sb_type type);
+    void areaYChange(sb_type type);
+    void dpiChange(sb_type type);
+    float getValuePx(float value);
+    void setValuePx(Glib::RefPtr<Gtk::Adjustment> &adj, double val);
+
+    void blockSpinConns(bool status);
+
+    void refreshArea();
+
+    // signals callback
+    void onContainerVisible();
+    void onAreaXChange(sb_type type);
+    void onAreaYChange(sb_type type);
+    void onDpiChange(sb_type type);
+    void onAreaTypeToggle(selection_mode key);
+
+    // signals
+    sigc::connection selectChangedConn;
+    sigc::connection subselChangedConn;
+    sigc::connection selectModifiedConn;
+    std::vector<sigc::connection> spinButtonConns;
 };
 } // namespace Dialog
 } // namespace UI
