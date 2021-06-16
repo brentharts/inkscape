@@ -20,6 +20,7 @@
   <object class="GtkMenu" id="repeatMenu">
     <property name="visible">True</property>
     <property name="can-focus">False</property>
+    <property name="reserve-toggle-size">False</property>
     <child>
       <object class="GtkMenuItem" id="repeatNone">
         <property name="visible">True</property>
@@ -84,10 +85,34 @@
             <property name="margin-start">4</property>
             <property name="popover">libraryPopover</property>
             <child>
-              <object class="GtkImage">
+              <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="icon-name">gradient-library</property>
+                <child>
+                  <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="margin-end">8</property>
+                    <property name="icon-name">gradient-library</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="icon-name">pan-down-symbolic</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
               </object>
             </child>
           </object>
@@ -171,19 +196,6 @@
           </packing>
         </child>
         <child>
-          <object class="GtkImage" id="repeatIco">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="margin-end">4</property>
-            <property name="icon-name">none</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">7</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkMenuButton" id="repeatMode">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
@@ -194,13 +206,41 @@
             <property name="relief">none</property>
             <property name="popup">repeatMenu</property>
             <child>
-              <placeholder/>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <child>
+                  <object class="GtkImage" id="repeatIco">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="margin-end">8</property>
+                    <property name="stock">gtk-missing-image</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="icon-name">pan-down-symbolic</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
             </child>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">8</property>
+            <property name="position">7</property>
           </packing>
         </child>
       </object>

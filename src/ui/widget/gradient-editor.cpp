@@ -291,7 +291,7 @@ GradientEditor::GradientEditor(const char* prefs) :
         hbox->pack_start(*img, false, true, 8);
         auto label = Gtk::manage(new Gtk::Label);
         label->set_label(text);
-        hbox->pack_start(*label, false, true, 0);
+        hbox->pack_start(*label, false, true, 8);
         hbox->show_all();
         item.remove();
         item.add(*hbox);
