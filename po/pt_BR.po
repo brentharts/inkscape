@@ -6203,8 +6203,9 @@ msgstr "Sombrear"
 
 #: ../src/extension/internal/bitmap/shade.cpp:44
 #: ../src/ui/dialog/filter-effects-dialog.cpp:1182
+# "Azimuth" Ângulo da luz em relação ao norte, sob o ponto de vista do observador. Direção da luz.
 msgid "Azimuth:"
-msgstr "Azimute:"
+msgstr "Direção:"
 
 #: ../src/extension/internal/bitmap/shade.cpp:45
 #: ../src/ui/dialog/filter-effects-dialog.cpp:1183
@@ -6644,8 +6645,9 @@ msgstr "Elevação (°)"
 #: ../src/extension/internal/filter/bevels.h:59
 #: ../src/extension/internal/filter/bevels.h:142
 #: ../src/extension/internal/filter/bevels.h:228
+# "Azimuth" Ângulo da luz em relação ao norte, sob o ponto de vista do observador. Direção da luz.
 msgid "Azimuth (°)"
-msgstr "Ângulo de Visão (°)"
+msgstr "Direção (°)"
 
 #: ../src/extension/internal/filter/bevels.h:60
 #: ../src/extension/internal/filter/bevels.h:143
@@ -7064,8 +7066,9 @@ msgstr "Opções da luz distante"
 
 #: ../src/extension/internal/filter/bumps.h:112
 #: ../src/extension/internal/filter/bumps.h:338
+# "Azimuth" Ângulo da luz em relação ao norte, sob o ponto de vista do observador. Direção da luz.
 msgid "Azimuth"
-msgstr "Ângulo de Visão"
+msgstr "Direção"
 
 #: ../src/extension/internal/filter/bumps.h:113
 #: ../src/extension/internal/filter/bumps.h:339
@@ -23589,7 +23592,7 @@ msgstr "Modo de importação/abertura de bitmap:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2641
 msgid "Include"
-msgstr "Incluir"
+msgstr "Incluído"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2644
 msgid "SVG import mode:"
@@ -42744,9 +42747,9 @@ msgstr "ID do Grupo:"
 
 
 #: ../share/extensions/render_gear_rack.inx:3
+# Cremalheira = Barra Dentada
 msgid "Rack Gear"
 msgstr "Barra Dentada"
-# Cremalheira
 
 #: ../share/extensions/render_gear_rack.inx:5
 msgid "Rack Length:"
