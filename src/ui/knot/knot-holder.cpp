@@ -41,6 +41,7 @@
 #include "ui/tools/arc-tool.h"
 #include "ui/tools/node-tool.h"
 #include "ui/tools/rect-tool.h"
+#include "ui/tools/marker-tool.h"
 #include "ui/tools/spiral-tool.h"
 #include "ui/tools/tweak-tool.h"
 

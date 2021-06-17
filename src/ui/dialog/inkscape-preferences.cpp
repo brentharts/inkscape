@@ -819,6 +819,7 @@ void InkscapePreferences::initPageTools()
     Gtk::TreeModel::iterator iter_tools = this->AddPage(_page_tools, _("Tools"), PREFS_PAGE_TOOLS);
     this->AddPage(_page_selector, _("Selector"), iter_tools, PREFS_PAGE_TOOLS_SELECTOR);
     this->AddPage(_page_node, _("Node"), iter_tools, PREFS_PAGE_TOOLS_NODE);
+    this->AddPage(_page_node, _("Marker"), iter_tools, PREFS_PAGE_TOOLS_MARKER);
 
     // shapes
     Gtk::TreeModel::iterator iter_shapes = this->AddPage(_page_shapes, _("Shapes"), iter_tools, PREFS_PAGE_TOOLS_SHAPES);
@@ -1025,11 +1026,13 @@ void InkscapePreferences::initPageTools()
     _misc_gradientangle.init("/dialogs/gradienteditor/angle", -359, 359, 1, 90, 0, false, false);
     _page_gradient.add_line( false, _("Linear gradient _angle:"), _misc_gradientangle, "",
                            _("Default angle of new linear gradients in degrees (clockwise from horizontal)"), false);
-
-
     //Dropper
     this->AddSelcueCheckbox(_page_dropper, "/tools/dropper", true);
     this->AddGradientCheckbox(_page_dropper, "/tools/dropper", true);
+
+    //Marker
+    this->AddSelcueCheckbox(_page_marker, "/tools/marker", true);
+    this->AddGradientCheckbox(_page_marker, "/tools/marker", true);
 
     //Connector
     this->AddSelcueCheckbox(_page_connector, "/tools/connector", true);

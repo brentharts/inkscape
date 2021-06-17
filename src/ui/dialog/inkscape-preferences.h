@@ -47,6 +47,7 @@ enum {
     PREFS_PAGE_TOOLS,
     PREFS_PAGE_TOOLS_SELECTOR,
     PREFS_PAGE_TOOLS_NODE,
+    PREFS_PAGE_TOOLS_MARKER,
     PREFS_PAGE_TOOLS_TWEAK,
     PREFS_PAGE_TOOLS_ZOOM,
     PREFS_PAGE_TOOLS_MEASURE,
@@ -154,6 +155,7 @@ protected:
     UI::Widget::DialogPage _page_gradient;
     UI::Widget::DialogPage _page_connector;
     UI::Widget::DialogPage _page_dropper;
+    UI::Widget::DialogPage _page_marker;
     UI::Widget::DialogPage _page_lpetool;
 
     UI::Widget::DialogPage _page_rectangle;
