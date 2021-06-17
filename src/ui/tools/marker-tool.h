@@ -1,7 +1,9 @@
-/*
-	Marker Editing Context
-	Released under GNU GPL v2+, read the file 'COPYING' for more information.
-*/
+/***************
+-   SPDX-License-Identifier: GPL-2.0-or-later
+-   Released under GNU GPL v2+, read the file 'COPYING' for more information.
+
+-   Marker Editing Context
+****************/
 
 #ifndef __SP_MARKER_CONTEXT_H__
 #define __SP_MARKER_CONTEXT_H__

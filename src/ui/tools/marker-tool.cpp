@@ -1,7 +1,9 @@
-/*
-	Marker Editing Context
-	Released under GNU GPL v2+, read the file 'COPYING' for more information.
-*/
+/***************
+-   SPDX-License-Identifier: GPL-2.0-or-later
+-   Released under GNU GPL v2+, read the file 'COPYING' for more information.
+
+-   Marker Editing Context
+****************/
 
 #include <cstring>
 #include <string>
@@ -18,18 +20,15 @@
 #include "selection-chemistry.h"
 #include "selection.h"
 #include "verbs.h"
-#include "object/sp-rect.h"
 #include "object/sp-namedview.h"
 #include "ui/shape-editor.h"
 #include "xml/node-event-vector.h"
 
-#include "object/sp-marker.h"
-#include "ui/tools/rect-tool.h"
-#include "ui/tools/marker-tool.h"
+#include "ui/tool/shape-record.h"
 #include "object/sp-shape.h"
 #include "object/object-set.h"
-#include "document.h"
-#include "ui/tool/shape-record.h"
+#include "object/sp-marker.h"
+#include "ui/tools/marker-tool.h"
 
 
 using Inkscape::DocumentUndo;
@@ -37,15 +36,15 @@ namespace Inkscape {
 namespace UI {
 namespace Tools {
 
-const std::string& MarkerTool::getPrefsPath() {
-	return MarkerTool::prefsPath;
-}
-
 const std::string MarkerTool::prefsPath = "/tools/marker";
 
 MarkerTool::MarkerTool()
     : ToolBase("select.svg")
 {}
+
+const std::string& MarkerTool::getPrefsPath() {
+	return MarkerTool::prefsPath;
+}
 
 void MarkerTool::finish() {
     ungrabCanvasEvents();
@@ -54,37 +53,67 @@ void MarkerTool::finish() {
     ToolBase::finish();
 }
 
-
 MarkerTool::~MarkerTool() {
     this->enableGrDrag(false);
     this->sel_changed_connection.disconnect();
 }
 
+/* 
+Recursively collect all the child objects from the top level marker object 
+to be editable by the shape editor
 
-void MarkerTool::selection_changed(Inkscape::Selection* selection) {
+~ Todo:
+ - add support for objectBoundingBox
+ - fix the edit_transform
+ - follow up on clipping, editing masks thing
+*/
+static void gather_marker_items(SPObject *obj, Inkscape::UI::ShapeRole role, std::set<Inkscape::UI::ShapeRecord> &shapes) {
+    
     using namespace Inkscape::UI;
+    if (!obj) return;
 
+    if (SP_IS_GROUP(obj) || SP_IS_OBJECTGROUP(obj) || SP_IS_MARKER(obj)) {
+        for (auto& c: obj->children) {
+            gather_marker_items(&c, role, shapes);
+        }
+    } else if (SP_IS_ITEM(obj)) {
+        SPObject *object = obj;
+        SPItem *item = dynamic_cast<SPItem *>(obj);
+
+        ShapeRecord sr;
+        sr.object = object;
+        sr.edit_transform = Geom::identity();
+        sr.role = role;
+        shapes.insert(sr);
+    }
+}
+
+/* 
+Get the selected objects and passes their marker items, if they have any, into
+the shape editor for editing.
+
+~ Todo:
+ - allow users to only edit markers on one object at a time?
+*/
+void MarkerTool::selection_changed(Inkscape::Selection* selection) {
+    
+    using namespace Inkscape::UI;
     std::set<ShapeRecord> shapes;
+    auto selected_items = this->desktop->getSelection()->items();
 
-    auto items = this->desktop->getSelection()->items();
-
-    for(auto i=items.begin();i!=items.end();++i){
+    for(auto i = selected_items.begin(); i != selected_items.end(); ++i){
         SPItem *item = *i;
+        
         if (item) {
             SPShape* shape = dynamic_cast<SPShape*>(item);
 
             if(shape && shape->hasMarkers()) {
-                Inkscape::XML::Node* repr = shape->_marker[SP_MARKER_LOC_START]->getRepr()->firstChild();
-                if(repr) {
-                    item = dynamic_cast<SPItem *>(desktop->getDocument()->getObjectByRepr(repr));
-                    if (SP_IS_ITEM(item)) {
-                        ShapeRecord r;
-                        r.object = item;
-                        // TODO - add support for objectBoundingBox
-                        // TODO - fix the edit_transform
-                        r.edit_transform = Geom::identity();
-                        r.role = SHAPE_ROLE_NORMAL;
-                        shapes.insert(r);
+                for(int i = 0; i < SP_MARKER_LOC_QTY; i++) {
+                    SPObject *marker_obj = shape->_marker[i];
+                    if(marker_obj) {
+                        Inkscape::XML::Node *marker_repr = marker_obj->getRepr();
+                        SPItem* marker_item = dynamic_cast<SPItem *>(desktop->getDocument()->getObjectByRepr(marker_repr));
+                        gather_marker_items(marker_item, SHAPE_ROLE_NORMAL, shapes);
                     }
                 }
             }
@@ -92,28 +121,28 @@ void MarkerTool::selection_changed(Inkscape::Selection* selection) {
     }
 
     for (auto i = this->_shape_editors.begin(); i != this->_shape_editors.end();) {
-        ShapeRecord s;
-        s.object = dynamic_cast<SPObject *>(i->first);
+        ShapeRecord sr;
+        sr.object = dynamic_cast<SPObject *>(i->first);
 
-        if (shapes.find(s) == shapes.end()) {
+        if (shapes.find(sr) == shapes.end()) {
             this->_shape_editors.erase(i++);
         } else {
             ++i;
         }
     }
 
-    for (const auto & r : shapes) {
-        if (this->_shape_editors.find(SP_ITEM(r.object)) == this->_shape_editors.end()) {
-            auto si = std::make_unique<ShapeEditor>(this->desktop, r.edit_transform);
-            SPItem *item = SP_ITEM(r.object);
+    for (const auto & shape : shapes) {
+        if (this->_shape_editors.find(SP_ITEM(shape.object)) == this->_shape_editors.end()) {
+            auto si = std::make_unique<ShapeEditor>(this->desktop, shape.edit_transform);
+            SPItem *item = SP_ITEM(shape.object);
             si->set_item(item);
             this->_shape_editors.insert({item, std::move(si)});
         }
     }
 }
 
-
 void MarkerTool::setup() {
+
     ToolBase::setup();
     Inkscape::Selection *selection = this->desktop->getSelection();
 
@@ -128,7 +157,9 @@ void MarkerTool::setup() {
     if (prefs->getBool("/tools/marker/gradientdrag")) this->enableGrDrag();
 }
 
-/* handles selection of items */
+/* 
+Handles selection/deselection of new items in marker edit mode
+*/
 bool MarkerTool::root_handler(GdkEvent* event) {
     SPDesktop *desktop = this->desktop;
     Inkscape::Selection *selection = desktop->getSelection();
@@ -162,6 +193,5 @@ bool MarkerTool::root_handler(GdkEvent* event) {
     if (!ret) ret = ToolBase::root_handler(event);
     return ret;
 }
-
 
 }}}
