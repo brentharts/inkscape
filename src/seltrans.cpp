@@ -192,7 +192,7 @@ void Inkscape::SelTrans::resetState()
         _state = STATE_ALIGN;
     }
     else{
-    _state = STATE_SCALE;
+        _state = STATE_SCALE;
     }
 }
 
@@ -207,11 +207,11 @@ void Inkscape::SelTrans::increaseState()
 
     else{
         if (_state == STATE_SCALE) {
-        _state = STATE_ROTATE;
+            _state = STATE_ROTATE;
         } else if (_state == STATE_ROTATE && show_align) {
-        _state = STATE_ALIGN;
+            _state = STATE_ALIGN;
         } else {
-        _state = STATE_SCALE;
+            _state = STATE_SCALE;
         }
     }
 
@@ -1068,6 +1068,12 @@ gboolean Inkscape::SelTrans::scaleRequest(Geom::Point &pt, guint state)
     return TRUE;
 }
 
+gboolean Inkscape::SelTrans::alignDragRequest(Geom::Point &pt, guint state)
+{
+    moveTo(pt,state);
+    return TRUE;
+}
+
 gboolean Inkscape::SelTrans::stretchRequest(SPSelTransHandle const &handle, Geom::Point &pt, guint state)
 {
     Geom::Dim2 axis, perp;
@@ -1189,6 +1195,7 @@ gboolean Inkscape::SelTrans::request(SPSelTransHandle const &handle, Geom::Point
         case HANDLE_SIDE_ALIGN:
         case HANDLE_CORNER_ALIGN:
         case HANDLE_CENTER_ALIGN:
+            return alignDragRequest(pt,state);
             break; // Do nothing, no dragging
     }
     return FALSE;
