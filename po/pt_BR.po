@@ -4481,19 +4481,19 @@ msgstr "Ativar/desativar atração para caminhos de clip"
 
 #: ../src/actions/actions-canvas-transform.cpp:200
 msgid "Zoom In"
-msgstr "Ampliar"
+msgstr "Mais Zoom"
 
 #: ../src/actions/actions-canvas-transform.cpp:200 ../share/ui/menu-view.ui:14
 msgid "Zoom in"
-msgstr "Ampliar"
+msgstr "Mais zoom"
 
 #: ../src/actions/actions-canvas-transform.cpp:201
 msgid "Zoom Out"
-msgstr "Reduzir"
+msgstr "Menos Zoom"
 
 #: ../src/actions/actions-canvas-transform.cpp:201 ../share/ui/menu-view.ui:19
 msgid "Zoom out"
-msgstr "Reduzir"
+msgstr "Menos zoom"
 
 #: ../src/actions/actions-canvas-transform.cpp:202
 msgid "Zoom 1:1"
@@ -4501,7 +4501,7 @@ msgstr "Zoom 1:1"
 
 #: ../src/actions/actions-canvas-transform.cpp:202 ../share/ui/menu-view.ui:27
 msgid "Zoom to 1:1"
-msgstr "Relação 1:1 (tamanho original do desenho)"
+msgstr "Zoom para 1:1 \"tamanho real\""
 
 #: ../src/actions/actions-canvas-transform.cpp:203
 msgid "Zoom 1:2"
@@ -4509,7 +4509,7 @@ msgstr "Zoom 1:2"
 
 #: ../src/actions/actions-canvas-transform.cpp:203 ../share/ui/menu-view.ui:32
 msgid "Zoom to 1:2"
-msgstr "Relação 1:2 (dobro do tamanho do desenho)"
+msgstr "Zoom para 1:2 \"metade do tamanho\""
 
 #: ../src/actions/actions-canvas-transform.cpp:204
 msgid "Zoom 2:1"
@@ -4517,7 +4517,7 @@ msgstr "Zoom 2:1"
 
 #: ../src/actions/actions-canvas-transform.cpp:204 ../share/ui/menu-view.ui:37
 msgid "Zoom to 2:1"
-msgstr "Relação 2:1 (metade do tamanho do desenho)"
+msgstr "Zoom para 2:1 \"dobro do tamanho\""
 
 #: ../src/actions/actions-canvas-transform.cpp:205 ../share/ui/menu-view.ui:45
 msgid "Zoom Selection"
@@ -4525,7 +4525,7 @@ msgstr "Zoom na Seleção"
 
 #: ../src/actions/actions-canvas-transform.cpp:205
 msgid "Zoom to fit selection in window"
-msgstr "Aplica um zoom para as dimensões do objeto selecionado"
+msgstr "Zoom para ajustar a seleção na janela"
 
 #: ../src/actions/actions-canvas-transform.cpp:206 ../share/ui/menu-view.ui:50
 msgid "Zoom Drawing"
@@ -4533,7 +4533,7 @@ msgstr "Zoom no Desenho"
 
 #: ../src/actions/actions-canvas-transform.cpp:206
 msgid "Zoom to fit drawing in window"
-msgstr "Aplica um zoom para as dimensões do desenho"
+msgstr "Zoom para ajustar o desenho na janela"
 
 #: ../src/actions/actions-canvas-transform.cpp:207 ../share/ui/menu-view.ui:55
 msgid "Zoom Page"
@@ -4541,15 +4541,15 @@ msgstr "Zoom na Página"
 
 #: ../src/actions/actions-canvas-transform.cpp:207
 msgid "Zoom to fit page in window"
-msgstr "Aplica um zoom para as dimensões da página"
+msgstr "Zoom para ajustar a página na janela"
 
 #: ../src/actions/actions-canvas-transform.cpp:208 ../share/ui/menu-view.ui:60
 msgid "Zoom Page Width"
-msgstr "Largura da Página"
+msgstr "Zoom na Largura da Página"
 
 #: ../src/actions/actions-canvas-transform.cpp:208
 msgid "Zoom to fit page width in window"
-msgstr "Aplica um zoom para a largura da página"
+msgstr "Zoom para ajustar a largura da página na janela"
 
 #: ../src/actions/actions-canvas-transform.cpp:209
 msgid "Zoom Center Page"
@@ -4569,7 +4569,7 @@ msgstr "Voltar ao zoom anterior (do histórico de zooms)"
 
 #: ../src/actions/actions-canvas-transform.cpp:211 ../share/ui/menu-view.ui:78
 msgid "Zoom Next"
-msgstr "Zoom Próximo"
+msgstr "Zoom Seguinte"
 
 #: ../src/actions/actions-canvas-transform.cpp:211
 msgid "Go to next zoom (from the history of zooms)"
@@ -21651,7 +21651,7 @@ msgstr "Usar cor de base padrão para os ícones"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1692
 msgid "Use default highlight colors for icons"
-msgstr "Use cores de destaque padrão para ícones"
+msgstr "Usar cores de destaque padrão para ícones"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1718
 msgid "Icon color base"
@@ -23118,7 +23118,7 @@ msgstr ""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2403
 msgid "_Zoom in/out by:"
-msgstr "_Zoom com as teclas +/- por:"
+msgstr "_Zoom aumenta/diminui por:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2403
 #: ../src/ui/dialog/inkscape-preferences.cpp:2526 ../share/ui/units.xml:4
@@ -25444,11 +25444,11 @@ msgstr "Alterne os símbolos de 'ajuste' no espaço do ícone."
 
 #: ../src/ui/dialog/symbols.cpp:307
 msgid "Make symbols smaller by zooming out."
-msgstr "Diminua o zoom dos símbolos."
+msgstr "Diminuir zoom dos símbolos."
 
 #: ../src/ui/dialog/symbols.cpp:318
 msgid "Make symbols bigger by zooming in."
-msgstr "Aumente os símbolos ao aumentar o zoom."
+msgstr "Aumentar zoom dos símbolos."
 
 #: ../src/ui/dialog/symbols.cpp:397 ../src/ui/dialog/symbols.cpp:1033
 msgid "Searching..."
@@ -30632,7 +30632,7 @@ msgstr ""
 
 #: ../src/ui/widget/canvas-grid.cpp:128
 msgid "Zoom drawing if window size changes"
-msgstr "Ajustar nível de zoom do desenho se o tamanho da janela mudar"
+msgstr "Ajustar zoom do desenho se o tamanho da janela mudar"
 
 #: ../src/ui/widget/color-entry.cpp:37
 msgid "Hexadecimal RGBA value of the color"
@@ -33805,7 +33805,7 @@ msgstr "Preferências abertas para a ferramenta Malha"
 
 #: ../src/verbs.cpp:2764
 msgid "Zoom Preferences"
-msgstr "Preferências da ferramenta Zoom"
+msgstr "Preferências de Zoom"
 
 #: ../src/verbs.cpp:2765
 msgid "Open Preferences for the Zoom tool"
