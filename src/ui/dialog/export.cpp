@@ -17,26 +17,27 @@
 // This has to be included prior to anything that includes setjmp.h, it croaks otherwise
 #include "export.h"
 
+#include <glibmm/convert.h>
+#include <glibmm/i18n.h>
+#include <glibmm/miscutils.h>
 #include <gtkmm.h>
 #include <png.h>
 
+#include "desktop.h"
 #include "document-undo.h"
 #include "document.h"
+#include "extension/db.h"
 #include "file.h"
+#include "helper/png-write.h"
 #include "inkscape-window.h"
 #include "inkscape.h"
-#include "preferences.h"
-#include "selection-chemistry.h"
-
-// required to set status message after export
-#include "desktop.h"
-#include "extension/db.h"
-#include "helper/png-write.h"
 #include "io/resource.h"
 #include "io/sys.h"
 #include "message-stack.h"
 #include "object/sp-namedview.h"
 #include "object/sp-root.h"
+#include "preferences.h"
+#include "selection-chemistry.h"
 #include "ui/dialog-events.h"
 #include "ui/dialog/dialog-notebook.h"
 #include "ui/dialog/filedialog.h"
@@ -57,8 +58,16 @@ namespace Inkscape {
 namespace UI {
 namespace Dialog {
 
+static std::string create_filepath_from_id(Glib::ustring id, const Glib::ustring &file_entry_text);
+static void append_ext_to_filename(Glib::ustring &filename, Glib::ustring &extension);
+static Glib::ustring get_default_filename(Glib::ustring &filename_entry_text, Glib::ustring &extension);
+static Glib::ustring get_ext_from_filename(Glib::ustring &filename);
+
 Export::Export()
     : DialogBase("/dialogs/export/", "Export")
+    , filename_modified(false)
+    , original_name()
+    , doc_export_name()
     , selectChangedConn()
     , subselChangedConn()
     , selectModifiedConn()
@@ -82,16 +91,18 @@ Export::Export()
 
     // setting up units beforehand is important as we will use it to initialise other values
     setupUnits();
-
     setupSpinButtons();
     setupExtensionList();
 
     // Callback when container is dinally mapped on window. All intialisation like set active is done inside it.
     container->signal_map().connect(sigc::mem_fun(*this, &Export::onContainerVisible));
     units->signal_changed().connect(sigc::mem_fun(*this, &Export::onUnitChanged));
+    extension_cb->signal_changed().connect(sigc::mem_fun(*this, &Export::onExtensionChanged));
     for (auto [key, button] : selection_buttons) {
         button->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &Export::onAreaTypeToggle), key));
     }
+    filenameChangedConn = filename_entry->signal_changed().connect(sigc::mem_fun(*this, &Export::onFilenameModified));
+    siExportConn = si_export->signal_clicked().connect(sigc::mem_fun(*this, &Export::onExport));
 }
 
 Export::~Export()
@@ -107,7 +118,6 @@ void Export::update()
         std::cerr << "Export::update(): _app is null" << std::endl;
         return;
     }
-
     onSelectionChanged();
     onSelectionModified(0);
 #if 0
@@ -123,10 +133,17 @@ void Export::onSelectionChanged()
         if (current_key == SELECTION_SELECTION) {
             selection_buttons[(selection_mode)0]->set_active(true); // This causes refresh area
             // return otherwise refreshArea will be called again
+            // even though we are at default key, selection is the one which was original key.
+            prefs->setString("/dialogs/export/exportarea/value", selection_names[SELECTION_SELECTION]);
             return;
         }
     } else {
         selection_buttons[SELECTION_SELECTION]->set_sensitive(true);
+        Glib::ustring pref_key_name = prefs->getString("/dialogs/export/exportarea/value");
+        if (selection_names[SELECTION_SELECTION] == pref_key_name && current_key != SELECTION_SELECTION) {
+            selection_buttons[SELECTION_SELECTION]->set_active();
+            return;
+        }
     }
     refreshArea();
 }
@@ -160,6 +177,7 @@ void Export::onSelectionModified(guint /*flags*/)
                 break;
         }
     }
+    refreshExportHints();
 
     return;
 }
@@ -205,7 +223,7 @@ void Export::initialise_all()
                 builder->get_widget("si_show_preview", si_show_preview);
 
                 builder->get_widget("si_extention", extension_cb);
-                builder->get_widget("si_filename", filename);
+                builder->get_widget("si_filename", filename_entry);
                 builder->get_widget("si_export", si_export);
             } // Single Image End
 
@@ -252,8 +270,6 @@ void Export::setupExtensionList()
     extension = manual_omod->get_extension();
     extension_cb->append(extension);
     extension_list[extension] = manual_omod;
-
-    extension_cb->set_active(0);
 }
 
 void Export::setupSpinButtons()
@@ -274,7 +290,8 @@ void Export::setupSpinButtons()
 
     setupSpinButton<sb_type>(bmheight_sb, 1.0, 1.0, 1000000.0, 1.0, 10.0, 3, true, &Export::onDpiChange, SPIN_BMHEIGHT);
     setupSpinButton<sb_type>(bmwidth_sb, 1.0, 1.0, 1000000.0, 1.0, 10.0, 3, true, &Export::onDpiChange, SPIN_BMWIDTH);
-    setupSpinButton<sb_type>(dpi_sb, 92.0, 0.01, 100000.0, 0.1, 1.0, 2, true, &Export::onDpiChange, SPIN_DPI);
+    setupSpinButton<sb_type>(dpi_sb, prefs->getDouble("/dialogs/export/defaultxdpi/value", DPI_BASE), 0.01, 100000.0,
+                             0.1, 1.0, 2, true, &Export::onDpiChange, SPIN_DPI);
 }
 
 template <typename T>
@@ -434,6 +451,7 @@ void Export::dpiChange(sb_type type)
             dpi = bmwidth * DPI_BASE / width;
             break;
         case SPIN_DPI:
+            prefs->setDouble("/dialogs/export/defaultdpi/value", dpi);
             break;
         default:
             break;
@@ -472,13 +490,19 @@ void Export::setDefaultSelectionMode()
         { // Single Image Selection Mode
 
             current_key = (selection_mode)0; // default key
+            bool found = false;
             Glib::ustring pref_key_name = prefs->getString("/dialogs/export/exportarea/value");
             for (auto [key, name] : selection_names) {
                 if (pref_key_name == name) {
                     current_key = key;
+                    found = true;
                     break;
                 }
             }
+            if (!found) {
+                pref_key_name = selection_names[current_key];
+            }
+
             if (current_key == SELECTION_SELECTION && (SP_ACTIVE_DESKTOP->getSelection())->isEmpty()) {
                 current_key = (selection_mode)0;
             }
@@ -486,10 +510,32 @@ void Export::setDefaultSelectionMode()
                 selection_buttons[SELECTION_SELECTION]->set_sensitive(false);
             }
             selection_buttons[current_key]->set_active(true);
+            prefs->setString("/dialogs/export/exportarea/value", pref_key_name);
         }
 
         { // Batch Export Selection Mode
         }
+    }
+}
+
+void Export::setDefaultFilename()
+{
+    Glib::ustring filename;
+    float xdpi = 0.0, ydpi = 0.0;
+    SPDocument *doc = SP_ACTIVE_DOCUMENT;
+    sp_document_get_export_hints(doc, filename, &xdpi, &ydpi);
+    if (filename.empty()) {
+        Glib::ustring filename_entry_text = filename_entry->get_text();
+        Glib::ustring extention_entry_text = ".png";
+        filename = get_default_filename(filename_entry_text, extention_entry_text);
+    }
+    doc_export_name = filename;
+    original_name = filename;
+    filename_entry->set_text(filename);
+    filename_entry->set_position(filename.length());
+    // We only need to check xdpi
+    if (xdpi != 0.0) {
+        dpi_sb->set_value(xdpi);
     }
 }
 
@@ -499,6 +545,7 @@ void Export::refreshArea()
         SPDocument *doc;
         Geom::OptRect bbox;
         doc = SP_ACTIVE_DESKTOP->getDocument();
+        doc->ensureUpToDate();
 
         switch (current_key) {
             case SELECTION_SELECTION:
@@ -524,8 +571,61 @@ void Export::refreshArea()
             setArea(bbox->min()[Geom::X], bbox->min()[Geom::Y], bbox->max()[Geom::X], bbox->max()[Geom::Y]);
         }
     }
+}
 
-    // TODO: FilenameModified
+void Export::refreshExportHints()
+{
+    if (SP_ACTIVE_DESKTOP && !filename_modified) {
+        SPDocument *doc = SP_ACTIVE_DOCUMENT;
+        Glib::ustring filename;
+        float xdpi = 0.0, ydpi = 0.0;
+        switch (current_key) {
+            case SELECTION_CUSTOM:
+            case SELECTION_PAGE:
+            case SELECTION_DRAWING:
+                sp_document_get_export_hints(doc, filename, &xdpi, &ydpi);
+                if (filename.empty()) {
+                    Glib::ustring filename_entry_text = filename_entry->get_text();
+                    Glib::ustring extension_entry_text = extension_cb->get_active_text();
+                    filename = get_default_filename(filename_entry_text, extension_entry_text);
+                }
+                doc_export_name = filename;
+                break;
+            case SELECTION_SELECTION:
+                if ((SP_ACTIVE_DESKTOP->getSelection())->isEmpty()) {
+                    break;
+                }
+                SP_ACTIVE_DESKTOP->getSelection()->getExportHints(filename, &xdpi, &ydpi);
+
+                /* If we still don't have a filename -- let's build
+                   one that's nice */
+                if (filename.empty()) {
+                    const gchar *id = "object";
+                    auto reprlst = SP_ACTIVE_DESKTOP->getSelection()->xmlNodes();
+                    for (auto i = reprlst.begin(); reprlst.end() != i; ++i) {
+                        Inkscape::XML::Node *repr = *i;
+                        if (repr->attribute("id")) {
+                            id = repr->attribute("id");
+                            break;
+                        }
+                    }
+                    filename = create_filepath_from_id(id, filename_entry->get_text());
+                    filename = filename + extension_cb->get_active_text();
+                }
+                break;
+            default:
+                break;
+        }
+        if (!filename.empty()) {
+            original_name = filename;
+            filename_entry->set_text(filename);
+            filename_entry->set_position(filename.length());
+        }
+
+        if (xdpi != 0.0) {
+            dpi_sb->set_value(xdpi);
+        }
+    }
 }
 
 void Export::setArea(double x0, double y0, double x1, double y1)
@@ -548,6 +648,17 @@ void Export::setArea(double x0, double y0, double x1, double y1)
     blockSpinConns(false);
 }
 
+Glib::ustring Export::getValidExtension(Glib::ustring &extension, Glib::ustring &original_extension)
+{
+    if (extension_list[extension]) {
+        return extension;
+    }
+    if (!original_extension.empty()) {
+        return original_extension;
+    }
+    return ".png";
+}
+
 /**
  * SIGNALS
  */
@@ -556,8 +667,11 @@ void Export::setArea(double x0, double y0, double x1, double y1)
 
 void Export::onContainerVisible()
 {
+    std::cout << "Container Visible" << std::endl;
     setDefaultNotebookPage();
     setDefaultSelectionMode();
+    setDefaultFilename();
+    extension_cb->set_active(0);
 }
 
 void Export::onAreaXChange(sb_type type)
@@ -587,15 +701,142 @@ void Export::onAreaTypeToggle(selection_mode key)
     }
     // If you have reached here means the current key is active one ( not sure if multiple transitions happen but last
     // call will change values)
-
     current_key = key;
     prefs->setString("/dialogs/export/exportarea/value", selection_names[current_key]);
     refreshArea();
+    refreshExportHints();
 }
 
 void Export::onUnitChanged()
 {
     refreshArea();
+}
+
+void Export::onFilenameModified()
+{
+    filenameChangedConn.block();
+    Glib::ustring filename = filename_entry->get_text();
+    Glib::ustring filename_extension = get_ext_from_filename(filename);
+    Glib::ustring active_extension = extension_cb->get_active_text();
+    Glib::ustring filtered_extension = getValidExtension(filename_extension, active_extension);
+
+    if (original_name == filename) {
+        filename_modified = false;
+    } else {
+        filename_modified = true;
+    }
+
+    extension_cb->set_active_text(filtered_extension);
+
+    filenameChangedConn.unblock();
+}
+
+void Export::onExtensionChanged()
+{
+    filenameChangedConn.block();
+    Glib::ustring filename = filename_entry->get_text();
+    Glib::ustring filename_extension = get_ext_from_filename(filename);
+    Glib::ustring active_extension = extension_cb->get_active_text();
+    if (filename_extension == active_extension) {
+        return;
+    }
+    if (extension_list[filename_extension]) {
+        auto extension_point = filename.rfind(filename_extension);
+        filename.erase(extension_point);
+    }
+    filename = filename + active_extension;
+    filename_entry->set_text(filename);
+    filename_entry->set_position(filename.length());
+
+    filenameChangedConn.unblock();
+}
+
+void Export::onExport()
+{
+    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
+    if (!desktop) {
+        return;
+    }
+}
+
+/**
+ * UTILS FUNCTIONS
+ */
+
+std::string create_filepath_from_id(Glib::ustring id, const Glib::ustring &file_entry_text)
+{
+    if (id.empty()) { /* This should never happen */
+        id = "bitmap";
+    }
+
+    std::string directory;
+
+    if (!file_entry_text.empty()) {
+        directory = Glib::path_get_dirname(Glib::filename_from_utf8(file_entry_text));
+    }
+
+    if (directory.empty()) {
+        /* Grab document directory */
+        const gchar *docFilename = SP_ACTIVE_DOCUMENT->getDocumentFilename();
+        if (docFilename) {
+            directory = Glib::path_get_dirname(docFilename);
+        }
+    }
+
+    if (directory.empty()) {
+        directory = Inkscape::IO::Resource::homedir_path(nullptr);
+    }
+
+    return Glib::build_filename(directory, Glib::filename_from_utf8(id));
+}
+
+Glib::ustring get_ext_from_filename(Glib::ustring &filename)
+{
+    Glib::ustring extension = "";
+    if (!filename.empty()) {
+        auto extension_point = filename.rfind('.');
+        if (extension_point != Glib::ustring::npos) {
+            extension = filename.substr(extension_point);
+        }
+    }
+    return extension;
+}
+
+void append_ext_to_filename(Glib::ustring &filename, Glib::ustring &extention)
+{
+    if (Glib::str_has_suffix(filename, extention)) {
+        return;
+    }
+    filename = filename + extention;
+    return;
+}
+
+Glib::ustring get_default_filename(Glib::ustring &filename_entry_text, Glib::ustring &extension)
+{
+    Glib::ustring filename;
+    if (SP_ACTIVE_DOCUMENT && SP_ACTIVE_DOCUMENT->getDocumentFilename()) {
+        SPDocument *doc = SP_ACTIVE_DOCUMENT;
+        filename = doc->getDocumentFilename();
+        auto &&text_extension = get_file_save_extension(Inkscape::Extension::FILE_SAVE_METHOD_SAVE_AS);
+        Inkscape::Extension::Output *oextension = nullptr;
+        if (!text_extension.empty()) {
+            oextension =
+                dynamic_cast<Inkscape::Extension::Output *>(Inkscape::Extension::db.get(text_extension.c_str()));
+        }
+        if (oextension != nullptr) {
+            Glib::ustring old_extension = oextension->get_extension();
+            if (Glib::str_has_suffix(filename, old_extension)) {
+                auto extension_point = filename.rfind(old_extension);
+                filename.erase(extension_point);
+            }
+        }
+        filename = filename + extension;
+
+    } else if (SP_ACTIVE_DOCUMENT) {
+        filename = create_filepath_from_id(_("bitmap"), filename_entry_text);
+        filename = filename + extension;
+    }
+    return filename;
 }
 
 } // namespace Dialog

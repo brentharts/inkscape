@@ -752,7 +752,7 @@
                 <child>
                   <object class="GtkEntry" id="si_filename">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can_focus">True</property>
                     <property name="hexpand">True</property>
                     <property name="secondary_icon_name">folder-open</property>
                     <property name="placeholder_text" translatable="yes">Filename</property>

@@ -43,7 +43,7 @@ enum selection_mode
     SELECTION_PAGE = 0, // Default is alaways placed first
     SELECTION_SELECTION,
     SELECTION_DRAWING,
-    SELECTION_CUSTOM
+    SELECTION_CUSTOM,
 };
 
 class ExportProgressDialog;
@@ -91,7 +91,7 @@ private:
     Gtk::Box *si_preview_box = nullptr;
     Gtk::CheckButton *si_show_preview = nullptr;
     Gtk::ComboBoxText *extension_cb = nullptr;
-    Gtk::Entry *filename = nullptr;
+    Gtk::Entry *filename_entry = nullptr;
     Gtk::Button *si_export = nullptr;
 
     Gtk::Box *batch_export = nullptr;
@@ -101,6 +101,13 @@ private:
     std::map<selection_mode, Glib::ustring> selection_names;
     selection_mode current_key;
     std::map<Glib::ustring, Inkscape::Extension::Output*> extension_list;
+
+    // Once user change filename it is set and prevent automatic changes to filename_entry
+    bool filename_modified;
+    // original name for export. Changes everytime selection changes or when exported.
+    Glib::ustring original_name;
+    // initialised only at startup and is used as fallback for original name.
+    Glib::ustring doc_export_name;
 
     // Initialise all objects from builder
     void initialise_all();
@@ -117,6 +124,7 @@ private:
     // setup default values of widgets
     void setDefaultNotebookPage();
     void setDefaultSelectionMode();
+    void setDefaultFilename();
 
     // Utils Functions
     void areaXChange(sb_type type);
@@ -124,10 +132,12 @@ private:
     void dpiChange(sb_type type);
     float getValuePx(float value);
     void setValuePx(Glib::RefPtr<Gtk::Adjustment> &adj, double val);
+    Glib::ustring getValidExtension(Glib::ustring &extension, Glib::ustring &original_extension);
 
     void blockSpinConns(bool status);
 
     void refreshArea();
+    void refreshExportHints();
     void setArea(double x0, double y0, double x1, double y1);
 
     // signals callback
@@ -137,6 +147,11 @@ private:
     void onDpiChange(sb_type type);
     void onAreaTypeToggle(selection_mode key);
     void onUnitChanged();
+    void onExport();
+    void onBatchExport();
+    void onFilenameModified();
+    void onExtensionChanged();
+
     /**
      * Inkscape selection change callback
      */
@@ -153,6 +168,8 @@ private:
     sigc::connection subselChangedConn;
     sigc::connection selectModifiedConn;
     std::vector<sigc::connection> spinButtonConns;
+    sigc::connection filenameChangedConn;
+    sigc::connection siExportConn;
 };
 } // namespace Dialog
 } // namespace UI
