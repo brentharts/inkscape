@@ -9495,7 +9495,7 @@ msgstr "Reverter gradiente"
 #: ../src/gradient-chemistry.cpp:1596
 #: ../src/ui/widget/gradient-selector.cpp:148
 msgid "Delete swatch"
-msgstr "Apagar amostra"
+msgstr "Excluir amostra"
 
 #: ../src/gradient-drag.cpp:86 ../src/ui/tools/gradient-tool.cpp:83
 #: ../src/ui/tools/mesh-tool.cpp:95
@@ -9510,7 +9510,7 @@ msgstr "<b>Fim</b> do gradiente linear"
 #: ../src/gradient-drag.cpp:88 ../src/ui/tools/gradient-tool.cpp:85
 #: ../src/ui/tools/mesh-tool.cpp:97
 msgid "Linear gradient <b>mid stop</b>"
-msgstr "<b>Intervalo de cor</b> do gradiente linear"
+msgstr "<b>Ponto intermediário</b> do gradiente linear"
 
 #: ../src/gradient-drag.cpp:89 ../src/ui/tools/gradient-tool.cpp:86
 #: ../src/ui/tools/mesh-tool.cpp:98
@@ -9532,22 +9532,22 @@ msgstr "<b>Foco</b> do gradiente radial"
 #: ../src/ui/tools/gradient-tool.cpp:90 ../src/ui/tools/gradient-tool.cpp:91
 #: ../src/ui/tools/mesh-tool.cpp:102 ../src/ui/tools/mesh-tool.cpp:103
 msgid "Radial gradient <b>mid stop</b>"
-msgstr "<b>Intervalo de cor</b> do gradiente radial"
+msgstr "<b>Ponto intermediário</b> do gradiente radial"
 
 #: ../src/gradient-drag.cpp:95 ../src/ui/tools/gradient-tool.cpp:92
 #: ../src/ui/tools/mesh-tool.cpp:104
 msgid "Mesh gradient <b>corner</b>"
-msgstr "Malha do gradiente <b>canto</b>"
+msgstr "<b>Canto</b> da Malha de gradiente"
 
 #: ../src/gradient-drag.cpp:96 ../src/ui/tools/gradient-tool.cpp:93
 #: ../src/ui/tools/mesh-tool.cpp:105
 msgid "Mesh gradient <b>handle</b>"
-msgstr "Malha do gradiente <b>alça</b>"
+msgstr "<b>Alça</b> da Malha de gradiente"
 
 #: ../src/gradient-drag.cpp:97 ../src/ui/tools/gradient-tool.cpp:94
 #: ../src/ui/tools/mesh-tool.cpp:106
 msgid "Mesh gradient <b>tensor</b>"
-msgstr "Malha do gradiente <b>tensor</b>"
+msgstr "<b>Tensor</b> da Malha de gradiente"
 
 #: ../src/gradient-drag.cpp:543
 msgid "Added patch row or column"
@@ -9563,7 +9563,7 @@ msgstr "Mover alça do gradiente"
 
 #: ../src/gradient-drag.cpp:1148
 msgid "Delete gradient stop"
-msgstr "Excluir intervalo de cor"
+msgstr "Excluir ponto do gradiente"
 
 #: ../src/gradient-drag.cpp:1425
 #, c-format
@@ -9572,7 +9572,7 @@ msgid ""
 "+Alt</b> to delete stop"
 msgstr ""
 "%s %d para: %s%s; arraste com <b>Ctrl</b> para alinhar em intervalos, clique "
-"com <b>Ctrl+Alt</b> excluir o intervalo"
+"com <b>Ctrl+Alt</b> excluir o ponto"
 
 #: ../src/gradient-drag.cpp:1429 ../src/gradient-drag.cpp:1438
 #: ../src/gradient-drag.cpp:1445
@@ -9627,7 +9627,7 @@ msgstr "Mover intervalos(s) de cor do gradiente"
 
 #: ../src/gradient-drag.cpp:3117
 msgid "Delete gradient stop(s)"
-msgstr "Excluir intervalo(s) do gradiente"
+msgstr "Excluir pontos(s) do gradiente"
 
 #. TRANSLATORS: Please don't translate link unless the page exists in your language. Add your language code to
 #. the link this way: https://inkscape.org/[lang]/learn/tutorials/
@@ -17594,7 +17594,7 @@ msgstr "Criar Guias em torno da página"
 
 #: ../src/ui/dialog/document-properties.cpp:117
 msgid "Delete all guides"
-msgstr "Apagar todas as guias"
+msgstr "Excluir todas as guias"
 
 #: ../src/ui/dialog/document-properties.cpp:119
 msgid "Snap _distance"
@@ -22316,7 +22316,7 @@ msgstr "Remover atributos"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2047
 msgid "Delete invalid or non-useful attributes from element tag"
-msgstr "Exclua atributos inválidos ou não úteis da tag do elemento"
+msgstr "Excluir atributos inválidos ou não úteis da tag do elemento"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2050
 msgid "Inappropriate Style Properties Actions"
@@ -24280,7 +24280,7 @@ msgstr "Adicionar efeito de caminho"
 
 #: ../src/ui/dialog/livepatheffect-editor.cpp:127
 msgid "Delete current path effect"
-msgstr "Apagar efeito de caminho atual"
+msgstr "Excluir efeito de caminho atual"
 
 #: ../src/ui/dialog/livepatheffect-editor.cpp:131
 msgid "Raise the current path effect"
@@ -25300,7 +25300,7 @@ msgstr "Muito grande para pré-visualizar"
 #: ../src/ui/dialog/swatches.cpp:204 ../src/ui/tools/gradient-tool.cpp:347
 #: ../src/ui/tools/gradient-tool.cpp:444
 msgid "Add gradient stop"
-msgstr "Adicionar intervalo de cor"
+msgstr "Adicionar ponto de gradiente"
 
 #. TRANSLATORS: An item in context menu on a colour in the swatches
 #: ../src/ui/dialog/swatches.cpp:257
@@ -27516,11 +27516,11 @@ msgstr ""
 
 #: ../src/ui/toolbar/gradient-toolbar.cpp:490
 msgid "No stops"
-msgstr "Sem paradas"
+msgstr "Sem pontos"
 
 #: ../src/ui/toolbar/gradient-toolbar.cpp:496
 msgid "Stops"
-msgstr "Paradas"
+msgstr "Pontos"
 
 #: ../src/ui/toolbar/gradient-toolbar.cpp:515
 msgctxt "Gradient"
@@ -27529,17 +27529,17 @@ msgstr "Deslocamento:"
 
 #: ../src/ui/toolbar/gradient-toolbar.cpp:516
 msgid "Offset of selected stop"
-msgstr "Deslocamento da parada selecionada"
+msgstr "Deslocamento do ponto selecionado"
 
 #: ../src/ui/toolbar/gradient-toolbar.cpp:525
 #: ../src/ui/toolbar/gradient-toolbar.cpp:526
 msgid "Insert new stop"
-msgstr "Inserir nova parada"
+msgstr "Inserir novo ponto"
 
 #: ../src/ui/toolbar/gradient-toolbar.cpp:535
 #: ../src/ui/toolbar/gradient-toolbar.cpp:536
 msgid "Delete stop"
-msgstr "Excluir parada"
+msgstr "Excluir ponto"
 
 #: ../src/ui/toolbar/gradient-toolbar.cpp:602
 msgid "Assign gradient to object"
@@ -27551,15 +27551,15 @@ msgstr "Definir repetição de gradiente"
 
 #: ../src/ui/toolbar/gradient-toolbar.cpp:778
 msgid "Change gradient stop offset"
-msgstr "Alterar posição do intervalo no gradiente"
+msgstr "Alterar posição do ponto no gradiente"
 
 #: ../src/ui/toolbar/gradient-toolbar.cpp:996
 msgid "No stops in gradient"
-msgstr "Nenhum intervalo de cor no gradiente"
+msgstr "Nenhum ponto no gradiente"
 
 #: ../src/ui/toolbar/gradient-toolbar.cpp:1122
 msgid "Multiple stops"
-msgstr "Múltiplas paradas"
+msgstr "Múltiplos pontos"
 
 #: ../src/ui/toolbar/lpe-toolbar.cpp:73
 msgid "All inactive"
@@ -29761,10 +29761,10 @@ msgid ""
 msgid_plural ""
 "One handle merging %d stops (drag with <b>Shift</b> to separate) selected"
 msgstr[0] ""
-"Uma alça mesclando %d intervalo (arraste com <b>Shift</b> para separar) "
+"Uma alça mesclando %d ponto (arraste com <b>Shift</b> para separar) "
 "selecionada"
 msgstr[1] ""
-"Uma alça mesclando %d intervalos (arraste com <b>Shift</b> para separar) "
+"Uma alça mesclando %d pontos (arraste com <b>Shift</b> para separar) "
 "selecionadas"
 
 #. TRANSLATORS: The plural refers to number of selected gradient handles. This is part of a compound message (part two indicates selected object count)
@@ -29895,7 +29895,7 @@ msgstr[1] "<b>%d</b> alças de malha selecionadas de %d"
 msgid "<b>No</b> mesh handles selected out of %d on %d selected object"
 msgid_plural "<b>No</b> mesh handles selected out of %d on %d selected objects"
 msgstr[0] ""
-"<b>Sem</b> alças de malha selecionadas de %d em %d objeto selecionado"
+"<b>Sem</b> alça de malha selecionada de %d em %d objeto selecionado"
 msgstr[1] ""
 "<b>Sem</b> alças de malha selecionadas de %d em %d objetos selecionados"
 
@@ -34591,14 +34591,14 @@ msgid ""
 "\n"
 "Do you want to save this file as Inkscape SVG?"
 msgstr ""
-"<span weight = \"bold\" size = \"maior\"> O arquivo \"%s\" foi salvo com um "
-"formato que pode causar perda de dados! </span>\n"
+"<span weight=\"bold\" size=\"larger\">O arquivo \"%s\" foi salvo com um "
+"formato que pode causar perda de dados!</span>\n"
 "\n"
-"Você deseja salvar este arquivo como Inkscape SVG?"
+"Gostaria salvar este arquivo como Inkscape SVG?"
 
 #: ../src/widgets/desktop-widget.cpp:902
 msgid "_Save as Inkscape SVG"
-msgstr "_Salvar como SVG Inkscape"
+msgstr "_Salvar como Inkscape SVG"
 
 #: ../src/widgets/desktop-widget.cpp:1124
 msgid "Note:"
@@ -37572,7 +37572,7 @@ msgstr "marcar com estilo"
 
 #: ../share/extensions/gcodetools_area.inx:36
 msgid "delete"
-msgstr "apagar"
+msgstr "excluir"
 
 #
 # File: ../share/extensions/gcodetools_area.inx, line: 39
@@ -38850,7 +38850,7 @@ msgstr "Iniciar pelas bordas"
 
 #: ../share/extensions/guides_creator.inx:80
 msgid "Delete existing guides"
-msgstr "Remover guias existentes"
+msgstr "Excluir guias existentes"
 
 #: ../share/extensions/guillotine.inx:3
 msgid "Guillotine"
