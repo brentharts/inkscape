@@ -406,7 +406,6 @@ void ColorPalette::set_up_scrolling() {
             // vertical scrolling with multiple rows
             // 'external' allows scrollbar to shrink vertically
             _scroll.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_EXTERNAL);
-            // _scroll.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_ALWAYS);
             _flowbox.set_min_children_per_line(1);
             _flowbox.set_max_children_per_line(_count);
             _scroll_left.hide();

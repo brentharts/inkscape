@@ -804,7 +804,6 @@ SwatchesPanel::SwatchesPanel(gchar const *prefsPath)
         _palette->set_aspect(prefs->getDoubleLimited(_prefs_path + "/tile_aspect", 0.0, -2, 2));
         _palette->set_tile_border(prefs->getInt(_prefs_path + "/tile_border", 1));
         _palette->set_rows(prefs->getInt(_prefs_path + "/rows", 1));
-        // _palette->enable_scrollbar(prefs->getBool(_prefs_path + "/scrollbar", true));
         _palette->enable_stretch(prefs->getBool(_prefs_path + "/tile_stretch", false));
         // save settings when they change
         _palette->get_settings_changed_signal().connect([=](){
