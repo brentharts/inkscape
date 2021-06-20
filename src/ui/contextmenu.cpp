@@ -443,18 +443,13 @@ void ContextMenu::MakeItemMenu ()
     mi->show();
     append(*mi);
 
-    bool ClipRefOK=false;
-    bool MaskRefOK=false;
-    if (_item && _item->getClipObject()) {
-        ClipRefOK = true;
-    }
-    if (_item && _item->getMaskObject()) {
-        MaskRefOK = true;
-    }
+    bool has_clip = _item && _item->getClipObject();
+    bool has_mask = _item && _item->getMaskObject();
+
     /* Set mask */
     mi = Gtk::manage(new Gtk::MenuItem(_("Set Mask"), true));
     mi->signal_activate().connect(sigc::mem_fun(*this, &ContextMenu::SetMask));
-    if (ClipRefOK || MaskRefOK) {
+    if (has_clip || has_mask) {
         mi->set_sensitive(FALSE);
     } else {
         mi->set_sensitive(TRUE);
@@ -463,15 +458,13 @@ void ContextMenu::MakeItemMenu ()
     append(*mi);
 
     /* Release mask */
-    mi = Gtk::manage(new Gtk::MenuItem(_("Release Mask"), true));
-    mi->signal_activate().connect(sigc::mem_fun(*this, &ContextMenu::ReleaseMask));
-    if (MaskRefOK) {
+    if (has_mask) {
+        mi = Gtk::manage(new Gtk::MenuItem(_("Release Mask"), true));
+        mi->signal_activate().connect(sigc::mem_fun(*this, &ContextMenu::ReleaseMask));
         mi->set_sensitive(TRUE);
-    } else {
-        mi->set_sensitive(FALSE);
+        mi->show();
+        append(*mi);
     }
-    mi->show();
-    append(*mi);
 
     /*SSet Clip Group */
     mi = Gtk::manage(new Gtk::MenuItem(_("Create Clip G_roup"),true));
@@ -483,7 +476,7 @@ void ContextMenu::MakeItemMenu ()
     /* Set Clip */
     mi = Gtk::manage(new Gtk::MenuItem(_("Set Cl_ip"), true));
     mi->signal_activate().connect(sigc::mem_fun(*this, &ContextMenu::SetClip));
-    if (ClipRefOK || MaskRefOK) {
+    if (has_clip || has_mask) {
         mi->set_sensitive(FALSE);
     } else {
         mi->set_sensitive(TRUE);
@@ -491,16 +484,14 @@ void ContextMenu::MakeItemMenu ()
     mi->show();
     append(*mi);
 
-    /* Release Clip */
-    mi = Gtk::manage(new Gtk::MenuItem(_("Release C_lip"), true));
-    mi->signal_activate().connect(sigc::mem_fun(*this, &ContextMenu::ReleaseClip));
-    if (ClipRefOK) {
+    if (has_clip) {
+        /* Release Clip */
+        mi = Gtk::manage(new Gtk::MenuItem(_("Release C_lip"), true));
+        mi->signal_activate().connect(sigc::mem_fun(*this, &ContextMenu::ReleaseClip));
         mi->set_sensitive(TRUE);
-    } else {
-        mi->set_sensitive(FALSE);
+        mi->show();
+        append(*mi);
     }
-    mi->show();
-    append(*mi);
 
     /* Group */
     mi = Gtk::manage(new Gtk::MenuItem(_("_Group"), true));
@@ -717,6 +708,19 @@ void ContextMenu::MakeImageMenu ()
         mi->set_sensitive(FALSE);
     }
 
+    /* Crop image */
+    if (_item && Inkscape::Verb::getbyid("org.inkscape.effect.bitmap.crop.noprefs")) {
+        if (_item->getClipObject()) {
+            mi = Gtk::manage(new Gtk::MenuItem(C_("Context menu", "Crop Image ✂️")));
+            mi->signal_activate().connect(sigc::mem_fun(*this, &ContextMenu::ImageCrop));
+            mi->show();
+            insert(*mi,positionOfLastDialog++);
+            if ( (!href) || ((strncmp(href, "data:", 5) != 0)) ) {
+                mi->set_sensitive( FALSE );
+            }
+        }
+    }
+
     /* Embed image */
     if (Inkscape::Verb::getbyid( "org.inkscape.filter.selected.embed_image" )) {
         mi = Gtk::manage(new Gtk::MenuItem(C_("Context menu", "Embed Image")));
@@ -847,6 +851,20 @@ void ContextMenu::ImageEdit()
 void ContextMenu::ImageTraceBitmap()
 {
     _desktop->getContainer()->new_dialog(SP_VERB_SELECTION_TRACE);
+}
+
+void ContextMenu::ImageCrop()
+{
+    if (_desktop->selection->isEmpty()) {
+        _desktop->selection->set(_item);
+    }
+    Inkscape::Verb *verb = Inkscape::Verb::getbyid( "org.inkscape.effect.bitmap.crop.noprefs" );
+    if (verb) {
+        SPAction *action = verb->get_action(Inkscape::ActionContext(_desktop));
+        if (action) {
+            sp_action_perform(action, nullptr);
+        }
+    }
 }
 
 void ContextMenu::ImageEmbed()

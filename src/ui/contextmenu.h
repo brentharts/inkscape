@@ -174,6 +174,11 @@ class ContextMenu : public Gtk::Menu
         Glib::ustring getImageEditorName(bool is_svg = false);
         
         /**
+         * callback, is executed on clicking the "Embed Crop" menu entry
+         */
+        void ImageCrop();
+        
+        /**
          * callback, is executed on clicking the "Embed Image" menu entry
          */
         void ImageEmbed();
