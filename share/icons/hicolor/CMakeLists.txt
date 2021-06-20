@@ -1,5 +1,7 @@
 set(THEME hicolor)
 install(FILES "index.theme" DESTINATION ${INKSCAPE_SHARE_INSTALL}/icons/${THEME})
+install(FILES "cursors-drop-shadow.svg" DESTINATION ${INKSCAPE_SHARE_INSTALL}/icons/${THEME})
+install(FILES "cursors.css" DESTINATION ${INKSCAPE_SHARE_INSTALL}/icons/${THEME})
 
 set(PIXMAP_SIZES "scalable" "symbolic")
 set(CONTENT "actions")
