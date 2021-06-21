@@ -16,8 +16,8 @@
    id="svg20"
    sodipodi:docname="node-dragging.svg"
    inkscape:version="1.0.1 (3bc2e81, 2020-09-07)">
-  <style
-     id="style849"></style>
+  <style>@import '../cursors.css';</style>
+
   <metadata
      id="metadata24">
     <rdf:RDF>
@@ -99,7 +99,8 @@
   </defs>
   <g
      id="cursor"
-     style="stroke-linejoin:miter;stroke-miterlimit:10;filter:url(#shadow)">
+     class="drop-shadow"
+     style="stroke-linejoin:miter;stroke-miterlimit:10">
     <!-- Triangle -->
     <!-- Outline (cross) -->
     <path

@@ -7,6 +7,8 @@
      inkscape:hotspot_y="4"
      style="fill:gray;stroke:black">
 
+  <style>@import '../cursors.css';</style>
+
   <defs>
     <!-- Shadow -->
     <filter id="shadow" x="-0.5" y="-0.5" width="2" height="2">
@@ -28,7 +30,7 @@
   <path d="M 1.5,4.5 7.5,4.5 M 4.5,1.5 4.5,7.5" style="fill:none;stroke:black;stroke-width:1px;stroke-linecap:square"/>
 
   <!-- Sides  -->
-  <g id="cursor" style="filter:url(#shadow)">
+  <g id="cursor" class="drop-shadow" style="">
     <use xlink:href="#spiral" style="fill:none;stroke:white;stroke-width:3px"/>
     <use xlink:href="#spiral" style="fill:none;stroke:black;stroke-width:1px"/>
   </g>

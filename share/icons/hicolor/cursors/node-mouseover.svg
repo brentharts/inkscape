@@ -16,10 +16,9 @@
    id="svg20"
    sodipodi:docname="node-mouseover.svg"
    inkscape:version="1.0.1 (3bc2e81, 2020-09-07)">
-  <style
-    id="s2">
-    @import '../cursors.css';
-  </style>
+
+  <style>@import '../cursors.css';</style>
+
   <metadata
      id="metadata24">
     <rdf:RDF>
@@ -53,7 +52,52 @@
      inkscape:current-layer="cursor" />
   <defs
      id="defs9">
-      </defs>
+    <!-- Shadow -->
+    <filter
+       id="shadow"
+       x="-0.5"
+       y="-0.5"
+       width="2"
+       height="2">
+      <feOffset
+         result="offOut"
+         in="SourceAlpha"
+         dx="1"
+         dy="1"
+         id="feOffset2" />
+      <feGaussianBlur
+         result="blurOut"
+         stdDeviation="1"
+         id="feGaussianBlur4" />
+      <feBlend
+         in="SourceGraphic"
+         in2="blurOut"
+         mode="normal"
+         id="feBlend6" />
+    </filter>
+    <filter
+       id="shadow-8"
+       x="-0.5"
+       y="-0.5"
+       width="2"
+       height="2">
+      <feOffset
+         result="offOut"
+         in="SourceAlpha"
+         dx="1"
+         dy="1"
+         id="feOffset2-4" />
+      <feGaussianBlur
+         result="blurOut"
+         stdDeviation="1"
+         id="feGaussianBlur4-1" />
+      <feBlend
+         in="SourceGraphic"
+         in2="blurOut"
+         mode="normal"
+         id="feBlend6-3" />
+    </filter>
+  </defs>
   <g
      id="cursor"
      class="drop-shadow"

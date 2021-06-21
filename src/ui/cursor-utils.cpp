@@ -143,17 +143,20 @@ load_svg_cursor(Glib::RefPtr<Gdk::Display> display,
         scale = window->get_scale_factor(); // Adjust for HiDPI screens.
     }
 #endif
+
     auto enable_drop_shadow = prefs->getBool("/options/cursor-drop-shadow", true);
     if (!enable_drop_shadow) {
         // turn off drop shadow, if any
         if (auto main = document->getObjectById("cursor")) {
-            Glib::ustring cls = main->getAttribute("class");
-            auto shadow = "drop-shadow";
-            auto pos = cls.find(shadow);
-            if (pos != Glib::ustring::npos) {
-                cls.erase(pos, strlen(shadow)); // can get away with strlen for ASCII string...
+            if (auto val = main->getAttribute("class")) {
+                Glib::ustring cls = val;
+                auto shadow = "drop-shadow";
+                auto pos = cls.find(shadow);
+                if (pos != Glib::ustring::npos) {
+                    cls.erase(pos, strlen(shadow)); // can get away with strlen for ASCII string...
+                }
+                main->setAttribute("class", cls);
             }
-            main->setAttribute("class", cls);
         }
         else {
             g_warning("Cursor's main object with ID='cursor' not found in %s. Cannot disable drop shadow.", full_file_path.c_str());

@@ -6,6 +6,8 @@
      inkscape:hotspot_y="4"
      style="fill:gray;stroke:black">
 
+  <style>@import '../cursors.css';</style>
+
   <defs>
     <!-- Shadow -->
     <filter id="shadow" x="-0.5" y="-0.5" width="2" height="2">

@@ -54,6 +54,8 @@
        id="grid1537"
        type="xygrid" />
   </sodipodi:namedview>
+  <style>@import '../cursors.css';</style>
+
   <defs
      id="defs957">
     <!-- Shadow -->
@@ -81,7 +83,7 @@
     </filter>
   </defs>
   <g
-     style="filter:url(#shadow)"
+    class="drop-shadow"
      id="cursor">
     <!-- Arrow -->
     <path

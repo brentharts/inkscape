@@ -7,6 +7,8 @@
      inkscape:hotspot_y="26"
      style="fill:gray;stroke:black">
 
+  <style>@import '../cursors.css';</style>
+
   <defs>
     <!-- Shadow -->
     <filter id="shadow" x="-0.5" y="-0.5" width="2" height="2">
@@ -23,7 +25,7 @@
   </defs>
 
   <!-- Bucket with paint -->
-  <g id="cursor" style="filter:url(#shadow)">
+  <g id="cursor" class="drop-shadow" style="">
 
     <!-- Outline -->
     <g style="fill:white;stroke:white;stroke-width:3px">

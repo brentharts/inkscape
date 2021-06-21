@@ -6,6 +6,8 @@
      inkscape:hotspot_y="4"
      style="fill:gray;stroke:black">
 
+  <style>@import '../cursors.css';</style>
+
   <defs>
     <!-- Shadow -->
     <filter id="shadow" x="-0.5" y="-0.5" width="2.5" height="2">
@@ -15,7 +17,7 @@
     </filter>
   </defs>
 
-  <g id="cursor" style="filter:url(#shadow)">
+  <g id="cursor" class="drop-shadow" style="">
     <!-- Arrow -->
     <path d="m 4.5,4.5 l 7.5,7.5 h -4 l 3,7 l -1,0.5 l -3,-7 l -2.5,2.5 z" style="stroke:white;stroke-width:3px"/>
     <path d="m 4.5,4.5 l 7.5,7.5 h -4 l 3,7 l -1,0.5 l -3,-7 l -2.5,2.5 z" style="fill:black;stroke-width:1px"/>

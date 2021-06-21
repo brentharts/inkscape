@@ -82,7 +82,7 @@
   </defs>
   <g
      id="cursor"
-     style="filter:url(#shadow)">
+     class="drop-shadow">
     <!-- Arrow -->
     <path
        d="M 4.5,4.5 12,12 H 8 l 3,7 -1,0.5 -3,-7 -2.5,2.5 z"

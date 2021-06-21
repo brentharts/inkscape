@@ -103,7 +103,7 @@
     </filter>
   </defs>
   <g
-     style="filter:url(#shadow)"
+    class="drop-shadow"
      id="cursor">
     <!-- Arrow -->
     <path
