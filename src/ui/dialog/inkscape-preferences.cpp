@@ -1611,9 +1611,9 @@ void InkscapePreferences::initPageUI()
     _page_ui.add_line(false, "", _mouse_grabsize, "", _("Set the relative size of node handles"), true);
 
     _page_ui.add_group_header(_("Mouse cursors"));
-    _ui_cursorscaling.init(_("Enable cursor scaling"), "/options/cursorscaling", true);
+    _ui_cursorscaling.init(_("Enable scaling"), "/options/cursorscaling", true);
     _page_ui.add_line(false, "", _ui_cursorscaling, "", _("When off, cursor scaling is disabled. Cursor scaling may be broken when fractional scaling is enabled."), true);
-    _ui_cursor_shadow.init(_("Show cursor drop shadow"), "/options/cursor-drop-shadow", true);
+    _ui_cursor_shadow.init(_("Show drop shadow"), "/options/cursor-drop-shadow", true);
     _page_ui.add_line(false, "", _ui_cursor_shadow, "", _("Control visibility of drop shadow for Inkscape cursors."), true);
 
     // Theme
