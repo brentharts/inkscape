@@ -55,7 +55,7 @@
   </sodipodi:namedview>
   <defs
      id="defs9">
-    <!-- Shadow -->
+    <!-- Drop shadow filter used by mouse cursors -->
     <filter
        id="def-drop-shadow"
        x="-0.31588888"
@@ -79,6 +79,7 @@
         <feFuncB
            id="feFuncB1429"
            type="identity" />
+		  <!-- Shadow's transparency -->
         <feFuncA
            id="feFuncA1431"
            type="linear"
@@ -96,9 +97,10 @@
     </filter>
   </defs>
 
+  <!-- This object is not used. It's just an illustration of drop shadow effect. -->
   <g
      id="cursor"
-     style="stroke-linejoin:miter;stroke-miterlimit:10;filter:url(#shadow)">
+     style="stroke-linejoin:miter;stroke-miterlimit:10;filter:url(#def-drop-shadow)">
     <path
        d="m 5,5 12,8 -5,5 z"
        style="stroke-width:1px"
