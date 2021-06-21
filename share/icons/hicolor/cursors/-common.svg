@@ -5,7 +5,7 @@
    style="fill:gray;stroke:black"
    version="1.1"
    id="svg16"
-   sodipodi:docname="cursors-drop-shadow.svg"
+   sodipodi:docname="-common.svg"
    inkscape:version="1.2-dev (11cc75ba41, 2021-06-18)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -53,15 +53,16 @@
        spacingx="2"
        spacingy="2" />
   </sodipodi:namedview>
+
   <defs
      id="defs9">
     <!-- Drop shadow filter used by mouse cursors -->
     <filter
        id="def-drop-shadow"
-       x="-0.31588888"
-       y="-0.30215663"
-       width="1.6646238"
-       height="1.6274443">
+       x="-0.3"
+       y="-0.3"
+       width="1.6"
+       height="1.6">
       <feOffset
          result="offOut"
          in="SourceAlpha"
@@ -79,7 +80,7 @@
         <feFuncB
            id="feFuncB1429"
            type="identity" />
-		  <!-- Shadow's transparency -->
+        <!-- Shadow's transparency -->
         <feFuncA
            id="feFuncA1431"
            type="linear"
@@ -96,6 +97,12 @@
          id="feBlend6" />
     </filter>
   </defs>
+
+  <!-- Cross (centered on hotspot @ 4,4) -->
+  <g id="def-cross">
+    <path d="M 1.5,4.5 7.5,4.5 M 4.5,1.5 4.5,7.5" style="fill:none;stroke:white;stroke-width:3px;stroke-linecap:square;stroke-opacity:0.7"/>
+    <path d="M 1.5,4.5 7.5,4.5 M 4.5,1.5 4.5,7.5" style="fill:none;stroke:black;stroke-width:1px;stroke-linecap:square;stroke-opacity:1"/>
+  </g>
 
   <!-- This object is not used. It's just an illustration of drop shadow effect. -->
   <g

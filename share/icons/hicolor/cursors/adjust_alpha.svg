@@ -7,15 +7,9 @@
      inkscape:hotspot_y="16"
      style="fill:gray;stroke:black">
 
-  <style>@import '../cursors.css';</style>
+  <style>@import './cursors.css';</style>
 
   <defs>
-    <!-- Shadow -->
-    <filter id="shadow" x="-0.5" y="-0.5" width="2" height="2">
-      <feOffset result="offOut" in="SourceAlpha" dx="1" dy="1" />
-      <feGaussianBlur result="blurOut" stdDeviation="1" />
-      <feBlend in="SourceGraphic" in2="blurOut" mode="normal" />
-    </filter>
 
     <g id="objects">
 
