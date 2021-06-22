@@ -114,6 +114,11 @@ void MarkerTool::selection_changed(Inkscape::Selection* selection) {
                         Inkscape::XML::Node *marker_repr = marker_obj->getRepr();
                         SPItem* marker_item = dynamic_cast<SPItem *>(desktop->getDocument()->getObjectByRepr(marker_repr));
                         gather_marker_items(marker_item, SHAPE_ROLE_NORMAL, shapes);
+                                // ShapeRecord sr;
+                                // sr.object = marker_item;
+                                // sr.edit_transform = Geom::identity();
+                                // sr.role = SHAPE_ROLE_NORMAL;
+                                // shapes.insert(sr);
                     }
                 }
             }

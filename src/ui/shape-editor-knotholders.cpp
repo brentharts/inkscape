@@ -23,6 +23,7 @@
 #include "live_effects/effect.h"
 
 #include "object/box3d.h"
+#include "object/sp-marker.h"
 #include "object/sp-ellipse.h"
 #include "object/sp-flowtext.h"
 #include "object/sp-item.h"
@@ -49,6 +50,12 @@ class Box3DKnotHolder : public KnotHolder {
 public:
     Box3DKnotHolder(SPDesktop *desktop, SPItem *item, SPKnotHolderReleasedFunc relhandler);
     ~Box3DKnotHolder() override = default;;
+};
+
+class MarkerKnotHolder : public KnotHolder {
+public:
+    MarkerKnotHolder(SPDesktop *desktop, SPItem *item, SPKnotHolderReleasedFunc relhandler);
+    ~MarkerKnotHolder() override = default;;
 };
 
 class ArcKnotHolder : public KnotHolder {
@@ -118,6 +125,8 @@ KnotHolder *createKnotHolder(SPItem *item, SPDesktop *desktop)
         knotholder = new RectKnotHolder(desktop, item, nullptr);
     } else if (dynamic_cast<SPBox3D *>(item)) {
         knotholder = new Box3DKnotHolder(desktop, item, nullptr);
+    } else if (dynamic_cast<SPMarker *>(item)) {
+        knotholder = new MarkerKnotHolder(desktop, item, nullptr);
     } else if (dynamic_cast<SPGenericEllipse *>(item)) {
         knotholder = new ArcKnotHolder(desktop, item, nullptr);
     } else if (dynamic_cast<SPStar *>(item)) {
@@ -874,6 +883,69 @@ Box3DKnotHolder::Box3DKnotHolder(SPDesktop *desktop, SPItem *item, SPKnotHolderR
     entity.push_back(entity_corner5);
     entity.push_back(entity_corner6);
     entity.push_back(entity_corner7);
+    entity.push_back(entity_center);
+
+    add_pattern_knotholder();
+    add_hatch_knotholder();
+}
+
+/* SPMarker */
+
+/* handle for marker width/height adjustment */
+class MarkerKnotHolderEntityWH : public KnotHolderEntity {
+public:
+    Geom::Point knot_get() const override;
+    void knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) override {};
+    void knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state) override;
+    void knot_click(unsigned int state) override; // ??
+protected:
+    void set_internal(Geom::Point const &p, Geom::Point const &origin, unsigned int state); // ??
+};
+
+/* handle for refX/refY position */
+class MarkerKnotHolderEntityCenter : public KnotHolderEntity {
+public:
+    Geom::Point knot_get() const override;
+    void knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) override {};
+    void knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state) override;
+};
+
+Geom::Point
+MarkerKnotHolderEntityCenter::knot_get() const
+{
+    SPMarker *marker = dynamic_cast<SPMarker *>(item);
+    g_assert(marker != nullptr);
+
+    return Geom::Point(marker->refX.computed, marker->refY.computed);
+}
+
+void
+MarkerKnotHolderEntityCenter::knot_set(Geom::Point const &p, Geom::Point const &/*origin*/, unsigned int state)
+{
+    SPMarker *marker = dynamic_cast<SPMarker *>(item);
+    g_assert(marker != nullptr);
+
+    Geom::Point const s = snap_knot_position(p, state);
+
+    marker->refX = s[Geom::X];
+    marker->refY = s[Geom::Y];
+
+    marker->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+}
+
+MarkerKnotHolder::MarkerKnotHolder(SPDesktop *desktop, SPItem *item, SPKnotHolderReleasedFunc relhandler) :
+    KnotHolder(desktop, item, relhandler)
+{
+    //MarkerKnotHolderEntityWH *entity_wh = new MarkerKnotHolderEntityWH();
+    MarkerKnotHolderEntityCenter *entity_center = new MarkerKnotHolderEntityCenter();
+
+    //entity_wh->create(desktop, item, this, Inkscape::CANVAS_ITEM_CTRL_TYPE_SIZER, "Marker:wh",
+    //                  _("Adjust the <b>size</b> of the marker"));
+
+    entity_center->create(desktop, item, this, Inkscape::CANVAS_ITEM_CTRL_TYPE_POINT, "Marker:center",
+                          _("Drag to adjust the refX/refY position of the marker"));
+
+    //entity.push_back(entity_wh);
     entity.push_back(entity_center);
 
     add_pattern_knotholder();
