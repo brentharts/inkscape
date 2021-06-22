@@ -202,38 +202,15 @@
                             <property name="margin_bottom">10</property>
                             <property name="label_fill">True</property>
                             <child>
-                              <object class="GtkGrid">
+                              <object class="GtkGrid" id="si_advance_grid">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
+                                <property name="margin_left">10</property>
+                                <property name="margin_top">5</property>
                                 <property name="row_spacing">5</property>
+                                <property name="column_spacing">5</property>
                                 <child>
-                                  <object class="GtkCheckButton">
-                                    <property name="label" translatable="yes">checkbutton</property>
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="receives_default">False</property>
-                                    <property name="margin_left">20</property>
-                                    <property name="margin_top">10</property>
-                                    <property name="draw_indicator">True</property>
-                                  </object>
-                                  <packing>
-                                    <property name="left_attach">0</property>
-                                    <property name="top_attach">0</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkCheckButton">
-                                    <property name="label" translatable="yes">checkbutton</property>
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="receives_default">False</property>
-                                    <property name="margin_left">20</property>
-                                    <property name="draw_indicator">True</property>
-                                  </object>
-                                  <packing>
-                                    <property name="left_attach">0</property>
-                                    <property name="top_attach">1</property>
-                                  </packing>
+                                  <placeholder/>
                                 </child>
                               </object>
                             </child>
@@ -319,18 +296,6 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkSpinButton" id="si_dpi_sb">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="valign">start</property>
-                            <property name="hexpand">True</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">2</property>
-                            <property name="top_attach">12</property>
-                          </packing>
-                        </child>
-                        <child>
                           <object class="GtkSpinButton" id="si_img_width_sb">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
@@ -413,95 +378,50 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel">
+                          <object class="GtkSpinButton" id="si_top_sb">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Left</property>
-                            <property name="wrap">True</property>
-                            <property name="xalign">0</property>
+                            <property name="can_focus">True</property>
+                            <property name="hexpand">True</property>
                           </object>
                           <packing>
-                            <property name="left_attach">1</property>
+                            <property name="left_attach">4</property>
                             <property name="top_attach">2</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel">
+                          <object class="GtkSpinButton" id="si_right_sb">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Top</property>
-                            <property name="wrap">True</property>
-                            <property name="xalign">0</property>
+                            <property name="can_focus">True</property>
+                            <property name="hexpand">True</property>
                           </object>
                           <packing>
-                            <property name="left_attach">3</property>
-                            <property name="top_attach">2</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Right</property>
-                            <property name="wrap">True</property>
-                            <property name="xalign">0</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">1</property>
+                            <property name="left_attach">2</property>
                             <property name="top_attach">4</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel">
+                          <object class="GtkSpinButton" id="si_dpi_sb">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Bottom</property>
-                            <property name="wrap">True</property>
-                            <property name="xalign">0</property>
+                            <property name="can_focus">True</property>
+                            <property name="valign">start</property>
+                            <property name="hexpand">True</property>
                           </object>
                           <packing>
-                            <property name="left_attach">3</property>
-                            <property name="top_attach">4</property>
+                            <property name="left_attach">2</property>
+                            <property name="top_attach">12</property>
                           </packing>
                         </child>
                         <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Width</property>
+                            <property name="label" translatable="yes">DPI</property>
                             <property name="wrap">True</property>
                             <property name="xalign">0</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
-                            <property name="top_attach">6</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Height</property>
-                            <property name="wrap">True</property>
-                            <property name="xalign">0</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">3</property>
-                            <property name="top_attach">6</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Width
-(px)</property>
-                            <property name="wrap">True</property>
-                            <property name="xalign">0</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">1</property>
-                            <property name="top_attach">10</property>
+                            <property name="top_attach">12</property>
                           </packing>
                         </child>
                         <child>
@@ -522,35 +442,92 @@
                           <object class="GtkLabel">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">DPI</property>
+                            <property name="label" translatable="yes">Width
+(px)</property>
                             <property name="wrap">True</property>
                             <property name="xalign">0</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
-                            <property name="top_attach">12</property>
+                            <property name="top_attach">10</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkSpinButton" id="si_top_sb">
+                          <object class="GtkLabel">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="hexpand">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Height</property>
+                            <property name="wrap">True</property>
+                            <property name="xalign">0</property>
                           </object>
                           <packing>
-                            <property name="left_attach">4</property>
+                            <property name="left_attach">3</property>
+                            <property name="top_attach">6</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Width</property>
+                            <property name="wrap">True</property>
+                            <property name="xalign">0</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="top_attach">6</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Bottom</property>
+                            <property name="wrap">True</property>
+                            <property name="xalign">0</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">3</property>
+                            <property name="top_attach">4</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Right</property>
+                            <property name="wrap">True</property>
+                            <property name="xalign">0</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="top_attach">4</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Top</property>
+                            <property name="wrap">True</property>
+                            <property name="xalign">0</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">3</property>
                             <property name="top_attach">2</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkSpinButton" id="si_right_sb">
+                          <object class="GtkLabel">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="hexpand">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Left</property>
+                            <property name="wrap">True</property>
+                            <property name="xalign">0</property>
                           </object>
                           <packing>
-                            <property name="left_attach">2</property>
-                            <property name="top_attach">4</property>
+                            <property name="left_attach">1</property>
+                            <property name="top_attach">2</property>
                           </packing>
                         </child>
                         <child>

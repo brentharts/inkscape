@@ -15,11 +15,10 @@
 
 #include <gtkmm.h>
 
+#include "extension/output.h"
 #include "ui/dialog/dialog-base.h"
 #include "ui/widget/scrollprotected.h"
 #include "ui/widget/unit-menu.h"
-#include "extension/output.h"
-
 
 namespace Inkscape {
 namespace UI {
@@ -90,6 +89,9 @@ private:
     Gtk::CheckButton *hide_all = nullptr;
     Gtk::Box *si_preview_box = nullptr;
     Gtk::CheckButton *si_show_preview = nullptr;
+
+    Gtk::Grid *advance_grid = nullptr;
+
     Gtk::ComboBoxText *extension_cb = nullptr;
     Gtk::Entry *filename_entry = nullptr;
     Gtk::Button *si_export = nullptr;
@@ -100,7 +102,18 @@ private:
     Inkscape::Preferences *prefs = nullptr;
     std::map<selection_mode, Glib::ustring> selection_names;
     selection_mode current_key;
-    std::map<Glib::ustring, Inkscape::Extension::Output*> extension_list;
+    std::map<Glib::ustring, Inkscape::Extension::Output *> extension_list;
+
+    // Advanced
+    Gtk::CheckButton interlacing;
+    std::vector<int> bit_depth_list;
+    std::vector<int> color_list;
+    Inkscape::UI::Widget::ScrollProtected<Gtk::ComboBoxText> bit_depth_cb;
+    std::vector<int> compression_list;
+    Inkscape::UI::Widget::ScrollProtected<Gtk::ComboBoxText> compression_cb;
+    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> phys_dpi_sb;
+    std::vector<int> anti_aliasing_list;
+    Inkscape::UI::Widget::ScrollProtected<Gtk::ComboBoxText> anti_aliasing_cb;
 
     // Once user change filename it is set and prevent automatic changes to filename_entry
     bool filename_modified;
@@ -114,6 +127,7 @@ private:
     // Add units from db
     void setupUnits();
     void setupExtensionList();
+    void setupAdvance();
 
     // change range and callbacks to spinbuttons
     void setupSpinButtons();
@@ -139,6 +153,10 @@ private:
     void refreshArea();
     void refreshExportHints();
     void setArea(double x0, double y0, double x1, double y1);
+
+    // Export Functions
+    bool _export_raster(Inkscape::Extension::Output *extension = nullptr, std::vector<SPItem *> *items = nullptr);
+    bool _export_vector(Inkscape::Extension::Output *extension = nullptr, std::vector<SPItem *> *items = nullptr);
 
     // signals callback
     void onContainerVisible();

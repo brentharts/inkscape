@@ -34,6 +34,7 @@
 #include "io/resource.h"
 #include "io/sys.h"
 #include "message-stack.h"
+#include "object/object-set.h"
 #include "object/sp-namedview.h"
 #include "object/sp-root.h"
 #include "preferences.h"
@@ -93,6 +94,7 @@ Export::Export()
     setupUnits();
     setupSpinButtons();
     setupExtensionList();
+    setupAdvance();
 
     // Callback when container is dinally mapped on window. All intialisation like set active is done inside it.
     container->signal_map().connect(sigc::mem_fun(*this, &Export::onContainerVisible));
@@ -222,6 +224,8 @@ void Export::initialise_all()
                 builder->get_widget("si_preview_box", si_preview_box);
                 builder->get_widget("si_show_preview", si_show_preview);
 
+                builder->get_widget("si_advance_grid", advance_grid);
+
                 builder->get_widget("si_extention", extension_cb);
                 builder->get_widget("si_filename", filename_entry);
                 builder->get_widget("si_export", si_export);
@@ -270,6 +274,77 @@ void Export::setupExtensionList()
     extension = manual_omod->get_extension();
     extension_cb->append(extension);
     extension_list[extension] = manual_omod;
+}
+
+void Export::setupAdvance()
+{
+    int row = 0;
+    std::vector<Glib::ustring> labels;
+    {
+        interlacing.set_label("Use Interlacing");
+        advance_grid->attach(interlacing, 0, row, 2, 1);
+        row++;
+    }
+    {
+        labels.insert(labels.end(), {"Gray_1", "Gray_2", "Gray_4", "Gray_8", "Gray_16", "RGB_8", "RGB_16",
+                                     "GrayAlpha_8", "GrayAlpha_16", "RGBA_8", "RGBA_16"});
+        bit_depth_list.insert(bit_depth_list.end(), {1, 2, 4, 8, 16, 8, 16, 8, 16, 8, 16});
+
+        for (auto label : labels) {
+            bit_depth_cb.append(label);
+        }
+        labels.clear();
+
+        bit_depth_cb.set_active_text("RGBA_8");
+        bit_depth_cb.set_hexpand();
+        Gtk::Label *bit_depth_label = Gtk::manage(new Gtk::Label(_("Bit Depth"), Gtk::ALIGN_START));
+        advance_grid->attach(*bit_depth_label, 0, row, 1, 1);
+        advance_grid->attach(bit_depth_cb, 1, row, 1, 1);
+        row++;
+    }
+    {
+        labels.insert(labels.end(), {"Z_NO_COMPRESSION", "Z_BEST_SPEED", "2", "3", "4", "5", "Z_DEFAULT_COMPRESSION",
+                                     "7", "8", "Z_BEST_COMPRESSION"});
+
+        compression_list.insert(compression_list.end(), {0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
+        for (auto label : labels) {
+            compression_cb.append(label);
+        }
+        labels.clear();
+
+        compression_cb.set_active_text("Z_DEFAULT_COMPRESSION");
+        Gtk::Label *compression_label = Gtk::manage(new Gtk::Label(_("Compression"), Gtk::ALIGN_START));
+        advance_grid->attach(*compression_label, 0, row, 1, 1);
+        advance_grid->attach(compression_cb, 1, row, 1, 1);
+        row++;
+    }
+
+    {
+        auto pHYs_adj = Gtk::Adjustment::create(0, 0, 100000, 0.1, 1.0, 0);
+        phys_dpi_sb.set_adjustment(pHYs_adj);
+        phys_dpi_sb.set_width_chars(7);
+        phys_dpi_sb.set_digits(2);
+        Gtk::Label *phys_dpi_label = Gtk::manage(new Gtk::Label(_("pHYs DPI"), Gtk::ALIGN_START));
+        advance_grid->attach(*phys_dpi_label, 0, row, 1, 1);
+        advance_grid->attach(phys_dpi_sb, 1, row, 1, 1);
+        row++;
+    }
+    {
+        labels.insert(labels.end(), {"CAIRO_ANTIALIAS_NONE", "CAIRO_ANTIALIAS_FAST", "CAIRO_ANTIALIAS_GOOD (default)",
+                                     "CAIRO_ANTIALIAS_BEST"});
+        anti_aliasing_list.insert(anti_aliasing_list.end(), {0, 1, 2, 3});
+
+        for (auto label : labels) {
+            anti_aliasing_cb.append(label);
+        }
+        labels.clear();
+
+        anti_aliasing_cb.set_active_text("CAIRO_ANTIALIAS_GOOD (default)");
+        Gtk::Label *anti_aliasing_label = Gtk::manage(new Gtk::Label(_("Anti Aliasing"), Gtk::ALIGN_START));
+        advance_grid->attach(*anti_aliasing_label, 0, row, 1, 1);
+        advance_grid->attach(anti_aliasing_cb, 1, row, 1, 1);
+        row++;
+    }
 }
 
 void Export::setupSpinButtons()
@@ -537,6 +612,7 @@ void Export::setDefaultFilename()
     if (xdpi != 0.0) {
         dpi_sb->set_value(xdpi);
     }
+    refreshExportHints();
 }
 
 void Export::refreshArea()
@@ -699,8 +775,8 @@ void Export::onAreaTypeToggle(selection_mode key)
     if (!selection_buttons[key]->get_active()) {
         return;
     }
-    // If you have reached here means the current key is active one ( not sure if multiple transitions happen but last
-    // call will change values)
+    // If you have reached here means the current key is active one ( not sure if multiple transitions happen but
+    // last call will change values)
     current_key = key;
     prefs->setString("/dialogs/export/exportarea/value", selection_names[current_key]);
     refreshArea();
@@ -725,6 +801,8 @@ void Export::onFilenameModified()
     } else {
         filename_modified = true;
     }
+    std::cout << "Original Name: " << original_name << std::endl;
+    std::cout << "Filename Name: " << filename << std::endl;
 
     extension_cb->set_active_text(filtered_extension);
 
@@ -753,10 +831,73 @@ void Export::onExtensionChanged()
 
 void Export::onExport()
 {
-    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
-    if (!desktop) {
+    si_export->set_sensitive(false);
+    bool exportSuccessful = false;
+    auto extension = extension_cb->get_active_text();
+    if (!extension_list[extension]) {
+        si_export->set_sensitive(true);
         return;
     }
+    auto itemlist = SP_ACTIVE_DESKTOP->getSelection()->items();
+    std::vector<SPItem *> list;
+    for (auto i = itemlist.begin(); i != itemlist.end(); ++i) {
+        SPItem *item = *i;
+        list.push_back(item);
+    }
+    list.push_back(item);
+    if (extension_list[extension]->is_raster()) {
+        exportSuccessful = _export_raster(extension_list[extension]);
+    } else {
+        exportSuccessful = _export_vector(extension_list[extension]);
+    }
+    si_export->set_sensitive(true);
+}
+
+bool Export::_export_raster(Inkscape::Extension::Output *extension, std::vector<SPItem *> *items)
+{
+    std::cout << "Here" << std::endl;
+    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
+    if (!desktop)
+        return false;
+    SPNamedView *nv = desktop->getNamedView();
+    SPDocument *doc = desktop->getDocument();
+    unsigned long int width, height;
+    Glib::ustring filename;
+    float xdpi = 0.0, ydpi = 0.0;
+    float dpi = dpi_sb->get_value();
+    if (items != nullptr) {
+        Inkscape::ObjectSet s(doc);
+        for (auto it = items->begin(); it != items->end(); ++it) {
+            s.add(*it, true);
+        }
+        auto area = s.visualBounds();
+        width = area->width() * dpi / DPI_BASE + 0.5;
+        height = area->height() * dpi / DPI_BASE + 0.5;
+
+    } else {
+        float x0, x1, y0, y1;
+        x0 = getValuePx(x0_sb->get_value());
+        x1 = getValuePx(x1_sb->get_value());
+        y0 = getValuePx(y0_sb->get_value());
+        y1 = getValuePx(y1_sb->get_value());
+        width = int(bmwidth_sb->get_value() + 0.5);
+        height = int(bmheight_sb->get_value() + 0.5);
+    }
+
+    const float dpi = dpi_sb->get_value();
+
+    const bool hide = hide_all->get_active();
+
+    // Advance Parameters
+    const bool use_interlacing = interlacing.get_active();
+    const float pHYs = (phys_dpi_sb.get_value() > 0.01) ? phys_dpi_sb.get_value() : dpi;
+    return true;
+}
+
+bool Export::_export_vector(Inkscape::Extension::Output *extension, std::vector<SPItem *> *items)
+{
+    ;
+    return true;
 }
 
 /**
@@ -837,6 +978,13 @@ Glib::ustring get_default_filename(Glib::ustring &filename_entry_text, Glib::ust
         filename = filename + extension;
     }
     return filename;
+}
+
+bool _export_raster(Inkscape::Extension::Output *extension, ){
+    SPDesktop* desktop = SP_ACTIVE_DOCUMENT;
+    if(!desktop){
+        return;
+    }
 }
 
 } // namespace Dialog
