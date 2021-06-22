@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
-     xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -86,15 +86,4 @@
        style="fill:#ffffff;stroke:#ffffff;stroke-width:1px;stroke-opacity:1"
        id="path965" />
   </g>
-  <g
-     transform="translate(19.248044,-16.309248)"
-     style="opacity:0.716157;fill:#ff0101;fill-opacity:1;stroke:#081cf7;stroke-opacity:1;filter:url(#shadow-0)"
-     id="cursor-6">
-    <!-- Arrow -->
-    <!-- Outline (cross) -->
-    <!-- Cross -->
-  </g>
-  <g
-     transform="matrix(-1,0,0,1,59.366699,-19.101396)"
-     id="g916" />
 </svg>

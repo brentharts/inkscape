@@ -12,7 +12,7 @@
   <defs>
   </defs>
 
-  <g id="cursor" style="filter:url(#shadow)">
+  <g id="cursor" style="">
 
     <g style="fill:white;stroke:white;stroke-width:3px">
       <circle cx="8.5" cy="8.5" r="6"/>

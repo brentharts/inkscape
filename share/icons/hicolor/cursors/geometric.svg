@@ -16,7 +16,6 @@
   <!-- Cross (centered on hotspot) -->
   <use xlink:href="-common.svg#def-cross"/>
 
-
   <!-- Compass -->
 
   <g class="drop-shadow" style="">

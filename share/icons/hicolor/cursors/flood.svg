@@ -19,7 +19,7 @@
   </defs>
 
   <!-- Bucket with paint -->
-  <g id="cursor" class="drop-shadow" style="">
+  <g id="cursor" class="drop-shadow" style="stroke-opacity:1">
 
     <!-- Outline -->
     <g style="fill:white;stroke:white;stroke-width:3px">
