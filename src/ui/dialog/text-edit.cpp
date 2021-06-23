@@ -105,6 +105,7 @@ TextEdit::TextEdit()
     builder->get_widget("preview_label2", preview_label2);
     builder->get_widget("text_view", text_view);
     builder->get_widget("setasdefault_button", setasdefault_button);
+    builder->get_widget("refresh_button", refresh_fonts_button);
     builder->get_widget("apply_button", apply_button);
 
     text_buffer = Glib::RefPtr<Gtk::TextBuffer>::cast_static(builder->get_object("text_buffer"));
@@ -134,6 +135,12 @@ TextEdit::TextEdit()
     fontChangedConn = font_selector.connectChanged(sigc::mem_fun(*this, &TextEdit::onFontChange));
     fontFeaturesChangedConn = font_features.connectChanged(sigc::mem_fun(*this, &TextEdit::onChange));
     notebook->signal_switch_page().connect(sigc::mem_fun(*this, &TextEdit::onFontFeatures));
+    refresh_fonts_button->signal_clicked().connect([=](){
+        auto font_lister = Inkscape::FontLister::get_instance();
+        font_lister->refresh_font_list();
+        auto desktop = getDesktop();
+        font_lister->update_font_list(desktop->getDocument());
+    });
 
     font_selector.set_name("TextEdit");
 

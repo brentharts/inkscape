@@ -300,6 +300,8 @@ public:
 
     bool blocked() { return block; }
 
+    void refresh_font_list();
+
 private:
     FontLister();
 

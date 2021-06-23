@@ -120,7 +120,7 @@ void SvgBuilder::_init() {
 
     // Fill _availableFontNames (Bug LP #179589) (code cfr. FontLister)
     std::vector<PangoFontFamily *> families;
-    font_factory::Default()->GetUIFamilies(families);
+    font_factory::Default()->GetUIFamilies(families, false);
     for (auto & familie : families) {
         _availableFontNames.emplace_back(pango_font_family_get_name(familie));
     }
