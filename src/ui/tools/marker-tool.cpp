@@ -24,11 +24,19 @@
 #include "ui/shape-editor.h"
 #include "xml/node-event-vector.h"
 
+#include "display/control/canvas-item-group.h"
+#include "ui/tool/control-point-selection.h"
+#include "ui/tool/event-utils.h"
+#include "ui/tool/multi-path-manipulator.h"
+#include "ui/tool/path-manipulator.h"
+
 #include "ui/tool/shape-record.h"
 #include "object/sp-shape.h"
 #include "object/object-set.h"
 #include "object/sp-marker.h"
 #include "ui/tools/marker-tool.h"
+
+#include "ui/tools/node-tool.h"
 
 
 using Inkscape::DocumentUndo;
@@ -40,7 +48,15 @@ const std::string MarkerTool::prefsPath = "/tools/marker";
 
 MarkerTool::MarkerTool()
     : ToolBase("select.svg")
-{}
+{
+}
+
+Inkscape::CanvasItemGroup *createControlGroup(SPDesktop *desktop)
+{
+    auto group = new Inkscape::CanvasItemGroup(desktop->getCanvasControls());
+    group->set_name("CanvasItemGroup:NodeTool");
+    return group;
+}
 
 const std::string& MarkerTool::getPrefsPath() {
 	return MarkerTool::prefsPath;
@@ -50,6 +66,7 @@ void MarkerTool::finish() {
     ungrabCanvasEvents();
     this->message_context->clear();
     this->sel_changed_connection.disconnect();
+    delete this->_multipath;
     ToolBase::finish();
 }
 
@@ -112,7 +129,7 @@ void MarkerTool::selection_changed(Inkscape::Selection* selection) {
                     SPObject *marker_obj = shape->_marker[i];
                     if(marker_obj) {
                         Inkscape::XML::Node *marker_repr = marker_obj->getRepr();
-                        SPItem* marker_item = dynamic_cast<SPItem *>(desktop->getDocument()->getObjectByRepr(marker_repr));
+                        SPItem* marker_item = dynamic_cast<SPItem *>(this->desktop->getDocument()->getObjectByRepr(marker_repr));
                         gather_marker_items(marker_item, SHAPE_ROLE_NORMAL, shapes);
                                 // ShapeRecord sr;
                                 // sr.object = marker_item;
@@ -144,11 +161,30 @@ void MarkerTool::selection_changed(Inkscape::Selection* selection) {
             this->_shape_editors.insert({item, std::move(si)});
         }
     }
+
+    this->_multipath->setItems(shapes);
 }
 
 void MarkerTool::setup() {
 
     ToolBase::setup();
+
+    this->_path_data = new Inkscape::UI::PathSharedData();
+
+    Inkscape::UI::PathSharedData &data = *this->_path_data;
+    data.node_data.desktop = this->desktop;
+
+    // Prepare canvas groups for controls. This guarantees correct z-order, so that
+    // for example a dragpoint won't obscure a node
+    data.outline_group          = createControlGroup(this->desktop);
+    data.node_data.handle_line_group = new Inkscape::CanvasItemGroup(desktop->getCanvasControls());
+    data.dragpoint_group        = createControlGroup(this->desktop);
+    _transform_handle_group     = createControlGroup(this->desktop);
+    data.node_data.node_group   = createControlGroup(this->desktop);
+    data.node_data.handle_group = createControlGroup(this->desktop);
+
+    data.node_data.handle_line_group->set_name("CanvasItemGroup:NodeTool:handle_line_group");
+
     Inkscape::Selection *selection = this->desktop->getSelection();
 
     this->sel_changed_connection.disconnect();
@@ -156,7 +192,23 @@ void MarkerTool::setup() {
     	sigc::mem_fun(this, &MarkerTool::selection_changed)
     );
 
+    if (this->_transform_handle_group) {
+        this->_selected_nodes = new Inkscape::UI::ControlPointSelection(this->desktop, this->_transform_handle_group);
+    }
+    data.node_data.selection = this->_selected_nodes;
+
+    this->_multipath = new Inkscape::UI::MultiPathManipulator(data, this->sel_changed_connection);
+
+    this->_multipath->signal_coords_changed.connect(
+        sigc::bind(
+            sigc::mem_fun(*this->desktop, &SPDesktop::emitToolSubselectionChanged),
+            (void*)nullptr
+        )
+    );
+
     this->selection_changed(selection);
+    this->desktop->emitToolSubselectionChanged(nullptr); // sets the coord entry fields to inactive
+    
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     if (prefs->getBool("/tools/marker/selcue")) this->enableSelectionCue();
     if (prefs->getBool("/tools/marker/gradientdrag")) this->enableGrDrag();
@@ -166,15 +218,19 @@ void MarkerTool::setup() {
 Handles selection/deselection of new items in marker edit mode
 */
 bool MarkerTool::root_handler(GdkEvent* event) {
-    SPDesktop *desktop = this->desktop;
-    Inkscape::Selection *selection = desktop->getSelection();
+    Inkscape::Selection *selection = this->desktop->getSelection();
+
+    if (this->_multipath->event(this, event)) {
+        return true;
+    }
+
     gint ret = false;
     
     switch (event->type) {
         case GDK_BUTTON_PRESS:
             if (event->button.button == 1) {
                 Geom::Point const button_w(event->button.x, event->button.y);  
-                this->item_to_select = sp_event_context_find_item (desktop, button_w, event->button.state & GDK_MOD1_MASK, TRUE);
+                this->item_to_select = sp_event_context_find_item (this->desktop, button_w, event->button.state & GDK_MOD1_MASK, TRUE);
                 grabCanvasEvents();
                 ret = true;
             }
