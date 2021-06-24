@@ -1660,6 +1660,8 @@ void InkscapePreferences::initPageUI()
     _contrast_theme.getSlider()->signal_value_changed().connect(sigc::mem_fun(*this, &InkscapePreferences::contrastThemeChange));
     _contrast_theme.getSpinButton()->signal_value_changed().connect(sigc::mem_fun(*this, &InkscapePreferences::contrastThemeChange));
     _page_theme.add_line(true, "", _dark_theme, "", _("Use dark theme"), true);
+    _narrow_spinbutton.init(_("Use narrow number entry boxes"), "/theme/narrowSpinButton", false);
+    _page_theme.add_line(true, "", _narrow_spinbutton, "", _("Make number editing boxes smaller by limiting padding"), false);
 
     if (dark_themes[current_theme]) {
         _dark_theme.get_parent()->set_no_show_all(false);

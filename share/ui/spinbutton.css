@@ -1,0 +1,8 @@
+spinbutton > button {
+    padding: 0;
+    border: 0;
+}
+
+spinbutton > entry {
+    padding: 0 0 0 0.5em;
+}
