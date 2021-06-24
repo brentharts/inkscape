@@ -5807,6 +5807,7 @@ msgstr "Desfoque"
 msgid "Radius:"
 msgstr "Raio:"
 
+# Em desfoques, o Sigma é o quão distante da média do píxels o desfoque está
 #: ../src/extension/internal/bitmap/blur.cpp:43
 #: ../src/extension/internal/bitmap/charcoal.cpp:43
 #: ../src/extension/internal/bitmap/emboss.cpp:43
@@ -6201,9 +6202,9 @@ msgstr ""
 msgid "Shade"
 msgstr "Sombrear"
 
+# "Azimuth" Ângulo da luz em relação ao norte, sob o ponto de vista do observador. Direção da luz.
 #: ../src/extension/internal/bitmap/shade.cpp:44
 #: ../src/ui/dialog/filter-effects-dialog.cpp:1182
-# "Azimuth" Ângulo da luz em relação ao norte, sob o ponto de vista do observador. Direção da luz.
 msgid "Azimuth:"
 msgstr "Direção:"
 
@@ -6642,10 +6643,10 @@ msgstr "Suavidade"
 msgid "Elevation (°)"
 msgstr "Elevação (°)"
 
+# "Azimuth" Ângulo da luz em relação ao norte, sob o ponto de vista do observador. Direção da luz.
 #: ../src/extension/internal/filter/bevels.h:59
 #: ../src/extension/internal/filter/bevels.h:142
 #: ../src/extension/internal/filter/bevels.h:228
-# "Azimuth" Ângulo da luz em relação ao norte, sob o ponto de vista do observador. Direção da luz.
 msgid "Azimuth (°)"
 msgstr "Direção (°)"
 
@@ -7064,9 +7065,9 @@ msgstr "Local"
 msgid "Distant light options"
 msgstr "Opções da luz distante"
 
+# "Azimuth" Ângulo da luz em relação ao norte, sob o ponto de vista do observador. Direção da luz.
 #: ../src/extension/internal/filter/bumps.h:112
 #: ../src/extension/internal/filter/bumps.h:338
-# "Azimuth" Ângulo da luz em relação ao norte, sob o ponto de vista do observador. Direção da luz.
 msgid "Azimuth"
 msgstr "Direção"
 
@@ -13582,7 +13583,7 @@ msgstr "Pelo número de segmentos"
 
 #: ../src/live_effects/lpe-roughen.cpp:31
 msgid "By max. segment size"
-msgstr "Por máx. tamanho do segmento"
+msgstr "Pelo tamanho máx. do segmento"
 
 #: ../src/live_effects/lpe-roughen.cpp:36
 msgid "Along nodes"
@@ -13606,7 +13607,7 @@ msgstr "Método de divisão"
 
 #: ../src/live_effects/lpe-roughen.cpp:46
 msgid "Max. segment size"
-msgstr "Máx. tamanho do segmento"
+msgstr "Tamanho Máx. do segmento"
 
 #: ../src/live_effects/lpe-roughen.cpp:47
 msgid "Number of segments"
@@ -13614,11 +13615,11 @@ msgstr "Número de segmentos"
 
 #: ../src/live_effects/lpe-roughen.cpp:48
 msgid "Max. displacement in X"
-msgstr "Máx. deslocamento em X"
+msgstr "Alteração Máx. em X"
 
 #: ../src/live_effects/lpe-roughen.cpp:49
 msgid "Max. displacement in Y"
-msgstr "Máx. deslocamento em Y"
+msgstr "Alteração Máx. em Y"
 
 #: ../src/live_effects/lpe-roughen.cpp:50
 msgid "Global randomize"
@@ -13654,19 +13655,19 @@ msgstr "Para uso com ferramenta de spray no modo de cópia"
 
 #: ../src/live_effects/lpe-roughen.cpp:142
 msgid "<b>Add nodes</b> Subdivide each segment"
-msgstr "<b>Adicionar nós</b> Subdivide cada segmento"
+msgstr "<b>Adição nós:</b> Subdividir cada segmento"
 
 #: ../src/live_effects/lpe-roughen.cpp:150
 msgid "<b>Jitter nodes</b> Move nodes/handles"
-msgstr "<b>Nós de distorção</b> Mover nós/alças"
+msgstr "<b>Nós de distorção:</b> Mover nós/alças"
 
 #: ../src/live_effects/lpe-roughen.cpp:158
 msgid "<b>Extra roughen</b> Add an extra layer of rough"
-msgstr "<b>Extra áspero</b> Adicione uma camada extra de aspereza"
+msgstr "<b>Aspereza Extra:</b> Adicionar uma camada extra de aspereza"
 
 #: ../src/live_effects/lpe-roughen.cpp:166
 msgid "<b>Options</b> Modify options to rough"
-msgstr "<b>Opções</b> Modificar opções para duro"
+msgstr "<b>Opções:</b> Modificar opções para Áspero"
 
 #: ../src/live_effects/lpe-ruler.cpp:23
 #: ../src/live_effects/lpe-taperstroke.cpp:80
@@ -13898,7 +13899,7 @@ msgstr "Distância média de cada rabisco em relação ao caminho original"
 
 #: ../src/live_effects/lpe-sketch.cpp:45
 msgid "Max. tremble:"
-msgstr "Tremulação máxima:"
+msgstr "Tremulação máx.:"
 
 #: ../src/live_effects/lpe-sketch.cpp:46
 msgid "Maximum tremble magnitude"
@@ -14111,7 +14112,7 @@ msgstr "Quantidade de suavização a ser aplicada ao cone final"
 
 #: ../src/live_effects/lpe-taperstroke.cpp:94
 msgid "Join type:"
-msgstr "Unir tipo:"
+msgstr "Tipo de junção:"
 
 #: ../src/live_effects/lpe-taperstroke.cpp:94
 msgid "Join type for non-smooth nodes"
@@ -14119,7 +14120,7 @@ msgstr "Tipo de junção para nós não suaves"
 
 #: ../src/live_effects/lpe-taperstroke.cpp:95
 msgid "Start direction:"
-msgstr "Direção inicial:"
+msgstr "Direção do início:"
 
 #: ../src/live_effects/lpe-taperstroke.cpp:95
 msgid "Direction of the taper at the path start"
@@ -14127,7 +14128,7 @@ msgstr "Direção da conicidade no início do caminho"
 
 #: ../src/live_effects/lpe-taperstroke.cpp:96
 msgid "End direction:"
-msgstr "Direção final:"
+msgstr "Direção do final:"
 
 #: ../src/live_effects/lpe-taperstroke.cpp:96
 msgid "Direction of the taper at the path end"
@@ -15579,7 +15580,7 @@ msgstr "<b>Nenhum clone a desvincular</b> na seleção."
 
 #: ../src/selection-chemistry.cpp:2821
 msgid "Unlink clone"
-msgstr "Desvincular"
+msgstr "Desvincular clone"
 
 #: ../src/selection-chemistry.cpp:2836
 msgid ""
@@ -16061,16 +16062,16 @@ msgstr ""
 #: ../src/trace/potrace/inkscape-potrace.cpp:539
 #: ../src/trace/potrace/inkscape-potrace.cpp:602
 msgid "Trace: %1.  %2 nodes"
-msgstr "Rastreio: %1.  %2 nós"
+msgstr "Traçado: %1.  %2 nós"
 
 #: ../src/trace/trace.cpp:60 ../src/trace/trace.cpp:125
 #: ../src/trace/trace.cpp:133 ../src/trace/trace.cpp:224
 msgid "Select an <b>image</b> to trace"
-msgstr "Selecione uma <b>imagem</b> para rastrear"
+msgstr "Selecione uma <b>imagem</b> para traçar"
 
 #: ../src/trace/trace.cpp:95
 msgid "Select only one <b>image</b> to trace"
-msgstr "Selecione uma única <b>imagem</b> para rastrear"
+msgstr "Selecione uma única <b>imagem</b> para traçar"
 
 #: ../src/trace/trace.cpp:113
 msgid "Select one image and one or more shapes above it"
@@ -16098,7 +16099,7 @@ msgstr "Rastreio: iniciando..."
 
 #: ../src/trace/trace.cpp:538 ../share/ui/dialog-trace.glade:677
 msgid "Trace bitmap"
-msgstr "Rastrear bitmap"
+msgstr "Traçar bitmap"
 
 #: ../src/trace/trace.cpp:542
 #, c-format
@@ -16260,7 +16261,7 @@ msgstr "_Seguir link"
 
 #: ../src/ui/contextmenu.cpp:656
 msgid "_Remove Link"
-msgstr "_Remover link"
+msgstr "_Remover Link"
 
 #: ../src/ui/contextmenu.cpp:687
 msgid "Remove link"
@@ -16277,7 +16278,7 @@ msgstr "Editar Externamente..."
 #. TRANSLATORS: "to trace" means "to convert a bitmap to vector graphics" (to vectorize)
 #: ../src/ui/contextmenu.cpp:712 ../src/verbs.cpp:2587
 msgid "_Trace Bitmap..."
-msgstr "_Rastear Bitmap..."
+msgstr "_Traçar Bitmap..."
 
 #: ../src/ui/contextmenu.cpp:722
 msgctxt "Context menu"
@@ -16287,7 +16288,7 @@ msgstr "Incorporar Imagem"
 #: ../src/ui/contextmenu.cpp:733
 msgctxt "Context menu"
 msgid "Extract Image..."
-msgstr "Extrair imagem..."
+msgstr "Extrair Imagem..."
 
 #: ../src/ui/contextmenu.cpp:887 ../src/ui/contextmenu.cpp:907
 #: ../src/verbs.cpp:2830
@@ -17096,11 +17097,11 @@ msgstr "Alternar o valor de mudanças de cor para cada coluna"
 
 #: ../src/ui/dialog/clonetiler.cpp:798
 msgid "_Trace"
-msgstr "_Traçar"
+msgstr "_Rastrear"
 
 #: ../src/ui/dialog/clonetiler.cpp:805
 msgid "Trace the drawing under the clones/sprayed items"
-msgstr "Traçar o desenho sob os clones/itens pulverizados"
+msgstr "Rastrear o desenho sob os clones/itens pulverizados"
 
 #: ../src/ui/dialog/clonetiler.cpp:809
 msgid ""
@@ -17175,7 +17176,7 @@ msgstr "Capturar o brilho da cor"
 
 #: ../src/ui/dialog/clonetiler.cpp:891
 msgid "2. Tweak the picked value:"
-msgstr "2. Altere o valor requerido:"
+msgstr "2. Ajustar o valor requerido:"
 
 #: ../src/ui/dialog/clonetiler.cpp:902
 msgid "Gamma-correct:"
@@ -31632,11 +31633,11 @@ msgstr "Preenchimento:"
 
 #: ../src/ui/widget/selected-style.cpp:126
 msgid "O:"
-msgstr "O:"
+msgstr "T:"
 
 #: ../src/ui/widget/selected-style.cpp:172
 msgid "N/A"
-msgstr "N/A"
+msgstr "N/D"
 
 #: ../src/ui/widget/selected-style.cpp:174
 #: ../src/ui/widget/selected-style.cpp:1045
@@ -31767,7 +31768,7 @@ msgstr "Contorno médio entre os objetos selecionados"
 #. TRANSLATORS: M means "Multiple"
 #: ../src/ui/widget/selected-style.cpp:241
 msgid "<b>m</b>"
-msgstr "<b>i</b>"
+msgstr "<b>d</b>"
 
 #: ../src/ui/widget/selected-style.cpp:243
 msgid "Multiple selected objects have the same fill"
@@ -32131,7 +32132,7 @@ msgstr "Largura do contorno: %.5g%s"
 #: ../src/ui/widget/style-swatch.cpp:350
 #, c-format
 msgid "O: %2.0f"
-msgstr "O: %2.0f"
+msgstr "T: %2.0f"
 
 #: ../src/ui/widget/style-swatch.cpp:355
 #, c-format
@@ -32599,7 +32600,7 @@ msgstr "Duplica os objetos selecionados"
 
 #: ../src/verbs.cpp:2421
 msgid "Create Clo_ne"
-msgstr "Clo_nar"
+msgstr "Criar Clo_ne"
 
 #: ../src/verbs.cpp:2422
 msgid "Create a clone (a copy linked to the original) of selected object"
@@ -32608,7 +32609,7 @@ msgstr ""
 
 #: ../src/verbs.cpp:2423
 msgid "Unlin_k Clone"
-msgstr "_Desvincular"
+msgstr "_Desvincular Clone"
 
 #: ../src/verbs.cpp:2424
 msgid ""
@@ -33138,7 +33139,7 @@ msgstr ""
 
 #: ../src/verbs.cpp:2588
 msgid "Create one or more paths from a bitmap by tracing it"
-msgstr "Crie um ou mais caminhos a partir de um bitmap rastreando-o"
+msgstr "Criar um ou mais caminhos a partir de um bitmap, traçando-o"
 
 #: ../src/verbs.cpp:2589
 msgid "Make a _Bitmap Copy"
@@ -33203,7 +33204,7 @@ msgstr "Renomear a camada atual"
 
 #: ../src/verbs.cpp:2607
 msgid "Switch to Layer Abov_e"
-msgstr "Mudar para a Camada Acima"
+msgstr "Mudar para a Camada Acim_a"
 
 #: ../src/verbs.cpp:2608
 msgid "Switch to the layer above the current"
@@ -34333,7 +34334,7 @@ msgstr "Usando a extensão interpolar"
 
 #: ../src/verbs.cpp:2939
 msgid "_Elements of Design"
-msgstr "_Elementos de Desenho"
+msgstr "_Elementos de Design"
 
 #: ../src/verbs.cpp:2940
 msgid "Principles of design in the tutorial form"
@@ -34787,7 +34788,7 @@ msgstr ""
 "pixel ou um para despixelizar para vetorizar imagens de Arte pixel.\n"
 "\n"
 " * NOTA:\n"
-"  1) Salve seu trabalho antes de rastrear\n"
+"  1) Salve seu trabalho antes de traçar\n"
 "  2) Observe a contagem de pixels: \"Trace Arte pixel\" cria até um caminho "
 "por pixel. Não é recomendado para imagens que não sejam Arte pixel.\n"
 "  3) Autotrace é mais lento do que potrace, não é recomendado para imagens "
@@ -34814,11 +34815,11 @@ msgstr "Quantidade de cores"
 
 #: ../share/ui/dialog-trace.glade:164
 msgid "Autotrace"
-msgstr "Rastreio automático"
+msgstr "Traçar automáticamente"
 
 #: ../share/ui/dialog-trace.glade:165
 msgid "Centerline tracing (autotrace)"
-msgstr "Traçado da linha central (rastreio automático)"
+msgstr "Traçado de linha central (traçar automáticamente)"
 
 #: ../share/ui/dialog-trace.glade:194
 msgid "Brightness threshold"
@@ -34858,11 +34859,11 @@ msgstr "Cinzas"
 
 #: ../share/ui/dialog-trace.glade:462
 msgid "Autotrace (slower)"
-msgstr "Rastreio automático (lento)"
+msgstr "Traçar automáticamente (lento)"
 
 #: ../share/ui/dialog-trace.glade:477
 msgid "Apply Gaussian blur to the bitmap before tracing"
-msgstr "Aplicar desfoque gaussiano ao bitmap antes de rastrear"
+msgstr "Aplicar desfoque gaussiano ao bitmap antes de traçar"
 
 #: ../share/ui/dialog-trace.glade:487
 msgid "Stack"
@@ -42745,9 +42746,8 @@ msgstr ""
 msgid "Group ID:"
 msgstr "ID do Grupo:"
 
-
-#: ../share/extensions/render_gear_rack.inx:3
 # Cremalheira = Barra Dentada
+#: ../share/extensions/render_gear_rack.inx:3
 msgid "Rack Gear"
 msgstr "Barra Dentada"
 
@@ -44488,7 +44488,7 @@ msgstr ""
 "Inkscape é compatível com muitas funcionalidades avançadas do formato SVG "
 "(marcadores, clones, mistura alfa, etc.) e um grande cuidado é tomado na "
 "concepção de uma interface simplificada. É muito fácil editar nós, executar "
-"operações complexas de caminho, rastrear bitmaps e muito mais. Temos também "
+"operações complexas de caminho, traçar bitmaps e muito mais. Temos também "
 "como objetivo manter uma comunidade próspera de usuários e desenvolvedores "
 "usando desenvolvimento aberto, voltado para a comunidade."
 
@@ -44521,7 +44521,7 @@ msgstr "Abrir uma Nova Janela"
 
 #: ../share/ui/menus.xml:51
 msgid "Clo_ne"
-msgstr "Clo_ne"
+msgstr "Clo_nar"
 
 #: ../share/ui/menus.xml:66
 msgid "Select Sa_me"
