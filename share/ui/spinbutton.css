@@ -1,7 +1,11 @@
+/* those styles make spin buttons narrow; if enabled in preferences they are applied to all themes */
+
 spinbutton > button {
-    padding: 0;
+    padding-left: 0;
+    padding-right: 0;
 }
 
 spinbutton > entry {
-    padding: 0 0 0 0.5em;
+    padding-left: 0.5em;
+    padding-right: 0;
 }
