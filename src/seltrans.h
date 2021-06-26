@@ -67,6 +67,7 @@ public:
     int request(SPSelTransHandle const &handle, Geom::Point &pt, unsigned int state);
     int scaleRequest(Geom::Point &pt, unsigned int state);
     int stretchRequest(SPSelTransHandle const &handle, Geom::Point &pt, unsigned int state);
+    int distributeDragRequest(Geom::Point &pt, unsigned int state);
     int skewRequest(SPSelTransHandle const &handle, Geom::Point &pt, unsigned int state);
     int rotateRequest(Geom::Point &pt, unsigned int state);
     int centerRequest(Geom::Point &pt, unsigned int state);
@@ -126,7 +127,8 @@ private:
     enum State {
         STATE_SCALE, //scale or stretch
         STATE_ROTATE, //rotate or skew
-        STATE_ALIGN //on canvas align
+        STATE_ALIGN, //on canvas align
+        STATE_ALIGN_DISTRIBUTE //on canvas align and distribute
     };
 
     SPDesktop *_desktop;

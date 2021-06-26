@@ -187,20 +187,31 @@ Inkscape::SelTrans::~SelTrans()
 
 void Inkscape::SelTrans::resetState()
 {
+    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+    if(prefs->getBool("/tools/select/align_distribute_box", false)){
+        _state = STATE_ALIGN_DISTRIBUTE;
+        // _updateHandles();
+    }
+    else{
     _state = STATE_SCALE;
+    }
 }
 
 void Inkscape::SelTrans::increaseState()
 {
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     bool show_align = prefs->getBool("/dialogs/align/oncanvas", false);
-        
-    if (_state == STATE_SCALE) {
-        _state = STATE_ROTATE;
-    } else if (_state == STATE_ROTATE && show_align) {
-        _state = STATE_ALIGN;
-    } else {
-        _state = STATE_SCALE;
+    if(prefs->getBool("/tools/select/align_distribute_box", false)){
+        _state = STATE_ALIGN_DISTRIBUTE;
+    }
+    if(!prefs->getBool("/tools/select/align_distribute_box", false)){     
+        if (_state == STATE_SCALE) {
+            _state = STATE_ROTATE;
+        } else if (_state == STATE_ROTATE && show_align) {
+            _state = STATE_ALIGN;
+        } else {
+            _state = STATE_SCALE;
+        }
     }
 
     _center_is_set = true; // no need to reread center
@@ -596,11 +607,16 @@ void Inkscape::SelTrans::_updateHandles()
        _showHandles(HANDLE_SIDE_ALIGN);
        _showHandles(HANDLE_CORNER_ALIGN);
        _showHandles(HANDLE_CENTER_ALIGN);
-    } else {
+    } else if(_state == STATE_ROTATE) {
         _showHandles(HANDLE_SKEW);
         _showHandles(HANDLE_ROTATE);
         _showHandles(HANDLE_CENTER);
     }
+    else {
+        _showHandles(HANDLE_SIDE_ALIGN_DISTRIBUTE);
+        _showHandles(HANDLE_CORNER_ALIGN_DISTRIBUTE);
+        _showHandles(HANDLE_CENTER_ALIGN_DISTRIBUTE);
+}
 
     // Set anchor point, 0.0 is always set if nothing is selected (top/left).
     bool set = false;
@@ -809,6 +825,11 @@ void Inkscape::SelTrans::handleClick(SPKnot *knot, guint state, SPSelTransHandle
         case HANDLE_CORNER_ALIGN:
         case HANDLE_CENTER_ALIGN:
             align(state, handle);
+            break;
+        case HANDLE_CENTER_ALIGN_DISTRIBUTE:
+        case HANDLE_CORNER_ALIGN_DISTRIBUTE:
+        case HANDLE_SIDE_ALIGN_DISTRIBUTE:
+            align(state, handle);
         default:
             break;
     }
@@ -864,6 +885,11 @@ void Inkscape::SelTrans::handleNewEvent(SPKnot *knot, Geom::Point *position, gui
             break;
         case HANDLE_CENTER:
             setCenter(*position);
+            break;
+        case HANDLE_CENTER_ALIGN_DISTRIBUTE:
+        case HANDLE_CORNER_ALIGN_DISTRIBUTE:
+        case HANDLE_SIDE_ALIGN_DISTRIBUTE:
+            scale(*position, state);
             break;
         case HANDLE_SIDE_ALIGN:
         case HANDLE_CORNER_ALIGN:
@@ -1056,6 +1082,101 @@ gboolean Inkscape::SelTrans::scaleRequest(Geom::Point &pt, guint state)
     return TRUE;
 }
 
+gboolean Inkscape::SelTrans::distributeDragRequest(Geom::Point &pt, guint state)
+{
+    // Calculate the scale factors, which can be either visual or geometric
+    // depending on which type of bbox is currently being used (see preferences -> selector tool)
+    Geom::Scale default_scale = calcScaleFactors(_point, pt, _origin);
+
+    // Find the scale factors for the geometric bbox
+    Geom::Point pt_geom = _getGeomHandlePos(pt);
+    Geom::Scale geom_scale = calcScaleFactors(_point_geom, pt_geom, _origin_for_specpoints);
+
+    _absolute_affine = Geom::identity(); //Initialize the scaler
+
+    auto increments = Modifiers::Modifier::get(Modifiers::Type::TRANS_INCREMENT)->active(state);
+    if (increments) { // scale by an integer multiplier/divider
+        // We're scaling either the visual or the geometric bbox here (see the comment above)
+        for ( unsigned int i = 0 ; i < 2 ; i++ ) {
+            if (fabs(default_scale[i]) > 1) {
+                default_scale[i] = round(default_scale[i]);
+            } else if (default_scale[i] != 0) {
+                default_scale[i] = 1/round(1/(MIN(default_scale[i], 10)));
+            }
+        }
+        // Update the knot position
+        pt = _calcAbsAffineDefault(default_scale);
+        // When scaling by an integer, snapping is not needed
+    } else {
+        // In all other cases we should try to snap now
+        Inkscape::PureScale  *bb, *sn;
+
+        auto confine = Modifiers::Modifier::get(Modifiers::Type::TRANS_CONFINE)->active(state);
+        if (confine || _desktop->isToolboxButtonActive ("lock")) {
+            // Scale is locked to a 1:1 aspect ratio, so that s[X] must be made to equal s[Y].
+            //
+            // The aspect-ratio must be locked before snapping
+            if (fabs(default_scale[Geom::X]) > fabs(default_scale[Geom::Y])) {
+                default_scale[Geom::X] = fabs(default_scale[Geom::Y]) * sign(default_scale[Geom::X]);
+                geom_scale[Geom::X] = fabs(geom_scale[Geom::Y]) * sign(geom_scale[Geom::X]);
+            } else {
+                default_scale[Geom::Y] = fabs(default_scale[Geom::X]) * sign(default_scale[Geom::Y]);
+                geom_scale[Geom::Y] = fabs(geom_scale[Geom::X]) * sign(geom_scale[Geom::Y]);
+            }
+
+            // Snap along a suitable constraint vector from the origin.
+
+            bb = new Inkscape::PureScaleConstrained(default_scale, _origin_for_bboxpoints);
+            sn = new Inkscape::PureScaleConstrained(geom_scale, _origin_for_specpoints);
+        } else {
+            /* Scale aspect ratio is unlocked */
+            bb = new Inkscape::PureScale(default_scale, _origin_for_bboxpoints, false);
+            sn = new Inkscape::PureScale(geom_scale, _origin_for_specpoints, false);
+        }
+        SnapManager &m = _desktop->namedview->snap_manager;
+        m.setup(_desktop, false, _items_const);
+        m.snapTransformed(_bbox_points, _point, (*bb));
+        m.snapTransformed(_snap_points, _point, (*sn));
+        m.unSetup();
+
+        // These lines below are duplicated in stretchRequest
+        //TODO: Eliminate this code duplication
+        if (bb->best_snapped_point.getSnapped() || sn->best_snapped_point.getSnapped()) {
+            if (bb->best_snapped_point.getSnapped()) {
+                if (!bb->best_snapped_point.isOtherSnapBetter(sn->best_snapped_point, false)) {
+                    // We snapped the bbox (which is either visual or geometric)
+                    _desktop->snapindicator->set_new_snaptarget(bb->best_snapped_point);
+                    default_scale = bb->getScaleSnapped();
+                    // Calculate the new transformation and update the handle position
+                    pt = _calcAbsAffineDefault(default_scale);
+                }
+            } else if (sn->best_snapped_point.getSnapped()) {
+                _desktop->snapindicator->set_new_snaptarget(sn->best_snapped_point);
+                // We snapped the special points (e.g. nodes), which are not at the visual bbox
+                // The handle location however (pt) might however be at the visual bbox, so we
+                // will have to calculate pt taking the stroke width into account
+                geom_scale = sn->getScaleSnapped();
+                pt = _calcAbsAffineGeom(geom_scale);
+            }
+        } else {
+            // We didn't snap at all! Don't update the handle position, just calculate the new transformation
+            _calcAbsAffineDefault(default_scale);
+            _desktop->snapindicator->remove_snaptarget();
+        }
+
+        delete bb;
+        delete sn;
+    }
+
+    /* Status text */
+    _message_context.setF(Inkscape::IMMEDIATE_MESSAGE,
+                          _("<b>Scale</b>: %0.2f%% x %0.2f%%; with <b>Ctrl</b> to lock ratio"),
+                          100 * _absolute_affine[0], 100 * _absolute_affine[3]);
+    // moveTo(pt,state);
+    // scale(*position, state);
+    return TRUE;
+}
+
 gboolean Inkscape::SelTrans::stretchRequest(SPSelTransHandle const &handle, Geom::Point &pt, guint state)
 {
     Geom::Dim2 axis, perp;
@@ -1174,6 +1295,10 @@ gboolean Inkscape::SelTrans::request(SPSelTransHandle const &handle, Geom::Point
             return rotateRequest(pt, state);
         case HANDLE_CENTER:
             return centerRequest(pt, state);
+        case HANDLE_CENTER_ALIGN_DISTRIBUTE:
+        case HANDLE_CORNER_ALIGN_DISTRIBUTE:
+        case HANDLE_SIDE_ALIGN_DISTRIBUTE:
+            return distributeDragRequest(pt,state);
         case HANDLE_SIDE_ALIGN:
         case HANDLE_CORNER_ALIGN:
         case HANDLE_CENTER_ALIGN:

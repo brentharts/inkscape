@@ -38,7 +38,10 @@ enum SPSelTransType {
     HANDLE_CENTER,
     HANDLE_SIDE_ALIGN,
     HANDLE_CORNER_ALIGN,
-    HANDLE_CENTER_ALIGN
+    HANDLE_CENTER_ALIGN,
+    HANDLE_SIDE_ALIGN_DISTRIBUTE,
+    HANDLE_CENTER_ALIGN_DISTRIBUTE,
+    HANDLE_CORNER_ALIGN_DISTRIBUTE
 };
 
 // Which handle does what in the alignment (clicking)
@@ -79,7 +82,7 @@ struct SPSelTransHandle {
 	gdouble x, y;
 };
 // These are 4 * each handle type + 1 for center
-int const NUMHANDS = 26;
+int const NUMHANDS = 35;
 extern SPSelTransHandle const hands[NUMHANDS];
 
 #endif // SEEN_SP_SELTRANS_HANDLES_H

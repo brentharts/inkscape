@@ -45,6 +45,17 @@ SPSelTransHandle const hands[] = {
     { HANDLE_CORNER_ALIGN,  SP_ANCHOR_SW,      GDK_TOP_RIGHT_CORNER,     19,    1,    1   },
     { HANDLE_CORNER_ALIGN,  SP_ANCHOR_NW,      GDK_BOTTOM_RIGHT_CORNER,  20,    1,    0   },
     { HANDLE_CORNER_ALIGN,  SP_ANCHOR_NE,      GDK_BOTTOM_LEFT_CORNER,   21,    0,    0   },
+    
+    //New dummy handles for testing
+    { HANDLE_SIDE_ALIGN_DISTRIBUTE,    SP_ANCHOR_S,       GDK_TOP_SIDE,             13,    0.5,  1   },
+    { HANDLE_SIDE_ALIGN_DISTRIBUTE,    SP_ANCHOR_W,       GDK_RIGHT_SIDE,           14,    1,    0.5 },
+    { HANDLE_SIDE_ALIGN_DISTRIBUTE,    SP_ANCHOR_N,       GDK_BOTTOM_SIDE,          15,    0.5,  0   },
+    { HANDLE_SIDE_ALIGN_DISTRIBUTE,    SP_ANCHOR_E,       GDK_LEFT_SIDE,            16,    0,    0.5 },
+    { HANDLE_CENTER_ALIGN_DISTRIBUTE,  SP_ANCHOR_CENTER,  GDK_CROSSHAIR,            17,    0.5,  0.5 },
+    { HANDLE_CORNER_ALIGN_DISTRIBUTE,  SP_ANCHOR_SE,      GDK_TOP_LEFT_CORNER,      18,    0,    1   },
+    { HANDLE_CORNER_ALIGN_DISTRIBUTE,  SP_ANCHOR_SW,      GDK_TOP_RIGHT_CORNER,     19,    1,    1   },
+    { HANDLE_CORNER_ALIGN_DISTRIBUTE,  SP_ANCHOR_NW,      GDK_BOTTOM_RIGHT_CORNER,  20,    1,    0   },
+    { HANDLE_CORNER_ALIGN_DISTRIBUTE,  SP_ANCHOR_NE,      GDK_BOTTOM_LEFT_CORNER,   21,    0,    0   },
     // clang-format on
 };
 
