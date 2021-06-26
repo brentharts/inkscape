@@ -187,32 +187,20 @@ Inkscape::SelTrans::~SelTrans()
 
 void Inkscape::SelTrans::resetState()
 {
-    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    if(prefs->getBool("/tools/select/align_box", false)){
-        _state = STATE_ALIGN;
-    }
-    else{
-        _state = STATE_SCALE;
-    }
+    _state = STATE_SCALE;
 }
 
 void Inkscape::SelTrans::increaseState()
 {
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    bool show_align = prefs->getBool("/dialogs/align/oncanvas", false);      
-
-    if(prefs->getBool("/tools/select/align_box", false)){
+    bool show_align = prefs->getBool("/dialogs/align/oncanvas", false);
+        
+    if (_state == STATE_SCALE) {
+        _state = STATE_ROTATE;
+    } else if (_state == STATE_ROTATE && show_align) {
         _state = STATE_ALIGN;
-    }
-
-    else{
-        if (_state == STATE_SCALE) {
-            _state = STATE_ROTATE;
-        } else if (_state == STATE_ROTATE && show_align) {
-            _state = STATE_ALIGN;
-        } else {
-            _state = STATE_SCALE;
-        }
+    } else {
+        _state = STATE_SCALE;
     }
 
     _center_is_set = true; // no need to reread center
@@ -1068,12 +1056,6 @@ gboolean Inkscape::SelTrans::scaleRequest(Geom::Point &pt, guint state)
     return TRUE;
 }
 
-gboolean Inkscape::SelTrans::alignDragRequest(Geom::Point &pt, guint state)
-{
-    moveTo(pt,state);
-    return TRUE;
-}
-
 gboolean Inkscape::SelTrans::stretchRequest(SPSelTransHandle const &handle, Geom::Point &pt, guint state)
 {
     Geom::Dim2 axis, perp;
@@ -1195,7 +1177,6 @@ gboolean Inkscape::SelTrans::request(SPSelTransHandle const &handle, Geom::Point
         case HANDLE_SIDE_ALIGN:
         case HANDLE_CORNER_ALIGN:
         case HANDLE_CENTER_ALIGN:
-            return alignDragRequest(pt,state);
             break; // Do nothing, no dragging
     }
     return FALSE;

@@ -66,7 +66,6 @@ public:
     void align(guint state, SPSelTransHandle const &handle);
     int request(SPSelTransHandle const &handle, Geom::Point &pt, unsigned int state);
     int scaleRequest(Geom::Point &pt, unsigned int state);
-    int alignDragRequest(Geom::Point &pt, unsigned int state);
     int stretchRequest(SPSelTransHandle const &handle, Geom::Point &pt, unsigned int state);
     int skewRequest(SPSelTransHandle const &handle, Geom::Point &pt, unsigned int state);
     int rotateRequest(Geom::Point &pt, unsigned int state);
