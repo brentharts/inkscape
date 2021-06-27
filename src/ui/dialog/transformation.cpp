@@ -208,11 +208,13 @@ void Transformation::layoutPageMove()
     _scalar_move_horizontal.setDigits(3);
     _scalar_move_horizontal.setIncrements(0.1, 1.0);
     _scalar_move_horizontal.set_hexpand();
+    _scalar_move_horizontal.setWidthChars(7);
 
     _scalar_move_vertical.initScalar(-1e6, 1e6);
     _scalar_move_vertical.setDigits(3);
     _scalar_move_vertical.setIncrements(0.1, 1.0);
     _scalar_move_vertical.set_hexpand();
+    _scalar_move_vertical.setWidthChars(7);
 
     //_scalar_move_vertical.set_label_image( INKSCAPE_STOCK_ARROWS_HOR );
 
@@ -248,6 +250,7 @@ void Transformation::layoutPageScale()
     _scalar_scale_horizontal.setAbsoluteIsIncrement(true);
     _scalar_scale_horizontal.setPercentageIsIncrement(true);
     _scalar_scale_horizontal.set_hexpand();
+    _scalar_scale_horizontal.setWidthChars(7);
 
     _scalar_scale_vertical.initScalar(-1e6, 1e6);
     _scalar_scale_vertical.setValue(100.0, "%");
@@ -256,6 +259,7 @@ void Transformation::layoutPageScale()
     _scalar_scale_vertical.setAbsoluteIsIncrement(true);
     _scalar_scale_vertical.setPercentageIsIncrement(true);
     _scalar_scale_vertical.set_hexpand();
+    _scalar_scale_vertical.setWidthChars(7);
 
     _page_scale.table().attach(_scalar_scale_horizontal, 0, 0, 2, 1);
 
@@ -303,10 +307,15 @@ void Transformation::layoutPageRotate()
     Gtk::RadioButton::Group group = _counterclockwise_rotate.get_group();
     _clockwise_rotate.set_group(group);
 
-    _page_rotate.table().attach(_scalar_rotate,           0, 0, 2, 1);
-    _page_rotate.table().attach(_units_rotate,            2, 0, 1, 1);
-    _page_rotate.table().attach(_counterclockwise_rotate, 3, 0, 1, 1);
-    _page_rotate.table().attach(_clockwise_rotate,        4, 0, 1, 1);
+    auto box = Gtk::make_managed<Gtk::Box>();
+    _counterclockwise_rotate.set_halign(Gtk::ALIGN_START);
+    _clockwise_rotate.set_halign(Gtk::ALIGN_START);
+    box->pack_start(_counterclockwise_rotate);
+    box->pack_start(_clockwise_rotate);
+
+    _page_rotate.table().attach(_scalar_rotate, 0, 0, 1, 1);
+    _page_rotate.table().attach(_units_rotate,  1, 0, 1, 1);
+    _page_rotate.table().attach(*box,           1, 1, 1, 1);
 
     _scalar_rotate.signal_value_changed()
         .connect(sigc::mem_fun(*this, &Transformation::onRotateValueChanged));
@@ -327,11 +336,13 @@ void Transformation::layoutPageSkew()
     _scalar_skew_horizontal.setDigits(3);
     _scalar_skew_horizontal.setIncrements(0.1, 1.0);
     _scalar_skew_horizontal.set_hexpand();
+    _scalar_skew_horizontal.setWidthChars(7);
 
     _scalar_skew_vertical.initScalar(-1e6, 1e6);
     _scalar_skew_vertical.setDigits(3);
     _scalar_skew_vertical.setIncrements(0.1, 1.0);
     _scalar_skew_vertical.set_hexpand();
+    _scalar_skew_vertical.setWidthChars(7);
 
     _page_skew.table().attach(_scalar_skew_horizontal, 0, 0, 2, 1);
     _page_skew.table().attach(_units_skew,             2, 0, 1, 1);
@@ -351,6 +362,7 @@ void Transformation::layoutPageTransform()
 {
     _units_transform.setUnitType(UNIT_TYPE_LINEAR);
     _units_transform.set_tooltip_text(_("E and F units"));
+    _units_transform.set_halign(Gtk::ALIGN_END);
 
     _scalar_transform_a.setWidgetSizeRequest(65, -1);
     _scalar_transform_a.setRange(-1e10, 1e10);
@@ -414,7 +426,7 @@ void Transformation::layoutPageTransform()
     _scalar_transform_e.setWidthChars(6);
     _scalar_transform_e.set_hexpand();
 
-    _page_transform.table().attach(_scalar_transform_e, 2, 0, 1, 1);
+    _page_transform.table().attach(_scalar_transform_e, 0, 2, 1, 1);
 
     _scalar_transform_e.signal_value_changed()
         .connect(sigc::mem_fun(*this, &Transformation::onTransformValueChanged));
@@ -428,8 +440,8 @@ void Transformation::layoutPageTransform()
     _scalar_transform_f.setWidthChars(6);
     _scalar_transform_f.set_hexpand();
 
-    _page_transform.table().attach(_scalar_transform_f, 2, 1, 1, 1);
-    _page_transform.table().attach(_units_transform, 2, 2, 1, 1);
+    _page_transform.table().attach(_scalar_transform_f, 1, 2, 1, 1);
+    _page_transform.table().attach(_units_transform, 1, 3, 1, 1);
 
     _scalar_transform_f.signal_value_changed()
         .connect(sigc::mem_fun(*this, &Transformation::onTransformValueChanged));
