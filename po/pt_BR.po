@@ -7678,7 +7678,7 @@ msgstr "Cor Quente"
 #: ../src/extension/internal/filter/color.h:1650
 #: ../src/ui/widget/filter-effect-chooser.cpp:30
 msgid "Hard Light"
-msgstr "Luz Dura"
+msgstr "Luz Forte"
 
 #: ../src/extension/internal/filter/color.h:1651
 #: ../src/ui/tools/flood-tool.cpp:90
@@ -11773,7 +11773,7 @@ msgstr "O número de dentes"
 
 #: ../src/live_effects/lpe-gears.cpp:207
 msgid "_Phi:"
-msgstr "_Phi:"
+msgstr "_Ângulo:"
 
 #: ../src/live_effects/lpe-gears.cpp:207
 msgid ""
@@ -23335,12 +23335,12 @@ msgstr "Marcadores"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2495
 msgid "Document cleanup"
-msgstr "Limpar documento"
+msgstr "Limpando documento"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2496
 #: ../src/ui/dialog/inkscape-preferences.cpp:2498
 msgid "Remove unused swatches when doing a document cleanup"
-msgstr "Remover amostras não utilizadas ao fazer uma limpeza no documento"
+msgstr "Remover Amostras de Cores não utilizadas ao fazer uma limpeza no documento"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2499
 msgid "Cleanup"
@@ -30844,7 +30844,7 @@ msgstr "Contorno indefinido"
 
 #: ../src/ui/widget/filter-effect-chooser.cpp:31
 msgid "Soft Light"
-msgstr "Luz Clara"
+msgstr "Luz Suave"
 
 # Enevoar, desfocar ou borrar? -- krishna
 # Desfoque, não é um verbo -- Frank
@@ -34777,9 +34777,9 @@ msgstr ""
 "(usando potrace).\n"
 " * A \"quantização de cores\" separa a imagem em um determinado número de "
 "cores e as separa com um caminho (usando potrace).\n"
-" * \"Autotrace\" usa o algoritmo de autotrace com a opção fornecida.\n"
-" * \"Rastreamento de linha de centro\" tenta vetorizar um desenho de linha "
-"(com rastreamento automático).\n"
+" * \"Traçar automáticamente\" usa o algoritmo de autotrace com a opção fornecida.\n"
+" * \"Traçado de linha central\" tenta vetorizar um desenho de linha "
+"(usando autotrace).\n"
 " * As opções de \"Varreduras múltiplas\" separam a imagem em uma série de "
 "varreduras, dependendo do brilho, separação de cores ou níveis de cinza "
 "(usando potrace) ou usando o algoritmo de rastreio automático e cria vários "
@@ -34791,7 +34791,7 @@ msgstr ""
 "  1) Salve seu trabalho antes de traçar\n"
 "  2) Observe a contagem de pixels: \"Trace Arte pixel\" cria até um caminho "
 "por pixel. Não é recomendado para imagens que não sejam Arte pixel.\n"
-"  3) Autotrace é mais lento do que potrace, não é recomendado para imagens "
+"  3) Autotrace (Traçar automáticamente) é mais lento do que potrace, não é recomendado para imagens "
 "grandes. Recomenda-se o pré-processamento de suas imagens para aumentar o "
 "contraste.\n"
 "  4) Se o seu objetivo é obter poucos nós e boa precisão, o rastreamento "
@@ -34819,7 +34819,7 @@ msgstr "Traçar automáticamente"
 
 #: ../share/ui/dialog-trace.glade:165
 msgid "Centerline tracing (autotrace)"
-msgstr "Traçado de linha central (traçar automáticamente)"
+msgstr "Traçado de linha central (autotrace)"
 
 #: ../share/ui/dialog-trace.glade:194
 msgid "Brightness threshold"
