@@ -311,12 +311,6 @@ SPDesktop::init (SPNamedView *nv, Inkscape::UI::Widget::Canvas *acanvas, SPDeskt
         )
     );
 
-    _sel_modified_connection = selection->connectModified(
-        sigc::bind(
-            sigc::ptr_fun(&_onSelectionModified),
-            this
-        )
-    );
     _sel_changed_connection = selection->connectChanged(
         sigc::bind(
             sigc::ptr_fun(&_onSelectionChanged),
@@ -358,7 +352,6 @@ void SPDesktop::destroy()
 
     _activate_connection.disconnect();
     _deactivate_connection.disconnect();
-    _sel_modified_connection.disconnect();
     _sel_changed_connection.disconnect();
     _modified_connection.disconnect();
     _commit_connection.disconnect();
@@ -1685,17 +1678,6 @@ SPDesktop::_onDeactivate (SPDesktop* dt)
     sp_dtw_desktop_deactivate(dt->_widget);
 }
 
-void
-SPDesktop::_onSelectionModified
-(Inkscape::Selection *selection, guint /*flags*/, SPDesktop *dt)
-{
-    if (!dt->_widget) return;
-    dt->_widget->update_scrollbars (dt->_current_affine.getZoom());
-    if (selection->desktop()->getInkscapeWindow()) {
-        selection->desktop()->getInkscapeWindow()->on_selection_changed();
-    }
-}
-
 static void
 _onSelectionChanged
 (Inkscape::Selection *selection, SPDesktop *desktop)
@@ -1711,9 +1693,6 @@ _onSelectionChanged
         if ( layer && layer != desktop->currentLayer() ) {
             desktop->layers->setCurrentLayer(layer);
         }
-    }
-    if (selection->desktop()->getInkscapeWindow()) {
-        selection->desktop()->getInkscapeWindow()->on_selection_changed();
     }
 }
 

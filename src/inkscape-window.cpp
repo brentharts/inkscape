@@ -290,14 +290,6 @@ InkscapeWindow::on_delete_event(GdkEventAny* event)
     return true;
 };
 
-void InkscapeWindow::on_selection_changed()
-{
-    if (_app) {
-        _app->set_active_selection(_desktop->selection);
-        update_dialogs();
-    }
-}
-
 void InkscapeWindow::update_dialogs()
 {
     std::vector<Gtk::Window *> windows = _app->gtk_app()->get_windows();

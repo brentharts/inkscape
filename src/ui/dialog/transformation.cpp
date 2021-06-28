@@ -44,12 +44,6 @@ static void on_selection_changed(Inkscape::Selection *selection, Transformation 
     daad->updateSelection((Inkscape::UI::Dialog::Transformation::PageType)page, selection);
 }
 
-static void on_selection_modified(Inkscape::Selection *selection, Transformation *daad)
-{
-    int page = daad->getCurrentPage();
-    daad->updateSelection((Inkscape::UI::Dialog::Transformation::PageType)page, selection);
-}
-
 /*########################################################################
 # C O N S T R U C T O R
 ########################################################################*/
@@ -169,8 +163,9 @@ Transformation::Transformation()
     button_box->pack_end(*applyButton);
 
     // Connect to the global selection changed & modified signals
-    _selChangeConn = INKSCAPE.signal_selection_changed.connect(sigc::bind(sigc::ptr_fun(&on_selection_changed), this));
-    _selModifyConn = INKSCAPE.signal_selection_modified.connect(sigc::hide<1>(sigc::bind(sigc::ptr_fun(&on_selection_modified), this)));
+    // XXX Connect selection changed and modified directly.
+    //_selChangeConn = INKSCAPE.signal_selection_changed.connect(sigc::bind(sigc::ptr_fun(&on_selection_changed), this));
+    //_selModifyConn = INKSCAPE.signal_selection_modified.connect(sigc::hide<1>(sigc::bind(sigc::ptr_fun(&on_selection_modified), this)));
 
     show_all_children();
 }
@@ -178,8 +173,8 @@ Transformation::Transformation()
 Transformation::~Transformation()
 {
     _tabSwitchConn.disconnect();
-    _selModifyConn.disconnect();
-    _selChangeConn.disconnect();
+    //_selModifyConn.disconnect();
+    //_selChangeConn.disconnect();
 }
 
 /*########################################################################

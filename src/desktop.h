@@ -614,7 +614,6 @@ private:
 
     sigc::connection _activate_connection;
     sigc::connection _deactivate_connection;
-    sigc::connection _sel_modified_connection;
     sigc::connection _sel_changed_connection;
     sigc::connection _reconstruction_start_connection;
     sigc::connection _reconstruction_finish_connection;
@@ -629,7 +628,6 @@ private:
 
     static void _onActivate (SPDesktop* dt);
     static void _onDeactivate (SPDesktop* dt);
-    static void _onSelectionModified (Inkscape::Selection *selection, guint flags, SPDesktop *dt);
 };
 
 #endif // SEEN_SP_DESKTOP_H
