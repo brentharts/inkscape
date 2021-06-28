@@ -90,12 +90,10 @@ void ColorPicker::on_clicked()
         _color_selector->show();
     }
 
-    if (_color_selector)
-    {
-        _updating = true;
-        _selected_color.setValue(_rgba);
-        _updating = false;
-    }
+    _updating = true;
+    _selected_color.setValue(_rgba);
+    _updating = false;
+
     _colorSelectorDialog.show();
     Glib::RefPtr<Gdk::Window> window = _colorSelectorDialog.get_parent_window();
     if (window) {
