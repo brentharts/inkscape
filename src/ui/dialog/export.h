@@ -24,6 +24,10 @@ namespace Inkscape {
 namespace UI {
 namespace Dialog {
 
+#define EXPORT_COORD_PRECISION 3
+#define SP_EXPORT_MIN_SIZE 1.0
+#define DPI_BASE Inkscape::Util::Quantity::convert(1, "in", "px")
+
 enum sb_type
 {
     SPIN_X0 = 0,
@@ -45,6 +49,12 @@ enum selection_mode
     SELECTION_CUSTOM,
 };
 
+enum notebook_page
+{
+    SINGLE_IMAGE = 0,
+    BATCH_EXPORT
+};
+
 class ExportProgressDialog;
 
 /**
@@ -63,47 +73,41 @@ public:
     static Export &getInstance() { return *new Export(); }
 
 private:
+    typedef Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> SpinButton;
+
+private:
     // builder and its object ( in order )
     Glib::RefPtr<Gtk::Builder> builder;
     Gtk::Box *container = nullptr;
     Gtk::Notebook *export_notebook = nullptr;
 
-    Gtk::Box *single_image = nullptr;
-
+    //  These are toggle radio buttons.
     std::map<selection_mode, Gtk::RadioButton *> selection_buttons;
+    // These are spin buttons in the dialog.
+    std::map<sb_type, SpinButton *> spin_buttons;
 
-    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> *x0_sb = nullptr;
-    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> *x1_sb = nullptr;
-    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> *y0_sb = nullptr;
-    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> *y1_sb = nullptr;
-    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> *height_sb = nullptr;
-    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> *width_sb = nullptr;
-
-    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> *bmheight_sb = nullptr;
-    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> *bmwidth_sb = nullptr;
-    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> *dpi_sb = nullptr;
+private:
+    // Single Image Objects Start Here
+    Gtk::Box *single_image = nullptr;
 
     Gtk::CheckButton *show_export_area = nullptr;
     Inkscape::UI::Widget::UnitMenu *units = nullptr;
 
-    Gtk::CheckButton *hide_all = nullptr;
+    Gtk::CheckButton *si_hide_all = nullptr;
     Gtk::Box *si_preview_box = nullptr;
     Gtk::CheckButton *si_show_preview = nullptr;
 
-    Gtk::Grid *advance_grid = nullptr;
-
-    Gtk::ComboBoxText *extension_cb = nullptr;
-    Gtk::Entry *filename_entry = nullptr;
+    Gtk::ComboBoxText *si_extension_cb = nullptr;
+    Gtk::Entry *si_filename_entry = nullptr;
     Gtk::Button *si_export = nullptr;
 
+private:
+    // Batch Export Start Here
     Gtk::Box *batch_export = nullptr;
 
-    // Utils Variables
-    Inkscape::Preferences *prefs = nullptr;
-    std::map<selection_mode, Glib::ustring> selection_names;
-    selection_mode current_key;
-    std::map<Glib::ustring, Inkscape::Extension::Output *> extension_list;
-
+private:
+    // Grid to store advance options. We put this grid inside the Box of advance expander where needed.
+    Gtk::Grid *advance_grid = nullptr;
     // Advanced
     Gtk::CheckButton interlacing;
     std::vector<int> bit_depth_list;
@@ -115,12 +119,21 @@ private:
     std::vector<int> anti_aliasing_list;
     Inkscape::UI::Widget::ScrollProtected<Gtk::ComboBoxText> anti_aliasing_cb;
 
+private:
     // Once user change filename it is set and prevent automatic changes to filename_entry
-    bool filename_modified;
+    bool filename_modified; // Batch doesnt need this
     // original name for export. Changes everytime selection changes or when exported.
-    Glib::ustring original_name;
+    Glib::ustring original_name; // Batch Doesnt need this
     // initialised only at startup and is used as fallback for original name.
-    Glib::ustring doc_export_name;
+    Glib::ustring doc_export_name; // Batch Doesnt Need this maybe
+
+private:
+    // Utils Variables
+    Inkscape::Preferences *prefs = nullptr;
+    // Selection Names for setting prefs
+    std::map<selection_mode, Glib::ustring> selection_names;
+    selection_mode current_key;
+    std::map<Glib::ustring, Inkscape::Extension::Output *> extension_list;
 
     // Initialise all objects from builder
     void initialise_all();
@@ -155,7 +168,9 @@ private:
     void setArea(double x0, double y0, double x1, double y1);
 
     // Export Functions
-    bool _export_raster(Inkscape::Extension::Output *extension = nullptr, std::vector<SPItem *> *items = nullptr);
+    bool _export_raster(Geom::Rect const &area, unsigned long int const &width, unsigned long int const &height,
+                        float const &dpi, Glib::ustring const &filename, bool overwrite,
+                        Inkscape::Extension::Output *extension);
     bool _export_vector(Inkscape::Extension::Output *extension = nullptr, std::vector<SPItem *> *items = nullptr);
 
     // signals callback
