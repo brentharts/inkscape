@@ -33,6 +33,11 @@ public:
         : Gtk::Box(cobject){};
     ~SingleExport() override;
 
+protected:
+    InkscapeApplication *_app;
+public:
+    void set_app(InkscapeApplication *app) { _app = app; };
+
 private:
     enum sb_type
     {
@@ -109,6 +114,7 @@ private:
     void onFilenameModified();
     void onExtensionChanged();
     void onExport();
+    void onBrowse(Gtk::EntryIconPosition pos, const GdkEventButton *ev);
     void on_inkscape_selection_modified(Inkscape::Selection *selection, guint flags);
     void on_inkscape_selection_changed(Inkscape::Selection *selection);
 

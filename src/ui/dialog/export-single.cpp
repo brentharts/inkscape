@@ -200,6 +200,7 @@ void SingleExport::setup()
     filenameConn = si_filename_entry->signal_changed().connect(sigc::mem_fun(*this, &SingleExport::onFilenameModified));
     extensionConn = si_extension_cb->signal_changed().connect(sigc::mem_fun(*this, &SingleExport::onExtensionChanged));
     exportConn = si_export->signal_clicked().connect(sigc::mem_fun(*this, &SingleExport::onExport));
+    si_filename_entry->signal_icon_press().connect(sigc::mem_fun(*this, &SingleExport::onBrowse));
 }
 
 // Setup units combobox
@@ -438,6 +439,7 @@ void SingleExport::onExport()
     if (!desktop)
         return;
     si_export->set_sensitive(false);
+    interrupted = false;
     bool exportSuccessful = false;
     auto extension = si_extension_cb->get_active_text();
     if (!ExtensionList::valid_extensions[extension]) {
@@ -481,6 +483,36 @@ void SingleExport::onExport()
     filename_modified = false;
     prog_dlg = nullptr;
     interrupted = false;
+}
+
+void SingleExport::onBrowse(Gtk::EntryIconPosition pos, const GdkEventButton *ev)
+{
+    Gtk::Window *window = _app->get_active_window();
+    Glib::ustring filename = Glib::filename_from_utf8(si_filename_entry->get_text());
+
+    if (filename.empty()) {
+        Glib::ustring tmp;
+        filename = create_filepath_from_id(tmp, tmp);
+    }
+
+    Inkscape::UI::Dialog::FileSaveDialog *dialog = Inkscape::UI::Dialog::FileSaveDialog::create(
+        *window, filename, Inkscape::UI::Dialog::RASTER_TYPES, _("Select a filename for exporting"), "", "",
+        Inkscape::Extension::FILE_SAVE_METHOD_EXPORT);
+
+    if (dialog->show()) {
+        filename = dialog->getFilename();
+        Inkscape::Extension::Output* selection_type = dynamic_cast<Inkscape::Extension::Output*>(dialog->getSelectionType());
+        Glib::ustring extension = selection_type->get_extension();
+        ExtensionList::appendExtensionToFilename(filename,extension);
+        si_filename_entry->set_text(filename);
+        si_filename_entry->set_position(filename.length());
+        // deleting dialog before exporting is important
+        // proper delete function should be made for dialog IMO
+        delete dialog;
+        onExport();
+    } else {
+        delete dialog;
+    }
 }
 
 // Utils Functions

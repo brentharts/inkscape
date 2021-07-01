@@ -83,6 +83,8 @@ Export::Export()
     builder->get_widget("Batch Export", batch_export);
     // Callback when container is dinally mapped on window. All intialisation like set active is done inside it.
     container->signal_realize().connect(sigc::mem_fun(*this, &Export::onRealize));
+
+    single_image->set_app(_app);
 }
 
 Export::~Export()
@@ -92,7 +94,6 @@ Export::~Export()
     selectChangedConn.disconnect();
 }
 
-
 void Export::setDefaultNotebookPage()
 {
     // if (export_notebook && batch_export) {
@@ -100,7 +101,6 @@ void Export::setDefaultNotebookPage()
     // export_notebook->set_current_page(page_num);
     // }
 }
-
 
 /**
  * SIGNALS
@@ -113,7 +113,6 @@ void Export::onRealize()
     single_image->setup();
     // setDefaultNotebookPage();
 }
-
 
 } // namespace Dialog
 } // namespace UI
