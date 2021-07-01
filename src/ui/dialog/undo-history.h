@@ -108,13 +108,9 @@ public:
     ~UndoHistory() override;
 
     static UndoHistory &getInstance();
-    void update() override;
-
-    sigc::connection _document_replaced_connection;
+    void documentReplaced() override;
 
 protected:
-
-    SPDocument *_document;
     EventLog *_event_log;
 
     Gtk::ScrolledWindow _scrolled_window;

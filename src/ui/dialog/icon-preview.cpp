@@ -88,8 +88,6 @@ void IconPreviewPanel::on_button_clicked(int which)
  */
 IconPreviewPanel::IconPreviewPanel()
     : DialogBase("/dialogs/iconpreview", "IconPreview")
-    , desktop(nullptr)
-    , document(nullptr)
     , drawing(nullptr)
     , visionkey(0)
     , timer(nullptr)
@@ -280,53 +278,32 @@ static Glib::ustring getTimestr()
 }
 #endif // ICON_VERBOSE
 
-void IconPreviewPanel::update()
+void IconPreviewPanel::selectionModified(Selection *selection, guint flags)
 {
-    if (!_app) {
-        std::cerr << "IconPreviewPanel::update(): _app is null" << std::endl;
-        return;
+    if (desktop && Inkscape::Preferences::get()->getBool("/iconpreview/autoRefresh", true)) {
+        queueRefresh();
     }
-
-    SPDesktop *desktop = getDesktop();
-
-    if (desktop) {
-        this->desktop = desktop;
-
-        if (this->desktop->selection && Inkscape::Preferences::get()->getBool("/iconpreview/autoRefresh", true)) {
-            queueRefresh();
-        }
-    }
-
-    SPDocument *document = _app->get_active_document();
-    setDocument(document);
 }
 
-void IconPreviewPanel::setDocument( SPDocument *document )
+void IconPreviewPanel::documentReplaced()
 {
-    if (this->document != document) {
-        docModConn.disconnect();
-        if (drawing) {
-            this->document->getRoot()->invoke_hide(visionkey);
-            delete drawing;
-            drawing = nullptr;
+    if (drawing) {
+        if (document) {
+            document->getRoot()->invoke_hide(visionkey);
         }
-        this->document = document;
-        if (this->document) {
-            drawing = new Inkscape::Drawing();
-            visionkey = SPItem::display_key_new(1);
-            drawing->setRoot(this->document->getRoot()->invoke_show(*drawing, visionkey, SP_ITEM_SHOW_DISPLAY));
-
-            if ( Inkscape::Preferences::get()->getBool("/iconpreview/autoRefresh", true) ) {
-                docModConn = this->document->connectModified(sigc::hide(sigc::mem_fun(this, &IconPreviewPanel::queueRefresh)));
-            }
-            queueRefresh();
-        }
+        delete drawing;
+        drawing = nullptr;
+    }
+    if (document) {
+        drawing = new Inkscape::Drawing();
+        visionkey = SPItem::display_key_new(1);
+        drawing->setRoot(document->getRoot()->invoke_show(*drawing, visionkey, SP_ITEM_SHOW_DISPLAY));
+        queueRefresh();
     }
 }
 
 void IconPreviewPanel::refreshPreview()
 {
-    SPDesktop *desktop = getDesktop();
     if (!timer) {
         timer = new Glib::Timer();
     }

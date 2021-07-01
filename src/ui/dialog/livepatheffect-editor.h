@@ -28,7 +28,6 @@
 #include "ui/widget/combo-enums.h"
 #include "ui/widget/frame.h"
 
-class SPDesktop;
 class SPLPEItem;
 
 namespace Inkscape {
@@ -49,21 +48,15 @@ public:
 
     static LivePathEffectEditor &getInstance() { return *new LivePathEffectEditor(); }
 
-    void onSelectionChanged(Inkscape::Selection *sel);
-    void onSelectionModified(Inkscape::Selection *sel);
-    virtual void on_effect_selection_changed();
-    void setDesktop(SPDesktop *desktop);
+    void selectionChanged(Inkscape::Selection *selection) override;
+    void selectionModified(Inkscape::Selection *selection, guint flags) override;
 
-    void update() override;
+    void onSelectionChanged(Inkscape::Selection *selection);
+
+    virtual void on_effect_selection_changed();
 
 private:
-
-    sigc::connection selection_changed_connection;
-    sigc::connection selection_modified_connection;
-
-    // void add_entry(const char* name );
     void effect_list_reload(SPLPEItem *lpeitem);
-
     void set_sensitize_all(bool sensitive);
     void showParams(LivePathEffect::Effect& effect);
     void showText(Glib::ustring const &str);
@@ -115,9 +108,6 @@ private:
     Gtk::Button button_remove;
     Gtk::Button button_up;
     Gtk::Button button_down;
-
-    SPDesktop * current_desktop;
-    Inkscape::Selection *_getSelection() { return current_desktop ? current_desktop->getSelection() : nullptr; }
 
     SPLPEItem * current_lpeitem;
 

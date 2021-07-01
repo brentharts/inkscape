@@ -49,12 +49,17 @@ namespace Dialog {
 class SelectorsDialog : public DialogBase
 {
 public:
-    ~SelectorsDialog() override;
     // No default constructor, noncopyable, nonassignable
     SelectorsDialog();
+    ~SelectorsDialog() override;
     SelectorsDialog(SelectorsDialog const &d) = delete;
     SelectorsDialog operator=(SelectorsDialog const &d) = delete;
     static SelectorsDialog &getInstance() { return *new SelectorsDialog(); }
+
+    void update() override;
+    void desktopReplaced() override;
+    void documentReplaced() override;
+    void selectionChanged(Selection *selection) override;
 
   private:
     // Monitor <style> element for changes.
@@ -133,7 +138,6 @@ public:
     // Update watchers
     std::unique_ptr<Inkscape::XML::NodeObserver> m_nodewatcher;
     std::unique_ptr<Inkscape::XML::NodeObserver> m_styletextwatcher;
-    void _updateWatchers(SPDesktop *);
 
     // Manipulate Tree
     void _addToSelector(Gtk::TreeModel::Row row);
@@ -158,8 +162,6 @@ public:
     Inkscape::XML::Node *m_root = nullptr;
     Inkscape::XML::Node *_textNode; // Track so we know when to add a NodeObserver.
 
-    void update() override;
-    void _handleSelectionChanged();
     void _rowExpand(const Gtk::TreeModel::iterator &iter, const Gtk::TreeModel::Path &path);
     void _rowCollapse(const Gtk::TreeModel::iterator &iter, const Gtk::TreeModel::Path &path);
     void _closeDialog(Gtk::Dialog *textDialogPtr);

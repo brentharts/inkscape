@@ -65,11 +65,11 @@ class SvgFontsDialog : public DialogBase
 {
 public:
     SvgFontsDialog();
-    ~SvgFontsDialog() override;
+    ~SvgFontsDialog() override {};
 
     static SvgFontsDialog &getInstance() { return *new SvgFontsDialog(); }
 
-    void update() override;
+    void documentReplaced() override;
 
     void update_fonts();
     SvgFont* get_selected_svgfont();

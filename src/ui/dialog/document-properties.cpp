@@ -193,13 +193,6 @@ DocumentProperties::~DocumentProperties()
 {
     for (auto & it : _rdflist)
         delete it;
-    if (_repr_root) {
-        _document_replaced_connection.disconnect();
-        _repr_root->removeListenerByData(this);
-        _repr_root = nullptr;
-        _repr_namedview->removeListenerByData(this);
-        _repr_namedview = nullptr;
-    }
 }
 
 //========================================================================
@@ -1280,7 +1273,7 @@ void DocumentProperties::populate_script_lists(){
 }
 
 /**
-* Called for _updating_ the dialog (e.g. when a new grid was manually added in XML)
+* Called for _updating_ the dialog. DO NOT call this a lot. It's expensive!
 */
 void DocumentProperties::update_gridspage()
 {
@@ -1500,34 +1493,21 @@ void DocumentProperties::save_default_metadata()
    }
 }
 
-void DocumentProperties::update()
+void DocumentProperties::documentReplaced()
 {
-    if (!_app) {
-        std::cerr << "UndoHistory::update(): _app is null" << std::endl;
-        return;
-    }
-
-    SPDesktop *desktop = getDesktop();
-
-    if (_repr_root) {
-        _document_replaced_connection.disconnect();
-        _repr_root->removeListenerByData(this);
-        _repr_root = nullptr;
+    if (_repr_namedview) {
         _repr_namedview->removeListenerByData(this);
         _repr_namedview = nullptr;
     }
-
-    if (!desktop) {
-        return;
+    if (desktop) {
+        _wr.setDesktop(desktop);
+        _repr_namedview = desktop->getNamedView()->getRepr();
+        _repr_namedview->addListener(&_repr_events, this);
     }
+}
 
-    _wr.setDesktop(desktop);
-
-    _repr_root = desktop->getNamedView()->getRepr();
-    _repr_root->addListener(&_repr_events, this);
-    _repr_namedview = desktop->getDocument()->getRoot()->getRepr();
-    _repr_namedview->addListener(&_repr_events, this);
-
+void DocumentProperties::update()
+{
     update_widgets();
 }
 

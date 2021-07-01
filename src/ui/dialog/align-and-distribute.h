@@ -52,6 +52,9 @@ public:
     ~AlignAndDistribute() override;
 
     static AlignAndDistribute &getInstance() { return *new AlignAndDistribute(); }
+    void desktopReplaced() override;
+    void selectionChanged(Inkscape::Selection*) override;
+    void toolChanged(SPDesktop* desktop, Inkscape::UI::Tools::ToolBase* ec);
 
     Gtk::Grid &align_table(){return _alignTable;}
     Gtk::Grid &distribute_table(){return _distributeTable;}
@@ -118,8 +121,7 @@ protected:
     Gtk::Box _anchorBoxNode;
     Inkscape::UI::Widget::ScrollProtected<Gtk::ComboBoxText> _comboNode;
 
-    sigc::connection _toolChangeConn;
-    sigc::connection _selChangeConn;
+    sigc::connection _tool_changed;
 private:
     AlignAndDistribute(AlignAndDistribute const &d) = delete;
     AlignAndDistribute& operator=(AlignAndDistribute const &d) = delete;

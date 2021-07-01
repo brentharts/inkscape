@@ -210,7 +210,6 @@ public:
 
     Glib::ustring _reconstruction_old_layer_id;
 
-    sigc::signal<void, sp_verb_t>      _tool_changed;
     sigc::signal<void, unsigned int, bool> _menu_update;
     sigc::signal<void, SPObject *>     _layer_changed_signal;
     sigc::signal<bool, const SPCSSAttr *, bool>::accumulated<StopOnTrue> _set_style_signal;

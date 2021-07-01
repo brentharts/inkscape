@@ -70,7 +70,6 @@ PaintServersColumns *PaintServersDialog::getColumns() { return new PaintServersC
 // Constructor
 PaintServersDialog::PaintServersDialog()
     : DialogBase("/dialogs/paint", "PaintServers")
-    , desktop(SP_ACTIVE_DESKTOP)
     , target_selected(true)
     , ALLDOCS(_("All paint servers"))
     , CURRENTDOC(_("Current document"))
@@ -95,7 +94,6 @@ PaintServersDialog::PaintServersDialog()
     dropdown = Gtk::manage(new Inkscape::UI::Widget::ScrollProtected<Gtk::ComboBoxText>());
     dropdown->append(ALLDOCS);
     dropdown->append(CURRENTDOC);
-    document_map[CURRENTDOC] = desktop->getDocument();
     dropdown->set_active_text(ALLDOCS);
     dropdown->set_hexpand();
     grid->attach(*dropdown, 1, 0, 1, 1);
@@ -161,16 +159,11 @@ PaintServersDialog::PaintServersDialog()
     load_sources();
 }
 
-void PaintServersDialog::update()
+void PaintServersDialog::documentReplaced()
 {
-    if (!_app) {
-        std::cerr << "PaintServersDialog::update(): _app is null" << std::endl;
-        return;
-    }
-
-    desktop = getDesktop();
-    if (desktop) {
-        load_current_document(desktop->getDocument()->getDefs(), 0);
+    if (document) {
+        document_map[CURRENTDOC] = document;
+        load_current_document();
     }
 }
 
@@ -231,15 +224,13 @@ void recurse_find_paint(SPObject* in, std::vector<Glib::ustring>& list)
 // Load paint servers from all the files associated
 void PaintServersDialog::load_sources()
 {
-
     // Extract paints from the current file
-    load_document(desktop->getDocument());
+    load_document(document);
 
     // Extract out paints from files in share/paint.
     for (auto &path : get_filenames(Inkscape::IO::Resource::PAINT, { ".svg" })) {
-        SPDocument *document = SPDocument::createNewDoc(path.c_str(), FALSE);
-
-        load_document(document);
+        SPDocument *doc = SPDocument::createNewDoc(path.c_str(), FALSE);
+        load_document(doc);
     }
 }
 
@@ -359,10 +350,9 @@ void PaintServersDialog::load_document(SPDocument *document)
     }
 }
 
-void PaintServersDialog::load_current_document(SPObject * /*object*/, guint /*flags*/)
+void PaintServersDialog::load_current_document()
 {
     std::unique_ptr<PaintServersColumns> columns(getColumns());
-    SPDocument *document = desktop->getDocument();
     Glib::RefPtr<Gtk::ListStore> current = store[CURRENTDOC];
 
     std::vector<Glib::ustring> paints;
@@ -441,7 +431,6 @@ void PaintServersDialog::on_item_activated(const Gtk::TreeModel::Path& path)
     Glib::ustring document_title = (*iter)[columns->document];
     SPDocument *document = document_map[document_title];
     SPObject *paint_server = document->getObjectById(id);
-    SPDocument *document_target = desktop->getDocument();
 
     bool paint_server_exists = false;
     for (auto server : store[CURRENTDOC]->children()) {
@@ -453,9 +442,9 @@ void PaintServersDialog::on_item_activated(const Gtk::TreeModel::Path& path)
 
     if (!paint_server_exists) {
         // Add the paint server to the current document definition
-        Inkscape::XML::Document *xml_doc = document_target->getReprDoc();
+        Inkscape::XML::Document *xml_doc = document->getReprDoc();
         Inkscape::XML::Node *repr = paint_server->getRepr()->duplicate(xml_doc);
-        document_target->getDefs()->appendChild(repr);
+        document->getDefs()->appendChild(repr);
         Inkscape::GC::release(repr);
 
         // Add the pixbuf to the current document store
@@ -478,7 +467,7 @@ void PaintServersDialog::on_item_activated(const Gtk::TreeModel::Path& path)
         item->updateRepr();
     }
 
-    document_target->collectOrphans();
+    document->collectOrphans();
 }
 
 std::vector<SPObject*> PaintServersDialog::extract_elements(SPObject* item)

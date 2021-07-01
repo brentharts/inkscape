@@ -536,7 +536,6 @@ SPDesktop::change_document (SPDocument *theDocument)
     if (dtw) {
         dtw->desktop = this;
         dtw->updateNamedview();
-        dtw->updateDocument();
     } else {
         std::cerr << "SPDesktop::change_document: failed to get desktop widget!" << std::endl;
     }

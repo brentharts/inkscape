@@ -2006,13 +2006,6 @@ guint CloneTiler::number_of_clones(SPObject *obj)
 
 void CloneTiler::remove(bool do_undo/* = true*/)
 {
-    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
-    if (desktop == nullptr) {
-        return;
-    }
-
-    Inkscape::Selection *selection = desktop->getSelection();
-
     // check if something is selected
     if (selection->isEmpty() || boost::distance(selection->items()) > 1) {
         desktop->getMessageStack()->flash(Inkscape::WARNING_MESSAGE, _("Select <b>one object</b> whose tiled clones to remove."));
@@ -2076,12 +2069,7 @@ double CloneTiler::randomize01(double val, double rand)
 
 void CloneTiler::apply()
 {
-    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
-    if (desktop == nullptr) {
-        return;
-    }
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    Inkscape::Selection *selection = desktop->getSelection();
 
     // check if something is selected
     if (selection->isEmpty()) {

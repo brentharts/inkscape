@@ -359,26 +359,9 @@ Find::Find()
     entry_find.getEntry()->grab_focus();
 }
 
-Find::~Find()
+void Find::desktopReplaced()
 {
-    selectChangedConn.disconnect();
-}
-
-void Find::update()
-{
-    if (!_app) {
-        std::cerr << "Find::update(): _app is null" << std::endl;
-        return;
-    }
-
-    SPDesktop *desktop = getDesktop();
-    selectChangedConn.disconnect();
-
-    if (!desktop)
-        return;
-
     auto selection = desktop->getSelection();
-
     if (selection) {
         SPItem *item = selection->singleItem();
         if (item && entry_find.getEntry()->get_text_length() == 0) {
@@ -387,12 +370,10 @@ void Find::update()
                 entry_find.getEntry()->set_text(str);
             }
         }
-
-        selectChangedConn = selection->connectChanged(sigc::hide(sigc::mem_fun(*this, &Find::onSelectionChange)));
     }
 }
 
-void Find::onSelectionChange()
+void Find::selectionChanged(Selection *selection)
 {
     if (!blocked) {
         status.set_text("");

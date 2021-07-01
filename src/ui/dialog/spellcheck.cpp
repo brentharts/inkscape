@@ -98,7 +98,6 @@ SpellCheck::SpellCheck()
     , dictionary_hbox(Gtk::ORIENTATION_HORIZONTAL, 0)
     , stop_button(_("_Stop"), true)
     , start_button(_("_Start"), true)
-    , desktop(nullptr)
     , suggestion_hbox(Gtk::ORIENTATION_HORIZONTAL)
     , changebutton_vbox(Gtk::ORIENTATION_VERTICAL)
 {
@@ -201,27 +200,12 @@ SpellCheck::~SpellCheck()
     disconnect();
 }
 
-void SpellCheck::update()
+void SpellCheck::documentReplaced()
 {
-    if (!_app) {
-        std::cerr << "SpellCheck::update(): _app is null" << std::endl;
-        return;
-    }
-
-    SPDesktop *desktop = getDesktop();
-
-    if (this->desktop == desktop) {
-        return;
-    }
-
-    this->desktop = desktop;
-
-    if (desktop) {
-        if (_working) {
-            // Stop and start on the new desktop
-            finished();
-            onStart();
-        }
+    if (_working) {
+        // Stop and start on the new desktop
+        finished();
+        onStart();
     }
 }
 

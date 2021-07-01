@@ -52,7 +52,7 @@ public:
 	ArrangeDialog();
 	~ArrangeDialog() override = default;;
 
-    void update() override;
+    void desktopReplaced() override;
 
     /**
      * Callback from Apply

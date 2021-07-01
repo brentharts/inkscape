@@ -71,15 +71,8 @@ void ArrangeDialog::_apply()
 	}
 }
 
-void ArrangeDialog::update()
+void ArrangeDialog::desktopReplaced()
 {
-    if (!_app) {
-        std::cerr << "ArrangeDialog::update(): _app is null" << std::endl;
-        return;
-    }
-
-    SPDesktop *desktop = getDesktop();
-
     _gridArrangeTab->setDesktop(desktop);
 }
 

@@ -20,7 +20,6 @@
 
 #include "inkscape-application.h"
 
-class SPDesktop;
 using Gtk::Label;
 using Gtk::Widget;
 

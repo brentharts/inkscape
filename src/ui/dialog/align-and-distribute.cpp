@@ -217,6 +217,10 @@ void ActionAlign::do_action(SPDesktop *desktop, int index)
     }
 }
 
+void AlignAndDistribute::selectionChanged(Selection *selection)
+{
+    randomize_bbox = Geom::OptRect();
+}
 
 ActionAlign::Coeffs const ActionAlign::_allCoeffs[19] = {
     {1., 0., 0., 0., 0., 1., 0., 0., SP_VERB_ALIGN_HORIZONTAL_RIGHT_TO_ANCHOR},
@@ -907,21 +911,6 @@ private :
 
 
 
-static void on_tool_changed(AlignAndDistribute *daad)
-{
-    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
-    if (desktop && desktop->getEventContext())
-        daad->setMode(get_active_tool(desktop) == "Node");
-    else
-        daad->setMode(false);
-
-}
-
-static void on_selection_changed(AlignAndDistribute *daad)
-{
-    daad->randomize_bbox = Geom::OptRect();
-}
-
 /////////////////////////////////////////////////////////
 
 AlignAndDistribute::AlignAndDistribute()
@@ -1150,26 +1139,36 @@ AlignAndDistribute::AlignAndDistribute()
     pack_start(_removeOverlapFrame, Gtk::PACK_SHRINK);
     pack_start(_nodesFrame, Gtk::PACK_SHRINK);
 
-    //Connect to the global tool change signal
-    _toolChangeConn = INKSCAPE.signal_eventcontext_set.connect(sigc::hide<0>(sigc::bind(sigc::ptr_fun(&on_tool_changed), this)));
-
     // Connect to the global selection change, to invalidate cached randomize_bbox
-    _selChangeConn = INKSCAPE.signal_selection_changed.connect(sigc::hide<0>(sigc::bind(sigc::ptr_fun(&on_selection_changed), this)));
     randomize_bbox = Geom::OptRect();
 
     show_all_children();
 
-    on_tool_changed (this); // set current mode
 }
+
+void AlignAndDistribute::desktopReplaced()
+{
+    _tool_changed.disconnect();
+    if (desktop) {
+        _tool_changed = desktop->connectEventContextChanged(sigc::mem_fun(*this, &AlignAndDistribute::toolChanged));
+    }
+}
+
+void AlignAndDistribute::toolChanged(SPDesktop* desktop, Inkscape::UI::Tools::ToolBase* ec)
+{
+    if (desktop && ec) {
+        setMode(get_active_tool(desktop) == "Node");
+    } else {
+        setMode(false);
+    }
+}
+
 
 AlignAndDistribute::~AlignAndDistribute()
 {
     for (auto & it : _actionList) {
         delete it;
     }
-
-    _toolChangeConn.disconnect();
-    _selChangeConn.disconnect();
 }
 
 

@@ -43,17 +43,28 @@ public:
     DialogBase(gchar const *prefs_path = nullptr, Glib::ustring dialog_type = "");
     ~DialogBase() override{
         ensure_size();
+        setDesktop(nullptr);
     };
 
     /**
-     * The update() method is essential to state management. DialogBase implementations get updated whenever
+     * The update() method is essential to Gtk state management. DialogBase implementations get updated whenever
      * a new focus event happens if they are in a DialogWindow or if they are in the currently focused window.
+     *
+     * DO NOT use update to keep SPDesktop, SPDocument or Selection states, use the virtual functions below.
      */
     virtual void update() {}
 
+    // Public for future use, say if the desktop is smartly set when docking dialogs.
+    void setDesktop(SPDesktop *new_desktop);
+    SPDesktop *getDesktop() { return desktop; }
+    SPDocument *getDocument() { return document; }
+
     void on_map() override
     {
+        // Update asks the dialogs if they need their Gtk widgets updated.
         update();
+        // Set the desktop on_map, although we might want to be smarter about this.
+        setDesktop(dynamic_cast<SPDesktop *>(_app->get_active_view()));
         parent_type::on_map();
     }
     /*
@@ -63,7 +74,7 @@ public:
      */
     void ensure_size()
     {
-        if (auto desktop = getDesktop()) {
+        if (desktop) {
             desktop->getToplevel()->resize_children();
         }
     }
@@ -72,7 +83,6 @@ public:
     Glib::ustring get_name() { return _name; };
     gchar const *getPrefsPath() const { return _prefs_path.data(); }
     Glib::ustring const &get_type() const { return _dialog_type; }
-    SPDesktop *getDesktop();
 
     void blink();
     // find focusable widget to grab focus
@@ -86,9 +96,28 @@ protected:
     Glib::ustring const _dialog_type; // Type of dialog (we could just use _pref_path?).
     InkscapeApplication *_app; // Used for state management
 
+    SPDesktop *desktop = nullptr;
+    SPDocument *document = nullptr;
+    Selection *selection = nullptr;
 private:
     bool blink_off(); // timer callback
     bool on_key_press_event(GdkEventKey* key_event) override;
+
+    void desktopDestroyed(SPDesktop* old_desktop);
+    void setDocument(SPDocument *new_document);
+    /**
+     * Called when the desktop has certainly changed. It may have changed to nullptr
+     * when destructing the dialog, so the override should expect nullptr too.
+     */
+    virtual void desktopReplaced() {}
+    virtual void documentReplaced() {}
+    virtual void selectionChanged(Inkscape::Selection *selection) {};
+    virtual void selectionModified(Inkscape::Selection *selection, guint flags) {};
+
+    sigc::connection _desktop_destroyed;
+    sigc::connection _doc_replaced;
+    sigc::connection _select_changed;
+    sigc::connection _select_modified;
 };
 
 } // namespace Dialog

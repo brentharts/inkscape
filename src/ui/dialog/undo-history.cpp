@@ -88,8 +88,6 @@ UndoHistory& UndoHistory::getInstance()
 
 UndoHistory::UndoHistory()
     : DialogBase("/dialogs/undo-history", "UndoHistory"),
-      _document_replaced_connection(),
-      _document(nullptr),
       _event_log(nullptr),
       _scrolled_window(),
       _event_list_store(),
@@ -160,22 +158,11 @@ UndoHistory::~UndoHistory()
     }
 }
 
-// Required for floating dialogs.
-void UndoHistory::update()
+void UndoHistory::documentReplaced()
 {
-    if (!_app) {
-        std::cerr << "UndoHistory::update(): _app is null" << std::endl;
+    if (!document)
         return;
-    }
 
-    if (_document != _app->get_active_document()) {
-        _connectDocument(_app->get_active_document());
-    }
-}
-
-void UndoHistory::_connectDocument(SPDocument *document)
-{
-    g_assert (document != nullptr);
     g_assert (document->get_event_log() != nullptr);
 
     // disconnect from prior
@@ -189,7 +176,6 @@ void UndoHistory::_connectDocument(SPDocument *document)
     _event_list_view.unset_model();
 
     // connect to new EventLog
-    _document = document;
     _event_log = document->get_event_log();
     _connectEventLog();
 }
@@ -251,7 +237,7 @@ UndoHistory::_onListSelectionChange()
 
             _event_log->blockNotifications();
             for ( --last ; curr_event != last ; ++curr_event ) {
-                DocumentUndo::redo(_document);
+                DocumentUndo::redo(document);
             }
             _event_log->blockNotifications(false);
 
@@ -285,7 +271,7 @@ UndoHistory::_onListSelectionChange()
 
             while ( selected != last_selected ) {
 
-                DocumentUndo::undo(_document);
+                DocumentUndo::undo(document);
 
                 if ( last_selected->parent() &&
                      last_selected == last_selected->parent()->children().begin() )
@@ -310,7 +296,7 @@ UndoHistory::_onListSelectionChange()
 
             while ( selected != last_selected ) {
 
-                DocumentUndo::redo(_document);
+                DocumentUndo::redo(document);
 
                 if ( !last_selected->children().empty() ) {
                     _event_log->setCurrEventParent(last_selected);
@@ -354,10 +340,10 @@ UndoHistory::_onCollapseEvent(const Gtk::TreeModel::iterator &iter, const Gtk::T
         EventLog::const_iterator last = curr_event_parent->children().end();
 
         _event_log->blockNotifications();
-        DocumentUndo::redo(_document);
+        DocumentUndo::redo(document);
 
         for ( --last ; curr_event != last ; ++curr_event ) {
-            DocumentUndo::redo(_document);
+            DocumentUndo::redo(document);
         }
         _event_log->blockNotifications(false);
 

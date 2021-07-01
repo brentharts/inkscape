@@ -144,11 +144,53 @@ bool DialogBase::blink_off()
 }
 
 /**
- * Get the active desktop.
+ * Called when the desktop might have changed for this dialog.
  */
-SPDesktop *DialogBase::getDesktop()
+void DialogBase::setDesktop(SPDesktop *new_desktop)
 {
-    return dynamic_cast<SPDesktop *>(_app->get_active_view());
+    if (desktop != new_desktop) {
+        desktop = new_desktop;
+        selection = nullptr;
+
+        _desktop_destroyed.disconnect();
+        _doc_replaced.disconnect();
+        _select_changed.disconnect();
+        _select_modified.disconnect();
+
+        if (desktop) {
+            _doc_replaced = desktop->connectDocumentReplaced(sigc::hide<0>(sigc::mem_fun(*this, &DialogBase::setDocument)));
+            _desktop_destroyed = desktop->connectDestroy( sigc::mem_fun(*this, &DialogBase::desktopDestroyed));
+            if (desktop->selection) {
+                selection = desktop->selection;
+                _select_changed = selection->connectChanged(sigc::mem_fun(*this, &DialogBase::selectionChanged));
+                _select_modified = selection->connectModified(sigc::mem_fun(*this, &DialogBase::selectionModified));
+            }
+        }
+        if (desktop) {
+            this->setDocument(desktop->getDocument());
+        } else {
+            this->setDocument(nullptr);
+        }
+        desktopReplaced();
+    }
+}
+
+void DialogBase::desktopDestroyed(SPDesktop* old_desktop)
+{
+    if (old_desktop == desktop && desktop) {
+        setDesktop(nullptr);
+    }
+}
+
+/**
+ * Called when the document might have changed, called from setDesktop too.
+ */
+void DialogBase::setDocument(SPDocument *new_document)
+{
+    if (document != new_document) {
+        document = new_document;
+        documentReplaced();
+    }
 }
 
 } // namespace Dialog

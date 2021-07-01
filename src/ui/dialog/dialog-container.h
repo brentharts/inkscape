@@ -27,8 +27,6 @@
 #include <memory>
 #include "dialog-manager.h"
 
-class SPDesktop;
-
 namespace Inkscape {
 namespace UI {
 namespace Dialog {

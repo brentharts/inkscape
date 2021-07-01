@@ -62,13 +62,14 @@ namespace Dialog {
 class StyleDialog : public DialogBase
 {
 public:
-    ~StyleDialog() override;
     // No default constructor, noncopyable, nonassignable
     StyleDialog();
+    ~StyleDialog() override {};
     StyleDialog(StyleDialog const &d) = delete;
     StyleDialog operator=(StyleDialog const &d) = delete;
 
-    void update() override;
+    void documentReplaced() override;
+    void selectionChanged(Selection *selection) override;
 
     static StyleDialog &getInstance() { return *new StyleDialog(); }
     void setCurrentSelector(Glib::ustring current_selector);
@@ -161,7 +162,6 @@ public:
     bool _scroollock;
     double _scroolpos;
     Glib::ustring _current_selector;
-    SPDesktop *_desktop;
 
     // Update watchers
     std::unique_ptr<Inkscape::XML::NodeObserver> m_nodewatcher;
@@ -178,12 +178,6 @@ public:
     Inkscape::XML::Node *_textNode; // Track so we know when to add a NodeObserver.
     bool _updating;                 // Prevent cyclic actions: read <-> write, select via dialog <-> via desktop
 
-    // Signals and handlers - External
-    sigc::connection _document_replaced_connection;
-    sigc::connection _selection_changed_connection;
-
-    void _handleDocumentReplaced(SPDesktop *desktop, SPDocument *document);
-    void _handleSelectionChanged();
     void _closeDialog(Gtk::Dialog *textDialogPtr);
 };
 
