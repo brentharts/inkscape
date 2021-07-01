@@ -1476,6 +1476,11 @@ void SPDesktop::updateNow()
     canvas->redraw_now();
 }
 
+void SPDesktop::updateDialogs()
+{
+    getContainer()->set_desktop(this);
+}
+
 void
 SPDesktop::enableInteraction()
 {

@@ -296,11 +296,13 @@ void InkscapeWindow::update_dialogs()
     for (auto const &window : windows) {
         DialogWindow *dialog_window = dynamic_cast<DialogWindow *>(window);
         if (dialog_window) {
+            // Update the floating dialogs, reset them to the new desktop.
             dialog_window->update_dialogs();
+            dialog_window->set_desktop(_desktop);
         }
-
-        _desktop_widget->getContainer()->update_dialogs();
     }
+    // Update the docked dialogs in this InkscapeWindow
+    _desktop->updateDialogs();
 }
 
 /*
