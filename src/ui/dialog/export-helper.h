@@ -10,8 +10,40 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
-#ifndef SP_HELPER_H
-#define SP_HELPER_H
+#ifndef SP_EXPORT_HELPER_H
+#define SP_EXPORT_HELPER_H
+
+#include <glibmm/convert.h>
+#include <glibmm/i18n.h>
+#include <glibmm/miscutils.h>
+#include <gtkmm.h>
+#include <png.h>
+
+#include "desktop.h"
+#include "document-undo.h"
+#include "document.h"
+#include "extension/db.h"
+#include "extension/output.h"
+#include "file.h"
+#include "helper/png-write.h"
+#include "inkscape-window.h"
+#include "inkscape.h"
+#include "io/resource.h"
+#include "io/sys.h"
+#include "message-stack.h"
+#include "object/object-set.h"
+#include "object/sp-namedview.h"
+#include "object/sp-root.h"
+#include "preferences.h"
+#include "selection-chemistry.h"
+#include "ui/dialog-events.h"
+#include "ui/dialog/dialog-notebook.h"
+#include "ui/dialog/filedialog.h"
+#include "ui/interface.h"
+#include "ui/widget/scrollprotected.h"
+#include "ui/widget/unit-menu.h"
+
+using Inkscape::Util::unit_table;
 
 namespace Inkscape {
 namespace UI {
@@ -20,6 +52,70 @@ namespace Dialog {
 #define EXPORT_COORD_PRECISION 3
 #define SP_EXPORT_MIN_SIZE 1.0
 #define DPI_BASE Inkscape::Util::Quantity::convert(1, "in", "px")
+
+// Class for storing and manipulating advance options.
+class AdvanceOptions : public Gtk::Expander
+{
+public:
+    AdvanceOptions();
+    ~AdvanceOptions();
+
+private:
+    Gtk::CheckButton interlacing;
+
+    std::vector<int> bit_depth_list;
+    std::vector<int> color_list;
+    Inkscape::UI::Widget::ScrollProtected<Gtk::ComboBoxText> bit_depth_cb;
+
+    std::vector<int> compression_list;
+    Inkscape::UI::Widget::ScrollProtected<Gtk::ComboBoxText> compression_cb;
+
+    Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> pHYs_sb;
+    Gtk::SpinButton a;
+
+    std::vector<int> anti_aliasing_list;
+    Inkscape::UI::Widget::ScrollProtected<Gtk::ComboBoxText> anti_aliasing_cb;
+
+private:
+    int row;
+
+public:
+    int get_color() { return color_list[bit_depth_cb.get_active_row_number()]; }
+    int get_bit_depth() { return bit_depth_list[bit_depth_cb.get_active_row_number()]; }
+    int get_compression() { return compression_list[compression_cb.get_active_row_number()]; }
+    int get_anti_aliasing() { return anti_aliasing_list[anti_aliasing_cb.get_active_row_number()]; }
+    bool get_interlacing() { return interlacing.get_active(); }
+    double get_pHYs() { return pHYs_sb.get_value(); }
+};
+
+// Class for storing and manipulating extensions
+class ExtensionList : public Gtk::ComboBoxText
+{
+public:
+    ExtensionList(){};
+    ExtensionList(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &refGlade)
+        : Gtk::ComboBoxText(cobject){};
+    ~ExtensionList();
+
+public:
+    void setup();
+    void setExtensionFromFilename(Glib::ustring const &filename);
+    void appendExtensionToFilename(Glib::ustring &filename);
+    static void createList();
+    static bool list_created;
+    static void appendExtensionToFilename(Glib::ustring &filename, Glib::ustring &extension);
+
+private:
+    static std::map<Glib::ustring, Inkscape::Extension::Output *> valid_extensions;
+    static std::map<Glib::ustring, Inkscape::Extension::Output *> all_extensions;
+};
+
+float getValuePx(float value, Unit const *unit);
+void setValuePx(Glib::RefPtr<Gtk::Adjustment> &adj, double val, Unit const *unit);
+Glib::ustring get_default_filename(Glib::ustring &filename_entry_text, Glib::ustring &extension);
+std::string create_filepath_from_id(Glib::ustring id, const Glib::ustring &file_entry_text);
+Glib::ustring get_ext_from_filename(Glib::ustring const &filename);
+std::string absolutize_path_from_document_location(SPDocument *doc, const std::string &filename);
 
 } // namespace Dialog
 } // namespace UI

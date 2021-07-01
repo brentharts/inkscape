@@ -112,6 +112,8 @@ set(ui_SRC
 	dialog/dialog-window.cpp
 	dialog/document-properties.cpp
 	dialog/export.cpp
+	dialog/export-single.cpp
+	dialog/export-helper.cpp
 	dialog/filedialog.cpp
 	dialog/filedialogimpl-gtkmm.cpp
 	dialog/fill-and-stroke.cpp
@@ -285,6 +287,8 @@ set(ui_SRC
 	dialog/dialog-window.h
 	dialog/document-properties.h
 	dialog/export.h
+	dialog/export-single.h
+	dialog/export-helper.h
 	dialog/filedialog.h
 	dialog/filedialogimpl-gtkmm.h
 	dialog/filedialogimpl-win32.h

@@ -12,38 +12,644 @@
 
 #include "export-single.h"
 
+#include <glibmm/convert.h>
+#include <glibmm/i18n.h>
+#include <glibmm/miscutils.h>
 #include <gtkmm.h>
+#include <png.h>
 
+#include "desktop.h"
+#include "document-undo.h"
+#include "document.h"
 #include "export-helper.h"
+#include "extension/db.h"
+#include "file.h"
+#include "helper/png-write.h"
+#include "inkscape-window.h"
+#include "inkscape.h"
+#include "io/resource.h"
+#include "io/sys.h"
+#include "message-stack.h"
+#include "object/object-set.h"
+#include "object/sp-namedview.h"
+#include "object/sp-root.h"
+#include "preferences.h"
+#include "selection-chemistry.h"
+#include "ui/dialog-events.h"
+#include "ui/dialog/dialog-notebook.h"
+#include "ui/dialog/filedialog.h"
+#include "ui/interface.h"
+#include "ui/widget/scrollprotected.h"
+#include "ui/widget/unit-menu.h"
+#ifdef _WIN32
+
+#endif
+
+using Inkscape::Util::unit_table;
 
 namespace Inkscape {
 namespace UI {
 namespace Dialog {
 
-enum sb_type
-{
-    SPIN_X0 = 0,
-    SPIN_X1,
-    SPIN_Y0,
-    SPIN_Y1,
-    SPIN_WIDTH,
-    SPIN_HEIGHT,
-    SPIN_BMWIDTH,
-    SPIN_BMHEIGHT,
-    SPIN_DPI
-};
-
-enum selection_mode
-{
-    SELECTION_PAGE = 0, // Default is alaways placed first
-    SELECTION_SELECTION,
-    SELECTION_DRAWING,
-    SELECTION_CUSTOM,
-};
-
-void SingleExport::initialise(Glib::RefPtr<Gtk::Builder> *builder)
+SingleExport::~SingleExport()
 {
     ;
+}
+
+void SingleExport::initialise(const Glib::RefPtr<Gtk::Builder> &builder)
+{
+    builder->get_widget("si_s_document", selection_buttons[SELECTION_DRAWING]);
+    selection_names[SELECTION_DRAWING] = "drawing";
+    builder->get_widget("si_s_page", selection_buttons[SELECTION_PAGE]);
+    selection_names[SELECTION_PAGE] = "page";
+    builder->get_widget("si_s_selection", selection_buttons[SELECTION_SELECTION]);
+    selection_names[SELECTION_SELECTION] = "selection";
+    builder->get_widget("si_s_custom", selection_buttons[SELECTION_CUSTOM]);
+    selection_names[SELECTION_CUSTOM] = "custom";
+
+    builder->get_widget_derived("si_left_sb", spin_buttons[SPIN_X0]);
+    builder->get_widget_derived("si_right_sb", spin_buttons[SPIN_X1]);
+    builder->get_widget_derived("si_top_sb", spin_buttons[SPIN_Y0]);
+    builder->get_widget_derived("si_bottom_sb", spin_buttons[SPIN_Y1]);
+    builder->get_widget_derived("si_height_sb", spin_buttons[SPIN_HEIGHT]);
+    builder->get_widget_derived("si_width_sb", spin_buttons[SPIN_WIDTH]);
+
+    builder->get_widget_derived("si_img_height_sb", spin_buttons[SPIN_BMHEIGHT]);
+    builder->get_widget_derived("si_img_width_sb", spin_buttons[SPIN_BMWIDTH]);
+    builder->get_widget_derived("si_dpi_sb", spin_buttons[SPIN_DPI]);
+
+    builder->get_widget("si_show_export_area", show_export_area);
+    builder->get_widget_derived("si_units", units);
+
+    builder->get_widget("si_hide_all", si_hide_all);
+    builder->get_widget("si_preview_box", si_preview_box);
+    builder->get_widget("si_show_preview", si_show_preview);
+
+    builder->get_widget_derived("si_extention", si_extension_cb);
+    builder->get_widget("si_filename", si_filename_entry);
+    builder->get_widget("si_export", si_export);
+
+    builder->get_widget("si_advance_box", adv_box);
+}
+
+void SingleExport::on_realize()
+{
+    std::cout << "SINGLE RE" << std::endl;
+
+    auto desktop = SP_ACTIVE_DESKTOP;
+    assert(desktop);
+    auto *selection = desktop->getSelection();
+
+    selectionModifiedConn =
+        selection->connectModified(sigc::mem_fun(*this, &SingleExport::on_inkscape_selection_modified));
+    selectionChangedConn =
+        selection->connectChanged(sigc::mem_fun(*this, &SingleExport::on_inkscape_selection_changed));
+
+    Gtk::Box::on_realize();
+}
+
+void SingleExport::on_unrealize()
+{
+    std::cout << "SINGLE UNRE" << std::endl;
+    selectionModifiedConn.disconnect();
+    selectionChangedConn.disconnect();
+    Gtk::Box::on_unrealize();
+}
+
+void SingleExport::on_inkscape_selection_modified(Inkscape::Selection *selection, guint flags)
+{
+    assert(SP_ACTIVE_DESKTOP->getSelection() == selection);
+    if (!(flags & (SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_PARENT_MODIFIED_FLAG | SP_OBJECT_CHILD_MODIFIED_FLAG))) {
+        return;
+    }
+    Geom::OptRect bbox;
+
+    switch (current_key) {
+        case SELECTION_DRAWING:
+            SPDocument *doc;
+            doc = SP_ACTIVE_DESKTOP->getDocument();
+            bbox = doc->getRoot()->desktopVisualBounds();
+            if (bbox) {
+                setArea(bbox->left(), bbox->top(), bbox->right(), bbox->bottom());
+            }
+            break;
+        case SELECTION_SELECTION:
+            if (selection->isEmpty() == false) {
+                bbox = selection->visualBounds();
+                if (bbox) {
+                    setArea(bbox->left(), bbox->top(), bbox->right(), bbox->bottom());
+                }
+            }
+            break;
+        default:
+            /* Do nothing for page or for custom */
+            break;
+    }
+    refreshExportHints();
+}
+
+void SingleExport::on_inkscape_selection_changed(Inkscape::Selection *selection)
+{
+    assert(SP_ACTIVE_DESKTOP->getSelection() == selection);
+
+    if (selection->isEmpty()) {
+        selection_buttons[SELECTION_SELECTION]->set_sensitive(false);
+        if (current_key == SELECTION_SELECTION) {
+            selection_buttons[(selection_mode)0]->set_active(true); // This causes refresh area
+            // return otherwise refreshArea will be called again
+            // even though we are at default key, selection is the one which was original key.
+            prefs->setString("/dialogs/export/exportarea/value", selection_names[SELECTION_SELECTION]);
+            return;
+        }
+    } else {
+        selection_buttons[SELECTION_SELECTION]->set_sensitive(true);
+        Glib::ustring pref_key_name = prefs->getString("/dialogs/export/exportarea/value");
+        if (selection_names[SELECTION_SELECTION] == pref_key_name && current_key != SELECTION_SELECTION) {
+            selection_buttons[SELECTION_SELECTION]->set_active();
+            return;
+        }
+    }
+    refreshArea();
+}
+
+// Setup Single Export.Called by export on realize
+void SingleExport::setup()
+{
+    prefs = Inkscape::Preferences::get();
+    si_extension_cb->setup();
+
+    // Add advance options to adv box
+    adv_box->pack_start(advance_options, true, true, 0);
+    adv_box->show_all_children();
+
+    setupUnits();
+    setupSpinButtons();
+
+    // set them before connecting to signals
+    setDefaultFilename();
+    setDefaultSelectionMode();
+
+    // Refresh values to sync them with defaults.
+    refreshArea();
+    refreshExportHints();
+
+    // Connect Signals Here
+    for (auto [key, button] : selection_buttons) {
+        button->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &SingleExport::onAreaTypeToggle), key));
+    }
+    units->signal_changed().connect(sigc::mem_fun(*this, &SingleExport::onUnitChanged));
+    filenameConn = si_filename_entry->signal_changed().connect(sigc::mem_fun(*this, &SingleExport::onFilenameModified));
+    extensionConn = si_extension_cb->signal_changed().connect(sigc::mem_fun(*this, &SingleExport::onExtensionChanged));
+    exportConn = si_export->signal_clicked().connect(sigc::mem_fun(*this, &SingleExport::onExport));
+}
+
+// Setup units combobox
+void SingleExport::setupUnits()
+{
+    units->setUnitType(Inkscape::Util::UNIT_TYPE_LINEAR);
+    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
+    if (desktop) {
+        units->setUnit(desktop->getNamedView()->display_units->abbr);
+    }
+}
+
+// Create all spin buttons
+void SingleExport::setupSpinButtons()
+{
+    setupSpinButton<sb_type>(spin_buttons[SPIN_X0], 0.0, -1000000.0, 1000000.0, 0.1, 1.0, EXPORT_COORD_PRECISION, true,
+                             &SingleExport::onAreaXChange, SPIN_X0);
+    setupSpinButton<sb_type>(spin_buttons[SPIN_X1], 0.0, -1000000.0, 1000000.0, 0.1, 1.0, EXPORT_COORD_PRECISION, true,
+                             &SingleExport::onAreaXChange, SPIN_X1);
+    setupSpinButton<sb_type>(spin_buttons[SPIN_Y0], 0.0, -1000000.0, 1000000.0, 0.1, 1.0, EXPORT_COORD_PRECISION, true,
+                             &SingleExport::onAreaYChange, SPIN_Y0);
+    setupSpinButton<sb_type>(spin_buttons[SPIN_Y1], 0.0, -1000000.0, 1000000.0, 0.1, 1.0, EXPORT_COORD_PRECISION, true,
+                             &SingleExport::onAreaYChange, SPIN_Y1);
+
+    setupSpinButton<sb_type>(spin_buttons[SPIN_HEIGHT], 0.0, 0.0, PNG_UINT_31_MAX, 0.1, 1.0, EXPORT_COORD_PRECISION,
+                             true, &SingleExport::onAreaYChange, SPIN_HEIGHT);
+    setupSpinButton<sb_type>(spin_buttons[SPIN_WIDTH], 0.0, 0.0, PNG_UINT_31_MAX, 0.1, 1.0, EXPORT_COORD_PRECISION,
+                             true, &SingleExport::onAreaXChange, SPIN_WIDTH);
+
+    setupSpinButton<sb_type>(spin_buttons[SPIN_BMHEIGHT], 1.0, 1.0, 1000000.0, 1.0, 10.0, 3, true,
+                             &SingleExport::onDpiChange, SPIN_BMHEIGHT);
+    setupSpinButton<sb_type>(spin_buttons[SPIN_BMWIDTH], 1.0, 1.0, 1000000.0, 1.0, 10.0, 3, true,
+                             &SingleExport::onDpiChange, SPIN_BMWIDTH);
+    setupSpinButton<sb_type>(spin_buttons[SPIN_DPI], prefs->getDouble("/dialogs/export/defaultxdpi/value", DPI_BASE),
+                             0.01, 100000.0, 0.1, 1.0, 2, true, &SingleExport::onDpiChange, SPIN_DPI);
+}
+
+template <typename T>
+void SingleExport::setupSpinButton(Gtk::SpinButton *sb, double val, double min, double max, double step, double page,
+                                   int digits, bool sensitive, void (SingleExport::*cb)(T), T param)
+{
+    if (sb) {
+        sb->set_digits(digits);
+        sb->set_increments(step, page);
+        sb->set_range(min, max);
+        sb->set_value(val);
+        sb->set_sensitive(sensitive);
+        sb->set_width_chars(7);
+        if (cb) {
+            auto signal = sb->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, cb), param));
+            // add signals to list to block all easily
+            spinButtonConns.push_back(signal);
+        }
+    }
+}
+
+void SingleExport::refreshArea()
+{
+    if (SP_ACTIVE_DESKTOP) {
+        SPDocument *doc;
+        Geom::OptRect bbox;
+        doc = SP_ACTIVE_DESKTOP->getDocument();
+        doc->ensureUpToDate();
+
+        switch (current_key) {
+            case SELECTION_SELECTION:
+                if ((SP_ACTIVE_DESKTOP->getSelection())->isEmpty() == false) {
+                    bbox = SP_ACTIVE_DESKTOP->getSelection()->visualBounds();
+                    break;
+                }
+            case SELECTION_DRAWING:
+                bbox = doc->getRoot()->desktopVisualBounds();
+                if (bbox) {
+                    break;
+                }
+            case SELECTION_PAGE:
+                bbox = Geom::Rect(Geom::Point(0.0, 0.0),
+                                  Geom::Point(doc->getWidth().value("px"), doc->getHeight().value("px")));
+                break;
+            case SELECTION_CUSTOM:
+                break;
+            default:
+                break;
+        }
+        if (current_key != SELECTION_CUSTOM && bbox) {
+            setArea(bbox->min()[Geom::X], bbox->min()[Geom::Y], bbox->max()[Geom::X], bbox->max()[Geom::Y]);
+        }
+    }
+}
+
+void SingleExport::refreshExportHints()
+{
+    if (SP_ACTIVE_DESKTOP && !filename_modified) {
+        SPDocument *doc = SP_ACTIVE_DOCUMENT;
+        Glib::ustring filename;
+        float xdpi = 0.0, ydpi = 0.0;
+        switch (current_key) {
+            case SELECTION_CUSTOM:
+            case SELECTION_PAGE:
+            case SELECTION_DRAWING:
+                sp_document_get_export_hints(doc, filename, &xdpi, &ydpi);
+                if (filename.empty()) {
+                    Glib::ustring filename_entry_text = si_filename_entry->get_text();
+                    Glib::ustring extension_entry_text = si_extension_cb->get_active_text();
+                    filename = get_default_filename(filename_entry_text, extension_entry_text);
+                }
+                doc_export_name = filename;
+                break;
+            case SELECTION_SELECTION:
+                if ((SP_ACTIVE_DESKTOP->getSelection())->isEmpty()) {
+                    break;
+                }
+                SP_ACTIVE_DESKTOP->getSelection()->getExportHints(filename, &xdpi, &ydpi);
+
+                /* If we still don't have a filename -- let's build
+                   one that's nice */
+                if (filename.empty()) {
+                    const gchar *id = "object";
+                    auto reprlst = SP_ACTIVE_DESKTOP->getSelection()->xmlNodes();
+                    for (auto i = reprlst.begin(); reprlst.end() != i; ++i) {
+                        Inkscape::XML::Node *repr = *i;
+                        if (repr->attribute("id")) {
+                            id = repr->attribute("id");
+                            break;
+                        }
+                    }
+                    filename = create_filepath_from_id(id, si_filename_entry->get_text());
+                    filename = filename + si_extension_cb->get_active_text();
+                }
+                break;
+            default:
+                break;
+        }
+        if (!filename.empty()) {
+            original_name = filename;
+            si_filename_entry->set_text(filename);
+            si_filename_entry->set_position(filename.length());
+        }
+
+        if (xdpi != 0.0) {
+            spin_buttons[SPIN_DPI]->set_value(xdpi);
+        }
+    }
+}
+
+void SingleExport::setArea(double x0, double y0, double x1, double y1)
+{
+    blockSpinConns(true);
+
+    auto x0_adj = spin_buttons[SPIN_X0]->get_adjustment();
+    auto x1_adj = spin_buttons[SPIN_X1]->get_adjustment();
+    auto y0_adj = spin_buttons[SPIN_Y0]->get_adjustment();
+    auto y1_adj = spin_buttons[SPIN_Y1]->get_adjustment();
+
+    Unit const *unit = units->getUnit();
+    setValuePx(x1_adj, x1, unit);
+    setValuePx(y1_adj, y1, unit);
+    setValuePx(x0_adj, x0, unit);
+    setValuePx(y0_adj, y0, unit);
+
+    areaXChange(SPIN_X1);
+    areaYChange(SPIN_Y1);
+
+    blockSpinConns(false);
+}
+
+// Signals CallBack
+
+void SingleExport::onRealize()
+{
+    ;
+}
+void SingleExport::onUnrealize()
+{
+    ;
+}
+
+void SingleExport::onUnitChanged()
+{
+    refreshArea();
+}
+
+void SingleExport::onAreaTypeToggle(selection_mode key)
+{
+    // Prevent executing function twice
+    if (!selection_buttons[key]->get_active()) {
+        return;
+    }
+    // If you have reached here means the current key is active one ( not sure if multiple transitions happen but
+    // last call will change values)
+    current_key = key;
+    prefs->setString("/dialogs/export/exportarea/value", selection_names[current_key]);
+    refreshArea();
+    refreshExportHints();
+}
+
+void SingleExport::onAreaXChange(sb_type type)
+{
+    blockSpinConns(true);
+    areaXChange(type);
+    blockSpinConns(false);
+}
+void SingleExport::onAreaYChange(sb_type type)
+{
+    blockSpinConns(true);
+    areaYChange(type);
+    blockSpinConns(false);
+}
+void SingleExport::onDpiChange(sb_type type)
+{
+    blockSpinConns(true);
+    dpiChange(type);
+    blockSpinConns(false);
+}
+
+void SingleExport::onFilenameModified()
+{
+    extensionConn.block();
+    Glib::ustring filename = si_filename_entry->get_text();
+
+    if (original_name == filename) {
+        filename_modified = false;
+    } else {
+        filename_modified = true;
+    }
+
+    si_extension_cb->setExtensionFromFilename(filename);
+
+    extensionConn.unblock();
+}
+
+void SingleExport::onExtensionChanged()
+{
+    filenameConn.block();
+    Glib::ustring filename = si_filename_entry->get_text();
+    si_extension_cb->appendExtensionToFilename(filename);
+    si_filename_entry->set_text(filename);
+    si_filename_entry->set_position(filename.length());
+    filenameConn.unblock();
+}
+
+void SingleExport::onExport()
+{
+    ;
+}
+
+// Utils Functions
+
+void SingleExport::blockSpinConns(bool status = true)
+{
+    for (auto signal : spinButtonConns) {
+        if (status) {
+            signal.block();
+        } else {
+            signal.unblock();
+        }
+    }
+}
+
+void SingleExport::areaXChange(sb_type type)
+{
+    auto x0_adj = spin_buttons[SPIN_X0]->get_adjustment();
+    auto x1_adj = spin_buttons[SPIN_X1]->get_adjustment();
+    auto width_adj = spin_buttons[SPIN_WIDTH]->get_adjustment();
+
+    float x0, x1, dpi, width, bmwidth;
+
+    // Get all values in px
+    Unit const *unit = units->getUnit();
+    x0 = getValuePx(x0_adj->get_value(), unit);
+    x1 = getValuePx(x1_adj->get_value(), unit);
+    width = getValuePx(width_adj->get_value(), unit);
+    bmwidth = spin_buttons[SPIN_BMWIDTH]->get_value();
+    dpi = spin_buttons[SPIN_DPI]->get_value();
+
+    switch (type) {
+        case SPIN_X0:
+            bmwidth = (x1 - x0) * dpi / DPI_BASE;
+            if (bmwidth < SP_EXPORT_MIN_SIZE) {
+                x0 = x1 - (SP_EXPORT_MIN_SIZE * DPI_BASE) / dpi;
+            }
+            break;
+        case SPIN_X1:
+            bmwidth = (x1 - x0) * dpi / DPI_BASE;
+            if (bmwidth < SP_EXPORT_MIN_SIZE) {
+                x1 = x0 + (SP_EXPORT_MIN_SIZE * DPI_BASE) / dpi;
+            }
+            break;
+        case SPIN_WIDTH:
+            bmwidth = width * dpi / DPI_BASE;
+            if (bmwidth < SP_EXPORT_MIN_SIZE) {
+                width = (SP_EXPORT_MIN_SIZE * DPI_BASE) / dpi;
+            }
+            x1 = x0 + width;
+            break;
+        default:
+            break;
+    }
+
+    width = x1 - x0;
+    bmwidth = floor(width * dpi / DPI_BASE + 0.5);
+
+    setValuePx(x0_adj, x0, unit);
+    setValuePx(x1_adj, x1, unit);
+    setValuePx(width_adj, width, unit);
+    spin_buttons[SPIN_BMWIDTH]->set_value(bmwidth);
+}
+
+void SingleExport::areaYChange(sb_type type)
+{
+    auto y0_adj = spin_buttons[SPIN_Y0]->get_adjustment();
+    auto y1_adj = spin_buttons[SPIN_Y1]->get_adjustment();
+    auto height_adj = spin_buttons[SPIN_HEIGHT]->get_adjustment();
+
+    float y0, y1, dpi, height, bmheight;
+
+    // Get all values in px
+    Unit const *unit = units->getUnit();
+    y0 = getValuePx(y0_adj->get_value(), unit);
+    y1 = getValuePx(y1_adj->get_value(), unit);
+    height = getValuePx(height_adj->get_value(), unit);
+    bmheight = spin_buttons[SPIN_BMHEIGHT]->get_value();
+    dpi = spin_buttons[SPIN_DPI]->get_value();
+
+    switch (type) {
+        case SPIN_Y0:
+            bmheight = (y1 - y0) * dpi / DPI_BASE;
+            if (bmheight < SP_EXPORT_MIN_SIZE) {
+                y0 = y1 - (SP_EXPORT_MIN_SIZE * DPI_BASE) / dpi;
+            }
+            break;
+        case SPIN_Y1:
+            bmheight = (y1 - y0) * dpi / DPI_BASE;
+            if (bmheight < SP_EXPORT_MIN_SIZE) {
+                y1 = y0 + (SP_EXPORT_MIN_SIZE * DPI_BASE) / dpi;
+            }
+            break;
+        case SPIN_HEIGHT:
+            bmheight = height * dpi / DPI_BASE;
+            if (bmheight < SP_EXPORT_MIN_SIZE) {
+                height = (SP_EXPORT_MIN_SIZE * DPI_BASE) / dpi;
+            }
+            y1 = y0 + height;
+            break;
+        default:
+            break;
+    }
+
+    height = y1 - y0;
+    bmheight = floor(height * dpi / DPI_BASE + 0.5);
+
+    setValuePx(y0_adj, y0, unit);
+    setValuePx(y1_adj, y1, unit);
+    setValuePx(height_adj, height, unit);
+    spin_buttons[SPIN_BMHEIGHT]->set_value(bmheight);
+}
+
+void SingleExport::dpiChange(sb_type type)
+{
+    float dpi, height, width, bmheight, bmwidth;
+
+    // Get all values in px
+    Unit const *unit = units->getUnit();
+    height = getValuePx(spin_buttons[SPIN_HEIGHT]->get_value(), unit);
+    width = getValuePx(spin_buttons[SPIN_WIDTH]->get_value(), unit);
+    bmheight = spin_buttons[SPIN_BMHEIGHT]->get_value();
+    bmwidth = spin_buttons[SPIN_BMWIDTH]->get_value();
+    dpi = spin_buttons[SPIN_DPI]->get_value();
+
+    switch (type) {
+        case SPIN_BMHEIGHT:
+            if (bmheight < SP_EXPORT_MIN_SIZE) {
+                bmheight = SP_EXPORT_MIN_SIZE;
+            }
+            dpi = bmheight * DPI_BASE / height;
+            break;
+        case SPIN_BMWIDTH:
+            if (bmwidth < SP_EXPORT_MIN_SIZE) {
+                bmwidth = SP_EXPORT_MIN_SIZE;
+            }
+            dpi = bmwidth * DPI_BASE / width;
+            break;
+        case SPIN_DPI:
+            prefs->setDouble("/dialogs/export/defaultdpi/value", dpi);
+            break;
+        default:
+            break;
+    }
+
+    bmwidth = floor(width * dpi / DPI_BASE + 0.5);
+    bmheight = floor(height * dpi / DPI_BASE + 0.5);
+
+    spin_buttons[SPIN_BMHEIGHT]->set_value(bmheight);
+    spin_buttons[SPIN_BMWIDTH]->set_value(bmwidth);
+    spin_buttons[SPIN_DPI]->set_value(dpi);
+}
+
+// We first check any export hints related to document. If there is none we create a default name using document name.
+// doc_export_name is set here and will only be changed when exporting.
+void SingleExport::setDefaultFilename()
+{
+    Glib::ustring filename;
+    float xdpi = 0.0, ydpi = 0.0;
+    SPDocument *doc = SP_ACTIVE_DOCUMENT;
+    sp_document_get_export_hints(doc, filename, &xdpi, &ydpi);
+    if (filename.empty()) {
+        Glib::ustring filename_entry_text = si_filename_entry->get_text();
+        Glib::ustring extention_entry_text = si_extension_cb->get_active_text();
+        filename = get_default_filename(filename_entry_text, extention_entry_text);
+    }
+    doc_export_name = filename;
+    original_name = filename;
+    si_filename_entry->set_text(filename);
+    si_filename_entry->set_position(filename.length());
+
+    si_extension_cb->setExtensionFromFilename(filename);
+
+    // We only need to check xdpi
+    if (xdpi != 0.0) {
+        spin_buttons[SPIN_DPI]->set_value(xdpi);
+    }
+}
+
+void SingleExport::setDefaultSelectionMode()
+{
+    if (SP_ACTIVE_DESKTOP) {
+        current_key = (selection_mode)0; // default key
+        bool found = false;
+        Glib::ustring pref_key_name = prefs->getString("/dialogs/export/exportarea/value");
+        for (auto [key, name] : selection_names) {
+            if (pref_key_name == name) {
+                current_key = key;
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            pref_key_name = selection_names[current_key];
+        }
+
+        if (current_key == SELECTION_SELECTION && (SP_ACTIVE_DESKTOP->getSelection())->isEmpty()) {
+            current_key = (selection_mode)0;
+        }
+        if ((SP_ACTIVE_DESKTOP->getSelection())->isEmpty()) {
+            selection_buttons[SELECTION_SELECTION]->set_sensitive(false);
+        }
+        selection_buttons[current_key]->set_active(true);
+        prefs->setString("/dialogs/export/exportarea/value", pref_key_name);
+    }
 }
 
 } // namespace Dialog
