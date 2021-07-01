@@ -30,6 +30,8 @@
 #include "sp-marker.h"
 #include "sp-defs.h"
 
+#include "svg/stringstream.h"
+
 class SPMarkerView {
 
 public:
@@ -278,10 +280,18 @@ Inkscape::XML::Node* SPMarker::write(Inkscape::XML::Document *xml_doc, Inkscape:
 	} else {
             repr->removeAttribute("orient");
 	}
-        
+    
+    if (this->viewBox_set) {
+        Inkscape::SVGOStringStream os;
+        os << this->viewBox.left() << " " << this->viewBox.top() << " "
+           << this->viewBox.width() << " " << this->viewBox.height();
+
+        repr->setAttribute("viewBox", os.str());
+    }
 	/* fixme: */
 	//XML Tree being used directly here while it shouldn't be....
-	repr->setAttribute("viewBox", this->getRepr()->attribute("viewBox"));
+	//repr->setAttribute("viewBox", this->getRepr()->attribute("viewBox"));
+
 	//XML Tree being used directly here while it shouldn't be....
 	repr->setAttribute("preserveAspectRatio", this->getRepr()->attribute("preserveAspectRatio"));
 
@@ -304,8 +314,19 @@ void SPMarker::hide(unsigned int key) {
 	SPGroup::hide(key);
 }
 
-Geom::OptRect SPMarker::bbox(Geom::Affine const &/*transform*/, SPItem::BBoxType /*type*/) const {
-	return Geom::OptRect();
+Geom::OptRect SPMarker::bbox(Geom::Affine const &transform, SPItem::BBoxType bboxtype) const {
+    Geom::OptRect bbox;
+
+    std::vector<SPObject*> l = const_cast<SPMarker*>(this)->childList(false, SPObject::ActionBBox);
+    for(auto o : l){
+        SPItem *item = dynamic_cast<SPItem *>(o);
+        if (item && !item->isHidden()) {
+            Geom::Affine const ct(item->transform * transform);
+            bbox |= item->bounds(bboxtype, ct);
+        }
+    }
+
+    return bbox;
 }
 
 void SPMarker::print(SPPrintContext* /*ctx*/) {

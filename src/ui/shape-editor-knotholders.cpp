@@ -891,16 +891,116 @@ Box3DKnotHolder::Box3DKnotHolder(SPDesktop *desktop, SPItem *item, SPKnotHolderR
 
 /* SPMarker */
 
-/* handle for marker width/height adjustment */
-class MarkerKnotHolderEntityWH : public KnotHolderEntity {
+/* handle for marker uniform scale adjustment */
+class MarkerKnotHolderEntityScale : public KnotHolderEntity {
 public:
     Geom::Point knot_get() const override;
     void knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) override {};
     void knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state) override;
-    void knot_click(unsigned int state) override; // ??
 protected:
     void set_internal(Geom::Point const &p, Geom::Point const &origin, unsigned int state); // ??
 };
+
+Geom::Point 
+MarkerKnotHolderEntityScale::knot_get() const
+{
+    SPMarker *sp_marker = dynamic_cast<SPMarker *>(item);
+    g_assert(sp_marker != nullptr);
+
+    return Geom::Point(sp_marker->markerWidth.computed, sp_marker->markerHeight.computed);
+}
+
+/* The math here needs to be updated - just trying to get something up and working right now */
+void
+MarkerKnotHolderEntityScale::set_internal(Geom::Point const &p, Geom::Point const &origin, unsigned int state)
+{
+    SPMarker *sp_marker = dynamic_cast<SPMarker *>(item);
+    g_assert(sp_marker != nullptr);
+
+    Geom::Point s = p;
+
+    if (state & GDK_CONTROL_MASK) {
+        // original width/height when drag started
+        gdouble const w_orig = (origin[Geom::X] - sp_marker->markerWidth.computed);
+        gdouble const h_orig = (origin[Geom::Y] - sp_marker->markerHeight.computed);
+
+        //original ratio
+        gdouble ratio = (w_orig / h_orig);
+
+        // mouse displacement since drag started
+        gdouble minx = p[Geom::X] - origin[Geom::X];
+        gdouble miny = p[Geom::Y] - origin[Geom::Y];
+
+        Geom::Point p_handle(sp_marker->markerWidth.computed, sp_marker->markerHeight.computed);
+
+        if (fabs(minx) > fabs(miny)) {
+            // snap to horizontal or diagonal
+            if (minx != 0 && fabs(miny/minx) > 0.5 * 1/ratio && (SGN(minx) == SGN(miny))) {
+                // closer to the diagonal and in same-sign quarters, change both using ratio
+                s = snap_knot_position_constrained(p, Inkscape::Snapper::SnapConstraint(p_handle, Geom::Point(-ratio, -1)), state);
+                minx = s[Geom::X] - origin[Geom::X];
+                // Dead assignment: Value stored to 'miny' is never read
+                //miny = s[Geom::Y] - origin[Geom::Y];
+                sp_marker->markerHeight = MAX(h_orig + minx / ratio, 0);
+            } else {
+                // closer to the horizontal, change only width, height is h_orig
+                s = snap_knot_position_constrained(p, Inkscape::Snapper::SnapConstraint(p_handle, Geom::Point(-1, 0)), state);
+                minx = s[Geom::X] - origin[Geom::X];
+                // Dead assignment: Value stored to 'miny' is never read
+                //miny = s[Geom::Y] - origin[Geom::Y];
+                sp_marker->markerHeight = MAX(h_orig, 0);
+            }
+            sp_marker->markerWidth = MAX(w_orig + minx, 0);
+
+        } else {
+            // snap to vertical or diagonal
+            if (miny != 0 && fabs(minx/miny) > 0.5 * ratio && (SGN(minx) == SGN(miny))) {
+                // closer to the diagonal and in same-sign quarters, change both using ratio
+                s = snap_knot_position_constrained(p, Inkscape::Snapper::SnapConstraint(p_handle, Geom::Point(-ratio, -1)), state);
+                // Dead assignment: Value stored to 'minx' is never read
+                //minx = s[Geom::X] - origin[Geom::X];
+                miny = s[Geom::Y] - origin[Geom::Y];
+                sp_marker->markerWidth = MAX(w_orig + miny * ratio, 0);
+            } else {
+                // closer to the vertical, change only height, width is w_orig
+                s = snap_knot_position_constrained(p, Inkscape::Snapper::SnapConstraint(p_handle, Geom::Point(0, -1)), state);
+                // Dead assignment: Value stored to 'minx' is never read
+                //minx = s[Geom::X] - origin[Geom::X];
+                miny = s[Geom::Y] - origin[Geom::Y];
+                sp_marker->markerWidth = MAX(w_orig, 0);
+            }
+            sp_marker->markerHeight = MAX(h_orig + miny, 0);
+
+        }
+
+    } else {
+        // move freely
+        s = snap_knot_position(p, state);
+        sp_marker->markerWidth = MAX(s[Geom::X], 0);
+        sp_marker->markerHeight = MAX(s[Geom::Y], 0);
+    }
+    
+    // Geom::Point d = s - Geom::Point(sp_marker->refX.computed, sp_marker->refY.computed);
+    // sp_marker->orient = atan2(d);
+    // sp_marker->orient_mode = MARKER_ORIENT_ANGLE;
+    // sp_marker->orient_set = TRUE;
+
+    sp_marker->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+}
+
+void MarkerKnotHolderEntityScale::knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state)
+{
+    SPMarker *sp_marker = dynamic_cast<SPMarker *>(item);
+    g_assert(sp_marker != nullptr);
+
+    sp_marker->viewBox = Geom::Rect::from_xywh(0, 0, 100, 100);
+    sp_marker->viewBox_set = true;
+    sp_marker->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_VIEWPORT_MODIFIED_FLAG);
+    //sp_marker->set(SPAttr::VIEWBOX, 
+    //    Geom::Rect::from_xywh(0, 0, sp_marker->markerWidth.computed, sp_marker->markerWidth.computed));
+    set_internal(p, origin, state);
+    update_knot();
+}
 
 /* handle for refX/refY position */
 class MarkerKnotHolderEntityCenter : public KnotHolderEntity {
@@ -936,16 +1036,16 @@ MarkerKnotHolderEntityCenter::knot_set(Geom::Point const &p, Geom::Point const &
 MarkerKnotHolder::MarkerKnotHolder(SPDesktop *desktop, SPItem *item, SPKnotHolderReleasedFunc relhandler) :
     KnotHolder(desktop, item, relhandler)
 {
-    //MarkerKnotHolderEntityWH *entity_wh = new MarkerKnotHolderEntityWH();
+    MarkerKnotHolderEntityScale *entity_scale = new MarkerKnotHolderEntityScale();
     MarkerKnotHolderEntityCenter *entity_center = new MarkerKnotHolderEntityCenter();
 
-    //entity_wh->create(desktop, item, this, Inkscape::CANVAS_ITEM_CTRL_TYPE_SIZER, "Marker:wh",
-    //                  _("Adjust the <b>size</b> of the marker"));
+    entity_scale->create(desktop, item, this, Inkscape::CANVAS_ITEM_CTRL_TYPE_SIZER, "Marker:scale",
+                      _("Adjust the <b>size</b> of the marker"));
 
     entity_center->create(desktop, item, this, Inkscape::CANVAS_ITEM_CTRL_TYPE_POINT, "Marker:center",
                           _("Drag to adjust the refX/refY position of the marker"));
 
-    //entity.push_back(entity_wh);
+    entity.push_back(entity_scale);
     entity.push_back(entity_center);
 
     add_pattern_knotholder();

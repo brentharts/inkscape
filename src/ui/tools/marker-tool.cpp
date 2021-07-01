@@ -1,258 +1,236 @@
-/***************
--   SPDX-License-Identifier: GPL-2.0-or-later
--   Released under GNU GPL v2+, read the file 'COPYING' for more information.
+#include <iomanip>
 
--   Marker Editing Context
-****************/
-
-#include <cstring>
-#include <string>
-
+#include <glibmm/ustring.h>
+#include <glib/gi18n.h>
 #include <gdk/gdkkeysyms.h>
-#include <glibmm/i18n.h>
-#include "context-fns.h"
-#include "desktop-style.h"
+
 #include "desktop.h"
-#include "document-undo.h"
 #include "document.h"
-#include "include/macros.h"
 #include "message-context.h"
 #include "selection-chemistry.h"
 #include "selection.h"
-#include "verbs.h"
-#include "object/sp-namedview.h"
-#include "ui/shape-editor.h"
-#include "xml/node-event-vector.h"
+#include "snap.h"
 
+#include "display/curve.h"
+#include "display/control/canvas-item-bpath.h"
 #include "display/control/canvas-item-group.h"
+
+#include "live_effects/effect.h"
+#include "live_effects/lpeobject.h"
+
+#include "include/macros.h"
+
+#include "object/sp-clippath.h"
+#include "object/sp-item-group.h"
+#include "object/sp-mask.h"
+#include "object/sp-namedview.h"
+#include "object/sp-path.h"
+#include "object/sp-shape.h"
+#include "object/sp-text.h"
+
+#include "ui/shape-editor.h"
 #include "ui/tool/control-point-selection.h"
+#include "ui/tool/curve-drag-point.h"
 #include "ui/tool/event-utils.h"
 #include "ui/tool/multi-path-manipulator.h"
 #include "ui/tool/path-manipulator.h"
-
-#include "ui/tool/shape-record.h"
-#include "object/sp-shape.h"
-#include "object/object-set.h"
-#include "object/sp-marker.h"
+#include "ui/tool/selector.h"
 #include "ui/tools/marker-tool.h"
 
-#include "ui/tools/node-tool.h"
+#include "object/sp-marker.h"
+#include "style.h"
 
-
-using Inkscape::DocumentUndo;
 namespace Inkscape {
 namespace UI {
 namespace Tools {
 
-const std::string MarkerTool::prefsPath = "/tools/marker";
-
 MarkerTool::MarkerTool()
-    : ToolBase("select.svg")
+    : NodeTool()
 {
 }
 
-Inkscape::CanvasItemGroup *createControlGroup(SPDesktop *desktop)
+// Clean selection on tool change
+void MarkerTool::finish() 
 {
-    auto group = new Inkscape::CanvasItemGroup(desktop->getCanvasControls());
-    group->set_name("CanvasItemGroup:NodeTool");
-    return group;
-}
-
-const std::string& MarkerTool::getPrefsPath() {
-	return MarkerTool::prefsPath;
-}
-
-void MarkerTool::finish() {
-    ungrabCanvasEvents();
-    this->message_context->clear();
-    this->sel_changed_connection.disconnect();
-    delete this->_multipath;
+    this->_selected_nodes->clear();
+    this->desktop->selection->clear();
     ToolBase::finish();
 }
 
-MarkerTool::~MarkerTool() {
-    this->enableGrDrag(false);
-    this->sel_changed_connection.disconnect();
-}
-
-/* 
-Recursively collect all the child objects from the top level marker object 
-to be editable by the shape editor
-
-~ Todo:
- - add support for objectBoundingBox
- - fix the edit_transform
- - follow up on clipping, editing masks thing
-*/
-static void gather_marker_items(SPObject *obj, Inkscape::UI::ShapeRole role, std::set<Inkscape::UI::ShapeRecord> &shapes) {
-    
+/** Recursively get all shapes within a marker when marker mode is entered **/
+static bool gather_items(NodeTool *nt, SPItem *base, SPObject *obj, Inkscape::UI::ShapeRole role,
+    std::set<Inkscape::UI::ShapeRecord> &s, Inkscape::Selection *sel, Geom::Affine &tr)
+{
     using namespace Inkscape::UI;
-    if (!obj) return;
+
+    if (!obj) {
+        return false;
+    }
 
     if (SP_IS_GROUP(obj) || SP_IS_OBJECTGROUP(obj) || SP_IS_MARKER(obj)) {
         for (auto& c: obj->children) {
-            gather_marker_items(&c, role, shapes);
+            gather_items(nt, base, &c, role, s, sel, tr);
         }
     } else if (SP_IS_ITEM(obj)) {
         SPObject *object = obj;
         SPItem *item = dynamic_cast<SPItem *>(obj);
+        ShapeRecord r;
+        r.object = object;
+        // TODO add support for objectBoundingBox
+        r.edit_transform = base ? base->i2doc_affine() : Geom::identity();
+        //r.edit_transform = tr;
+        r.role = role;
 
-        ShapeRecord sr;
-        sr.object = object;
-        sr.edit_transform = Geom::identity();
-        sr.role = role;
-        shapes.insert(sr);
+        if (s.insert(r).second) {
+            sel->add(obj);
+            // this item was encountered the first time
+            if (nt->edit_clipping_paths) {
+                gather_items(nt, item, item->getClipObject(), SHAPE_ROLE_CLIPPING_PATH, s, sel, tr);
+            }
+
+            if (nt->edit_masks) {
+                gather_items(nt, item, item->getMaskObject(), SHAPE_ROLE_MASK, s, sel, tr);
+            }
+        } else return false;
     }
+
+    return true;
 }
 
-/* 
-Get the selected objects and passes their marker items, if they have any, into
-the shape editor for editing.
+Geom::Affine MarkerTool::get_marker_transform(Geom::Curve const & c, SPItem *item)
+{
+    Geom::Point p = c.pointAt(0);
+    Geom::Point t = Geom::Point(Inkscape::Util::Quantity::convert(p[Geom::X], "mm", "px"), 
+                    Inkscape::Util::Quantity::convert(p[Geom::Y], "mm", "px")); // ??? Come back
+    Geom::Affine ret = Geom::Translate(t);
 
-~ Todo:
- - allow users to only edit markers on one object at a time?
-*/
-void MarkerTool::selection_changed(Inkscape::Selection* selection) {
+    if ( !c.isDegenerate() ) {
+        Geom::Point tang = c.unitTangentAt(0);
+        double const angle = Geom::atan2(tang);
+        ret = Geom::Rotate(angle) * ret;
+    }
     
+    return ret;
+}
+
+
+void MarkerTool::selection_changed(Inkscape::Selection *sel) {
     using namespace Inkscape::UI;
+
     std::set<ShapeRecord> shapes;
     auto selected_items = this->desktop->getSelection()->items();
 
     for(auto i = selected_items.begin(); i != selected_items.end(); ++i){
         SPItem *item = *i;
-        
-        if (item) {
+        if(item) {
             SPShape* shape = dynamic_cast<SPShape*>(item);
 
             if(shape && shape->hasMarkers()) {
                 for(int i = 0; i < SP_MARKER_LOC_QTY; i++) {
                     SPObject *marker_obj = shape->_marker[i];
+
                     if(marker_obj) {
                         Inkscape::XML::Node *marker_repr = marker_obj->getRepr();
                         SPItem* marker_item = dynamic_cast<SPItem *>(this->desktop->getDocument()->getObjectByRepr(marker_repr));
-                        gather_marker_items(marker_item, SHAPE_ROLE_NORMAL, shapes);
-                                // ShapeRecord sr;
-                                // sr.object = marker_item;
-                                // sr.edit_transform = Geom::identity();
-                                // sr.role = SHAPE_ROLE_NORMAL;
-                                // shapes.insert(sr);
+
+                        if(enter_marker_mode) {
+                            /* Scale marker transform with parent stroke width */
+                            SPMarker *sp_marker = dynamic_cast<SPMarker *>(marker_obj);
+
+                            SPStyle *style = shape->style;
+                            Geom::Scale scale(Inkscape::Util::Quantity::convert(style->stroke_width.computed, "mm", "px")); // TODO!! come back and check
+
+                            Geom::PathVector const &pathv = shape->curve()->get_pathvector();
+                            Geom::Affine const marker_transform(get_marker_transform(pathv.begin()->front(), item));
+                            Geom::Affine tr(marker_transform);
+                            tr = scale * tr;
+                            tr = sp_marker->c2p * tr;
+
+                            if (gather_items(this, nullptr, marker_item, SHAPE_ROLE_NORMAL, shapes, sel, tr)) {
+                                // remove
+                            }
+                        } else {
+                            ShapeRecord sr;
+                            sr.object = marker_item;
+                            sr.edit_transform = Geom::identity();
+                            sr.role = SHAPE_ROLE_NORMAL;
+                            if (shapes.insert(sr).second) {;
+                                sel->add(marker_item);
+                                //sel->remove(item);
+                            }
+                        }
+
+                        /* Trying to get transform in right place :'(  (works kinda unless parents/children have transforms too) */
+                        
+                        //tr =  (Geom::Affine)sp_marker->c2p * tr;
+
+                        // tr.setTranslation(Geom::Point(
+                        //     Inkscape::Util::Quantity::convert(x[Geom::X], "mm", "px"),
+                        //     Inkscape::Util::Quantity::convert(x[Geom::X], "mm", "px")
+                        // ));
+                        //std::cout << tr << std::endl;
+                        //tr = scale * tr;
+                        //std::cout << tr << std::endl;
+                        //tr = tr->i2doc_affine();
+                        
+                        //tr= tr * Geom::Scale(Inkscape::Util::Quantity::convert(x[Geom::X], "mm", "px"));
+                    
+                        //tr.setTranslation(Geom::Point(t[Geom::X], t[Geom::Y]));
+
+                        //std::cout << tr << std::endl;
+
+                        /*************************/
+
+                        //gather_marker_items(marker_item, SHAPE_ROLE_NORMAL, shapes, tr, selection);
                     }
                 }
             }
         }
     }
-
+    
     for (auto i = this->_shape_editors.begin(); i != this->_shape_editors.end();) {
-        ShapeRecord sr;
-        sr.object = dynamic_cast<SPObject *>(i->first);
+        ShapeRecord s;
+        s.object = dynamic_cast<SPObject *>(i->first);
 
-        if (shapes.find(sr) == shapes.end()) {
+        if (shapes.find(s) == shapes.end()) {
             this->_shape_editors.erase(i++);
         } else {
             ++i;
         }
     }
 
-    for (const auto & shape : shapes) {
-        if (this->_shape_editors.find(SP_ITEM(shape.object)) == this->_shape_editors.end()) {
-            auto si = std::make_unique<ShapeEditor>(this->desktop, shape.edit_transform);
-            SPItem *item = SP_ITEM(shape.object);
+    for (const auto & r : shapes) {
+        if (this->_shape_editors.find(SP_ITEM(r.object)) == this->_shape_editors.end()) {
+            auto si = std::make_unique<ShapeEditor>(this->desktop, r.edit_transform);
+            SPItem *item = SP_ITEM(r.object);
             si->set_item(item);
             this->_shape_editors.insert({item, std::move(si)});
         }
     }
 
+    std::vector<SPItem *> vec(sel->items().begin(), sel->items().end());
+    _previous_selection = _current_selection;
+    _current_selection = vec;
     this->_multipath->setItems(shapes);
+    this->update_tip(nullptr);
+    sp_update_helperpath(desktop);
 }
 
-void MarkerTool::setup() {
-
-    ToolBase::setup();
-
-    this->_path_data = new Inkscape::UI::PathSharedData();
-
-    Inkscape::UI::PathSharedData &data = *this->_path_data;
-    data.node_data.desktop = this->desktop;
-
-    // Prepare canvas groups for controls. This guarantees correct z-order, so that
-    // for example a dragpoint won't obscure a node
-    data.outline_group          = createControlGroup(this->desktop);
-    data.node_data.handle_line_group = new Inkscape::CanvasItemGroup(desktop->getCanvasControls());
-    data.dragpoint_group        = createControlGroup(this->desktop);
-    _transform_handle_group     = createControlGroup(this->desktop);
-    data.node_data.node_group   = createControlGroup(this->desktop);
-    data.node_data.handle_group = createControlGroup(this->desktop);
-
-    data.node_data.handle_line_group->set_name("CanvasItemGroup:NodeTool:handle_line_group");
-
+/* Toggles between two marker modes */
+bool MarkerTool::root_handler_extended(GdkEvent* event) {
     Inkscape::Selection *selection = this->desktop->getSelection();
 
-    this->sel_changed_connection.disconnect();
-    this->sel_changed_connection = selection->connectChanged(
-    	sigc::mem_fun(this, &MarkerTool::selection_changed)
-    );
-
-    if (this->_transform_handle_group) {
-        this->_selected_nodes = new Inkscape::UI::ControlPointSelection(this->desktop, this->_transform_handle_group);
+    if(enter_marker_mode) {
+        enter_marker_mode = false;
+        this->selection_changed(selection);
+    } else {
+        enter_marker_mode = true;
+        this->selection_changed(selection);
     }
-    data.node_data.selection = this->_selected_nodes;
-
-    this->_multipath = new Inkscape::UI::MultiPathManipulator(data, this->sel_changed_connection);
-
-    this->_multipath->signal_coords_changed.connect(
-        sigc::bind(
-            sigc::mem_fun(*this->desktop, &SPDesktop::emitToolSubselectionChanged),
-            (void*)nullptr
-        )
-    );
-
-    this->selection_changed(selection);
-    this->desktop->emitToolSubselectionChanged(nullptr); // sets the coord entry fields to inactive
-    
-    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    if (prefs->getBool("/tools/marker/selcue")) this->enableSelectionCue();
-    if (prefs->getBool("/tools/marker/gradientdrag")) this->enableGrDrag();
+    return TRUE;
 }
 
-/* 
-Handles selection/deselection of new items in marker edit mode
-*/
-bool MarkerTool::root_handler(GdkEvent* event) {
-    Inkscape::Selection *selection = this->desktop->getSelection();
-
-    if (this->_multipath->event(this, event)) {
-        return true;
-    }
-
-    gint ret = false;
-    
-    switch (event->type) {
-        case GDK_BUTTON_PRESS:
-            if (event->button.button == 1) {
-                Geom::Point const button_w(event->button.x, event->button.y);  
-                this->item_to_select = sp_event_context_find_item (this->desktop, button_w, event->button.state & GDK_MOD1_MASK, TRUE);
-                grabCanvasEvents();
-                ret = true;
-            }
-            break;
-        case GDK_BUTTON_RELEASE:
-            if (event->button.button == 1) {
-                if (this->item_to_select) {
-                    selection->toggle(this->item_to_select);
-                } else {
-                    selection->clear();
-                }
-                this->item_to_select = nullptr;
-                ungrabCanvasEvents();
-                ret = true;
-            }
-            break;
-        default:
-            break;
-    }
-
-    if (!ret) ret = ToolBase::root_handler(event);
-    return ret;
+}
+}
 }
 
-}}}
