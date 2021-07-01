@@ -393,8 +393,9 @@ bool _export_raster(Geom::Rect const &area, unsigned long int const &width, unsi
                                              nv->pagecolor, callback, (void *)prog_dialog, true, selected,
                                              use_interlacing, color_type, bit_depth, zlib, antialiasing);
 
+    bool failed = result == EXPORT_ERROR || prog_dialog->get_stopped();
     delete prog_dialog;
-    if (result == EXPORT_ERROR) {
+    if (failed){
         gchar *safeFile = Inkscape::IO::sanitizeString(path.c_str());
         gchar *error = g_strdup_printf(_("Could not export to filename %s.\n"), safeFile);
 

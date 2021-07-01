@@ -117,6 +117,7 @@ private:
     Gtk::Widget *_export_panel = nullptr;
     int _current = 0;
     int _total = 0;
+    bool _stopped = false;
 
 public:
     ExportProgressDialog(const Glib::ustring &title, bool modal = false)
@@ -134,6 +135,10 @@ public:
 
     inline void set_total(const int total) { _total = total; }
     inline int get_total() const { return _total; }
+
+    inline bool get_stopped() const { return _stopped; }
+    inline void set_stopped() { _stopped = true; }
+
 };
 
 float getValuePx(float value, Unit const *unit);

@@ -729,6 +729,7 @@ ExportProgressDialog *SingleExport::create_progress_dialog(Glib::ustring progres
 bool SingleExport::onProgressDelete(GdkEventAny * /*event*/)
 {
     interrupted = true;
+    prog_dlg->set_stopped();
     return TRUE;
 } // end of sp_export_progress_delete()
 
@@ -736,6 +737,7 @@ bool SingleExport::onProgressDelete(GdkEventAny * /*event*/)
 void SingleExport::onProgressCancel()
 {
     interrupted = true;
+    prog_dlg->set_stopped();
 } // end of sp_export_progress_cancel()
 
 /// Called for every progress iteration
