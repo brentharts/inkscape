@@ -8497,7 +8497,7 @@ msgstr "Tornar as partes mais claras do objeto progressivamente transparentes"
 
 #: ../src/extension/internal/filter/transparency.h:305
 msgid "Set opacity and strength of opacity boundaries"
-msgstr "Defina a transparência e a intensidade dos limites de transparência"
+msgstr "Definir a transparência e a intensidade dos limites de transparência"
 
 #: ../src/extension/internal/filter/transparency.h:359
 msgid "Silhouette"
@@ -12390,7 +12390,7 @@ msgstr "Cor e transparência"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:70
 msgid "Set color and opacity of the dimensions"
-msgstr "Defina a cor e a transparência das dimensões"
+msgstr "Definir a cor e a transparência das dimensões"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:71
 msgid "Font"
@@ -12828,7 +12828,7 @@ msgid ""
 "Set mode of transformation. Either freely defined by mirror line or "
 "constrained to certain symmetry points."
 msgstr ""
-"Defina o modo de transformação. Definido livremente por linha de espelho ou "
+"Definir o modo de transformação. Definido livremente por linha de espelho ou "
 "restrito a certos pontos de simetria."
 
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:61
@@ -13163,7 +13163,7 @@ msgstr "Cor e transparência de fundo"
 
 #: ../src/live_effects/lpe-powermask.cpp:41
 msgid "Set color and opacity of the background"
-msgstr "Defina a cor e a transparência do fundo"
+msgstr "Definir a cor e a transparência do fundo"
 
 #: ../src/live_effects/lpe-powerstroke.cpp:131
 msgid "CubicBezierSmooth"
@@ -13416,7 +13416,7 @@ msgid ""
 "Set smoothness/sharpness of path when reaching a 'bottom' half-turn. "
 "0=sharp, 1=default"
 msgstr ""
-"Defina a suavidade/nitidez do caminho ao atingir uma meia volta \"inferior"
+"Definir a suavidade/nitidez do caminho ao atingir uma meia volta \"inferior"
 "\". 0=agudo, 1=padrão"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:223
@@ -13428,7 +13428,7 @@ msgid ""
 "Set smoothness/sharpness of path when leaving a 'bottom' half-turn. 0=sharp, "
 "1=default"
 msgstr ""
-"Defina a suavidade/nitidez do caminho ao deixar uma meia volta \"inferior\". "
+"Definir a suavidade/nitidez do caminho ao deixar uma meia volta \"inferior\". "
 "0=agudo,1=padrão"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:224
@@ -13440,7 +13440,7 @@ msgid ""
 "Set smoothness/sharpness of path when reaching a 'top' half-turn. 0=sharp, "
 "1=default"
 msgstr ""
-"Defina a suavidade/nitidez do caminho ao atingir uma meia volta \"superior"
+"Definir a suavidade/nitidez do caminho ao atingir uma meia volta \"superior"
 "\". 0=agudo, 1=padrão"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:225
@@ -13452,7 +13452,7 @@ msgid ""
 "Set smoothness/sharpness of path when leaving a 'top' half-turn. 0=sharp, "
 "1=default"
 msgstr ""
-"Defina a suavidade/nitidez do caminho ao deixar uma meia volta \"superior\". "
+"Definir a suavidade/nitidez do caminho ao deixar uma meia volta \"superior\". "
 "0=agudo, 1= padrão"
 
 #: ../src/live_effects/lpe-rough-hatches.cpp:226
@@ -21109,11 +21109,11 @@ msgstr "Bretão (br)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1451
 msgid "Catalan (ca)"
-msgstr "Catalã (ca)"
+msgstr "Catalão (ca)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1451
 msgid "Valencian Catalan (ca@valencia)"
-msgstr "Catalão valenciano (ca@valencia)"
+msgstr "Catalão Valenciano (ca@valencia)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1451
 msgid "Chinese/China (zh_CN)"
@@ -21421,7 +21421,7 @@ msgstr "Idioma (requer inicialização):"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1524
 msgid "Set the language for menus and number formats"
-msgstr "Defina o idioma para menus e formatos de número"
+msgstr "Definir o idioma para menus e formatos de número"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1528
 msgid "Work-around color sliders not drawing"
@@ -21448,7 +21448,7 @@ msgid ""
 "Set the maximum length of the Open Recent list in the File menu, or clear "
 "the list"
 msgstr ""
-"Defina o comprimento máximo da lista Abrir Recentes no menu Arquivo ou limpe "
+"Definir o comprimento máximo da lista Abrir Recentes no menu Arquivo ou limpe "
 "a lista"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1541
@@ -21566,7 +21566,7 @@ msgstr "Tamanho da Alça"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1586
 msgid "Set the relative size of node handles"
-msgstr "Defina o tamanho relativo das alças do nó"
+msgstr "Definir o tamanho relativo das alças do nó"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1588
 msgid "Cursor size"
@@ -22803,27 +22803,25 @@ msgstr "Preservada"
 #: ../src/ui/toolbar/select-toolbar.cpp:194
 msgid "When scaling objects, scale the stroke width by the same proportion"
 msgstr ""
-"Ao redimensionar objetos, a largura do contorno será ajustada "
-"proporcionalmente"
+"Ao dimensionar objetos, dimensione a \"largura do contorno\" na mesma proporção"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2295
 #: ../src/ui/toolbar/select-toolbar.cpp:201
 msgid "When scaling rectangles, scale the radii of rounded corners"
 msgstr ""
-"Ao redimensionar retângulos, os cantos arredondados serão ajustados "
-"proporcionalmente"
+"Ao dimensionar retângulos, dimensionear os raios dos \"cantos arredondados\""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2297
 #: ../src/ui/toolbar/select-toolbar.cpp:208
 msgid "Move gradients (in fill or stroke) along with the objects"
 msgstr ""
-"Ajusta gradientes (em preenchimentos ou contornos) juntamente com os objetos"
+"Mover \"Gradientes\" (em preenchimento ou traçado) junto com os objetos"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2299
 #: ../src/ui/toolbar/select-toolbar.cpp:215
 msgid "Move patterns (in fill or stroke) along with the objects"
 msgstr ""
-"Ajusta padrões (em preenchimentos ou contornos) juntamente com os objetos"
+"Mover \"Padrões\" (em preenchimentos ou contornos) juntamente com os objetos"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2300
 msgid "Store transformation"
@@ -23369,7 +23367,7 @@ msgid ""
 "Set the amount of memory per document which can be used to store rendered "
 "parts of the drawing for later reuse; set to zero to disable caching"
 msgstr ""
-"Defina a quantidade de memória por documento que pode ser usada para "
+"Definir a quantidade de memória por documento que pode ser usada para "
 "armazenar partes renderizadas do desenho para reutilização posterior; "
 "definido como zero para desativar o cache"
 
@@ -23422,7 +23420,7 @@ msgstr "Redesenhar durante a edição:"
 #: ../src/ui/dialog/inkscape-preferences.cpp:2540
 msgid "Set how quickly the canvas display is updated while editing objects"
 msgstr ""
-"Defina a rapidez com que a tela de exibição é atualizada durante a edição de "
+"Definir a frequência com que a tela de exibição é atualizada durante a edição de "
 "objetos"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2544
@@ -39892,19 +39890,19 @@ msgstr "Definir a cor do caminho como magenta:"
 
 #: ../share/extensions/jessyink_key_bindings.inx:34
 msgid "Set path color to orange:"
-msgstr "Defina a cor do caminho como laranja:"
+msgstr "Definir a cor do caminho como laranja:"
 
 #: ../share/extensions/jessyink_key_bindings.inx:35
 msgid "Set path color to red:"
-msgstr "Defina a cor do caminho como vermelho:"
+msgstr "Definir a cor do caminho como vermelho:"
 
 #: ../share/extensions/jessyink_key_bindings.inx:36
 msgid "Set path color to white:"
-msgstr "Defina a cor do caminho como branco:"
+msgstr "Definir a cor do caminho como branco:"
 
 #: ../share/extensions/jessyink_key_bindings.inx:37
 msgid "Set path color to yellow:"
-msgstr "Defina a cor do caminho como amarelo:"
+msgstr "Definir a cor do caminho como amarelo:"
 
 #: ../share/extensions/jessyink_key_bindings.inx:38
 msgid "Undo last path segment:"
@@ -40113,7 +40111,7 @@ msgid ""
 "This extension allows you to set, update and remove views for a JessyInk "
 "presentation. Please see code.google.com/p/jessyink for more details."
 msgstr ""
-"Esta extensão permite que você defina, atualize e remova visualizações para "
+"Esta extensão permite você definir, atualizar e remover visualizações para "
 "uma apresentação JessyInk. Consulte code.google.com/p/jessyink para obter "
 "mais detalhes."
 
@@ -41101,7 +41099,7 @@ msgid ""
 "Set page size to 100%/100% (full width and height of the display area) and "
 "introduce a viewBox specifying the drawings dimensions."
 msgstr ""
-"Defina o tamanho da página para 100%/100% (largura total e altura da área de "
+"Definir o tamanho da página para 100%/100% (largura total e altura da área de "
 "exibição) e introduza uma caixa de exibição especificando as dimensões dos "
 "desenhos."
 
@@ -42347,7 +42345,7 @@ msgstr "Posicionamento"
 
 #: ../share/extensions/printing_marks.inx:16
 msgid "Set crop marks to:"
-msgstr "Defina as marcas de corte para:"
+msgstr "Definir marcas de corte para:"
 
 #: ../share/extensions/printing_marks.inx:28
 msgid "Bleed Margin"
@@ -43761,7 +43759,7 @@ msgstr "Primeira letra do paragrafo"
 
 #: ../share/extensions/text_split.inx:3
 msgid "Split text"
-msgstr "Quebrar texto"
+msgstr "Separar texto"
 
 #: ../share/extensions/text_split.inx:7
 msgid "Split:"
