@@ -105,9 +105,35 @@ public:
     static bool list_created;
     static void appendExtensionToFilename(Glib::ustring &filename, Glib::ustring &extension);
 
-private:
+public:
     static std::map<Glib::ustring, Inkscape::Extension::Output *> valid_extensions;
     static std::map<Glib::ustring, Inkscape::Extension::Output *> all_extensions;
+};
+
+class ExportProgressDialog : public Gtk::Dialog
+{
+private:
+    Gtk::ProgressBar *_progress = nullptr;
+    Gtk::Widget *_export_panel = nullptr;
+    int _current = 0;
+    int _total = 0;
+
+public:
+    ExportProgressDialog(const Glib::ustring &title, bool modal = false)
+        : Gtk::Dialog(title, modal)
+    {}
+
+    inline void set_export_panel(const decltype(_export_panel) export_panel) { _export_panel = export_panel; }
+    inline decltype(_export_panel) get_export_panel() const { return _export_panel; }
+
+    inline void set_progress(const decltype(_progress) progress) { _progress = progress; }
+    inline decltype(_progress) get_progress() const { return _progress; }
+
+    inline void set_current(const int current) { _current = current; }
+    inline int get_current() const { return _current; }
+
+    inline void set_total(const int total) { _total = total; }
+    inline int get_total() const { return _total; }
 };
 
 float getValuePx(float value, Unit const *unit);
@@ -116,6 +142,11 @@ Glib::ustring get_default_filename(Glib::ustring &filename_entry_text, Glib::ust
 std::string create_filepath_from_id(Glib::ustring id, const Glib::ustring &file_entry_text);
 Glib::ustring get_ext_from_filename(Glib::ustring const &filename);
 std::string absolutize_path_from_document_location(SPDocument *doc, const std::string &filename);
+
+bool _export_raster(Geom::Rect const &area, unsigned long int const &width, unsigned long int const &height,
+                    float const &dpi, Glib::ustring const &filename, bool overwrite, unsigned (*callback)(float, void *),
+                    ExportProgressDialog* prog_dialog, Inkscape::Extension::Output *extension, std::vector<SPItem *> *items = nullptr,
+                    AdvanceOptions *adv = nullptr);
 
 } // namespace Dialog
 } // namespace UI

@@ -71,6 +71,7 @@ private:
     Gtk::Entry *si_filename_entry = nullptr;
     Gtk::Button *si_export = nullptr;
     Gtk::Box *adv_box = nullptr;
+    Gtk::ProgressBar *_prog = nullptr;
 
     AdvanceOptions advance_options;
 
@@ -100,10 +101,6 @@ private:
                          bool sensitive, void (SingleExport::*cb)(T), T param);
 
 private:
-    // signals callback
-    void onRealize();
-    void onUnrealize();
-
     void onAreaXChange(sb_type type);
     void onAreaYChange(sb_type type);
     void onDpiChange(sb_type type);
@@ -124,6 +121,31 @@ private:
 
     void setArea(double x0, double y0, double x1, double y1);
     void blockSpinConns(bool status);
+
+private:
+    void setExporting(bool exporting, Glib::ustring const &text = "");
+    ExportProgressDialog *create_progress_dialog(Glib::ustring progress_text);
+    /**
+     * Callback to be used in for loop to update the progress bar.
+     *
+     * @param value number between 0 and 1 indicating the fraction of progress (0.17 = 17 % progress)
+     * @param dlg void pointer to the Gtk::Dialog progress dialog
+     */
+    static unsigned int onProgressCallback(float value, void *dlg);
+
+    /**
+     * Callback for pressing the cancel button.
+     */
+    void onProgressCancel();
+
+    /**
+     * Callback invoked on closing the progress dialog.
+     */
+    bool onProgressDelete(GdkEventAny *event);
+
+private:
+    ExportProgressDialog *prog_dlg;
+    bool interrupted;
 
 private:
     void setDefaultSelectionMode();

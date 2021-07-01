@@ -60,14 +60,11 @@ private:
     void setDefaultNotebookPage();
 
     // Export Functions
-    bool _export_raster(Geom::Rect const &area, unsigned long int const &width, unsigned long int const &height,
-                        float const &dpi, Glib::ustring const &filename, bool overwrite,
-                        Inkscape::Extension::Output *extension);
+
     bool _export_vector(Inkscape::Extension::Output *extension = nullptr, std::vector<SPItem *> *items = nullptr);
 
     // signals callback
     void onRealize();
-    void onExport();
     void onBatchExport();
 
     /**

@@ -89,13 +89,13 @@ void SingleExport::initialise(const Glib::RefPtr<Gtk::Builder> &builder)
     builder->get_widget("si_filename", si_filename_entry);
     builder->get_widget("si_export", si_export);
 
+    builder->get_widget("si_progress", _prog);
+
     builder->get_widget("si_advance_box", adv_box);
 }
 
 void SingleExport::on_realize()
 {
-    std::cout << "SINGLE RE" << std::endl;
-
     auto desktop = SP_ACTIVE_DESKTOP;
     assert(desktop);
     auto *selection = desktop->getSelection();
@@ -110,7 +110,6 @@ void SingleExport::on_realize()
 
 void SingleExport::on_unrealize()
 {
-    std::cout << "SINGLE UNRE" << std::endl;
     selectionModifiedConn.disconnect();
     selectionChangedConn.disconnect();
     Gtk::Box::on_unrealize();
@@ -369,15 +368,6 @@ void SingleExport::setArea(double x0, double y0, double x1, double y1)
 
 // Signals CallBack
 
-void SingleExport::onRealize()
-{
-    ;
-}
-void SingleExport::onUnrealize()
-{
-    ;
-}
-
 void SingleExport::onUnitChanged()
 {
     refreshArea();
@@ -444,7 +434,53 @@ void SingleExport::onExtensionChanged()
 
 void SingleExport::onExport()
 {
-    ;
+    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
+    if (!desktop)
+        return;
+    si_export->set_sensitive(false);
+    bool exportSuccessful = false;
+    auto extension = si_extension_cb->get_active_text();
+    if (!ExtensionList::valid_extensions[extension]) {
+        si_export->set_sensitive(true);
+        return;
+    }
+
+    auto omod = ExtensionList::valid_extensions[extension];
+    Unit const *unit = units->getUnit();
+
+    Glib::ustring filename = si_filename_entry->get_text();
+
+    if (omod->is_raster()) {
+        float x0 = getValuePx(spin_buttons[SPIN_X0]->get_value(), unit);
+        float x1 = getValuePx(spin_buttons[SPIN_X1]->get_value(), unit);
+        float y0 = getValuePx(spin_buttons[SPIN_Y0]->get_value(), unit);
+        float y1 = getValuePx(spin_buttons[SPIN_Y1]->get_value(), unit);
+        auto area = Geom::Rect(Geom::Point(x0, y0), Geom::Point(x1, y1)) * desktop->dt2doc();
+
+        unsigned long int width = int(spin_buttons[SPIN_BMWIDTH]->get_value() + 0.5);
+        unsigned long int height = int(spin_buttons[SPIN_BMHEIGHT]->get_value() + 0.5);
+
+        float dpi = spin_buttons[SPIN_DPI]->get_value();
+
+        /* TRANSLATORS: %1 will be the filename, %2 the width, and %3 the height of the image */
+        prog_dlg = create_progress_dialog(Glib::ustring::compose(_("Exporting %1 (%2 x %3)"), filename, width, height));
+        prog_dlg->set_export_panel(this);
+        setExporting(true, Glib::ustring::compose(_("Exporting %1 (%2 x %3)"), filename, width, height));
+        prog_dlg->set_current(0);
+        prog_dlg->set_total(0);
+
+        exportSuccessful = _export_raster(area, width, height, dpi, filename, false, onProgressCallback, prog_dlg, omod,
+                                          nullptr, &advance_options);
+
+    } else {
+        // exportSuccessful = _export_vector(omod);
+    }
+    setExporting(false);
+    si_export->set_sensitive(true);
+    original_name = filename;
+    filename_modified = false;
+    prog_dlg = nullptr;
+    interrupted = false;
 }
 
 // Utils Functions
@@ -651,6 +687,92 @@ void SingleExport::setDefaultSelectionMode()
         prefs->setString("/dialogs/export/exportarea/value", pref_key_name);
     }
 }
+
+void SingleExport::setExporting(bool exporting, Glib::ustring const &text)
+{
+    if (exporting) {
+        _prog->set_text(text);
+        _prog->set_fraction(0.0);
+        _prog->set_sensitive(true);
+        si_export->set_sensitive(false);
+    } else {
+        _prog->set_text("");
+        _prog->set_fraction(0.0);
+        _prog->set_sensitive(false);
+
+        si_export->set_sensitive(true);
+    }
+}
+
+ExportProgressDialog *SingleExport::create_progress_dialog(Glib::ustring progress_text)
+{
+    // dont forget to delete it later
+    auto dlg = new ExportProgressDialog(_("Export in progress"), true);
+    dlg->set_transient_for(*(INKSCAPE.active_desktop()->getToplevel()));
+
+    Gtk::ProgressBar *prg = Gtk::manage(new Gtk::ProgressBar());
+    prg->set_text(progress_text);
+    dlg->set_progress(prg);
+    auto CA = dlg->get_content_area();
+    CA->pack_start(*prg, FALSE, FALSE, 4);
+
+    Gtk::Button *btn = dlg->add_button(_("_Cancel"), Gtk::RESPONSE_CANCEL);
+
+    btn->signal_clicked().connect(sigc::mem_fun(*this, &SingleExport::onProgressCancel));
+    dlg->signal_delete_event().connect(sigc::mem_fun(*this, &SingleExport::onProgressDelete));
+
+    dlg->show_all();
+    return dlg;
+}
+
+/// Called when dialog is deleted
+bool SingleExport::onProgressDelete(GdkEventAny * /*event*/)
+{
+    interrupted = true;
+    return TRUE;
+} // end of sp_export_progress_delete()
+
+/// Called when progress is cancelled
+void SingleExport::onProgressCancel()
+{
+    interrupted = true;
+} // end of sp_export_progress_cancel()
+
+/// Called for every progress iteration
+unsigned int SingleExport::onProgressCallback(float value, void *dlg)
+{
+    auto dlg2 = reinterpret_cast<ExportProgressDialog *>(dlg);
+
+    auto self = dynamic_cast<SingleExport *>(dlg2->get_export_panel());
+
+    if (!self || self->interrupted)
+        return FALSE;
+
+    auto current = dlg2->get_current();
+    auto total = dlg2->get_total();
+    if (total > 0) {
+        double completed = current;
+        completed /= static_cast<double>(total);
+
+        value = completed + (value / static_cast<double>(total));
+    }
+
+    auto prg = dlg2->get_progress();
+    prg->set_fraction(value);
+
+    if (self) {
+        self->_prog->set_fraction(value);
+    }
+
+    int evtcount = 0;
+    while ((evtcount < 16) && gdk_events_pending()) {
+        Gtk::Main::iteration(false);
+        evtcount += 1;
+    }
+
+    Gtk::Main::iteration(false);
+    return TRUE;
+} // end of sp_export_progress_callback()
 
 } // namespace Dialog
 } // namespace UI

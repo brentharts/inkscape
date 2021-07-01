@@ -127,7 +127,6 @@ AdvanceOptions::AdvanceOptions()
         grid->attach(anti_aliasing_cb, 1, row, 1, 1);
         row++;
     }
-    std::cout<<"Advance Created"<<std::endl;
 }
 
 AdvanceOptions::~AdvanceOptions()
@@ -305,6 +304,136 @@ std::string absolutize_path_from_document_location(SPDocument *doc, const std::s
         path = filename;
     }
     return path;
+}
+
+bool _export_raster(Geom::Rect const &area, unsigned long int const &width, unsigned long int const &height,
+                    float const &dpi, Glib::ustring const &filename, bool overwrite,
+                    unsigned (*callback)(float, void *), ExportProgressDialog *prog_dialog,
+                    Inkscape::Extension::Output *extension, std::vector<SPItem *> *items, AdvanceOptions *adv)
+{
+    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
+    if (!desktop)
+        return false;
+    SPNamedView *nv = desktop->getNamedView();
+    SPDocument *doc = desktop->getDocument();
+
+    if (area.hasZeroArea() || width == 0 || height == 0) {
+        desktop->messageStack()->flash(Inkscape::ERROR_MESSAGE, _("The chosen area to be exported is invalid."));
+        sp_ui_error_dialog(_("The chosen area to be exported is invalid"));
+        return false;
+    }
+    if (filename.empty()) {
+        desktop->messageStack()->flash(Inkscape::ERROR_MESSAGE, _("You have to enter a filename."));
+        sp_ui_error_dialog(_("You have to enter a filename"));
+        return false;
+    }
+
+    if (!extension || !extension->is_raster()) {
+        desktop->messageStack()->flash(Inkscape::ERROR_MESSAGE, _("Raster Export Error"));
+        sp_ui_error_dialog(_("Raster export Method is used for NON RASTER EXTENSION"));
+        return false;
+    }
+
+    // Advance Parameters default value. We will change them later if adv dialog is provided.
+    bool use_interlacing = false; // Maybe use prefs here?
+    float pHYs = dpi;             // default is dpi.
+    int bit_depth = 8;            // corresponds to RGBA 8
+    int color_type = 6;           // corresponds to RGBA 8
+    int zlib = 6;                 // Z_DEFAULT_COMPRESSION
+    int antialiasing = 2;         // Cairo anti aliasing
+
+    if (adv) {
+        use_interlacing = adv->get_interlacing();
+        if (adv->get_pHYs() > 0.01) {
+            pHYs = adv->get_pHYs();
+        }
+        bit_depth = adv->get_bit_depth();
+        color_type = adv->get_color();
+        zlib = adv->get_compression();
+        antialiasing = adv->get_anti_aliasing();
+    }
+
+    std::string path = absolutize_path_from_document_location(doc, Glib::filename_from_utf8(filename));
+    Glib::ustring dirname = Glib::path_get_dirname(path);
+
+    if (dirname.empty() ||
+        !Inkscape::IO::file_test(dirname.c_str(), (GFileTest)(G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) {
+        gchar *safeDir = Inkscape::IO::sanitizeString(dirname.c_str());
+        gchar *error = g_strdup_printf(_("Directory %s does not exist or is not a directory.\n"), safeDir);
+
+        desktop->messageStack()->flash(Inkscape::ERROR_MESSAGE, error);
+        sp_ui_error_dialog(error);
+
+        g_free(safeDir);
+        g_free(error);
+        return false;
+    }
+
+    // Do the over-write protection now, since the png is just a temp file.
+    if (!overwrite && !sp_ui_overwrite_file(path.c_str())) {
+        return false;
+    }
+
+    auto fn = Glib::path_get_basename(path);
+    auto png_filename = path;
+    {
+        // Select the extension and set the filename to a temporary file
+        int tempfd_out = Glib::file_open_tmp(png_filename, "ink_ext_");
+        close(tempfd_out);
+    }
+
+    // Export Start Here
+    std::vector<SPItem *> selected;
+    if (items) {
+        selected = *items;
+    }
+
+    ExportResult result = sp_export_png_file(desktop->getDocument(), png_filename.c_str(), area, width, height, pHYs,
+                                             pHYs, // previously xdpi, ydpi.
+                                             nv->pagecolor, callback, (void *)prog_dialog, true, selected,
+                                             use_interlacing, color_type, bit_depth, zlib, antialiasing);
+
+    delete prog_dialog;
+    if (result == EXPORT_ERROR) {
+        gchar *safeFile = Inkscape::IO::sanitizeString(path.c_str());
+        gchar *error = g_strdup_printf(_("Could not export to filename %s.\n"), safeFile);
+
+        desktop->messageStack()->flash(Inkscape::ERROR_MESSAGE, error);
+        sp_ui_error_dialog(error);
+
+        g_free(safeFile);
+        g_free(error);
+        return false;
+    } else if (result == EXPORT_OK) {
+        if (extension->prefs()) {
+            try {
+                extension->export_raster(doc, png_filename, path.c_str(), false);
+            } catch (Inkscape::Extension::Output::save_failed &e) {
+                return false;
+            }
+        } else {
+            return false;
+        }
+
+    } else {
+        // Extensions have their own error popup, so this only tracks failures in the png step
+        desktop->messageStack()->flash(Inkscape::INFORMATION_MESSAGE, _("Export aborted."));
+        return false;
+    }
+
+    auto recentmanager = Gtk::RecentManager::get_default();
+    if (recentmanager && Glib::path_is_absolute(path)) {
+        Glib::ustring uri = Glib::filename_to_uri(path);
+        recentmanager->add_item(uri);
+    }
+
+    gchar *safeFile = Inkscape::IO::sanitizeString(path.c_str());
+    desktop->messageStack()->flashF(Inkscape::INFORMATION_MESSAGE, _("Drawing exported to <b>%s</b>."), safeFile);
+    g_free(safeFile);
+    
+
+    unlink(png_filename.c_str());
+    return true;
 }
 
 } // namespace Dialog
