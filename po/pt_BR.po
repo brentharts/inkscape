@@ -10280,7 +10280,7 @@ msgid ""
 "stroke style."
 msgstr ""
 "Adicione marcas de régua ao objeto em intervalos ajustáveis, usando o estilo "
-"de traçado do objeto."
+"de contorno do objeto."
 
 #: ../src/live_effects/effect.cpp:288
 msgid "Power stroke"
@@ -16104,7 +16104,7 @@ msgstr "Traçar bitmap"
 #: ../src/trace/trace.cpp:542
 #, c-format
 msgid "Trace: Done. %ld nodes created"
-msgstr "Traçado: Terminado. %ld nós criados"
+msgstr "Traçado: Finalizado. %ld nós criados"
 
 #: ../src/ui/clipboard.cpp:314
 msgid "Nothing was copied."
@@ -22815,7 +22815,7 @@ msgstr ""
 #: ../src/ui/toolbar/select-toolbar.cpp:208
 msgid "Move gradients (in fill or stroke) along with the objects"
 msgstr ""
-"Mover \"Gradientes\" (em preenchimento ou traçado) junto com os objetos"
+"Mover \"Gradientes\" (em preenchimento ou contorno) junto com os objetos"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2299
 #: ../src/ui/toolbar/select-toolbar.cpp:215
@@ -30815,7 +30815,7 @@ msgstr "Definir malha no preenchimento"
 
 #: ../src/ui/widget/fill-style.cpp:607
 msgid "Set mesh on stroke"
-msgstr "Definir malha no traçado"
+msgstr "Definir malha no contorno"
 
 #: ../src/ui/widget/fill-style.cpp:668
 msgid "Set pattern on fill"
@@ -32738,7 +32738,7 @@ msgstr "Preenchimento _e Contorno"
 msgid ""
 "Select all objects with the same fill and stroke as the selected objects"
 msgstr ""
-"Selecione todos os objetos com o mesmo preenchimento e traçado dos objetos "
+"Selecione todos os objetos com o mesmo preenchimento e contornos dos objetos "
 "selecionados"
 
 #: ../src/verbs.cpp:2458
@@ -32767,7 +32767,7 @@ msgid ""
 "Select all objects with the same stroke style (width, dash, markers) as the "
 "selected objects"
 msgstr ""
-"Selecione todos os objetos com o mesmo estilo de traçado (largura, traço, "
+"Selecione todos os objetos com o mesmo estilo de contorno (largura, traço, "
 "marcadores) que os objetos selecionados"
 
 #: ../src/verbs.cpp:2468
