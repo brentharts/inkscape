@@ -17,7 +17,6 @@
 
 #include "export-helper.h"
 #include "extension/output.h"
-#include "ui/dialog/dialog-base.h"
 #include "ui/widget/scrollprotected.h"
 #include "ui/widget/unit-menu.h"
 
@@ -35,6 +34,7 @@ public:
 
 protected:
     InkscapeApplication *_app;
+
 public:
     void set_app(InkscapeApplication *app) { _app = app; };
 
@@ -97,13 +97,17 @@ public:
 private:
     void setupUnits();
     void setupExtensionList();
+    void setupSpinButtons();
 
 private:
     // change range and callbacks to spinbuttons
-    void setupSpinButtons();
     template <typename T>
     void setupSpinButton(Gtk::SpinButton *sb, double val, double min, double max, double step, double page, int digits,
                          bool sensitive, void (SingleExport::*cb)(T), T param);
+
+private:
+    void setDefaultSelectionMode();
+    void setDefaultFilename();
 
 private:
     void onAreaXChange(sb_type type);
@@ -124,7 +128,6 @@ private:
     void areaXChange(sb_type type);
     void areaYChange(sb_type type);
     void dpiChange(sb_type type);
-
     void setArea(double x0, double y0, double x1, double y1);
     void blockSpinConns(bool status);
 
@@ -150,12 +153,8 @@ private:
     bool onProgressDelete(GdkEventAny *event);
 
 private:
-    ExportProgressDialog *prog_dlg;
+    ExportProgressDialog *prog_dlg = nullptr;
     bool interrupted;
-
-private:
-    void setDefaultSelectionMode();
-    void setDefaultFilename();
 
 private:
     // Signals
@@ -163,6 +162,7 @@ private:
     sigc::connection filenameConn;
     sigc::connection extensionConn;
     sigc::connection exportConn;
+    sigc::connection browseConn;
     sigc::connection selectionModifiedConn;
     sigc::connection selectionChangedConn;
 

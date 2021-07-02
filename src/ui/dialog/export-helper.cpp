@@ -308,7 +308,7 @@ std::string absolutize_path_from_document_location(SPDocument *doc, const std::s
 
 bool _export_raster(Geom::Rect const &area, unsigned long int const &width, unsigned long int const &height,
                     float const &dpi, Glib::ustring const &filename, bool overwrite,
-                    unsigned (*callback)(float, void *), ExportProgressDialog *prog_dialog,
+                    unsigned (*callback)(float, void *), ExportProgressDialog *&prog_dialog,
                     Inkscape::Extension::Output *extension, std::vector<SPItem *> *items, AdvanceOptions *adv)
 {
     SPDesktop *desktop = SP_ACTIVE_DESKTOP;
@@ -395,7 +395,8 @@ bool _export_raster(Geom::Rect const &area, unsigned long int const &width, unsi
 
     bool failed = result == EXPORT_ERROR || prog_dialog->get_stopped();
     delete prog_dialog;
-    if (failed){
+    prog_dialog = nullptr;
+    if (failed) {
         gchar *safeFile = Inkscape::IO::sanitizeString(path.c_str());
         gchar *error = g_strdup_printf(_("Could not export to filename %s.\n"), safeFile);
 
@@ -431,9 +432,119 @@ bool _export_raster(Geom::Rect const &area, unsigned long int const &width, unsi
     gchar *safeFile = Inkscape::IO::sanitizeString(path.c_str());
     desktop->messageStack()->flashF(Inkscape::INFORMATION_MESSAGE, _("Drawing exported to <b>%s</b>."), safeFile);
     g_free(safeFile);
-    
 
     unlink(png_filename.c_str());
+    return true;
+}
+
+bool _export_vector(Inkscape::Extension::Output *extension, SPDocument *doc, Glib::ustring const &filename,
+                    bool overwrite, std::vector<SPItem *> *items)
+{
+    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
+    if (!desktop)
+        return false;
+
+    if (filename.empty()) {
+        desktop->messageStack()->flash(Inkscape::ERROR_MESSAGE, _("You have to enter a filename."));
+        sp_ui_error_dialog(_("You have to enter a filename"));
+        return false;
+    }
+
+    if (!extension || extension->is_raster()) {
+        desktop->messageStack()->flash(Inkscape::ERROR_MESSAGE, _("Vector Export Error"));
+        sp_ui_error_dialog(_("Vector export Method is used for RASTER EXTENSION"));
+        return false;
+    }
+
+    std::string path = absolutize_path_from_document_location(doc, Glib::filename_from_utf8(filename));
+    Glib::ustring dirname = Glib::path_get_dirname(path);
+
+    if (dirname.empty() ||
+        !Inkscape::IO::file_test(dirname.c_str(), (GFileTest)(G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) {
+        gchar *safeDir = Inkscape::IO::sanitizeString(dirname.c_str());
+        gchar *error = g_strdup_printf(_("Directory %s does not exist or is not a directory.\n"), safeDir);
+
+        desktop->messageStack()->flash(Inkscape::ERROR_MESSAGE, error);
+        sp_ui_error_dialog(error);
+
+        g_free(safeDir);
+        g_free(error);
+        return false;
+    }
+
+    // Do the over-write protection now
+    if (!overwrite && !sp_ui_overwrite_file(path.c_str())) {
+        return false;
+    }
+    doc->ensureUpToDate();
+    SPDocument *copy_doc = (doc->copy()).get();
+    copy_doc->ensureUpToDate();
+
+    if (items && items->size() > 0) {
+        std::vector<SPObject *> objects_to_export;
+        std::vector<SPItem *> objects = *items;
+        Inkscape::ObjectSet s(copy_doc);
+        for (auto &object : objects) {
+            SPObject *temp = dynamic_cast<SPObject *>(object);
+
+            if (!temp) {
+                gchar *safeFile = Inkscape::IO::sanitizeString(path.c_str());
+                gchar *error = g_strdup_printf(_("Could not export to filename %s.\n"), safeFile);
+
+                desktop->messageStack()->flash(Inkscape::ERROR_MESSAGE, error);
+                sp_ui_error_dialog(error);
+
+                g_free(safeFile);
+                g_free(error);
+                return false;
+            }
+            SPObject *obj = copy_doc->getObjectById(temp->getId());
+            if (!obj) {
+                gchar *safeFile = Inkscape::IO::sanitizeString(path.c_str());
+                gchar *error = g_strdup_printf(_("Could not export to filename %s.\n"), safeFile);
+
+                desktop->messageStack()->flash(Inkscape::ERROR_MESSAGE, error);
+                sp_ui_error_dialog(error);
+
+                g_free(safeFile);
+                g_free(error);
+                return false;
+            }
+            copy_doc->ensureUpToDate();
+
+            s.add(obj, true);
+            objects_to_export.push_back(obj);
+        }
+        copy_doc->getRoot()->cropToObjects(objects_to_export);
+        s.fitCanvas(true, true);
+    }
+
+    copy_doc->vacuumDocument();
+    try {
+        Inkscape::Extension::save(dynamic_cast<Inkscape::Extension::Extension *>(extension), copy_doc, path.c_str(),
+                                  false, false, false, Inkscape::Extension::FILE_SAVE_METHOD_SAVE_COPY);
+    } catch (Inkscape::Extension::Output::save_failed &e) {
+        gchar *safeFile = Inkscape::IO::sanitizeString(path.c_str());
+        gchar *error = g_strdup_printf(_("Could not export to filename %s.\n"), safeFile);
+
+        desktop->messageStack()->flash(Inkscape::ERROR_MESSAGE, error);
+        sp_ui_error_dialog(error);
+
+        g_free(safeFile);
+        g_free(error);
+        return false;
+    }
+
+    auto recentmanager = Gtk::RecentManager::get_default();
+    if (recentmanager && Glib::path_is_absolute(path)) {
+        Glib::ustring uri = Glib::filename_to_uri(path);
+        recentmanager->add_item(uri);
+    }
+
+    gchar *safeFile = Inkscape::IO::sanitizeString(path.c_str());
+    desktop->messageStack()->flashF(Inkscape::INFORMATION_MESSAGE, _("Drawing exported to <b>%s</b>."), safeFile);
+    g_free(safeFile);
+
     return true;
 }
 

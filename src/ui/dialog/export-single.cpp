@@ -200,7 +200,7 @@ void SingleExport::setup()
     filenameConn = si_filename_entry->signal_changed().connect(sigc::mem_fun(*this, &SingleExport::onFilenameModified));
     extensionConn = si_extension_cb->signal_changed().connect(sigc::mem_fun(*this, &SingleExport::onExtensionChanged));
     exportConn = si_export->signal_clicked().connect(sigc::mem_fun(*this, &SingleExport::onExport));
-    si_filename_entry->signal_icon_press().connect(sigc::mem_fun(*this, &SingleExport::onBrowse));
+    browseConn = si_filename_entry->signal_icon_press().connect(sigc::mem_fun(*this, &SingleExport::onBrowse));
 }
 
 // Setup units combobox
@@ -248,7 +248,8 @@ void SingleExport::setupSpinButton(Gtk::SpinButton *sb, double val, double min, 
         sb->set_range(min, max);
         sb->set_value(val);
         sb->set_sensitive(sensitive);
-        sb->set_width_chars(7);
+        sb->set_width_chars(0);
+        sb->set_max_width_chars(0);
         if (cb) {
             auto signal = sb->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, cb), param));
             // add signals to list to block all easily
@@ -384,6 +385,7 @@ void SingleExport::onAreaTypeToggle(selection_mode key)
     // last call will change values)
     current_key = key;
     prefs->setString("/dialogs/export/exportarea/value", selection_names[current_key]);
+
     refreshArea();
     refreshExportHints();
 }
@@ -392,12 +394,14 @@ void SingleExport::onAreaXChange(sb_type type)
 {
     blockSpinConns(true);
     areaXChange(type);
+    selection_buttons[SELECTION_CUSTOM]->set_active(true);
     blockSpinConns(false);
 }
 void SingleExport::onAreaYChange(sb_type type)
 {
     blockSpinConns(true);
     areaYChange(type);
+    selection_buttons[SELECTION_CUSTOM]->set_active(true);
     blockSpinConns(false);
 }
 void SingleExport::onDpiChange(sb_type type)
@@ -475,18 +479,36 @@ void SingleExport::onExport()
                                           nullptr, &advance_options);
 
     } else {
-        // exportSuccessful = _export_vector(omod);
+        setExporting(true, Glib::ustring::compose(_("Exporting %1"), filename));
+        SPDocument *doc = desktop->getDocument();
+        SPDocument *copy_doc = (doc->copy()).get();
+        if (current_key == SELECTION_DRAWING) {
+            fit_canvas_to_drawing(copy_doc, true);
+        }
+        std::vector<SPItem *> items;
+        if (current_key == SELECTION_SELECTION) {
+            auto itemlist = desktop->getSelection()->items();
+            for (auto i = itemlist.begin(); i != itemlist.end(); ++i) {
+                SPItem *item = *i;
+                items.push_back(item);
+            }
+        }
+        exportSuccessful = _export_vector(omod, copy_doc, filename, false, &items);
+    }
+    if (prog_dlg) {
+        delete prog_dlg;
+        prog_dlg = nullptr;
     }
     setExporting(false);
     si_export->set_sensitive(true);
     original_name = filename;
     filename_modified = false;
-    prog_dlg = nullptr;
     interrupted = false;
 }
 
 void SingleExport::onBrowse(Gtk::EntryIconPosition pos, const GdkEventButton *ev)
 {
+    browseConn.block();
     Gtk::Window *window = _app->get_active_window();
     Glib::ustring filename = Glib::filename_from_utf8(si_filename_entry->get_text());
 
@@ -501,9 +523,10 @@ void SingleExport::onBrowse(Gtk::EntryIconPosition pos, const GdkEventButton *ev
 
     if (dialog->show()) {
         filename = dialog->getFilename();
-        Inkscape::Extension::Output* selection_type = dynamic_cast<Inkscape::Extension::Output*>(dialog->getSelectionType());
+        Inkscape::Extension::Output *selection_type =
+            dynamic_cast<Inkscape::Extension::Output *>(dialog->getSelectionType());
         Glib::ustring extension = selection_type->get_extension();
-        ExtensionList::appendExtensionToFilename(filename,extension);
+        ExtensionList::appendExtensionToFilename(filename, extension);
         si_filename_entry->set_text(filename);
         si_filename_entry->set_position(filename.length());
         // deleting dialog before exporting is important
@@ -513,6 +536,7 @@ void SingleExport::onBrowse(Gtk::EntryIconPosition pos, const GdkEventButton *ev
     } else {
         delete dialog;
     }
+    browseConn.unblock();
 }
 
 // Utils Functions
@@ -666,8 +690,8 @@ void SingleExport::dpiChange(sb_type type)
     spin_buttons[SPIN_DPI]->set_value(dpi);
 }
 
-// We first check any export hints related to document. If there is none we create a default name using document name.
-// doc_export_name is set here and will only be changed when exporting.
+// We first check any export hints related to document. If there is none we create a default name using document
+// name. doc_export_name is set here and will only be changed when exporting.
 void SingleExport::setDefaultFilename()
 {
     Glib::ustring filename;
@@ -717,6 +741,16 @@ void SingleExport::setDefaultSelectionMode()
         }
         selection_buttons[current_key]->set_active(true);
         prefs->setString("/dialogs/export/exportarea/value", pref_key_name);
+
+        if (current_key == SELECTION_CUSTOM &&
+            (spin_buttons[SPIN_HEIGHT]->get_value() == 0 || spin_buttons[SPIN_WIDTH]->get_value() == 0)) {
+            SPDocument *doc;
+            Geom::OptRect bbox;
+            doc = SP_ACTIVE_DESKTOP->getDocument();
+            bbox = Geom::Rect(Geom::Point(0.0, 0.0),
+                              Geom::Point(doc->getWidth().value("px"), doc->getHeight().value("px")));
+            setArea(bbox->min()[Geom::X], bbox->min()[Geom::Y], bbox->max()[Geom::X], bbox->max()[Geom::Y]);
+        }
     }
 }
 

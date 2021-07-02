@@ -57,9 +57,6 @@ namespace Dialog {
 
 Export::Export()
     : DialogBase("/dialogs/export/", "Export")
-    , selectChangedConn()
-    , subselChangedConn()
-    , selectModifiedConn()
 {
     std::string gladefile = get_filename_string(Inkscape::IO::Resource::UIS, "dialog-export.glade");
 
@@ -75,43 +72,39 @@ Export::Export()
     builder->get_widget("Export Dialog Box", container);
     add(*container);
     show_all_children();
-    builder->get_widget("Export Notebook", export_notebook);
-    builder->get_widget_derived("Single Image", single_image);
 
+    builder->get_widget("Export Notebook", export_notebook);
+
+    // Initialise Single Export Here. We will setup Single Export in onRealize callback.
+    builder->get_widget_derived("Single Image", single_image);
     single_image->initialise(builder);
 
     builder->get_widget("Batch Export", batch_export);
-    // Callback when container is dinally mapped on window. All intialisation like set active is done inside it.
+
+    // Callback when container is finally mapped on window. All intialisation like set active is done inside it.
     container->signal_realize().connect(sigc::mem_fun(*this, &Export::onRealize));
 
+    // Provide inkscape _app instance to single Export
     single_image->set_app(_app);
 }
 
-Export::~Export()
+Export::~Export() {}
+
+// When conainer is visible then setup all widgets.
+// It prevents gtk_is_widget assertion warning probably.
+void Export::onRealize()
 {
-    selectModifiedConn.disconnect();
-    subselChangedConn.disconnect();
-    selectChangedConn.disconnect();
+    single_image->setup();
+    // setDefaultNotebookPage();
 }
 
+// Set current page based on preference/last visited page
 void Export::setDefaultNotebookPage()
 {
     // if (export_notebook && batch_export) {
     //     auto page_num = export_notebook->page_num(*batch_export);
     // export_notebook->set_current_page(page_num);
     // }
-}
-
-/**
- * SIGNALS
- */
-
-// Set current page based on preference/last visited page
-
-void Export::onRealize()
-{
-    single_image->setup();
-    // setDefaultNotebookPage();
 }
 
 } // namespace Dialog

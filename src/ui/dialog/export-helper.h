@@ -138,7 +138,6 @@ public:
 
     inline bool get_stopped() const { return _stopped; }
     inline void set_stopped() { _stopped = true; }
-
 };
 
 float getValuePx(float value, Unit const *unit);
@@ -149,9 +148,13 @@ Glib::ustring get_ext_from_filename(Glib::ustring const &filename);
 std::string absolutize_path_from_document_location(SPDocument *doc, const std::string &filename);
 
 bool _export_raster(Geom::Rect const &area, unsigned long int const &width, unsigned long int const &height,
-                    float const &dpi, Glib::ustring const &filename, bool overwrite, unsigned (*callback)(float, void *),
-                    ExportProgressDialog* prog_dialog, Inkscape::Extension::Output *extension, std::vector<SPItem *> *items = nullptr,
+                    float const &dpi, Glib::ustring const &filename, bool overwrite,
+                    unsigned (*callback)(float, void *), ExportProgressDialog *&prog_dialog,
+                    Inkscape::Extension::Output *extension, std::vector<SPItem *> *items = nullptr,
                     AdvanceOptions *adv = nullptr);
+
+bool _export_vector(Inkscape::Extension::Output *extension, SPDocument *doc, Glib::ustring const &filename,
+                    bool overwrite, std::vector<SPItem *> *items = nullptr);
 
 } // namespace Dialog
 } // namespace UI

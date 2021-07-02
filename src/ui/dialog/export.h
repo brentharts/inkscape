@@ -51,32 +51,17 @@ private:
     SingleExport *single_image = nullptr;
     Gtk::Box *batch_export = nullptr;
 
-
 private:
-    // Utils Variables
     Inkscape::Preferences *prefs = nullptr;
 
     // setup default values of widgets
     void setDefaultNotebookPage();
 
-    // Export Functions
-
-    bool _export_vector(Inkscape::Extension::Output *extension = nullptr, std::vector<SPItem *> *items = nullptr);
-
+private:
     // signals callback
     void onRealize();
     void onBatchExport();
-
-    /**
-     * Inkscape selection change callback
-     */
-    void onSelectionChanged();
-    void onSelectionModified(guint flags);
-
-    // signals
-    sigc::connection selectChangedConn;
-    sigc::connection subselChangedConn;
-    sigc::connection selectModifiedConn;
+    
 };
 } // namespace Dialog
 } // namespace UI
