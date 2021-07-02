@@ -127,6 +127,8 @@ AdvanceOptions::AdvanceOptions()
         grid->attach(anti_aliasing_cb, 1, row, 1, 1);
         row++;
     }
+    grid->set_row_spacing(2);
+    grid->set_column_spacing(5);
 }
 
 AdvanceOptions::~AdvanceOptions()
@@ -384,7 +386,7 @@ bool _export_raster(Geom::Rect const &area, unsigned long int const &width, unsi
 
     // Export Start Here
     std::vector<SPItem *> selected;
-    if (items) {
+    if (items && items->size() > 0) {
         selected = *items;
     }
 

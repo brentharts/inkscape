@@ -439,11 +439,12 @@ void SingleExport::onExtensionChanged()
 
 void SingleExport::onExport()
 {
+    interrupted = false;
+
     SPDesktop *desktop = SP_ACTIVE_DESKTOP;
     if (!desktop)
         return;
     si_export->set_sensitive(false);
-    interrupted = false;
     bool exportSuccessful = false;
     auto extension = si_extension_cb->get_active_text();
     if (!ExtensionList::valid_extensions[extension]) {
@@ -475,8 +476,12 @@ void SingleExport::onExport()
         prog_dlg->set_current(0);
         prog_dlg->set_total(0);
 
+        std::vector<SPItem *> selected(desktop->getSelection()->items().begin(),
+                                       desktop->getSelection()->items().end());
+        bool hide = si_hide_all->get_active();
+
         exportSuccessful = _export_raster(area, width, height, dpi, filename, false, onProgressCallback, prog_dlg, omod,
-                                          nullptr, &advance_options);
+                                          hide ? &selected : nullptr, &advance_options);
 
     } else {
         setExporting(true, Glib::ustring::compose(_("Exporting %1"), filename));
@@ -765,7 +770,6 @@ void SingleExport::setExporting(bool exporting, Glib::ustring const &text)
         _prog->set_text("");
         _prog->set_fraction(0.0);
         _prog->set_sensitive(false);
-
         si_export->set_sensitive(true);
     }
 }

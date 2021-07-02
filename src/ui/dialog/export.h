@@ -61,7 +61,6 @@ private:
     // signals callback
     void onRealize();
     void onBatchExport();
-    
 };
 } // namespace Dialog
 } // namespace UI
