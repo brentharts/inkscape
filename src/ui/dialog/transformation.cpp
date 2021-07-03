@@ -357,20 +357,23 @@ void Transformation::layoutPageSkew()
 }
 
 
-
 void Transformation::layoutPageTransform()
 {
     _units_transform.setUnitType(UNIT_TYPE_LINEAR);
     _units_transform.set_tooltip_text(_("E and F units"));
     _units_transform.set_halign(Gtk::ALIGN_END);
+    _units_transform.set_margin_top(3);
+    _units_transform.set_margin_bottom(3);
 
     UI::Widget::Scalar* labels[] = {&_scalar_transform_a, &_scalar_transform_b, &_scalar_transform_c, &_scalar_transform_d, &_scalar_transform_e, &_scalar_transform_f};
     for (auto label : labels) {
-        auto widget = const_cast<Gtk::Label*>(label->getLabel());
-        widget->hide();
-        widget->set_no_show_all();
+        label->hide_label();
+        label->set_margin_start(2);
+        label->set_margin_end(2);
     }
     _page_transform.table().set_column_spacing(0);
+    _page_transform.table().set_row_spacing(1);
+    _page_transform.table().set_column_homogeneous(true);
 
     _scalar_transform_a.setWidgetSizeRequest(65, -1);
     _scalar_transform_a.setRange(-1e10, 1e10);
@@ -459,27 +462,28 @@ void Transformation::layoutPageTransform()
     auto img = Gtk::make_managed<Gtk::Image>();
     img->set_from_icon_name("matrix-2d", Gtk::ICON_SIZE_BUTTON);
     img->set_pixel_size(52);
-    _page_transform.table().attach(*img, 0, 4, 1, 1);
+    _page_transform.table().attach(*img, 0, 5, 1, 1);
 
     auto descr = Gtk::make_managed<Gtk::Label>();
     descr->set_line_wrap();
     descr->set_line_wrap_mode(Pango::WRAP_WORD);
     descr->set_text(
         "<small>"
-        "Transformation matrix combines translation, scaling, rotation and shearing.\n"
-        "Elements E, F represent translation, A and D scale. Rotation angle is encoded in A, B, C, and D.\n"
+        "<a href=\"https://www.w3.org/TR/SVG11/coords.html#TransformMatrixDefined\">"
+        "2D transformation matrix</a> that combines translation (E,F), scaling (A,D),"
+        " rotation (A-D) and shearing (B,C)."
         "</small>"
     );
     descr->set_use_markup();
-    _page_transform.table().attach(*descr, 1, 4, 2, 1);
+    _page_transform.table().attach(*descr, 1, 5, 2, 1);
 
-    _page_transform.table().attach(_units_transform, 2, 5, 1, 1);
+    _page_transform.table().attach(_units_transform, 2, 4, 1, 1);
 
     _scalar_transform_f.signal_value_changed()
         .connect(sigc::mem_fun(*this, &Transformation::onTransformValueChanged));
 
     // Edit existing matrix
-    _page_transform.table().attach(_check_replace_matrix, 0, 5, 2, 1);
+    _page_transform.table().attach(_check_replace_matrix, 0, 4, 2, 1);
 
     _check_replace_matrix.set_active(false);
     _check_replace_matrix.signal_toggled()
