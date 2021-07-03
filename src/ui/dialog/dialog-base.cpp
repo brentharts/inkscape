@@ -41,6 +41,9 @@ namespace Dialog {
  */
 DialogBase::DialogBase(gchar const *prefs_path, Glib::ustring dialog_type)
     : Gtk::Box(Gtk::ORIENTATION_VERTICAL)
+    , desktop(nullptr)
+    , document(nullptr)
+    , selection(nullptr)
     , _name("DialogBase")
     , _prefs_path(prefs_path)
     , _dialog_type(dialog_type)

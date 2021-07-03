@@ -411,6 +411,48 @@ Export::Export()
     refreshArea();
 }
 
+Export::~Export ()
+{
+    selectModifiedConn.disconnect();
+    subselChangedConn.disconnect();
+    selectChangedConn.disconnect();
+}
+
+void Export::setDesktop(SPDesktop *desktop)
+{
+#if 0
+    {
+        {
+            selectModifiedConn.disconnect();
+            subselChangedConn.disconnect();
+            selectChangedConn.disconnect();
+        }
+        if (desktop && desktop->selection) {
+
+            selectChangedConn = desktop->selection->connectChanged(sigc::hide(sigc::mem_fun(*this, &Export::onSelectionChanged)));
+            subselChangedConn = desktop->connectToolSubselectionChanged(sigc::hide(sigc::mem_fun(*this, &Export::onSelectionChanged)));
+
+            //// Must check flags, so can't call widget_setup() directly.
+            selectModifiedConn = desktop->selection->connectModified(sigc::hide<0>(sigc::mem_fun(*this, &Export::onSelectionModified)));
+        }
+    }
+#endif
+}
+
+void Export::update()
+{
+    if (!_app) {
+        std::cerr << "Export::update(): _app is null" << std::endl;
+        return;
+    }
+
+    onSelectionChanged();
+    onSelectionModified(0);
+#if 0
+    setDesktop(getDesktop());
+#endif
+}
+
 /*
  * set the default filename to be that of the current path + document
  * with .png extension
@@ -620,17 +662,20 @@ inline void Export::findDefaultSelection()
  * If selection changed and "Export area" is set to "Selection"
  * recalculate bounds when the selection changes
  */
-void Export::selectionChanged(Selection *selection)
+void Export::onSelectionChanged()
 {
+    Inkscape::Selection *selection = SP_ACTIVE_DESKTOP->getSelection();
     if (manual_key != SELECTION_CUSTOM && selection) {
         current_key = SELECTION_SELECTION;
         refreshArea();
     }
+
     updateCheckbuttons();
 }
 
-void Export::selectionModified(Selection *selection, guint flags)
+void Export::onSelectionModified ( guint /*flags*/ )
 {
+    Inkscape::Selection * Sel;
     switch (current_key) {
     case SELECTION_DRAWING:
         if ( SP_ACTIVE_DESKTOP ) {
@@ -646,8 +691,9 @@ void Export::selectionModified(Selection *selection, guint flags)
         }
         break;
     case SELECTION_SELECTION:
-        if (selection->isEmpty() == false) {
-            Geom::OptRect bbox = selection->visualBounds();
+        Sel = SP_ACTIVE_DESKTOP->getSelection();
+        if (Sel->isEmpty() == false) {
+            Geom::OptRect bbox = Sel->visualBounds();
             if (bbox)
             {
                 setArea ( bbox->left(),

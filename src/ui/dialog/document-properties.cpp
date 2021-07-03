@@ -1361,10 +1361,9 @@ void DocumentProperties::build_gridspage()
  */
 void DocumentProperties::update_widgets()
 {
-    if (_wr.isUpdating()) return;
+    if (_wr.isUpdating() || !desktop) return;
 
-    SPDesktop *dt = getDesktop();
-    SPNamedView *nv = dt->getNamedView();
+    SPNamedView *nv = desktop->getNamedView();
 
     _wr.setUpdating (true);
     set_sensitive (true);
@@ -1377,29 +1376,29 @@ void DocumentProperties::update_widgets()
     _rcp_bord.setRgba32 (nv->bordercolor);
     _rcb_shad.setActive (nv->showpageshadow);
 
-    SPRoot *root = dt->getDocument()->getRoot();
-    _rcb_antialias.set_xml_target(root->getRepr(), dt->getDocument());
+    SPRoot *root = document->getRoot();
+    _rcb_antialias.set_xml_target(root->getRepr(), document);
     _rcb_antialias.setActive(root->style->shape_rendering.computed != SP_CSS_SHAPE_RENDERING_CRISPEDGES);
 
     if (nv->display_units) {
         _rum_deflt.setUnit (nv->display_units->abbr);
     }
 
-    double doc_w = dt->getDocument()->getRoot()->width.value;
-    Glib::ustring doc_w_unit = unit_table.getUnit(dt->getDocument()->getRoot()->width.unit)->abbr;
+    double doc_w = root->width.value;
+    Glib::ustring doc_w_unit = unit_table.getUnit(root->width.unit)->abbr;
     if (doc_w_unit == "") {
         doc_w_unit = "px";
-    } else if (doc_w_unit == "%" && dt->getDocument()->getRoot()->viewBox_set) {
+    } else if (doc_w_unit == "%" && root->viewBox_set) {
         doc_w_unit = "px";
-        doc_w = dt->getDocument()->getRoot()->viewBox.width();
+        doc_w = root->viewBox.width();
     }
-    double doc_h = dt->getDocument()->getRoot()->height.value;
-    Glib::ustring doc_h_unit = unit_table.getUnit(dt->getDocument()->getRoot()->height.unit)->abbr;
+    double doc_h = root->height.value;
+    Glib::ustring doc_h_unit = unit_table.getUnit(root->height.unit)->abbr;
     if (doc_h_unit == "") {
         doc_h_unit = "px";
-    } else if (doc_h_unit == "%" && dt->getDocument()->getRoot()->viewBox_set) {
+    } else if (doc_h_unit == "%" && root->viewBox_set) {
         doc_h_unit = "px";
-        doc_h = dt->getDocument()->getRoot()->viewBox.height();
+        doc_h = root->viewBox.height();
     }
     _page_sizer.setDim(Inkscape::Util::Quantity(doc_w, doc_w_unit), Inkscape::Util::Quantity(doc_h, doc_h_unit));
     _page_sizer.updateFitMarginsUI(nv->getRepr());

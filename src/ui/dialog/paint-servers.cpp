@@ -154,15 +154,13 @@ PaintServersDialog::PaintServersDialog()
     preview_document->getRoot()->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
     preview_document->ensureUpToDate();
     renderDrawing.setRoot(preview_document->getRoot()->invoke_show(renderDrawing, key, SP_ITEM_SHOW_DISPLAY));
-
-    // Load paint servers from resource files
-    load_sources();
 }
 
 void PaintServersDialog::documentReplaced()
 {
     if (document) {
         document_map[CURRENTDOC] = document;
+        load_sources();
         load_current_document();
     }
 }
@@ -225,7 +223,9 @@ void recurse_find_paint(SPObject* in, std::vector<Glib::ustring>& list)
 void PaintServersDialog::load_sources()
 {
     // Extract paints from the current file
-    load_document(document);
+    if (document) {
+        load_document(document);
+    }
 
     // Extract out paints from files in share/paint.
     for (auto &path : get_filenames(Inkscape::IO::Resource::PAINT, { ".svg" })) {

@@ -96,9 +96,9 @@ protected:
     Glib::ustring const _dialog_type; // Type of dialog (we could just use _pref_path?).
     InkscapeApplication *_app; // Used for state management
 
-    SPDesktop *desktop = nullptr;
-    SPDocument *document = nullptr;
-    Selection *selection = nullptr;
+    SPDesktop *desktop;
+    SPDocument *document;
+    Selection *selection;
 private:
     bool blink_off(); // timer callback
     bool on_key_press_event(GdkEventKey* key_event) override;

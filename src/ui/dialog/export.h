@@ -51,10 +51,7 @@ class Export : public DialogBase
 {
 public:
     Export ();
-    ~Export () override {};
-
-    void selectionChanged(Selection *selection) override;
-    void selectionModified(Selection *selection, guint flags) override;
+    ~Export () override;
 
     static Export &getInstance() {
         return *new Export();
@@ -201,9 +198,25 @@ private:
     void onBatchClicked ();
 
     /**
+     * Inkscape selection change callback
+     */
+    void onSelectionChanged ();
+    void onSelectionModified (guint flags);
+
+    /**
      * Filename modified callback
      */
     void onFilenameModified ();
+
+    /**
+     * Can be invoked for setting the desktop. Currently not used.
+     */
+    void setDesktop(SPDesktop *desktop);
+
+    /**
+     * Update active window.
+     */
+    void update() override;
 
     /**
      * Creates progress dialog for batch exporting.
