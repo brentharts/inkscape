@@ -460,6 +460,8 @@ SPGlyph* SvgFontsDialog::get_selected_glyph()
     return nullptr;
 }
 
+const int MARGIN_SPACE = 4;
+
 Gtk::Box* SvgFontsDialog::global_settings_tab(){
     _font_label          = new Gtk::Label(Glib::ustring("<b>") + _("Font Attributes") + "</b>", Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
     _horiz_adv_x_spin    = new AttrSpin( this, (gchar*) _("Horiz. Advance X:"), _("Default glyph width for horizontal text"), SPAttr::HORIZ_ADV_X);
@@ -478,10 +480,10 @@ Gtk::Box* SvgFontsDialog::global_settings_tab(){
     _font_face_label->set_use_markup();
 
     auto grid = Gtk::make_managed<Gtk::Grid>();
-    grid->set_column_spacing(4);
-    grid->set_row_spacing(4);
-    grid->set_margin_start(4);
-    const int indent = 8;
+    grid->set_column_spacing(MARGIN_SPACE);
+    grid->set_row_spacing(MARGIN_SPACE);
+    grid->set_margin_start(MARGIN_SPACE);
+    const int indent = 2 * MARGIN_SPACE;
     int row = 0;
     grid->attach(*_font_label, 0, row++, 2);
     SvgFontsDialog::AttrSpin* font[] = {_horiz_adv_x_spin, _horiz_origin_x_spin, _horiz_origin_y_spin};
@@ -935,8 +937,9 @@ Gtk::Box* SvgFontsDialog::kerning_tab(){
     kerning_amount_hbox->pack_start(*Gtk::manage(new Gtk::Label(_("Kerning Value:"))), false,false);
     kerning_amount_hbox->pack_start(*kerning_slider, true,true);
 
-    kerning_preview.set_size(300 + 20, 150 + 20);
-    _font_da.set_size(300 + 50 + 20, 60 + 20);
+    kerning_preview.set_size(250 + 20, 150 + 20);
+    _font_da.set_size(200 + 50 + 20, 60 + 20);
+    // _font_da.set_size(-1, 60 + 20);
 
     return &kerning_vbox;
 }
@@ -1026,14 +1029,19 @@ SvgFontsDialog::SvgFontsDialog()
     kerning_slider = Gtk::manage(new Gtk::Scale(Gtk::ORIENTATION_HORIZONTAL));
     _add.signal_clicked().connect(sigc::mem_fun(*this, &SvgFontsDialog::add_font));
 
-    Gtk::Box* hbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL));
-    Gtk::Box* vbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
+    Gtk::Box* body_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
+    Gtk::Box* header_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL));
 
-    vbox->pack_start(_FontsList);
-    vbox->pack_start(_add, false, false);
-    hbox->add(*vbox);
-    hbox->add(_font_settings);
-    add(*hbox);
+    _fonts_scroller.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+    _fonts_scroller.add(_FontsList);
+    _fonts_scroller.show();
+    header_box->pack_start(_fonts_scroller);
+    header_box->pack_start(_add, false, false, MARGIN_SPACE);
+    header_box->set_margin_bottom(MARGIN_SPACE);
+    _add.set_valign(Gtk::ALIGN_CENTER);
+    body_box->add(*header_box);
+    body_box->add(_font_settings);
+    add(*body_box);
 
     // List of SVGFonts declared in a document:
     _model = Gtk::ListStore::create(_columns);

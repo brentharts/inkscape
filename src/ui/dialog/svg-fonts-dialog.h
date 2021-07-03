@@ -196,6 +196,7 @@ private:
     Glib::RefPtr<Gtk::ListStore> _model;
     Columns _columns;
     Gtk::TreeView _FontsList;
+    Gtk::ScrolledWindow _fonts_scroller;
 
     class GlyphsColumns : public Gtk::TreeModel::ColumnRecord
     {
