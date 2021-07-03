@@ -93,11 +93,14 @@ public:
     public:
         AttrEntry(SvgFontsDialog* d, gchar* lbl, Glib::ustring tooltip, const SPAttr attr);
         void set_text(char*);
+        Gtk::Entry* get_entry() { return &entry; }
+        Gtk::Label* get_label() { return _label; }
     private:
         SvgFontsDialog* dialog;
         void on_attr_changed();
         Gtk::Entry entry;
         SPAttr attr;
+        Gtk::Label* _label;
     };
 
     class AttrSpin : public Gtk::Box
@@ -107,11 +110,13 @@ public:
         void set_value(double v);
         void set_range(double low, double high);
         Inkscape::UI::Widget::SpinButton* getSpin() { return &spin; }
+        Gtk::Label* get_label() { return _label; }
     private:
         SvgFontsDialog* dialog;
         void on_attr_changed();
         Inkscape::UI::Widget::SpinButton spin;
         SPAttr attr;
+        Gtk::Label* _label;
     };
 
 private:

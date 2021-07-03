@@ -107,10 +107,12 @@ SvgFontsDialog::AttrEntry::AttrEntry(SvgFontsDialog* d, gchar* lbl, Glib::ustrin
     this->dialog = d;
     this->attr = attr;
     entry.set_tooltip_text(tooltip);
-    auto label = new Gtk::Label(lbl);
-    this->pack_start(*Gtk::manage(label), false, false, 4);
-    this->pack_end(entry, true, true);
-    this->show_all();
+    _label = Gtk::make_managed<Gtk::Label>(lbl);
+    _label->show();
+    _label->set_halign(Gtk::ALIGN_START);
+    // this->pack_start(*Gtk::manage(label), false, false, 4);
+    // this->pack_end(entry, true, true);
+    // this->show_all();
 
     entry.signal_changed().connect(sigc::mem_fun(*this, &SvgFontsDialog::AttrEntry::on_attr_changed));
 }
@@ -156,12 +158,15 @@ SvgFontsDialog::AttrSpin::AttrSpin(SvgFontsDialog* d, gchar* lbl, Glib::ustring 
     this->dialog = d;
     this->attr = attr;
     spin.set_tooltip_text(tooltip);
-    auto label = new Gtk::Label(lbl);
+    spin.show();
+    _label = Gtk::make_managed<Gtk::Label>(lbl);
+    _label->show();
+    _label->set_halign(Gtk::ALIGN_START);
     this->set_border_width(2);
     this->set_spacing(6);
-    this->pack_start(*Gtk::manage(label), false, false);
-    this->pack_end(spin, true, true);
-    this->show_all();
+    // this->pack_start(*Gtk::manage(label), false, false);
+    // this->pack_end(spin, true, true);
+    // this->show_all();
     spin.set_range(0, 4096);
     spin.set_increments(16, 0);
     spin.signal_value_changed().connect(sigc::mem_fun(*this, &SvgFontsDialog::AttrSpin::on_attr_changed));
@@ -472,24 +477,39 @@ Gtk::Box* SvgFontsDialog::global_settings_tab(){
     _font_label->set_use_markup();
     _font_face_label->set_use_markup();
 
+    auto grid = Gtk::make_managed<Gtk::Grid>();
+    grid->set_column_spacing(4);
+    grid->set_row_spacing(4);
+    grid->set_margin_start(4);
+    const int indent = 8;
+    int row = 0;
+    grid->attach(*_font_label, 0, row++, 2);
+    SvgFontsDialog::AttrSpin* font[] = {_horiz_adv_x_spin, _horiz_origin_x_spin, _horiz_origin_y_spin};
+    for (auto spin : font) {
+        spin->get_label()->set_margin_start(indent);
+        grid->attach(*spin->get_label(), 0, row);
+        grid->attach(*spin->getSpin(), 1, row++);
+    }
+
+    grid->attach(*_font_face_label, 0, row++, 2);
+    _familyname_entry->get_label()->set_margin_start(indent);
+    grid->attach(*_familyname_entry->get_label(), 0, row);
+    grid->attach(*_familyname_entry->get_entry(), 1, row++, 2);
+
+    SvgFontsDialog::AttrSpin* face[] = {_units_per_em_spin, _ascent_spin, _descent_spin, _cap_height_spin, _x_height_spin};
+    for (auto spin : face) {
+        spin->get_label()->set_margin_start(indent);
+        grid->attach(*spin->get_label(), 0, row);
+        grid->attach(*spin->getSpin(), 1, row++);
+    }
+
     global_vbox.set_border_width(2);
-    global_vbox.pack_start(*_font_label);
-    global_vbox.pack_start(*_horiz_adv_x_spin);
-    global_vbox.pack_start(*_horiz_origin_x_spin);
-    global_vbox.pack_start(*_horiz_origin_y_spin);
-    global_vbox.pack_start(*_font_face_label);
-    global_vbox.pack_start(*_familyname_entry);
-    global_vbox.pack_start(*_units_per_em_spin);
-    global_vbox.pack_start(*_ascent_spin);
-    global_vbox.pack_start(*_descent_spin);
-    global_vbox.pack_start(*_cap_height_spin);
-    global_vbox.pack_start(*_x_height_spin);
+    global_vbox.pack_start(*grid);
 
 /*    global_vbox->add(*AttrCombo((gchar*) _("Style:"), SPAttr::FONT_STYLE));
     global_vbox->add(*AttrCombo((gchar*) _("Variant:"), SPAttr::FONT_VARIANT));
     global_vbox->add(*AttrCombo((gchar*) _("Weight:"), SPAttr::FONT_WEIGHT));
 */
-
     return &global_vbox;
 }
 
