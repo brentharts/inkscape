@@ -1855,6 +1855,30 @@ Geom::Point SPDesktop::dt2doc(Geom::Point const &p) const
     return p * dt2doc();
 }
 
+sigc::connection SPDesktop::connect_gradient_stop_selected(const sigc::slot<void, void*, SPStop*>& slot) {
+    return _gradient_stop_selected.connect(slot);
+}
+
+sigc::connection SPDesktop::connect_control_point_selected(const sigc::slot<void, void*, Inkscape::UI::ControlPointSelection*>& slot) {
+    return _control_point_selected.connect(slot);
+}
+
+sigc::connection SPDesktop::connect_text_cursor_moved(const sigc::slot<void, void*, Inkscape::UI::Tools::TextTool*>& slot) {
+    return _text_cursor_moved.connect(slot);
+}
+
+void SPDesktop::emit_gradient_stop_selected(void* sender, SPStop* stop) {
+    _gradient_stop_selected.emit(sender, stop);
+}
+
+void SPDesktop::emit_control_point_selected(void* sender, Inkscape::UI::ControlPointSelection* selection) {
+    _control_point_selected.emit(sender, selection);
+}
+
+void SPDesktop::emit_text_cursor_moved(void* sender, Inkscape::UI::Tools::TextTool* tool) {
+    _text_cursor_moved.emit(sender, tool);
+}
+
 /*
  * Pop event context from desktop's context stack. Never used.
  */
