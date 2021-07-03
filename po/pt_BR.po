@@ -20660,7 +20660,7 @@ msgstr "Medidor"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:850
 msgid "Bounding box to use"
-msgstr "Caixa Delimitadora usada"
+msgstr "Caixa Delimitadora para Usar"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:851
 msgid "Visual bounding box"
@@ -20682,7 +20682,7 @@ msgstr "Este modo considera apenas as formas dos caminhos"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:858
 msgid "Conversion to guides"
-msgstr "Conversão de objetos em guias"
+msgstr "Conversão de Objetos em Guias"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:859
 msgid "Keep objects after conversion to guides"
@@ -20800,7 +20800,7 @@ msgid ""
 "Update the outline when dragging or transforming nodes; if this is off, the "
 "outline will only update when completing a drag"
 msgstr ""
-"Atualize o contorno ao arrastar ou transformar nós; se estiver desligado, o "
+"Atualizar o contorno ao arrastar ou transformar nós; se estiver desligado, o "
 "contorno só será atualizado ao completar um arrasto"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:904
@@ -20812,7 +20812,7 @@ msgid ""
 "Update paths when dragging or transforming nodes; if this is off, paths will "
 "only be updated when completing a drag"
 msgstr ""
-"Atualize caminhos ao arrastar ou transformar nós; se estiver desativado, os "
+"Atualizar caminhos ao arrastar ou transformar nós; se estiver desativado, os "
 "caminhos só serão atualizados ao completar um arrasto"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:906
@@ -20925,26 +20925,25 @@ msgstr ""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:980
 msgid "Show font samples in the drop-down list"
-msgstr "Mostrar exemplos de fontes na lista suspensa"
+msgstr "Exibir exemplos das fontes na lista suspensa"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:981
 msgid ""
 "Show font samples alongside font names in the drop-down list in Text bar"
 msgstr ""
-"Mostrar amostras de fontes ao lado dos nomes das fontes na lista suspensa na "
+"Exibir amostras das fontes ao lado dos nomes das fontes na lista suspensa na "
 "barra de texto"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:983
 msgid "Show font substitution warning dialog"
-msgstr "Mostrar diálogo de aviso de substituição de fonte"
+msgstr "Exibir diálogo de aviso de substituição de fonte"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:984
 msgid ""
 "Show font substitution warning dialog when requested fonts are not available "
 "on the system"
 msgstr ""
-"Mostrar a caixa de aviso de substituição da fonte quando as fontes "
-"solicitadas não estiverem disponíveis no sistema"
+"Exibir diálogo de substituição da fonte quando as fontes solicitadas não estiverem disponíveis no sistema"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:986
 msgid "Font sample"
@@ -21488,14 +21487,14 @@ msgstr ""
 #: ../src/ui/dialog/inkscape-preferences.cpp:1554
 msgid "Show filter primitives infobox (requires restart)"
 msgstr ""
-"Mostrar caixa de informações de primitivos de filtro (requer reinicialização)"
+"Mostrar caixa de informações de primitivas de filtro (requer reinicialização)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1556
 msgid ""
 "Show icons and descriptions for the filter primitives available at the "
 "filter effects dialog"
 msgstr ""
-"Mostra os ícones e descrições dos filtros primitivos disponíveis na janela "
+"Mostra os ícones e descrições das primitivas filtros disponíveis na janela "
 "de efeitos do filtro"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1559
@@ -21815,7 +21814,7 @@ msgstr "Salvar e restaurar a geometria das janelas para cada documento"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1779
 msgid "Zoom when window is resized"
-msgstr "Ampliar quando janela for redimensionada"
+msgstr "Zoom ajustado quando janela é redimensionada"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1780
 msgctxt "Dialog on top"
@@ -22228,7 +22227,7 @@ msgstr ""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2019
 msgid "Path data"
-msgstr "Caminho dos dados"
+msgstr "Caminho dos Dados"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2022
 msgid "Absolute"
@@ -22343,7 +22342,7 @@ msgstr "Excluir propriedades de estilo inadequadas"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2058
 msgid "Non-useful Style Properties Actions"
-msgstr "Ações de propriedades de estilo não úteis"
+msgstr "Ações de Propriedades de Estilo não Úteis"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2061
 msgid ""
@@ -22363,7 +22362,7 @@ msgstr "Excluir propriedades de estilo redundantes"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2065
 msgid "Check Attributes and Style Properties on"
-msgstr "Verifique os atributos e propriedades de estilo em"
+msgstr "Verificar os Atributos e Propriedades de Estilo quando"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2067
 msgid "Reading"
@@ -22490,7 +22489,7 @@ msgstr "Colorimetria Absoluta"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2107
 msgid "Display adjustment"
-msgstr "Ajustes de exibição"
+msgstr "Ajustes de Exibição"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2116
 #, c-format
@@ -22499,7 +22498,7 @@ msgid ""
 "Searched directories:%s"
 msgstr ""
 "O perfil ICC a usar para calibrar exibição de saída.\n"
-"Pastas procurados:%s"
+"Pastas verificadas:%s"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2117
 msgid "Display profile:"
@@ -22507,11 +22506,11 @@ msgstr "Perfil de exibição:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2122
 msgid "Retrieve profile from display"
-msgstr "Obter perfil de exibição"
+msgstr "Obter perfil do monitor"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2125
 msgid "Retrieve profiles from those attached to displays via XICC"
-msgstr "Recupere perfis daqueles anexados a monitores via XICC"
+msgstr "Recupera perfis daqueles anexados a monitores via XICC"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2127
 msgid "Retrieve profiles from those attached to displays"
@@ -22590,7 +22589,7 @@ msgstr "<nenhum>"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2208
 msgid "Color management"
-msgstr "Gestão de cores"
+msgstr "Gerenciamento de cores"
 
 # O "Ao vivo" não correspondia bem com o diálogo, pois a palavra Pré-visualizar ja expõe o sentido de uma visualização em tempo real. Além de ser mais conhecido na maioria dos programas graficos
 #: ../src/ui/dialog/inkscape-preferences.cpp:2211
@@ -22676,7 +22675,7 @@ msgstr "Marcadores personalizados de cor da mesma cor do objeto"
 #: ../src/ui/dialog/inkscape-preferences.cpp:2245
 #: ../src/ui/dialog/inkscape-preferences.cpp:2490
 msgid "Update marker color when object color changes"
-msgstr "Atualize a cor do marcador quando a cor do objeto mudar"
+msgstr "Atualizar a cor do marcador quando a cor do objeto mudar"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2248
 msgid "Select in all layers"
@@ -23276,7 +23275,7 @@ msgstr "Antes de aplicar"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2462
 msgid "Do not group clipped/masked objects"
-msgstr "Não agrupe objetos clipados/mascarados"
+msgstr "Não agrupar objetos clipados/mascarados"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2463
 msgid "Put every clipped/masked object in its own group"
@@ -23316,7 +23315,7 @@ msgstr "Clips e Máscaras"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2484
 msgid "Stroke Style Markers"
-msgstr "Estilo dos Marcadores de Cotorno"
+msgstr "Estilo dos Marcadores de Contorno"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2486
 #: ../src/ui/dialog/inkscape-preferences.cpp:2488
@@ -23338,7 +23337,7 @@ msgstr "Limpando documento"
 #: ../src/ui/dialog/inkscape-preferences.cpp:2496
 #: ../src/ui/dialog/inkscape-preferences.cpp:2498
 msgid "Remove unused swatches when doing a document cleanup"
-msgstr "Remover Amostras de Cores não utilizadas ao fazer uma limpeza no documento"
+msgstr "Remover \"Amostras de Cores\" não utilizadas ao fazer uma limpeza no documento"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2499
 msgid "Cleanup"
@@ -23450,7 +23449,7 @@ msgstr "Qualidade mínima (mais rápido)"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2555
 msgid "Gaussian blur quality for display"
-msgstr "Qualidade do desfoque gaussiano para exibição"
+msgstr "Qualidade do Desfoque Gaussiano na Exibição"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2557
 #: ../src/ui/dialog/inkscape-preferences.cpp:2581
@@ -23487,7 +23486,7 @@ msgstr ""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2579
 msgid "Filter effects quality for display"
-msgstr "Qualidades dos filtros para exibição"
+msgstr "Qualidade dos Filtros na Exibição"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2591
 #: ../src/ui/dialog/print.cpp:107
@@ -23813,7 +23812,7 @@ msgstr ""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3331
 msgid "System info"
-msgstr "Informações do sistema"
+msgstr "Informações do Sistema"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3335
 msgid "Reset Preferences"
@@ -23933,7 +23932,7 @@ msgstr "Abrir pasta da interface do usuário"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3390
 msgid "User UI:"
-msgstr "Interface do Usuário:"
+msgstr "Interface do usuário:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3391
 msgid "Location of the user’s user interface description files"
@@ -23985,11 +23984,11 @@ msgstr "Pasta Personalizada de Fontes"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3438
 msgid "Icon theme:"
-msgstr "Temas de ícones:"
+msgstr "Temas de Ícones:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3438
 msgid "Locations of icon themes"
-msgstr "Local dos temas de ícones"
+msgstr "Locais dos temas de ícones"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3440
 msgid "System"
@@ -34045,7 +34044,7 @@ msgstr "Selecionar símbolo de uma paleta de símbolos"
 
 #: ../src/verbs.cpp:2844
 msgid "_Paint Servers..."
-msgstr "_Padrões & Hachuras..."
+msgstr "_Padrões e Hachuras..."
 
 #: ../src/verbs.cpp:2846
 msgid "Select paint server from a collection"
