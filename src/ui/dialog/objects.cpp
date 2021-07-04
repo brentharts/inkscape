@@ -350,13 +350,12 @@ void ObjectsPanel::_objectsChangedWrapper(SPObject */*obj*/) {
  */
 void ObjectsPanel::_objectsChanged(SPObject */*obj*/)
 {
-    if (_desktop) {
+    if (desktop) {
         //Get the current document's root and use that to enumerate the tree
-        SPDocument* document = _desktop->doc();
+        SPDocument* document = desktop->doc();
         SPRoot* root = document->getRoot();
         if ( root ) {
             _selectedConnection.block(); // Will be unblocked after the queue has been processed fully
-            _documentChangedCurrentLayer.block();
 
             //Clear the tree store
             _store->clear(); // This will increment it's stamp, making all old iterators
@@ -590,8 +589,8 @@ void ObjectsPanel::_objectsSelected( Selection *sel ) {
         _updateObjectSelected(item, (*i)==items.back(), false);
     }
     if (!item) {
-        if (_desktop->currentLayer() && SP_IS_ITEM(_desktop->currentLayer())) {
-            item = SP_ITEM(_desktop->currentLayer());
+        if (desktop->currentLayer() && SP_IS_ITEM(desktop->currentLayer())) {
+            item = SP_ITEM(desktop->currentLayer());
             _setCompositingValues(item);
             _updateObjectSelected(item, false, true);
         }
@@ -734,12 +733,9 @@ void ObjectsPanel::_updateObjectSelected(SPItem* item, bool scrollto, bool expan
  */
 void ObjectsPanel::_pushTreeSelectionToCurrent()
 {
-    if ( _desktop && _desktop->currentRoot() ) {
-        //block connections for selection and compositing values to prevent interference
-        _selectionChangedConnection.block();
-        _documentChangedCurrentLayer.block();
+    if ( desktop && desktop->currentRoot() ) {
         //Clear the selection and then iterate over the tree selection, pushing each item to the desktop
-        _desktop->selection->clear();
+        desktop->selection->clear();
         if (_tree.get_selection()->count_selected_rows() == 0) {
             _store->foreach_iter(sigc::mem_fun(*this, &ObjectsPanel::_clearPrevSelectionState));
         }
@@ -748,10 +744,6 @@ void ObjectsPanel::_pushTreeSelectionToCurrent()
         _store->foreach_iter(sigc::bind<bool *>(sigc::mem_fun(*this, &ObjectsPanel::_selectItemCallback), &setOpacity, &first_pass));
         first_pass = false;
         _store->foreach_iter(sigc::bind<bool *>(sigc::mem_fun(*this, &ObjectsPanel::_selectItemCallback), &setOpacity, &first_pass));
-
-        //unblock connections, unless we were already blocking them beforehand
-        _selectionChangedConnection.unblock();
-        _documentChangedCurrentLayer.unblock();
 
         _checkTreeSelection();
     }
@@ -768,9 +760,9 @@ bool ObjectsPanel::_selectItemCallback(const Gtk::TreeModel::iterator& iter, boo
     bool selected = _tree.get_selection()->is_selected(iter);
     if (selected) { // All items selected in the treeview will be added to the current selection
         /* Adding/removing only the items that were selected or deselected since the previous call to _pushTreeSelectionToCurrent()
-         * is very slow on large documents, because _desktop->selection->remove(item) needs to traverse the whole ObjectSet to find
+         * is very slow on large documents, because desktop->selection->remove(item) needs to traverse the whole ObjectSet to find
          * the item to be removed. When all N objects are selected in a document, clearing the whole selection would require O(N^2)
-         * That's why we simply clear the complete selection using _desktop->selection->clear(), and re-add all items one by one.
+         * That's why we simply clear the complete selection using desktop->selection->clear(), and re-add all items one by one.
          * This is much faster.
          */
 
@@ -782,14 +774,14 @@ bool ObjectsPanel::_selectItemCallback(const Gtk::TreeModel::iterator& iter, boo
             SPItem *item = row[_model->_colObject];
             if (!SP_IS_GROUP(item) || SP_GROUP(item)->layerMode() != SPGroup::LAYER) {
                 //If the item is not a layer, then select it and set the current layer to its parent (if it's the first item)
-                if (_desktop->selection->isEmpty()) {
-                    _desktop->setCurrentLayer(item->parent);
+                if (desktop->selection->isEmpty()) {
+                    desktop->setCurrentLayer(item->parent);
                 }
-                _desktop->selection->add(item);
+                desktop->selection->add(item);
             } else {
                 //If the item is a layer, set the current layer
-                if (_desktop->selection->isEmpty()) {
-                    _desktop->setCurrentLayer(item);
+                if (desktop->selection->isEmpty()) {
+                    desktop->setCurrentLayer(item);
                 }
             }
             if (*setCompositingValues) {
@@ -877,7 +869,7 @@ void ObjectsPanel::_setLockedIter( const Gtk::TreeModel::iterator& iter, const b
  */
 bool ObjectsPanel::_handleKeyEvent(GdkEventKey *event)
 {
-    if (!_desktop)
+    if (!desktop)
         return false;
 
     Gtk::AccelKey shortcut = Inkscape::Shortcuts::get_from_event(event);
@@ -892,21 +884,21 @@ bool ObjectsPanel::_handleKeyEvent(GdkEventKey *event)
 
         // defocus:
         case GDK_KEY_Escape:
-            if (_desktop->canvas) {
-                _desktop->canvas->grab_focus();
+            if (desktop->canvas) {
+                desktop->canvas->grab_focus();
                 return true;
             }
             break;
     }
 
     // invoke user defined shortcuts first
-    bool done = Inkscape::Shortcuts::getInstance().invoke_verb(event, _desktop);
+    bool done = Inkscape::Shortcuts::getInstance().invoke_verb(event, desktop);
     if (done) {
         return true;
     }
 
     // handle events for the treeview
-    //  bool empty = _desktop->selection->isEmpty();
+    //  bool empty = desktop->selection->isEmpty();
 
     switch (Inkscape::UI::Tools::get_latin_keyval(event)) {
         case GDK_KEY_Return:
@@ -1026,11 +1018,11 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
                         Gtk::TreeModel::Row row = *iter;
                         SPItem *item = row[_model->_colObject];
                         if (col == _tree.get_column(COL_VISIBLE - 1)) {
-                            _desktop->toggleLayerSolo( item );
-                            DocumentUndo::maybeDone(_desktop->doc(), "layer:solo", SP_VERB_LAYER_SOLO, _("Toggle layer solo"));
+                            desktop->toggleLayerSolo( item );
+                            DocumentUndo::maybeDone(desktop->doc(), "layer:solo", SP_VERB_LAYER_SOLO, _("Toggle layer solo"));
                         } else if (col == _tree.get_column(COL_LOCKED - 1)) {
-                            _desktop->toggleLockOtherLayers( item );
-                            DocumentUndo::maybeDone(_desktop->doc(), "layer:lockothers", SP_VERB_LAYER_LOCK_OTHERS, _("Lock other layers"));
+                            desktop->toggleLockOtherLayers( item );
+                            DocumentUndo::maybeDone(desktop->doc(), "layer:lockothers", SP_VERB_LAYER_LOCK_OTHERS, _("Lock other layers"));
                         }
                     }
                 } else {
@@ -1056,7 +1048,7 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
                                 item->setHidden(!newValue);
                                 item->updateRepr(SP_OBJECT_WRITE_NO_CHILDREN | SP_OBJECT_WRITE_EXT);
                             }
-                            DocumentUndo::done( _desktop->doc() , SP_VERB_DIALOG_OBJECTS,
+                            DocumentUndo::done( desktop->doc() , SP_VERB_DIALOG_OBJECTS,
                                             newValue? _("Unhide objects") : _("Hide objects"));
                             overVisible = false;
                         }
@@ -1076,7 +1068,7 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
                             item->setLocked( newValue );
                             item->updateRepr(SP_OBJECT_WRITE_NO_CHILDREN | SP_OBJECT_WRITE_EXT);
                         }
-                        DocumentUndo::done( _desktop->doc() , SP_VERB_DIALOG_OBJECTS,
+                        DocumentUndo::done( desktop->doc() , SP_VERB_DIALOG_OBJECTS,
                                             newValue? _("Lock objects") : _("Unlock objects"));
 
                     } else if (col == _tree.get_column(COL_TYPE - 1)) {
@@ -1088,7 +1080,7 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
                             row[_model->_colType] = newValue ? 1: 2;
                             g->setLayerMode(newValue ? SPGroup::GROUP : SPGroup::LAYER);
                             g->updateRepr(SP_OBJECT_WRITE_NO_CHILDREN | SP_OBJECT_WRITE_EXT);
-                            DocumentUndo::done( _desktop->doc() , SP_VERB_DIALOG_OBJECTS,
+                            DocumentUndo::done( desktop->doc() , SP_VERB_DIALOG_OBJECTS,
                                             newValue? _("Layer to group") : _("Group to layer"));
                             _pushTreeSelectionToCurrent();
                         }
@@ -1101,7 +1093,7 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
                             row[_model->_colInsertOrder] = newValue ? 2: 1;
                             g->setInsertBottom(newValue);
                             g->updateRepr(SP_OBJECT_WRITE_NO_CHILDREN | SP_OBJECT_WRITE_EXT);
-                            DocumentUndo::done( _desktop->doc() , SP_VERB_DIALOG_OBJECTS,
+                            DocumentUndo::done( desktop->doc() , SP_VERB_DIALOG_OBJECTS,
                                             newValue? _("Set insert mode bottom") : _("Set insert mode top"));
                         }
                     }*/ else if (col == _tree.get_column(COL_HIGHLIGHT - 1)) {
@@ -1281,13 +1273,13 @@ void ObjectsPanel::_storeDragSource(const Gtk::TreeModel::iterator& iter)
  */
 void ObjectsPanel::_doTreeMove( )
 {
-    g_assert(_desktop != nullptr);
-    g_assert(_document != nullptr);
+    g_assert(desktop != nullptr);
+    g_assert(document != nullptr);
 
     std::vector<gchar *> idvector;
 
     //Clear the desktop selection
-    _desktop->selection->clear();
+    desktop->selection->clear();
     while (!_dnd_source.empty())
     {
         SPItem *obj = _dnd_source.back();
@@ -1304,23 +1296,23 @@ void ObjectsPanel::_doTreeMove( )
         //Grab the id from the vector, get the item in the document and select it
         gchar * id = idvector.back();
         idvector.pop_back();
-        SPObject *obj = _document->getObjectById(id);
+        SPObject *obj = document->getObjectById(id);
         g_free(id);
         if (obj && SP_IS_ITEM(obj)) {
             SPItem *item = SP_ITEM(obj);
             if (!SP_IS_GROUP(item) || SP_GROUP(item)->layerMode() != SPGroup::LAYER)
             {
-                if (_desktop->selection->isEmpty()) _desktop->setCurrentLayer(item->parent);
-                _desktop->selection->add(item);
+                if (desktop->selection->isEmpty()) desktop->setCurrentLayer(item->parent);
+                desktop->selection->add(item);
             }
             else
             {
-                if (_desktop->selection->isEmpty()) _desktop->setCurrentLayer(item);
+                if (desktop->selection->isEmpty()) desktop->setCurrentLayer(item);
             }
         }
     }
 
-    DocumentUndo::done( _desktop->doc() , SP_VERB_NONE,
+    DocumentUndo::done( desktop->doc() , SP_VERB_NONE,
                                             _("Moved objects"));
 }
 
@@ -1330,7 +1322,6 @@ void ObjectsPanel::_doTreeMove( )
 void ObjectsPanel::_blockAllSignals(bool should_block = true) {
 
     // incoming signals
-    _documentChangedCurrentLayer.block(should_block);
     _isolationConnection.block(should_block);
     _opacityConnection.block(should_block);
     _blendConnection.block(should_block);
@@ -1340,12 +1331,8 @@ void ObjectsPanel::_blockAllSignals(bool should_block = true) {
         // become unpredictable after the tree has been updated
         _pending->_signal.disconnect();
     }
-
-    _selectionChangedConnection.block(should_block);
     // outgoing signal
     _selectedConnection.block(should_block);
-
-    // These are not blocked: desktopChangeConn, _documentChangedConnection
 }
 
 /**
@@ -1353,10 +1340,10 @@ void ObjectsPanel::_blockAllSignals(bool should_block = true) {
  */
 void ObjectsPanel::_fireAction( unsigned int code )
 {
-    if ( _desktop ) {
+    if ( desktop ) {
         Verb *verb = Verb::get( code );
         if ( verb ) {
-            SPAction *action = verb->get_action(_desktop);
+            SPAction *action = verb->get_action(desktop);
             if ( action ) {
                 sp_action_perform( action, nullptr );
             }
@@ -1402,7 +1389,7 @@ void ObjectsPanel::_takeAction( int val )
 bool ObjectsPanel::_executeAction()
 {
     // Make sure selected layer hasn't changed since the action was triggered
-    if ( _document && _pending)
+    if ( document && _pending)
     {
         int val = _pending->_actionCode;
 //        SPObject* target = _pending->_target;
@@ -1420,7 +1407,7 @@ bool ObjectsPanel::_executeAction()
             break;
             case BUTTON_TOP:
             {
-                if (_desktop->selection->isEmpty())
+                if (desktop->selection->isEmpty())
                 {
                     _fireAction( SP_VERB_LAYER_TO_TOP );
                 }
@@ -1432,7 +1419,7 @@ bool ObjectsPanel::_executeAction()
             break;
             case BUTTON_BOTTOM:
             {
-                if (_desktop->selection->isEmpty())
+                if (desktop->selection->isEmpty())
                 {
                     _fireAction( SP_VERB_LAYER_TO_BOTTOM );
                 }
@@ -1444,7 +1431,7 @@ bool ObjectsPanel::_executeAction()
             break;
             case BUTTON_UP:
             {
-                if (_desktop->selection->isEmpty())
+                if (desktop->selection->isEmpty())
                 {
                     _fireAction( SP_VERB_LAYER_RAISE );
                 }
@@ -1456,7 +1443,7 @@ bool ObjectsPanel::_executeAction()
             break;
             case BUTTON_DOWN:
             {
-                if (_desktop->selection->isEmpty())
+                if (desktop->selection->isEmpty())
                 {
                     _fireAction( SP_VERB_LAYER_LOWER );
                 }
@@ -1468,7 +1455,7 @@ bool ObjectsPanel::_executeAction()
             break;
             case BUTTON_DUPLICATE:
             {
-                if (_desktop->selection->isEmpty())
+                if (desktop->selection->isEmpty())
                 {
                     _fireAction( SP_VERB_LAYER_DUPLICATE );
                 }
@@ -1480,7 +1467,7 @@ bool ObjectsPanel::_executeAction()
             break;
             case BUTTON_DELETE:
             {
-                if (_desktop->selection->isEmpty())
+                if (desktop->selection->isEmpty())
                 {
                     _fireAction( SP_VERB_LAYER_DELETE );
                 }
@@ -1556,12 +1543,12 @@ bool ObjectsPanel::_executeAction()
             break;
             case BUTTON_COLLAPSE_ALL:
             {
-                for (auto& obj: _document->getRoot()->children) {
+                for (auto& obj: document->getRoot()->children) {
                     if (SP_IS_GROUP(&obj)) {
                         _setCollapsed(SP_GROUP(&obj));
                     }
                 }
-                _objectsChanged(_document->getRoot());
+                _objectsChanged(document->getRoot());
             }
             break;
             case DRAGNDROP:
@@ -1608,13 +1595,13 @@ void ObjectsPanel::_handleEdited(const Glib::ustring& path, const Glib::ustring&
  */
 void ObjectsPanel::_renameObject(Gtk::TreeModel::Row row, const Glib::ustring& name)
 {
-    if ( row && _desktop) {
+    if ( row && desktop) {
         SPItem* item = row[_model->_colObject];
         if ( item ) {
             gchar const* oldLabel = item->label();
             if ( !name.empty() && (!oldLabel || name != oldLabel) ) {
                 item->setLabel(name.c_str());
-                DocumentUndo::done( _desktop->doc() , SP_VERB_NONE,
+                DocumentUndo::done( desktop->doc() , SP_VERB_NONE,
                                                     _("Rename object"));
             }
         }
@@ -1731,7 +1718,7 @@ void ObjectsPanel::_opacityValueChanged()
 {
     _blockCompositeUpdate = true;
     _tree.get_selection()->selected_foreach_iter(sigc::mem_fun(*this, &ObjectsPanel::_opacityChangedIter));
-    DocumentUndo::maybeDone(_document, "opacity", SP_VERB_DIALOG_OBJECTS, _("Set object opacity"));
+    DocumentUndo::maybeDone(document, "opacity", SP_VERB_DIALOG_OBJECTS, _("Set object opacity"));
     _blockCompositeUpdate = false;
 }
 
@@ -1758,7 +1745,7 @@ void ObjectsPanel::_isolationValueChanged()
 {
     _blockCompositeUpdate = true;
     _tree.get_selection()->selected_foreach_iter(sigc::mem_fun(*this, &ObjectsPanel::_isolationChangedIter));
-    DocumentUndo::maybeDone(_document, "isolation", SP_VERB_DIALOG_OBJECTS, _("Set object isolation"));
+    DocumentUndo::maybeDone(document, "isolation", SP_VERB_DIALOG_OBJECTS, _("Set object isolation"));
     _blockCompositeUpdate = false;
 }
 
@@ -1789,7 +1776,7 @@ void ObjectsPanel::_blendValueChanged()
 {
     _blockCompositeUpdate = true;
     _tree.get_selection()->selected_foreach_iter(sigc::mem_fun(*this, &ObjectsPanel::_blendChangedIter));
-    DocumentUndo::done(_document, SP_VERB_DIALOG_OBJECTS, _("Set object blend mode"));
+    DocumentUndo::done(document, SP_VERB_DIALOG_OBJECTS, _("Set object blend mode"));
     _blockCompositeUpdate = false;
 }
 
@@ -1828,7 +1815,7 @@ void ObjectsPanel::_blurValueChanged()
 {
     _blockCompositeUpdate = true;
     _tree.get_selection()->selected_foreach_iter(sigc::bind<double>(sigc::mem_fun(*this, &ObjectsPanel::_blurChangedIter), _filter_modifier.get_blur_value()));
-    DocumentUndo::maybeDone(_document, "blur", SP_VERB_DIALOG_OBJECTS, _("Set object blur"));
+    DocumentUndo::maybeDone(document, "blur", SP_VERB_DIALOG_OBJECTS, _("Set object blur"));
     _blockCompositeUpdate = false;
 }
 
@@ -1860,7 +1847,7 @@ void ObjectsPanel::_blurChangedIter(const Gtk::TreeIter& iter, double blur)
                 Geom::Affine i2d (item->i2dt_affine());
                 double expansion = i2d.descrim();
                 radius *= expansion;
-                SPFilter *filter = modify_filter_gaussian_blur_from_item(_document, item, radius);
+                SPFilter *filter = modify_filter_gaussian_blur_from_item(document, item, radius);
                 sp_style_set_property_url(item, "filter", filter, false);
             } else if (item->style->filter.set && item->style->getFilter()) {
                 for (auto& primitive: item->style->getFilter()->children) {
@@ -1887,8 +1874,6 @@ void ObjectsPanel::_blurChangedIter(const Gtk::TreeIter& iter, double blur)
 ObjectsPanel::ObjectsPanel() :
     DialogBase("/dialogs/objects", "Objects"),
     _rootWatcher(nullptr),
-    _desktop(nullptr),
-    _document(nullptr),
     _model(nullptr),
     _pending(nullptr),
     _pending_update(false),
@@ -2204,33 +2189,12 @@ ObjectsPanel::ObjectsPanel() :
 }
 
 /**
- * Callback method that will be called when the desktop is destroyed
- */
-void ObjectsPanel::_desktopDestroyed(SPDesktop* /*desktop*/) {
-    // We need to make sure that we're not trying to update the tree after the desktop has vanished, e.g.
-    // when closing Inkscape. Preferably, we would have done so in the destructor of the ObjectsPanel. But
-    // as this destructor is never ever called, we will do this by attaching to the desktop_destroyed signal
-    // instead
-    _processQueue_sig.disconnect();
-    _executeUpdate_sig.disconnect();
-    _desktop = nullptr;
-}
-
-/**
  * Destructor
  */
 ObjectsPanel::~ObjectsPanel()
 {
     //Close the highlight selection dialog
     _colorSelectorDialog.hide();
-
-    // Disconnect signals
-    _desktopDestroyedConnection.disconnect();
-    _documentChangedConnection.disconnect();
-    _documentChangedCurrentLayer.disconnect();
-    _selectionChangedConnection.disconnect();
-    setDocument(nullptr, nullptr);
-    _desktopDestroyed(_desktop);
 
     if ( _model )
     {
@@ -2253,7 +2217,7 @@ ObjectsPanel::~ObjectsPanel()
 /**
  * Sets the current document
  */
-void ObjectsPanel::setDocument(SPDesktop* /*desktop*/, SPDocument* document)
+void ObjectsPanel::documentReplaced()
 {
     //Clear all object watchers
     _removeWatchers();
@@ -2266,8 +2230,6 @@ void ObjectsPanel::setDocument(SPDesktop* /*desktop*/, SPDocument* document)
         _rootWatcher = nullptr;
     }
 
-    _document = document;
-
     if (document && document->getRoot() && document->getRoot()->getRepr())
     {
         //Create a new root watcher for the document and then call _objectsChanged to fill the tree
@@ -2277,43 +2239,6 @@ void ObjectsPanel::setDocument(SPDesktop* /*desktop*/, SPDocument* document)
     }
 }
 
-/**
- * Set the current panel desktop
- */
-void ObjectsPanel::update()
-{
-    if (!_app) {
-        std::cerr << "ObjectsPanel::update(): _app is null" << std::endl;
-        return;
-    }
-
-    SPDesktop *desktop = getDesktop();
-
-    if ( desktop != _desktop ) {
-        _documentChangedConnection.disconnect();
-        _documentChangedCurrentLayer.disconnect();
-        _selectionChangedConnection.disconnect();
-        if ( _desktop ) {
-            _desktop = nullptr;
-        }
-
-        _desktop = getDesktop();
-        if ( _desktop ) {
-            //Connect desktop signals
-            _documentChangedConnection = _desktop->connectDocumentReplaced( sigc::mem_fun(*this, &ObjectsPanel::setDocument));
-
-            _documentChangedCurrentLayer = _desktop->connectCurrentLayerChanged( sigc::mem_fun(*this, &ObjectsPanel::_objectsChangedWrapper));
-
-            _selectionChangedConnection = _desktop->selection->connectChanged( sigc::mem_fun(*this, &ObjectsPanel::_objectsSelected));
-
-            _desktopDestroyedConnection = _desktop->connectDestroy( sigc::mem_fun(*this, &ObjectsPanel::_desktopDestroyed));
-
-            setDocument(_desktop, _desktop->doc());
-        } else {
-            setDocument(nullptr, nullptr);
-        }
-    }
-}
 } //namespace Dialogs
 } //namespace UI
 } //namespace Inkscape
