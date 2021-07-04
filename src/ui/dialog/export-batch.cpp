@@ -311,14 +311,14 @@ void BatchExport::onExport()
 bool BatchExport::getNonConflictingFilename(Glib::ustring &filename, Glib::ustring const extension)
 {
     SPDocument *doc = SP_ACTIVE_DESKTOP->getDocument();
-    Glib::ustring test_filename = filename + extension;
-    std::string path = absolutize_path_from_document_location(doc, Glib::filename_from_utf8(test_filename));
+    std::string path = absolutize_path_from_document_location(doc, Glib::filename_from_utf8(filename));
+    Glib::ustring test_filename = path + extension;
     if (!Inkscape::IO::file_test(test_filename.c_str(), G_FILE_TEST_EXISTS)) {
         filename = test_filename;
         return true;
     }
-    for (int i = 0; i < 100; i++) {
-        test_filename = filename + "_copy_" + std::to_string(i) + extension;
+    for (int i = 1; i <= 100; i++) {
+        test_filename = path + "_copy_" + std::to_string(i) + extension;
         if (!Inkscape::IO::file_test(test_filename.c_str(), G_FILE_TEST_EXISTS)) {
             filename = test_filename;
             return true;
