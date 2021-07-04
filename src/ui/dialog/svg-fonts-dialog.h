@@ -175,6 +175,7 @@ private:
     Gtk::Box* kerning_tab();
     Gtk::Box* glyphs_tab();
     Gtk::Button _add;
+    Gtk::Button _remove;
     Gtk::Button add_glyph_button;
     Gtk::Button glyph_from_path_button;
     Gtk::Button missing_glyph_button;
@@ -243,7 +244,7 @@ private:
     Gtk::Button add_kernpair_button;
 
     Gtk::Box _font_settings;
-    Gtk::Box _header_box;
+    Gtk::Grid _header_box;
     Gtk::Grid _grid;
     Gtk::Box global_vbox;
     Gtk::Box glyphs_vbox;

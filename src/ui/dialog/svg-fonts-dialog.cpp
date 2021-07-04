@@ -451,14 +451,27 @@ const int MARGIN_SPACE = 4;
 
 Gtk::Box* SvgFontsDialog::global_settings_tab(){
 
-    _header_box.set_orientation(Gtk::ORIENTATION_HORIZONTAL);
     _fonts_scroller.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
     _fonts_scroller.add(_FontsList);
+    _fonts_scroller.set_hexpand();
     _fonts_scroller.show();
-    _header_box.pack_start(_fonts_scroller);
-    _header_box.pack_start(_add, false, false, MARGIN_SPACE);
+    _header_box.set_column_spacing(MARGIN_SPACE);
+    _header_box.set_row_spacing(MARGIN_SPACE);
+    _header_box.attach(_fonts_scroller, 0, 0, 1, 3);
+    _header_box.attach(*Gtk::make_managed<Gtk::Label>(), 1, 0);
+    _header_box.attach(_add, 1, 1);
+    _header_box.attach(_remove, 1, 2);
     _header_box.set_margin_bottom(MARGIN_SPACE);
+    _header_box.set_margin_end(MARGIN_SPACE);
     _add.set_valign(Gtk::ALIGN_CENTER);
+    _remove.set_valign(Gtk::ALIGN_CENTER);
+    _remove.set_halign(Gtk::ALIGN_CENTER);
+    auto image1 = Gtk::make_managed<Gtk::Image>();
+    image1->set_from_icon_name("list-add", Gtk::ICON_SIZE_BUTTON);
+    _add.add(*image1);
+    auto image2 = Gtk::make_managed<Gtk::Image>();
+    image2->set_from_icon_name("list-remove", Gtk::ICON_SIZE_BUTTON);
+    _remove.add(*image2);
 
     global_vbox.pack_start(_header_box);
 
@@ -1019,7 +1032,7 @@ void SvgFontsDialog::add_font(){
 
 SvgFontsDialog::SvgFontsDialog()
  : DialogBase("/dialogs/svgfonts", "SVGFonts")
- , _add(_("_New"), true)
+//  , _add(_("_New"), true)
  , _font_settings(Gtk::ORIENTATION_VERTICAL)
  , global_vbox(Gtk::ORIENTATION_VERTICAL)
  , glyphs_vbox(Gtk::ORIENTATION_VERTICAL)
@@ -1027,6 +1040,7 @@ SvgFontsDialog::SvgFontsDialog()
 {
     kerning_slider = Gtk::manage(new Gtk::Scale(Gtk::ORIENTATION_HORIZONTAL));
     _add.signal_clicked().connect(sigc::mem_fun(*this, &SvgFontsDialog::add_font));
+    _remove.signal_clicked().connect([=](){ remove_selected_font(); });
 
     // List of SVGFonts declared in a document:
     _model = Gtk::ListStore::create(_columns);
