@@ -148,7 +148,7 @@ char const *get_program_name()
        char buf[MAXPATHLEN];
        size_t cb = sizeof(buf);
        if (sysctl(mib, 4, buf, &cb, NULL, 0) == 0) {
-           program_name = realpath(buf, nullptr)
+           program_name = realpath(buf, nullptr);
        } else {
            g_warning("get_program_name() - sysctl failed");
        }      
