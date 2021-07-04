@@ -14,6 +14,7 @@
 
 #include <2geom/pathvector.h>
 #include <gtkmm/box.h>
+#include <gtkmm/grid.h>
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/drawingarea.h>
 #include <gtkmm/entry.h>
@@ -88,7 +89,7 @@ public:
     bool updating;
 
     // Used for font-family
-    class AttrEntry : public Gtk::Box
+    class AttrEntry
     {
     public:
         AttrEntry(SvgFontsDialog* d, gchar* lbl, Glib::ustring tooltip, const SPAttr attr);
@@ -103,7 +104,7 @@ public:
         Gtk::Label* _label;
     };
 
-    class AttrSpin : public Gtk::Box
+    class AttrSpin
     {
     public:
         AttrSpin(SvgFontsDialog* d, gchar* lbl, Glib::ustring tooltip, const SPAttr attr);
@@ -242,6 +243,8 @@ private:
     Gtk::Button add_kernpair_button;
 
     Gtk::Box _font_settings;
+    Gtk::Box _header_box;
+    Gtk::Grid _grid;
     Gtk::Box global_vbox;
     Gtk::Box glyphs_vbox;
     Gtk::Box kerning_vbox;
