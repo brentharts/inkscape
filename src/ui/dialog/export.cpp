@@ -79,13 +79,15 @@ Export::Export()
     builder->get_widget_derived("Single Image", single_image);
     single_image->initialise(builder);
 
-    builder->get_widget("Batch Export", batch_export);
+    builder->get_widget_derived("Batch Export", batch_export);
+    batch_export->initialise(builder);
 
     // Callback when container is finally mapped on window. All intialisation like set active is done inside it.
     container->signal_realize().connect(sigc::mem_fun(*this, &Export::onRealize));
 
     // Provide inkscape _app instance to single Export
     single_image->set_app(_app);
+    batch_export->set_app(_app);
 }
 
 Export::~Export() {}
@@ -95,6 +97,7 @@ Export::~Export() {}
 void Export::onRealize()
 {
     single_image->setup();
+    batch_export->setup();
     // setDefaultNotebookPage();
 }
 

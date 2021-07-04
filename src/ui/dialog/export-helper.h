@@ -89,12 +89,12 @@ public:
 };
 
 // Class for storing and manipulating extensions
-class ExtensionList : public Gtk::ComboBoxText
+class ExtensionList : public Inkscape::UI::Widget::ScrollProtected<Gtk::ComboBoxText>
 {
 public:
     ExtensionList(){};
     ExtensionList(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &refGlade)
-        : Gtk::ComboBoxText(cobject){};
+        : Inkscape::UI::Widget::ScrollProtected<Gtk::ComboBoxText>(cobject, refGlade){};
     ~ExtensionList();
 
 public:
@@ -138,6 +138,37 @@ public:
 
     inline bool get_stopped() const { return _stopped; }
     inline void set_stopped() { _stopped = true; }
+};
+
+class ExportList : public Gtk::Grid
+{
+public:
+    ExportList(){};
+    ExportList(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &refGlade)
+        : Gtk::Grid(cobject){};
+    ~ExportList();
+
+public:
+    void setup();
+    void append_row();
+    void delete_row(Gtk::Widget *widget);
+    Glib::ustring get_suffix(int row);
+    Glib::ustring get_extension(int row);
+    double get_dpi(int row);
+    int get_rows() { return _num_rows; }
+
+private:
+    typedef Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> SpinButton;
+    Inkscape::Preferences *prefs = nullptr;
+    double default_dpi = 96.00;
+
+private:
+    bool _initialised = false;
+    int _num_rows = 0;
+    int _suffix_col = 0;
+    int _extension_col = 1;
+    int _dpi_col = 2;
+    int _delete_col = 3;
 };
 
 float getValuePx(float value, Unit const *unit);

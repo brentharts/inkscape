@@ -37,6 +37,7 @@
 #include "ui/dialog-events.h"
 #include "ui/dialog/dialog-notebook.h"
 #include "ui/dialog/filedialog.h"
+#include "ui/icon-loader.h"
 #include "ui/interface.h"
 #include "ui/widget/scrollprotected.h"
 #include "ui/widget/unit-menu.h"
@@ -148,7 +149,7 @@ void ExtensionList::setup()
     for (auto [key, omod] : valid_extensions) {
         this->append(key);
     }
-    this->set_active(0);
+    this->set_active_text(".png");
 }
 void ExtensionList::createList()
 {
@@ -216,12 +217,146 @@ void ExtensionList::appendExtensionToFilename(Glib::ustring &filename, Glib::ust
     if (valid_extensions[filename_extension]) {
         active_extension = filename_extension;
     }
+    // We use ".png" as default extension. Change it to get extension from module.
     if (!valid_extensions[active_extension]) {
         active_extension = ".png";
     }
     filename = filename + active_extension;
     return;
 }
+
+void ExportList::setup()
+{
+    if (_initialised) {
+        return;
+    }
+    _initialised = true;
+    prefs = Inkscape::Preferences::get();
+    default_dpi = prefs->getDouble("/dialogs/export/defaultxdpi/value", DPI_BASE);
+
+    Gtk::Button *add_button = Gtk::manage(new Gtk::Button());
+    Glib::ustring label = "Add Export";
+    add_button->set_label(label);
+    this->attach(*add_button, 0, 0, 4, 1);
+
+    this->insert_row(0);
+
+    Gtk::Label *suffix_label = Gtk::manage(new Gtk::Label("Suffix"));
+    this->attach(*suffix_label, _suffix_col, 0, 1, 1);
+    suffix_label->show();
+
+    Gtk::Label *extension_label = Gtk::manage(new Gtk::Label("Format"));
+    this->attach(*extension_label, _extension_col, 0, 1, 1);
+    extension_label->show();
+
+    Gtk::Label *dpi_label = Gtk::manage(new Gtk::Label("DPI"));
+    this->attach(*dpi_label, _dpi_col, 0, 1, 1);
+    dpi_label->show();
+
+    append_row();
+
+    add_button->signal_clicked().connect(sigc::mem_fun(*this, &ExportList::append_row));
+    add_button->set_hexpand(true);
+    add_button->show();
+
+    this->set_row_spacing(5);
+    this->set_column_spacing(2);
+}
+
+ExportList::~ExportList()
+{
+    ;
+}
+
+void ExportList::append_row()
+{
+    int current_row = _num_rows + 1; // because we have label row at top
+    this->insert_row(current_row);
+
+    Gtk::Entry *suffix = Gtk::manage(new Gtk::Entry());
+    this->attach(*suffix, _suffix_col, current_row, 1, 1);
+    suffix->set_width_chars(2);
+    suffix->set_hexpand(true);
+    suffix->set_placeholder_text("Suffix");
+    suffix->show();
+
+    ExtensionList *extension = Gtk::manage(new ExtensionList());
+    extension->setup();
+    this->attach(*extension, _extension_col, current_row, 1, 1);
+    extension->show();
+
+    SpinButton *dpi_sb = Gtk::manage(new SpinButton());
+    dpi_sb->set_digits(2);
+    dpi_sb->set_increments(0.1, 1.0);
+    dpi_sb->set_range(0.01, 100000.0);
+    dpi_sb->set_value(default_dpi);
+    dpi_sb->set_sensitive(true);
+    dpi_sb->set_width_chars(6);
+    dpi_sb->set_max_width_chars(6);
+    this->attach(*dpi_sb, _dpi_col, current_row, 1, 1);
+    dpi_sb->show();
+
+    Gtk::Image *pIcon = Gtk::manage(sp_get_icon_image("window-close", Gtk::ICON_SIZE_SMALL_TOOLBAR));
+    Gtk::Button *delete_btn = Gtk::manage(new Gtk::Button());
+    delete_btn->set_relief(Gtk::RELIEF_NONE);
+    pIcon->show();
+    delete_btn->add(*pIcon);
+    this->attach(*delete_btn, _delete_col, current_row, 1, 1);
+    delete_btn->show();
+    delete_btn->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &ExportList::delete_row), delete_btn));
+
+    _num_rows++;
+}
+
+void ExportList::delete_row(Gtk::Widget *widget)
+{
+    if (widget == nullptr) {
+        return;
+    }
+    if (_num_rows <= 1) {
+        return;
+    }
+    int row = this->child_property_top_attach(*widget);
+    this->remove_row(row);
+    _num_rows--;
+}
+
+Glib::ustring ExportList::get_suffix(int row)
+{
+    Glib::ustring suffix = "";
+    Gtk::Entry *entry = dynamic_cast<Gtk::Entry *>(this->get_child_at(_suffix_col, row + 1));
+    if (entry == nullptr) {
+        return suffix;
+    }
+    suffix = entry->get_text();
+    return suffix;
+}
+Glib::ustring ExportList::get_extension(int row)
+{
+    Glib::ustring extension = "";
+    ExtensionList *extension_cb = dynamic_cast<ExtensionList *>(this->get_child_at(_extension_col, row + 1));
+    if (extension_cb == nullptr) {
+        return extension;
+    }
+    extension = extension_cb->get_active_text();
+    return extension;
+}
+double ExportList::get_dpi(int row)
+{
+    double dpi = default_dpi;
+    SpinButton *spin_sb = dynamic_cast<SpinButton *>(this->get_child_at(_dpi_col, row + 1));
+    if (spin_sb == nullptr) {
+        return dpi;
+    }
+    dpi = spin_sb->get_value();
+    return dpi;
+}
+
+/*
+ ******************************************
+ * HELPER FUNCTIONS NOT SPECIF TO CLASSES *
+ ******************************************
+ */
 
 float getValuePx(float value, Unit const *unit)
 {

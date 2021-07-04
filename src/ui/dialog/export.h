@@ -17,6 +17,7 @@
 
 #include "export-helper.h"
 #include "export-single.h"
+#include "export-batch.h"
 #include "extension/output.h"
 #include "ui/dialog/dialog-base.h"
 #include "ui/widget/scrollprotected.h"
@@ -49,7 +50,7 @@ private:
 
 private:
     SingleExport *single_image = nullptr;
-    Gtk::Box *batch_export = nullptr;
+    BatchExport *batch_export = nullptr;
 
 private:
     Inkscape::Preferences *prefs = nullptr;

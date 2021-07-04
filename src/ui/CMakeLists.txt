@@ -112,6 +112,7 @@ set(ui_SRC
 	dialog/dialog-window.cpp
 	dialog/document-properties.cpp
 	dialog/export.cpp
+	dialog/export-batch.cpp
 	dialog/export-single.cpp
 	dialog/export-helper.cpp
 	dialog/filedialog.cpp
@@ -287,6 +288,7 @@ set(ui_SRC
 	dialog/dialog-window.h
 	dialog/document-properties.h
 	dialog/export.h
+	dialog/export-batch.h
 	dialog/export-single.h
 	dialog/export-helper.h
 	dialog/filedialog.h

@@ -92,6 +92,9 @@ void SingleExport::initialise(const Glib::RefPtr<Gtk::Builder> &builder)
     builder->get_widget("si_progress", _prog);
 
     builder->get_widget("si_advance_box", adv_box);
+
+    Inkscape::UI::Widget::ScrollTransfer<Gtk::ScrolledWindow> *temp = nullptr;
+    builder->get_widget_derived("s_scroll", temp);
 }
 
 void SingleExport::on_realize()
@@ -169,6 +172,7 @@ void SingleExport::on_inkscape_selection_changed(Inkscape::Selection *selection)
         }
     }
     refreshArea();
+    refreshExportHints();
 }
 
 // Setup Single Export.Called by export on realize
@@ -230,9 +234,9 @@ void SingleExport::setupSpinButtons()
     setupSpinButton<sb_type>(spin_buttons[SPIN_WIDTH], 0.0, 0.0, PNG_UINT_31_MAX, 0.1, 1.0, EXPORT_COORD_PRECISION,
                              true, &SingleExport::onAreaXChange, SPIN_WIDTH);
 
-    setupSpinButton<sb_type>(spin_buttons[SPIN_BMHEIGHT], 1.0, 1.0, 1000000.0, 1.0, 10.0, 3, true,
+    setupSpinButton<sb_type>(spin_buttons[SPIN_BMHEIGHT], 1.0, 1.0, 1000000.0, 1.0, 10.0, 0, true,
                              &SingleExport::onDpiChange, SPIN_BMHEIGHT);
-    setupSpinButton<sb_type>(spin_buttons[SPIN_BMWIDTH], 1.0, 1.0, 1000000.0, 1.0, 10.0, 3, true,
+    setupSpinButton<sb_type>(spin_buttons[SPIN_BMWIDTH], 1.0, 1.0, 1000000.0, 1.0, 10.0, 0, true,
                              &SingleExport::onDpiChange, SPIN_BMWIDTH);
     setupSpinButton<sb_type>(spin_buttons[SPIN_DPI], prefs->getDouble("/dialogs/export/defaultxdpi/value", DPI_BASE),
                              0.01, 100000.0, 0.1, 1.0, 2, true, &SingleExport::onDpiChange, SPIN_DPI);
@@ -447,12 +451,12 @@ void SingleExport::onExport()
     si_export->set_sensitive(false);
     bool exportSuccessful = false;
     auto extension = si_extension_cb->get_active_text();
-    if (!ExtensionList::valid_extensions[extension]) {
+    auto omod = ExtensionList::valid_extensions[extension];
+    if (!omod) {
         si_export->set_sensitive(true);
         return;
     }
 
-    auto omod = ExtensionList::valid_extensions[extension];
     Unit const *unit = units->getUnit();
 
     Glib::ustring filename = si_filename_entry->get_text();
