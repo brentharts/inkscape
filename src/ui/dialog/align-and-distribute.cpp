@@ -924,10 +924,10 @@ static void on_selection_changed(AlignAndDistribute *daad)
 
 /////////////////////////////////////////////////////////
 
-AlignAndDistribute::AlignAndDistribute()
-    : DialogBase("/dialogs/align", "AlignDistribute")
+AlignAndDistribute::AlignAndDistribute(DialogBase* dlg) : Gtk::Box(Gtk::ORIENTATION_VERTICAL)
+    , _parent(dlg)
     , randomize_bbox()
-    , _alignFrame(_("Align"))
+    , _alignFrame()
     , _distributeFrame(_("Distribute"))
     , _rearrangeFrame(_("Rearrange"))
     , _removeOverlapFrame(_("Remove overlaps"))
@@ -951,6 +951,9 @@ AlignAndDistribute::AlignAndDistribute()
     , _anchorBoxNode(Gtk::ORIENTATION_HORIZONTAL)
 {
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+
+    set_margin_start(4);
+    set_margin_end(4);
 
     //Instantiate the align buttons
     addAlignButton(INKSCAPE_ICON("align-horizontal-right-to-anchor"),
@@ -1120,11 +1123,11 @@ AlignAndDistribute::AlignAndDistribute()
     _oncanvas.signal_toggled().connect(sigc::mem_fun(*this, &AlignAndDistribute::on_oncanvas_toggled));
 
     // Right align the buttons
-    _alignTableBox.pack_end(_alignTable, false, false);
-    _distributeTableBox.pack_end(_distributeTable, false, false);
-    _rearrangeTableBox.pack_end(_rearrangeTable, false, false);
-    _removeOverlapTableBox.pack_end(_removeOverlapTable, false, false);
-    _nodesTableBox.pack_end(_nodesTable, false, false);
+    _alignTableBox.pack_start(_alignTable, false, false);
+    _distributeTableBox.pack_start(_distributeTable, false, false);
+    _rearrangeTableBox.pack_start(_rearrangeTable, false, false);
+    _removeOverlapTableBox.pack_start(_removeOverlapTable, false, false);
+    _nodesTableBox.pack_start(_nodesTable, false, false);
 
     _alignBox.pack_start(_anchorBox);
     _alignBox.pack_start(_selgrpBox);
@@ -1172,6 +1175,9 @@ AlignAndDistribute::~AlignAndDistribute()
     _selChangeConn.disconnect();
 }
 
+SPDesktop* AlignAndDistribute::getDesktop() {
+    return _parent->getDesktop();
+}
 
 void AlignAndDistribute::on_ref_change(){
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();

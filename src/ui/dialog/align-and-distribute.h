@@ -45,13 +45,13 @@ namespace Dialog {
 
 class Action;
 
-class AlignAndDistribute : public DialogBase
+class AlignAndDistribute : public Gtk::Box
 {
 public:
-    AlignAndDistribute();
+    AlignAndDistribute(DialogBase* dlg);
     ~AlignAndDistribute() override;
 
-    static AlignAndDistribute &getInstance() { return *new AlignAndDistribute(); }
+    // static AlignAndDistribute &getInstance() { return *new AlignAndDistribute(); }
 
     Gtk::Grid &align_table(){return _alignTable;}
     Gtk::Grid &distribute_table(){return _distributeTable;}
@@ -63,7 +63,9 @@ public:
 
     Geom::OptRect randomize_bbox;
 
+    SPDesktop* getDesktop();
 protected:
+    DialogBase* _parent;
 
     void on_ref_change();
     void on_node_ref_change();

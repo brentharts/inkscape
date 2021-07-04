@@ -17,6 +17,7 @@
 
 #include "ui/dialog/grid-arrange-tab.h"
 #include "ui/dialog/polar-arrange-tab.h"
+#include "ui/dialog/align-and-distribute.h"
 
 #include <glibmm/i18n.h>
 
@@ -28,16 +29,21 @@ namespace UI {
 namespace Dialog {
 
 ArrangeDialog::ArrangeDialog()
-    : DialogBase("/dialogs/gridtiler", "Arrange")
+    : DialogBase("/dialogs/gridtiler", "AlignDistribute")
 {
+    _align_tab = Gtk::manage(new AlignAndDistribute(this));
     _arrangeBox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
     _notebook = Gtk::manage(new Gtk::Notebook());
     _gridArrangeTab = Gtk::manage(new GridArrangeTab(this));
     _polarArrangeTab = Gtk::manage(new PolarArrangeTab(this));
 
+    _notebook->append_page(*_align_tab, C_("Arrange dialog", "Align"));
     _notebook->append_page(*_gridArrangeTab, C_("Arrange dialog", "Rectangular grid"));
     _notebook->append_page(*_polarArrangeTab, C_("Arrange dialog", "Polar Coordinates"));
     _arrangeBox->pack_start(*_notebook);
+    _notebook->signal_switch_page().connect([=](Widget*, guint page){
+        update_arrange_btn();
+    });
     pack_start(*_arrangeBox);
 
     // Add button
@@ -50,12 +56,25 @@ ArrangeDialog::ArrangeDialog()
     button_box->set_layout(Gtk::BUTTONBOX_END);
     button_box->set_spacing(6);
     button_box->set_border_width(4);
+    button_box->set_valign(Gtk::ALIGN_START);
 
     button_box->pack_end(*_arrangeButton);
     pack_end(*button_box);
 
     show();
     show_all_children();
+    set_no_show_all();
+    update_arrange_btn();
+}
+
+void ArrangeDialog::update_arrange_btn() {
+    // "align" page doesn't use "Arrange" button
+    if (_notebook->get_current_page() == 0) {
+        _arrangeButton->hide();
+    }
+    else {
+        _arrangeButton->show();
+    }
 }
 
 void ArrangeDialog::_apply()
@@ -63,9 +82,11 @@ void ArrangeDialog::_apply()
 	switch(_notebook->get_current_page())
 	{
 	case 0:
+        break;
+	case 1:
 		_gridArrangeTab->arrange();
 		break;
-	case 1:
+	case 2:
 		_polarArrangeTab->arrange();
 		break;
 	}
