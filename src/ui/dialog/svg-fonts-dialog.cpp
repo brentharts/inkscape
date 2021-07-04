@@ -320,7 +320,7 @@ void SvgFontsDialog::update_fonts()
     if (children.size() == fonts.size()) {
         equal = true; // assume they are the same
         auto it = fonts.begin();
-        for (auto&& node : _model->children()) {
+        for (auto&& node : children) {
             SPFont* sp_font = node[_columns.spfont];
             if (it == fonts.end() || *it != sp_font) {
                 // difference detected; update model
@@ -331,6 +331,12 @@ void SvgFontsDialog::update_fonts()
         }
     }
 
+    auto get_label = [](SPFont* font) {
+        const gchar* label = font->label();
+        const gchar* id = font->getId();
+        return Glib::ustring(label ? label : (id ? id : "font"));
+    };
+
     // rebuild model if list of fonts is different
     if (!equal) {
         _model->clear();
@@ -339,14 +345,21 @@ void SvgFontsDialog::update_fonts()
             SPFont* f = SP_FONT(font);
             row[_columns.spfont] = f;
             row[_columns.svgfont] = new SvgFont(f);
-            const gchar* lbl = f->label();
-            const gchar* id = f->getId();
-            row[_columns.label] = lbl ? lbl : (id ? id : "font");
+            row[_columns.label] = get_label(f);
         }
         if (!fonts.empty()) {
             // select a font, this dialog is disabled without a font
             auto selection = _FontsList.get_selection();
             if (selection) selection->select(_model->get_iter("0"));
+        }
+    }
+    else {
+        // list of fonts is the same, but attributes may have changed
+        auto it = fonts.begin();
+        for (auto&& node : children) {
+            if (auto font = dynamic_cast<SPFont*>(*it++)) {
+                node[_columns.label] = get_label(font);
+            }
         }
     }
 
@@ -1032,7 +1045,6 @@ void SvgFontsDialog::add_font(){
 
 SvgFontsDialog::SvgFontsDialog()
  : DialogBase("/dialogs/svgfonts", "SVGFonts")
-//  , _add(_("_New"), true)
  , _font_settings(Gtk::ORIENTATION_VERTICAL)
  , global_vbox(Gtk::ORIENTATION_VERTICAL)
  , glyphs_vbox(Gtk::ORIENTATION_VERTICAL)
@@ -1047,6 +1059,18 @@ SvgFontsDialog::SvgFontsDialog()
     _FontsList.set_model(_model);
     _FontsList.append_column_editable(_("_Fonts"), _columns.label);
     _FontsList.get_selection()->signal_changed().connect(sigc::mem_fun(*this, &SvgFontsDialog::on_font_selection_changed));
+    // connect to the cell renderer's edit signal; there's also model's row_changed, but it is less specific
+    if (auto renderer = dynamic_cast<Gtk::CellRendererText*>(_FontsList.get_column_cell_renderer(0))) {
+        // commit font names when user edits them
+        renderer->signal_edited().connect([=](const Glib::ustring& path, const Glib::ustring& new_name) {
+            if (auto it = _model->get_iter(path)) {
+                auto font = it->get_value(_columns.spfont);
+                font->setLabel(new_name.c_str());
+                Glib::ustring undokey = "svgfonts:fontName";
+                DocumentUndo::maybeDone(font->document, undokey.c_str(), SP_VERB_DIALOG_SVG_FONTS, _("Set SVG font name"));
+            }
+        });
+    }
 
     Gtk::Notebook *tabs = Gtk::manage(new Gtk::Notebook());
     tabs->set_scrollable();
