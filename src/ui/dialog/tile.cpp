@@ -38,8 +38,8 @@ ArrangeDialog::ArrangeDialog()
     _polarArrangeTab = Gtk::manage(new PolarArrangeTab(this));
 
     _notebook->append_page(*_align_tab, C_("Arrange dialog", "Align"));
-    _notebook->append_page(*_gridArrangeTab, C_("Arrange dialog", "Rectangular grid"));
-    _notebook->append_page(*_polarArrangeTab, C_("Arrange dialog", "Polar Coordinates"));
+    _notebook->append_page(*_gridArrangeTab, C_("Arrange dialog", "Grid arrange"));
+    _notebook->append_page(*_polarArrangeTab, C_("Arrange dialog", "Circular arrange"));
     _arrangeBox->pack_start(*_notebook);
     _notebook->signal_switch_page().connect([=](Widget*, guint page){
         update_arrange_btn();
