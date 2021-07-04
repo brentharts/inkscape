@@ -73,6 +73,12 @@ FillAndStroke::FillAndStroke()
     _composite_settings.setSubject(&_subject);
 }
 
+FillAndStroke::~FillAndStroke()
+{
+    // Disconnect signals from composite settings
+    _composite_settings.setSubject(nullptr);
+}
+
 void FillAndStroke::desktopReplaced()
 {
     if (fillWdgt) {

@@ -37,7 +37,7 @@ class FillAndStroke : public DialogBase
 {
 public:
     FillAndStroke();
-    ~FillAndStroke() override {};
+    ~FillAndStroke() override;
 
     static FillAndStroke &getInstance() { return *new FillAndStroke(); }
 
