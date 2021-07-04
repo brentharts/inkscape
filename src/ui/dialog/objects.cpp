@@ -3,12 +3,14 @@
  * A simple panel for objects (originally developed for Ponyscape, an Inkscape derivative)
  *
  * Authors:
+ *   Martin Owens, completely rewritten
  *   Theodore Janeczko
  *   Tweaked by Liam P White for use in Inkscape
  *   Tavmjong Bah
  *
  * Copyright (C) Theodore Janeczko 2012 <flutterguy317@gmail.com>
  *               Tavmjong Bah 2017
+ *               Martin Owens 2020-2021
  *
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
@@ -551,7 +553,7 @@ public:
  * Constructor
  */
 ObjectsPanel::ObjectsPanel() :
-    DialogBase("/dialogs/objects", SP_VERB_DIALOG_OBJECTS),
+    DialogBase("/dialogs/objects", "Objects"),
     root_watcher(nullptr),
     _desktop(nullptr),
     _document(nullptr),

@@ -158,9 +158,9 @@ set(ui_SRC
 	widget/iconrenderer.cpp
 	widget/alignment-selector.cpp
 	widget/anchor-selector.cpp
-        widget/button.cpp
-        widget/canvas.cpp
-        widget/canvas-grid.cpp
+	widget/button.cpp
+	widget/canvas.cpp
+	widget/canvas-grid.cpp
 	widget/color-entry.cpp
 	widget/color-icc-selector.cpp
 	widget/color-notebook.cpp
@@ -186,6 +186,7 @@ set(ui_SRC
 	widget/gradient-editor.cpp
 	widget/gradient-selector.cpp
 	widget/gradient-vector-selector.cpp
+	widget/gradient-with-stops.cpp
 	widget/imagetoggler.cpp
 	widget/ink-color-wheel.cpp
 	widget/ink-flow-box.cpp
@@ -212,8 +213,8 @@ set(ui_SRC
 	widget/scalar.cpp
 	widget/scroll-utils.cpp
 	widget/selected-style.cpp
-        widget/shapeicon.cpp
-        widget/spin-button-tool-item.cpp
+	widget/shapeicon.cpp
+	widget/spin-button-tool-item.cpp
 	widget/spin-scale.cpp
 	widget/spin-slider.cpp
 	widget/spinbutton.cpp
@@ -402,9 +403,9 @@ set(ui_SRC
 	widget/alignment-selector.h
 	widget/anchor-selector.h
 	widget/attr-widget.h
-        widget/button.h
-        widget/canvas.h
-        widget/canvas-grid.h
+	widget/button.h
+	widget/canvas.h
+	widget/canvas-grid.h
 	widget/color-entry.h
 	widget/color-icc-selector.h
 	widget/color-notebook.h
@@ -431,6 +432,7 @@ set(ui_SRC
 	widget/gradient-editor.h
 	widget/gradient-selector.h
 	widget/gradient-vector-selector.h
+	widget/gradient-with-stops.h
 	widget/imagetoggler.h
 	widget/ink-color-wheel.h
 	widget/ink-flow-box.h
@@ -460,8 +462,8 @@ set(ui_SRC
 	widget/scroll-utils.h
 	widget/scrollprotected.h
 	widget/selected-style.h
-        widget/shapeicon.h
-        widget/spin-button-tool-item.h
+	widget/shapeicon.h
+	widget/spin-button-tool-item.h
 	widget/spin-scale.h
 	widget/spin-slider.h
 	widget/spinbutton.h
