@@ -17,6 +17,7 @@
 
 #include <gtkmm/scale.h>
 #include <gtkmm/notebook.h>
+#include <gtkmm/expander.h>
 #include <gtkmm/imagemenuitem.h>
 #include <glibmm/stringutils.h>
 #include <glibmm/i18n.h>
@@ -479,14 +480,10 @@ Gtk::Box* SvgFontsDialog::global_settings_tab(){
     _add.set_valign(Gtk::ALIGN_CENTER);
     _remove.set_valign(Gtk::ALIGN_CENTER);
     _remove.set_halign(Gtk::ALIGN_CENTER);
-    auto image1 = Gtk::make_managed<Gtk::Image>();
-    image1->set_from_icon_name("list-add", Gtk::ICON_SIZE_BUTTON);
-    _add.add(*image1);
-    auto image2 = Gtk::make_managed<Gtk::Image>();
-    image2->set_from_icon_name("list-remove", Gtk::ICON_SIZE_BUTTON);
-    _remove.add(*image2);
+    _add.set_image_from_icon_name("list-add", Gtk::ICON_SIZE_BUTTON);
+    _remove.set_image_from_icon_name("list-remove", Gtk::ICON_SIZE_BUTTON);
 
-    global_vbox.pack_start(_header_box);
+    global_vbox.pack_start(_header_box, false, false);
 
     _font_label          = new Gtk::Label(Glib::ustring("<b>") + _("Font Attributes") + "</b>", Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
     _horiz_adv_x_spin    = new AttrSpin( this, (gchar*) _("Horizontal advance X:"), _("Default glyph width for horizontal text"), SPAttr::HORIZ_ADV_X);
@@ -533,7 +530,7 @@ Gtk::Box* SvgFontsDialog::global_settings_tab(){
     }
 
     global_vbox.set_border_width(2);
-    global_vbox.pack_start(_grid);
+    global_vbox.pack_start(_grid, false, true);
 
 /*    global_vbox->add(*AttrCombo((gchar*) _("Style:"), SPAttr::FONT_STYLE));
     global_vbox->add(*AttrCombo((gchar*) _("Variant:"), SPAttr::FONT_VARIANT));
@@ -546,6 +543,14 @@ void
 SvgFontsDialog::populate_glyphs_box()
 {
     if (!_GlyphsListStore) return;
+
+    // try to keep selected glyph
+    Gtk::TreeModel::Path selected_item;
+    if (auto selection = _GlyphsList.get_selection()) {
+        if (auto selected = selection->get_selected()) {
+            selected_item = _GlyphsListStore->get_path(selected);
+        }
+    }
     _GlyphsListStore->clear();
 
     SPFont* spfont = this->get_selected_spfont();
@@ -559,6 +564,11 @@ SvgFontsDialog::populate_glyphs_box()
             row[_GlyphsListColumns.unicode]    = (static_cast<SPGlyph*>(&node))->unicode;
             row[_GlyphsListColumns.advance]    = (static_cast<SPGlyph*>(&node))->horiz_adv_x;
         }
+    }
+
+    if (!selected_item.empty()) {
+        _GlyphsList.get_selection()->select(selected_item);
+        _GlyphsList.scroll_to_row(selected_item);
     }
 }
 
@@ -838,16 +848,20 @@ Gtk::Box* SvgFontsDialog::glyphs_tab(){
     _GlyphsList.signal_button_release_event().connect_notify(sigc::mem_fun(*this, &SvgFontsDialog::glyphs_list_button_release));
     create_glyphs_popup_menu(_GlyphsList, sigc::mem_fun(*this, &SvgFontsDialog::remove_selected_glyph));
 
+    auto missing_glyph = Gtk::make_managed<Gtk::Expander>();
+    missing_glyph->set_label(_("Missing glyph"));
     Gtk::Box* missing_glyph_hbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4));
+    missing_glyph->add(*missing_glyph_hbox);
     Gtk::Label* missing_glyph_label = Gtk::manage(new Gtk::Label(_("Missing glyph:")));
     missing_glyph_hbox->set_hexpand(false);
-    missing_glyph_hbox->pack_start(*missing_glyph_label, false,false);
     missing_glyph_hbox->pack_start(missing_glyph_button, false,false);
     missing_glyph_hbox->pack_start(missing_glyph_reset_button, false,false);
 
     missing_glyph_button.set_label(_("From selection"));
+    missing_glyph_button.set_margin_top(MARGIN_SPACE);
     missing_glyph_button.signal_clicked().connect(sigc::mem_fun(*this, &SvgFontsDialog::missing_glyph_description_from_selected_path));
     missing_glyph_reset_button.set_label(_("Reset"));
+    missing_glyph_reset_button.set_margin_top(MARGIN_SPACE);
     missing_glyph_reset_button.signal_clicked().connect(sigc::mem_fun(*this, &SvgFontsDialog::reset_missing_glyph_description));
 
     glyphs_vbox.set_border_width(4);
@@ -861,17 +875,25 @@ Gtk::Box* SvgFontsDialog::glyphs_tab(){
     _GlyphsList.append_column_editable(_("Matching string"), _GlyphsListColumns.unicode);
     _GlyphsList.append_column_numeric_editable(_("Advance"), _GlyphsListColumns.advance, "%.2f");
     Gtk::Box* hb = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4));
-    add_glyph_button.set_label(_("Add glyph"));
+    add_glyph_button.set_image_from_icon_name("list-add");
     add_glyph_button.signal_clicked().connect(sigc::mem_fun(*this, &SvgFontsDialog::add_glyph));
+    remove_glyph_button.set_image_from_icon_name("list-remove");
+    remove_glyph_button.signal_clicked().connect([=](){ remove_selected_glyph(); });
 
-    hb->pack_start(add_glyph_button, false,false);
-    hb->pack_start(glyph_from_path_button, false,false);
+    hb->pack_start(glyph_from_path_button, false, false);
+    hb->pack_end(remove_glyph_button, false, false);
+    hb->pack_end(add_glyph_button, false, false);
 
     glyphs_vbox.pack_start(*hb, false, false);
     glyphs_vbox.pack_start(_GlyphsListScroller, true, true);
-    glyphs_vbox.pack_start(*missing_glyph_hbox, false,false);
+    glyphs_vbox.pack_start(*missing_glyph, false,false);
 
     glyph_from_path_button.set_label(_("Get curves from selection"));
+    glyph_from_path_button.set_always_show_image();
+    auto img = Gtk::make_managed<Gtk::Image>();
+    img->set_from_icon_name("glyph-copy-from", Gtk::ICON_SIZE_BUTTON);
+    img->set_margin_right(5);
+    glyph_from_path_button.set_image(*img);
     glyph_from_path_button.signal_clicked().connect(sigc::mem_fun(*this, &SvgFontsDialog::set_glyph_description_from_selected_path));
 
     static_cast<Gtk::CellRendererText*>( _GlyphsList.get_column_cell_renderer(0))->signal_edited().connect(
@@ -936,9 +958,9 @@ Gtk::Box* SvgFontsDialog::kerning_tab(){
     // kerning_vbox.add(*Gtk::manage(new Gtk::Label(_("Kerning Setup"))));
     Gtk::Box* kerning_selector = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL));
     kerning_selector->pack_start(*Gtk::manage(new Gtk::Label(_("Select glyphs:"))), false, false);
-    kerning_selector->pack_start(first_glyph, true, true, MARGIN_SPACE / 2);
-    kerning_selector->pack_start(second_glyph, true, true, MARGIN_SPACE / 2);
-    kerning_selector->pack_start(add_kernpair_button, true, true, MARGIN_SPACE / 2);
+    kerning_selector->pack_start(first_glyph, false, false, MARGIN_SPACE / 2);
+    kerning_selector->pack_start(second_glyph, false, false, MARGIN_SPACE / 2);
+    kerning_selector->pack_start(add_kernpair_button, false, false, MARGIN_SPACE / 2);
     add_kernpair_button.set_label(_("Add pair"));
     add_kernpair_button.signal_clicked().connect(sigc::mem_fun(*this, &SvgFontsDialog::add_kerning_pair));
     _KerningPairsList.get_selection()->signal_changed().connect(sigc::mem_fun(*this, &SvgFontsDialog::on_kerning_pair_selection_changed));
@@ -1045,7 +1067,6 @@ void SvgFontsDialog::add_font(){
 
 SvgFontsDialog::SvgFontsDialog()
  : DialogBase("/dialogs/svgfonts", "SVGFonts")
- , _font_settings(Gtk::ORIENTATION_VERTICAL)
  , global_vbox(Gtk::ORIENTATION_VERTICAL)
  , glyphs_vbox(Gtk::ORIENTATION_VERTICAL)
  , kerning_vbox(Gtk::ORIENTATION_VERTICAL)
@@ -1079,8 +1100,7 @@ SvgFontsDialog::SvgFontsDialog()
     tabs->append_page(*glyphs_tab(), _("_Glyphs"), true);
     tabs->append_page(*kerning_tab(), _("_Kerning"), true);
 
-    _font_settings.add(*tabs);
-    pack_start(_font_settings, true, true, 0);
+    pack_start(*tabs, true, true, 0);
 
     // Text Preview:
     _preview_entry.signal_changed().connect(sigc::mem_fun(*this, &SvgFontsDialog::on_preview_text_changed));
