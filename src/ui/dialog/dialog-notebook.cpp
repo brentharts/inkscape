@@ -60,7 +60,8 @@ DialogNotebook::DialogNotebook(DialogContainer *container)
     // ============= Notebook menu ==============
     _menu.set_title("NotebookOptions");
     _notebook.set_group_name("InkscapeDialogGroup");
-    _notebook.set_scrollable(true);
+    // turn off scrolling to make notebook adjust its size to fit tabs (so we don't have to calculate it)
+    _notebook.set_scrollable(false);
 
     Gtk::MenuItem *new_menu_item = nullptr;
 
@@ -567,8 +568,9 @@ void DialogNotebook::on_page_switch(Gtk::Widget *curr_page, guint page_number)
     // TODO: make this dynamic
     // the requested size needs to be incremented by some amount to get rid of
     // the arrows
-    req_size += 40;
-    _notebook.set_size_request(req_size);
+    // req_size += 40;
+    // No need to resize, let notebook take care of that with disabled scrolling
+    // _notebook.set_size_request();
 }
 
 /**
