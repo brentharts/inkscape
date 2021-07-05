@@ -18,6 +18,7 @@
 #include "ui/dialog/grid-arrange-tab.h"
 #include "ui/dialog/polar-arrange-tab.h"
 #include "ui/dialog/align-and-distribute.h"
+#include "ui/icon-names.h"
 
 #include <glibmm/i18n.h>
 
@@ -28,6 +29,17 @@ namespace Inkscape {
 namespace UI {
 namespace Dialog {
 
+Gtk::Box& create_tab_label(const char* label_text, const char* icon_name) {
+    auto box = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, 4);
+    auto image = Gtk::make_managed<Gtk::Image>();
+    image->set_from_icon_name(icon_name, Gtk::ICON_SIZE_MENU);
+    auto label = Gtk::make_managed<Gtk::Label>(label_text, true);
+    box->pack_start(*image, false, true);
+    box->pack_start(*label, false, true);
+    box->show_all();
+    return *box;
+}
+
 ArrangeDialog::ArrangeDialog()
     : DialogBase("/dialogs/gridtiler", "AlignDistribute")
 {
@@ -37,11 +49,11 @@ ArrangeDialog::ArrangeDialog()
     _gridArrangeTab = Gtk::manage(new GridArrangeTab(this));
     _polarArrangeTab = Gtk::manage(new PolarArrangeTab(this));
 
-    _notebook->append_page(*_align_tab, C_("Arrange dialog", "Align"));
+    _notebook->append_page(*_align_tab, create_tab_label(C_("Arrange dialog", "Align"), INKSCAPE_ICON("dialog-align-and-distribute")));
     // TRANSLATORS: "Grid" refers to grid (columns/rows) arrangement
-    _notebook->append_page(*_gridArrangeTab, C_("Arrange dialog", "Grid"));
+    _notebook->append_page(*_gridArrangeTab, create_tab_label(C_("Arrange dialog", "Grid"), INKSCAPE_ICON("dialog-rows-and-columns")));
     // TRANSLATORS: "Circular" refers to circular/radial arrangement
-    _notebook->append_page(*_polarArrangeTab, C_("Arrange dialog", "Circular"));
+    _notebook->append_page(*_polarArrangeTab, create_tab_label(C_("Arrange dialog", "Circular"), INKSCAPE_ICON("arrange-circular")));
     _arrangeBox->pack_start(*_notebook);
     _notebook->signal_switch_page().connect([=](Widget*, guint page){
         update_arrange_btn();
