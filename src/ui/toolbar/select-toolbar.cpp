@@ -83,7 +83,8 @@ SelectToolbar::SelectToolbar(SPDesktop *desktop) :
     _align_distribute_btn->set_label(_("On Canvas Alignment and Distribution"));
     _align_distribute_btn->set_tooltip_text(_("Aligns and Distributes the objects with respect to the bounding box"));
     _align_distribute_btn->set_icon_name(INKSCAPE_ICON("align-distribute"));
-    _align_distribute_btn->set_active(prefs->getBool("/tools/select/align_distribute_box", false));
+    _align_distribute_btn->set_active(false);
+    prefs->setBool("/tools/select/align_distribute_box", false);
     _align_distribute_btn->signal_toggled().connect(sigc::mem_fun(*this, &SelectToolbar::toggle_align_distribute));
 
     add(*_align_distribute_btn);
