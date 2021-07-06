@@ -1083,7 +1083,7 @@ gboolean Inkscape::SelTrans::stretchRequest(SPSelTransHandle const &handle, Geom
     Geom::Scale geom_scale = calcScaleFactors(_point_geom, pt_geom, _origin_for_specpoints);
     geom_scale[perp] = 1;
 
-    _absolute_affine = Geom::identity(); //Initialize the scaler
+    _absolute_affine = Geom::identity(); //Initialize the scalar
 
     auto increments = Modifiers::Modifier::get(Modifiers::Type::TRANS_INCREMENT)->active(state);
     if (increments) { // stretch by an integer multiplier/divider
