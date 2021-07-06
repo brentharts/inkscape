@@ -970,7 +970,7 @@ gboolean Inkscape::SelTrans::scaleRequest(Geom::Point &pt, guint state)
     Geom::Point pt_geom = _getGeomHandlePos(pt);
     Geom::Scale geom_scale = calcScaleFactors(_point_geom, pt_geom, _origin_for_specpoints);
 
-    _absolute_affine = Geom::identity(); //Initialize the scaler
+    _absolute_affine = Geom::identity(); //Initialize the scalar
 
     auto increments = Modifiers::Modifier::get(Modifiers::Type::TRANS_INCREMENT)->active(state);
     if (increments) { // scale by an integer multiplier/divider
