@@ -51,7 +51,7 @@ ArrangeDialog::ArrangeDialog()
 
     _notebook->append_page(*_align_tab, create_tab_label(C_("Arrange dialog", "Align"), INKSCAPE_ICON("dialog-align-and-distribute")));
     // TRANSLATORS: "Grid" refers to grid (columns/rows) arrangement
-    _notebook->append_page(*_gridArrangeTab, create_tab_label(C_("Arrange dialog", "Grid"), INKSCAPE_ICON("dialog-rows-and-columns")));
+    _notebook->append_page(*_gridArrangeTab, create_tab_label(C_("Arrange dialog", "Grid"), INKSCAPE_ICON("arrange-grid")));
     // TRANSLATORS: "Circular" refers to circular/radial arrangement
     _notebook->append_page(*_polarArrangeTab, create_tab_label(C_("Arrange dialog", "Circular"), INKSCAPE_ICON("arrange-circular")));
     _arrangeBox->pack_start(*_notebook);
