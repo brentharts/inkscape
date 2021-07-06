@@ -1129,10 +1129,12 @@ AlignAndDistribute::AlignAndDistribute(DialogBase* dlg) : Gtk::Box(Gtk::ORIENTAT
     _removeOverlapTableBox.pack_start(_removeOverlapTable, false, false);
     _nodesTableBox.pack_start(_nodesTable, false, false);
 
+    _anchorBox.set_halign(Gtk::ALIGN_START);
     _alignBox.pack_start(_anchorBox);
     _alignBox.pack_start(_selgrpBox);
     _alignBox.pack_start(_alignTableBox);
 
+    _anchorBoxNode.set_halign(Gtk::ALIGN_START);
     _alignBoxNode.pack_start(_anchorBoxNode, false, false);
     _alignBoxNode.pack_start(_nodesTableBox);
 
