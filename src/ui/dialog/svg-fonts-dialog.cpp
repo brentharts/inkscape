@@ -209,7 +209,9 @@ Gtk::Box* SvgFontsDialog::AttrCombo(gchar* lbl, const SPAttr /*attr*/){
 
 /*** SvgFontsDialog ***/
 
-GlyphComboBox::GlyphComboBox()= default;
+GlyphComboBox::GlyphComboBox() {
+    set_wrap_width(4);
+}
 
 void GlyphComboBox::update(SPFont* spfont){
     if (!spfont) return;
@@ -576,6 +578,7 @@ void
 SvgFontsDialog::populate_kerning_pairs_box()
 {
     if (!_KerningPairsListStore) return;
+
     _KerningPairsListStore->clear();
 
     SPFont* spfont = this->get_selected_spfont();
@@ -944,6 +947,17 @@ void SvgFontsDialog::add_kerning_pair(){
 
     // get corresponding object
     this->kerning_pair = SP_HKERN( document->getObjectByRepr(repr) );
+
+    // select newly added pair
+    if (auto selection = _KerningPairsList.get_selection()) {
+        _KerningPairsListStore->foreach_iter([=](const Gtk::TreeModel::iterator& it) {
+            if (it->get_value(_KerningPairsListColumns.spnode) == kerning_pair) {
+                selection->select(it);
+                return true; // stop
+            }
+            return false; // continue
+        });
+    }
 
     DocumentUndo::done(document, SP_VERB_DIALOG_SVG_FONTS, _("Add kerning pair"));
 }
