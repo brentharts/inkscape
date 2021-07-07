@@ -889,7 +889,7 @@ void Inkscape::SelTrans::handleNewEvent(SPKnot *knot, Geom::Point *position, gui
         case HANDLE_CENTER_ALIGN_DISTRIBUTE:
         case HANDLE_CORNER_ALIGN_DISTRIBUTE:
         case HANDLE_SIDE_ALIGN_DISTRIBUTE:
-            scale(*position, state);
+            alignDistribute(*position, state);
             break;
         case HANDLE_SIDE_ALIGN:
         case HANDLE_CORNER_ALIGN:
@@ -1581,6 +1581,11 @@ void Inkscape::SelTrans::stretch(SPSelTransHandle const &/*handle*/, Geom::Point
 }
 
 void Inkscape::SelTrans::scale(Geom::Point &/*pt*/, guint /*state*/)
+{
+    transform(_absolute_affine, Geom::Point(0, 0)); // we have already accounted for origin, so pass 0,0
+}
+
+void Inkscape::SelTrans::alignDistribute(Geom::Point &/*pt*/, guint /*state*/)
 {
     transform(_absolute_affine, Geom::Point(0, 0)); // we have already accounted for origin, so pass 0,0
 }
