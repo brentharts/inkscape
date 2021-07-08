@@ -77,12 +77,12 @@ static bool gather_items(NodeTool *nt, SPItem *base, SPObject *obj, Inkscape::UI
         ShapeRecord r;
         r.object = object;
         // TODO add support for objectBoundingBox
-        r.edit_transform = base ? base->i2doc_affine() : Geom::identity();
-        //r.edit_transform = tr;
+        //r.edit_transform = base ? base->i2doc_affine() : Geom::identity();
+        r.edit_transform = tr;
         r.role = role;
 
         if (s.insert(r).second) {
-            sel->add(obj);
+            //sel->add(obj);
             // this item was encountered the first time
             if (nt->edit_clipping_paths) {
                 gather_items(nt, item, item->getClipObject(), SHAPE_ROLE_CLIPPING_PATH, s, sel, tr);
@@ -97,19 +97,132 @@ static bool gather_items(NodeTool *nt, SPItem *base, SPObject *obj, Inkscape::UI
     return true;
 }
 
-Geom::Affine MarkerTool::get_marker_transform(Geom::Curve const & c, SPItem *item)
+/* TODO - break this function up and make look nicer */
+Geom::Affine MarkerTool::get_marker_transform(SPShape* shape, SPItem *item, SPMarkerLoc marker_type)
 {
-    Geom::Point p = c.pointAt(0);
-    Geom::Point t = Geom::Point(Inkscape::Util::Quantity::convert(p[Geom::X], "mm", "px"), 
-                    Inkscape::Util::Quantity::convert(p[Geom::Y], "mm", "px")); // ??? Come back
-    Geom::Affine ret = Geom::Translate(t);
+    SPObject *marker_obj = shape->_marker[marker_type];
+    SPMarker *sp_marker = dynamic_cast<SPMarker *>(marker_obj);
 
-    if ( !c.isDegenerate() ) {
-        Geom::Point tang = c.unitTangentAt(0);
-        double const angle = Geom::atan2(tang);
-        ret = Geom::Rotate(angle) * ret;
-    }
+    /* scale marker transform with parent stroke width */
+    SPStyle *style = shape->style;
+    Geom::Scale scale(Inkscape::Util::Quantity::convert(style->stroke_width.computed, "mm", "px")); // TODO!! come back and check why is it mm -> px conversion that works here?? Hardcoded units can't be right?
     
+    Geom::PathVector const &pathv = shape->curve()->get_pathvector();
+    Geom::Affine ret = Geom::identity();
+    
+    if(marker_type == SP_MARKER_LOC_START) {
+        /* start marker location */
+        Geom::Curve const &c = pathv.begin()->front();
+        Geom::Point p = c.pointAt(0);
+        Geom::Point t = Geom::Point(Inkscape::Util::Quantity::convert(p[Geom::X], "mm", "px"), 
+            Inkscape::Util::Quantity::convert(p[Geom::Y], "mm", "px")); // ??? Come back
+        ret = Geom::Translate(t);
+
+        if (!c.isDegenerate()) {
+            Geom::Point tang = c.unitTangentAt(0);
+            double const angle = Geom::atan2(tang);
+            ret = Geom::Rotate(angle) * ret;
+        }
+
+    } else if(marker_type == SP_MARKER_LOC_MID) {
+        /* mid marker - following the same logic from "sp_shape_update_marker_view" in sp-shape to calculate where markers 
+        are being rendered for an object. For a mid marker - as soon as a location is found, exiting and passing that one single
+        transform into the shape_record.
+        */
+        for(Geom::PathVector::const_iterator path_it = pathv.begin(); path_it != pathv.end(); ++path_it) {
+            // mid marker start position
+            if (path_it != pathv.begin() && ! ((path_it == (pathv.end()-1)) && (path_it->size_default() == 0)) ) // if this is the last path and it is a moveto-only, don't draw mid marker there
+            {
+                Geom::Curve const &c = path_it->front();
+                Geom::Point p = c.pointAt(0);
+                Geom::Point t = Geom::Point(Inkscape::Util::Quantity::convert(p[Geom::X], "mm", "px"), 
+                    Inkscape::Util::Quantity::convert(p[Geom::Y], "mm", "px")); // ??? Come back
+                ret = Geom::Translate(t);
+
+                if (!c.isDegenerate()) {
+                    Geom::Point tang = c.unitTangentAt(0);
+                    double const angle = Geom::atan2(tang);
+                    ret = Geom::Rotate(angle) * ret;
+                    break;
+                }
+            }
+            // mid marker mid positions
+            if ( path_it->size_default() > 1) {
+                Geom::Path::const_iterator curve_it1 = path_it->begin();      // incoming curve
+                Geom::Path::const_iterator curve_it2 = ++(path_it->begin());  // outgoing curve
+                while (curve_it2 != path_it->end_default())
+                {
+                    Geom::Curve const & c1 = *curve_it1;
+                    Geom::Curve const & c2 = *curve_it2;
+
+                    Geom::Point p = c1.pointAt(1);
+                    
+                    Geom::Curve * c1_reverse = c1.reverse();
+                    Geom::Point tang1 = - c1_reverse->unitTangentAt(0);
+                    delete c1_reverse;
+                    Geom::Point tang2 = c2.unitTangentAt(0);
+
+                    double const angle1 = Geom::atan2(tang1);
+                    double const angle2 = Geom::atan2(tang2);
+
+                    double ret_angle = .5 * (angle1 + angle2);
+
+                    if ( fabs( angle2 - angle1 ) > M_PI ) {
+                        ret_angle += M_PI;
+                    }
+
+                    Geom::Point t = Geom::Point(Inkscape::Util::Quantity::convert(p[Geom::X], "mm", "px"), 
+                        Inkscape::Util::Quantity::convert(p[Geom::Y], "mm", "px"));
+                    ret = Geom::Rotate(ret_angle) * Geom::Translate(t);
+
+                    ++curve_it1;
+                    ++curve_it2;
+                    break;
+                }
+            }
+            // mid marker end position
+            if ( path_it != (pathv.end()-1) && !path_it->empty()) {
+                Geom::Curve const &c = path_it->back_default();
+                Geom::Point p = c.pointAt(1);
+                Geom::Point t = Geom::Point(Inkscape::Util::Quantity::convert(p[Geom::X], "mm", "px"), 
+                    Inkscape::Util::Quantity::convert(p[Geom::Y], "mm", "px"));
+                ret = Geom::Translate(t);
+
+                if ( !c.isDegenerate() ) {
+                    Geom::Curve * c_reverse = c.reverse();
+                    Geom::Point tang = - c_reverse->unitTangentAt(0);
+                    delete c_reverse;
+                    double const angle = Geom::atan2(tang);
+                    ret = Geom::Rotate(angle) * ret;
+                    break;
+                } 
+            }
+        }
+
+    } else if (marker_type == SP_MARKER_LOC_END) {
+        /* end marker location */
+        Geom::Path const &path_last = pathv.back();
+        unsigned int index = path_last.size_default();
+        if (index > 0) {
+            index--;
+        }
+        Geom::Curve const &c = path_last[index];
+        Geom::Point p = c.pointAt(1);
+        Geom::Point t = Geom::Point(Inkscape::Util::Quantity::convert(p[Geom::X], "mm", "px"), 
+            Inkscape::Util::Quantity::convert(p[Geom::Y], "mm", "px"));
+        ret = Geom::Translate(t);
+
+        if ( !c.isDegenerate() ) {
+            Geom::Curve * c_reverse = c.reverse();
+            Geom::Point tang = - c_reverse->unitTangentAt(0);
+            delete c_reverse;
+            double const angle = Geom::atan2(tang);
+            ret = Geom::Rotate(angle) * ret;
+        } 
+    }
+
+    ret = scale * ret;
+    ret = sp_marker->c2p * ret;
     return ret;
 }
 
@@ -134,54 +247,37 @@ void MarkerTool::selection_changed(Inkscape::Selection *sel) {
                         SPItem* marker_item = dynamic_cast<SPItem *>(this->desktop->getDocument()->getObjectByRepr(marker_repr));
 
                         if(enter_marker_mode) {
-                            /* Scale marker transform with parent stroke width */
-                            SPMarker *sp_marker = dynamic_cast<SPMarker *>(marker_obj);
+                            
+                            Geom::Affine marker_tr = Geom::identity();
 
-                            SPStyle *style = shape->style;
-                            Geom::Scale scale(Inkscape::Util::Quantity::convert(style->stroke_width.computed, "mm", "px")); // TODO!! come back and check
+                            switch(i) {
+                                case SP_MARKER_LOC_START:
+                                    marker_tr  = get_marker_transform(shape, marker_item, SP_MARKER_LOC_START);
+                                    break;
+                                case SP_MARKER_LOC_MID:
+                                    marker_tr  = get_marker_transform(shape, marker_item, SP_MARKER_LOC_MID);
+                                    break;
+                                case SP_MARKER_LOC_END:
+                                    marker_tr  = get_marker_transform(shape, marker_item, SP_MARKER_LOC_END);
+                                    break;
+                                default:
+                                    break;
+                            }  
 
-                            Geom::PathVector const &pathv = shape->curve()->get_pathvector();
-                            Geom::Affine const marker_transform(get_marker_transform(pathv.begin()->front(), item));
-                            Geom::Affine tr(marker_transform);
-                            tr = scale * tr;
-                            tr = sp_marker->c2p * tr;
-
-                            if (gather_items(this, nullptr, marker_item, SHAPE_ROLE_NORMAL, shapes, sel, tr)) {
-                                // remove
+                            if (gather_items(this, nullptr, marker_item, SHAPE_ROLE_NORMAL, shapes, sel, marker_tr)) {
+                                // remove parent item here maybe ?
                             }
+
                         } else {
                             ShapeRecord sr;
                             sr.object = marker_item;
                             sr.edit_transform = Geom::identity();
                             sr.role = SHAPE_ROLE_NORMAL;
                             if (shapes.insert(sr).second) {;
-                                sel->add(marker_item);
-                                //sel->remove(item);
+                                //sel->add(marker_item);
+                                //sel->remove(item); remove parent item here maybe ?
                             }
                         }
-
-                        /* Trying to get transform in right place :'(  (works kinda unless parents/children have transforms too) */
-                        
-                        //tr =  (Geom::Affine)sp_marker->c2p * tr;
-
-                        // tr.setTranslation(Geom::Point(
-                        //     Inkscape::Util::Quantity::convert(x[Geom::X], "mm", "px"),
-                        //     Inkscape::Util::Quantity::convert(x[Geom::X], "mm", "px")
-                        // ));
-                        //std::cout << tr << std::endl;
-                        //tr = scale * tr;
-                        //std::cout << tr << std::endl;
-                        //tr = tr->i2doc_affine();
-                        
-                        //tr= tr * Geom::Scale(Inkscape::Util::Quantity::convert(x[Geom::X], "mm", "px"));
-                    
-                        //tr.setTranslation(Geom::Point(t[Geom::X], t[Geom::Y]));
-
-                        //std::cout << tr << std::endl;
-
-                        /*************************/
-
-                        //gather_marker_items(marker_item, SHAPE_ROLE_NORMAL, shapes, tr, selection);
                     }
                 }
             }

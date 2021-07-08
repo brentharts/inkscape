@@ -88,7 +88,8 @@ KnotHolderEntity::update_knot()
 {
     Geom::Point knot_pos(knot_get());
     if (knot_pos.isFinite()) {
-        Geom::Point dp(knot_pos * parent_holder->getEditTransform() * item->i2dt_affine());
+        Geom::Point dp(knot_pos * item->i2dt_affine());
+        dp = dp * parent_holder->getEditTransform();
 
         _moved_connection.block();
         knot->setPosition(dp, SP_KNOT_STATE_NORMAL);

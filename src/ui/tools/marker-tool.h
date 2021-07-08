@@ -2,6 +2,7 @@
 #define __SP_MARKER_CONTEXT_H__
 
 #include "ui/tools/node-tool.h"
+#include "object/sp-marker-loc.h"
 
 namespace Inkscape {
 namespace UI {
@@ -18,7 +19,7 @@ class MarkerTool : public NodeTool {
         bool root_handler_extended(GdkEvent* event) override;
 		void finish() override;
 
-		Geom::Affine get_marker_transform(Geom::Curve const & c, SPItem *item);
+		Geom::Affine get_marker_transform(SPShape* shape, SPItem *item, SPMarkerLoc marker_type);
 };
 
 }

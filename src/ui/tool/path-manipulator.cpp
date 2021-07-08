@@ -1202,8 +1202,8 @@ void PathManipulator::_createControlPointsFromGeometry()
         return;
     }
     _spcurve->set_pathvector(pathv);
-
-    pathv *= (_edit_transform * _i2d_transform);
+    pathv *= _i2d_transform;
+    pathv *= _edit_transform;
 
     // in this loop, we know that there are no zero-segment subpaths
     for (auto & pit : pathv) {

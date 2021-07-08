@@ -197,7 +197,7 @@ void SPMarker::set(SPAttr key, const gchar* value) {
 void SPMarker::update(SPCtx *ctx, guint flags) {
 
     SPItemCtx ictx;
-
+    //std::cout << "sp marker update" << std::endl;
     // Copy parent context
     ictx.flags = ctx->flags;
 
@@ -225,6 +225,20 @@ void SPMarker::update(SPCtx *ctx, guint flags) {
             if (item) {
                 Inkscape::DrawingGroup *g = dynamic_cast<Inkscape::DrawingGroup *>(item);
                 g->setChildTransform(this->c2p);
+                /* TODO next - update base/linewidth to get orient shape editor to work */
+                Geom::Affine m;
+                if (this->orient_mode == MARKER_ORIENT_AUTO) {
+                    //m = base;
+                } else if (this->orient_mode == MARKER_ORIENT_AUTO_START_REVERSE) {
+                    // m = Geom::Rotate::from_degrees( 180.0 ) * base;
+                    // Rotating is done at rendering time if necessary
+                    //m = base;
+                } else {
+                    /* fixme: Orient units (Lauris) */
+                    m = Geom::Rotate::from_degrees(this->orient.computed);
+                    //m *= Geom::Translate(base.translation());
+                }
+                item->setTransform(m);
             }
         }
     }
@@ -381,6 +395,7 @@ sp_marker_show_instance ( SPMarker *marker, Inkscape::DrawingItem *parent,
     // Do not show marker if linewidth == 0 and markerUnits == strokeWidth
     // otherwise Cairo will fail to render anything on the tile
     // that contains the "degenerate" marker.
+    //std::cout << "sp marker show instance" << std::endl;
     if (marker->markerUnits == SP_MARKER_UNITS_STROKEWIDTH && linewidth == 0) {
         return nullptr;
     }

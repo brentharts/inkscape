@@ -907,7 +907,7 @@ MarkerKnotHolderEntityScale::knot_get() const
     SPMarker *sp_marker = dynamic_cast<SPMarker *>(item);
     g_assert(sp_marker != nullptr);
 
-    return Geom::Point(sp_marker->markerWidth.computed, sp_marker->markerHeight.computed);
+    return Geom::Point(sp_marker->refX.computed + sp_marker->markerWidth.computed, sp_marker->refY.computed + sp_marker->markerHeight.computed);
 }
 
 /* The math here needs to be updated - just trying to get something up and working right now */
@@ -979,11 +979,6 @@ MarkerKnotHolderEntityScale::set_internal(Geom::Point const &p, Geom::Point cons
         sp_marker->markerWidth = MAX(s[Geom::X], 0);
         sp_marker->markerHeight = MAX(s[Geom::Y], 0);
     }
-    
-    // Geom::Point d = s - Geom::Point(sp_marker->refX.computed, sp_marker->refY.computed);
-    // sp_marker->orient = atan2(d);
-    // sp_marker->orient_mode = MARKER_ORIENT_ANGLE;
-    // sp_marker->orient_set = TRUE;
 
     sp_marker->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
 }
@@ -996,8 +991,7 @@ void MarkerKnotHolderEntityScale::knot_set(Geom::Point const &p, Geom::Point con
     sp_marker->viewBox = Geom::Rect::from_xywh(0, 0, 100, 100);
     sp_marker->viewBox_set = true;
     sp_marker->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_VIEWPORT_MODIFIED_FLAG);
-    //sp_marker->set(SPAttr::VIEWBOX, 
-    //    Geom::Rect::from_xywh(0, 0, sp_marker->markerWidth.computed, sp_marker->markerWidth.computed));
+
     set_internal(p, origin, state);
     update_knot();
 }
@@ -1033,11 +1027,46 @@ MarkerKnotHolderEntityCenter::knot_set(Geom::Point const &p, Geom::Point const &
     marker->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
 }
 
+/* Handle for marker orientation - setting up here, come back to math l8r g8r */
+class MarkerKnotHolderEntityOrient : public KnotHolderEntity {
+public:
+    Geom::Point knot_get() const override;
+    void knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) override {};
+    void knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state) override;
+};
+
+Geom::Point
+MarkerKnotHolderEntityOrient::knot_get() const
+{
+    SPMarker *marker = dynamic_cast<SPMarker *>(item);
+    g_assert(marker != nullptr);
+
+    return Geom::Point(marker->refX.computed - marker->markerHeight.computed, marker->refY.computed - marker->markerWidth.computed);
+}
+
+void
+MarkerKnotHolderEntityOrient::knot_set(Geom::Point const &p, Geom::Point const &/*origin*/, unsigned int state)
+{
+    SPMarker *sp_marker = dynamic_cast<SPMarker *>(item);
+    g_assert(sp_marker != nullptr);
+
+    Geom::Point s = p;
+    Geom::Point d = s - Geom::Point(sp_marker->refX.computed, sp_marker->refY.computed);
+    //sp_marker->orient = atan2(d);
+    /* Placeholder while I fix a related bug */
+    sp_marker->orient = 90;
+    sp_marker->orient_mode = MARKER_ORIENT_ANGLE;
+    sp_marker->orient_set = TRUE;
+    sp_marker->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+    //sp_marker->set(SPAttr::ORIENT, "auto-start-reverse");
+}
+
 MarkerKnotHolder::MarkerKnotHolder(SPDesktop *desktop, SPItem *item, SPKnotHolderReleasedFunc relhandler) :
     KnotHolder(desktop, item, relhandler)
 {
     MarkerKnotHolderEntityScale *entity_scale = new MarkerKnotHolderEntityScale();
     MarkerKnotHolderEntityCenter *entity_center = new MarkerKnotHolderEntityCenter();
+    MarkerKnotHolderEntityOrient *entity_orient = new MarkerKnotHolderEntityOrient();
 
     entity_scale->create(desktop, item, this, Inkscape::CANVAS_ITEM_CTRL_TYPE_SIZER, "Marker:scale",
                       _("Adjust the <b>size</b> of the marker"));
@@ -1045,8 +1074,12 @@ MarkerKnotHolder::MarkerKnotHolder(SPDesktop *desktop, SPItem *item, SPKnotHolde
     entity_center->create(desktop, item, this, Inkscape::CANVAS_ITEM_CTRL_TYPE_POINT, "Marker:center",
                           _("Drag to adjust the refX/refY position of the marker"));
 
+    entity_orient->create(desktop, item, this, Inkscape::CANVAS_ITEM_CTRL_TYPE_SHAPER, "Marker:orient",
+                        _("Adjust marker orientation through rotation"));
+
     entity.push_back(entity_scale);
     entity.push_back(entity_center);
+    entity.push_back(entity_orient);
 
     add_pattern_knotholder();
     add_hatch_knotholder();
