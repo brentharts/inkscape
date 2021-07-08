@@ -455,12 +455,11 @@ void StrokeStyle::markerSelectCB(MarkerComboBox *marker_combo, StrokeStyle *spw,
     }
 
     /* Get Marker */
-    gchar const *marker = marker_combo->get_active_marker_uri();
-
+    std::string marker = marker_combo->get_active_marker_uri();
 
     SPCSSAttr *css = sp_repr_css_attr_new();
     gchar const *combo_id = marker_combo->get_id();
-    sp_repr_css_set_property(css, combo_id, marker);
+    sp_repr_css_set_property(css, combo_id, marker.c_str());
 
     Inkscape::Selection *selection = spw->desktop->getSelection();
     auto itemlist= selection->items();
