@@ -17,6 +17,7 @@
 #include <gtkmm/flowbox.h>
 #include <gtkmm/image.h>
 #include <gtkmm/liststore.h>
+#include <gtkmm/spinbutton.h>
 #include <gtkmm/builder.h>
 #include <gio/gliststore.h>
 
@@ -73,6 +74,10 @@ private:
         bool stock = false;
         bool history = false;
         bool separator = false;
+        int width = 0;
+        int height = 0;
+
+        bool operator == (const MarkerItem& item) const;
     };
 
     sigc::signal<void()> _signal_changed;
@@ -80,8 +85,15 @@ private:
     Gtk::FlowBox& _marker_list;
     Gtk::Label& _marker_name;
     Glib::RefPtr<Gio::ListStore<MarkerItem>> _marker_store;
+    std::vector<Glib::RefPtr<MarkerItem>> _stock_items;
+    std::vector<Glib::RefPtr<MarkerItem>> _history_items;
     std::map<Gtk::Widget*, Glib::RefPtr<MarkerItem>> _widgets_to_markers;
     Gtk::Image& _preview;
+    Gtk::Button& _link_scale;
+    Gtk::MenuButton& _menu_btn;
+    Gtk::SpinButton& _scale_x;
+    Gtk::SpinButton& _scale_y;
+    bool _scale_linked = true;
     guint32 _background_color;
     guint32 _foreground_color;
     gchar const *combo_id;
@@ -107,11 +119,14 @@ private:
     };
     MarkerColumns marker_columns;
 
+    void update_store();
+    Glib::RefPtr<MarkerItem> add_separator(bool filler);
+    void update_scale_link();
     Glib::RefPtr<MarkerItem> get_active();
     void set_selected(const gchar *name, gboolean retry=true);
     void on_style_updated() override;
     void update_preview();
-    void set_active(int index);
+    void set_active(Glib::RefPtr<MarkerItem> item);
     void init_combo();
     void set_history(Gtk::TreeModel::Row match_row);
     void sp_marker_list_from_doc(SPDocument *source,  gboolean history);

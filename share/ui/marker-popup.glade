@@ -18,6 +18,18 @@
     <property name="step-increment">0.10</property>
     <property name="page-increment">1</property>
   </object>
+  <object class="GtkImage" id="image-linked">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <property name="icon-name">entries-linked-symbolic</property>
+    <property name="icon_size">3</property>
+  </object>
+  <object class="GtkImage" id="image-unlinked">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <property name="icon-name">entries-unlinked-symbolic</property>
+    <property name="icon_size">3</property>
+  </object>
   <object class="GtkImage" id="image1">
     <property name="visible">True</property>
     <property name="can-focus">False</property>
@@ -32,12 +44,6 @@
     <property name="visible">True</property>
     <property name="can-focus">False</property>
     <property name="icon-name">orient-angle</property>
-  </object>
-  <object class="GtkImage" id="image4">
-    <property name="visible">True</property>
-    <property name="can-focus">False</property>
-    <property name="icon-name">entries-unlinked</property>
-    <property name="icon_size">3</property>
   </object>
   <object class="GtkRadioButton" id="radiobutton1">
     <property name="label" translatable="yes">radiobutton</property>
@@ -73,7 +79,6 @@
                     <property name="can-focus">True</property>
                     <property name="halign">start</property>
                     <property name="valign">start</property>
-                    <property name="homogeneous">True</property>
                     <property name="min-children-per-line">8</property>
                     <property name="max-children-per-line">8</property>
                   </object>
@@ -396,9 +401,9 @@
                 <property name="focus-on-click">False</property>
                 <property name="receives-default">True</property>
                 <property name="halign">end</property>
+                <property name="margin-end">1</property>
                 <property name="margin-top">5</property>
                 <property name="margin-bottom">5</property>
-                <property name="image">image4</property>
                 <property name="relief">none</property>
               </object>
               <packing>
@@ -428,7 +433,17 @@
         <property name="visible">True</property>
         <property name="can-focus">False</property>
         <child>
-          <placeholder/>
+          <object class="GtkImage" id="preview-img">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="hexpand">True</property>
+            <property name="stock">gtk-missing-image</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
         </child>
         <child>
           <object class="GtkImage">
