@@ -112,17 +112,22 @@ void sp_marker_set_uniform_scale(SPMarker* marker, bool uniform) {
     }
 }
 
-static cairo_surface_t* create_separator(double alpha) {
-    cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 30, 1);
-        // cairo_surface_set_device_scale(_surface, _device_scale, _device_scale);
+static cairo_surface_t* create_separator(double alpha, int width, int height, int device_scale) {
+    width *= device_scale;
+    height *= device_scale;
+    cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
     cairo_t* ctx = cairo_create(surface);
     cairo_set_source_rgba(ctx, 0.5, 0.5, 0.5, alpha);
-    cairo_paint(ctx);
+    cairo_move_to(ctx, 0.5, height / 2 + 0.5);
+    cairo_line_to(ctx, width + 0.5, height / 2 + 0.5);
+    cairo_set_line_width(ctx, 1.0 * device_scale);
+    cairo_stroke(ctx);
     cairo_surface_flush(surface);
+    cairo_surface_set_device_scale(surface, device_scale, device_scale);
     return surface;
 }
 
-static Cairo::RefPtr<Cairo::Surface> g_image_none(new Cairo::Surface(create_separator(1)));
+static Cairo::RefPtr<Cairo::Surface> g_image_none;
 
 // get widget from builder or throw
 template<class W> W& get_widget(Glib::RefPtr<Gtk::Builder>& builder, const char* id) {
@@ -172,14 +177,12 @@ MarkerComboBox::MarkerComboBox(gchar const *id, int l) :
     _background_color = 0x808080ff;
     _foreground_color = 0x808080ff;
 
-    add(_menu_btn);
+    if (!g_image_none) {
+        auto device_scale = get_scale_factor();
+        g_image_none = Cairo::RefPtr<Cairo::Surface>(new Cairo::Surface(create_separator(1, ITEM_WIDTH, ITEM_HEIGHT, device_scale)));
+    }
 
-    _link_scale.signal_clicked().connect([=](){
-        if (updating) return;
-        _scale_linked = !_scale_linked;
-        sp_marker_set_uniform_scale(_current_marker, _scale_linked);
-        update_scale_link();
-    });
+    add(_menu_btn);
 
     _marker_store = Gio::ListStore<MarkerItem>::create(); //marker_columns);
     _marker_list.bind_list_store(_marker_store, [=](const Glib::RefPtr<MarkerItem>& item){
@@ -244,15 +247,26 @@ MarkerComboBox::MarkerComboBox(gchar const *id, int l) :
 
     _angle_btn.signal_changed().connect([=]() {
         if (updating || !_angle_btn.is_sensitive()) return;
-        set_marker_orientation(_angle_btn.get_text().c_str());
+        sp_marker_set_orient(_current_marker, _angle_btn.get_text().c_str());
     });
 
-    _scale_x.signal_changed().connect([=]() {
+    auto set_scale = [=]() {
         if (updating) return;
         auto sx = _scale_x.get_value();
         auto sy = _scale_linked ? sx : _scale_y.get_value();
         sp_marker_set_size(_current_marker, sx, sy);
+    };
+
+    _link_scale.signal_clicked().connect([=](){
+        if (updating) return;
+        _scale_linked = !_scale_linked;
+        sp_marker_set_uniform_scale(_current_marker, _scale_linked);
+        update_scale_link();
+        set_scale();
     });
+
+    _scale_x.signal_changed().connect([=]() { set_scale(); });
+    _scale_y.signal_changed().connect([=]() { set_scale(); });
 
     _scale_with_stroke.signal_toggled().connect([=](){
         if (updating) return;
@@ -327,13 +341,6 @@ g_warning("%s update ui %p", combo_id, marker);
     // updating = false;
 }
 
-void MarkerComboBox::set_marker_orientation(const char* orient) {
-    //
-// g_warning("set ori %s %p", orient, _current_marker);
-
-    sp_marker_set_orient(_current_marker, orient);
-}
-
 void MarkerComboBox::update_scale_link() {
     _link_scale.remove();
     _link_scale.add(get_widget<Gtk::Image>(_builder, _scale_linked ? "image-linked" : "image-unlinked"));
@@ -344,6 +351,7 @@ void MarkerComboBox::update_scale_link() {
     }
 }
 
+// update marker preview image in the popover panel
 void MarkerComboBox::update_preview() {
     auto item = get_active();
 
@@ -487,7 +495,8 @@ Glib::RefPtr<MarkerComboBox::MarkerItem> MarkerComboBox::add_separator(bool fill
     item->label = filler ? "filler" : "Separator";
     item->stock = false;
     if (!filler) {
-        static Cairo::RefPtr<Cairo::Surface> separator(new Cairo::Surface(create_separator(0.7)));
+        auto device_scale = get_scale_factor();
+        static Cairo::RefPtr<Cairo::Surface> separator(new Cairo::Surface(create_separator(0.7, ITEM_WIDTH, 10, device_scale)));
         item->pix = separator;
     }
     item->height = 10;
@@ -540,7 +549,8 @@ MarkerComboBox::init_combo()
 void MarkerComboBox::set_current(SPObject *marker)
 {
     auto sp_marker = dynamic_cast<SPMarker*>(marker);
-    if (sp_marker == _current_marker) return;
+
+    bool reselect = sp_marker != _current_marker;
 
     updating = true;
     _current_marker = sp_marker;
@@ -566,8 +576,11 @@ void MarkerComboBox::set_current(SPObject *marker)
         }
     }
 
-    set_active(marker_item);
+    if (reselect) {
+        set_active(marker_item);
+    }
 
+    // update marker image inside the menu button
     Cairo::RefPtr<Cairo::Surface> preview;
     if (!marker) {
         preview = g_image_none;
@@ -606,7 +619,7 @@ std::string MarkerComboBox::get_active_marker_uri()
         bool stockid = item->stock; // get_active()->get_value(marker_columns.stock);
 
         std::string markurn = stockid ? "urn:inkscape:marker:" + item->id : item->id;
-        SPObject* mark = get_stock_item(markurn.c_str(), stockid);
+        SPObject* mark = dynamic_cast<SPMarker*>(get_stock_item(markurn.c_str(), stockid));
         // g_free(markurn);
         if (mark) {
             Inkscape::XML::Node* repr = mark->getRepr();
@@ -615,6 +628,9 @@ std::string MarkerComboBox::get_active_marker_uri()
                 std::ostringstream ost;
                 ost << "url(#" << id << ")";
                 marker = ost.str();
+            }
+            if (stockid) {
+                mark->getRepr()->setAttribute("inkscape:collect", "always");
             }
         }
     } else {

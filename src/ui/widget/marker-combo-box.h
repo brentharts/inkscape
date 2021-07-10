@@ -131,7 +131,6 @@ private:
     MarkerColumns marker_columns;
 
     void update_widgets_from_marker(SPMarker* marker);
-    void set_marker_orientation(const char* orient);
     void update_store();
     Glib::RefPtr<MarkerItem> add_separator(bool filler);
     void update_scale_link();
