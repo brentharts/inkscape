@@ -172,7 +172,7 @@ void SPMarker::set(SPAttr key, const gchar* value) {
                         }
                     }
 		}
-
+// g_warning("marker")
 		this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
 		break;
 

@@ -14,6 +14,7 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/bin.h>
+#include <gtkmm/checkbutton.h>
 #include <gtkmm/flowbox.h>
 #include <gtkmm/image.h>
 #include <gtkmm/liststore.h>
@@ -80,6 +81,7 @@ private:
         bool operator == (const MarkerItem& item) const;
     };
 
+    SPMarker* _current_marker = nullptr;
     sigc::signal<void()> _signal_changed;
     Glib::RefPtr<Gtk::Builder> _builder;
     Gtk::FlowBox& _marker_list;
@@ -90,9 +92,18 @@ private:
     std::map<Gtk::Widget*, Glib::RefPtr<MarkerItem>> _widgets_to_markers;
     Gtk::Image& _preview;
     Gtk::Button& _link_scale;
+    Gtk::SpinButton& _angle_btn;
     Gtk::MenuButton& _menu_btn;
     Gtk::SpinButton& _scale_x;
     Gtk::SpinButton& _scale_y;
+    Gtk::CheckButton& _scale_with_stroke;
+    Gtk::SpinButton& _offset_x;
+    Gtk::SpinButton& _offset_y;
+    Gtk::Widget& _input_grid;
+    Gtk::RadioButton& _orient_auto_rev;
+    Gtk::RadioButton& _orient_auto;
+    Gtk::RadioButton& _orient_angle;
+    Gtk::Image& _preview_img;
     bool _scale_linked = true;
     guint32 _background_color;
     guint32 _foreground_color;
@@ -119,6 +130,8 @@ private:
     };
     MarkerColumns marker_columns;
 
+    void update_widgets_from_marker(SPMarker* marker);
+    void set_marker_orientation(const char* orient);
     void update_store();
     Glib::RefPtr<MarkerItem> add_separator(bool filler);
     void update_scale_link();
