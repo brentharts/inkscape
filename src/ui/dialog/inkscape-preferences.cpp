@@ -2368,6 +2368,10 @@ void InkscapePreferences::initPageBehavior()
     _page_snapping.add_line( true, _("Snap indicator persistence (in seconds):"), _snap_persistence, "",
                              _("Controls how long the snap indicator message will be shown, before it disappears"), true);
 
+    _snap_indicator_distance.init( _("Show snap distance in case of alignment or distribution snap"), "/options/snapindicatordistance/value", false);
+    _page_snapping.add_line( true, "", _snap_indicator_distance, "",
+                             _("Show snap distance in case of alignment or distribution snap"));
+
     _page_snapping.add_group_header( _("What should snap"));
 
     _snap_closest_only.init( _("Only snap the node closest to the pointer"), "/options/snapclosestonly/value", false);
