@@ -135,9 +135,10 @@ private:
     Glib::RefPtr<MarkerItem> add_separator(bool filler);
     void update_scale_link();
     Glib::RefPtr<MarkerItem> get_active();
+    Glib::RefPtr<MarkerItem> find_marker_item(SPMarker* marker);
     void set_selected(const gchar *name, gboolean retry=true);
     void on_style_updated() override;
-    void update_preview();
+    void update_preview(Glib::RefPtr<MarkerItem> marker_item);
     void set_active(Glib::RefPtr<MarkerItem> item);
     void init_combo();
     void set_history(Gtk::TreeModel::Row match_row);

@@ -184,6 +184,9 @@ MarkerComboBox::MarkerComboBox(gchar const *id, int l) :
 
     add(_menu_btn);
 
+    auto& popover = get_widget<Gtk::Popover>(_builder, "popover");
+    popover.signal_show().connect([=](){ update_preview(find_marker_item(_current_marker)); });
+
     _marker_store = Gio::ListStore<MarkerItem>::create(); //marker_columns);
     _marker_list.bind_list_store(_marker_store, [=](const Glib::RefPtr<MarkerItem>& item){
         // g_warning("create widg %p", item.get());
@@ -197,6 +200,10 @@ MarkerComboBox::MarkerComboBox(gchar const *id, int l) :
             image->set_size_request(-1, 10);
             box->set_sensitive(false);
             box->set_can_focus(false);
+            box->get_style_context()->add_class("marker-separator");
+        }
+        else {
+            box->get_style_context()->add_class("marker-item-box");
         }
         _widgets_to_markers[image] = item;
         auto alloc = image->get_allocation();
@@ -219,23 +226,23 @@ MarkerComboBox::MarkerComboBox(gchar const *id, int l) :
     // this->get_style_context()->add_class("combobright");
 
     _marker_list.signal_selected_children_changed().connect([=](){
-        g_warning("%s sel chg", combo_id);
+        // g_warning("%s sel chg", combo_id);
         auto item = get_active();
         if (!item && !_marker_list.get_selected_children().empty()) {
             _marker_list.unselect_all();
         }
-        update_preview();
+        // update_preview();
         // _signal_changed.emit();
     });
     _marker_list.signal_child_activated().connect([=](Gtk::FlowBoxChild* box){
-        g_warning("%s activated %p", combo_id, box);
+        // g_warning("%s activated %p", combo_id, box);
         if (box->get_sensitive()) _signal_changed.emit();
     });
 
-    auto& orient_group = get_widget<Gtk::RadioButton>(_builder, "radio-orient");
-    orient_group.signal_toggled().connect([](){
-        g_warning("orient grp toggle");
-    });
+    // auto& orient_group = get_widget<Gtk::RadioButton>(_builder, "radio-orient");
+    // orient_group.signal_toggled().connect([](){
+        // g_warning("orient grp toggle");
+    // });
     auto set_orient = [=](bool enable_angle, const char* value) {
         if (updating) return;
         _angle_btn.set_sensitive(enable_angle);
@@ -280,7 +287,7 @@ MarkerComboBox::MarkerComboBox(gchar const *id, int l) :
     _offset_x.signal_changed().connect([=]() { set_offset(); });
     _offset_y.signal_changed().connect([=]() { set_offset(); });
 
-    update_preview();
+    // update_preview();
     update_scale_link();
     _preview_img.set(g_image_none);
     show();
@@ -307,14 +314,15 @@ double get_attrib_num(SPMarker* marker, const char* attrib) {
 
 void MarkerComboBox::update_widgets_from_marker(SPMarker* marker) {
     // updating = true;
-g_warning("%s update ui %p", combo_id, marker);
+// g_warning("%s update ui %p", combo_id, marker);
 
     _input_grid.set_sensitive(marker != nullptr);
 
     if (marker) {
         _scale_x.set_value(get_attrib_num(marker, "markerWidth"));
         _scale_y.set_value(get_attrib_num(marker, "markerHeight"));
-        _scale_with_stroke.set_active(get_attrib(marker, "markerUnits") == "strokeWidth");
+        auto units = get_attrib(marker, "markerUnits");
+        _scale_with_stroke.set_active(units == "strokeWidth" || units == "");
         auto aspect = get_attrib(marker, "preserveAspectRatio");
         _scale_linked = aspect != "none";
         update_scale_link();
@@ -352,28 +360,29 @@ void MarkerComboBox::update_scale_link() {
 }
 
 // update marker preview image in the popover panel
-void MarkerComboBox::update_preview() {
-    auto item = get_active();
-
+void MarkerComboBox::update_preview(Glib::RefPtr<MarkerItem> item) {
     Cairo::RefPtr<Cairo::Surface> surface;
     Glib::ustring label;
-    auto alloc = _preview.get_allocation();
 
-    if (auto item = get_active()) {
-        // auto image = sel.front()->get_child();
-        // auto item = static_cast<MarkerItem*>(image ? image->get_data("marker") : nullptr);
-        if (item->source && !item->id.empty()) {
-            Inkscape::Drawing drawing;
-            unsigned const visionkey = SPItem::display_key_new(1);
-            drawing.setRoot(_sandbox->getRoot()->invoke_show(drawing, visionkey, SP_ITEM_SHOW_DISPLAY));
-            // generate preview
-            auto size = Geom::IntPoint(alloc.get_width() - 10, alloc.get_height() - 10);
-            if (size.x() > 0 && size.y() > 0) {
-                surface = create_marker_image(size, item->id.c_str(), item->source, drawing, visionkey, true, false, 2.60);
-            }
-            _sandbox->getRoot()->invoke_hide(visionkey);
-            label = item->label;
+// g_warning("render preview %p %p", item.get(), _current_marker);
+    if (item && item->source && !item->id.empty()) {
+        Inkscape::Drawing drawing;
+        unsigned const visionkey = SPItem::display_key_new(1);
+        drawing.setRoot(_sandbox->getRoot()->invoke_show(drawing, visionkey, SP_ITEM_SHOW_DISPLAY));
+        // generate preview
+        auto alloc = _preview.get_allocation();
+        // g_warning("render preview mow %d %d", alloc.get_width(), alloc.get_height());
+        auto size = Geom::IntPoint(alloc.get_width() - 10, alloc.get_height() - 10);
+        if (size.x() > 0 && size.y() > 0) {
+            surface = create_marker_image(size, item->id.c_str(), item->source, drawing, visionkey, true, false, 2.60);
+        // g_warning("render preview %d", surface.operator bool());
         }
+        else {
+            // call itself later...
+            //
+        }
+        _sandbox->getRoot()->invoke_hide(visionkey);
+        label = item->label;
     }
 
     _preview.set(surface);
@@ -421,6 +430,27 @@ void MarkerComboBox::set_active(Glib::RefPtr<MarkerItem> item) {
     }
 }
 
+Glib::RefPtr<MarkerComboBox::MarkerItem> MarkerComboBox::find_marker_item(SPMarker* marker) {
+    std::string id;
+    if (marker != nullptr) {
+        if (auto markname = marker->getRepr()->attribute("id")) {
+            id = markname;
+        }
+    }
+
+    Glib::RefPtr<MarkerItem> marker_item;
+    if (!id.empty()) {
+        for (auto&& item : _history_items) {
+            if (item->id == id) {
+                marker_item = item;
+                break;
+            }
+        }
+    }
+
+    return marker_item;
+}
+
 Glib::RefPtr<MarkerComboBox::MarkerItem> MarkerComboBox::get_active() {
     //
     auto sel = _marker_list.get_selected_children();
@@ -451,6 +481,7 @@ void MarkerComboBox::setDocument(SPDocument *document)
             modified_connection = doc->getDefs()->connectModified( sigc::hide(sigc::hide(sigc::bind(sigc::ptr_fun(&MarkerComboBox::handleDefsModified), this))) );
         }
 _current_marker = nullptr;
+// g_warning("clr current ");
         refreshHistory();
     }
 }
@@ -554,7 +585,10 @@ void MarkerComboBox::set_current(SPObject *marker)
 
     updating = true;
     _current_marker = sp_marker;
+// g_warning("set current %p", sp_marker);
 
+    auto marker_item = find_marker_item(sp_marker);
+/*
     std::string id;
     if (marker != nullptr) {
         if (auto markname = marker->getRepr()->attribute("id")) {
@@ -575,7 +609,7 @@ void MarkerComboBox::set_current(SPObject *marker)
             }
         }
     }
-
+*/
     if (reselect) {
         set_active(marker_item);
     }
@@ -591,6 +625,7 @@ void MarkerComboBox::set_current(SPObject *marker)
     _preview_img.set(preview);
 
     update_widgets_from_marker(sp_marker);
+    update_preview(marker_item);
 
     updating = false;
 }
@@ -674,7 +709,7 @@ void MarkerComboBox::set_selected(const gchar *name, gboolean retry/*=true*/) {
 void MarkerComboBox::sp_marker_list_from_doc(SPDocument *source, gboolean history)
 {
     std::vector<SPMarker *> ml = get_marker_list(source);
-g_warning("add markers from doc, hist: %d", (int)history);
+// g_warning("add markers from doc, hist: %d", (int)history);
     remove_markers(history); // Seem to need to remove 2x
     // remove_markers(history);
     add_markers(ml, source, history);
@@ -879,8 +914,8 @@ auto old_time =  std::chrono::high_resolution_clock::now();
         item->label = markid ? markid : "";
         item->stock = !history;
         item->history = history;
-        item->width = ITEM_WIDTH + 4;
-        item->height = ITEM_HEIGHT + 4;
+        item->width = ITEM_WIDTH;
+        item->height = ITEM_HEIGHT;
 
         if (history) {
             _history_items.push_back(item);

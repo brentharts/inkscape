@@ -539,3 +539,9 @@ button.link:hover image {
     -gtk-icon-effect: dim;
 }
 
+.marker-item.box {
+    padding: 4px;
+}
+.marker-separator {
+    padding: 0;
+}
