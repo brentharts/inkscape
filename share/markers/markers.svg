@@ -9,8 +9,18 @@ Insert the new markers into the <defs>.
   <defs id="defs3">
 
     <!-- Arrows -->
+    <marker style="overflow:visible" id="Arrow1" refX="0.0" refY="0.0" orient="auto-start-reverse" inkscape:stockid="Arrow1">
+      <path style="fill:context-stroke;stroke:context-stroke;stroke-width:1.0pt"
+      d="M -1.5,0 -3.5,-2 3.5,0 -3.5,2 Z"/>
+    </marker>
 
-    <!-- 1 LARGE -->
+    <marker style="overflow:visible" id="Arrow2" refX="0.0" refY="0.0" orient="auto-start-reverse" inkscape:stockid="Arrow2">
+      <path style="stroke:context-stroke;fill:context-stroke;stroke-width:0.625;stroke-linejoin:round"
+      d="M -2.75,2 2.75,0 -2.75,-2 C -1.85,-0.80 -1.85,0.80 -2.75,2 Z" />
+    </marker>
+
+<!--
+    <!- - 1 LARGE - ->
     <marker style="overflow:visible" id="Arrow1Lstart" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="Arrow1Lstart">
       <path transform="scale(0.8) translate(12.5,0)" style="fill-rule:evenodd;fill:context-stroke;stroke:context-stroke;stroke-width:1.0pt" d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "/>
     </marker>
@@ -18,7 +28,7 @@ Insert the new markers into the <defs>.
       <path transform="scale(0.8) rotate(180) translate(12.5,0)" style="fill-rule:evenodd;fill:context-stroke;stroke:context-stroke;stroke-width:1.0pt;" d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "/>
     </marker>
 
-    <!-- 1 Medium -->
+    <!- - 1 Medium - ->
     <marker style="overflow:visible" id="Arrow1Mstart" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="Arrow1Mstart">
       <path transform="scale(0.4) translate(10,0)" style="fill-rule:evenodd;fill:context-stroke;stroke:context-stroke;stroke-width:1.0pt" d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "/>
     </marker>
@@ -26,7 +36,7 @@ Insert the new markers into the <defs>.
       <path transform="scale(0.4) rotate(180) translate(10,0)" style="fill-rule:evenodd;fill:context-stroke;stroke:context-stroke;stroke-width:1.0pt;" d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "/>
     </marker>
 
-    <!-- 1 small -->
+    <!- - 1 small - ->
     <marker style="overflow:visible" id="Arrow1Sstart" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="Arrow1Sstart">
       <path transform="scale(0.2) translate(6,0)" style="fill-rule:evenodd;fill:context-stroke;stroke:context-stroke;stroke-width:1.0pt" d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "/>
     </marker>
@@ -34,7 +44,7 @@ Insert the new markers into the <defs>.
       <path transform="scale(0.2) rotate(180) translate(6,0)" style="fill-rule:evenodd;fill:context-stroke;stroke:context-stroke;stroke-width:1.0pt;" d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "/>
     </marker>
 
-    <!-- 2 LARGE -->
+    <!- - 2 LARGE - ->
     <marker style="overflow:visible" id="Arrow2Lstart" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="Arrow2Lstart">
       <path transform="scale(1.1) translate(1,0)" d="M 8.7185878,4.0337352 L -2.2072895,0.016013256 L 8.7185884,-4.0017078 C 6.9730900,-1.6296469 6.9831476,1.6157441 8.7185878,4.0337352 z " style="stroke:context-stroke;fill-rule:evenodd;fill:context-stroke;stroke-width:0.62500000;stroke-linejoin:round"/>
     </marker>
@@ -42,7 +52,7 @@ Insert the new markers into the <defs>.
       <path transform="scale(1.1) rotate(180) translate(1,0)" d="M 8.7185878,4.0337352 L -2.2072895,0.016013256 L 8.7185884,-4.0017078 C 6.9730900,-1.6296469 6.9831476,1.6157441 8.7185878,4.0337352 z " style="stroke:context-stroke;fill-rule:evenodd;fill:context-stroke;stroke-width:0.62500000;stroke-linejoin:round;"/>
     </marker>
 
-    <!-- 2 Medium -->
+    <!- - 2 Medium - ->
     <marker style="overflow:visible" id="Arrow2Mstart" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="Arrow2Mstart">
       <path transform="scale(0.6) translate(0,0)" d="M 8.7185878,4.0337352 L -2.2072895,0.016013256 L 8.7185884,-4.0017078 C 6.9730900,-1.6296469 6.9831476,1.6157441 8.7185878,4.0337352 z " style="stroke:context-stroke;fill-rule:evenodd;fill:context-stroke;stroke-width:0.62500000;stroke-linejoin:round"/>
     </marker>
@@ -50,13 +60,14 @@ Insert the new markers into the <defs>.
       <path transform="scale(0.6) rotate(180) translate(0,0)" d="M 8.7185878,4.0337352 L -2.2072895,0.016013256 L 8.7185884,-4.0017078 C 6.9730900,-1.6296469 6.9831476,1.6157441 8.7185878,4.0337352 z " style="stroke:context-stroke;fill-rule:evenodd;fill:context-stroke;stroke-width:0.62500000;stroke-linejoin:round;"/>
     </marker>
 
-    <!-- 2 small -->
+    <!- - 2 small - ->
     <marker style="overflow:visible" id="Arrow2Sstart" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="Arrow2Sstart">
       <path transform="scale(0.3) translate(-2.3,0)" d="M 8.7185878,4.0337352 L -2.2072895,0.016013256 L 8.7185884,-4.0017078 C 6.9730900,-1.6296469 6.9831476,1.6157441 8.7185878,4.0337352 z " style="stroke:context-stroke;fill-rule:evenodd;fill:context-stroke;stroke-width:0.62500000;stroke-linejoin:round"/>
     </marker>
     <marker style="overflow:visible;" id="Arrow2Send" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="Arrow2Send">
       <path transform="scale(0.3) rotate(180) translate(-2.3,0)" d="M 8.7185878,4.0337352 L -2.2072895,0.016013256 L 8.7185884,-4.0017078 C 6.9730900,-1.6296469 6.9831476,1.6157441 8.7185878,4.0337352 z " style="stroke:context-stroke;fill-rule:evenodd;fill:context-stroke;stroke-width:0.62500000;stroke-linejoin:round;"/>
     </marker>
+-->
 
     <!-- Tail -->
     <marker style="overflow:visible" id="Tail" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="Tail">
@@ -86,7 +97,12 @@ Insert the new markers into the <defs>.
       </g>
     </marker>
 
-    <!-- round dots -->
+    <marker style="overflow:visible" id="Dot" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="Dot">
+      <path style="fill:context-stroke;stroke:context-stroke;stroke-width:1.0pt"
+      d="M 3,0 A 3,3 0 0 1 0,3 3,3 0 0 1 -3,0 3,3 0 0 1 0,-3 3,3 0 0 1 3,0 Z"/>
+    </marker>
+
+    <!-- round dots
     <marker style="overflow:visible" id="DotL" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="DotL">
       <path transform="scale(0.8) translate(7.4, 1)" style="fill-rule:evenodd;fill:context-stroke;stroke:context-stroke;stroke-width:1.0pt" d="M -2.5,-1.0 C -2.5,1.7600000 -4.7400000,4.0 -7.5,4.0 C -10.260000,4.0 -12.5,1.7600000 -12.5,-1.0 C -12.5,-3.7600000 -10.260000,-6.0 -7.5,-6.0 C -4.7400000,-6.0 -2.5,-3.7600000 -2.5,-1.0 z "/>
     </marker>
@@ -95,23 +111,25 @@ Insert the new markers into the <defs>.
     </marker>
     <marker style="overflow:visible" id="DotS" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="DotS">
       <path transform="scale(0.2) translate(7.4, 1)" style="fill-rule:evenodd;fill:context-stroke;stroke:context-stroke;stroke-width:1.0pt" d="M -2.5,-1.0 C -2.5,1.7600000 -4.7400000,4.0 -7.5,4.0 C -10.260000,4.0 -12.5,1.7600000 -12.5,-1.0 C -12.5,-3.7600000 -10.260000,-6.0 -7.5,-6.0 C -4.7400000,-6.0 -2.5,-3.7600000 -2.5,-1.0 z "/>
-    </marker>
+    </marker> -->
 
     <!-- squares -->
     <marker style="overflow:visible" id="SquareL" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="SquareL">
       <path transform="scale(0.8)" style="fill-rule:evenodd;fill:context-stroke;stroke:context-stroke;stroke-width:1.0pt" d="M -5.0,-5.0 L -5.0,5.0 L 5.0,5.0 L 5.0,-5.0 L -5.0,-5.0 z "/>
     </marker>
+<!--
     <marker style="overflow:visible" id="SquareM" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="SquareM">
       <path transform="scale(0.4)" style="fill-rule:evenodd;fill:context-stroke;stroke:context-stroke;stroke-width:1.0pt" d="M -5.0,-5.0 L -5.0,5.0 L 5.0,5.0 L 5.0,-5.0 L -5.0,-5.0 z "/>
     </marker>
     <marker style="overflow:visible" id="SquareS" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="SquareS">
       <path transform="scale(0.2)" style="fill-rule:evenodd;fill:context-stroke;stroke:context-stroke;stroke-width:1.0pt" d="M -5.0,-5.0 L -5.0,5.0 L 5.0,5.0 L 5.0,-5.0 L -5.0,-5.0 z "/>
     </marker>
-
+-->
     <!-- diamonds -->
     <marker style="overflow:visible" id="DiamondL" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="DiamondL">
       <path transform="scale(0.8)" style="fill-rule:evenodd;fill:context-stroke;stroke:context-stroke;stroke-width:1.0pt" d="M 0,-7.0710768 L -7.0710894,0 L 0,7.0710589 L 7.0710462,0 L 0,-7.0710768 z "/>
     </marker>
+<!--
     <marker style="overflow:visible" id="DiamondM" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="DiamondM">
       <path transform="scale(0.4)" style="fill-rule:evenodd;fill:context-stroke;stroke:context-stroke;stroke-width:1.0pt" d="M 0,-7.0710768 L -7.0710894,0 L 0,7.0710589 L 7.0710462,0 L 0,-7.0710768 z "/>
     </marker>
@@ -119,7 +137,7 @@ Insert the new markers into the <defs>.
       <path transform="scale(0.2)" style="fill-rule:evenodd;fill:context-stroke;stroke:context-stroke;stroke-width:1.0pt" d="M 0,-7.0710768 L -7.0710894,0 L 0,7.0710589 L 7.0710462,0 L 0,-7.0710768 z "/>
     </marker>
 
-    <!-- diamonds placed at the start of the line -->
+    <!- - diamonds placed at the start of the line - ->
     <marker style="overflow:visible" id="DiamondLstart" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="DiamondLstart">
       <path transform="scale(0.8) translate(7,0)" style="fill-rule:evenodd;fill:context-stroke;stroke:context-stroke;stroke-width:1.0pt" d="M 0,-7.0710768 L -7.0710894,0 L 0,7.0710589 L 7.0710462,0 L 0,-7.0710768 z "/>
     </marker>
@@ -130,7 +148,7 @@ Insert the new markers into the <defs>.
       <path transform="scale(0.2) translate(6,0)" style="fill-rule:evenodd;fill:context-stroke;stroke:context-stroke;stroke-width:1.0pt" d="M 0,-7.0710768 L -7.0710894,0 L 0,7.0710589 L 7.0710462,0 L 0,-7.0710768 z "/>
     </marker>
 
-    <!-- diamonds placed at the end of the line -->
+    <!- - diamonds placed at the end of the line - ->
     <marker style="overflow:visible" id="DiamondLend" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="DiamondLend">
       <path transform="scale(0.8) translate(-7,0)" style="fill-rule:evenodd;fill:context-stroke;stroke:context-stroke;stroke-width:1.0pt" d="M 0,-7.0710768 L -7.0710894,0 L 0,7.0710589 L 7.0710462,0 L 0,-7.0710768 z "/>
     </marker>
@@ -140,11 +158,12 @@ Insert the new markers into the <defs>.
     <marker style="overflow:visible" id="DiamondSend" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="DiamondSend">
       <path transform="scale(0.2) translate(-6,0)" style="fill-rule:evenodd;fill:context-stroke;stroke:context-stroke;stroke-width:1.0pt" d="M 0,-7.0710768 L -7.0710894,0 L 0,7.0710589 L 7.0710462,0 L 0,-7.0710768 z "/>
     </marker>
-
+-->
     <!-- empty diamonds -->
     <marker style="overflow:visible" id="EmptyDiamondL" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="EmptyDiamondL">
       <path transform="scale(0.8)" style="fill-rule:evenodd;fill:context-fill;stroke:context-stroke;stroke-width:1.0pt" d="M 0,-7.0710768 L -7.0710894,0 L 0,7.0710589 L 7.0710462,0 L 0,-7.0710768 z "/>
     </marker>
+<!--
     <marker style="overflow:visible" id="EmptyDiamondM" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="EmptyDiamondM">
       <path transform="scale(0.4)" style="fill-rule:evenodd;fill:context-fill;stroke:context-stroke;stroke-width:1.0pt" d="M 0,-7.0710768 L -7.0710894,0 L 0,7.0710589 L 7.0710462,0 L 0,-7.0710768 z "/>
     </marker>
@@ -152,7 +171,7 @@ Insert the new markers into the <defs>.
       <path transform="scale(0.2)" style="fill-rule:evenodd;fill:context-fill;stroke:context-stroke;stroke-width:1.0pt" d="M 0,-7.0710768 L -7.0710894,0 L 0,7.0710589 L 7.0710462,0 L 0,-7.0710768 z "/>
     </marker>
 
-    <!-- empty diamonds placed at the start of the line -->
+    <!- - empty diamonds placed at the start of the line - ->
     <marker style="overflow:visible" id="EmptyDiamondLstart" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="EmptyDiamondLstart">
       <path transform="scale(0.8) translate(7,0)" style="fill-rule:evenodd;fill:context-fill;stroke:context-stroke;stroke-width:1.0pt" d="M 0,-7.0710768 L -7.0710894,0 L 0,7.0710589 L 7.0710462,0 L 0,-7.0710768 z "/>
     </marker>
@@ -163,7 +182,7 @@ Insert the new markers into the <defs>.
       <path transform="scale(0.2) translate(6,0)" style="fill-rule:evenodd;fill:context-fill;stroke:context-stroke;stroke-width:1.0pt" d="M 0,-7.0710768 L -7.0710894,0 L 0,7.0710589 L 7.0710462,0 L 0,-7.0710768 z "/>
     </marker>
 
-    <!-- empty diamonds placed at the end of the line -->
+    <!- - empty diamonds placed at the end of the line - ->
     <marker style="overflow:visible" id="EmptyDiamondLend" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="EmptyDiamondLend">
       <path transform="scale(0.8) translate(-7,0)" style="fill-rule:evenodd;fill:context-fill;stroke:context-stroke;stroke-width:1.0pt" d="M 0,-7.0710768 L -7.0710894,0 L 0,7.0710589 L 7.0710462,0 L 0,-7.0710768 z "/>
     </marker>
@@ -173,59 +192,66 @@ Insert the new markers into the <defs>.
     <marker style="overflow:visible" id="EmptyDiamondSend" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="EmptyDiamondSend">
       <path transform="scale(0.2) translate(-6,0)" style="fill-rule:evenodd;fill:context-fill;stroke:context-stroke;stroke-width:1.0pt" d="M 0,-7.0710768 L -7.0710894,0 L 0,7.0710589 L 7.0710462,0 L 0,-7.0710768 z "/>
     </marker>
-
+-->
 
     <!-- triangles -->
     <marker style="overflow:visible" id="TriangleInL" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="TriangleInL">
       <path transform="scale(-0.8)" style="fill-rule:evenodd;fill:context-stroke;stroke:context-stroke;stroke-width:1.0pt" d="M 5.77,0.0 L -2.88,5.0 L -2.88,-5.0 L 5.77,0.0 z "/>
     </marker>
+<!--
     <marker style="overflow:visible" id="TriangleInM" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="TriangleInM">
       <path transform="scale(-0.4)" style="fill-rule:evenodd;fill:context-stroke;stroke:context-stroke;stroke-width:1.0pt" d="M 5.77,0.0 L -2.88,5.0 L -2.88,-5.0 L 5.77,0.0 z "/>
     </marker>
     <marker style="overflow:visible" id="TriangleInS" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="TriangleInS">
       <path transform="scale(-0.2)" style="fill-rule:evenodd;fill:context-stroke;stroke:context-stroke;stroke-width:1.0pt" d="M 5.77,0.0 L -2.88,5.0 L -2.88,-5.0 L 5.77,0.0 z "/>
     </marker>
+-->
     <marker style="overflow:visible" id="TriangleOutL" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="TriangleOutL">
       <path transform="scale(0.8)" style="fill-rule:evenodd;fill:context-stroke;stroke:context-stroke;stroke-width:1.0pt" d="M 5.77,0.0 L -2.88,5.0 L -2.88,-5.0 L 5.77,0.0 z "/>
     </marker>
+<!--
     <marker style="overflow:visible" id="TriangleOutM" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="TriangleOutM">
       <path transform="scale(0.4)" style="fill-rule:evenodd;fill:context-stroke;stroke:context-stroke;stroke-width:1.0pt" d="M 5.77,0.0 L -2.88,5.0 L -2.88,-5.0 L 5.77,0.0 z "/>
     </marker>
     <marker style="overflow:visible" id="TriangleOutS" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="TriangleOutS">
       <path transform="scale(0.2)" style="fill-rule:evenodd;fill:context-stroke;stroke:context-stroke;stroke-width:1.0pt" d="M 5.77,0.0 L -2.88,5.0 L -2.88,-5.0 L 5.77,0.0 z "/>
     </marker>
-
+-->
     <!-- Empty Triangles -->
     <marker style="overflow:visible" id="EmptyTriangleInL" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="EmptyTriangleInL">
       <path transform="scale(-0.8) translate(-6,0)" style="fill-rule:evenodd;fill:context-fill;stroke:context-stroke;stroke-width:1.0pt" d="M 5.77,0.0 L -2.88,5.0 L -2.88,-5.0 L 5.77,0.0 z "/>
     </marker>
+<!--
     <marker style="overflow:visible" id="EmptyTriangleInM" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="EmptyTriangleInM">
       <path transform="scale(-0.4) translate(-4.5,0)" style="fill-rule:evenodd;fill:context-fill;stroke:context-stroke;stroke-width:1.0pt" d="M 5.77,0.0 L -2.88,5.0 L -2.88,-5.0 L 5.77,0.0 z "/>
     </marker>
     <marker style="overflow:visible" id="EmptyTriangleInS" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="EmptyTriangleInS">
       <path transform="scale(-0.2) translate(-3.0,0)" style="fill-rule:evenodd;fill:context-fill;stroke:context-stroke;stroke-width:1.0pt" d="M 5.77,0.0 L -2.88,5.0 L -2.88,-5.0 L 5.77,0.0 z "/>
     </marker>
+-->
     <marker style="overflow:visible" id="EmptyTriangleOutL" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="EmptyTriangleOutL">
       <path transform="scale(0.8) translate(-6,0)" style="fill-rule:evenodd;fill:context-fill;stroke:context-stroke;stroke-width:1.0pt" d="M 5.77,0.0 L -2.88,5.0 L -2.88,-5.0 L 5.77,0.0 z "/>
     </marker>
+<!--
     <marker style="overflow:visible" id="EmptyTriangleOutM" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="EmptyTriangleOutM">
       <path transform="scale(0.4) translate(-4.5,0)" style="fill-rule:evenodd;fill:context-fill;stroke:context-stroke;stroke-width:1.0pt" d="M 5.77,0.0 L -2.88,5.0 L -2.88,-5.0 L 5.77,0.0 z "/>
     </marker>
     <marker style="overflow:visible" id="EmptyTriangleOutS" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="EmptyTriangleOutS">
       <path transform="scale(0.2) translate(-3.0,0)" style="fill-rule:evenodd;fill:context-fill;stroke:context-stroke;stroke-width:1.0pt" d="M 5.77,0.0 L -2.88,5.0 L -2.88,-5.0 L 5.77,0.0 z "/>
     </marker>
-
+-->
     <!-- stops -->
     <marker style="overflow:visible" id="StopL" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="StopL">
       <path transform="scale(0.8)" style="fill:none;fill-opacity:0.75000000;fill-rule:evenodd;stroke:context-stroke;stroke-width:1.0pt" d="M 0.0,5.65 L 0.0,-5.65"/>
     </marker>
+<!--
     <marker style="overflow:visible" id="StopM" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="StopM">
       <path transform="scale(0.4)" style="fill:none;fill-opacity:0.75000000;fill-rule:evenodd;stroke:context-stroke;stroke-width:1.0pt" d="M 0.0,5.65 L 0.0,-5.65"/>
     </marker>
     <marker style="overflow:visible" id="StopS" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="StopS">
       <path transform="scale(0.2)" style="fill:none;fill-opacity:0.75000000;fill-rule:evenodd;stroke:context-stroke;stroke-width:1.0pt" d="M 0.0,5.65 L 0.0,-5.65"/>
     </marker>
-
+-->
     <!-- filled semicircles -->
     <marker style="overflow:visible" id="SemiCircleIn" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="SemiCircleIn">
       <path transform="scale(0.6)" style="fill-rule:evenodd;fill:context-stroke;stroke:context-stroke;stroke-width:1.0pt" d="M -0.37450702,-0.045692580 C -0.37450702,2.7143074 1.8654930,4.9543074 4.6254930,4.9543074 L 4.6254930,-5.0456926 C 1.8654930,-5.0456926 -0.37450702,-2.8056926 -0.37450702,-0.045692580 z "/>

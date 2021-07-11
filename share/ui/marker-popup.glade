@@ -4,7 +4,7 @@
   <requires lib="gtk+" version="3.24"/>
   <object class="GtkAdjustment" id="adjustment-angle">
     <property name="lower">-360</property>
-    <property name="upper">360</property>
+    <property name="upper">360.00999999999999</property>
     <property name="step-increment">1</property>
     <property name="page-increment">15</property>
   </object>
@@ -71,7 +71,7 @@
     <property name="can-focus">False</property>
     <child>
       <object class="GtkBox">
-        <property name="width-request">360</property>
+        <property name="width-request">370</property>
         <property name="height-request">540</property>
         <property name="visible">True</property>
         <property name="can-focus">False</property>
@@ -119,7 +119,7 @@
           </packing>
         </child>
         <child>
-          <!-- n-columns=4 n-rows=7 -->
+          <!-- n-columns=4 n-rows=8 -->
           <object class="GtkGrid" id="input-grid">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
@@ -307,7 +307,7 @@
               </object>
               <packing>
                 <property name="left-attach">1</property>
-                <property name="top-attach">5</property>
+                <property name="top-attach">6</property>
                 <property name="width">2</property>
               </packing>
             </child>
@@ -321,7 +321,7 @@
               </object>
               <packing>
                 <property name="left-attach">1</property>
-                <property name="top-attach">6</property>
+                <property name="top-attach">7</property>
                 <property name="width">2</property>
               </packing>
             </child>
@@ -335,7 +335,7 @@
               </object>
               <packing>
                 <property name="left-attach">3</property>
-                <property name="top-attach">5</property>
+                <property name="top-attach">6</property>
               </packing>
             </child>
             <child>
@@ -348,7 +348,7 @@
               </object>
               <packing>
                 <property name="left-attach">3</property>
-                <property name="top-attach">6</property>
+                <property name="top-attach">7</property>
               </packing>
             </child>
             <child>
@@ -362,7 +362,7 @@
               </object>
               <packing>
                 <property name="left-attach">0</property>
-                <property name="top-attach">6</property>
+                <property name="top-attach">7</property>
               </packing>
             </child>
             <child>
@@ -408,7 +408,7 @@
               <packing>
                 <property name="left-attach">0</property>
                 <property name="top-attach">0</property>
-                <property name="height">6</property>
+                <property name="height">7</property>
               </packing>
             </child>
             <child>
@@ -429,6 +429,23 @@
                 <property name="top-attach">0</property>
                 <property name="height">2</property>
               </packing>
+            </child>
+            <child>
+              <object class="GtkImage" id="spacer">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="pixel-size">5</property>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">5</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
             </child>
           </object>
           <packing>
@@ -451,7 +468,7 @@
         <property name="visible">True</property>
         <property name="can-focus">False</property>
         <child>
-          <object class="GtkImage" id="preview-img">
+          <object class="GtkImage" id="current-img">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="hexpand">True</property>

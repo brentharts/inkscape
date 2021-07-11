@@ -91,6 +91,7 @@ private:
     std::vector<Glib::RefPtr<MarkerItem>> _history_items;
     std::map<Gtk::Widget*, Glib::RefPtr<MarkerItem>> _widgets_to_markers;
     Gtk::Image& _preview;
+    bool _preview_no_alloc = true;
     Gtk::Button& _link_scale;
     Gtk::SpinButton& _angle_btn;
     Gtk::MenuButton& _menu_btn;
@@ -103,7 +104,7 @@ private:
     Gtk::RadioButton& _orient_auto_rev;
     Gtk::RadioButton& _orient_auto;
     Gtk::RadioButton& _orient_angle;
-    Gtk::Image& _preview_img;
+    Gtk::Image& _current_img;
     bool _scale_linked = true;
     guint32 _background_color;
     guint32 _foreground_color;
@@ -139,6 +140,7 @@ private:
     void set_selected(const gchar *name, gboolean retry=true);
     void on_style_updated() override;
     void update_preview(Glib::RefPtr<MarkerItem> marker_item);
+    void update_menu_btn(Glib::RefPtr<MarkerItem> marker_item);
     void set_active(Glib::RefPtr<MarkerItem> item);
     void init_combo();
     void set_history(Gtk::TreeModel::Row match_row);
@@ -149,12 +151,6 @@ private:
     std::unique_ptr<SPDocument> ink_markers_preview_doc(const gchar* group_id);
     Cairo::RefPtr<Cairo::Surface> create_marker_image(Geom::IntPoint pixel_size, gchar const *mname,
         SPDocument *source, Inkscape::Drawing &drawing, unsigned /*visionkey*/, bool checkerboard, bool no_clip, double scale);
-
-    /*
-     * Callbacks for drawing the combo box
-     */
-    static gboolean separator_cb (GtkTreeModel *model, GtkTreeIter *iter, gpointer data);
-
     static void handleDefsModified(MarkerComboBox *self);
 
     void refreshHistory();
