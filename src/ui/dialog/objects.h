@@ -66,6 +66,9 @@ public:
     void setSelection(Selection *sel);
     void setLayer(SPObject *obj);
 
+protected:
+
+    // Accessed by ObjectWatcher directly (friend class)
     SPObject* getObject(Node *node);
     ObjectWatcher* getWatcher(Node *node);
     ObjectWatcher *getRootWatcher() const { return root_watcher; };
@@ -76,20 +79,16 @@ public:
     bool isDummy(Gtk::TreeModel::Row const &row) const { return getRepr(row) == nullptr; }
     bool hasDummyChildren(Gtk::TreeModel::Row const &row) const;
     bool removeDummyChildren(Gtk::TreeModel::Row const &row);
+    void cleanDummyChildren(Gtk::TreeModel::Row const &row);
 
     Glib::RefPtr<Gtk::TreeStore> _store;
     ModelColumns* _model;
 
-    bool isObserverBlocked() const { return observer_blocked != 0; }
-
 private:
-    //Internal Classes:
-    class InternalUIBounce;
+    void setRootWatcher();
 
     ObjectWatcher* root_watcher;
     SPItem *current_item;
-
-    unsigned observer_blocked = 0;
 
     sigc::connection document_changed;
     sigc::connection selection_changed;
@@ -116,6 +115,7 @@ private:
     Gtk::ScrolledWindow _scroller;
     Gtk::Menu _popupMenu;
     Gtk::Box _page;
+    Gtk::Switch _switch_objects;
 
     //Methods:
 
@@ -124,6 +124,7 @@ private:
 
     void _addBarButton(char const* iconName, char const* tooltip, int verb_id);
     void _fireAction( unsigned int code );
+    void _objects_toggle();
     
     Gtk::MenuItem& _addPopupItem(SPDesktop *desktop, unsigned int code);
     
@@ -147,6 +148,8 @@ private:
     bool on_drag_drop(const Glib::RefPtr<Gdk::DragContext> &, int, int, guint);
     void on_drag_start(const Glib::RefPtr<Gdk::DragContext> &);
     void on_drag_end(const Glib::RefPtr<Gdk::DragContext> &);
+
+    friend class ObjectWatcher;
 };
 
 

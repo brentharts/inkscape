@@ -78,7 +78,7 @@ public:
 
     void addDummyChild();
     void addChild(SPItem *);
-    void addChildren();
+    void addChildren(SPItem *, bool dummy = false);
     void setSelectedBit(SelectionState mask, bool enabled);
     void setSelectedBitRecursive(SelectionState mask, bool enabled);
     void moveChild(Node &child, Node *sibling);
@@ -187,23 +187,9 @@ ObjectWatcher::ObjectWatcher(ObjectsPanel* panel, SPItem* obj, Gtk::TreeRow *row
     if (!dynamic_cast<SPGroup const*>(obj)) {
         return;
     }
-
-    // We'll add children for the root node (row == NULL), for all other
-    // nodes we'll just add a dummy child and wait until the user expands
-    // the row.
-
-    if (!row) {
-        addChildren();
-    } else {
-        for (auto &child : obj->children) {
-            if (dynamic_cast<SPItem const *>(&child)) {
-                addDummyChild();
-
-                // one dummy child is enough to make the group expandable
-                break;
-            }
-        }
-    }
+    // Add children as a dummy row to avoid excensive execution when
+    // the tree is really large.
+    addChildren(obj, (bool)row);
 }
 ObjectWatcher::~ObjectWatcher()
 {
@@ -338,15 +324,19 @@ void ObjectWatcher::addChild(SPItem *child)
 /**
  * Add all SPItem children as child rows.
  */
-void ObjectWatcher::addChildren()
+void ObjectWatcher::addChildren(SPItem *obj, bool dummy)
 {
     assert(child_watchers.empty());
 
-    auto obj = panel->getObject(node);
-
-    for (auto it = obj->children.rbegin(), it_end = obj->children.rend(); it != it_end; ++it) {
-        if (auto child = dynamic_cast<SPItem *>(&*it)) {
-            addChild(child);
+    for (auto &child : obj->children) {
+        if (auto item = dynamic_cast<SPItem *>(&child)) {
+            if (dummy) {
+                addDummyChild();
+                // one dummy child is enough to make the group expandable
+                break;
+            } else {
+                addChild(item);
+            }
         }
     }
 }
@@ -419,10 +409,6 @@ void ObjectWatcher::notifyChildAdded( Node &node, Node &child, Node *prev )
 {
     assert(this->node == &node);
 
-    if (panel->isObserverBlocked()) {
-        return;
-    }
-
     // Ignore XML nodes which are not displayable items
     auto item = dynamic_cast<SPItem *>(panel->getObject(&child));
     if (!item) {
@@ -447,10 +433,6 @@ void ObjectWatcher::notifyChildRemoved( Node &node, Node &child, Node* /*prev*/ 
 {
     assert(this->node == &node);
 
-    if (panel->isObserverBlocked()) {
-        return;
-    }
-
     if (child_watchers.erase(&child) > 0) {
         return;
     }
@@ -465,19 +447,11 @@ void ObjectWatcher::notifyChildOrderChanged( Node &parent, Node &child, Node */*
 {
     assert(this->node == &parent);
 
-    if (panel->isObserverBlocked()) {
-        return;
-    }
-
     moveChild(child, new_prev);
 }
 void ObjectWatcher::notifyAttributeChanged( Node &node, GQuark name, Util::ptr_shared /*old_value*/, Util::ptr_shared /*new_value*/ )
 {
     assert(this->node == &node);
-
-    if (panel->isObserverBlocked()) {
-        return;
-    }
 
     // The root <svg> node doesn't have a row
     if (this == panel->getRootWatcher()) {
@@ -540,14 +514,6 @@ ObjectWatcher* ObjectsPanel::getWatcher(Node *node)
     }
     return nullptr;
 }
-
-class ObjectsPanel::InternalUIBounce
-{
-public:
-    int _actionCode;
-    int _actionCode2;
-    sigc::connection _signal;
-};
 
 /**
  * Constructor
@@ -621,7 +587,6 @@ ObjectsPanel::ObjectsPanel() :
     _tree.set_expander_column( *_name_column );
     _tree.set_search_column(_model->_colLabel);
     _tree.set_enable_search(true);
-
     _tree.get_selection()->set_mode(Gtk::SELECTION_NONE);
 
     //Set up tree signals
@@ -633,12 +598,7 @@ ObjectsPanel::ObjectsPanel() :
 
     // Before expanding a row, replace the dummy child with the actual children
     _tree.signal_test_expand_row().connect([this](const Gtk::TreeModel::iterator &iter, const Gtk::TreeModel::Path &) {
-        if (removeDummyChildren(*iter)) {
-            assert(iter);
-            assert(*iter);
-            getWatcher(getRepr(*iter))->addChildren();
-            setSelection(_desktop->selection);
-        }
+        cleanDummyChildren(*iter);
         return false;
     });
 
@@ -666,6 +626,14 @@ ObjectsPanel::ObjectsPanel() :
     _page.pack_start( _scroller, Gtk::PACK_EXPAND_WIDGET );
     _page.pack_end(_buttonsRow, Gtk::PACK_SHRINK);
     pack_start(_page, Gtk::PACK_EXPAND_WIDGET);
+
+    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+    _switch_objects.get_style_context()->add_class("inkswitch");
+    _switch_objects.get_style_context()->add_class("rawstyle");
+    _switch_objects.set_tooltip_text(_("Switch between layers only and all objects view."));
+    _switch_objects.property_active() = !prefs->getBool("/dialogs/objects/layers_only", true);
+    _switch_objects.property_active().signal_changed().connect(sigc::mem_fun(*this, &ObjectsPanel::_objects_toggle));
+    _buttonsPrimary.pack_start(_switch_objects, Gtk::PACK_SHRINK);
 
     _addBarButton(INKSCAPE_ICON("list-add"), _("Add layer..."), (int)SP_VERB_LAYER_NEW);
     _addBarButton(INKSCAPE_ICON("list-remove"), _("Remove object"), (int)SP_VERB_EDIT_DELETE);
@@ -699,22 +667,34 @@ ObjectsPanel::~ObjectsPanel()
     }
 }
 
+void ObjectsPanel::_objects_toggle()
+{
+    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+    prefs->setBool("/dialogs/objects/layers_only", !_switch_objects.get_active());
+    // Clear and update entire tree (do not use this in changed/modified signals)
+    setRootWatcher();
+}
+
+
 /**
  * Sets the current document
  */
 void ObjectsPanel::setDocument(SPDesktop* desktop, SPDocument* document)
 {
     g_assert(desktop == _desktop);
+    _document = document;
+    setRootWatcher();
+}
 
+void ObjectsPanel::setRootWatcher()
+{
     if (root_watcher) {
         delete root_watcher;
     }
-
-    _document = document;
     root_watcher = nullptr;
 
-    if (document && document->getRoot()) {
-        root_watcher = new ObjectWatcher(this, document->getRoot(), nullptr);
+    if (_document && _document->getRoot()) {
+        root_watcher = new ObjectWatcher(this, _document->getRoot(), nullptr);
         setLayer(_desktop->currentLayer());
     }
 }
@@ -1148,6 +1128,15 @@ bool ObjectsPanel::removeDummyChildren(Gtk::TreeModel::Row const &row)
         } while (child && child->parent() == row);
     }
     return true;
+}
+
+void ObjectsPanel::cleanDummyChildren(Gtk::TreeModel::Row const &row)
+{
+    if (removeDummyChildren(row)) {
+        assert(row);
+        getWatcher(getRepr(row))->addChildren(getItem(row));
+        setSelection(_desktop->selection);
+    }
 }
 
 /**
