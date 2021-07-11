@@ -4593,11 +4593,11 @@ msgstr "Rotacionar tela no sentido anti-horário"
 
 #: ../src/actions/actions-canvas-transform.cpp:215 ../share/ui/menu-view.ui:99
 msgid "Reset Rotation"
-msgstr "Redefinir Rotação"
+msgstr "Restaurar Rotação"
 
 #: ../src/actions/actions-canvas-transform.cpp:215
 msgid "Reset canvas rotation"
-msgstr "Redefinir rotação da tela"
+msgstr "Restaurar rotação da tela"
 
 #: ../src/actions/actions-canvas-transform.cpp:217
 msgid "Flip Horizontal"
@@ -4617,11 +4617,11 @@ msgstr "Espelhar tela verticalmente"
 
 #: ../src/actions/actions-canvas-transform.cpp:219 ../share/ui/menu-view.ui:118
 msgid "Reset Flipping"
-msgstr "Redefinir Espelhamento"
+msgstr "Restaurar Espelhamento"
 
 #: ../src/actions/actions-canvas-transform.cpp:219
 msgid "Reset canvas flipping"
-msgstr "Redefinir espelhamento da tela"
+msgstr "Restaurar espelhamento da tela"
 
 #: ../src/actions/actions-canvas-transform.cpp:221 ../share/ui/menu-view.ui:103
 msgid "Lock Rotation"
@@ -11293,7 +11293,7 @@ msgstr "Dividir elementos, para que cada um tenha seu próprio estilo"
 #: ../src/live_effects/lpe-mirror_symmetry.cpp:148
 #: ../src/live_effects/lpe-slice.cpp:92
 msgid "Reset styles"
-msgstr "Redefinir estilos"
+msgstr "Restaurar estilos"
 
 #: ../src/live_effects/lpe-curvestitch.cpp:37
 msgid "Stitch path:"
@@ -12064,7 +12064,7 @@ msgstr "Controle 0:"
 #: ../src/live_effects/lpe-lattice2.cpp:41
 msgid "Control 0 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controle 0 - <b>Ctrl+Alt+Clique</b>: redefinir, <b>Ctrl</b>: mover ao longo "
+"Controle 0 - <b>Ctrl+Alt+Clique</b>: restaurar, <b>Ctrl</b>: mover ao longo "
 "dos eixos"
 
 #: ../src/live_effects/lpe-lattice2.cpp:42
@@ -12074,7 +12074,7 @@ msgstr "Controle 1:"
 #: ../src/live_effects/lpe-lattice2.cpp:42
 msgid "Control 1 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controle 1 - <b>Ctrl+Alt+Clique</b>: redefinir, <b>Ctrl</b>: mover ao longo "
+"Controle 1 - <b>Ctrl+Alt+Clique</b>: restaurar, <b>Ctrl</b>: mover ao longo "
 "dos eixos"
 
 #: ../src/live_effects/lpe-lattice2.cpp:43
@@ -12084,7 +12084,7 @@ msgstr "Controle 2:"
 #: ../src/live_effects/lpe-lattice2.cpp:43
 msgid "Control 2 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controle 2 - <b>Ctrl+Alt+Clique</b>: redefinir, <b>Ctrl</b>: mover ao longo "
+"Controle 2 - <b>Ctrl+Alt+Clique</b>: restaurar, <b>Ctrl</b>: mover ao longo "
 "dos eixos"
 
 #: ../src/live_effects/lpe-lattice2.cpp:44
@@ -12094,7 +12094,7 @@ msgstr "Controle 3:"
 #: ../src/live_effects/lpe-lattice2.cpp:44
 msgid "Control 3 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controle 3 - <b>Ctrl+Alt+Clique</b>: redefinir, <b>Ctrl</b>: mover ao longo "
+"Controle 3 - <b>Ctrl+Alt+Clique</b>: restaurar, <b>Ctrl</b>: mover ao longo "
 "dos eixos"
 
 #: ../src/live_effects/lpe-lattice2.cpp:45
@@ -12104,7 +12104,7 @@ msgstr "Controle 4:"
 #: ../src/live_effects/lpe-lattice2.cpp:45
 msgid "Control 4 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controle 4 - <b>Ctrl+Alt+Clique</b>: redefinir, <b>Ctrl</b>: mover ao longo "
+"Controle 4 - <b>Ctrl+Alt+Clique</b>: restaurar, <b>Ctrl</b>: mover ao longo "
 "dos eixos"
 
 #: ../src/live_effects/lpe-lattice2.cpp:46
@@ -12114,7 +12114,7 @@ msgstr "Controle 5:"
 #: ../src/live_effects/lpe-lattice2.cpp:46
 msgid "Control 5 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controle 5 - <b>Ctrl+Alt+Clique</b>: redefinir, <b>Ctrl</b>: mover ao longo "
+"Controle 5 - <b>Ctrl+Alt+Clique</b>: restaurar, <b>Ctrl</b>: mover ao longo "
 "dos eixos"
 
 #: ../src/live_effects/lpe-lattice2.cpp:47
@@ -12124,7 +12124,7 @@ msgstr "Controle 6:"
 #: ../src/live_effects/lpe-lattice2.cpp:47
 msgid "Control 6 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controle 6 - <b>Ctrl+Alt+Clique</b>: redefinir, <b>Ctrl</b>: mover ao longo "
+"Controle 6 - <b>Ctrl+Alt+Clique</b>: restaurar, <b>Ctrl</b>: mover ao longo "
 "dos eixos"
 
 #: ../src/live_effects/lpe-lattice2.cpp:48
@@ -12134,7 +12134,7 @@ msgstr "Controle 7:"
 #: ../src/live_effects/lpe-lattice2.cpp:48
 msgid "Control 7 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controle 7 - <b>Ctrl+Alt+Clique</b>: redefinir, <b>Ctrl</b>: mover ao longo "
+"Controle 7 - <b>Ctrl+Alt+Clique</b>: restaurar, <b>Ctrl</b>: mover ao longo "
 "dos eixos"
 
 #: ../src/live_effects/lpe-lattice2.cpp:49
@@ -12145,7 +12145,7 @@ msgstr "Controle 8x9:"
 msgid ""
 "Control 8x9 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controle 8x9 - <b>Ctrl+Alt+Clique</b>: redefinir, <b>Ctrl</b>: mover ao "
+"Controle 8x9 - <b>Ctrl+Alt+Clique</b>: restaurar, <b>Ctrl</b>: mover ao "
 "longo dos eixos"
 
 #: ../src/live_effects/lpe-lattice2.cpp:50
@@ -12156,7 +12156,7 @@ msgstr "Controle 10x11:"
 msgid ""
 "Control 10x11 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controle 10x11 - <b>Ctrl+Alt+Clique</b>: redefinir, <b>Ctrl</b>: mover ao "
+"Controle 10x11 - <b>Ctrl+Alt+Clique</b>: restaurar, <b>Ctrl</b>: mover ao "
 "longo dos eixos"
 
 #: ../src/live_effects/lpe-lattice2.cpp:51
@@ -12166,7 +12166,7 @@ msgstr "Controle 012:"
 #: ../src/live_effects/lpe-lattice2.cpp:51
 msgid "Control 12 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controle 12 - <b>Ctrl+Alt+Clique</b>: redefinir, <b>Ctrl</b>: mover ao longo "
+"Controle 12 - <b>Ctrl+Alt+Clique</b>: restaurar, <b>Ctrl</b>: mover ao longo "
 "dos eixos"
 
 #: ../src/live_effects/lpe-lattice2.cpp:52
@@ -12176,7 +12176,7 @@ msgstr "Controle 13:"
 #: ../src/live_effects/lpe-lattice2.cpp:52
 msgid "Control 13 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controle 13 - <b>Ctrl+Alt+Clique</b>: redefinir, <b>Ctrl</b>: mover ao longo "
+"Controle 13 - <b>Ctrl+Alt+Clique</b>: restaurar, <b>Ctrl</b>: mover ao longo "
 "dos eixos"
 
 #: ../src/live_effects/lpe-lattice2.cpp:53
@@ -12186,7 +12186,7 @@ msgstr "Controle 14:"
 #: ../src/live_effects/lpe-lattice2.cpp:53
 msgid "Control 14 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controle 14 - <b>Ctrl+Alt+Clique</b>: redefinir, <b>Ctrl</b>: mover ao longo "
+"Controle 14 - <b>Ctrl+Alt+Clique</b>: restaurar, <b>Ctrl</b>: mover ao longo "
 "dos eixos"
 
 #: ../src/live_effects/lpe-lattice2.cpp:54
@@ -12196,7 +12196,7 @@ msgstr "Controle 15:"
 #: ../src/live_effects/lpe-lattice2.cpp:54
 msgid "Control 15 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controle 15 - <b>Ctrl+Alt+Clique</b>: redefinir, <b>Ctrl</b>: mover ao longo "
+"Controle 15 - <b>Ctrl+Alt+Clique</b>: restaurar, <b>Ctrl</b>: mover ao longo "
 "dos eixos"
 
 #: ../src/live_effects/lpe-lattice2.cpp:55
@@ -12206,7 +12206,7 @@ msgstr "Controle 16:"
 #: ../src/live_effects/lpe-lattice2.cpp:55
 msgid "Control 16 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controle 16 - <b>Ctrl+Alt+Clique</b>: redefinir, <b>Ctrl</b>: mover ao longo "
+"Controle 16 - <b>Ctrl+Alt+Clique</b>: restaurar, <b>Ctrl</b>: mover ao longo "
 "dos eixos"
 
 #: ../src/live_effects/lpe-lattice2.cpp:56
@@ -12216,7 +12216,7 @@ msgstr "Controle 17:"
 #: ../src/live_effects/lpe-lattice2.cpp:56
 msgid "Control 17 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controle 17 - <b>Ctrl+Alt+Clique</b>: redefinir, <b>Ctrl</b>: mover ao longo "
+"Controle 17 - <b>Ctrl+Alt+Clique</b>: restaurar, <b>Ctrl</b>: mover ao longo "
 "dos eixos"
 
 #: ../src/live_effects/lpe-lattice2.cpp:57
@@ -12226,7 +12226,7 @@ msgstr "Controle 18:"
 #: ../src/live_effects/lpe-lattice2.cpp:57
 msgid "Control 18 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controle 18 - <b>Ctrl+Alt+Clique</b>: redefinir, <b>Ctrl</b>: mover ao longo "
+"Controle 18 - <b>Ctrl+Alt+Clique</b>: restaurar, <b>Ctrl</b>: mover ao longo "
 "dos eixos"
 
 #: ../src/live_effects/lpe-lattice2.cpp:58
@@ -12236,7 +12236,7 @@ msgstr "Controle 19:"
 #: ../src/live_effects/lpe-lattice2.cpp:58
 msgid "Control 19 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controle 19 - <b>Ctrl+Alt+Clique</b>: redefinir, <b>Ctrl</b>: mover ao longo "
+"Controle 19 - <b>Ctrl+Alt+Clique</b>: restaurar, <b>Ctrl</b>: mover ao longo "
 "dos eixos"
 
 #: ../src/live_effects/lpe-lattice2.cpp:59
@@ -12247,7 +12247,7 @@ msgstr "Controle 20x21:"
 msgid ""
 "Control 20x21 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controle 20x21 - <b>Ctrl+Alt+Clique</b>: redefinir, <b>Ctrl</b>: mover ao "
+"Controle 20x21 - <b>Ctrl+Alt+Clique</b>: restaurar, <b>Ctrl</b>: mover ao "
 "longo dos eixos"
 
 #: ../src/live_effects/lpe-lattice2.cpp:60
@@ -12258,7 +12258,7 @@ msgstr "Controle 22x23:"
 msgid ""
 "Control 22x23 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controle 22x23 - <b>Ctrl+Alt+Clique</b>: redefinir, <b>Ctrl</b>: mover ao "
+"Controle 22x23 - <b>Ctrl+Alt+Clique</b>: restaurar, <b>Ctrl</b>: mover ao "
 "longo dos eixos"
 
 #: ../src/live_effects/lpe-lattice2.cpp:61
@@ -12269,7 +12269,7 @@ msgstr "Controle 24x26:"
 msgid ""
 "Control 24x26 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controle 24x26 - <b>Ctrl+Alt+Clique</b>: redefinir, <b>Ctrl</b>: mover ao "
+"Controle 24x26 - <b>Ctrl+Alt+Clique</b>: restaurar, <b>Ctrl</b>: mover ao "
 "longo dos eixos"
 
 #: ../src/live_effects/lpe-lattice2.cpp:62
@@ -12280,7 +12280,7 @@ msgstr "Controle 25x27:"
 msgid ""
 "Control 25x27 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controle 25x27 - <b>Ctrl+Alt+Clique</b>: redefinir, <b>Ctrl</b>: mover ao "
+"Controle 25x27 - <b>Ctrl+Alt+Clique</b>: restaurar, <b>Ctrl</b>: mover ao "
 "longo dos eixos"
 
 #: ../src/live_effects/lpe-lattice2.cpp:63
@@ -12291,7 +12291,7 @@ msgstr "Controle 28x30:"
 msgid ""
 "Control 28x30 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controle 28x30 - <b>Ctrl+Alt+Clique</b>: redefinir, <b>Ctrl</b>: mover ao "
+"Controle 28x30 - <b>Ctrl+Alt+Clique</b>: restaurar, <b>Ctrl</b>: mover ao "
 "longo dos eixos"
 
 #: ../src/live_effects/lpe-lattice2.cpp:64
@@ -12302,7 +12302,7 @@ msgstr "Controle 29x31:"
 msgid ""
 "Control 29x31 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Controle 29x31 - <b>Ctrl+Alt+Clique</b>: redefinir, <b>Ctrl</b>: mover ao "
+"Controle 29x31 - <b>Ctrl+Alt+Clique</b>: restaurar, <b>Ctrl</b>: mover ao "
 "longo dos eixos"
 
 #: ../src/live_effects/lpe-lattice2.cpp:65
@@ -12314,12 +12314,12 @@ msgid ""
 "Control 32x33x34x35 - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along "
 "axes"
 msgstr ""
-"Controle 32x33x34x35 - <b>Ctrl+Alt+Clique</b>: redefinir, <b>Ctrl</b>: mover "
+"Controle 32x33x34x35 - <b>Ctrl+Alt+Clique</b>: restaurar, <b>Ctrl</b>: mover "
 "ao longo dos eixos"
 
 #: ../src/live_effects/lpe-lattice2.cpp:233
 msgid "Reset grid"
-msgstr "Redefinir grade"
+msgstr "Restaurar grade"
 
 #: ../src/live_effects/lpe-lattice2.cpp:269
 #: ../src/live_effects/lpe-lattice2.cpp:287
@@ -13074,7 +13074,7 @@ msgstr "Superior Esquerdo"
 #: ../src/live_effects/lpe-perspective-envelope.cpp:50
 msgid "Top Left - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Superior esquerdo - <b>Ctrl+Alt+Clique</b>: redefinir, <b>Ctrl</b>: mover ao "
+"Superior esquerdo - <b>Ctrl+Alt+Clique</b>: restaurar, <b>Ctrl</b>: mover ao "
 "longo dos eixos"
 
 #: ../src/live_effects/lpe-perspective-envelope.cpp:51
@@ -13084,7 +13084,7 @@ msgstr "Superior Direito"
 #: ../src/live_effects/lpe-perspective-envelope.cpp:51
 msgid "Top Right - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Superior direito - <b>Ctrl+Alt+Clique</b>: redefinir, <b>Ctrl</b>: mover ao "
+"Superior direito - <b>Ctrl+Alt+Clique</b>: restaurar, <b>Ctrl</b>: mover ao "
 "longo dos eixos"
 
 #: ../src/live_effects/lpe-perspective-envelope.cpp:52
@@ -13094,7 +13094,7 @@ msgstr "Inferior Esquerdo"
 #: ../src/live_effects/lpe-perspective-envelope.cpp:52
 msgid "Down Left - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Inferior esquerdo - <b>Ctrl+Alt+Clique</b>: redefinir, <b>Ctrl</b>: mover ao "
+"Inferior esquerdo - <b>Ctrl+Alt+Clique</b>: restaurar, <b>Ctrl</b>: mover ao "
 "longo dos eixos"
 
 #: ../src/live_effects/lpe-perspective-envelope.cpp:53
@@ -13104,7 +13104,7 @@ msgstr "Inferior Direito"
 #: ../src/live_effects/lpe-perspective-envelope.cpp:53
 msgid "Down Right - <b>Ctrl+Alt+Click</b>: reset, <b>Ctrl</b>: move along axes"
 msgstr ""
-"Inferior direito - <b>Ctrl+Alt+Clique</b>: redefinir, <b>Ctrl</b>: mover ao "
+"Inferior direito - <b>Ctrl+Alt+Clique</b>: restaurar, <b>Ctrl</b>: mover ao "
 "longo dos eixos"
 
 #: ../src/live_effects/lpe-perspective-envelope.cpp:288
@@ -14224,7 +14224,7 @@ msgstr "Alterar o índice do nó"
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:801
 #: ../src/ui/widget/preferences-widget.cpp:751
 msgid "Reset"
-msgstr "Redefinir"
+msgstr "Restaurar"
 
 #: ../src/live_effects/lpe-vonkoch.cpp:45
 msgid "N_r of generations:"
@@ -15112,7 +15112,7 @@ msgstr "O arquivo de preferências foi copiado para"
 
 #: ../src/preferences.cpp:282
 msgid "There was an error trying to reset the preferences file."
-msgstr "Ocorreu um erro ao tentar redefinir o arquivo de preferências."
+msgstr "Ocorreu um erro ao tentar restaurar o arquivo de preferências."
 
 #: ../src/rdf.cpp:179
 msgid "CC Attribution"
@@ -15738,9 +15738,7 @@ msgstr "Trocar o preenchimento e o contorno de um objeto"
 
 #: ../src/selection-chemistry.cpp:4360
 msgid "Select <b>path(s)</b> to create fill between."
-msgstr ""
-"Selecionar <b>caminho(s)</b> para criar um preenchimento entre eles. para "
-"redefinir o arquivo de preferências."
+msgstr "Selecione <b>caminho(s)</b> para criar um preenchimento entre eles."
 
 #: ../src/selection-chemistry.cpp:4415
 msgid "Create linked fill object between paths"
@@ -26586,7 +26584,7 @@ msgid ""
 "reset. (more: %s)"
 msgstr ""
 "<b>A alça do nó B-Spline</b> (%.3g de força): Arraste-se para mover, clique "
-"duas vezes para redefinir. (mais: %s)"
+"duas vezes para restaurar. (mais: %s)"
 
 #: ../src/ui/tool/node.cpp:735
 msgctxt "Path handle tip"
@@ -29589,7 +29587,7 @@ msgstr "Arrasto de ponto final de conector cancelado."
 
 #: ../src/ui/tools/connector-tool.cpp:787
 msgid "Reroute connector"
-msgstr "Redefinir conector"
+msgstr "Redirecionar conector"
 
 #: ../src/ui/tools/connector-tool.cpp:933
 msgid "Create connector"
@@ -29606,8 +29604,7 @@ msgstr "Clique para entrar neste ponto"
 #: ../src/ui/tools/connector-tool.cpp:1205
 msgid "<b>Connector endpoint</b>: drag to reroute or connect to new shapes"
 msgstr ""
-"<b>Ponto final do conector</b>: arraste para redefinir ou conectar a novas "
-"formas"
+"<b>Ponto final do conector</b>: arraste para redirecionar ou conectar-se a novas formas"
 
 #: ../src/ui/tools/connector-tool.cpp:1324
 msgid "Select <b>at least one non-connector object</b>."
@@ -48685,7 +48682,7 @@ msgstr "Metade da altura da fonte"
 #, fuzzy
 #~ msgctxt "Symbol"
 #~ msgid "Leisure Center"
-#~ msgstr "Redefinir centro"
+#~ msgstr "Restaurar centro"
 
 #~ msgctxt "Symbol"
 #~ msgid "Rock Climbing"
@@ -48865,11 +48862,11 @@ msgstr "Metade da altura da fonte"
 
 #, fuzzy
 #~ msgid "Move a connection point"
-#~ msgstr "Redefinir conector"
+#~ msgstr "Restaurar conector"
 
 #, fuzzy
 #~ msgid "Remove a connection point"
-#~ msgstr "Redefinir conector"
+#~ msgstr "Restaurar conector"
 
 #, fuzzy
 #~ msgid "<b>Flowed text</b> (%d character%s)"
