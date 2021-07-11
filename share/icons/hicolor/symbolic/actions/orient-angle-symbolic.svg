@@ -6,10 +6,7 @@
    height="16"
    width="16"
    xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:dc="http://purl.org/dc/elements/1.1/">
+   xmlns:svg="http://www.w3.org/2000/svg">
   <defs
      id="defs2" />
   <g
@@ -22,4 +19,12 @@
        d="M 10.351563,4.6484375 9.3046875,5.7246094 C 10.998546,7.3721869 11.955078,9.633115 11.955078,11.996094 h 1.5 c 0,-2.7673785 -1.11977,-5.418113 -3.103515,-7.3476565 z"
        id="path7568" />
   </g>
+  <path
+     style="stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     d="m 10.5,16 h 4 l -2,-3 z"
+     id="path630" />
+  <path
+     style="stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     d="M 8.695752,0.9942731 5.7446313,3.6944368 9.245314,4.5576956 Z"
+     id="path1413" />
 </svg>
