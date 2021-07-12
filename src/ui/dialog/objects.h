@@ -102,6 +102,7 @@ private:
     
     //Show icons in the context menu
     bool _show_contextmenu_icons;
+    bool _is_editing;
 
     std::vector<Gtk::Widget*> _watching;
     std::vector<Gtk::Widget*> _watchingNonTop;

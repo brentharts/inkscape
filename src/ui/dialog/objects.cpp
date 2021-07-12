@@ -630,7 +630,7 @@ ObjectsPanel::ObjectsPanel() :
     _tree.signal_drag_end().connect(sigc::mem_fun(*this, &ObjectsPanel::on_drag_end), false);
 
     //Set up the label editing signals
-    _text_renderer->signal_edited().connect( sigc::mem_fun(*this, &ObjectsPanel::_handleEdited));
+    _text_renderer->signal_edited().connect(sigc::mem_fun(*this, &ObjectsPanel::_handleEdited));
 
     //Set up the scroller window and pack the page
     _scroller.add(_tree);
@@ -775,7 +775,6 @@ void ObjectsPanel::setSelection(Selection *selected)
                     }
                 }
             }
-
             if (watcher) {
                 if (auto final_watcher = watcher->findChild(item->getRepr())) {
                     final_watcher->setSelectedBit(SELECTED_OBJECT, true);
@@ -895,8 +894,10 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
         // This doesn't work, it might be being eaten.
         if (event->type == GDK_2BUTTON_PRESS) {
             _tree.set_cursor(path, *col, true);
+            _is_editing = true;
             return true;
         }
+        _is_editing = _is_editing && event->type == GDK_BUTTON_RELEASE;
 
         auto selection = _desktop->getSelection();
         auto row = *_store->get_iter(path);
@@ -913,7 +914,7 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
         }
 
         // Select items on button release to not confuse drag
-        if (event->type == GDK_BUTTON_RELEASE) {
+        if (!_is_editing && event->type == GDK_BUTTON_RELEASE) {
             if (event->state & GDK_SHIFT_MASK) {
                 selection->toggle(item);
             } else if (group && group->layerMode() == SPGroup::LAYER) {
@@ -959,6 +960,7 @@ void ObjectsPanel::_takeAction(int val)
  */
 void ObjectsPanel::_handleEdited(const Glib::ustring& path, const Glib::ustring& new_text)
 {
+    _is_editing = false;
     auto row = *_store->get_iter(path);
     if (row && !new_text.empty()) {
         SPItem *item = getItem(row);
