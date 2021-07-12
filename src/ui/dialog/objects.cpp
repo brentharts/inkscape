@@ -54,6 +54,7 @@
 #include "ui/desktop/menu-icon-shift.h"
 #include "ui/tools/node-tool.h"
 
+#include "ui/contextmenu.h"
 #include "ui/widget/canvas.h"
 #include "ui/widget/imagetoggler.h"
 #include "ui/widget/shapeicon.h"
@@ -76,6 +77,7 @@ public:
     void updateRowInfo();
     void updateRowBg();
 
+    ObjectWatcher *findChild(Node *node);
     void addDummyChild();
     void addChild(SPItem *);
     void addChildren(SPItem *, bool dummy = false);
@@ -97,11 +99,15 @@ public:
         assert(path);
         row_ref = Gtk::TreeModel::RowReference(panel->_store, path);
     }
+    void setRow(const Gtk::TreeModel::Row &row)
+    {
+        setRow(panel->_store->get_path(row));
+    }
+
     // Get the path out of this watcher
-    Gtk::TreeModel::Path getRow() const {
+    Gtk::TreeModel::Path getTreePath() const {
         return row_ref.get_path();
     }
-    void setRow(const Gtk::TreeModel::Row &row) { setRow(panel->_store->get_path(row)); }
 
     /// True if this watchr has a valid row reference.
     bool hasRow() const { return bool(row_ref); }
@@ -119,6 +125,14 @@ public:
 
     /// The XML node associated with this watcher.
     Node *getRepr() const { return node; }
+    Gtk::TreeModel::Row const *getRow() const {
+        if (auto path = row_ref.get_path()) {
+            if(auto iter = panel->_store->get_iter(path)) {
+                return &*iter;
+            }
+        }
+        return nullptr;
+    }
 
     std::unordered_map<Node const *, std::unique_ptr<ObjectWatcher>> child_watchers;
 
@@ -224,7 +238,7 @@ void ObjectWatcher::updateRowInfo() {
 
         row[panel->_model->_colType] = item->typeName();
         row[panel->_model->_colIconColor] = item->highlight_color();
-        row[panel->_model->_colClipMask] = 0;
+        row[panel->_model->_colClipMask] =
             (item->getClipObject() ? Inkscape::UI::Widget::OVERLAY_CLIP : 0) |
             (item->getMaskObject() ? Inkscape::UI::Widget::OVERLAY_MASK : 0);
         row[panel->_model->_colVisible] = !item->isHidden();
@@ -290,6 +304,18 @@ void ObjectWatcher::setSelectedBitRecursive(SelectionState mask, bool enabled)
     for (auto &pair : child_watchers) {
         pair.second->setSelectedBitRecursive(mask, enabled);
     }
+}
+
+/**
+ * Find the child watcher for the given node.
+ */
+ObjectWatcher *ObjectWatcher::findChild(Node *node)
+{
+    auto it = child_watchers.find(node);
+    if (it != child_watchers.end()) {
+        return it->second.get();
+    }
+    return nullptr;
 }
 
 void ObjectWatcher::addDummyChild()
@@ -504,12 +530,8 @@ ObjectWatcher* ObjectsPanel::getWatcher(Node *node)
     if (root_watcher->getRepr() == node) {
         return root_watcher;
     } else if (node->parent()) {
-        auto parent_watcher = getWatcher(node->parent());
-        if (parent_watcher) {
-            auto it = parent_watcher->child_watchers.find(node);
-            if (it != parent_watcher->child_watchers.end()) {
-                return it->second.get();
-            }
+        if (auto parent_watcher = getWatcher(node->parent())) {
+            return parent_watcher->findChild(node);
         }
     }
     return nullptr;
@@ -593,12 +615,12 @@ ObjectsPanel::ObjectsPanel() :
     _tree.signal_button_press_event().connect(sigc::mem_fun(*this, &ObjectsPanel::_handleButtonEvent), false);
     _tree.signal_button_release_event().connect(sigc::mem_fun(*this, &ObjectsPanel::_handleButtonEvent), false);
     _tree.signal_key_press_event().connect( sigc::mem_fun(*this, &ObjectsPanel::_handleKeyEvent), false );
-    _tree.signal_row_collapsed().connect( sigc::bind<bool>(sigc::mem_fun(*this, &ObjectsPanel::_setExpanded), false));
-    _tree.signal_row_expanded().connect( sigc::bind<bool>(sigc::mem_fun(*this, &ObjectsPanel::_setExpanded), true));
 
     // Before expanding a row, replace the dummy child with the actual children
     _tree.signal_test_expand_row().connect([this](const Gtk::TreeModel::iterator &iter, const Gtk::TreeModel::Path &) {
-        cleanDummyChildren(*iter);
+        if (cleanDummyChildren(*iter)) {
+            setSelection(_desktop->selection);
+        }
         return false;
     });
 
@@ -722,7 +744,6 @@ void ObjectsPanel::update()
             selection_changed = _desktop->selection->connectChanged( sigc::mem_fun(*this, &ObjectsPanel::setSelection));
             layer_changed = _desktop->connectCurrentLayerChanged( sigc::mem_fun(*this, &ObjectsPanel::setLayer));
             setDocument(_desktop, _desktop->doc());
-            connectPopupItems();
         } else {
             setDocument(_desktop, nullptr);
         }
@@ -736,12 +757,35 @@ void ObjectsPanel::update()
  */
 void ObjectsPanel::setSelection(Selection *selected)
 {
-    root_watcher->setSelectedBitRecursive(SELECTED_OBJECT, false);
+    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+    if(!prefs->getBool("/dialogs/objects/layers_only", true)) {
+        root_watcher->setSelectedBitRecursive(SELECTED_OBJECT, false);
 
-    for (auto item : selected->items()) {
-        auto watcher = getWatcher(item->getRepr());
-        if (watcher) {
-            watcher->setSelectedBit(SELECTED_OBJECT, true);
+        for (auto item : selected->items()) {
+            ObjectWatcher *watcher = nullptr;
+            // This both unpacks the tree, and populates lazy loading
+            for (auto &parent : item->ancestorList(true)) {
+                if (parent->getRepr() == root_watcher->getRepr()) {
+                    watcher = root_watcher;
+                } else if (watcher) {
+                    if (watcher = watcher->findChild(parent->getRepr())) {
+                        if (auto row = watcher->getRow()) {
+                            cleanDummyChildren(*row);
+                        }
+                    }
+                }
+            }
+
+            if (watcher) {
+                if (auto final_watcher = watcher->findChild(item->getRepr())) {
+                    final_watcher->setSelectedBit(SELECTED_OBJECT, true);
+                    _tree.expand_to_path(final_watcher->getTreePath());
+                } else {
+                    g_warning("Can't find final step in tree selection!");
+                }
+            } else {
+                g_warning("Can't find a mid step in tree selection!");
+            }
         }
     }
 }
@@ -781,43 +825,6 @@ void ObjectsPanel::_addBarButton(char const* iconName, char const* tooltip, int 
     btn->signal_clicked().connect(sigc::bind( sigc::mem_fun(*this, &ObjectsPanel::_takeAction), verb_id));
     _buttonsSecondary.pack_start(*btn, Gtk::PACK_SHRINK);
 }
-
-/**
- * Adds an item to the pop-up (right-click) menu
- * @param desktop The active destktop
- * @param code Action code
- * @return The generated menu item
- */
-Gtk::MenuItem& ObjectsPanel::_addPopupItem( SPDesktop *desktop, unsigned int code)
-{
-    Verb *verb = Verb::get( code );
-    g_assert(verb);
-    SPAction *action = verb->get_action(Inkscape::ActionContext(desktop));
-
-    Gtk::MenuItem* item = Gtk::manage(new Gtk::MenuItem());
-
-    Gtk::Label *label = Gtk::manage(new Gtk::Label(action->name, true));
-    label->set_xalign(0.0);
-
-    if (_show_contextmenu_icons && action->image) {
-        item->set_name("ImageMenuItem");  // custom name to identify our "ImageMenuItems"
-        Gtk::Image *icon = Gtk::manage(sp_get_icon_image(action->image, Gtk::ICON_SIZE_MENU));
-
-        // Create a box to hold icon and label as Gtk::MenuItem derives from GtkBin and can only hold one child
-        Gtk::Box *box = Gtk::manage(new Gtk::Box());
-        box->pack_start(*icon, false, false, 0);
-        box->pack_start(*label, true,  true,  0);
-        item->add(*box);
-    } else {
-        item->add(*label);
-    }
-
-    item->signal_activate().connect(sigc::bind(sigc::mem_fun(*this, &ObjectsPanel::_takeAction), code));
-    _popupMenu.append(*item);
-
-    return *item;
-}
-
 
 /**
  * Sets visibility of items in the tree
@@ -897,6 +904,14 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
         SPItem *item = getItem(row);
         SPGroup *group = SP_GROUP(item);
 
+        // Load the right click menu
+        if (event->type == GDK_BUTTON_PRESS && event->button == 3) {
+            ContextMenu* menu = new ContextMenu(_desktop, item);
+            menu->show();
+            menu->popup_at_pointer(nullptr);
+            return true;
+        }
+
         // Select items on button release to not confuse drag
         if (event->type == GDK_BUTTON_RELEASE) {
             if (event->state & GDK_SHIFT_MASK) {
@@ -968,113 +983,6 @@ bool ObjectsPanel::select_row( Glib::RefPtr<Gtk::TreeModel> const & /*model*/, G
 }
 
 /**
- * Sets a group to be collapsed and recursively collapses its children
- * @param group The group to collapse
- */
-void ObjectsPanel::_setCollapsed(SPGroup * group)
-{
-    /*group->setExpanded(false);
-    group->updateRepr(SP_OBJECT_WRITE_NO_CHILDREN | SP_OBJECT_WRITE_EXT);
-    for (auto& iter: group->children) {
-        if (SP_IS_GROUP(&iter)) {
-            _setCollapsed(SP_GROUP(&iter));
-        }
-    }*/
-}
-
-/**
- * Sets a group to be expanded or collapsed
- * @param iter Current tree item
- * @param isexpanded Whether to expand or collapse
- */
-void ObjectsPanel::_setExpanded(const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path& /*path*/, bool isexpanded)
-{
-    /*Gtk::TreeModel::Row row = *iter;
-
-    SPItem* item = row[_model->_colObject];
-    if (item && SP_IS_GROUP(item))
-    {
-        if (isexpanded)
-        {
-            //If we're expanding, simply perform the expansion
-            SP_GROUP(item)->setExpanded(isexpanded);
-            item->updateRepr(SP_OBJECT_WRITE_NO_CHILDREN | SP_OBJECT_WRITE_EXT);
-        }
-        else
-        {
-            //If we're collapsing, we need to recursively collapse, so call our helper function
-            _setCollapsed(SP_GROUP(item));
-        }
-    }*/
-}
-
-void ObjectsPanel::connectPopupItems()
-{
-    _watching.clear();
-    _watchingNonTop.clear();
-    _watchingNonBottom.clear();
-    _popupMenu = Gtk::Menu();
-
-    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    _show_contextmenu_icons = prefs->getBool("/theme/menuIcons_objects", true);
-
-    _watching.push_back( &_addPopupItem(_desktop, SP_VERB_LAYER_RENAME));
-    _watching.push_back( &_addPopupItem(_desktop, SP_VERB_LAYER_NEW));
-
-    _popupMenu.append(*Gtk::manage(new Gtk::SeparatorMenuItem()));
-
-    _watching.push_back( &_addPopupItem(_desktop, SP_VERB_LAYER_SOLO));
-    _watching.push_back( &_addPopupItem(_desktop, SP_VERB_LAYER_SHOW_ALL));
-    _watching.push_back( &_addPopupItem(_desktop, SP_VERB_LAYER_HIDE_ALL));
-
-    _popupMenu.append(*Gtk::manage(new Gtk::SeparatorMenuItem()));
-
-    _watching.push_back( &_addPopupItem(_desktop, SP_VERB_LAYER_LOCK_OTHERS));
-    _watching.push_back( &_addPopupItem(_desktop, SP_VERB_LAYER_LOCK_ALL));
-    _watching.push_back( &_addPopupItem(_desktop, SP_VERB_LAYER_UNLOCK_ALL));
-
-    _popupMenu.append(*Gtk::manage(new Gtk::SeparatorMenuItem()));
-
-    _watchingNonTop.push_back( &_addPopupItem(_desktop, SP_VERB_SELECTION_STACK_UP));
-    _watchingNonBottom.push_back( &_addPopupItem(_desktop, SP_VERB_SELECTION_STACK_DOWN));
-
-    _popupMenu.append(*Gtk::manage(new Gtk::SeparatorMenuItem()));
-
-    _watching.push_back( &_addPopupItem(_desktop, SP_VERB_SELECTION_GROUP));
-    _watching.push_back( &_addPopupItem(_desktop, SP_VERB_SELECTION_UNGROUP));
-
-    _popupMenu.append(*Gtk::manage(new Gtk::SeparatorMenuItem()));
-
-    _watching.push_back( &_addPopupItem(_desktop, SP_VERB_OBJECT_SET_CLIPPATH));
-    _watching.push_back( &_addPopupItem(_desktop, SP_VERB_OBJECT_CREATE_CLIP_GROUP));
-    _watching.push_back( &_addPopupItem(_desktop, SP_VERB_OBJECT_UNSET_CLIPPATH));
-
-    _popupMenu.append(*Gtk::manage(new Gtk::SeparatorMenuItem()));
-
-    _watching.push_back( &_addPopupItem(_desktop, SP_VERB_OBJECT_SET_MASK));
-    _watching.push_back( &_addPopupItem(_desktop, SP_VERB_OBJECT_UNSET_MASK));
-
-    _watching.push_back( &_addPopupItem(_desktop, SP_VERB_EDIT_DUPLICATE));
-    _watching.push_back( &_addPopupItem(_desktop, SP_VERB_EDIT_DELETE));
-
-    _popupMenu.show_all_children();
-
-    // Install CSS to shift icons into the space reserved for toggles (i.e. check and radio items).
-    _popupMenu.signal_map().connect(sigc::bind<Gtk::MenuShell *>(sigc::ptr_fun(shift_icons), &_popupMenu));
-
-    //Set initial sensitivity of buttons
-    for (auto & it : _watching) {
-        it->set_sensitive( false );
-    }
-    for (auto & it : _watchingNonTop) {
-        it->set_sensitive( false );
-    }
-    for (auto & it : _watchingNonBottom) {
-        it->set_sensitive( false );
-    }
-}
-
-/**
  * Get the XML node which is associated with a row. Can be NULL for dummy children.
  */
 Node *ObjectsPanel::getRepr(Gtk::TreeModel::Row const &row) const
@@ -1130,13 +1038,14 @@ bool ObjectsPanel::removeDummyChildren(Gtk::TreeModel::Row const &row)
     return true;
 }
 
-void ObjectsPanel::cleanDummyChildren(Gtk::TreeModel::Row const &row)
+bool ObjectsPanel::cleanDummyChildren(Gtk::TreeModel::Row const &row)
 {
     if (removeDummyChildren(row)) {
         assert(row);
         getWatcher(getRepr(row))->addChildren(getItem(row));
-        setSelection(_desktop->selection);
+        return true;
     }
+    return false;
 }
 
 /**
@@ -1231,7 +1140,7 @@ void ObjectsPanel::on_drag_start(const Glib::RefPtr<Gdk::DragContext> &context)
         // So we'll deselect everything and start draging this item instead.
         auto watcher = getWatcher(current_item->getRepr());
         if (watcher) {
-            auto path = watcher->getRow();
+            auto path = watcher->getTreePath();
             selection->select(path);
             obj_selection->set(current_item);
         }
@@ -1240,7 +1149,7 @@ void ObjectsPanel::on_drag_start(const Glib::RefPtr<Gdk::DragContext> &context)
         for (auto item : obj_selection->items()) {
             auto watcher = getWatcher(item->getRepr());
             if (watcher) {
-                auto path = watcher->getRow();
+                auto path = watcher->getTreePath();
                 selection->select(path);
             }
         }

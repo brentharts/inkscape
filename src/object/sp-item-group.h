@@ -37,7 +37,6 @@ public:
 
     enum LayerMode { GROUP, LAYER, MASK_HELPER };
 
-    bool _expanded;
     bool _insert_bottom;
     LayerMode _layer_mode;
     std::map<unsigned int, LayerMode> _display_modes;
@@ -45,9 +44,6 @@ public:
     LayerMode layerMode() const { return _layer_mode; }
     void setLayerMode(LayerMode mode);
 
-    bool expanded() const { return _expanded; }
-    void setExpanded(bool isexpanded);
-    
     bool insertBottom() const { return _insert_bottom; }
     void setInsertBottom(bool insertbottom);
 

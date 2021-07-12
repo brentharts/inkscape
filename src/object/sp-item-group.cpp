@@ -58,7 +58,6 @@ using Inkscape::DocumentUndo;
 static void sp_group_perform_patheffect(SPGroup *group, SPGroup *top_group, Inkscape::LivePathEffect::Effect *lpe, bool write);
 
 SPGroup::SPGroup() : SPLPEItem(),
-    _expanded(false),
     _insert_bottom(false),
     _layer_mode(SPGroup::GROUP)
 {
@@ -643,12 +642,6 @@ SPGroup::LayerMode SPGroup::layerDisplayMode(unsigned int dkey) const {
         return (*iter).second;
     } else {
         return GROUP;
-    }
-}
-
-void SPGroup::setExpanded(bool isexpanded) {
-    if ( _expanded != isexpanded ){
-        _expanded = isexpanded;
     }
 }
 

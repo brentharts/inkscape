@@ -75,11 +75,12 @@ protected:
 
     Node *getRepr(Gtk::TreeModel::Row const &row) const;
     SPItem *getItem(Gtk::TreeModel::Row const &row) const;
+    Gtk::TreeModel::Row *getRow(SPItem *item) const;
 
     bool isDummy(Gtk::TreeModel::Row const &row) const { return getRepr(row) == nullptr; }
     bool hasDummyChildren(Gtk::TreeModel::Row const &row) const;
     bool removeDummyChildren(Gtk::TreeModel::Row const &row);
-    void cleanDummyChildren(Gtk::TreeModel::Row const &row);
+    bool cleanDummyChildren(Gtk::TreeModel::Row const &row);
 
     Glib::RefPtr<Gtk::TreeStore> _store;
     ModelColumns* _model;
@@ -126,8 +127,6 @@ private:
     void _fireAction( unsigned int code );
     void _objects_toggle();
     
-    Gtk::MenuItem& _addPopupItem(SPDesktop *desktop, unsigned int code);
-    
     void toggleVisible(const Glib::ustring& path);
     void toggleLocked(const Glib::ustring& path);
     
@@ -137,12 +136,8 @@ private:
     void _handleEdited(const Glib::ustring& path, const Glib::ustring& new_text);
 
     void _takeAction(int val);
-    void _setExpanded( const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path& path, bool isexpanded );
-    void _setCollapsed(SPGroup * group);
     
     bool select_row( Glib::RefPtr<Gtk::TreeModel> const & model, Gtk::TreeModel::Path const & path, bool b );
-
-    void connectPopupItems();
 
     bool on_drag_motion(const Glib::RefPtr<Gdk::DragContext> &, int, int, guint);
     bool on_drag_drop(const Glib::RefPtr<Gdk::DragContext> &, int, int, guint);
