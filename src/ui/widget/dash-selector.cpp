@@ -62,9 +62,10 @@ DashSelector::DashSelector()
     dash_combo.pack_start(image_renderer);
     dash_combo.set_cell_data_func(image_renderer, sigc::mem_fun(*this, &DashSelector::prepareImageRenderer));
     dash_combo.set_tooltip_text(_("Dash pattern"));
-    dash_combo.get_style_context()->add_class("combobright");
+    // dash_combo.get_style_context()->add_class("combobright");
     dash_combo.show();
     dash_combo.signal_changed().connect( sigc::mem_fun(*this, &DashSelector::on_selection) );
+    dash_combo.set_wrap_width(2);
 
     this->pack_start(dash_combo, true, true, 0);
 
@@ -83,7 +84,8 @@ DashSelector::DashSelector()
         // Add the dashes to the combobox
         Gtk::TreeModel::Row row = *(dash_store->append());
         row[dash_columns.dash] = dashes[i];
-        row[dash_columns.pixbuf] = Glib::wrap(sp_dash_to_pixbuf(dashes[i]));
+        // row[dash_columns.pixbuf] = Glib::wrap(sp_dash_to_pixbuf(dashes[i]));
+        row[dash_columns.surface] = sp_dash_to_pixbuf(dashes[i]);
     }
     // add the custom one
     Gtk::TreeModel::Row row = *(dash_store->append());
@@ -101,7 +103,9 @@ DashSelector::~DashSelector() {
 void DashSelector::prepareImageRenderer( Gtk::TreeModel::const_iterator const &row ) {
 
     Glib::RefPtr<Gdk::Pixbuf> pixbuf = (*row)[dash_columns.pixbuf];
-    image_renderer.property_pixbuf() = pixbuf;
+    Cairo::RefPtr<Cairo::Surface> surface = (*row)[dash_columns.surface];
+    image_renderer.property_surface() = surface;
+    if (!surface) image_renderer.property_pixbuf() = pixbuf;
 }
 
 void DashSelector::init_dashes() {
@@ -232,27 +236,35 @@ void DashSelector::get_dash(int *ndash, double **dash, double *off)
 /**
  * Fill a pixbuf with the dash pattern using standard cairo drawing
  */
-GdkPixbuf* DashSelector::sp_dash_to_pixbuf(double *pattern)
-{
+Cairo::RefPtr<Cairo::Surface> DashSelector::sp_dash_to_pixbuf(double *pattern) {
+    auto device_scale = get_scale_factor();
     int n_dashes;
     for (n_dashes = 0; pattern[n_dashes] >= 0.0; n_dashes ++) ;
 
-    cairo_surface_t *s = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, preview_width, preview_height);
+    auto height = preview_height * device_scale;
+    auto width = preview_width * device_scale;
+    cairo_surface_t *s = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
     cairo_t *ct = cairo_create(s);
 
-    cairo_set_line_width (ct, preview_lineheight);
-    cairo_scale (ct, preview_lineheight, 1);
-    //cairo_set_source_rgb (ct, 0, 0, 0);
-    cairo_move_to (ct, 0, preview_height/2);
-    cairo_line_to (ct, preview_width, preview_height/2);
+    auto context = get_style_context();
+    Gdk::RGBA fg = context->get_color(get_state_flags());
+
+    cairo_set_line_width (ct, preview_lineheight * device_scale);
+    cairo_scale (ct, preview_lineheight * device_scale, 1);
+    cairo_move_to (ct, 0, height/2);
+    cairo_line_to (ct, width, height/2);
     cairo_set_dash(ct, pattern, n_dashes, 0);
+    cairo_set_source_rgb(ct, fg.get_red(), fg.get_green(), fg.get_blue());
     cairo_stroke (ct);
 
     cairo_destroy(ct);
     cairo_surface_flush(s);
 
-    GdkPixbuf* pixbuf = ink_pixbuf_create_from_cairo_surface(s);
-    return pixbuf;
+    cairo_surface_set_device_scale(s, device_scale, device_scale);
+
+    // GdkPixbuf* pixbuf = ink_pixbuf_create_from_cairo_surface(s);
+    // return pixbuf;
+    return Cairo::RefPtr<Cairo::Surface>(new Cairo::Surface(s));
 }
 
 /**

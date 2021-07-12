@@ -49,7 +49,7 @@ private:
     /**
      * Fill a pixbuf with the dash pattern using standard cairo drawing
      */
-    GdkPixbuf* sp_dash_to_pixbuf(double *pattern);
+    Cairo::RefPtr<Cairo::Surface> sp_dash_to_pixbuf(double *pattern);
 
     /**
      * Fill a pixbuf with text standard cairo drawing
@@ -78,9 +78,10 @@ private:
     public:
         Gtk::TreeModelColumn<double *> dash;
         Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf> > pixbuf;
+        Gtk::TreeModelColumn<Cairo::RefPtr<Cairo::Surface>> surface;
 
         DashColumns() {
-            add(dash); add(pixbuf);
+            add(dash); add(pixbuf); add(surface);
         }
     };
     DashColumns dash_columns;
