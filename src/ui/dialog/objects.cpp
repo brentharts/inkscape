@@ -71,7 +71,7 @@ class ObjectWatcher : public Inkscape::XML::NodeObserver
 {
 public:
     ObjectWatcher() = delete;
-    ObjectWatcher(ObjectsPanel *panel, SPItem *, Gtk::TreeRow *row);
+    ObjectWatcher(ObjectsPanel *panel, SPItem *, Gtk::TreeRow *row, bool layers_only);
     ~ObjectWatcher() override;
 
     void updateRowInfo();
@@ -141,6 +141,7 @@ private:
     Gtk::TreeModel::RowReference row_ref;
     ObjectsPanel *panel;
     SelectionState selection_state;
+    bool layers_only;
 };
 
 class ObjectsPanel::ModelColumns : public Gtk::TreeModel::ColumnRecord
@@ -183,12 +184,14 @@ ObjectsPanel& ObjectsPanel::getInstance()
  * @param obj The object to watch
  * @param iter The optional list store iter for the item, if not provided,
  *             assumes this is the root 'document' object.
+ * @param layers If true, only show and watch layers, not groups or other objects.
  */
-ObjectWatcher::ObjectWatcher(ObjectsPanel* panel, SPItem* obj, Gtk::TreeRow *row) :
-    panel(panel),
-    row_ref(),
-    selection_state(0),
-    node(obj->getRepr())
+ObjectWatcher::ObjectWatcher(ObjectsPanel* panel, SPItem* obj, Gtk::TreeRow *row, bool layers)
+    : panel(panel)
+    , layers_only(layers)
+    , row_ref()
+    , selection_state(0)
+    , node(obj->getRepr())
 {
     if(row != nullptr) {
         assert(row->children().empty());
@@ -202,8 +205,8 @@ ObjectWatcher::ObjectWatcher(ObjectsPanel* panel, SPItem* obj, Gtk::TreeRow *row
         return;
     }
     // Add children as a dummy row to avoid excensive execution when
-    // the tree is really large.
-    addChildren(obj, (bool)row);
+    // the tree is really large, but not in layers mode.
+    addChildren(obj, (bool)row && !layers);
 }
 ObjectWatcher::~ObjectWatcher()
 {
@@ -333,13 +336,18 @@ void ObjectWatcher::addDummyChild()
  */
 void ObjectWatcher::addChild(SPItem *child)
 {
+    auto group = dynamic_cast<SPGroup *>(child);
+    if (layers_only && (!group || group->layerMode() != SPGroup::LAYER)) {
+        return;
+    }
+
     auto *node = child->getRepr();
     assert(node);
     Gtk::TreeModel::Row row = *(panel->_store->append(getChildren()));
 
     auto &watcher = child_watchers[node];
     assert(!watcher);
-    watcher.reset(new ObjectWatcher(panel, child, &row));
+    watcher.reset(new ObjectWatcher(panel, child, &row, layers_only));
 
     // Make sure new children have the right focus set.
     if ((selection_state & LAYER_FOCUSED) != 0) {
@@ -716,7 +724,9 @@ void ObjectsPanel::setRootWatcher()
     root_watcher = nullptr;
 
     if (_document && _document->getRoot()) {
-        root_watcher = new ObjectWatcher(this, _document->getRoot(), nullptr);
+        Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+        bool layers_only = prefs->getBool("/dialogs/objects/layers_only", true);
+        root_watcher = new ObjectWatcher(this, _document->getRoot(), nullptr, layers_only);
         setLayer(_desktop->currentLayer());
     }
 }
