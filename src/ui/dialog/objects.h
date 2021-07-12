@@ -140,10 +140,10 @@ private:
     
     bool select_row( Glib::RefPtr<Gtk::TreeModel> const & model, Gtk::TreeModel::Path const & path, bool b );
 
-    bool on_drag_motion(const Glib::RefPtr<Gdk::DragContext> &, int, int, guint);
-    bool on_drag_drop(const Glib::RefPtr<Gdk::DragContext> &, int, int, guint);
+    bool on_drag_motion(const Glib::RefPtr<Gdk::DragContext> &, int, int, guint) override;
+    bool on_drag_drop(const Glib::RefPtr<Gdk::DragContext> &, int, int, guint) override;
     void on_drag_start(const Glib::RefPtr<Gdk::DragContext> &);
-    void on_drag_end(const Glib::RefPtr<Gdk::DragContext> &);
+    void on_drag_end(const Glib::RefPtr<Gdk::DragContext> &) override;
 
     friend class ObjectWatcher;
 };
