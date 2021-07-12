@@ -65,6 +65,7 @@ DashSelector::DashSelector()
     // dash_combo.get_style_context()->add_class("combobright");
     dash_combo.show();
     dash_combo.signal_changed().connect( sigc::mem_fun(*this, &DashSelector::on_selection) );
+    // show dashes in two columns to eliminate or minimize scrolling
     dash_combo.set_wrap_width(2);
 
     this->pack_start(dash_combo, true, true, 0);
@@ -80,17 +81,18 @@ DashSelector::DashSelector()
 
     int np=0;
     while (dashes[np]){ np++;}
-    for (int i = 0; i<np-1; i++) {  // all but the custom one go this way
+    for (int i = 0; i<np-1; i++) {
+        if (i == 1) {
+            // add the custom one as a second option; it'll show up at the top of second column
+            Gtk::TreeModel::Row row = *(dash_store->append());
+            row[dash_columns.dash] = dashes[np-1];
+            row[dash_columns.surface] = sp_text_to_pixbuf((char *)"Custom");
+        }
         // Add the dashes to the combobox
         Gtk::TreeModel::Row row = *(dash_store->append());
         row[dash_columns.dash] = dashes[i];
-        // row[dash_columns.pixbuf] = Glib::wrap(sp_dash_to_pixbuf(dashes[i]));
         row[dash_columns.surface] = sp_dash_to_pixbuf(dashes[i]);
     }
-    // add the custom one
-    Gtk::TreeModel::Row row = *(dash_store->append());
-    row[dash_columns.dash] = dashes[np-1];
-    row[dash_columns.pixbuf] = Glib::wrap(sp_text_to_pixbuf((char *)"Custom"));
 
     _pattern = dashes[0];
 }
@@ -101,11 +103,8 @@ DashSelector::~DashSelector() {
 }
 
 void DashSelector::prepareImageRenderer( Gtk::TreeModel::const_iterator const &row ) {
-
-    Glib::RefPtr<Gdk::Pixbuf> pixbuf = (*row)[dash_columns.pixbuf];
     Cairo::RefPtr<Cairo::Surface> surface = (*row)[dash_columns.surface];
     image_renderer.property_surface() = surface;
-    if (!surface) image_renderer.property_pixbuf() = pixbuf;
 }
 
 void DashSelector::init_dashes() {
@@ -186,16 +185,17 @@ void DashSelector::set_dash (int ndash, double *dash, double o)
     else  if(ndash==0) {
        pos = 0;
     }
+
     if(pos>=0){
        _pattern = dashes[pos];
-       this->dash_combo.set_active(pos);
+       this->dash_combo.set_active(pos > 0 ? pos + 1 : 0); // skip "custom"
        this->offset->set_value(o);
        if(pos == 10) {
            this->offset->set_value(10.0);
        }
     }
     else { // Hit a custom pattern in the SVG, write it into the combobox.
-       count--;  // the one slot for custom patterns
+       count = 1;  // the one slot for custom patterns
        double *d = dashes[count];
        int i=0;
        for(i=0;i< (ndash > 15 ? 15 : ndash) ;i++) {
@@ -261,24 +261,24 @@ Cairo::RefPtr<Cairo::Surface> DashSelector::sp_dash_to_pixbuf(double *pattern) {
     cairo_surface_flush(s);
 
     cairo_surface_set_device_scale(s, device_scale, device_scale);
-
-    // GdkPixbuf* pixbuf = ink_pixbuf_create_from_cairo_surface(s);
-    // return pixbuf;
     return Cairo::RefPtr<Cairo::Surface>(new Cairo::Surface(s));
 }
 
 /**
  * Fill a pixbuf with a text label using standard cairo drawing
  */
-GdkPixbuf* DashSelector::sp_text_to_pixbuf(char *text)
+Cairo::RefPtr<Cairo::Surface> DashSelector::sp_text_to_pixbuf(char *text)
 {
-    cairo_surface_t *s = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, preview_width, preview_height);
+    auto device_scale = get_scale_factor();
+    cairo_surface_t *s = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, preview_width * device_scale, preview_height * device_scale);
     cairo_t *ct = cairo_create(s);
 
     cairo_select_font_face (ct, "Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_font_size (ct, 12.0);
-    cairo_set_source_rgb (ct, 0.0, 0.0, 0.0);
-    cairo_move_to (ct, 16.0, 13.0);
+    cairo_set_font_size (ct, 12.0 * device_scale);
+    auto context = get_style_context();
+    Gdk::RGBA fg = context->get_color(get_state_flags());
+    cairo_set_source_rgb(ct, fg.get_red(), fg.get_green(), fg.get_blue());
+    cairo_move_to (ct, 16.0 * device_scale, 13.0 * device_scale);
     cairo_show_text (ct, text);
 
     cairo_stroke (ct);
@@ -286,8 +286,8 @@ GdkPixbuf* DashSelector::sp_text_to_pixbuf(char *text)
     cairo_destroy(ct);
     cairo_surface_flush(s);
 
-    GdkPixbuf* pixbuf = ink_pixbuf_create_from_cairo_surface(s);
-    return pixbuf;
+    cairo_surface_set_device_scale(s, device_scale, device_scale);
+    return Cairo::RefPtr<Cairo::Surface>(new Cairo::Surface(s));
 }
 
 void DashSelector::on_selection ()

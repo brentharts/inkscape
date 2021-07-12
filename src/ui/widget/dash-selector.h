@@ -54,7 +54,7 @@ private:
     /**
      * Fill a pixbuf with text standard cairo drawing
      */
-    GdkPixbuf* sp_text_to_pixbuf(char *text);
+    Cairo::RefPtr<Cairo::Surface> sp_text_to_pixbuf(char *text);
 
     /**
      * Callback for combobox image renderer
@@ -77,11 +77,10 @@ private:
     class DashColumns : public Gtk::TreeModel::ColumnRecord {
     public:
         Gtk::TreeModelColumn<double *> dash;
-        Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf> > pixbuf;
         Gtk::TreeModelColumn<Cairo::RefPtr<Cairo::Surface>> surface;
 
         DashColumns() {
-            add(dash); add(pixbuf); add(surface);
+            add(dash); add(surface);
         }
     };
     DashColumns dash_columns;
