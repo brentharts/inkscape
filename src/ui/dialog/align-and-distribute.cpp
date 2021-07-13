@@ -307,10 +307,9 @@ public :
 private :
     void on_button_click() override {
         //Retrieve selected objects
-        SPDesktop *desktop = _dialog.getDesktop();
-        if (!desktop) return;
+        if (!_desktop) return;
 
-        Inkscape::Selection *selection = desktop->getSelection();
+        Inkscape::Selection *selection = _desktop->getSelection();
         if (!selection) return;
 
         std::vector<SPItem*> selected(selection->items().begin(), selection->items().end());
@@ -323,7 +322,7 @@ private :
 
         double kBegin = _kBegin;
         double kEnd = _kEnd;
-        if (_orientation == Geom::Y && desktop->is_yaxisdown()) {
+        if (_orientation == Geom::Y && _desktop->is_yaxisdown()) {
             kBegin = 1. - kBegin;
             kEnd = 1. - kEnd;
         }
@@ -402,7 +401,7 @@ private :
         prefs->setInt("/options/clonecompensation/value", saved_compensation);
 
         if (changed) {
-            DocumentUndo::done( desktop->getDocument(), SP_VERB_DIALOG_ALIGN_DISTRIBUTE,
+            DocumentUndo::done(_desktop->getDocument(), SP_VERB_DIALOG_ALIGN_DISTRIBUTE,
                                 _("Distribute"));
         }
     }
@@ -434,11 +433,10 @@ private :
     bool _distribute;
 
     void on_button_click() override {
-        if (!_dialog.getDesktop()) {
-        	return;
-        }
+        if (!_desktop)
+            return;
 
-        Inkscape::UI::Tools::ToolBase *event_context = _dialog.getDesktop()->getEventContext();
+        Inkscape::UI::Tools::ToolBase *event_context = _desktop->getEventContext();
 
         if (!INK_IS_NODE_TOOL(event_context)) {
         	return;
@@ -501,7 +499,8 @@ public:
 private :
     void on_button_click() override
     {
-        if (!_dialog.getDesktop()) return;
+        if (!_desktop)
+            return;
 
         // see comment in ActionAlign above
         Inkscape::Preferences *prefs = Inkscape::Preferences::get();
@@ -511,14 +510,14 @@ private :
         // xGap and yGap are the minimum space required between bounding rectangles.
         double const xGap = removeOverlapXGap.get_value();
         double const yGap = removeOverlapYGap.get_value();
-        auto tmp = _dialog.getDesktop()->getSelection()->items();
+        auto tmp = _desktop->getSelection()->items();
         std::vector<SPItem *> vec(tmp.begin(), tmp.end());
         removeoverlap(vec, xGap, yGap);
 
         // restore compensation setting
         prefs->setInt("/options/clonecompensation/value", saved_compensation);
 
-        DocumentUndo::done(_dialog.getDesktop()->getDocument(), SP_VERB_DIALOG_ALIGN_DISTRIBUTE,
+        DocumentUndo::done(_desktop->getDocument(), SP_VERB_DIALOG_ALIGN_DISTRIBUTE,
                            _("Remove overlaps"));
     }
 };
@@ -537,20 +536,21 @@ public:
 private :
     void on_button_click() override
     {
-        if (!_dialog.getDesktop()) return;
+        if (!_desktop)
+            return;
 
         // see comment in ActionAlign above
         Inkscape::Preferences *prefs = Inkscape::Preferences::get();
         int saved_compensation = prefs->getInt("/options/clonecompensation/value", SP_CLONE_COMPENSATION_UNMOVED);
         prefs->setInt("/options/clonecompensation/value", SP_CLONE_COMPENSATION_UNMOVED);
 
-        auto tmp = _dialog.getDesktop()->getSelection()->items();
+        auto tmp = _desktop->getSelection()->items();
         std::vector<SPItem *> vec(tmp.begin(), tmp.end());
         graphlayout(vec);
         // restore compensation setting
         prefs->setInt("/options/clonecompensation/value", saved_compensation);
 
-        DocumentUndo::done(_dialog.getDesktop()->getDocument(), SP_VERB_DIALOG_ALIGN_DISTRIBUTE,
+        DocumentUndo::done(_desktop->getDocument(), SP_VERB_DIALOG_ALIGN_DISTRIBUTE,
                            _("Arrange connector network"));
     }
 };
@@ -602,10 +602,8 @@ private :
 
     void on_button_click() override
     {
-        SPDesktop *desktop = _dialog.getDesktop();
-        if (!desktop) return;
-
-        Inkscape::Selection *selection = desktop->getSelection();
+        if (!_desktop) return;
+        Inkscape::Selection *selection = _desktop->getSelection();
         if (!selection) return;
 
         std::vector<SPItem*> selected(selection->items().begin(), selection->items().end());
@@ -640,7 +638,7 @@ private :
         // restore compensation setting
         prefs->setInt("/options/clonecompensation/value", saved_compensation);
 
-        DocumentUndo::done(_dialog.getDesktop()->getDocument(), SP_VERB_DIALOG_ALIGN_DISTRIBUTE,
+        DocumentUndo::done(_desktop->getDocument(), SP_VERB_DIALOG_ALIGN_DISTRIBUTE,
                            _("Exchange Positions"));
     }
 };
@@ -662,20 +660,21 @@ public :
 private :
     void on_button_click() override
     {
-        if (!_dialog.getDesktop()) return;
+        if (!_desktop)
+            return;
 
         // see comment in ActionAlign above
         Inkscape::Preferences *prefs = Inkscape::Preferences::get();
         int saved_compensation = prefs->getInt("/options/clonecompensation/value", SP_CLONE_COMPENSATION_UNMOVED);
         prefs->setInt("/options/clonecompensation/value", SP_CLONE_COMPENSATION_UNMOVED);
-        auto tmp = _dialog.getDesktop()->getSelection()->items();
+        auto tmp = _desktop->getSelection()->items();
         std::vector<SPItem*> x(tmp.begin(), tmp.end());
         unclump (x);
 
         // restore compensation setting
         prefs->setInt("/options/clonecompensation/value", saved_compensation);
 
-        DocumentUndo::done(_dialog.getDesktop()->getDocument(), SP_VERB_DIALOG_ALIGN_DISTRIBUTE,
+        DocumentUndo::done(_desktop->getDocument(), SP_VERB_DIALOG_ALIGN_DISTRIBUTE,
                            _("Unclump"));
     }
 };
@@ -694,10 +693,9 @@ public :
 private :
     void on_button_click() override
     {
-        SPDesktop *desktop = _dialog.getDesktop();
-        if (!desktop) return;
+        if (!_desktop) return;
 
-        Inkscape::Selection *selection = desktop->getSelection();
+        Inkscape::Selection *selection = _desktop->getSelection();
         if (!selection) return;
 
         std::vector<SPItem*> selected(selection->items().begin(), selection->items().end());
@@ -726,7 +724,7 @@ private :
 
         for (auto item : selected)
         {
-        	desktop->getDocument()->ensureUpToDate();
+            _desktop->getDocument()->ensureUpToDate();
             Geom::OptRect item_box = !prefs_bbox ? (item)->desktopVisualBounds() : (item)->desktopGeometricBounds();
             if (item_box) {
                 // find new center, staying within bbox
@@ -743,7 +741,7 @@ private :
         // restore compensation setting
         prefs->setInt("/options/clonecompensation/value", saved_compensation);
 
-        DocumentUndo::done(desktop->getDocument(), SP_VERB_DIALOG_ALIGN_DISTRIBUTE,
+        DocumentUndo::done(_desktop->getDocument(), SP_VERB_DIALOG_ALIGN_DISTRIBUTE,
                            _("Randomize positions"));
     }
 };
@@ -785,10 +783,8 @@ private :
     bool _distribute;
     void on_button_click() override
     {
-        SPDesktop *desktop = _dialog.getDesktop();
-        if (!desktop) return;
-
-        Inkscape::Selection *selection = desktop->getSelection();
+        if (!_desktop) return;
+        Inkscape::Selection *selection = _desktop->getSelection();
         if (!selection) return;
 
         std::vector<SPItem*> selected(selection->items().begin(), selection->items().end());
@@ -837,7 +833,7 @@ private :
             }
 
             if (changed) {
-                DocumentUndo::done(desktop->getDocument(), SP_VERB_DIALOG_ALIGN_DISTRIBUTE,
+                DocumentUndo::done(_desktop->getDocument(), SP_VERB_DIALOG_ALIGN_DISTRIBUTE,
                                     _("Distribute text baselines"));
             }
 
@@ -863,10 +859,10 @@ private :
                     focus = selection->smallestItem(Selection::AREA);
                     break;
                 case PAGE:
-                    b = desktop->getDocument()->preferredBounds();
+                    b = _desktop->getDocument()->preferredBounds();
                     break;
                 case DRAWING:
-                    b = desktop->getDocument()->getRoot()->desktopPreferredBounds();
+                    b = _desktop->getDocument()->getRoot()->desktopPreferredBounds();
                     break;
                 case SELECTION:
                     b = selection->preferredBounds();
@@ -902,7 +898,7 @@ private :
             }
 
             if (changed) {
-                DocumentUndo::done(desktop->getDocument(), SP_VERB_DIALOG_ALIGN_DISTRIBUTE,
+                DocumentUndo::done(_desktop->getDocument(), SP_VERB_DIALOG_ALIGN_DISTRIBUTE,
                                    _("Align text baselines"));
             }
         }
@@ -1149,8 +1145,11 @@ AlignAndDistribute::AlignAndDistribute()
 void AlignAndDistribute::desktopReplaced()
 {
     _tool_changed.disconnect();
-    if (desktop) {
+    if (auto desktop = getDesktop()) {
         _tool_changed = desktop->connectEventContextChanged(sigc::mem_fun(*this, &AlignAndDistribute::toolChanged));
+        for (auto & it : _actionList) {
+            it->setDesktop(desktop);
+        }
     }
 }
 

@@ -404,7 +404,7 @@ void AttrDialog::setRepr(Inkscape::XML::Node * repr)
 
 void AttrDialog::setUndo(Glib::ustring const &event_description)
 {
-    DocumentUndo::done(document, SP_VERB_DIALOG_XML_EDITOR, event_description);
+    DocumentUndo::done(getDocument(), SP_VERB_DIALOG_XML_EDITOR, event_description);
 }
 
 void AttrDialog::_set_status_message(Inkscape::MessageType /*type*/, const gchar *message, GtkWidget *widget)
@@ -674,6 +674,10 @@ void AttrDialog::valueCanceledPop()
  */
 void AttrDialog::valueEdited (const Glib::ustring& path, const Glib::ustring& value)
 {
+    auto selection = getSelection();
+    if (!selection)
+        return;
+
     Gtk::TreeModel::Row row = *_store->get_iter(path);
     if(row && this->_repr) {
         Glib::ustring name = row[_attrColumns._attributeName];

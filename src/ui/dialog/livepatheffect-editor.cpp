@@ -17,7 +17,6 @@
 
 #include <gtkmm/expander.h>
 
-#include "desktop.h"
 #include "document-undo.h"
 #include "document.h"
 #include "inkscape.h"
@@ -376,13 +375,14 @@ LivePathEffectEditor::effect_list_reload(SPLPEItem *lpeitem)
 // TODO:  factor out the effect applying code which can be called from anywhere. (selection-chemistry.cpp also needs it)
 void LivePathEffectEditor::onAdd()
 {
+    auto selection = getSelection();
     if (selection && !selection->isEmpty() ) {
         SPItem *item = selection->singleItem();
         if (item) {
             if ( dynamic_cast<SPLPEItem *>(item) ) {
                 // show effectlist dialog
                 using Inkscape::UI::Dialog::LivePathEffectAdd;
-                LivePathEffectAdd::show(desktop);
+                LivePathEffectAdd::show(getDesktop());
                 if ( !LivePathEffectAdd::isApplied()) {
                     return;
                 }
@@ -394,8 +394,8 @@ void LivePathEffectEditor::onAdd()
                 }
                 item = selection->singleItem(); // get new item
 
-                LivePathEffect::Effect::createAndApply(data->key.c_str(), document, item);
-                DocumentUndo::done(document, SP_VERB_DIALOG_LIVE_PATH_EFFECT,
+                LivePathEffect::Effect::createAndApply(data->key.c_str(), getDocument(), item);
+                DocumentUndo::done(getDocument(), SP_VERB_DIALOG_LIVE_PATH_EFFECT,
                                    _("Create and apply path effect"));
 
                 lpe_list_locked = false;
@@ -435,7 +435,7 @@ void LivePathEffectEditor::onAdd()
 
                         /// \todo Add the LPE stack of the original path?
 
-                        DocumentUndo::done(document, SP_VERB_DIALOG_LIVE_PATH_EFFECT,
+                        DocumentUndo::done(getDocument(), SP_VERB_DIALOG_LIVE_PATH_EFFECT,
                                            _("Create and apply Clone original path effect"));
 
                         lpe_list_locked = false;
@@ -450,6 +450,7 @@ void LivePathEffectEditor::onAdd()
 void
 LivePathEffectEditor::onRemove()
 {
+    auto selection = getSelection();
     if (selection && !selection->isEmpty() ) {
         SPItem *item = selection->singleItem();
         SPLPEItem *lpeitem  = dynamic_cast<SPLPEItem *>(item);
@@ -457,7 +458,7 @@ LivePathEffectEditor::onRemove()
             sp_lpe_item_update_patheffect(lpeitem, false, false);
             lpeitem->removeCurrentPathEffect(false);
             current_lperef = nullptr;
-            DocumentUndo::done(document, SP_VERB_DIALOG_LIVE_PATH_EFFECT, _("Remove path effect"));
+            DocumentUndo::done(getDocument(), SP_VERB_DIALOG_LIVE_PATH_EFFECT, _("Remove path effect"));
             lpe_list_locked = false;
             onSelectionChanged(selection);
         }
@@ -467,13 +468,14 @@ LivePathEffectEditor::onRemove()
 
 void LivePathEffectEditor::onUp()
 {
+    auto selection = getSelection();
     if (selection && !selection->isEmpty() ) {
         SPItem *item = selection->singleItem();
         SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(item);
         if (lpeitem) {
             Inkscape::LivePathEffect::Effect *lpe = lpeitem->getCurrentLPE();
             lpeitem->upCurrentPathEffect();
-            DocumentUndo::done(document, SP_VERB_DIALOG_LIVE_PATH_EFFECT, _("Move path effect up") );
+            DocumentUndo::done(getDocument(), SP_VERB_DIALOG_LIVE_PATH_EFFECT, _("Move path effect up") );
             effect_list_reload(lpeitem);
             if (lpe) {
                 showParams(*lpe);
@@ -486,13 +488,14 @@ void LivePathEffectEditor::onUp()
 
 void LivePathEffectEditor::onDown()
 {
+    auto selection = getSelection();
     if (selection && !selection->isEmpty() ) {
         SPItem *item = selection->singleItem();
         SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(item);
         if ( lpeitem ) {
             Inkscape::LivePathEffect::Effect *lpe = lpeitem->getCurrentLPE();
             lpeitem->downCurrentPathEffect();
-            DocumentUndo::done(document, SP_VERB_DIALOG_LIVE_PATH_EFFECT, _("Move path effect down") );
+            DocumentUndo::done(getDocument(), SP_VERB_DIALOG_LIVE_PATH_EFFECT, _("Move path effect down") );
             effect_list_reload(lpeitem);
             if (lpe) {
                 showParams(*lpe);
@@ -525,11 +528,12 @@ void LivePathEffectEditor::on_effect_selection_changed()
                 effect->refresh_widgets = true;
                 showParams(*effect);
                 // To reload knots and helper paths
+                auto selection = getSelection();
                 if (selection && !selection->isEmpty() && !selection_changed_lock) {
                     SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(selection->singleItem());
                     if (lpeitem) {
                         selection->set(lpeitem);
-                        Inkscape::UI::Tools::sp_update_helperpath(desktop);
+                        Inkscape::UI::Tools::sp_update_helperpath(getDesktop());
                     }
                 }
             }
@@ -551,6 +555,7 @@ void LivePathEffectEditor::on_visibility_toggled( Glib::ustring const& str )
         /* FIXME: this explicit writing to SVG is wrong. The lpe_item should have a method to disable/enable an effect within its stack.
          * So one can call:  lpe_item->setActive(lpeobjref->lpeobject); */
         lpeobjref->lpeobject->get_lpe()->getRepr()->setAttribute("is_visible", newValue ? "true" : "false");
+        auto selection = getSelection();
         if (selection && !selection->isEmpty() ) {
             SPItem *item = selection->singleItem();
             SPLPEItem *lpeitem  = dynamic_cast<SPLPEItem *>(item);
@@ -558,7 +563,7 @@ void LivePathEffectEditor::on_visibility_toggled( Glib::ustring const& str )
                 lpeobjref->lpeobject->get_lpe()->doOnVisibilityToggled(lpeitem);
             }
         }
-        DocumentUndo::done(document, SP_VERB_DIALOG_LIVE_PATH_EFFECT,
+        DocumentUndo::done(getDocument(), SP_VERB_DIALOG_LIVE_PATH_EFFECT,
                             newValue ? _("Activate path effect") : _("Deactivate path effect"));
     }
 }

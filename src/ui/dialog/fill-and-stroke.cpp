@@ -82,15 +82,15 @@ FillAndStroke::~FillAndStroke()
 void FillAndStroke::desktopReplaced()
 {
     if (fillWdgt) {
-        fillWdgt->setDesktop(desktop);
+        fillWdgt->setDesktop(getDesktop());
     }
     if (strokeWdgt) {
-        strokeWdgt->setDesktop(desktop);
+        strokeWdgt->setDesktop(getDesktop());
     }
     if (strokeStyleWdgt) {
-        strokeStyleWdgt->setDesktop(desktop);
+        strokeStyleWdgt->setDesktop(getDesktop());
     }
-    _subject.setDesktop(desktop);
+    _subject.setDesktop(getDesktop());
 }
 
 void FillAndStroke::_onSwitchPage(Gtk::Widget * /*page*/, guint pagenum)

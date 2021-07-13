@@ -586,6 +586,10 @@ void GlyphsPanel::selectionModified(Selection *selection, guint flags)
 // Append selected glyphs to selected text
 void GlyphsPanel::insertText()
 {
+    auto selection = getSelection();
+    if (!selection)
+        return;
+
     SPItem *textItem = nullptr;
     auto itemlist = selection->items();
         for(auto i=itemlist.begin(); itemlist.end() != i; ++i) {
@@ -614,7 +618,7 @@ void GlyphsPanel::insertText()
             Glib::ustring combined = sp_te_get_string_multiline(textItem);
             combined += glyphs;
             sp_te_set_repr_text_multiline(textItem, combined.c_str());
-            DocumentUndo::done(document, SP_VERB_CONTEXT_TEXT, _("Append text"));
+            DocumentUndo::done(getDocument(), SP_VERB_CONTEXT_TEXT, _("Append text"));
         }
     }
 }
@@ -663,6 +667,10 @@ void GlyphsPanel::glyphSelectionChanged()
 
 void GlyphsPanel::calcCanInsert()
 {
+    auto selection = getSelection();
+    if (!selection)
+        return;
+
     int items = 0;
     auto itemlist = selection->items();
     for(auto i=itemlist.begin(); itemlist.end() != i; ++i) {

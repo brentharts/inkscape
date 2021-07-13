@@ -42,7 +42,7 @@ Prototype::Prototype()
 
 void Prototype::documentReplaced()
 {
-    if (document) {
+    if (document && document->getRoot()) {
         const gchar *root_id = document->getRoot()->getId();
         Glib::ustring label_string("Document's SVG id: ");
         label_string += (root_id ? root_id : "null");

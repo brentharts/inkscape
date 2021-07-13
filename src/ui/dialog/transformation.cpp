@@ -634,11 +634,7 @@ void Transformation::updatePageTransform(Inkscape::Selection *selection)
 
 void Transformation::_apply()
 {
-    if (!_app) {
-        std::cerr << "Transformation::_apply(): _app is null" << std::endl;
-        return;
-    }
-    Inkscape::Selection *selection = _app->get_active_selection();
+    auto selection = getSelection();
     if (!selection || selection->isEmpty())
         return;
 
@@ -985,12 +981,7 @@ void Transformation::onMoveValueChanged()
 
 void Transformation::onMoveRelativeToggled()
 {
-    if (!_app) {
-        std::cerr << "Transformation::onMoveRelativeToggled(): _app is null" << std::endl;
-        return;
-    }
-    Inkscape::Selection *selection = _app->get_active_selection();
-
+    auto selection = getSelection();
     if (!selection || selection->isEmpty())
         return;
 
@@ -1100,12 +1091,7 @@ void Transformation::onTransformValueChanged()
 
 void Transformation::onReplaceMatrixToggled()
 {
-    if (!_app) {
-        std::cerr << "Transformation::onReplaceMatrixToggled(): _app is null" << std::endl;
-        return;
-    }
-    Inkscape::Selection *selection = _app->get_active_selection();
-
+    auto selection = getSelection();
     if (!selection || selection->isEmpty())
         return;
 
@@ -1149,11 +1135,7 @@ void Transformation::onClear()
 
     switch (page) {
         case PAGE_MOVE: {
-            if (!_app) {
-                std::cerr << "Transformation::onClear(): _app is null" << std::endl;
-                return;
-            }
-            Inkscape::Selection *selection = _app->get_active_selection();
+            auto selection = getSelection();
             if (!selection || selection->isEmpty() || _check_move_relative.get_active()) {
                 _scalar_move_horizontal.setValue(0);
                 _scalar_move_vertical.setValue(0);
@@ -1201,22 +1183,24 @@ void Transformation::onApplySeparatelyToggled()
 void Transformation::desktopReplaced()
 {
     // Setting default unit to document unit
-    SPNamedView *nv = desktop->getNamedView();
-    if (nv->display_units) {
-        _units_move.setUnit(nv->display_units->abbr);
-        _units_transform.setUnit(nv->display_units->abbr);
-    }
+    if (auto desktop = getDesktop()) {
+        SPNamedView *nv = desktop->getNamedView();
+        if (nv->display_units) {
+            _units_move.setUnit(nv->display_units->abbr);
+            _units_transform.setUnit(nv->display_units->abbr);
+        }
 
-    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    if (prefs->getBool("/dialogs/transformation/rotateCounterClockwise", true) != desktop->is_yaxisdown()) {
-        _counterclockwise_rotate.set_active();
-        onRotateCounterclockwiseClicked();
-    } else {
-        _clockwise_rotate.set_active();
-        onRotateClockwiseClicked();
-    }
+        Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+        if (prefs->getBool("/dialogs/transformation/rotateCounterClockwise", true) != desktop->is_yaxisdown()) {
+            _counterclockwise_rotate.set_active();
+            onRotateCounterclockwiseClicked();
+        } else {
+            _clockwise_rotate.set_active();
+            onRotateClockwiseClicked();
+        }
 
-    updateSelection(PAGE_MOVE, _app->get_active_selection());
+        updateSelection(PAGE_MOVE, getSelection());
+    }
 }
 
 } // namespace Dialog

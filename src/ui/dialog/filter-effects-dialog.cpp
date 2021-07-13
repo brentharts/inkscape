@@ -1506,10 +1506,7 @@ void FilterEffectsDialog::FilterModifier::update_counts()
    Keeps the same selection if possible, otherwise selects the first element */
 void FilterEffectsDialog::FilterModifier::update_filters()
 {
-    SPDesktop* desktop = _dialog.getDesktop();
-    SPDocument* document = desktop->getDocument();
-
-    std::vector<SPObject *> filters = document->getResourceList( "filter" );
+    std::vector<SPObject *> filters = _dialog.getDocument()->getResourceList("filter");
 
     _model->clear();
 
@@ -1522,7 +1519,7 @@ void FilterEffectsDialog::FilterModifier::update_filters()
         row[_columns.label] = lbl ? lbl : (id ? id : "filter");
     }
 
-    update_selection(desktop->selection);
+    update_selection(_dialog.getSelection());
     _dialog.update_filter_general_settings_view();
 }
 
@@ -2664,6 +2661,7 @@ FilterEffectsDialog::~FilterEffectsDialog()
 void FilterEffectsDialog::documentReplaced()
 {
    _resource_changed.disconnect();
+   auto document = getDocument();
    if (document) {
        _resource_changed = document->connectResourcesChanged("filter", sigc::mem_fun(_filter_modifier, &FilterModifier::update_filters));
        _filter_modifier.update_filters();

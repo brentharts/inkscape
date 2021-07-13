@@ -73,7 +73,7 @@ void ArrangeDialog::_apply()
 
 void ArrangeDialog::desktopReplaced()
 {
-    _gridArrangeTab->setDesktop(desktop);
+    _gridArrangeTab->setDesktop(getDesktop());
 }
 
 } //namespace Dialog

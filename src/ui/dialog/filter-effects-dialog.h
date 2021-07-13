@@ -37,13 +37,13 @@ namespace UI {
 namespace Dialog {
 
 class EntryAttr;
-//class SpinButtonAttr;
+class FileOrElementChooser;
 class DualSpinButton;
 class MultiSpinButton;
+
 class FilterEffectsDialog : public DialogBase
 {
 public:
-
     FilterEffectsDialog();
     ~FilterEffectsDialog() override;
 
@@ -59,6 +59,8 @@ private:
     void selectionModified(Inkscape::Selection *selection, guint flags) override;
 
     sigc::connection _resource_changed;
+
+    friend class FileOrElementChooser;
 
     class FilterModifier : public Gtk::Box
     {

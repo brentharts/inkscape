@@ -1117,8 +1117,8 @@ void SwatchesPanel::_regItem(Gtk::MenuItem* item, int id)
 
 void SwatchesPanel::documentReplaced()
 {
-    _trackDocument(this, document);
-    if (document) {
+    _trackDocument(this, getDocument());
+    if (auto document = getDocument()) {
         handleGradientsChange(document);
     }
 }
@@ -1246,25 +1246,29 @@ void SwatchesPanel::handleDefsModified(SPDocument *document)
 std::vector<SwatchPage*> SwatchesPanel::_getSwatchSets() const
 {
     std::vector<SwatchPage*> tmp;
-    if (docPalettes.find(document) != docPalettes.end()) {
-        tmp.push_back(docPalettes[document]);
+    if (auto document = getDocument()) {
+        if (docPalettes.find(document) != docPalettes.end()) {
+            tmp.push_back(docPalettes[document]);
+        }
     }
-
     tmp.insert(tmp.end(), userSwatchPages.begin(), userSwatchPages.end());
     tmp.insert(tmp.end(), systemSwatchPages.begin(), systemSwatchPages.end());
-
     return tmp;
 }
 
 void SwatchesPanel::_updateFromSelection()
 {
+    auto document = getDocument();
+    if (!document)
+        return;
+
     SwatchPage *docPalette = (docPalettes.find(document) != docPalettes.end()) ? docPalettes[document] : nullptr;
     if ( docPalette ) {
         std::string fillId;
         std::string strokeId;
 
         SPStyle tmpStyle(document);
-        int result = sp_desktop_query_style( desktop, &tmpStyle, QUERY_STYLE_PROPERTY_FILL );
+        int result = sp_desktop_query_style(getDesktop(), &tmpStyle, QUERY_STYLE_PROPERTY_FILL );
         switch (result) {
             case QUERY_STYLE_SINGLE:
             case QUERY_STYLE_MULTIPLE_AVERAGED:
@@ -1297,7 +1301,7 @@ void SwatchesPanel::_updateFromSelection()
             }
         }
 
-        result = sp_desktop_query_style(desktop, &tmpStyle, QUERY_STYLE_PROPERTY_STROKE);
+        result = sp_desktop_query_style(getDesktop(), &tmpStyle, QUERY_STYLE_PROPERTY_STROKE);
         switch (result) {
             case QUERY_STYLE_SINGLE:
             case QUERY_STYLE_MULTIPLE_AVERAGED:

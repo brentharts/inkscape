@@ -350,11 +350,8 @@ void ObjectsPanel::_objectsChangedWrapper(SPObject */*obj*/) {
  */
 void ObjectsPanel::_objectsChanged(SPObject */*obj*/)
 {
-    if (desktop) {
-        //Get the current document's root and use that to enumerate the tree
-        SPDocument* document = desktop->doc();
-        SPRoot* root = document->getRoot();
-        if ( root ) {
+    if (auto document = getDocument()) {
+        if (auto root = document->getRoot()) {
             _selectedConnection.block(); // Will be unblocked after the queue has been processed fully
 
             //Clear the tree store
@@ -416,7 +413,7 @@ void ObjectsPanel::_queueObject(SPObject* obj, Gtk::TreeModel::Row* parentRow)
  * @return False if the queue has been fully emptied
  */
 bool ObjectsPanel::_processQueue() {
-    auto *desktop = getDesktop();
+    auto desktop = getDesktop();
     if (!desktop) {
         return false;
     }
@@ -589,6 +586,7 @@ void ObjectsPanel::_objectsSelected( Selection *sel ) {
         _updateObjectSelected(item, (*i)==items.back(), false);
     }
     if (!item) {
+        auto desktop = getDesktop();
         if (desktop->currentLayer() && SP_IS_ITEM(desktop->currentLayer())) {
             item = SP_ITEM(desktop->currentLayer());
             _setCompositingValues(item);
@@ -733,9 +731,9 @@ void ObjectsPanel::_updateObjectSelected(SPItem* item, bool scrollto, bool expan
  */
 void ObjectsPanel::_pushTreeSelectionToCurrent()
 {
-    if ( desktop && desktop->currentRoot() ) {
+    if (auto selection = getSelection()) {
         //Clear the selection and then iterate over the tree selection, pushing each item to the desktop
-        desktop->selection->clear();
+        selection->clear();
         if (_tree.get_selection()->count_selected_rows() == 0) {
             _store->foreach_iter(sigc::mem_fun(*this, &ObjectsPanel::_clearPrevSelectionState));
         }
@@ -756,6 +754,9 @@ void ObjectsPanel::_pushTreeSelectionToCurrent()
  */
 bool ObjectsPanel::_selectItemCallback(const Gtk::TreeModel::iterator& iter, bool *setCompositingValues, bool *first_pass)
 {
+    auto desktop = getDesktop();
+    if (!desktop)
+        return false;
     Gtk::TreeModel::Row row = *iter;
     bool selected = _tree.get_selection()->is_selected(iter);
     if (selected) { // All items selected in the treeview will be added to the current selection
@@ -869,6 +870,7 @@ void ObjectsPanel::_setLockedIter( const Gtk::TreeModel::iterator& iter, const b
  */
 bool ObjectsPanel::_handleKeyEvent(GdkEventKey *event)
 {
+    auto desktop = getDesktop();
     if (!desktop)
         return false;
 
@@ -931,6 +933,7 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
 {
     static unsigned doubleclick = 0;
     static bool overVisible = false;
+    auto desktop = getDesktop();
 
     //Right mouse button was clicked, launch the pop-up menu
     if ( (event->type == GDK_BUTTON_PRESS) && (event->button == 3) ) {
@@ -1271,10 +1274,12 @@ void ObjectsPanel::_storeDragSource(const Gtk::TreeModel::iterator& iter)
 /*
  * Move a selection of items in response to a drag & drop action
  */
-void ObjectsPanel::_doTreeMove( )
+void ObjectsPanel::_doTreeMove()
 {
-    g_assert(desktop != nullptr);
-    g_assert(document != nullptr);
+    auto desktop = getDesktop();
+    auto document = getDocument();
+    if (!document)
+        return;
 
     std::vector<gchar *> idvector;
 
@@ -1312,8 +1317,7 @@ void ObjectsPanel::_doTreeMove( )
         }
     }
 
-    DocumentUndo::done( desktop->doc() , SP_VERB_NONE,
-                                            _("Moved objects"));
+    DocumentUndo::done(document, SP_VERB_NONE, _("Moved objects"));
 }
 
 /**
@@ -1340,7 +1344,7 @@ void ObjectsPanel::_blockAllSignals(bool should_block = true) {
  */
 void ObjectsPanel::_fireAction( unsigned int code )
 {
-    if ( desktop ) {
+    if (auto desktop = getDesktop()) {
         Verb *verb = Verb::get( code );
         if ( verb ) {
             SPAction *action = verb->get_action(desktop);
@@ -1389,11 +1393,12 @@ void ObjectsPanel::_takeAction( int val )
 bool ObjectsPanel::_executeAction()
 {
     // Make sure selected layer hasn't changed since the action was triggered
-    if ( document && _pending)
-    {
-        int val = _pending->_actionCode;
-//        SPObject* target = _pending->_target;
+    if (auto document = getDocument()) {
+        if (_pending)
+            return false;
 
+        auto selection = getSelection();
+        int val = _pending->_actionCode;
         switch ( val ) {
             case BUTTON_NEW:
             {
@@ -1407,72 +1412,54 @@ bool ObjectsPanel::_executeAction()
             break;
             case BUTTON_TOP:
             {
-                if (desktop->selection->isEmpty())
-                {
+                if (selection->isEmpty()) {
                     _fireAction( SP_VERB_LAYER_TO_TOP );
-                }
-                else
-                {
+                } else {
                     _fireAction( SP_VERB_SELECTION_TO_FRONT);
                 }
             }
             break;
             case BUTTON_BOTTOM:
             {
-                if (desktop->selection->isEmpty())
-                {
+                if (selection->isEmpty()) {
                     _fireAction( SP_VERB_LAYER_TO_BOTTOM );
-                }
-                else
-                {
+                } else {
                     _fireAction( SP_VERB_SELECTION_TO_BACK);
                 }
             }
             break;
             case BUTTON_UP:
             {
-                if (desktop->selection->isEmpty())
-                {
+                if (selection->isEmpty()) {
                     _fireAction( SP_VERB_LAYER_RAISE );
-                }
-                else
-                {
+                } else {
                     _fireAction( SP_VERB_SELECTION_STACK_UP );
                 }
             }
             break;
             case BUTTON_DOWN:
             {
-                if (desktop->selection->isEmpty())
-                {
+                if (selection->isEmpty()) {
                     _fireAction( SP_VERB_LAYER_LOWER );
-                }
-                else
-                {
+                } else {
                     _fireAction( SP_VERB_SELECTION_STACK_DOWN );
                 }
             }
             break;
             case BUTTON_DUPLICATE:
             {
-                if (desktop->selection->isEmpty())
-                {
+                if (selection->isEmpty()) {
                     _fireAction( SP_VERB_LAYER_DUPLICATE );
-                }
-                else
-                {
+                } else {
                     _fireAction( SP_VERB_EDIT_DUPLICATE );
                 }
             }
             break;
             case BUTTON_DELETE:
             {
-                if (desktop->selection->isEmpty())
-                {
+                if (selection->isEmpty()) {
                     _fireAction( SP_VERB_LAYER_DELETE );
-                }
-                else
-                {
+                } else {
                     _fireAction( SP_VERB_EDIT_DELETE );
                 }
             }
@@ -1595,13 +1582,14 @@ void ObjectsPanel::_handleEdited(const Glib::ustring& path, const Glib::ustring&
  */
 void ObjectsPanel::_renameObject(Gtk::TreeModel::Row row, const Glib::ustring& name)
 {
-    if ( row && desktop) {
+    auto document = getDocument();
+    if (row && document) {
         SPItem* item = row[_model->_colObject];
-        if ( item ) {
+        if (item) {
             gchar const* oldLabel = item->label();
             if ( !name.empty() && (!oldLabel || name != oldLabel) ) {
                 item->setLabel(name.c_str());
-                DocumentUndo::done( desktop->doc() , SP_VERB_NONE,
+                DocumentUndo::done(document, SP_VERB_NONE,
                                                     _("Rename object"));
             }
         }
@@ -1708,7 +1696,7 @@ void ObjectsPanel::_highlightPickerColorMod()
         target->setHighlightColor(rgba);
         target->updateRepr(SP_OBJECT_WRITE_NO_CHILDREN | SP_OBJECT_WRITE_EXT);
     }
-    DocumentUndo::maybeDone(SP_ACTIVE_DOCUMENT, "highlight", SP_VERB_DIALOG_OBJECTS, _("Set object highlight color"));
+    DocumentUndo::maybeDone(getDocument(), "highlight", SP_VERB_DIALOG_OBJECTS, _("Set object highlight color"));
 }
 
 /**
@@ -1718,7 +1706,7 @@ void ObjectsPanel::_opacityValueChanged()
 {
     _blockCompositeUpdate = true;
     _tree.get_selection()->selected_foreach_iter(sigc::mem_fun(*this, &ObjectsPanel::_opacityChangedIter));
-    DocumentUndo::maybeDone(document, "opacity", SP_VERB_DIALOG_OBJECTS, _("Set object opacity"));
+    DocumentUndo::maybeDone(getDocument(), "opacity", SP_VERB_DIALOG_OBJECTS, _("Set object opacity"));
     _blockCompositeUpdate = false;
 }
 
@@ -1745,7 +1733,7 @@ void ObjectsPanel::_isolationValueChanged()
 {
     _blockCompositeUpdate = true;
     _tree.get_selection()->selected_foreach_iter(sigc::mem_fun(*this, &ObjectsPanel::_isolationChangedIter));
-    DocumentUndo::maybeDone(document, "isolation", SP_VERB_DIALOG_OBJECTS, _("Set object isolation"));
+    DocumentUndo::maybeDone(getDocument(), "isolation", SP_VERB_DIALOG_OBJECTS, _("Set object isolation"));
     _blockCompositeUpdate = false;
 }
 
@@ -1776,7 +1764,7 @@ void ObjectsPanel::_blendValueChanged()
 {
     _blockCompositeUpdate = true;
     _tree.get_selection()->selected_foreach_iter(sigc::mem_fun(*this, &ObjectsPanel::_blendChangedIter));
-    DocumentUndo::done(document, SP_VERB_DIALOG_OBJECTS, _("Set object blend mode"));
+    DocumentUndo::done(getDocument(), SP_VERB_DIALOG_OBJECTS, _("Set object blend mode"));
     _blockCompositeUpdate = false;
 }
 
@@ -1815,7 +1803,7 @@ void ObjectsPanel::_blurValueChanged()
 {
     _blockCompositeUpdate = true;
     _tree.get_selection()->selected_foreach_iter(sigc::bind<double>(sigc::mem_fun(*this, &ObjectsPanel::_blurChangedIter), _filter_modifier.get_blur_value()));
-    DocumentUndo::maybeDone(document, "blur", SP_VERB_DIALOG_OBJECTS, _("Set object blur"));
+    DocumentUndo::maybeDone(getDocument(), "blur", SP_VERB_DIALOG_OBJECTS, _("Set object blur"));
     _blockCompositeUpdate = false;
 }
 
@@ -1847,7 +1835,7 @@ void ObjectsPanel::_blurChangedIter(const Gtk::TreeIter& iter, double blur)
                 Geom::Affine i2d (item->i2dt_affine());
                 double expansion = i2d.descrim();
                 radius *= expansion;
-                SPFilter *filter = modify_filter_gaussian_blur_from_item(document, item, radius);
+                SPFilter *filter = modify_filter_gaussian_blur_from_item(getDocument(), item, radius);
                 sp_style_set_property_url(item, "filter", filter, false);
             } else if (item->style->filter.set && item->style->getFilter()) {
                 for (auto& primitive: item->style->getFilter()->children) {
@@ -2230,12 +2218,13 @@ void ObjectsPanel::documentReplaced()
         _rootWatcher = nullptr;
     }
 
-    if (document && document->getRoot() && document->getRoot()->getRepr())
-    {
-        //Create a new root watcher for the document and then call _objectsChanged to fill the tree
-        _rootWatcher = new ObjectsPanel::ObjectWatcher(this, document->getRoot());
-        document->getRoot()->getRepr()->addObserver(*_rootWatcher);
-        _objectsChanged(document->getRoot());
+    if (auto document = getDocument()) {
+        if (document->getRoot() && document->getRoot()->getRepr()) {
+            //Create a new root watcher for the document and then call _objectsChanged to fill the tree
+            _rootWatcher = new ObjectsPanel::ObjectWatcher(this, document->getRoot());
+            document->getRoot()->getRepr()->addObserver(*_rootWatcher);
+            _objectsChanged(document->getRoot());
+        }
     }
 }
 

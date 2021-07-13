@@ -158,7 +158,7 @@ PaintServersDialog::PaintServersDialog()
 
 void PaintServersDialog::documentReplaced()
 {
-    if (document) {
+    if (auto document = getDocument()) {
         document_map[CURRENTDOC] = document;
         load_sources();
         load_current_document();
@@ -223,7 +223,7 @@ void recurse_find_paint(SPObject* in, std::vector<Glib::ustring>& list)
 void PaintServersDialog::load_sources()
 {
     // Extract paints from the current file
-    if (document) {
+    if (auto document = getDocument()) {
         load_document(document);
     }
 
@@ -358,7 +358,7 @@ void PaintServersDialog::load_current_document()
     std::vector<Glib::ustring> paints;
     std::vector<Glib::ustring> paints_current;
     std::vector<Glib::ustring> paints_missing;
-    recurse_find_paint(document->getDefs(), paints);
+    recurse_find_paint(getDocument()->getDefs(), paints);
 
     std::sort(paints.begin(), paints.end());
     paints.erase(std::unique(paints.begin(), paints.end()), paints.end());
@@ -389,7 +389,7 @@ void PaintServersDialog::load_current_document()
     for (auto paint : paints_missing) {
         Glib::RefPtr<Gdk::Pixbuf> pixbuf(nullptr);
         Glib::ustring id;
-        pixbuf = get_pixbuf(document, paint, &id);
+        pixbuf = get_pixbuf(getDocument(), paint, &id);
         if (!pixbuf) {
             continue;
         }
@@ -416,7 +416,7 @@ void PaintServersDialog::on_document_changed()
 void PaintServersDialog::on_item_activated(const Gtk::TreeModel::Path& path)
 {
     // Get the current selected elements
-    Selection *selection = desktop->getSelection();
+    Selection *selection = getSelection();
     std::vector<SPObject*> const selected_items(selection->items().begin(), selection->items().end());
 
     if (!selected_items.size()) {

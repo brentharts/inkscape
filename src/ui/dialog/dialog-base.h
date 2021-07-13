@@ -56,8 +56,6 @@ public:
 
     // Public for future use, say if the desktop is smartly set when docking dialogs.
     void setDesktop(SPDesktop *new_desktop);
-    SPDesktop *getDesktop() { return desktop; }
-    SPDocument *getDocument() { return document; }
 
     void on_map() override
     {
@@ -90,15 +88,16 @@ public:
     // return focus back to canvas
     void defocus_dialog();
 
+    // Too many dialogs have unprotected calls to ask for this data
+    SPDesktop *getDesktop() const { return desktop; }
 protected:
+    InkscapeApplication *getApp() const { return _app; }
+    SPDocument *getDocument() const { return document; }
+    Selection *getSelection() const { return selection; }
+
     Glib::ustring _name;             // Gtk widget name (must be set!)
     Glib::ustring const _prefs_path; // Stores characteristic path for loading/saving the dialog position.
     Glib::ustring const _dialog_type; // Type of dialog (we could just use _pref_path?).
-    InkscapeApplication *_app; // Used for state management
-
-    SPDesktop *desktop;
-    SPDocument *document;
-    Selection *selection;
 private:
     bool blink_off(); // timer callback
     bool on_key_press_event(GdkEventKey* key_event) override;
@@ -118,6 +117,11 @@ private:
     sigc::connection _doc_replaced;
     sigc::connection _select_changed;
     sigc::connection _select_modified;
+
+    InkscapeApplication *_app; // Used for state management
+    SPDesktop *desktop;
+    SPDocument *document;
+    Selection *selection;
 };
 
 } // namespace Dialog

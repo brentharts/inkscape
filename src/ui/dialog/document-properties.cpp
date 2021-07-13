@@ -401,10 +401,9 @@ void DocumentProperties::build_snap()
 
 void DocumentProperties::create_guides_around_page()
 {
-    SPDesktop *dt = getDesktop();
     Verb *verb = Verb::get( SP_VERB_EDIT_GUIDES_AROUND_PAGE );
     if (verb) {
-        SPAction *action = verb->get_action(Inkscape::ActionContext(dt));
+        SPAction *action = verb->get_action(Inkscape::ActionContext(getDesktop()));
         if (action) {
             sp_action_perform(action, nullptr);
         }
@@ -413,10 +412,9 @@ void DocumentProperties::create_guides_around_page()
 
 void DocumentProperties::delete_all_guides()
 {
-    SPDesktop *dt = getDesktop();
     Verb *verb = Verb::get( SP_VERB_EDIT_DELETE_ALL_GUIDES );
     if (verb) {
-        SPAction *action = verb->get_action(Inkscape::ActionContext(dt));
+        SPAction *action = verb->get_action(Inkscape::ActionContext(getDesktop()));
         if (action) {
             sp_action_perform(action, nullptr);
         }
@@ -488,29 +486,23 @@ static void sanitizeName( Glib::ustring& str )
 void DocumentProperties::linkSelectedProfile()
 {
     //store this profile in the SVG document (create <color-profile> element in the XML)
-    // TODO remove use of 'active' desktop
-    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
-    if (!desktop){
-        g_warning("No active desktop");
-    } else {
+    if (auto document = getDocument()){
         // Find the index of the currently-selected row in the color profiles combobox
         Gtk::TreeModel::iterator iter = _AvailableProfilesList.get_active();
-
-        if (!iter) {
+        if (!iter)
             return;
-        }
 
         // Read the filename and description from the list of available profiles
         Glib::ustring file = (*iter)[_AvailableProfilesListColumns.fileColumn];
         Glib::ustring name = (*iter)[_AvailableProfilesListColumns.nameColumn];
 
-        std::vector<SPObject *> current = SP_ACTIVE_DOCUMENT->getResourceList( "iccprofile" );
+        std::vector<SPObject *> current = document->getResourceList( "iccprofile" );
         for (auto obj : current) {
             Inkscape::ColorProfile* prof = reinterpret_cast<Inkscape::ColorProfile*>(obj);
             if (!strcmp(prof->href, file.c_str()))
                 return;
         }
-        Inkscape::XML::Document *xml_doc = desktop->doc()->getReprDoc();
+        Inkscape::XML::Document *xml_doc = document->getReprDoc();
         Inkscape::XML::Node *cprofRepr = xml_doc->createElement("svg:color-profile");
         gchar* tmp = g_strdup(name.c_str());
         Glib::ustring nameStr = tmp ? tmp : "profile"; // TODO add some auto-numbering to avoid collisions
@@ -527,14 +519,14 @@ void DocumentProperties::linkSelectedProfile()
             xml_doc->root()->addChild(defsRepr, nullptr);
         }
 
-        g_assert(desktop->doc()->getDefs());
+        g_assert(document->getDefs());
         defsRepr->addChild(cprofRepr, nullptr);
 
         // TODO check if this next line was sometimes needed. It being there caused an assertion.
         //Inkscape::GC::release(defsRepr);
 
         // inform the document, so we can undo
-        DocumentUndo::done(desktop->doc(), SP_VERB_EDIT_LINK_COLOR_PROFILE, _("Link Color Profile"));
+        DocumentUndo::done(document, SP_VERB_EDIT_LINK_COLOR_PROFILE, _("Link Color Profile"));
 
         populate_linked_profiles_box();
     }
@@ -560,7 +552,7 @@ struct static_caster { To * operator () (From * value) const { return static_cas
 void DocumentProperties::populate_linked_profiles_box()
 {
     _LinkedProfilesListStore->clear();
-    std::vector<SPObject *> current = SP_ACTIVE_DOCUMENT->getResourceList( "iccprofile" );
+    std::vector<SPObject *> current = getDocument()->getResourceList( "iccprofile" );
     if (! current.empty()) {
         _emb_profiles_observer.set((*(current.begin()))->parent);
     }
@@ -647,12 +639,12 @@ void DocumentProperties::removeSelectedProfile(){
             return;
         }
     }
-    std::vector<SPObject *> current = SP_ACTIVE_DOCUMENT->getResourceList( "iccprofile" );
+    std::vector<SPObject *> current = getDocument()->getResourceList( "iccprofile" );
     for (auto obj : current) {
         Inkscape::ColorProfile* prof = reinterpret_cast<Inkscape::ColorProfile*>(obj);
         if (!name.compare(prof->name)){
             prof->deleteObject(true, false);
-            DocumentUndo::done(SP_ACTIVE_DOCUMENT, SP_VERB_EDIT_REMOVE_COLOR_PROFILE, _("Remove linked color profile"));
+            DocumentUndo::done(getDocument(), SP_VERB_EDIT_REMOVE_COLOR_PROFILE, _("Remove linked color profile"));
             break; // removing the color profile likely invalidates part of the traversed list, stop traversing here.
         }
     }
@@ -748,7 +740,7 @@ void DocumentProperties::build_cms()
     _LinkedProfilesList.signal_button_release_event().connect_notify(sigc::mem_fun(*this, &DocumentProperties::linked_profiles_list_button_release));
     cms_create_popup_menu(_LinkedProfilesList, sigc::mem_fun(*this, &DocumentProperties::removeSelectedProfile));
 
-    std::vector<SPObject *> current = SP_ACTIVE_DOCUMENT->getResourceList( "defs" );
+    std::vector<SPObject *> current = getDocument()->getResourceList( "defs" );
     if (!current.empty()) {
         _emb_profiles_observer.set((*(current.begin()))->parent);
     }
@@ -927,7 +919,7 @@ void DocumentProperties::build_scripting()
     embedded_create_popup_menu(_EmbeddedScriptsList, sigc::mem_fun(*this, &DocumentProperties::removeEmbeddedScript));
 
 //TODO: review this observers code:
-    std::vector<SPObject *> current = SP_ACTIVE_DOCUMENT->getResourceList( "script" );
+    std::vector<SPObject *> current = getDocument()->getResourceList( "script" );
     if (! current.empty()) {
         _scripts_observer.set((*(current.begin()))->parent);
     }
@@ -1002,11 +994,9 @@ void DocumentProperties::build_metadata()
 
 void DocumentProperties::addExternalScript(){
 
-    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
-    if (!desktop) {
-        g_warning("No active desktop");
+    auto document = getDocument();
+    if (!document)
         return;
-    }
 
     if (_script_entry.get_text().empty() ) {
         // Click Add button with no filename, show a Browse dialog
@@ -1014,8 +1004,7 @@ void DocumentProperties::addExternalScript(){
     }
 
     if (!_script_entry.get_text().empty()) {
-
-        Inkscape::XML::Document *xml_doc = desktop->doc()->getReprDoc();
+        Inkscape::XML::Document *xml_doc = document->getReprDoc();
         Inkscape::XML::Node *scriptRepr = xml_doc->createElement("svg:script");
         scriptRepr->setAttributeOrRemoveIfEmpty("xlink:href", _script_entry.get_text());
         _script_entry.set_text("");
@@ -1023,11 +1012,10 @@ void DocumentProperties::addExternalScript(){
         xml_doc->root()->addChild(scriptRepr, nullptr);
 
         // inform the document, so we can undo
-        DocumentUndo::done(desktop->doc(), SP_VERB_EDIT_ADD_EXTERNAL_SCRIPT, _("Add external script..."));
+        DocumentUndo::done(document, SP_VERB_EDIT_ADD_EXTERNAL_SCRIPT, _("Add external script..."));
 
         populate_script_lists();
     }
-
 }
 
 static Inkscape::UI::Dialog::FileOpenDialog * selectPrefsFileInstance = nullptr;
@@ -1048,15 +1036,14 @@ void  DocumentProperties::browseExternalScript() {
         open_path = "";
 
     //# If no open path, default to our home directory
-    if (open_path.empty())
-    {
+    if (open_path.empty()) {
         open_path = g_get_home_dir();
         open_path.append(G_DIR_SEPARATOR_S);
     }
 
     //# Create a dialog
-    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
-    if (!selectPrefsFileInstance) {
+    SPDesktop *desktop = getDesktop();
+    if (desktop && !selectPrefsFileInstance) {
         selectPrefsFileInstance =
               Inkscape::UI::Dialog::FileOpenDialog::create(
                  *desktop->getToplevel(),
@@ -1080,18 +1067,14 @@ void  DocumentProperties::browseExternalScript() {
 }
 
 void DocumentProperties::addEmbeddedScript(){
-    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
-    if (!desktop){
-        g_warning("No active desktop");
-    } else {
-        Inkscape::XML::Document *xml_doc = desktop->doc()->getReprDoc();
+    if(auto document = getDocument()) {
+        Inkscape::XML::Document *xml_doc = document->getReprDoc();
         Inkscape::XML::Node *scriptRepr = xml_doc->createElement("svg:script");
 
         xml_doc->root()->addChild(scriptRepr, nullptr);
 
         // inform the document, so we can undo
-        DocumentUndo::done(desktop->doc(), SP_VERB_EDIT_ADD_EMBEDDED_SCRIPT, _("Add embedded script..."));
-
+        DocumentUndo::done(document, SP_VERB_EDIT_ADD_EMBEDDED_SCRIPT, _("Add embedded script..."));
         populate_script_lists();
     }
 }
@@ -1108,7 +1091,7 @@ void DocumentProperties::removeExternalScript(){
         }
     }
 
-    std::vector<SPObject *> current = SP_ACTIVE_DOCUMENT->getResourceList( "script" );
+    std::vector<SPObject *> current = getDocument()->getResourceList( "script" );
     for (auto obj : current) {
         if (obj) {
             SPScript* script = dynamic_cast<SPScript *>(obj);
@@ -1120,7 +1103,7 @@ void DocumentProperties::removeExternalScript(){
                     sp_repr_unparent(repr);
 
                     // inform the document, so we can undo
-                    DocumentUndo::done(SP_ACTIVE_DOCUMENT, SP_VERB_EDIT_REMOVE_EXTERNAL_SCRIPT, _("Remove external script"));
+                    DocumentUndo::done(getDocument(), SP_VERB_EDIT_REMOVE_EXTERNAL_SCRIPT, _("Remove external script"));
                 }
             }
         }
@@ -1141,7 +1124,7 @@ void DocumentProperties::removeEmbeddedScript(){
         }
     }
 
-    SPObject* obj = SP_ACTIVE_DOCUMENT->getObjectById(id);
+    SPObject* obj = getDocument()->getObjectById(id);
     if (obj) {
         //XML Tree being used directly here while it shouldn't be.
         Inkscape::XML::Node *repr = obj->getRepr();
@@ -1149,7 +1132,7 @@ void DocumentProperties::removeEmbeddedScript(){
             sp_repr_unparent(repr);
 
             // inform the document, so we can undo
-            DocumentUndo::done(SP_ACTIVE_DOCUMENT, SP_VERB_EDIT_REMOVE_EMBEDDED_SCRIPT, _("Remove embedded script"));
+            DocumentUndo::done(getDocument(), SP_VERB_EDIT_REMOVE_EMBEDDED_SCRIPT, _("Remove embedded script"));
         }
     }
 
@@ -1185,7 +1168,7 @@ void DocumentProperties::changeEmbeddedScript(){
     }
 
     bool voidscript=true;
-    std::vector<SPObject *> current = SP_ACTIVE_DOCUMENT->getResourceList( "script" );
+    std::vector<SPObject *> current = getDocument()->getResourceList( "script" );
     for (auto obj : current) {
         if (id == obj->getId()){
             int count = (int) obj->children.size();
@@ -1223,11 +1206,9 @@ void DocumentProperties::editEmbeddedScript(){
         }
     }
 
-    Inkscape::XML::Document *xml_doc = SP_ACTIVE_DOCUMENT->getReprDoc();
-    std::vector<SPObject *> current = SP_ACTIVE_DOCUMENT->getResourceList( "script" );
-    for (auto obj : current) {
-        if (id == obj->getId()){
-
+    auto document = getDocument();
+    for (auto obj : document->getResourceList("script")) {
+        if (id == obj->getId()) {
             //XML Tree being used directly here while it shouldn't be.
             Inkscape::XML::Node *repr = obj->getRepr();
             if (repr){
@@ -1236,12 +1217,12 @@ void DocumentProperties::editEmbeddedScript(){
                 for (auto &child: vec) {
                     child->deleteObject();
                 }
-                obj->appendChildRepr(xml_doc->createTextNode(_EmbeddedContent.get_buffer()->get_text().c_str()));
+                obj->appendChildRepr(document->getReprDoc()->createTextNode(_EmbeddedContent.get_buffer()->get_text().c_str()));
 
                 //TODO repr->set_content(_EmbeddedContent.get_buffer()->get_text());
 
                 // inform the document, so we can undo
-                DocumentUndo::done(SP_ACTIVE_DOCUMENT, SP_VERB_EDIT_EMBEDDED_SCRIPT, _("Edit embedded script"));
+                DocumentUndo::done(document, SP_VERB_EDIT_EMBEDDED_SCRIPT, _("Edit embedded script"));
             }
         }
     }
@@ -1250,7 +1231,7 @@ void DocumentProperties::editEmbeddedScript(){
 void DocumentProperties::populate_script_lists(){
     _ExternalScriptsListStore->clear();
     _EmbeddedScriptsListStore->clear();
-    std::vector<SPObject *> current = SP_ACTIVE_DOCUMENT->getResourceList( "script" );
+    std::vector<SPObject *> current = getDocument()->getResourceList( "script" );
     if (!current.empty()) {
         SPObject *obj = *(current.begin());
         g_assert(obj != nullptr);
@@ -1277,8 +1258,7 @@ void DocumentProperties::populate_script_lists(){
 */
 void DocumentProperties::update_gridspage()
 {
-    SPDesktop *dt = getDesktop();
-    SPNamedView *nv = dt->getNamedView();
+    SPNamedView *nv = getDesktop()->getNamedView();
 
     int prev_page_count = _grids_notebook.get_n_pages();
     int prev_page_pos = _grids_notebook.get_current_page();
@@ -1361,6 +1341,8 @@ void DocumentProperties::build_gridspage()
  */
 void DocumentProperties::update_widgets()
 {
+    auto desktop = getDesktop();
+    auto document = getDocument();
     if (_wr.isUpdating() || !desktop) return;
 
     SPNamedView *nv = desktop->getNamedView();
@@ -1435,9 +1417,9 @@ void DocumentProperties::update_widgets()
     //-----------------------------------------------------------meta pages
     /* update the RDF entities */
     for (auto & it : _rdflist)
-        it->update (SP_ACTIVE_DOCUMENT);
+        it->update (getDocument());
 
-    _licensor.update (SP_ACTIVE_DOCUMENT);
+    _licensor.update (getDocument());
 
 
     _wr.setUpdating (false);
@@ -1488,7 +1470,7 @@ void DocumentProperties::save_default_metadata()
 {
     /* Save these RDF entities to preferences*/
     for (auto & it : _rdflist) {
-        it->save_to_preferences (SP_ACTIVE_DOCUMENT);
+        it->save_to_preferences (getDocument());
    }
 }
 
@@ -1498,7 +1480,7 @@ void DocumentProperties::documentReplaced()
         _repr_namedview->removeListenerByData(this);
         _repr_namedview = nullptr;
     }
-    if (desktop) {
+    if (auto desktop = getDesktop()) {
         _wr.setDesktop(desktop);
         _repr_namedview = desktop->getNamedView()->getRepr();
         _repr_namedview->addListener(&_repr_events, this);
@@ -1540,15 +1522,14 @@ static void on_repr_attr_changed(Inkscape::XML::Node *, gchar const *, gchar con
 
 void DocumentProperties::onNewGrid()
 {
-    SPDesktop *dt = getDesktop();
-    Inkscape::XML::Node *repr = dt->getNamedView()->getRepr();
-    SPDocument *doc = dt->getDocument();
+    if (auto desktop = getDesktop()) {
+        Inkscape::XML::Node *repr = desktop->getNamedView()->getRepr();
+        Glib::ustring typestring = _grids_combo_gridtype.get_active_text();
+        CanvasGrid::writeNewGridToRepr(repr, getDocument(), CanvasGrid::getGridTypeFromName(typestring.c_str()));
 
-    Glib::ustring typestring = _grids_combo_gridtype.get_active_text();
-    CanvasGrid::writeNewGridToRepr(repr, doc, CanvasGrid::getGridTypeFromName(typestring.c_str()));
-
-    // toggle grid showing to ON:
-    dt->showGrids(true);
+        // toggle grid showing to ON:
+        desktop->showGrids(true);
+    }
 }
 
 
@@ -1558,8 +1539,7 @@ void DocumentProperties::onRemoveGrid()
     if (pagenum == -1) // no pages
       return;
 
-    SPDesktop *dt = getDesktop();
-    SPNamedView *nv = dt->getNamedView();
+    SPNamedView *nv = getDesktop()->getNamedView();
     Inkscape::CanvasGrid * found_grid = nullptr;
     if( pagenum < (gint)nv->grids.size())
         found_grid = nv->grids[pagenum];
@@ -1568,7 +1548,7 @@ void DocumentProperties::onRemoveGrid()
         // delete the grid that corresponds with the selected tab
         // when the grid is deleted from SVG, the SPNamedview handler automatically deletes the object, so found_grid becomes an invalid pointer!
         found_grid->repr->parent()->removeChild(found_grid->repr);
-        DocumentUndo::done(dt->getDocument(), SP_VERB_DIALOG_DOCPROPERTIES, _("Remove grid"));
+        DocumentUndo::done(getDocument(), SP_VERB_DIALOG_DOCPROPERTIES, _("Remove grid"));
     }
 }
 
@@ -1577,9 +1557,9 @@ void DocumentProperties::onRemoveGrid()
    This should only effect values displayed in the GUI. */
 void DocumentProperties::onDocUnitChange()
 {
-    SPDocument *doc = SP_ACTIVE_DOCUMENT;
+    SPDocument *document = getDocument();
     // Don't execute when change is being undone
-    if (!DocumentUndo::getUndoSensitive(doc)) {
+    if (!document || !DocumentUndo::getUndoSensitive(document)) {
         return;
     }
     // Don't execute when initializing widgets
@@ -1658,9 +1638,9 @@ void DocumentProperties::onDocUnitChange()
     prefs->setBool("/options/transform/gradient",    transform_gradient);
 #endif
 
-    doc->setModifiedSinceSave();
+    document->setModifiedSinceSave();
 
-    DocumentUndo::done(doc, SP_VERB_NONE, _("Changed default display unit"));
+    DocumentUndo::done(document, SP_VERB_NONE, _("Changed default display unit"));
 }
 
 } // namespace Dialog

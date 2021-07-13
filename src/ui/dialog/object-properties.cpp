@@ -33,7 +33,6 @@
 
 #include <gtkmm/grid.h>
 
-#include "desktop.h"
 #include "document-undo.h"
 #include "document.h"
 #include "inkscape.h"
@@ -278,7 +277,7 @@ void ObjectProperties::_init()
 
 void ObjectProperties::update_entries()
 {
-    if (_blocked || !desktop) {
+    if (_blocked || !getDesktop()) {
         return;
     }
 

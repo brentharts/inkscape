@@ -287,13 +287,13 @@ void XmlTree::documentReplaced()
         g_source_destroy(g_main_context_find_source_by_id(nullptr, deferred_on_tree_select_row_id));
         deferred_on_tree_select_row_id = 0;
     }
-    if (document) {
+    if (auto document = getDocument()) {
         // TODO: Why is this a document property?
         document->setXMLDialogSelectedObject(nullptr);
 
         document_uri_set_connection =
             document->connectFilenameSet(sigc::bind(sigc::ptr_fun(&on_document_uri_set), document));
-        on_document_uri_set(document->getDocumentFilename(), document );
+        on_document_uri_set(document->getDocumentFilename(), document);
         set_tree_repr(document->getReprRoot());
     } else {
         set_tree_repr(nullptr);
@@ -354,7 +354,7 @@ void XmlTree::set_tree_select(Inkscape::XML::Node *repr)
     }
 
     selected_repr = repr;
-    if (document) {
+    if (auto document = getDocument()) {
         document->setXMLDialogSelectedObject(nullptr);
     }
     if (repr) {
@@ -405,7 +405,7 @@ void XmlTree::propagate_tree_select(Inkscape::XML::Node *repr)
 
 Inkscape::XML::Node *XmlTree::get_dt_select()
 {
-    if (selection) {
+    if (auto selection = getSelection()) {
         return selection->singleRepr();
     }
     return nullptr;
@@ -423,9 +423,9 @@ static bool isRealLayer(SPObject const *object)
 
 void XmlTree::set_dt_select(Inkscape::XML::Node *repr)
 {
-    if (!desktop || !document) {
+    auto document = getDocument();
+    if (!document)
         return;
-    }
 
     SPObject *object;
     if (repr) {
@@ -445,27 +445,25 @@ void XmlTree::set_dt_select(Inkscape::XML::Node *repr)
     if (!object || !in_dt_coordsys(*object)) {
         // object not on canvas
     } else if (isRealLayer(object)) {
-        desktop->setCurrentLayer(object);
+        getDesktop()->setCurrentLayer(object);
     } else {
         if (SP_IS_GROUP(object->parent)) {
-            desktop->setCurrentLayer(object->parent);
+            getDesktop()->setCurrentLayer(object->parent);
         }
 
-        selection->set(SP_ITEM(object));
+        getSelection()->set(SP_ITEM(object));
     }
 
     document->setXMLDialogSelectedObject(object);
-
     blocked--;
-
-} // end of set_dt_select()
+}
 
 
 void XmlTree::on_tree_select_row(GtkTreeSelection *selection, gpointer data)
 {
     XmlTree *self = static_cast<XmlTree *>(data);
 
-    if (self->blocked || !self->desktop) {
+    if (self->blocked || !self->getDesktop()) {
         return;
     }
 
@@ -693,6 +691,10 @@ gboolean XmlTree::quit_on_esc (GtkWidget *w, GdkEventKey *event, GObject */*tbl*
 
 void XmlTree::cmd_new_element_node()
 {
+    auto document = getDocument();
+    if (!document)
+        return;
+
     Gtk::Dialog dialog;
     Gtk::Entry entry;
 
@@ -722,6 +724,10 @@ void XmlTree::cmd_new_element_node()
 
 void XmlTree::cmd_new_text_node()
 {
+    auto document = getDocument();
+    if (!document)
+        return;
+
     g_assert(selected_repr != nullptr);
 
     Inkscape::XML::Document *xml_doc = document->getReprDoc();
@@ -737,6 +743,10 @@ void XmlTree::cmd_new_text_node()
 
 void XmlTree::cmd_duplicate_node()
 {
+    auto document = getDocument();
+    if (!document)
+        return;
+
     g_assert(selected_repr != nullptr);
 
     Inkscape::XML::Node *parent = selected_repr->parent();
@@ -755,6 +765,10 @@ void XmlTree::cmd_duplicate_node()
 
 void XmlTree::cmd_delete_node()
 {
+    auto document = getDocument();
+    if (!document)
+        return;
+
     g_assert(selected_repr != nullptr);
 
     document->setXMLDialogSelectedObject(nullptr);
@@ -775,8 +789,11 @@ void XmlTree::cmd_delete_node()
 
 void XmlTree::cmd_raise_node()
 {
-    g_assert(selected_repr != nullptr);
+    auto document = getDocument();
+    if (!document)
+        return;
 
+    g_assert(selected_repr != nullptr);
 
     Inkscape::XML::Node *parent = selected_repr->parent();
     g_return_if_fail(parent != nullptr);
@@ -801,6 +818,10 @@ void XmlTree::cmd_raise_node()
 
 void XmlTree::cmd_lower_node()
 {
+    auto document = getDocument();
+    if (!document)
+        return;
+
     g_assert(selected_repr != nullptr);
 
     g_return_if_fail(selected_repr->next() != nullptr);
@@ -816,6 +837,10 @@ void XmlTree::cmd_lower_node()
 
 void XmlTree::cmd_indent_node()
 {
+    auto document = getDocument();
+    if (!document)
+        return;
+
     Inkscape::XML::Node *repr = selected_repr;
     g_assert(repr != nullptr);
 
@@ -848,6 +873,10 @@ void XmlTree::cmd_indent_node()
 
 void XmlTree::cmd_unindent_node()
 {
+    auto document = getDocument();
+    if (!document)
+        return;
+
     Inkscape::XML::Node *repr = selected_repr;
     g_assert(repr != nullptr);
 

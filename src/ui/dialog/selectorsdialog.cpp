@@ -402,16 +402,6 @@ void SelectorsDialog::_toggleDirection(Gtk::RadioButton *vertical)
 }
 
 /**
- * Class destructor
- */
-SelectorsDialog::~SelectorsDialog()
-{
-    // Detach watchers to prevent crashes.
-    _updateWatchers(nullptr);
-}
-
-
-/**
  * @return Inkscape::XML::Node* pointing to a style element's text node.
  * Returns the style element's text node. If there is no style element, one is created.
  * Ditto for text node.
@@ -1276,7 +1266,7 @@ void SelectorsDialog::update()
 
 void SelectorsDialog::desktopReplaced()
 {
-    _style_dialog->setDesktop(desktop);
+    _style_dialog->setDesktop(getDesktop());
 }
 
 void SelectorsDialog::documentReplaced()
@@ -1285,12 +1275,11 @@ void SelectorsDialog::documentReplaced()
         _textNode->removeObserver(*m_styletextwatcher);
         _textNode = nullptr;
     }
-
     if (m_root) {
         m_root->removeSubtreeObserver(*m_nodewatcher);
         m_root = nullptr;
     }
-    if (document) {
+    if (auto document = getDocument()) {
         m_root = document->getReprRoot();
         m_root->addSubtreeObserver(*m_nodewatcher);
     }
@@ -1302,7 +1291,6 @@ void SelectorsDialog::selectionChanged(Selection *selection)
     _readStyleElement();
     _selectRow();
 }
-
 
 /**
  * @param event

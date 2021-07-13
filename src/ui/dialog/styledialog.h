@@ -166,7 +166,6 @@ public:
     // Update watchers
     std::unique_ptr<Inkscape::XML::NodeObserver> m_nodewatcher;
     std::unique_ptr<Inkscape::XML::NodeObserver> m_styletextwatcher;
-    void _updateWatchers(SPDesktop *);
 
     // Manipulate Tree
     std::vector<SPObject *> _getObjVec(Glib::ustring selector);
