@@ -124,8 +124,8 @@ void DashSelector::init_dashes() {
             s_dashes.emplace_back(std::vector<double>());
         }
 
-        std::vector<double> custom; // 'custom' dashes second on the list
-        s_dashes.insert(s_dashes.begin()++, custom);
+        std::vector<double> custom {1, 2, 1, 4}; // 'custom' dashes second on the list
+        s_dashes.insert(s_dashes.begin() + 1, custom);
     }
 }
 
