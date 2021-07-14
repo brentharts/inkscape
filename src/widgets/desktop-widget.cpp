@@ -651,8 +651,8 @@ void SPDesktopWidget::on_realize()
     GtkSettings *settings = gtk_settings_get_default();
     Gtk::Container *window = get_toplevel();
     if (settings && window) {
-        g_object_get(settings, "gtk-theme-name", &gtkThemeName, NULL);
-        g_object_get(settings, "gtk-application-prefer-dark-theme", &gtkApplicationPreferDarkTheme, NULL);
+        g_object_get(settings, "gtk-theme-name", &gtkThemeName, nullptr);
+        g_object_get(settings, "gtk-application-prefer-dark-theme", &gtkApplicationPreferDarkTheme, nullptr);
         bool dark = INKSCAPE.themecontext->isCurrentThemeDark(dynamic_cast<Gtk::Container *>(window));
         if (dark) {
             prefs->setBool("/theme/darkTheme", true);
@@ -2032,7 +2032,7 @@ SPDesktopWidget::on_ruler_box_button_release_event(GdkEventButton *event, Gtk::W
 bool
 SPDesktopWidget::on_ruler_box_button_press_event(GdkEventButton *event, Gtk::Widget *widget, bool horiz)
 {
-    if (_ruler_clicked) // event triggerred on a double click: do no process the click
+    if (_ruler_clicked) // event triggered on a double click: do no process the click
         return false;
 
     int wx, wy;

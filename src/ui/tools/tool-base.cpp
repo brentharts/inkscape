@@ -33,6 +33,7 @@
 
 #include "display/control/canvas-item-catchall.h" // Grab/Ungrab
 #include "display/control/canvas-item-rotate.h"
+#include "display/control/snap-indicator.h"
 
 #include "include/gtkmm_version.h"
 #include "include/macros.h"
@@ -899,7 +900,7 @@ bool ToolBase::root_handler(GdkEvent* event) {
 }
 
 /**
- * This function allow to handle global tool events if not _pre function is full overrided.
+ * This function allows to handle global tool events if _pre function is not fully overridden.
  */
 
 bool ToolBase::block_button(GdkEvent *event)
@@ -1046,6 +1047,7 @@ void ToolBase::grabCanvasEvents(Gdk::EventMask mask)
  */
 void ToolBase::ungrabCanvasEvents()
 {
+    desktop->snapindicator->remove_snaptarget();
     desktop->getCanvasCatchall()->ungrab();
 }
 
