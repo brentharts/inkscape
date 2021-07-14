@@ -58,6 +58,7 @@ public:
     static XmlTree &getInstance() { return *new XmlTree(); }
 
 private:
+    void unsetDocument();
     void documentReplaced() override;
     void selectionChanged(Selection *selection) override;
 

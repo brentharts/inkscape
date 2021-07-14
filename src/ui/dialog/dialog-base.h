@@ -41,9 +41,9 @@ class DialogBase : public Gtk::Box
 
 public:
     DialogBase(gchar const *prefs_path = nullptr, Glib::ustring dialog_type = "");
-    ~DialogBase() override{
+    ~DialogBase() override {
         ensure_size();
-        setDesktop(nullptr);
+        unsetDesktop();
     };
 
     /**
@@ -102,6 +102,7 @@ private:
     bool blink_off(); // timer callback
     bool on_key_press_event(GdkEventKey* key_event) override;
 
+    void unsetDesktop();
     void desktopDestroyed(SPDesktop* old_desktop);
     void setDocument(SPDocument *new_document);
     /**

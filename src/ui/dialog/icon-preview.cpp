@@ -244,6 +244,10 @@ IconPreviewPanel::IconPreviewPanel()
 
 IconPreviewPanel::~IconPreviewPanel()
 {
+    if (drawing) {
+        delete drawing;
+        drawing = nullptr;
+    }
     if (timer) {
         timer->stop();
         delete timer;

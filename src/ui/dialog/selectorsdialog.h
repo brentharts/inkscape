@@ -51,7 +51,7 @@ class SelectorsDialog : public DialogBase
 public:
     // No default constructor, noncopyable, nonassignable
     SelectorsDialog();
-    ~SelectorsDialog() override {};
+    ~SelectorsDialog() override;
     SelectorsDialog(SelectorsDialog const &d) = delete;
     SelectorsDialog operator=(SelectorsDialog const &d) = delete;
     static SelectorsDialog &getInstance() { return *new SelectorsDialog(); }
@@ -64,6 +64,8 @@ public:
   private:
     // Monitor <style> element for changes.
     class NodeObserver;
+
+    void removeObservers();
 
     // Monitor all objects for addition/removal/attribute change
     class NodeWatcher;

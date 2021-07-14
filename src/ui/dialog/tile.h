@@ -40,17 +40,17 @@ class PolarArrangeTab;
 class ArrangeDialog : public DialogBase
 {
 private:
-	Gtk::Box        *_arrangeBox;
-	Gtk::Notebook   *_notebook;
+    Gtk::Box        *_arrangeBox;
+    Gtk::Notebook   *_notebook;
 
-	GridArrangeTab  *_gridArrangeTab;
-	PolarArrangeTab *_polarArrangeTab;
+    GridArrangeTab  *_gridArrangeTab;
+    PolarArrangeTab *_polarArrangeTab;
 
-	Gtk::Button     *_arrangeButton;
+    Gtk::Button     *_arrangeButton;
 
 public:
-	ArrangeDialog();
-	~ArrangeDialog() override = default;;
+    ArrangeDialog();
+    ~ArrangeDialog() override;
 
     void desktopReplaced() override;
 
@@ -59,7 +59,7 @@ public:
      */
     void _apply();
 
-	static ArrangeDialog& getInstance() { return *new ArrangeDialog(); }
+    static ArrangeDialog& getInstance() { return *new ArrangeDialog(); }
 };
 
 } //namespace Dialog

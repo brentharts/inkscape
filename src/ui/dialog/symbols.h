@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "display/drawing.h"
+#include "helper/auto-connection.h"
 #include "include/gtkmm_version.h"
 #include "ui/dialog/dialog-base.h"
 
@@ -156,7 +157,7 @@ private:
     Inkscape::Drawing renderDrawing;
 
     std::vector<sigc::connection> gtk_connections;
-    sigc::connection defs_modified;
+    Inkscape::auto_connection defs_modified;
 };
 
 } //namespace Dialogs

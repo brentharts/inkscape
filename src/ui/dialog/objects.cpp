@@ -334,6 +334,14 @@ void ObjectsPanel::_removeWatchers(bool only_unused = false) {
             iter++;
         }
     }
+    if (!only_unused) {
+        //Delete the root watcher
+        if (_rootWatcher) {
+            _rootWatcher->_repr->removeObserver(*_rootWatcher);
+            delete _rootWatcher;
+            _rootWatcher = nullptr;
+        }
+    }
 }
 /**
  * Call function for asynchronous invocation of _objectsChanged
@@ -2181,11 +2189,12 @@ ObjectsPanel::ObjectsPanel() :
  */
 ObjectsPanel::~ObjectsPanel()
 {
+    _removeWatchers();
+
     //Close the highlight selection dialog
     _colorSelectorDialog.hide();
 
-    if ( _model )
-    {
+    if (_model) {
         delete _model;
         _model = nullptr;
     }
@@ -2195,9 +2204,8 @@ ObjectsPanel::~ObjectsPanel()
         _pending = nullptr;
     }
 
-    if ( _toggleEvent )
-    {
-        gdk_event_free( _toggleEvent );
+    if (_toggleEvent) {
+        gdk_event_free(_toggleEvent);
         _toggleEvent = nullptr;
     }
 }
@@ -2209,15 +2217,6 @@ void ObjectsPanel::documentReplaced()
 {
     //Clear all object watchers
     _removeWatchers();
-
-    //Delete the root watcher
-    if (_rootWatcher)
-    {
-        _rootWatcher->_repr->removeObserver(*_rootWatcher);
-        delete _rootWatcher;
-        _rootWatcher = nullptr;
-    }
-
     if (auto document = getDocument()) {
         if (document->getRoot() && document->getRoot()->getRepr()) {
             //Create a new root watcher for the document and then call _objectsChanged to fill the tree

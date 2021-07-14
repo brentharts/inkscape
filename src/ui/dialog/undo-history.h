@@ -123,8 +123,9 @@ protected:
 
     static void *_handleEventLogDestroyCB(void *data);
 
-    void _connectDocument(SPDocument *document);
-    void _connectEventLog();
+    void disconnectEventLog();
+    void connectEventLog();
+
     void *_handleEventLogDestroy();
     void _onListSelectionChange();
     void _onExpandEvent(const Gtk::TreeModel::iterator &iter, const Gtk::TreeModel::Path &path);

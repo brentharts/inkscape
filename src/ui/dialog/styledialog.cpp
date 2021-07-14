@@ -231,6 +231,11 @@ StyleDialog::StyleDialog()
     pack_start(_mainBox, Gtk::PACK_EXPAND_WIDGET);
 }
 
+StyleDialog::~StyleDialog()
+{
+    removeObservers();
+}
+
 void StyleDialog::_vscrool()
 {
     if (!_scroollock) {
@@ -1547,11 +1552,7 @@ std::vector<SPObject *> StyleDialog::_getObjVec(Glib::ustring selector)
 void StyleDialog::_closeDialog(Gtk::Dialog *textDialogPtr) { textDialogPtr->response(Gtk::RESPONSE_OK); }
 
 
-/**
- * Handle document replaced. (Happens when a default document is immediately replaced by another
- * document in a new window.)
- */
-void StyleDialog::documentReplaced()
+void StyleDialog::removeObservers()
 {
     if (_textNode) {
         _textNode->removeObserver(*m_styletextwatcher);
@@ -1561,6 +1562,15 @@ void StyleDialog::documentReplaced()
         m_root->removeSubtreeObserver(*m_nodewatcher);
         m_root = nullptr;
     }
+}
+
+/**
+ * Handle document replaced. (Happens when a default document is immediately replaced by another
+ * document in a new window.)
+ */
+void StyleDialog::documentReplaced()
+{
+    removeObservers();
     if (auto document = getDocument()) {
         m_root = document->getReprRoot();
         m_root->addSubtreeObserver(*m_nodewatcher);

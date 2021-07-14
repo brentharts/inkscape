@@ -152,13 +152,8 @@ bool DialogBase::blink_off()
 void DialogBase::setDesktop(SPDesktop *new_desktop)
 {
     if (desktop != new_desktop) {
+        unsetDesktop();
         desktop = new_desktop;
-        selection = nullptr;
-
-        _desktop_destroyed.disconnect();
-        _doc_replaced.disconnect();
-        _select_changed.disconnect();
-        _select_modified.disconnect();
 
         if (desktop) {
             _doc_replaced = desktop->connectDocumentReplaced(sigc::hide<0>(sigc::mem_fun(*this, &DialogBase::setDocument)));
@@ -178,10 +173,24 @@ void DialogBase::setDesktop(SPDesktop *new_desktop)
     }
 }
 
+/**
+ * Called to destruct desktops, must not call virtuals
+ */
+void DialogBase::unsetDesktop()
+{
+    desktop = nullptr;
+    document = nullptr;
+    selection = nullptr;
+    _desktop_destroyed.disconnect();
+    _doc_replaced.disconnect();
+    _select_changed.disconnect();
+    _select_modified.disconnect();
+}
+
 void DialogBase::desktopDestroyed(SPDesktop* old_desktop)
 {
     if (old_desktop == desktop && desktop) {
-        setDesktop(nullptr);
+        unsetDesktop();
     }
 }
 

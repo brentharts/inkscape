@@ -24,6 +24,7 @@
 
 #include "attributes.h"
 #include "display/nr-filter-types.h"
+#include "helper/auto-connection.h"
 #include "ui/dialog/dialog-base.h"
 #include "ui/widget/combo-enums.h"
 #include "ui/widget/spin-scale.h"
@@ -58,7 +59,7 @@ private:
     void selectionChanged(Inkscape::Selection *selection) override;
     void selectionModified(Inkscape::Selection *selection, guint flags) override;
 
-    sigc::connection _resource_changed;
+    Inkscape::auto_connection _resource_changed;
 
     friend class FileOrElementChooser;
 

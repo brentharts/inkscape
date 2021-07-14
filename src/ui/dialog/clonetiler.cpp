@@ -1204,8 +1204,6 @@ CloneTiler::CloneTiler()
 
 CloneTiler::~CloneTiler ()
 {
-    //subselChangedConn.disconnect();
-    //selectModifiedConn.disconnect();
     selectChangedConn.disconnect();
     externChangedConn.disconnect();
     color_changed_connection.disconnect();

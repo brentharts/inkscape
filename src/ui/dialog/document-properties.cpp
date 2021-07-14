@@ -191,6 +191,10 @@ void DocumentProperties::init()
 
 DocumentProperties::~DocumentProperties()
 {
+    if (_repr_namedview) {
+        _repr_namedview->removeListenerByData(this);
+        _repr_namedview = nullptr;
+    }
     for (auto & it : _rdflist)
         delete it;
 }

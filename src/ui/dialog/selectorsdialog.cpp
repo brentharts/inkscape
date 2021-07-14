@@ -1259,6 +1259,12 @@ private:
 
 // -------------------------------------------------------------------
 
+SelectorsDialog::~SelectorsDialog()
+{
+    removeObservers();
+    _style_dialog->setDesktop(nullptr);
+}
+
 void SelectorsDialog::update()
 {
     _style_dialog->update();
@@ -1269,7 +1275,7 @@ void SelectorsDialog::desktopReplaced()
     _style_dialog->setDesktop(getDesktop());
 }
 
-void SelectorsDialog::documentReplaced()
+void SelectorsDialog::removeObservers()
 {
     if (_textNode) {
         _textNode->removeObserver(*m_styletextwatcher);
@@ -1279,6 +1285,11 @@ void SelectorsDialog::documentReplaced()
         m_root->removeSubtreeObserver(*m_nodewatcher);
         m_root = nullptr;
     }
+}
+
+void SelectorsDialog::documentReplaced()
+{
+    removeObservers();
     if (auto document = getDocument()) {
         m_root = document->getReprRoot();
         m_root->addSubtreeObserver(*m_nodewatcher);

@@ -1108,7 +1108,6 @@ SvgFontsDialog::SvgFontsDialog()
 void SvgFontsDialog::documentReplaced()
 {
     _defs_observer_connection.disconnect();
-
     if (auto document = getDocument()) {
         _defs_observer.set(document->getDefs());
         _defs_observer_connection =

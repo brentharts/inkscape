@@ -58,17 +58,22 @@ ArrangeDialog::ArrangeDialog()
     show_all_children();
 }
 
+ArrangeDialog::~ArrangeDialog()
+{
+    _gridArrangeTab->setDesktop(nullptr);
+}
+
 void ArrangeDialog::_apply()
 {
-	switch(_notebook->get_current_page())
-	{
-	case 0:
-		_gridArrangeTab->arrange();
-		break;
-	case 1:
-		_polarArrangeTab->arrange();
-		break;
-	}
+    switch(_notebook->get_current_page())
+    {
+    case 0:
+        _gridArrangeTab->arrange();
+        break;
+    case 1:
+        _polarArrangeTab->arrange();
+        break;
+    }
 }
 
 void ArrangeDialog::desktopReplaced()

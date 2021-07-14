@@ -151,39 +151,35 @@ UndoHistory::UndoHistory()
 
 UndoHistory::~UndoHistory()
 {
-    // disconnect from prior
-    if (_event_log) {
-        _event_log->removeDialogConnection(&_event_list_view, &_callback_connections);
-        _event_log->remove_destroy_notify_callback(this);
-    }
+    disconnectEventLog();
 }
 
 void UndoHistory::documentReplaced()
 {
-    // disconnect from prior
-    if (_event_log) {
-        _event_log->removeDialogConnection(&_event_list_view, &_callback_connections);
-        _event_log->remove_destroy_notify_callback(this);
-    }
+    disconnectEventLog();
     if (auto document = getDocument()) {
         g_assert (document->get_event_log() != nullptr);
         SignalBlocker blocker(&_callback_connections[EventLog::CALLB_SELECTION_CHANGE]);
         _event_list_view.unset_model();
-
-        // connect to new EventLog
-        _event_log = document->get_event_log();
-        _connectEventLog();
+        connectEventLog();
     }
 }
 
-void UndoHistory::_connectEventLog()
+void UndoHistory::disconnectEventLog()
 {
     if (_event_log) {
+        _event_log->removeDialogConnection(&_event_list_view, &_callback_connections);
+        _event_log->remove_destroy_notify_callback(this);
+    }
+}
+
+void UndoHistory::connectEventLog()
+{
+    if (auto document = getDocument()) {
+        _event_log = document->get_event_log();
         _event_log->add_destroy_notify_callback(this, &_handleEventLogDestroyCB);
         _event_list_store = _event_log->getEventListStore();
-
         _event_list_view.set_model(_event_list_store);
-
         _event_log->addDialogConnection(&_event_list_view, &_callback_connections);
         _event_list_view.scroll_to_row(_event_list_store->get_path(_event_list_selection->get_selected()));
     }

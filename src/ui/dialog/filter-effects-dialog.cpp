@@ -2661,8 +2661,7 @@ FilterEffectsDialog::~FilterEffectsDialog()
 void FilterEffectsDialog::documentReplaced()
 {
    _resource_changed.disconnect();
-   auto document = getDocument();
-   if (document) {
+   if (auto document = getDocument()) {
        _resource_changed = document->connectResourcesChanged("filter", sigc::mem_fun(_filter_modifier, &FilterModifier::update_filters));
        _filter_modifier.update_filters();
    }

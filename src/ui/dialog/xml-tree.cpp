@@ -267,6 +267,7 @@ void XmlTree::_attrtoggler()
 
 XmlTree::~XmlTree ()
 {
+    unsetDocument();
     _message_changed_connection.disconnect();
 }
 
@@ -279,14 +280,18 @@ void XmlTree::tree_reset_context()
                           _("<b>Click</b> to select nodes, <b>drag</b> to rearrange."));
 }
 
-void XmlTree::documentReplaced()
+void XmlTree::unsetDocument()
 {
     document_uri_set_connection.disconnect();
-
     if (deferred_on_tree_select_row_id != 0) {
         g_source_destroy(g_main_context_find_source_by_id(nullptr, deferred_on_tree_select_row_id));
         deferred_on_tree_select_row_id = 0;
     }
+}
+
+void XmlTree::documentReplaced()
+{
+    unsetDocument();
     if (auto document = getDocument()) {
         // TODO: Why is this a document property?
         document->setXMLDialogSelectedObject(nullptr);

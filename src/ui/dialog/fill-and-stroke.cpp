@@ -77,6 +77,10 @@ FillAndStroke::~FillAndStroke()
 {
     // Disconnect signals from composite settings
     _composite_settings.setSubject(nullptr);
+    fillWdgt->setDesktop(nullptr);
+    strokeWdgt->setDesktop(nullptr);
+    strokeStyleWdgt->setDesktop(nullptr);
+    _subject.setDesktop(nullptr);
 }
 
 void FillAndStroke::desktopReplaced()

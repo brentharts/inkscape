@@ -923,9 +923,11 @@ LayersPanel::LayersPanel()
 
 LayersPanel::~LayersPanel()
 {
-    setDesktop(nullptr);
-
     _compositeSettings.setSubject(nullptr);
+    _layerChangedConnection.disconnect();
+    _layerUpdatedConnection.disconnect();
+    _changedConnection.disconnect();
+    _subject.setDesktop(nullptr);
 
     if ( _model )
     {
@@ -951,7 +953,6 @@ void LayersPanel::desktopReplaced()
     _layerUpdatedConnection.disconnect();
     _changedConnection.disconnect();
     _subject.setDesktop(getDesktop());
-
     if (auto desktop = getDesktop()) {
         //setLabel(document->name);
         LayerManager *mgr = desktop->layer_manager;

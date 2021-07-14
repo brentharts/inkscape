@@ -64,7 +64,7 @@ class StyleDialog : public DialogBase
 public:
     // No default constructor, noncopyable, nonassignable
     StyleDialog();
-    ~StyleDialog() override {};
+    ~StyleDialog() override;
     StyleDialog(StyleDialog const &d) = delete;
     StyleDialog operator=(StyleDialog const &d) = delete;
 
@@ -90,6 +90,7 @@ public:
     void _nodeAdded(Inkscape::XML::Node &repr);
     void _nodeRemoved(Inkscape::XML::Node &repr);
     void _nodeChanged(Inkscape::XML::Node &repr);
+    void removeObservers();
     /* void _stylesheetChanged( Inkscape::XML::Node &repr ); */
     // Data structure
     class ModelColumns : public Gtk::TreeModel::ColumnRecord {
