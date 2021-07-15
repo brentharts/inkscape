@@ -1082,99 +1082,19 @@ gboolean Inkscape::SelTrans::scaleRequest(Geom::Point &pt, guint state)
     return TRUE;
 }
 
-gboolean Inkscape::SelTrans::distributeDragRequest(Geom::Point &pt, guint state)
+gboolean Inkscape::SelTrans::distributeDragRequest(SPSelTransHandle const &handle, Geom::Point &pt, guint state)
 {
-    // Calculate the scale factors, which can be either visual or geometric
-    // depending on which type of bbox is currently being used (see preferences -> selector tool)
-    Geom::Scale default_scale = calcScaleFactors(_point, pt, _origin);
-
-    // Find the scale factors for the geometric bbox
-    Geom::Point pt_geom = _getGeomHandlePos(pt);
-    Geom::Scale geom_scale = calcScaleFactors(_point_geom, pt_geom, _origin_for_specpoints);
-
-    _absolute_affine = Geom::identity(); //Initialize the scaler
-
-    auto increments = Modifiers::Modifier::get(Modifiers::Type::TRANS_INCREMENT)->active(state);
-    if (increments) { // scale by an integer multiplier/divider
-        // We're scaling either the visual or the geometric bbox here (see the comment above)
-        for ( unsigned int i = 0 ; i < 2 ; i++ ) {
-            if (fabs(default_scale[i]) > 1) {
-                default_scale[i] = round(default_scale[i]);
-            } else if (default_scale[i] != 0) {
-                default_scale[i] = 1/round(1/(MIN(default_scale[i], 10)));
-            }
+    auto delta = pt;
+    auto new_box = _bbox;
+    switch(handle.type){
+        case HANDLE_SIDE_ALIGN_DISTRIBUTE:
+        for (unsigned i = 0; i < _items.size(); i++) {
+            SPItem &item = *_items[i];
+            _items[i]->move_rel(Geom::Translate( (i * delta[Geom::X]/((_items.size() - 1)*1000)), 0));
         }
-        // Update the knot position
-        pt = _calcAbsAffineDefault(default_scale);
-        // When scaling by an integer, snapping is not needed
-    } else {
-        // In all other cases we should try to snap now
-        Inkscape::PureScale  *bb, *sn;
-
-        auto confine = Modifiers::Modifier::get(Modifiers::Type::TRANS_CONFINE)->active(state);
-        if (confine || _desktop->isToolboxButtonActive ("lock")) {
-            // Scale is locked to a 1:1 aspect ratio, so that s[X] must be made to equal s[Y].
-            //
-            // The aspect-ratio must be locked before snapping
-            if (fabs(default_scale[Geom::X]) > fabs(default_scale[Geom::Y])) {
-                default_scale[Geom::X] = fabs(default_scale[Geom::Y]) * sign(default_scale[Geom::X]);
-                geom_scale[Geom::X] = fabs(geom_scale[Geom::Y]) * sign(geom_scale[Geom::X]);
-            } else {
-                default_scale[Geom::Y] = fabs(default_scale[Geom::X]) * sign(default_scale[Geom::Y]);
-                geom_scale[Geom::Y] = fabs(geom_scale[Geom::X]) * sign(geom_scale[Geom::Y]);
-            }
-
-            // Snap along a suitable constraint vector from the origin.
-
-            bb = new Inkscape::PureScaleConstrained(default_scale, _origin_for_bboxpoints);
-            sn = new Inkscape::PureScaleConstrained(geom_scale, _origin_for_specpoints);
-        } else {
-            /* Scale aspect ratio is unlocked */
-            bb = new Inkscape::PureScale(default_scale, _origin_for_bboxpoints, false);
-            sn = new Inkscape::PureScale(geom_scale, _origin_for_specpoints, false);
-        }
-        SnapManager &m = _desktop->namedview->snap_manager;
-        m.setup(_desktop, false, _items_const);
-        m.snapTransformed(_bbox_points, _point, (*bb));
-        m.snapTransformed(_snap_points, _point, (*sn));
-        m.unSetup();
-
-        // These lines below are duplicated in stretchRequest
-        //TODO: Eliminate this code duplication
-        if (bb->best_snapped_point.getSnapped() || sn->best_snapped_point.getSnapped()) {
-            if (bb->best_snapped_point.getSnapped()) {
-                if (!bb->best_snapped_point.isOtherSnapBetter(sn->best_snapped_point, false)) {
-                    // We snapped the bbox (which is either visual or geometric)
-                    _desktop->snapindicator->set_new_snaptarget(bb->best_snapped_point);
-                    default_scale = bb->getScaleSnapped();
-                    // Calculate the new transformation and update the handle position
-                    pt = _calcAbsAffineDefault(default_scale);
-                }
-            } else if (sn->best_snapped_point.getSnapped()) {
-                _desktop->snapindicator->set_new_snaptarget(sn->best_snapped_point);
-                // We snapped the special points (e.g. nodes), which are not at the visual bbox
-                // The handle location however (pt) might however be at the visual bbox, so we
-                // will have to calculate pt taking the stroke width into account
-                geom_scale = sn->getScaleSnapped();
-                pt = _calcAbsAffineGeom(geom_scale);
-            }
-        } else {
-            // We didn't snap at all! Don't update the handle position, just calculate the new transformation
-            _calcAbsAffineDefault(default_scale);
-            _desktop->snapindicator->remove_snaptarget();
-        }
-
-        delete bb;
-        delete sn;
+        break;
     }
-
-    /* Status text */
-    _message_context.setF(Inkscape::IMMEDIATE_MESSAGE,
-                          _("<b>Scale</b>: %0.2f%% x %0.2f%%; with <b>Ctrl</b> to lock ratio"),
-                          100 * _absolute_affine[0], 100 * _absolute_affine[3]);
-    // moveTo(pt,state);
-    // scale(*position, state);
-    return TRUE;
+    return true;
 }
 
 gboolean Inkscape::SelTrans::stretchRequest(SPSelTransHandle const &handle, Geom::Point &pt, guint state)
@@ -1298,7 +1218,7 @@ gboolean Inkscape::SelTrans::request(SPSelTransHandle const &handle, Geom::Point
         case HANDLE_CENTER_ALIGN_DISTRIBUTE:
         case HANDLE_CORNER_ALIGN_DISTRIBUTE:
         case HANDLE_SIDE_ALIGN_DISTRIBUTE:
-            return distributeDragRequest(pt,state);
+            return distributeDragRequest(handle,pt,state);
         case HANDLE_SIDE_ALIGN:
         case HANDLE_CORNER_ALIGN:
         case HANDLE_CENTER_ALIGN:

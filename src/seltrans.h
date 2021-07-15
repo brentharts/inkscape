@@ -68,7 +68,7 @@ public:
     int request(SPSelTransHandle const &handle, Geom::Point &pt, unsigned int state);
     int scaleRequest(Geom::Point &pt, unsigned int state);
     int stretchRequest(SPSelTransHandle const &handle, Geom::Point &pt, unsigned int state);
-    int distributeDragRequest(Geom::Point &pt, unsigned int state);
+    int distributeDragRequest(SPSelTransHandle const &handle, Geom::Point &pt, unsigned int state);
     int skewRequest(SPSelTransHandle const &handle, Geom::Point &pt, unsigned int state);
     int rotateRequest(Geom::Point &pt, unsigned int state);
     int centerRequest(Geom::Point &pt, unsigned int state);
