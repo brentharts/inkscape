@@ -430,10 +430,9 @@ StrokeStyle::makeRadioButton(Gtk::RadioButtonGroup &grp,
     return tb;
 }
 
-bool StrokeStyle::shouldMarkersBeUpdated()
+bool StrokeStyle::areMarkersBeingUpdated()
 {
-    return startMarkerCombo->update() || midMarkerCombo->update() ||
-                          endMarkerCombo->update();
+    return startMarkerCombo->in_update() || midMarkerCombo->in_update() || endMarkerCombo->in_update();
 }
 
 /**
@@ -443,7 +442,7 @@ bool StrokeStyle::shouldMarkersBeUpdated()
  */
 void StrokeStyle::markerSelectCB(MarkerComboBox *marker_combo, StrokeStyle *spw, SPMarkerLoc const /*which*/)
 {
-    if (spw->update || spw->shouldMarkersBeUpdated()) {
+    if (spw->update || spw->areMarkersBeingUpdated()) {
         return;
     }
 
@@ -1106,7 +1105,7 @@ StrokeStyle::updateAllMarkers(std::vector<SPItem*> const &objects, bool skip_und
         MarkerComboBox *combo = markertype.key;
 
         // Quit if we're in update state
-        if (combo->update()) {
+        if (combo->in_update()) {
             return;
         }
 

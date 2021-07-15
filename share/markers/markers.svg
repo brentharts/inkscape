@@ -70,8 +70,8 @@ Insert the new markers into the <defs>.
 -->
 
     <!-- Tail -->
-    <marker style="overflow:visible" id="Tail" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="Tail">
-      <g transform="scale(-1.2)">
+    <marker style="overflow:visible" id="Tail" refX="0.0" refY="0.0" orient="auto-start-reverse" inkscape:stockid="Tail">
+      <g transform="scale(1.2)">
         <path style="fill:none;fill-rule:evenodd;stroke:context-stroke;stroke-width:0.8;stroke-linecap:round" d="M -3.8048674,-3.9585227 L 0.54352094,0"/>
         <path style="fill:none;fill-rule:evenodd;stroke:context-stroke;stroke-width:0.8;stroke-linecap:round" d="M -1.2866832,-3.9585227 L 3.0617053,0"/>
         <path style="fill:none;fill-rule:evenodd;stroke:context-stroke;stroke-width:0.8;stroke-linecap:round" d="M 1.3053582,-3.9585227 L 5.6537466,0"/>

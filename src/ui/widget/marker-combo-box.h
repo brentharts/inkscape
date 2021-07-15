@@ -43,11 +43,10 @@ namespace UI {
 namespace Widget {
 
 /**
- * ComboBox derived class for selecting stroke markers.
+ * ComboBox-like class for selecting stroke markers.
  */
-class MarkerComboBox : public Gtk::Bin { // public ScrollProtected<Gtk::ComboBox> {
+class MarkerComboBox : public Gtk::Bin {
     using parent_type = Gtk::Bin;
-    // using parent_type = ScrollProtected<Gtk::ComboBox>;
 
 public:
     MarkerComboBox(gchar const *id, int loc);
@@ -59,17 +58,17 @@ public:
 
     void set_current(SPObject *marker);
     std::string get_active_marker_uri();
-    bool update() { return updating; };
-    gchar const *get_id() { return combo_id; };
+    bool in_update() { return _updating; };
+    gchar const *get_id() { return _combo_id; };
     void update_marker_image(gchar const *mname);
-    int get_loc() { return loc; };
+    int get_loc() { return _loc; };
 
     sigc::signal<void()> signal_changed() { return _signal_changed; }
+
 private:
     struct MarkerItem : Glib::Object {
         Cairo::RefPtr<Cairo::Surface> pix;
         SPDocument* source = nullptr;
-        // SPMarker* marker;
         std::string id;
         std::string label;
         bool stock = false;
@@ -81,7 +80,9 @@ private:
         bool operator == (const MarkerItem& item) const;
     };
 
-    SPMarker* _current_marker = nullptr;
+    SPMarker* get_current() const;
+    Glib::ustring _current_marker_id;
+    // SPMarker* _current_marker = nullptr;
     sigc::signal<void()> _signal_changed;
     Glib::RefPtr<Gtk::Builder> _builder;
     Gtk::FlowBox& _marker_list;
@@ -108,13 +109,12 @@ private:
     bool _scale_linked = true;
     guint32 _background_color;
     guint32 _foreground_color;
-    gchar const *combo_id;
-    int loc;
-    bool updating;
-    guint markerCount;
-    SPDocument *doc = nullptr;
+    gchar const* _combo_id;
+    int _loc;
+    bool _updating;
+    SPDocument *_document = nullptr;
     std::unique_ptr<SPDocument> _sandbox;
-    Gtk::CellRendererPixbuf image_renderer;
+    Gtk::CellRendererPixbuf _image_renderer;
 
     class MarkerColumns : public Gtk::TreeModel::ColumnRecord {
     public:
@@ -137,7 +137,6 @@ private:
     void update_scale_link();
     Glib::RefPtr<MarkerItem> get_active();
     Glib::RefPtr<MarkerItem> find_marker_item(SPMarker* marker);
-    void set_selected(const gchar *name, gboolean retry=true);
     void on_style_updated() override;
     void update_preview(Glib::RefPtr<MarkerItem> marker_item);
     void update_menu_btn(Glib::RefPtr<MarkerItem> marker_item);
@@ -151,10 +150,7 @@ private:
     std::unique_ptr<SPDocument> ink_markers_preview_doc(const gchar* group_id);
     Cairo::RefPtr<Cairo::Surface> create_marker_image(Geom::IntPoint pixel_size, gchar const *mname,
         SPDocument *source, Inkscape::Drawing &drawing, unsigned /*visionkey*/, bool checkerboard, bool no_clip, double scale);
-    static void handleDefsModified(MarkerComboBox *self);
-
     void refreshHistory();
-
     sigc::connection modified_connection;
 };
 
