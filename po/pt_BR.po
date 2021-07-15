@@ -23785,7 +23785,7 @@ msgstr "Ignora palavras contendo dígitos, como \"R2D2\""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3303
 msgid "Ignore words in ALL CAPITALS"
-msgstr "Ignorar palavras em caixa alta"
+msgstr "Ignorar palavras se TODAS MAIÚSCULAS"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3305
 msgid "Ignore words in all capitals, such as \"IUPAC\""
@@ -27699,11 +27699,11 @@ msgstr "Converter para item"
 #: ../src/ui/toolbar/measure-toolbar.cpp:206
 #: ../src/ui/toolbar/measure-toolbar.cpp:207
 msgid "Mark Dimension"
-msgstr "Marcar Dimensão"
+msgstr "Anotar Dimensão"
 
 #: ../src/ui/toolbar/measure-toolbar.cpp:218
 msgid "Mark dimension offset"
-msgstr "Marcar o deslocamento da dimensão"
+msgstr "Deslocamento da dimensão anotada"
 
 #: ../src/ui/toolbar/measure-toolbar.cpp:309
 msgid "Measures only selected."
@@ -29833,7 +29833,7 @@ msgstr "Escolha uma ferramenta de construção da barra de ferramentas."
 
 #: ../src/ui/tools/measure-tool.cpp:338
 msgid "Measure start, <b>Shift+Click</b> for position dialog"
-msgstr "Iniciar medição, <b>Shift+Clique</b> para caixa de diálogo de posição"
+msgstr "Inicio da medição, <b>Shift+Clique</b> para caixa de diálogo de posição"
 
 #: ../src/ui/tools/measure-tool.cpp:346
 msgid "Measure end, <b>Shift+Click</b> for position dialog"
@@ -34177,7 +34177,7 @@ msgstr "Gerenciador de Objetos..."
 
 #: ../src/verbs.cpp:2892
 msgid "View Objects"
-msgstr "Ver e gerenciar os objetos"
+msgstr "Ver e Gerenciar os Objetos"
 
 #: ../src/verbs.cpp:2894
 msgid "Style Dialog..."
