@@ -724,8 +724,6 @@ SwatchesPanel::SwatchesPanel(gchar const *prefsPath)
     , _clear(nullptr)
     , _remove(nullptr)
     , _currentIndex(0)
-    , _currentDesktop(nullptr)
-    , _currentDocument(nullptr)
 {
     _palette = Gtk::manage(new Inkscape::UI::Widget::ColorPalette());
     pack_start(*_palette);
@@ -833,16 +831,11 @@ SwatchesPanel::SwatchesPanel(gchar const *prefsPath)
 
 SwatchesPanel::~SwatchesPanel()
 {
-    for (auto &conn : _desktopConnections) {
-        conn.disconnect();
-    }
-
     _trackDocument( this, nullptr );
     for (auto & docTracking : docTrackings){
         delete docTracking;
     }
     docTrackings.clear();
-
 
     if ( _clear ) {
         delete _clear;
@@ -852,69 +845,15 @@ SwatchesPanel::~SwatchesPanel()
     }
 }
 
-void SwatchesPanel::update()
-{
-    if (!_app) {
-        std::cerr << "SwatchesPanel::update(): _app is null" << std::endl;
-        return;
-    }
-
-    SPDesktop *desktop = getDesktop();
-
-    if ( desktop != _currentDesktop ) {
-        if ( _currentDesktop ) {
-            for (auto &conn : _desktopConnections) {
-                conn.disconnect();
-            }
-        }
-        _desktopConnections.clear();
-
-        _currentDesktop = desktop;
-
-        if ( desktop ) {
-            _desktopConnections.emplace_back(desktop->selection->connectChanged( //
-                [this](Inkscape::Selection *) { this->_updateFromSelection(); }));
-
-            _desktopConnections.emplace_back(desktop->selection->connectModified( //
-                [this](Inkscape::Selection *, unsigned) { this->_updateFromSelection(); }));
-
-            _desktopConnections.emplace_back(desktop->connectToolSubselectionChanged( //
-                [this](gpointer) { this->_updateFromSelection(); }));
-
-            _desktopConnections.emplace_back(desktop->connectDocumentReplaced( //
-                [this](SPDesktop *, SPDocument *doc) { this->_setDocument(doc); }));
-
-            _setDocument(desktop->doc());
-        } else {
-            _setDocument(nullptr);
-        }
-    }
-}
-
-
 void SwatchesPanel::_updateSettings(int settings, int value)
 {
 }
 
-/**
- * Set the document if the swatches dialog is closed
- */
-void SwatchesPanel::setDocumentIfClosed( SPDocument *document )
+void SwatchesPanel::documentReplaced()
 {
-    if (_desktopConnections.empty()) {
-        _setDocument(document);
-    }
-}
-
-void SwatchesPanel::_setDocument( SPDocument *document )
-{
-    if ( document != _currentDocument ) {
-        _trackDocument(this, document);
-        _currentDocument = document;
-
-        if (document) {
-            handleGradientsChange(document);
-        }
+    _trackDocument(this, getDocument());
+    if (auto document = getDocument()) {
+        handleGradientsChange(document);
     }
 }
 
@@ -1041,13 +980,13 @@ void SwatchesPanel::handleDefsModified(SPDocument *document)
 std::vector<SwatchPage*> SwatchesPanel::_getSwatchSets() const
 {
     std::vector<SwatchPage*> tmp;
-    if (docPalettes.find(_currentDocument) != docPalettes.end()) {
-        tmp.push_back(docPalettes[_currentDocument]);
+    if (auto document = getDocument()) {
+        if (docPalettes.find(document) != docPalettes.end()) {
+            tmp.push_back(docPalettes[document]);
+        }
     }
-
     tmp.insert(tmp.end(), userSwatchPages.begin(), userSwatchPages.end());
     tmp.insert(tmp.end(), systemSwatchPages.begin(), systemSwatchPages.end());
-
     return tmp;
 }
 
@@ -1061,13 +1000,17 @@ std::vector<SwatchPage*> SwatchesPanel::getSwatchSets() {
 
 void SwatchesPanel::_updateFromSelection()
 {
-    SwatchPage *docPalette = (docPalettes.find(_currentDocument) != docPalettes.end()) ? docPalettes[_currentDocument] : nullptr;
+    auto document = getDocument();
+    if (!document)
+        return;
+
+    SwatchPage *docPalette = (docPalettes.find(document) != docPalettes.end()) ? docPalettes[document] : nullptr;
     if ( docPalette ) {
         std::string fillId;
         std::string strokeId;
 
-        SPStyle tmpStyle(_currentDesktop->getDocument());
-        int result = sp_desktop_query_style( _currentDesktop, &tmpStyle, QUERY_STYLE_PROPERTY_FILL );
+        SPStyle tmpStyle(document);
+        int result = sp_desktop_query_style(getDesktop(), &tmpStyle, QUERY_STYLE_PROPERTY_FILL );
         switch (result) {
             case QUERY_STYLE_SINGLE:
             case QUERY_STYLE_MULTIPLE_AVERAGED:
@@ -1100,7 +1043,7 @@ void SwatchesPanel::_updateFromSelection()
             }
         }
 
-        result = sp_desktop_query_style( _currentDesktop, &tmpStyle, QUERY_STYLE_PROPERTY_STROKE );
+        result = sp_desktop_query_style(getDesktop(), &tmpStyle, QUERY_STYLE_PROPERTY_STROKE);
         switch (result) {
             case QUERY_STYLE_SINGLE:
             case QUERY_STYLE_MULTIPLE_AVERAGED:
