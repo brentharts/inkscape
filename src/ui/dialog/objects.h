@@ -18,6 +18,7 @@
 #include <gtkmm/box.h>
 #include <gtkmm/dialog.h>
 
+#include "helper/auto-connection.h"
 #include "xml/node-observer.h"
 
 #include "ui/dialog/dialog-base.h"
@@ -61,12 +62,12 @@ public:
     class ModelColumns;
     static ObjectsPanel& getInstance();
 
-    void update() override;
-    void setDocument(SPDesktop* desktop, SPDocument* document);
-    void setSelection(Selection *sel);
-    void setLayer(SPObject *obj);
-
 protected:
+
+    void desktopReplaced() override;
+    void documentReplaced() override;
+    void layerChanged(SPObject *obj);
+    void selectionChanged(Selection *selected) override;
 
     // Accessed by ObjectWatcher directly (friend class)
     SPObject* getObject(Node *node);
@@ -91,15 +92,9 @@ private:
     ObjectWatcher* root_watcher;
     SPItem *current_item;
 
-    sigc::connection document_changed;
-    sigc::connection selection_changed;
-    sigc::connection layer_changed;
-
-    //The current desktop, document, tree-data
-    SPDesktop* _desktop;
-    SPDocument* _document;
+    Inkscape::auto_connection layer_changed;
     SPObject *_layer;
-    
+
     //Show icons in the context menu
     bool _show_contextmenu_icons;
     bool _is_editing;
@@ -118,8 +113,6 @@ private:
     Gtk::Menu _popupMenu;
     Gtk::Box _page;
     Gtk::Switch _switch_objects;
-
-    //Methods:
 
     ObjectsPanel(ObjectsPanel const &) = delete; // no copy
     ObjectsPanel &operator=(ObjectsPanel const &) = delete; // no assign

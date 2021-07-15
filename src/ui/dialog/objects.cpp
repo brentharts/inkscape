@@ -520,8 +520,8 @@ void ObjectWatcher::notifyAttributeChanged( Node &node, GQuark name, Util::ptr_s
  * @returns SPObject matching the node, returns nullptr if not found.
  */
 SPObject *ObjectsPanel::getObject(Node *node) {
-    if (node != nullptr)
-        return _document->getObjectByRepr(node);
+    if (node != nullptr && getDocument())
+        return getDocument()->getObjectByRepr(node);
     return nullptr;
 }
 
@@ -551,8 +551,6 @@ ObjectWatcher* ObjectsPanel::getWatcher(Node *node)
 ObjectsPanel::ObjectsPanel() :
     DialogBase("/dialogs/objects", "Objects"),
     root_watcher(nullptr),
-    _desktop(nullptr),
-    _document(nullptr),
     _model(nullptr),
     _layer(nullptr),
     _page(Gtk::ORIENTATION_VERTICAL)
@@ -627,7 +625,9 @@ ObjectsPanel::ObjectsPanel() :
     // Before expanding a row, replace the dummy child with the actual children
     _tree.signal_test_expand_row().connect([this](const Gtk::TreeModel::iterator &iter, const Gtk::TreeModel::Path &) {
         if (cleanDummyChildren(*iter)) {
-            setSelection(_desktop->selection);
+            if (auto selection = getSelection()) {
+                selectionChanged(selection);
+            }
         }
         return false;
     });
@@ -684,12 +684,10 @@ ObjectsPanel::ObjectsPanel() :
  */
 ObjectsPanel::~ObjectsPanel()
 {
-    document_changed.disconnect();
-    selection_changed.disconnect();
-    layer_changed.disconnect();
-
-    _desktop = nullptr;
-    setDocument(nullptr, nullptr);
+    if (root_watcher) {
+        delete root_watcher;
+    }
+    root_watcher = nullptr;
 
     if (_model) {
         delete _model;
@@ -705,14 +703,17 @@ void ObjectsPanel::_objects_toggle()
     setRootWatcher();
 }
 
-
-/**
- * Sets the current document
- */
-void ObjectsPanel::setDocument(SPDesktop* desktop, SPDocument* document)
+void ObjectsPanel::desktopReplaced()
 {
-    g_assert(desktop == _desktop);
-    _document = document;
+    layer_changed.disconnect();
+
+    if (auto desktop = getDesktop()) {
+        layer_changed = desktop->connectCurrentLayerChanged( sigc::mem_fun(*this, &ObjectsPanel::layerChanged));
+    }
+}
+
+void ObjectsPanel::documentReplaced()
+{
     setRootWatcher();
 }
 
@@ -723,49 +724,15 @@ void ObjectsPanel::setRootWatcher()
     }
     root_watcher = nullptr;
 
-    if (_document && _document->getRoot()) {
+    if (auto document = getDocument()) {
         Inkscape::Preferences *prefs = Inkscape::Preferences::get();
         bool layers_only = prefs->getBool("/dialogs/objects/layers_only", true);
-        root_watcher = new ObjectWatcher(this, _document->getRoot(), nullptr, layers_only);
-        setLayer(_desktop->currentLayer());
+        root_watcher = new ObjectWatcher(this, document->getRoot(), nullptr, layers_only);
+        layerChanged(getDesktop()->currentLayer());
     }
 }
 
-/**
- * Set the current panel desktop
- */
-void ObjectsPanel::update()
-{
-    if (!_app) {
-        std::cerr << "ObjectsPanel::update(): _app is null" << std::endl;
-        return;
-    }
-    SPDesktop *desktop = getDesktop();
-
-    if ( desktop != _desktop ) {
-        document_changed.disconnect();
-        selection_changed.disconnect();
-        layer_changed.disconnect();
-
-        _desktop = desktop;
-
-        if (_desktop ) {
-            document_changed = _desktop->connectDocumentReplaced( sigc::mem_fun(*this, &ObjectsPanel::setDocument));
-            selection_changed = _desktop->selection->connectChanged( sigc::mem_fun(*this, &ObjectsPanel::setSelection));
-            layer_changed = _desktop->connectCurrentLayerChanged( sigc::mem_fun(*this, &ObjectsPanel::setLayer));
-            setDocument(_desktop, _desktop->doc());
-        } else {
-            setDocument(_desktop, nullptr);
-        }
-    }
-}
-
-/**
- * Occurs when the current desktop selection changes
- *
- * @param sel The current selection
- */
-void ObjectsPanel::setSelection(Selection *selected)
+void ObjectsPanel::selectionChanged(Selection *selected)
 {
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     if(!prefs->getBool("/dialogs/objects/layers_only", true)) {
@@ -804,7 +771,7 @@ void ObjectsPanel::setSelection(Selection *selected)
  *
  * @param layer - The layer now selected
  */
-void ObjectsPanel::setLayer(SPObject *layer)
+void ObjectsPanel::layerChanged(SPObject *layer)
 {
     root_watcher->setSelectedBitRecursive(LAYER_FOCUS_CHILD | LAYER_FOCUSED, false);
 
@@ -869,21 +836,22 @@ void ObjectsPanel::toggleLocked(const Glib::ustring& path)
  */
 bool ObjectsPanel::_handleKeyEvent(GdkEventKey *event)
 {
-    if (!_desktop)
+    auto desktop = getDesktop();
+    if (!desktop)
         return false;
 
     Gtk::AccelKey shortcut = Inkscape::Shortcuts::get_from_event(event);
     switch (shortcut.get_key()) {
         case GDK_KEY_Escape:
-            if (_desktop->canvas) {
-                _desktop->canvas->grab_focus();
+            if (desktop->canvas) {
+                desktop->canvas->grab_focus();
                 return true;
             }
             break;
     }
 
     // invoke user defined shortcuts first
-    if (Inkscape::Shortcuts::getInstance().invoke_verb(event, _desktop))
+    if (Inkscape::Shortcuts::getInstance().invoke_verb(event, desktop))
         return true;
     return false;
 }
@@ -895,6 +863,10 @@ bool ObjectsPanel::_handleKeyEvent(GdkEventKey *event)
  */
 bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
 {
+    auto desktop = getDesktop();
+    if (!desktop)
+        return false;
+
     Gtk::TreeModel::Path path;
     Gtk::TreeViewColumn* col = nullptr;
 
@@ -909,7 +881,7 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
         }
         _is_editing = _is_editing && event->type == GDK_BUTTON_RELEASE;
 
-        auto selection = _desktop->getSelection();
+        auto selection = desktop->getSelection();
         auto row = *_store->get_iter(path);
         if (!row) return false;
         SPItem *item = getItem(row);
@@ -917,7 +889,7 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
 
         // Load the right click menu
         if (event->type == GDK_BUTTON_PRESS && event->button == 3) {
-            ContextMenu* menu = new ContextMenu(_desktop, item);
+            ContextMenu* menu = new ContextMenu(desktop, item);
             menu->show();
             menu->popup_at_pointer(nullptr);
             return true;
@@ -933,7 +905,7 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
                     selection->clear();
                 } else if (_layer != item) {
                     selection->clear();
-                    _desktop->setCurrentLayer(item);
+                    desktop->setCurrentLayer(item);
                 } else {
                     selection->set(item);
                 }
@@ -952,13 +924,12 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
  */
 void ObjectsPanel::_takeAction(int val)
 {
-    if (!_document) return;
-
-    Verb *verb = Verb::get(val);
-    if (verb) {
-        SPAction *action = verb->get_action(_desktop);
-        if (action) {
-            sp_action_perform( action, nullptr );
+    if (auto desktop = getDesktop()) {
+        if (auto verb = Verb::get(val)) {
+            SPAction *action = verb->get_action(desktop);
+            if (action) {
+                sp_action_perform( action, nullptr );
+            }
         }
     }
 }
@@ -976,7 +947,7 @@ void ObjectsPanel::_handleEdited(const Glib::ustring& path, const Glib::ustring&
         SPItem *item = getItem(row);
         if (!item->label() || new_text != item->label()) {
             item->setLabel(new_text.c_str());
-            DocumentUndo::done(_document, SP_VERB_NONE, _("Rename object"));
+            DocumentUndo::done(getDocument(), SP_VERB_NONE, _("Rename object"));
         }
     }
 }
@@ -988,9 +959,6 @@ void ObjectsPanel::_handleEdited(const Glib::ustring& path, const Glib::ustring&
  */
 bool ObjectsPanel::select_row( Glib::RefPtr<Gtk::TreeModel> const & /*model*/, Gtk::TreeModel::Path const &path, bool /*sel*/ )
 {
-    auto row = *_store->get_iter(path);
-    if (_desktop && row) {
-    }
     return true;
 }
 
@@ -1070,22 +1038,24 @@ bool ObjectsPanel::on_drag_motion(const Glib::RefPtr<Gdk::DragContext> &context,
     Gtk::TreeModel::Path path;
     Gtk::TreeViewDropPosition pos;
 
-    if (!_desktop->getSelection()) {
+    auto selection = getSelection();
+    auto document = getDocument();
+
+    if (!selection || !document)
         goto finally;
-    }
 
     _tree.get_dest_row_at_pos(x, y, path, pos);
 
     if (path) {
         auto iter = _store->get_iter(path);
         auto repr = getRepr(*iter);
-        auto obj = _document->getObjectByRepr(repr);
+        auto obj = document->getObjectByRepr(repr);
 
         bool const drop_into = pos != Gtk::TREE_VIEW_DROP_BEFORE && //
                                pos != Gtk::TREE_VIEW_DROP_AFTER;
 
         // don't drop on self
-        if (_desktop->getSelection()->includes(obj)) {
+        if (selection->includes(obj)) {
             goto finally;
         }
 
@@ -1126,13 +1096,15 @@ bool ObjectsPanel::on_drag_drop(const Glib::RefPtr<Gdk::DragContext> &context, i
     bool const drop_into = pos != Gtk::TREE_VIEW_DROP_BEFORE && //
                            pos != Gtk::TREE_VIEW_DROP_AFTER;
 
-    auto sele = _desktop->getSelection();
-
-    if (drop_into) {
-        sele->toLayer(_document->getObjectByRepr(drop_repr));
-    } else {
-        Node *after = (pos == Gtk::TREE_VIEW_DROP_BEFORE) ? drop_repr : drop_repr->prev();
-        sele->toLayer(_document->getObjectByRepr(drop_repr->parent()), false, after);
+    auto selection = getSelection();
+    auto document = getDocument();
+    if (selection && document) {
+        if (drop_into) {
+            selection->toLayer(document->getObjectByRepr(drop_repr));
+        } else {
+            Node *after = (pos == Gtk::TREE_VIEW_DROP_BEFORE) ? drop_repr : drop_repr->prev();
+            selection->toLayer(document->getObjectByRepr(drop_repr->parent()), false, after);
+        }
     }
 
     on_drag_end(context);
@@ -1145,7 +1117,9 @@ void ObjectsPanel::on_drag_start(const Glib::RefPtr<Gdk::DragContext> &context)
     selection->set_mode(Gtk::SELECTION_MULTIPLE);
     selection->unselect_all();
 
-    auto obj_selection = _desktop->getSelection();
+    auto obj_selection = getSelection();
+    if (!obj_selection)
+        return;
 
     if (current_item && !obj_selection->includes(current_item)) {
         // This means the item the user started to drag is not one that is selected
