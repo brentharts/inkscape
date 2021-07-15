@@ -150,10 +150,8 @@ static Glib::RefPtr<Gtk::Builder> create_builder() {
 }
 
 MarkerComboBox::MarkerComboBox(gchar const *id, int l) :
-            _combo_id(id),
-            _loc(l),
-            _updating(false),
-            // markerCount(0),
+    _combo_id(id),
+    _loc(l),
     _builder(create_builder()),
     _marker_list(get_widget<Gtk::FlowBox>(_builder, "flowbox")),
     _preview(get_widget<Gtk::Image>(_builder, "preview")),
@@ -207,15 +205,10 @@ MarkerComboBox::MarkerComboBox(gchar const *id, int l) :
         }
         _widgets_to_markers[image] = item;
         auto alloc = image->get_allocation();
-        // box->set_size_request(alloc.get_width(), alloc.get_height());
         box->set_size_request(item->width, item->height);
-        // image->set_data("marker", item.get());
         return box;
-        // return image;
     });
     auto& btn_box = get_widget<Gtk::Box>(_builder, "btn-box");
-    // btn_box.pack_start(_image_renderer, false, true);
-    // btn_box.add_attribute(_image_renderer, "pixbuf", marker_columns.pixbuf);
 
     _sandbox = ink_markers_preview_doc(_combo_id);
 
@@ -234,10 +227,6 @@ MarkerComboBox::MarkerComboBox(gchar const *id, int l) :
         if (box->get_sensitive()) _signal_changed.emit();
     });
 
-    // auto& orient_group = get_widget<Gtk::RadioButton>(_builder, "radio-orient");
-    // orient_group.signal_toggled().connect([](){
-        // g_warning("orient grp toggle");
-    // });
     auto set_orient = [=](bool enable_angle, const char* value) {
         if (_updating) return;
         _angle_btn.set_sensitive(enable_angle);
@@ -307,9 +296,6 @@ double get_attrib_num(SPMarker* marker, const char* attrib) {
 }
 
 void MarkerComboBox::update_widgets_from_marker(SPMarker* marker) {
-    // updating = true;
-// g_warning("%s update ui %p", combo_id, marker);
-
     _input_grid.set_sensitive(marker != nullptr);
 
     if (marker) {
@@ -339,8 +325,6 @@ void MarkerComboBox::update_widgets_from_marker(SPMarker* marker) {
             _angle_btn.set_sensitive(true);
         }
     }
-
-    // updating = false;
 }
 
 void MarkerComboBox::update_scale_link() {
@@ -349,6 +333,7 @@ void MarkerComboBox::update_scale_link() {
 
     _scale_y.set_sensitive(!_scale_linked);
     if (_scale_linked) {
+        //TODO: this is not correct, viewBox size should be taken into account to change Y in proportion to aspect ratio
         _scale_y.set_value(_scale_x.get_value());
     }
 }
@@ -368,18 +353,15 @@ void MarkerComboBox::update_preview(Glib::RefPtr<MarkerItem> item) {
         label = _("None");
     }
 
-// g_warning("render preview %p %p", item.get(), _current_marker);
     if (item && item->source && !item->id.empty()) {
         Inkscape::Drawing drawing;
         unsigned const visionkey = SPItem::display_key_new(1);
         drawing.setRoot(_sandbox->getRoot()->invoke_show(drawing, visionkey, SP_ITEM_SHOW_DISPLAY));
         // generate preview
         auto alloc = _preview.get_allocation();
-        // g_warning("render preview mow %d %d", alloc.get_width(), alloc.get_height());
         auto size = Geom::IntPoint(alloc.get_width() - 10, alloc.get_height() - 10);
         if (size.x() > 0 && size.y() > 0) {
             surface = create_marker_image(size, item->id.c_str(), item->source, drawing, visionkey, true, false, 2.60);
-        // g_warning("render preview %d", surface.operator bool());
         }
         else {
             // too early, preview hasn't been expanded/resized yet
@@ -413,7 +395,7 @@ SPMarker* find_marker(SPDocument* document, const Glib::ustring& marker_id) {
     SPDefs* defs = document->getDefs();
     if (!defs) return nullptr;
 
-    for (auto& child: defs->children) {
+    for (auto& child : defs->children) {
         if (SP_IS_MARKER(&child)) {
             auto marker = SP_MARKER(&child);
             auto id = marker->getId();
@@ -440,14 +422,7 @@ void MarkerComboBox::set_active(Glib::RefPtr<MarkerItem> item) {
             if (auto box = dynamic_cast<Gtk::FlowBoxChild*>(&widget)) {
                 if (auto marker = _widgets_to_markers[box->get_child()]) {
                     if (*marker.get() == *item.get()) {
-// g_warning("%s reselec: %p", combo_id, box);                        
                         _marker_list.select_child(*box);
-                        // _marker_list.grab_focus();
-                        // _marker_list.set_focus_child(*box);
-                        // box->grab_focus();
-                        // _marker_list.set_focus_child(*box);
-                        // _marker_list.grab_focus();
-                        // box->grab_focus();
                         selected = true;
                     }
                 }
@@ -509,15 +484,12 @@ void MarkerComboBox::setDocument(SPDocument *document)
 
         if (_document) {
             modified_connection = _document->getDefs()->connectModified([=](SPObject*, unsigned int){
-                // _current_marker = nullptr; // don't use it, it might have been deleted
                 refreshHistory();
             });
         }
 
-        // _current_marker = nullptr;
         _current_marker_id = "";
 
-// g_warning("clr current ");
         refreshHistory();
     }
 }
@@ -536,7 +508,7 @@ MarkerComboBox::refreshHistory()
      * so listen to changes in all defs and check if the number of markers has changed here
      * to avoid unnecessary refreshes when things like gradients change
     */
-   // TODO: detect changes to markers; ignore changes to everything else
+   // TODO: detect changes to markers; ignore changes to everything else; simple count doesn't cut it
 
     // if (markerCount != ml.size()) {
         // auto iter = get_active();
@@ -607,10 +579,9 @@ void MarkerComboBox::set_current(SPObject *marker)
     bool reselect = sp_marker != get_current();
 
     _updating = true;
-    // _current_marker = sp_marker;
+
     auto id = sp_marker ? sp_marker->getId() : nullptr;
     _current_marker_id = id ? id : "";
-// g_warning("set current %p", sp_marker);
 
     auto marker_item = find_marker_item(sp_marker);
 
@@ -619,7 +590,6 @@ void MarkerComboBox::set_current(SPObject *marker)
     }
 
     update_widgets_from_marker(sp_marker);
-
     update_menu_btn(marker_item);
     update_preview(marker_item);
 
@@ -630,28 +600,20 @@ void MarkerComboBox::set_current(SPObject *marker)
  */
 std::string MarkerComboBox::get_active_marker_uri()
 {
-    //todo
     /* Get Marker */
     auto item = get_active();
     if (!item) {
         return std::string();
     }
-    // const gchar *markid = nullptr; // get_active()->get_value(marker_columns.marker);
-    // if (!markid)
-    // {
-    //     return nullptr;
-    // }
 
-    // gchar const *marker = "";
     std::string marker;
 
     if (item->id != "none") {
-    // if (strcmp(markid, "none")) {
-        bool stockid = item->stock; // get_active()->get_value(marker_columns.stock);
+        bool stockid = item->stock;
 
         std::string markurn = stockid ? "urn:inkscape:marker:" + item->id : item->id;
         SPObject* mark = dynamic_cast<SPMarker*>(get_stock_item(markurn.c_str(), stockid));
-        // g_free(markurn);
+
         if (mark) {
             Inkscape::XML::Node* repr = mark->getRepr();
             auto id = repr->attribute("id");
@@ -678,7 +640,7 @@ std::string MarkerComboBox::get_active_marker_uri()
 void MarkerComboBox::sp_marker_list_from_doc(SPDocument *source, gboolean history)
 {
     std::vector<SPMarker *> ml = get_marker_list(source);
-// g_warning("add markers from doc, hist: %d", (int)history);
+
     remove_markers(history);
 
     add_markers(ml, source, history);
@@ -742,14 +704,17 @@ std::vector<SPMarker *> MarkerComboBox::get_marker_list (SPDocument *source)
         if (SP_IS_MARKER(&child)) {
             auto marker = SP_MARKER(&child);
             // patch them up; viewPort is needed for size attributes to work
-            if (marker->getAttribute("viewBox") == nullptr) {
-                marker->setAttribute("viewBox", "0 0 1 1");
-            }
             if (marker->getAttribute("markerWidth") == nullptr) {
                 marker->setAttribute("markerWidth", "1");
             }
             if (marker->getAttribute("markerHeight") == nullptr) {
                 marker->setAttribute("markerHeight", "1");
+            }
+            if (marker->getAttribute("viewBox") == nullptr) {
+                auto width = marker->getAttribute("markerWidth");
+                auto height = marker->getAttribute("markerHeight");
+                Glib::ustring box("0 0 ");
+                marker->setAttribute("viewBox", box + width + " " + height);
             }
             ml.push_back(marker);
         }
@@ -806,22 +771,6 @@ auto old_time =  std::chrono::high_resolution_clock::now();
         // generate preview
         auto pixbuf = create_marker_image(Geom::IntPoint(ITEM_WIDTH, ITEM_HEIGHT), repr->attribute("id"), source, drawing, visionkey, false, true, 1.50);
 
-        // Add history before separator, others after
-        // Gtk::TreeModel::Row row;
-        // if (history)
-            // row = *(marker_store->insert(sep_iter));
-        // else
-            // row = *(marker_store->append());
-/*
-        row[marker_columns.label] = ink_ellipsize_text(markid, 20);
-        // Non "stock" markers can also have "inkscape:stockid" (when using extension ColorMarkers),
-        // So use !is_history instead to determine is it is "stock" (ie in the markers.svg file)
-        row[marker_columns.stock] = !history;
-        row[marker_columns.marker] = repr->attribute("id");
-        row[marker_columns.pixbuf] = pixbuf;
-        row[marker_columns.history] = history;
-        row[marker_columns.separator] = false;
-*/
         auto item = Glib::RefPtr<MarkerItem>(new MarkerItem);
         item->source = source;
         item->pix = pixbuf;
@@ -888,12 +837,11 @@ Cairo::RefPtr<Cairo::Surface>
 MarkerComboBox::create_marker_image(Geom::IntPoint pixel_size, gchar const *mname,
     SPDocument *source, Inkscape::Drawing &drawing, unsigned /*visionkey*/, bool checkerboard, bool no_clip, double scale)
 {
-        // return Cairo::RefPtr<Cairo::Surface>(); // sp_get_icon_pixbuf("bad-marker", Gtk::ICON_SIZE_SMALL_TOOLBAR);
     // Retrieve the marker named 'mname' from the source SVG document
     SPObject const *marker = source->getObjectById(mname);
     if (marker == nullptr) {
         g_warning("bad mname: %s", mname);
-        return Cairo::RefPtr<Cairo::Surface>(); // sp_get_icon_pixbuf("bad-marker", Gtk::ICON_SIZE_SMALL_TOOLBAR);
+        return Cairo::RefPtr<Cairo::Surface>(); //TODO: sp_get_icon_pixbuf("bad-marker", Gtk::ICON_SIZE_SMALL_TOOLBAR);
     }
 
     /* Get from cache right away */
@@ -1033,7 +981,7 @@ void MarkerComboBox::on_style_updated() {
     }
 }
 
-/*
+/*TODO: background for custom markers
       <filter id="softGlow" height="1.2" width="1.2" x="0.0" y="0.0">
       <!-- <feMorphology operator="dilate" radius="1" in="SourceAlpha" result="thicken" id="feMorphology2" /> -->
       <!-- Use a gaussian blur to create the soft blurriness of the glow -->
@@ -1052,8 +1000,8 @@ void MarkerComboBox::on_style_updated() {
 
 /**
  * Returns a new document containing default start, mid, and end markers.
- * Note 1: group IDs are matched against "combo_id" to render correct preview object.
- * Note 2: paths/lines are kept outside of groups, so they dont' inflate visible bounds
+ * Note 1: group IDs are matched against "_combo_id" to render correct preview object.
+ * Note 2: paths/lines are kept outside of groups, so they don't inflate visible bounds
  * Note 3: invisible rects inside groups keep visual bounds from getting too small, so we can see relative marker sizes
  */
 std::unique_ptr<SPDocument> MarkerComboBox::ink_markers_preview_doc(const gchar* group_id)

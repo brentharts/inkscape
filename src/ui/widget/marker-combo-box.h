@@ -111,7 +111,7 @@ private:
     guint32 _foreground_color;
     gchar const* _combo_id;
     int _loc;
-    bool _updating;
+    bool _updating = false;
     SPDocument *_document = nullptr;
     std::unique_ptr<SPDocument> _sandbox;
     Gtk::CellRendererPixbuf _image_renderer;
