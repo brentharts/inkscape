@@ -101,10 +101,10 @@ ColorPalette::ColorPalette():
         }
     }
 
-    _scroll_down.signal_clicked().connect([=](){ scroll(0, get_tile_height() + _border, true, true); });
-    _scroll_up.signal_clicked().connect([=](){ scroll(0, -(get_tile_height() + _border), true, true); });
-    _scroll_left.signal_clicked().connect([=](){ scroll(-10 * (get_tile_width() + _border), 0, false, false); });
-    _scroll_right.signal_clicked().connect([=](){ scroll(10 * (get_tile_width() + _border), 0, false, false); });
+    _scroll_down.signal_clicked().connect([=](){ scroll(0, get_palette_height(), get_tile_height() + _border, true); });
+    _scroll_up.signal_clicked().connect([=](){ scroll(0, -get_palette_height(), get_tile_height() + _border, true); });
+    _scroll_left.signal_clicked().connect([=](){ scroll(-10 * (get_tile_width() + _border), 0, 0.0, false); });
+    _scroll_right.signal_clicked().connect([=](){ scroll(10 * (get_tile_width() + _border), 0, 0.0, false); });
 
     {
         auto css_provider = Gtk::CssProvider::create();
@@ -189,13 +189,13 @@ gboolean ColorPalette::scroll_cb(gpointer self) {
     return fire_again;
 }
 
-void ColorPalette::scroll(int dx, int dy, bool snap, bool smooth) {
+void ColorPalette::scroll(int dx, int dy, double snap, bool smooth) {
     if (auto vert = _scroll.get_vscrollbar()) {
         if (smooth && dy != 0.0) {
             _scroll_final = vert->get_value() + dy;
-            if (snap) {
+            if (snap > 0) {
                 // round it to whole 'dy' increments
-                _scroll_final -= fmod(_scroll_final, dy);
+                _scroll_final -= fmod(_scroll_final, snap);
             }
             auto range = get_range(*vert);
             if (_scroll_final < range.first) {
@@ -461,6 +461,10 @@ int ColorPalette::get_tile_height() const {
     return get_tile_size(false);
 }
 
+int ColorPalette::get_palette_height() const {
+    return (get_tile_height() + _border) * _rows;
+}
+
 void ColorPalette::resize() {
     if (_rows == 1 && _force_scrollbar || !_compact) {
         // auto size for single row to allocate space for scrollbar
@@ -468,7 +472,7 @@ void ColorPalette::resize() {
     }
     else {
         // exact size for multiple rows
-        int height = (get_tile_height() + _border) * _rows - _border;
+        int height = get_palette_height() - _border;
         _scroll.set_size_request(1, height);
     }
 

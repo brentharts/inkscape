@@ -64,7 +64,7 @@ private:
     void resize();
     void set_up_scrolling();
     void free();
-    void scroll(int dx, int dy, bool snap, bool smooth);
+    void scroll(int dx, int dy, double snap, bool smooth);
     void do_scroll(int dx, int dy);
     static gboolean scroll_cb(gpointer self);
     void _set_tile_size(int size_px);
@@ -79,6 +79,7 @@ private:
     int get_tile_size(bool horz) const;
     int get_tile_width() const;
     int get_tile_height() const;
+    int get_palette_height() const;
 
     Glib::RefPtr<Gtk::Builder> _builder;
     Gtk::FlowBox& _flowbox;

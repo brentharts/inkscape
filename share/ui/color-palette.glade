@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.38.1 -->
+<!-- Generated with glade 3.38.2 -->
 <interface>
   <requires lib="gtk+" version="3.24"/>
   <object class="GtkAdjustment" id="adjustment-aspect">
-    <property name="lower">-2</property>
-    <property name="upper">2</property>
-    <property name="step-increment">0.1</property>
-    <property name="page-increment">0.2</property>
+    <property name="lower">-1</property>
+    <property name="upper">1</property>
+    <property name="step-increment">0.10</property>
+    <property name="page-increment">0.20</property>
   </object>
   <object class="GtkAdjustment" id="adjustment-border">
-    <property name="upper">16</property>
+    <property name="upper">8</property>
     <property name="step-increment">1</property>
     <property name="page-increment">1</property>
   </object>
   <object class="GtkAdjustment" id="adjustment-rows">
     <property name="lower">1</property>
-    <property name="upper">16</property>
+    <property name="upper">5</property>
     <property name="value">1</property>
     <property name="step-increment">1</property>
     <property name="page-increment">1</property>
   </object>
   <object class="GtkAdjustment" id="adjustment-size">
     <property name="lower">4</property>
-    <property name="upper">40</property>
+    <property name="upper">32</property>
     <property name="value">8</property>
     <property name="step-increment">1</property>
     <property name="page-increment">2</property>
