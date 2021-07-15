@@ -28,6 +28,7 @@
 
 class SPDocument;
 class SPObject;
+class SPItem;
 
 namespace Inkscape {
   
@@ -75,6 +76,7 @@ public:
     void reset();
     void setCurrentLayer(SPObject *object);
     void toggleLayerSolo(SPObject *object);
+    std::list<SPItem *> getAllLayers();
     void toggleHideAllLayers(bool hide);
     void toggleLockAllLayers(bool lock);
     void toggleLockOtherLayers(SPObject *object);

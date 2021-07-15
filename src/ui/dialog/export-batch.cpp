@@ -51,6 +51,37 @@ namespace Inkscape {
 namespace UI {
 namespace Dialog {
 
+class BatchItem : public Gtk::FlowBoxChild
+{
+public:
+    BatchItem(SPItem *item);
+    ~BatchItem(){};
+
+public:
+    Gtk::CheckButton selector;
+
+private:
+    Gtk::Grid grid;
+    // PreviewBox p_box;
+    SPItem *_item;
+};
+
+BatchItem::BatchItem(SPItem *item)
+    : grid()
+    , selector()
+{
+    if (!item) {
+        return;
+    }
+    _item = item;
+    grid.attach(selector, 0, 0, 1, 1);
+    Glib::ustring id = _item->getId();
+    selector.set_label(id);
+    selector.set_active(false);
+    set_child(gird);
+    show_all_children();
+}
+
 BatchExport::~BatchExport()
 {
     ;
@@ -164,13 +195,18 @@ void BatchExport::refreshItems()
     SPDesktop *desktop = SP_ACTIVE_DESKTOP;
     SPDocument *doc = desktop->getDocument();
     doc->ensureUpToDate();
-    gint num = 0;
+    
+    std::set
     switch (current_key) {
         case SELECTION_SELECTION:
-            num = (gint)boost::distance(desktop->getSelection()->items());
+            current_items.insert()
+            num = (int)boost::distance(desktop->getSelection()->items());
             break;
-        case SELECTION_LAYER:
-            num = 0;
+        case SELECTION_LAYER: {
+            std::list<SPItem *> layers = desktop->getAllLayers();
+            num = layers.size();
+            break;
+        }
         default:
             break;
     }

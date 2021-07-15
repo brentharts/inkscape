@@ -446,6 +446,11 @@ void SPDesktop::toggleLayerSolo(SPObject *object)
     layers->toggleLayerSolo(object);
 }
 
+std::list<SPItem*> SPDesktop::getAllLayers()
+{
+    return layers->getAllLayers();
+}
+
 void SPDesktop::toggleHideAllLayers(bool hide)
 {
     layers->toggleHideAllLayers(hide);
