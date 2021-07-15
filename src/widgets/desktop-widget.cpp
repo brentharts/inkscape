@@ -688,17 +688,6 @@ void SPDesktopWidget::updateNamedview()
 }
 
 /**
- * Code to run when the document changes (usually because the desktop has changed)
- */
-void SPDesktopWidget::updateDocument()
-{
-    if (_panels) {
-        _panels->setDocumentIfClosed(desktop->doc());
-    }
-}
-
-
-/**
  * Callback to handle desktop widget event.
  */
 gint
@@ -1233,7 +1222,6 @@ void SPDesktopWidget::layoutWidgets()
         dtw->_panels->hide();
     } else {
         dtw->_panels->show_all();
-        _panels->setDocumentIfClosed(desktop->doc());
     }
 
     _canvas_grid->ShowScrollbars(prefs->getBool(pref_root + "scrollbars/state", true));
@@ -1993,7 +1981,7 @@ SPDesktopWidget::on_ruler_box_button_release_event(GdkEventButton *event, Gtk::W
 bool
 SPDesktopWidget::on_ruler_box_button_press_event(GdkEventButton *event, Gtk::Widget *widget, bool horiz)
 {
-    if (_ruler_clicked) // event triggerred on a double click: do no process the click
+    if (_ruler_clicked) // event triggered on a double click: do no process the click
         return false;
 
     int wx, wy;
