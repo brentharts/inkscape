@@ -349,7 +349,7 @@ bool ObjectWatcher::addChild(SPItem *child, bool dummy)
 
     auto *node = child->getRepr();
     assert(node);
-    Gtk::TreeModel::Row row = *(panel->_store->append(children));
+    Gtk::TreeModel::Row row = *(panel->_store->prepend(children));
 
     auto &watcher = child_watchers[node];
     assert(!watcher);
@@ -641,27 +641,29 @@ ObjectsPanel::ObjectsPanel() :
         _scroller.set_size_request(sreq.width, minHeight);
     }
 
-    _page.pack_start( _scroller, Gtk::PACK_EXPAND_WIDGET );
-    _page.pack_end(_buttonsRow, Gtk::PACK_SHRINK);
+    _page.pack_start(_buttonsRow, Gtk::PACK_SHRINK);
+    _page.pack_end(_scroller, Gtk::PACK_EXPAND_WIDGET);
     pack_start(_page, Gtk::PACK_EXPAND_WIDGET);
 
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    _switch_objects.get_style_context()->add_class("inkswitch");
-    _switch_objects.get_style_context()->add_class("rawstyle");
-    _switch_objects.set_tooltip_text(_("Switch between layers only and all objects view."));
-    _switch_objects.property_active() = !prefs->getBool("/dialogs/objects/layers_only", true);
-    _switch_objects.property_active().signal_changed().connect(sigc::mem_fun(*this, &ObjectsPanel::_objects_toggle));
-    _buttonsPrimary.pack_start(_switch_objects, Gtk::PACK_SHRINK);
+    {
+        auto child = Glib::wrap(sp_get_icon_image("layer-duplicate", GTK_ICON_SIZE_SMALL_TOOLBAR));
+        child->show();
+        _object_mode.add(*child);
+        _object_mode.set_relief(Gtk::RELIEF_NONE);
+    }
+    _object_mode.set_tooltip_text(_("Switch between layers only and all objects view."));
+    _object_mode.property_active() = !prefs->getBool("/dialogs/objects/layers_only", true);
+    _object_mode.property_active().signal_changed().connect(sigc::mem_fun(*this, &ObjectsPanel::_objects_toggle));
+    _buttonsPrimary.pack_start(_object_mode, Gtk::PACK_SHRINK);
 
-    _addBarButton(INKSCAPE_ICON("list-add"), _("Add layer..."), (int)SP_VERB_LAYER_NEW);
-    _addBarButton(INKSCAPE_ICON("list-remove"), _("Remove object"), (int)SP_VERB_EDIT_DELETE);
-    _addBarButton(INKSCAPE_ICON("go-bottom"), _("Move To Bottom"), (int)SP_VERB_SELECTION_TO_BACK);
-    _addBarButton(INKSCAPE_ICON("go-down"), _("Move Down"), (int)SP_VERB_SELECTION_STACK_DOWN);
-    _addBarButton(INKSCAPE_ICON("go-up"), _("Move Up"), (int)SP_VERB_SELECTION_STACK_UP);
-    _addBarButton(INKSCAPE_ICON("go-top"), _("Move To Top"), (int)SP_VERB_SELECTION_TO_FRONT);
+    _buttonsPrimary.pack_start(*_addBarButton(INKSCAPE_ICON("layer-new"), _("Add layer..."), (int)SP_VERB_LAYER_NEW), Gtk::PACK_SHRINK);
+    _buttonsSecondary.pack_end(*_addBarButton(INKSCAPE_ICON("edit-delete"), _("Remove object"), (int)SP_VERB_EDIT_DELETE), Gtk::PACK_SHRINK);
+    _buttonsSecondary.pack_end(*_addBarButton(INKSCAPE_ICON("go-down"), _("Move Down"), (int)SP_VERB_SELECTION_STACK_DOWN), Gtk::PACK_SHRINK);
+    _buttonsSecondary.pack_end(*_addBarButton(INKSCAPE_ICON("go-up"), _("Move Up"), (int)SP_VERB_SELECTION_STACK_UP), Gtk::PACK_SHRINK);
 
-    _buttonsRow.pack_start(_buttonsSecondary, Gtk::PACK_EXPAND_WIDGET);
-    _buttonsRow.pack_end(_buttonsPrimary, Gtk::PACK_EXPAND_WIDGET);
+    _buttonsRow.pack_start(_buttonsPrimary, Gtk::PACK_SHRINK);
+    _buttonsRow.pack_end(_buttonsSecondary, Gtk::PACK_SHRINK);
 
     update();
     show_all_children();
@@ -686,7 +688,7 @@ ObjectsPanel::~ObjectsPanel()
 void ObjectsPanel::_objects_toggle()
 {
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    prefs->setBool("/dialogs/objects/layers_only", !_switch_objects.get_active());
+    prefs->setBool("/dialogs/objects/layers_only", !_object_mode.get_active());
     // Clear and update entire tree (do not use this in changed/modified signals)
     setRootWatcher();
 }
@@ -778,7 +780,7 @@ void ObjectsPanel::layerChanged(SPObject *layer)
 /**
  * Stylizes a button using the given icon name and tooltip
  */
-void ObjectsPanel::_addBarButton(char const* iconName, char const* tooltip, int verb_id)
+Gtk::Button* ObjectsPanel::_addBarButton(char const* iconName, char const* tooltip, int verb_id)
 {
     Gtk::Button* btn = Gtk::manage(new Gtk::Button());
     auto child = Glib::wrap(sp_get_icon_image(iconName, GTK_ICON_SIZE_SMALL_TOOLBAR));
@@ -787,7 +789,7 @@ void ObjectsPanel::_addBarButton(char const* iconName, char const* tooltip, int 
     btn->set_relief(Gtk::RELIEF_NONE);
     btn->set_tooltip_text(tooltip);
     btn->signal_clicked().connect(sigc::bind( sigc::mem_fun(*this, &ObjectsPanel::_takeAction), verb_id));
-    _buttonsSecondary.pack_start(*btn, Gtk::PACK_SHRINK);
+    return btn;
 }
 
 /**

@@ -112,12 +112,12 @@ private:
     Gtk::ScrolledWindow _scroller;
     Gtk::Menu _popupMenu;
     Gtk::Box _page;
-    Gtk::Switch _switch_objects;
+    Gtk::ToggleButton _object_mode;
 
     ObjectsPanel(ObjectsPanel const &) = delete; // no copy
     ObjectsPanel &operator=(ObjectsPanel const &) = delete; // no assign
 
-    void _addBarButton(char const* iconName, char const* tooltip, int verb_id);
+    Gtk::Button *_addBarButton(char const* iconName, char const* tooltip, int verb_id);
     void _fireAction( unsigned int code );
     void _objects_toggle();
     
