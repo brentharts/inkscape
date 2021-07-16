@@ -79,7 +79,7 @@ public:
 
     ObjectWatcher *findChild(Node *node);
     void addDummyChild();
-    void addChild(SPItem *);
+    bool addChild(SPItem *, bool dummy = true);
     void addChildren(SPItem *, bool dummy = false);
     void setSelectedBit(SelectionState mask, bool enabled);
     void setSelectedBitRecursive(SelectionState mask, bool enabled);
@@ -321,29 +321,35 @@ ObjectWatcher *ObjectWatcher::findChild(Node *node)
     return nullptr;
 }
 
-void ObjectWatcher::addDummyChild()
-{
-    auto const children = getChildren();
-    assert(!children || children.empty());
-    auto const iter = panel->_store->append(children);
-    assert(panel->isDummy(*iter));
-}
-
 /**
  * Add the child object to this node.
  *
  * @param child - SPObject to be added
+ * @param dummy - Add a dummy objects (hidden) instead
+ *
+ * @returns true if child added was a dummy objects
  */
-void ObjectWatcher::addChild(SPItem *child)
+bool ObjectWatcher::addChild(SPItem *child, bool dummy)
 {
     auto group = dynamic_cast<SPGroup *>(child);
     if (layers_only && (!group || group->layerMode() != SPGroup::LAYER)) {
-        return;
+        return false;
+    }
+
+    auto const children = getChildren();
+    if (dummy) {
+        if (children.empty()) {
+            auto const iter = panel->_store->append(children);
+            assert(panel->isDummy(*iter));
+            return true;
+        } else if (panel->isDummy(children[0])) {
+            return false;
+        }
     }
 
     auto *node = child->getRepr();
     assert(node);
-    Gtk::TreeModel::Row row = *(panel->_store->append(getChildren()));
+    Gtk::TreeModel::Row row = *(panel->_store->append(children));
 
     auto &watcher = child_watchers[node];
     assert(!watcher);
@@ -353,6 +359,7 @@ void ObjectWatcher::addChild(SPItem *child)
     if ((selection_state & LAYER_FOCUSED) != 0) {
         watcher->setSelectedBit(LAYER_FOCUS_CHILD, true);
     }
+    return false;
 }
 
 /**
@@ -364,12 +371,9 @@ void ObjectWatcher::addChildren(SPItem *obj, bool dummy)
 
     for (auto &child : obj->children) {
         if (auto item = dynamic_cast<SPItem *>(&child)) {
-            if (dummy) {
-                addDummyChild();
+            if (addChild(item, dummy) && dummy) {
                 // one dummy child is enough to make the group expandable
                 break;
-            } else {
-                addChild(item);
             }
         }
     }
@@ -434,34 +438,18 @@ Gtk::TreeIter ObjectWatcher::getChildIter(Node *node) const
             return row;
         }
     }
-
-    g_warning("%s cound not find child <%s %p>", __func__, node->name(), node);
+    // In layer mode, we will come here for all non-layers
     return childrows.begin();
 }
 
 void ObjectWatcher::notifyChildAdded( Node &node, Node &child, Node *prev )
 {
     assert(this->node == &node);
-
     // Ignore XML nodes which are not displayable items
-    auto item = dynamic_cast<SPItem *>(panel->getObject(&child));
-    if (!item) {
-        return;
+    if (auto item = dynamic_cast<SPItem *>(panel->getObject(&child))) {
+        addChild(item);
+        moveChild(child, prev);
     }
-
-    auto const childrows = getChildren();
-
-    if (childrows.empty()) {
-        addDummyChild();
-        return;
-    }
-
-    if (panel->isDummy(childrows[0])) {
-        return;
-    }
-
-    addChild(item);
-    moveChild(child, prev);
 }
 void ObjectWatcher::notifyChildRemoved( Node &node, Node &child, Node* /*prev*/ )
 {
