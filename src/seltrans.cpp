@@ -1085,14 +1085,55 @@ gboolean Inkscape::SelTrans::scaleRequest(Geom::Point &pt, guint state)
 gboolean Inkscape::SelTrans::distributeDragRequest(SPSelTransHandle const &handle, Geom::Point &pt, guint state)
 {
     auto delta = pt;
-    auto new_box = _bbox;
+
+    if(_items.size()<2)
+        return true;
+
     switch(handle.type){
+
+        case HANDLE_CENTER_ALIGN_DISTRIBUTE:
+            return true;
+
+
+        case HANDLE_CORNER_ALIGN_DISTRIBUTE:
+            break;
+
         case HANDLE_SIDE_ALIGN_DISTRIBUTE:
-        for (unsigned i = 0; i < _items.size(); i++) {
-            SPItem &item = *_items[i];
-            _items[i]->move_rel(Geom::Translate( (i * delta[Geom::X]/((_items.size() - 1)*1000)), 0));
+        {
+            switch(handle.cursor)
+            {
+                case GDK_TOP_SIDE:
+                {
+                    for (unsigned i = 0; i < _items.size(); i++) {
+                        _items[_items.size() - 1 - i]->move_rel(Geom::Translate(0, (i * delta[Geom::X]/((_items.size() - 1)*1000))));
+                    }
+                }
+                break;
+                case GDK_RIGHT_SIDE:
+                {
+                    for (unsigned i = 0; i < _items.size(); i++) {
+                        _items[i]->move_rel(Geom::Translate( (i * delta[Geom::X]/((_items.size() - 1)*1000)), 0));
+                    }
+                }
+                break;
+                case GDK_BOTTOM_SIDE:
+                {
+                    for (unsigned i = 0; i < _items.size(); i++) {
+                        _items[i]->move_rel(Geom::Translate( 0, (i * delta[Geom::Y]/((_items.size() - 1)*1000))));
+                    }
+                }
+                break;
+                case GDK_LEFT_SIDE:
+                {
+                    for (unsigned i = 0; i < _items.size(); i++) {
+                        _items[_items.size() - 1 - i]->move_rel(Geom::Translate( (i * delta[Geom::X]/((_items.size() - 1)*1000)), 0));
+                    }
+                }
+                break;
+            }
         }
         break;
+
     }
     return true;
 }
