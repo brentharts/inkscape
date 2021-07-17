@@ -49,15 +49,17 @@ MarkerTool::MarkerTool()
 {
 }
 
-// Clean selection on tool change
 void MarkerTool::finish() 
 {
     this->_selected_nodes->clear();
+    // Clear markers selected on exit from marker tool
     this->desktop->selection->clear();
     ToolBase::finish();
 }
 
-/** Recursively get all shapes within a marker when marker mode is entered **/
+/** Recursively get all shapes within a marker when marker mode 2 is entered
+This function is very similar to the one that exists in node-tool.cpp
+TODO: look at case when marker has group transforms underneath **/
 static bool gather_items(NodeTool *nt, SPItem *base, SPObject *obj, Inkscape::UI::ShapeRole role,
     std::set<Inkscape::UI::ShapeRecord> &s, Inkscape::Selection *sel, Geom::Affine &tr)
 {
@@ -76,8 +78,6 @@ static bool gather_items(NodeTool *nt, SPItem *base, SPObject *obj, Inkscape::UI
         SPItem *item = dynamic_cast<SPItem *>(obj);
         ShapeRecord r;
         r.object = object;
-        // TODO add support for objectBoundingBox
-        //r.edit_transform = base ? base->i2doc_affine() : Geom::identity();
         r.edit_transform = tr;
         r.role = role;
 
@@ -97,7 +97,9 @@ static bool gather_items(NodeTool *nt, SPItem *base, SPObject *obj, Inkscape::UI
     return true;
 }
 
-/* TODO - break this function up and make look nicer */
+/* This function uses similar logic that exists in sp_shape_update_marker_view, to calculate exactly where
+the knotholders need to go and returns the edit_transform that is then loaded into the
+ShapeEditor/PathManipulator/MultipathManipulator  */
 Geom::Affine MarkerTool::get_marker_transform(SPShape* shape, SPItem *item, SPMarkerLoc marker_type)
 {
     SPObject *marker_obj = shape->_marker[marker_type];
@@ -221,12 +223,15 @@ Geom::Affine MarkerTool::get_marker_transform(SPShape* shape, SPItem *item, SPMa
         } 
     }
 
+    /* scale by stroke width */
     ret = scale * ret;
+    /* child to parent transform */
     ret = sp_marker->c2p * ret;
     return ret;
 }
 
-
+/* When a selection changes, if any selected objects have start/end/mid markers,
+they are loaded into the ShapeEditor/PathManipulator/MultipathManipulator */
 void MarkerTool::selection_changed(Inkscape::Selection *sel) {
     using namespace Inkscape::UI;
 
@@ -246,32 +251,31 @@ void MarkerTool::selection_changed(Inkscape::Selection *sel) {
                         Inkscape::XML::Node *marker_repr = marker_obj->getRepr();
                         SPItem* marker_item = dynamic_cast<SPItem *>(this->desktop->getDocument()->getObjectByRepr(marker_repr));
 
+                        Geom::Affine marker_tr = Geom::identity();
+
+                        switch(i) {
+                            case SP_MARKER_LOC_START:
+                                marker_tr  = get_marker_transform(shape, marker_item, SP_MARKER_LOC_START);
+                                break;
+                            case SP_MARKER_LOC_MID:
+                                marker_tr  = get_marker_transform(shape, marker_item, SP_MARKER_LOC_MID);
+                                break;
+                            case SP_MARKER_LOC_END:
+                                marker_tr  = get_marker_transform(shape, marker_item, SP_MARKER_LOC_END);
+                                break;
+                            default:
+                                break;
+                        }  
+
                         if(enter_marker_mode) {
-                            
-                            Geom::Affine marker_tr = Geom::identity();
-
-                            switch(i) {
-                                case SP_MARKER_LOC_START:
-                                    marker_tr  = get_marker_transform(shape, marker_item, SP_MARKER_LOC_START);
-                                    break;
-                                case SP_MARKER_LOC_MID:
-                                    marker_tr  = get_marker_transform(shape, marker_item, SP_MARKER_LOC_MID);
-                                    break;
-                                case SP_MARKER_LOC_END:
-                                    marker_tr  = get_marker_transform(shape, marker_item, SP_MARKER_LOC_END);
-                                    break;
-                                default:
-                                    break;
-                            }  
-
                             if (gather_items(this, nullptr, marker_item, SHAPE_ROLE_NORMAL, shapes, sel, marker_tr)) {
-                                // remove parent item here maybe ?
+                                // remove parent item here maybe ? - this is extra stuff related to selection that might be remove - ignore for now
                             }
 
                         } else {
                             ShapeRecord sr;
                             sr.object = marker_item;
-                            sr.edit_transform = Geom::identity();
+                            sr.edit_transform = marker_tr;
                             sr.role = SHAPE_ROLE_NORMAL;
                             if (shapes.insert(sr).second) {;
                                 //sel->add(marker_item);
@@ -297,7 +301,7 @@ void MarkerTool::selection_changed(Inkscape::Selection *sel) {
 
     for (const auto & r : shapes) {
         if (this->_shape_editors.find(SP_ITEM(r.object)) == this->_shape_editors.end()) {
-            auto si = std::make_unique<ShapeEditor>(this->desktop, r.edit_transform);
+            auto si = std::make_unique<ShapeEditor>(this->desktop, r.edit_transform, true);
             SPItem *item = SP_ITEM(r.object);
             si->set_item(item);
             this->_shape_editors.insert({item, std::move(si)});
@@ -312,7 +316,7 @@ void MarkerTool::selection_changed(Inkscape::Selection *sel) {
     sp_update_helperpath(desktop);
 }
 
-/* Toggles between two marker modes */
+/* Toggles between two marker modes 1 and 2 using shift+z */
 bool MarkerTool::root_handler_extended(GdkEvent* event) {
     Inkscape::Selection *selection = this->desktop->getSelection();
 

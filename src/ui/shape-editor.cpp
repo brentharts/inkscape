@@ -24,18 +24,19 @@
 namespace Inkscape {
 namespace UI {
 
-KnotHolder *createKnotHolder(SPItem *item, SPDesktop *desktop);
+KnotHolder *createKnotHolder(SPItem *item, SPDesktop *desktop, bool edit_marker_mode);
 KnotHolder *createLPEKnotHolder(SPItem *item, SPDesktop *desktop);
 
 bool ShapeEditor::_blockSetItem = false;
 
-ShapeEditor::ShapeEditor(SPDesktop *dt, Geom::Affine edit_transform) :
+ShapeEditor::ShapeEditor(SPDesktop *dt, Geom::Affine edit_transform, bool edit_marker_mode) :
     desktop(dt),
     knotholder(nullptr),
     lpeknotholder(nullptr),
     knotholder_listener_attached_for(nullptr),
     lpeknotholder_listener_attached_for(nullptr),
-    _edit_transform(edit_transform)
+    _edit_transform(edit_transform),
+    _edit_marker_mode(edit_marker_mode)
 {
 }
 
@@ -134,7 +135,7 @@ void ShapeEditor::set_item(SPItem *item) {
         Inkscape::XML::Node *repr;
         if (!this->knotholder) {
             // only recreate knotholder if none is present
-            this->knotholder = createKnotHolder(item, desktop);
+            this->knotholder = createKnotHolder(item, desktop, _edit_marker_mode);
         }
         SPLPEItem *lpe = dynamic_cast<SPLPEItem *>(item);
         if (!(lpe &&
@@ -151,6 +152,7 @@ void ShapeEditor::set_item(SPItem *item) {
         }
         if (this->knotholder) {
             this->knotholder->setEditTransform(_edit_transform);
+            this->knotholder->setEditMarkerMode(_edit_marker_mode);
             this->knotholder->update_knots();
             // setting new listener
             repr = this->knotholder->repr;
