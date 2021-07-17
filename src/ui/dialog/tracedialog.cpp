@@ -32,6 +32,7 @@
 #include "trace/autotrace/inkscape-autotrace.h"
 #include "trace/potrace/inkscape-potrace.h"
 #include "trace/depixelize/inkscape-depixelize.h"
+#include "display/cairo-utils.h"
 
 // This maps the column ids in the glade file to useful enums
 static const std::map<std::string, Inkscape::Trace::Potrace::TraceType> trace_types = {
@@ -65,6 +66,7 @@ private:
     bool previewResize(const Cairo::RefPtr<Cairo::Context>&);
     void traceCallback();
     void onSetDefaults();
+    void show_hide_params();
 
     Glib::RefPtr<Gtk::Builder> builder;
 
@@ -76,10 +78,14 @@ private:
     Gtk::RadioButton *RB_PA_voronoi;
     Gtk::Button *B_RESET, *B_STOP, *B_OK, *B_Update;
     Gtk::Box *mainBox;
-    Gtk::Stack *choice_scan;
+    // Gtk::Stack *choice_scan;
     Gtk::Notebook *choice_tab;
     Glib::RefPtr<Gdk::Pixbuf> scaledPreview;
     Gtk::DrawingArea *previewArea;
+    Gtk::Box* orient_box;
+    // Gtk::Label* _expand;
+    Gtk::Frame* _preview_frame;
+    Gtk::Grid* _param_grid;
 };
 
 void TraceDialogImpl2::traceProcess(bool do_i_trace)
@@ -94,7 +100,7 @@ void TraceDialogImpl2::traceProcess(bool do_i_trace)
         tracer.enableSiox(false);
 
     Glib::ustring type =
-        choice_scan->get_visible_child_name() == "SingleScan" ? CBT_SS->get_active_id() : CBT_MS->get_active_id();
+        /*choice_scan->get_visible_child_name() == "SingleScan" ?*/ CBT_SS->get_active_id(); // : CBT_MS->get_active_id();
 
     bool use_autotrace = false;
     Inkscape::Trace::Autotrace::AutotraceTracingEngine ate; // TODO
@@ -179,21 +185,41 @@ void TraceDialogImpl2::traceProcess(bool do_i_trace)
 
 bool TraceDialogImpl2::previewResize(const Cairo::RefPtr<Cairo::Context>& cr)
 {
-    if (!scaledPreview) return false; // return early
-    int width = scaledPreview->get_width();
-    int height = scaledPreview->get_height();
-    const Gtk::Allocation &vboxAlloc = previewArea->get_allocation();
-    double scaleFX = vboxAlloc.get_width() / (double)width;
-    double scaleFY = vboxAlloc.get_height() / (double)height;
-    double scaleFactor = scaleFX > scaleFY ? scaleFY : scaleFX;
-    int newWidth = (int)(((double)width) * scaleFactor);
-    int newHeight = (int)(((double)height) * scaleFactor);
-    int offsetX = (vboxAlloc.get_width() - newWidth)/2;
-    int offsetY = (vboxAlloc.get_height() - newHeight)/2;
+    if (auto wnd = dynamic_cast<Gtk::Window*>(this->get_toplevel())) {
+        auto color = wnd->get_style_context()->get_background_color();
+        auto background =
+            gint32(0xff * color.get_red()) << 24 |
+            gint32(0xff * color.get_green()) << 16 |
+            gint32(0xff * color.get_blue()) << 8 |
+            0xff;
 
-    Glib::RefPtr<Gdk::Pixbuf> temp = scaledPreview->scale_simple(newWidth, newHeight, Gdk::INTERP_NEAREST);
-    Gdk::Cairo::set_source_pixbuf(cr, temp, offsetX, offsetY);
-    cr->paint();
+        auto device_scale = get_scale_factor();
+        Cairo::RefPtr<Cairo::Pattern> pattern(new Cairo::Pattern(ink_cairo_pattern_create_checkerboard(background)));
+        cr->save();
+        cr->scale(device_scale, device_scale);
+        cr->set_operator(Cairo::OPERATOR_SOURCE);
+        cr->set_source(pattern);
+        cr->paint();
+        cr->restore();
+    }
+
+    if (scaledPreview) {
+        int width = scaledPreview->get_width();
+        int height = scaledPreview->get_height();
+        const Gtk::Allocation &vboxAlloc = previewArea->get_allocation();
+        double scaleFX = vboxAlloc.get_width() / (double)width;
+        double scaleFY = vboxAlloc.get_height() / (double)height;
+        double scaleFactor = scaleFX > scaleFY ? scaleFY : scaleFX;
+        int newWidth = (int)(((double)width) * scaleFactor);
+        int newHeight = (int)(((double)height) * scaleFactor);
+        int offsetX = (vboxAlloc.get_width() - newWidth)/2;
+        int offsetY = (vboxAlloc.get_height() - newHeight)/2;
+
+        Glib::RefPtr<Gdk::Pixbuf> temp = scaledPreview->scale_simple(newWidth, newHeight, Gdk::INTERP_NEAREST);
+        Gdk::Cairo::set_source_pixbuf(cr, temp, offsetX, offsetY);
+        cr->paint();
+    }
+
     return false;
 }
 
@@ -252,7 +278,7 @@ TraceDialogImpl2::TraceDialogImpl2()
                                         "CB_MS_stack", "CB_MS_rb",  "CB_speckles", "CB_smooth",  "CB_optimize",
                                         "CB_PA_optimize", /*"CB_live",*/ "CB_SIOX", "CBT_SS",    "CBT_MS",
                                         "B_RESET",     "B_STOP",    "B_OK",         "mainBox",   "choice_tab",
-                                        "choice_scan", "previewArea" };
+                                        /*"choice_scan",*/ "previewArea" };
     auto gladefile = get_filename_string(Inkscape::IO::Resource::UIS, "dialog-trace.glade");
     try {
         builder = Gtk::Builder::create_from_file(gladefile);
@@ -310,8 +336,12 @@ TraceDialogImpl2::TraceDialogImpl2()
     GET_W(B_Update)
     GET_W(mainBox)
     GET_W(choice_tab)
-    GET_W(choice_scan)
+    // GET_W(choice_scan)
     GET_W(previewArea)
+    GET_W(orient_box)
+    // GET_W(_expand)
+    GET_W(_preview_frame)
+    GET_W(_param_grid)
 #undef GET_W
 #undef GET_O
     add(*mainBox);
@@ -322,6 +352,37 @@ TraceDialogImpl2::TraceDialogImpl2()
     B_STOP->signal_clicked().connect(sigc::mem_fun(*this, &TraceDialogImpl2::abort));
     B_RESET->signal_clicked().connect(sigc::mem_fun(*this, &TraceDialogImpl2::onSetDefaults));
     previewArea->signal_draw().connect(sigc::mem_fun(*this, &TraceDialogImpl2::previewResize));
+
+    // attempt at making UI responsive: relocate preview to right or bottom depending on dialog size
+    const int WIDTH_SMALL = 600;
+    this->signal_size_allocate().connect([=](const Gtk::Allocation& alloc){
+        g_warning("size alloc: %d x %d", alloc.get_width(), alloc.get_height());
+        if (alloc.get_height() > 600 && alloc.get_width() < WIDTH_SMALL) {
+            orient_box->set_orientation(Gtk::ORIENTATION_VERTICAL);
+        }
+        if (alloc.get_height() > 500 && alloc.get_width() > WIDTH_SMALL + 10) { // add some hysteresis
+            orient_box->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
+        }
+    });
+    // this->signa
+    CBT_SS->signal_changed().connect([=](){ show_hide_params(); });
+    show_hide_params();
+}
+
+void TraceDialogImpl2::show_hide_params() {
+    int start_row = 2;
+    int option = CBT_SS->get_active_row_number();
+    int show1 = start_row + option;
+    int show2 = start_row + option;
+    if (option >= 3) ++show2;
+
+    for (int row = start_row; row < start_row + 5; ++row) {
+        for (int col = 0; col < 4; ++col) {
+            if (auto widget = _param_grid->get_child_at(col, row)) {
+                if (row == show1 || row == show2) widget->show(); else widget->hide();
+            }
+        }
+    }
 }
 
 TraceDialog &TraceDialog::getInstance()
