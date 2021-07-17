@@ -462,10 +462,9 @@ void SPShape::modified(unsigned int flags) {
         }
     }
 
-    if (flags != 29 && flags != 253 && !_curve) {
+    //we must do a LPE cicle on SPShapes not paths
+    if (!_curve) {
         sp_lpe_item_update_patheffect(this, true, false);
-    } else if (!_curve) {
-        this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
     }
 }
 

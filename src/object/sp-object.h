@@ -248,6 +248,10 @@ public:
         }
     };
 
+    void setForkedTo(SPObject *forked_to);
+    
+    void releaseForkedTo();
+
     typedef Inkscape::Util::ForwardPointerIterator<SPObject, ParentIteratorStrategy> ParentIterator;
     typedef Inkscape::Util::ForwardPointerIterator<SPObject const, ParentIteratorStrategy> ConstParentIterator;
 
@@ -832,6 +836,9 @@ public:
     void recursivePrintTree(unsigned level = 0);  // For debugging
     static unsigned indent_level;
     void objectTrace( std::string const &, bool in=true, unsigned flags=0 );
+    
+    /* Temporary store reference to a copyed/clone/stamped/dupled object */
+    Glib::ustring forked_id;
 };
 
 std::ostream &operator<<(std::ostream &out, const SPObject &o);

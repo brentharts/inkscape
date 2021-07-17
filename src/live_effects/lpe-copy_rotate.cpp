@@ -105,10 +105,44 @@ LPECopyRotate::LPECopyRotate(LivePathEffectObject *lpeobject) :
     previous_start_point = Geom::Point(0,0);
     starting_point.param_widget_is_visible(false);
     reset = false;
+    lpesatellites.setPreserveSlots(true);
+    fixLegacy();
 }
 
 LPECopyRotate::~LPECopyRotate()
 = default;
+
+void
+LPECopyRotate::fixLegacy()
+{
+    if (!is_load) {
+        return;
+    }
+    Glib::ustring version = lpeversion.param_getSVGValue();
+    if (version < "1.2") {
+        if (split_items) {
+            for (size_t i = 0; i< num_copies; i++) {
+                Glib::ustring id = Glib::ustring("rotated-");
+                id += std::to_string(i);
+                id += "-";
+                id += this->lpeobj->getId();
+                if (id.empty()) {
+                    return;
+                }
+                SPObject *elemref = SP_ACTIVE_DOCUMENT->getObjectById(id.c_str());
+                if (elemref) {
+                    lpesatellites.link(elemref, i);
+                }
+            }
+            std::vector<SPLPEItem *> lpeitems = getCurrrentLPEItems();
+            if (lpeitems.size() == 1) {
+                sp_lpe_item = lpeitems[0];
+                sp_lpe_item_update_patheffect(sp_lpe_item, false, false);
+            }
+        }
+        lpeversion.param_setValue("1.2", true);
+    }
+}
 
 void
 LPECopyRotate::doAfterEffect (SPLPEItem const* lpeitem, SPCurve *curve)
@@ -118,23 +152,26 @@ LPECopyRotate::doAfterEffect (SPLPEItem const* lpeitem, SPCurve *curve)
         if (!document) {
             return;
         }
-        items.clear();
+        /* Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+        if (prefs->getBool("/live_effects/satelleitesiddle", false)) {
+            return;
+        }  */
+        if (lpeitem->on_ungroup) {
+            return;
+        }
         container = dynamic_cast<SPObject *>(sp_lpe_item->parent);
         if (previous_num_copies != num_copies) {
             gint numcopies_gap = previous_num_copies - num_copies;
             if (numcopies_gap > 0 && num_copies != 0) {
                 guint counter = num_copies - 1;
-                while (numcopies_gap > 0) {
-                    Glib::ustring id = Glib::ustring("rotated-");
-                    id += std::to_string(counter);
-                    id += "-";
-                    id += this->lpeobj->getId();
-                    if (id.empty()) {
-                        return;
-                    }
-                    SPObject *elemref = document->getObjectById(id.c_str());
-                    if (elemref) {
-                        SP_ITEM(elemref)->setHidden(true);
+                for (auto obj: lpesatellites._vector) {
+                    if (obj) {
+                        if (numcopies_gap > 0) {
+                            SPItem *tohide = dynamic_cast<SPItem *>(obj->getObject());
+                            if (tohide) {
+                                tohide->setHidden(true);
+                            }
+                        }
                     }
                     counter++;
                     numcopies_gap--;
@@ -142,20 +179,7 @@ LPECopyRotate::doAfterEffect (SPLPEItem const* lpeitem, SPCurve *curve)
             }
             previous_num_copies = num_copies;
         }
-        SPObject *elemref = nullptr;
-        guint counter = 0;
-        Glib::ustring id = "rotated-0-";
-        id += this->lpeobj->getId();
-        while((elemref = document->getObjectById(id.c_str()))) {
-            id = Glib::ustring("rotated-");
-            id += std::to_string(counter);
-            id += "-";
-            id += this->lpeobj->getId();
-            if (SP_ITEM(elemref)->isHidden()) {
-                items.push_back(id);
-            }
-            counter++;
-        }
+
         Geom::Affine m = Geom::Translate(-origin) * Geom::Rotate(-(Geom::rad_from_deg(starting_angle)));
         for (size_t i = 1; i < num_copies; ++i) {
             Geom::Affine r = Geom::identity();
@@ -181,8 +205,39 @@ LPECopyRotate::doAfterEffect (SPLPEItem const* lpeitem, SPCurve *curve)
         }
         reset = false;
     } else {
-        processObjects(LPE_ERASE);
-        items.clear();
+        processObjectsOK(LPE_ERASE);
+        lpesatellites.clear();
+    }
+}
+
+void 
+LPECopyRotate::doOnFork(SPLPEItem const *lpeitem, Effect const *preveffect)
+{
+    if (!preveffect) {
+        return;
+    }
+    std::vector<SPLPEItem *> lpeitems = preveffect->getCurrrentLPEItems();
+    if (!lpeitems.size()) {
+        return;
+    }
+    SPLPEItem *previous = nullptr;
+    previous = lpeitems.back();
+    if (!previous) {
+        return;
+    }
+    lpesatellites.clear();
+    size_t counter = 0;
+    for (auto itemref : preveffect->lpesatellites._vector) {
+        if (!itemref) {
+            counter++;
+            continue;
+        }
+        SPObject *elemref = itemref->getObject();
+        SPObject *forked_obj = elemref->document->getObjectById(elemref->forked_id);
+        if (elemref && forked_obj) {
+            lpesatellites.link(forked_obj,counter);
+        }
+        counter++;
     }
 }
 
@@ -298,18 +353,19 @@ LPECopyRotate::toItem(Geom::Affine transform, size_t i, bool reset)
         return;
     }
     Inkscape::XML::Document *xml_doc = document->getReprDoc();
-    Glib::ustring elemref_id = Glib::ustring("rotated-");
-    elemref_id += std::to_string(i);
-    elemref_id += "-";
-    elemref_id += this->lpeobj->getId();
-    items.push_back(elemref_id);
-    SPObject *elemref = document->getObjectById(elemref_id.c_str());
+    SPObject *elemref = nullptr;
+    if (lpesatellites._vector.size() > i) {
+        if (lpesatellites._vector[i]) {
+            elemref = lpesatellites._vector[i]->getObject();
+        }
+    }
     Inkscape::XML::Node *phantom = nullptr;
+    bool cration = false;
     if (elemref) {
         phantom = elemref->getRepr();
     } else {
+        cration = true;
         phantom = createPathBase(sp_lpe_item);
-        phantom->setAttribute("id", elemref_id);
         reset = true;
         elemref = container->appendChildRepr(phantom);
         elemref->parent->reorder(elemref, sp_lpe_item);
@@ -319,11 +375,18 @@ LPECopyRotate::toItem(Geom::Affine transform, size_t i, bool reset)
     elemref->getRepr()->setAttributeOrRemoveIfEmpty("transform", sp_svg_transform_write(transform));
     SP_ITEM(elemref)->setHidden(false);
     if (elemref->parent != container) {
+        if (!cration) {
+            lpesatellites.remove_link(elemref);
+        }
         Inkscape::XML::Node *copy = phantom->duplicate(xml_doc);
-        copy->setAttribute("id", elemref_id);
-        container->appendChildRepr(copy);
+        copy->setAttribute("id", elemref->getId());
+        lpesatellites.link(container->appendChildRepr(copy), i);
         Inkscape::GC::release(copy);
         elemref->deleteObject();
+    } else {
+        if (cration) {
+            lpesatellites.link(elemref, i);
+        }
     }
 }
 
@@ -386,12 +449,14 @@ LPECopyRotate::doOnApply(SPLPEItem const* lpeitem)
     origin.param_update_default(A);
     dist_angle_handle = L2(B - A);
     dir = unit_vector(B - A);
+    lpeversion.param_setValue("1.2", true);
 }
 
 void
 LPECopyRotate::doBeforeEffect (SPLPEItem const* lpeitem)
 {
     using namespace Geom;
+    Glib::ustring version = lpeversion.param_getSVGValue();
     original_bbox(lpeitem, false, true);
     if (copies_to_360 && num_copies > 2) {
         rotation_angle.param_set_value(360.0/(double)num_copies);
@@ -661,7 +726,7 @@ LPECopyRotate::resetDefaults(SPItem const* item)
 void
 LPECopyRotate::doOnVisibilityToggled(SPLPEItem const* /*lpeitem*/)
 {
-    processObjects(LPE_VISIBILITY);
+    processObjectsOK(LPE_VISIBILITY);
 }
 
 void 
@@ -669,17 +734,20 @@ LPECopyRotate::doOnRemove (SPLPEItem const* lpeitem)
 {
     std::vector<SPLPEItem *> lpeitems = getCurrrentLPEItems();
     if (lpeitems.size() == 1) {
+        if (lpeitem->on_ungroup) {
+            return;
+        }
         sp_lpe_item = lpeitems[0];
         if (!sp_lpe_item->path_effects_enabled) {
             return;
         }
         //set "keep paths" hook on sp-lpe-item.cpp
         if (keep_paths) {
-            processObjects(LPE_TO_OBJECTS);
-            items.clear();
+            processObjectsOK(LPE_TO_OBJECTS);
+            lpesatellites.clear();
             return;
         }
-        processObjects(LPE_ERASE);
+        processObjectsOK(LPE_ERASE);
     }
 }
 

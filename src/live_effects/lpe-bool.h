@@ -32,6 +32,7 @@ public:
     void transform_multiply(Geom::Affine const &postmul, bool set) override;
     void doOnVisibilityToggled(SPLPEItem const * /*lpeitem*/) override;
     void doOnRemove(SPLPEItem const * /*lpeitem*/) override;
+    void doOnFork(SPLPEItem const *lpeitem, Effect const *preveffect) override;
     void add_filter();
     Geom::PathVector get_union(SPObject *object);
     void remove_filter();
@@ -54,12 +55,11 @@ public:
         assert(val <= bool_op_ex_cut);
         return (bool_op) val;
     }
-
+    OriginalItemParam operand_path;
 private:
     LPEBool(const LPEBool &) = delete;
     LPEBool &operator=(const LPEBool &) = delete;
 
-    OriginalItemParam operand_path;
     EnumParam<bool_op_ex> bool_operation;
     EnumParam<fill_typ> fill_type_this;
     EnumParam<fill_typ> fill_type_operand;

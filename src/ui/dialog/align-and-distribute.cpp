@@ -126,7 +126,9 @@ void ActionAlign::do_action(SPDesktop *desktop, int index)
     for (auto itemlist = list.begin(); itemlist != list.end(); ++itemlist) {
         SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(*itemlist);
         if (lpeitem && lpeitem->hasPathEffectOfType(Inkscape::LivePathEffect::EffectType::BOOL_OP)) {
+            lpeitem->on_align_distribute = true;
             sp_lpe_item_update_patheffect(lpeitem, false, false);
+            lpeitem->on_align_distribute = false;
         }
     }
     std::vector<SPItem*> selected(selection->items().begin(), selection->items().end());
@@ -314,7 +316,16 @@ private :
 
         std::vector<SPItem*> selected(selection->items().begin(), selection->items().end());
         if (selected.empty()) return;
-
+        // We force unselect operand in bool LPE
+        auto list = selection->items();
+        for (auto itemlist = list.begin(); itemlist != list.end(); ++itemlist) {
+            SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(*itemlist);
+            if (lpeitem && lpeitem->hasPathEffectOfType(Inkscape::LivePathEffect::EffectType::BOOL_OP)){
+                lpeitem->on_align_distribute = true;
+                sp_lpe_item_update_patheffect(lpeitem, false, false);
+                lpeitem->on_align_distribute = false;
+            }
+        }
         //Check 2 or more selected objects
         std::vector<SPItem*>::iterator second(selected.begin());
         ++second;

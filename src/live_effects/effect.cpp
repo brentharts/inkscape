@@ -1068,6 +1068,7 @@ Effect::Effect(LivePathEffectObject *lpeobject)
       oncanvasedit_it(0),
       is_visible(_("Is visible?"), _("If unchecked, the effect remains applied to the object but is temporarily disabled on canvas"), "is_visible", &wr, this, true),
       lpeversion(_("Version"), _("LPE version"), "lpeversion", &wr, this, "0", true),
+      lpesatellites(_("lpesatellites"), _("Items satellites"), "lpesatellites", &wr, this),
       show_orig_path(false),
       keep_paths(false),
       is_load(true),
@@ -1083,8 +1084,9 @@ Effect::Effect(LivePathEffectObject *lpeobject)
       is_ready(false),
       is_applied(false)
 {
-    registerParameter( dynamic_cast<Parameter *>(&is_visible) );
-    registerParameter( dynamic_cast<Parameter *>(&lpeversion) );
+    registerParameter(&is_visible);
+    registerParameter(&lpeversion);
+    registerParameter(&lpesatellites);
     is_visible.widget_is_visible = false;
 }
 
@@ -1192,6 +1194,140 @@ Effect::isNodePointSelected(Geom::Point const &nodePoint) const
         }
     }
     return false;
+}
+
+void
+Effect::_processObjects(LPEAction lpe_action)
+{
+    SPDocument *document = getSPDoc();
+    if (!document) {
+        return;
+    }
+    SPLPEItem *sp_lpe_item = dynamic_cast<SPLPEItem *>(*getLPEObj()->hrefList.begin());
+    if (!document || !sp_lpe_item) {
+        return;
+    }
+    sp_lpe_item_enable_path_effects(sp_lpe_item, false);
+    // we check the items are not deleted
+    lpesatellites.param_readSVGValue(lpesatellites.param_getSVGValue().c_str());
+    // end
+    //std::cout << lpesatellites._vector.size() << std::endl;
+    for (auto &iter : lpesatellites._vector) {
+        SPObject *elemref;
+        if (iter && iter->isAttached() && (elemref = iter->getObject())) {
+            SPItem *item = dynamic_cast<SPItem *>(elemref);
+            if (item) {
+                Inkscape::XML::Node * elemnode = elemref->getRepr();
+                SPCSSAttr *css;
+                Glib::ustring css_str;
+                switch (lpe_action){
+                case LPE_TO_OBJECTS:
+                    if (item->isHidden()) {
+                        item->deleteObject(true);
+                    } else {
+                        elemnode->removeAttribute("sodipodi:insensitive");
+                        SPDefs *defs = dynamic_cast<SPDefs *>(elemref->parent);
+                        if (!defs) {
+                            item->moveTo(sp_lpe_item, false);
+                        }
+                    }
+                    break;
+
+                case LPE_ERASE:
+                    item->deleteObject(true);
+                    break;
+                
+                case LPE_ERASE_UNREF:
+                    if (item->hrefList.size() == 1) { 
+                        item->deleteObject(true);
+                    }
+                    break;
+
+                case LPE_VISIBILITY:
+                    css = sp_repr_css_attr_new();
+                    sp_repr_css_attr_add_from_string(css, elemref->getRepr()->attribute("style"));
+                    if (!isVisible()/* && std::strcmp(elemref->getId(),sp_lpe_item->getId()) != 0*/) {
+                        css->setAttribute("display", "none");
+                    } else {
+                        css->removeAttribute("display");
+                    }
+                    sp_repr_css_write_string(css,css_str);
+                    elemnode->setAttributeOrRemoveIfEmpty("style", css_str);
+                    sp_lpe_item_update_patheffect(sp_lpe_item, false, false);
+                    break;
+                default:
+                    break;
+                }
+            }
+        } else {
+            sp_lpe_item_enable_path_effects(sp_lpe_item, true);
+            return;
+        }
+    }
+    if (lpe_action == LPE_ERASE || lpe_action == LPE_ERASE_UNREF || lpe_action == LPE_TO_OBJECTS) {
+        lpesatellites.clear();
+    }
+    sp_lpe_item_enable_path_effects(sp_lpe_item, true);
+}
+
+
+gboolean 
+Effect::_processObjectsTimeout(gpointer data)
+{
+    Effect *effect=reinterpret_cast<Effect *>(data);
+    effect->_processObjects(effect->_lpe_action);
+    return false;
+}
+
+// we delay till current operation is done to aboid deleted items crashes
+void
+Effect::processObjectsOK(LPEAction lpe_action)
+{
+    SPDocument *document = getSPDoc();
+    if (!document) {
+        return;
+    }
+    SPLPEItem *sp_lpe_item = dynamic_cast<SPLPEItem *>(*getLPEObj()->hrefList.begin());
+    if (!document || !sp_lpe_item) {
+        return;
+    }
+    // we check the items are not deleted
+    lpesatellites.param_readSVGValue(lpesatellites.param_getSVGValue().c_str());
+    // end
+    for (auto &iter : lpesatellites._vector) {
+        SPObject *elemref;
+        if (iter && iter->isAttached() && (elemref = iter->getObject())) {
+            SPItem *item = dynamic_cast<SPItem *>(elemref);
+            if (item) {
+                SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(item);
+                switch (lpe_action){
+                case LPE_TO_OBJECTS:
+                    if (lpeitem && item->isHidden()) {
+                        lpeitem->removeAllPathEffects(false);
+                    }
+                    break;
+                case LPE_ERASE:
+                    if (lpeitem) {
+                        lpeitem->removeAllPathEffects(false);
+                    }
+                    break;
+                case LPE_ERASE_UNREF:
+                    if (lpeitem && item->hrefList.size() == 1) { 
+                        lpeitem->removeAllPathEffects(false);
+                    }
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+    }
+    _lpe_action = lpe_action;
+    g_timeout_add_full(G_PRIORITY_HIGH,1, &Effect::_processObjectsTimeout, this,nullptr);
+    if (!sp_lpe_item->on_ungroup) {
+        while (gtk_events_pending ())
+            gtk_main_iteration();
+    }
 }
 
 void
@@ -1339,6 +1475,19 @@ Effect::acceptParamPath (SPPath const*/*param_path*/) {
     setReady();
 }
 
+void 
+Effect::doOnFork_impl(SPLPEItem const *lpeitem, Effect const *preveffect)
+{   
+    doOnFork(lpeitem, preveffect);
+}
+
+/*
+ *  Do nothing for simple lpe
+ */
+void
+Effect::doOnFork(SPLPEItem const *lpeitem, Effect const *preveffect)
+{
+}
 /*
  *  Here be the doEffect function chain:
  */

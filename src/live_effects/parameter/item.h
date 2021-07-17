@@ -40,6 +40,7 @@ public:
     void param_update_default(const gchar * default_value) override;
     void param_set_and_write_default();
     SPObject *param_fork();
+    void param_relink();
     void addCanvasIndicators(SPLPEItem const* lpeitem, std::vector<Geom::PathVector> &hp_vec) override;
     sigc::signal <void> signal_item_pasted;
     sigc::signal <void> signal_item_changed;

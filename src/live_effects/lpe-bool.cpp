@@ -94,7 +94,6 @@ LPEBool::LPEBool(LivePathEffectObject *lpeobject)
     registerParameter(&filter);
     registerParameter(&fill_type_operand);
     show_orig_path = true;
-    is_load = true;
     prev_affine = Geom::identity();
     operand = dynamic_cast<SPItem *>(operand_path.getObject());
     if (operand) {
@@ -108,6 +107,36 @@ LPEBool::~LPEBool() {
 bool cmp_cut_position(const Path::cut_position &a, const Path::cut_position &b)
 {
     return a.piece == b.piece ? a.t < b.t : a.piece < b.piece;
+}
+
+void 
+LPEBool::doOnFork(SPLPEItem const *lpeitem, Effect const *preveffect)
+{
+    if (!preveffect) {
+        return;
+    }
+    std::vector<SPLPEItem *> lpeitems = preveffect->getCurrrentLPEItems();
+    if (!lpeitems.size()) {
+        return;
+    }
+    SPLPEItem *previous = nullptr;
+    previous = lpeitems.back();
+    if (!previous) {
+        return;
+    }
+    operand_path.remove_link();
+    LPEBool const *prevbool = reinterpret_cast<LPEBool const *>(preveffect);
+    if (!prevbool) {
+        return;
+    }
+    if (!prevbool->operand_path.ref.getObject()) {
+        return;
+    }
+    SPObject *elemref = prevbool->operand_path.ref.getObject();
+    std::cout << elemref->forked_id << std::endl;
+    if (elemref && elemref->forked_id != "") {
+        operand_path.linkitem(elemref->forked_id);
+    }
 }
 
 Geom::PathVector
@@ -367,6 +396,7 @@ static fill_typ GetFillTyp(SPItem *item)
 
 void LPEBool::add_filter()
 {
+    SPItem *operand = dynamic_cast<SPItem *>(operand_path.getObject());
     if (operand) {
         Inkscape::XML::Node *repr = operand->getRepr();
         if (!repr) {
@@ -387,6 +417,7 @@ void LPEBool::add_filter()
 
 void LPEBool::remove_filter()
 {
+    SPObject *operand = operand_path.getObject();
     if (operand) {
         Inkscape::XML::Node *repr = operand->getRepr();
         if (!repr) {
@@ -460,7 +491,6 @@ void LPEBool::doBeforeEffect(SPLPEItem const *lpeitem)
             }
         }
     }
-    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
     SPItem *current_operand = dynamic_cast<SPItem *>(operand_path.getObject());
     operand =  dynamic_cast<SPItem *>(lpeitem->document->getObjectById(operand_id));
     
@@ -469,9 +499,8 @@ void LPEBool::doBeforeEffect(SPLPEItem const *lpeitem)
     }
     if (!current_operand) {
         operand_path.remove_link();
-        operand = nullptr;
     }
-    if (current_operand && current_operand->getId()) {
+    if (current_operand) {
         if (!(document->getObjectById(current_operand->getId()))) {
             operand_path.remove_link();
             operand = nullptr;
@@ -481,17 +510,23 @@ void LPEBool::doBeforeEffect(SPLPEItem const *lpeitem)
             operand_id = current_operand->getId();
         }
     }
+    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
     SPLPEItem *operandlpe = dynamic_cast<SPLPEItem *>(operand_path.getObject());
-    if (desktop && 
-        operand && 
-        sp_lpe_item &&
-        desktop->getSelection()->includes(operand) && 
-        desktop->getSelection()->includes(sp_lpe_item)) 
-    {
-        if (operandlpe && operandlpe->hasPathEffectOfType(Inkscape::LivePathEffect::EffectType::BOOL_OP)) {
-            sp_lpe_item_update_patheffect(operandlpe, false, false);
+    if (desktop) {
+        Inkscape::Selection *selection = desktop->getSelection();
+        if (selection &&
+            operand && 
+            sp_lpe_item &&
+            selection->includes(operand) && 
+            selection->includes(sp_lpe_item)) 
+        {
+            if (operandlpe && operandlpe->hasPathEffectOfType(Inkscape::LivePathEffect::EffectType::BOOL_OP)) {
+                sp_lpe_item_update_patheffect(operandlpe, false, false);
+            }
+            if (sp_lpe_item->on_align_distribute) {
+                selection->remove(current_operand);
+            }
         }
-        desktop->getSelection()->remove(operand);
     }
     if (!current_operand) {
         if (operand) {
@@ -511,24 +546,54 @@ void LPEBool::doBeforeEffect(SPLPEItem const *lpeitem)
             sp_lpe_item_update_patheffect(sp_lpe_item, true, true);
         }
     }
-    if (operand) {
+    if (current_operand) {
         if (is_visible) {
             add_filter();
-            if (operand->getPosition() - 1 != sp_lpe_item->getPosition()) {
-                sp_lpe_item->parent->reorder(operand,sp_lpe_item);
+            if (current_operand->getPosition() - 1 != sp_lpe_item->getPosition()) {
+                sp_lpe_item->parent->reorder(current_operand,sp_lpe_item);
             } 
         } else {
             remove_filter();
         }
     }
+    /* Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+    if (prefs->getBool("/live_effects/satelleitesiddle", false)) {
+        remove_filter();
+    } */
+    if (sp_lpe_item->on_ungroup) {
+        remove_filter();
+    }
+}
+
+gboolean relink(gpointer data)
+{
+    static gint counter = 0;
+    counter++;
+    LPEBool *boollpe = reinterpret_cast<LPEBool *>(data);
+    boollpe->operand_path.param_relink();
+    if (!boollpe->operand_path.getObject()) {
+        gboolean ret = counter > 10 ? FALSE : TRUE;
+        counter = 0;
+        return ret;
+    }
+    return FALSE;
 }
 
 void LPEBool::transform_multiply(Geom::Affine const &postmul, bool /*set*/)
 {
     operand =  dynamic_cast<SPItem *>(sp_lpe_item->document->getObjectById(operand_id));
     if (operand && !isOnClipboard()) {
+        if (!operand_path.getObject()) {
+            g_timeout_add(100, &relink, this);
+            return;
+        }
         SPDesktop *desktop = SP_ACTIVE_DESKTOP;
-        if (desktop && !desktop->getSelection()->includes(operand)) {
+        std::cout << sp_lpe_item->forked_id << std::endl;
+        std::cout << operand->forked_id << std::endl;
+        if (sp_lpe_item->forked_id != "" && operand->forked_id == "") {
+            return;
+        }
+        if (sp_lpe_item && desktop && operand && !desktop->getSelection()->includes(operand)) {
             prev_affine = operand->transform * sp_item_transform_repr(sp_lpe_item).inverse() * postmul;
             operand->doWriteTransform(prev_affine);
         }
@@ -601,18 +666,18 @@ Geom::PathVector LPEBool::get_union(SPObject *object)
 void LPEBool::doEffect(SPCurve *curve)
 {
     Geom::PathVector path_in = curve->get_pathvector();
-    if (operand == current_shape) {
+    SPItem *current_operand = dynamic_cast<SPItem *>(operand_path.getObject());
+    if (current_operand == current_shape) {
         g_warning("operand and current shape are the same");
         operand_path.param_set_default();
         return;
     }
-    if (operand_path.getObject() && operand) {
+    if (current_operand) {
         bool_op_ex op = bool_operation.get_value();
         bool swap =  swap_operands.get_value();
-
         Geom::Affine current_affine = sp_lpe_item->transform;
-        Geom::Affine operand_affine = operand->transform;
-        Geom::PathVector operand_pv = get_union(operand);
+        Geom::Affine operand_affine = current_operand->transform;
+        Geom::PathVector operand_pv = get_union(current_operand);
         if (operand_pv.empty()) {
             return;
         }

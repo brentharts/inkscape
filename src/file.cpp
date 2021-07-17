@@ -961,12 +961,12 @@ void sp_import_document(SPDesktop *desktop, SPDocument *clipdoc, bool in_place)
         target_parent->addChild(obj_copy, node_after);
         node_after = obj_copy;
         Inkscape::GC::release(obj_copy);
-
+        SPObject *copy = target_document->getObjectByRepr(obj_copy);
         pasted_objects.push_back(obj_copy);
 
         // if we are pasting a clone to an already existing object, its
         // transform is relative to the document, not to its original (see ui/clipboard.cpp)
-        SPUse *use = dynamic_cast<SPUse *>(obj_copy);
+        SPUse *use = dynamic_cast<SPUse *>(copy);
         if (use) {
             SPItem *original = use->get_original();
             if (original) {
@@ -976,33 +976,11 @@ void sp_import_document(SPDesktop *desktop, SPDocument *clipdoc, bool in_place)
         }
     }
 
-    std::vector<Inkscape::XML::Node*> pasted_objects_not;
-    if(clipboard) //???? Removed dead code can cause any bug, need to reimplement undead
-    for (Inkscape::XML::Node *obj = clipboard->firstChild() ; obj ; obj = obj->next()) {
-        if(target_document->getObjectById(obj->attribute("id"))) continue;
-        Inkscape::XML::Node *obj_copy = obj->duplicate(target_document->getReprDoc());
-        SPObject * pasted = desktop->currentLayer()->appendChildRepr(obj_copy);
-        Inkscape::GC::release(obj_copy);
-        SPLPEItem * pasted_lpe_item = dynamic_cast<SPLPEItem *>(pasted);
-        if (pasted_lpe_item){
-            pasted_lpe_item->forkPathEffectsIfNecessary(1);
-        }
-        pasted_objects_not.push_back(obj_copy);
-    }
-    Inkscape::Selection *selection = desktop->getSelection();
-    selection->setReprList(pasted_objects_not);
-    Geom::Affine doc2parent = SP_ITEM(desktop->currentLayer())->i2doc_affine().inverse();
-    selection->applyAffine(desktop->dt2doc() * doc2parent * desktop->doc2dt(), true, false, false);
-    selection->deleteItems();
-
     // Change the selection to the freshly pasted objects
+    SPItem * item = dynamic_cast<SPItem *>(desktop->currentLayer());
+    Geom::Affine doc2parent = item->i2doc_affine().inverse();
+    Inkscape::Selection *selection = desktop->getSelection();
     selection->setReprList(pasted_objects);
-    for (auto item : selection->items()) {
-        SPLPEItem *pasted_lpe_item = dynamic_cast<SPLPEItem *>(item);
-        if (pasted_lpe_item) {
-            pasted_lpe_item->forkPathEffectsIfNecessary(1);
-        }
-    }
     // Apply inverse of parent transform
     selection->applyAffine(desktop->dt2doc() * doc2parent * desktop->doc2dt(), true, false, false);
 

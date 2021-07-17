@@ -25,6 +25,7 @@
 #include "object/box3d.h"
 #include "ui/tools/box3d-tool.h"
 #include "desktop-style.h"
+#include "helper/geom.h"
 
 static void box3d_side_compute_corner_ids(Box3DSide *side, unsigned int corners[4]);
 
@@ -195,13 +196,17 @@ void Box3DSide::set_shape() {
      * This is very important for LPEs to work properly! (the bbox might be recalculated depending on the curve in shape)*/
 
     SPCurve const *before = curveBeforeLPE();
-    if (before && before->get_pathvector() != c->get_pathvector()) {
+    if (before && !geom_path_compare(before->get_pathvector(),c->get_pathvector(),0.01)) {
         setCurveBeforeLPE(std::move(c));
         sp_lpe_item_update_patheffect(this, true, false);
         return;
     }
 
     if (hasPathEffectOnClipOrMaskRecursive(this)) {
+        if (!before && this->getRepr()->attribute("d")) {
+            Geom::PathVector pv = sp_svg_read_pathv(this->getRepr()->attribute("d"));
+            setCurveInsync(std::make_unique<SPCurve>(pv));
+        }
         setCurveBeforeLPE(std::move(c));
         return;
     }

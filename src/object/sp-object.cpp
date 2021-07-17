@@ -23,6 +23,8 @@
 
 #include <boost/range/adaptor/transformed.hpp>
 
+#include "bad-uri-exception.h"
+
 #include "helper/sp-marshal.h"
 #include "xml/node-event-vector.h"
 #include "attributes.h"
@@ -116,7 +118,7 @@ SPObject::SPObject()
     : cloned(0), clone_original(nullptr), uflags(0), mflags(0), hrefcount(0), _total_hrefcount(0),
       document(nullptr), parent(nullptr), id(nullptr), repr(nullptr), refCount(1), hrefList(std::list<SPObject*>()),
       _successor(nullptr), _collection_policy(SPObject::COLLECT_WITH_PARENT),
-      _label(nullptr), _default_label(nullptr)
+      _label(nullptr), _default_label(nullptr), forked_id("")
 {
     debug("id=%p, typename=%s",this, g_type_name_from_instance((GTypeInstance*)this));
 
@@ -151,6 +153,7 @@ SPObject::~SPObject() {
         parent->children.erase(parent->children.iterator_to(*this));
     }
 
+    forked_id = "";
     if( style == nullptr ) {
         // style pointer could be NULL if unreffed too many times.
         // Conjecture: style pointer is never NULL.
@@ -286,6 +289,36 @@ void SPObject::hrefObject(SPObject* owner)
 
     if(owner)
         hrefList.push_front(owner);
+}
+
+void SPObject::setForkedTo(SPObject *forked_to) {
+    SPGroup *fgroup = dynamic_cast<SPGroup *>(forked_to);
+    SPGroup *group = dynamic_cast<SPGroup *>(this);
+    if (group && fgroup) {
+        size_t pos = 0;
+        std::vector fitems = sp_item_group_item_list(fgroup);
+        for (auto& child: group->children) {
+            child.setForkedTo(fitems[pos]);
+            pos ++;
+        }
+    }
+    if ( forked_to->getId()) {
+        forked_id = forked_to->getId();
+    } else {
+        forked_id = "";
+    }
+}
+
+void SPObject::releaseForkedTo() {
+    SPGroup *group = dynamic_cast<SPGroup *>(this);
+    if (group) {
+        size_t pos = 0;
+        for (auto& child: group->children) {
+            child.releaseForkedTo();
+            pos ++;
+        }
+    }
+    forked_id = "";
 }
 
 void SPObject::unhrefObject(SPObject* owner)

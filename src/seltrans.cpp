@@ -33,7 +33,6 @@
 #include "mod360.h"
 #include "pure-transform.h"
 #include "selection-chemistry.h"
-#include "filter-chemistry.h"
 #include "selection.h"
 #include "seltrans-handles.h"
 #include "verbs.h"
@@ -518,7 +517,7 @@ void Inkscape::SelTrans::stamp()
             sort(l.begin(), l.end(), sp_object_compare_position_bool);
             _stamp_cache = l;
         }
-
+        std::vector<SPItem *> newitems;
         for(auto original_item : l) {
             Inkscape::XML::Node *original_repr = original_item->getRepr();
 
@@ -530,38 +529,38 @@ void Inkscape::SelTrans::stamp()
             // add the new repr to the parent
             parent->addChild(copy_repr, original_repr->prev());
 
-            SPItem *copy_item = (SPItem *) _desktop->getDocument()->getObjectByRepr(copy_repr);
-            // 1.1 COPYPASTECLONESTAMPLPEBUG
-            SPItem *newitem = dynamic_cast<SPItem *>(_desktop->getDocument()->getObjectByRepr(copy_repr));
-            if (newitem) {
-                remove_hidder_filter(newitem);
-                gchar * id = strdup(copy_item->getId());
-                copy_item = (SPItem *) sp_lpe_item_remove_autoflatten(newitem, id);
-                copy_repr = copy_item->getRepr();
-                g_free(id);
-            }
-            // END COPYPASTECLONESTAMPLPEBUG
-            Geom::Affine const *new_affine;
-            if (_show == SHOW_OUTLINE) {
-                Geom::Affine const i2d(original_item->i2dt_affine());
-                Geom::Affine const i2dnew( i2d * _current_relative_affine );
-                copy_item->set_i2d_affine(i2dnew);
-                new_affine = &copy_item->transform;
-            } else {
-                new_affine = &original_item->transform;
-            }
+            SPItem *copy_item = dynamic_cast<SPItem *>(_desktop->getDocument()->getObjectByRepr(copy_repr));
+            original_item->setForkedTo(copy_item);
 
-            copy_item->doWriteTransform(*new_affine);
+            newitems.push_back(copy_item);
+            if (copy_item) {
+                Geom::Affine const *new_affine;
+                if (_show == SHOW_OUTLINE) {
+                    Geom::Affine const i2d(original_item->i2dt_affine());
+                    Geom::Affine const i2dnew( i2d * _current_relative_affine );
+                    copy_item->set_i2d_affine(i2dnew);
+                    new_affine = &copy_item->transform;
+                } else {
+                    new_affine = &original_item->transform;
+                }
 
-            if ( copy_item->isCenterSet() && _center ) {
-                copy_item->setCenter(*_center * _current_relative_affine);
+                copy_item->doWriteTransform(*new_affine);
+
+                if ( copy_item->isCenterSet() && _center ) {
+                    copy_item->setCenter(*_center * _current_relative_affine);
+                }
             }
             Inkscape::GC::release(copy_repr);
-            SPLPEItem * lpeitem = dynamic_cast<SPLPEItem *>(copy_item);
+        }
+        for (auto item : newitems) {
+            SPLPEItem * lpeitem = dynamic_cast<SPLPEItem *>(item);
             if(lpeitem && lpeitem->hasPathEffectRecursive()) {
-                lpeitem->forkPathEffectsIfNecessary(1);
+                lpeitem->forkPathEffectsIfNecessary(0);
                 sp_lpe_item_update_patheffect(lpeitem, true, true);
             }
+        }
+        for(auto original_item : l) {
+            original_item->releaseForkedTo();
         }
         DocumentUndo::done(_desktop->getDocument(), SP_VERB_CONTEXT_SELECT,
                            _("Stamp"));
