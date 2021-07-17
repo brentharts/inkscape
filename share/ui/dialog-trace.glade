@@ -71,8 +71,7 @@
     <property name="page-increment">0.10</property>
   </object>
   <object class="GtkTextBuffer" id="helptext">
-    <property name="text" translatable="yes">
-  This dialog allows you to automatically convert a raster graphic into vector paths. Several options are available for different use cases:
+    <property name="text" translatable="yes">This dialog allows you to automatically convert a raster graphic into vector paths. Several options are available for different use cases:
  * "Brightness cutoff" detects areas that are darker than the threshold value and creates a path enclosing them (using potrace).
  * "Edge detection" detects changes greater than the given threshold value in the brightness of color patches and creates paths to separate them (using potrace).
  * "Color quantization" separates the image into the given number of colors, and separates them with a path (using potrace).
@@ -85,14 +84,45 @@
   1) Save your work before tracing
   2) Watch your pixel count: "Trace pixel art" creates up to one path per pixel. It is not recommended for images that are not pixel art.
   3) Autotrace is slower than potrace, it is not recommended for big images. Preprocessing your images to increase contrast is recommended.
-  4) If your goal is to get few nodes and good precision, manual tracing is always best.
-</property>
+  4) If your goal is to get few nodes and good precision, manual tracing is always best.</property>
+  </object>
+  <object class="GtkPopover" id="popover1">
+    <property name="width-request">350</property>
+    <property name="height-request">400</property>
+    <property name="can-focus">False</property>
+    <property name="constrain-to">none</property>
+    <child>
+      <object class="GtkScrolledWindow">
+        <property name="visible">True</property>
+        <property name="can-focus">True</property>
+        <property name="hscrollbar-policy">never</property>
+        <property name="overlay-scrolling">False</property>
+        <child>
+          <object class="GtkTextView">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="hscroll-policy">natural</property>
+            <property name="vscroll-policy">natural</property>
+            <property name="editable">False</property>
+            <property name="wrap-mode">word</property>
+            <property name="buffer">helptext</property>
+          </object>
+        </child>
+      </object>
+    </child>
   </object>
   <object class="GtkAdjustment" id="optimize">
     <property name="upper">5</property>
     <property name="value">0.20</property>
     <property name="step-increment">0.05</property>
     <property name="page-increment">10</property>
+  </object>
+  <object class="GtkRadioButton" id="pa_radio_group">
+    <property name="label" translatable="yes">radiobutton</property>
+    <property name="visible">True</property>
+    <property name="can-focus">True</property>
+    <property name="receives-default">False</property>
+    <property name="draw-indicator">True</property>
   </object>
   <object class="GtkAdjustment" id="smooth">
     <property name="upper">1.34</property>
@@ -114,12 +144,14 @@
       <object class="GtkBox" id="orient_box">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
+        <property name="orientation">vertical</property>
         <property name="baseline-position">top</property>
         <child>
           <object class="GtkNotebook" id="choice_tab">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="no-show-all">True</property>
+            <property name="valign">start</property>
             <property name="hexpand">True</property>
             <property name="vexpand">False</property>
             <child>
@@ -139,8 +171,7 @@
                     <property name="margin-end">8</property>
                     <property name="margin-top">4</property>
                     <property name="margin-bottom">4</property>
-                    <property name="hexpand">False</property>
-                    <property name="row-spacing">3</property>
+                    <property name="row-spacing">4</property>
                     <child>
                       <object class="GtkCheckButton" id="CB_speckles">
                         <property name="label" translatable="yes">Speckles</property>
@@ -589,7 +620,7 @@
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Single</property>
+                <property name="label" translatable="yes">Single scan</property>
               </object>
               <packing>
                 <property name="tab-fill">False</property>
@@ -597,16 +628,22 @@
             </child>
             <child>
               <object class="GtkBox">
+                <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="halign">start</property>
                 <property name="valign">start</property>
+                <property name="orientation">vertical</property>
                 <child>
-                  <!-- n-columns=2 n-rows=4 -->
+                  <!-- n-columns=4 n-rows=14 -->
                   <object class="GtkGrid">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="halign">start</property>
+                    <property name="no-show-all">True</property>
                     <property name="valign">start</property>
+                    <property name="margin-start">8</property>
+                    <property name="margin-end">8</property>
+                    <property name="margin-top">4</property>
+                    <property name="margin-bottom">4</property>
+                    <property name="row-spacing">4</property>
                     <child>
                       <object class="GtkComboBoxText" id="CBT_MS">
                         <property name="visible">True</property>
@@ -621,8 +658,36 @@
                       </object>
                       <packing>
                         <property name="left-attach">0</property>
+                        <property name="top-attach">1</property>
+                        <property name="width">4</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes">Scans</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes">Detection mode:</property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
                         <property name="top-attach">0</property>
-                        <property name="width">2</property>
+                        <property name="width">3</property>
                       </packing>
                     </child>
                     <child>
@@ -632,11 +697,13 @@
                         <property name="can-focus">True</property>
                         <property name="receives-default">False</property>
                         <property name="tooltip-text" translatable="yes">Apply Gaussian blur to the bitmap before tracing</property>
+                        <property name="halign">start</property>
                         <property name="draw-indicator">True</property>
                       </object>
                       <packing>
-                        <property name="left-attach">1</property>
-                        <property name="top-attach">1</property>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">4</property>
+                        <property name="width">3</property>
                       </packing>
                     </child>
                     <child>
@@ -646,11 +713,13 @@
                         <property name="can-focus">True</property>
                         <property name="receives-default">False</property>
                         <property name="tooltip-text" translatable="yes">Stack scans on top of one another (no gaps) instead of tiling (usually with gaps)</property>
+                        <property name="halign">start</property>
                         <property name="draw-indicator">True</property>
                       </object>
                       <packing>
-                        <property name="left-attach">1</property>
-                        <property name="top-attach">2</property>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">5</property>
+                        <property name="width">3</property>
                       </packing>
                     </child>
                     <child>
@@ -660,22 +729,13 @@
                         <property name="can-focus">True</property>
                         <property name="receives-default">False</property>
                         <property name="tooltip-text" translatable="yes">Remove bottom (background) layer when done</property>
+                        <property name="halign">start</property>
                         <property name="draw-indicator">True</property>
                       </object>
                       <packing>
-                        <property name="left-attach">1</property>
-                        <property name="top-attach">3</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="label" translatable="yes">Scans</property>
-                      </object>
-                      <packing>
                         <property name="left-attach">0</property>
-                        <property name="top-attach">1</property>
+                        <property name="top-attach">6</property>
+                        <property name="width">3</property>
                       </packing>
                     </child>
                     <child>
@@ -688,7 +748,7 @@
                         <property name="value">8</property>
                       </object>
                       <packing>
-                        <property name="left-attach">0</property>
+                        <property name="left-attach">3</property>
                         <property name="top-attach">2</property>
                       </packing>
                     </child>
@@ -696,16 +756,244 @@
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes">Details:</property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
                       </object>
                       <packing>
                         <property name="left-attach">0</property>
-                        <property name="top-attach">3</property>
+                        <property name="top-attach">8</property>
+                        <property name="width">3</property>
                       </packing>
+                    </child>
+                    <child>
+                      <object class="GtkScale">
+                        <property name="width-request">100</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="hexpand">True</property>
+                        <property name="adjustment">speckles</property>
+                        <property name="draw-value">False</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">1</property>
+                        <property name="top-attach">10</property>
+                        <property name="width">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSpinButton">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="tooltip-text" translatable="yes">Speckles of up to this many pixels will be suppressed</property>
+                        <property name="text" translatable="yes">2</property>
+                        <property name="adjustment">speckles</property>
+                        <property name="value">2</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">3</property>
+                        <property name="top-attach">10</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="CB_speckles1">
+                        <property name="label" translatable="yes">Speckles</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">False</property>
+                        <property name="tooltip-text" translatable="yes">Ignore small spots (speckles) in the bitmap</property>
+                        <property name="halign">start</property>
+                        <property name="active">True</property>
+                        <property name="draw-indicator">True</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">10</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="CB_optimize1">
+                        <property name="label" translatable="yes">Optimize</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">False</property>
+                        <property name="tooltip-text" translatable="yes">Try to optimize paths by joining adjacent Bezier curve segments</property>
+                        <property name="halign">start</property>
+                        <property name="active">True</property>
+                        <property name="draw-indicator">True</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">12</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkScale">
+                        <property name="width-request">100</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="hexpand">True</property>
+                        <property name="adjustment">optimize</property>
+                        <property name="draw-value">False</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">1</property>
+                        <property name="top-attach">12</property>
+                        <property name="width">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSpinButton">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="tooltip-text" translatable="yes">Increase this to smooth corners more</property>
+                        <property name="text" translatable="yes">1.00</property>
+                        <property name="adjustment">smooth</property>
+                        <property name="digits">2</property>
+                        <property name="value">1</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">3</property>
+                        <property name="top-attach">11</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkScale">
+                        <property name="width-request">100</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="hexpand">True</property>
+                        <property name="adjustment">smooth</property>
+                        <property name="draw-value">False</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">1</property>
+                        <property name="top-attach">11</property>
+                        <property name="width">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="CB_smooth1">
+                        <property name="label" translatable="yes">Smooth corners</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">False</property>
+                        <property name="tooltip-text" translatable="yes">Smooth out sharp corners of the trace</property>
+                        <property name="halign">start</property>
+                        <property name="active">True</property>
+                        <property name="draw-indicator">True</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">11</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSpinButton">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="tooltip-text" translatable="yes">Increase this to reduce the number of nodes in the trace by more aggressive optimization</property>
+                        <property name="text" translatable="yes">0.200</property>
+                        <property name="adjustment">optimize</property>
+                        <property name="digits">3</property>
+                        <property name="value">0.20</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">3</property>
+                        <property name="top-attach">12</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="CB_SIOX1">
+                        <property name="label" translatable="yes">User-assisted trace</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">False</property>
+                        <property name="tooltip-text" translatable="yes">Cover the area you want to select as the foreground then select both objects</property>
+                        <property name="halign">start</property>
+                        <property name="draw-indicator">True</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">13</property>
+                        <property name="width">3</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkScale">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="hexpand">True</property>
+                        <property name="adjustment">MS_scans</property>
+                        <property name="round-digits">1</property>
+                        <property name="draw-value">False</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">1</property>
+                        <property name="top-attach">2</property>
+                        <property name="width">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
                     </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
-                    <property name="fill">True</property>
+                    <property name="fill">False</property>
                     <property name="position">0</property>
                   </packing>
                 </child>
@@ -733,30 +1021,16 @@
                 <property name="valign">start</property>
                 <property name="orientation">vertical</property>
                 <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="halign">start</property>
-                    <property name="label" translatable="yes"> Heuristics </property>
-                    <attributes>
-                      <attribute name="weight" value="bold"/>
-                    </attributes>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <!-- n-columns=2 n-rows=5 -->
+                  <!-- n-columns=3 n-rows=10 -->
                   <object class="GtkGrid">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="halign">start</property>
                     <property name="valign">start</property>
-                    <property name="margin-left">5</property>
-                    <property name="margin-right">5</property>
+                    <property name="margin-start">8</property>
+                    <property name="margin-end">8</property>
+                    <property name="margin-top">4</property>
+                    <property name="margin-bottom">4</property>
                     <property name="row-spacing">4</property>
                     <child>
                       <object class="GtkLabel">
@@ -768,7 +1042,7 @@
                       </object>
                       <packing>
                         <property name="left-attach">0</property>
-                        <property name="top-attach">0</property>
+                        <property name="top-attach">1</property>
                       </packing>
                     </child>
                     <child>
@@ -781,7 +1055,7 @@
                       </object>
                       <packing>
                         <property name="left-attach">0</property>
-                        <property name="top-attach">1</property>
+                        <property name="top-attach">2</property>
                       </packing>
                     </child>
                     <child>
@@ -794,7 +1068,7 @@
                       </object>
                       <packing>
                         <property name="left-attach">0</property>
-                        <property name="top-attach">2</property>
+                        <property name="top-attach">3</property>
                       </packing>
                     </child>
                     <child>
@@ -807,7 +1081,7 @@
                       </object>
                       <packing>
                         <property name="left-attach">0</property>
-                        <property name="top-attach">3</property>
+                        <property name="top-attach">4</property>
                       </packing>
                     </child>
                     <child>
@@ -822,7 +1096,7 @@
                       </object>
                       <packing>
                         <property name="left-attach">1</property>
-                        <property name="top-attach">0</property>
+                        <property name="top-attach">1</property>
                       </packing>
                     </child>
                     <child>
@@ -836,7 +1110,7 @@
                       </object>
                       <packing>
                         <property name="left-attach">1</property>
-                        <property name="top-attach">1</property>
+                        <property name="top-attach">2</property>
                       </packing>
                     </child>
                     <child>
@@ -850,7 +1124,7 @@
                       </object>
                       <packing>
                         <property name="left-attach">1</property>
-                        <property name="top-attach">2</property>
+                        <property name="top-attach">3</property>
                       </packing>
                     </child>
                     <child>
@@ -865,7 +1139,7 @@
                       </object>
                       <packing>
                         <property name="left-attach">1</property>
-                        <property name="top-attach">3</property>
+                        <property name="top-attach">4</property>
                       </packing>
                     </child>
                     <child>
@@ -880,8 +1154,129 @@
                       </object>
                       <packing>
                         <property name="left-attach">0</property>
-                        <property name="top-attach">4</property>
+                        <property name="top-attach">5</property>
                       </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes"> Output </property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">6</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes"> Heuristics </property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">0</property>
+                        <property name="width">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="orientation">vertical</property>
+                        <child>
+                          <object class="GtkRadioButton" id="RB_PA_voronoi">
+                            <property name="label" translatable="yes">Voronoi</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="tooltip-text" translatable="yes">Output composed of straight lines</property>
+                            <property name="halign">start</property>
+                            <property name="active">True</property>
+                            <property name="draw-indicator">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkRadioButton">
+                            <property name="label" translatable="yes">B-splines</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="tooltip-text" translatable="yes">Preserve staircasing artifacts</property>
+                            <property name="halign">start</property>
+                            <property name="draw-indicator">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">7</property>
+                        <property name="height">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
                     </child>
                     <child>
                       <placeholder/>
@@ -890,61 +1285,7 @@
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="halign">start</property>
-                    <property name="label" translatable="yes"> Output </property>
-                    <attributes>
-                      <attribute name="weight" value="bold"/>
-                    </attributes>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">2</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkRadioButton" id="RB_PA_voronoi">
-                    <property name="label" translatable="yes">Voronoi</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">False</property>
-                    <property name="tooltip-text" translatable="yes">Output composed of straight lines</property>
-                    <property name="halign">start</property>
-                    <property name="margin-left">5</property>
-                    <property name="active">True</property>
-                    <property name="draw-indicator">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">3</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkRadioButton">
-                    <property name="label" translatable="yes">B-splines</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">False</property>
-                    <property name="tooltip-text" translatable="yes">Preserve staircasing artifacts</property>
-                    <property name="halign">start</property>
-                    <property name="margin-left">5</property>
-                    <property name="margin-bottom">5</property>
-                    <property name="active">True</property>
-                    <property name="draw-indicator">True</property>
-                    <property name="group">RB_PA_voronoi</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">4</property>
+                    <property name="position">0</property>
                   </packing>
                 </child>
               </object>
@@ -964,43 +1305,14 @@
               </packing>
             </child>
             <child>
-              <object class="GtkScrolledWindow">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="halign">start</property>
-                <property name="hscrollbar-policy">never</property>
-                <property name="shadow-type">in</property>
-                <property name="overlay-scrolling">False</property>
-                <child>
-                  <object class="GtkTextView">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="hscroll-policy">natural</property>
-                    <property name="vscroll-policy">natural</property>
-                    <property name="editable">False</property>
-                    <property name="wrap-mode">word</property>
-                    <property name="buffer">helptext</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="position">3</property>
-              </packing>
+              <placeholder/>
             </child>
             <child type="tab">
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Help</property>
-              </object>
-              <packing>
-                <property name="position">3</property>
-                <property name="tab-fill">False</property>
-              </packing>
+              <placeholder/>
             </child>
           </object>
           <packing>
-            <property name="expand">True</property>
+            <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="position">0</property>
           </packing>
@@ -1086,6 +1398,7 @@
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="margin-top">4</property>
                 <property name="label" translatable="yes">Preview:</property>
               </object>
             </child>
@@ -1107,51 +1420,80 @@
       <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-      </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="fill">True</property>
-        <property name="position">1</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkButtonBox">
-        <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <property name="no-show-all">True</property>
-        <property name="halign">baseline</property>
+        <property name="margin-start">4</property>
         <property name="margin-top">5</property>
         <property name="margin-bottom">5</property>
-        <property name="spacing">3</property>
-        <property name="layout-style">center</property>
         <child>
-          <object class="GtkButton" id="B_RESET">
-            <property name="label">gtk-revert-to-saved</property>
+          <object class="GtkMenuButton" id="help-btn">
+            <property name="visible">True</property>
             <property name="can-focus">True</property>
+            <property name="focus-on-click">False</property>
             <property name="receives-default">True</property>
-            <property name="use-stock">True</property>
+            <property name="direction">up</property>
+            <property name="popover">popover1</property>
+            <child>
+              <object class="GtkImage">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="icon-name">help-about-symbolic</property>
+              </object>
+            </child>
           </object>
           <packing>
-            <property name="expand">True</property>
+            <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="position">0</property>
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="B_STOP">
-            <property name="label">gtk-stop</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">True</property>
-            <property name="use-stock">True</property>
+          <object class="GtkButtonBox">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="no-show-all">True</property>
+            <property name="halign">baseline</property>
+            <property name="spacing">3</property>
+            <property name="layout-style">center</property>
+            <child>
+              <object class="GtkButton" id="B_RESET">
+                <property name="label">gtk-revert-to-saved</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-stock">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="B_STOP">
+                <property name="label">gtk-stop</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-stock">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="B_OK">
+                <property name="label">gtk-apply</property>
+                <property name="width-request">150</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-stock">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">True</property>
@@ -1159,30 +1501,12 @@
             <property name="position">1</property>
           </packing>
         </child>
-        <child>
-          <object class="GtkButton" id="B_OK">
-            <property name="label">gtk-apply</property>
-            <property name="width-request">150</property>
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">True</property>
-            <property name="use-stock">True</property>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
       </object>
       <packing>
         <property name="expand">False</property>
         <property name="fill">True</property>
-        <property name="position">2</property>
+        <property name="position">1</property>
       </packing>
-    </child>
-    <child>
-      <placeholder/>
     </child>
   </object>
 </interface>

@@ -88,6 +88,10 @@ private:
     Gtk::Grid* _param_grid;
 };
 
+enum Page {
+    SingleScan, MultiScan, PixelArt
+};
+
 void TraceDialogImpl2::traceProcess(bool do_i_trace)
 {
     SPDesktop *desktop = SP_ACTIVE_DESKTOP;
@@ -99,12 +103,11 @@ void TraceDialogImpl2::traceProcess(bool do_i_trace)
     else
         tracer.enableSiox(false);
 
-    Glib::ustring type =
-        /*choice_scan->get_visible_child_name() == "SingleScan" ?*/ CBT_SS->get_active_id(); // : CBT_MS->get_active_id();
+    auto current_page = choice_tab->get_current_page();
+    Glib::ustring type = current_page == SingleScan ? CBT_SS->get_active_id() : CBT_MS->get_active_id();
 
     bool use_autotrace = false;
     Inkscape::Trace::Autotrace::AutotraceTracingEngine ate; // TODO
-
 
     auto potraceType = trace_types.find(type);
     assert(potraceType != trace_types.end());
@@ -167,13 +170,13 @@ void TraceDialogImpl2::traceProcess(bool do_i_trace)
         }
     }
     if (do_i_trace){
-        if (choice_tab->get_current_page() == 1){
+        if (current_page == PixelArt){
             tracer.trace(&dte);
             printf("dt\n");
         } else if (use_autotrace) {
 	          tracer.trace(&ate);
             printf("at\n");
-        } else if (choice_tab->get_current_page() == 0) {
+        } else if (current_page == SingleScan || current_page == MultiScan) {
             tracer.trace(&pte);
             printf("pt\n");
         }
@@ -358,10 +361,12 @@ TraceDialogImpl2::TraceDialogImpl2()
     this->signal_size_allocate().connect([=](const Gtk::Allocation& alloc){
         g_warning("size alloc: %d x %d", alloc.get_width(), alloc.get_height());
         if (alloc.get_height() > 600 && alloc.get_width() < WIDTH_SMALL) {
+            choice_tab->set_valign(Gtk::ALIGN_START);
             orient_box->set_orientation(Gtk::ORIENTATION_VERTICAL);
         }
         if (alloc.get_height() > 500 && alloc.get_width() > WIDTH_SMALL + 10) { // add some hysteresis
             orient_box->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
+            choice_tab->set_valign(Gtk::ALIGN_FILL);
         }
     });
     // this->signa
