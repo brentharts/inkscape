@@ -54,9 +54,14 @@ namespace Dialog {
 class TraceDialogImpl2 : public TraceDialog {
   public:
     TraceDialogImpl2();
-    ~TraceDialogImpl2() override {};
+    ~TraceDialogImpl2() override {
+        if (_source) {
+            g_source_destroy(g_main_context_find_source_by_id(nullptr, _source));
+        }
+    };
 
     void selectionModified(Selection *selection, guint flags) override;
+    void selectionChanged(Inkscape::Selection *selection) override;
 private:
     Inkscape::Trace::Tracer tracer;
     void traceProcess(bool do_i_trace);
@@ -67,6 +72,8 @@ private:
     void traceCallback();
     void onSetDefaults();
     void show_hide_params();
+    void params_changed();
+    static gboolean update_cb(gpointer user_data);
 
     Glib::RefPtr<Gtk::Builder> builder;
 
@@ -75,10 +82,13 @@ private:
     Gtk::ComboBoxText *CBT_SS, *CBT_MS;
     Gtk::CheckButton *CB_invert, *CB_MS_smooth, *CB_MS_stack, *CB_MS_rb, *CB_speckles, *CB_smooth, *CB_optimize, *CB_PA_optimize,
         /* *CB_live,*/ *CB_SIOX;
+    Gtk::CheckButton* CB_SIOX1;
+    Gtk::CheckButton* CB_speckles1;
+    Gtk::CheckButton* CB_smooth1;
+    Gtk::CheckButton* CB_optimize1;
     Gtk::RadioButton *RB_PA_voronoi;
     Gtk::Button *B_RESET, *B_STOP, *B_OK, *B_Update;
     Gtk::Box *mainBox;
-    // Gtk::Stack *choice_scan;
     Gtk::Notebook *choice_tab;
     Glib::RefPtr<Gdk::Pixbuf> scaledPreview;
     Gtk::DrawingArea *previewArea;
@@ -86,6 +96,8 @@ private:
     // Gtk::Label* _expand;
     Gtk::Frame* _preview_frame;
     Gtk::Grid* _param_grid;
+    Gtk::CheckButton* _live_preview;
+    guint _source = 0;
 };
 
 enum Page {
@@ -98,12 +110,14 @@ void TraceDialogImpl2::traceProcess(bool do_i_trace)
     if (desktop)
         desktop->setWaitingCursor();
 
-    if (CB_SIOX->get_active())
+    auto current_page = choice_tab->get_current_page();
+
+    auto cb_siox = current_page == SingleScan ? CB_SIOX : CB_SIOX1;
+    if (cb_siox->get_active())
         tracer.enableSiox(true);
     else
         tracer.enableSiox(false);
 
-    auto current_page = choice_tab->get_current_page();
     Glib::ustring type = current_page == SingleScan ? CBT_SS->get_active_id() : CBT_MS->get_active_id();
 
     bool use_autotrace = false;
@@ -138,11 +152,16 @@ void TraceDialogImpl2::traceProcess(bool do_i_trace)
         0., // Brightness floor
         SS_ED_T->get_value(), (int)MS_scans->get_value(), CB_MS_stack->get_active(), CB_MS_smooth->get_active(),
         CB_MS_rb->get_active());
-    pte.potraceParams->opticurve = CB_optimize->get_active();
-    pte.potraceParams->opttolerance = optimize->get_value();
-    pte.potraceParams->alphamax = CB_smooth->get_active() ? smooth->get_value() : 0;
-    pte.potraceParams->turdsize = CB_speckles->get_active() ? (int)speckles->get_value() : 0;
 
+    auto cb_optimize = current_page == SingleScan ? CB_optimize : CB_optimize1;
+    pte.potraceParams->opticurve = cb_optimize->get_active();
+    pte.potraceParams->opttolerance = optimize->get_value();
+
+    auto cb_smooth = current_page == SingleScan ? CB_smooth : CB_smooth1;
+    pte.potraceParams->alphamax = cb_smooth->get_active() ? smooth->get_value() : 0;
+
+    auto cb_speckles = current_page == SingleScan ? CB_speckles : CB_speckles1;
+    pte.potraceParams->turdsize = cb_speckles->get_active() ? (int)speckles->get_value() : 0;
 
 
     //Inkscape::Trace::Autotrace::AutotraceTracingEngine ate; // TODO
@@ -156,7 +175,10 @@ void TraceDialogImpl2::traceProcess(bool do_i_trace)
     Glib::RefPtr<Gdk::Pixbuf> pixbuf = tracer.getSelectedImage();
     if (pixbuf) {
         Glib::RefPtr<Gdk::Pixbuf> preview = use_autotrace ? ate.preview(pixbuf) : pte.preview(pixbuf);
-        if (preview) {
+        scaledPreview = preview;
+
+        // if (preview) {
+            /*
             int width = preview->get_width();
             int height = preview->get_height();
             const Gtk::Allocation &vboxAlloc = previewArea->get_allocation();
@@ -165,10 +187,16 @@ void TraceDialogImpl2::traceProcess(bool do_i_trace)
             double scaleFactor = scaleFX > scaleFY ? scaleFY : scaleFX;
             int newWidth = (int)(((double)width) * scaleFactor);
             int newHeight = (int)(((double)height) * scaleFactor);
-            scaledPreview = preview->scale_simple(newWidth, newHeight, Gdk::INTERP_NEAREST);
-            previewArea->queue_draw();
-        }
+            scaledPreview = preview->scale_simple(newWidth, newHeight, Gdk::INTERP_HYPER);
+            */
+        // }
     }
+    else {
+        scaledPreview.reset();
+    }
+
+    previewArea->queue_draw();
+
     if (do_i_trace){
         if (current_page == PixelArt){
             tracer.trace(&dte);
@@ -188,6 +216,7 @@ void TraceDialogImpl2::traceProcess(bool do_i_trace)
 
 bool TraceDialogImpl2::previewResize(const Cairo::RefPtr<Cairo::Context>& cr)
 {
+    /*
     if (auto wnd = dynamic_cast<Gtk::Window*>(this->get_toplevel())) {
         auto color = wnd->get_style_context()->get_background_color();
         auto background =
@@ -204,7 +233,7 @@ bool TraceDialogImpl2::previewResize(const Cairo::RefPtr<Cairo::Context>& cr)
         cr->set_source(pattern);
         cr->paint();
         cr->restore();
-    }
+    } */
 
     if (scaledPreview) {
         int width = scaledPreview->get_width();
@@ -217,9 +246,12 @@ bool TraceDialogImpl2::previewResize(const Cairo::RefPtr<Cairo::Context>& cr)
         int newHeight = (int)(((double)height) * scaleFactor);
         int offsetX = (vboxAlloc.get_width() - newWidth)/2;
         int offsetY = (vboxAlloc.get_height() - newHeight)/2;
-
-        Glib::RefPtr<Gdk::Pixbuf> temp = scaledPreview->scale_simple(newWidth, newHeight, Gdk::INTERP_NEAREST);
-        Gdk::Cairo::set_source_pixbuf(cr, temp, offsetX, offsetY);
+        cr->scale(scaleFactor, scaleFactor);
+        Gdk::Cairo::set_source_pixbuf(cr, scaledPreview, offsetX / scaleFactor, offsetY / scaleFactor);
+        cr->paint();
+    }
+    else {
+        cr->set_source_rgba(0, 0, 0, 0);
         cr->paint();
     }
 
@@ -232,6 +264,10 @@ void TraceDialogImpl2::abort()
      if (desktop)
          desktop->clearWaitingCursor();
      tracer.abort();
+}
+
+void TraceDialogImpl2::selectionChanged(Inkscape::Selection *selection) {
+    previewCallback();
 }
 
 void TraceDialogImpl2::selectionModified(Selection *selection, guint flags)
@@ -263,9 +299,13 @@ void TraceDialogImpl2::onSetDefaults()
     CB_speckles->set_active(true);
     CB_smooth->set_active(true);
     CB_optimize->set_active(true);
+    CB_speckles1->set_active(true);
+    CB_smooth1->set_active(true);
+    CB_optimize1->set_active(true);
     CB_PA_optimize->set_active(false);
     //CB_live->set_active(false);
     CB_SIOX->set_active(false);
+    CB_SIOX1->set_active(false);
 }
 
 void TraceDialogImpl2::previewCallback() { traceProcess(false); }
@@ -279,9 +319,10 @@ TraceDialogImpl2::TraceDialogImpl2()
                                         "SS_AT_FI_T", "SS_AT_ET_T",     "SS_BC_T",   "SS_CQ_T",     "SS_ED_T",
                                         "optimize",    "smooth",    "speckles",    "CB_invert",  "CB_MS_smooth",
                                         "CB_MS_stack", "CB_MS_rb",  "CB_speckles", "CB_smooth",  "CB_optimize",
+                                        "CB_speckles1", "CB_smooth1",  "CB_optimize1", "CB_SIOX1",
                                         "CB_PA_optimize", /*"CB_live",*/ "CB_SIOX", "CBT_SS",    "CBT_MS",
                                         "B_RESET",     "B_STOP",    "B_OK",         "mainBox",   "choice_tab",
-                                        /*"choice_scan",*/ "previewArea" };
+                                        /*"choice_scan",*/ "previewArea", "_live_preview" };
     auto gladefile = get_filename_string(Inkscape::IO::Resource::UIS, "dialog-trace.glade");
     try {
         builder = Gtk::Builder::create_from_file(gladefile);
@@ -327,9 +368,13 @@ TraceDialogImpl2::TraceDialogImpl2()
     GET_W(CB_speckles)
     GET_W(CB_smooth)
     GET_W(CB_optimize)
+    GET_W(CB_speckles1)
+    GET_W(CB_smooth1)
+    GET_W(CB_optimize1)
     GET_W(CB_PA_optimize)
     //GET_W(CB_live)
     GET_W(CB_SIOX)
+    GET_W(CB_SIOX1)
     GET_W(RB_PA_voronoi)
     GET_W(CBT_SS)
     GET_W(CBT_MS)
@@ -345,6 +390,7 @@ TraceDialogImpl2::TraceDialogImpl2()
     // GET_W(_expand)
     GET_W(_preview_frame)
     GET_W(_param_grid)
+    GET_W(_live_preview)
 #undef GET_W
 #undef GET_O
     add(*mainBox);
@@ -372,11 +418,37 @@ TraceDialogImpl2::TraceDialogImpl2()
     // this->signa
     CBT_SS->signal_changed().connect([=](){ show_hide_params(); });
     show_hide_params();
+
+    // watch for changes
+    for (auto adj : {SS_BC_T, SS_ED_T, SS_CQ_T, SS_AT_FI_T, SS_AT_ET_T, optimize, smooth, speckles, MS_scans, PA_curves, PA_islands, PA_sparse1, PA_sparse2 }) {
+        adj->signal_value_changed().connect([=](){ params_changed(); });
+    }
+    for (auto checkbtn : {CB_invert, CB_MS_rb, CB_MS_smooth, CB_MS_stack, CB_optimize1, CB_optimize, CB_PA_optimize, CB_SIOX1, CB_SIOX, CB_smooth1, CB_smooth, CB_speckles1, CB_speckles, _live_preview}) {
+        checkbtn->signal_toggled().connect([=](){ params_changed(); });
+    }
+    for (auto combo : {CBT_SS, CBT_MS}) {
+        combo->signal_changed().connect([=](){ params_changed(); });
+    }
+    choice_tab->signal_switch_page().connect([=](Gtk::Widget*, guint){ params_changed(); });
+}
+
+gboolean TraceDialogImpl2::update_cb(gpointer user_data) {
+    auto self = static_cast<TraceDialogImpl2*>(user_data);
+    self->previewCallback();
+    self->_source = 0;
+    return FALSE;
+}
+
+void TraceDialogImpl2::params_changed() {
+    if (!_live_preview->get_active() || _source) return;
+
+    _source = g_idle_add(&TraceDialogImpl2::update_cb, this);
 }
 
 void TraceDialogImpl2::show_hide_params() {
     int start_row = 2;
     int option = CBT_SS->get_active_row_number();
+    if (option >= 3) option = 3;
     int show1 = start_row + option;
     int show2 = start_row + option;
     if (option >= 3) ++show2;

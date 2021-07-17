@@ -117,13 +117,6 @@
     <property name="step-increment">0.05</property>
     <property name="page-increment">10</property>
   </object>
-  <object class="GtkRadioButton" id="pa_radio_group">
-    <property name="label" translatable="yes">radiobutton</property>
-    <property name="visible">True</property>
-    <property name="can-focus">True</property>
-    <property name="receives-default">False</property>
-    <property name="draw-indicator">True</property>
-  </object>
   <object class="GtkAdjustment" id="smooth">
     <property name="upper">1.34</property>
     <property name="value">1</property>
@@ -206,7 +199,7 @@
                     </child>
                     <child>
                       <object class="GtkScale">
-                        <property name="width-request">100</property>
+                        <property name="width-request">60</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="hexpand">True</property>
@@ -222,7 +215,6 @@
                     </child>
                     <child>
                       <object class="GtkScale">
-                        <property name="width-request">100</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="hexpand">True</property>
@@ -253,7 +245,6 @@
                     </child>
                     <child>
                       <object class="GtkScale">
-                        <property name="width-request">100</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="hexpand">True</property>
@@ -340,7 +331,7 @@
                       <packing>
                         <property name="left-attach">0</property>
                         <property name="top-attach">7</property>
-                        <property name="width">3</property>
+                        <property name="width">4</property>
                       </packing>
                     </child>
                     <child>
@@ -356,12 +347,11 @@
                       <packing>
                         <property name="left-attach">0</property>
                         <property name="top-attach">9</property>
-                        <property name="width">2</property>
+                        <property name="width">4</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkScale">
-                        <property name="width-request">100</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="adjustment">SS_AT_ET_T</property>
@@ -375,7 +365,6 @@
                     </child>
                     <child>
                       <object class="GtkScale">
-                        <property name="width-request">100</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="adjustment">SS_AT_FI_T</property>
@@ -389,7 +378,6 @@
                     </child>
                     <child>
                       <object class="GtkScale">
-                        <property name="width-request">100</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="adjustment">SS_CQ_T</property>
@@ -403,7 +391,6 @@
                     </child>
                     <child>
                       <object class="GtkScale">
-                        <property name="width-request">100</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="adjustment">SS_ED_T</property>
@@ -417,7 +404,6 @@
                     </child>
                     <child>
                       <object class="GtkScale">
-                        <property name="width-request">100</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="adjustment">SS_BC_T</property>
@@ -461,7 +447,7 @@
                       <packing>
                         <property name="left-attach">0</property>
                         <property name="top-attach">0</property>
-                        <property name="width">2</property>
+                        <property name="width">4</property>
                       </packing>
                     </child>
                     <child>
@@ -574,26 +560,8 @@
                       <packing>
                         <property name="left-attach">0</property>
                         <property name="top-attach">13</property>
-                        <property name="width">3</property>
+                        <property name="width">4</property>
                       </packing>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
                     </child>
                     <child>
                       <placeholder/>
@@ -703,23 +671,6 @@
                       <packing>
                         <property name="left-attach">0</property>
                         <property name="top-attach">4</property>
-                        <property name="width">3</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkCheckButton" id="CB_MS_stack">
-                        <property name="label" translatable="yes">Stack</property>
-                        <property name="visible">True</property>
-                        <property name="can-focus">True</property>
-                        <property name="receives-default">False</property>
-                        <property name="tooltip-text" translatable="yes">Stack scans on top of one another (no gaps) instead of tiling (usually with gaps)</property>
-                        <property name="halign">start</property>
-                        <property name="draw-indicator">True</property>
-                      </object>
-                      <packing>
-                        <property name="left-attach">0</property>
-                        <property name="top-attach">5</property>
-                        <property name="width">3</property>
                       </packing>
                     </child>
                     <child>
@@ -734,7 +685,7 @@
                       </object>
                       <packing>
                         <property name="left-attach">0</property>
-                        <property name="top-attach">6</property>
+                        <property name="top-attach">5</property>
                         <property name="width">3</property>
                       </packing>
                     </child>
@@ -770,7 +721,7 @@
                     </child>
                     <child>
                       <object class="GtkScale">
-                        <property name="width-request">100</property>
+                        <property name="width-request">60</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="hexpand">True</property>
@@ -831,7 +782,6 @@
                     </child>
                     <child>
                       <object class="GtkScale">
-                        <property name="width-request">100</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="hexpand">True</property>
@@ -861,7 +811,6 @@
                     </child>
                     <child>
                       <object class="GtkScale">
-                        <property name="width-request">100</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="hexpand">True</property>
@@ -935,6 +884,28 @@
                         <property name="top-attach">2</property>
                         <property name="width">2</property>
                       </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="CB_MS_stack">
+                        <property name="label" translatable="yes">Stack</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">False</property>
+                        <property name="tooltip-text" translatable="yes">Stack scans on top of one another (no gaps) instead of tiling (usually with gaps)</property>
+                        <property name="halign">start</property>
+                        <property name="draw-indicator">True</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">1</property>
+                        <property name="top-attach">4</property>
+                        <property name="width">3</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
                     </child>
                     <child>
                       <placeholder/>
@@ -1017,7 +988,6 @@
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="halign">start</property>
                 <property name="valign">start</property>
                 <property name="orientation">vertical</property>
                 <child>
@@ -1025,20 +995,20 @@
                   <object class="GtkGrid">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="halign">start</property>
                     <property name="valign">start</property>
                     <property name="margin-start">8</property>
                     <property name="margin-end">8</property>
                     <property name="margin-top">4</property>
                     <property name="margin-bottom">4</property>
                     <property name="row-spacing">4</property>
+                    <property name="column-spacing">2</property>
                     <child>
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="tooltip-text" translatable="yes">Favors connections that are part of a long curve</property>
+                        <property name="tooltip-text" translatable="yes">Favors connections that are part of a long curve (multiplier)</property>
                         <property name="halign">start</property>
-                        <property name="label" translatable="yes">Curves (multiplier)</property>
+                        <property name="label" translatable="yes">Curves</property>
                       </object>
                       <packing>
                         <property name="left-attach">0</property>
@@ -1049,9 +1019,9 @@
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="tooltip-text" translatable="yes">Avoid single disconnected pixels</property>
+                        <property name="tooltip-text" translatable="yes">Avoid single disconnected pixels (weight)</property>
                         <property name="halign">start</property>
-                        <property name="label" translatable="yes">Islands (weight)</property>
+                        <property name="label" translatable="yes">Islands</property>
                       </object>
                       <packing>
                         <property name="left-attach">0</property>
@@ -1064,24 +1034,13 @@
                         <property name="can-focus">False</property>
                         <property name="tooltip-text" translatable="yes">Favors connections that are part of foreground color</property>
                         <property name="halign">start</property>
-                        <property name="label" translatable="yes">Sparse pixels (window radius)</property>
+                        <property name="margin-top">8</property>
+                        <property name="label" translatable="yes">Sparse pixels:</property>
                       </object>
                       <packing>
                         <property name="left-attach">0</property>
                         <property name="top-attach">3</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="tooltip-text" translatable="yes">Favors connections that are part of foreground color</property>
-                        <property name="halign">start</property>
-                        <property name="label" translatable="yes">Sparse pixels (multiplier)</property>
-                      </object>
-                      <packing>
-                        <property name="left-attach">0</property>
-                        <property name="top-attach">4</property>
+                        <property name="width">2</property>
                       </packing>
                     </child>
                     <child>
@@ -1095,7 +1054,7 @@
                         <property name="value">1</property>
                       </object>
                       <packing>
-                        <property name="left-attach">1</property>
+                        <property name="left-attach">2</property>
                         <property name="top-attach">1</property>
                       </packing>
                     </child>
@@ -1109,7 +1068,7 @@
                         <property name="value">5</property>
                       </object>
                       <packing>
-                        <property name="left-attach">1</property>
+                        <property name="left-attach">2</property>
                         <property name="top-attach">2</property>
                       </packing>
                     </child>
@@ -1123,8 +1082,8 @@
                         <property name="value">2</property>
                       </object>
                       <packing>
-                        <property name="left-attach">1</property>
-                        <property name="top-attach">3</property>
+                        <property name="left-attach">2</property>
+                        <property name="top-attach">4</property>
                       </packing>
                     </child>
                     <child>
@@ -1138,8 +1097,128 @@
                         <property name="value">1</property>
                       </object>
                       <packing>
+                        <property name="left-attach">2</property>
+                        <property name="top-attach">5</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes"> Heuristics:</property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">0</property>
+                        <property name="width">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkScale">
+                        <property name="width-request">60</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="hexpand">True</property>
+                        <property name="adjustment">PA_curves</property>
+                        <property name="round-digits">1</property>
+                        <property name="draw-value">False</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">1</property>
+                        <property name="top-attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkScale">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="hexpand">True</property>
+                        <property name="adjustment">PA_islands</property>
+                        <property name="draw-value">False</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">1</property>
+                        <property name="top-attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkScale">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="hexpand">True</property>
+                        <property name="adjustment">PA_sparse1</property>
+                        <property name="draw-value">False</property>
+                      </object>
+                      <packing>
                         <property name="left-attach">1</property>
                         <property name="top-attach">4</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkScale">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="hexpand">True</property>
+                        <property name="adjustment">PA_sparse2</property>
+                        <property name="draw-value">False</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">1</property>
+                        <property name="top-attach">5</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkRadioButton">
+                        <property name="label" translatable="yes">B-splines</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">False</property>
+                        <property name="tooltip-text" translatable="yes">Preserve staircasing artifacts</property>
+                        <property name="halign">start</property>
+                        <property name="draw-indicator">True</property>
+                        <property name="group">RB_PA_voronoi</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">9</property>
+                        <property name="width">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkRadioButton" id="RB_PA_voronoi">
+                        <property name="label" translatable="yes">Voronoi</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">False</property>
+                        <property name="tooltip-text" translatable="yes">Output composed of straight lines</property>
+                        <property name="halign">start</property>
+                        <property name="active">True</property>
+                        <property name="draw-indicator">True</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">8</property>
+                        <property name="width">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes"> Output:</property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">7</property>
+                        <property name="width">2</property>
                       </packing>
                     </child>
                     <child>
@@ -1154,6 +1233,20 @@
                       </object>
                       <packing>
                         <property name="left-attach">0</property>
+                        <property name="top-attach">6</property>
+                        <property name="width">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="tooltip-text" translatable="yes">Favors connections that are part of foreground color</property>
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes">Multiplier</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
                         <property name="top-attach">5</property>
                       </packing>
                     </child>
@@ -1161,107 +1254,14 @@
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
+                        <property name="tooltip-text" translatable="yes">Favors connections that are part of foreground color</property>
                         <property name="halign">start</property>
-                        <property name="label" translatable="yes"> Output </property>
-                        <attributes>
-                          <attribute name="weight" value="bold"/>
-                        </attributes>
+                        <property name="label" translatable="yes">Window radius</property>
                       </object>
                       <packing>
                         <property name="left-attach">0</property>
-                        <property name="top-attach">6</property>
+                        <property name="top-attach">4</property>
                       </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="halign">start</property>
-                        <property name="label" translatable="yes"> Heuristics </property>
-                        <attributes>
-                          <attribute name="weight" value="bold"/>
-                        </attributes>
-                      </object>
-                      <packing>
-                        <property name="left-attach">0</property>
-                        <property name="top-attach">0</property>
-                        <property name="width">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkBox">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="orientation">vertical</property>
-                        <child>
-                          <object class="GtkRadioButton" id="RB_PA_voronoi">
-                            <property name="label" translatable="yes">Voronoi</property>
-                            <property name="visible">True</property>
-                            <property name="can-focus">True</property>
-                            <property name="receives-default">False</property>
-                            <property name="tooltip-text" translatable="yes">Output composed of straight lines</property>
-                            <property name="halign">start</property>
-                            <property name="active">True</property>
-                            <property name="draw-indicator">True</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkRadioButton">
-                            <property name="label" translatable="yes">B-splines</property>
-                            <property name="visible">True</property>
-                            <property name="can-focus">True</property>
-                            <property name="receives-default">False</property>
-                            <property name="tooltip-text" translatable="yes">Preserve staircasing artifacts</property>
-                            <property name="halign">start</property>
-                            <property name="draw-indicator">True</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="left-attach">0</property>
-                        <property name="top-attach">7</property>
-                        <property name="height">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
                     </child>
                     <child>
                       <placeholder/>
@@ -1297,6 +1297,7 @@
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="halign">start</property>
                 <property name="label" translatable="yes">Pixel art</property>
               </object>
               <packing>
@@ -1435,7 +1436,7 @@
               <object class="GtkImage">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="icon-name">help-about-symbolic</property>
+                <property name="icon-name">info-button-symbolic</property>
               </object>
             </child>
           </object>
@@ -1481,12 +1482,11 @@
             </child>
             <child>
               <object class="GtkButton" id="B_OK">
-                <property name="label">gtk-apply</property>
+                <property name="label">Apply</property>
                 <property name="width-request">150</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
-                <property name="use-stock">True</property>
               </object>
               <packing>
                 <property name="expand">True</property>
