@@ -601,8 +601,9 @@ ObjectsPanel::ObjectsPanel() :
 
     //Set the expander and search columns
     _tree.set_expander_column( *_name_column );
-    _tree.set_search_column(_model->_colLabel);
-    _tree.set_enable_search(true);
+    // Disable search (it doesn't make much sense)
+    _tree.set_search_column(-1);
+    _tree.set_enable_search(false);
     _tree.get_selection()->set_mode(Gtk::SELECTION_NONE);
 
     //Set up tree signals
