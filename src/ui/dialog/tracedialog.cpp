@@ -174,22 +174,7 @@ void TraceDialogImpl2::traceProcess(bool do_i_trace)
 
     Glib::RefPtr<Gdk::Pixbuf> pixbuf = tracer.getSelectedImage();
     if (pixbuf) {
-        Glib::RefPtr<Gdk::Pixbuf> preview = use_autotrace ? ate.preview(pixbuf) : pte.preview(pixbuf);
-        scaledPreview = preview;
-
-        // if (preview) {
-            /*
-            int width = preview->get_width();
-            int height = preview->get_height();
-            const Gtk::Allocation &vboxAlloc = previewArea->get_allocation();
-            double scaleFX = vboxAlloc.get_width() / (double)width;
-            double scaleFY = vboxAlloc.get_height() / (double)height;
-            double scaleFactor = scaleFX > scaleFY ? scaleFY : scaleFX;
-            int newWidth = (int)(((double)width) * scaleFactor);
-            int newHeight = (int)(((double)height) * scaleFactor);
-            scaledPreview = preview->scale_simple(newWidth, newHeight, Gdk::INTERP_HYPER);
-            */
-        // }
+        scaledPreview = use_autotrace ? ate.preview(pixbuf) : pte.preview(pixbuf);
     }
     else {
         scaledPreview.reset();
@@ -402,7 +387,7 @@ TraceDialogImpl2::TraceDialogImpl2()
     B_RESET->signal_clicked().connect(sigc::mem_fun(*this, &TraceDialogImpl2::onSetDefaults));
     previewArea->signal_draw().connect(sigc::mem_fun(*this, &TraceDialogImpl2::previewResize));
 
-    // attempt at making UI responsive: relocate preview to right or bottom depending on dialog size
+    // attempt at making UI responsive: relocate preview to the right or bottom of dialog depending on dialog size
     const int WIDTH_SMALL = 600;
     this->signal_size_allocate().connect([=](const Gtk::Allocation& alloc){
         g_warning("size alloc: %d x %d", alloc.get_width(), alloc.get_height());
@@ -419,11 +404,11 @@ TraceDialogImpl2::TraceDialogImpl2()
     CBT_SS->signal_changed().connect([=](){ show_hide_params(); });
     show_hide_params();
 
-    // watch for changes
-    for (auto adj : {SS_BC_T, SS_ED_T, SS_CQ_T, SS_AT_FI_T, SS_AT_ET_T, optimize, smooth, speckles, MS_scans, PA_curves, PA_islands, PA_sparse1, PA_sparse2 }) {
+    // watch for changes, but only in params that can impact preview bitmap
+    for (auto adj : {SS_BC_T, SS_ED_T, SS_CQ_T, SS_AT_FI_T, SS_AT_ET_T, /* optimize, smooth, speckles,*/ MS_scans, PA_curves, PA_islands, PA_sparse1, PA_sparse2 }) {
         adj->signal_value_changed().connect([=](){ params_changed(); });
     }
-    for (auto checkbtn : {CB_invert, CB_MS_rb, CB_MS_smooth, CB_MS_stack, CB_optimize1, CB_optimize, CB_PA_optimize, CB_SIOX1, CB_SIOX, CB_smooth1, CB_smooth, CB_speckles1, CB_speckles, _live_preview}) {
+    for (auto checkbtn : {CB_invert, CB_MS_rb, /* CB_MS_smooth, CB_MS_stack, CB_optimize1, CB_optimize, */ CB_PA_optimize, CB_SIOX1, CB_SIOX, /* CB_smooth1, CB_smooth, CB_speckles1, CB_speckles, */ _live_preview}) {
         checkbtn->signal_toggled().connect([=](){ params_changed(); });
     }
     for (auto combo : {CBT_SS, CBT_MS}) {
