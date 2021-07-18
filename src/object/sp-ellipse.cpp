@@ -21,7 +21,7 @@
 #include "live_effects/effect.h"
 #include "live_effects/lpeobject.h"
 #include "live_effects/lpeobject-reference.h"
-
+#include "helper/geom.h"
 #include <2geom/angle.h>
 #include <2geom/circle.h>
 #include <2geom/ellipse.h>
@@ -476,9 +476,9 @@ void SPGenericEllipse::set_shape()
     /* Reset the shape's curve to the "original_curve"
      * This is very important for LPEs to work properly! (the bbox might be recalculated depending on the curve in shape)*/
     auto const before = this->curveBeforeLPE();
-    if (before && before->get_pathvector() != c->get_pathvector()) {
+    if (before && !geom_pathv_compare(before->get_pathvector(), c->get_pathvector(), 0.01)) {
         setCurveBeforeLPE(std::move(c));
-        sp_lpe_item_update_patheffect(this, true, false);
+        sp_lpe_item_update_patheffect(this, false, false);
         return;
     }
 

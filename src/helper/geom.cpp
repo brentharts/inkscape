@@ -138,6 +138,35 @@ cubic_bbox (Geom::Coord x000, Geom::Coord y000, Geom::Coord x001, Geom::Coord y0
     }
 }
 
+bool 
+geom_pathv_compare(Geom::PathVector apv, Geom::PathVector bpv, double precission) 
+{
+    size_t totala = apv.curveCount();
+    size_t totalb = bpv.curveCount();
+    if (totala != totalb) {
+        return false;
+    }
+    std::vector<Geom::Coord> pos;
+    for (size_t i = 0; i < apv.curveCount(); i++) {
+        Geom::Point pointa = apv.pointAt(float(i)+0.2);
+        Geom::Point pointb = bpv.pointAt(float(i)+0.2);
+        Geom::Point pointc = apv.pointAt(float(i)+0.4);
+        Geom::Point pointd = bpv.pointAt(float(i)+0.4);
+        Geom::Point pointe = apv.pointAt(float(i));
+        Geom::Point pointf = bpv.pointAt(float(i));
+        if (!Geom::are_near(pointa[Geom::X], pointb[Geom::X], precission) ||
+            !Geom::are_near(pointa[Geom::Y], pointb[Geom::Y], precission) ||
+            !Geom::are_near(pointc[Geom::X], pointd[Geom::X], precission) ||
+            !Geom::are_near(pointc[Geom::Y], pointd[Geom::Y], precission) ||
+            !Geom::are_near(pointe[Geom::X], pointf[Geom::X], precission) ||
+            !Geom::are_near(pointe[Geom::Y], pointf[Geom::Y], precission)) 
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
 Geom::OptRect
 bounds_fast_transformed(Geom::PathVector const & pv, Geom::Affine const & t)
 {
