@@ -69,6 +69,7 @@
   </object>
   <object class="GtkPopover" id="popover">
     <property name="can-focus">False</property>
+    <property name="constrain-to">none</property>
     <child>
       <object class="GtkBox">
         <property name="width-request">370</property>
