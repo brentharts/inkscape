@@ -94,6 +94,7 @@ private:
 
     Inkscape::auto_connection layer_changed;
     SPObject *_layer;
+    Gtk::TreeModel::RowReference _hovered_row_ref;
 
     //Show icons in the context menu
     bool _show_contextmenu_icons;
@@ -126,6 +127,7 @@ private:
     
     bool _handleButtonEvent(GdkEventButton *event);
     bool _handleKeyEvent(GdkEventKey *event);
+    bool _handleMotionEvent(GdkEventMotion* motion_event);
     
     void _handleEdited(const Glib::ustring& path, const Glib::ustring& new_text);
 

@@ -76,6 +76,7 @@ public:
 
     void updateRowInfo();
     void updateRowHighlight();
+    void updateRowAncestorState(bool invisible, bool locked);
     void updateRowBg();
 
     ObjectWatcher *findChild(Node *node);
@@ -156,8 +157,11 @@ public:
         add(_colIconColor);
         add(_colClipMask);
         add(_colBgColor);
-        add(_colVisible);
+        add(_colInvisible);
         add(_colLocked);
+        add(_colAncestorInvisible);
+        add(_colAncestorLocked);
+        add(_colHover);
     }
     ~ModelColumns() override = default;
     Gtk::TreeModelColumn<Node*> _colNode;
@@ -166,8 +170,11 @@ public:
     Gtk::TreeModelColumn<unsigned int> _colIconColor;
     Gtk::TreeModelColumn<unsigned int> _colClipMask;
     Gtk::TreeModelColumn<Gdk::RGBA> _colBgColor;
-    Gtk::TreeModelColumn<bool> _colVisible;
+    Gtk::TreeModelColumn<bool> _colInvisible;
     Gtk::TreeModelColumn<bool> _colLocked;
+    Gtk::TreeModelColumn<bool> _colAncestorInvisible;
+    Gtk::TreeModelColumn<bool> _colAncestorLocked;
+    Gtk::TreeModelColumn<bool> _colHover;
 };
 
 /**
@@ -242,10 +249,11 @@ void ObjectWatcher::updateRowInfo() {
         row[_model->_colClipMask] =
             (item->getClipObject() ? Inkscape::UI::Widget::OVERLAY_CLIP : 0) |
             (item->getMaskObject() ? Inkscape::UI::Widget::OVERLAY_MASK : 0);
-        row[_model->_colVisible] = item->isHidden();
+        row[_model->_colInvisible] = item->isHidden();
         row[_model->_colLocked] = !item->isSensitive();
 
         updateRowHighlight();
+        updateRowAncestorState(row[_model->_colAncestorInvisible], row[_model->_colAncestorLocked]);
     }
 }
 
@@ -265,6 +273,19 @@ void ObjectWatcher::updateRowHighlight() {
         }
     }
 }
+
+/**
+ * Propegate a change in visibility or locked state to all children
+ */
+void ObjectWatcher::updateRowAncestorState(bool invisible, bool locked) {
+    auto _model = panel->_model;
+    auto row = *panel->_store->get_iter(row_ref.get_path());
+    row[_model->_colAncestorInvisible] = invisible;
+    row[_model->_colAncestorLocked] = locked;
+    for (auto &watcher : child_watchers) {
+        watcher.second->updateRowAncestorState(
+            invisible || row[_model->_colInvisible],
+            locked || row[_model->_colLocked]);
     }
 }
 
@@ -369,6 +390,17 @@ bool ObjectWatcher::addChild(SPItem *child, bool dummy)
     auto *node = child->getRepr();
     assert(node);
     Gtk::TreeModel::Row row = *(panel->_store->prepend(children));
+
+    // Ancestor states are handled inside the list store (so we don't have to re-ask every update)
+    auto _model = panel->_model;
+    if (row_ref) {
+        auto parent_row = *panel->_store->get_iter(row_ref.get_path());
+        row[_model->_colAncestorInvisible] = parent_row[_model->_colAncestorInvisible] || parent_row[_model->_colInvisible];
+        row[_model->_colAncestorLocked] = parent_row[_model->_colAncestorLocked] || parent_row[_model->_colLocked];
+    } else {
+        row[_model->_colAncestorInvisible] = false;
+        row[_model->_colAncestorLocked] = false;
+    }
 
     auto &watcher = child_watchers[node];
     assert(!watcher);
@@ -597,30 +629,34 @@ ObjectsPanel::ObjectsPanel() :
     _name_column->add_attribute(icon_renderer->property_clipmask(), _model->_colClipMask);
     _name_column->add_attribute(icon_renderer->property_cell_background_rgba(), _model->_colBgColor);
 
-    //Visible
-    auto *eyeRenderer = Gtk::manage( new Inkscape::UI::Widget::ImageToggler(INKSCAPE_ICON("object-visible"), INKSCAPE_ICON("object-hidden")));
-
+    // Visible icon
+    auto *eyeRenderer = Gtk::manage( new Inkscape::UI::Widget::ImageToggler(
+            INKSCAPE_ICON("object-hidden"), INKSCAPE_ICON("object-visible")));
     int visibleColNum = _tree.append_column("vis", *eyeRenderer) - 1;
     eyeRenderer->signal_toggled().connect(sigc::mem_fun(*this, &ObjectsPanel::toggleVisible));
     Gtk::TreeViewColumn* col = _tree.get_column(visibleColNum);
     if ( col ) {
-        col->add_attribute( eyeRenderer->property_active(), _model->_colVisible );
-        col->add_attribute( eyeRenderer->property_cell_background_rgba(), _model->_colBgColor);
+        col->add_attribute(eyeRenderer->property_active(), _model->_colInvisible);
+        col->add_attribute(eyeRenderer->property_cell_background_rgba(), _model->_colBgColor);
+        col->add_attribute(eyeRenderer->property_activatable(), _model->_colHover);
+        col->add_attribute(eyeRenderer->property_gossamer(), _model->_colAncestorInvisible);
     }
 
-    //Locked
-    Inkscape::UI::Widget::ImageToggler * renderer = Gtk::manage( new Inkscape::UI::Widget::ImageToggler(
+    // Unlocked icon
+    Inkscape::UI::Widget::ImageToggler * lockRenderer = Gtk::manage( new Inkscape::UI::Widget::ImageToggler(
         INKSCAPE_ICON("object-locked"), INKSCAPE_ICON("object-unlocked")));
-    int lockedColNum = _tree.append_column("lock", *renderer) - 1;
-    renderer->signal_toggled().connect(sigc::mem_fun(*this, &ObjectsPanel::toggleLocked));
+    int lockedColNum = _tree.append_column("lock", *lockRenderer) - 1;
+    lockRenderer->signal_toggled().connect(sigc::mem_fun(*this, &ObjectsPanel::toggleLocked));
     col = _tree.get_column(lockedColNum);
-    if ( col ) {
-        col->add_attribute( renderer->property_active(), _model->_colLocked );
-        col->add_attribute( renderer->property_cell_background_rgba(), _model->_colBgColor);
+    if (col) {
+        col->add_attribute(lockRenderer->property_active(), _model->_colLocked);
+        col->add_attribute(lockRenderer->property_cell_background_rgba(), _model->_colBgColor);
+        col->add_attribute(lockRenderer->property_activatable(), _model->_colHover);
+        col->add_attribute(lockRenderer->property_gossamer(), _model->_colAncestorLocked);
     }
 
     //Set the expander and search columns
-    _tree.set_expander_column( *_name_column );
+    _tree.set_expander_column(*_name_column);
     // Disable search (it doesn't make much sense)
     _tree.set_search_column(-1);
     _tree.set_enable_search(false);
@@ -629,7 +665,8 @@ ObjectsPanel::ObjectsPanel() :
     //Set up tree signals
     _tree.signal_button_press_event().connect(sigc::mem_fun(*this, &ObjectsPanel::_handleButtonEvent), false);
     _tree.signal_button_release_event().connect(sigc::mem_fun(*this, &ObjectsPanel::_handleButtonEvent), false);
-    _tree.signal_key_press_event().connect( sigc::mem_fun(*this, &ObjectsPanel::_handleKeyEvent), false );
+    _tree.signal_key_press_event().connect(sigc::mem_fun(*this, &ObjectsPanel::_handleKeyEvent), false);
+    _tree.signal_motion_notify_event().connect(sigc::mem_fun(*this, &ObjectsPanel::_handleMotionEvent), false);
 
     // Before expanding a row, replace the dummy child with the actual children
     _tree.signal_test_expand_row().connect([this](const Gtk::TreeModel::iterator &iter, const Gtk::TreeModel::Path &) {
@@ -820,10 +857,8 @@ Gtk::Button* ObjectsPanel::_addBarButton(char const* iconName, char const* toolt
 void ObjectsPanel::toggleVisible(const Glib::ustring& path)
 {
     Gtk::TreeModel::Row row = *_store->get_iter(path);
-    SPItem* item = getItem(row);
-    if (item) {
-        item->setHidden(row[_model->_colVisible]);
-    }
+    if (SPItem* item = getItem(row))
+        item->setHidden(!row[_model->_colInvisible]);
 }
 
 /**
@@ -834,10 +869,8 @@ void ObjectsPanel::toggleVisible(const Glib::ustring& path)
 void ObjectsPanel::toggleLocked(const Glib::ustring& path)
 {
     Gtk::TreeModel::Row row = *_store->get_iter(path);
-    SPItem* item = getItem(row);
-    if (item) {
+    if (SPItem* item = getItem(row))
         item->setLocked(!row[_model->_colLocked]);
-    }
 }
 
 /**
@@ -864,6 +897,37 @@ bool ObjectsPanel::_handleKeyEvent(GdkEventKey *event)
     // invoke user defined shortcuts first
     if (Inkscape::Shortcuts::getInstance().invoke_verb(event, desktop))
         return true;
+    return false;
+}
+
+/**
+ * Handles mouse movements
+ * @param event Motion event passed in from GDK
+ * @returns Whether the event should be eaten.
+ */
+bool ObjectsPanel::_handleMotionEvent(GdkEventMotion* motion_event)
+{
+    if (_is_editing) return false;
+
+    Gtk::TreeModel::Path path;
+    Gtk::TreeViewColumn* col = nullptr;
+    int x, y;
+    // Unhover any existing hovered row.
+    if (_hovered_row_ref) {
+        if (auto row = *_store->get_iter(_hovered_row_ref.get_path()))
+            row[_model->_colHover] = false;
+    }
+    // Allow this function to be called blind.
+    if (!motion_event)
+        return false;
+
+    if (_tree.get_path_at_pos((int)motion_event->x, (int)motion_event->y, path, col, x, y)) {
+        if (auto row = *_store->get_iter(path)) {
+            row[_model->_colHover] = true;
+            _hovered_row_ref = Gtk::TreeModel::RowReference(_store, path);
+        }
+    }
+
     return false;
 }
 

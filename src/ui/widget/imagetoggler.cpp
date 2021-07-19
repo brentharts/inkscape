@@ -28,6 +28,7 @@ ImageToggler::ImageToggler( char const* on, char const* off) :
     _pixOffName(off),
     _property_active(*this, "active", false),
     _property_activatable(*this, "activatable", true),
+    _property_gossamer(*this, "gossamer", false),
     _property_pixbuf_on(*this, "pixbuf_on", Glib::RefPtr<Gdk::Pixbuf>(nullptr)),
     _property_pixbuf_off(*this, "pixbuf_off", Glib::RefPtr<Gdk::Pixbuf>(nullptr))
 {
@@ -60,6 +61,13 @@ void ImageToggler::render_vfunc( const Cairo::RefPtr<Cairo::Context>& cr,
         _property_pixbuf_off = sp_get_icon_pixbuf(_pixOffName, _size * scale);
     }
 
+    // Hide when not being used.
+    bool visible = _property_activatable.get_value()
+                || _property_active.get_value();
+    if (!visible) {
+        return;
+    }
+
     Glib::RefPtr<Gdk::Pixbuf> pixbuf;
     if(_property_active.get_value()) {
         pixbuf = _property_pixbuf_on.get_value();
@@ -78,7 +86,12 @@ void ImageToggler::render_vfunc( const Cairo::RefPtr<Cairo::Context>& cr,
     cairo_set_source_surface(cr->cobj(), surface, x, y);
     cr->set_operator(Cairo::OPERATOR_ATOP);
     cr->rectangle(x, y, _size, _size);
-    cr->fill();
+    if (_property_gossamer.get_value()) {
+        cr->clip();
+        cr->paint_with_alpha(0.2);
+    } else {
+        cr->fill();
+    }
     cairo_surface_destroy(surface); // free!
 }
 
