@@ -634,12 +634,11 @@ ObjectsPanel::ObjectsPanel() :
             INKSCAPE_ICON("object-hidden"), INKSCAPE_ICON("object-visible")));
     int visibleColNum = _tree.append_column("vis", *eyeRenderer) - 1;
     eyeRenderer->signal_toggled().connect(sigc::mem_fun(*this, &ObjectsPanel::toggleVisible));
-    Gtk::TreeViewColumn* col = _tree.get_column(visibleColNum);
-    if ( col ) {
-        col->add_attribute(eyeRenderer->property_active(), _model->_colInvisible);
-        col->add_attribute(eyeRenderer->property_cell_background_rgba(), _model->_colBgColor);
-        col->add_attribute(eyeRenderer->property_activatable(), _model->_colHover);
-        col->add_attribute(eyeRenderer->property_gossamer(), _model->_colAncestorInvisible);
+    if (auto eye = _tree.get_column(visibleColNum)) {
+        eye->add_attribute(eyeRenderer->property_active(), _model->_colInvisible);
+        eye->add_attribute(eyeRenderer->property_cell_background_rgba(), _model->_colBgColor);
+        eye->add_attribute(eyeRenderer->property_activatable(), _model->_colHover);
+        eye->add_attribute(eyeRenderer->property_gossamer(), _model->_colAncestorInvisible);
     }
 
     // Unlocked icon
@@ -647,12 +646,11 @@ ObjectsPanel::ObjectsPanel() :
         INKSCAPE_ICON("object-locked"), INKSCAPE_ICON("object-unlocked")));
     int lockedColNum = _tree.append_column("lock", *lockRenderer) - 1;
     lockRenderer->signal_toggled().connect(sigc::mem_fun(*this, &ObjectsPanel::toggleLocked));
-    col = _tree.get_column(lockedColNum);
-    if (col) {
-        col->add_attribute(lockRenderer->property_active(), _model->_colLocked);
-        col->add_attribute(lockRenderer->property_cell_background_rgba(), _model->_colBgColor);
-        col->add_attribute(lockRenderer->property_activatable(), _model->_colHover);
-        col->add_attribute(lockRenderer->property_gossamer(), _model->_colAncestorLocked);
+    if (auto lock = _tree.get_column(lockedColNum)) {
+        lock->add_attribute(lockRenderer->property_active(), _model->_colLocked);
+        lock->add_attribute(lockRenderer->property_cell_background_rgba(), _model->_colBgColor);
+        lock->add_attribute(lockRenderer->property_activatable(), _model->_colHover);
+        lock->add_attribute(lockRenderer->property_gossamer(), _model->_colAncestorLocked);
     }
 
     //Set the expander and search columns
@@ -909,9 +907,6 @@ bool ObjectsPanel::_handleMotionEvent(GdkEventMotion* motion_event)
 {
     if (_is_editing) return false;
 
-    Gtk::TreeModel::Path path;
-    Gtk::TreeViewColumn* col = nullptr;
-    int x, y;
     // Unhover any existing hovered row.
     if (_hovered_row_ref) {
         if (auto row = *_store->get_iter(_hovered_row_ref.get_path()))
@@ -921,6 +916,9 @@ bool ObjectsPanel::_handleMotionEvent(GdkEventMotion* motion_event)
     if (!motion_event)
         return false;
 
+    Gtk::TreeModel::Path path;
+    Gtk::TreeViewColumn* col = nullptr;
+    int x, y;
     if (_tree.get_path_at_pos((int)motion_event->x, (int)motion_event->y, path, col, x, y)) {
         if (auto row = *_store->get_iter(path)) {
             row[_model->_colHover] = true;
@@ -946,6 +944,11 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
     Gtk::TreeViewColumn* col = nullptr;
     int x, y;
     if (_tree.get_path_at_pos((int)event->x, (int)event->y, path, col, x, y)) {
+        // Only the label reacts to clicks, nothing else, only need to test horz
+        Gdk::Rectangle r;
+        _tree.get_cell_area(path, *_name_column, r);
+        if (x < r.get_x() || x > (r.get_x() + r.get_width()))
+            return false;
 
         // This doesn't work, it might be being eaten.
         if (event->type == GDK_2BUTTON_PRESS) {
@@ -990,6 +993,7 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
         } else {
             current_item = item;
         }
+        return true;
     }
     return false;
 }
