@@ -19,6 +19,7 @@
 
 #include "bad-uri-exception.h"
 #include "svg/svg.h"
+#include "svg/svg-color.h"
 #include "print.h"
 #include "display/drawing-item.h"
 #include "attributes.h"
@@ -71,8 +72,7 @@ SPItem::SPItem() : SPObject() {
     sensitive = TRUE;
     bbox_valid = FALSE;
 
-    _highlightColor = nullptr;
-
+    _highlightColor = 0;
     transform_center_x = 0;
     transform_center_y = 0;
 
@@ -187,20 +187,19 @@ bool SPItem::isHidden(unsigned display_key) const {
 }
 
 bool SPItem::isHighlightSet() const {
-    return _highlightColor != nullptr;
+    return _highlightColor != 0;
 }
 
 guint32 SPItem::highlight_color() const {
-    if (_highlightColor) {
-        return atoi(_highlightColor) | 0x00000000;
+    if (isHighlightSet())
+        return _highlightColor;
+
+    SPItem const *item = dynamic_cast<SPItem const *>(parent);
+    if (parent && (parent != this) && item) {
+        return item->highlight_color();
     } else {
-        SPItem const *item = dynamic_cast<SPItem const *>(parent);
-        if (parent && (parent != this) && item) {
-            return item->highlight_color();
-        } else {
-            static Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-            return prefs->getInt("/tools/nodes/highlight_color", 0xff0000ff);
-        }
+        static Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+        return prefs->getInt("/tools/nodes/highlight_color", 0xff0000ff);
     }
 }
 
@@ -498,12 +497,9 @@ void SPItem::set(SPAttr key, gchar const* value) {
         }
         case SPAttr::INKSCAPE_HIGHLIGHT_COLOR:
         {
-            g_free(item->_highlightColor);
-            if (value) {
-                item->_highlightColor = g_strdup(value);
-            } else {
-                item->_highlightColor = nullptr;
-            }
+            item->_highlightColor = 0;
+            if (value)
+                item->_highlightColor = sp_svg_read_color(value, 0x0);
             break;
         }
         case SPAttr::CONNECTOR_AVOID:
@@ -787,8 +783,8 @@ Inkscape::XML::Node* SPItem::write(Inkscape::XML::Document *xml_doc, Inkscape::X
             repr->setAttributeOrRemoveIfEmpty("mask", value);
         }
     }
-    if (item->_highlightColor){
-        repr->setAttribute("inkscape:highlight-color", item->_highlightColor);
+    if (item->isHighlightSet()){
+        repr->setAttribute("inkscape:highlight-color", SPColor(item->_highlightColor).toString());
     } else {
         repr->removeAttribute("inkscape:highlight-color");
     }

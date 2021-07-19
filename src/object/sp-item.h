@@ -386,7 +386,7 @@ public:
      */
     Geom::Affine dt2i_affine() const;
 
-    char *_highlightColor;
+    guint32 _highlightColor;
 
 private:
     enum EvaluatedStatus

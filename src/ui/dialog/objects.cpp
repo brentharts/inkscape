@@ -75,6 +75,7 @@ public:
     ~ObjectWatcher() override;
 
     void updateRowInfo();
+    void updateRowHighlight();
     void updateRowBg();
 
     ObjectWatcher *findChild(Node *node);
@@ -225,27 +226,45 @@ ObjectWatcher::~ObjectWatcher()
  * Update the information in the row from the stored node
  */
 void ObjectWatcher::updateRowInfo() {
-    auto item = dynamic_cast<SPItem *>(panel->getObject(node));
-    assert(item);
-
-    if (item) {
+    if (auto item = dynamic_cast<SPItem *>(panel->getObject(node))) {
         assert(row_ref);
         assert(row_ref.get_path());
 
+        auto _model = panel->_model;
         auto row = *panel->_store->get_iter(row_ref.get_path());
-        row[panel->_model->_colNode] = node;
+        row[_model->_colNode] = node;
 
         // show ids without "#"
         char const *id = item->getId();
-        row[panel->_model->_colLabel] = (id && !item->label()) ? id : item->defaultLabel();
+        row[_model->_colLabel] = (id && !item->label()) ? id : item->defaultLabel();
 
-        row[panel->_model->_colType] = item->typeName();
-        row[panel->_model->_colIconColor] = item->highlight_color();
-        row[panel->_model->_colClipMask] =
+        row[_model->_colType] = item->typeName();
+        row[_model->_colClipMask] =
             (item->getClipObject() ? Inkscape::UI::Widget::OVERLAY_CLIP : 0) |
             (item->getMaskObject() ? Inkscape::UI::Widget::OVERLAY_MASK : 0);
-        row[panel->_model->_colVisible] = !item->isHidden();
-        row[panel->_model->_colLocked] = !item->isSensitive();
+        row[_model->_colVisible] = item->isHidden();
+        row[_model->_colLocked] = !item->isSensitive();
+
+        updateRowHighlight();
+    }
+}
+
+/**
+ * Propegate changes to the highlight color to all children.
+ */
+void ObjectWatcher::updateRowHighlight() {
+    if (auto item = dynamic_cast<SPItem *>(panel->getObject(node))) {
+        auto row = *panel->_store->get_iter(row_ref.get_path());
+        auto new_color = item->highlight_color();
+        if (new_color != row[panel->_model->_colIconColor]) {
+            row[panel->_model->_colIconColor] = new_color;
+            updateRowBg();
+            for (auto &watcher : child_watchers) {
+                watcher.second->updateRowHighlight();
+            }
+        }
+    }
+}
     }
 }
 
@@ -541,6 +560,7 @@ ObjectsPanel::ObjectsPanel() :
     root_watcher(nullptr),
     _model(nullptr),
     _layer(nullptr),
+    _is_editing(false),
     _page(Gtk::ORIENTATION_VERTICAL)
 {
     //Create the tree model and store
@@ -860,7 +880,6 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
 
     Gtk::TreeModel::Path path;
     Gtk::TreeViewColumn* col = nullptr;
-
     int x, y;
     if (_tree.get_path_at_pos((int)event->x, (int)event->y, path, col, x, y)) {
 
