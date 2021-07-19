@@ -77,7 +77,7 @@ public:
     void updateRowInfo();
     void updateRowHighlight();
     void updateRowAncestorState(bool invisible, bool locked);
-    void updateRowBg();
+    void updateRowBg(guint32 rgba = 0.0);
 
     ObjectWatcher *findChild(Node *node);
     void addDummyChild();
@@ -266,7 +266,7 @@ void ObjectWatcher::updateRowHighlight() {
         auto new_color = item->highlight_color();
         if (new_color != row[panel->_model->_colIconColor]) {
             row[panel->_model->_colIconColor] = new_color;
-            updateRowBg();
+            updateRowBg(new_color);
             for (auto &watcher : child_watchers) {
                 watcher.second->updateRowHighlight();
             }
@@ -292,18 +292,20 @@ void ObjectWatcher::updateRowAncestorState(bool invisible, bool locked) {
 /**
  * Updates the row's background colour as indicated by it's selection.
  */
-void ObjectWatcher::updateRowBg()
+void ObjectWatcher::updateRowBg(guint32 rgba)
 {
     assert(row_ref);
-    auto row = *panel->_store->get_iter(row_ref.get_path());
-    if (row) {
+    if (auto row = *panel->_store->get_iter(row_ref.get_path())) {
         auto alpha = SELECTED_ALPHA[selection_state];
         if (alpha == 0.0) {
             row[panel->_model->_colBgColor] = Gdk::RGBA();
             return;
         }
+        if (rgba == 0.0) {
+            rgba = row[panel->_model->_colIconColor];
+        }
 
-        auto color = ColorRGBA(row[panel->_model->_colIconColor]);
+        auto color = ColorRGBA(rgba);
         auto gdk_color = Gdk::RGBA();
         gdk_color.set_red(color[0]);
         gdk_color.set_green(color[1]);
@@ -321,18 +323,16 @@ void ObjectWatcher::updateRowBg()
  */
 void ObjectWatcher::setSelectedBit(SelectionState mask, bool enabled) {
     if (!row_ref) return;
-    {
-        SelectionState value = selection_state;
-        SelectionState original = value;
-        if (enabled) {
-            value |= mask;
-        } else {
-            value &= ~mask;
-        }
-        if (value != original) {
-            selection_state = value;
-            updateRowBg();
-        }
+    SelectionState value = selection_state;
+    SelectionState original = value;
+    if (enabled) {
+        value |= mask;
+    } else {
+        value &= ~mask;
+    }
+    if (value != original) {
+        selection_state = value;
+        updateRowBg();
     }
 }
 
@@ -377,7 +377,7 @@ bool ObjectWatcher::addChild(SPItem *child, bool dummy)
     }
 
     auto const children = getChildren();
-    if (dummy) {
+    if (dummy && row_ref) {
         if (children.empty()) {
             auto const iter = panel->_store->append(children);
             assert(panel->isDummy(*iter));
@@ -954,11 +954,12 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
             return true;
         }
         _is_editing = _is_editing && event->type == GDK_BUTTON_RELEASE;
-
         auto selection = desktop->getSelection();
         auto row = *_store->get_iter(path);
         if (!row) return false;
         SPItem *item = getItem(row);
+
+        if (!item) return false;
         SPGroup *group = SP_GROUP(item);
 
         // Load the right click menu
@@ -1016,12 +1017,12 @@ void ObjectsPanel::_takeAction(int val)
 void ObjectsPanel::_handleEdited(const Glib::ustring& path, const Glib::ustring& new_text)
 {
     _is_editing = false;
-    auto row = *_store->get_iter(path);
-    if (row && !new_text.empty()) {
-        SPItem *item = getItem(row);
-        if (!item->label() || new_text != item->label()) {
-            item->setLabel(new_text.c_str());
-            DocumentUndo::done(getDocument(), SP_VERB_NONE, _("Rename object"));
+    if (auto row = *_store->get_iter(path)) {
+        if (auto item = getItem(row)) {
+            if (!new_text.empty() && (!item->label() || new_text != item->label())) {
+                item->setLabel(new_text.c_str());
+                DocumentUndo::done(getDocument(), SP_VERB_NONE, _("Rename object"));
+            }
         }
     }
 }

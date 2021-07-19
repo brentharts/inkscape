@@ -182,6 +182,7 @@ public:
         return sensitive;
     };
 
+    void setHighlight(guint32 color);
     bool isHighlightSet() const;
     virtual guint32 highlight_color() const;
 

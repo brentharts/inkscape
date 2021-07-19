@@ -186,20 +186,27 @@ bool SPItem::isHidden(unsigned display_key) const {
     return true;
 }
 
+
+void SPItem::setHighlight(guint32 color) {
+    _highlightColor = color;
+    updateRepr();
+}
+
 bool SPItem::isHighlightSet() const {
     return _highlightColor != 0;
 }
 
 guint32 SPItem::highlight_color() const {
-    if (isHighlightSet())
+    if (isHighlightSet()) {
         return _highlightColor;
+    }
 
     SPItem const *item = dynamic_cast<SPItem const *>(parent);
     if (parent && (parent != this) && item) {
         return item->highlight_color();
     } else {
         static Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-        return prefs->getInt("/tools/nodes/highlight_color", 0xff0000ff);
+        return prefs->getInt("/tools/nodes/highlight_color", 0xaaaaaaff);
     }
 }
 
@@ -498,8 +505,9 @@ void SPItem::set(SPAttr key, gchar const* value) {
         case SPAttr::INKSCAPE_HIGHLIGHT_COLOR:
         {
             item->_highlightColor = 0;
-            if (value)
-                item->_highlightColor = sp_svg_read_color(value, 0x0);
+            if (value) {
+                item->_highlightColor = sp_svg_read_color(value, 0x0) | 0xff;
+            }
             break;
         }
         case SPAttr::CONNECTOR_AVOID:
