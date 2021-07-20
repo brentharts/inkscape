@@ -20,12 +20,10 @@
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/stack.h>
 
-
 #include <glibmm/i18n.h>
 
 #include "desktop.h"
 #include "selection.h"
-
 #include "inkscape.h"
 #include "io/resource.h"
 #include "io/sys.h"
@@ -33,6 +31,7 @@
 #include "trace/potrace/inkscape-potrace.h"
 #include "trace/depixelize/inkscape-depixelize.h"
 #include "display/cairo-utils.h"
+#include "ui/util.h"
 
 // This maps the column ids in the glade file to useful enums
 static const std::map<std::string, Inkscape::Trace::Potrace::TraceType> trace_types = {
@@ -67,12 +66,12 @@ private:
     void traceProcess(bool do_i_trace);
     void abort();
 
-    void previewCallback();
+    void previewCallback(bool force);
     bool previewResize(const Cairo::RefPtr<Cairo::Context>&);
     void traceCallback();
     void onSetDefaults();
     void show_hide_params();
-    void params_changed();
+    void schedule_preview_update();
     static gboolean update_cb(gpointer user_data);
 
     Glib::RefPtr<Gtk::Builder> builder;
@@ -93,7 +92,6 @@ private:
     Glib::RefPtr<Gdk::Pixbuf> scaledPreview;
     Gtk::DrawingArea *previewArea;
     Gtk::Box* orient_box;
-    // Gtk::Label* _expand;
     Gtk::Frame* _preview_frame;
     Gtk::Grid* _param_grid;
     Gtk::CheckButton* _live_preview;
@@ -106,7 +104,7 @@ enum Page {
 
 void TraceDialogImpl2::traceProcess(bool do_i_trace)
 {
-    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
+    SPDesktop* desktop = getDesktop();
     if (desktop)
         desktop->setWaitingCursor();
 
@@ -163,14 +161,12 @@ void TraceDialogImpl2::traceProcess(bool do_i_trace)
     auto cb_speckles = current_page == SingleScan ? CB_speckles : CB_speckles1;
     pte.potraceParams->turdsize = cb_speckles->get_active() ? (int)speckles->get_value() : 0;
 
-
     //Inkscape::Trace::Autotrace::AutotraceTracingEngine ate; // TODO
     Inkscape::Trace::Depixelize::DepixelizeTracingEngine dte(
         RB_PA_voronoi->get_active() ? Inkscape::Trace::Depixelize::TraceType::TRACE_VORONOI : Inkscape::Trace::Depixelize::TraceType::TRACE_BSPLINES,
         PA_curves->get_value(), (int) PA_islands->get_value(),
         (int) PA_sparse1->get_value(), PA_sparse2->get_value(),
         CB_PA_optimize->get_active());
-
 
     Glib::RefPtr<Gdk::Pixbuf> pixbuf = tracer.getSelectedImage();
     if (pixbuf) {
@@ -201,7 +197,7 @@ void TraceDialogImpl2::traceProcess(bool do_i_trace)
 
 bool TraceDialogImpl2::previewResize(const Cairo::RefPtr<Cairo::Context>& cr)
 {
-    /*
+    /* Checkerboard - is not applicable here; left for reference
     if (auto wnd = dynamic_cast<Gtk::Window*>(this->get_toplevel())) {
         auto color = wnd->get_style_context()->get_background_color();
         auto background =
@@ -252,13 +248,13 @@ void TraceDialogImpl2::abort()
 }
 
 void TraceDialogImpl2::selectionChanged(Inkscape::Selection *selection) {
-    previewCallback();
+    previewCallback(false);
 }
 
 void TraceDialogImpl2::selectionModified(Selection *selection, guint flags)
 {
     if (flags & (SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_PARENT_MODIFIED_FLAG | SP_OBJECT_STYLE_MODIFIED_FLAG)) {
-        previewCallback();
+        previewCallback(false);
     }
 }
 
@@ -288,12 +284,16 @@ void TraceDialogImpl2::onSetDefaults()
     CB_smooth1->set_active(true);
     CB_optimize1->set_active(true);
     CB_PA_optimize->set_active(false);
-    //CB_live->set_active(false);
     CB_SIOX->set_active(false);
     CB_SIOX1->set_active(false);
 }
 
-void TraceDialogImpl2::previewCallback() { traceProcess(false); }
+void TraceDialogImpl2::previewCallback(bool force) {
+    if (force || (_live_preview->get_active() && is_widget_effectively_visible(this))) {
+        traceProcess(false);
+    }
+}
+
 void TraceDialogImpl2::traceCallback() { traceProcess(true); }
 
 
@@ -381,50 +381,60 @@ TraceDialogImpl2::TraceDialogImpl2()
     add(*mainBox);
     // show_all_children();
 
-    B_Update->signal_clicked().connect(sigc::mem_fun(*this, &TraceDialogImpl2::previewCallback));
+    B_Update->signal_clicked().connect([=](){ previewCallback(true); });
     B_OK->signal_clicked().connect(sigc::mem_fun(*this, &TraceDialogImpl2::traceCallback));
     B_STOP->signal_clicked().connect(sigc::mem_fun(*this, &TraceDialogImpl2::abort));
     B_RESET->signal_clicked().connect(sigc::mem_fun(*this, &TraceDialogImpl2::onSetDefaults));
     previewArea->signal_draw().connect(sigc::mem_fun(*this, &TraceDialogImpl2::previewResize));
 
     // attempt at making UI responsive: relocate preview to the right or bottom of dialog depending on dialog size
-    const int WIDTH_SMALL = 600;
     this->signal_size_allocate().connect([=](const Gtk::Allocation& alloc){
-        g_warning("size alloc: %d x %d", alloc.get_width(), alloc.get_height());
-        if (alloc.get_height() > 600 && alloc.get_width() < WIDTH_SMALL) {
+        // skip bogus sizes
+        if (alloc.get_width() < 10 || alloc.get_height() < 10) return;
+        // ratio: is dialog wide or is it tall?
+        double ratio = alloc.get_width() / static_cast<double>(alloc.get_height());
+        // g_warning("size alloc: %d x %d - %f", alloc.get_width(), alloc.get_height(), ratio);
+        const auto hysteresis = 0.01;
+        if (ratio < 1 - hysteresis) {
+            // narrow/tall
             choice_tab->set_valign(Gtk::ALIGN_START);
             orient_box->set_orientation(Gtk::ORIENTATION_VERTICAL);
         }
-        if (alloc.get_height() > 500 && alloc.get_width() > WIDTH_SMALL + 10) { // add some hysteresis
+        else if (ratio > 1 + hysteresis) {
+            // wide/short
             orient_box->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
             choice_tab->set_valign(Gtk::ALIGN_FILL);
         }
     });
-    // this->signa
+
     CBT_SS->signal_changed().connect([=](){ show_hide_params(); });
     show_hide_params();
 
     // watch for changes, but only in params that can impact preview bitmap
     for (auto adj : {SS_BC_T, SS_ED_T, SS_CQ_T, SS_AT_FI_T, SS_AT_ET_T, /* optimize, smooth, speckles,*/ MS_scans, PA_curves, PA_islands, PA_sparse1, PA_sparse2 }) {
-        adj->signal_value_changed().connect([=](){ params_changed(); });
+        adj->signal_value_changed().connect([=](){ schedule_preview_update(); });
     }
     for (auto checkbtn : {CB_invert, CB_MS_rb, /* CB_MS_smooth, CB_MS_stack, CB_optimize1, CB_optimize, */ CB_PA_optimize, CB_SIOX1, CB_SIOX, /* CB_smooth1, CB_smooth, CB_speckles1, CB_speckles, */ _live_preview}) {
-        checkbtn->signal_toggled().connect([=](){ params_changed(); });
+        checkbtn->signal_toggled().connect([=](){ schedule_preview_update(); });
     }
     for (auto combo : {CBT_SS, CBT_MS}) {
-        combo->signal_changed().connect([=](){ params_changed(); });
+        combo->signal_changed().connect([=](){ schedule_preview_update(); });
     }
-    choice_tab->signal_switch_page().connect([=](Gtk::Widget*, guint){ params_changed(); });
+    choice_tab->signal_switch_page().connect([=](Gtk::Widget*, guint){ schedule_preview_update(); });
+
+    signal_set_focus_child().connect([=](Gtk::Widget* w){
+        if (w) schedule_preview_update();
+    });
 }
 
 gboolean TraceDialogImpl2::update_cb(gpointer user_data) {
     auto self = static_cast<TraceDialogImpl2*>(user_data);
-    self->previewCallback();
+    self->previewCallback(false);
     self->_source = 0;
     return FALSE;
 }
 
-void TraceDialogImpl2::params_changed() {
+void TraceDialogImpl2::schedule_preview_update() {
     if (!_live_preview->get_active() || _source) return;
 
     _source = g_idle_add(&TraceDialogImpl2::update_cb, this);
