@@ -85,6 +85,7 @@ public:
     void addChildren(SPItem *, bool dummy = false);
     void setSelectedBit(SelectionState mask, bool enabled);
     void setSelectedBitRecursive(SelectionState mask, bool enabled);
+    void setSelectedBitChildren(SelectionState mask, bool enabled);
     void moveChild(Node &child, Node *sibling);
 
     Gtk::TreeNodeChildren getChildren() const;
@@ -343,7 +344,10 @@ void ObjectWatcher::setSelectedBit(SelectionState mask, bool enabled) {
 void ObjectWatcher::setSelectedBitRecursive(SelectionState mask, bool enabled)
 {
     setSelectedBit(mask, enabled);
-
+    setSelectedBitChildren(mask, enabled);
+}
+void ObjectWatcher::setSelectedBitChildren(SelectionState mask, bool enabled)
+{
     for (auto &pair : child_watchers) {
         pair.second->setSelectedBitRecursive(mask, enabled);
     }
@@ -824,10 +828,8 @@ void ObjectsPanel::layerChanged(SPObject *layer)
     if (!layer) return;
     auto watcher = getWatcher(layer->getRepr());
     if (watcher && watcher != root_watcher) {
+        watcher->setSelectedBitChildren(LAYER_FOCUS_CHILD, true);
         watcher->setSelectedBit(LAYER_FOCUSED, true);
-        for (const auto &iter : watcher->child_watchers) {
-            iter.second->setSelectedBit(LAYER_FOCUS_CHILD, true);
-        }
     }
     _layer = layer;
 }
@@ -936,8 +938,8 @@ bool ObjectsPanel::_handleMotionEvent(GdkEventMotion* motion_event)
  */
 bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
 {
-    auto desktop = getDesktop();
-    if (!desktop)
+    auto selection = getSelection();
+    if (!selection)
         return false;
 
     Gtk::TreeModel::Path path;
@@ -957,7 +959,6 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
             return true;
         }
         _is_editing = _is_editing && event->type == GDK_BUTTON_RELEASE;
-        auto selection = desktop->getSelection();
         auto row = *_store->get_iter(path);
         if (!row) return false;
         SPItem *item = getItem(row);
@@ -967,7 +968,7 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
 
         // Load the right click menu
         if (event->type == GDK_BUTTON_PRESS && event->button == 3) {
-            ContextMenu* menu = new ContextMenu(desktop, item);
+            ContextMenu* menu = new ContextMenu(getDesktop(), item);
             menu->show();
             menu->popup_at_pointer(nullptr);
             return true;
@@ -976,6 +977,9 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
         // Select items on button release to not confuse drag
         if (!_is_editing && event->type == GDK_BUTTON_RELEASE) {
             if (event->state & GDK_SHIFT_MASK) {
+                // Select everything between this row and the already seleced item
+                selection->setBetween(item);
+            } else if (event->state & GDK_CONTROL_MASK) {
                 selection->toggle(item);
             } else if (group && group->layerMode() == SPGroup::LAYER) {
                 // Clicking on layers firstly switches to that layer.
@@ -983,17 +987,18 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
                     selection->clear();
                 } else if (_layer != item) {
                     selection->clear();
-                    desktop->setCurrentLayer(item);
+                    getDesktop()->setCurrentLayer(item);
                 } else {
                     selection->set(item);
                 }
             } else {
                 selection->set(item);
             }
+            return true;
         } else {
+            // Remember the item for we are about to drag it!
             current_item = item;
         }
-        return true;
     }
     return false;
 }
