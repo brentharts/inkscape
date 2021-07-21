@@ -40,6 +40,7 @@ static const std::map<std::string, Inkscape::Trace::Potrace::TraceType> trace_ty
     {"SS_CQ", Inkscape::Trace::Potrace::TRACE_QUANT},
     {"SS_AT", Inkscape::Trace::Potrace::AUTOTRACE_SINGLE},
     {"SS_CT", Inkscape::Trace::Potrace::AUTOTRACE_CENTERLINE},
+
     {"MS_BS", Inkscape::Trace::Potrace::TRACE_BRIGHTNESS_MULTI},
     {"MS_C", Inkscape::Trace::Potrace::TRACE_QUANT_COLOR},
     {"MS_BW", Inkscape::Trace::Potrace::TRACE_QUANT_MONO},
@@ -54,9 +55,6 @@ class TraceDialogImpl2 : public TraceDialog {
   public:
     TraceDialogImpl2();
     ~TraceDialogImpl2() override {
-        if (_source) {
-            g_source_destroy(g_main_context_find_source_by_id(nullptr, _source));
-        }
     };
 
     void selectionModified(Selection *selection, guint flags) override;
@@ -168,6 +166,8 @@ void TraceDialogImpl2::traceProcess(bool do_i_trace)
         (int) PA_sparse1->get_value(), PA_sparse2->get_value(),
         CB_PA_optimize->get_active());
 
+    //TODO: preview for multiscan: grayscale bitmap with matching number of gray levels?
+    // Currently there's one created using brightness threshold, which is wrong and misleading
     Glib::RefPtr<Gdk::Pixbuf> pixbuf = tracer.getSelectedImage();
     if (pixbuf) {
         scaledPreview = use_autotrace ? ate.preview(pixbuf) : pte.preview(pixbuf);
@@ -357,7 +357,6 @@ TraceDialogImpl2::TraceDialogImpl2()
     GET_W(CB_smooth1)
     GET_W(CB_optimize1)
     GET_W(CB_PA_optimize)
-    //GET_W(CB_live)
     GET_W(CB_SIOX)
     GET_W(CB_SIOX1)
     GET_W(RB_PA_voronoi)
@@ -369,17 +368,18 @@ TraceDialogImpl2::TraceDialogImpl2()
     GET_W(B_Update)
     GET_W(mainBox)
     GET_W(choice_tab)
-    // GET_W(choice_scan)
     GET_W(previewArea)
     GET_W(orient_box)
-    // GET_W(_expand)
     GET_W(_preview_frame)
     GET_W(_param_grid)
     GET_W(_live_preview)
 #undef GET_W
 #undef GET_O
     add(*mainBox);
-    // show_all_children();
+
+    Inkscape::Preferences* prefs = Inkscape::Preferences::get();
+
+    _live_preview->set_active(prefs->getBool(getPrefsPath() + "liveUpdate", true));
 
     B_Update->signal_clicked().connect([=](){ previewCallback(true); });
     B_OK->signal_clicked().connect(sigc::mem_fun(*this, &TraceDialogImpl2::traceCallback));
@@ -425,6 +425,15 @@ TraceDialogImpl2::TraceDialogImpl2()
     signal_set_focus_child().connect([=](Gtk::Widget* w){
         if (w) schedule_preview_update();
     });
+}
+
+TraceDialogImpl2::~TraceDialogImpl2() {
+    Inkscape::Preferences* prefs = Inkscape::Preferences::get();
+    prefs->setBool(getPrefsPath() + "liveUpdate", _live_preview->get_active());
+
+    if (_source) {
+        g_source_destroy(g_main_context_find_source_by_id(nullptr, _source));
+    }
 }
 
 gboolean TraceDialogImpl2::update_cb(gpointer user_data) {
