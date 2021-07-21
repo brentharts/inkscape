@@ -54,8 +54,7 @@ namespace Dialog {
 class TraceDialogImpl2 : public TraceDialog {
   public:
     TraceDialogImpl2();
-    ~TraceDialogImpl2() override {
-    };
+    ~TraceDialogImpl2() override;
 
     void selectionModified(Selection *selection, guint flags) override;
     void selectionChanged(Inkscape::Selection *selection) override;

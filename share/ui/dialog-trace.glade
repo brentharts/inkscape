@@ -111,6 +111,11 @@
       </object>
     </child>
   </object>
+  <object class="GtkImage" id="image1">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <property name="icon-name">off-outline-symbolic</property>
+  </object>
   <object class="GtkAdjustment" id="optimize">
     <property name="upper">5</property>
     <property name="value">0.20</property>
@@ -1430,13 +1435,15 @@
             <property name="can-focus">True</property>
             <property name="focus-on-click">False</property>
             <property name="receives-default">True</property>
+            <property name="tooltip-text" translatable="yes">Instructions</property>
+            <property name="margin-end">4</property>
             <property name="direction">up</property>
             <property name="popover">popover1</property>
             <child>
               <object class="GtkImage">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="icon-name">info-button-symbolic</property>
+                <property name="icon-name">info-outline-symbolic</property>
               </object>
             </child>
           </object>
@@ -1444,6 +1451,19 @@
             <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="B_STOP">
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+            <property name="tooltip-text" translatable="yes">Abort trace operation</property>
+            <property name="image">image1</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
           </packing>
         </child>
         <child>
@@ -1468,19 +1488,6 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="B_STOP">
-                <property name="label">gtk-stop</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
-                <property name="use-stock">True</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkButton" id="B_OK">
                 <property name="label">Apply</property>
                 <property name="width-request">150</property>
@@ -1491,14 +1498,14 @@
               <packing>
                 <property name="expand">True</property>
                 <property name="fill">True</property>
-                <property name="position">2</property>
+                <property name="position">1</property>
               </packing>
             </child>
           </object>
           <packing>
             <property name="expand">True</property>
             <property name="fill">True</property>
-            <property name="position">1</property>
+            <property name="position">2</property>
           </packing>
         </child>
       </object>
