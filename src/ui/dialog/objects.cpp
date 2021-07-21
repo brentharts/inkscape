@@ -712,8 +712,8 @@ ObjectsPanel::ObjectsPanel() :
         _object_mode.add(*child);
         _object_mode.set_relief(Gtk::RELIEF_NONE);
     }
-    _object_mode.set_tooltip_text(_("Switch between layers only and all objects view."));
-    _object_mode.property_active() = !prefs->getBool("/dialogs/objects/layers_only", true);
+    _object_mode.set_tooltip_text(_("Switch to layers only view."));
+    _object_mode.property_active() = prefs->getBool("/dialogs/objects/layers_only", false);
     _object_mode.property_active().signal_changed().connect(sigc::mem_fun(*this, &ObjectsPanel::_objects_toggle));
     _buttonsPrimary.pack_start(_object_mode, Gtk::PACK_SHRINK);
 
@@ -748,7 +748,7 @@ ObjectsPanel::~ObjectsPanel()
 void ObjectsPanel::_objects_toggle()
 {
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    prefs->setBool("/dialogs/objects/layers_only", !_object_mode.get_active());
+    prefs->setBool("/dialogs/objects/layers_only", _object_mode.get_active());
     // Clear and update entire tree (do not use this in changed/modified signals)
     setRootWatcher();
 }
