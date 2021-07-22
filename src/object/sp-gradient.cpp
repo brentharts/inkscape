@@ -88,6 +88,7 @@ SPGradientSpread SPGradient::getSpread() const
 void SPGradient::setSwatch( bool swatch )
 {
     if ( swatch != isSwatch() ) {
+g_warning("set swatch: %d", swatch?1:0);
         this->swatch = swatch; // to make isSolid() work, this happens first
         gchar const* paintVal = swatch ? (isSolid() ? "solid" : "gradient") : nullptr;
         setAttribute( "inkscape:swatch", paintVal);
@@ -1190,7 +1191,7 @@ SPGradient::create_preview_pattern(double width)
 
 bool SPGradient::isSolid() const
 {
-    if (swatch && hasStops() && getStopCount() == 0) {
+    if (swatch && hasStops() && getStopCount() == 1) {
         return true;
     }
     return false;
