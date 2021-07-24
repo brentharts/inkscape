@@ -889,7 +889,6 @@ void Inkscape::SelTrans::handleNewEvent(SPKnot *knot, Geom::Point *position, gui
         case HANDLE_CENTER_ALIGN_DISTRIBUTE:
         case HANDLE_CORNER_ALIGN_DISTRIBUTE:
         case HANDLE_SIDE_ALIGN_DISTRIBUTE:
-            alignDistribute(*position, state);
             break;
         case HANDLE_SIDE_ALIGN:
         case HANDLE_CORNER_ALIGN:
@@ -1084,10 +1083,32 @@ gboolean Inkscape::SelTrans::scaleRequest(Geom::Point &pt, guint state)
 
 gboolean Inkscape::SelTrans::distributeDragRequest(SPSelTransHandle const &handle, Geom::Point &pt, guint state)
 {
-    auto delta = pt;
+
+    Inkscape::Selection *selection = _desktop->getSelection();
+    auto delta = pt - selection->geometricBounds()->min();
 
     if(_items.size()<2)
         return true;
+
+    double xposition[_items.size()];
+    double yposition[_items.size()];
+
+    for (unsigned i = 0; i < _items.size(); i++) {
+        xposition[i]=_items[i]->geometricBounds()->min()[Geom::X];
+        yposition[i]=_items[i]->geometricBounds()->min()[Geom::Y];
+    }
+
+    std::vector<std::pair<double, int> > vp1;
+    std::vector<std::pair<double, int> > vp2;
+
+    for (int i = 0; i < _items.size(); ++i) {
+        vp1.push_back(std::make_pair(xposition[i], i));
+        vp2.push_back(std::make_pair(yposition[i], i));
+    }
+
+    std::sort(vp1.begin(), vp1.end());
+    std::sort(vp2.begin(), vp2.end());
+
 
     switch(handle.type){
 
@@ -1096,40 +1117,93 @@ gboolean Inkscape::SelTrans::distributeDragRequest(SPSelTransHandle const &handl
 
 
         case HANDLE_CORNER_ALIGN_DISTRIBUTE:
-            break;
+        {
+            switch(handle.cursor)
+            {
+
+                case GDK_TOP_LEFT_CORNER:
+                {
+                    for (unsigned i = 0; i < _items.size(); i++) {
+                        _items[vp2[_items.size() - 1 - i].second]->move_rel(Geom::Translate(0, (i * delta[Geom::Y]/(_items.size() - 1))));
+                        _items[vp1[_items.size() - 1 - i].second]->move_rel(Geom::Translate( (i * delta[Geom::X]/(_items.size() - 1)), 0));
+                    }
+                }
+                break;
+
+                case GDK_TOP_RIGHT_CORNER:
+                {
+                    delta[Geom::X] = delta[Geom::X] - selection->geometricBounds()->dimensions()[Geom::X];
+                    for (unsigned i = 0; i < _items.size(); i++) {
+                        _items[vp2[_items.size() - 1 - i].second]->move_rel(Geom::Translate(0, (i * delta[Geom::Y]/(_items.size() - 1))));
+                        _items[vp1[i].second]->move_rel(Geom::Translate( (i * delta[Geom::X]/(_items.size() - 1)), 0));
+                    }
+                }
+                break;
+
+                case GDK_BOTTOM_RIGHT_CORNER:
+                {
+                    delta[Geom::X] = delta[Geom::X] - selection->geometricBounds()->dimensions()[Geom::X];
+                    delta[Geom::Y] = delta[Geom::Y] - selection->geometricBounds()->dimensions()[Geom::Y];
+                    for (unsigned i = 0; i < _items.size(); i++) {
+                        _items[vp2[i].second]->move_rel(Geom::Translate( 0, (i * delta[Geom::Y]/(_items.size() - 1))));
+                        _items[vp1[i].second]->move_rel(Geom::Translate( (i * delta[Geom::X]/(_items.size() - 1)), 0));
+                    }
+                }
+                break;
+
+                case GDK_BOTTOM_LEFT_CORNER:
+                {
+                    delta[Geom::Y] = delta[Geom::Y] - selection->geometricBounds()->dimensions()[Geom::Y];
+                    for (unsigned i = 0; i < _items.size(); i++) {
+                        _items[vp2[i].second]->move_rel(Geom::Translate( 0, (i * delta[Geom::Y]/(_items.size() - 1))));
+                        _items[vp1[_items.size() - 1 - i].second]->move_rel(Geom::Translate( (i * delta[Geom::X]/(_items.size() - 1)), 0));
+                    }
+                }
+                break;
+
+            }
+        }
+        break;
 
         case HANDLE_SIDE_ALIGN_DISTRIBUTE:
         {
             switch(handle.cursor)
             {
+
                 case GDK_TOP_SIDE:
                 {
                     for (unsigned i = 0; i < _items.size(); i++) {
-                        _items[_items.size() - 1 - i]->move_rel(Geom::Translate(0, (i * delta[Geom::X]/((_items.size() - 1)*1000))));
+                        _items[vp2[_items.size() - 1 - i].second]->move_rel(Geom::Translate(0, (i * delta[Geom::Y]/(_items.size() - 1))));
                     }
                 }
                 break;
+
                 case GDK_RIGHT_SIDE:
                 {
+                    delta[Geom::X] = delta[Geom::X] - selection->geometricBounds()->dimensions()[Geom::X];
                     for (unsigned i = 0; i < _items.size(); i++) {
-                        _items[i]->move_rel(Geom::Translate( (i * delta[Geom::X]/((_items.size() - 1)*1000)), 0));
+                        _items[vp1[i].second]->move_rel(Geom::Translate( (i * delta[Geom::X]/(_items.size() - 1)), 0));
                     }
                 }
                 break;
+
                 case GDK_BOTTOM_SIDE:
                 {
+                    delta[Geom::Y] = delta[Geom::Y] - selection->geometricBounds()->dimensions()[Geom::Y];
                     for (unsigned i = 0; i < _items.size(); i++) {
-                        _items[i]->move_rel(Geom::Translate( 0, (i * delta[Geom::Y]/((_items.size() - 1)*1000))));
+                        _items[vp2[i].second]->move_rel(Geom::Translate( 0, (i * delta[Geom::Y]/(_items.size() - 1))));
                     }
                 }
                 break;
+
                 case GDK_LEFT_SIDE:
                 {
                     for (unsigned i = 0; i < _items.size(); i++) {
-                        _items[_items.size() - 1 - i]->move_rel(Geom::Translate( (i * delta[Geom::X]/((_items.size() - 1)*1000)), 0));
+                        _items[vp1[_items.size() - 1 - i].second]->move_rel(Geom::Translate( (i * delta[Geom::X]/(_items.size() - 1)), 0));
                     }
                 }
                 break;
+
             }
         }
         break;
@@ -1542,11 +1616,6 @@ void Inkscape::SelTrans::stretch(SPSelTransHandle const &/*handle*/, Geom::Point
 }
 
 void Inkscape::SelTrans::scale(Geom::Point &/*pt*/, guint /*state*/)
-{
-    transform(_absolute_affine, Geom::Point(0, 0)); // we have already accounted for origin, so pass 0,0
-}
-
-void Inkscape::SelTrans::alignDistribute(Geom::Point &/*pt*/, guint /*state*/)
 {
     transform(_absolute_affine, Geom::Point(0, 0)); // we have already accounted for origin, so pass 0,0
 }
