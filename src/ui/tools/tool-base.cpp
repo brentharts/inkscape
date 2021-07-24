@@ -33,6 +33,7 @@
 
 #include "display/control/canvas-item-catchall.h" // Grab/Ungrab
 #include "display/control/canvas-item-rotate.h"
+#include "display/control/snap-indicator.h"
 
 #include "include/gtkmm_version.h"
 #include "include/macros.h"
@@ -899,7 +900,7 @@ bool ToolBase::root_handler(GdkEvent* event) {
 }
 
 /**
- * This function allow to handle global tool events if not _pre function is full overrided.
+ * This function allows to handle global tool events if _pre function is not fully overridden.
  */
 
 bool ToolBase::block_button(GdkEvent *event)
@@ -1046,6 +1047,7 @@ void ToolBase::grabCanvasEvents(Gdk::EventMask mask)
  */
 void ToolBase::ungrabCanvasEvents()
 {
+    desktop->snapindicator->remove_snaptarget();
     desktop->getCanvasCatchall()->ungrab();
 }
 
@@ -1257,28 +1259,13 @@ void sp_event_root_menu_popup(SPDesktop *desktop, SPItem *item, GdkEvent *event)
         item = desktop->getSelection()->items().front();
     }
 
-    ContextMenu* CM = new ContextMenu(desktop, item);
-    Gtk::Window *window = desktop->getToplevel();
-    if (window) {
-        if (window->get_style_context()->has_class("dark")) {
-            CM->get_style_context()->add_class("dark");
-        } else {
-            CM->get_style_context()->add_class("bright");
-        }
-        Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-        if (prefs->getBool("/theme/symbolicIcons", false)) {
-            CM->get_style_context()->add_class("symbolic");
-        } else {
-            CM->get_style_context()->add_class("regular");
-        }
-    }
-    CM->show();
-
+    ContextMenu* menu = new ContextMenu(desktop, item);
+    menu->show();
 
     switch (event->type) {
     case GDK_BUTTON_PRESS:
     case GDK_KEY_PRESS:
-        CM->popup_at_pointer(event);
+        menu->popup_at_pointer(event);
         break;
     default:
         break;

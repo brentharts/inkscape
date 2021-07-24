@@ -91,11 +91,17 @@ void ArrangeDialog::update_arrange_btn() {
     }
 }
 
+ArrangeDialog::~ArrangeDialog()
+{
+    _gridArrangeTab->setDesktop(nullptr);
+}
+
 void ArrangeDialog::_apply()
 {
 	switch(_notebook->get_current_page())
 	{
 	case 0:
+        // not applicable to align panel
         break;
 	case 1:
 		_gridArrangeTab->arrange();
@@ -106,16 +112,14 @@ void ArrangeDialog::_apply()
 	}
 }
 
-void ArrangeDialog::update()
+void ArrangeDialog::desktopReplaced()
 {
-    if (!_app) {
-        std::cerr << "ArrangeDialog::update(): _app is null" << std::endl;
-        return;
-    }
+    _gridArrangeTab->setDesktop(getDesktop());
+    _align_tab->desktopReplaced();
+}
 
-    SPDesktop *desktop = getDesktop();
-
-    _gridArrangeTab->setDesktop(desktop);
+void ArrangeDialog::selectionChanged(Inkscape::Selection* sel) {
+    _align_tab->selectionChanged(sel);
 }
 
 } //namespace Dialog

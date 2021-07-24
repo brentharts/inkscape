@@ -50,6 +50,10 @@ gint SPPath::nodesInPath() const
     return _curve ? _curve->nodes_in_path() : 0;
 }
 
+const char* SPPath::typeName() const {
+    return "path";
+}
+
 const char* SPPath::displayName() const {
     return _("Path");
 }
@@ -243,8 +247,10 @@ void SPPath::set(SPAttr key, const gchar* value) {
             // again this line in a MR that near 1.1 release is finaly rollbacked. 
             // This rollback happends near release (1.1) and think is beter leave 
             // uncomented for release as all check are done this way
-            // TODO: Comment on 1.2 branching to see issues
-            sp_lpe_item_update_patheffect(this, true, true);
+            // Commentesd near 1.2 branching to seee isues
+            // If we find necesary and readd it agasin all plesse format the commments 
+            // abobe to nor comment again in the future
+            // sp_lpe_item_update_patheffect(this, true, true);
             break;
 
        case SPAttr::D:

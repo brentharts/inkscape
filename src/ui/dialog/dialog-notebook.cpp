@@ -71,7 +71,7 @@ DialogNotebook::DialogNotebook(DialogContainer *container)
     _menu.append(*new_menu_item);
 
     // Close notebook
-    new_menu_item = Gtk::manage(new Gtk::MenuItem(_("Close Notebook")));
+    new_menu_item = Gtk::manage(new Gtk::MenuItem(_("Close Panel")));
     _conn.emplace_back(
         new_menu_item->signal_activate().connect(sigc::mem_fun(*this, &DialogNotebook::close_notebook_callback)));
     _menu.append(*new_menu_item);
@@ -486,7 +486,7 @@ void DialogNotebook::on_close_button_click_event(Gtk::Widget *page)
 
 /**
  * Callback to toggle all tab labels to the selected state.
- * @param show: wether you want the labels to show or not
+ * @param show: whether you want the labels to show or not
  */
 void DialogNotebook::toggle_tab_labels_callback(bool show)
 {

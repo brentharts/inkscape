@@ -46,14 +46,15 @@ private:
     AlignAndDistribute* _align_tab;
 	GridArrangeTab  *_gridArrangeTab;
 	PolarArrangeTab *_polarArrangeTab;
+    Gtk::Button     *_arrangeButton;
 
-	Gtk::Button     *_arrangeButton;
+    void selectionChanged(Inkscape::Selection*) override;
 
 public:
-	ArrangeDialog();
-	~ArrangeDialog() override = default;;
+    ArrangeDialog();
+    ~ArrangeDialog() override;
 
-    void update() override;
+    void desktopReplaced() override;
 
     void update_arrange_btn();
 
@@ -62,7 +63,7 @@ public:
      */
     void _apply();
 
-	static ArrangeDialog& getInstance() { return *new ArrangeDialog(); }
+    static ArrangeDialog& getInstance() { return *new ArrangeDialog(); }
 };
 
 } //namespace Dialog

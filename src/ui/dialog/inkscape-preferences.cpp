@@ -1131,10 +1131,10 @@ void InkscapePreferences::resetIconsColors(bool themechange)
         if (INKSCAPE.themecontext->getColorizeProvider()) {
             Gtk::StyleContext::remove_provider_for_screen(screen, INKSCAPE.themecontext->getColorizeProvider());
         }
-        // This colors are setted on style.css of inkscape
+        // This colors are set on style.css of inkscape
         Gdk::RGBA base_color = _symbolic_base_color.get_style_context()->get_color();
-        // This is a hack to fix a proble style is not updated enoght fast on
-        // chage from dark to bright themes
+        // This is a hack to fix a proble style is not updated enough fast on
+        // change from dark to bright themes
         if (themechange) {
             base_color = _symbolic_base_color.get_style_context()->get_background_color();
         }
@@ -1671,7 +1671,7 @@ void InkscapePreferences::initPageUI()
             if (std::string::npos != last_slash_idx) {
                 folder.erase(0, last_slash_idx + 1);
             }
-            // we want use Adwaita intead fallback hicolor theme
+            // we want use Adwaita instead fallback hicolor theme
             if (folder == default_icon_theme) {
                 continue;
             }
@@ -1779,7 +1779,7 @@ void InkscapePreferences::initPageUI()
     _win_save_dialog_pos_on.init ( _("Save and restore dialogs status"), "/options/savedialogposition/value", PREFS_DIALOGS_STATE_SAVE, true, nullptr);
     _win_save_dialog_pos_off.init ( _("Don't save dialogs status"), "/options/savedialogposition/value", PREFS_DIALOGS_STATE_NONE, false, &_win_save_dialog_pos_on);
 
-    _win_dockable.init ( _("Dockable"), "/options/dialogtype/value", PREFS_DIALOGS_BEHAVIOR_DOCKABLE, true, nullptr);
+    _win_dockable.init ( _("Docked"), "/options/dialogtype/value", PREFS_DIALOGS_BEHAVIOR_DOCKABLE, true, nullptr);
     _win_floating.init ( _("Floating"), "/options/dialogtype/value", PREFS_DIALOGS_BEHAVIOR_FLOATING, false, &_win_dockable);
 
     _win_native.init ( _("Native open/save dialogs"), "/options/desktopintegration/value", 1, true, nullptr);
@@ -1827,9 +1827,9 @@ void InkscapePreferences::initPageUI()
 
 
 
-    _page_windows.add_group_header( _("Dialog behavior (requires restart)"));
+    _page_windows.add_group_header( _("Default dialog behavior (requires restart)"));
     _page_windows.add_line( true, "", _win_dockable, "",
-                            _("Dockable"));
+                            _("Docked"));
     _page_windows.add_line( true, "", _win_floating, "",
                             _("Floating"));
 #ifdef _WIN32
@@ -2367,6 +2367,10 @@ void InkscapePreferences::initPageBehavior()
     _snap_persistence.init("/options/snapindicatorpersistence/value", 0.1, 10, 0.1, 1, 2, 1);
     _page_snapping.add_line( true, _("Snap indicator persistence (in seconds):"), _snap_persistence, "",
                              _("Controls how long the snap indicator message will be shown, before it disappears"), true);
+
+    _snap_indicator_distance.init( _("Show snap distance in case of alignment or distribution snap"), "/options/snapindicatordistance/value", false);
+    _page_snapping.add_line( true, "", _snap_indicator_distance, "",
+                             _("Show snap distance in case of alignment or distribution snap"));
 
     _page_snapping.add_group_header( _("What should snap"));
 

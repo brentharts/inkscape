@@ -26,8 +26,7 @@
 #include <set>
 #include <memory>
 #include "dialog-manager.h"
-
-class SPDesktop;
+#include "desktop.h"
 
 namespace Inkscape {
 namespace UI {
@@ -57,7 +56,6 @@ public:
     // Dialog-related functions
     void new_dialog(unsigned int code);  // TEMP TEMP TEMP
     void new_dialog(const Glib::ustring& dialog_type);
-    void new_dialog(const Glib::ustring& dialog_type, DialogNotebook *notebook);
 
     DialogWindow* new_floating_dialog(unsigned int code);  // TEMP TEMP TEMP
     DialogWindow* new_floating_dialog(const Glib::ustring& dialog_type);
@@ -68,6 +66,7 @@ public:
     const std::multimap<Glib::ustring, DialogBase *> *get_dialogs() { return &dialogs; };
     void toggle_dialogs();
     void update_dialogs(); // Update all linked dialogs
+    void set_desktop(SPDesktop *desktop);
 
     // State saving functionality
     std::unique_ptr<Glib::KeyFile> save_container_state();
@@ -95,6 +94,7 @@ private:
      */
     std::multimap<Glib::ustring, DialogBase *>dialogs;
 
+    void new_dialog(const Glib::ustring& dialog_type, DialogNotebook* notebook);
     DialogBase *dialog_factory(const Glib::ustring& dialog_type);
     Gtk::Widget *create_notebook_tab(Glib::ustring label, Glib::ustring image, const Glib::ustring shortcut);
     DialogWindow* create_new_floating_dialog(const Glib::ustring& dialog_type, bool blink);
@@ -109,6 +109,7 @@ private:
     void append_drop(const Glib::RefPtr<Gdk::DragContext> context, DialogMultipaned *column);
     void column_empty(DialogMultipaned *column);
     DialogBase* find_existing_dialog(const Glib::ustring& dialog_type);
+    static bool recreate_dialogs_from_state(const Glib::KeyFile* keyfile);
 };
 
 } // namespace Dialog

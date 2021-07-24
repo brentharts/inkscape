@@ -206,7 +206,7 @@ InkscapeWindow::on_key_press_event(GdkEventKey* event)
     // accelerators, we wouldn't even be able to type text! We can get around this by sending key
     // events first to the focus widget.
     //
-    // See https://developer.gnome.org/gtk3/stable/chap-input-handling.html (Event Propogation)
+    // See https://developer.gnome.org/gtk3/stable/chap-input-handling.html (Event Propagation)
 
     auto focus = get_focus();
     if (focus) {
@@ -290,25 +290,19 @@ InkscapeWindow::on_delete_event(GdkEventAny* event)
     return true;
 };
 
-void InkscapeWindow::on_selection_changed()
-{
-    if (_app) {
-        _app->set_active_selection(_desktop->selection);
-        update_dialogs();
-    }
-}
-
 void InkscapeWindow::update_dialogs()
 {
     std::vector<Gtk::Window *> windows = _app->gtk_app()->get_windows();
     for (auto const &window : windows) {
         DialogWindow *dialog_window = dynamic_cast<DialogWindow *>(window);
         if (dialog_window) {
+            // Update the floating dialogs, reset them to the new desktop.
             dialog_window->update_dialogs();
+            dialog_window->set_desktop(_desktop);
         }
-
-        _desktop_widget->getContainer()->update_dialogs();
     }
+    // Update the docked dialogs in this InkscapeWindow
+    _desktop->updateDialogs();
 }
 
 /*
