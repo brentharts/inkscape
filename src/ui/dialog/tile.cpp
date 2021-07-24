@@ -92,9 +92,7 @@ void ArrangeDialog::update_arrange_btn() {
 }
 
 ArrangeDialog::~ArrangeDialog()
-{
-    _gridArrangeTab->setDesktop(nullptr);
-}
+{ }
 
 void ArrangeDialog::_apply()
 {

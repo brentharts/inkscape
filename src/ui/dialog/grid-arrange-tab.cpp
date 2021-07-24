@@ -716,6 +716,11 @@ GridArrangeTab::GridArrangeTab(ArrangeDialog *parent)
     show_all_children();
 }
 
+
+GridArrangeTab::~GridArrangeTab() {
+    setDesktop(nullptr);
+}
+
 } //namespace Dialog
 } //namespace UI
 } //namespace Inkscape
