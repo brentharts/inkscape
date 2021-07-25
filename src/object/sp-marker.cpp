@@ -30,6 +30,8 @@
 #include "sp-marker.h"
 #include "sp-defs.h"
 
+#include "svg/stringstream.h"
+
 class SPMarkerView {
 
 public:
@@ -223,6 +225,19 @@ void SPMarker::update(SPCtx *ctx, guint flags) {
             if (item) {
                 Inkscape::DrawingGroup *g = dynamic_cast<Inkscape::DrawingGroup *>(item);
                 g->setChildTransform(this->c2p);
+                /* TODO next - update base/linewidth to get orient shape editor to work */
+                Geom::Affine m;
+                if (this->orient_mode == MARKER_ORIENT_AUTO) {
+                    //m = base;
+                } else if (this->orient_mode == MARKER_ORIENT_AUTO_START_REVERSE) {
+                    // m = Geom::Rotate::from_degrees( 180.0 ) * base;
+                    // Rotating is done at rendering time if necessary
+                    //m = base;
+                } else {
+                    m = Geom::Rotate::from_degrees(this->orient.computed);
+                    //m *= Geom::Translate(base.translation());
+                }
+                item->setTransform(m);
             }
         }
     }
@@ -278,6 +293,15 @@ Inkscape::XML::Node* SPMarker::write(Inkscape::XML::Document *xml_doc, Inkscape:
 	} else {
             repr->removeAttribute("orient");
 	}
+
+    /* TODO - I think I added this because viewBox was not being updated, come back and go over this. */
+    if (this->viewBox_set) {
+        Inkscape::SVGOStringStream os;
+        os << this->viewBox.left() << " " << this->viewBox.top() << " "
+           << this->viewBox.width() << " " << this->viewBox.height();
+
+        repr->setAttribute("viewBox", os.str());
+    }
         
 	/* fixme: */
 	//XML Tree being used directly here while it shouldn't be....
