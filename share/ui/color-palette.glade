@@ -52,9 +52,10 @@
     <property name="can-focus">False</property>
     <child>
       <object class="GtkSeparatorMenuItem">
-        <property name="height-request">12</property>
         <property name="visible">True</property>
         <property name="can-focus">False</property>
+        <property name="margin-top">5</property>
+        <property name="margin-bottom">5</property>
       </object>
     </child>
     <child>
