@@ -19,7 +19,7 @@ class MarkerTool : public NodeTool {
         bool root_handler_extended(GdkEvent* event) override;
 		void finish() override;
 
-		Geom::Affine get_marker_transform(SPShape* shape, SPItem *item, SPMarkerLoc marker_type);
+		Geom::Affine get_marker_transform(SPShape* shape, SPItem *parent_item, SPItem *item, SPMarkerLoc marker_type);
 };
 
 }

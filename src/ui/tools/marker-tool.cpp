@@ -100,15 +100,15 @@ static bool gather_items(NodeTool *nt, SPItem *base, SPObject *obj, Inkscape::UI
 /* This function uses similar logic that exists in sp_shape_update_marker_view, to calculate exactly where
 the knotholders need to go and returns the edit_transform that is then loaded into the
 ShapeEditor/PathManipulator/MultipathManipulator  */
-Geom::Affine MarkerTool::get_marker_transform(SPShape* shape, SPItem *item, SPMarkerLoc marker_type)
+Geom::Affine MarkerTool::get_marker_transform(SPShape* shape, SPItem *parent_item, SPItem *marker_item, SPMarkerLoc marker_type)
 {
     SPObject *marker_obj = shape->_marker[marker_type];
     SPMarker *sp_marker = dynamic_cast<SPMarker *>(marker_obj);
 
     /* scale marker transform with parent stroke width */
     SPStyle *style = shape->style;
-    Geom::Scale scale(Inkscape::Util::Quantity::convert(style->stroke_width.computed, "mm", "px")); // TODO!! come back and check why is it mm -> px conversion that works here?? Hardcoded units can't be right?
-    
+    Geom::Scale scale(style->stroke_width.computed * this->desktop->getDocument()->getDocumentScale()[Geom::X]);
+
     Geom::PathVector const &pathv = shape->curve()->get_pathvector();
     Geom::Affine ret = Geom::identity();
     
@@ -116,9 +116,7 @@ Geom::Affine MarkerTool::get_marker_transform(SPShape* shape, SPItem *item, SPMa
         /* start marker location */
         Geom::Curve const &c = pathv.begin()->front();
         Geom::Point p = c.pointAt(0);
-        Geom::Point t = Geom::Point(Inkscape::Util::Quantity::convert(p[Geom::X], "mm", "px"), 
-            Inkscape::Util::Quantity::convert(p[Geom::Y], "mm", "px")); // ??? Come back
-        ret = Geom::Translate(t);
+        ret = Geom::Translate(p * parent_item->i2dt_affine());
 
         if (!c.isDegenerate()) {
             Geom::Point tang = c.unitTangentAt(0);
@@ -137,9 +135,7 @@ Geom::Affine MarkerTool::get_marker_transform(SPShape* shape, SPItem *item, SPMa
             {
                 Geom::Curve const &c = path_it->front();
                 Geom::Point p = c.pointAt(0);
-                Geom::Point t = Geom::Point(Inkscape::Util::Quantity::convert(p[Geom::X], "mm", "px"), 
-                    Inkscape::Util::Quantity::convert(p[Geom::Y], "mm", "px")); // ??? Come back
-                ret = Geom::Translate(t);
+                ret = Geom::Translate(p * parent_item->i2dt_affine());
 
                 if (!c.isDegenerate()) {
                     Geom::Point tang = c.unitTangentAt(0);
@@ -173,9 +169,7 @@ Geom::Affine MarkerTool::get_marker_transform(SPShape* shape, SPItem *item, SPMa
                         ret_angle += M_PI;
                     }
 
-                    Geom::Point t = Geom::Point(Inkscape::Util::Quantity::convert(p[Geom::X], "mm", "px"), 
-                        Inkscape::Util::Quantity::convert(p[Geom::Y], "mm", "px"));
-                    ret = Geom::Rotate(ret_angle) * Geom::Translate(t);
+                    ret = Geom::Rotate(ret_angle) * Geom::Translate(p * parent_item->i2dt_affine());
 
                     ++curve_it1;
                     ++curve_it2;
@@ -186,9 +180,7 @@ Geom::Affine MarkerTool::get_marker_transform(SPShape* shape, SPItem *item, SPMa
             if ( path_it != (pathv.end()-1) && !path_it->empty()) {
                 Geom::Curve const &c = path_it->back_default();
                 Geom::Point p = c.pointAt(1);
-                Geom::Point t = Geom::Point(Inkscape::Util::Quantity::convert(p[Geom::X], "mm", "px"), 
-                    Inkscape::Util::Quantity::convert(p[Geom::Y], "mm", "px"));
-                ret = Geom::Translate(t);
+                ret = Geom::Translate(p * parent_item->i2dt_affine());
 
                 if ( !c.isDegenerate() ) {
                     Geom::Curve * c_reverse = c.reverse();
@@ -210,9 +202,7 @@ Geom::Affine MarkerTool::get_marker_transform(SPShape* shape, SPItem *item, SPMa
         }
         Geom::Curve const &c = path_last[index];
         Geom::Point p = c.pointAt(1);
-        Geom::Point t = Geom::Point(Inkscape::Util::Quantity::convert(p[Geom::X], "mm", "px"), 
-            Inkscape::Util::Quantity::convert(p[Geom::Y], "mm", "px"));
-        ret = Geom::Translate(t);
+        ret = Geom::Translate(p * parent_item->i2dt_affine());
 
         if ( !c.isDegenerate() ) {
             Geom::Curve * c_reverse = c.reverse();
@@ -225,8 +215,8 @@ Geom::Affine MarkerTool::get_marker_transform(SPShape* shape, SPItem *item, SPMa
 
     /* scale by stroke width */
     ret = scale * ret;
-    /* child to parent transform */
-    ret = sp_marker->c2p * ret;
+    /* account for parent transform */
+    ret = parent_item->transform * ret;
     return ret;
 }
 
@@ -255,13 +245,13 @@ void MarkerTool::selection_changed(Inkscape::Selection *sel) {
 
                         switch(i) {
                             case SP_MARKER_LOC_START:
-                                marker_tr  = get_marker_transform(shape, marker_item, SP_MARKER_LOC_START);
+                                marker_tr  = get_marker_transform(shape, item, marker_item, SP_MARKER_LOC_START);
                                 break;
                             case SP_MARKER_LOC_MID:
-                                marker_tr  = get_marker_transform(shape, marker_item, SP_MARKER_LOC_MID);
+                                marker_tr  = get_marker_transform(shape, item, marker_item, SP_MARKER_LOC_MID);
                                 break;
                             case SP_MARKER_LOC_END:
-                                marker_tr  = get_marker_transform(shape, marker_item, SP_MARKER_LOC_END);
+                                marker_tr  = get_marker_transform(shape, item, marker_item, SP_MARKER_LOC_END);
                                 break;
                             default:
                                 break;
