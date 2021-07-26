@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-#include <gtkmm/box.h>
-#include <gtkmm/popover.h>
-#include <gtkmm/scale.h>
-#include <gtkmm/cssprovider.h>
-#include <gtkmm/button.h>
-#include <gtkmm/scrollbar.h>
-#include <gtkmm/menu.h>
-#include <gtkmm/radiomenuitem.h>
-#include <gtkmm/menubutton.h>
+
 #include <gtkmm/adjustment.h>
+#include <gtkmm/box.h>
+#include <gtkmm/button.h>
+#include <gtkmm/cssprovider.h>
+#include <gtkmm/menu.h>
+#include <gtkmm/menubutton.h>
+#include <gtkmm/popover.h>
+#include <gtkmm/radiomenuitem.h>
+#include <gtkmm/scale.h>
+#include <gtkmm/scrollbar.h>
 
 #include "color-palette.h"
 #include "ui/builder-utils.h"
@@ -523,7 +524,7 @@ void ColorPalette::set_colors(const std::vector<Gtk::Widget*>& swatches) {
 class CustomMenuItem : public Gtk::RadioMenuItem {
 public:
     CustomMenuItem(Gtk::RadioMenuItem::Group& group, const Glib::ustring& label, std::vector<ColorPalette::rgb_t> colors):
-        Gtk::RadioMenuItem(group, label), _colors(colors) {
+        Gtk::RadioMenuItem(group, label), _colors(std::move(colors)) {
 
         set_margin_bottom(2);
     }

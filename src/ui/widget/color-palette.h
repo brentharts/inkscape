@@ -27,7 +27,7 @@ namespace Widget {
 class ColorPalette : public Gtk::Bin {
 public:
     ColorPalette();
-    virtual ~ColorPalette();
+    ~ColorPalette() override;
 
     struct rgb_t { double r; double g; double b; };
     struct palette_t { Glib::ustring name; std::vector<rgb_t> colors; };
