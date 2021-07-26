@@ -13,6 +13,7 @@
 
 #include "tracedialog.h"
 
+#include <glibmm/i18n.h>
 #include <gtkmm.h>
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/notebook.h>
@@ -20,17 +21,15 @@
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/stack.h>
 
-#include <glibmm/i18n.h>
-
 #include "desktop.h"
-#include "selection.h"
+#include "display/cairo-utils.h"
 #include "inkscape.h"
 #include "io/resource.h"
 #include "io/sys.h"
+#include "selection.h"
 #include "trace/autotrace/inkscape-autotrace.h"
-#include "trace/potrace/inkscape-potrace.h"
 #include "trace/depixelize/inkscape-depixelize.h"
-#include "display/cairo-utils.h"
+#include "trace/potrace/inkscape-potrace.h"
 #include "ui/util.h"
 
 // This maps the column ids in the glade file to useful enums
