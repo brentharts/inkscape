@@ -144,6 +144,7 @@ void Inkscape::SVG::PathString::State::appendRelative(Geom::Coord v, Geom::Coord
 }
 
 void Inkscape::SVG::PathString::State::appendNumber(double v, int precision, int minexp) {
+
     str.append(sp_svg_number_write_de(v, precision, minexp));
 }
 

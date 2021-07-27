@@ -113,6 +113,7 @@ static void sp_svg_number_write_d(std::string &buf, double val, unsigned int tpr
 
 }
 
+
 std::string sp_svg_number_write_de(double val, unsigned int tprec, int min_exp)
 {
     std::string buf;

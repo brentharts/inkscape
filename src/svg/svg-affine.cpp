@@ -85,6 +85,7 @@ sp_svg_transform_write(Geom::Affine const &transform)
 
         Geom::Affine const& m = transform;
         double tx = (m[2]*m[5]+m[4]-m[4]*m[3]) / (1-m[3]-m[0]+m[0]*m[3]-m[2]*m[1]);
+
         c.append(sp_svg_number_write_de(tx, prec, min_exp));
         c.append(",");
 
@@ -101,6 +102,7 @@ sp_svg_transform_write(Geom::Affine const &transform)
         // We are more or less a pure skewY
         c="skewY(";
         double angle = atan(transform[1]) * (180 / M_PI);
+
         c.append(sp_svg_number_write_de(angle, prec, min_exp));
         c.append(")");
     } else {
