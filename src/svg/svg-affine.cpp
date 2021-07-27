@@ -48,30 +48,30 @@ sp_svg_transform_write(Geom::Affine const &transform)
     } else if (transform.isScale()) {
         // We are more or less a uniform scale
         c= "scale(";
-        sp_svg_number_write_de(c,  transform[0], prec, min_exp );
+        c.append(sp_svg_number_write_de(transform[0], prec, min_exp ));
         if (Geom::are_near(transform[0], transform[3], e)) {
             c.append(")");
         } else {
             c.append(",");
-            sp_svg_number_write_de(c , transform[3], prec, min_exp );
+            c.append(sp_svg_number_write_de(transform[3], prec, min_exp ));
             c.append(")");
         }
     } else if (transform.isTranslation()) {
         // We are more or less a pure translation
         c ="translate(";
-        sp_svg_number_write_de(c, transform[4], prec, min_exp );
+        c.append(sp_svg_number_write_de(transform[4], prec, min_exp ));
         if (Geom::are_near(transform[5], 0.0, e)) {
             c.append(")");
         } else {
             c.append(",");
-            sp_svg_number_write_de(c, transform[5], prec, min_exp );
+            c.append(sp_svg_number_write_de(transform[5], prec, min_exp ));
             c.append(")");
         }
     } else if (transform.isRotation()) {
         // We are more or less a pure rotation
         c="rotate(";
         double angle = std::atan2(transform[1], transform[0]) * (180 / M_PI);
-        sp_svg_number_write_de(c, angle, prec, min_exp);
+        c.append(sp_svg_number_write_de(angle, prec, min_exp));
         c.append(")");
     } else if (transform.withoutTranslation().isRotation()) {
         // Solution found by Johan Engelen
@@ -80,42 +80,42 @@ sp_svg_transform_write(Geom::Affine const &transform)
         // We are a rotation about a special axis
         c="rotate(";
         double angle = std::atan2(transform[1], transform[0]) * (180 / M_PI);
-        sp_svg_number_write_de(c, angle, prec, min_exp);
+        c.append(sp_svg_number_write_de(angle, prec, min_exp));
         c.append(",");
 
         Geom::Affine const& m = transform;
         double tx = (m[2]*m[5]+m[4]-m[4]*m[3]) / (1-m[3]-m[0]+m[0]*m[3]-m[2]*m[1]);
-        sp_svg_number_write_de(c, tx, prec, min_exp);
+        c.append(sp_svg_number_write_de(tx, prec, min_exp));
         c.append(",");
 
         double ty = (m[1]*tx + m[5]) / (1 - m[3]);
-        sp_svg_number_write_de(c, ty, prec, min_exp);
+        c.append(sp_svg_number_write_de(ty, prec, min_exp));
         c.append(")");
     } else if (transform.isHShear()) {
         // We are more or less a pure skewX
         c="skewX(";
         double angle = atan(transform[2]) * (180 / M_PI);
-        sp_svg_number_write_de(c, angle, prec, min_exp);
+        c.append(sp_svg_number_write_de(angle, prec, min_exp));
         c.append(")");
     } else if (transform.isVShear()) {
         // We are more or less a pure skewY
         c="skewY(";
         double angle = atan(transform[1]) * (180 / M_PI);
-        sp_svg_number_write_de(c, angle, prec, min_exp);
+        c.append(sp_svg_number_write_de(angle, prec, min_exp));
         c.append(")");
     } else {
         c="matrix(";
-        sp_svg_number_write_de(c, transform[0], prec, min_exp );
+        c.append(sp_svg_number_write_de(transform[0], prec, min_exp));
         c.append(",");
-        sp_svg_number_write_de(c, transform[1], prec, min_exp );
+        c.append(sp_svg_number_write_de(transform[1], prec, min_exp));
         c.append(",");
-        sp_svg_number_write_de(c, transform[2], prec, min_exp );
+        c.append(sp_svg_number_write_de(transform[2], prec, min_exp));
         c.append(",");
-        sp_svg_number_write_de(c, transform[3], prec, min_exp );
+        c.append(sp_svg_number_write_de(transform[3], prec, min_exp));
         c.append(",");
-        sp_svg_number_write_de(c, transform[4], prec, min_exp );
+        c.append(sp_svg_number_write_de(transform[4], prec, min_exp));
         c.append(",");
-        sp_svg_number_write_de(c, transform[5], prec, min_exp );
+        c.append(sp_svg_number_write_de(transform[5], prec, min_exp));
         c.append(")");
     }
 

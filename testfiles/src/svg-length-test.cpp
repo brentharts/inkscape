@@ -175,7 +175,7 @@ TEST(SvgLengthTest, testPlaces)
 
     for (size_t i = 0; i < G_N_ELEMENTS(precTests); i++) {
         std::string buf;
-        sp_svg_number_write_de(buf, precTests[i].val, precTests[i].prec, precTests[i].minexp);
+        buf.append(sp_svg_number_write_de(precTests[i].val, precTests[i].prec, precTests[i].minexp));
         unsigned int retval = buf.length();
         ASSERT_EQ( retval, strlen(precTests[i].str)) << "Number of chars written";
         ASSERT_EQ( std::string(buf), std::string(precTests[i].str)) << "Numeric string written";

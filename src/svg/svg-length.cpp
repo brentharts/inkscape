@@ -113,26 +113,29 @@ static void sp_svg_number_write_d(std::string &buf, double val, unsigned int tpr
 
 }
 
-void sp_svg_number_write_de(std::string &buf, double val, unsigned int tprec, int min_exp)
+std::string sp_svg_number_write_de(double val, unsigned int tprec, int min_exp)
 {
+    std::string buf;
     int eval = (int)floor(log10(fabs(val)));
     if (val == 0.0 || eval < min_exp) {
         buf.append("0");
-        return;
     }
-    unsigned int maxnumdigitsWithoutExp = // This doesn't include the sign because it is included in either representation
-        eval<0?tprec+(unsigned int)-eval+1:
-        eval+1<(int)tprec?tprec+1:
-        (unsigned int)eval+1;
-    unsigned int maxnumdigitsWithExp = tprec + ( eval<0 ? 4 : 3 ); // It's not necessary to take larger exponents into account, because then maxnumdigitsWithoutExp is DEFINITELY larger
-    if (maxnumdigitsWithoutExp <= maxnumdigitsWithExp) {
-        sp_svg_number_write_d(buf, val, tprec, 0);
-    } else {
-        val = eval < 0 ? val * pow(10.0, -eval) : val / pow(10.0, eval);
-        sp_svg_number_write_d(buf, val, tprec, 0);
-        buf.append("e");
-        buf.append(std::to_string(eval));
+    else {
+        unsigned int maxnumdigitsWithoutExp = // This doesn't include the sign because it is included in either representation
+            eval<0?tprec+(unsigned int)-eval+1:
+            eval+1<(int)tprec?tprec+1:
+            (unsigned int)eval+1;
+        unsigned int maxnumdigitsWithExp = tprec + ( eval<0 ? 4 : 3 ); // It's not necessary to take larger exponents into account, because then maxnumdigitsWithoutExp is DEFINITELY larger
+        if (maxnumdigitsWithoutExp <= maxnumdigitsWithExp) {
+            sp_svg_number_write_d(buf, val, tprec, 0);
+        } else {
+            val = eval < 0 ? val * pow(10.0, -eval) : val / pow(10.0, eval);
+            sp_svg_number_write_d(buf, val, tprec, 0);
+            buf.append("e");
+            buf.append(std::to_string(eval));
+        }
     }
+    return buf;
 }
 
 SVGLength::SVGLength()
