@@ -189,7 +189,7 @@ void Inkscape::SelTrans::resetState()
 {
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     if(prefs->getBool("/tools/select/align_distribute_box", false)){
-        _state = STATE_ALIGN_DISTRIBUTE;
+        _state = STATE_ALIGN;
         // _updateHandles();
     }
     else{
@@ -200,15 +200,17 @@ void Inkscape::SelTrans::resetState()
 void Inkscape::SelTrans::increaseState()
 {
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    bool show_align = prefs->getBool("/dialogs/align/oncanvas", false);
     if(prefs->getBool("/tools/select/align_distribute_box", false)){
-        _state = STATE_ALIGN_DISTRIBUTE;
+        if (_state == STATE_ALIGN) {
+            _state = STATE_DISTRIBUTE;
+        }
+        else {
+            _state = STATE_ALIGN;
+        }
     }
     if(!prefs->getBool("/tools/select/align_distribute_box", false)){     
         if (_state == STATE_SCALE) {
             _state = STATE_ROTATE;
-        } else if (_state == STATE_ROTATE && show_align) {
-            _state = STATE_ALIGN;
         } else {
             _state = STATE_SCALE;
         }
@@ -603,20 +605,20 @@ void Inkscape::SelTrans::_updateHandles()
         _showHandles(HANDLE_STRETCH);
         _showHandles(HANDLE_SCALE);
         _showHandles(HANDLE_CENTER);
-    } else if(_state == STATE_ALIGN) {
-       _showHandles(HANDLE_SIDE_ALIGN);
-       _showHandles(HANDLE_CORNER_ALIGN);
-       _showHandles(HANDLE_CENTER_ALIGN);
     } else if(_state == STATE_ROTATE) {
         _showHandles(HANDLE_SKEW);
         _showHandles(HANDLE_ROTATE);
         _showHandles(HANDLE_CENTER);
     }
-    else {
-        _showHandles(HANDLE_SIDE_ALIGN_DISTRIBUTE);
-        _showHandles(HANDLE_CORNER_ALIGN_DISTRIBUTE);
-        _showHandles(HANDLE_CENTER_ALIGN_DISTRIBUTE);
-}
+    else if(_state == STATE_ALIGN) {
+       _showHandles(HANDLE_SIDE_ALIGN);
+       _showHandles(HANDLE_CORNER_ALIGN);
+       _showHandles(HANDLE_CENTER_ALIGN);
+    }
+    else{
+        _showHandles(HANDLE_SIDE_DISTRIBUTE);
+        _showHandles(HANDLE_CORNER_DISTRIBUTE);
+    }
 
     // Set anchor point, 0.0 is always set if nothing is selected (top/left).
     bool set = false;
@@ -725,15 +727,25 @@ void Inkscape::SelTrans::_makeHandles()
                     _("<b>Align</b> objects to the side clicked; <b>Shift</b> click to invert side; <b>Ctrl</b> to group whole selection."),
                     CANVAS_ITEM_CTRL_TYPE_ADJ_SALIGN, "SelTrans");
                 break;
+            case HANDLE_CENTER_ALIGN:
+                knots[i] = new SPKnot(_desktop,
+                    _("<b>Align</b> objects to center; <b>Shift</b> click to center vertically instead of horizontally."),
+                    CANVAS_ITEM_CTRL_TYPE_ADJ_MALIGN, "SelTrans");
+                break;
             case HANDLE_CORNER_ALIGN:
                 knots[i] = new SPKnot(_desktop,
                     _("<b>Align</b> objects to the corner clicked; <b>Shift</b> click to invert side; <b>Ctrl</b> to group whole selection."),
                     CANVAS_ITEM_CTRL_TYPE_ADJ_CALIGN, "SelTrans");
                 break;
-            case HANDLE_CENTER_ALIGN:
+            case HANDLE_SIDE_DISTRIBUTE:
                 knots[i] = new SPKnot(_desktop,
-                    _("<b>Align</b> objects to center; <b>Shift</b> click to center vertically instead of horizontally."),
-                    CANVAS_ITEM_CTRL_TYPE_ADJ_MALIGN, "SelTrans");
+                    _("<b>Distribute</b> selection"),
+                    CANVAS_ITEM_CTRL_TYPE_ADJ_HANDLE, "SelTrans");
+                break;
+            case HANDLE_CORNER_DISTRIBUTE:
+                knots[i] = new SPKnot(_desktop,
+                    _("<b>Distribute</b> selection"),
+                    CANVAS_ITEM_CTRL_TYPE_ADJ_HANDLE, "SelTrans");
                 break;
             default:
                 knots[i] = new SPKnot(_desktop, "", CANVAS_ITEM_CTRL_TYPE_ADJ_HANDLE, "SelTrans");
@@ -821,14 +833,9 @@ void Inkscape::SelTrans::handleClick(SPKnot *knot, guint state, SPSelTransHandle
                 _updateHandles();
             }
             break;
-        case HANDLE_SIDE_ALIGN:
-        case HANDLE_CORNER_ALIGN:
         case HANDLE_CENTER_ALIGN:
-            align(state, handle);
-            break;
-        case HANDLE_CENTER_ALIGN_DISTRIBUTE:
-        case HANDLE_CORNER_ALIGN_DISTRIBUTE:
-        case HANDLE_SIDE_ALIGN_DISTRIBUTE:
+        case HANDLE_CORNER_ALIGN:
+        case HANDLE_SIDE_ALIGN:
             align(state, handle);
         default:
             break;
@@ -886,13 +893,9 @@ void Inkscape::SelTrans::handleNewEvent(SPKnot *knot, Geom::Point *position, gui
         case HANDLE_CENTER:
             setCenter(*position);
             break;
-        case HANDLE_CENTER_ALIGN_DISTRIBUTE:
-        case HANDLE_CORNER_ALIGN_DISTRIBUTE:
-        case HANDLE_SIDE_ALIGN_DISTRIBUTE:
-            break;
-        case HANDLE_SIDE_ALIGN:
-        case HANDLE_CORNER_ALIGN:
         case HANDLE_CENTER_ALIGN:
+        case HANDLE_CORNER_ALIGN:
+        case HANDLE_SIDE_ALIGN:
             break;
     }
 }
@@ -1112,11 +1115,7 @@ gboolean Inkscape::SelTrans::distributeDragRequest(SPSelTransHandle const &handl
 
     switch(handle.type){
 
-        case HANDLE_CENTER_ALIGN_DISTRIBUTE:
-            return true;
-
-
-        case HANDLE_CORNER_ALIGN_DISTRIBUTE:
+        case HANDLE_CORNER_DISTRIBUTE:
         {
             switch(handle.cursor)
             {
@@ -1165,7 +1164,7 @@ gboolean Inkscape::SelTrans::distributeDragRequest(SPSelTransHandle const &handl
         }
         break;
 
-        case HANDLE_SIDE_ALIGN_DISTRIBUTE:
+        case HANDLE_SIDE_DISTRIBUTE:
         {
             switch(handle.cursor)
             {
@@ -1330,14 +1329,9 @@ gboolean Inkscape::SelTrans::request(SPSelTransHandle const &handle, Geom::Point
             return rotateRequest(pt, state);
         case HANDLE_CENTER:
             return centerRequest(pt, state);
-        case HANDLE_CENTER_ALIGN_DISTRIBUTE:
-        case HANDLE_CORNER_ALIGN_DISTRIBUTE:
-        case HANDLE_SIDE_ALIGN_DISTRIBUTE:
+        case HANDLE_CORNER_DISTRIBUTE:
+        case HANDLE_SIDE_DISTRIBUTE:
             return distributeDragRequest(handle,pt,state);
-        case HANDLE_SIDE_ALIGN:
-        case HANDLE_CORNER_ALIGN:
-        case HANDLE_CENTER_ALIGN:
-            break; // Do nothing, no dragging
     }
     return FALSE;
 }

@@ -61,7 +61,6 @@ public:
     void moveTo(Geom::Point const &xy, unsigned int state);
     void stretch(SPSelTransHandle const &handle, Geom::Point &pt, unsigned int state);
     void scale(Geom::Point &pt, unsigned int state);
-    void alignDistribute(Geom::Point &pt, unsigned int state);
     void skew(SPSelTransHandle const &handle, Geom::Point &pt, unsigned int state);
     void rotate(Geom::Point &pt, unsigned int state);
     void align(guint state, SPSelTransHandle const &handle);
@@ -129,7 +128,7 @@ private:
         STATE_SCALE, //scale or stretch
         STATE_ROTATE, //rotate or skew
         STATE_ALIGN, //on canvas align
-        STATE_ALIGN_DISTRIBUTE //on canvas align and distribute
+        STATE_DISTRIBUTE //on canvas distribute
     };
 
     SPDesktop *_desktop;
