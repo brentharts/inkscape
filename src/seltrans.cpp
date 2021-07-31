@@ -188,6 +188,10 @@ Inkscape::SelTrans::~SelTrans()
 void Inkscape::SelTrans::resetState()
 {
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+    _sorted = false;
+    vp1.clear();
+    vp2.clear();
+
     if(prefs->getBool("/tools/select/align_distribute_box", false)){
         _state = STATE_ALIGN;
         // _updateHandles();
@@ -1101,16 +1105,18 @@ gboolean Inkscape::SelTrans::distributeDragRequest(SPSelTransHandle const &handl
         yposition[i]=_items[i]->geometricBounds()->min()[Geom::Y];
     }
 
-    std::vector<std::pair<double, int> > vp1;
-    std::vector<std::pair<double, int> > vp2;
-
     for (int i = 0; i < _items.size(); ++i) {
         vp1.push_back(std::make_pair(xposition[i], i));
         vp2.push_back(std::make_pair(yposition[i], i));
     }
 
-    std::sort(vp1.begin(), vp1.end());
-    std::sort(vp2.begin(), vp2.end());
+
+    if(_sorted == false){
+
+        std::sort(vp1.begin(), vp1.end());
+        std::sort(vp2.begin(), vp2.end());
+        _sorted = true;
+    }
 
 
     switch(handle.type){
@@ -1166,8 +1172,7 @@ gboolean Inkscape::SelTrans::distributeDragRequest(SPSelTransHandle const &handl
 
         case HANDLE_SIDE_DISTRIBUTE:
         {
-            switch(handle.cursor)
-            {
+            switch(handle.cursor){
 
                 case GDK_TOP_SIDE:
                 {

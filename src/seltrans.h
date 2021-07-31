@@ -152,6 +152,10 @@ private:
     bool _show_handles = true;
     bool _empty;
     bool _changed;
+    bool _sorted = false;
+
+    std::vector<std::pair<double, int> > vp1;
+    std::vector<std::pair<double, int> > vp2;
 
     SPItem::BBoxType _snap_bbox_type;
 
