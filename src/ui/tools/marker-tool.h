@@ -31,6 +31,7 @@ class MarkerTool : public ToolBase {
 	private:
 		sigc::connection sel_changed_connection;
 		void selection_changed(Inkscape::Selection* selection);
+		void validateMarker(SPItem* i);
         Geom::Affine get_marker_transform(SPShape* shape, SPItem *parent_item, SPItem *item, SPMarkerLoc marker_type);
 };
 

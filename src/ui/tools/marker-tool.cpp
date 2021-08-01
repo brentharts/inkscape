@@ -55,6 +55,78 @@ MarkerTool::MarkerTool()
     : ToolBase("select.svg")
 {}
 
+/* validates the marker item before passing it into the shape editor. 
+Sets/fixes any missing or weird properties */
+void MarkerTool::validateMarker(SPItem* i) {
+    gdouble original_scale = 1;
+
+    SPMarker *sp_marker = dynamic_cast<SPMarker *>(i);
+    g_assert(sp_marker != nullptr);
+
+    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
+    SPDocument *doc = desktop->getDocument();
+    doc->ensureUpToDate();
+
+    /* calculate marker bounds */
+    std::vector<SPObject*> items = const_cast<SPMarker*>(sp_marker)->childList(false, SPObject::ActionBBox);
+
+    Geom::OptRect r;
+    for (auto *i : items) {
+        SPItem *item = dynamic_cast<SPItem*>(i);
+        r.unionWith(item->desktopVisualBounds());
+    }
+
+    Geom::Rect bounds(r->min() * doc->dt2doc(), r->max() * doc->dt2doc());
+    Geom::Point const center = bounds.dimensions() * 0.5;
+
+    /* check if refX/refY properties are set. If not, set them to default values. */
+    if(!sp_marker->refX._set) {
+        sp_marker->refX = center[Geom::X];
+    }
+
+    if(!sp_marker->refY._set) {
+        sp_marker->refY = center[Geom::Y];
+    }
+
+    /* if there is no markerWidth or markerHeight, calculate and set it */
+    if(!sp_marker->markerWidth._set || !sp_marker->markerHeight._set) {
+        sp_marker->markerWidth = bounds.dimensions()[Geom::X];
+        sp_marker->markerHeight = bounds.dimensions()[Geom::Y];
+        sp_marker->viewBox = Geom::Rect::from_xywh(0, 0, sp_marker->markerWidth.computed / original_scale, sp_marker->markerHeight.computed / original_scale);
+        sp_marker->viewBox_set = true;
+    } else {
+        /* check if markerWidth/markerHeight was correctly calculated */
+        if((sp_marker->markerWidth.computed != bounds.dimensions()[Geom::X]) || (sp_marker->markerHeight.computed != bounds.dimensions()[Geom::Y])) {
+            /* xScale and yScale should be the same for now, check if some scaling exists already and save it */
+            if(sp_marker->viewBox_set && sp_marker->viewBox.width() > 0 && sp_marker->viewBox.height() > 0) {
+                    double xScale = sp_marker->markerWidth.computed/sp_marker->viewBox.width();
+                    double yScale = sp_marker->markerHeight.computed/sp_marker->viewBox.height();
+                    if(xScale == yScale) {
+                        original_scale = xScale;
+                    } else if(xScale != 1) {
+                        original_scale = xScale;
+                    } else if(yScale != 1) {
+                        original_scale = yScale;
+                    }
+            }
+            
+            sp_marker->markerWidth = bounds.dimensions()[Geom::X];
+            sp_marker->markerHeight = bounds.dimensions()[Geom::Y];
+            sp_marker->viewBox = Geom::Rect::from_xywh(0, 0, sp_marker->markerWidth.computed / original_scale, 
+                                    sp_marker->markerHeight.computed / original_scale);
+            sp_marker->viewBox_set = true;
+        } else { /* markerHeigh/markerWidth was set but viewBox was not */
+            if(!sp_marker->viewBox_set) {
+                sp_marker->viewBox = Geom::Rect::from_xywh(0, 0, sp_marker->markerWidth.computed / original_scale, 
+                                        sp_marker->markerHeight.computed / original_scale);
+                sp_marker->viewBox_set = true;
+            }
+        }
+    }
+
+    sp_marker->updateRepr();
+}
+
 /* This function uses similar logic that exists in sp_shape_update_marker_view, to calculate exactly where
 the knotholders need to go and returns the edit_transform that is then loaded into the
 ShapeEditor/PathManipulator/MultipathManipulator  */
@@ -209,11 +281,12 @@ void MarkerTool::selection_changed(Inkscape::Selection *sel) {
                     SPObject *marker_obj = shape->_marker[i];
 
                     if(marker_obj) {
+
                         Inkscape::XML::Node *marker_repr = marker_obj->getRepr();
                         SPItem* marker_item = dynamic_cast<SPItem *>(this->desktop->getDocument()->getObjectByRepr(marker_repr));
+                        validateMarker(marker_item);
 
                         Geom::Affine marker_tr = Geom::identity();
-
                         switch(i) {
                             case SP_MARKER_LOC_START:
                                 marker_tr  = get_marker_transform(shape, item, marker_item, SP_MARKER_LOC_START);
