@@ -66,6 +66,7 @@ LPESlice::LPESlice(LivePathEffectObject *lpeobject) :
     allow_transforms_prev = allow_transforms;
     on_remove_all = false;
     parentlpe = nullptr;
+    lpesatellites.setPreserveSlots(true);
 }
 
 LPESlice::~LPESlice()
@@ -219,103 +220,130 @@ LPESlice::originalDtoD(SPItem *item)
 void LPESlice::reloadOriginal(SPLPEItem const* lpeitem)
 {
     SPLPEItem *originallpeitem = getOriginal(lpeitem);
+    is_applied = false;
     if (originallpeitem) {
-        is_applied = false;
-        sp_lpe_item_update_patheffect(originallpeitem, false, true);
+        //sp_lpe_item_update_patheffect(originallpeitem, false, true);
     }
 }
 
 SPLPEItem *LPESlice::getOriginal(SPLPEItem const* lpeitem)
 {
     SPLPEItem *lpeparent = nullptr;
-    if (lpeitem->getAttribute("class")) {
-        gchar **strarray = g_strsplit(lpeitem->getAttribute("class"), " ", 0);
-        gchar **iter = strarray;
-        while (*iter != nullptr) {
-            Glib::ustring classsplited = *iter;
-            size_t pos = classsplited.rfind("-slice");
-            if (pos != std::string::npos) {
-                classsplited = classsplited.replace(pos, 6, "");
-                lpeparent = dynamic_cast<SPLPEItem *>(getSPDoc()->getObjectById(classsplited));
-                if (lpeparent && lpeitem != lpeparent) {
-                    g_strfreev(strarray);
-                    return lpeparent;
-                }
+    std::vector<SPLPEItem *> result;
+    auto hreflist = lpeitem->hrefList;
+    for (auto obj : hreflist) {
+        LivePathEffectObject *lpeobject = dynamic_cast<LivePathEffectObject *>(obj);
+        if (lpeobject && lpeobject->get_lpe() && lpeobject->get_lpe()->getName() == "Slice") {
+            std::vector<SPLPEItem *> items = lpeobject->get_lpe()->getCurrrentLPEItems();
+            if (items.size() > 0) {
+                lpeparent = items[0];
             }
-            iter++;
         }
-        g_strfreev(strarray);
     }
     return lpeparent;
 }
 
-gboolean allowreset(gpointer data)
+void 
+LPESlice::doOnFork(SPLPEItem const *lpeitem, Effect const *preveffect)
 {
-    LPESlice *slice = reinterpret_cast<LPESlice *>(data);
-    sp_lpe_item_update_patheffect(slice->sp_lpe_item, false, false);
-    return FALSE;
-}
+    if (!preveffect) {
+        return;
+    }
+    std::vector<SPLPEItem *> lpeitems = preveffect->getCurrrentLPEItems();
+    if (!lpeitems.size()) {
+        return;
+    }
+    SPLPEItem *previous = nullptr;
+    previous = lpeitems.back();
+    if (!previous) {
+        return;
+    }
+    SPLPEItem *sp_lpe_item = const_cast<SPLPEItem *>(lpeitem);
+    if (!sp_lpe_item) {
+        return;
+    }
+    //sp_lpe_item_enable_path_effects(sp_lpe_item, false);
+    lpesatellites.clear();
+    lpesatellites.setUpdating(true);
+    size_t counter = 0;
+    for (auto itemref : preveffect->lpesatellites._vector) {
+        if (!itemref) {
+            counter++;
+            continue;
+        }
 
-gboolean delayupdate(gpointer data)
-{
-    LPESlice *slice = reinterpret_cast<LPESlice *>(data);
-    sp_lpe_item_update_patheffect(slice->sp_lpe_item, false, false);
-    return FALSE;
+        SPObject *elemref = itemref->getObject();
+        if (elemref) {
+            SPObject *forked_obj = elemref->document->getObjectById(elemref->forked_id);
+            if (!forked_obj) {
+                Inkscape::XML::Node *phantom = createPathBase(elemref);
+                forked_obj = sp_lpe_item->parent->appendChildRepr(phantom);
+                Glib::ustring unoptimiced = "UnoptimicedTransforms";
+                phantom->setAttribute("class", unoptimiced.c_str());
+                phantom->setAttribute("d", nullptr);
+                Inkscape::GC::release(phantom);
+            }
+            lpesatellites.link(forked_obj, counter);
+        }
+        counter++;  
+    }
+    lpesatellites.setUpdating(false);
+    //sp_lpe_item_enable_path_effects(sp_lpe_item, true);
 }
 
 void 
 LPESlice::doAfterEffect (SPLPEItem const* lpeitem, SPCurve *curve)
 {
     bool cleanup = is_load && SP_ACTIVE_DESKTOP; // don't crash on tests
+    bool is_applied_on = false; 
     if (is_applied) {
-        cleanup = true;
-        reloadOriginal(lpeitem);
+        is_applied_on = true;
+        is_applied = false;
+        //reloadOriginal(lpeitem);
     }
     LPESlice *nextslice = dynamic_cast<LPESlice *>(sp_lpe_item->getNextLPE(this));
-    if (!nextslice || !nextslice->is_visible) {
+    if (is_visible && (!nextslice || !nextslice->is_visible)) {   
+        LPESlice *prevslice = dynamic_cast<LPESlice *>(sp_lpe_item->getPrevLPE(this));
+        if (prevslice && is_applied_on) {
+            /* sp_lpe_item_enable_path_effects(sp_lpe_item, false);
+            lpesatellites.param_readSVGValue(prevslice->lpesatellites.param_getSVGValue().c_str());
+            prevslice->lpesatellites.clear(); */
+        }
         if (boundingbox_X.isSingular() || boundingbox_Y.isSingular()) {
+            for (auto & iter : lpesatellites._vector) {
+                SPObject *elemref;
+                if (iter && iter->isAttached() && (elemref = iter->getObject())) {
+                    SPLPEItem *splpeitem = dynamic_cast<SPLPEItem *>(elemref);
+                    if (splpeitem) {
+                        splpeitem->setHidden(true);
+                    }
+                }
+            }
             return;
-        }
-        std::vector<SPLPEItem *> lpeitems = getCurrrentLPEItems();
-        if (lpeitems.size() != 1) {
-            return;
-        }
-        Glib::ustring theclass = lpeitem->getId();
-        theclass += "-slice";
-        //ungroup
-        if (!is_load && parentlpe && parentlpe != sp_lpe_item->parent && parentlpe != sp_lpe_item->parent->parent) {
-            parentlpe = sp_lpe_item->parent;
-            g_timeout_add(250, &delayupdate, this);
-            return;
-        } else if (!is_load && parentlpe && parentlpe != sp_lpe_item->parent) { // group
-            g_timeout_add(250, &allowreset, this);
-            cleanup = true;
-        }
-        parentlpe = sp_lpe_item->parent;
-        items.clear();
+        }        
+
         std::vector<std::pair<Geom::Line, size_t> > slicer = getSplitLines();
         if (!slicer.size()) {
             return;
         }
-        for (auto item : getSPDoc()->getObjectsByClass(theclass)) {
-            SPItem *extraitem = dynamic_cast<SPItem *>(item);
-            if (extraitem) {
-                extraitem->setHidden("true");
+        objindex = 0;
+        legacy = false;
+        split(sp_lpe_item, curve, slicer, 0);
+        parentlpe = lpeitem->parent;
+        bool maindata = sp_has_path_data(sp_lpe_item, false);
+        for (auto & iter : lpesatellites._vector) {
+            SPObject *elemref;
+            if (iter && iter->isAttached() && (elemref = iter->getObject())) {
+                SPLPEItem *splpeitem = dynamic_cast<SPLPEItem *>(elemref);
+                if (splpeitem || lpeitem->isHidden()) {
+                    if (!maindata || lpeitem->isHidden()) {
+                        splpeitem->setHidden(true);
+                    }
+                    sp_lpe_item_update_patheffect(splpeitem, false, false);
+                }
             }
         }
-        split(sp_lpe_item, curve, slicer, 0);
-        std::vector<Glib::ustring> newitemstmp;
-        newitemstmp.assign(items.begin(), items.end());
-        items.clear();
-        bool maindata = sp_has_path_data(sp_lpe_item, false);
         if (!maindata) {
-            Glib::ustring theclass = lpeitem->getId();
-            theclass += "-slice";
-            for (auto item : getSPDoc()->getObjectsByClass(theclass)) {
-                SPLPEItem *splpeitem = dynamic_cast<SPLPEItem *>(item);
-                splpeitem->setHidden(true);
-                sp_lpe_item_update_patheffect(splpeitem, false, false);
-            }
             if (!curve) { // group
                 originalDtoD(sp_lpe_item);
             } else {
@@ -323,108 +351,139 @@ LPESlice::doAfterEffect (SPLPEItem const* lpeitem, SPCurve *curve)
             }
             return;
         }
-        bool hidden = sp_lpe_item->isHidden();
-        for (auto item: newitemstmp) {
-            SPItem *spitem = dynamic_cast<SPItem *>(getSPDoc()->getObjectById(item.c_str()));
-            SPLPEItem *splpeitem = dynamic_cast<SPLPEItem *>(spitem);
-            if (hidden) {
-                splpeitem->setHidden("true");
-            } 
-            if (spitem && sp_has_path_data(spitem, false)) {
-                items.push_back(item);
-                sp_lpe_item_update_patheffect(splpeitem, false, false);
-            }
-        }
-        for (auto item : getSPDoc()->getObjectsByClass(theclass)) {
-            SPItem *extraitem = dynamic_cast<SPItem *>(item);
-            if (extraitem) {
-                SPLPEItem *spitem = dynamic_cast<SPLPEItem *>(extraitem);
-                if (spitem && !sp_has_path_data(spitem, false)) {
-                    if (cleanup) {
-                        sp_lpe_item_update_patheffect(spitem, false, false);
-                        spitem->deleteObject(true);
-                    } else {
-                        originalDtoD(spitem);
+        reset = false;
+        if (is_applied_on && prevslice) {
+            sp_lpe_item_update_patheffect(sp_lpe_item, false, false);
+            for (auto link : prevslice->lpesatellites._vector) {
+                if (link) {
+                    SPGroup *spgrp = dynamic_cast<SPGroup *>(link->getObject());
+                    SPShape *spit = dynamic_cast<SPShape *>(link->getObject());
+                    Glib::ustring transform = "";
+                    Glib::ustring patheffects = "";
+                    Geom::OptRect _gbbox = Geom::OptRect();
+                    if (spgrp) {
+                        if (spgrp->getAttribute("transform")) {
+                            transform = spgrp->getAttribute("transform");
+                        }
+                        if (spgrp->getAttribute("inkscape:path-effect")) {
+                            patheffects =  spgrp->getAttribute("inkscape:path-effect");
+                        }
+                        spgrp->setAttribute("transform", nullptr);   
+                        spgrp->setAttribute("inkscape:path-effect", nullptr); 
+                        _gbbox = spgrp->geometricBounds();
                     }
-                } else {
-                    SPLPEItem *splpeitem = dynamic_cast<SPLPEItem *>(extraitem);
-                    if (splpeitem && splpeitem->hasPathEffectOfType(SLICE)) {
-                        sp_lpe_item_update_patheffect(splpeitem, false, false);
+                    if (spit || spgrp) {
+                        for (auto link2 : lpesatellites._vector) {
+                            if (link2) {
+                                SPGroup *spgrp2 = dynamic_cast<SPGroup *>(link2->getObject());
+                                SPShape *spit2 = dynamic_cast<SPShape *>(link2->getObject());
+                                if (spit && spit2) {
+                                    auto edit = SPCurve::copy(spit->curveForEdit());
+                                    auto edit2 = SPCurve::copy(spit2->curveForEdit());
+                                    Geom::OptRect _bbox = edit->get_pathvector().boundsFast();
+                                    Geom::OptRect _bbox2 = edit2->get_pathvector().boundsFast();
+                                    if (_bbox && _bbox2) {
+                                        if ((*_bbox).roundOutwards() == (*_bbox2).roundOutwards()) {
+                                            spit2->setAttribute("transform", spit->getAttribute("transform"));
+                                            spit2->setAttribute("inkscape:path-effect", spit->getAttribute("inkscape:path-effect"));
+                                            spit2->setAttribute("style", spit->getAttribute("style"));
+                                            break;
+                                        }
+                                    }
+                                } else if (spgrp && spgrp2) {  
+                                    Geom::OptRect _gbbox2 = spgrp2->geometricBounds();
+                                    if (_gbbox && _gbbox2) {
+                                        if ((*_gbbox).roundOutwards() == (*_gbbox2).roundOutwards()) {
+                                            spgrp2->setAttribute("transform", transform);
+                                            spgrp2->setAttribute("inkscape:path-effect", patheffects);
+                                            cloneStyle(spgrp, spgrp2);
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (spgrp) {
+                            spgrp->setAttribute("transform", transform);
+                            spgrp->setAttribute("inkscape:path-effect", patheffects);
+                        }
                     }
                 }
             }
         }
-        reset = false;
-    }
-}
-
-void
-LPESlice::split(SPItem* item, SPCurve *curve, std::vector<std::pair<Geom::Line, size_t> > slicer, size_t splitindex) {
-    SPDocument *document = getSPDoc();
-    if (!document) {
-        return;
-    }
-    Glib::ustring elemref_id = Glib::ustring("slice-");
-    elemref_id += Glib::ustring::format(slicer[splitindex].second);
-    elemref_id += "-";
-    Glib::ustring clean_id = item->getId();
-    SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(item);
-    if (!lpeitem) {
-        return;
-    }
-    //First check is to allow effects on "satellites"
-    if (!lpeitem->hasPathEffectOfType(SLICE) && clean_id.find("slice-") != Glib::ustring::npos) {
-        clean_id = clean_id.replace(0,6,"");
-        elemref_id += clean_id;
     } else {
-        elemref_id += clean_id;
-    }
-
-    items.push_back(elemref_id);
-
-    SPObject *elemref = getSPDoc()->getObjectById(elemref_id.c_str());
-    bool prevreset = reset;
-    if (!elemref) {
-        reset = true;
-        Inkscape::XML::Node *phantom = createPathBase(item);
-        phantom->setAttribute("id", elemref_id);
-        Glib::ustring classes = sp_lpe_item->getId();
-        classes += "-slice UnoptimicedTransforms";
-        phantom->setAttribute("class", classes.c_str());
-        elemref = parentlpe->appendChildRepr(phantom);
-        Inkscape::GC::release(phantom);
-        parentlpe->reorder(elemref, sp_lpe_item);
-    }
-    Inkscape::XML::Document *xml_doc = getSPDoc()->getReprDoc();
-    if (elemref && elemref->parent != parentlpe) {
-        Inkscape::XML::Node *repr = elemref->getRepr();
-        Inkscape::XML::Node *copy = repr->duplicate(xml_doc);
-        if (copy) {
-            parentlpe->addChild(copy, sp_lpe_item->getRepr());
-            // Retrieve the SPItem of the resulting repr.
-            SPObject *sucessor = document->getObjectByRepr(copy);
-            if (sucessor) {
-                sp_object_ref(elemref);
-                Inkscape::GC::anchor(repr);
-                elemref->deleteObject(false);
-                sucessor->setAttribute("id", elemref_id);
-                Inkscape::GC::release(repr);
-                elemref->setSuccessor(sucessor);
-                sp_object_unref(elemref);
-                elemref = dynamic_cast<SPItem *>(sucessor);
-                g_assert(item != nullptr);
+        for (auto itemrf : lpesatellites._vector) {
+            if (itemrf) {
+                SPLPEItem *splpeitem = dynamic_cast<SPLPEItem *>(itemrf->getObject());
+                if (splpeitem) {
+                    splpeitem->setHidden(true);
+                    sp_lpe_item_update_patheffect(splpeitem, false, false);
+                }
             }
         }
     }
+}
+
+bool
+LPESlice::split(SPItem* item, SPCurve *curve, std::vector<std::pair<Geom::Line, size_t> > slicer, size_t splitindex) {
+    bool splited = false;
+    size_t nsplits = slicer.size();
+    SPDocument *document = getSPDoc();
+    if (!document) {
+        return splited;
+    }
+    
+    SPObject *elemref = nullptr;
+    if (objindex < lpesatellites._vector.size() && lpesatellites._vector[objindex]) {
+        elemref = lpesatellites._vector[objindex]->getObject();
+    }
+    bool prevreset = reset;
+    if (!elemref) {
+        Glib::ustring elemref_id = Glib::ustring("slice-");
+        elemref_id += Glib::ustring::format(slicer[splitindex].second);
+        elemref_id += "-";
+        Glib::ustring clean_id = item->getId();
+        //First check is to allow effects on "satellittes"
+        SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(item);
+        if (!lpeitem) {
+            return splited;
+        }
+        if (!lpeitem->hasPathEffectOfType(SLICE) && clean_id.find("slice-") != Glib::ustring::npos) {
+            clean_id = clean_id.replace(0,6,"");
+            elemref_id += clean_id;
+        } else {
+            elemref_id += clean_id;
+        }
+        if (is_load && (elemref = document->getObjectById(elemref_id))) {
+            legacy = true;
+            lpesatellites.link(elemref, objindex);
+        } else {
+            reset = true;
+            Inkscape::XML::Node *phantom = createPathBase(item);
+            if (!parentlpe) {
+                return splited;
+            }
+            elemref = parentlpe->appendChildRepr(phantom);
+            Glib::ustring unoptimiced = "UnoptimicedTransforms";
+            phantom->setAttribute("class", unoptimiced.c_str());
+            Inkscape::GC::release(phantom);
+            parentlpe->reorder(elemref, sp_lpe_item);
+            lpesatellites.link(elemref, objindex);
+        }
+    }
+
     SPItem *other = dynamic_cast<SPItem *>(elemref);
     if (other) {
+        objindex++;
         other->setHidden(false);
-        size_t nsplits = slicer.size();
         if (nsplits) {
             cloneD(item, other, false);
             reset = prevreset;
-            splititem(item, curve, slicer[splitindex], true);
+            splited = splititem(item, curve, slicer[splitindex], true);
             splititem(other, nullptr, slicer[splitindex], false);
+            if (!splited) {
+                other->setHidden(true);
+            }
             splitindex++;
             if (nsplits > splitindex) {
                 SPLPEItem *splpeother = dynamic_cast<SPLPEItem *>(other);
@@ -438,6 +497,7 @@ LPESlice::split(SPItem* item, SPCurve *curve, std::vector<std::pair<Geom::Line, 
             }
         }
     }
+    return splited;
 }
 
 std::vector<std::pair<Geom::Line, size_t> >
@@ -447,12 +507,10 @@ LPESlice::getSplitLines() {
     if (prevslice) {
         splitlines = prevslice->getSplitLines();
     }
-    if (isVisible()) {
-        Geom::Line line_separation((Geom::Point)start_point, (Geom::Point)end_point);
-        size_t index = sp_lpe_item->getLPEIndex(this);
-        std::pair<Geom::Line, size_t> slice = std::make_pair(line_separation, index);
-        splitlines.push_back(slice);
-    }
+    Geom::Line line_separation((Geom::Point)start_point, (Geom::Point)end_point);
+    size_t index = sp_lpe_item->getLPEIndex(this);
+    std::pair<Geom::Line, size_t> slice = std::make_pair(line_separation, index);
+    splitlines.push_back(slice);
     return splitlines;
 }
 
@@ -519,12 +577,7 @@ LPESlice::cloneD(SPObject *orig, SPObject *dest, bool is_original)
     SPPath * path =  SP_PATH(dest);
     SPLPEItem *splpeitem = dynamic_cast<SPLPEItem *>(path);
     if (path && shape && splpeitem) {
-        SPCurve const *c;
-        if (!is_original && shape->hasPathEffectRecursive()) {
-            c = shape->curve();
-        } else {
-            c = shape->curve();
-        }
+        SPCurve const *c = shape->curve();
         if (c && !c->is_empty()) {
             auto str = sp_svg_write_path(c->get_pathvector());
             if (path->hasPathEffectRecursive()) {
@@ -582,15 +635,16 @@ static fill_typ GetFillTyp(SPItem *item)
     }
 }
 
-void
+bool
 LPESlice::splititem(SPItem* item, SPCurve * curve, std::pair<Geom::Line, size_t> slicer, bool toggle, bool is_original) 
 {
+    bool splited = false;
     if (!is_original && !g_strcmp0(sp_lpe_item->getId(), item->getId())) {
         is_original = true;
     }
     Geom::Line line_separation = slicer.first;
     // check top level split/sp_lpe_item item
-    SPObject *top = sp_lpe_item->parent;
+    /* SPObject *top = sp_lpe_item->parent;
     SPObject *other = item;
     while (other && other->parent) {
         if (other->parent != top) {
@@ -603,8 +657,8 @@ LPESlice::splititem(SPItem* item, SPCurve * curve, std::pair<Geom::Line, size_t>
     if (topitem && topitem != item) {
         Geom::Affine ptransform = item->getRelativeTransform(topitem);
         ptransform *= item->document->doc2dt();
-        line_separation *= ptransform.inverse();
-    }
+        //line_separation *= ptransform.inverse();
+    } */
     Geom::Point s = line_separation.initialPoint();
     Geom::Point e = line_separation.finalPoint();
     Geom::Point center = Geom::middle_point(s, e);
@@ -614,14 +668,15 @@ LPESlice::splititem(SPItem* item, SPCurve * curve, std::pair<Geom::Line, size_t>
         for (auto &child : childs) {
             SPItem *dest_child = dynamic_cast<SPItem *>(child);
             // groups not need update curve
-            splititem(dest_child, nullptr, slicer, toggle, is_original);
+            splited = splititem(dest_child, nullptr, slicer, toggle, is_original) ? true : splited;
         }
         if (!is_original && group->hasPathEffectRecursive()) { 
             sp_lpe_item_update_patheffect(group, false, false);
         }
-        return;
+        return splited;
     }
     SPShape *shape = dynamic_cast<SPShape *>(item);
+    SPPath *path = dynamic_cast<SPPath *>(item);
     if (shape) {
         SPCurve const *c;
         c = shape->curve();
@@ -725,7 +780,10 @@ LPESlice::splititem(SPItem* item, SPCurve * curve, std::pair<Geom::Line, size_t>
                     }
                 }
                 if (cs.size() == 0 && position == 1) {
-                   tmp_pathvector.push_back(original);
+                    splited = false;
+                    tmp_pathvector.push_back(original);
+                } else {
+                    splited = true;
                 }
                 path_out.insert(path_out.end(), tmp_pathvector.begin(), tmp_pathvector.end());
                 tmp_pathvector.clear();
@@ -742,7 +800,11 @@ LPESlice::splititem(SPItem* item, SPCurve * curve, std::pair<Geom::Line, size_t>
                 auto str = sp_svg_write_path(path_out);
                 if (!is_original && shape->hasPathEffectRecursive()) {
                     sp_lpe_item_enable_path_effects(shape, false);
-                    shape->setAttribute("inkscape:original-d", str);
+                    if (path) {
+                        shape->setAttribute("inkscape:original-d", str);
+                    } else {
+                        shape->setAttribute("d", str);
+                    }
                     sp_lpe_item_enable_path_effects(shape, true);
                 } else {
                     shape->setAttribute("d", str);
@@ -750,6 +812,7 @@ LPESlice::splititem(SPItem* item, SPCurve * curve, std::pair<Geom::Line, size_t>
             }
         }
     }
+    return splited;
 }
 
 void
@@ -792,7 +855,7 @@ LPESlice::doBeforeEffect (SPLPEItem const* lpeitem)
             center_point.param_setValue(previous_center);
             return;
         }
-        if (are_near(previous_center, (Geom::Point)center_point, 0.01)) {
+        if (are_near(previous_center, (Geom::Point)center_point, 0.001)) {
             center_point.param_setValue(Geom::middle_point((Geom::Point)start_point, (Geom::Point)end_point));
         } else {
             Geom::Point trans = center_point - Geom::middle_point((Geom::Point)start_point, (Geom::Point)end_point);
@@ -852,39 +915,34 @@ LPESlice::resetStyles(){
     }
 }
 
-//TODO: Migrate the tree next function to effect.cpp/h to avoid duplication
 void
 LPESlice::doOnVisibilityToggled(SPLPEItem const* /*lpeitem*/)
 {
-    processObjects(LPE_VISIBILITY);
+    if (!is_visible) {
+        for (auto itemrf : lpesatellites._vector) {
+            if (itemrf) {
+                SPLPEItem *splpeitem = dynamic_cast<SPLPEItem *>(itemrf->getObject());
+                if (splpeitem) {
+                    splpeitem->setHidden(true);
+                    sp_lpe_item_update_patheffect(splpeitem, false, false);
+                }
+            }
+        }
+    }
 }
 
 
 void
 LPESlice::doOnRemove(SPLPEItem const* lpeitem)
 {
-    items.clear();
     std::vector<SPLPEItem *> lpeitems = getCurrrentLPEItems();
-    if (lpeitems.size() == 1) {
+    if (lpeitems.size() > 0) {
         sp_lpe_item = lpeitems[0];
-        if (!sp_lpe_item->path_effects_enabled) {
-            return;
-        }
-        Glib::ustring theclass = sp_lpe_item->getId();
-        theclass += "-slice";
-        for (auto item : getSPDoc()->getObjectsByClass(theclass)) {
-            items.emplace_back(item->getId());
-        }
         if (keep_paths) {
-            processObjects(LPE_TO_OBJECTS);
-            items.clear();
+            processObjectsOK(LPE_TO_OBJECTS);
             return;
         }
-        if (sp_lpe_item->countLPEOfType(SLICE) == 1 || on_remove_all) {
-            processObjects(LPE_ERASE);
-        } else {
-            sp_lpe_item_update_patheffect(sp_lpe_item, false, false);
-        }
+        processObjectsOK(LPE_ERASE_UNREF);
     }
 }
 
@@ -908,6 +966,7 @@ LPESlice::doOnApply (SPLPEItem const* lpeitem)
     center_point.param_setValue(point_c, true);
     end_point.param_update_default(point_c);
     previous_center = center_point;
+    lpeversion.param_setValue("1.2", true);
 }
 
 

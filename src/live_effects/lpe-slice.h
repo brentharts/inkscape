@@ -36,13 +36,14 @@ public:
     void doOnApply (SPLPEItem const* lpeitem) override;
     void doBeforeEffect (SPLPEItem const* lpeitem) override;
     void doAfterEffect (SPLPEItem const* lpeitem, SPCurve *curve) override;
+    void doOnFork(SPLPEItem const *lpeitem, Effect const *preveffect) override;
     Geom::PathVector doEffect_path (Geom::PathVector const & path_in) override;
     void doOnRemove (SPLPEItem const* /*lpeitem*/) override;
     void doOnVisibilityToggled(SPLPEItem const* /*lpeitem*/) override;
-    Gtk::Widget * newWidget() override;
+    Gtk::Widget *newWidget() override;
     void cloneStyle(SPObject *orig, SPObject *dest);
-    void split(SPItem* item, SPCurve *curve, std::vector<std::pair<Geom::Line, size_t> > slicer, size_t splitindex);
-    void splititem(SPItem* item, SPCurve * curve, std::pair<Geom::Line, size_t> slicer, bool toggle, bool is_original = false);
+    bool split(SPItem* item, SPCurve *curve, std::vector<std::pair<Geom::Line, size_t> > slicer, size_t splitindex);
+    bool splititem(SPItem* item, SPCurve * curve, std::pair<Geom::Line, size_t> slicer, bool toggle, bool is_original = false);
     bool haschildslice(SPItem *item);
     std::vector<std::pair<Geom::Line, size_t> > getSplitLines();
     void cloneD(SPObject *orig, SPObject *dest, bool is_original); 
@@ -55,6 +56,7 @@ public:
     void resetStyles();
     void centerVert();
     void centerHoriz();
+    SPObject *parentlpe;
 
 protected:
     void addCanvasIndicators(SPLPEItem const *lpeitem, std::vector<Geom::PathVector> &hp_vec) override;
@@ -70,7 +72,8 @@ private:
     bool center_vert;
     bool center_horiz;
     bool allow_transforms_prev;
-    SPObject *parentlpe;
+    size_t objindex = 0;
+    bool legacy = false;
     LPESlice(const LPESlice&) = delete;
     LPESlice& operator=(const LPESlice&) = delete;
 };

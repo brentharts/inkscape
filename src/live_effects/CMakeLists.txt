@@ -74,6 +74,7 @@ set(live_effects_SRC
 	parameter/item.cpp
 	parameter/message.cpp
 	parameter/originalitemarray.cpp
+	parameter/originalitemarrayhidden.cpp
 	parameter/originalitem.cpp
 	parameter/originalpath.cpp
 	parameter/originalpatharray.cpp
@@ -169,7 +170,8 @@ set(live_effects_SRC
 	parameter/enum.h
 	parameter/item.h
 	parameter/message.h
-	parameter/originalitemarray.cpp
+	parameter/originalitemarray.h
+	parameter/originalitemarrayhidden.h
 	parameter/item-reference.h
 	parameter/originalitem.h
 	parameter/originalpath.h

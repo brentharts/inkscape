@@ -11,6 +11,7 @@
 #include "effect-enum.h"
 #include "parameter/bool.h"
 #include "parameter/hidden.h"
+#include "parameter/originalitemarrayhidden.h"
 #include "ui/widget/registry.h"
 #include <2geom/forward.h>
 #include <glibmm/ustring.h>
@@ -51,7 +52,8 @@ enum LPEPathFlashType {
 enum LPEAction {
     LPE_ERASE = 0,
     LPE_TO_OBJECTS,
-    LPE_VISIBILITY
+    LPE_VISIBILITY,
+    LPE_ERASE_UNREF
 };
 
 class Effect {
@@ -70,12 +72,14 @@ public:
     //of indirection is needed. We first call these methods, then the below.
     void doAfterEffect_impl(SPLPEItem const *lpeitem, SPCurve *curve);
     void doOnApply_impl(SPLPEItem const* lpeitem);
+    void doOnFork_impl(SPLPEItem const *lpeitem, Effect const *preveffect);
     void doBeforeEffect_impl(SPLPEItem const* lpeitem);
     void setCurrentZoom(double cZ);
     void setSelectedNodePoints(std::vector<Geom::Point> sNP);
     bool isNodePointSelected(Geom::Point const &nodePoint) const;
     bool isOnClipboard();
     virtual void doOnApply (SPLPEItem const* lpeitem);
+    virtual void doOnFork (SPLPEItem const *lpeitem, Effect const *preveffect);
     virtual void doBeforeEffect (SPLPEItem const* lpeitem);
     std::vector<SPLPEItem *> getCurrrentLPEItems() const;
 
@@ -96,6 +100,9 @@ public:
     SPShape * getCurrentShape() const { return current_shape; };
     void setCurrentShape(SPShape * shape) { current_shape = shape; }
     void processObjects(LPEAction lpe_action);
+    static int _processObjectsTimeout(gpointer data);
+    void _processObjects(LPEAction lpe_action);
+    void processObjectsOK(LPEAction lpe_action);
 
     /*
      * isReady() indicates whether all preparations which are necessary to apply the LPE are done,
@@ -155,9 +162,12 @@ public:
     SPLPEItem *sp_lpe_item; // these get stored in doBeforeEffect_impl, and derived classes may do as they please with
                             // them.
     SPShape *current_shape; // these get stored in performPathEffects.
+    OriginalItemArrayHiddenParam lpesatellites; //replacement for items at finish move
+    std::vector<Glib::ustring> items;
+    std::vector<Parameter *> param_vector;
   protected:
     Effect(LivePathEffectObject *lpeobject);
-
+    friend class OriginalItemArrayHiddenParam;
     // provide a set of doEffect functions so the developer has a choice
     // of what kind of input/output parameters he desires.
     // the order in which they appear is the order in which they are
@@ -175,7 +185,6 @@ public:
 
     virtual void addCanvasIndicators(SPLPEItem const* lpeitem, std::vector<Geom::PathVector> &hp_vec);
 
-    std::vector<Parameter *> param_vector;
     bool _provides_knotholder_entities;
 
     int oncanvasedit_it;
@@ -190,7 +199,6 @@ public:
     // this boolean defaults to false, it concatenates the input path to one pwd2,
     // instead of normally 'splitting' the path into continuous pwd2 paths and calling doEffect_pwd2 for each.
     bool concatenate_before_pwd2;
-    std::vector<Glib::ustring> items;
     double current_zoom;
     std::vector<Geom::Point> selectedNodesPoints;
 
@@ -201,7 +209,8 @@ private:
     void unsetDefaultParam(Glib::ustring pref_path, Glib::ustring tooltip, Parameter *param, Gtk::Image *info,
                            Gtk::Button *set, Gtk::Button *unset);
     bool provides_own_flash_paths; // if true, the standard flash path is suppressed
-
+    
+    LPEAction _lpe_action;
     bool is_ready;
     bool defaultsopen;
 };

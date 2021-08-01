@@ -166,7 +166,23 @@ ItemParam::emit_changed()
     changed = true;
     signal_item_changed.emit();
 }
-
+void
+ItemParam::param_relink()
+{
+    const gchar *newhref = param_effect->getLPEObj()->getAttribute(param_key.c_str());
+    if (newhref) {
+        Glib::ustring id = newhref;
+        id = id.erase(0,1);
+        if (param_effect->getSPDoc()->getObjectById(id)) {
+            try {
+                ref.attach(Inkscape::URI(newhref));
+            } catch (Inkscape::BadURIException &e) {
+                g_warning("%s", e.what());
+                ref.detach();
+            }
+        }
+    }
+}
 
 void
 ItemParam::addCanvasIndicators(SPLPEItem const*/*lpeitem*/, std::vector<Geom::PathVector> &hp_vec)

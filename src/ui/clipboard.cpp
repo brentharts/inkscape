@@ -30,6 +30,7 @@
 #include "desktop-style.h" // for sp_desktop_set_style, used in _pasteStyle
 #include "desktop.h"
 #include "document.h"
+#include "id-clash.h"
 #include "file.h"          // for file_import, used in _pasteImage
 #include "gradient-drag.h"
 #include "inkscape.h"
@@ -501,7 +502,7 @@ bool ClipboardManagerImpl::paste(SPDesktop *desktop, bool in_place)
             return true;
         }
     }
-
+    prevent_id_clashes(tempdoc.get(), desktop->getDocument(), true); 
     sp_import_document(desktop, tempdoc.get(), in_place);
 
     // _copySelection() has put all items in groups, now ungroup them (preserves transform
@@ -909,20 +910,6 @@ void ClipboardManagerImpl::_copySelection(ObjectSet *selection)
             }
             sp_repr_css_set(obj_copy, css, "style");
             sp_repr_css_attr_unref(css);
-
-            // 1.1 COPYPASTECLONESTAMPLPEBUG
-            if (_clipboardSPDoc) {
-                SPItem *newitem = dynamic_cast<SPItem *>(_clipboardSPDoc->getObjectByRepr(obj_copy));
-                if (newitem) {
-                    remove_hidder_filter(newitem);
-                    gchar *id = strdup(newitem->getId());
-                    newitem = (SPItem *)sp_lpe_item_remove_autoflatten(newitem, id);
-                    obj_copy = newitem->getRepr();
-                    g_free(id);
-                }
-            }
-            // END COPYPASTECLONESTAMPLPEBUG
-
         }
     }
     // copy style for Paste Style action

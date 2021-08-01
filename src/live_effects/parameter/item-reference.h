@@ -11,9 +11,13 @@
  */
 
 #include "object/uri-references.h"
+#include "object/sp-object.h"
+#include <glib.h>
+#include <iostream>
 
 class SPItem;
 namespace Inkscape {
+
 namespace XML { class Node; }
 
 namespace LivePathEffect {
@@ -35,6 +39,40 @@ protected:
 private:
     ItemReference(const ItemReference&) = delete;
     ItemReference& operator=(const ItemReference&) = delete;
+};
+
+class LPEItemRef : public Inkscape::URIReference {
+public:
+    LPEItemRef(SPObject *owner) : URIReference(owner) {};
+    ~LPEItemRef() override {
+        linked_delete_connection.disconnect();
+        linked_modified_connection.disconnect();
+        linked_transformed_connection.disconnect();
+        linked_changed_connection.disconnect();
+        owner_release_connection.disconnect();
+        if (isAttached()) {
+            detach();
+        }
+        if (href) {
+            g_free(href);
+            href = nullptr;
+        }    
+    };
+    sigc::connection owner_release_connection = getOwner()->connectRelease([this](SPObject *obj) {
+        // Fully detach to prevent reconnecting with a modified signal
+        owner_release_connection.disconnect();
+        if (isAttached()) {
+            detach();
+        }
+    });
+    sigc::connection linked_changed_connection;
+    sigc::connection linked_delete_connection;
+    sigc::connection linked_modified_connection;
+    sigc::connection linked_transformed_connection;
+    gchar *href;
+private:
+    LPEItemRef(const LPEItemRef&) = delete;
+    LPEItemRef& operator=(const LPEItemRef&) = delete;
 };
 
 } // namespace LivePathEffect

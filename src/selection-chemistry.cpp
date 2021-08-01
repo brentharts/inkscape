@@ -62,7 +62,6 @@
 #include "live_effects/effect.h"
 #include "live_effects/parameter/originalpath.h"
 
-#include "filter-chemistry.h"
 #include "object/box3d.h"
 #include "object/object-set.h"
 #include "object/persp3d.h"
@@ -507,15 +506,9 @@ void ObjectSet::duplicate(bool suppressDone, bool duplicateLayer)
 
         if (!duplicateLayer || sp_repr_is_def(old_repr)) {
             parent->appendChild(copy);
-            // 1.1 COPYPASTECLONESTAMPLPEBUG
-            SPItem *newitem = dynamic_cast<SPItem *>(doc->getObjectByRepr(copy));
-            if (_desktop && newitem) {
-                remove_hidder_filter(newitem);
-                gchar * id = strdup(copy->attribute("id"));
-                copy = sp_lpe_item_remove_autoflatten(newitem, id)->getRepr();
-                g_free(id);
-            }
-            // END 1.1 COPYPASTECLONESTAMPLPEBUG fix
+            SPObject *original = doc->getObjectByRepr(old_repr);
+            SPObject *newobj = doc->getObjectByRepr(copy);
+            original->setForkedTo(newobj);
         } else if (sp_repr_is_layer(old_repr)) {
             parent->addChild(copy, old_repr);
         } else {
@@ -532,18 +525,22 @@ void ObjectSet::duplicate(bool suppressDone, bool duplicateLayer)
             add_ids_recursive(new_ids, new_obj);
         }
 
-        if (fork_livepatheffects) {
-            SPObject *new_obj = doc->getObjectByRepr(copy);
-            SPLPEItem *newLPEObj = dynamic_cast<SPLPEItem *>(new_obj);
-            if (newLPEObj) {
-                newLPEObj->forkPathEffectsIfNecessary(1);
-            }
-        }
-
         copies.push_back(copy);
         Inkscape::GC::release(copy);
     }
-
+    for (auto copy : copies) {
+        if (fork_livepatheffects) {
+            SPObject *new_obj = doc->getObjectByRepr(copy);
+            SPLPEItem *newLPEItem = dynamic_cast<SPLPEItem *>(new_obj);
+            if (newLPEItem) {
+                newLPEItem->forkPathEffectsIfNecessary(0);
+            }
+        }
+    }
+    for(auto old_repr : reprs) {
+        SPObject *original = doc->getObjectByRepr(old_repr);
+        original->releaseForkedTo();
+    }
     // Relink copied text nodes to copied reference shapes
     text_relink_refs(text_refs, reprs.begin(), reprs.end(), copies.begin());
 

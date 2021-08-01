@@ -50,9 +50,11 @@ public:
     void doOnVisibilityToggled(SPLPEItem const* /*lpeitem*/) override;
     Gtk::Widget * newWidget() override;
     void cloneStyle(SPObject *orig, SPObject *dest);
+    void doOnFork(SPLPEItem const *lpeitem, Effect const *preveffect) override;
     Geom::PathVector doEffect_path_post (Geom::PathVector const & path_in, FillRuleBool fillrule);
     void toItem(Geom::Affine transform, size_t i, bool reset);
     void cloneD(SPObject *orig, SPObject *dest, Geom::Affine transform, bool reset);
+    void fixLegacy();
     Inkscape::XML::Node * createPathBase(SPObject *elemref);
     void resetStyles();
     //virtual void setFusion(Geom::PathVector &path_in, Geom::Path divider, double sizeDivider);

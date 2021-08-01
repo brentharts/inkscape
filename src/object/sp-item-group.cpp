@@ -469,7 +469,6 @@ void
 sp_item_group_ungroup (SPGroup *group, std::vector<SPItem*> &children, bool do_done)
 {
     g_return_if_fail (group != nullptr);
-
     SPDocument *doc = group->document;
     SPRoot *root = doc->getRoot();
     SPObject *defs = root->defs;
@@ -560,7 +559,6 @@ sp_item_group_ungroup (SPGroup *group, std::vector<SPItem*> &children, bool do_d
 
     // the group is leaving forever, no heir, clones should take note; its children however are going to reemerge
     group->deleteObject(true, false);
-
     /* Step 3 - add nonitems */
     if (!objects.empty()) {
         Inkscape::XML::Node *last_def = defs->getRepr()->lastChild();
@@ -574,6 +572,7 @@ sp_item_group_ungroup (SPGroup *group, std::vector<SPItem*> &children, bool do_d
     }
 
     /* Step 4 - add items */
+    std::vector<SPLPEItem *> lpeitems;
     for (auto *repr : items) {
         // add item
         prepr->addChild(repr, insert_after);
@@ -583,14 +582,26 @@ sp_item_group_ungroup (SPGroup *group, std::vector<SPItem*> &children, bool do_d
         SPItem *item = static_cast<SPItem *>(doc->getObjectByRepr(repr));
 
         if (item) {
-            item->doWriteTransform(item->transform, nullptr, false);
-            children.insert(children.begin(),item);
-            item->requestModified(SP_OBJECT_MODIFIED_FLAG);
+            SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(item);
+            if (lpeitem) {
+                lpeitems.push_back(lpeitem);
+                sp_lpe_item_enable_path_effects(lpeitem, false);
+                children.insert(children.begin(),item);
+            } else {
+                item->doWriteTransform(item->transform, nullptr, false);
+                children.insert(children.begin(),item);
+                item->requestModified(SP_OBJECT_MODIFIED_FLAG);
+            }
         } else {
             g_assert_not_reached();
         }
 
         Inkscape::GC::release(repr);
+    }
+    for (auto lpeitem : lpeitems) {
+        sp_lpe_item_enable_path_effects(lpeitem, true);
+        lpeitem->doWriteTransform(lpeitem->transform, nullptr, false);
+        lpeitem->requestModified(SP_OBJECT_MODIFIED_FLAG);
     }
     if (do_done) {
         DocumentUndo::done(doc, SP_VERB_NONE, _("Ungroup"));

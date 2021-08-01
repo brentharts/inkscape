@@ -24,7 +24,7 @@
 #include <glibmm/i18n.h>
 #include "xml/repr.h"
 #include "document.h"
-
+#include "helper/geom.h"
 #include "sp-spiral.h"
 
 SPSpiral::SPSpiral()
@@ -349,13 +349,17 @@ void SPSpiral::set_shape() {
      * This is very important for LPEs to work properly! (the bbox might be recalculated depending on the curve in shape)*/
 
     auto const before = this->curveBeforeLPE();
-    if (before && before->get_pathvector() != c->get_pathvector()) {
+    if (before && !geom_path_compare(before->get_pathvector(), c->get_pathvector(),0.01)) {
         setCurveBeforeLPE(std::move(c));
         sp_lpe_item_update_patheffect(this, true, false);
         return;
     }
 
     if (hasPathEffectOnClipOrMaskRecursive(this)) {
+        if (!before && this->getRepr()->attribute("d")) {
+            Geom::PathVector pv = sp_svg_read_pathv(this->getRepr()->attribute("d"));
+            setCurveInsync(std::make_unique<SPCurve>(pv));
+        }
         setCurveBeforeLPE(std::move(c));
         return;
     }
