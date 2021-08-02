@@ -206,7 +206,8 @@ Cairo::RefPtr<Cairo::Surface> DashSelector::sp_text_to_pixbuf(const char* text) 
     cairo_t *ct = cairo_create(s);
 
     cairo_select_font_face (ct, "Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_font_size (ct, 12.0 * device_scale);
+    // todo: how to find default font face and size?
+    cairo_set_font_size (ct, 13.333 * device_scale);
     auto context = get_style_context();
     Gdk::RGBA fg = context->get_color(get_state_flags());
     cairo_set_source_rgb(ct, fg.get_red(), fg.get_green(), fg.get_blue());
