@@ -985,10 +985,7 @@ MarkerKnotHolderEntityScale::set_internal(Geom::Point const &p, Geom::Point cons
         }
     }
 
-    for(auto i: sp_marker->hrefList) {
-        sp_marker->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_VIEWPORT_MODIFIED_FLAG);
-        i->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_VIEWPORT_MODIFIED_FLAG);
-    }
+    sp_marker->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_VIEWPORT_MODIFIED_FLAG);
 }
 
 void MarkerKnotHolderEntityScale::knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state)
@@ -1039,10 +1036,7 @@ MarkerKnotHolderEntityOrient::knot_set(Geom::Point const &p, Geom::Point const &
     SPMarker *sp_marker = dynamic_cast<SPMarker *>(item);
     g_assert(sp_marker != nullptr);
 
-    for(auto i: sp_marker->hrefList) {
-        sp_marker->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
-        i->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
-    }
+    sp_marker->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
 }
 
 /* handles the marker refX/refY attributes */
@@ -1072,10 +1066,7 @@ MarkerKnotHolderEntityReference::knot_set(Geom::Point const &p, Geom::Point cons
     sp_marker->refX = s[Geom::X];
     sp_marker->refY = s[Geom::Y];
 
-    for(auto i: sp_marker->hrefList) {
-        sp_marker->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
-        i->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
-    }
+    sp_marker->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
 }
 
 MarkerKnotHolder::MarkerKnotHolder(SPDesktop *desktop, SPItem *item, SPKnotHolderReleasedFunc relhandler) :

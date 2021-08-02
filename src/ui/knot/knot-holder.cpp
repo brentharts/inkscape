@@ -280,16 +280,6 @@ KnotHolder::knot_ungrabbed_handler(SPKnot *knot, guint state)
         // (such as object).
         object->updateRepr();
 
-
-        /* While editing markers, the objects which reference the edited marker and its
-        child shapes needs to update its display after its repr is set.
-        TODO: is there an easier way to do this. Just update the item with other flags? */
-        if(SP_IS_MARKER(item)) {
-            for(auto i: item->hrefList) {
-                i->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
-            }
-        }
-
         /* do cleanup tasks (e.g., for LPE items write the parameter values
          * that were changed by dragging the handle to SVG)
          */
