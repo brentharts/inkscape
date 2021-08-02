@@ -201,6 +201,7 @@ StrokeStyle::StrokeStyle() :
                                             //   Inkscape::UI::Widget::DashSelector class, so that we do not have to
                                             //   expose any of the underlying widgets?
     dashSelector = Gtk::manage(new Inkscape::UI::Widget::DashSelector);
+    _pattern = Gtk::make_managed<Gtk::Entry>();
 
     dashSelector->show();
     dashSelector->set_hexpand();
@@ -211,7 +212,6 @@ StrokeStyle::StrokeStyle() :
 
     i++;
 
-    _pattern = Gtk::make_managed<Gtk::Entry>();
     table->attach(*_pattern, 1, i, 4, 1);
     _pattern_label = spw_label(table, _("_Pattern:"), 0, i, _pattern);
     _pattern_label->set_tooltip_text(_("Repeating \"dash gap ...\" pattern"));
@@ -794,17 +794,19 @@ StrokeStyle::updateLine()
                 (!query.stroke_extensions.hairline || result_sw == QUERY_STYLE_MULTIPLE_AVERAGED));
         unitSelector->set_sensitive(enabled);
 
-        joinMiter->set_sensitive(enabled && !query.stroke_extensions.hairline);
-        joinRound->set_sensitive(enabled && !query.stroke_extensions.hairline);
-        joinBevel->set_sensitive(enabled && !query.stroke_extensions.hairline);
+        bool is_enabled = enabled && !query.stroke_extensions.hairline;
+        joinMiter->set_sensitive(is_enabled);
+        joinRound->set_sensitive(is_enabled);
+        joinBevel->set_sensitive(is_enabled);
 
-        miterLimitSpin->set_sensitive(enabled && !query.stroke_extensions.hairline);
+        miterLimitSpin->set_sensitive(is_enabled);
 
-        capButt->set_sensitive(enabled && !query.stroke_extensions.hairline);
-        capRound->set_sensitive(enabled && !query.stroke_extensions.hairline);
-        capSquare->set_sensitive(enabled && !query.stroke_extensions.hairline);
+        capButt->set_sensitive(is_enabled);
+        capRound->set_sensitive(is_enabled);
+        capSquare->set_sensitive(is_enabled);
 
-        dashSelector->set_sensitive(enabled && !query.stroke_extensions.hairline);
+        dashSelector->set_sensitive(is_enabled);
+        _pattern->set_sensitive(is_enabled);
     }
 
     if (result_ml != QUERY_STYLE_NOTHING)
