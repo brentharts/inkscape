@@ -22,6 +22,7 @@
 #include <glibmm/markup.h>
 
 #include "bad-uri-exception.h"
+#include "display/curve.h"
 #include "display/drawing-group.h"
 #include "attributes.h"
 #include "document.h"
@@ -226,6 +227,14 @@ void SPUse::print(SPPrintContext* ctx) {
 
     if (translated) {
         ctx->release();
+    }
+}
+
+const char* SPUse::typeName() const {
+    if (dynamic_cast<SPSymbol *>(child)) {
+        return "symbol";
+    } else {
+        return "clone";
     }
 }
 
