@@ -59,6 +59,8 @@ public:
 
 public:
     Gtk::CheckButton selector;
+    SPItem *getItem() { return _item; }
+    bool isActive() { return selector.get_active(); }
 
 private:
     Gtk::Grid grid;
@@ -77,9 +79,10 @@ BatchItem::BatchItem(SPItem *item)
     grid.attach(selector, 0, 0, 1, 1);
     Glib::ustring id = _item->getId();
     selector.set_label(id);
-    selector.set_active(false);
-    // set_child(grid);
+    selector.set_active(true);
+    add(grid);
     show_all_children();
+    show();
 }
 
 BatchExport::~BatchExport()
@@ -111,12 +114,13 @@ void BatchExport::initialise(const Glib::RefPtr<Gtk::Builder> &builder)
 
 void BatchExport::selectionModified(Inkscape::Selection *selection, guint flags)
 {
-    if (!_desktop ||_desktop->getSelection() != selection) {
+    if (!_desktop || _desktop->getSelection() != selection) {
         return;
     }
     if (!(flags & (SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_PARENT_MODIFIED_FLAG | SP_OBJECT_CHILD_MODIFIED_FLAG))) {
         return;
     }
+    refreshItems();
 }
 
 void BatchExport::selectionChanged(Inkscape::Selection *selection)
@@ -184,21 +188,59 @@ void BatchExport::refreshItems()
     doc->ensureUpToDate();
 
     // std::set
-    int num = 0;
+    std::set<SPItem *> itemsList;
     switch (current_key) {
-        case SELECTION_SELECTION:
-            num = (int)boost::distance(_desktop->getSelection()->items());
+        case SELECTION_SELECTION: {
+            auto items = _desktop->getSelection()->items();
+            for (auto i = items.begin(); i != items.end(); ++i) {
+                SPItem *item = *i;
+                if (item) {
+                    itemsList.insert(item);
+                }
+            }
             break;
+        }
         case SELECTION_LAYER: {
-            std::list<SPItem *> layers = _desktop->getAllLayers();
-            num = layers.size();
+            auto layersList = _desktop->getAllLayers();
+            for (auto i = layersList.begin(); i != layersList.end(); ++i) {
+                SPItem *item = *i;
+                itemsList.insert(item);
+            }
+
             break;
         }
         default:
             break;
     }
+    int num = itemsList.size();
     Glib::ustring label_text = std::to_string(num) + " Items";
     num_elements->set_text(label_text);
+
+    std::vector<std::string> toRemove;
+    for (auto &[key, val] : current_items) {
+        SPItem *item = val->getItem();
+        // if item is not present in itemList add it to remove list so that we can remove it
+        if (itemsList.find(item) == itemsList.end()) {
+            toRemove.push_back(key);
+        }
+    }
+    // now remove all the items
+    for (auto key : toRemove) {
+        if (current_items[key]) {
+            preview_container->remove(*current_items[key]);
+            current_items.erase(key);
+        }
+    }
+
+    // now add which were are new
+    for (auto &item : itemsList) {
+        auto id = item->getId();
+        if (current_items[id] && current_items[id]->getItem() == item) {
+            continue;
+        }
+        current_items[id] = Gtk::manage(new BatchItem(item));
+        preview_container->insert(*current_items[id], -1);
+    }
 }
 
 void BatchExport::refreshExportHints()
@@ -219,6 +261,7 @@ void BatchExport::onAreaTypeToggle(selection_mode key)
     current_key = key;
     prefs->setString("/dialogs/export/batchexportarea/value", selection_names[current_key]);
 
+    refreshItems();
     refreshExportHints();
 }
 
@@ -264,9 +307,13 @@ void BatchExport::onExport()
         dpis.push_back(export_list->get_dpi(i));
     }
 
-    auto itemlist = _desktop->getSelection()->items();
-    for (auto i = itemlist.begin(); i != itemlist.end() && !interrupted; ++i) {
-        SPItem *item = *i;
+    for (auto i = current_items.begin(); i != current_items.end() && !interrupted; ++i) {
+        BatchItem *batchItem = i->second;
+        if (!batchItem->isActive()) {
+            n++;
+            continue;
+        }
+        SPItem *item = batchItem->getItem();
         if (!item) {
             n++;
             continue;
@@ -295,6 +342,10 @@ void BatchExport::onExport()
             if (!omod) {
                 continue;
             }
+            if (prog_dlg) {
+                delete prog_dlg;
+                prog_dlg = nullptr;
+            }
             prog_dlg = create_progress_dialog(Glib::ustring::compose(_("Exporting %1 files"), num));
             prog_dlg->set_export_panel(this);
             setExporting(true, Glib::ustring::compose(_("Exporting %1 files"), num));
@@ -320,18 +371,18 @@ void BatchExport::onExport()
             } else {
                 // exportSuccessful = _export_vector(omod, copy_doc, filename, false, &items);
             }
-            if (prog_dlg) {
-                delete prog_dlg;
-                prog_dlg = nullptr;
-            }
             setExporting(false);
+        }
+        if (prog_dlg) {
+            delete prog_dlg;
+            prog_dlg = nullptr;
         }
     }
 }
 
 bool BatchExport::getNonConflictingFilename(Glib::ustring &filename, Glib::ustring const extension)
 {
-    if(_desktop){
+    if (!_desktop) {
         return false;
     }
     SPDocument *doc = _desktop->getDocument();

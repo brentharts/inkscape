@@ -70,7 +70,9 @@ private:
     ExportList *export_list = nullptr;
 
     AdvanceOptions advance_options;
-    std::vector<BatchItem *> current_items;
+
+private:
+    std::map<std::string, BatchItem *> current_items;
 
 private:
     std::set<SPItem *> added_items;
