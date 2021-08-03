@@ -82,12 +82,15 @@ Export::Export()
     builder->get_widget_derived("Batch Export", batch_export);
     batch_export->initialise(builder);
 
+    if (single_image) {
+        single_image->setDesktop(getDesktop());
+    }
+    if (batch_export) {
+        batch_export->setDesktop(getDesktop());
+    }
+
     // Callback when container is finally mapped on window. All intialisation like set active is done inside it.
     container->signal_realize().connect(sigc::mem_fun(*this, &Export::onRealize));
-
-    // Provide inkscape _app instance to single Export
-    single_image->set_app(_app);
-    batch_export->set_app(_app);
 }
 
 Export::~Export() {}
@@ -98,6 +101,9 @@ void Export::onRealize()
 {
     single_image->setup();
     batch_export->setup();
+
+    single_image->setApp(getApp());
+    batch_export->setApp(getApp());
     // setDefaultNotebookPage();
 }
 
@@ -108,6 +114,29 @@ void Export::setDefaultNotebookPage()
     //     auto page_num = export_notebook->page_num(*batch_export);
     // export_notebook->set_current_page(page_num);
     // }
+}
+
+void Export::desktopReplaced()
+{
+    if (single_image) {
+        single_image->setDesktop(getDesktop());
+    }
+    if (batch_export) {
+        batch_export->setDesktop(getDesktop());
+    }
+}
+
+void Export::selectionChanged(Inkscape::Selection *selection)
+{
+    // TODO: refresh only active page
+    single_image->selectionChanged(selection);
+    batch_export->selectionChanged(selection);
+}
+void Export::selectionModified(Inkscape::Selection *selection, guint flags)
+{
+    // TODO: refresh only active page
+    single_image->selectionModified(selection, flags);
+    batch_export->selectionModified(selection, flags);
 }
 
 } // namespace Dialog

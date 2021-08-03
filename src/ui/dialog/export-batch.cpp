@@ -78,7 +78,7 @@ BatchItem::BatchItem(SPItem *item)
     Glib::ustring id = _item->getId();
     selector.set_label(id);
     selector.set_active(false);
-    set_child(gird);
+    // set_child(grid);
     show_all_children();
 }
 
@@ -109,37 +109,21 @@ void BatchExport::initialise(const Glib::RefPtr<Gtk::Builder> &builder)
     builder->get_widget_derived("b_scroll", temp);
 }
 
-void BatchExport::on_realize()
+void BatchExport::selectionModified(Inkscape::Selection *selection, guint flags)
 {
-    auto desktop = SP_ACTIVE_DESKTOP;
-    assert(desktop);
-    auto *selection = desktop->getSelection();
-
-    selectionModifiedConn =
-        selection->connectModified(sigc::mem_fun(*this, &BatchExport::on_inkscape_selection_modified));
-    selectionChangedConn = selection->connectChanged(sigc::mem_fun(*this, &BatchExport::on_inkscape_selection_changed));
-
-    Gtk::Box::on_realize();
-}
-
-void BatchExport::on_unrealize()
-{
-    selectionModifiedConn.disconnect();
-    selectionChangedConn.disconnect();
-    Gtk::Box::on_unrealize();
-}
-
-void BatchExport::on_inkscape_selection_modified(Inkscape::Selection *selection, guint flags)
-{
-    assert(SP_ACTIVE_DESKTOP->getSelection() == selection);
+    if (!_desktop ||_desktop->getSelection() != selection) {
+        return;
+    }
     if (!(flags & (SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_PARENT_MODIFIED_FLAG | SP_OBJECT_CHILD_MODIFIED_FLAG))) {
         return;
     }
 }
 
-void BatchExport::on_inkscape_selection_changed(Inkscape::Selection *selection)
+void BatchExport::selectionChanged(Inkscape::Selection *selection)
 {
-    assert(SP_ACTIVE_DESKTOP->getSelection() == selection);
+    if (!_desktop || _desktop->getSelection() != selection) {
+        return;
+    }
     if (selection->isEmpty()) {
         selection_buttons[SELECTION_SELECTION]->set_sensitive(false);
         if (current_key == SELECTION_SELECTION) {
@@ -164,6 +148,10 @@ void BatchExport::on_inkscape_selection_changed(Inkscape::Selection *selection)
 // Setup Single Export.Called by export on realize
 void BatchExport::setup()
 {
+    if (setupDone) {
+        return;
+    }
+    setupDone = true;
     prefs = Inkscape::Preferences::get();
 
     // Setup Advance Options
@@ -189,21 +177,20 @@ void BatchExport::setup()
 
 void BatchExport::refreshItems()
 {
-    if (!SP_ACTIVE_DESKTOP) {
+    if (!_desktop) {
         return;
     }
-    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
-    SPDocument *doc = desktop->getDocument();
+    SPDocument *doc = _desktop->getDocument();
     doc->ensureUpToDate();
-    
-    std::set
+
+    // std::set
+    int num = 0;
     switch (current_key) {
         case SELECTION_SELECTION:
-            current_items.insert()
-            num = (int)boost::distance(desktop->getSelection()->items());
+            num = (int)boost::distance(_desktop->getSelection()->items());
             break;
         case SELECTION_LAYER: {
-            std::list<SPItem *> layers = desktop->getAllLayers();
+            std::list<SPItem *> layers = _desktop->getAllLayers();
             num = layers.size();
             break;
         }
@@ -243,16 +230,14 @@ void BatchExport::onFilenameModified()
 void BatchExport::onExport()
 {
     interrupted = false;
-
-    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
-    if (!desktop)
+    if (!_desktop)
         return;
     export_btn->set_sensitive(false);
     bool exportSuccessful = true;
 
-    gint num = (gint)boost::distance(desktop->getSelection()->items());
+    gint num = (gint)boost::distance(_desktop->getSelection()->items());
     if (num < 1) {
-        desktop->messageStack()->flash(Inkscape::ERROR_MESSAGE, _("No items selected."));
+        _desktop->messageStack()->flash(Inkscape::ERROR_MESSAGE, _("No items selected."));
         export_btn->set_sensitive(true);
         return;
     }
@@ -279,7 +264,7 @@ void BatchExport::onExport()
         dpis.push_back(export_list->get_dpi(i));
     }
 
-    auto itemlist = desktop->getSelection()->items();
+    auto itemlist = _desktop->getSelection()->items();
     for (auto i = itemlist.begin(); i != itemlist.end() && !interrupted; ++i) {
         SPItem *item = *i;
         if (!item) {
@@ -327,8 +312,8 @@ void BatchExport::onExport()
                 unsigned long int width = (int)(area->width() * dpi / DPI_BASE + 0.5);
                 unsigned long int height = (int)(area->height() * dpi / DPI_BASE + 0.5);
 
-                std::vector<SPItem *> selected(desktop->getSelection()->items().begin(),
-                                               desktop->getSelection()->items().end());
+                std::vector<SPItem *> selected(_desktop->getSelection()->items().begin(),
+                                               _desktop->getSelection()->items().end());
                 bool hide = hide_all->get_active();
                 exportSuccessful = _export_raster(*area, width, height, dpi, item_filename, true, onProgressCallback,
                                                   prog_dlg, omod, hide ? &selected : nullptr, &advance_options);
@@ -346,7 +331,10 @@ void BatchExport::onExport()
 
 bool BatchExport::getNonConflictingFilename(Glib::ustring &filename, Glib::ustring const extension)
 {
-    SPDocument *doc = SP_ACTIVE_DESKTOP->getDocument();
+    if(_desktop){
+        return false;
+    }
+    SPDocument *doc = _desktop->getDocument();
     std::string path = absolutize_path_from_document_location(doc, Glib::filename_from_utf8(filename));
     Glib::ustring test_filename = path + extension;
     if (!Inkscape::IO::file_test(test_filename.c_str(), G_FILE_TEST_EXISTS)) {
@@ -374,14 +362,17 @@ void BatchExport::onBrowse(Gtk::EntryIconPosition pos, const GdkEventButton *ev)
 // name. doc_export_name is set here and will only be changed when exporting.
 void BatchExport::setDefaultFilename()
 {
+    if (!_desktop) {
+        return;
+    }
     Glib::ustring filename;
     float xdpi = 0.0, ydpi = 0.0;
-    SPDocument *doc = SP_ACTIVE_DOCUMENT;
+    SPDocument *doc = _desktop->getDocument();
     sp_document_get_export_hints(doc, filename, &xdpi, &ydpi);
     if (filename.empty()) {
         Glib::ustring filename_entry_text = filename_entry->get_text();
         Glib::ustring extension = ".png";
-        filename = get_default_filename(filename_entry_text, extension);
+        filename = get_default_filename(filename_entry_text, extension, doc);
     }
     doc_export_name = filename;
     original_name = filename;
@@ -391,7 +382,7 @@ void BatchExport::setDefaultFilename()
 
 void BatchExport::setDefaultSelectionMode()
 {
-    if (SP_ACTIVE_DESKTOP) {
+    if (_desktop) {
         current_key = (selection_mode)0; // default key
         bool found = false;
         Glib::ustring pref_key_name = prefs->getString("/dialogs/export/batchexportarea/value");
@@ -406,10 +397,10 @@ void BatchExport::setDefaultSelectionMode()
             pref_key_name = selection_names[current_key];
         }
 
-        if (current_key == SELECTION_SELECTION && (SP_ACTIVE_DESKTOP->getSelection())->isEmpty()) {
+        if (current_key == SELECTION_SELECTION && (_desktop->getSelection())->isEmpty()) {
             current_key = (selection_mode)0;
         }
-        if ((SP_ACTIVE_DESKTOP->getSelection())->isEmpty()) {
+        if ((_desktop->getSelection())->isEmpty()) {
             selection_buttons[SELECTION_SELECTION]->set_sensitive(false);
         }
         selection_buttons[current_key]->set_active(true);

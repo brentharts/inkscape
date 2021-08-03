@@ -97,39 +97,23 @@ void SingleExport::initialise(const Glib::RefPtr<Gtk::Builder> &builder)
     builder->get_widget_derived("s_scroll", temp);
 }
 
-void SingleExport::on_realize()
+void SingleExport::selectionModified(Inkscape::Selection *selection, guint flags)
 {
-    auto desktop = SP_ACTIVE_DESKTOP;
-    assert(desktop);
-    auto *selection = desktop->getSelection();
-
-    selectionModifiedConn =
-        selection->connectModified(sigc::mem_fun(*this, &SingleExport::on_inkscape_selection_modified));
-    selectionChangedConn =
-        selection->connectChanged(sigc::mem_fun(*this, &SingleExport::on_inkscape_selection_changed));
-
-    Gtk::Box::on_realize();
-}
-
-void SingleExport::on_unrealize()
-{
-    selectionModifiedConn.disconnect();
-    selectionChangedConn.disconnect();
-    Gtk::Box::on_unrealize();
-}
-
-void SingleExport::on_inkscape_selection_modified(Inkscape::Selection *selection, guint flags)
-{
-    assert(SP_ACTIVE_DESKTOP->getSelection() == selection);
+    if (!_desktop || _desktop->getSelection() != selection) {
+        return;
+    }
     if (!(flags & (SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_PARENT_MODIFIED_FLAG | SP_OBJECT_CHILD_MODIFIED_FLAG))) {
         return;
     }
     Geom::OptRect bbox;
+    SPDocument *doc = _desktop->getDocument();
+
+    if (!doc) {
+        return;
+    }
 
     switch (current_key) {
         case SELECTION_DRAWING:
-            SPDocument *doc;
-            doc = SP_ACTIVE_DESKTOP->getDocument();
             bbox = doc->getRoot()->desktopVisualBounds();
             if (bbox) {
                 setArea(bbox->left(), bbox->top(), bbox->right(), bbox->bottom());
@@ -150,9 +134,11 @@ void SingleExport::on_inkscape_selection_modified(Inkscape::Selection *selection
     refreshExportHints();
 }
 
-void SingleExport::on_inkscape_selection_changed(Inkscape::Selection *selection)
+void SingleExport::selectionChanged(Inkscape::Selection *selection)
 {
-    assert(SP_ACTIVE_DESKTOP->getSelection() == selection);
+    if (!_desktop || _desktop->getSelection() != selection) {
+        return;
+    }
 
     if (selection->isEmpty()) {
         selection_buttons[SELECTION_SELECTION]->set_sensitive(false);
@@ -178,6 +164,10 @@ void SingleExport::on_inkscape_selection_changed(Inkscape::Selection *selection)
 // Setup Single Export.Called by export on realize
 void SingleExport::setup()
 {
+    if (setupDone) {
+        return;
+    }
+    setupDone = true;
     prefs = Inkscape::Preferences::get();
     si_extension_cb->setup();
 
@@ -211,9 +201,8 @@ void SingleExport::setup()
 void SingleExport::setupUnits()
 {
     units->setUnitType(Inkscape::Util::UNIT_TYPE_LINEAR);
-    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
-    if (desktop) {
-        units->setUnit(desktop->getNamedView()->display_units->abbr);
+    if (_desktop) {
+        units->setUnit(_desktop->getNamedView()->display_units->abbr);
     }
 }
 
@@ -264,16 +253,16 @@ void SingleExport::setupSpinButton(Gtk::SpinButton *sb, double val, double min, 
 
 void SingleExport::refreshArea()
 {
-    if (SP_ACTIVE_DESKTOP) {
+    if (_desktop) {
         SPDocument *doc;
         Geom::OptRect bbox;
-        doc = SP_ACTIVE_DESKTOP->getDocument();
+        doc = _desktop->getDocument();
         doc->ensureUpToDate();
 
         switch (current_key) {
             case SELECTION_SELECTION:
-                if ((SP_ACTIVE_DESKTOP->getSelection())->isEmpty() == false) {
-                    bbox = SP_ACTIVE_DESKTOP->getSelection()->visualBounds();
+                if ((_desktop->getSelection())->isEmpty() == false) {
+                    bbox = _desktop->getSelection()->visualBounds();
                     break;
                 }
             case SELECTION_DRAWING:
@@ -298,8 +287,8 @@ void SingleExport::refreshArea()
 
 void SingleExport::refreshExportHints()
 {
-    if (SP_ACTIVE_DESKTOP && !filename_modified) {
-        SPDocument *doc = SP_ACTIVE_DOCUMENT;
+    if (_desktop && !filename_modified) {
+        SPDocument *doc = _desktop->getDocument();
         Glib::ustring filename;
         float xdpi = 0.0, ydpi = 0.0;
         switch (current_key) {
@@ -310,21 +299,21 @@ void SingleExport::refreshExportHints()
                 if (filename.empty()) {
                     Glib::ustring filename_entry_text = si_filename_entry->get_text();
                     Glib::ustring extension_entry_text = si_extension_cb->get_active_text();
-                    filename = get_default_filename(filename_entry_text, extension_entry_text);
+                    filename = get_default_filename(filename_entry_text, extension_entry_text, doc);
                 }
                 doc_export_name = filename;
                 break;
             case SELECTION_SELECTION:
-                if ((SP_ACTIVE_DESKTOP->getSelection())->isEmpty()) {
+                if ((_desktop->getSelection())->isEmpty()) {
                     break;
                 }
-                SP_ACTIVE_DESKTOP->getSelection()->getExportHints(filename, &xdpi, &ydpi);
+                _desktop->getSelection()->getExportHints(filename, &xdpi, &ydpi);
 
                 /* If we still don't have a filename -- let's build
                    one that's nice */
                 if (filename.empty()) {
                     const gchar *id = "object";
-                    auto reprlst = SP_ACTIVE_DESKTOP->getSelection()->xmlNodes();
+                    auto reprlst = _desktop->getSelection()->xmlNodes();
                     for (auto i = reprlst.begin(); reprlst.end() != i; ++i) {
                         Inkscape::XML::Node *repr = *i;
                         if (repr->attribute("id")) {
@@ -444,9 +433,7 @@ void SingleExport::onExtensionChanged()
 void SingleExport::onExport()
 {
     interrupted = false;
-
-    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
-    if (!desktop)
+    if (!_desktop)
         return;
     si_export->set_sensitive(false);
     bool exportSuccessful = false;
@@ -466,7 +453,7 @@ void SingleExport::onExport()
         float x1 = getValuePx(spin_buttons[SPIN_X1]->get_value(), unit);
         float y0 = getValuePx(spin_buttons[SPIN_Y0]->get_value(), unit);
         float y1 = getValuePx(spin_buttons[SPIN_Y1]->get_value(), unit);
-        auto area = Geom::Rect(Geom::Point(x0, y0), Geom::Point(x1, y1)) * desktop->dt2doc();
+        auto area = Geom::Rect(Geom::Point(x0, y0), Geom::Point(x1, y1)) * _desktop->dt2doc();
 
         unsigned long int width = int(spin_buttons[SPIN_BMWIDTH]->get_value() + 0.5);
         unsigned long int height = int(spin_buttons[SPIN_BMHEIGHT]->get_value() + 0.5);
@@ -480,8 +467,8 @@ void SingleExport::onExport()
         prog_dlg->set_current(0);
         prog_dlg->set_total(0);
 
-        std::vector<SPItem *> selected(desktop->getSelection()->items().begin(),
-                                       desktop->getSelection()->items().end());
+        std::vector<SPItem *> selected(_desktop->getSelection()->items().begin(),
+                                       _desktop->getSelection()->items().end());
         bool hide = si_hide_all->get_active();
 
         exportSuccessful = _export_raster(area, width, height, dpi, filename, false, onProgressCallback, prog_dlg, omod,
@@ -489,14 +476,14 @@ void SingleExport::onExport()
 
     } else {
         setExporting(true, Glib::ustring::compose(_("Exporting %1"), filename));
-        SPDocument *doc = desktop->getDocument();
+        SPDocument *doc = _desktop->getDocument();
         SPDocument *copy_doc = (doc->copy()).get();
         if (current_key == SELECTION_DRAWING) {
             fit_canvas_to_drawing(copy_doc, true);
         }
         std::vector<SPItem *> items;
         if (current_key == SELECTION_SELECTION) {
-            auto itemlist = desktop->getSelection()->items();
+            auto itemlist = _desktop->getSelection()->items();
             for (auto i = itemlist.begin(); i != itemlist.end(); ++i) {
                 SPItem *item = *i;
                 items.push_back(item);
@@ -517,8 +504,11 @@ void SingleExport::onExport()
 
 void SingleExport::onBrowse(Gtk::EntryIconPosition pos, const GdkEventButton *ev)
 {
-    browseConn.block();
+    if(!_app){
+        return;
+    }
     Gtk::Window *window = _app->get_active_window();
+    browseConn.block();
     Glib::ustring filename = Glib::filename_from_utf8(si_filename_entry->get_text());
 
     if (filename.empty()) {
@@ -703,14 +693,17 @@ void SingleExport::dpiChange(sb_type type)
 // name. doc_export_name is set here and will only be changed when exporting.
 void SingleExport::setDefaultFilename()
 {
+    if (!_desktop) {
+        return;
+    }
     Glib::ustring filename;
     float xdpi = 0.0, ydpi = 0.0;
-    SPDocument *doc = SP_ACTIVE_DOCUMENT;
+    SPDocument *doc = _desktop->getDocument();
     sp_document_get_export_hints(doc, filename, &xdpi, &ydpi);
     if (filename.empty()) {
         Glib::ustring filename_entry_text = si_filename_entry->get_text();
         Glib::ustring extention_entry_text = si_extension_cb->get_active_text();
-        filename = get_default_filename(filename_entry_text, extention_entry_text);
+        filename = get_default_filename(filename_entry_text, extention_entry_text, doc);
     }
     doc_export_name = filename;
     original_name = filename;
@@ -727,7 +720,7 @@ void SingleExport::setDefaultFilename()
 
 void SingleExport::setDefaultSelectionMode()
 {
-    if (SP_ACTIVE_DESKTOP) {
+    if (_desktop) {
         current_key = (selection_mode)0; // default key
         bool found = false;
         Glib::ustring pref_key_name = prefs->getString("/dialogs/export/exportarea/value");
@@ -745,7 +738,7 @@ void SingleExport::setDefaultSelectionMode()
         if (current_key == SELECTION_SELECTION && (SP_ACTIVE_DESKTOP->getSelection())->isEmpty()) {
             current_key = (selection_mode)0;
         }
-        if ((SP_ACTIVE_DESKTOP->getSelection())->isEmpty()) {
+        if ((_desktop->getSelection())->isEmpty()) {
             selection_buttons[SELECTION_SELECTION]->set_sensitive(false);
         }
         selection_buttons[current_key]->set_active(true);
@@ -755,7 +748,7 @@ void SingleExport::setDefaultSelectionMode()
             (spin_buttons[SPIN_HEIGHT]->get_value() == 0 || spin_buttons[SPIN_WIDTH]->get_value() == 0)) {
             SPDocument *doc;
             Geom::OptRect bbox;
-            doc = SP_ACTIVE_DESKTOP->getDocument();
+            doc = _desktop->getDocument();
             bbox = Geom::Rect(Geom::Point(0.0, 0.0),
                               Geom::Point(doc->getWidth().value("px"), doc->getHeight().value("px")));
             setArea(bbox->min()[Geom::X], bbox->min()[Geom::Y], bbox->max()[Geom::X], bbox->max()[Geom::Y]);

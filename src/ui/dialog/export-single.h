@@ -32,11 +32,18 @@ public:
         : Gtk::Box(cobject){};
     ~SingleExport() override;
 
-protected:
+private:
     InkscapeApplication *_app;
+    SPDesktop *_desktop = nullptr;
+
+private:
+    bool setupDone = false; // To prevent setup() call add connections again.
 
 public:
-    void set_app(InkscapeApplication *app) { _app = app; };
+    void setApp(InkscapeApplication *app) { _app = app; }
+    void setDesktop(SPDesktop *desktop) { _desktop = desktop; }
+    void selectionChanged(Inkscape::Selection *selection);
+    void selectionModified(Inkscape::Selection *selection, guint flags);
 
 private:
     enum sb_type
@@ -122,6 +129,12 @@ private:
     void on_inkscape_selection_modified(Inkscape::Selection *selection, guint flags);
     void on_inkscape_selection_changed(Inkscape::Selection *selection);
 
+public:
+    void refresh()
+    {
+        refreshArea();
+        refreshExportHints();
+    };
 private:
     void refreshArea();
     void refreshExportHints();
@@ -163,12 +176,6 @@ private:
     sigc::connection extensionConn;
     sigc::connection exportConn;
     sigc::connection browseConn;
-    sigc::connection selectionModifiedConn;
-    sigc::connection selectionChangedConn;
-
-private:
-    void on_realize() override;
-    void on_unrealize() override;
 };
 } // namespace Dialog
 } // namespace UI

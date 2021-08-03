@@ -35,11 +35,18 @@ public:
         : Gtk::Box(cobject){};
     ~BatchExport() override;
 
-protected:
+private:
     InkscapeApplication *_app;
+    SPDesktop *_desktop = nullptr;
+
+private:
+    bool setupDone = false; // To prevent setup() call add connections again.
 
 public:
-    void set_app(InkscapeApplication *app) { _app = app; };
+    void setApp(InkscapeApplication *app) { _app = app; }
+    void setDesktop(SPDesktop *desktop) { _desktop = desktop; }
+    void selectionChanged(Inkscape::Selection *selection);
+    void selectionModified(Inkscape::Selection *selection, guint flags);
 
 private:
     enum selection_mode
@@ -63,10 +70,11 @@ private:
     ExportList *export_list = nullptr;
 
     AdvanceOptions advance_options;
-    std::vector<BatchItem*> current_items;
+    std::vector<BatchItem *> current_items;
 
 private:
-    std::set<SPItem*> added_items;
+    std::set<SPItem *> added_items;
+
 private:
     bool filename_modified;
     Glib::ustring original_name;
@@ -80,7 +88,7 @@ public:
     // initialise variables from builder
     void initialise(const Glib::RefPtr<Gtk::Builder> &builder);
     void setup();
-    bool getNonConflictingFilename(Glib::ustring& filename,Glib::ustring const extension);
+    bool getNonConflictingFilename(Glib::ustring &filename, Glib::ustring const extension);
 
 private:
     void setDefaultSelectionMode();
@@ -91,8 +99,13 @@ private:
     void onAreaTypeToggle(selection_mode key);
     void onExport();
     void onBrowse(Gtk::EntryIconPosition pos, const GdkEventButton *ev);
-    void on_inkscape_selection_modified(Inkscape::Selection *selection, guint flags);
-    void on_inkscape_selection_changed(Inkscape::Selection *selection);
+
+public:
+    void refresh()
+    {
+        refreshItems();
+        refreshExportHints();
+    };
 
 private:
     void refreshItems();
@@ -129,10 +142,6 @@ private:
     sigc::connection browseConn;
     sigc::connection selectionModifiedConn;
     sigc::connection selectionChangedConn;
-
-private:
-    void on_realize() override;
-    void on_unrealize() override;
 };
 } // namespace Dialog
 } // namespace UI

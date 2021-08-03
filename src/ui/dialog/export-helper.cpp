@@ -372,16 +372,13 @@ void setValuePx(Glib::RefPtr<Gtk::Adjustment> &adj, double val, Unit const *unit
 
 // We Create filename by removing already present extension in document name and replacing it with extension passed as
 // parameter if exxtension is not valid. If document doesn't have a name we use bitmap as defalt name.
-Glib::ustring get_default_filename(Glib::ustring &filename_entry_text, Glib::ustring &extension)
+Glib::ustring get_default_filename(Glib::ustring &filename_entry_text, Glib::ustring &extension, SPDocument *doc)
 {
     Glib::ustring filename;
-    if (SP_ACTIVE_DOCUMENT && SP_ACTIVE_DOCUMENT->getDocumentFilename()) {
-        SPDocument *doc = SP_ACTIVE_DOCUMENT;
+    if (doc && doc->getDocumentFilename()) {
         filename = doc->getDocumentFilename();
-
         ExtensionList::appendExtensionToFilename(filename, extension);
-
-    } else if (SP_ACTIVE_DOCUMENT) {
+    } else if (doc) {
         filename = create_filepath_from_id(_("bitmap"), filename_entry_text);
         filename = filename + extension;
     }

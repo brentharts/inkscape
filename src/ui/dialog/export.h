@@ -15,9 +15,9 @@
 
 #include <gtkmm.h>
 
+#include "export-batch.h"
 #include "export-helper.h"
 #include "export-single.h"
-#include "export-batch.h"
 #include "extension/output.h"
 #include "ui/dialog/dialog-base.h"
 #include "ui/widget/scrollprotected.h"
@@ -62,6 +62,10 @@ private:
     // signals callback
     void onRealize();
     void onBatchExport();
+
+    void desktopReplaced() override;
+    void selectionChanged(Inkscape::Selection *selection) override;
+    void selectionModified(Inkscape::Selection *selection, guint flags) override;
 };
 } // namespace Dialog
 } // namespace UI

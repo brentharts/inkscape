@@ -173,7 +173,7 @@ private:
 
 float getValuePx(float value, Unit const *unit);
 void setValuePx(Glib::RefPtr<Gtk::Adjustment> &adj, double val, Unit const *unit);
-Glib::ustring get_default_filename(Glib::ustring &filename_entry_text, Glib::ustring &extension);
+Glib::ustring get_default_filename(Glib::ustring &filename_entry_text, Glib::ustring &extension, SPDocument *doc);
 std::string create_filepath_from_id(Glib::ustring id, const Glib::ustring &file_entry_text);
 Glib::ustring get_ext_from_filename(Glib::ustring const &filename);
 std::string absolutize_path_from_document_location(SPDocument *doc, const std::string &filename);
