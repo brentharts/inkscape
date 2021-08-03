@@ -369,7 +369,12 @@ void BatchExport::onExport()
                 exportSuccessful = _export_raster(*area, width, height, dpi, item_filename, true, onProgressCallback,
                                                   prog_dlg, omod, hide ? &selected : nullptr, &advance_options);
             } else {
-                // exportSuccessful = _export_vector(omod, copy_doc, filename, false, &items);
+                setExporting(true, Glib::ustring::compose(_("Exporting %1"), filename));
+                SPDocument *doc = _desktop->getDocument();
+                SPDocument *copy_doc = (doc->copy()).get();
+                std::vector<SPItem *> items;
+                items.push_back(item);
+                exportSuccessful = _export_vector(omod, copy_doc, item_filename, true, &items);
             }
             setExporting(false);
         }
