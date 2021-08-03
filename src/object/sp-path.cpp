@@ -243,7 +243,7 @@ void SPPath::set(SPAttr key, const gchar* value) {
                 }
             }
             // fix issue https://gitlab.com/inkscape/inbox/-/issues/5460
-            sp_lpe_item_update_patheffect(this, true, true);
+            sp_lpe_item_update_patheffect(this, false, false);
             break;
 
        case SPAttr::D:
