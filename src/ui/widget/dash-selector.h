@@ -80,10 +80,8 @@ private:
     class DashColumns : public Gtk::TreeModel::ColumnRecord {
     public:
         Gtk::TreeModelColumn<std::size_t> dash;
-        Gtk::TreeModelColumn<Cairo::RefPtr<Cairo::Surface>> surface;
-
         DashColumns() {
-            add(dash); add(surface);
+            add(dash);
         }
     };
     DashColumns dash_columns;
@@ -91,12 +89,10 @@ private:
     ScrollProtected<Gtk::ComboBox> _dash_combo;
     Gtk::CellRendererPixbuf _image_renderer;
     Glib::RefPtr<Gtk::Adjustment> _offset;
-
     static gchar const *const _prefs_path;
     int _preview_width;
     int _preview_height;
     int _preview_lineheight;
-
     std::vector<double>* _pattern = nullptr;
 };
 

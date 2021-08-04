@@ -68,14 +68,6 @@ DashSelector::DashSelector()
     for (std::size_t i = 0; i < s_dashes.size(); ++i) {
         Gtk::TreeModel::Row row = *(_dash_store->append());
         row[dash_columns.dash] = i;
-        if (i == 1) {
-            // add the custom one as a second option; it'll show up at the top of second column
-            row[dash_columns.surface] = sp_text_to_pixbuf((char *)"Custom");
-        }
-        else {
-            // Add the dashes to the combobox
-            row[dash_columns.surface] = sp_dash_to_pixbuf(s_dashes[i]);
-        }
     }
 
     _pattern = &s_dashes.front();
@@ -87,7 +79,21 @@ DashSelector::~DashSelector() {
 }
 
 void DashSelector::prepareImageRenderer( Gtk::TreeModel::const_iterator const &row ) {
-    Cairo::RefPtr<Cairo::Surface> surface = (*row)[dash_columns.surface];
+    // dashes are rendered on the fly to adapt to current theme colors
+    std::size_t index = (*row)[dash_columns.dash];
+    Cairo::RefPtr<Cairo::Surface> surface;
+    if (index == 1) {
+        // add the custom one as a second option; it'll show up at the top of second column
+        surface = sp_text_to_pixbuf((char *)"Custom");
+    }
+    else if (index < s_dashes.size()) {
+        // add the dash to the combobox
+        surface = sp_dash_to_pixbuf(s_dashes[index]);
+    }
+    else {
+        surface = Cairo::RefPtr<Cairo::Surface>(new Cairo::Surface(cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 1, 1)));
+        g_warning("No surface in prepareImageRenderer.");
+    }
     _image_renderer.property_surface() = surface;
 }
 
@@ -124,7 +130,7 @@ void DashSelector::init_dashes() {
             s_dashes.emplace_back(std::vector<double>());
         }
 
-        std::vector<double> custom {1, 2, 1, 4}; // 'custom' dashes second on the list
+        std::vector<double> custom {1, 2, 1, 4}; // 'custom' dashes second on the list, so they are at the top of the second column in a combo box
         s_dashes.insert(s_dashes.begin() + 1, custom);
     }
 }
@@ -207,7 +213,7 @@ Cairo::RefPtr<Cairo::Surface> DashSelector::sp_text_to_pixbuf(const char* text) 
 
     cairo_select_font_face (ct, "Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
     // todo: how to find default font face and size?
-    cairo_set_font_size (ct, 13.333 * device_scale);
+    cairo_set_font_size (ct, 12 * device_scale);
     auto context = get_style_context();
     Gdk::RGBA fg = context->get_color(get_state_flags());
     cairo_set_source_rgb(ct, fg.get_red(), fg.get_green(), fg.get_blue());
