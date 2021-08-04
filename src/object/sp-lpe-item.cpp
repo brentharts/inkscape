@@ -285,7 +285,7 @@ bool SPLPEItem::performOnePathEffect(SPCurve *curve, SPShape *current, Inkscape:
                 }
                 lpe->doAfterEffect_impl(this, curve);
             }
-            // we need this on slice LPE to calulate correcly effects
+            // we need this on slice LPE to calculate effects correctly
             if (dynamic_cast<Inkscape::LivePathEffect::LPESlice *>(lpe)) { // we are on 1 or up
                 current->bbox_vis_cache_is_valid = false;
                 current->bbox_geom_cache_is_valid = false;
@@ -623,9 +623,6 @@ sp_lpe_item_cleanup_original_path_recursive(SPLPEItem *lpeitem, bool keep_paths,
                 if (desc && newObj) {
                     newObj->setDesc(desc);
                     g_free(desc);
-                }
-                if (highlight_color && newObj) {
-                    SP_ITEM(newObj)->setHighlightColor( highlight_color );
                 }
                 // move to the saved position
                 repr->setPosition(pos > 0 ? pos : 0);

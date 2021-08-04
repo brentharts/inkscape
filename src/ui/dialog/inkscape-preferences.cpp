@@ -1131,10 +1131,10 @@ void InkscapePreferences::resetIconsColors(bool themechange)
         if (INKSCAPE.themecontext->getColorizeProvider()) {
             Gtk::StyleContext::remove_provider_for_screen(screen, INKSCAPE.themecontext->getColorizeProvider());
         }
-        // This colors are setted on style.css of inkscape
+        // This colors are set on style.css of inkscape
         Gdk::RGBA base_color = _symbolic_base_color.get_style_context()->get_color();
-        // This is a hack to fix a proble style is not updated enoght fast on
-        // chage from dark to bright themes
+        // This is a hack to fix a proble style is not updated enough fast on
+        // change from dark to bright themes
         if (themechange) {
             base_color = _symbolic_base_color.get_style_context()->get_background_color();
         }
@@ -1580,24 +1580,6 @@ void InkscapePreferences::initPageUI()
     _page_ui.add_line(false, "", _show_filters_info_box, "",
                         _("Show icons and descriptions for the filter primitives available at the filter effects dialog"));
 
-    {
-        Glib::ustring dockbarstyleLabels[] = {_("Icons only"), _("Text only"), _("Icons and text")};
-        int dockbarstyleValues[] = {0, 1, 2};
-
-        /* dockbar style */
-        _dockbar_style.init( "/options/dock/dockbarstyle", dockbarstyleLabels, dockbarstyleValues, G_N_ELEMENTS(dockbarstyleLabels), 0);
-        _page_ui.add_line(false, _("Dockbar style (requires restart):"),  _dockbar_style, "",
-                        _("Selects whether the vertical bars on the dockbar will show text labels, icons, or both"), false);
-
-        Glib::ustring switcherstyleLabels[] = {_("Text only"), _("Icons only"), _("Icons and text")}; /* see bug #1098437   */
-        int switcherstyleValues[] = {0, 1, 2};
-
-        /* switcher style */
-        _switcher_style.init( "/options/dock/switcherstyle", switcherstyleLabels, switcherstyleValues, G_N_ELEMENTS(switcherstyleLabels), 0);
-        _page_ui.add_line(false, _("Switcher style (requires restart):"),  _switcher_style, "",
-                        _("Selects whether the dockbar switcher will show text labels, icons, or both"), false);
-    }
-
     _ui_yaxisdown.init( _("Origin at upper left with y-axis pointing down (requires restart)"), "/options/yaxisdown", true);
     _page_ui.add_line( false, "", _ui_yaxisdown, "",
                        _("When off, origin is at lower left corner and y-axis points up"), true);
@@ -1606,13 +1588,18 @@ void InkscapePreferences::initPageUI()
     _page_ui.add_line(false, "", _ui_rotationlock, "",
                        _("Prevent accidental canvas rotation by disabling on-canvas keyboard and mouse actions for rotation"), true);
 
-    _page_ui.add_group_header(_("Handle size"));
-        _mouse_grabsize.init("/options/grabsize/value", 1, 15, 1, 2, 3, 0);
-    _page_ui.add_line(false, "", _mouse_grabsize, "", _("Set the relative size of node handles"), true);
+    _page_ui.add_group_header(_("UI"));
+    // _page_ui.add_group_header(_("Handle size"));
+    _mouse_grabsize.init("/options/grabsize/value", 1, 15, 1, 2, 3, 0);
+    _page_ui.add_line(true, "Handle size", _mouse_grabsize, "", _("Set the relative size of node handles"), true);
+    _narrow_spinbutton.init(_("Use narrow number entry boxes"), "/theme/narrowSpinButton", false);
+    _page_ui.add_line(false, "", _narrow_spinbutton, "", _("Make number editing boxes smaller by limiting padding"), false);
 
-    _page_ui.add_group_header(_("Cursor size"));
-    _ui_cursorscaling.init(_("Enable cursor scaling"), "/options/cursorscaling", true);
+    _page_ui.add_group_header(_("Mouse cursors"));
+    _ui_cursorscaling.init(_("Enable scaling"), "/options/cursorscaling", true);
     _page_ui.add_line(false, "", _ui_cursorscaling, "", _("When off, cursor scaling is disabled. Cursor scaling may be broken when fractional scaling is enabled."), true);
+    _ui_cursor_shadow.init(_("Show drop shadow"), "/options/cursor-drop-shadow", true);
+    _page_ui.add_line(false, "", _ui_cursor_shadow, "", _("Control visibility of drop shadow for Inkscape cursors."), true);
 
     // Theme
     _page_theme.add_group_header(_("Theme"));
@@ -1648,7 +1635,7 @@ void InkscapePreferences::initPageUI()
         _page_theme.add_line(false, _("Change GTK theme:"), _gtk_theme, "", "", false);
         _gtk_theme.signal_changed().connect(sigc::mem_fun(*this, &InkscapePreferences::comboThemeChange));
     }
-    _sys_user_themes_dir_copy.init(g_build_filename(g_get_user_data_dir(), "themes", NULL), _("Open themes folder"));
+    _sys_user_themes_dir_copy.init(g_build_filename(g_get_user_data_dir(), "themes", nullptr), _("Open themes folder"));
     _page_theme.add_line(true, _("User themes:"), _sys_user_themes_dir_copy, "", _("Location of the user’s themes"), true, Gtk::manage(new Gtk::Box()));
     _contrast_theme.init("/theme/contrast", 1, 10, 1, 2, 10, 1);
     Gtk::Widget *space = new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL);
@@ -1684,7 +1671,7 @@ void InkscapePreferences::initPageUI()
             if (std::string::npos != last_slash_idx) {
                 folder.erase(0, last_slash_idx + 1);
             }
-            // we want use Adwaita intead fallback hicolor theme
+            // we want use Adwaita instead fallback hicolor theme
             if (folder == default_icon_theme) {
                 continue;
             }
@@ -1782,7 +1769,7 @@ void InkscapePreferences::initPageUI()
                              _("You can either enable or disable all icons in menus. By default, the setting for the 'show-icons' attribute in the 'menus.xml' file determines whether to display icons in menus."), false);
     }
 
-    this->AddPage(_page_theme, _("Themeing"), iter_ui, PREFS_PAGE_UI_THEME);
+    this->AddPage(_page_theme, _("Theming"), iter_ui, PREFS_PAGE_UI_THEME);
     symbolicThemeCheck();
     // Windows
     _win_save_geom.init ( _("Save and restore window geometry for each document"), "/options/savewindowgeometry/value", PREFS_WINDOW_GEOMETRY_FILE, true, nullptr);
@@ -1792,7 +1779,7 @@ void InkscapePreferences::initPageUI()
     _win_save_dialog_pos_on.init ( _("Save and restore dialogs status"), "/options/savedialogposition/value", PREFS_DIALOGS_STATE_SAVE, true, nullptr);
     _win_save_dialog_pos_off.init ( _("Don't save dialogs status"), "/options/savedialogposition/value", PREFS_DIALOGS_STATE_NONE, false, &_win_save_dialog_pos_on);
 
-    _win_dockable.init ( _("Dockable"), "/options/dialogtype/value", PREFS_DIALOGS_BEHAVIOR_DOCKABLE, true, nullptr);
+    _win_dockable.init ( _("Docked"), "/options/dialogtype/value", PREFS_DIALOGS_BEHAVIOR_DOCKABLE, true, nullptr);
     _win_floating.init ( _("Floating"), "/options/dialogtype/value", PREFS_DIALOGS_BEHAVIOR_FLOATING, false, &_win_dockable);
 
     _win_native.init ( _("Native open/save dialogs"), "/options/desktopintegration/value", 1, true, nullptr);
@@ -1840,9 +1827,9 @@ void InkscapePreferences::initPageUI()
 
 
 
-    _page_windows.add_group_header( _("Dialog behavior (requires restart)"));
+    _page_windows.add_group_header( _("Default dialog behavior (requires restart)"));
     _page_windows.add_line( true, "", _win_dockable, "",
-                            _("Dockable"));
+                            _("Docked"));
     _page_windows.add_line( true, "", _win_floating, "",
                             _("Floating"));
 #ifdef _WIN32
@@ -2380,6 +2367,10 @@ void InkscapePreferences::initPageBehavior()
     _snap_persistence.init("/options/snapindicatorpersistence/value", 0.1, 10, 0.1, 1, 2, 1);
     _page_snapping.add_line( true, _("Snap indicator persistence (in seconds):"), _snap_persistence, "",
                              _("Controls how long the snap indicator message will be shown, before it disappears"), true);
+
+    _snap_indicator_distance.init( _("Show snap distance in case of alignment or distribution snap"), "/options/snapindicatordistance/value", false);
+    _page_snapping.add_line( true, "", _snap_indicator_distance, "",
+                             _("Show snap distance in case of alignment or distribution snap"));
 
     _page_snapping.add_group_header( _("What should snap"));
 
@@ -3380,7 +3371,7 @@ void InkscapePreferences::initPageSystem()
                              _("Open fonts folder"));
     _page_system.add_line(true, _("User fonts:"), _sys_user_fonts_dir, "", _("Location of the user’s fonts"), true);
 
-    _sys_user_themes_dir.init(g_build_filename(g_get_user_data_dir(), "themes", NULL), _("Open themes folder"));
+    _sys_user_themes_dir.init(g_build_filename(g_get_user_data_dir(), "themes", nullptr), _("Open themes folder"));
     _page_system.add_line(true, _("User themes:"), _sys_user_themes_dir, "", _("Location of the user’s themes"), true);
 
     _sys_user_icons_dir.init((char const *)IO::Resource::get_path(IO::Resource::USER, IO::Resource::ICONS, ""),

@@ -196,7 +196,7 @@ StartScreen::StartScreen()
     set_active_combo("themes", prefs->getString("/options/boot/theme"));
     set_active_combo("canvas", prefs->getString("/options/boot/canvas"));
 
-    // initalise dark depending on prefs and background
+    // initialise dark depending on prefs and background
     refresh_dark_switch();
 
     // Welcome! tab
@@ -403,7 +403,7 @@ StartScreen::new_now()
                         filename = Resource::get_filename_string(
                             Resource::TEMPLATES, template_filename.c_str(), true);
                     }
-                    // This isn't used on opening, just for checking it's existance.
+                    // This isn't used on opening, just for checking it's existence.
                     file = Gio::File::create_for_path(filename);
                     width = row[cols.width];
                     height = row[cols.height];
@@ -571,7 +571,7 @@ StartScreen::refresh_theme(Glib::ustring theme_name)
 /**
  * Set the theme, icon pack and other theme options from a set defined
  * in the glade file. The combo box has a number of columns with the needed
- * data decribing how to set up the theme.
+ * data describing how to set up the theme.
  */
 void
 StartScreen::theme_changed()
@@ -726,7 +726,7 @@ StartScreen::keyboard_changed()
 
         Gtk::InfoBar* keys_warning;
         builder->get_widget("keys_warning", keys_warning);
-        if (set_to != "inkscape.xml") {
+        if (set_to != "inkscape.xml" && set_to != "default.xml") {
             keys_warning->set_message_type(Gtk::MessageType::MESSAGE_WARNING);
             keys_warning->show();
         } else {

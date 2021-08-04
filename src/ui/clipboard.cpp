@@ -440,7 +440,7 @@ bool ClipboardManagerImpl::paste(SPDesktop *desktop, bool in_place)
         if (_pasteText(desktop)) {
             return true;
         }
-        // If the clipboard conains text/plain, but is an svg document
+        // If the clipboard contains text/plain, but is an svg document
         // then we'll try and detect it and then paste it if possible.
     }
 
@@ -1221,7 +1221,7 @@ bool ClipboardManagerImpl::_pasteImage(SPDocument *doc)
     prefs->setBool("/dialogs/import/ask", false);
     png->set_gui(false);
 
-    gchar *filename = g_build_filename( g_get_user_cache_dir(), "inkscape-clipboard-import", NULL );
+    gchar *filename = g_build_filename( g_get_user_cache_dir(), "inkscape-clipboard-import", nullptr );
     img->save(filename, "png");
     file_import(doc, filename, png);
     g_free(filename);
@@ -1320,7 +1320,7 @@ std::unique_ptr<SPDocument> ClipboardManagerImpl::_retrieveClipboard(Glib::ustri
 
     // FIXME: Temporary hack until we add memory input.
     // Save the clipboard contents to some file, then read it
-    gchar *filename = g_build_filename( g_get_user_cache_dir(), "inkscape-clipboard-import", NULL );
+    gchar *filename = g_build_filename( g_get_user_cache_dir(), "inkscape-clipboard-import", nullptr );
 
     bool file_saved = false;
     Glib::ustring target = best_target;
@@ -1413,7 +1413,7 @@ void ClipboardManagerImpl::_onGet(Gtk::SelectionData &sel, guint /*info*/)
 
     // FIXME: Temporary hack until we add support for memory output.
     // Save to a temporary file, read it back and then set the clipboard contents
-    gchar *filename = g_build_filename( g_get_user_cache_dir(), "inkscape-clipboard-export", NULL );
+    gchar *filename = g_build_filename( g_get_user_cache_dir(), "inkscape-clipboard-export", nullptr );
     gchar *data = nullptr;
     gsize len;
 
@@ -1674,7 +1674,7 @@ void ClipboardManagerImpl::_setClipboardTargets()
             if ( out != outlist.end() ) {
                 // FIXME: Temporary hack until we add support for memory output.
                 // Save to a temporary file, read it back and then set the clipboard contents
-                gchar *filename = g_build_filename( g_get_user_cache_dir(), "inkscape-clipboard-export.emf", NULL );
+                gchar *filename = g_build_filename( g_get_user_cache_dir(), "inkscape-clipboard-export.emf", nullptr );
 
                 try {
                     (*out)->save(_clipboardSPDoc.get(), filename);

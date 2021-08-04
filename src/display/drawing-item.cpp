@@ -487,6 +487,13 @@ DrawingItem::setItemBounds(Geom::OptRect const &bounds)
 void
 DrawingItem::update(Geom::IntRect const &area, UpdateContext const &ctx, unsigned flags, unsigned reset)
 {
+
+    // We don't need to update what is not visible
+    if (!visible()) {
+        _state = STATE_ALL; // Touch the state for future change to this item
+        return;
+    }
+
     bool render_filters = _drawing.renderFilters();
     bool outline = _drawing.outline();
 
@@ -728,6 +735,11 @@ DrawingItem::render(DrawingContext &dc, Geom::IntRect const &area, unsigned flag
     // Render from cache if possible
     // Bypass in case of pattern, see below.
     if (_cached && !(flags & RENDER_BYPASS_CACHE)) {
+        if (_cache && _cache->device_scale() != device_scale) {
+            delete _cache;
+            _cache = nullptr;
+        }
+
         if (_cache) {
             _cache->prepare();
             dc.setOperator(ink_css_blend_to_cairo_operator(_mix_blend_mode));
@@ -892,7 +904,7 @@ DrawingItem::render(DrawingContext &dc, Geom::IntRect const &area, unsigned flag
     dc.setOperator(ink_css_blend_to_cairo_operator(_mix_blend_mode));
     dc.fill();
     dc.setSource(0,0,0,0);
-    // Web isolation only works if parent doesnt have transform
+    // Web isolation only works if parent doesn't have transform
 
 
     // the call above is to clear a ref on the intermediate surface held by dc
@@ -1212,13 +1224,13 @@ Geom::OptIntRect DrawingItem::_cacheRect()
 {
     Geom::OptIntRect r = _drawbox & _drawing.cacheLimit();
     if (_filter && _drawing.cacheLimit() && _drawing.renderFilters() && r && r != _drawbox) {
-        // we check unfiltered item is emought inside the cache area to  render properly
+        // we check unfiltered item is enough inside the cache area to render properly
         Geom::OptIntRect canvas = r;
         expandByScale(*canvas, 0.5);
         Geom::OptIntRect valid = Geom::intersect(canvas, _bbox);
         if (!valid && _bbox) {
             valid = _bbox;
-            // contract the item _bbox to get reduced size to render. $ seems good enought
+            // contract the item _bbox to get reduced size to render. $ seems good enough
             expandByScale(*valid, 0.5);
             // now we get the nearest point to cache area
             Geom::IntPoint center = (*_drawing.cacheLimit()).midpoint();

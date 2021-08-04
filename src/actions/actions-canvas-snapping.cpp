@@ -24,6 +24,7 @@
 #include "document-undo.h"
 
 #include "object/sp-namedview.h"
+#include "snap-enums.h"
 
 // There are four snapping lists that must be connected:
 // 1. The attribute name in NamedView: e.g. "inkscape:snap-bbox".
@@ -44,7 +45,7 @@ canvas_snapping_toggle(SPDocument* document, const SPAttr option)
         return;
     }
 
-    // This is a bit ackward.
+    // This is a bit awkward.
     SPObject* obj = document->getObjectByRepr(repr);
     SPNamedView* nv = dynamic_cast<SPNamedView *> (obj);
     if (nv == nullptr) {
@@ -61,6 +62,20 @@ canvas_snapping_toggle(SPDocument* document, const SPAttr option)
         case SPAttr::INKSCAPE_SNAP_GLOBAL:
             v = nv->snap_manager.snapprefs.getSnapEnabledGlobally();
             repr->setAttributeBoolean("inkscape:snap-global", !v);
+            break;
+
+        case SPAttr::INKSCAPE_SNAP_ALIGNMENT:
+            v = nv->snap_manager.snapprefs.isTargetSnappable(Inkscape::SNAPTARGET_ALIGNMENT_CATEGORY);
+            repr->setAttributeBoolean("inkscape:snap-alignment", !v);
+            break;
+        case SPAttr::INKSCAPE_SNAP_ALIGNMENT_SELF:
+            v = nv->snap_manager.snapprefs.isTargetSnappable(Inkscape::SNAPTARGET_ALIGNMENT_HANDLE);
+            repr->setAttributeBoolean("inkscape:snap-alignment-self", !v);
+            break;
+
+        case SPAttr::INKSCAPE_SNAP_DISTRIBUTION:
+            v = nv->snap_manager.snapprefs.isTargetSnappable(Inkscape::SNAPTARGET_DISTRIBUTION_CATEGORY);
+            repr->setAttributeBoolean("inkscape:snap-distribution", !v);
             break;
 
         // BBox
@@ -184,6 +199,11 @@ std::vector<std::vector<Glib::ustring>> raw_data_canvas_snapping =
 {
     {"doc.snap-global-toggle",        N_("Snapping"),                          "Snap",  N_("Toggle snapping on/off")                             },
 
+    {"doc.snap-alignment",            N_("Snap Objects that Align"),           "Snap",  N_("Toggle alignment snapping")                          },
+    {"doc.snap-alignment-self",       N_("Snap Nodes that Align"),             "Snap",  N_("Toggle alignment snapping to nodes in the same path")},
+
+    {"doc.snap-distribution",         N_("Snap Objects at Equal Distances"),   "Snap",  N_("Toggle snapping objects at equal distances")},
+
     {"doc.snap-bbox",                 N_("Snap Bounding Boxes"),               "Snap",  N_("Toggle snapping to bounding boxes (global)")         },
     {"doc.snap-bbox-edge",            N_("Snap Bounding Box Edges"),           "Snap",  N_("Toggle snapping to bounding-box edges")              },
     {"doc.snap-bbox-corner",          N_("Snap Bounding Box Corners"),         "Snap",  N_("Toggle snapping to bounding-box corners")            },
@@ -216,6 +236,11 @@ add_actions_canvas_snapping(SPDocument* document)
     Glib::RefPtr<Gio::SimpleActionGroup> map = document->getActionGroup();
 
     map->add_action_bool( "snap-global-toggle",      sigc::bind<SPDocument*, SPAttr>(sigc::ptr_fun(&canvas_snapping_toggle),  document, SPAttr::INKSCAPE_SNAP_GLOBAL));
+
+    map->add_action_bool( "snap-distribution",       sigc::bind<SPDocument*, SPAttr>(sigc::ptr_fun(&canvas_snapping_toggle),  document, SPAttr::INKSCAPE_SNAP_DISTRIBUTION));
+
+    map->add_action_bool( "snap-alignment",          sigc::bind<SPDocument*, SPAttr>(sigc::ptr_fun(&canvas_snapping_toggle),  document, SPAttr::INKSCAPE_SNAP_ALIGNMENT));
+    map->add_action_bool( "snap-alignment-self",     sigc::bind<SPDocument*, SPAttr>(sigc::ptr_fun(&canvas_snapping_toggle),  document, SPAttr::INKSCAPE_SNAP_ALIGNMENT_SELF));
 
     map->add_action_bool( "snap-bbox",               sigc::bind<SPDocument*, SPAttr>(sigc::ptr_fun(&canvas_snapping_toggle),  document, SPAttr::INKSCAPE_SNAP_BBOX));
     map->add_action_bool( "snap-bbox-edge",          sigc::bind<SPDocument*, SPAttr>(sigc::ptr_fun(&canvas_snapping_toggle),  document, SPAttr::INKSCAPE_SNAP_BBOX_EDGE));
@@ -286,7 +311,7 @@ set_actions_canvas_snapping(SPDocument* document)
         return;
     }
 
-    // This is a bit ackward.
+    // This is a bit awkward.
     SPObject* obj = document->getObjectByRepr(repr);
     SPNamedView* nv = dynamic_cast<SPNamedView *> (obj);
 
@@ -303,6 +328,13 @@ set_actions_canvas_snapping(SPDocument* document)
 
     bool global = nv->snap_manager.snapprefs.getSnapEnabledGlobally();
     set_actions_canvas_snapping_helper(map, "snap-global-toggle", global, true); // Always enabled
+
+    bool alignment = nv->snap_manager.snapprefs.isTargetSnappable(Inkscape::SNAPTARGET_ALIGNMENT_CATEGORY);
+    set_actions_canvas_snapping_helper(map, "snap-alignment", alignment, global);
+    set_actions_canvas_snapping_helper(map, "snap-alignment-self",     nv->snap_manager.snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_ALIGNMENT_HANDLE),   global && alignment);
+
+    bool distribution = nv->snap_manager.snapprefs.isTargetSnappable(Inkscape::SNAPTARGET_DISTRIBUTION_CATEGORY);
+    set_actions_canvas_snapping_helper(map, "snap-distribution", distribution, global);
 
     bool bbox = nv->snap_manager.snapprefs.isTargetSnappable(Inkscape::SNAPTARGET_BBOX_CATEGORY);
     set_actions_canvas_snapping_helper(map, "snap-bbox", bbox, global);

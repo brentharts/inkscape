@@ -414,7 +414,7 @@ void SPGradient::set(SPAttr key, gchar const *value)
 
             if (newVal) {
                 // Might need to flip solid/gradient
-                Glib::ustring paintVal = ( this->hasStops() && (this->getStopCount() == 0) ) ? "solid" : "gradient";
+                Glib::ustring paintVal = ( this->hasStops() && (this->getStopCount() <= 1) ) ? "solid" : "gradient";
 
                 if ( paintVal != value ) {
                     this->setAttribute( "inkscape:swatch", paintVal);
@@ -478,10 +478,10 @@ void SPGradient::child_added(Inkscape::XML::Node *child, Inkscape::XML::Node *re
     SPObject *ochild = this->get_child_by_repr(child);
     if ( ochild && SP_IS_STOP(ochild) ) {
         this->has_stops = TRUE;
-        if ( this->getStopCount() > 0 ) {
+        if ( this->getStopCount() > 1 ) {
             gchar const * attr = this->getAttribute("inkscape:swatch");
             if ( attr && strcmp(attr, "gradient") ) {
-            	this->setAttribute( "inkscape:swatch", "gradient" );
+               this->setAttribute( "inkscape:swatch", "gradient" );
             }
         }
     }
@@ -522,7 +522,7 @@ void SPGradient::remove_child(Inkscape::XML::Node *child)
         }
     }
 
-    if ( this->getStopCount() == 0 ) {
+    if ( this->getStopCount() <= 1 ) {
         gchar const * attr = this->getAttribute("inkscape:swatch");
 
         if ( attr && strcmp(attr, "solid") ) {
@@ -595,9 +595,11 @@ SPStop* SPGradient::getFirstStop()
 int SPGradient::getStopCount() const
 {
     int count = 0;
-
-    for (SPStop *stop = const_cast<SPGradient*>(this)->getFirstStop(); stop && stop->getNextStop(); stop = stop->getNextStop()) {
-        count++;
+    // fixed off-by one count
+    SPStop *stop = const_cast<SPGradient*>(this)->getFirstStop();
+    while (stop) {
+       count++;
+       stop = stop->getNextStop();
     }
 
     return count;
@@ -1188,7 +1190,7 @@ SPGradient::create_preview_pattern(double width)
 
 bool SPGradient::isSolid() const
 {
-    if (swatch && hasStops() && getStopCount() == 0) {
+    if (swatch && hasStops() && getStopCount() == 1) {
         return true;
     }
     return false;

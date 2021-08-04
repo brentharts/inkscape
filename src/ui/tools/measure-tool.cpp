@@ -170,8 +170,11 @@ Geom::Point calcAngleDisplayAnchor(SPDesktop *desktop, double angle, double base
     // We now have the ideal position, but need to see if it will fit/work.
 
     Geom::Rect screen_world = desktop->getCanvas()->get_area_world();
-    screen_world.expandBy(fontsize * -3, fontsize / -2);
-    where = desktop->w2d(screen_world.clamp(desktop->d2w(where)));
+    if (screen_world.interiorContains(desktop->d2w(startPoint)) ||
+        screen_world.interiorContains(desktop->d2w(endPoint))) {
+        screen_world.expandBy(fontsize * -3, fontsize / -2);
+        where = desktop->w2d(screen_world.clamp(desktop->d2w(where)));
+    } // else likely initialized the measurement tool, keep display near the measurement.
 
     return where;
 }
@@ -342,6 +345,8 @@ MeasureTool::MeasureTool()
     this->knot_start->setStroke(0x0000007f, 0x0000007f, 0x0000007f, 0x0000007f);
     this->knot_start->setShape(Inkscape::CANVAS_ITEM_CTRL_SHAPE_CIRCLE);
     this->knot_start->updateCtrl();
+    this->knot_start->moveto(start_p);
+    this->knot_start->show();
 
     this->knot_end = new SPKnot(desktop, _("Measure end, <b>Shift+Click</b> for position dialog"),
                                 Inkscape::CANVAS_ITEM_CTRL_TYPE_SHAPER, "CanvasItemCtrl:MeasureTool");
@@ -350,21 +355,10 @@ MeasureTool::MeasureTool()
     this->knot_end->setStroke(0x0000007f, 0x0000007f, 0x0000007f, 0x0000007f);
     this->knot_end->setShape(Inkscape::CANVAS_ITEM_CTRL_SHAPE_CIRCLE);
     this->knot_end->updateCtrl();
+    this->knot_end->moveto(end_p);
+    this->knot_end->show();
 
-    Geom::Rect screen_world = desktop->getCanvas()->get_area_world();
-    if (screen_world.interiorContains(desktop->d2w(start_p)) && //
-        screen_world.interiorContains(desktop->d2w(end_p)) && end_p != Geom::Point()) {
-        this->knot_start->moveto(start_p);
-        this->knot_start->show();
-        this->knot_end->moveto(end_p);
-        this->knot_end->show();
-        showCanvasItems();
-    } else {
-        start_p = Geom::Point(0,0);
-        end_p = Geom::Point(0,0);
-        writeMeasurePoint(start_p, true);
-        writeMeasurePoint(end_p, false);
-    }
+    showCanvasItems();
 
     this->_knot_start_moved_connection = this->knot_start->moved_signal.connect(sigc::mem_fun(*this, &MeasureTool::knotStartMovedHandler));
     this->_knot_start_click_connection = this->knot_start->click_signal.connect(sigc::mem_fun(*this, &MeasureTool::knotClickHandler));
@@ -533,6 +527,9 @@ bool MeasureTool::root_handler(GdkEvent* event)
 
     switch (event->type) {
     case GDK_BUTTON_PRESS: {
+        if (event->button.button != 1) {
+            break;
+        }
         this->knot_start->hide();
         this->knot_end->hide();
         Geom::Point const button_w(event->button.x, event->button.y);
@@ -540,13 +537,9 @@ bool MeasureTool::root_handler(GdkEvent* event)
         explicit_base_tmp = std::nullopt;
         last_end = std::nullopt;
 
-        if (event->button.button == 1) {
-            // save drag origin
-            start_p = desktop->w2d(Geom::Point(event->button.x, event->button.y));
-            within_tolerance = true;
-
-            ret = TRUE;
-        }
+        // save drag origin
+        start_p = desktop->w2d(Geom::Point(event->button.x, event->button.y));
+        within_tolerance = true;
 
         SnapManager &snap_manager = desktop->namedview->snap_manager;
         snap_manager.setup(desktop);
@@ -558,6 +551,7 @@ bool MeasureTool::root_handler(GdkEvent* event)
                          Gdk::BUTTON_PRESS_MASK   |
                          Gdk::BUTTON_RELEASE_MASK |
                          Gdk::POINTER_MOTION_MASK );
+        ret = TRUE;
         break;
     }
     case GDK_KEY_PRESS: {
@@ -639,6 +633,9 @@ bool MeasureTool::root_handler(GdkEvent* event)
         break;
     }
     case GDK_BUTTON_RELEASE: {
+        if (event->button.button != 1) {
+            break;
+        }
         this->knot_start->moveto(start_p);
         this->knot_start->show();
         if(last_end) {
@@ -1053,7 +1050,7 @@ void MeasureTool::setMeasureCanvasText(bool is_angle, double precision, double a
 {
     SPDesktop *desktop = SP_ACTIVE_DESKTOP;
 
-    Glib::ustring measure = Glib::ustring::format(std::setprecision(2), std::fixed, amount);
+    Glib::ustring measure = Glib::ustring::format(std::setprecision(precision), std::fixed, amount);
     measure += " ";
     measure += (is_angle ? "°" : unit_name);
     auto canvas_tooltip = new Inkscape::CanvasItemText(desktop->getCanvasTemp(), position, measure);

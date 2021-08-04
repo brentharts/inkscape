@@ -89,7 +89,7 @@ bool SPIBase::shall_write(guint const flags, SPStyleSrc const &style_src_req, SP
         return true;
     }
 
-    if (!set) {
+    if (!set && !(base && inherits)) {
         return false;
     }
 
@@ -1662,6 +1662,7 @@ SPIPaint::reset( bool init ) {
     colorSet = false;
     noneSet = false;
     value.color.set( false );
+    tag = nullptr;
     if (value.href){
         if (value.href->getObject()) {
             value.href->detach();

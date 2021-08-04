@@ -39,15 +39,15 @@ void
 ThemeContext::inkscape_fill_gtk(const gchar *path, gtkThemeList &themes)
 {
     const gchar *dir_entry;
-    GDir *dir = g_dir_open(path, 0, NULL);
+    GDir *dir = g_dir_open(path, 0, nullptr);
     if (!dir)
         return;
     while ((dir_entry = g_dir_read_name(dir))) {
-        gchar *filename = g_build_filename(path, dir_entry, "gtk-3.0", "gtk.css", NULL);
+        gchar *filename = g_build_filename(path, dir_entry, "gtk-3.0", "gtk.css", nullptr);
         bool has_prefer_dark = false;
   
         Glib::ustring theme = dir_entry;
-        gchar *filenamedark = g_build_filename(path, dir_entry, "gtk-3.0", "gtk-dark.css", NULL);
+        gchar *filenamedark = g_build_filename(path, dir_entry, "gtk-3.0", "gtk-dark.css", nullptr);
         if (g_file_test(filenamedark, G_FILE_TEST_IS_REGULAR))
             has_prefer_dark = true;
         if (themes.find(theme) != themes.end() && !has_prefer_dark) {
@@ -77,7 +77,7 @@ ThemeContext::get_available_themes()
     const gchar *const *dirs;
   
     /* Builtin themes */
-    builtin_themes = g_resources_enumerate_children("/org/gtk/libgtk/theme", G_RESOURCE_LOOKUP_FLAGS_NONE, NULL);
+    builtin_themes = g_resources_enumerate_children("/org/gtk/libgtk/theme", G_RESOURCE_LOOKUP_FLAGS_NONE, nullptr);
     for (i = 0; builtin_themes[i] != NULL; i++) {
         if (g_str_has_suffix(builtin_themes[i], "/")) {
             theme = builtin_themes[i];
@@ -85,7 +85,7 @@ ThemeContext::get_available_themes()
             Glib::ustring theme_path = "/org/gtk/libgtk/theme";
             theme_path += "/" + theme;
             gchar **builtin_themes_files =
-                g_resources_enumerate_children(theme_path.c_str(), G_RESOURCE_LOOKUP_FLAGS_NONE, NULL);
+                g_resources_enumerate_children(theme_path.c_str(), G_RESOURCE_LOOKUP_FLAGS_NONE, nullptr);
             bool has_prefer_dark = false;
             if (builtin_themes_files != NULL) {
                 for (j = 0; builtin_themes_files[j] != NULL; j++) {
@@ -102,17 +102,17 @@ ThemeContext::get_available_themes()
 
     g_strfreev(builtin_themes);
 
-    path = g_build_filename(g_get_user_data_dir(), "themes", NULL);
+    path = g_build_filename(g_get_user_data_dir(), "themes", nullptr);
     inkscape_fill_gtk(path, themes);
     g_free(path);
   
-    path = g_build_filename(g_get_home_dir(), ".themes", NULL);
+    path = g_build_filename(g_get_home_dir(), ".themes", nullptr);
     inkscape_fill_gtk(path, themes);
     g_free(path);
   
     dirs = g_get_system_data_dirs();
     for (i = 0; dirs[i]; i++) {
-        path = g_build_filename(dirs[i], "themes", NULL);
+        path = g_build_filename(dirs[i], "themes", nullptr);
         inkscape_fill_gtk(path, themes);
         g_free(path);
     }
@@ -217,6 +217,24 @@ show_parsing_error(const Glib::RefPtr<const Gtk::CssSection>& section, const Gli
 #endif
 }
 
+// callback for a "narrow spinbutton" preference change
+struct NarrowSpinbuttonObserver : Preferences::Observer {
+    NarrowSpinbuttonObserver(const char* path, Glib::RefPtr<Gtk::CssProvider> provider):
+        Preferences::Observer(path), _provider(std::move(provider)) {}
+
+    void notify(Preferences::Entry const& new_val) override {
+        auto screen = Gdk::Screen::get_default();
+        if (new_val.getBool()) {
+            Gtk::StyleContext::add_provider_for_screen(screen, _provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+        }
+        else {
+            Gtk::StyleContext::remove_provider_for_screen(screen, _provider);
+        }
+    }
+
+    Glib::RefPtr<Gtk::CssProvider> _provider;
+};
+
 /**
  * \brief Add our CSS style sheets
  * @param only_providers: Apply only the providers part, from inkscape preferences::theme change, no need to reaply
@@ -233,24 +251,24 @@ void ThemeContext::add_gtk_css(bool only_providers, bool cached)
     gboolean gtkApplicationPreferDarkTheme;
     GtkSettings *settings = gtk_settings_get_default();
     if (settings && !only_providers) {
-        g_object_get(settings, "gtk-icon-theme-name", &gtkIconThemeName, NULL);
-        g_object_get(settings, "gtk-theme-name", &gtkThemeName, NULL);
-        g_object_get(settings, "gtk-application-prefer-dark-theme", &gtkApplicationPreferDarkTheme, NULL);
+        g_object_get(settings, "gtk-icon-theme-name", &gtkIconThemeName, nullptr);
+        g_object_get(settings, "gtk-theme-name", &gtkThemeName, nullptr);
+        g_object_get(settings, "gtk-application-prefer-dark-theme", &gtkApplicationPreferDarkTheme, nullptr);
         prefs->setBool("/theme/defaultPreferDarkTheme", gtkApplicationPreferDarkTheme);
         prefs->setString("/theme/defaultGtkTheme", Glib::ustring(gtkThemeName));
         prefs->setString("/theme/defaultIconTheme", Glib::ustring(gtkIconThemeName));
         Glib::ustring gtkthemename = prefs->getString("/theme/gtkTheme");
         if (gtkthemename != "") {
-            g_object_set(settings, "gtk-theme-name", gtkthemename.c_str(), NULL);
+            g_object_set(settings, "gtk-theme-name", gtkthemename.c_str(), nullptr);
         }
         bool preferdarktheme = prefs->getBool("/theme/preferDarkTheme", false);
-        g_object_set(settings, "gtk-application-prefer-dark-theme", preferdarktheme, NULL);
+        g_object_set(settings, "gtk-application-prefer-dark-theme", preferdarktheme, nullptr);
         themeiconname = prefs->getString("/theme/iconTheme");
         // legacy cleanup
         if (themeiconname == prefs->getString("/theme/defaultIconTheme")) {
             prefs->setString("/theme/iconTheme", "");
         } else if (themeiconname != "") {
-            g_object_set(settings, "gtk-icon-theme-name", themeiconname.c_str(), NULL);
+            g_object_set(settings, "gtk-icon-theme-name", themeiconname.c_str(), nullptr);
         }
     }
 
@@ -260,11 +278,11 @@ void ThemeContext::add_gtk_css(bool only_providers, bool cached)
     int themecontrast = prefs->getInt("/theme/contrast", 10);
     if (!_contrastthemeprovider) {
         _contrastthemeprovider = Gtk::CssProvider::create();
-        // We can uncoment this line to remove warnings and errors on the theme
+        // We can uncomment this line to remove warnings and errors on the theme
         _contrastthemeprovider->signal_parsing_error().connect(sigc::ptr_fun(show_parsing_error));
     }
     static std::string cssstringcached = "";
-    // we use contast only if is setup (!= 10)
+    // we use contrast only if is setup (!= 10)
     if (themecontrast < 10) {
         Glib::ustring css_contrast = "";
         double contrast = (10 - themecontrast) / 30.0;
@@ -296,7 +314,7 @@ void ThemeContext::add_gtk_css(bool only_providers, bool cached)
             std::string line;    
             while (std::getline(f, line)) {
                 // here we ignore most of class to parse because is in additive mode
-                // so stiles not applyed are set on previous context style
+                // so stiles not applied are set on previous context style
                 if (line.find(";") != std::string::npos &&
                     line.find("background-image") == std::string::npos &&
                     line.find("background-color") == std::string::npos)
@@ -389,6 +407,27 @@ void ThemeContext::add_gtk_css(bool only_providers, bool cached)
         g_critical("CSSProviderError::load_from_data(): failed to load '%s'\n(%s)", css_str.c_str(), ex.what().c_str());
     }
     Gtk::StyleContext::add_provider_for_screen(screen, _colorizeprovider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+
+    // load small CSS snippet to style spinbuttons by removing excessive padding
+    if (!_spinbuttonprovider) {
+        _spinbuttonprovider = Gtk::CssProvider::create();
+        Glib::ustring style = get_filename(UIS, "spinbutton.css");
+        if (!style.empty()) {
+            try {
+                _spinbuttonprovider->load_from_path(style);
+            } catch (const Gtk::CssProviderError &ex) {
+                g_critical("CSSProviderError::load_from_path(): failed to load '%s'\n(%s)", style.c_str(), ex.what().c_str());
+            }
+        }
+    }
+    _spinbutton_observer = std::make_unique<NarrowSpinbuttonObserver>("/theme/narrowSpinButton", _spinbuttonprovider);
+    // note: ideally we should remove the callback during destruction, but ThemeContext is never deleted
+    prefs->addObserver(*_spinbutton_observer);
+    // establish default value, so both this setting here and checkbox in preferences are in sync
+    if (!prefs->getEntry(_spinbutton_observer->observed_path).isValid()) {
+        prefs->setBool(_spinbutton_observer->observed_path, true);
+    }
+    _spinbutton_observer->notify(prefs->getEntry(_spinbutton_observer->observed_path));
 }
 
 /**
@@ -410,7 +449,7 @@ bool ThemeContext::isCurrentThemeDark(Gtk::Container *window)
             settings->property_gtk_application_prefer_dark_theme() = prefs->getBool("/theme/preferDarkTheme", false);
         }
         dark = current_theme.find(":dark") != std::string::npos;
-        // if theme is dark or we use contast slider feature and have set prefearDarkTheme we force the theme dark
+        // if theme is dark or we use contrast slider feature and have set preferDarkTheme we force the theme dark
         // and avoid color check, this fix a issue with low contrast themes bad switch of dark theme toggle
         dark = dark || (prefs->getInt("/theme/contrast", 10) != 10 && prefs->getBool("/theme/preferDarkTheme", false));
         if (!dark) {

@@ -55,6 +55,8 @@
 #include "verbs.h"
 #include "gradient-chemistry.h"
 #include "helper/action.h"
+#include "ui/widget/color-palette.h"
+#include "widgets/ege-paint-def.h"
 
 namespace Inkscape {
 namespace UI {
@@ -722,37 +724,18 @@ SwatchesPanel::SwatchesPanel(gchar const *prefsPath)
     , _clear(nullptr)
     , _remove(nullptr)
     , _currentIndex(0)
-    , _currentDesktop(nullptr)
-    , _currentDocument(nullptr)
 {
-    _holder = new PreviewHolder();
-
-    _build_menu();
-
-    auto menu_button = Gtk::manage(new Gtk::MenuButton());
-    menu_button->set_halign(Gtk::ALIGN_END);
-    menu_button->set_relief(Gtk::RELIEF_NONE);
-    menu_button->set_image_from_icon_name("pan-start-symbolic", Gtk::ICON_SIZE_SMALL_TOOLBAR);
-    menu_button->set_popup(*_menu);
-
-    auto box = Gtk::manage(new Gtk::Box());
+    _palette = Gtk::manage(new Inkscape::UI::Widget::ColorPalette());
+    pack_start(*_palette);
 
     if (_prefs_path == "/dialogs/swatches") {
-        box->set_orientation(Gtk::ORIENTATION_VERTICAL);
-        box->pack_start(*menu_button, Gtk::PACK_SHRINK);
+        _palette->set_compact(false);
     } else {
-        box->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
-        box->pack_end(*menu_button, Gtk::PACK_SHRINK);
-        _updateSettings(SWATCHES_SETTINGS_MODE, 1);
-        _holder->setOrientation(SP_ANCHOR_SOUTH);
+        _palette->set_compact(true);
     }
-
-    box->pack_start(*_holder, Gtk::PACK_EXPAND_WIDGET);
-    pack_start(*box);
 
     load_palettes();
 
-    Gtk::RadioMenuItem* hotItem = nullptr;
     _clear = new ColorItem( ege::PaintDef::CLEAR );
     _remove = new ColorItem( ege::PaintDef::NONE );
 
@@ -793,42 +776,66 @@ SwatchesPanel::SwatchesPanel(gchar const *prefsPath)
             _currentIndex = index;
         }
 
+        std::vector<SwatchPage*> swatchSets = _getSwatchSets();
+        std::vector<Inkscape::UI::Widget::ColorPalette::palette_t> palettes;
+        palettes.reserve(swatchSets.size());
+        for (auto curr : swatchSets) {
+            Inkscape::UI::Widget::ColorPalette::palette_t palette;
+            palette.name = curr->_name;
+            for (const auto& color : curr->_colors) {
+                if (color.def.getType() == ege::PaintDef::RGB) {
+                    auto& c = color.def;
+                    palette.colors.push_back(
+                        Inkscape::UI::Widget::ColorPalette::rgb_t { c.getR() / 255.0, c.getG() / 255.0, c.getB() / 255.0 });
+                }
+            }
+            palettes.push_back(palette);
+        }
+
+        // pass list of available palettes
+        _palette->set_palettes(palettes);
         _rebuild();
 
-        Gtk::RadioMenuItem::Group groupOne;
+        // restore palette settings
+        Inkscape::Preferences* prefs = Inkscape::Preferences::get();
+        _palette->set_tile_size(prefs->getInt(_prefs_path + "/tile_size", 16));
+        _palette->set_aspect(prefs->getDoubleLimited(_prefs_path + "/tile_aspect", 0.0, -2, 2));
+        _palette->set_tile_border(prefs->getInt(_prefs_path + "/tile_border", 1));
+        _palette->set_rows(prefs->getInt(_prefs_path + "/rows", 1));
+        _palette->enable_stretch(prefs->getBool(_prefs_path + "/tile_stretch", false));
+        // save settings when they change
+        _palette->get_settings_changed_signal().connect([=](){
+            prefs->setInt(_prefs_path + "/tile_size", _palette->get_tile_size());
+            prefs->setDouble(_prefs_path + "/tile_aspect", _palette->get_aspect());
+            prefs->setInt(_prefs_path + "/tile_border", _palette->get_tile_border());
+            prefs->setInt(_prefs_path + "/rows", _palette->get_rows());
+            prefs->setBool(_prefs_path + "/tile_stretch", _palette->is_stretch_enabled());
+        });
 
-        int i = 0;
-        std::vector<SwatchPage*> swatchSets = _getSwatchSets();
-        for (auto curr : swatchSets) {
-            Gtk::RadioMenuItem* single = Gtk::manage(new Gtk::RadioMenuItem(groupOne, curr->_name));
-            if ( curr == first ) {
-                hotItem = single;
+        // switch swatch palettes
+        _palette->get_palette_selected_signal().connect([=](Glib::ustring name) {
+            std::vector<SwatchPage*> pages = _getSwatchSets();
+            auto it = std::find_if(pages.begin(), pages.end(), [&](auto el){ return el->_name == name; });
+            if (it != pages.end()) {
+                auto index = static_cast<int>(it - pages.begin());
+                if (_currentIndex != index) {
+                    _currentIndex = index;
+                    Inkscape::Preferences* prefs = Inkscape::Preferences::get();
+                    prefs->setString(_prefs_path + "/palette", pages[_currentIndex]->_name);
+                    _rebuild();
+                }
             }
-            _regItem(single, i);
-
-            i++;
-        }
+        });
     }
-
-    if ( hotItem ) {
-        hotItem->set_active();
-    }
-
-    show_all_children();
 }
 
 SwatchesPanel::~SwatchesPanel()
 {
-    for (auto &conn : _desktopConnections) {
-        conn.disconnect();
-    }
-
     _trackDocument( this, nullptr );
     for (auto & docTracking : docTrackings){
         delete docTracking;
     }
     docTrackings.clear();
-
 
     if ( _clear ) {
         delete _clear;
@@ -836,351 +843,17 @@ SwatchesPanel::~SwatchesPanel()
     if ( _remove ) {
         delete _remove;
     }
-    if ( _holder ) {
-        delete _holder;
-    }
-
-    delete _menu;
 }
-
-void SwatchesPanel::_build_menu()
-{
-    guint panel_size = 0, panel_mode = 0, panel_ratio = 100, panel_border = 0;
-    bool panel_wrap = false;
-    if (!_prefs_path.empty()) {
-        Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-        panel_wrap = prefs->getBool(_prefs_path + "/panel_wrap");
-        panel_size = prefs->getIntLimited(_prefs_path + "/panel_size", 1, 0, UI::Widget::PREVIEW_SIZE_HUGE);
-        panel_mode = prefs->getIntLimited(_prefs_path + "/panel_mode", 1, 0, 10);
-        panel_ratio = prefs->getIntLimited(_prefs_path + "/panel_ratio", 100, 0, 500 );
-        panel_border = prefs->getIntLimited(_prefs_path + "/panel_border", UI::Widget::BORDER_NONE, 0, 2 );
-    }
-
-    _menu = new Gtk::Menu();
-
-    if (_prefs_path == "/dialogs/swatches") {
-        Gtk::RadioMenuItem::Group group;
-        Glib::ustring list_label(_("List"));
-        Glib::ustring grid_label(_("Grid"));
-        Gtk::RadioMenuItem *list_item = Gtk::manage(new Gtk::RadioMenuItem(group, list_label));
-        Gtk::RadioMenuItem *grid_item = Gtk::manage(new Gtk::RadioMenuItem(group, grid_label));
-
-        if (panel_mode == 0) {
-            list_item->set_active(true);
-        } else if (panel_mode == 1) {
-            grid_item->set_active(true);
-        }
-
-        _menu->append(*list_item);
-        _menu->append(*grid_item);
-        _menu->append(*Gtk::manage(new Gtk::SeparatorMenuItem()));
-
-        list_item->signal_activate().connect(sigc::bind<int, int>(sigc::mem_fun(*this, &SwatchesPanel::_updateSettings), SWATCHES_SETTINGS_MODE, 0));
-        grid_item->signal_activate().connect(sigc::bind<int, int>(sigc::mem_fun(*this, &SwatchesPanel::_updateSettings), SWATCHES_SETTINGS_MODE, 1));
-    }
-
-    {
-        Glib::ustring heightItemLabel(C_("Swatches", "Size"));
-
-        //TRANSLATORS: Indicates size of colour swatches
-        const gchar *heightLabels[] = {
-            NC_("Swatches height", "Tiny"),
-            NC_("Swatches height", "Small"),
-            NC_("Swatches height", "Medium"),
-            NC_("Swatches height", "Large"),
-            NC_("Swatches height", "Huge")
-        };
-
-        Gtk::MenuItem *sizeItem = Gtk::manage(new Gtk::MenuItem(heightItemLabel));
-        Gtk::Menu *sizeMenu = Gtk::manage(new Gtk::Menu());
-        sizeItem->set_submenu(*sizeMenu);
-
-        Gtk::RadioMenuItem::Group heightGroup;
-        for (unsigned int i = 0; i < G_N_ELEMENTS(heightLabels); i++) {
-            Glib::ustring _label(g_dpgettext2(nullptr, "Swatches height", heightLabels[i]));
-            Gtk::RadioMenuItem* _item = Gtk::manage(new Gtk::RadioMenuItem(heightGroup, _label));
-            sizeMenu->append(*_item);
-            if (i == panel_size) {
-                _item->set_active(true);
-            }
-            _item->signal_activate().connect(sigc::bind<int, int>(sigc::mem_fun(*this, &SwatchesPanel::_updateSettings), SWATCHES_SETTINGS_SIZE, i));
-       }
-
-       _menu->append(*sizeItem);
-    }
-
-    {
-        Glib::ustring widthItemLabel(C_("Swatches", "Width"));
-
-        //TRANSLATORS: Indicates width of colour swatches
-        const gchar *widthLabels[] = {
-            NC_("Swatches width", "Narrower"),
-            NC_("Swatches width", "Narrow"),
-            NC_("Swatches width", "Medium"),
-            NC_("Swatches width", "Wide"),
-            NC_("Swatches width", "Wider")
-        };
-
-        Gtk::MenuItem *item = Gtk::manage( new Gtk::MenuItem(widthItemLabel));
-        Gtk::Menu *type_menu = Gtk::manage(new Gtk::Menu());
-        item->set_submenu(*type_menu);
-        _menu->append(*item);
-
-        Gtk::RadioMenuItem::Group widthGroup;
-
-        guint values[] = {0, 25, 50, 100, 200, 400};
-        guint hot_index = 3;
-        for ( guint i = 0; i < G_N_ELEMENTS(widthLabels); ++i ) {
-            // Assume all values are in increasing order
-            if ( values[i] <= panel_ratio ) {
-                hot_index = i;
-            }
-        }
-        for ( guint i = 0; i < G_N_ELEMENTS(widthLabels); ++i ) {
-            Glib::ustring _label(g_dpgettext2(nullptr, "Swatches width", widthLabels[i]));
-            Gtk::RadioMenuItem *_item = Gtk::manage(new Gtk::RadioMenuItem(widthGroup, _label));
-            type_menu->append(*_item);
-            if ( i <= hot_index ) {
-                _item->set_active(true);
-            }
-            _item->signal_activate().connect(sigc::bind<int, int>(sigc::mem_fun(*this, &SwatchesPanel::_updateSettings), SWATCHES_SETTINGS_SHAPE, values[i]));
-        }
-    }
-
-    {
-        Glib::ustring widthItemLabel(C_("Swatches", "Border"));
-
-        //TRANSLATORS: Indicates border of colour swatches
-        const gchar *widthLabels[] = {
-            NC_("Swatches border", "None"),
-            NC_("Swatches border", "Solid"),
-            NC_("Swatches border", "Wide"),
-        };
-
-        Gtk::MenuItem *item = Gtk::manage( new Gtk::MenuItem(widthItemLabel));
-        Gtk::Menu *type_menu = Gtk::manage(new Gtk::Menu());
-        item->set_submenu(*type_menu);
-        _menu->append(*item);
-
-        Gtk::RadioMenuItem::Group widthGroup;
-
-        guint values[] = {0, 1, 2};
-        guint hot_index = 0;
-        for ( guint i = 0; i < G_N_ELEMENTS(widthLabels); ++i ) {
-            // Assume all values are in increasing order
-            if ( values[i] <= panel_border ) {
-                hot_index = i;
-            }
-        }
-        for ( guint i = 0; i < G_N_ELEMENTS(widthLabels); ++i ) {
-            Glib::ustring _label(g_dpgettext2(nullptr, "Swatches border", widthLabels[i]));
-            Gtk::RadioMenuItem *_item = Gtk::manage(new Gtk::RadioMenuItem(widthGroup, _label));
-            type_menu->append(*_item);
-            if ( i <= hot_index ) {
-                _item->set_active(true);
-            }
-            _item->signal_activate().connect(sigc::bind<int, int>(sigc::mem_fun(*this, &SwatchesPanel::_updateSettings), SWATCHES_SETTINGS_BORDER, values[i]));
-        }
-    }
-
-    if (_prefs_path == "/embedded/swatches") {
-        //TRANSLATORS: "Wrap" indicates how colour swatches are displayed
-        Glib::ustring wrap_label(C_("Swatches","Wrap"));
-        Gtk::CheckMenuItem *check = Gtk::manage(new Gtk::CheckMenuItem(wrap_label));
-        check->set_active(panel_wrap);
-        _menu->append(*check);
-
-        check->signal_toggled().connect(sigc::bind<Gtk::CheckMenuItem*>(sigc::mem_fun(*this, &SwatchesPanel::_wrapToggled), check));
-    }
-
-    _menu->append(*Gtk::manage(new Gtk::SeparatorMenuItem()));
-
-    _menu->show_all();
-
-    _updateSettings(SWATCHES_SETTINGS_SIZE, panel_size);
-    _updateSettings(SWATCHES_SETTINGS_MODE, panel_mode);
-    _updateSettings(SWATCHES_SETTINGS_SHAPE, panel_ratio);
-    _updateSettings(SWATCHES_SETTINGS_WRAP, panel_wrap);
-    _updateSettings(SWATCHES_SETTINGS_BORDER, panel_border);
-}
-
-void SwatchesPanel::update()
-{
-    if (!_app) {
-        std::cerr << "SwatchesPanel::update(): _app is null" << std::endl;
-        return;
-    }
-
-    SPDesktop *desktop = getDesktop();
-
-    if ( desktop != _currentDesktop ) {
-        if ( _currentDesktop ) {
-            for (auto &conn : _desktopConnections) {
-                conn.disconnect();
-            }
-        }
-        _desktopConnections.clear();
-
-        _currentDesktop = desktop;
-
-        if ( desktop ) {
-            _desktopConnections.emplace_back(desktop->selection->connectChanged( //
-                [this](Inkscape::Selection *) { this->_updateFromSelection(); }));
-
-            _desktopConnections.emplace_back(desktop->selection->connectModified( //
-                [this](Inkscape::Selection *, unsigned) { this->_updateFromSelection(); }));
-
-            _desktopConnections.emplace_back(desktop->connectToolSubselectionChanged( //
-                [this](gpointer) { this->_updateFromSelection(); }));
-
-            _desktopConnections.emplace_back(desktop->connectDocumentReplaced( //
-                [this](SPDesktop *, SPDocument *doc) { this->_setDocument(doc); }));
-
-            _setDocument(desktop->doc());
-        } else {
-            _setDocument(nullptr);
-        }
-    }
-}
-
 
 void SwatchesPanel::_updateSettings(int settings, int value)
 {
-    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-
-    switch (settings) {
-    case SWATCHES_SETTINGS_SIZE: {
-        prefs->setInt(_prefs_path + "/panel_size", value);
-
-        auto curr_type = _holder->getPreviewType();
-        guint curr_ratio = _holder->getPreviewRatio();
-        auto curr_border = _holder->getPreviewBorder();
-
-        switch (value) {
-        case 0:
-            _holder->setStyle(UI::Widget::PREVIEW_SIZE_TINY, curr_type, curr_ratio, curr_border);
-            break;
-        case 1:
-            _holder->setStyle(UI::Widget::PREVIEW_SIZE_SMALL, curr_type, curr_ratio, curr_border);
-            break;
-        case 2:
-            _holder->setStyle(UI::Widget::PREVIEW_SIZE_MEDIUM, curr_type, curr_ratio, curr_border);
-            break;
-        case 3:
-            _holder->setStyle(UI::Widget::PREVIEW_SIZE_BIG, curr_type, curr_ratio, curr_border);
-            break;
-        case 4:
-            _holder->setStyle(UI::Widget::PREVIEW_SIZE_HUGE, curr_type, curr_ratio, curr_border);
-            break;
-        default:
-            break;
-        }
-
-        break;
-    }
-    case SWATCHES_SETTINGS_MODE: {
-        prefs->setInt(_prefs_path + "/panel_mode", value);
-
-        auto curr_size = _holder->getPreviewSize();
-        guint curr_ratio = _holder->getPreviewRatio();
-        auto curr_border = _holder->getPreviewBorder();
-        switch (value) {
-        case 0:
-            _holder->setStyle(curr_size, UI::Widget::VIEW_TYPE_LIST, curr_ratio, curr_border);
-            break;
-        case 1:
-            _holder->setStyle(curr_size, UI::Widget::VIEW_TYPE_GRID, curr_ratio, curr_border);
-            break;
-        default:
-            break;
-        }
-        break;
-    }
-    case SWATCHES_SETTINGS_SHAPE: {
-        prefs->setInt(_prefs_path + "/panel_ratio", value);
-
-        auto curr_type = _holder->getPreviewType();
-        auto curr_size = _holder->getPreviewSize();
-        auto curr_border = _holder->getPreviewBorder();
-
-        _holder->setStyle(curr_size, curr_type, value, curr_border);
-        break;
-    }
-    case SWATCHES_SETTINGS_BORDER: {
-        prefs->setInt(_prefs_path + "/panel_border", value);
-
-        auto curr_size = _holder->getPreviewSize();
-        auto curr_type = _holder->getPreviewType();
-        guint curr_ratio = _holder->getPreviewRatio();
-
-        switch (value) {
-        case 0:
-            _holder->setStyle(curr_size, curr_type, curr_ratio, UI::Widget::BORDER_NONE);
-            break;
-        case 1:
-            _holder->setStyle(curr_size, curr_type, curr_ratio, UI::Widget::BORDER_SOLID);
-            break;
-        case 2:
-            _holder->setStyle(curr_size, curr_type, curr_ratio, UI::Widget::BORDER_WIDE);
-            break;
-        default:
-            break;
-        }
-        break;
-    }
-    case SWATCHES_SETTINGS_WRAP: {
-        prefs->setBool(_prefs_path + "/panel_wrap", value);
-        _holder->setWrap(value);
-        break;
-    }
-    case SWATCHES_SETTINGS_PALETTE: {
-        std::vector<SwatchPage*> pages = _getSwatchSets();
-        if (value >= 0 && value < static_cast<int>(pages.size()) ) {
-            _currentIndex = value;
-
-            prefs->setString(_prefs_path + "/palette", pages[_currentIndex]->_name);
-
-            _rebuild();
-        }
-    }
-    default:
-        break;
-    }
 }
 
-void SwatchesPanel::_wrapToggled(Gtk::CheckMenuItem* toggler)
+void SwatchesPanel::documentReplaced()
 {
-    if (toggler) {
-        _updateSettings(SWATCHES_SETTINGS_WRAP, toggler->get_active() ? 1 : 0);
-    }
-}
-
-void SwatchesPanel::_regItem(Gtk::MenuItem* item, int id)
-{
-    _menu->append(*item);
-    item->signal_activate().connect(sigc::bind<int, int>(sigc::mem_fun(*this, &SwatchesPanel::_updateSettings), SWATCHES_SETTINGS_PALETTE, id));
-    item->show();
-}
-
-/**
- * Set the document if the swatches dialog is closed
- */
-void SwatchesPanel::setDocumentIfClosed( SPDocument *document )
-{
-    if (_desktopConnections.empty()) {
-        _setDocument(document);
-    }
-}
-
-void SwatchesPanel::_setDocument( SPDocument *document )
-{
-    if ( document != _currentDocument ) {
-        _trackDocument(this, document);
-        _currentDocument = document;
-
-        if (document) {
-            handleGradientsChange(document);
-        }
+    _trackDocument(this, getDocument());
+    if (auto document = getDocument()) {
+        handleGradientsChange(document);
     }
 }
 
@@ -1307,25 +980,37 @@ void SwatchesPanel::handleDefsModified(SPDocument *document)
 std::vector<SwatchPage*> SwatchesPanel::_getSwatchSets() const
 {
     std::vector<SwatchPage*> tmp;
-    if (docPalettes.find(_currentDocument) != docPalettes.end()) {
-        tmp.push_back(docPalettes[_currentDocument]);
+    if (auto document = getDocument()) {
+        if (docPalettes.find(document) != docPalettes.end()) {
+            tmp.push_back(docPalettes[document]);
+        }
     }
-
     tmp.insert(tmp.end(), userSwatchPages.begin(), userSwatchPages.end());
     tmp.insert(tmp.end(), systemSwatchPages.begin(), systemSwatchPages.end());
+    return tmp;
+}
 
+std::vector<SwatchPage*> SwatchesPanel::getSwatchSets() {
+    load_palettes();
+    std::vector<SwatchPage*> tmp;
+    tmp.insert(tmp.end(), userSwatchPages.begin(), userSwatchPages.end());
+    tmp.insert(tmp.end(), systemSwatchPages.begin(), systemSwatchPages.end());
     return tmp;
 }
 
 void SwatchesPanel::_updateFromSelection()
 {
-    SwatchPage *docPalette = (docPalettes.find(_currentDocument) != docPalettes.end()) ? docPalettes[_currentDocument] : nullptr;
+    auto document = getDocument();
+    if (!document)
+        return;
+
+    SwatchPage *docPalette = (docPalettes.find(document) != docPalettes.end()) ? docPalettes[document] : nullptr;
     if ( docPalette ) {
         std::string fillId;
         std::string strokeId;
 
-        SPStyle tmpStyle(_currentDesktop->getDocument());
-        int result = sp_desktop_query_style( _currentDesktop, &tmpStyle, QUERY_STYLE_PROPERTY_FILL );
+        SPStyle tmpStyle(document);
+        int result = sp_desktop_query_style(getDesktop(), &tmpStyle, QUERY_STYLE_PROPERTY_FILL );
         switch (result) {
             case QUERY_STYLE_SINGLE:
             case QUERY_STYLE_MULTIPLE_AVERAGED:
@@ -1358,7 +1043,7 @@ void SwatchesPanel::_updateFromSelection()
             }
         }
 
-        result = sp_desktop_query_style( _currentDesktop, &tmpStyle, QUERY_STYLE_PROPERTY_STROKE );
+        result = sp_desktop_query_style(getDesktop(), &tmpStyle, QUERY_STYLE_PROPERTY_STROKE);
         switch (result) {
             case QUERY_STYLE_SINGLE:
             case QUERY_STYLE_MULTIPLE_AVERAGED:
@@ -1403,18 +1088,15 @@ void SwatchesPanel::_rebuild()
 {
     std::vector<SwatchPage*> pages = _getSwatchSets();
     SwatchPage* curr = pages[_currentIndex];
-    _holder->clear();
 
-    if ( curr->_prefWidth > 0 ) {
-        _holder->setColumnPref( curr->_prefWidth );
-    }
-    _holder->freezeUpdates();
-    // TODO restore once 'clear' works _holder->addPreview(_clear);
-    _holder->addPreview(_remove);
+    std::vector<Widget*> palette;
+    palette.reserve(curr->_colors.size() + 1);
+    palette.push_back(_remove->createWidget());
     for (auto & _color : curr->_colors) {
-        _holder->addPreview(&_color);
+        palette.push_back(_color.createWidget());
     }
-    _holder->thawUpdates();
+    _palette->set_colors(palette);
+    _palette->set_selected(curr->_name);
 }
 
 } //namespace Dialog
