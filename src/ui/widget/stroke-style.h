@@ -100,6 +100,11 @@ private:
         STROKE_STYLE_BUTTON_CAP,  ///< A button to set the line-cap style
         STROKE_STYLE_BUTTON_ORDER ///< A button to set the paint-order style
     };
+    enum StrokeUpdateType {
+        STROKE_UPDATE_WIDTH,
+        STROKE_UPDATE_MITER,
+        STROKE_UPDATE_DASH,
+    };
     
     /**
      * A custom radio-button for setting the stroke style.  It can be configured
@@ -132,7 +137,7 @@ private:
     void setJoinButtons(Gtk::ToggleButton *active);
     void setCapButtons(Gtk::ToggleButton *active);
     void setPaintOrderButtons(Gtk::ToggleButton *active);
-    void scaleLine();
+    void scaleLine(StrokeUpdateType update_type);
     void setScaledDash(SPCSSAttr *css, int ndash, double *dash, double offset, double scale);
     bool isHairlineSelected() const;
 
