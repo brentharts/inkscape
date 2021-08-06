@@ -35,6 +35,7 @@ struct ShapeRecord :
 {
     SPObject *object; // SP node for the edited shape could be a lpeoject invisible so we use a spobject
     Geom::Affine edit_transform; // how to transform controls - used for clipping paths and masks
+    double edit_rotation; // how to transform controls - used for markers
     ShapeRole role;
     Glib::ustring lpe_key; // name of LPE shape param being edited
 

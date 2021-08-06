@@ -130,7 +130,7 @@ void MarkerTool::validateMarker(SPItem* i) {
 /* This function uses similar logic that exists in sp_shape_update_marker_view, to calculate exactly where
 the knotholders need to go and returns the edit_transform that is then loaded into the
 ShapeEditor/PathManipulator/MultipathManipulator  */
-Geom::Affine MarkerTool::get_marker_transform(SPShape* shape, SPItem *parent_item, SPItem *marker_item, SPMarkerLoc marker_type)
+ShapeRecord MarkerTool::get_marker_transform(SPShape* shape, SPItem *parent_item, SPItem *marker_item, SPMarkerLoc marker_type)
 {
     SPObject *marker_obj = shape->_marker[marker_type];
     SPMarker *sp_marker = dynamic_cast<SPMarker *>(marker_obj);
@@ -141,6 +141,7 @@ Geom::Affine MarkerTool::get_marker_transform(SPShape* shape, SPItem *parent_ite
 
     Geom::PathVector const &pathv = shape->curve()->get_pathvector();
     Geom::Affine ret = Geom::identity();
+    double angle = 0.0;
     
     if(marker_type == SP_MARKER_LOC_START) {
         /* start marker location */
@@ -150,7 +151,7 @@ Geom::Affine MarkerTool::get_marker_transform(SPShape* shape, SPItem *parent_ite
 
         if (!c.isDegenerate()) {
             Geom::Point tang = c.unitTangentAt(0);
-            double const angle = Geom::atan2(tang);
+            angle = Geom::atan2(tang);
             ret = Geom::Rotate(angle) * ret;
         }
 
@@ -169,7 +170,7 @@ Geom::Affine MarkerTool::get_marker_transform(SPShape* shape, SPItem *parent_ite
 
                 if (!c.isDegenerate()) {
                     Geom::Point tang = c.unitTangentAt(0);
-                    double const angle = Geom::atan2(tang);
+                    angle = Geom::atan2(tang);
                     ret = Geom::Rotate(angle) * ret;
                     break;
                 }
@@ -193,13 +194,13 @@ Geom::Affine MarkerTool::get_marker_transform(SPShape* shape, SPItem *parent_ite
                     double const angle1 = Geom::atan2(tang1);
                     double const angle2 = Geom::atan2(tang2);
 
-                    double ret_angle = .5 * (angle1 + angle2);
+                    angle = .5 * (angle1 + angle2);
 
                     if ( fabs( angle2 - angle1 ) > M_PI ) {
-                        ret_angle += M_PI;
+                        angle += M_PI;
                     }
 
-                    ret = Geom::Rotate(ret_angle) * Geom::Translate(p * parent_item->i2dt_affine());
+                    ret = Geom::Rotate(angle) * Geom::Translate(p * parent_item->i2dt_affine());
 
                     ++curve_it1;
                     ++curve_it2;
@@ -216,7 +217,7 @@ Geom::Affine MarkerTool::get_marker_transform(SPShape* shape, SPItem *parent_ite
                     Geom::Curve * c_reverse = c.reverse();
                     Geom::Point tang = - c_reverse->unitTangentAt(0);
                     delete c_reverse;
-                    double const angle = Geom::atan2(tang);
+                    angle = Geom::atan2(tang);
                     ret = Geom::Rotate(angle) * ret;
                     break;
                 } 
@@ -238,7 +239,7 @@ Geom::Affine MarkerTool::get_marker_transform(SPShape* shape, SPItem *parent_ite
             Geom::Curve * c_reverse = c.reverse();
             Geom::Point tang = - c_reverse->unitTangentAt(0);
             delete c_reverse;
-            double const angle = Geom::atan2(tang);
+            angle = Geom::atan2(tang);
             ret = Geom::Rotate(angle) * ret;
         } 
     }
@@ -247,7 +248,13 @@ Geom::Affine MarkerTool::get_marker_transform(SPShape* shape, SPItem *parent_ite
     ret = scale * ret;
     /* account for parent transform */
     ret = parent_item->transform * ret;
-    return ret;
+
+    ShapeRecord sr;
+    sr.object = marker_item;
+    sr.edit_transform = ret;
+    sr.edit_rotation = angle * 180.0/M_PI;
+    sr.role = SHAPE_ROLE_NORMAL;
+    return sr;
 }
 
 void MarkerTool::finish() {
@@ -286,25 +293,21 @@ void MarkerTool::selection_changed(Inkscape::Selection *sel) {
                         SPItem* marker_item = dynamic_cast<SPItem *>(this->desktop->getDocument()->getObjectByRepr(marker_repr));
                         validateMarker(marker_item);
 
-                        Geom::Affine marker_tr = Geom::identity();
+                        ShapeRecord sr;
                         switch(i) {
                             case SP_MARKER_LOC_START:
-                                marker_tr  = get_marker_transform(shape, item, marker_item, SP_MARKER_LOC_START);
+                                sr  = get_marker_transform(shape, item, marker_item, SP_MARKER_LOC_START);
                                 break;
                             case SP_MARKER_LOC_MID:
-                                marker_tr  = get_marker_transform(shape, item, marker_item, SP_MARKER_LOC_MID);
+                                sr  = get_marker_transform(shape, item, marker_item, SP_MARKER_LOC_MID);
                                 break;
                             case SP_MARKER_LOC_END:
-                                marker_tr  = get_marker_transform(shape, item, marker_item, SP_MARKER_LOC_END);
+                                sr  = get_marker_transform(shape, item, marker_item, SP_MARKER_LOC_END);
                                 break;
                             default:
                                 break;
                         }  
 
-                        ShapeRecord sr;
-                        sr.object = marker_item;
-                        sr.edit_transform = marker_tr;
-                        sr.role = SHAPE_ROLE_NORMAL;
                         shapes.insert(sr);
 
                     }
@@ -326,7 +329,7 @@ void MarkerTool::selection_changed(Inkscape::Selection *sel) {
 
     for (const auto & r : shapes) {
         if (this->_shape_editors.find(SP_ITEM(r.object)) == this->_shape_editors.end()) {
-            auto si = std::make_unique<ShapeEditor>(this->desktop, r.edit_transform);
+            auto si = std::make_unique<ShapeEditor>(this->desktop, r.edit_transform, r.edit_rotation);
             SPItem *item = SP_ITEM(r.object);
             si->set_item(item);
             this->_shape_editors.insert({item, std::move(si)});
