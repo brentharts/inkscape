@@ -961,48 +961,22 @@ MarkerKnotHolderEntityScale::set_internal(Geom::Point const &p, Geom::Point cons
     Geom::Point orig_ref = Geom::Point(-original_refX * original_scale, 
     -original_refY * original_scale) * getMarkerRotation(item, _edit_rotation);
 
-    gdouble orig_width = fabs(origin[Geom::X] - orig_ref[Geom::X]);
-    gdouble orig_height = fabs(origin[Geom::Y] - orig_ref[Geom::Y]);
+    gdouble orig_width = origin[Geom::X] - orig_ref[Geom::X];
+    gdouble orig_height = origin[Geom::Y] - orig_ref[Geom::Y];
 
     // x & y displacement made from mouse to origin
     gdouble dx = p[Geom::X] - origin[Geom::X];
     gdouble dy = p[Geom::Y] - origin[Geom::Y];
     gdouble adjusted_scale = 0.0;
 
-    // std::cout << "origin" << std::endl;
-    // std::cout << origin << std::endl;
-
-    // std::cout << "p" << std::endl;
-    // std::cout << p << std::endl;
-
-    // std::cout << "orig_ref" << std::endl;
-    // std::cout << orig_ref << std::endl;
-
-    // std::cout << "orig_width" << std::endl;
-    // std::cout << orig_width << std::endl;
-    // std::cout << orig_width << std::endl;
-
-    // std::cout << "orig_height" << std::endl;
-    // std::cout << orig_height << std::endl;
-    // std::cout << orig_height << std::endl;
-
-    // std::cout << "dx" << std::endl;
-    // std::cout << dx << std::endl;
-
-    // std::cout << "dy" << std::endl;
-    // std::cout << dy << std::endl;
-
-    // std::cout << "\n\n" << std::endl;
-
     //if x coord change is greater then use x coord for uniform scaling, else base it off the y coord
-    // if (fabs(dx) > fabs(dy)) {
-    //     adjusted_scale = (dx/orig_width) + 1;
-    //     adjusted_scale = adjusted_scale * original_scale;
-    // } else {
-        /* commented out the top part - so I could just focus on the Y coord for uniform scaling for now */
+    if (fabs(dx) > fabs(dy)) {
+        adjusted_scale = (dx/orig_width) + 1;
+        adjusted_scale = adjusted_scale * original_scale;
+    } else {
         adjusted_scale = (dy/orig_height) + 1;
         adjusted_scale = adjusted_scale * original_scale;
-    // }
+    }
 
     if(adjusted_scale > 0.0) {
         sp_marker->viewBox = Geom::Rect::from_xywh(0, 0, 
