@@ -154,8 +154,10 @@ private:
     bool _changed;
     bool _sorted = false;
 
-    std::vector<std::pair<double, int> > vp1;
-    std::vector<std::pair<double, int> > vp2;
+    std::vector <double> x_ratio_right;
+    std::vector <double> y_ratio_bottom;
+    std::vector <double> x_ratio_left;
+    std::vector <double> y_ratio_top;
 
     SPItem::BBoxType _snap_bbox_type;
 
