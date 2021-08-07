@@ -227,15 +227,10 @@ void SPMarker::update(SPCtx *ctx, guint flags) {
                 g->setChildTransform(this->c2p);
                 /* TODO next - update base/linewidth to get orient shape editor to work */
                 Geom::Affine m;
-                if (this->orient_mode == MARKER_ORIENT_AUTO) {
-                    //m = base;
-                } else if (this->orient_mode == MARKER_ORIENT_AUTO_START_REVERSE) {
-                    // m = Geom::Rotate::from_degrees( 180.0 ) * base;
-                    // Rotating is done at rendering time if necessary
-                    //m = base;
+                if (this->orient_mode == MARKER_ORIENT_AUTO_START_REVERSE) {
+                    m = Geom::Rotate::from_degrees( 180.0 );
                 } else {
                     m = Geom::Rotate::from_degrees(this->orient.computed);
-                    //m *= Geom::Translate(base.translation());
                 }
                 item->setTransform(m);
             }

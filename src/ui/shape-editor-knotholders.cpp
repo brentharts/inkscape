@@ -958,8 +958,8 @@ MarkerKnotHolderEntityScale::set_internal(Geom::Point const &p, Geom::Point cons
     g_assert(sp_marker != nullptr);
 
     // keep track of original values
-    Geom::Point orig_ref(-original_refX * original_scale, 
-    -original_refY * original_scale);
+    Geom::Point orig_ref = Geom::Point(-original_refX * original_scale, 
+    -original_refY * original_scale) * getMarkerRotation(item, _edit_rotation);
 
     gdouble orig_width = fabs(origin[Geom::X] - orig_ref[Geom::X]);
     gdouble orig_height = fabs(origin[Geom::Y] - orig_ref[Geom::Y]);
@@ -969,14 +969,40 @@ MarkerKnotHolderEntityScale::set_internal(Geom::Point const &p, Geom::Point cons
     gdouble dy = p[Geom::Y] - origin[Geom::Y];
     gdouble adjusted_scale = 0.0;
 
-    // if x coord change is greater then use x coord for uniform scaling, else base it off the y coord
-    if (fabs(dx) > fabs(dy)) {
-        adjusted_scale = (dx/orig_width) + 1;
-        adjusted_scale = adjusted_scale * original_scale;
-    } else {
+    // std::cout << "origin" << std::endl;
+    // std::cout << origin << std::endl;
+
+    // std::cout << "p" << std::endl;
+    // std::cout << p << std::endl;
+
+    // std::cout << "orig_ref" << std::endl;
+    // std::cout << orig_ref << std::endl;
+
+    // std::cout << "orig_width" << std::endl;
+    // std::cout << orig_width << std::endl;
+    // std::cout << orig_width << std::endl;
+
+    // std::cout << "orig_height" << std::endl;
+    // std::cout << orig_height << std::endl;
+    // std::cout << orig_height << std::endl;
+
+    // std::cout << "dx" << std::endl;
+    // std::cout << dx << std::endl;
+
+    // std::cout << "dy" << std::endl;
+    // std::cout << dy << std::endl;
+
+    // std::cout << "\n\n" << std::endl;
+
+    //if x coord change is greater then use x coord for uniform scaling, else base it off the y coord
+    // if (fabs(dx) > fabs(dy)) {
+    //     adjusted_scale = (dx/orig_width) + 1;
+    //     adjusted_scale = adjusted_scale * original_scale;
+    // } else {
+        /* commented out the top part - so I could just focus on the Y coord for uniform scaling for now */
         adjusted_scale = (dy/orig_height) + 1;
         adjusted_scale = adjusted_scale * original_scale;
-    }
+    // }
 
     if(adjusted_scale > 0.0) {
         sp_marker->viewBox = Geom::Rect::from_xywh(0, 0, 
@@ -1067,7 +1093,6 @@ MarkerKnotHolderEntityOrient::knot_set(Geom::Point const &p, Geom::Point const &
     update_knot();
 }
 
-/* this doesn't quite work when scale is greater than 1 - working on this fix now */
 void
 MarkerKnotHolderEntityOrient::set_internal(Geom::Point const &p, Geom::Point const &origin, unsigned int state)
 {
@@ -1084,8 +1109,8 @@ MarkerKnotHolderEntityOrient::set_internal(Geom::Point const &p, Geom::Point con
     sp_marker->orient_mode = MARKER_ORIENT_ANGLE;
     sp_marker->orient_set = true;
 
-    sp_marker->refX = -(original_radius * cos(-(axis_angle + sp_marker->orient.computed) * M_PI/180.0));
-    sp_marker->refY = -(original_radius * sin(-(axis_angle + sp_marker->orient.computed) * M_PI/180.0));
+    sp_marker->refX = -(original_radius * cos(-(axis_angle + sp_marker->orient.computed) * M_PI/180.0))/getMarkerScale(item);
+    sp_marker->refY = -(original_radius * sin(-(axis_angle + sp_marker->orient.computed) * M_PI/180.0))/getMarkerScale(item);
 
     sp_marker->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
 }
