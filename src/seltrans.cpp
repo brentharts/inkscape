@@ -1091,10 +1091,10 @@ gboolean Inkscape::SelTrans::scaleRequest(Geom::Point &pt, guint state)
     return TRUE;
 }
 
-gboolean Inkscape::SelTrans::distributeDragRequest(SPSelTransHandle const & handle, Geom::Point & pt, guint state)
+gboolean Inkscape::SelTrans::distributeDragRequest(SPSelTransHandle const &handle, Geom::Point &pt, guint state)
 {
 
-    Inkscape::Selection * selection = _desktop -> getSelection();
+    Inkscape::Selection *selection = _desktop -> getSelection();
     auto delta = pt - selection -> geometricBounds() -> min();
 
     if (_items.size() < 2)
