@@ -1091,145 +1091,129 @@ gboolean Inkscape::SelTrans::scaleRequest(Geom::Point &pt, guint state)
     return TRUE;
 }
 
-gboolean Inkscape::SelTrans::distributeDragRequest(SPSelTransHandle const &handle, Geom::Point &pt, guint state)
+gboolean Inkscape::SelTrans::distributeDragRequest(SPSelTransHandle const & handle, Geom::Point & pt, guint state)
 {
 
-    Inkscape::Selection *selection = _desktop->getSelection();
-    auto delta = pt - selection->geometricBounds()->min();
+    Inkscape::Selection * selection = _desktop -> getSelection();
+    auto delta = pt - selection -> geometricBounds() -> min();
 
-    if(_items.size()<2)
+    if (_items.size() < 2)
         return true;
 
     double xposition[_items.size()];
     double yposition[_items.size()];
 
     for (unsigned i = 0; i < _items.size(); i++) {
-        xposition[i]=_items[i]->geometricBounds()->min()[Geom::X];
-        yposition[i]=_items[i]->geometricBounds()->min()[Geom::Y];
+        xposition[i] = _items[i] -> geometricBounds() -> min()[Geom::X];
+        yposition[i] = _items[i] -> geometricBounds() -> min()[Geom::Y];
     }
 
+    if (_sorted == false) {
 
-    if(_sorted == false){
+        double smallest_x = _items[0] -> geometricBounds() -> min()[Geom::X];
+        double smallest_y = _items[0] -> geometricBounds() -> min()[Geom::Y];
+        double largest_x = _items[0] -> geometricBounds() -> min()[Geom::X] + _items[0] -> geometricBounds() -> dimensions()[Geom::X];
+        double largest_y = _items[0] -> geometricBounds() -> min()[Geom::Y] + _items[0] -> geometricBounds() -> dimensions()[Geom::Y];
 
-        double smallest_x = _items[0]->geometricBounds()->min()[Geom::X];
-        double smallest_y = _items[0]->geometricBounds()->min()[Geom::Y];
-        double largest_x = _items[0]->geometricBounds()->min()[Geom::X] + _items[0]->geometricBounds()->dimensions()[Geom::X];
-        double largest_y = _items[0]->geometricBounds()->min()[Geom::Y] + _items[0]->geometricBounds()->dimensions()[Geom::Y];
-
-        for (int i = 0; i < _items.size(); ++i)
-        {
-            if(_items[i]->geometricBounds()->min()[Geom::X] < smallest_x)
-                smallest_x = _items[i]->geometricBounds()->min()[Geom::X];
-            if(_items[i]->geometricBounds()->min()[Geom::Y] < smallest_y)
-                smallest_y = _items[i]->geometricBounds()->min()[Geom::Y];
-            if((_items[i]->geometricBounds()->min()[Geom::X] + _items[0]->geometricBounds()->dimensions()[Geom::X]) > largest_x)
-                largest_x = _items[i]->geometricBounds()->min()[Geom::X] + _items[0]->geometricBounds()->dimensions()[Geom::X];
-            if((_items[i]->geometricBounds()->min()[Geom::Y] + _items[0]->geometricBounds()->dimensions()[Geom::Y]) > largest_y)
-                largest_y = _items[i]->geometricBounds()->min()[Geom::Y] + _items[0]->geometricBounds()->dimensions()[Geom::Y];
+        for (int i = 0; i < _items.size(); ++i) {
+            if (_items[i] -> geometricBounds() -> min()[Geom::X] < smallest_x)
+                smallest_x = _items[i] -> geometricBounds() -> min()[Geom::X];
+            if (_items[i] -> geometricBounds() -> min()[Geom::Y] < smallest_y)
+                smallest_y = _items[i] -> geometricBounds() -> min()[Geom::Y];
+            if ((_items[i] -> geometricBounds() -> min()[Geom::X] + _items[0] -> geometricBounds() -> dimensions()[Geom::X]) > largest_x)
+                largest_x = _items[i] -> geometricBounds() -> min()[Geom::X] + _items[0] -> geometricBounds() -> dimensions()[Geom::X];
+            if ((_items[i] -> geometricBounds() -> min()[Geom::Y] + _items[0] -> geometricBounds() -> dimensions()[Geom::Y]) > largest_y)
+                largest_y = _items[i] -> geometricBounds() -> min()[Geom::Y] + _items[0] -> geometricBounds() -> dimensions()[Geom::Y];
         }
 
-
-        for (int i = 0; i < _items.size(); i++)
-        {
-            x_ratio_right.push_back((_items[i]->geometricBounds()->min()[Geom::X] - smallest_x) / selection->geometricBounds()->dimensions()[Geom::X]);
-            y_ratio_bottom.push_back((_items[i]->geometricBounds()->min()[Geom::Y] - smallest_y) / selection->geometricBounds()->dimensions()[Geom::Y]);
-            x_ratio_left.push_back((largest_x -_items[i]->geometricBounds()->min()[Geom::X] - _items[i]->geometricBounds()->dimensions()[Geom::X]) / selection->geometricBounds()->dimensions()[Geom::X]);
-            y_ratio_top.push_back((largest_y -_items[i]->geometricBounds()->min()[Geom::Y] - _items[i]->geometricBounds()->dimensions()[Geom::Y]) / selection->geometricBounds()->dimensions()[Geom::Y]);
+        for (int i = 0; i < _items.size(); i++) {
+            x_ratio_right.push_back((_items[i] -> geometricBounds() -> min()[Geom::X] - smallest_x) / selection -> geometricBounds() -> dimensions()[Geom::X]);
+            y_ratio_bottom.push_back((_items[i] -> geometricBounds() -> min()[Geom::Y] - smallest_y) / selection -> geometricBounds() -> dimensions()[Geom::Y]);
+            x_ratio_left.push_back((largest_x - _items[i] -> geometricBounds() -> min()[Geom::X] - _items[i] -> geometricBounds() -> dimensions()[Geom::X]) / selection -> geometricBounds() -> dimensions()[Geom::X]);
+            y_ratio_top.push_back((largest_y - _items[i] -> geometricBounds() -> min()[Geom::Y] - _items[i] -> geometricBounds() -> dimensions()[Geom::Y]) / selection -> geometricBounds() -> dimensions()[Geom::Y]);
 
         }
 
         _sorted = true;
     }
 
+    switch (handle.type) {
 
-    switch(handle.type){
+    case HANDLE_CORNER_DISTRIBUTE: {
+        switch (handle.cursor) {
 
-        case HANDLE_CORNER_DISTRIBUTE:
-        {
-            switch(handle.cursor)
-            {
-
-                case GDK_TOP_LEFT_CORNER:
-                {
-                    for (unsigned i = 0; i < _items.size(); i++) {
-                        _items[i]->move_rel(Geom::Translate(( x_ratio_left.at(i) * delta[Geom::X]), ( y_ratio_top.at(i) * delta[Geom::Y])));
-                    }
-                }
-                break;
-
-                case GDK_TOP_RIGHT_CORNER:
-                {
-                    delta[Geom::X] = delta[Geom::X] - selection->geometricBounds()->dimensions()[Geom::X];
-                    for (unsigned i = 0; i < _items.size(); i++) {
-                        _items[i]->move_rel(Geom::Translate(( x_ratio_right.at(i) * delta[Geom::X]), ( y_ratio_top.at(i) * delta[Geom::Y])));
-                    }
-                }
-                break;
-
-                case GDK_BOTTOM_RIGHT_CORNER:
-                {
-                    delta[Geom::X] = delta[Geom::X] - selection->geometricBounds()->dimensions()[Geom::X];
-                    delta[Geom::Y] = delta[Geom::Y] - selection->geometricBounds()->dimensions()[Geom::Y];
-                    for (unsigned i = 0; i < _items.size(); i++) {
-                        _items[i]->move_rel(Geom::Translate(( x_ratio_right.at(i) * delta[Geom::X]), ( y_ratio_bottom.at(i) * delta[Geom::Y])));
-                    }
-                }
-                break;
-
-                case GDK_BOTTOM_LEFT_CORNER:
-                {
-                    delta[Geom::Y] = delta[Geom::Y] - selection->geometricBounds()->dimensions()[Geom::Y];
-                    for (unsigned i = 0; i < _items.size(); i++) {
-                        _items[i]->move_rel(Geom::Translate(( x_ratio_left.at(i) * delta[Geom::X]), ( y_ratio_bottom.at(i) * delta[Geom::Y])));
-                    }
-                }
-                break;
-
+        case GDK_TOP_LEFT_CORNER: {
+            for (unsigned i = 0; i < _items.size(); i++) {
+                _items[i] -> move_rel(Geom::Translate((x_ratio_left.at(i) * delta[Geom::X]), (y_ratio_top.at(i) * delta[Geom::Y])));
             }
         }
         break;
 
-        case HANDLE_SIDE_DISTRIBUTE:
-        {
-            switch(handle.cursor){
-
-                case GDK_TOP_SIDE:
-                {
-                    for (unsigned i = 0; i < _items.size(); i++) {
-                         _items[i]->move_rel(Geom::Translate(0, ( y_ratio_top.at(i) * delta[Geom::Y])));
-                    }
-                }
-                break;
-
-                case GDK_RIGHT_SIDE:
-                {
-                    delta[Geom::X] = delta[Geom::X] - selection->geometricBounds()->dimensions()[Geom::X];
-                    for (unsigned i = 0; i < _items.size(); i++) {
-                        _items[i]->move_rel(Geom::Translate( ( x_ratio_right.at(i) * delta[Geom::X]), 0));
-                    }
-                }
-                break;
-
-                case GDK_BOTTOM_SIDE:
-                {
-                    delta[Geom::Y] = delta[Geom::Y] - selection->geometricBounds()->dimensions()[Geom::Y];
-                    for (unsigned i = 0; i < _items.size(); i++) {
-                        _items[i]->move_rel(Geom::Translate(0, ( y_ratio_bottom.at(i) * delta[Geom::Y])));
-                    }
-                }
-                break;
-
-                case GDK_LEFT_SIDE:
-                {
-                    for (unsigned i = 0; i < _items.size(); i++) {
-                        _items[i]->move_rel(Geom::Translate( ( x_ratio_left.at(i) * delta[Geom::X]), 0));
-                    }
-                }
-                break;
-
+        case GDK_TOP_RIGHT_CORNER: {
+            delta[Geom::X] = delta[Geom::X] - selection -> geometricBounds() -> dimensions()[Geom::X];
+            for (unsigned i = 0; i < _items.size(); i++) {
+                _items[i] -> move_rel(Geom::Translate((x_ratio_right.at(i) * delta[Geom::X]), (y_ratio_top.at(i) * delta[Geom::Y])));
             }
         }
         break;
+
+        case GDK_BOTTOM_RIGHT_CORNER: {
+            delta[Geom::X] = delta[Geom::X] - selection -> geometricBounds() -> dimensions()[Geom::X];
+            delta[Geom::Y] = delta[Geom::Y] - selection -> geometricBounds() -> dimensions()[Geom::Y];
+            for (unsigned i = 0; i < _items.size(); i++) {
+                _items[i] -> move_rel(Geom::Translate((x_ratio_right.at(i) * delta[Geom::X]), (y_ratio_bottom.at(i) * delta[Geom::Y])));
+            }
+        }
+        break;
+
+        case GDK_BOTTOM_LEFT_CORNER: {
+            delta[Geom::Y] = delta[Geom::Y] - selection -> geometricBounds() -> dimensions()[Geom::Y];
+            for (unsigned i = 0; i < _items.size(); i++) {
+                _items[i] -> move_rel(Geom::Translate((x_ratio_left.at(i) * delta[Geom::X]), (y_ratio_bottom.at(i) * delta[Geom::Y])));
+            }
+        }
+        break;
+
+        }
+    }
+    break;
+
+    case HANDLE_SIDE_DISTRIBUTE: {
+        switch (handle.cursor) {
+
+        case GDK_TOP_SIDE: {
+            for (unsigned i = 0; i < _items.size(); i++) {
+                _items[i] -> move_rel(Geom::Translate(0, (y_ratio_top.at(i) * delta[Geom::Y])));
+            }
+        }
+        break;
+
+        case GDK_RIGHT_SIDE: {
+            delta[Geom::X] = delta[Geom::X] - selection -> geometricBounds() -> dimensions()[Geom::X];
+            for (unsigned i = 0; i < _items.size(); i++) {
+                _items[i] -> move_rel(Geom::Translate((x_ratio_right.at(i) * delta[Geom::X]), 0));
+            }
+        }
+        break;
+
+        case GDK_BOTTOM_SIDE: {
+            delta[Geom::Y] = delta[Geom::Y] - selection -> geometricBounds() -> dimensions()[Geom::Y];
+            for (unsigned i = 0; i < _items.size(); i++) {
+                _items[i] -> move_rel(Geom::Translate(0, (y_ratio_bottom.at(i) * delta[Geom::Y])));
+            }
+        }
+        break;
+
+        case GDK_LEFT_SIDE: {
+            for (unsigned i = 0; i < _items.size(); i++) {
+                _items[i] -> move_rel(Geom::Translate((x_ratio_left.at(i) * delta[Geom::X]), 0));
+            }
+        }
+        break;
+
+        }
+    }
+    break;
 
     }
     return true;
