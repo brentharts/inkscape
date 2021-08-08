@@ -934,6 +934,9 @@ public:
     double original_refX = 0;
     double original_refY = 0;
 
+    double original_width = 0;
+    double original_height = 0;
+
     double _edit_rotation = 0.0;
 
     MarkerKnotHolderEntityScale(double edit_rotation) : _edit_rotation(edit_rotation) {}
@@ -973,8 +976,8 @@ MarkerKnotHolderEntityScale::set_internal(Geom::Point const &p, Geom::Point cons
     Geom::Point orig_ref = Geom::Point(-original_refX * original_scaleX, 
     -original_refY * original_scaleY) * getMarkerRotation(item, _edit_rotation);
 
-    gdouble orig_width = adjusted_origin[Geom::X] - orig_ref[Geom::X];
-    gdouble orig_height = adjusted_origin[Geom::Y] - orig_ref[Geom::Y];
+    gdouble orig_width = original_width * original_scaleX;
+    gdouble orig_height = original_height * original_scaleY;
 
     // x & y displacement made from mouse to origin
     gdouble dx = adjusted_p[Geom::X] - adjusted_origin[Geom::X];
@@ -1012,6 +1015,8 @@ void MarkerKnotHolderEntityScale::knot_set(Geom::Point const &p, Geom::Point con
         original_scaleY = getMarkerYScale(item);
         original_refX = sp_marker->refX.computed;
         original_refY = sp_marker->refY.computed;
+        original_width = sp_marker->markerWidth.computed;
+        original_height = sp_marker->markerHeight.computed;
 
         originals_set = true;
     }
