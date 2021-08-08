@@ -58,8 +58,6 @@ MarkerTool::MarkerTool()
 /* validates the marker item before passing it into the shape editor. 
 Sets/fixes any missing or weird properties */
 void MarkerTool::validateMarker(SPItem* i) {
-    gdouble original_scale = 1;
-
     SPMarker *sp_marker = dynamic_cast<SPMarker *>(i);
     g_assert(sp_marker != nullptr);
 
@@ -92,33 +90,29 @@ void MarkerTool::validateMarker(SPItem* i) {
     if(!sp_marker->markerWidth._set || !sp_marker->markerHeight._set) {
         sp_marker->markerWidth = bounds.dimensions()[Geom::X];
         sp_marker->markerHeight = bounds.dimensions()[Geom::Y];
-        sp_marker->viewBox = Geom::Rect::from_xywh(0, 0, sp_marker->markerWidth.computed / original_scale, sp_marker->markerHeight.computed / original_scale);
+        sp_marker->viewBox = Geom::Rect::from_xywh(0, 0, sp_marker->markerWidth.computed, sp_marker->markerHeight.computed);
         sp_marker->viewBox_set = true;
     } else {
         /* check if markerWidth/markerHeight was correctly calculated */
         if((sp_marker->markerWidth.computed != bounds.dimensions()[Geom::X]) || (sp_marker->markerHeight.computed != bounds.dimensions()[Geom::Y])) {
             /* xScale and yScale should be the same for now, check if some scaling exists already and save it */
+            double xScale = 1;
+            double yScale = 1;
+
             if(sp_marker->viewBox_set && sp_marker->viewBox.width() > 0 && sp_marker->viewBox.height() > 0) {
-                    double xScale = sp_marker->markerWidth.computed/sp_marker->viewBox.width();
-                    double yScale = sp_marker->markerHeight.computed/sp_marker->viewBox.height();
-                    if(xScale == yScale) {
-                        original_scale = xScale;
-                    } else if(xScale != 1) {
-                        original_scale = xScale;
-                    } else if(yScale != 1) {
-                        original_scale = yScale;
-                    }
+                    xScale = sp_marker->markerWidth.computed/sp_marker->viewBox.width();
+                    yScale = sp_marker->markerHeight.computed/sp_marker->viewBox.height();
             }
             
             sp_marker->markerWidth = bounds.dimensions()[Geom::X];
             sp_marker->markerHeight = bounds.dimensions()[Geom::Y];
-            sp_marker->viewBox = Geom::Rect::from_xywh(0, 0, sp_marker->markerWidth.computed / original_scale, 
-                                    sp_marker->markerHeight.computed / original_scale);
+            sp_marker->viewBox = Geom::Rect::from_xywh(0, 0, sp_marker->markerWidth.computed / xScale, 
+                                    sp_marker->markerHeight.computed / yScale);
             sp_marker->viewBox_set = true;
         } else { /* markerHeigh/markerWidth was set but viewBox was not */
             if(!sp_marker->viewBox_set) {
-                sp_marker->viewBox = Geom::Rect::from_xywh(0, 0, sp_marker->markerWidth.computed / original_scale, 
-                                        sp_marker->markerHeight.computed / original_scale);
+                sp_marker->viewBox = Geom::Rect::from_xywh(0, 0, sp_marker->markerWidth.computed, 
+                                        sp_marker->markerHeight.computed);
                 sp_marker->viewBox_set = true;
             }
         }
