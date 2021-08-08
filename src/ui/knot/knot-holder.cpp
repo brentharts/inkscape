@@ -35,12 +35,14 @@
 #include "object/sp-shape.h"
 #include "object/sp-spiral.h"
 #include "object/sp-star.h"
+#include "object/sp-marker.h"
 #include "style.h"
 
 #include "ui/shape-editor.h"
 #include "ui/tools/arc-tool.h"
 #include "ui/tools/node-tool.h"
 #include "ui/tools/rect-tool.h"
+#include "ui/tools/marker-tool.h"
 #include "ui/tools/spiral-tool.h"
 #include "ui/tools/tweak-tool.h"
 
@@ -82,6 +84,12 @@ void
 KnotHolder::setEditTransform(Geom::Affine edit_transform)
 {
     _edit_transform = edit_transform;
+}
+
+void
+KnotHolder::setEditMarkerMode(bool edit_marker_mode)
+{
+    _edit_marker_mode = edit_marker_mode;
 }
 
 void KnotHolder::update_knots()
@@ -276,6 +284,16 @@ KnotHolder::knot_ungrabbed_handler(SPKnot *knot, guint state)
         // (such as object).
         object->updateRepr();
 
+        /* During edit marker mode, the objects which reference the edited marker and its
+        child shapes needs to update its display after its repr is set */
+        if(_edit_marker_mode) {
+            SPObject *parent = SP_IS_MARKER(item)? item: item->parent;
+
+            for(auto i: parent->hrefList) {
+                i->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+            }
+        }
+
         /* do cleanup tasks (e.g., for LPE items write the parameter values
          * that were changed by dragging the handle to SVG)
          */
@@ -308,6 +326,8 @@ KnotHolder::knot_ungrabbed_handler(SPKnot *knot, guint state)
             object_verb = SP_VERB_CONTEXT_STAR;
         } else if (dynamic_cast<SPSpiral *>(object)) {
             object_verb = SP_VERB_CONTEXT_SPIRAL;
+        } else if (dynamic_cast<SPMarker *>(object)) {
+            object_verb = SP_VERB_CONTEXT_MARKER;
         } else {
             SPOffset *offset = dynamic_cast<SPOffset *>(object);
             if (offset) {

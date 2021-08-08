@@ -66,6 +66,7 @@ public:
     void add_filter_knotholder();
 
     void setEditTransform(Geom::Affine edit_transform);
+    void setEditMarkerMode(bool edit_marker_mode);
     Geom::Affine getEditTransform() const { return _edit_transform; }
 
     bool knot_mouseover() const;
@@ -92,6 +93,7 @@ protected:
     bool dragging;
 
     Geom::Affine _edit_transform;
+    bool _edit_marker_mode;
 };
 
 /**

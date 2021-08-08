@@ -567,6 +567,12 @@ bool NodeTool::root_handler(GdkEvent* event) {
             }
             break;
 
+        case GDK_KEY_z:
+        case GDK_KEY_Z:
+            if (MOD__SHIFT_ONLY(event)) { 
+                return root_handler_extended(event);
+                break;
+            }
         default:
             break;
         }

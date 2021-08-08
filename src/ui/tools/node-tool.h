@@ -64,7 +64,7 @@ public:
     const std::string& getPrefsPath() override;
     std::map<SPItem *, std::unique_ptr<ShapeEditor>> _shape_editors;
 
-private:
+protected:
     sigc::connection _selection_changed_connection;
     sigc::connection _mouseover_changed_connection;
 
@@ -88,7 +88,8 @@ private:
     std::vector<SPItem*> _current_selection;
     std::vector<SPItem*> _previous_selection;
 
-    void selection_changed(Inkscape::Selection *sel);
+    virtual void selection_changed(Inkscape::Selection *sel);
+    virtual bool root_handler_extended(GdkEvent* event) { return TRUE; };
 
     void select_area(Geom::Rect const &sel, GdkEventButton *event);
     void select_point(Geom::Point const &sel, GdkEventButton *event);

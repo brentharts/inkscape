@@ -23,6 +23,7 @@
 #include "live_effects/effect.h"
 
 #include "object/box3d.h"
+#include "object/sp-marker.h"
 #include "object/sp-ellipse.h"
 #include "object/sp-flowtext.h"
 #include "object/sp-item.h"
@@ -49,6 +50,12 @@ class Box3DKnotHolder : public KnotHolder {
 public:
     Box3DKnotHolder(SPDesktop *desktop, SPItem *item, SPKnotHolderReleasedFunc relhandler);
     ~Box3DKnotHolder() override = default;;
+};
+
+class MarkerKnotHolder : public KnotHolder {
+public:
+    MarkerKnotHolder(SPDesktop *desktop, SPItem *item, SPKnotHolderReleasedFunc relhandler);
+    ~MarkerKnotHolder() override = default;;
 };
 
 class ArcKnotHolder : public KnotHolder {
@@ -95,6 +102,8 @@ public:
 
 namespace {
 
+static bool _edit_marker_mode = false;
+
 static KnotHolder *sp_lpe_knot_holder(SPLPEItem *item, SPDesktop *desktop)
 {
     KnotHolder *knot_holder = new KnotHolder(desktop, item, nullptr);
@@ -105,19 +114,38 @@ static KnotHolder *sp_lpe_knot_holder(SPLPEItem *item, SPDesktop *desktop)
     return knot_holder;
 }
 
+/* wrapper around item->requestDisplayUpdate to handle items which are being edited in edit_marker_mode.
+All the objects that reference the marker also need to update their displays */
+static void requestDisplayUpdate(SPItem *item, unsigned int flags = SP_OBJECT_MODIFIED_FLAG) {
+    if(_edit_marker_mode) {
+        /* todo - handle logic when marker is not immediate parent, its under a group etc. */
+        SPObject *parent = SP_IS_MARKER(item)? item: item->parent;
+
+        for(auto i: parent->hrefList) {
+            item->requestDisplayUpdate(flags);
+            i->requestDisplayUpdate(flags);
+        }
+    } else {
+        item->requestDisplayUpdate(flags);
+    }
+}
+
 } // namespace
 
 namespace Inkscape {
 namespace UI {
 
-KnotHolder *createKnotHolder(SPItem *item, SPDesktop *desktop)
+KnotHolder *createKnotHolder(SPItem *item, SPDesktop *desktop, bool edit_marker_mode)
 {
     KnotHolder *knotholder = nullptr;
+    _edit_marker_mode = edit_marker_mode;
 
     if (dynamic_cast<SPRect *>(item)) {
         knotholder = new RectKnotHolder(desktop, item, nullptr);
     } else if (dynamic_cast<SPBox3D *>(item)) {
         knotholder = new Box3DKnotHolder(desktop, item, nullptr);
+    } else if (dynamic_cast<SPMarker *>(item)) {
+        knotholder = new MarkerKnotHolder(desktop, item, nullptr);
     } else if (dynamic_cast<SPGenericEllipse *>(item)) {
         knotholder = new ArcKnotHolder(desktop, item, nullptr);
     } else if (dynamic_cast<SPStar *>(item)) {
@@ -247,7 +275,7 @@ RectKnotHolderEntityRX::knot_set(Geom::Point const &p, Geom::Point const &/*orig
 
     update_knot();
 
-    rect->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+    requestDisplayUpdate(rect);
 }
 
 void
@@ -305,7 +333,7 @@ RectKnotHolderEntityRY::knot_set(Geom::Point const &p, Geom::Point const &/*orig
 
     update_knot();
 
-    rect->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+    requestDisplayUpdate(rect);
 }
 
 void
@@ -417,7 +445,7 @@ RectKnotHolderEntityWH::set_internal(Geom::Point const &p, Geom::Point const &or
 
     sp_rect_clamp_radii(rect);
 
-    rect->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+    requestDisplayUpdate(rect);
 }
 
 void
@@ -521,7 +549,7 @@ RectKnotHolderEntityXY::knot_set(Geom::Point const &p, Geom::Point const &origin
 
     update_knot();
 
-    rect->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+    requestDisplayUpdate(rect);
 }
 
 Geom::Point
@@ -547,7 +575,7 @@ RectKnotHolderEntityCenter::knot_set(Geom::Point const &p, Geom::Point const &/*
     // No need to call sp_rect_clamp_radii(): width and height haven't changed.
     // No need to call update_knot(): the knot is set directly by the user.
 
-    rect->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+    requestDisplayUpdate(rect);
 }
 
 RectKnotHolder::RectKnotHolder(SPDesktop *desktop, SPItem *item, SPKnotHolderReleasedFunc relhandler) :
@@ -880,6 +908,259 @@ Box3DKnotHolder::Box3DKnotHolder(SPDesktop *desktop, SPItem *item, SPKnotHolderR
     add_hatch_knotholder();
 }
 
+/* SPMarker Section */
+
+/* MarkerKnotHolderEntity helper functions */
+class MarkerKnotHolderWrapper {
+public:
+    static SPItem* item;
+    static double original_scale; //helps with set_internal for scaling, need to keep track of the original_scale there
+
+    static void validateMarker(SPItem* i);
+    static double getScale();
+};
+
+SPItem* MarkerKnotHolderWrapper::item = nullptr;
+double MarkerKnotHolderWrapper::original_scale = 1;
+
+/* gets calculated markerScale, xScale and yScale should be the same for now */
+double MarkerKnotHolderWrapper::getScale(){
+    SPMarker *sp_marker = dynamic_cast<SPMarker *>(item);
+    g_assert(sp_marker != nullptr);
+
+    return (sp_marker->markerWidth.computed/sp_marker->viewBox.width());
+}
+
+/* sets any missing properties */
+void MarkerKnotHolderWrapper::validateMarker(SPItem* i) {
+    item = i;
+    original_scale = 1;
+
+    SPMarker *sp_marker = dynamic_cast<SPMarker *>(item);
+    g_assert(sp_marker != nullptr);
+
+    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
+    SPDocument *doc = desktop->getDocument();
+    doc->ensureUpToDate();
+
+    /* calculate marker bounds */
+    std::vector<SPObject*> items = const_cast<SPMarker*>(sp_marker)->childList(false, SPObject::ActionBBox);
+
+    Geom::OptRect r;
+    for (auto *i : items) {
+        SPItem *item = dynamic_cast<SPItem*>(i);
+        r.unionWith(item->desktopVisualBounds());
+    }
+
+    Geom::Rect bounds(r->min() * doc->dt2doc(), r->max() * doc->dt2doc());
+    Geom::Point const center = bounds.dimensions() * 0.5;
+
+    /* check if refX/refY properties are set. If not, set them to default values. */
+    if(!sp_marker->refX._set) {
+        sp_marker->refX = center[Geom::X];
+    }
+
+    if(!sp_marker->refY._set) {
+        sp_marker->refY = center[Geom::Y];
+    }
+
+    /* if there is no markerWidth or markerHeight, calculate and set it */
+    if(!sp_marker->markerWidth._set || !sp_marker->markerHeight._set) {
+        sp_marker->markerWidth = bounds.dimensions()[Geom::X];
+        sp_marker->markerHeight = bounds.dimensions()[Geom::Y];
+        sp_marker->viewBox = Geom::Rect::from_xywh(0, 0, sp_marker->markerWidth.computed / original_scale, sp_marker->markerHeight.computed / original_scale);
+        sp_marker->viewBox_set = true;
+    } else {
+        /* check if markerWidth/markerHeight was correctly calculated */
+        if((sp_marker->markerWidth.computed != bounds.dimensions()[Geom::X]) || (sp_marker->markerHeight.computed != bounds.dimensions()[Geom::Y])) {
+            /* xScale and yScale should be the same for now, check if some scaling exists already and save it */
+            if(sp_marker->viewBox_set && sp_marker->viewBox.width() > 0 && sp_marker->viewBox.height() > 0) {
+                    double xScale = sp_marker->markerWidth.computed/sp_marker->viewBox.width();
+                    double yScale = sp_marker->markerHeight.computed/sp_marker->viewBox.height();
+                    if(xScale == yScale) {
+                        original_scale = xScale;
+                    } else if(xScale != 1) {
+                        original_scale = xScale;
+                    } else if(yScale != 1) {
+                        original_scale = yScale;
+                    }
+            }
+            
+            sp_marker->markerWidth = bounds.dimensions()[Geom::X];
+            sp_marker->markerHeight = bounds.dimensions()[Geom::Y];
+            sp_marker->viewBox = Geom::Rect::from_xywh(0, 0, sp_marker->markerWidth.computed / original_scale, 
+                                    sp_marker->markerHeight.computed / original_scale);
+            sp_marker->viewBox_set = true;
+        }
+    }
+}
+
+/* handles for marker scaling */
+class MarkerKnotHolderEntityScale : public KnotHolderEntity {
+public:
+    Geom::Point knot_get() const override;
+    void knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) override;
+    void knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state) override;
+protected:
+    void set_internal(Geom::Point const &p, Geom::Point const &origin, unsigned int state);
+};
+
+Geom::Point 
+MarkerKnotHolderEntityScale::knot_get() const
+{
+    SPMarker *sp_marker = dynamic_cast<SPMarker *>(item);
+    g_assert(sp_marker != nullptr);
+
+    return Geom::Point((-sp_marker->refX.computed + sp_marker->markerWidth.computed) * MarkerKnotHolderWrapper::getScale(), 
+        (-sp_marker->refY.computed + sp_marker->markerHeight.computed) * MarkerKnotHolderWrapper::getScale());
+}
+
+void 
+MarkerKnotHolderEntityScale::knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) {
+    SPMarker *sp_marker = dynamic_cast<SPMarker *>(item);
+    g_assert(sp_marker != nullptr);
+    
+    MarkerKnotHolderWrapper::original_scale = MarkerKnotHolderWrapper::getScale();
+}
+
+void
+MarkerKnotHolderEntityScale::set_internal(Geom::Point const &p, Geom::Point const &origin, unsigned int state)
+{
+    SPMarker *sp_marker = dynamic_cast<SPMarker *>(item);
+    g_assert(sp_marker != nullptr);
+    Geom::Point s = p;
+
+    // ratio for the uniform scaling
+    gdouble ratio = sp_marker->markerWidth.computed/sp_marker->markerHeight.computed;
+    
+    // mouse displacement since drag started
+    gdouble minx = p[Geom::X] - origin[Geom::X];
+    gdouble miny = p[Geom::Y] - origin[Geom::Y];
+    
+    Geom::Point p_handle((-sp_marker->refX.computed + sp_marker->markerWidth.computed) * MarkerKnotHolderWrapper::getScale(), 
+        (-sp_marker->refY.computed + sp_marker->markerHeight.computed) * MarkerKnotHolderWrapper::getScale());
+
+    // always snap to diagonal for now, to keep scaling uniform
+    if (fabs(minx) > fabs(miny)) {
+        s = snap_knot_position_constrained(p, Inkscape::Snapper::SnapConstraint(p_handle, Geom::Point(-ratio, -1)), state);
+        
+        double tmp_scale = MarkerKnotHolderWrapper::original_scale * (s[Geom::X]/sp_marker->markerWidth.computed);
+        sp_marker->viewBox = Geom::Rect::from_xywh(0, 0, sp_marker->markerWidth.computed / tmp_scale, 
+                        sp_marker->markerHeight.computed / tmp_scale);
+        sp_marker->viewBox_set = true;
+    } else {
+        s = snap_knot_position_constrained(p, Inkscape::Snapper::SnapConstraint(p_handle, Geom::Point(-ratio, -1)), state);
+
+        double tmp_scale = MarkerKnotHolderWrapper::original_scale * (s[Geom::Y]/sp_marker->markerHeight.computed);
+        sp_marker->viewBox = Geom::Rect::from_xywh(0, 0, sp_marker->markerWidth.computed / tmp_scale, 
+                        sp_marker->markerHeight.computed / tmp_scale);
+        sp_marker->viewBox_set = true;
+    }
+
+    requestDisplayUpdate(sp_marker, SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_VIEWPORT_MODIFIED_FLAG);
+}
+
+void MarkerKnotHolderEntityScale::knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state)
+{
+    set_internal(p, origin, state);
+    update_knot();
+}
+
+/* Handle for marker orientation - setting up here, come back to math l8r g8r */
+class MarkerKnotHolderEntityOrient : public KnotHolderEntity {
+public:
+    Geom::Point knot_get() const override;
+    void knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) override {};
+    void knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state) override;
+};
+
+Geom::Point
+MarkerKnotHolderEntityOrient::knot_get() const
+{
+    SPMarker *sp_marker = dynamic_cast<SPMarker *>(item);
+    g_assert(sp_marker != nullptr);
+
+    return Geom::Point((-sp_marker->refX.computed + sp_marker->markerWidth.computed) * MarkerKnotHolderWrapper::getScale(), 
+        -sp_marker->refY.computed * MarkerKnotHolderWrapper::getScale());
+}
+
+void
+MarkerKnotHolderEntityOrient::knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state)
+{
+    SPMarker *sp_marker = dynamic_cast<SPMarker *>(item);
+    g_assert(sp_marker != nullptr);
+
+    gdouble   dx = p[Geom::X] - sp_marker->refX.computed;
+    gdouble   dy = p[Geom::Y] - sp_marker->refY.computed;
+
+    gdouble   moved_y = p[Geom::Y] - origin[Geom::Y];
+
+    double exp_delta = moved_y;
+    sp_marker->orient = exp_delta;
+
+    sp_marker->orient_mode = MARKER_ORIENT_ANGLE;
+    sp_marker->orient_set = TRUE;
+    requestDisplayUpdate(sp_marker);
+}
+
+/* handles the marker refX/refY attributes */
+class MarkerKnotHolderEntityCenter : public KnotHolderEntity {
+public:
+    Geom::Point knot_get() const override;
+    void knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) override {};
+    void knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state) override;
+};
+
+Geom::Point
+MarkerKnotHolderEntityCenter::knot_get() const
+{
+    SPMarker *sp_marker = dynamic_cast<SPMarker *>(item);
+    g_assert(sp_marker != nullptr);
+
+    return Geom::Point(-sp_marker->refX.computed * MarkerKnotHolderWrapper::getScale(), -sp_marker->refY.computed * MarkerKnotHolderWrapper::getScale());
+}
+
+void
+MarkerKnotHolderEntityCenter::knot_set(Geom::Point const &p, Geom::Point const &/*origin*/, unsigned int state)
+{
+    SPMarker *sp_marker = dynamic_cast<SPMarker *>(item);
+    g_assert(sp_marker != nullptr);
+
+    Geom::Point const s = -snap_knot_position(p, state) / MarkerKnotHolderWrapper::getScale();
+    sp_marker->refX = s[Geom::X];
+    sp_marker->refY = s[Geom::Y];
+
+    requestDisplayUpdate(sp_marker);
+}
+
+
+MarkerKnotHolder::MarkerKnotHolder(SPDesktop *desktop, SPItem *item, SPKnotHolderReleasedFunc relhandler) :
+    KnotHolder(desktop, item, relhandler)
+{
+    /* This needs to be called before proceeding, to make sure all the marker attributes have been set correctly */
+    MarkerKnotHolderWrapper::validateMarker(item);
+
+    MarkerKnotHolderEntityCenter *entity_center = new MarkerKnotHolderEntityCenter();
+    MarkerKnotHolderEntityScale *entity_scale = new MarkerKnotHolderEntityScale();
+    MarkerKnotHolderEntityOrient *entity_orient = new MarkerKnotHolderEntityOrient();
+
+    entity_center->create(desktop, item, this, Inkscape::CANVAS_ITEM_CTRL_TYPE_POINT, "Marker:center",
+                          _("Drag to adjust the refX/refY position of the marker"));
+
+    entity_scale->create(desktop, item, this, Inkscape::CANVAS_ITEM_CTRL_TYPE_SIZER, "Marker:scale",
+                      _("Adjust the <b>size</b> of the marker"));
+
+    entity_orient->create(desktop, item, this, Inkscape::CANVAS_ITEM_CTRL_TYPE_SHAPER, "Marker:orient",
+                        _("Adjust marker orientation through rotation"));
+
+    entity.push_back(entity_center);
+    entity.push_back(entity_scale);
+    entity.push_back(entity_orient);
+
+    add_pattern_knotholder();
+    add_hatch_knotholder();
+}
+
 /* SPArc */
 
 class ArcKnotHolderEntityStart : public KnotHolderEntity {
@@ -970,7 +1251,7 @@ ArcKnotHolderEntityStart::knot_set(Geom::Point const &p, Geom::Point const &/*or
     }
 
     arc->normalize();
-    arc->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+    requestDisplayUpdate(arc);
 }
 
 Geom::Point
@@ -1022,7 +1303,7 @@ ArcKnotHolderEntityEnd::knot_set(Geom::Point const &p, Geom::Point const &/*orig
     }
 
     arc->normalize();
-    arc->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+    requestDisplayUpdate(arc);
 }
 
 Geom::Point
@@ -1062,7 +1343,7 @@ ArcKnotHolderEntityRX::knot_set(Geom::Point const &p, Geom::Point const &/*origi
         ge->ry = ge->rx.computed;
     }
 
-    item->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+    requestDisplayUpdate(item);
 }
 
 Geom::Point
@@ -1100,7 +1381,7 @@ ArcKnotHolderEntityRY::knot_set(Geom::Point const &p, Geom::Point const &/*origi
         ge->rx = ge->ry.computed;
     }
 
-    item->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+    requestDisplayUpdate(item);
 }
 
 Geom::Point
@@ -1135,7 +1416,7 @@ ArcKnotHolderEntityCenter::knot_set(Geom::Point const &p, Geom::Point const &/*o
     ge->cx = s[Geom::X];
     ge->cy = s[Geom::Y];
 
-    item->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+    requestDisplayUpdate(item);
 }
 
 Geom::Point
@@ -1235,7 +1516,7 @@ StarKnotHolderEntity1::knot_set(Geom::Point const &p, Geom::Point const &/*origi
         star->arg[0]  = arg1;
         star->arg[1] += darg1;
     }
-    star->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+    requestDisplayUpdate(star);
 }
 
 void
@@ -1264,7 +1545,7 @@ StarKnotHolderEntity2::knot_set(Geom::Point const &p, Geom::Point const &/*origi
             star->r[1]   = L2(d);
             star->arg[1] = atan2(d);
         }
-        star->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+        requestDisplayUpdate(star);
     }
 }
 
@@ -1276,7 +1557,7 @@ StarKnotHolderEntityCenter::knot_set(Geom::Point const &p, Geom::Point const &/*
 
     star->center = snap_knot_position(p, state);
 
-    item->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+    requestDisplayUpdate(item);
 }
 
 Geom::Point
@@ -1447,7 +1728,7 @@ SpiralKnotHolderEntityInner::knot_set(Geom::Point const &p, Geom::Point const &o
         spiral->t0 = CLAMP(spiral->t0, 0.0, 0.999);
     }
 
-    spiral->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+    requestDisplayUpdate(spiral);
 }
 
 /*
@@ -1529,7 +1810,7 @@ SpiralKnotHolderEntityOuter::knot_set(Geom::Point const &p, Geom::Point const &/
         spiral->t0 = CLAMP(spiral->t0, 0.0, 0.999);
     }
 
-    spiral->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+    requestDisplayUpdate(spiral);
 }
 
 void
@@ -1543,7 +1824,7 @@ SpiralKnotHolderEntityCenter::knot_set(Geom::Point const &p, Geom::Point const &
     spiral->cx = s[Geom::X];
     spiral->cy = s[Geom::Y];
 
-    spiral->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+    requestDisplayUpdate(spiral);
 }
 
 Geom::Point
@@ -1647,7 +1928,7 @@ OffsetKnotHolderEntity::knot_set(Geom::Point const &p, Geom::Point const &/*orig
     offset->knot = p_snapped;
     offset->knotSet = true;
 
-    offset->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+    requestDisplayUpdate(offset);
 }
 
 
@@ -1822,7 +2103,7 @@ TextKnotHolderEntityInlineSize::knot_set(Geom::Point const &p, Geom::Point const
     // Convert sodipodi:role="line" to '\n'.
     text->sodipodi_to_newline();
 
-    text->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+    requestDisplayUpdate(text);
     text->updateRepr();
 }
 
@@ -1839,7 +2120,7 @@ TextKnotHolderEntityInlineSize::knot_click(unsigned int state)
         text->remove_svg11_fallback();   // Else 'x' and 'y' will be interpreted as absolute positions.
         text->newline_to_sodipodi();     // Convert '\n' to tspans with sodipodi:role="line".
 
-        text->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+        requestDisplayUpdate(text);
         text->updateRepr();
     }
 }
@@ -1892,7 +2173,7 @@ TextKnotHolderEntityShapePadding::knot_set(Geom::Point const &p, Geom::Point con
             text->style->shape_padding.read(pad);
             g_free(pad);
 
-            text->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+            requestDisplayUpdate(text);
             text->updateRepr();
         }
     }
@@ -1943,7 +2224,7 @@ TextKnotHolderEntityShapeMargin::knot_set(Geom::Point const &p, Geom::Point cons
         linked_shape->style->shape_margin.read(pad);
         g_free(pad);
 
-        linked_shape->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+        requestDisplayUpdate(linked_shape);
         linked_shape->updateRepr();
     }
 }
@@ -1995,7 +2276,7 @@ TextKnotHolderEntityShapeInside::knot_set(Geom::Point const &p, Geom::Point cons
     double height = s[Geom::Y] - y;
     rectangle->setAttributeSvgDouble("width", width);
     rectangle->setAttributeSvgDouble("height", height);
-    text->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+    requestDisplayUpdate(text);
     text->updateRepr();
 }
 

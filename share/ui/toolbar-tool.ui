@@ -131,6 +131,16 @@
         <property name="group">ToolGroup</property>
       </object>
     </child>
+    <child>
+      <object class="GtkRadioToolButton">
+        <property name="visible">True</property>
+        <property name="action_name">win.tool-switch</property>
+        <property name="action_target">'Marker'</property>
+        <property name="icon_name">tool-pointer</property>
+        <property name="label" translatable="true">Marker</property>
+        <property name="group">ToolGroup</property>
+      </object>
+    </child>
 
     <child>
       <object class="GtkSeparatorToolItem">

@@ -30,6 +30,8 @@
 #include "sp-marker.h"
 #include "sp-defs.h"
 
+#include "svg/stringstream.h"
+
 class SPMarkerView {
 
 public:
@@ -195,7 +197,7 @@ void SPMarker::set(SPAttr key, const gchar* value) {
 void SPMarker::update(SPCtx *ctx, guint flags) {
 
     SPItemCtx ictx;
-
+    //std::cout << "sp marker update" << std::endl;
     // Copy parent context
     ictx.flags = ctx->flags;
 
@@ -223,6 +225,20 @@ void SPMarker::update(SPCtx *ctx, guint flags) {
             if (item) {
                 Inkscape::DrawingGroup *g = dynamic_cast<Inkscape::DrawingGroup *>(item);
                 g->setChildTransform(this->c2p);
+                /* TODO next - update base/linewidth to get orient shape editor to work */
+                Geom::Affine m;
+                if (this->orient_mode == MARKER_ORIENT_AUTO) {
+                    //m = base;
+                } else if (this->orient_mode == MARKER_ORIENT_AUTO_START_REVERSE) {
+                    // m = Geom::Rotate::from_degrees( 180.0 ) * base;
+                    // Rotating is done at rendering time if necessary
+                    //m = base;
+                } else {
+                    /* fixme: Orient units (Lauris) */
+                    m = Geom::Rotate::from_degrees(this->orient.computed);
+                    //m *= Geom::Translate(base.translation());
+                }
+                item->setTransform(m);
             }
         }
     }
@@ -278,10 +294,18 @@ Inkscape::XML::Node* SPMarker::write(Inkscape::XML::Document *xml_doc, Inkscape:
 	} else {
             repr->removeAttribute("orient");
 	}
-        
+    
+    if (this->viewBox_set) {
+        Inkscape::SVGOStringStream os;
+        os << this->viewBox.left() << " " << this->viewBox.top() << " "
+           << this->viewBox.width() << " " << this->viewBox.height();
+
+        repr->setAttribute("viewBox", os.str());
+    }
 	/* fixme: */
 	//XML Tree being used directly here while it shouldn't be....
-	repr->setAttribute("viewBox", this->getRepr()->attribute("viewBox"));
+	//repr->setAttribute("viewBox", this->getRepr()->attribute("viewBox"));
+
 	//XML Tree being used directly here while it shouldn't be....
 	repr->setAttribute("preserveAspectRatio", this->getRepr()->attribute("preserveAspectRatio"));
 
@@ -304,8 +328,19 @@ void SPMarker::hide(unsigned int key) {
 	SPGroup::hide(key);
 }
 
-Geom::OptRect SPMarker::bbox(Geom::Affine const &/*transform*/, SPItem::BBoxType /*type*/) const {
-	return Geom::OptRect();
+Geom::OptRect SPMarker::bbox(Geom::Affine const &transform, SPItem::BBoxType bboxtype) const {
+    Geom::OptRect bbox;
+
+    std::vector<SPObject*> l = const_cast<SPMarker*>(this)->childList(false, SPObject::ActionBBox);
+    for(auto o : l){
+        SPItem *item = dynamic_cast<SPItem *>(o);
+        if (item && !item->isHidden()) {
+            Geom::Affine const ct(item->transform * transform);
+            bbox |= item->bounds(bboxtype, ct);
+        }
+    }
+
+    return bbox;
 }
 
 void SPMarker::print(SPPrintContext* /*ctx*/) {
@@ -360,6 +395,7 @@ sp_marker_show_instance ( SPMarker *marker, Inkscape::DrawingItem *parent,
     // Do not show marker if linewidth == 0 and markerUnits == strokeWidth
     // otherwise Cairo will fail to render anything on the tile
     // that contains the "degenerate" marker.
+    //std::cout << "sp marker show instance" << std::endl;
     if (marker->markerUnits == SP_MARKER_UNITS_STROKEWIDTH && linewidth == 0) {
         return nullptr;
     }
