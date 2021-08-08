@@ -131,6 +131,7 @@ void SingleExport::selectionModified(Inkscape::Selection *selection, guint flags
             /* Do nothing for page or for custom */
             break;
     }
+    refreshPreview();
     refreshExportHints();
 }
 
@@ -185,6 +186,9 @@ void SingleExport::setup()
     // Refresh values to sync them with defaults.
     refreshArea();
     refreshExportHints();
+
+    // Add preview box here
+    refreshPreview();
 
     // Connect Signals Here
     for (auto [key, button] : selection_buttons) {
@@ -282,6 +286,7 @@ void SingleExport::refreshArea()
         if (current_key != SELECTION_CUSTOM && bbox) {
             setArea(bbox->min()[Geom::X], bbox->min()[Geom::Y], bbox->max()[Geom::X], bbox->max()[Geom::Y]);
         }
+        refreshPreview();
     }
 }
 
@@ -504,7 +509,7 @@ void SingleExport::onExport()
 
 void SingleExport::onBrowse(Gtk::EntryIconPosition pos, const GdkEventButton *ev)
 {
-    if(!_app){
+    if (!_app) {
         return;
     }
     Gtk::Window *window = _app->get_active_window();
@@ -842,6 +847,28 @@ unsigned int SingleExport::onProgressCallback(float value, void *dlg)
     Gtk::Main::iteration(false);
     return TRUE;
 } // end of sp_export_progress_callback()
+
+void SingleExport::refreshPreview()
+{
+    if (!_desktop) {
+        return;
+    }
+    if (!preview) {
+        preview = Gtk::manage(new ExportPreview());
+        si_preview_box->pack_start(*preview, true, true, 0);
+        si_preview_box->show_all_children();
+    }
+    preview->setDocument(_desktop->getDocument());
+
+    Unit const *unit = units->getUnit();
+    float x0 = getValuePx(spin_buttons[SPIN_X0]->get_value(), unit);
+    float x1 = getValuePx(spin_buttons[SPIN_X1]->get_value(), unit);
+    float y0 = getValuePx(spin_buttons[SPIN_Y0]->get_value(), unit);
+    float y1 = getValuePx(spin_buttons[SPIN_Y1]->get_value(), unit);
+    preview->setItem(nullptr);
+    preview->setDbox(x0,x1,y0,y1);
+    preview->queueRefresh();
+}
 
 } // namespace Dialog
 } // namespace UI

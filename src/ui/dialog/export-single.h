@@ -16,6 +16,7 @@
 #include <gtkmm.h>
 
 #include "export-helper.h"
+#include "export-preview.h"
 #include "extension/output.h"
 #include "ui/widget/scrollprotected.h"
 #include "ui/widget/unit-menu.h"
@@ -76,8 +77,10 @@ private:
     Inkscape::UI::Widget::UnitMenu *units = nullptr;
 
     Gtk::CheckButton *si_hide_all = nullptr;
+
     Gtk::Box *si_preview_box = nullptr;
     Gtk::CheckButton *si_show_preview = nullptr;
+    ExportPreview *preview = nullptr;
 
     ExtensionList *si_extension_cb = nullptr;
     Gtk::Entry *si_filename_entry = nullptr;
@@ -105,6 +108,9 @@ private:
     void setupUnits();
     void setupExtensionList();
     void setupSpinButtons();
+
+private:
+    void refreshPreview();
 
 private:
     // change range and callbacks to spinbuttons
@@ -135,6 +141,7 @@ public:
         refreshArea();
         refreshExportHints();
     };
+
 private:
     void refreshArea();
     void refreshExportHints();

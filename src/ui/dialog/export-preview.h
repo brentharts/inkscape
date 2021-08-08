@@ -31,16 +31,15 @@ namespace Dialog {
 class ExportPreview : public Gtk::Box
 {
 public:
-    ExportPreview(Glib::ustring id);
-    ExportPreview(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &refGlade)
-        : Gtk::Box(cobject){};
-    ~ExportPreview() override;
+    ExportPreview();
+    ~ExportPreview();
 
 private:
-    Glib::ustring targetId;
+    SPItem *_item = nullptr;
+
+    Geom::OptRect _dbox;
 
     SPDocument *_document = nullptr;
-    SPDesktop *_desktop = nullptr;
 
     Drawing *drawing;
     unsigned int visionkey;
@@ -56,12 +55,13 @@ private:
 
 public:
     void setDocument(SPDocument *document);
-    void setDesktop(SPDesktop *desktop);
-    void refreshPreview();
+    void setItem(SPItem *item);
+    void setDbox(double x0, double x1, double y0, double y1);
+    void queueRefresh();
 
 private:
-    void renderPreview(SPObject *obj);
-    void queueRefresh();
+    void refreshPreview();
+    void renderPreview();
     bool refreshCB();
 };
 } // namespace Dialog
