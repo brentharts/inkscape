@@ -32,6 +32,9 @@
 #include "ui/widget/dash-selector.h"
 #include "ui/widget/marker-combo-box.h"
 #include "ui/widget/unit-menu.h"
+#include "ui/tools/marker-tool.h"
+
+#include "actions/actions-tools.h"
 
 #include "widgets/style-utils.h"
 
@@ -140,6 +143,12 @@ StrokeStyle::StrokeStyle() :
     startMarkerConn(),
     midMarkerConn(),
     endMarkerConn(),
+    editStartMarkerButton(),
+    editMidMarkerButton(),
+    editEndMarkerButton(),
+    editStartMarkerConn(),
+    editMidMarkerConn(),
+    editEndMarkerConn(),
     _old_unit(nullptr)
 {
     table = new Gtk::Grid();
@@ -270,6 +279,34 @@ StrokeStyle::StrokeStyle() :
 
     i++;
 
+    /* marker edit mode buttons*/
+    spw_label(table, _("Edit:"), 0, i, nullptr);
+
+    hb = spw_hbox(table, 1, 1, i);
+    i++;
+
+    editStartMarkerButton = Gtk::manage(new Gtk::Button(_("start"), true));
+    editStartMarkerButton->set_tooltip_text(_("Edit the start marker of the selected object."));
+    editStartMarkerConn = editStartMarkerButton->signal_clicked().connect(
+        sigc::mem_fun(this, &StrokeStyle::enterEditMarkerMode));
+    editStartMarkerButton->show();
+    hb->pack_start(*editStartMarkerButton, true, true, 0);
+
+    editMidMarkerButton = Gtk::manage(new Gtk::Button(_("mid"), true));
+    editMidMarkerButton->set_tooltip_text(_("Edit the mid marker of the selected object."));
+    editMidMarkerConn = editMidMarkerButton->signal_clicked().connect(
+        sigc::mem_fun(this, &StrokeStyle::enterEditMarkerMode));
+    editMidMarkerButton->show();
+    hb->pack_start(*editMidMarkerButton, true, true, 0);
+
+    editEndMarkerButton = Gtk::manage(new Gtk::Button(_("end"), true));
+    editEndMarkerButton->set_tooltip_text(_("Edit the end marker of the selected object."));
+    editEndMarkerConn = editEndMarkerButton->signal_clicked().connect(
+        sigc::mem_fun(this, &StrokeStyle::enterEditMarkerMode));
+    editEndMarkerButton->show();
+    hb->pack_start(*editEndMarkerButton, true, true, 0);
+
+    i++;
     /* Join type */
     // TRANSLATORS: The line join style specifies the shape to be used at the
     //  corners of paths. It can be "miter", "round" or "bevel".
@@ -465,6 +502,15 @@ StrokeStyle::makeRadioButton(Gtk::RadioButtonGroup &grp,
                                      sigc::ptr_fun(&StrokeStyle::buttonToggledCB), tb, this));
 
     return tb;
+}
+
+void StrokeStyle::enterEditMarkerMode()
+{
+    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
+
+    if (desktop && !dynamic_cast<Inkscape::UI::Tools::MarkerTool *>(desktop->event_context)) {
+        set_active_tool(desktop, "Marker");
+    }
 }
 
 bool StrokeStyle::shouldMarkersBeUpdated()
