@@ -531,8 +531,26 @@ add_cli_test(verb-list     PARAMETERS --verb-list   PASS_FOR_OUTPUT "FileNew:")
 ### actions and verbs ###
 #########################
 
-# (TODO)
-
+# transform-remove
+add_cli_test(actions-transform-remove    INPUT_FILENAME pyramids.svg
+                                         PARAMETERS --actions=select-by-id:quad_snapped_4$<SEMICOLON>transform-rotate:2$<SEMICOLON>transform-remove
+                                         OUTPUT_FILENAME actions-transform-remove.png
+                                         REFERENCE_FILENAME actions-transform-remove_expected.png)
+# transform-rotate
+add_cli_test(actions-transform-rotate    INPUT_FILENAME pyramids.svg
+                                         PARAMETERS --actions=select-by-id:rect_snapped_4$<SEMICOLON>transform-rotate:45
+                                         OUTPUT_FILENAME actions-transform-rotate.png
+                                         REFERENCE_FILENAME actions-transform-rotate_expected.png)
+# transform-scale
+add_cli_test(actions-transform-scale     INPUT_FILENAME pyramids.svg
+                                         PARAMETERS --actions=select-by-id:quad_snapped_1$<SEMICOLON>transform-scale:10
+                                         OUTPUT_FILENAME actions-transform-scale.png
+                                         REFERENCE_FILENAME actions-transform-scale_expected.png)
+# transform-translate
+add_cli_test(actions-transform-translate INPUT_FILENAME pyramids.svg
+                                         PARAMETERS --actions=select-by-id:quad_snapped_1$<SEMICOLON>transform-translate:-5,-5
+                                         OUTPUT_FILENAME actions-transform-translate.png
+                                         REFERENCE_FILENAME actions-transform-translate_expected.png)
 
 
 ###########################
