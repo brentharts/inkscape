@@ -43,10 +43,8 @@ public:
 
 private:
     Glib::RefPtr<Gtk::Builder> builder;
-    // Main Container
-    Gtk::Box *container = nullptr;
-    // Notebook containing pages for diiferent export types
-    Gtk::Notebook *export_notebook = nullptr;
+    Gtk::Box *container = nullptr;            // Main Container
+    Gtk::Notebook *export_notebook = nullptr; // Notebook Container for single and batch export
 
 private:
     SingleExport *single_image = nullptr;
@@ -57,12 +55,14 @@ private:
 
     // setup default values of widgets
     void setDefaultNotebookPage();
+    std::map<notebook_page,int> pages;
 
 private:
     // signals callback
     void onRealize();
-    void onBatchExport();
+    void onPageSwitch(Widget* page, guint page_number);
 
+private:
     void desktopReplaced() override;
     void selectionChanged(Inkscape::Selection *selection) override;
     void selectionModified(Inkscape::Selection *selection, guint flags) override;

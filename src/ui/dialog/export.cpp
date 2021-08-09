@@ -75,22 +75,26 @@ Export::Export()
 
     builder->get_widget("Export Notebook", export_notebook);
 
-    // Initialise Single Export Here. We will setup Single Export in onRealize callback.
+    // Initialise Single Export and its objects
     builder->get_widget_derived("Single Image", single_image);
     single_image->initialise(builder);
 
+    // Initialise Batch Export and its objects
     builder->get_widget_derived("Batch Export", batch_export);
     batch_export->initialise(builder);
 
     if (single_image) {
         single_image->setDesktop(getDesktop());
+        single_image->setApp(getApp());
     }
     if (batch_export) {
         batch_export->setDesktop(getDesktop());
+        batch_export->setApp(getApp());
     }
 
     // Callback when container is finally mapped on window. All intialisation like set active is done inside it.
     container->signal_realize().connect(sigc::mem_fun(*this, &Export::onRealize));
+    export_notebook->signal_switch_page().connect(sigc::mem_fun(*this, &Export::onPageSwitch));
 }
 
 Export::~Export() {}
@@ -101,19 +105,15 @@ void Export::onRealize()
 {
     single_image->setup();
     batch_export->setup();
-
-    single_image->setApp(getApp());
-    batch_export->setApp(getApp());
     // setDefaultNotebookPage();
 }
 
 // Set current page based on preference/last visited page
 void Export::setDefaultNotebookPage()
 {
-    // if (export_notebook && batch_export) {
-    //     auto page_num = export_notebook->page_num(*batch_export);
-    // export_notebook->set_current_page(page_num);
-    // }
+    pages[BATCH_EXPORT] = export_notebook->page_num(*batch_export);
+    pages[SINGLE_IMAGE] = export_notebook->page_num(*single_image);
+    export_notebook->set_current_page(pages[SINGLE_IMAGE]);
 }
 
 void Export::desktopReplaced()
@@ -128,15 +128,38 @@ void Export::desktopReplaced()
 
 void Export::selectionChanged(Inkscape::Selection *selection)
 {
-    // TODO: refresh only active page
-    single_image->selectionChanged(selection);
-    batch_export->selectionChanged(selection);
+    auto current_page = export_notebook->get_current_page();
+    if (current_page == pages[SINGLE_IMAGE]) {
+        single_image->selectionChanged(selection);
+    }
+    if (current_page == pages[BATCH_EXPORT]) {
+        batch_export->selectionChanged(selection);
+    }
 }
 void Export::selectionModified(Inkscape::Selection *selection, guint flags)
 {
-    // TODO: refresh only active page
-    single_image->selectionModified(selection, flags);
-    batch_export->selectionModified(selection, flags);
+    auto current_page = export_notebook->get_current_page();
+    if (current_page == pages[SINGLE_IMAGE]) {
+        single_image->selectionModified(selection, flags);
+    }
+    if (current_page == pages[BATCH_EXPORT]) {
+        batch_export->selectionModified(selection, flags);
+    }
+}
+
+void Export::onPageSwitch(Widget *page, guint page_number)
+{
+    auto desktop = getDesktop();
+    if (desktop) {
+        auto selection = desktop->getSelection();
+
+        if (page_number == pages[SINGLE_IMAGE]) {
+            single_image->selectionChanged(selection);
+        }
+        if (page_number == pages[BATCH_EXPORT]) {
+            batch_export->selectionChanged(selection);
+        }
+    }
 }
 
 } // namespace Dialog

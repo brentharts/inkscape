@@ -18,6 +18,8 @@
 #include <gtkmm.h>
 
 #include "display/cairo-utils.h"
+#include "object/sp-defs.h"
+#include "object/sp-item.h"
 #include "object/sp-namedview.h"
 #include "object/sp-root.h"
 #include "preview-util.h"
@@ -46,8 +48,15 @@ ExportPreview::ExportPreview()
     image->show();
     // add this image to box here
     this->pack_start(*image, true, true, 0);
-    show();
     show_all_children();
+}
+
+void ExportPreview::resetPixels()
+{
+    int stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, size);
+    memset(pixMem, 0x00, size * stride);
+    image->set(image->get_pixbuf());
+    image->show();
 }
 
 ExportPreview::~ExportPreview()
@@ -80,27 +89,72 @@ void ExportPreview::setDbox(double x0, double x1, double y0, double y1)
     if (!_document) {
         return;
     }
+    if ((x1 - x0 == 0) || (y1 - y0) == 0) {
+        return;
+    }
     _dbox = Geom::Rect(Geom::Point(x0, y0), Geom::Point(x1, y1)) * _document->dt2doc();
 }
 
 void ExportPreview::setDocument(SPDocument *document)
 {
-    if (_document == document) {
-        return;
-    }
-    _document = document;
-    if (drawing) {
-        if (_document) {
-            _document->getRoot()->invoke_hide(visionkey);
+    if (_document != document) {
+        _document = document;
+        if (drawing) {
+            if (_document) {
+                _document->getRoot()->invoke_hide(visionkey);
+            }
+            delete drawing;
+            drawing = nullptr;
         }
-        delete drawing;
-        drawing = nullptr;
+        if (_document) {
+            drawing = new Inkscape::Drawing();
+            visionkey = SPItem::display_key_new(1);
+            DrawingItem *ai = _document->getRoot()->invoke_show(*drawing, visionkey, SP_ITEM_SHOW_DISPLAY);
+            if (ai) {
+                drawing->setRoot(ai);
+            }
+        }
     }
+}
+
+void ExportPreview::refreshHide(const std::vector<SPItem *> *list)
+{
     if (_document) {
-        drawing = new Inkscape::Drawing();
-        visionkey = SPItem::display_key_new(1);
-        drawing->setRoot(_document->getRoot()->invoke_show(*drawing, visionkey, SP_ITEM_SHOW_DISPLAY));
-        queueRefresh();
+        if (isLastHide) {
+            if (drawing) {
+                if (_document) {
+                    _document->getRoot()->invoke_hide(visionkey);
+                }
+                delete drawing;
+                drawing = nullptr;
+            }
+            drawing = new Inkscape::Drawing();
+            visionkey = SPItem::display_key_new(1);
+            DrawingItem *ai = _document->getRoot()->invoke_show(*drawing, visionkey, SP_ITEM_SHOW_DISPLAY);
+            if (ai) {
+                drawing->setRoot(ai);
+            }
+            isLastHide = false;
+        }
+        if (list && !list->empty()) {
+            hide_other_items_recursively(_document->getRoot(), *list);
+            isLastHide = true;
+        }
+    }
+}
+
+void ExportPreview::hide_other_items_recursively(SPObject *o, const std::vector<SPItem *> &list)
+{
+    if (SP_IS_ITEM(o) && !SP_IS_DEFS(o) && !SP_IS_ROOT(o) && !SP_IS_GROUP(o) &&
+        list.end() == find(list.begin(), list.end(), o)) {
+        SP_ITEM(o)->invoke_hide(visionkey);
+    }
+
+    // recurse
+    if (list.end() == find(list.begin(), list.end(), o)) {
+        for (auto &child : o->children) {
+            hide_other_items_recursively(&child, list);
+        }
     }
 }
 
@@ -167,17 +221,13 @@ void ExportPreview::renderPreview()
         } else if (_item) {
             gchar const *id = _item->getId();
             px = Inkscape::UI::PREVIEW::sp_icon_doc_icon(_document, *drawing, id, size, unused);
-        } else {
-            std::cout << "Not me" << std::endl;
         }
 
         if (px) {
             memcpy(pixMem, px, size * stride);
             g_free(px);
-            std::cout << "Image Rendered" << std::endl;
             px = nullptr;
         } else {
-            std::cout << "Image Rendered NOT" << std::endl;
             memset(pixMem, 0, size * stride);
         }
         image->set(image->get_pixbuf());

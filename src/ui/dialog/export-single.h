@@ -34,7 +34,7 @@ public:
     ~SingleExport() override;
 
 private:
-    InkscapeApplication *_app;
+    InkscapeApplication *_app = nullptr;
     SPDesktop *_desktop = nullptr;
 
 private:
@@ -72,7 +72,10 @@ private:
     typedef Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> SpinButton;
 
     std::map<sb_type, SpinButton *> spin_buttons;
+    std::map<sb_type, Gtk::Label *> spin_labels;
     std::map<selection_mode, Gtk::RadioButton *> selection_buttons;
+
+    Gtk::Box *si_units_row = nullptr;
     Gtk::CheckButton *show_export_area = nullptr;
     Inkscape::UI::Widget::UnitMenu *units = nullptr;
 
@@ -97,7 +100,7 @@ private:
 
     Inkscape::Preferences *prefs = nullptr;
     std::map<selection_mode, Glib::ustring> selection_names;
-    selection_mode current_key;
+    selection_mode current_key = (selection_mode)0;
 
 public:
     // initialise variables from builder
@@ -108,6 +111,7 @@ private:
     void setupUnits();
     void setupExtensionList();
     void setupSpinButtons();
+    void toggleSpinButtonVisibility();
 
 private:
     void refreshPreview();

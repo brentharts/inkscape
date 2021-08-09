@@ -74,12 +74,20 @@ void SingleExport::initialise(const Glib::RefPtr<Gtk::Builder> &builder)
     builder->get_widget_derived("si_height_sb", spin_buttons[SPIN_HEIGHT]);
     builder->get_widget_derived("si_width_sb", spin_buttons[SPIN_WIDTH]);
 
+    builder->get_widget("si_label_left", spin_labels[SPIN_X0]);
+    builder->get_widget("si_label_right", spin_labels[SPIN_X1]);
+    builder->get_widget("si_label_top", spin_labels[SPIN_Y0]);
+    builder->get_widget("si_label_bottom", spin_labels[SPIN_Y1]);
+    builder->get_widget("si_label_height", spin_labels[SPIN_HEIGHT]);
+    builder->get_widget("si_label_width", spin_labels[SPIN_WIDTH]);
+
     builder->get_widget_derived("si_img_height_sb", spin_buttons[SPIN_BMHEIGHT]);
     builder->get_widget_derived("si_img_width_sb", spin_buttons[SPIN_BMWIDTH]);
     builder->get_widget_derived("si_dpi_sb", spin_buttons[SPIN_DPI]);
 
-    builder->get_widget("si_show_export_area", show_export_area);
+    // builder->get_widget("si_show_export_area", show_export_area);
     builder->get_widget_derived("si_units", units);
+    builder->get_widget("si_units_row", si_units_row);
 
     builder->get_widget("si_hide_all", si_hide_all);
     builder->get_widget("si_preview_box", si_preview_box);
@@ -158,6 +166,7 @@ void SingleExport::selectionChanged(Inkscape::Selection *selection)
             return;
         }
     }
+    refreshPreview();
     refreshArea();
     refreshExportHints();
 }
@@ -166,6 +175,7 @@ void SingleExport::selectionChanged(Inkscape::Selection *selection)
 void SingleExport::setup()
 {
     if (setupDone) {
+        // We need to setup only once
         return;
     }
     setupDone = true;
@@ -199,6 +209,8 @@ void SingleExport::setup()
     extensionConn = si_extension_cb->signal_changed().connect(sigc::mem_fun(*this, &SingleExport::onExtensionChanged));
     exportConn = si_export->signal_clicked().connect(sigc::mem_fun(*this, &SingleExport::onExport));
     browseConn = si_filename_entry->signal_icon_press().connect(sigc::mem_fun(*this, &SingleExport::onBrowse));
+    si_show_preview->signal_toggled().connect(sigc::mem_fun(*this, &SingleExport::refreshPreview));
+    si_hide_all->signal_toggled().connect(sigc::mem_fun(*this, &SingleExport::refreshPreview));
 }
 
 // Setup units combobox
@@ -286,7 +298,6 @@ void SingleExport::refreshArea()
         if (current_key != SELECTION_CUSTOM && bbox) {
             setArea(bbox->min()[Geom::X], bbox->min()[Geom::Y], bbox->max()[Geom::X], bbox->max()[Geom::Y]);
         }
-        refreshPreview();
     }
 }
 
@@ -386,6 +397,28 @@ void SingleExport::onAreaTypeToggle(selection_mode key)
 
     refreshArea();
     refreshExportHints();
+    toggleSpinButtonVisibility();
+    refreshPreview();
+}
+
+void SingleExport::toggleSpinButtonVisibility()
+{
+    bool show = current_key == SELECTION_CUSTOM;
+    spin_buttons[SPIN_X0]->set_visible(show);
+    spin_buttons[SPIN_X1]->set_visible(show);
+    spin_buttons[SPIN_Y0]->set_visible(show);
+    spin_buttons[SPIN_Y1]->set_visible(show);
+    spin_buttons[SPIN_WIDTH]->set_visible(show);
+    spin_buttons[SPIN_HEIGHT]->set_visible(show);
+
+    spin_labels[SPIN_X0]->set_visible(show);
+    spin_labels[SPIN_X1]->set_visible(show);
+    spin_labels[SPIN_Y0]->set_visible(show);
+    spin_labels[SPIN_Y1]->set_visible(show);
+    spin_labels[SPIN_WIDTH]->set_visible(show);
+    spin_labels[SPIN_HEIGHT]->set_visible(show);
+
+    si_units_row->set_visible(show);
 }
 
 void SingleExport::onAreaXChange(sb_type type)
@@ -393,6 +426,7 @@ void SingleExport::onAreaXChange(sb_type type)
     blockSpinConns(true);
     areaXChange(type);
     selection_buttons[SELECTION_CUSTOM]->set_active(true);
+    refreshPreview();
     blockSpinConns(false);
 }
 void SingleExport::onAreaYChange(sb_type type)
@@ -400,6 +434,7 @@ void SingleExport::onAreaYChange(sb_type type)
     blockSpinConns(true);
     areaYChange(type);
     selection_buttons[SELECTION_CUSTOM]->set_active(true);
+    refreshPreview();
     blockSpinConns(false);
 }
 void SingleExport::onDpiChange(sb_type type)
@@ -759,6 +794,7 @@ void SingleExport::setDefaultSelectionMode()
             setArea(bbox->min()[Geom::X], bbox->min()[Geom::Y], bbox->max()[Geom::X], bbox->max()[Geom::Y]);
         }
     }
+    toggleSpinButtonVisibility();
 }
 
 void SingleExport::setExporting(bool exporting, Glib::ustring const &text)
@@ -858,6 +894,14 @@ void SingleExport::refreshPreview()
         si_preview_box->pack_start(*preview, true, true, 0);
         si_preview_box->show_all_children();
     }
+    if (!si_show_preview->get_active()) {
+        preview->resetPixels();
+        return;
+    }
+
+    std::vector<SPItem *> selected(_desktop->getSelection()->items().begin(), _desktop->getSelection()->items().end());
+    bool hide = si_hide_all->get_active();
+
     preview->setDocument(_desktop->getDocument());
 
     Unit const *unit = units->getUnit();
@@ -866,7 +910,8 @@ void SingleExport::refreshPreview()
     float y0 = getValuePx(spin_buttons[SPIN_Y0]->get_value(), unit);
     float y1 = getValuePx(spin_buttons[SPIN_Y1]->get_value(), unit);
     preview->setItem(nullptr);
-    preview->setDbox(x0,x1,y0,y1);
+    preview->setDbox(x0, x1, y0, y1);
+    preview->refreshHide(hide ? &selected : nullptr);
     preview->queueRefresh();
 }
 
