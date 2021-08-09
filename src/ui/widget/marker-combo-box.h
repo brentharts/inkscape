@@ -105,6 +105,7 @@ private:
     Gtk::RadioButton& _orient_auto_rev;
     Gtk::RadioButton& _orient_auto;
     Gtk::RadioButton& _orient_angle;
+    Gtk::Button& _orient_flip_horz;
     Gtk::Image& _current_img;
     bool _scale_linked = true;
     guint32 _background_color;

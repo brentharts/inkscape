@@ -51,7 +51,7 @@ using Inkscape::DocumentUndo;
 static Inkscape::UI::Cache::SvgPreview svg_preview_cache;
 
 // size of marker image in a list
-static const int ITEM_WIDTH = 38;
+static const int ITEM_WIDTH = 39;
 static const int ITEM_HEIGHT = 32;
 
 namespace Inkscape {
@@ -107,6 +107,20 @@ void sp_marker_set_uniform_scale(SPMarker* marker, bool uniform) {
 
     if (marker->document) {
         DocumentUndo::maybeDone(marker->document, "marker", SP_VERB_DIALOG_FILL_STROKE, _("Set marker uniform scaling"));
+    }
+}
+
+void sp_marker_flip_horizontally(SPMarker* marker) {
+    if (!marker) return;
+
+    ObjectSet set(marker->document);
+    set.addList(sp_item_group_item_list(marker));
+    Geom::OptRect bbox = set.visualBounds();
+    if (bbox) {
+        set.setScaleRelative(bbox->midpoint(), Geom::Scale(-1.0, 1.0));
+        if (marker->document) {
+            DocumentUndo::maybeDone(marker->document, "marker", SP_VERB_DIALOG_FILL_STROKE, _("Flip marker horizontally"));
+        }
     }
 }
 
@@ -168,6 +182,7 @@ MarkerComboBox::MarkerComboBox(gchar const *id, int l) :
     _orient_auto_rev(get_widget<Gtk::RadioButton>(_builder, "orient-auto-rev")),
     _orient_auto(get_widget<Gtk::RadioButton>(_builder, "orient-auto")),
     _orient_angle(get_widget<Gtk::RadioButton>(_builder, "orient-angle")),
+    _orient_flip_horz(get_widget<Gtk::Button>(_builder, "btn-horz-flip")),
     _current_img(get_widget<Gtk::Image>(_builder, "current-img"))
 {
     _background_color = 0x808080ff;
@@ -235,6 +250,7 @@ MarkerComboBox::MarkerComboBox(gchar const *id, int l) :
     _orient_auto_rev.signal_toggled().connect([=](){ set_orient(false, "auto-start-reverse"); });
     _orient_auto.signal_toggled().connect([=]()    { set_orient(false, "auto"); });
     _orient_angle.signal_toggled().connect([=]()   { set_orient(true, _angle_btn.get_text().c_str()); });
+    _orient_flip_horz.signal_clicked().connect([=]() { sp_marker_flip_horizontally(get_current()); });
 
     _angle_btn.signal_changed().connect([=]() {
         if (_updating || !_angle_btn.is_sensitive()) return;
@@ -910,8 +926,8 @@ MarkerComboBox::create_marker_image(Geom::IntPoint pixel_size, gchar const *mnam
 
     // object to render; note that the id is the same as that of the combo we're building
     SPObject *object = _sandbox->getObjectById(_combo_id);
-    _sandbox->getRoot()->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
-    _sandbox->ensureUpToDate();
+    // _sandbox->getRoot()->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+    // _sandbox->ensureUpToDate();
 
     if (object == nullptr || !SP_IS_ITEM(object)) {
         g_warning("no obj: %s", _combo_id);
@@ -935,6 +951,18 @@ MarkerComboBox::create_marker_image(Geom::IntPoint pixel_size, gchar const *mnam
             sp_repr_css_attr_unref(css);
         }
     }
+
+    auto cross = _sandbox->getObjectsBySelector(".cross");
+    for (auto el : cross) {
+        if (SPCSSAttr* css = sp_repr_css_attr(el->getRepr(), "style")) {
+            sp_repr_css_set_property(css, "display", checkerboard ? "block" : "none");
+            el->changeCSS(css, "style");
+            sp_repr_css_attr_unref(css);
+        }
+    }
+
+    _sandbox->getRoot()->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+    _sandbox->ensureUpToDate();
 
     SPItem *item = SP_ITEM(object);
     // Find object's bbox in document
@@ -1028,26 +1056,34 @@ gchar const *buffer = R"A(
       </filter>
     </defs>
 
-    <path id="line-marker-start" class="line colors" style="stroke-width:2;stroke-opacity:0.2" d="M 12.5,13 l 1000,0" />
+    <!-- cross at the end of the line to help position marker -->
+    <symbol id="cross" width="25" height="25" viewBox="0 0 25 25">
+      <path class="cross" style="mix-blend-mode:difference;stroke:#fff;stroke-width:0.7;stroke-opacity:0.7;fill:none;display:block" d="M 0,0 M 25,25 M 11,11 14,14 M 11,14 14,11" />
+    </symbol>
+
+    <path id="line-marker-start" class="line colors" style="stroke-width:2;stroke-opacity:0.2" d="M 12.5,12.5 l 1000,0" />
     <!-- <g id="marker-start" class="group" style="filter:url(#softGlow)"> -->
     <g id="marker-start" class="group">
       <path class="colors" style="stroke-width:1.7;stroke-opacity:0;marker-start:url(#sample)"
-       d="M 12.5,13 L 25,13"/>
+       d="M 12.5,12.5 L 25,12.5"/>
       <rect x="0" y="0" width="25" height="25" style="fill:none;stroke:none"/>
+      <use xlink:href="#cross" width="25" height="25" />
     </g>
 
-    <path id="line-marker-mid" class="line colors" style="stroke-width:2;stroke-opacity:0.2" d="M -1000,13 L 1000,13" />
+    <path id="line-marker-mid" class="line colors" style="stroke-width:2;stroke-opacity:0.2" d="M -1000,12.5 L 1000,12.5" />
     <g id="marker-mid" class="group">
       <path class="colors" style="stroke-width:1.7;stroke-opacity:0;marker-mid:url(#sample)"
-       d="M 0,13 L 12.5,13 L 25,13"/>
+       d="M 0,12.5 L 12.5,12.5 L 25,12.5"/>
       <rect x="0" y="0" width="25" height="25" style="fill:none;stroke:none"/>
+      <use xlink:href="#cross" width="25" height="25" />
     </g>
 
-    <path id="line-marker-end" class="line colors" style="stroke-width:2;stroke-opacity:0.2" d="M -1000,13 L 12.5,13" />
+    <path id="line-marker-end" class="line colors" style="stroke-width:2;stroke-opacity:0.2" d="M -1000,12.5 L 12.5,12.5" />
     <g id="marker-end" class="group">
       <path class="colors" style="stroke-width:1.7;stroke-opacity:0;marker-end:url(#sample)"
-       d="M 0,13 L 12.5,13"/>
+       d="M 0,12.5 L 12.5,12.5"/>
       <rect x="0" y="0" width="25" height="25" style="fill:none;stroke:none"/>
+      <use xlink:href="#cross" width="25" height="25" />
     </g>
 
   </svg>

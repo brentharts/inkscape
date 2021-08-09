@@ -545,3 +545,7 @@ button.link:hover image {
 .marker-separator {
     padding: 0;
 }
+
+.tight-button {
+    padding: 5px 3px;
+}

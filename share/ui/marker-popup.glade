@@ -59,6 +59,11 @@
     <property name="can-focus">False</property>
     <property name="icon-name">orient-angle</property>
   </object>
+  <object class="GtkImage" id="image4">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <property name="icon-name">object-flip-horizontal-symbolic</property>
+  </object>
   <object class="GtkRadioButton" id="radio-orient">
     <property name="label" translatable="yes">radiobutton</property>
     <property name="visible">True</property>
@@ -72,8 +77,8 @@
     <property name="constrain-to">none</property>
     <child>
       <object class="GtkBox">
-        <property name="width-request">370</property>
-        <property name="height-request">540</property>
+        <property name="width-request">378</property>
+        <property name="height-request">500</property>
         <property name="visible">True</property>
         <property name="can-focus">False</property>
         <property name="orientation">vertical</property>
@@ -220,11 +225,14 @@
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
-                    <property name="tooltip-text" translatable="yes">Orient along the path reverseing at the end</property>
+                    <property name="tooltip-text" translatable="yes">Orient along the path reverseing at the start</property>
                     <property name="image">image1</property>
                     <property name="always-show-image">True</property>
                     <property name="draw-indicator">False</property>
                     <property name="group">radio-orient</property>
+                    <style>
+                      <class name="tight-button"/>
+                    </style>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -242,6 +250,9 @@
                     <property name="always-show-image">True</property>
                     <property name="draw-indicator">False</property>
                     <property name="group">radio-orient</property>
+                    <style>
+                      <class name="tight-button"/>
+                    </style>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -259,11 +270,32 @@
                     <property name="active">True</property>
                     <property name="draw-indicator">False</property>
                     <property name="group">radio-orient</property>
+                    <style>
+                      <class name="tight-button"/>
+                    </style>
                   </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="position">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="btn-horz-flip">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="receives-default">True</property>
+                    <property name="tooltip-text" translatable="yes">Flip marker horizontally</property>
+                    <property name="margin-start">8</property>
+                    <property name="image">image4</property>
+                    <style>
+                      <class name="tight-button"/>
+                    </style>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">3</property>
                   </packing>
                 </child>
               </object>

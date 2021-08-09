@@ -311,7 +311,7 @@ Insert the new markers into the <defs>.
       <path d="M 0.022727273,-0.74009011 L 0.022727273,0.69740989 L -7.7585227,3.0099099 L 10.678977,3.0099099 L 3.4914773,0.69740989 L 3.4914773,-0.74009011 L 10.741477,-2.8963401 L -7.7272727,-2.8963401 L 0.022727273,-0.74009011 z " style="fill:#808080;fill-opacity:1;fill-rule:evenodd;stroke:context-stroke;stroke-width:0.1pt" transform="scale(0.8,0.8)"/>
     </marker>
 
-    <!-- Infinite lines -->
+    <!-- Infinite lines 
     <marker orient="auto" refY="0" refX="0" id="InfiniteLineEnd" inkscape:stockid="InfiniteLineEnd" style="overflow:visible">
       <g style="fill:context-stroke">
         <circle cx="3" cy="0" r="0.8"/>
@@ -319,17 +319,18 @@ Insert the new markers into the <defs>.
         <circle cx="10" cy="0" r="0.8"/>
       </g>
     </marker>
+
     <marker orient="auto" refY="0" refX="0" id="InfiniteLineStart" inkscape:stockid="InfiniteLineStart" style="overflow:visible">
       <g transform="translate(-13,0)" style="fill:context-stroke">
         <circle cx="3" cy="0" r="0.8"/>
         <circle cx="6.5" cy="0" r="0.8"/>
         <circle cx="10" cy="0" r="0.8"/>
       </g>
-    </marker>
+    </marker> -->
 
-    <marker id="ExperimentalArrow" refX="5.0" refY="3.0" orient="auto-start-reverse" inkscape:stockid="ExperimentalArrow">
+    <!-- <marker id="ExperimentalArrow" refX="5.0" refY="3.0" orient="auto-start-reverse" inkscape:stockid="ExperimentalArrow">
       <path style="fill:context-stroke" d="m 10,3 -10,3 0,-6 z"/>
-    </marker>
+    </marker> -->
 
   </defs>
 </svg>
