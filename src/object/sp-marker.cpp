@@ -289,18 +289,16 @@ Inkscape::XML::Node* SPMarker::write(Inkscape::XML::Document *xml_doc, Inkscape:
             repr->removeAttribute("orient");
 	}
 
-    /* TODO - I think I added this because viewBox was not being updated, come back and go over this. */
     if (this->viewBox_set) {
         Inkscape::SVGOStringStream os;
         os << this->viewBox.left() << " " << this->viewBox.top() << " "
            << this->viewBox.width() << " " << this->viewBox.height();
 
         repr->setAttribute("viewBox", os.str());
+    }  else {
+        repr->removeAttribute("viewBox");
     }
         
-	/* fixme: */
-	//XML Tree being used directly here while it shouldn't be....
-	repr->setAttribute("viewBox", this->getRepr()->attribute("viewBox"));
 	//XML Tree being used directly here while it shouldn't be....
 	repr->setAttribute("preserveAspectRatio", this->getRepr()->attribute("preserveAspectRatio"));
 
@@ -322,6 +320,84 @@ void SPMarker::hide(unsigned int key) {
 	// CPPIFY: correct?
 	SPGroup::hide(key);
 }
+
+/* validates the marker item before passing it into the shape editor. Sets any missing properties that are needed before editing */
+void SPMarker::validateMarker(SPItem* i, SPDocument *doc) {
+    SPMarker *sp_marker = dynamic_cast<SPMarker *>(i);
+    g_assert(sp_marker != nullptr);
+
+    doc->ensureUpToDate();
+
+    /* calculate marker bounds */
+    std::vector<SPObject*> items = const_cast<SPMarker*>(sp_marker)->childList(false, SPObject::ActionBBox);
+
+    Geom::OptRect r;
+    for (auto *i : items) {
+        SPItem *item = dynamic_cast<SPItem*>(i);
+        r.unionWith(item->desktopVisualBounds());
+    }
+
+    Geom::Rect bounds(r->min() * doc->dt2doc(), r->max() * doc->dt2doc());
+    Geom::Point const center = bounds.dimensions() * 0.5;
+
+    /* check if refX/refY properties are set. If not, set them to default values. */
+    if(!sp_marker->refX._set) {
+        i->setAttribute("refX", "0.0");
+    }
+
+    if(!sp_marker->refY._set) {
+        i->setAttribute("refY", "0.0");
+    }
+
+    /* if there is no markerWidth or markerHeight or viewBox, calculate and set it */
+    if(!sp_marker->markerWidth._set || !sp_marker->markerHeight._set) {
+        /* scale is set to 1x */
+        if(!sp_marker->viewBox_set) {
+            i->setAttribute("markerWidth", std::to_string(bounds.dimensions()[Geom::X]));
+            i->setAttribute("markerHeight", std::to_string(bounds.dimensions()[Geom::Y]));
+
+            i->setAttribute("viewBox", "0 0 " + std::to_string(sp_marker->markerWidth.computed) + " " + std::to_string(sp_marker->markerHeight.computed));
+        } else {
+            i->setAttribute("markerWidth", std::to_string(sp_marker->viewBox.width()));
+            i->setAttribute("markerHeight", std::to_string(sp_marker->viewBox.height()));
+        }
+    } else {
+        if(!sp_marker->viewBox_set) {
+            i->setAttribute("viewBox", "0 0 " + std::to_string(sp_marker->markerWidth.computed) + " " + std::to_string(sp_marker->markerHeight.computed));
+        } else {
+            /* When users scale using onCanvas operations, the marker is scaled using the markerWidth/markerHeight while the viewBox stays constant.
+            Check if markerWidth/markerHeight was correctly calculated */
+            if((sp_marker->viewBox.width() != bounds.dimensions()[Geom::X]) || (sp_marker->viewBox.height() != bounds.dimensions()[Geom::Y])) {
+                double xScale = sp_marker->markerWidth.computed/sp_marker->viewBox.width();
+                double yScale = sp_marker->markerHeight.computed/sp_marker->viewBox.height();
+
+                i->setAttribute("viewBox", "0 0 " + std::to_string(bounds.dimensions()[Geom::X]) + " " + std::to_string(bounds.dimensions()[Geom::Y]));
+                
+                i->setAttribute("markerWidth", std::to_string(sp_marker->viewBox.width() * xScale));
+                i->setAttribute("markerHeight", std::to_string(sp_marker->viewBox.height() * yScale ));
+
+            }
+        }
+    }
+
+    if(!sp_marker->orient._set) {
+        sp_marker->setAttribute("orient", "auto");
+    }
+
+    if(!sp_marker->aspect_set) {
+        double xScale = sp_marker->markerWidth.computed/sp_marker->viewBox.width();
+        double yScale = sp_marker->markerHeight.computed/sp_marker->viewBox.height();
+
+        if(xScale == yScale) {
+            sp_marker->setAttribute("preserveAspectRatio", "xMidYMid");
+        } else {
+            sp_marker->setAttribute("preserveAspectRatio", "none");
+        }
+    }
+
+    sp_marker->updateRepr();
+}
+
 
 Geom::OptRect SPMarker::bbox(Geom::Affine const &/*transform*/, SPItem::BBoxType /*type*/) const {
 	return Geom::OptRect();

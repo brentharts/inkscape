@@ -31,6 +31,7 @@
 #include "object/sp-spiral.h"
 #include "object/sp-star.h"
 #include "object/sp-text.h"
+#include "object/sp-marker.h"
 
 #include "ui/dialog/dialog-container.h"
 #include "ui/dialog/dialog-manager.h"
@@ -162,6 +163,8 @@ set_active_tool(InkscapeWindow *win, SPItem *item, Geom::Point const p)
         tool_switch("3DBox", win);
     } else if (dynamic_cast<SPSpiral *>(item)) {
         tool_switch("Spiral", win);
+    } else if (dynamic_cast<SPMarker *>(item)) {
+        tool_switch("Marker", win);
     } else if (dynamic_cast<SPPath *>(item)) {
         if (Inkscape::UI::Tools::cc_item_is_connector(item)) {
             tool_switch("Connector", win);

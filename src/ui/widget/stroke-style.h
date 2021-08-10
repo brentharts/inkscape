@@ -192,15 +192,12 @@ private:
     sigc::connection startMarkerConn;
     sigc::connection midMarkerConn;
     sigc::connection endMarkerConn;
-    sigc::connection editStartMarkerConn;
-    sigc::connection editMidMarkerConn;
-    sigc::connection editEndMarkerConn;
     sigc::connection unitChangedConn;
     
     Inkscape::Util::Unit const *_old_unit;
 
     void _handleDocumentReplaced(SPDesktop *, SPDocument *);
-    void enterEditMarkerMode();
+    void enterEditMarkerMode(SPMarkerLoc editMarkerMode);
     sigc::connection _document_replaced_connection;
 };
 

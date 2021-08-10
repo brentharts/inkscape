@@ -146,9 +146,6 @@ StrokeStyle::StrokeStyle() :
     editStartMarkerButton(),
     editMidMarkerButton(),
     editEndMarkerButton(),
-    editStartMarkerConn(),
-    editMidMarkerConn(),
-    editEndMarkerConn(),
     _old_unit(nullptr)
 {
     table = new Gtk::Grid();
@@ -287,22 +284,25 @@ StrokeStyle::StrokeStyle() :
 
     editStartMarkerButton = Gtk::manage(new Gtk::Button(_("start"), true));
     editStartMarkerButton->set_tooltip_text(_("Edit the start marker of the selected object."));
-    editStartMarkerConn = editStartMarkerButton->signal_clicked().connect(
-        sigc::mem_fun(this, &StrokeStyle::enterEditMarkerMode));
+    editStartMarkerButton->signal_clicked().connect([=]() {
+        enterEditMarkerMode(SP_MARKER_LOC_START);
+    });
     editStartMarkerButton->show();
     hb->pack_start(*editStartMarkerButton, true, true, 0);
 
     editMidMarkerButton = Gtk::manage(new Gtk::Button(_("mid"), true));
     editMidMarkerButton->set_tooltip_text(_("Edit the mid marker of the selected object."));
-    editMidMarkerConn = editMidMarkerButton->signal_clicked().connect(
-        sigc::mem_fun(this, &StrokeStyle::enterEditMarkerMode));
+    editMidMarkerButton->signal_clicked().connect([=]() {
+        enterEditMarkerMode(SP_MARKER_LOC_MID);
+    });
     editMidMarkerButton->show();
     hb->pack_start(*editMidMarkerButton, true, true, 0);
 
     editEndMarkerButton = Gtk::manage(new Gtk::Button(_("end"), true));
     editEndMarkerButton->set_tooltip_text(_("Edit the end marker of the selected object."));
-    editEndMarkerConn = editEndMarkerButton->signal_clicked().connect(
-        sigc::mem_fun(this, &StrokeStyle::enterEditMarkerMode));
+    editEndMarkerButton->signal_clicked().connect([=]() {
+        enterEditMarkerMode(SP_MARKER_LOC_END);
+    });
     editEndMarkerButton->show();
     hb->pack_start(*editEndMarkerButton, true, true, 0);
 
@@ -504,14 +504,21 @@ StrokeStyle::makeRadioButton(Gtk::RadioButtonGroup &grp,
     return tb;
 }
 
-void StrokeStyle::enterEditMarkerMode()
+void StrokeStyle::enterEditMarkerMode(SPMarkerLoc _editMarkerMode)
 {
     SPDesktop *desktop = SP_ACTIVE_DESKTOP;
 
     if (desktop && !dynamic_cast<Inkscape::UI::Tools::MarkerTool *>(desktop->event_context)) {
         set_active_tool(desktop, "Marker");
     }
+
+    Inkscape::UI::Tools::MarkerTool *mt = dynamic_cast<Inkscape::UI::Tools::MarkerTool*>(desktop->event_context);
+    if (mt && (mt->editMarkerMode != _editMarkerMode)) {
+        mt->editMarkerMode = _editMarkerMode;
+        mt->selection_changed(desktop->getSelection());
+    }
 }
+
 
 bool StrokeStyle::shouldMarkersBeUpdated()
 {

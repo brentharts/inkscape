@@ -1,5 +1,14 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-// Released under GNU GPL v2+, read the file 'COPYING' for more information.
+/** @file
+ * Marker edit mode toolbar - onCanvas marker editing of marker orientation, position, scale
+ *//*
+ * Authors:
+ * see git history
+ * Rachana Podaralla <rpodaralla3@gatech.edu>
+ *
+ * Copyright (C) 2018 Authors
+ * Released under GNU GPL v2+, read the file 'COPYING' for more information.
+ */
 
 #include <glibmm/i18n.h>
 #include "marker-toolbar.h"
