@@ -959,8 +959,8 @@ MarkerKnotHolderEntityScale::knot_get() const
     SPMarker *sp_marker = dynamic_cast<SPMarker *>(item);
     g_assert(sp_marker != nullptr);
 
-    return Geom::Point((-sp_marker->refX.computed + sp_marker->markerWidth.computed) * getMarkerXScale(item), 
-    (-sp_marker->refY.computed + sp_marker->markerHeight.computed) * getMarkerYScale(item)) * getMarkerRotation(item, _edit_rotation);
+    return Geom::Point((-sp_marker->refX.computed + sp_marker->viewBox.width()) * getMarkerXScale(item), 
+    (-sp_marker->refY.computed + sp_marker->viewBox.height()) * getMarkerYScale(item)) * getMarkerRotation(item, _edit_rotation);
 }
 
 void
@@ -992,9 +992,8 @@ MarkerKnotHolderEntityScale::set_internal(Geom::Point const &p, Geom::Point cons
     adjusted_scaleY = adjusted_scaleY * original_scaleY;
 
     if(adjusted_scaleX > 0.0 && adjusted_scaleY > 0.0) {
-        sp_marker->viewBox = Geom::Rect::from_xywh(0, 0, 
-        sp_marker->markerWidth.computed/adjusted_scaleX, 
-        sp_marker->markerHeight.computed/adjusted_scaleY);
+        sp_marker->markerWidth.computed = sp_marker->viewBox.width() * adjusted_scaleX;
+        sp_marker->markerHeight.computed = sp_marker->viewBox.height() * adjusted_scaleY;
 
         sp_marker->viewBox_set = true;
 
@@ -1015,8 +1014,8 @@ void MarkerKnotHolderEntityScale::knot_set(Geom::Point const &p, Geom::Point con
         original_scaleY = getMarkerYScale(item);
         original_refX = sp_marker->refX.computed;
         original_refY = sp_marker->refY.computed;
-        original_width = sp_marker->markerWidth.computed;
-        original_height = sp_marker->markerHeight.computed;
+        original_width = sp_marker->viewBox.width();
+        original_height = sp_marker->viewBox.height();
 
         originals_set = true;
     }
@@ -1052,7 +1051,7 @@ MarkerKnotHolderEntityOrient::knot_get() const
     SPMarker *sp_marker = dynamic_cast<SPMarker *>(item);
     g_assert(sp_marker != nullptr);
 
-    return Geom::Point((-sp_marker->refX.computed + sp_marker->markerWidth.computed) * getMarkerXScale(item), 
+    return Geom::Point((-sp_marker->refX.computed + sp_marker->viewBox.width()) * getMarkerXScale(item), 
     -sp_marker->refY.computed * getMarkerYScale(item)) * getMarkerRotation(item, _edit_rotation);
 }
 
@@ -1131,7 +1130,7 @@ MarkerKnotHolderEntityReference::knot_set(Geom::Point const &p, Geom::Point cons
     SPMarker *sp_marker = dynamic_cast<SPMarker *>(item);
     g_assert(sp_marker != nullptr);
 
-    Geom::Point s = -snap_knot_position(p, state);
+    Geom::Point s = -p;
     s = s * getMarkerRotation(item, _edit_rotation, true);
     sp_marker->refX = s[Geom::X] / getMarkerXScale(item);
     sp_marker->refY = s[Geom::Y] / getMarkerYScale(item);
