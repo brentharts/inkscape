@@ -311,10 +311,10 @@
 ../src/ui/toolbar/calligraphy-toolbar.cpp
 ../src/ui/toolbar/connector-toolbar.cpp
 ../src/ui/toolbar/dropper-toolbar.cpp
-../src/ui/toolbar/marker-toolbar.cpp
 ../src/ui/toolbar/eraser-toolbar.cpp
 ../src/ui/toolbar/gradient-toolbar.cpp
 ../src/ui/toolbar/lpe-toolbar.cpp
+../src/ui/toolbar/marker-toolbar.cpp
 ../src/ui/toolbar/measure-toolbar.cpp
 ../src/ui/toolbar/mesh-toolbar.cpp
 ../src/ui/toolbar/node-toolbar.cpp
@@ -343,7 +343,6 @@
 ../src/ui/tools/pen-tool.cpp
 ../src/ui/tools/pencil-tool.cpp
 ../src/ui/tools/rect-tool.cpp
-../src/ui/tools/marker-tool.cpp
 ../src/ui/tools/select-tool.cpp
 ../src/ui/tools/spiral-tool.cpp
 ../src/ui/tools/spray-tool.cpp

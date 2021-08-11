@@ -322,7 +322,7 @@ void SPMarker::hide(unsigned int key) {
 }
 
 /* validates the marker item before passing it into the shape editor. Sets any missing properties that are needed before editing */
-void SPMarker::validateMarker(SPItem* i, SPDocument *doc) {
+void validateMarker(SPItem* i, SPDocument *doc) {
     SPMarker *sp_marker = dynamic_cast<SPMarker *>(i);
     g_assert(sp_marker != nullptr);
 

@@ -234,7 +234,7 @@ void MarkerTool::selection_changed(Inkscape::Selection *sel) {
 
                     Inkscape::XML::Node *marker_repr = marker_obj->getRepr();
                     SPItem* marker_item = dynamic_cast<SPItem *>(this->desktop->getDocument()->getObjectByRepr(marker_repr));
-                    SPMarker::validateMarker(marker_item, doc);
+                    validateMarker(marker_item, doc);
 
                     ShapeRecord sr;
                     switch(editMarkerMode) {

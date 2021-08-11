@@ -69,7 +69,6 @@ public:
 	std::map<unsigned int, SPMarkerView> views_map;
 
 	void build(SPDocument *document, Inkscape::XML::Node *repr) override;
-	static void validateMarker(SPItem* i, SPDocument *doc);
 	void release() override;
 	void set(SPAttr key, gchar const* value) override;
 	void update(SPCtx *ctx, guint flags) override;
@@ -97,6 +96,7 @@ protected:
 	}
 };
 
+void validateMarker(SPItem* i, SPDocument *doc);
 void sp_marker_show_dimension (SPMarker *marker, unsigned int key, unsigned int size);
 Inkscape::DrawingItem *sp_marker_show_instance (SPMarker *marker, Inkscape::DrawingItem *parent,
 				      unsigned int key, unsigned int pos,
