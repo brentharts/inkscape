@@ -1191,13 +1191,13 @@ MarkerKnotHolder::MarkerKnotHolder(SPDesktop *desktop, SPItem *item, SPKnotHolde
     MarkerKnotHolderEntityScale *entity_scale = new MarkerKnotHolderEntityScale(getEditRotation());
     MarkerKnotHolderEntityOrient *entity_orient = new MarkerKnotHolderEntityOrient(getEditRotation());
 
-    entity_reference->create(desktop, item, this, Inkscape::CANVAS_ITEM_CTRL_TYPE_POINT, "Marker:reference",
+    entity_reference->create(desktop, item, this, Inkscape::CANVAS_ITEM_CTRL_TYPE_SHAPER, "Marker:reference",
                           _("Drag to adjust the refX/refY position of the marker"));
 
     entity_scale->create(desktop, item, this, Inkscape::CANVAS_ITEM_CTRL_TYPE_SIZER, "Marker:scale",
                       _("Adjust the <b>size</b> of the marker"));
 
-    entity_orient->create(desktop, item, this, Inkscape::CANVAS_ITEM_CTRL_TYPE_SHAPER, "Marker:orient",
+    entity_orient->create(desktop, item, this, Inkscape::CANVAS_ITEM_CTRL_TYPE_ROTATE, "Marker:orient",
                         _("Adjust marker orientation through rotation"));
 
     entity.push_back(entity_reference);
