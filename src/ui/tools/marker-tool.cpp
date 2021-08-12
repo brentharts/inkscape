@@ -193,7 +193,7 @@ ShapeRecord MarkerTool::get_marker_transform(SPShape* shape, SPItem *parent_item
     /* scale by stroke width */
     ret = scale * ret;
     /* account for parent transform */
-    ret = parent_item->transform * ret;
+    ret = parent_item->transform.withoutTranslation() * ret;
 
     ShapeRecord sr;
     sr.object = marker_item;
