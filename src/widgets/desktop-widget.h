@@ -112,6 +112,7 @@ private:
     Gtk::Box *_hbox;
     Inkscape::UI::Dialog::DialogContainer *_container = nullptr;
     Inkscape::UI::Dialog::DialogMultipaned *_columns;
+    Gtk::Grid* _top_toolbars;
 
     Gtk::Box     *_statusbar;
 

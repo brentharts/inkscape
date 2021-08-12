@@ -233,8 +233,8 @@ SnapVector snap_node = {
 };
 
 SnapVector snap_alignment = {
-    { "snap-distribution",       SPAttr::INKSCAPE_SNAP_DISTRIBUTION },
     { "snap-alignment",          SPAttr::INKSCAPE_SNAP_ALIGNMENT },
+    { "snap-distribution",       SPAttr::INKSCAPE_SNAP_DISTRIBUTION,       true },
     { "snap-alignment-self",     SPAttr::INKSCAPE_SNAP_ALIGNMENT_SELF,     false },
     { "snap-bbox",               SPAttr::INKSCAPE_SNAP_BBOX,               true },
     { "snap-bbox-edge",          SPAttr::INKSCAPE_SNAP_BBOX_EDGE,          true },

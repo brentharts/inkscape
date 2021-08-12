@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.38.1 -->
+<!-- Generated with glade 3.38.2 -->
 <interface>
   <requires lib="gtk+" version="3.22"/>
   <object class="GtkPopover" id="advanced">
@@ -271,7 +271,7 @@
           </object>
           <packing>
             <property name="left-attach">0</property>
-            <property name="top-attach">26</property>
+            <property name="top-attach">27</property>
             <property name="width">2</property>
           </packing>
         </child>
@@ -287,7 +287,7 @@
           </object>
           <packing>
             <property name="left-attach">0</property>
-            <property name="top-attach">27</property>
+            <property name="top-attach">28</property>
             <property name="width">2</property>
           </packing>
         </child>
@@ -303,7 +303,7 @@
           </object>
           <packing>
             <property name="left-attach">0</property>
-            <property name="top-attach">28</property>
+            <property name="top-attach">29</property>
             <property name="width">2</property>
           </packing>
         </child>
@@ -375,12 +375,12 @@
           </object>
           <packing>
             <property name="left-attach">1</property>
-            <property name="top-attach">25</property>
+            <property name="top-attach">26</property>
           </packing>
         </child>
         <child>
           <object class="GtkCheckButton" id="align-snap-self">
-            <property name="label" translatable="yes">Self snap</property>
+            <property name="label" translatable="yes">Self snap path nodes</property>
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">False</property>
@@ -404,7 +404,7 @@
           </object>
           <packing>
             <property name="left-attach">1</property>
-            <property name="top-attach">30</property>
+            <property name="top-attach">31</property>
             <property name="width">2</property>
           </packing>
         </child>
@@ -416,7 +416,7 @@
           </object>
           <packing>
             <property name="left-attach">1</property>
-            <property name="top-attach">29</property>
+            <property name="top-attach">30</property>
           </packing>
         </child>
         <child>
@@ -585,7 +585,7 @@
           </object>
           <packing>
             <property name="left-attach">2</property>
-            <property name="top-attach">26</property>
+            <property name="top-attach">27</property>
           </packing>
         </child>
         <child>
@@ -598,7 +598,7 @@
           </object>
           <packing>
             <property name="left-attach">2</property>
-            <property name="top-attach">27</property>
+            <property name="top-attach">28</property>
           </packing>
         </child>
         <child>
@@ -611,7 +611,7 @@
           </object>
           <packing>
             <property name="left-attach">2</property>
-            <property name="top-attach">28</property>
+            <property name="top-attach">29</property>
           </packing>
         </child>
         <child>
@@ -631,6 +631,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">False</property>
+            <property name="halign">start</property>
             <property name="action-name">doc.snap-path-mask</property>
             <property name="draw-indicator">True</property>
           </object>
@@ -645,6 +646,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">False</property>
+            <property name="halign">start</property>
             <property name="action-name">doc.snap-path-clip</property>
             <property name="draw-indicator">True</property>
           </object>
@@ -680,16 +682,51 @@
           </packing>
         </child>
         <child>
-          <placeholder/>
+          <object class="GtkCheckButton">
+            <property name="label" translatable="yes">Distribution snap</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">False</property>
+            <property name="action-name">doc.snap-distribution</property>
+            <property name="draw-indicator">True</property>
+          </object>
+          <packing>
+            <property name="left-attach">1</property>
+            <property name="top-attach">25</property>
+          </packing>
         </child>
         <child>
-          <placeholder/>
+          <object class="GtkImage">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="icon-name">snap-alignment</property>
+          </object>
+          <packing>
+            <property name="left-attach">2</property>
+            <property name="top-attach">23</property>
+          </packing>
         </child>
         <child>
-          <placeholder/>
+          <object class="GtkImage">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="icon-name">snap-alignment-self</property>
+          </object>
+          <packing>
+            <property name="left-attach">2</property>
+            <property name="top-attach">24</property>
+          </packing>
         </child>
         <child>
-          <placeholder/>
+          <object class="GtkImage">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="icon-name">snap-distribution</property>
+          </object>
+          <packing>
+            <property name="left-attach">2</property>
+            <property name="top-attach">25</property>
+          </packing>
         </child>
         <child>
           <placeholder/>
@@ -1106,49 +1143,5 @@
         <property name="homogeneous">False</property>
       </packing>
     </child>
-
-    <!-- Alignment -->
-
-    <child>
-      <object class="GtkSeparatorToolItem">
-        <property name="visible">True</property>
-      </object>
-    </child>
-
-    <child>
-      <object class="GtkToggleToolButton">
-        <property name="visible">True</property>
-        <property name="action_name">doc.snap-alignment</property>
-        <property name="icon_name">snap-alignment</property>
-        <property name="label" translatable="true">Alignment</property>
-      </object>
-    </child>
-
-    <child>
-      <object class="GtkToggleToolButton">
-        <property name="visible">True</property>
-        <property name="action_name">doc.snap-alignment-self</property>
-        <property name="icon_name">snap-alignment-self</property>
-        <property name="label" translatable="true">Self Alignment</property>
-      </object>
-    </child>
-
-    <!-- Distribution -->
-
-    <child>
-      <object class="GtkSeparatorToolItem">
-        <property name="visible">True</property>
-      </object>
-    </child>
-
-    <child>
-      <object class="GtkToggleToolButton">
-        <property name="visible">True</property>
-        <property name="action_name">doc.snap-distribution</property>
-        <property name="icon_name">snap-distribution</property>
-        <property name="label" translatable="true">Distribution</property>
-      </object>
-    </child>
-
   </object>
 </interface>

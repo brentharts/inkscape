@@ -652,6 +652,18 @@ void setup_aux_toolbox(GtkWidget *toolbox, SPDesktop *desktop)
     for (int i = 0 ; aux_toolboxes[i].type_name ; i++ ) {
         if (aux_toolboxes[i].create_func) {
             GtkWidget *sub_toolbox = aux_toolboxes[i].create_func(desktop);
+            // center items vertically/horizontally to prevent stretching;
+            // all buttons will look uniform across toolbars if their original size is preserved
+            if (auto* tb = dynamic_cast<Gtk::Container*>(Glib::wrap(sub_toolbox))) {
+                for (auto&& item : tb->get_children()) {
+                    if (dynamic_cast<Gtk::Button*>(item) ||
+                        dynamic_cast<Gtk::SpinButton*>(item) ||
+                        dynamic_cast<Gtk::ToolButton*>(item)) {
+                        item->set_valign(Gtk::ALIGN_CENTER);
+                        item->set_halign(Gtk::ALIGN_CENTER);
+                    }
+                }
+            }
             gtk_widget_set_name( sub_toolbox, "SubToolBox" );
 
             auto holder = gtk_grid_new();

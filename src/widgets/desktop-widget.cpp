@@ -255,16 +255,21 @@ SPDesktopWidget::SPDesktopWidget()
     dtw->_hbox->set_name("DesktopHbox");
     dtw->_vbox->pack_end(*dtw->_hbox, true, true);
 
+    dtw->_top_toolbars = Gtk::make_managed<Gtk::Grid>();
+    dtw->_vbox->pack_end(*dtw->_top_toolbars, false, true);
+
     /* Toolboxes */
     dtw->aux_toolbox = ToolboxFactory::createAuxToolbox();
-    dtw->_vbox->pack_end(*Glib::wrap(dtw->aux_toolbox), false, true);
 
     dtw->snap_toolbox = ToolboxFactory::createSnapToolbox();
-    ToolboxFactory::setOrientation( dtw->snap_toolbox, GTK_ORIENTATION_VERTICAL );
-    dtw->_hbox->pack_end(*Glib::wrap(dtw->snap_toolbox), false, true);
+    ToolboxFactory::setOrientation(dtw->snap_toolbox, GTK_ORIENTATION_HORIZONTAL);
+    dtw->_top_toolbars->attach(*Glib::wrap(dtw->snap_toolbox), 1, 0, 1, 2);
 
     dtw->commands_toolbox = ToolboxFactory::createCommandsToolbox();
-    dtw->_vbox->pack_end(*Glib::wrap(dtw->commands_toolbox), false, true);
+    auto cmd = Glib::wrap(dtw->commands_toolbox);
+    dtw->_top_toolbars->attach(*cmd, 0, 0);
+
+    dtw->_top_toolbars->attach(*Glib::wrap(dtw->aux_toolbox), 0, 1);
 
     dtw->tool_toolbox = ToolboxFactory::createToolToolbox();
     ToolboxFactory::setOrientation( dtw->tool_toolbox, GTK_ORIENTATION_VERTICAL );
@@ -1217,9 +1222,9 @@ void SPDesktopWidget::layoutWidgets()
     Glib::ustring pref_root;
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
 
-    if (dtw->desktop->is_focusMode()) {
+    if (desktop && desktop->is_focusMode()) {
         pref_root = "/focus/";
-    } else if (dtw->desktop->is_fullscreen()) {
+    } else if (desktop && desktop->is_fullscreen()) {
         pref_root = "/fullscreen/";
     } else {
         pref_root = "/window/";
@@ -1265,6 +1270,22 @@ void SPDesktopWidget::layoutWidgets()
 
     _canvas_grid->ShowScrollbars(prefs->getBool(pref_root + "scrollbars/state", true));
     _canvas_grid->ShowRulers(    prefs->getBool(pref_root + "rulers/state",     true));
+
+    auto& snap = *Glib::wrap(snap_toolbox);
+    auto& aux = *Glib::wrap(aux_toolbox);
+
+    g_warning ("chil %d  vis: %d", (int) _top_toolbars->get_children().size(), gtk_widget_get_visible(commands_toolbox)?1:0);
+    if (_top_toolbars->get_children().size() == 3 && gtk_widget_get_visible(commands_toolbox)) {
+        _top_toolbars->child_property_height(snap) =  1;
+        _top_toolbars->child_property_width(aux) = 2;
+        snap.set_valign(Gtk::ALIGN_START);
+    }
+    else {
+        _top_toolbars->child_property_width(aux) = 1;
+        _top_toolbars->child_property_height(snap) =  2;
+        snap.set_valign(Gtk::ALIGN_CENTER);
+    }
+    _top_toolbars->resize_children();
 }
 
 Gtk::Toolbar *
@@ -1360,45 +1381,53 @@ void SPDesktopWidget::setToolboxPosition(Glib::ustring const& id, GtkPositionTyp
         toolbox = aux_toolbox;
     } else if (id == "CommandsToolbar") {
         toolbox = commands_toolbox;
-    } else if (id == "SnapToolbar") {
-        toolbox = snap_toolbox;
     }
 
+    if (!toolbox) return;
 
-    if (toolbox) {
-        switch(pos) {
-            case GTK_POS_TOP:
-            case GTK_POS_BOTTOM:
-                if ( gtk_widget_is_ancestor(toolbox, GTK_WIDGET(_hbox->gobj())) ) {
-                    // Removing a widget can reduce ref count to zero
-                    g_object_ref(G_OBJECT(toolbox));
-                    _hbox->remove(*Glib::wrap(toolbox));
-                    _vbox->add(*Glib::wrap(toolbox));
-                    g_object_unref(G_OBJECT(toolbox));
+    bool horizontal = true;
 
-                    // Function doesn't seem to be in Gtkmm wrapper yet
-                    gtk_box_set_child_packing(_vbox->gobj(), toolbox, FALSE, TRUE, 0, GTK_PACK_START);
+    switch(pos) {
+        case GTK_POS_TOP:
+        case GTK_POS_BOTTOM:
+            if (gtk_widget_is_ancestor(toolbox, GTK_WIDGET(_hbox->gobj()))) {
+                // Removing a widget can reduce ref count to zero
+                g_object_ref(G_OBJECT(toolbox));
+                _hbox->remove(*Glib::wrap(toolbox));
+                int row = id == "CommandsToolbar" ? 0 : 1;
+                _top_toolbars->attach(*Glib::wrap(toolbox), 0, row);
+                g_object_unref(G_OBJECT(toolbox));
+
+                // Function doesn't seem to be in Gtkmm wrapper yet
+                gtk_box_set_child_packing(_vbox->gobj(), toolbox, FALSE, TRUE, 0, GTK_PACK_START);
+            }
+            ToolboxFactory::setOrientation(toolbox, GTK_ORIENTATION_HORIZONTAL);
+            break;
+        case GTK_POS_LEFT:
+        case GTK_POS_RIGHT:
+            horizontal = false;
+            if (!gtk_widget_is_ancestor(toolbox, GTK_WIDGET(_hbox->gobj()))) {
+                g_object_ref(G_OBJECT(toolbox));
+                _top_toolbars->remove(*Glib::wrap(toolbox));
+                _hbox->add(*Glib::wrap(toolbox));
+                g_object_unref(G_OBJECT(toolbox));
+
+                // Function doesn't seem to be in Gtkmm wrapper yet
+                gtk_box_set_child_packing(_hbox->gobj(), toolbox, FALSE, TRUE, 0, GTK_PACK_START);
+                if (pos == GTK_POS_LEFT) {
+                    _hbox->reorder_child(*Glib::wrap(toolbox), 0);
                 }
-                ToolboxFactory::setOrientation(toolbox, GTK_ORIENTATION_HORIZONTAL);
-                break;
-            case GTK_POS_LEFT:
-            case GTK_POS_RIGHT:
-                if ( !gtk_widget_is_ancestor(toolbox, GTK_WIDGET(_hbox->gobj())) ) {
-                    g_object_ref(G_OBJECT(toolbox));
-                    _vbox->remove(*Glib::wrap(toolbox));
-                    _hbox->add(*Glib::wrap(toolbox));
-                    g_object_unref(G_OBJECT(toolbox));
-
-                    // Function doesn't seem to be in Gtkmm wrapper yet
-                    gtk_box_set_child_packing(_hbox->gobj(), toolbox, FALSE, TRUE, 0, GTK_PACK_START);
-                    if (pos == GTK_POS_LEFT) {
-                        _hbox->reorder_child(*Glib::wrap(toolbox), 0 );
-                    }
-                }
-                ToolboxFactory::setOrientation(toolbox, GTK_ORIENTATION_VERTICAL);
-                break;
-        }
+            }
+            ToolboxFactory::setOrientation(toolbox, GTK_ORIENTATION_VERTICAL);
+            break;
     }
+
+    if (id == "CommandsToolbar") {
+        auto cmd = Glib::wrap(commands_toolbox);
+        cmd->set_hexpand(horizontal);
+    }
+
+    layoutWidgets();
 }
 
 
