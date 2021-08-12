@@ -140,11 +140,13 @@ static int gr_drag_style_query(SPStyle *style, int property, gpointer data)
         float cf[4];
         cf[0] = cf[1] = cf[2] = cf[3] = 0;
 
+        SPStop* selected = nullptr;
         int count = 0;
         for(auto d : drag->selected) { //for all selected draggers
             for(auto draggable : d->draggables) { //for all draggables of dragger
                 if (ret == QUERY_STYLE_NOTHING) {
                     ret = QUERY_STYLE_SINGLE;
+                    selected = sp_item_gradient_get_stop(draggable->item, draggable->point_type, draggable->point_i, draggable->fill_or_stroke);
                 } else if (ret == QUERY_STYLE_SINGLE) {
                     ret = QUERY_STYLE_MULTIPLE_AVERAGED;
                 }
@@ -169,9 +171,11 @@ static int gr_drag_style_query(SPStyle *style, int property, gpointer data)
             style->fill.clear();
             style->fill.setColor( cf[0], cf[1], cf[2] );
             style->fill.set = TRUE;
+            style->fill.setTag(selected);
             style->stroke.clear();
             style->stroke.setColor( cf[0], cf[1], cf[2] );
             style->stroke.set = TRUE;
+            style->stroke.setTag(selected);
 
             style->fill_opacity.value = SP_SCALE24_FROM_FLOAT (cf[3]);
             style->fill_opacity.set = TRUE;
@@ -218,7 +222,7 @@ Glib::ustring GrDrag::makeStopSafeColor( gchar const *str, bool &isNull )
     return colorStr;
 }
 
-bool GrDrag::styleSet( const SPCSSAttr *css )
+bool GrDrag::styleSet( const SPCSSAttr *css, bool switch_style)
 {
     if (selected.empty()) {
         return false;
@@ -291,6 +295,16 @@ bool GrDrag::styleSet( const SPCSSAttr *css )
 
     for(auto d : selected) { //for all selected draggers
         for(auto draggable : d->draggables) { //for all draggables of dragger
+            SPGradient* gradient = getGradient(draggable->item, draggable->fill_or_stroke);
+
+            // for linear and radial gradients F&S dialog deals with stops' colors;
+            // don't handle style notifications, or else it will not be possible to switch
+            // object style back to solid color
+            if (switch_style && gradient && SP_IS_GRADIENT(gradient) &&
+                (SP_IS_LINEARGRADIENT(gradient) || SP_IS_RADIALGRADIENT(gradient))) {
+                continue;
+            }
+
             local_change = true;
             sp_item_gradient_stop_set_style(draggable->item, draggable->point_type, draggable->point_i, draggable->fill_or_stroke, stop);
         }
@@ -298,7 +312,7 @@ bool GrDrag::styleSet( const SPCSSAttr *css )
 
     //sp_repr_css_print(stop);
     sp_repr_css_attr_unref(stop);
-    return true;
+    return local_change; // true if handled
 }
 
 guint32 GrDrag::getColor()
@@ -613,7 +627,7 @@ GrDrag::GrDrag(SPDesktop *desktop) :
             (gpointer)this )
         );
 
-    style_set_connection = desktop->connectSetStyle( sigc::mem_fun(*this, &GrDrag::styleSet) );
+    style_set_connection = desktop->connectSetStyleEx( sigc::mem_fun(*this, &GrDrag::styleSet) );
 
     style_query_connection = desktop->connectQueryStyle(
         sigc::bind(
@@ -1196,17 +1210,15 @@ void GrDragger::fireDraggables(bool write_repr, bool scale_radial, bool merging_
 void GrDragger::updateControlSizesOverload(SPKnot * knot)
 {
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    int sizes[] = {3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25}; // Must be odd!
-    std::vector<int> sizeTable = std::vector<int>(sizes, sizes + (sizeof(sizes) / sizeof(sizes[0])));
     int size = prefs->getIntLimited("/options/grabsize/value", 3, 1, 15);
-    int knot_size = sizeTable[size - 1];
+
+    // shadow what's done in CanvasItemCtrl::set_size_via_index;
+    // TODO: code should likely be merged
+    int knot_size = size * 2 + 3;
     if(knot->shape == Inkscape::CANVAS_ITEM_CTRL_SHAPE_TRIANGLE) {
-        knot_size *= 2.2;
-        knot_size = floor(knot_size);
-        if ( knot_size % 2 == 0 ){
-            knot_size += 1;
-        }
+        knot_size = size * 2 + 1;
     }
+
     knot->setSize(knot_size);
 }
 
@@ -1919,7 +1931,7 @@ void GrDrag::deselect_all()
 void GrDrag::deselectAll()
 {
     deselect_all();
-    this->desktop->emitToolSubselectionChanged(nullptr);
+    desktop->emit_gradient_stop_selected(this, nullptr);
 }
 
 /**
@@ -2020,7 +2032,7 @@ void GrDrag::setSelected(GrDragger *dragger, bool add_to_selection, bool overrid
         }
     }
     if (seldragger) {
-        this->desktop->emitToolSubselectionChanged((gpointer) seldragger);
+        desktop->emit_gradient_stop_selected(this, nullptr);
     }
 }
 
@@ -2034,9 +2046,8 @@ void GrDrag::setDeselected(GrDragger *dragger)
         selected.erase(dragger);
         dragger->deselect();
     }
-    this->desktop->emitToolSubselectionChanged((gpointer) (selected.empty() ? NULL :*(selected.begin())));
+    desktop->emit_gradient_stop_selected(this, nullptr);
 }
-
 
 
 /**

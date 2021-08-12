@@ -695,7 +695,7 @@ private:
                      *_dialog.getDesktop()->getToplevel(),
                      open_path,
                      Inkscape::UI::Dialog::SVG_TYPES,/*TODO: any image, not just svg*/
-                     (char const *)_("Select an image to be used as feImage input"));
+                     (char const *)_("Select an image to be used as input."));
         }
 
         //# Show the dialog
@@ -789,12 +789,6 @@ public:
     void add_no_params()
     {
         Gtk::Label* lbl = Gtk::manage(new Gtk::Label(_("This SVG filter effect does not require any parameters.")));
-        add_widget(lbl, "");
-    }
-
-    void add_notimplemented()
-    {
-        Gtk::Label* lbl = Gtk::manage(new Gtk::Label(_("This SVG filter effect is not yet implemented in Inkscape.")));
         add_widget(lbl, "");
     }
 
@@ -1327,7 +1321,6 @@ static Gtk::Menu * create_popup_menu(Gtk::Widget& parent,
 /*** FilterModifier ***/
 FilterEffectsDialog::FilterModifier::FilterModifier(FilterEffectsDialog& d)
     :    Gtk::Box(Gtk::ORIENTATION_VERTICAL),
-         _desktop(nullptr),
          _dialog(d),
          _add(_("_New"), true),
          _observer(new Inkscape::XML::SignalObserver)
@@ -1388,70 +1381,6 @@ FilterEffectsDialog::FilterModifier::FilterModifier(FilterEffectsDialog& d)
 
     _list.get_selection()->signal_changed().connect(sigc::mem_fun(*this, &FilterModifier::on_filter_selection_changed));
     _observer->signal_changed().connect(signal_filter_changed().make_slot());
-}
-
-FilterEffectsDialog::FilterModifier::~FilterModifier()
-{
-   _selectChangedConn.disconnect();
-   _selectModifiedConn.disconnect();
-   _resource_changed.disconnect();
-   _doc_replaced.disconnect();
-}
-
-void FilterEffectsDialog::FilterModifier::setTargetDesktop(SPDesktop *desktop)
-{
-    if (_desktop != desktop) {
-        if (_desktop) {
-            _selectChangedConn.disconnect();
-            _selectModifiedConn.disconnect();
-            _doc_replaced.disconnect();
-            _resource_changed.disconnect();
-        }
-        _desktop = desktop;
-        if (desktop) {
-            if (desktop->selection) {
-                _selectChangedConn = desktop->selection->connectChanged(sigc::hide(sigc::mem_fun(*this, &FilterModifier::on_change_selection)));
-                _selectModifiedConn = desktop->selection->connectModified(sigc::hide<0>(sigc::mem_fun(*this, &FilterModifier::on_modified_selection)));
-            }
-            _doc_replaced = desktop->connectDocumentReplaced( sigc::mem_fun(*this, &FilterModifier::on_document_replaced));
-            _resource_changed = desktop->getDocument()->connectResourcesChanged("filter",sigc::mem_fun(*this, &FilterModifier::update_filters));
-
-            update_filters();
-        }
-    }
-}
-
-// When the document changes, update connection to resources
-void FilterEffectsDialog::FilterModifier::on_document_replaced(SPDesktop * /*desktop*/, SPDocument *document)
-{
-    if (_resource_changed) {
-        _resource_changed.disconnect();
-    }
-    if (document)
-    {
-        _resource_changed = document->connectResourcesChanged("filter",sigc::mem_fun(*this, &FilterModifier::update_filters));
-    }
-
-    update_filters();
-}
-
-// When the selection changes, show the active filter(s) in the dialog
-void FilterEffectsDialog::FilterModifier::on_change_selection()
-{
-    if (!_desktop)
-        return;
-
-    Inkscape::Selection *selection = _desktop->getSelection();
-    update_selection(selection);
-}
-
-void FilterEffectsDialog::FilterModifier::on_modified_selection( guint flags )
-{
-    if (flags & ( SP_OBJECT_MODIFIED_FLAG |
-                   SP_OBJECT_PARENT_MODIFIED_FLAG |
-                   SP_OBJECT_STYLE_MODIFIED_FLAG) ) {
-        on_change_selection();
-    }
 }
 
 // Update each filter's sel property based on the current object selection;
@@ -1539,8 +1468,8 @@ void FilterEffectsDialog::FilterModifier::on_selection_toggled(const Glib::ustri
     if(iter) {
         SPDesktop *desktop = _dialog.getDesktop();
         SPDocument *doc = desktop->getDocument();
-        SPFilter* filter = (*iter)[_columns.filter];
         Inkscape::Selection *sel = desktop->getSelection();
+        SPFilter* filter = (*iter)[_columns.filter];
 
         /* If this filter is the only one used in the selection, unset it */
         if((*iter)[_columns.sel] == 1)
@@ -1577,10 +1506,7 @@ void FilterEffectsDialog::FilterModifier::update_counts()
    Keeps the same selection if possible, otherwise selects the first element */
 void FilterEffectsDialog::FilterModifier::update_filters()
 {
-    SPDesktop* desktop = _dialog.getDesktop();
-    SPDocument* document = desktop->getDocument();
-
-    std::vector<SPObject *> filters = document->getResourceList( "filter" );
+    std::vector<SPObject *> filters = _dialog.getDocument()->getResourceList("filter");
 
     _model->clear();
 
@@ -1593,7 +1519,7 @@ void FilterEffectsDialog::FilterModifier::update_filters()
         row[_columns.label] = lbl ? lbl : (id ? id : "filter");
     }
 
-    update_selection(desktop->selection);
+    update_selection(_dialog.getSelection());
     _dialog.update_filter_general_settings_view();
 }
 
@@ -1637,7 +1563,7 @@ void FilterEffectsDialog::FilterModifier::filter_list_button_release(GdkEventBut
 
 void FilterEffectsDialog::FilterModifier::add_filter()
 {
-    SPDocument* doc = _dialog.getDesktop()->getDocument();
+    SPDocument* doc = _dialog.getDocument();
     SPFilter* filter = new_filter(doc);
 
     const int count = _model->children().size();
@@ -1657,11 +1583,12 @@ void FilterEffectsDialog::FilterModifier::remove_filter()
     SPFilter *filter = get_selected_filter();
 
     if(filter) {
+        auto desktop = _dialog.getDesktop();
         SPDocument* doc = filter->document;
 
         // Delete all references to this filter
         std::vector<SPItem*> x,y;
-        std::vector<SPItem*> all = get_all_items(x, _desktop->currentRoot(), _desktop, false, false, true, y);
+        std::vector<SPItem*> all = get_all_items(x, desktop->currentRoot(), desktop, false, false, true, y);
         for(std::vector<SPItem*>::const_iterator i=all.begin(); all.end() != i; ++i) {
             if (!SP_IS_ITEM(*i)) {
                 continue;
@@ -1713,13 +1640,14 @@ void FilterEffectsDialog::FilterModifier::rename_filter()
 void FilterEffectsDialog::FilterModifier::select_filter_elements()
 {
     SPFilter *filter = get_selected_filter();
+    auto desktop = _dialog.getDesktop();
 
     if(!filter)
         return;
 
     std::vector<SPItem*> x,y;
     std::vector<SPItem*> items;
-    std::vector<SPItem*> all = get_all_items(x, _desktop->currentRoot(), _desktop, false, false, true, y);
+    std::vector<SPItem*> all = get_all_items(x, desktop->currentRoot(), desktop, false, false, true, y);
     for(SPItem *item: all) {
         if (!item->style) {
             continue;
@@ -1733,8 +1661,7 @@ void FilterEffectsDialog::FilterModifier::select_filter_elements()
             }
         }
     }
-    Inkscape::Selection *selection = _desktop->getSelection();
-    selection->setList(items);
+    desktop->getSelection()->setList(items);
 }
 
 FilterEffectsDialog::CellRendererConnection::CellRendererConnection()
@@ -1945,7 +1872,7 @@ void FilterEffectsDialog::PrimitiveList::remove_selected()
         //XML Tree being used directly here while it shouldn't be.
         sp_repr_unparent(prim->getRepr());
 
-        DocumentUndo::done(_dialog.getDesktop()->getDocument(), SP_VERB_DIALOG_FILTER_EFFECTS,
+        DocumentUndo::done(_dialog.getDocument(), SP_VERB_DIALOG_FILTER_EFFECTS,
                            _("Remove filter primitive"));
 
         update();
@@ -2731,16 +2658,29 @@ FilterEffectsDialog::~FilterEffectsDialog()
     delete _filter_general_settings;
 }
 
-void FilterEffectsDialog::update()
+void FilterEffectsDialog::documentReplaced()
 {
-    if (!_app) {
-        std::cerr << "FilterEffectsDialog::update(): _app is null" << std::endl;
-        return;
+   _resource_changed.disconnect();
+   if (auto document = getDocument()) {
+       _resource_changed = document->connectResourcesChanged("filter", sigc::mem_fun(_filter_modifier, &FilterModifier::update_filters));
+       _filter_modifier.update_filters();
+   }
+}
+
+void FilterEffectsDialog::selectionChanged(Inkscape::Selection *selection)
+{
+    if (selection) {
+        _filter_modifier.update_selection(selection);
     }
+}
 
-    SPDesktop *desktop = getDesktop();
-
-    _filter_modifier.setTargetDesktop(desktop);
+void FilterEffectsDialog::selectionModified(Inkscape::Selection *selection, guint flags)
+{
+    if (flags & ( SP_OBJECT_MODIFIED_FLAG |
+                   SP_OBJECT_PARENT_MODIFIED_FLAG |
+                   SP_OBJECT_STYLE_MODIFIED_FLAG) ) {
+        _filter_modifier.update_selection(selection);
+    }
 }
 
 void FilterEffectsDialog::set_attrs_locked(const bool l)
@@ -2892,67 +2832,67 @@ void FilterEffectsDialog::update_primitive_infobox()
     switch(_add_primitive_type.get_active_data()->id){
         case(NR_FILTER_BLEND):
             _infobox_icon.set_from_icon_name("feBlend-icon", Gtk::ICON_SIZE_DIALOG);
-            _infobox_desc.set_markup(_("The <b>feBlend</b> filter primitive provides different image blending modes, such as screen, multiply, darken and lighten."));
+            _infobox_desc.set_markup(_("Provides image blending modes, such as screen, multiply, darken and lighten."));
             break;
         case(NR_FILTER_COLORMATRIX):
             _infobox_icon.set_from_icon_name("feColorMatrix-icon", Gtk::ICON_SIZE_DIALOG);
-            _infobox_desc.set_markup(_("The <b>feColorMatrix</b> filter primitive applies a matrix transformation to color of each rendered pixel. This allows for effects like turning object to grayscale, modifying color saturation and changing color hue."));
+            _infobox_desc.set_markup(_("Modifies pixel colors based on a transformation matrix. Useful for adjusting color hue and saturation."));
             break;
         case(NR_FILTER_COMPONENTTRANSFER):
             _infobox_icon.set_from_icon_name("feComponentTransfer-icon", Gtk::ICON_SIZE_DIALOG);
-            _infobox_desc.set_markup(_("The <b>feComponentTransfer</b> filter primitive manipulates the input's color components (red, green, blue, and alpha) according to particular transfer functions, allowing operations like brightness and contrast adjustment, color balance, and thresholding."));
+            _infobox_desc.set_markup(_("Manipulates color components according to particular transfer functions. Useful for brightness and contrast adjustment, color balance, and thresholding."));
             break;
         case(NR_FILTER_COMPOSITE):
             _infobox_icon.set_from_icon_name("feComposite-icon", Gtk::ICON_SIZE_DIALOG);
-            _infobox_desc.set_markup(_("The <b>feComposite</b> filter primitive composites two images using one of the Porter-Duff blending modes or the arithmetic mode described in SVG standard. Porter-Duff blending modes are essentially logical operations between the corresponding pixel values of the images."));
+            _infobox_desc.set_markup(_("Composites two images using one of the Porter-Duff blending modes or the arithmetic mode described in SVG standard."));
             break;
         case(NR_FILTER_CONVOLVEMATRIX):
             _infobox_icon.set_from_icon_name("feConvolveMatrix-icon", Gtk::ICON_SIZE_DIALOG);
-            _infobox_desc.set_markup(_("The <b>feConvolveMatrix</b> lets you specify a Convolution to be applied on the image. Common effects created using convolution matrices are blur, sharpening, embossing and edge detection. Note that while gaussian blur can be created using this filter primitive, the special gaussian blur primitive is faster and resolution-independent."));
+            _infobox_desc.set_markup(_("Performs a convolution on the input image enabling effects like blur, sharpening, embossing and edge detection."));
             break;
         case(NR_FILTER_DIFFUSELIGHTING):
             _infobox_icon.set_from_icon_name("feDiffuseLighting-icon", Gtk::ICON_SIZE_DIALOG);
-            _infobox_desc.set_markup(_("The <b>feDiffuseLighting</b> and feSpecularLighting filter primitives create \"embossed\" shadings.  The input's alpha channel is used to provide depth information: higher opacity areas are raised toward the viewer and lower opacity areas recede away from the viewer."));
+            _infobox_desc.set_markup(_("Creates \"embossed\" shadings.  The input's alpha channel is used to provide depth information: higher opacity areas are raised toward the viewer and lower opacity areas recede away from the viewer."));
             break;
         case(NR_FILTER_DISPLACEMENTMAP):
             _infobox_icon.set_from_icon_name("feDisplacementMap-icon", Gtk::ICON_SIZE_DIALOG);
-            _infobox_desc.set_markup(_("The <b>feDisplacementMap</b> filter primitive displaces the pixels in the first input using the second input as a displacement map, that shows from how far the pixel should come from. Classical examples are whirl and pinch effects."));
+            _infobox_desc.set_markup(_("Displaces pixels from the first input using the second as a map of displacement intensity. Classical examples are whirl and pinch effects."));
             break;
         case(NR_FILTER_FLOOD):
             _infobox_icon.set_from_icon_name("feFlood-icon", Gtk::ICON_SIZE_DIALOG);
-            _infobox_desc.set_markup(_("The <b>feFlood</b> filter primitive fills the region with a given color and opacity.  It is usually used as an input to other filters to apply color to a graphic."));
+            _infobox_desc.set_markup(_("Fills the region with a given color and opacity. Often used as input to other filters to apply color to a graphic."));
             break;
         case(NR_FILTER_GAUSSIANBLUR):
             _infobox_icon.set_from_icon_name("feGaussianBlur-icon", Gtk::ICON_SIZE_DIALOG);
-            _infobox_desc.set_markup(_("The <b>feGaussianBlur</b> filter primitive uniformly blurs its input.  It is commonly used together with feOffset to create a drop shadow effect."));
+            _infobox_desc.set_markup(_("Uniformly blurs its input. Commonly used together with Offset to create a drop shadow effect."));
             break;
         case(NR_FILTER_IMAGE):
             _infobox_icon.set_from_icon_name("feImage-icon", Gtk::ICON_SIZE_DIALOG);
-            _infobox_desc.set_markup(_("The <b>feImage</b> filter primitive fills the region with an external image or another part of the document."));
+            _infobox_desc.set_markup(_("Fills the region with graphics from an external file or from another portion of the document."));
             break;
         case(NR_FILTER_MERGE):
             _infobox_icon.set_from_icon_name("feMerge-icon", Gtk::ICON_SIZE_DIALOG);
-            _infobox_desc.set_markup(_("The <b>feMerge</b> filter primitive composites several temporary images inside the filter primitive to a single image. It uses normal alpha compositing for this. This is equivalent to using several feBlend primitives in 'normal' mode or several feComposite primitives in 'over' mode."));
+            _infobox_desc.set_markup(_("Merges multiple inputs using normal alpha compositing. Equivalent to using several Blend primitives in 'normal' mode or several Composite primitives in 'over' mode."));
             break;
         case(NR_FILTER_MORPHOLOGY):
             _infobox_icon.set_from_icon_name("feMorphology-icon", Gtk::ICON_SIZE_DIALOG);
-            _infobox_desc.set_markup(_("The <b>feMorphology</b> filter primitive provides erode and dilate effects. For single-color objects erode makes the object thinner and dilate makes it thicker."));
+            _infobox_desc.set_markup(_("Provides erode and dilate effects. For single-color objects erode makes the object thinner and dilate makes it thicker."));
             break;
         case(NR_FILTER_OFFSET):
             _infobox_icon.set_from_icon_name("feOffset-icon", Gtk::ICON_SIZE_DIALOG);
-            _infobox_desc.set_markup(_("The <b>feOffset</b> filter primitive offsets the image by an user-defined amount. For example, this is useful for drop shadows, where the shadow is in a slightly different position than the actual object."));
+            _infobox_desc.set_markup(_("Offsets the input by an user-defined amount. Commonly used for drop shadow effects."));
             break;
         case(NR_FILTER_SPECULARLIGHTING):
             _infobox_icon.set_from_icon_name("feSpecularLighting-icon", Gtk::ICON_SIZE_DIALOG);
-            _infobox_desc.set_markup(_("The <b>feDiffuseLighting</b> and <b>feSpecularLighting</b> filter primitives create \"embossed\" shadings.  The input's alpha channel is used to provide depth information: higher opacity areas are raised toward the viewer and lower opacity areas recede away from the viewer."));
+            _infobox_desc.set_markup(_("Creates \"embossed\" shadings.  The input's alpha channel is used to provide depth information: higher opacity areas are raised toward the viewer and lower opacity areas recede away from the viewer."));
             break;
         case(NR_FILTER_TILE):
             _infobox_icon.set_from_icon_name("feTile-icon", Gtk::ICON_SIZE_DIALOG);
-            _infobox_desc.set_markup(_("The <b>feTile</b> filter primitive tiles a region with an input graphic. The source tile is defined by the filter primitive subregion of the input."));
+            _infobox_desc.set_markup(_("Tiles a region with an input graphic. The source tile is defined by the filter primitive subregion of the input."));
             break;
         case(NR_FILTER_TURBULENCE):
             _infobox_icon.set_from_icon_name("feTurbulence-icon", Gtk::ICON_SIZE_DIALOG);
-            _infobox_desc.set_markup(_("The <b>feTurbulence</b> filter primitive renders Perlin noise. This kind of noise is useful in simulating several nature phenomena like clouds, fire and smoke and in generating complex textures like marble or granite."));
+            _infobox_desc.set_markup(_("Renders Perlin noise, which is useful to generate textures such as clouds, fire, smoke, marble or granite."));
             break;
         default:
             g_assert(false);

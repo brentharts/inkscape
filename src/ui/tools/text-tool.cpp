@@ -102,8 +102,8 @@ TextTool::~TextTool() {
 void TextTool::setup() {
     GtkSettings* settings = gtk_settings_get_default();
     gint timeout = 0;
-    g_object_get( settings, "gtk-cursor-blink-time", &timeout, NULL );
-    
+    g_object_get( settings, "gtk-cursor-blink-time", &timeout, nullptr );
+
     if (timeout < 0) {
         timeout = 200;
     } else {
@@ -308,7 +308,7 @@ bool TextTool::item_handler(SPItem* item, GdkEvent* event) {
                 this->dragging = 0;
                 sp_event_context_discard_delayed_snap_event(this);
                 ret = TRUE;
-                desktop->emitToolSubselectionChanged((gpointer)this);
+                desktop->emit_text_cursor_moved(this, this);
             }
             break;
         case GDK_MOTION_NOTIFY:
@@ -666,7 +666,7 @@ bool TextTool::root_handler(GdkEvent* event) {
                     }
                 }
                 this->creating = false;
-                desktop->emitToolSubselectionChanged((gpointer)this);
+                desktop->emit_text_cursor_moved(this, this);
                 return TRUE;
             }
             break;
@@ -1394,7 +1394,7 @@ SPCSSAttr *sp_text_get_style_at_cursor(ToolBase const *ec)
 // this two functions are commented because are used on clipboard
 // and because slow the text pastinbg and usage a lot
 // and couldent get it working properly we miss font size font style or never work
-// and user usualy want paste as plain text and get the position context
+// and user usually want paste as plain text and get the position context
 // style. Anyway I retain for further usage.
 
 /* static bool css_attrs_are_equal(SPCSSAttr const *first, SPCSSAttr const *second)
@@ -1786,7 +1786,7 @@ static void sp_text_context_update_cursor(TextTool *tc,  bool scroll_to_see)
         }
     }
 
-    desktop->emitToolSubselectionChanged((gpointer)tc);
+    desktop->emit_text_cursor_moved(tc, tc);
 }
 
 static void sp_text_context_update_text_selection(TextTool *tc)
@@ -1843,7 +1843,7 @@ static void sp_text_context_forget_text(TextTool *tc)
      * or selection changed signal messes everything up */
     tc->text = nullptr;
 
-/* FIXME: this automatic deletion when nothing is inputted crashes the XML edittor and also crashes when duplicating an empty flowtext.
+/* FIXME: this automatic deletion when nothing is inputted crashes the XML editor and also crashes when duplicating an empty flowtext.
     So don't create an empty flowtext in the first place? Create it when first character is typed.
     */
 /*

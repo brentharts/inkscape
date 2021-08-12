@@ -68,7 +68,9 @@ apt_bundle \
     python${PY_VER}-minimal \
     python3-lxml \
     python3-numpy \
+    python3-six \
     python3-scour \
+    python3-cssselect \
     python3-distutils \
     python3-gi \
     python3-pil \

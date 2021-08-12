@@ -9,6 +9,8 @@
 
 #include "parameter-float.h"
 
+#include <iomanip>
+
 #include <gtkmm/adjustment.h>
 #include <gtkmm/box.h>
 
@@ -84,7 +86,7 @@ ParamFloat::ParamFloat(Inkscape::XML::Node *xml, Inkscape::Extension::Extension 
  *
  * @param  in   The value to set to.
  */
-float ParamFloat::set(float in)
+double ParamFloat::set(double in)
 {
     _value = in;
     if (_value > _max) {
@@ -102,12 +104,8 @@ float ParamFloat::set(float in)
 
 std::string ParamFloat::value_to_string() const
 {
-    char value_string[G_ASCII_DTOSTR_BUF_SIZE];
-    // TODO: Some strange rounding is going on here, resulting in parameter values quite different
-    //       from the original string value. Needs some investigation to make it less bad.
-    //       See also https://gitlab.gnome.org/GNOME/glib/issues/964
-    g_ascii_dtostr(value_string, G_ASCII_DTOSTR_BUF_SIZE, _value);
-    return value_string;
+    static constexpr auto digits10 = std::numeric_limits<double>::digits10; // number of decimal digits that are ensured to be precise
+    return Glib::ustring::format(std::setprecision(digits10), _value);
 }
 
 /** A class to make an adjustment that uses Extension params. */

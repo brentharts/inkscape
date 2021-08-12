@@ -48,7 +48,7 @@ namespace Tools {
 static void sp_gradient_drag(GradientTool &rc, Geom::Point const pt, guint state, guint32 etime);
 
 const std::string& GradientTool::getPrefsPath() {
-	return GradientTool::prefsPath;
+   return GradientTool::prefsPath;
 }
 
 const std::string GradientTool::prefsPath = "/tools/gradient";
@@ -116,7 +116,7 @@ void GradientTool::selection_changed(Inkscape::Selection*) {
                 _("%s selected"),
                 //TRANSLATORS: Mind the space in front. This is part of a compound message
                 ngettext(" out of %d gradient handle"," out of %d gradient handles",n_tot),
-                ngettext(" on %d selected object"," on %d selected objects",n_obj),NULL);
+                ngettext(" on %d selected object"," on %d selected objects",n_obj),nullptr);
             message_context->setF(Inkscape::NORMAL_MESSAGE,
                                   message,_(gr_handle_descr[drag->singleSelectedDraggerSingleDraggableType()]), n_tot, n_obj);
         } else {
@@ -125,14 +125,14 @@ void GradientTool::selection_changed(Inkscape::Selection*) {
                 ngettext("One handle merging %d stop (drag with <b>Shift</b> to separate) selected",
                          "One handle merging %d stops (drag with <b>Shift</b> to separate) selected",drag->singleSelectedDraggerNumDraggables()),
                 ngettext(" out of %d gradient handle"," out of %d gradient handles",n_tot),
-                ngettext(" on %d selected object"," on %d selected objects",n_obj),NULL);
+                ngettext(" on %d selected object"," on %d selected objects",n_obj),nullptr);
             message_context->setF(Inkscape::NORMAL_MESSAGE,message,drag->singleSelectedDraggerNumDraggables(), n_tot, n_obj);
         }
     } else if (n_sel > 1) {
         //TRANSLATORS: The plural refers to number of selected gradient handles. This is part of a compound message (part two indicates selected object count)
         gchar * message = g_strconcat(ngettext("<b>%d</b> gradient handle selected out of %d","<b>%d</b> gradient handles selected out of %d",n_sel),
                                       //TRANSLATORS: Mind the space in front. (Refers to gradient handles selected). This is part of a compound message
-                                      ngettext(" on %d selected object"," on %d selected objects",n_obj),NULL);
+                                      ngettext(" on %d selected object"," on %d selected objects",n_obj),nullptr);
         message_context->setF(Inkscape::NORMAL_MESSAGE,message, n_sel, n_tot, n_obj);
     } else if (n_sel == 0) {
         message_context->setF(Inkscape::NORMAL_MESSAGE,
@@ -155,14 +155,17 @@ void GradientTool::setup() {
     Inkscape::Selection *selection = this->desktop->getSelection();
 
     this->selcon = new sigc::connection(selection->connectChanged(
-    	sigc::mem_fun(this, &GradientTool::selection_changed)
+       sigc::mem_fun(this, &GradientTool::selection_changed)
     ));
 
-    this->subselcon = new sigc::connection(this->desktop->connectToolSubselectionChanged(
-    	sigc::hide(sigc::bind(
-    		sigc::mem_fun(this, &GradientTool::selection_changed),
-    		(Inkscape::Selection*)nullptr
-    	))
+    subselcon = new sigc::connection(desktop->connect_gradient_stop_selected(
+        [=](void* sender, SPStop* stop) {
+          selection_changed(nullptr);
+          if (stop) {
+             // sync stop selection:
+            _grdrag->selectByStop(stop, false, true);
+          }
+        }
     ));
 
     this->selection_changed(selection);
@@ -471,7 +474,7 @@ bool GradientTool::root_handler(GdkEvent* event) {
                 // always resets selection to the single object under cursor
                 sp_gradient_context_add_stop_near_point(this, selection->items().front(), mousepoint_doc, event->button.time);
             } else {
-            	auto items= selection->items();
+               auto items= selection->items();
                 for (auto i = items.begin();i!=items.end();++i) {
                     SPItem *item = *i;
                     SPGradientType new_type = (SPGradientType) prefs->getInt("/tools/gradient/newgradient", SP_GRADIENT_TYPE_LINEAR);
@@ -750,7 +753,7 @@ bool GradientTool::root_handler(GdkEvent* event) {
     }
 
     if (!ret) {
-    	ret = ToolBase::root_handler(event);
+       ret = ToolBase::root_handler(event);
     }
 
     return ret;
@@ -775,7 +778,7 @@ static void sp_gradient_drag(GradientTool &rc, Geom::Point const pt, guint /*sta
         } else {
             // Starting from empty space:
             // Sort items so that the topmost comes last
-        	std::vector<SPItem*> items(selection->items().begin(), selection->items().end());
+           std::vector<SPItem*> items(selection->items().begin(), selection->items().end());
             sort(items.begin(),items.end(),sp_item_repr_compare_position_bool);
             // take topmost
             vector = sp_gradient_vector_for_object(document, desktop, items.back(), fill_or_stroke);

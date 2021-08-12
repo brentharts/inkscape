@@ -25,6 +25,7 @@
 #include "document-undo.h"
 
 #include "object/sp-namedview.h"
+#include "snap-enums.h"
 
 // There are four snapping lists that must be connected:
 // 1. The attribute name in NamedView: e.g. "inkscape:snap-bbox".
@@ -45,7 +46,7 @@ void set_canvas_snapping(SPDocument* document, const SPAttr option, std::optiona
         return;
     }
 
-    // This is a bit ackward.
+    // This is a bit awkward.
     SPObject* obj = document->getObjectByRepr(repr);
     SPNamedView* nv = dynamic_cast<SPNamedView *> (obj);
     if (nv == nullptr) {
@@ -63,6 +64,20 @@ void set_canvas_snapping(SPDocument* document, const SPAttr option, std::optiona
         case SPAttr::INKSCAPE_SNAP_GLOBAL:
             v = nv->snap_manager.snapprefs.getSnapEnabledGlobally();
             repr->setAttributeBoolean("inkscape:snap-global", value(!v));
+            break;
+
+        case SPAttr::INKSCAPE_SNAP_ALIGNMENT:
+            v = nv->snap_manager.snapprefs.isTargetSnappable(Inkscape::SNAPTARGET_ALIGNMENT_CATEGORY);
+            repr->setAttributeBoolean("inkscape:snap-alignment", !v);
+            break;
+        case SPAttr::INKSCAPE_SNAP_ALIGNMENT_SELF:
+            v = nv->snap_manager.snapprefs.isTargetSnappable(Inkscape::SNAPTARGET_ALIGNMENT_HANDLE);
+            repr->setAttributeBoolean("inkscape:snap-alignment-self", !v);
+            break;
+
+        case SPAttr::INKSCAPE_SNAP_DISTRIBUTION:
+            v = nv->snap_manager.snapprefs.isTargetSnappable(Inkscape::SNAPTARGET_DISTRIBUTION_CATEGORY);
+            repr->setAttributeBoolean("inkscape:snap-distribution", !v);
             break;
 
         // BBox
@@ -218,9 +233,14 @@ SnapVector snap_node = {
 };
 
 SnapVector snap_alignment = {
-    // to be added when available
-    // { "snap-alignment", ... },
-    // { "snap-alignment-self", ... },
+    { "snap-distribution",       SPAttr::INKSCAPE_SNAP_DISTRIBUTION },
+    { "snap-alignment",          SPAttr::INKSCAPE_SNAP_ALIGNMENT },
+    { "snap-alignment-self",     SPAttr::INKSCAPE_SNAP_ALIGNMENT_SELF,     false },
+    { "snap-bbox",               SPAttr::INKSCAPE_SNAP_BBOX,               true },
+    { "snap-bbox-edge",          SPAttr::INKSCAPE_SNAP_BBOX_EDGE,          true },
+    { "snap-bbox-corner",        SPAttr::INKSCAPE_SNAP_BBOX_CORNER,        false },
+    { "snap-bbox-center",        SPAttr::INKSCAPE_SNAP_BBOX_MIDPOINT,      false },
+    { "snap-bbox-edge-midpoint", SPAttr::INKSCAPE_SNAP_BBOX_EDGE_MIDPOINT, false },
 };
 
 SnapVector snap_all_the_rest = {
@@ -306,6 +326,11 @@ void apply_simple_snap_defaults(SPDocument* document) {
 std::vector<std::vector<Glib::ustring>> raw_data_canvas_snapping =
 {
     {"doc.snap-global-toggle",        N_("Snapping"),                          "Snap",  N_("Toggle snapping on/off")                             },
+
+    {"doc.snap-alignment",            N_("Snap Objects that Align"),           "Snap",  N_("Toggle alignment snapping")                          },
+    {"doc.snap-alignment-self",       N_("Snap Nodes that Align"),             "Snap",  N_("Toggle alignment snapping to nodes in the same path")},
+
+    {"doc.snap-distribution",         N_("Snap Objects at Equal Distances"),   "Snap",  N_("Toggle snapping objects at equal distances")},
 
     {"doc.snap-bbox",                 N_("Snap Bounding Boxes"),               "Snap",  N_("Toggle snapping to bounding boxes (global)")         },
     {"doc.snap-bbox-edge",            N_("Snap Bounding Box Edges"),           "Snap",  N_("Toggle snapping to bounding-box edges")              },
@@ -408,7 +433,7 @@ set_actions_canvas_snapping(SPDocument* document)
         return;
     }
 
-    // This is a bit ackward.
+    // This is a bit awkward.
     SPObject* obj = document->getObjectByRepr(repr);
     SPNamedView* nv = dynamic_cast<SPNamedView *> (obj);
 
@@ -425,6 +450,13 @@ set_actions_canvas_snapping(SPDocument* document)
 
     bool global = nv->snap_manager.snapprefs.getSnapEnabledGlobally();
     set_actions_canvas_snapping_helper(map, "snap-global-toggle", global, true); // Always enabled
+
+    bool alignment = nv->snap_manager.snapprefs.isTargetSnappable(Inkscape::SNAPTARGET_ALIGNMENT_CATEGORY);
+    set_actions_canvas_snapping_helper(map, "snap-alignment", alignment, global);
+    set_actions_canvas_snapping_helper(map, "snap-alignment-self",     nv->snap_manager.snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_ALIGNMENT_HANDLE),   global && alignment);
+
+    bool distribution = nv->snap_manager.snapprefs.isTargetSnappable(Inkscape::SNAPTARGET_DISTRIBUTION_CATEGORY);
+    set_actions_canvas_snapping_helper(map, "snap-distribution", distribution, global);
 
     bool bbox = nv->snap_manager.snapprefs.isTargetSnappable(Inkscape::SNAPTARGET_BBOX_CATEGORY);
     set_actions_canvas_snapping_helper(map, "snap-bbox", bbox, global);

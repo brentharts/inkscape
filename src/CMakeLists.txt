@@ -4,6 +4,7 @@
 # -----------------------------------------------------------------------------
 
 set(inkscape_SRC
+  alignment-snapper.cpp
   attribute-rel-css.cpp
   attribute-rel-svg.cpp
   attribute-rel-util.cpp
@@ -21,6 +22,7 @@ set(inkscape_SRC
   desktop-style.cpp
   desktop.cpp
   device-manager.cpp
+  distribution-snapper.cpp
   document-subset.cpp
   document-undo.cpp
   document.cpp
@@ -88,6 +90,7 @@ set(inkscape_SRC
 
   # -------
   # Headers
+  alignment-snapper.h
   attribute-rel-css.h
   attribute-rel-svg.h
   attribute-rel-util.h
@@ -111,6 +114,7 @@ set(inkscape_SRC
   desktop-style.h
   desktop.h
   device-manager.h
+  distribution-snapper.h
   document-subset.h
   document-undo.h
   document.h

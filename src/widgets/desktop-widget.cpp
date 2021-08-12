@@ -82,6 +82,11 @@
 #include "toolbox.h"
 #include "widget-sizes.h"
 
+#include "ui/widget/color-palette.h"
+#include "ui/widget/preview.h"
+#include "ui/dialog/color-item.h"
+#include "widgets/ege-paint-def.h"
+
 #ifdef GDK_WINDOWING_QUARTZ
 #include <gtkosxapplication.h>
 #endif
@@ -206,9 +211,43 @@ SPDesktopWidget::SPDesktopWidget()
 
     /* Swatches panel */
     {
+        // auto panel = Gtk::manage(new Inkscape::UI::Widget::ColorPalette());
+        // auto sets = Inkscape::UI::Dialog::SwatchesPanel::getSwatchSets();
+    /*
+		  std::vector<Widget*> vc;
+		  
+		  Inkscape::UI::Dialog::ColorItem rm(ege::PaintDef::NONE);
+		  vc.push_back(rm.createWidget());
+		  for (auto& c : sets[1]->_colors) {
+			  vc.push_back(c.createWidget());
+			//   getPreview(Inkscape::UI::Widget::PREVIEW_STYLE_ICON, Inkscape::UI::Widget::VIEW_TYPE_GRID,
+			//   Inkscape::UI::Widget::PREVIEW_SIZE_TINY, 100, 0));
+		  }
+		  panel->set_colors(vc);
+		  std::vector<Glib::ustring> names;
+		  for (auto& pal : sets) {
+			  names.push_back(pal->_name);
+		  }
+		  panel->set_palettes(names);
+		  panel->get_palette_selected_signal().connect([=](Glib::ustring name){
+				auto sets = Inkscape::UI::Dialog::SwatchesPanel::getSwatchSets();
+			  auto pal = std::find_if(sets.begin(), sets.end(), [&](auto& set){ return set->_name == name; });
+			  if (pal != sets.end()) {
+				  //
+		  std::vector<Widget*> vc;
+		  for (auto& c : (*pal)->_colors) {
+			  vc.push_back(c.getPreview(Inkscape::UI::Widget::PREVIEW_STYLE_ICON, Inkscape::UI::Widget::VIEW_TYPE_GRID,
+			  Inkscape::UI::Widget::PREVIEW_SIZE_TINY, 100, 0));
+		  }
+		  panel->set_colors(vc);
+			  }
+		  });
+      */
+      //   panel->set_vexpand(false);
         dtw->_panels = Gtk::manage(new Inkscape::UI::Dialog::SwatchesPanel("/embedded/swatches"));
         dtw->_panels->set_vexpand(false);
         dtw->_vbox->pack_end(*dtw->_panels, false, true);
+        // dtw->_vbox->pack_end(*panel, false, true);
     }
 
     /* DesktopHBox (Vertical toolboxes, canvas) */
@@ -612,8 +651,8 @@ void SPDesktopWidget::on_realize()
     GtkSettings *settings = gtk_settings_get_default();
     Gtk::Container *window = get_toplevel();
     if (settings && window) {
-        g_object_get(settings, "gtk-theme-name", &gtkThemeName, NULL);
-        g_object_get(settings, "gtk-application-prefer-dark-theme", &gtkApplicationPreferDarkTheme, NULL);
+        g_object_get(settings, "gtk-theme-name", &gtkThemeName, nullptr);
+        g_object_get(settings, "gtk-application-prefer-dark-theme", &gtkApplicationPreferDarkTheme, nullptr);
         bool dark = INKSCAPE.themecontext->isCurrentThemeDark(dynamic_cast<Gtk::Container *>(window));
         if (dark) {
             prefs->setBool("/theme/darkTheme", true);
@@ -686,17 +725,6 @@ void SPDesktopWidget::updateNamedview()
 
     updateTitle( desktop->doc()->getDocumentName() );
 }
-
-/**
- * Code to run when the document changes (usually because the desktop has changed)
- */
-void SPDesktopWidget::updateDocument()
-{
-    if (_panels) {
-        _panels->setDocumentIfClosed(desktop->doc());
-    }
-}
-
 
 /**
  * Callback to handle desktop widget event.
@@ -1233,7 +1261,6 @@ void SPDesktopWidget::layoutWidgets()
         dtw->_panels->hide();
     } else {
         dtw->_panels->show_all();
-        _panels->setDocumentIfClosed(desktop->doc());
     }
 
     _canvas_grid->ShowScrollbars(prefs->getBool(pref_root + "scrollbars/state", true));
@@ -1993,7 +2020,7 @@ SPDesktopWidget::on_ruler_box_button_release_event(GdkEventButton *event, Gtk::W
 bool
 SPDesktopWidget::on_ruler_box_button_press_event(GdkEventButton *event, Gtk::Widget *widget, bool horiz)
 {
-    if (_ruler_clicked) // event triggerred on a double click: do no process the click
+    if (_ruler_clicked) // event triggered on a double click: do no process the click
         return false;
 
     int wx, wy;
