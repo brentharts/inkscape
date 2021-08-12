@@ -56,6 +56,9 @@ SingleExport::~SingleExport()
     ;
 }
 
+/**
+ * Initialise Builder Objects. Called in Export constructor.
+ */
 void SingleExport::initialise(const Glib::RefPtr<Gtk::Builder> &builder)
 {
     builder->get_widget("si_s_document", selection_buttons[SELECTION_DRAWING]);
@@ -105,6 +108,7 @@ void SingleExport::initialise(const Glib::RefPtr<Gtk::Builder> &builder)
     builder->get_widget_derived("s_scroll", temp);
 }
 
+// Inkscape Selection Modified CallBack
 void SingleExport::selectionModified(Inkscape::Selection *selection, guint flags)
 {
     if (!_desktop || _desktop->getSelection() != selection) {
@@ -120,26 +124,29 @@ void SingleExport::selectionModified(Inkscape::Selection *selection, guint flags
         return;
     }
 
-    switch (current_key) {
-        case SELECTION_DRAWING:
-            bbox = doc->getRoot()->desktopVisualBounds();
-            if (bbox) {
-                setArea(bbox->left(), bbox->top(), bbox->right(), bbox->bottom());
-            }
-            break;
-        case SELECTION_SELECTION:
-            if (selection->isEmpty() == false) {
-                bbox = selection->visualBounds();
-                if (bbox) {
-                    setArea(bbox->left(), bbox->top(), bbox->right(), bbox->bottom());
-                }
-            }
-            break;
-        default:
-            /* Do nothing for page or for custom */
-            break;
-    }
-    refreshPreview();
+    // Will Remove this code after testing
+
+    // switch (current_key) {
+    //     case SELECTION_DRAWING:
+    //         bbox = doc->getRoot()->desktopVisualBounds();
+    //         if (bbox) {
+    //             setArea(bbox->left(), bbox->top(), bbox->right(), bbox->bottom());
+    //         }
+    //         break;
+    //     case SELECTION_SELECTION:
+    //         if (selection->isEmpty() == false) {
+    //             bbox = selection->visualBounds();
+    //             if (bbox) {
+    //                 setArea(bbox->left(), bbox->top(), bbox->right(), bbox->bottom());
+    //             }
+    //         }
+    //         break;
+    //     default:
+    //         /* Do nothing for page or for custom */
+    //         break;
+    // }
+
+    refreshArea();
     refreshExportHints();
 }
 
@@ -148,25 +155,31 @@ void SingleExport::selectionChanged(Inkscape::Selection *selection)
     if (!_desktop || _desktop->getSelection() != selection) {
         return;
     }
-
+    Glib::ustring pref_key_name = prefs->getString("/dialogs/export/exportarea/value");
+    for (auto [key, name] : selection_names) {
+        if (name == pref_key_name && current_key != key && key != SELECTION_SELECTION) {
+            selection_buttons[key]->set_active(true);
+            current_key = key;
+            break;
+        }
+    }
     if (selection->isEmpty()) {
         selection_buttons[SELECTION_SELECTION]->set_sensitive(false);
         if (current_key == SELECTION_SELECTION) {
             selection_buttons[(selection_mode)0]->set_active(true); // This causes refresh area
-            // return otherwise refreshArea will be called again
             // even though we are at default key, selection is the one which was original key.
             prefs->setString("/dialogs/export/exportarea/value", selection_names[SELECTION_SELECTION]);
+            // return otherwise refreshArea will be called again
             return;
         }
     } else {
         selection_buttons[SELECTION_SELECTION]->set_sensitive(true);
-        Glib::ustring pref_key_name = prefs->getString("/dialogs/export/exportarea/value");
         if (selection_names[SELECTION_SELECTION] == pref_key_name && current_key != SELECTION_SELECTION) {
             selection_buttons[SELECTION_SELECTION]->set_active();
             return;
         }
     }
-    refreshPreview();
+
     refreshArea();
     refreshExportHints();
 }
@@ -196,9 +209,6 @@ void SingleExport::setup()
     // Refresh values to sync them with defaults.
     refreshArea();
     refreshExportHints();
-
-    // Add preview box here
-    refreshPreview();
 
     // Connect Signals Here
     for (auto [key, button] : selection_buttons) {
@@ -299,6 +309,7 @@ void SingleExport::refreshArea()
             setArea(bbox->min()[Geom::X], bbox->min()[Geom::Y], bbox->max()[Geom::X], bbox->max()[Geom::Y]);
         }
     }
+    refreshPreview();
 }
 
 void SingleExport::refreshExportHints()
@@ -348,6 +359,12 @@ void SingleExport::refreshExportHints()
             original_name = filename;
             si_filename_entry->set_text(filename);
             si_filename_entry->set_position(filename.length());
+        } else {
+            Glib::ustring newName = !doc_export_name.empty() ? doc_export_name : original_name;
+            if (!newName.empty()) {
+                si_filename_entry->set_text(filename);
+                si_filename_entry->set_position(filename.length());
+            }
         }
 
         if (xdpi != 0.0) {
@@ -398,7 +415,6 @@ void SingleExport::onAreaTypeToggle(selection_mode key)
     refreshArea();
     refreshExportHints();
     toggleSpinButtonVisibility();
-    refreshPreview();
 }
 
 void SingleExport::toggleSpinButtonVisibility()
@@ -760,30 +776,27 @@ void SingleExport::setDefaultFilename()
 
 void SingleExport::setDefaultSelectionMode()
 {
-    if (_desktop) {
-        current_key = (selection_mode)0; // default key
-        bool found = false;
-        Glib::ustring pref_key_name = prefs->getString("/dialogs/export/exportarea/value");
-        for (auto [key, name] : selection_names) {
-            if (pref_key_name == name) {
-                current_key = key;
-                found = true;
-                break;
-            }
+    current_key = (selection_mode)0; // default key
+    bool found = false;
+    Glib::ustring pref_key_name = prefs->getString("/dialogs/export/exportarea/value");
+    for (auto [key, name] : selection_names) {
+        if (pref_key_name == name) {
+            current_key = key;
+            found = true;
+            break;
         }
-        if (!found) {
-            pref_key_name = selection_names[current_key];
-        }
+    }
+    if (!found) {
+        pref_key_name = selection_names[current_key];
+    }
 
-        if (current_key == SELECTION_SELECTION && (SP_ACTIVE_DESKTOP->getSelection())->isEmpty()) {
+    if (_desktop) {
+        if (current_key == SELECTION_SELECTION && (_desktop->getSelection())->isEmpty()) {
             current_key = (selection_mode)0;
         }
         if ((_desktop->getSelection())->isEmpty()) {
             selection_buttons[SELECTION_SELECTION]->set_sensitive(false);
         }
-        selection_buttons[current_key]->set_active(true);
-        prefs->setString("/dialogs/export/exportarea/value", pref_key_name);
-
         if (current_key == SELECTION_CUSTOM &&
             (spin_buttons[SPIN_HEIGHT]->get_value() == 0 || spin_buttons[SPIN_WIDTH]->get_value() == 0)) {
             SPDocument *doc;
@@ -793,7 +806,12 @@ void SingleExport::setDefaultSelectionMode()
                               Geom::Point(doc->getWidth().value("px"), doc->getHeight().value("px")));
             setArea(bbox->min()[Geom::X], bbox->min()[Geom::Y], bbox->max()[Geom::X], bbox->max()[Geom::Y]);
         }
+    } else {
+        current_key = (selection_mode)0;
     }
+    selection_buttons[current_key]->set_active(true);
+    prefs->setString("/dialogs/export/exportarea/value", pref_key_name);
+
     toggleSpinButtonVisibility();
 }
 
@@ -839,16 +857,15 @@ bool SingleExport::onProgressDelete(GdkEventAny * /*event*/)
     interrupted = true;
     prog_dlg->set_stopped();
     return TRUE;
-} // end of sp_export_progress_delete()
-
+}
 /// Called when progress is cancelled
 void SingleExport::onProgressCancel()
 {
     interrupted = true;
     prog_dlg->set_stopped();
-} // end of sp_export_progress_cancel()
+}
 
-/// Called for every progress iteration
+// Called for every progress iteration
 unsigned int SingleExport::onProgressCallback(float value, void *dlg)
 {
     auto dlg2 = reinterpret_cast<ExportProgressDialog *>(dlg);
@@ -882,7 +899,7 @@ unsigned int SingleExport::onProgressCallback(float value, void *dlg)
 
     Gtk::Main::iteration(false);
     return TRUE;
-} // end of sp_export_progress_callback()
+}
 
 void SingleExport::refreshPreview()
 {
@@ -902,8 +919,6 @@ void SingleExport::refreshPreview()
     std::vector<SPItem *> selected(_desktop->getSelection()->items().begin(), _desktop->getSelection()->items().end());
     bool hide = si_hide_all->get_active();
 
-    preview->setDocument(_desktop->getDocument());
-
     Unit const *unit = units->getUnit();
     float x0 = getValuePx(spin_buttons[SPIN_X0]->get_value(), unit);
     float x1 = getValuePx(spin_buttons[SPIN_X1]->get_value(), unit);
@@ -913,6 +928,16 @@ void SingleExport::refreshPreview()
     preview->setDbox(x0, x1, y0, y1);
     preview->refreshHide(hide ? &selected : nullptr);
     preview->queueRefresh();
+}
+
+void SingleExport::setDocument(SPDocument *document)
+{
+    if (!preview) {
+        preview = Gtk::manage(new ExportPreview());
+        si_preview_box->pack_start(*preview, true, true, 0);
+        si_preview_box->show_all_children();
+    }
+    preview->setDocument(document);
 }
 
 } // namespace Dialog

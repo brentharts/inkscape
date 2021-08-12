@@ -65,6 +65,12 @@ public:
     void queueRefresh();
     void resetPixels();
 
+    void setSize(int newSize)
+    {
+        size = newSize;
+        resetPixels();
+    }
+
 private:
     void refreshPreview();
     void renderPreview();

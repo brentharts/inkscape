@@ -43,7 +43,7 @@ guchar *sp_icon_doc_icon(SPDocument *doc, Inkscape::Drawing &drawing, gchar cons
             SPItem *item = SP_ITEM(object);
             dbox = item->documentVisualBounds();
         }
-    } else {
+    } else if (doc->getRoot()) {
         // If we still dont have a dbox we will use document coordinates.
         dbox = doc->getRoot()->documentVisualBounds();
     }

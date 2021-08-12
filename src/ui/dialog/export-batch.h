@@ -44,6 +44,7 @@ private:
 
 public:
     void setApp(InkscapeApplication *app) { _app = app; }
+    void setDocument(SPDocument* document);
     void setDesktop(SPDesktop *desktop) { _desktop = desktop; }
     void selectionChanged(Inkscape::Selection *selection);
     void selectionModified(Inkscape::Selection *selection, guint flags);
@@ -72,10 +73,8 @@ private:
     AdvanceOptions advance_options;
 
 private:
+    // Store all items to be displayed in flowbox
     std::map<std::string, BatchItem *> current_items;
-
-private:
-    std::set<SPItem *> added_items;
 
 private:
     bool filename_modified;

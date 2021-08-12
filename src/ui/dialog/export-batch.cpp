@@ -22,6 +22,7 @@
 #include "document-undo.h"
 #include "document.h"
 #include "export-helper.h"
+#include "export-preview.h"
 #include "extension/db.h"
 #include "file.h"
 #include "helper/png-write.h"
@@ -41,6 +42,7 @@
 #include "ui/interface.h"
 #include "ui/widget/scrollprotected.h"
 #include "ui/widget/unit-menu.h"
+
 #ifdef _WIN32
 
 #endif
@@ -51,22 +53,33 @@ namespace Inkscape {
 namespace UI {
 namespace Dialog {
 
+// START OF BATCH ITEM
+
 class BatchItem : public Gtk::FlowBoxChild
 {
 public:
     BatchItem(SPItem *item);
-    ~BatchItem(){};
+    ~BatchItem();
 
 public:
     Gtk::CheckButton selector;
     SPItem *getItem() { return _item; }
     bool isActive() { return selector.get_active(); }
+    void refresh();
 
 private:
     Gtk::Grid grid;
-    // PreviewBox p_box;
+    ExportPreview *preview = nullptr;
     SPItem *_item;
 };
+
+BatchItem::~BatchItem()
+{
+    if (preview) {
+        delete preview;
+        preview = nullptr;
+    }
+}
 
 BatchItem::BatchItem(SPItem *item)
     : grid()
@@ -77,13 +90,38 @@ BatchItem::BatchItem(SPItem *item)
     }
     _item = item;
     grid.attach(selector, 0, 0, 1, 1);
+    grid.set_row_spacing(10);
     Glib::ustring id = _item->getId();
     selector.set_label(id);
     selector.set_active(true);
+
+    if (!preview) {
+        preview = Gtk::manage(new ExportPreview());
+        grid.attach(*preview, 0, 1, 1, 1);
+    }
+
+    preview->setItem(_item);
+    preview->setDocument(_item->document);
+    preview->setSize(64);
+
     add(grid);
     show_all_children();
     show();
+
+    refresh();
 }
+
+void BatchItem::refresh()
+{
+    if (!_item) {
+        return;
+    }
+    preview->queueRefresh();
+}
+
+// END OF BATCH ITEM
+
+// START OF BATCH EXPORT
 
 BatchExport::~BatchExport()
 {
@@ -170,6 +208,8 @@ void BatchExport::setup()
 
     refreshExportHints();
 
+    refreshItems();
+
     // Connect Signals
     for (auto [key, button] : selection_buttons) {
         button->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &BatchExport::onAreaTypeToggle), key));
@@ -185,9 +225,12 @@ void BatchExport::refreshItems()
         return;
     }
     SPDocument *doc = _desktop->getDocument();
+    if (!doc) {
+        return;
+    }
     doc->ensureUpToDate();
 
-    // std::set
+    // Create New List of Items
     std::set<SPItem *> itemsList;
     switch (current_key) {
         case SELECTION_SELECTION: {
@@ -212,21 +255,27 @@ void BatchExport::refreshItems()
         default:
             break;
     }
+
+    // Number of Items
     int num = itemsList.size();
     Glib::ustring label_text = std::to_string(num) + " Items";
     num_elements->set_text(label_text);
 
+    // Create a list of items which are already present but will be removed as they are not present anymore
     std::vector<std::string> toRemove;
     for (auto &[key, val] : current_items) {
         SPItem *item = val->getItem();
         // if item is not present in itemList add it to remove list so that we can remove it
-        if (itemsList.find(item) == itemsList.end()) {
+        auto itemItr = itemsList.find(item);
+        if (itemItr == itemsList.end() || (*itemItr)->getId() != key) {
             toRemove.push_back(key);
         }
     }
+
     // now remove all the items
     for (auto key : toRemove) {
         if (current_items[key]) {
+            // Preview Boxes are GTK managed so simply removing from container will handle delete
             preview_container->remove(*current_items[key]);
             current_items.erase(key);
         }
@@ -235,11 +284,17 @@ void BatchExport::refreshItems()
     // now add which were are new
     for (auto &item : itemsList) {
         auto id = item->getId();
+        // If an Item with same Id is already present, Skip
         if (current_items[id] && current_items[id]->getItem() == item) {
             continue;
         }
+        // Add new item to the end of list
         current_items[id] = Gtk::manage(new BatchItem(item));
         preview_container->insert(*current_items[id], -1);
+    }
+
+    for (auto &[key, val] : current_items) {
+        val->refresh();
     }
 }
 
@@ -294,7 +349,6 @@ void BatchExport::onExport()
     }
 
     int n = 0;
-    int export_count = 0;
 
     // create vector of exports
     int num_rows = export_list->get_rows();
@@ -307,6 +361,10 @@ void BatchExport::onExport()
         dpis.push_back(export_list->get_dpi(i));
     }
 
+    std::vector<SPItem *> selected(_desktop->getSelection()->items().begin(), _desktop->getSelection()->items().end());
+    bool hide = hide_all->get_active();
+
+    // Start Exporting Each Item
     for (auto i = current_items.begin(); i != current_items.end() && !interrupted; ++i) {
         BatchItem *batchItem = i->second;
         if (!batchItem->isActive()) {
@@ -363,9 +421,6 @@ void BatchExport::onExport()
                 unsigned long int width = (int)(area->width() * dpi / DPI_BASE + 0.5);
                 unsigned long int height = (int)(area->height() * dpi / DPI_BASE + 0.5);
 
-                std::vector<SPItem *> selected(_desktop->getSelection()->items().begin(),
-                                               _desktop->getSelection()->items().end());
-                bool hide = hide_all->get_active();
                 exportSuccessful = _export_raster(*area, width, height, dpi, item_filename, true, onProgressCallback,
                                                   prog_dlg, omod, hide ? &selected : nullptr, &advance_options);
             } else {
@@ -438,33 +493,32 @@ void BatchExport::setDefaultFilename()
 
 void BatchExport::setDefaultSelectionMode()
 {
+    current_key = (selection_mode)0; // default key
+    bool found = false;
+    Glib::ustring pref_key_name = prefs->getString("/dialogs/export/batchexportarea/value");
+    for (auto [key, name] : selection_names) {
+        if (pref_key_name == name) {
+            current_key = key;
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        pref_key_name = selection_names[current_key];
+    }
     if (_desktop) {
-        current_key = (selection_mode)0; // default key
-        bool found = false;
-        Glib::ustring pref_key_name = prefs->getString("/dialogs/export/batchexportarea/value");
-        for (auto [key, name] : selection_names) {
-            if (pref_key_name == name) {
-                current_key = key;
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            pref_key_name = selection_names[current_key];
-        }
-
         if (current_key == SELECTION_SELECTION && (_desktop->getSelection())->isEmpty()) {
             current_key = (selection_mode)0;
         }
         if ((_desktop->getSelection())->isEmpty()) {
             selection_buttons[SELECTION_SELECTION]->set_sensitive(false);
         }
-        selection_buttons[current_key]->set_active(true);
-
-        // we need to set pref key because signals above will set set pref == current key but we sometimes change
-        // current key like selection key
-        prefs->setString("/dialogs/export/batchexportarea/value", pref_key_name);
     }
+    selection_buttons[current_key]->set_active(true);
+
+    // we need to set pref key because signals above will set set pref == current key but we sometimes change
+    // current key like selection key
+    prefs->setString("/dialogs/export/batchexportarea/value", pref_key_name);
 }
 
 void BatchExport::setExporting(bool exporting, Glib::ustring const &text)
@@ -509,14 +563,14 @@ bool BatchExport::onProgressDelete(GdkEventAny * /*event*/)
     interrupted = true;
     prog_dlg->set_stopped();
     return TRUE;
-} // end of sp_export_progress_delete()
+}
 
 /// Called when progress is cancelled
 void BatchExport::onProgressCancel()
 {
     interrupted = true;
     prog_dlg->set_stopped();
-} // end of sp_export_progress_cancel()
+}
 
 /// Called for every progress iteration
 unsigned int BatchExport::onProgressCallback(float value, void *dlg)
@@ -552,7 +606,12 @@ unsigned int BatchExport::onProgressCallback(float value, void *dlg)
 
     Gtk::Main::iteration(false);
     return TRUE;
-} // end of sp_export_progress_callback()
+}
+
+void BatchExport::setDocument(SPDocument *document)
+{
+    ;
+}
 
 } // namespace Dialog
 } // namespace UI

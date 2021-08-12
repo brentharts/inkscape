@@ -18,6 +18,7 @@
 #include <gtkmm.h>
 
 #include "display/cairo-utils.h"
+#include "inkscape.h"
 #include "object/sp-defs.h"
 #include "object/sp-item.h"
 #include "object/sp-namedview.h"
@@ -44,7 +45,7 @@ ExportPreview::ExportPreview()
     memset(pixMem, 0x00, size * stride);
 
     auto pb = Gdk::Pixbuf::create_from_data(pixMem, Gdk::COLORSPACE_RGB, true, 8, size, size, stride);
-    image = Gtk::make_managed<Gtk::Image>(pb);
+    image = Gtk::manage(new Gtk::Image(pb));
     image->show();
     // add this image to box here
     this->pack_start(*image, true, true, 0);
@@ -53,9 +54,15 @@ ExportPreview::ExportPreview()
 
 void ExportPreview::resetPixels()
 {
+    if (pixMem) {
+        delete pixMem;
+        pixMem = nullptr;
+    }
     int stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, size);
+    pixMem = new guchar[size * stride];
+    auto pb = Gdk::Pixbuf::create_from_data(pixMem, Gdk::COLORSPACE_RGB, true, 8, size, size, stride);
     memset(pixMem, 0x00, size * stride);
-    image->set(image->get_pixbuf());
+    image->set(pb);
     image->show();
 }
 
@@ -78,6 +85,8 @@ ExportPreview::~ExportPreview()
         delete renderTimer;
         renderTimer = nullptr;
     }
+    _item = nullptr;
+    _document = nullptr;
 }
 
 void ExportPreview::setItem(SPItem *item)
@@ -97,22 +106,20 @@ void ExportPreview::setDbox(double x0, double x1, double y0, double y1)
 
 void ExportPreview::setDocument(SPDocument *document)
 {
-    if (_document != document) {
-        _document = document;
-        if (drawing) {
-            if (_document) {
-                _document->getRoot()->invoke_hide(visionkey);
-            }
-            delete drawing;
-            drawing = nullptr;
-        }
+    if (drawing) {
         if (_document) {
-            drawing = new Inkscape::Drawing();
-            visionkey = SPItem::display_key_new(1);
-            DrawingItem *ai = _document->getRoot()->invoke_show(*drawing, visionkey, SP_ITEM_SHOW_DISPLAY);
-            if (ai) {
-                drawing->setRoot(ai);
-            }
+            _document->getRoot()->invoke_hide(visionkey);
+        }
+        delete drawing;
+        drawing = nullptr;
+    }
+    _document = document;
+    if (_document) {
+        drawing = new Inkscape::Drawing();
+        visionkey = SPItem::display_key_new(1);
+        DrawingItem *ai = _document->getRoot()->invoke_show(*drawing, visionkey, SP_ITEM_SHOW_DISPLAY);
+        if (ai) {
+            drawing->setRoot(ai);
         }
     }
 }
@@ -160,6 +167,9 @@ void ExportPreview::hide_other_items_recursively(SPObject *o, const std::vector<
 
 void ExportPreview::queueRefresh()
 {
+    if (drawing == nullptr) {
+        return;
+    }
     if (!pending) {
         pending = true;
         if (!timer) {
@@ -210,6 +220,9 @@ void ExportPreview::renderPreview()
         renderTimer = new Glib::Timer();
     }
     renderTimer->reset();
+    if (drawing == nullptr) {
+        return;
+    }
 
     if (_document) {
         unsigned unused;

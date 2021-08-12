@@ -63,6 +63,7 @@ private:
     void onPageSwitch(Widget* page, guint page_number);
 
 private:
+    void documentReplaced() override;
     void desktopReplaced() override;
     void selectionChanged(Inkscape::Selection *selection) override;
     void selectionModified(Inkscape::Selection *selection, guint flags) override;

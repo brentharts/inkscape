@@ -103,9 +103,17 @@ Export::~Export() {}
 // It prevents gtk_is_widget assertion warning probably.
 void Export::onRealize()
 {
+    if (single_image) {
+        single_image->setDesktop(getDesktop());
+        single_image->setApp(getApp());
+    }
+    if (batch_export) {
+        batch_export->setDesktop(getDesktop());
+        batch_export->setApp(getApp());
+    }
     single_image->setup();
     batch_export->setup();
-    // setDefaultNotebookPage();
+    setDefaultNotebookPage();
 }
 
 // Set current page based on preference/last visited page
@@ -114,6 +122,16 @@ void Export::setDefaultNotebookPage()
     pages[BATCH_EXPORT] = export_notebook->page_num(*batch_export);
     pages[SINGLE_IMAGE] = export_notebook->page_num(*single_image);
     export_notebook->set_current_page(pages[SINGLE_IMAGE]);
+}
+
+void Export::documentReplaced()
+{
+    if (single_image) {
+        single_image->setDocument(getDocument());
+    }
+    if (batch_export) {
+        batch_export->setDocument(getDocument());
+    }
 }
 
 void Export::desktopReplaced()
