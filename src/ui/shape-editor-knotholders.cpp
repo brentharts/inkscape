@@ -916,8 +916,7 @@ static Geom::Affine getMarkerRotation(SPItem* item, double edit_rotation, bool r
     Geom::Affine rot = Geom::Rotate::from_degrees(0.0);
 
     if (sp_marker->orient_mode == MARKER_ORIENT_AUTO_START_REVERSE) {
-        /* fix */
-        //rot = reverse? Geom::Rotate::from_degrees(-180.0) : Geom::Rotate::from_degrees(180.0) ;
+        rot = Geom::Rotate::from_degrees(180.0);
     } else if (sp_marker->orient_mode == MARKER_ORIENT_ANGLE) {
         rot = reverse? Geom::Rotate::from_degrees(-sp_marker->orient.computed + edit_rotation) : Geom::Rotate::from_degrees(sp_marker->orient.computed - edit_rotation);
     }
@@ -1002,7 +1001,15 @@ MarkerKnotHolderEntityScale::set_internal(Geom::Point const &p, Geom::Point cons
         * Geom::Translate(getMarkerBounds(item, desktop).min()) 
         * Geom::Rotate::from_degrees(_edit_rotation) 
         * Geom::Rotate::from_degrees(-sp_marker->orient.computed);
-    } 
+    } else if (sp_marker->orient_mode == MARKER_ORIENT_AUTO_START_REVERSE) {
+        adjusted_origin = adjusted_origin
+        * Geom::Translate(getMarkerBounds(item, desktop).min()) 
+        * Geom::Rotate::from_degrees(180.0);
+
+        adjusted_p = adjusted_p
+        * Geom::Translate(getMarkerBounds(item, desktop).min()) 
+        * Geom::Rotate::from_degrees(180.0);
+    }
 
     gdouble orig_width = original_width * original_scaleX;
     gdouble orig_height = original_height * original_scaleY;
@@ -1093,7 +1100,7 @@ MarkerKnotHolderEntityOrient::knot_set(Geom::Point const &p, Geom::Point const &
         /* if the marker is set to auto or auto-start-reverse, set its type to orient 
         since users will want to alter orientation with this knot. Also set default angle */
         if (sp_marker->orient_mode != MARKER_ORIENT_ANGLE) {
-            sp_marker->orient = _edit_rotation;
+            sp_marker->orient = ((sp_marker->orient_mode == MARKER_ORIENT_AUTO_START_REVERSE) ? _edit_rotation + 180.0 : _edit_rotation);
             sp_marker->orient_mode = MARKER_ORIENT_ANGLE;
             sp_marker->orient_set = true;
         }

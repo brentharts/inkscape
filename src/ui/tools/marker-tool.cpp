@@ -185,6 +185,11 @@ ShapeRecord MarkerTool::get_marker_transform(SPShape* shape, SPItem *parent_item
         } 
     }
 
+    /* orientation is auto-start-reverse, reverse marker */
+    if (sp_marker->orient.computed == MARKER_ORIENT_AUTO_START_REVERSE) {
+        ret = Geom::Rotate::from_degrees( 180.0 ) * ret;
+    }
+
     /* scale by stroke width */
     ret = scale * ret;
     /* account for parent transform */
