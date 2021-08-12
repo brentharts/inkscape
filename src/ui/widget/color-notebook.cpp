@@ -85,7 +85,7 @@ ColorNotebook::Page::Page(Inkscape::UI::ColorSelectorFactory *selector_factory, 
 }
 
 void ColorNotebook::set_label(const Glib::ustring& label) {
-    _label->set_text(label);
+    _label->set_markup(label);
 }
 
 void ColorNotebook::_initUI()

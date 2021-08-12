@@ -430,15 +430,11 @@ SPCanvas {
 /* InkSpinScale */
 #InkSpinScale {
     background: @theme_bg_color;
-    border: 1px black;
-    border-radius: 3px;
     padding: 0px;
+    margin: 2px 4px;
 }
 
 #InkSpinScale spinbutton {
-    border-color: #eee;
-    border-width: 0 0 0 0;
-    border-radius: 0 3px 3px 0;
     box-shadow: none;
     padding: 0 0 0 1px;
     min-height: 10px;
@@ -467,7 +463,8 @@ SPCanvas {
 }
 
 #InkSpinScale trough {
-    min-height: 30px;
+    min-height: 26px;
+    margin: 2px; /* some themes have humongous scale margins; rein in */
 }
 
 #InkSpinScale box.active {
