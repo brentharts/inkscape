@@ -144,10 +144,10 @@ protected:
     UI::Widget::ToleranceSlider       _rsu_gusn;
     UI::Widget::ToleranceSlider       _rsu_assn;
     UI::Widget::ToleranceSlider       _rsu_dssn;
-    UI::Widget::RegisteredCheckButton _rcb_snclp;
-    UI::Widget::RegisteredCheckButton _rcb_snmsk;
-    UI::Widget::RegisteredCheckButton _rcb_perp;
-    UI::Widget::RegisteredCheckButton _rcb_tang;
+    // UI::Widget::RegisteredCheckButton _rcb_snclp;
+    // UI::Widget::RegisteredCheckButton _rcb_snmsk;
+    // UI::Widget::RegisteredCheckButton _rcb_perp;
+    // UI::Widget::RegisteredCheckButton _rcb_tang;
     //---------------------------------------------------------------
     Gtk::Button         _unlink_btn;
     class AvailableProfilesColumns : public Gtk::TreeModel::ColumnRecord
