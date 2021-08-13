@@ -495,7 +495,7 @@ void Inkscape::SelTrans::ungrab()
 
         if (_center_is_set) {
             // we were dragging center; update reprs and commit undoable action
-        	auto items= _desktop->selection->items();
+            auto items= _desktop->selection->items();
             for (auto iter=items.begin();iter!=items.end(); ++iter) {
                 SPItem *it = *iter;
                 it->updateRepr();
@@ -529,7 +529,7 @@ void Inkscape::SelTrans::stamp()
 
     /* stamping mode */
     if (!_empty) {
-    	std::vector<SPItem*> l;
+        std::vector<SPItem*> l;
         if (!_stamp_cache.empty()) {
             l = _stamp_cache;
         } else {
@@ -815,7 +815,7 @@ void Inkscape::SelTrans::handleClick(SPKnot *knot, guint state, SPSelTransHandle
         case HANDLE_CENTER:
             if (state & GDK_SHIFT_MASK) {
                 // Unset the  center position for all selected items
-            	auto items = _desktop->selection->items();
+                auto items = _desktop->selection->items();
                 for (auto iter=items.begin();iter!=items.end(); ++iter) {
                     SPItem *it = *iter;
                     it->unsetCenter();
@@ -1102,6 +1102,7 @@ gboolean Inkscape::SelTrans::distributeDragRequest(SPSelTransHandle const &handl
 
     double xposition[_items.size()];
     double yposition[_items.size()];
+    double smallest_x, smallest_y, largest_x, largest_y;
 
     for (unsigned i = 0; i < _items.size(); i++) {
         xposition[i] = _items[i] -> geometricBounds() -> min()[Geom::X];
@@ -1110,20 +1111,33 @@ gboolean Inkscape::SelTrans::distributeDragRequest(SPSelTransHandle const &handl
 
     if (_sorted == false) {
 
-        double smallest_x = _items[0] -> geometricBounds() -> min()[Geom::X];
-        double smallest_y = _items[0] -> geometricBounds() -> min()[Geom::Y];
-        double largest_x = _items[0] -> geometricBounds() -> min()[Geom::X] + _items[0] -> geometricBounds() -> dimensions()[Geom::X];
-        double largest_y = _items[0] -> geometricBounds() -> min()[Geom::Y] + _items[0] -> geometricBounds() -> dimensions()[Geom::Y];
+        smallest_x = _items[0] -> geometricBounds() -> min()[Geom::X];
+        smallest_y = _items[0] -> geometricBounds() -> min()[Geom::Y];
+        largest_x = _items[0] -> geometricBounds() -> min()[Geom::X] + _items[0] -> geometricBounds() -> dimensions()[Geom::X];
+        largest_y = _items[0] -> geometricBounds() -> min()[Geom::Y] + _items[0] -> geometricBounds() -> dimensions()[Geom::Y];
 
-        for (auto & _item : _items) {
-            if (_item -> geometricBounds() -> min()[Geom::X] < smallest_x)
-                smallest_x = _item -> geometricBounds() -> min()[Geom::X];
-            if (_item -> geometricBounds() -> min()[Geom::Y] < smallest_y)
-                smallest_y = _item -> geometricBounds() -> min()[Geom::Y];
-            if ((_item -> geometricBounds() -> min()[Geom::X] + _items[0] -> geometricBounds() -> dimensions()[Geom::X]) > largest_x)
-                largest_x = _item -> geometricBounds() -> min()[Geom::X] + _items[0] -> geometricBounds() -> dimensions()[Geom::X];
-            if ((_item -> geometricBounds() -> min()[Geom::Y] + _items[0] -> geometricBounds() -> dimensions()[Geom::Y]) > largest_y)
-                largest_y = _item -> geometricBounds() -> min()[Geom::Y] + _items[0] -> geometricBounds() -> dimensions()[Geom::Y];
+        for (unsigned i = 0; i < _items.size(); i++) {
+
+            if (_items[i] -> geometricBounds() -> min()[Geom::X] < smallest_x){
+                smallest_x = _items[i] -> geometricBounds() -> min()[Geom::X];
+                first_item_x = i;
+            }
+
+            if (_items[i] -> geometricBounds() -> min()[Geom::Y] < smallest_y){
+                smallest_y = _items[i] -> geometricBounds() -> min()[Geom::Y];
+                first_item_y = i;
+            }
+
+            if ((_items[i] -> geometricBounds() -> min()[Geom::X] + _items[i] -> geometricBounds() -> dimensions()[Geom::X]) > largest_x){
+                largest_x = _items[i] -> geometricBounds() -> min()[Geom::X] + _items[i] -> geometricBounds() -> dimensions()[Geom::X];
+                last_item_x = i;
+            }
+
+            if ((_items[i] -> geometricBounds() -> min()[Geom::Y] + _items[i] -> geometricBounds() -> dimensions()[Geom::Y]) > largest_y)
+            {
+                largest_y = _items[i] -> geometricBounds() -> min()[Geom::Y] + _items[i] -> geometricBounds() -> dimensions()[Geom::Y];
+                last_item_y = i;
+            }
         }
 
         for (auto & _item : _items) {
@@ -1142,6 +1156,10 @@ gboolean Inkscape::SelTrans::distributeDragRequest(SPSelTransHandle const &handl
         switch (handle.cursor) {
 
         case GDK_TOP_LEFT_CORNER: {
+            if(_items[first_item_y]->geometricBounds()->min()[Geom::Y] >= _items[last_item_y]->geometricBounds()->min()[Geom::Y])
+                delta[Geom::Y] -= selection->geometricBounds()->dimensions()[Geom::Y];
+            if(_items[first_item_x]->geometricBounds()->min()[Geom::X] >= _items[last_item_x]->geometricBounds()->min()[Geom::X])
+                delta[Geom::X] -= selection->geometricBounds()->dimensions()[Geom::X];
             for (unsigned i = 0; i < _items.size(); i++) {
                 _items[i] -> move_rel(Geom::Translate((x_ratio_left.at(i) * delta[Geom::X]), (y_ratio_top.at(i) * delta[Geom::Y])));
             }
@@ -1149,7 +1167,10 @@ gboolean Inkscape::SelTrans::distributeDragRequest(SPSelTransHandle const &handl
         break;
 
         case GDK_TOP_RIGHT_CORNER: {
-            delta[Geom::X] = delta[Geom::X] - selection -> geometricBounds() -> dimensions()[Geom::X];
+            if(_items[first_item_y]->geometricBounds()->min()[Geom::Y] >= _items[last_item_y]->geometricBounds()->min()[Geom::Y])
+                delta[Geom::Y] -= selection->geometricBounds()->dimensions()[Geom::Y];
+            if(_items[first_item_x]->geometricBounds()->min()[Geom::X] <= _items[last_item_x]->geometricBounds()->min()[Geom::X])
+                delta[Geom::X] = delta[Geom::X] - selection -> geometricBounds() -> dimensions()[Geom::X];
             for (unsigned i = 0; i < _items.size(); i++) {
                 _items[i] -> move_rel(Geom::Translate((x_ratio_right.at(i) * delta[Geom::X]), (y_ratio_top.at(i) * delta[Geom::Y])));
             }
@@ -1157,8 +1178,10 @@ gboolean Inkscape::SelTrans::distributeDragRequest(SPSelTransHandle const &handl
         break;
 
         case GDK_BOTTOM_RIGHT_CORNER: {
-            delta[Geom::X] = delta[Geom::X] - selection -> geometricBounds() -> dimensions()[Geom::X];
-            delta[Geom::Y] = delta[Geom::Y] - selection -> geometricBounds() -> dimensions()[Geom::Y];
+            if(_items[first_item_y]->geometricBounds()->min()[Geom::Y] <= _items[last_item_y]->geometricBounds()->min()[Geom::Y])
+                delta[Geom::Y] = delta[Geom::Y] - selection -> geometricBounds() -> dimensions()[Geom::Y];
+            if(_items[first_item_x]->geometricBounds()->min()[Geom::X] <= _items[last_item_x]->geometricBounds()->min()[Geom::X])
+                delta[Geom::X] = delta[Geom::X] - selection -> geometricBounds() -> dimensions()[Geom::X];
             for (unsigned i = 0; i < _items.size(); i++) {
                 _items[i] -> move_rel(Geom::Translate((x_ratio_right.at(i) * delta[Geom::X]), (y_ratio_bottom.at(i) * delta[Geom::Y])));
             }
@@ -1166,7 +1189,10 @@ gboolean Inkscape::SelTrans::distributeDragRequest(SPSelTransHandle const &handl
         break;
 
         case GDK_BOTTOM_LEFT_CORNER: {
-            delta[Geom::Y] = delta[Geom::Y] - selection -> geometricBounds() -> dimensions()[Geom::Y];
+            if(_items[first_item_y]->geometricBounds()->min()[Geom::Y] <= _items[last_item_y]->geometricBounds()->min()[Geom::Y])
+                delta[Geom::Y] = delta[Geom::Y] - selection -> geometricBounds() -> dimensions()[Geom::Y];
+            if(_items[first_item_x]->geometricBounds()->min()[Geom::X] >= _items[last_item_x]->geometricBounds()->min()[Geom::X])
+                delta[Geom::X] -= selection->geometricBounds()->dimensions()[Geom::X];
             for (unsigned i = 0; i < _items.size(); i++) {
                 _items[i] -> move_rel(Geom::Translate((x_ratio_left.at(i) * delta[Geom::X]), (y_ratio_bottom.at(i) * delta[Geom::Y])));
             }
@@ -1181,6 +1207,8 @@ gboolean Inkscape::SelTrans::distributeDragRequest(SPSelTransHandle const &handl
         switch (handle.cursor) {
 
         case GDK_TOP_SIDE: {
+            if(_items[first_item_y]->geometricBounds()->min()[Geom::Y] >= _items[last_item_y]->geometricBounds()->min()[Geom::Y])
+                delta[Geom::Y] -= selection->geometricBounds()->dimensions()[Geom::Y];
             for (unsigned i = 0; i < _items.size(); i++) {
                 _items[i] -> move_rel(Geom::Translate(0, (y_ratio_top.at(i) * delta[Geom::Y])));
             }
@@ -1188,15 +1216,18 @@ gboolean Inkscape::SelTrans::distributeDragRequest(SPSelTransHandle const &handl
         break;
 
         case GDK_RIGHT_SIDE: {
-            delta[Geom::X] = delta[Geom::X] - selection -> geometricBounds() -> dimensions()[Geom::X];
+            if(_items[first_item_x]->geometricBounds()->min()[Geom::X] <= _items[last_item_x]->geometricBounds()->min()[Geom::X])
+                delta[Geom::X] = delta[Geom::X] - selection -> geometricBounds() -> dimensions()[Geom::X];
             for (unsigned i = 0; i < _items.size(); i++) {
                 _items[i] -> move_rel(Geom::Translate((x_ratio_right.at(i) * delta[Geom::X]), 0));
+                // }
             }
         }
         break;
 
         case GDK_BOTTOM_SIDE: {
-            delta[Geom::Y] = delta[Geom::Y] - selection -> geometricBounds() -> dimensions()[Geom::Y];
+            if(_items[first_item_y]->geometricBounds()->min()[Geom::Y] <= _items[last_item_y]->geometricBounds()->min()[Geom::Y])
+                delta[Geom::Y] = delta[Geom::Y] - selection -> geometricBounds() -> dimensions()[Geom::Y];
             for (unsigned i = 0; i < _items.size(); i++) {
                 _items[i] -> move_rel(Geom::Translate(0, (y_ratio_bottom.at(i) * delta[Geom::Y])));
             }
@@ -1204,6 +1235,8 @@ gboolean Inkscape::SelTrans::distributeDragRequest(SPSelTransHandle const &handl
         break;
 
         case GDK_LEFT_SIDE: {
+            if(_items[first_item_x]->geometricBounds()->min()[Geom::X] >= _items[last_item_x]->geometricBounds()->min()[Geom::X])
+                delta[Geom::X] -= selection->geometricBounds()->dimensions()[Geom::X];
             for (unsigned i = 0; i < _items.size(); i++) {
                 _items[i] -> move_rel(Geom::Translate((x_ratio_left.at(i) * delta[Geom::X]), 0));
             }

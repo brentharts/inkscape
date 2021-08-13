@@ -153,6 +153,10 @@ private:
     bool _empty;
     bool _changed;
     bool _sorted = false;
+    int last_item_x = 0;
+    int first_item_x = 0;
+    int last_item_y = 0;
+    int first_item_y = 0;
 
     std::vector <double> x_ratio_right;
     std::vector <double> y_ratio_bottom;
