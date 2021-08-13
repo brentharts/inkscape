@@ -1274,7 +1274,6 @@ void SPDesktopWidget::layoutWidgets()
     auto& snap = *Glib::wrap(snap_toolbox);
     auto& aux = *Glib::wrap(aux_toolbox);
 
-    g_warning ("chil %d  vis: %d", (int) _top_toolbars->get_children().size(), gtk_widget_get_visible(commands_toolbox)?1:0);
     if (_top_toolbars->get_children().size() == 3 && gtk_widget_get_visible(commands_toolbox)) {
         _top_toolbars->child_property_height(snap) =  1;
         _top_toolbars->child_property_width(aux) = 2;

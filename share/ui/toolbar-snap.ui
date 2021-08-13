@@ -5,7 +5,7 @@
   <object class="GtkPopover" id="advanced">
     <property name="can-focus">False</property>
     <child>
-      <!-- n-columns=3 n-rows=32 -->
+      <!-- n-columns=3 n-rows=35 -->
       <object class="GtkGrid">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
@@ -210,7 +210,7 @@
           </object>
           <packing>
             <property name="left-attach">1</property>
-            <property name="top-attach">17</property>
+            <property name="top-attach">19</property>
           </packing>
         </child>
         <child>
@@ -225,7 +225,7 @@
           </object>
           <packing>
             <property name="left-attach">0</property>
-            <property name="top-attach">16</property>
+            <property name="top-attach">18</property>
             <property name="width">2</property>
           </packing>
         </child>
@@ -241,7 +241,7 @@
           </object>
           <packing>
             <property name="left-attach">1</property>
-            <property name="top-attach">18</property>
+            <property name="top-attach">20</property>
           </packing>
         </child>
         <child>
@@ -256,7 +256,7 @@
           </object>
           <packing>
             <property name="left-attach">1</property>
-            <property name="top-attach">19</property>
+            <property name="top-attach">21</property>
           </packing>
         </child>
         <child>
@@ -271,7 +271,7 @@
           </object>
           <packing>
             <property name="left-attach">0</property>
-            <property name="top-attach">27</property>
+            <property name="top-attach">29</property>
             <property name="width">2</property>
           </packing>
         </child>
@@ -287,7 +287,7 @@
           </object>
           <packing>
             <property name="left-attach">0</property>
-            <property name="top-attach">28</property>
+            <property name="top-attach">30</property>
             <property name="width">2</property>
           </packing>
         </child>
@@ -303,7 +303,7 @@
           </object>
           <packing>
             <property name="left-attach">0</property>
-            <property name="top-attach">29</property>
+            <property name="top-attach">31</property>
             <property name="width">2</property>
           </packing>
         </child>
@@ -311,7 +311,10 @@
           <object class="GtkLabel">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="label" translatable="yes">       </property>
+            <property name="label" translatable="yes"> </property>
+            <attributes>
+              <attribute name="scale" value="0.5"/>
+            </attributes>
           </object>
           <packing>
             <property name="left-attach">1</property>
@@ -323,6 +326,9 @@
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="label" translatable="yes">       </property>
+            <attributes>
+              <attribute name="scale" value="0.5"/>
+            </attributes>
           </object>
           <packing>
             <property name="left-attach">1</property>
@@ -334,10 +340,13 @@
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="label" translatable="yes">       </property>
+            <attributes>
+              <attribute name="scale" value="0.5"/>
+            </attributes>
           </object>
           <packing>
             <property name="left-attach">1</property>
-            <property name="top-attach">15</property>
+            <property name="top-attach">17</property>
           </packing>
         </child>
         <child>
@@ -345,10 +354,13 @@
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="label" translatable="yes">       </property>
+            <attributes>
+              <attribute name="scale" value="0.5"/>
+            </attributes>
           </object>
           <packing>
             <property name="left-attach">1</property>
-            <property name="top-attach">22</property>
+            <property name="top-attach">24</property>
           </packing>
         </child>
         <child>
@@ -363,7 +375,7 @@
           </object>
           <packing>
             <property name="left-attach">0</property>
-            <property name="top-attach">23</property>
+            <property name="top-attach">25</property>
             <property name="width">2</property>
           </packing>
         </child>
@@ -372,10 +384,13 @@
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="label" translatable="yes">       </property>
+            <attributes>
+              <attribute name="scale" value="0.5"/>
+            </attributes>
           </object>
           <packing>
             <property name="left-attach">1</property>
-            <property name="top-attach">26</property>
+            <property name="top-attach">28</property>
           </packing>
         </child>
         <child>
@@ -390,7 +405,7 @@
           </object>
           <packing>
             <property name="left-attach">1</property>
-            <property name="top-attach">24</property>
+            <property name="top-attach">26</property>
           </packing>
         </child>
         <child>
@@ -404,7 +419,7 @@
           </object>
           <packing>
             <property name="left-attach">1</property>
-            <property name="top-attach">31</property>
+            <property name="top-attach">33</property>
             <property name="width">2</property>
           </packing>
         </child>
@@ -413,10 +428,13 @@
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="label" translatable="yes">       </property>
+            <attributes>
+              <attribute name="scale" value="0.5"/>
+            </attributes>
           </object>
           <packing>
             <property name="left-attach">1</property>
-            <property name="top-attach">30</property>
+            <property name="top-attach">32</property>
           </packing>
         </child>
         <child>
@@ -546,7 +564,7 @@
           </object>
           <packing>
             <property name="left-attach">2</property>
-            <property name="top-attach">17</property>
+            <property name="top-attach">19</property>
           </packing>
         </child>
         <child>
@@ -559,7 +577,7 @@
           </object>
           <packing>
             <property name="left-attach">2</property>
-            <property name="top-attach">18</property>
+            <property name="top-attach">20</property>
           </packing>
         </child>
         <child>
@@ -572,7 +590,7 @@
           </object>
           <packing>
             <property name="left-attach">2</property>
-            <property name="top-attach">19</property>
+            <property name="top-attach">21</property>
           </packing>
         </child>
         <child>
@@ -585,7 +603,7 @@
           </object>
           <packing>
             <property name="left-attach">2</property>
-            <property name="top-attach">27</property>
+            <property name="top-attach">29</property>
           </packing>
         </child>
         <child>
@@ -598,7 +616,7 @@
           </object>
           <packing>
             <property name="left-attach">2</property>
-            <property name="top-attach">28</property>
+            <property name="top-attach">30</property>
           </packing>
         </child>
         <child>
@@ -611,18 +629,7 @@
           </object>
           <packing>
             <property name="left-attach">2</property>
-            <property name="top-attach">29</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="label" translatable="yes">       </property>
-          </object>
-          <packing>
-            <property name="left-attach">0</property>
-            <property name="top-attach">2</property>
+            <property name="top-attach">31</property>
           </packing>
         </child>
         <child>
@@ -637,7 +644,7 @@
           </object>
           <packing>
             <property name="left-attach">1</property>
-            <property name="top-attach">20</property>
+            <property name="top-attach">22</property>
           </packing>
         </child>
         <child>
@@ -652,7 +659,7 @@
           </object>
           <packing>
             <property name="left-attach">1</property>
-            <property name="top-attach">21</property>
+            <property name="top-attach">23</property>
           </packing>
         </child>
         <child>
@@ -665,7 +672,7 @@
           </object>
           <packing>
             <property name="left-attach">2</property>
-            <property name="top-attach">20</property>
+            <property name="top-attach">22</property>
           </packing>
         </child>
         <child>
@@ -678,7 +685,7 @@
           </object>
           <packing>
             <property name="left-attach">2</property>
-            <property name="top-attach">21</property>
+            <property name="top-attach">23</property>
           </packing>
         </child>
         <child>
@@ -692,7 +699,7 @@
           </object>
           <packing>
             <property name="left-attach">1</property>
-            <property name="top-attach">25</property>
+            <property name="top-attach">27</property>
           </packing>
         </child>
         <child>
@@ -703,7 +710,7 @@
           </object>
           <packing>
             <property name="left-attach">2</property>
-            <property name="top-attach">23</property>
+            <property name="top-attach">25</property>
           </packing>
         </child>
         <child>
@@ -714,7 +721,7 @@
           </object>
           <packing>
             <property name="left-attach">2</property>
-            <property name="top-attach">24</property>
+            <property name="top-attach">26</property>
           </packing>
         </child>
         <child>
@@ -725,8 +732,87 @@
           </object>
           <packing>
             <property name="left-attach">2</property>
-            <property name="top-attach">25</property>
+            <property name="top-attach">27</property>
           </packing>
+        </child>
+        <child>
+          <object class="GtkCheckButton">
+            <property name="label" translatable="yes">Perpendicular lines</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">False</property>
+            <property name="action-name">doc.snap-line-perpendicular</property>
+            <property name="draw-indicator">True</property>
+          </object>
+          <packing>
+            <property name="left-attach">1</property>
+            <property name="top-attach">15</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkCheckButton">
+            <property name="label" translatable="yes">Tangential lines</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">False</property>
+            <property name="action-name">doc.snap-line-tangential</property>
+            <property name="draw-indicator">True</property>
+          </object>
+          <packing>
+            <property name="left-attach">1</property>
+            <property name="top-attach">16</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkImage">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="icon-name">snap-lines-perpendicular</property>
+          </object>
+          <packing>
+            <property name="left-attach">2</property>
+            <property name="top-attach">15</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkImage">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="icon-name">snap-lines-tangential</property>
+          </object>
+          <packing>
+            <property name="left-attach">2</property>
+            <property name="top-attach">16</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="indent-space">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">        </property>
+            <attributes>
+              <attribute name="scale" value="0.5"/>
+            </attributes>
+          </object>
+          <packing>
+            <property name="left-attach">0</property>
+            <property name="top-attach">2</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
         </child>
         <child>
           <placeholder/>
@@ -979,6 +1065,9 @@
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="label" translatable="yes">       </property>
+            <attributes>
+              <attribute name="scale" value="0.5"/>
+            </attributes>
           </object>
           <packing>
             <property name="left-attach">1</property>

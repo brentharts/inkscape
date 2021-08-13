@@ -68,16 +68,16 @@ void set_canvas_snapping(SPDocument* document, const SPAttr option, std::optiona
 
         case SPAttr::INKSCAPE_SNAP_ALIGNMENT:
             v = nv->snap_manager.snapprefs.isTargetSnappable(Inkscape::SNAPTARGET_ALIGNMENT_CATEGORY);
-            repr->setAttributeBoolean("inkscape:snap-alignment", !v);
+            repr->setAttributeBoolean("inkscape:snap-alignment", value(!v));
             break;
         case SPAttr::INKSCAPE_SNAP_ALIGNMENT_SELF:
             v = nv->snap_manager.snapprefs.isTargetSnappable(Inkscape::SNAPTARGET_ALIGNMENT_HANDLE);
-            repr->setAttributeBoolean("inkscape:snap-alignment-self", !v);
+            repr->setAttributeBoolean("inkscape:snap-alignment-self", value(!v));
             break;
 
         case SPAttr::INKSCAPE_SNAP_DISTRIBUTION:
             v = nv->snap_manager.snapprefs.isTargetSnappable(Inkscape::SNAPTARGET_DISTRIBUTION_CATEGORY);
-            repr->setAttributeBoolean("inkscape:snap-distribution", !v);
+            repr->setAttributeBoolean("inkscape:snap-distribution", value(!v));
             break;
 
         // BBox
@@ -185,8 +185,19 @@ void set_canvas_snapping(SPDocument* document, const SPAttr option, std::optiona
             repr->setAttributeBoolean("inkscape:snap-path-mask", value(!v));
             break;
 
+        case SPAttr::INKSCAPE_SNAP_PERP:
+            v = nv->snap_manager.snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_PATH_PERPENDICULAR);
+            repr->setAttributeBoolean("inkscape:snap-perpendicular", value(!v));
+            //TODO: global preferences
+            break;
+        case SPAttr::INKSCAPE_SNAP_TANG:
+            v = nv->snap_manager.snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_PATH_TANGENTIAL);
+            repr->setAttributeBoolean("inkscape:snap-tangential", value(!v));
+            //TODO: global preferences
+            break;
+
         default:
-            std::cerr << "canvas_snapping_toggle: unhandled option!" << std::endl;
+            std::cerr << "canvas_snapping_toggle: unhandled option: " << (int)option << std::endl;
     }
 }
 
@@ -230,6 +241,8 @@ SnapVector snap_node = {
     { "snap-node-cusp",          SPAttr::INKSCAPE_SNAP_NODE_CUSP,          true },
     { "snap-node-smooth",        SPAttr::INKSCAPE_SNAP_NODE_SMOOTH,        true },
     { "snap-line-midpoint",      SPAttr::INKSCAPE_SNAP_LINE_MIDPOINT,      false },
+    { "snap-line-tangential",    SPAttr::INKSCAPE_SNAP_TANG,               false },
+    { "snap-line-perpendicular", SPAttr::INKSCAPE_SNAP_PERP,               false },
 };
 
 SnapVector snap_alignment = {
@@ -344,6 +357,8 @@ std::vector<std::vector<Glib::ustring>> raw_data_canvas_snapping =
     {"doc.snap-node-cusp",            N_("Snap Cusp Nodes"),                   "Snap",  N_("Toggle snapping to cusp nodes, including rectangle corners")},
     {"doc.snap-node-smooth",          N_("Snap Smooth Node"),                  "Snap",  N_("Toggle snapping to smooth nodes, including quadrant points of ellipses")},
     {"doc.snap-line-midpoint",        N_("Snap Line Midpoints"),               "Snap",  N_("Toggle snapping to midpoints of lines")              },
+    {"doc.snap-line-perpendicular",   N_("Snap Perpendicular Lines"),          "Snap",  N_("Toggle snapping to perpendicular lines")             },
+    {"doc.snap-line-tangential",      N_("Snap Tangential Lines"),             "Snap",  N_("Toggle snapping to tangential lines")                },
 
     {"doc.snap-others",               N_("Snap Others"),                       "Snap",  N_("Toggle snapping to misc. points (global)")           },
     {"doc.snap-object-midpoint",      N_("Snap Object Midpoint"),              "Snap",  N_("Toggle snapping to object midpoint")                 },
@@ -483,8 +498,8 @@ set_actions_canvas_snapping(SPDocument* document)
     set_actions_canvas_snapping_helper(map, "snap-grid",               nv->snap_manager.snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_GRID),               global);
     set_actions_canvas_snapping_helper(map, "snap-guide",              nv->snap_manager.snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_GUIDE),              global);
 
-    set_actions_canvas_snapping_helper(map, "snap-path-mask",          nv->snap_manager.snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_PATH_CLIP),          global);
-    set_actions_canvas_snapping_helper(map, "snap-path-clip",          nv->snap_manager.snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_PATH_MASK),          global);
+    set_actions_canvas_snapping_helper(map, "snap-path-clip",          nv->snap_manager.snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_PATH_CLIP),          global);
+    set_actions_canvas_snapping_helper(map, "snap-path-mask",          nv->snap_manager.snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_PATH_MASK),          global);
 
     set_actions_canvas_snapping_helper(map, "simple-snap-bbox", bbox, global);
     set_actions_canvas_snapping_helper(map, "simple-snap-nodes", node, global);
