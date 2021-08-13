@@ -95,11 +95,11 @@ void ColorNotebook::_initUI()
     _book = Gtk::make_managed<Gtk::Stack>();
     _book->show();
 
-    _buttonbox = Gtk::make_managed<Gtk::Box>(); // gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+    _buttonbox = Gtk::make_managed<Gtk::Box>();
     _buttonbox->show();
-    // gtk_widget_show(_buttonbox);
 
     _combo = Gtk::manage(new IconComboBox());
+    _combo->set_can_focus(false);
     _combo->set_visible();
 
     for (auto&& page : _available_pages) {
@@ -110,7 +110,6 @@ void ColorNotebook::_initUI()
     _label->set_visible();
     _buttonbox->pack_start(*_label, false, true);
     _buttonbox->pack_end(*_combo, false, false);
-    // gtk_box_pack_end(GTK_BOX(_buttonbox), GTK_WIDGET(_combo->gobj()), FALSE, FALSE, 0);
     _combo->signal_changed().connect([=](){ _setCurrentPage(_combo->get_active_row_id(), false); });
 
     _buttonbox->set_margin_start(XPAD);
@@ -119,9 +118,7 @@ void ColorNotebook::_initUI()
     _buttonbox->set_margin_bottom(YPAD);
     _buttonbox->set_hexpand();
     _buttonbox->set_valign(Gtk::ALIGN_START);
-    // gtk_widget_set_valign(_buttonbox, GTK_ALIGN_CENTER);
     attach(*_buttonbox, 0, row, 2);
-    // attach(*Glib::wrap(_buttonbox), 0, row, 2, 1);
 
     row++;
 

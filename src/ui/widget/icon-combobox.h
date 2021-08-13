@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#ifndef ICON_COMBO_BOX_SEEN_
+#define ICON_COMBO_BOX_SEEN_
+
 #include <gtkmm/combobox.h>
 #include <gtkmm/liststore.h>
 
@@ -28,20 +31,6 @@ public:
         row[_columns.label] = ' ' + label;
     }
 
-    // void remove_row(int id) {
-    //     Gtk::TreeModel::iterator i;
-
-    //     for (i = _model->children().begin(); i != _model->children().end(); ++i) {
-    //         const Util::EnumData<E>* data = (*i)[_columns.data];
-
-    //         if (data->id == id) break;
-    //     }
-
-    //     if (i != _model->children().end()) {
-    //         _model->erase(i);
-    //     }
-    // }
-
     void set_active_by_id(int id) {
         for (auto i = _model->children().begin(); i != _model->children().end(); ++i) {
             const int data = (*i)[_columns.id];
@@ -51,8 +40,6 @@ public:
             }
         }
     };
-
-    // bool on_scroll_event(GdkEventScroll *event) override { return false; }
 
     int get_active_row_id() const {
         if (auto it = get_active()) {
@@ -82,3 +69,5 @@ private:
 };
 
 }}}
+
+#endif
