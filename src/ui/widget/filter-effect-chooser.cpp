@@ -55,18 +55,20 @@ SimpleFilterModifier::SimpleFilterModifier(int flags)
 {
     set_name("SimpleFilterModifier");
 
+    /* "More options" expander --------
     _extras.set_visible();
-    _extras.set_label(_("Extras"));
+    _extras.set_label(_("More options"));
     auto box = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL);
     _extras.add(*box);
     if (flags & (BLEND | BLUR)) {
         add(_extras);
     }
+    */
 
     _flags = flags;
 
     if (flags & BLEND) {
-        box->add(_hb_blend);
+        add(_hb_blend);
         _lb_blend.set_use_underline();
         _hb_blend.set_halign(Gtk::ALIGN_END);
         _hb_blend.set_valign(Gtk::ALIGN_CENTER);
@@ -94,7 +96,7 @@ SimpleFilterModifier::SimpleFilterModifier(int flags)
     }
 
     if (flags & BLUR) {
-       box->add(_blur);
+       add(_blur);
     }
 
     if (flags & OPACITY) {
