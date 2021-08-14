@@ -10,48 +10,24 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
-
-#include <iomanip>
-
-#include <glibmm/ustring.h>
-#include <glib/gi18n.h>
-#include <gdk/gdkkeysyms.h>
+#include "display/curve.h"
 
 #include "desktop.h"
 #include "document.h"
+#include "style.h"
 #include "message-context.h"
-#include "selection-chemistry.h"
 #include "selection.h"
-#include "snap.h"
 
-#include "display/curve.h"
-#include "display/control/canvas-item-bpath.h"
-#include "display/control/canvas-item-group.h"
-
-#include "live_effects/effect.h"
-#include "live_effects/lpeobject.h"
-
-#include "include/macros.h"
-
-#include "object/sp-clippath.h"
-#include "object/sp-item-group.h"
-#include "object/sp-mask.h"
-#include "object/sp-namedview.h"
 #include "object/sp-path.h"
 #include "object/sp-shape.h"
-#include "object/sp-text.h"
+#include "object/sp-marker.h"
 
 #include "ui/shape-editor.h"
-#include "ui/tool/control-point-selection.h"
-#include "ui/tool/curve-drag-point.h"
 #include "ui/tool/event-utils.h"
 #include "ui/tool/multi-path-manipulator.h"
 #include "ui/tool/path-manipulator.h"
-#include "ui/tool/selector.h"
 #include "ui/tools/marker-tool.h"
 
-#include "object/sp-marker.h"
-#include "style.h"
 
 using Inkscape::DocumentUndo;
 namespace Inkscape {
@@ -65,8 +41,9 @@ const std::string& MarkerTool::getPrefsPath() {
 const std::string MarkerTool::prefsPath = "/tools/marker";
 
 MarkerTool::MarkerTool()
-    : ToolBase("select.svg")
-{}
+    :   ToolBase("select.svg")
+{
+}
 
 /* This function uses similar logic that exists in sp_shape_update_marker_view, to calculate exactly where
 the knotholders need to go and returns the edit_transform that is then loaded into the
