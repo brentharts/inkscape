@@ -101,6 +101,7 @@ void ColorNotebook::_initUI()
     _combo = Gtk::manage(new IconComboBox());
     _combo->set_can_focus(false);
     _combo->set_visible();
+    _combo->set_tooltip_text(_("Choose style of color selection"));
 
     for (auto&& page : _available_pages) {
         _addPage(page);
