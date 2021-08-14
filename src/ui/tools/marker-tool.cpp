@@ -248,6 +248,7 @@ void MarkerTool::selection_changed(Inkscape::Selection *selection) {
                     validateMarker(marker_item, doc);
 
                     ShapeRecord sr;
+
                     switch(editMarkerMode) {
                         case SP_MARKER_LOC_START:
                             sr  = get_marker_transform(shape, item, marker_item, SP_MARKER_LOC_START);
@@ -264,9 +265,9 @@ void MarkerTool::selection_changed(Inkscape::Selection *selection) {
 
                     /* only allow users to edit one marker at a time */
                     this->_shape_editors.clear();
-                    
-                    auto si = std::make_unique<ShapeEditor>(this->desktop, r.edit_transform, r.edit_rotation);
-                    SPItem *item = SP_ITEM(r.object);
+
+                    auto si = std::make_unique<ShapeEditor>(this->desktop, sr.edit_transform, sr.edit_rotation);
+                    SPItem *item = SP_ITEM(sr.object);
                     si->set_item(item);
                     this->_shape_editors.insert({item, std::move(si)});
                     break;                     
