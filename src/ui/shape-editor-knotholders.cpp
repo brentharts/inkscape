@@ -1027,6 +1027,21 @@ MarkerKnotHolderEntityScale::set_internal(Geom::Point const &p, Geom::Point cons
     adjusted_scaleY = adjusted_scaleY * original_scaleY;
 
     if(adjusted_scaleX > 0.0 && adjusted_scaleY > 0.0) {
+
+        /* need to enforce uniform scaling when marker preserveAspectRatio is not set to none */
+        if(sp_marker->aspect_align != SP_ASPECT_NONE) {
+            
+            /* possible areas based on which x/y coord is used to calculate uniform scale */
+            double dx_area = (sp_marker->viewBox.width()*adjusted_scaleX) * (sp_marker->viewBox.height()*adjusted_scaleX); // A = W*H
+            double dy_area = (sp_marker->viewBox.width()*adjusted_scaleY) * (sp_marker->viewBox.height()*adjusted_scaleY);
+
+            if (dy_area > dx_area) {
+                adjusted_scaleX = adjusted_scaleY;
+            } else if (dx_area > dy_area) {
+                adjusted_scaleY = adjusted_scaleX;
+            }
+        }
+
         sp_marker->markerWidth.computed = sp_marker->viewBox.width() * adjusted_scaleX;
         sp_marker->markerHeight.computed = sp_marker->viewBox.height() * adjusted_scaleY;
 
