@@ -23,8 +23,6 @@ namespace Toolbar {
 MarkerToolbar::MarkerToolbar(SPDesktop *desktop)
     : Toolbar(desktop)
 {
-    add_label(_("Marker Edit Mode"));
-    show_all();
 }
 
 GtkWidget* MarkerToolbar::create(SPDesktop *desktop)

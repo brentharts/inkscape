@@ -211,6 +211,8 @@ void MarkerTool::finish() {
 
 
 MarkerTool::~MarkerTool() {
+    this->_shape_editors.clear();
+    
     this->enableGrDrag(false);
     this->sel_changed_connection.disconnect();
 }
@@ -226,6 +228,8 @@ void MarkerTool::selection_changed(Inkscape::Selection *selection) {
     SPDocument *doc = desktop->getDocument();
 
     auto selected_items = selection->items();
+
+    this->_shape_editors.clear();
 
     for(auto i = selected_items.begin(); i != selected_items.end(); ++i){
 
@@ -258,13 +262,11 @@ void MarkerTool::selection_changed(Inkscape::Selection *selection) {
                             break;
                     }
 
-                    /* only allow users to edit one marker at a time */
-                    this->_shape_editors.clear();
-
                     auto si = std::make_unique<ShapeEditor>(this->desktop, sr.edit_transform, sr.edit_rotation, editMarkerMode);
                     SPItem *item = SP_ITEM(sr.object);
                     si->set_item(item);
                     this->_shape_editors.insert({item, std::move(si)});
+                    /* only allow users to edit one marker at a time */
                     break;                     
                 }
             }

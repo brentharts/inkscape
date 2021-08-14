@@ -531,7 +531,7 @@ bool StrokeStyle::shouldMarkersBeUpdated()
  * Gets the marker uri string and applies it to all selected
  * items in the current desktop.
  */
-void StrokeStyle::markerSelectCB(MarkerComboBox *marker_combo, StrokeStyle *spw, SPMarkerLoc const /*which*/)
+void StrokeStyle::markerSelectCB(MarkerComboBox *marker_combo, StrokeStyle *spw, SPMarkerLoc const which)
 {
     if (spw->update || spw->shouldMarkersBeUpdated()) {
         return;
@@ -568,6 +568,18 @@ void StrokeStyle::markerSelectCB(MarkerComboBox *marker_combo, StrokeStyle *spw,
         item->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_STYLE_MODIFIED_FLAG);
 
         DocumentUndo::done(document, SP_VERB_DIALOG_FILL_STROKE, _("Set markers"));
+    }
+
+    /* edit marker mode - update */
+    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
+
+    if (desktop) {
+        Inkscape::UI::Tools::MarkerTool *mt = dynamic_cast<Inkscape::UI::Tools::MarkerTool*>(desktop->event_context);
+
+        if(mt) {
+            mt->editMarkerMode = which;
+            mt->selection_changed(desktop->getSelection());
+        }
     }
 
     sp_repr_css_attr_unref(css);
