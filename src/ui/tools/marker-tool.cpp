@@ -78,7 +78,11 @@ ShapeRecord MarkerTool::get_marker_transform(SPShape* shape, SPItem *parent_item
 
     /* scale marker transform with parent stroke width */
     SPStyle *style = shape->style;
-    Geom::Scale scale(style->stroke_width.computed * this->desktop->getDocument()->getDocumentScale()[Geom::X]);
+    Geom::Scale scale = this->desktop->getDocument()->getDocumentScale(); 
+    
+    if(sp_marker->markerUnits == SP_MARKER_UNITS_STROKEWIDTH) {
+        scale = Geom::Scale(style->stroke_width.computed * this->desktop->getDocument()->getDocumentScale()[Geom::X]);
+    }
 
     Geom::PathVector const &pathv = shape->curve()->get_pathvector();
     Geom::Affine ret = Geom::identity();
