@@ -189,11 +189,6 @@ ShapeRecord MarkerTool::get_marker_transform(SPShape* shape, SPItem *parent_item
         } 
     }
 
-    /* orientation is auto-start-reverse, reverse marker */
-    if (sp_marker->orient.computed == MARKER_ORIENT_AUTO_START_REVERSE) {
-        ret = Geom::Rotate::from_degrees( 180.0 ) * ret;
-    }
-
     /* scale by stroke width */
     ret = scale * ret;
     /* account for parent transform */
@@ -266,7 +261,7 @@ void MarkerTool::selection_changed(Inkscape::Selection *selection) {
                     /* only allow users to edit one marker at a time */
                     this->_shape_editors.clear();
 
-                    auto si = std::make_unique<ShapeEditor>(this->desktop, sr.edit_transform, sr.edit_rotation);
+                    auto si = std::make_unique<ShapeEditor>(this->desktop, sr.edit_transform, sr.edit_rotation, editMarkerMode);
                     SPItem *item = SP_ITEM(sr.object);
                     si->set_item(item);
                     this->_shape_editors.insert({item, std::move(si)});

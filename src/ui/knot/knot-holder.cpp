@@ -54,7 +54,7 @@ using Inkscape::DocumentUndo;
 
 class SPDesktop;
 
-KnotHolder::KnotHolder(SPDesktop *desktop, SPItem *item, SPKnotHolderReleasedFunc relhandler, double edit_rotation) :
+KnotHolder::KnotHolder(SPDesktop *desktop, SPItem *item, SPKnotHolderReleasedFunc relhandler) :
     desktop(desktop),
     item(item),
     //XML Tree being used directly for item->getRepr() while it shouldn't be...
@@ -63,8 +63,7 @@ KnotHolder::KnotHolder(SPDesktop *desktop, SPItem *item, SPKnotHolderReleasedFun
     released(relhandler),
     local_change(FALSE),
     dragging(false),
-    _edit_transform(Geom::identity()),
-    _edit_rotation(edit_rotation)
+    _edit_transform(Geom::identity())
 {
     if (!desktop || !item) {
         g_print ("Error! Throw an exception, please!\n");

@@ -47,7 +47,7 @@ typedef void (* SPKnotHolderReleasedFunc) (SPItem *item);
 
 class KnotHolder {
 public:
-    KnotHolder(SPDesktop *desktop, SPItem *item, SPKnotHolderReleasedFunc relhandler, double edit_rotation = 0.0);
+    KnotHolder(SPDesktop *desktop, SPItem *item, SPKnotHolderReleasedFunc relhandler);
     virtual ~KnotHolder();
 
     KnotHolder() = delete; // declared but not defined
@@ -67,7 +67,6 @@ public:
 
     void setEditTransform(Geom::Affine edit_transform);
     Geom::Affine getEditTransform() const { return _edit_transform; }
-    double getEditRotation() const { return _edit_rotation; }
 
     bool knot_mouseover() const;
 
@@ -93,7 +92,6 @@ protected:
     bool dragging;
 
     Geom::Affine _edit_transform;
-    double _edit_rotation;
 };
 
 /**
