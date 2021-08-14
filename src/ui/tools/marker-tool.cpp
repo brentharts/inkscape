@@ -220,29 +220,31 @@ MarkerTool::~MarkerTool() {
     this->sel_changed_connection.disconnect();
 }
 
-/* When a selection changes, if any selected objects have start/end/mid markers,
-their markers are loaded into the ShapeEditor */
-void MarkerTool::selection_changed(Inkscape::Selection *sel) {
+/* When a selection changes, if a selected object has start/end/mid markers,
+its markers are loaded into the ShapeEditor. For now, force users to only
+edit one marker at a time. */
+
+void MarkerTool::selection_changed(Inkscape::Selection *selection) {
     using namespace Inkscape::UI;
 
-    std::set<ShapeRecord> shapes;
-    auto selected_items = this->desktop->getSelection()->items();
+    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
+    SPDocument *doc = desktop->getDocument();
+
+    auto selected_items = selection->items();
 
     for(auto i = selected_items.begin(); i != selected_items.end(); ++i){
+
         SPItem *item = *i;
         if(item) {
-            SPShape* shape = dynamic_cast<SPShape*>(item);
 
+            SPShape* shape = dynamic_cast<SPShape*>(item);
             if(shape && shape->hasMarkers() && (editMarkerMode != -1)) {
 
-                SPObject *marker_obj = shape->_marker[editMarkerMode];
+                SPObject *obj = shape->_marker[editMarkerMode];
+                if(obj && doc) {
 
-                if(marker_obj) {
-                    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
-                    SPDocument *doc = desktop->getDocument();
-
-                    Inkscape::XML::Node *marker_repr = marker_obj->getRepr();
-                    SPItem* marker_item = dynamic_cast<SPItem *>(this->desktop->getDocument()->getObjectByRepr(marker_repr));
+                    Inkscape::XML::Node *marker_repr = obj->getRepr();
+                    SPItem* marker_item = dynamic_cast<SPItem *>(obj);
                     validateMarker(marker_item, doc);
 
                     ShapeRecord sr;
@@ -258,33 +260,18 @@ void MarkerTool::selection_changed(Inkscape::Selection *sel) {
                             break;
                         default:
                             break;
-                    }  
+                    }
 
-                    shapes.insert(sr);
-                    // exit after first found marker - force user to just select one marker at a time for editing
-                    break;
+                    /* only allow users to edit one marker at a time */
+                    this->_shape_editors.clear();
+                    
+                    auto si = std::make_unique<ShapeEditor>(this->desktop, r.edit_transform, r.edit_rotation);
+                    SPItem *item = SP_ITEM(r.object);
+                    si->set_item(item);
+                    this->_shape_editors.insert({item, std::move(si)});
+                    break;                     
                 }
             }
-        }
-    }
-    
-    for (auto i = this->_shape_editors.begin(); i != this->_shape_editors.end();) {
-        ShapeRecord s;
-        s.object = dynamic_cast<SPObject *>(i->first);
-
-        if (shapes.find(s) == shapes.end()) {
-            this->_shape_editors.erase(i++);
-        } else {
-            ++i;
-        }
-    }
-
-    for (const auto & r : shapes) {
-        if (this->_shape_editors.find(SP_ITEM(r.object)) == this->_shape_editors.end()) {
-            auto si = std::make_unique<ShapeEditor>(this->desktop, r.edit_transform, r.edit_rotation);
-            SPItem *item = SP_ITEM(r.object);
-            si->set_item(item);
-            this->_shape_editors.insert({item, std::move(si)});
         }
     }
 }
@@ -322,7 +309,7 @@ bool MarkerTool::root_handler(GdkEvent* event) {
         case GDK_BUTTON_RELEASE:
             if (event->button.button == 1) {
                 if (this->item_to_select) {
-                    selection->toggle(this->item_to_select);
+                    selection->set(this->item_to_select);
                 } else {
                     selection->clear();
                 }

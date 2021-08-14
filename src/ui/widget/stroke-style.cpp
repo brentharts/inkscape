@@ -508,14 +508,14 @@ void StrokeStyle::enterEditMarkerMode(SPMarkerLoc _editMarkerMode)
 {
     SPDesktop *desktop = SP_ACTIVE_DESKTOP;
 
-    if (desktop && !dynamic_cast<Inkscape::UI::Tools::MarkerTool *>(desktop->event_context)) {
+    if (desktop) {
         set_active_tool(desktop, "Marker");
-    }
+        Inkscape::UI::Tools::MarkerTool *mt = dynamic_cast<Inkscape::UI::Tools::MarkerTool*>(desktop->event_context);
 
-    Inkscape::UI::Tools::MarkerTool *mt = dynamic_cast<Inkscape::UI::Tools::MarkerTool*>(desktop->event_context);
-    if (mt && (mt->editMarkerMode != _editMarkerMode)) {
-        mt->editMarkerMode = _editMarkerMode;
-        mt->selection_changed(desktop->getSelection());
+        if(mt) {
+            mt->editMarkerMode = _editMarkerMode;
+            mt->selection_changed(desktop->getSelection());
+        }
     }
 }
 
