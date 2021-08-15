@@ -94,10 +94,22 @@ void ColorNotebook::_initUI()
 
     _book = Gtk::make_managed<Gtk::Stack>();
     _book->show();
+    _book->set_transition_type(Gtk::STACK_TRANSITION_TYPE_CROSSFADE);
+    _book->set_transition_duration(130);
+
+    // mode selection switcher widget shows all buttons for color mode selection, side by side
+    _switcher = Gtk::make_managed<Gtk::StackSwitcher>();
+    _switcher->set_stack(*_book);
+    // cannot leave it homogenous - in some themes switcher gets very wide
+    _switcher->set_homogeneous(false);
+    _switcher->set_halign(Gtk::ALIGN_CENTER);
+    _switcher->show();
+    attach(*_switcher, 0, row++, 2);
 
     _buttonbox = Gtk::make_managed<Gtk::Box>();
     _buttonbox->show();
 
+    // combo mode selection is compact and only shows one entry (active)
     _combo = Gtk::manage(new IconComboBox());
     _combo->set_can_focus(false);
     _combo->set_visible();
@@ -135,6 +147,24 @@ void ColorNotebook::_initUI()
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     _setCurrentPage(prefs->getInt("/colorselector/page", 0), true);
     row++;
+
+    auto switcher_path = Glib::ustring("/colorselector/switcher");
+    auto choose_switch = [=](bool compact) {
+        if (compact) {
+            _switcher->hide();
+            _buttonbox->show();
+        }
+        else {
+            _buttonbox->hide();
+            _switcher->show();
+        }
+    };
+
+    _observer = prefs->createObserver(switcher_path, [=](const Preferences::Entry& new_value) {
+        choose_switch(new_value.getBool());
+    });
+
+    choose_switch(prefs->getBool(switcher_path));
 
     GtkWidget *rgbabox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 
@@ -292,7 +322,7 @@ void ColorNotebook::_addPage(Page &page)
         selector_widget->show();
 
         Glib::ustring mode_name = page.selector_factory->modeName();
-        _book->add(*selector_widget);
+        _book->add(*selector_widget, mode_name, mode_name);
         int page_num = _book->get_children().size() - 1;
 
         _combo->add_row(page.icon_name, mode_name, page_num);

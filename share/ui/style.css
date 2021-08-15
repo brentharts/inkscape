@@ -536,3 +536,9 @@ button.link:hover image {
     -gtk-icon-effect: dim;
 }
 
+/* In some themes stack switcher buttons are extra wide forcing dialogs too wide */
+stackswitcher button {
+    padding-left: 1px;
+    padding-right: 1px;
+    min-width: 40px;
+}

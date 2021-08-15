@@ -20,10 +20,12 @@
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <gtkmm/grid.h>
 #include <gtkmm/stack.h>
+#include <gtkmm/stackswitcher.h>
 #include <glib.h>
 
 #include "color.h"
 #include "color-rgba.h"
+#include "preferences.h"
 #include "ui/selected-color.h"
 #include "ui/widget/icon-combobox.h"
 
@@ -62,6 +64,7 @@ protected:
     Inkscape::UI::SelectedColor &_selected_color;
     gulong _entryId;
     Gtk::Stack* _book;
+    Gtk::StackSwitcher* _switcher;
     Gtk::Box* _buttonbox;
     Gtk::Label* _label;
     GtkWidget *_rgbal; /* RGBA entry */
@@ -76,6 +79,8 @@ private:
     // By default, disallow copy constructor and assignment operator
     ColorNotebook(const ColorNotebook &obj) = delete;
     ColorNotebook &operator=(const ColorNotebook &obj) = delete;
+
+    PrefObserver _observer;
 };
 
 }
