@@ -1058,7 +1058,7 @@ gchar const *buffer = R"A(
 
     <!-- cross at the end of the line to help position marker -->
     <symbol id="cross" width="25" height="25" viewBox="0 0 25 25">
-      <path class="cross" style="mix-blend-mode:difference;stroke:#fff;stroke-width:0.7;stroke-opacity:0.7;fill:none;display:block" d="M 0,0 M 25,25 M 11,11 14,14 M 11,14 14,11" />
+      <path class="cross" style="mix-blend-mode:difference;stroke:#fff;stroke-width:0.5;stroke-opacity:0.7;fill:none;display:block" d="M 0,0 M 25,25 M 10,10 15,15 M 10,15 15,10" />
     </symbol>
 
     <path id="line-marker-start" class="line colors" style="stroke-width:2;stroke-opacity:0.2" d="M 12.5,12.5 l 1000,0" />
