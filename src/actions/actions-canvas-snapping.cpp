@@ -38,7 +38,7 @@
 
 // record 'option' in a corresponding document attribute;
 // set it to a value of 'set' if given, or toggle if there's no value specified
-void set_canvas_snapping(SPDocument* document, const SPAttr option, std::optional<bool> set) {
+void set_canvas_snapping(SPDocument* document, const SPAttr option, std::optional<bool> set = std::optional<bool>()) {
     Inkscape::XML::Node* repr = document->getReprNamedView();
 
     if (repr == nullptr) {
@@ -212,7 +212,7 @@ void update_actions(SPDocument* document) {
 static void
 canvas_snapping_toggle(SPDocument* document, const SPAttr option)
 {
-    set_canvas_snapping(document, option, std::optional<bool>());
+    set_canvas_snapping(document, option);
     update_actions(document);
 }
 
@@ -247,26 +247,22 @@ SnapVector snap_node = {
 
 SnapVector snap_alignment = {
     { "snap-alignment",          SPAttr::INKSCAPE_SNAP_ALIGNMENT },
-    { "snap-distribution",       SPAttr::INKSCAPE_SNAP_DISTRIBUTION,       true },
     { "snap-alignment-self",     SPAttr::INKSCAPE_SNAP_ALIGNMENT_SELF,     false },
-    { "snap-bbox",               SPAttr::INKSCAPE_SNAP_BBOX,               true },
-    { "snap-bbox-edge",          SPAttr::INKSCAPE_SNAP_BBOX_EDGE,          true },
-    { "snap-bbox-corner",        SPAttr::INKSCAPE_SNAP_BBOX_CORNER,        false },
-    { "snap-bbox-center",        SPAttr::INKSCAPE_SNAP_BBOX_MIDPOINT,      false },
-    { "snap-bbox-edge-midpoint", SPAttr::INKSCAPE_SNAP_BBOX_EDGE_MIDPOINT, false },
+    // separate category:
+    { "snap-distribution",       SPAttr::INKSCAPE_SNAP_DISTRIBUTION,       false },
 };
 
 SnapVector snap_all_the_rest = {
-    { "snap-others",             SPAttr::INKSCAPE_SNAP_OTHERS,            true },
-    { "snap-object-midpoint",    SPAttr::INKSCAPE_SNAP_OBJECT_MIDPOINT,   false },
-    { "snap-rotation-center",    SPAttr::INKSCAPE_SNAP_ROTATION_CENTER,   false },
-    { "snap-text-baseline",      SPAttr::INKSCAPE_SNAP_TEXT_BASELINE,     true },
-    { "snap-path-mask",          SPAttr::INKSCAPE_SNAP_PATH_MASK,         true },
-    { "snap-path-clip",          SPAttr::INKSCAPE_SNAP_PATH_CLIP,         true },
+    { "snap-others",             SPAttr::INKSCAPE_SNAP_OTHERS,             true },
+    { "snap-object-midpoint",    SPAttr::INKSCAPE_SNAP_OBJECT_MIDPOINT,    false },
+    { "snap-rotation-center",    SPAttr::INKSCAPE_SNAP_ROTATION_CENTER,    false },
+    { "snap-text-baseline",      SPAttr::INKSCAPE_SNAP_TEXT_BASELINE,      true },
+    { "snap-path-mask",          SPAttr::INKSCAPE_SNAP_PATH_MASK,          true },
+    { "snap-path-clip",          SPAttr::INKSCAPE_SNAP_PATH_CLIP,          true },
 
-    { "snap-page-border",        SPAttr::INKSCAPE_SNAP_PAGE_BORDER,       false },
-    { "snap-grid",               SPAttr::INKSCAPE_SNAP_GRID,              true },
-    { "snap-guide",              SPAttr::INKSCAPE_SNAP_GUIDE,             true },
+    { "snap-page-border",        SPAttr::INKSCAPE_SNAP_PAGE_BORDER,        false },
+    { "snap-grid",               SPAttr::INKSCAPE_SNAP_GRID,               true },
+    { "snap-guide",              SPAttr::INKSCAPE_SNAP_GUIDE,              true },
 };
 
 enum class SimpleSnap { BBox, Nodes, Alignment, Rest };
@@ -308,7 +304,7 @@ void set_simple_snap(SPDocument* document, SimpleSnap option, bool toggle) {
     if (vect) {
         for (auto&& info : *vect) {
             if (toggle) {
-                set_canvas_snapping(document, info.attr, info.set);
+                set_canvas_snapping(document, info.attr);
             }
             else {
                 set_canvas_snapping(document, info.attr, info.set.value_or(false));
@@ -503,7 +499,7 @@ set_actions_canvas_snapping(SPDocument* document)
 
     set_actions_canvas_snapping_helper(map, "simple-snap-bbox", bbox, global);
     set_actions_canvas_snapping_helper(map, "simple-snap-nodes", node, global);
-    set_actions_canvas_snapping_helper(map, "simple-snap-alignment", false, global); // not available just yet
+    set_actions_canvas_snapping_helper(map, "simple-snap-alignment", alignment, global);
 }
 
 /**

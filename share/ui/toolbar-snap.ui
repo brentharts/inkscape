@@ -694,6 +694,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">False</property>
+            <property name="halign">start</property>
             <property name="action-name">doc.snap-distribution</property>
             <property name="draw-indicator">True</property>
           </object>
@@ -741,6 +742,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">False</property>
+            <property name="halign">start</property>
             <property name="action-name">doc.snap-line-perpendicular</property>
             <property name="draw-indicator">True</property>
           </object>
@@ -755,6 +757,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">False</property>
+            <property name="halign">start</property>
             <property name="action-name">doc.snap-line-tangential</property>
             <property name="draw-indicator">True</property>
           </object>
