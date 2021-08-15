@@ -22,6 +22,7 @@ namespace Toolbar {
 class MarkerToolbar : public Toolbar {
 protected:
     MarkerToolbar(SPDesktop *desktop);
+
 public:
     static GtkWidget * create(SPDesktop *desktop);
 };

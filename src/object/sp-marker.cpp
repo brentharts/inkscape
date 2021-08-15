@@ -304,14 +304,19 @@ void SPMarker::hide(unsigned int key) {
 	SPGroup::hide(key);
 }
 
-/* validates the marker item before passing it into the shape editor. Sets any missing properties that are needed before editing */
+/* 
+- used to validate the marker item before passing it into the shape editor from the marker-tool. 
+- sets any missing properties that are needed before editing starts.
+*/
 void validateMarker(SPItem* i, SPDocument *doc) {
+
     SPMarker *sp_marker = dynamic_cast<SPMarker *>(i);
     g_assert(sp_marker != nullptr);
+    g_assert(doc != nullptr);
 
     doc->ensureUpToDate();
 
-    /* calculate marker bounds */
+    // calculate the marker bounds to set any missing viewBox information
     std::vector<SPObject*> items = const_cast<SPMarker*>(sp_marker)->childList(false, SPObject::ActionBBox);
 
     Geom::OptRect r;
@@ -323,7 +328,6 @@ void validateMarker(SPItem* i, SPDocument *doc) {
     Geom::Rect bounds(r->min() * doc->dt2doc(), r->max() * doc->dt2doc());
     Geom::Point const center = bounds.dimensions() * 0.5;
 
-    /* check if refX/refY properties are set. If not, set them to default values. */
     if(!sp_marker->refX._set) {
         i->setAttribute("refX", "0.0");
     }
@@ -332,9 +336,14 @@ void validateMarker(SPItem* i, SPDocument *doc) {
         i->setAttribute("refY", "0.0");
     }
 
-    /* if there is no markerWidth or markerHeight or viewBox, calculate and set it */
+    if(!sp_marker->orient._set) {
+        sp_marker->setAttribute("orient", "auto");
+    }
+
+    // if there is no markerWidth or markerHeight or viewBox, calculate and set it
     if(!sp_marker->markerWidth._set || !sp_marker->markerHeight._set) {
-        /* scale is set to 1x */
+        
+        // scale is set to 1x by deafult
         if(!sp_marker->viewBox_set) {
             i->setAttribute("markerWidth", std::to_string(bounds.dimensions()[Geom::X]));
             i->setAttribute("markerHeight", std::to_string(bounds.dimensions()[Geom::Y]));
@@ -344,15 +353,29 @@ void validateMarker(SPItem* i, SPDocument *doc) {
             i->setAttribute("markerWidth", std::to_string(sp_marker->viewBox.width()));
             i->setAttribute("markerHeight", std::to_string(sp_marker->viewBox.height()));
         }
+
     } else {
         if(!sp_marker->viewBox_set) {
             i->setAttribute("viewBox", "0 0 " + std::to_string(sp_marker->markerWidth.computed) + " " + std::to_string(sp_marker->markerHeight.computed));
         } else {
-            /* When users scale using onCanvas operations, the marker is scaled using the markerWidth/markerHeight while the viewBox stays constant.
-            Check if markerWidth/markerHeight was correctly calculated */
+            /* 
+            - for now, onCanvas marker editing expects the viewBox width and viewBox height to correspond to the calculated bounds
+            - if the viewBox width/height are not equal to bounds, adjust the values
+            */
+
             if((sp_marker->viewBox.width() != bounds.dimensions()[Geom::X]) || (sp_marker->viewBox.height() != bounds.dimensions()[Geom::Y])) {
-                double xScale = sp_marker->markerWidth.computed/sp_marker->viewBox.width();
-                double yScale = sp_marker->markerHeight.computed/sp_marker->viewBox.height();
+
+                double xScale = 1;
+                double yScale = 1;
+
+                // check for any existing scale factors and apply accordingly
+                if(sp_marker->viewBox.width() > 0) {
+                    xScale = sp_marker->markerWidth.computed/sp_marker->viewBox.width();
+                }
+
+                if(sp_marker->viewBox.height() > 0) {
+                    yScale = sp_marker->markerHeight.computed/sp_marker->viewBox.height();
+                }
 
                 i->setAttribute("viewBox", "0 0 " + std::to_string(bounds.dimensions()[Geom::X]) + " " + std::to_string(bounds.dimensions()[Geom::Y]));
                 
@@ -363,17 +386,15 @@ void validateMarker(SPItem* i, SPDocument *doc) {
         }
     }
 
-    if(!sp_marker->orient._set) {
-        sp_marker->setAttribute("orient", "auto");
-    }
-
     if(!sp_marker->aspect_set) {
         double xScale = sp_marker->markerWidth.computed/sp_marker->viewBox.width();
         double yScale = sp_marker->markerHeight.computed/sp_marker->viewBox.height();
 
         if(xScale == yScale) {
+            // uniform scaling will be enforced
             sp_marker->setAttribute("preserveAspectRatio", "xMidYMid");
         } else {
+            // non uniform scaling can happen
             sp_marker->setAttribute("preserveAspectRatio", "none");
         }
     }

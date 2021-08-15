@@ -890,26 +890,34 @@ Box3DKnotHolder::Box3DKnotHolder(SPDesktop *desktop, SPItem *item, SPKnotHolderR
     add_hatch_knotholder();
 }
 
-/* SPMarker Section */
+/* SPMarker */
 
-/* helper functions for marker knotholders*/
+// marker x scale = (marker width)/(view box width) 
+double 
+getMarkerXScale(SPItem* item){
 
-/* gets calculated markerScale */
-double getMarkerXScale(SPItem* item){
     SPMarker *sp_marker = dynamic_cast<SPMarker *>(item);
     g_assert(sp_marker != nullptr);
 
-    return (sp_marker->markerWidth.computed/sp_marker->viewBox.width());
+    return ((sp_marker->viewBox.width() != 0) ? sp_marker->markerWidth.computed/sp_marker->viewBox.width() : 1.0);
 }
 
-double getMarkerYScale(SPItem* item){
+double 
+getMarkerYScale(SPItem* item){
+
     SPMarker *sp_marker = dynamic_cast<SPMarker *>(item);
     g_assert(sp_marker != nullptr);
 
-    return (sp_marker->markerHeight.computed/sp_marker->viewBox.height());
+    return ((sp_marker->viewBox.height() != 0) ? sp_marker->markerHeight.computed/sp_marker->viewBox.height() : 1.0);
 }
 
-Geom::Affine getMarkerRotation(SPItem* item, double edit_rotation, int edit_marker_mode, bool reverse = false){
+/* 
+- edit_rotation is the tangent angle that is used in orient auto mode.
+- edit_rotation is applied in the edit_transform, it needs to be undone and then the orient.computed can be applied. 
+*/
+Geom::Affine 
+getMarkerRotation(SPItem* item, double edit_rotation, int edit_marker_mode, bool reverse = false){
+
     SPMarker *sp_marker = dynamic_cast<SPMarker *>(item);
     g_assert(sp_marker != nullptr);
 
@@ -918,32 +926,37 @@ Geom::Affine getMarkerRotation(SPItem* item, double edit_rotation, int edit_mark
     if ((sp_marker->orient_mode == MARKER_ORIENT_AUTO_START_REVERSE) && (edit_marker_mode == SP_MARKER_LOC_START)) {
         rot = Geom::Rotate::from_degrees(180.0);
     } else if (sp_marker->orient_mode == MARKER_ORIENT_ANGLE) {
-        rot = reverse? Geom::Rotate::from_degrees(-sp_marker->orient.computed + edit_rotation) : Geom::Rotate::from_degrees(sp_marker->orient.computed - edit_rotation);
+        rot = reverse? Geom::Rotate::from_degrees(edit_rotation - sp_marker->orient.computed) : Geom::Rotate::from_degrees(sp_marker->orient.computed - edit_rotation);
     }
 
     return rot;
 }
-
-Geom::Rect getMarkerBounds(SPItem* item, SPDesktop *desktop){
+ 
+// used to translate the knots when the marker's minimum bounds are less than zero. 
+Geom::Rect 
+getMarkerBounds(SPItem* item, SPDesktop *desktop){
     SPMarker *sp_marker = dynamic_cast<SPMarker *>(item);
-    g_assert(sp_marker != nullptr);
-
     SPDocument *doc = desktop->getDocument();
-    std::vector<SPObject*> items = sp_marker->childList(false, SPObject::ActionBBox);
 
+    g_assert(sp_marker != nullptr);
+    g_assert(doc != nullptr);
+
+    std::vector<SPObject*> items = sp_marker->childList(false, SPObject::ActionBBox);
     Geom::OptRect r;
+
     for (auto *i : items) {
         SPItem *item = dynamic_cast<SPItem*>(i);
         r.unionWith(item->desktopVisualBounds());
     }
-
     Geom::Rect bounds(r->min() * doc->dt2doc(), r->max() * doc->dt2doc());
     return bounds;
 }
 
-/* handles for marker scaling */
 class MarkerKnotHolderEntityScale : public KnotHolderEntity {
 public:
+    double _edit_rotation = 0.0;
+    int _edit_marker_mode = -1;
+
     bool originals_set = false;
 
     double original_scaleX = 1;
@@ -955,9 +968,6 @@ public:
     double original_width = 0;
     double original_height = 0;
 
-    double _edit_rotation = 0.0;
-    int _edit_marker_mode = -1;
-
     MarkerKnotHolderEntityScale(double edit_rotation, int edit_marker_mode) 
     : _edit_rotation(edit_rotation),
     _edit_marker_mode(edit_marker_mode) 
@@ -965,14 +975,16 @@ public:
     }
 
     void knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) override;
-
-    Geom::Point knot_get() const override;
     void knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state) override;
+    Geom::Point knot_get() const override;
+
 protected:
     void set_internal(Geom::Point const &p, Geom::Point const &origin, unsigned int state);
+
 };
 
-void MarkerKnotHolderEntityScale::knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) {
+void 
+MarkerKnotHolderEntityScale::knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) {
     originals_set = false;
 }
 
@@ -982,7 +994,8 @@ MarkerKnotHolderEntityScale::knot_get() const
     SPMarker *sp_marker = dynamic_cast<SPMarker *>(item);
     g_assert(sp_marker != nullptr);
 
-    return Geom::Point((-sp_marker->refX.computed + sp_marker->viewBox.width() + getMarkerBounds(item, desktop).min()[Geom::X]) * getMarkerXScale(item), 
+    return Geom::Point(
+    (-sp_marker->refX.computed + sp_marker->viewBox.width() + getMarkerBounds(item, desktop).min()[Geom::X]) * getMarkerXScale(item), 
     (-sp_marker->refY.computed + sp_marker->viewBox.height() + getMarkerBounds(item, desktop).min()[Geom::Y]) * getMarkerYScale(item)) 
     * getMarkerRotation(item, _edit_rotation, _edit_marker_mode);
 }
@@ -997,16 +1010,17 @@ MarkerKnotHolderEntityScale::set_internal(Geom::Point const &p, Geom::Point cons
     Geom::Point adjusted_p = p; 
 
     if(sp_marker->orient_mode == MARKER_ORIENT_ANGLE) {
+
         adjusted_origin = adjusted_origin
         * Geom::Translate(getMarkerBounds(item, desktop).min()) 
-        * Geom::Rotate::from_degrees(_edit_rotation) 
-        * Geom::Rotate::from_degrees(-sp_marker->orient.computed);
+        * Geom::Rotate::from_degrees(_edit_rotation - sp_marker->orient.computed); 
 
         adjusted_p = adjusted_p
         * Geom::Translate(getMarkerBounds(item, desktop).min()) 
-        * Geom::Rotate::from_degrees(_edit_rotation) 
-        * Geom::Rotate::from_degrees(-sp_marker->orient.computed);
+        * Geom::Rotate::from_degrees(_edit_rotation - sp_marker->orient.computed); 
+
     } else if ((sp_marker->orient_mode == MARKER_ORIENT_AUTO_START_REVERSE) && (_edit_marker_mode == SP_MARKER_LOC_START)) {
+
         adjusted_origin = adjusted_origin
         * Geom::Translate(getMarkerBounds(item, desktop).min()) 
         * Geom::Rotate::from_degrees(180.0);
@@ -1016,14 +1030,14 @@ MarkerKnotHolderEntityScale::set_internal(Geom::Point const &p, Geom::Point cons
         * Geom::Rotate::from_degrees(180.0);
     }
 
-    gdouble orig_width = original_width * original_scaleX;
-    gdouble orig_height = original_height * original_scaleY;
+    double orig_width = original_width * original_scaleX;
+    double orig_height = original_height * original_scaleY;
 
-    // x & y displacement made from mouse to origin
-    gdouble dx = adjusted_p[Geom::X] - adjusted_origin[Geom::X];
-    gdouble dy = adjusted_p[Geom::Y] - adjusted_origin[Geom::Y];
-    gdouble adjusted_scaleX = 0.0;
-    gdouble adjusted_scaleY = 0.0;
+    // x & y displacement between origin and new mouse displacement
+    double dx = adjusted_p[Geom::X] - adjusted_origin[Geom::X];
+    double dy = adjusted_p[Geom::Y] - adjusted_origin[Geom::Y];
+    double adjusted_scaleX = 0.0;
+    double adjusted_scaleY = 0.0;
 
     adjusted_scaleX = (dx/orig_width) + 1;
     adjusted_scaleX = adjusted_scaleX * original_scaleX;
@@ -1033,10 +1047,10 @@ MarkerKnotHolderEntityScale::set_internal(Geom::Point const &p, Geom::Point cons
 
     if(adjusted_scaleX > 0.0 && adjusted_scaleY > 0.0) {
 
-        /* need to enforce uniform scaling when marker preserveAspectRatio is not set to none */
+        // need to enforce uniform scaling when marker preserveAspectRatio is not set to none
         if(sp_marker->aspect_align != SP_ASPECT_NONE) {
             
-            /* possible areas based on which x/y coord is used to calculate uniform scale */
+            // possible areas based on which x/y coord is used to calculate uniform scale
             double dx_area = (sp_marker->viewBox.width()*adjusted_scaleX) * (sp_marker->viewBox.height()*adjusted_scaleX); // A = W*H
             double dy_area = (sp_marker->viewBox.width()*adjusted_scaleY) * (sp_marker->viewBox.height()*adjusted_scaleY);
 
@@ -1057,36 +1071,40 @@ MarkerKnotHolderEntityScale::set_internal(Geom::Point const &p, Geom::Point cons
     sp_marker->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_VIEWPORT_MODIFIED_FLAG);
 }
 
-void MarkerKnotHolderEntityScale::knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state)
+void 
+MarkerKnotHolderEntityScale::knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state)
 {
+    // keep track of the original values before the knot/mouse position is being moved
     if(!originals_set) {
+
         SPMarker *sp_marker = dynamic_cast<SPMarker *>(item);
         g_assert(sp_marker != nullptr);
 
-
         original_scaleX = getMarkerXScale(item);
         original_scaleY = getMarkerYScale(item);
+
         original_refX = sp_marker->refX.computed;
         original_refY = sp_marker->refY.computed;
+
         original_width = sp_marker->viewBox.width();
         original_height = sp_marker->viewBox.height();
 
         originals_set = true;
     }
+
     set_internal(p, origin, state);
     update_knot();
 }
 
-/* Handle for marker orientation - setting up here, come back to math l8r g8r */
 class MarkerKnotHolderEntityOrient : public KnotHolderEntity {
 public:
+    double _edit_rotation = 0.0;
+    int _edit_marker_mode = -1;
+
     bool originals_set = false;
 
     double original_radius = 0;
     Geom::Point original_center = Geom::Point(0, 0);
-
-    double _edit_rotation = 0.0;
-    int _edit_marker_mode = -1;
     
     MarkerKnotHolderEntityOrient(double edit_rotation, int edit_marker_mode) 
     : _edit_rotation(edit_rotation),
@@ -1097,8 +1115,10 @@ public:
     Geom::Point knot_get() const override;
     void knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) override;
     void knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state) override;
+
 protected:
     void set_internal(Geom::Point const &p, Geom::Point const &origin, unsigned int state);
+
 };
 
 void MarkerKnotHolderEntityOrient::knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) {
@@ -1111,7 +1131,8 @@ MarkerKnotHolderEntityOrient::knot_get() const
     SPMarker *sp_marker = dynamic_cast<SPMarker *>(item);
     g_assert(sp_marker != nullptr);
 
-    return Geom::Point((-sp_marker->refX.computed + sp_marker->viewBox.width() + getMarkerBounds(item, desktop).min()[Geom::X]) * getMarkerXScale(item), 
+    return Geom::Point(
+    (-sp_marker->refX.computed + sp_marker->viewBox.width() + getMarkerBounds(item, desktop).min()[Geom::X]) * getMarkerXScale(item), 
     (-sp_marker->refY.computed + getMarkerBounds(item, desktop).min()[Geom::Y]) * getMarkerYScale(item)) 
     * getMarkerRotation(item, _edit_rotation, _edit_marker_mode);
 }
@@ -1123,22 +1144,29 @@ MarkerKnotHolderEntityOrient::knot_set(Geom::Point const &p, Geom::Point const &
         SPMarker *sp_marker = dynamic_cast<SPMarker *>(item);
         g_assert(sp_marker != nullptr);
 
-        /* if the marker is set to auto or auto-start-reverse, set its type to orient 
-        since users will want to alter orientation with this knot. Also set default angle */
+        /* 
+        - if the marker is set to auto or auto-start-reverse, set its type to orient
+        - calculate and set the default angle for the orient mode
+        */
         if (sp_marker->orient_mode != MARKER_ORIENT_ANGLE) {
             sp_marker->orient = (((sp_marker->orient_mode == MARKER_ORIENT_AUTO_START_REVERSE) && (_edit_marker_mode == SP_MARKER_LOC_START)) ? _edit_rotation + 180.0 : _edit_rotation);
             sp_marker->orient_mode = MARKER_ORIENT_ANGLE;
             sp_marker->orient_set = true;
         }
 
-        /* this original center is used to calculate angle with mouse */
-        original_center = Geom::Point((-sp_marker->refX.computed + getMarkerBounds(item, desktop).min()[Geom::X]) * getMarkerXScale(item), 
+        /* 
+        - the original center (refX/refY) is used to calculate the angle with mouse
+        - the refX/refY will be changing to adjust for the new rotation to give appearance that it is stationary onCanvas while editing. 
+        */
+        original_center = Geom::Point(
+        (-sp_marker->refX.computed + getMarkerBounds(item, desktop).min()[Geom::X]) * getMarkerXScale(item), 
         (-sp_marker->refY.computed + getMarkerBounds(item, desktop).min()[Geom::Y]) * getMarkerYScale(item))
         * getMarkerRotation(item, _edit_rotation, _edit_marker_mode);
         
         original_radius = L2(original_center);
         originals_set = true;
     }
+
     set_internal(p, origin, state);
     update_knot();
 }
@@ -1149,6 +1177,7 @@ MarkerKnotHolderEntityOrient::set_internal(Geom::Point const &p, Geom::Point con
     SPMarker *sp_marker = dynamic_cast<SPMarker *>(item);
     g_assert(sp_marker != nullptr);
 
+    // edit_rotation is the tangest angle to the shapes and needs to be taken into account while setting the orient angle
     double new_angle = atan2(p[Geom::Y] - original_center[Geom::Y], p[Geom::X] - original_center[Geom::X]) * 180.0/M_PI;
     new_angle = new_angle + _edit_rotation;
 
@@ -1165,8 +1194,7 @@ MarkerKnotHolderEntityOrient::set_internal(Geom::Point const &p, Geom::Point con
 
     Geom::Point ref = Geom::Point(
     (-(original_radius * cos(-(axis_angle + sp_marker->orient.computed) * M_PI/180.0))/getMarkerXScale(item)) + getMarkerBounds(item, desktop).min()[Geom::X],
-    (-(original_radius * sin(-(axis_angle + sp_marker->orient.computed) * M_PI/180.0))/getMarkerYScale(item)) + getMarkerBounds(item, desktop).min()[Geom::Y]
-    );
+    (-(original_radius * sin(-(axis_angle + sp_marker->orient.computed) * M_PI/180.0))/getMarkerYScale(item)) + getMarkerBounds(item, desktop).min()[Geom::Y]);
 
     sp_marker->refX = ref[Geom::X];
     sp_marker->refY = ref[Geom::Y];
@@ -1174,7 +1202,6 @@ MarkerKnotHolderEntityOrient::set_internal(Geom::Point const &p, Geom::Point con
     sp_marker->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
 }
 
-/* handles the marker refX/refY attributes */
 class MarkerKnotHolderEntityReference : public KnotHolderEntity {
 public:
     double _edit_rotation = 0.0;
@@ -1190,6 +1217,7 @@ public:
     void knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) override {};
     void knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state) override;
 };
+
 
 Geom::Point
 MarkerKnotHolderEntityReference::knot_get() const
@@ -1216,8 +1244,8 @@ MarkerKnotHolderEntityReference::knot_set(Geom::Point const &p, Geom::Point cons
     sp_marker->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
 }
 
-MarkerKnotHolder::MarkerKnotHolder(SPDesktop *desktop, SPItem *item, SPKnotHolderReleasedFunc relhandler, double edit_rotation, int edit_marker_mode) :
-    KnotHolder(desktop, item, relhandler)
+MarkerKnotHolder::MarkerKnotHolder(SPDesktop *desktop, SPItem *item, SPKnotHolderReleasedFunc relhandler, double edit_rotation, int edit_marker_mode) 
+    : KnotHolder(desktop, item, relhandler)
 {
     MarkerKnotHolderEntityReference *entity_reference = new MarkerKnotHolderEntityReference(edit_rotation, edit_marker_mode);
     MarkerKnotHolderEntityScale *entity_scale = new MarkerKnotHolderEntityScale(edit_rotation, edit_marker_mode);

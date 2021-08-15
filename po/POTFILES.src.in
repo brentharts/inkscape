@@ -314,7 +314,6 @@
 ../src/ui/toolbar/eraser-toolbar.cpp
 ../src/ui/toolbar/gradient-toolbar.cpp
 ../src/ui/toolbar/lpe-toolbar.cpp
-../src/ui/toolbar/marker-toolbar.cpp
 ../src/ui/toolbar/measure-toolbar.cpp
 ../src/ui/toolbar/mesh-toolbar.cpp
 ../src/ui/toolbar/node-toolbar.cpp

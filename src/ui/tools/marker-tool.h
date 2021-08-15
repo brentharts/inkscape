@@ -42,9 +42,11 @@ class MarkerTool : public ToolBase {
 		std::map<SPItem *, std::unique_ptr<ShapeEditor>> _shape_editors;
 		
 		int editMarkerMode = -1;
+
 	private:
 		sigc::connection sel_changed_connection;
         ShapeRecord get_marker_transform(SPShape* shape, SPItem *parent_item, SPItem *item, SPMarkerLoc marker_type);
+		
 };
 
 }}}
