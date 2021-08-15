@@ -119,10 +119,10 @@ public:
     */
     class PreferencesObserver : Observer {
     public:
-        static std::unique_ptr<PreferencesObserver> create(Glib::ustring path, const std::function<void (const Preferences::Entry& new_value)>& callback);
-        virtual ~PreferencesObserver() = default;
+        static std::unique_ptr<PreferencesObserver> create(Glib::ustring path, std::function<void (const Preferences::Entry& new_value)> callback);
+        ~PreferencesObserver() override = default;
     private:
-        PreferencesObserver(Glib::ustring path, const std::function<void (const Preferences::Entry& new_value)>& callback);
+        PreferencesObserver(Glib::ustring path, std::function<void (const Preferences::Entry& new_value)> callback);
         void notify(Preferences::Entry const& new_val) override;
         std::function<void (const Preferences::Entry&)> _callback;
     };
@@ -562,7 +562,7 @@ public:
     void removeObserver(Observer &);
     /*@}*/
 
-    std::unique_ptr<PreferencesObserver> createObserver(Glib::ustring path, const std::function<void (const Preferences::Entry& new_value)>& callback);
+    std::unique_ptr<PreferencesObserver> createObserver(Glib::ustring path, std::function<void (const Preferences::Entry& new_value)> callback);
     /**
      * @name Access and manipulate the Preferences object.
      * @{
