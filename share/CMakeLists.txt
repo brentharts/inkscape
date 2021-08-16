@@ -24,9 +24,22 @@ install(DIRECTORY extensions DESTINATION ${INKSCAPE_SHARE_INSTALL}
     PATTERN ".git*" EXCLUDE
     PATTERN "tests" EXCLUDE
     PATTERN "*.pyc" EXCLUDE
+    PATTERN "print_win32_vector.*" EXCLUDE
+    PATTERN "extension-manager-bootstrap.*" EXCLUDE
+)
+
+install(
+    FILES extensions/extension-manager-bootstrap.py extensions/extension-manager-bootstrap.inx
+    DESTINATION ${INKSCAPE_SHARE_INSTALL}/extensions
+    COMPONENT extension_manager
 )
 
 if(WIN32)
+    install(
+        FILES extensions/print_win32_vector.py extensions/print_win32_vector.inx
+        DESTINATION ${INKSCAPE_SHARE_INSTALL}/extensions
+        COMPONENT extensions
+    )
   install(CODE
     "MESSAGE(\"Pre-compiling Python extensions to byte-code (.pyc files)\")
      execute_process(COMMAND \${CMAKE_INSTALL_PREFIX}/bin/python -m compileall -qq \${CMAKE_INSTALL_PREFIX}/${INKSCAPE_SHARE_INSTALL})"
@@ -41,7 +54,7 @@ install(DIRECTORY themes DESTINATION ${INKSCAPE_SHARE_INSTALL}
 )
 
 
-# appdata and desktop files
+# appdata and desktop files, bash completions
 if(UNIX)
   if (ENABLE_BINRELOC)
     set(INKSCAPE_ICONPATH "\${SNAP}/share/inkscape/branding/inkscape.svg")
@@ -112,11 +125,8 @@ if(UNIX)
     DESTINATION ${SHARE_INSTALL}/applications)
   install(FILES ${CMAKE_BINARY_DIR}/org.inkscape.Inkscape.appdata.xml
     DESTINATION ${SHARE_INSTALL}/metainfo)
-  install(FILES
-    ../AUTHORS
-    ../TRANSLATORS
-    ../COPYING
-    DESTINATION ${INKSCAPE_SHARE_INSTALL}/doc)
+
+
   install(FILES
     bash-completion/completions/inkscape
     DESTINATION ${SHARE_INSTALL}/bash-completion/completions)

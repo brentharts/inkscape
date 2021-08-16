@@ -119,13 +119,13 @@ public:
 
 
     // Document creation ------------------
-    static SPDocument *createDoc(Inkscape::XML::Document *rdoc, char const *uri,
+    static SPDocument *createDoc(Inkscape::XML::Document *rdoc, char const *filename,
             char const *base, char const *name, bool keepalive,
             SPDocument *parent);
-    static SPDocument *createNewDoc(char const*uri, bool keepalive,
+    static SPDocument *createNewDoc(char const *filename, bool keepalive,
             bool make_new = false, SPDocument *parent=nullptr );
     static SPDocument *createNewDocFromMem(char const*buffer, int length, bool keepalive);
-           SPDocument *createChildDoc(std::string const &uri);
+           SPDocument *createChildDoc(std::string const &filename);
 
     // Make a copy, you are responsible for the copy.
     std::unique_ptr<SPDocument> copy() const;
@@ -155,12 +155,14 @@ public:
     bool removeResource(char const *key, SPObject *object);
     std::vector<SPObject *> const getResourceList(char const *key);
 
-    void do_change_uri(char const *const filename, bool const rebase);
-    void changeUriAndHrefs(char const *uri);
+    void do_change_filename(char const *const filename, bool const rebase);
+    void changeFilenameAndHrefs(char const *filename);
     void setXMLDialogSelectedObject(SPObject *activexmltree) { _activexmltree = activexmltree; }
     SPObject *getXMLDialogSelectedObject() { return _activexmltree; }
 
-  private:
+    Inkscape::EventLog* get_event_log() { return _event_log; }
+
+private:
     void _importDefsNode(SPDocument *source, Inkscape::XML::Node *defs, Inkscape::XML::Node *target_defs);
     SPObject *_activexmltree;
 
@@ -194,20 +196,23 @@ public:
 
     std::vector<Glib::ustring> getLanguages() const;
 
+    SPDocument *getParent() { return _parent_document; }
+    SPDocument const *getParent() const { return _parent_document; }
+
     // Styling
     CRCascade    *getStyleCascade() { return style_cascade; }
 
     // File information --------------------
 
-    /** A filename (not a URI yet), or NULL */
-    void setDocumentUri(char const *document_uri);
-    char const *getDocumentURI() const { return document_uri; }
+    /** A filename, or NULL */
+    void setDocumentFilename(char const *filename);
+    char const *getDocumentFilename() const { return document_filename; }
 
     /** To be used for resolving relative hrefs. */
     void setDocumentBase( char const* document_base );
     char const *getDocumentBase() const { return document_base; };
 
-    /** basename(uri) or other human-readable label for the document. */
+    /** basename or other human-readable label for the document. */
     char const* getDocumentName() const { return document_name; }
 
 
@@ -254,7 +259,7 @@ public:
     std::vector<SPItem*> getItemsInBox         (unsigned int dkey, Geom::Rect const &box, bool take_hidden = false, bool take_insensitive = false, bool take_groups = true, bool enter_groups = false) const;
     std::vector<SPItem*> getItemsPartiallyInBox(unsigned int dkey, Geom::Rect const &box, bool take_hidden = false, bool take_insensitive = false, bool take_groups = true, bool enter_groups = false) const;
     SPItem *getItemAtPoint(unsigned int key, Geom::Point const &p, bool into_groups, SPItem *upto = nullptr) const;
-    std::vector<SPItem*> getItemsAtPoints(unsigned const key, std::vector<Geom::Point> points, bool all_layers = true, size_t limit = 0) const ;
+    std::vector<SPItem*> getItemsAtPoints(unsigned const key, std::vector<Geom::Point> points, bool all_layers = true, bool topmost_only = true, size_t limit = 0) const;
     SPItem *getGroupAtPoint(unsigned int key,  Geom::Point const &p) const;
 
     /**
@@ -330,9 +335,9 @@ private:
     CRCascade *style_cascade;
 
     // File information ----------------------
-    char *document_uri;   ///< A filename (not a URI yet), or NULL
+    char *document_filename;   ///< A filename, or NULL
     char *document_base;  ///< To be used for resolving relative hrefs.
-    char *document_name;  ///< basename(uri) or other human-readable label for the document.
+    char *document_name;  ///< basename or other human-readable label for the document.
 
     // Find items ----------------------------
     std::map<std::string, SPObject *> iddef;
@@ -348,6 +353,7 @@ private:
 
     // Document undo/redo ----------------------
     friend Inkscape::DocumentUndo;
+    Inkscape::EventLog *_event_log = nullptr;
 
     /* Undo/Redo state */
     bool sensitive; /* If we save actions to undo stack */
@@ -378,7 +384,7 @@ private:
     typedef sigc::signal<void, SPObject *> IDChangedSignal;
     typedef sigc::signal<void> ResourcesChangedSignal;
     typedef sigc::signal<void, unsigned> ModifiedSignal;
-    typedef sigc::signal<void, char const *> URISetSignal;
+    typedef sigc::signal<void, char const *> FilenameSetSignal;
     typedef sigc::signal<void, double, double> ResizedSignal;
     typedef sigc::signal<void> ReconstructionStart;
     typedef sigc::signal<void> ReconstructionFinish;
@@ -391,7 +397,7 @@ private:
     IDChangedSignalMap id_changed_signals;
 
     SPDocument::ModifiedSignal modified_signal;
-    SPDocument::URISetSignal uri_set_signal;
+    SPDocument::FilenameSetSignal filename_set_signal;
     SPDocument::ResizedSignal resized_signal;
     SPDocument::ReconstructionStart _reconstruction_start_signal;
     SPDocument::ReconstructionFinish  _reconstruction_finish_signal;
@@ -427,7 +433,7 @@ public:
 
     sigc::connection connectDestroy(sigc::signal<void>::slot_type slot);
     sigc::connection connectModified(ModifiedSignal::slot_type slot);
-    sigc::connection connectURISet(URISetSignal::slot_type slot);
+    sigc::connection connectFilenameSet(FilenameSetSignal::slot_type slot);
     sigc::connection connectResized(ResizedSignal::slot_type slot);
     sigc::connection connectCommit(CommitSignal::slot_type slot);
     sigc::connection connectIdChanged(const char *id, IDChangedSignal::slot_type slot);

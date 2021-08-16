@@ -24,6 +24,7 @@
 #include "object/sp-shape.h"
 #include "preferences.h"
 #include "ui/widget/canvas.h"
+#include "ui/themes.h"
 
 namespace Inkscape {
 namespace UI {
@@ -179,8 +180,8 @@ LivePathEffectAdd::LivePathEffectAdd()
             sigc::mem_fun(*this, &LivePathEffectAdd::mouseout), GTK_WIDGET(LPESelectorEffect->gobj())));
         Gtk::Label *LPEName;
         builder_effect->get_widget("LPEName", LPEName);
-        const Glib::ustring label = _(converter.get_label(data->id).c_str());
-        const Glib::ustring untranslated_label = converter.get_untranslated_label(data->id);
+        const Glib::ustring label = g_dpgettext2(nullptr, "path effect", converter.get_label(data->id).c_str());
+        const Glib::ustring untranslated_label = converter.get_label(data->id);
         if (untranslated_label == label) {
             LPEName->set_text(label);
         } else {
@@ -295,7 +296,7 @@ LivePathEffectAdd::LivePathEffectAdd()
             viewChanged(2);
     }
     Gtk::Widget *widg = dynamic_cast<Gtk::Widget *>(_LPEDialogSelector);
-    INKSCAPE.signal_change_theme.connect(sigc::bind(sigc::ptr_fun(sp_add_top_window_classes), widg));
+    INKSCAPE.themecontext->getChangeThemeSignal().connect(sigc::bind(sigc::ptr_fun(sp_add_top_window_classes), widg));
     sp_add_top_window_classes(widg);
 }
 const LivePathEffect::EnumEffectData<LivePathEffect::EffectType> *LivePathEffectAdd::getActiveData()

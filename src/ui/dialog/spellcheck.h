@@ -36,7 +36,6 @@
 #include <gspell/gspell.h>
 #endif  /* WITH_GSPELL */
 
-class SPDesktop;
 class SPObject;
 class SPItem;
 class SPCanvasItem;
@@ -67,6 +66,7 @@ public:
     static std::vector<LanguagePair> get_available_langs();
 
 private:
+    void documentReplaced() override;
 
     /**
      * Remove the highlight rectangle form the canvas
@@ -91,7 +91,7 @@ private:
     /**
      * Compare the visual bounds of 2 SPItems referred to by a and b
      */
-    static bool compareTextBboxes (gconstpointer a, gconstpointer b);
+    static bool compareTextBboxes(SPItem const *i1, SPItem const *i2);
     SPItem *getText (SPObject *root);
     void    nextText ();
 
@@ -163,11 +163,6 @@ private:
      * Selection in suggestions text view changed
      */
     void onTreeSelectionChange();
-
-    /**
-     * Can be invoked for setting the desktop. Currently not used.
-     */
-    void update() override;
 
     SPObject *_root;
 
@@ -256,8 +251,6 @@ private:
     Gtk::Button     stop_button;
     Gtk::Button     start_button;
     Gtk::ButtonBox  actionbutton_hbox;
-
-    SPDesktop *     desktop;
 
     class TreeColumns : public Gtk::TreeModel::ColumnRecord
     {

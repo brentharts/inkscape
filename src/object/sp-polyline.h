@@ -12,9 +12,6 @@
 
 #include "sp-shape.h"
 
-#define SP_POLYLINE(obj) (dynamic_cast<SPPolyLine*>((SPObject*)obj))
-#define SP_IS_POLYLINE(obj) (dynamic_cast<const SPPolyLine*>((SPObject*)obj) != NULL)
-
 class SPPolyLine : public SPShape {
 public:
 	SPPolyLine();
@@ -24,6 +21,7 @@ public:
 	void set(SPAttr key, char const* value) override;
 	Inkscape::XML::Node* write(Inkscape::XML::Document *xml_doc, Inkscape::XML::Node *repr, unsigned int flags) override;
 
+        const char* typeName() const override;
 	char* description() const override;
 };
 

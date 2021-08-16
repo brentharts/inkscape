@@ -324,7 +324,7 @@ void SPImage::update(SPCtx *ctx, unsigned int flags) {
             Inkscape::Pixbuf *pixbuf = nullptr;
             double svgdpi = 96;
             if (this->getRepr()->attribute("inkscape:svg-dpi")) {
-                svgdpi = atof(this->getRepr()->attribute("inkscape:svg-dpi"));
+                svgdpi = g_ascii_strtod(this->getRepr()->attribute("inkscape:svg-dpi"), nullptr);
             }
             this->dpi = svgdpi;
             pixbuf = sp_image_repr_read_image(this->getRepr()->attribute("xlink:href"),
@@ -410,13 +410,13 @@ void SPImage::update(SPCtx *ctx, unsigned int flags) {
             proportion_image = this->width.computed / (double)this->height.computed;
             if (proportion_pixbuf != proportion_image) {
                 double new_height = this->height.computed * proportion_pixbuf;
-                sp_repr_set_svg_double(this->getRepr(), "width", new_height);
+                this->getRepr()->setAttributeSvgDouble("width", new_height);
             }
         }
         else {
             if (proportion_pixbuf != proportion_image) {
                 double new_width = this->width.computed * proportion_pixbuf;
-                sp_repr_set_svg_double(this->getRepr(), "height", new_width);
+                this->getRepr()->setAttributeSvgDouble("height", new_width);
             }
         }
     }
@@ -445,19 +445,19 @@ Inkscape::XML::Node *SPImage::write(Inkscape::XML::Document *xml_doc, Inkscape::
 
     /* fixme: Reset attribute if needed (Lauris) */
     if (this->x._set) {
-        sp_repr_set_svg_double(repr, "x", this->x.computed);
+        repr->setAttributeSvgDouble("x", this->x.computed);
     }
 
     if (this->y._set) {
-        sp_repr_set_svg_double(repr, "y", this->y.computed);
+        repr->setAttributeSvgDouble("y", this->y.computed);
     }
 
     if (this->width._set) {
-        sp_repr_set_svg_double(repr, "width", this->width.computed);
+        repr->setAttributeSvgDouble("width", this->width.computed);
     }
 
     if (this->height._set) {
-        sp_repr_set_svg_double(repr, "height", this->height.computed);
+        repr->setAttributeSvgDouble("height", this->height.computed);
     }
     repr->setAttribute("inkscape:svg-dpi", this->getRepr()->attribute("inkscape:svg-dpi"));
     //XML Tree being used directly here while it shouldn't be...
@@ -504,6 +504,10 @@ void SPImage::print(SPPrintContext *ctx) {
     }
 }
 
+const char* SPImage::typeName() const {
+    return "image";
+}
+
 const char* SPImage::displayName() const {
     return _("Image");
 }
@@ -533,7 +537,7 @@ gchar* SPImage::description() const {
         Inkscape::Pixbuf * pb = nullptr;
         double svgdpi = 96;
         if (this->getRepr()->attribute("inkscape:svg-dpi")) {
-            svgdpi = atof(this->getRepr()->attribute("inkscape:svg-dpi"));
+            svgdpi = g_ascii_strtod(this->getRepr()->attribute("inkscape:svg-dpi"), nullptr);
         }
         pb = sp_image_repr_read_image(this->getRepr()->attribute("xlink:href"),
                                       this->getRepr()->attribute("sodipodi:absref"), this->document->getDocumentBase(), svgdpi);
@@ -636,7 +640,7 @@ Inkscape::Pixbuf *sp_image_repr_read_image(gchar const *href, gchar const *absre
 static void
 sp_image_update_arenaitem (SPImage *image, Inkscape::DrawingImage *ai)
 {
-    ai->setStyle(SP_OBJECT(image)->style);
+    ai->setStyle(image->style);
     ai->setPixbuf(image->pixbuf);
     ai->setOrigin(Geom::Point(image->ox, image->oy));
     ai->setScale(image->sx, image->sy);
@@ -645,8 +649,7 @@ sp_image_update_arenaitem (SPImage *image, Inkscape::DrawingImage *ai)
 
 static void sp_image_update_canvas_image(SPImage *image)
 {
-    SPItem *item = SP_ITEM(image);
-    for (SPItemView *v = item->display; v != nullptr; v = v->next) {
+    for (SPItemView *v = image->display; v != nullptr; v = v->next) {
         sp_image_update_arenaitem(image, dynamic_cast<Inkscape::DrawingImage *>(v->arenaitem));
     }
 }
@@ -756,7 +759,7 @@ void sp_embed_image(Inkscape::XML::Node *image_node, Inkscape::Pixbuf *pb)
     if (data == nullptr) {
         // if there is no supported MIME data, embed as PNG
         data_mimetype = "image/png";
-        gdk_pixbuf_save_to_buffer(pb->getPixbufRaw(), reinterpret_cast<gchar**>(&data), &len, "png", nullptr, NULL);
+        gdk_pixbuf_save_to_buffer(pb->getPixbufRaw(), reinterpret_cast<gchar**>(&data), &len, "png", nullptr, nullptr);
         free_data = true;
     }
 

@@ -68,7 +68,9 @@ apt_bundle \
     python${PY_VER}-minimal \
     python3-lxml \
     python3-numpy \
+    python3-six \
     python3-scour \
+    python3-cssselect \
     python3-distutils \
     python3-gi \
     python3-pil \
@@ -81,6 +83,15 @@ apt_bundle \
     make_ld_launcher "python${PY_VER}" python3
     make_ld_launcher "python${PY_VER}" python
 )
+
+# Compile GLib schemas if the subdirectory is present in the AppImage
+# AppRun has to export GSETTINGS_SCHEMA_DIR for this to work
+apt_bundle gnome-settings-daemon-common
+mkdir -p usr/share/glib-2.0/schemas/
+cp /usr/share/glib-2.0/schemas/*.gschema.xml usr/share/glib-2.0/schemas/
+if [ -d usr/share/glib-2.0/schemas/ ] ; then
+  ( cd usr/share/glib-2.0/schemas/ ; glib-compile-schemas . )
+fi
 
 cd -
 

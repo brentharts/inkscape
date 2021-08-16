@@ -37,6 +37,7 @@
 
 #include "display/curve.h"
 #include "display/control/canvas-item-bpath.h"
+#include "display/control/snap-indicator.h"
 
 #include "livarot/Path.h"  // Simplify paths
 
@@ -127,6 +128,8 @@ void PencilTool::_endpointSnap(Geom::Point &p, guint const state) {
                                          //pressing CTRL
             std::optional<Geom::Point> origin = this->_npoints > 0 ? this->p[0] : std::optional<Geom::Point>();
             spdc_endpoint_snap_free(this, p, origin, state);
+        } else {
+            desktop->snapindicator->remove_snaptarget();
         }
     }
 }
@@ -265,7 +268,7 @@ bool PencilTool::_handleMotionNotify(GdkEventMotion const &mevent) {
     }
     bool ret = false;
 
-    if ((mevent.state & GDK_BUTTON2_MASK) || (mevent.state & GDK_BUTTON3_MASK)) {
+    if ((mevent.state & GDK_BUTTON2_MASK)) {
         // allow scrolling
         return ret;
     }
@@ -737,7 +740,7 @@ void PencilTool::addPowerStrokePencil()
                 tol = tol / (130.0 * (132.0 - tol));
                 Inkscape::SVGOStringStream threshold;
                 threshold << tol;
-                Effect::createAndApply(SIMPLIFY, document, SP_ITEM(lpeitem));
+                Effect::createAndApply(SIMPLIFY, document, lpeitem);
                 Effect *lpe = lpeitem->getCurrentLPE();
                 Inkscape::LivePathEffect::LPESimplify *simplify =
                     static_cast<Inkscape::LivePathEffect::LPESimplify *>(lpe);

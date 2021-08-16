@@ -70,7 +70,7 @@ namespace UI {
 namespace Dialog {
 
 TextEdit::TextEdit()
-    : DialogBase("/dialogs/textandfont", SP_VERB_DIALOG_TEXT),
+    : DialogBase("/dialogs/textandfont", "Text"),
       selectChangedConn(),
       subselChangedConn(),
       selectModifiedConn(),
@@ -147,19 +147,6 @@ TextEdit::~TextEdit()
     selectChangedConn.disconnect();
     fontChangedConn.disconnect();
     fontFeaturesChangedConn.disconnect();
-}
-
-void TextEdit::onSelectionModified(guint flags )
-{
-    gboolean style, content;
-
-    style =  ((flags & ( SP_OBJECT_CHILD_MODIFIED_FLAG |
-                    SP_OBJECT_STYLE_MODIFIED_FLAG  )) != 0 );
-
-    content = ((flags & ( SP_OBJECT_CHILD_MODIFIED_FLAG |
-                    SP_TEXT_CONTENT_MODIFIED_FLAG  )) != 0 );
-
-    onReadSelection (style, content);
 }
 
 void TextEdit::onReadSelection ( gboolean dostyle, gboolean /*docontent*/ )
@@ -330,10 +317,25 @@ unsigned TextEdit::getSelectedTextCount ()
     return items;
 }
 
-void TextEdit::onSelectionChange()
+void TextEdit::documentReplaced()
 {
-    onReadSelection (TRUE, TRUE);
+    onReadSelection(true, true);
 }
+
+void TextEdit::selectionChanged(Selection *selection)
+{
+    onReadSelection(true, true);
+}
+
+void TextEdit::selectionModified(Selection *selection, guint flags)
+{
+    bool style = ((flags & (SP_OBJECT_CHILD_MODIFIED_FLAG |
+                            SP_OBJECT_STYLE_MODIFIED_FLAG  )) != 0 );
+    bool content = ((flags & (SP_OBJECT_CHILD_MODIFIED_FLAG |
+                              SP_TEXT_CONTENT_MODIFIED_FLAG  )) != 0 );
+    onReadSelection (style, content);
+}
+
 
 void TextEdit::updateObjectText ( SPItem *text )
 {
@@ -492,31 +494,8 @@ void TextEdit::onChange()
 
 void TextEdit::onFontChange(Glib::ustring fontspec)
 {
-    // Is not necesary update open type features this done when user click on font features tab
+    // Is not necessary update open type features this done when user click on font features tab
     onChange();
-}
-
-void TextEdit::update()
-{
-    if (!_app) {
-        std::cerr << "TextEdit::update(): _app is null" << std::endl;
-        return;
-    }
-
-    SPDesktop *desktop = getDesktop();
-
-    selectModifiedConn.disconnect();
-    subselChangedConn.disconnect();
-    selectChangedConn.disconnect();
-
-    {
-        if (desktop && desktop->selection) {
-            selectChangedConn = desktop->selection->connectChanged(sigc::hide(sigc::mem_fun(*this, &TextEdit::onSelectionChange)));
-            subselChangedConn = desktop->connectToolSubselectionChanged(sigc::hide(sigc::mem_fun(*this, &TextEdit::onSelectionChange)));
-            selectModifiedConn = desktop->selection->connectModified(sigc::hide<0>(sigc::mem_fun(*this, &TextEdit::onSelectionModified)));
-            onReadSelection(TRUE, TRUE);
-        }
-    }
 }
 
 } //namespace Dialog

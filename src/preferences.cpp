@@ -13,6 +13,7 @@
 
 #include <cstring>
 #include <ctime>
+#include <iomanip>
 #include <sstream>
 #include <utility>
 #include <glibmm/fileutils.h>
@@ -381,7 +382,8 @@ void Preferences::setBool(Glib::ustring const &pref_path, bool value)
  */
 void Preferences::setPoint(Glib::ustring const &pref_path, Geom::Point value)
 {
-    _setRawValue(pref_path, Glib::ustring::compose("%1",value[Geom::X]) + "," + Glib::ustring::compose("%1",value[Geom::Y]));
+    setDouble(pref_path + "/x", value[Geom::X]);
+    setDouble(pref_path + "/y", value[Geom::Y]);
 }
 
 /**
@@ -414,7 +416,8 @@ void Preferences::setUInt(Glib::ustring const &pref_path, unsigned int value)
  */
 void Preferences::setDouble(Glib::ustring const &pref_path, double value)
 {
-    _setRawValue(pref_path, Glib::ustring::compose("%1",value));
+    static constexpr auto digits10 = std::numeric_limits<double>::digits10; // number of decimal digits that are ensured to be precise
+    _setRawValue(pref_path, Glib::ustring::format(std::setprecision(digits10), value));
 }
 
 /**
@@ -426,7 +429,8 @@ void Preferences::setDouble(Glib::ustring const &pref_path, double value)
  */
 void Preferences::setDoubleUnit(Glib::ustring const &pref_path, double value, Glib::ustring const &unit_abbr)
 {
-    Glib::ustring str = Glib::ustring::compose("%1%2",value,unit_abbr);
+    static constexpr auto digits10 = std::numeric_limits<double>::digits10; // number of decimal digits that are ensured to be precise
+    Glib::ustring str = Glib::ustring::compose("%1%2", Glib::ustring::format(std::setprecision(digits10), value), unit_abbr);
     _setRawValue(pref_path, str);
 }
 
@@ -777,18 +781,6 @@ bool Preferences::_extractBool(Entry const &v)
         v.value_bool = true;
         return true;
     }
-}
-
-Geom::Point Preferences::_extractPoint(Entry const &v)
-{
-    if (v.cached_point) return v.value_point;
-    v.cached_point = true;
-    gchar const *s = static_cast<gchar const *>(v._value);
-    gchar ** strarray = g_strsplit(s, ",", 2);
-    double newx = atoi(strarray[0]);
-    double newy = atoi(strarray[1]);
-    g_strfreev (strarray);
-    return Geom::Point(newx, newy);
 }
 
 int Preferences::_extractInt(Entry const &v)

@@ -35,7 +35,7 @@
 #include "ui/dialog/tile.h" // for Inkscape::UI::Dialog::ArrangeDialog
 
     /*
-     *    Sort items by their x co-ordinates, taking account of y (keeps rows intact)
+     *    Sort items by their x coordinates, taking account of y (keeps rows intact)
      *
      *    <0 *elem1 goes before *elem2
      *    0  *elem1 == *elem2
@@ -75,7 +75,7 @@
     }
 
     /*
-     *    Sort items by their y co-ordinates.
+     *    Sort items by their y coordinates.
      */
     static bool sp_compare_y_position(SPItem *first, SPItem *second)
     {
@@ -332,7 +332,7 @@ g_print("\n row = %f     col = %f selection x= %f selection y = %f", total_row_h
              }
     }
 
-    DocumentUndo::done(desktop->getDocument(), SP_VERB_SELECTION_ARRANGE,
+    DocumentUndo::done(desktop->getDocument(), SP_VERB_DIALOG_ALIGN_DISTRIBUTE,
                        _("Arrange in a grid"));
 
 }
@@ -561,6 +561,7 @@ GridArrangeTab::GridArrangeTab(ArrangeDialog *parent)
     auto _col3 = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
 
     Gtk::Box *contents = this;
+    set_valign(Gtk::ALIGN_START);
 
 #define MARGIN 2
 
@@ -713,6 +714,11 @@ GridArrangeTab::GridArrangeTab(ArrangeDialog *parent)
     YPadding.set_sensitive (ManualSpacing);
 
     show_all_children();
+}
+
+
+GridArrangeTab::~GridArrangeTab() {
+    setDesktop(nullptr);
 }
 
 } //namespace Dialog

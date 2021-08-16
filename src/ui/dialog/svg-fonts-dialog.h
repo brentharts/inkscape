@@ -14,6 +14,7 @@
 
 #include <2geom/pathvector.h>
 #include <gtkmm/box.h>
+#include <gtkmm/grid.h>
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/drawingarea.h>
 #include <gtkmm/entry.h>
@@ -22,6 +23,7 @@
 #include <gtkmm/treeview.h>
 
 #include "attributes.h"
+#include "helper/auto-connection.h"
 #include "ui/dialog/dialog-base.h"
 #include "ui/widget/spinbutton.h"
 #include "xml/helper-observer.h"
@@ -64,11 +66,11 @@ class SvgFontsDialog : public DialogBase
 {
 public:
     SvgFontsDialog();
-    ~SvgFontsDialog() override;
+    ~SvgFontsDialog() override {};
 
     static SvgFontsDialog &getInstance() { return *new SvgFontsDialog(); }
 
-    void update() override;
+    void documentReplaced() override;
 
     void update_fonts();
     SvgFont* get_selected_svgfont();
@@ -88,30 +90,35 @@ public:
     bool updating;
 
     // Used for font-family
-    class AttrEntry : public Gtk::Box
+    class AttrEntry
     {
     public:
         AttrEntry(SvgFontsDialog* d, gchar* lbl, Glib::ustring tooltip, const SPAttr attr);
         void set_text(char*);
+        Gtk::Entry* get_entry() { return &entry; }
+        Gtk::Label* get_label() { return _label; }
     private:
         SvgFontsDialog* dialog;
         void on_attr_changed();
         Gtk::Entry entry;
         SPAttr attr;
+        Gtk::Label* _label;
     };
 
-    class AttrSpin : public Gtk::Box
+    class AttrSpin
     {
     public:
         AttrSpin(SvgFontsDialog* d, gchar* lbl, Glib::ustring tooltip, const SPAttr attr);
         void set_value(double v);
         void set_range(double low, double high);
         Inkscape::UI::Widget::SpinButton* getSpin() { return &spin; }
+        Gtk::Label* get_label() { return _label; }
     private:
         SvgFontsDialog* dialog;
         void on_attr_changed();
         Inkscape::UI::Widget::SpinButton spin;
         SPAttr attr;
+        Gtk::Label* _label;
     };
 
 private:
@@ -145,7 +152,7 @@ private:
     Inkscape::XML::SignalObserver _defs_observer; //in order to update fonts
     Inkscape::XML::SignalObserver _glyphs_observer;
 
-    sigc::connection _defs_observer_connection;
+    Inkscape::auto_connection _defs_observer_connection;
 
     Gtk::Box* AttrCombo(gchar* lbl, const SPAttr attr);
 //    Gtk::Box* AttrSpin(gchar* lbl, const SPAttr attr);
@@ -169,7 +176,9 @@ private:
     Gtk::Box* kerning_tab();
     Gtk::Box* glyphs_tab();
     Gtk::Button _add;
+    Gtk::Button _remove;
     Gtk::Button add_glyph_button;
+    Gtk::Button remove_glyph_button;
     Gtk::Button glyph_from_path_button;
     Gtk::Button missing_glyph_button;
     Gtk::Button missing_glyph_reset_button;
@@ -191,6 +200,7 @@ private:
     Glib::RefPtr<Gtk::ListStore> _model;
     Columns _columns;
     Gtk::TreeView _FontsList;
+    Gtk::ScrolledWindow _fonts_scroller;
 
     class GlyphsColumns : public Gtk::TreeModel::ColumnRecord
     {
@@ -235,7 +245,8 @@ private:
     Gtk::ScrolledWindow _KerningPairsListScroller;
     Gtk::Button add_kernpair_button;
 
-    Gtk::Box _font_settings;
+    Gtk::Grid _header_box;
+    Gtk::Grid _grid;
     Gtk::Box global_vbox;
     Gtk::Box glyphs_vbox;
     Gtk::Box kerning_vbox;

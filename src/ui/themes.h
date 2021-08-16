@@ -14,18 +14,59 @@
 #ifndef UI_THEMES_H_SEEN
 #define UI_THEMES_H_SEEN
 
-#include <map>
 #include <cstring>
+#include <glibmm.h>
+#include <gtkmm.h>
+#include <map>
 #include <utility>
 #include <vector>
+#include <sigc++/signal.h>
+#include "preferences.h"
 
-#include <glibmm.h>
+namespace Inkscape {
+namespace UI {
 
+/**
+ * A simple mediator class that sets the state of a Gtk::ToggleToolButton when
+ * a preference is changed.  Unlike the PrefPusher class, this does not provide
+ * the reverse process, so you still need to write your own handler for the
+ * "toggled" signal on the ToggleToolButton.
+ */
+typedef std::map<Glib::ustring, bool> gtkThemeList;
+class ThemeContext
+{
+public:
+ThemeContext();
+~ThemeContext() = default;
 // Name of theme -> has dark theme
 typedef std::map<Glib::ustring, bool> gtkThemeList;
+void inkscape_fill_gtk(const gchar *path, gtkThemeList &themes);
+std::map<Glib::ustring, bool> get_available_themes();
+void add_gtk_css(bool only_providers, bool cached = false);
+void add_icon_theme();
+Glib::ustring get_symbolic_colors();
+Glib::RefPtr<Gtk::CssProvider> getColorizeProvider() { return _colorizeprovider;}
+Glib::RefPtr<Gtk::CssProvider> getContrastThemeProvider() { return _contrastthemeprovider;}
+Glib::RefPtr<Gtk::CssProvider> getThemeProvider() { return _themeprovider;}
+Glib::RefPtr<Gtk::CssProvider> getStyleProvider() { return _styleprovider;}
+sigc::signal<void> getChangeThemeSignal() { return _signal_change_theme;}
 
-gtkThemeList get_available_themes();
+// True if current theme (applied one) is dark
+bool isCurrentThemeDark(Gtk::Container *window);
 
+private:
+    // user change theme
+    sigc::signal<void> _signal_change_theme;
+    Glib::RefPtr<Gtk::CssProvider> _styleprovider;
+    Glib::RefPtr<Gtk::CssProvider> _themeprovider;
+    Glib::RefPtr<Gtk::CssProvider> _contrastthemeprovider;
+    Glib::RefPtr<Gtk::CssProvider> _colorizeprovider;
+    Glib::RefPtr<Gtk::CssProvider> _spinbuttonprovider;
+    std::unique_ptr<Preferences::Observer> _spinbutton_observer;
+};
+
+}
+}
 #endif /* !UI_THEMES_H_SEEN */
 
 /*

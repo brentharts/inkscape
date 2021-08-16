@@ -24,6 +24,10 @@ namespace UI {
 
 class PreviewHolder;
 
+namespace Widget {
+    class ColorPalette;
+}
+
 namespace Dialog {
 
 class ColorItem;
@@ -44,9 +48,9 @@ public:
     SwatchesPanel(gchar const* prefsPath = "/dialogs/swatches");
     ~SwatchesPanel() override;
 
+    void documentReplaced() override;
     static SwatchesPanel& getInstance();
-
-    void update() override;
+    static std::vector<SwatchPage*> getSwatchSets();
 
     virtual int getSelectedIndex() {return _currentIndex;} // temporary
 
@@ -54,7 +58,6 @@ protected:
     static void handleGradientsChange(SPDocument *document);
 
     virtual void _updateFromSelection();
-    virtual void _setDocument( SPDocument *document );
     virtual void _rebuild();
 
     virtual std::vector<SwatchPage*> _getSwatchSets() const;
@@ -72,8 +75,7 @@ private:
     ColorItem* _clear;
     ColorItem* _remove;
     int _currentIndex;
-    SPDesktop*  _currentDesktop;
-    SPDocument* _currentDocument;
+    Inkscape::UI::Widget::ColorPalette* _palette;
 
     void _regItem(Gtk::MenuItem* item, int id);
 
@@ -82,8 +84,6 @@ private:
     void _wrapToggled(Gtk::CheckMenuItem *toggler);
 
     Gtk::Menu       *_menu;
-
-    std::vector<sigc::connection> _desktopConnections;
 
     friend class DocTrack;
 };

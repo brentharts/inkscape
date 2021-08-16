@@ -69,8 +69,8 @@ appreciate this. New files should have one or two lines describing the
 purpose of the code inside the file.
 
 
-Building
---------
+Building (In Linux distribution)
+--------------------------------
 
 This is the best set of instructions for setting up your build directory...
 
@@ -107,10 +107,12 @@ Now we can run `inkscape` that we have built, with the latest resources and code
 ./bin/inkscape
 ```
 
+To build in Non-Linux Platforms check out `INSTALL.md` (Links to Inkscape Wiki pages are given right below "Basic Installation")
+
 Profiling
 ---------
 
-To run with profiling, add `-DWITH_PROFILING=ON` to the above cmake script. Compiling and running will be slower and the gmon file will apear only after Inkscape quits.
+To run with profiling, add `-DWITH_PROFILING=ON` to the above cmake script. Compiling and running will be slower and the gmon file will appear only after Inkscape quits.
 
 See: https://wiki.inkscape.org/wiki/index.php/Profiling
 

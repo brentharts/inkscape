@@ -59,7 +59,7 @@ load_svg_cursor(Glib::RefPtr<Gdk::Display> display,
 
     // Set in preferences
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    Glib::ustring theme_name = prefs->getStringOrDefault("/theme/iconTheme", "/theme/defaultIconTheme");
+    Glib::ustring theme_name = prefs->getString("/theme/iconTheme", prefs->getString("/theme/defaultIconTheme", ""));
     if (!theme_name.empty()) {
         theme_names.push_back(theme_name);
     }
@@ -114,11 +114,11 @@ load_svg_cursor(Glib::RefPtr<Gdk::Display> display,
     SPCSSAttr *css = sp_repr_css_attr(root->getRepr(), "style");
 
     std::stringstream fill_stream;
-    fill_stream << "#" 
+    fill_stream << "#"
                 << std::setfill ('0') << std::setw(6)
                 << std::hex << (fill >> 8);
     std::stringstream stroke_stream;
-    stroke_stream << "#" 
+    stroke_stream << "#"
                   << std::setfill ('0') << std::setw(6)
                   << std::hex << (stroke >> 8);
 
@@ -134,14 +134,32 @@ load_svg_cursor(Glib::RefPtr<Gdk::Display> display,
 
     // Find the rendered size of the icon.
     int scale = 1;
+    bool cursor_scaling = false;
 #ifndef GDK_WINDOWING_QUARTZ
     // Default cursor size (get_default_cursor_size()) fixed to 32 on Quartz. Cursor scaling handled elsewhere.
 
-    bool cursor_scaling = prefs->getBool("/options/cursorscaling"); // Fractional scaling is broken but we can't detect it.
+    cursor_scaling = prefs->getBool("/options/cursorscaling"); // Fractional scaling is broken but we can't detect it.
     if (cursor_scaling) {
         scale = window->get_scale_factor(); // Adjust for HiDPI screens.
     }
 #endif
+
+    auto enable_drop_shadow = prefs->getBool("/options/cursor-drop-shadow", true);
+    if (!enable_drop_shadow) {
+        // turn off drop shadow, if any
+        Glib::ustring shadow("drop-shadow");
+        auto objects = document->getObjectsByClass(shadow);
+        for (auto&& el : objects) {
+            if (auto val = el->getAttribute("class")) {
+                Glib::ustring cls = val;
+                auto pos = cls.find(shadow);
+                if (pos != Glib::ustring::npos) {
+                    cls.erase(pos, shadow.length());
+                }
+                el->setAttribute("class", cls);
+            }
+        }
+    }
 
     // Check for maximum size
     // int mwidth = 0;
@@ -151,21 +169,37 @@ load_svg_cursor(Glib::RefPtr<Gdk::Display> display,
 
     auto w = document->getWidth().value("px");
     auto h = document->getHeight().value("px");
-    int sw = w * scale;
-    int sh = h * scale;
-    int dpix = 96 * scale; // DPI
-    int dpiy = 96 * scale;
-
     // Calculate the hotspot.
     int hotspot_x = root->getIntAttribute("inkscape:hotspot_x", 0); // Do not include window scale factor!
     int hotspot_y = root->getIntAttribute("inkscape:hotspot_y", 0);
 
-    auto ink_pixbuf = sp_generate_internal_bitmap(document.get(), nullptr, 0, 0, w, h, sw, sh, dpix, dpiy, 0, nullptr);
-    auto pixbuf = Glib::wrap(ink_pixbuf->getPixbufRaw());
+    Geom::Rect area(0, 0, cursor_scaling ? w * scale : w, cursor_scaling ? h * scale : h);
+    int dpi = 96 * scale;
+    // render document into internal bitmap; returns null on failure
+    if (auto ink_pixbuf = std::unique_ptr<Inkscape::Pixbuf>(sp_generate_internal_bitmap(document.get(), area, dpi))) {
+       if (cursor_scaling) {
+            // creating cursor from Cairo surface rather than pixbuf gives us opportunity to set device scaling;
+            // what that means in practice is we can prepare high-res image and it will be used as-is on
+            // a high-res display; cursors created from pixbuf are up-scaled to device pixels (blurry)
+            auto surface = ink_pixbuf->getSurface();
+            if (surface && surface->cobj()) {
+                cairo_surface_set_device_scale(surface->cobj(), scale, scale);
+                cursor = Gdk::Cursor::create(display, surface, hotspot_x, hotspot_y);
+                window->set_cursor(cursor);
+            }
+            else {
+                std::cerr << "load_svg_cursor: failed to get surface for: " << full_file_path << std::endl;
+            }
+        }
+        else {
+            // original code path when cursor scaling is turned off in preferences
+            auto pixbuf = Glib::wrap(ink_pixbuf->getPixbufRaw(), true);
 
-    if (pixbuf) {
-        cursor = Gdk::Cursor::create(display, pixbuf, hotspot_x, hotspot_y);
-        window->set_cursor(cursor);
+            if (pixbuf) {
+                cursor = Gdk::Cursor::create(display, pixbuf, hotspot_x, hotspot_y);
+                window->set_cursor(cursor);
+            }
+        }
     } else {
         std::cerr << "load_svg_cursor: failed to create pixbuf for: " << full_file_path << std::endl;
     }

@@ -179,7 +179,7 @@ public:
     bool isToolboxButtonActive (gchar const *id);
     void setToolboxPosition(Glib::ustring const& id, GtkPositionType pos);
     void setCoordinateStatus(Geom::Point p);
-    void storeDesktopPosition();
+    void storeDesktopPosition(bool store_maximize = true);
     void requestCanvasUpdate();
     void requestCanvasUpdateAndWait();
     void enableInteraction();
@@ -189,7 +189,6 @@ public:
     Inkscape::UI::Dialog::DialogContainer *getContainer();
 
     Gtk::MenuBar *menubar() { return _menubar; }
-
 
     void updateNamedview();
     void update_guides_lock();
@@ -226,7 +225,6 @@ private:
     void zoom_value_changed();
     void zoom_menu_handler(double factor);
     void zoom_populate_popup(Gtk::Menu *menu);
-    int rotation_input(double *new_val);
     bool rotation_output();
     void rotation_value_changed();
     void rotation_populate_popup(Gtk::Menu *menu);

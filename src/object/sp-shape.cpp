@@ -462,13 +462,15 @@ void SPShape::modified(unsigned int flags) {
         }
     }
 
-    if (!_curve) {
+    if (flags != 29 && flags != 253 && !_curve) {
         sp_lpe_item_update_patheffect(this, true, false);
+    } else if (!_curve) {
+        this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
     }
 }
 
 Geom::OptRect SPShape::bbox(Geom::Affine const &transform, SPItem::BBoxType bboxtype) const {
-    // If the object is clipped, the update funcation that invalidates
+    // If the object is clipped, the update function that invalidates
     // the cache doesn't get called if the object is moved, so we need
     // to compare the transformations as well.
 
@@ -829,7 +831,7 @@ void SPShape::update_patheffect(bool write)
 
         bool success = false;
         if (hasPathEffect() && pathEffectsEnabled()) {
-            success = this->performPathEffect(c_lpe.get(), SP_SHAPE(this));
+            success = this->performPathEffect(c_lpe.get(), this);
             if (success) {
                 this->setCurveInsync(c_lpe.get());
                 this->applyToClipPath(this);

@@ -34,6 +34,8 @@ endif()
 list(APPEND INKSCAPE_CXX_FLAGS "-fstack-protector-strong")
 list(APPEND INKSCAPE_CXX_FLAGS "-Werror=format")                # e.g.: printf("%s", std::string("foo"))
 list(APPEND INKSCAPE_CXX_FLAGS "-Werror=format-security")       # e.g.: printf(variable);
+list(APPEND INKSCAPE_CXX_FLAGS "-Werror=ignored-qualifiers")    # e.g.: const int foo();
+list(APPEND INKSCAPE_CXX_FLAGS "-Werror=return-type")           # non-void functions that don't return a value
 list(APPEND INKSCAPE_CXX_FLAGS "-Wno-switch")                   # See !849 for discussion
 list(APPEND INKSCAPE_CXX_FLAGS_DEBUG "-Og")                     # -Og for _FORTIFY_SOURCE. One could add -Weffc++ here to see approx. 6000 warnings
 list(APPEND INKSCAPE_CXX_FLAGS_DEBUG "-Wcomment")
@@ -41,6 +43,7 @@ list(APPEND INKSCAPE_CXX_FLAGS_DEBUG "-Wunused-function")
 list(APPEND INKSCAPE_CXX_FLAGS_DEBUG "-Wunused-variable")
 list(APPEND INKSCAPE_CXX_FLAGS_DEBUG "-D_GLIBCXX_ASSERTIONS")
 if (CMAKE_COMPILER_IS_GNUCC)
+    list(APPEND INKSCAPE_CXX_FLAGS "-Wstrict-null-sentinel")    # For NULL instead of nullptr
     list(APPEND INKSCAPE_CXX_FLAGS_DEBUG "-fexceptions -grecord-gcc-switches -fasynchronous-unwind-tables")
     if(CXX_COMPILER_VERSION VERSION_GREATER 8.0)
         list(APPEND INKSCAPE_CXX_FLAGS_DEBUG "-fstack-clash-protection -fcf-protection")
@@ -393,7 +396,7 @@ if(WITH_NLS)
     if(GETTEXT_XGETTEXT_EXECUTABLE)
         message(STATUS "Found xgettext. inkscape.pot will be re-created if missing.")
     else()
-        message(STATUS "Did not find xgetttext. inkscape.pot can't be re-created.")
+        message(STATUS "Did not find xgettext. inkscape.pot can't be re-created.")
     endif()
 endif(WITH_NLS)
 

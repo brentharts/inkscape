@@ -42,7 +42,8 @@ public:
 
     static GlyphsPanel& getInstance();
 
-    void update() override;
+    void selectionChanged(Selection *selection) override;
+    void selectionModified(Selection *selection, guint flags) override;
 
 protected:
 
@@ -56,23 +57,20 @@ private:
 
     void glyphActivated(Gtk::TreeModel::Path const & path);
     void glyphSelectionChanged();
-    void selectionModifiedCB(guint flags);
     void readSelection( bool updateStyle, bool updateContent );
     void calcCanInsert();
     void insertText();
 
-
     Glib::RefPtr<Gtk::ListStore> store;
     Gtk::IconView *iconView;
-    Gtk::Entry *entry;
-    Gtk::Label *label;
-    Gtk::Button *insertBtn;
+    Glib::RefPtr<Gtk::Entry> entry;
+    Glib::RefPtr<Gtk::Label> label;
+    Glib::RefPtr<Gtk::Button> insertBtn;
     Gtk::ComboBoxText *scriptCombo;
     Gtk::ComboBoxText *rangeCombo;
     Inkscape::UI::Widget::FontSelector *fontSelector;
 
     std::vector<sigc::connection> instanceConns;
-    std::vector<sigc::connection> desktopConns;
 };
 
 

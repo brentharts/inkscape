@@ -294,7 +294,7 @@ Inkscape::XML::Node *SPText::write(Inkscape::XML::Document *xml_doc, Inkscape::X
 
 
 Geom::OptRect SPText::bbox(Geom::Affine const &transform, SPItem::BBoxType type) const {
-    Geom::OptRect bbox = SP_TEXT(this)->layout.bounds(transform);
+    Geom::OptRect bbox = this->layout.bounds(transform);
 
     // FIXME this code is incorrect
     if (bbox && type == SPItem::VISUAL_BBOX && !this->style->stroke.isNone()) {
@@ -324,6 +324,12 @@ void SPText::hide(unsigned int key) {
             this->_clearFlow(g);
         }
     }
+}
+
+const char* SPText::typeName() const {
+    if (has_inline_size() || has_shape_inside())
+        return "text-flow";
+    return "text";
 }
 
 const char* SPText::displayName() const {
@@ -512,7 +518,7 @@ void SPText::_buildLayoutInit()
             // Find union of all exclusion shapes
             Shape *exclusion_shape = nullptr;
             if(style->shape_subtract.set) {
-                exclusion_shape = _buildExclusionShape();
+                exclusion_shape = getExclusionShape();
             }
 
             // Find inside shape curves
@@ -764,7 +770,7 @@ unsigned SPText::_buildLayoutInput(SPObject *object, Inkscape::Text::Layout::Opt
     return length;
 }
 
-Shape* SPText::_buildExclusionShape() const
+Shape* SPText::getExclusionShape() const
 {
     std::unique_ptr<Shape> result(new Shape()); // Union of all exclusion shapes
     std::unique_ptr<Shape> shape_temp(new Shape());
@@ -1124,15 +1130,11 @@ Geom::OptRect SPText::get_frame()
         Inkscape::XML::Node* rectangle = get_first_rectangle();
 
         if (rectangle) {
-            double x = 0.0;
-            double y = 0.0;
-            double width = 0.0;
-            double height = 0.0;
-            sp_repr_get_double (rectangle, "x",      &x);
-            sp_repr_get_double (rectangle, "y",      &y);
-            sp_repr_get_double (rectangle, "width",  &width);
-            sp_repr_get_double (rectangle, "height", &height);
-            frame = Geom::Rect::from_xywh( x, y, width, height);
+            double x = rectangle->getAttributeDouble("x", 0.0);
+            double y = rectangle->getAttributeDouble("y", 0.0);
+            double width = rectangle->getAttributeDouble("width", 0.0);
+            double height = rectangle->getAttributeDouble("height", 0.0);
+            frame = Geom::Rect::from_xywh(x, y, width, height);
             opt_frame = frame;
         }
     }
@@ -1196,8 +1198,8 @@ SPItem *create_text_with_inline_size (SPDesktop *desktop, Geom::Point p0, Geom::
     p0 *= SP_ITEM(desktop->currentLayer())->i2doc_affine().inverse();
     p1 *= SP_ITEM(desktop->currentLayer())->i2doc_affine().inverse();
 
-    sp_repr_set_svg_double( text_repr, "x", p0[Geom::X]);
-    sp_repr_set_svg_double( text_repr, "y", p0[Geom::Y]);
+    text_repr->setAttributeSvgDouble("x", p0[Geom::X]);
+    text_repr->setAttributeSvgDouble("y", p0[Geom::Y]);
 
     double inline_size = p1[Geom::X] - p0[Geom::X];
 
@@ -1240,10 +1242,10 @@ SPItem *create_text_with_rectangle (SPDesktop *desktop, Geom::Point p0, Geom::Po
 
     // Create rectangle
     Inkscape::XML::Node *rect_repr = xml_doc->createElement("svg:rect");
-    sp_repr_set_svg_double( rect_repr, "x", p0[Geom::X]);
-    sp_repr_set_svg_double( rect_repr, "y", p0[Geom::Y]);
-    sp_repr_set_svg_double( rect_repr, "width",  abs(p1[Geom::X]-p0[Geom::X]));
-    sp_repr_set_svg_double( rect_repr, "height", abs(p1[Geom::Y]-p0[Geom::Y]));
+    rect_repr->setAttributeSvgDouble("x", p0[Geom::X]);
+    rect_repr->setAttributeSvgDouble("y", p0[Geom::Y]);
+    rect_repr->setAttributeSvgDouble("width", abs(p1[Geom::X]-p0[Geom::X]));
+    rect_repr->setAttributeSvgDouble("height", abs(p1[Geom::Y]-p0[Geom::Y]));
 
     // Find defs, if does not exist, create.
     Inkscape::XML::Node *defs_repr = sp_repr_lookup_name (xml_doc->root(), "svg:defs");

@@ -423,7 +423,7 @@ Inkscape::Text::Layout::iterator sp_te_insert_line (SPItem *item, Inkscape::Text
 
         if (need_to_wrap) {
 
-            // We'll need to rebuild layout, so store character postion:
+            // We'll need to rebuild layout, so store character position:
             int char_index = layout->iteratorToCharIndex(position);
 
             // Create wrapping tspan.
@@ -463,7 +463,7 @@ Inkscape::Text::Layout::iterator sp_te_insert_line (SPItem *item, Inkscape::Text
         if (split_obj) {
             Inkscape::XML::Document *xml_doc = split_obj->document->getReprDoc();
             Inkscape::XML::Node *new_node = duplicate_node_without_children(xml_doc, split_obj->getRepr());
-            // if we finaly go to a text element without TSpan we mist set content to none
+            // if we finally go to a text element without TSpan we mist set content to none
             // new_node->setContent("");
             split_obj->parent->getRepr()->addChild(new_node, split_obj->getRepr());
             Inkscape::GC::release(new_node);
@@ -532,7 +532,7 @@ static void insert_into_spstring(SPString *string_item, Glib::ustring::iterator 
 {
     unsigned char_index = 0;
     unsigned char_count = g_utf8_strlen(utf8, -1);
-    Glib::ustring *string = &SP_STRING(string_item)->string;
+    Glib::ustring *string = &string_item->string;
 
     for (Glib::ustring::iterator it = string->begin() ; it != iter_at ; ++it)
         char_index++;
@@ -755,7 +755,7 @@ static void erase_from_spstring(SPString *string_item, Glib::ustring::iterator i
 {
     unsigned char_index = 0;
     unsigned char_count = 0;
-    Glib::ustring *string = &SP_STRING(string_item)->string;
+    Glib::ustring *string = &string_item->string;
 
     for (Glib::ustring::iterator it = string->begin() ; it != iter_from ; ++it){
         char_index++;

@@ -44,7 +44,6 @@ public:
     SPDesktopWidget* get_desktop_widget() { return _desktop_widget; }
 
     void change_document(SPDocument* document);
-    void on_selection_changed();
 
 private:
     InkscapeApplication *_app = nullptr;
@@ -59,7 +58,9 @@ private:
     void setup_view();
 
     // Callbacks
+public:
     bool on_key_press_event(GdkEventKey* event) override;
+private:
     bool on_focus_in_event(GdkEventFocus* event) override;
     bool on_delete_event(GdkEventAny* event) override;
 

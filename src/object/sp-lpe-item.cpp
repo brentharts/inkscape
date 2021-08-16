@@ -285,7 +285,7 @@ bool SPLPEItem::performOnePathEffect(SPCurve *curve, SPShape *current, Inkscape:
                 }
                 lpe->doAfterEffect_impl(this, curve);
             }
-            // we need this on slice LPE to calulate correcly effects
+            // we need this on slice LPE to calculate effects correctly
             if (dynamic_cast<Inkscape::LivePathEffect::LPESlice *>(lpe)) { // we are on 1 or up
                 current->bbox_vis_cache_is_valid = false;
                 current->bbox_geom_cache_is_valid = false;
@@ -434,7 +434,7 @@ sp_lpe_item_create_original_path_recursive(SPLPEItem *lpeitem)
 {
     g_return_if_fail(lpeitem != nullptr);
 
-    SPClipPath *clip_path = SP_ITEM(lpeitem)->getClipObject();
+    SPClipPath *clip_path = lpeitem->getClipObject();
     if(clip_path) {
         std::vector<SPObject*> clip_path_list = clip_path->childList(true);
         for (auto iter : clip_path_list) {
@@ -443,7 +443,7 @@ sp_lpe_item_create_original_path_recursive(SPLPEItem *lpeitem)
         }
     }
 
-    SPMask *mask_path = SP_ITEM(lpeitem)->getMaskObject();
+    SPMask *mask_path = lpeitem->getMaskObject();
     if(mask_path) {
         std::vector<SPObject*> mask_path_list = mask_path->childList(true);
         for (auto iter : mask_path_list) {
@@ -623,9 +623,6 @@ sp_lpe_item_cleanup_original_path_recursive(SPLPEItem *lpeitem, bool keep_paths,
                 if (desc && newObj) {
                     newObj->setDesc(desc);
                     g_free(desc);
-                }
-                if (highlight_color && newObj) {
-                    SP_ITEM(newObj)->setHighlightColor( highlight_color );
                 }
                 // move to the saved position
                 repr->setPosition(pos > 0 ? pos : 0);
@@ -1138,6 +1135,7 @@ void SPLPEItem::remove_child(Inkscape::XML::Node * child) {
         SPObject *ochild = this->get_child_by_repr(child);
 
         if ( ochild && SP_IS_LPE_ITEM(ochild) ) {
+            // we not need to update item because keep paths is false
             sp_lpe_item_cleanup_original_path_recursive(SP_LPE_ITEM(ochild), false);
         }
     }

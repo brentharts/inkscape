@@ -175,18 +175,21 @@ private: // Signal handlers
     /**
      * Implements text matching logic
      */
-    bool fuzzy_search(const Glib::ustring &subject, const Glib::ustring &search);
-    bool normal_search(const Glib::ustring &subject, const Glib::ustring &search);
-    int fuzzy_points(const Glib::ustring &subject, const Glib::ustring &search);
+    static bool fuzzy_search(const Glib::ustring &subject, const Glib::ustring &search);
+    static bool normal_search(const Glib::ustring &subject, const Glib::ustring &search);
+    static bool fuzzy_tolerance_search(const Glib::ustring &subject, const Glib::ustring &search);
+    static int fuzzy_points(const Glib::ustring &subject, const Glib::ustring &search);
+    static int fuzzy_tolerance_points(const Glib::ustring &subject, const Glib::ustring &search);
+    static int fuzzy_points_compare(int fuzzy_points_count_1, int fuzzy_points_count_2, int text_len_1, int text_len_2);
     int on_sort(Gtk::ListBoxRow *row1, Gtk::ListBoxRow *row2);
     void set_mode(CPMode mode);
 
     /**
      * Color addition in searched character
      */
-    void add_color(Gtk::Label *label, const Glib::ustring &search, const Glib::ustring &subject);
-    void remove_color(Gtk::Label *label, const Glib::ustring &subject);
-    void add_color_description(Gtk::Label *label, const Glib::ustring &search);
+    void add_color(Gtk::Label *label, const Glib::ustring &search, const Glib::ustring &subject, bool tooltip=false);
+    void remove_color(Gtk::Label *label, const Glib::ustring &subject, bool tooltip=false);
+    static void add_color_description(Gtk::Label *label, const Glib::ustring &search);
 
     /**
      * Executes Action
@@ -228,7 +231,7 @@ private: // variables
     // History
     CPHistoryXML _history_xml;
     /**
-     * Remember the mode we are in helps in unecessary signal disconnection and reconnection
+     * Remember the mode we are in helps in unnecessary signal disconnection and reconnection
      * Used by set_mode()
      */
     CPMode _mode = CPMode::SHELL;
@@ -236,7 +239,7 @@ private: // variables
     // set_mode() switches between mode hence checks if it already in the target mode.
     // Constructed value is sometimes SEARCH being the first Item for now
     // set_mode() never attaches the on search listener then
-    // This initialising value can be any thing ohter than the initial required mode
+    // This initialising value can be any thing other than the initial required mode
     // Example currently it's open in search mode
 
     /**

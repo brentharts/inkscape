@@ -50,6 +50,18 @@ ExecutionEnv::ExecutionEnv (Effect * effect, Inkscape::UI::View::View * doc, Imp
     _effect(effect),
     _show_working(show_working)
 {
+    SPDesktop *desktop = (SPDesktop *)_doc;
+    SPDocument *document = _doc->doc();
+    if (document && desktop) {
+        // Temporarily prevent undo in this scope
+        Inkscape::DocumentUndo::ScopedInsensitive pauseUndo(document);
+        Inkscape::Selection *selection = desktop->getSelection();
+        if (selection) {
+            // Make sure all selected objects have an ID attribute
+            selection->enforceIds();
+        }
+    }
+
     genDocCache();
 
     return;

@@ -16,9 +16,6 @@
 
 #include "sp-shape.h"
 
-#define SP_POLYGON(obj) (dynamic_cast<SPPolygon*>((SPObject*)obj))
-#define SP_IS_POLYGON(obj) (dynamic_cast<const SPPolygon*>((SPObject*)obj) != NULL)
-
 class SPPolygon : public SPShape {
 public:
 	SPPolygon();
@@ -27,6 +24,7 @@ public:
 	void build(SPDocument *document, Inkscape::XML::Node *repr) override;
 	Inkscape::XML::Node* write(Inkscape::XML::Document *xml_doc, Inkscape::XML::Node *repr, unsigned int flags) override;
 	void set(SPAttr key, char const* value) override;
+        const char* typeName() const override;
 	char* description() const override;
 };
 

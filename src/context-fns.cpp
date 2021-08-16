@@ -47,7 +47,7 @@ bool Inkscape::have_viable_layer(SPDesktop *desktop, MessageContext *message)
             return false;
     }
 
-    if ( !layer || layer->isLocked() ) {
+    if ( layer->isLocked() ) {
             message->flash(Inkscape::ERROR_MESSAGE,
                          _("<b>Current layer is locked</b>. Unlock it to be able to draw on it."));
             return false;
@@ -76,7 +76,7 @@ bool Inkscape::have_viable_layer(SPDesktop *desktop, MessageStack *message)
             return false;
     }
 
-    if ( !layer || layer->isLocked() ) {
+    if ( layer->isLocked() ) {
             message->flash(Inkscape::WARNING_MESSAGE,
                          _("<b>Current layer is locked</b>. Unlock it to be able to draw on it."));
             return false;
@@ -89,6 +89,7 @@ bool Inkscape::have_viable_layer(SPDesktop *desktop, MessageStack *message)
 Geom::Rect Inkscape::snap_rectangular_box(SPDesktop const *desktop, SPItem *item,
                                         Geom::Point const &pt, Geom::Point const &center, int state)
 {
+    desktop->snapindicator->remove_snaptarget();
     Geom::Point p[2];
 
     auto confine = Modifiers::Modifier::get(Modifiers::Type::TRANS_CONFINE)->active(state);

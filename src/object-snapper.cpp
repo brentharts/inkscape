@@ -17,6 +17,7 @@
 #include <2geom/line.h>
 #include <2geom/path-intersection.h>
 #include <2geom/path-sink.h>
+#include <memory>
 
 #include "desktop.h"
 #include "display/curve.h"
@@ -36,6 +37,7 @@
 #include "object/sp-use.h"
 #include "path/path-util.h" // curve_for_item
 #include "preferences.h"
+#include "snap-enums.h"
 #include "style.h"
 #include "svg/svg.h"
 #include "text-editing.h"
@@ -43,21 +45,14 @@
 Inkscape::ObjectSnapper::ObjectSnapper(SnapManager *sm, Geom::Coord const d)
     : Snapper(sm, d)
 {
-    _candidates = new std::vector<SnapCandidateItem>;
-    _points_to_snap_to = new std::vector<SnapCandidatePoint>;
-    _paths_to_snap_to = new std::vector<SnapCandidatePath >;
+    _points_to_snap_to = std::make_unique<std::vector<SnapCandidatePoint>>();
+    _paths_to_snap_to = std::make_unique<std::vector<SnapCandidatePath>>();
 }
 
 Inkscape::ObjectSnapper::~ObjectSnapper()
 {
-    _candidates->clear();
-    delete _candidates;
-
     _points_to_snap_to->clear();
-    delete _points_to_snap_to;
-
     _clear_paths();
-    delete _paths_to_snap_to;
 }
 
 Geom::Coord Inkscape::ObjectSnapper::getSnapperTolerance() const
@@ -71,135 +66,6 @@ bool Inkscape::ObjectSnapper::getSnapperAlwaysSnap() const
 {
     return _snapmanager->snapprefs.getObjectTolerance() == 10000; //TODO: Replace this threshold of 10000 by a constant; see also tolerance-slider.cpp
 }
-
-void Inkscape::ObjectSnapper::_findCandidates(SPObject* parent,
-                                              std::vector<SPItem const *> const *it,
-                                              bool const &first_point,
-                                              Geom::Rect const &bbox_to_snap,
-                                              bool const clip_or_mask,
-                                              Geom::Affine const additional_affine) const // transformation of the item being clipped / masked
-{
-    SPDesktop const *dt = _snapmanager->getDesktop();
-    if (dt == nullptr) {
-        g_warning("desktop == NULL, so we cannot snap; please inform the developers of this bug");
-        // Apparently the setup() method from the SnapManager class hasn't been called before trying to snap.
-    }
-
-    if (first_point) {
-        _candidates->clear();
-    }
-
-    Geom::Rect bbox_to_snap_incl = bbox_to_snap; // _incl means: will include the snapper tolerance
-    bbox_to_snap_incl.expandBy(getSnapperTolerance()); // see?
-
-    for (auto& o: parent->children) {
-        g_assert(dt != nullptr);
-        SPItem *item = dynamic_cast<SPItem *>(&o);
-        if (item && !(dt->itemIsHidden(item) && !clip_or_mask)) {
-            // Fix LPE boolops selfsnaping
-            bool stop = false;
-            if (item->style) {
-                SPFilter *filt = item->style->getFilter();
-                if (filt && filt->getId() && strcmp(filt->getId(), "selectable_hidder_filter") == 0) {
-                    stop = true;
-                }
-                SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(item);
-                if (lpeitem && lpeitem->hasPathEffectOfType(Inkscape::LivePathEffect::EffectType::BOOL_OP)) {
-                    stop = true;
-                }
-            }
-            if (stop) {
-                stop = false;
-                for (auto skipitem : *it) {
-                    if (skipitem && skipitem->style) {
-                        SPItem *toskip = const_cast<SPItem *>(skipitem);
-                        if (toskip) {
-                            SPFilter *filt = toskip->style->getFilter();
-                            if (filt && filt->getId() && strcmp(filt->getId(), "selectable_hidder_filter") == 0) {
-                                stop = true;
-                                break;
-                            }
-
-                            SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(toskip);
-                            if (!stop && lpeitem &&
-                                lpeitem->hasPathEffectOfType(Inkscape::LivePathEffect::EffectType::BOOL_OP)) {
-                                stop = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-                if (stop) {
-                    continue;
-                }
-            }
-            // Snapping to items in a locked layer is allowed
-            // Don't snap to hidden objects, unless they're a clipped path or a mask
-            /* See if this item is on the ignore list */
-            std::vector<SPItem const *>::const_iterator i;
-            if (it != nullptr) {
-                i = it->begin();
-                while (i != it->end() && *i != &o) {
-                    ++i;
-                }
-            }
-
-            if (it == nullptr || i == it->end()) {
-                if (item) {
-                    if (!clip_or_mask) { // cannot clip or mask more than once
-                        // The current item is not a clipping path or a mask, but might
-                        // still be the subject of clipping or masking itself ; if so, then
-                        // we should also consider that path or mask for snapping to
-                        SPObject *obj = item->getClipObject();
-                        if (obj && _snapmanager->snapprefs.isTargetSnappable(SNAPTARGET_PATH_CLIP)) {
-                            _findCandidates(obj, it, false, bbox_to_snap, true, item->i2doc_affine());
-                        }
-                        obj = item->getMaskObject();
-                        if (obj && _snapmanager->snapprefs.isTargetSnappable(SNAPTARGET_PATH_MASK)) {
-                            _findCandidates(obj, it, false, bbox_to_snap, true, item->i2doc_affine());
-                        }
-                    }
-
-                    if (dynamic_cast<SPGroup *>(item)) {
-                        _findCandidates(&o, it, false, bbox_to_snap, clip_or_mask, additional_affine);
-                    } else {
-                        Geom::OptRect bbox_of_item;
-                        Preferences *prefs = Preferences::get();
-                        int prefs_bbox = prefs->getBool("/tools/bounding_box", false);
-                        // We'll only need to obtain the visual bounding box if the user preferences tell
-                        // us to, AND if we are snapping to the bounding box itself. If we're snapping to
-                        // paths only, then we can just as well use the geometric bounding box (which is faster)
-                        SPItem::BBoxType bbox_type = (!prefs_bbox && _snapmanager->snapprefs.isTargetSnappable(SNAPTARGET_BBOX_CATEGORY)) ?
-                            SPItem::VISUAL_BBOX : SPItem::GEOMETRIC_BBOX;
-                        if (clip_or_mask) {
-                            // Oh oh, this will get ugly. We cannot use sp_item_i2d_affine directly because we need to
-                            // insert an additional transformation in document coordinates (code copied from sp_item_i2d_affine)
-                            bbox_of_item = item->bounds(bbox_type, item->i2doc_affine() * additional_affine * dt->doc2dt());
-                        } else {
-                            bbox_of_item = item->desktopBounds(bbox_type);
-                        }
-                        if (bbox_of_item) {
-                            // See if the item is within range
-                            if (bbox_to_snap_incl.intersects(*bbox_of_item)
-                                    || (_snapmanager->snapprefs.isTargetSnappable(SNAPTARGET_ROTATION_CENTER) && bbox_to_snap_incl.contains(item->getCenter()))) { // rotation center might be outside of the bounding box
-                                // This item is within snapping range, so record it as a candidate
-                                _candidates->push_back(SnapCandidateItem(item, clip_or_mask, additional_affine));
-                                // For debugging: print the id of the candidate to the console
-                                // SPObject *obj = (SPObject*)item;
-                                // std::cout << "Snap candidate added: " << obj->getId() << std::endl;
-                                if (_candidates->size() > 200) { // This makes Inkscape crawl already
-                                    std::cout << "Warning: limit of 200 snap target paths reached, some will be ignored" << std::endl;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
 
 void Inkscape::ObjectSnapper::_collectNodes(SnapSourceType const &t,
                                             bool const &first_point) const
@@ -231,10 +97,10 @@ void Inkscape::ObjectSnapper::_collectNodes(SnapSourceType const &t,
 
         // Consider the page border for snapping to
         if (_snapmanager->snapprefs.isTargetSnappable(SNAPTARGET_PAGE_CORNER)) {
-            _getBorderNodes(_points_to_snap_to);
+            _getBorderNodes(_points_to_snap_to.get());
         }
 
-        for (const auto & _candidate : *_candidates) {
+        for (const auto & _candidate : *_snapmanager->obj_snapper_candidates) {
             //Geom::Affine i2doc(Geom::identity());
             SPItem *root_item = _candidate.item;
 
@@ -300,7 +166,7 @@ void Inkscape::ObjectSnapper::_collectNodes(SnapSourceType const &t,
                 // of the item AND the bbox of the clipping path at the same time
                 if (!_candidate.clip_or_mask) {
                     Geom::OptRect b = root_item->desktopBounds(bbox_type);
-                    getBBoxPoints(b, _points_to_snap_to, true,
+                    getBBoxPoints(b, _points_to_snap_to.get(), true,
                             _snapmanager->snapprefs.isTargetSnappable(SNAPTARGET_BBOX_CORNER),
                             _snapmanager->snapprefs.isTargetSnappable(SNAPTARGET_BBOX_EDGE_MIDPOINT),
                             _snapmanager->snapprefs.isTargetSnappable(SNAPTARGET_BBOX_MIDPOINT));
@@ -419,7 +285,7 @@ void Inkscape::ObjectSnapper::_collectPaths(Geom::Point /*p*/,
             }
         }
 
-        for (const auto & _candidate : *_candidates) {
+        for (const auto & _candidate : *_snapmanager->obj_snapper_candidates) {
 
             /* Transform the requested snap point to this item's coordinates */
             Geom::Affine i2doc(Geom::identity());
@@ -703,12 +569,6 @@ void Inkscape::ObjectSnapper::freeSnap(IntermSnapResults &isr,
         return;
     }
 
-    /* Get a list of all the SPItems that we will try to snap to */
-    if (p.getSourceNum() <= 0) {
-        Geom::Rect const local_bbox_to_snap = bbox_to_snap ? *bbox_to_snap : Geom::Rect(p.getPoint(), p.getPoint());
-        _findCandidates(_snapmanager->getDocument()->getRoot(), it, p.getSourceNum() <= 0, local_bbox_to_snap, false, Geom::identity());
-    }
-
     _snapNodes(isr, p, unselected_nodes);
 
     if (_snapmanager->snapprefs.isTargetSnappable(SNAPTARGET_PATH, SNAPTARGET_PATH_INTERSECTION, SNAPTARGET_BBOX_EDGE, SNAPTARGET_PAGE_BORDER, SNAPTARGET_TEXT_BASELINE)) {
@@ -747,12 +607,6 @@ void Inkscape::ObjectSnapper::constrainedSnap( IntermSnapResults &isr,
 
     // project the mouse pointer onto the constraint. Only the projected point will be considered for snapping
     Geom::Point pp = c.projection(p.getPoint());
-
-    /* Get a list of all the SPItems that we will try to snap to */
-    if (p.getSourceNum() <= 0) {
-        Geom::Rect const local_bbox_to_snap = bbox_to_snap ? *bbox_to_snap : Geom::Rect(pp, pp);
-        _findCandidates(_snapmanager->getDocument()->getRoot(), it, p.getSourceNum() <= 0, local_bbox_to_snap, false, Geom::identity());
-    }
 
     // A constrained snap, is a snap in only one degree of freedom (specified by the constraint line).
     // This is useful for example when scaling an object while maintaining a fixed aspect ratio. It's
@@ -810,21 +664,34 @@ void Inkscape::getBBoxPoints(Geom::OptRect const bbox,
                              bool const /*isTarget*/,
                              bool const includeCorners,
                              bool const includeLineMidpoints,
-                             bool const includeObjectMidpoints)
+                             bool const includeObjectMidpoints,
+                             bool const isAlignment)
 {
     if (bbox) {
         // collect the corners of the bounding box
         for ( unsigned k = 0 ; k < 4 ; k++ ) {
             if (includeCorners) {
-                points->push_back(SnapCandidatePoint(bbox->corner(k), SNAPSOURCE_BBOX_CORNER, -1, SNAPTARGET_BBOX_CORNER, *bbox));
+                points->push_back(SnapCandidatePoint(bbox->corner(k),
+                                isAlignment ? SNAPSOURCE_ALIGNMENT_BBOX_CORNER : SNAPSOURCE_BBOX_CORNER,
+                                -1,
+                                isAlignment ? SNAPTARGET_ALIGNMENT_BBOX_CORNER : SNAPTARGET_BBOX_CORNER,
+                                *bbox));
             }
             // optionally, collect the midpoints of the bounding box's edges too
             if (includeLineMidpoints) {
-                points->push_back(SnapCandidatePoint((bbox->corner(k) + bbox->corner((k+1) % 4))/2, SNAPSOURCE_BBOX_EDGE_MIDPOINT, -1, SNAPTARGET_BBOX_EDGE_MIDPOINT, *bbox));
+                points->push_back(SnapCandidatePoint((bbox->corner(k) + bbox->corner((k+1) % 4))/2,
+                                isAlignment ? SNAPSOURCE_ALIGNMENT_BBOX_EDGE_MIDPOINT : SNAPSOURCE_BBOX_EDGE_MIDPOINT,
+                                -1,
+                                isAlignment ? SNAPTARGET_ALIGNMENT_BBOX_EDGE_MIDPOINT : SNAPTARGET_BBOX_EDGE_MIDPOINT,
+                                *bbox));
             }
         }
         if (includeObjectMidpoints) {
-            points->push_back(SnapCandidatePoint(bbox->midpoint(), SNAPSOURCE_BBOX_MIDPOINT, -1, SNAPTARGET_BBOX_MIDPOINT, *bbox));
+            points->push_back(SnapCandidatePoint(bbox->midpoint(),
+                            isAlignment ? SNAPSOURCE_ALIGNMENT_BBOX_MIDPOINT : SNAPSOURCE_BBOX_MIDPOINT,
+                            -1,
+                            isAlignment ? SNAPTARGET_ALIGNMENT_BBOX_MIDPOINT : SNAPTARGET_BBOX_MIDPOINT,
+                            *bbox));
         }
     }
 }

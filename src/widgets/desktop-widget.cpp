@@ -70,6 +70,7 @@
 #include "ui/widget/selected-style.h"
 #include "ui/widget/spin-button-tool-item.h"
 #include "ui/widget/unit-tracker.h"
+#include "ui/themes.h"
 
 // TEMP
 #include "ui/desktop/menubar.h"
@@ -80,6 +81,11 @@
 #include "spw-utilities.h"
 #include "toolbox.h"
 #include "widget-sizes.h"
+
+#include "ui/widget/color-palette.h"
+#include "ui/widget/preview.h"
+#include "ui/dialog/color-item.h"
+#include "widgets/ege-paint-def.h"
 
 #ifdef GDK_WINDOWING_QUARTZ
 #include <gtkosxapplication.h>
@@ -205,9 +211,43 @@ SPDesktopWidget::SPDesktopWidget()
 
     /* Swatches panel */
     {
+        // auto panel = Gtk::manage(new Inkscape::UI::Widget::ColorPalette());
+        // auto sets = Inkscape::UI::Dialog::SwatchesPanel::getSwatchSets();
+    /*
+		  std::vector<Widget*> vc;
+		  
+		  Inkscape::UI::Dialog::ColorItem rm(ege::PaintDef::NONE);
+		  vc.push_back(rm.createWidget());
+		  for (auto& c : sets[1]->_colors) {
+			  vc.push_back(c.createWidget());
+			//   getPreview(Inkscape::UI::Widget::PREVIEW_STYLE_ICON, Inkscape::UI::Widget::VIEW_TYPE_GRID,
+			//   Inkscape::UI::Widget::PREVIEW_SIZE_TINY, 100, 0));
+		  }
+		  panel->set_colors(vc);
+		  std::vector<Glib::ustring> names;
+		  for (auto& pal : sets) {
+			  names.push_back(pal->_name);
+		  }
+		  panel->set_palettes(names);
+		  panel->get_palette_selected_signal().connect([=](Glib::ustring name){
+				auto sets = Inkscape::UI::Dialog::SwatchesPanel::getSwatchSets();
+			  auto pal = std::find_if(sets.begin(), sets.end(), [&](auto& set){ return set->_name == name; });
+			  if (pal != sets.end()) {
+				  //
+		  std::vector<Widget*> vc;
+		  for (auto& c : (*pal)->_colors) {
+			  vc.push_back(c.getPreview(Inkscape::UI::Widget::PREVIEW_STYLE_ICON, Inkscape::UI::Widget::VIEW_TYPE_GRID,
+			  Inkscape::UI::Widget::PREVIEW_SIZE_TINY, 100, 0));
+		  }
+		  panel->set_colors(vc);
+			  }
+		  });
+      */
+      //   panel->set_vexpand(false);
         dtw->_panels = Gtk::manage(new Inkscape::UI::Dialog::SwatchesPanel("/embedded/swatches"));
         dtw->_panels->set_vexpand(false);
         dtw->_vbox->pack_end(*dtw->_panels, false, true);
+        // dtw->_vbox->pack_end(*panel, false, true);
     }
 
     /* DesktopHBox (Vertical toolboxes, canvas) */
@@ -325,7 +365,6 @@ SPDesktopWidget::SPDesktopWidget()
     dtw->_rotation_status->set_update_policy(Gtk::UPDATE_ALWAYS);
 
     // Callbacks
-    dtw->_rotation_status_input_connection  = dtw->_rotation_status->signal_input().connect(sigc::mem_fun(dtw, &SPDesktopWidget::rotation_input), false);
     dtw->_rotation_status_output_connection = dtw->_rotation_status->signal_output().connect(sigc::mem_fun(dtw, &SPDesktopWidget::rotation_output));
     dtw->_rotation_status_value_changed_connection = dtw->_rotation_status->signal_value_changed().connect(sigc::mem_fun(dtw, &SPDesktopWidget::rotation_value_changed));
     dtw->_rotation_status_populate_popup_connection = dtw->_rotation_status->signal_populate_popup().connect(sigc::mem_fun(dtw, &SPDesktopWidget::rotation_populate_popup));
@@ -639,17 +678,9 @@ void SPDesktopWidget::on_realize()
     GtkSettings *settings = gtk_settings_get_default();
     Gtk::Container *window = get_toplevel();
     if (settings && window) {
-        g_object_get(settings, "gtk-theme-name", &gtkThemeName, NULL);
-        g_object_get(settings, "gtk-application-prefer-dark-theme", &gtkApplicationPreferDarkTheme, NULL);
-        bool dark = Glib::ustring(gtkThemeName).find(":dark") != std::string::npos;
-        if (!dark) {
-            Glib::RefPtr<Gtk::StyleContext> stylecontext = window->get_style_context();
-            Gdk::RGBA rgba;
-            bool background_set = stylecontext->lookup_color("theme_bg_color", rgba);
-            if (background_set && (0.299 * rgba.get_red() + 0.587 * rgba.get_green() + 0.114 * rgba.get_blue()) < 0.5) {
-                dark = true;
-            }
-        }
+        g_object_get(settings, "gtk-theme-name", &gtkThemeName, nullptr);
+        g_object_get(settings, "gtk-application-prefer-dark-theme", &gtkApplicationPreferDarkTheme, nullptr);
+        bool dark = INKSCAPE.themecontext->isCurrentThemeDark(dynamic_cast<Gtk::Container *>(window));
         if (dark) {
             prefs->setBool("/theme/darkTheme", true);
             window->get_style_context()->add_class("dark");
@@ -666,7 +697,7 @@ void SPDesktopWidget::on_realize()
             window->get_style_context()->add_class("regular");
             window->get_style_context()->remove_class("symbolic");
         }
-        INKSCAPE.signal_change_theme.emit();
+        INKSCAPE.themecontext->getChangeThemeSignal().emit();
     }
 
 #ifdef GDK_WINDOWING_QUARTZ
@@ -989,19 +1020,24 @@ SPDesktopWidget::shutdown()
 /**
  * \store dessktop position
  */
-void SPDesktopWidget::storeDesktopPosition()
+void SPDesktopWidget::storeDesktopPosition(bool store_maximize)
 {
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     bool maxed = desktop->is_maximized();
     bool full = desktop->is_fullscreen();
-    prefs->setBool("/desktop/geometry/fullscreen", full);
-    prefs->setBool("/desktop/geometry/maximized", maxed);
-    gint w, h, x, y;
-    desktop->getWindowGeometry(x, y, w, h);
-    // Don't save geom for maximized windows.  It
-    // just tells you the current maximized size, which is not
+    // Don't store max/full when setting max/full (it's about to change)
+    if (store_maximize) {
+        prefs->setBool("/desktop/geometry/fullscreen", full);
+        prefs->setBool("/desktop/geometry/maximized", maxed);
+    }
+    // Don't save geom for maximized, fullscreen or iconified windows.
+    // It just tells you the current maximized size, which is not
     // as useful as whatever value it had previously.
-    if (!maxed && !full) {
+    if (!desktop->is_iconified() && !maxed && !full) {
+        gint w = -1;
+        gint h, x, y;
+        desktop->getWindowGeometry(x, y, w, h);
+        g_assert(w != -1);
         prefs->setInt("/desktop/geometry/width", w);
         prefs->setInt("/desktop/geometry/height", h);
         prefs->setInt("/desktop/geometry/x", x);
@@ -1177,21 +1213,7 @@ SPDesktopWidget::maximize()
         if (desktop->is_maximized()) {
             gtk_window_unmaximize(topw);
         } else {
-            // Save geometry to prefs before maximizing so that
-            // something useful is stored there, because GTK doesn't maintain
-            // a separate non-maximized size.
-            if (!desktop->is_iconified() && !desktop->is_fullscreen())
-            {
-                Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-                gint w = -1;
-                gint h, x, y;
-                getWindowGeometry(x, y, w, h);
-                g_assert(w != -1);
-                prefs->setInt("/desktop/geometry/width", w);
-                prefs->setInt("/desktop/geometry/height", h);
-                prefs->setInt("/desktop/geometry/x", x);
-                prefs->setInt("/desktop/geometry/y", y);
-            }
+            storeDesktopPosition(false);
             gtk_window_maximize(topw);
         }
     }
@@ -1206,19 +1228,7 @@ SPDesktopWidget::fullscreen()
             gtk_window_unfullscreen(topw);
             // widget layout is triggered by the resulting window_state_event
         } else {
-            // Save geometry to prefs before maximizing so that
-            // something useful is stored there, because GTK doesn't maintain
-            // a separate non-maximized size.
-            if (!desktop->is_iconified() && !desktop->is_maximized())
-            {
-                Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-                gint w, h, x, y;
-                getWindowGeometry(x, y, w, h);
-                prefs->setInt("/desktop/geometry/width", w);
-                prefs->setInt("/desktop/geometry/height", h);
-                prefs->setInt("/desktop/geometry/x", x);
-                prefs->setInt("/desktop/geometry/y", y);
-            }
+            storeDesktopPosition(false);
             gtk_window_fullscreen(topw);
             // widget layout is triggered by the resulting window_state_event
         }
@@ -1578,22 +1588,9 @@ sp_dtw_zoom_display_to_value (gdouble value)
 int
 SPDesktopWidget::zoom_input(double *new_val)
 {
-    gchar *b = g_strdup(_zoom_status->get_text().c_str());
-
-    gchar *comma = g_strstr_len (b, -1, ",");
-    if (comma) {
-        *comma = '.';
-    }
-
-    char *oldlocale = g_strdup (setlocale(LC_NUMERIC, nullptr));
-    setlocale (LC_NUMERIC, "C");
-    gdouble new_typed = atof (b);
-    setlocale (LC_NUMERIC, oldlocale);
-    g_free (oldlocale);
-    g_free (b);
-
+    double new_typed = g_strtod (_zoom_status->get_text().c_str(), nullptr);
     *new_val = sp_dtw_zoom_display_to_value (new_typed);
-    return TRUE;
+    return true;
 }
 
 bool
@@ -1723,26 +1720,6 @@ SPDesktopWidget::update_zoom()
 
 
 // ---------------------- Rotation ------------------------
-int
-SPDesktopWidget::rotation_input(double *new_val)
-{
-    auto *b = g_strdup(_rotation_status->get_text().c_str());
-
-    gchar *comma = g_strstr_len (b, -1, ",");
-    if (comma) {
-        *comma = '.';
-    }
-
-    char *oldlocale = g_strdup (setlocale(LC_NUMERIC, nullptr));
-    setlocale (LC_NUMERIC, "C");
-    gdouble new_value = atof (b);
-    setlocale (LC_NUMERIC, oldlocale);
-    g_free (oldlocale);
-    g_free (b);
-
-    *new_val = new_value;
-    return true;
-}
 
 bool
 SPDesktopWidget::rotation_output()
@@ -2045,8 +2022,8 @@ SPDesktopWidget::on_ruler_box_button_release_event(GdkEventButton *event, Gtk::W
                 newx = newx * root->viewBox.width()  / root->width.computed;
                 newy = newy * root->viewBox.height() / root->height.computed;
             }
-            sp_repr_set_point(repr, "position", Geom::Point( newx, newy ));
-            sp_repr_set_point(repr, "orientation", _normal);
+            repr->setAttributePoint("position", Geom::Point( newx, newy ));
+            repr->setAttributePoint("orientation", _normal);
             desktop->namedview->appendChild(repr);
             Inkscape::GC::release(repr);
             DocumentUndo::done(desktop->getDocument(), SP_VERB_NONE,
@@ -2070,7 +2047,7 @@ SPDesktopWidget::on_ruler_box_button_release_event(GdkEventButton *event, Gtk::W
 bool
 SPDesktopWidget::on_ruler_box_button_press_event(GdkEventButton *event, Gtk::Widget *widget, bool horiz)
 {
-    if (_ruler_clicked) // event triggerred on a double click: do no process the click
+    if (_ruler_clicked) // event triggered on a double click: do no process the click
         return false;
 
     int wx, wy;

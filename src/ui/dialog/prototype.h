@@ -13,6 +13,8 @@
 #ifndef SEEN_PROTOTYPE_PANEL_H
 #define SEEN_PROTOTYPE_PANEL_H
 
+#ifdef DEBUG
+
 #include <iostream>
 
 #include "selection.h"
@@ -34,17 +36,14 @@ public:
     ~Prototype() override { std::cout << "Prototype::~Prototype()" << std::endl; }
     static Prototype &getInstance() { return *new Prototype(); }
 
-    void update() override;
+    void documentReplaced(SPDocument *document) override;
+    void selectionChanged(Inkscape::Selection *selection) override;
 
 private:
     // No default constructor, noncopyable, nonassignable
     Prototype();
     Prototype(Prototype const &d) = delete;
     Prototype operator=(Prototype const &d) = delete;
-
-    // Handlers
-    void handleDocumentReplaced(SPDocument *document);
-    void handleSelectionChanged(Inkscape::Selection *selection);
 
     // Just for example
     Gtk::Label *_label;
@@ -55,6 +54,8 @@ private:
 } // namespace Dialog
 } // namespace UI
 } // namespace Inkscape
+
+#endif // DEBUG
 
 #endif // SEEN_PROTOTYPE_PANEL_H
 

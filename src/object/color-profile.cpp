@@ -321,8 +321,8 @@ void ColorProfile::set(SPAttr key, gchar const *value) {
                         doc = SP_ACTIVE_DOCUMENT;
                         g_warning("this has no document.  using active");
                     }
-                    //# 1.  Get complete URI of document
-                    gchar const *docbase = doc->getDocumentURI();
+                    //# 1.  Get complete filename of document
+                    gchar const *docbase = doc->getDocumentFilename();
 
                     Inkscape::URI docUri("");
                     if (docbase) { // The file has already been saved
@@ -486,36 +486,31 @@ static int getLcmsIntent( guint svgIntent )
     return intent;
 }
 
-static SPObject* bruteFind( SPDocument* document, gchar const* name )
+static ColorProfile *bruteFind(SPDocument *document, gchar const *name)
 {
-    SPObject* result = nullptr;
     std::vector<SPObject *> current = document->getResourceList("iccprofile");
-    for (std::vector<SPObject *>::const_iterator it = current.begin(); (!result) && (it != current.end()); ++it) {
-        if ( IS_COLORPROFILE(*it) ) {
-            ColorProfile* prof = COLORPROFILE(*it);
-            if ( prof ) {
-                if ( prof->name && (strcmp(prof->name, name) == 0) ) {
-                    result = SP_OBJECT(*it);
-                    break;
-                }
+    for (auto *obj : current) {
+        if (auto prof = dynamic_cast<ColorProfile*>(obj)) {
+            if ( prof->name && (strcmp(prof->name, name) == 0) ) {
+                return prof;
             }
         }
     }
 
-    return result;
+    return nullptr;
 }
 
 cmsHPROFILE Inkscape::CMSSystem::getHandle( SPDocument* document, guint* intent, gchar const* name )
 {
     cmsHPROFILE prof = nullptr;
 
-    SPObject* thing = bruteFind( document, name );
+    auto *thing = bruteFind(document, name);
     if ( thing ) {
-        prof = COLORPROFILE(thing)->impl->_profHandle;
+        prof = thing->impl->_profHandle;
     }
 
     if ( intent ) {
-        *intent = thing ? COLORPROFILE(thing)->rendering_intent : (guint)RENDERING_INTENT_UNKNOWN;
+        *intent = thing ? thing->rendering_intent : (guint)RENDERING_INTENT_UNKNOWN;
     }
 
     DEBUG_MESSAGE( lcmsThree, "<color-profile> queried for profile of '%s'. Returning %p with intent of %d", name, prof, (intent? *intent:0) );
@@ -700,7 +695,7 @@ std::set<ColorProfile::FilePlusHome> ColorProfile::getBaseProfileDirs() {
     std::set<ColorProfile::FilePlusHome> sources;
 
     // first try user's local dir
-    gchar* path = g_build_filename(g_get_user_data_dir(), "color", "icc", NULL);
+    gchar* path = g_build_filename(g_get_user_data_dir(), "color", "icc", nullptr);
     sources.insert(FilePlusHome(path, true));
     g_free(path);
 
@@ -708,11 +703,11 @@ std::set<ColorProfile::FilePlusHome> ColorProfile::getBaseProfileDirs() {
     // (see https://github.com/hughsie/colord/blob/fe10f76536bb27614ced04e0ff944dc6fb4625c0/lib/colord/cd-icc-store.c#L590)
 
     // user store
-    path = g_build_filename(g_get_user_data_dir(), "icc", NULL);
+    path = g_build_filename(g_get_user_data_dir(), "icc", nullptr);
     sources.insert(FilePlusHome(path, true));
     g_free(path);
 
-    path = g_build_filename(g_get_home_dir(), ".color", "icc", NULL);
+    path = g_build_filename(g_get_home_dir(), ".color", "icc", nullptr);
     sources.insert(FilePlusHome(path, true));
     g_free(path);
 
@@ -722,7 +717,7 @@ std::set<ColorProfile::FilePlusHome> ColorProfile::getBaseProfileDirs() {
 
     const gchar* const * dataDirs = g_get_system_data_dirs();
     for ( int i = 0; dataDirs[i]; i++ ) {
-        gchar* path = g_build_filename(dataDirs[i], "color", "icc", NULL);
+        gchar* path = g_build_filename(dataDirs[i], "color", "icc", nullptr);
         sources.insert(FilePlusHome(path, false));
         g_free(path);
     }
@@ -732,7 +727,7 @@ std::set<ColorProfile::FilePlusHome> ColorProfile::getBaseProfileDirs() {
         sources.insert(FilePlusHome("/System/Library/ColorSync/Profiles", false));
         sources.insert(FilePlusHome("/Library/ColorSync/Profiles", false));
 
-        gchar *path = g_build_filename(g_get_home_dir(), "Library", "ColorSync", "Profiles", NULL);
+        gchar *path = g_build_filename(g_get_home_dir(), "Library", "ColorSync", "Profiles", nullptr);
         sources.insert(FilePlusHome(path, true));
         g_free(path);
     }

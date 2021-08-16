@@ -389,7 +389,7 @@ Extension::get_name () const
     implementation, but we are guaranteed to have a benign one.
 
     \warning It is important to note that there is no 'activate' function.
-    Running this function is irreversable.
+    Running this function is irreversible.
 */
 void
 Extension::deactivate ()
@@ -558,10 +558,24 @@ const char *Extension::get_translation(const char *msgid, const char *msgctxt) c
   *
   * Currently sets the environment variables INKEX_GETTEXT_DOMAIN and INKEX_GETTEXT_DIRECTORY
   * to make the "translationdomain" accessible to child processes spawned by this extension's Implementation.
+  *
+  * @param   doc   Optional document, if provided sets the DOCUMENT_PATH from the document's save location.
   */
-void Extension::set_environment() {
+void Extension::set_environment(const SPDocument *doc) {
     Glib::unsetenv("INKEX_GETTEXT_DOMAIN");
     Glib::unsetenv("INKEX_GETTEXT_DIRECTORY");
+
+    // This is needed so extensions can interact with the user's profile, keep settings etc.
+    Glib::setenv("INKSCAPE_PROFILE_DIR", std::string(Inkscape::IO::Resource::profile_path()));
+
+    // This is needed so files can be saved relative to their document location (see image-extract)
+    if (doc) {
+        auto path = doc->getDocumentFilename();
+        if (!path) {
+            path = ""; // Set to blank string so extensions know the difference between old inkscape and not-saved document.
+        }
+        Glib::setenv("DOCUMENT_PATH", std::string(path));
+    }
 
     if (_translationdomain) {
         Glib::setenv("INKEX_GETTEXT_DOMAIN", std::string(_translationdomain));
@@ -683,13 +697,13 @@ Extension::get_param_int(const gchar *name) const
 }
 
 /**
-    \return   The float value for the parameter specified
-    \brief    Gets a parameter identified by name with the float in value.
+    \return   The double value for the float parameter specified
+    \brief    Gets a float parameter identified by name with the double placed in value.
     \param    name   The name of the parameter to get
 
     Look up in the parameters list, const then execute the function on that found parameter.
 */
-float
+double
 Extension::get_param_float(const gchar *name) const
 {
     const InxParameter *param;
@@ -790,14 +804,14 @@ Extension::set_param_int(const gchar *name, const int value)
 
 /**
     \return   The passed in value
-    \brief    Sets a parameter identified by name with the float in the parameter value.
+    \brief    Sets a parameter identified by name with the double in the parameter value.
     \param    name   The name of the parameter to set
     \param    value  The value to set the parameter to
 
     Look up in the parameters list, const then execute the function on that found parameter.
 */
-float
-Extension::set_param_float(const gchar *name, const float value)
+double
+Extension::set_param_float(const gchar *name, const double value)
 {
     InxParameter *param;
     param = get_param(name);

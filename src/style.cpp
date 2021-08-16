@@ -480,6 +480,7 @@ SPStyle::~SPStyle() {
     release_connection.disconnect();
     fill_ps_changed_connection.disconnect();
     stroke_ps_changed_connection.disconnect();
+    filter_changed_connection.disconnect();
 
     // The following should be moved into SPIPaint and SPIFilter
     if (fill.value.href) {
@@ -544,7 +545,7 @@ SPStyle::clear() {
 
     if (document) {
         filter.href = new SPFilterReference(document);
-        filter.href->changedSignal().connect(sigc::bind(sigc::ptr_fun(sp_style_filter_ref_changed), this));
+        filter_changed_connection = filter.href->changedSignal().connect(sigc::bind(sigc::ptr_fun(sp_style_filter_ref_changed), this));
 
         fill.value.href = new SPPaintServerReference(document);
         fill_ps_changed_connection = fill.value.href->changedSignal().connect(sigc::bind(sigc::ptr_fun(sp_style_fill_paint_server_ref_changed), this));
@@ -561,7 +562,7 @@ SPStyle::clear() {
 void
 SPStyle::read( SPObject *object, Inkscape::XML::Node *repr ) {
 
-    // std::cout << "SPstyle::read( SPObject, Inkscape::XML::Node ): Entrance: "
+    // std::cout << "SPStyle::read( SPObject, Inkscape::XML::Node ): Entrance: "
     //           << (object?(object->getId()?object->getId():"id null"):"object null") << " "
     //           << (repr?(repr->name()?repr->name():"no name"):"repr null")
     //           << std::endl;
@@ -626,7 +627,7 @@ SPStyle::read( SPObject *object, Inkscape::XML::Node *repr ) {
 void
 SPStyle::readFromObject( SPObject *object ) {
 
-    // std::cout << "SPStyle::readFromObject: "<< (object->getId()?object->getId():"null")<< std::endl;
+    // std::cout << "SPStyle::readFromObject: "<< (object->getId()?object->getId():"null") << std::endl;
 
     g_return_if_fail(object != nullptr);
     g_return_if_fail(SP_IS_OBJECT(object));
@@ -669,7 +670,7 @@ SPStyle::readFromPrefs(Glib::ustring const &path) {
 void
 SPStyle::readIfUnset(SPAttr id, gchar const *val, SPStyleSrc const &source ) {
 
-    // std::cout << "SPStyle::readIfUnset: Entrance: " << id << ": " << (val?val:"null") << std::endl;
+    // std::cout << "SPStyle::readIfUnset: Entrance: " << sp_attribute_name(id) << ": " << (val?val:"null") << std::endl;
     // To Do: If it is not too slow, use std::map instead of std::vector inorder to remove switch()
     // (looking up SPAttr::xxxx already uses a hash).
     g_return_if_fail(val != nullptr);
@@ -995,9 +996,16 @@ SPStyle::_mergeObjectStylesheet( SPObject const *const object ) {
 
     // std::cout << "SPStyle::_mergeObjectStylesheet: " << (object->getId()?object->getId():"null") << std::endl;
 
-    static CRSelEng *sel_eng = nullptr;
-    if (!sel_eng) {
-        sel_eng = sp_repr_sel_eng();
+    _mergeObjectStylesheet(object, object->document);
+}
+
+void
+SPStyle::_mergeObjectStylesheet( SPObject const *const object, SPDocument *const document ) {
+
+    static CRSelEng *sel_eng = sp_repr_sel_eng();
+
+    if (auto *const parent = document->getParent()) {
+        _mergeObjectStylesheet(object, parent);
     }
 
     CRPropList *props = nullptr;
@@ -1005,7 +1013,7 @@ SPStyle::_mergeObjectStylesheet( SPObject const *const object ) {
     //XML Tree being directly used here while it shouldn't be.
     CRStatus status =
         cr_sel_eng_get_matched_properties_from_cascade(sel_eng,
-                                                       object->document->getStyleCascade(),
+                                                       document->getStyleCascade(),
                                                        object->getRepr(),
                                                        &props);
     g_return_if_fail(status == CR_OK);

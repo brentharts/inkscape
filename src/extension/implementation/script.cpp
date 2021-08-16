@@ -410,7 +410,7 @@ SPDocument *Script::open(Inkscape::Extension::Input *module,
 
     if (mydoc != nullptr) {
         mydoc->setDocumentBase(nullptr);
-        mydoc->changeUriAndHrefs(filenameArg);
+        mydoc->changeFilenameAndHrefs(filenameArg);
     }
 
     // make sure we don't leak file descriptors from Glib::file_open_tmp
@@ -454,7 +454,7 @@ void Script::save(Inkscape::Extension::Output *module,
 {
     std::list<std::string> params;
     module->paramListString(params);
-    module->set_environment();
+    module->set_environment(doc);
 
     std::string tempfilename_in;
     int tempfd_in = 0;
@@ -502,7 +502,8 @@ void Script::save(Inkscape::Extension::Output *module,
 
 
 void Script::export_raster(Inkscape::Extension::Output *module,
-             const std::string png_file,
+             const SPDocument *doc,
+             const std::string &png_file,
              const gchar *filenameArg)
 {
     if(!module->is_raster()) {
@@ -512,7 +513,7 @@ void Script::export_raster(Inkscape::Extension::Output *module,
 
     std::list<std::string> params;
     module->paramListString(params);
-    module->set_environment();
+    module->set_environment(doc);
 
     file_listener fileout;
     int data_read = execute(command, params, png_file, fileout);
@@ -579,7 +580,7 @@ void Script::effect(Inkscape::Extension::Effect *module,
 
     std::list<std::string> params;
     module->paramListString(params);
-    module->set_environment();
+    module->set_environment(desktop->getDocument());
 
     parent_window = module->get_execution_env()->get_working_dialog();
 
@@ -657,7 +658,7 @@ void Script::effect(Inkscape::Extension::Effect *module,
         SPDocument* vd=doc->doc();
         if (vd != nullptr)
         {
-            mydoc->changeUriAndHrefs(vd->getDocumentURI());
+            mydoc->changeFilenameAndHrefs(vd->getDocumentFilename());
 
             vd->emitReconstructionStart();
             copy_doc(vd->getReprRoot(), mydoc->getReprRoot());

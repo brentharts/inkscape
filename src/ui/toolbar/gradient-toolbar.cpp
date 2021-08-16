@@ -772,7 +772,7 @@ GradientToolbar::stop_offset_adjustment_changed()
     SPStop *stop = get_selected_stop();
     if (stop) {
         stop->offset = _offset_adj->get_value();
-        sp_repr_set_css_double(stop->getRepr(), "offset", stop->offset);
+        stop->getRepr()->setAttributeCssDouble("offset", stop->offset);
 
         DocumentUndo::maybeDone(stop->document, "gradient:stop:offset", SP_VERB_CONTEXT_GRADIENT,
                                 _("Change gradient stop offset"));
@@ -872,7 +872,9 @@ GradientToolbar::check_ec(SPDesktop* desktop, Inkscape::UI::Tools::ToolBase* ec)
         // connect to selection modified and changed signals
         _connection_changed  = selection->connectChanged(sigc::mem_fun(*this, &GradientToolbar::selection_changed));
         _connection_modified = selection->connectModified(sigc::mem_fun(*this, &GradientToolbar::selection_modified));
-        _connection_subselection_changed = desktop->connectToolSubselectionChanged(sigc::mem_fun(*this, &GradientToolbar::drag_selection_changed));
+        _connection_subselection_changed = desktop->connect_gradient_stop_selected([=](void* sender, SPStop* stop){
+            drag_selection_changed(nullptr);
+        });
 
         // Is this necessary? Couldn't hurt.
         selection_changed(selection);

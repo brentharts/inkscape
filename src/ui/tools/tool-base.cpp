@@ -28,10 +28,12 @@
 #include "rubberband.h"
 #include "selcue.h"
 #include "selection.h"
-#include "ui/cursor-utils.h"
+
+#include "actions/actions-tools.h"
 
 #include "display/control/canvas-item-catchall.h" // Grab/Ungrab
 #include "display/control/canvas-item-rotate.h"
+#include "display/control/snap-indicator.h"
 
 #include "include/gtkmm_version.h"
 #include "include/macros.h"
@@ -39,6 +41,7 @@
 #include "object/sp-guide.h"
 
 #include "ui/contextmenu.h"
+#include "ui/cursor-utils.h"
 #include "ui/event-debug.h"
 #include "ui/interface.h"
 #include "ui/knot/knot.h"
@@ -60,21 +63,17 @@
 #include "ui/tools/tool-base.h"
 #include "ui/widget/canvas.h"
 
-#include "ui/tools-switch.h"
-#include "ui/tools/lpe-tool.h"
-#include "ui/tools/tool-base.h"
-
 #include "widgets/desktop-widget.h"
 
 #include "xml/node-event-vector.h"
 
 // globals for temporary switching to selector by space
 static bool selector_toggled = FALSE;
-static int switch_selector_to = 0;
+static Glib::ustring switch_selector_to;
 
 // globals for temporary switching to dropper by 'D'
 static bool dropper_toggled = FALSE;
-static int switch_dropper_to = 0;
+static Glib::ustring switch_dropper_to;
 
 // globals for keeping track of keyboard scroll events in order to accelerate
 static guint32 scroll_event_time = 0;
@@ -214,15 +213,13 @@ static void sp_toggle_selector(SPDesktop *dt) {
 
     if (dynamic_cast<Inkscape::UI::Tools::SelectTool *>(dt->event_context)) {
         if (selector_toggled) {
-            if (switch_selector_to)
-                tools_switch(dt, switch_selector_to);
-            selector_toggled = FALSE;
-        } else
-            return;
+            set_active_tool(dt, switch_selector_to);
+            selector_toggled = false;
+        }
     } else {
         selector_toggled = TRUE;
-        switch_selector_to = tools_active(dt);
-        tools_switch(dt, TOOLS_SELECT);
+        switch_selector_to = get_active_tool(dt);
+        set_active_tool(dt, "Select");
     }
 }
 
@@ -238,15 +235,13 @@ void sp_toggle_dropper(SPDesktop *dt) {
 
     if (dynamic_cast<Inkscape::UI::Tools::DropperTool *>(dt->event_context)) {
         if (dropper_toggled) {
-            if (switch_dropper_to)
-                tools_switch(dt, switch_dropper_to);
+            set_active_tool(dt, switch_dropper_to);
             dropper_toggled = FALSE;
-        } else
-            return;
+        }
     } else {
         dropper_toggled = TRUE;
-        switch_dropper_to = tools_active(dt);
-        tools_switch(dt, TOOLS_DROPPER);
+        switch_dropper_to = get_active_tool(dt);
+        set_active_tool(dt, "Dropper");
     }
 }
 
@@ -414,7 +409,7 @@ bool ToolBase::root_handler(GdkEvent* event) {
                 grabCanvasEvents(Gdk::BUTTON_RELEASE_MASK |
                                  Gdk::POINTER_MOTION_MASK );
                 ret = TRUE;
-            } else {
+            } else if (!are_buttons_1_and_3_on(event)) {
                 sp_event_root_menu_popup(desktop, nullptr, event);
                 ret = TRUE;
             }
@@ -905,10 +900,10 @@ bool ToolBase::root_handler(GdkEvent* event) {
 }
 
 /**
- * This function allow to handle global tool events if not _pre function is full overrided.
+ * This function allows to handle global tool events if _pre function is not fully overridden.
  */
 
-bool ToolBase::block_button(GdkEvent *event)
+void ToolBase::set_on_buttons(GdkEvent *event)
 {
     switch (event->type) {
         case GDK_BUTTON_PRESS:
@@ -954,10 +949,17 @@ bool ToolBase::block_button(GdkEvent *event)
                 this->_button3on = false;
             }
     }
-    if (this->_button1on == true && this->_button3on == true) {
-        return true;
-    }
-    return false;
+}
+
+bool ToolBase::are_buttons_1_and_3_on() const
+{
+    return this->_button1on && this->_button3on;
+}
+
+bool ToolBase::are_buttons_1_and_3_on(GdkEvent* event)
+{
+    set_on_buttons(event);
+    return are_buttons_1_and_3_on();
 }
 
 /**
@@ -971,7 +973,7 @@ bool ToolBase::item_handler(SPItem* item, GdkEvent* event) {
 
     switch (event->type) {
     case GDK_BUTTON_PRESS:
-        if (event->button.button == 3 &&
+        if (!are_buttons_1_and_3_on(event) && event->button.button == 3 &&
             !((event->button.state & GDK_SHIFT_MASK) || (event->button.state & GDK_CONTROL_MASK))) {
             sp_event_root_menu_popup(this->desktop, item, event);
             ret = TRUE;
@@ -1052,6 +1054,7 @@ void ToolBase::grabCanvasEvents(Gdk::EventMask mask)
  */
 void ToolBase::ungrabCanvasEvents()
 {
+    desktop->snapindicator->remove_snaptarget();
     desktop->getCanvasCatchall()->ungrab();
 }
 
@@ -1157,9 +1160,9 @@ gint sp_event_context_virtual_root_handler(ToolBase * event_context, GdkEvent * 
 
     if (event_context) {
 
-        if (event_context->block_button(event)) {
-            return false;
-        }
+        // Just set the on buttons for now. later, behave as intended.
+        event_context->set_on_buttons(event);
+
         SPDesktop* desktop = event_context->getDesktop();
 
         // Panning has priority over tool-specific event handling
@@ -1213,9 +1216,9 @@ gint sp_event_context_virtual_item_handler(ToolBase * event_context, SPItem * it
     gint ret = false;
     if (event_context) {    // If no event-context is available then do nothing, otherwise Inkscape would crash
                             // (see the comment in SPDesktop::set_event_context, and bug LP #622350)
-        if (event_context->block_button(event)) {
-            return false;
-        }
+
+        // Just set the on buttons for now. later, behave as intended.
+        event_context->set_on_buttons(event);
 
         // Panning has priority over tool-specific event handling
         if (event_context->is_panning()) {
@@ -1263,28 +1266,13 @@ void sp_event_root_menu_popup(SPDesktop *desktop, SPItem *item, GdkEvent *event)
         item = desktop->getSelection()->items().front();
     }
 
-    ContextMenu* CM = new ContextMenu(desktop, item);
-    Gtk::Window *window = desktop->getToplevel();
-    if (window) {
-        if (window->get_style_context()->has_class("dark")) {
-            CM->get_style_context()->add_class("dark");
-        } else {
-            CM->get_style_context()->add_class("bright");
-        }
-        Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-        if (prefs->getBool("/theme/symbolicIcons", false)) {
-            CM->get_style_context()->add_class("symbolic");
-        } else {
-            CM->get_style_context()->add_class("regular");
-        }
-    }
-    CM->show();
-
+    ContextMenu* menu = new ContextMenu(desktop, item);
+    menu->show();
 
     switch (event->type) {
     case GDK_BUTTON_PRESS:
     case GDK_KEY_PRESS:
-        CM->popup_at_pointer(event);
+        menu->popup_at_pointer(event);
         break;
     default:
         break;
@@ -1541,9 +1529,9 @@ gboolean sp_event_context_snap_watchdog_callback(gpointer data) {
         sp_event_context_virtual_root_handler(ec, dse->getEvent());
         break;
     case DelayedSnapEvent::EVENTCONTEXT_ITEM_HANDLER: {
-        gpointer item = dse->getItem();
-        if (item && SP_IS_ITEM(item)) {
-            sp_event_context_virtual_item_handler(ec, SP_ITEM(item), dse->getEvent());
+        auto item = static_cast<SPItem *>(dse->getItem());
+        if (item) {
+            sp_event_context_virtual_item_handler(ec, item, dse->getEvent());
         }
     }
         break;

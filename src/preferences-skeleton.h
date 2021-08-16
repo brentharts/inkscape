@@ -116,7 +116,7 @@ static char const preferences_skeleton[] =
     </eventcontext>
 
     <eventcontext id="eraser" mode="1" style="fill:#ff0000;fill-opacity:1;fill-rule:nonzero;stroke:none;"
-                       mass="0.02" drag="1" angle="30" width="10" thinning="0.1" flatness="0.0" cap_rounding="1.4" usecurrent="0"
+                       mass="3.00" drag="1" angle="30" width="10" thinning="0.1" flatness="0.0" cap_rounding="1.4" usecurrent="0"
                        tracebackground="0" usepressure="1" usetilt="0" selcue="1">
     </eventcontext>
 
@@ -290,10 +290,6 @@ static char const preferences_skeleton[] =
     <group id="svgeditor" value="inkscape"/>
     <group id="bitmapautoreload" value="1"/>
     <group id="dialogtype" value="1"/>
-    <group id="dock"
-           cancenterdock="1"
-           dockbarstyle="2"
-           switcherstyle="2"/>
     <group id="dialogsskiptaskbar" value="1"/>
     <group id="defaultwindowsize" value="2" />
     <group id="arenatilescachesize" value="8192"/>

@@ -40,7 +40,6 @@
 
 #include "ui/dialog/dialog-container.h"
 #include "ui/dialog/inkscape-preferences.h" // for PREFS_PAGE_SPELLCHECK
-#include "ui/tools-switch.h"
 #include "ui/tools/text-tool.h"
 
 #include <glibmm/i18n.h>
@@ -83,7 +82,7 @@ static void show_spellcheck_preferences_dialog()
 }
 
 SpellCheck::SpellCheck()
-    : DialogBase("/dialogs/spellcheck/", SP_VERB_DIALOG_SPELLCHECK)
+    : DialogBase("/dialogs/spellcheck/", "Spellcheck")
     , _text(nullptr)
     , _layout(nullptr)
     , _stops(0)
@@ -99,7 +98,6 @@ SpellCheck::SpellCheck()
     , dictionary_hbox(Gtk::ORIENTATION_HORIZONTAL, 0)
     , stop_button(_("_Stop"), true)
     , start_button(_("_Start"), true)
-    , desktop(nullptr)
     , suggestion_hbox(Gtk::ORIENTATION_HORIZONTAL)
     , changebutton_vbox(Gtk::ORIENTATION_VERTICAL)
 {
@@ -202,27 +200,12 @@ SpellCheck::~SpellCheck()
     disconnect();
 }
 
-void SpellCheck::update()
+void SpellCheck::documentReplaced()
 {
-    if (!_app) {
-        std::cerr << "SpellCheck::update(): _app is null" << std::endl;
-        return;
-    }
-
-    SPDesktop *desktop = getDesktop();
-
-    if (this->desktop == desktop) {
-        return;
-    }
-
-    this->desktop = desktop;
-
-    if (desktop) {
-        if (_working) {
-            // Stop and start on the new desktop
-            finished();
-            onStart();
-        }
+    if (_working) {
+        // Stop and start on the new desktop
+        finished();
+        onStart();
     }
 }
 
@@ -247,9 +230,6 @@ void SpellCheck::disconnect()
 
 void SpellCheck::allTextItems (SPObject *r, std::vector<SPItem *> &l, bool hidden, bool locked)
 {
-    if (!desktop)
-        return; // no desktop to check
-
     if (SP_IS_DEFS(r))
         return; // we're not interested in items in defs
 
@@ -257,14 +237,16 @@ void SpellCheck::allTextItems (SPObject *r, std::vector<SPItem *> &l, bool hidde
         return; // we're not interested in metadata
     }
 
-    for (auto& child: r->children) {
-        if (SP_IS_ITEM (&child) && !child.cloned && !desktop->isLayer(SP_ITEM(&child))) {
-                if ((hidden || !desktop->itemIsHidden(SP_ITEM(&child))) && (locked || !SP_ITEM(&child)->isLocked())) {
-                    if (SP_IS_TEXT(&child) || SP_IS_FLOWTEXT(&child))
-                        l.push_back(static_cast<SPItem*>(&child));
-                }
+    if (auto desktop = getDesktop()) {
+        for (auto& child: r->children) {
+            if (SP_IS_ITEM (&child) && !child.cloned && !desktop->isLayer(SP_ITEM(&child))) {
+                    if ((hidden || !desktop->itemIsHidden(SP_ITEM(&child))) && (locked || !SP_ITEM(&child)->isLocked())) {
+                        if (SP_IS_TEXT(&child) || SP_IS_FLOWTEXT(&child))
+                            l.push_back(static_cast<SPItem*>(&child));
+                    }
+            }
+            allTextItems (&child, l, hidden, locked);
         }
-        allTextItems (&child, l, hidden, locked);
     }
     return;
 }
@@ -277,11 +259,8 @@ SpellCheck::textIsValid (SPObject *root, SPItem *text)
     return (std::find(l.begin(), l.end(), text) != l.end());
 }
 
-bool SpellCheck::compareTextBboxes (gconstpointer a, gconstpointer b)//returns a<b
+bool SpellCheck::compareTextBboxes(SPItem const *i1, SPItem const *i2)//returns a<b
 {
-    SPItem *i1 = SP_ITEM(a);
-    SPItem *i2 = SP_ITEM(b);
-
     Geom::OptRect bbox1 = i1->documentVisualBounds();
     Geom::OptRect bbox2 = i2->documentVisualBounds();
     if (!bbox1 || !bbox2) {
@@ -317,8 +296,8 @@ SpellCheck::nextText()
     _text = getText(_root);
     if (_text) {
 
-        _modified_connection = (SP_OBJECT(_text))->connectModified(sigc::mem_fun(*this, &SpellCheck::onObjModified));
-        _release_connection = (SP_OBJECT(_text))->connectRelease(sigc::mem_fun(*this, &SpellCheck::onObjReleased));
+        _modified_connection = _text->connectModified(sigc::mem_fun(*this, &SpellCheck::onObjModified));
+        _release_connection = _text->connectRelease(sigc::mem_fun(*this, &SpellCheck::onObjReleased));
 
         _layout = te_get_layout (_text);
         _begin_w = _layout->begin();
@@ -346,7 +325,7 @@ bool SpellCheck::updateSpeller() {
 
 void SpellCheck::onStart()
 {
-    if (!desktop)
+    if (!getDocument())
         return;
 
     start_button.set_sensitive(false);
@@ -358,7 +337,7 @@ void SpellCheck::onStart()
     if (!updateSpeller())
         return;
 
-    _root = desktop->getDocument()->getRoot();
+    _root = getDocument()->getRoot();
 
     // empty the list of objects we've checked
     _seen_objects.clear();
@@ -408,7 +387,8 @@ SpellCheck::finished ()
 bool
 SpellCheck::nextWord()
 {
-    if (!_working)
+    auto desktop = getDesktop();
+    if (!_working || !desktop)
         return false;
 
     if (!_text) {
@@ -693,7 +673,7 @@ void SpellCheck::onAccept ()
             // find the end of the word anew
             _end_w = _begin_w;
             _end_w.nextEndOfWord();
-            DocumentUndo::done(desktop->getDocument(), SP_VERB_CONTEXT_TEXT,
+            DocumentUndo::done(getDocument(), SP_VERB_CONTEXT_TEXT,
                                _("Fix spelling"));
         }
     }

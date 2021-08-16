@@ -18,6 +18,7 @@
 #include "ui/tool/event-utils.h"
 #include "ui/tool/transform-handle-set.h"
 #include "ui/tool/node.h"
+#include "display/control/snap-indicator.h"
 
 
 
@@ -161,12 +162,16 @@ void ControlPointSelection::selectAll()
     }
 }
 /** Select all points inside the given rectangle (in desktop coordinates). */
-void ControlPointSelection::selectArea(Geom::Rect const &r)
+void ControlPointSelection::selectArea(Geom::Rect const &r, bool invert)
 {
     std::vector<SelectableControlPoint *> out;
     for (auto _all_point : _all_points) {
         if (r.contains(*_all_point)) {
-            insert(_all_point, false, false);
+            if (invert) {
+                erase(_all_point);
+            } else {
+                insert(_all_point, false, false);
+            }
             out.push_back(_all_point);
         }
     }
@@ -438,6 +443,7 @@ void ControlPointSelection::_pointDragged(Geom::Point &new_pos, GdkEventMotion *
 
 void ControlPointSelection::_pointUngrabbed()
 {
+    _desktop->snapindicator->remove_snaptarget();
     _original_positions.clear();
     _last_trans.clear();
     _dragging = false;

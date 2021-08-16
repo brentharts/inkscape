@@ -55,7 +55,7 @@
 #include "helper/action-context.h"
 #include "helper/action.h" //sp_action_perform
 
-#include "io/resource-manager.h"
+#include "io/fix-broken-links.h"
 
 #include "object/sp-namedview.h"
 #include "object/sp-root.h"
@@ -113,7 +113,6 @@ SPDesktop::SPDesktop()
     , selection(nullptr)
     , event_context(nullptr)
     , layer_manager(nullptr)
-    , event_log(nullptr)
     , temporary_item_list(nullptr)
     , snapindicator(nullptr)
     , current(nullptr)  // current style
@@ -153,7 +152,6 @@ SPDesktop::init (SPNamedView *nv, Inkscape::UI::Widget::Canvas *acanvas, SPDeskt
 
     // Temporary workaround for link order issues:
     Inkscape::DeviceManager::getManager().getDevices();
-    Inkscape::ResourceManager::getManager();
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
 
     _guides_message_context = std::unique_ptr<Inkscape::MessageContext>(new Inkscape::MessageContext(messageStack()));
@@ -313,12 +311,6 @@ SPDesktop::init (SPNamedView *nv, Inkscape::UI::Widget::Canvas *acanvas, SPDeskt
         )
     );
 
-    _sel_modified_connection = selection->connectModified(
-        sigc::bind(
-            sigc::ptr_fun(&_onSelectionModified),
-            this
-        )
-    );
     _sel_changed_connection = selection->connectChanged(
         sigc::bind(
             sigc::ptr_fun(&_onSelectionChanged),
@@ -360,7 +352,6 @@ void SPDesktop::destroy()
 
     _activate_connection.disconnect();
     _deactivate_connection.disconnect();
-    _sel_modified_connection.disconnect();
     _sel_changed_connection.disconnect();
     _modified_connection.disconnect();
     _commit_connection.disconnect();
@@ -530,6 +521,9 @@ SPDesktop::change_document (SPDocument *theDocument)
 
     /* unselect everything before switching documents */
     selection->clear();
+
+    // Reset any tool actions currently in progress.
+    setEventContext(event_context->getPrefsPath());
 
     setDocument (theDocument);
 
@@ -716,8 +710,6 @@ SPDesktop::set_display_area (bool log)
         // if we do a logged transform, our transform-forward list is invalidated, so delete it
         transforms_future.clear();
     }
-
-    redrawDesktop();
 
     // Scroll
     Geom::Point offset = _current_affine.getOffset();
@@ -1461,13 +1453,30 @@ SPDesktop::isToolboxButtonActive (gchar const *id)
 void
 SPDesktop::emitToolSubselectionChanged(gpointer data)
 {
-    _tool_subselection_changed.emit(data);
-    INKSCAPE.subselection_changed (this);
+    emitToolSubselectionChangedEx(data, nullptr);
+}
+
+void SPDesktop::emitToolSubselectionChangedEx(gpointer data, SPObject* object) {
+    _tool_subselection_changed.emit(data, object);
+    INKSCAPE.subselection_changed(this);
+}
+
+sigc::connection SPDesktop::connectToolSubselectionChanged(const sigc::slot<void, gpointer>& slot) {
+    return _tool_subselection_changed.connect([=](gpointer ptr, SPObject*) { slot(ptr); });
+}
+
+sigc::connection SPDesktop::connectToolSubselectionChangedEx(const sigc::slot<void, gpointer, SPObject*>& slot) {
+    return _tool_subselection_changed.connect(slot);
 }
 
 void SPDesktop::updateNow()
 {
     canvas->redraw_now();
+}
+
+void SPDesktop::updateDialogs()
+{
+    getContainer()->set_desktop(this);
 }
 
 void
@@ -1594,21 +1603,6 @@ SPDesktop::setDocument (SPDocument *doc)
     layers->setDocument(doc);
     selection->setDocument(doc);
 
-    if (event_log) {
-        // Remove it from the replaced document. This prevents Inkscape from
-        // crashing since we access it in the replaced document's destructor
-        // which results in an undefined behavior. (See also: bug #1670688)
-        if (this->doc()) {
-            this->doc()->removeUndoObserver(*event_log);
-        }
-        delete event_log;
-        event_log = nullptr;
-    }
-
-    /* setup EventLog */
-    event_log = new Inkscape::EventLog(doc);
-    doc->addUndoObserver(*event_log);
-
     _commit_connection.disconnect();
     _commit_connection = doc->connectCommit(sigc::mem_fun(*this, &SPDesktop::updateNow));
 
@@ -1653,9 +1647,9 @@ SPDesktop::onStatusMessage
 }
 
 void
-SPDesktop::onDocumentURISet (gchar const* uri)
+SPDesktop::onDocumentFilenameSet (gchar const* filename)
 {
-    _widget->updateTitle(uri);
+    _widget->updateTitle(filename);
 }
 
 /**
@@ -1686,17 +1680,6 @@ SPDesktop::_onDeactivate (SPDesktop* dt)
     sp_dtw_desktop_deactivate(dt->_widget);
 }
 
-void
-SPDesktop::_onSelectionModified
-(Inkscape::Selection *selection, guint /*flags*/, SPDesktop *dt)
-{
-    if (!dt->_widget) return;
-    dt->_widget->update_scrollbars (dt->_current_affine.getZoom());
-    if (selection->desktop()->getInkscapeWindow()) {
-        selection->desktop()->getInkscapeWindow()->on_selection_changed();
-    }
-}
-
 static void
 _onSelectionChanged
 (Inkscape::Selection *selection, SPDesktop *desktop)
@@ -1712,9 +1695,6 @@ _onSelectionChanged
         if ( layer && layer != desktop->currentLayer() ) {
             desktop->layers->setCurrentLayer(layer);
         }
-    }
-    if (selection->desktop()->getInkscapeWindow()) {
-        selection->desktop()->getInkscapeWindow()->on_selection_changed();
     }
 }
 
@@ -1871,6 +1851,30 @@ Geom::Point SPDesktop::doc2dt(Geom::Point const &p) const
 Geom::Point SPDesktop::dt2doc(Geom::Point const &p) const
 {
     return p * dt2doc();
+}
+
+sigc::connection SPDesktop::connect_gradient_stop_selected(const sigc::slot<void, void*, SPStop*>& slot) {
+    return _gradient_stop_selected.connect(slot);
+}
+
+sigc::connection SPDesktop::connect_control_point_selected(const sigc::slot<void, void*, Inkscape::UI::ControlPointSelection*>& slot) {
+    return _control_point_selected.connect(slot);
+}
+
+sigc::connection SPDesktop::connect_text_cursor_moved(const sigc::slot<void, void*, Inkscape::UI::Tools::TextTool*>& slot) {
+    return _text_cursor_moved.connect(slot);
+}
+
+void SPDesktop::emit_gradient_stop_selected(void* sender, SPStop* stop) {
+    _gradient_stop_selected.emit(sender, stop);
+}
+
+void SPDesktop::emit_control_point_selected(void* sender, Inkscape::UI::ControlPointSelection* selection) {
+    _control_point_selected.emit(sender, selection);
+}
+
+void SPDesktop::emit_text_cursor_moved(void* sender, Inkscape::UI::Tools::TextTool* tool) {
+    _text_cursor_moved.emit(sender, tool);
 }
 
 /*

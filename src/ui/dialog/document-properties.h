@@ -55,9 +55,10 @@ public:
     static DocumentProperties &getInstance();
     static void destroy();
 
-    void update() override;
+    void documentReplaced() override;
 
-    void  update_gridspage();
+    void update() override;
+    void update_gridspage();
 
 protected:
     void  build_page();
@@ -141,12 +142,13 @@ protected:
     UI::Widget::ToleranceSlider       _rsu_sno;
     UI::Widget::ToleranceSlider       _rsu_sn;
     UI::Widget::ToleranceSlider       _rsu_gusn;
+    UI::Widget::ToleranceSlider       _rsu_assn;
+    UI::Widget::ToleranceSlider       _rsu_dssn;
     UI::Widget::RegisteredCheckButton _rcb_snclp;
     UI::Widget::RegisteredCheckButton _rcb_snmsk;
     UI::Widget::RegisteredCheckButton _rcb_perp;
     UI::Widget::RegisteredCheckButton _rcb_tang;
     //---------------------------------------------------------------
-    Gtk::Button         _link_btn;
     Gtk::Button         _unlink_btn;
     class AvailableProfilesColumns : public Gtk::TreeModel::ColumnRecord
         {
@@ -239,9 +241,6 @@ private:
 
     // nodes connected to listeners
     Inkscape::XML::Node *_repr_namedview = nullptr;
-    Inkscape::XML::Node *_repr_root = nullptr;
-
-    sigc::connection _document_replaced_connection;
 };
 
 } // namespace Dialog

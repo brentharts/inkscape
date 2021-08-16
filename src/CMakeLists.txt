@@ -4,6 +4,7 @@
 # -----------------------------------------------------------------------------
 
 set(inkscape_SRC
+  alignment-snapper.cpp
   attribute-rel-css.cpp
   attribute-rel-svg.cpp
   attribute-rel-util.cpp
@@ -21,6 +22,7 @@ set(inkscape_SRC
   desktop-style.cpp
   desktop.cpp
   device-manager.cpp
+  distribution-snapper.cpp
   document-subset.cpp
   document-undo.cpp
   document.cpp
@@ -63,7 +65,6 @@ set(inkscape_SRC
   rdf.cpp
   removeoverlap.cpp
   rubberband.cpp
-  satisfied-guide-cns.cpp
   selcue.cpp
   selection-chemistry.cpp
   selection-describer.cpp
@@ -76,7 +77,6 @@ set(inkscape_SRC
   snapped-line.cpp
   snapped-point.cpp
   snapper.cpp
-  sp-item-notify-moveto.cpp 
   style-internal.cpp
   style.cpp
   text-chemistry.cpp
@@ -90,6 +90,7 @@ set(inkscape_SRC
 
   # -------
   # Headers
+  alignment-snapper.h
   attribute-rel-css.h
   attribute-rel-svg.h
   attribute-rel-util.h
@@ -113,6 +114,7 @@ set(inkscape_SRC
   desktop-style.h
   desktop.h
   device-manager.h
+  distribution-snapper.h
   document-subset.h
   document-undo.h
   document.h
@@ -161,10 +163,8 @@ set(inkscape_SRC
   proj_pt.h
   pure-transform.h
   rdf.h
-  remove-last.h
   removeoverlap.h
   rubberband.h
-  satisfied-guide-cns.h
   selcue.h
   selection-chemistry.h
   selection-describer.h
@@ -179,9 +179,6 @@ set(inkscape_SRC
   snapped-line.h
   snapped-point.h
   snapper.h
-  sp-guide-attachment.h
-  sp-guide-constraint.h
-  sp-item-notify-moveto.h
   streq.h
   strneq.h
   style-enums.h
@@ -215,6 +212,8 @@ set(inkscape_SRC
   actions/actions-canvas-transform.h
   actions/actions-canvas-transform.cpp
   actions/actions-base.h
+  actions/actions-dialogs.cpp
+  actions/actions-dialogs.h
   actions/actions-base.cpp
   actions/actions-file.h
   actions/actions-file.cpp
@@ -228,6 +227,8 @@ set(inkscape_SRC
   actions/actions-output.cpp
   actions/actions-selection.h
   actions/actions-selection.cpp
+  actions/actions-tools.h
+  actions/actions-tools.cpp
   actions/actions-transform.h
   actions/actions-transform.cpp
   actions/actions-window.h

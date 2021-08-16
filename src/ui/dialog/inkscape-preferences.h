@@ -112,6 +112,7 @@ public:
     ~InkscapePreferences() override;
 
     static InkscapePreferences &getInstance() { return *new InkscapePreferences(); }
+    void showPage(); // Show page indicated by "/dialogs/preferences/page".
 
 protected:
     Gtk::Frame _page_frame;
@@ -215,6 +216,7 @@ protected:
     UI::Widget::PrefCheckButton _snap_indicator;
     UI::Widget::PrefCheckButton _snap_closest_only;
     UI::Widget::PrefCheckButton _snap_mouse_pointer;
+    UI::Widget::PrefCheckButton _snap_indicator_distance;
 
     UI::Widget::PrefCombo       _steps_rot_snap;
     UI::Widget::PrefCheckButton _steps_rot_relative;
@@ -257,6 +259,7 @@ protected:
     UI::Widget::PrefCombo _icon_theme;
     UI::Widget::PrefCheckButton _dark_theme;
     UI::Widget::PrefSlider _contrast_theme;
+    UI::Widget::PrefCheckButton _narrow_spinbutton;
     UI::Widget::PrefCheckButton _symbolic_icons;
     UI::Widget::PrefCheckButton _symbolic_base_colors;
     UI::Widget::PrefCheckButton _symbolic_highlight_colors;
@@ -322,8 +325,6 @@ protected:
     UI::Widget::PrefRadioButton _filter_quality_worse;
     UI::Widget::PrefRadioButton _filter_quality_worst;
     UI::Widget::PrefCheckButton _show_filters_info_box;
-    UI::Widget::PrefCombo       _dockbar_style;
-    UI::Widget::PrefCombo       _switcher_style;
     UI::Widget::PrefCheckButton _rendering_image_outline;
     UI::Widget::PrefSpinButton  _rendering_cache_size;
     UI::Widget::PrefSpinButton  _rendering_tile_multiplier;
@@ -346,6 +347,8 @@ protected:
     UI::Widget::PrefRadioButton _sel_recursive;
     UI::Widget::PrefCheckButton _sel_hidden;
     UI::Widget::PrefCheckButton _sel_locked;
+    UI::Widget::PrefCheckButton _sel_inlayer_same;
+    UI::Widget::PrefCheckButton _sel_touch_topmost_only;
     UI::Widget::PrefCheckButton _sel_layer_deselects;
     UI::Widget::PrefCheckButton _sel_cycle;
 
@@ -411,6 +414,7 @@ protected:
     UI::Widget::PrefCheckButton _ui_yaxisdown;
     UI::Widget::PrefCheckButton _ui_rotationlock;
     UI::Widget::PrefCheckButton _ui_cursorscaling;
+    UI::Widget::PrefCheckButton _ui_cursor_shadow;
 
     //Spellcheck
     UI::Widget::PrefCombo       _spell_language;
@@ -600,7 +604,7 @@ protected:
     Gtk::TreeModel::iterator AddPage(UI::Widget::DialogPage& p, Glib::ustring title, Gtk::TreeModel::iterator parent, int id);
     Gtk::TreePath get_next_result(Gtk::TreeIter& iter, bool check_children = true);
     Gtk::TreePath get_prev_result(Gtk::TreeIter& iter, bool iterate = true);
-    bool PresentPage(const Gtk::TreeModel::iterator& iter);
+    bool matchPage(const Gtk::TreeModel::iterator& iter);
 
     static void AddSelcueCheckbox(UI::Widget::DialogPage& p, Glib::ustring const &prefs_path, bool def_value);
     static void AddGradientCheckbox(UI::Widget::DialogPage& p, Glib::ustring const &prefs_path, bool def_value);
@@ -640,8 +644,6 @@ protected:
     void initPageI18n(); // Do we still need it?
     void initKeyboardShortcuts(Gtk::TreeModel::iterator iter_ui);
 
-    void _presentPages();
-
     /*
      * Functions for the Keyboard shortcut editor panel
      */
@@ -662,7 +664,9 @@ protected:
 
 private:
   Gtk::TreeModel::iterator searchRows(char const* srch, Gtk::TreeModel::iterator& iter, Gtk::TreeModel::Children list_model_childern);
-  void themeChange();
+  void themeChange(bool contrastslider = false);
+  void comboThemeChange();
+  void contrastThemeChange();
   void preferDarkThemeChange();
   bool contrastChange(GdkEventButton* button_event);
   void symbolicThemeCheck();

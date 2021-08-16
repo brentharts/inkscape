@@ -34,7 +34,6 @@ pacman -Sy
 # install basic development system, compiler toolchain and build tools
 eval pacman -S $PACMAN_OPTIONS \
 git \
-intltool \
 base-devel \
 $ARCH-toolchain \
 $ARCH-cmake \
@@ -83,12 +82,25 @@ $ARCH-python \
 $ARCH-python-pip \
 $ARCH-python-lxml \
 $ARCH-python-numpy \
+$ARCH-python-cssselect \
 $ARCH-python-pillow \
 $ARCH-python-six \
 $ARCH-python-gobject \
 $ARCH-python-pyserial \
 $ARCH-python-coverage \
 $ARCH-scour
+
+# install modules needed by extensions manager
+eval pacman -S $PACMAN_OPTIONS \
+$ARCH-python-appdirs \
+$ARCH-python-msgpack \
+$ARCH-python-lockfile \
+$ARCH-python-cachecontrol \
+$ARCH-python-idna \
+$ARCH-python-urllib3 \
+$ARCH-python-chardet \
+$ARCH-python-certifi \
+$ARCH-python-requests
 
 # install Python modules not provided as MSYS2/MinGW packages
 PACKAGES=""

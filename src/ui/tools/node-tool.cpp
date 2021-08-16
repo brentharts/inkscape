@@ -50,9 +50,7 @@
 #include "ui/tool/multi-path-manipulator.h"
 #include "ui/tool/path-manipulator.h"
 #include "ui/tool/selector.h"
-#include "ui/tools-switch.h"
 #include "ui/tools/node-tool.h"
-#include "ui/tools/tool-base.h"
 
 /** @struct NodeTool
  *
@@ -204,12 +202,9 @@ void NodeTool::setup() {
     this->_selector->signal_point.connect(sigc::mem_fun(this, &NodeTool::select_point));
     this->_selector->signal_area.connect(sigc::mem_fun(this, &NodeTool::select_area));
 
-    this->_multipath->signal_coords_changed.connect(
-        sigc::bind(
-            sigc::mem_fun(*this->desktop, &SPDesktop::emitToolSubselectionChanged),
-            (void*)nullptr
-        )
-    );
+    this->_multipath->signal_coords_changed.connect([=](){
+        desktop->emit_control_point_selected(this, _selected_nodes);
+    });
 
     this->_selected_nodes->signal_selection_changed.connect(
         // Hide both signal parameters and bind the function parameter to 0
@@ -253,7 +248,7 @@ void NodeTool::setup() {
         this->enableGrDrag();
     }
 
-    this->desktop->emitToolSubselectionChanged(nullptr); // sets the coord entry fields to inactive
+    desktop->emit_control_point_selected(this, _selected_nodes); // sets the coord entry fields to inactive
     sp_update_helperpath(desktop);
 }
 
@@ -289,7 +284,7 @@ void sp_update_helperpath(SPDesktop *desktop)
     for (auto item : vec) {
         SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(item);
         if (lpeitem && lpeitem->hasPathEffectRecursive()) {
-            Inkscape::LivePathEffect::Effect *lpe = SP_LPE_ITEM(lpeitem)->getCurrentLPE();
+            Inkscape::LivePathEffect::Effect *lpe = lpeitem->getCurrentLPE();
             if (lpe && lpe->isVisible()/* && lpe->showOrigPath()*/) {
                 std::vector<Geom::Point> selectedNodesPositions;
                 if (nt->_selected_nodes) {
@@ -304,6 +299,7 @@ void sp_update_helperpath(SPDesktop *desktop)
                 auto c = std::make_unique<SPCurve>();
                 std::vector<Geom::PathVector> cs = lpe->getCanvasIndicators(lpeitem);
                 for (auto &p : cs) {
+                    p *= desktop->dt2doc();
                     c->append(p);
                 }
                 if (!c->is_empty()) {
@@ -617,7 +613,7 @@ bool NodeTool::root_handler(GdkEvent* event) {
     default:
         break;
     }
-    // we realy dont want to stop any node operation we want to success all even the time consume it
+    // we really dont want to stop any node operation we want to success all even the time consume it
 
     return ToolBase::root_handler(event);
 }
@@ -720,11 +716,24 @@ void NodeTool::select_area(Geom::Rect const &sel, GdkEventButton *event) {
         std::vector<SPItem*> items = this->desktop->getDocument()->getItemsInBox(this->desktop->dkey, sel_doc);
         selection->setList(items);
     } else {
-        if (!held_shift(*event)) {
+        bool shift = held_shift(*event);
+        bool ctrl = held_control(*event);
+
+        if (!shift) {
+            // A/C. No modifier, selects all nodes, or selects all other nodes.
             this->_selected_nodes->clear();
         }
-
-        this->_selected_nodes->selectArea(sel);
+        if (shift && ctrl) {
+            // D. Shift+Ctrl pressed, removes nodes under box from existing selection.
+            this->_selected_nodes->selectArea(sel, true);
+        } else {
+            // A/B/C. Adds nodes under box to existing selection.
+            this->_selected_nodes->selectArea(sel);
+            if (ctrl) {
+                // C. Selects the inverse of all nodes under the box.
+                this->_selected_nodes->invertSelection();
+            }
+        }
     }
 }
 

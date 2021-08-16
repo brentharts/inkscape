@@ -10,14 +10,16 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
-#include <sigc++/sigc++.h>
-#include <glib.h>
 #include "object-set.h"
+
+#include <boost/range/adaptor/filtered.hpp>
+#include <boost/range/adaptor/transformed.hpp>
+#include <glib.h>
+#include <sigc++/sigc++.h>
+
 #include "box3d.h"
 #include "persp3d.h"
 #include "preferences.h"
-#include <boost/range/adaptor/filtered.hpp>
-#include <boost/range/adaptor/transformed.hpp>
 
 namespace Inkscape {
 
@@ -218,8 +220,8 @@ SPItem *ObjectSet::_sizeistItem(bool sml, CompareSize compare) {
     gdouble max = sml ? 1e18 : 0;
     SPItem *ist = nullptr;
 
-    for (auto i = items.begin(); i != items.end(); ++i) {
-        Geom::OptRect obox = SP_ITEM(*i)->documentPreferredBounds();
+    for (auto *item : items) {
+        Geom::OptRect obox = item->documentPreferredBounds();
         if (!obox || obox.empty()) {
             continue;
         }
@@ -231,7 +233,7 @@ SPItem *ObjectSet::_sizeistItem(bool sml, CompareSize compare) {
         size = sml ? size : size * -1;
         if (size < max) {
             max = size;
-            ist = SP_ITEM(*i);
+            ist = item;
         }
     }
 
@@ -281,6 +283,32 @@ void ObjectSet::set(XML::Node *repr)
     }
 }
 
+int ObjectSet::setBetween(SPObject *obj_a, SPObject *obj_b)
+{
+    auto parent = obj_a->parent;
+    if (!obj_b)
+        obj_b = singleItem();
+
+    if (!obj_a || !obj_b || parent != obj_b->parent) {
+        return 0;
+    } else if (obj_a == obj_b) {
+        set(obj_a);
+        return 1;
+    }
+    clear();
+
+    int count = 0;
+    int min = std::min(obj_a->getPosition(), obj_b->getPosition());
+    int max = std::max(obj_a->getPosition(), obj_b->getPosition());
+    for (int i = min ; i <= max ; i++) {
+        if (auto child = parent->nthChild(i)) {
+            count += add(child);
+        }    
+    }
+    return count;
+}
+
+
 void ObjectSet::setReprList(std::vector<XML::Node*> const &list) {
     if(!document())
         return;
@@ -300,7 +328,26 @@ void ObjectSet::setReprList(std::vector<XML::Node*> const &list) {
     _emitChanged();
 }
 
-
+void ObjectSet::enforceIds()
+{
+    bool idAssigned = false;
+    auto items = this->items();
+    for (auto *item : items) {
+        if (!item->getId()) {
+            // Selected object does not have an ID, so assign it a unique ID
+            gchar *id = sp_object_get_unique_id(item, nullptr);
+            item->setAttribute("id", id);
+            g_free(id);
+            idAssigned = true;
+        }
+    }
+    if (idAssigned) {
+        SPDocument *document = _desktop->getDocument();
+        if (document) {
+            document->setModifiedSinceSave(true);
+        }
+    }
+}
 
 Geom::OptRect ObjectSet::bounds(SPItem::BBoxType type) const
 {
@@ -313,8 +360,8 @@ Geom::OptRect ObjectSet::geometricBounds() const
     auto items = const_cast<ObjectSet *>(this)->items();
 
     Geom::OptRect bbox;
-    for (auto iter = items.begin(); iter != items.end(); ++iter) {
-        bbox.unionWith(SP_ITEM(*iter)->desktopGeometricBounds());
+    for (auto *item : items) {
+        bbox.unionWith(item->desktopGeometricBounds());
     }
     return bbox;
 }
@@ -324,8 +371,8 @@ Geom::OptRect ObjectSet::visualBounds() const
     auto items = const_cast<ObjectSet *>(this)->items();
 
     Geom::OptRect bbox;
-    for (auto iter = items.begin(); iter != items.end(); ++iter) {
-        bbox.unionWith(SP_ITEM(*iter)->desktopVisualBounds());
+    for (auto *item : items) {
+        bbox.unionWith(item->desktopVisualBounds());
     }
     return bbox;
 }
@@ -345,8 +392,7 @@ Geom::OptRect ObjectSet::documentBounds(SPItem::BBoxType type) const
     auto items = const_cast<ObjectSet *>(this)->items();
     if (items.empty()) return bbox;
 
-    for (auto iter = items.begin(); iter != items.end(); ++iter) {
-        SPItem *item = SP_ITEM(*iter);
+    for (auto *item : items) {
         bbox |= item->documentBounds(type);
     }
 

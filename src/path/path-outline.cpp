@@ -192,8 +192,8 @@ void item_to_outline_add_marker_child( SPItem const *item, Geom::Affine marker_t
     if (SP_IS_GROUP(item)) {
         // recurse through all childs:
         for (auto& o: item->children) {
-            if ( SP_IS_ITEM(&o) ) {
-                item_to_outline_add_marker_child(SP_ITEM(&o), tr, pathv_in);
+            if (auto childitem = dynamic_cast<SPItem const *>(&o)) {
+                item_to_outline_add_marker_child(childitem, tr, pathv_in);
             }
         }
     } else {
@@ -385,11 +385,11 @@ void item_to_paths_add_marker( SPItem *context,
 Inkscape::XML::Node*
 item_to_paths(SPItem *item, bool legacy, SPItem *context)
 {
-    char const *id = item->getRepr()->attribute("id");
-    SPDocument * document = item->document;
+    char const *id = item->getAttribute("id");
     // flatten all paths effects
     SPLPEItem *lpeitem = SP_LPE_ITEM(item);
     if (lpeitem) {
+        SPDocument * document = item->document;
         lpeitem->removeAllPathEffects(true);
         SPObject *elemref = document->getObjectById(id);
         if (elemref && elemref != item) {
@@ -444,9 +444,9 @@ item_to_paths(SPItem *item, bool legacy, SPItem *context)
     if (context) {
         SPStyle *context_style = context->style;
         SPCSSAttr *ctxt_style = sp_css_attr_from_style(context_style, SP_STYLE_FLAG_ALWAYS);
-        // TODO: browsers has diferent behabiours with context on markers
+        // TODO: browsers have different behaviours with context on markers
         // we need to revisit in the future for best matching
-        // also dont know if opacity is or want to be included in context
+        // also dont know if opacity is or should be included in context
         gchar const *s_val   = sp_repr_css_property(ctxt_style, "stroke", nullptr);
         gchar const *f_val   = sp_repr_css_property(ctxt_style, "fill", nullptr);
         if (style->fill.paintOrigin == SP_CSS_PAINT_ORIGIN_CONTEXT_STROKE ||
@@ -481,7 +481,7 @@ item_to_paths(SPItem *item, bool legacy, SPItem *context)
     sp_repr_css_unset_property(ncss, "marker-mid");
     sp_repr_css_unset_property(ncss, "marker-end");
 
-    // we change the stroke to fill on ncss for create the filled stroke
+    // we change the stroke to fill on ncss to create the filled stroke
     sp_repr_css_set_property(ncss, "fill", s_val);
     if ( s_opac ) {
         sp_repr_css_set_property(ncss, "fill-opacity", s_opac);

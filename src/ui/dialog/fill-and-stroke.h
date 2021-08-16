@@ -41,7 +41,7 @@ public:
 
     static FillAndStroke &getInstance() { return *new FillAndStroke(); }
 
-    void update() override;
+    void desktopReplaced() override;
 
     void showPageFill();
     void showPageStrokePaint();
@@ -70,7 +70,6 @@ private:
     FillAndStroke(FillAndStroke const &d) = delete;
     FillAndStroke& operator=(FillAndStroke const &d) = delete;
 
-    SPDesktop *targetDesktop;
     UI::Widget::FillNStroke *fillWdgt;
     UI::Widget::FillNStroke *strokeWdgt;
     UI::Widget::StrokeStyle *strokeStyleWdgt;

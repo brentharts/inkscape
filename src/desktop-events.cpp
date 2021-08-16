@@ -36,8 +36,9 @@
 #include "snap.h"
 #include "verbs.h"
 
+#include "actions/actions-tools.h"
+
 #include "display/control/snap-indicator.h"
-#include "display/control/canvas-item.h" // NOT USED!!
 #include "display/control/canvas-item-guideline.h"
 
 #include "helper/action.h"
@@ -48,12 +49,12 @@
 
 #include "ui/cursor-utils.h"
 #include "ui/dialog-events.h"
-#include "ui/tools-switch.h"
 #include "ui/dialog/guides.h"
-#include "ui/tools/tool-base.h"
-#include "ui/widget/canvas.h"  // Desktop hidden in g_object data.
-
 #include "ui/event-debug.h"
+#include "ui/tools/tool-base.h"
+#include "ui/tools/node-tool.h"
+#include "ui/tools/select-tool.h"
+#include "ui/widget/canvas.h"
 
 #include "widgets/desktop-widget.h"
 
@@ -113,6 +114,11 @@ bool sp_dt_guide_event(GdkEvent *event, Inkscape::CanvasItemGuideLine *guide_ite
     if (!desktop) {
         std::cerr << "sp_dt_guide_event: No desktop!" << std::endl;
     }
+    // Limit to select tool only.
+    if (!dynamic_cast<Inkscape::UI::Tools::SelectTool *>(desktop->event_context) &&
+        !dynamic_cast<Inkscape::UI::Tools::NodeTool *>(desktop->event_context)) {
+        return false;
+    }
 
     switch (event->type) {
         case GDK_2BUTTON_PRESS:
@@ -151,8 +157,7 @@ bool sp_dt_guide_event(GdkEvent *event, Inkscape::CanvasItemGuideLine *guide_ite
                 if (drag_type == SP_DRAG_ROTATE || drag_type == SP_DRAG_TRANSLATE) {
                     guide_item->grab((Gdk::BUTTON_RELEASE_MASK      |
                                       Gdk::BUTTON_PRESS_MASK        |
-                                      Gdk::POINTER_MOTION_MASK      |
-                                      Gdk::POINTER_MOTION_HINT_MASK ),
+                                      Gdk::POINTER_MOTION_MASK      ),
                                      nullptr);
                 }
                 ret = true;
@@ -252,7 +257,6 @@ bool sp_dt_guide_event(GdkEvent *event, Inkscape::CanvasItemGuideLine *guide_ite
                     Geom::Point const event_w(event->button.x,
                                               event->button.y);
                     Geom::Point event_dt(desktop->w2d(event_w));
-                    std::cout << "    event_w: " << event_w << ", event_dt: " << event_dt << std::endl;
                     SnapManager &m = desktop->namedview->snap_manager;
                     m.setup(desktop, true, nullptr, nullptr, guide);
                     if (drag_type == SP_DRAG_MOVE_ORIGIN) {
@@ -436,7 +440,7 @@ bool sp_dt_guide_event(GdkEvent *event, Inkscape::CanvasItemGuideLine *guide_ite
 }
 
 //static std::map<GdkInputSource, std::string> switchMap;
-static std::map<std::string, int> toolToUse;
+static std::map<std::string, Glib::ustring> toolToUse;
 static std::string lastName;
 static GdkInputSource lastType = GDK_SOURCE_MOUSE;
 
@@ -460,13 +464,13 @@ static void init_extended()
                 // Set the initial tool for the device
                 switch ( devSrc ) {
                     case Gdk::SOURCE_PEN:
-                        toolToUse[devName] = TOOLS_CALLIGRAPHIC;
+                        toolToUse[devName] = "Calligraphic";
                         break;
                     case Gdk::SOURCE_ERASER:
-                        toolToUse[devName] = TOOLS_ERASER;
+                        toolToUse[devName] = "Eraser";
                         break;
                     case Gdk::SOURCE_CURSOR:
-                        toolToUse[devName] = TOOLS_SELECT;
+                        toolToUse[devName] = "Select";
                         break;
                     default:
                         ; // do not add
@@ -537,16 +541,16 @@ void snoop_extended(GdkEvent* event, SPDesktop *desktop)
         if ( lastType != source || lastName != name ) {
             // The device switched. See if it is one we 'count'
             //g_message("Changed device %s -> %s", lastName.c_str(), name.c_str());
-            std::map<std::string, int>::iterator it = toolToUse.find(lastName);
+            auto it = toolToUse.find(lastName);
             if (it != toolToUse.end()) {
                 // Save the tool currently selected for next time the input
                 // device shows up.
-                it->second = tools_active(desktop);
+                it->second = get_active_tool(desktop);
             }
 
             it = toolToUse.find(name);
             if (it != toolToUse.end() ) {
-                tools_switch(desktop, it->second);
+                set_active_tool(desktop, it->second);
             }
 
             lastName = name;

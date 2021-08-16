@@ -98,18 +98,22 @@ Inkscape::XML::Node* SPLine::write(Inkscape::XML::Document *xml_doc, Inkscape::X
         repr->mergeFrom(this->getRepr(), "id");
     }
 
-    sp_repr_set_svg_double(repr, "x1", this->x1.computed);
-    sp_repr_set_svg_double(repr, "y1", this->y1.computed);
-    sp_repr_set_svg_double(repr, "x2", this->x2.computed);
-    sp_repr_set_svg_double(repr, "y2", this->y2.computed);
+    repr->setAttributeSvgDouble("x1", this->x1.computed);
+    repr->setAttributeSvgDouble("y1", this->y1.computed);
+    repr->setAttributeSvgDouble("x2", this->x2.computed);
+    repr->setAttributeSvgDouble("y2", this->y2.computed);
 
     SPShape::write(xml_doc, repr, flags);
 
     return repr;
 }
 
+const char* SPLine::typeName() const {
+    return "path";
+}
+
 const char* SPLine::displayName() const {
-	return _("Line");
+    return _("Line");
 }
 
 void SPLine::convert_to_guides() const {

@@ -21,6 +21,7 @@
 
 #include "enums.h"
 #include "inkscape-application.h"
+#include "inkscape-window.h"
 #include "inkscape.h"
 #include "preferences.h"
 #include "ui/dialog/dialog-base.h"
@@ -50,11 +51,11 @@ DialogWindow::~DialogWindow() {}
 
 // Create a dialog window and move page from old notebook.
 DialogWindow::DialogWindow(Gtk::Widget *page)
-    : Gtk::ApplicationWindow()
+    : Gtk::Window()
     , _app(InkscapeApplication::instance())
     , _title(_("Dialog Window"))
 {
-    // ============ Intialization ===============
+    // ============ Initialization ===============
     // Setting the window type
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     bool window_above = true;
@@ -151,6 +152,11 @@ DialogWindow::DialogWindow(Gtk::Widget *page)
     // window is created hidden; don't show it now, its size needs to be restored
 }
 
+void DialogWindow::set_desktop(SPDesktop *desktop)
+{
+    _container->set_desktop(desktop);
+}
+
 /**
  * Update all dialogs that are owned by the DialogWindow's _container.
  */
@@ -164,7 +170,7 @@ void DialogWindow::update_dialogs()
     }
 
     if (_container) {
-        const std::multimap<int, DialogBase *> *dialogs = _container->get_dialogs();
+        const std::multimap<Glib::ustring, DialogBase *> *dialogs = _container->get_dialogs();
         if (dialogs->size() > 1) {
             _title = "Multiple dialogs";
         } else if (dialogs->size() == 1) {
@@ -197,7 +203,7 @@ void DialogWindow::update_window_size_to_fit_children()
     // Read needed data
     get_position(pos_x, pos_y);
     get_allocated_size(allocation, baseline);
-    const std::multimap<int, DialogBase *> *dialogs = _container->get_dialogs();
+    const std::multimap<Glib::ustring, DialogBase *> *dialogs = _container->get_dialogs();
 
     // Get largest sizes for dialogs
     for (auto dialog : *dialogs) {
@@ -248,7 +254,12 @@ bool DialogWindow::on_key_press_event(GdkEventKey *key_event)
         return true;
     }
 
-    return Inkscape::Shortcuts::getInstance().invoke_verb(key_event, SP_ACTIVE_DESKTOP);
+    // Pass key event to active InkscapeWindow to handle app level shortcuts.
+    if (_app->get_active_window()->on_key_press_event(key_event)) {
+        return true;
+    }
+
+    return false;
 }
 
 } // namespace Dialog

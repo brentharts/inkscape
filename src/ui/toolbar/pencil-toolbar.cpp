@@ -43,7 +43,6 @@
 #include "object/sp-shape.h"
 #include "selection.h"
 #include "ui/icon-names.h"
-#include "ui/tools-switch.h"
 #include "ui/tools/freehand-base.h"
 #include "ui/tools/pen-tool.h"
 #include "ui/tools/pencil-tool.h"
@@ -448,26 +447,7 @@ PencilToolbar::add_advanced_shape_options(bool tool_is_pencil)
         _shapescale_adj->signal_value_changed().connect(sigc::mem_fun(*this, &PencilToolbar::shapewidth_value_changed));
         update_width_value(shape);
         add(*_shapescale);
-
-        _desktop->_tool_changed.connect(sigc::mem_fun(*this, &PencilToolbar::desktop_tool_changed));
     }
-}
-
-void
-PencilToolbar::desktop_tool_changed(int tool) {
-    int shape = 0;
-    auto prefs = Inkscape::Preferences::get();
-    switch (tool) {
-        case TOOLS_FREEHAND_PENCIL:
-            shape = prefs->getInt("/tools/freehand/pencil/shape", 0);
-            break;
-        case TOOLS_FREEHAND_PEN:
-            shape = prefs->getInt("/tools/freehand/pen/shape", 0);
-            break;
-        default:
-            return; // Bail out!
-    }
-    update_width_value(shape);
 }
 
 void
