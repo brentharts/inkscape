@@ -293,16 +293,14 @@ SPDesktopWidget::SPDesktopWidget()
     // Selected Style (Fill/Stroke/Opacity)
     dtw->_selected_style = Gtk::manage(new Inkscape::UI::Widget::SelectedStyle(true));
     dtw->_statusbar->pack_start(*dtw->_selected_style, false, false);
-    dtw->_selected_style->set_no_show_all();
-
-    // Separator
-    // dtw->_statusbar->pack_start(*Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_VERTICAL)),
-		                // false, false);
+    _selected_style->show_all();
+    _selected_style->set_no_show_all();
 
     // Layer Selector
-    dtw->layer_selector = Gtk::manage(new Inkscape::UI::Widget::LayerSelector(nullptr));
-    dtw->layer_selector->set_no_show_all();
-    dtw->_statusbar->pack_start(*dtw->layer_selector, false, false, 1);
+    _layer_selector = Gtk::manage(new Inkscape::UI::Widget::LayerSelector(nullptr));
+    _layer_selector->show_all();
+    _layer_selector->set_no_show_all();
+    dtw->_statusbar->pack_start(*_layer_selector, false, false, 1);
 
     // Select Status
     dtw->_select_status = Gtk::manage(new Gtk::Label());
@@ -432,8 +430,12 @@ SPDesktopWidget::SPDesktopWidget()
 
     update_statusbar_visibility();
 
+    _statusbar_preferences_observer = prefs->createObserver("/statusbar/visibility", [=](const Inkscape::Preferences::Entry&) {
+        update_statusbar_visibility();
+    });
+
     // --------------- Color Management ---------------- //
-    dtw->_tracker = ege_color_prof_tracker_new(GTK_WIDGET(dtw->layer_selector->gobj()));
+    dtw->_tracker = ege_color_prof_tracker_new(GTK_WIDGET(_layer_selector->gobj()));
     bool fromDisplay = prefs->getBool( "/options/displayprofile/from_display");
     if ( fromDisplay ) {
         auto id = Inkscape::CMSSystem::getDisplayId(0);
@@ -451,14 +453,11 @@ SPDesktopWidget::SPDesktopWidget()
 
 void SPDesktopWidget::update_statusbar_visibility() {
     auto prefs = Inkscape::Preferences::get();
-    Glib::ustring path("statusbar/visibility/");
-// prefs->setBool(path + "coordinates", false);
-// prefs->setBool(path + "rotation", false);
-// prefs->setBool(path + "layer", false);
-// prefs->setBool(path + "style", false);
+    Glib::ustring path("/statusbar/visibility/");
+
     _coord_status->set_visible(prefs->getBool(path + "coordinates", true));
     _rotation_status_box->set_visible(prefs->getBool(path + "rotation", true));
-    layer_selector->set_visible(prefs->getBool(path + "layer", true));
+    _layer_selector->set_visible(prefs->getBool(path + "layer", true));
     _selected_style->set_visible(prefs->getBool(path + "style", true));
 }
 
@@ -528,7 +527,7 @@ SPDesktopWidget::on_unrealize()
 
         delete _container;
 
-        dtw->layer_selector->setDesktop(nullptr);
+        _layer_selector->setDesktop(nullptr);
         INKSCAPE.remove_desktop(dtw->desktop); // clears selection and event_context
         dtw->modified_connection.disconnect();
         dtw->desktop->destroy();
@@ -1463,7 +1462,7 @@ SPDesktopWidget::SPDesktopWidget(SPDocument *document)
     /* Listen on namedview modification */
     dtw->modified_connection = namedview->connectModified(sigc::mem_fun(*dtw, &SPDesktopWidget::namedviewModified));
 
-    dtw->layer_selector->setDesktop(dtw->desktop);
+    _layer_selector->setDesktop(dtw->desktop);
 
     // TEMP
     dtw->_menubar = build_menubar(dtw->desktop);

@@ -23,6 +23,7 @@
 
 #include "message.h"
 #include "ui/view/view-widget.h"
+#include "preferences.h"
 
 #include <cstddef>
 #include <sigc++/connection.h>
@@ -153,12 +154,11 @@ public:
 
 private:
     Inkscape::UI::Widget::Canvas *_canvas = nullptr;
-
     std::vector<sigc::connection> _connections;
+    Inkscape::PrefObserver _statusbar_preferences_observer;
+    Inkscape::UI::Widget::LayerSelector* _layer_selector;
 
 public:
-    Inkscape::UI::Widget::LayerSelector *layer_selector;
-
     EgeColorProfTracker* _tracker;
 
     void setMessage(Inkscape::MessageType type, gchar const *message);
