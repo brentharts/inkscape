@@ -293,10 +293,11 @@ SPDesktopWidget::SPDesktopWidget()
     // Selected Style (Fill/Stroke/Opacity)
     dtw->_selected_style = Gtk::manage(new Inkscape::UI::Widget::SelectedStyle(true));
     dtw->_statusbar->pack_start(*dtw->_selected_style, false, false);
+    dtw->_selected_style->set_no_show_all();
 
     // Separator
-    dtw->_statusbar->pack_start(*Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_VERTICAL)),
-		                false, false);
+    // dtw->_statusbar->pack_start(*Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_VERTICAL)),
+		                // false, false);
 
     // Layer Selector
     dtw->layer_selector = Gtk::manage(new Inkscape::UI::Widget::LayerSelector(nullptr));
@@ -454,9 +455,11 @@ void SPDesktopWidget::update_statusbar_visibility() {
 // prefs->setBool(path + "coordinates", false);
 // prefs->setBool(path + "rotation", false);
 // prefs->setBool(path + "layer", false);
+// prefs->setBool(path + "style", false);
     _coord_status->set_visible(prefs->getBool(path + "coordinates", true));
     _rotation_status_box->set_visible(prefs->getBool(path + "rotation", true));
     layer_selector->set_visible(prefs->getBool(path + "layer", true));
+    _selected_style->set_visible(prefs->getBool(path + "style", true));
 }
 
 void
