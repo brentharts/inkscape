@@ -86,7 +86,7 @@ void MarkerTool::setup() {
 void MarkerTool::selection_changed(Inkscape::Selection *selection) {
     using namespace Inkscape::UI;
 
-    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
+    SPDesktop *desktop = this->desktop;;
     g_assert(desktop != nullptr);
 
     SPDocument *doc = desktop->getDocument();
@@ -105,21 +105,24 @@ void MarkerTool::selection_changed(Inkscape::Selection *selection) {
                 SPObject *obj = shape->_marker[editMarkerMode];
 
                 if(obj) {
-                    SPItem* marker_item = dynamic_cast<SPItem *>(obj);
-                    validateMarker(marker_item, doc);
+
+                    SPMarker *sp_marker = dynamic_cast<SPMarker *>(obj);
+                    g_assert(sp_marker != nullptr);
+
+                    validateMarker(sp_marker, doc);
 
                     ShapeRecord sr;
                     switch(editMarkerMode) {
                         case SP_MARKER_LOC_START:
-                            sr  = get_marker_transform(shape, item, marker_item, SP_MARKER_LOC_START);
+                            sr  = get_marker_transform(shape, item, sp_marker, SP_MARKER_LOC_START);
                             break;
 
                         case SP_MARKER_LOC_MID:
-                            sr  = get_marker_transform(shape, item, marker_item, SP_MARKER_LOC_MID);
+                            sr  = get_marker_transform(shape, item, sp_marker, SP_MARKER_LOC_MID);
                             break;
 
                         case SP_MARKER_LOC_END:
-                            sr  = get_marker_transform(shape, item, marker_item, SP_MARKER_LOC_END);
+                            sr  = get_marker_transform(shape, item, sp_marker, SP_MARKER_LOC_END);
                             break;
 
                         default:
@@ -184,9 +187,8 @@ bool MarkerTool::root_handler(GdkEvent* event) {
 - however, the tangent angle needs to be saved here and parent_item->i2dt_affine() needs to also be accounted for in the right places
 - calculate where the shape-editor knotholders need to go based on the reference shape
 */
-ShapeRecord MarkerTool::get_marker_transform(SPShape* shape, SPItem *parent_item, SPItem *marker_item, SPMarkerLoc marker_type)
+ShapeRecord MarkerTool::get_marker_transform(SPShape* shape, SPItem *parent_item, SPMarker *sp_marker, SPMarkerLoc marker_type)
 {
-    SPMarker *sp_marker = dynamic_cast<SPMarker *>(marker_item);
 
     // scale marker transform with parent stroke width
     SPStyle *style = shape->style;
@@ -309,7 +311,7 @@ ShapeRecord MarkerTool::get_marker_transform(SPShape* shape, SPItem *parent_item
     ret = parent_item->transform.withoutTranslation() * ret;
 
     ShapeRecord sr;
-    sr.object = marker_item;
+    sr.object = sp_marker;
     sr.edit_transform = ret;
     sr.edit_rotation = angle * 180.0/M_PI;
     sr.role = SHAPE_ROLE_NORMAL;

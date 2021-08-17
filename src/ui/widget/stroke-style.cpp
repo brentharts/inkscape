@@ -506,7 +506,7 @@ StrokeStyle::makeRadioButton(Gtk::RadioButtonGroup &grp,
 
 void StrokeStyle::enterEditMarkerMode(SPMarkerLoc _editMarkerMode)
 {
-    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
+    SPDesktop *desktop = this->desktop;
 
     if (desktop) {
         set_active_tool(desktop, "Marker");

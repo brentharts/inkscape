@@ -308,11 +308,7 @@ void SPMarker::hide(unsigned int key) {
 - used to validate the marker item before passing it into the shape editor from the marker-tool. 
 - sets any missing properties that are needed before editing starts.
 */
-void validateMarker(SPItem* i, SPDocument *doc) {
-
-    SPMarker *sp_marker = dynamic_cast<SPMarker *>(i);
-    g_assert(sp_marker != nullptr);
-    g_assert(doc != nullptr);
+void validateMarker(SPMarker *sp_marker, SPDocument *doc) {
 
     doc->ensureUpToDate();
 
@@ -329,11 +325,11 @@ void validateMarker(SPItem* i, SPDocument *doc) {
     Geom::Point const center = bounds.dimensions() * 0.5;
 
     if(!sp_marker->refX._set) {
-        i->setAttribute("refX", "0.0");
+        sp_marker->setAttribute("refX", "0.0");
     }
 
     if(!sp_marker->refY._set) {
-        i->setAttribute("refY", "0.0");
+        sp_marker->setAttribute("refY", "0.0");
     }
 
     if(!sp_marker->orient._set) {
@@ -345,18 +341,18 @@ void validateMarker(SPItem* i, SPDocument *doc) {
         
         // scale is set to 1x by deafult
         if(!sp_marker->viewBox_set) {
-            i->setAttribute("markerWidth", std::to_string(bounds.dimensions()[Geom::X]));
-            i->setAttribute("markerHeight", std::to_string(bounds.dimensions()[Geom::Y]));
+            sp_marker->setAttribute("markerWidth", std::to_string(bounds.dimensions()[Geom::X]));
+            sp_marker->setAttribute("markerHeight", std::to_string(bounds.dimensions()[Geom::Y]));
 
-            i->setAttribute("viewBox", "0 0 " + std::to_string(sp_marker->markerWidth.computed) + " " + std::to_string(sp_marker->markerHeight.computed));
+            sp_marker->setAttribute("viewBox", "0 0 " + std::to_string(sp_marker->markerWidth.computed) + " " + std::to_string(sp_marker->markerHeight.computed));
         } else {
-            i->setAttribute("markerWidth", std::to_string(sp_marker->viewBox.width()));
-            i->setAttribute("markerHeight", std::to_string(sp_marker->viewBox.height()));
+            sp_marker->setAttribute("markerWidth", std::to_string(sp_marker->viewBox.width()));
+            sp_marker->setAttribute("markerHeight", std::to_string(sp_marker->viewBox.height()));
         }
 
     } else {
         if(!sp_marker->viewBox_set) {
-            i->setAttribute("viewBox", "0 0 " + std::to_string(sp_marker->markerWidth.computed) + " " + std::to_string(sp_marker->markerHeight.computed));
+            sp_marker->setAttribute("viewBox", "0 0 " + std::to_string(sp_marker->markerWidth.computed) + " " + std::to_string(sp_marker->markerHeight.computed));
         } else {
             /* 
             - for now, onCanvas marker editing expects the viewBox width and viewBox height to correspond to the calculated bounds
@@ -377,10 +373,10 @@ void validateMarker(SPItem* i, SPDocument *doc) {
                     yScale = sp_marker->markerHeight.computed/sp_marker->viewBox.height();
                 }
 
-                i->setAttribute("viewBox", "0 0 " + std::to_string(bounds.dimensions()[Geom::X]) + " " + std::to_string(bounds.dimensions()[Geom::Y]));
+                sp_marker->setAttribute("viewBox", "0 0 " + std::to_string(bounds.dimensions()[Geom::X]) + " " + std::to_string(bounds.dimensions()[Geom::Y]));
                 
-                i->setAttribute("markerWidth", std::to_string(sp_marker->viewBox.width() * xScale));
-                i->setAttribute("markerHeight", std::to_string(sp_marker->viewBox.height() * yScale ));
+                sp_marker->setAttribute("markerWidth", std::to_string(sp_marker->viewBox.width() * xScale));
+                sp_marker->setAttribute("markerHeight", std::to_string(sp_marker->viewBox.height() * yScale ));
 
             }
         }

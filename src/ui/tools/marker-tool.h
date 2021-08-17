@@ -16,8 +16,11 @@
 #include <cstddef>
 #include <sigc++/sigc++.h>
 #include <2geom/point.h>
-#include "ui/tools/tool-base.h"
+
+#include "object/sp-marker.h"
 #include "object/sp-marker-loc.h"
+
+#include "ui/tools/tool-base.h"
 #include "ui/tool/shape-record.h"
 
 namespace Inkscape {
@@ -45,7 +48,7 @@ class MarkerTool : public ToolBase {
 
 	private:
 		sigc::connection sel_changed_connection;
-        ShapeRecord get_marker_transform(SPShape* shape, SPItem *parent_item, SPItem *item, SPMarkerLoc marker_type);
+        ShapeRecord get_marker_transform(SPShape* shape, SPItem *parent_item, SPMarker *sp_marker, SPMarkerLoc marker_type);
 		
 };
 
