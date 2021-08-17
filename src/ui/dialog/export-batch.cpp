@@ -65,7 +65,7 @@ public:
     Gtk::CheckButton selector;
     SPItem *getItem() { return _item; }
     bool isActive() { return selector.get_active(); }
-    void refresh();
+    void refresh(bool hide = false);
 
 private:
     Gtk::Grid grid;
@@ -94,6 +94,7 @@ BatchItem::BatchItem(SPItem *item)
     Glib::ustring id = _item->getId();
     selector.set_label(id);
     selector.set_active(true);
+    selector.set_can_focus(false);
 
     if (!preview) {
         preview = Gtk::manage(new ExportPreview());
@@ -107,16 +108,19 @@ BatchItem::BatchItem(SPItem *item)
     add(grid);
     show_all_children();
     show();
-
-    refresh();
+    this->set_can_focus(false);
 }
 
-void BatchItem::refresh()
+void BatchItem::refresh(bool hide)
 {
     if (!_item) {
         return;
     }
-    preview->queueRefresh();
+    if (hide) {
+        preview->resetPixels();
+    } else {
+        preview->queueRefresh();
+    }
 }
 
 // END OF BATCH ITEM
@@ -214,6 +218,7 @@ void BatchExport::setup()
     for (auto [key, button] : selection_buttons) {
         button->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &BatchExport::onAreaTypeToggle), key));
     }
+    show_preview->signal_toggled().connect(sigc::mem_fun(*this, &BatchExport::refreshPreview));
     filenameConn = filename_entry->signal_changed().connect(sigc::mem_fun(*this, &BatchExport::onFilenameModified));
     exportConn = export_btn->signal_clicked().connect(sigc::mem_fun(*this, &BatchExport::onExport));
     browseConn = filename_entry->signal_icon_press().connect(sigc::mem_fun(*this, &BatchExport::onBrowse));
@@ -293,8 +298,17 @@ void BatchExport::refreshItems()
         preview_container->insert(*current_items[id], -1);
     }
 
+    refreshPreview();
+}
+
+void BatchExport::refreshPreview()
+{
     for (auto &[key, val] : current_items) {
-        val->refresh();
+        if (show_preview->get_active()) {
+            val->refresh();
+        } else {
+            val->refresh(true);
+        }
     }
 }
 
@@ -464,7 +478,38 @@ bool BatchExport::getNonConflictingFilename(Glib::ustring &filename, Glib::ustri
 
 void BatchExport::onBrowse(Gtk::EntryIconPosition pos, const GdkEventButton *ev)
 {
-    ;
+    if (!_app) {
+        return;
+    }
+    Gtk::Window *window = _app->get_active_window();
+    browseConn.block();
+    Glib::ustring filename = Glib::filename_from_utf8(filename_entry->get_text());
+
+    if (filename.empty()) {
+        Glib::ustring tmp;
+        filename = create_filepath_from_id(tmp, tmp);
+    }
+
+    Inkscape::UI::Dialog::FileSaveDialog *dialog = Inkscape::UI::Dialog::FileSaveDialog::create(
+        *window, filename, Inkscape::UI::Dialog::RASTER_TYPES, _("Select a filename for exporting"), "", "",
+        Inkscape::Extension::FILE_SAVE_METHOD_EXPORT);
+
+    if (dialog->show()) {
+        filename = dialog->getFilename();
+        Inkscape::Extension::Output *selection_type =
+            dynamic_cast<Inkscape::Extension::Output *>(dialog->getSelectionType());
+        Glib::ustring extension = selection_type->get_extension();
+        ExtensionList::appendExtensionToFilename(filename, extension);
+        filename_entry->set_text(filename);
+        filename_entry->set_position(filename.length());
+        // deleting dialog before exporting is important
+        // proper delete function should be made for dialog IMO
+        delete dialog;
+        onExport();
+    } else {
+        delete dialog;
+    }
+    browseConn.unblock();
 }
 
 // Utils Functions

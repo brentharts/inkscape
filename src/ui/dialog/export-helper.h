@@ -63,27 +63,26 @@ public:
 private:
     Gtk::CheckButton interlacing;
 
-    std::vector<int> bit_depth_list;
-    std::vector<int> color_list;
+    std::vector<std::pair<Glib::ustring, std::pair<int,int>>> bit_depth_list;
     Inkscape::UI::Widget::ScrollProtected<Gtk::ComboBoxText> bit_depth_cb;
 
-    std::vector<int> compression_list;
+    std::vector<std::pair<Glib::ustring, int>> compression_list;
     Inkscape::UI::Widget::ScrollProtected<Gtk::ComboBoxText> compression_cb;
 
     Inkscape::UI::Widget::ScrollProtected<Gtk::SpinButton> pHYs_sb;
     Gtk::SpinButton a;
 
-    std::vector<int> anti_aliasing_list;
+    std::vector<std::pair<Glib::ustring, int>> anti_aliasing_list;
     Inkscape::UI::Widget::ScrollProtected<Gtk::ComboBoxText> anti_aliasing_cb;
 
 private:
     int row;
 
 public:
-    int get_color() { return color_list[bit_depth_cb.get_active_row_number()]; }
-    int get_bit_depth() { return bit_depth_list[bit_depth_cb.get_active_row_number()]; }
-    int get_compression() { return compression_list[compression_cb.get_active_row_number()]; }
-    int get_anti_aliasing() { return anti_aliasing_list[anti_aliasing_cb.get_active_row_number()]; }
+    int get_color() { return bit_depth_list[bit_depth_cb.get_active_row_number()].second.second; }
+    int get_bit_depth() { return bit_depth_list[bit_depth_cb.get_active_row_number()].second.first; }
+    int get_compression() { return compression_list[compression_cb.get_active_row_number()].second; }
+    int get_anti_aliasing() { return anti_aliasing_list[anti_aliasing_cb.get_active_row_number()].second; }
     bool get_interlacing() { return interlacing.get_active(); }
     double get_pHYs() { return pHYs_sb.get_value(); }
 };

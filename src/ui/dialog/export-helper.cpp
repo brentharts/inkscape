@@ -58,26 +58,30 @@ AdvanceOptions::AdvanceOptions()
     this->set_label(_("Advance"));
     Gtk::Grid *grid = Gtk::manage(new Gtk::Grid());
     this->add(*grid);
-    std::vector<Glib::ustring> labels;
     {
-        interlacing.set_label("Use Interlacing");
+        interlacing.set_label(_("Use Interlacing"));
         grid->attach(interlacing, 0, row, 2, 1);
         row++;
     }
     {
-        labels.insert(labels.end(), {"Gray_1", "Gray_2", "Gray_4", "Gray_8", "Gray_16", "RGB_8", "RGB_16",
-                                     "GrayAlpha_8", "GrayAlpha_16", "RGBA_8", "RGBA_16"});
         bit_depth_list.clear();
-        bit_depth_list.insert(bit_depth_list.end(), {1, 2, 4, 8, 16, 8, 16, 8, 16, 8, 16});
-        color_list.clear();
-        color_list.insert(color_list.end(), {0, 0, 0, 0, 0, 2, 2, 4, 4, 6, 6});
+        bit_depth_list.insert(bit_depth_list.end(), {{_("Gray 1"), {1, 0}},
+                                                     {_("Gray 2"), {2, 0}},
+                                                     {_("Gray 4"), {4, 0}},
+                                                     {_("Gray 8"), {8, 0}},
+                                                     {_("Gray 16"), {16, 0}},
+                                                     {_("RGB 8"), {8, 2}},
+                                                     {_("RGB 16"), {16, 2}},
+                                                     {_("GrayAlpha 8"), {8, 4}},
+                                                     {_("GrayAlpha 16"), {16, 4}},
+                                                     {_("RGBA 8"), {8, 6}},
+                                                     {_("RGBA 16"), {16, 6}}});
 
-        for (auto label : labels) {
+        for (auto [label, depth] : bit_depth_list) {
             bit_depth_cb.append(label);
         }
-        labels.clear();
 
-        bit_depth_cb.set_active_text("RGBA_8");
+        bit_depth_cb.set_active_text(_("RGBA 8"));
         bit_depth_cb.set_hexpand();
         Gtk::Label *bit_depth_label = Gtk::manage(new Gtk::Label(_("Bit Depth"), Gtk::ALIGN_START));
         grid->attach(*bit_depth_label, 0, row, 1, 1);
@@ -85,16 +89,22 @@ AdvanceOptions::AdvanceOptions()
         row++;
     }
     {
-        labels.insert(labels.end(), {"Z_NO_COMPRESSION", "Z_BEST_SPEED", "2", "3", "4", "5", "Z_DEFAULT_COMPRESSION",
-                                     "7", "8", "Z_BEST_COMPRESSION"});
         compression_list.clear();
-        compression_list.insert(compression_list.end(), {0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
-        for (auto label : labels) {
+        compression_list.insert(compression_list.end(), {{_("Z No Compression"), 0},
+                                                         {_("Z Best Speed"), 1},
+                                                         {_("2"), 2},
+                                                         {_("3"), 3},
+                                                         {_("4"), 4},
+                                                         {_("5"), 5},
+                                                         {_("Z Default Compression"), 6},
+                                                         {_("7"), 7},
+                                                         {_("8"), 8},
+                                                         {_("Z Best Compression"), 9}});
+        for (auto [label, compress] : compression_list) {
             compression_cb.append(label);
         }
-        labels.clear();
 
-        compression_cb.set_active_text("Z_DEFAULT_COMPRESSION");
+        compression_cb.set_active_text(_("Z Default Compression"));
         Gtk::Label *compression_label = Gtk::manage(new Gtk::Label(_("Compression"), Gtk::ALIGN_START));
         grid->attach(*compression_label, 0, row, 1, 1);
         grid->attach(compression_cb, 1, row, 1, 1);
@@ -112,23 +122,23 @@ AdvanceOptions::AdvanceOptions()
         row++;
     }
     {
-        labels.insert(labels.end(), {"CAIRO_ANTIALIAS_NONE", "CAIRO_ANTIALIAS_FAST", "CAIRO_ANTIALIAS_GOOD (default)",
-                                     "CAIRO_ANTIALIAS_BEST"});
         anti_aliasing_list.clear();
-        anti_aliasing_list.insert(anti_aliasing_list.end(), {0, 1, 2, 3});
+        anti_aliasing_list.insert(anti_aliasing_list.end(), {{_("Cairo Antialias None"), 0},
+                                                             {_("Cairo Antialias Fast"), 1},
+                                                             {_("Cairo Antialias Good (Default)"), 2},
+                                                             {_("Cairo Antialias Best"), 3}});
 
-        for (auto label : labels) {
+        for (auto [label, anti_alias] : anti_aliasing_list) {
             anti_aliasing_cb.append(label);
         }
-        labels.clear();
 
-        anti_aliasing_cb.set_active_text("CAIRO_ANTIALIAS_GOOD (default)");
+        anti_aliasing_cb.set_active_text(_("Cairo Antialias Good (Default)"));
         Gtk::Label *anti_aliasing_label = Gtk::manage(new Gtk::Label(_("Anti Aliasing"), Gtk::ALIGN_START));
         grid->attach(*anti_aliasing_label, 0, row, 1, 1);
         grid->attach(anti_aliasing_cb, 1, row, 1, 1);
         row++;
     }
-    grid->set_row_spacing(2);
+    grid->set_row_spacing(4);
     grid->set_column_spacing(5);
 }
 
@@ -370,8 +380,8 @@ void setValuePx(Glib::RefPtr<Gtk::Adjustment> &adj, double val, Unit const *unit
     return;
 }
 
-// We Create filename by removing already present extension in document name and replacing it with extension passed as
-// parameter if exxtension is not valid. If document doesn't have a name we use bitmap as defalt name.
+// We Create filename by removing already present extension in document name and replacing it with extension passed
+// as parameter if exxtension is not valid. If document doesn't have a name we use bitmap as defalt name.
 Glib::ustring get_default_filename(Glib::ustring &filename_entry_text, Glib::ustring &extension, SPDocument *doc)
 {
     Glib::ustring filename;
@@ -492,14 +502,12 @@ bool _export_raster(Geom::Rect const &area, unsigned long int const &width, unsi
 
     if (dirname.empty() ||
         !Inkscape::IO::file_test(dirname.c_str(), (GFileTest)(G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) {
-        gchar *safeDir = Inkscape::IO::sanitizeString(dirname.c_str());
-        gchar *error = g_strdup_printf(_("Directory %s does not exist or is not a directory.\n"), safeDir);
+        Glib::ustring safeDir = Inkscape::IO::sanitizeString(dirname.c_str());
+        Glib::ustring error =
+            g_strdup_printf(_("Directory <b>%s</b> does not exist or is not a directory.\n"), safeDir.c_str());
 
-        desktop->messageStack()->flash(Inkscape::ERROR_MESSAGE, error);
-        sp_ui_error_dialog(error);
-
-        g_free(safeDir);
-        g_free(error);
+        desktop->messageStack()->flash(Inkscape::ERROR_MESSAGE, error.c_str());
+        sp_ui_error_dialog(error.c_str());
         return false;
     }
 
@@ -531,14 +539,11 @@ bool _export_raster(Geom::Rect const &area, unsigned long int const &width, unsi
     delete prog_dialog;
     prog_dialog = nullptr;
     if (failed) {
-        gchar *safeFile = Inkscape::IO::sanitizeString(path.c_str());
-        gchar *error = g_strdup_printf(_("Could not export to filename %s.\n"), safeFile);
+        Glib::ustring safeFile = Inkscape::IO::sanitizeString(path.c_str());
+        Glib::ustring error = g_strdup_printf(_("Could not export to filename <b>%s</b>.\n"), safeFile.c_str());
 
-        desktop->messageStack()->flash(Inkscape::ERROR_MESSAGE, error);
-        sp_ui_error_dialog(error);
-
-        g_free(safeFile);
-        g_free(error);
+        desktop->messageStack()->flash(Inkscape::ERROR_MESSAGE, error.c_str());
+        sp_ui_error_dialog(error.c_str());
         return false;
     } else if (result == EXPORT_OK) {
         if (extension->prefs()) {
@@ -563,9 +568,9 @@ bool _export_raster(Geom::Rect const &area, unsigned long int const &width, unsi
         recentmanager->add_item(uri);
     }
 
-    gchar *safeFile = Inkscape::IO::sanitizeString(path.c_str());
-    desktop->messageStack()->flashF(Inkscape::INFORMATION_MESSAGE, _("Drawing exported to <b>%s</b>."), safeFile);
-    g_free(safeFile);
+    Glib::ustring safeFile = Inkscape::IO::sanitizeString(path.c_str());
+    desktop->messageStack()->flashF(Inkscape::INFORMATION_MESSAGE, _("Drawing exported to <b>%s</b>."),
+                                    safeFile.c_str());
 
     unlink(png_filename.c_str());
     return true;
@@ -595,14 +600,13 @@ bool _export_vector(Inkscape::Extension::Output *extension, SPDocument *doc, Gli
 
     if (dirname.empty() ||
         !Inkscape::IO::file_test(dirname.c_str(), (GFileTest)(G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) {
-        gchar *safeDir = Inkscape::IO::sanitizeString(dirname.c_str());
-        gchar *error = g_strdup_printf(_("Directory %s does not exist or is not a directory.\n"), safeDir);
+        Glib::ustring safeDir = Inkscape::IO::sanitizeString(dirname.c_str());
+        Glib::ustring error =
+            g_strdup_printf(_("Directory <b>%s</b> does not exist or is not a directory.\n"), safeDir.c_str());
 
-        desktop->messageStack()->flash(Inkscape::ERROR_MESSAGE, error);
-        sp_ui_error_dialog(error);
+        desktop->messageStack()->flash(Inkscape::ERROR_MESSAGE, error.c_str());
+        sp_ui_error_dialog(error.c_str());
 
-        g_free(safeDir);
-        g_free(error);
         return false;
     }
 
@@ -622,26 +626,21 @@ bool _export_vector(Inkscape::Extension::Output *extension, SPDocument *doc, Gli
             SPObject *temp = dynamic_cast<SPObject *>(object);
 
             if (!temp) {
-                gchar *safeFile = Inkscape::IO::sanitizeString(path.c_str());
-                gchar *error = g_strdup_printf(_("Could not export to filename %s.\n"), safeFile);
+                Glib::ustring safeFile = Inkscape::IO::sanitizeString(path.c_str());
+                Glib::ustring error = g_strdup_printf(_("Could not export to filename <b>%s</b>.\n"), safeFile.c_str());
 
-                desktop->messageStack()->flash(Inkscape::ERROR_MESSAGE, error);
-                sp_ui_error_dialog(error);
-
-                g_free(safeFile);
-                g_free(error);
+                desktop->messageStack()->flash(Inkscape::ERROR_MESSAGE, error.c_str());
+                sp_ui_error_dialog(error.c_str());
                 return false;
             }
             SPObject *obj = copy_doc->getObjectById(temp->getId());
             if (!obj) {
-                gchar *safeFile = Inkscape::IO::sanitizeString(path.c_str());
-                gchar *error = g_strdup_printf(_("Could not export to filename %s.\n"), safeFile);
+                Glib::ustring safeFile = Inkscape::IO::sanitizeString(path.c_str());
+                Glib::ustring error = g_strdup_printf(_("Could not export to filename <b>%s</b>.\n"), safeFile.c_str());
 
-                desktop->messageStack()->flash(Inkscape::ERROR_MESSAGE, error);
-                sp_ui_error_dialog(error);
+                desktop->messageStack()->flash(Inkscape::ERROR_MESSAGE, error.c_str());
+                sp_ui_error_dialog(error.c_str());
 
-                g_free(safeFile);
-                g_free(error);
                 return false;
             }
             copy_doc->ensureUpToDate();
@@ -658,14 +657,12 @@ bool _export_vector(Inkscape::Extension::Output *extension, SPDocument *doc, Gli
         Inkscape::Extension::save(dynamic_cast<Inkscape::Extension::Extension *>(extension), copy_doc, path.c_str(),
                                   false, false, false, Inkscape::Extension::FILE_SAVE_METHOD_SAVE_COPY);
     } catch (Inkscape::Extension::Output::save_failed &e) {
-        gchar *safeFile = Inkscape::IO::sanitizeString(path.c_str());
-        gchar *error = g_strdup_printf(_("Could not export to filename %s.\n"), safeFile);
+        Glib::ustring safeFile = Inkscape::IO::sanitizeString(path.c_str());
+        Glib::ustring error = g_strdup_printf(_("Could not export to filename <b>%s</b>.\n"), safeFile.c_str());
 
-        desktop->messageStack()->flash(Inkscape::ERROR_MESSAGE, error);
-        sp_ui_error_dialog(error);
+        desktop->messageStack()->flash(Inkscape::ERROR_MESSAGE, error.c_str());
+        sp_ui_error_dialog(error.c_str());
 
-        g_free(safeFile);
-        g_free(error);
         return false;
     }
 
@@ -675,10 +672,9 @@ bool _export_vector(Inkscape::Extension::Output *extension, SPDocument *doc, Gli
         recentmanager->add_item(uri);
     }
 
-    gchar *safeFile = Inkscape::IO::sanitizeString(path.c_str());
-    desktop->messageStack()->flashF(Inkscape::INFORMATION_MESSAGE, _("Drawing exported to <b>%s</b>."), safeFile);
-    g_free(safeFile);
-
+    Glib::ustring safeFile = Inkscape::IO::sanitizeString(path.c_str());
+    desktop->messageStack()->flashF(Inkscape::INFORMATION_MESSAGE, _("Drawing exported to <b>%s</b>."),
+                                    safeFile.c_str());
     return true;
 }
 

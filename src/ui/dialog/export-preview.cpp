@@ -50,6 +50,9 @@ ExportPreview::ExportPreview()
     // add this image to box here
     this->pack_start(*image, true, true, 0);
     show_all_children();
+    this->set_name("export_preview_box");
+    this->set_can_focus(false);
+    image->set_can_focus(false);
 }
 
 void ExportPreview::resetPixels()

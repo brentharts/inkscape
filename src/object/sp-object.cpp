@@ -64,9 +64,15 @@
 //#define OBJECT_TRACE
 unsigned SPObject::indent_level = 0;
 
-Inkscape::XML::NodeEventVector object_event_vector = {SPObject::repr_child_added, SPObject::repr_child_removed,
-                                                      SPObject::repr_attr_changed, SPObject::repr_content_changed,
-                                                      SPObject::repr_order_changed};
+//clang-format off
+Inkscape::XML::NodeEventVector object_event_vector = {
+    SPObject::repr_child_added,
+    SPObject::repr_child_removed,
+    SPObject::repr_attr_changed,
+    SPObject::repr_content_changed,
+    SPObject::repr_order_changed
+};
+//clang-format on
 
 /**
  * A friend class used to set internal members on SPObject so as to not expose settors in SPObject's public API

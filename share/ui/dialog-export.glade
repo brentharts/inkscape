@@ -184,8 +184,6 @@
                                 <property name="margin-end">5</property>
                                 <property name="margin-top">5</property>
                                 <property name="margin-bottom">5</property>
-                                <property name="hexpand">True</property>
-                                <property name="vexpand">True</property>
                                 <property name="orientation">vertical</property>
                                 <child>
                                   <placeholder/>
@@ -207,7 +205,7 @@
                                   <object class="GtkCheckButton" id="si_show_preview">
                                     <property name="label" translatable="yes">Show Preview</property>
                                     <property name="visible">True</property>
-                                    <property name="can-focus">True</property>
+                                    <property name="can-focus">False</property>
                                     <property name="receives-default">False</property>
                                     <property name="active">True</property>
                                     <property name="draw-indicator">True</property>
@@ -222,7 +220,7 @@
                                   <object class="GtkCheckButton" id="si_hide_all">
                                     <property name="label" translatable="yes">Show Selected only</property>
                                     <property name="visible">True</property>
-                                    <property name="can-focus">True</property>
+                                    <property name="can-focus">False</property>
                                     <property name="receives-default">False</property>
                                     <property name="draw-indicator">True</property>
                                   </object>
@@ -488,7 +486,7 @@
                                 <property name="label" translatable="yes">Selection</property>
                                 <property name="name">export_selection</property>
                                 <property name="visible">True</property>
-                                <property name="can-focus">True</property>
+                                <property name="can-focus">False</property>
                                 <property name="focus-on-click">False</property>
                                 <property name="receives-default">False</property>
                                 <property name="hexpand">True</property>
@@ -505,7 +503,7 @@
                                 <property name="label" translatable="yes">Document</property>
                                 <property name="name">export_selection</property>
                                 <property name="visible">True</property>
-                                <property name="can-focus">True</property>
+                                <property name="can-focus">False</property>
                                 <property name="focus-on-click">False</property>
                                 <property name="receives-default">False</property>
                                 <property name="hexpand">True</property>
@@ -522,7 +520,7 @@
                                 <property name="label" translatable="yes">Page</property>
                                 <property name="name">export_selection</property>
                                 <property name="visible">True</property>
-                                <property name="can-focus">True</property>
+                                <property name="can-focus">False</property>
                                 <property name="focus-on-click">False</property>
                                 <property name="receives-default">False</property>
                                 <property name="hexpand">True</property>
@@ -539,7 +537,7 @@
                                 <property name="label" translatable="yes">Custom</property>
                                 <property name="name">export_selection</property>
                                 <property name="visible">True</property>
-                                <property name="can-focus">True</property>
+                                <property name="can-focus">False</property>
                                 <property name="focus-on-click">False</property>
                                 <property name="receives-default">False</property>
                                 <property name="hexpand">True</property>
@@ -745,7 +743,7 @@
                   <object class="GtkButton" id="si_export">
                     <property name="label" translatable="yes">Export</property>
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
+                    <property name="can-focus">False</property>
                     <property name="receives-default">False</property>
                   </object>
                   <packing>
@@ -890,8 +888,7 @@
                           <object class="GtkCheckButton" id="b_show_preview">
                             <property name="label" translatable="yes">Preview</property>
                             <property name="visible">True</property>
-                            <property name="sensitive">False</property>
-                            <property name="can-focus">True</property>
+                            <property name="can-focus">False</property>
                             <property name="focus-on-click">False</property>
                             <property name="receives-default">False</property>
                             <property name="halign">start</property>
@@ -918,7 +915,7 @@
                           <object class="GtkCheckButton" id="b_hide_all">
                             <property name="label" translatable="yes">Hide All Except Selected</property>
                             <property name="visible">True</property>
-                            <property name="can-focus">True</property>
+                            <property name="can-focus">False</property>
                             <property name="focus-on-click">False</property>
                             <property name="receives-default">False</property>
                             <property name="halign">start</property>
@@ -1036,7 +1033,7 @@
                   <object class="GtkButton" id="b_export">
                     <property name="label" translatable="yes">Export</property>
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
+                    <property name="can-focus">False</property>
                     <property name="receives-default">True</property>
                   </object>
                   <packing>
