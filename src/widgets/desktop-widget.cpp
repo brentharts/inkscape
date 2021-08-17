@@ -270,6 +270,34 @@ SPDesktopWidget::SPDesktopWidget()
     ToolboxFactory::setOrientation( dtw->tool_toolbox, GTK_ORIENTATION_VERTICAL );
     dtw->_hbox->pack_start(*Glib::wrap(dtw->tool_toolbox), false, true);
 
+    auto set_icon_size = [=](GtkWidget* tb, GtkIconSize size) {
+        sp_traverse_widget_tree(Glib::wrap(tb), [=](Gtk::Widget* widget) {
+            if (auto toolbar = dynamic_cast<Gtk::Toolbar*>(widget)) {
+                toolbar->set_icon_size(static_cast<Gtk::IconSize>(size));
+            }
+            return false;
+        });
+    };
+    _tb_icon_sizes = prefs->createObserver("/toolbox", [=](const Inkscape::Preferences::Entry&) {
+        GtkIconSize toolboxSize = ToolboxFactory::prefToSize("/toolbox/tools/small", 1);
+        set_icon_size(tool_toolbox, toolboxSize);
+
+        toolboxSize = ToolboxFactory::prefToSize("/toolbox/secondary", 1);
+        set_icon_size(snap_toolbox, toolboxSize);
+
+        toolboxSize = ToolboxFactory::prefToSize("/toolbox/small");
+        set_icon_size(commands_toolbox, toolboxSize);
+
+        sp_traverse_widget_tree(Glib::wrap(aux_toolbox), [=](Gtk::Widget* widget) {
+            if (auto btn = dynamic_cast<Gtk::ToolButton*>(widget)) {
+                if (auto ico = dynamic_cast<Gtk::Image*>(btn->get_icon_widget())) {
+                    ico->set_from_icon_name(ico->get_icon_name(), static_cast<Gtk::IconSize>(toolboxSize));
+                }
+            }
+            return false;
+        });
+    });
+
     /* Canvas Grid (canvas, rulers, scrollbars, etc.) */
     dtw->_canvas_grid = Gtk::manage(new Inkscape::UI::Widget::CanvasGrid(this));
 

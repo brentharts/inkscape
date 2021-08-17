@@ -757,13 +757,13 @@ void Preferences::_setRawValue(Glib::ustring const &path, Glib::ustring const &v
     Glib::ustring node_key, attr_key;
     _keySplit(path, node_key, attr_key);
 
-    // set the attribute
-    Inkscape::XML::Node *node = _getNode(node_key, true);
-    node->setAttributeOrRemoveIfEmpty(attr_key, value);
-
     if (_initialized) {
         cachedRawValue[path.c_str()] = RAWCACHE_CODE_VALUE + value;
     }
+
+    // set the attribute
+    Inkscape::XML::Node *node = _getNode(node_key, true);
+    node->setAttributeOrRemoveIfEmpty(attr_key, value);
 }
 
 // The _extract* methods are where the actual work is done - they define how preferences are stored
