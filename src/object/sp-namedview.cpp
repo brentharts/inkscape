@@ -35,6 +35,7 @@
 #include "layer-manager.h"
 #include "preferences.h"
 #include "sp-guide.h"
+#include "sp-page.h"
 #include "sp-item-group.h"
 #include "sp-root.h"
 #include "verbs.h"
@@ -99,6 +100,7 @@ SPNamedView::SPNamedView() : SPObjectGroup(), snap_manager(this, get_snapping_pr
     this->showpageshadow = TRUE;
 
     this->guides.clear();
+    this->pages.clear();
     this->viewcount = 0;
     this->grids.clear();
 
@@ -266,14 +268,17 @@ void SPNamedView::build(SPDocument *document, Inkscape::XML::Node *repr) {
     this->readAttr(SPAttr::INKSCAPE_LOCKGUIDES);
 
     /* Construct guideline list */
-    for (auto& o: children) {
-        if (SP_IS_GUIDE(&o)) {
-            SPGuide * g = SP_GUIDE(&o);
-            this->guides.push_back(g);
+    for (auto &child: children) {
+        if (auto guide = dynamic_cast<SPGuide *>(&child)) {
+            this->guides.push_back(guide);
             //g_object_set(G_OBJECT(g), "color", nv->guidecolor, "hicolor", nv->guidehicolor, NULL);
-            g->setColor(this->guidecolor);
-            g->setHiColor(this->guidehicolor);
-            g->readAttr(SPAttr::INKSCAPE_COLOR);
+            guide->setColor(this->guidecolor);
+            guide->setHiColor(this->guidehicolor);
+            guide->readAttr(SPAttr::INKSCAPE_COLOR);
+        }
+        if (auto page = dynamic_cast<SPPage *>(&child)) {
+            this->pages.push_back(page);
+            // TODO: Set the same colors as we have before
         }
     }
 
@@ -282,7 +287,8 @@ void SPNamedView::build(SPDocument *document, Inkscape::XML::Node *repr) {
 }
 
 void SPNamedView::release() {
-        this->guides.clear();
+    this->guides.clear();
+    this->pages.clear();
 
     // delete grids:
     for(auto grid : this->grids)
@@ -383,15 +389,18 @@ void SPNamedView::set(SPAttr key, const gchar* value) {
             this->requestModified(SP_OBJECT_MODIFIED_FLAG);
             break;
     case SPAttr::SHOWBORDER:
+            // TODO: Update each page show border here.
             this->showborder = (value) ? sp_str_to_bool (value) : TRUE;
             this->requestModified(SP_OBJECT_MODIFIED_FLAG);
             break;
     case SPAttr::BORDERLAYER:
+            // TODO: How in the world does this interact with our pages?
             this->borderlayer = SP_BORDER_LAYER_BOTTOM;
             if (value && !strcasecmp(value, "true")) this->borderlayer = SP_BORDER_LAYER_TOP;
             this->requestModified(SP_OBJECT_MODIFIED_FLAG);
             break;
     case SPAttr::BORDERCOLOR:
+            // TODO: Add border color to each page
             this->bordercolor = (this->bordercolor & 0xff) | (DEFAULTBORDERCOLOR & 0xffffff00);
             if (value) {
                 this->bordercolor = (this->bordercolor & 0xff) | sp_svg_read_color (value, this->bordercolor);
@@ -399,11 +408,13 @@ void SPNamedView::set(SPAttr key, const gchar* value) {
             this->requestModified(SP_OBJECT_MODIFIED_FLAG);
             break;
     case SPAttr::BORDEROPACITY:
+            // TODO: Add border color to each page
             this->bordercolor = (this->bordercolor & 0xffffff00) | (DEFAULTBORDERCOLOR & 0xff);
             sp_nv_read_opacity(value, &this->bordercolor);
             this->requestModified(SP_OBJECT_MODIFIED_FLAG);
             break;
     case SPAttr::PAGECOLOR:
+            // TODO: Add page color to each page
             this->pagecolor = (this->pagecolor & 0xff) | (DEFAULTPAGECOLOR & 0xffffff00);
             if (value) {
                 this->pagecolor = (this->pagecolor & 0xff) | sp_svg_read_color(value, this->pagecolor);
@@ -422,6 +433,7 @@ void SPNamedView::set(SPAttr key, const gchar* value) {
             this->requestModified(SP_OBJECT_MODIFIED_FLAG);
             break;
     case SPAttr::INKSCAPE_PAGEOPACITY:
+            // TODO: Add page color to each page
             this->pagecolor = (this->pagecolor & 0xffffff00) | (DEFAULTPAGECOLOR & 0xff);
             sp_nv_read_opacity(value, &this->pagecolor);
             this->requestModified(SP_OBJECT_MODIFIED_FLAG);
@@ -432,10 +444,12 @@ void SPNamedView::set(SPAttr key, const gchar* value) {
             this->requestModified(SP_OBJECT_MODIFIED_FLAG);
             break;
     case SPAttr::INKSCAPE_PAGESHADOW:
+            // TODO: Add page color to each page
             this->pageshadow = value? atoi(value) : 2; // 2 is the default
             this->requestModified(SP_OBJECT_MODIFIED_FLAG);
             break;
     case SPAttr::SHOWPAGESHADOW:
+            // TODO: Add page color to each page
             this->showpageshadow = (value) ? sp_str_to_bool(value) : TRUE;
             this->requestModified(SP_OBJECT_MODIFIED_FLAG);
             break;
@@ -593,14 +607,22 @@ sp_namedview_add_grid(SPNamedView *nv, Inkscape::XML::Node *repr, SPDesktop *des
 void SPNamedView::child_added(Inkscape::XML::Node *child, Inkscape::XML::Node *ref) {
     SPObjectGroup::child_added(child, ref);
 
+    SPObject *no = this->document->getObjectByRepr(child);
+    if (!no) return;
+
     if (!strcmp(child->name(), "inkscape:grid")) {
         sp_namedview_add_grid(this, child, nullptr);
-    } else {
-        SPObject *no = this->document->getObjectByRepr(child);
-        if (!no) {
-            return;
+    } else if (!strcmp(child->name(), "inkscape:page")) {
+        if (auto p = dynamic_cast<SPPage *>(no)) {
+            this->pages.push_back(p);
+            //p->setFill(pagecolor);
+            //p->setBorder(pageborder);
+            //p->setShadow(pageshadow);
+            for(auto view : this->views) {
+                p->showPage(view, view->getCanvasPages());
+            }
         }
-
+    } else {
         if (auto g = dynamic_cast<SPGuide *>(no)) {
             this->guides.push_back(g);
 
@@ -631,6 +653,12 @@ void SPNamedView::remove_child(Inkscape::XML::Node *child) {
                 delete (*it);
                 this->grids.erase(it);
                 break;
+            }
+        }
+    } else if (!strcmp(child->name(), "inkscape:page")) {
+        for(auto it = this->pages.begin(); it != this->pages.end(); ++it) {
+            if ((*it)->getRepr() == child) {
+                this->pages.erase(it);
             }
         }
     } else {
@@ -669,6 +697,9 @@ void SPNamedView::show(SPDesktop *desktop)
             guide->sensitize(desktop->getCanvas(), TRUE);
         }
         sp_namedview_show_single_guide(guide, showguides);
+    }
+    for (auto page : this->pages) {
+        page->showPage(desktop, desktop->getCanvasPages());
     }
 
     views.push_back(desktop);
@@ -868,6 +899,9 @@ void SPNamedView::hide(SPDesktop const *desktop)
     g_assert(std::find(views.begin(),views.end(),desktop)!=views.end());
     for(auto & guide : this->guides) {
         guide->hideSPGuide(desktop->getCanvas());
+    }
+    for(auto &page : this->pages) {
+        page->hidePage(desktop->getCanvas());
     }
     views.erase(std::remove(views.begin(),views.end(),desktop),views.end());
 }

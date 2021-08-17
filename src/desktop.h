@@ -163,6 +163,7 @@ public:
     Inkscape::CanvasItemGroup    *getCanvasControls() const { return canvas_group_controls; }
     Inkscape::CanvasItemGroup    *getCanvasGrids()    const { return canvas_group_grids; }
     Inkscape::CanvasItemGroup    *getCanvasGuides()   const { return canvas_group_guides; }
+    Inkscape::CanvasItemGroup    *getCanvasPages()    const { return canvas_group_pages; }
     Inkscape::CanvasItemGroup    *getCanvasSketch()   const { return canvas_group_sketch; }
     Inkscape::CanvasItemGroup    *getCanvasTemp()     const { return canvas_group_temp; }
 
@@ -176,9 +177,10 @@ public:
 private:
     // Groups
     Inkscape::CanvasItemGroup    *canvas_group_controls  = nullptr; ///< Handles, knots, nodes, etc.
-    Inkscape::CanvasItemGroup    *canvas_group_drawing   = nullptr; ///< Drawing + border + shadow.
+    Inkscape::CanvasItemGroup    *canvas_group_drawing   = nullptr; ///< SVG Drawing
     Inkscape::CanvasItemGroup    *canvas_group_grids     = nullptr; ///< Grids.
     Inkscape::CanvasItemGroup    *canvas_group_guides    = nullptr; ///< Guide lines.
+    Inkscape::CanvasItemGroup    *canvas_group_pages     = nullptr; ///< Page border + shadow.
     Inkscape::CanvasItemGroup    *canvas_group_sketch    = nullptr; ///< Temporary items before becoming permanent.
     Inkscape::CanvasItemGroup    *canvas_group_temp      = nullptr; ///< Temporary items that self-destruct.
 

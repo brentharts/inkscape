@@ -21,6 +21,8 @@
 #include "util/units.h"
 #include <vector>
 
+class SPPage;
+
 namespace Inkscape {
     class CanvasGrid;
     namespace Util {
@@ -78,7 +80,22 @@ public:
     guint32 pageshadow;
 
     std::vector<SPGuide *> guides;
+    std::vector<SPPage *> pages;
     std::vector<SPDesktop *> views;
+
+    /* TODO: Planning for the kinds of interface we need.
+
+    SPPage *current_page;
+    // Returns None if no page selected
+    SPPage *getCurrentPage() { current_page; }
+
+    // Get the current affine, default is no affine (i.e. no page)
+    Geom::Affine currentPageAffine();
+    // Get the current rect, default is the document rect.
+    Geom::Rect currentPageRect();
+
+    BE CAREFUL EDITING THIS PAGE IS CAUSES 470 RECOMPILES!
+    */
 
     int viewcount;
 
