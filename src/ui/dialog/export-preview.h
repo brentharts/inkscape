@@ -32,7 +32,7 @@ class ExportPreview : public Gtk::Box
 {
 public:
     ExportPreview();
-    ~ExportPreview();
+    ~ExportPreview() override;
 
 private:
     bool isLastHide = false;

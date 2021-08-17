@@ -39,7 +39,7 @@ public:
     {}
     ScrollProtected(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &refGlade)
         : Base(cobject){};
-    virtual ~ScrollProtected(){};
+    ~ScrollProtected() override{};
 
 protected:
     /**
@@ -83,7 +83,7 @@ public:
     {}
     ScrollTransfer(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &refGlade)
         : Base(cobject){};
-    virtual ~ScrollTransfer(){};
+    ~ScrollTransfer() override{};
 
 protected:
     /**

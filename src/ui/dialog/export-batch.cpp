@@ -59,7 +59,7 @@ class BatchItem : public Gtk::FlowBoxChild
 {
 public:
     BatchItem(SPItem *item);
-    ~BatchItem();
+    ~BatchItem() override;
 
 public:
     Gtk::CheckButton selector;
@@ -250,8 +250,7 @@ void BatchExport::refreshItems()
         }
         case SELECTION_LAYER: {
             auto layersList = _desktop->getAllLayers();
-            for (auto i = layersList.begin(); i != layersList.end(); ++i) {
-                SPItem *item = *i;
+            for (auto item : layersList) {
                 itemsList.insert(item);
             }
 

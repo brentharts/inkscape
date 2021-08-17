@@ -58,12 +58,12 @@ class AdvanceOptions : public Gtk::Expander
 {
 public:
     AdvanceOptions();
-    ~AdvanceOptions();
+    ~AdvanceOptions() override;
 
 private:
     Gtk::CheckButton interlacing;
 
-    std::vector<std::pair<Glib::ustring, std::pair<int,int>>> bit_depth_list;
+    std::vector<std::pair<Glib::ustring, std::pair<int, int>>> bit_depth_list;
     Inkscape::UI::Widget::ScrollProtected<Gtk::ComboBoxText> bit_depth_cb;
 
     std::vector<std::pair<Glib::ustring, int>> compression_list;
@@ -94,7 +94,7 @@ public:
     ExtensionList(){};
     ExtensionList(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &refGlade)
         : Inkscape::UI::Widget::ScrollProtected<Gtk::ComboBoxText>(cobject, refGlade){};
-    ~ExtensionList();
+    ~ExtensionList() override;
 
 public:
     void setup();
