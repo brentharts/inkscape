@@ -810,7 +810,6 @@
                             <property name="can-focus">True</property>
                             <property name="hexpand">True</property>
                             <property name="hscrollbar-policy">never</property>
-                            <property name="vscrollbar-policy">external</property>
                             <property name="window-placement-set">False</property>
                             <property name="shadow-type">in</property>
                             <child>
