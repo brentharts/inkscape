@@ -317,7 +317,6 @@ SPDesktopWidget::SPDesktopWidget()
     dtw->_statusbar->pack_start(*dtw->_select_status, true, true);
 
     dtw->_zoom_status_box = Gtk::make_managed<Gtk::Box>();
-    // dtw->_zoom_status_box->set_no_show_all();
     // Zoom status spinbutton ---------------
     auto zoom_adj = Gtk::Adjustment::create(100.0, log(SP_DESKTOP_ZOOM_MIN)/log(2), log(SP_DESKTOP_ZOOM_MAX)/log(2), 0.1);
     dtw->_zoom_status = Gtk::manage(new Inkscape::UI::Widget::SpinButton(zoom_adj));
@@ -414,15 +413,11 @@ SPDesktopWidget::SPDesktopWidget()
     dtw->_zoom_status_box->pack_start(*label_z, true, true);
     dtw->_zoom_status_box->pack_end(*dtw->_zoom_status, true, true);
     dtw->_zoom_status_box->show_all();
-    // dtw->_coord_status->attach(*label_z, 3, 0, 1, 2);
-    // dtw->_coord_status->attach(*dtw->_zoom_status, 4, 0, 1, 2);
 
     dtw->_rotation_status_box->pack_start(*label_r, true, true);
     dtw->_rotation_status_box->pack_end(*dtw->_rotation_status, true, true);
     dtw->_rotation_status_box->show_all();
     dtw->_rotation_status_box->set_no_show_all();
-    // dtw->_coord_status->attach(*label_r, 5, 0, 1, 2);
-    // dtw->_coord_status->attach(*dtw->_rotation_status, 6, 0, 1, 2);
 
     dtw->_statusbar->pack_end(*dtw->_rotation_status_box, false, false);
     dtw->_statusbar->pack_end(*dtw->_zoom_status_box, false, false);
