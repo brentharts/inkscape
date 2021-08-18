@@ -21,6 +21,7 @@
 #include <2geom/forward.h>
 #include <vector>
 #include <glibmm/ustring.h>
+#include "xml/simple-document.h"
 
 class SPCSSAttr;
 class SPDesktop;
@@ -87,6 +88,9 @@ enum SPSelectStrokeStyleType {
     SP_STROKE_STYLE_ALL = 5,
     SP_STYLE_ALL = 6
 };
+
+void sp_selection_copy_one(Inkscape::XML::Node *repr, Geom::Affine full_t, std::vector<Inkscape::XML::Node*> &clip, Inkscape::XML::Document* xml_doc);
+std::vector<Inkscape::XML::Node *> sp_selection_paste_impl(SPDocument *doc, SPObject *parent, std::vector<Inkscape::XML::Node *> &clip, Inkscape::XML::Node *after = nullptr);
 
 void sp_select_same_fill_stroke_style(SPDesktop *desktop, gboolean fill, gboolean strok, gboolean style);
 void sp_select_same_object_type(SPDesktop *desktop);
