@@ -66,6 +66,7 @@ public:
     SPItem *getItem() { return _item; }
     bool isActive() { return selector.get_active(); }
     void refresh(bool hide = false);
+    void refreshHide(const std::vector<SPItem *> *list) { preview->refreshHide(list); }
 
 private:
     Gtk::Grid grid;
@@ -95,8 +96,8 @@ BatchItem::BatchItem(SPItem *item)
     grid.set_column_spacing(5);
 
     Glib::ustring id = _item->getId();
-    Glib::ustring compactId = id.substr(0,7);
-    if(id.length()>7){
+    Glib::ustring compactId = id.substr(0, 7);
+    if (id.length() > 7) {
         compactId = compactId + "...";
     }
 
@@ -236,6 +237,7 @@ void BatchExport::setup()
     filenameConn = filename_entry->signal_changed().connect(sigc::mem_fun(*this, &BatchExport::onFilenameModified));
     exportConn = export_btn->signal_clicked().connect(sigc::mem_fun(*this, &BatchExport::onExport));
     browseConn = filename_entry->signal_icon_press().connect(sigc::mem_fun(*this, &BatchExport::onBrowse));
+    hide_all->signal_toggled().connect(sigc::mem_fun(*this, &BatchExport::refreshPreview));
 }
 
 void BatchExport::refreshItems()
@@ -316,11 +318,17 @@ void BatchExport::refreshItems()
 
 void BatchExport::refreshPreview()
 {
-    for (auto &[key, val] : current_items) {
-        if (show_preview->get_active()) {
-            val->refresh();
-        } else {
-            val->refresh(true);
+    if (_desktop) {
+        std::vector<SPItem *> selected(_desktop->getSelection()->items().begin(),
+                                       _desktop->getSelection()->items().end());
+        bool hide = hide_all->get_active();
+        for (auto &[key, val] : current_items) {
+            if (show_preview->get_active()) {
+                val->refreshHide(hide ? &selected : nullptr);
+                val->refresh();
+            } else {
+                val->refresh(true);
+            }
         }
     }
 }

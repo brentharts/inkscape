@@ -914,7 +914,7 @@
                         </child>
                         <child>
                           <object class="GtkCheckButton" id="b_hide_all">
-                            <property name="label" translatable="yes">Hide All Except Selected</property>
+                            <property name="label" translatable="yes">Show Selected Only</property>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="focus-on-click">False</property>
