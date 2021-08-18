@@ -69,6 +69,7 @@ public:
 
 private:
     Gtk::Grid grid;
+    Gtk::Label label;
     ExportPreview *preview = nullptr;
     SPItem *_item;
 };
@@ -89,26 +90,39 @@ BatchItem::BatchItem(SPItem *item)
         return;
     }
     _item = item;
-    grid.attach(selector, 0, 0, 1, 1);
-    grid.set_row_spacing(10);
+    grid.attach(selector, 0, 1, 1, 1);
+    grid.set_row_spacing(5);
+    grid.set_column_spacing(5);
+
     Glib::ustring id = _item->getId();
-    selector.set_label(id);
+    Glib::ustring compactId = id.substr(0,7);
+    if(id.length()>7){
+        compactId = compactId + "...";
+    }
+
     selector.set_active(true);
     selector.set_can_focus(false);
+    selector.set_valign(Gtk::Align::ALIGN_END);
+    selector.set_margin_start(2);
+    selector.set_margin_bottom(2);
 
     if (!preview) {
         preview = Gtk::manage(new ExportPreview());
-        grid.attach(*preview, 0, 1, 1, 1);
+        grid.attach(*preview, 0, 0, 2, 2);
     }
-
     preview->setItem(_item);
     preview->setDocument(_item->document);
     preview->setSize(64);
+
+    label.set_text(compactId);
+    label.set_halign(Gtk::Align::ALIGN_CENTER);
+    grid.attach(label, 0, 2, 2, 1);
 
     add(grid);
     show_all_children();
     show();
     this->set_can_focus(false);
+    this->set_tooltip_text(id);
 }
 
 void BatchItem::refresh(bool hide)

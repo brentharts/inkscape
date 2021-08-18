@@ -204,9 +204,9 @@
                                 <child>
                                   <object class="GtkCheckButton" id="si_show_preview">
                                     <property name="label" translatable="yes">Show Preview</property>
-                                    <property name="visible">True</property>
                                     <property name="can-focus">False</property>
                                     <property name="receives-default">False</property>
+                                    <property name="no-show-all">True</property>
                                     <property name="active">True</property>
                                     <property name="draw-indicator">True</property>
                                   </object>
@@ -809,6 +809,7 @@
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="hexpand">True</property>
+                            <property name="vexpand">True</property>
                             <property name="hscrollbar-policy">never</property>
                             <property name="window-placement-set">False</property>
                             <property name="shadow-type">in</property>
@@ -891,6 +892,7 @@
                             <property name="focus-on-click">False</property>
                             <property name="receives-default">False</property>
                             <property name="halign">start</property>
+                            <property name="active">True</property>
                             <property name="draw-indicator">True</property>
                           </object>
                           <packing>

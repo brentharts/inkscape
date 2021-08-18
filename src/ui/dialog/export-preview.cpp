@@ -47,6 +47,7 @@ ExportPreview::ExportPreview()
     auto pb = Gdk::Pixbuf::create_from_data(pixMem, Gdk::COLORSPACE_RGB, true, 8, size, size, stride);
     image = Gtk::manage(new Gtk::Image(pb));
     image->show();
+    image->set_name("export_preview_image");
     // add this image to box here
     this->pack_start(*image, true, true, 0);
     show_all_children();

@@ -65,13 +65,9 @@
 unsigned SPObject::indent_level = 0;
 
 //clang-format off
-Inkscape::XML::NodeEventVector object_event_vector = {
-    SPObject::repr_child_added,
-    SPObject::repr_child_removed,
-    SPObject::repr_attr_changed,
-    SPObject::repr_content_changed,
-    SPObject::repr_order_changed
-};
+Inkscape::XML::NodeEventVector object_event_vector = {SPObject::repr_child_added, SPObject::repr_child_removed,
+                                                      SPObject::repr_attr_changed, SPObject::repr_content_changed,
+                                                      SPObject::repr_order_changed};
 //clang-format on
 
 /**
@@ -442,10 +438,10 @@ std::vector<SPObject *> SPObject::childList(bool add_ref, Action)
     return l;
 }
 
-std::vector<SPObject*> SPObject::ancestorList(bool root_to_tip)
+std::vector<SPObject *> SPObject::ancestorList(bool root_to_tip)
 {
     std::vector<SPObject *> ancestors;
-    for (SPObject::ParentIterator iter=parent ; iter ; ++iter) {
+    for (SPObject::ParentIterator iter = parent; iter; ++iter) {
         ancestors.push_back(iter);
     }
     if (root_to_tip) {
@@ -454,7 +450,8 @@ std::vector<SPObject*> SPObject::ancestorList(bool root_to_tip)
     return ancestors;
 }
 
-gchar const *SPObject::label() const {
+gchar const *SPObject::label() const
+{
     return _label;
 }
 

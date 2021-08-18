@@ -296,9 +296,9 @@ void ExportList::append_row()
     extension->show();
 
     SpinButton *dpi_sb = Gtk::manage(new SpinButton());
-    dpi_sb->set_digits(2);
-    dpi_sb->set_increments(0.1, 1.0);
-    dpi_sb->set_range(0.01, 100000.0);
+    dpi_sb->set_digits(0);
+    dpi_sb->set_increments(1.0, 1.0);
+    dpi_sb->set_range(1.0, 100000.0);
     dpi_sb->set_value(default_dpi);
     dpi_sb->set_sensitive(true);
     dpi_sb->set_width_chars(6);
@@ -309,10 +309,17 @@ void ExportList::append_row()
     Gtk::Image *pIcon = Gtk::manage(sp_get_icon_image("window-close", Gtk::ICON_SIZE_SMALL_TOOLBAR));
     Gtk::Button *delete_btn = Gtk::manage(new Gtk::Button());
     delete_btn->set_relief(Gtk::RELIEF_NONE);
+    delete_btn->set_no_show_all(true);
+    if (_num_rows != 0) {
+        Gtk::Widget *d_button_0 = dynamic_cast<Gtk::Widget *>(this->get_child_at(_delete_col, 1));
+        if (d_button_0) {
+            d_button_0->show();
+        }
+        delete_btn->show();
+    }
     pIcon->show();
     delete_btn->add(*pIcon);
     this->attach(*delete_btn, _delete_col, current_row, 1, 1);
-    delete_btn->show();
     delete_btn->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &ExportList::delete_row), delete_btn));
 
     _num_rows++;
@@ -329,6 +336,12 @@ void ExportList::delete_row(Gtk::Widget *widget)
     int row = this->child_property_top_attach(*widget);
     this->remove_row(row);
     _num_rows--;
+    if (_num_rows <= 1) {
+        Gtk::Widget *d_button_0 = dynamic_cast<Gtk::Widget *>(this->get_child_at(_delete_col, 1));
+        if (d_button_0) {
+            d_button_0->hide();
+        }
+    }
 }
 
 Glib::ustring ExportList::get_suffix(int row)

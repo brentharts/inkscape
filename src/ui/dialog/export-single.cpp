@@ -254,7 +254,7 @@ void SingleExport::setupSpinButtons()
     setupSpinButton<sb_type>(spin_buttons[SPIN_BMWIDTH], 1.0, 1.0, 1000000.0, 1.0, 10.0, 0, true,
                              &SingleExport::onDpiChange, SPIN_BMWIDTH);
     setupSpinButton<sb_type>(spin_buttons[SPIN_DPI], prefs->getDouble("/dialogs/export/defaultxdpi/value", DPI_BASE),
-                             0.01, 100000.0, 0.1, 1.0, 2, true, &SingleExport::onDpiChange, SPIN_DPI);
+                             1.0, 100000.0, 1.0, 1.0, 0, true, &SingleExport::onDpiChange, SPIN_DPI);
 }
 
 template <typename T>

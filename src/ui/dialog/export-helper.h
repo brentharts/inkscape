@@ -145,7 +145,7 @@ public:
     ExportList(){};
     ExportList(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &refGlade)
         : Gtk::Grid(cobject){};
-    ~ExportList();
+    ~ExportList() override;
 
 public:
     void setup();
