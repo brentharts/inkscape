@@ -26,7 +26,6 @@
 #include "attributes.h"
 #include "document.h"
 #include "preferences.h"
-#include "selection-chemistry.h"
 
 #include "sp-marker.h"
 #include "sp-defs.h"
@@ -313,17 +312,6 @@ void validateMarker(SPMarker *sp_marker, SPDocument *doc) {
 
     doc->ensureUpToDate();
 
-    /*
-    - check if marker has a group element directly underneath it - if not, group items under marker 
-    - rotation transformations for on canvas marker editing will be applied on transform attribute of this group
-    - since the marker orient property is absolute rotation vs relative rotation to the path
-    */
-   SPObject *group = sp_marker->firstChild();
-
-   if(!SP_IS_GROUP(group) && !SP_IS_OBJECTGROUP(group)) {
-       createMarkerGroup(sp_marker, doc);
-   }
-
     // calculate the marker bounds to set any missing viewBox information
     std::vector<SPObject*> items = const_cast<SPMarker*>(sp_marker)->childList(false, SPObject::ActionBBox);
 
@@ -410,66 +398,6 @@ void validateMarker(SPMarker *sp_marker, SPDocument *doc) {
     sp_marker->updateRepr();
 }
 
-void createMarkerGroup(SPMarker *sp_marker, SPDocument *doc) {
-
-    Inkscape::XML::Document *xml_doc = doc->getReprDoc();
-    Inkscape::XML::Node *group = xml_doc->createElement("svg:g");
-
-    std::vector<Inkscape::XML::Node*> p;
-    for (auto& c: sp_marker->children) {
-        p.push_back(c.getRepr());
-    }    
-
-    std::sort(p.begin(), p.end(), sp_repr_compare_position_bool);
-
-    // Remember the position and parent of the topmost object.
-    gint topmost = p.back()->position();
-    Inkscape::XML::Node *topmost_parent = p.back()->parent();
-
-    for(auto current : p){
-        if (current->parent() == topmost_parent) {
-            Inkscape::XML::Node *spnew = current->duplicate(xml_doc);
-            sp_repr_unparent(current);
-            group->appendChild(spnew);
-            Inkscape::GC::release(spnew);
-            topmost --; // only reduce count for those items deleted from topmost_parent
-        } else { // move it to topmost_parent first
-            std::vector<Inkscape::XML::Node*> temp_clip;
-
-            // At this point, current may already have no item, due to its being a clone whose original is already moved away
-            // So we copy it artificially calculating the transform from its repr->attr("transform") and the parent transform
-            gchar const *t_str = current->attribute("transform");
-            Geom::Affine item_t(Geom::identity());
-            if (t_str)
-                sp_svg_transform_read(t_str, &item_t);
-            auto parent_item = dynamic_cast<SPItem *>(doc->getObjectByRepr(current->parent()));
-            assert(parent_item);
-            item_t *= parent_item->i2doc_affine();
-
-            sp_selection_copy_one(current, item_t, temp_clip, xml_doc);
-            sp_repr_unparent(current);
-
-            //paste into topmost_parent (temporarily)
-            std::vector<Inkscape::XML::Node*> copied = sp_selection_paste_impl(doc, doc->getObjectByRepr(topmost_parent), temp_clip);
-            if (!temp_clip.empty())temp_clip.clear() ;
-            if (!copied.empty()) { // if success,
-                // take pasted object (now in topmost_parent)
-                Inkscape::XML::Node *in_topmost = copied.back();
-                // make a copy
-                Inkscape::XML::Node *spnew = in_topmost->duplicate(xml_doc);
-                // remove pasted
-                sp_repr_unparent(in_topmost);
-                // put its copy into group
-                group->appendChild(spnew);
-                Inkscape::GC::release(spnew);
-                copied.clear();
-            }
-        }
-    }
-
-    //Add the new group to the topmost members' parent
-    topmost_parent->addChildAtPos(group, topmost + 1);
-}
 
 Geom::OptRect SPMarker::bbox(Geom::Affine const &/*transform*/, SPItem::BBoxType /*type*/) const {
 	return Geom::OptRect();

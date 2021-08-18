@@ -307,7 +307,7 @@ void SelectionHelper::fixSelection(SPDesktop *dt)
  * Copies repr and its inherited css style elements, along with the accumulated transform 'full_t',
  * then prepends the copy to 'clip'.
  */
-void sp_selection_copy_one(Inkscape::XML::Node *repr, Geom::Affine full_t, std::vector<Inkscape::XML::Node*> &clip, Inkscape::XML::Document* xml_doc)
+static void sp_selection_copy_one(Inkscape::XML::Node *repr, Geom::Affine full_t, std::vector<Inkscape::XML::Node*> &clip, Inkscape::XML::Document* xml_doc)
 {
     Inkscape::XML::Node *copy = repr->duplicate(xml_doc);
 
@@ -342,9 +342,9 @@ static void sp_selection_copy_impl(std::vector<SPItem*> const &items, std::vecto
 }
 
 // TODO check if parent parameter should be changed to SPItem, of if the code should handle non-items.
-std::vector<Inkscape::XML::Node *> sp_selection_paste_impl(SPDocument *doc, SPObject *parent,
-                                                            std::vector<Inkscape::XML::Node *> &clip,
-                                                            Inkscape::XML::Node *after)
+static std::vector<Inkscape::XML::Node *> sp_selection_paste_impl(SPDocument *doc, SPObject *parent,
+                                                                  std::vector<Inkscape::XML::Node *> &clip,
+                                                                  Inkscape::XML::Node *after = nullptr)
 {
     assert(!after || after->parent() == parent->getRepr());
     assert(!parent->cloned);
