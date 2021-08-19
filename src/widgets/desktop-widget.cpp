@@ -288,6 +288,8 @@ SPDesktopWidget::SPDesktopWidget()
         toolboxSize = ToolboxFactory::prefToSize("/toolbox/small");
         set_icon_size(commands_toolbox, toolboxSize);
 
+        set_icon_size(aux_toolbox, toolboxSize);
+
         sp_traverse_widget_tree(Glib::wrap(aux_toolbox), [=](Gtk::Widget* widget) {
             if (auto btn = dynamic_cast<Gtk::ToolButton*>(widget)) {
                 if (auto ico = dynamic_cast<Gtk::Image*>(btn->get_icon_widget())) {
