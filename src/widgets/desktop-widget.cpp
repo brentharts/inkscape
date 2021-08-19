@@ -425,7 +425,7 @@ SPDesktopWidget::SPDesktopWidget()
 
     update_statusbar_visibility();
 
-    _statusbar_preferences_observer = prefs->createObserver("/statusbar/visibility", [=](const Inkscape::Preferences::Entry&) {
+    _statusbar_preferences_observer = prefs->createObserver("/statusbar/visibility", [=]() {
         update_statusbar_visibility();
     });
 

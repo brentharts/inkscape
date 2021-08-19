@@ -994,6 +994,10 @@ PrefObserver Preferences::createObserver(Glib::ustring path, std::function<void 
     return Preferences::PreferencesObserver::create(path, std::move(callback));
 }
 
+PrefObserver Preferences::createObserver(Glib::ustring path, std::function<void ()> callback) {
+    return createObserver(std::move(path), [=](const Entry&) { callback(); });
+}
+
 } // namespace Inkscape
 
 /*
