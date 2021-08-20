@@ -30,7 +30,8 @@ namespace Inkscape {
 guint32 const DEF_COLOR[] = { 0x000000ff, 0xff0066ff, 0x00ff66ff, 0x000000ff, 0x000000ff };
 guint32 const CEN_COLOR[] = { 0x000000ff, 0x000000ff, 0x00ff66ff, 0x000000ff, 0xff0000b0 };
 
-enum SPSelTransType {
+enum SPSelTransType
+{
     HANDLE_STRETCH,
     HANDLE_SCALE,
     HANDLE_SKEW,

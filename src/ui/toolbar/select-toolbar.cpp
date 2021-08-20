@@ -53,17 +53,17 @@ namespace Inkscape {
 namespace UI {
 namespace Toolbar {
 
-SelectToolbar::SelectToolbar(SPDesktop *desktop) :
-    Toolbar(desktop),
-    _tracker(new UnitTracker(Inkscape::Util::UNIT_TYPE_LINEAR)),
-    _update(false),
-    _lock_btn(Gtk::manage(new Gtk::ToggleToolButton())),
-    _select_touch_btn(Gtk::manage(new Gtk::ToggleToolButton())),
-    _align_distribute_btn(Gtk::manage(new Gtk::ToggleToolButton())),
-    _transform_stroke_btn(Gtk::manage(new Gtk::ToggleToolButton())),
-    _transform_corners_btn(Gtk::manage(new Gtk::ToggleToolButton())),
-    _transform_gradient_btn(Gtk::manage(new Gtk::ToggleToolButton())),
-    _transform_pattern_btn(Gtk::manage(new Gtk::ToggleToolButton()))
+SelectToolbar::SelectToolbar(SPDesktop *desktop)
+    : Toolbar(desktop)
+    , _tracker(new UnitTracker(Inkscape::Util::UNIT_TYPE_LINEAR))
+    , _update(false)
+    , _lock_btn(Gtk::manage(new Gtk::ToggleToolButton()))
+    , _select_touch_btn(Gtk::manage(new Gtk::ToggleToolButton()))
+    , _align_distribute_btn(Gtk::manage(new Gtk::ToggleToolButton()))
+    , _transform_stroke_btn(Gtk::manage(new Gtk::ToggleToolButton()))
+    , _transform_corners_btn(Gtk::manage(new Gtk::ToggleToolButton()))
+    , _transform_gradient_btn(Gtk::manage(new Gtk::ToggleToolButton()))
+    , _transform_pattern_btn(Gtk::manage(new Gtk::ToggleToolButton()))
 {
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
 
@@ -480,8 +480,7 @@ SelectToolbar::toggle_touch()
     prefs->setBool("/tools/select/touch_box", _select_touch_btn->get_active());
 }
 
-void
-SelectToolbar::toggle_align_distribute()
+void SelectToolbar::toggle_align_distribute()
 {
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     prefs->setBool("/tools/select/align_distribute_box", _align_distribute_btn->get_active());
