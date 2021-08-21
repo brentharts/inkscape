@@ -1242,14 +1242,10 @@ MarkerKnotHolderEntityScale::set_internal(Geom::Point const &p, Geom::Point cons
     double adjusted_scaleY = 0.0;
 
     adjusted_scaleX = (dx/orig_width) + 1;
-    adjusted_scaleX = adjusted_scaleX * original_scaleX;
-
     adjusted_scaleY = (dy/orig_height) + 1;
-    adjusted_scaleY = adjusted_scaleY * original_scaleY;
 
-
-    // need to enforce uniform scaling when marker preserveAspectRatio is not set to none
-    if(sp_marker->aspect_align != SP_ASPECT_NONE) {
+    // uniform scaling when ctrl+key is pressed
+    if(state & GDK_CONTROL_MASK) {
         adjusted_scaleX = fabs(adjusted_scaleX);
         adjusted_scaleY = fabs(adjusted_scaleY);
 
@@ -1263,12 +1259,24 @@ MarkerKnotHolderEntityScale::set_internal(Geom::Point const &p, Geom::Point cons
             adjusted_scaleY = adjusted_scaleX;
         }
 
+        adjusted_scaleX = adjusted_scaleX * original_scaleX;
+        adjusted_scaleY = adjusted_scaleY * original_scaleY;
+
         sp_marker->markerWidth = sp_marker->viewBox.width() * adjusted_scaleX;
         sp_marker->markerHeight = sp_marker->viewBox.height() * adjusted_scaleY;
 
         sp_marker->refX = ((original_refX * original_scaleX)/adjusted_scaleX) - ((getMarkerBounds(item, desktop).min()[Geom::X] + sp_marker->viewBox.width()/2) * (original_scaleX/adjusted_scaleX  - 1));
         sp_marker->refY = ((original_refY * original_scaleY)/adjusted_scaleY) - ((getMarkerBounds(item, desktop).min()[Geom::Y] + sp_marker->viewBox.height()/2) * (original_scaleY/adjusted_scaleY  - 1));
     } else {
+
+        adjusted_scaleX = adjusted_scaleX * original_scaleX;
+        adjusted_scaleY = adjusted_scaleY * original_scaleY;
+
+        // make sure the preserveAspectRatio is none when the user wants to use non-uniform scaling
+        if (sp_marker->aspect_align != SP_ASPECT_NONE) {
+            sp_marker->setAttribute("preserveAspectRatio", "none");
+        }
+
         if(adjusted_scaleX > 0.0 && adjusted_scaleY > 0.0) {
             sp_marker->markerWidth = sp_marker->viewBox.width() * adjusted_scaleX;
             sp_marker->markerHeight = sp_marker->viewBox.height() * adjusted_scaleY;
