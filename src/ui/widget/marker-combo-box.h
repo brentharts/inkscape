@@ -55,6 +55,7 @@ public:
     void setDocument(SPDocument *);
 
     sigc::signal<void> changed_signal;
+    sigc::signal<void> edit_signal;
 
     void set_current(SPObject *marker);
     std::string get_active_marker_uri();
@@ -107,6 +108,7 @@ private:
     Gtk::RadioButton& _orient_angle;
     Gtk::Button& _orient_flip_horz;
     Gtk::Image& _current_img;
+    Gtk::Button& _edit_marker;
     bool _scale_linked = true;
     guint32 _background_color;
     guint32 _foreground_color;
@@ -132,6 +134,7 @@ private:
     };
     MarkerColumns marker_columns;
 
+    void update_ui(SPMarker* marker, bool select);
     void update_widgets_from_marker(SPMarker* marker);
     void update_store();
     Glib::RefPtr<MarkerItem> add_separator(bool filler);

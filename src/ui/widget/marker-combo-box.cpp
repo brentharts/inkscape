@@ -183,7 +183,8 @@ MarkerComboBox::MarkerComboBox(gchar const *id, int l) :
     _orient_auto(get_widget<Gtk::RadioButton>(_builder, "orient-auto")),
     _orient_angle(get_widget<Gtk::RadioButton>(_builder, "orient-angle")),
     _orient_flip_horz(get_widget<Gtk::Button>(_builder, "btn-horz-flip")),
-    _current_img(get_widget<Gtk::Image>(_builder, "current-img"))
+    _current_img(get_widget<Gtk::Image>(_builder, "current-img")),
+    _edit_marker(get_widget<Gtk::Button>(_builder, "edit-marker"))
 {
     _background_color = 0x808080ff;
     _foreground_color = 0x808080ff;
@@ -287,6 +288,12 @@ MarkerComboBox::MarkerComboBox(gchar const *id, int l) :
     _offset_x.signal_changed().connect([=]() { set_offset(); });
     _offset_y.signal_changed().connect([=]() { set_offset(); });
 
+    // request to edit marker on canvas; close popup to get it out of the way and call marker edit tool
+    _edit_marker.signal_clicked().connect([=]() { _menu_btn.get_popover()->popdown(); edit_signal(); });
+
+    // before showing popover refresh marker attributes
+    _menu_btn.get_popover()->signal_show().connect([=](){ update_ui(get_current(), false); }, false);
+
     update_scale_link();
     _current_img.set(g_image_none);
     show();
@@ -315,6 +322,8 @@ void MarkerComboBox::update_widgets_from_marker(SPMarker* marker) {
     _input_grid.set_sensitive(marker != nullptr);
 
     if (marker) {
+        marker->updateRepr();
+
         _scale_x.set_value(get_attrib_num(marker, "markerWidth"));
         _scale_y.set_value(get_attrib_num(marker, "markerHeight"));
         auto units = get_attrib(marker, "markerUnits");
@@ -326,6 +335,7 @@ void MarkerComboBox::update_widgets_from_marker(SPMarker* marker) {
         _offset_x.set_value(get_attrib_num(marker, "refX"));
         _offset_y.set_value(get_attrib_num(marker, "refY"));
         auto orient = get_attrib(marker, "orient");
+
         // try parsing as number
         _angle_btn.set_value(strtod(orient.c_str(), nullptr));
         if (orient == "auto-start-reverse") {
@@ -594,23 +604,28 @@ void MarkerComboBox::set_current(SPObject *marker)
 
     bool reselect = sp_marker != get_current();
 
+    update_ui(sp_marker, reselect);
+}
+
+void MarkerComboBox::update_ui(SPMarker* marker, bool select) {
     _updating = true;
 
-    auto id = sp_marker ? sp_marker->getId() : nullptr;
+    auto id = marker ? marker->getId() : nullptr;
     _current_marker_id = id ? id : "";
 
-    auto marker_item = find_marker_item(sp_marker);
+    auto marker_item = find_marker_item(marker);
 
-    if (reselect) {
+    if (select) {
         set_active(marker_item);
     }
 
-    update_widgets_from_marker(sp_marker);
+    update_widgets_from_marker(marker);
     update_menu_btn(marker_item);
     update_preview(marker_item);
 
     _updating = false;
 }
+
 /**
  * Return a uri string representing the current selected marker used for setting the marker style in the document
  */
