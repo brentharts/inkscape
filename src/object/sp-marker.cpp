@@ -333,69 +333,45 @@ void validateMarker(SPMarker *sp_marker, SPDocument *doc) {
     }
 
     if(!sp_marker->orient._set) {
-        sp_marker->setAttribute("orient", "auto");
+        sp_marker->setAttribute("orient", "0.0");
     }
 
-    // if there is no markerWidth or markerHeight or viewBox, calculate and set it
-    if(!sp_marker->markerWidth._set || !sp_marker->markerHeight._set) {
-        
-        // scale is set to 1x by deafult
-        if(!sp_marker->viewBox_set) {
-            sp_marker->setAttribute("markerWidth", std::to_string(bounds.dimensions()[Geom::X]));
-            sp_marker->setAttribute("markerHeight", std::to_string(bounds.dimensions()[Geom::Y]));
+    double xScale = 1;
+    double yScale = 1;
 
-            sp_marker->setAttribute("viewBox", "0 0 " + std::to_string(sp_marker->markerWidth.computed) + " " + std::to_string(sp_marker->markerHeight.computed));
-        } else {
-            sp_marker->setAttribute("markerWidth", std::to_string(sp_marker->viewBox.width()));
-            sp_marker->setAttribute("markerHeight", std::to_string(sp_marker->viewBox.height()));
+    if(sp_marker->viewBox_set) {
+        // check if the X direction has any existing scale factor
+        if(sp_marker->viewBox.width() > 0) {
+            double existingXScale = sp_marker->markerWidth.computed/sp_marker->viewBox.width();
+            xScale = (existingXScale >= 0? existingXScale: 1);
         }
 
-    } else {
-        if(!sp_marker->viewBox_set) {
-            sp_marker->setAttribute("viewBox", "0 0 " + std::to_string(sp_marker->markerWidth.computed) + " " + std::to_string(sp_marker->markerHeight.computed));
-        } else {
-            /* 
-            - for now, onCanvas marker editing expects the viewBox width and viewBox height to correspond to the calculated bounds
-            - if the viewBox width/height are not equal to bounds, adjust the values
-            */
+        // check if the Y direction has any existing scale factor
+        if(sp_marker->viewBox.height() > 0) {
+            double existingYScale = sp_marker->markerHeight.computed/sp_marker->viewBox.height();
+            yScale = (existingYScale >= 0? existingYScale: 1);
+        }
 
-            if((sp_marker->viewBox.width() != bounds.dimensions()[Geom::X]) || (sp_marker->viewBox.height() != bounds.dimensions()[Geom::Y])) {
-
-                double xScale = 1;
-                double yScale = 1;
-
-                // check for any existing scale factors and apply accordingly
-                if(sp_marker->viewBox.width() > 0) {
-                    xScale = sp_marker->markerWidth.computed/sp_marker->viewBox.width();
-                }
-
-                if(sp_marker->viewBox.height() > 0) {
-                    yScale = sp_marker->markerHeight.computed/sp_marker->viewBox.height();
-                }
-
-                sp_marker->setAttribute("viewBox", "0 0 " + std::to_string(bounds.dimensions()[Geom::X]) + " " + std::to_string(bounds.dimensions()[Geom::Y]));
-                
-                sp_marker->setAttribute("markerWidth", std::to_string(sp_marker->viewBox.width() * xScale));
-                sp_marker->setAttribute("markerHeight", std::to_string(sp_marker->viewBox.height() * yScale ));
-
+        // only enforce uniform scale if the preserveAspectRatio is not set yet or if it does not equal "none"
+        if((!sp_marker->aspect_set) || (sp_marker->aspect_align != SP_ASPECT_NONE)) {
+            // set the scale to the smaller option if both xScale and yScale exist
+            if(xScale > yScale) {
+                xScale = yScale;
+            } else {
+                yScale = xScale;
             }
         }
     }
 
+    sp_marker->setAttribute("viewBox", "0 0 " + std::to_string(bounds.dimensions()[Geom::X]) + " " + std::to_string(bounds.dimensions()[Geom::Y]));
+    
+    sp_marker->setAttribute("markerWidth", std::to_string(sp_marker->viewBox.width() * xScale));
+    sp_marker->setAttribute("markerHeight", std::to_string(sp_marker->viewBox.height() * yScale));
+
     if(!sp_marker->aspect_set) {
-        double xScale = sp_marker->markerWidth.computed/sp_marker->viewBox.width();
-        double yScale = sp_marker->markerHeight.computed/sp_marker->viewBox.height();
-
-        if(xScale == yScale) {
-            // uniform scaling will be enforced
-            sp_marker->setAttribute("preserveAspectRatio", "xMidYMid");
-        } else {
-            // non uniform scaling can happen
-            sp_marker->setAttribute("preserveAspectRatio", "none");
-        }
+        // allow non uniform scaling unless the user explicitly sets "uniform" scaling through the marker UI
+        sp_marker->setAttribute("preserveAspectRatio", "none");
     }
-
-    sp_marker->updateRepr();
 }
 
 
