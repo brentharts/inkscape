@@ -282,6 +282,12 @@ Inkscape::SnappedPoint SnapManager::constrainedSnap(Inkscape::SnapCandidatePoint
         return no_snap;
     }
 
+    // this makes sure that _findCandidates populates the respective vectors for a snapper.
+    if (p.getSourceNum() <= 0){
+        Geom::Rect const local_bbox_to_snap = bbox_to_snap ? *bbox_to_snap : Geom::Rect(p.getPoint(), p.getPoint());
+        _findCandidates(getDocument()->getRoot(), &_items_to_ignore, p.getSourceNum() <= 0, local_bbox_to_snap, false, Geom::identity());
+    }
+
     IntermSnapResults isr;
     SnapperList const snappers = getSnappers();
     for (auto snapper : snappers) {

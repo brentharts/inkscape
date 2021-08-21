@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 set(ui_SRC
+	builder-utils.cpp
 	clipboard.cpp
 	contextmenu.cpp
 	cursor-utils.cpp
@@ -49,6 +50,7 @@ set(ui_SRC
 	toolbar/calligraphy-toolbar.cpp
 	toolbar/connector-toolbar.cpp
 	toolbar/dropper-toolbar.cpp
+	toolbar/marker-toolbar.cpp
 	toolbar/eraser-toolbar.cpp
 	toolbar/gradient-toolbar.cpp
 	toolbar/lpe-toolbar.cpp
@@ -84,6 +86,7 @@ set(ui_SRC
 	tools/pencil-tool.cpp
 	tools/pen-tool.cpp
 	tools/rect-tool.cpp
+	tools/marker-tool.cpp
 	tools/select-tool.cpp
 	tools/spiral-tool.cpp
 	tools/spray-tool.cpp
@@ -161,10 +164,10 @@ set(ui_SRC
 	widget/button.cpp
 	widget/canvas.cpp
 	widget/canvas-grid.cpp
-	widget/clipmaskicon.cpp
 	widget/color-entry.cpp
 	widget/color-icc-selector.cpp
 	widget/color-notebook.cpp
+	widget/color-palette.cpp
 	widget/color-picker.cpp
 	widget/color-preview.cpp	icon-loader.cpp
 	widget/color-scales.cpp
@@ -188,17 +191,14 @@ set(ui_SRC
 	widget/gradient-selector.cpp
 	widget/gradient-vector-selector.cpp
 	widget/gradient-with-stops.cpp
-	widget/highlight-picker.cpp
 	widget/imagetoggler.cpp
 	widget/ink-color-wheel.cpp
 	widget/ink-flow-box.cpp
 	widget/ink-ruler.cpp
 	widget/ink-spinscale.cpp
-	widget/insertordericon.cpp
 	widget/label-tool-item.cpp
 	widget/labelled.cpp
 	widget/layer-selector.cpp
-	widget/layertypeicon.cpp
 	widget/licensor.cpp
 	widget/marker-combo-box.cpp
 	widget/notebook-page.cpp
@@ -217,6 +217,7 @@ set(ui_SRC
 	widget/scalar.cpp
 	widget/scroll-utils.cpp
 	widget/selected-style.cpp
+	widget/shapeicon.cpp
 	widget/spin-button-tool-item.cpp
 	widget/spin-scale.cpp
 	widget/spin-slider.cpp
@@ -237,6 +238,7 @@ set(ui_SRC
 
 	# -------
 	# Headers
+	builder-utils.h
 	clipboard.h
 	contextmenu.h
 	cursor-utils.h
@@ -358,6 +360,7 @@ set(ui_SRC
 	toolbar/calligraphy-toolbar.h
 	toolbar/connector-toolbar.h
 	toolbar/dropper-toolbar.h
+	toolbar/marker-toolbar.h
 	toolbar/eraser-toolbar.h
 	toolbar/gradient-toolbar.h
 	toolbar/lpe-toolbar.h
@@ -393,6 +396,7 @@ set(ui_SRC
 	tools/pen-tool.h
 	tools/pencil-tool.h
 	tools/rect-tool.h
+	tools/marker-tool.h
 	tools/select-tool.h
 	tools/spiral-tool.h
 	tools/spray-tool.h
@@ -409,10 +413,10 @@ set(ui_SRC
 	widget/button.h
 	widget/canvas.h
 	widget/canvas-grid.h
-	widget/clipmaskicon.h
 	widget/color-entry.h
 	widget/color-icc-selector.h
 	widget/color-notebook.h
+	widget/color-palette.h
 	widget/color-picker.h
 	widget/color-preview.h
 	widget/color-scales.h
@@ -436,8 +440,7 @@ set(ui_SRC
 	widget/gradient-editor.h
 	widget/gradient-selector.h
 	widget/gradient-vector-selector.h
-	widget/highlight-picker.h
-	widget/insertordericon.h
+	widget/gradient-with-stops.h
 	widget/imagetoggler.h
 	widget/ink-color-wheel.h
 	widget/ink-flow-box.h
@@ -446,7 +449,6 @@ set(ui_SRC
 	widget/label-tool-item.h
 	widget/labelled.h
 	widget/layer-selector.h
-	widget/layertypeicon.h
 	widget/licensor.h
 	widget/marker-combo-box.h
 	widget/notebook-page.h
@@ -468,6 +470,7 @@ set(ui_SRC
 	widget/scroll-utils.h
 	widget/scrollprotected.h
 	widget/selected-style.h
+	widget/shapeicon.h
 	widget/spin-button-tool-item.h
 	widget/spin-scale.h
 	widget/spin-slider.h

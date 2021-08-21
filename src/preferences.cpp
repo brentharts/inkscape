@@ -527,8 +527,7 @@ public:
 };
 
 Preferences::Observer::Observer(Glib::ustring path) :
-    observed_path(std::move(path)),
-    _data(nullptr)
+    observed_path(std::move(path))
 {
 }
 
@@ -758,13 +757,15 @@ void Preferences::_setRawValue(Glib::ustring const &path, Glib::ustring const &v
     Glib::ustring node_key, attr_key;
     _keySplit(path, node_key, attr_key);
 
-    // set the attribute
-    Inkscape::XML::Node *node = _getNode(node_key, true);
-    node->setAttributeOrRemoveIfEmpty(attr_key, value);
-
+    // update cache first, so by the time notification change fires and observers are called,
+    // they have access to current settings even if they watch a group
     if (_initialized) {
         cachedRawValue[path.c_str()] = RAWCACHE_CODE_VALUE + value;
     }
+
+    // set the attribute
+    Inkscape::XML::Node *node = _getNode(node_key, true);
+    node->setAttributeOrRemoveIfEmpty(attr_key, value);
 }
 
 // The _extract* methods are where the actual work is done - they define how preferences are stored
@@ -970,6 +971,32 @@ Glib::ustring Preferences::getPrefsFilename() const
 
 Preferences *Preferences::_instance = nullptr;
 
+
+PrefObserver Preferences::PreferencesObserver::create(
+    Glib::ustring path, std::function<void (const Preferences::Entry& new_value)> callback) {
+    assert(callback);
+
+    return PrefObserver(new Preferences::PreferencesObserver(std::move(path), std::move(callback)));
+}
+
+Preferences::PreferencesObserver::PreferencesObserver(Glib::ustring path, std::function<void (const Preferences::Entry&)> callback) :
+    Observer(std::move(path)), _callback(std::move(callback)) {
+
+    auto prefs = Inkscape::Preferences::get();
+    prefs->addObserver(*this);
+}
+
+void Preferences::PreferencesObserver::notify(Preferences::Entry const& new_val) {
+    _callback(new_val);
+}
+
+PrefObserver Preferences::createObserver(Glib::ustring path, std::function<void (const Preferences::Entry&)> callback) {
+    return Preferences::PreferencesObserver::create(path, std::move(callback));
+}
+
+PrefObserver Preferences::createObserver(Glib::ustring path, std::function<void ()> callback) {
+    return createObserver(std::move(path), [=](const Entry&) { callback(); });
+}
 
 } // namespace Inkscape
 

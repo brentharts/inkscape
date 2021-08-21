@@ -50,6 +50,10 @@ gint SPPath::nodesInPath() const
     return _curve ? _curve->nodes_in_path() : 0;
 }
 
+const char* SPPath::typeName() const {
+    return "path";
+}
+
 const char* SPPath::displayName() const {
     return _("Path");
 }
@@ -238,13 +242,8 @@ void SPPath::set(SPAttr key, const gchar* value) {
                     this->removeAllPathEffects(false);
                 }
             }
-            // In 2020-8-15 next line is commented and added
-            // a todo to see regressions, after this in a commit this line is uncommented
-            // again this line in a MR that near 1.1 release is finally rollbacked. 
-            // This rollback happends near release (1.1) and think is better leave 
-            // uncommented for release as all check are done this way
-            // TODO: Comment on 1.2 branching to see issues
-            sp_lpe_item_update_patheffect(this, true, true);
+            // fix issue https://gitlab.com/inkscape/inbox/-/issues/5460
+            sp_lpe_item_update_patheffect(this, false, false);
             break;
 
        case SPAttr::D:

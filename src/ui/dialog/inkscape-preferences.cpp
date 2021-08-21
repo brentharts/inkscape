@@ -1594,6 +1594,22 @@ void InkscapePreferences::initPageUI()
     _page_ui.add_line(true, "Handle size", _mouse_grabsize, "", _("Set the relative size of node handles"), true);
     _narrow_spinbutton.init(_("Use narrow number entry boxes"), "/theme/narrowSpinButton", false);
     _page_ui.add_line(false, "", _narrow_spinbutton, "", _("Make number editing boxes smaller by limiting padding"), false);
+    _compact_colorselector.init(_("Use compact color selector mode switch"), "/colorselector/switcher", true);
+    _page_ui.add_line(false, "", _compact_colorselector, "", _("Use compact combo box for selecting color modes"), false);
+
+    _page_ui.add_group_header(_("Status bar"));
+    auto sb_style = Gtk::make_managed<UI::Widget::PrefCheckButton>();
+    sb_style->init(_("Show current style"), "/statusbar/visibility/style", true);
+    _page_ui.add_line(false, "", *sb_style, "", _("Control visibility of current fill, stroke and opacity in status bar."), true);
+    auto sb_layer = Gtk::make_managed<UI::Widget::PrefCheckButton>();
+    sb_layer->init(_("Show layer selector"), "/statusbar/visibility/layer", true);
+    _page_ui.add_line(false, "", *sb_layer, "", _("Control visibility of layer selection menu in status bar."), true);
+    auto sb_coords = Gtk::make_managed<UI::Widget::PrefCheckButton>();
+    sb_coords->init(_("Show mouse coordinates"), "/statusbar/visibility/coordinates", true);
+    _page_ui.add_line(false, "", *sb_coords, "", _("Control visibility of mouse coordinates X & Y in status bar."), true);
+    auto sb_rotate = Gtk::make_managed<UI::Widget::PrefCheckButton>();
+    sb_rotate->init(_("Show canvas rotation"), "/statusbar/visibility/rotation", true);
+    _page_ui.add_line(false, "", *sb_rotate, "", _("Control visibility of canvas rotation in status bar."), true);
 
     _page_ui.add_group_header(_("Mouse cursors"));
     _ui_cursorscaling.init(_("Enable scaling"), "/options/cursorscaling", true);
@@ -1779,7 +1795,7 @@ void InkscapePreferences::initPageUI()
     _win_save_dialog_pos_on.init ( _("Save and restore dialogs status"), "/options/savedialogposition/value", PREFS_DIALOGS_STATE_SAVE, true, nullptr);
     _win_save_dialog_pos_off.init ( _("Don't save dialogs status"), "/options/savedialogposition/value", PREFS_DIALOGS_STATE_NONE, false, &_win_save_dialog_pos_on);
 
-    _win_dockable.init ( _("Dockable"), "/options/dialogtype/value", PREFS_DIALOGS_BEHAVIOR_DOCKABLE, true, nullptr);
+    _win_dockable.init ( _("Docked"), "/options/dialogtype/value", PREFS_DIALOGS_BEHAVIOR_DOCKABLE, true, nullptr);
     _win_floating.init ( _("Floating"), "/options/dialogtype/value", PREFS_DIALOGS_BEHAVIOR_FLOATING, false, &_win_dockable);
 
     _win_native.init ( _("Native open/save dialogs"), "/options/desktopintegration/value", 1, true, nullptr);
@@ -1827,9 +1843,9 @@ void InkscapePreferences::initPageUI()
 
 
 
-    _page_windows.add_group_header( _("Dialog behavior (requires restart)"));
+    _page_windows.add_group_header( _("Default dialog behavior (requires restart)"));
     _page_windows.add_line( true, "", _win_dockable, "",
-                            _("Dockable"));
+                            _("Docked"));
     _page_windows.add_line( true, "", _win_floating, "",
                             _("Floating"));
 #ifdef _WIN32
@@ -2265,9 +2281,13 @@ void InkscapePreferences::initPageBehavior()
     _sel_inlayer_same.init ( _("Select same behaves like select all"), "/options/selection/samelikeall", false);
 
     _sel_layer_deselects.init ( _("Deselect upon layer change"), "/options/selection/layerdeselect", true);
+    _sel_touch_topmost_only.init ( _("Select the topmost items only when in touch selection mode"), "/options/selection/touchsel_topmost_only", true);
 
     _page_select.add_line( false, "", _sel_layer_deselects, "",
                            _("Uncheck this to be able to keep the current objects selected when the current layer changes"));
+
+    _page_select.add_line( false, "", _sel_touch_topmost_only, "",
+                           _("In touch selection mode, if multiple items overlap at a point, select only the topmost item"));
 
     _page_select.add_group_header( _("Ctrl+A, Tab, Shift+Tab"));
     _page_select.add_line( true, "", _sel_all, "",

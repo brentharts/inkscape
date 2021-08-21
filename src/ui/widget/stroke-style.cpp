@@ -32,6 +32,9 @@
 #include "ui/widget/dash-selector.h"
 #include "ui/widget/marker-combo-box.h"
 #include "ui/widget/unit-menu.h"
+#include "ui/tools/marker-tool.h"
+
+#include "actions/actions-tools.h"
 
 #include "widgets/style-utils.h"
 
@@ -105,6 +108,22 @@ StrokeStyle::StrokeStyleButton::StrokeStyleButton(Gtk::RadioButtonGroup &grp,
     add(*px);
 }
 
+std::vector<double> parse_pattern(const Glib::ustring& input) {
+    std::vector<double> output;
+    if (input.empty()) return output;
+
+    std::istringstream stream(input.c_str());
+    while (stream) {
+        double val;
+        stream >> val;
+        if (stream) {
+            output.push_back(val);
+        }
+    }
+
+    return output;
+}
+
 StrokeStyle::StrokeStyle() :
     Gtk::Box(),
     miterLimitSpin(),
@@ -124,6 +143,9 @@ StrokeStyle::StrokeStyle() :
     startMarkerConn(),
     midMarkerConn(),
     endMarkerConn(),
+    editStartMarkerButton(),
+    editMidMarkerButton(),
+    editEndMarkerButton(),
     _old_unit(nullptr)
 {
     table = new Gtk::Grid();
@@ -185,6 +207,7 @@ StrokeStyle::StrokeStyle() :
                                             //   Inkscape::UI::Widget::DashSelector class, so that we do not have to
                                             //   expose any of the underlying widgets?
     dashSelector = Gtk::manage(new Inkscape::UI::Widget::DashSelector);
+    _pattern = Gtk::make_managed<Gtk::Entry>();
 
     dashSelector->show();
     dashSelector->set_hexpand();
@@ -192,6 +215,26 @@ StrokeStyle::StrokeStyle() :
     dashSelector->set_valign(Gtk::ALIGN_CENTER);
     table->attach(*dashSelector, 1, i, 3, 1);
     dashSelector->changed_signal.connect(sigc::mem_fun(*this, &StrokeStyle::lineDashChangedCB));
+
+    i++;
+
+    table->attach(*_pattern, 1, i, 4, 1);
+    _pattern_label = spw_label(table, _("_Pattern:"), 0, i, _pattern);
+    _pattern_label->set_tooltip_text(_("Repeating \"dash gap ...\" pattern"));
+    _pattern->set_no_show_all();
+    _pattern_label->set_no_show_all();
+    _pattern->signal_changed().connect([=](){
+        if (update || _editing_pattern) return;
+
+        auto pat = parse_pattern(_pattern->get_text());
+        _editing_pattern = true;
+        update = true;
+        dashSelector->set_dash(pat, dashSelector->get_offset());
+        update = false;
+        scaleLine();
+        _editing_pattern = false;
+    });
+    update_pattern(0, nullptr);
 
     i++;
 
@@ -233,6 +276,37 @@ StrokeStyle::StrokeStyle() :
 
     i++;
 
+    /* marker edit mode buttons*/
+    spw_label(table, _("Edit:"), 0, i, nullptr);
+
+    hb = spw_hbox(table, 1, 1, i);
+    i++;
+
+    editStartMarkerButton = Gtk::manage(new Gtk::Button(_("start"), true));
+    editStartMarkerButton->set_tooltip_text(_("Edit the start marker of the selected object."));
+    editStartMarkerButton->signal_clicked().connect([=]() {
+        enterEditMarkerMode(SP_MARKER_LOC_START);
+    });
+    editStartMarkerButton->show();
+    hb->pack_start(*editStartMarkerButton, true, true, 0);
+
+    editMidMarkerButton = Gtk::manage(new Gtk::Button(_("mid"), true));
+    editMidMarkerButton->set_tooltip_text(_("Edit the mid marker of the selected object."));
+    editMidMarkerButton->signal_clicked().connect([=]() {
+        enterEditMarkerMode(SP_MARKER_LOC_MID);
+    });
+    editMidMarkerButton->show();
+    hb->pack_start(*editMidMarkerButton, true, true, 0);
+
+    editEndMarkerButton = Gtk::manage(new Gtk::Button(_("end"), true));
+    editEndMarkerButton->set_tooltip_text(_("Edit the end marker of the selected object."));
+    editEndMarkerButton->signal_clicked().connect([=]() {
+        enterEditMarkerMode(SP_MARKER_LOC_END);
+    });
+    editEndMarkerButton->show();
+    hb->pack_start(*editEndMarkerButton, true, true, 0);
+
+    i++;
     /* Join type */
     // TRANSLATORS: The line join style specifies the shape to be used at the
     //  corners of paths. It can be "miter", "round" or "bevel".
@@ -242,14 +316,6 @@ StrokeStyle::StrokeStyle() :
 
     Gtk::RadioButtonGroup joinGrp;
 
-    joinRound = makeRadioButton(joinGrp, INKSCAPE_ICON("stroke-join-round"),
-                                hb, STROKE_STYLE_BUTTON_JOIN, "round");
-
-    // TRANSLATORS: Round join: joining lines with a rounded corner.
-    //  For an example, draw a triangle with a large stroke width and modify the
-    //  "Join" option (in the Fill and Stroke dialog).
-    joinRound->set_tooltip_text(_("Round join"));
-
     joinBevel = makeRadioButton(joinGrp, INKSCAPE_ICON("stroke-join-bevel"),
                                 hb, STROKE_STYLE_BUTTON_JOIN, "bevel");
 
@@ -257,6 +323,14 @@ StrokeStyle::StrokeStyle() :
     //  For an example, draw a triangle with a large stroke width and modify the
     //  "Join" option (in the Fill and Stroke dialog).
     joinBevel->set_tooltip_text(_("Bevel join"));
+
+    joinRound = makeRadioButton(joinGrp, INKSCAPE_ICON("stroke-join-round"),
+                                hb, STROKE_STYLE_BUTTON_JOIN, "round");
+
+    // TRANSLATORS: Round join: joining lines with a rounded corner.
+    //  For an example, draw a triangle with a large stroke width and modify the
+    //  "Join" option (in the Fill and Stroke dialog).
+    joinRound->set_tooltip_text(_("Round join"));
 
     joinMiter = makeRadioButton(joinGrp, INKSCAPE_ICON("stroke-join-miter"),
                                 hb, STROKE_STYLE_BUTTON_JOIN, "miter");
@@ -430,6 +504,22 @@ StrokeStyle::makeRadioButton(Gtk::RadioButtonGroup &grp,
     return tb;
 }
 
+void StrokeStyle::enterEditMarkerMode(SPMarkerLoc _editMarkerMode)
+{
+    SPDesktop *desktop = this->desktop;
+
+    if (desktop) {
+        set_active_tool(desktop, "Marker");
+        Inkscape::UI::Tools::MarkerTool *mt = dynamic_cast<Inkscape::UI::Tools::MarkerTool*>(desktop->event_context);
+
+        if(mt) {
+            mt->editMarkerMode = _editMarkerMode;
+            mt->selection_changed(desktop->getSelection());
+        }
+    }
+}
+
+
 bool StrokeStyle::shouldMarkersBeUpdated()
 {
     return startMarkerCombo->update() || midMarkerCombo->update() ||
@@ -441,7 +531,7 @@ bool StrokeStyle::shouldMarkersBeUpdated()
  * Gets the marker uri string and applies it to all selected
  * items in the current desktop.
  */
-void StrokeStyle::markerSelectCB(MarkerComboBox *marker_combo, StrokeStyle *spw, SPMarkerLoc const /*which*/)
+void StrokeStyle::markerSelectCB(MarkerComboBox *marker_combo, StrokeStyle *spw, SPMarkerLoc const which)
 {
     if (spw->update || spw->shouldMarkersBeUpdated()) {
         return;
@@ -478,6 +568,18 @@ void StrokeStyle::markerSelectCB(MarkerComboBox *marker_combo, StrokeStyle *spw,
         item->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_STYLE_MODIFIED_FLAG);
 
         DocumentUndo::done(document, SP_VERB_DIALOG_FILL_STROKE, _("Set markers"));
+    }
+
+    /* edit marker mode - update */
+    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
+
+    if (desktop) {
+        Inkscape::UI::Tools::MarkerTool *mt = dynamic_cast<Inkscape::UI::Tools::MarkerTool*>(desktop->event_context);
+
+        if(mt) {
+            mt->editMarkerMode = which;
+            mt->selection_changed(desktop->getSelection());
+        }
     }
 
     sp_repr_css_attr_unref(css);
@@ -550,8 +652,8 @@ void
 StrokeStyle::setDashSelectorFromStyle(Inkscape::UI::Widget::DashSelector *dsel, SPStyle *style)
 {
     if (!style->stroke_dasharray.values.empty()) {
-        double d[64];
-        size_t len = MIN(style->stroke_dasharray.values.size(), 64);
+        std::vector<double> d;
+        size_t len = style->stroke_dasharray.values.size();
         /* Set dash */
         Inkscape::Preferences *prefs = Inkscape::Preferences::get();
         gboolean scale = prefs->getBool("/options/dash/scale", true);
@@ -561,15 +663,35 @@ StrokeStyle::setDashSelectorFromStyle(Inkscape::UI::Widget::DashSelector *dsel, 
         }
         for (unsigned i = 0; i < len; i++) {
             if (style->stroke_width.computed != 0)
-                d[i] = style->stroke_dasharray.values[i].value / scaledash;
+                d.push_back(style->stroke_dasharray.values[i].value / scaledash);
             else
-                d[i] = style->stroke_dasharray.values[i].value; // is there a better thing to do for stroke_width==0?
+                d.push_back(style->stroke_dasharray.values[i].value); // is there a better thing to do for stroke_width==0?
         }
-        dsel->set_dash(len, d,
+        dsel->set_dash(d,
                        style->stroke_width.computed != 0 ? style->stroke_dashoffset.value / scaledash
                                                          : style->stroke_dashoffset.value);
+        update_pattern(d.size(), d.data());
     } else {
-        dsel->set_dash(0, nullptr, 0.0);
+        dsel->set_dash(std::vector<double>(), 0.0);
+        update_pattern(0, nullptr);
+    }
+}
+
+void StrokeStyle::update_pattern(int ndash, const double* pattern) {
+    if (_editing_pattern || _pattern->has_focus()) return;
+
+    std::ostringstream ost;
+    for (int i = 0; i < ndash; ++i) {
+        ost << pattern[i] << ' ';
+    }
+    _pattern->set_text(ost.str().c_str());
+    if (ndash > 0) {
+        _pattern_label->show();
+        _pattern->show();
+    }
+    else {
+        _pattern_label->hide();
+        _pattern->hide();
     }
 }
 
@@ -737,17 +859,19 @@ StrokeStyle::updateLine()
                 (!query.stroke_extensions.hairline || result_sw == QUERY_STYLE_MULTIPLE_AVERAGED));
         unitSelector->set_sensitive(enabled);
 
-        joinMiter->set_sensitive(enabled && !query.stroke_extensions.hairline);
-        joinRound->set_sensitive(enabled && !query.stroke_extensions.hairline);
-        joinBevel->set_sensitive(enabled && !query.stroke_extensions.hairline);
+        bool is_enabled = enabled && !query.stroke_extensions.hairline;
+        joinMiter->set_sensitive(is_enabled);
+        joinRound->set_sensitive(is_enabled);
+        joinBevel->set_sensitive(is_enabled);
 
-        miterLimitSpin->set_sensitive(enabled && !query.stroke_extensions.hairline);
+        miterLimitSpin->set_sensitive(is_enabled);
 
-        capButt->set_sensitive(enabled && !query.stroke_extensions.hairline);
-        capRound->set_sensitive(enabled && !query.stroke_extensions.hairline);
-        capSquare->set_sensitive(enabled && !query.stroke_extensions.hairline);
+        capButt->set_sensitive(is_enabled);
+        capRound->set_sensitive(is_enabled);
+        capSquare->set_sensitive(is_enabled);
 
-        dashSelector->set_sensitive(enabled && !query.stroke_extensions.hairline);
+        dashSelector->set_sensitive(is_enabled);
+        _pattern->set_sensitive(is_enabled);
     }
 
     if (result_ml != QUERY_STYLE_NOTHING)
@@ -792,7 +916,7 @@ StrokeStyle::updateLine()
  */
 void
 StrokeStyle::setScaledDash(SPCSSAttr *css,
-                                int ndash, double *dash, double offset,
+                                int ndash, const double *dash, double offset,
                                 double scale)
 {
     if (ndash > 0) {
@@ -853,9 +977,9 @@ StrokeStyle::scaleLine()
 
         Inkscape::Util::Unit const *const unit = unitSelector->getUnit();
 
-        double *dash, offset;
-        int ndash;
-        dashSelector->get_dash(&ndash, &dash, &offset);
+        double offset;
+        const auto& dash = dashSelector->get_dash(&offset);
+        update_pattern(dash.size(), dash.data());
 
         for(auto i=items.begin();i!=items.end();++i){
             /* Set stroke width */
@@ -887,15 +1011,13 @@ StrokeStyle::scaleLine()
             Inkscape::Preferences *prefs = Inkscape::Preferences::get();
             gboolean scale = prefs->getBool("/options/dash/scale", true);
             if (scale) {
-                setScaledDash(css, ndash, dash, offset, width);
+                setScaledDash(css, dash.size(), dash.data(), offset, width);
             }
             else {
-                setScaledDash(css, ndash, dash, offset, document->getDocumentScale()[0]);
+                setScaledDash(css, dash.size(), dash.data(), offset, document->getDocumentScale()[0]);
             }
             sp_desktop_apply_css_recursive ((*i), css, true);
         }
-
-        g_free(dash);
 
         if (unit->type != Inkscape::Util::UNIT_TYPE_LINEAR) {
             // reset to 100 percent

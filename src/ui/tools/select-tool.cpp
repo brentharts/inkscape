@@ -42,6 +42,7 @@
 #include "display/drawing-item.h"
 #include "display/control/canvas-item-catchall.h"
 #include "display/control/canvas-item-drawing.h"
+#include "display/control/snap-indicator.h"
 
 #include "object/box3d.h"
 #include "style.h"
@@ -77,6 +78,8 @@ const std::string SelectTool::prefsPath = "/tools/select";
 SelectTool::SelectTool()
     : ToolBase("select.svg")
     , dragging(false)
+    , _force_dragging(false)
+    , _alt_on(false)
     , moved(false)
     , button_press_state(0)
     , cycling_wrap(true)
@@ -122,6 +125,7 @@ void SelectTool::setup() {
     auto select_scroll = Modifier::get(Modifiers::Type::SELECT_CYCLE)->get_label();
 
     // cursors in select context
+    _default_cursor = this->cursor;
     Gtk::Widget *w = desktop->getCanvas();
     if (w->get_window()) {
         // Window may not be open when tool is setup for the first time!
@@ -315,14 +319,14 @@ bool SelectTool::item_handler(SPItem* item, GdkEvent* event) {
     
 
         case GDK_ENTER_NOTIFY: {
-            if (!desktop->isWaitingCursor() && !this->dragging) {
+            if (!dragging && !_alt_on && !desktop->isWaitingCursor()) {
                 auto window = desktop->getCanvas()->get_window();
                 window->set_cursor(_cursor_mouseover);
             }
             break;
         }
         case GDK_LEAVE_NOTIFY:
-            if (!desktop->isWaitingCursor() && !this->dragging) {
+            if (!dragging && !_force_dragging && !desktop->isWaitingCursor()) {
                 auto window = desktop->getCanvas()->get_window();
                 window->set_cursor(this->cursor);
             }
@@ -345,6 +349,13 @@ bool SelectTool::item_handler(SPItem* item, GdkEvent* event) {
                     _seltrans->getNextClosestPoint(true);
                     ret = TRUE;
                 }
+            }
+            break;
+
+        case GDK_BUTTON_RELEASE:
+        case GDK_KEY_RELEASE:
+            if (_alt_on) {
+                _default_cursor = _cursor_mouseover;
             }
             break;
 
@@ -523,6 +534,10 @@ bool SelectTool::root_handler(GdkEvent* event) {
 
         case GDK_MOTION_NOTIFY:
         {
+            if (this->grabbed && event->button.state & (GDK_SHIFT_MASK | GDK_MOD1_MASK)) {
+                desktop->snapindicator->remove_snaptarget();
+            }
+
             tolerance = prefs->getIntLimited("/options/dragtolerance/value", 0, 0, 100);
 
             bool first_hit = Modifier::get(Modifiers::Type::SELECT_FIRST_HIT)->active(this->button_press_state);
@@ -684,7 +699,15 @@ bool SelectTool::root_handler(GdkEvent* event) {
                     this->dragging = FALSE;
 
                     auto window = desktop->getCanvas()->get_window();
-                    window->set_cursor(_cursor_mouseover);
+
+                    if (!_alt_on) {
+                        if (_force_dragging) {
+                            window->set_cursor(_default_cursor);
+                            _force_dragging = false;
+                        } else {
+                            window->set_cursor(_cursor_mouseover);
+                        }
+                    }
 
                     sp_event_context_discard_delayed_snap_event(this);
 
@@ -707,7 +730,8 @@ bool SelectTool::root_handler(GdkEvent* event) {
                             Geom::OptRect const b = r->getRectangle();
                             items = desktop->getDocument()->getItemsPartiallyInBox(desktop->dkey, (*b) * desktop->dt2doc());
                         } else if (r->getMode() == RUBBERBAND_MODE_TOUCHPATH) {
-                            items = desktop->getDocument()->getItemsAtPoints(desktop->dkey, r->getPoints());
+                            bool topmost_items_only = prefs->getBool("/options/selection/touchsel_topmost_only");
+                            items = desktop->getDocument()->getItemsAtPoints(desktop->dkey, r->getPoints(), true, topmost_items_only);
                         }
 
                         _seltrans->resetState();
@@ -856,6 +880,10 @@ bool SelectTool::root_handler(GdkEvent* event) {
                                     || (keyval == GDK_KEY_Meta_L)
                                     || (keyval == GDK_KEY_Meta_R));
 
+            if (alt) {
+                _alt_on = true;
+            }
+
             if (!key_is_a_modifier (keyval)) {
                 this->defaultMessageContext()->clear();
             } else if (this->grabbed || _seltrans->isGrabbed()) {
@@ -880,6 +908,8 @@ bool SelectTool::root_handler(GdkEvent* event) {
                     if (alt && !selection->isEmpty() && !desktop->isWaitingCursor()) {
                         auto window = desktop->getCanvas()->get_window();
                         window->set_cursor(_cursor_dragging);
+                        _force_dragging = true;
+                        _default_cursor = this->cursor;
                     }
                     //*/
                     break;
@@ -1104,6 +1134,10 @@ bool SelectTool::root_handler(GdkEvent* event) {
                          || (keyval == GDK_KEY_Meta_L)
                          || (keyval == GDK_KEY_Meta_R));
 
+            if (alt) {
+                _alt_on = false;
+            }
+
             if (Inkscape::Rubberband::get(desktop)->is_started()) {
                 // if Alt then change cursor to moving cursor:
                 if (alt) {
@@ -1120,10 +1154,10 @@ bool SelectTool::root_handler(GdkEvent* event) {
             }
 
             // set cursor to default.
-            if (!desktop->isWaitingCursor()) {
-                // Do we need to reset the cursor here on key release ?
-                //GdkWindow* window = gtk_widget_get_window (GTK_WIDGET (desktop->getCanvas()));
-                //gdk_window_set_cursor(window, event_context->cursor);
+            if (alt && !(this->grabbed || _seltrans->isGrabbed()) && !selection->isEmpty() && !desktop->isWaitingCursor()) {
+                auto window = desktop->getCanvas()->get_window();
+                window->set_cursor(_default_cursor);
+                _force_dragging = false;
             }
             break;
         }

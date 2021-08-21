@@ -133,7 +133,7 @@ private:
     void setCapButtons(Gtk::ToggleButton *active);
     void setPaintOrderButtons(Gtk::ToggleButton *active);
     void scaleLine();
-    void setScaledDash(SPCSSAttr *css, int ndash, double *dash, double offset, double scale);
+    void setScaledDash(SPCSSAttr *css, int ndash, const double *dash, double offset, double scale);
     bool isHairlineSelected() const;
 
     StrokeStyleButton * makeRadioButton(Gtk::RadioButtonGroup &grp,
@@ -157,6 +157,9 @@ private:
     MarkerComboBox *startMarkerCombo;
     MarkerComboBox *midMarkerCombo;
     MarkerComboBox *endMarkerCombo;
+    Gtk::Button *editStartMarkerButton;
+    Gtk::Button *editMidMarkerButton;
+    Gtk::Button *editEndMarkerButton;
     Gtk::Grid *table;
     Glib::RefPtr<Gtk::Adjustment> *widthAdj;
     Glib::RefPtr<Gtk::Adjustment> *miterLimitAdj;
@@ -177,6 +180,10 @@ private:
     StrokeStyleButton *paintOrderSMF;
     StrokeStyleButton *paintOrderMSF;
     Inkscape::UI::Widget::DashSelector *dashSelector;
+    Gtk::Entry* _pattern = nullptr;
+    Gtk::Label* _pattern_label = nullptr;
+    void update_pattern(int ndash, const double* pattern);
+    bool _editing_pattern = false;
 
     gboolean update;
     SPDesktop *desktop;
@@ -190,6 +197,7 @@ private:
     Inkscape::Util::Unit const *_old_unit;
 
     void _handleDocumentReplaced(SPDesktop *, SPDocument *);
+    void enterEditMarkerMode(SPMarkerLoc editMarkerMode);
     sigc::connection _document_replaced_connection;
 };
 

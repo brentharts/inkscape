@@ -260,6 +260,7 @@ protected:
     UI::Widget::PrefCheckButton _dark_theme;
     UI::Widget::PrefSlider _contrast_theme;
     UI::Widget::PrefCheckButton _narrow_spinbutton;
+    UI::Widget::PrefCheckButton _compact_colorselector;
     UI::Widget::PrefCheckButton _symbolic_icons;
     UI::Widget::PrefCheckButton _symbolic_base_colors;
     UI::Widget::PrefCheckButton _symbolic_highlight_colors;
@@ -348,6 +349,7 @@ protected:
     UI::Widget::PrefCheckButton _sel_hidden;
     UI::Widget::PrefCheckButton _sel_locked;
     UI::Widget::PrefCheckButton _sel_inlayer_same;
+    UI::Widget::PrefCheckButton _sel_touch_topmost_only;
     UI::Widget::PrefCheckButton _sel_layer_deselects;
     UI::Widget::PrefCheckButton _sel_cycle;
 
