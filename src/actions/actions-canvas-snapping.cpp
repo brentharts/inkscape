@@ -27,6 +27,8 @@
 #include "object/sp-namedview.h"
 #include "snap-enums.h"
 
+using namespace Inkscape;
+
 // There are four snapping lists that must be connected:
 // 1. The attribute name in NamedView: e.g. "inkscape:snap-bbox".
 // 2. The SPAttr value:       e.g. SPAttr::INKSCAPE_SNAP_BBOX.
@@ -59,7 +61,9 @@ void set_canvas_snapping(SPDocument* document, const SPAttr option, std::optiona
 
     bool v = false;
     auto value = [&](bool val){ return set.value_or(val); };
+// }
 
+// void set_snapping(SnapTargetType snap, bool enabled) {
     switch (option) {
         case SPAttr::INKSCAPE_SNAP_GLOBAL:
             v = nv->snap_manager.snapprefs.getSnapEnabledGlobally();
@@ -218,7 +222,8 @@ canvas_snapping_toggle(SPDocument* document, const SPAttr option)
 
 struct SnapInfo {
     Glib::ustring name;         // action name without "doc." prefix
-    SPAttr attr;                // corresponding attribute
+    SnapTargetType type;        // corresponding snapping type
+    // SPAttr attr;                // corresponding attribute
     // for simple snapping use only:
     std::optional<bool> set;    // if given this is default for when "simple snapping" is ON and this option is not exposed in the UI
                                 // if not present it can be toggled by simple snapping dialog (and this option is exposed in the UI)
@@ -227,42 +232,42 @@ struct SnapInfo {
 typedef std::vector<SnapInfo> SnapVector;
 
 SnapVector snap_bbox = {
-    { "snap-bbox",               SPAttr::INKSCAPE_SNAP_BBOX },
-    { "snap-bbox-edge",          SPAttr::INKSCAPE_SNAP_BBOX_EDGE,          true },
-    { "snap-bbox-corner",        SPAttr::INKSCAPE_SNAP_BBOX_CORNER,        true },
-    { "snap-bbox-edge-midpoint", SPAttr::INKSCAPE_SNAP_BBOX_EDGE_MIDPOINT, false },
-    { "snap-bbox-center",        SPAttr::INKSCAPE_SNAP_BBOX_MIDPOINT,      false },
+    { "snap-bbox",               SNAPTARGET_BBOX_CATEGORY }, //SPAttr::INKSCAPE_SNAP_BBOX },
+    { "snap-bbox-edge",          SNAPTARGET_BBOX_EDGE,          true }, //SPAttr::INKSCAPE_SNAP_BBOX_EDGE,          true },
+    { "snap-bbox-corner",        SNAPTARGET_BBOX_CORNER,        true },
+    { "snap-bbox-edge-midpoint", SNAPTARGET_BBOX_EDGE_MIDPOINT, false },
+    { "snap-bbox-center",        SNAPTARGET_BBOX_MIDPOINT,      false },
 };
 
 SnapVector snap_node = {
-    { "snap-node-category",      SPAttr::INKSCAPE_SNAP_NODE },
-    { "snap-path",               SPAttr::INKSCAPE_SNAP_PATH,               false },
-    { "snap-path-intersection",  SPAttr::INKSCAPE_SNAP_PATH_INTERSECTION,  false },
-    { "snap-node-cusp",          SPAttr::INKSCAPE_SNAP_NODE_CUSP,          true },
-    { "snap-node-smooth",        SPAttr::INKSCAPE_SNAP_NODE_SMOOTH,        true },
-    { "snap-line-midpoint",      SPAttr::INKSCAPE_SNAP_LINE_MIDPOINT,      false },
-    { "snap-line-tangential",    SPAttr::INKSCAPE_SNAP_TANG,               false },
-    { "snap-line-perpendicular", SPAttr::INKSCAPE_SNAP_PERP,               false },
+    { "snap-node-category",      SNAPTARGET_NODE_CATEGORY },
+    { "snap-path",               SNAPTARGET_PATH,               true },
+    { "snap-path-intersection",  SNAPTARGET_PATH_INTERSECTION,  true },
+    { "snap-node-cusp",          SNAPTARGET_NODE_CUSP,          true },
+    { "snap-node-smooth",        SNAPTARGET_NODE_SMOOTH,        true },
+    { "snap-line-midpoint",      SNAPTARGET_LINE_MIDPOINT,      true },
+    { "snap-line-tangential",    SNAPTARGET_PATH_TANGENTIAL,    true },
+    { "snap-line-perpendicular", SNAPTARGET_PATH_PERPENDICULAR, true },
 };
 
 SnapVector snap_alignment = {
-    { "snap-alignment",          SPAttr::INKSCAPE_SNAP_ALIGNMENT },
-    { "snap-alignment-self",     SPAttr::INKSCAPE_SNAP_ALIGNMENT_SELF,     false },
+    { "snap-alignment",          SNAPTARGET_ALIGNMENT_CATEGORY },
+    { "snap-alignment-self",     SNAPTARGET_ALIGNMENT_HANDLE,      false },
     // separate category:
-    { "snap-distribution",       SPAttr::INKSCAPE_SNAP_DISTRIBUTION,       false },
+    { "snap-distribution",       SNAPTARGET_DISTRIBUTION_CATEGORY, true },
 };
 
 SnapVector snap_all_the_rest = {
-    { "snap-others",             SPAttr::INKSCAPE_SNAP_OTHERS,             true },
-    { "snap-object-midpoint",    SPAttr::INKSCAPE_SNAP_OBJECT_MIDPOINT,    false },
-    { "snap-rotation-center",    SPAttr::INKSCAPE_SNAP_ROTATION_CENTER,    false },
-    { "snap-text-baseline",      SPAttr::INKSCAPE_SNAP_TEXT_BASELINE,      true },
-    { "snap-path-mask",          SPAttr::INKSCAPE_SNAP_PATH_MASK,          true },
-    { "snap-path-clip",          SPAttr::INKSCAPE_SNAP_PATH_CLIP,          true },
+    { "snap-others",             SNAPTARGET_OTHERS_CATEGORY,    true },
+    { "snap-object-midpoint",    SNAPTARGET_OBJECT_MIDPOINT,    false },
+    { "snap-rotation-center",    SNAPTARGET_ROTATION_CENTER,    false },
+    { "snap-text-baseline",      SNAPTARGET_TEXT_BASELINE,      true },
+    { "snap-path-mask",          SNAPTARGET_PATH_MASK,          true },
+    { "snap-path-clip",          SNAPTARGET_PATH_CLIP,          true },
 
-    { "snap-page-border",        SPAttr::INKSCAPE_SNAP_PAGE_BORDER,        false },
-    { "snap-grid",               SPAttr::INKSCAPE_SNAP_GRID,               true },
-    { "snap-guide",              SPAttr::INKSCAPE_SNAP_GUIDE,              true },
+    { "snap-page-border",        SNAPTARGET_PAGE_BORDER,        false },
+    { "snap-grid",               SNAPTARGET_GRID,               true },
+    { "snap-guide",              SNAPTARGET_GUIDE,              true },
 };
 
 enum class SimpleSnap { BBox, Nodes, Alignment, Rest };
@@ -460,6 +465,57 @@ set_actions_canvas_snapping(SPDocument* document)
     }
 
     bool global = nv->snap_manager.snapprefs.getSnapEnabledGlobally();
+    bool alignment = nv->snap_manager.snapprefs.isTargetSnappable(Inkscape::SNAPTARGET_ALIGNMENT_CATEGORY);
+    bool distribution = nv->snap_manager.snapprefs.isTargetSnappable(Inkscape::SNAPTARGET_DISTRIBUTION_CATEGORY);
+    bool bbox = nv->snap_manager.snapprefs.isTargetSnappable(Inkscape::SNAPTARGET_BBOX_CATEGORY);
+    bool node = nv->snap_manager.snapprefs.isTargetSnappable(Inkscape::SNAPTARGET_NODE_CATEGORY);
+    bool other = nv->snap_manager.snapprefs.isTargetSnappable(Inkscape::SNAPTARGET_OTHERS_CATEGORY);
+
+    struct { const char* action; bool state; bool enabled; } snap_options[] = {
+        { "snap-global-toggle", global, true }, // Always enabled
+
+        { "snap-alignment", alignment, global },
+        { "snap-alignment-self",     nv->snap_manager.snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_ALIGNMENT_HANDLE),   global && alignment },
+
+        { "snap-distribution", distribution, global },
+
+        { "snap-bbox", bbox, global },
+        { "snap-bbox-edge",          nv->snap_manager.snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_BBOX_EDGE),          global && bbox },
+        { "snap-bbox-corner",        nv->snap_manager.snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_BBOX_CORNER),        global && bbox },
+        { "snap-bbox-edge-midpoint", nv->snap_manager.snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_BBOX_EDGE_MIDPOINT), global && bbox },
+        { "snap-bbox-center",        nv->snap_manager.snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_BBOX_MIDPOINT),      global && bbox },
+
+        { "snap-node-category", node, global },
+        { "snap-path",               nv->snap_manager.snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_PATH),               global && node },
+        { "snap-path-intersection",  nv->snap_manager.snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_PATH_INTERSECTION),  global && node },
+        { "snap-node-cusp",          nv->snap_manager.snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_NODE_CUSP),          global && node },
+        { "snap-node-smooth",        nv->snap_manager.snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_NODE_SMOOTH),        global && node },
+        { "snap-line-midpoint",      nv->snap_manager.snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_LINE_MIDPOINT),      global && node },
+
+        { "snap-others", other, global },
+        { "snap-object-midpoint",    nv->snap_manager.snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_OBJECT_MIDPOINT),    global && other },
+        { "snap-rotation-center",    nv->snap_manager.snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_ROTATION_CENTER),    global && other },
+        { "snap-text-baseline",      nv->snap_manager.snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_TEXT_BASELINE),      global && other },
+
+        { "snap-page-border",        nv->snap_manager.snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_PAGE_BORDER),        global },
+        { "snap-grid",               nv->snap_manager.snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_GRID),               global },
+        { "snap-guide",              nv->snap_manager.snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_GUIDE),              global },
+
+        { "snap-path-clip",          nv->snap_manager.snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_PATH_CLIP),          global },
+        { "snap-path-mask",          nv->snap_manager.snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_PATH_MASK),          global },
+
+        { "simple-snap-bbox", bbox, global },
+        { "simple-snap-nodes", node, global },
+        { "simple-snap-alignment", alignment, global },
+    };
+
+    for (auto&& snap : snap_options) {
+        set_actions_canvas_snapping_helper(map, snap.action, snap.state, snap.enabled);
+    }
+
+//////////////////////////////////////////
+/*
+    bool global = nv->snap_manager.snapprefs.getSnapEnabledGlobally();
     set_actions_canvas_snapping_helper(map, "snap-global-toggle", global, true); // Always enabled
 
     bool alignment = nv->snap_manager.snapprefs.isTargetSnappable(Inkscape::SNAPTARGET_ALIGNMENT_CATEGORY);
@@ -500,6 +556,7 @@ set_actions_canvas_snapping(SPDocument* document)
     set_actions_canvas_snapping_helper(map, "simple-snap-bbox", bbox, global);
     set_actions_canvas_snapping_helper(map, "simple-snap-nodes", node, global);
     set_actions_canvas_snapping_helper(map, "simple-snap-alignment", alignment, global);
+*/
 }
 
 /**
