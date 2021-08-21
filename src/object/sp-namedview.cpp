@@ -31,7 +31,7 @@
 #include "enums.h"
 #include "ui/monitor.h"
 #include "ui/dialog/dialog-container.h"
-
+#include "actions/actions-canvas-snapping.h"
 #include "sp-guide.h"
 #include "sp-item-group.h"
 #include "sp-namedview.h"
@@ -60,7 +60,7 @@ static void sp_namedview_lock_single_guide(SPGuide* guide, bool show);
 static gboolean sp_str_to_bool(const gchar *str);
 static gboolean sp_nv_read_opacity(const gchar *str, guint32 *color);
 
-SPNamedView::SPNamedView() : SPObjectGroup(), snap_manager(this) {
+SPNamedView::SPNamedView() : SPObjectGroup(), snap_manager(this, get_snapping_preferences()) {
 
     this->zoom = 0;
     this->guidecolor = 0;

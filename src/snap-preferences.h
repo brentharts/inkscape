@@ -30,6 +30,8 @@ public:
     bool isTargetSnappable(Inkscape::SnapTargetType const target1, Inkscape::SnapTargetType const target2, Inkscape::SnapTargetType const target3, Inkscape::SnapTargetType const target4) const;
     bool isTargetSnappable(Inkscape::SnapTargetType const target1, Inkscape::SnapTargetType const target2, Inkscape::SnapTargetType const target3, Inkscape::SnapTargetType const target4, Inkscape::SnapTargetType const target5) const;
     bool isSnapButtonEnabled(Inkscape::SnapTargetType const target) const;
+    bool get_simple_snap(Inkscape::SimpleSnap option) const;
+    void set_simple_snap(Inkscape::SimpleSnap option, bool enable);
 
     SnapTargetType source2target(SnapSourceType source) const;
     bool isSourceSnappable(Inkscape::SnapSourceType const source) const;
@@ -92,6 +94,8 @@ private:
     //snap bbox corners to nodes, or nodes to bboxes.
     //(snapping to grids and guides is not affected by this)
     bool _strict_snapping;
+
+    bool _simple_snapping[_MaxEnumValue];
 
     bool _snap_perp;
     bool _snap_tang;

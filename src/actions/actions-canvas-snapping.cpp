@@ -29,6 +29,12 @@
 
 using namespace Inkscape;
 
+// global and single location of snapping preferences
+Inkscape::SnapPreferences& get_snapping_preferences() {
+    static Inkscape::SnapPreferences preferences;
+    return preferences;
+}
+
 // There are four snapping lists that must be connected:
 // 1. The attribute name in NamedView: e.g. "inkscape:snap-bbox".
 // 2. The SPAttr value:       e.g. SPAttr::INKSCAPE_SNAP_BBOX.
@@ -40,6 +46,7 @@ using namespace Inkscape;
 
 // record 'option' in a corresponding document attribute;
 // set it to a value of 'set' if given, or toggle if there's no value specified
+/*
 void set_canvas_snapping(SPDocument* document, const SPAttr option, std::optional<bool> set = std::optional<bool>()) {
     Inkscape::XML::Node* repr = document->getReprNamedView();
 
@@ -203,7 +210,20 @@ void set_canvas_snapping(SPDocument* document, const SPAttr option, std::optiona
         default:
             std::cerr << "canvas_snapping_toggle: unhandled option: " << (int)option << std::endl;
     }
+} */
+
+// Turn requested snapping type on or off:
+// * type - snap target
+// * enabled - true to turn it on, false to turn it off
+//
+void set_canvas_snapping(SnapTargetType type, bool enabled) {
+    //
+    get_snapping_preferences().setTargetSnappable(type, enabled);
 }
+
+// void set_canvas_snapping(SPDocument* document, SnapTargetType type, std::optional<bool> set = std::optional<bool>()) {
+    // DELETE
+// }
 
 void update_actions(SPDocument* document) {
     // Some actions depend on others... we need to update everything!
@@ -213,10 +233,9 @@ void update_actions(SPDocument* document) {
     document->setModifiedSinceSave();
 }
 
-static void
-canvas_snapping_toggle(SPDocument* document, const SPAttr option)
-{
-    set_canvas_snapping(document, option);
+static void canvas_snapping_toggle(SPDocument* document, SnapTargetType type) {
+    //TODO:
+    // set_canvas_snapping(document, type);
     update_actions(document);
 }
 
@@ -270,22 +289,21 @@ SnapVector snap_all_the_rest = {
     { "snap-guide",              SNAPTARGET_GUIDE,              true },
 };
 
-enum class SimpleSnap { BBox, Nodes, Alignment, Rest };
 
-void set_simple_snap(SPDocument* document, SimpleSnap option, bool toggle) {
-    Inkscape::XML::Node* repr = document->getReprNamedView();
+void set_simple_snap(SPDocument* document, SimpleSnap option, std::optional<bool> value) {
+    // Inkscape::XML::Node* repr = document->getReprNamedView();
 
-    if (repr == nullptr) {
-        std::cerr << __func__ << ": namedview XML repr missing!" << std::endl;
-        return;
-    }
+    // if (repr == nullptr) {
+    //     std::cerr << __func__ << ": namedview XML repr missing!" << std::endl;
+    //     return;
+    // }
 
-    SPObject* obj = document->getObjectByRepr(repr);
-    SPNamedView* nv = dynamic_cast<SPNamedView*>(obj);
-    if (nv == nullptr) {
-        std::cerr << __func__ << ": no namedview!" << std::endl;
-        return;
-    }
+    // SPObject* obj = document->getObjectByRepr(repr);
+    // SPNamedView* nv = dynamic_cast<SPNamedView*>(obj);
+    // if (nv == nullptr) {
+    //     std::cerr << __func__ << ": no namedview!" << std::endl;
+    //     return;
+    // }
 
     const SnapVector* vect = nullptr;
     switch (option) {
@@ -308,12 +326,8 @@ void set_simple_snap(SPDocument* document, SimpleSnap option, bool toggle) {
 
     if (vect) {
         for (auto&& info : *vect) {
-            if (toggle) {
-                set_canvas_snapping(document, info.attr);
-            }
-            else {
-                set_canvas_snapping(document, info.attr, info.set.value_or(false));
-            }
+            bool enable = value.value_or(info.set.value_or(false));
+            set_canvas_snapping(info.type, enable);
         }
 
         update_actions(document);
@@ -322,11 +336,12 @@ void set_simple_snap(SPDocument* document, SimpleSnap option, bool toggle) {
 
 void toggle_simple_snap_option(SPDocument* document, SimpleSnap option) {
     // toggle desired option
-    set_simple_snap(document, option, true);
+    bool enabled = !get_snapping_preferences().get_simple_snap(option);
+    set_simple_snap(document, option, enabled);
 
     // reset others not visible / not exposed to their "simple" defaults
     for (auto&& info : snap_all_the_rest) {
-        set_canvas_snapping(document, info.attr, info.set);
+        // set_canvas_snapping(document, info.attr, info.set);
     }
 }
 
@@ -386,19 +401,19 @@ add_actions_canvas_snapping(SPDocument* document)
     map->add_action_bool( "snap-global-toggle",      sigc::bind<SPDocument*, SPAttr>(sigc::ptr_fun(&canvas_snapping_toggle),  document, SPAttr::INKSCAPE_SNAP_GLOBAL));
 
     for (auto&& info : snap_bbox) {
-        map->add_action_bool(info.name, [=](){ canvas_snapping_toggle(document, info.attr); });
+        map->add_action_bool(info.name, [=](){ canvas_snapping_toggle(document, info.type); });
     }
 
     for (auto&& info : snap_node) {
-        map->add_action_bool(info.name, [=](){ canvas_snapping_toggle(document, info.attr); });
+        map->add_action_bool(info.name, [=](){ canvas_snapping_toggle(document, info.type); });
     }
 
     for (auto&& info : snap_alignment) {
-        map->add_action_bool(info.name, [=](){ canvas_snapping_toggle(document, info.attr); });
+        map->add_action_bool(info.name, [=](){ canvas_snapping_toggle(document, info.type); });
     }
 
     for (auto&& info : snap_all_the_rest) {
-        map->add_action_bool(info.name, [=](){ canvas_snapping_toggle(document, info.attr); });
+        map->add_action_bool(info.name, [=](){ canvas_snapping_toggle(document, info.type); });
     }
 
     // Simple snapping popover
