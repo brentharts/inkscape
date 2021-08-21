@@ -111,6 +111,12 @@ void Inkscape::SelCue::_updateItemBboxes(gint mode, int prefs_bbox)
     int bcount = 0;
     for (auto item : items) {
 
+        if (auto group = dynamic_cast<SPGroup *>(item)) {
+            if (group->layerMode() == SPGroup::PAGE) {
+                continue;
+            }
+        }
+
         auto canvas_item = _item_bboxes[bcount++];
 
         if (canvas_item) {
@@ -157,6 +163,12 @@ void Inkscape::SelCue::_newItemBboxes()
     
     auto items = _selection->items();
     for (auto item : items) {
+
+        if (auto group = dynamic_cast<SPGroup *>(item)) {
+            if (group->layerMode() == SPGroup::PAGE) {
+                continue;
+            }
+        }
 
         Geom::OptRect const bbox = (prefs_bbox == 0) ?
             item->desktopVisualBounds() : item->desktopGeometricBounds();

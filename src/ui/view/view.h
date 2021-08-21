@@ -99,7 +99,7 @@ public:
     virtual void onRedrawRequested() {};
     virtual void onStatusMessage (Inkscape::MessageType type, gchar const *message) {};
     virtual void onDocumentFilenameSet (gchar const* filename) {};
-    virtual void onDocumentResized (double, double) {};
+    virtual void onViewBoxResized (double, double) {};
 
 protected:
     SPDocument *_doc;
@@ -128,7 +128,7 @@ private:
     sigc::connection _redraw_requested_connection;
     sigc::connection _message_changed_connection;  // foreign
     sigc::connection _document_uri_set_connection; // foreign
-    sigc::connection _document_resized_connection; // foreign
+    sigc::connection _viewbox_resized_connection; // foreign
 };
 
 }}}

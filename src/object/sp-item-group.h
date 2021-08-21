@@ -29,7 +29,7 @@ public:
 	SPGroup();
 	~SPGroup() override;
 
-    enum LayerMode { GROUP, LAYER, MASK_HELPER };
+    enum LayerMode { GROUP, LAYER, PAGE, MASK_HELPER };
 
     bool isLayer() const { return _layer_mode == LAYER; }
 
@@ -44,8 +44,8 @@ public:
     void setInsertBottom(bool insertbottom);
 
     LayerMode effectiveLayerMode(unsigned int display_key) const {
-        if ( _layer_mode == LAYER ) {
-            return LAYER;
+        if ( _layer_mode == LAYER || _layer_mode == PAGE ) {
+            return _layer_mode;
         } else {
             return layerDisplayMode(display_key);
         }
@@ -115,6 +115,12 @@ inline bool SP_IS_LAYER(SPObject const *obj)
 {
     auto group = dynamic_cast<SPGroup const *>(obj);
     return group && group->layerMode() == SPGroup::LAYER;
+}
+
+inline bool SP_IS_PAGE(SPObject const *obj)
+{
+    auto group = dynamic_cast<SPGroup const *>(obj);
+    return group && group->layerMode() == SPGroup::PAGE;
 }
 
 void set_default_highlight_colors(std::vector<guint32> colors);

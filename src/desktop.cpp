@@ -39,6 +39,7 @@
 #include "layer-manager.h"
 #include "message-context.h"
 #include "message-stack.h"
+#include "page-manager.h"
 
 #include "display/drawing.h"
 #include "display/control/canvas-temporary-item-list.h"
@@ -106,6 +107,7 @@ SPDesktop::SPDesktop()
     , canvas(nullptr)
     , selection(nullptr)
     , event_context(nullptr)
+    , page_manager(nullptr)
     , temporary_item_list(nullptr)
     , snapindicator(nullptr)
     , current(nullptr)  // current style
@@ -223,22 +225,10 @@ SPDesktop::init (SPNamedView *nv, Inkscape::UI::Widget::Canvas *acanvas, SPDeskt
     Geom::Rect const d(Geom::Point(0.0, 0.0),
                        Geom::Point(document->getWidth().value("px"), document->getHeight().value("px")));
 
-    canvas_background = new Inkscape::CanvasItemRect(canvas_group_drawing, d);
-    canvas_background->set_name("CanvasItemRect:PageBackground");
-    canvas_background->set_stroke(0x00000000);
-    canvas_background->set_background(0x00000000);
-
-    // canvas_page is used to render page border only (no fill, no background) as it can be placed on top of drawing
-    canvas_page = new Inkscape::CanvasItemRect(canvas_group_drawing, d);
-    canvas_page->set_name( "CanvasItemRect:Page" );
-    canvas_page->set_stroke(0x00000000);
-
-    canvas_shadow = new Inkscape::CanvasItemRect(canvas_group_drawing, d);
-    canvas_shadow->set_name( "CanvasItemRect:Shadow" );
-    canvas_shadow->set_stroke(0x00000000);
-    if ( namedview->pageshadow != 0 && namedview->showpageshadow ) {
-        canvas_shadow->set_shadow(0x3f3f3fff, namedview->pageshadow);
-    }
+    // The viewBox is not a page, instead it is the boundry defined by the document's "viewBox"
+    canvas_viewbox = new Inkscape::CanvasItemRect(canvas_group_drawing, d);
+    canvas_viewbox->set_name("CanvasItemRect:ViewBox");
+    canvas_viewbox->set_stroke(0xff000022);
 
     canvas_drawing = new Inkscape::CanvasItemDrawing(canvas_group_drawing);
     canvas_drawing->get_drawing()->delta = prefs->getDouble("/options/cursortolerance/value", 1.0);
@@ -262,7 +252,7 @@ SPDesktop::init (SPNamedView *nv, Inkscape::UI::Widget::Canvas *acanvas, SPDeskt
 
     /* --------- End Canvas Items ----------- */
 
-    /* Connect event for page resize */
+    /* Connect event for page display properties */
     _modified_connection =
         namedview->connectModified(sigc::bind<2>(sigc::ptr_fun(&_namedview_modified), this));
 
@@ -290,6 +280,9 @@ SPDesktop::init (SPNamedView *nv, Inkscape::UI::Widget::Canvas *acanvas, SPDeskt
     _reconstruction_finish_connection =
         document->connectReconstructionFinish(sigc::bind(sigc::ptr_fun(_reconstruction_finish), this));
     _reconstruction_old_layer_id.clear();
+
+    // TODO: Remove me (see layer-manager)
+    page_manager = new Inkscape::PageManager(this);
 
     showGrids(namedview->grids_visible, false);
 }
@@ -327,6 +320,11 @@ void SPDesktop::destroy()
     if (zoomgesture) {
         g_signal_handlers_disconnect_by_data(zoomgesture, this);
         g_clear_object(&zoomgesture);
+    }
+
+    if (page_manager) {
+        delete page_manager;
+        page_manager = nullptr;
     }
 
     if (canvas_drawing) {
@@ -1514,14 +1512,14 @@ SPDesktop::onDocumentFilenameSet (gchar const* filename)
  * Resized callback.
  */
 void
-SPDesktop::onDocumentResized (gdouble width, gdouble height)
+SPDesktop::onViewBoxResized (gdouble width, gdouble height)
 {
     assert(canvas->get_affine() == _current_affine.d2w());
 
+    // XXX This viewbox should only be visible if we are in a multipage document
     Geom::Rect const a(Geom::Point(0, 0), Geom::Point(width, height));
-    canvas_background->set_rect(a);
-    canvas_page->set_rect(a);
-    canvas_shadow->set_rect(a);
+    canvas_viewbox->set_rect(a);
+    // TODO: Update the default page, if we have one.
 }
 
 /**
@@ -1594,30 +1592,7 @@ static void _namedview_modified (SPObject *obj, guint flags, SPDesktop *desktop)
             desktop->getCanvasPageBackground()->set_background(nv->pagecolor | 0xff);
         }
 
-        /* Show/hide page border */
-        if (nv->showborder) {
-            desktop->getCanvasPage()->set_stroke(nv->bordercolor);
-            desktop->getCanvasPage()->show();
-
-            // place in the z-order stack
-            if (nv->borderlayer == SP_BORDER_LAYER_BOTTOM) {
-                desktop->getCanvasPage()->set_z_position(1); // In display group, on top of shadow.
-            } else {
-                desktop->getCanvasPage()->raise_to_top(); // In display group.
-            }
-
-            /* Show/hide page shadow */
-            if (nv->showpageshadow && nv->pageshadow) {
-                desktop->getCanvasShadow()->set_shadow(nv->bordercolor, nv->pageshadow);
-                desktop->getCanvasShadow()->show();
-            } else {
-                desktop->getCanvasShadow()->hide();
-            }
-
-        } else {
-            desktop->getCanvasPage()->hide();
-            desktop->getCanvasShadow()->hide(); // No page border, no shadow!
-        }
+        // XXX Modify page attributes here.
 
         Inkscape::Preferences *prefs = Inkscape::Preferences::get();
         if (SP_RGBA32_R_U(nv->pagecolor) +

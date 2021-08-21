@@ -572,6 +572,16 @@ void Inkscape::SelTrans::_updateHandles()
     for (auto & knot : knots)
         knot->hide();
 
+    // Never show handles for pages
+    if (auto item = _desktop->selection->single()) {
+        if (auto group = dynamic_cast<SPGroup *>(item)) {
+            if (group->layerMode() == SPGroup::PAGE) {
+                _desktop->selection->setAnchor(0.0, 0.0, false);
+                return;
+            }
+        }
+    }
+
     if ( !_show_handles || _empty ) {
         _desktop->selection->setAnchor(0.0, 0.0, false);
         return;

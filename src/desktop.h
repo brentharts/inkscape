@@ -70,6 +70,7 @@ struct InkscapeApplication;
 namespace Inkscape {
     class LayerManager;
     class MessageContext;
+    class PageManager;
     class Selection;
 
     class CanvasItem;
@@ -168,12 +169,12 @@ public:
     Inkscape::CanvasItemGroup    *getCanvasTemp()     const { return canvas_group_temp; }
 
     Inkscape::CanvasItemCatchall *getCanvasCatchall() const { return canvas_catchall; }
-    Inkscape::CanvasItemRect     *getCanvasPageBackground() const { return canvas_background; }
-    Inkscape::CanvasItemRect     *getCanvasPage()     const { return canvas_page; }
-    Inkscape::CanvasItemRect     *getCanvasShadow()   const { return canvas_shadow; }
+    Inkscape::CanvasItemRect     *getCanvasViewBox()  const { return canvas_viewbox; }
     Inkscape::CanvasItemDrawing  *getCanvasDrawing()  const { return canvas_drawing; }
     Inkscape::CanvasItemRotate   *getCanvasRotate()   const { return canvas_rotate; }
 
+    Inkscape::LayerManager *layer_manager;
+    Inkscape::PageManager *page_manager;
 private:
     // Groups
     Inkscape::CanvasItemGroup    *canvas_group_controls  = nullptr; ///< Handles, knots, nodes, etc.
@@ -186,9 +187,7 @@ private:
 
     // Individual items
     Inkscape::CanvasItemCatchall *canvas_catchall        = nullptr; ///< The bottom item for unclaimed events.
-    Inkscape::CanvasItemRect     *canvas_background      = nullptr; ///< Page background
-    Inkscape::CanvasItemRect     *canvas_page            = nullptr; ///< Page border
-    Inkscape::CanvasItemRect     *canvas_shadow          = nullptr; ///< Page shadow
+    Inkscape::CanvasItemRect     *canvas_viewbox         = nullptr; ///< The document's viewbox
     Inkscape::CanvasItemDrawing  *canvas_drawing         = nullptr; ///< The actual SVG drawing (a.k.a. arena).
     Inkscape::CanvasItemRotate   *canvas_rotate          = nullptr; ///< Quick preview of canvas rotation.
 
@@ -626,7 +625,7 @@ private:
     void onRedrawRequested() override;
     void onStatusMessage (Inkscape::MessageType type, gchar const *message) override;
     void onDocumentFilenameSet(gchar const* filename) override;
-    void onDocumentResized (double, double) override;
+    void onViewBoxResized (double, double) override;
 };
 
 #endif // SEEN_SP_DESKTOP_H

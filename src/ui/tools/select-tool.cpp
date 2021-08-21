@@ -589,7 +589,7 @@ bool SelectTool::root_handler(GdkEvent* event) {
 
                             {
                                 SPGroup *selGroup = dynamic_cast<SPGroup *>(selection->single());
-                                if (selGroup && (selGroup->layerMode() == SPGroup::LAYER)) {
+                                if (selGroup && (selGroup->layerMode() == SPGroup::LAYER || selGroup->layerMode() == SPGroup::PAGE)) {
                                     group_at_point = selGroup;
                                 }
                             }
@@ -683,7 +683,7 @@ bool SelectTool::root_handler(GdkEvent* event) {
                                 // without shift, increase state (i.e. toggle scale/rotation handles)
                                 if (selection->includes(this->item)) {
                                     _seltrans->increaseState();
-                                } else if (singleGroup && (singleGroup->layerMode() == SPGroup::LAYER) && single->isAncestorOf(this->item)) {
+                                } else if (singleGroup && (singleGroup->layerMode() == SPGroup::LAYER || singleGroup->layerMode() == SPGroup::PAGE) && single->isAncestorOf(this->item)) {
                                     _seltrans->increaseState();
                                 } else {
                                     _seltrans->resetState();
