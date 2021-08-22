@@ -308,7 +308,8 @@ void SPMarker::hide(unsigned int key) {
 - used to validate the marker item before passing it into the shape editor from the marker-tool. 
 - sets any missing properties that are needed before editing starts.
 */
-void validateMarker(SPMarker *sp_marker, SPDocument *doc) {
+void sp_validate_marker(SPMarker *sp_marker, SPDocument *doc) {
+    if (!doc || !sp_marker) return;
 
     doc->ensureUpToDate();
 
