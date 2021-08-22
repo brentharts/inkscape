@@ -565,7 +565,7 @@ static SPStyleProp const props[] = {
     /* LivePathEffect */
     {SPAttr::PATH_EFFECT, "effect"},
 
-    {SPAttr::BLACKOUTCOLOR, "blackoutcolor"},
+    {SPAttr::BLACKOUTCOLOR, "inkscape:blackoutcolor"},
     {SPAttr::INKSCAPE_BLACKOUTOPACITY, "inkscape:blackoutopacity"},
 
 };
