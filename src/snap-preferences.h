@@ -47,11 +47,6 @@ public:
 
     bool getStrictSnapping() const {return _strict_snapping;}
 
-    bool getSnapPerp() const {return _snap_perp;}
-    bool getSnapTang() const {return _snap_tang;}
-    void setSnapPerp(bool enabled) {_snap_perp = enabled;}
-    void setSnapTang(bool enabled) {_snap_tang = enabled;}
-
     double getGridTolerance() const {return _grid_tolerance;}
     double getGuideTolerance() const {return _guide_tolerance;}
     double getObjectTolerance() const {return _object_tolerance;}
@@ -95,10 +90,7 @@ private:
     //(snapping to grids and guides is not affected by this)
     bool _strict_snapping;
 
-    bool _simple_snapping[_MaxEnumValue];
-
-    bool _snap_perp;
-    bool _snap_tang;
+    bool _simple_snapping[static_cast<int>(Inkscape::SimpleSnap::_MaxEnumValue)];
 
     double _grid_tolerance;
     double _guide_tolerance;

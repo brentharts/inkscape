@@ -2161,10 +2161,10 @@ SPDesktopWidget::ruler_snap_new_guide(SPDesktop *desktop, Geom::Point &event_dt,
     // We're dragging a brand new guide, just pulled of the rulers seconds ago. When snapping to a
     // path this guide will change it slope to become either tangential or perpendicular to that path. It's
     // therefore not useful to try tangential or perpendicular snapping, so this will be disabled temporarily
-    bool pref_perp = m.snapprefs.getSnapPerp();
-    bool pref_tang = m.snapprefs.getSnapTang();
-    m.snapprefs.setSnapPerp(false);
-    m.snapprefs.setSnapTang(false);
+    bool pref_perp = m.snapprefs.isTargetSnappable(Inkscape::SNAPTARGET_PATH_PERPENDICULAR);
+    bool pref_tang = m.snapprefs.isTargetSnappable(Inkscape::SNAPTARGET_PATH_TANGENTIAL);
+    m.snapprefs.setTargetSnappable(Inkscape::SNAPTARGET_PATH_PERPENDICULAR, false);
+    m.snapprefs.setTargetSnappable(Inkscape::SNAPTARGET_PATH_TANGENTIAL, false);
     // We only have a temporary guide which is not stored in our document yet.
     // Because the guide snapper only looks in the document for guides to snap to,
     // we don't have to worry about a guide snapping to itself here
@@ -2181,8 +2181,8 @@ SPDesktopWidget::ruler_snap_new_guide(SPDesktop *desktop, Geom::Point &event_dt,
         normal = normal_orig; // we must restore the normal to it's original state
     }
     // Restore the preferences
-    m.snapprefs.setSnapPerp(pref_perp);
-    m.snapprefs.setSnapTang(pref_tang);
+    m.snapprefs.setTargetSnappable(Inkscape::SNAPTARGET_PATH_PERPENDICULAR, pref_perp);
+    m.snapprefs.setTargetSnappable(Inkscape::SNAPTARGET_PATH_TANGENTIAL, pref_tang);
     m.unSetup();
 }
 

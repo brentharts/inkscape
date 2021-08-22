@@ -90,7 +90,7 @@ DocumentProperties::DocumentProperties()
     : DialogBase("/dialogs/documentoptions", "DocumentProperties")
     , _page_page(Gtk::manage(new UI::Widget::NotebookPage(1, 1, true, true)))
     , _page_guides(Gtk::manage(new UI::Widget::NotebookPage(1, 1)))
-    , _page_snap(Gtk::manage(new UI::Widget::NotebookPage(1, 1)))
+    // , _page_snap(Gtk::manage(new UI::Widget::NotebookPage(1, 1)))
     , _page_cms(Gtk::manage(new UI::Widget::NotebookPage(1, 1)))
     , _page_scripting(Gtk::manage(new UI::Widget::NotebookPage(1, 1)))
     , _page_external_scripts(Gtk::manage(new UI::Widget::NotebookPage(1, 1)))
@@ -116,6 +116,7 @@ DocumentProperties::DocumentProperties()
     , _create_guides_btn(_("Create guides around the page"))
     , _delete_guides_btn(_("Delete all guides"))
     //---------------------------------------------------------------
+/*
     , _rsu_sno(_("Snap _distance"), _("Snap only when _closer than:"), _("Always snap"),
                _("Snapping distance, in screen pixels, for snapping to objects"), _("Always snap to objects, regardless of their distance"),
                _("If set, objects only snap to another object when it's within the range specified below"),
@@ -140,6 +141,7 @@ DocumentProperties::DocumentProperties()
                 _("Snapping distance, in screen pixels, for distribution snapping"), _("Always snap objects at equal distance, regardless of the distance"),
                 _("If set, objects only snap to at equal distances when it's within the range specified below"),
                 "distributiontolerance", _wr)
+*/
     //---------------------------------------------------------------
     // , _rcb_snclp(_("Snap to clip paths"), _("When snapping to paths, then also try snapping to clip paths"), "inkscape:snap-path-clip", _wr)
     // , _rcb_snmsk(_("Snap to mask paths"), _("When snapping to paths, then also try snapping to mask paths"), "inkscape:snap-path-mask", _wr)
@@ -160,7 +162,7 @@ DocumentProperties::DocumentProperties()
     _notebook.append_page(*_page_page,      _("Page"));
     _notebook.append_page(*_page_guides,    _("Guides"));
     _notebook.append_page(_grids_vbox,      _("Grids"));
-    _notebook.append_page(*_page_snap,      _("Snap"));
+    // _notebook.append_page(*_page_snap,      _("Snap"));
     _notebook.append_page(*_page_cms,       _("Color"));
     _notebook.append_page(*_page_scripting, _("Scripting"));
     _notebook.append_page(*_page_metadata1, _("Metadata"));
@@ -170,7 +172,7 @@ DocumentProperties::DocumentProperties()
     build_page();
     build_guides();
     build_gridspage();
-    build_snap();
+    // build_snap();
     build_cms();
     build_scripting();
     build_metadata();
@@ -358,6 +360,7 @@ void DocumentProperties::build_guides()
     _delete_guides_btn.signal_clicked().connect(sigc::mem_fun(*this, &DocumentProperties::delete_all_guides));
 }
 
+/*
 void DocumentProperties::build_snap()
 {
     _page_snap->show();
@@ -402,6 +405,7 @@ void DocumentProperties::build_snap()
     };
     attach_all(_page_snap->table(), array, G_N_ELEMENTS(array));
  }
+ */
 
 void DocumentProperties::create_guides_around_page()
 {
@@ -1421,11 +1425,11 @@ void DocumentProperties::update_widgets()
 
     //-----------------------------------------------------------snap page
 
-    _rsu_sno.setValue (nv->snap_manager.snapprefs.getObjectTolerance());
-    _rsu_sn.setValue (nv->snap_manager.snapprefs.getGridTolerance());
-    _rsu_gusn.setValue (nv->snap_manager.snapprefs.getGuideTolerance());
-    _rsu_assn.setValue (nv->snap_manager.snapprefs.getAlignmentTolerance());
-    _rsu_dssn.setValue (nv->snap_manager.snapprefs.getDistributionTolerance());
+    // _rsu_sno.setValue (nv->snap_manager.snapprefs.getObjectTolerance());
+    // _rsu_sn.setValue (nv->snap_manager.snapprefs.getGridTolerance());
+    // _rsu_gusn.setValue (nv->snap_manager.snapprefs.getGuideTolerance());
+    // _rsu_assn.setValue (nv->snap_manager.snapprefs.getAlignmentTolerance());
+    // _rsu_dssn.setValue (nv->snap_manager.snapprefs.getDistributionTolerance());
     // _rcb_snclp.setActive (nv->snap_manager.snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_PATH_CLIP));
     // _rcb_snmsk.setActive (nv->snap_manager.snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_PATH_MASK));
     // _rcb_perp.setActive (nv->snap_manager.snapprefs.getSnapPerp());
