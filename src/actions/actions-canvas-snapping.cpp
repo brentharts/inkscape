@@ -113,20 +113,29 @@ const SnapVector& get_snap_vect() {
 Glib::ustring snap_pref_path = "/options/snapping/";
 
 // global and single location of snapping preferences
-Inkscape::SnapPreferences& get_snapping_preferences() {
-    static Inkscape::SnapPreferences preferences;
+SnapPreferences& get_snapping_preferences() {
+    static SnapPreferences preferences;
     static bool initialized = false;
 
     if (!initialized) {
+        // after starting up restore all snapping preferences:
+        auto prefs = Preferences::get();
         for (auto&& info : get_snap_vect()) {
-            bool enabled = Inkscape::Preferences::get()->getBool(snap_pref_path + info.action_name, info.set);
-    // g_warning("act: %s  en: %d", info.action_name.c_str(), info.set?1:0);
+            bool enabled = prefs->getBool(snap_pref_path + info.action_name, info.set);
             preferences.setTargetSnappable(info.type, enabled);
         }
         for (auto&& info : simple_snap_options) {
-            bool enabled = Inkscape::Preferences::get()->getBool(snap_pref_path + info.action_name, info.set);
+            bool enabled = prefs->getBool(snap_pref_path + info.action_name, info.set);
             preferences.set_simple_snap(info.option, enabled);
         }
+
+        auto simple = prefs->getEntry("/toolbox/simplesnap");
+        if (!simple.isValid()) {
+            // first time up after creating preferences; apply "simple" snapping defaults
+            prefs->setBool(simple.getPath(), true);
+            transition_to_simple_snapping();
+        }
+
         initialized = true;
     }
 
@@ -146,7 +155,7 @@ void set_canvas_snapping(SnapTargetType type, bool enabled) {
     }
     else {
         auto&& action_name = it->second;
-        Inkscape::Preferences::get()->setBool(snap_pref_path + action_name, enabled);
+        Preferences::get()->setBool(snap_pref_path + action_name, enabled);
     }
 }
 
@@ -160,7 +169,6 @@ static void canvas_snapping_toggle(SPDocument* document, SnapTargetType type) {
     set_canvas_snapping(type, !enabled);
     update_actions(document);
 }
-
 
 void set_simple_snap(SimpleSnap option, bool value) {
     const SnapVector* vect = nullptr;
@@ -197,7 +205,7 @@ void set_simple_snap(SimpleSnap option, bool value) {
         }
         assert(!action_name.empty());
         get_snapping_preferences().set_simple_snap(option, value);
-        Inkscape::Preferences::get()->setBool(snap_pref_path + action_name, value);
+        Preferences::get()->setBool(snap_pref_path + action_name, value);
     }
 }
 
@@ -327,46 +335,46 @@ void set_actions_canvas_snapping(SPDocument* document) {
 
     auto& snapprefs = get_snapping_preferences();
     bool global = snapprefs.getSnapEnabledGlobally();
-    bool alignment = snapprefs.isTargetSnappable(Inkscape::SNAPTARGET_ALIGNMENT_CATEGORY);
-    bool distribution = snapprefs.isTargetSnappable(Inkscape::SNAPTARGET_DISTRIBUTION_CATEGORY);
-    bool bbox = snapprefs.isTargetSnappable(Inkscape::SNAPTARGET_BBOX_CATEGORY);
-    bool node = snapprefs.isTargetSnappable(Inkscape::SNAPTARGET_NODE_CATEGORY);
-    bool other = snapprefs.isTargetSnappable(Inkscape::SNAPTARGET_OTHERS_CATEGORY);
+    bool alignment = snapprefs.isTargetSnappable(SNAPTARGET_ALIGNMENT_CATEGORY);
+    bool distribution = snapprefs.isTargetSnappable(SNAPTARGET_DISTRIBUTION_CATEGORY);
+    bool bbox = snapprefs.isTargetSnappable(SNAPTARGET_BBOX_CATEGORY);
+    bool node = snapprefs.isTargetSnappable(SNAPTARGET_NODE_CATEGORY);
+    bool other = snapprefs.isTargetSnappable(SNAPTARGET_OTHERS_CATEGORY);
 
     struct { const char* action; bool state; bool enabled; } snap_options[] = {
         { "snap-global-toggle", global, true }, // Always enabled
 
         { "snap-alignment", alignment, global },
-        { "snap-alignment-self",     snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_ALIGNMENT_HANDLE),   global && alignment },
+        { "snap-alignment-self",     snapprefs.isSnapButtonEnabled(SNAPTARGET_ALIGNMENT_HANDLE),   global && alignment },
 
         { "snap-distribution", distribution, global },
 
         { "snap-bbox", bbox, global },
-        { "snap-bbox-edge",          snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_BBOX_EDGE),          global && bbox },
-        { "snap-bbox-corner",        snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_BBOX_CORNER),        global && bbox },
-        { "snap-bbox-edge-midpoint", snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_BBOX_EDGE_MIDPOINT), global && bbox },
-        { "snap-bbox-center",        snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_BBOX_MIDPOINT),      global && bbox },
+        { "snap-bbox-edge",          snapprefs.isSnapButtonEnabled(SNAPTARGET_BBOX_EDGE),          global && bbox },
+        { "snap-bbox-corner",        snapprefs.isSnapButtonEnabled(SNAPTARGET_BBOX_CORNER),        global && bbox },
+        { "snap-bbox-edge-midpoint", snapprefs.isSnapButtonEnabled(SNAPTARGET_BBOX_EDGE_MIDPOINT), global && bbox },
+        { "snap-bbox-center",        snapprefs.isSnapButtonEnabled(SNAPTARGET_BBOX_MIDPOINT),      global && bbox },
 
         { "snap-node-category", node, global },
-        { "snap-path",               snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_PATH),               global && node },
-        { "snap-path-intersection",  snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_PATH_INTERSECTION),  global && node },
-        { "snap-node-cusp",          snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_NODE_CUSP),          global && node },
-        { "snap-node-smooth",        snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_NODE_SMOOTH),        global && node },
-        { "snap-line-midpoint",      snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_LINE_MIDPOINT),      global && node },
-        { "snap-line-tangential",    snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_PATH_TANGENTIAL),    global && node },
-        { "snap-line-perpendicular", snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_PATH_PERPENDICULAR), global && node },
+        { "snap-path",               snapprefs.isSnapButtonEnabled(SNAPTARGET_PATH),               global && node },
+        { "snap-path-intersection",  snapprefs.isSnapButtonEnabled(SNAPTARGET_PATH_INTERSECTION),  global && node },
+        { "snap-node-cusp",          snapprefs.isSnapButtonEnabled(SNAPTARGET_NODE_CUSP),          global && node },
+        { "snap-node-smooth",        snapprefs.isSnapButtonEnabled(SNAPTARGET_NODE_SMOOTH),        global && node },
+        { "snap-line-midpoint",      snapprefs.isSnapButtonEnabled(SNAPTARGET_LINE_MIDPOINT),      global && node },
+        { "snap-line-tangential",    snapprefs.isSnapButtonEnabled(SNAPTARGET_PATH_TANGENTIAL),    global && node },
+        { "snap-line-perpendicular", snapprefs.isSnapButtonEnabled(SNAPTARGET_PATH_PERPENDICULAR), global && node },
 
         { "snap-others", other, global },
-        { "snap-object-midpoint",    snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_OBJECT_MIDPOINT),    global && other },
-        { "snap-rotation-center",    snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_ROTATION_CENTER),    global && other },
-        { "snap-text-baseline",      snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_TEXT_BASELINE),      global && other },
+        { "snap-object-midpoint",    snapprefs.isSnapButtonEnabled(SNAPTARGET_OBJECT_MIDPOINT),    global && other },
+        { "snap-rotation-center",    snapprefs.isSnapButtonEnabled(SNAPTARGET_ROTATION_CENTER),    global && other },
+        { "snap-text-baseline",      snapprefs.isSnapButtonEnabled(SNAPTARGET_TEXT_BASELINE),      global && other },
 
-        { "snap-page-border",        snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_PAGE_BORDER),        global },
-        { "snap-grid",               snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_GRID),               global },
-        { "snap-guide",              snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_GUIDE),              global },
+        { "snap-page-border",        snapprefs.isSnapButtonEnabled(SNAPTARGET_PAGE_BORDER),        global },
+        { "snap-grid",               snapprefs.isSnapButtonEnabled(SNAPTARGET_GRID),               global },
+        { "snap-guide",              snapprefs.isSnapButtonEnabled(SNAPTARGET_GUIDE),              global },
 
-        { "snap-path-clip",          snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_PATH_CLIP),          global },
-        { "snap-path-mask",          snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_PATH_MASK),          global },
+        { "snap-path-clip",          snapprefs.isSnapButtonEnabled(SNAPTARGET_PATH_CLIP),          global },
+        { "snap-path-mask",          snapprefs.isSnapButtonEnabled(SNAPTARGET_PATH_MASK),          global },
 
         { "simple-snap-bbox", bbox, global },
         { "simple-snap-nodes", node, global },
