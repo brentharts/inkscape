@@ -634,8 +634,7 @@ add_cli_test(actions-object-unlink-clones  INPUT_FILENAME path.svg
                                            OUTPUT_FILENAME actions-object-unlink-clones.png
                                            REFERENCE_FILENAME actions-object-unlink-clones_expected.png)
 # open-page
-add_cli_test(actions-open-page             INPUT_FILENAME path.svg
-                                           PARAMETERS --actions=open-page:3$<SEMICOLON>file-open:${CMAKE_CURRENT_SOURCE_DIR}/testcases/pdf-pages.pdf$<SEMICOLON>export-filename:actions-open-page.png$<SEMICOLON>export-do
+add_cli_test(actions-open-page             PARAMETERS --actions=open-page:3$<SEMICOLON>file-open:${CMAKE_CURRENT_SOURCE_DIR}/testcases/pdf-pages.pdf$<SEMICOLON>export-filename:actions-open-page.png$<SEMICOLON>export-do
                                            OUTPUT_FILENAME actions-open-page.png
                                            REFERENCE_FILENAME actions-open-page_expected.png)
 
