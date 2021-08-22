@@ -679,7 +679,7 @@ add_cli_test(actions-select-by-selector    INPUT_FILENAME path.svg PARAMETERS --
 
 # select-clear
 add_cli_test(actions-select-clear          INPUT_FILENAME path.svg PARAMETERS --actions=select-by-element:path$<SEMICOLON>select-clear$<SEMICOLON>select-by-id:cross$<SEMICOLON>select-list
-                                           PASS_FOR_OUTPUT "^cross .+[\r\n\t ]*$")
+                                           PASS_FOR_OUTPUT "^cross .+$")
 
 # select-invert
 add_cli_test(actions-select-invert         INPUT_FILENAME path.svg PARAMETERS --actions=select-by-selector:path:nth-of-type\(2n\)$<SEMICOLON>select-invert:all$<SEMICOLON>select-list
