@@ -31,7 +31,10 @@ function(add_cli_test name)
     set(testname  cli_${name})
 
     if(DEFINED ARG_OUTPUT_FILENAME)
-        set(ARG_PARAMETERS ${ARG_PARAMETERS} "--export-filename=${ARG_OUTPUT_FILENAME}")
+        # for actions: if an export-do is present do not append export-filename option to prevent
+        if(NOT ARG_PARAMETERS MATCHES "export-do")
+            set(ARG_PARAMETERS ${ARG_PARAMETERS} "--export-filename=${ARG_OUTPUT_FILENAME}")
+        endif()
     endif()
     if(DEFINED ARG_INPUT_FILENAME)
         set(ARG_INPUT_FILENAME "${CMAKE_CURRENT_SOURCE_DIR}/testcases/${ARG_INPUT_FILENAME}")
