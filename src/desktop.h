@@ -70,7 +70,6 @@ struct InkscapeApplication;
 namespace Inkscape {
     class LayerManager;
     class MessageContext;
-    class PageManager;
     class Selection;
 
     class CanvasItem;
@@ -144,6 +143,7 @@ public:
     /// current selection; will never generally be NULL
     Inkscape::Selection       *selection;
     Inkscape::UI::Tools::ToolBase            *event_context;
+    Inkscape::LayerManager    *layer_manager;
     DocumentInterface *dbus_document_interface;
     Inkscape::Display::TemporaryItemList *temporary_item_list;
     Inkscape::Display::SnapIndicator *snapindicator;
@@ -173,8 +173,6 @@ public:
     Inkscape::CanvasItemDrawing  *getCanvasDrawing()  const { return canvas_drawing; }
     Inkscape::CanvasItemRotate   *getCanvasRotate()   const { return canvas_rotate; }
 
-    Inkscape::LayerManager *layer_manager;
-    Inkscape::PageManager *page_manager;
 private:
     // Groups
     Inkscape::CanvasItemGroup    *canvas_group_controls  = nullptr; ///< Handles, knots, nodes, etc.

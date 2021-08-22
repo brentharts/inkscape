@@ -39,7 +39,6 @@
 #include "layer-manager.h"
 #include "message-context.h"
 #include "message-stack.h"
-#include "page-manager.h"
 
 #include "display/drawing.h"
 #include "display/control/canvas-temporary-item-list.h"
@@ -1512,14 +1511,13 @@ SPDesktop::onDocumentFilenameSet (gchar const* filename)
  * Resized callback.
  */
 void
-SPDesktop::onViewBoxResized (gdouble width, gdouble height)
+SPDesktop::onDocumentResized (gdouble width, gdouble height)
 {
     assert(canvas->get_affine() == _current_affine.d2w());
 
-    // XXX This viewbox should only be visible if we are in a multipage document
     Geom::Rect const a(Geom::Point(0, 0), Geom::Point(width, height));
-    canvas_viewbox->set_rect(a);
-    // TODO: Update the default page, if we have one.
+    canvas_page->set_rect(a);
+    canvas_shadow->set_rect(a);
 }
 
 /**

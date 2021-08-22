@@ -1388,8 +1388,7 @@ static std::vector<SPItem*> &find_items_in_area(std::vector<SPItem*> &s,
             }
 
             if (SPGroup * childgroup = dynamic_cast<SPGroup *>(item)) {
-                auto layer_mode = childgroup->effectiveLayerMode(dkey);
-                bool is_layer = layer_mode == SPGroup::LAYER;// || layer_mode == SPGroup::PAGE;
+                bool is_layer = childgroup->effectiveLayerMode(dkey) == SPGroup::LAYER;
                 if (is_layer || (enter_groups)) {
                     s = find_items_in_area(s, childgroup, dkey, area, test, take_hidden, take_insensitive, take_groups, enter_groups);
                 }
@@ -1454,13 +1453,7 @@ void SPDocument::build_flat_item_list(unsigned int dkey, SPGroup *group, gboolea
             continue;
         }
 
-        auto layer_mode = SPGroup::GROUP;
-        if (SP_IS_GROUP(&o)) {
-            layer_mode = SP_GROUP(&o)->effectiveLayerMode(dkey);
-        }
-
-        //if (SP_IS_GROUP(&o) && (layer_mode == SPGroup::LAYER || layer_mode == SPGroup::PAGE || into_groups)) {
-        if (SP_IS_GROUP(&o) && (layer_mode == SPGroup::LAYER || into_groups)) {
+        if (SP_IS_GROUP(&o) && (SP_GROUP(&o)->effectiveLayerMode(dkey) == SPGroup::LAYER || into_groups)) {
             build_flat_item_list(dkey, SP_GROUP(&o), into_groups);
         } else {
             SPItem *child = SP_ITEM(&o);
@@ -1534,25 +1527,22 @@ static SPItem *find_group_at_point(unsigned int dkey, SPGroup *group, Geom::Poin
         if (!SP_IS_ITEM(&o)) {
             continue;
         }
-        if (SP_IS_GROUP(&o)) {
-            auto layer_mode = SP_GROUP(&o)->effectiveLayerMode(dkey);
-            if (SP_IS_GROUP(&o) && (layer_mode == SPGroup::LAYER)) {// || layer_mode == SPGroup::PAGE)) {
-                SPItem *newseen = find_group_at_point(dkey, SP_GROUP(&o), p);
-                if (newseen) {
-                    seen = newseen;
-                }
+        if (SP_IS_GROUP(&o) && SP_GROUP(&o)->effectiveLayerMode(dkey) == SPGroup::LAYER) {
+            SPItem *newseen = find_group_at_point(dkey, SP_GROUP(&o), p);
+            if (newseen) {
+                seen = newseen;
             }
-            if ((layer_mode != SPGroup::LAYER)) {// && layer_mode != SPGroup::PAGE)) {
-                SPItem *child = SP_ITEM(&o);
-                Inkscape::DrawingItem *arenaitem = child->get_arenaitem(dkey);
-                if (arenaitem) {
-                    arenaitem->drawing().update();
-                }
+        }
+        if (SP_IS_GROUP(&o) && SP_GROUP(&o)->effectiveLayerMode(dkey) != SPGroup::LAYER ) {
+            SPItem *child = SP_ITEM(&o);
+            Inkscape::DrawingItem *arenaitem = child->get_arenaitem(dkey);
+            if (arenaitem) {
+                arenaitem->drawing().update();
+            }
 
-                // seen remembers the last (topmost) of groups pickable at this point
-                if (arenaitem && arenaitem->pick(p, delta, 1) != nullptr) {
-                    seen = child;
-                }
+            // seen remembers the last (topmost) of groups pickable at this point
+            if (arenaitem && arenaitem->pick(p, delta, 1) != nullptr) {
+                seen = child;
             }
         }
     }

@@ -74,9 +74,6 @@ void SPGroup::release() {
     if (this->_layer_mode == SPGroup::LAYER) {
         this->document->removeResource("layer", this);
     }
-    if (this->_layer_mode == SPGroup::PAGE) {
-        this->document->removeResource("page", this);
-    }
 
     SPLPEItem::release();
 }
@@ -254,8 +251,6 @@ Inkscape::XML::Node* SPGroup::write(Inkscape::XML::Document *xml_doc, Inkscape::
         const char *value;
         if ( _layer_mode == SPGroup::LAYER ) {
             value = "layer";
-        } else if ( _layer_mode == SPGroup::PAGE ) {
-            value = "page";
         } else if ( _layer_mode == SPGroup::MASK_HELPER ) {
             value = "maskhelper";
         } else if ( flags & SP_OBJECT_WRITE_ALL ) {
@@ -303,8 +298,6 @@ const char *SPGroup::typeName() const {
     switch (_layer_mode) {
         case SPGroup::LAYER:
             return "layer";
-        case SPGroup::PAGE:
-            return "page";
         case SPGroup::MASK_HELPER:
         case SPGroup::GROUP:
         default:
@@ -316,8 +309,6 @@ const char *SPGroup::displayName() const {
     switch (_layer_mode) {
         case SPGroup::LAYER:
             return _("Layer");
-        case SPGroup::PAGE:
-            return _("Page");
         case SPGroup::MASK_HELPER:
             return _("Mask Helper");
         case SPGroup::GROUP:
@@ -335,16 +326,10 @@ gchar *SPGroup::description() const {
 void SPGroup::set(SPAttr key, gchar const* value) {
     switch (key) {
         case SPAttr::INKSCAPE_GROUPMODE:
-            if (value) {
-                if (!strcmp(value, "layer") ) {
-                    this->setLayerMode(SPGroup::LAYER);
-                } else if (!strcmp(value, "page") ) {
-                    this->setLayerMode(SPGroup::PAGE);
-                } else if (!strcmp(value, "maskhelper") ) {
-                    this->setLayerMode(SPGroup::MASK_HELPER);
-                } else {
-                    g_warning("Unknown layer mode: '%s'", value);
-                }
+            if ( value && !strcmp(value, "layer") ) {
+                this->setLayerMode(SPGroup::LAYER);
+            } else if ( value && !strcmp(value, "maskhelper") ) {
+                this->setLayerMode(SPGroup::MASK_HELPER);
             } else {
                 this->setLayerMode(SPGroup::GROUP);
             }
@@ -361,8 +346,7 @@ Inkscape::DrawingItem *SPGroup::show (Inkscape::Drawing &drawing, unsigned int k
     Inkscape::DrawingGroup *ai;
 
     ai = new Inkscape::DrawingGroup(drawing);
-    auto mode = this->effectiveLayerMode(key);
-    ai->setPickChildren(mode == SPGroup::LAYER || mode == SPGroup::PAGE);
+    ai->setPickChildren(this->effectiveLayerMode(key) == SPGroup::LAYER);
     if( this->parent ) {
         this->context_style = this->parent->context_style;
     }
@@ -750,11 +734,6 @@ void SPGroup::setLayerMode(LayerMode mode) {
         } else if ( _layer_mode == LAYER ) {
             this->document->removeResource("layer", this);
         }
-        if ( mode == PAGE ) {
-            this->document->addResource("page", this);
-        } else if ( _layer_mode == PAGE ) {
-            this->document->removeResource("page", this);
-        }
         _layer_mode = mode;
         _updateLayerMode();
     }
@@ -789,8 +768,7 @@ void SPGroup::_updateLayerMode(unsigned int display_key) {
         if ( !display_key || view->key == display_key ) {
             Inkscape::DrawingGroup *g = dynamic_cast<Inkscape::DrawingGroup *>(view->arenaitem);
             if (g) {
-                auto mode = this->effectiveLayerMode(display_key);
-                g->setPickChildren(mode == SPGroup::LAYER || mode == SPGroup::PAGE);
+                g->setPickChildren(effectiveLayerMode(view->key) == SPGroup::LAYER);
             }
         }
     }
