@@ -1534,23 +1534,25 @@ static SPItem *find_group_at_point(unsigned int dkey, SPGroup *group, Geom::Poin
         if (!SP_IS_ITEM(&o)) {
             continue;
         }
-        auto layer_mode = SP_GROUP(&o)->effectiveLayerMode(dkey);
-        if (SP_IS_GROUP(&o) && (layer_mode == SPGroup::LAYER)) {// || layer_mode == SPGroup::PAGE)) {
-            SPItem *newseen = find_group_at_point(dkey, SP_GROUP(&o), p);
-            if (newseen) {
-                seen = newseen;
+        if (SP_IS_GROUP(&o)) {
+            auto layer_mode = SP_GROUP(&o)->effectiveLayerMode(dkey);
+            if (SP_IS_GROUP(&o) && (layer_mode == SPGroup::LAYER)) {// || layer_mode == SPGroup::PAGE)) {
+                SPItem *newseen = find_group_at_point(dkey, SP_GROUP(&o), p);
+                if (newseen) {
+                    seen = newseen;
+                }
             }
-        }
-        if (SP_IS_GROUP(&o) && (layer_mode != SPGroup::LAYER)) {// && layer_mode != SPGroup::PAGE)) {
-            SPItem *child = SP_ITEM(&o);
-            Inkscape::DrawingItem *arenaitem = child->get_arenaitem(dkey);
-            if (arenaitem) {
-                arenaitem->drawing().update();
-            }
+            if ((layer_mode != SPGroup::LAYER)) {// && layer_mode != SPGroup::PAGE)) {
+                SPItem *child = SP_ITEM(&o);
+                Inkscape::DrawingItem *arenaitem = child->get_arenaitem(dkey);
+                if (arenaitem) {
+                    arenaitem->drawing().update();
+                }
 
-            // seen remembers the last (topmost) of groups pickable at this point
-            if (arenaitem && arenaitem->pick(p, delta, 1) != nullptr) {
-                seen = child;
+                // seen remembers the last (topmost) of groups pickable at this point
+                if (arenaitem && arenaitem->pick(p, delta, 1) != nullptr) {
+                    seen = child;
+                }
             }
         }
     }
