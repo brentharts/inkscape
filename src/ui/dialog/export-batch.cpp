@@ -368,8 +368,9 @@ void BatchExport::onExport()
     export_btn->set_sensitive(false);
     bool exportSuccessful = true;
 
-    gint num = (gint)boost::distance(_desktop->getSelection()->items());
-    if (num < 1) {
+
+    // If there are no selected button, simply flash message in status bar
+    if (current_items.size() == 0) {
         _desktop->messageStack()->flash(Inkscape::ERROR_MESSAGE, _("No items selected."));
         export_btn->set_sensitive(true);
         return;
