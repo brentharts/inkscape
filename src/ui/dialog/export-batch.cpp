@@ -319,11 +319,13 @@ void BatchExport::refreshItems()
 void BatchExport::refreshPreview()
 {
     if (_desktop) {
-        std::vector<SPItem *> selected(_desktop->getSelection()->items().begin(),
-                                       _desktop->getSelection()->items().end());
+        // For Batch Export we are now hiding all object except current object
+        // std::vector<SPItem *> selected(_desktop->getSelection()->items().begin(),
+        //                                _desktop->getSelection()->items().end());
         bool hide = hide_all->get_active();
         for (auto &[key, val] : current_items) {
             if (show_preview->get_active()) {
+                std::vector<SPItem *> selected = {val->getItem()};
                 val->refreshHide(hide ? &selected : nullptr);
                 val->refresh();
             } else {
@@ -368,8 +370,8 @@ void BatchExport::onExport()
     export_btn->set_sensitive(false);
     bool exportSuccessful = true;
 
-
     // If there are no selected button, simply flash message in status bar
+    int num = current_items.size();
     if (current_items.size() == 0) {
         _desktop->messageStack()->flash(Inkscape::ERROR_MESSAGE, _("No items selected."));
         export_btn->set_sensitive(true);
