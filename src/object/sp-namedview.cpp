@@ -214,7 +214,7 @@ void SPNamedView::build(SPDocument *document, Inkscape::XML::Node *repr) {
     this->readAttr(SPAttr::BORDERCOLOR);
     this->readAttr(SPAttr::BORDEROPACITY);
     this->readAttr(SPAttr::PAGECOLOR);
-    this->readAttr(SPAttr::BLACKOUTCOLOR);
+    this->readAttr(SPAttr::INKSCAPE_BLACKOUTCOLOR);
     this->readAttr(SPAttr::INKSCAPE_PAGECHECKERBOARD);
     this->readAttr(SPAttr::INKSCAPE_PAGEOPACITY);
     this->readAttr(SPAttr::INKSCAPE_BLACKOUTOPACITY);
@@ -404,7 +404,7 @@ void SPNamedView::set(SPAttr key, const gchar* value) {
             }
             this->requestModified(SP_OBJECT_MODIFIED_FLAG);
             break;
-    case SPAttr::BLACKOUTCOLOR:
+    case SPAttr::INKSCAPE_BLACKOUTCOLOR:
             blackoutcolor = (blackoutcolor & 0xff) | (DEFAULTBLACKOUTCOLOR & 0xffffff00);
             if (value) {
                 blackoutcolor = (blackoutcolor & 0xff) | sp_svg_read_color(value, blackoutcolor);

@@ -568,7 +568,7 @@ enum class SPAttr {
     PATH_EFFECT,
 
     // canvas blackout color
-    BLACKOUTCOLOR,
+    INKSCAPE_BLACKOUTCOLOR,
     INKSCAPE_BLACKOUTOPACITY,
 
     // sentinel
