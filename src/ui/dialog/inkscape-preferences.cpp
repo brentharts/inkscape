@@ -1765,6 +1765,10 @@ void InkscapePreferences::initPageUI()
         int sizeValues[] = { 3, 2, 0, 1 };
         // "Larger" is 3 to not break existing preference files. Should fix in GTK3
 
+        auto slider = new UI::Widget::PrefSlider();
+        slider->init("/toolbox/tools/iconsize", 16, 48, 1, 2, 16, 0);
+        _page_theme.add_line(false, "Icon size:", *slider, "", "ttip");
+
         _misc_small_tools.init("/toolbox/tools/small", sizeLabels, sizeValues, G_N_ELEMENTS(sizeLabels), 0);
         _page_theme.add_line(false, _("Toolbox icon size:"), _misc_small_tools, _("(requires restart)"),
                              _("Set the size for the tool icons."), false);

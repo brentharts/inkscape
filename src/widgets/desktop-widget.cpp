@@ -275,12 +275,24 @@ SPDesktopWidget::SPDesktopWidget()
             if (auto toolbar = dynamic_cast<Gtk::Toolbar*>(widget)) {
                 toolbar->set_icon_size(static_cast<Gtk::IconSize>(size));
             }
+            else if (auto ico = dynamic_cast<Gtk::Image*>(widget)) {
+                ico->set_from_icon_name(ico->get_icon_name(), static_cast<Gtk::IconSize>(size));
+            }
+            return false;
+        });
+    };
+    auto set_icon_size_2 = [=](GtkWidget* tb, int pixel_size) {
+        sp_traverse_widget_tree(Glib::wrap(tb), [=](Gtk::Widget* widget) {
+            if (auto ico = dynamic_cast<Gtk::Image*>(widget)) {
+                ico->set_from_icon_name(ico->get_icon_name(), static_cast<Gtk::IconSize>(Gtk::ICON_SIZE_BUTTON));
+                ico->set_pixel_size(pixel_size);
+            }
             return false;
         });
     };
     _tb_icon_sizes = prefs->createObserver("/toolbox", [=](const Inkscape::Preferences::Entry&) {
         GtkIconSize toolboxSize = ToolboxFactory::prefToSize("/toolbox/tools/small", 1);
-        set_icon_size(tool_toolbox, toolboxSize);
+        // set_icon_size(tool_toolbox, toolboxSize);
 
         toolboxSize = ToolboxFactory::prefToSize("/toolbox/secondary", 1);
         set_icon_size(snap_toolbox, toolboxSize);
@@ -298,6 +310,8 @@ SPDesktopWidget::SPDesktopWidget()
             }
             return false;
         });
+        int s = prefs->getIntLimited("/toolbox/tools/iconsize", 16, 16, 48);
+        set_icon_size_2(tool_toolbox, s);
     });
 
     /* Canvas Grid (canvas, rulers, scrollbars, etc.) */
