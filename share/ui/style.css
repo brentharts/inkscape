@@ -550,3 +550,8 @@ stackswitcher button {
 .color-palette-main-box scrolledwindow undershoot.left {
     background-image: none;
 }
+
+.tight-flowbox flowboxchild {
+    margin: 0;
+    padding: 2px;
+}
