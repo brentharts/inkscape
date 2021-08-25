@@ -654,36 +654,36 @@ add_cli_test(actions-query-x               INPUT_FILENAME rects.svg PARAMETERS -
 add_cli_test(actions-query-y               INPUT_FILENAME rects.svg PARAMETERS --actions=select-by-id:rect2$<SEMICOLON>query-y      PASS_FOR_OUTPUT 20)
 
 # quit-inkscape
-add_cli_test(actions-quit-inkscape         PARAMETERS --actions=quit-inkscape FAIL_FOR_OUTPUT ".+\n")
+add_cli_test(actions-quit-inkscape         PARAMETERS --actions=quit-inkscape FAIL_FOR_OUTPUT ".+")
 
 # select: it is deprecated
 # select-all
 add_cli_test(actions-select-all            INPUT_FILENAME path.svg PARAMETERS --actions=select-all$<SEMICOLON>select-list
-                                           PASS_FOR_OUTPUT "^heart .+\nbottom-left-corner .+\nsquare .+\ntop-right-corner .+\narc-big .+\narc-small .+\ngates .+\ncross .+\nclone .+\n$")
+                                           PASS_FOR_OUTPUT "^heart .+\nbottom-left-corner .+\nsquare .+\ntop-right-corner .+\narc-big .+\narc-small .+\ngates .+\ncross .+\nclone .+$")
 
 # select-by-class
 add_cli_test(actions-select-by-class       INPUT_FILENAME path.svg PARAMETERS --actions=select-by-class:corner$<SEMICOLON>select-list
-                                           PASS_FOR_OUTPUT "^bottom-left-corner .+\ntop-right-corner .+\n$")
+                                           PASS_FOR_OUTPUT "^bottom-left-corner .+\ntop-right-corner .+$")
 
 # select-by-element
 add_cli_test(actions-select-by-element     INPUT_FILENAME path.svg PARAMETERS --actions=select-by-element:use$<SEMICOLON>select-list
-                                           PASS_FOR_OUTPUT "^clone .+\n$")
+                                           PASS_FOR_OUTPUT "^clone .+$")
 
 # select-by-id
 add_cli_test(actions-select-by-id          INPUT_FILENAME path.svg PARAMETERS --actions=select-by-id:top-right-corner$<SEMICOLON>select-list
-                                           PASS_FOR_OUTPUT "^top-right-corner .+\n$")
+                                           PASS_FOR_OUTPUT "^top-right-corner .+$")
 
 # select-by-selector = svg > path:nth-child(2n) ~ *[fill=red]:nth-of-type(even)
 add_cli_test(actions-select-by-selector    INPUT_FILENAME path.svg PARAMETERS --actions=select-by-selector:svg\ >\ path:nth-child\(2n\)\ ~\ *\[fill\=red\]:nth-of-type\(even\)$<SEMICOLON>select-list
-                                           PASS_FOR_OUTPUT "^arc-big .+\nclone .+\n$")
+                                           PASS_FOR_OUTPUT "^arc-big .+\nclone .+$")
 
 # select-clear
 add_cli_test(actions-select-clear          INPUT_FILENAME path.svg PARAMETERS --actions=select-by-element:path$<SEMICOLON>select-clear$<SEMICOLON>select-by-id:cross$<SEMICOLON>select-list
-                                           PASS_FOR_OUTPUT "^cross .+\n$")
+                                           PASS_FOR_OUTPUT "^cross .+$")
 
 # select-invert
 add_cli_test(actions-select-invert         INPUT_FILENAME path.svg PARAMETERS --actions=select-by-selector:path:nth-of-type\(2n\)$<SEMICOLON>select-invert:all$<SEMICOLON>select-list
-                                           PASS_FOR_OUTPUT "^heart .+\nsquare .+\narc-big .+\ngates .+\nclone .+\n$")
+                                           PASS_FOR_OUTPUT "^heart .+\nsquare .+\narc-big .+\ngates .+\nclone .+$")
 
 # select-list
 add_cli_test(actions-select-list           INPUT_FILENAME path.svg PARAMETERS --actions=select-by-selector:*[stroke-width]:nth-child\(3n+3\)$<SEMICOLON>select-list
@@ -719,7 +719,7 @@ add_cli_test(actions-transform-translate   INPUT_FILENAME pyramids.svg
 # unselect: it is deprecated
 # unselect-by-id
 add_cli_test(actions-unselect-by-id        INPUT_FILENAME path.svg PARAMETERS --actions=select-by-element:path$<SEMICOLON>unselect-by-id:heart,bottom-left-corner,square,top-right-corner,arc-big,arc-small,gates$<SEMICOLON>select-list
-                                           PASS_FOR_OUTPUT "^cross .+\n$")
+                                           PASS_FOR_OUTPUT "^cross .+$")
 
 # user-data-directory: test = user-data-directory
 add_cli_test(actions-user-data-directory   PARAMETERS --actions=user-data-directory ENVIRONMENT unset PASS_FOR_OUTPUT "inkscape\n$")
