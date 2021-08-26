@@ -658,8 +658,17 @@ add_cli_test(actions-quit-inkscape         PARAMETERS --actions=quit-inkscape FA
 
 # select: it is deprecated
 # select-all
+string(CONCAT actions-select-all_expected "^heart cloned: false ref: 1 href: 1 total href: 1\n"
+                                          "bottom-left-corner cloned: false ref: 1 href: 0 total href: 0\n"
+                                          "square cloned: false ref: 1 href: 0 total href: 0\n"
+                                          "top-right-corner cloned: false ref: 1 href: 0 total href: 0\n"
+                                          "arc-big cloned: false ref: 1 href: 0 total href: 0\n"
+                                          "arc-small cloned: false ref: 1 href: 0 total href: 0\n"
+                                          "gates cloned: false ref: 1 href: 0 total href: 0\n"
+                                          "cross cloned: false ref: 1 href: 0 total href: 0\n"
+                                          "clone cloned: false ref: 1 href: 0 total href: 0\n$")
 add_cli_test(actions-select-all            INPUT_FILENAME path.svg PARAMETERS --actions=select-all$<SEMICOLON>select-list
-                                           PASS_FOR_OUTPUT "^heart .+\nbottom-left-corner .+\nsquare .+\ntop-right-corner .+\narc-big .+\narc-small .+\ngates .+\ncross .+\nclone .+$")
+                                           PASS_FOR_OUTPUT ${actions-select-all_expected})
 
 # select-by-class
 add_cli_test(actions-select-by-class       INPUT_FILENAME path.svg PARAMETERS --actions=select-by-class:corner$<SEMICOLON>select-list
