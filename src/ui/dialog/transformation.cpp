@@ -1184,14 +1184,7 @@ void Transformation::onApplySeparatelyToggled()
 
 void Transformation::desktopReplaced()
 {
-    // Setting default unit to document unit
     if (auto desktop = getDesktop()) {
-        SPNamedView *nv = desktop->getNamedView();
-        if (nv->display_units) {
-            _units_move.setUnit(nv->display_units->abbr);
-            _units_transform.setUnit(nv->display_units->abbr);
-        }
-
         Inkscape::Preferences *prefs = Inkscape::Preferences::get();
         if (prefs->getBool("/dialogs/transformation/rotateCounterClockwise", true) != desktop->is_yaxisdown()) {
             _counterclockwise_rotate.set_active();
