@@ -1511,13 +1511,12 @@ SPDesktop::onDocumentFilenameSet (gchar const* filename)
  * Resized callback.
  */
 void
-SPDesktop::onDocumentResized (gdouble width, gdouble height)
+SPDesktop::onViewBoxResized (gdouble width, gdouble height)
 {
     assert(canvas->get_affine() == _current_affine.d2w());
 
     Geom::Rect const a(Geom::Point(0, 0), Geom::Point(width, height));
-    canvas_page->set_rect(a);
-    canvas_shadow->set_rect(a);
+    canvas_viewbox->set_rect(a);
 }
 
 /**
