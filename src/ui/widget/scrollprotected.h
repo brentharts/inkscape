@@ -4,8 +4,9 @@
 
 /* Authors:
  *   Thomas Holder
+ *   Anshudhar Kumar Singh <anshudhar2001@gmail.com>
  *
- * Copyright (C) 2020 authors
+ * Copyright (C) 2020-2021 Authors
  *
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */

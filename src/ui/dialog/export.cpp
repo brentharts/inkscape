@@ -7,8 +7,9 @@
  *   Jon A. Cruz <jon@joncruz.org>
  *   Abhishek Sharma
  *   Kris De Gussem <Kris.DeGussem@gmail.com>
+ *   Anshudhar Kumar Singh <anshudhar2001@gmail.com>
  *
- * Copyright (C) 1999-2007, 2012 Authors
+ * Copyright (C) 1999-2007, 2012, 2021 Authors
  * Copyright (C) 2001-2002 Ximian, Inc.
  *
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.

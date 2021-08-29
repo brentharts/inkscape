@@ -3,8 +3,9 @@
  *   Lauris Kaplinski <lauris@kaplinski.com>
  *   bulia byak <buliabyak@users.sf.net>
  *   Johan Engelen <j.b.c.engelen@ewi.utwente.nl>
+ *   Anshudhar Kumar Singh <anshudhar2001@gmail.com>
  *
- * Copyright (C) 1999-2007 Authors
+ * Copyright (C) 1999-2007, 2021 Authors
  * Copyright (C) 2001-2002 Ximian, Inc.
  *
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
