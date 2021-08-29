@@ -95,7 +95,10 @@ BatchItem::BatchItem(SPItem *item)
     grid.set_row_spacing(5);
     grid.set_column_spacing(5);
 
-    Glib::ustring id = _item->getId();
+    Glib::ustring id = _item->defaultLabel();
+    if (id.empty()) {
+        id = _item->getId();
+    }
     Glib::ustring compactId = id.substr(0, 7);
     if (id.length() > 7) {
         compactId = compactId + "...";
@@ -422,7 +425,10 @@ void BatchExport::onExport()
             n++;
             continue;
         }
-        Glib::ustring id = item->getId();
+        Glib::ustring id = item->defaultLabel();
+        if (id.empty()) {
+            id = item->getId();
+        }
         if (id.empty()) {
             n++;
             continue;
