@@ -43,7 +43,7 @@ private:
 
 public:
     void setApp(InkscapeApplication *app) { _app = app; }
-    void setDocument(SPDocument* document);
+    void setDocument(SPDocument *document);
     void setDesktop(SPDesktop *desktop) { _desktop = desktop; }
     void selectionChanged(Inkscape::Selection *selection);
     void selectionModified(Inkscape::Selection *selection, guint flags);

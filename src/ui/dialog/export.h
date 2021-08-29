@@ -56,12 +56,12 @@ private:
 
     // setup default values of widgets
     void setDefaultNotebookPage();
-    std::map<notebook_page,int> pages;
+    std::map<notebook_page, int> pages;
 
 private:
     // signals callback
     void onRealize();
-    void onPageSwitch(Widget* page, guint page_number);
+    void onPageSwitch(Widget *page, guint page_number);
 
 private:
     void documentReplaced() override;

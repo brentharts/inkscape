@@ -466,8 +466,8 @@ public:
     /**
      * Removes all children except for the given object, it's children and it's ancesstors.
      */
-     void cropToObject(SPObject *except);
-     void cropToObjects(std::vector<SPObject *> except_objects);
+    void cropToObject(SPObject *except);
+    void cropToObjects(std::vector<SPObject *> except_objects);
 
     /**
      * Connects a slot to be called when an object is deleted.
@@ -481,11 +481,10 @@ public:
      *
      * @see SPObject::deleteObject
      */
-    sigc::connection connectDelete(sigc::slot<void, SPObject *> slot) {
-        return _delete_signal.connect(slot);
-    }
+    sigc::connection connectDelete(sigc::slot<void, SPObject *> slot) { return _delete_signal.connect(slot); }
 
-    sigc::connection connectPositionChanged(sigc::slot<void, SPObject *> slot) {
+    sigc::connection connectPositionChanged(sigc::slot<void, SPObject *> slot)
+    {
         return _position_changed_signal.connect(slot);
     }
 
