@@ -399,7 +399,9 @@ void BatchExport::onExport()
         dpis.push_back(export_list->get_dpi(i));
     }
 
-    std::vector<SPItem *> selected(_desktop->getSelection()->items().begin(), _desktop->getSelection()->items().end());
+    // We are exporting standalone items only for now
+    // std::vector<SPItem *> selected(_desktop->getSelection()->items().begin(),
+    // _desktop->getSelection()->items().end());
     bool hide = hide_all->get_active();
 
     // Start Exporting Each Item
@@ -459,8 +461,9 @@ void BatchExport::onExport()
                 unsigned long int width = (int)(area->width() * dpi / DPI_BASE + 0.5);
                 unsigned long int height = (int)(area->height() * dpi / DPI_BASE + 0.5);
 
+                std::vector<SPItem *> show_only = {item};
                 exportSuccessful = _export_raster(*area, width, height, dpi, item_filename, true, onProgressCallback,
-                                                  prog_dlg, omod, hide ? &selected : nullptr, &advance_options);
+                                                  prog_dlg, omod, hide ? &show_only : nullptr, &advance_options);
             } else {
                 setExporting(true, Glib::ustring::compose(_("Exporting %1"), filename));
                 SPDocument *doc = _desktop->getDocument();
