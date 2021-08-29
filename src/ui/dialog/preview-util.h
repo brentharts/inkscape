@@ -20,7 +20,7 @@
 #ifndef SP_PREVIEW_UTIL_H
 #define SP_PREVIEW_UTIL_H
 
-#include <glibmm/main.h>u
+#include <glibmm/main.h>
 
 #include "desktop.h"
 #include "display/drawing.h"
