@@ -293,8 +293,8 @@ void ExportList::append_row()
     extension->show();
 
     SpinButton *dpi_sb = Gtk::manage(new SpinButton());
-    dpi_sb->set_digits(0);
-    dpi_sb->set_increments(1.0, 1.0);
+    dpi_sb->set_digits(2);
+    dpi_sb->set_increments(0.1, 1.0);
     dpi_sb->set_range(1.0, 100000.0);
     dpi_sb->set_value(default_dpi);
     dpi_sb->set_sensitive(true);

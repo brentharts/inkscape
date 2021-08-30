@@ -301,6 +301,7 @@
                           <object class="GtkBox" id="si_advance_box">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
+                            <property name="no-show-all">True</property>
                             <property name="orientation">vertical</property>
                             <child>
                               <placeholder/>
