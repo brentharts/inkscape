@@ -70,6 +70,7 @@
 #include "ui/toolbar/lpe-toolbar.h"
 #include "ui/toolbar/mesh-toolbar.h"
 #include "ui/toolbar/measure-toolbar.h"
+#include "ui/toolbar/distribute-toolbar.h"
 #include "ui/toolbar/node-toolbar.h"
 #include "ui/toolbar/rect-toolbar.h"
 #include "ui/toolbar/marker-toolbar.h"
@@ -156,6 +157,7 @@ static struct {
     { "/tools/mesh",            "Mesh",         Inkscape::UI::Toolbar::MeshToolbar::create,          nullptr},
     { "/tools/zoom",            "Zoom",         Inkscape::UI::Toolbar::ZoomToolbar::create,          nullptr},
     { "/tools/measure",         "Measure",      Inkscape::UI::Toolbar::MeasureToolbar::create,       nullptr},
+    { "/tools/distribute",      "Distribute",   Inkscape::UI::Toolbar::DistributeToolbar::create,    nullptr},
     { "/tools/dropper",         "Dropper",      Inkscape::UI::Toolbar::DropperToolbar::create,       nullptr},
     { "/tools/tweak",           "Tweak",        Inkscape::UI::Toolbar::TweakToolbar::create,         N_("Color/opacity used for color tweaking")},
     { "/tools/spray",           "Spray",        Inkscape::UI::Toolbar::SprayToolbar::create,         nullptr},

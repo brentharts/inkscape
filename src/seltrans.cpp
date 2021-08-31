@@ -52,6 +52,8 @@
 #include "ui/modifiers.h"
 #include "ui/knot/knot.h"
 #include "ui/tools/select-tool.h"
+#include "ui/tools/distribute-tool.h"
+#include "ui/toolbar/distribute-toolbar.h"
 
 using Inkscape::DocumentUndo;
 
@@ -187,19 +189,20 @@ Inkscape::SelTrans::~SelTrans()
 
 void Inkscape::SelTrans::resetState()
 {
-    _state = STATE_SCALE;
+    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+    int mode = prefs->getInt("/tools/distribute/mode", 0);
+    if (mode == 1) {
+        _state = STATE_ALIGN;
+    }else{
+        _state = STATE_SCALE;
+    }
 }
 
 void Inkscape::SelTrans::increaseState()
 {
-    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    bool show_align = prefs->getBool("/dialogs/align/oncanvas", false);
-        
     if (_state == STATE_SCALE) {
         _state = STATE_ROTATE;
-    } else if (_state == STATE_ROTATE && show_align) {
-        _state = STATE_ALIGN;
-    } else {
+    } else if (_state == STATE_ROTATE) {
         _state = STATE_SCALE;
     }
 

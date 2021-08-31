@@ -13,6 +13,7 @@
 
 #include "ui/tools/arc-tool.h"
 #include "ui/tools/box3d-tool.h"
+#include "ui/tools/distribute-tool.h"
 #include "ui/tools/calligraphic-tool.h"
 #include "ui/tools/connector-tool.h"
 #include "ui/tools/dropper-tool.h"
@@ -44,6 +45,8 @@ ToolBase *ToolFactory::createObject(std::string const& id)
         tool = new ArcTool;
     else if (id == "/tools/shapes/3dbox")
         tool = new Box3dTool;
+    else if (id == "/tools/distribute")
+        tool = new DistributeTool;
     else if (id == "/tools/calligraphic")
         tool = new CalligraphicTool;
     else if (id == "/tools/connector")

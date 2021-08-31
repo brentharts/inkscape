@@ -55,6 +55,7 @@ set(ui_SRC
 	toolbar/gradient-toolbar.cpp
 	toolbar/lpe-toolbar.cpp
 	toolbar/measure-toolbar.cpp
+	toolbar/distribute-toolbar.cpp
 	toolbar/mesh-toolbar.cpp
 	toolbar/node-toolbar.cpp
 	toolbar/paintbucket-toolbar.cpp
@@ -81,6 +82,7 @@ set(ui_SRC
 	tools/gradient-tool.cpp
 	tools/lpe-tool.cpp
 	tools/measure-tool.cpp
+	tools/distribute-tool.cpp
 	tools/mesh-tool.cpp
 	tools/node-tool.cpp
 	tools/pencil-tool.cpp
@@ -364,6 +366,7 @@ set(ui_SRC
 	toolbar/gradient-toolbar.h
 	toolbar/lpe-toolbar.h
 	toolbar/measure-toolbar.h
+	toolbar/distribute-toolbar.h
 	toolbar/mesh-toolbar.h
 	toolbar/node-toolbar.h
 	toolbar/paintbucket-toolbar.h
@@ -390,6 +393,7 @@ set(ui_SRC
 	tools/gradient-tool.h
 	tools/lpe-tool.h
 	tools/measure-tool.h
+	tools/distribute-tool.h
 	tools/mesh-tool.h
 	tools/node-tool.h
 	tools/pen-tool.h

@@ -1753,6 +1753,9 @@ void ContextVerb::perform(SPAction *action, void *data)
         case SP_VERB_CONTEXT_MEASURE:
             set_active_tool(dt, "Measure");
             break;
+        case SP_VERB_CONTEXT_DISTRIBUTE:
+            set_active_tool(dt, "Distribute");
+            break;
         case SP_VERB_CONTEXT_DROPPER:
             Inkscape::UI::Tools::sp_toggle_dropper(dt); // Functionality defined in event-context.cpp
             break;
@@ -2640,6 +2643,8 @@ Verb *Verb::_base_verbs[] = {
                     INKSCAPE_ICON("zoom")),
     new ContextVerb(SP_VERB_CONTEXT_MEASURE, "ToolMeasure", NC_("ContextVerb", "Measure"), N_("Measurement tool"),
                     INKSCAPE_ICON("tool-measure")),
+    new ContextVerb(SP_VERB_CONTEXT_DISTRIBUTE, "ToolDistribute", NC_("ContextVerb", "Distribute"), N_("On canvas align and distribute"),
+                    INKSCAPE_ICON("tool-distribute")),
     new ContextVerb(SP_VERB_CONTEXT_DROPPER, "ToolDropper", NC_("ContextVerb", "Dropper"), N_("Pick colors from image"),
                     INKSCAPE_ICON("color-picker")),
     new ContextVerb(SP_VERB_CONTEXT_CONNECTOR, "ToolConnector", NC_("ContextVerb", "Connector"),
