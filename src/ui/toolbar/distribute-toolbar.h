@@ -13,7 +13,6 @@
  */
 
 #include <gtkmm.h>
-
 #include <utility>
 
 #include "toolbar.h"
@@ -44,13 +43,15 @@ struct ButtonDescriptor
     DistributeToolbarVoidMethod handler;
 };
 
-enum DistributeToolMode {
+enum DistributeToolMode
+{
     JUST_SELECT = 0,
     ON_CANVAS_ALIGN = 1,
     ON_CANVAS_DISTRIBUTE = 2,
 };
 
-class DistributeToolbar : public Toolbar {
+class DistributeToolbar : public Toolbar
+{
     using parent_type = Toolbar;
 
 private:
@@ -58,9 +59,9 @@ private:
     std::vector<DistributeToolbarVoidMethod> _mode_handlers;
     DistributeToolMode _current_mode;
 
-//  Mode related methods {
+    //  Mode related methods {
     void mode_buttons_init();
-    void mode_buttons_init_create_buttons(const std::vector<ButtonDescriptor>& descriptors);
+    void mode_buttons_init_create_buttons(const std::vector<ButtonDescriptor> &descriptors);
     void mode_buttons_init_set_active_button();
     void mode_buttons_init_add_buttons();
 
@@ -70,11 +71,11 @@ private:
     void set_mode_just_select();
     void set_mode_align();
     void set_mode_distribute();
-//  }
+    //  }
 
     void oncanvas_buttons_init();
     void oncanvas_buttons_init_actions();
-    void oncanvas_buttons_init_actions_add_buttons(const std::vector<ButtonDescriptor>& descriptors);
+    void oncanvas_buttons_init_actions_add_buttons(const std::vector<ButtonDescriptor> &descriptors);
     void oncanvas_buttons_init_verbs();
     void perform_horizontal_distribution();
     void perform_vertical_distribution();
@@ -85,10 +86,10 @@ protected:
     DistributeToolbar(SPDesktop *desktop);
 
 public:
-    static GtkWidget * create(SPDesktop *desktop);
+    static GtkWidget *create(SPDesktop *desktop);
     DistributeToolMode get_mode() const;
 };
 
-}
-}
-}
+} // namespace Toolbar
+} // namespace UI
+} // namespace Inkscape

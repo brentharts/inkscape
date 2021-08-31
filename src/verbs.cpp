@@ -2516,7 +2516,7 @@ Verb *Verb::_base_verbs[] = {
     new SelectionVerb(SP_VERB_SELECTION_BREAK_APART, "SelectionBreakApart", N_("Break _Apart"),
                       N_("Break selected paths into subpaths"), INKSCAPE_ICON("path-break-apart")),
     // new SelectionVerb(SP_VERB_SELECTION_ARRANGE, "DialogArrange", N_("_Arrange..."),
-                    //   N_("Arrange selected objects in a table or circle"), INKSCAPE_ICON("dialog-rows-and-columns")),
+    //   N_("Arrange selected objects in a table or circle"), INKSCAPE_ICON("dialog-rows-and-columns")),
     new SelectionVerb(SP_VERB_SELECTION_FILL_BETWEEN_MANY, "SelectionFillBetweenMany", N_("Fill between paths"),
                       N_("Create a fill object using the selected paths"), nullptr),
     // Layer
@@ -2643,8 +2643,8 @@ Verb *Verb::_base_verbs[] = {
                     INKSCAPE_ICON("zoom")),
     new ContextVerb(SP_VERB_CONTEXT_MEASURE, "ToolMeasure", NC_("ContextVerb", "Measure"), N_("Measurement tool"),
                     INKSCAPE_ICON("tool-measure")),
-    new ContextVerb(SP_VERB_CONTEXT_DISTRIBUTE, "ToolDistribute", NC_("ContextVerb", "Distribute"), N_("On canvas align and distribute"),
-                    INKSCAPE_ICON("tool-distribute")),
+    new ContextVerb(SP_VERB_CONTEXT_DISTRIBUTE, "ToolDistribute", NC_("ContextVerb", "Distribute"),
+                    N_("On canvas align and distribute"), INKSCAPE_ICON("tool-distribute")),
     new ContextVerb(SP_VERB_CONTEXT_DROPPER, "ToolDropper", NC_("ContextVerb", "Dropper"), N_("Pick colors from image"),
                     INKSCAPE_ICON("color-picker")),
     new ContextVerb(SP_VERB_CONTEXT_CONNECTOR, "ToolConnector", NC_("ContextVerb", "Connector"),
@@ -2663,7 +2663,8 @@ Verb *Verb::_base_verbs[] = {
     // WHY ARE THE FOLLOWING ZoomVerbs???
 
     // View
-    new ZoomVerb(SP_VERB_TOGGLE_COMMAND_PALETTE, "ToggleCommandPalette", N_("_Command Palette"), N_("Show or hide the on-canvas command palette"), nullptr),
+    new ZoomVerb(SP_VERB_TOGGLE_COMMAND_PALETTE, "ToggleCommandPalette", N_("_Command Palette"),
+                 N_("Show or hide the on-canvas command palette"), nullptr),
     new ZoomVerb(SP_VERB_TOGGLE_RULERS, "ToggleRulers", N_("_Rulers"), N_("Show or hide the canvas rulers"), nullptr),
     new ZoomVerb(SP_VERB_TOGGLE_SCROLLBARS, "ToggleScrollbars", N_("Scroll_bars"),
                  N_("Show or hide the canvas scrollbars"), nullptr),
@@ -2671,8 +2672,8 @@ Verb *Verb::_base_verbs[] = {
                  INKSCAPE_ICON("show-grid")),
     new ZoomVerb(SP_VERB_TOGGLE_GUIDES, "ToggleGuides", N_("G_uides"),
                  N_("Show or hide guides (drag from a ruler to create a guide)"), INKSCAPE_ICON("show-guides")),
-    new ZoomVerb(SP_VERB_TOGGLE_ROTATION_LOCK, "ToggleRotationLock", N_("Lock rotation"),
-                 N_("Lock canvas rotation"), nullptr),
+    new ZoomVerb(SP_VERB_TOGGLE_ROTATION_LOCK, "ToggleRotationLock", N_("Lock rotation"), N_("Lock canvas rotation"),
+                 nullptr),
     new ZoomVerb(SP_VERB_TOGGLE_COMMANDS_TOOLBAR, "ToggleCommandsToolbar", N_("_Commands Bar"),
                  N_("Show or hide the Commands bar (under the menu)"), nullptr),
     new ZoomVerb(SP_VERB_TOGGLE_SNAP_TOOLBAR, "ToggleSnapToolbar", N_("Sn_ap Controls Bar"),
@@ -2704,8 +2705,8 @@ Verb *Verb::_base_verbs[] = {
     new DialogVerb(SP_VERB_DIALOG_PROTOTYPE, "DialogPrototype", N_("Prototype..."), N_("Prototype Dialog"),
                    INKSCAPE_ICON("document-properties")),
 #endif
-    new DialogVerb(SP_VERB_DIALOG_PREFERENCES, "DialogPreferences", N_("P_references"), N_("Edit global Inkscape preferences"),
-                   INKSCAPE_ICON("preferences-system")),
+    new DialogVerb(SP_VERB_DIALOG_PREFERENCES, "DialogPreferences", N_("P_references"),
+                   N_("Edit global Inkscape preferences"), INKSCAPE_ICON("preferences-system")),
     new DialogVerb(SP_VERB_DIALOG_DOCPROPERTIES, "DialogDocumentProperties", N_("_Document Properties..."),
                    N_("Edit properties of this document (to be saved with the document)"),
                    INKSCAPE_ICON("document-properties")),

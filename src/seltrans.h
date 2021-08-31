@@ -124,10 +124,11 @@ private:
     Geom::Point _calcAbsAffineGeom(Geom::Scale const geom_scale);
     void _keepClosestPointOnly(Geom::Point const &p);
 
-    enum State {
-        STATE_SCALE, //scale or stretch
-        STATE_ROTATE, //rotate or skew
-        STATE_ALIGN, //on canvas align
+    enum State
+    {
+        STATE_SCALE,     // scale or stretch
+        STATE_ROTATE,    // rotate or skew
+        STATE_ALIGN,     // on canvas align
         STATE_DISTRIBUTE // on canvas distribute
     };
 

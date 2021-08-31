@@ -17,13 +17,14 @@
 namespace Inkscape {
 class SelTrans;
 class SelectionDescriber;
-}
+} // namespace Inkscape
 
 namespace Inkscape {
 namespace UI {
 namespace Tools {
 
-class DistributeTool : public ToolBase {
+class DistributeTool : public ToolBase
+{
 public:
     DistributeTool();
     ~DistributeTool() override;
@@ -46,11 +47,11 @@ public:
     static const std::string prefsPath;
 
     void setup() override;
-    void set(const Inkscape::Preferences::Entry& val) override;
-    bool root_handler(GdkEvent* event) override;
-    bool item_handler(SPItem* item, GdkEvent* event) override;
+    void set(const Inkscape::Preferences::Entry &val) override;
+    bool root_handler(GdkEvent *event) override;
+    bool item_handler(SPItem *item, GdkEvent *event) override;
 
-    const std::string& getPrefsPath() override;
+    const std::string &getPrefsPath() override;
 
 private:
     bool sp_select_context_abort();
@@ -65,6 +66,6 @@ private:
     Glib::RefPtr<Gdk::Cursor> _cursor_dragging;
 };
 
-}
-}
-}
+} // namespace Tools
+} // namespace UI
+} // namespace Inkscape

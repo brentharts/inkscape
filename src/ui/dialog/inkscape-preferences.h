@@ -43,7 +43,8 @@
 // UPDATE THIS IF YOU'RE ADDING PREFS PAGES.
 // Otherwise the commands that open the dialog with the new page will fail.
 
-enum {
+enum
+{
     PREFS_PAGE_TOOLS,
     PREFS_PAGE_TOOLS_SELECTOR,
     PREFS_PAGE_TOOLS_NODE,

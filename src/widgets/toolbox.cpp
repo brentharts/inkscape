@@ -28,55 +28,46 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
-#include <gtkmm.h>
 #include <glibmm/i18n.h>
+#include <gtkmm.h>
 
 #include "desktop-style.h"
 #include "desktop.h"
 #include "document-undo.h"
-#include "inkscape.h"
-#include "verbs.h"
-
-#include "ink-action.h"
-
 #include "helper/action.h"
-
 #include "include/gtkmm_version.h"
-
+#include "ink-action.h"
+#include "inkscape.h"
 #include "io/resource.h"
-
 #include "object/sp-namedview.h"
-
 #include "ui/icon-names.h"
+#include "ui/toolbar/arc-toolbar.h"
+#include "ui/toolbar/box3d-toolbar.h"
+#include "ui/toolbar/calligraphy-toolbar.h"
+#include "ui/toolbar/connector-toolbar.h"
+#include "ui/toolbar/distribute-toolbar.h"
+#include "ui/toolbar/dropper-toolbar.h"
+#include "ui/toolbar/eraser-toolbar.h"
+#include "ui/toolbar/gradient-toolbar.h"
+#include "ui/toolbar/lpe-toolbar.h"
+#include "ui/toolbar/marker-toolbar.h"
+#include "ui/toolbar/measure-toolbar.h"
+#include "ui/toolbar/mesh-toolbar.h"
+#include "ui/toolbar/node-toolbar.h"
+#include "ui/toolbar/paintbucket-toolbar.h"
+#include "ui/toolbar/pencil-toolbar.h"
+#include "ui/toolbar/rect-toolbar.h"
+#include "ui/toolbar/select-toolbar.h"
 #include "ui/uxmanager.h"
 #include "ui/widget/button.h"
 #include "ui/widget/spinbutton.h"
 #include "ui/widget/style-swatch.h"
 #include "ui/widget/unit-tracker.h"
-
+#include "verbs.h"
 #include "widgets/spw-utilities.h"
 #include "widgets/widget-sizes.h"
-
 #include "xml/attribute-record.h"
 #include "xml/node-event-vector.h"
-
-#include "ui/toolbar/arc-toolbar.h"
-#include "ui/toolbar/box3d-toolbar.h"
-#include "ui/toolbar/calligraphy-toolbar.h"
-#include "ui/toolbar/connector-toolbar.h"
-#include "ui/toolbar/dropper-toolbar.h"
-#include "ui/toolbar/eraser-toolbar.h"
-#include "ui/toolbar/gradient-toolbar.h"
-#include "ui/toolbar/lpe-toolbar.h"
-#include "ui/toolbar/mesh-toolbar.h"
-#include "ui/toolbar/measure-toolbar.h"
-#include "ui/toolbar/distribute-toolbar.h"
-#include "ui/toolbar/node-toolbar.h"
-#include "ui/toolbar/rect-toolbar.h"
-#include "ui/toolbar/marker-toolbar.h"
-#include "ui/toolbar/paintbucket-toolbar.h"
-#include "ui/toolbar/pencil-toolbar.h"
-#include "ui/toolbar/select-toolbar.h"
 //#include "ui/toolbar/snap-toolbar.h"
 #include "ui/toolbar/spray-toolbar.h"
 #include "ui/toolbar/spiral-toolbar.h"
@@ -168,7 +159,6 @@ static struct {
     { nullptr,                  "",             nullptr,                                             nullptr }
     // clang-format on
 };
-
 
 static Glib::RefPtr<Gtk::ActionGroup> create_or_fetch_actions( SPDesktop* desktop );
 

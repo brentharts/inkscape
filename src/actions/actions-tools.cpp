@@ -363,8 +363,7 @@ void set_active_tool(SPDesktop *desktop, SPItem *item, Geom::Point const p)
     set_active_tool(win, item, p);
 }
 
-std::vector<std::vector<Glib::ustring>> raw_data_tools =
-{
+std::vector<std::vector<Glib::ustring>> raw_data_tools = {
     // clang-format off
     {"win.tool-switch('Select')",       N_("Tool: Select"),       "Tool Switch",   N_("Select and transform objects.")                  },
     {"win.tool-switch('Node')",         N_("Tool: Node"),         "Tool Switch",   N_("Edit paths by nodes.")                           },
@@ -399,7 +398,6 @@ std::vector<std::vector<Glib::ustring>> raw_data_tools =
     {"win.tool-toggle",                 N_("Tool Toggle"),        "Tool Switch",   N_("Toggle between Select tool and last used tool.") },
     // clang-format on
 };
-
 
 void
 add_actions_tools(InkscapeWindow* win)

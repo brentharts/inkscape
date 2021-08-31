@@ -15,45 +15,39 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
-#include <cstring>
-#include <string>
-
-#include <gdk/gdkkeysyms.h>
-#include <glibmm/i18n.h>
+#include "seltrans.h"
 
 #include <2geom/transforms.h>
-
-#include "seltrans.h"
+#include <cstring>
+#include <gdk/gdkkeysyms.h>
+#include <glibmm/i18n.h>
+#include <string>
 
 #include "desktop-style.h"
 #include "desktop.h"
-#include "document-undo.h"
-#include "document.h"
-#include "message-stack.h"
-#include "mod360.h"
-#include "pure-transform.h"
-#include "selection-chemistry.h"
-#include "filter-chemistry.h"
-#include "selection.h"
-#include "seltrans-handles.h"
-#include "verbs.h"
-
-#include "display/control/snap-indicator.h"
 #include "display/control/canvas-item-ctrl.h"
 #include "display/control/canvas-item-curve.h"
 #include "display/control/canvas-item-group.h"
-
+#include "display/control/snap-indicator.h"
+#include "document-undo.h"
+#include "document.h"
+#include "filter-chemistry.h"
 #include "helper/action.h"
-
+#include "message-stack.h"
+#include "mod360.h"
 #include "object/sp-item-transform.h"
 #include "object/sp-namedview.h"
 #include "object/sp-root.h"
-
-#include "ui/modifiers.h"
+#include "pure-transform.h"
+#include "selection-chemistry.h"
+#include "selection.h"
+#include "seltrans-handles.h"
 #include "ui/knot/knot.h"
-#include "ui/tools/select-tool.h"
-#include "ui/tools/distribute-tool.h"
+#include "ui/modifiers.h"
 #include "ui/toolbar/distribute-toolbar.h"
+#include "ui/tools/distribute-tool.h"
+#include "ui/tools/select-tool.h"
+#include "verbs.h"
 
 using Inkscape::DocumentUndo;
 
@@ -191,7 +185,7 @@ void Inkscape::SelTrans::resetState()
 {
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     int mode = prefs->getInt("/tools/distribute/mode", 0);
-    if(!prefs->getBool("/tools/select")){
+    if (!prefs->getBool("/tools/select")) {
         if (mode == 1) {
             _state = STATE_ALIGN;
         } else if (mode == 2) {

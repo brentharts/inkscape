@@ -12,41 +12,35 @@
 
 #include "distribute-toolbar.h"
 
+#include <2geom/rect.h>
 #include <glibmm/i18n.h>
-
 #include <gtkmm/adjustment.h>
 #include <gtkmm/separatortoolitem.h>
-
-#include <2geom/rect.h>
 
 #include "desktop.h"
 #include "document-undo.h"
 #include "document.h"
-#include "selection.h"
+#include "io/resource.h"
 #include "message-stack.h"
-#include "selection-chemistry.h"
-#include "verbs.h"
-
-
 #include "object/sp-item-transform.h"
 #include "object/sp-namedview.h"
-
+#include "selection-chemistry.h"
+#include "selection.h"
 #include "ui/icon-names.h"
 #include "ui/widget/canvas.h" // Focus widget
 #include "ui/widget/combo-tool-item.h"
 #include "ui/widget/spin-button-tool-item.h"
 #include "ui/widget/spinbutton.h"
 #include "ui/widget/unit-tracker.h"
-
+#include "verbs.h"
 #include "widgets/widget-sizes.h"
-#include "io/resource.h"
 
 namespace Inkscape {
 namespace UI {
 namespace Toolbar {
 
-DistributeToolbar::DistributeToolbar(SPDesktop *desktop) :
-    Toolbar(desktop)
+DistributeToolbar::DistributeToolbar(SPDesktop *desktop)
+    : Toolbar(desktop)
 {
     mode_buttons_init();
     add_separator();
@@ -83,12 +77,11 @@ void DistributeToolbar::mode_buttons_init()
     mode_buttons_init_add_buttons();
 }
 
-void DistributeToolbar::mode_buttons_init_create_buttons(const std::vector<ButtonDescriptor>& descriptors)
+void DistributeToolbar::mode_buttons_init_create_buttons(const std::vector<ButtonDescriptor> &descriptors)
 {
     Gtk::RadioToolButton::Group mode_group;
 
-    for (auto& mode : descriptors)
-    {
+    for (auto &mode : descriptors) {
         auto button = Gtk::manage(new Gtk::RadioToolButton((mode.label)));
         button->set_tooltip_text((mode.tooltip_text));
         button->set_icon_name(INKSCAPE_ICON(mode.icon_name));
@@ -96,7 +89,6 @@ void DistributeToolbar::mode_buttons_init_create_buttons(const std::vector<Butto
         _mode_buttons.push_back(button);
         _mode_handlers.push_back(mode.handler);
     }
-
 }
 
 void DistributeToolbar::mode_buttons_init_set_active_button()
@@ -109,10 +101,10 @@ void DistributeToolbar::mode_buttons_init_set_active_button()
 void DistributeToolbar::mode_buttons_init_add_buttons()
 {
     int button_index = 0;
-    for (auto button : _mode_buttons)
-    {
+    for (auto button : _mode_buttons) {
         button->set_sensitive();
-        button->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &DistributeToolbar::mode_changed), button_index++));
+        button->signal_clicked().connect(
+            sigc::bind(sigc::mem_fun(*this, &DistributeToolbar::mode_changed), button_index++));
         add(*button);
     }
 }
@@ -124,20 +116,13 @@ void DistributeToolbar::mode_changed(int mode)
 
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     prefs->setInt("/tools/distribute/mode", mode);
-
 }
 
-void DistributeToolbar::set_mode_just_select()
-{
-}
+void DistributeToolbar::set_mode_just_select() {}
 
-void DistributeToolbar::set_mode_align()
-{
-}
+void DistributeToolbar::set_mode_align() {}
 
-void DistributeToolbar::set_mode_distribute()
-{
-}
+void DistributeToolbar::set_mode_distribute() {}
 
 void DistributeToolbar::oncanvas_buttons_init()
 {
@@ -166,10 +151,9 @@ void DistributeToolbar::oncanvas_buttons_init_actions()
     oncanvas_buttons_init_actions_add_buttons(oncanvas_buttons_descriptors);
 }
 
-void DistributeToolbar::oncanvas_buttons_init_actions_add_buttons(const std::vector<ButtonDescriptor>& descriptors)
+void DistributeToolbar::oncanvas_buttons_init_actions_add_buttons(const std::vector<ButtonDescriptor> &descriptors)
 {
-    for (auto& oncanvas : descriptors)
-    {
+    for (auto &oncanvas : descriptors) {
         auto button = Gtk::manage(new Gtk::ToolButton(oncanvas.label));
         button->set_tooltip_text((oncanvas.tooltip_text));
         button->set_icon_name(INKSCAPE_ICON(oncanvas.icon_name));
@@ -205,16 +189,15 @@ void DistributeToolbar::oncanvas_buttons_init_verbs()
 
 void DistributeToolbar::add_separator()
 {
-    add(* Gtk::manage(new Gtk::SeparatorToolItem()));
+    add(*Gtk::manage(new Gtk::SeparatorToolItem()));
 }
 
-GtkWidget *
-DistributeToolbar::create(SPDesktop *desktop)
+GtkWidget *DistributeToolbar::create(SPDesktop *desktop)
 {
     auto toolbar = new DistributeToolbar(desktop);
     return GTK_WIDGET(toolbar->gobj());
 }
 
-}
-}
-}
+} // namespace Toolbar
+} // namespace UI
+} // namespace Inkscape
