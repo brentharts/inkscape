@@ -14,9 +14,6 @@
 
 #include "ui/tools/tool-base.h"
 
-#define SP_SELECT_CONTEXT(obj) (dynamic_cast<Inkscape::UI::Tools::DistributeTool*>((Inkscape::UI::Tools::ToolBase*)obj))
-#define SP_IS_SELECT_CONTEXT(obj) (dynamic_cast<const Inkscape::UI::Tools::DistributeTool*>((const Inkscape::UI::Tools::ToolBase*)obj) != NULL)
-
 namespace Inkscape {
 class SelTrans;
 class SelectionDescriber;
