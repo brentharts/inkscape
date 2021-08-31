@@ -313,6 +313,7 @@ public:
 
     void on_size_allocate(Gtk::Allocation& allocation) override {
         Gtk::FlowBox::on_size_allocate(allocation);
+        return;
         // set_allocation(allocation);
         bool horizontal = get_orientation() == Gtk::ORIENTATION_HORIZONTAL;
         int x = allocation.get_x();
