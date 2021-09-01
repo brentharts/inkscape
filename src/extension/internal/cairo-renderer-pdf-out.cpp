@@ -33,6 +33,7 @@
 
 #include "object/sp-item.h"
 #include "object/sp-root.h"
+#include "object/sp-page.h"
 
 #include <2geom/affine.h>
 #include "document.h"
@@ -102,11 +103,37 @@ pdf_render_document_to_file(SPDocument *doc, gchar const *filename, unsigned int
     bool ret = ctx->setPdfTarget (filename);
     if(ret) {
         /* Render document */
+        std::cout << "Render One...\n";
         ret = renderer->setupDocument(ctx, doc, pageBoundingBox, bleedmargin_px, base);
-        if (ret) {
+
+        auto pages = doc->getNamedView()->pages;
+        if (pages.size() == 0) {
+            // Output the page bounding box as already set up in the initial setupDocument.
             renderer->renderItem(ctx, root);
             ret = ctx->finish();
+        } else {
+            int index = 1;
+            for (auto &page : pages) {
+                auto rect = page->getRect();
+                ctx->nextPage(rect.width(), rect.height());
+
+                // TODO: May need to add bleed margins and other options, or maybe not.
+                //Geom::Affine tp(Geom::Translate(rect.x, rect.y));
+                //ctx->setTransform(tp);
+                for (auto &child : page->getExclusiveItems()) {
+                    std::cout << " EX - Page " << index << " : " << child->getId() << "\n";
+                }
+
+                for (auto &child : page->getOverlappingItems()) {
+                    std::cout << " OX - Page " << index << " : " << child->getId() << "\n";
+                    renderer->renderItem(ctx, child);
+                }
+                ret = ctx->finishPage();
+                index += 1;
+            }
+            ret = ctx->finish();
         }
+        std::cout << "DONE\n";
     }
 
     root->invoke_hide(dkey);

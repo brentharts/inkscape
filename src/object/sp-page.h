@@ -35,13 +35,15 @@ public:
     void setPageColor(guint32 color);
     void setPageBorder(guint32 color);
     void setPageShadow(bool show);
+
+    Geom::Rect getRect() const;
+    Geom::Rect getDesktopRect() const;
+    std::vector<SPItem*> getExclusiveItems() const;
+    std::vector<SPItem*> getOverlappingItems() const;
 protected:
     void build(SPDocument* doc, Inkscape::XML::Node* repr) override;
     void release() override;
     void set(SPAttr key, const char* value) override;
-
-    Geom::Rect get_rect();
-
 private:
     std::string label;
 

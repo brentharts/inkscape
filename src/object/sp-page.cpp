@@ -12,6 +12,7 @@
 
 #include "attributes.h"
 
+#include "inkscape.h"
 #include "desktop.h"
 #include "sp-page.h"
 #include "sp-namedview.h"
@@ -83,7 +84,7 @@ void SPPage::set(SPAttr key, const gchar *value) {
 /**
  * Gets the rectangle in document units
  */
-Geom::Rect SPPage::get_rect()
+Geom::Rect SPPage::getRect() const
 {
     return Geom::Rect(
         this->x.computed, this->y.computed,
@@ -92,17 +93,38 @@ Geom::Rect SPPage::get_rect()
     );
 }
 
+/**
+ * Get the rectangle of the page, scaled to the document.
+ */
+Geom::Rect SPPage::getDesktopRect() const
+{
+    return getRect() * document->getDocumentScale();
+}
+
+/**
+ * Get the items which are ONLY on this page and don't overlap.
+ */
+std::vector<SPItem*> SPPage::getExclusiveItems() const
+{
+    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
+    return document->getItemsInBox(desktop->dkey, getDesktopRect(), true, true, true, false);
+}
+
+/**
+ * Get all the items which are inside or overlapping.
+ */
+std::vector<SPItem*> SPPage::getOverlappingItems() const
+{
+    SPDesktop *desktop = SP_ACTIVE_DESKTOP;
+    return document->getItemsPartiallyInBox(desktop->dkey, getDesktopRect(), true, true, true, false);
+}
+
+/**
+ * Shows the page in the given canvas item group.
+ */
 void SPPage::showPage(SPDesktop *desktop, Inkscape::CanvasItemGroup *group)
 {
-    auto rect_b = get_rect() * desktop->d2w();
-    auto rect_c = get_rect() * document->doc2dt();
-    auto rect = get_rect() * document->getDocumentScale();
-
-    std::cout << "RECT A" << get_rect() << "\n"
-                 "RECT B" << rect_b << "\n"
-                 "RECT C" << rect_c << "\n";
-
-    auto item = new Inkscape::CanvasItemRect(group, rect);
+    auto item = new Inkscape::CanvasItemRect(group, getDesktopRect());
     item->set_fill(0xffffffff);
     item->set_stroke(0x000000cc);
     item->set_shadow(0x00000088, 2);
@@ -110,7 +132,10 @@ void SPPage::showPage(SPDesktop *desktop, Inkscape::CanvasItemGroup *group)
     item->set_inverted(false);
     views.push_back(item);
 }
-  
+
+/**
+ * Hide the page in the given canvas widget.
+ */
 void SPPage::hidePage(Inkscape::UI::Widget::Canvas *canvas)
 {
     g_assert(canvas != nullptr);
@@ -166,9 +191,6 @@ void SPPage::setLabel(const char* label, bool const commit)
         setAttribute("inkscape:label", label);
     }
 }
-
-// TODO We need to watch the parent namedview for pagecolor changes.
-// or maybe not, as the namedview will actually update us now...
 
 /*
   Local Variables:
