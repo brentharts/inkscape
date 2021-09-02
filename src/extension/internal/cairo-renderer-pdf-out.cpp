@@ -115,17 +115,18 @@ pdf_render_document_to_file(SPDocument *doc, gchar const *filename, unsigned int
             int index = 1;
             for (auto &page : pages) {
                 auto rect = page->getRect();
+                // Conclude previous page and set new page width and height.
                 ctx->nextPage(rect.width(), rect.height());
 
+                // Set up page transformation which pushes objects back into the 0,0 location
                 // TODO: May need to add bleed margins and other options, or maybe not.
-                //Geom::Affine tp(Geom::Translate(rect.x, rect.y));
-                //ctx->setTransform(tp);
-                for (auto &child : page->getExclusiveItems()) {
-                    std::cout << " EX - Page " << index << " : " << child->getId() << "\n";
-                }
+                Geom::Affine page_tr = doc->getDocumentScale();
+                page_tr *= Geom::Translate(rect.left(), rect.top()).inverse();
 
                 for (auto &child : page->getOverlappingItems()) {
-                    std::cout << " OX - Page " << index << " : " << child->getId() << "\n";
+                    // This process does not return layers, so those affines are added manually.
+                    ctx->setTransform(child->i2doc_affine() * page_tr);
+                    // Render the page into the context in the new location.
                     renderer->renderItem(ctx, child);
                 }
                 ret = ctx->finishPage();
