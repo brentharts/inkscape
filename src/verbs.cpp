@@ -42,6 +42,7 @@
 #include "inkscape-version.h"
 #include "layer-manager.h"
 #include "message-stack.h"
+#include "page-manager.h"
 #include "path-chemistry.h"
 #include "selection-chemistry.h"
 #include "seltrans.h"
@@ -931,6 +932,14 @@ void EditVerb::perform(SPAction *action, void *data)
             break;
         case SP_VERB_EDIT_SWAP_FILL_STROKE:
             dt->selection->swapFillStroke();
+            break;
+        case SP_VERB_PAGES_ENABLE:
+            Inkscape::PageManager::enablePages(dt->getDocument());
+            DocumentUndo::done(dt->getDocument(), SP_VERB_PAGES_ENABLE, _("Pages Enabled"));
+            break;
+        case SP_VERB_PAGES_DISABLE:
+            Inkscape::PageManager::disablePages(dt->getDocument());
+            DocumentUndo::done(dt->getDocument(), SP_VERB_PAGES_DISABLE, _("Pages Disabled"));
             break;
         case SP_VERB_EDIT_LINK_COLOR_PROFILE:
             break;
@@ -1953,6 +1962,11 @@ Verb *Verb::_base_verbs[] = {
                  INKSCAPE_ICON("path-effect-parameter-next")),
     new EditVerb(SP_VERB_EDIT_SWAP_FILL_STROKE, "EditSwapFillStroke", N_("Swap fill and stroke"),
                  N_("Swap fill and stroke of an object"), nullptr),
+
+    new EditVerb(SP_VERB_PAGES_ENABLE, "PagesEnable", N_("Enable Multiple pages"),
+                 N_("Turn into a multiple page document"), nullptr),
+    new EditVerb(SP_VERB_PAGES_DISABLE, "PagesDisable", N_("Remove all pages"),
+                 N_("Turn into a single page document"), nullptr),
 
     // Selection
     new SelectionVerb(SP_VERB_SELECTION_TO_FRONT, "SelectionToFront", N_("Raise to _Top"), N_("Raise selection to top"),

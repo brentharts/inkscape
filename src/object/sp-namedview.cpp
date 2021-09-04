@@ -33,6 +33,7 @@
 #include "enums.h"
 #include "event-log.h"
 #include "layer-manager.h"
+#include "page-manager.h"
 #include "preferences.h"
 #include "sp-guide.h"
 #include "sp-page.h"
@@ -195,7 +196,7 @@ static void sp_namedview_generate_old_grid(SPNamedView * /*nv*/, SPDocument *doc
         repr->removeAttribute("gridempopacity");
         repr->removeAttribute("gridempspacing");
 
-//        SPDocumentUndo::done(doc, _("Create new grid from pre0.46 grid settings"), INKSCAPE_ICON("document-properties"));
+//        SPDocumentUndo::done(doc, SP_VERB_DIALOG_DOCPROPERTIES, _("Create new grid from pre0.46 grid settings"));
     }
 }
 

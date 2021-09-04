@@ -36,6 +36,7 @@
 #include "object/sp-page.h"
 
 #include <2geom/affine.h>
+#include "page-manager.h"
 #include "document.h"
 
 #include "util/units.h"
@@ -106,7 +107,7 @@ pdf_render_document_to_file(SPDocument *doc, gchar const *filename, unsigned int
         std::cout << "Render One...\n";
         ret = renderer->setupDocument(ctx, doc, pageBoundingBox, bleedmargin_px, base);
 
-        auto pages = doc->getNamedView()->pages;
+        auto pages = doc->getNamedView()->getPageManager()->getPages();
         if (pages.size() == 0) {
             // Output the page bounding box as already set up in the initial setupDocument.
             renderer->renderItem(ctx, root);
