@@ -941,6 +941,10 @@ void EditVerb::perform(SPAction *action, void *data)
             Inkscape::PageManager::disablePages(dt->getDocument());
             DocumentUndo::done(dt->getDocument(), SP_VERB_PAGES_DISABLE, _("Pages Disabled"));
             break;
+        case SP_VERB_PAGES_NEW:
+            Inkscape::PageManager::newPage(dt->getDocument());
+            DocumentUndo::done(dt->getDocument(), SP_VERB_PAGES_NEW, _("Added new page"));
+            break;
         case SP_VERB_EDIT_LINK_COLOR_PROFILE:
             break;
         case SP_VERB_EDIT_REMOVE_COLOR_PROFILE:
@@ -1965,8 +1969,10 @@ Verb *Verb::_base_verbs[] = {
 
     new EditVerb(SP_VERB_PAGES_ENABLE, "PagesEnable", N_("Enable Multiple pages"),
                  N_("Turn into a multiple page document"), nullptr),
-    new EditVerb(SP_VERB_PAGES_DISABLE, "PagesDisable", N_("Remove all pages"),
+    new EditVerb(SP_VERB_PAGES_DISABLE, "PagesDisable", N_("Remove All Pages"),
                  N_("Turn into a single page document"), nullptr),
+    new EditVerb(SP_VERB_PAGES_NEW, "PagesNew", N_("New Default Page"),
+                 N_("Add a new default page."), nullptr),
 
     // Selection
     new SelectionVerb(SP_VERB_SELECTION_TO_FRONT, "SelectionToFront", N_("Raise to _Top"), N_("Raise selection to top"),

@@ -73,6 +73,7 @@
 #include "object/persp3d.h"
 #include "object/sp-defs.h"
 #include "object/sp-factory.h"
+#include "object/sp-namedview.h"
 #include "object/sp-root.h"
 #include "object/sp-symbol.h"
 

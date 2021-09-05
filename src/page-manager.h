@@ -12,6 +12,7 @@
 
 #include <vector>
 #include "document.h"
+#include "object/sp-namedview.h"
 
 class SPDesktop;
 class SPPage;
@@ -34,17 +35,21 @@ public:
     int getPageIndex(SPPage *page) const;
     int getCurrentPageIndex() const;
 
-    // Multi-page support
     void enablePages();
     void disablePages();
     void pagesChanged();
     void selectPage(SPPage *page);
+    SPPage *newPage();
+    SPPage *newPage(double width, double height);
 
     static void enablePages(SPDocument *document) {
         document->getNamedView()->getPageManager()->enablePages();
     }
     static void disablePages(SPDocument *document) {
         document->getNamedView()->getPageManager()->disablePages();
+    }
+    static SPPage *newPage(SPDocument *document) {
+        return document->getNamedView()->getPageManager()->newPage();
     }
 
     sigc::connection connectPageSelected(const sigc::slot<void, SPObject *> & slot) {

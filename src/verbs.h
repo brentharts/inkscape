@@ -114,6 +114,7 @@ enum {
     /* Pages */
     SP_VERB_PAGES_ENABLE,
     SP_VERB_PAGES_DISABLE,
+    SP_VERB_PAGES_NEW,
     /* Selection */
     SP_VERB_SELECTION_TO_FRONT,
     SP_VERB_SELECTION_TO_BACK,

@@ -40,7 +40,6 @@
 #include "event.h"
 #include "gc-anchored.h"
 #include "gc-finalized.h"
-#include "object/sp-namedview.h"
 
 #include "inkgc/gc-managed.h"
 
@@ -74,6 +73,7 @@ class SPItem;
 class SPObject;
 class SPGroup;
 class SPRoot;
+class SPNamedView;
 
 namespace Inkscape {
     class Selection; 

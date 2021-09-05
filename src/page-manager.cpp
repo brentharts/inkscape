@@ -23,7 +23,7 @@ PageManager::PageManager(SPDocument *document)
 
 PageManager::~PageManager()
 {
-    pages.empty();
+    pages.clear();
     _selected_page = nullptr;
 }
 
@@ -39,9 +39,7 @@ void PageManager::addPage(SPPage *page)
  * Remove a page from this manager, called from namedview parent.
  */
 void PageManager::removePage(Inkscape::XML::Node *child) {
-    g_warning("removePage...");
     for(auto it = pages.begin(); it != pages.end(); ++it) {
-        g_warning("removePage Iter... %d", (int)pages.size());
         if ((*it)->getRepr() == child) {
             pages.erase(it);
             pagesChanged();
@@ -57,19 +55,49 @@ void PageManager::removePage(Inkscape::XML::Node *child) {
 void PageManager::enablePages()
 {
     if (!hasPages()) {
-        auto unit = _document->getDisplayUnit();
-        auto width = _document->getWidth().value(unit);
-        auto height = _document->getHeight().value(unit);
-        auto xml_doc = _document->getReprDoc();
-        auto page = xml_doc->createElement("inkscape:page");
-        page->setAttributeSvgDouble("x", 0.0);
-        page->setAttributeSvgDouble("y", 0.0);
-        page->setAttributeSvgDouble("width", width);
-        page->setAttributeSvgDouble("height", height);
-        if (auto nv = _document->getNamedView()) {
-            nv->getRepr()->appendChild(page);
+        newPage();
+    }
+}
+
+/**
+ * Add a new page of the default (viewBox) width and height.
+ */
+SPPage *PageManager::newPage()
+{
+    auto unit = _document->getDisplayUnit();
+    return newPage(
+        _document->getWidth().value(unit),
+        _document->getHeight().value(unit));
+}
+
+/**
+ * Add a new page of the given width and height.
+ */
+SPPage *PageManager::newPage(double width, double height)
+{
+    // Get a new location for the page.
+    // XXX This is just silly simple.
+    double top = 0.0;
+    double left = 0.0;
+    for (auto &page : pages) {
+        auto rect = page->getRect();
+        if (rect.right() > left) {
+            left = rect.right() + 10;
         }
     }
+
+    auto xml_doc = _document->getReprDoc();
+    auto repr = xml_doc->createElement("inkscape:page");
+    repr->setAttributeSvgDouble("x", left);
+    repr->setAttributeSvgDouble("y", top);
+    repr->setAttributeSvgDouble("width", width);
+    repr->setAttributeSvgDouble("height", height);
+    if (auto nv = _document->getNamedView()) {
+        if (auto page = dynamic_cast<SPPage *>(nv->appendChildRepr(repr))) {
+            return page;
+        }
+    }
+    return nullptr;
 }
 
 /**

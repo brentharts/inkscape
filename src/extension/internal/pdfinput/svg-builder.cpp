@@ -24,6 +24,7 @@
 #include "pdf-parser.h"
 
 #include "document.h"
+#include "object/sp-namedview.h"
 #include "png.h"
 
 #include "xml/document.h"
