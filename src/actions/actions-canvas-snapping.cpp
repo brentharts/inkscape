@@ -207,9 +207,11 @@ void set_simple_snap(SimpleSnap option, bool value) {
                 break;
             }
         }
-        assert(!action_name.empty());
-        get_snapping_preferences().set_simple_snap(option, value);
-        Preferences::get()->setBool(snap_pref_path + action_name, value);
+        // simple snap option 'Rest' does not have an action; only save other ones
+        if (!action_name.empty()) {
+            get_snapping_preferences().set_simple_snap(option, value);
+            Preferences::get()->setBool(snap_pref_path + action_name, value);
+        }
     }
 }
 
