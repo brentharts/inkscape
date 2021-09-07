@@ -11,7 +11,6 @@
  *   Stephen Silver <sasilver@users.sourceforge.net>
  *   Jon A. Cruz <jon@joncruz.org>
  *   Abhishek Sharma
- *   David Xiong
  *   Tavmjong Bah
  *
  * Copyright (C) 2006 Johan Engelen <johan@shouraizou.nl>
@@ -564,19 +563,6 @@ file_save(Gtk::Window &parentWindow, SPDocument *doc, const Glib::ustring &uri,
 
 
 /**
- * Check if a string ends with another string.
- * \todo Find a better code file to put this general purpose method
- */
-static bool hasEnding (Glib::ustring const &fullString, Glib::ustring const &ending)
-{
-    if (fullString.length() > ending.length()) {
-        return (0 == fullString.compare (fullString.length() - ending.length(), ending.length(), ending));
-    } else {
-        return false;
-    }
-}
-
-/**
  *  Display a SaveAs dialog.  Save the document if OK pressed.
  */
 bool
@@ -678,14 +664,6 @@ sp_file_save_dialog(Gtk::Window &parentWindow, SPDocument *doc, Inkscape::Extens
             fileName = newFileName;
         else
             g_warning( "Error converting filename for saving to UTF-8." );
-
-        Inkscape::Extension::Output *omod = dynamic_cast<Inkscape::Extension::Output *>(selectionType);
-        if (omod) {
-            Glib::ustring save_extension = (omod->get_extension()) ? (omod->get_extension()) : "";
-            if ( !hasEnding(fileName, save_extension) ) {
-                fileName += save_extension;
-            }
-        }
 
         // FIXME: does the argument !is_copy really convey the correct meaning here?
         success = file_save(parentWindow, doc, fileName, selectionType, TRUE, !is_copy, save_method);
