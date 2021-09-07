@@ -125,16 +125,17 @@ SPDocument *open(Extension *key, gchar const *filename)
     SPDocument *doc = imod->open(filename);
 
     if (!doc) {
+        if (last_chance_svg) {
+            if ( INKSCAPE.use_gui() ) {
+                sp_ui_error_dialog(_("Could not detect file format. Tried to open it as an svg anyway but this also failed."));
+            } else {
+                g_warning("%s", _("Could not detect file format. Tried to open it as an svg anyway but this also failed."));
+            }
+        }
         throw Input::open_failed();
     }
-
-    if (last_chance_svg) {
-        if ( INKSCAPE.use_gui() ) {
-            sp_ui_error_dialog(_("Format autodetect failed. The file is being opened as SVG."));
-        } else {
-            g_warning("%s", _("Format autodetect failed. The file is being opened as SVG."));
-        }
-    }
+    // If last_chance_svg is true here, it means we successfully opened a file as an svg
+    // and there's no need to warn the user about it, just do it.
 
     doc->setDocumentFilename(filename);
     if (!show) {
