@@ -216,7 +216,7 @@ open_internal(Extension *in_plug, gpointer in_data)
  * Lastly, the save function is called in the module itself.
  */
 void
-save(Extension *key, SPDocument *doc, gchar const *filename, bool setextension, bool check_overwrite, bool official,
+save(Extension *key, SPDocument *doc, gchar const *filename, bool check_overwrite, bool official,
     Inkscape::Extension::FileSaveMethod save_method)
 {
     Output *omod;
@@ -255,22 +255,7 @@ save(Extension *key, SPDocument *doc, gchar const *filename, bool setextension, 
         throw Output::save_cancelled();
     }
 
-    gchar *fileName = nullptr;
-    if (setextension) {
-        gchar *lowerfile = g_utf8_strdown(filename, -1);
-        gchar *lowerext = g_utf8_strdown(omod->get_extension(), -1);
-
-        if (!g_str_has_suffix(lowerfile, lowerext)) {
-            fileName = g_strdup_printf("%s%s", filename, omod->get_extension());
-        }
-
-        g_free(lowerfile);
-        g_free(lowerext);
-    }
-
-    if (fileName == nullptr) {
-        fileName = g_strdup(filename);
-    }
+    gchar *fileName = g_strdup(filename);
 
     if (check_overwrite && !sp_ui_overwrite_file(fileName)) {
         g_free(fileName);
