@@ -699,9 +699,8 @@ sp_file_save_document(Gtk::Window &parentWindow, SPDocument *doc)
     if (doc->isModifiedSinceSave()) {
         if ( doc->getDocumentFilename() == nullptr )
         {
-            // Hier sollte in Argument mitgegeben werden, das anzeigt, da� das Dokument das erste
-            // Mal gespeichert wird, so da� als default .svg ausgew�hlt wird und nicht die zuletzt
-            // benutzte "Save as ..."-Endung
+            // In this case, an argument should be given that indicates that the document is the first
+            // time saved, so that .svg is selected as the default and not the last one "Save as ..." extension used
             return sp_file_save_dialog(parentWindow, doc, Inkscape::Extension::FILE_SAVE_METHOD_INKSCAPE_SVG);
         } else {
             Glib::ustring extension = Inkscape::Extension::get_file_save_extension(Inkscape::Extension::FILE_SAVE_METHOD_SAVE_AS);
