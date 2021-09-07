@@ -19,7 +19,7 @@ namespace Inkscape {
 
 namespace Debug {
 
-#ifdef xxxxNDEBUG
+#ifdef NDEBUG
 // Make event tracking a no-op for non-debug builds
 template <typename = void> struct EventTracker {
     template <typename... Args> EventTracker(Args &&...) {}
