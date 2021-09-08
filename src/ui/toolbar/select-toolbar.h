@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-#ifndef SEEN_SELECT_TOOLBAR_H
-#define SEEN_SELECT_TOOLBAR_H
+// #ifndef SEEN_SELECT_TOOLBAR_H
+// #define SEEN_SELECT_TOOLBAR_H
+#pragma once
 
 /** \file
  * Selector aux toolbar
@@ -76,7 +77,7 @@ public:
 }
 }
 }
-#endif /* !SEEN_SELECT_TOOLBAR_H */
+// #endif /* !SEEN_SELECT_TOOLBAR_H */
 
 /*
   Local Variables:

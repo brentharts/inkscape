@@ -43,7 +43,8 @@
 // UPDATE THIS IF YOU'RE ADDING PREFS PAGES.
 // Otherwise the commands that open the dialog with the new page will fail.
 
-enum {
+enum
+{
     PREFS_PAGE_TOOLS,
     PREFS_PAGE_TOOLS_SELECTOR,
     PREFS_PAGE_TOOLS_NODE,
@@ -67,6 +68,7 @@ enum {
     PREFS_PAGE_TOOLS_DROPPER,
     PREFS_PAGE_TOOLS_CONNECTOR,
     PREFS_PAGE_TOOLS_LPETOOL,
+    PREFS_PAGE_TOOLS_DISTRIBUTE,
     PREFS_PAGE_UI,
     PREFS_PAGE_UI_THEME,
     PREFS_PAGE_UI_WINDOWS,

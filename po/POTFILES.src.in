@@ -314,6 +314,7 @@
 ../src/ui/toolbar/gradient-toolbar.cpp
 ../src/ui/toolbar/lpe-toolbar.cpp
 ../src/ui/toolbar/measure-toolbar.cpp
+../src/ui/toolbar/distribute-toolbar.cppp
 ../src/ui/toolbar/mesh-toolbar.cpp
 ../src/ui/toolbar/node-toolbar.cpp
 ../src/ui/toolbar/paintbucket-toolbar.cpp
@@ -336,6 +337,7 @@
 ../src/ui/tools/gradient-tool.cpp
 ../src/ui/tools/lpe-tool.cpp
 ../src/ui/tools/measure-tool.cpp
+../src/ui/tools/distribute-tool.cpp
 ../src/ui/tools/mesh-tool.cpp
 ../src/ui/tools/node-tool.cpp
 ../src/ui/tools/pen-tool.cpp

@@ -71,7 +71,8 @@ static std::map<Glib::ustring, ToolData> tool_data =
     {"Connector",    {TOOLS_CONNECTOR,       PREFS_PAGE_TOOLS_CONNECTOR,      "/tools/connector",       }},
     {"PaintBucket",  {TOOLS_PAINTBUCKET,     PREFS_PAGE_TOOLS_PAINTBUCKET,    "/tools/paintbucket",     }},
     {"Eraser",       {TOOLS_ERASER,          PREFS_PAGE_TOOLS_ERASER,         "/tools/eraser",          }},
-    {"LPETool",      {TOOLS_LPETOOL,         PREFS_PAGE_TOOLS, /* No Page */  "/tools/lpetool",         }}
+    {"LPETool",      {TOOLS_LPETOOL,         PREFS_PAGE_TOOLS, /* No Page */  "/tools/lpetool",         }},
+    {"Distribute",   {TOOLS_DISTRIBUTE,      PREFS_PAGE_TOOLS_DISTRIBUTE,     "/tools/distribute",      }}
 };
 
 static std::map<Glib::ustring, Glib::ustring> tool_msg =
@@ -98,7 +99,8 @@ static std::map<Glib::ustring, Glib::ustring> tool_msg =
     {"Connector",   N_("<b>Click and drag</b> between shapes to create a connector.")                                                                                                                                         },
     {"PaintBucket", N_("<b>Click</b> to paint a bounded area, <b>Shift+click</b> to union the new fill with the current selection, <b>Ctrl+click</b> to change the clicked object's fill and stroke to the current setting.") },
     {"Eraser",      N_("<b>Drag</b> to erase.")                                                                                                                                                                               },
-    {"LPETool",     N_("Choose a subtool from the toolbar")                                                                                                                                                                   } 
+    {"LPETool",     N_("Choose a subtool from the toolbar")                                                                                                                                                                   },
+    {"Distribute",  N_("<b>Click</b> to align the objects in the align mode, <b>Drag</b> to distribute objects in the distribute mode.")                                                                                      }
 };
 // clang-format on
 
@@ -361,8 +363,7 @@ void set_active_tool(SPDesktop *desktop, SPItem *item, Geom::Point const p)
     set_active_tool(win, item, p);
 }
 
-std::vector<std::vector<Glib::ustring>> raw_data_tools =
-{
+std::vector<std::vector<Glib::ustring>> raw_data_tools = {
     // clang-format off
     {"win.tool-switch('Select')",       N_("Tool: Select"),       "Tool Switch",   N_("Select and transform objects.")                  },
     {"win.tool-switch('Node')",         N_("Tool: Node"),         "Tool Switch",   N_("Edit paths by nodes.")                           },
@@ -392,11 +393,11 @@ std::vector<std::vector<Glib::ustring>> raw_data_tools =
 
     {"win.tool-switch('Zoom')",         N_("Tool: Zoom"),         "Tool Switch",   N_("Zoom in or out.")                                },
     {"win.tool-switch('Measure')",      N_("Tool: Measure"),      "Tool Switch",   N_("Measure objects.")                               },
+    {"win.tool-switch('Distribute')",   N_("Tool: Distribute"),   "Tool Switch",   N_("Align and distribute objects")                   },
 
     {"win.tool-toggle",                 N_("Tool Toggle"),        "Tool Switch",   N_("Toggle between Select tool and last used tool.") },
     // clang-format on
 };
-
 
 void
 add_actions_tools(InkscapeWindow* win)

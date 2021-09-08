@@ -17,6 +17,7 @@
         <property name="label" translatable="true">Select</property>
       </object>
     </child>
+
     <child>
       <object class="GtkRadioToolButton">
         <property name="visible">True</property>
@@ -44,6 +45,7 @@
         <property name="group">ToolGroup</property>
       </object>
     </child>
+
     <child>
       <object class="GtkRadioToolButton">
         <property name="visible">True</property>
@@ -54,6 +56,7 @@
         <property name="group">ToolGroup</property>
       </object>
     </child>
+
     <child>
       <object class="GtkRadioToolButton">
         <property name="visible">True</property>
@@ -64,6 +67,7 @@
         <property name="group">ToolGroup</property>
       </object>
     </child>
+
     <child>
       <object class="GtkRadioToolButton">
         <property name="visible">True</property>
@@ -74,6 +78,7 @@
         <property name="group">ToolGroup</property>
       </object>
     </child>
+
     <child>
       <object class="GtkRadioToolButton">
         <property name="visible">True</property>
@@ -101,6 +106,7 @@
         <property name="group">ToolGroup</property>
       </object>
     </child>
+
     <child>
       <object class="GtkRadioToolButton">
         <property name="visible">True</property>
@@ -111,6 +117,7 @@
         <property name="group">ToolGroup</property>
       </object>
     </child>
+
     <child>
       <object class="GtkRadioToolButton">
         <property name="visible">True</property>
@@ -121,6 +128,7 @@
         <property name="group">ToolGroup</property>
       </object>
     </child>
+
     <child>
       <object class="GtkRadioToolButton">
         <property name="visible">True</property>
@@ -148,6 +156,7 @@
         <property name="group">ToolGroup</property>
       </object>
     </child>
+
     <child>
       <object class="GtkRadioToolButton">
         <property name="visible">True</property>
@@ -158,6 +167,7 @@
         <property name="group">ToolGroup</property>
       </object>
     </child>
+
     <child>
       <object class="GtkRadioToolButton">
         <property name="visible">True</property>
@@ -168,6 +178,7 @@
         <property name="group">ToolGroup</property>
       </object>
     </child>
+
     <child>
       <object class="GtkRadioToolButton">
         <property name="visible">True</property>
@@ -195,6 +206,7 @@
         <property name="group">ToolGroup</property>
       </object>
     </child>
+
     <child>
       <object class="GtkRadioToolButton">
         <property name="visible">True</property>
@@ -205,6 +217,7 @@
         <property name="group">ToolGroup</property>
       </object>
     </child>
+
     <child>
       <object class="GtkRadioToolButton">
         <property name="visible">True</property>
@@ -215,6 +228,7 @@
         <property name="group">ToolGroup</property>
       </object>
     </child>
+
     <child>
       <object class="GtkRadioToolButton">
         <property name="visible">True</property>
@@ -225,6 +239,7 @@
         <property name="group">ToolGroup</property>
       </object>
     </child>
+
     <child>
       <object class="GtkRadioToolButton">
         <property name="visible">True</property>
@@ -235,7 +250,6 @@
         <property name="group">ToolGroup</property>
       </object>
     </child>
-
 
     <child>
       <object class="GtkSeparatorToolItem">
@@ -253,6 +267,7 @@
         <property name="group">ToolGroup</property>
       </object>
     </child>
+
     <child>
       <object class="GtkRadioToolButton">
         <property name="visible">True</property>
@@ -263,6 +278,18 @@
         <property name="group">ToolGroup</property>
       </object>
     </child>
+
+    <child>
+      <object class="GtkRadioToolButton">
+        <property name="visible">True</property>
+        <property name="action_name">win.tool-switch</property>
+        <property name="action_target">'Distribute'</property>
+        <property name="icon_name">tool-distribute</property>
+        <property name="label" translatable="true">Distribute</property>
+        <property name="group">ToolGroup</property>
+      </object>
+    </child>
+
   </object>
 
 </interface>

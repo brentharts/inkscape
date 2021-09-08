@@ -41,7 +41,8 @@ class View;
  * which are defined statically in the verb files.  There may be
  * other verbs which are defined dynamically also.
  */
-enum {
+enum
+{
     /* Header */
     SP_VERB_INVALID, /**< A dummy verb to represent doing something wrong. */
     SP_VERB_NONE,    /**< A dummy verb to represent not having a verb. */
@@ -215,6 +216,7 @@ enum {
     SP_VERB_CONTEXT_MESH,
     SP_VERB_CONTEXT_ZOOM,
     SP_VERB_CONTEXT_MEASURE,
+    SP_VERB_CONTEXT_DISTRIBUTE,
     SP_VERB_CONTEXT_DROPPER,
     SP_VERB_CONTEXT_CONNECTOR,
     SP_VERB_CONTEXT_PAINTBUCKET,
@@ -303,7 +305,7 @@ enum {
     // SP_VERB_VIEW_CMS_TOGGLE,
     SP_VERB_VIEW_ICON_PREVIEW,
 
-    /* Dialogs */
+/* Dialogs */
 #ifdef DEBUG
     SP_VERB_DIALOG_PROTOTYPE,
 #endif
