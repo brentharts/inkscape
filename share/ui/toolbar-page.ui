@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.22.2 -->
+<interface>
+  <requires lib="gtk+" version="3.22"/>
+  <object class="GtkToolbar" id="page-toolbar">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkToolButton">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="action_name">win.canvas-page-in</property>
+        <property name="label" translatable="yes">Zoom In</property>
+        <property name="icon_name">page-in</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="homogeneous">True</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkToolButton">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="action_name">win.canvas-page-out</property>
+        <property name="label" translatable="yes">Zoom Out</property>
+        <property name="icon_name">page-out</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="homogeneous">True</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkSeparatorToolItem">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="homogeneous">False</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkSeparatorToolItem">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="homogeneous">False</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkToolItem">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <child>
+          <object class="GtkComboBoxText">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="active">0</property>
+            <property name="has_entry">True</property>
+            <property name="active_id">a4</property>
+            <items>
+              <item id="a4" translatable="yes">A4</item>
+              <item id="a5" translatable="yes">A5</item>
+              <item id="us" translatable="yes">US Letter</item>
+            </items>
+            <child internal-child="entry">
+              <object class="GtkEntry">
+                <property name="can_focus">False</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="homogeneous">True</property>
+      </packing>
+    </child>
+  </object>
+  <object class="GtkListStore" id="page_presets"/>
+</interface>
