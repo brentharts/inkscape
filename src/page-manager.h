@@ -39,12 +39,15 @@ public:
     void enablePages();
     void disablePages();
     void pagesChanged();
-    void selectPage(SPPage *page);
-    void selectPage(int page_index);
-    void selectNextPage() { selectPage(getSelectedPageIndex() + 1); }
-    void selectPrevPage() { selectPage(getSelectedPageIndex() - 1); }
+    bool selectPage(SPPage *page);
+    bool selectPage(int page_index);
+    bool selectNextPage() { return selectPage(getSelectedPageIndex() + 1); }
+    bool selectPrevPage() { return selectPage(getSelectedPageIndex() - 1); }
     bool hasNextPage() { return getSelectedPageIndex() + 1 < pages.size(); }
     bool hasPrevPage() { return getSelectedPageIndex() - 1 >= 0; }
+
+    void zoomToPage(SPDesktop *desktop, SPPage *page);
+    void zoomToSelectedPage(SPDesktop *desktop) { zoomToPage(desktop, _selected_page); };
 
     SPPage *newPage();
     SPPage *newPage(double width, double height);

@@ -147,17 +147,21 @@ void PageSelector::renderPageLabel(Gtk::TreeModel::const_iterator const &row)
 void PageSelector::setSelectedPage()
 {
     SPPage *page = _selector.get_active()->get_value(_model_columns.object);
-    if (page) {
-        _page_manager->selectPage(page);
+    if (page && _page_manager->selectPage(page)) {
+        _page_manager->zoomToSelectedPage(_desktop);
     }
 }
 
 void PageSelector::nextPage() {
-    _page_manager->selectNextPage();
+    if (_page_manager->selectNextPage()) {
+        _page_manager->zoomToSelectedPage(_desktop);
+    }
 }
 
 void PageSelector::prevPage() {
-    _page_manager->selectPrevPage();
+    if (_page_manager->selectPrevPage()) {
+        _page_manager->zoomToSelectedPage(_desktop);
+    }
 }
 
 } // namespace Widget

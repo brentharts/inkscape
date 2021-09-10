@@ -178,14 +178,16 @@ void PageManager::pagesChanged()
  *
  * @param page - The page to set as the selected page.
  */
-void PageManager::selectPage(SPPage *page)
+bool PageManager::selectPage(SPPage *page)
 {
     if (getPageIndex(page) >= 0) {
         if (_selected_page != page) {
             _selected_page = page;
             _page_selected_signal.emit(_selected_page);
+            return true;
         }
     }
+    return false;
 }
 
 /**
@@ -193,12 +195,28 @@ void PageManager::selectPage(SPPage *page)
  *
  * @param page_index - The page index (from 0) of the page to select.
  */
-void PageManager::selectPage(int page_index)
+bool PageManager::selectPage(int page_index)
 {
     if (page_index >= 0 && page_index < pages.size()) {
-        selectPage(pages[page_index]);
+        return selectPage(pages[page_index]);
     }
+    return false;
 }
+
+/**
+ * Center/zoom on the given page.
+ */
+void PageManager::zoomToPage(SPDesktop *desktop, SPPage *page)
+{
+    if (!page) return;
+
+    auto d = page->getDesktopRect();
+    if (d.minExtent() < 1.0)
+          return;
+
+    desktop->set_display_area(d, 10);
+}
+
 
 };
 
