@@ -124,16 +124,16 @@ void PageSelector::selectonChanged(SPPage *page)
 void PageSelector::renderPageLabel(Gtk::TreeModel::const_iterator const &row)
 {
     SPPage *page = (*row)[_model_columns.object];
-    bool label_defaulted(false);
 
     if (page && page->getRepr()) {
-        label_defaulted = !(page->label());
-        auto label = page->defaultLabel();
         int page_num = page->getPageNumber();
 
-        gchar *format = g_strdup_printf(
-              "<span size=\"smaller\"><tt>%d.</tt>%s</span>",
-              page_num, label);
+        gchar *format;
+        if (auto label = page->label()) {
+            format = g_strdup_printf("<span size=\"smaller\"><tt>%d.</tt>%s</span>", page_num, label);
+        } else {
+            format = g_strdup_printf("<span size=\"smaller\"><i>Page %d</i></span>", page_num);
+        }
 
         _label_renderer.property_markup() = format;
         g_free(format);
@@ -142,7 +142,6 @@ void PageSelector::renderPageLabel(Gtk::TreeModel::const_iterator const &row)
     }
 
     _label_renderer.property_ypad() = 1;
-    _label_renderer.property_style() = (label_defaulted ? Pango::STYLE_ITALIC : Pango::STYLE_NORMAL);
 }
 
 void PageSelector::setSelectedPage()
