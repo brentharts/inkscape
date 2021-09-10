@@ -9,22 +9,9 @@
       <object class="GtkToolButton">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="action_name">win.canvas-page-in</property>
-        <property name="label" translatable="yes">Zoom In</property>
-        <property name="icon_name">page-in</property>
-      </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="homogeneous">True</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkToolButton">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="action_name">win.canvas-page-out</property>
-        <property name="label" translatable="yes">Zoom Out</property>
-        <property name="icon_name">page-out</property>
+        <property name="action_name">win.generic_verb</property>
+        <property name="label" translatable="yes">New Page</property>
+        <property name="icon_name">zoom-fit-page</property>
       </object>
       <packing>
         <property name="expand">False</property>
