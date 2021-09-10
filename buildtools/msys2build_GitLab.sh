@@ -34,12 +34,12 @@ export FONTCONFIG_FILE=$(cygpath -a fonts.conf)
 cat > "$FONTCONFIG_FILE" <<EOF
 <?xml version="1.0"?>
 <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
-<fontconfig><dir>$(cygpath -aw fonts)</dir></fontconfig>
+<fontconfig><dir>$(cygpath -aw fonts)</dir><cachedir>$(cygpath -aw fontconfig)</cachedir></fontconfig>
 EOF
 
 mkdir fonts
 wget -nv https://github.com/dejavu-fonts/dejavu-fonts/releases/download/version_2_37/dejavu-fonts-ttf-2.37.tar.bz2 \
-    && tar -xf dejavu-fonts-ttf-2.37.tar.bz2 --directory=fonts
+    && tar -xf dejavu-fonts-ttf-2.37.tar.bz2 && cp dejavu-fonts-ttf-2.37/ttf/* fonts/ && rm -rf dejavu-fonts-ttf-2.37
 
 # install dependencies
 message "--- Installing dependencies"
@@ -66,7 +66,7 @@ cmake .. -G Ninja \
 # build
 message "--- Compiling Inkscape"
 ccache --zero-stats
-ninja
+ninja || error "compilation failed"
 ccache --show-stats
 
 # install
@@ -86,7 +86,10 @@ INKSCAPE_DATADIR=inkscape_datadir bin/inkscape.exe -V >/dev/null || error "unins
 err=$(INKSCAPE_DATADIR=inkscape_datadir bin/inkscape.exe -V 2>&1 >/dev/null)
 if [ -n "$err" ]; then warning "uninstalled executable produces output on stderr:"; echo "$err"; fi
 # run tests
-ninja check || error "tests failed"
+ninja check || {
+    "C:/Program Files/7-Zip/7z.exe" a testfiles.7z testfiles
+    error "tests failed"
+}
 
 message "##### BUILD SUCCESSFUL #####\n\n"
 
@@ -104,7 +107,7 @@ FILENAME=$(ls inkscape*.7z)
 URL=$CI_PROJECT_URL/-/jobs/$CI_JOB_ID/artifacts/raw/build/$FILENAME
 BRANCH=$CI_COMMIT_BRANCH
 HTMLNAME=latest_${BRANCH}_x${MSYSTEM#MINGW}.html
-sed -e "s#\${FILENAME}#${FILENAME}#" -e "s#\${URL}#${URL}#" -e "s#\${BRANCH}#${BRANCH}#" ../buildtools/appveyor_redirect_template.html > $HTMLNAME
+sed -e "s#\${FILENAME}#${FILENAME}#" -e "s#\${URL}#${URL}#" -e "s#\${BRANCH}#${BRANCH}#" ../buildtools/ci_redirect_template.html > $HTMLNAME
 # upload redirect to http://alpha.inkscape.org/snapshots/
 if [ "${CI_PROJECT_PATH}" == "inkscape/inkscape" ] && [ -n "${INKSCAPE_CI_SSH_KEY}" ]; then
     if [ "$BRANCH" == "master" ]; then
