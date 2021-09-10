@@ -50,8 +50,6 @@ class PageSelector : public Gtk::Box {
         SPDesktop *_desktop;
         Inkscape::PageManager *_page_manager;
 
-        std::vector<sigc::connection> _connections;
-
         Gtk::ComboBox _selector;
         Gtk::Button _prev_button;
         Gtk::Button _next_button;
@@ -60,19 +58,20 @@ class PageSelector : public Gtk::Box {
         Gtk::CellRendererText _label_renderer;
         Glib::RefPtr<Gtk::ListStore> _page_model;
 
-        sigc::connection _changed_connection;
-        sigc::connection _resource_connection;
-        sigc::connection _doc_replaced;
-        sigc::connection _prev_page_connection;
-        sigc::connection _next_page_connection;
+        sigc::connection _selector_changed_connection;
+        sigc::connection _pages_changed_connection;
+        sigc::connection _page_selected_connection;
+        sigc::connection _doc_replaced_connection;
 
         void setDocument(SPDocument *document);
         void pagesChanged();
+        void selectonChanged(SPPage *page);
 
+        void renderPageLabel(Gtk::TreeModel::const_iterator const &row);
+        void setSelectedPage();
         void nextPage();
         void prevPage();
 
-        void renderPageLabel(Gtk::TreeModel::const_iterator const &row);
 };
 
 } // namespace Widget

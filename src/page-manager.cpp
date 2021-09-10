@@ -142,6 +142,7 @@ int PageManager::getPageIndex(SPPage *page) const
         if (it != pages.end()) {
             return it - pages.begin();
         }
+        g_warning("Can't get page index for %s", page->getId());
     }
     return -1;
 }
@@ -179,9 +180,11 @@ void PageManager::pagesChanged()
  */
 void PageManager::selectPage(SPPage *page)
 {
-    if (getPageIndex(page) != -1) {
-        _selected_page = page;
-        _page_selected_signal.emit(_selected_page);
+    if (getPageIndex(page) >= 0) {
+        if (_selected_page != page) {
+            _selected_page = page;
+            _page_selected_signal.emit(_selected_page);
+        }
     }
 }
 

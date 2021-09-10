@@ -43,6 +43,9 @@ public:
     void selectPage(int page_index);
     void selectNextPage() { selectPage(getSelectedPageIndex() + 1); }
     void selectPrevPage() { selectPage(getSelectedPageIndex() - 1); }
+    bool hasNextPage() { return getSelectedPageIndex() + 1 < pages.size(); }
+    bool hasPrevPage() { return getSelectedPageIndex() - 1 >= 0; }
+
     SPPage *newPage();
     SPPage *newPage(double width, double height);
 
