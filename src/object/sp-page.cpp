@@ -55,13 +55,6 @@ void SPPage::release()
 
 void SPPage::set(SPAttr key, const gchar *value) {
     switch (key) {
-        case SPAttr::INKSCAPE_LABEL:
-            if (value) {
-                this->label = std::string(value);
-            } else {
-                this->label = "";
-            }
-            break;
         case SPAttr::X:
             this->x.readOrUnset(value);
             break;
@@ -79,6 +72,16 @@ void SPPage::set(SPAttr key, const gchar *value) {
             break;
     }
     this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+}
+
+void SPPage::setManager(Inkscape::PageManager *manager)
+{
+    if (_manager != manager) {
+        if (manager && _manager) {
+            g_warning("Overwriting page manager for %s!", this->getId());
+        }
+        _manager = manager;
+    }
 }
 
 /**
@@ -163,33 +166,37 @@ void SPPage::hidePage()
     }
 }
 
-void SPPage::setPageColor(guint32 color) {
+void SPPage::setPageColor(guint32 color)
+{
     // TODO: There may be more related to defaults here.
     for (auto view : views) {
         view->set_fill(color);
     }
 }
-void SPPage::setPageBorder(guint32 color) {
+
+void SPPage::setPageBorder(guint32 color)
+{
     for (auto view : views) {
         view->set_stroke(color);
     }
 }
 
-void SPPage::setPageShadow(bool show) {
+void SPPage::setPageShadow(bool show)
+{
     for (auto view : views) {
         view->set_shadow(0x00000088, show ? 2 : 0);
     }
 }
 
-void SPPage::setLabel(const char* label, bool const commit)
+/**
+ * Returns the page number (order of pages) starting at 1
+ */
+int SPPage::getPageNumber()
 {
-    // TODO: Add set_label to rectangle canvas control
-    if (!views.empty()) {
-        //views[0]->set_label(label);
+    if (_manager) {
+        return _manager->getPageIndex(this) + 1;
     }
-    if (commit) {
-        setAttribute("inkscape:label", label);
-    }
+    return -5;
 }
 
 /*

@@ -76,6 +76,7 @@
 #include "object/sp-namedview.h"
 #include "object/sp-root.h"
 #include "object/sp-symbol.h"
+#include "object/sp-page.h"
 
 #include "widgets/desktop-widget.h"
 
@@ -1675,7 +1676,7 @@ bool SPDocument::addResource(gchar const *key, SPObject *object)
         [this check should be more generally presend on emit() calls since
         the backtrace is unusable with crashed from this cause]
         */
-        if(object->getId() || dynamic_cast<SPGroup*>(object) )
+        if(object->getId() || dynamic_cast<SPGroup*>(object) || dynamic_cast<SPPage*>(object) )
             resources_changed_signals[q].emit();
 
         result = true;

@@ -674,6 +674,14 @@ void SPNamedView::remove_child(Inkscape::XML::Node *child) {
     SPObjectGroup::remove_child(child);
 }
 
+void SPNamedView::order_changed(Inkscape::XML::Node* child, Inkscape::XML::Node* old_repr, Inkscape::XML::Node* new_repr)
+{
+    if (!strcmp(child->name(), "inkscape:page")) {
+        _page_manager->reorderPage(child);
+    }
+    SPObjectGroup::order_changed(child, old_repr, new_repr);
+}
+
 Inkscape::XML::Node* SPNamedView::write(Inkscape::XML::Document *xml_doc, Inkscape::XML::Node *repr, guint flags) {
     if ( ( flags & SP_OBJECT_WRITE_EXT ) &&
          repr != this->getRepr() )

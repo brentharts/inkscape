@@ -28,17 +28,21 @@ public:
     std::vector<SPPage *> getPages() const { return pages; }
     void addPage(SPPage *page);
     void removePage(Inkscape::XML::Node *child);
+    void reorderPage(Inkscape::XML::Node *child);
     
     // Returns None if no page selected
     SPPage *getSelected() const { return _selected_page; }
     bool hasPages() const { return !pages.empty(); }
     int getPageIndex(SPPage *page) const;
-    int getCurrentPageIndex() const;
+    int getSelectedPageIndex() const;
 
     void enablePages();
     void disablePages();
     void pagesChanged();
     void selectPage(SPPage *page);
+    void selectPage(int page_index);
+    void selectNextPage() { selectPage(getSelectedPageIndex() + 1); }
+    void selectPrevPage() { selectPage(getSelectedPageIndex() - 1); }
     SPPage *newPage();
     SPPage *newPage(double width, double height);
 
@@ -52,11 +56,11 @@ public:
         return document->getNamedView()->getPageManager()->newPage();
     }
 
-    sigc::connection connectPageSelected(const sigc::slot<void, SPObject *> & slot) {
+    sigc::connection connectPageSelected(const sigc::slot<void, SPPage *> & slot) {
         return _page_selected_signal.connect(slot);
     }
-    sigc::connection connectPageChanged(const sigc::slot<void, SPObject *> & slot) {
-        return _page_changed_signal.connect(slot);
+    sigc::connection connectPagesChanged(const sigc::slot<void> & slot) {
+        return _pages_changed_signal.connect(slot);
     }
 
 private:
@@ -64,8 +68,8 @@ private:
     SPPage *_selected_page = nullptr;
     std::vector<SPPage *> pages;
 
-    sigc::signal<void, SPObject *> _page_selected_signal;
-    sigc::signal<void, SPObject *> _page_changed_signal;
+    sigc::signal<void, SPPage *> _page_selected_signal;
+    sigc::signal<void> _pages_changed_signal;
 };
 
 }

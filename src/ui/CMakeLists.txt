@@ -206,6 +206,7 @@ set(ui_SRC
 	widget/notebook-page.cpp
 	widget/object-composite-settings.cpp
 	widget/page-sizer.cpp
+	widget/page-selector.cpp
 	widget/paint-selector.cpp
 	widget/point.cpp
 	widget/preferences-widget.cpp
@@ -457,6 +458,7 @@ set(ui_SRC
 	widget/notebook-page.h
 	widget/object-composite-settings.h
 	widget/page-sizer.h
+	widget/page-selector.h
 	widget/pages-skeleton.h
 	widget/paint-selector.h
 	widget/point.h

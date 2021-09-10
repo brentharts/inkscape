@@ -67,6 +67,7 @@
 #include "ui/widget/combo-tool-item.h"
 #include "ui/widget/ink-ruler.h"
 #include "ui/widget/layer-selector.h"
+#include "ui/widget/page-selector.h"
 #include "ui/widget/selected-style.h"
 #include "ui/widget/spin-button-tool-item.h"
 #include "ui/widget/unit-tracker.h"
@@ -1349,6 +1350,12 @@ SPDesktopWidget::SPDesktopWidget(SPDocument *document)
     dtw->modified_connection = namedview->connectModified(sigc::mem_fun(*dtw, &SPDesktopWidget::namedviewModified));
 
     _layer_selector->setDesktop(dtw->desktop);
+
+    // We never want a page widget if there's no desktop.
+    _page_selector = Gtk::manage(new Inkscape::UI::Widget::PageSelector(desktop));
+    _page_selector->show_all();
+    _page_selector->set_no_show_all();
+    _statusbar->pack_end(*_page_selector, false, false);
 
     dtw->layoutWidgets();
 

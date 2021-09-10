@@ -32,13 +32,17 @@ PageManager::~PageManager()
  */
 void PageManager::addPage(SPPage *page)
 {
+    // TODO: Pages may not always be added at the end.
     pages.push_back(page);
+    page->setManager(this);
+    pagesChanged();
 }
 
 /**
  * Remove a page from this manager, called from namedview parent.
  */
-void PageManager::removePage(Inkscape::XML::Node *child) {
+void PageManager::removePage(Inkscape::XML::Node *child)
+{
     for(auto it = pages.begin(); it != pages.end(); ++it) {
         if ((*it)->getRepr() == child) {
             pages.erase(it);
@@ -46,6 +50,22 @@ void PageManager::removePage(Inkscape::XML::Node *child) {
             break;
         }
     }
+}
+
+/**
+ * Reorder page within the internal list to keep it up to date.
+ */
+void PageManager::reorderPage(Inkscape::XML::Node *child)
+{
+    auto nv = _document->getNamedView();
+    pages.clear();
+    // Reverse order from children order, we want the top-down order.
+    for (auto rit = nv->children.rbegin(); rit != nv->children.rend(); ++rit) {
+        if (auto page = dynamic_cast<SPPage *>(&*rit)) {
+            pages.push_back(page);
+        }
+    }
+    pagesChanged();
 }
 
 /**
@@ -117,9 +137,11 @@ void PageManager::disablePages()
  */
 int PageManager::getPageIndex(SPPage *page) const
 {
-    auto it = std::find(pages.begin(), pages.end(), page);
-    if (it != pages.end()) {
-        return it - pages.begin();
+    if (page) {
+        auto it = std::find(pages.begin(), pages.end(), page);
+        if (it != pages.end()) {
+            return it - pages.begin();
+        }
     }
     return -1;
 }
@@ -127,7 +149,7 @@ int PageManager::getPageIndex(SPPage *page) const
 /**
  * Return the index of the page in the index
  */
-int PageManager::getCurrentPageIndex() const
+int PageManager::getSelectedPageIndex() const
 {
     return getPageIndex(_selected_page);
 }
@@ -138,24 +160,40 @@ int PageManager::getCurrentPageIndex() const
  */
 void PageManager::pagesChanged()
 {
-    if (pages.empty() || getCurrentPageIndex() == -1) {
+    if (pages.empty() || getSelectedPageIndex() == -1) {
         _selected_page = nullptr;
     }
-    for (auto &page : pages) {
-        if (!_selected_page) {
-            _selected_page = page;
+    _pages_changed_signal.emit();
+    if (!_selected_page) {
+        for (auto &page : pages) {
+            selectPage(page);
             break;
         }
     }
 }
 
 /**
- * Set the given page as the current page.
+ * Set the given page as the selected page.
+ *
+ * @param page - The page to set as the selected page.
  */
 void PageManager::selectPage(SPPage *page)
 {
     if (getPageIndex(page) != -1) {
         _selected_page = page;
+        _page_selected_signal.emit(_selected_page);
+    }
+}
+
+/**
+ * Set the given page as the selected page.
+ *
+ * @param page_index - The page index (from 0) of the page to select.
+ */
+void PageManager::selectPage(int page_index)
+{
+    if (page_index >= 0 && page_index < pages.size()) {
+        selectPage(pages[page_index]);
     }
 }
 

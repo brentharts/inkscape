@@ -18,6 +18,7 @@
 #include "display/control/canvas-item-rect.h"
 #include "sp-object.h"
 #include "svg/svg-length.h"
+#include "page-manager.h"
 
 class SPDesktop;
 
@@ -26,15 +27,17 @@ public:
     SPPage();
     ~SPPage() override = default;
 
-    void setLabel(const char* label, bool const commit);
     void showPage(SPDesktop *desktop, Inkscape::CanvasItemGroup *group);
     void hidePage(Inkscape::UI::Widget::Canvas *canvas);
     void showPage();
     void hidePage();
 
+    void setManager(Inkscape::PageManager *manager);
+
     void setPageColor(guint32 color);
     void setPageBorder(guint32 color);
     void setPageShadow(bool show);
+    int getPageNumber();
 
     Geom::Rect getRect() const;
     Geom::Rect getDesktopRect() const;
@@ -45,8 +48,8 @@ protected:
     void release() override;
     void set(SPAttr key, const char* value) override;
 private:
-    std::string label;
 
+    Inkscape::PageManager *_manager = nullptr;
     std::vector<Inkscape::CanvasItemRect *> views;
 
     SVGLength x;
