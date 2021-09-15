@@ -18,12 +18,18 @@
 #define SP_PAGES_CONTEXT(obj) (dynamic_cast<Inkscape::UI::Tools::PagesTool*>((Inkscape::UI::Tools::ToolBase*)obj))
 #define SP_IS_PAGES_CONTEXT(obj) (dynamic_cast<const Inkscape::UI::Tools::PagesTool*>((const Inkscape::UI::Tools::ToolBase*)obj) != NULL)
 
+class SPObject;
+class SPPage;
+
 namespace Inkscape {
+    class CanvasItemRect;
+    class PageManager;
+
 namespace UI {
 namespace Tools {
 
 class PagesTool : public ToolBase {
-public:
+    public:
 	PagesTool();
 	~PagesTool() override;
 
@@ -35,8 +41,18 @@ public:
 
 	const std::string& getPrefsPath() override;
 
-private:
-	bool escaped;
+    private:
+        SPPage *page_under(Geom::Point pt);
+        Inkscape::PageManager *getPageManager();
+
+        bool mouse_is_pressed = false;
+        Geom::Point drag_origin_w;
+        Geom::Point drag_origin_dt;
+        int drag_tolerance = 5;
+
+        SPPage *dragging_item = nullptr;
+        Geom::Rect *dragging_box = nullptr;
+        Inkscape::CanvasItemRect *visual_box = nullptr;
 };
 
 }

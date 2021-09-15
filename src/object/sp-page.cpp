@@ -199,6 +199,50 @@ int SPPage::getPageNumber()
     return -5;
 }
 
+/**
+ * Move the page by the given affine, in desktop units.
+ */
+void SPPage::movePage(Geom::Affine translate, bool with_objects)
+{
+    if (translate.isTranslation()) {
+        if (with_objects) {
+            g_warning("I want to move all the objects...");
+        }
+        auto current_rect = getDesktopRect() * translate;
+        current_rect *= document->getDocumentScale().inverse();
+
+        this->x = current_rect.left();
+        this->y = current_rect.top();
+        this->width = current_rect.width();
+        this->height = current_rect.height();
+
+        this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+    }
+}
+
+void SPPage::update(SPCtx* /*ctx*/, unsigned int /*flags*/)
+{
+    for (auto view : views) {
+        view->set_rect(getDesktopRect());
+    }
+}
+
+/*
+Inkscape::XML::Node *SPPage::write(Inkscape::XML::Document *xml_doc, Inkscape::XML::Node *repr, guint flags)
+{
+    if ((flags & SP_OBJECT_WRITE_BUILD) && !repr) {
+        repr = xml_doc->createElement("inkscape:page");
+    }
+
+    repr->setAttributeSvgDouble("x", this->x.computed);
+    repr->setAttributeSvgDouble("y", this->y.computed);
+    repr->setAttributeSvgDouble("width", this->width.computed);
+    repr->setAttributeSvgDouble("height", this->height.computed);
+
+    return SPObject::write(xml_doc, repr, flags);
+}
+*/
+
 /*
   Local Variables:
   mode:c++

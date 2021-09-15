@@ -51,6 +51,8 @@ public:
 
     SPPage *newPage();
     SPPage *newPage(double width, double height);
+    SPPage *newPage(Geom::Rect rect);
+    SPPage *newDesktopPage(Geom::Rect rect);
 
     static void enablePages(SPDocument *document) {
         document->getNamedView()->getPageManager()->enablePages();

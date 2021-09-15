@@ -27,6 +27,7 @@ public:
     SPPage();
     ~SPPage() override = default;
 
+    void movePage(Geom::Affine translate, bool with_objects);
     void showPage(SPDesktop *desktop, Inkscape::CanvasItemGroup *group);
     void hidePage(Inkscape::UI::Widget::Canvas *canvas);
     void showPage();
@@ -46,6 +47,7 @@ public:
 protected:
     void build(SPDocument* doc, Inkscape::XML::Node* repr) override;
     void release() override;
+    void update(SPCtx* ctx, unsigned int flags) override;
     void set(SPAttr key, const char* value) override;
 private:
 

@@ -298,6 +298,24 @@ void SPNamedView::release() {
     SPObjectGroup::release();
 }
 
+/**
+ * Propergate the update to the child nodes so they can be updated correctly.
+ */
+void SPNamedView::update(SPCtx *ctx, guint flags) {
+    if (flags & SP_OBJECT_MODIFIED_FLAG) {
+        flags |= SP_OBJECT_PARENT_MODIFIED_FLAG;
+    }
+
+    flags &= SP_OBJECT_MODIFIED_CASCADE;
+    std::vector<SPObject*> l(this->childList(true));
+    for(auto child : l){
+        if (flags || (child->uflags & (SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_CHILD_MODIFIED_FLAG))) {
+            child->updateDisplay(ctx, flags);
+        }
+        sp_object_unref(child);
+    }
+}
+
 void SPNamedView::set(SPAttr key, const gchar* value) {
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     bool global_snapping = prefs->getBool("/options/snapdefault/value", true);

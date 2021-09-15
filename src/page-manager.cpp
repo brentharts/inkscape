@@ -105,19 +105,35 @@ SPPage *PageManager::newPage(double width, double height)
             left = rect.right() + 10;
         }
     }
+    return newPage(Geom::Rect(left, top, left + width, top + height));
+}
 
+
+/**
+ * Add a new page with the given rectangle.
+ */
+SPPage *PageManager::newPage(Geom::Rect rect)
+{
     auto xml_doc = _document->getReprDoc();
     auto repr = xml_doc->createElement("inkscape:page");
-    repr->setAttributeSvgDouble("x", left);
-    repr->setAttributeSvgDouble("y", top);
-    repr->setAttributeSvgDouble("width", width);
-    repr->setAttributeSvgDouble("height", height);
+    repr->setAttributeSvgDouble("x", rect.left());
+    repr->setAttributeSvgDouble("y", rect.top());
+    repr->setAttributeSvgDouble("width", rect.width());
+    repr->setAttributeSvgDouble("height", rect.height());
     if (auto nv = _document->getNamedView()) {
         if (auto page = dynamic_cast<SPPage *>(nv->appendChildRepr(repr))) {
             return page;
         }
     }
     return nullptr;
+}
+
+/**
+ * Create a new page, resizing the rectangle from desktop coordinates.
+ */
+SPPage *PageManager::newDesktopPage(Geom::Rect rect)
+{
+    return newPage(rect * _document->getDocumentScale().inverse());
 }
 
 /**
