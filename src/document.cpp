@@ -147,7 +147,7 @@ SPDocument::SPDocument() :
 
     // Actions
     action_group = Gio::SimpleActionGroup::create();
-    add_actions_canvas_snapping(this);
+    // empty for now...
 }
 
 SPDocument::~SPDocument() {
@@ -444,10 +444,6 @@ SPDocument *SPDocument::createDoc(Inkscape::XML::Document *rdoc,
     // ************* Fix Document **************
     // Move to separate function?
 
-    /** Fix OSB **/
-    sp_file_fix_osb(document->getRoot());
-
-
     /** Fix baseline spacing (pre-92 files) **/
     if ( (!sp_no_convert_text_baseline_spacing)
          && sp_version_inside_range( document->root->version.inkscape, 0, 1, 0, 92 ) ) {
@@ -464,6 +460,17 @@ SPDocument *SPDocument::createDoc(Inkscape::XML::Document *rdoc,
         sp_file_fix_empty_lines(document);
     }
 
+    /** Fix OSB (pre-1.1 files) **/
+    if (sp_version_inside_range(document->root->version.inkscape, 0, 1, 1, 1)) {
+        sp_file_fix_osb(document->getRoot());
+    }
+
+    /** Fix feComposite (pre-1.2 files) **/
+    if (sp_version_inside_range(document->root->version.inkscape, 0, 1, 1, 1)) {
+        sp_file_fix_feComposite(document->getRoot());
+    }
+
+
     /** Fix dpi (pre-92 files). With GUI fixed in Inkscape::Application::fix_document. **/
     if ( !(INKSCAPE.use_gui()) && sp_version_inside_range( document->root->version.inkscape, 0, 1, 0, 92 ) ) {
         sp_file_convert_dpi(document);
@@ -476,7 +483,7 @@ SPDocument *SPDocument::createDoc(Inkscape::XML::Document *rdoc,
     }
 
     // Update document level action settings
-    set_actions_canvas_snapping(document);
+    // -- none available so far --
 
     return document;
 }
@@ -503,10 +510,9 @@ std::unique_ptr<SPDocument> SPDocument::copy() const
     }
 
     auto doc = createDoc(new_rdoc, document_filename, document_base, document_name, keepalive, nullptr);
-    doc->_original_document = this->doRef();
-    Inkscape::GC::release(new_rdoc);
+    doc->_original_document = this;
 
-    return std::unique_ptr<SPDocument>(doc);
+    return doc->doRef();
 }
 
 /**
@@ -868,16 +874,14 @@ void SPDocument::fitToRect(Geom::Rect const &rect, bool with_margins)
     double margin_bottom = 0.0;
 
     if (with_margins && nv) {
-        if (nv != nullptr) {
-            margin_top = nv->getMarginLength("fit-margin-top", nv_units, unit_table.getUnit("px"), w, h, false);
-            margin_left = nv->getMarginLength("fit-margin-left", nv_units, unit_table.getUnit("px"), w, h, true);
-            margin_right = nv->getMarginLength("fit-margin-right", nv_units, unit_table.getUnit("px"), w, h, true);
-            margin_bottom = nv->getMarginLength("fit-margin-bottom", nv_units, unit_table.getUnit("px"), w, h, false);
-            margin_top = Inkscape::Util::Quantity::convert(margin_top, nv_units, "px");
-            margin_left = Inkscape::Util::Quantity::convert(margin_left, nv_units, "px");
-            margin_right = Inkscape::Util::Quantity::convert(margin_right, nv_units, "px");
-            margin_bottom = Inkscape::Util::Quantity::convert(margin_bottom, nv_units, "px");
-        }
+        margin_top = nv->getMarginLength("fit-margin-top", nv_units, unit_table.getUnit("px"), w, h, false);
+        margin_left = nv->getMarginLength("fit-margin-left", nv_units, unit_table.getUnit("px"), w, h, true);
+        margin_right = nv->getMarginLength("fit-margin-right", nv_units, unit_table.getUnit("px"), w, h, true);
+        margin_bottom = nv->getMarginLength("fit-margin-bottom", nv_units, unit_table.getUnit("px"), w, h, false);
+        margin_top = Inkscape::Util::Quantity::convert(margin_top, nv_units, "px");
+        margin_left = Inkscape::Util::Quantity::convert(margin_left, nv_units, "px");
+        margin_right = Inkscape::Util::Quantity::convert(margin_right, nv_units, "px");
+        margin_bottom = Inkscape::Util::Quantity::convert(margin_bottom, nv_units, "px");
     }
 
     double y_dir = yaxisdir();

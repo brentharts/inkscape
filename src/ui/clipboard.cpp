@@ -917,7 +917,6 @@ void ClipboardManagerImpl::_copySelection(ObjectSet *selection)
                     remove_hidder_filter(newitem);
                     gchar *id = strdup(newitem->getId());
                     newitem = (SPItem *)sp_lpe_item_remove_autoflatten(newitem, id);
-                    obj_copy = newitem->getRepr();
                     g_free(id);
                 }
             }
@@ -1525,7 +1524,9 @@ void ClipboardManagerImpl::_createInternalClipboard()
 void ClipboardManagerImpl::_discardInternalClipboard()
 {
     if ( _clipboardSPDoc != nullptr ) {
-        _clipboardSPDoc = nullptr;
+        // Explicit delete required to free SPDocument
+        // see https://gitlab.com/inkscape/inkscape/-/issues/2723
+        delete _clipboardSPDoc.release();
         _defs = nullptr;
         _doc = nullptr;
         _root = nullptr;

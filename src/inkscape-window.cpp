@@ -26,6 +26,7 @@
 #include "actions/actions-canvas-transform.h"
 #include "actions/actions-dialogs.h"
 #include "actions/actions-tools.h"
+#include "actions/actions-canvas-snapping.h"
 
 #include "object/sp-namedview.h"  // TODO Remove need for this!
 
@@ -94,6 +95,7 @@ InkscapeWindow::InkscapeWindow(SPDocument* document)
     add_actions_canvas_mode(this);         // Actions to change canvas display mode.
     add_actions_dialogs(this);             // Actions to open dialogs.
     add_actions_tools(this);               // Actions to switch between tools.
+    add_actions_canvas_snapping(this);     // Actions to togglesnapping.
 
     // ========== Drag and Drop of Documents =========
     ink_drag_setup(_desktop_widget);
@@ -132,6 +134,12 @@ InkscapeWindow::InkscapeWindow(SPDocument* document)
 
     // ========= Update text for Accellerators =======
     Inkscape::Shortcuts::getInstance().update_gui_text_recursive(this);
+}
+
+InkscapeWindow::~InkscapeWindow()
+{
+    Gtk::Window *win = _desktop->getToplevel();
+    g_idle_remove_by_data(win);
 }
 
 // Change a document, leaving desktop/view the same. (Eventually move all code here.)
