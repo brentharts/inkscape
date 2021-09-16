@@ -285,7 +285,12 @@ SPDesktopWidget::SPDesktopWidget()
                 auto name = sp_get_action_target(widget);
                 auto show = prefs->getBool(ToolboxFactory::tools_visible_buttons + name, true);
                 auto parent = btn->get_parent();
-                if (show) parent->show(); else parent->hide();
+                if (show) {
+                    parent->show();
+                }
+                else {
+                    parent->hide();
+                }
             }
             return false;
         });

@@ -258,7 +258,6 @@ static Glib::RefPtr<Gtk::ActionGroup> create_or_fetch_actions( SPDesktop* deskto
         SP_VERB_SELECTION_UNGROUP,
     };
 
-    // GtkIconSize toolboxSize = ToolboxFactory::prefToSize("/toolbox/small");
     Glib::RefPtr<Gtk::ActionGroup> mainActions;
     if (desktop == nullptr)
     {
@@ -310,47 +309,6 @@ static GtkWidget* toolboxNewCommon( GtkWidget* tb, BarId id, GtkPositionType /*h
     return hb;
 }
 
-// class tbbox : public Gtk::FlowBox {
-// public:
-//     tbbox(){}
-
-//     void on_size_allocate(Gtk::Allocation& allocation) override {
-//         Gtk::FlowBox::on_size_allocate(allocation);
-//         return;
-//         // set_allocation(allocation);
-//         bool horizontal = get_orientation() == Gtk::ORIENTATION_HORIZONTAL;
-//         int x = allocation.get_x();
-//         int y = allocation.get_y();
-//         int i = 0;
-//         for (auto child : get_children()) {
-//             //
-//             if (!child->get_visible()) continue;
-
-//             Gtk::Allocation alloc = child->get_allocation();
-//             if (allocation.get_width() > 40) {
-//                 alloc.set_y(y);
-//                 if (i % 2) {
-//                     alloc.set_x(x + alloc.get_width());
-//                     y += alloc.get_height();
-//                 }
-//                 else {
-//                     alloc.set_x(x);
-//                 }
-//                 child->size_allocate(alloc);
-//             }
-
-//             // y += alloc.get_height();
-//             // if (y > 600) {
-//                 // y = allocation.get_y();
-//                 // x += alloc.get_width();
-//             // }
-//             ++i;
-//         }
-
-//     }
-
-// };
-
 GtkWidget *ToolboxFactory::createToolToolbox()
 {
     auto tb = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
@@ -373,27 +331,7 @@ GtkWidget *ToolboxFactory::createToolToolbox()
     if (!toolbar) {
         std::cerr << "InkscapeWindow: Failed to load tool toolbar!" << std::endl;
     } else {
-        // auto tbox = new tbbox();
-        // std::vector<Gtk::Widget*> widgets = toolbar->get_children();
-        // for (auto w : widgets) {
-        //     w->reference();
-        //     toolbar->remove(*w);
-        //     w->show();
-        //     tbox->add(*w);
-        // }
-        // tbox->set_orientation(toolbar->get_orientation());
-        // tbox->set_homogeneous(toolbar->get_homogeneous());
-        // tbox->set_max_children_per_line(toolbar->get_max_children_per_line());
-        // tbox->set_min_children_per_line(toolbar->get_min_children_per_line());
-        // tbox->set_valign(toolbar->get_valign());
-        // tbox->get_style_context()->add_class("tight-flowbox");
-        // toolbar = tbox;
         gtk_box_pack_start(GTK_BOX(tb), GTK_WIDGET(toolbar->gobj()), false, false, 0);
-
-        Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-        if ( prefs->getBool("/toolbox/icononly", true) ) {
-            // toolbar->set_toolbar_style( Gtk::TOOLBAR_ICONS );
-        }
     }
 
     return toolboxNewCommon( tb, BAR_TOOL, GTK_POS_LEFT );
@@ -457,9 +395,6 @@ GtkWidget *ToolboxFactory::createSnapToolbox()
             toolbar->set_toolbar_style( Gtk::TOOLBAR_ICONS );
         }
         simple_snap = prefs->getBool("/toolbox/simplesnap", simple_snap);
-
-        // GtkIconSize toolboxSize = ToolboxFactory::prefToSize("/toolbox/secondary", 1);
-        // toolbar->set_icon_size (static_cast<Gtk::IconSize>(toolboxSize));
     }
 
     Gtk::ToolItem* item_simple = nullptr;
