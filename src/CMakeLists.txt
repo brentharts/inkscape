@@ -265,6 +265,8 @@ set(inkscape_SRC
   actions/actions-view-window.cpp
   actions/actions-window.h
   actions/actions-window.cpp
+  actions/actions-pages.h
+  actions/actions-pages.cpp
 
   inkview-application.h
   inkview-application.cpp

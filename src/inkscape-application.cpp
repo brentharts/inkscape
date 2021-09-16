@@ -614,7 +614,6 @@ InkscapeApplication::InkscapeApplication()
     add_actions_transform(this);            // actions for transforming selected objects
     add_actions_window(this);               // actions for windows
 
-
     // ====================== Command Line ======================
 
     // Will automatically handle character conversions.

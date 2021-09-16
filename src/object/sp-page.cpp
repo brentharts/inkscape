@@ -109,6 +109,8 @@ Geom::Rect SPPage::getDesktopRect() const
  */
 std::vector<SPItem*> SPPage::getExclusiveItems() const
 {
+    // There's no logical reason why the desktop is needed here
+    // we should have a getItemsInBox that doesn't use the desktop
     SPDesktop *desktop = SP_ACTIVE_DESKTOP;
     return document->getItemsInBox(desktop->dkey, getDesktopRect(), true, true, true, false);
 }
@@ -118,6 +120,8 @@ std::vector<SPItem*> SPPage::getExclusiveItems() const
  */
 std::vector<SPItem*> SPPage::getOverlappingItems() const
 {
+    // There's no logical reason why the desktop is needed here
+    // we should have a getItemsInBox that doesn't use the desktop
     SPDesktop *desktop = SP_ACTIVE_DESKTOP;
     return document->getItemsPartiallyInBox(desktop->dkey, getDesktopRect(), true, true, true, false);
 }
@@ -178,6 +182,20 @@ void SPPage::setPageBorder(guint32 color)
 {
     for (auto view : views) {
         view->set_stroke(color);
+    }
+}
+
+/**
+ * Set the selected high-light for this page.
+ */
+void SPPage::setSelected(bool selected)
+{
+    for (auto view : views) {
+        if (selected) {
+            view->set_stroke(0xff0000cc);
+        } else {
+            view->set_stroke(0x000000cc);
+        }
     }
 }
 

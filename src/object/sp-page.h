@@ -35,6 +35,7 @@ public:
 
     void setManager(Inkscape::PageManager *manager);
 
+    void setSelected(bool selected);
     void setPageColor(guint32 color);
     void setPageBorder(guint32 color);
     void setPageShadow(bool show);

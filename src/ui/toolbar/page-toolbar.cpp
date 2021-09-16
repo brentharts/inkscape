@@ -49,6 +49,9 @@ PageToolbar::create(SPDesktop *desktop)
                           // it to a container yet. This probably causes a memory leak but we'll
                           // fix it when all toolbars are converted to use Gio::Actions.
 
+    // XXX Start building the non-action pieces.
+    //builder->get_widget("page_sizes", combo_page_sizes)
+
     return GTK_WIDGET(toolbar->gobj());
 }
 }

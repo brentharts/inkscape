@@ -6,12 +6,12 @@
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <child>
-      <object class="GtkToolButton">
+      <object class="GtkToolButton" id="page_new">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="action_name">win.generic_verb</property>
+        <property name="action_name">doc.page-new</property>
         <property name="label" translatable="yes">New Page</property>
-        <property name="icon_name">zoom-fit-page</property>
+        <property name="stock_id">gtk-new</property>
       </object>
       <packing>
         <property name="expand">False</property>
@@ -19,31 +19,11 @@
       </packing>
     </child>
     <child>
-      <object class="GtkSeparatorToolItem">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-      </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="homogeneous">False</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkSeparatorToolItem">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-      </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="homogeneous">False</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkToolItem">
+      <object class="GtkToolItem" id="page_sizes_container">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <child>
-          <object class="GtkComboBoxText">
+          <object class="GtkComboBoxText" id="page_sizes">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="active">0</property>
@@ -65,6 +45,55 @@
       <packing>
         <property name="expand">False</property>
         <property name="homogeneous">True</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkSeparatorToolItem">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="homogeneous">False</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkToolItem" id="page_label_container">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <child>
+          <object class="GtkEntry" id="page_label">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+          </object>
+        </child>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="homogeneous">True</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkToolButton" id="page_delete">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="action_name">doc.page-delete</property>
+        <property name="label" translatable="yes">New Page</property>
+        <property name="stock_id">gtk-delete</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="homogeneous">True</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkSeparatorToolItem">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="homogeneous">False</property>
       </packing>
     </child>
   </object>

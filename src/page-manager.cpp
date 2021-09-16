@@ -80,11 +80,17 @@ void PageManager::enablePages()
 }
 
 /**
- * Add a new page of the default (viewBox) width and height.
+ * Add a new page of the default size, this will be either
+ * the size of the viewBox if no pages exist, or the size
+ * of the selected page.
  */
 SPPage *PageManager::newPage()
 {
     auto unit = _document->getDisplayUnit();
+    if (_selected_page) {
+        auto rect = _selected_page->getRect();
+        return newPage(rect.width(), rect.height());
+    }
     return newPage(
         _document->getWidth().value(unit),
         _document->getHeight().value(unit));
@@ -134,6 +140,25 @@ SPPage *PageManager::newPage(Geom::Rect rect)
 SPPage *PageManager::newDesktopPage(Geom::Rect rect)
 {
     return newPage(rect * _document->getDocumentScale().inverse());
+}
+
+/**
+ * Delete the given page.
+ */
+void PageManager::deletePage(SPPage *page)
+{
+    if (page) {
+        // Removal from pages is done automatically via signals.
+        page->deleteObject();
+    }
+}
+
+/**
+ * Delete the selected page.
+ */
+void PageManager::deletePage()
+{
+    deletePage(_selected_page);
 }
 
 /**
@@ -198,7 +223,11 @@ bool PageManager::selectPage(SPPage *page)
 {
     if (getPageIndex(page) >= 0) {
         if (_selected_page != page) {
+            if (_selected_page) {
+                _selected_page->setSelected(false);
+            }
             _selected_page = page;
+            _selected_page->setSelected(true);
             _page_selected_signal.emit(_selected_page);
             return true;
         }
