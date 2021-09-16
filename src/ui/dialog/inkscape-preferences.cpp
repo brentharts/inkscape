@@ -1761,17 +1761,23 @@ void InkscapePreferences::initPageUI()
     _page_theme.add_line(false, "", *icon_buttons_def, "",
                          _("Reset theme colors for some symbolic icon themes"),
                          false);
-    {
-        Glib::ustring sizeLabels[] = { C_("Icon size", "Larger"), C_("Icon size", "Large"), C_("Icon size", "Small"),
-                                       C_("Icon size", "Smaller") };
-        int sizeValues[] = { 3, 2, 0, 1 };
-        // "Larger" is 3 to not break existing preference files. Should fix in GTK3
+        Glib::ustring menu_icons_labels[] = {_("Yes"), _("No"), _("Theme decides")};
+        int menu_icons_values[] = {1, -1, 0};
+        _menu_icons.init("/theme/menuIcons", menu_icons_labels, menu_icons_values, G_N_ELEMENTS(menu_icons_labels), 0);
+        _page_theme.add_line(false, _("Show icons in menus:"), _menu_icons, _("(requires restart)"),
+                             _("You can either enable or disable all icons in menus. By default, the setting for the 'show-icons' attribute in the 'menus.xml' file determines whether to display icons in menus."), false);
 
+    this->AddPage(_page_theme, _("Theming"), iter_ui, PREFS_PAGE_UI_THEME);
+    symbolicThemeCheck();
+
+    // Toolbars
+    _page_toolbars.add_group_header(_("Toolbars"));
+    {
         auto custom = Gtk::make_managed<Gtk::MenuButton>();
         auto dlg = Gtk::make_managed<Gtk::Popover>();
         custom->set_label(_("Customize..."));
         custom->set_popover(*dlg);
-        custom->set_direction(Gtk::ARROW_UP);
+        custom->set_direction(Gtk::ARROW_DOWN);
         auto toolbox = Glib::wrap(ToolboxFactory::createToolToolbox());
         toolbox->show_all();
         const int MARGIN = 6;
@@ -1779,7 +1785,7 @@ void InkscapePreferences::initPageUI()
         toolbox->set_margin_end(MARGIN);
         toolbox->set_margin_top(MARGIN);
         toolbox->set_margin_bottom(MARGIN);
-        Glib::ustring visible_buttons_path = "/toolbox/tools/buttons/"; 
+        Glib::ustring visible_buttons_path = ToolboxFactory::tools_visible_buttons;
 
         sp_traverse_widget_tree(toolbox, [=](Gtk::Widget* widget){
             if (auto flowbox = dynamic_cast<Gtk::FlowBox*>(widget)) {
@@ -1791,13 +1797,12 @@ void InkscapePreferences::initPageUI()
                 // do not execute any action:
                 gtk_actionable_set_action_name(GTK_ACTIONABLE(widget->gobj()), "");
 
-                button->set_relief(Gtk::RELIEF_NORMAL);
                 button->set_margin_start(MARGIN / 2);
                 button->set_margin_end(MARGIN / 2);
                 button->set_margin_top(MARGIN / 2);
                 button->set_margin_bottom(MARGIN / 2);
                 button->set_sensitive();
-                auto path = visible_buttons_path + "show" + sp_get_action_target(button);
+                auto path = visible_buttons_path + sp_get_action_target(button);
                 auto visible = Inkscape::Preferences::get()->getBool(path, true);
                 button->set_active(visible);
                 button->signal_toggled().connect([=](){
@@ -1806,58 +1811,33 @@ void InkscapePreferences::initPageUI()
             }
             return false;
         });
-        // for (auto&& child : flowbox->get_children()) {
-        //     if (auto box = dynamic_cast<Gtk::FlowBoxChild*>(child)) {
-        //         if (auto button = dynamic_cast/\)
-        //     }
-        // }
+
         dlg->add(*toolbox);
-        _page_theme.add_line(false, "Toolbox buttons:", *custom, "", "ttip", false);
-        //
+        _page_toolbars.add_line(false, "Toolbox buttons:", *custom, "", _("Select visible tool buttons"), false);
+
         struct tbar_info {const char* label; const char* prefs;} toolbars[] = {
-            {_("Toolbox icon size:"),       "/toolbox/tools/iconsize"},
-            {_("Control bar icon size:"),   "/toolbox/controlbars/iconsize"},
+            {_("Toolbox icon size:"),     ToolboxFactory::tools_icon_size},
+            {_("Control bar icon size:"), ToolboxFactory::ctrlbars_icon_size},
         };
         for (auto&& tbox : toolbars) {
-            auto slider = Gtk::manage(new UI::Widget::PrefSlider());
-            const int min = 16;
-            const int max = 48;
+            auto slider = Gtk::manage(new UI::Widget::PrefSlider(false));
+            const int min = ToolboxFactory::min_pixel_size;
+            const int max = ToolboxFactory::max_pixel_size;
             slider->init(tbox.prefs, min, max, 1, 4, min, 0);
-            slider->show_all();
-            slider->getSpinButton()->hide();
-            slider->set_no_show_all();
             slider->getSlider()->signal_format_value().connect([](double val){
-                return Glib::ustring::format(std::fixed, std::setprecision(0), val * 100.0 / 16.0) + "%";
+                return Glib::ustring::format(std::fixed, std::setprecision(0), val * 100.0 / min) + "%";
             });
             slider->getSlider()->get_style_context()->add_class("small-marks");
             for (int i = min; i <= max; i += 8) {
-                slider->getSlider()->add_mark(i, Gtk::POS_BOTTOM, i % 16 ? "" : (std::to_string(100 * i / 16) + "%").c_str());
+                slider->getSlider()->add_mark(i, Gtk::POS_BOTTOM, i % min ? "" : (std::to_string(100 * i / min) + "%").c_str());
             }
-            _page_theme.add_line(false, tbox.label, *slider, "", _("Adjust toolbar icon size"));
+            slider->set_margin_bottom(MARGIN);
+            _page_toolbars.add_line(false, tbox.label, *slider, "", _("Adjust toolbar icon size"));
         }
-
-        // _misc_small_tools.init("/toolbox/tools/small", sizeLabels, sizeValues, G_N_ELEMENTS(sizeLabels), 0);
-        // _page_theme.add_line(false, _("Toolbox icon size:"), _misc_small_tools, _("(requires restart)"),
-        //                      _("Set the size for the tool icons."), false);
-
-        // _misc_small_toolbar.init("/toolbox/small", sizeLabels, sizeValues, G_N_ELEMENTS(sizeLabels), 0);
-        // _page_theme.add_line(false, _("Control bar icon size:"), _misc_small_toolbar, _("(requires restart)"),
-        //                      _("Set the size for the icons in tools' control bars."), false);
-
-        // _misc_small_secondary.init("/toolbox/secondary", sizeLabels, sizeValues, G_N_ELEMENTS(sizeLabels), 1);
-        // _page_theme.add_line(false, _("Secondary toolbar icon size:"), _misc_small_secondary, _("(requires restart)"),
-        //                      _("Set the size for the icons in secondary toolbars."), false);
-    }
-    {
-        Glib::ustring menu_icons_labels[] = {_("Yes"), _("No"), _("Theme decides")};
-        int menu_icons_values[] = {1, -1, 0};
-        _menu_icons.init("/theme/menuIcons", menu_icons_labels, menu_icons_values, G_N_ELEMENTS(menu_icons_labels), 0);
-        _page_theme.add_line(false, _("Show icons in menus:"), _menu_icons, _("(requires restart)"),
-                             _("You can either enable or disable all icons in menus. By default, the setting for the 'show-icons' attribute in the 'menus.xml' file determines whether to display icons in menus."), false);
     }
 
-    this->AddPage(_page_theme, _("Theming"), iter_ui, PREFS_PAGE_UI_THEME);
-    symbolicThemeCheck();
+    this->AddPage(_page_toolbars, _("Toolbars"), iter_ui, PREFS_PAGE_UI_TOOLBARS);
+
     // Windows
     _win_save_geom.init ( _("Save and restore window geometry for each document"), "/options/savewindowgeometry/value", PREFS_WINDOW_GEOMETRY_FILE, true, nullptr);
     _win_save_geom_prefs.init ( _("Remember and use last window's geometry"), "/options/savewindowgeometry/value", PREFS_WINDOW_GEOMETRY_LAST, false, &_win_save_geom);

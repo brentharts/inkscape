@@ -103,15 +103,15 @@ Glib::RefPtr<Gdk::Pixbuf> sp_get_icon_pixbuf(Glib::ustring icon_name, GtkIconSiz
     return sp_get_icon_pixbuf(icon_name, width * scale);
 }
 
-Glib::RefPtr<Gdk::Pixbuf> sp_get_icon_pixbuf(Glib::ustring icon_name, gchar const *prefs_size, int scale)
-{
-    // Load icon based in preference size defined allowed values are:
-    //"/toolbox/tools/small" Toolbox icon size
-    //"/toolbox/small" Control bar icon size
-    //"/toolbox/secondary" Secondary toolbar icon size
-    GtkIconSize icon_size = Inkscape::UI::ToolboxFactory::prefToSize(prefs_size);
-    return sp_get_icon_pixbuf(icon_name, icon_size, scale);
-}
+// Glib::RefPtr<Gdk::Pixbuf> sp_get_icon_pixbuf(Glib::ustring icon_name, gchar const *prefs_size, int scale)
+// {
+//     // Load icon based in preference size defined allowed values are:
+//     //"/toolbox/tools/small" Toolbox icon size
+//     //"/toolbox/small" Control bar icon size
+//     //"/toolbox/secondary" Secondary toolbar icon size
+//     GtkIconSize icon_size = Inkscape::UI::ToolboxFactory::prefToSize(prefs_size);
+//     return sp_get_icon_pixbuf(icon_name, icon_size, scale);
+// }
 
 /**
  * Get the shape icon for this named shape type. For example 'rect'. These icons
