@@ -219,25 +219,43 @@ int SPPage::getPageNumber()
 
 /**
  * Move the page by the given affine, in desktop units.
+ *
+ * @param translate - The positional translation to apply.
+ * @param with_objects - Flag to request that connected objects also move.
  */
 void SPPage::movePage(Geom::Affine translate, bool with_objects)
 {
     if (translate.isTranslation()) {
+        auto scale = document->getDocumentScale();
+
         if (with_objects) {
-            g_warning("I want to move all the objects...");
+            // Move each item that is overlapping this page too
+            for (auto &item : getOverlappingItems()) {
+                auto move = (item->transform * scale) * translate * scale.inverse();
+                item->doWriteTransform(move, &move, false);
+            }
         }
         auto current_rect = getDesktopRect() * translate;
-        current_rect *= document->getDocumentScale().inverse();
+        current_rect *= scale.inverse();
 
         this->x = current_rect.left();
         this->y = current_rect.top();
         this->width = current_rect.width();
         this->height = current_rect.height();
 
+        // This is needed to update the xml, although perhaps it
+        // should be moved to the ::update below.
+        this->updateRepr();
+
+        // This eventually calls the ::update below while idle
         this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
     }
 }
 
+/**
+ * Update the visual representation on screen, this is manual because
+ * this is not an SPItem, but it's own visual identity.
+ */
 void SPPage::update(SPCtx* /*ctx*/, unsigned int /*flags*/)
 {
     for (auto view : views) {
@@ -245,7 +263,9 @@ void SPPage::update(SPCtx* /*ctx*/, unsigned int /*flags*/)
     }
 }
 
-/*
+/**
+ * Write out the page's data into it's xml structure.
+ */
 Inkscape::XML::Node *SPPage::write(Inkscape::XML::Document *xml_doc, Inkscape::XML::Node *repr, guint flags)
 {
     if ((flags & SP_OBJECT_WRITE_BUILD) && !repr) {
@@ -259,7 +279,6 @@ Inkscape::XML::Node *SPPage::write(Inkscape::XML::Document *xml_doc, Inkscape::X
 
     return SPObject::write(xml_doc, repr, flags);
 }
-*/
 
 /*
   Local Variables:

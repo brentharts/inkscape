@@ -50,6 +50,7 @@ protected:
     void release() override;
     void update(SPCtx* ctx, unsigned int flags) override;
     void set(SPAttr key, const char* value) override;
+    Inkscape::XML::Node *write(Inkscape::XML::Document *xml_doc, Inkscape::XML::Node *repr, guint flags) override;
 private:
 
     Inkscape::PageManager *_manager = nullptr;

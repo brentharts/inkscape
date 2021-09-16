@@ -15,6 +15,7 @@
 
 #include "actions-pages.h"
 #include "inkscape-application.h"
+#include "document-undo.h"
 
 #include "page-manager.h"
 #include "object/sp-page.h"
@@ -23,6 +24,7 @@ void page_new(SPDocument *document)
 {
     if (auto manager = document->getNamedView()->getPageManager()) {
         manager->newPage();
+        Inkscape::DocumentUndo::done(document, SP_VERB_NONE, "New Automatic Page");
     }
 }
 
@@ -30,6 +32,22 @@ void page_delete(SPDocument *document)
 {
     if (auto manager = document->getNamedView()->getPageManager()) {
         manager->deletePage();
+        Inkscape::DocumentUndo::done(document, SP_VERB_NONE, "Delete Page");
+    }
+}
+
+void set_move_objects(SPDocument *doc)
+{
+    if (auto action = doc->getActionGroup()->lookup_action("page-move-objects")) {
+        bool active = false;
+        action->get_state(active);
+        active = !active; // toggle
+        action->change_state(active);
+
+        Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+        prefs->setBool("/tools/pages/move_objects", active);
+    } else {
+        g_warning("Can't find page-move-objects action group!");
     }
 }
 
@@ -38,15 +56,27 @@ std::vector<std::vector<Glib::ustring>> raw_data_actions =
     // clang-format off
     {"doc.page-new",               N_("New Page"),                "Page",     N_("Create a new page")                                  },
     {"doc.page-delete",            N_("Delete Page"),             "Page",     N_("Delete the selected page")                           },
+    {"doc.page-move-objects",      N_("Move Objects with Page"),  "Page",     N_("Move overlapping objects as the page is moved.")     },
     // clang-format on
 };
 
 void add_actions_pages(SPDocument* doc)
 {
+    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+
     auto group = doc->getActionGroup();
     group->add_action("page-new", sigc::bind<SPDocument*>(sigc::ptr_fun(&page_new), doc));
     group->add_action("page-delete", sigc::bind<SPDocument*>(sigc::ptr_fun(&page_delete), doc));
-    //doc->get_action_extra_data().add_data(raw_data_actions);
+    group->add_action_bool("page-move-objects", sigc::bind<SPDocument*>(sigc::ptr_fun(&set_move_objects), doc),
+        prefs->getBool("/tools/pages/move_objects", true));
+
+    // Note: This will only work for the first ux to load, possible problem.
+    auto app = InkscapeApplication::instance();
+    if (!app) {
+        std::cerr << "add_actions_canvas_snapping: no app!" << std::endl;
+        return;
+    }
+    app->get_action_extra_data().add_data(raw_data_actions);
 }
 
 /*

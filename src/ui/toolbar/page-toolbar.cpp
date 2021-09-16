@@ -18,6 +18,8 @@
 #include "desktop.h"
 #include "io/resource.h"
 
+#include "document-undo.h"
+
 using Inkscape::IO::Resource::UIS;
 
 namespace Inkscape {

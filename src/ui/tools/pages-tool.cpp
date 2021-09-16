@@ -20,6 +20,7 @@
 #include "desktop.h"
 #include "rubberband.h"
 #include "selection-chemistry.h"
+#include "document-undo.h"
 #include "object/sp-page.h"
 
 #include "display/control/canvas-item-rect.h"
@@ -124,13 +125,14 @@ bool PagesTool::root_handler(GdkEvent* event)
             if (auto page_manager = getPageManager()) {
                 if (dragging_item) {
                     // conclude item here (move item to new location)
-                    g_warning("conclude moving the page around.");
                     auto affine = Geom::Translate(drag_origin_dt).inverse() * Geom::Translate(point_dt);
                     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-                    dragging_item->movePage(affine, prefs->getBool("/tools/pages/move_objects"));
+                    dragging_item->movePage(affine, prefs->getBool("/tools/pages/move_objects", true));
+                    Inkscape::DocumentUndo::done(desktop->getDocument(), SP_VERB_NONE, "Move page position");
                 } else if (dragging_box) {
                     // conclude box here (make new page)
                     page_manager->newDesktopPage(*dragging_box);
+                    Inkscape::DocumentUndo::done(desktop->getDocument(), SP_VERB_NONE, "Create new drawn page");
                 } else if (auto page = page_under(point_dt)) {
                     // Select the clicked on page. Manager ignores the same-page.
                     page_manager->selectPage(page);
@@ -151,7 +153,7 @@ bool PagesTool::root_handler(GdkEvent* event)
     }
 
     // Clean up any finished dragging, doesn't matter how it ends
-    if (mouse_is_pressed == false) {
+    if (!mouse_is_pressed && (dragging_item || dragging_box)) {
         dragging_item = nullptr;
         dragging_box = nullptr;
         visual_box->hide();
@@ -162,11 +164,7 @@ bool PagesTool::root_handler(GdkEvent* event)
         ret = true;
     }
 
-    if (!ret) {
-        ret = ToolBase::root_handler(event);
-    }
-
-    return ret;
+    return ret ? true : ToolBase::root_handler(event);
 }
 
 /**

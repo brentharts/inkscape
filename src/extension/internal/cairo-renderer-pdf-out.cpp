@@ -104,7 +104,6 @@ pdf_render_document_to_file(SPDocument *doc, gchar const *filename, unsigned int
     bool ret = ctx->setPdfTarget (filename);
     if(ret) {
         /* Render document */
-        std::cout << "Render One...\n";
         ret = renderer->setupDocument(ctx, doc, pageBoundingBox, bleedmargin_px, base);
 
         auto pages = doc->getNamedView()->getPageManager()->getPages();
@@ -115,18 +114,18 @@ pdf_render_document_to_file(SPDocument *doc, gchar const *filename, unsigned int
         } else {
             int index = 1;
             for (auto &page : pages) {
-                auto rect = page->getRect();
+                auto rect = page->getDesktopRect();
                 // Conclude previous page and set new page width and height.
                 ctx->nextPage(rect.width(), rect.height());
 
                 // Set up page transformation which pushes objects back into the 0,0 location
                 // TODO: May need to add bleed margins and other options, or maybe not.
-                Geom::Affine page_tr = doc->getDocumentScale();
-                page_tr *= Geom::Translate(rect.left(), rect.top()).inverse();
+                auto page_tr = Geom::Translate(rect.left(), rect.top()).inverse();
 
                 for (auto &child : page->getOverlappingItems()) {
                     // This process does not return layers, so those affines are added manually.
                     ctx->setTransform(child->i2doc_affine() * page_tr);
+
                     // Render the page into the context in the new location.
                     renderer->renderItem(ctx, child);
                 }
@@ -135,7 +134,6 @@ pdf_render_document_to_file(SPDocument *doc, gchar const *filename, unsigned int
             }
             ret = ctx->finish();
         }
-        std::cout << "DONE\n";
     }
 
     root->invoke_hide(dkey);
