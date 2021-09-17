@@ -23,6 +23,7 @@ class SPPage;
 
 namespace Inkscape {
     class CanvasItemRect;
+    class CanvasItemBpath;
     class PageManager;
 
 namespace UI {
@@ -43,7 +44,10 @@ class PagesTool : public ToolBase {
 
     private:
         void selectionChanged(SPPage *page);
-        SPPage *page_under(Geom::Point pt);
+        SPPage *pageUnder(Geom::Point pt);
+        void addDragShape(SPPage *page);
+        void addDragShape(SPItem *item);
+        void addDragShape(Geom::PathVector pth);
         Inkscape::PageManager *getPageManager();
 
         sigc::connection _selector_changed_connection;
@@ -55,8 +59,9 @@ class PagesTool : public ToolBase {
 
         SPPage *highlight_item = nullptr;
         SPPage *dragging_item = nullptr;
-        Geom::Rect *dragging_box = nullptr;
+        Geom::Rect *creating_box = nullptr;
         Inkscape::CanvasItemRect *visual_box = nullptr;
+        std::vector<Inkscape::CanvasItemBpath *> drag_shapes;
 };
 
 }

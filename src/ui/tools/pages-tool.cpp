@@ -22,8 +22,11 @@
 #include "selection-chemistry.h"
 #include "document-undo.h"
 #include "object/sp-page.h"
+#include "path/path-outline.h"
 
+#include "display/control/canvas-item-group.h"
 #include "display/control/canvas-item-rect.h"
+#include "display/control/canvas-item-bpath.h"
 
 namespace Inkscape {
 namespace UI {
@@ -105,22 +108,29 @@ bool PagesTool::root_handler(GdkEvent* event)
                 }
                 if (dragging_item) {
                     // Continue to drag item.
-                    delete dragging_box;
-                    dragging_box = new Geom::Rect(dragging_item->getDesktopRect());
-                    *dragging_box *= Geom::Translate(drag_origin_dt).inverse() * Geom::Translate(point_dt);
-                } else if (dragging_box) {
+                    Geom::Affine tr = Geom::Translate(drag_origin_w).inverse() * Geom::Translate(point_w);
+                    for (auto &shape : drag_shapes) {
+                        shape->update(shape->get_parent()->get_affine() * tr);
+                    }
+                } else if (creating_box) {
                     // Continue to drag new box
-                    delete dragging_box;
-                    dragging_box = new Geom::Rect(drag_origin_dt, point_dt);
-                } else if (auto page = page_under(point_dt)) {
+                    delete creating_box;
+                    creating_box = new Geom::Rect(drag_origin_dt, point_dt);
+                } else if (auto page = pageUnder(point_dt)) {
                     // Starting to drag page around the screen.
                     dragging_item = page;
-                    dragging_box = new Geom::Rect(page->getDesktopRect());
+                    addDragShape(page);
+                    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+                    if (prefs->getBool("/tools/pages/move_objects", true)) {
+                        for (auto &item : page->getOverlappingItems()) {
+                            addDragShape(item);
+                        }
+                    }
                     page_manager->selectPage(page);
                 } else {
                     // Start making a new page.
                     dragging_item = nullptr;
-                    dragging_box = new Geom::Rect(point_dt, point_dt);
+                    creating_box = new Geom::Rect(point_dt, point_dt);
                 }
             } else {
                 mouse_is_pressed = false;
@@ -138,11 +148,11 @@ bool PagesTool::root_handler(GdkEvent* event)
                 Inkscape::Preferences *prefs = Inkscape::Preferences::get();
                 dragging_item->movePage(affine, prefs->getBool("/tools/pages/move_objects", true));
                 Inkscape::DocumentUndo::done(desktop->getDocument(), SP_VERB_NONE, "Move page position");
-            } else if (dragging_box) {
+            } else if (creating_box) {
                 // conclude box here (make new page)
-                page_manager->newDesktopPage(*dragging_box);
+                page_manager->newDesktopPage(*creating_box);
                 Inkscape::DocumentUndo::done(desktop->getDocument(), SP_VERB_NONE, "Create new drawn page");
-            } else if (auto page = page_under(point_dt)) {
+            } else if (auto page = pageUnder(point_dt)) {
                 // Select the clicked on page. Manager ignores the same-page.
                 page_manager->selectPage(page);
             }
@@ -161,14 +171,18 @@ bool PagesTool::root_handler(GdkEvent* event)
     }
 
     // Clean up any finished dragging, doesn't matter how it ends
-    if (!mouse_is_pressed && (dragging_item || dragging_box)) {
+    if (!mouse_is_pressed && (dragging_item || creating_box)) {
         dragging_item = nullptr;
-        dragging_box = nullptr;
+        creating_box = nullptr;
+        for (auto &shape : drag_shapes) {
+            delete shape;
+        }
+        drag_shapes.clear();
         visual_box->hide();
         ret = true;
-    } else if (dragging_box) {
+    } else if (creating_box) {
         visual_box->show();
-        visual_box->set_rect(*dragging_box);
+        visual_box->set_rect(*creating_box);
         ret = true;
     }
 
@@ -176,9 +190,37 @@ bool PagesTool::root_handler(GdkEvent* event)
 }
 
 /**
+ * Add a page the the things being dragged.
+ */
+void PagesTool::addDragShape(SPPage *page)
+{
+    addDragShape(Geom::PathVector(Geom::Path(Geom::Rect(page->getDesktopRect()))));
+}
+
+/**
+ * Add an SPItem to the things being dragged.
+ */
+void PagesTool::addDragShape(SPItem *item)
+{
+    auto shape = *item_to_outline(item);
+    addDragShape(shape * item->i2dt_affine());
+}
+
+/**
+ * Add a shape to the set of dragging shapes, these are deleted when dragging stops.
+ */
+void PagesTool::addDragShape(Geom::PathVector pth)
+{
+    auto shape = new CanvasItemBpath(desktop->getCanvasTemp(), pth, false);
+    shape->set_stroke(0x00ff007f);
+    shape->set_fill(0x00000000, SP_WIND_RULE_EVENODD);
+    drag_shapes.push_back(shape);
+}
+
+/**
  * Find a page under the cursor point.
  */
-SPPage *PagesTool::page_under(Geom::Point pt) {
+SPPage *PagesTool::pageUnder(Geom::Point pt) {
     if (auto page_manager = getPageManager()) {
         // If the point is still on the selected, favour that one.
         if (auto selected = page_manager->getSelected()) {
