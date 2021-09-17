@@ -203,9 +203,11 @@ int PageManager::getSelectedPageIndex() const
 void PageManager::pagesChanged()
 {
     if (pages.empty() || getSelectedPageIndex() == -1) {
-        _selected_page = nullptr;
+        selectPage(nullptr);
     }
+    
     _pages_changed_signal.emit();
+
     if (!_selected_page) {
         for (auto &page : pages) {
             selectPage(page);
@@ -221,7 +223,7 @@ void PageManager::pagesChanged()
  */
 bool PageManager::selectPage(SPPage *page)
 {
-    if (getPageIndex(page) >= 0) {
+    if (!page || getPageIndex(page) >= 0) {
         if (_selected_page != page) {
             _selected_page = page;
             _page_selected_signal.emit(_selected_page);

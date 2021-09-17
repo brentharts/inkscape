@@ -132,12 +132,12 @@ std::vector<SPItem*> SPPage::getOverlappingItems() const
 void SPPage::showPage(SPDesktop *desktop, Inkscape::CanvasItemGroup *group)
 {
     auto item = new Inkscape::CanvasItemRect(group, getDesktopRect());
-    item->set_fill(0xffffffff);
-    item->set_stroke(0x000000cc);
-    item->set_shadow(0x00000088, 2);
     item->set_dashed(false);
     item->set_inverted(false);
     views.push_back(item);
+
+    // The final steps are completed in an update cycle
+    this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
 }
 
 /**
@@ -172,38 +172,29 @@ void SPPage::hidePage()
 
 void SPPage::setPageColor(guint32 color)
 {
-    // TODO: There may be more related to defaults here.
-    for (auto view : views) {
-        view->set_fill(color);
-    }
+    this->fill_color = color;
+    this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
 }
 
 void SPPage::setPageBorder(guint32 color)
 {
-    for (auto view : views) {
-        view->set_stroke(color);
-    }
+    this->stroke_color = color;
+    this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
 }
 
 /**
  * Set the selected high-light for this page.
  */
-void SPPage::setSelected(bool selected)
+void SPPage::setSelected(bool sel)
 {
-    for (auto view : views) {
-        if (selected) {
-            view->set_stroke(0xff0000cc);
-        } else {
-            view->set_stroke(0x000000cc);
-        }
-    }
+    this->is_selected = sel;
+    this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
 }
 
 void SPPage::setPageShadow(bool show)
 {
-    for (auto view : views) {
-        view->set_shadow(0x00000088, show ? 2 : 0);
-    }
+    this->has_shadow = show;
+    this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
 }
 
 /**
@@ -258,8 +249,14 @@ void SPPage::movePage(Geom::Affine translate, bool with_objects)
  */
 void SPPage::update(SPCtx* /*ctx*/, unsigned int /*flags*/)
 {
+    // Put these in the preferences?
+    guint32 shadow_color = 0x00000088;
+    guint32 select_color = 0xff0000cc;
     for (auto view : views) {
         view->set_rect(getDesktopRect());
+        view->set_shadow(shadow_color, has_shadow ? 2 : 0);
+        view->set_stroke(is_selected ? select_color : stroke_color);
+        view->set_fill(fill_color);
     }
 }
 

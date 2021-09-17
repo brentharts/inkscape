@@ -14,17 +14,42 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
+#include <gtkmm.h>
 #include "toolbar.h"
 
+class SPDesktop;
+class SPDocument;
+class SPPage;
+
 namespace Inkscape {
+    class PageManager;
 namespace UI {
+    namespace Tools {
+        class ToolBase;
+    }
 namespace Toolbar {
 
-class PageToolbar {
+class PageToolbar : public Gtk::Toolbar {
     public:
+        PageToolbar(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, SPDesktop *desktop);
+        ~PageToolbar() override;
+
        static GtkWidget * create(SPDesktop *desktop);
     protected:
-        PageToolbar(SPDesktop *desktop) {};
+       void labelEdited();
+    private:
+        SPDesktop *_desktop;
+        SPDocument *_document;
+        PageManager *_page_manager;
+        
+        void toolChanged(SPDesktop* desktop, Inkscape::UI::Tools::ToolBase* ec);
+        void selectionChanged(SPPage *page);
+
+        sigc::connection _ec_connection;
+        sigc::connection _page_connection;
+
+        Gtk::ComboBoxText* combo_page_sizes;
+        Gtk::Entry* text_page_label;
 };
 
 }

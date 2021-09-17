@@ -52,6 +52,10 @@ protected:
     void set(SPAttr key, const char* value) override;
     Inkscape::XML::Node *write(Inkscape::XML::Document *xml_doc, Inkscape::XML::Node *repr, guint flags) override;
 private:
+    bool is_selected = false;
+    bool has_shadow = true;
+    guint32 fill_color = 0xffffffff;
+    guint32 stroke_color = 0x000000cc;
 
     Inkscape::PageManager *_manager = nullptr;
     std::vector<Inkscape::CanvasItemRect *> views;

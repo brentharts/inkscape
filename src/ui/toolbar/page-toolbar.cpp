@@ -12,19 +12,99 @@
  */
 
 #include <gtkmm.h>
+#include <glibmm/i18n.h>
 
 #include "page-toolbar.h"
-
-#include "desktop.h"
 #include "io/resource.h"
 
+#include "desktop.h"
+#include "document.h"
 #include "document-undo.h"
+
+#include "object/sp-namedview.h"
+#include "object/sp-page.h"
+
+#include "ui/tools/pages-tool.h"
 
 using Inkscape::IO::Resource::UIS;
 
 namespace Inkscape {
 namespace UI {
 namespace Toolbar {
+
+PageToolbar::PageToolbar(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, SPDesktop *desktop)
+    : Gtk::Toolbar(cobject)
+    , _desktop(desktop)
+    , combo_page_sizes(nullptr)
+    , text_page_label(nullptr)
+{
+    builder->get_widget("page_sizes", combo_page_sizes);
+    builder->get_widget("page_label", text_page_label);
+
+    if (text_page_label) {
+        text_page_label->signal_changed().connect(sigc::mem_fun(*this, &PageToolbar::labelEdited));
+    }
+
+    // Watch for when the tool changes
+    _ec_connection = _desktop->connectEventContextChanged(sigc::mem_fun(*this, &PageToolbar::toolChanged));
+}
+
+PageToolbar::~PageToolbar() {
+    _ec_connection.disconnect();
+}
+
+void PageToolbar::toolChanged(SPDesktop* desktop, Inkscape::UI::Tools::ToolBase* ec)
+{
+    // Disconnect previous page changed signal
+    if (_page_connection) {
+        _page_connection.disconnect();
+        _document = nullptr;
+        _page_manager = nullptr;
+    }
+    if (dynamic_cast<Inkscape::UI::Tools::PagesTool *>(ec)) {
+        // Save the document and page_manager for future use.
+        if (_document = desktop->getDocument()) {
+            if (_page_manager = _document->getNamedView()->getPageManager()) {
+                // Connect the page changed signal and indicate changed
+                _page_connection = _page_manager->connectPageSelected(sigc::mem_fun(*this, &PageToolbar::selectionChanged));
+                selectionChanged(_page_manager->getSelected());
+            }
+        }
+    }
+}
+
+void PageToolbar::labelEdited()
+{
+    auto text = text_page_label->get_text();
+    if (_page_manager) {
+        if (auto page = _page_manager->getSelected()) {
+            page->setLabel(text.empty() ? nullptr : text.c_str());
+        }
+    }
+}
+
+void PageToolbar::selectionChanged(SPPage *page)
+{
+    // Set label widget content with page label.
+    if (page) {
+        text_page_label->set_sensitive(true);
+
+        gchar *format = g_strdup_printf(_("Page %d"), page->getPageNumber());
+        text_page_label->set_placeholder_text(format);
+        g_free(format);
+
+        if (auto label = page->label()) {
+            text_page_label->set_text(label);
+        } else {
+            text_page_label->set_text("");
+        }
+    } else {
+        text_page_label->set_text("");
+        text_page_label->set_sensitive(false);
+        text_page_label->set_placeholder_text(_("No Page Selected"));
+    }
+    // Set size widget with page size
+}
 
 GtkWidget *
 PageToolbar::create(SPDesktop *desktop)
@@ -40,8 +120,8 @@ PageToolbar::create(SPDesktop *desktop)
         std::cerr << "PageToolbar: " << page_toolbar_builder_file << " file not read! " << ex.what() << std::endl;
     }
 
-    Gtk::Toolbar* toolbar = nullptr;
-    builder->get_widget("page-toolbar", toolbar);
+    PageToolbar* toolbar = nullptr;
+    builder->get_widget_derived("page-toolbar", toolbar, desktop);
     if (!toolbar) {
         std::cerr << "InkscapeWindow: Failed to load page toolbar!" << std::endl;
         return nullptr;
@@ -50,9 +130,6 @@ PageToolbar::create(SPDesktop *desktop)
     toolbar->reference(); // Or it will be deleted when builder is destroyed since we haven't added
                           // it to a container yet. This probably causes a memory leak but we'll
                           // fix it when all toolbars are converted to use Gio::Actions.
-
-    // XXX Start building the non-action pieces.
-    //builder->get_widget("page_sizes", combo_page_sizes)
 
     return GTK_WIDGET(toolbar->gobj());
 }
