@@ -42,14 +42,18 @@ class PagesTool : public ToolBase {
 	const std::string& getPrefsPath() override;
 
     private:
+        void selectionChanged(SPPage *page);
         SPPage *page_under(Geom::Point pt);
         Inkscape::PageManager *getPageManager();
+
+        sigc::connection _selector_changed_connection;
 
         bool mouse_is_pressed = false;
         Geom::Point drag_origin_w;
         Geom::Point drag_origin_dt;
         int drag_tolerance = 5;
 
+        SPPage *highlight_item = nullptr;
         SPPage *dragging_item = nullptr;
         Geom::Rect *dragging_box = nullptr;
         Inkscape::CanvasItemRect *visual_box = nullptr;

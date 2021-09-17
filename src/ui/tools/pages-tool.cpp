@@ -44,7 +44,8 @@ PagesTool::~PagesTool() {
 }
 
 void PagesTool::finish() {
-    this->enableGrDrag(false);
+    _selector_changed_connection.disconnect();
+    selectionChanged(nullptr);
 
     ungrabCanvasEvents();
 
@@ -67,11 +68,19 @@ void PagesTool::setup() {
         visual_box->set_stroke(0x0000ff7f);
         visual_box->hide();
     }
+    if (auto page_manager = getPageManager()) {
+        _selector_changed_connection = page_manager->connectPageSelected(sigc::mem_fun(*this, &PagesTool::selectionChanged));
+        if (auto page = page_manager->getSelected()) {
+            selectionChanged(page);
+        }
+    }
 }
 
 bool PagesTool::root_handler(GdkEvent* event)
 {
     bool ret = false;
+    auto page_manager = getPageManager();
+    if (!page_manager) return false;
 
     switch (event->type) {
         case GDK_BUTTON_PRESS:
@@ -107,6 +116,7 @@ bool PagesTool::root_handler(GdkEvent* event)
                     // Starting to drag page around the screen.
                     dragging_item = page;
                     dragging_box = new Geom::Rect(page->getDesktopRect());
+                    page_manager->selectPage(page);
                 } else {
                     // Start making a new page.
                     dragging_item = nullptr;
@@ -122,21 +132,19 @@ bool PagesTool::root_handler(GdkEvent* event)
             auto point_w = Geom::Point(event->button.x, event->button.y);
             auto point_dt = desktop->w2d(point_w);
 
-            if (auto page_manager = getPageManager()) {
-                if (dragging_item) {
-                    // conclude item here (move item to new location)
-                    auto affine = Geom::Translate(drag_origin_dt).inverse() * Geom::Translate(point_dt);
-                    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-                    dragging_item->movePage(affine, prefs->getBool("/tools/pages/move_objects", true));
-                    Inkscape::DocumentUndo::done(desktop->getDocument(), SP_VERB_NONE, "Move page position");
-                } else if (dragging_box) {
-                    // conclude box here (make new page)
-                    page_manager->newDesktopPage(*dragging_box);
-                    Inkscape::DocumentUndo::done(desktop->getDocument(), SP_VERB_NONE, "Create new drawn page");
-                } else if (auto page = page_under(point_dt)) {
-                    // Select the clicked on page. Manager ignores the same-page.
-                    page_manager->selectPage(page);
-                }
+            if (dragging_item) {
+                // conclude item here (move item to new location)
+                auto affine = Geom::Translate(drag_origin_dt).inverse() * Geom::Translate(point_dt);
+                Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+                dragging_item->movePage(affine, prefs->getBool("/tools/pages/move_objects", true));
+                Inkscape::DocumentUndo::done(desktop->getDocument(), SP_VERB_NONE, "Move page position");
+            } else if (dragging_box) {
+                // conclude box here (make new page)
+                page_manager->newDesktopPage(*dragging_box);
+                Inkscape::DocumentUndo::done(desktop->getDocument(), SP_VERB_NONE, "Create new drawn page");
+            } else if (auto page = page_under(point_dt)) {
+                // Select the clicked on page. Manager ignores the same-page.
+                page_manager->selectPage(page);
             }
             mouse_is_pressed = false;
             ret = true;
@@ -196,6 +204,22 @@ Inkscape::PageManager *PagesTool::getPageManager() {
         }
     }
     return nullptr;
+}
+
+void PagesTool::selectionChanged(SPPage *page)
+{
+    // Loop existing pages because highlight_item is unsafe.
+    if (auto page_manager = getPageManager()) {
+        for (auto &possible : page_manager->getPages()) {
+            if (highlight_item == possible) {
+                highlight_item->setSelected(false);
+            }
+        }
+        highlight_item = page;
+        if (page) {
+            page->setSelected(true);
+        }
+    }
 }
 
 }

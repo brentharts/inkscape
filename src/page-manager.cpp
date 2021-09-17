@@ -223,13 +223,7 @@ bool PageManager::selectPage(SPPage *page)
 {
     if (getPageIndex(page) >= 0) {
         if (_selected_page != page) {
-            // TODO: Move setSelected to page-tool, as something the tool does
-            // to highlight items, not as a part of the manager.
-            if (_selected_page) {
-                _selected_page->setSelected(false);
-            }
             _selected_page = page;
-            _selected_page->setSelected(true);
             _page_selected_signal.emit(_selected_page);
             return true;
         }
