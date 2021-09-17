@@ -26,6 +26,7 @@
 ../src/actions/actions-paths.cpp
 ../src/actions/actions-selection-object.cpp
 ../src/actions/actions-selection-window.cpp
+../src/actions/actions-pages.cpp
 ../src/actions/actions-selection.cpp
 ../src/actions/actions-text.cpp
 ../src/actions/actions-tools.cpp
@@ -384,6 +385,7 @@
 ../src/ui/widget/licensor.cpp
 ../src/ui/widget/marker-combo-box.cpp
 ../src/ui/widget/object-composite-settings.cpp
+../src/ui/widget/page-selector.cpp
 ../src/ui/widget/page-sizer.cpp
 ../src/ui/widget/paint-selector.cpp
 ../src/ui/widget/preferences-widget.cpp
