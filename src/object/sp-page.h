@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "display/control/canvas-item-rect.h"
+#include "display/control/canvas-item-text.h"
 #include "sp-object.h"
 #include "svg/svg-length.h"
 #include "page-manager.h"
@@ -59,6 +60,7 @@ private:
 
     Inkscape::PageManager *_manager = nullptr;
     std::vector<Inkscape::CanvasItemRect *> views;
+    std::vector<Inkscape::CanvasItemText *> labels;
 
     SVGLength x;
     SVGLength y;

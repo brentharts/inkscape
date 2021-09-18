@@ -1583,10 +1583,10 @@ static void _namedview_modified (SPObject *obj, guint flags, SPDesktop *desktop)
         }
         if (nv->pagecheckerboard) {
             desktop->getCanvas()->set_background_checkerboard(blackout_color);
-            desktop->getCanvasPageBackground()->set_background_checkerboard(nv->pagecolor);
+            //desktop->getCanvasPageBackground()->set_background_checkerboard(nv->pagecolor);
         } else {
             desktop->getCanvas()->set_background_color(blackout_color);
-            desktop->getCanvasPageBackground()->set_background(nv->pagecolor | 0xff);
+            //desktop->getCanvasPageBackground()->set_background(nv->pagecolor | 0xff);
         }
 
         // XXX Modify page attributes here.

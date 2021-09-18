@@ -45,6 +45,11 @@ void SPPage::release()
     }
     this->views.clear();
 
+    for(auto label : labels) {
+        delete label;
+    }
+    this->labels.clear();
+
     if (this->document) {
         // Unregister ourselves
         this->document->removeResource("page", this);
@@ -136,6 +141,15 @@ void SPPage::showPage(SPDesktop *desktop, Inkscape::CanvasItemGroup *group)
     item->set_inverted(false);
     views.push_back(item);
 
+    auto label = new Inkscape::CanvasItemText(group, Geom::Point(0, 0), "{Page Label}");
+    label->set_fontsize(10.0);
+    label->set_fill(0xffffffff);
+    label->set_background(0x00000099);
+    label->set_bg_radius(1.0);
+    label->set_anchor(Geom::Point(-1.0, -1.5));
+    label->set_adjust(Geom::Point(-3, 0));
+    labels.push_back(label);
+
     // The final steps are completed in an update cycle
     this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
 }
@@ -146,27 +160,41 @@ void SPPage::showPage(SPDesktop *desktop, Inkscape::CanvasItemGroup *group)
 void SPPage::hidePage(Inkscape::UI::Widget::Canvas *canvas)
 {
     g_assert(canvas != nullptr);
+    int done = 0;
     for (auto it = views.begin(); it != views.end(); ++it) {
         if (canvas == (*it)->get_canvas()) {
             delete (*it);
             views.erase(it);
-            return;
+            done |= 1;
         }
     }
-    assert(false);
+    for (auto it = labels.begin(); it != labels.end(); ++it) {
+        if (canvas == (*it)->get_canvas()) {
+            delete (*it);
+            labels.erase(it);
+            done |= 2;
+        }
+    }
+    assert(done < 3);
 }
 
 void SPPage::showPage()
 {
     for (auto view : views) {
         view->show();
-    }   
+    }
+    for(auto label : labels) {
+        label->show();
+    }
 }
 
 void SPPage::hidePage()
 {
     for(auto view : views) {
         view->hide();
+    }
+    for(auto label : labels) {
+        label->hide();
     }
 }
 
@@ -257,6 +285,17 @@ void SPPage::update(SPCtx* /*ctx*/, unsigned int /*flags*/)
         view->set_shadow(shadow_color, has_shadow ? 2 : 0);
         view->set_stroke(is_selected ? select_color : stroke_color);
         view->set_fill(fill_color);
+    }
+    for (auto label : labels) {
+        if (auto txt = this->label()) {
+            auto corner = getDesktopRect().corner(0);
+            label->set_coord(corner);
+            label->set_text(txt);
+            label->show();
+        } else {
+            label->set_text("");
+            label->hide();
+        }
     }
 }
 
