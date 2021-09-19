@@ -462,7 +462,6 @@ void SPGuide::set_locked(const bool locked, bool const commit)
 void SPGuide::set_label(const char* label, bool const commit)
 {
     if (!views.empty()) {
-        // gchar to std::string has to be done carefully.
         views[0]->set_label(label ? label : "");
     }
 
