@@ -40,15 +40,10 @@ void SPPage::build(SPDocument *document, Inkscape::XML::Node *repr)
 
 void SPPage::release()
 {
-    for(auto view : views) {
-        delete view;
+    for(auto item : canvas_items) {
+        delete item;
     }
-    this->views.clear();
-
-    for(auto label : labels) {
-        delete label;
-    }
-    this->labels.clear();
+    this->canvas_items.clear();
 
     if (this->document) {
         // Unregister ourselves
@@ -111,6 +106,10 @@ Geom::Rect SPPage::getDesktopRect() const
 
 /**
  * Get the items which are ONLY on this page and don't overlap.
+ *
+ * This ignores layers so items in the same layer which are shared
+ * between pages are not moved around or exported into pages they
+ * shouldn't be.
  */
 std::vector<SPItem*> SPPage::getExclusiveItems() const
 {
@@ -121,12 +120,12 @@ std::vector<SPItem*> SPPage::getExclusiveItems() const
 }
 
 /**
- * Get all the items which are inside or overlapping.
+ * Like ExcludiveItems above but get all the items which are inside or overlapping.
  */
 std::vector<SPItem*> SPPage::getOverlappingItems() const
 {
     // There's no logical reason why the desktop is needed here
-    // we should have a getItemsInBox that doesn't use the desktop
+    // we should have a getItemsPartiallyInBox that doesn't use the desktop
     SPDesktop *desktop = SP_ACTIVE_DESKTOP;
     return document->getItemsPartiallyInBox(desktop->dkey, getDesktopRect(), true, true, true, false);
 }
@@ -134,21 +133,34 @@ std::vector<SPItem*> SPPage::getOverlappingItems() const
 /**
  * Shows the page in the given canvas item group.
  */
-void SPPage::showPage(SPDesktop *desktop, Inkscape::CanvasItemGroup *group)
+void SPPage::showPage(SPDesktop *desktop, Inkscape::CanvasItemGroup *background_group, Inkscape::CanvasItemGroup *border_group)
 {
-    auto item = new Inkscape::CanvasItemRect(group, getDesktopRect());
-    item->set_dashed(false);
-    item->set_inverted(false);
-    views.push_back(item);
+    // Foreground 'border'
+    if (auto item = new Inkscape::CanvasItemRect(border_group, getDesktopRect())) {
+        item->set_name("border");
+        item->set_dashed(false);
+        item->set_inverted(false);
+        item->set_fill(0x00000000);
+        canvas_items.push_back(item);
+    }
 
-    auto label = new Inkscape::CanvasItemText(group, Geom::Point(0, 0), "{Page Label}");
-    label->set_fontsize(10.0);
-    label->set_fill(0xffffffff);
-    label->set_background(0x00000099);
-    label->set_bg_radius(1.0);
-    label->set_anchor(Geom::Point(-1.0, -1.5));
-    label->set_adjust(Geom::Point(-3, 0));
-    labels.push_back(label);
+    // Background rectangle
+    if (auto item = new Inkscape::CanvasItemRect(background_group, getDesktopRect())) {
+        item->set_dashed(false);
+        item->set_inverted(false);
+        item->set_stroke(0x00000000);
+        canvas_items.push_back(item);
+    }
+
+    if (auto label = new Inkscape::CanvasItemText(border_group, Geom::Point(0, 0), "{Page Label}")) {
+        label->set_fontsize(10.0);
+        label->set_fill(0xffffffff);
+        label->set_background(0x00000099);
+        label->set_bg_radius(1.0);
+        label->set_anchor(Geom::Point(-1.0, -1.5));
+        label->set_adjust(Geom::Point(-3, 0));
+        canvas_items.push_back(label);
+    }
 
     // The final steps are completed in an update cycle
     this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
@@ -160,41 +172,27 @@ void SPPage::showPage(SPDesktop *desktop, Inkscape::CanvasItemGroup *group)
 void SPPage::hidePage(Inkscape::UI::Widget::Canvas *canvas)
 {
     g_assert(canvas != nullptr);
-    int done = 0;
-    for (auto it = views.begin(); it != views.end(); ++it) {
+    for (auto it = canvas_items.begin(); it != canvas_items.end(); it) {
         if (canvas == (*it)->get_canvas()) {
             delete (*it);
-            views.erase(it);
-            done |= 1;
+            it = canvas_items.erase(it);
+        } else {
+            ++it;
         }
     }
-    for (auto it = labels.begin(); it != labels.end(); ++it) {
-        if (canvas == (*it)->get_canvas()) {
-            delete (*it);
-            labels.erase(it);
-            done |= 2;
-        }
-    }
-    assert(done < 3);
 }
 
 void SPPage::showPage()
 {
-    for (auto view : views) {
-        view->show();
-    }
-    for(auto label : labels) {
-        label->show();
+    for (auto item : canvas_items) {
+        item->show();
     }
 }
 
 void SPPage::hidePage()
 {
-    for(auto view : views) {
-        view->hide();
-    }
-    for(auto label : labels) {
-        label->hide();
+    for(auto item : canvas_items) {
+        item->hide();
     }
 }
 
@@ -280,21 +278,26 @@ void SPPage::update(SPCtx* /*ctx*/, unsigned int /*flags*/)
     // Put these in the preferences?
     guint32 shadow_color = 0x00000088;
     guint32 select_color = 0xff0000cc;
-    for (auto view : views) {
-        view->set_rect(getDesktopRect());
-        view->set_shadow(shadow_color, has_shadow ? 2 : 0);
-        view->set_stroke(is_selected ? select_color : stroke_color);
-        view->set_fill(fill_color);
-    }
-    for (auto label : labels) {
-        if (auto txt = this->label()) {
-            auto corner = getDesktopRect().corner(0);
-            label->set_coord(corner);
-            label->set_text(txt);
-            label->show();
-        } else {
-            label->set_text("");
-            label->hide();
+    for (auto item : canvas_items) {
+        if (auto rect = dynamic_cast<Inkscape::CanvasItemRect *>(item)) {
+            rect->set_rect(getDesktopRect());
+            if (rect->get_name() == "border") {
+                rect->set_shadow(shadow_color, has_shadow ? 2 : 0);
+                rect->set_stroke(is_selected ? select_color : stroke_color);
+            } else {
+                rect->set_fill(fill_color);
+            }
+        }
+        if (auto label = dynamic_cast<Inkscape::CanvasItemText *>(item)) {
+            if (auto txt = this->label()) {
+                auto corner = getDesktopRect().corner(0);
+                label->set_coord(corner);
+                label->set_text(txt);
+                label->show();
+            } else {
+                label->set_text("");
+                label->hide();
+            }
         }
     }
 }

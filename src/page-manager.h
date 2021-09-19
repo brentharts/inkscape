@@ -25,7 +25,8 @@ public:
     PageManager(SPDocument *document);
     ~PageManager();
 
-    std::vector<SPPage *> getPages() const { return pages; }
+    const std::vector<SPPage*>& getPages() const { return pages; }
+
     void addPage(SPPage *page);
     void removePage(Inkscape::XML::Node *child);
     void reorderPage(Inkscape::XML::Node *child);

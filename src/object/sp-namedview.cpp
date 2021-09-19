@@ -101,13 +101,14 @@ SPNamedView::SPNamedView() : SPObjectGroup(), snap_manager(this, get_snapping_pr
     this->showpageshadow = TRUE;
 
     this->guides.clear();
-    this->pages.clear();
     this->viewcount = 0;
     this->grids.clear();
 
     this->default_layer_id = 0;
 
     this->connector_spacing = defaultConnSpacing;
+
+    this->_page_manager = nullptr;
 }
 
 SPNamedView::~SPNamedView() = default;
@@ -268,7 +269,12 @@ void SPNamedView::build(SPDocument *document, Inkscape::XML::Node *repr) {
     this->readAttr(SPAttr::INKSCAPE_CONNECTOR_SPACING);
     this->readAttr(SPAttr::INKSCAPE_LOCKGUIDES);
 
-    /* Construct guideline list */
+    if (_page_manager) {
+        delete _page_manager;
+    }
+    _page_manager = new Inkscape::PageManager(document);
+
+    /* Construct guideline and pages list */
     for (auto &child: children) {
         if (auto guide = dynamic_cast<SPGuide *>(&child)) {
             this->guides.push_back(guide);
@@ -278,8 +284,7 @@ void SPNamedView::build(SPDocument *document, Inkscape::XML::Node *repr) {
             guide->readAttr(SPAttr::INKSCAPE_COLOR);
         }
         if (auto page = dynamic_cast<SPPage *>(&child)) {
-            this->pages.push_back(page);
-            // TODO: Set the same colors as we have before
+            _page_manager->addPage(page);
         }
     }
 
@@ -289,12 +294,13 @@ void SPNamedView::build(SPDocument *document, Inkscape::XML::Node *repr) {
 
 void SPNamedView::release() {
     this->guides.clear();
-    this->pages.clear();
 
     // delete grids:
     for(auto grid : this->grids)
         delete grid;
     this->grids.clear();
+    delete this->_page_manager;
+    this->_page_manager = nullptr;
     SPObjectGroup::release();
 }
 
@@ -632,13 +638,11 @@ void SPNamedView::child_added(Inkscape::XML::Node *child, Inkscape::XML::Node *r
     if (!strcmp(child->name(), "inkscape:grid")) {
         sp_namedview_add_grid(this, child, nullptr);
     } else if (!strcmp(child->name(), "inkscape:page")) {
-        if (auto p = dynamic_cast<SPPage *>(no)) {
-            this->pages.push_back(p);
-            //p->setFill(pagecolor);
-            //p->setBorder(pageborder);
-            //p->setShadow(pageshadow);
+        if (auto page = dynamic_cast<SPPage *>(no)) {
+            this->_page_manager->addPage(page);
             for(auto view : this->views) {
-                p->showPage(view, view->getCanvasPages());
+                // XXX This will change to getCanvasPagesBorder { is_border_on_top ? PagesFg : PagesBg }
+                page->showPage(view, view->getCanvasPagesBg(), view->getCanvasPagesFg());
             }
         }
     } else {
@@ -675,11 +679,7 @@ void SPNamedView::remove_child(Inkscape::XML::Node *child) {
             }
         }
     } else if (!strcmp(child->name(), "inkscape:page")) {
-        for(auto it = this->pages.begin(); it != this->pages.end(); ++it) {
-            if ((*it)->getRepr() == child) {
-                this->pages.erase(it);
-            }
-        }
+        _page_manager->removePage(child);
     } else {
         for(std::vector<SPGuide *>::iterator it=this->guides.begin();it!=this->guides.end();++it ) {
             if ( (*it)->getRepr() == child ) {
@@ -725,8 +725,9 @@ void SPNamedView::show(SPDesktop *desktop)
         }
         sp_namedview_show_single_guide(guide, showguides);
     }
-    for (auto page : this->pages) {
-        page->showPage(desktop, desktop->getCanvasPages());
+    for (auto page : this->_page_manager->getPages()) {
+        // XXX This will change to getCanvasPagesBorder { is_border_on_top ? PagesFg : PagesBg }
+        page->showPage(desktop, desktop->getCanvasPagesBg(), desktop->getCanvasPagesFg());
     }
 
     views.push_back(desktop);
@@ -927,7 +928,7 @@ void SPNamedView::hide(SPDesktop const *desktop)
     for(auto & guide : this->guides) {
         guide->hideSPGuide(desktop->getCanvas());
     }
-    for(auto &page : this->pages) {
+    for(auto &page : this->_page_manager->getPages()) {
         page->hidePage(desktop->getCanvas());
     }
     views.erase(std::remove(views.begin(),views.end(),desktop),views.end());
@@ -1212,7 +1213,6 @@ void SPNamedView::scrollAllDesktops(double dx, double dy, bool is_scrolling) {
         view->scroll_relative_in_svg_coords(dx, dy, is_scrolling);
     }
 }
-
 
 /*
   Local Variables:

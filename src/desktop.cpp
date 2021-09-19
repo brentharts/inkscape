@@ -197,20 +197,22 @@ SPDesktop::init (SPNamedView *nv, Inkscape::UI::Widget::Canvas *acanvas, SPDeskt
     // node handler? see bug https://bugs.launchpad.net/inkscape/+bug/414142)
 
     canvas_catchall       = new Inkscape::CanvasItemCatchall(canvas_item_root); // Lowest item!
+    canvas_group_pages_bg = new Inkscape::CanvasItemGroup(canvas_item_root);
     canvas_group_drawing  = new Inkscape::CanvasItemGroup(canvas_item_root);
+    canvas_group_pages_fg = new Inkscape::CanvasItemGroup(canvas_item_root);
     canvas_group_grids    = new Inkscape::CanvasItemGroup(canvas_item_root);
     canvas_group_guides   = new Inkscape::CanvasItemGroup(canvas_item_root);
-    canvas_group_pages    = new Inkscape::CanvasItemGroup(canvas_item_root);
     canvas_group_sketch   = new Inkscape::CanvasItemGroup(canvas_item_root);
     canvas_group_temp     = new Inkscape::CanvasItemGroup(canvas_item_root);
     canvas_group_controls = new Inkscape::CanvasItemGroup(canvas_item_root);
 
-    canvas_group_drawing->set_name( "CanvasItemGroup:Drawing" ); // The actual SVG drawing.
-    canvas_group_grids->set_name(   "CanvasItemGroup:Grids"   ); // Grids.
-    canvas_group_guides->set_name(  "CanvasItemGroup:Guides"  ); // Guides.
-    canvas_group_pages->set_name("CanvasItemGroup:Pages");
-    canvas_group_sketch->set_name(  "CanvasItemGroup:Sketch"  ); // Temporary items before becoming permanent.
-    canvas_group_temp->set_name(    "CanvasItemGroup:Temp"    ); // Temporary items that disappear by themselves.
+    canvas_group_pages_bg->set_name("CanvasItemGroup:PagesBg");  // Page backgrounds
+    canvas_group_drawing->set_name("CanvasItemGroup:Drawing");   // The actual SVG drawing.
+    canvas_group_pages_fg->set_name("CanvasItemGroup:PagesFg");  // Page borders, when on top.
+    canvas_group_grids->set_name("CanvasItemGroup:Grids");       // Grids.
+    canvas_group_guides->set_name("CanvasItemGroup:Guides");     // Guides.
+    canvas_group_sketch->set_name("CanvasItemGroup:Sketch");     // Temporary items before becoming permanent.
+    canvas_group_temp->set_name("CanvasItemGroup:Temp");         // Temporary items that disappear by themselves.
     canvas_group_controls->set_name("CanvasItemGroup:Controls"); // Controls (handles, knots, rectangles, etc.).
 
     canvas_group_sketch->set_pickable(false);  // Temporary items are not pickable!

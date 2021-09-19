@@ -29,7 +29,7 @@ public:
     ~SPPage() override = default;
 
     void movePage(Geom::Affine translate, bool with_objects);
-    void showPage(SPDesktop *desktop, Inkscape::CanvasItemGroup *group);
+    void showPage(SPDesktop *desktop, Inkscape::CanvasItemGroup *, Inkscape::CanvasItemGroup *);
     void hidePage(Inkscape::UI::Widget::Canvas *canvas);
     void showPage();
     void hidePage();
@@ -55,12 +55,11 @@ protected:
 private:
     bool is_selected = false;
     bool has_shadow = true;
-    guint32 fill_color = 0xffffffff;
+    guint32 fill_color = 0xffffff00;
     guint32 stroke_color = 0x000000cc;
 
     Inkscape::PageManager *_manager = nullptr;
-    std::vector<Inkscape::CanvasItemRect *> views;
-    std::vector<Inkscape::CanvasItemText *> labels;
+    std::vector<Inkscape::CanvasItem *> canvas_items;
 
     SVGLength x;
     SVGLength y;
