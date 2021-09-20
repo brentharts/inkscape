@@ -214,6 +214,13 @@ void CanvasItem::set_stroke(guint32 rgba)
     }
 }
 
+void CanvasItem::request_redraw() {
+    if (_canvas) {
+        // Queue redraw request
+        _canvas->redraw_area(_bounds);
+    }
+}
+
 }  // Namespace Inkscape
 
 void canvas_item_print_tree(Inkscape::CanvasItem *item)
@@ -237,13 +244,6 @@ void canvas_item_print_tree(Inkscape::CanvasItem *item)
             canvas_item_print_tree(&item);
         }
         --level;
-    }
-}
-
-void CanvasItem::request_redraw() {
-    if (_canvas) {
-        // Queue redraw request
-        _canvas->redraw_area(_bounds);
     }
 }
 
