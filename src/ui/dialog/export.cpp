@@ -49,6 +49,7 @@
 
 #include "object/sp-namedview.h"
 #include "object/sp-root.h"
+#include "page-manager.h"
 
 #include "ui/dialog-events.h"
 #include "ui/interface.h"
@@ -922,8 +923,11 @@ void Export::_export_raster(Inkscape::Extension::Output *extension)
     auto desktop = getDesktop();
     if (!desktop) return;
 
-    SPNamedView *nv = desktop->getNamedView();
-    SPDocument *doc = desktop->getDocument();
+    auto doc = desktop->getDocument();
+
+    // In the future, this could be a different color for each page.
+    auto pm = desktop->getNamedView()->getPageManager();
+    guint32 default_bg = pm->background_color;
 
     bool exportSuccessful = false;
 
@@ -938,7 +942,6 @@ void Export::_export_raster(Inkscape::Extension::Output *extension)
     int color_type = colortypes[bitdepth_cb.get_active_row_number()] ;
     int bit_depth = bitdepths[bitdepth_cb.get_active_row_number()] ;
     int antialiasing = antialiasing_cb.get_active_row_number();
-
 
     if (batch_export.get_active ()) {
         // Batch export of selected objects
@@ -1004,9 +1007,10 @@ void Export::_export_raster(Inkscape::Extension::Output *extension)
                                                    _("Exporting file <b>%s</b>..."), safeFile), desktop);
                     std::vector<SPItem*> x;
                     std::vector<SPItem*> selected(desktop->getSelection()->items().begin(), desktop->getSelection()->items().end());
+
                     if (!sp_export_png_file (doc, path.c_str(),
                                              *area, width, height, pHYs, pHYs,
-                                             nv->pagecolor,
+                                             default_bg,
                                              onProgressCallback, (void*)prog_dlg,
                                              TRUE,  // overwrite without asking
                                              hide ? selected : x,
@@ -1124,7 +1128,7 @@ void Export::_export_raster(Inkscape::Extension::Output *extension)
         std::vector<SPItem*> selected(desktop->getSelection()->items().begin(), desktop->getSelection()->items().end());
         ExportResult status = sp_export_png_file(desktop->getDocument(), png_filename.c_str(),
                               area, width, height, pHYs, pHYs, //previously xdpi, ydpi.
-                              nv->pagecolor,
+                              default_bg,
                               onProgressCallback, (void*)prog_dlg,
                               overwrite,
                               hide ? selected : x, 

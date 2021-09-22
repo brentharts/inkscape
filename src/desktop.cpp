@@ -80,7 +80,6 @@ namespace Inkscape { namespace XML { class Node; }}
 static bool _drawing_handler (GdkEvent *event, Inkscape::DrawingItem *item, SPDesktop *desktop);
 static void _reconstruction_start(SPDesktop * desktop);
 static void _reconstruction_finish(SPDesktop * desktop);
-static void _namedview_modified (SPObject *obj, guint flags, SPDesktop *desktop);
 
 static gdouble _pinch_begin_zoom = 1.;
 
@@ -253,15 +252,9 @@ SPDesktop::init (SPNamedView *nv, Inkscape::UI::Widget::Canvas *acanvas, SPDeskt
 
     /* --------- End Canvas Items ----------- */
 
-    /* Connect event for page display properties */
-    _modified_connection =
-        namedview->connectModified(sigc::bind<2>(sigc::ptr_fun(&_namedview_modified), this));
-
     namedview->show(this);
     /* Ugly hack */
     activate_guides (true);
-    /* Ugly hack */
-    _namedview_modified (namedview, SP_OBJECT_MODIFIED_FLAG, this);
 
     // Set the select tool as the active tool.
     setEventContext("/tools/select");
@@ -313,7 +306,6 @@ void SPDesktop::destroy()
     namedview->hide(this);
 
     _sel_changed_connection.disconnect();
-    _modified_connection.disconnect();
     _commit_connection.disconnect();
     _reconstruction_start_connection.disconnect();
     _reconstruction_finish_connection.disconnect();
@@ -441,7 +433,6 @@ SPDesktop::change_document (SPDocument *theDocument)
         std::cerr << "SPDesktop::change_document: failed to get desktop widget!" << std::endl;
     }
 
-    _namedview_modified (namedview, SP_OBJECT_MODIFIED_FLAG, this);
 }
 
 /**
@@ -1470,7 +1461,6 @@ SPDesktop::setDocument (SPDocument *doc)
     if (canvas_drawing) {
 
         namedview = sp_document_namedview (doc, nullptr);
-        _modified_connection = namedview->connectModified(sigc::bind<2>(sigc::ptr_fun(&_namedview_modified), this));
         number = namedview->getViewCount();
 
         Inkscape::DrawingItem *drawing_item = doc->getRoot()->invoke_show(
@@ -1484,8 +1474,6 @@ SPDesktop::setDocument (SPDocument *doc)
         namedview->show(this);
         /* Ugly hack */
         activate_guides (true);
-        /* Ugly hack */
-        _namedview_modified (namedview, SP_OBJECT_MODIFIED_FLAG, this);
     }
 
 
@@ -1564,47 +1552,6 @@ static void _reconstruction_finish(SPDesktop * desktop)
         desktop->_reconstruction_old_layer_id.clear();
     }
     g_debug("Desktop, finishing reconstruction end\n");
-}
-
-/**
- * Namedview_modified callback.
- */
-static void _namedview_modified (SPObject *obj, guint flags, SPDesktop *desktop)
-{
-    SPNamedView *nv=SP_NAMEDVIEW(obj);
-
-    if (flags & SP_OBJECT_MODIFIED_FLAG) {
-        guint32 blackout_color = 0;
-        {
-            // blend page and blackout colors by "painting" with blackout on top of opaque page:
-            const auto a = SP_RGBA32_A_F(nv->blackoutcolor);
-            const auto r = SP_RGBA32_R_F(nv->pagecolor) * (1 - a) + SP_RGBA32_R_F(nv->blackoutcolor) * a;
-            const auto g = SP_RGBA32_G_F(nv->pagecolor) * (1 - a) + SP_RGBA32_G_F(nv->blackoutcolor) * a;
-            const auto b = SP_RGBA32_B_F(nv->pagecolor) * (1 - a) + SP_RGBA32_B_F(nv->blackoutcolor) * a;
-            blackout_color = SP_RGBA32_F_COMPOSE(r, g, b, 1);
-        }
-        if (nv->pagecheckerboard) {
-            desktop->getCanvas()->set_background_checkerboard(blackout_color);
-            //desktop->getCanvasPageBackground()->set_background_checkerboard(nv->pagecolor);
-        } else {
-            desktop->getCanvas()->set_background_color(blackout_color);
-            //desktop->getCanvasPageBackground()->set_background(nv->pagecolor | 0xff);
-        }
-
-        // XXX Modify page attributes here.
-
-        Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-        if (SP_RGBA32_R_U(nv->pagecolor) +
-            SP_RGBA32_G_U(nv->pagecolor) +
-            SP_RGBA32_B_U(nv->pagecolor) >= 384) {
-            // the background color is light, use black outline
-            desktop->getCanvasDrawing()->get_drawing()->outlinecolor =
-                prefs->getInt("/options/wireframecolors/onlight", 0xff);
-        } else { // use white outline
-            desktop->getCanvasDrawing()->get_drawing()->outlinecolor =
-                prefs->getInt("/options/wireframecolors/ondark", 0xffffffff);
-        }
-    }
 }
 
 Geom::Affine SPDesktop::w2d() const

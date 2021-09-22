@@ -26,6 +26,7 @@
 #include "preferences.h"
 #include "selection.h"
 #include "style.h"
+#include "page-manager.h"
 
 #include "display/curve.h"
 #include "display/drawing.h"
@@ -257,10 +258,10 @@ bool DropperTool::root_handler(GdkEvent* event) {
 
                 if (pick == SP_DROPPER_PICK_VISIBLE) {
                     // compose with page color
-                    guint32 bg = desktop->getNamedView()->pagecolor;
-                    R = R + (SP_RGBA32_R_F(bg)) * (1 - A);
-                    G = G + (SP_RGBA32_G_F(bg)) * (1 - A);
-                    B = B + (SP_RGBA32_B_F(bg)) * (1 - A);
+                    auto bg = desktop->getNamedView()->getPageManager()->getDefaultBackgroundColor();
+                    R = R + bg[0] * (1 - A);
+                    G = G + bg[1] * (1 - A);
+                    B = B + bg[2] * (1 - A);
                     A = 1.0;
                 } else {
                     // un-premultiply color channels

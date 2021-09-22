@@ -19,6 +19,7 @@
 #include "snap.h"
 #include "document.h"
 #include "util/units.h"
+#include "svg/svg-bool.h"
 #include <vector>
 
 namespace Inkscape {
@@ -43,12 +44,13 @@ public:
     ~SPNamedView() override;
 
     unsigned int editable : 1;
-    unsigned int showguides : 1;
-    unsigned int lockguides : 1;
-    unsigned int pagecheckerboard : 1;
-    unsigned int showborder : 1;
-    unsigned int showpageshadow : 1;
-    unsigned int borderlayer : 2;
+
+    SVGBool showguides;
+    SVGBool lockguides;
+    SVGBool grids_visible;
+
+    guint32 desk_color;
+    SVGBool desk_checkerboard;
 
     double zoom;
     double rotation; // Document rotation in degrees (positive is clockwise)
@@ -62,7 +64,6 @@ public:
 
     SnapManager snap_manager;
     std::vector<Inkscape::CanvasGrid *> grids;
-    bool grids_visible;
 
     Inkscape::Util::Unit const *display_units;   // Units used for the UI (*not* the same as units of SVG coordinates)
     Inkscape::Util::Unit const *page_size_units; // Only used in "Custom size" part of Document Properties dialog 
@@ -73,10 +74,6 @@ public:
 
     guint32 guidecolor;
     guint32 guidehicolor;
-    guint32 bordercolor;
-    guint32 pagecolor;
-    guint32 blackoutcolor;
-    guint32 pageshadow;
 
     std::vector<SPGuide *> guides;
     std::vector<SPDesktop *> views;
@@ -112,6 +109,7 @@ private:
 protected:
 	void build(SPDocument *document, Inkscape::XML::Node *repr) override;
 	void release() override;
+        void modified(unsigned int flags) override;
         void update(SPCtx* ctx, unsigned int flags) override;
 	void set(SPAttr key, char const* value) override;
 

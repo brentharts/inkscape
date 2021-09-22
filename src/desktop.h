@@ -619,7 +619,6 @@ private:
     sigc::connection _reconstruction_start_connection;
     sigc::connection _reconstruction_finish_connection;
     sigc::connection _commit_connection;
-    sigc::connection _modified_connection;
 
     void onResized (double, double) override;
     void onRedrawRequested() override;

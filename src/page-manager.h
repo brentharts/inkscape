@@ -11,13 +11,23 @@
 #define SEEN_INKSCAPE_PAGE_MANAGER_H
 
 #include <vector>
+#include "color-rgba.h"
 #include "document.h"
+
+#include "svg/svg-bool.h"
+
 #include "object/sp-namedview.h"
 
 class SPDesktop;
 class SPPage;
+class ColorRGBA;
 
 namespace Inkscape {
+    namespace UI {
+        namespace Dialog {
+            class DocumentProperties;
+        }
+    }
 
 class PageManager
 {
@@ -44,8 +54,10 @@ public:
     bool selectPage(int page_index);
     bool selectNextPage() { return selectPage(getSelectedPageIndex() + 1); }
     bool selectPrevPage() { return selectPage(getSelectedPageIndex() - 1); }
-    bool hasNextPage() { return getSelectedPageIndex() + 1 < pages.size(); }
-    bool hasPrevPage() { return getSelectedPageIndex() - 1 >= 0; }
+    bool hasNextPage() const { return getSelectedPageIndex() + 1 < pages.size(); }
+    bool hasPrevPage() const { return getSelectedPageIndex() - 1 >= 0; }
+
+    ColorRGBA getDefaultBackgroundColor() const { return ColorRGBA(background_color); }
 
     void zoomToPage(SPDesktop *desktop, SPPage *page);
     void zoomToSelectedPage(SPDesktop *desktop) { zoomToPage(desktop, _selected_page); };
@@ -56,6 +68,9 @@ public:
     SPPage *newDesktopPage(Geom::Rect rect);
     void deletePage(SPPage *page);
     void deletePage();
+
+    bool subset(SPAttr key, const gchar* value);
+    void modified();
 
     static void enablePages(SPDocument *document) {
         document->getNamedView()->getPageManager()->enablePages();
@@ -74,6 +89,20 @@ public:
         return _pages_changed_signal.connect(slot);
     }
 
+    // Access from export.cpp and others for the guint32
+    guint32 background_color = 0xffffff00;
+
+protected:
+    friend class Inkscape::UI::Dialog::DocumentProperties;
+
+    // Default settings from sp-namedview
+    SVGBool border_show;
+    SVGBool border_on_top;
+    SVGBool shadow_show;
+
+    guint32 border_color = 0x000000cc;
+    
+    int shadow_size = 0;
 private:
     SPDocument *_document;
     SPPage *_selected_page = nullptr;

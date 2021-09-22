@@ -137,15 +137,13 @@ void SPPage::showPage(SPDesktop *desktop, Inkscape::CanvasItemGroup *background_
 {
     // Foreground 'border'
     if (auto item = new Inkscape::CanvasItemRect(border_group, getDesktopRect())) {
-        item->set_name("border");
-        item->set_dashed(false);
-        item->set_inverted(false);
-        item->set_fill(0x00000000);
+        item->set_name("foreground");
         canvas_items.push_back(item);
     }
 
-    // Background rectangle
+    // Background rectangle 'fill'
     if (auto item = new Inkscape::CanvasItemRect(background_group, getDesktopRect())) {
+        item->set_name("background");
         item->set_dashed(false);
         item->set_inverted(false);
         item->set_stroke(0x00000000);
@@ -196,16 +194,20 @@ void SPPage::hidePage()
     }
 }
 
-void SPPage::setPageColor(guint32 color)
+/** 
+ * Sets the default attributes from the namedview.
+ */
+bool SPPage::setDefaultAttributes(bool on_top, guint32 border, guint32 bg, int shadow)
 {
-    this->fill_color = color;
-    this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
-}
-
-void SPPage::setPageBorder(guint32 color)
-{
-    this->stroke_color = color;
-    this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+    if (on_top != border_on_top || border != border_color || bg != background_color || shadow != shadow_size) {
+        this->border_on_top = on_top;
+        this->border_color = border;
+        this->background_color = bg;
+        this->shadow_size = shadow;
+        this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+        return true;
+    }
+    return false;
 }
 
 /**
@@ -214,12 +216,6 @@ void SPPage::setPageBorder(guint32 color)
 void SPPage::setSelected(bool sel)
 {
     this->is_selected = sel;
-    this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
-}
-
-void SPPage::setPageShadow(bool show)
-{
-    this->has_shadow = show;
     this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
 }
 
@@ -260,8 +256,7 @@ void SPPage::movePage(Geom::Affine translate, bool with_objects)
         this->width = current_rect.width();
         this->height = current_rect.height();
 
-        // This is needed to update the xml, although perhaps it
-        // should be moved to the ::update below.
+        // This is needed to update the xml
         this->updateRepr();
 
         // This eventually calls the ::update below while idle
@@ -281,11 +276,22 @@ void SPPage::update(SPCtx* /*ctx*/, unsigned int /*flags*/)
     for (auto item : canvas_items) {
         if (auto rect = dynamic_cast<Inkscape::CanvasItemRect *>(item)) {
             rect->set_rect(getDesktopRect());
-            if (rect->get_name() == "border") {
-                rect->set_shadow(shadow_color, has_shadow ? 2 : 0);
-                rect->set_stroke(is_selected ? select_color : stroke_color);
+
+            bool is_foreground = (rect->get_name() == "foreground");
+            // This will put the border on the background OR foreground layer as needed.
+            if (is_foreground == border_on_top) {
+                rect->show();
+                rect->set_shadow(shadow_color, shadow_size);
+                rect->set_stroke(is_selected ? select_color : border_color);
             } else {
-                rect->set_fill(fill_color);
+                rect->hide();
+                rect->set_shadow(0x0, 0);
+                rect->set_stroke(0x0);
+            }
+            // This undoes the hide for the background rect, but that's ok
+            if (!is_foreground) {
+                rect->show();
+                rect->set_background(background_color);
             }
         }
         if (auto label = dynamic_cast<Inkscape::CanvasItemText *>(item)) {

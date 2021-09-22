@@ -37,9 +37,7 @@ public:
     void setManager(Inkscape::PageManager *manager);
 
     void setSelected(bool selected);
-    void setPageColor(guint32 color);
-    void setPageBorder(guint32 color);
-    void setPageShadow(bool show);
+    bool setDefaultAttributes(bool on_top, guint32 border, guint32 bg, int shadow);
     int getPageNumber();
 
     Geom::Rect getRect() const;
@@ -54,9 +52,11 @@ protected:
     Inkscape::XML::Node *write(Inkscape::XML::Document *xml_doc, Inkscape::XML::Node *repr, guint flags) override;
 private:
     bool is_selected = false;
-    bool has_shadow = true;
-    guint32 fill_color = 0xffffff00;
-    guint32 stroke_color = 0x000000cc;
+
+    bool border_on_top = true;
+    guint32 background_color = 0xffffff00;
+    guint32 border_color = 0x000000cc;
+    int shadow_size = 0;
 
     Inkscape::PageManager *_manager = nullptr;
     std::vector<Inkscape::CanvasItem *> canvas_items;

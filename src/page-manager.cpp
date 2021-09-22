@@ -10,6 +10,9 @@
 #include "desktop.h"
 #include "document.h"
 #include "page-manager.h"
+#include "attributes.h"
+
+#include "svg/svg-color.h"
 
 #include "object/sp-namedview.h"
 #include "object/sp-page.h"
@@ -17,6 +20,9 @@
 namespace Inkscape {
 
 PageManager::PageManager(SPDocument *document)
+    : border_show(true)
+    , border_on_top(true)
+    , shadow_show(true)
 {
     _document = document;
 }
@@ -260,6 +266,62 @@ void PageManager::zoomToPage(SPDesktop *desktop, SPPage *page)
     desktop->set_display_area(d, 10);
 }
 
+/**
+ * Manage the page subset of attributes from sp-namedview and store them.
+ */
+bool PageManager::subset(SPAttr key, const gchar* value)
+{
+    switch (key) {
+        case SPAttr::SHOWBORDER:
+            this->border_show.readOrUnset(value);
+            break;
+        case SPAttr::BORDERLAYER:
+            this->border_on_top.readOrUnset(value);
+            break;
+        case SPAttr::BORDERCOLOR:
+            this->border_color = this->border_color & 0xff;
+            if (value) {
+                this->border_color = this->border_color | sp_svg_read_color(value, this->border_color);
+            }
+            break;
+        case SPAttr::BORDEROPACITY:
+            sp_ink_read_opacity(value, &this->border_color, 0x000000ff);
+            break;
+        case SPAttr::PAGECOLOR:
+            this->background_color = this->background_color & 0xff;
+            if (value) {
+                this->background_color = this->background_color | sp_svg_read_color(value, this->background_color);
+            }
+            break;
+        case SPAttr::INKSCAPE_PAGEOPACITY:
+            sp_ink_read_opacity(value, &this->background_color, 0xffffff00);
+            break;
+        case SPAttr::INKSCAPE_PAGESHADOW:
+            this->shadow_size = value ? atoi(value) : 2;
+            break;
+        case SPAttr::SHOWPAGESHADOW: // Depricated
+            this->shadow_show.readOrUnset(value);
+            break;
+        default:
+            return false;
+    }
+    return true;
+}
+
+/**
+ * Namedview has been modified, keep our pages up to date.
+ */
+void PageManager::modified()
+{
+    for (auto &page : pages) {
+        page->setDefaultAttributes(
+            border_on_top,
+            border_show ? border_color : 0x0,
+            background_color,
+            shadow_show ? shadow_size : 0
+        );
+    }
+}
 
 };
 
