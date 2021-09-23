@@ -40,7 +40,7 @@ cairo_surface_t* render_surface(Inkscape::Drawing &drawing, double scale_factor,
     Geom::IntRect ibox = (dbox * Geom::Scale(scale_factor)).roundOutwards();
 
     if (no_clip) {
-        // check of object fits in the surface
+        // check if object fits in the surface
         if (ibox.width() > pixsize.x() || ibox.height() > pixsize.y()) {
             auto sx = static_cast<double>(ibox.width()) / pixsize.x();
             auto sy = static_cast<double>(ibox.height()) / pixsize.y();

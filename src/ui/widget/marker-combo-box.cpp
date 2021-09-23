@@ -387,7 +387,7 @@ void MarkerComboBox::update_preview(Glib::RefPtr<MarkerItem> item) {
         auto alloc = _preview.get_allocation();
         auto size = Geom::IntPoint(alloc.get_width() - 10, alloc.get_height() - 10);
         if (size.x() > 0 && size.y() > 0) {
-            surface = create_marker_image(size, item->id.c_str(), item->source, drawing, visionkey, true, false, 2.60);
+            surface = create_marker_image(size, item->id.c_str(), item->source, drawing, visionkey, true, true, 2.60);
         }
         else {
             // too early, preview hasn't been expanded/resized yet
