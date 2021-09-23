@@ -49,7 +49,7 @@ class MarkerComboBox : public Gtk::Bin {
     using parent_type = Gtk::Bin;
 
 public:
-    MarkerComboBox(gchar const *id, int loc);
+    MarkerComboBox(Glib::ustring id, int loc);
     ~MarkerComboBox() override;
 
     void setDocument(SPDocument *);
@@ -60,8 +60,7 @@ public:
     void set_current(SPObject *marker);
     std::string get_active_marker_uri();
     bool in_update() { return _updating; };
-    gchar const *get_id() { return _combo_id; };
-    void update_marker_image(gchar const *mname);
+    const char* get_id() { return _combo_id.c_str(); };
     int get_loc() { return _loc; };
 
     sigc::signal<void()> signal_changed() { return _signal_changed; }
@@ -112,7 +111,7 @@ private:
     bool _scale_linked = true;
     guint32 _background_color;
     guint32 _foreground_color;
-    gchar const* _combo_id;
+    Glib::ustring _combo_id;
     int _loc;
     bool _updating = false;
     SPDocument *_document = nullptr;
@@ -151,7 +150,7 @@ private:
     std::vector <SPMarker*> get_marker_list (SPDocument *source);
     void add_markers (std::vector<SPMarker *> const& marker_list, SPDocument *source,  gboolean history);
     void remove_markers (gboolean history);
-    std::unique_ptr<SPDocument> ink_markers_preview_doc(const gchar* group_id);
+    std::unique_ptr<SPDocument> ink_markers_preview_doc(const Glib::ustring& group_id);
     Cairo::RefPtr<Cairo::Surface> create_marker_image(Geom::IntPoint pixel_size, gchar const *mname,
         SPDocument *source, Inkscape::Drawing &drawing, unsigned /*visionkey*/, bool checkerboard, bool no_clip, double scale);
     void refreshHistory();
