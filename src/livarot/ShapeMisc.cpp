@@ -389,11 +389,10 @@ Shape::ConvertToFormeNested (Path * dest, int nbP, Path * *orig, int /*wildPath*
           break;
       }
       {
-        int askTo = 0;
-        if (pData.size()<= fi) {
+        if (pData.size()<= fi || fi == numberOfPoints()) {
             parentContour=-1;
         } else {
-          askTo = pData[fi].askForWindingB;
+          int askTo = pData[fi].askForWindingB;
           if (askTo < 0 || askTo >= numberOfEdges() ) {
             parentContour=-1;
           } else {
@@ -401,7 +400,7 @@ Shape::ConvertToFormeNested (Path * dest, int nbP, Path * *orig, int /*wildPath*
                 parentContour = GPOINTER_TO_INT(swdData[askTo].misc);
                 parentContour-=1; // pour compenser le decalage
             }
-            childEdge = getPoint(fi % numberOfPoints()).incidentEdge[FIRST];
+            childEdge = getPoint(fi).incidentEdge[FIRST];
           }
         }
       }
