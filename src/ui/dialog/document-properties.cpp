@@ -104,7 +104,7 @@ DocumentProperties::DocumentProperties()
     , _rcb_bord(_("Border on _top of drawing"), _("If set, border is always on top of the drawing"), "borderlayer", _wr, false)
     , _rcb_shad(_("_Show border shadow"), _("If set, page border shows a shadow on its right and lower side"), "inkscape:showpageshadow", _wr, false)
     , _rcb_shwd(_("_Border shadow width"), _("Width of page border when set"), "", "inkscape:pageshadow", _wr)
-    , _rcp_bg(_("Back_ground color:"), _("Background color"), _("Color of the canvas background. Note: opacity is ignored except when exporting to bitmap."), "pagecolor", "inkscape:pageopacity", _wr)
+    , _rcp_bg(_("Page color:"), _("Page color"), _("Default color of new pages."), "pagecolor", "inkscape:pageopacity", _wr)
     , _rcp_blkout(_("Desk color:"), _("Desk color"), _("Color of the desk background."), "inkscape:deskcolor", "inkscape:deskopacity", _wr)
     , _rcb_checkerboard(_("Desk Checkerboard"), _("If set, use a colored checkerboard for the desk background"), "inkscape:pagecheckerboard", _wr, false)
     , _rcp_bord(_("Border _color:"), _("Page border color"), _("Color of the page border"), "bordercolor", "borderopacity", _wr)
@@ -162,7 +162,7 @@ DocumentProperties::DocumentProperties()
     set_spacing (4);
     pack_start(_notebook, true, true);
 
-    _notebook.append_page(*_page_page,      _("Page"));
+    _notebook.append_page(*_page_page,      _("Display"));
     _notebook.append_page(*_page_guides,    _("Guides"));
     _notebook.append_page(_grids_vbox,      _("Grids"));
     // _notebook.append_page(*_page_snap,      _("Snap"));
@@ -271,10 +271,10 @@ void DocumentProperties::build_page()
     label_for->set_markup (_("<b>Page Size</b>"));
 
     Gtk::Label* label_bkg = Gtk::manage (new Gtk::Label);
-    label_bkg->set_markup (_("<b>Background</b>"));
+    label_bkg->set_markup (_("<b>Desk</b>"));
 
     Gtk::Label* label_bdr = Gtk::manage (new Gtk::Label);
-    label_bdr->set_markup (_("<b>Border</b>"));
+    label_bdr->set_markup (_("<b>Pages</b>"));
 
     Gtk::Label* label_dsp = Gtk::manage (new Gtk::Label);
     label_dsp->set_markup (_("<b>Display</b>"));
@@ -304,7 +304,6 @@ void DocumentProperties::build_page()
     {
         label_bkg,            nullptr,
         nullptr,              &_rcb_checkerboard,
-        nullptr,              &_rcp_bg,
         nullptr,              &_rcp_blkout,
         label_dsp,            nullptr,
         nullptr,              &_rcb_antialias,
@@ -319,6 +318,7 @@ void DocumentProperties::build_page()
         nullptr,              &_rcb_shad,
         nullptr,              &_rcb_shwd,
         nullptr,              &_rcp_bord,
+        nullptr,              &_rcp_bg,
     };
     attach_all(_rcb_doc_props_right, widget_array_right, G_N_ELEMENTS(widget_array_right));
 
