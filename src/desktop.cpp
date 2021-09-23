@@ -39,6 +39,7 @@
 #include "layer-manager.h"
 #include "message-context.h"
 #include "message-stack.h"
+#include "page-manager.h"
 
 #include "display/drawing.h"
 #include "display/control/canvas-temporary-item-list.h"

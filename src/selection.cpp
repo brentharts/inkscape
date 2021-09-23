@@ -111,6 +111,10 @@ void Selection::_emitChanged(bool persist_selection_context/* = false */) {
             if (layer && layer != _selection_context) {
                 _desktop->layerManager().setCurrentLayer(layer);
             }
+            if (auto page_manager = _desktop->getNamedView()->getPageManager()) {
+                // This could be more complex if we want to be smarter.
+                page_manager->selectPage(item, false);
+            }
         }
     }
 

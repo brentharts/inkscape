@@ -15,6 +15,7 @@
 #include "svg/svg-color.h"
 
 #include "object/sp-namedview.h"
+#include "object/sp-item.h"
 #include "object/sp-page.h"
 
 namespace Inkscape {
@@ -250,6 +251,20 @@ bool PageManager::selectPage(int page_index)
         return selectPage(pages[page_index]);
     }
     return false;
+}
+
+/**
+ * Get the first page for the given item, if contains is true the item
+ * must be entirely on the page, not just touching it.
+ */
+SPPage *PageManager::getPageFor(SPItem *item, bool contains) const
+{
+    for (auto &page : pages) {
+        if (page->itemOnPage(item, contains)) {
+            return page;
+        }
+    }
+    return nullptr;
 }
 
 /**

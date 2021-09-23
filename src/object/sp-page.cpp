@@ -131,6 +131,20 @@ std::vector<SPItem*> SPPage::getOverlappingItems() const
 }
 
 /**
+ * Return true if this item is contained within the page boundry.
+ */
+bool SPPage::itemOnPage(SPItem *item, bool contains) const
+{
+    if (auto box = item->desktopGeometricBounds()) {
+        if (contains) {
+            return getDesktopRect().contains(*box);
+        }
+        return getDesktopRect().intersects(*box);
+    }
+    return false;
+}
+
+/**
  * Shows the page in the given canvas item group.
  */
 void SPPage::showPage(SPDesktop *desktop, Inkscape::CanvasItemGroup *background_group, Inkscape::CanvasItemGroup *border_group)

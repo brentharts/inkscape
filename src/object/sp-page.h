@@ -22,6 +22,7 @@
 #include "page-manager.h"
 
 class SPDesktop;
+class SPItem;
 
 class SPPage : public SPObject {
 public:
@@ -44,6 +45,7 @@ public:
     Geom::Rect getDesktopRect() const;
     std::vector<SPItem*> getExclusiveItems() const;
     std::vector<SPItem*> getOverlappingItems() const;
+    bool itemOnPage(SPItem *item, bool contains = false) const;
 protected:
     void build(SPDocument* doc, Inkscape::XML::Node* repr) override;
     void release() override;

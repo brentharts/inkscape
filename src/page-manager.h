@@ -20,9 +20,9 @@
 
 class SPDesktop;
 class SPPage;
-class ColorRGBA;
 
 namespace Inkscape {
+    class Selection;
     namespace UI {
         namespace Dialog {
             class DocumentProperties;
@@ -43,6 +43,7 @@ public:
     
     // Returns None if no page selected
     SPPage *getSelected() const { return _selected_page; }
+    SPPage *getPageFor(SPItem *item, bool contains) const;
     bool hasPages() const { return !pages.empty(); }
     int getPageIndex(SPPage *page) const;
     int getSelectedPageIndex() const;
@@ -52,6 +53,7 @@ public:
     void pagesChanged();
     bool selectPage(SPPage *page);
     bool selectPage(int page_index);
+    bool selectPage(SPItem *item, bool contains) { return selectPage(getPageFor(item, contains)); }
     bool selectNextPage() { return selectPage(getSelectedPageIndex() + 1); }
     bool selectPrevPage() { return selectPage(getSelectedPageIndex() - 1); }
     bool hasNextPage() const { return getSelectedPageIndex() + 1 < pages.size(); }
