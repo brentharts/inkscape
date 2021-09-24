@@ -109,15 +109,16 @@ private:
 protected:
 	void build(SPDocument *document, Inkscape::XML::Node *repr) override;
 	void release() override;
-        void modified(unsigned int flags) override;
-        void update(SPCtx* ctx, unsigned int flags) override;
-	void set(SPAttr key, char const* value) override;
+    void modified(unsigned int flags) override;
+    void update(SPCtx *ctx, unsigned int flags) override;
+    void set(SPAttr key, char const* value) override;
 
 	void child_added(Inkscape::XML::Node* child, Inkscape::XML::Node* ref) override;
 	void remove_child(Inkscape::XML::Node* child) override;
-        void order_changed(Inkscape::XML::Node* child, Inkscape::XML::Node* old_repr, Inkscape::XML::Node* new_repr) override;
+    void order_changed(Inkscape::XML::Node *child, Inkscape::XML::Node *old_repr,
+                       Inkscape::XML::Node *new_repr) override;
 
-	Inkscape::XML::Node* write(Inkscape::XML::Document *xml_doc, Inkscape::XML::Node *repr, unsigned int flags) override;
+    Inkscape::XML::Node* write(Inkscape::XML::Document *xml_doc, Inkscape::XML::Node *repr, unsigned int flags) override;
 };
 
 

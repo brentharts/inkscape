@@ -10,43 +10,40 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
+#include "pages-tool.h"
 
 #include <gdk/gdkkeysyms.h>
 
-#include "pages-tool.h"
-
-#include "include/macros.h"
-
 #include "desktop.h"
-#include "rubberband.h"
-#include "selection-chemistry.h"
-#include "document-undo.h"
-#include "object/sp-page.h"
-#include "path/path-outline.h"
-
+#include "display/control/canvas-item-bpath.h"
 #include "display/control/canvas-item-group.h"
 #include "display/control/canvas-item-rect.h"
-#include "display/control/canvas-item-bpath.h"
+#include "document-undo.h"
+#include "include/macros.h"
+#include "object/sp-page.h"
+#include "path/path-outline.h"
+#include "rubberband.h"
+#include "selection-chemistry.h"
 
 namespace Inkscape {
 namespace UI {
 namespace Tools {
 
-const std::string& PagesTool::getPrefsPath() {
-	return PagesTool::prefsPath;
+const std::string &PagesTool::getPrefsPath()
+{
+    return PagesTool::prefsPath;
 }
 
 const std::string PagesTool::prefsPath = "/tools/pages";
 
 PagesTool::PagesTool()
     : ToolBase("select.svg")
+{}
+
+PagesTool::~PagesTool() {}
+
+void PagesTool::finish()
 {
-}
-
-PagesTool::~PagesTool() {
-}
-
-void PagesTool::finish() {
     _selector_changed_connection.disconnect();
     selectionChanged(nullptr);
 
@@ -60,7 +57,8 @@ void PagesTool::finish() {
     }
 }
 
-void PagesTool::setup() {
+void PagesTool::setup()
+{
     ToolBase::setup();
 
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
@@ -72,22 +70,23 @@ void PagesTool::setup() {
         visual_box->hide();
     }
     if (auto page_manager = getPageManager()) {
-        _selector_changed_connection = page_manager->connectPageSelected(sigc::mem_fun(*this, &PagesTool::selectionChanged));
+        _selector_changed_connection =
+            page_manager->connectPageSelected(sigc::mem_fun(*this, &PagesTool::selectionChanged));
         if (auto page = page_manager->getSelected()) {
             selectionChanged(page);
         }
     }
 }
 
-bool PagesTool::root_handler(GdkEvent* event)
+bool PagesTool::root_handler(GdkEvent *event)
 {
     bool ret = false;
     auto page_manager = getPageManager();
-    if (!page_manager) return false;
+    if (!page_manager)
+        return false;
 
     switch (event->type) {
-        case GDK_BUTTON_PRESS:
-        {
+        case GDK_BUTTON_PRESS: {
             if (event->button.button == 1) {
                 mouse_is_pressed = true;
                 drag_origin_w = Geom::Point(event->button.x, event->button.y);
@@ -96,15 +95,14 @@ bool PagesTool::root_handler(GdkEvent* event)
             }
             break;
         }
-        case GDK_MOTION_NOTIFY:
-        {
+        case GDK_MOTION_NOTIFY: {
             if (mouse_is_pressed && event->motion.state & GDK_BUTTON1_MASK) {
                 auto point_w = Geom::Point(event->motion.x, event->motion.y);
                 auto point_dt = desktop->w2d(point_w);
 
                 // do not drag if we're within tolerance from origin
                 if (Geom::distance(drag_origin_w, point_w) < drag_tolerance) {
-                    break; 
+                    break;
                 }
                 if (dragging_item) {
                     // Continue to drag item.
@@ -137,8 +135,7 @@ bool PagesTool::root_handler(GdkEvent* event)
             }
             break;
         }
-        case GDK_BUTTON_RELEASE:
-        {
+        case GDK_BUTTON_RELEASE: {
             auto point_w = Geom::Point(event->button.x, event->button.y);
             auto point_dt = desktop->w2d(point_w);
 
@@ -160,8 +157,7 @@ bool PagesTool::root_handler(GdkEvent* event)
             ret = true;
             break;
         }
-        case GDK_KEY_RELEASE:
-        {
+        case GDK_KEY_RELEASE: {
             if (event->key.keyval == GDK_KEY_Escape) {
                 mouse_is_pressed = false;
             }
@@ -220,7 +216,8 @@ void PagesTool::addDragShape(Geom::PathVector pth)
 /**
  * Find a page under the cursor point.
  */
-SPPage *PagesTool::pageUnder(Geom::Point pt) {
+SPPage *PagesTool::pageUnder(Geom::Point pt)
+{
     if (auto page_manager = getPageManager()) {
         // If the point is still on the selected, favour that one.
         if (auto selected = page_manager->getSelected()) {
@@ -239,7 +236,8 @@ SPPage *PagesTool::pageUnder(Geom::Point pt) {
     return nullptr;
 }
 
-Inkscape::PageManager *PagesTool::getPageManager() {
+Inkscape::PageManager *PagesTool::getPageManager()
+{
     if (auto desktop = getDesktop()) {
         if (auto document = desktop->getDocument()) {
             return document->getNamedView()->getPageManager();
@@ -264,9 +262,9 @@ void PagesTool::selectionChanged(SPPage *page)
     }
 }
 
-}
-}
-}
+} // namespace Tools
+} // namespace UI
+} // namespace Inkscape
 
 /*
   Local Variables:

@@ -15,6 +15,7 @@
  */
 
 #include <gtkmm.h>
+
 #include "toolbar.h"
 
 class SPDesktop;
@@ -22,39 +23,42 @@ class SPDocument;
 class SPPage;
 
 namespace Inkscape {
-    class PageManager;
+class PageManager;
 namespace UI {
-    namespace Tools {
-        class ToolBase;
-    }
+namespace Tools {
+class ToolBase;
+}
 namespace Toolbar {
 
-class PageToolbar : public Gtk::Toolbar {
-    public:
-        PageToolbar(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, SPDesktop *desktop);
-        ~PageToolbar() override;
+class PageToolbar : public Gtk::Toolbar
+{
+public:
+    PageToolbar(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &builder, SPDesktop *desktop);
+    ~PageToolbar() override;
 
-       static GtkWidget * create(SPDesktop *desktop);
-    protected:
-       void labelEdited();
-    private:
-        SPDesktop *_desktop;
-        SPDocument *_document;
-        PageManager *_page_manager;
-        
-        void toolChanged(SPDesktop* desktop, Inkscape::UI::Tools::ToolBase* ec);
-        void selectionChanged(SPPage *page);
+    static GtkWidget *create(SPDesktop *desktop);
 
-        sigc::connection _ec_connection;
-        sigc::connection _page_connection;
+protected:
+    void labelEdited();
 
-        Gtk::ComboBoxText* combo_page_sizes;
-        Gtk::Entry* text_page_label;
+private:
+    SPDesktop *_desktop;
+    SPDocument *_document;
+    PageManager *_page_manager;
+
+    void toolChanged(SPDesktop *desktop, Inkscape::UI::Tools::ToolBase *ec);
+    void selectionChanged(SPPage *page);
+
+    sigc::connection _ec_connection;
+    sigc::connection _page_connection;
+
+    Gtk::ComboBoxText *combo_page_sizes;
+    Gtk::Entry *text_page_label;
 };
 
-}
-}
-}
+} // namespace Toolbar
+} // namespace UI
+} // namespace Inkscape
 
 #endif /* !SEEN_PAGE_TOOLBAR_H */
 

@@ -10,27 +10,26 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
-#include <cstring>
-#include <string>
-
-#include <glibmm/i18n.h>
-
 #include "page-selector.h"
 
-#include "ui/icon-names.h"
-#include "ui/icon-loader.h"
-#include "object/sp-page.h"
-#include "object/sp-namedview.h"
-#include "page-manager.h"
+#include <cstring>
+#include <glibmm/i18n.h>
+#include <string>
+
 #include "desktop.h"
 #include "document.h"
+#include "object/sp-namedview.h"
+#include "object/sp-page.h"
+#include "page-manager.h"
+#include "ui/icon-loader.h"
+#include "ui/icon-names.h"
 
 namespace Inkscape {
 namespace UI {
 namespace Widget {
 
 PageSelector::PageSelector(SPDesktop *desktop)
-: Gtk::Box(Gtk::ORIENTATION_HORIZONTAL)
+    : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL)
     , _desktop(desktop)
 {
     set_name("PageSelector");
@@ -52,25 +51,28 @@ PageSelector::PageSelector(SPDesktop *desktop)
     _selector.pack_start(_label_renderer);
     _selector.set_cell_data_func(_label_renderer, sigc::mem_fun(*this, &PageSelector::renderPageLabel));
 
-    _selector_changed_connection = _selector.signal_changed().connect(
-        sigc::mem_fun(*this, &PageSelector::setSelectedPage));
+    _selector_changed_connection =
+        _selector.signal_changed().connect(sigc::mem_fun(*this, &PageSelector::setSelectedPage));
 
     pack_start(_prev_button, Gtk::PACK_EXPAND_PADDING);
     pack_start(_selector, Gtk::PACK_EXPAND_WIDGET);
     pack_start(_next_button, Gtk::PACK_EXPAND_PADDING);
 
-    _doc_replaced_connection = _desktop->connectDocumentReplaced(sigc::hide<0>(sigc::mem_fun(*this, &PageSelector::setDocument)));
+    _doc_replaced_connection =
+        _desktop->connectDocumentReplaced(sigc::hide<0>(sigc::mem_fun(*this, &PageSelector::setDocument)));
 
     setDocument(desktop->getDocument());
 }
 
-PageSelector::~PageSelector() {
+PageSelector::~PageSelector()
+{
     _doc_replaced_connection.disconnect();
     _selector_changed_connection.disconnect();
     setDocument(nullptr);
 }
 
-void PageSelector::setDocument(SPDocument *document) {
+void PageSelector::setDocument(SPDocument *document)
+{
     if (_page_manager) {
         _page_manager = nullptr;
         _pages_changed_connection.disconnect();
@@ -78,8 +80,10 @@ void PageSelector::setDocument(SPDocument *document) {
     }
     if (document) {
         _page_manager = document->getNamedView()->getPageManager();
-        _pages_changed_connection = _page_manager->connectPagesChanged(sigc::mem_fun(*this, &PageSelector::pagesChanged));
-        _page_selected_connection = _page_manager->connectPageSelected(sigc::mem_fun(*this, &PageSelector::selectonChanged));
+        _pages_changed_connection =
+            _page_manager->connectPagesChanged(sigc::mem_fun(*this, &PageSelector::pagesChanged));
+        _page_selected_connection =
+            _page_manager->connectPageSelected(sigc::mem_fun(*this, &PageSelector::selectonChanged));
         pagesChanged();
     }
 }
@@ -108,8 +112,8 @@ void PageSelector::selectonChanged(SPPage *page)
     _next_button.set_sensitive(_page_manager->hasNextPage());
     _prev_button.set_sensitive(_page_manager->hasPrevPage());
 
-    if(_selector.get_active()->get_value(_model_columns.object) != page) {
-        for (auto row: _page_model->children()) {
+    if (_selector.get_active()->get_value(_model_columns.object) != page) {
+        for (auto row : _page_model->children()) {
             if (page == row->get_value(_model_columns.object)) {
                 _selector.set_active(row);
                 return;
@@ -152,13 +156,15 @@ void PageSelector::setSelectedPage()
     }
 }
 
-void PageSelector::nextPage() {
+void PageSelector::nextPage()
+{
     if (_page_manager->selectNextPage()) {
         _page_manager->zoomToSelectedPage(_desktop);
     }
 }
 
-void PageSelector::prevPage() {
+void PageSelector::prevPage()
+{
     if (_page_manager->selectPrevPage()) {
         _page_manager->zoomToSelectedPage(_desktop);
     }

@@ -11,23 +11,22 @@
 #define SEEN_INKSCAPE_PAGE_MANAGER_H
 
 #include <vector>
+
 #include "color-rgba.h"
 #include "document.h"
-
-#include "svg/svg-bool.h"
-
 #include "object/sp-namedview.h"
+#include "svg/svg-bool.h"
 
 class SPDesktop;
 class SPPage;
 
 namespace Inkscape {
-    class Selection;
-    namespace UI {
-        namespace Dialog {
-            class DocumentProperties;
-        }
-    }
+class Selection;
+namespace UI {
+namespace Dialog {
+class DocumentProperties;
+}
+} // namespace UI
 
 class PageManager
 {
@@ -35,12 +34,12 @@ public:
     PageManager(SPDocument *document);
     ~PageManager();
 
-    const std::vector<SPPage*>& getPages() const { return pages; }
+    const std::vector<SPPage *> &getPages() const { return pages; }
 
     void addPage(SPPage *page);
     void removePage(Inkscape::XML::Node *child);
     void reorderPage(Inkscape::XML::Node *child);
-    
+
     // Returns None if no page selected
     SPPage *getSelected() const { return _selected_page; }
     SPPage *getPageFor(SPItem *item, bool contains) const;
@@ -71,25 +70,18 @@ public:
     void deletePage(SPPage *page);
     void deletePage();
 
-    bool subset(SPAttr key, const gchar* value);
+    bool subset(SPAttr key, const gchar *value);
     void modified();
 
-    static void enablePages(SPDocument *document) {
-        document->getNamedView()->getPageManager()->enablePages();
-    }
-    static void disablePages(SPDocument *document) {
-        document->getNamedView()->getPageManager()->disablePages();
-    }
-    static SPPage *newPage(SPDocument *document) {
-        return document->getNamedView()->getPageManager()->newPage();
-    }
+    static void enablePages(SPDocument *document) { document->getNamedView()->getPageManager()->enablePages(); }
+    static void disablePages(SPDocument *document) { document->getNamedView()->getPageManager()->disablePages(); }
+    static SPPage *newPage(SPDocument *document) { return document->getNamedView()->getPageManager()->newPage(); }
 
-    sigc::connection connectPageSelected(const sigc::slot<void, SPPage *> & slot) {
+    sigc::connection connectPageSelected(const sigc::slot<void, SPPage *> &slot)
+    {
         return _page_selected_signal.connect(slot);
     }
-    sigc::connection connectPagesChanged(const sigc::slot<void> & slot) {
-        return _pages_changed_signal.connect(slot);
-    }
+    sigc::connection connectPagesChanged(const sigc::slot<void> &slot) { return _pages_changed_signal.connect(slot); }
 
     // Access from export.cpp and others for the guint32
     guint32 background_color = 0xffffff00;
@@ -103,8 +95,9 @@ protected:
     SVGBool shadow_show;
 
     guint32 border_color = 0x000000cc;
-    
+
     int shadow_size = 0;
+
 private:
     SPDocument *_document;
     SPPage *_selected_page = nullptr;
@@ -114,7 +107,7 @@ private:
     sigc::signal<void> _pages_changed_signal;
 };
 
-}
+} // namespace Inkscape
 
 #endif
 /*

@@ -14,11 +14,11 @@
 #define SEEN_INKSCAPE_WIDGETS_PAGE_SELECTOR
 
 #include <gtkmm/box.h>
-#include <gtkmm/combobox.h>
-#include <gtkmm/togglebutton.h>
 #include <gtkmm/cellrenderertext.h>
-#include <gtkmm/treemodel.h>
+#include <gtkmm/combobox.h>
 #include <gtkmm/liststore.h>
+#include <gtkmm/togglebutton.h>
+#include <gtkmm/treemodel.h>
 #include <sigc++/slot.h>
 
 #include "object/sp-page.h"
@@ -27,51 +27,51 @@ class SPDesktop;
 class SPPage;
 
 namespace Inkscape {
-    class PageManager;
+class PageManager;
 namespace UI {
 namespace Widget {
 
-//class DocumentTreeModel;
+// class DocumentTreeModel;
 
-class PageSelector : public Gtk::Box {
+class PageSelector : public Gtk::Box
+{
+public:
+    PageSelector(SPDesktop *desktop = nullptr);
+    ~PageSelector() override;
+
+private:
+    class PageModelColumns : public Gtk::TreeModel::ColumnRecord
+    {
     public:
-        PageSelector(SPDesktop *desktop = nullptr);
-        ~PageSelector() override;
-    private:
-        class PageModelColumns : public Gtk::TreeModel::ColumnRecord {
-            public:
-                Gtk::TreeModelColumn<SPPage*> object;
+        Gtk::TreeModelColumn<SPPage *> object;
 
-                PageModelColumns() {
-                    add(object);
-                }
-        };
+        PageModelColumns() { add(object); }
+    };
 
-        SPDesktop *_desktop;
-        Inkscape::PageManager *_page_manager;
+    SPDesktop *_desktop;
+    Inkscape::PageManager *_page_manager;
 
-        Gtk::ComboBox _selector;
-        Gtk::Button _prev_button;
-        Gtk::Button _next_button;
+    Gtk::ComboBox _selector;
+    Gtk::Button _prev_button;
+    Gtk::Button _next_button;
 
-        PageModelColumns _model_columns;
-        Gtk::CellRendererText _label_renderer;
-        Glib::RefPtr<Gtk::ListStore> _page_model;
+    PageModelColumns _model_columns;
+    Gtk::CellRendererText _label_renderer;
+    Glib::RefPtr<Gtk::ListStore> _page_model;
 
-        sigc::connection _selector_changed_connection;
-        sigc::connection _pages_changed_connection;
-        sigc::connection _page_selected_connection;
-        sigc::connection _doc_replaced_connection;
+    sigc::connection _selector_changed_connection;
+    sigc::connection _pages_changed_connection;
+    sigc::connection _page_selected_connection;
+    sigc::connection _doc_replaced_connection;
 
-        void setDocument(SPDocument *document);
-        void pagesChanged();
-        void selectonChanged(SPPage *page);
+    void setDocument(SPDocument *document);
+    void pagesChanged();
+    void selectonChanged(SPPage *page);
 
-        void renderPageLabel(Gtk::TreeModel::const_iterator const &row);
-        void setSelectedPage();
-        void nextPage();
-        void prevPage();
-
+    void renderPageLabel(Gtk::TreeModel::const_iterator const &row);
+    void setSelectedPage();
+    void nextPage();
+    void prevPage();
 };
 
 } // namespace Widget

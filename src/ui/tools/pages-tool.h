@@ -15,57 +15,59 @@
 
 #include "ui/tools/tool-base.h"
 
-#define SP_PAGES_CONTEXT(obj) (dynamic_cast<Inkscape::UI::Tools::PagesTool*>((Inkscape::UI::Tools::ToolBase*)obj))
-#define SP_IS_PAGES_CONTEXT(obj) (dynamic_cast<const Inkscape::UI::Tools::PagesTool*>((const Inkscape::UI::Tools::ToolBase*)obj) != NULL)
+#define SP_PAGES_CONTEXT(obj) (dynamic_cast<Inkscape::UI::Tools::PagesTool *>((Inkscape::UI::Tools::ToolBase *)obj))
+#define SP_IS_PAGES_CONTEXT(obj) \
+    (dynamic_cast<const Inkscape::UI::Tools::PagesTool *>((const Inkscape::UI::Tools::ToolBase *)obj) != NULL)
 
 class SPObject;
 class SPPage;
 
 namespace Inkscape {
-    class CanvasItemRect;
-    class CanvasItemBpath;
-    class PageManager;
+class CanvasItemRect;
+class CanvasItemBpath;
+class PageManager;
 
 namespace UI {
 namespace Tools {
 
-class PagesTool : public ToolBase {
-    public:
-	PagesTool();
-	~PagesTool() override;
+class PagesTool : public ToolBase
+{
+public:
+    PagesTool();
+    ~PagesTool() override;
 
-	static const std::string prefsPath;
+    static const std::string prefsPath;
 
-	void setup() override;
-	void finish() override;
-	bool root_handler(GdkEvent* event) override;
+    void setup() override;
+    void finish() override;
+    bool root_handler(GdkEvent *event) override;
 
-	const std::string& getPrefsPath() override;
+    const std::string &getPrefsPath() override;
 
-    private:
-        void selectionChanged(SPPage *page);
-        SPPage *pageUnder(Geom::Point pt);
-        void addDragShape(SPPage *page);
-        void addDragShape(SPItem *item);
-        void addDragShape(Geom::PathVector pth);
-        Inkscape::PageManager *getPageManager();
+private:
+    void selectionChanged(SPPage *page);
+    SPPage *pageUnder(Geom::Point pt);
+    void addDragShape(SPPage *page);
+    void addDragShape(SPItem *item);
+    void addDragShape(Geom::PathVector pth);
+    Inkscape::PageManager *getPageManager();
 
-        sigc::connection _selector_changed_connection;
+    sigc::connection _selector_changed_connection;
 
-        bool mouse_is_pressed = false;
-        Geom::Point drag_origin_w;
-        Geom::Point drag_origin_dt;
-        int drag_tolerance = 5;
+    bool mouse_is_pressed = false;
+    Geom::Point drag_origin_w;
+    Geom::Point drag_origin_dt;
+    int drag_tolerance = 5;
 
-        SPPage *highlight_item = nullptr;
-        SPPage *dragging_item = nullptr;
-        Geom::Rect *creating_box = nullptr;
-        Inkscape::CanvasItemRect *visual_box = nullptr;
-        std::vector<Inkscape::CanvasItemBpath *> drag_shapes;
+    SPPage *highlight_item = nullptr;
+    SPPage *dragging_item = nullptr;
+    Geom::Rect *creating_box = nullptr;
+    Inkscape::CanvasItemRect *visual_box = nullptr;
+    std::vector<Inkscape::CanvasItemBpath *> drag_shapes;
 };
 
-}
-}
-}
+} // namespace Tools
+} // namespace UI
+} // namespace Inkscape
 
 #endif

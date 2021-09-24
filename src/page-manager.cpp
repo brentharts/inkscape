@@ -7,16 +7,15 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
+#include "page-manager.h"
+
+#include "attributes.h"
 #include "desktop.h"
 #include "document.h"
-#include "page-manager.h"
-#include "attributes.h"
-
-#include "svg/svg-color.h"
-
-#include "object/sp-namedview.h"
 #include "object/sp-item.h"
+#include "object/sp-namedview.h"
 #include "object/sp-page.h"
+#include "svg/svg-color.h"
 
 namespace Inkscape {
 
@@ -50,7 +49,7 @@ void PageManager::addPage(SPPage *page)
  */
 void PageManager::removePage(Inkscape::XML::Node *child)
 {
-    for(auto it = pages.begin(); it != pages.end(); ++it) {
+    for (auto it = pages.begin(); it != pages.end(); ++it) {
         if ((*it)->getRepr() == child) {
             pages.erase(it);
             pagesChanged();
@@ -98,9 +97,7 @@ SPPage *PageManager::newPage()
         auto rect = _selected_page->getRect();
         return newPage(rect.width(), rect.height());
     }
-    return newPage(
-        _document->getWidth().value(unit),
-        _document->getHeight().value(unit));
+    return newPage(_document->getWidth().value(unit), _document->getHeight().value(unit));
 }
 
 /**
@@ -120,7 +117,6 @@ SPPage *PageManager::newPage(double width, double height)
     }
     return newPage(Geom::Rect(left, top, left + width, top + height));
 }
-
 
 /**
  * Add a new page with the given rectangle.
@@ -212,7 +208,7 @@ void PageManager::pagesChanged()
     if (pages.empty() || getSelectedPageIndex() == -1) {
         selectPage(nullptr);
     }
-    
+
     _pages_changed_signal.emit();
 
     if (!_selected_page) {
@@ -272,11 +268,12 @@ SPPage *PageManager::getPageFor(SPItem *item, bool contains) const
  */
 void PageManager::zoomToPage(SPDesktop *desktop, SPPage *page)
 {
-    if (!page) return;
+    if (!page)
+        return;
 
     auto d = page->getDesktopRect();
     if (d.minExtent() < 1.0)
-          return;
+        return;
 
     desktop->set_display_area(d, 10);
 }
@@ -284,7 +281,7 @@ void PageManager::zoomToPage(SPDesktop *desktop, SPPage *page)
 /**
  * Manage the page subset of attributes from sp-namedview and store them.
  */
-bool PageManager::subset(SPAttr key, const gchar* value)
+bool PageManager::subset(SPAttr key, const gchar *value)
 {
     switch (key) {
         case SPAttr::SHOWBORDER:
@@ -329,16 +326,12 @@ bool PageManager::subset(SPAttr key, const gchar* value)
 void PageManager::modified()
 {
     for (auto &page : pages) {
-        page->setDefaultAttributes(
-            border_on_top,
-            border_show ? border_color : 0x0,
-            background_color,
-            shadow_show ? shadow_size : 0
-        );
+        page->setDefaultAttributes(border_on_top, border_show ? border_color : 0x0, background_color,
+                                   shadow_show ? shadow_size : 0);
     }
 }
 
-};
+}; // namespace Inkscape
 
 /*
   Local Variables:

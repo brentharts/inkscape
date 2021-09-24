@@ -17,14 +17,15 @@
 
 #include "display/control/canvas-item-rect.h"
 #include "display/control/canvas-item-text.h"
+#include "page-manager.h"
 #include "sp-object.h"
 #include "svg/svg-length.h"
-#include "page-manager.h"
 
 class SPDesktop;
 class SPItem;
 
-class SPPage : public SPObject {
+class SPPage : public SPObject
+{
 public:
     SPPage();
     ~SPPage() override = default;
@@ -43,15 +44,17 @@ public:
 
     Geom::Rect getRect() const;
     Geom::Rect getDesktopRect() const;
-    std::vector<SPItem*> getExclusiveItems() const;
-    std::vector<SPItem*> getOverlappingItems() const;
+    std::vector<SPItem *> getExclusiveItems() const;
+    std::vector<SPItem *> getOverlappingItems() const;
     bool itemOnPage(SPItem *item, bool contains = false) const;
+
 protected:
-    void build(SPDocument* doc, Inkscape::XML::Node* repr) override;
+    void build(SPDocument *doc, Inkscape::XML::Node *repr) override;
     void release() override;
-    void update(SPCtx* ctx, unsigned int flags) override;
-    void set(SPAttr key, const char* value) override;
+    void update(SPCtx *ctx, unsigned int flags) override;
+    void set(SPAttr key, const char *value) override;
     Inkscape::XML::Node *write(Inkscape::XML::Document *xml_doc, Inkscape::XML::Node *repr, guint flags) override;
+
 private:
     bool is_selected = false;
 

@@ -10,11 +10,11 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
-#include "attributes.h"
-
-#include "inkscape.h"
-#include "desktop.h"
 #include "sp-page.h"
+
+#include "attributes.h"
+#include "desktop.h"
+#include "inkscape.h"
 #include "sp-namedview.h"
 #include "sp-root.h"
 
@@ -40,7 +40,7 @@ void SPPage::build(SPDocument *document, Inkscape::XML::Node *repr)
 
 void SPPage::release()
 {
-    for(auto item : canvas_items) {
+    for (auto item : canvas_items) {
         delete item;
     }
     this->canvas_items.clear();
@@ -53,7 +53,8 @@ void SPPage::release()
     SPObject::release();
 }
 
-void SPPage::set(SPAttr key, const gchar *value) {
+void SPPage::set(SPAttr key, const gchar *value)
+{
     switch (key) {
         case SPAttr::X:
             this->x.readOrUnset(value);
@@ -89,11 +90,8 @@ void SPPage::setManager(Inkscape::PageManager *manager)
  */
 Geom::Rect SPPage::getRect() const
 {
-    return Geom::Rect(
-        this->x.computed, this->y.computed,
-        this->x.computed + this->width.computed,
-        this->y.computed + this->height.computed
-    );
+    return Geom::Rect(this->x.computed, this->y.computed, this->x.computed + this->width.computed,
+                      this->y.computed + this->height.computed);
 }
 
 /**
@@ -111,7 +109,7 @@ Geom::Rect SPPage::getDesktopRect() const
  * between pages are not moved around or exported into pages they
  * shouldn't be.
  */
-std::vector<SPItem*> SPPage::getExclusiveItems() const
+std::vector<SPItem *> SPPage::getExclusiveItems() const
 {
     // There's no logical reason why the desktop is needed here
     // we should have a getItemsInBox that doesn't use the desktop
@@ -122,7 +120,7 @@ std::vector<SPItem*> SPPage::getExclusiveItems() const
 /**
  * Like ExcludiveItems above but get all the items which are inside or overlapping.
  */
-std::vector<SPItem*> SPPage::getOverlappingItems() const
+std::vector<SPItem *> SPPage::getOverlappingItems() const
 {
     // There's no logical reason why the desktop is needed here
     // we should have a getItemsPartiallyInBox that doesn't use the desktop
@@ -147,7 +145,8 @@ bool SPPage::itemOnPage(SPItem *item, bool contains) const
 /**
  * Shows the page in the given canvas item group.
  */
-void SPPage::showPage(SPDesktop *desktop, Inkscape::CanvasItemGroup *background_group, Inkscape::CanvasItemGroup *border_group)
+void SPPage::showPage(SPDesktop *desktop, Inkscape::CanvasItemGroup *background_group,
+                      Inkscape::CanvasItemGroup *border_group)
 {
     // Foreground 'border'
     if (auto item = new Inkscape::CanvasItemRect(border_group, getDesktopRect())) {
@@ -203,12 +202,12 @@ void SPPage::showPage()
 
 void SPPage::hidePage()
 {
-    for(auto item : canvas_items) {
+    for (auto item : canvas_items) {
         item->hide();
     }
 }
 
-/** 
+/**
  * Sets the default attributes from the namedview.
  */
 bool SPPage::setDefaultAttributes(bool on_top, guint32 border, guint32 bg, int shadow)
@@ -282,7 +281,7 @@ void SPPage::movePage(Geom::Affine translate, bool with_objects)
  * Update the visual representation on screen, this is manual because
  * this is not an SPItem, but it's own visual identity.
  */
-void SPPage::update(SPCtx* /*ctx*/, unsigned int /*flags*/)
+void SPPage::update(SPCtx * /*ctx*/, unsigned int /*flags*/)
 {
     // Put these in the preferences?
     guint32 shadow_color = 0x00000088;

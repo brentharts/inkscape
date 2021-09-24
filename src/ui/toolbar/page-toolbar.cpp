@@ -11,19 +11,17 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
-#include <gtkmm.h>
-#include <glibmm/i18n.h>
-
 #include "page-toolbar.h"
-#include "io/resource.h"
+
+#include <glibmm/i18n.h>
+#include <gtkmm.h>
 
 #include "desktop.h"
-#include "document.h"
 #include "document-undo.h"
-
+#include "document.h"
+#include "io/resource.h"
 #include "object/sp-namedview.h"
 #include "object/sp-page.h"
-
 #include "ui/tools/pages-tool.h"
 
 using Inkscape::IO::Resource::UIS;
@@ -32,7 +30,7 @@ namespace Inkscape {
 namespace UI {
 namespace Toolbar {
 
-PageToolbar::PageToolbar(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, SPDesktop *desktop)
+PageToolbar::PageToolbar(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &builder, SPDesktop *desktop)
     : Gtk::Toolbar(cobject)
     , _desktop(desktop)
     , combo_page_sizes(nullptr)
@@ -49,11 +47,12 @@ PageToolbar::PageToolbar(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builde
     _ec_connection = _desktop->connectEventContextChanged(sigc::mem_fun(*this, &PageToolbar::toolChanged));
 }
 
-PageToolbar::~PageToolbar() {
+PageToolbar::~PageToolbar()
+{
     _ec_connection.disconnect();
 }
 
-void PageToolbar::toolChanged(SPDesktop* desktop, Inkscape::UI::Tools::ToolBase* ec)
+void PageToolbar::toolChanged(SPDesktop *desktop, Inkscape::UI::Tools::ToolBase *ec)
 {
     // Disconnect previous page changed signal
     if (_page_connection) {
@@ -66,7 +65,8 @@ void PageToolbar::toolChanged(SPDesktop* desktop, Inkscape::UI::Tools::ToolBase*
         if (_document = desktop->getDocument()) {
             if (_page_manager = _document->getNamedView()->getPageManager()) {
                 // Connect the page changed signal and indicate changed
-                _page_connection = _page_manager->connectPageSelected(sigc::mem_fun(*this, &PageToolbar::selectionChanged));
+                _page_connection =
+                    _page_manager->connectPageSelected(sigc::mem_fun(*this, &PageToolbar::selectionChanged));
                 selectionChanged(_page_manager->getSelected());
             }
         }
@@ -106,21 +106,17 @@ void PageToolbar::selectionChanged(SPPage *page)
     // Set size widget with page size
 }
 
-GtkWidget *
-PageToolbar::create(SPDesktop *desktop)
+GtkWidget *PageToolbar::create(SPDesktop *desktop)
 {
     Glib::ustring page_toolbar_builder_file = get_filename(UIS, "toolbar-page.ui");
     auto builder = Gtk::Builder::create();
-    try
-    {
+    try {
         builder->add_from_file(page_toolbar_builder_file);
-    }
-    catch (const Glib::Error& ex)
-    {
+    } catch (const Glib::Error &ex) {
         std::cerr << "PageToolbar: " << page_toolbar_builder_file << " file not read! " << ex.what() << std::endl;
     }
 
-    PageToolbar* toolbar = nullptr;
+    PageToolbar *toolbar = nullptr;
     builder->get_widget_derived("page-toolbar", toolbar, desktop);
     if (!toolbar) {
         std::cerr << "InkscapeWindow: Failed to load page toolbar!" << std::endl;
@@ -133,9 +129,9 @@ PageToolbar::create(SPDesktop *desktop)
 
     return GTK_WIDGET(toolbar->gobj());
 }
-}
-}
-}
+} // namespace Toolbar
+} // namespace UI
+} // namespace Inkscape
 
 /*
   Local Variables:

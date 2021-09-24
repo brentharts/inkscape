@@ -69,7 +69,6 @@ SPNamedView::SPNamedView()
     , grids_visible(false)
     , desk_checkerboard(false)
 {
-
     this->zoom = 0;
     this->guidecolor = 0;
     this->guidehicolor = 0;
@@ -263,7 +262,7 @@ void SPNamedView::build(SPDocument *document, Inkscape::XML::Node *repr) {
     this->readAttr(SPAttr::INKSCAPE_LOCKGUIDES);
 
     /* Construct guideline and pages list */
-    for (auto &child: children) {
+    for (auto &child : children) {
         if (auto guide = dynamic_cast<SPGuide *>(&child)) {
             this->guides.push_back(guide);
             //g_object_set(G_OBJECT(g), "color", nv->guidecolor, "hicolor", nv->guidehicolor, NULL);
@@ -299,7 +298,7 @@ void SPNamedView::modified(unsigned int flags)
         this->_page_manager->modified();
     }
     // Add desk color, and chckerboard pattern to desk view
-    for(auto desktop : views) {
+    for (auto desktop : views) {
         if (desk_checkerboard) {
             desktop->getCanvas()->set_background_checkerboard(desk_color);
         } else {
@@ -311,14 +310,15 @@ void SPNamedView::modified(unsigned int flags)
 /**
  * Propergate the update to the child nodes so they can be updated correctly.
  */
-void SPNamedView::update(SPCtx *ctx, guint flags) {
+void SPNamedView::update(SPCtx *ctx, guint flags)
+{
     if (flags & SP_OBJECT_MODIFIED_FLAG) {
         flags |= SP_OBJECT_PARENT_MODIFIED_FLAG;
     }
 
     flags &= SP_OBJECT_MODIFIED_CASCADE;
-    std::vector<SPObject*> l(this->childList(true));
-    for(auto child : l){
+    std::vector<SPObject *> l(this->childList(true));
+    for (auto child : l) {
         if (flags || (child->uflags & (SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_CHILD_MODIFIED_FLAG))) {
             child->updateDisplay(ctx, flags);
         }
@@ -342,19 +342,19 @@ void SPNamedView::set(SPAttr key, const gchar* value) {
             this->requestModified(SP_OBJECT_MODIFIED_FLAG);
             break;
     case SPAttr::SHOWGUIDES:
-            this->showguides.readOrUnset(value);
-            sp_namedview_setup_guides(this);
-            this->requestModified(SP_OBJECT_MODIFIED_FLAG);
-            break;
+        this->showguides.readOrUnset(value);
+        sp_namedview_setup_guides(this);
+        this->requestModified(SP_OBJECT_MODIFIED_FLAG);
+        break;
     case SPAttr::INKSCAPE_LOCKGUIDES:
-            this->lockguides.readOrUnset(value);
-            this->lockGuides();
-            this->requestModified(SP_OBJECT_MODIFIED_FLAG);
-            break;
+        this->lockguides.readOrUnset(value);
+        this->lockGuides();
+        this->requestModified(SP_OBJECT_MODIFIED_FLAG);
+        break;
     case SPAttr::SHOWGRIDS:
-            this->grids_visible.readOrUnset(value);
-            this->requestModified(SP_OBJECT_MODIFIED_FLAG);
-            break;
+        this->grids_visible.readOrUnset(value);
+        this->requestModified(SP_OBJECT_MODIFIED_FLAG);
+        break;
     case SPAttr::GRIDTOLERANCE:
             this->snap_manager.snapprefs.setGridTolerance(value ? g_ascii_strtod(value, nullptr) : 10000);
             this->requestModified(SP_OBJECT_MODIFIED_FLAG);
@@ -390,11 +390,11 @@ void SPNamedView::set(SPAttr key, const gchar* value) {
             this->requestModified(SP_OBJECT_MODIFIED_FLAG);
             break;
     case SPAttr::GUIDEOPACITY:
-            sp_ink_read_opacity(value, &this->guidecolor, DEFAULTGUIDECOLOR);
+        sp_ink_read_opacity(value, &this->guidecolor, DEFAULTGUIDECOLOR);
 
-            for(auto guide : this->guides) {
-                guide->setColor(this->guidecolor);
-                guide->readAttr(SPAttr::INKSCAPE_COLOR);
+        for (auto guide : this->guides) {
+            guide->setColor(this->guidecolor);
+            guide->readAttr(SPAttr::INKSCAPE_COLOR);
             }
 
             this->requestModified(SP_OBJECT_MODIFIED_FLAG);
@@ -412,27 +412,27 @@ void SPNamedView::set(SPAttr key, const gchar* value) {
             this->requestModified(SP_OBJECT_MODIFIED_FLAG);
             break;
     case SPAttr::GUIDEHIOPACITY:
-            sp_ink_read_opacity(value, &this->guidehicolor, DEFAULTGUIDEHICOLOR);
-            for(auto guide : this->guides) {
-            	guide->setHiColor(this->guidehicolor);
+        sp_ink_read_opacity(value, &this->guidehicolor, DEFAULTGUIDEHICOLOR);
+        for (auto guide : this->guides) {
+            guide->setHiColor(this->guidehicolor);
             }
             this->requestModified(SP_OBJECT_MODIFIED_FLAG);
             break;
     case SPAttr::INKSCAPE_DESK_COLOR:
-            desk_color = (desk_color & 0xff) | (DEFAULTDESKCOLOR & 0xffffff00);
-            if (value) {
-                desk_color = (desk_color & 0xff) | sp_svg_read_color(value, desk_color);
-            }
-            this->requestModified(SP_OBJECT_MODIFIED_FLAG);
-            break;
+        desk_color = (desk_color & 0xff) | (DEFAULTDESKCOLOR & 0xffffff00);
+        if (value) {
+            desk_color = (desk_color & 0xff) | sp_svg_read_color(value, desk_color);
+        }
+        this->requestModified(SP_OBJECT_MODIFIED_FLAG);
+        break;
     case SPAttr::INKSCAPE_DESK_OPACITY:
-            sp_ink_read_opacity(value, &desk_color, DEFAULTDESKCOLOR);
-            this->requestModified(SP_OBJECT_MODIFIED_FLAG);
-            break;
+        sp_ink_read_opacity(value, &desk_color, DEFAULTDESKCOLOR);
+        this->requestModified(SP_OBJECT_MODIFIED_FLAG);
+        break;
     case SPAttr::INKSCAPE_DESK_CHECKERBOARD:
-            this->desk_checkerboard.readOrUnset(value);
-            this->requestModified(SP_OBJECT_MODIFIED_FLAG);
-            break;
+        this->desk_checkerboard.readOrUnset(value);
+        this->requestModified(SP_OBJECT_MODIFIED_FLAG);
+        break;
     case SPAttr::INKSCAPE_ZOOM:
             this->zoom = value ? g_ascii_strtod(value, nullptr) : 0; // zero means not set
             this->requestModified(SP_OBJECT_MODIFIED_FLAG);
@@ -583,14 +583,15 @@ void SPNamedView::child_added(Inkscape::XML::Node *child, Inkscape::XML::Node *r
     SPObjectGroup::child_added(child, ref);
 
     SPObject *no = this->document->getObjectByRepr(child);
-    if (!no) return;
+    if (!no)
+        return;
 
     if (!strcmp(child->name(), "inkscape:grid")) {
         sp_namedview_add_grid(this, child, nullptr);
     } else if (!strcmp(child->name(), "inkscape:page")) {
         if (auto page = dynamic_cast<SPPage *>(no)) {
             this->_page_manager->addPage(page);
-            for(auto view : this->views) {
+            for (auto view : this->views) {
                 page->showPage(view, view->getCanvasPagesBg(), view->getCanvasPagesFg());
             }
         }
@@ -641,7 +642,8 @@ void SPNamedView::remove_child(Inkscape::XML::Node *child) {
     SPObjectGroup::remove_child(child);
 }
 
-void SPNamedView::order_changed(Inkscape::XML::Node* child, Inkscape::XML::Node* old_repr, Inkscape::XML::Node* new_repr)
+void SPNamedView::order_changed(Inkscape::XML::Node *child, Inkscape::XML::Node *old_repr,
+                                Inkscape::XML::Node *new_repr)
 {
     if (!strcmp(child->name(), "inkscape:page")) {
         _page_manager->reorderPage(child);
@@ -877,7 +879,7 @@ void SPNamedView::hide(SPDesktop const *desktop)
     for(auto & guide : this->guides) {
         guide->hideSPGuide(desktop->getCanvas());
     }
-    for(auto &page : this->_page_manager->getPages()) {
+    for (auto &page : this->_page_manager->getPages()) {
         page->hidePage(desktop->getCanvas());
     }
     views.erase(std::remove(views.begin(),views.end(),desktop),views.end());

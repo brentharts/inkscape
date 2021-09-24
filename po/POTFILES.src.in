@@ -332,6 +332,7 @@
 ../src/ui/toolbar/measure-toolbar.cpp
 ../src/ui/toolbar/mesh-toolbar.cpp
 ../src/ui/toolbar/node-toolbar.cpp
+../src/ui/toolbar/page-toolbar.cpp
 ../src/ui/toolbar/paintbucket-toolbar.cpp
 ../src/ui/toolbar/pencil-toolbar.cpp
 ../src/ui/toolbar/rect-toolbar.cpp

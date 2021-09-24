@@ -128,7 +128,7 @@ private:
     sigc::connection _redraw_requested_connection;
     sigc::connection _message_changed_connection;  // foreign
     sigc::connection _document_uri_set_connection; // foreign
-    sigc::connection _viewbox_resized_connection; // foreign
+    sigc::connection _viewbox_resized_connection;  // foreign
 };
 
 }}}
