@@ -13,6 +13,7 @@
 #include "pages-tool.h"
 
 #include <gdk/gdkkeysyms.h>
+#include <glibmm/i18n.h>
 
 #include "desktop.h"
 #include "display/control/canvas-item-bpath.h"
@@ -24,6 +25,7 @@
 #include "path/path-outline.h"
 #include "rubberband.h"
 #include "selection-chemistry.h"
+#include "ui/knot/knot.h"
 
 namespace Inkscape {
 namespace UI {
@@ -55,6 +57,11 @@ void PagesTool::finish()
         delete visual_box;
         visual_box = nullptr;
     }
+
+    if (resize_knot) {
+        delete resize_knot;
+        resize_knot = nullptr;
+    }
 }
 
 void PagesTool::setup()
@@ -63,6 +70,17 @@ void PagesTool::setup()
 
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     drag_tolerance = prefs->getIntLimited("/options/dragtolerance/value", 0, 0, 100);
+
+    if (!resize_knot) {
+        resize_knot = new SPKnot(desktop, _("Resize page"), Inkscape::CANVAS_ITEM_CTRL_TYPE_SHAPER, "PageTool:Resize");
+        resize_knot->setShape(Inkscape::CANVAS_ITEM_CTRL_SHAPE_SQUARE);
+        resize_knot->setFill(0xffffff00, 0x0000ff00, 0x000000ff, 0x000000ff);
+        resize_knot->setSize(5);
+        resize_knot->setAnchor(SP_ANCHOR_CENTER);
+        resize_knot->updateCtrl();
+        resize_knot->hide();
+        resize_knot->moved_signal.connect(sigc::mem_fun(*this, &PagesTool::resizeKnotMoved));
+    }
 
     if (!visual_box) {
         visual_box = new Inkscape::CanvasItemRect(desktop->getCanvasControls());
@@ -74,6 +92,20 @@ void PagesTool::setup()
             page_manager->connectPageSelected(sigc::mem_fun(*this, &PagesTool::selectionChanged));
         if (auto page = page_manager->getSelected()) {
             selectionChanged(page);
+        }
+    }
+}
+
+void PagesTool::resizeKnotMoved(SPKnot *knot, Geom::Point const &ppointer, guint state)
+{
+    Geom::Point point = knot->position();
+    if (auto page_manager = getPageManager()) {
+        if (auto page = page_manager->getSelected()) {
+            auto rect = page->getDesktopRect();
+            if (point != rect.corner(2)) {
+                rect.setMax(point);
+                page->setDesktopRect(rect);
+            }
         }
     }
 }
@@ -248,6 +280,11 @@ Inkscape::PageManager *PagesTool::getPageManager()
 
 void PagesTool::selectionChanged(SPPage *page)
 {
+    if (_page_modified_connection) {
+        _page_modified_connection.disconnect();
+        resize_knot->hide();
+    }
+
     // Loop existing pages because highlight_item is unsafe.
     if (auto page_manager = getPageManager()) {
         for (auto &possible : page_manager->getPages()) {
@@ -257,7 +294,19 @@ void PagesTool::selectionChanged(SPPage *page)
         }
         highlight_item = page;
         if (page) {
+            _page_modified_connection = page->connectModified(sigc::mem_fun(*this, &PagesTool::pageModified));
             page->setSelected(true);
+            pageModified(page, 0);
+        }
+    }
+}
+
+void PagesTool::pageModified(SPObject *object, guint /*flags*/)
+{
+    if (auto page = dynamic_cast<SPPage *>(object)) {
+        if (resize_knot) {
+            resize_knot->setPosition(page->getDesktopRect().corner(2), 0);
+            resize_knot->show();
         }
     }
 }

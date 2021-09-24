@@ -305,6 +305,15 @@ void SPNamedView::modified(unsigned int flags)
             desktop->getCanvas()->set_background_color(desk_color);
         }
     }
+
+    // Keep children modified signal hot.
+    for (auto child : this->childList(true)) {
+        sp_object_ref(child, nullptr);
+        if (flags || (child->mflags & (SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_CHILD_MODIFIED_FLAG))) {
+            child->emitModified(flags & SP_OBJECT_MODIFIED_CASCADE);
+        }
+        sp_object_unref(child, nullptr);
+    }
 }
 
 /**
@@ -317,12 +326,13 @@ void SPNamedView::update(SPCtx *ctx, guint flags)
     }
 
     flags &= SP_OBJECT_MODIFIED_CASCADE;
-    std::vector<SPObject *> l(this->childList(true));
-    for (auto child : l) {
+
+    for (auto child : this->childList(true)) {
+        sp_object_ref(child, nullptr);
         if (flags || (child->uflags & (SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_CHILD_MODIFIED_FLAG))) {
             child->updateDisplay(ctx, flags);
         }
-        sp_object_unref(child);
+        sp_object_unref(child, nullptr);
     }
 }
 

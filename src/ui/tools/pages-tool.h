@@ -21,6 +21,7 @@
 
 class SPObject;
 class SPPage;
+class SPKnot;
 
 namespace Inkscape {
 class CanvasItemRect;
@@ -52,13 +53,18 @@ private:
     void addDragShape(Geom::PathVector pth);
     Inkscape::PageManager *getPageManager();
 
+    void resizeKnotMoved(SPKnot *knot, Geom::Point const &ppointer, guint state);
+    void pageModified(SPObject *object, guint flags);
+
     sigc::connection _selector_changed_connection;
+    sigc::connection _page_modified_connection;
 
     bool mouse_is_pressed = false;
     Geom::Point drag_origin_w;
     Geom::Point drag_origin_dt;
     int drag_tolerance = 5;
 
+    SPKnot *resize_knot = nullptr;
     SPPage *highlight_item = nullptr;
     SPPage *dragging_item = nullptr;
     Geom::Rect *creating_box = nullptr;

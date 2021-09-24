@@ -103,6 +103,31 @@ Geom::Rect SPPage::getDesktopRect() const
 }
 
 /**
+ * Set the page rectangle in it's native units.
+ */
+void SPPage::setRect(Geom::Rect rect)
+{
+    this->x = rect.left();
+    this->y = rect.top();
+    this->width = rect.width();
+    this->height = rect.height();
+
+    // This is needed to update the xml
+    this->updateRepr();
+
+    // This eventually calls the ::update below while idle
+    this->requestModified(SP_OBJECT_MODIFIED_FLAG);
+}
+
+/**
+ * Set the page rectangle is desktop coordinates.
+ */
+void SPPage::setDesktopRect(Geom::Rect rect)
+{
+    setRect(rect * document->getDocumentScale().inverse());
+}
+
+/**
  * Get the items which are ONLY on this page and don't overlap.
  *
  * This ignores layers so items in the same layer which are shared
@@ -252,28 +277,15 @@ int SPPage::getPageNumber()
 void SPPage::movePage(Geom::Affine translate, bool with_objects)
 {
     if (translate.isTranslation()) {
-        auto scale = document->getDocumentScale();
-
         if (with_objects) {
             // Move each item that is overlapping this page too
+            auto scale = document->getDocumentScale();
             for (auto &item : getOverlappingItems()) {
                 auto move = (item->transform * scale) * translate * scale.inverse();
                 item->doWriteTransform(move, &move, false);
             }
         }
-        auto current_rect = getDesktopRect() * translate;
-        current_rect *= scale.inverse();
-
-        this->x = current_rect.left();
-        this->y = current_rect.top();
-        this->width = current_rect.width();
-        this->height = current_rect.height();
-
-        // This is needed to update the xml
-        this->updateRepr();
-
-        // This eventually calls the ::update below while idle
-        this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+        setDesktopRect(getDesktopRect() * translate);
     }
 }
 
