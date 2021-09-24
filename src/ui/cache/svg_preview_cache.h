@@ -24,7 +24,9 @@ class DrawingItem;
 } // namespace Inkscape
 
 
-cairo_surface_t* render_surface(Inkscape::Drawing &drawing, double scale_factor, const Geom::Rect& dbox, Geom::IntPoint pixsize, double device_scale, const guint32* checkerboard_color, bool no_clip);
+cairo_surface_t* render_surface(Inkscape::Drawing &drawing, double scale_factor, const Geom::Rect& dbox,
+    Geom::IntPoint pixsize, double device_scale, const guint32* checkerboard_color, bool no_clip);
+
 GdkPixbuf* render_pixbuf(Inkscape::Drawing &drawing, double scale_factor, const Geom::Rect& dbox, unsigned psize);
 
 namespace Inkscape {

@@ -31,7 +31,8 @@
 
 #include "ui/cache/svg_preview_cache.h"
 
-cairo_surface_t* render_surface(Inkscape::Drawing &drawing, double scale_factor, Geom::Rect const &dbox, Geom::IntPoint pixsize, double device_scale, const guint32* checkerboard_color, bool no_clip)
+cairo_surface_t* render_surface(Inkscape::Drawing &drawing, double scale_factor, Geom::Rect const &dbox,
+    Geom::IntPoint pixsize, double device_scale, const guint32* checkerboard_color, bool no_clip)
 {
     scale_factor *= device_scale;
     pixsize.x() *= device_scale;
@@ -53,7 +54,7 @@ cairo_surface_t* render_surface(Inkscape::Drawing &drawing, double scale_factor,
     drawing.root()->setTransform(Geom::Scale(scale_factor));
 
     drawing.update(ibox);
-// g_warning("rendr: sc %f box: %d %d  %d %d", scale_factor, ibox.min().x(), ibox.min().y(), ibox.width(), ibox.height());
+
     /* Find visible area */
     int width = ibox.width();
     int height = ibox.height();

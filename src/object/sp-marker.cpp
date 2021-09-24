@@ -172,7 +172,6 @@ void SPMarker::set(SPAttr key, const gchar* value) {
                         }
                     }
 		}
-// g_warning("marker")
 		this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
 		break;
 
@@ -309,6 +308,7 @@ void SPMarker::hide(unsigned int key) {
 - sets any missing properties that are needed before editing starts.
 */
 void sp_validate_marker(SPMarker *sp_marker, SPDocument *doc) {
+
     if (!doc || !sp_marker) return;
 
     doc->ensureUpToDate();
@@ -375,13 +375,11 @@ void sp_validate_marker(SPMarker *sp_marker, SPDocument *doc) {
     }
 }
 
-
 Geom::OptRect SPMarker::bbox(Geom::Affine const &/*transform*/, SPItem::BBoxType /*type*/) const {
 	return Geom::OptRect();
 }
 
 void SPMarker::print(SPPrintContext* /*ctx*/) {
-
 }
 
 /* fixme: Remove link if zero-sized (Lauris) */
