@@ -278,6 +278,13 @@ void PageManager::zoomToPage(SPDesktop *desktop, SPPage *page)
     desktop->set_display_area(d, 10);
 }
 
+void PageManager::resizePage(double width, double height)
+{
+    if (_selected_page) {
+        _selected_page->setDesktopSize(width, height);
+    }
+}
+
 /**
  * Manage the page subset of attributes from sp-namedview and store them.
  */

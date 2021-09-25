@@ -69,6 +69,7 @@ public:
     SPPage *newDesktopPage(Geom::Rect rect);
     void deletePage(SPPage *page);
     void deletePage();
+    void resizePage(double width, double height);
 
     bool subset(SPAttr key, const gchar *value);
     void modified();
@@ -85,7 +86,6 @@ public:
 
     // Access from export.cpp and others for the guint32
     guint32 background_color = 0xffffff00;
-
 protected:
     friend class Inkscape::UI::Dialog::DocumentProperties;
 

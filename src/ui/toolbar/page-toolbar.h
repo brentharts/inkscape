@@ -24,6 +24,7 @@ class SPPage;
 
 namespace Inkscape {
 class PageManager;
+class PaperSize;
 namespace UI {
 namespace Tools {
 class ToolBase;
@@ -40,6 +41,8 @@ public:
 
 protected:
     void labelEdited();
+    void sizeChoose();
+    void sizeChanged();
 
 private:
     SPDesktop *_desktop;
@@ -53,7 +56,10 @@ private:
     sigc::connection _page_connection;
 
     Gtk::ComboBoxText *combo_page_sizes;
+    Gtk::Entry *entry_page_sizes;
     Gtk::Entry *text_page_label;
+
+    std::vector<PaperSize *> page_sizes;
 };
 
 } // namespace Toolbar

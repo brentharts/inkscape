@@ -1067,8 +1067,7 @@ void SPNamedView::lockGuides()
 /**
  * Gets page fitting margin information from the namedview node in the XML.
  * \param nv_repr reference to this document's namedview
- * \param key the same key used by the RegisteredScalarUnit in
- *        ui/widget/page-sizer.cpp
+ * \param key
  * \param margin_units units for the margin
  * \param return_units units to return the result in
  * \param width width in px (for percentage margins)

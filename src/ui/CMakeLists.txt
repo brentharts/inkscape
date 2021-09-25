@@ -205,7 +205,6 @@ set(ui_SRC
 	widget/marker-combo-box.cpp
 	widget/notebook-page.cpp
 	widget/object-composite-settings.cpp
-	widget/page-sizer.cpp
 	widget/page-selector.cpp
 	widget/paint-selector.cpp
 	widget/point.cpp
@@ -457,9 +456,7 @@ set(ui_SRC
 	widget/marker-combo-box.h
 	widget/notebook-page.h
 	widget/object-composite-settings.h
-	widget/page-sizer.h
 	widget/page-selector.h
-	widget/pages-skeleton.h
 	widget/paint-selector.h
 	widget/point.h
 	widget/preferences-widget.h

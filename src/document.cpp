@@ -697,7 +697,7 @@ Geom::Scale SPDocument::getDocumentScale() const
 }
 
 // Avoid calling root->updateRepr() twice by combining setting width and height.
-// (As done on every delete as clipboard calls this via fitToRect(). Also called in page-sizer.cpp)
+// (As done on every delete as clipboard calls this via fitToRect())
 void SPDocument::setWidthAndHeight(const Inkscape::Util::Quantity &width, const Inkscape::Util::Quantity &height, bool changeSize)
 {
     Inkscape::Util::Unit const *old_width_units = unit_table.getUnit("px");

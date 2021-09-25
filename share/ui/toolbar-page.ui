@@ -25,18 +25,16 @@
         <child>
           <object class="GtkComboBoxText" id="page_sizes">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can_focus">True</property>
             <property name="active">0</property>
             <property name="has_entry">True</property>
-            <property name="active_id">a4</property>
+            <property name="active_id">-1</property>
             <items>
-              <item id="a4" translatable="yes">A4</item>
-              <item id="a5" translatable="yes">A5</item>
-              <item id="us" translatable="yes">US Letter</item>
+              <item id="-1" translatable="yes">Custom</item>
             </items>
             <child internal-child="entry">
               <object class="GtkEntry">
-                <property name="can_focus">False</property>
+                <property name="can_focus">True</property>
               </object>
             </child>
           </object>
@@ -111,5 +109,4 @@
       </packing>
     </child>
   </object>
-  <object class="GtkListStore" id="page_presets"/>
 </interface>

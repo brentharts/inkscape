@@ -109,7 +109,6 @@ DocumentProperties::DocumentProperties()
     , _rcb_checkerboard(_("Desk Checkerboard"), _("If set, use a colored checkerboard for the desk background"), "inkscape:pagecheckerboard", _wr, false)
     , _rcp_bord(_("Border _color:"), _("Page border color"), _("Color of the page border"), "bordercolor", "borderopacity", _wr)
     , _rum_deflt(_("Display _units:"), "inkscape:document-units", _wr)
-    , _page_sizer(_wr)
     //---------------------------------------------------------------
     //General guide options
     , _rcb_sgui(_("Show _guides"), _("Show or hide guides"), "showguides", _wr)
@@ -228,10 +227,6 @@ void attach_all(Gtk::Grid &table, Gtk::Widget *const arr[], unsigned const n)
         } else {
             if (arr[i+1]) {
                 Gtk::AttachOptions yoptions = (Gtk::AttachOptions)0;
-                if (dynamic_cast<Inkscape::UI::Widget::PageSizer*>(arr[i+1])) {
-                    // only the PageSizer in Document Properties|Page should be stretched vertically
-                    yoptions = Gtk::FILL|Gtk::EXPAND;
-                }
                 arr[i+1]->set_hexpand();
 
                 if (yoptions & Gtk::EXPAND)
@@ -273,13 +268,8 @@ void DocumentProperties::build_page()
     Gtk::Label* label_bkg = Gtk::manage (new Gtk::Label);
     label_bkg->set_markup (_("<b>Desk</b>"));
 
-    Gtk::Label* label_bdr = Gtk::manage (new Gtk::Label);
-    label_bdr->set_markup (_("<b>Pages</b>"));
-
     Gtk::Label* label_dsp = Gtk::manage (new Gtk::Label);
     label_dsp->set_markup (_("<b>Display</b>"));
-
-    _page_sizer.init();
 
     _rcb_doc_props_left.set_border_width(4);
     _rcb_doc_props_left.set_row_spacing(4);
@@ -294,7 +284,7 @@ void DocumentProperties::build_page()
         nullptr,              &_rum_deflt,
         nullptr,              nullptr,
         label_for,            nullptr,
-        nullptr,              &_page_sizer,
+        nullptr,              nullptr,
         nullptr,              nullptr,
         &_rcb_doc_props_left, &_rcb_doc_props_right,
     };
@@ -312,7 +302,6 @@ void DocumentProperties::build_page()
 
     Gtk::Widget *const widget_array_right[] =
     {
-        label_bdr,            nullptr,
         nullptr,              &_rcb_canb,
         nullptr,              &_rcb_bord,
         nullptr,              &_rcb_shad,
@@ -1427,9 +1416,6 @@ void DocumentProperties::update_widgets()
         doc_h_unit = "px";
         doc_h = root->viewBox.height();
     }
-    _page_sizer.setDim(Inkscape::Util::Quantity(doc_w, doc_w_unit), Inkscape::Util::Quantity(doc_h, doc_h_unit));
-    _page_sizer.updateFitMarginsUI(nv->getRepr());
-    _page_sizer.updateScaleUI();
 
     //-----------------------------------------------------------guide page
 
@@ -1631,8 +1617,6 @@ void DocumentProperties::onDocUnitChange()
     Inkscape::SVGOStringStream os;
     os << doc_unit->abbr;
     repr->setAttribute("inkscape:document-units", os.str());
-
-    _page_sizer.updateScaleUI();
 
     // Disable changing of SVG Units. The intent here is to change the units in the UI, not the units in SVG.
     // This code should be moved (and fixed) once we have an "SVG Units" setting that sets what units are used in SVG data.

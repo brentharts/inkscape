@@ -23,6 +23,7 @@
 #include "object/sp-namedview.h"
 #include "object/sp-page.h"
 #include "ui/tools/pages-tool.h"
+#include "util/paper.h"
 
 using Inkscape::IO::Resource::UIS;
 
@@ -41,6 +42,18 @@ PageToolbar::PageToolbar(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
 
     if (text_page_label) {
         text_page_label->signal_changed().connect(sigc::mem_fun(*this, &PageToolbar::labelEdited));
+    }
+
+    if (combo_page_sizes) {
+        combo_page_sizes->signal_changed().connect(sigc::mem_fun(*this, &PageToolbar::sizeChoose));
+        entry_page_sizes = dynamic_cast<Gtk::Entry *>(combo_page_sizes->get_child());
+        if (entry_page_sizes) {
+            entry_page_sizes->signal_activate().connect(sigc::mem_fun(*this, &PageToolbar::sizeChanged));
+        }
+        page_sizes = Inkscape::PaperSize::getPageSizes();
+        for (int i = 0; i < page_sizes.size(); i++) {
+            combo_page_sizes->append(std::to_string(i), page_sizes[i]->getDescription());
+        }
     }
 
     // Watch for when the tool changes
@@ -81,6 +94,27 @@ void PageToolbar::labelEdited()
             page->setLabel(text.empty() ? nullptr : text.c_str());
         }
     }
+}
+
+void PageToolbar::sizeChoose()
+{
+    try {
+        auto page_id = std::stoi(combo_page_sizes->get_active_id());
+        if (page_id >= 0 && page_id < page_sizes.size()) {
+            auto ps = page_sizes[page_id];
+            auto smaller = ps->unit->convert(ps->smaller, "px");
+            auto larger = ps->unit->convert(ps->larger, "px");
+            _page_manager->resizePage(smaller, larger);
+        }
+    } catch (std::invalid_argument const &e) {
+        // Ignore because user is typing into Entry
+    }
+}
+
+void PageToolbar::sizeChanged()
+{
+    auto size = combo_page_sizes->get_active_text();
+    entry_page_sizes->set_text("Not Implemented!");
 }
 
 void PageToolbar::selectionChanged(SPPage *page)

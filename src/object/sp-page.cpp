@@ -128,6 +128,16 @@ void SPPage::setDesktopRect(Geom::Rect rect)
 }
 
 /**
+ * Set just the height and width from a predefined size.
+ */
+void SPPage::setDesktopSize(double width, double height)
+{
+    auto rect = getDesktopRect();
+    rect.setMax(rect.corner(0) + Geom::Point(width, height));
+    setDesktopRect(rect);
+}
+
+/**
  * Get the items which are ONLY on this page and don't overlap.
  *
  * This ignores layers so items in the same layer which are shared
