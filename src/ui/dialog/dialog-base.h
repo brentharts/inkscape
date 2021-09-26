@@ -41,10 +41,7 @@ class DialogBase : public Gtk::Box
 
 public:
     DialogBase(gchar const *prefs_path = nullptr, Glib::ustring dialog_type = "");
-    ~DialogBase() override {
-        ensure_size();
-        unsetDesktop();
-    };
+    ~DialogBase() override;
 
     /**
      * The update() method is essential to Gtk state management. DialogBase implementations get updated whenever

@@ -76,6 +76,14 @@ DialogBase::DialogBase(gchar const *prefs_path, Glib::ustring dialog_type)
     ensure_size();
 }
 
+DialogBase::~DialogBase() {
+    // this is bad, but it supposedly fixes some resizng problem on Windows
+#ifdef _WIN32
+    ensure_size();
+    unsetDesktop();
+#endif
+};
+
 bool DialogBase::on_key_press_event(GdkEventKey* key_event) {
     switch (Inkscape::UI::Tools::get_latin_keyval(key_event)) {
         case GDK_KEY_Escape:
