@@ -33,7 +33,7 @@ class ToolItemMenu : public Gtk::ToolItem
 public:
     ToolItemMenu();
     ToolItemMenu(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder);
-    virtual ~ToolItemMenu();
+    ~ToolItemMenu() override;
 
     Glib::PropertyProxy<Glib::ustring> property_menuitem_name() { return prop_menuitem_name.get_proxy(); }
 

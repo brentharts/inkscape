@@ -48,7 +48,7 @@ public:
 
     ComboBoxUnit(); // Dummy for declaring type.
     ComboBoxUnit(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refUI);
-    virtual ~ComboBoxUnit();
+    ~ComboBoxUnit() override;
 
 #if !GTK_CHECK_VERSION(4, 0, 0)
     Gtk::MenuItem* get_menu(); // Used in GTK3 toolbars.

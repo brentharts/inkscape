@@ -75,7 +75,7 @@ public:
 
     SpinButtonAction(); // Dummy for declaring type.
     SpinButtonAction(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refUI);
-    virtual ~SpinButtonAction() = default;
+    ~SpinButtonAction() override = default;
 
     /**  Blocks calling action so only GUI is updated. */
     void set_value_gui(double value);
