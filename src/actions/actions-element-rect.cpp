@@ -23,106 +23,37 @@
 #include "ui/icon-names.h"        // Tag Inkscape icons.
 
 void
-set_attribute_width(const Glib::VariantBase& value, InkscapeApplication *app)
+set_attribute(const Glib::VariantBase& value, InkscapeApplication *app, Glib::ustring& attribute)
 {
     Glib::Variant<double> d = Glib::VariantBase::cast_dynamic<Glib::Variant<double> >(value);
     double dval = d.get();
     auto selection = app->get_active_selection();
     bool modmade = false;
 
-    auto itemlist= selection->items();
-    for (auto item : itemlist) {
+    for (auto item : selection->items()) {
         auto rect = dynamic_cast<SPRect *>(item);
         if (rect) {
             if (dval != 0.0) {
-                rect->setVisibleWidth(dval);
+                if (attribute == "width") {
+                    rect->setVisibleWidth(dval);
+                } else if (attribute == "height") {
+                    rect->setVisibleHeight(dval);
+                } else if (attribute == "rx") {
+                    rect->setVisibleRx(dval);
+                } else if (attribute == "ry") {
+                    rect->setVisibleRy(dval);
+                } else {
+                    std::cerr << "Rectangle action set_attribute: invalid attribute" << std::endl;
+                }
             } else {
-                rect->removeAttribute("width");
+                rect->removeAttribute(attribute.c_str());
             }
             modmade = true;
         }
     }
 
     if (modmade) {
-        Inkscape::DocumentUndo::done(app->get_active_document(), _("Change rectangle width"), INKSCAPE_ICON("draw-rectangle"));
-    }
-}
-
-void
-set_attribute_height(const Glib::VariantBase& value, InkscapeApplication *app)
-{
-    Glib::Variant<double> d = Glib::VariantBase::cast_dynamic<Glib::Variant<double> >(value);
-    double dval = d.get();
-    auto selection = app->get_active_selection();
-    bool modmade = false;
-
-    auto itemlist= selection->items();
-    for (auto item : itemlist) {
-        auto rect = dynamic_cast<SPRect *>(item);
-        if (rect) {
-            if (dval != 0.0) {
-                rect->setVisibleHeight(dval);
-            } else {
-                rect->removeAttribute("height");
-            }
-            modmade = true;
-        }
-    }
-
-    if (modmade) {
-        Inkscape::DocumentUndo::done(app->get_active_document(), _("Change rectangle height"), INKSCAPE_ICON("draw-rectangle"));
-    }
-}
-
-void
-set_attribute_rx(const Glib::VariantBase& value, InkscapeApplication *app)
-{
-    Glib::Variant<double> d = Glib::VariantBase::cast_dynamic<Glib::Variant<double> >(value);
-    double dval = d.get();
-    auto selection = app->get_active_selection();
-    bool modmade = false;
-
-    auto itemlist= selection->items();
-    for (auto item : itemlist) {
-        auto rect = dynamic_cast<SPRect *>(item);
-        if (rect) {
-            if (dval != 0.0) {
-                rect->setVisibleRx(dval);
-            } else {
-                rect->removeAttribute("rx");
-            }
-            modmade = true;
-        }
-    }
-
-    if (modmade) {
-        Inkscape::DocumentUndo::done(app->get_active_document(), _("Change rectangle rx"), INKSCAPE_ICON("draw-rectangle"));
-    }
-}
-
-void
-set_attribute_ry(const Glib::VariantBase& value, InkscapeApplication *app)
-{
-    Glib::Variant<double> d = Glib::VariantBase::cast_dynamic<Glib::Variant<double> >(value);
-    double dval = d.get();
-    auto selection = app->get_active_selection();
-    bool modmade = false;
-
-    auto itemlist= selection->items();
-    for (auto item : itemlist) {
-        auto rect = dynamic_cast<SPRect *>(item);
-        if (rect) {
-            if (dval != 0.0) {
-                rect->setVisibleRy(dval);
-            } else {
-                rect->removeAttribute("ry");
-            }
-            modmade = true;
-        }
-    }
-
-    if (modmade) {
-        Inkscape::DocumentUndo::done(app->get_active_document(), _("Change rectangle ry"), INKSCAPE_ICON("draw-rectangle"));
+        Inkscape::DocumentUndo::done(app->get_active_document(), _("Change rectangle"), INKSCAPE_ICON("draw-rectangle"));
     }
 }
 
@@ -132,8 +63,7 @@ reset_corners(InkscapeApplication *app)
     auto selection = app->get_active_selection();
     bool modmade = false;
 
-    auto itemlist= selection->items();
-    for (auto item : itemlist) {
+    for (auto item : selection->items()) {
         auto rect = dynamic_cast<SPRect *>(item);
         if (rect) {
             rect->removeAttribute("rx");
@@ -170,11 +100,11 @@ add_actions_element_rect(InkscapeApplication* app)
     auto *gapp = app->gio_app();
 
     // clang-format off
-    gapp->add_action_with_parameter( "element-rect-width",  Double, sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&set_attribute_width),  app));
-    gapp->add_action_with_parameter( "element-rect-height", Double, sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&set_attribute_height), app));
-    gapp->add_action_with_parameter( "element-rect-rx",     Double, sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&set_attribute_rx),     app));
-    gapp->add_action_with_parameter( "element-rect-ry",     Double, sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&set_attribute_ry),     app));
-    gapp->add_action(                "element-rect-reset-corners",  sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&reset_corners),        app));
+    gapp->add_action_with_parameter( "element-rect-width",  Double, sigc::bind<InkscapeApplication*, Glib::ustring>(sigc::ptr_fun(&set_attribute), app, "width" ));
+    gapp->add_action_with_parameter( "element-rect-height", Double, sigc::bind<InkscapeApplication*, Glib::ustring>(sigc::ptr_fun(&set_attribute), app, "height"));
+    gapp->add_action_with_parameter( "element-rect-rx",     Double, sigc::bind<InkscapeApplication*, Glib::ustring>(sigc::ptr_fun(&set_attribute), app, "rx"    ));
+    gapp->add_action_with_parameter( "element-rect-ry",     Double, sigc::bind<InkscapeApplication*, Glib::ustring>(sigc::ptr_fun(&set_attribute), app, "ry"    ));
+    gapp->add_action(                "element-rect-reset-corners",  sigc::bind<InkscapeApplication*               >(sigc::ptr_fun(&reset_corners), app          ));
     // clang-format on
 
     app->get_action_extra_data().add_data(raw_data_element_rect);
