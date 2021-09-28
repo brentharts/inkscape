@@ -2310,6 +2310,7 @@ void TextToolbar::prepare_inner()
     // We check for external files with text nodes direct children of text element
     // and wrap it into a tspan elements as inkscape do.
     if (text) {
+        bool changed = false;
         std::vector<SPObject *> childs = spitem->childList(false);
         for (auto child : childs) {
             SPString *spstring = dynamic_cast<SPString *>(child);
@@ -2325,8 +2326,14 @@ void TextToolbar::prepare_inner()
                     Inkscape::GC::release(rstring);
                     Inkscape::GC::release(rtspan);
                     text->getRepr()->removeChild(spstring->getRepr());
+                    changed = true;
                 }
             }
+        }
+        if (changed) {
+            // proper rebuild happens later,
+            // this just updates layout to use now, avoids use after free
+            text->rebuildLayout();
         }
     }
 
@@ -2344,6 +2351,8 @@ void TextToolbar::prepare_inner()
         }
         SPObject *rawptr_start = nullptr;
         SPObject *rawptr_end = nullptr;
+        layout->validateIterator(&wrap_start);
+        layout->validateIterator(&wrap_end);
         layout->getSourceOfCharacter(wrap_start, &rawptr_start);
         layout->getSourceOfCharacter(wrap_end, &rawptr_end);
         if (text) {
