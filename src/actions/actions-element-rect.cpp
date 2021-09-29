@@ -22,8 +22,9 @@
 #include "object/sp-rect.h"
 #include "ui/icon-names.h"        // Tag Inkscape icons.
 
+// Set attribute. If visible is "true", take into account the current transform (value in document units).
 void
-set_attribute(const Glib::VariantBase& value, InkscapeApplication *app, Glib::ustring& attribute)
+set_attribute(const Glib::VariantBase& value, InkscapeApplication *app, bool visible, Glib::ustring& attribute)
 {
     Glib::Variant<double> d = Glib::VariantBase::cast_dynamic<Glib::Variant<double> >(value);
     double dval = d.get();
@@ -34,17 +35,18 @@ set_attribute(const Glib::VariantBase& value, InkscapeApplication *app, Glib::us
         auto rect = dynamic_cast<SPRect *>(item);
         if (rect) {
             if (dval != 0.0) {
-                if (attribute == "width") {
-                    rect->setVisibleWidth(dval);
-                } else if (attribute == "height") {
-                    rect->setVisibleHeight(dval);
-                } else if (attribute == "rx") {
-                    rect->setVisibleRx(dval);
-                } else if (attribute == "ry") {
-                    rect->setVisibleRy(dval);
-                } else {
-                    std::cerr << "Rectangle action set_attribute: invalid attribute" << std::endl;
+                // Find "stretch"
+                if (visible) {
+                    auto affine = rect->i2doc_affine();
+                    if (!affine.isSingular()) {
+                        if (attribute == "x" || attribute == "width" || attribute == "rx") {
+                            dval /= affine.expansionX();
+                        } else {
+                            dval /= affine.expansionY();
+                        }
+                    }
                 }
+                rect->setAttribute(attribute.c_str(), std::to_string(dval));
             } else {
                 rect->removeAttribute(attribute.c_str());
             }
@@ -77,15 +79,23 @@ reset_corners(InkscapeApplication *app)
     }
 }
 
-// SHOULD REALLY BE DOC LEVEL ACTIONS
+// Should really be ObjectSet level actions.
 std::vector<std::vector<Glib::ustring>> raw_data_element_rect =
 {
     // clang-format off
-    {"app.element-rect-width",          N_("Width"),    "Rectangle",  N_("Set rectangle width")                    },
-    {"app.element-rect-height",         N_("Height"),   "Rectangle",  N_("Set rectangle height")                   },
-    {"app.element-rect-rx",             N_("Rx"),       "Rectangle",  N_("Set rectangle horizontal corner radius") },
-    {"app.element-rect-ry",             N_("Ry"),       "Rectangle",  N_("Set rectangle vertical corner radius")   },
-    {"app.element-rect-reset-corners",  N_("Corner"),   "Rectangle",  N_("Remove rounded corners")                 }
+    {"app.element-rect-x",              N_("X"),              "Rectangle",  N_("Set rectangle x position")                                 },
+    {"app.element-rect-y",              N_("Y"),              "Rectangle",  N_("Set rectangle y poistion")                                 },
+    {"app.element-rect-width",          N_("Width"),          "Rectangle",  N_("Set rectangle width")                                      },
+    {"app.element-rect-height",         N_("Height"),         "Rectangle",  N_("Set rectangle height")                                     },
+    {"app.element-rect-rx",             N_("Rx"),             "Rectangle",  N_("Set rectangle horizontal corner radius")                   },
+    {"app.element-rect-ry",             N_("Ry"),             "Rectangle",  N_("Set rectangle vertical corner radius")                     },
+    {"app.element-rect-visible-x",      N_("Visible X"),      "Rectangle",  N_("Set rectangle x position in document units")               },
+    {"app.element-rect-visible-y",      N_("Visible Y"),      "Rectangle",  N_("Set rectangle y position in document units")               },
+    {"app.element-rect-visible-width",  N_("Visible Width"),  "Rectangle",  N_("Set rectangle width in document units")                    },
+    {"app.element-rect-visible-height", N_("Visible Height"), "Rectangle",  N_("Set rectangle height in document units")                   },
+    {"app.element-rect-visible-rx",     N_("Visible Rx"),     "Rectangle",  N_("Set rectangle horizontal corner radius in document units") },
+    {"app.element-rect-visible-ry",     N_("Visible Ry"),     "Rectangle",  N_("Set rectangle vertical corner radius in document units")   },
+    {"app.element-rect-reset-corners",  N_("Reset Corners"),  "Rectangle",  N_("Remove rounded corners")                                   }
     // clang-format on
 };
 
@@ -100,11 +110,19 @@ add_actions_element_rect(InkscapeApplication* app)
     auto *gapp = app->gio_app();
 
     // clang-format off
-    gapp->add_action_with_parameter( "element-rect-width",  Double, sigc::bind<InkscapeApplication*, Glib::ustring>(sigc::ptr_fun(&set_attribute), app, "width" ));
-    gapp->add_action_with_parameter( "element-rect-height", Double, sigc::bind<InkscapeApplication*, Glib::ustring>(sigc::ptr_fun(&set_attribute), app, "height"));
-    gapp->add_action_with_parameter( "element-rect-rx",     Double, sigc::bind<InkscapeApplication*, Glib::ustring>(sigc::ptr_fun(&set_attribute), app, "rx"    ));
-    gapp->add_action_with_parameter( "element-rect-ry",     Double, sigc::bind<InkscapeApplication*, Glib::ustring>(sigc::ptr_fun(&set_attribute), app, "ry"    ));
-    gapp->add_action(                "element-rect-reset-corners",  sigc::bind<InkscapeApplication*               >(sigc::ptr_fun(&reset_corners), app          ));
+    gapp->add_action_with_parameter( "element-rect-x",              Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute), app, false, "x"     ));
+    gapp->add_action_with_parameter( "element-rect-y",              Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute), app, false, "y"     ));
+    gapp->add_action_with_parameter( "element-rect-width",          Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute), app, false, "width" ));
+    gapp->add_action_with_parameter( "element-rect-height",         Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute), app, false, "height"));
+    gapp->add_action_with_parameter( "element-rect-rx",             Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute), app, false, "rx"    ));
+    gapp->add_action_with_parameter( "element-rect-ry",             Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute), app, false, "ry"    ));
+    gapp->add_action_with_parameter( "element-rect-visible-x",      Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute), app, true,  "x"     ));
+    gapp->add_action_with_parameter( "element-rect-visible-y",      Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute), app, true,  "y"     ));
+    gapp->add_action_with_parameter( "element-rect-visible-width",  Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute), app, true,  "width" ));
+    gapp->add_action_with_parameter( "element-rect-visible-height", Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute), app, true,  "height"));
+    gapp->add_action_with_parameter( "element-rect-visible-rx",     Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute), app, true,  "rx"    ));
+    gapp->add_action_with_parameter( "element-rect-visible-ry",     Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute), app, true,  "ry"    ));
+    gapp->add_action(                "element-rect-reset-corners",          sigc::bind<InkscapeApplication*                     >(sigc::ptr_fun(&reset_corners), app                 ));
     // clang-format on
 
     app->get_action_extra_data().add_data(raw_data_element_rect);

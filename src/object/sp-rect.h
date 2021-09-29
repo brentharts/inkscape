@@ -22,57 +22,50 @@
 
 class SPRect : public SPShape {
 public:
-	SPRect();
-	~SPRect() override;
+    SPRect();
+    ~SPRect() override;
 
-	void setPosition(double x, double y, double width, double height);
+    void setPosition(double x, double y, double width, double height);
 
-	/* If SET if FALSE, VALUE is just ignored */
-	void setRx(bool set, double value);
-	void setRy(bool set, double value);
+    /* If SET if FALSE, VALUE is just ignored */
+    void setRx(bool set, double value);
+    void setRy(bool set, double value);
 
-	double getVisibleRx() const;
-	void setVisibleRx(double rx);
+    double getVisibleWidth() const;
+    double getVisibleHeight() const;
+    double getVisibleRx() const;
+    double getVisibleRy() const;
 
-	double getVisibleRy() const;
-	void setVisibleRy(double ry);
+    Geom::Rect getRect() const;
 
-	Geom::Rect getRect() const;
+    void compensateRxRy(Geom::Affine xform);
 
-	double getVisibleWidth() const;
-	void setVisibleWidth(double rx);
+    void build(SPDocument* doc, Inkscape::XML::Node* repr) override;
 
-	double getVisibleHeight() const;
-	void setVisibleHeight(double ry);
+    void set(SPAttr key, char const *value) override;
+    void update(SPCtx* ctx, unsigned int flags) override;
+    void modified(unsigned int flags) override;
+    bool set_rect_path_attribute(Inkscape::XML::Node *repr);
 
-	void compensateRxRy(Geom::Affine xform);
+    Inkscape::XML::Node* write(Inkscape::XML::Document *xml_doc, Inkscape::XML::Node *repr, unsigned int flags) override;
+    const char* typeName() const override;
+    const char* displayName() const override;
+    void update_patheffect(bool write) override;
+    void set_shape() override;
+    Geom::Affine set_transform(Geom::Affine const& xform) override;
 
-	void build(SPDocument* doc, Inkscape::XML::Node* repr) override;
+    void snappoints(std::vector<Inkscape::SnapCandidatePoint> &p, Inkscape::SnapPreferences const *snapprefs) const override;
+    void convert_to_guides() const override;
 
-	void set(SPAttr key, char const *value) override;
-	void update(SPCtx* ctx, unsigned int flags) override;
-  void modified(unsigned int flags) override;
-  bool set_rect_path_attribute(Inkscape::XML::Node *repr);
-
-  Inkscape::XML::Node* write(Inkscape::XML::Document *xml_doc, Inkscape::XML::Node *repr, unsigned int flags) override;
-  const char* typeName() const override;
-  const char* displayName() const override;
-  void update_patheffect(bool write) override;
-	void set_shape() override;
-	Geom::Affine set_transform(Geom::Affine const& xform) override;
-
-	void snappoints(std::vector<Inkscape::SnapCandidatePoint> &p, Inkscape::SnapPreferences const *snapprefs) const override;
-	void convert_to_guides() const override;
-
-	SVGLength x;
-	SVGLength y;
-	SVGLength width;
-	SVGLength height;
-	SVGLength rx;
-	SVGLength ry;
+    SVGLength x;
+    SVGLength y;
+    SVGLength width;
+    SVGLength height;
+    SVGLength rx;
+    SVGLength ry;
 
 private:
-	static double vectorStretch(Geom::Point p0, Geom::Point p1, Geom::Affine xform);
+    static double vectorStretch(Geom::Point p0, Geom::Point p1, Geom::Affine xform);
 };
 
 MAKE_SP_OBJECT_DOWNCAST_FUNCTIONS(SP_RECT, SPRect)

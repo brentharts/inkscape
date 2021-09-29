@@ -95,7 +95,7 @@
             <property name="input-purpose">number</property>
             <property name="adjustment">AdjustmentRectangleWidth</property>
             <property name="digits">2</property>
-            <property name="action-name">app.element-rect-width</property>
+            <property name="action-name">app.element-rect-visible-width</property>
             <property name="custom-values">1; 2; 5; 10; 20; 50; 100; 200; 500</property>
             <property name="defocus-widget">InkscapeCanvas</property>
             <property name="unit-menu-widget">ToolbarRectangleUnits</property>
@@ -131,7 +131,7 @@
             <property name="input-purpose">number</property>
             <property name="adjustment">AdjustmentRectangleHeight</property>
             <property name="digits">2</property>
-            <property name="action-name">app.element-rect-height</property>
+            <property name="action-name">app.element-rect-visible-height</property>
             <property name="custom-values">1; 2; 5; 10; 20; 50; 100; 200; 500</property>
             <property name="defocus-widget">InkscapeCanvas</property>
             <property name="unit-menu-widget">ToolbarRectangleUnits</property>
@@ -167,7 +167,7 @@
             <property name="input-purpose">number</property>
             <property name="adjustment">AdjustmentRectangleRx</property>
             <property name="digits">2</property>
-            <property name="action-name">app.element-rect-rx</property>
+            <property name="action-name">app.element-rect-visible-rx</property>
             <property name="custom-values">1; 2; 5; 10; 20; 50; 100</property>
             <property name="defocus-widget">InkscapeCanvas</property>
             <property name="unit-menu-widget">ToolbarRectangleUnits</property>
@@ -203,7 +203,7 @@
             <property name="input-purpose">number</property>
             <property name="adjustment">AdjustmentRectangleRy</property>
             <property name="digits">2</property>
-            <property name="action-name">app.element-rect-ry</property>
+            <property name="action-name">app.element-rect-visible-ry</property>
             <property name="custom-values">1; 2; 5; 10; 20; 50; 100</property>
             <property name="defocus-widget">InkscapeCanvas</property>
             <property name="unit-menu-widget">ToolbarRectangleUnits</property>
