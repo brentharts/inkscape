@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 /*
- * Gio::Actions for use with <rect>.
+ * Gio::Actions for use with <circle>.
  *
  * Copyright (C) 2021 Tavmjong Bah
  *
@@ -8,14 +8,14 @@
  *
  */
 
-#ifndef INK_ACTIONS_ELEMENT_RECT_H
-#define INK_ACTIONS_ELEMENT_RECT_H
+#ifndef INK_ACTIONS_ELEMENT_CIRCLE_H
+#define INK_ACTIONS_ELEMENT_CIRCLE_H
 
 class InkscapeApplication;
 
-void add_actions_element_rect(InkscapeApplication* app);
+void add_actions_element_circle(InkscapeApplication* app);
 
-#endif // INK_ACTIONS_ELEMENT_RECT_H
+#endif // INK_ACTIONS_ELEMENT_CIRCLE_H
 
 /*
   Local Variables:

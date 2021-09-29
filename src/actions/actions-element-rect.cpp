@@ -24,7 +24,7 @@
 
 // Set attribute. If visible is "true", take into account the current transform (value in document units).
 void
-set_attribute(const Glib::VariantBase& value, InkscapeApplication *app, bool visible, Glib::ustring& attribute)
+set_attribute_rect(const Glib::VariantBase& value, InkscapeApplication *app, bool visible, Glib::ustring& attribute)
 {
     Glib::Variant<double> d = Glib::VariantBase::cast_dynamic<Glib::Variant<double> >(value);
     double dval = d.get();
@@ -84,7 +84,7 @@ std::vector<std::vector<Glib::ustring>> raw_data_element_rect =
 {
     // clang-format off
     {"app.element-rect-x",              N_("X"),              "Rectangle",  N_("Set rectangle x position")                                 },
-    {"app.element-rect-y",              N_("Y"),              "Rectangle",  N_("Set rectangle y poistion")                                 },
+    {"app.element-rect-y",              N_("Y"),              "Rectangle",  N_("Set rectangle y position")                                 },
     {"app.element-rect-width",          N_("Width"),          "Rectangle",  N_("Set rectangle width")                                      },
     {"app.element-rect-height",         N_("Height"),         "Rectangle",  N_("Set rectangle height")                                     },
     {"app.element-rect-rx",             N_("Rx"),             "Rectangle",  N_("Set rectangle horizontal corner radius")                   },
@@ -110,19 +110,19 @@ add_actions_element_rect(InkscapeApplication* app)
     auto *gapp = app->gio_app();
 
     // clang-format off
-    gapp->add_action_with_parameter( "element-rect-x",              Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute), app, false, "x"     ));
-    gapp->add_action_with_parameter( "element-rect-y",              Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute), app, false, "y"     ));
-    gapp->add_action_with_parameter( "element-rect-width",          Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute), app, false, "width" ));
-    gapp->add_action_with_parameter( "element-rect-height",         Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute), app, false, "height"));
-    gapp->add_action_with_parameter( "element-rect-rx",             Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute), app, false, "rx"    ));
-    gapp->add_action_with_parameter( "element-rect-ry",             Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute), app, false, "ry"    ));
-    gapp->add_action_with_parameter( "element-rect-visible-x",      Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute), app, true,  "x"     ));
-    gapp->add_action_with_parameter( "element-rect-visible-y",      Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute), app, true,  "y"     ));
-    gapp->add_action_with_parameter( "element-rect-visible-width",  Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute), app, true,  "width" ));
-    gapp->add_action_with_parameter( "element-rect-visible-height", Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute), app, true,  "height"));
-    gapp->add_action_with_parameter( "element-rect-visible-rx",     Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute), app, true,  "rx"    ));
-    gapp->add_action_with_parameter( "element-rect-visible-ry",     Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute), app, true,  "ry"    ));
-    gapp->add_action(                "element-rect-reset-corners",          sigc::bind<InkscapeApplication*                     >(sigc::ptr_fun(&reset_corners), app                 ));
+    gapp->add_action_with_parameter( "element-rect-x",              Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute_rect), app, false, "x"     ));
+    gapp->add_action_with_parameter( "element-rect-y",              Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute_rect), app, false, "y"     ));
+    gapp->add_action_with_parameter( "element-rect-width",          Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute_rect), app, false, "width" ));
+    gapp->add_action_with_parameter( "element-rect-height",         Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute_rect), app, false, "height"));
+    gapp->add_action_with_parameter( "element-rect-rx",             Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute_rect), app, false, "rx"    ));
+    gapp->add_action_with_parameter( "element-rect-ry",             Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute_rect), app, false, "ry"    ));
+    gapp->add_action_with_parameter( "element-rect-visible-x",      Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute_rect), app, true,  "x"     ));
+    gapp->add_action_with_parameter( "element-rect-visible-y",      Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute_rect), app, true,  "y"     ));
+    gapp->add_action_with_parameter( "element-rect-visible-width",  Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute_rect), app, true,  "width" ));
+    gapp->add_action_with_parameter( "element-rect-visible-height", Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute_rect), app, true,  "height"));
+    gapp->add_action_with_parameter( "element-rect-visible-rx",     Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute_rect), app, true,  "rx"    ));
+    gapp->add_action_with_parameter( "element-rect-visible-ry",     Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute_rect), app, true,  "ry"    ));
+    gapp->add_action(                "element-rect-reset-corners",          sigc::bind<InkscapeApplication*                     >(sigc::ptr_fun(&reset_corners),      app                 ));
     // clang-format on
 
     app->get_action_extra_data().add_data(raw_data_element_rect);

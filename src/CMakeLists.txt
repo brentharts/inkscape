@@ -221,6 +221,10 @@ set(inkscape_SRC
   actions/actions-edit.cpp
   actions/actions-effect.h
   actions/actions-effect.cpp
+  actions/actions-element-circle.h
+  actions/actions-element-circle.cpp
+  actions/actions-element-ellipse.h
+  actions/actions-element-ellipse.cpp
   actions/actions-element-rect.h
   actions/actions-element-rect.cpp
   actions/actions-file-window.h
