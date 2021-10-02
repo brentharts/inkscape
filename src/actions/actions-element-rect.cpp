@@ -35,18 +35,19 @@ set_attribute_rect(const Glib::VariantBase& value, InkscapeApplication *app, boo
         auto rect = dynamic_cast<SPRect *>(item);
         if (rect) {
             if (dval != 0.0) {
+                auto d = dval;
                 // Find "stretch"
                 if (visible) {
                     auto affine = rect->i2doc_affine();
                     if (!affine.isSingular()) {
                         if (attribute == "x" || attribute == "width" || attribute == "rx") {
-                            dval /= affine.expansionX();
+                            d /= affine.expansionX();
                         } else {
-                            dval /= affine.expansionY();
+                            d /= affine.expansionY();
                         }
                     }
                 }
-                rect->setAttribute(attribute.c_str(), std::to_string(dval));
+                rect->setAttribute(attribute.c_str(), std::to_string(d));
             } else {
                 rect->removeAttribute(attribute.c_str());
             }

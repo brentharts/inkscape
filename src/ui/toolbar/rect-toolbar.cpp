@@ -29,37 +29,26 @@
 
 #include <glibmm/i18n.h>
 
-#include <gtkmm/separatortoolitem.h>
-#include <gtkmm/toolbutton.h>
 
 #include "desktop.h"
 #include "document-undo.h"
 #include "selection.h"
-#include "verbs.h"
 
 #include "object/sp-namedview.h"
 #include "object/sp-rect.h"
 
-#include "io/resource.h"
-
 #include "ui/icon-names.h"
 #include "ui/tools/rect-tool.h"
-#include "ui/uxmanager.h"
 
-#include "ui/widget/canvas.h"
 #include "ui/widget/combobox-unit.h"
 #include "ui/widget/spinbutton-action.h"
 #include "ui/widget/toolitem-menu.h"
 
-#include "widgets/widget-sizes.h"
-
 #include "xml/node-event-vector.h"
 
-using Inkscape::UI::UXManager;
 using Inkscape::DocumentUndo;
 using Inkscape::Util::Unit;
 using Inkscape::Util::Quantity;
-using Inkscape::Util::unit_table;
 
 static Inkscape::XML::NodeEventVector rect_tb_repr_events = {
     nullptr, /* child_added */
@@ -139,21 +128,18 @@ RectToolbar::sensitivize()
 void
 RectToolbar::watch_ec(SPDesktop* desktop, Inkscape::UI::Tools::ToolBase* ec)
 {
-    static sigc::connection changed;
-
     // use of dynamic_cast<> seems wrong here -- we just need to check the current tool
 
     if (dynamic_cast<Inkscape::UI::Tools::RectTool *>(ec)) {
-        Inkscape::Selection *sel = desktop->getSelection();
+        Inkscape::Selection *selection = desktop->getSelection();
 
-        changed = sel->connectChanged(sigc::mem_fun(*this, &RectToolbar::selection_changed));
+        _changed = selection->connectChanged(sigc::mem_fun(*this, &RectToolbar::selection_changed));
 
         // Synthesize an emission to trigger the update
-        selection_changed(sel);
+        selection_changed(selection);
     } else {
-        if (changed) {
-            changed.disconnect();
-        
+        if (_changed) {
+            _changed.disconnect();
             if (_repr) { // remove old listener
                 _repr->removeListenerByData(this);
                 Inkscape::GC::release(_repr);
@@ -176,13 +162,14 @@ RectToolbar::selection_changed(Inkscape::Selection *selection)
         _repr = nullptr;
     }
 
-    SPRect* rect = nullptr;
+    SPRect* last_rect = nullptr;
     _n_selected = 0;
     auto itemlist= selection->items();
-    for(auto item : itemlist) {
-        rect = dynamic_cast<SPRect*>(item);
+    for(auto item : selection->items()) {
+        auto rect = dynamic_cast<SPRect*>(item);
         if (rect) {
             _n_selected++;
+            last_rect = rect;
         }
     }
 
@@ -207,10 +194,10 @@ RectToolbar::selection_changed(Inkscape::Selection *selection)
             _spinbutton_height->set_sensitive(true);
         }
 
-        if (rect) {
+        if (last_rect) {
             // Uses last rect in itemlist... but that's OK.
-            _rect = rect;
-            _repr = rect->getRepr();
+            _rect = last_rect;
+            _repr = last_rect->getRepr();
             Inkscape::GC::anchor(_repr);
             _repr->addListener(&rect_tb_repr_events, this);
             _repr->synthesizeEvents(&rect_tb_repr_events, this);

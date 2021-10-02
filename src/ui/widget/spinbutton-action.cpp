@@ -71,9 +71,6 @@ SpinButtonAction::SpinButtonAction(BaseObjectType* cobject, const Glib::RefPtr<G
         std::cerr << "SpinButtonAction: no application!" << std::endl;
         return;
     }
-
-    static Inkscape::Util::Unit default_unit; // Dimensionless with value 1, compatible with all other units.
-    unit = &default_unit;
 }
 
 // ----------- Utility -----------
@@ -321,15 +318,28 @@ SpinButtonAction::create_menu()
     auto page_up        = value + page_increment;              
     auto page_down      = value - page_increment;              
 
+
     // Labels use "GUI" values but actions requires "px" value. (FIXME if used by non-linear properties)
-    entries[Quantity::convert(value,         unit, "px")] = round_to_digits (value, digits);
-    entries[Quantity::convert(lower_value,   unit, "px")] = round_to_digits (lower_value, digits);
-    entries[Quantity::convert(upper_value,   unit, "px")] = round_to_digits (upper_value, digits);
-    if (page_up < upper_value) {                    
-        entries[Quantity::convert(page_up,   unit, "px")] = round_to_digits (page_up, digits);
-    }                                               
-    if (page_down > lower_value) {                  
-        entries[Quantity::convert(page_down, unit, "px")] = round_to_digits (page_down, digits);
+    if (unit) {
+        entries[Quantity::convert(value,         unit, "px")] = round_to_digits (value, digits);
+        entries[Quantity::convert(lower_value,   unit, "px")] = round_to_digits (lower_value, digits);
+        entries[Quantity::convert(upper_value,   unit, "px")] = round_to_digits (upper_value, digits);
+        if (page_up < upper_value) {
+            entries[Quantity::convert(page_up,   unit, "px")] = round_to_digits (page_up, digits);
+        }
+        if (page_down > lower_value) {
+            entries[Quantity::convert(page_down, unit, "px")] = round_to_digits (page_down, digits);
+        }
+    } else {
+        entries[value        ] = round_to_digits (value, digits);
+        entries[lower_value  ] = round_to_digits (lower_value, digits);
+        entries[upper_value  ] = round_to_digits (upper_value, digits);
+        if (page_up < upper_value) {
+            entries[page_up  ] = round_to_digits (page_up, digits);
+        }
+        if (page_down > lower_value) {
+            entries[page_down] = round_to_digits (page_down, digits);
+        }
     }
     // clang-format on
 
@@ -479,7 +489,7 @@ int SpinButtonAction::on_input(double* new_value)
         result = eval.evaluate();
 
         // Check if output dimension corresponds to input unit.
-        if (result.dimension != (unit->isAbsolute() ? 1 : 0) ) {
+        if (unit && result.dimension != (unit->isAbsolute() ? 1 : 0) ) {
             throw Inkscape::Util::EvaluatorException("Input dimensions do not match with parameter dimensions.","");
         }
 
@@ -514,9 +524,10 @@ void SpinButtonAction::on_value_changed()
         // Double
 
         auto value = get_value();
-        // Convert to SVG User units.
-        value = Quantity::convert(value, unit, "px");
-
+        if (unit) {
+            // Convert to SVG User units.
+            value = Quantity::convert(value, unit, "px");
+        }
         Glib::Variant<double> d = Glib::Variant<double>::create(value);
         frozen = true;
         action->activate(d);
@@ -550,9 +561,10 @@ void SpinButtonAction::on_action_value_changed(const Glib::VariantBase& paramete
 
         Glib::Variant<double> d = Glib::VariantBase::cast_dynamic<Glib::Variant<double> >(parameter);
         auto value = d.get();
-        // Convert to GUI value
-        value = Quantity::convert(value, "px", unit);
-
+        if (unit) {
+            // Convert to GUI value
+            value = Quantity::convert(value, "px", unit);
+        }
         frozen = true;
         set_value(value);
         frozen = false;
@@ -573,6 +585,11 @@ void SpinButtonAction::on_action_value_changed(const Glib::VariantBase& paramete
 void
 SpinButtonAction::on_unit_changed()
 {
+    if (!unit_menu_widget) {
+        std::cerr << "SpinbuttonAction::on_unit_changed() called without unit menu widget!" << std::endl;
+        return;
+    }
+
     auto new_unit = unit_menu_widget->get_unit();
     auto adjustment = get_adjustment();
     if (adjustment && new_unit != unit) {

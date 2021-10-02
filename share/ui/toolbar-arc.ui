@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<interface>
+  <requires lib="gtk+" version="3.22"/>
+
+  <!-- Toolbox Arc -->
+
+  <object class="GtkAdjustment" id="AdjustmentArcRx">
+    <property name="lower">0</property>
+    <property name="upper">999999</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
+
+  <object class="GtkAdjustment" id="AdjustmentArcRy">
+    <property name="lower">0</property>
+    <property name="upper">999999</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
+
+  <object class="GtkAdjustment" id="AdjustmentArcStart">
+    <property name="lower">-360</property>
+    <property name="upper">+360</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">5</property>
+  </object>
+
+  <object class="GtkAdjustment" id="AdjustmentArcEnd">
+    <property name="lower">-360</property>
+    <property name="upper">+360</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">5</property>
+  </object>
+
+  
+  <!-- MenuItem"s for ToolItemMenu"s -->
+
+  <object class="GtkCheckMenuItem" id="ToolbarArcArcTypeSlice">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <property name="tooltip-text" translatable="yes">Switch to slice (closed shape with two radii).</property>
+    <property name="label" translatable="true">Slice</property>
+    <property name="action_name">app.object-ellipse-arc-type</property>
+    <property name="action_target">'slice'</property>
+  </object>
+
+  <object class="GtkCheckMenuItem" id="ToolbarArcArcTypeArc">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <property name="tooltip-text" translatable="yes">Switch to arc (unclosed shape).</property>
+    <property name="label" translatable="true">Arc</property>
+    <property name="action_name">app.object-ellipse-arc-type</property>
+    <property name="action_target">'arc'</property>
+  </object>
+
+  <object class="GtkCheckMenuItem" id="ToolbarArcArcTypeChord">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <property name="tooltip-text" translatable="yes">Switch to chord (closed shape).</property>
+    <property name="label" translatable="true">Chord</property>
+    <property name="action_name">app.object-ellipse-arc-type</property>
+    <property name="action_target">'chord'</property>
+  </object>
+
+  <object class="GtkMenuItem" id="ToolbarArcSetWhole">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <property name="tooltip-text" translatable="yes">Convert to full ellipse or circle.</property>
+    <property name="label" translatable="true">Full circle or ellipse</property>
+    <property name="action_name">app.object-ellipse-set-whole</property>
+  </object>
+
+  <!--  #########  Toolbar  ######## -->
+
+  <object class="gtkmm__CustomObject_ArcToolbar" id="ToolbarArc">
+    <property name="visible">True</property>
+    <!-- <property name="spacing">5</property> -->
+
+    <child>
+      <object class="GtkToolItem">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+         <child>
+          <object class="GtkLabel" id="ToolbarArcLabel">
+            <property name="visible">True</property>
+            <!-- Label text set by code -->
+            <property name="label" translatable="true">&lt;b&gt;New:&lt;/b&gt;</property>
+            <property name="use-markup">True</property>
+          </object>
+        </child>
+      </object>
+    </child>
+
+
+    <child>
+      <object class="GtkToolItem">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="label" translatable="true">Rx:</property>
+          </object>
+        </child>
+      </object>
+    </child>
+
+    <child>
+      <object class='gtkmm__CustomObject_ToolItemMenu' id='ToolbarArcMenuRx'>
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <child>
+          <object class='gtkmm__CustomObject_SpinButtonAction' id='ToolbarArcRx'>
+            <property name="visible">True</property>
+            <property name="tooltip-text" translatable="true">Horizontal radius of arc.</property>
+            <property name="can-focus">True</property>
+            <property name="input-purpose">number</property>
+            <property name="adjustment">AdjustmentArcRx</property>
+            <property name="digits">2</property>
+            <property name="action-name">app.object-ellipse-visible-rx</property>
+            <property name="custom-values">1; 2; 5; 10; 20; 50; 100</property>
+            <property name="defocus-widget">InkscapeCanvas</property>
+            <property name="unit-menu-widget">ToolbarArcUnits</property>
+            <property name="menu-label" translatable="true">Rx</property>
+          </object>
+        </child>
+      </object>
+    </child>
+
+
+    <child>
+      <object class="GtkToolItem">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="label" translatable="true">Ry:</property>
+          </object>
+        </child>
+      </object>
+    </child>
+
+    <child>
+      <object class='gtkmm__CustomObject_ToolItemMenu' id='ToolbarArcMenuRy'>
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <child>
+          <object class='gtkmm__CustomObject_SpinButtonAction' id='ToolbarArcRy'>
+            <property name="visible">True</property>
+            <property name="tooltip-text" translatable="true">Vertical radius of arc.</property>
+            <property name="can-focus">True</property>
+            <property name="input-purpose">number</property>
+            <property name="adjustment">AdjustmentArcRy</property>
+            <property name="digits">2</property>
+            <property name="action-name">app.object-ellipse-visible-ry</property>
+            <property name="custom-values">1; 2; 5; 10; 20; 50; 100</property>
+            <property name="defocus-widget">InkscapeCanvas</property>
+            <property name="unit-menu-widget">ToolbarArcUnits</property>
+            <property name="menu-label" translatable="true">Ry</property>
+          </object>
+        </child>
+      </object>
+    </child>
+
+    <child>
+      <object class='gtkmm__CustomObject_ToolItemMenu' id='ToolbarArcMenuUnits'>
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <child>
+          <object class='gtkmm__CustomObject_ComboBoxUnit' id='ToolbarArcUnits'>
+            <property name="name">ToolbarArcUnits</property>
+            <property name="visible">True</property>
+            <property name="tooltip-text" translatable="true">Display units.</property>
+            <property name="can-focus">True</property>
+            <property name="unit-type">Linear</property>
+          </object>
+        </child>
+      </object>
+    </child>
+
+    <child>
+      <object class="GtkToolItem">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="label" translatable="true">Start:</property>
+          </object>
+        </child>
+      </object>
+    </child>
+
+    <child>
+      <object class='gtkmm__CustomObject_ToolItemMenu' id='ToolbarArcMenuStart'>
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <child>
+          <object class='gtkmm__CustomObject_SpinButtonAction' id='ToolbarArcStart'>
+            <property name="visible">True</property>
+            <property name="tooltip-text" translatable="true">Start angle of arc.</property>
+            <property name="can-focus">True</property>
+            <property name="input-purpose">number</property>
+            <property name="adjustment">AdjustmentArcStart</property>
+            <property name="digits">2</property>
+            <property name="action-name">app.object-ellipse-start</property>
+            <property name="custom-values">-180; -145; -90; -45; -30; 0; 30; 45; 90; 145; 180</property>
+            <property name="defocus-widget">InkscapeCanvas</property>
+            <property name="menu-label" translatable="true">Start</property>
+          </object>
+        </child>
+      </object>
+    </child>
+
+
+    <child>
+      <object class="GtkToolItem">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="label" translatable="true">End:</property>
+          </object>
+        </child>
+      </object>
+    </child>
+
+    <child>
+      <object class='gtkmm__CustomObject_ToolItemMenu' id='ToolbarArcMenuEnd'>
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <child>
+          <object class='gtkmm__CustomObject_SpinButtonAction' id='ToolbarArcEnd'>
+            <property name="visible">True</property>
+            <property name="tooltip-text" translatable="true">End angle of arc.</property>
+            <property name="can-focus">True</property>
+            <property name="input-purpose">number</property>
+            <property name="adjustment">AdjustmentArcEnd</property>
+            <property name="digits">2</property>
+            <property name="action-name">app.object-ellipse-end</property>
+            <property name="custom-values">-180; -145; -90; -45; -30; 0; 30; 45; 90; 145; 180</property>
+            <property name="defocus-widget">InkscapeCanvas</property>
+            <property name="menu-label" translatable="true">End</property>
+          </object>
+        </child>
+      </object>
+    </child>
+
+
+    <child>
+      <object class='gtkmm__CustomObject_ToolItemMenu' id='ToolbarArcMenuArcTypeSlice'>
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="menuitem-name">ToolbarArcArcTypeSlice</property>
+        <child>
+          <object class="GtkToggleButton" id="ToolbarArcButtonArcTypeSlice">
+            <property name="visible">True</property>
+            <property name="tooltip-text" translatable="true">Switch to slice (closed shape with two radii).</property>
+            <property name="action_name">app.object-ellipse-arc-type</property>
+            <property name="action_target">'slice'</property>
+            <child>
+              <object class="GtkImage">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="icon-name">draw-ellipse-segment</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+
+    <child>
+      <object class='gtkmm__CustomObject_ToolItemMenu' id='ToolbarArcMenuArcTypeArc'>
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="menuitem-name">ToolbarArcArcTypeArc</property>
+        <child>
+          <object class="GtkToggleButton" id="ToolbarArcButtonArcTypeArc">
+            <property name="visible">True</property>
+            <property name="tooltip-text" translatable="true">Switch to arc (unclosed shape).</property>
+            <property name="action_name">app.object-ellipse-arc-type</property>
+             <property name="action_target">'arc'</property>
+            <child>
+              <object class="GtkImage">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="icon-name">draw-ellipse-arc</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+
+    <child>
+      <object class='gtkmm__CustomObject_ToolItemMenu' id='ToolbarArcMenuArcTypeChord'>
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="menuitem-name">ToolbarArcArcTypeChord</property>
+        <child>
+          <object class="GtkToggleButton" id="ToolbarArcButtonArcTypeChord">
+            <property name="visible">True</property>
+            <property name="tooltip-text" translatable="true">Switch to chord (closed shape).</property>
+            <property name="action_name">app.object-ellipse-arc-type</property>
+            <property name="action_target">'chord'</property>
+            <child>
+              <object class="GtkImage">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="icon-name">draw-ellipse-chord</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+
+    <child>
+      <object class='gtkmm__CustomObject_ToolItemMenu' id='ToolbarArcMenuSetWhole'>
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="menuitem-name">ToolbarArcSetWhole</property>
+        <child>
+          <object class="GtkButton" id="ToolbarArcButtonSetWhole">
+            <property name="visible">True</property>
+            <property name="tooltip-text" translatable="true">Convert to full ellipse or circle.</property>
+            <property name="action_name">app.object-ellipse-set-whole</property>
+            <child>
+              <object class="GtkImage">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="icon-name">draw-ellipse-whole</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+
+  </object>
+</interface>

@@ -4,7 +4,7 @@
 
 /**
  * @file
- * 3d box aux toolbar
+ * Arc aux toolbar
  */
 /* Authors:
  *   MenTaLguY <mental@rydia.net>
@@ -30,15 +30,15 @@
 
 #include "toolbar.h"
 
-#include <gtkmm/adjustment.h>
-
-class SPDesktop;
-class SPItem;
+#include <gtkmm/builder.h>
 
 namespace Gtk {
-class RadioToolButton;
-class ToolButton;
+class Button;
+class ToggleButton;
 }
+
+class SPDesktop;
+class SPGenericEllipse;
 
 namespace Inkscape {
 class Selection;
@@ -53,60 +53,58 @@ class ToolBase;
 }
 
 namespace Widget {
-class LabelToolItem;
-class SpinButtonToolItem;
-class UnitTracker;
+class SpinButtonAction;
+class ToolItemMenu;
+class ComboBoxUnit;
 }
 
 namespace Toolbar {
-class ArcToolbar : public Toolbar {
-private:
-    UI::Widget::UnitTracker *_tracker;
-
-    UI::Widget::SpinButtonToolItem *_rx_item;
-    UI::Widget::SpinButtonToolItem *_ry_item;
-
-    UI::Widget::LabelToolItem *_mode_item;
-
-    std::vector<Gtk::RadioToolButton *> _type_buttons;
-    Gtk::ToolButton *_make_whole;
-
-    Glib::RefPtr<Gtk::Adjustment> _rx_adj;
-    Glib::RefPtr<Gtk::Adjustment> _ry_adj;
-    Glib::RefPtr<Gtk::Adjustment> _start_adj;
-    Glib::RefPtr<Gtk::Adjustment> _end_adj;
-
-    bool _freeze;
-    bool _single;
-
-    XML::Node *_repr;
-    SPItem *_item;
-
-    void value_changed(Glib::RefPtr<Gtk::Adjustment>&  adj,
-                       gchar const                    *value_name);
-    void startend_value_changed(Glib::RefPtr<Gtk::Adjustment>&  adj,
-                                gchar const                    *value_name,
-                                Glib::RefPtr<Gtk::Adjustment>&  other_adj);
-    void type_changed( int type );
-    void defaults();
-    void sensitivize( double v1, double v2 );
-    void check_ec(SPDesktop* desktop, Inkscape::UI::Tools::ToolBase* ec);
-    void selection_changed(Inkscape::Selection *selection);
-
-    sigc::connection _changed;
-
-protected:
-    ArcToolbar(SPDesktop *desktop);
-    ~ArcToolbar() override;
+class ArcToolbar : public Gtk::Toolbar {
 
 public:
-    static GtkWidget * create(SPDesktop *desktop);
+
+    ArcToolbar(); // Dummy for declaring type.
+    ArcToolbar(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refUI, SPDesktop* desktop);
+    ~ArcToolbar() override;
+
     static void event_attr_changed(Inkscape::XML::Node *repr,
                                    gchar const         *name,
                                    gchar const         *old_value,
                                    gchar const         *new_value,
                                    bool                 is_interactive,
                                    gpointer             data);
+
+private:
+
+    // Functions
+    void sensitivize( double v1, double v2, const Glib::ustring& arc_type);
+    void watch_ec(SPDesktop* desktop, Inkscape::UI::Tools::ToolBase* ec);
+    void selection_changed(Inkscape::Selection *selection);
+
+    // Widgets
+    Gtk::Label                   *_label = nullptr;
+    UI::Widget::SpinButtonAction *_spinbutton_rx = nullptr;
+    UI::Widget::SpinButtonAction *_spinbutton_ry = nullptr;
+    UI::Widget::ComboBoxUnit     *_combobox_unit = nullptr;
+    UI::Widget::SpinButtonAction *_spinbutton_start = nullptr;
+    UI::Widget::SpinButtonAction *_spinbutton_end = nullptr;
+    UI::Widget::ToolItemMenu     *_toolitem_reset_corners = nullptr;
+    Gtk::ToggleButton            *_togglebutton_slice = nullptr;
+    Gtk::ToggleButton            *_togglebutton_arc = nullptr;
+    Gtk::ToggleButton            *_togglebutton_chord = nullptr;
+    Gtk::Button                  *_button_set_whole = nullptr;
+
+    // Variables
+    XML::Node *_repr = nullptr;
+    SPGenericEllipse *_ellipse = nullptr;
+    SPDesktop *_desktop = nullptr;
+    bool _freeze = false;
+    int _n_selected = 0;
+
+
+
+    sigc::connection _changed;
+
 };
 
 }
@@ -114,3 +112,14 @@ public:
 }
 
 #endif /* !SEEN_ARC_TOOLBAR_H */
+
+/*
+  Local Variables:
+  mode:c++
+  c-file-style:"stroustrup"
+  c-file-offsets:((innamespace . 0)(inline-open . 0)(case-label . +))
+  indent-tabs-mode:nil
+  fill-column:99
+  End:
+*/
+// vim: filetype=cpp:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:fileencoding=utf-8:textwidth=99 :

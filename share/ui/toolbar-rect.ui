@@ -40,6 +40,7 @@
   </object>
 
   <!-- MenuItem"s for ToolItemMenu"s -->
+
   <object class="GtkMenuItem" id="ToolbarRectangleResetCorners">
     <property name="visible">True</property>
     <property name="can-focus">False</property>
@@ -47,6 +48,8 @@
     <property name="label">Reset Corners</property>
     <property name="action_name">app.element-rect-reset-corners</property>
   </object>
+
+  <!--  #########  Toolbar  ######## -->
 
   <object class="gtkmm__CustomObject_RectToolbar" id="ToolbarRect">
     <property name="visible">True</property>

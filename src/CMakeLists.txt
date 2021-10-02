@@ -243,6 +243,8 @@ set(inkscape_SRC
   actions/actions-layer.cpp
   actions/actions-object.h
   actions/actions-object.cpp
+  actions/actions-object-ellipse.h
+  actions/actions-object-ellipse.cpp
   actions/actions-object-align.h
   actions/actions-object-align.cpp
   actions/actions-output.h

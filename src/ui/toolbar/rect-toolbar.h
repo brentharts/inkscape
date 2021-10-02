@@ -30,15 +30,10 @@
 
 #include "toolbar.h"
 
-#include <gtkmm/adjustment.h>
 #include <gtkmm/builder.h>
 
 class SPDesktop;
 class SPRect;
-
-namespace Gtk {
-class Toolbutton;
-}
 
 namespace Inkscape {
 class Selection;
@@ -86,17 +81,15 @@ private:
     UI::Widget::SpinButtonAction *_spinbutton_height = nullptr;
     UI::Widget::SpinButtonAction *_spinbutton_rx = nullptr;
     UI::Widget::SpinButtonAction *_spinbutton_ry = nullptr;
-    UI::Widget::ToolItemMenu     *_toolitem_reset_corners = nullptr;
     UI::Widget::ComboBoxUnit     *_combobox_unit = nullptr;
-    Glib::RefPtr<Gtk::Adjustment> _adj_width;
-    Glib::RefPtr<Gtk::Adjustment> _adj_height;
-    Glib::RefPtr<Gtk::Adjustment> _adj_rx;
-    Glib::RefPtr<Gtk::Adjustment> _adj_ry;
+    UI::Widget::ToolItemMenu     *_toolitem_reset_corners = nullptr;
+
 
     // Variables
     XML::Node *_repr = nullptr;
     SPRect *_rect = nullptr;
     SPDesktop *_desktop = nullptr;
+    sigc::connection _changed;
     bool _freeze = false;
     int _n_selected = 0;
 };

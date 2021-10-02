@@ -699,32 +699,6 @@ gdouble SPGenericEllipse::vectorStretch(Geom::Point p0, Geom::Point p1, Geom::Af
     return (Geom::distance(p0 * xform, p1 * xform) / Geom::distance(p0, p1));
 }
 
-void SPGenericEllipse::setVisibleRx(gdouble rx) {
-    if (rx == 0) {
-        this->rx.unset();
-    } else {
-        this->rx = rx / SPGenericEllipse::vectorStretch(
-            Geom::Point(this->cx.computed + 1, this->cy.computed),
-            Geom::Point(this->cx.computed, this->cy.computed),
-            this->i2doc_affine());
-    }
-
-    this->updateRepr();
-}
-
-void SPGenericEllipse::setVisibleRy(gdouble ry) {
-    if (ry == 0) {
-        this->ry.unset();
-    } else {
-        this->ry = ry / SPGenericEllipse::vectorStretch(
-            Geom::Point(this->cx.computed, this->cy.computed + 1),
-            Geom::Point(this->cx.computed, this->cy.computed),
-            this->i2doc_affine());
-    }
-
-    this->updateRepr();
-}
-
 gdouble SPGenericEllipse::getVisibleRx() const {
     if (!this->rx._set) {
         return 0;

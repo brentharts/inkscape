@@ -59,7 +59,7 @@
 #include "xml/attribute-record.h"
 #include "xml/node-event-vector.h"
 
-#include "ui/toolbar/arc-toolbar.h"
+//#include "ui/toolbar/arc-toolbar.h"
 #include "ui/toolbar/box3d-toolbar.h"
 #include "ui/toolbar/calligraphy-toolbar.h"
 #include "ui/toolbar/connector-toolbar.h"
@@ -88,6 +88,7 @@
 #include "ui/tools/tool-base.h"
 
 // Our own widgets which must be declared before we can load .ui (.glade) files.
+#include "ui/toolbar/arc-toolbar.h"
 #include "ui/toolbar/rect-toolbar.h"
 #include "ui/widget/combobox-unit.h"
 #include "ui/widget/spinbutton-action.h"
@@ -155,7 +156,7 @@ static struct {
     { "/tools/nodes",           "Node",         Inkscape::UI::Toolbar::NodeToolbar::create,          "",          nullptr},
     { "/tools/marker",          "Marker",       Inkscape::UI::Toolbar::MarkerToolbar::create,        "",          nullptr},
     { "/tools/shapes/rect",     "Rect",         nullptr,                              "toolbar-rect.ui",          N_("Style of new rectangles")},
-    { "/tools/shapes/arc",      "Arc",          Inkscape::UI::Toolbar::ArcToolbar::create,           "",          N_("Style of new ellipses")},
+    { "/tools/shapes/arc",      "Arc",          nullptr,                              "toolbar-arc.ui",           N_("Style of new ellipses")},
     { "/tools/shapes/star",     "Star",         Inkscape::UI::Toolbar::StarToolbar::create,          "",          N_("Style of new stars")},
     { "/tools/shapes/3dbox",    "3DBox",        Inkscape::UI::Toolbar::Box3DToolbar::create,         "",          N_("Style of new 3D boxes")},
     { "/tools/shapes/spiral",   "Spiral",       Inkscape::UI::Toolbar::SpiralToolbar::create,        "",          N_("Style of new spirals")},
@@ -678,6 +679,7 @@ void setup_aux_toolbox(GtkWidget *toolbox, SPDesktop *desktop)
         } else if (aux_toolboxes[i].ui_filename != "") {
 
             // For declaring type. (Before reading .ui file.)
+            Inkscape::UI::Toolbar::ArcToolbar();
             Inkscape::UI::Toolbar::RectToolbar();
             Inkscape::UI::Widget::SpinButtonAction();
             Inkscape::UI::Widget::ToolItemMenu();
@@ -694,10 +696,20 @@ void setup_aux_toolbox(GtkWidget *toolbox, SPDesktop *desktop)
                 return;
             }
 
-            Inkscape::UI::Toolbar::RectToolbar* toolbar_rect = nullptr;
-            builder->get_widget_derived("ToolbarRect", toolbar_rect, desktop);
-            if (toolbar_rect) {
-                sub_toolbox = GTK_WIDGET(toolbar_rect->gobj());
+            if (aux_toolboxes[i].tool_name == "Arc") {
+                Inkscape::UI::Toolbar::ArcToolbar* toolbar = nullptr;
+                builder->get_widget_derived("ToolbarArc", toolbar, desktop);
+                if (toolbar) {
+                    sub_toolbox = GTK_WIDGET(toolbar->gobj());
+                }
+            }
+
+            if (aux_toolboxes[i].tool_name == "Rect") {
+                Inkscape::UI::Toolbar::RectToolbar* toolbar = nullptr;
+                builder->get_widget_derived("ToolbarRect", toolbar, desktop);
+                if (toolbar) {
+                    sub_toolbox = GTK_WIDGET(toolbar->gobj());
+                }
             }
         }
 
