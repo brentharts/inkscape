@@ -974,9 +974,13 @@ InkscapeApplication::on_activate()
 
         Inkscape::UI::Dialog::StartScreen start_screen;
 
-        // int status =
-        start_screen.run();
-        document = start_screen.get_document();
+        //affect start window for proper closing
+        _startWindow = &start_screen;
+
+        if(Gtk::RESPONSE_ACCEPT == start_screen.run()) {
+            document = start_screen.get_document();
+        }
+        _startWindow = nullptr;
 
     } else {
 
@@ -1557,6 +1561,8 @@ InkscapeApplication::on_new()
 void
 InkscapeApplication::on_quit()
 {
+    //Ensure closing the start window
+    if(_startWindow) _startWindow->close();
     gio_app()->quit();
 }
 
