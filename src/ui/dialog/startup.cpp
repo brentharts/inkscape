@@ -492,6 +492,11 @@ StartScreen::notebook_next(Gtk::Widget *button)
 bool
 StartScreen::on_key_press_event(GdkEventKey* event)
 {
+    //On macOS only, if user press Cmd+Q => exit
+    if(__APPLE__ && (event->keyval == 'q' && event->state == (GDK_MOD2_MASK | GDK_META_MASK))) {
+        close();
+        return false;
+    }
     switch (event->keyval) {
         case GDK_KEY_Escape:
             // Prevent loading any selected items
