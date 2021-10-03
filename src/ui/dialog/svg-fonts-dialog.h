@@ -24,6 +24,7 @@
 
 #include "attributes.h"
 #include "helper/auto-connection.h"
+#include "ui/operation-blocker.h"
 #include "ui/dialog/dialog-base.h"
 #include "ui/widget/spinbutton.h"
 #include "xml/helper-observer.h"
@@ -87,7 +88,6 @@ public:
     void on_setfontdata_changed();
     void add_font();
     Geom::PathVector flip_coordinate_system(Geom::PathVector pathv);
-    bool updating;
 
     // Used for font-family
     class AttrEntry
@@ -120,6 +120,8 @@ public:
         SPAttr attr;
         Gtk::Label* _label;
     };
+
+    OperationBlocker _update;
 
 private:
     void update_glyphs();

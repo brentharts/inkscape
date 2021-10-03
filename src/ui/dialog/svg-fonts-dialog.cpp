@@ -101,6 +101,7 @@ void SvgFontsDialog::AttrEntry::set_text(char* t){
 
 // 'font-family' has a problem as it is also a presentation attribute for <text>
 void SvgFontsDialog::AttrEntry::on_attr_changed(){
+    if (dialog->_update.pending()) return;
 
     SPObject* o = nullptr;
     for (auto& node: dialog->get_selected_spfont()->children) {
@@ -152,6 +153,7 @@ void SvgFontsDialog::AttrSpin::set_value(double v){
 }
 
 void SvgFontsDialog::AttrSpin::on_attr_changed(){
+    if (dialog->_update.pending()) return;
 
     SPObject* o = nullptr;
     switch (this->attr) {
@@ -210,11 +212,13 @@ Gtk::Box* SvgFontsDialog::AttrCombo(gchar* lbl, const SPAttr /*attr*/){
 /*** SvgFontsDialog ***/
 
 GlyphComboBox::GlyphComboBox() {
-    set_wrap_width(4);
 }
 
 void GlyphComboBox::update(SPFont* spfont){
     if (!spfont) return;
+
+    // remove wrapping - it has severe performance penalty for appending items
+    set_wrap_width(0);
 
     this->remove_all();
 
@@ -223,6 +227,9 @@ void GlyphComboBox::update(SPFont* spfont){
             this->append((static_cast<SPGlyph*>(&node))->unicode);
         }
     }
+
+    // set desired wrpping now
+    set_wrap_width(4);
 }
 
 void SvgFontsDialog::on_kerning_value_changed(){
@@ -409,6 +416,8 @@ void SvgFontsDialog::update_global_settings_tab(){
 void SvgFontsDialog::on_font_selection_changed(){
     SPFont* spfont = this->get_selected_spfont();
     if (!spfont) return;
+
+    auto scoped(_update.block());
 
     SvgFont* svgfont = this->get_selected_svgfont();
     first_glyph.update(spfont);
@@ -623,6 +632,7 @@ SPGlyph *new_glyph(SPDocument* document, SPFont *font, const int count)
 void SvgFontsDialog::update_glyphs(){
     SPFont* font = get_selected_spfont();
     if (!font) return;
+
     populate_glyphs_box();
     populate_kerning_pairs_box();
     first_glyph.update(font);
@@ -793,7 +803,6 @@ void SvgFontsDialog::glyph_unicode_edit(const Glib::ustring&, const Glib::ustrin
     glyph->setAttribute("unicode", str);
 
     DocumentUndo::done(getDocument(), SP_VERB_DIALOG_SVG_FONTS, _("Set glyph unicode"));
-
     update_glyphs();
 }
 
