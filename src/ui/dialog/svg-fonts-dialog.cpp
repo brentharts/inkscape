@@ -314,9 +314,10 @@ void SvgFontsDialog::update_sensitiveness(){
     }
 }
 
-/* Add all fonts in the getDocument() to the combobox. */
-// This function is called when new document is selected as well as when SVG "definition" section changes.
-// Try to detect if font(s) have actually been modified to eliminate some expensive refreshes
+/** Add all fonts in the getDocument() to the combobox.
+ * This function is called when new document is selected as well as when SVG "definition" section changes.
+ * Try to detect if font(s) have actually been modified to eliminate some expensive refreshes.
+ */
 void SvgFontsDialog::update_fonts(bool document_replaced)
 {
     std::vector<SPObject*> fonts;
@@ -454,7 +455,7 @@ void SvgFontsDialog::font_selected(SvgFont* svgfont, SPFont* spfont) {
 
 void SvgFontsDialog::on_font_selection_changed(){
     SPFont* spfont = get_selected_spfont();
-    SvgFont* svgfont = this->get_selected_svgfont();
+    SvgFont* svgfont = get_selected_svgfont();
     font_selected(svgfont, spfont);
 }
 
