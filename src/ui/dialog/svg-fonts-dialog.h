@@ -73,7 +73,7 @@ public:
 
     void documentReplaced() override;
 
-    void update_fonts();
+    void update_fonts(bool document_replaced);
     SvgFont* get_selected_svgfont();
     SPFont* get_selected_spfont();
     SPGlyph* get_selected_glyph();
@@ -94,7 +94,7 @@ public:
     {
     public:
         AttrEntry(SvgFontsDialog* d, gchar* lbl, Glib::ustring tooltip, const SPAttr attr);
-        void set_text(char*);
+        void set_text(const char*);
         Gtk::Entry* get_entry() { return &entry; }
         Gtk::Label* get_label() { return _label; }
     private:
@@ -139,6 +139,7 @@ private:
     void remove_selected_glyph();
     void remove_selected_font();
     void remove_selected_kerning_pair();
+    void font_selected(SvgFont* svgfont, SPFont* spfont);
 
     void add_kerning_pair();
 
