@@ -977,9 +977,8 @@ InkscapeApplication::on_activate()
         //affect start window for proper closing
         _startWindow = &start_screen;
 
-        if(Gtk::RESPONSE_ACCEPT == start_screen.run()) {
-            document = start_screen.get_document();
-        }
+        start_screen.run();
+        document = start_screen.get_document();
         _startWindow = nullptr;
 
     } else {
