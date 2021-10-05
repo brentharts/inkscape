@@ -974,12 +974,11 @@ InkscapeApplication::on_activate()
 
         Inkscape::UI::Dialog::StartScreen start_screen;
 
-        //affect start window for proper closing
-        _startWindow = &start_screen;
+        //add start window to gtk_app to ensure proper closing on quit
+        gtk_app()->add_window(start_screen);
 
         start_screen.run();
         document = start_screen.get_document();
-        _startWindow = nullptr;
 
     } else {
 
@@ -1560,8 +1559,12 @@ InkscapeApplication::on_new()
 void
 InkscapeApplication::on_quit()
 {
-    //Ensure closing the start window
-    if(_startWindow) _startWindow->close();
+    //Ensure closing the gtk_app windows
+    if(gtk_app()) {
+        for(auto window : gtk_app()->get_windows()) {
+            window->close();
+        }
+    }
     gio_app()->quit();
 }
 
