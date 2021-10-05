@@ -144,9 +144,6 @@ protected:
     Inkscape::UI::View::View* _active_view       = nullptr;
     InkscapeWindow*           _active_window     = nullptr;
 
-    //start dialog, just to ensure proper destruction on app quitting
-    Gtk::Dialog*              _startWindow       = nullptr;
-
     InkFileExportCmd _file_export;
 
     // Actions from the command line or file.
