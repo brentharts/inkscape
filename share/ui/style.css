@@ -550,3 +550,14 @@ stackswitcher button {
 .color-palette-main-box scrolledwindow undershoot.left {
     background-image: none;
 }
+/*
+ * Inkscape Export Dialog
+ */
+
+#ExportDialog #export_selection{
+	border-radius:0px;
+}
+#ExportDialog #export_preview_box{
+	border:1px solid;
+}
+

@@ -116,6 +116,17 @@ void LayerModel::setCurrentLayer(SPObject *object) {
     _layer_hierarchy->setBottom(object);
 }
 
+std::list<SPItem *> LayerModel::getAllLayers()
+{
+    std::list<SPItem *> layers;
+    for (SPObject *obj = Inkscape::previous_layer(currentRoot(), currentRoot()); obj;
+         obj = Inkscape::previous_layer(currentRoot(), obj)) {
+        auto item = SP_ITEM(obj);
+        layers.push_back(item);
+    }
+    return layers;
+}
+
 void LayerModel::toggleHideAllLayers(bool hide) {
 
     for ( SPObject* obj = Inkscape::previous_layer(currentRoot(), currentRoot()); obj; obj = Inkscape::previous_layer(currentRoot(), obj) ) {

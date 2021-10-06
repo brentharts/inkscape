@@ -112,6 +112,10 @@ set(ui_SRC
 	dialog/dialog-window.cpp
 	dialog/document-properties.cpp
 	dialog/export.cpp
+	dialog/export-batch.cpp
+	dialog/export-single.cpp
+	dialog/export-helper.cpp
+	dialog/export-preview.cpp
 	dialog/filedialog.cpp
 	dialog/filedialogimpl-gtkmm.cpp
 	dialog/fill-and-stroke.cpp
@@ -138,6 +142,7 @@ set(ui_SRC
 	dialog/object-properties.cpp
 	dialog/objects.cpp
 	dialog/polar-arrange-tab.cpp
+	dialog/preview-util.cpp
 	dialog/print.cpp
 	dialog/prototype.cpp
 	dialog/selectorsdialog.cpp
@@ -285,6 +290,10 @@ set(ui_SRC
 	dialog/dialog-window.h
 	dialog/document-properties.h
 	dialog/export.h
+	dialog/export-batch.h
+	dialog/export-single.h
+	dialog/export-helper.h
+	dialog/export-preview.h
 	dialog/filedialog.h
 	dialog/filedialogimpl-gtkmm.h
 	dialog/filedialogimpl-win32.h
@@ -312,6 +321,7 @@ set(ui_SRC
 	dialog/object-properties.h
 	dialog/objects.h
 	dialog/polar-arrange-tab.h
+	dialog/preview-util.h
 	dialog/print.h
 	dialog/prototype.h
 	dialog/selectorsdialog.h

@@ -348,6 +348,7 @@ public:
     SPObject *currentLayer() const;
     void setCurrentLayer(SPObject *object);
     void toggleLayerSolo(SPObject *object);
+    std::list<SPItem *> getAllLayers();
     void toggleHideAllLayers(bool hide);
     void toggleLockAllLayers(bool lock);
     void toggleLockOtherLayers(SPObject *object);
