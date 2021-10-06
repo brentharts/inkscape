@@ -218,6 +218,10 @@ UndoHistory::_onListSelectionChange()
     /* If no event is selected in the view, find the right one and select it. This happens whenever
      * a branch we're currently in is collapsed.
      */
+    SPDesktop* desktop = getDesktop();
+    if (desktop) {
+        desktop->selection->clear();
+    }
     if (!selected) {
 
         EventLog::iterator curr_event = _event_log->getCurrEvent();
@@ -325,6 +329,10 @@ UndoHistory::_onExpandEvent(const Gtk::TreeModel::iterator &iter, const Gtk::Tre
 void
 UndoHistory::_onCollapseEvent(const Gtk::TreeModel::iterator &iter, const Gtk::TreeModel::Path &/*path*/)
 {
+    SPDesktop* desktop = getDesktop();
+    if (desktop) {
+        desktop->selection->clear();
+    }
     // Collapsing a branch we're currently in is equal to stepping to the last event in that branch
     if ( iter == _event_log->getCurrEvent() ) {
         EventLog::const_iterator curr_event_parent = _event_log->getCurrEvent();

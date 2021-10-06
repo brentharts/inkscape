@@ -1252,7 +1252,8 @@ sp_undo(SPDesktop *desktop, SPDocument *)
 {
     // No re/undo while dragging, too dangerous.
     if (desktop->getCanvas()->is_dragging()) return;
-
+    // we force unselect to avoid knot problems
+    desktop->selection->clear();
     if (!DocumentUndo::undo(desktop->getDocument())) {
         desktop->messageStack()->flash(Inkscape::WARNING_MESSAGE, _("Nothing to undo."));
     }
@@ -1263,7 +1264,8 @@ sp_redo(SPDesktop *desktop, SPDocument *)
 {
     // No re/undo while dragging, too dangerous.
     if (desktop->getCanvas()->is_dragging()) return;
-
+    // we force unselect to avoid knot problems
+    desktop->selection->clear();
     if (!DocumentUndo::redo(desktop->getDocument())) {
         desktop->messageStack()->flash(Inkscape::WARNING_MESSAGE, _("Nothing to redo."));
     }
