@@ -150,15 +150,20 @@ ArcToolbar::sensitivize(double v1, double v2, const Glib::ustring& arc_type)
         enable = false;
     }
 
-    if (_button_set_whole)       _button_set_whole->set_sensitive(enable);
+    if (_button_set_whole) {
+        _button_set_whole->set_sensitive(enable);
+    }
 
     // We must enable/disable action to enable/disable buttons.
-    auto app = InkscapeApplication::instance()->gtk_app();
-    auto action = app->lookup_action("object-ellipse-arc-type");
-    if (action) {
-        auto saction = Glib::RefPtr<Gio::SimpleAction>::cast_dynamic(action);
-        saction->change_state(arc_type);
-        saction->set_enabled(enable);
+    auto toplevel = get_toplevel();
+    auto win = dynamic_cast<Gtk::ApplicationWindow *>(toplevel);
+    if (win) {
+        auto action = win->lookup_action("object-ellipse-arc-type");
+        if (action) {
+            auto saction = Glib::RefPtr<Gio::SimpleAction>::cast_dynamic(action);
+            saction->change_state(arc_type);
+            saction->set_enabled(enable);
+        }
     }
 }
 
@@ -179,12 +184,6 @@ Glib::ustring get_arc_type(XML::Node *repr)
 void
 ArcToolbar::selection_changed(Inkscape::Selection *selection)
 {
-    if (_freeze) {
-        return;
-    }
-
-    _freeze = true;
-
     if ( _repr ) {
         _ellipse = nullptr;
         _repr->removeListenerByData(this);
@@ -244,8 +243,8 @@ ArcToolbar::selection_changed(Inkscape::Selection *selection)
             _label->set_markup(_("<b>Change:</b>"));
         }
     }
+
     sensitivize(start, end, arc_type);
-    _freeze = false;
 }
 
 void

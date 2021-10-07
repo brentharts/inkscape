@@ -196,6 +196,18 @@ void SPGenericEllipse::set(SPAttr key, gchar const *value)
 void SPGenericEllipse::update(SPCtx *ctx, guint flags)
 {
     // std::cout << "\nSPGenericEllipse::update: Entrance" << std::endl;
+
+    // "type" must be set here for "undo" operations (it is normally set by
+    // SPFactory::create_object or by SPGenericEllipse::write, both of which are not called during
+    // an undo).
+    auto name = getRepr()->name();
+    type = SP_GENERIC_ELLIPSE_ARC;
+    if (name == "svg::circle") {
+        type = SP_GENERIC_ELLIPSE_CIRCLE;
+    } else if (name == "svg::elipse") {
+        type = SP_GENERIC_ELLIPSE_ELLIPSE;
+    }
+
     if (flags & (SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_STYLE_MODIFIED_FLAG | SP_OBJECT_VIEWPORT_MODIFIED_FLAG)) {
         Geom::Rect const &viewbox = ((SPItemCtx const *) ctx)->viewport;
 

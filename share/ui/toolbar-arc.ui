@@ -181,6 +181,13 @@
     </child>
 
     <child>
+      <object class='GtkSeparatorToolItem'>
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+      </object>
+    </child>
+
+    <child>
       <object class="GtkToolItem">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
@@ -249,6 +256,12 @@
       </object>
     </child>
 
+    <child>
+      <object class='GtkSeparatorToolItem'>
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+      </object>
+    </child>
 
     <child>
       <object class='gtkmm__CustomObject_ToolItemMenu' id='ToolbarArcMenuArcTypeSlice'>
@@ -259,7 +272,7 @@
           <object class="GtkToggleButton" id="ToolbarArcButtonArcTypeSlice">
             <property name="visible">True</property>
             <property name="tooltip-text" translatable="true">Switch to slice (closed shape with two radii).</property>
-            <property name="action_name">app.object-ellipse-arc-type</property>
+            <property name="action_name">win.object-ellipse-arc-type</property>
             <property name="action_target">'slice'</property>
             <child>
               <object class="GtkImage">
@@ -282,7 +295,7 @@
           <object class="GtkToggleButton" id="ToolbarArcButtonArcTypeArc">
             <property name="visible">True</property>
             <property name="tooltip-text" translatable="true">Switch to arc (unclosed shape).</property>
-            <property name="action_name">app.object-ellipse-arc-type</property>
+            <property name="action_name">win.object-ellipse-arc-type</property>
              <property name="action_target">'arc'</property>
             <child>
               <object class="GtkImage">
@@ -305,7 +318,7 @@
           <object class="GtkToggleButton" id="ToolbarArcButtonArcTypeChord">
             <property name="visible">True</property>
             <property name="tooltip-text" translatable="true">Switch to chord (closed shape).</property>
-            <property name="action_name">app.object-ellipse-arc-type</property>
+            <property name="action_name">win.object-ellipse-arc-type</property>
             <property name="action_target">'chord'</property>
             <child>
               <object class="GtkImage">
@@ -316,6 +329,13 @@
             </child>
           </object>
         </child>
+      </object>
+    </child>
+
+    <child>
+      <object class='GtkSeparatorToolItem'>
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
       </object>
     </child>
 

@@ -14,12 +14,13 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
-#include "selection.h"
-#include <glib-object.h>
-#include <glib.h>
 #include <map>
-#include <sigc++/signal.h>
 #include <vector>
+
+#include <glib.h>
+#include <sigc++/signal.h>
+
+#include "selection.h"
 
 class SPDesktop;
 class SPDocument;
@@ -55,15 +56,19 @@ void inkscape_unref(Inkscape::Application & in);
 #define SP_ACTIVE_DESKTOP (INKSCAPE.active_desktop())
 
 class AppSelectionModel {
-    Inkscape::Selection *_selection;
+
+    Inkscape::Selection *_selection = nullptr;
 
 public:
     AppSelectionModel(SPDocument *doc) {
-        // TODO: is this really how we should manage the lifetime of the selection?
-        // I just copied this from the initialization of the Selection in SPDesktop.
-        // When and how is it actually released?
-        _selection = Inkscape::GC::release(new Inkscape::Selection(nullptr));
+        _selection = new Inkscape::Selection(nullptr);
         _selection->setDocument(doc);
+    }
+
+    ~AppSelectionModel() {
+        if (_selection) {
+            delete _selection;
+        }
     }
 
     Inkscape::Selection *getSelection() const { return _selection; }

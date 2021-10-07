@@ -22,6 +22,7 @@
 
 #include "document-undo.h"
 #include "inkscape-application.h"
+#include "inkscape-window.h"
 
 #include "selection.h"            // Selection
 #include "object/sp-ellipse.h"
@@ -77,6 +78,7 @@ set_attribute_arc(const Glib::VariantBase& value, InkscapeApplication *app, bool
     }
 }
 
+// From command line.
 void
 set_arc_type(Glib::ustring type, InkscapeApplication* app)
 {
@@ -93,7 +95,7 @@ set_arc_type(Glib::ustring type, InkscapeApplication* app)
     for (auto item : selection->items()) {
         auto ellipse = dynamic_cast<SPGenericEllipse *>(item);
         if (ellipse && ellipse->type == SP_GENERIC_ELLIPSE_ARC) {
-            ellipse->setAttribute("sodipodi:open", (open ? "true" : nullptr));
+            ellipse->setAttribute("sodipodi:open", (open ? "true" : nullptr)); // Deprecated.
             ellipse->setAttribute("sodipodi:arc-type", type);
             modmade = true;
         }
@@ -103,25 +105,7 @@ set_arc_type(Glib::ustring type, InkscapeApplication* app)
         Inkscape::DocumentUndo::done(app->get_active_document(), _("Changed Arc type"), INKSCAPE_ICON("draw-ellipse"));
     }
 
-    // Update action state!
-    auto *gapp = app->gio_app();
-
-    auto action = gapp->lookup_action("object-ellipse-arc-type");
-    if (!action) {
-        std::cerr << "set_arc_type: action 'object-ellipse-arc-type' missing!" << std::endl;
-        return;
-    }
-
-    auto saction = Glib::RefPtr<Gio::SimpleAction>::cast_dynamic(action);
-    if (!saction) {
-        std::cerr << "set_arc_type: action 'object-ellipse-arc-type' not SimpleAction!" << std::endl;
-        return;
-    }
-
-    // Update button states.
-    saction->set_enabled(false);
-    saction->change_state(type);
-    saction->set_enabled(true);
+    // No need to update action state as we don't use it in GUI.
 }
 
 void
@@ -145,12 +129,75 @@ set_arc_whole(InkscapeApplication* app)
     }
 }
 
+// From toolbar.
+void
+set_arc_type_win(Glib::ustring type, InkscapeWindow* win)
+{
+    if ( !(type == "slice" || type == "arc" || type == "chord")) {
+        std::cerr << "set_arc_type_win: invalid type: " << type << std::endl;
+        return;
+    }
+
+    bool open = (type != "slice");
+
+    auto selection = win->get_desktop()->selection;
+    if (!selection) {
+        std::cerr << "set_arc_type_win: no selection!" << std::endl;
+        return;
+    }
+
+    bool modmade = false;
+
+    for (auto item : selection->items()) {
+        auto ellipse = dynamic_cast<SPGenericEllipse *>(item);
+        if (ellipse && ellipse->type == SP_GENERIC_ELLIPSE_ARC) {
+            ellipse->setAttribute("sodipodi:open", (open ? "true" : nullptr)); // Deprecated.
+            ellipse->setAttribute("sodipodi:arc-type", type);
+            modmade = true;
+        }
+    }
+
+    if (modmade) {
+        Inkscape::DocumentUndo::done(win->get_document(), _("Changed Arc type"), INKSCAPE_ICON("draw-ellipse"));
+    }
+
+    // Update action state!
+    auto action = win->lookup_action("object-ellipse-arc-type");
+    if (!action) {
+        std::cerr << "set_arc_type: action 'object-ellipse-arc-type' missing!" << std::endl;
+        return;
+    }
+
+    auto saction = Glib::RefPtr<Gio::SimpleAction>::cast_dynamic(action);
+    if (!saction) {
+        std::cerr << "set_arc_type: action 'object-ellipse-arc-type' not SimpleAction!" << std::endl;
+        return;
+    }
+
+    // Update button states.
+    saction->set_enabled(false);
+    saction->change_state(type);
+    saction->set_enabled(true);
+}
+
 // Should really be ObjectSet level actions.
 std::vector<std::vector<Glib::ustring>> raw_data_object_ellipse =
 {
-     // clang-format off
-     {"app.object-ellipse-arc-type",              N_("Type"),        "Arc",  N_("Set arc type: slice, arc, or chord")                      },
-     {"app.object-ellipse-make-whole",            N_("Make whole"),  "Arc",  N_("Make arc whole (circle or ellipse)")                      },
+    // clang-format off
+    {"app.object-ellipse-cx",                 N_("Cx"),          "Arc",  N_("Set arc center horizontal position.")                   },
+    {"app.object-ellipse-cy",                 N_("Cy"),          "Arc",  N_("Set arc center horizontal position.")                   },
+    {"app.object-ellipse-rx",                 N_("Rx"),          "Arc",  N_("Set arc horizontal radius.")                            },
+    {"app.object-ellipse-ry",                 N_("Ry"),          "Arc",  N_("Set arc vertical radius.")                              },
+    {"app.object-ellipse-visible-cx",         N_("Visible Cx"),  "Arc",  N_("Set arc center horizontal position in document units.") },
+    {"app.object-ellipse-visible-cy",         N_("Visible Cy"),  "Arc",  N_("Set arc center horizontal position in document units.") },
+    {"app.object-ellipse-visible-rx",         N_("Visible Rx"),  "Arc",  N_("Set arc horizontal radius in document units.")          },
+    {"app.object-ellipse-visible-ry",         N_("Visible Ry"),  "Arc",  N_("Set arc vertical radius in document units.")            },
+    {"app.object-ellipse-start",              N_("Arc start"),   "Arc",  N_("Set arc start angle (degrees).")                        },
+    {"app.object-ellipse-end",                N_("Arc end"),     "Arc",  N_("Set arc end angle (degress).")                          },
+    {"app.object-ellipse-arc-type('slice')",  N_("Slice"),       "Arc",  N_("Set arc type to 'Slice'")                               },
+    {"app.object-ellipse-arc-type('arc')",    N_("Arc"),         "Arc",  N_("Set arc type to 'Arc'")                                 },
+    {"app.object-ellipse-arc-type('chord')",  N_("Chord"),       "Arc",  N_("Set arc type to 'Chord'")                               },
+    {"app.object-ellipse-make-whole",         N_("Make whole"),  "Arc",  N_("Convert to full ellipse or circle.")                    },
     // clang-format on
 };
 
@@ -177,10 +224,25 @@ add_actions_object_ellipse(InkscapeApplication* app)
     gapp->add_action_with_parameter( "object-ellipse-end",        Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute_arc), app, false, "sodipodi:end"  ));
     gapp->add_action_radio_string(   "object-ellipse-arc-type",           sigc::bind<InkscapeApplication*>(                     sigc::ptr_fun(&set_arc_type),      app),       "slice"          );
     gapp->add_action(                "object-ellipse-set-whole",          sigc::bind<InkscapeApplication*>(                     sigc::ptr_fun(&set_arc_whole),     app)                         );
-
-    // gapp->add_action_with_parameter( "element-ellipse-cx",          Double, sigc::bind<InkscapeApplication*, bool, Glib::ustring>(sigc::ptr_fun(&set_attribute_ellipse), app, false, "cx" ));
     // clang-format on
 
+    app->get_action_extra_data().add_data(raw_data_object_ellipse);
+}
+
+// Stateful actions for toolbar. (App action needed for command line.)
+void
+add_actions_object_ellipse(InkscapeWindow *win)
+{
+
+    // clang-format off
+    win->add_action_radio_string(    "object-ellipse-arc-type",           sigc::bind<InkscapeWindow*>(                          sigc::ptr_fun(&set_arc_type_win),  win),       "slice"          );
+    // clang-format on
+
+    auto app = InkscapeApplication::instance();
+    if (!app) {
+        std::cerr << "add_actions_canvas_transform: no app!" << std::endl;
+        return;
+    }
     app->get_action_extra_data().add_data(raw_data_object_ellipse);
 }
 

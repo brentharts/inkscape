@@ -12,8 +12,10 @@
 #define INK_ACTIONS_OBJECT_ELLIPSE_H
 
 class InkscapeApplication;
+class InkscapeWindow;
 
 void add_actions_object_ellipse(InkscapeApplication* app);
+void add_actions_object_ellipse(InkscapeWindow* win);
 
 #endif // INK_ACTIONS_OBJECT_ELLIPSE_H
 
