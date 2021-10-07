@@ -105,4 +105,11 @@ void sp_marker_hide (SPMarker *marker, unsigned int key);
 const char *generate_marker (std::vector<Inkscape::XML::Node*> &reprs, Geom::Rect bounds, SPDocument *document, Geom::Point center, Geom::Affine move);
 SPObject *sp_marker_fork_if_necessary(SPObject *marker);
 
+void sp_marker_set_orient(SPMarker* marker, const char* value);
+void sp_marker_set_size(SPMarker* marker, double sx, double sy);
+void sp_marker_scale_with_stroke(SPMarker* marker, bool scale_with_stroke);
+void sp_marker_set_offset(SPMarker* marker, double dx, double dy);
+void sp_marker_set_uniform_scale(SPMarker* marker, bool uniform);
+void sp_marker_flip_horizontally(SPMarker* marker);
+
 #endif

@@ -52,72 +52,6 @@ namespace Inkscape {
 namespace UI {
 namespace Widget {
 
-void sp_marker_set_orient(SPMarker* marker, const char* value) {
-    if (!marker || !value) return;
-
-    marker->setAttribute("orient", value);
-
-    if (marker->document) {
-        DocumentUndo::maybeDone(marker->document, "marker", SP_VERB_DIALOG_FILL_STROKE, _("Set marker orientation"));
-    }
-}
-
-void sp_marker_set_size(SPMarker* marker, double sx, double sy) {
-    if (!marker) return;
-
-    marker->setAttribute("markerWidth", std::to_string(sx).c_str());
-    marker->setAttribute("markerHeight", std::to_string(sy).c_str());
-
-    if (marker->document) {
-        DocumentUndo::maybeDone(marker->document, "marker", SP_VERB_DIALOG_FILL_STROKE, _("Set marker size"));
-    }
-}
-
-void sp_marker_scale_with_stroke(SPMarker* marker, bool scale_with_stroke) {
-    if (!marker) return;
-
-    marker->setAttribute("markerUnits", scale_with_stroke ? "strokeWidth" : "userSpaceOnUse");
-
-    if (marker->document) {
-        DocumentUndo::maybeDone(marker->document, "marker", SP_VERB_DIALOG_FILL_STROKE, _("Set marker scale with stroke"));
-    }
-}
-
-void sp_marker_set_offset(SPMarker* marker, double dx, double dy) {
-    if (!marker) return;
-
-    marker->setAttribute("refX", std::to_string(dx).c_str());
-    marker->setAttribute("refY", std::to_string(dy).c_str());
-
-    if (marker->document) {
-        DocumentUndo::maybeDone(marker->document, "marker", SP_VERB_DIALOG_FILL_STROKE, _("Set marker offset"));
-    }
-}
-
-void sp_marker_set_uniform_scale(SPMarker* marker, bool uniform) {
-    if (!marker) return;
-
-    marker->setAttribute("preserveAspectRatio", uniform ? "xMidYMid" : "none");
-
-    if (marker->document) {
-        DocumentUndo::maybeDone(marker->document, "marker", SP_VERB_DIALOG_FILL_STROKE, _("Set marker uniform scaling"));
-    }
-}
-
-void sp_marker_flip_horizontally(SPMarker* marker) {
-    if (!marker) return;
-
-    ObjectSet set(marker->document);
-    set.addList(sp_item_group_item_list(marker));
-    Geom::OptRect bbox = set.visualBounds();
-    if (bbox) {
-        set.setScaleRelative(bbox->midpoint(), Geom::Scale(-1.0, 1.0));
-        if (marker->document) {
-            DocumentUndo::maybeDone(marker->document, "marker", SP_VERB_DIALOG_FILL_STROKE, _("Flip marker horizontally"));
-        }
-    }
-}
-
 // separator for FlowBox widget
 static cairo_surface_t* create_separator(double alpha, int width, int height, int device_scale) {
     width *= device_scale;
@@ -139,9 +73,18 @@ static Cairo::RefPtr<Cairo::Surface> g_image_none;
 // error extracting/rendering marker; "bad marker"
 static Cairo::RefPtr<Cairo::Surface> g_bad_marker;
 
+Glib::ustring get_attrib(SPMarker* marker, const char* attrib) {
+    auto value = marker->getAttribute(attrib);
+    return value ? value : "";
+}
+
+double get_attrib_num(SPMarker* marker, const char* attrib) {
+    auto val = get_attrib(marker, attrib);
+    return strtod(val.c_str(), nullptr);
+}
 
 MarkerComboBox::MarkerComboBox(Glib::ustring id, int l) :
-    _combo_id(id),
+    _combo_id(std::move(id)),
     _loc(l),
     _builder(create_builder("marker-popup.glade")),
     _marker_list(get_widget<Gtk::FlowBox>(_builder, "flowbox")),
@@ -224,7 +167,7 @@ MarkerComboBox::MarkerComboBox(Glib::ustring id, int l) :
     });
 
     auto set_orient = [=](bool enable_angle, const char* value) {
-        if (_updating) return;
+        if (_update.pending()) return;
         _angle_btn.set_sensitive(enable_angle);
         sp_marker_set_orient(get_current(), value);
     };
@@ -233,40 +176,56 @@ MarkerComboBox::MarkerComboBox(Glib::ustring id, int l) :
     _orient_angle.signal_toggled().connect([=]()   { set_orient(true, _angle_btn.get_text().c_str()); });
     _orient_flip_horz.signal_clicked().connect([=]() { sp_marker_flip_horizontally(get_current()); });
 
-    _angle_btn.signal_changed().connect([=]() {
-        if (_updating || !_angle_btn.is_sensitive()) return;
+    _angle_btn.signal_value_changed().connect([=]() {
+        if (_update.pending() || !_angle_btn.is_sensitive()) return;
         sp_marker_set_orient(get_current(), _angle_btn.get_text().c_str());
     });
 
-    auto set_scale = [=]() {
-        if (_updating) return;
-        auto sx = _scale_x.get_value();
-        auto sy = _scale_linked ? sx : _scale_y.get_value();
-        sp_marker_set_size(get_current(), sx, sy);
+    auto set_scale = [=](bool changeWidth) {
+        if (_update.pending()) return;
+        if (auto marker = get_current()) {
+            auto sx = _scale_x.get_value();
+            auto sy = _scale_y.get_value();
+            auto width  = get_attrib_num(marker, "markerWidth");
+            auto height = get_attrib_num(marker, "markerHeight");
+            if (_scale_linked && width > 0.0 && height > 0.0) {
+                auto scoped(_update.block());
+                if (changeWidth) {
+                    // scale height proportionally
+                    sy = height * (sx / width);
+                    _scale_y.set_value(sy);
+                }
+                else {
+                    // scale width proportionally
+                    sx = width * (sy / height);
+                    _scale_x.set_value(sx);
+                }
+            }
+            sp_marker_set_size(marker, sx, sy);
+        }
     };
 
     _link_scale.signal_clicked().connect([=](){
-        if (_updating) return;
+        if (_update.pending()) return;
         _scale_linked = !_scale_linked;
         sp_marker_set_uniform_scale(get_current(), _scale_linked);
         update_scale_link();
-        set_scale();
     });
 
-    _scale_x.signal_changed().connect([=]() { set_scale(); });
-    _scale_y.signal_changed().connect([=]() { set_scale(); });
+    _scale_x.signal_value_changed().connect([=]() { set_scale(true); });
+    _scale_y.signal_value_changed().connect([=]() { set_scale(false); });
 
     _scale_with_stroke.signal_toggled().connect([=](){
-        if (_updating) return;
+        if (_update.pending()) return;
         sp_marker_scale_with_stroke(get_current(), _scale_with_stroke.get_active());
     });
 
     auto set_offset = [=](){
-        if (_updating) return;
+        if (_update.pending()) return;
         sp_marker_set_offset(get_current(), _offset_x.get_value(), _offset_y.get_value());
     };
-    _offset_x.signal_changed().connect([=]() { set_offset(); });
-    _offset_y.signal_changed().connect([=]() { set_offset(); });
+    _offset_x.signal_value_changed().connect([=]() { set_offset(); });
+    _offset_y.signal_value_changed().connect([=]() { set_offset(); });
 
     // request to edit marker on canvas; close popup to get it out of the way and call marker edit tool
     _edit_marker.signal_clicked().connect([=]() { _menu_btn.get_popover()->popdown(); edit_signal(); });
@@ -283,16 +242,6 @@ MarkerComboBox::~MarkerComboBox() {
     if (_document) {
         modified_connection.disconnect();
     }
-}
-
-Glib::ustring get_attrib(SPMarker* marker, const char* attrib) {
-    auto value = marker->getAttribute(attrib);
-    return value ? value : "";
-}
-
-double get_attrib_num(SPMarker* marker, const char* attrib) {
-    auto val = get_attrib(marker, attrib);
-    return strtod(val.c_str(), nullptr);
 }
 
 void MarkerComboBox::update_widgets_from_marker(SPMarker* marker) {
@@ -333,14 +282,6 @@ void MarkerComboBox::update_widgets_from_marker(SPMarker* marker) {
 void MarkerComboBox::update_scale_link() {
     _link_scale.remove();
     _link_scale.add(get_widget<Gtk::Image>(_builder, _scale_linked ? "image-linked" : "image-unlinked"));
-
-    _scale_y.set_sensitive(!_scale_linked);
-    if (_scale_linked) {
-        // if scale is linked, then aspect ratio is assumed to be preserved
-        // TODO: this is not correct is aspect ration is not preserved;
-        // viewBox size should be taken into account to change Y in proportion to aspect ratio
-        _scale_y.set_value(_scale_x.get_value());
-    }
 }
 
 // update marker image inside the menu button
@@ -394,6 +335,7 @@ bool MarkerComboBox::MarkerItem::operator == (const MarkerItem& item) const {
         height == item.height;
 }
 
+// find marker object by ID in a document
 SPMarker* find_marker(SPDocument* document, const Glib::ustring& marker_id) {
     if (!document) return nullptr;
 
@@ -488,24 +430,27 @@ void MarkerComboBox::setDocument(SPDocument *document)
 
         if (_document) {
             modified_connection = _document->getDefs()->connectModified([=](SPObject*, unsigned int){
-                refreshHistory();
+                refresh_after_markers_modified();
             });
         }
 
         _current_marker_id = "";
 
-        refreshHistory();
+        refresh_after_markers_modified();
     }
 }
 
-void
-MarkerComboBox::refreshHistory()
-{
-    if (_updating) return;
+/**
+ * This function is invoked after document "defs" section changes.
+ * It will change when current marker's attributes are modified in this popup
+ * and this function will refresh the recent list and a preview to reflect the changes.
+ * It would be more efficient if there was a way to determine what has changed
+ * and perform only more targeted update.
+ */
+void MarkerComboBox::refresh_after_markers_modified() {
+    if (_update.pending()) return;
 
-    _updating = true;
-
-    std::vector<SPMarker *> ml = get_marker_list(_document);
+    auto scoped(_update.block());
 
     /*
      * Seems to be no way to get notified of changes just to markers,
@@ -514,13 +459,11 @@ MarkerComboBox::refreshHistory()
     */
    // TODO: detect changes to markers; ignore changes to everything else;
    // simple count check doesn't cut it, so just do it unconditionally for now
-    sp_marker_list_from_doc(_document, true);
+    marker_list_from_doc(_document, true);
 
     auto marker = find_marker_item(get_current());
     update_menu_btn(marker);
     update_preview(marker);
-
-    _updating = false;
 }
 
 Glib::RefPtr<MarkerComboBox::MarkerItem> MarkerComboBox::add_separator(bool filler) {
@@ -546,7 +489,7 @@ Glib::RefPtr<MarkerComboBox::MarkerItem> MarkerComboBox::add_separator(bool fill
 void
 MarkerComboBox::init_combo()
 {
-    if (_updating) return;
+    if (_update.pending()) return;
 
     static SPDocument *markers_doc = nullptr;
 
@@ -561,10 +504,10 @@ MarkerComboBox::init_combo()
 
     // load markers from markers.svg
     if (markers_doc) {
-        sp_marker_list_from_doc(markers_doc, false);
+        marker_list_from_doc(markers_doc, false);
     }
 
-    refreshHistory();
+    refresh_after_markers_modified();
 }
 
 /**
@@ -580,7 +523,7 @@ void MarkerComboBox::set_current(SPObject *marker)
 }
 
 void MarkerComboBox::update_ui(SPMarker* marker, bool select) {
-    _updating = true;
+    auto scoped(_update.block());
 
     auto id = marker ? marker->getId() : nullptr;
     _current_marker_id = id ? id : "";
@@ -594,8 +537,6 @@ void MarkerComboBox::update_ui(SPMarker* marker, bool select) {
     update_widgets_from_marker(marker);
     update_menu_btn(marker_item);
     update_preview(marker_item);
-
-    _updating = false;
 }
 
 /**
@@ -615,7 +556,7 @@ std::string MarkerComboBox::get_active_marker_uri()
         bool stockid = item->stock;
 
         std::string markurn = stockid ? "urn:inkscape:marker:" + item->id : item->id;
-        SPObject* mark = dynamic_cast<SPMarker*>(get_stock_item(markurn.c_str(), stockid));
+        auto mark = dynamic_cast<SPMarker*>(get_stock_item(markurn.c_str(), stockid));
 
         if (mark) {
             Inkscape::XML::Node* repr = mark->getRepr();
@@ -628,6 +569,8 @@ std::string MarkerComboBox::get_active_marker_uri()
             if (stockid) {
                 mark->getRepr()->setAttribute("inkscape:collect", "always");
             }
+            // adjust marker's attributes (or add missing ones) to stay in sync with marker tool
+            sp_validate_marker(mark, _document);
         }
     } else {
         marker = item->id;
@@ -637,17 +580,14 @@ std::string MarkerComboBox::get_active_marker_uri()
 }
 
 /**
- * Pick up all markers from source, except those that are in
- * current_doc (if non-NULL), and add items to the combo.
+ * Pick up all markers from source and add items to the list/store.
+ * If 'history' is true, then update recently used in-document portion of the list;
+ * otherwise update list of stock markers, which is displayed after recent ones
  */
-void MarkerComboBox::sp_marker_list_from_doc(SPDocument *source, gboolean history)
-{
-    std::vector<SPMarker *> ml = get_marker_list(source);
-
+void MarkerComboBox::marker_list_from_doc(SPDocument* source, bool history) {
+    std::vector<SPMarker*> markers = get_marker_list(source);
     remove_markers(history);
-
-    add_markers(ml, source, history);
-
+    add_markers(markers, source, history);
     update_store();
 }
 
@@ -690,10 +630,11 @@ void MarkerComboBox::update_store() {
     set_active(selected);
 }
 /**
- *  Returns a vector of markers in the defs of the given source document as a vector
- *  Returns empty vectorr if there are no markers in the document.
+ *  Returns a vector of markers in the defs of the given source document as a vector.
+ *  Returns empty vector if there are no markers in the document.
+ *  If validate is true then it runs each marker through the validation routine that alters some attributes.
  */
-std::vector<SPMarker *> MarkerComboBox::get_marker_list (SPDocument *source)
+std::vector<SPMarker*> MarkerComboBox::get_marker_list(SPDocument* source)
 {
     std::vector<SPMarker *> ml;
     if (source == nullptr) return ml;
@@ -706,8 +647,6 @@ std::vector<SPMarker *> MarkerComboBox::get_marker_list (SPDocument *source)
     for (auto& child: defs->children) {
         if (SP_IS_MARKER(&child)) {
             auto marker = SP_MARKER(&child);
-            // patch them up; viewPort is needed for size attributes to work
-            sp_validate_marker(marker, source);
             ml.push_back(marker);
         }
     }

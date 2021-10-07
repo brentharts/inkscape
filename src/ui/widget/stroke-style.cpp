@@ -498,8 +498,6 @@ void StrokeStyle::markerSelectCB(MarkerComboBox *marker_combo, SPMarkerLoc const
         return;
     }
 
-    update = true;
-
     SPDocument *document = desktop->getDocument();
     if (!document) {
         return;
@@ -507,6 +505,9 @@ void StrokeStyle::markerSelectCB(MarkerComboBox *marker_combo, SPMarkerLoc const
 
     /* Get Marker */
     std::string marker = marker_combo->get_active_marker_uri();
+    if (marker.empty()) return;
+
+    update = true;
 
     SPCSSAttr *css = sp_repr_css_attr_new();
     gchar const *combo_id = marker_combo->get_id();

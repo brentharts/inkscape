@@ -26,9 +26,9 @@
 
 #include "document.h"
 #include "inkscape.h"
-
-#include "display/drawing.h"
 #include "scrollprotected.h"
+#include "display/drawing.h"
+#include "ui/operation-blocker.h"
 
 class SPMarker;
 
@@ -59,7 +59,7 @@ public:
 
     void set_current(SPObject *marker);
     std::string get_active_marker_uri();
-    bool in_update() { return _updating; };
+    bool in_update() { return _update.pending(); };
     const char* get_id() { return _combo_id.c_str(); };
     int get_loc() { return _loc; };
 
@@ -113,7 +113,7 @@ private:
     guint32 _foreground_color;
     Glib::ustring _combo_id;
     int _loc;
-    bool _updating = false;
+    OperationBlocker _update;
     SPDocument *_document = nullptr;
     std::unique_ptr<SPDocument> _sandbox;
     Gtk::CellRendererPixbuf _image_renderer;
@@ -146,14 +146,14 @@ private:
     void set_active(Glib::RefPtr<MarkerItem> item);
     void init_combo();
     void set_history(Gtk::TreeModel::Row match_row);
-    void sp_marker_list_from_doc(SPDocument *source,  gboolean history);
-    std::vector <SPMarker*> get_marker_list (SPDocument *source);
+    void marker_list_from_doc(SPDocument* source, bool history);
+    std::vector<SPMarker*> get_marker_list(SPDocument* source);
     void add_markers (std::vector<SPMarker *> const& marker_list, SPDocument *source,  gboolean history);
     void remove_markers (gboolean history);
     std::unique_ptr<SPDocument> ink_markers_preview_doc(const Glib::ustring& group_id);
     Cairo::RefPtr<Cairo::Surface> create_marker_image(Geom::IntPoint pixel_size, gchar const *mname,
         SPDocument *source, Inkscape::Drawing &drawing, unsigned /*visionkey*/, bool checkerboard, bool no_clip, double scale);
-    void refreshHistory();
+    void refresh_after_markers_modified();
     sigc::connection modified_connection;
 };
 

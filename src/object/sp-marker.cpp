@@ -17,6 +17,7 @@
 
 #include <cstring>
 #include <string>
+#include <glib/gi18n.h>
 
 #include <2geom/affine.h>
 #include <2geom/transforms.h>
@@ -25,10 +26,15 @@
 #include "xml/repr.h"
 #include "attributes.h"
 #include "document.h"
+#include "document-undo.h"
 #include "preferences.h"
+#include "object/object-set.h"
 
 #include "sp-marker.h"
 #include "sp-defs.h"
+
+using Inkscape::DocumentUndo;
+using Inkscape::ObjectSet;
 
 class SPMarkerView {
 
@@ -563,6 +569,72 @@ SPObject *sp_marker_fork_if_necessary(SPObject *marker)
     SPObject *marker_new = static_cast<SPObject *>(doc->getObjectByRepr(mark_repr));
     Inkscape::GC::release(mark_repr);
     return marker_new;
+}
+
+void sp_marker_set_orient(SPMarker* marker, const char* value) {
+    if (!marker || !value) return;
+
+    marker->setAttribute("orient", value);
+
+    if (marker->document) {
+        DocumentUndo::maybeDone(marker->document, "marker", SP_VERB_DIALOG_FILL_STROKE, _("Set marker orientation"));
+    }
+}
+
+void sp_marker_set_size(SPMarker* marker, double sx, double sy) {
+    if (!marker) return;
+
+    marker->setAttribute("markerWidth", std::to_string(sx).c_str());
+    marker->setAttribute("markerHeight", std::to_string(sy).c_str());
+
+    if (marker->document) {
+        DocumentUndo::maybeDone(marker->document, "marker", SP_VERB_DIALOG_FILL_STROKE, _("Set marker size"));
+    }
+}
+
+void sp_marker_scale_with_stroke(SPMarker* marker, bool scale_with_stroke) {
+    if (!marker) return;
+
+    marker->setAttribute("markerUnits", scale_with_stroke ? "strokeWidth" : "userSpaceOnUse");
+
+    if (marker->document) {
+        DocumentUndo::maybeDone(marker->document, "marker", SP_VERB_DIALOG_FILL_STROKE, _("Set marker scale with stroke"));
+    }
+}
+
+void sp_marker_set_offset(SPMarker* marker, double dx, double dy) {
+    if (!marker) return;
+
+    marker->setAttribute("refX", std::to_string(dx).c_str());
+    marker->setAttribute("refY", std::to_string(dy).c_str());
+
+    if (marker->document) {
+        DocumentUndo::maybeDone(marker->document, "marker", SP_VERB_DIALOG_FILL_STROKE, _("Set marker offset"));
+    }
+}
+
+void sp_marker_set_uniform_scale(SPMarker* marker, bool uniform) {
+    if (!marker) return;
+
+    marker->setAttribute("preserveAspectRatio", uniform ? "xMidYMid" : "none");
+
+    if (marker->document) {
+        DocumentUndo::maybeDone(marker->document, "marker", SP_VERB_DIALOG_FILL_STROKE, _("Set marker uniform scaling"));
+    }
+}
+
+void sp_marker_flip_horizontally(SPMarker* marker) {
+    if (!marker) return;
+
+    ObjectSet set(marker->document);
+    set.addList(sp_item_group_item_list(marker));
+    Geom::OptRect bbox = set.visualBounds();
+    if (bbox) {
+        set.setScaleRelative(bbox->midpoint(), Geom::Scale(-1.0, 1.0));
+        if (marker->document) {
+            DocumentUndo::maybeDone(marker->document, "marker", SP_VERB_DIALOG_FILL_STROKE, _("Flip marker horizontally"));
+        }
+    }
 }
 
 /*

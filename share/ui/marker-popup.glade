@@ -23,14 +23,14 @@
   <object class="GtkAdjustment" id="adjustment-scale">
     <property name="lower">0.001</property>
     <property name="upper">10000</property>
-    <property name="step-increment">0.10</property>
-    <property name="page-increment">1</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">2</property>
   </object>
   <object class="GtkAdjustment" id="adjustment-scale-2">
     <property name="lower">0.001</property>
     <property name="upper">10000</property>
-    <property name="step-increment">0.10</property>
-    <property name="page-increment">1</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">2</property>
   </object>
   <object class="GtkImage" id="image-linked">
     <property name="visible">True</property>
