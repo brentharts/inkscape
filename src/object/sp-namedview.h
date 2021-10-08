@@ -74,6 +74,7 @@ public:
     guint32 guidehicolor;
     guint32 bordercolor;
     guint32 pagecolor;
+    guint32 blackoutcolor;
     guint32 pageshadow;
 
     std::vector<SPGuide *> guides;
@@ -94,6 +95,7 @@ public:
     void translateGrids(Geom::Translate const &translation);
     void scrollAllDesktops(double dx, double dy, bool is_scrolling);
     void writeNewGrid(SPDocument *document,int gridtype);
+    void toggleGuides();
     void setGuides(bool v);
     bool getGuides();
     void lockGuides();
