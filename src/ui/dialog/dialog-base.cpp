@@ -85,6 +85,20 @@ DialogBase::~DialogBase() {
     unsetDesktop();
 };
 
+void DialogBase::ensure_size() {
+    if (desktop) {
+        desktop->getToplevel()->resize_children();
+    }
+}
+
+void DialogBase::on_map() {
+    // Update asks the dialogs if they need their Gtk widgets updated.
+    update();
+    // Set the desktop on_map, although we might want to be smarter about this.
+    setDesktop(dynamic_cast<SPDesktop *>(_app->get_active_view()));
+    parent_type::on_map();
+}
+
 bool DialogBase::on_key_press_event(GdkEventKey* key_event) {
     switch (Inkscape::UI::Tools::get_latin_keyval(key_event)) {
         case GDK_KEY_Escape:
