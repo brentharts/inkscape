@@ -971,10 +971,9 @@ InkscapeApplication::on_activate()
         output = "-";
 
     } else if(prefs->getBool("/options/boot/enabled", true) && !_use_command_line_argument) {
-
         Inkscape::UI::Dialog::StartScreen start_screen;
 
-        //add start window to gtk_app to ensure proper closing on quit
+        // add start window to gtk_app to ensure proper closing on quit
         gtk_app()->add_window(start_screen);
 
         start_screen.run();
@@ -1559,9 +1558,9 @@ InkscapeApplication::on_new()
 void
 InkscapeApplication::on_quit()
 {
-    //Ensure closing the gtk_app windows
-    if(gtk_app()) {
-        for(auto window : gtk_app()->get_windows()) {
+    // Ensure closing the gtk_app windows
+    if (gtk_app()) {
+        for (auto window : gtk_app()->get_windows()) {
             window->close();
         }
     }
