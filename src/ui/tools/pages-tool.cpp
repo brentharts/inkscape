@@ -16,15 +16,19 @@
 #include <glibmm/i18n.h>
 
 #include "desktop.h"
+#include "display/control/canvas-item-curve.h"
 #include "display/control/canvas-item-bpath.h"
 #include "display/control/canvas-item-group.h"
 #include "display/control/canvas-item-rect.h"
+#include "display/control/snap-indicator.h"
 #include "document-undo.h"
 #include "include/macros.h"
 #include "object/sp-page.h"
 #include "path/path-outline.h"
+#include "pure-transform.h"
 #include "rubberband.h"
 #include "selection-chemistry.h"
+#include "snap.h"
 #include "ui/knot/knot.h"
 
 namespace Inkscape {
@@ -163,6 +167,7 @@ bool PagesTool::root_handler(GdkEvent *event)
                     dragging_item = page;
                     page_manager->selectPage(page);
                     addDragShapes(page, Geom::Affine());
+                    grabPage(page);
                 } else {
                     // Start making a new page.
                     dragging_item = nullptr;
@@ -209,6 +214,7 @@ bool PagesTool::root_handler(GdkEvent *event)
         creating_box = nullptr;
         clearDragShapes();
         visual_box->hide();
+        unsetupSnap();
         ret = true;
     } else if (creating_box) {
         visual_box->show();
@@ -219,14 +225,60 @@ bool PagesTool::root_handler(GdkEvent *event)
     return ret ? true : ToolBase::root_handler(event);
 }
 
+/**
+ * Creates the right snapping setup for dragging items around.
+ */
+void PagesTool::grabPage(SPPage *target)
+{
+    unsetupSnap();
+    snap_manager = &(desktop->namedview->snap_manager);
+    snap_manager->setup(desktop);
+
+    bool corners = true; //m.snapprefs.isTargetSnappable(SNAPTARGET_BBOX_CORNER, SNAPTARGET_ALIGNMENT_CATEGORY, SNAPTARGET_DISTRIBUTION_CATEGORY);
+    bool midpoint = true; //m.snapprefs.isTargetSnappable(SNAPTARGET_BBOX_MIDPOINT, SNAPTARGET_ALIGNMENT_CATEGORY, SNAPTARGET_DISTRIBUTION_CATEGORY);
+    bool edgepoint = true; //m.snapprefs.isTargetSnappable(SNAPTARGET_BBOX_EDGE_MIDPOINT);
+
+    _bbox_points.clear();
+    getBBoxPoints(target->getDesktopRect(), &_bbox_points, false, corners, edgepoint, midpoint);
+}
+
 /*
  * Generate the movement affine as the page is dragged around (including snapping)
  */
 Geom::Affine PagesTool::moveTo(Geom::Point xy)
 {
     Geom::Point dxy = xy - drag_origin_dt;
+
+    if (snap_manager) {
+        Inkscape::PureTranslate *bb = new Inkscape::PureTranslate(dxy);
+        snap_manager->snapTransformed(_bbox_points, drag_origin_dt, (*bb));
+
+        if (bb->best_snapped_point.getSnapped()) {
+            dxy = bb->getTranslationSnapped();
+            desktop->snapindicator->set_new_snaptarget(bb->best_snapped_point);
+        }
+    }
+
     return Geom::Translate(dxy);
 }
+
+/**
+ * Create the snapping for the resize boxes.
+ */
+void PagesTool::setupResizeSnap(SPPage *target)
+{
+    unsetupSnap();
+    // XXX Add all the resize points
+}
+
+void PagesTool::unsetupSnap()
+{
+    if (snap_manager) {
+      snap_manager->unSetup();
+      snap_manager = nullptr;
+    }
+}
+
 
 /**
  * Add all the shapes needed to see it being dragged.

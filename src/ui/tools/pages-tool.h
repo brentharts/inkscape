@@ -22,8 +22,10 @@
 class SPObject;
 class SPPage;
 class SPKnot;
+class SnapManager;
 
 namespace Inkscape {
+class SnapCandidatePoint;
 class CanvasItemGroup;
 class CanvasItemRect;
 class CanvasItemBpath;
@@ -59,7 +61,10 @@ private:
     void resizeKnotMoved(SPKnot *knot, Geom::Point const &ppointer, guint state);
     void pageModified(SPObject *object, guint flags);
 
+    void grabPage(SPPage *target);
     Geom::Affine moveTo(Geom::Point xy);
+    void setupResizeSnap(SPPage *target);
+    void unsetupSnap();
 
     sigc::connection _selector_changed_connection;
     sigc::connection _page_modified_connection;
@@ -69,6 +74,7 @@ private:
     Geom::Point drag_origin_dt;
     int drag_tolerance = 5;
 
+    SnapManager *snap_manager = nullptr;
     SPKnot *resize_knot = nullptr;
     SPPage *highlight_item = nullptr;
     SPPage *dragging_item = nullptr;
@@ -76,6 +82,8 @@ private:
     Inkscape::CanvasItemRect *visual_box = nullptr;
     Inkscape::CanvasItemGroup *drag_group = nullptr;
     std::vector<Inkscape::CanvasItemBpath *> drag_shapes;
+
+    std::vector<Inkscape::SnapCandidatePoint> _bbox_points;
 };
 
 } // namespace Tools
