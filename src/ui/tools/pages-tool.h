@@ -24,6 +24,7 @@ class SPPage;
 class SPKnot;
 
 namespace Inkscape {
+class CanvasItemGroup;
 class CanvasItemRect;
 class CanvasItemBpath;
 class PageManager;
@@ -48,13 +49,17 @@ public:
 private:
     void selectionChanged(SPPage *page);
     SPPage *pageUnder(Geom::Point pt);
-    void addDragShape(SPPage *page);
-    void addDragShape(SPItem *item);
-    void addDragShape(Geom::PathVector pth);
+    void addDragShapes(SPPage *page, Geom::Affine tr);
+    void addDragShape(SPPage *page, Geom::Affine tr);
+    void addDragShape(SPItem *item, Geom::Affine tr);
+    void addDragShape(Geom::PathVector pth, Geom::Affine tr);
+    void clearDragShapes();
     Inkscape::PageManager *getPageManager();
 
     void resizeKnotMoved(SPKnot *knot, Geom::Point const &ppointer, guint state);
     void pageModified(SPObject *object, guint flags);
+
+    Geom::Affine moveTo(Geom::Point xy);
 
     sigc::connection _selector_changed_connection;
     sigc::connection _page_modified_connection;
@@ -69,6 +74,7 @@ private:
     SPPage *dragging_item = nullptr;
     Geom::Rect *creating_box = nullptr;
     Inkscape::CanvasItemRect *visual_box = nullptr;
+    Inkscape::CanvasItemGroup *drag_group = nullptr;
     std::vector<Inkscape::CanvasItemBpath *> drag_shapes;
 };
 

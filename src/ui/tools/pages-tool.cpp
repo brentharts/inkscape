@@ -62,6 +62,12 @@ void PagesTool::finish()
         delete resize_knot;
         resize_knot = nullptr;
     }
+
+    if (drag_group) {
+        delete drag_group;
+        drag_group = nullptr;
+        drag_shapes.clear(); // Already deleted by group
+    }
 }
 
 void PagesTool::setup()
@@ -86,6 +92,10 @@ void PagesTool::setup()
         visual_box = new Inkscape::CanvasItemRect(desktop->getCanvasControls());
         visual_box->set_stroke(0x0000ff7f);
         visual_box->hide();
+    }
+    if (!drag_group) {
+        drag_group = new Inkscape::CanvasItemGroup(desktop->getCanvasTemp());
+        drag_group->set_name("CanvasItemGroup:PagesDragShapes");
     }
     if (auto page_manager = getPageManager()) {
         _selector_changed_connection =
@@ -136,12 +146,14 @@ bool PagesTool::root_handler(GdkEvent *event)
                 if (Geom::distance(drag_origin_w, point_w) < drag_tolerance) {
                     break;
                 }
+
                 if (dragging_item) {
                     // Continue to drag item.
-                    Geom::Affine tr = Geom::Translate(drag_origin_w).inverse() * Geom::Translate(point_w);
-                    for (auto &shape : drag_shapes) {
-                        shape->update(shape->get_parent()->get_affine() * tr);
-                    }
+                    Geom::Affine tr = moveTo(point_dt);
+                    // XXX Moving the existing shapes would be much better, but it has
+                    //  weird bug which stops it from working well.
+                    //drag_group->update(tr * drag_group->get_parent()->get_affine());
+                    addDragShapes(dragging_item, tr);
                 } else if (creating_box) {
                     // Continue to drag new box
                     delete creating_box;
@@ -149,14 +161,8 @@ bool PagesTool::root_handler(GdkEvent *event)
                 } else if (auto page = pageUnder(point_dt)) {
                     // Starting to drag page around the screen.
                     dragging_item = page;
-                    addDragShape(page);
-                    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-                    if (prefs->getBool("/tools/pages/move_objects", true)) {
-                        for (auto &item : page->getOverlappingItems()) {
-                            addDragShape(item);
-                        }
-                    }
                     page_manager->selectPage(page);
+                    addDragShapes(page, Geom::Affine());
                 } else {
                     // Start making a new page.
                     dragging_item = nullptr;
@@ -173,9 +179,8 @@ bool PagesTool::root_handler(GdkEvent *event)
 
             if (dragging_item) {
                 // conclude item here (move item to new location)
-                auto affine = Geom::Translate(drag_origin_dt).inverse() * Geom::Translate(point_dt);
                 Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-                dragging_item->movePage(affine, prefs->getBool("/tools/pages/move_objects", true));
+                dragging_item->movePage(moveTo(point_dt), prefs->getBool("/tools/pages/move_objects", true));
                 Inkscape::DocumentUndo::done(desktop->getDocument(), SP_VERB_NONE, "Move page position");
             } else if (creating_box) {
                 // conclude box here (make new page)
@@ -202,10 +207,7 @@ bool PagesTool::root_handler(GdkEvent *event)
     if (!mouse_is_pressed && (dragging_item || creating_box)) {
         dragging_item = nullptr;
         creating_box = nullptr;
-        for (auto &shape : drag_shapes) {
-            delete shape;
-        }
-        drag_shapes.clear();
+        clearDragShapes();
         visual_box->hide();
         ret = true;
     } else if (creating_box) {
@@ -217,32 +219,67 @@ bool PagesTool::root_handler(GdkEvent *event)
     return ret ? true : ToolBase::root_handler(event);
 }
 
+/*
+ * Generate the movement affine as the page is dragged around (including snapping)
+ */
+Geom::Affine PagesTool::moveTo(Geom::Point xy)
+{
+    Geom::Point dxy = xy - drag_origin_dt;
+    return Geom::Translate(dxy);
+}
+
+/**
+ * Add all the shapes needed to see it being dragged.
+ */
+void PagesTool::addDragShapes(SPPage *page, Geom::Affine tr)
+{
+    clearDragShapes();
+    addDragShape(page, tr);
+    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+    if (prefs->getBool("/tools/pages/move_objects", true)) {
+        for (auto &item : page->getOverlappingItems()) {
+            addDragShape(item, tr);
+        }
+    }
+}
+
 /**
  * Add a page the the things being dragged.
  */
-void PagesTool::addDragShape(SPPage *page)
+void PagesTool::addDragShape(SPPage *page, Geom::Affine tr)
 {
-    addDragShape(Geom::PathVector(Geom::Path(Geom::Rect(page->getDesktopRect()))));
+    addDragShape(Geom::PathVector(Geom::Path(Geom::Rect(page->getDesktopRect()))), tr);
 }
 
 /**
  * Add an SPItem to the things being dragged.
  */
-void PagesTool::addDragShape(SPItem *item)
+void PagesTool::addDragShape(SPItem *item, Geom::Affine tr)
 {
     auto shape = *item_to_outline(item);
-    addDragShape(shape * item->i2dt_affine());
+    addDragShape(shape * item->i2dt_affine(), tr);
 }
 
 /**
  * Add a shape to the set of dragging shapes, these are deleted when dragging stops.
  */
-void PagesTool::addDragShape(Geom::PathVector pth)
+void PagesTool::addDragShape(Geom::PathVector pth, Geom::Affine tr)
 {
-    auto shape = new CanvasItemBpath(desktop->getCanvasTemp(), pth, false);
+    auto shape = new CanvasItemBpath(drag_group, pth * tr, false);
     shape->set_stroke(0x00ff007f);
     shape->set_fill(0x00000000, SP_WIND_RULE_EVENODD);
     drag_shapes.push_back(shape);
+}
+
+/**
+ * Remove all drag shapes from the canvas.
+ */
+void PagesTool::clearDragShapes()
+{
+    for (auto &shape : drag_shapes) {
+        delete shape;
+    }
+    drag_shapes.clear();
 }
 
 /**
