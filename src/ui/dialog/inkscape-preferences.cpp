@@ -1846,12 +1846,6 @@ void InkscapePreferences::initPageUI()
     _win_save_geom_prefs.init ( _("Remember and use last window's geometry"), "/options/savewindowgeometry/value", PREFS_WINDOW_GEOMETRY_LAST, false, &_win_save_geom);
     _win_save_geom_off.init ( _("Don't save window geometry"), "/options/savewindowgeometry/value", PREFS_WINDOW_GEOMETRY_NONE, false, &_win_save_geom);
 
-    // _win_save_dialog_pos_on.init ( _("Save and restore dialogs status"), "/options/savedialogposition/value", PREFS_DIALOGS_STATE_SAVE, true, nullptr);
-    // _win_save_dialog_pos_off.init ( _("Don't save dialogs status"), "/options/savedialogposition/value", PREFS_DIALOGS_STATE_NONE, false, &_win_save_dialog_pos_on);
-
-    // _win_dockable.init ( _("Docked"), "/options/dialogtype/value", PREFS_DIALOGS_BEHAVIOR_DOCKABLE, true, nullptr);
-    // _win_floating.init ( _("Floating"), "/options/dialogtype/value", PREFS_DIALOGS_BEHAVIOR_FLOATING, false, &_win_dockable);
-
     _win_native.init ( _("Native open/save dialogs"), "/options/desktopintegration/value", 1, true, nullptr);
     _win_gtk.init ( _("GTK open/save dialogs"), "/options/desktopintegration/value", 0, false, &_win_native);
 
@@ -1889,12 +1883,6 @@ void InkscapePreferences::initPageUI()
     _page_windows.add_line( true, "", _win_save_geom, "",
                             _("Save and restore window geometry for each document (saves geometry in the document)"));
 
-    // _page_windows.add_group_header( _("Saving dialogs' status"));
-    // _page_windows.add_line( true, "", _win_save_dialog_pos_off, "",
-    //                         _("Don't save dialogs' status"));
-    // _page_windows.add_line( true, "", _win_save_dialog_pos_on, "",
-    //                         _("Save and restore dialogs' status (the last open windows dialogs are saved when it closes)"));
-
 #ifdef _WIN32
     _page_windows.add_group_header( _("Desktop integration"));
     _page_windows.add_line( true, "", _win_native, "",
@@ -1918,11 +1906,6 @@ void InkscapePreferences::initPageUI()
     };
     _page_windows.add_line(true, "Dialog behavior", *Gtk::make_managed<PrefRadioButtons>(dock, "/options/dialogtype/value"), "", "", false, reset_icon());
 
-    // _page_windows.add_line( true, "", _win_dockable, "",
-    //                         _("Docked"));
-    // _page_windows.add_line( true, "", _win_floating, "",
-    //                         _("Floating"));
-
 #ifndef _WIN32 // non-Win32 special code to enable transient dialogs
     std::vector<PrefItem> on_top = {
         { C_("Dialog on top", "None"), PREFS_DIALOGS_WINDOWS_NONE, _("Dialogs are treated as regular windows") },
@@ -1931,24 +1914,12 @@ void InkscapePreferences::initPageUI()
     };
     // _page_windows.add_group_header( _("Dialog on top:"));
     _page_windows.add_line(true, "Dialog on top", *Gtk::make_managed<PrefRadioButtons>(on_top, "/options/transientpolicy/value"), "", "");
-
-    // _page_windows.add_line( true, "", _win_ontop_none, "",
-    //                         _("Dialogs are treated as regular windows"));
-    // _page_windows.add_line( true, "", _win_ontop_normal, "",
-    //                         _("Dialogs stay on top of document windows"));
-    // _page_windows.add_line( true, "", _win_ontop_agressive, "",
-    //                         _("Same as Normal but may work better with some window managers"));
 #endif
     std::vector<PrefItem> labels = {
         { _("Automatic"), PREFS_NOTEBOOK_LABELS_AUTO, _("Dialog names will be displayed when there is enough space"), true },
         { _("Off"), PREFS_NOTBOOK_LABELS_OFF, _("Only show dialog icons") }
     };
-    // _page_windows.add_group_header( _("Dialog labels behavior (requires restart)"), 4);
     _page_windows.add_line(true, "Labels behavior", *Gtk::make_managed<PrefRadioButtons>(labels, "/options/notebooklabels/value"), "", "", false, reset_icon());
-
-    // _page_windows.add_group_header( _("Dialog labels behavior (requires restart)"));
-    // _page_windows.add_line( true, "", _win_dialogs_labels_auto, "", _("Dialog names will be displayed when there is enough space"));
-    // _page_windows.add_line( true, "", _win_dialogs_labels_off, "", _("Only show dialog icons"));
 
     auto save_dlg = Gtk::make_managed<PrefCheckButton>();
     save_dlg->init(_("Save and restore dialogs' status"), "/options/savedialogposition/value", true);
@@ -1971,10 +1942,6 @@ void InkscapePreferences::initPageUI()
                             _("Zoom drawing when document window is resized, to keep the same area visible (this is the default which can be changed in any window using the button above the right scrollbar)"));
     _page_windows.add_line( true, "", _win_save_viewport, "",
                             _("Save documents viewport (zoom and panning position). Useful to turn off when sharing version controlled files."));
-
-    // _win_save_dialog_pos_on.init ( _("Save and restore dialogs status"), "/options/savedialogposition/value", PREFS_DIALOGS_STATE_SAVE, true, nullptr);
-    // _win_save_dialog_pos_off.init ( _("Don't save dialogs status"), "/options/savedialogposition/value", PREFS_DIALOGS_STATE_NONE, false, &_win_save_dialog_pos_on);
-
 
     this->AddPage(_page_windows, _("Windows"), iter_ui, PREFS_PAGE_UI_WINDOWS);
 
