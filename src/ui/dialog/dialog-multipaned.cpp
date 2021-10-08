@@ -54,7 +54,7 @@ int get_drop_zone_size() {
 }
 
 int get_handle_size() {
-    return Inkscape::Preferences::get()->getBool("/options/dockingzone/value", true) ? (HANDLE_SIZE * 2 / 3) : HANDLE_SIZE;
+    return HANDLE_SIZE;
 }
 
 /* ============ MyDropZone ============ */
