@@ -77,11 +77,12 @@ DialogBase::DialogBase(gchar const *prefs_path, Glib::ustring dialog_type)
 }
 
 DialogBase::~DialogBase() {
-    // this is bad, but it supposedly fixes some resizng problem on Windows
 #ifdef _WIN32
+    // this is bad, but it supposedly fixes some resizng problem on Windows
     ensure_size();
-    unsetDesktop();
 #endif
+
+    unsetDesktop();
 };
 
 bool DialogBase::on_key_press_event(GdkEventKey* key_event) {
