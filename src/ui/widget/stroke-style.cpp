@@ -503,9 +503,8 @@ void StrokeStyle::markerSelectCB(MarkerComboBox *marker_combo, SPMarkerLoc const
         return;
     }
 
-    /* Get Marker */
+    // Get marker ID; could be empty (to remove marker)
     std::string marker = marker_combo->get_active_marker_uri();
-    if (marker.empty()) return;
 
     update = true;
 
