@@ -452,6 +452,10 @@ void MarkerComboBox::refresh_after_markers_modified() {
 
     auto scoped(_update.block());
 
+    // collect orphaned markers, so they are not listed; if they are listed then
+    // they disappear upon selection leaving dangling URLs
+    if (_document) _document->collectOrphans();
+
     /*
      * Seems to be no way to get notified of changes just to markers,
      * so listen to changes in all defs and check if the number of markers has changed here
