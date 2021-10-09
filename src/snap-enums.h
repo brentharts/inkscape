@@ -25,6 +25,11 @@ enum SnapSourceType { // When adding source types here, then also update Inkscap
     SNAPSOURCE_BBOX_CORNER,
     SNAPSOURCE_BBOX_MIDPOINT,
     SNAPSOURCE_BBOX_EDGE_MIDPOINT,
+
+    // Allow PAGES to be moved as BBOX (enabled alignment snapping)
+    SNAPSOURCE_PAGE_CENTER,
+    SNAPSOURCE_PAGE_CORNER,
+
     //-------------------------------------------------------------------
     // For the same reason, nodes will not snap to bbox points
     SNAPSOURCE_NODE_CATEGORY = 32, // will be used as a flag and must therefore be a power of two
@@ -50,9 +55,6 @@ enum SnapSourceType { // When adding source types here, then also update Inkscap
     SNAPSOURCE_TEXT_ANCHOR,
     SNAPSOURCE_OTHER_HANDLE, // eg. the handle of a gradient or of a connector (ie not being tied to a stroke)
     SNAPSOURCE_GRID_PITCH, // eg. when pasting or alt-dragging in the selector tool; not really a snap source
-
-    SNAPSOURCE_PAGE_CENTER,
-    SNAPSOURCE_PAGE_CORNER,
 
     //-------------------------------------------------------------------
     // Alignment snapping

@@ -38,6 +38,7 @@ enum SPGuideDragType { // used both here and in desktop-events.cpp
 
 class SPDocument;
 class SPGuide;
+class SPPage;
 class SPNamedView;
 
 namespace Inkscape {
@@ -370,6 +371,7 @@ public:
     SPNamedView const *getNamedView() const {return _named_view;}
     SPDocument *getDocument() const;
     SPGuide const *getGuideToIgnore() const;
+    SPPage const *getPageToIgnore() const;
 
     bool getSnapIndicator() const {return _snapindicator;}
 

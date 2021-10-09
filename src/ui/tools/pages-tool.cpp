@@ -29,6 +29,7 @@
 #include "rubberband.h"
 #include "selection-chemistry.h"
 #include "snap.h"
+#include "snap-preferences.h"
 #include "ui/knot/knot.h"
 
 namespace Inkscape {
@@ -232,14 +233,13 @@ void PagesTool::grabPage(SPPage *target)
 {
     unsetupSnap();
     snap_manager = &(desktop->namedview->snap_manager);
-    snap_manager->setup(desktop);
-
-    bool corners = true; //m.snapprefs.isTargetSnappable(SNAPTARGET_BBOX_CORNER, SNAPTARGET_ALIGNMENT_CATEGORY, SNAPTARGET_DISTRIBUTION_CATEGORY);
-    bool midpoint = true; //m.snapprefs.isTargetSnappable(SNAPTARGET_BBOX_MIDPOINT, SNAPTARGET_ALIGNMENT_CATEGORY, SNAPTARGET_DISTRIBUTION_CATEGORY);
-    bool edgepoint = true; //m.snapprefs.isTargetSnappable(SNAPTARGET_BBOX_EDGE_MIDPOINT);
+    snap_manager->setup(desktop, true, target);
 
     _bbox_points.clear();
-    getBBoxPoints(target->getDesktopRect(), &_bbox_points, false, corners, edgepoint, midpoint);
+    getBBoxPoints(target->getDesktopRect(), &_bbox_points, false,
+        SNAPSOURCE_PAGE_CORNER, SNAPTARGET_UNDEFINED,
+        SNAPSOURCE_UNDEFINED, SNAPTARGET_UNDEFINED,
+        SNAPSOURCE_PAGE_CENTER, SNAPTARGET_UNDEFINED);
 }
 
 /*
@@ -250,6 +250,13 @@ Geom::Affine PagesTool::moveTo(Geom::Point xy)
     Geom::Point dxy = xy - drag_origin_dt;
 
     if (snap_manager) {
+        snap_manager->snapprefs.clearTargetMask(0); // Disable all snapping targets
+        snap_manager->snapprefs.setTargetMask(SNAPTARGET_ALIGNMENT_CATEGORY, -1);
+        snap_manager->snapprefs.setTargetMask(SNAPTARGET_ALIGNMENT_PAGE_CORNER, -1);
+        snap_manager->snapprefs.setTargetMask(SNAPTARGET_ALIGNMENT_PAGE_CENTER, -1);
+        snap_manager->snapprefs.setTargetMask(SNAPTARGET_PAGE_CORNER, -1);
+        snap_manager->snapprefs.setTargetMask(SNAPTARGET_PAGE_CENTER, -1);
+
         Inkscape::PureTranslate *bb = new Inkscape::PureTranslate(dxy);
         snap_manager->snapTransformed(_bbox_points, drag_origin_dt, (*bb));
 
@@ -257,6 +264,8 @@ Geom::Affine PagesTool::moveTo(Geom::Point xy)
             dxy = bb->getTranslationSnapped();
             desktop->snapindicator->set_new_snaptarget(bb->best_snapped_point);
         }
+
+        snap_manager->snapprefs.clearTargetMask(-1); // Reset preferences
     }
 
     return Geom::Translate(dxy);

@@ -68,15 +68,18 @@ void Inkscape::AlignmentSnapper::_collectBBoxPoints(bool const &first_point) con
     // collect page corners and center
     if (_snapmanager->snapprefs.isTargetSnappable(SNAPTARGET_PAGE_CORNER)) {
         if (auto document = _snapmanager->getDocument()) {
+            auto ignore_page = _snapmanager->getPageToIgnore();
             if (auto pm = document->getNamedView()->getPageManager()) {
                 for (auto page : pm->getPages()) {
+                    if (ignore_page == page)
+                        continue;
                     getBBoxPoints(page->getDesktopRect(), _points_to_snap_to.get(), true,
                         SNAPSOURCE_ALIGNMENT_PAGE_CORNER, SNAPTARGET_ALIGNMENT_PAGE_CORNER,
                         SNAPSOURCE_UNDEFINED, SNAPTARGET_UNDEFINED, // No edges
                         SNAPSOURCE_ALIGNMENT_PAGE_CENTER, SNAPTARGET_ALIGNMENT_PAGE_CENTER);
                 }
             }
-            getBBoxPoints(document->getViewBox(), _points_to_snap_to.get(), true,
+            getBBoxPoints(document->preferredBounds(), _points_to_snap_to.get(), true,
                 SNAPSOURCE_ALIGNMENT_PAGE_CORNER, SNAPTARGET_ALIGNMENT_PAGE_CORNER,
                 SNAPSOURCE_UNDEFINED, SNAPTARGET_UNDEFINED, // No edges
                 SNAPSOURCE_ALIGNMENT_PAGE_CENTER, SNAPTARGET_ALIGNMENT_PAGE_CENTER);
@@ -137,11 +140,10 @@ void Inkscape::AlignmentSnapper::_snapBBoxPoints(IntermSnapResults &isr,
     bool success_x = false;
     bool success_y = false;
     bool intersection = false;
-    //bool strict_snapping = _snapmanager->snapprefs.getStrictSnapping();
+    bool strict_snapping = _snapmanager->snapprefs.getStrictSnapping();
 
     for (const auto & k : *_points_to_snap_to) {
-        // TODO:  add strict snapping checks from ObjectSnapper::_allowSourceToSnapToTarget(...)
-        if (true) {
+        if (_allowSourceToSnapToTarget(p.getSourceType(), k.getTargetType(), strict_snapping)) {
             Geom::Point target_pt = k.getPoint();
             // (unconstrained) distance from HORIZONTAL guide 
             Geom::Point point_on_x(p.getPoint().x(), target_pt.y());
@@ -226,6 +228,17 @@ void Inkscape::AlignmentSnapper::_snapBBoxPoints(IntermSnapResults &isr,
     }
 
 }
+
+bool Inkscape::AlignmentSnapper::_allowSourceToSnapToTarget(SnapSourceType source, SnapTargetType target, bool strict_snapping) const
+{
+    if (strict_snapping && (source == SNAPSOURCE_PAGE_CENTER || source == SNAPSOURCE_PAGE_CORNER)) {
+        // Restrict page alignment snapping to just other pages (no objects please!)
+        return target == SNAPTARGET_PAGE_CENTER || target == SNAPTARGET_PAGE_CORNER 
+            || target == SNAPTARGET_ALIGNMENT_PAGE_CENTER || target == SNAPTARGET_ALIGNMENT_PAGE_CORNER;
+    }   
+    return true;
+}
+
 
 void Inkscape::AlignmentSnapper::freeSnap(IntermSnapResults &isr,
                                           Inkscape::SnapCandidatePoint const &p,

@@ -100,8 +100,11 @@ void Inkscape::ObjectSnapper::_collectNodes(SnapSourceType const &t,
         // Consider the page border for snapping to
         if (_snapmanager->snapprefs.isTargetSnappable(SNAPTARGET_PAGE_CORNER)) {
             if (auto document = _snapmanager->getDocument()) {
+                auto ignore_page = _snapmanager->getPageToIgnore();
                 if (auto pm = document->getNamedView()->getPageManager()) {
                     for (auto page : pm->getPages()) {
+                        if (ignore_page == page)
+                            continue;
                         getBBoxPoints(page->getDesktopRect(), _points_to_snap_to.get(), true,
                             SNAPSOURCE_PAGE_CORNER, SNAPTARGET_PAGE_CORNER,
                             SNAPSOURCE_UNDEFINED, SNAPTARGET_UNDEFINED, // No edges
@@ -109,7 +112,7 @@ void Inkscape::ObjectSnapper::_collectNodes(SnapSourceType const &t,
                     }
                 }
                 // Only the corners get added here.
-                getBBoxPoints(document->getViewBox(), _points_to_snap_to.get(), false,
+                getBBoxPoints(document->preferredBounds(), _points_to_snap_to.get(), false,
                     SNAPSOURCE_UNDEFINED, SNAPTARGET_PAGE_CORNER,
                     SNAPSOURCE_UNDEFINED, SNAPTARGET_UNDEFINED,
                     SNAPSOURCE_UNDEFINED, SNAPTARGET_UNDEFINED);
