@@ -22,6 +22,7 @@
 #include <gtkmm.h>
 
 #include "message.h"
+#include "preferences.h"
 #include "ui/view/view-widget.h"
 #include "preferences.h"
 
@@ -219,6 +220,8 @@ private:
     GtkWidget *aux_toolbox;
     GtkWidget *commands_toolbox;
     GtkWidget *snap_toolbox;
+    Inkscape::PrefObserver _tb_icon_sizes1;
+    Inkscape::PrefObserver _tb_icon_sizes2;
 
     void namedviewModified(SPObject *obj, guint flags);
     int zoom_input(double *new_val);
