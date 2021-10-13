@@ -23,7 +23,7 @@
 void page_new(SPDocument *document)
 {
     if (auto manager = document->getNamedView()->getPageManager()) {
-        manager->newPage();
+        manager->selectPage(manager->newPage());
         Inkscape::DocumentUndo::done(document, SP_VERB_NONE, "New Automatic Page");
     }
 }
@@ -33,6 +33,22 @@ void page_delete(SPDocument *document)
     if (auto manager = document->getNamedView()->getPageManager()) {
         manager->deletePage();
         Inkscape::DocumentUndo::done(document, SP_VERB_NONE, "Delete Page");
+    }
+}
+
+void page_backward(SPDocument *document)
+{
+    if (auto manager = document->getNamedView()->getPageManager()) {
+        manager->shiftPagePosition(-1);
+        Inkscape::DocumentUndo::done(document, SP_VERB_NONE, "Shift Page Backwards");
+    }
+}
+
+void page_forward(SPDocument *document)
+{
+    if (auto manager = document->getNamedView()->getPageManager()) {
+        manager->shiftPagePosition(1);
+        Inkscape::DocumentUndo::done(document, SP_VERB_NONE, "Shift Page Forewards");
     }
 }
 
@@ -57,6 +73,8 @@ std::vector<std::vector<Glib::ustring>> raw_data_actions =
     {"doc.page-new",               N_("New Page"),                "Page",     N_("Create a new page")                                  },
     {"doc.page-delete",            N_("Delete Page"),             "Page",     N_("Delete the selected page")                           },
     {"doc.page-move-objects",      N_("Move Objects with Page"),  "Page",     N_("Move overlapping objects as the page is moved.")     },
+    {"doc.page-move-backward",     N_("Move Before Previous"),    "Page",     N_("Move page backwards in the page order")              },
+    {"doc.page-move-forward",      N_("Move After Next"),         "Page",     N_("Move page forwards in the page order")               },
     // clang-format on
 };
 
@@ -67,6 +85,8 @@ void add_actions_pages(SPDocument* doc)
     auto group = doc->getActionGroup();
     group->add_action("page-new", sigc::bind<SPDocument*>(sigc::ptr_fun(&page_new), doc));
     group->add_action("page-delete", sigc::bind<SPDocument*>(sigc::ptr_fun(&page_delete), doc));
+    group->add_action("page-move-backward", sigc::bind<SPDocument*>(sigc::ptr_fun(&page_backward), doc));
+    group->add_action("page-move-forward", sigc::bind<SPDocument*>(sigc::ptr_fun(&page_forward), doc));
     group->add_action_bool("page-move-objects", sigc::bind<SPDocument*>(sigc::ptr_fun(&set_move_objects), doc),
         prefs->getBool("/tools/pages/move_objects", true));
 

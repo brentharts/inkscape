@@ -58,6 +58,9 @@ private:
     Gtk::ComboBoxText *combo_page_sizes;
     Gtk::Entry *entry_page_sizes;
     Gtk::Entry *text_page_label;
+    Gtk::Label *label_page_pos;
+    Gtk::ToolButton *btn_page_backward;
+    Gtk::ToolButton *btn_page_foreward;
 
     std::vector<PaperSize *> page_sizes;
 };

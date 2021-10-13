@@ -42,8 +42,10 @@ public:
 
     // Returns None if no page selected
     SPPage *getSelected() const { return _selected_page; }
+    SPPage *getPage(int index) const;
     SPPage *getPageFor(SPItem *item, bool contains) const;
     bool hasPages() const { return !pages.empty(); }
+    int getPageCount() const { return pages.size(); }
     int getPageIndex(SPPage *page) const;
     int getSelectedPageIndex() const;
 
@@ -51,12 +53,14 @@ public:
     void disablePages();
     void pagesChanged();
     bool selectPage(SPPage *page);
-    bool selectPage(int page_index);
+    bool selectPage(int index) { return selectPage(getPage(index)); }
     bool selectPage(SPItem *item, bool contains) { return selectPage(getPageFor(item, contains)); }
     bool selectNextPage() { return selectPage(getSelectedPageIndex() + 1); }
     bool selectPrevPage() { return selectPage(getSelectedPageIndex() - 1); }
     bool hasNextPage() const { return getSelectedPageIndex() + 1 < pages.size(); }
     bool hasPrevPage() const { return getSelectedPageIndex() - 1 >= 0; }
+
+    void shiftPagePosition(int amount = 1);
 
     ColorRGBA getDefaultBackgroundColor() const { return ColorRGBA(background_color); }
 

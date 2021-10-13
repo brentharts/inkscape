@@ -39,6 +39,9 @@ PageToolbar::PageToolbar(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
 {
     builder->get_widget("page_sizes", combo_page_sizes);
     builder->get_widget("page_label", text_page_label);
+    builder->get_widget("page_pos", label_page_pos);
+    builder->get_widget("page_backward", btn_page_backward);
+    builder->get_widget("page_foreward", btn_page_foreward);
 
     if (text_page_label) {
         text_page_label->signal_changed().connect(sigc::mem_fun(*this, &PageToolbar::labelEdited));
@@ -92,6 +95,7 @@ void PageToolbar::labelEdited()
     if (_page_manager) {
         if (auto page = _page_manager->getSelected()) {
             page->setLabel(text.empty() ? nullptr : text.c_str());
+            DocumentUndo::maybeDone(_document, "page-relabel", SP_VERB_NONE, _("Relabel Page"));
         }
     }
 }
@@ -105,6 +109,7 @@ void PageToolbar::sizeChoose()
             auto smaller = ps->unit->convert(ps->smaller, "px");
             auto larger = ps->unit->convert(ps->larger, "px");
             _page_manager->resizePage(smaller, larger);
+            DocumentUndo::maybeDone(_document, "page-resize", SP_VERB_NONE, _("Resize Page"));
         }
     } catch (std::invalid_argument const &e) {
         // Ignore because user is typing into Entry
@@ -132,12 +137,23 @@ void PageToolbar::selectionChanged(SPPage *page)
         } else {
             text_page_label->set_text("");
         }
+
+        // Set the position label
+        gchar *pos = g_strdup_printf(_("%d/%d"), page->getPageNumber(), _page_manager->getPageCount());
+        label_page_pos->set_label(pos);
+        g_free(pos);
+
     } else {
         text_page_label->set_text("");
         text_page_label->set_sensitive(false);
         text_page_label->set_placeholder_text(_("No Page Selected"));
+        label_page_pos->set_label("-/0");
     }
-    // Set size widget with page size
+    // Set the forward and backward button sensitivities
+    btn_page_backward->set_sensitive(_page_manager->hasPrevPage());
+    btn_page_foreward->set_sensitive(_page_manager->hasNextPage());
+
+    // TODO Set size widget with page size
 }
 
 GtkWidget *PageToolbar::create(SPDesktop *desktop)

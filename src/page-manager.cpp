@@ -65,9 +65,8 @@ void PageManager::reorderPage(Inkscape::XML::Node *child)
 {
     auto nv = _document->getNamedView();
     pages.clear();
-    // Reverse order from children order, we want the top-down order.
-    for (auto rit = nv->children.rbegin(); rit != nv->children.rend(); ++rit) {
-        if (auto page = dynamic_cast<SPPage *>(&*rit)) {
+    for (auto &child : nv->children) {
+        if (auto page = dynamic_cast<SPPage *>(&child)) {
             pages.push_back(page);
         }
     }
@@ -164,6 +163,13 @@ void PageManager::deletePage()
     deletePage(_selected_page);
 }
 
+void PageManager::shiftPagePosition(int amount)
+{
+    if (_selected_page) {
+        _selected_page->setPageNumber(_selected_page->getPageNumber() + amount);
+    }
+}
+
 /**
  * Disables multi page supply by removing all the page objects.
  */
@@ -237,16 +243,16 @@ bool PageManager::selectPage(SPPage *page)
 }
 
 /**
- * Set the given page as the selected page.
+ * Get the page at the given positon or return nullptr if out of range.
  *
- * @param page_index - The page index (from 0) of the page to select.
+ * @param index - The page index (from 0) of the page.
  */
-bool PageManager::selectPage(int page_index)
+SPPage *PageManager::getPage(int index) const
 {
-    if (page_index >= 0 && page_index < pages.size()) {
-        return selectPage(pages[page_index]);
+    if (index < 0 || index >= pages.size()) {
+        return nullptr;
     }
-    return false;
+    return pages[index];
 }
 
 /**

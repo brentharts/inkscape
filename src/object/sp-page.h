@@ -41,6 +41,7 @@ public:
     void setSelected(bool selected);
     bool setDefaultAttributes(bool on_top, guint32 border, guint32 bg, int shadow);
     int getPageNumber();
+    bool setPageNumber(int position);
 
     Geom::Rect getRect() const;
     Geom::Rect getDesktopRect() const;

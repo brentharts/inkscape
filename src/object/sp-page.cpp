@@ -279,6 +279,37 @@ int SPPage::getPageNumber()
 }
 
 /**
+ * Set this page to a new position in the page stack.
+ *
+ * @param position - Placement of page in the stack, starting at '1'
+ * @returns true if page has been moved.
+ */
+bool SPPage::setPageNumber(int position)
+{
+    if (position < 1) {
+        position = 1;
+    }
+
+    g_warning("Setting page number to: %d", position);
+    int current = getPageNumber();
+    if (current != position && _manager) {
+        auto sibling = _manager->getPage(position - 2);
+        if (sibling) {
+            g_warning("Reordering to after %s.", sibling->getId());
+            //parent->appendChild(this->getRepr(), sibling->getRepr());
+            getRepr()->parent()->changeOrder(getRepr(), sibling->getRepr());
+        } else {
+            g_warning("Appendng it to the end...");
+            //parent->appendChild(this->getRepr());
+            getRepr()->parent()->changeOrder(getRepr(), nullptr);
+        }
+        //parent->attach(this, sibling);
+        return true;
+    }
+    return false;
+}
+
+/**
  * Move the page by the given affine, in desktop units.
  *
  * @param translate - The positional translation to apply.
