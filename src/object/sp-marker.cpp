@@ -376,8 +376,9 @@ void sp_validate_marker(SPMarker *sp_marker, SPDocument *doc) {
     sp_marker->setAttribute("markerHeight", std::to_string(sp_marker->viewBox.height() * yScale));
 
     if(!sp_marker->aspect_set) {
-        // allow non uniform scaling unless the user explicitly sets "uniform" scaling through the marker UI
-        sp_marker->setAttribute("preserveAspectRatio", "none");
+        // feedback from UX expert indicates that uniform scaling should be used by default;
+        // marker tool should respect aspect ratio setting too (without Ctrl key modifier?)
+        sp_marker->setAttribute("preserveAspectRatio", "xMidYMid");
     }
 }
 
