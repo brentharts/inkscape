@@ -31,6 +31,7 @@ public:
     ~SPPage() override = default;
 
     void movePage(Geom::Affine translate, bool with_objects);
+    void swapPage(SPPage *other, bool with_objects);
     void showPage(SPDesktop *desktop, Inkscape::CanvasItemGroup *, Inkscape::CanvasItemGroup *);
     void hidePage(Inkscape::UI::Widget::Canvas *canvas);
     void showPage();
@@ -40,8 +41,13 @@ public:
 
     void setSelected(bool selected);
     bool setDefaultAttributes(bool on_top, guint32 border, guint32 bg, int shadow);
-    int getPageNumber();
-    bool setPageNumber(int position);
+    int getPageIndex();
+    int getPagePosition() { return getPageIndex() + 1; }
+    bool setPageIndex(int index, bool swap_page);
+    bool setPagePosition(int position, bool swap_page) { return setPageIndex(position - 1, swap_page); }
+
+    SPPage *getNextPage();
+    SPPage *getPreviousPage();
 
     Geom::Rect getRect() const;
     Geom::Rect getDesktopRect() const;

@@ -134,7 +134,7 @@ void PageToolbar::selectionChanged(SPPage *page)
     if (page) {
         text_page_label->set_sensitive(true);
 
-        gchar *format = g_strdup_printf(_("Page %d"), page->getPageNumber());
+        gchar *format = g_strdup_printf(_("Page %d"), page->getPagePosition());
         text_page_label->set_placeholder_text(format);
         g_free(format);
 
@@ -145,7 +145,7 @@ void PageToolbar::selectionChanged(SPPage *page)
         }
 
         // Set the position label
-        gchar *pos = g_strdup_printf(_("%d/%d"), page->getPageNumber(), _page_manager->getPageCount());
+        gchar *pos = g_strdup_printf(_("%d/%d"), page->getPagePosition(), _page_manager->getPageCount());
         label_page_pos->set_label(pos);
         g_free(pos);
 

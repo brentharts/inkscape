@@ -136,7 +136,7 @@ void PageSelector::renderPageLabel(Gtk::TreeModel::const_iterator const &row)
     SPPage *page = (*row)[_model_columns.object];
 
     if (page && page->getRepr()) {
-        int page_num = page->getPageNumber();
+        int page_num = page->getPagePosition();
 
         gchar *format;
         if (auto label = page->label()) {

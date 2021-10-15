@@ -62,8 +62,6 @@ public:
     bool hasNextPage() const { return getSelectedPageIndex() + 1 < pages.size(); }
     bool hasPrevPage() const { return getSelectedPageIndex() - 1 >= 0; }
 
-    void shiftPagePosition(int amount = 1);
-
     ColorRGBA getDefaultBackgroundColor() const { return ColorRGBA(background_color); }
 
     void zoomToPage(SPDesktop *desktop, SPPage *page);

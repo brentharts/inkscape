@@ -163,13 +163,6 @@ void PageManager::deletePage()
     deletePage(_selected_page);
 }
 
-void PageManager::shiftPagePosition(int amount)
-{
-    if (_selected_page) {
-        _selected_page->setPageNumber(_selected_page->getPageNumber() + amount);
-    }
-}
-
 /**
  * Disables multi page supply by removing all the page objects.
  */

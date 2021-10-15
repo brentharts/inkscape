@@ -39,16 +39,22 @@ void page_delete(SPDocument *document)
 void page_backward(SPDocument *document)
 {
     if (auto manager = document->getNamedView()->getPageManager()) {
-        manager->shiftPagePosition(-1);
-        Inkscape::DocumentUndo::done(document, SP_VERB_NONE, "Shift Page Backwards");
+        if (auto page = manager->getSelected()) {
+            if (page->setPageIndex(page->getPageIndex() - 1, true)) {
+                Inkscape::DocumentUndo::done(document, SP_VERB_NONE, "Shift Page Backwards");
+            }
+        }
     }
 }
 
 void page_forward(SPDocument *document)
 {
     if (auto manager = document->getNamedView()->getPageManager()) {
-        manager->shiftPagePosition(1);
-        Inkscape::DocumentUndo::done(document, SP_VERB_NONE, "Shift Page Forewards");
+        if (auto page = manager->getSelected()) {
+            if (page->setPageIndex(page->getPageIndex() + 1, true)) {
+                Inkscape::DocumentUndo::done(document, SP_VERB_NONE, "Shift Page Forewards");
+            }
+        }
     }
 }
 

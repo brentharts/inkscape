@@ -270,50 +270,82 @@ void SPPage::setSelected(bool sel)
 /**
  * Returns the page number (order of pages) starting at 1
  */
-int SPPage::getPageNumber()
+int SPPage::getPageIndex()
 {
     if (_manager) {
-        return _manager->getPageIndex(this) + 1;
+        return _manager->getPageIndex(this);
     }
     return -5;
 }
 
 /**
- * Set this page to a new position in the page stack.
+ * Set this page to a new order in the page stack.
  *
- * @param position - Placement of page in the stack, starting at '1'
+ * @param index - Placement of page in the stack, starting at '0'
+ * @param swap_page - Swap the rectangle position
+ *
  * @returns true if page has been moved.
  */
-bool SPPage::setPageNumber(int position)
+bool SPPage::setPageIndex(int index, bool swap_page)
 {
-    int current = getPageNumber();
+    int current = getPageIndex();
 
-    // Insertions are done to the right of the sibling
-    if (position < current) {
-        position -= 1;
-    }
+    if (_manager && current != index) {
+        // The page we're going to be shifting to
+        auto sibling = _manager->getPage(index);
 
-    if (current != position && _manager) {
-        auto sibling = _manager->getPage(position - 1);
-
-        // We may have selected a position off the end, so attach it after the last page.
-        if (!sibling && position > 1) {
-            sibling = _manager->getLastPage();
+        // Insertions are done to the right of the sibling
+        if (index < current) {
+            index -= 1;
         }
-        if (sibling) {
-            if (this == sibling) {
-                g_warning("Page is already at this position. Not moving.");
+        auto insert_after = _manager->getPage(index);
+
+        // We may have selected an index off the end, so attach it after the last page.
+        if (!insert_after && index > 0) {
+            insert_after = _manager->getLastPage();
+            sibling = nullptr; // disable swap
+        }
+
+        if (insert_after) {
+            if (this == insert_after) {
+                g_warning("Page is already at this index. Not moving.");
                 return false;
             }
-            // Attach after the given sibling.
-            getRepr()->parent()->changeOrder(getRepr(), sibling->getRepr());
+            // Attach after the given page
+            getRepr()->parent()->changeOrder(getRepr(), insert_after->getRepr());
         } else {
-            // Attach to before any existing sibling.
+            // Attach to before any existing page
+            sibling = _manager->getFirstPage();
             getRepr()->parent()->changeOrder(getRepr(), nullptr);
+        }
+        if (sibling && swap_page) {
+            swapPage(sibling, true);
         }
         return true;
     }
     return false;
+}
+
+/**
+ * Returns the sibling page next to this one in the stack order.
+ */
+SPPage *SPPage::getNextPage()
+{
+    if (_manager) {
+        _manager->getPage(getPageIndex() + 1);
+    }
+    return nullptr;
+}
+
+/**
+ * Returns the sibling page previous to this one in the stack order.
+ */
+SPPage *SPPage::getPreviousPage()
+{
+    if (_manager) {
+        _manager->getPage(getPageIndex() - 1);
+    }
+    return nullptr;
 }
 
 /**
@@ -335,6 +367,20 @@ void SPPage::movePage(Geom::Affine translate, bool with_objects)
         }
         setDesktopRect(getDesktopRect() * translate);
     }
+}
+
+/**
+ * Swap the locations of this page with another page (see movePage)
+ *
+ * @param other - The other page to swap with
+ * @param with_objects - Should the page objects move too.
+ */
+void SPPage::swapPage(SPPage *other, bool with_objects)
+{
+    auto this_affine = Geom::Translate(getDesktopRect().corner(0));
+    auto other_affine = Geom::Translate(other->getDesktopRect().corner(0));
+    movePage(this_affine.inverse() * other_affine, with_objects);
+    other->movePage(other_affine.inverse() * this_affine, with_objects);
 }
 
 /**
