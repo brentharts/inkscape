@@ -90,6 +90,8 @@ void PageSelector::setDocument(SPDocument *document)
 
 void PageSelector::pagesChanged()
 {
+    _selector_changed_connection.block();
+
     // Destroy all existing pages in the model.
     while (!_page_model->children().empty()) {
         Gtk::ListStore::iterator row(_page_model->children().begin());
@@ -105,6 +107,8 @@ void PageSelector::pagesChanged()
     }
 
     selectonChanged(_page_manager->getSelected());
+
+    _selector_changed_connection.unblock();
 }
 
 void PageSelector::selectonChanged(SPPage *page)
@@ -112,7 +116,9 @@ void PageSelector::selectonChanged(SPPage *page)
     _next_button.set_sensitive(_page_manager->hasNextPage());
     _prev_button.set_sensitive(_page_manager->hasPrevPage());
 
-    if (_selector.get_active()->get_value(_model_columns.object) != page) {
+    auto active = _selector.get_active();
+
+    if (!active || active->get_value(_model_columns.object) != page) {
         for (auto row : _page_model->children()) {
             if (page == row->get_value(_model_columns.object)) {
                 _selector.set_active(row);

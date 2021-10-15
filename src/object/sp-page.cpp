@@ -286,24 +286,31 @@ int SPPage::getPageNumber()
  */
 bool SPPage::setPageNumber(int position)
 {
-    if (position < 1) {
-        position = 1;
+    int current = getPageNumber();
+
+    // Insertions are done to the right of the sibling
+    if (position < current) {
+        position -= 1;
     }
 
-    g_warning("Setting page number to: %d", position);
-    int current = getPageNumber();
     if (current != position && _manager) {
-        auto sibling = _manager->getPage(position - 2);
+        auto sibling = _manager->getPage(position - 1);
+
+        // We may have selected a position off the end, so attach it after the last page.
+        if (!sibling && position > 1) {
+            sibling = _manager->getLastPage();
+        }
         if (sibling) {
-            g_warning("Reordering to after %s.", sibling->getId());
-            //parent->appendChild(this->getRepr(), sibling->getRepr());
+            if (this == sibling) {
+                g_warning("Page is already at this position. Not moving.");
+                return false;
+            }
+            // Attach after the given sibling.
             getRepr()->parent()->changeOrder(getRepr(), sibling->getRepr());
         } else {
-            g_warning("Appendng it to the end...");
-            //parent->appendChild(this->getRepr());
+            // Attach to before any existing sibling.
             getRepr()->parent()->changeOrder(getRepr(), nullptr);
         }
-        //parent->attach(this, sibling);
         return true;
     }
     return false;

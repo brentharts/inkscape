@@ -43,6 +43,8 @@ public:
     // Returns None if no page selected
     SPPage *getSelected() const { return _selected_page; }
     SPPage *getPage(int index) const;
+    SPPage *getFirstPage() const { return getPage(0); }
+    SPPage *getLastPage() const { return getPage(pages.size() - 1); }
     SPPage *getPageFor(SPItem *item, bool contains) const;
     bool hasPages() const { return !pages.empty(); }
     int getPageCount() const { return pages.size(); }

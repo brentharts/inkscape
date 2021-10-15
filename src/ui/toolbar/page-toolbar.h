@@ -50,10 +50,12 @@ private:
     PageManager *_page_manager;
 
     void toolChanged(SPDesktop *desktop, Inkscape::UI::Tools::ToolBase *ec);
+    void pagesChanged();
     void selectionChanged(SPPage *page);
 
     sigc::connection _ec_connection;
-    sigc::connection _page_connection;
+    sigc::connection _pages_changed;
+    sigc::connection _page_selected;
 
     Gtk::ComboBoxText *combo_page_sizes;
     Gtk::Entry *entry_page_sizes;

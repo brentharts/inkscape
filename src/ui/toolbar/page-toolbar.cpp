@@ -71,8 +71,8 @@ PageToolbar::~PageToolbar()
 void PageToolbar::toolChanged(SPDesktop *desktop, Inkscape::UI::Tools::ToolBase *ec)
 {
     // Disconnect previous page changed signal
-    if (_page_connection) {
-        _page_connection.disconnect();
+    if (_page_selected) {
+        _page_selected.disconnect();
         _document = nullptr;
         _page_manager = nullptr;
     }
@@ -81,9 +81,10 @@ void PageToolbar::toolChanged(SPDesktop *desktop, Inkscape::UI::Tools::ToolBase 
         if (_document = desktop->getDocument()) {
             if (_page_manager = _document->getNamedView()->getPageManager()) {
                 // Connect the page changed signal and indicate changed
-                _page_connection =
-                    _page_manager->connectPageSelected(sigc::mem_fun(*this, &PageToolbar::selectionChanged));
-                selectionChanged(_page_manager->getSelected());
+                _pages_changed = _page_manager->connectPagesChanged(sigc::mem_fun(*this, &PageToolbar::pagesChanged));
+                _page_selected = _page_manager->connectPageSelected(sigc::mem_fun(*this, &PageToolbar::selectionChanged));
+                // Update everything now.
+                pagesChanged();
             }
         }
     }
@@ -120,6 +121,11 @@ void PageToolbar::sizeChanged()
 {
     auto size = combo_page_sizes->get_active_text();
     entry_page_sizes->set_text("Not Implemented!");
+}
+
+void PageToolbar::pagesChanged()
+{
+    selectionChanged(_page_manager->getSelected());
 }
 
 void PageToolbar::selectionChanged(SPPage *page)
