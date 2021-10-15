@@ -263,6 +263,22 @@ SPPage *PageManager::getPageFor(SPItem *item, bool contains) const
 }
 
 /**
+ * Returns the total area of all the pages in desktop units.
+ */
+Geom::OptRect PageManager::getDesktopRect() const
+{
+    Geom::OptRect total_area;
+    for (auto &page : pages) {
+        if (total_area) {
+            total_area->unionWith(page->getDesktopRect());
+        } else {
+            total_area = page->getDesktopRect();
+        }
+    }
+    return total_area;
+}
+
+/**
  * Center/zoom on the given page.
  */
 void PageManager::zoomToPage(SPDesktop *desktop, SPPage *page)

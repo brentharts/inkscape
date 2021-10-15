@@ -46,6 +46,7 @@ public:
     SPPage *getFirstPage() const { return getPage(0); }
     SPPage *getLastPage() const { return getPage(pages.size() - 1); }
     SPPage *getPageFor(SPItem *item, bool contains) const;
+    Geom::OptRect getDesktopRect() const;
     bool hasPages() const { return !pages.empty(); }
     int getPageCount() const { return pages.size(); }
     int getPageIndex(SPPage *page) const;
