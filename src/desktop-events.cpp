@@ -492,11 +492,11 @@ void snoop_extended(GdkEvent* event, SPDesktop *desktop)
     switch ( event->type ) {
         case GDK_MOTION_NOTIFY:
         {
-             source_device = gdk_event_get_source_device (event);
+            source_device = gdk_event_get_source_device (event);
             if ( source_device ) {
                 source = gdk_device_get_source(source_device);
                 name = gdk_device_get_name(source_device);
-             }
+            }
         }
         break;
 
@@ -509,7 +509,7 @@ void snoop_extended(GdkEvent* event, SPDesktop *desktop)
             if ( source_device ) {
                 source = gdk_device_get_source(source_device);
                 name = gdk_device_get_name(source_device);
-             }
+            }
         }
         break;
 
