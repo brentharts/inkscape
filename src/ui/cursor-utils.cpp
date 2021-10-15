@@ -28,6 +28,8 @@
 
 #include "util/units.h"
 
+#include "svg/css-ostringstream.h"
+
 using Inkscape::IO::Resource::SYSTEM;
 using Inkscape::IO::Resource::ICONS;
 
@@ -122,13 +124,16 @@ load_svg_cursor(Glib::RefPtr<Gdk::Display> display,
                   << std::setfill ('0') << std::setw(6)
                   << std::hex << (stroke >> 8);
 
-    std::string fill_opacity_string = std::to_string(fill_opacity);
-    std::string stroke_opacity_string = std::to_string(stroke_opacity);
+    Inkscape::CSSOStringStream os_fill_opacity;
+    Inkscape::CSSOStringStream os_stroke_opacity;
+
+    os_fill_opacity   << fill_opacity;
+    os_stroke_opacity << stroke_opacity;
 
     sp_repr_css_set_property(css, "fill",   fill_stream.str().c_str());
     sp_repr_css_set_property(css, "stroke", stroke_stream.str().c_str());
-    sp_repr_css_set_property(css, "fill-opacity",   fill_opacity_string.c_str());
-    sp_repr_css_set_property(css, "stroke-opacity", stroke_opacity_string.c_str());
+    sp_repr_css_set_property(css, "fill-opacity",   os_fill_opacity.str().c_str());
+    sp_repr_css_set_property(css, "stroke-opacity", os_stroke_opacity.str().c_str());
     root->changeCSS(css, "style");
     sp_repr_css_attr_unref(css);
 
