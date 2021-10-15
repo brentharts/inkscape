@@ -486,16 +486,17 @@ static void init_extended()
 void snoop_extended(GdkEvent* event, SPDesktop *desktop)
 {
     GdkInputSource source = GDK_SOURCE_MOUSE;
+    GdkDevice *source_device;
     std::string name;
 
     switch ( event->type ) {
         case GDK_MOTION_NOTIFY:
         {
-            GdkEventMotion* event2 = reinterpret_cast<GdkEventMotion*>(event);
-            if ( event2->device ) {
-                source = gdk_device_get_source(event2->device);
-                name = gdk_device_get_name(event2->device);
-            }
+             source_device = gdk_event_get_source_device (event);
+            if ( source_device ) {
+                source = gdk_device_get_source(source_device);
+                name = gdk_device_get_name(source_device);
+             }
         }
         break;
 
@@ -504,20 +505,20 @@ void snoop_extended(GdkEvent* event, SPDesktop *desktop)
         case GDK_3BUTTON_PRESS:
         case GDK_BUTTON_RELEASE:
         {
-            GdkEventButton* event2 = reinterpret_cast<GdkEventButton*>(event);
-            if ( event2->device ) {
-                source = gdk_device_get_source(event2->device);
-                name = gdk_device_get_name(event2->device);
-            }
+            source_device = gdk_event_get_source_device (event);
+            if ( source_device ) {
+                source = gdk_device_get_source(source_device);
+                name = gdk_device_get_name(source_device);
+             }
         }
         break;
 
         case GDK_SCROLL:
         {
-            GdkEventScroll* event2 = reinterpret_cast<GdkEventScroll*>(event);
-            if ( event2->device ) {
-                source = gdk_device_get_source(event2->device);
-                name = gdk_device_get_name(event2->device);
+            source_device = gdk_event_get_source_device (event);
+            if ( source_device ) {
+                source = gdk_device_get_source(source_device);
+                name = gdk_device_get_name(source_device);
             }
         }
         break;
@@ -525,10 +526,10 @@ void snoop_extended(GdkEvent* event, SPDesktop *desktop)
         case GDK_PROXIMITY_IN:
         case GDK_PROXIMITY_OUT:
         {
-            GdkEventProximity* event2 = reinterpret_cast<GdkEventProximity*>(event);
-            if ( event2->device ) {
-                source = gdk_device_get_source(event2->device);
-                name = gdk_device_get_name(event2->device);
+            source_device = gdk_event_get_source_device (event);
+            if ( source_device ) {
+                source = gdk_device_get_source(source_device);
+                name = gdk_device_get_name(source_device);
             }
         }
         break;
