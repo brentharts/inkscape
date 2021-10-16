@@ -1903,7 +1903,7 @@ void InkscapePreferences::initPageUI()
         { _("Docked"), PREFS_DIALOGS_BEHAVIOR_DOCKABLE, _("Allow dialog docking"), true },
         { _("Floating"), PREFS_DIALOGS_BEHAVIOR_FLOATING, _("Disable dialog docking") }
     };
-    _page_windows.add_line(true, "Dialog behavior", *Gtk::make_managed<PrefRadioButtons>(dock, "/options/dialogtype/value"), "", "", false, reset_icon());
+    _page_windows.add_line(true, _("Dialog behavior"), *Gtk::make_managed<PrefRadioButtons>(dock, "/options/dialogtype/value"), "", "", false, reset_icon());
 
 #ifndef _WIN32 // non-Win32 special code to enable transient dialogs
     std::vector<PrefItem> on_top = {
@@ -1911,14 +1911,13 @@ void InkscapePreferences::initPageUI()
         { _("Normal"),    PREFS_DIALOGS_WINDOWS_NORMAL,     _("Dialogs stay on top of document windows"), true },
         { _("Aggresive"), PREFS_DIALOGS_WINDOWS_AGGRESSIVE, _("Same as Normal but may work better with some window managers") }
     };
-    // _page_windows.add_group_header( _("Dialog on top:"));
-    _page_windows.add_line(true, "Dialog on top", *Gtk::make_managed<PrefRadioButtons>(on_top, "/options/transientpolicy/value"), "", "");
+    _page_windows.add_line(true, _("Dialog on top"), *Gtk::make_managed<PrefRadioButtons>(on_top, "/options/transientpolicy/value"), "", "");
 #endif
     std::vector<PrefItem> labels = {
         { _("Automatic"), PREFS_NOTEBOOK_LABELS_AUTO, _("Dialog names will be displayed when there is enough space"), true },
         { _("Off"), PREFS_NOTBOOK_LABELS_OFF, _("Only show dialog icons") }
     };
-    _page_windows.add_line(true, "Labels behavior", *Gtk::make_managed<PrefRadioButtons>(labels, "/options/notebooklabels/value"), "", "", false, reset_icon());
+    _page_windows.add_line(true, _("Labels behavior"), *Gtk::make_managed<PrefRadioButtons>(labels, "/options/notebooklabels/value"), "", "", false, reset_icon());
 
     auto save_dlg = Gtk::make_managed<PrefCheckButton>();
     save_dlg->init(_("Save and restore dialogs' status"), "/options/savedialogposition/value", true);
