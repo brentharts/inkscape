@@ -50,13 +50,8 @@ jhbuild_configure
 
 if ! $CI_GITLAB; then     # not running GitLab CI
 
-  if [ -d "$INK_DIR"/.git ]; then   # Already cloned?
-    # Special treatment 1/2 for local builds: Leave it up to the
-    # user if they need a fresh clone. This way we enable making changes
-    # to the code and running the build again.
-    echo_w "using existing repository in $INK_DIR"
-    echo_w "Do 'rm -rf $INK_DIR' if you want a fresh clone."
-    sleep 5
+  if [ -d "$INK_DIR" ]; then   # Sourcecode directory already there?
+    echo_i "using existing source $INK_DIR"
   else
     git clone \
       --branch "$INK_BRANCH" \
@@ -66,9 +61,9 @@ if ! $CI_GITLAB; then     # not running GitLab CI
       "$INK_URL" "$INK_DIR"
   fi
 
-  if ! $CI && [ -d "$INK_BLD_DIR" ]; then   # Running locally and build exists?
-    # Special treatment 2/2 for local builds: remove the build directory
-    # to ensure clean builds.
+  # Remove files from a previous build if they exist. This is to ensure clean
+  # builds when running locally or on non-ephemeral runners.
+  if [ -d "$INK_BLD_DIR" ]; then
     rm -rf "$INK_BLD_DIR"
   fi
 fi
@@ -88,34 +83,11 @@ ninja
 ninja install
 ninja tests
 
-#--------------------------------------------- make library link paths canonical
+#----------------------------------- make libraries work for unpackaged Inkscape
 
-# Most libraries are linked to with their fully qualified paths. Some of them
-# have been linked to using '@rpath', which we are not setting, therefore
-# breaking the binary. Since we want Inkscape to work in unpackaged form as
-# well, we adjust all offending paths to use qualified paths.
-# (They will be re-adjusted later to use relative location inside the
-# application bundle.)
-#
-# example 'ldd /Users/Shared/work/0.47/lib/inkscape/libinkscape_base.dylib':
-#
-#   /Users/Shared/work/0.47/lib/inkscape/libinkscape_base.dylib:
-#     @rpath/libinkscape_base.dylib (compatibility version 0.0.0, ...     <- fix
-#     @rpath/libboost_filesystem.dylib (compatibility version 0.0....     <- fix
-#     @rpath/lib2geom.1.1.0.dylib (compatibility version 1.1.0, cu...     <- fix
-#     /Users/Shared/work/0.47/lib/libharfbuzz.0.dylib (compatibili...     <- ok
-#     /Users/Shared/work/0.47/lib/libpangocairo-1.0.0.dylib (compa...     <- ok
-#     /Users/Shared/work/0.47/lib/libcairo.2.dylib (compatibility ...     <- ok
-#     ...
+# Most libraries are linked to with their fully qualified paths, a few have been
+# linked to using '@rpath'. The Inkscape binary only provides an LC_RPATH
+# setting for its custom library path 'lib/inkscape' at this point, so we need
+# to add the common library path 'lib'.
 
-for binary in $BIN_DIR/inkscape \
-              $LIB_DIR/inkscape/libinkscape_base.dylib; do
-  for lib in $(otool -L "$binary" |
-               grep "@rpath/" |
-               awk '{ print $1 }'); do
-    # This here is the reason we require GNU's 'find', as the macOS one doesn't
-    # pick up the files from the bottom layer of our union mount.
-    lib_canonical=$(find "$LIB_DIR" -maxdepth 2 -name "$(basename "$lib")")
-    lib_change_path "$lib_canonical" "$binary"
-  done
-done
+lib_add_rpath @loader_path/../lib "$BIN_DIR"/inkscape

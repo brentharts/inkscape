@@ -220,7 +220,9 @@ private:
     GtkWidget *aux_toolbox;
     GtkWidget *commands_toolbox;
     GtkWidget *snap_toolbox;
-    Inkscape::PrefObserver _tb_icon_sizes;
+    Inkscape::PrefObserver _tb_icon_sizes1;
+    Inkscape::PrefObserver _tb_icon_sizes2;
+    Inkscape::PrefObserver _tb_visible_buttons;
 
     void namedviewModified(SPObject *obj, guint flags);
     int zoom_input(double *new_val);

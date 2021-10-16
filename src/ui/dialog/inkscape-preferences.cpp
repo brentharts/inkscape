@@ -1596,7 +1596,7 @@ void InkscapePreferences::initPageUI()
     _page_ui.add_group_header(_("UI"));
     // _page_ui.add_group_header(_("Handle size"));
     _mouse_grabsize.init("/options/grabsize/value", 1, 15, 1, 2, 3, 0);
-    _page_ui.add_line(true, "Handle size", _mouse_grabsize, "", _("Set the relative size of node handles"), true);
+    _page_ui.add_line(true, _("Handle size"), _mouse_grabsize, "", _("Set the relative size of node handles"), true);
     _narrow_spinbutton.init(_("Use narrow number entry boxes"), "/theme/narrowSpinButton", false);
     _page_ui.add_line(false, "", _narrow_spinbutton, "", _("Make number editing boxes smaller by limiting padding"), false);
     _compact_colorselector.init(_("Use compact color selector mode switch"), "/colorselector/switcher", true);
@@ -1788,7 +1788,6 @@ void InkscapePreferences::initPageUI()
         toolbox->set_margin_end(MARGIN);
         toolbox->set_margin_top(MARGIN);
         toolbox->set_margin_bottom(MARGIN);
-        Glib::ustring visible_buttons_path = ToolboxFactory::tools_visible_buttons;
 
         sp_traverse_widget_tree(toolbox, [=](Gtk::Widget* widget){
             if (auto flowbox = dynamic_cast<Gtk::FlowBox*>(widget)) {
@@ -1805,7 +1804,7 @@ void InkscapePreferences::initPageUI()
                 button->set_margin_top(MARGIN / 2);
                 button->set_margin_bottom(MARGIN / 2);
                 button->set_sensitive();
-                auto path = visible_buttons_path + sp_get_action_target(button);
+                auto path = ToolboxFactory::get_tool_visible_buttons_path(sp_get_action_target(button));
                 auto visible = Inkscape::Preferences::get()->getBool(path, true);
                 button->set_active(visible);
                 button->signal_toggled().connect([=](){
@@ -1816,7 +1815,7 @@ void InkscapePreferences::initPageUI()
         });
 
         dlg->add(*toolbox);
-        _page_toolbars.add_line(false, "Toolbox buttons:", *custom, "", _("Select visible tool buttons"), false);
+        _page_toolbars.add_line(false, _("Toolbox buttons:"), *custom, "", _("Select visible tool buttons"), false);
 
         struct tbar_info {const char* label; const char* prefs;} toolbars[] = {
             {_("Toolbox icon size:"),     ToolboxFactory::tools_icon_size},

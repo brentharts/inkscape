@@ -20,10 +20,10 @@ export JHBUILDRC=$ETC_DIR/jhbuildrc
 export JHBUILDRC_CUSTOM=$JHBUILDRC-custom
 
 JHBUILD_REQUIREMENTS="\
-  certifi==2021.5.30\
-  meson==0.57.1\
-  ninja==1.10.0.post2\
-  pygments==2.8.1\
+  certifi==2021.10.8\
+  meson==0.59.2\
+  ninja==1.10.2.2\
+  pygments==2.10.0\
 "
 
 # JHBuild build system 3.38.0+ (a896cbf404461cab979fa3cd1c83ddf158efe83b)
@@ -38,13 +38,12 @@ jhbuild-$JHBUILD_VER.tar.bz2
 # We install a dedicated Python runtime for JHBuild. It is installed and
 # kept separately from the rest of this system. This does not interfere
 # with the Python runtime that gets build when building all our libraries
-# later
+# later.
 JHBUILD_PYTHON_VER_MAJOR=3
 JHBUILD_PYTHON_VER_MINOR=8
 JHBUILD_PYTHON_VER=$JHBUILD_PYTHON_VER_MAJOR.$JHBUILD_PYTHON_VER_MINOR
-JHBUILD_PYTHON_URL="https://gitlab.com/dehesselle/python_macos/-/jobs/\
-artifacts/master/raw/python_${JHBUILD_PYTHON_VER//.}_$(uname -p).tar.xz?\
-job=python${JHBUILD_PYTHON_VER//.}:$(uname -p)"
+JHBUILD_PYTHON_URL="https://gitlab.com/api/v4/projects/26780227/packages/generic/\
+python_macos/1/python_${INK_PYTHON_VER/./}_$(uname -p).tar.xz"
 JHBUILD_PYTHON_DIR=$OPT_DIR/Python.framework/Versions/$JHBUILD_PYTHON_VER
 JHBUILD_PYTHON_BIN_DIR=$JHBUILD_PYTHON_DIR/bin
 
