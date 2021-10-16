@@ -112,25 +112,47 @@ pdf_render_document_to_file(SPDocument *doc, gchar const *filename, unsigned int
             renderer->renderItem(ctx, root);
             ret = ctx->finish();
         } else {
+            auto scale = doc->getDocumentScale();
+
+            // Set root transformation, which copies a bit of what happens above the
+            // reason for this manual process is because we need to slide in the page
+            // offset transformations so need fine-control over placing the children.
+            ctx->transform(scale);
+            ctx->transform(root->transform);
+
             int index = 1;
             for (auto &page : pages) {
-                auto rect = page->getDesktopRect();
+                ctx->pushState();
+
+                auto pt = Inkscape::Util::Quantity::convert(1, "px", "pt");
+                auto rect = page->getRect();
                 // Conclude previous page and set new page width and height.
-                ctx->nextPage(rect.width(), rect.height());
+                auto big_rect = rect * scale;
+                ctx->nextPage(big_rect.width() * pt, big_rect.height() * pt);
 
                 // Set up page transformation which pushes objects back into the 0,0 location
-                // TODO: May need to add bleed margins and other options, or maybe not.
-                auto page_tr = Geom::Translate(rect.left(), rect.top()).inverse();
+                ctx->transform(Geom::Translate(rect.corner(0)).inverse());
 
                 for (auto &child : page->getOverlappingItems()) {
+                    ctx->pushState();
+
                     // This process does not return layers, so those affines are added manually.
-                    ctx->setTransform(child->i2doc_affine() * page_tr);
+                    for (auto anc : child->ancestorList(true)) {
+                        if (auto layer = dynamic_cast<SPItem *>(anc)) {
+                            if (layer != child && layer != root) {
+                                ctx->transform(layer->transform);
+                            }
+                        }
+                    }
 
                     // Render the page into the context in the new location.
                     renderer->renderItem(ctx, child);
+                    ctx->popState();
                 }
                 ret = ctx->finishPage();
                 index += 1;
+
+                ctx->popState();
             }
             ret = ctx->finish();
         }
