@@ -362,10 +362,6 @@ DialogMultipaned::DialogMultipaned(Gtk::Orientation orientation)
     _connections.emplace_back(
         dropzone_e->signal_drag_data_received().connect(sigc::mem_fun(*this, &DialogMultipaned::on_append_drag_data)));
 
-signal_drag_motion().connect([](const Glib::RefPtr<Gdk::DragContext>& ctx, int x, int y, guint tm){
-    g_warning("MP drag motion %d %d", x, y);
-    return true;
-}, false);
     // add empty widget to initiate the container
     add_empty_widget();
 
