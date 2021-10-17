@@ -19,6 +19,12 @@
 
 namespace Inkscape {
 
+bool PageManager::move_objects()
+{
+    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+    return prefs->getBool("/tools/pages/move_objects", true);
+}
+
 PageManager::PageManager(SPDocument *document)
     : border_show(true)
     , border_on_top(true)
@@ -146,10 +152,24 @@ SPPage *PageManager::newDesktopPage(Geom::Rect rect)
 
 /**
  * Delete the given page.
+ *
+ * @param page - The page to be deleted.
+ * @param content - Also remove the svg objects that are inside the page.
  */
-void PageManager::deletePage(SPPage *page)
+void PageManager::deletePage(SPPage *page, bool content)
 {
     if (page) {
+        if (content) {
+            for (auto &item : page->getExclusiveItems()) {
+                item->deleteObject();
+            }
+            for (auto &item : page->getOverlappingItems()) {
+                // Only delete objects when they rest on one page.
+                if (getPagesFor(item, false).size() == 1) {
+                    item->deleteObject();
+                }
+            }
+        }
         // Removal from pages is done automatically via signals.
         page->deleteObject();
     }
@@ -157,10 +177,12 @@ void PageManager::deletePage(SPPage *page)
 
 /**
  * Delete the selected page.
+ *
+ * @param content - Also remove the svg objects that are inside the page.
  */
-void PageManager::deletePage()
+void PageManager::deletePage(bool content)
 {
-    deletePage(_selected_page);
+    deletePage(_selected_page, content);
 }
 
 /**
@@ -236,6 +258,23 @@ bool PageManager::selectPage(SPPage *page)
 }
 
 /**
+ * Select the first page the given sp-item object is within.
+ *
+ * If the item is between two pages and one of them is already selected
+ * then don't change the selection.
+ */
+bool PageManager::selectPage(SPItem *item, bool contains)
+{
+    if (_selected_page->itemOnPage(item, contains)) {
+        return true;
+    }
+    for (auto &page : getPagesFor(item, contains)) {
+        return selectPage(page);
+    }
+    return false;
+}
+
+/**
  * Get the page at the given positon or return nullptr if out of range.
  *
  * @param index - The page index (from 0) of the page.
@@ -249,17 +288,17 @@ SPPage *PageManager::getPage(int index) const
 }
 
 /**
- * Get the first page for the given item, if contains is true the item
- * must be entirely on the page, not just touching it.
+ * Return a list of pages this item is on.
  */
-SPPage *PageManager::getPageFor(SPItem *item, bool contains) const
+std::vector<SPPage *> PageManager::getPagesFor(SPItem *item, bool contains) const
 {
+    std::vector<SPPage *> ret;
     for (auto &page : pages) {
         if (page->itemOnPage(item, contains)) {
-            return page;
+            ret.push_back(page);
         }
     }
-    return nullptr;
+    return ret;
 }
 
 /**

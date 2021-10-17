@@ -31,7 +31,8 @@ void page_new(SPDocument *document)
 void page_delete(SPDocument *document)
 {
     if (auto manager = document->getNamedView()->getPageManager()) {
-        manager->deletePage();
+        // Delete page's content if move_objects is checked.
+        manager->deletePage(manager->move_objects());
         Inkscape::DocumentUndo::done(document, SP_VERB_NONE, "Delete Page");
     }
 }
@@ -40,7 +41,7 @@ void page_backward(SPDocument *document)
 {
     if (auto manager = document->getNamedView()->getPageManager()) {
         if (auto page = manager->getSelected()) {
-            if (page->setPageIndex(page->getPageIndex() - 1, true)) {
+            if (page->setPageIndex(page->getPageIndex() - 1, manager->move_objects())) {
                 Inkscape::DocumentUndo::done(document, SP_VERB_NONE, "Shift Page Backwards");
             }
         }
@@ -51,7 +52,7 @@ void page_forward(SPDocument *document)
 {
     if (auto manager = document->getNamedView()->getPageManager()) {
         if (auto page = manager->getSelected()) {
-            if (page->setPageIndex(page->getPageIndex() + 1, true)) {
+            if (page->setPageIndex(page->getPageIndex() + 1, manager->move_objects())) {
                 Inkscape::DocumentUndo::done(document, SP_VERB_NONE, "Shift Page Forewards");
             }
         }

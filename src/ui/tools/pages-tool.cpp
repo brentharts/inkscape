@@ -27,6 +27,7 @@
 #include "path/path-outline.h"
 #include "pure-transform.h"
 #include "rubberband.h"
+#include "selection.h"
 #include "selection-chemistry.h"
 #include "snap.h"
 #include "snap-preferences.h"
@@ -56,6 +57,8 @@ void PagesTool::finish()
 
     ungrabCanvasEvents();
 
+    desktop->selection->restoreBackup();
+
     ToolBase::finish();
 
     if (visual_box) {
@@ -79,6 +82,9 @@ void PagesTool::setup()
 {
     ToolBase::setup();
 
+    // Stash the regular object selection so we don't modify them in base-tools root handler.
+    desktop->selection->setBackup();
+
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     drag_tolerance = prefs->getIntLimited("/options/dragtolerance/value", 0, 0, 100);
 
@@ -86,7 +92,7 @@ void PagesTool::setup()
         resize_knot = new SPKnot(desktop, _("Resize page"), Inkscape::CANVAS_ITEM_CTRL_TYPE_SHAPER, "PageTool:Resize");
         resize_knot->setShape(Inkscape::CANVAS_ITEM_CTRL_SHAPE_SQUARE);
         resize_knot->setFill(0xffffff00, 0x0000ff00, 0x000000ff, 0x000000ff);
-        resize_knot->setSize(5);
+        resize_knot->setSize(9);
         resize_knot->setAnchor(SP_ANCHOR_CENTER);
         resize_knot->updateCtrl();
         resize_knot->hide();
@@ -120,6 +126,7 @@ void PagesTool::resizeKnotMoved(SPKnot *knot, Geom::Point const &ppointer, guint
             if (point != rect.corner(2)) {
                 rect.setMax(point);
                 page->setDesktopRect(rect);
+                Inkscape::DocumentUndo::maybeDone(desktop->getDocument(), "page-resize", SP_VERB_NONE, "Resize page");
             }
         }
     }
@@ -139,6 +146,10 @@ bool PagesTool::root_handler(GdkEvent *event)
                 drag_origin_w = Geom::Point(event->button.x, event->button.y);
                 drag_origin_dt = desktop->w2d(drag_origin_w);
                 ret = true;
+                if (auto page = pageUnder(drag_origin_dt)) {
+                    // Select the clicked on page. Manager ignores the same-page.
+                    page_manager->selectPage(page);
+                }
             }
             break;
         }
@@ -171,6 +182,7 @@ bool PagesTool::root_handler(GdkEvent *event)
                     grabPage(page);
                 } else {
                     // Start making a new page.
+                    setupResizeSnap(point_dt);
                     dragging_item = nullptr;
                     creating_box = new Geom::Rect(point_dt, point_dt);
                 }
@@ -185,16 +197,12 @@ bool PagesTool::root_handler(GdkEvent *event)
 
             if (dragging_item) {
                 // conclude item here (move item to new location)
-                Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-                dragging_item->movePage(moveTo(point_dt), prefs->getBool("/tools/pages/move_objects", true));
+                dragging_item->movePage(moveTo(point_dt), page_manager->move_objects());
                 Inkscape::DocumentUndo::done(desktop->getDocument(), SP_VERB_NONE, "Move page position");
             } else if (creating_box) {
                 // conclude box here (make new page)
                 page_manager->newDesktopPage(*creating_box);
                 Inkscape::DocumentUndo::done(desktop->getDocument(), SP_VERB_NONE, "Create new drawn page");
-            } else if (auto page = pageUnder(point_dt)) {
-                // Select the clicked on page. Manager ignores the same-page.
-                page_manager->selectPage(page);
             }
             mouse_is_pressed = false;
             ret = true;
@@ -203,6 +211,12 @@ bool PagesTool::root_handler(GdkEvent *event)
         case GDK_KEY_RELEASE: {
             if (event->key.keyval == GDK_KEY_Escape) {
                 mouse_is_pressed = false;
+                ret = true;
+            }
+            if (event->key.keyval == GDK_KEY_Delete) {
+                page_manager->deletePage(page_manager->move_objects());
+                Inkscape::DocumentUndo::done(desktop->getDocument(), SP_VERB_NONE, "Delete Page");
+                ret = true;
             }
         }
         default:
@@ -274,7 +288,7 @@ Geom::Affine PagesTool::moveTo(Geom::Point xy)
 /**
  * Create the snapping for the resize boxes.
  */
-void PagesTool::setupResizeSnap(SPPage *target)
+void PagesTool::setupResizeSnap(Geom::Point start)
 {
     unsetupSnap();
     // XXX Add all the resize points

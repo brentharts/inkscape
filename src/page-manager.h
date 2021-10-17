@@ -34,6 +34,7 @@ public:
     PageManager(SPDocument *document);
     ~PageManager();
 
+    static bool move_objects();
     const std::vector<SPPage *> &getPages() const { return pages; }
 
     void addPage(SPPage *page);
@@ -45,7 +46,7 @@ public:
     SPPage *getPage(int index) const;
     SPPage *getFirstPage() const { return getPage(0); }
     SPPage *getLastPage() const { return getPage(pages.size() - 1); }
-    SPPage *getPageFor(SPItem *item, bool contains) const;
+    std::vector<SPPage *> getPagesFor(SPItem *item, bool contains) const;
     Geom::OptRect getDesktopRect() const;
     bool hasPages() const { return !pages.empty(); }
     int getPageCount() const { return pages.size(); }
@@ -56,8 +57,8 @@ public:
     void disablePages();
     void pagesChanged();
     bool selectPage(SPPage *page);
+    bool selectPage(SPItem *item, bool contains);
     bool selectPage(int index) { return selectPage(getPage(index)); }
-    bool selectPage(SPItem *item, bool contains) { return selectPage(getPageFor(item, contains)); }
     bool selectNextPage() { return selectPage(getSelectedPageIndex() + 1); }
     bool selectPrevPage() { return selectPage(getSelectedPageIndex() - 1); }
     bool hasNextPage() const { return getSelectedPageIndex() + 1 < pages.size(); }
@@ -72,8 +73,8 @@ public:
     SPPage *newPage(double width, double height);
     SPPage *newPage(Geom::Rect rect);
     SPPage *newDesktopPage(Geom::Rect rect);
-    void deletePage(SPPage *page);
-    void deletePage();
+    void deletePage(SPPage *page, bool contents = false);
+    void deletePage(bool contents = false);
     void resizePage(double width, double height);
 
     bool subset(SPAttr key, const gchar *value);

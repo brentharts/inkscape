@@ -773,7 +773,7 @@ PdfInput::open(::Inkscape::Extension::Input * /*mod*/, const gchar * uri) {
         } else {
             // Multi page (open all pages)
             Catalog *catalog = pdf_doc->getCatalog();
-            for (int p = 1; p < catalog->getNumPages(); p++) {
+            for (int p = 1; p <= catalog->getNumPages(); p++) {
                 // Incriment the page building here.
                 builder->pushPage();
                 // And then add each of the pages

@@ -63,7 +63,7 @@ private:
 
     void grabPage(SPPage *target);
     Geom::Affine moveTo(Geom::Point xy);
-    void setupResizeSnap(SPPage *target);
+    void setupResizeSnap(Geom::Point start);
     void unsetupSnap();
 
     sigc::connection _selector_changed_connection;
