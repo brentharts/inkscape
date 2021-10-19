@@ -301,6 +301,7 @@ Pixbuf *Pixbuf::create_from_data_uri(gchar const *uri_data, double svgdpi)
             gdk_pixbuf_loader_close(loader, nullptr);
             GdkPixbuf *buf = gdk_pixbuf_loader_get_pixbuf(loader);
             if (buf) {
+                buf = gdk_pixbuf_apply_embedded_orientation(buf);
                 g_object_ref(buf);
                 buf = Pixbuf::apply_embedded_orientation(buf);
                 pixbuf = new Pixbuf(buf);
@@ -465,6 +466,7 @@ Pixbuf *Pixbuf::create_from_buffer(gchar *&&data, gsize len, double svgdpi, std:
                 Geom::Rect area(0, 0, svgWidth_px, svgHeight_px);
                 pb = sp_generate_internal_bitmap(svgDoc.get(), area, dpi);
                 buf = pb->getPixbufRaw();
+                buf = gdk_pixbuf_apply_embedded_orientation(buf);
 
                 // Tidy up
                 if (buf == nullptr) {
@@ -497,6 +499,7 @@ Pixbuf *Pixbuf::create_from_buffer(gchar *&&data, gsize len, double svgdpi, std:
             
             buf = gdk_pixbuf_loader_get_pixbuf(loader);
             if (buf) {
+                buf = gdk_pixbuf_apply_embedded_orientation(buf);
                 // gdk_pixbuf_loader_get_pixbuf returns a borrowed reference
                 g_object_ref(buf);
                 buf = Pixbuf::apply_embedded_orientation(buf);
