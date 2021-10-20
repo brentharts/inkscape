@@ -73,6 +73,7 @@ void PageToolbar::toolChanged(SPDesktop *desktop, Inkscape::UI::Tools::ToolBase 
     // Disconnect previous page changed signal
     if (_page_selected) {
         _page_selected.disconnect();
+        _pages_changed.disconnect();
         _document = nullptr;
         _page_manager = nullptr;
     }

@@ -37,6 +37,7 @@ PageManager::~PageManager()
 {
     pages.clear();
     _selected_page = nullptr;
+    _document = nullptr;
 }
 
 /**
@@ -265,7 +266,7 @@ bool PageManager::selectPage(SPPage *page)
  */
 bool PageManager::selectPage(SPItem *item, bool contains)
 {
-    if (_selected_page->itemOnPage(item, contains)) {
+    if (_selected_page && _selected_page->itemOnPage(item, contains)) {
         return true;
     }
     for (auto &page : getPagesFor(item, contains)) {
@@ -389,6 +390,17 @@ void PageManager::modified()
     for (auto &page : pages) {
         page->setDefaultAttributes(border_on_top, border_show ? border_color : 0x0, background_color,
                                    shadow_show ? shadow_size : 0);
+    }
+}
+
+/**
+ * Called when the viewbox is resized.
+ */
+void PageManager::movePages(Geom::Affine tr)
+{
+    // Adjust each page against the change in position of the viewbox.
+    for (auto &page : pages) {
+        page->movePage(tr, false);
     }
 }
 

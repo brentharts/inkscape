@@ -918,6 +918,7 @@ void SPDocument::fitToRect(Geom::Rect const &rect, bool with_margins)
         Geom::Translate tr2(-rect_with_margins_dt_old.min());
         nv->translateGuides(tr2);
         nv->translateGrids(tr2);
+        nv->getPageManager()->movePages(tr2);
 
         // update the viewport so the drawing appears to stay where it was
         nv->scrollAllDesktops(-tr2[0], -tr2[1] * y_dir, false);

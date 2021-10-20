@@ -92,6 +92,8 @@ public:
 
     // Access from export.cpp and others for the guint32
     guint32 background_color = 0xffffff00;
+
+    void movePages(Geom::Affine tr);
 protected:
     friend class Inkscape::UI::Dialog::DocumentProperties;
 
