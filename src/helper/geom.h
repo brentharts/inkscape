@@ -28,6 +28,7 @@ void pathv_matrix_point_bbox_wind_distance ( Geom::PathVector const & pathv, Geo
 
 size_t count_pathvector_nodes(Geom::PathVector const &pathv );
 size_t count_path_nodes(Geom::Path const &path);
+bool geom_path_compare(Geom::PathVector apv, Geom::PathVector bpv, double precission = 0.001);
 Geom::PathVector pathv_to_linear_and_cubic_beziers( Geom::PathVector const &pathv );
 Geom::PathVector pathv_to_linear( Geom::PathVector const &pathv, double maxdisp );
 Geom::PathVector pathv_to_cubicbezier( Geom::PathVector const &pathv);
