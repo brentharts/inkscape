@@ -28,8 +28,6 @@
 
 #include "util/units.h"
 
-#include "svg/css-ostringstream.h"
-
 using Inkscape::IO::Resource::SYSTEM;
 using Inkscape::IO::Resource::ICONS;
 
