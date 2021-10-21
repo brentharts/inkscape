@@ -234,6 +234,7 @@ private:
     int _page_num = 0; // Are we on a page
     double _page_left = 0 ; // Move to the left for more pages
     double _page_top = 0 ; // Move to the top (maybe)
+    bool _page_offset = false;
 };
 
 

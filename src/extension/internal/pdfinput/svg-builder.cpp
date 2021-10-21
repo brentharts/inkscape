@@ -148,6 +148,7 @@ void SvgBuilder::pushPage() {
         // TODO: A more interesting page layout could be implemented here.
     }
     _page_num += 1;
+    _page_offset = true;
 
     if (_page) {
         Inkscape::GC::release(_page);
@@ -617,10 +618,13 @@ void SvgBuilder::setTransform(double c0, double c1, double c2, double c3,
 
     auto matrix = Geom::Affine(c0, c1, c2, c3, c4, c5);
 
-    // Add page transformation
-    if ( _container->parent() == _root && _is_top_level ) {
-        // Page position is applied before main scaling.
-        matrix = matrix * Geom::Translate(_page_left, _page_top);
+    // Add page transformation only once (see scaledCTM in pdf-parser.cpp)
+    if ( _container->parent() == _root && _is_top_level && _page_offset) {
+        // Page position is in pixels from pushPage, translate in pt
+        auto _left = Inkscape::Util::Quantity::convert(_page_left, "px", "pt");
+        auto _top = Inkscape::Util::Quantity::convert(_page_top, "px", "pt");
+        matrix = Geom::Translate(_left, _top) * matrix;
+        _page_offset = false;
     }
 
     // do not remember the group which is a layer
