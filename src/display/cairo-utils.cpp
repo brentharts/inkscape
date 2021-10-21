@@ -301,9 +301,8 @@ Pixbuf *Pixbuf::create_from_data_uri(gchar const *uri_data, double svgdpi)
             gdk_pixbuf_loader_close(loader, nullptr);
             GdkPixbuf *buf = gdk_pixbuf_loader_get_pixbuf(loader);
             if (buf) {
-                buf = gdk_pixbuf_apply_embedded_orientation(buf);
-                g_object_ref(buf);
                 buf = Pixbuf::apply_embedded_orientation(buf);
+                g_object_ref(buf);
                 pixbuf = new Pixbuf(buf);
 
                 GdkPixbufFormat *fmt = gdk_pixbuf_loader_get_format(loader);
@@ -409,10 +408,10 @@ Pixbuf *Pixbuf::create_from_file(std::string const &fn, double svgdpi)
 
 GdkPixbuf *Pixbuf::apply_embedded_orientation(GdkPixbuf *buf)
 {
-    GdkPixbuf *old = buf;
-    buf = gdk_pixbuf_apply_embedded_orientation(buf);
-    g_object_unref(old);
-    return buf;
+    g_object_ref(buf);
+    auto copy = gdk_pixbuf_apply_embedded_orientation(buf);
+    g_object_unref(buf);
+    return copy;
 }
 
 Pixbuf *Pixbuf::create_from_buffer(std::string const &buffer, double svgdpi, std::string const &fn)
@@ -466,14 +465,13 @@ Pixbuf *Pixbuf::create_from_buffer(gchar *&&data, gsize len, double svgdpi, std:
                 Geom::Rect area(0, 0, svgWidth_px, svgHeight_px);
                 pb = sp_generate_internal_bitmap(svgDoc.get(), area, dpi);
                 buf = pb->getPixbufRaw();
-                buf = gdk_pixbuf_apply_embedded_orientation(buf);
+                buf = Pixbuf::apply_embedded_orientation(buf);
 
                 // Tidy up
                 if (buf == nullptr) {
                     delete pb;
                     return nullptr;
                 }
-                buf = Pixbuf::apply_embedded_orientation(buf);
                 is_svg = true;
             }
         }
@@ -499,10 +497,9 @@ Pixbuf *Pixbuf::create_from_buffer(gchar *&&data, gsize len, double svgdpi, std:
             
             buf = gdk_pixbuf_loader_get_pixbuf(loader);
             if (buf) {
-                buf = gdk_pixbuf_apply_embedded_orientation(buf);
+                buf = Pixbuf::apply_embedded_orientation(buf);
                 // gdk_pixbuf_loader_get_pixbuf returns a borrowed reference
                 g_object_ref(buf);
-                buf = Pixbuf::apply_embedded_orientation(buf);
                 pb = new Pixbuf(buf);
             }
         }
