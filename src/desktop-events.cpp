@@ -485,57 +485,14 @@ static void init_extended()
 
 void snoop_extended(GdkEvent* event, SPDesktop *desktop)
 {
+    GdkDevice *source_device = gdk_event_get_source_device (event);
     GdkInputSource source = GDK_SOURCE_MOUSE;
-    GdkDevice *source_device;
     std::string name;
 
-    switch ( event->type ) {
-        case GDK_MOTION_NOTIFY:
-        {
-            source_device = gdk_event_get_source_device (event);
-            if ( source_device ) {
-                source = gdk_device_get_source(source_device);
-                name = gdk_device_get_name(source_device);
-            }
-        }
-        break;
-
-        case GDK_BUTTON_PRESS:
-        case GDK_2BUTTON_PRESS:
-        case GDK_3BUTTON_PRESS:
-        case GDK_BUTTON_RELEASE:
-        {
-            source_device = gdk_event_get_source_device (event);
-            if ( source_device ) {
-                source = gdk_device_get_source(source_device);
-                name = gdk_device_get_name(source_device);
-            }
-        }
-        break;
-
-        case GDK_SCROLL:
-        {
-            source_device = gdk_event_get_source_device (event);
-            if ( source_device ) {
-                source = gdk_device_get_source(source_device);
-                name = gdk_device_get_name(source_device);
-            }
-        }
-        break;
-
-        case GDK_PROXIMITY_IN:
-        case GDK_PROXIMITY_OUT:
-        {
-            source_device = gdk_event_get_source_device (event);
-            if ( source_device ) {
-                source = gdk_device_get_source(source_device);
-                name = gdk_device_get_name(source_device);
-            }
-        }
-        break;
-
-        default:
-            ;
+    // fix to previous code using event->device that did not point to original device that generated the event.
+    if ( source_device ) {
+        source = gdk_device_get_source(source_device);
+        name = gdk_device_get_name(source_device);
     }
 
     if (!name.empty()) {
