@@ -97,6 +97,7 @@ void PagesTool::setup()
         resize_knot->updateCtrl();
         resize_knot->hide();
         resize_knot->moved_signal.connect(sigc::mem_fun(*this, &PagesTool::resizeKnotMoved));
+        resize_knot->ungrabbed_signal.connect(sigc::mem_fun(*this, &PagesTool::resizeKnotFinished));
     }
 
     if (!visual_box) {
@@ -125,11 +126,31 @@ void PagesTool::resizeKnotMoved(SPKnot *knot, Geom::Point const &ppointer, guint
             auto rect = page->getDesktopRect();
             if (point != rect.corner(2)) {
                 rect.setMax(point);
-                page->setDesktopRect(rect);
-                Inkscape::DocumentUndo::maybeDone(desktop->getDocument(), "page-resize", SP_VERB_NONE, "Resize page");
+                visual_box->show();
+                visual_box->set_rect(rect);
+                if (on_screen_rect) {
+                    delete on_screen_rect;
+                }
+                on_screen_rect = new Geom::Rect(rect);
+                mouse_is_pressed = true;
             }
         }
     }
+}
+
+
+void PagesTool::resizeKnotFinished(SPKnot *knot, guint state)
+{
+    if (auto page_manager = getPageManager()) {
+        if (on_screen_rect) {
+            page_manager->getSelected()->setDesktopRect(*on_screen_rect);
+            Inkscape::DocumentUndo::done(desktop->getDocument(), SP_VERB_NONE, "Resize page");
+            delete on_screen_rect;
+            on_screen_rect = nullptr;
+        }
+    }
+    visual_box->hide();
+    mouse_is_pressed = false;
 }
 
 bool PagesTool::root_handler(GdkEvent *event)
@@ -170,10 +191,10 @@ bool PagesTool::root_handler(GdkEvent *event)
                     //  weird bug which stops it from working well.
                     //drag_group->update(tr * drag_group->get_parent()->get_affine());
                     addDragShapes(dragging_item, tr);
-                } else if (creating_box) {
+                } else if (on_screen_rect) {
                     // Continue to drag new box
-                    delete creating_box;
-                    creating_box = new Geom::Rect(drag_origin_dt, point_dt);
+                    delete on_screen_rect;
+                    on_screen_rect = new Geom::Rect(drag_origin_dt, point_dt);
                 } else if (auto page = pageUnder(point_dt)) {
                     // Starting to drag page around the screen.
                     dragging_item = page;
@@ -184,7 +205,7 @@ bool PagesTool::root_handler(GdkEvent *event)
                     // Start making a new page.
                     setupResizeSnap(point_dt);
                     dragging_item = nullptr;
-                    creating_box = new Geom::Rect(point_dt, point_dt);
+                    on_screen_rect = new Geom::Rect(point_dt, point_dt);
                 }
             } else {
                 mouse_is_pressed = false;
@@ -199,9 +220,9 @@ bool PagesTool::root_handler(GdkEvent *event)
                 // conclude item here (move item to new location)
                 dragging_item->movePage(moveTo(point_dt), page_manager->move_objects());
                 Inkscape::DocumentUndo::done(desktop->getDocument(), SP_VERB_NONE, "Move page position");
-            } else if (creating_box) {
+            } else if (on_screen_rect) {
                 // conclude box here (make new page)
-                page_manager->newDesktopPage(*creating_box);
+                page_manager->newDesktopPage(*on_screen_rect);
                 Inkscape::DocumentUndo::done(desktop->getDocument(), SP_VERB_NONE, "Create new drawn page");
             }
             mouse_is_pressed = false;
@@ -224,16 +245,16 @@ bool PagesTool::root_handler(GdkEvent *event)
     }
 
     // Clean up any finished dragging, doesn't matter how it ends
-    if (!mouse_is_pressed && (dragging_item || creating_box)) {
+    if (!mouse_is_pressed && (dragging_item || on_screen_rect)) {
         dragging_item = nullptr;
-        creating_box = nullptr;
+        on_screen_rect = nullptr;
         clearDragShapes();
         visual_box->hide();
         unsetupSnap();
         ret = true;
-    } else if (creating_box) {
+    } else if (on_screen_rect) {
         visual_box->show();
-        visual_box->set_rect(*creating_box);
+        visual_box->set_rect(*on_screen_rect);
         ret = true;
     }
 
@@ -331,8 +352,9 @@ void PagesTool::addDragShape(SPPage *page, Geom::Affine tr)
  */
 void PagesTool::addDragShape(SPItem *item, Geom::Affine tr)
 {
-    auto shape = *item_to_outline(item);
-    addDragShape(shape * item->i2dt_affine(), tr);
+    if (auto shape = item_to_outline(item)) {
+        addDragShape(*shape * item->i2dt_affine(), tr);
+    }
 }
 
 /**

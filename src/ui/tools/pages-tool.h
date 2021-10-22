@@ -59,6 +59,7 @@ private:
     Inkscape::PageManager *getPageManager();
 
     void resizeKnotMoved(SPKnot *knot, Geom::Point const &ppointer, guint state);
+    void resizeKnotFinished(SPKnot *knot, guint state);
     void pageModified(SPObject *object, guint flags);
 
     void grabPage(SPPage *target);
@@ -78,7 +79,7 @@ private:
     SPKnot *resize_knot = nullptr;
     SPPage *highlight_item = nullptr;
     SPPage *dragging_item = nullptr;
-    Geom::Rect *creating_box = nullptr;
+    Geom::Rect *on_screen_rect = nullptr;
     Inkscape::CanvasItemRect *visual_box = nullptr;
     Inkscape::CanvasItemGroup *drag_group = nullptr;
     std::vector<Inkscape::CanvasItemBpath *> drag_shapes;
