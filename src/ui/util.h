@@ -13,7 +13,7 @@
 #ifndef UI_UTIL_SEEN
 #define UI_UTIL_SEEN
 
-#include <stddef.h> // size_t
+#include <cstddef> // size_t
 
 namespace Glib {
 class ustring;
