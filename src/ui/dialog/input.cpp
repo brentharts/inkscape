@@ -1660,6 +1660,13 @@ bool InputDialogImpl::eventSnoop(GdkEvent* event)
     Glib::ustring key;
     gint hotButton = -1;
 
+    // this code is not used for Inkscape 1.1 (and some previous versions?)
+    // please note that the code for determining which input device caused the event
+    // fails with GTK3, because event->device gives a "generic" input device, not the one that actually
+    // caused the event. 
+    // should use gdk_device_get_source_device(event)
+    // see src/desktop-events.cpp snoop_extended for a way to fix this, if needed. 
+
     switch ( event->type ) {
         case GDK_KEY_PRESS:
         case GDK_KEY_RELEASE:
