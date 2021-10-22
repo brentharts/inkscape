@@ -95,10 +95,14 @@ SPNamedView::SPNamedView()
 
     this->connector_spacing = defaultConnSpacing;
 
-    this->_page_manager = nullptr;
+    this->_viewport = new PageOnCanvas();
+    this->_viewport->hide();
 }
 
-SPNamedView::~SPNamedView() = default;
+SPNamedView::~SPNamedView()
+{
+    delete _viewport;
+}
 
 static void sp_namedview_generate_old_grid(SPNamedView * /*nv*/, SPDocument *document, Inkscape::XML::Node *repr) {
     bool old_grid_settings_present = false;
@@ -293,9 +297,14 @@ void SPNamedView::release() {
 
 void SPNamedView::modified(unsigned int flags)
 {
-    // Pass modifications to the page manager to update the page items.
-    if (this->_page_manager && flags & SP_OBJECT_MODIFIED_FLAG) {
-        this->_page_manager->modified();
+    // Copy the page style for the default viewport attributes
+    if (_page_manager && flags & SP_OBJECT_MODIFIED_FLAG) {
+        _page_manager->setDefaultAttributes(_viewport);
+        updateViewPort();
+        // Pass modifications to the page manager to update the page items.
+        for (auto &page : _page_manager->getPages()) {
+            page->setDefaultAttributes();
+        }
     }
     // Add desk color, and chckerboard pattern to desk view
     for (auto desktop : views) {
@@ -589,6 +598,24 @@ sp_namedview_add_grid(SPNamedView *nv, Inkscape::XML::Node *repr, SPDesktop *des
     return grid;
 }
 
+/**
+ * Update the visibility of the viewport space. This can look like a page
+ * if there's no multi-pages, or invisible if it shadows the first page.
+ */
+void SPNamedView::updateViewPort()
+{
+    auto box = document->preferredBounds();
+    if (auto page = _page_manager->getPageAt(box->corner(0))) {
+        // An existing page is set as the main page, so hide th viewport canvas item.
+        _viewport->hide();
+        page->setDesktopRect(*box);
+    } else {
+        // Otherwise we are showing the viewport item.
+        _viewport->show();
+        _viewport->update(*box, nullptr, _page_manager->hasPages());
+    }
+}
+
 void SPNamedView::child_added(Inkscape::XML::Node *child, Inkscape::XML::Node *ref) {
     SPObjectGroup::child_added(child, ref);
 
@@ -602,7 +629,7 @@ void SPNamedView::child_added(Inkscape::XML::Node *child, Inkscape::XML::Node *r
         if (auto page = dynamic_cast<SPPage *>(no)) {
             this->_page_manager->addPage(page);
             for (auto view : this->views) {
-                page->showPage(view, view->getCanvasPagesBg(), view->getCanvasPagesFg());
+                page->showPage(view->getCanvasPagesBg(), view->getCanvasPagesFg());
             }
         }
     } else {
@@ -677,8 +704,8 @@ Inkscape::XML::Node* SPNamedView::write(Inkscape::XML::Document *xml_doc, Inksca
 
 void SPNamedView::show(SPDesktop *desktop)
 {
-    for(auto guide : this->guides) {
 
+    for(auto guide : this->guides) {
         guide->showSPGuide( desktop->getCanvasGuides() );
 
         if (desktop->guides_active) {
@@ -686,9 +713,14 @@ void SPNamedView::show(SPDesktop *desktop)
         }
         sp_namedview_show_single_guide(guide, showguides);
     }
-    for (auto page : this->_page_manager->getPages()) {
-        // XXX This will change to getCanvasPagesBorder { is_border_on_top ? PagesFg : PagesBg }
-        page->showPage(desktop, desktop->getCanvasPagesBg(), desktop->getCanvasPagesFg());
+
+    auto box = document->preferredBounds();
+    _viewport->add(*box, desktop->getCanvasPagesBg(), desktop->getCanvasPagesFg());
+    _page_manager->setDefaultAttributes(_viewport);
+    updateViewPort();
+
+    for (auto page : _page_manager->getPages()) {
+        page->showPage(desktop->getCanvasPagesBg(), desktop->getCanvasPagesFg());
     }
 
     views.push_back(desktop);
@@ -889,6 +921,7 @@ void SPNamedView::hide(SPDesktop const *desktop)
     for(auto & guide : this->guides) {
         guide->hideSPGuide(desktop->getCanvas());
     }
+    _viewport->remove(desktop->getCanvas());
     for (auto &page : this->_page_manager->getPages()) {
         page->hidePage(desktop->getCanvas());
     }

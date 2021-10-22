@@ -19,6 +19,7 @@
 
 class SPDesktop;
 class SPPage;
+class PageOnCanvas;
 
 namespace Inkscape {
 class Selection;
@@ -44,6 +45,7 @@ public:
     // Returns None if no page selected
     SPPage *getSelected() const { return _selected_page; }
     SPPage *getPage(int index) const;
+    SPPage *getPageAt(Geom::Point pos) const;
     SPPage *getFirstPage() const { return getPage(0); }
     SPPage *getLastPage() const { return getPage(pages.size() - 1); }
     std::vector<SPPage *> getPagesFor(SPItem *item, bool contains) const;
@@ -78,7 +80,7 @@ public:
     void resizePage(double width, double height);
 
     bool subset(SPAttr key, const gchar *value);
-    void modified();
+    bool setDefaultAttributes(PageOnCanvas *item);
 
     static void enablePages(SPDocument *document) { document->getNamedView()->getPageManager()->enablePages(); }
     static void disablePages(SPDocument *document) { document->getNamedView()->getPageManager()->disablePages(); }

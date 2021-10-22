@@ -24,23 +24,50 @@
 class SPDesktop;
 class SPItem;
 
+class PageOnCanvas
+{
+public:
+    PageOnCanvas();
+    ~PageOnCanvas();
+
+    void update(Geom::Rect size, const char *txt, bool outline = false);
+    void add(Geom::Rect size, Inkscape::CanvasItemGroup *background_group, Inkscape::CanvasItemGroup *border_group);
+    void remove(Inkscape::UI::Widget::Canvas *canvas);
+    void show();
+    void hide();
+
+    bool setAttributes(bool on_top, guint32 border, guint32 bg, int shadow);
+    void setOutline(bool outline);
+
+    bool is_selected = false;
+private:
+    std::vector<Inkscape::CanvasItem *> canvas_items;
+
+    bool _border_on_top = true;
+    guint32 _background_color = 0xffffff00;
+    guint32 _border_color = 0x000000cc;
+    int _shadow_size = 0;
+};
+
 class SPPage : public SPObject
 {
 public:
     SPPage();
-    ~SPPage() override = default;
+    ~SPPage() override;
 
     void movePage(Geom::Affine translate, bool with_objects);
     void swapPage(SPPage *other, bool with_objects);
-    void showPage(SPDesktop *desktop, Inkscape::CanvasItemGroup *, Inkscape::CanvasItemGroup *);
-    void hidePage(Inkscape::UI::Widget::Canvas *canvas);
-    void showPage();
-    void hidePage();
+
+    // Canvas visualisation
+    void showPage(Inkscape::CanvasItemGroup *fg, Inkscape::CanvasItemGroup *bg);
+    void hidePage(Inkscape::UI::Widget::Canvas *canvas) { _canvas_item->remove(canvas); }
+    void showPage() { _canvas_item->show(); }
+    void hidePage() { _canvas_item->hide(); }
 
     void setManager(Inkscape::PageManager *manager);
 
     void setSelected(bool selected);
-    bool setDefaultAttributes(bool on_top, guint32 border, guint32 bg, int shadow);
+    bool setDefaultAttributes();
     int getPageIndex();
     int getPagePosition() { return getPageIndex() + 1; }
     bool setPageIndex(int index, bool swap_page);
@@ -66,15 +93,8 @@ protected:
     Inkscape::XML::Node *write(Inkscape::XML::Document *xml_doc, Inkscape::XML::Node *repr, guint flags) override;
 
 private:
-    bool is_selected = false;
-
-    bool border_on_top = true;
-    guint32 background_color = 0xffffff00;
-    guint32 border_color = 0x000000cc;
-    int shadow_size = 0;
-
+    PageOnCanvas *_canvas_item = nullptr;
     Inkscape::PageManager *_manager = nullptr;
-    std::vector<Inkscape::CanvasItem *> canvas_items;
 
     SVGLength x;
     SVGLength y;

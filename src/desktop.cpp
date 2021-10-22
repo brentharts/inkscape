@@ -226,11 +226,6 @@ SPDesktop::init (SPNamedView *nv, Inkscape::UI::Widget::Canvas *acanvas, SPDeskt
     Geom::Rect const d(Geom::Point(0.0, 0.0),
                        Geom::Point(document->getWidth().value("px"), document->getHeight().value("px")));
 
-    // The viewBox is not a page, instead it is the boundry defined by the document's "viewBox"
-    canvas_viewbox = new Inkscape::CanvasItemRect(canvas_group_drawing, d);
-    canvas_viewbox->set_name("CanvasItemRect:ViewBox");
-    canvas_viewbox->set_stroke(0xff000022);
-
     canvas_drawing = new Inkscape::CanvasItemDrawing(canvas_group_drawing);
     canvas_drawing->get_drawing()->delta = prefs->getDouble("/options/cursortolerance/value", 1.0);
     canvas_drawing->connect_drawing_event(sigc::bind(sigc::ptr_fun(_drawing_handler), this));

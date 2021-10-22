@@ -303,6 +303,19 @@ std::vector<SPPage *> PageManager::getPagesFor(SPItem *item, bool contains) cons
 }
 
 /**
+ * Get a page at a specific starting location.
+ */
+SPPage *PageManager::getPageAt(Geom::Point pos) const
+{
+    for (auto &page : pages) {
+        if (page->getDesktopRect().corner(0) == pos) {
+            return page;
+        }
+    }
+    return nullptr;
+}
+
+/**
  * Returns the total area of all the pages in desktop units.
  */
 Geom::OptRect PageManager::getDesktopRect() const
@@ -383,14 +396,14 @@ bool PageManager::subset(SPAttr key, const gchar *value)
 }
 
 /**
- * Namedview has been modified, keep our pages up to date.
+ * Update the canvas item with the default display attributes.
  */
-void PageManager::modified()
+bool PageManager::setDefaultAttributes(PageOnCanvas *item)
 {
-    for (auto &page : pages) {
-        page->setDefaultAttributes(border_on_top, border_show ? border_color : 0x0, background_color,
-                                   shadow_show ? shadow_size : 0);
-    }
+    return item->setAttributes(border_on_top,
+                               border_show ? border_color : 0x0,
+                               background_color,
+                               border_show && shadow_show ? shadow_size : 0);
 }
 
 /**

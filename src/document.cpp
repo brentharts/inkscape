@@ -2041,11 +2041,6 @@ sigc::connection SPDocument::connectFilenameSet(SPDocument::FilenameSetSignal::s
     return filename_set_signal.connect(slot);
 }
 
-sigc::connection SPDocument::connectResized(SPDocument::ResizedSignal::slot_type slot)
-{
-    return resized_signal.connect(slot);
-}
-
 sigc::connection SPDocument::connectCommit(SPDocument::CommitSignal::slot_type slot)
 {
     return commit_signal.connect(slot);
@@ -2104,12 +2099,6 @@ SPDocument::emitReconstructionFinish()
     initialize_current_persp3d();
 **/
 }
-
-void SPDocument::emitResizedSignal(gdouble width, gdouble height)
-{
-    this->resized_signal.emit(width, height);
-}
-
 
 /*
   Local Variables:

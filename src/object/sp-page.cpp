@@ -20,9 +20,166 @@
 
 using Inkscape::DocumentUndo;
 
+PageOnCanvas::PageOnCanvas()
+{
+}
+
+PageOnCanvas::~PageOnCanvas()
+{
+    for (auto item : canvas_items) {
+        delete item;
+    }
+    canvas_items.clear();
+}
+
+/**
+ * Add the page canvas to the given canvas item groups (canvas view is implicit)
+ */
+void PageOnCanvas::add(Geom::Rect size, Inkscape::CanvasItemGroup *background_group, Inkscape::CanvasItemGroup *border_group)
+{
+    // Foreground 'border'
+    if (auto item = new Inkscape::CanvasItemRect(border_group, size)) {
+        item->set_name("foreground");
+        canvas_items.push_back(item);
+    }
+
+    // Background rectangle 'fill'
+    if (auto item = new Inkscape::CanvasItemRect(background_group, size)) {
+        item->set_name("background");
+        item->set_dashed(false);
+        item->set_inverted(false);
+        item->set_stroke(0x00000000);
+        canvas_items.push_back(item);
+    }
+
+    if (auto label = new Inkscape::CanvasItemText(border_group, Geom::Point(0, 0), "{Page Label}")) {
+        label->set_fontsize(10.0);
+        label->set_fill(0xffffffff);
+        label->set_background(0x00000099);
+        label->set_bg_radius(1.0);
+        label->set_anchor(Geom::Point(-1.0, -1.5));
+        label->set_adjust(Geom::Point(-3, 0));
+        canvas_items.push_back(label);
+    }
+}
+/**
+ * Hide the page in the given canvas widget.
+ */
+void PageOnCanvas::remove(Inkscape::UI::Widget::Canvas *canvas)
+{
+    g_assert(canvas != nullptr);
+    for (auto it = canvas_items.begin(); it != canvas_items.end(); it) {
+        if (canvas == (*it)->get_canvas()) {
+            delete (*it);
+            it = canvas_items.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+void PageOnCanvas::show()
+{
+    for (auto item : canvas_items) {
+        item->show();
+    }
+}
+
+void PageOnCanvas::hide()
+{
+    for (auto item : canvas_items) {
+        item->hide();
+    }
+}
+
+/**
+ * Update the visual representation of a page on screen.
+ *
+ * @param size - The size of the page in desktop units
+ * @param txt - An optional label for the page
+ * @param outline - Disable normal rendering and show as an outline.
+ */
+void PageOnCanvas::update(Geom::Rect size, const char *txt, bool outline)
+{
+    // Put these in the preferences?
+    bool border_on_top = _border_on_top;
+    int shadow_size = _shadow_size;
+    guint32 shadow_color = 0x00000088;
+    guint32 select_color = 0xff0000cc;
+    guint32 border_color = _border_color;
+    guint32 background_color = _background_color;
+
+    // This is used when showing the viewport as *not a page* it's mostly
+    // never used as the first page is normally the viewport too.
+    if (outline) {
+        border_on_top = false;
+        shadow_size = 0;
+        border_color = select_color;
+    }
+
+    for (auto item : canvas_items) {
+        if (auto rect = dynamic_cast<Inkscape::CanvasItemRect *>(item)) {
+            rect->set_rect(size);
+
+            bool is_foreground = (rect->get_name() == "foreground");
+            // This will put the border on the background OR foreground layer as needed.
+            if (is_foreground == border_on_top) {
+                rect->show();
+                rect->set_shadow(shadow_color, shadow_size);
+                rect->set_stroke(is_selected ? select_color : border_color);
+            } else {
+                rect->hide();
+                rect->set_shadow(0x0, 0);
+                rect->set_stroke(0x0);
+            }
+            // This undoes the hide for the background rect, but that's ok
+            if (!is_foreground) {
+                rect->show();
+                rect->set_background(background_color);
+            }
+        }
+        if (auto label = dynamic_cast<Inkscape::CanvasItemText *>(item)) {
+            if (txt) {
+                auto corner = size.corner(0);
+                label->set_coord(corner);
+                label->set_text(txt);
+                label->show();
+            } else {
+                label->set_text("");
+                label->hide();
+            }
+        }
+    }
+}
+
+bool PageOnCanvas::setAttributes(bool on_top, guint32 border, guint32 bg, int shadow)
+{
+    if (on_top != _border_on_top || border != _border_color || bg != _background_color || shadow != _shadow_size) {
+        this->_border_on_top = on_top;
+        this->_border_color = border;
+        this->_background_color = bg;
+        this->_shadow_size = shadow;
+        return true;
+    }
+    return false;
+}
+
+
+
+
+
+
+
 SPPage::SPPage()
     : SPObject()
-{}
+{
+    _canvas_item = new PageOnCanvas();
+}
+
+SPPage::~SPPage()
+{
+    delete _canvas_item;
+}
 
 void SPPage::build(SPDocument *document, Inkscape::XML::Node *repr)
 {
@@ -40,10 +197,7 @@ void SPPage::build(SPDocument *document, Inkscape::XML::Node *repr)
 
 void SPPage::release()
 {
-    for (auto item : canvas_items) {
-        delete item;
-    }
-    this->canvas_items.clear();
+    delete _canvas_item;
 
     if (this->document) {
         // Unregister ourselves
@@ -180,78 +334,19 @@ bool SPPage::itemOnPage(SPItem *item, bool contains) const
 /**
  * Shows the page in the given canvas item group.
  */
-void SPPage::showPage(SPDesktop *desktop, Inkscape::CanvasItemGroup *background_group,
-                      Inkscape::CanvasItemGroup *border_group)
-{
-    // Foreground 'border'
-    if (auto item = new Inkscape::CanvasItemRect(border_group, getDesktopRect())) {
-        item->set_name("foreground");
-        canvas_items.push_back(item);
-    }
-
-    // Background rectangle 'fill'
-    if (auto item = new Inkscape::CanvasItemRect(background_group, getDesktopRect())) {
-        item->set_name("background");
-        item->set_dashed(false);
-        item->set_inverted(false);
-        item->set_stroke(0x00000000);
-        canvas_items.push_back(item);
-    }
-
-    if (auto label = new Inkscape::CanvasItemText(border_group, Geom::Point(0, 0), "{Page Label}")) {
-        label->set_fontsize(10.0);
-        label->set_fill(0xffffffff);
-        label->set_background(0x00000099);
-        label->set_bg_radius(1.0);
-        label->set_anchor(Geom::Point(-1.0, -1.5));
-        label->set_adjust(Geom::Point(-3, 0));
-        canvas_items.push_back(label);
-    }
-
+void SPPage::showPage(Inkscape::CanvasItemGroup *fg, Inkscape::CanvasItemGroup *bg) {
+    _canvas_item->add(getDesktopRect(), fg, bg);
     // The final steps are completed in an update cycle
     this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
 }
 
-/**
- * Hide the page in the given canvas widget.
- */
-void SPPage::hidePage(Inkscape::UI::Widget::Canvas *canvas)
-{
-    g_assert(canvas != nullptr);
-    for (auto it = canvas_items.begin(); it != canvas_items.end(); it) {
-        if (canvas == (*it)->get_canvas()) {
-            delete (*it);
-            it = canvas_items.erase(it);
-        } else {
-            ++it;
-        }
-    }
-}
-
-void SPPage::showPage()
-{
-    for (auto item : canvas_items) {
-        item->show();
-    }
-}
-
-void SPPage::hidePage()
-{
-    for (auto item : canvas_items) {
-        item->hide();
-    }
-}
 
 /**
  * Sets the default attributes from the namedview.
  */
-bool SPPage::setDefaultAttributes(bool on_top, guint32 border, guint32 bg, int shadow)
+bool SPPage::setDefaultAttributes()
 {
-    if (on_top != border_on_top || border != border_color || bg != background_color || shadow != shadow_size) {
-        this->border_on_top = on_top;
-        this->border_color = border;
-        this->background_color = bg;
-        this->shadow_size = shadow;
+    if (_manager->setDefaultAttributes(_canvas_item)) {
         this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
         return true;
     }
@@ -263,7 +358,7 @@ bool SPPage::setDefaultAttributes(bool on_top, guint32 border, guint32 bg, int s
  */
 void SPPage::setSelected(bool sel)
 {
-    this->is_selected = sel;
+    this->_canvas_item->is_selected = sel;
     this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
 }
 
@@ -383,49 +478,12 @@ void SPPage::swapPage(SPPage *other, bool with_objects)
     other->movePage(other_affine.inverse() * this_affine, with_objects);
 }
 
-/**
- * Update the visual representation on screen, this is manual because
- * this is not an SPItem, but it's own visual identity.
- */
 void SPPage::update(SPCtx * /*ctx*/, unsigned int /*flags*/)
 {
-    // Put these in the preferences?
-    guint32 shadow_color = 0x00000088;
-    guint32 select_color = 0xff0000cc;
-    for (auto item : canvas_items) {
-        if (auto rect = dynamic_cast<Inkscape::CanvasItemRect *>(item)) {
-            rect->set_rect(getDesktopRect());
-
-            bool is_foreground = (rect->get_name() == "foreground");
-            // This will put the border on the background OR foreground layer as needed.
-            if (is_foreground == border_on_top) {
-                rect->show();
-                rect->set_shadow(shadow_color, shadow_size);
-                rect->set_stroke(is_selected ? select_color : border_color);
-            } else {
-                rect->hide();
-                rect->set_shadow(0x0, 0);
-                rect->set_stroke(0x0);
-            }
-            // This undoes the hide for the background rect, but that's ok
-            if (!is_foreground) {
-                rect->show();
-                rect->set_background(background_color);
-            }
-        }
-        if (auto label = dynamic_cast<Inkscape::CanvasItemText *>(item)) {
-            if (auto txt = this->label()) {
-                auto corner = getDesktopRect().corner(0);
-                label->set_coord(corner);
-                label->set_text(txt);
-                label->show();
-            } else {
-                label->set_text("");
-                label->hide();
-            }
-        }
-    }
+    // This is manual because this is not an SPItem, but it's own visual identity.
+    _canvas_item->update(getDesktopRect(), this->label());
 }
+
 
 /**
  * Write out the page's data into it's xml structure.

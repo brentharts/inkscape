@@ -48,11 +48,6 @@ _onDocumentFilenameSet (gchar const* filename, View* v)
     v->onDocumentFilenameSet (filename);
 }
 
-static void _onViewBoxResized(double x, double y, View *v)
-{
-    v->onViewBoxResized(x, y);
-}
-
 //--------------------------------------------------------------------
 View::View()
 :  _doc(nullptr)
@@ -80,7 +75,6 @@ void View::_close() {
 
     if (_doc) {
         _document_uri_set_connection.disconnect();
-        _viewbox_resized_connection.disconnect();
         if (INKSCAPE.remove_document(_doc)) {
             // this was the last view of this document, so delete it
             // delete _doc;  Delete now handled in Inkscape::Application
@@ -106,7 +100,6 @@ void View::setDocument(SPDocument *doc) {
 
     if (_doc) {
         _document_uri_set_connection.disconnect();
-        _viewbox_resized_connection.disconnect();
         if (INKSCAPE.remove_document(_doc)) {
             // this was the last view of this document, so delete it
             // delete _doc; Delete now handled in Inkscape::Application
@@ -117,7 +110,6 @@ void View::setDocument(SPDocument *doc) {
 
     _doc = doc;
     _document_uri_set_connection = _doc->connectFilenameSet(sigc::bind(sigc::ptr_fun(&_onDocumentFilenameSet), this));
-    _viewbox_resized_connection = _doc->connectResized(sigc::bind(sigc::ptr_fun(&_onViewBoxResized), this));
     _document_filename_set_signal.emit( _doc->getDocumentFilename() );
 }
 

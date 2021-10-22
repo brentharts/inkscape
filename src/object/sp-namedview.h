@@ -22,6 +22,7 @@
 #include "svg/svg-bool.h"
 #include <vector>
 
+class PageOnCanvas;
 namespace Inkscape {
     class PageManager;
     class CanvasGrid;
@@ -97,6 +98,7 @@ public:
     void setGuides(bool v);
     bool getGuides();
     void lockGuides();
+    void updateViewPort();
 
     Inkscape::PageManager *getPageManager() const { return _page_manager; }
 
@@ -104,7 +106,8 @@ private:
     double getMarginLength(gchar const * const key,Inkscape::Util::Unit const * const margin_units,Inkscape::Util::Unit const * const return_units,double const width,double const height,bool const use_width);
     friend class SPDocument;
 
-    Inkscape::PageManager *_page_manager;
+    Inkscape::PageManager *_page_manager = nullptr;
+    PageOnCanvas *_viewport = nullptr;
 
 protected:
 	void build(SPDocument *document, Inkscape::XML::Node *repr) override;

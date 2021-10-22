@@ -76,7 +76,6 @@ namespace Inkscape {
     class CanvasItemCatchall;
     class CanvasItemDrawing;
     class CanvasItemGroup;
-    class CanvasItemRect;
     class CanvasItemRotate;
 
     namespace UI {
@@ -170,7 +169,6 @@ public:
     Inkscape::CanvasItemGroup    *getCanvasTemp()     const { return canvas_group_temp; }
 
     Inkscape::CanvasItemCatchall *getCanvasCatchall() const { return canvas_catchall; }
-    Inkscape::CanvasItemRect     *getCanvasViewBox()  const { return canvas_viewbox; }
     Inkscape::CanvasItemDrawing  *getCanvasDrawing()  const { return canvas_drawing; }
     Inkscape::CanvasItemRotate   *getCanvasRotate()   const { return canvas_rotate; }
 
@@ -187,7 +185,6 @@ private:
 
     // Individual items
     Inkscape::CanvasItemCatchall *canvas_catchall        = nullptr; ///< The bottom item for unclaimed events.
-    Inkscape::CanvasItemRect     *canvas_viewbox         = nullptr; ///< The document's viewbox
     Inkscape::CanvasItemDrawing  *canvas_drawing         = nullptr; ///< The actual SVG drawing (a.k.a. arena).
     Inkscape::CanvasItemRotate   *canvas_rotate          = nullptr; ///< Quick preview of canvas rotation.
 
@@ -624,7 +621,6 @@ private:
     void onRedrawRequested() override;
     void onStatusMessage (Inkscape::MessageType type, gchar const *message) override;
     void onDocumentFilenameSet(gchar const* filename) override;
-    void onViewBoxResized (double, double) override;
 };
 
 #endif // SEEN_SP_DESKTOP_H
