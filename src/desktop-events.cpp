@@ -489,11 +489,26 @@ void snoop_extended(GdkEvent* event, SPDesktop *desktop)
     GdkInputSource source = GDK_SOURCE_MOUSE;
     std::string name;
 
+    if (! source_device) return;
+    switch ( event->type ) {
+        case GDK_MOTION_NOTIFY:
+        case GDK_BUTTON_PRESS:
+        case GDK_2BUTTON_PRESS:
+        case GDK_3BUTTON_PRESS:
+        case GDK_BUTTON_RELEASE:
+        case GDK_SCROLL:
+        case GDK_PROXIMITY_IN:
+        case GDK_PROXIMITY_OUT:
     // fix to previous code using event->device that did not point to original device that generated the event.
-    if ( source_device ) {
         source = gdk_device_get_source(source_device);
         name = gdk_device_get_name(source_device);
+    
+        break;
+
+        default:
+            ;
     }
+
 
     if (!name.empty()) {
         if ( lastType != source || lastName != name ) {
