@@ -619,9 +619,10 @@ ObjectsPanel::ObjectsPanel() :
     _text_renderer->property_editable() = true;
     _text_renderer->property_ellipsize().set_value(Pango::ELLIPSIZE_END);
 
+    const int icon_col_width = 24;
     auto icon_renderer = Gtk::manage(new Inkscape::UI::Widget::CellRendererItemIcon());
     icon_renderer->property_xpad() = 2;
-    icon_renderer->property_width() = 24;
+    icon_renderer->property_width() = icon_col_width;
     _tree.append_column(*_name_column);
     _name_column->set_expand(true);
     _name_column->pack_start(*icon_renderer, false);
@@ -643,6 +644,7 @@ ObjectsPanel::ObjectsPanel() :
         eye->add_attribute(eyeRenderer->property_cell_background_rgba(), _model->_colBgColor);
         eye->add_attribute(eyeRenderer->property_activatable(), _model->_colHover);
         eye->add_attribute(eyeRenderer->property_gossamer(), _model->_colAncestorInvisible);
+        eye->set_fixed_width(icon_col_width);
     }
 
     // Unlocked icon
@@ -655,6 +657,7 @@ ObjectsPanel::ObjectsPanel() :
         lock->add_attribute(lockRenderer->property_cell_background_rgba(), _model->_colBgColor);
         lock->add_attribute(lockRenderer->property_activatable(), _model->_colHover);
         lock->add_attribute(lockRenderer->property_gossamer(), _model->_colAncestorLocked);
+        lock->set_fixed_width(icon_col_width);
     }
 
     //Set the expander and search columns
@@ -689,6 +692,8 @@ ObjectsPanel::ObjectsPanel() :
     _text_renderer->signal_edited().connect(sigc::mem_fun(*this, &ObjectsPanel::_handleEdited));
 
     //Set up the scroller window and pack the page
+    // turn off overlay scrollbars - they block access to the 'lock' icon
+    _scroller.set_overlay_scrolling(false);
     _scroller.add(_tree);
     _scroller.set_policy( Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC );
     _scroller.set_shadow_type(Gtk::SHADOW_IN);
@@ -715,9 +720,12 @@ ObjectsPanel::ObjectsPanel() :
     _object_mode.set_tooltip_text(_("Switch to layers only view."));
     _object_mode.property_active() = prefs->getBool("/dialogs/objects/layers_only", false);
     _object_mode.property_active().signal_changed().connect(sigc::mem_fun(*this, &ObjectsPanel::_objects_toggle));
-    _buttonsPrimary.pack_start(_object_mode, Gtk::PACK_SHRINK);
 
+    _buttonsPrimary.pack_start(_object_mode, Gtk::PACK_SHRINK);
     _buttonsPrimary.pack_start(*_addBarButton(INKSCAPE_ICON("layer-new"), _("Add layer..."), (int)SP_VERB_LAYER_NEW), Gtk::PACK_SHRINK);
+    // uncomment if we think 'properties' dialog button deserves to be exposed:
+    // _buttonsPrimary.pack_start(*_addBarButton(INKSCAPE_ICON("dialog-object-properties"), _("Object properties..."), (int)SP_VERB_DIALOG_ITEM), Gtk::PACK_SHRINK);
+
     _buttonsSecondary.pack_end(*_addBarButton(INKSCAPE_ICON("edit-delete"), _("Remove object"), (int)SP_VERB_EDIT_DELETE), Gtk::PACK_SHRINK);
     _buttonsSecondary.pack_end(*_addBarButton(INKSCAPE_ICON("go-down"), _("Move Down"), (int)SP_VERB_SELECTION_STACK_DOWN), Gtk::PACK_SHRINK);
     _buttonsSecondary.pack_end(*_addBarButton(INKSCAPE_ICON("go-up"), _("Move Up"), (int)SP_VERB_SELECTION_STACK_UP), Gtk::PACK_SHRINK);
