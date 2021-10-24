@@ -25,6 +25,7 @@
 
 #include "selection.h"
 #include "color-rgba.h"
+#include "helper/auto-connection.h"
 
 using Inkscape::XML::Node;
 
@@ -113,6 +114,7 @@ private:
     Gtk::Menu _popupMenu;
     Gtk::Box _page;
     Gtk::ToggleButton _object_mode;
+    Inkscape::auto_connection _tree_style;
 
     ObjectsPanel(ObjectsPanel const &) = delete; // no copy
     ObjectsPanel &operator=(ObjectsPanel const &) = delete; // no assign

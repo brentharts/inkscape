@@ -17,6 +17,7 @@
 
 #include "objects.h"
 
+#include <gtkmm/cellrenderer.h>
 #include <gtkmm/icontheme.h>
 #include <gtkmm/imagemenuitem.h>
 #include <gtkmm/separatormenuitem.h>
@@ -59,7 +60,18 @@
 #include "ui/widget/imagetoggler.h"
 #include "ui/widget/shapeicon.h"
 
-static double const SELECTED_ALPHA[8] = {0.0, 2.5, 4.0, 2.0, 8.0, 2.5, 1.0, 1.0};
+// alpha (transparency) multipliers corresponding to item selection state combinations (SelectionState)
+// when 0 - do not color item's background
+static double const SELECTED_ALPHA[8] = {
+    0.00, //0 not selected
+    1.00, //1 selected
+    0.50, //2 layer focused
+    1.00, //3 layer focused & selected
+    0.00, //4 child of focused layer
+    1.00, //5 selected child of focused layer
+    0.50, //6 2 and 4
+    1.00  //7 1, 2 and 4
+};
 
 //#define DUMP_LAYERS 1
 
@@ -290,6 +302,8 @@ void ObjectWatcher::updateRowAncestorState(bool invisible, bool locked) {
     }
 }
 
+Gdk::RGBA selection_color;
+
 /**
  * Updates the row's background colour as indicated by it's selection.
  */
@@ -302,16 +316,13 @@ void ObjectWatcher::updateRowBg(guint32 rgba)
             row[panel->_model->_colBgColor] = Gdk::RGBA();
             return;
         }
-        if (rgba == 0.0) {
-            rgba = row[panel->_model->_colIconColor];
-        }
 
-        auto color = ColorRGBA(rgba);
+        const auto& sel = selection_color;
         auto gdk_color = Gdk::RGBA();
-        gdk_color.set_red(color[0]);
-        gdk_color.set_green(color[1]);
-        gdk_color.set_blue(color[2]);
-        gdk_color.set_alpha(color[3] / alpha);
+        gdk_color.set_red(sel.get_red());
+        gdk_color.set_green(sel.get_green());
+        gdk_color.set_blue(sel.get_blue());
+        gdk_color.set_alpha(sel.get_alpha() * alpha);
         row[panel->_model->_colBgColor] = gdk_color;
     }
 }
@@ -588,6 +599,50 @@ ObjectWatcher* ObjectsPanel::getWatcher(Node *node)
     return nullptr;
 }
 
+class ColorTagRenderer : public Gtk::CellRenderer {
+public:
+    ColorTagRenderer() :
+        Glib::ObjectBase(typeid(CellRenderer)),
+        Gtk::CellRenderer(),
+        _property_color(*this, "tagcolor", 0) {
+        
+        int dummy;
+        // height size is not critical
+        Gtk::IconSize::lookup(Gtk::ICON_SIZE_MENU, dummy, _height);
+    }
+
+    ~ColorTagRenderer() override = default;
+
+    Glib::PropertyProxy<unsigned int> property_color() {
+        return _property_color.get_proxy();
+    }
+
+    void render_vfunc(const Cairo::RefPtr<Cairo::Context>& cr, 
+                      Gtk::Widget& widget,
+                      const Gdk::Rectangle& background_area,
+                      const Gdk::Rectangle& cell_area,
+                      Gtk::CellRendererState flags) override {
+        cr->rectangle(cell_area.get_x(), cell_area.get_y(), cell_area.get_width(), cell_area.get_height());
+        ColorRGBA color(_property_color.get_value());
+        cr->set_source_rgb(color[0], color[1], color[2]);
+        cr->fill();
+    }
+
+    void get_preferred_width_vfunc(Gtk::Widget& widget, int& min_w, int& nat_w) const override {
+        min_w = nat_w = _width;
+    }
+
+    void get_preferred_height_vfunc(Gtk::Widget& widget, int& min_h, int& nat_h) const override {
+        min_h = 1;
+        nat_h = _height;
+    }
+
+private:
+    int _width = 8;
+    int _height;
+    Glib::Property<unsigned int> _property_color;
+};
+
 /**
  * Constructor
  */
@@ -660,6 +715,14 @@ ObjectsPanel::ObjectsPanel() :
         lock->set_fixed_width(icon_col_width);
     }
 
+    // hierarchy indicator - using item's layer highlight color
+    auto tag_renderer = Gtk::manage(new ColorTagRenderer());
+    int tag_column = _tree.append_column("tag", *tag_renderer) - 1;
+    if (auto tag = _tree.get_column(tag_column)) {
+        tag->add_attribute(tag_renderer->property_color(), _model->_colIconColor);
+        tag->set_fixed_width(8);
+    }
+
     //Set the expander and search columns
     _tree.set_expander_column(*_name_column);
     // Disable search (it doesn't make much sense)
@@ -672,6 +735,8 @@ ObjectsPanel::ObjectsPanel() :
     _tree.signal_button_release_event().connect(sigc::mem_fun(*this, &ObjectsPanel::_handleButtonEvent), false);
     _tree.signal_key_press_event().connect(sigc::mem_fun(*this, &ObjectsPanel::_handleKeyEvent), false);
     _tree.signal_motion_notify_event().connect(sigc::mem_fun(*this, &ObjectsPanel::_handleMotionEvent), false);
+    // watch mouse leave too
+    _tree.signal_leave_notify_event().connect([=](GdkEventCrossing*){ return _handleMotionEvent(nullptr); }, false);
 
     // Before expanding a row, replace the dummy child with the actual children
     _tree.signal_test_expand_row().connect([this](const Gtk::TreeModel::iterator &iter, const Gtk::TreeModel::Path &) {
@@ -732,6 +797,11 @@ ObjectsPanel::ObjectsPanel() :
 
     _buttonsRow.pack_start(_buttonsPrimary, Gtk::PACK_SHRINK);
     _buttonsRow.pack_end(_buttonsSecondary, Gtk::PACK_SHRINK);
+
+    selection_color = _tree.get_style_context()->get_background_color(Gtk::STATE_FLAG_SELECTED);
+    _tree_style = _tree.signal_style_updated().connect([&](){
+        selection_color = _tree.get_style_context()->get_background_color(Gtk::STATE_FLAG_SELECTED);
+    });
 
     update();
     show_all_children();
