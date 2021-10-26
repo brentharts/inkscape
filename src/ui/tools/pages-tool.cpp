@@ -143,7 +143,7 @@ void PagesTool::resizeKnotFinished(SPKnot *knot, guint state)
 {
     if (auto page_manager = getPageManager()) {
         if (on_screen_rect) {
-            page_manager->getSelected()->setDesktopRect(*on_screen_rect);
+            page_manager->resizePage(on_screen_rect->width(), on_screen_rect->height());
             Inkscape::DocumentUndo::done(desktop->getDocument(), SP_VERB_NONE, "Resize page");
             delete on_screen_rect;
             on_screen_rect = nullptr;
@@ -217,8 +217,18 @@ bool PagesTool::root_handler(GdkEvent *event)
             auto point_dt = desktop->w2d(point_w);
 
             if (dragging_item) {
-                // conclude item here (move item to new location)
-                dragging_item->movePage(moveTo(point_dt), page_manager->move_objects());
+                if (dragging_item->isViewportPage()) {
+                    // Move the document's viewport first
+                    auto rect = dragging_item->document->preferredBounds();
+                    auto affine = moveTo(point_dt);
+                    dragging_item->document->fitToRect(*rect * affine, false);
+                    // Now move the page back to where we expect it.
+                    dragging_item->movePage(affine, page_manager->move_objects());
+                    dragging_item->setDesktopRect(*rect);
+                } else {
+                    // Move the page object on the canvas.
+                    dragging_item->movePage(moveTo(point_dt), page_manager->move_objects());
+                }
                 Inkscape::DocumentUndo::done(desktop->getDocument(), SP_VERB_NONE, "Move page position");
             } else if (on_screen_rect) {
                 // conclude box here (make new page)

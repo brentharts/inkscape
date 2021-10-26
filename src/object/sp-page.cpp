@@ -184,6 +184,15 @@ bool SPPage::itemOnPage(SPItem *item, bool contains) const
 }
 
 /**
+ * Returns true if this page is the same as the viewport.
+ */
+bool SPPage::isViewportPage() const
+{
+    auto rect = document->preferredBounds();
+    return getDesktopRect().corner(0) == rect->corner(0);
+}
+
+/**
  * Shows the page in the given canvas item group.
  */
 void SPPage::showPage(Inkscape::CanvasItemGroup *fg, Inkscape::CanvasItemGroup *bg) {

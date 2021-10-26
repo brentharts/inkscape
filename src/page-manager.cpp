@@ -350,7 +350,13 @@ void PageManager::zoomToPage(SPDesktop *desktop, SPPage *page)
 void PageManager::resizePage(double width, double height)
 {
     if (_selected_page) {
-        _selected_page->setDesktopSize(width, height);
+        // Resizing the Viewport, means the page gets updated automatically
+        if (_selected_page->isViewportPage()) {
+            auto rect = Geom::Rect(Geom::Point(0, 0), Geom::Point(width, height));
+            _selected_page->document->fitToRect(rect, false);
+        } else {
+            _selected_page->setDesktopSize(width, height);
+        }
     }
 }
 

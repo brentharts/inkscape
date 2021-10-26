@@ -58,6 +58,7 @@ public:
     std::vector<SPItem *> getExclusiveItems() const;
     std::vector<SPItem *> getOverlappingItems() const;
     bool itemOnPage(SPItem *item, bool contains = false) const;
+    bool isViewportPage() const;
 
 protected:
     void build(SPDocument *doc, Inkscape::XML::Node *repr) override;
