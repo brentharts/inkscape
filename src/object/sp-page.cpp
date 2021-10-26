@@ -308,8 +308,10 @@ void SPPage::movePage(Geom::Affine translate, bool with_objects)
             // Move each item that is overlapping this page too
             auto scale = document->getDocumentScale();
             for (auto &item : getOverlappingItems()) {
-                auto move = (item->transform * scale) * translate * scale.inverse();
-                item->doWriteTransform(move, &move, false);
+                if (auto parent_item = dynamic_cast<SPItem *>(item->parent)) {
+                    auto move = item->i2dt_affine() * (translate * parent_item->i2doc_affine().inverse());
+                    item->doWriteTransform(move, &move, false);
+                }
             }
         }
         setDesktopRect(getDesktopRect() * translate);
