@@ -19,10 +19,10 @@
 
 class SPDesktop;
 class SPPage;
-class PageOnCanvas;
 
 namespace Inkscape {
 class Selection;
+class CanvasPage;
 namespace UI {
 namespace Dialog {
 class DocumentProperties;
@@ -80,7 +80,7 @@ public:
     void resizePage(double width, double height);
 
     bool subset(SPAttr key, const gchar *value);
-    bool setDefaultAttributes(PageOnCanvas *item);
+    bool setDefaultAttributes(CanvasPage *item);
 
     static void enablePages(SPDocument *document) { document->getNamedView()->getPageManager()->enablePages(); }
     static void disablePages(SPDocument *document) { document->getNamedView()->getPageManager()->disablePages(); }

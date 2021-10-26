@@ -11,6 +11,7 @@
 
 #include "attributes.h"
 #include "desktop.h"
+#include "display/control/canvas-page.h"
 #include "document.h"
 #include "object/sp-item.h"
 #include "object/sp-namedview.h"
@@ -398,7 +399,7 @@ bool PageManager::subset(SPAttr key, const gchar *value)
 /**
  * Update the canvas item with the default display attributes.
  */
-bool PageManager::setDefaultAttributes(PageOnCanvas *item)
+bool PageManager::setDefaultAttributes(Inkscape::CanvasPage *item)
 {
     return item->setAttributes(border_on_top,
                                border_show ? border_color : 0x0,

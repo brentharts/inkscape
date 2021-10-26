@@ -42,6 +42,7 @@
 #include "verbs.h"
 
 #include "display/control/canvas-grid.h"
+#include "display/control/canvas-page.h"
 #include "svg/svg-color.h"
 #include "util/units.h"
 #include "xml/repr.h"
@@ -95,7 +96,7 @@ SPNamedView::SPNamedView()
 
     this->connector_spacing = defaultConnSpacing;
 
-    this->_viewport = new PageOnCanvas();
+    this->_viewport = new Inkscape::CanvasPage();
     this->_viewport->hide();
 }
 

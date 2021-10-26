@@ -22,8 +22,8 @@
 #include "svg/svg-bool.h"
 #include <vector>
 
-class PageOnCanvas;
 namespace Inkscape {
+    class CanvasPage;
     class PageManager;
     class CanvasGrid;
     namespace Util {
@@ -107,7 +107,7 @@ private:
     friend class SPDocument;
 
     Inkscape::PageManager *_page_manager = nullptr;
-    PageOnCanvas *_viewport = nullptr;
+    Inkscape::CanvasPage *_viewport = nullptr;
 
 protected:
 	void build(SPDocument *document, Inkscape::XML::Node *repr) override;

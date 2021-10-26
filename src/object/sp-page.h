@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 /** @file
- * SPPage -- a guideline
+ * SPPage -- a page object.
  *//*
  * Authors:
  *   Martin Owens 2021
@@ -15,39 +15,13 @@
 #include <2geom/rect.h>
 #include <vector>
 
-#include "display/control/canvas-item-rect.h"
-#include "display/control/canvas-item-text.h"
+#include "display/control/canvas-page.h"
 #include "page-manager.h"
 #include "sp-object.h"
 #include "svg/svg-length.h"
 
 class SPDesktop;
 class SPItem;
-
-class PageOnCanvas
-{
-public:
-    PageOnCanvas();
-    ~PageOnCanvas();
-
-    void update(Geom::Rect size, const char *txt, bool outline = false);
-    void add(Geom::Rect size, Inkscape::CanvasItemGroup *background_group, Inkscape::CanvasItemGroup *border_group);
-    void remove(Inkscape::UI::Widget::Canvas *canvas);
-    void show();
-    void hide();
-
-    bool setAttributes(bool on_top, guint32 border, guint32 bg, int shadow);
-    void setOutline(bool outline);
-
-    bool is_selected = false;
-private:
-    std::vector<Inkscape::CanvasItem *> canvas_items;
-
-    bool _border_on_top = true;
-    guint32 _background_color = 0xffffff00;
-    guint32 _border_color = 0x000000cc;
-    int _shadow_size = 0;
-};
 
 class SPPage : public SPObject
 {
@@ -93,7 +67,7 @@ protected:
     Inkscape::XML::Node *write(Inkscape::XML::Document *xml_doc, Inkscape::XML::Node *repr, guint flags) override;
 
 private:
-    PageOnCanvas *_canvas_item = nullptr;
+    Inkscape::CanvasPage *_canvas_item = nullptr;
     Inkscape::PageManager *_manager = nullptr;
 
     SVGLength x;
