@@ -19,6 +19,7 @@
 
 #include <map>
 
+#include <glibmm/keyfile.h>
 #include <glibmm/regex.h>
 
 #include <gtkmm/icontheme.h>
@@ -50,6 +51,7 @@
 
 #include "libnrtype/FontFactory.h"
 
+#include "object/sp-item-group.h"
 #include "object/sp-root.h"
 
 #include "ui/themes.h"
@@ -253,6 +255,28 @@ Application::Application(bool use_gui) :
         /* Check for global remapping of Alt key */
         mapalt(guint(prefs->getInt("/options/mapalt/value", 0)));
         trackalt(guint(prefs->getInt("/options/trackalt/value", 0)));
+
+        themecontext->getChangeThemeSignal().connect([=](){
+            try {
+                auto desktop = active_desktop();
+                bool dark = desktop ? themecontext->isCurrentThemeDark(desktop->getToplevel()) : false;
+                Glib::KeyFile file;
+                file.load_from_file(std::string(get_path(SYSTEM, UIS, "highlight-colors.ini")));
+                auto array = file.get_string_list(dark ? "dark-theme" : "light-theme", "highlights");
+                std::vector<guint32> colors;
+                for (auto&& entry : array) {
+                    guint32 c = std::stoul(entry.c_str(), nullptr, 16);
+                    if (c) colors.push_back(c);
+                }
+                set_default_highlight_colors(std::move(colors));
+            }
+            catch (Glib::Error& error) {
+                g_warning("Error loading default highlight colors: %s", error.what().c_str());
+            }
+            catch (...) {
+                g_warning("Error loading default highlight colors.");
+            }
+        });
     }
 
     /* Initialize the extensions */

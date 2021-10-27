@@ -605,16 +605,20 @@ public:
         Glib::ObjectBase(typeid(CellRenderer)),
         Gtk::CellRenderer(),
         _property_color(*this, "tagcolor", 0) {
-        
-        int dummy;
+
+        int dummy_width;
         // height size is not critical
-        Gtk::IconSize::lookup(Gtk::ICON_SIZE_MENU, dummy, _height);
+        Gtk::IconSize::lookup(Gtk::ICON_SIZE_MENU, dummy_width, _height);
     }
 
     ~ColorTagRenderer() override = default;
 
     Glib::PropertyProxy<unsigned int> property_color() {
         return _property_color.get_proxy();
+    }
+
+    int get_width() const {
+        return _width;
     }
 
     void render_vfunc(const Cairo::RefPtr<Cairo::Context>& cr, 
@@ -720,7 +724,7 @@ ObjectsPanel::ObjectsPanel() :
     int tag_column = _tree.append_column("tag", *tag_renderer) - 1;
     if (auto tag = _tree.get_column(tag_column)) {
         tag->add_attribute(tag_renderer->property_color(), _model->_colIconColor);
-        tag->set_fixed_width(8);
+        tag->set_fixed_width(tag_renderer->get_width());
     }
 
     //Set the expander and search columns
@@ -788,8 +792,6 @@ ObjectsPanel::ObjectsPanel() :
 
     _buttonsPrimary.pack_start(_object_mode, Gtk::PACK_SHRINK);
     _buttonsPrimary.pack_start(*_addBarButton(INKSCAPE_ICON("layer-new"), _("Add layer..."), (int)SP_VERB_LAYER_NEW), Gtk::PACK_SHRINK);
-    // uncomment if we think 'properties' dialog button deserves to be exposed:
-    // _buttonsPrimary.pack_start(*_addBarButton(INKSCAPE_ICON("dialog-object-properties"), _("Object properties..."), (int)SP_VERB_DIALOG_ITEM), Gtk::PACK_SHRINK);
 
     _buttonsSecondary.pack_end(*_addBarButton(INKSCAPE_ICON("edit-delete"), _("Remove object"), (int)SP_VERB_EDIT_DELETE), Gtk::PACK_SHRINK);
     _buttonsSecondary.pack_end(*_addBarButton(INKSCAPE_ICON("go-down"), _("Move Down"), (int)SP_VERB_SELECTION_STACK_DOWN), Gtk::PACK_SHRINK);
@@ -801,6 +803,11 @@ ObjectsPanel::ObjectsPanel() :
     selection_color = _tree.get_style_context()->get_background_color(Gtk::STATE_FLAG_SELECTED);
     _tree_style = _tree.signal_style_updated().connect([&](){
         selection_color = _tree.get_style_context()->get_background_color(Gtk::STATE_FLAG_SELECTED);
+        for (auto&& kv : root_watcher->child_watchers) {
+            if (kv.second) {
+                kv.second->updateRowHighlight();
+            }
+        }
     });
 
     update();

@@ -17,12 +17,6 @@
 #include <map>
 #include "sp-lpe-item.h"
 
-// A list of default highlight colours to use when one isn't set.
-const unsigned int default_highlights[8] = {
-    0xad7fa8ff, 0x729fcfff, 0xbabdb6ff, 0xdb2828ff,
-    0x73b92fff, 0xedd400ff, 0xfcaf3eff, 0xbabdb6ff,
-};
-
 namespace Inkscape {
 
 class Drawing;
@@ -120,6 +114,8 @@ inline bool SP_IS_LAYER(SPObject const *obj)
     auto group = dynamic_cast<SPGroup const *>(obj);
     return group && group->layerMode() == SPGroup::LAYER;
 }
+
+void set_default_highlight_colors(std::vector<guint32> colors);
 
 #endif
 
