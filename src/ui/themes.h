@@ -65,6 +65,9 @@ private:
     std::unique_ptr<Preferences::Observer> _spinbutton_observer;
 };
 
+// load default highlight colors (for dark or light theme)
+std::vector<guint32> load_highlight_colors(bool dark_theme);
+
 }
 }
 #endif /* !UI_THEMES_H_SEEN */

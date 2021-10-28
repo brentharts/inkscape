@@ -462,12 +462,43 @@ bool ThemeContext::isCurrentThemeDark(Gtk::Container *window)
         }
     }
     return dark;
-    
 }
 
+std::vector<guint32> load_highlight_colors(bool dark_theme) {
+    std::vector<guint32> colors;
+    auto css = Gtk::CssProvider::create();
+    auto path = Inkscape::IO::Resource::get_filename(Inkscape::IO::Resource::UIS, dark_theme ? "highlight-colors-dark.css" : "highlight-colors.css");
 
+    if (css->load_from_path(path)) {
+        auto widget = std::make_unique<Gtk::Box>();
+        auto ctx = widget->get_style_context();
+        // extract colors from CSS
+        ctx->add_provider(css, GTK_STYLE_PROVIDER_PRIORITY_USER);
+
+        Glib::ustring name = "highlight-color-";
+        // 8 colors with no easy way to detect number of classes
+        for (int i = 1; i <= 8; ++i) {
+            auto class_name = name + Glib::ustring::format(i);
+            ctx->add_class(class_name);
+            auto color = ctx->get_color();
+            guint32 rgba =
+                gint32(0xff * color.get_red()) << 24 |
+                gint32(0xff * color.get_green()) << 16 |
+                gint32(0xff * color.get_blue()) << 8 |
+                gint32(0xff * color.get_alpha());
+            colors.push_back(rgba);
+            ctx->remove_class(class_name);
+        }
+    }
+    else {
+        g_warning("Error loading highlight colors from %s", path.c_str());
+    }
+    return colors;
 }
-}
+
+} // UI
+} // Inkscape
+
 /*
   Local Variables:
   mode:c++

@@ -1,0 +1,29 @@
+/* default highlight colors; variant for dark backgrounds
+ * 
+ * gray, blue, yellow, red, green, orange, cyan, purple
+ */
+
+.highlight-color-1 {
+    color: #b1b5ad;
+}
+.highlight-color-2 {
+    color: #3b80ee;
+}
+.highlight-color-3 {
+    color: #c3e33e;
+}
+.highlight-color-4 {
+    color: #f3215a;
+}
+.highlight-color-5 {
+    color: #36a949;
+}
+.highlight-color-6 {
+    color: #f37f35;
+}
+.highlight-color-7 {
+    color: #3be3c2;
+}
+.highlight-color-8 {
+    color: #b85ac9;
+}
