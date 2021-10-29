@@ -3,27 +3,57 @@
  * gray, blue, yellow, red, green, orange, cyan, purple
  */
 
-.highlight-color-1 {
+.light .highlight-color-1 {
     color: #babdb6;
 }
-.highlight-color-2 {
+.light .highlight-color-2 {
     color: #729fcf;
 }
-.highlight-color-3 {
+.light .highlight-color-3 {
     color: #edd400;
 }
-.highlight-color-4 {
+.light .highlight-color-4 {
     color: #eb486a;
 }
-.highlight-color-5 {
+.light .highlight-color-5 {
     color: #73b92f;
 }
-.highlight-color-6 {
+.light .highlight-color-6 {
     color: #fcaf3e;
 }
-.highlight-color-7 {
+.light .highlight-color-7 {
     color: #54d5ba;
 }
-.highlight-color-8 {
+.light .highlight-color-8 {
     color: #ad7fa8;
+}
+
+/* default highlight colors; variant for dark backgrounds
+ * 
+ * gray, blue, yellow, red, green, orange, cyan, purple
+ */
+
+.dark .highlight-color-1 {
+    color: #b1b5ad;
+}
+.dark .highlight-color-2 {
+    color: #3b80ee;
+}
+.dark .highlight-color-3 {
+    color: #c3e33e;
+}
+.dark .highlight-color-4 {
+    color: #f3215a;
+}
+.dark .highlight-color-5 {
+    color: #36a949;
+}
+.dark .highlight-color-6 {
+    color: #f37f35;
+}
+.dark .highlight-color-7 {
+    color: #3be3c2;
+}
+.dark .highlight-color-8 {
+    color: #b85ac9;
 }

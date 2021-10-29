@@ -464,14 +464,21 @@ bool ThemeContext::isCurrentThemeDark(Gtk::Container *window)
     return dark;
 }
 
+// extract "default" highlight colors from style.css
 std::vector<guint32> load_highlight_colors(bool dark_theme) {
     std::vector<guint32> colors;
     auto css = Gtk::CssProvider::create();
-    auto path = Inkscape::IO::Resource::get_filename(Inkscape::IO::Resource::UIS, dark_theme ? "highlight-colors-dark.css" : "highlight-colors.css");
+    auto path = Inkscape::IO::Resource::get_filename(Inkscape::IO::Resource::UIS, "style.css");
 
     if (css->load_from_path(path)) {
+        auto parent = std::make_unique<Gtk::Box>();
+        auto parent_ctx = parent->get_style_context();
+        parent_ctx->add_class(dark_theme ? "dark" : "light");
+
         auto widget = std::make_unique<Gtk::Box>();
+        parent->pack_start(*widget);
         auto ctx = widget->get_style_context();
+
         // extract colors from CSS
         ctx->add_provider(css, GTK_STYLE_PROVIDER_PRIORITY_USER);
 
@@ -493,6 +500,7 @@ std::vector<guint32> load_highlight_colors(bool dark_theme) {
     else {
         g_warning("Error loading highlight colors from %s", path.c_str());
     }
+
     return colors;
 }
 
