@@ -172,6 +172,9 @@ ImageMagick::effect (Inkscape::Extension::Effect *module, Inkscape::UI::View::Vi
         {
             Magick::Image effectedImage = *dc->_images[i]; // make a copy
 
+            // preEffect can be used to set the variables from the item
+            preEffect(&effectedImage, dc->_imageItems[i]);
+
             applyEffect(&effectedImage);
 
             // postEffect can be used to change things on the item itself

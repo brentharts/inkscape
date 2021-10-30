@@ -13,6 +13,9 @@
 #include "crop.h"
 #include "selection-chemistry.h"
 #include "object/sp-item.h"
+#include "object/sp-rect.h"
+#include "object/sp-image.h"
+#include "object/sp-clippath.h"
 #include "object/sp-item-transform.h"
 #include <Magick++.h>
 
@@ -28,30 +31,65 @@ Crop::applyEffect(Magick::Image *image) {
     if (width > 0 and height > 0) {
         image->crop(Magick::Geometry(width, height, _left, _top, false, false));
         image->page("+0+0");
+    } else {
+        g_warning("Refusing to crop to %d,%d (w:%d, h:%d)", _left, _top, width, height);
     }
 }
 
 void
-Crop::postEffect(Magick::Image *image, SPItem *item) {
+Crop::preEffect(Magick::Image *image, SPItem *item) {
+    _auto = false;
+    if (_left || _top || _right || _bottom) {
+        return;
+    }
+    if (auto sp_clip = item->getClipObject()) {
+        Geom::OptRect item_bbox(item->documentGeometricBounds());
+        Geom::OptRect clip_bbox(sp_clip->geometricBounds(item->i2doc_affine()));
 
+        if (item_bbox && clip_bbox) {
+            _auto = true;
+            _left = clip_bbox->left() - item_bbox->left();
+            _top = clip_bbox->top() - item_bbox->top();
+            _right = item_bbox->width() - clip_bbox->width() - _left;
+            _bottom = item_bbox->height() - clip_bbox->height() - _top;
+        }
+    }
+}
+
+void
+Crop::postEffect(Magick::Image *image, SPItem *item)
+{
     // Scale bbox
-    Geom::Scale scale (0,0);
-    scale = Geom::Scale(image->columns() / (double) image->baseColumns(),
-                        image->rows() / (double) image->baseRows());
+    auto scale = Geom::Scale(image->columns() / (double) image->baseColumns());
+
+    // OK something is very wrong here, when applying both scales, the height ends up
+    // squashed, but if we apply the width scale only, it somehow works. We have no idea why.
+    // image->rows() / (double) image->baseRows());
     item->scale_rel(scale);
 
     // Translate proportionaly to the image/bbox ratio
     Geom::OptRect bbox(item->desktopGeometricBounds());
-    //g_warning("bbox. W:%f, H:%f, X:%f, Y:%f", bbox->dimensions()[Geom::X], bbox->dimensions()[Geom::Y], bbox->min()[Geom::X], bbox->min()[Geom::Y]);
 
     Geom::Translate translate (0,0);
     translate = Geom::Translate(((_left - _right) / 2.0) * (bbox->dimensions()[Geom::X] / (double) image->columns()),
                                 ((_bottom - _top) / 2.0) * (bbox->dimensions()[Geom::Y] / (double) image->rows()));
     item->move_rel(translate);
+
+    if (_auto) {
+        // Resetting the x,y coords allows the smaller image to keep the crop
+        //auto translate = Geom::Translate(_left, _top);
+        if (auto sp_clip = item->getClipObject()) {
+            item->setAttribute("clip-path", "none");
+            //for (auto& child: sp_clip->childList(false)) {
+            //    delete child;
+            //}
+        }
+    }
 }
 
 void
-Crop::refreshParameters(Inkscape::Extension::Effect *module) {    
+Crop::refreshParameters(Inkscape::Extension::Effect *module) {
+    _auto = false;
     _top = module->get_param_int("top");
     _bottom = module->get_param_int("bottom");
     _left = module->get_param_int("left");

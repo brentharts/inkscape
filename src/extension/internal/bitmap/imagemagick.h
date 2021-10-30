@@ -32,6 +32,7 @@ public:
     /* Functions to be implemented by subclasses */
     virtual void applyEffect(Magick::Image */*image*/) { };
     virtual void refreshParameters(Inkscape::Extension::Effect */*module*/) { };
+    virtual void preEffect(Magick::Image */*image*/, SPItem */*item*/) { };
     virtual void postEffect(Magick::Image */*image*/, SPItem */*item*/) { };
 
     /* Functions implemented from ::Implementation */

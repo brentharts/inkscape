@@ -18,12 +18,14 @@ namespace Bitmap {
 class Crop : public ImageMagick
 {
 private:
+    bool _auto;
     int _top;
     int _bottom;
     int _left;
     int _right;
 public:
     void applyEffect(Magick::Image *image) override;
+    void preEffect(Magick::Image *image, SPItem *item) override;
     void postEffect(Magick::Image *image, SPItem *item) override;
     void refreshParameters(Inkscape::Extension::Effect *module) override;
     static void init ();
