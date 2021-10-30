@@ -933,18 +933,6 @@ void EditVerb::perform(SPAction *action, void *data)
         case SP_VERB_EDIT_SWAP_FILL_STROKE:
             dt->selection->swapFillStroke();
             break;
-        case SP_VERB_PAGES_ENABLE:
-            Inkscape::PageManager::enablePages(dt->getDocument());
-            DocumentUndo::done(dt->getDocument(), SP_VERB_PAGES_ENABLE, _("Pages Enabled"));
-            break;
-        case SP_VERB_PAGES_DISABLE:
-            Inkscape::PageManager::disablePages(dt->getDocument());
-            DocumentUndo::done(dt->getDocument(), SP_VERB_PAGES_DISABLE, _("Pages Disabled"));
-            break;
-        case SP_VERB_PAGES_NEW:
-            Inkscape::PageManager::newPage(dt->getDocument());
-            DocumentUndo::done(dt->getDocument(), SP_VERB_PAGES_NEW, _("Added new page"));
-            break;
         case SP_VERB_EDIT_LINK_COLOR_PROFILE:
             break;
         case SP_VERB_EDIT_REMOVE_COLOR_PROFILE:
