@@ -1967,13 +1967,6 @@ Verb *Verb::_base_verbs[] = {
     new EditVerb(SP_VERB_EDIT_SWAP_FILL_STROKE, "EditSwapFillStroke", N_("Swap fill and stroke"),
                  N_("Swap fill and stroke of an object"), nullptr),
 
-    new EditVerb(SP_VERB_PAGES_ENABLE, "PagesEnable", N_("Enable Multiple pages"),
-                 N_("Turn into a multiple page document"), nullptr),
-    new EditVerb(SP_VERB_PAGES_DISABLE, "PagesDisable", N_("Remove All Pages"),
-                 N_("Turn into a single page document"), nullptr),
-    new EditVerb(SP_VERB_PAGES_NEW, "PagesNew", N_("New Default Page"),
-                 N_("Add a new default page."), INKSCAPE_ICON("page")),
-
     // Selection
     new SelectionVerb(SP_VERB_SELECTION_TO_FRONT, "SelectionToFront", N_("Raise to _Top"), N_("Raise selection to top"),
                       INKSCAPE_ICON("selection-top")),
