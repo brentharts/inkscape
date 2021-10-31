@@ -67,24 +67,6 @@ using Inkscape::DocumentUndo;
 
 static bool temporarily_block_actions = false;
 
-SPGroup* get_layer(SPObject* object) {
-    if (auto group = dynamic_cast<SPGroup*>(object)) {
-        if (group->layerMode() == SPGroup::LAYER) {
-            return group;
-        }
-    }
-    return nullptr;
-}
-
-SPGroup* get_group(SPObject* object) {
-    if (auto group = dynamic_cast<SPGroup*>(object)) {
-        if (group->layerMode() == SPGroup::GROUP) {
-            return group;
-        }
-    }
-    return nullptr;
-}
-
 ContextMenu::ContextMenu(SPDesktop *desktop, SPItem *item) :
     _item(item),
     MIGroup(),
@@ -97,7 +79,7 @@ ContextMenu::ContextMenu(SPDesktop *desktop, SPItem *item) :
 
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     _show_icons = prefs->getInt("/theme/menuIcons_canvas", true);
-    auto layer = get_layer(_object);
+    auto layer = sp_item_get_layer(_object);
 
     AppendItemFromVerb(Inkscape::Verb::get(SP_VERB_EDIT_UNDO));
     AppendItemFromVerb(Inkscape::Verb::get(SP_VERB_EDIT_REDO));
@@ -337,7 +319,7 @@ void ContextMenu::AppendItemFromVerb(Inkscape::Verb *verb)
 void ContextMenu::MakeObjectMenu()
 {
     if (SP_IS_ITEM(_object)) {
-        MakeItemMenu(get_layer(_object));
+        MakeItemMenu(sp_item_get_layer(_object));
     }
 
     if (SP_IS_GROUP(_object)) {
@@ -645,7 +627,7 @@ void ContextMenu::fireAction(unsigned int code) {
 // group and layer menu
 void ContextMenu::MakeGroupMenu(SPGroup* item)
 {
-    if (auto layer = get_layer(item)) {
+    if (auto layer = sp_item_get_layer(item)) {
         // layer-specific commands
         AppendItemFromVerb(Inkscape::Verb::get(SP_VERB_LAYER_NEW));
         AppendItemFromVerb(Inkscape::Verb::get(SP_VERB_LAYER_RENAME));
@@ -662,11 +644,11 @@ void ContextMenu::MakeGroupMenu(SPGroup* item)
         // transform layer into group
         append_item(_("Layer to group"), false).connect([=]() { sp_group_layer_transform(_desktop->doc(), layer, SPGroup::GROUP); });
     }
-    else if (auto group = get_group(item)) {
+    else if (auto group = sp_item_get_group(item)) {
         /* Ungroup */
         append_item(_("_Ungroup"), true).connect(sigc::mem_fun(*this, &ContextMenu::ActivateUngroup));
 
-        if (auto parent = get_layer(group->parent)) {
+        if (auto parent = sp_item_get_layer(group->parent)) {
             // transform group into layer
             append_item(_("Group to layer"), false).connect([=](){ sp_group_layer_transform(_desktop->doc(), group, SPGroup::LAYER); });
         }

@@ -677,6 +677,15 @@ ObjectsPanel::ObjectsPanel() :
     _text_renderer = Gtk::manage(new Gtk::CellRendererText());
     _text_renderer->property_editable() = true;
     _text_renderer->property_ellipsize().set_value(Pango::ELLIPSIZE_END);
+    _text_renderer->signal_editing_started().connect([=](Gtk::CellEditable*,const Glib::ustring&){
+        _is_editing = true;
+    });
+    _text_renderer->signal_editing_canceled().connect([=](){
+        _is_editing = false;
+    });
+    _text_renderer->signal_edited().connect([=](const Glib::ustring&,const Glib::ustring&){
+        _is_editing = false;
+    });
 
     const int icon_col_width = 24;
     auto icon_renderer = Gtk::manage(new Inkscape::UI::Widget::CellRendererItemIcon());
