@@ -697,26 +697,26 @@ ObjectsPanel::ObjectsPanel() :
     auto *eyeRenderer = Gtk::manage( new Inkscape::UI::Widget::ImageToggler(
             INKSCAPE_ICON("object-hidden"), INKSCAPE_ICON("object-visible")));
     int visibleColNum = _tree.append_column("vis", *eyeRenderer) - 1;
-    eyeRenderer->signal_toggled().connect(sigc::mem_fun(*this, &ObjectsPanel::toggleVisible));
     if (auto eye = _tree.get_column(visibleColNum)) {
         eye->add_attribute(eyeRenderer->property_active(), _model->_colInvisible);
         eye->add_attribute(eyeRenderer->property_cell_background_rgba(), _model->_colBgColor);
         eye->add_attribute(eyeRenderer->property_activatable(), _model->_colHover);
         eye->add_attribute(eyeRenderer->property_gossamer(), _model->_colAncestorInvisible);
         eye->set_fixed_width(icon_col_width);
+        _eye_column = eye;
     }
 
     // Unlocked icon
     Inkscape::UI::Widget::ImageToggler * lockRenderer = Gtk::manage( new Inkscape::UI::Widget::ImageToggler(
         INKSCAPE_ICON("object-locked"), INKSCAPE_ICON("object-unlocked")));
     int lockedColNum = _tree.append_column("lock", *lockRenderer) - 1;
-    lockRenderer->signal_toggled().connect(sigc::mem_fun(*this, &ObjectsPanel::toggleLocked));
     if (auto lock = _tree.get_column(lockedColNum)) {
         lock->add_attribute(lockRenderer->property_active(), _model->_colLocked);
         lock->add_attribute(lockRenderer->property_cell_background_rgba(), _model->_colBgColor);
         lock->add_attribute(lockRenderer->property_activatable(), _model->_colHover);
         lock->add_attribute(lockRenderer->property_gossamer(), _model->_colAncestorLocked);
         lock->set_fixed_width(icon_col_width);
+        _lock_column = lock;
     }
 
     // hierarchy indicator - using item's layer highlight color
@@ -939,11 +939,20 @@ Gtk::Button* ObjectsPanel::_addBarButton(char const* iconName, char const* toolt
  * Sets visibility of items in the tree
  * @param iter Current item in the tree
  */
-void ObjectsPanel::toggleVisible(const Glib::ustring& path)
+bool ObjectsPanel::toggleVisible(GdkEventButton* event, Gtk::TreeModel::Row row)
 {
-    Gtk::TreeModel::Row row = *_store->get_iter(path);
-    if (SPItem* item = getItem(row))
-        item->setHidden(!row[_model->_colInvisible]);
+    if (SPItem* item = getItem(row)) { 
+        if (event->state & GDK_SHIFT_MASK) {
+            // Toggle Visible for layers (hide all other layers)
+            if (auto desktop = getDesktop()) {
+                desktop->toggleLayerSolo(item);
+                DocumentUndo::done(desktop->getDocument(), SP_VERB_LAYER_SOLO, _("Toggle layer solo"));
+            }
+        } else {
+            item->setHidden(!row[_model->_colInvisible]);
+        }
+    }
+    return true;
 }
 
 /**
@@ -951,11 +960,20 @@ void ObjectsPanel::toggleVisible(const Glib::ustring& path)
  * @param iter Current item in the tree
  * @param locked Whether the item should be locked
  */
-void ObjectsPanel::toggleLocked(const Glib::ustring& path)
+bool ObjectsPanel::toggleLocked(GdkEventButton* event, Gtk::TreeModel::Row row)
 {
-    Gtk::TreeModel::Row row = *_store->get_iter(path);
-    if (SPItem* item = getItem(row))
-        item->setLocked(!row[_model->_colLocked]);
+    if (SPItem* item = getItem(row)) { 
+        if (event->state & GDK_SHIFT_MASK) {
+            // Toggle lock for layers (lock all other layers)
+            if (auto desktop = getDesktop()) {
+                desktop->toggleLockOtherLayers(item);
+                DocumentUndo::done(desktop->getDocument(), SP_VERB_LAYER_LOCK_OTHERS, _("Lock other layers"));
+            }
+        } else {
+            item->setHidden(!row[_model->_colInvisible]);
+        }
+    }
+    return true;
 }
 
 /**
@@ -1031,6 +1049,15 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
     Gtk::TreeViewColumn* col = nullptr;
     int x, y;
     if (_tree.get_path_at_pos((int)event->x, (int)event->y, path, col, x, y)) {
+        if (auto row = *_store->get_iter(path)) {
+            if (event->type == GDK_BUTTON_RELEASE) {
+                if (col == _eye_column) {
+                    return toggleVisible(event, row);
+                } else if (col == _lock_column) {
+                    return toggleLocked(event, row);
+                }
+            }
+        }
         // Only the label reacts to clicks, nothing else, only need to test horz
         Gdk::Rectangle r;
         _tree.get_cell_area(path, *_name_column, r);
@@ -1052,23 +1079,26 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
         SPGroup *group = SP_GROUP(item);
 
         // Load the right click menu
-        if (event->type == GDK_BUTTON_PRESS && event->button == 3) {
-            ContextMenu* menu = new ContextMenu(getDesktop(), item);
-            menu->show();
-            menu->popup_at_pointer(nullptr);
-            return true;
-        }
+        const bool context_menu = event->type == GDK_BUTTON_PRESS && event->button == 3;
 
-        // Select items on button release to not confuse drag
-        if (!_is_editing && event->type == GDK_BUTTON_RELEASE) {
+        // Select items on button release to not confuse drag (unless it's a right-click)
+        // Right-click selects too to set up the stage for context menu which frequently relies on current selection!
+        if (!_is_editing && (event->type == GDK_BUTTON_RELEASE || context_menu)) {
             if (event->state & GDK_SHIFT_MASK) {
                 // Select everything between this row and the already seleced item
                 selection->setBetween(item);
             } else if (event->state & GDK_CONTROL_MASK) {
                 selection->toggle(item);
             } else if (group && group->layerMode() == SPGroup::LAYER) {
+                // if right-clicking on a layer, make it current for context menu actions to work correctly
+                if (context_menu) {
+                    if (getDesktop()->currentLayer() != item) {
+                        selection->clear();
+                        getDesktop()->setCurrentLayer(item);
+                    }
+                }
                 // Clicking on layers firstly switches to that layer.
-                if(selection->includes(item)) {
+                else if (selection->includes(item)) {
                     selection->clear();
                 } else if (_layer != item) {
                     selection->clear();
@@ -1078,6 +1108,12 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
                 }
             } else {
                 selection->set(item);
+            }
+
+            if (context_menu) {
+                ContextMenu *menu = new ContextMenu(getDesktop(), item);
+                menu->show();
+                menu->popup_at_pointer(nullptr);
             }
             return true;
         } else {

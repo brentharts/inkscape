@@ -464,43 +464,36 @@ bool ThemeContext::isCurrentThemeDark(Gtk::Container *window)
     return dark;
 }
 
-// extract "default" highlight colors from style.css
-std::vector<guint32> load_highlight_colors(bool dark_theme) {
+/**
+ * Load the highlight colours from the current theme. If the theme changes
+ * you can call this function again to refresh the list.
+ */
+std::vector<guint32> ThemeContext::getHighlightColors(Gtk::Window *window)
+{
     std::vector<guint32> colors;
-    auto css = Gtk::CssProvider::create();
-    auto path = Inkscape::IO::Resource::get_filename(Inkscape::IO::Resource::UIS, "style.css");
+    if (!window) return colors;
 
-    if (css->load_from_path(path)) {
-        auto parent = std::make_unique<Gtk::Box>();
-        auto parent_ctx = parent->get_style_context();
-        parent_ctx->add_class(dark_theme ? "dark" : "light");
+    Glib::ustring name = "highlight-color-";
 
-        auto widget = std::make_unique<Gtk::Box>();
-        parent->pack_start(*widget);
-        auto ctx = widget->get_style_context();
+    for (int i = 1; i <= 8; ++i) {
+        auto context = Gtk::StyleContext::create();
 
-        // extract colors from CSS
-        ctx->add_provider(css, GTK_STYLE_PROVIDER_PRIORITY_USER);
+        // The highlight colors will be attached to a GtkWidget
+        // but it isn't neccessary to use this in the .css file.
+        auto path = window->get_style_context()->get_path();
+        path.path_append_type(Gtk::Widget::get_type());
+        path.iter_add_class(-1, name + Glib::ustring::format(i));
+        context->set_path(path);
 
-        Glib::ustring name = "highlight-color-";
-        // 8 colors with no easy way to detect number of classes
-        for (int i = 1; i <= 8; ++i) {
-            auto class_name = name + Glib::ustring::format(i);
-            ctx->add_class(class_name);
-            auto color = ctx->get_color();
-            guint32 rgba =
-                gint32(0xff * color.get_red()) << 24 |
-                gint32(0xff * color.get_green()) << 16 |
-                gint32(0xff * color.get_blue()) << 8 |
-                gint32(0xff * color.get_alpha());
-            colors.push_back(rgba);
-            ctx->remove_class(class_name);
-        }
+        // Get the color from the new context
+        auto color = context->get_color();
+        guint32 rgba =
+            gint32(0xff * color.get_red()) << 24 |
+            gint32(0xff * color.get_green()) << 16 |
+            gint32(0xff * color.get_blue()) << 8 |
+            gint32(0xff * color.get_alpha());
+        colors.push_back(rgba);
     }
-    else {
-        g_warning("Error loading highlight colors from %s", path.c_str());
-    }
-
     return colors;
 }
 

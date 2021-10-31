@@ -54,6 +54,8 @@ sigc::signal<void> getChangeThemeSignal() { return _signal_change_theme;}
 // True if current theme (applied one) is dark
 bool isCurrentThemeDark(Gtk::Container *window);
 
+static std::vector<guint32> getHighlightColors(Gtk::Window *window);
+
 private:
     // user change theme
     sigc::signal<void> _signal_change_theme;
@@ -64,9 +66,6 @@ private:
     Glib::RefPtr<Gtk::CssProvider> _spinbuttonprovider;
     std::unique_ptr<Preferences::Observer> _spinbutton_observer;
 };
-
-// load default highlight colors (for dark or light theme)
-std::vector<guint32> load_highlight_colors(bool dark_theme);
 
 }
 }
