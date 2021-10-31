@@ -995,6 +995,11 @@ bool ObjectsPanel::_handleKeyEvent(GdkEventKey *event)
                 return true;
             }
             break;
+
+        // space and return enter label editing mode; leave them for the tree to handle
+        case GDK_KEY_Return:
+        case GDK_KEY_space:
+            return false;
     }
 
     // invoke user defined shortcuts first
