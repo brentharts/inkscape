@@ -92,10 +92,16 @@ void SPFeColorMatrix::set(SPAttr key, gchar const *str) {
             }
             break;
         case SPAttr::VALUES:
-            if (str){
+            if (str) {
                 this->values = helperfns_read_vector(str);
                 this->value = helperfns_read_number(str, HELPERFNS_NO_WARNING);
                 this->parent->requestModified(SP_OBJECT_MODIFIED_FLAG);
+            } else {
+                // Set non-zero defaults.
+                if (type == Inkscape::Filters::COLORMATRIX_SATURATE) {
+                    // Default value for saturate is 1.0 ("values" not used).
+                    value = 1.0;
+                }
             }
             break;
         default:

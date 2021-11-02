@@ -514,11 +514,11 @@ public:
         : AttrWidget(SPAttr::VALUES),
           // TRANSLATORS: this dialog is accessible via menu Filters - Filter editor
           _matrix(SPAttr::VALUES, _("This matrix determines a linear transform on color space. Each line affects one of the color components. Each column determines how much of each color component from the input is passed to the output. The last column does not depend on input colors, so can be used to adjust a constant component value.")),
-          _saturation("", 0, 0, 1, 0.1, 0.01, 2, SPAttr::VALUES),
+          _saturation("", 1, 0, 1, 0.1, 0.01, 2, SPAttr::VALUES),
           _angle("", 0, 0, 360, 0.1, 0.01, 1, SPAttr::VALUES),
           _label(C_("Label", "None"), Gtk::ALIGN_START),
           _use_stored(false),
-          _saturation_store(0),
+          _saturation_store(1.0),
           _angle_store(0)
     {
         _matrix.signal_attr_changed().connect(signal_attr_changed().make_slot());
