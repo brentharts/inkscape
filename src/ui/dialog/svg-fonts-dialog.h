@@ -63,6 +63,66 @@ public:
     void update(SPFont*);
 };
 
+
+class SvgGlyphRenderer : public Gtk::CellRenderer {
+public:
+    SvgGlyphRenderer() :
+        Glib::ObjectBase(typeid(CellRenderer)),
+        Gtk::CellRenderer(),
+        _property_active(*this, "active", true),
+        _property_activatable(*this, "activatable", true),
+        _property_glyph(*this, "glyph", "") {
+
+        property_mode() = Gtk::CELL_RENDERER_MODE_ACTIVATABLE;
+    }
+
+    ~SvgGlyphRenderer() override = default;
+
+    Glib::PropertyProxy<Glib::ustring> property_glyph() { return _property_glyph.get_proxy(); }
+    Glib::PropertyProxy<bool> property_active() { return _property_active.get_proxy(); }
+    Glib::PropertyProxy<bool> property_activatable() { return _property_activatable.get_proxy(); }
+
+    sigc::signal<void (const GdkEvent*, const Glib::ustring&)>& signal_clicked() {
+        return _signal_clicked;
+    }
+ 
+    void set_svg_font(SvgFont* font) {
+        _font = font;
+    }
+
+    void set_tree(Gtk::TreeView* tree) {
+        _tree = tree;
+    }
+
+    int get_width() const {
+        return _width;
+    }
+
+    void render_vfunc(const Cairo::RefPtr<Cairo::Context>& cr, Gtk::Widget& widget, const Gdk::Rectangle& background_area, const Gdk::Rectangle& cell_area, Gtk::CellRendererState flags) override;
+
+    bool activate_vfunc(GdkEvent* event, Gtk::Widget& widget, const Glib::ustring& path, const Gdk::Rectangle& background_area, const Gdk::Rectangle& cell_area, Gtk::CellRendererState flags) override;
+
+    void get_preferred_width_vfunc(Gtk::Widget& widget, int& min_w, int& nat_w) const override {
+        min_w = nat_w = _width;
+    }
+
+    void get_preferred_height_vfunc(Gtk::Widget& widget, int& min_h, int& nat_h) const override {
+        min_h = 1;
+        nat_h = _height;
+    }
+
+private:
+    int _width = 30;
+    int _height = 20;
+    Glib::Property<Glib::ustring> _property_glyph;
+    Glib::Property<bool> _property_active;
+    Glib::Property<bool> _property_activatable;
+    SvgFont* _font = nullptr;
+    Gtk::TreeView* _tree = nullptr;
+    sigc::signal<void (const GdkEvent*, const Glib::ustring&)> _signal_clicked;
+};
+
+
 class SvgFontsDialog : public DialogBase
 {
 public:
@@ -209,22 +269,24 @@ private:
     {
     public:
         GlyphsColumns()
-	{
+        {
             add(glyph_node);
             add(glyph_name);
             add(unicode);
             add(advance);
-	}
+        }
 
         Gtk::TreeModelColumn<SPGlyph*> glyph_node;
         Gtk::TreeModelColumn<Glib::ustring> glyph_name;
         Gtk::TreeModelColumn<Glib::ustring> unicode;
         Gtk::TreeModelColumn<double> advance;
     };
+    enum GlyphColumnIndex { ColGlyph, ColName, ColString, ColAdvance };
     GlyphsColumns _GlyphsListColumns;
     Glib::RefPtr<Gtk::ListStore> _GlyphsListStore;
     Gtk::TreeView _GlyphsList;
     Gtk::ScrolledWindow _GlyphsListScroller;
+    SvgGlyphRenderer* _glyph_renderer = nullptr;
 
     class KerningPairColumns : public Gtk::TreeModel::ColumnRecord
     {

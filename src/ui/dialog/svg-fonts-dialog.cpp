@@ -83,6 +83,36 @@ namespace Inkscape {
 namespace UI {
 namespace Dialog {
 
+
+void SvgGlyphRenderer::render_vfunc(
+        const Cairo::RefPtr<Cairo::Context>& cr, Gtk::Widget& widget,
+        const Gdk::Rectangle& background_area, const Gdk::Rectangle& cell_area, Gtk::CellRendererState flags) {
+
+    if (!_font || !_tree) return;
+
+    cr->set_font_face(Cairo::RefPtr<Cairo::FontFace>(new Cairo::FontFace(_font->get_font_face(), false /* does not have reference */)));
+    cr->set_font_size(18);
+    cr->move_to(cell_area.get_x() + 1, cell_area.get_y() + 1);
+    auto context = _tree->get_style_context();
+    Gtk::StateFlags sflags = _tree->get_state_flags();
+    if (flags & Gtk::CELL_RENDERER_SELECTED) {
+        sflags |= Gtk::STATE_FLAG_SELECTED;
+    }
+    Gdk::RGBA fg = context->get_color(sflags);
+    cr->set_source_rgb(fg.get_red(), fg.get_green(), fg.get_blue());
+    Glib::ustring glyph = _property_glyph.get_value();
+    cr->show_text(glyph);
+}
+
+bool SvgGlyphRenderer::activate_vfunc(
+        GdkEvent* event, Gtk::Widget& widget, const Glib::ustring& path, const Gdk::Rectangle& background_area,
+        const Gdk::Rectangle& cell_area, Gtk::CellRendererState flags) {
+
+    Glib::ustring glyph = _property_glyph.get_value();
+    _signal_clicked.emit(event, glyph);
+    return false;
+}
+
 SvgFontsDialog::AttrEntry::AttrEntry(SvgFontsDialog* d, gchar* lbl, Glib::ustring tooltip, const SPAttr attr)
 {
     this->dialog = d;
@@ -442,6 +472,7 @@ void SvgFontsDialog::font_selected(SvgFont* svgfont, SPFont* spfont) {
     kerning_preview.set_svgfont(svgfont);
     _font_da.set_svgfont(svgfont);
     _font_da.redraw();
+    _glyph_renderer->set_svg_font(svgfont);
 
     kerning_slider->set_range(0, spfont ? spfont->horiz_adv_x : 0);
     kerning_slider->set_draw_value(false);
@@ -918,9 +949,22 @@ Gtk::Box* SvgFontsDialog::glyphs_tab(){
     _GlyphsListScroller.add(_GlyphsList);
     _GlyphsListStore = Gtk::ListStore::create(_GlyphsListColumns);
     _GlyphsList.set_model(_GlyphsListStore);
-    _GlyphsList.append_column_editable(_("Glyph name"),      _GlyphsListColumns.glyph_name);
+
+    _glyph_renderer = Gtk::manage(new SvgGlyphRenderer());
+    _glyph_renderer->set_tree(&_GlyphsList);
+    _glyph_renderer->property_activatable() = true;
+    _glyph_renderer->signal_clicked().connect([=](const GdkEvent*, const Glib::ustring& unicodes){
+        // set preview: show clicked glyph only
+        _preview_entry.set_text(unicodes);
+    });
+    auto col_index = _GlyphsList.append_column(_("Glyph"), *_glyph_renderer) - 1;
+    if (auto column = _GlyphsList.get_column(col_index)) {
+        column->add_attribute(_glyph_renderer->property_glyph(), _GlyphsListColumns.unicode);
+    }
+    _GlyphsList.append_column_editable(_("Name"), _GlyphsListColumns.glyph_name);
     _GlyphsList.append_column_editable(_("Matching string"), _GlyphsListColumns.unicode);
     _GlyphsList.append_column_numeric_editable(_("Advance"), _GlyphsListColumns.advance, "%.2f");
+
     Gtk::Box* hb = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4));
     add_glyph_button.set_image_from_icon_name("list-add");
     add_glyph_button.signal_clicked().connect(sigc::mem_fun(*this, &SvgFontsDialog::add_glyph));
@@ -943,13 +987,16 @@ Gtk::Box* SvgFontsDialog::glyphs_tab(){
     glyph_from_path_button.set_image(*img);
     glyph_from_path_button.signal_clicked().connect(sigc::mem_fun(*this, &SvgFontsDialog::set_glyph_description_from_selected_path));
 
-    static_cast<Gtk::CellRendererText*>( _GlyphsList.get_column_cell_renderer(0))->signal_edited().connect(
+    _GlyphsList.get_column(ColName)->set_resizable();
+    _GlyphsList.get_column(ColString)->set_resizable();
+    _GlyphsList.get_column(ColAdvance)->set_resizable();
+    static_cast<Gtk::CellRendererText*>(_GlyphsList.get_column_cell_renderer(ColName))->signal_edited().connect(
         sigc::mem_fun(*this, &SvgFontsDialog::glyph_name_edit));
 
-    static_cast<Gtk::CellRendererText*>( _GlyphsList.get_column_cell_renderer(1))->signal_edited().connect(
+    static_cast<Gtk::CellRendererText*>(_GlyphsList.get_column_cell_renderer(ColString))->signal_edited().connect(
         sigc::mem_fun(*this, &SvgFontsDialog::glyph_unicode_edit));
 
-    static_cast<Gtk::CellRendererText*>( _GlyphsList.get_column_cell_renderer(2))->signal_edited().connect(
+    static_cast<Gtk::CellRendererText*>(_GlyphsList.get_column_cell_renderer(ColAdvance))->signal_edited().connect(
         sigc::mem_fun(*this, &SvgFontsDialog::glyph_advance_edit));
 
     _glyphs_observer.signal_changed().connect(sigc::mem_fun(*this, &SvgFontsDialog::update_glyphs));
