@@ -27,6 +27,7 @@
 #include "document-undo.h"
 #include "document.h"
 #include "inkscape.h"
+#include "layer-model.h"
 #include "message-context.h"
 #include "message-stack.h"
 #include "verbs.h"
@@ -457,10 +458,10 @@ void XmlTree::set_dt_select(Inkscape::XML::Node *repr)
     if (!object || !in_dt_coordsys(*object)) {
         // object not on canvas
     } else if (isRealLayer(object)) {
-        getDesktop()->setCurrentLayer(object);
+        getDesktop()->layers->setCurrentLayer(object);
     } else {
         if (SP_IS_GROUP(object->parent)) {
-            getDesktop()->setCurrentLayer(object->parent);
+            getDesktop()->layers->setCurrentLayer(object->parent);
         }
 
         getSelection()->set(SP_ITEM(object));

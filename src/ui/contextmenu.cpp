@@ -80,7 +80,9 @@ ContextMenu::ContextMenu(SPDesktop *desktop, SPItem *item) :
 
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     _show_icons = prefs->getInt("/theme/menuIcons_canvas", true);
-    auto layer = sp_item_get_layer(_object);
+
+    auto group = dynamic_cast<SPGroup *>(_object);
+    auto layer = group->isLayer() ? group : nullptr;
 
     AppendItemFromVerb(Inkscape::Verb::get(SP_VERB_EDIT_UNDO));
     AppendItemFromVerb(Inkscape::Verb::get(SP_VERB_EDIT_REDO));
@@ -186,13 +188,13 @@ Gtk::SeparatorMenuItem* ContextMenu::AddSeparator()
 
 void ContextMenu::EnterGroup(Gtk::MenuItem* mi)
 {
-    _desktop->setCurrentLayer(_MIGroup_group);
+    _desktop->layers->setCurrentLayer(_MIGroup_group);
     _desktop->selection->clear();
 }
 
 void ContextMenu::LeaveGroup()
 {
-    _desktop->setCurrentLayer(_desktop->currentLayer()->parent);
+    _desktop->layers->setCurrentLayer(_desktop->layers->currentLayer()->parent);
 }
 
 void ContextMenu::LockSelected()
@@ -320,7 +322,7 @@ void ContextMenu::AppendItemFromVerb(Inkscape::Verb *verb)
 void ContextMenu::MakeObjectMenu()
 {
     if (SP_IS_ITEM(_object)) {
-        MakeItemMenu(sp_item_get_layer(_object));
+        MakeItemMenu(dynamic_cast<SPGroup *>(_object));
     }
 
     if (SP_IS_GROUP(_object)) {
@@ -344,7 +346,7 @@ void ContextMenu::MakeObjectMenu()
     }
 }
 
-void ContextMenu::MakeItemMenu(SPGroup* layer)
+void ContextMenu::MakeItemMenu(SPGroup* group)
 {
     Gtk::MenuItem* mi;
 
@@ -370,7 +372,7 @@ void ContextMenu::MakeItemMenu(SPGroup* layer)
 
     // several options are not applicable to layers; adding them makes context menu unwieldy,
     // so we need to be selective, or else it grows too much
-    if (!layer) {
+    if (!group || !group->isLayer()) {
         mi = Gtk::manage(new Gtk::MenuItem(_("Select Same")));
         mi->show();
         Gtk::Menu *select_same_submenu = Gtk::manage(new Gtk::Menu());
@@ -426,7 +428,7 @@ void ContextMenu::MakeItemMenu(SPGroup* layer)
     mi->show();
     append(*mi);
 
-    if (!layer) {
+    if (!group || !group->isLayer()) {
         /* Create link */
         mi = Gtk::manage(new Gtk::MenuItem(_("Create _Link"), true));
         mi->signal_activate().connect(sigc::mem_fun(*this, &ContextMenu::ItemCreateLink));
@@ -544,7 +546,7 @@ void ContextMenu::ItemSelectThis()
 
 void ContextMenu::ItemMoveTo()
 {
-    Inkscape::UI::Dialogs::LayerPropertiesDialog::showMove(_desktop, _desktop->currentLayer());
+    Inkscape::UI::Dialogs::LayerPropertiesDialog::showMove(_desktop, _desktop->layers->currentLayer());
 }
 
 
@@ -628,7 +630,7 @@ void ContextMenu::fireAction(unsigned int code) {
 // group and layer menu
 void ContextMenu::MakeGroupMenu(SPGroup* item)
 {
-    if (auto layer = sp_item_get_layer(item)) {
+    if (item->isLayer()) {
         // layer-specific commands
         AppendItemFromVerb(Inkscape::Verb::get(SP_VERB_LAYER_NEW));
         AppendItemFromVerb(Inkscape::Verb::get(SP_VERB_LAYER_RENAME));
@@ -643,28 +645,30 @@ void ContextMenu::MakeGroupMenu(SPGroup* item)
         AddSeparator();
 
         // transform layer into group
-        append_item(_("Layer to group"), false).connect([=]() { sp_group_layer_transform(_desktop->doc(), layer, SPGroup::GROUP); });
+        append_item(_("Layer to group"), false).connect([=]() { sp_group_layer_transform(_desktop->doc(), item, SPGroup::GROUP); });
     }
-    else if (auto group = sp_item_get_group(item)) {
+    else if (item->isGroup()) {
         /* Ungroup */
         append_item(_("_Ungroup"), true).connect(sigc::mem_fun(*this, &ContextMenu::ActivateUngroup));
 
-        if (auto parent = sp_item_get_layer(group->parent)) {
+        if (item->getParentGroup()->isLayer()) {
             // transform group into layer
-            append_item(_("Group to layer"), false).connect([=](){ sp_group_layer_transform(_desktop->doc(), group, SPGroup::LAYER); });
+            append_item(_("Group to layer"), false).connect([=](){ sp_group_layer_transform(_desktop->doc(), item, SPGroup::LAYER); });
         }
 
         // enter group
-        if (group != _desktop->currentLayer()) {
-            MIGroup.set_label(Glib::ustring::compose(_("Enter group %1"), group->defaultLabel()));
-            _MIGroup_group = group;
+        auto layer = _desktop->layers->currentLayer();
+        if (item != layer) {
+            MIGroup.set_label(Glib::ustring::compose(_("Enter group %1"), item->defaultLabel()));
+            _MIGroup_group = item;
             MIGroup.signal_activate().connect(sigc::bind(sigc::mem_fun(*this, &ContextMenu::EnterGroup),&MIGroup));
             MIGroup.show();
             append(MIGroup);
         }
 
-        if (_desktop->currentLayer() != _desktop->currentRoot()) {
-            if (_desktop->currentLayer()->parent != _desktop->currentRoot()) {
+        auto root = _desktop->layers->currentRoot();
+        if (layer != root) {
+            if (layer->parent != root) {
                 MIParent.signal_activate().connect(sigc::mem_fun(*this, &ContextMenu::LeaveGroup));
                 MIParent.show();
                 append(MIParent);

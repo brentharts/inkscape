@@ -217,7 +217,6 @@ public:
     Glib::ustring _reconstruction_old_layer_id;
 
     sigc::signal<void, unsigned int, bool> _menu_update;
-    sigc::signal<void, SPObject *>     _layer_changed_signal;
     sigc::signal<bool, const SPCSSAttr *, bool>::accumulated<StopOnTrue> _set_style_signal;
     sigc::signal<int, SPStyle *, int>::accumulated<StopOnNonZero> _query_style_signal;
 
@@ -257,10 +256,6 @@ public:
 
     void emitToolSubselectionChanged(gpointer data);
     void emitToolSubselectionChangedEx(gpointer data, SPObject* object);
-
-    sigc::connection connectCurrentLayerChanged(const sigc::slot<void, SPObject *> & slot) {
-        return _layer_changed_signal.connect(slot);
-    }
 
     // there's an object selected and it has a gradient fill and/or stroke; one of the gradient stops has been selected
     // callback receives sender pointer and selected stop pointer
@@ -340,16 +335,6 @@ public:
     Inkscape::ColorMode getColorMode() const { return _display_color_mode; }
 
     Inkscape::UI::Dialog::DialogContainer *getContainer();
-
-    // Could make all callers use this->layers instead of passing calls through?
-    SPObject *currentRoot() const;
-    SPObject *currentLayer() const;
-    void setCurrentLayer(SPObject *object);
-    void toggleLayerSolo(SPObject *object);
-    void toggleHideAllLayers(bool hide);
-    void toggleLockAllLayers(bool lock);
-    void toggleLockOtherLayers(SPObject *object);
-    bool isLayer(SPObject *object) const;
 
     bool isWithinViewport(SPItem *item) const;
     bool itemIsHidden(SPItem const *item) const;

@@ -681,7 +681,7 @@ void Script::effect(Inkscape::Extension::Effect *module,
             //If that layer exists,
             if (layer) {
                 //set the current layer
-                desktop->setCurrentLayer(layer);
+                desktop->layers->setCurrentLayer(layer);
             }
         }
         mydoc->release();

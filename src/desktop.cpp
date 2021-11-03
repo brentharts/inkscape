@@ -38,6 +38,7 @@
 #include "inkscape-window.h"
 #include "layer-fns.h"
 #include "layer-manager.h"
+#include "layer-model.h"
 #include "message-context.h"
 #include "message-stack.h"
 
@@ -80,9 +81,6 @@ namespace Inkscape { namespace XML { class Node; }}
 // Callback declarations
 static void _onSelectionChanged (Inkscape::Selection *selection, SPDesktop *desktop);
 static bool _drawing_handler (GdkEvent *event, Inkscape::DrawingItem *item, SPDesktop *desktop);
-static void _layer_activated(SPObject *layer, SPDesktop *desktop);
-static void _layer_deactivated(SPObject *layer, SPDesktop *desktop);
-static void _layer_hierarchy_changed(SPObject *top, SPObject *bottom, SPDesktop *desktop);
 static void _reconstruction_start(SPDesktop * desktop);
 static void _reconstruction_finish(SPDesktop * desktop);
 static void _namedview_modified (SPObject *obj, guint flags, SPDesktop *desktop);
@@ -137,9 +135,6 @@ SPDesktop::SPDesktop()
     , grids_visible(false)
 {
     layers = new Inkscape::LayerModel();
-    layers->_layer_activated_signal.connect(sigc::bind(sigc::ptr_fun(_layer_activated), this));
-    layers->_layer_deactivated_signal.connect(sigc::bind(sigc::ptr_fun(_layer_deactivated), this));
-    layers->_layer_changed_signal.connect(sigc::bind(sigc::ptr_fun(_layer_hierarchy_changed), this));
     selection = Inkscape::GC::release( new Inkscape::Selection(layers, this) );
 }
 
@@ -415,47 +410,6 @@ SPDesktop::remove_temporary_canvasitem (Inkscape::Display::TemporaryItem * tempi
 
 void SPDesktop::redrawDesktop() {
     canvas->set_affine(_current_affine.d2w()); // For CanvasItem's.
-}
-
-// Pass-through LayerModel functions
-SPObject *SPDesktop::currentRoot() const
-{
-    return layers->currentRoot();
-}
-
-SPObject *SPDesktop::currentLayer() const
-{
-    return layers->currentLayer();
-}
-
-void SPDesktop::setCurrentLayer(SPObject *object)
-{
-    layers->setCurrentLayer(object);
-}
-
-void SPDesktop::toggleLayerSolo(SPObject *object)
-{
-    layers->toggleLayerSolo(object);
-}
-
-void SPDesktop::toggleHideAllLayers(bool hide)
-{
-    layers->toggleHideAllLayers(hide);
-}
-
-void SPDesktop::toggleLockAllLayers(bool lock)
-{
-    layers->toggleLockAllLayers(lock);
-}
-
-void SPDesktop::toggleLockOtherLayers(SPObject *object)
-{
-    layers->toggleLockOtherLayers(object);
-}
-
-bool SPDesktop::isLayer(SPObject *object) const
-{
-    return layers->isLayer(object);
 }
 
 /**
@@ -1612,7 +1566,7 @@ _onSelectionChanged
     SPItem *item=selection->singleItem();
     if (item) {
         SPObject *layer=desktop->layers->layerForObject(item);
-        if ( layer && layer != desktop->currentLayer() ) {
+        if ( layer && layer != desktop->layers->currentLayer() ) {
             desktop->layers->setCurrentLayer(layer);
         }
     }
@@ -1638,31 +1592,11 @@ _drawing_handler (GdkEvent *event, Inkscape::DrawingItem *drawing_item, SPDeskto
     }
 }
 
-static void
-_layer_activated(SPObject *layer, SPDesktop *desktop) {
-    g_return_if_fail(SP_IS_GROUP(layer));
-    SP_GROUP(layer)->setLayerDisplayMode(desktop->dkey, SPGroup::LAYER);
-}
-
-/// Callback
-static void
-_layer_deactivated(SPObject *layer, SPDesktop *desktop) {
-    g_return_if_fail(SP_IS_GROUP(layer));
-    SP_GROUP(layer)->setLayerDisplayMode(desktop->dkey, SPGroup::GROUP);
-}
-
-/// Callback
-static void
-_layer_hierarchy_changed(SPObject */*top*/, SPObject *bottom,
-                                         SPDesktop *desktop)
-{
-    desktop->_layer_changed_signal.emit (bottom);
-}
-
 /// Called when document is starting to be rebuilt.
 static void _reconstruction_start(SPDesktop * desktop)
 {
-    desktop->_reconstruction_old_layer_id = desktop->currentLayer()->getId() ? desktop->currentLayer()->getId() : "";
+    auto layer = desktop->layers->currentLayer();
+    desktop->_reconstruction_old_layer_id = layer->getId() ? layer->getId() : "";
     desktop->layers->reset();
 
     desktop->selection->clear();

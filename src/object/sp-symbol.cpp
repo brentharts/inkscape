@@ -78,7 +78,7 @@ void SPSymbol::unSymbol()
     //TODO: Better handle if no desktop, currently go to defs without it
     SPDesktop *desktop = SP_ACTIVE_DESKTOP;
     if(desktop && desktop->doc() == doc) {
-        desktop->currentLayer()->getRepr()->appendChild(group);
+        desktop->layers->currentLayer()->getRepr()->appendChild(group);
     } else {
         parent->getRepr()->appendChild(group);
     }

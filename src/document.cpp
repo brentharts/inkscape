@@ -1599,8 +1599,8 @@ std::vector<SPItem*> SPDocument::getItemsAtPoints(unsigned const key, std::vecto
     SPDesktop *desktop = SP_ACTIVE_DESKTOP;
     Inkscape::LayerModel *layer_model = nullptr;
     if(desktop){
-        current_layer = desktop->currentLayer();
         layer_model = desktop->layers;
+        current_layer = layer_model->currentLayer();
     }
     size_t item_counter = 0;
     for(int i = points.size()-1;i>=0; i--) {

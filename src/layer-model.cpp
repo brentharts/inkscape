@@ -82,17 +82,17 @@ SPDocument *LayerModel::getDocument()
 /**
  * Returns current root (=bottom) layer.
  */
-SPObject *LayerModel::currentRoot() const
+SPGroup *LayerModel::currentRoot() const
 {
-    return _layer_hierarchy ? _layer_hierarchy->top() : nullptr;
+    return _layer_hierarchy ? dynamic_cast<SPGroup *>(_layer_hierarchy->top()) : nullptr;
 }
 
 /**
  * Returns current top layer.
  */
-SPObject *LayerModel::currentLayer() const
+SPGroup *LayerModel::currentLayer() const
 {
-    return _layer_hierarchy ? _layer_hierarchy->bottom() : nullptr;
+    return _layer_hierarchy ? dynamic_cast<SPGroup *>(_layer_hierarchy->bottom()) : nullptr;
 }
 
 /** 

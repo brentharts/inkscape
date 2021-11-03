@@ -646,7 +646,7 @@ bool SPFlowtext::has_internal_frame() const
 SPItem *create_flowtext_with_internal_frame (SPDesktop *desktop, Geom::Point p0, Geom::Point p1)
 {
     SPDocument *doc = desktop->getDocument();
-    auto const parent = dynamic_cast<SPItem *>(desktop->currentLayer());
+    auto const parent = dynamic_cast<SPItem *>(desktop->layers->currentLayer());
     assert(parent);
 
     Inkscape::XML::Document *xml_doc = doc->getReprDoc();
@@ -657,7 +657,7 @@ SPItem *create_flowtext_with_internal_frame (SPDesktop *desktop, Geom::Point p0,
     /* Set style */
     sp_desktop_apply_style_tool(desktop, root_repr, "/tools/text", true);
 
-    SPItem *ft_item = dynamic_cast<SPItem *>(desktop->currentLayer()->appendChildRepr(root_repr));
+    SPItem *ft_item = dynamic_cast<SPItem *>(parent->appendChildRepr(root_repr));
     g_assert(ft_item != nullptr);
     SPObject *root_object = doc->getObjectByRepr(root_repr);
     g_assert(dynamic_cast<SPFlowtext *>(root_object) != nullptr);

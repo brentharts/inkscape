@@ -19,6 +19,7 @@
 #include "document.h"
 #include "gc-finalized.h"
 #include "layer-manager.h"
+#include "layer-model.h"
 #include "selection.h"
 
 #include "inkgc/gc-managed.h"
@@ -138,7 +139,10 @@ public:
 LayerManager::LayerManager(SPDesktop *desktop)
 : _desktop(desktop), _document(nullptr)
 {
-    _layer_connection = desktop->connectCurrentLayerChanged( sigc::mem_fun(*this, &LayerManager::_selectedLayerChanged) );
+    auto layers = desktop->layers;
+    _layer_connection = layers->_layer_changed_signal.connect(sigc::mem_fun(*this, &LayerManager::_selectedLayerChanged));
+    _activate_connection = layers->_layer_activated_signal.connect(sigc::mem_fun(*this, &LayerManager::_layer_activated));
+    _deactivate_connection = layers->_layer_deactivated_signal.connect(sigc::mem_fun(*this, &LayerManager::_layer_deactivated));
 
     sigc::bound_mem_functor1<void, Inkscape::LayerManager, SPDocument*> first = sigc::mem_fun(*this, &LayerManager::_setDocument);
 
@@ -154,6 +158,8 @@ LayerManager::LayerManager(SPDesktop *desktop)
 LayerManager::~LayerManager()
 {
     _layer_connection.disconnect();
+    _activate_connection.disconnect();
+    _deactivate_connection.disconnect();
     _document_connection.disconnect();
     _resource_connection.disconnect();
     _document = nullptr;
@@ -161,9 +167,9 @@ LayerManager::~LayerManager()
 
 void LayerManager::setCurrentLayer( SPObject* obj )
 {
-    //g_return_if_fail( _desktop->currentRoot() );
-    if ( _desktop->currentRoot() ) {
-        _desktop->setCurrentLayer( obj );
+    //g_return_if_fail( _desktop->layers->currentRoot() );
+    if ( _desktop->layers->currentRoot() ) {
+        _desktop->layers->setCurrentLayer( obj );
 
         Inkscape::Preferences *prefs = Inkscape::Preferences::get();
         if (prefs->getBool("/options/selection/layerdeselect", true)) {
@@ -171,6 +177,21 @@ void LayerManager::setCurrentLayer( SPObject* obj )
         }
     }
 }
+
+void LayerManager::_layer_activated(SPObject *layer)
+{
+    if (auto group = dynamic_cast<SPGroup *>(layer)) {
+        group->setLayerDisplayMode(_desktop->dkey, SPGroup::LAYER);
+    }
+}
+
+void LayerManager::_layer_deactivated(SPObject *layer)
+{
+    if (auto group = dynamic_cast<SPGroup *>(layer)) {
+        group->setLayerDisplayMode(_desktop->dkey, SPGroup::GROUP);
+    }
+}
+
 
 /*
  * Return a unique layer name similar to param label
@@ -205,7 +226,7 @@ Glib::ustring LayerManager::getNextLayerName( SPObject* obj, gchar const *label)
 
     std::set<Glib::ustring> currentNames;
     std::vector<SPObject *> layers = _document->getResourceList("layer");
-    SPObject *root=_desktop->currentRoot();
+    SPObject *root = _desktop->layers->currentRoot();
     if ( root ) {
         for (auto layer : layers) { 
             if (layer != obj)
@@ -265,7 +286,7 @@ void LayerManager::_rebuild() {
 
     std::vector<SPObject *> layers = _document->getResourceList("layer");
 
-    SPObject *root=_desktop->currentRoot();
+    SPObject *root = _desktop->layers->currentRoot();
     if ( root ) {
         _addOne(root);
 
@@ -336,10 +357,10 @@ void LayerManager::_rebuild() {
 }
 
 // Connected to the desktop's CurrentLayerChanged signal
-void LayerManager::_selectedLayerChanged(SPObject *layer)
+void LayerManager::_selectedLayerChanged(SPObject *top, SPObject *bottom)
 {
     // notify anyone who's listening to this instead of directly to the desktop
-    _layer_changed_signal.emit(layer);
+    _layer_changed_signal.emit(bottom);
 }
 
 }

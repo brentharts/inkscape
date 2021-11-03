@@ -24,6 +24,7 @@
 #include "inkscape.h"
 #include "layer-fns.h"
 #include "layer-manager.h"
+#include "layer-model.h"
 #include "selection-chemistry.h"
 #include "verbs.h"
 
@@ -186,8 +187,8 @@ bool LayersPanel::_executeAction()
     if ( _pending
          && (
              (_pending->_actionCode == BUTTON_NEW || _pending->_actionCode == DRAGNDROP)
-             || !( (desktop && desktop->currentLayer())
-                   && (desktop->currentLayer() != _pending->_target)
+             || !( (desktop && desktop->layers->currentLayer())
+                   && (desktop->layers->currentLayer() != _pending->_target)
                  )
              )
         ) {
@@ -364,7 +365,7 @@ void LayersPanel::_layersChanged()
             _selectedConnection.block();
             auto desktop = getDesktop();
             if (desktop->layer_manager && desktop->layer_manager->includes( root ) ) {
-                SPObject* target = desktop->currentLayer();
+                SPObject* target = desktop->layers->currentLayer();
                 _store->clear();
 
     #if DUMP_LAYERS
@@ -427,10 +428,10 @@ SPObject* LayersPanel::_selectedLayer()
 void LayersPanel::_pushTreeSelectionToCurrent()
 {
     auto desktop = getDesktop();
-    if (desktop && desktop->layer_manager && desktop->currentRoot() ) {
+    if (desktop && desktop->layer_manager && desktop->layers->currentRoot() ) {
         SPObject* inTree = _selectedLayer();
         if ( inTree ) {
-            SPObject* curr = desktop->currentLayer();
+            SPObject* curr = desktop->layers->currentLayer();
             if (curr != inTree) {
                 desktop->layer_manager->setCurrentLayer(inTree);
             }
@@ -579,10 +580,10 @@ bool LayersPanel::_handleButtonEvent(GdkEventButton* event)
                     Gtk::TreeModel::Row row = *iter;
                     SPObject *obj = row[_model->_colObject];
                     if (col == _tree.get_column(COL_VISIBLE - 1)) {
-                        desktop->toggleLayerSolo( obj );
+                        desktop->layers->toggleLayerSolo( obj );
                         DocumentUndo::maybeDone(document, "layer:solo", SP_VERB_LAYER_SOLO, _("Toggle layer solo"));
                     } else if (col == _tree.get_column(COL_LOCKED - 1)) {
-                        desktop->toggleLockOtherLayers(obj);
+                        desktop->layers->toggleLockOtherLayers(obj);
                         DocumentUndo::maybeDone(document, "layer:lockothers", SP_VERB_LAYER_LOCK_OTHERS, _("Lock other layers"));
                     }
                 }

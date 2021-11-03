@@ -28,6 +28,7 @@
 
 class SPDocument;
 class SPObject;
+class SPGroup;
 
 namespace Inkscape {
   
@@ -68,9 +69,8 @@ public:
     // Get the document that this layer model refers to. May be NULL.
     SPDocument *getDocument();
 
-    // TODO look into making these return a more specific subclass:
-    SPObject *currentRoot() const;
-    SPObject *currentLayer() const;
+    SPGroup *currentRoot() const;
+    SPGroup *currentLayer() const;
 
     void reset();
     void setCurrentLayer(SPObject *object);

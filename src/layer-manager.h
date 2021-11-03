@@ -50,9 +50,14 @@ private:
     void _objectModified( SPObject* obj, unsigned int flags );
     void _setDocument(SPDocument *document);
     void _rebuild();
-    void _selectedLayerChanged(SPObject *layer);
+
+    void _selectedLayerChanged(SPObject *top, SPObject *bottom);
+    void _layer_activated(SPObject *layer);
+    void _layer_deactivated(SPObject *layer);
 
     sigc::connection _layer_connection;
+    sigc::connection _activate_connection;
+    sigc::connection _deactivate_connection;
     sigc::connection _document_connection;
     sigc::connection _resource_connection;
 
