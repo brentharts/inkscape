@@ -19,7 +19,7 @@
 #include "desktop.h"
 
 #include "document.h"
-#include "layer-model.h"
+#include "layer-manager.h"
 #include "selection.h"
 #include "2geom/geom.h"
 
@@ -117,7 +117,7 @@ Grid::effect (Inkscape::Extension::Effect *module, Inkscape::UI::View::View *vie
     Inkscape::XML::Document * xml_doc = doc->getReprDoc();
 
     //XML Tree being used directly here while it shouldn't be.
-    Inkscape::XML::Node * current_layer = desktop->layers->currentLayer()->getRepr();
+    Inkscape::XML::Node * current_layer = desktop->layerManager().currentLayer()->getRepr();
     Inkscape::XML::Node * path = xml_doc->createElement("svg:path");
 
     path->setAttribute("d", path_data);

@@ -24,7 +24,7 @@
 #include "desktop.h"
 #include "file.h"
 #include "gradient-drag.h"
-#include "layer-model.h"
+#include "layer-manager.h"
 #include "message-context.h"
 #include "rubberband.h"
 #include "selcue.h"
@@ -134,7 +134,7 @@ void ToolBase::set(const Inkscape::Preferences::Entry& /*val*/) {
 
 SPGroup *ToolBase::currentLayer() const
 {
-    return desktop->layers->currentLayer();
+    return desktop->layerManager().currentLayer();
 }
 
 /**

@@ -69,7 +69,6 @@ struct InkscapeApplication;
 
 namespace Inkscape {
     class LayerManager;
-    class LayerModel;
     class MessageContext;
     class Selection;
 
@@ -141,11 +140,9 @@ class SPDesktop : public Inkscape::UI::View::View
 {
 public:
     SPNamedView               *namedview;
-    Inkscape::LayerModel      *layers;
     /// current selection; will never generally be NULL
     Inkscape::Selection       *selection;
     Inkscape::UI::Tools::ToolBase            *event_context;
-    Inkscape::LayerManager    *layer_manager;
     DocumentInterface *dbus_document_interface;
     Inkscape::Display::TemporaryItemList *temporary_item_list;
     Inkscape::Display::SnapIndicator *snapindicator;
@@ -281,6 +278,9 @@ public:
     void init (SPNamedView* nv, Inkscape::UI::Widget::Canvas* new_canvas, SPDesktopWidget *widget);
     ~SPDesktop() override;
     void destroy();
+
+    Inkscape::LayerManager& layerManager() { return *_layer_manager; }
+    const Inkscape::LayerManager& layerManager() const { return *_layer_manager; }
 
     Inkscape::MessageContext *guidesMessageContext() const {
         return _guides_message_context.get();
@@ -604,6 +604,8 @@ private:
 
     bool grids_visible; /* don't set this variable directly, use the method below */
     void set_grids_visible(bool visible);
+
+    std::unique_ptr<Inkscape::LayerManager> _layer_manager;
 
     sigc::signal<void, SPDesktop*> _destroy_signal;
     sigc::signal<void,SPDesktop*,SPDocument*>     _document_replaced_signal;

@@ -12,7 +12,7 @@
 #include "context-fns.h"
 
 #include "desktop.h"
-#include "layer-model.h"
+#include "layer-manager.h"
 #include "message-context.h"
 #include "message-stack.h"
 #include "snap.h"
@@ -41,7 +41,7 @@ static const double midpt_goldenratio_2 = (goldenratio + 2) / 2;
 
 bool Inkscape::have_viable_layer(SPDesktop *desktop, MessageContext *message)
 {
-    auto layer = desktop->layers->currentLayer();
+    auto layer = desktop->layerManager().currentLayer();
 
     if ( !layer || desktop->itemIsHidden(layer) ) {
             message->flash(Inkscape::ERROR_MESSAGE,
@@ -70,7 +70,7 @@ bool Inkscape::have_viable_layer(SPDesktop *desktop, MessageContext *message)
 
 bool Inkscape::have_viable_layer(SPDesktop *desktop, MessageStack *message)
 {
-    auto layer = desktop->layers->currentLayer();
+    auto layer = desktop->layerManager().currentLayer();
 
     if ( !layer || desktop->itemIsHidden(layer) ) {
             message->flash(Inkscape::WARNING_MESSAGE,

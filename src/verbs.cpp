@@ -40,9 +40,7 @@
 #include "gradient-drag.h"
 #include "inkscape.h"
 #include "inkscape-version.h"
-#include "layer-fns.h"
 #include "layer-manager.h"
-#include "layer-model.h"
 #include "message-stack.h"
 #include "path-chemistry.h"
 #include "selection-chemistry.h"
@@ -1230,9 +1228,8 @@ void LayerVerb::perform(SPAction *action, void *data)
     SPDesktop *dt = sp_action_get_desktop(action);
     size_t verb = reinterpret_cast<std::size_t>(data);
 
-    auto layers = dt->layers;
-    auto layer = layers->currentLayer();
-    auto root = layers->currentRoot();
+    auto layer = dt->layerManager().currentLayer();
+    auto root = dt->layerManager().currentRoot();
     if (!layer)
         return;
 
@@ -1248,7 +1245,7 @@ void LayerVerb::perform(SPAction *action, void *data)
         case SP_VERB_LAYER_NEXT: {
             SPObject *next=Inkscape::next_layer(root, layer);
             if (next) {
-                layers->setCurrentLayer(next);
+                dt->layerManager().setCurrentLayer(next);
                 DocumentUndo::done(dt->getDocument(), SP_VERB_LAYER_NEXT,
                                    _("Switch to next layer"));
                 dt->messageStack()->flash(Inkscape::NORMAL_MESSAGE, _("Switched to next layer."));
@@ -1260,7 +1257,7 @@ void LayerVerb::perform(SPAction *action, void *data)
         case SP_VERB_LAYER_PREV: {
             SPObject *prev=Inkscape::previous_layer(root, layer);
             if (prev) {
-                layers->setCurrentLayer(prev);
+                dt->layerManager().setCurrentLayer(prev);
                 DocumentUndo::done(dt->getDocument(), SP_VERB_LAYER_PREV,
                                    _("Switch to previous layer"));
                 dt->messageStack()->flash(Inkscape::NORMAL_MESSAGE, _("Switched to previous layer."));
@@ -1390,7 +1387,7 @@ void LayerVerb::perform(SPAction *action, void *data)
                 old_layer->deleteObject();
 
                 if (survivor) {
-                    layers->setCurrentLayer(survivor);
+                    dt->layerManager().setCurrentLayer(survivor);
                 }
 
                 DocumentUndo::done(dt->getDocument(), SP_VERB_LAYER_DELETE,
@@ -1407,23 +1404,23 @@ void LayerVerb::perform(SPAction *action, void *data)
             if ( layer == root ) {
                 dt->messageStack()->flash(Inkscape::ERROR_MESSAGE, _("No current layer."));
             } else {
-                layers->toggleLayerSolo( layer );
+                dt->layerManager().toggleLayerSolo( layer );
                 DocumentUndo::done(dt->getDocument(), SP_VERB_LAYER_SOLO, _("Toggle layer solo"));
             }
             break;
         }
         case SP_VERB_LAYER_SHOW_ALL: {
-            layers->toggleHideAllLayers( false );
+            dt->layerManager().toggleHideAllLayers( false );
             DocumentUndo::maybeDone(dt->getDocument(), "layer:showall", SP_VERB_LAYER_SHOW_ALL, _("Show all layers"));
             break;
         }
         case SP_VERB_LAYER_HIDE_ALL: {
-            layers->toggleHideAllLayers( true );
+            dt->layerManager().toggleHideAllLayers( true );
             DocumentUndo::maybeDone(dt->getDocument(), "layer:hideall", SP_VERB_LAYER_HIDE_ALL, _("Hide all layers"));
             break;
         }
         case SP_VERB_LAYER_LOCK_ALL: {
-            layers->toggleLockAllLayers( true );
+            dt->layerManager().toggleLockAllLayers( true );
             DocumentUndo::maybeDone(dt->getDocument(), "layer:lockall", SP_VERB_LAYER_LOCK_ALL, _("Lock all layers"));
             break;
         }
@@ -1431,13 +1428,13 @@ void LayerVerb::perform(SPAction *action, void *data)
             if ( layer == root ) {
                 dt->messageStack()->flash(Inkscape::ERROR_MESSAGE, _("No current layer."));
             } else {
-                layers->toggleLockOtherLayers( layer );
+                dt->layerManager().toggleLockOtherLayers( layer );
                 DocumentUndo::done(dt->getDocument(), SP_VERB_LAYER_LOCK_OTHERS, _("Lock other layers"));
             }
             break;
         }
         case SP_VERB_LAYER_UNLOCK_ALL: {
-            layers->toggleLockAllLayers( false );
+            dt->layerManager().toggleLockAllLayers( false );
             DocumentUndo::maybeDone(dt->getDocument(), "layer:unlockall", SP_VERB_LAYER_UNLOCK_ALL, _("Unlock all layers"));
             break;
         }

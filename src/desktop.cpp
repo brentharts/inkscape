@@ -36,9 +36,7 @@
 #include "document-undo.h"
 #include "event-log.h"
 #include "inkscape-window.h"
-#include "layer-fns.h"
 #include "layer-manager.h"
-#include "layer-model.h"
 #include "message-context.h"
 #include "message-stack.h"
 
@@ -79,7 +77,6 @@
 namespace Inkscape { namespace XML { class Node; }}
 
 // Callback declarations
-static void _onSelectionChanged (Inkscape::Selection *selection, SPDesktop *desktop);
 static bool _drawing_handler (GdkEvent *event, Inkscape::DrawingItem *item, SPDesktop *desktop);
 static void _reconstruction_start(SPDesktop * desktop);
 static void _reconstruction_finish(SPDesktop * desktop);
@@ -107,10 +104,8 @@ static void _pinch_scale_changed_handler(GtkGesture *gesture, gdouble delta, SPD
 SPDesktop::SPDesktop()
     : namedview(nullptr)
     , canvas(nullptr)
-    , layers(nullptr)
     , selection(nullptr)
     , event_context(nullptr)
-    , layer_manager(nullptr)
     , temporary_item_list(nullptr)
     , snapindicator(nullptr)
     , current(nullptr)  // current style
@@ -134,8 +129,8 @@ SPDesktop::SPDesktop()
     , _image_render_observer(this, "/options/rendering/imageinoutlinemode")
     , grids_visible(false)
 {
-    layers = new Inkscape::LayerModel();
-    selection = Inkscape::GC::release( new Inkscape::Selection(layers, this) );
+    _layer_manager = std::make_unique<Inkscape::LayerManager>(this);
+    selection = Inkscape::GC::release(new Inkscape::Selection(this));
 }
 
 void
@@ -173,9 +168,6 @@ SPDesktop::init (SPNamedView *nv, Inkscape::UI::Widget::Canvas *acanvas, SPDeskt
     Inkscape::DocumentUndo::setUndoSensitive(document, true);
 
     dkey = SPItem::display_key_new(1);
-
-    /* Connect display key to layer model */
-    layers->setDisplayKey(dkey);
 
     /* Connect document */
     setDocument (document);
@@ -297,21 +289,6 @@ SPDesktop::init (SPNamedView *nv, Inkscape::UI::Widget::Canvas *acanvas, SPDeskt
         document->connectReconstructionFinish(sigc::bind(sigc::ptr_fun(_reconstruction_finish), this));
     _reconstruction_old_layer_id.clear();
 
-    // ?
-    // sp_active_desktop_set (desktop);
-
-    _sel_changed_connection = selection->connectChanged(
-        sigc::bind(
-            sigc::ptr_fun(&_onSelectionChanged),
-            this
-        )
-    );
-
-
-    /* setup LayerManager */
-    //   (Setting up after the connections are all in place, as it may use some of them)
-    layer_manager = new Inkscape::LayerManager( this );
-
     showGrids(namedview->grids_visible, false);
 }
 
@@ -348,13 +325,6 @@ void SPDesktop::destroy()
     if (zoomgesture) {
         g_signal_handlers_disconnect_by_data(zoomgesture, this);
         g_clear_object(&zoomgesture);
-    }
-
-    delete layers;
-
-    if (layer_manager) {
-        delete layer_manager;
-        layer_manager = nullptr;
     }
 
     if (canvas_drawing) {
@@ -1488,7 +1458,6 @@ SPDesktop::setDocument (SPDocument *doc)
         this->doc()->getRoot()->invoke_hide(dkey);
     }
 
-    layers->setDocument(doc);
     selection->setDocument(doc);
 
     _commit_connection.disconnect();
@@ -1554,24 +1523,6 @@ SPDesktop::onDocumentResized (gdouble width, gdouble height)
     canvas_shadow->set_rect(a);
 }
 
-static void
-_onSelectionChanged
-(Inkscape::Selection *selection, SPDesktop *desktop)
-{
-    /** \todo
-     * only change the layer for single selections, or what?
-     * This seems reasonable -- for multiple selections there can be many
-     * different layers involved.
-     */
-    SPItem *item=selection->singleItem();
-    if (item) {
-        SPObject *layer=desktop->layers->layerForObject(item);
-        if ( layer && layer != desktop->layers->currentLayer() ) {
-            desktop->layers->setCurrentLayer(layer);
-        }
-    }
-}
-
 /**
  * Calls event handler of current event context.
  */
@@ -1595,9 +1546,9 @@ _drawing_handler (GdkEvent *event, Inkscape::DrawingItem *drawing_item, SPDeskto
 /// Called when document is starting to be rebuilt.
 static void _reconstruction_start(SPDesktop * desktop)
 {
-    auto layer = desktop->layers->currentLayer();
+    auto layer = desktop->layerManager().currentLayer();
     desktop->_reconstruction_old_layer_id = layer->getId() ? layer->getId() : "";
-    desktop->layers->reset();
+    desktop->layerManager().reset();
 
     desktop->selection->clear();
 }
@@ -1609,7 +1560,7 @@ static void _reconstruction_finish(SPDesktop * desktop)
     if ( !desktop->_reconstruction_old_layer_id.empty() ) {
         SPObject * newLayer = desktop->namedview->document->getObjectById(desktop->_reconstruction_old_layer_id);
         if (newLayer != nullptr) {
-            desktop->layers->setCurrentLayer(newLayer);
+            desktop->layerManager().setCurrentLayer(newLayer);
         }
 
         desktop->_reconstruction_old_layer_id.clear();

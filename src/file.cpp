@@ -43,7 +43,7 @@
 #include "id-clash.h"
 #include "inkscape-version.h"
 #include "inkscape.h"
-#include "layer-model.h"
+#include "layer-manager.h"
 #include "message-stack.h"
 #include "path-prefix.h"
 #include "print.h"
@@ -901,7 +901,7 @@ void sp_import_document(SPDesktop *desktop, SPDocument *clipdoc, bool in_place)
 
     SPDocument *target_document = desktop->getDocument();
     Inkscape::XML::Node *root = clipdoc->getReprRoot();
-    Inkscape::XML::Node *target_parent = desktop->layers->currentLayer()->getRepr();
+    Inkscape::XML::Node *target_parent = desktop->layerManager().currentLayer()->getRepr();
 
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
 
@@ -952,7 +952,7 @@ void sp_import_document(SPDesktop *desktop, SPDocument *clipdoc, bool in_place)
         }
     }
 
-    auto layer = desktop->layers->currentLayer();
+    auto layer = desktop->layerManager().currentLayer();
     std::vector<Inkscape::XML::Node*> pasted_objects_not;
     if(clipboard) //???? Removed dead code can cause any bug, need to reimplement undead
     for (Inkscape::XML::Node *obj = clipboard->firstChild() ; obj ; obj = obj->next()) {
@@ -1087,7 +1087,7 @@ file_import(SPDocument *in_doc, const Glib::ustring &uri,
         //        For now, we just use the root in this case.
         SPObject *place_to_insert;
         if (desktop) {
-            place_to_insert = desktop->layers->currentLayer();
+            place_to_insert = desktop->layerManager().currentLayer();
         } else {
             place_to_insert = in_doc->getRoot();
         }

@@ -16,22 +16,21 @@
 #include <glibmm/ustring.h>
 
 #include "document-subset.h"
-#include "gc-finalized.h"
 #include "inkgc/gc-soft-ptr.h"
 
 class SPDesktop;
 class SPDocument;
+class SPGroup;
 
 namespace Inkscape {
+    class ObjectHierarchy;
 
-class LayerManager : public DocumentSubset,
-                     public GC::Finalized
+class LayerManager : public DocumentSubset
 {
 public:
     LayerManager(SPDesktop *desktop);
     ~LayerManager() override;
 
-    void setCurrentLayer( SPObject* obj );
     void renameLayer( SPObject* obj, char const *label, bool uniquify );
     Glib::ustring getNextLayerName( SPObject* obj, char const *label);
 
@@ -43,12 +42,24 @@ public:
         return _details_changed_signal.connect(slot);
     }
 
+    SPGroup *currentRoot() const;
+    SPGroup *currentLayer() const;
+
+    void reset();
+    void setCurrentLayer(SPObject *object);
+    void toggleLayerSolo(SPObject *object);
+    void toggleHideAllLayers(bool hide);
+    void toggleLockAllLayers(bool lock);
+    void toggleLockOtherLayers(SPObject *object);
+    SPObject *layerForObject(SPObject *object);
+    bool isLayer(SPObject *object) const;
+
 private:
     friend class LayerWatcher;
     class LayerWatcher;
 
     void _objectModified( SPObject* obj, unsigned int flags );
-    void _setDocument(SPDocument *document);
+    void _setDocument(SPDesktop *, SPDocument *document);
     void _rebuild();
 
     void _selectedLayerChanged(SPObject *top, SPObject *bottom);
@@ -61,14 +72,25 @@ private:
     sigc::connection _document_connection;
     sigc::connection _resource_connection;
 
-    GC::soft_ptr<SPDesktop> _desktop;
+    SPDesktop *_desktop;
     SPDocument *_document;
 
     std::vector<std::unique_ptr<LayerWatcher>> _watchers;
+    std::unique_ptr<Inkscape::ObjectHierarchy> _layer_hierarchy;
 
-    sigc::signal<void, SPObject *>     _layer_changed_signal;
-    sigc::signal<void, SPObject *>     _details_changed_signal;
+    sigc::signal<void, SPObject *> _layer_changed_signal;
+    sigc::signal<void, SPObject *> _details_changed_signal;
 };
+
+enum LayerRelativePosition {
+    LPOS_ABOVE,
+    LPOS_BELOW,
+    LPOS_CHILD,
+};
+    
+SPObject *create_layer(SPObject *root, SPObject *layer, LayerRelativePosition position);
+SPObject *next_layer(SPObject *root, SPObject *layer);
+SPObject *previous_layer(SPObject *root, SPObject *layer);
 
 }
 

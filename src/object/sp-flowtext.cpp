@@ -42,6 +42,8 @@
 #include "display/curve.h"
 #include "display/drawing-text.h"
 
+#include "layer-manager.h"
+
 SPFlowtext::SPFlowtext() : SPItem(),
     par_indent(0),
     _optimizeScaledText(false)
@@ -646,7 +648,7 @@ bool SPFlowtext::has_internal_frame() const
 SPItem *create_flowtext_with_internal_frame (SPDesktop *desktop, Geom::Point p0, Geom::Point p1)
 {
     SPDocument *doc = desktop->getDocument();
-    auto const parent = dynamic_cast<SPItem *>(desktop->layers->currentLayer());
+    auto const parent = dynamic_cast<SPItem *>(desktop->layerManager().currentLayer());
     assert(parent);
 
     Inkscape::XML::Document *xml_doc = doc->getReprDoc();

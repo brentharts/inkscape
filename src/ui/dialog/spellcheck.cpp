@@ -24,7 +24,7 @@
 #include "document.h"
 #include "inkscape.h"
 #include "message-stack.h"
-#include "layer-model.h"
+#include "layer-manager.h"
 #include "selection-chemistry.h"
 #include "text-editing.h"
 #include "verbs.h"
@@ -241,7 +241,7 @@ void SpellCheck::allTextItems (SPObject *r, std::vector<SPItem *> &l, bool hidde
     if (auto desktop = getDesktop()) {
         for (auto& child: r->children) {
             if (auto item = dynamic_cast<SPItem *>(&child)) {
-                if (!child.cloned && !desktop->layers->isLayer(item)) {
+                if (!child.cloned && !desktop->layerManager().isLayer(item)) {
                     if ((hidden || !desktop->itemIsHidden(item)) && (locked || !item->isLocked())) {
                         if (SP_IS_TEXT(item) || SP_IS_FLOWTEXT(item))
                             l.push_back(item);

@@ -23,7 +23,6 @@
 #include "document-undo.h"
 #include "document.h"
 #include "layer-manager.h"
-#include "layer-model.h"
 #include "verbs.h"
 
 #include "ui/dialog/layer-properties.h"
@@ -182,10 +181,8 @@ void LayerSelector::setDesktop(SPDesktop *desktop) {
     _desktop = desktop;
 
     if (_desktop) {
-        if (auto manager = _desktop->layer_manager) {
-            _current_layer_changed_connection = manager->connectCurrentLayerChanged(sigc::mem_fun(*this, &LayerSelector::_selectLayer));
-        }
-        _selectLayer(dynamic_cast<SPObject *>(_desktop->layers->currentLayer()));
+        _current_layer_changed_connection = _desktop->layerManager().connectCurrentLayerChanged(sigc::mem_fun(*this, &LayerSelector::_selectLayer));
+        _selectLayer(dynamic_cast<SPObject *>(_desktop->layerManager().currentLayer()));
     }
 }
 
@@ -195,7 +192,7 @@ class is_layer {
 public:
     is_layer(SPDesktop *desktop) : _desktop(desktop) {}
     bool operator()(SPObject &object) const {
-        return _desktop->layers->isLayer(&object);
+        return _desktop->layerManager().isLayer(&object);
     }
 private:
     SPDesktop *_desktop;
@@ -231,7 +228,7 @@ void LayerSelector::_selectLayer(SPObject *layer)
         _layer_model->erase(first_row);
     }
 
-    SPGroup *root = _desktop->layers->currentRoot();
+    SPGroup *root = _desktop->layerManager().currentRoot();
     if (_layer) {
         sp_object_unref(_layer, nullptr);
         _layer = nullptr;
@@ -290,12 +287,12 @@ void LayerSelector::_setDesktopLayer() {
         _current_layer_changed_connection.block();
         _layers_changed_connection.block();
 
-        _desktop->layer_manager->setCurrentLayer(layer);
+        _desktop->layerManager().setCurrentLayer(layer);
 
         _current_layer_changed_connection.unblock();
         _layers_changed_connection.unblock();
 
-        _selectLayer(dynamic_cast<SPObject *>(_desktop->layers->currentLayer()));
+        _selectLayer(dynamic_cast<SPObject *>(_desktop->layerManager().currentLayer()));
     }
     if (_desktop && _desktop->canvas) {
         _desktop->canvas->grab_focus();
@@ -398,7 +395,7 @@ void update_row_for_object(SPObject *object,
 
 void rebuild_all_rows(sigc::slot<void, SPObject *> rebuild, SPDesktop *desktop)
 {
-    rebuild(desktop->layers->currentLayer());
+    rebuild(desktop->layerManager().currentLayer());
 }
 
 }
@@ -410,7 +407,7 @@ void LayerSelector::_protectUpdate(sigc::slot<void> slot) {
     _lock_toggled_connection.block(true);
     slot();
 
-    auto layer = _desktop ? _desktop->layers->currentLayer() : nullptr;
+    auto layer = _desktop ? _desktop->layerManager().currentLayer() : nullptr;
     if (layer) {
         bool wantedValue = layer->isLocked();
         if ( _lock_toggle.get_active() != wantedValue ) {
@@ -440,7 +437,7 @@ void LayerSelector::_buildEntry(unsigned depth, SPObject &object) {
         )
     );
 
-    auto layer = _desktop->layers->currentLayer();
+    auto layer = _desktop->layerManager().currentLayer();
     if ( (&object == layer) || (&object == layer->parent) ) {
         callbacks->update_list = sigc::bind(
             sigc::mem_fun(*this, &LayerSelector::_protectUpdate),
@@ -518,8 +515,8 @@ void LayerSelector::_prepareLabelRenderer(
     //       "invent" an iterator with null data and try to render it;
     //       where does it come from, and how can we avoid it?
     if ( object && object->getRepr() ) {
-        auto layer = _desktop ? _desktop->layers->currentLayer() : nullptr;
-        auto root = _desktop ? _desktop->layers->currentRoot() : nullptr;
+        auto layer = _desktop ? _desktop->layerManager().currentLayer() : nullptr;
+        auto root = _desktop ? _desktop->layerManager().currentRoot() : nullptr;
 
         bool isancestor = !( (layer && (object->parent == layer->parent)) || ((layer == root) && (object->parent == root)));
 

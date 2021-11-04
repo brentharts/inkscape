@@ -23,7 +23,6 @@
 #include "document.h"
 #include "document-undo.h"
 #include "layer-manager.h"
-#include "layer-model.h"
 #include "message-stack.h"
 #include "preferences.h"
 
@@ -223,7 +222,7 @@ LayerPropertiesDialog::_setup_layers_controls() {
     SPDocument* document = _desktop->doc();
     SPRoot* root = document->getRoot();
     if ( root ) {
-        SPObject* target = _desktop->layers->currentLayer();
+        SPObject* target = _desktop->layerManager().currentLayer();
         _store->clear();
         _addLayer( document, root, nullptr, target, 0 );
     }
@@ -245,10 +244,10 @@ LayerPropertiesDialog::_setup_layers_controls() {
 void LayerPropertiesDialog::_addLayer( SPDocument* doc, SPObject* layer, Gtk::TreeModel::Row* parentRow, SPObject* target, int level )
 {
     int _maxNestDepth = 20;
-    if ( _desktop && _desktop->layer_manager && layer && (level < _maxNestDepth) ) {
-        unsigned int counter = _desktop->layer_manager->childCount(layer);
+    if ( _desktop && layer && (level < _maxNestDepth) ) {
+        unsigned int counter = _desktop->layerManager().childCount(layer);
         for ( unsigned int i = 0; i < counter; i++ ) {
-            SPObject *child = _desktop->layer_manager->nthChildOf(layer, i);
+            SPObject *child = _desktop->layerManager().nthChildOf(layer, i);
             if ( child ) {
 #if DUMP_LAYERS
                 g_message(" %3d    layer:%p  {%s}   [%s]", level, child, child->id, child->label() );
@@ -324,7 +323,7 @@ void LayerPropertiesDialog::_prepareLabelRenderer(
 void LayerPropertiesDialog::Rename::setup(LayerPropertiesDialog &dialog) {
     SPDesktop *desktop=dialog._desktop;
     dialog.set_title(_("Rename Layer"));
-    gchar const *name = desktop->layers->currentLayer()->label();
+    gchar const *name = desktop->layerManager().currentLayer()->label();
     dialog._layer_name_entry.set_text(( name ? name : _("Layer") ));
     dialog._apply_button.set_label(_("_Rename"));
 }
@@ -334,7 +333,7 @@ void LayerPropertiesDialog::Rename::perform(LayerPropertiesDialog &dialog) {
     Glib::ustring name(dialog._layer_name_entry.get_text());
     if (name.empty())
         return;
-    desktop->layer_manager->renameLayer( desktop->layers->currentLayer(),
+    desktop->layerManager().renameLayer( desktop->layerManager().currentLayer(),
                                          (gchar *)name.c_str(),
                                          FALSE
     );
@@ -347,8 +346,8 @@ void LayerPropertiesDialog::Create::setup(LayerPropertiesDialog &dialog) {
     dialog.set_title(_("Add Layer"));
 
     // Set the initial name to the "next available" layer name
-    LayerManager *mgr = dialog._desktop->layer_manager;
-    Glib::ustring newName = mgr->getNextLayerName(nullptr, dialog._desktop->layers->currentLayer()->label());
+    auto desktop = dialog._desktop;
+    Glib::ustring newName = desktop->layerManager().getNextLayerName(nullptr, desktop->layerManager().currentLayer()->label());
     dialog._layer_name_entry.set_text(newName.c_str());
     dialog._apply_button.set_label(_("_Add"));
     dialog._setup_position_controls();
@@ -372,10 +371,10 @@ void LayerPropertiesDialog::Create::perform(LayerPropertiesDialog &dialog) {
     SPObject *new_layer=Inkscape::create_layer(root, dialog._layer, position);
     
     if (!name.empty()) {
-        desktop->layer_manager->renameLayer( new_layer, (gchar *)name.c_str(), TRUE );
+        desktop->layerManager().renameLayer(new_layer, name.c_str(), true);
     }
     desktop->getSelection()->clear();
-    desktop->layers->setCurrentLayer(new_layer);
+    desktop->layerManager().setCurrentLayer(new_layer);
     DocumentUndo::done(desktop->getDocument(), SP_VERB_LAYER_NEW, _("Add layer"));
     desktop->messageStack()->flash(Inkscape::NORMAL_MESSAGE, _("New layer created."));
 }

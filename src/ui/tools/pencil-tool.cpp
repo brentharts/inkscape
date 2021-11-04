@@ -29,6 +29,7 @@
 #include "context-fns.h"
 #include "desktop.h"
 #include "desktop-style.h"
+#include "layer-manager.h"
 #include "message-context.h"
 #include "message-stack.h"
 #include "selection-chemistry.h"
@@ -1173,7 +1174,7 @@ void PencilTool::_fitAndSplit() {
 
         /// \todo fixme:
 
-        auto layer = desktop->layers->currentLayer();
+        auto layer = desktop->layerManager().currentLayer();
         this->highlight_color = layer->highlight_color();
         if((unsigned int)prefs->getInt("/tools/nodes/highlight_color", 0xff0000ff) == this->highlight_color){
             this->green_color = 0x00ff007f;

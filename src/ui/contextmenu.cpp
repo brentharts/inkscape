@@ -35,6 +35,7 @@
 #include "document.h"
 #include "document-undo.h"
 #include "inkscape.h"
+#include "layer-manager.h"
 #include "message-context.h"
 #include "message-stack.h"
 #include "selection.h"
@@ -188,13 +189,13 @@ Gtk::SeparatorMenuItem* ContextMenu::AddSeparator()
 
 void ContextMenu::EnterGroup(Gtk::MenuItem* mi)
 {
-    _desktop->layers->setCurrentLayer(_MIGroup_group);
+    _desktop->layerManager().setCurrentLayer(_MIGroup_group);
     _desktop->selection->clear();
 }
 
 void ContextMenu::LeaveGroup()
 {
-    _desktop->layers->setCurrentLayer(_desktop->layers->currentLayer()->parent);
+    _desktop->layerManager().setCurrentLayer(_desktop->layerManager().currentLayer()->parent);
 }
 
 void ContextMenu::LockSelected()
@@ -546,7 +547,7 @@ void ContextMenu::ItemSelectThis()
 
 void ContextMenu::ItemMoveTo()
 {
-    Inkscape::UI::Dialogs::LayerPropertiesDialog::showMove(_desktop, _desktop->layers->currentLayer());
+    Inkscape::UI::Dialogs::LayerPropertiesDialog::showMove(_desktop, _desktop->layerManager().currentLayer());
 }
 
 
@@ -657,7 +658,7 @@ void ContextMenu::MakeGroupMenu(SPGroup* item)
         }
 
         // enter group
-        auto layer = _desktop->layers->currentLayer();
+        auto layer = _desktop->layerManager().currentLayer();
         if (item != layer) {
             MIGroup.set_label(Glib::ustring::compose(_("Enter group %1"), item->defaultLabel()));
             _MIGroup_group = item;
@@ -666,7 +667,7 @@ void ContextMenu::MakeGroupMenu(SPGroup* item)
             append(MIGroup);
         }
 
-        auto root = _desktop->layers->currentRoot();
+        auto root = _desktop->layerManager().currentRoot();
         if (layer != root) {
             if (layer->parent != root) {
                 MIParent.signal_activate().connect(sigc::mem_fun(*this, &ContextMenu::LeaveGroup));

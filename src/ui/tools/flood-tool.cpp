@@ -34,7 +34,7 @@
 #include "desktop.h"
 #include "document-undo.h"
 #include "document.h"
-#include "layer-model.h"
+#include "layer-manager.h"
 #include "message-context.h"
 #include "message-stack.h"
 #include "rubberband.h"
@@ -448,7 +448,7 @@ static void do_trace(bitmap_coords_info bci, guchar *trace_px, SPDesktop *deskto
             g_free(str);
         }
 
-        auto layer = desktop->layers->currentLayer();
+        auto layer = desktop->layerManager().currentLayer();
         layer->addChild(pathRepr, nullptr);
 
         SPObject *reprobj = document->getObjectByRepr(pathRepr);

@@ -61,6 +61,8 @@
 #include "livarot/Shape.h"
 #include "display/curve.h"
 
+#include "layer-manager.h"
+
 /*#####################################################
 #  SPTEXT
 #####################################################*/
@@ -1198,7 +1200,7 @@ SPItem *create_text_with_inline_size (SPDesktop *desktop, Geom::Point p0, Geom::
     Inkscape::XML::Node *text_repr = xml_doc->createElement("svg:text");
     text_repr->setAttribute("xml:space", "preserve"); // we preserve spaces in the text objects we create
 
-    auto layer = desktop->layers->currentLayer();
+    auto layer = desktop->layerManager().currentLayer();
     g_assert(layer != nullptr);
 
     SPText *text_object = dynamic_cast<SPText *>(layer->appendChildRepr(text_repr));
@@ -1235,7 +1237,7 @@ SPItem *create_text_with_inline_size (SPDesktop *desktop, Geom::Point p0, Geom::
 SPItem *create_text_with_rectangle (SPDesktop *desktop, Geom::Point p0, Geom::Point p1)
 {
     SPDocument *doc = desktop->getDocument();
-    auto const parent = desktop->layers->currentLayer();
+    auto const parent = desktop->layerManager().currentLayer();
     assert(parent);
 
     Inkscape::XML::Document *xml_doc = doc->getReprDoc();
