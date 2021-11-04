@@ -82,12 +82,11 @@ ContextMenu::ContextMenu(SPDesktop *desktop, SPItem *item) :
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     _show_icons = prefs->getInt("/theme/menuIcons_canvas", true);
 
-    auto group = dynamic_cast<SPGroup *>(_object);
-    auto layer = group->isLayer() ? group : nullptr;
-
     AppendItemFromVerb(Inkscape::Verb::get(SP_VERB_EDIT_UNDO));
     AppendItemFromVerb(Inkscape::Verb::get(SP_VERB_EDIT_REDO));
     AddSeparator();
+
+    auto layer = Inkscape::LayerManager::asLayer(_object);
     if (!layer) {
         // don't bother adding copy/paste/cut when clicking on a layer; it won't work unless layer is *selected*
         AppendItemFromVerb(Inkscape::Verb::get(SP_VERB_EDIT_CUT));
@@ -323,7 +322,7 @@ void ContextMenu::AppendItemFromVerb(Inkscape::Verb *verb)
 void ContextMenu::MakeObjectMenu()
 {
     if (SP_IS_ITEM(_object)) {
-        MakeItemMenu(dynamic_cast<SPGroup *>(_object));
+        MakeItemMenu(Inkscape::LayerManager::asLayer(_object));
     }
 
     if (SP_IS_GROUP(_object)) {
@@ -347,7 +346,7 @@ void ContextMenu::MakeObjectMenu()
     }
 }
 
-void ContextMenu::MakeItemMenu(SPGroup* group)
+void ContextMenu::MakeItemMenu(SPGroup* layer)
 {
     Gtk::MenuItem* mi;
 
@@ -373,7 +372,7 @@ void ContextMenu::MakeItemMenu(SPGroup* group)
 
     // several options are not applicable to layers; adding them makes context menu unwieldy,
     // so we need to be selective, or else it grows too much
-    if (!group || !group->isLayer()) {
+    if (!layer) {
         mi = Gtk::manage(new Gtk::MenuItem(_("Select Same")));
         mi->show();
         Gtk::Menu *select_same_submenu = Gtk::manage(new Gtk::Menu());
@@ -429,7 +428,7 @@ void ContextMenu::MakeItemMenu(SPGroup* group)
     mi->show();
     append(*mi);
 
-    if (!group || !group->isLayer()) {
+    if (!layer) {
         /* Create link */
         mi = Gtk::manage(new Gtk::MenuItem(_("Create _Link"), true));
         mi->signal_activate().connect(sigc::mem_fun(*this, &ContextMenu::ItemCreateLink));

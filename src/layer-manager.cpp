@@ -592,11 +592,23 @@ SPObject *LayerManager::layerForObject(SPObject *object) {
 /**
  * True if object is a layer.
  */
-bool LayerManager::isLayer(SPObject *object) const {
+bool LayerManager::isLayer(SPObject *object) const
+{
     if (auto group = dynamic_cast<SPGroup *>(object)) {
         return group->effectiveLayerMode(_desktop->dkey) == SPGroup::LAYER;
     }
     return false;
+}
+
+/**
+ * Return the SPGroup if we have a layer object.
+ */
+SPGroup *LayerManager::asLayer(SPObject *object)
+{
+    if (auto group = dynamic_cast<SPGroup *>(object)) {
+        return group->isLayer() ? group : nullptr;
+    }
+    return nullptr;
 }
 
 }

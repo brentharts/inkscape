@@ -53,6 +53,7 @@ public:
     void toggleLockOtherLayers(SPObject *object);
     SPObject *layerForObject(SPObject *object);
     bool isLayer(SPObject *object) const;
+    static SPGroup *asLayer(SPObject *object);
 
 private:
     friend class LayerWatcher;
