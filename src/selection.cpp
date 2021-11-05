@@ -102,18 +102,20 @@ void Selection::_emitChanged(bool persist_selection_context/* = false */) {
         _releaseContext(_selection_context);
     }
 
-    INKSCAPE.selection_changed(this);
-    _changed_signal.emit(this);
-
     /** Change the layer selection to the item selection
       * TODO: Should it only change if there's a single object?
       */
-     if (auto item = singleItem()) {
-         auto layer = _desktop->layerManager().layerForObject(item);
-         if (layer && layer != _selection_context) {
-             _desktop->layerManager().setCurrentLayer(layer);
-         }
-     }
+    if (_desktop) {
+        if (auto item = singleItem()) {
+            auto layer = _desktop->layerManager().layerForObject(item);
+            if (layer && layer != _selection_context) {
+                _desktop->layerManager().setCurrentLayer(layer);
+            }
+        }
+    }
+
+    INKSCAPE.selection_changed(this);
+    _changed_signal.emit(this);
 }
 
 void Selection::_releaseContext(SPObject *obj)

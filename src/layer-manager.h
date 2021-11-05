@@ -46,7 +46,7 @@ public:
     SPGroup *currentLayer() const;
 
     void reset();
-    void setCurrentLayer(SPObject *object);
+    void setCurrentLayer(SPObject *object, bool clear=false);
     void toggleLayerSolo(SPObject *object);
     void toggleHideAllLayers(bool hide);
     void toggleLockAllLayers(bool lock);

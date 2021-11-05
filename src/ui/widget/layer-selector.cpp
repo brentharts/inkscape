@@ -287,7 +287,7 @@ void LayerSelector::_setDesktopLayer() {
         _current_layer_changed_connection.block();
         _layers_changed_connection.block();
 
-        _desktop->layerManager().setCurrentLayer(layer);
+        _desktop->layerManager().setCurrentLayer(layer, true);
 
         _current_layer_changed_connection.unblock();
         _layers_changed_connection.unblock();

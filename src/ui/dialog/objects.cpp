@@ -1107,16 +1107,14 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
                 // if right-clicking on a layer, make it current for context menu actions to work correctly
                 if (context_menu) {
                     if (getDesktop()->layerManager().currentLayer() != item) {
-                        selection->clear();
-                        getDesktop()->layerManager().setCurrentLayer(item);
+                        getDesktop()->layerManager().setCurrentLayer(item, true);
                     }
                 }
                 // Clicking on layers firstly switches to that layer.
                 else if (selection->includes(item)) {
                     selection->clear();
                 } else if (_layer != item) {
-                    selection->clear();
-                    getDesktop()->layerManager().setCurrentLayer(item);
+                    getDesktop()->layerManager().setCurrentLayer(item, true);
                 } else {
                     selection->set(item);
                 }
