@@ -22,6 +22,9 @@
 #include "selection.h"            // Selection
 #include "path/path-simplify.h"
 
+#include "live_effects/lpe-powerclip.h"
+#include "live_effects/lpe-powermask.h"
+#include "ui/icon-names.h"
 
 // No sanity checking is done... should probably add.
 void
@@ -49,7 +52,7 @@ object_set_attribute(const Glib::VariantBase& value, InkscapeApplication *app)
     }
 
     // Needed to update repr (is this the best way?).
-    Inkscape::DocumentUndo::done(app->get_active_document(), 0, "ActionObjectSetAttribute");
+    Inkscape::DocumentUndo::done(app->get_active_document(), "ActionObjectSetAttribute", "");
 }
 
 
@@ -82,7 +85,7 @@ object_set_property(const Glib::VariantBase& value, InkscapeApplication *app)
     }
 
     // Needed to update repr (is this the best way?).
-    Inkscape::DocumentUndo::done(app->get_active_document(), 0, "ActionObjectSetProperty");
+    Inkscape::DocumentUndo::done(app->get_active_document(), "ActionObjectSetProperty", "");
 }
 
 
@@ -96,6 +99,132 @@ object_unlink_clones(InkscapeApplication *app)
     selection->setDocument(document);
 
     selection->unlink();
+}
+
+void
+set_clip(InkscapeApplication *app)
+{
+    Inkscape::Selection *selection = app->get_active_selection();
+
+    // Object Clip Set
+    selection->setMask(true, false);
+}
+
+void
+object_set_inverse(InkscapeApplication *app)
+{
+    Inkscape::Selection *selection = app->get_active_selection();
+
+    // Object Clip Set Inverse
+    selection->setMask(true, false);
+    Inkscape::LivePathEffect::sp_inverse_powerclip(app->get_active_selection());
+    Inkscape::DocumentUndo::done(app->get_active_document(), _("_Set Inverse (LPE)"), "");
+}
+
+void
+object_release(InkscapeApplication *app)
+{
+    Inkscape::Selection *selection = app->get_active_selection();
+
+    // Object Clip Release
+    Inkscape::LivePathEffect::sp_remove_powerclip(app->get_active_selection());
+    selection->unsetMask(true);
+    Inkscape::DocumentUndo::done(app->get_active_document(), _("Release clipping path"), "");
+}
+
+void
+set_mask(InkscapeApplication *app)
+{
+    Inkscape::Selection *selection = app->get_active_selection();
+
+    // Object Mask Set
+    selection->setMask(false, false);
+}
+
+void
+object_set_inverse_mask(InkscapeApplication *app)
+{
+    Inkscape::Selection *selection = app->get_active_selection();
+
+    // Object Mask Set Inverse
+    selection->setMask(false, false);
+    Inkscape::LivePathEffect::sp_inverse_powermask(app->get_active_selection());
+    Inkscape::DocumentUndo::done(app->get_active_document(), _("_Set Inverse (LPE)"), "");
+}
+
+void
+object_release_mask(InkscapeApplication *app)
+{
+    Inkscape::Selection *selection = app->get_active_selection();
+
+    // Object Mask Release
+    Inkscape::LivePathEffect::sp_remove_powermask(app->get_active_selection());
+    selection->unsetMask(false);
+    Inkscape::DocumentUndo::done(app->get_active_document(), _("Release mask"), "");
+}
+
+void
+object_rotate_90_cw(InkscapeApplication *app)
+{
+    Inkscape::Selection *selection = app->get_active_selection();
+
+    // Object Rotate 90
+    selection->rotate90(false);
+}
+
+void
+object_rotate_90_ccw(InkscapeApplication *app)
+{
+    Inkscape::Selection *selection = app->get_active_selection();
+
+    // Object Rotate 90 CCW
+    selection->rotate90(true);
+}
+
+void
+object_flip_horizontal(InkscapeApplication *app)
+{
+    Inkscape::Selection *selection = app->get_active_selection();
+
+    Geom::OptRect bbox = selection->visualBounds();
+    if (!bbox) {
+        return;
+    }
+
+    // Get center
+    Geom::Point center;
+    if (selection->center()) {
+        center = *selection->center();
+    } else {
+        center = bbox->midpoint();
+    }
+
+    // Object Flip Horizontal
+    selection->setScaleRelative(center, Geom::Scale(-1.0, 1.0));
+    Inkscape::DocumentUndo::done(app->get_active_document(), _("Flip horizontally"), INKSCAPE_ICON("object-flip-horizontal"));
+}
+
+void
+object_flip_vertical(InkscapeApplication *app)
+{
+    Inkscape::Selection *selection = app->get_active_selection();
+
+    Geom::OptRect bbox = selection->visualBounds();
+    if (!bbox) {
+        return;
+    }
+
+    // Get center
+    Geom::Point center;
+    if (selection->center()) {
+        center = *selection->center();
+    } else {
+        center = bbox->midpoint();
+    }
+
+    // Object Flip Vertical
+    selection->setScaleRelative(center, Geom::Scale(1.0, -1.0));
+    Inkscape::DocumentUndo::done(app->get_active_document(), _("Flip vertically"), INKSCAPE_ICON("object-flip-vertical"));
 }
 
 
@@ -141,12 +270,30 @@ object_simplify_path(InkscapeApplication *app)
 std::vector<std::vector<Glib::ustring>> raw_data_object =
 {
     // clang-format off
-    {"app.object-set-attribute",      N_("Set Attribute"),         "Object",     N_("Set or update an attribute of selected objects; usage: object-set-attribute:attribute name, attribute value;")},
-    {"app.object-set-property",       N_("Set Property"),          "Object",     N_("Set or update a property on selected objects; usage: object-set-property:property name, property value;")},
-    {"app.object-unlink-clones",      N_("Unlink Clones"),         "Object",     N_("Unlink clones and symbols")                          },
-    {"app.object-to-path",            N_("Object To Path"),        "Object",     N_("Convert shapes to paths")                            },
-    {"app.object-stroke-to-path",     N_("Stroke to Path"),        "Object",     N_("Convert strokes to paths")                           },
-    {"app.object-simplify-path",      N_("Simplify Path"),         "Object",     N_("Simplify paths, reducing node counts")               }
+    {"app.object-set-attribute",        N_("Set Attribute"),                    "Object",     N_("Set or update an attribute of selected objects; usage: object-set-attribute:attribute name, attribute value;")},
+    {"app.object-set-property",         N_("Set Property"),                     "Object",     N_("Set or update a property on selected objects; usage: object-set-property:property name, property value;")},
+    {"app.object-unlink-clones",        N_("Unlink Clones"),                    "Object",     N_("Unlink clones and symbols")},
+    {"app.object-to-path",              N_("Object To Path"),                   "Object",     N_("Convert shapes to paths")},
+    {"app.object-stroke-to-path",       N_("Stroke to Path"),                   "Object",     N_("Convert strokes to paths")},
+    {"app.object-simplify-path",        N_("Simplify Path"),                    "Object",     N_("Simplify paths, reducing node counts")},
+    {"app.object-set",                  N_("Object Clip Set"),                  "Object",     N_("Apply clipping path to selection (using the topmost object as clipping path)")},
+    {"app.object-set-inverse",          N_("Object Clip Set Inverse"),          "Object",     N_("Apply inverse clipping path to selection (using the topmost object as clipping path)")},
+    {"app.object-release",              N_("Object Clip Release"),              "Object",     N_("Remove clipping path from selection")},
+    {"app.object-set-mask",             N_("Object Mask Set"),                  "Object",     N_("Apply mask to selection (using the topmost object as mask)")},
+    {"app.object-set-inverse-mask",     N_("Object Mask Set Inverse"),          "Object",     N_("Set Inverse (LPE)")},
+    {"app.object-release-mask",         N_("Object Mask Release"),              "Object",     N_("Remove mask from selection")},
+    {"app.object-rotate-90-cw",         N_("Object Rotate 90"),                 "Object",     N_("Rotate selection 90° clockwise")},
+    {"app.object-rotate-90-ccw",        N_("Object Rotate 90 CCW"),             "Object",     N_("Rotate selection 90° counter-clockwise")},
+    {"app.object-flip-horizontal",      N_("Object Flip Horizontal"),           "Object",     N_("Flip selected objects horizontally")},
+    {"app.object-flip-vertical",        N_("Object Flip Vertical"),             "Object",     N_("Flip selected objects vertically")}
+    // clang-format on
+};
+
+std::vector<std::vector<Glib::ustring>> hint_data_object =
+{
+    // clang-format off
+    {"app.object-set-attribute",        N_("Give two String input for Attribute Name, Attribute Value") },
+    {"app.object-set-property",         N_("Give two String input for Property Name, Property Value")  }
     // clang-format on
 };
 
@@ -164,17 +311,28 @@ add_actions_object(InkscapeApplication* app)
 #if GLIB_CHECK_VERSION(2, 52, 0)
 
     // clang-format off
-    gapp->add_action_with_parameter( "object-set-attribute",     String, sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&object_set_attribute),      app));
-    gapp->add_action_with_parameter( "object-set-property",      String, sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&object_set_property),       app));
-    gapp->add_action(                "object-unlink-clones",             sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&object_unlink_clones),      app));
-    gapp->add_action(                "object-to-path",                   sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&object_to_path),            app));
-    gapp->add_action(                "object-stroke-to-path",            sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&object_stroke_to_path),     app));
-    gapp->add_action(                "object-simplify-path",             sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&object_simplify_path),      app));
+    gapp->add_action_with_parameter( "object-set-attribute",            String, sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&object_set_attribute),  app));
+    gapp->add_action_with_parameter( "object-set-property",             String, sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&object_set_property),   app));
+    gapp->add_action(                "object-unlink-clones",            sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&object_unlink_clones),          app));
+    gapp->add_action(                "object-to-path",                  sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&object_to_path),                app));
+    gapp->add_action(                "object-stroke-to-path",           sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&object_stroke_to_path),         app));
+    gapp->add_action(                "object-simplify-path",            sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&object_simplify_path),          app));
+    gapp->add_action(                "object-set",                      sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&set_clip),                      app));
+    gapp->add_action(                "object-set-inverse",              sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&object_set_inverse),            app));
+    gapp->add_action(                "object-release",                  sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&object_release),                app));
+    gapp->add_action(                "object-set-mask",                 sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&set_mask),                      app));
+    gapp->add_action(                "object-set-inverse-mask",         sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&object_set_inverse_mask),       app));
+    gapp->add_action(                "object-release-mask",             sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&object_release_mask),           app));
+    gapp->add_action(                "object-rotate-90-cw",             sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&object_rotate_90_cw),           app));
+    gapp->add_action(                "object-rotate-90-ccw",            sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&object_rotate_90_cw),           app));
+    gapp->add_action(                "object-flip-horizontal",          sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&object_flip_horizontal),        app));
+    gapp->add_action(                "object-flip-vertical",            sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&object_flip_vertical),          app));
     // clang-format on
 
 #endif
 
     app->get_action_extra_data().add_data(raw_data_object);
+    app->get_action_hint_data().add_data(hint_data_object);
 }
 
 

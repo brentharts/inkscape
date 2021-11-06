@@ -53,6 +53,7 @@
 #include "object/sp-item-group.h"
 #include "object/sp-root.h"
 
+#include "ui/desktop/menubar.h"
 #include "ui/themes.h"
 #include "ui/dialog/debug.h"
 #include "ui/tools/tool-base.h"
@@ -75,8 +76,6 @@ static void (* ill_handler)  (int) = SIG_DFL;
 #ifndef _WIN32
 static void (* bus_handler)  (int) = SIG_DFL;
 #endif
-
-#define MENUS_FILE "menus.xml"
 
 #define SP_INDENT 8
 
@@ -222,8 +221,6 @@ Application::Application(bool use_gui) :
         icon_theme->prepend_search_path(get_path_ustring(USER, ICONS));
         themecontext = new Inkscape::UI::ThemeContext();
         themecontext->add_gtk_css(false);
-        /* Load the preferences and menus */
-        load_menus();
         Inkscape::DeviceManager::getManager().loadConfig();
     }
 
@@ -290,11 +287,6 @@ Application::~Application()
     }
 
     Inkscape::Preferences::unload();
-
-    if (_menus) {
-        Inkscape::GC::release(_menus);
-        _menus = nullptr;
-    }
 
     _S_inst = nullptr; // this will probably break things
 
@@ -523,22 +515,6 @@ Application::crash_handler (int /*signum*/)
     fflush(stderr); // make sure buffers are empty before crashing (otherwise output might be suppressed)
 
     /* on exit, allow restored signal handler to take over and crash us */
-}
-
-/**
- *  Menus management
- *
- */
-bool Application::load_menus()
-{
-    using namespace Inkscape::IO::Resource;
-    Glib::ustring filename = get_filename(UIS, MENUS_FILE);
-
-    _menus = sp_repr_read_file(filename.c_str(), nullptr);
-    if ( !_menus ) {
-        _menus = sp_repr_read_mem(menus_skeleton, MENUS_SKELETON_SIZE, nullptr);
-    }
-    return (_menus != nullptr);
 }
 
 
@@ -979,17 +955,6 @@ Application::exit ()
 
     Inkscape::Preferences::unload();
     //gtk_main_quit ();
-}
-
-
-
-
-Inkscape::XML::Node *
-Application::get_menus()
-{
-    Inkscape::XML::Node *repr = _menus->root();
-    g_assert (!(strcmp (repr->name(), "inkscape")));
-    return repr->firstChild();
 }
 
 void

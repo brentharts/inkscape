@@ -25,7 +25,9 @@
 #include "document.h"
 #include "selection.h"
 
+#include "actions/actions-effect-data.h"
 #include "actions/actions-extra-data.h"
+#include "actions/actions-hint-data.h"
 #include "helper/action.h"
 #include "io/file-export-cmd.h"   // File export (non-verb)
 
@@ -111,7 +113,9 @@ public:
 
 
     /****** Actions *******/
-    InkActionExtraData&   get_action_extra_data() { return _action_extra_data; }
+    InkActionExtraData&     get_action_extra_data()     { return _action_extra_data;  }
+    InkActionEffectData&    get_action_effect_data()    { return _action_effect_data; }
+    InkActionHintData&      get_action_hint_data()      { return _action_hint_data;   }
 
     /******* Debug ********/
     void                  dump();
@@ -151,7 +155,9 @@ protected:
     action_vector_t _command_line_actions;
 
     // Extra data associated with actions (Label, Section, Tooltip/Help).
-    InkActionExtraData _action_extra_data;
+    InkActionExtraData  _action_extra_data;
+    InkActionEffectData  _action_effect_data;
+    InkActionHintData   _action_hint_data;
 
     void on_activate();
     void on_open(const Gio::Application::type_vec_files &files, const Glib::ustring &hint);

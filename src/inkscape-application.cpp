@@ -48,14 +48,18 @@
 
 #include "util/units.h"           // Redimension window
 
-#include "actions/actions-base.h"         // Actions
-#include "actions/actions-file.h"         // Actions
-#include "actions/actions-object.h"       // Actions
-#include "actions/actions-object-align.h" // Actions
-#include "actions/actions-output.h"       // Actions
-#include "actions/actions-selection.h"    // Actions
-#include "actions/actions-transform.h"    // Actions
-#include "actions/actions-window.h"       // Actions
+#include "actions/actions-base.h"                   // Actions
+#include "actions/actions-file.h"                   // Actions
+#include "actions/actions-edit.h"                   // Actions
+#include "actions/actions-effect.h"                 // Actions
+#include "actions/actions-object.h"                 // Actions
+#include "actions/actions-object-align.h"           // Actions
+#include "actions/actions-output.h"                 // Actions
+#include "actions/actions-paths.h"                  // Actions
+#include "actions/actions-selection-object.h"       // Actions
+#include "actions/actions-selection.h"              // Actions
+#include "actions/actions-transform.h"              // Actions
+#include "actions/actions-window.h"                 // Actions
 
 #include "widgets/desktop-widget.h" // Access dialog container.
 
@@ -590,14 +594,18 @@ InkscapeApplication::InkscapeApplication()
     // Glib::set_application_name(N_("Inkscape - A Vector Drawing Program"));  // After gettext() init.
 
     // ======================== Actions =========================
-    add_actions_base(this);         // actions that are GUI independent
-    add_actions_file(this);         // actions for file handling
-    add_actions_object(this);       // actions for object manipulation
-    add_actions_object_align(this); // actions for object alignment
-    add_actions_output(this);       // actions for file export
-    add_actions_selection(this);    // actions for object selection
-    add_actions_transform(this);    // actions for transforming selected objects
-    add_actions_window(this);       // actions for windows
+    add_actions_base(this);                 // actions that are GUI independent
+    add_actions_edit(this);                 // actions for editing
+    add_actions_effect(this);               // actions for Filters and Extensions
+    add_actions_file(this);                 // actions for file handling
+    add_actions_object(this);               // actions for object manipulation
+    add_actions_object_align(this);         // actions for object alignment
+    add_actions_output(this);               // actions for file export
+    add_actions_selection(this);            // actions for object selection
+    add_actions_path(this);                 // actions for Paths
+    add_actions_selection_object(this);     // actions for selected objects
+    add_actions_transform(this);            // actions for transforming selected objects
+    add_actions_window(this);               // actions for windows
 
 
     // ====================== Command Line ======================
