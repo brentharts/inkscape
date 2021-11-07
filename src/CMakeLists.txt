@@ -39,7 +39,6 @@ set(inkscape_SRC
   gradient-drag.cpp
   graphlayout.cpp
   guide-snapper.cpp
-  help.cpp
   id-clash.cpp
   inkscape.cpp
   inkscape-version-info.cpp
@@ -133,7 +132,6 @@ set(inkscape_SRC
   gradient-drag.h
   graphlayout.h
   guide-snapper.h
-  help.h
   helper-fns.h
   id-clash.h
   inkscape-version.h
@@ -202,35 +200,71 @@ set(inkscape_SRC
 
   inkscape-application.h
   inkscape-application.cpp
+  actions/actions-effect-data.h
+  actions/actions-effect-data.cpp
   actions/actions-extra-data.h
   actions/actions-extra-data.cpp
+  actions/actions-hint-data.h
+  actions/actions-hint-data.cpp
 
+  actions/actions-base.h
+  actions/actions-base.cpp
   actions/actions-canvas-mode.h
   actions/actions-canvas-mode.cpp
   actions/actions-canvas-snapping.h
   actions/actions-canvas-snapping.cpp
   actions/actions-canvas-transform.h
   actions/actions-canvas-transform.cpp
-  actions/actions-base.h
   actions/actions-dialogs.cpp
   actions/actions-dialogs.h
-  actions/actions-base.cpp
+  actions/actions-edit-document.h
+  actions/actions-edit-document.cpp
+  actions/actions-edit-window.h
+  actions/actions-edit-window.cpp
+  actions/actions-edit.h
+  actions/actions-edit.cpp
+  actions/actions-effect.h
+  actions/actions-effect.cpp
+  actions/actions-file-window.h
+  actions/actions-file-window.cpp
   actions/actions-file.h
   actions/actions-file.cpp
+  actions/actions-fit-canvas.h
+  actions/actions-fit-canvas.cpp
   actions/actions-helper.h
   actions/actions-helper.cpp
+  actions/actions-help-url.h
+  actions/actions-help-url.cpp
+  actions/actions-hide-lock.h
+  actions/actions-hide-lock.cpp
+  actions/actions-layer.h
+  actions/actions-layer.cpp
   actions/actions-object.h
   actions/actions-object.cpp
   actions/actions-object-align.h
   actions/actions-object-align.cpp
   actions/actions-output.h
   actions/actions-output.cpp
+  actions/actions-paths.h
+  actions/actions-paths.cpp
+  actions/actions-selection-object.h
+  actions/actions-selection-object.cpp
+  actions/actions-selection-window.h
+  actions/actions-selection-window.cpp
   actions/actions-selection.h
   actions/actions-selection.cpp
+  actions/actions-text.h
+  actions/actions-text.cpp
   actions/actions-tools.h
   actions/actions-tools.cpp
+  actions/actions-tutorial.h
+  actions/actions-tutorial.cpp
   actions/actions-transform.h
   actions/actions-transform.cpp
+  actions/actions-view-mode.h
+  actions/actions-view-mode.cpp
+  actions/actions-view-window.h
+  actions/actions-view-window.cpp
   actions/actions-window.h
   actions/actions-window.cpp
 

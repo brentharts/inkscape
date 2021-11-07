@@ -569,7 +569,7 @@ DialogWindow *DialogContainer::create_new_floating_dialog(const Glib::ustring& d
         }
         return nullptr;
     }
-
+    
     // check if this dialog *was* open and floating; if so recreate its window
     if (auto state = DialogManager::singleton().find_dialog_state(dialog_type)) {
         if (recreate_dialogs_from_state(state.get())) {

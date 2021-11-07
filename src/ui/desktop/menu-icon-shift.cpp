@@ -22,6 +22,7 @@
 
 /*
  *  Install CSS to shift icons into the space reserved for toggles (i.e. check and radio items).
+ *  The CSS will apply to all menu icons but is updated as each menu is shown.
  */
 void
 shift_icons(Gtk::MenuShell* menu)

@@ -21269,9 +21269,9 @@ msgstr "Zobrazit ikony v nabídkách:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1785
 msgid ""
-"You can either enable or disable all icons in menus. By default, the setting for "
-"the 'show-icons' attribute in the 'menus.xml' file determines whether to display "
-"icons in menus."
+"You can either enable or disable all icons in menus. By default, the setting for the "
+"'show-icons' attribute in the 'menus.xml' file determines whether to display icons in "
+"menus."
 msgstr ""
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1788
