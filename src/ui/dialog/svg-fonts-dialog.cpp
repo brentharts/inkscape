@@ -310,12 +310,62 @@ void SvgFontsDialog::fonts_list_button_release(GdkEventButton* event)
     }
 }
 
+void SvgFontsDialog::sort_glyphs(SPFont* font) {
+    if (!font) return;
+
+    {
+        auto scoped(_update.block());
+        font->sort_glyphs();
+    }
+    update_glyphs();
+}
+
+void SvgFontsDialog::create_layer_for_glyph(SPGlyph* glyph) {
+    if (!glyph) return;
+
+    //
+}
+
 void SvgFontsDialog::create_glyphs_popup_menu(Gtk::Widget& parent, sigc::slot<void> rem)
 {
-    auto mi = Gtk::manage(new Gtk::MenuItem(_("_Remove"), true));
+    // - edit glyph (show its layer)
+    // - create layer for current glyph
+    // - sort glyphs and their layers
+    // - remove current glyph
+    auto mi = Gtk::make_managed<Gtk::MenuItem>(_("_Edit current glyph"), true);
+    mi->show();
+    mi->signal_activate().connect([=](){
+        edit_glyph(get_selected_glyph());
+    });
+    _GlyphsContextMenu.append(*mi);
+
+    mi = Gtk::make_managed<Gtk::SeparatorMenuItem>();
+    mi->show();
+    _GlyphsContextMenu.append(*mi);
+
+    mi = Gtk::make_managed<Gtk::MenuItem>(_("_Create layer for glyph"), true);
+    mi->show();
+    mi->signal_activate().connect([=](){
+        create_layer_for_glyph(get_selected_glyph());
+    });
+    _GlyphsContextMenu.append(*mi);
+
+    mi = Gtk::make_managed<Gtk::MenuItem>(_("_Sort glyphs"), true);
+    mi->show();
+    mi->signal_activate().connect([=](){
+        sort_glyphs(get_selected_spfont());
+    });
+    _GlyphsContextMenu.append(*mi);
+
+    mi = Gtk::make_managed<Gtk::SeparatorMenuItem>();
+    mi->show();
+    _GlyphsContextMenu.append(*mi);
+
+    mi = Gtk::make_managed<Gtk::MenuItem>(_("_Remove"), true);
     _GlyphsContextMenu.append(*mi);
     mi->signal_activate().connect(rem);
     mi->show();
+
     _GlyphsContextMenu.accelerate(parent);
 }
 
@@ -731,6 +781,8 @@ SPGlyph* new_glyph(SPDocument* document, SPFont* font, const char* name, const c
 }
 
 void SvgFontsDialog::update_glyphs(){
+    if (_update.pending()) return;
+
     SPFont* font = get_selected_spfont();
     if (!font) return;
 
@@ -1020,6 +1072,7 @@ void SvgFontsDialog::set_glyphs_view_mode(bool list) {
 
 Gtk::Box* SvgFontsDialog::glyphs_tab() {
     _GlyphsList.signal_button_release_event().connect_notify(sigc::mem_fun(*this, &SvgFontsDialog::glyphs_list_button_release));
+    _glyphs_grid.signal_button_release_event().connect_notify([=](GdkEventButton* event){ glyphs_list_button_release(event); });
     create_glyphs_popup_menu(_GlyphsList, sigc::mem_fun(*this, &SvgFontsDialog::remove_selected_glyph));
 
     auto missing_glyph = Gtk::make_managed<Gtk::Expander>();
@@ -1164,9 +1217,13 @@ Gtk::Box* SvgFontsDialog::glyphs_tab() {
     glyph_from_path_button.set_image(*img);
     glyph_from_path_button.signal_clicked().connect(sigc::mem_fun(*this, &SvgFontsDialog::set_glyph_description_from_selected_path));
 
-    _GlyphsList.get_column(ColName)->set_resizable();
-    _GlyphsList.get_column(ColString)->set_resizable();
-    _GlyphsList.get_column(ColAdvance)->set_resizable();
+    for (auto&& col : _GlyphsList.get_columns()) {
+        col->set_resizable();
+    }
+    // _GlyphsList.get_column(ColGlyph)->set_resizable();
+    // _GlyphsList.get_column(ColName)->set_resizable();
+    // _GlyphsList.get_column(ColString)->set_resizable();
+    // _GlyphsList.get_column(ColAdvance)->set_resizable();
     static_cast<Gtk::CellRendererText*>(_GlyphsList.get_column_cell_renderer(ColName))->signal_edited().connect(
         sigc::mem_fun(*this, &SvgFontsDialog::glyph_name_edit));
 

@@ -226,6 +226,8 @@ private:
     Gtk::TreeModel::iterator get_selected_glyph_iter();
     void set_selected_glyph(SPGlyph* glyph);
     void edit_glyph(SPGlyph* glyph);
+    void sort_glyphs(SPFont* font);
+    void create_layer_for_glyph(SPGlyph* glyph);
 
     Inkscape::XML::SignalObserver _defs_observer; //in order to update fonts
     Inkscape::XML::SignalObserver _glyphs_observer;
