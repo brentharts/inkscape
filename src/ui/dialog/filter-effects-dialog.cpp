@@ -537,6 +537,7 @@ public:
 
     void set_from_attribute(SPObject* o) override
     {
+        std::string values_string;
         if(SP_IS_FECOLORMATRIX(o)) {
             SPFeColorMatrix* col = SP_FECOLORMATRIX(o);
             remove();
@@ -547,6 +548,7 @@ public:
                         _saturation.set_value(_saturation_store);
                     else
                         _saturation.set_from_attribute(o);
+                    values_string = std::to_string(_saturation.get_value());
                     break;
                 case COLORMATRIX_HUEROTATE:
                     add(_angle);
@@ -554,6 +556,7 @@ public:
                         _angle.set_value(_angle_store);
                     else
                         _angle.set_from_attribute(o);
+                    values_string = std::to_string(_angle.get_value());
                     break;
                 case COLORMATRIX_LUMINANCETOALPHA:
                     add(_label);
@@ -565,8 +568,23 @@ public:
                         _matrix.set_values(_matrix_store);
                     else
                         _matrix.set_from_attribute(o);
+                    for (auto v : _matrix.get_values()) {
+                        values_string += std::to_string(v) + " ";
+                    }
+                    values_string.pop_back();
                     break;
             }
+
+            // The filter effects widgets derived from AttrWidget automatically update the
+            // attribute on use. In this case, however, we must also update "values" whenever
+            // "type" is changed.
+            auto repr = o->getRepr();
+            if (values_string.empty()) {
+                repr->removeAttribute("values");
+            } else {
+                repr->setAttribute("values", values_string);
+            }
+
             _use_stored = true;
         }
     }
