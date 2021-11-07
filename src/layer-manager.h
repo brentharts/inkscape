@@ -55,6 +55,8 @@ public:
     bool isLayer(SPObject *object) const;
     static SPGroup *asLayer(SPObject *object);
 
+    bool isRoot() const { return currentLayer() == currentRoot(); }
+
 private:
     friend class LayerWatcher;
     class LayerWatcher;
