@@ -646,8 +646,7 @@ void ContextMenu::MakeGroupMenu(SPGroup* item)
 
         // transform layer into group
         append_item(_("Layer to group"), false).connect([=]() { sp_group_layer_transform(_desktop->doc(), item, SPGroup::GROUP); });
-    }
-    else if (item->isGroup()) {
+    } else {
         /* Ungroup */
         append_item(_("_Ungroup"), true).connect(sigc::mem_fun(*this, &ContextMenu::ActivateUngroup));
 
@@ -680,10 +679,6 @@ void ContextMenu::MakeGroupMenu(SPGroup* item)
                 append(*miu);
             }
         }
-    }
-    else {
-        // not a plain group and not a layer; a mask helper?
-        // no special operations here so far
     }
 }
 

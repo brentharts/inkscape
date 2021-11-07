@@ -31,7 +31,6 @@ public:
 
     enum LayerMode { GROUP, LAYER, MASK_HELPER };
 
-    bool isGroup() const { return _layer_mode == GROUP; }
     bool isLayer() const { return _layer_mode == LAYER; }
 
     bool _insert_bottom;
