@@ -27,6 +27,7 @@
 #include "document-undo.h"
 #include "layer-model.h"
 #include "layer-fns.h"
+#include "layer-manager.h"
 #include "selection.h"
 #include "svg-fonts-dialog.h"
 #include "verbs.h"
@@ -342,27 +343,57 @@ Glib::ustring create_unicode_name(const Glib::ustring& unicode, int max_chars) {
     return ost.str();
 }
 
-Glib::ustring get_glyph_synthetic_name(SPGlyph* glyph) {
-    if (!glyph) return "";
-
+Glib::ustring get_glyph_synthetic_name(const SPGlyph& glyph) {
     auto unicode_name = create_unicode_name(glyph.unicode, 3);
     // U+<code> plus character
     return unicode_name + " " + glyph.unicode;
 }
 
-void SvgFontsDialog::create_layer_for_glyph(SPGlyph* glyph) {
-    if (!glyph) return;
+SPItem* find_layer(SPDesktop* desktop, const Glib::ustring& name) {
+    if (!desktop) return nullptr;
 
-    auto name = get_glyph_synthetic_name(glyph);
+    auto layers = desktop->layers;
+    SPItem* layer = nullptr;
+    for (SPObject* obj = Inkscape::previous_layer(layers->currentRoot(), layers->currentRoot());
+        obj;
+        obj = Inkscape::previous_layer(layers->currentRoot(), obj) ) {
 
-    // todo
+        auto item = static_cast<SPItem*>(obj);
+        auto label = item->label();
+        if (label && strcmp(label, name.c_str()) == 0) {
+            layer = item;
+            break;
+        }
+    }
 
+    return layer;
+}
+
+SPItem* get_or_create_layer_for_glyph(SPDesktop* desktop, const Glib::ustring& font, const Glib::ustring& name) {
+    if (!desktop || name.empty() || font.empty()) return nullptr;
+
+    auto parent_layer = find_layer(desktop, font);
+
+    if (auto layer = find_layer(desktop, name)) {
+        return layer;
+    }
+
+    // create a new layer
+    auto layers = desktop->layers;
+    auto layer = create_layer(layers->currentRoot(), layers->currentRoot(), Inkscape::LayerRelativePosition::LPOS_CHILD);
+    if (layer) {
+        desktop->layer_manager->renameLayer(layer, (gchar *)name.c_str(), false);
+    }
+    desktop->getSelection()->clear();
+    // desktop->setCurrentLayer(new_layer);
+    DocumentUndo::done(desktop->getDocument(), SP_VERB_LAYER_NEW, _("Add layer"));
+    // desktop->messageStack()->flash(Inkscape::NORMAL_MESSAGE, _("New layer created."));
+    return dynamic_cast<SPItem*>(layer);
 }
 
 void SvgFontsDialog::create_glyphs_popup_menu(Gtk::Widget& parent, sigc::slot<void> rem)
 {
     // - edit glyph (show its layer)
-    // - create layer for current glyph
     // - sort glyphs and their layers
     // - remove current glyph
     auto mi = Gtk::make_managed<Gtk::MenuItem>(_("_Edit current glyph"), true);
@@ -376,12 +407,12 @@ void SvgFontsDialog::create_glyphs_popup_menu(Gtk::Widget& parent, sigc::slot<vo
     mi->show();
     _GlyphsContextMenu.append(*mi);
 
-    mi = Gtk::make_managed<Gtk::MenuItem>(_("_Create layer for glyph"), true);
-    mi->show();
-    mi->signal_activate().connect([=](){
-        create_layer_for_glyph(get_selected_glyph());
-    });
-    _GlyphsContextMenu.append(*mi);
+    // mi = Gtk::make_managed<Gtk::MenuItem>(_("_Create layer for glyph"), true);
+    // mi->show();
+    // mi->signal_activate().connect([=](){
+    //     create_layer_for_glyph(get_selected_glyph());
+    // });
+    // _GlyphsContextMenu.append(*mi);
 
     mi = Gtk::make_managed<Gtk::MenuItem>(_("_Sort glyphs"), true);
     mi->show();
@@ -750,7 +781,7 @@ SvgFontsDialog::populate_glyphs_box()
                 row[_GlyphsListColumns.unicode]     = glyph.unicode;
                 row[_GlyphsListColumns.UplusCode]   = unicode_name;
                 row[_GlyphsListColumns.advance]     = glyph.horiz_adv_x;
-                row[_GlyphsListColumns.name_markup] = "<small>" + Glib::Markup::escape_text(get_glyph_synthetic_name) + "</small>";
+                row[_GlyphsListColumns.name_markup] = "<small>" + Glib::Markup::escape_text(get_glyph_synthetic_name(glyph)) + "</small>";
             }
         }
 
@@ -1017,42 +1048,25 @@ void SvgFontsDialog::remove_selected_kerning_pair() {
 }
 
 void SvgFontsDialog::edit_glyph(SPGlyph* glyph) {
-    if (!glyph) return;
+    if (!glyph || !glyph->parent) return;
 
     auto desktop = getDesktop();
     if (!desktop) return;
     auto document = getDocument();
     if (!document) return;
 
-    auto name = glyph->getAttribute("glyph-name");
-    if (!name) return;
+    auto name = get_glyph_synthetic_name(*glyph);
+    if (name.empty()) return;
+    auto font_label = glyph->parent->label(); // getLabel
+    if (!font_label) return;
 
-    auto layers = desktop->layers;
-    SPItem* layer = nullptr;
-    for (SPObject* obj = Inkscape::previous_layer(layers->currentRoot(), layers->currentRoot());
-        obj;
-        obj = Inkscape::previous_layer(layers->currentRoot(), obj) ) {
-
-        auto item = static_cast<SPItem*>(obj);
-        auto label = item->label();
-        if (label && strcmp(label, name) == 0) {
-            layer = item;
-            break;
-        }
-    }
-// document->getObjectById
-//     Glib::ustring selector = "[label=";
-//     selector += name;
-//     selector += "]";
-//     auto items = document->getObjectsBySelector(selector); // getObjectById(name));
-
-// g_warning("sel: %s,  items: %d", selector.c_str(), int(items.size()));
-
-    // if (items.size() != 1) return;
-    // auto item = dynamic_cast<SPItem*>(items.front());
+    auto layer = get_or_create_layer_for_glyph(desktop, font_label, name);
     if (!layer) return;
 
+    // desktop->setCurrentLayer(layer);
 
+    auto layers = desktop->layers;
+    // set layer as "solo"
     if (layers->isLayer(layer) && layer != layers->currentRoot()) {
         layers->setCurrentLayer(layer);
         layers->toggleHideAllLayers(true);
