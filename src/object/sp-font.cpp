@@ -226,40 +226,21 @@ void SPFont::sort_glyphs() {
     glyphs.reserve(repr->childCount());
 
     // collect all glyphs (SPGlyph and their representations) 
-    auto node = repr->firstChild();
-    while (node) {
-        if (SPGlyph* g = SP_GLYPH(document->getObjectByRepr(node))) {
+    for (auto&& node : children) {
+        if (auto g = dynamic_cast<SPGlyph*>(&node)) {
             glyphs.push_back(std::make_pair(g, g->getRepr()));
             // keep representation around as it gets removed
             g->getRepr()->anchor();
         }
-
-        node = node->next();
     }
 
     // now sort by unicode point
     std::stable_sort(begin(glyphs), end(glyphs), [](const std::pair<SPGlyph*, Node*>& a, const std::pair<SPGlyph*, Node*>& b) {
         // compare individual unicode points in each string one by one to establish glyph order
+        // note: ustring operator< doesn't work as expected
         const auto& str1 = a.first->unicode;
         const auto& str2 = b.first->unicode;
-        auto it1 = str1.begin();
-        auto it2 = str2.begin();
-        while (it1 != str1.end() && it2 != str2.end()) {
-            if (*it1 != *it2) {
-                return *it1 < *it2;
-            }
-            ++it1;
-            ++it2;
-        }
-        if (it2 != str2.end()) {
-            return true; // second string longer, so first one is "less" than second
-        }
-        else if (it1 != str1.end()) {
-            return false; // first string longer, so it is not "less" than second
-        }
-        else {
-            return false; // neither string is smaller
-        }
+        return std::lexicographical_compare(str1.begin(), str1.end(), str2.begin(), str2.end());
     });
 
     // remove all glyph nodes from the document; block notifications
@@ -278,30 +259,6 @@ void SPFont::sort_glyphs() {
     _block = false;
     // notify listeners about the change
     parent->requestModified(SP_OBJECT_MODIFIED_FLAG);
-
-#if 0
-    std::vector<SPObject*> glyphs = this->childList(true);
-
-    std::stable_sort(begin(glyphs), end(glyphs), [](SPObject* a, SPObject* b) {
-        auto g1 = dynamic_cast<SPGlyph*>(a);
-        auto g2 = dynamic_cast<SPGlyph*>(b);
-        if (g1 && g2) {
-            return g1->unicode < g2->unicode;
-        }
-        else if (g2) {
-            return true;
-        }
-        return false;
-    });
-
-    for (auto&& glyph : glyphs) {
-        detach(glyph);
-    }
-    for (auto&& glyph : glyphs) {
-        attach(glyph);
-        sp_object_ref(glyphs, this);
-    }
-#endif
 }
 
 /*

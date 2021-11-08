@@ -320,10 +320,43 @@ void SvgFontsDialog::sort_glyphs(SPFont* font) {
     update_glyphs();
 }
 
+// return U+<code> ... string
+Glib::ustring create_unicode_name(const Glib::ustring& unicode, int max_chars) {
+    std::ostringstream ost;
+    if (unicode.empty()) {
+        ost << "-";
+    }
+    else {
+        auto it = unicode.begin();
+        for (int i = 0; i < max_chars && it != unicode.end(); ++i) {
+            if (i > 0) {
+                ost << " ";
+            }
+            unsigned int code = *it++;
+            ost << "U+" << std::hex << std::uppercase << std::setw(code <= 0xffff ? 4 : 6) << std::setfill('0') << code;
+        }
+        if (it != unicode.end()) {
+            ost << "..."; // there's more, but we skip them
+        }
+    }
+    return ost.str();
+}
+
+Glib::ustring get_glyph_synthetic_name(SPGlyph* glyph) {
+    if (!glyph) return "";
+
+    auto unicode_name = create_unicode_name(glyph.unicode, 3);
+    // U+<code> plus character
+    return unicode_name + " " + glyph.unicode;
+}
+
 void SvgFontsDialog::create_layer_for_glyph(SPGlyph* glyph) {
     if (!glyph) return;
 
-    //
+    auto name = get_glyph_synthetic_name(glyph);
+
+    // todo
+
 }
 
 void SvgFontsDialog::create_glyphs_popup_menu(Gtk::Widget& parent, sigc::slot<void> rem)
@@ -705,19 +738,19 @@ SvgFontsDialog::populate_glyphs_box()
 
     SPFont* spfont = get_selected_spfont();
     _glyphs_observer.set(spfont);
-    SvgFont* font = get_selected_svgfont();
 
     if (spfont) {
         for (auto& node: spfont->children) {
             if (SP_IS_GLYPH(&node)) {
                 auto& glyph = static_cast<SPGlyph&>(node);
                 Gtk::TreeModel::Row row = *_GlyphsListStore->append();
-                row[_GlyphsListColumns.glyph_node] = &glyph;
-                row[_GlyphsListColumns.glyph_name] = glyph.glyph_name;
-                row[_GlyphsListColumns.unicode]    = glyph.unicode;
-                row[_GlyphsListColumns.advance]    = glyph.horiz_adv_x;
-                Glib::ustring markup = "<small>" + Glib::Markup::escape_text(glyph.glyph_name) + "</small>";
-                row[_GlyphsListColumns.name_markup] = markup;
+                auto unicode_name = create_unicode_name(glyph.unicode, 3);
+                row[_GlyphsListColumns.glyph_node]  = &glyph;
+                row[_GlyphsListColumns.glyph_name]  = glyph.glyph_name;
+                row[_GlyphsListColumns.unicode]     = glyph.unicode;
+                row[_GlyphsListColumns.UplusCode]   = unicode_name;
+                row[_GlyphsListColumns.advance]     = glyph.horiz_adv_x;
+                row[_GlyphsListColumns.name_markup] = "<small>" + Glib::Markup::escape_text(get_glyph_synthetic_name) + "</small>";
             }
         }
 
@@ -753,33 +786,6 @@ SvgFontsDialog::populate_kerning_pairs_box()
     }
 }
 
-SPGlyph* new_glyph(SPDocument* document, SPFont* font, const char* name, const char* unicode)
-{
-    g_return_val_if_fail(font != nullptr, NULL);
-    Inkscape::XML::Document *xml_doc = document->getReprDoc();
-
-    // create a new glyph
-    Inkscape::XML::Node *repr;
-    repr = xml_doc->createElement("svg:glyph");
-
-    // std::ostringstream os;
-    // os << _("glyph") << " " << count;
-    repr->setAttribute("glyph-name", name);
-    repr->setAttribute("unicode", unicode);
-
-    // Append the new glyph node to the current font
-    font->getRepr()->appendChild(repr);
-    Inkscape::GC::release(repr);
-
-    // get corresponding object
-    SPGlyph *g = SP_GLYPH( document->getObjectByRepr(repr) );
-
-    g_assert(g != nullptr);
-    g_assert(SP_IS_GLYPH(g));
-
-    return g;
-}
-
 void SvgFontsDialog::update_glyphs(){
     if (_update.pending()) return;
 
@@ -797,6 +803,8 @@ void SvgFontsDialog::update_glyphs(){
 void SvgFontsDialog::add_glyph(){
     auto document = getDocument();
     if (!document) return;
+    auto font = get_selected_spfont();
+    if (!font) return;
 
     const int count = _GlyphsListStore->children().size();
 
@@ -818,14 +826,10 @@ void SvgFontsDialog::add_glyph(){
         }
     }
     auto str = Glib::ustring(1, unicode);
-    std::ostringstream ost;
-    ost << "U+" << std::hex << std::uppercase << std::setw(unicode <= 0xffff ? 4 : 6) << std::setfill('0') << unicode;
 
-    SPGlyph* glyph = new_glyph(document, get_selected_spfont(), ost.str().c_str(), str.c_str());
-
+    // empty name to begin with
+    SPGlyph* glyph = font->create_new_glyph("", str.c_str());
     DocumentUndo::done(document, SP_VERB_DIALOG_SVG_FONTS, _("Add glyph"));
-
-    // update_glyphs();
 
     // select newly added glyph
     set_selected_glyph(glyph);
@@ -1115,6 +1119,7 @@ Gtk::Box* SvgFontsDialog::glyphs_tab() {
     }
     _GlyphsList.append_column_editable(_("Name"), _GlyphsListColumns.glyph_name);
     _GlyphsList.append_column_editable(_("Matching string"), _GlyphsListColumns.unicode);
+    _GlyphsList.append_column(_("Unicode"), _GlyphsListColumns.UplusCode);
     _GlyphsList.append_column_numeric_editable(_("Advance"), _GlyphsListColumns.advance, "%.2f");
     _GlyphsList.show();
 
@@ -1220,10 +1225,7 @@ Gtk::Box* SvgFontsDialog::glyphs_tab() {
     for (auto&& col : _GlyphsList.get_columns()) {
         col->set_resizable();
     }
-    // _GlyphsList.get_column(ColGlyph)->set_resizable();
-    // _GlyphsList.get_column(ColName)->set_resizable();
-    // _GlyphsList.get_column(ColString)->set_resizable();
-    // _GlyphsList.get_column(ColAdvance)->set_resizable();
+
     static_cast<Gtk::CellRendererText*>(_GlyphsList.get_column_cell_renderer(ColName))->signal_edited().connect(
         sigc::mem_fun(*this, &SvgFontsDialog::glyph_name_edit));
 

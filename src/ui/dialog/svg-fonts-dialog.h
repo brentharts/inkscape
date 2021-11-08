@@ -286,6 +286,7 @@ private:
             add(glyph_node);
             add(glyph_name);
             add(unicode);
+            add(UplusCode);
             add(advance);
             add(name_markup);
         }
@@ -293,10 +294,11 @@ private:
         Gtk::TreeModelColumn<SPGlyph*> glyph_node;
         Gtk::TreeModelColumn<Glib::ustring> glyph_name;
         Gtk::TreeModelColumn<Glib::ustring> unicode;
+        Gtk::TreeModelColumn<Glib::ustring> UplusCode;
         Gtk::TreeModelColumn<double> advance;
         Gtk::TreeModelColumn<Glib::ustring> name_markup;
     };
-    enum GlyphColumnIndex { ColGlyph, ColName, ColString, ColAdvance };
+    enum GlyphColumnIndex { ColGlyph, ColName, ColString, ColUplusCode, ColAdvance };
     GlyphsColumns _GlyphsListColumns;
     Glib::RefPtr<Gtk::ListStore> _GlyphsListStore;
     Gtk::TreeView _GlyphsList;
