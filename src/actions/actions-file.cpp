@@ -32,7 +32,6 @@ file_open(const Glib::VariantBase& value, InkscapeApplication *app)
         std::cerr << "file_open: file '" << s.get() << "' does not exist." << std::endl;
         return;
     }
-
     SPDocument *document = app->document_open(file);
     INKSCAPE.add_document(document);
 
@@ -43,6 +42,19 @@ file_open(const Glib::VariantBase& value, InkscapeApplication *app)
 
     document->ensureUpToDate();
 }
+
+void
+file_open_with_window(const Glib::VariantBase& value, InkscapeApplication *app)
+{
+    Glib::Variant<Glib::ustring> s = Glib::VariantBase::cast_dynamic<Glib::Variant<Glib::ustring> >(value);
+    Glib::RefPtr<Gio::File> file = Gio::File::create_for_path(s.get());
+    if (!file->query_exists()) {
+        std::cerr << "file_open: file '" << s.get() << "' does not exist." << std::endl;
+        return;
+    }
+    app->create_window(file);
+}
+
 
 void
 file_new(const Glib::VariantBase& value, InkscapeApplication *app)
@@ -60,13 +72,14 @@ file_new(const Glib::VariantBase& value, InkscapeApplication *app)
     document->ensureUpToDate();
 }
 
-// Need to redo document_revert so that it doesn't depend on windows.
+// Need to create a document_revert that doesn't depend on windows.
 // void
 // file_revert(InkscapeApplication *app)
 // {
 //     app->document_revert(app->get_current_document());
 // }
 
+// No checks for dataloss are performed. Useful for scripts.
 void
 file_close(InkscapeApplication *app)
 {
@@ -78,28 +91,22 @@ file_close(InkscapeApplication *app)
     app->set_active_view(nullptr);
 }
 
-// TODO:
-// file_open
-// file_new
-
-// The following might be best tied to the file rather than app.
-// file_revert
-// file_save
-// file_saveas
-// file_saveacopy
-// file_print
-// file_vacuum
-// file_import
-// file_close
-// file_quit ... should just be quit
-// file_template
-
 std::vector<std::vector<Glib::ustring>> raw_data_file =
 {
     // clang-format off
     {"app.file-open",              N_("File Open"),                "File",       N_("Open file")                                         },
     {"app.file-new",               N_("File New"),                 "File",       N_("Open new document using template")                  },
-    {"app.file-close",             N_("File Close"),               "File",       N_("Close active document")                             }
+    {"app.file-close",             N_("File Close"),               "File",       N_("Close active document")                             },
+    {"app.file-open-window",       N_("File Open Window"),         "File",       N_("Open file window")                                  }
+    // clang-format on
+};
+
+std::vector<std::vector<Glib::ustring>> hint_data_file =
+{
+    // clang-format off
+    {"app.file-open",               N_("Give String input for File name")},
+    {"app.file-new",                N_("Give String input for File name")},
+    {"app.file-open-window",        N_("Give String input for File name")}
     // clang-format on
 };
 
@@ -117,15 +124,17 @@ add_actions_file(InkscapeApplication* app)
     auto *gapp = app->gio_app();
 
     // clang-format off
-    gapp->add_action_with_parameter( "file-open",                 String, sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&file_open),           app));
-    gapp->add_action_with_parameter( "file-new",                  String, sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&file_new),            app));
-    gapp->add_action(                "file-close",                        sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&file_close),          app));
+    gapp->add_action_with_parameter( "file-open",                 String, sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&file_open),               app));
+    gapp->add_action_with_parameter( "file-new",                  String, sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&file_new),                app));
+    gapp->add_action_with_parameter( "file-open-window",          String, sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&file_open_with_window),   app));
+    gapp->add_action(                "file-close",                        sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&file_close),              app));
     // clang-format on
 #else
-    std::cerr << "add_actions: Some actions require Glibmm 2.52, compiled with: " << glib_major_version << "." << glib_minor_version << std::endl;
+            std::cerr << "add_actions: Some actions require Glibmm 2.52, compiled with: " << glib_major_version << "." << glib_minor_version << std::endl;
 #endif
 
     app->get_action_extra_data().add_data(raw_data_file);
+    app->get_action_hint_data().add_data(hint_data_file);
 }
 
 

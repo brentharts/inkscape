@@ -55,6 +55,9 @@
 #include "rdf.h"
 
 #include "actions/actions-canvas-snapping.h"
+#include "actions/actions-edit-document.h"
+#include "actions/actions-tutorial.h"
+#include "actions/actions-text.h"
 
 #include "display/drawing.h"
 
@@ -147,7 +150,7 @@ SPDocument::SPDocument() :
 
     // Actions
     action_group = Gio::SimpleActionGroup::create();
-    // empty for now...
+    add_actions_edit_document(this);
 }
 
 SPDocument::~SPDocument() {

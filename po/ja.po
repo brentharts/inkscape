@@ -32548,7 +32548,7 @@ msgstr "スタイルを貼り付け(_S)"
 msgid "Apply the style of the copied object to selection"
 msgstr "コピーされたオブジェクトのスタイルを選択オブジェクトに適用"
 
-#: ../src/verbs.cpp:2309 ../share/ui/menus.xml:39
+#: ../src/verbs.cpp:2395 ../share/ui/menus.xml:39
 msgid "Paste Si_ze"
 msgstr "サイズを貼り付け(_Z)"
 
@@ -33478,7 +33478,7 @@ msgstr ""
 "選択オブジェクトにマスクを反転して適用します (最前面のオブジェクトをマスクと"
 "して使用します)"
 
-#: ../src/verbs.cpp:2592 ../src/verbs.cpp:2602 ../share/ui/menus.xml:29
+#: ../src/verbs.cpp:2678 ../src/verbs.cpp:2688 ../share/ui/menus.ui:29
 msgid "_Edit"
 msgstr "編集(_E)"
 

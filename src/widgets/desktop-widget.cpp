@@ -72,9 +72,6 @@
 #include "ui/widget/unit-tracker.h"
 #include "ui/themes.h"
 
-// TEMP
-#include "ui/desktop/menubar.h"
-
 #include "util/units.h"
 
 // We're in the "widgets" directory, so no need to explicitly prefix these:
@@ -759,28 +756,6 @@ void SPDesktopWidget::on_realize()
         gtkosx_application_set_use_quartz_accelerators(osxapp, false);
         gtkosx_application_set_help_menu(osxapp, _get_help_menu(menushell->gobj()));
         gtkosx_application_set_window_menu(osxapp, nullptr);
-
-        // move some items to "Inkscape" menu
-        unsigned app_menu_verbs[] = {
-            SP_VERB_NONE,
-            SP_VERB_DIALOG_INPUT,
-            SP_VERB_DIALOG_PREFERENCES,
-            SP_VERB_NONE,
-            SP_VERB_HELP_ABOUT,
-        };
-        for (auto verb : app_menu_verbs) {
-            GtkWidget *menuitem = nullptr;
-            if (verb == SP_VERB_NONE) {
-                menuitem = gtk_separator_menu_item_new();
-            } else if (auto item = get_menu_item_for_verb(verb, dtw->desktop)) {
-                menuitem = static_cast<Gtk::Widget *>(item)->gobj();
-            } else {
-                continue;
-            }
-            // Don't use index 0 because it appends the app name. Index 1
-            // seems to work perfectly with inserting items in reverse order.
-            gtkosx_application_insert_app_menu_item(osxapp, menuitem, 1);
-        }
     }
 #endif
 }
@@ -1381,12 +1356,6 @@ SPDesktopWidget::SPDesktopWidget(SPDocument *document)
     dtw->modified_connection = namedview->connectModified(sigc::mem_fun(*dtw, &SPDesktopWidget::namedviewModified));
 
     _layer_selector->setDesktop(dtw->desktop);
-
-    // TEMP
-    dtw->_menubar = build_menubar(dtw->desktop);
-    dtw->_menubar->set_name("MenuBar");
-    dtw->_menubar->show_all();
-    dtw->_vbox->pack_start(*dtw->_menubar, false, false);
 
     dtw->layoutWidgets();
 
@@ -2051,6 +2020,7 @@ SPDesktopWidget::on_ruler_box_button_press_event(GdkEventButton *event, Gtk::Wid
 void
 SPDesktopWidget::ruler_snap_new_guide(SPDesktop *desktop, Geom::Point &event_dt, Geom::Point &normal)
 {
+    desktop->getCanvas()->grab_focus();
     SnapManager &m = desktop->namedview->snap_manager;
     m.setup(desktop);
     // We're dragging a brand new guide, just pulled of the rulers seconds ago. When snapping to a

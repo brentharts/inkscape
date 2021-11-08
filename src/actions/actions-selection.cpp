@@ -232,21 +232,30 @@ select_list(InkscapeApplication* app)
     }
 }
 
-// SHOULD REALLY BE DOC ACTIONS
+void
+selection_make_bitmap_copy(InkscapeApplication *app)
+{
+    auto selection = app->get_active_selection();
+
+    // Make a Bitmap Copy
+    selection->createBitmapCopy();
+}
+
 std::vector<std::vector<Glib::ustring>> raw_data_selection =
 {
-    // clang-format off
-    {"app.select-clear",           N_("Clear Selection"),         "Select",   N_("Clear selection")                                    },
-    {"app.select",                 N_("Select"),                  "Select",   N_("Select by ID (deprecated)")                          },
-    {"app.unselect",               N_("Deselect"),                "Select",   N_("Deselect by ID (deprecated)")                        },
-    {"app.select-by-id",           N_("Select by ID"),            "Select",   N_("Select by ID")                                       },
-    {"app.unselect-by-id",         N_("Deselect by ID"),          "Select",   N_("Deselect by ID")                                     },
-    {"app.select-by-class",        N_("Select by Class"),         "Select",   N_("Select by class")                                    },
-    {"app.select-by-element",      N_("Select by Element"),       "Select",   N_("Select by SVG element (e.g. 'rect')")                },
-    {"app.select-by-selector",     N_("Select by Selector"),      "Select",   N_("Select by CSS selector")                             },
-    {"app.select-all",             N_("Select All"),              "Select",   N_("Select all; options: 'all' (every object including groups), 'layers', 'no-layers' (top level objects in layers), 'groups' (all groups including layers), 'no-groups' (all objects other than groups and layers, default)")},
-    {"app.select-invert",          N_("Invert Selection"),        "Select",   N_("Invert selection; options: 'all', 'layers', 'no-layers', 'groups', 'no-groups' (default)")},
-    {"app.select-list",            N_("List Selection"),          "Select",   N_("Print a list of objects in current selection")       }
+    // clang-format offs
+    {"app.select-clear",                    N_("Clear Selection"),      "Select",   N_("Clear selection")},
+    {"app.select",                          N_("Select"),               "Select",   N_("Select by ID (deprecated)")},
+    {"app.unselect",                        N_("Deselect"),             "Select",   N_("Deselect by ID (deprecated)")},
+    {"app.select-by-id",                    N_("Select by ID"),         "Select",   N_("Select by ID")},
+    {"app.unselect-by-id",                  N_("Deselect by ID"),       "Select",   N_("Deselect by ID")},
+    {"app.select-by-class",                 N_("Select by Class"),      "Select",   N_("Select by class")},
+    {"app.select-by-element",               N_("Select by Element"),    "Select",   N_("Select by SVG element (e.g. 'rect')")},
+    {"app.select-by-selector",              N_("Select by Selector"),   "Select",   N_("Select by CSS selector")},
+    {"app.select-all",                      N_("Select All Objects"),   "Select",   N_("Select all; options: 'all' (every object including groups), 'layers', 'no-layers' (top level objects in layers), 'groups' (all groups including layers), 'no-groups' (all objects other than groups and layers, default)")},
+    {"app.select-invert",                   N_("Invert Selection"),     "Select",   N_("Invert selection; options: 'all', 'layers', 'no-layers', 'groups', 'no-groups' (default)")},
+    {"app.select-list",                     N_("List Selection"),       "Select",   N_("Print a list of objects in current selection")},
+    {"app.selection-make-bitmap-copy",      N_("Make a Bitmap Copy"),   "Select",   N_("Export selection to a bitmap and insert it into document")}
     // clang-format on
 };
 
@@ -256,18 +265,19 @@ add_actions_selection(InkscapeApplication* app)
     auto *gapp = app->gio_app();
 
     // clang-format off
-    gapp->add_action(               "select-clear",       sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&select_clear),              app)        );
-    gapp->add_action_radio_string(  "select",             sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&select_by_id),              app), "null"); // Backwards compatible.
-    gapp->add_action_radio_string(  "unselect",           sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&unselect_by_id),            app), "null"); // Match select.
-    gapp->add_action_radio_string(  "select-by-id",       sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&select_by_id),              app), "null");
-    gapp->add_action_radio_string(  "unselect-by-id",     sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&unselect_by_id),            app), "null");
-    gapp->add_action_radio_string(  "select-by-class",    sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&select_by_class),           app), "null");
-    gapp->add_action_radio_string(  "select-by-element",  sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&select_by_element),         app), "null");
-    gapp->add_action_radio_string(  "select-by-selector", sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&select_by_selector),        app), "null");
-    gapp->add_action_radio_string(  "select-all",         sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&select_all),                app), "null");
-    gapp->add_action_radio_string(  "select-invert",      sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&select_invert),             app), "null");
-    gapp->add_action(               "select-list",        sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&select_list),               app)        );
-    // clang-format on
+    gapp->add_action(               "select-clear",                 sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&select_clear),                  app)        );
+    gapp->add_action_radio_string(  "select",                       sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&select_by_id),                  app), "null"); // Backwards compatible.
+    gapp->add_action_radio_string(  "unselect",                     sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&unselect_by_id),                app), "null"); // Match select.
+    gapp->add_action_radio_string(  "select-by-id",                 sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&select_by_id),                  app), "null");
+    gapp->add_action_radio_string(  "unselect-by-id",               sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&unselect_by_id),                app), "null");
+    gapp->add_action_radio_string(  "select-by-class",              sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&select_by_class),               app), "null");
+    gapp->add_action_radio_string(  "select-by-element",            sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&select_by_element),             app), "null");
+    gapp->add_action_radio_string(  "select-by-selector",           sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&select_by_selector),            app), "null");
+    gapp->add_action_radio_string(  "select-all",                   sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&select_all),                    app), "null");
+    gapp->add_action_radio_string(  "select-invert",                sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&select_invert),                 app), "null");
+    gapp->add_action(               "select-list",                  sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&select_list),                   app)        );
+    gapp->add_action(               "selection-make-bitmap-copy",   sigc::bind<InkscapeApplication*>(sigc::ptr_fun(&selection_make_bitmap_copy),    app));
+    // clangt on
 
     app->get_action_extra_data().add_data(raw_data_selection);
 }
