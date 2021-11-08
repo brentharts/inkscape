@@ -548,7 +548,7 @@ public:
                         _saturation.set_value(_saturation_store);
                     else
                         _saturation.set_from_attribute(o);
-                    values_string = std::to_string(_saturation.get_value());
+                    values_string = Glib::Ascii::dtostr(_saturation.get_value());
                     break;
                 case COLORMATRIX_HUEROTATE:
                     add(_angle);
@@ -556,7 +556,7 @@ public:
                         _angle.set_value(_angle_store);
                     else
                         _angle.set_from_attribute(o);
-                    values_string = std::to_string(_angle.get_value());
+                    values_string = Glib::Ascii::dtostr(_angle.get_value());
                     break;
                 case COLORMATRIX_LUMINANCETOALPHA:
                     add(_label);
@@ -569,7 +569,7 @@ public:
                     else
                         _matrix.set_from_attribute(o);
                     for (auto v : _matrix.get_values()) {
-                        values_string += std::to_string(v) + " ";
+                        values_string += Glib::Ascii::dtostr(v) + " ";
                     }
                     values_string.pop_back();
                     break;
