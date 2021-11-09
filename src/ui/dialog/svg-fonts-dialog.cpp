@@ -25,8 +25,6 @@
 
 #include "desktop.h"
 #include "document-undo.h"
-#include "layer-model.h"
-#include "layer-fns.h"
 #include "layer-manager.h"
 #include "selection.h"
 #include "svg-fonts-dialog.h"
@@ -343,47 +341,56 @@ Glib::ustring create_unicode_name(const Glib::ustring& unicode, int max_chars) {
     return ost.str();
 }
 
+// synthetic name consists for unicode hex numbers derived from glyph's "unicode" attribute
 Glib::ustring get_glyph_synthetic_name(const SPGlyph& glyph) {
     auto unicode_name = create_unicode_name(glyph.unicode, 3);
     // U+<code> plus character
     return unicode_name + " " + glyph.unicode;
 }
 
-SPItem* find_layer(SPDesktop* desktop, const Glib::ustring& name) {
+// look for a layer by its label; looking only in direct sublayers of  'root_layer'
+SPItem* find_layer(SPDesktop* desktop, SPObject* root_layer, const Glib::ustring& name) {
     if (!desktop) return nullptr;
 
-    auto layers = desktop->layers;
+    const auto& layers = desktop->layerManager();
     SPItem* layer = nullptr;
-    for (SPObject* obj = Inkscape::previous_layer(layers->currentRoot(), layers->currentRoot());
-        obj;
-        obj = Inkscape::previous_layer(layers->currentRoot(), obj) ) {
+    auto root = root_layer == nullptr ? layers.currentRoot() : root_layer;
+    if (!root) return nullptr;
 
-        auto item = static_cast<SPItem*>(obj);
-        auto label = item->label();
-        if (label && strcmp(label, name.c_str()) == 0) {
-            layer = item;
-            break;
-        }
+    // check only direct child layers
+    auto it = std::find_if(root->children.begin(), root->children.end(), [&](SPObject& obj) {
+        return layers.isLayer(&obj) && obj.label() && strcmp(obj.label(), name.c_str()) == 0;
+    });
+    if (it != root->children.end()) {
+        return static_cast<SPItem*>(&*it);
     }
 
-    return layer;
+    return nullptr; // not found
 }
 
 SPItem* get_or_create_layer_for_glyph(SPDesktop* desktop, const Glib::ustring& font, const Glib::ustring& name) {
     if (!desktop || name.empty() || font.empty()) return nullptr;
 
-    auto parent_layer = find_layer(desktop, font);
+    auto& layers = desktop->layerManager();
+    auto parent_layer = find_layer(desktop, layers.currentRoot(), font);
+    if (!parent_layer) {
+        // create a new layer for a font
+        parent_layer = static_cast<SPItem*>(create_layer(layers.currentRoot(), layers.currentRoot(), Inkscape::LayerRelativePosition::LPOS_CHILD));
+        if (!parent_layer) return nullptr;
 
-    if (auto layer = find_layer(desktop, name)) {
+        layers.renameLayer(parent_layer, font.c_str(), false);
+    }
+
+    if (auto layer = find_layer(desktop, parent_layer, name)) {
         return layer;
     }
 
-    // create a new layer
-    auto layers = desktop->layers;
-    auto layer = create_layer(layers->currentRoot(), layers->currentRoot(), Inkscape::LayerRelativePosition::LPOS_CHILD);
-    if (layer) {
-        desktop->layer_manager->renameLayer(layer, (gchar *)name.c_str(), false);
-    }
+    // create a new layer for a glyph
+    auto layer = create_layer(parent_layer, parent_layer, Inkscape::LayerRelativePosition::LPOS_CHILD);
+    if (!layer) return nullptr;
+
+    layers.renameLayer(layer, name.c_str(), false);
+
     desktop->getSelection()->clear();
     // desktop->setCurrentLayer(new_layer);
     DocumentUndo::done(desktop->getDocument(), SP_VERB_LAYER_NEW, _("Add layer"));
@@ -1047,6 +1054,7 @@ void SvgFontsDialog::remove_selected_kerning_pair() {
     update_glyphs();
 }
 
+// switch to a glyph layer (and create this dedicated layer if necessary)
 void SvgFontsDialog::edit_glyph(SPGlyph* glyph) {
     if (!glyph || !glyph->parent) return;
 
@@ -1055,25 +1063,23 @@ void SvgFontsDialog::edit_glyph(SPGlyph* glyph) {
     auto document = getDocument();
     if (!document) return;
 
+    // glyph's synthetic name to match layer name
     auto name = get_glyph_synthetic_name(*glyph);
     if (name.empty()) return;
-    auto font_label = glyph->parent->label(); // getLabel
+    // font's name to match parent layer name
+    auto font_label = glyph->parent->label();
     if (!font_label) return;
 
     auto layer = get_or_create_layer_for_glyph(desktop, font_label, name);
     if (!layer) return;
 
-    // desktop->setCurrentLayer(layer);
-
-    auto layers = desktop->layers;
-    // set layer as "solo"
-    if (layers->isLayer(layer) && layer != layers->currentRoot()) {
-        layers->setCurrentLayer(layer);
-        layers->toggleHideAllLayers(true);
-        layer->setHidden(false);
-        layers->toggleLockAllLayers(true);
-        layer->setLocked(false);
-        // DocumentUndo::done(document, SP_VERB_LAYER_SOLO, _("Toggle layer solo"));
+    auto& layers = desktop->layerManager();
+    // set layer as "solo" - only one visible and unlocked
+    if (layers.isLayer(layer) && layer != layers.currentRoot()) {
+        layers.toggleLayerSolo(layer, true);
+        layers.toggleLockOtherLayers(layer, true);
+        layers.setCurrentLayer(layer, true);
+        DocumentUndo::done(document, SP_VERB_LAYER_SOLO, _("Toggle layer solo"));
     }
 }
 
@@ -1132,20 +1138,32 @@ Gtk::Box* SvgFontsDialog::glyphs_tab() {
         column->add_attribute(_glyph_renderer->property_glyph(), _GlyphsListColumns.unicode);
     }
     _GlyphsList.append_column_editable(_("Name"), _GlyphsListColumns.glyph_name);
-    _GlyphsList.append_column_editable(_("Matching string"), _GlyphsListColumns.unicode);
+    _GlyphsList.append_column_editable(_("Characters"), _GlyphsListColumns.unicode);
     _GlyphsList.append_column(_("Unicode"), _GlyphsListColumns.UplusCode);
     _GlyphsList.append_column_numeric_editable(_("Advance"), _GlyphsListColumns.advance, "%.2f");
     _GlyphsList.show();
+    _GlyphsList.signal_row_activated().connect([=](const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn*) {
+        edit_glyph(get_selected_glyph());
+    });
 
     Gtk::Box* hb = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4));
     add_glyph_button.set_image_from_icon_name("list-add");
+    add_glyph_button.set_tooltip_text(_("Add new glyph"));
     add_glyph_button.signal_clicked().connect(sigc::mem_fun(*this, &SvgFontsDialog::add_glyph));
     remove_glyph_button.set_image_from_icon_name("list-remove");
+    remove_glyph_button.set_tooltip_text(_("Delete current glyph"));
     remove_glyph_button.signal_clicked().connect([=](){ remove_selected_glyph(); });
 
+    glyph_from_path_button.set_label(_("Get curves"));
+    glyph_from_path_button.set_always_show_image();
+    glyph_from_path_button.set_image_from_icon_name("glyph-copy-from");
+    glyph_from_path_button.set_tooltip_text(_("Get curves from selection to replace current glyph"));
+    glyph_from_path_button.signal_clicked().connect(sigc::mem_fun(*this, &SvgFontsDialog::set_glyph_description_from_selected_path));
+
     auto edit = Gtk::make_managed<Gtk::Button>();
+    edit->set_label(_("Edit"));
     edit->set_image_from_icon_name("edit");
-    edit->set_tooltip_text(_("Switch to layer with the same name as glyph"));
+    edit->set_tooltip_text(_("Switch to a layer with the same name as current glyph"));
     edit->signal_clicked().connect([=]() {
         edit_glyph(get_selected_glyph());
     });
@@ -1202,16 +1220,19 @@ Gtk::Box* SvgFontsDialog::glyphs_tab() {
         });
     }
 
+    // display mode switching buttons
     auto hbox = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, 4);
     Gtk::RadioButtonGroup group;
     auto list = Gtk::make_managed<Gtk::RadioButton>(group);
     list->set_mode(false);
     list->set_image_from_icon_name("glyph-list");
+    list->set_tooltip_text(_("Glyph list view"));
     list->set_valign(Gtk::ALIGN_START);
     list->signal_toggled().connect([=]() { set_glyphs_view_mode(true); });
     auto grid = Gtk::make_managed<Gtk::RadioButton>(group);
     grid->set_mode(false);
     grid->set_image_from_icon_name("glyph-grid");
+    grid->set_tooltip_text(_("Glyph grid view"));
     grid->set_valign(Gtk::ALIGN_START);
     grid->signal_toggled().connect([=]() { set_glyphs_view_mode(false); });
     hbox->pack_start(*missing_glyph);
@@ -1227,14 +1248,6 @@ Gtk::Box* SvgFontsDialog::glyphs_tab() {
     _glyphs_icon_scroller.set_no_show_all();
     (_show_glyph_list ? list : grid)->set_active();
     set_glyphs_view_mode(_show_glyph_list);
-
-    glyph_from_path_button.set_label(_("Get curves from selection"));
-    glyph_from_path_button.set_always_show_image();
-    auto img = Gtk::make_managed<Gtk::Image>();
-    img->set_from_icon_name("glyph-copy-from", Gtk::ICON_SIZE_BUTTON);
-    img->set_margin_right(5);
-    glyph_from_path_button.set_image(*img);
-    glyph_from_path_button.signal_clicked().connect(sigc::mem_fun(*this, &SvgFontsDialog::set_glyph_description_from_selected_path));
 
     for (auto&& col : _GlyphsList.get_columns()) {
         col->set_resizable();

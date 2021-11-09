@@ -507,7 +507,7 @@ SPObject *create_layer(SPObject *root, SPObject *layer, LayerRelativePosition po
 /**
  * Toggle the sensitivity of every layer except the given layer.
  */
-void LayerManager::toggleLockOtherLayers(SPObject *object) {
+void LayerManager::toggleLockOtherLayers(SPObject *object, bool force_lock) {
     g_return_if_fail(SP_IS_GROUP(object));
     g_return_if_fail( currentRoot() == object || (currentRoot() && currentRoot()->isAncestorOf(object)) );
 
@@ -531,6 +531,11 @@ void LayerManager::toggleLockOtherLayers(SPObject *object) {
     if ( item->isLocked() ) {
         item->setLocked(false);
     }
+
+    if (force_lock) {
+        othersLocked = true;
+    }
+
     for (auto & layer : layers) {
         SP_ITEM(layer)->setLocked(othersLocked);
     }
@@ -539,7 +544,7 @@ void LayerManager::toggleLockOtherLayers(SPObject *object) {
 /**
  * Toggle the visibility of every layer except the given layer.
  */
-void LayerManager::toggleLayerSolo(SPObject *object) {
+void LayerManager::toggleLayerSolo(SPObject *object, bool force_hide) {
     g_return_if_fail(SP_IS_GROUP(object));
     g_return_if_fail( currentRoot() == object || (currentRoot() && currentRoot()->isAncestorOf(object)) );
 
@@ -562,6 +567,10 @@ void LayerManager::toggleLayerSolo(SPObject *object) {
     SPItem *item = SP_ITEM(object);
     if ( item->isHidden() ) {
         item->setHidden(false);
+    }
+
+    if (force_hide) {
+        othersShowing = true;
     }
 
     for (auto & layer : layers) {
