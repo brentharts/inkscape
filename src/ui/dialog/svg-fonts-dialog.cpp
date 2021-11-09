@@ -385,16 +385,37 @@ SPItem* get_or_create_layer_for_glyph(SPDesktop* desktop, const Glib::ustring& f
         return layer;
     }
 
+    // find a right place for a new layer, so they appear sorted
+    auto& glyph_layers = parent_layer->children;
+    auto it = std::lower_bound(glyph_layers.rbegin(), glyph_layers.rend(), name, [&](auto&& layer, const Glib::ustring n) {
+        auto label = layer.label();
+        if (!layers.isLayer(&layer) || !label) return false;
+
+        Glib::ustring temp(label);
+        return std::lexicographical_compare(temp.begin(), temp.end(), n.begin(), n.end());
+    });
+    SPObject* insert = parent_layer;
+    Inkscape::LayerRelativePosition pos = Inkscape::LayerRelativePosition::LPOS_ABOVE;
+    if (it != glyph_layers.rend()) {
+        insert = &*it;
+    }
+    else {
+        auto first = std::find_if(glyph_layers.begin(), glyph_layers.end(), [&](auto&& obj) {
+            return layers.isLayer(&obj);
+        });
+        if (first != glyph_layers.end()) {
+            insert = &*first;
+            pos = Inkscape::LayerRelativePosition::LPOS_BELOW;
+        }
+    }
+
     // create a new layer for a glyph
-    auto layer = create_layer(parent_layer, parent_layer, Inkscape::LayerRelativePosition::LPOS_CHILD);
+    auto layer = create_layer(parent_layer, insert, pos);
     if (!layer) return nullptr;
 
     layers.renameLayer(layer, name.c_str(), false);
 
-    desktop->getSelection()->clear();
-    // desktop->setCurrentLayer(new_layer);
     DocumentUndo::done(desktop->getDocument(), SP_VERB_LAYER_NEW, _("Add layer"));
-    // desktop->messageStack()->flash(Inkscape::NORMAL_MESSAGE, _("New layer created."));
     return dynamic_cast<SPItem*>(layer);
 }
 
@@ -1123,6 +1144,7 @@ Gtk::Box* SvgFontsDialog::glyphs_tab() {
     _GlyphsListScroller.add(_GlyphsList);
     _GlyphsListStore = Gtk::ListStore::create(_GlyphsListColumns);
     _GlyphsList.set_model(_GlyphsListStore);
+    _GlyphsList.set_enable_search(false);
 
     _glyph_renderer = Gtk::manage(new SvgGlyphRenderer());
     const int size = 20; // arbitrarily chosen to keep glyphs small but still legible
@@ -1445,6 +1467,7 @@ SvgFontsDialog::SvgFontsDialog()
     // List of SVGFonts declared in a document:
     _model = Gtk::ListStore::create(_columns);
     _FontsList.set_model(_model);
+    _FontsList.set_enable_search(false);
     _FontsList.append_column_editable(_("_Fonts"), _columns.label);
     _FontsList.get_selection()->signal_changed().connect(sigc::mem_fun(*this, &SvgFontsDialog::on_font_selection_changed));
     // connect to the cell renderer's edit signal; there's also model's row_changed, but it is less specific
