@@ -52,7 +52,6 @@
 #include "ui/widget/button.h"
 #include "ui/widget/spinbutton.h"
 #include "ui/widget/style-swatch.h"
-#include "ui/widget/unit-tracker.h"
 
 #include "widgets/spw-utilities.h"
 #include "widgets/widget-sizes.h"
@@ -60,7 +59,7 @@
 #include "xml/attribute-record.h"
 #include "xml/node-event-vector.h"
 
-#include "ui/toolbar/arc-toolbar.h"
+//#include "ui/toolbar/arc-toolbar.h"
 #include "ui/toolbar/box3d-toolbar.h"
 #include "ui/toolbar/calligraphy-toolbar.h"
 #include "ui/toolbar/connector-toolbar.h"
@@ -71,7 +70,7 @@
 #include "ui/toolbar/mesh-toolbar.h"
 #include "ui/toolbar/measure-toolbar.h"
 #include "ui/toolbar/node-toolbar.h"
-#include "ui/toolbar/rect-toolbar.h"
+//#include "ui/toolbar/rect-toolbar.h"
 #include "ui/toolbar/marker-toolbar.h"
 #include "ui/toolbar/paintbucket-toolbar.h"
 #include "ui/toolbar/pencil-toolbar.h"
@@ -87,6 +86,14 @@
 #include "toolbox.h"
 
 #include "ui/tools/tool-base.h"
+
+// Our own widgets which must be declared before we can load .ui (.glade) files.
+#include "ui/toolbar/arc-toolbar.h"
+#include "ui/toolbar/rect-toolbar.h"
+#include "ui/widget/combobox-unit.h"
+#include "ui/widget/spinbutton-action.h"
+#include "ui/widget/toolitem-menu.h"
+
 
 //#define DEBUG_TEXT
 
@@ -140,34 +147,35 @@ static struct {
     gchar const *type_name;
     Glib::ustring const tool_name;
     GtkWidget *(*create_func)(SPDesktop *desktop);
+    Glib::ustring const ui_filename;
     gchar const *swatch_tip;
 } const aux_toolboxes[] = {
     // If you change the tool_name for Measure or Text here, change it also in desktop-widget.cpp.
     // clang-format off
-    { "/tools/select",          "Select",       Inkscape::UI::Toolbar::SelectToolbar::create,        nullptr},
-    { "/tools/nodes",           "Node",         Inkscape::UI::Toolbar::NodeToolbar::create,          nullptr},
-    { "/tools/marker",          "Marker",       Inkscape::UI::Toolbar::MarkerToolbar::create,        nullptr},
-    { "/tools/shapes/rect",     "Rect",         Inkscape::UI::Toolbar::RectToolbar::create,          N_("Style of new rectangles")},
-    { "/tools/shapes/arc",      "Arc",          Inkscape::UI::Toolbar::ArcToolbar::create,           N_("Style of new ellipses")},
-    { "/tools/shapes/star",     "Star",         Inkscape::UI::Toolbar::StarToolbar::create,          N_("Style of new stars")},
-    { "/tools/shapes/3dbox",    "3DBox",        Inkscape::UI::Toolbar::Box3DToolbar::create,         N_("Style of new 3D boxes")},
-    { "/tools/shapes/spiral",   "Spiral",       Inkscape::UI::Toolbar::SpiralToolbar::create,        N_("Style of new spirals")},
-    { "/tools/freehand/pencil", "Pencil",       Inkscape::UI::Toolbar::PencilToolbar::create_pencil, N_("Style of new paths created by Pencil")},
-    { "/tools/freehand/pen",    "Pen",          Inkscape::UI::Toolbar::PencilToolbar::create_pen,    N_("Style of new paths created by Pen")},
-    { "/tools/calligraphic",    "Calligraphic", Inkscape::UI::Toolbar::CalligraphyToolbar::create,   N_("Style of new calligraphic strokes")},
-    { "/tools/text",            "Text",         Inkscape::UI::Toolbar::TextToolbar::create,          nullptr},
-    { "/tools/gradient",        "Gradient",     Inkscape::UI::Toolbar::GradientToolbar::create,      nullptr},
-    { "/tools/mesh",            "Mesh",         Inkscape::UI::Toolbar::MeshToolbar::create,          nullptr},
-    { "/tools/zoom",            "Zoom",         Inkscape::UI::Toolbar::ZoomToolbar::create,          nullptr},
-    { "/tools/measure",         "Measure",      Inkscape::UI::Toolbar::MeasureToolbar::create,       nullptr},
-    { "/tools/dropper",         "Dropper",      Inkscape::UI::Toolbar::DropperToolbar::create,       nullptr},
-    { "/tools/tweak",           "Tweak",        Inkscape::UI::Toolbar::TweakToolbar::create,         N_("Color/opacity used for color tweaking")},
-    { "/tools/spray",           "Spray",        Inkscape::UI::Toolbar::SprayToolbar::create,         nullptr},
-    { "/tools/connector",       "Connector",    Inkscape::UI::Toolbar::ConnectorToolbar::create,     nullptr},
-    { "/tools/paintbucket",     "Paintbucket",  Inkscape::UI::Toolbar::PaintbucketToolbar::create,   N_("Style of Paint Bucket fill objects")},
-    { "/tools/eraser",          "Eraser",       Inkscape::UI::Toolbar::EraserToolbar::create,        _("TBD")},
-    { "/tools/lpetool",         "LPETool",      Inkscape::UI::Toolbar::LPEToolbar::create,           _("TBD")},
-    { nullptr,                  "",             nullptr,                                             nullptr }
+    { "/tools/select",          "Select",       Inkscape::UI::Toolbar::SelectToolbar::create,        "",          nullptr},
+    { "/tools/nodes",           "Node",         Inkscape::UI::Toolbar::NodeToolbar::create,          "",          nullptr},
+    { "/tools/marker",          "Marker",       Inkscape::UI::Toolbar::MarkerToolbar::create,        "",          nullptr},
+    { "/tools/shapes/rect",     "Rect",         nullptr,                              "toolbar-rect.ui",          N_("Style of new rectangles")},
+    { "/tools/shapes/arc",      "Arc",          nullptr,                              "toolbar-arc.ui",           N_("Style of new ellipses")},
+    { "/tools/shapes/star",     "Star",         Inkscape::UI::Toolbar::StarToolbar::create,          "",          N_("Style of new stars")},
+    { "/tools/shapes/3dbox",    "3DBox",        Inkscape::UI::Toolbar::Box3DToolbar::create,         "",          N_("Style of new 3D boxes")},
+    { "/tools/shapes/spiral",   "Spiral",       Inkscape::UI::Toolbar::SpiralToolbar::create,        "",          N_("Style of new spirals")},
+    { "/tools/freehand/pencil", "Pencil",       Inkscape::UI::Toolbar::PencilToolbar::create_pencil, "",          N_("Style of new paths created by Pencil")},
+    { "/tools/freehand/pen",    "Pen",          Inkscape::UI::Toolbar::PencilToolbar::create_pen,    "",          N_("Style of new paths created by Pen")},
+    { "/tools/calligraphic",    "Calligraphic", Inkscape::UI::Toolbar::CalligraphyToolbar::create,   "",          N_("Style of new calligraphic strokes")},
+    { "/tools/text",            "Text",         Inkscape::UI::Toolbar::TextToolbar::create,          "",          nullptr},
+    { "/tools/gradient",        "Gradient",     Inkscape::UI::Toolbar::GradientToolbar::create,      "",          nullptr},
+    { "/tools/mesh",            "Mesh",         Inkscape::UI::Toolbar::MeshToolbar::create,          "",          nullptr},
+    { "/tools/zoom",            "Zoom",         Inkscape::UI::Toolbar::ZoomToolbar::create,          "",          nullptr},
+    { "/tools/measure",         "Measure",      Inkscape::UI::Toolbar::MeasureToolbar::create,       "",          nullptr},
+    { "/tools/dropper",         "Dropper",      Inkscape::UI::Toolbar::DropperToolbar::create,       "",          nullptr},
+    { "/tools/tweak",           "Tweak",        Inkscape::UI::Toolbar::TweakToolbar::create,         "",          N_("Color/opacity used for color tweaking")},
+    { "/tools/spray",           "Spray",        Inkscape::UI::Toolbar::SprayToolbar::create,         "",          nullptr},
+    { "/tools/connector",       "Connector",    Inkscape::UI::Toolbar::ConnectorToolbar::create,     "",          nullptr},
+    { "/tools/paintbucket",     "Paintbucket",  Inkscape::UI::Toolbar::PaintbucketToolbar::create,   "",          N_("Style of Paint Bucket fill objects")},
+    { "/tools/eraser",          "Eraser",       Inkscape::UI::Toolbar::EraserToolbar::create,        "",          _("TBD")},
+    { "/tools/lpetool",         "LPETool",      Inkscape::UI::Toolbar::LPEToolbar::create,           "",          _("TBD")},
+    { nullptr,                  "",             nullptr,                                             "",          nullptr }
     // clang-format on
 };
 
@@ -657,11 +665,55 @@ void setup_aux_toolbox(GtkWidget *toolbox, SPDesktop *desktop)
 {
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
 
+    auto builder = Gtk::Builder::create(); // Must remain instantiated until widgets added to top level tree.
+
     // Loop through all the toolboxes and create them using either
     // their "create" methods.
     for (int i = 0 ; aux_toolboxes[i].type_name ; i++ ) {
+
+        GtkWidget *sub_toolbox = nullptr;
         if (aux_toolboxes[i].create_func) {
-            GtkWidget *sub_toolbox = aux_toolboxes[i].create_func(desktop);
+
+            sub_toolbox = aux_toolboxes[i].create_func(desktop);
+
+        } else if (aux_toolboxes[i].ui_filename != "") {
+
+            // For declaring type. (Before reading .ui file.)
+            Inkscape::UI::Toolbar::ArcToolbar();
+            Inkscape::UI::Toolbar::RectToolbar();
+            Inkscape::UI::Widget::SpinButtonAction();
+            Inkscape::UI::Widget::ToolItemMenu();
+            Inkscape::UI::Widget::ComboBoxUnit();
+
+            try
+            {
+                auto file = Inkscape::IO::Resource::get_filename(Inkscape::IO::Resource::UIS, aux_toolboxes[i].ui_filename.c_str());
+                builder->add_from_file(file);
+            }
+            catch (const Glib::Error& err)
+            {
+                std::cerr << "Failed to read builder file: " << err.what() << std::endl;
+                return;
+            }
+
+            if (aux_toolboxes[i].tool_name == "Arc") {
+                Inkscape::UI::Toolbar::ArcToolbar* toolbar = nullptr;
+                builder->get_widget_derived("ToolbarArc", toolbar, desktop);
+                if (toolbar) {
+                    sub_toolbox = GTK_WIDGET(toolbar->gobj());
+                }
+            }
+
+            if (aux_toolboxes[i].tool_name == "Rect") {
+                Inkscape::UI::Toolbar::RectToolbar* toolbar = nullptr;
+                builder->get_widget_derived("ToolbarRect", toolbar, desktop);
+                if (toolbar) {
+                    sub_toolbox = GTK_WIDGET(toolbar->gobj());
+                }
+            }
+        }
+
+        if (sub_toolbox) {
             // center items vertically/horizontally to prevent stretching;
             // all buttons will look uniform across toolbars if their original size is preserved
             if (auto* tb = dynamic_cast<Gtk::Container*>(Glib::wrap(sub_toolbox))) {

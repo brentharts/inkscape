@@ -196,6 +196,18 @@ void SPGenericEllipse::set(SPAttr key, gchar const *value)
 void SPGenericEllipse::update(SPCtx *ctx, guint flags)
 {
     // std::cout << "\nSPGenericEllipse::update: Entrance" << std::endl;
+
+    // "type" must be set here for "undo" operations (it is normally set by
+    // SPFactory::create_object or by SPGenericEllipse::write, both of which are not called during
+    // an undo).
+    auto name = getRepr()->name();
+    type = SP_GENERIC_ELLIPSE_ARC;
+    if (name == "svg::circle") {
+        type = SP_GENERIC_ELLIPSE_CIRCLE;
+    } else if (name == "svg::elipse") {
+        type = SP_GENERIC_ELLIPSE_ELLIPSE;
+    }
+
     if (flags & (SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_STYLE_MODIFIED_FLAG | SP_OBJECT_VIEWPORT_MODIFIED_FLAG)) {
         Geom::Rect const &viewbox = ((SPItemCtx const *) ctx)->viewport;
 
@@ -697,32 +709,6 @@ gdouble SPGenericEllipse::vectorStretch(Geom::Point p0, Geom::Point p1, Geom::Af
     }
 
     return (Geom::distance(p0 * xform, p1 * xform) / Geom::distance(p0, p1));
-}
-
-void SPGenericEllipse::setVisibleRx(gdouble rx) {
-    if (rx == 0) {
-        this->rx.unset();
-    } else {
-        this->rx = rx / SPGenericEllipse::vectorStretch(
-            Geom::Point(this->cx.computed + 1, this->cy.computed),
-            Geom::Point(this->cx.computed, this->cy.computed),
-            this->i2doc_affine());
-    }
-
-    this->updateRepr();
-}
-
-void SPGenericEllipse::setVisibleRy(gdouble ry) {
-    if (ry == 0) {
-        this->ry.unset();
-    } else {
-        this->ry = ry / SPGenericEllipse::vectorStretch(
-            Geom::Point(this->cx.computed, this->cy.computed + 1),
-            Geom::Point(this->cx.computed, this->cy.computed),
-            this->i2doc_affine());
-    }
-
-    this->updateRepr();
 }
 
 gdouble SPGenericEllipse::getVisibleRx() const {

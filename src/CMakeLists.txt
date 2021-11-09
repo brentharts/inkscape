@@ -211,8 +211,8 @@ set(inkscape_SRC
   actions/actions-canvas-snapping.cpp
   actions/actions-canvas-transform.h
   actions/actions-canvas-transform.cpp
-  actions/actions-dialogs.cpp
   actions/actions-dialogs.h
+  actions/actions-dialogs.cpp
   actions/actions-edit-document.h
   actions/actions-edit-document.cpp
   actions/actions-edit-window.h
@@ -221,6 +221,12 @@ set(inkscape_SRC
   actions/actions-edit.cpp
   actions/actions-effect.h
   actions/actions-effect.cpp
+  actions/actions-element-circle.h
+  actions/actions-element-circle.cpp
+  actions/actions-element-ellipse.h
+  actions/actions-element-ellipse.cpp
+  actions/actions-element-rect.h
+  actions/actions-element-rect.cpp
   actions/actions-file-window.h
   actions/actions-file-window.cpp
   actions/actions-file.h
@@ -237,6 +243,8 @@ set(inkscape_SRC
   actions/actions-layer.cpp
   actions/actions-object.h
   actions/actions-object.cpp
+  actions/actions-object-ellipse.h
+  actions/actions-object-ellipse.cpp
   actions/actions-object-align.h
   actions/actions-object-align.cpp
   actions/actions-output.h

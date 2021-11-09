@@ -81,10 +81,7 @@ public:
     void position_set(double x, double y, double rx, double ry);
 
     double getVisibleRx() const;
-    void setVisibleRx(double rx);
-
     double getVisibleRy() const;
-    void setVisibleRy(double ry);
 
 protected:
     /**

@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<interface>
+  <requires lib="gtk+" version="3.22"/>
+
+  <!-- Toolbox Rectangle -->
+
+  <object class="GtkAdjustment" id="AdjustmentRectangleWidth">
+    <property name="lower">0</property>
+    <property name="upper">999999</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
+
+  <object class="GtkAdjustment" id="AdjustmentRectangleHeight">
+    <property name="lower">0</property>
+    <property name="upper">999999</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
+
+  <object class="GtkAdjustment" id="AdjustmentRectangleRx">
+    <property name="lower">0</property>
+    <property name="upper">999999</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">5</property>
+  </object>
+
+  <object class="GtkAdjustment" id="AdjustmentRectangleRy">
+    <property name="lower">0</property>
+    <property name="upper">999999</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">5</property>
+  </object>
+
+  <object class="GtkImage" id="ResetCorners">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <property name="icon-name">rectangle-make-corners-sharp</property>
+  </object>
+
+  <!-- MenuItem"s for ToolItemMenu"s -->
+
+  <object class="GtkMenuItem" id="ToolbarRectangleResetCorners">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <property name="tooltip-text" translatable="yes">Remove rounded corners.</property>
+    <property name="label">Reset Corners</property>
+    <property name="action_name">app.element-rect-reset-corners</property>
+  </object>
+
+  <!--  #########  Toolbar  ######## -->
+
+  <object class="gtkmm__CustomObject_RectToolbar" id="ToolbarRect">
+    <property name="visible">True</property>
+    <!-- <property name="spacing">5</property> -->
+
+    <child>
+      <object class="GtkToolItem">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+         <child>
+          <object class="GtkLabel" id="ToobarRectLabel">
+            <property name="visible">True</property>
+            <!-- Label text set by code -->
+            <property name="label" translatable="true">&lt;b&gt;New:&lt;/b&gt;</property>
+            <property name="use-markup">True</property>
+            <!-- <attributes> -->
+            <!--   <attribute name="weight" value="bold"/> -->
+            <!-- </attributes> -->
+          </object>
+        </child>
+      </object>
+    </child>
+
+    <child>
+      <object class="GtkToolItem">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="label" translatable="true">W:</property>
+          </object>
+        </child>
+      </object>
+    </child>
+
+    <child>
+      <object class='gtkmm__CustomObject_ToolItemMenu' id='ToolbarRectangleMenuWidth'>
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <child>
+          <object class='gtkmm__CustomObject_SpinButtonAction' id='ToolbarRectangleWidth'>
+            <property name="visible">True</property>
+            <property name="tooltip-text" translatable="true">Width of rectangle.</property>
+            <property name="can-focus">True</property>
+            <property name="input-purpose">number</property>
+            <property name="adjustment">AdjustmentRectangleWidth</property>
+            <property name="digits">2</property>
+            <property name="action-name">app.element-rect-visible-width</property>
+            <property name="custom-values">1; 2; 5; 10; 20; 50; 100; 200; 500</property>
+            <property name="defocus-widget">InkscapeCanvas</property>
+            <property name="unit-menu-widget">ToolbarRectangleUnits</property>
+            <property name="menu-label" translatable="true">Width</property>
+          </object>
+        </child>
+      </object>
+    </child>
+
+
+    <child>
+      <object class="GtkToolItem">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="label" translatable="true">H:</property>
+          </object>
+        </child>
+      </object>
+    </child>
+
+    <child>
+      <object class='gtkmm__CustomObject_ToolItemMenu' id='ToolbarRectangleMenuHeight'>
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <child>
+          <object class='gtkmm__CustomObject_SpinButtonAction' id='ToolbarRectangleHeight'>
+            <property name="visible">True</property>
+            <property name="tooltip-text" translatable="true">Height of rectangle.</property>
+            <property name="can-focus">True</property>
+            <property name="input-purpose">number</property>
+            <property name="adjustment">AdjustmentRectangleHeight</property>
+            <property name="digits">2</property>
+            <property name="action-name">app.element-rect-visible-height</property>
+            <property name="custom-values">1; 2; 5; 10; 20; 50; 100; 200; 500</property>
+            <property name="defocus-widget">InkscapeCanvas</property>
+            <property name="unit-menu-widget">ToolbarRectangleUnits</property>
+            <property name="menu-label" translatable="true">Height</property>
+          </object>
+        </child>
+      </object>
+    </child>
+
+
+    <child>
+      <object class="GtkToolItem">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="label" translatable="true">Rx:</property>
+          </object>
+        </child>
+      </object>
+    </child>
+
+    <child>
+      <object class='gtkmm__CustomObject_ToolItemMenu' id='ToolbarRectangleMenuRx'>
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <child>
+          <object class='gtkmm__CustomObject_SpinButtonAction' id='ToolbarRectangleRx'>
+            <property name="visible">True</property>
+            <property name="tooltip-text" translatable="true">Horizontal radius of rounded corners.</property>
+            <property name="can-focus">True</property>
+            <property name="input-purpose">number</property>
+            <property name="adjustment">AdjustmentRectangleRx</property>
+            <property name="digits">2</property>
+            <property name="action-name">app.element-rect-visible-rx</property>
+            <property name="custom-values">1; 2; 5; 10; 20; 50; 100</property>
+            <property name="defocus-widget">InkscapeCanvas</property>
+            <property name="unit-menu-widget">ToolbarRectangleUnits</property>
+            <property name="menu-label" translatable="true">Rx</property>
+          </object>
+        </child>
+      </object>
+    </child>
+
+
+    <child>
+      <object class="GtkToolItem">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="label" translatable="true">Ry:</property>
+          </object>
+        </child>
+      </object>
+    </child>
+
+    <child>
+      <object class='gtkmm__CustomObject_ToolItemMenu' id='ToolbarRectangleMenuRy'>
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <child>
+          <object class='gtkmm__CustomObject_SpinButtonAction' id='ToolbarRectangleRy'>
+            <property name="visible">True</property>
+            <property name="tooltip-text" translatable="true">Vertical radius of rounded corners.</property>
+            <property name="can-focus">True</property>
+            <property name="input-purpose">number</property>
+            <property name="adjustment">AdjustmentRectangleRy</property>
+            <property name="digits">2</property>
+            <property name="action-name">app.element-rect-visible-ry</property>
+            <property name="custom-values">1; 2; 5; 10; 20; 50; 100</property>
+            <property name="defocus-widget">InkscapeCanvas</property>
+            <property name="unit-menu-widget">ToolbarRectangleUnits</property>
+            <property name="menu-label" translatable="true">Ry</property>
+          </object>
+        </child>
+      </object>
+    </child>
+
+    <child>
+      <object class='gtkmm__CustomObject_ToolItemMenu' id='ToolbarRectangleMenuUnits'>
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <child>
+          <object class='gtkmm__CustomObject_ComboBoxUnit' id='ToolbarRectangleUnits'>
+            <property name="name">ToolbarRectangleUnits</property>
+            <property name="visible">True</property>
+            <property name="tooltip-text" translatable="true">Display units.</property>
+            <property name="can-focus">True</property>
+            <property name="unit-type">Linear</property>
+          </object>
+        </child>
+      </object>
+    </child>
+
+    <child>
+      <object class='gtkmm__CustomObject_ToolItemMenu' id='ToolbarRectangleMenuResetCorners'>
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="menuitem-name">ToolbarRectangleResetCorners</property>
+        <child>
+          <object class="GtkButton">
+            <property name="visible">True</property>
+            <property name="action_name">app.element-rect-reset-corners</property>
+            <!-- <property name="label" translatable="true">Reset</property> -->
+            <property name="image">ResetCorners</property>
+          </object>
+        </child>
+      </object>
+    </child>
+
+  </object>
+</interface>

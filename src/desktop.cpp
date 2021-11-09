@@ -130,7 +130,7 @@ SPDesktop::SPDesktop()
     , grids_visible(false)
 {
     _layer_manager = std::make_unique<Inkscape::LayerManager>(this);
-    selection = Inkscape::GC::release(new Inkscape::Selection(this));
+    selection = new Inkscape::Selection(this);
 }
 
 void

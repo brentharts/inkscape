@@ -431,63 +431,36 @@ Geom::Affine SPRect::set_transform(Geom::Affine const& xform) {
 }
 
 
-/**
-Returns the ratio in which the vector from p0 to p1 is stretched by transform
- */
-gdouble SPRect::vectorStretch(Geom::Point p0, Geom::Point p1, Geom::Affine xform) {
-    if (p0 == p1) {
+double SPRect::getVisibleWidth() const {
+    if (!width._set) {
         return 0;
     }
 
-    return (Geom::distance(p0 * xform, p1 * xform) / Geom::distance(p0, p1));
+    return width.computed * i2doc_affine().expansionX();
 }
 
-void SPRect::setVisibleRx(gdouble rx) {
-    if (rx == 0) {
-        this->rx.unset();
-    } else {
-    	this->rx = rx / SPRect::vectorStretch(
-            Geom::Point(this->x.computed + 1, this->y.computed),
-            Geom::Point(this->x.computed, this->y.computed),
-            this->i2doc_affine());
-    }
-
-    this->updateRepr();
-}
-
-void SPRect::setVisibleRy(gdouble ry) {
-    if (ry == 0) {
-    	this->ry.unset();
-    } else {
-    	this->ry = ry / SPRect::vectorStretch(
-            Geom::Point(this->x.computed, this->y.computed + 1),
-            Geom::Point(this->x.computed, this->y.computed),
-            this->i2doc_affine());
-    }
-
-    this->updateRepr();
-}
-
-gdouble SPRect::getVisibleRx() const {
-    if (!this->rx._set) {
+double SPRect::getVisibleHeight() const {
+    if (!height._set) {
         return 0;
     }
 
-    return this->rx.computed * SPRect::vectorStretch(
-        Geom::Point(this->x.computed + 1, this->y.computed),
-        Geom::Point(this->x.computed, this->y.computed),
-        this->i2doc_affine());
+    return height.computed * i2doc_affine().expansionY();
 }
 
-gdouble SPRect::getVisibleRy() const {
-    if (!this->ry._set) {
+double SPRect::getVisibleRx() const {
+    if (!rx._set) {
         return 0;
     }
 
-    return this->ry.computed * SPRect::vectorStretch(
-        Geom::Point(this->x.computed, this->y.computed + 1),
-        Geom::Point(this->x.computed, this->y.computed),
-        this->i2doc_affine());
+    return rx.computed * i2doc_affine().expansionX();
+}
+
+double SPRect::getVisibleRy() const {
+    if (!ry._set) {
+        return 0;
+    }
+
+    return ry.computed * i2doc_affine().expansionY();
 }
 
 Geom::Rect SPRect::getRect() const {
@@ -495,6 +468,21 @@ Geom::Rect SPRect::getRect() const {
     Geom::Point p2 = Geom::Point(this->x.computed + this->width.computed, this->y.computed + this->height.computed);
 
     return Geom::Rect(p0, p2);
+}
+
+/**
+Returns the ratio in which the vector from p0 to p1 is stretched by transform
+ */
+gdouble SPRect::vectorStretch(Geom::Point p0, Geom::Point p1, Geom::Affine xform) {
+    if (p0 == p1) {
+        return 0;
+    }
+    std::cout << "SPRect::vectorStretch: "
+              << xform.expansionX()
+              << ", " << xform.expansionY()
+              << ": " << Geom::distance(p0 * xform, p1 * xform) / Geom::distance(p0, p1)
+              << std::endl;
+    return (Geom::distance(p0 * xform, p1 * xform) / Geom::distance(p0, p1));
 }
 
 void SPRect::compensateRxRy(Geom::Affine xform) {
@@ -532,45 +520,6 @@ void SPRect::compensateRxRy(Geom::Affine xform) {
     // and set_shape will take care of trimming too large radii when generating d=
 }
 
-void SPRect::setVisibleWidth(gdouble width) {
-    this->width = width / SPRect::vectorStretch(
-        Geom::Point(this->x.computed + 1, this->y.computed),
-        Geom::Point(this->x.computed, this->y.computed),
-        this->i2doc_affine());
-
-    this->updateRepr();
-}
-
-void SPRect::setVisibleHeight(gdouble height) {
-    this->height = height / SPRect::vectorStretch(
-        Geom::Point(this->x.computed, this->y.computed + 1),
-        Geom::Point(this->x.computed, this->y.computed),
-        this->i2doc_affine());
-
-	this->updateRepr();
-}
-
-gdouble SPRect::getVisibleWidth() const {
-    if (!this->width._set) {
-        return 0;
-    }
-
-    return this->width.computed * SPRect::vectorStretch(
-        Geom::Point(this->x.computed + 1, this->y.computed),
-        Geom::Point(this->x.computed, this->y.computed),
-        this->i2doc_affine());
-}
-
-gdouble SPRect::getVisibleHeight() const {
-    if (!this->height._set) {
-        return 0;
-    }
-
-    return this->height.computed * SPRect::vectorStretch(
-        Geom::Point(this->x.computed, this->y.computed + 1),
-        Geom::Point(this->x.computed, this->y.computed),
-        this->i2doc_affine());
-}
 
 void SPRect::snappoints(std::vector<Inkscape::SnapCandidatePoint> &p, Inkscape::SnapPreferences const *snapprefs) const {
     /* This method overrides sp_shape_snappoints, which is the default for any shape. The default method

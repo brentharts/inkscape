@@ -175,6 +175,7 @@ set(ui_SRC
 	widget/color-slider.cpp
 	widget/color-wheel-selector.cpp
 	widget/combo-box-entry-tool-item.cpp
+        widget/combobox-unit.cpp
 	widget/combo-tool-item.cpp
 	widget/dash-selector.cpp
 	widget/entity-entry.cpp
@@ -222,12 +223,14 @@ set(ui_SRC
 	widget/spin-button-tool-item.cpp
 	widget/spin-scale.cpp
 	widget/spinbutton.cpp
+        widget/spinbutton-action.cpp
 	widget/stroke-style.cpp
 	widget/style-subject.cpp
 	widget/style-swatch.cpp
 	widget/swatch-selector.cpp
 	widget/text.cpp
 	widget/tolerance-slider.cpp
+        widget/toolitem-menu.cpp
 	widget/unit-menu.cpp
 	widget/unit-tracker.cpp
 
@@ -425,6 +428,7 @@ set(ui_SRC
 	widget/color-wheel-selector.h
 	widget/combo-enums.h
 	widget/combo-box-entry-tool-item.h
+        widget/combobox-unit.h
 	widget/combo-tool-item.h
 	widget/dash-selector.h
 	widget/entity-entry.h
@@ -475,12 +479,14 @@ set(ui_SRC
 	widget/spin-button-tool-item.h
 	widget/spin-scale.h
 	widget/spinbutton.h
+	widget/spinbutton-action.h
 	widget/stroke-style.h
 	widget/style-subject.h
 	widget/style-swatch.h
 	widget/swatch-selector.h
 	widget/text.h
 	widget/tolerance-slider.h
+        widget/toolitem-menu.cpp
 	widget/unit-menu.h
 	widget/unit-tracker.h
 

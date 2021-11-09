@@ -53,8 +53,12 @@
 #include "actions/actions-file.h"                   // Actions
 #include "actions/actions-edit.h"                   // Actions
 #include "actions/actions-effect.h"                 // Actions
+#include "actions/actions-element-circle.h"         // Actions
+#include "actions/actions-element-ellipse.h"        // Actions
+#include "actions/actions-element-rect.h"           // Actions
 #include "actions/actions-object.h"                 // Actions
 #include "actions/actions-object-align.h"           // Actions
+#include "actions/actions-object-ellipse.h"         // Actions
 #include "actions/actions-output.h"                 // Actions
 #include "actions/actions-paths.h"                  // Actions
 #include "actions/actions-selection-object.h"       // Actions
@@ -602,9 +606,13 @@ InkscapeApplication::InkscapeApplication()
     add_actions_base(this);                 // actions that are GUI independent
     add_actions_edit(this);                 // actions for editing
     add_actions_effect(this);               // actions for Filters and Extensions
+    add_actions_element_circle(this);       // actions for manipulating the <circle> element
+    add_actions_element_ellipse(this);      // actions for manipulating the <ellipse> element
+    add_actions_element_rect(this);         // actions for manipulating the <rect> element
     add_actions_file(this);                 // actions for file handling
     add_actions_object(this);               // actions for object manipulation
     add_actions_object_align(this);         // actions for object alignment
+    add_actions_object_ellipse(this);       // actions for manipulating the SPGenericEllipse object
     add_actions_output(this);               // actions for file export
     add_actions_selection(this);            // actions for object selection
     add_actions_path(this);                 // actions for Paths

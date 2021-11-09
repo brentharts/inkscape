@@ -12,6 +12,9 @@
 ../src/actions/actions-edit-window.cpp
 ../src/actions/actions-edit.cpp
 ../src/actions/actions-effect.cpp
+../src/actions/actions-element-circle.cpp
+../src/actions/actions-element-ellipse.cpp
+../src/actions/actions-element-rect.cpp
 ../src/actions/actions-extra-data.cpp
 ../src/actions/actions-file-window.cpp
 ../src/actions/actions-file.cpp
@@ -21,6 +24,7 @@
 ../src/actions/actions-hint-data.cpp
 ../src/actions/actions-layer.cpp
 ../src/actions/actions-object-align.cpp
+../src/actions/actions-object-ellipse.cpp
 ../src/actions/actions-object.cpp
 ../src/actions/actions-output.cpp
 ../src/actions/actions-paths.cpp
@@ -371,6 +375,7 @@
 ../src/ui/widget/color-scales.cpp
 ../src/ui/widget/color-wheel-selector.cpp
 ../src/ui/widget/combo-enums.h
+../src/ui/widget/combobox-unit.cpp
 ../src/ui/widget/dash-selector.cpp
 ../src/ui/widget/entity-entry.cpp
 ../src/ui/widget/fill-style.cpp
