@@ -228,7 +228,7 @@ void SPFont::sort_glyphs() {
     // collect all glyphs (SPGlyph and their representations) 
     for (auto&& node : children) {
         if (auto g = dynamic_cast<SPGlyph*>(&node)) {
-            glyphs.push_back(std::make_pair(g, g->getRepr()));
+            glyphs.emplace_back(g, g->getRepr());
             // keep representation around as it gets removed
             g->getRepr()->anchor();
         }
