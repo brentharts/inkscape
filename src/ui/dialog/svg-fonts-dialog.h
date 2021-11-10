@@ -195,7 +195,10 @@ public:
     OperationBlocker _update;
 
 private:
-    void update_glyphs();
+    void update_glyphs(SPGlyph* changed_glyph = nullptr);
+    void update_glyph(SPGlyph* glyph);
+    void set_glyph_row(const Gtk::TreeRow& row, SPGlyph& glyph);
+    void refresh_svgfont();
     void update_sensitiveness();
     void update_global_settings_tab();
     void populate_glyphs_box();

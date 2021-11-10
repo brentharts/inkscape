@@ -781,6 +781,16 @@ Gtk::Box* SvgFontsDialog::global_settings_tab(){
     return &global_vbox;
 }
 
+void SvgFontsDialog::set_glyph_row(const Gtk::TreeRow& row, SPGlyph& glyph) {
+    auto unicode_name = create_unicode_name(glyph.unicode, 3);
+    row[_GlyphsListColumns.glyph_node] = &glyph;
+    row[_GlyphsListColumns.glyph_name] = glyph.glyph_name;
+    row[_GlyphsListColumns.unicode]    = glyph.unicode;
+    row[_GlyphsListColumns.UplusCode]  = unicode_name;
+    row[_GlyphsListColumns.advance]    = glyph.horiz_adv_x;
+    row[_GlyphsListColumns.name_markup] = "<small>" + Glib::Markup::escape_text(get_glyph_synthetic_name(glyph)) + "</small>";
+}
+
 void
 SvgFontsDialog::populate_glyphs_box()
 {
@@ -803,18 +813,12 @@ SvgFontsDialog::populate_glyphs_box()
             if (SP_IS_GLYPH(&node)) {
                 auto& glyph = static_cast<SPGlyph&>(node);
                 Gtk::TreeModel::Row row = *_GlyphsListStore->append();
-                auto unicode_name = create_unicode_name(glyph.unicode, 3);
-                row[_GlyphsListColumns.glyph_node]  = &glyph;
-                row[_GlyphsListColumns.glyph_name]  = glyph.glyph_name;
-                row[_GlyphsListColumns.unicode]     = glyph.unicode;
-                row[_GlyphsListColumns.UplusCode]   = unicode_name;
-                row[_GlyphsListColumns.advance]     = glyph.horiz_adv_x;
-                row[_GlyphsListColumns.name_markup] = "<small>" + Glib::Markup::escape_text(get_glyph_synthetic_name(glyph)) + "</small>";
+                set_glyph_row(row, glyph);
             }
         }
 
         if (!selected_item.empty()) {
-            if (auto selection =  _GlyphsList.get_selection()) {
+            if (auto selection = _GlyphsList.get_selection()) {
                 selection->select(selected_item);
                 _GlyphsList.scroll_to_row(selected_item);
             }
@@ -845,17 +849,41 @@ SvgFontsDialog::populate_kerning_pairs_box()
     }
 }
 
-void SvgFontsDialog::update_glyphs(){
+// update existing glyph in the tree model
+void SvgFontsDialog::update_glyph(SPGlyph* glyph) {
+    if (_update.pending() || !glyph || !_GlyphsListStore) return;
+
+    _GlyphsListStore->foreach_iter([&](const Gtk::TreeModel::iterator& it) {
+        if (it->get_value(_GlyphsListColumns.glyph_node) == glyph) {
+            const Gtk::TreeRow& row = *it;
+            set_glyph_row(row, *glyph);
+            return true; // stop
+        }
+        return false; // continue
+    });
+}
+
+void SvgFontsDialog::update_glyphs(SPGlyph* changed_glyph) {
     if (_update.pending()) return;
 
     SPFont* font = get_selected_spfont();
     if (!font) return;
 
-    populate_glyphs_box();
+    if (changed_glyph) {
+        update_glyph(changed_glyph);
+    }
+    else {
+        populate_glyphs_box();
+    }
+
     populate_kerning_pairs_box();
-    first_glyph.update(font);
-    second_glyph.update(font);
-    get_selected_svgfont()->refresh();
+    refresh_svgfont();
+}
+
+void SvgFontsDialog::refresh_svgfont() {
+    if (auto font = get_selected_svgfont()) {
+        font->refresh();
+    }
     _font_da.redraw();
 }
 
@@ -942,7 +970,7 @@ void SvgFontsDialog::set_glyph_description_from_selected_path(){
     glyph->setAttribute("d", sp_svg_write_path(flip_coordinate_system(pathv)));
     DocumentUndo::done(getDocument(), SP_VERB_DIALOG_SVG_FONTS, _("Set glyph curves"));
 
-    update_glyphs();
+    update_glyphs(glyph);
 }
 
 void SvgFontsDialog::missing_glyph_description_from_selected_path(){
@@ -976,7 +1004,7 @@ void SvgFontsDialog::missing_glyph_description_from_selected_path(){
         }
     }
 
-    update_glyphs();
+    refresh_svgfont();
 }
 
 void SvgFontsDialog::reset_missing_glyph_description(){
@@ -987,7 +1015,7 @@ void SvgFontsDialog::reset_missing_glyph_description(){
             DocumentUndo::done(getDocument(), SP_VERB_DIALOG_SVG_FONTS, _("Reset missing-glyph"));
         }
     }
-    update_glyphs();
+    refresh_svgfont();
 }
 
 void SvgFontsDialog::glyph_name_edit(const Glib::ustring&, const Glib::ustring& str){
@@ -1002,7 +1030,7 @@ void SvgFontsDialog::glyph_name_edit(const Glib::ustring&, const Glib::ustring& 
     glyph->setAttribute("glyph-name", str);
 
     DocumentUndo::done(getDocument(), SP_VERB_DIALOG_SVG_FONTS, _("Edit glyph name"));
-    update_glyphs();
+    update_glyphs(glyph);
 }
 
 void SvgFontsDialog::glyph_unicode_edit(const Glib::ustring&, const Glib::ustring& str){
@@ -1017,7 +1045,7 @@ void SvgFontsDialog::glyph_unicode_edit(const Glib::ustring&, const Glib::ustrin
     glyph->setAttribute("unicode", str);
 
     DocumentUndo::done(getDocument(), SP_VERB_DIALOG_SVG_FONTS, _("Set glyph unicode"));
-    update_glyphs();
+    update_glyphs(glyph);
 }
 
 void SvgFontsDialog::glyph_advance_edit(const Glib::ustring&, const Glib::ustring& str){
@@ -1036,7 +1064,7 @@ void SvgFontsDialog::glyph_advance_edit(const Glib::ustring&, const Glib::ustrin
         glyph->setAttribute("horiz-adv-x", str);
         DocumentUndo::done(getDocument(), SP_VERB_DIALOG_SVG_FONTS, _("Set glyph advance"));
 
-        update_glyphs();
+        update_glyphs(glyph);
     } else {
         std::cerr << "SvgFontDialog::glyph_advance_edit: Error in input: " << str << std::endl;
     }
@@ -1284,7 +1312,7 @@ Gtk::Box* SvgFontsDialog::glyphs_tab() {
     static_cast<Gtk::CellRendererText*>(_GlyphsList.get_column_cell_renderer(ColAdvance))->signal_edited().connect(
         sigc::mem_fun(*this, &SvgFontsDialog::glyph_advance_edit));
 
-    _glyphs_observer.signal_changed().connect(sigc::mem_fun(*this, &SvgFontsDialog::update_glyphs));
+    _glyphs_observer.signal_changed().connect([=]() { update_glyphs(); });
 
     return &glyphs_vbox;
 }
@@ -1489,6 +1517,15 @@ SvgFontsDialog::SvgFontsDialog()
     tabs->append_page(*global_settings_tab(), _("_Global settings"), true);
     tabs->append_page(*glyphs_tab(), _("_Glyphs"), true);
     tabs->append_page(*kerning_tab(), _("_Kerning"), true);
+    tabs->signal_switch_page().connect([=](Gtk::Widget*, guint page) {
+        if (page == 2) {
+            // update kerning glyph combos
+            if (SPFont* font = get_selected_spfont()) {
+                first_glyph.update(font);
+                second_glyph.update(font);
+            }
+        }
+    });
 
     pack_start(*tabs, true, true, 0);
 
