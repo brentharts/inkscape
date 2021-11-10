@@ -954,8 +954,10 @@ bool ObjectsPanel::toggleVisible(GdkEventButton* event, Gtk::TreeModel::Row row)
         if (event->state & GDK_SHIFT_MASK) {
             // Toggle Visible for layers (hide all other layers)
             if (auto desktop = getDesktop()) {
-                desktop->layerManager().toggleLayerSolo(item);
-                DocumentUndo::done(desktop->getDocument(), SP_VERB_LAYER_SOLO, _("Toggle layer solo"));
+                if (desktop->layerManager().isLayer(item)) {
+                    desktop->layerManager().toggleLayerSolo(item);
+                    DocumentUndo::done(desktop->getDocument(), SP_VERB_LAYER_SOLO, _("Toggle layer solo"));
+                }
             }
         } else {
             item->setHidden(!row[_model->_colInvisible]);
@@ -975,8 +977,10 @@ bool ObjectsPanel::toggleLocked(GdkEventButton* event, Gtk::TreeModel::Row row)
         if (event->state & GDK_SHIFT_MASK) {
             // Toggle lock for layers (lock all other layers)
             if (auto desktop = getDesktop()) {
-                desktop->layerManager().toggleLockOtherLayers(item);
-                DocumentUndo::done(desktop->getDocument(), SP_VERB_LAYER_LOCK_OTHERS, _("Lock other layers"));
+                if (desktop->layerManager().isLayer(item)) {
+                    desktop->layerManager().toggleLockOtherLayers(item);
+                    DocumentUndo::done(desktop->getDocument(), SP_VERB_LAYER_LOCK_OTHERS, _("Lock other layers"));
+                }
             }
         } else {
             item->setLocked(!row[_model->_colLocked]);
