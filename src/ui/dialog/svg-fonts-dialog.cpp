@@ -348,6 +348,18 @@ Glib::ustring get_glyph_synthetic_name(const SPGlyph& glyph) {
     return unicode_name + " " + glyph.unicode;
 }
 
+// full name consists of user-defined name combined with synthetic one
+Glib::ustring get_glyph_full_name(const SPGlyph& glyph) {
+    auto name = get_glyph_synthetic_name(glyph);
+    if (!glyph.glyph_name.empty()) {
+        // unicode name first, followed by user name - for sorting layers
+        return name + " " + glyph.glyph_name;
+    }
+    else {
+        return name;
+    }
+}
+
 // look for a layer by its label; looking only in direct sublayers of  'root_layer'
 SPItem* find_layer(SPDesktop* desktop, SPObject* root_layer, const Glib::ustring& name) {
     if (!desktop) return nullptr;
@@ -434,13 +446,6 @@ void SvgFontsDialog::create_glyphs_popup_menu(Gtk::Widget& parent, sigc::slot<vo
     mi = Gtk::make_managed<Gtk::SeparatorMenuItem>();
     mi->show();
     _GlyphsContextMenu.append(*mi);
-
-    // mi = Gtk::make_managed<Gtk::MenuItem>(_("_Create layer for glyph"), true);
-    // mi->show();
-    // mi->signal_activate().connect([=](){
-    //     create_layer_for_glyph(get_selected_glyph());
-    // });
-    // _GlyphsContextMenu.append(*mi);
 
     mi = Gtk::make_managed<Gtk::MenuItem>(_("_Sort glyphs"), true);
     mi->show();
@@ -851,7 +856,7 @@ SvgFontsDialog::populate_kerning_pairs_box()
 
 // update existing glyph in the tree model
 void SvgFontsDialog::update_glyph(SPGlyph* glyph) {
-    if (_update.pending() || !glyph || !_GlyphsListStore) return;
+    if (_update.pending() || !glyph) return;
 
     _GlyphsListStore->foreach_iter([&](const Gtk::TreeModel::iterator& it) {
         if (it->get_value(_GlyphsListColumns.glyph_node) == glyph) {
@@ -1022,9 +1027,7 @@ void SvgFontsDialog::glyph_name_edit(const Glib::ustring&, const Glib::ustring& 
     SPGlyph* glyph = get_selected_glyph();
     if (!glyph) return;
 
-    if (auto name = glyph->getAttribute("glyph-name")) {
-        if (str == name) return; // no change
-    }
+    if (glyph->glyph_name == str) return; // no change
 
     //XML Tree being directly used here while it shouldn't be.
     glyph->setAttribute("glyph-name", str);
@@ -1037,9 +1040,7 @@ void SvgFontsDialog::glyph_unicode_edit(const Glib::ustring&, const Glib::ustrin
     SPGlyph* glyph = get_selected_glyph();
     if (!glyph) return;
 
-    if (auto val = glyph->getAttribute("unicode")) {
-        if (str == val) return; // no change
-    }
+    if (glyph->unicode == str) return; // no change
 
     //XML Tree being directly used here while it shouldn't be.
     glyph->setAttribute("unicode", str);
@@ -1112,8 +1113,8 @@ void SvgFontsDialog::edit_glyph(SPGlyph* glyph) {
     auto document = getDocument();
     if (!document) return;
 
-    // glyph's synthetic name to match layer name
-    auto name = get_glyph_synthetic_name(*glyph);
+    // glyph's full name to match layer name
+    auto name = get_glyph_full_name(*glyph);
     if (name.empty()) return;
     // font's name to match parent layer name
     auto font_label = glyph->parent->label();
@@ -1170,7 +1171,6 @@ Gtk::Box* SvgFontsDialog::glyphs_tab() {
 
     _GlyphsListScroller.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_ALWAYS);
     _GlyphsListScroller.add(_GlyphsList);
-    _GlyphsListStore = Gtk::ListStore::create(_GlyphsListColumns);
     _GlyphsList.set_model(_GlyphsListStore);
     _GlyphsList.set_enable_search(false);
 
@@ -1388,7 +1388,6 @@ Gtk::Box* SvgFontsDialog::kerning_tab(){
     kerning_vbox.pack_start(_KerningPairsListScroller, true,true);
     _KerningPairsListScroller.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_ALWAYS);
     _KerningPairsListScroller.add(_KerningPairsList);
-    _KerningPairsListStore = Gtk::ListStore::create(_KerningPairsListColumns);
     _KerningPairsList.set_model(_KerningPairsListStore);
     _KerningPairsList.append_column(_("First glyph"), _KerningPairsListColumns.first_glyph);
     _KerningPairsList.append_column(_("Second glyph"), _KerningPairsListColumns.second_glyph);
@@ -1489,8 +1488,12 @@ SvgFontsDialog::SvgFontsDialog()
  , kerning_vbox(Gtk::ORIENTATION_VERTICAL)
 {
     kerning_slider = Gtk::manage(new Gtk::Scale(Gtk::ORIENTATION_HORIZONTAL));
-    _add.signal_clicked().connect(sigc::mem_fun(*this, &SvgFontsDialog::add_font));
-    _remove.signal_clicked().connect([=](){ remove_selected_font(); });
+
+    // kerning pairs store
+    _KerningPairsListStore = Gtk::ListStore::create(_KerningPairsListColumns);
+
+    // list of glyphs in a current font; this store is reused if there are multiple fonts
+    _GlyphsListStore = Gtk::ListStore::create(_GlyphsListColumns);
 
     // List of SVGFonts declared in a document:
     _model = Gtk::ListStore::create(_columns);
@@ -1510,6 +1513,9 @@ SvgFontsDialog::SvgFontsDialog()
             }
         });
     }
+
+    _add.signal_clicked().connect(sigc::mem_fun(*this, &SvgFontsDialog::add_font));
+    _remove.signal_clicked().connect([=](){ remove_selected_font(); });
 
     Gtk::Notebook *tabs = Gtk::manage(new Gtk::Notebook());
     tabs->set_scrollable();
