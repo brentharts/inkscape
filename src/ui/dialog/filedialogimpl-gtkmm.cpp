@@ -388,7 +388,7 @@ bool FileOpenDialogImplGtk::show()
         // This is a hack, to avoid the warning messages that
         // Gtk::FileChooser::get_filter() returns
         // should be:  Gtk::FileFilter *filter = get_filter();
-        GtkFileChooser *gtkFileChooser = Gtk::FileChooser::gobj();
+        GtkFileChooserNative *gtkFileChooser = Gtk::FileChooserNative::gobj();
         GtkFileFilter *filter = gtk_file_chooser_get_filter(gtkFileChooser);
         if (filter) {
             // Get which extension was chosen, if any
