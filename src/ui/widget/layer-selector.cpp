@@ -218,6 +218,10 @@ private:
  */
 void LayerSelector::_selectLayer(SPObject *layer)
 {
+    // temporary: don't slow down UI if this element has been turned off and is not visible
+    // (minor side effect: it'll be out of sync when re-enabled)
+    if (!get_visible()) return;
+
     _selection_changed_connection.block();
     _visibility_toggled_connection.block();
     _lock_toggled_connection.block();
