@@ -763,7 +763,7 @@ ObjectsPanel::ObjectsPanel() :
     _color_picker.connectChanged([=](guint rgba) {
         if (auto item = getItem(_clicked_item_row)) {
             item->setHighlight(rgba);
-            DocumentUndo::done(getDocument(), SP_VERB_DIALOG_ITEM, _("Set item highlight color"));
+            DocumentUndo::maybeDone(getDocument(), "highligh-color", SP_VERB_DIALOG_ITEM, _("Set item highlight color"));
         }
     });
 
