@@ -380,6 +380,29 @@ SPItem* find_layer(SPDesktop* desktop, SPObject* root_layer, const Glib::ustring
     return nullptr; // not found
 }
 
+coid rename_glyph_layer(SPDesktop* desktop, SPItem* layer, const Glib::ustring& font, const Glib::ustring& name) {
+    if (!desktop || !layer || font.empty() || name.empty()) return;
+
+    auto parent_layer = find_layer(desktop, desktop->layerManager().currentRoot(), font);
+    if (!parent_layer) return;
+ 
+    desktop->layerManager().renameLayer(layer, name.c_str(), false);
+
+    // after renaming the layer find new place to move it into to keep sorted order
+    auto behind = 0;
+
+    parent_layer->reorder(layer, behind);
+}
+
+SPItem* get_layer_for_glyph(SPDesktop* desktop, const Glib::ustring& font, const Glib::ustring& name) {
+    if (!desktop || name.empty() || font.empty()) return nullptr;
+
+    auto parent_layer = find_layer(desktop, desktop->layerManager().currentRoot(), font);
+    if (!parent_layer) return nullptr;
+
+    return find_layer(desktop, parent_layer, name);
+}
+
 SPItem* get_or_create_layer_for_glyph(SPDesktop* desktop, const Glib::ustring& font, const Glib::ustring& name) {
     if (!desktop || name.empty() || font.empty()) return nullptr;
 
@@ -397,7 +420,7 @@ SPItem* get_or_create_layer_for_glyph(SPDesktop* desktop, const Glib::ustring& f
         return layer;
     }
 
-    // find a right place for a new layer, so they appear sorted
+    // find the right place for a new layer, so they appear sorted
     auto& glyph_layers = parent_layer->children;
     auto it = std::lower_bound(glyph_layers.rbegin(), glyph_layers.rend(), name, [&](auto&& layer, const Glib::ustring n) {
         auto label = layer.label();
@@ -1021,6 +1044,22 @@ void SvgFontsDialog::reset_missing_glyph_description(){
         }
     }
     refresh_svgfont();
+}
+
+void change_glyph_attribute(SPDesktop* desktop, SPGlyph& glyph, std::function<void ()> change) {
+    assert(glyph.parent);
+
+    auto name = get_glyph_full_name(glyph);
+    auto font_label = glyph.parent->label();
+    auto layer = get_layer_for_glyph(desktop, font_label, name);
+
+    change();
+
+    if (!layer) return;
+
+    name = get_glyph_full_name(glyph);
+    font_label = glyph.parent->label();
+    rename_glyph_layer(desktop, layer, font_label, name);
 }
 
 void SvgFontsDialog::glyph_name_edit(const Glib::ustring&, const Glib::ustring& str){
