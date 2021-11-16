@@ -13,6 +13,7 @@
 #include <cerrno>  // History file
 #include <regex>
 #include <numeric>
+#include <unistd.h>
 
 #include <glibmm/i18n.h>  // Internationalization
 
@@ -562,14 +563,15 @@ InkscapeApplication::InkscapeApplication()
 {
     using T = Gio::Application;
 
-    auto app_id = "org.inkscape.Inkscape";
+    auto app_id = std::string("org.inkscape.Inkscape");
     auto flags = Gio::APPLICATION_HANDLES_OPEN; // Use default file opening.
 
     if (gtk_init_check(nullptr, nullptr)) {
-        g_set_prgname(app_id);
-        _gio_application = Gtk::Application::create(app_id, flags);
+        g_set_prgname(app_id.c_str());
+        _gio_application = Gtk::Application::create(app_id.c_str(), flags);
     } else {
-        _gio_application = Gio::Application::create(app_id, flags);
+        app_id += "." + std::to_string(getpid());
+        _gio_application = Gio::Application::create(app_id.c_str(), flags);
         _with_gui = false;
     }
 
@@ -739,11 +741,10 @@ InkscapeApplication::InkscapeApplication()
 
     // Export application action group to built in DBus connection. Must be done after registering app.
     auto connection = _gio_application->get_dbus_connection();
-    Glib::ustring path = _gio_application->get_dbus_object_path();
     if (connection) {
         connection->export_action_group("/org/inkscape/application_action_group", _gio_application);
     } else {
-        std::cerr << "InkscapeApplication::InkscapeApplication(): Did not get DBus connection: " << path << std::endl;
+        std::cerr << "InkscapeApplication::InkscapeApplication(): Did not get DBus connection!" << std::endl;
     }
 
 }
