@@ -741,10 +741,11 @@ InkscapeApplication::InkscapeApplication()
 
     // Export application action group to built in DBus connection. Must be done after registering app.
     auto connection = _gio_application->get_dbus_connection();
+    Glib::ustring path = _gio_application->get_dbus_object_path();
     if (connection) {
         connection->export_action_group("/org/inkscape/application_action_group", _gio_application);
     } else {
-        std::cerr << "InkscapeApplication::InkscapeApplication(): Did not get DBus connection!" << std::endl;
+        std::cerr << "InkscapeApplication::InkscapeApplication(): Did not get DBus connection: " << path << std::endl;
     }
 
 }
