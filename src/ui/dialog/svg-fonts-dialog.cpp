@@ -411,7 +411,6 @@ void rename_glyph_layer(SPDesktop* desktop, SPItem* layer, const Glib::ustring& 
     });
     SPObject* after = nullptr;
     if (it != glyph_layers.rend()) {
-        g_warning("place: %s", (*it)->label());
         after = *it;
     }
 
