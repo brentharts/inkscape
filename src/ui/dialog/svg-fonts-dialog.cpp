@@ -380,18 +380,47 @@ SPItem* find_layer(SPDesktop* desktop, SPObject* root_layer, const Glib::ustring
     return nullptr; // not found
 }
 
-coid rename_glyph_layer(SPDesktop* desktop, SPItem* layer, const Glib::ustring& font, const Glib::ustring& name) {
+std::vector<SPGroup*> get_direct_sublayers(SPObject* layer) {
+    std::vector<SPGroup*> layers;
+    if (!layer) return layers;
+
+    for (auto&& item : layer->children) {
+        if (auto l = LayerManager::asLayer(&item)) {
+            layers.push_back(l);
+        }
+    }
+
+    return layers;
+}
+
+void rename_glyph_layer(SPDesktop* desktop, SPItem* layer, const Glib::ustring& font, const Glib::ustring& name) {
     if (!desktop || !layer || font.empty() || name.empty()) return;
 
     auto parent_layer = find_layer(desktop, desktop->layerManager().currentRoot(), font);
     if (!parent_layer) return;
- 
+
+    // before renaming the layer find new place to move it into to keep sorted order intact
+    auto glyph_layers = get_direct_sublayers(parent_layer);
+
+    auto it = std::lower_bound(glyph_layers.rbegin(), glyph_layers.rend(), name, [&](auto&& layer, const Glib::ustring n) {
+        auto label = layer->label();
+        if (!label) return false;
+
+        Glib::ustring temp(label);
+        return std::lexicographical_compare(temp.begin(), temp.end(), n.begin(), n.end());
+    });
+    SPObject* after = nullptr;
+    if (it != glyph_layers.rend()) {
+        g_warning("place: %s", (*it)->label());
+        after = *it;
+    }
+
+    // SPItem changeOrder messes up inserting into first position, so dropping to Node level
+    if (layer != after && parent_layer->getRepr() && layer->getRepr()) {
+        parent_layer->getRepr()->changeOrder(layer->getRepr(), after ? after->getRepr() : nullptr);
+    }
+
     desktop->layerManager().renameLayer(layer, name.c_str(), false);
-
-    // after renaming the layer find new place to move it into to keep sorted order
-    auto behind = 0;
-
-    parent_layer->reorder(layer, behind);
 }
 
 SPItem* get_layer_for_glyph(SPDesktop* desktop, const Glib::ustring& font, const Glib::ustring& name) {
@@ -421,10 +450,11 @@ SPItem* get_or_create_layer_for_glyph(SPDesktop* desktop, const Glib::ustring& f
     }
 
     // find the right place for a new layer, so they appear sorted
-    auto& glyph_layers = parent_layer->children;
+    auto glyph_layers = get_direct_sublayers(parent_layer);
+    // auto& glyph_layers = parent_layer->children;
     auto it = std::lower_bound(glyph_layers.rbegin(), glyph_layers.rend(), name, [&](auto&& layer, const Glib::ustring n) {
-        auto label = layer.label();
-        if (!layers.isLayer(&layer) || !label) return false;
+        auto label = layer->label();
+        if (!label) return false;
 
         Glib::ustring temp(label);
         return std::lexicographical_compare(temp.begin(), temp.end(), n.begin(), n.end());
@@ -432,14 +462,14 @@ SPItem* get_or_create_layer_for_glyph(SPDesktop* desktop, const Glib::ustring& f
     SPObject* insert = parent_layer;
     Inkscape::LayerRelativePosition pos = Inkscape::LayerRelativePosition::LPOS_ABOVE;
     if (it != glyph_layers.rend()) {
-        insert = &*it;
+        insert = *it;
     }
     else {
-        auto first = std::find_if(glyph_layers.begin(), glyph_layers.end(), [&](auto&& obj) {
-            return layers.isLayer(&obj);
-        });
-        if (first != glyph_layers.end()) {
-            insert = &*first;
+        // auto first = std::find_if(glyph_layers.begin(), glyph_layers.end(), [&](auto&& obj) {
+            // return layers.isLayer(&obj);
+        // });
+        if (!glyph_layers.empty()) {
+            insert = glyph_layers.front();
             pos = Inkscape::LayerRelativePosition::LPOS_BELOW;
         }
     }
@@ -1068,11 +1098,13 @@ void SvgFontsDialog::glyph_name_edit(const Glib::ustring&, const Glib::ustring& 
 
     if (glyph->glyph_name == str) return; // no change
 
-    //XML Tree being directly used here while it shouldn't be.
-    glyph->setAttribute("glyph-name", str);
+    change_glyph_attribute(getDesktop(), *glyph, [=](){
+        //XML Tree being directly used here while it shouldn't be.
+        glyph->setAttribute("glyph-name", str);
 
-    DocumentUndo::done(getDocument(), SP_VERB_DIALOG_SVG_FONTS, _("Edit glyph name"));
-    update_glyphs(glyph);
+        DocumentUndo::done(getDocument(), SP_VERB_DIALOG_SVG_FONTS, _("Edit glyph name"));
+        update_glyphs(glyph);
+    });
 }
 
 void SvgFontsDialog::glyph_unicode_edit(const Glib::ustring&, const Glib::ustring& str){
@@ -1081,11 +1113,13 @@ void SvgFontsDialog::glyph_unicode_edit(const Glib::ustring&, const Glib::ustrin
 
     if (glyph->unicode == str) return; // no change
 
-    //XML Tree being directly used here while it shouldn't be.
-    glyph->setAttribute("unicode", str);
+    change_glyph_attribute(getDesktop(), *glyph, [=]() {
+        // XML Tree being directly used here while it shouldn't be.
+        glyph->setAttribute("unicode", str);
 
-    DocumentUndo::done(getDocument(), SP_VERB_DIALOG_SVG_FONTS, _("Set glyph unicode"));
-    update_glyphs(glyph);
+        DocumentUndo::done(getDocument(), SP_VERB_DIALOG_SVG_FONTS, _("Set glyph unicode"));
+        update_glyphs(glyph);
+    });
 }
 
 void SvgFontsDialog::glyph_advance_edit(const Glib::ustring&, const Glib::ustring& str){
@@ -1165,9 +1199,9 @@ void SvgFontsDialog::edit_glyph(SPGlyph* glyph) {
     auto& layers = desktop->layerManager();
     // set layer as "solo" - only one visible and unlocked
     if (layers.isLayer(layer) && layer != layers.currentRoot()) {
+        layers.setCurrentLayer(layer, true);
         layers.toggleLayerSolo(layer, true);
         layers.toggleLockOtherLayers(layer, true);
-        layers.setCurrentLayer(layer, true);
         DocumentUndo::done(document, SP_VERB_LAYER_SOLO, _("Toggle layer solo"));
     }
 }
