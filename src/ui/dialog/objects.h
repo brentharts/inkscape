@@ -22,6 +22,7 @@
 #include "xml/node-observer.h"
 
 #include "ui/dialog/dialog-base.h"
+#include "ui/widget/color-picker.h"
 
 #include "selection.h"
 #include "color-rgba.h"
@@ -31,7 +32,7 @@ using Inkscape::XML::Node;
 
 class SPObject;
 class SPGroup;
-struct SPColorSelector;
+// struct SPColorSelector;
 
 namespace Inkscape {
 namespace UI {
@@ -86,9 +87,10 @@ protected:
     Glib::RefPtr<Gtk::TreeStore> _store;
     ModelColumns* _model;
 
-private:
     void setRootWatcher();
+private:
 
+    Inkscape::PrefObserver _watch_object_mode;
     ObjectWatcher* root_watcher;
     SPItem *current_item = nullptr;
 
@@ -117,6 +119,8 @@ private:
     Gtk::Box _page;
     Gtk::ToggleButton _object_mode;
     Inkscape::auto_connection _tree_style;
+    Inkscape::UI::Widget::ColorPicker _color_picker;
+    Gtk::TreeRow _clicked_item_row;
 
     ObjectsPanel(ObjectsPanel const &) = delete; // no copy
     ObjectsPanel &operator=(ObjectsPanel const &) = delete; // no assign

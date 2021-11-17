@@ -604,6 +604,7 @@ public:
         Glib::ObjectBase(typeid(CellRenderer)),
         Gtk::CellRenderer(),
         _property_color(*this, "tagcolor", 0) {
+        property_mode() = Gtk::CELL_RENDERER_MODE_ACTIVATABLE;
 
         int dummy_width;
         // height size is not critical
@@ -620,6 +621,11 @@ public:
         return _width;
     }
 
+    sigc::signal<void, const Glib::ustring&> signal_clicked() {
+        return _signal_clicked;
+    }
+
+private:
     void render_vfunc(const Cairo::RefPtr<Cairo::Context>& cr, 
                       Gtk::Widget& widget,
                       const Gdk::Rectangle& background_area,
@@ -640,10 +646,17 @@ public:
         nat_h = _height;
     }
 
-private:
+    bool activate_vfunc(GdkEvent* event, Gtk::Widget& /*widget*/, const Glib::ustring& path,
+            const Gdk::Rectangle& /*background_area*/, const Gdk::Rectangle& /*cell_area*/,
+            Gtk::CellRendererState /*flags*/) override {
+        _signal_clicked.emit(path);
+        return false;
+    }
+
     int _width = 8;
     int _height;
     Glib::Property<unsigned int> _property_color;
+    sigc::signal<void, const Glib::ustring&> _signal_clicked;
 };
 
 /**
@@ -655,13 +668,16 @@ ObjectsPanel::ObjectsPanel() :
     _model(nullptr),
     _layer(nullptr),
     _is_editing(false),
-    _page(Gtk::ORIENTATION_VERTICAL)
+    _page(Gtk::ORIENTATION_VERTICAL),
+    _color_picker(_("Highlight color"), "", 0, true)
 {
     //Create the tree model and store
     ModelColumns *zoop = new ModelColumns();
     _model = zoop;
 
     _store = Gtk::TreeStore::create( *zoop );
+
+    _color_picker.hide();
 
     //Set up the tree
     _tree.set_model( _store );
@@ -734,6 +750,22 @@ ObjectsPanel::ObjectsPanel() :
         tag->add_attribute(tag_renderer->property_color(), _model->_colIconColor);
         tag->set_fixed_width(tag_renderer->get_width());
     }
+    tag_renderer->signal_clicked().connect([=](const Glib::ustring& path) {
+        // object's color indicator clicked - open color picker
+        _clicked_item_row = *_store->get_iter(path);
+        if (auto item = getItem(_clicked_item_row)) {
+            // find object's color
+            _color_picker.setRgba32(item->highlight_color());
+            _color_picker.open();
+        }
+    });
+
+    _color_picker.connectChanged([=](guint rgba) {
+        if (auto item = getItem(_clicked_item_row)) {
+            item->setHighlight(rgba);
+            DocumentUndo::maybeDone(getDocument(), "highligh-color", SP_VERB_DIALOG_ITEM, _("Set item highlight color"));
+        }
+    });
 
     //Set the expander and search columns
     _tree.set_expander_column(*_name_column);
@@ -818,6 +850,8 @@ ObjectsPanel::ObjectsPanel() :
             }
         }
     });
+    // Clear and update entire tree (do not use this in changed/modified signals)
+    _watch_object_mode = prefs->createObserver("/dialogs/objects/layers_only", [=]() { setRootWatcher(); });
 
     update();
     show_all_children();
@@ -843,8 +877,6 @@ void ObjectsPanel::_objects_toggle()
 {
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     prefs->setBool("/dialogs/objects/layers_only", _object_mode.get_active());
-    // Clear and update entire tree (do not use this in changed/modified signals)
-    setRootWatcher();
 }
 
 void ObjectsPanel::desktopReplaced()
@@ -954,8 +986,10 @@ bool ObjectsPanel::toggleVisible(GdkEventButton* event, Gtk::TreeModel::Row row)
         if (event->state & GDK_SHIFT_MASK) {
             // Toggle Visible for layers (hide all other layers)
             if (auto desktop = getDesktop()) {
-                desktop->layerManager().toggleLayerSolo(item);
-                DocumentUndo::done(desktop->getDocument(), SP_VERB_LAYER_SOLO, _("Toggle layer solo"));
+                if (desktop->layerManager().isLayer(item)) {
+                    desktop->layerManager().toggleLayerSolo(item);
+                    DocumentUndo::done(desktop->getDocument(), SP_VERB_LAYER_SOLO, _("Toggle layer solo"));
+                }
             }
         } else {
             item->setHidden(!row[_model->_colInvisible]);
@@ -975,8 +1009,10 @@ bool ObjectsPanel::toggleLocked(GdkEventButton* event, Gtk::TreeModel::Row row)
         if (event->state & GDK_SHIFT_MASK) {
             // Toggle lock for layers (lock all other layers)
             if (auto desktop = getDesktop()) {
-                desktop->layerManager().toggleLockOtherLayers(item);
-                DocumentUndo::done(desktop->getDocument(), SP_VERB_LAYER_LOCK_OTHERS, _("Lock other layers"));
+                if (desktop->layerManager().isLayer(item)) {
+                    desktop->layerManager().toggleLockOtherLayers(item);
+                    DocumentUndo::done(desktop->getDocument(), SP_VERB_LAYER_LOCK_OTHERS, _("Lock other layers"));
+                }
             }
         } else {
             item->setLocked(!row[_model->_colLocked]);

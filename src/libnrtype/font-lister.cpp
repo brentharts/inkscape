@@ -367,8 +367,7 @@ void FontLister::update_font_list(SPDocument *document)
 
     }
 
-	int start_row = (row_is_system) ? font_data.size() : 0;
-	font_family_row_update(start_row);
+	font_family_row_update(row_is_system ? font_data.size() : 0);
     // std::cout << "  Out: row: " << current_family_row << "  " << current_family << std::endl;
 
     font_list_store->thaw_notify();
@@ -578,7 +577,7 @@ std::pair<Glib::ustring, Glib::ustring> FontLister::selection_update()
     }
 
 	// Need to update font family row too
-	font_family_row_update(0);
+	font_family_row_update();
 
     std::pair<Glib::ustring, Glib::ustring> ui = ui_from_fontspec(fontspec);
     set_font_family(ui.first);
