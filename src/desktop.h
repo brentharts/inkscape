@@ -69,6 +69,7 @@ struct InkscapeApplication;
 
 namespace Inkscape {
     class LayerManager;
+    class PageManager;
     class MessageContext;
     class Selection;
 
@@ -142,7 +143,6 @@ public:
     /// current selection; will never generally be NULL
     Inkscape::Selection       *selection;
     Inkscape::UI::Tools::ToolBase            *event_context;
-    Inkscape::LayerManager    *layer_manager;
     DocumentInterface *dbus_document_interface;
     Inkscape::Display::TemporaryItemList *temporary_item_list;
     Inkscape::Display::SnapIndicator *snapindicator;

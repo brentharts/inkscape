@@ -39,7 +39,6 @@
 #include "layer-manager.h"
 #include "message-context.h"
 #include "message-stack.h"
-#include "page-manager.h"
 
 #include "display/drawing.h"
 #include "display/control/canvas-temporary-item-list.h"
@@ -106,7 +105,6 @@ SPDesktop::SPDesktop()
     , canvas(nullptr)
     , selection(nullptr)
     , event_context(nullptr)
-    , page_manager(nullptr)
     , temporary_item_list(nullptr)
     , snapindicator(nullptr)
     , current(nullptr)  // current style
@@ -271,9 +269,6 @@ SPDesktop::init (SPNamedView *nv, Inkscape::UI::Widget::Canvas *acanvas, SPDeskt
         document->connectReconstructionFinish(sigc::bind(sigc::ptr_fun(_reconstruction_finish), this));
     _reconstruction_old_layer_id.clear();
 
-    // TODO: Remove me (see layer-manager)
-    page_manager = new Inkscape::PageManager(this);
-
     showGrids(namedview->grids_visible, false);
 }
 
@@ -309,11 +304,6 @@ void SPDesktop::destroy()
     if (zoomgesture) {
         g_signal_handlers_disconnect_by_data(zoomgesture, this);
         g_clear_object(&zoomgesture);
-    }
-
-    if (page_manager) {
-        delete page_manager;
-        page_manager = nullptr;
     }
 
     if (canvas_drawing) {
@@ -1491,18 +1481,6 @@ void
 SPDesktop::onDocumentFilenameSet (gchar const* filename)
 {
     _widget->updateTitle(filename);
-}
-
-/**
- * Resized callback.
- */
-void
-SPDesktop::onViewBoxResized (gdouble width, gdouble height)
-{
-    assert(canvas->get_affine() == _current_affine.d2w());
-
-    Geom::Rect const a(Geom::Point(0, 0), Geom::Point(width, height));
-    canvas_viewbox->set_rect(a);
 }
 
 /**

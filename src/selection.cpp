@@ -31,6 +31,7 @@
 #include "ui/tool/path-manipulator.h"
 #include "ui/tool/control-point-selection.h"
 #include "layer-manager.h"
+#include "page-manager.h"
 #include "object/sp-path.h"
 #include "object/sp-defs.h"
 #include "object/sp-shape.h"
