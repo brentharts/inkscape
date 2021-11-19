@@ -1353,8 +1353,6 @@ SPDesktopWidget::SPDesktopWidget(SPDocument *document)
 
     // We never want a page widget if there's no desktop.
     _page_selector = Gtk::manage(new Inkscape::UI::Widget::PageSelector(desktop));
-    _page_selector->show_all();
-    _page_selector->set_no_show_all();
     _statusbar->pack_end(*_page_selector, false, false);
 
     dtw->layoutWidgets();

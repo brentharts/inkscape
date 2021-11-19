@@ -158,7 +158,9 @@ void PageToolbar::sizeChanged()
 {
     // Parse the size out of the typed text if possible.
     auto text = std::string(combo_page_sizes->get_active_text());
+    // This does not support negative values, because pages can not be negatively sized.
     static std::string arg = "([\\d,\\.]+)(px|mm|cm|in|\\\")?";
+    // We can't support × here since it's UTF8 and this doesn't match
     static std::regex re_size("^ *" + arg + " ?([Xx,\\-]) ?" + arg + " *$");
 
     std::smatch matches;

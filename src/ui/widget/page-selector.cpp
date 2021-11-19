@@ -61,6 +61,8 @@ PageSelector::PageSelector(SPDesktop *desktop)
     _doc_replaced_connection =
         _desktop->connectDocumentReplaced(sigc::hide<0>(sigc::mem_fun(*this, &PageSelector::setDocument)));
 
+    this->show_all();
+    this->set_no_show_all();
     setDocument(desktop->getDocument());
 }
 
@@ -98,6 +100,9 @@ void PageSelector::pagesChanged()
         // Put cleanup here if any
         _page_model->erase(row);
     }
+
+    // Hide myself when there's no pages (single page document)
+    this->set_visible(_page_manager->hasPages());
 
     // Add in pages, do not use getResourcelist("page") because the items
     // are not guarenteed to be in node order, they are in first-seen order.
