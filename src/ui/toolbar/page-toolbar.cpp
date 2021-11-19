@@ -15,6 +15,7 @@
 
 #include <glibmm/i18n.h>
 #include <gtkmm.h>
+#include <regex>
 
 #include "desktop.h"
 #include "document-undo.h"
@@ -24,6 +25,7 @@
 #include "object/sp-page.h"
 #include "ui/tools/pages-tool.h"
 #include "util/paper.h"
+#include "util/units.h"
 
 using Inkscape::IO::Resource::UIS;
 
@@ -42,6 +44,9 @@ PageToolbar::PageToolbar(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
     builder->get_widget("page_pos", label_page_pos);
     builder->get_widget("page_backward", btn_page_backward);
     builder->get_widget("page_foreward", btn_page_foreward);
+    builder->get_widget("page_delete", btn_page_delete);
+    builder->get_widget("page_move_objects", btn_move_toggle);
+    builder->get_widget("sep1", sep1);
 
     if (text_page_label) {
         text_page_label->signal_changed().connect(sigc::mem_fun(*this, &PageToolbar::labelEdited));
@@ -66,6 +71,7 @@ PageToolbar::PageToolbar(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
 PageToolbar::~PageToolbar()
 {
     _ec_connection.disconnect();
+    _page_modified.disconnect();
 }
 
 void PageToolbar::toolChanged(SPDesktop *desktop, Inkscape::UI::Tools::ToolBase *ec)
@@ -118,10 +124,72 @@ void PageToolbar::sizeChoose()
     }
 }
 
+double PageToolbar::_unit_to_size(std::string number, std::string unit_str, std::string backup)
+{
+    // We always support comma, even if not in that particular locale.
+    std::replace(number.begin(), number.end(), ',', '.');
+    double value = std::stod(number);
+
+    // Get the best unit, for example 50x40cm means cm for both
+    auto unit = _document->getDisplayUnit();
+    if (unit_str.empty() && !backup.empty())
+        unit_str == backup;
+    if (unit_str == "\"")
+        unit_str = "in";
+
+    // Convert from user entered unit to display unit
+    if (!unit_str.empty())
+        return Inkscape::Util::Quantity::convert(value, unit_str, unit);
+
+    // Default unit
+    return value;
+}
+
+/**
+ * A manually typed input size, parse out what we can understand from
+ * the text or ignore it if the text can't be parsed.
+ *
+ * Format: 50cm x 40mm
+ *         20',40"
+ *         30,4-40.2
+ */
 void PageToolbar::sizeChanged()
 {
-    auto size = combo_page_sizes->get_active_text();
-    entry_page_sizes->set_text("Not Implemented!");
+    // Parse the size out of the typed text if possible.
+    auto text = std::string(combo_page_sizes->get_active_text());
+    static std::string arg = "([\\d,\\.]+)(px|mm|cm|in|\\\")?";
+    static std::regex re_size("^ *" + arg + " ?([Xx,\\-]) ?" + arg + " *$");
+
+    std::smatch matches;
+    if(std::regex_match(text, matches, re_size)) {
+        double width = _unit_to_size(matches[1], matches[2], matches[5]);
+        double height = _unit_to_size(matches[4], matches[5], matches[2]);
+        if (width > 0 && height > 0) {
+            auto scale = _document->getDocumentScale()[0];
+            _page_manager->resizePage(width * scale, height * scale);
+        }
+    }
+    setSizeText(_page_manager->getSelected());
+}
+
+/**
+ * Sets the size of the current page into the entry page size.
+ */
+void PageToolbar::setSizeText(SPPage *page)
+{
+    auto unit = _document->getDisplayUnit();
+    double width = _document->getWidth().value(unit);
+    double height = _document->getHeight().value(unit);
+    if (page) {
+        auto rect = page->getRect();
+        width = rect.width();
+        height = rect.height();
+    }
+    if (auto page_size = Inkscape::PaperSize::findPaperSize(width, height, unit)) {
+        entry_page_sizes->set_text(page_size->getDescription());
+    } else {
+        entry_page_sizes->set_text(Inkscape::PaperSize::toDescription(_("Custom"), width, height, unit));
+    }
 }
 
 void PageToolbar::pagesChanged()
@@ -131,6 +199,8 @@ void PageToolbar::pagesChanged()
 
 void PageToolbar::selectionChanged(SPPage *page)
 {
+    _page_modified.disconnect();
+
     // Set label widget content with page label.
     if (page) {
         text_page_label->set_sensitive(true);
@@ -150,17 +220,36 @@ void PageToolbar::selectionChanged(SPPage *page)
         label_page_pos->set_label(pos);
         g_free(pos);
 
+        _page_modified = page->connectModified([=](SPObject *obj, unsigned int /*flags*/) {
+            if (auto page = dynamic_cast<SPPage *>(obj)) {
+                selectionChanged(page);
+            }
+        });
     } else {
         text_page_label->set_text("");
         text_page_label->set_sensitive(false);
-        text_page_label->set_placeholder_text(_("No Page Selected"));
-        label_page_pos->set_label("-/0");
+        text_page_label->set_placeholder_text(_("Single Page Document"));
+        label_page_pos->set_label("-");
     }
-    // Set the forward and backward button sensitivities
-    btn_page_backward->set_sensitive(_page_manager->hasPrevPage());
-    btn_page_foreward->set_sensitive(_page_manager->hasNextPage());
-
-    // TODO Set size widget with page size
+    if (!_page_manager->hasPrevPage() && !_page_manager->hasNextPage() && !page) {
+        sep1->set_visible(false);
+        label_page_pos->get_parent()->set_visible(false);
+        btn_page_backward->set_visible(false);
+        btn_page_foreward->set_visible(false);
+        btn_page_delete->set_visible(false);
+        btn_move_toggle->set_sensitive(false);
+    } else {
+        // Set the forward and backward button sensitivities
+        sep1->set_visible(true);
+        label_page_pos->get_parent()->set_visible(true);
+        btn_page_backward->set_visible(true);
+        btn_page_foreward->set_visible(true);
+        btn_page_backward->set_sensitive(_page_manager->hasPrevPage());
+        btn_page_foreward->set_sensitive(_page_manager->hasNextPage());
+        btn_page_delete->set_visible(true);
+        btn_move_toggle->set_sensitive(true);
+    }
+    setSizeText(page);
 }
 
 GtkWidget *PageToolbar::create(SPDesktop *desktop)

@@ -25,7 +25,10 @@ namespace Inkscape {
  */ 
 std::vector<PaperSize *> PaperSize::getPageSizes()
 {   
-    std::vector<PaperSize *> ret;
+    // Static makes us only load pages once.
+    static std::vector<PaperSize *> ret;
+    if (!ret.empty())
+        return ret;
     
     char *path = Inkscape::IO::Resource::profile_path("pages.csv");
     if (!g_file_test(path, G_FILE_TEST_EXISTS)) {
@@ -57,6 +60,7 @@ std::vector<PaperSize *> PaperSize::getPageSizes()
     return ret;
 }   
 
+
 PaperSize::PaperSize()
     : name("")
     , smaller(0.0)
@@ -73,10 +77,11 @@ PaperSize::PaperSize(std::string name, double smaller, double larger, Inkscape::
     , unit(unit) 
 {}
 
-std::string PaperSize::getDescription() const
+std::string PaperSize::getDescription() const { return toDescription(name, smaller, larger, unit); }
+std::string PaperSize::toDescription(std::string name, double x, double y, Inkscape::Util::Unit const *unit)
 {
     char buf[80];
-    snprintf(buf, 79, "%s (%0.1fx%0.1f %s)", name.c_str(), smaller, larger, unit->abbr.c_str());
+    snprintf(buf, 79, "%s (%0.1fx%0.1f %s)", name.c_str(), x, y, unit->abbr.c_str());
     return std::string(buf);
 }
 
@@ -86,6 +91,25 @@ void PaperSize::assign(const PaperSize &other)
     smaller = other.smaller;
     larger  = other.larger;
     unit    = other.unit;
+}
+
+/**
+ * Returns a matching paper size, if possible.
+ */
+PaperSize *PaperSize::findPaperSize(double width, double height, Inkscape::Util::Unit const *unit)
+{
+    double smaller = width;
+    double larger = height;
+    if (width > height) {
+        smaller = height;
+        larger = width;
+    }
+    for (auto &page_size : Inkscape::PaperSize::getPageSizes()) {
+        if (page_size->smaller == smaller && page_size->larger == larger && page_size->unit == unit) {
+            return page_size;
+        }
+    }
+    return nullptr;
 }
 
 } // namespace Inkscape

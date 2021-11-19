@@ -40,6 +40,8 @@ public:
     std::string getDescription() const;
 
     static std::vector<PaperSize *> getPageSizes();
+    static PaperSize *findPaperSize(double width, double height, Inkscape::Util::Unit const *unit);
+    static std::string toDescription(std::string name, double x, double y, Inkscape::Util::Unit const *unit);
             
 private:
     void assign(const PaperSize &other);

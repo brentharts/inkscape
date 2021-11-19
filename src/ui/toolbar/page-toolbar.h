@@ -43,6 +43,7 @@ protected:
     void labelEdited();
     void sizeChoose();
     void sizeChanged();
+    void setSizeText(SPPage *);
 
 private:
     SPDesktop *_desktop;
@@ -56,6 +57,7 @@ private:
     sigc::connection _ec_connection;
     sigc::connection _pages_changed;
     sigc::connection _page_selected;
+    sigc::connection _page_modified;
 
     Gtk::ComboBoxText *combo_page_sizes;
     Gtk::Entry *entry_page_sizes;
@@ -63,8 +65,13 @@ private:
     Gtk::Label *label_page_pos;
     Gtk::ToolButton *btn_page_backward;
     Gtk::ToolButton *btn_page_foreward;
+    Gtk::ToolButton *btn_page_delete;
+    Gtk::ToolButton *btn_move_toggle;
+    Gtk::SeparatorToolItem *sep1;
 
     std::vector<PaperSize *> page_sizes;
+
+    double _unit_to_size(std::string number, std::string unit_str, std::string backup);
 };
 
 } // namespace Toolbar
