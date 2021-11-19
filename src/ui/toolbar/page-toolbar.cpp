@@ -201,6 +201,7 @@ void PageToolbar::pagesChanged()
 void PageToolbar::selectionChanged(SPPage *page)
 {
     _page_modified.disconnect();
+    if (!_page_manager) return;
 
     // Set label widget content with page label.
     if (page) {

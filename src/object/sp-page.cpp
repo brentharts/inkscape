@@ -16,6 +16,7 @@
 #include "desktop.h"
 #include "display/control/canvas-page.h"
 #include "inkscape.h"
+#include "object/object-set.h"
 #include "sp-namedview.h"
 #include "sp-root.h"
 
@@ -140,6 +141,25 @@ void SPPage::setDesktopSize(double width, double height)
     auto rect = getDesktopRect();
     rect.setMax(rect.corner(0) + Geom::Point(width, height));
     setDesktopRect(rect);
+}
+
+/**
+ * Resize the page to the given selection. If nothing is selected,
+ * Resize to all the items on this page.
+ */
+void SPPage::fitToSelection(Inkscape::ObjectSet *selection)
+{
+    if (!selection || selection->isEmpty()) {
+        auto contents = new Inkscape::ObjectSet();
+        contents->setList(getOverlappingItems());
+        // Do we have anything to do?
+        if (contents->isEmpty())
+            return;
+        fitToSelection(contents);
+        delete contents;
+    } else if (auto box = selection->visualBounds()) {
+        setDesktopRect(*box);
+    }
 }
 
 /**

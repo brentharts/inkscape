@@ -46,6 +46,19 @@
       </packing>
     </child>
     <child>
+      <object class="GtkToolButton" id="page_fit">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="action_name">win.fit-canvas-to-selection-or-drawing</property>
+        <property name="label" translatable="yes">Fit Page to Selection</property>
+        <property name="icon_name">page-resize</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="homogeneous">True</property>
+      </packing>
+    </child>
+    <child>
       <object class="GtkSeparatorToolItem">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
