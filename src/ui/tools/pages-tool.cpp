@@ -16,8 +16,8 @@
 #include <glibmm/i18n.h>
 
 #include "desktop.h"
-#include "display/control/canvas-item-curve.h"
 #include "display/control/canvas-item-bpath.h"
+#include "display/control/canvas-item-curve.h"
 #include "display/control/canvas-item-group.h"
 #include "display/control/canvas-item-rect.h"
 #include "display/control/snap-indicator.h"
@@ -27,10 +27,10 @@
 #include "path/path-outline.h"
 #include "pure-transform.h"
 #include "rubberband.h"
-#include "selection.h"
 #include "selection-chemistry.h"
-#include "snap.h"
+#include "selection.h"
 #include "snap-preferences.h"
+#include "snap.h"
 #include "ui/knot/knot.h"
 
 namespace Inkscape {
@@ -138,7 +138,6 @@ void PagesTool::resizeKnotMoved(SPKnot *knot, Geom::Point const &ppointer, guint
     }
 }
 
-
 void PagesTool::resizeKnotFinished(SPKnot *knot, guint state)
 {
     if (auto page_manager = getPageManager()) {
@@ -189,7 +188,7 @@ bool PagesTool::root_handler(GdkEvent *event)
                     Geom::Affine tr = moveTo(point_dt);
                     // XXX Moving the existing shapes would be much better, but it has
                     //  weird bug which stops it from working well.
-                    //drag_group->update(tr * drag_group->get_parent()->get_affine());
+                    // drag_group->update(tr * drag_group->get_parent()->get_affine());
                     addDragShapes(dragging_item, tr);
                 } else if (on_screen_rect) {
                     // Continue to drag new box
@@ -281,10 +280,8 @@ void PagesTool::grabPage(SPPage *target)
     snap_manager->setup(desktop, true, target);
 
     _bbox_points.clear();
-    getBBoxPoints(target->getDesktopRect(), &_bbox_points, false,
-        SNAPSOURCE_PAGE_CORNER, SNAPTARGET_UNDEFINED,
-        SNAPSOURCE_UNDEFINED, SNAPTARGET_UNDEFINED,
-        SNAPSOURCE_PAGE_CENTER, SNAPTARGET_UNDEFINED);
+    getBBoxPoints(target->getDesktopRect(), &_bbox_points, false, SNAPSOURCE_PAGE_CORNER, SNAPTARGET_UNDEFINED,
+                  SNAPSOURCE_UNDEFINED, SNAPTARGET_UNDEFINED, SNAPSOURCE_PAGE_CENTER, SNAPTARGET_UNDEFINED);
 }
 
 /*
@@ -328,11 +325,10 @@ void PagesTool::setupResizeSnap(Geom::Point start)
 void PagesTool::unsetupSnap()
 {
     if (snap_manager) {
-      snap_manager->unSetup();
-      snap_manager = nullptr;
+        snap_manager->unSetup();
+        snap_manager = nullptr;
     }
 }
-
 
 /**
  * Add all the shapes needed to see it being dragged.

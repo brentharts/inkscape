@@ -14,11 +14,10 @@
 
 #include "attributes.h"
 #include "desktop.h"
+#include "display/control/canvas-page.h"
 #include "inkscape.h"
 #include "sp-namedview.h"
 #include "sp-root.h"
-
-#include "display/control/canvas-page.h"
 
 using Inkscape::DocumentUndo;
 
@@ -195,12 +194,12 @@ bool SPPage::isViewportPage() const
 /**
  * Shows the page in the given canvas item group.
  */
-void SPPage::showPage(Inkscape::CanvasItemGroup *fg, Inkscape::CanvasItemGroup *bg) {
+void SPPage::showPage(Inkscape::CanvasItemGroup *fg, Inkscape::CanvasItemGroup *bg)
+{
     _canvas_item->add(getDesktopRect(), fg, bg);
     // The final steps are completed in an update cycle
     this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
 }
-
 
 /**
  * Sets the default attributes from the namedview.
@@ -346,7 +345,6 @@ void SPPage::update(SPCtx * /*ctx*/, unsigned int /*flags*/)
     // This is manual because this is not an SPItem, but it's own visual identity.
     _canvas_item->update(getDesktopRect(), this->label());
 }
-
 
 /**
  * Write out the page's data into it's xml structure.

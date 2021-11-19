@@ -407,9 +407,7 @@ bool PageManager::subset(SPAttr key, const gchar *value)
  */
 bool PageManager::setDefaultAttributes(Inkscape::CanvasPage *item)
 {
-    return item->setAttributes(border_on_top,
-                               border_show ? border_color : 0x0,
-                               background_color,
+    return item->setAttributes(border_on_top, border_show ? border_color : 0x0, background_color,
                                border_show && shadow_show ? shadow_size : 0);
 }
 

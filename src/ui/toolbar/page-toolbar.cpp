@@ -89,7 +89,8 @@ void PageToolbar::toolChanged(SPDesktop *desktop, Inkscape::UI::Tools::ToolBase 
             if (_page_manager = _document->getNamedView()->getPageManager()) {
                 // Connect the page changed signal and indicate changed
                 _pages_changed = _page_manager->connectPagesChanged(sigc::mem_fun(*this, &PageToolbar::pagesChanged));
-                _page_selected = _page_manager->connectPageSelected(sigc::mem_fun(*this, &PageToolbar::selectionChanged));
+                _page_selected =
+                    _page_manager->connectPageSelected(sigc::mem_fun(*this, &PageToolbar::selectionChanged));
                 // Update everything now.
                 pagesChanged();
             }
@@ -161,7 +162,7 @@ void PageToolbar::sizeChanged()
     static std::regex re_size("^ *" + arg + " ?([Xx,\\-]) ?" + arg + " *$");
 
     std::smatch matches;
-    if(std::regex_match(text, matches, re_size)) {
+    if (std::regex_match(text, matches, re_size)) {
         double width = _unit_to_size(matches[1], matches[2], matches[5]);
         double height = _unit_to_size(matches[4], matches[5], matches[2]);
         if (width > 0 && height > 0) {
