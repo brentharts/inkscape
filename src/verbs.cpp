@@ -1814,7 +1814,6 @@ void DialogVerb::perform(SPAction *action, void *data)
         case SP_VERB_DIALOG_DEBUG:
         case SP_VERB_DIALOG_UNDO_HISTORY:
         case SP_VERB_DIALOG_CLONETILER:
-        case SP_VERB_DIALOG_ATTR:
         case SP_VERB_DIALOG_ITEM:
         case SP_VERB_DIALOG_INPUT:
         case SP_VERB_DIALOG_EXPORT:
@@ -1823,9 +1822,6 @@ void DialogVerb::perform(SPAction *action, void *data)
         case SP_VERB_DIALOG_LIVE_PATH_EFFECT:
         case SP_VERB_DIALOG_FILTER_EFFECTS:
         case SP_VERB_DIALOG_SVG_FONTS:
-        case SP_VERB_DIALOG_STYLE:
-            container->new_dialog(reinterpret_cast<std::size_t>(data));
-            break;
         case SP_VERB_DIALOG_TOGGLE:
             container->toggle_dialogs();
             break;
@@ -2529,8 +2525,6 @@ Verb *Verb::_base_verbs[] = {
                    N_("Create multiple clones of selected object, arranging them into a pattern or scattering"),
                    INKSCAPE_ICON("dialog-tile-clones")),
     new DialogVerb(SP_VERB_DIALOG_ATTR, "DialogObjectAttributes", N_("_Object attributes..."),
-                   N_("Edit the object attributes..."), INKSCAPE_ICON("dialog-object-properties")),
-    new DialogVerb(SP_VERB_DIALOG_ATTR_XML, "DialogAttrDialog", N_("_Object attributes..."),
                    N_("Edit the object attributes..."), INKSCAPE_ICON("dialog-object-properties")),
     new DialogVerb(SP_VERB_DIALOG_ITEM, "DialogObjectProperties", N_("_Object Properties..."),
                    N_("Edit the ID, locked and visible status, and other object properties"),
