@@ -274,6 +274,11 @@
             <attribute name='icon'>edit-select-same-fill</attribute>
           </item>
           <item>
+            <attribute name='label' translatable="yes">_Stroke Color</attribute>
+            <attribute name='action'>win.select-same-stroke-color</attribute>
+            <attribute name='icon'>edit-select-same-stroke-color</attribute>
+          </item>
+          <item>
             <attribute name='label' translatable="yes">Stroke St_yle</attribute>
             <attribute name='action'>win.select-same-stroke-style</attribute>
             <attribute name='icon'>edit-select-same-stroke-style</attribute>
