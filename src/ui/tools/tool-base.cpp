@@ -93,7 +93,8 @@ static void set_event_location(SPDesktop * desktop, GdkEvent * event);
 
 
 ToolBase::ToolBase(std::string cursor_filename, bool uses_snap)
-    : cursor_filename(std::move(cursor_filename))
+    : cursor_default(std::move(cursor_filename))
+    , cursor_filename("none")
     , _uses_snap(uses_snap)
 {
 }
@@ -117,7 +118,8 @@ ToolBase::~ToolBase() {
 void ToolBase::setup() {
     this->pref_observer = new ToolPrefObserver(this->getPrefsPath(), this);
     Inkscape::Preferences::get()->addObserver(*(this->pref_observer));
-    this->sp_event_context_update_cursor();
+    this->set_cursor(cursor_default);
+    desktop->getCanvas()->grab_focus();
 }
 
 void ToolBase::finish() {
@@ -135,6 +137,17 @@ void ToolBase::set(const Inkscape::Preferences::Entry& /*val*/) {
 SPGroup *ToolBase::currentLayer() const
 {
     return desktop->layerManager().currentLayer();
+}
+
+/**
+ * Sets the current cursor to the given filename. Does not readload if not changed.
+ */
+void ToolBase::set_cursor(std::string filename)
+{
+    if (filename != cursor_filename) {
+        cursor_filename = filename;
+        sp_event_context_update_cursor();
+    }
 }
 
 /**

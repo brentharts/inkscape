@@ -49,8 +49,6 @@ void SPPage::build(SPDocument *document, Inkscape::XML::Node *repr)
 
 void SPPage::release()
 {
-    delete _canvas_item;
-
     if (this->document) {
         // Unregister ourselves
         this->document->removeResource("page", this);

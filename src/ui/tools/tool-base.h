@@ -199,6 +199,7 @@ public:
     Inkscape::Preferences::Observer *pref_observer = nullptr;
     Glib::RefPtr<Gdk::Cursor> cursor;
     std::string cursor_filename = "select.svg";
+    std::string cursor_default = "select.svg";
 
     gint xp = 0;           ///< where drag started
     gint yp = 0;           ///< where drag started
@@ -241,7 +242,7 @@ public:
     bool _uses_snap = false;
     DelayedSnapEvent *_delayed_snap_event = nullptr;
 
-// private:
+    void set_cursor(std::string filename);
     void sp_event_context_update_cursor();
 
 protected:

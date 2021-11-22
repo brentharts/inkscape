@@ -174,9 +174,11 @@ bool PagesTool::root_handler(GdkEvent *event)
             break;
         }
         case GDK_MOTION_NOTIFY: {
+            bool drawing_allowed = event->motion.state & GDK_SHIFT_MASK;
+            auto point_w = Geom::Point(event->motion.x, event->motion.y);
+            auto point_dt = desktop->w2d(point_w);
+
             if (mouse_is_pressed && event->motion.state & GDK_BUTTON1_MASK) {
-                auto point_w = Geom::Point(event->motion.x, event->motion.y);
-                auto point_dt = desktop->w2d(point_w);
 
                 // do not drag if we're within tolerance from origin
                 if (Geom::distance(drag_origin_w, point_w) < drag_tolerance) {
@@ -194,20 +196,29 @@ bool PagesTool::root_handler(GdkEvent *event)
                     // Continue to drag new box
                     delete on_screen_rect;
                     on_screen_rect = new Geom::Rect(drag_origin_dt, point_dt);
+                } else if (drawing_allowed) {
+                    // Start making a new page.
+                    setupResizeSnap(point_dt);
+                    dragging_item = nullptr;
+                    on_screen_rect = new Geom::Rect(point_dt, point_dt);
+                    this->set_cursor("page-draw.svg");
                 } else if (auto page = pageUnder(point_dt)) {
                     // Starting to drag page around the screen.
                     dragging_item = page;
                     page_manager->selectPage(page);
                     addDragShapes(page, Geom::Affine());
                     grabPage(page);
-                } else {
-                    // Start making a new page.
-                    setupResizeSnap(point_dt);
-                    dragging_item = nullptr;
-                    on_screen_rect = new Geom::Rect(point_dt, point_dt);
+                    this->set_cursor("page-dragging.svg");
                 }
             } else {
                 mouse_is_pressed = false;
+                if (drawing_allowed) {
+                    this->set_cursor("page-draw.svg");
+                } else if (pageUnder(point_dt)) {
+                    this->set_cursor("page-mouseover.svg");
+                } else {
+                    this->set_cursor(cursor_default);
+                }
             }
             break;
         }
@@ -230,6 +241,8 @@ bool PagesTool::root_handler(GdkEvent *event)
                 }
                 Inkscape::DocumentUndo::done(desktop->getDocument(), SP_VERB_NONE, "Move page position");
             } else if (on_screen_rect) {
+                // If pages are not enabled, enable them first. (creates a default)
+                page_manager->enablePages();
                 // conclude box here (make new page)
                 page_manager->newDesktopPage(*on_screen_rect);
                 Inkscape::DocumentUndo::done(desktop->getDocument(), SP_VERB_NONE, "Create new drawn page");
