@@ -45,10 +45,14 @@ ArrangeDialog::ArrangeDialog()
 {
     _align_tab = Gtk::manage(new AlignAndDistribute(this));
     _arrangeBox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
+    _arrangeBox->set_valign(Gtk::ALIGN_START);
     _notebook = Gtk::manage(new Gtk::Notebook());
     _gridArrangeTab = Gtk::manage(new GridArrangeTab(this));
     _polarArrangeTab = Gtk::manage(new PolarArrangeTab(this));
 
+    set_valign(Gtk::ALIGN_START);
+
+    _notebook->set_valign(Gtk::ALIGN_START);
     _notebook->append_page(*_align_tab, create_tab_label(C_("Arrange dialog", "Align"), INKSCAPE_ICON("dialog-align-and-distribute")));
     // TRANSLATORS: "Grid" refers to grid (columns/rows) arrangement
     _notebook->append_page(*_gridArrangeTab, create_tab_label(C_("Arrange dialog", "Grid"), INKSCAPE_ICON("arrange-grid")));
@@ -73,7 +77,7 @@ ArrangeDialog::ArrangeDialog()
     button_box->set_valign(Gtk::ALIGN_START);
 
     button_box->pack_end(*_arrangeButton);
-    pack_end(*button_box);
+    pack_start(*button_box);
 
     show();
     show_all_children();
