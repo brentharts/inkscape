@@ -26,6 +26,7 @@
 #include "ui/icon-names.h"
 
 // Note the "AttrDialog" is now part of the "XMLDialog" and the "Style" dialog is part of the "Selectors" dialog.
+// Also note that the "AttrDialog" does not correspond to SP_VERB_DIALOG_ATTR!!!!! (That would be the "ObjectAttributes" dialog.)
 
 std::vector<std::vector<Glib::ustring>> raw_data_dialogs =
 {
@@ -43,7 +44,7 @@ std::vector<std::vector<Glib::ustring>> raw_data_dialogs =
     {"win.dialog-open('LivePathEffect')",     N_("Open LivePathEffect"),       "Dialog",  N_("Manage, edit, and apply path effects")                                                   },
     {"win.dialog-open('Memory')",             N_("Open Memory"),               "Dialog",  N_("View memory use")                                                                        },
     {"win.dialog-open('Messages')",           N_("Open Messages"),             "Dialog",  N_("View debug messages")                                                                    },
-    {"win.dialog-open('ObjectAttributes')",   N_("Open ObjectAttributes"),     "Dialog",  N_("Edit the object attributes...")                                                          },
+    {"win.dialog-open('ObjectAttributes')",   N_("Open ObjectAttributes"),     "Dialog",  N_("Edit the object attributes (context dependent)...")                                      },
     {"win.dialog-open('ObjectProperties')",   N_("Open ObjectProperties"),     "Dialog",  N_("Edit the ID, locked and visible status, and other object properties")                    },
     {"win.dialog-open('Objects')",            N_("Open Objects"),              "Dialog",  N_("View Objects")                                                                           },
     {"win.dialog-open('PaintServers')",       N_("Open PaintServers"),         "Dialog",  N_("Select paint server from a collection")                                                  },
