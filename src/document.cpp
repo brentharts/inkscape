@@ -859,6 +859,17 @@ Geom::OptRect SPDocument::preferredBounds() const
 }
 
 /**
+ * Returns the position of the selected page or the preferredBounds()
+ */
+Geom::OptRect SPDocument::pageBounds()
+{
+    if (auto page = getNamedView()->getPageManager()->getSelected()) {
+        return page->getDesktopRect();
+    }
+    return preferredBounds();
+}
+
+/**
  * Given a Geom::Rect that may, for example, correspond to the bbox of an object,
  * this function fits the canvas to that rect by resizing the canvas
  * and translating the document root into position.

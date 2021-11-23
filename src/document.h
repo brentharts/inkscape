@@ -236,6 +236,7 @@ private:
     Geom::Rect getViewBox() const;
 
     Geom::OptRect preferredBounds() const;
+    Geom::OptRect pageBounds();
     void fitToRect(Geom::Rect const &rect, bool with_margins = false);
     void setupViewport(SPItemCtx *ctx);
 
