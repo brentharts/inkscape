@@ -16,9 +16,7 @@
    xmlns:dc="http://purl.org/dc/elements/1.1/">
   <style
      id="s0">
-   .success { fill: #009909; }
-   .warning { fill: #FF1990; }
-   .error   { fill: #00AAFF; }
+ 
   </style>
   <style
      id="s2"> 
@@ -99,6 +97,6 @@
        id="rect22505"
        d="m 1048.4995,670.36207 h 1.5 v 24 h -1.5 z"
        style="opacity:1;fill-opacity:1;stroke-width:0.829161;fill:#000000"
-       class="success" />
+         />
   </g>
 </svg>

@@ -53,9 +53,7 @@
        split_open="false" />
   </defs>
   <style
-     id="s0">.success { fill:#009909; }
-.warning { fill:#FF1990; }
-.error { fill:#00AAFF; }
+     id="s0"> 
 </style>
   <style
      id="s2">
@@ -110,7 +108,7 @@
        x="-605.03625"
        y="-353.30621"
        transform="rotate(-135)"
-       class="success" />
+         />
     <rect
        style="fill-opacity:1;stroke:none;stroke-width:0.0300984;stroke-linecap:round;stroke-linejoin:round;fill:#000000"
        id="rect22027"
@@ -119,7 +117,7 @@
        x="-597.98706"
        y="-360.39911"
        transform="rotate(-135)"
-       class="success" />
+         />
     <rect
        style="fill-opacity:1;stroke:none;stroke-width:0.0300984;stroke-linecap:round;stroke-linejoin:round;fill:#000000"
        id="rect26524"
@@ -128,7 +126,7 @@
        x="-175.00003"
        y="-676.12585"
        transform="scale(-1)"
-       class="success" />
+         />
     <path
        id="path26641"
        style="fill:#000000;fill-rule:nonzero;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"

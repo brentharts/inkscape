@@ -16,9 +16,7 @@
    xmlns:dc="http://purl.org/dc/elements/1.1/">
   <style
      id="s0">
-   .success { fill: #009909; }
-   .warning { fill: #FF1990; }
-   .error   { fill: #00AAFF; }
+ 
   </style>
   <style
      id="s2"> 
@@ -92,7 +90,7 @@
        style="opacity:0;fill:none"
        transform="scale(-1,1)" />
     <path
-       class="success"
+        
        style="fill:#000000;fill-opacity:1;stroke-width:1.15467"
        d="m 1133.4991,595.36228 h -3 v 24.00004 h 3 z"
        id="rect22219"

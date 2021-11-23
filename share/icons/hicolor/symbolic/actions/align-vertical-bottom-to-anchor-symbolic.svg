@@ -16,9 +16,7 @@
    xmlns:dc="http://purl.org/dc/elements/1.1/">
   <style
      id="s0">
-   .success { fill: #009909; }
-   .warning { fill: #FF1990; }
-   .error   { fill: #00AAFF; }
+ 
   </style>
   <style
      id="s2"> 
@@ -87,13 +85,13 @@
        id="rect22388"
        d="m 1096.5003,647.9886 v 3 h -3 v -3 z"
        style="opacity:1;fill:#000000;fill-opacity:1;stroke-width:0.99999"
-       class="success" />
+         />
     <path
        inkscape:connector-curvature="0"
        id="rect22390"
        d="m 1098.0003,644.9886 10e-5,1.5 h -24 l -10e-5,-1.5 z"
        style="fill:#000000;fill-opacity:1;stroke-width:1.15474"
-       class="success"
+        
        sodipodi:nodetypes="ccccc" />
     <path
        inkscape:connector-curvature="0"

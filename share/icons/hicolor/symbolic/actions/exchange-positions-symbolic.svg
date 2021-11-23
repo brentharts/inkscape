@@ -47,9 +47,7 @@
   </defs>
   <style
      id="s0">
-.success { fill:#009909; }
-.warning { fill:#FF1990; }
-.error { fill:#00AAFF; }
+ 
 </style>
   <style
      id="s2">
@@ -93,7 +91,7 @@
        id="rect40857"
        inkscape:connector-curvature="0" />
     <path
-       class="error"
+        
        sodipodi:nodetypes="cccccccc"
        style="opacity:1;stroke-width:1;fill:#000000;fill-opacity:1"
        inkscape:connector-curvature="0"

@@ -16,9 +16,7 @@
    xmlns:dc="http://purl.org/dc/elements/1.1/">
   <style
      id="s0">
-   .success { fill: #009909; }
-   .warning { fill: #FF1990; }
-   .error   { fill: #00AAFF; }
+ 
   </style>
   <style
      id="s2"> 
@@ -84,7 +82,7 @@
        sodipodi:nodetypes="ssscssssssssscsss" />
     <path
        sodipodi:nodetypes="ccccc"
-       class="success"
+        
        style="opacity:1;fill-opacity:1;stroke-width:0.999997;fill:#000000"
        d="m 1105.9992,685.36164 -8e-4,1.50017 h -23.9992 l 8e-4,-1.50017 z"
        id="rect17564"

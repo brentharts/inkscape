@@ -28,9 +28,7 @@
   <defs
      id="defs6230" />
   <style
-     id="s0">.success { fill:#009909; }
-.warning { fill:#FF1990; }
-.error { fill:#00AAFF; }
+     id="s0"> 
 </style>
   <style
      id="s2">
@@ -108,7 +106,7 @@
        height="0.99999738"
        x="-171"
        y="669.36218"
-       class="success"
+        
        transform="scale(-1,1)" />
     <rect
        style="opacity:1;fill:#000000;fill-opacity:1;stroke-width:0.670898;stroke-linecap:round;stroke-linejoin:round"
@@ -117,7 +115,7 @@
        height="0.99999738"
        x="-177"
        y="669.36218"
-       class="success"
+        
        transform="scale(-1,1)" />
     <rect
        style="opacity:1;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.670894;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
@@ -126,7 +124,7 @@
        height="3"
        x="168"
        y="668.36218"
-       class="success" />
+         />
     <rect
        style="opacity:1;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.670894;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
        id="rect19691"
@@ -134,7 +132,7 @@
        height="3"
        x="171"
        y="668.36218"
-       class="success" />
+         />
     <rect
        style="opacity:1;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.670894;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
        id="rect19693"
@@ -142,7 +140,7 @@
        height="3"
        x="174"
        y="668.36218"
-       class="success" />
+         />
     <rect
        style="opacity:1;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.670894;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
        id="rect19695"
@@ -150,6 +148,6 @@
        height="3"
        x="177"
        y="668.36218"
-       class="success" />
+         />
   </g>
 </svg>

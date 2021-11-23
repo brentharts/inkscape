@@ -95,9 +95,7 @@
   </defs>
   <style
      id="s0">
-.success { fill:#009909; }
-.warning { fill:#FF1990; }
-.error { fill:#00AAFF; }
+ 
 </style>
   <style
      id="s2">
@@ -145,7 +143,7 @@
        id="rect40839"
        inkscape:connector-curvature="0" />
     <path
-       class="error"
+        
        style="opacity:1;fill:#000000;fill-opacity:1"
        d="M 2.2499989,11.999994 0,16.499992 h 1.4999993 v 5.999997 h 1.4999984 v -5.999997 h 1.5000001 z"
        id="path40841"

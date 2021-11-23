@@ -16,9 +16,7 @@
    xmlns:dc="http://purl.org/dc/elements/1.1/">
   <style
      id="s0">
-   .success { fill: #009909; }
-   .warning { fill: #FF1990; }
-   .error   { fill: #00AAFF; }
+ 
   </style>
   <style
      id="s2"> 
@@ -120,14 +118,14 @@
        inkscape:path-effect="#path-effect3466" />
     <path
        sodipodi:nodetypes="ccccc"
-       class="success"
+        
        id="path1584-5"
        d="m 1044,879.36111 h 7.5 l 1.3983,1.50031 H 1044 Z"
        style="opacity:1;fill:#000000;fill-opacity:1"
        inkscape:connector-curvature="0" />
     <path
        sodipodi:nodetypes="ccccc"
-       class="success"
+        
        id="path1586-6"
        d="m 1044,871.85957 h 9 l -1.6017,1.5003 H 1044 Z"
        style="opacity:1;fill:#000000;fill-opacity:1"
@@ -137,7 +135,7 @@
        style="opacity:1;fill:#000000;fill-opacity:1"
        d="m 1044,864.35803 h 7.6699 l 1.3301,1.5003 h -9 z"
        id="use5269-4"
-       class="success"
+        
        sodipodi:nodetypes="ccccc" />
     <rect
        y="1047"

@@ -28,9 +28,7 @@
   <defs
      id="defs6230" />
   <style
-     id="s0">.success { fill:#009909; }
-.warning { fill:#FF1990; }
-.error { fill:#00AAFF; }
+     id="s0"> 
 </style>
   <style
      id="s2">
@@ -92,14 +90,14 @@
        cx="167.5"
        cy="671.86218"
        r="1.4999975"
-       class="success" />
+         />
     <circle
        style="opacity:1;fill:#000000;fill-opacity:1;stroke-width:0.670895;stroke-linecap:round;stroke-linejoin:round"
        id="circle1464"
        cx="167.5"
        cy="677.86218"
        r="1.4999975"
-       class="success" />
+         />
     <rect
        style="opacity:1;fill:#000000;fill-opacity:1;stroke-width:0.670894;stroke-linecap:round;stroke-linejoin:round"
        id="rect1570"
@@ -107,6 +105,6 @@
        height="6"
        x="167"
        y="671.36218"
-       class="success" />
+         />
   </g>
 </svg>
