@@ -15,9 +15,7 @@
    xmlns:cc="http://creativecommons.org/ns#"
    xmlns:dc="http://purl.org/dc/elements/1.1/">
   <style
-     id="s0">
- 
-  </style>
+     id="s0" />
   <style
      id="s2"> 
      @import '../../highlights.css'; 
@@ -37,9 +35,9 @@
      id="defs1123">
     <inkscape:path-effect
        effect="mirror_symmetry"
-       start_point="1131.9994,595.46259"
-       end_point="1131.9994,611.96275"
-       center_point="1131.9994,603.71267"
+       start_point="1131.2494,596.1122"
+       end_point="1131.2494,612.61236"
+       center_point="1131.2494,604.36228"
        id="path-effect1114"
        is_visible="true"
        lpeversion="1.1"
@@ -56,9 +54,9 @@
      guidetolerance="10"
      id="namedview"
      showgrid="true"
-     inkscape:zoom="31.5625"
-     inkscape:cx="8"
-     inkscape:cy="8.0316832"
+     inkscape:zoom="44.636116"
+     inkscape:cx="2.4195654"
+     inkscape:cy="8.8717397"
      inkscape:window-width="1858"
      inkscape:window-height="1177"
      inkscape:window-x="54"
@@ -72,12 +70,21 @@
      borderopacity="1.0"
      inkscape:pageshadow="2"
      inkscape:pageopacity="0.0"
-     inkscape:pagecheckerboard="0">
+     inkscape:pagecheckerboard="0"
+     showguides="true"
+     inkscape:guide-bbox="true">
     <inkscape:grid
        spacingy="1"
        spacingx="1"
        type="xygrid"
        id="grid" />
+    <sodipodi:guide
+       position="-2,7.5"
+       orientation="0,1"
+       id="guide1084"
+       inkscape:label=""
+       inkscape:locked="false"
+       inkscape:color="rgb(0,0,255)" />
   </sodipodi:namedview>
   <g
      transform="matrix(0,0.666667,-0.666666,0,412.90774,-746.66664)"
@@ -90,18 +97,17 @@
        style="opacity:0;fill:none"
        transform="scale(-1,1)" />
     <path
-        
        style="fill:#000000;fill-opacity:1;stroke-width:1.15467"
-       d="m 1133.4991,595.36228 h -3 v 24.00004 h 3 z"
+       d="m 1133.4991,595.36221 h -1.4997 v 24.00011 h 1.4997 z"
        id="rect22219"
        inkscape:connector-curvature="0" />
     <path
        sodipodi:nodetypes="ccccccccccccccc"
        inkscape:connector-curvature="0"
        id="rect22225"
-       d="m 1121.4994,610.36229 v 4.50001 h 7.5 v -4.50001 z m 3,-6 v 4.5 h 4.5 v -4.5 z m -2.9999,-6 -10e-5,4.5 h 7.5 v -4.50001 z m 20.9999,12 v 4.50001 h -7.5 v -4.50001 z m -3,-6 v 4.5 h -4.5 v -4.5 z m 2.9999,-6 10e-5,4.5 h -7.5 v -4.50001 z"
+       d="m 1121.4994,610.36229 v 4.50001 h 7.5 v -4.50001 z m 3,-6 v 4.5 h 4.5 v -4.5 z m -2.9999,-6 -10e-5,4.5 h 7.5 v -4.50001 z m 19.4999,12 v 4.50001 h -7.5 v -4.50001 z m -3,-6 v 4.5 h -4.5 v -4.5 z m 2.9999,-6 10e-5,4.5 h -7.5 v -4.50001 z"
        inkscape:path-effect="#path-effect1114"
        inkscape:original-d="m 1121.4994,610.36229 v 4.50001 h 7.5 v -4.50001 z m 3,-6 v 4.5 h 4.5 v -4.5 z m -2.9999,-6 -10e-5,4.5 h 7.5 v -4.50001 z"
-       transform="translate(-2.999983e-4,1.6095814e-4)" />
+       transform="translate(1.4999948,-6.963778e-5)" />
   </g>
 </svg>

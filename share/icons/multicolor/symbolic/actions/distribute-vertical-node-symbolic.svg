@@ -15,11 +15,10 @@
    xmlns:cc="http://creativecommons.org/ns#"
    xmlns:dc="http://purl.org/dc/elements/1.1/">
   <style
-     id="s0">
-   .success { fill: #009909; }
-   .warning { fill: #FF1990; }
-   .error   { fill: #00AAFF; }
-  </style>
+     id="s0">.success { fill: #009909; }
+.warning { fill: #FF1990; }
+.error { fill: #00AAFF; }
+</style>
   <style
      id="s2"> 
      @import '../../highlights.css'; 
@@ -65,7 +64,7 @@
      inkscape:window-height="1177"
      inkscape:window-width="1858"
      inkscape:cy="8.1683526"
-     inkscape:cx="4.1764741"
+     inkscape:cx="0.73838216"
      inkscape:zoom="21.668996"
      showgrid="true"
      id="namedview"
@@ -145,15 +144,17 @@
        height="3.0000031"
        width="3.0006113"
        id="rect830-2"
-       style="fill:#009909;fill-opacity:1;stroke-width:0.999997"
-       transform="rotate(-90)" />
+       style="fill-opacity:1;stroke-width:0.999997"
+       transform="rotate(-90)"
+       class="success" />
     <rect
-       style="fill:#009909;fill-opacity:1;stroke-width:0.999997"
+       style="fill-opacity:1;stroke-width:0.999997"
        id="rect828-4"
        width="3.0006232"
        height="3.0000088"
        x="-870.35925"
        y="1047"
-       transform="rotate(-90)" />
+       transform="rotate(-90)"
+       class="success" />
   </g>
 </svg>

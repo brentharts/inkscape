@@ -15,9 +15,7 @@
    xmlns:cc="http://creativecommons.org/ns#"
    xmlns:dc="http://purl.org/dc/elements/1.1/">
   <style
-     id="s0">
- 
-  </style>
+     id="s0" />
   <style
      id="s2"> 
      @import '../../highlights.css'; 
@@ -51,9 +49,9 @@
        split_open="false" />
     <inkscape:path-effect
        effect="mirror_symmetry"
-       start_point="1131.9994,595.46259"
-       end_point="1131.9994,611.96275"
-       center_point="1131.9994,603.71267"
+       start_point="1131.2494,587.1121"
+       end_point="1131.2494,603.61226"
+       center_point="1131.2494,595.36218"
        id="path-effect1114"
        is_visible="true"
        lpeversion="1.1"
@@ -73,7 +71,7 @@
      inkscape:window-x="54"
      inkscape:window-height="1177"
      inkscape:window-width="1858"
-     inkscape:cy="6.2611607"
+     inkscape:cy="6.25"
      inkscape:cx="5.3236607"
      inkscape:zoom="44.8"
      showgrid="true"
@@ -86,7 +84,11 @@
      borderopacity="1.0"
      inkscape:pageshadow="2"
      inkscape:pageopacity="1"
-     inkscape:pagecheckerboard="0">
+     inkscape:pagecheckerboard="0"
+     inkscape:object-paths="true"
+     inkscape:snap-intersection-paths="true"
+     inkscape:snap-smooth-nodes="true"
+     inkscape:snap-midpoints="true">
     <inkscape:grid
        spacingy="1"
        spacingx="1"
@@ -104,18 +106,19 @@
        id="rect22217"
        inkscape:connector-curvature="0" />
     <path
-        
-       style="opacity:1;fill-opacity:1;stroke-width:1.15467;fill:#000000"
-       d="m 1133.4994,595.36218 h -3 v 24 h 3 z"
+       style="opacity:1;fill:#000000;fill-opacity:1;stroke-width:1.15467"
+       d="m 1133.4994,595.36218 h -1.5 v 24 h 1.5 z"
        id="rect22219"
-       inkscape:connector-curvature="0" />
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccc" />
     <path
        sodipodi:nodetypes="ccccccccccccccc"
        inkscape:connector-curvature="0"
        id="rect22225"
        style="opacity:1"
-       d="m 1121.4994,610.36229 v 4.50001 h 7.5 v -4.50001 z m 3,-6 v 4.5 h 4.5 v -4.5 z m -2.9999,-6 -10e-5,4.5 h 7.5 v -4.50001 z m 20.9999,12 v 4.50001 h -7.5 v -4.50001 z m -3,-6 v 4.5 h -4.5 v -4.5 z m 2.9999,-6 10e-5,4.5 h -7.5 v -4.50001 z"
+       d="m 1121.4994,610.36229 v 4.50001 h 7.5 v -4.50001 z m 3,-6 v 4.5 h 4.5 v -4.5 z m -2.9999,-6 -10e-5,4.5 h 7.5 v -4.50001 z m 19.4999,12 v 4.50001 h -7.5 v -4.50001 z m -3,-6 v 4.5 h -4.5 v -4.5 z m 2.9999,-6 10e-5,4.5 h -7.5 v -4.50001 z"
        inkscape:path-effect="#path-effect1114"
-       inkscape:original-d="m 1121.4994,610.36229 v 4.50001 h 7.5 v -4.50001 z m 3,-6 v 4.5 h 4.5 v -4.5 z m -2.9999,-6 -10e-5,4.5 h 7.5 v -4.50001 z" />
+       inkscape:original-d="m 1121.4994,610.36229 v 4.50001 h 7.5 v -4.50001 z m 3,-6 v 4.5 h 4.5 v -4.5 z m -2.9999,-6 -10e-5,4.5 h 7.5 v -4.50001 z"
+       transform="translate(1.500042)" />
   </g>
 </svg>

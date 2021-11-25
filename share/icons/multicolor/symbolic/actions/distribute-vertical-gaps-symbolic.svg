@@ -15,11 +15,10 @@
    xmlns:cc="http://creativecommons.org/ns#"
    xmlns:dc="http://purl.org/dc/elements/1.1/">
   <style
-     id="s0">
-   .success { fill: #009909; }
-   .warning { fill: #FF1990; }
-   .error   { fill: #00AAFF; }
-  </style>
+     id="s0">.success { fill: #009909; }
+.warning { fill: #FF1990; }
+.error { fill: #00AAFF; }
+</style>
   <style
      id="s2"> 
      @import '../../highlights.css'; 
@@ -47,7 +46,7 @@
      inkscape:window-height="1177"
      inkscape:window-width="1858"
      inkscape:cy="9.2604025"
-     inkscape:cx="3.7941927"
+     inkscape:cx="0.59485225"
      inkscape:zoom="31.10016"
      showgrid="true"
      id="namedview"
@@ -86,43 +85,45 @@
     <path
        inkscape:connector-curvature="0"
        style="display:inline;opacity:1;fill-opacity:1;stroke-width:0.999997"
-       d="m 22.284252,17.749238 h 0.115381 2.769232 0.115395 v -1.011571 h -0.115395 -2.769232 -0.115381 z"
+       d="m 21.284252,17.749238 h 0.115381 2.769232 0.115395 v -1.011571 h -0.115395 -2.769232 -0.115381 z"
        id="path892"
-       class="success " />
+       class="success" />
     <path
        inkscape:connector-curvature="0"
        style="display:inline;opacity:1;fill-opacity:1;stroke-width:0.999997"
-       d="m 22.28426,21.738294 h 0.11538 2.769223 0.115395 V 20.749237 H 25.168863 22.39964 22.28426 Z"
+       d="m 21.28426,21.738294 h 0.11538 2.769223 0.115395 V 20.749237 H 24.168863 21.39964 21.28426 Z"
        id="path894"
-       class="success " />
+       class="success" />
     <path
        inkscape:connector-curvature="0"
-       style="display:inline;fill:#009909;fill-opacity:1;stroke-width:0.999997"
-       d="m 22.284252,24.749237 h 0.115381 2.76923 0.115395 V 23.76018 h -0.115395 -2.76923 -0.115381 z"
+       style="display:inline;fill-opacity:1;stroke-width:0.999997"
+       d="m 21.284252,24.749237 h 0.115381 2.76923 0.115395 V 23.76018 h -0.115395 -2.76923 -0.115381 z"
        id="path1179"
-       class="success " />
+       class="success" />
     <path
        inkscape:connector-curvature="0"
-       style="display:inline;fill:#009909;fill-opacity:1;stroke-width:0.999997"
-       d="m 22.284252,28.749237 h 0.115381 2.76923 0.115395 V 27.76018 h -0.115395 -2.76923 -0.115381 z"
+       style="display:inline;fill-opacity:1;stroke-width:0.999997"
+       d="m 21.284252,28.749237 h 0.115381 2.76923 0.115395 V 27.76018 h -0.115395 -2.76923 -0.115381 z"
        id="path894-8"
-       class="success " />
+       class="success" />
     <rect
        transform="rotate(-90)"
-       y="23.28426"
+       y="22.28426"
        x="-28.749239"
        height="1.0000004"
        width="5.0000024"
        id="rect1177"
-       style="display:inline;opacity:1;fill-opacity:1;stroke-width:0.999998;fill:#009909" />
+       style="display:inline;opacity:1;fill-opacity:1;stroke-width:0.999998"
+       class="success" />
     <rect
        transform="rotate(-90)"
-       y="23.28426"
+       y="22.28426"
        x="-21.749237"
        height="1.0000004"
        width="5.0000014"
        id="rect912"
-       style="display:inline;opacity:1;fill-opacity:1;stroke-width:0.999998;fill:#009909" />
+       style="display:inline;opacity:1;fill-opacity:1;stroke-width:0.999998"
+       class="success" />
     <rect
        transform="rotate(-90)"
        style="display:inline;opacity:1;stroke-width:1"
