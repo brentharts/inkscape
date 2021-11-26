@@ -73,7 +73,6 @@ protected:
     void on_ref_change();
     void on_node_ref_change();
     void on_selgrp_toggled();
-    void on_oncanvas_toggled();
     void addDistributeButton(const Glib::ustring &id, const Glib::ustring tiptext,
                                       guint row, guint col, bool onInterSpace,
                                       Geom::Dim2 orientation, float kBegin, float kEnd);

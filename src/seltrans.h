@@ -67,6 +67,7 @@ public:
     int request(SPSelTransHandle const &handle, Geom::Point &pt, unsigned int state);
     int scaleRequest(Geom::Point &pt, unsigned int state);
     int stretchRequest(SPSelTransHandle const &handle, Geom::Point &pt, unsigned int state);
+    int distributeDragRequest(SPSelTransHandle const &handle, Geom::Point &pt, unsigned int state);
     int skewRequest(SPSelTransHandle const &handle, Geom::Point &pt, unsigned int state);
     int rotateRequest(Geom::Point &pt, unsigned int state);
     int centerRequest(Geom::Point &pt, unsigned int state);
@@ -123,10 +124,12 @@ private:
     Geom::Point _calcAbsAffineGeom(Geom::Scale const geom_scale);
     void _keepClosestPointOnly(Geom::Point const &p);
 
-    enum State {
-        STATE_SCALE, //scale or stretch
-        STATE_ROTATE, //rotate or skew
-        STATE_ALIGN //on canvas align
+    enum State
+    {
+        STATE_SCALE,     // scale or stretch
+        STATE_ROTATE,    // rotate or skew
+        STATE_ALIGN,     // on canvas align
+        STATE_DISTRIBUTE // on canvas distribute
     };
 
     SPDesktop *_desktop;
@@ -150,6 +153,16 @@ private:
     bool _show_handles = true;
     bool _empty;
     bool _changed;
+    bool _sorted = false;
+    int last_item_x;
+    int first_item_x;
+    int last_item_y;
+    int first_item_y;
+
+    std::vector<double> x_ratio_right;
+    std::vector<double> y_ratio_bottom;
+    std::vector<double> x_ratio_left;
+    std::vector<double> y_ratio_top;
 
     SPItem::BBoxType _snap_bbox_type;
 

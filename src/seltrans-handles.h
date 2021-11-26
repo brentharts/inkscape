@@ -30,15 +30,18 @@ namespace Inkscape {
 guint32 const DEF_COLOR[] = { 0x000000ff, 0xff0066ff, 0x00ff66ff, 0x000000ff, 0x000000ff };
 guint32 const CEN_COLOR[] = { 0x000000ff, 0x000000ff, 0x00ff66ff, 0x000000ff, 0xff0000b0 };
 
-enum SPSelTransType {
+enum SPSelTransType
+{
     HANDLE_STRETCH,
     HANDLE_SCALE,
     HANDLE_SKEW,
     HANDLE_ROTATE,
     HANDLE_CENTER,
     HANDLE_SIDE_ALIGN,
+    HANDLE_CENTER_ALIGN,
     HANDLE_CORNER_ALIGN,
-    HANDLE_CENTER_ALIGN
+    HANDLE_SIDE_DISTRIBUTE,
+    HANDLE_CORNER_DISTRIBUTE,
 };
 
 // Which handle does what in the alignment (clicking)
@@ -79,7 +82,7 @@ struct SPSelTransHandle {
 	gdouble x, y;
 };
 // These are 4 * each handle type + 1 for center
-int const NUMHANDS = 26;
+int const NUMHANDS = 34;
 extern SPSelTransHandle const hands[NUMHANDS];
 
 #endif // SEEN_SP_SELTRANS_HANDLES_H

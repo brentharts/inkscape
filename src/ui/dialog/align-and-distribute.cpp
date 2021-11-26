@@ -1101,16 +1101,6 @@ AlignAndDistribute::AlignAndDistribute(DialogBase* dlg) : Gtk::Box(Gtk::ORIENTAT
     _anchorBoxNode.pack_end(_comboNode, false, false);
     _anchorBoxNode.pack_end(_anchorLabelNode, false, false);
 
-    Gtk::Image* oncanvas_icon = Gtk::manage(new Gtk::Image());
-    oncanvas_icon = sp_get_icon_image("align-on-canvas", Gtk::ICON_SIZE_LARGE_TOOLBAR);
-    _oncanvas.add(*oncanvas_icon);
-
-    _oncanvas.set_relief(Gtk::RELIEF_NONE);
-    _oncanvas.set_tooltip_text(_("Enable on-canvas alignment handles."));
-    _anchorBox.pack_start(_oncanvas, false, false);
-    _oncanvas.set_active(prefs->getBool("/dialogs/align/oncanvas"));
-    _oncanvas.signal_toggled().connect(sigc::mem_fun(*this, &AlignAndDistribute::on_oncanvas_toggled));
-
     // Right align the buttons
     _alignTableBox.pack_start(_alignTable, false, false);
     _distributeTableBox.pack_start(_distributeTable, false, false);
@@ -1203,13 +1193,6 @@ void AlignAndDistribute::on_node_ref_change(){
 void AlignAndDistribute::on_selgrp_toggled(){
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     prefs->setInt("/dialogs/align/sel-as-groups", _selgrp.get_active());
-
-    //Make blink the master
-}
-
-void AlignAndDistribute::on_oncanvas_toggled(){
-    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    prefs->setInt("/dialogs/align/oncanvas", _oncanvas.get_active());
 
     //Make blink the master
 }
