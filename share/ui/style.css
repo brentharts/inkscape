@@ -605,3 +605,7 @@ button.square-button image {
 #StyleSwatch label {
     font-size: small;
 }
+
+.toolbar-separator {
+    margin: 7px 3px;
+}
