@@ -1602,6 +1602,7 @@ InkscapeApplication::on_quit()
             window->close();
         }
     }
+
     gio_app()->quit();
 }
 
