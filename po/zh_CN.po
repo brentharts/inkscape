@@ -22724,11 +22724,11 @@ msgstr "极坐标"
 #: ../src/ui/dialog/tile.cpp:44
 msgctxt "Arrange dialog"
 msgid "_Arrange"
-msgstr "安排(_A)"
+msgstr "排列(_A)"
 
 #: ../src/ui/dialog/tile.cpp:47
 msgid "Arrange selected objects"
-msgstr "安排选择的对象"
+msgstr "排列选择的对象"
 
 #: ../src/ui/dialog/transformation.cpp:64 ../src/ui/dialog/transformation.cpp:74
 msgid "_Horizontal:"
