@@ -104,7 +104,7 @@ SPPage *PageManager::newPage()
         auto rect = _selected_page->getRect();
         return newPage(rect.width(), rect.height());
     }
-    return newPage(_document->getWidth().value(unit), _document->getHeight().value(unit));
+    return newDesktopPage(*_document->preferredBounds(), true);
 }
 
 /**
@@ -113,7 +113,6 @@ SPPage *PageManager::newPage()
 SPPage *PageManager::newPage(double width, double height)
 {
     // Get a new location for the page.
-    // XXX This is just silly simple.
     double top = 0.0;
     double left = 0.0;
     for (auto &page : pages) {
@@ -128,8 +127,14 @@ SPPage *PageManager::newPage(double width, double height)
 /**
  * Add a new page with the given rectangle.
  */
-SPPage *PageManager::newPage(Geom::Rect rect)
+SPPage *PageManager::newPage(Geom::Rect rect, bool first_page)
 {
+    // This turns on pages support, which will make two pages if none exist yet.
+    // The first is the ViewBox page, and the second is made below as the "second"
+    if (!hasPages() && !first_page) {
+        enablePages();
+    }
+
     auto xml_doc = _document->getReprDoc();
     auto repr = xml_doc->createElement("inkscape:page");
     repr->setAttributeSvgDouble("x", rect.left());
@@ -138,6 +143,7 @@ SPPage *PageManager::newPage(Geom::Rect rect)
     repr->setAttributeSvgDouble("height", rect.height());
     if (auto nv = _document->getNamedView()) {
         if (auto page = dynamic_cast<SPPage *>(nv->appendChildRepr(repr))) {
+            Inkscape::GC::release(repr);
             return page;
         }
     }
@@ -147,9 +153,9 @@ SPPage *PageManager::newPage(Geom::Rect rect)
 /**
  * Create a new page, resizing the rectangle from desktop coordinates.
  */
-SPPage *PageManager::newDesktopPage(Geom::Rect rect)
+SPPage *PageManager::newDesktopPage(Geom::Rect rect, bool first_page)
 {
-    return newPage(rect * _document->getDocumentScale().inverse());
+    return newPage(rect * _document->getDocumentScale().inverse(), first_page);
 }
 
 /**
@@ -172,8 +178,23 @@ void PageManager::deletePage(SPPage *page, bool content)
                 }
             }
         }
+        if (_selected_page == page) {
+            selectPage(nullptr);
+        }
         // Removal from pages is done automatically via signals.
         page->deleteObject();
+        // We're not sure why this is needed, but SPPage's stick around without it.
+        delete page;
+    }
+
+    // As above with the viewbox shadowing, we need go back to a single page
+    // (which is zero pages) when needed.
+    if (getPageCount() == 1) {
+        if (auto page = getFirstPage()) {
+            auto rect = page->getDesktopRect();
+            deletePage(page, false);
+            _document->fitToRect(rect, false);
+         }
     }
 }
 
@@ -195,6 +216,7 @@ void PageManager::disablePages()
     if (hasPages()) {
         for (auto &page : pages) {
             page->deleteObject();
+            delete page;
         }
     }
 }

@@ -31,6 +31,7 @@ SPPage::SPPage()
 SPPage::~SPPage()
 {
     delete _canvas_item;
+    _canvas_item = nullptr;
 }
 
 void SPPage::build(SPDocument *document, Inkscape::XML::Node *repr)

@@ -174,12 +174,10 @@ bool PagesTool::root_handler(GdkEvent *event)
             break;
         }
         case GDK_MOTION_NOTIFY: {
-            bool drawing_allowed = event->motion.state & GDK_SHIFT_MASK;
             auto point_w = Geom::Point(event->motion.x, event->motion.y);
             auto point_dt = desktop->w2d(point_w);
 
             if (mouse_is_pressed && event->motion.state & GDK_BUTTON1_MASK) {
-
                 // do not drag if we're within tolerance from origin
                 if (Geom::distance(drag_origin_w, point_w) < drag_tolerance) {
                     break;
@@ -196,28 +194,28 @@ bool PagesTool::root_handler(GdkEvent *event)
                     // Continue to drag new box
                     delete on_screen_rect;
                     on_screen_rect = new Geom::Rect(drag_origin_dt, point_dt);
-                } else if (drawing_allowed) {
-                    // Start making a new page.
-                    setupResizeSnap(point_dt);
-                    dragging_item = nullptr;
-                    on_screen_rect = new Geom::Rect(point_dt, point_dt);
-                    this->set_cursor("page-draw.svg");
-                } else if (auto page = pageUnder(point_dt)) {
-                    // Starting to drag page around the screen.
+                } else if (auto page = pageUnder(drag_origin_dt)) {
+                    // Starting to drag page around the screen, the pageUnder must
+                    // be the drag_origin as small movements can kill the UX feel.
                     dragging_item = page;
                     page_manager->selectPage(page);
                     addDragShapes(page, Geom::Affine());
                     grabPage(page);
                     this->set_cursor("page-dragging.svg");
+                } else {
+                    // Start making a new page.
+                    setupResizeSnap(point_dt);
+                    dragging_item = nullptr;
+                    on_screen_rect = new Geom::Rect(point_dt, point_dt);
+                    this->set_cursor("page-draw.svg");
                 }
             } else {
                 mouse_is_pressed = false;
-                if (drawing_allowed) {
-                    this->set_cursor("page-draw.svg");
-                } else if (pageUnder(point_dt)) {
+                if (pageUnder(point_dt)) {
+                    // This page under uses the current mouse position (unlike the above)
                     this->set_cursor("page-mouseover.svg");
                 } else {
-                    this->set_cursor(cursor_default);
+                    this->set_cursor("page-draw.svg");
                 }
             }
             break;

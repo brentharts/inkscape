@@ -23,10 +23,6 @@
 void page_new(SPDocument *document)
 {
     if (auto manager = document->getNamedView()->getPageManager()) {
-        // This turns on pages support, which will make two pages if none exist yet.
-        // The first is the ViewBox page, and the second is made below as the "second"
-        manager->enablePages();
-
         manager->selectPage(manager->newPage());
         Inkscape::DocumentUndo::done(document, SP_VERB_NONE, "New Automatic Page");
     }
@@ -37,16 +33,6 @@ void page_delete(SPDocument *document)
     if (auto manager = document->getNamedView()->getPageManager()) {
         // Delete page's content if move_objects is checked.
         manager->deletePage(manager->move_objects());
-
-        // As above with the viewbox shadowing, we need go back to a single page
-        // (which is zero pages) when needed.
-        if (manager->getPageCount() == 1) {
-            if (auto page = manager->getFirstPage()) {
-                auto rect = page->getDesktopRect();
-                manager->deletePage(page, false);
-                document->fitToRect(rect, false);
-            }
-        }
         Inkscape::DocumentUndo::done(document, SP_VERB_NONE, "Delete Page");
     }
 }

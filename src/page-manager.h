@@ -73,8 +73,8 @@ public:
 
     SPPage *newPage();
     SPPage *newPage(double width, double height);
-    SPPage *newPage(Geom::Rect rect);
-    SPPage *newDesktopPage(Geom::Rect rect);
+    SPPage *newPage(Geom::Rect rect, bool first_page = false);
+    SPPage *newDesktopPage(Geom::Rect rect, bool first_page = false);
     void deletePage(SPPage *page, bool contents = false);
     void deletePage(bool contents = false);
     void resizePage(double width, double height);
