@@ -183,8 +183,6 @@ void PageManager::deletePage(SPPage *page, bool content)
         }
         // Removal from pages is done automatically via signals.
         page->deleteObject();
-        // We're not sure why this is needed, but SPPage's stick around without it.
-        delete page;
     }
 
     // As above with the viewbox shadowing, we need go back to a single page
@@ -216,7 +214,6 @@ void PageManager::disablePages()
     if (hasPages()) {
         for (auto &page : pages) {
             page->deleteObject();
-            delete page;
         }
     }
 }
