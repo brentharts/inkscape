@@ -63,9 +63,7 @@ private:
     void pageModified(SPObject *object, guint flags);
 
     void grabPage(SPPage *target);
-    Geom::Affine moveTo(Geom::Point xy);
-    void setupResizeSnap(Geom::Point start);
-    void unsetupSnap();
+    Geom::Affine moveTo(Geom::Point xy, bool snap);
 
     sigc::connection _selector_changed_connection;
     sigc::connection _page_modified_connection;
@@ -75,7 +73,6 @@ private:
     Geom::Point drag_origin_dt;
     int drag_tolerance = 5;
 
-    SnapManager *snap_manager = nullptr;
     SPKnot *resize_knot = nullptr;
     SPPage *highlight_item = nullptr;
     SPPage *dragging_item = nullptr;

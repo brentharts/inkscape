@@ -32,6 +32,7 @@
 #include "snap-preferences.h"
 #include "snap.h"
 #include "ui/knot/knot.h"
+#include "ui/widget/canvas.h"
 
 namespace Inkscape {
 namespace UI {
@@ -98,6 +99,10 @@ void PagesTool::setup()
         resize_knot->hide();
         resize_knot->moved_signal.connect(sigc::mem_fun(*this, &PagesTool::resizeKnotMoved));
         resize_knot->ungrabbed_signal.connect(sigc::mem_fun(*this, &PagesTool::resizeKnotFinished));
+        if (auto window = desktop->getCanvas()->get_window()) {
+            resize_knot->setCursor(SP_KNOT_STATE_DRAGGING, this->get_cursor(window, "page-resizing.svg"));
+            resize_knot->setCursor(SP_KNOT_STATE_MOUSEOVER, this->get_cursor(window, "page-resize.svg"));
+        }
     }
 
     if (!visual_box) {
@@ -127,13 +132,13 @@ void PagesTool::resizeKnotMoved(SPKnot *knot, Geom::Point const &ppointer, guint
 
             // Resize snapping
             if (!(state & GDK_SHIFT_MASK)) {
-                unsetupSnap();
                 SnapManager &snap_manager = desktop->namedview->snap_manager;
                 snap_manager.setup(desktop, true, page);
                 Inkscape::SnapCandidatePoint scp(point, Inkscape::SNAPSOURCE_OTHER_HANDLE);
                 scp.addOrigin(rect.corner(2));
                 Inkscape::SnappedPoint sp = snap_manager.freeSnap(scp);
                 point = sp.getPoint();
+                snap_manager.unSetup();
             }
 
             if (point != rect.corner(2)) {
@@ -188,8 +193,14 @@ bool PagesTool::root_handler(GdkEvent *event)
         case GDK_MOTION_NOTIFY: {
             auto point_w = Geom::Point(event->motion.x, event->motion.y);
             auto point_dt = desktop->w2d(point_w);
+            bool snap = !(event->motion.state & GDK_SHIFT_MASK);
 
-            if (mouse_is_pressed && event->motion.state & GDK_BUTTON1_MASK) {
+            if (event->motion.state & GDK_BUTTON1_MASK) {
+                if (!mouse_is_pressed) {
+                    // this sometims happens if the mouse was off the edge when the event started
+                    drag_origin_w = point_w;
+                    drag_origin_dt = point_dt;
+                }
                 // do not drag if we're within tolerance from origin
                 if (Geom::distance(drag_origin_w, point_w) < drag_tolerance) {
                     break;
@@ -197,7 +208,7 @@ bool PagesTool::root_handler(GdkEvent *event)
 
                 if (dragging_item) {
                     // Continue to drag item.
-                    Geom::Affine tr = moveTo(point_dt);
+                    Geom::Affine tr = moveTo(point_dt, snap);
                     // XXX Moving the existing shapes would be much better, but it has
                     //  weird bug which stops it from working well.
                     // drag_group->update(tr * drag_group->get_parent()->get_affine());
@@ -222,31 +233,27 @@ bool PagesTool::root_handler(GdkEvent *event)
                 }
             } else {
                 mouse_is_pressed = false;
-                if (pageUnder(point_dt)) {
-                    // This page under uses the current mouse position (unlike the above)
-                    this->set_cursor("page-mouseover.svg");
-                } else {
-                    this->set_cursor("page-draw.svg");
-                }
+                drag_origin_dt = point_dt;
             }
             break;
         }
         case GDK_BUTTON_RELEASE: {
             auto point_w = Geom::Point(event->button.x, event->button.y);
             auto point_dt = desktop->w2d(point_w);
+            bool snap = !(event->button.state & GDK_SHIFT_MASK);
 
             if (dragging_item) {
                 if (dragging_item->isViewportPage()) {
                     // Move the document's viewport first
                     auto rect = dragging_item->document->preferredBounds();
-                    auto affine = moveTo(point_dt);
+                    auto affine = moveTo(point_dt, snap);
                     dragging_item->document->fitToRect(*rect * affine, false);
                     // Now move the page back to where we expect it.
                     dragging_item->movePage(affine, page_manager->move_objects());
                     dragging_item->setDesktopRect(*rect);
                 } else {
                     // Move the page object on the canvas.
-                    dragging_item->movePage(moveTo(point_dt), page_manager->move_objects());
+                    dragging_item->movePage(moveTo(point_dt, snap), page_manager->move_objects());
                 }
                 Inkscape::DocumentUndo::done(desktop->getDocument(), SP_VERB_NONE, "Move page position");
             } else if (on_screen_rect) {
@@ -255,6 +262,7 @@ bool PagesTool::root_handler(GdkEvent *event)
                 Inkscape::DocumentUndo::done(desktop->getDocument(), SP_VERB_NONE, "Create new drawn page");
             }
             mouse_is_pressed = false;
+            drag_origin_dt = point_dt;
             ret = true;
             break;
         }
@@ -279,12 +287,19 @@ bool PagesTool::root_handler(GdkEvent *event)
         on_screen_rect = nullptr;
         clearDragShapes();
         visual_box->hide();
-        unsetupSnap();
         ret = true;
     } else if (on_screen_rect) {
         visual_box->show();
         visual_box->set_rect(*on_screen_rect);
         ret = true;
+    }
+    if (!mouse_is_pressed) {
+        if (pageUnder(drag_origin_dt)) {
+            // This page under uses the current mouse position (unlike the above)
+            this->set_cursor("page-mouseover.svg");
+        } else {
+            this->set_cursor("page-draw.svg");
+        }
     }
 
     return ret ? true : ToolBase::root_handler(event);
@@ -295,10 +310,6 @@ bool PagesTool::root_handler(GdkEvent *event)
  */
 void PagesTool::grabPage(SPPage *target)
 {
-    unsetupSnap();
-    snap_manager = &(desktop->namedview->snap_manager);
-    snap_manager->setup(desktop, true, target);
-
     _bbox_points.clear();
     getBBoxPoints(target->getDesktopRect(), &_bbox_points, false, SNAPSOURCE_PAGE_CORNER, SNAPTARGET_UNDEFINED,
                   SNAPSOURCE_UNDEFINED, SNAPTARGET_UNDEFINED, SNAPSOURCE_PAGE_CENTER, SNAPTARGET_UNDEFINED);
@@ -307,41 +318,36 @@ void PagesTool::grabPage(SPPage *target)
 /*
  * Generate the movement affine as the page is dragged around (including snapping)
  */
-Geom::Affine PagesTool::moveTo(Geom::Point xy)
+Geom::Affine PagesTool::moveTo(Geom::Point xy, bool snap)
 {
     Geom::Point dxy = xy - drag_origin_dt;
 
-    if (snap_manager) {
-        snap_manager->snapprefs.clearTargetMask(0); // Disable all snapping targets
-        snap_manager->snapprefs.setTargetMask(SNAPTARGET_ALIGNMENT_CATEGORY, -1);
-        snap_manager->snapprefs.setTargetMask(SNAPTARGET_ALIGNMENT_PAGE_CORNER, -1);
-        snap_manager->snapprefs.setTargetMask(SNAPTARGET_ALIGNMENT_PAGE_CENTER, -1);
-        snap_manager->snapprefs.setTargetMask(SNAPTARGET_PAGE_CORNER, -1);
-        snap_manager->snapprefs.setTargetMask(SNAPTARGET_PAGE_CENTER, -1);
-        snap_manager->snapprefs.setTargetMask(SNAPTARGET_GRID_INTERSECTION, -1);
-        snap_manager->snapprefs.setTargetMask(SNAPTARGET_GUIDE, -1);
-        snap_manager->snapprefs.setTargetMask(SNAPTARGET_GUIDE_INTERSECTION, -1);
+    if (snap) {
+        SnapManager &snap_manager = desktop->namedview->snap_manager;
+        snap_manager.setup(desktop, true, dragging_item);
+        snap_manager.snapprefs.clearTargetMask(0); // Disable all snapping targets
+        snap_manager.snapprefs.setTargetMask(SNAPTARGET_ALIGNMENT_CATEGORY, -1);
+        snap_manager.snapprefs.setTargetMask(SNAPTARGET_ALIGNMENT_PAGE_CORNER, -1);
+        snap_manager.snapprefs.setTargetMask(SNAPTARGET_ALIGNMENT_PAGE_CENTER, -1);
+        snap_manager.snapprefs.setTargetMask(SNAPTARGET_PAGE_CORNER, -1);
+        snap_manager.snapprefs.setTargetMask(SNAPTARGET_PAGE_CENTER, -1);
+        snap_manager.snapprefs.setTargetMask(SNAPTARGET_GRID_INTERSECTION, -1);
+        snap_manager.snapprefs.setTargetMask(SNAPTARGET_GUIDE, -1);
+        snap_manager.snapprefs.setTargetMask(SNAPTARGET_GUIDE_INTERSECTION, -1);
 
         Inkscape::PureTranslate *bb = new Inkscape::PureTranslate(dxy);
-        snap_manager->snapTransformed(_bbox_points, drag_origin_dt, (*bb));
+        snap_manager.snapTransformed(_bbox_points, drag_origin_dt, (*bb));
 
         if (bb->best_snapped_point.getSnapped()) {
             dxy = bb->getTranslationSnapped();
             desktop->snapindicator->set_new_snaptarget(bb->best_snapped_point);
         }
 
-        snap_manager->snapprefs.clearTargetMask(-1); // Reset preferences
+        snap_manager.snapprefs.clearTargetMask(-1); // Reset preferences
+        snap_manager.unSetup();
     }
 
     return Geom::Translate(dxy);
-}
-
-void PagesTool::unsetupSnap()
-{
-    if (snap_manager) {
-        snap_manager->unSetup();
-        snap_manager = nullptr;
-    }
 }
 
 /**

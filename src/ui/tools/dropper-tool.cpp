@@ -383,13 +383,14 @@ bool DropperTool::root_handler(GdkEvent* event) {
     g_free(alpha);
 
     // Set the right cursor for the mode and apply the special Fill color
-    cursor_filename = (this->dropping ? (this->stroke ? "dropper-drop-stroke.svg" : "dropper-drop-fill.svg") :
+    _cursor_filename = (this->dropping ? (this->stroke ? "dropper-drop-stroke.svg" : "dropper-drop-fill.svg") :
                                         (this->stroke ? "dropper-pick-stroke.svg" : "dropper-pick-fill.svg") );
 
     // We do this ourselves to get color correct.
     auto display = desktop->getCanvas()->get_display();
     auto window = desktop->getCanvas()->get_window();
-    load_svg_cursor(display, window, cursor_filename, get_color(invert));
+    auto cursor = load_svg_cursor(display, window, _cursor_filename, get_color(invert));
+    window->set_cursor(cursor);
 
     if (!ret) {
     	ret = ToolBase::root_handler(event);

@@ -1345,7 +1345,7 @@ void SPDesktop::setWaitingCursor()
 
 void SPDesktop::clearWaitingCursor() {
   if (waiting_cursor) {
-      this->event_context->sp_event_context_update_cursor();
+      this->event_context->use_tool_cursor();
   }
 }
 

@@ -93,8 +93,8 @@ static void set_event_location(SPDesktop * desktop, GdkEvent * event);
 
 
 ToolBase::ToolBase(std::string cursor_filename, bool uses_snap)
-    : cursor_default(std::move(cursor_filename))
-    , cursor_filename("none")
+    : _cursor_default(std::move(cursor_filename))
+    , _cursor_filename("none")
     , _uses_snap(uses_snap)
 {
 }
@@ -118,7 +118,7 @@ ToolBase::~ToolBase() {
 void ToolBase::setup() {
     this->pref_observer = new ToolPrefObserver(this->getPrefsPath(), this);
     Inkscape::Preferences::get()->addObserver(*(this->pref_observer));
-    this->set_cursor(cursor_default);
+    this->set_cursor(_cursor_default);
     desktop->getCanvas()->grab_focus();
 }
 
@@ -144,30 +144,51 @@ SPGroup *ToolBase::currentLayer() const
  */
 void ToolBase::set_cursor(std::string filename)
 {
-    if (filename != cursor_filename) {
-        cursor_filename = filename;
-        sp_event_context_update_cursor();
+    if (filename != _cursor_filename) {
+        _cursor_filename = filename;
+        use_tool_cursor();
     }
 }
 
 /**
- * Recreates and draws cursor on desktop related to ToolBase.
+ * Returns the Gdk Cursor for the given filename
+ *
+ * WARNING: currently this changes the window cursor, see load_svg_cursor
  */
-void ToolBase::sp_event_context_update_cursor() {
-    Gtk::Widget *w = desktop->getCanvas();
-    if (w->get_window()) {
+Glib::RefPtr<Gdk::Cursor> ToolBase::get_cursor(Glib::RefPtr<Gdk::Window> window, std::string filename)
+{
+    bool fillHasColor   = false;
+    bool strokeHasColor = false;
+    guint32 fillColor   = sp_desktop_get_color_tool(desktop, getPrefsPath(), true,  &fillHasColor);
+    guint32 strokeColor = sp_desktop_get_color_tool(desktop, getPrefsPath(), false, &strokeHasColor);
+    double fillOpacity  = fillHasColor   ? sp_desktop_get_opacity_tool(desktop, getPrefsPath(), true)  : 1.0;
+    double strokeOpacity= strokeHasColor ? sp_desktop_get_opacity_tool(desktop, getPrefsPath(), false) : 1.0;
 
-        bool fillHasColor   = false;
-        bool strokeHasColor = false;
-        guint32 fillColor   = sp_desktop_get_color_tool(desktop, getPrefsPath(), true,  &fillHasColor);
-        guint32 strokeColor = sp_desktop_get_color_tool(desktop, getPrefsPath(), false, &strokeHasColor);
-        double fillOpacity  = fillHasColor   ? sp_desktop_get_opacity_tool(desktop, getPrefsPath(), true)  : 1.0;
-        double strokeOpacity= strokeHasColor ? sp_desktop_get_opacity_tool(desktop, getPrefsPath(), false) : 1.0;
+    return load_svg_cursor(window->get_display(), window, filename,
+                           fillColor, strokeColor, fillOpacity, strokeOpacity);
+}
 
-        cursor = load_svg_cursor(w->get_display(), w->get_window(), cursor_filename,
-                                 fillColor, strokeColor, fillOpacity, strokeOpacity);
+/**
+ * Uses the saved cursor, based on the saved fiilename.
+ */
+void ToolBase::use_tool_cursor() {
+    if (auto window = desktop->getCanvas()->get_window()) {
+        _cursor = get_cursor(window, _cursor_filename);
+        window->set_cursor(_cursor);
     }
     this->desktop->waiting_cursor = false;
+}
+
+/**
+ * Set the cursor to this specific one, don't remember it.
+ *
+ * If RefPtr is empty, sets the remembered cursor (reverting it)
+ */
+void ToolBase::use_cursor(Glib::RefPtr<Gdk::Cursor> cursor)
+{
+    if (auto window = desktop->getCanvas()->get_window()) {
+        window->set_cursor(cursor ? cursor : _cursor);
+    }
 }
 
 /**
@@ -532,7 +553,7 @@ bool ToolBase::root_handler(GdkEvent* event) {
 
         if (panning_cursor == 1) {
             panning_cursor = 0;
-            desktop->getCanvas()->get_window()->set_cursor(cursor);
+            desktop->getCanvas()->get_window()->set_cursor(_cursor);
         }
 
         if (middle_mouse_zoom && within_tolerance && (panning || zoom_rb)) {
@@ -729,7 +750,7 @@ bool ToolBase::root_handler(GdkEvent* event) {
 
         if (panning_cursor == 1) {
             panning_cursor = 0;
-            desktop->getCanvas()->get_window()->set_cursor(cursor);
+            desktop->getCanvas()->get_window()->set_cursor(_cursor);
         }
 
         switch (get_latin_keyval(&event->key)) {

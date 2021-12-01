@@ -197,9 +197,9 @@ public:
 
 // private:
     Inkscape::Preferences::Observer *pref_observer = nullptr;
-    Glib::RefPtr<Gdk::Cursor> cursor;
-    std::string cursor_filename = "select.svg";
-    std::string cursor_default = "select.svg";
+    Glib::RefPtr<Gdk::Cursor> _cursor;
+    std::string _cursor_filename = "select.svg";
+    std::string _cursor_default = "select.svg";
 
     gint xp = 0;           ///< where drag started
     gint yp = 0;           ///< where drag started
@@ -243,7 +243,9 @@ public:
     DelayedSnapEvent *_delayed_snap_event = nullptr;
 
     void set_cursor(std::string filename);
-    void sp_event_context_update_cursor();
+    void use_cursor(Glib::RefPtr<Gdk::Cursor> cursor);
+    Glib::RefPtr<Gdk::Cursor> get_cursor(Glib::RefPtr<Gdk::Window> window, std::string filename);
+    void use_tool_cursor();
 
 protected:
     bool sp_event_context_knot_mouseover() const;
