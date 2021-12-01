@@ -124,6 +124,18 @@ void PagesTool::resizeKnotMoved(SPKnot *knot, Geom::Point const &ppointer, guint
     if (auto page_manager = getPageManager()) {
         if (auto page = page_manager->getSelected()) {
             auto rect = page->getDesktopRect();
+
+            // Resize snapping
+            if (!(state & GDK_SHIFT_MASK)) {
+                unsetupSnap();
+                SnapManager &snap_manager = desktop->namedview->snap_manager;
+                snap_manager.setup(desktop, true, page);
+                Inkscape::SnapCandidatePoint scp(point, Inkscape::SNAPSOURCE_OTHER_HANDLE);
+                scp.addOrigin(rect.corner(2));
+                Inkscape::SnappedPoint sp = snap_manager.freeSnap(scp);
+                point = sp.getPoint();
+            }
+
             if (point != rect.corner(2)) {
                 rect.setMax(point);
                 visual_box->show();
@@ -204,7 +216,6 @@ bool PagesTool::root_handler(GdkEvent *event)
                     this->set_cursor("page-dragging.svg");
                 } else {
                     // Start making a new page.
-                    setupResizeSnap(point_dt);
                     dragging_item = nullptr;
                     on_screen_rect = new Geom::Rect(point_dt, point_dt);
                     this->set_cursor("page-draw.svg");
@@ -239,10 +250,8 @@ bool PagesTool::root_handler(GdkEvent *event)
                 }
                 Inkscape::DocumentUndo::done(desktop->getDocument(), SP_VERB_NONE, "Move page position");
             } else if (on_screen_rect) {
-                // If pages are not enabled, enable them first. (creates a default)
-                page_manager->enablePages();
                 // conclude box here (make new page)
-                page_manager->newDesktopPage(*on_screen_rect);
+                page_manager->selectPage(page_manager->newDesktopPage(*on_screen_rect));
                 Inkscape::DocumentUndo::done(desktop->getDocument(), SP_VERB_NONE, "Create new drawn page");
             }
             mouse_is_pressed = false;
@@ -309,6 +318,9 @@ Geom::Affine PagesTool::moveTo(Geom::Point xy)
         snap_manager->snapprefs.setTargetMask(SNAPTARGET_ALIGNMENT_PAGE_CENTER, -1);
         snap_manager->snapprefs.setTargetMask(SNAPTARGET_PAGE_CORNER, -1);
         snap_manager->snapprefs.setTargetMask(SNAPTARGET_PAGE_CENTER, -1);
+        snap_manager->snapprefs.setTargetMask(SNAPTARGET_GRID_INTERSECTION, -1);
+        snap_manager->snapprefs.setTargetMask(SNAPTARGET_GUIDE, -1);
+        snap_manager->snapprefs.setTargetMask(SNAPTARGET_GUIDE_INTERSECTION, -1);
 
         Inkscape::PureTranslate *bb = new Inkscape::PureTranslate(dxy);
         snap_manager->snapTransformed(_bbox_points, drag_origin_dt, (*bb));
@@ -322,15 +334,6 @@ Geom::Affine PagesTool::moveTo(Geom::Point xy)
     }
 
     return Geom::Translate(dxy);
-}
-
-/**
- * Create the snapping for the resize boxes.
- */
-void PagesTool::setupResizeSnap(Geom::Point start)
-{
-    unsetupSnap();
-    // XXX Add all the resize points
 }
 
 void PagesTool::unsetupSnap()

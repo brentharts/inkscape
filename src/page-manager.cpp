@@ -88,7 +88,7 @@ void PageManager::reorderPage(Inkscape::XML::Node *child)
 void PageManager::enablePages()
 {
     if (!hasPages()) {
-        newPage();
+        _selected_page = newDesktopPage(*_document->preferredBounds(), true);
     }
 }
 
@@ -99,12 +99,9 @@ void PageManager::enablePages()
  */
 SPPage *PageManager::newPage()
 {
-    auto unit = _document->getDisplayUnit();
-    if (_selected_page) {
-        auto rect = _selected_page->getRect();
-        return newPage(rect.width(), rect.height());
-    }
-    return newDesktopPage(*_document->preferredBounds(), true);
+    enablePages();
+    auto rect = _selected_page->getRect();
+    return newPage(rect.width(), rect.height());
 }
 
 /**
