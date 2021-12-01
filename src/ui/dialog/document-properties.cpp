@@ -46,6 +46,8 @@
 
 #include "object/color-profile.h"
 
+#include "ui/widget/page-properties.h"
+
 namespace Inkscape {
 namespace UI {
 namespace Dialog {
@@ -185,6 +187,11 @@ DocumentProperties::DocumentProperties()
 
     _rum_deflt._changed_connection.block();
     _rum_deflt.getUnitMenu()->signal_changed().connect(sigc::mem_fun(*this, &DocumentProperties::onDocUnitChange));
+
+// test
+    UI::Widget::NotebookPage* _page_test = new UI::Widget::NotebookPage(1, 1, false, true);
+    _page_test->table().attach(*(Inkscape::UI::Widget::PageProperties::create()), 0, 0);
+    _notebook.append_page(*_page_test, _("!Test"));
 }
 
 void DocumentProperties::init()

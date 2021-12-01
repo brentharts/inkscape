@@ -203,6 +203,8 @@ set(ui_SRC
 	widget/marker-combo-box.cpp
 	widget/notebook-page.cpp
 	widget/object-composite-settings.cpp
+	widget/page-properties.cpp
+	widget/page-size-preview.cpp
 	widget/page-sizer.cpp
 	widget/paint-selector.cpp
 	widget/point.cpp

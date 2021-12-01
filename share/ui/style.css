@@ -606,6 +606,22 @@ button.square-button image {
     font-size: small;
 }
 
+/* heading label in dialogs */
+.heading {
+    font-weight: bold;
+    font-size: 1.1em; /* make it optically comparable with non-bold */
+    margin-top: 0.5em;
+}
+/* topmost heading in dialogs */
+.heading.top {
+    margin-top: 0.2em;
+}
+
+/* single-level indentation for labels in a dialog */
+.indent {
+    margin-left: 1em;
+}
+
 /* for dialogs with "Apply" button (or equivalent) - larger hit target */
 .wide-apply-button {
     min-width: 150px;

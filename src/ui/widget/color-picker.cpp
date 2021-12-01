@@ -29,21 +29,26 @@ namespace UI {
 namespace Widget {
 
 ColorPicker::ColorPicker (const Glib::ustring& title, const Glib::ustring& tip,
-                          guint32 rgba, bool undo)
+                          guint32 rgba, bool undo, Gtk::Button* external_button)
     : _preview(new ColorPreview(rgba))
     , _title(title)
     , _rgba(rgba)
     , _undo(undo)
     , _colorSelectorDialog("dialogs.colorpickerwindow")
 {
+    Gtk::Button* button = external_button ? external_button : this;
     _color_selector = nullptr;
     setupDialog(title);
     _preview->show();
-    add(*Gtk::manage(_preview));
-    set_tooltip_text (tip);
+    button->add(*Gtk::manage(_preview));
+    button->set_tooltip_text(tip);
     _selected_color.signal_changed.connect(sigc::mem_fun(this, &ColorPicker::_onSelectedColorChanged));
     _selected_color.signal_dragged.connect(sigc::mem_fun(this, &ColorPicker::_onSelectedColorChanged));
     _selected_color.signal_released.connect(sigc::mem_fun(this, &ColorPicker::_onSelectedColorChanged));
+
+    if (external_button) {
+        external_button->signal_clicked().connect([=](){ on_clicked(); });
+    }
 }
 
 ColorPicker::~ColorPicker()

@@ -41,7 +41,8 @@ public:
     ColorPicker (const Glib::ustring& title,
                  const Glib::ustring& tip,
                  const guint32 rgba,
-                 bool undo);
+                 bool undo,
+                 Gtk::Button* external_button = nullptr);
 
     ~ColorPicker() override;
 
