@@ -1656,16 +1656,36 @@ void InkscapePreferences::initPageUI()
         _page_theme.add_line(false, _("Change GTK theme:"), _gtk_theme, "", "", false);
         _gtk_theme.signal_changed().connect(sigc::mem_fun(*this, &InkscapePreferences::comboThemeChange));
     }
+
     _sys_user_themes_dir_copy.init(g_build_filename(g_get_user_data_dir(), "themes", nullptr), _("Open themes folder"));
     _page_theme.add_line(true, _("User themes:"), _sys_user_themes_dir_copy, "", _("Location of the user’s themes"), true, Gtk::manage(new Gtk::Box()));
     _contrast_theme.init("/theme/contrast", 1, 10, 1, 2, 10, 1);
-    Gtk::Widget *space = new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL);
+
+    _page_theme.add_line(true, "", _dark_theme, "", _("Use dark theme"), true);
+    {
+        auto font_scale = new Inkscape::UI::Widget::PrefSlider(false);
+        font_scale = Gtk::manage(font_scale);
+        const double min = 0.5; // 50%
+        font_scale->init("/theme/fontscale", 0, 20, 1, 1, 10, 0);
+        font_scale->getSlider()->signal_format_value().connect([=](double val) {
+            return Glib::ustring::format(std::fixed, std::setprecision(0), (min + val / 20.0) * 100.0) + "%";
+        });
+        auto space = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL);
+        space->set_size_request(_sb_width / 3, -1);
+        auto apply = Gtk::make_managed<Gtk::Button>("Apply");
+        apply->set_valign(Gtk::ALIGN_CENTER);
+        space->add(*apply);
+        apply->signal_clicked().connect([=](){
+            INKSCAPE.themecontext->adjust_global_font_scale(font_scale->getSlider()->get_value() / 20.0 + min);
+        });
+        _page_theme.add_line(false, _("_Font scale:"), *font_scale, "", _("Adjust size of UI fonts"), true, space);
+    }
+    auto space = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL);
     space->set_size_request(_sb_width / 3, -1);
     _page_theme.add_line(false, _("_Contrast:"), _contrast_theme, "",
                          _("Make background brighter or darker to adjust contrast"), true, space);
     _contrast_theme.getSlider()->signal_value_changed().connect(sigc::mem_fun(*this, &InkscapePreferences::contrastThemeChange));
     _contrast_theme.getSpinButton()->signal_value_changed().connect(sigc::mem_fun(*this, &InkscapePreferences::contrastThemeChange));
-    _page_theme.add_line(true, "", _dark_theme, "", _("Use dark theme"), true);
 
     if (dark_themes[current_theme]) {
         _dark_theme.get_parent()->set_no_show_all(false);
@@ -1769,6 +1789,7 @@ void InkscapePreferences::initPageUI()
         _menu_icons.init("/theme/menuIcons", menu_icons_labels, menu_icons_values, G_N_ELEMENTS(menu_icons_labels), 0);
         _page_theme.add_line(false, _("Show icons in menus:"), _menu_icons, _("(requires restart)"),
                              _("You can either enable or disable all icons in menus. By default, the setting for the 'show-icons' attribute in the 'menus.ui' file determines whether to display icons in menus."), false);
+
 
     this->AddPage(_page_theme, _("Theming"), iter_ui, PREFS_PAGE_UI_THEME);
     symbolicThemeCheck();
