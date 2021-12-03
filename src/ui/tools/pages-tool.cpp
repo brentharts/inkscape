@@ -186,11 +186,13 @@ bool PagesTool::root_handler(GdkEvent *event)
                 if (auto page = pageUnder(drag_origin_dt)) {
                     // Select the clicked on page. Manager ignores the same-page.
                     page_manager->selectPage(page);
+                    this->set_cursor("page-dragging.svg");
                 }
             }
             break;
         }
         case GDK_MOTION_NOTIFY: {
+
             auto point_w = Geom::Point(event->motion.x, event->motion.y);
             auto point_dt = desktop->w2d(point_w);
             bool snap = !(event->motion.state & GDK_SHIFT_MASK);
@@ -200,10 +202,7 @@ bool PagesTool::root_handler(GdkEvent *event)
                     // this sometims happens if the mouse was off the edge when the event started
                     drag_origin_w = point_w;
                     drag_origin_dt = point_dt;
-                }
-                // do not drag if we're within tolerance from origin
-                if (Geom::distance(drag_origin_w, point_w) < drag_tolerance) {
-                    break;
+                    mouse_is_pressed = true;
                 }
 
                 if (dragging_item) {
@@ -217,6 +216,9 @@ bool PagesTool::root_handler(GdkEvent *event)
                     // Continue to drag new box
                     delete on_screen_rect;
                     on_screen_rect = new Geom::Rect(drag_origin_dt, point_dt);
+                } else if (Geom::distance(drag_origin_w, point_w) < drag_tolerance) {
+                    // do not start draging anything new if we're within tolerance from origin.
+                    // pass
                 } else if (auto page = pageUnder(drag_origin_dt)) {
                     // Starting to drag page around the screen, the pageUnder must
                     // be the drag_origin as small movements can kill the UX feel.
@@ -224,7 +226,6 @@ bool PagesTool::root_handler(GdkEvent *event)
                     page_manager->selectPage(page);
                     addDragShapes(page, Geom::Affine());
                     grabPage(page);
-                    this->set_cursor("page-dragging.svg");
                 } else {
                     // Start making a new page.
                     dragging_item = nullptr;
@@ -465,7 +466,7 @@ void PagesTool::pageModified(SPObject *object, guint /*flags*/)
 {
     if (auto page = dynamic_cast<SPPage *>(object)) {
         if (resize_knot) {
-            resize_knot->setPosition(page->getDesktopRect().corner(2), 0);
+            resize_knot->moveto(page->getDesktopRect().corner(2));
             resize_knot->show();
         }
     }
