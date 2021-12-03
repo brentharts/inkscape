@@ -8,6 +8,10 @@
  * Copyright (C) 2005-2008 Authors
  *
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
+ *
+ *
+ * Only used by Live Path Effects (see src/live_effects/parameter/)
+ *
  */
 
 #ifndef INKSCAPE_UI_WIDGET_REGISTERED_WIDGET__H_
@@ -51,9 +55,9 @@ class Registry;
 template <class W>
 class RegisteredWidget : public W {
 public:
-    void set_undo_parameters(const unsigned int _event_type, Glib::ustring _event_description)
+    void set_undo_parameters(Glib::ustring _event_description, Glib::ustring _icon_name)
     {
-        event_type = _event_type;
+        icon_name = _icon_name;
         event_description = _event_description;
         write_undo = true;
     }
@@ -124,7 +128,7 @@ protected:
 
         if (write_undo) {
             local_repr->setAttribute(_key, svgstr);
-            DocumentUndo::done(local_doc, event_type, event_description);
+            DocumentUndo::done(local_doc, event_description, icon_name);
         }
     }
 
@@ -132,8 +136,8 @@ protected:
     Glib::ustring _key;
     Inkscape::XML::Node * repr;
     SPDocument * doc;
-    unsigned int event_type;
     Glib::ustring event_description;
+    Glib::ustring icon_name; // Used by History dialog.
     bool write_undo;
 
 private:
@@ -142,7 +146,7 @@ private:
         repr = nullptr;
         doc = nullptr;
         write_undo = false;
-        event_type = 0; //SP_VERB_INVALID
+        icon_name; // Used by History dialog.
     }
 };
 
