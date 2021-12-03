@@ -226,7 +226,7 @@ bool PagesTool::root_handler(GdkEvent *event)
                     page_manager->selectPage(page);
                     addDragShapes(page, Geom::Affine());
                     grabPage(page);
-                } else {
+                } else if (!viewboxUnder(drag_origin_dt)) {
                     // Start making a new page.
                     dragging_item = nullptr;
                     on_screen_rect = new Geom::Rect(point_dt, point_dt);
@@ -295,7 +295,7 @@ bool PagesTool::root_handler(GdkEvent *event)
         ret = true;
     }
     if (!mouse_is_pressed) {
-        if (pageUnder(drag_origin_dt)) {
+        if (pageUnder(drag_origin_dt) || viewboxUnder(drag_origin_dt)) {
             // This page under uses the current mouse position (unlike the above)
             this->set_cursor("page-mouseover.svg");
         } else {
@@ -427,6 +427,20 @@ SPPage *PagesTool::pageUnder(Geom::Point pt)
         }
     }
     return nullptr;
+}
+
+/**
+ * Returns true if the document contains no pages AND the point
+ * is within the document viewbox.
+ */
+bool PagesTool::viewboxUnder(Geom::Point pt)
+{
+    if (auto page_manager = getPageManager()) {
+        if (auto document = desktop->getDocument()) {
+            return !page_manager->hasPages() && document->preferredBounds().contains(pt);
+        }
+    }
+    return true;
 }
 
 Inkscape::PageManager *PagesTool::getPageManager()

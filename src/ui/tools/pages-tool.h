@@ -51,6 +51,7 @@ public:
 private:
     void selectionChanged(SPPage *page);
     SPPage *pageUnder(Geom::Point pt);
+    bool viewboxUnder(Geom::Point pt);
     void addDragShapes(SPPage *page, Geom::Affine tr);
     void addDragShape(SPPage *page, Geom::Affine tr);
     void addDragShape(SPItem *item, Geom::Affine tr);
