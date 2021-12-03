@@ -1663,20 +1663,30 @@ void InkscapePreferences::initPageUI()
 
     _page_theme.add_line(true, "", _dark_theme, "", _("Use dark theme"), true);
     {
-        auto font_scale = new Inkscape::UI::Widget::PrefSlider(false);
+        auto font_scale = new Inkscape::UI::Widget::PrefSlider(true);
         font_scale = Gtk::manage(font_scale);
-        const double min = 0.5; // 50%
-        font_scale->init("/theme/fontscale", 0, 20, 1, 1, 10, 0);
+        font_scale->init("/theme/fontscale", 50, 150, 5, 5, 100, 0); // 50% to 150%
         font_scale->getSlider()->signal_format_value().connect([=](double val) {
-            return Glib::ustring::format(std::fixed, std::setprecision(0), (min + val / 20.0) * 100.0) + "%";
+            return Glib::ustring::format(std::fixed, std::setprecision(0), val) + "%";
+        });
+        font_scale->getSlider()->signal_value_changed().connect([=](){
+            // INKSCAPE.themecontext->adjust_global_font_scale(font_scale->getSlider()->get_value() / 100.0);
         });
         auto space = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL);
-        space->set_size_request(_sb_width / 3, -1);
-        auto apply = Gtk::make_managed<Gtk::Button>("Apply");
+        // space->set_size_request(_sb_width / 3, -1);
+        auto reset = Gtk::make_managed<Gtk::Button>(_("Reset"));
+        auto apply = Gtk::make_managed<Gtk::Button>(_("Apply"));
         apply->set_valign(Gtk::ALIGN_CENTER);
+        apply->set_margin_right(5);
+        reset->set_valign(Gtk::ALIGN_CENTER);
         space->add(*apply);
+        space->add(*reset);
+        reset->signal_clicked().connect([=](){
+            font_scale->getSlider()->set_value(100);
+            INKSCAPE.themecontext->adjust_global_font_scale(1.0);
+        });
         apply->signal_clicked().connect([=](){
-            INKSCAPE.themecontext->adjust_global_font_scale(font_scale->getSlider()->get_value() / 20.0 + min);
+            INKSCAPE.themecontext->adjust_global_font_scale(font_scale->getSlider()->get_value() / 100.0);
         });
         _page_theme.add_line(false, _("_Font scale:"), *font_scale, "", _("Adjust size of UI fonts"), true, space);
     }
