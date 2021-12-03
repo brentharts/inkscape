@@ -1691,6 +1691,8 @@ void ObjectSet::applyAffine(Geom::Affine const &affine, bool set_i2d, bool compe
         auto offset = dynamic_cast<SPOffset *>(item);
         bool transform_offset_with_source = offset && offset->sourceHref && includes(sp_offset_get_source(offset));
 
+		bool has_multiple_shapes = item->style->shape_inside.doesContain(this);
+
         // If we're moving a connector, we want to detach it
         // from shapes that aren't part of the selection, but
         // leave it attached if they are
@@ -1803,6 +1805,8 @@ void ObjectSet::applyAffine(Geom::Affine const &affine, bool set_i2d, bool compe
                 // just apply the result
                 item->doWriteTransform(result, &t, compensate);
             }
+		} else if (has_multiple_shapes) {
+			item->readAttr(SPAttr::TRANSFORM);
 
         } else {
             if (set_i2d) {

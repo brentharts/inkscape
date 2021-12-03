@@ -36,6 +36,7 @@
 #include "strneq.h"
 
 #include "object/sp-text.h"
+#include "object/object-set.h"
 
 #include "svg/svg.h"
 #include "svg/svg-color.h"
@@ -1302,11 +1303,15 @@ SPIShapes::SPIShapes()
 {
 }
 
+bool SPIShapes::doesContain(Inkscape::ObjectSet *set) {
+	for (auto ref : hrefs) {
+		if (set->includes(ref->getObject())) {
+			return true;
+		}
+	}
 
-//SPIShapes::~SPIShapes() {
-//    clear(); // Will segfault if called here. Seems to be already cleared.
-//}
-
+	return false;
+}
 
 // Used to add/remove listeners for text wrapped in shapes.
 // Note: this is done differently than for patterns, etc. where presentation attributes can be used.
