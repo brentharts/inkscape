@@ -99,7 +99,9 @@ void CanvasPage::update(Geom::Rect size, const char *txt, bool outline)
     guint32 shadow_color = 0x00000088;
     guint32 select_color = 0xff0000cc;
     guint32 border_color = _border_color;
-    guint32 background_color = _background_color;
+    // TODO: This ignores the requested transparency to paint the background.
+    // there is disagreement between developers about this feature.
+    guint32 background_color = _background_color | 0xff;
 
     // This is used when showing the viewport as *not a page* it's mostly
     // never used as the first page is normally the viewport too.
