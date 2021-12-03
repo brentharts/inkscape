@@ -15,6 +15,8 @@
 
 #include "object-composite-settings.h"
 
+#include <utility>
+
 #include "desktop.h"
 #include "desktop-style.h"
 #include "document.h"
@@ -23,8 +25,8 @@
 #include "inkscape.h"
 #include "style.h"
 
-#include "svg/css-ostringstream.h"
 #include "object/filters/blend.h"
+#include "svg/css-ostringstream.h"
 #include "ui/widget/style-subject.h"
 
 constexpr double BLUR_MULTIPLIER = 4.0;
@@ -35,7 +37,7 @@ namespace Widget {
 
 ObjectCompositeSettings::ObjectCompositeSettings(Glib::ustring icon_name, char const *history_prefix, int flags)
 : Gtk::Box(Gtk::ORIENTATION_VERTICAL),
-  _icon_name(icon_name),
+  _icon_name(std::move(icon_name)),
   _blend_tag(Glib::ustring(history_prefix) + ":blend"),
   _blur_tag(Glib::ustring(history_prefix) + ":blur"),
   _opacity_tag(Glib::ustring(history_prefix) + ":opacity"),
