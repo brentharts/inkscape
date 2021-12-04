@@ -356,7 +356,7 @@ ConnectorToolbar::graph_layout()
 
     prefs->setInt("/options/clonecompensation/value", saved_compensation);
 
-    DocumentUndo::done(_desktop->getDocument(), _("Arrange connector network"), INKSCAPE_ICON("draw-connector"));
+    DocumentUndo::done(_desktop->getDocument(), _("Arrange connector network"), INKSCAPE_ICON("dialog-align-and-distribute"));
 }
 
 void

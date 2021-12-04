@@ -1558,7 +1558,7 @@ void ObjectVerb::perform( SPAction *action, void *data)
             break;
         case SP_VERB_OBJECT_FLIP_HORIZONTAL:
             sel->setScaleRelative(center, Geom::Scale(-1.0, 1.0));
-            DocumentUndo::done(dt->getDocument(), _("Flip horizontally"), INKSCAPE_ICON("object-flip-horzontal"));
+            DocumentUndo::done(dt->getDocument(), _("Flip horizontally"), INKSCAPE_ICON("object-flip-horizontal"));
             break;
         case SP_VERB_OBJECT_FLIP_VERTICAL:
             sel->setScaleRelative(center, Geom::Scale(1.0, -1.0));
