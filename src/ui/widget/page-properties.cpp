@@ -133,6 +133,7 @@ public:
             if (_update.pending()) return;
             //todo
             // sp_marker_set_offset(get_current(), _offset_x.get_value(), _offset_y.get_value());
+            _preview->set_page_size(_page_width.get_value(), _page_height.get_value());
         };
         _page_width .signal_value_changed().connect([=](){ set_page_size(); });
         _page_height.signal_value_changed().connect([=](){ set_page_size(); });
