@@ -64,7 +64,7 @@ Action::Action(Glib::ustring id,
     , _id(std::move(id))
 {
     Gtk::Image*  pIcon = Gtk::manage(new Gtk::Image());
-    pIcon = sp_get_icon_image(_id, Gtk::ICON_SIZE_LARGE_TOOLBAR);
+    pIcon = sp_get_icon_image(_id, Gtk::ICON_SIZE_BUTTON);
     Gtk::Button * pButton = Gtk::manage(new Gtk::Button());
     pButton->set_relief(Gtk::RELIEF_NONE);
     pIcon->show();
@@ -212,8 +212,7 @@ void ActionAlign::do_action(SPDesktop *desktop, int index)
     }
 
     if (changed) {
-        DocumentUndo::done( desktop->getDocument() , SP_VERB_DIALOG_ALIGN_DISTRIBUTE,
-                            _("Align"));
+        DocumentUndo::done( desktop->getDocument(), _("Align"), INKSCAPE_ICON("dialog-align-and-distribute"));
     }
 }
 
@@ -401,8 +400,7 @@ private :
         prefs->setInt("/options/clonecompensation/value", saved_compensation);
 
         if (changed) {
-            DocumentUndo::done(_desktop->getDocument(), SP_VERB_DIALOG_ALIGN_DISTRIBUTE,
-                                _("Distribute"));
+            DocumentUndo::done(_desktop->getDocument(), _("Distribute"), INKSCAPE_ICON("dialog-align-and-distribute"));
         }
     }
     AlignAndDistribute &_dialog;
@@ -515,8 +513,7 @@ private :
         // restore compensation setting
         prefs->setInt("/options/clonecompensation/value", saved_compensation);
 
-        DocumentUndo::done(_desktop->getDocument(), SP_VERB_DIALOG_ALIGN_DISTRIBUTE,
-                           _("Remove overlaps"));
+        DocumentUndo::done(_desktop->getDocument(), _("Remove overlaps"), INKSCAPE_ICON("dialog-align-and-distribute"));
     }
 };
 
@@ -548,8 +545,7 @@ private :
         // restore compensation setting
         prefs->setInt("/options/clonecompensation/value", saved_compensation);
 
-        DocumentUndo::done(_desktop->getDocument(), SP_VERB_DIALOG_ALIGN_DISTRIBUTE,
-                           _("Arrange connector network"));
+        DocumentUndo::done(_desktop->getDocument(), _("Arrange connector network"), INKSCAPE_ICON("dialog-align-and-distribute"));
     }
 };
 
@@ -636,8 +632,7 @@ private :
         // restore compensation setting
         prefs->setInt("/options/clonecompensation/value", saved_compensation);
 
-        DocumentUndo::done(_desktop->getDocument(), SP_VERB_DIALOG_ALIGN_DISTRIBUTE,
-                           _("Exchange Positions"));
+        DocumentUndo::done(_desktop->getDocument(), _("Exchange Positions"), INKSCAPE_ICON("dialog-align-and-distribute"));
     }
 };
 
@@ -672,8 +667,7 @@ private :
         // restore compensation setting
         prefs->setInt("/options/clonecompensation/value", saved_compensation);
 
-        DocumentUndo::done(_desktop->getDocument(), SP_VERB_DIALOG_ALIGN_DISTRIBUTE,
-                           _("Unclump"));
+        DocumentUndo::done(_desktop->getDocument(), _("Unclump"), INKSCAPE_ICON("dialog-align-and-distribute"));
     }
 };
 
@@ -739,8 +733,7 @@ private :
         // restore compensation setting
         prefs->setInt("/options/clonecompensation/value", saved_compensation);
 
-        DocumentUndo::done(_desktop->getDocument(), SP_VERB_DIALOG_ALIGN_DISTRIBUTE,
-                           _("Randomize positions"));
+        DocumentUndo::done(_desktop->getDocument(), _("Randomize positions"), INKSCAPE_ICON("dialog-align-and-distribute"));
     }
 };
 
@@ -831,8 +824,7 @@ private :
             }
 
             if (changed) {
-                DocumentUndo::done(_desktop->getDocument(), SP_VERB_DIALOG_ALIGN_DISTRIBUTE,
-                                    _("Distribute text baselines"));
+                DocumentUndo::done(_desktop->getDocument(), _("Distribute text baselines"), INKSCAPE_ICON("dialog-align-and-distribute"));
             }
 
         } else { //align
@@ -896,8 +888,7 @@ private :
             }
 
             if (changed) {
-                DocumentUndo::done(_desktop->getDocument(), SP_VERB_DIALOG_ALIGN_DISTRIBUTE,
-                                   _("Align text baselines"));
+                DocumentUndo::done(_desktop->getDocument(), _("Align text baselines"), INKSCAPE_ICON("dialog-align-and-distribute"));
             }
         }
     }
@@ -920,7 +911,7 @@ AlignAndDistribute::AlignAndDistribute(DialogBase* dlg) : Gtk::Box(Gtk::ORIENTAT
     , _rearrangeTable()
     , _removeOverlapTable()
     , _nodesTable()
-    , _groupLabel(_("Selection as group"))
+    , _groupLabel(_("Move/align selection as group"))
     , _anchorLabel(_("Relative to: "))
     , _anchorLabelNode(_("Relative to: "))
     , _anchorBox(Gtk::ORIENTATION_HORIZONTAL)
@@ -1083,31 +1074,37 @@ AlignAndDistribute::AlignAndDistribute(DialogBase* dlg) : Gtk::Box(Gtk::ORIENTAT
     _comboNode.signal_changed().connect(sigc::mem_fun(*this, &AlignAndDistribute::on_node_ref_change));
 
     Gtk::Image* selgrp_icon = Gtk::manage(new Gtk::Image());
-    selgrp_icon = sp_get_icon_image("align-sel-as-group", Gtk::ICON_SIZE_LARGE_TOOLBAR);
+    selgrp_icon = sp_get_icon_image("align-sel-as-group", Gtk::ICON_SIZE_BUTTON);
     _selgrp.add(*selgrp_icon);
 
     _selgrp.set_active(prefs->getBool("/dialogs/align/sel-as-groups"));
     _selgrp.set_relief(Gtk::RELIEF_NONE);
     _selgrp.set_tooltip_text(_("Treat selection as group"));
     _selgrp.signal_toggled().connect(sigc::mem_fun(*this, &AlignAndDistribute::on_selgrp_toggled));
-    
-    
+
     _anchorBox.pack_end(_combo, false, false);
     _anchorBox.pack_end(_anchorLabel, false, false);
-    
+
+    _groupLabel.set_margin_left(4);
     _groupBox.pack_end(_groupLabel, false, false);
     _groupBox.pack_end(_selgrp, false, false);
+    _groupBox.set_margin_bottom(3);
 
     _anchorBoxNode.pack_end(_comboNode, false, false);
     _anchorBoxNode.pack_end(_anchorLabelNode, false, false);
 
+    auto hbox = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL);
     Gtk::Image* oncanvas_icon = Gtk::manage(new Gtk::Image());
-    oncanvas_icon = sp_get_icon_image("align-on-canvas", Gtk::ICON_SIZE_LARGE_TOOLBAR);
+    oncanvas_icon = sp_get_icon_image("align-on-canvas", Gtk::ICON_SIZE_BUTTON);
     _oncanvas.add(*oncanvas_icon);
 
     _oncanvas.set_relief(Gtk::RELIEF_NONE);
     _oncanvas.set_tooltip_text(_("Enable on-canvas alignment handles."));
-    _anchorBox.pack_start(_oncanvas, false, false);
+    hbox->pack_start(_oncanvas, false, false);
+    auto label = Gtk::make_managed<Gtk::Label>(_("Alignment handles with a third click"));
+    label->set_margin_left(4);
+    hbox->pack_start(*label, false, false);
+    hbox->set_margin_bottom(3);
     _oncanvas.set_active(prefs->getBool("/dialogs/align/oncanvas"));
     _oncanvas.signal_toggled().connect(sigc::mem_fun(*this, &AlignAndDistribute::on_oncanvas_toggled));
 
@@ -1118,10 +1115,12 @@ AlignAndDistribute::AlignAndDistribute(DialogBase* dlg) : Gtk::Box(Gtk::ORIENTAT
     _removeOverlapTableBox.pack_start(_removeOverlapTable, false, false);
     _nodesTableBox.pack_start(_nodesTable, false, false);
 
+    hbox->set_halign(Gtk::ALIGN_START);
     _anchorBox.set_halign(Gtk::ALIGN_START);
     _groupBox.set_halign(Gtk::ALIGN_START);
-    _alignBox.pack_start(_anchorBox);
+    _alignBox.pack_start(*hbox);
     _alignBox.pack_start(_groupBox);
+    _alignBox.pack_start(_anchorBox);
     _alignBox.pack_start(_selgrpBox);
     _alignBox.pack_start(_alignTableBox);
 
@@ -1132,12 +1131,16 @@ AlignAndDistribute::AlignAndDistribute(DialogBase* dlg) : Gtk::Box(Gtk::ORIENTAT
 
     _alignFrame.add(_alignBox);
     _alignFrame.set_name("align");
+    const_cast<Gtk::Label*>(_alignFrame.get_label_widget())->hide();
+    _alignFrame.show();
+    _alignFrame.set_no_show_all();
     _distributeFrame.add(_distributeTableBox);
     _rearrangeFrame.add(_rearrangeTableBox);
     _removeOverlapFrame.add(_removeOverlapTableBox);
     _nodesFrame.add(_alignBoxNode);
 
     set_spacing(4);
+    set_valign(Gtk::ALIGN_START);
 
     // Notebook for individual transformations
 
@@ -1145,13 +1148,13 @@ AlignAndDistribute::AlignAndDistribute(DialogBase* dlg) : Gtk::Box(Gtk::ORIENTAT
     pack_start(_distributeFrame, Gtk::PACK_SHRINK);
     pack_start(_rearrangeFrame, Gtk::PACK_SHRINK);
     pack_start(_removeOverlapFrame, Gtk::PACK_SHRINK);
+    _removeOverlapFrame.set_margin_bottom(4); // space between buttons and frame
     pack_start(_nodesFrame, Gtk::PACK_SHRINK);
 
     // Connect to the global selection change, to invalidate cached randomize_bbox
     randomize_bbox = Geom::OptRect();
 
     show_all_children();
-
 }
 
 void AlignAndDistribute::desktopReplaced()
@@ -1159,6 +1162,7 @@ void AlignAndDistribute::desktopReplaced()
     _tool_changed.disconnect();
     if (auto desktop = getDesktop()) {
         _tool_changed = desktop->connectEventContextChanged(sigc::mem_fun(*this, &AlignAndDistribute::toolChanged));
+        toolChanged(desktop, desktop->event_context);
         for (auto & it : _actionList) {
             it->setDesktop(desktop);
         }
@@ -1218,11 +1222,11 @@ void AlignAndDistribute::setMode(bool nodeEdit)
 {
     //Act on widgets used in node mode
     void ( Gtk::Widget::*mNode) ()  = nodeEdit ?
-        &Gtk::Widget::show_all : &Gtk::Widget::hide;
+        &Gtk::Widget::show : &Gtk::Widget::hide;
 
     //Act on widgets used in selection mode
   void ( Gtk::Widget::*mSel) ()  = nodeEdit ?
-      &Gtk::Widget::hide : &Gtk::Widget::show_all;
+      &Gtk::Widget::hide : &Gtk::Widget::show;
 
     ((_alignFrame).*(mSel))();
     ((_distributeFrame).*(mSel))();

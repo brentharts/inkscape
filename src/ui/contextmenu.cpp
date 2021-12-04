@@ -63,6 +63,7 @@
 #include "ui/dialog/dialog-container.h"
 #include "ui/dialog/layer-properties.h"
 #include "ui/icon-loader.h"
+#include "ui/icon-names.h"
 #include "ui/shortcuts.h"
 
 using Inkscape::DocumentUndo;
@@ -325,8 +326,8 @@ void ContextMenu::MakeObjectMenu()
         MakeItemMenu(Inkscape::LayerManager::asLayer(_object));
     }
 
-    if (SP_IS_GROUP(_object)) {
-        MakeGroupMenu(SP_GROUP(_object));
+    if (SP_IS_ITEM(_object)) {
+        MakeGroupMenu(SP_ITEM(_object));
     }
 
     if (SP_IS_ANCHOR(_object)) {
@@ -568,7 +569,7 @@ void ContextMenu::ItemCreateLink()
     Inkscape::GC::release(repr);
     Inkscape::GC::release(child);
 
-    Inkscape::DocumentUndo::done(object->document, SP_VERB_NONE, _("Create link"));
+    Inkscape::DocumentUndo::done(object->document, _("Create link"), "");
 
     _desktop->selection->set(SP_ITEM(object));
     _desktop->getContainer()->new_dialog(SP_VERB_DIALOG_ATTR);
@@ -608,7 +609,7 @@ void sp_group_layer_transform(SPDocument* document, SPGroup* group, SPGroup::Lay
     group->setLayerMode(mode);
     group->updateRepr(SP_OBJECT_WRITE_NO_CHILDREN | SP_OBJECT_WRITE_EXT);
     if (document) {
-        DocumentUndo::done(document, SP_VERB_DIALOG_OBJECTS, mode == SPGroup::GROUP ? _("Layer to group") : _("Group to layer"));
+        DocumentUndo::done(document, mode == SPGroup::GROUP ? _("Layer to group") : _("Group to layer"), INKSCAPE_ICON("dialog-objects"));
     }
 }
 
@@ -628,9 +629,10 @@ void ContextMenu::fireAction(unsigned int code) {
 }
 
 // group and layer menu
-void ContextMenu::MakeGroupMenu(SPGroup* item)
-{
-    if (item->isLayer()) {
+void ContextMenu::MakeGroupMenu(SPItem* item) {
+    auto group = dynamic_cast<SPGroup*>(item);
+
+    if (group && group->isLayer()) {
         // layer-specific commands
         AppendItemFromVerb(Inkscape::Verb::get(SP_VERB_LAYER_NEW));
         AppendItemFromVerb(Inkscape::Verb::get(SP_VERB_LAYER_RENAME));
@@ -645,14 +647,15 @@ void ContextMenu::MakeGroupMenu(SPGroup* item)
         AddSeparator();
 
         // transform layer into group
-        append_item(_("Layer to group"), false).connect([=]() { sp_group_layer_transform(_desktop->doc(), item, SPGroup::GROUP); });
-    } else {
+        append_item(_("Layer to group"), false).connect([=]() { sp_group_layer_transform(_desktop->doc(), group, SPGroup::GROUP); });
+    }
+    else if (group) {
         /* Ungroup */
         append_item(_("_Ungroup"), true).connect(sigc::mem_fun(*this, &ContextMenu::ActivateUngroup));
 
         if (item->getParentGroup()->isLayer()) {
             // transform group into layer
-            append_item(_("Group to layer"), false).connect([=](){ sp_group_layer_transform(_desktop->doc(), item, SPGroup::LAYER); });
+            append_item(_("Group to layer"), false).connect([=](){ sp_group_layer_transform(_desktop->doc(), group, SPGroup::LAYER); });
         }
 
         // enter group
@@ -664,20 +667,21 @@ void ContextMenu::MakeGroupMenu(SPGroup* item)
             MIGroup.show();
             append(MIGroup);
         }
+    }
 
-        auto root = _desktop->layerManager().currentRoot();
-        if (layer != root) {
-            if (layer->parent != root) {
-                MIParent.signal_activate().connect(sigc::mem_fun(*this, &ContextMenu::LeaveGroup));
-                MIParent.show();
-                append(MIParent);
+    auto layer = _desktop->layerManager().currentLayer();
+    auto root = _desktop->layerManager().currentRoot();
+    if (layer != root) {
+        if (layer->parent != root) {
+            MIParent.signal_activate().connect(sigc::mem_fun(*this, &ContextMenu::LeaveGroup));
+            MIParent.show();
+            append(MIParent);
 
-                /* Pop selection out of group */
-                Gtk::MenuItem* miu = Gtk::manage(new Gtk::MenuItem(_("_Pop selection out of group"), true));
-                miu->signal_activate().connect(sigc::mem_fun(*this, &ContextMenu::ActivateUngroupPopSelection));
-                miu->show();
-                append(*miu);
-            }
+            /* Pop selection out of group */
+            Gtk::MenuItem* miu = Gtk::manage(new Gtk::MenuItem(_("_Pop selection out of group"), true));
+            miu->signal_activate().connect(sigc::mem_fun(*this, &ContextMenu::ActivateUngroupPopSelection));
+            miu->show();
+            append(*miu);
         }
     }
 }
@@ -749,7 +753,7 @@ void ContextMenu::AnchorLinkRemove()
 {
 	std::vector<SPItem*> children;
     sp_item_group_ungroup(static_cast<SPAnchor*>(_item), children, false);
-    Inkscape::DocumentUndo::done(_desktop->doc(), SP_VERB_NONE, _("Remove link"));
+    Inkscape::DocumentUndo::done(_desktop->doc(), _("Remove link"), "");
 }
 
 void ContextMenu::MakeImageMenu ()

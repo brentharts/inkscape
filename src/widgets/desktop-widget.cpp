@@ -39,7 +39,6 @@
 #include "file.h"
 #include "inkscape-application.h"
 #include "inkscape-version.h"
-#include "verbs.h"
 
 #include "display/control/canvas-axonomgrid.h"
 #include "display/control/canvas-item-drawing.h"
@@ -65,6 +64,7 @@
 #include "ui/widget/button.h"
 #include "ui/widget/canvas.h"
 #include "ui/widget/canvas-grid.h"
+#include "ui/widget/combo-tool-item.h"
 #include "ui/widget/ink-ruler.h"
 #include "ui/widget/layer-selector.h"
 #include "ui/widget/selected-style.h"
@@ -273,7 +273,9 @@ SPDesktopWidget::SPDesktopWidget()
     dtw->_hbox->pack_start(*Glib::wrap(dtw->tool_toolbox), false, true);
 
     auto set_visible_buttons = [=](GtkWidget* tb) {
-        sp_traverse_widget_tree(Glib::wrap(tb), [=](Gtk::Widget* widget) {
+        int buttons_before_separator = 0;
+        Gtk::Widget* last_one = nullptr;
+        sp_traverse_widget_tree(Glib::wrap(tb), [&](Gtk::Widget* widget) {
             if (auto flowbox = dynamic_cast<Gtk::FlowBox*>(widget)) {
                 flowbox->show();
                 flowbox->set_no_show_all();
@@ -284,13 +286,30 @@ SPDesktopWidget::SPDesktopWidget()
                 auto parent = btn->get_parent();
                 if (show) {
                     parent->show();
+                    ++buttons_before_separator;
+                    last_one = nullptr;
                 }
                 else {
                     parent->hide();
                 }
             }
+            else if (auto sep = dynamic_cast<Gtk::Separator*>(widget)) {
+                auto parent = sep->get_parent();
+                if (buttons_before_separator <= 0) {
+                    parent->hide();
+                }
+                else {
+                    parent->show();
+                    buttons_before_separator = 0;
+                    last_one = parent;
+                }
+            }
             return false;
         });
+        if (last_one) {
+            // hide trailing separator
+            last_one->hide();
+        }
     };
     auto set_toolbar_prefs = [=]() {
         int min = ToolboxFactory::min_pixel_size;
@@ -877,13 +896,6 @@ SPDesktopWidget::cms_adjust_toggled()
 void
 SPDesktopWidget::cms_adjust_set_sensitive(bool enabled)
 {
-    // Inkscape::Verb* verb = Inkscape::Verb::get( SP_VERB_VIEW_CMS_TOGGLE );
-    // if ( verb ) {
-    //     SPAction *act = verb->get_action(Inkscape::ActionContext(getView()));
-    //     if ( act ) {
-    //         sp_action_set_sensitive( act, enabled );
-    //     }
-    // }
     _canvas_grid->GetCmsAdjust()->set_sensitive(enabled);
 }
 
@@ -1417,10 +1429,12 @@ void SPDesktopWidget::namedviewModified(SPObject *obj, guint flags)
                         if ( name == "TextToolbar" || name == "MeasureToolbar")
                             continue;
 
-                        auto tracker = dynamic_cast<UnitTracker*>(sp_search_by_name_recursive(j, "unit-tracker"));
+                        auto tracker = dynamic_cast<Inkscape::UI::Widget::ComboToolItem*>(sp_search_by_name_recursive(j, "unit-tracker"));
 
                         if (tracker) { // it's null when inkscape is first opened
-                            tracker->setActiveUnit( nv->display_units );
+                            if (auto ptr = static_cast<UnitTracker*>(tracker->get_data(Glib::Quark("unit-tracker")))) {
+                                ptr->setActiveUnit(nv->display_units);
+                            }
                         }
                     } // grandchildren
                 } // if child is a container
@@ -1915,8 +1929,7 @@ SPDesktopWidget::on_ruler_box_button_release_event(GdkEventButton *event, Gtk::W
             repr->setAttributePoint("orientation", _normal);
             desktop->namedview->appendChild(repr);
             Inkscape::GC::release(repr);
-            DocumentUndo::done(desktop->getDocument(), SP_VERB_NONE,
-                    _("Create guide"));
+            DocumentUndo::done(desktop->getDocument(), _("Create guide"), "");
         }
         desktop->set_coordinate_status(event_dt);
 
