@@ -3,6 +3,7 @@
 #include <gtkmm/builder.h>
 #include <gtkmm/button.h>
 #include <gtkmm/checkbutton.h>
+#include <gtkmm/comboboxtext.h>
 #include <gtkmm/grid.h>
 #include <gtkmm/label.h>
 #include <gtkmm/menu.h>
@@ -55,6 +56,8 @@ public:
         GET(_main_grid, "main-grid"),
         GET(_page_width, "page-width"),
         GET(_page_height, "page-height"),
+        GET(_portrait, "page-portrait"),
+        GET(_landscape, "page-landscape"),
         GET(_scale_x, "scale-x"),
         GET(_scale_y, "scale-y"),
         GET(_viewbox_x, "viewbox-x"),
@@ -68,7 +71,6 @@ public:
         GET(_border, "border"),
         GET(_shadow, "shadow"),
         GET(_link_width_height, "link-width-height")
-        // _backgnd_color_picker(new ColorPicker(_("Background color"), _("tip"), 0x0, true, &get_widget(_builder, "background-color"))
     {
 #undef GET
 
@@ -129,14 +131,10 @@ public:
         });
         _link_width_height.set_image_from_icon_name("entries-linked-symbolic", Gtk::ICON_SIZE_LARGE_TOOLBAR);
 
-        auto set_page_size = [=](){
-            if (_update.pending()) return;
-            //todo
-            // sp_marker_set_offset(get_current(), _offset_x.get_value(), _offset_y.get_value());
-            _preview->set_page_size(_page_width.get_value(), _page_height.get_value());
-        };
         _page_width .signal_value_changed().connect([=](){ set_page_size(); });
         _page_height.signal_value_changed().connect([=](){ set_page_size(); });
+        _landscape.signal_toggled().connect([=](){ if (_landscape.get_active()) swap_width_height(); });
+        _portrait .signal_toggled().connect([=](){ if (_portrait .get_active()) swap_width_height(); });
 
         add(_main_grid);
         show();
@@ -144,20 +142,56 @@ public:
 
 private:
     void set_page_template(const PaperSize& page) {
-        //
-        _template_name.set_label(page.name);
-        // size
-        _page_width.set_value(page.larger);
-        _page_height.set_value(page.smaller);
-        //todo: units
-        //
-        _preview->set_page_size(page.larger, page.smaller);
+        if (_update.pending()) return;
+
+        {
+            auto scoped(_update.block());
+            _template_name.set_label(page.name);
+            _page_width.set_value(page.larger);
+            _page_height.set_value(page.smaller);
+            if (page.unit) _page_units->setUnit(page.unit->abbr);
+        }
+        set_page_size();
     }
+
+    void set_page_size() {
+        if (_update.pending()) return;
+
+        auto scoped(_update.block());
+
+        auto width = _page_width.get_value();
+        auto height = _page_height.get_value();
+        _preview->set_page_size(width, height);
+        if (width != height) {
+            (width > height ? _landscape : _portrait).set_active();
+            _portrait.set_sensitive();
+            _landscape.set_sensitive();
+        }
+        else {
+            _portrait.set_sensitive(false);
+            _landscape.set_sensitive(false);
+        }
+    }
+
+    void swap_width_height() {
+        if (_update.pending()) return;
+
+        {
+            auto scoped(_update.block());
+            auto width = _page_width.get_value();
+            auto height = _page_height.get_value();
+            _page_width.set_value(height);
+            _page_height.set_value(width);
+        }
+        set_page_size();
+    };
 
     Glib::RefPtr<Gtk::Builder> _builder;
     Gtk::Grid& _main_grid;
     Gtk::SpinButton& _page_width;
     Gtk::SpinButton& _page_height;
+    Gtk::RadioButton& _portrait;
+    Gtk::RadioButton& _landscape;
     Gtk::SpinButton& _scale_x;
     Gtk::SpinButton& _scale_y;
     Gtk::SpinButton& _viewbox_x;
@@ -171,12 +205,10 @@ private:
     Gtk::Label& _template_name;
     Gtk::Box& _preview_box;
     std::unique_ptr<PageSizePreview> _preview = std::make_unique<PageSizePreview>();
-    // Gtk::MenuButton& _pages_btn;
     Gtk::CheckButton& _border;
     Gtk::CheckButton& _shadow;
     Gtk::CheckButton& _checkerboard;
     Gtk::Button& _link_width_height;
-
     std::unique_ptr<PageSizes> _paper = std::make_unique<PageSizes>();
     std::unique_ptr<UnitMenu> _display_units;
     std::unique_ptr<UnitMenu> _page_units;

@@ -3,6 +3,7 @@
 <interface>
   <requires lib="gtk+" version="3.24"/>
   <object class="GtkAdjustment" id="adj-page-heigh">
+    <property name="lower">0.001</property>
     <property name="upper">1000000</property>
     <property name="step-increment">1</property>
     <property name="page-increment">10</property>
@@ -93,6 +94,7 @@
             <property name="can-focus">True</property>
             <property name="width-chars">9</property>
             <property name="adjustment">adj-page-width</property>
+            <property name="digits">3</property>
           </object>
           <packing>
             <property name="left-attach">1</property>
@@ -106,6 +108,7 @@
             <property name="can-focus">True</property>
             <property name="width-chars">9</property>
             <property name="adjustment">adj-page-heigh</property>
+            <property name="digits">3</property>
           </object>
           <packing>
             <property name="left-attach">1</property>
@@ -288,6 +291,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="width-chars">9</property>
+            <property name="digits">6</property>
           </object>
           <packing>
             <property name="left-attach">1</property>
@@ -300,6 +304,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="width-chars">9</property>
+            <property name="digits">6</property>
           </object>
           <packing>
             <property name="left-attach">1</property>
@@ -396,6 +401,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="width-chars">9</property>
+            <property name="digits">3</property>
           </object>
           <packing>
             <property name="left-attach">1</property>
@@ -408,6 +414,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="width-chars">9</property>
+            <property name="digits">3</property>
           </object>
           <packing>
             <property name="left-attach">1</property>
@@ -420,6 +427,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="width-chars">9</property>
+            <property name="digits">3</property>
           </object>
           <packing>
             <property name="left-attach">1</property>
@@ -432,6 +440,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="width-chars">9</property>
+            <property name="digits">3</property>
           </object>
           <packing>
             <property name="left-attach">1</property>
