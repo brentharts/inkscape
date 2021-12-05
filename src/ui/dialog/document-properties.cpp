@@ -550,7 +550,7 @@ void DocumentProperties::linkSelectedProfile()
         //Inkscape::GC::release(defsRepr);
 
         // inform the document, so we can undo
-        DocumentUndo::done(document, SP_VERB_EDIT_LINK_COLOR_PROFILE, _("Link Color Profile"));
+        DocumentUndo::done(document, _("Link Color Profile"), "");
 
         populate_linked_profiles_box();
     }
@@ -671,7 +671,7 @@ void DocumentProperties::removeSelectedProfile(){
             Inkscape::ColorProfile* prof = reinterpret_cast<Inkscape::ColorProfile*>(obj);
             if (!name.compare(prof->name)){
                 prof->deleteObject(true, false);
-                DocumentUndo::done(document, SP_VERB_EDIT_REMOVE_COLOR_PROFILE, _("Remove linked color profile"));
+                DocumentUndo::done(document, _("Remove linked color profile"), "");
                 break; // removing the color profile likely invalidates part of the traversed list, stop traversing here.
             }
         }
@@ -1044,7 +1044,7 @@ void DocumentProperties::addExternalScript(){
         xml_doc->root()->addChild(scriptRepr, nullptr);
 
         // inform the document, so we can undo
-        DocumentUndo::done(document, SP_VERB_EDIT_ADD_EXTERNAL_SCRIPT, _("Add external script..."));
+        DocumentUndo::done(document, _("Add external script..."), "");
 
         populate_script_lists();
     }
@@ -1106,7 +1106,7 @@ void DocumentProperties::addEmbeddedScript(){
         xml_doc->root()->addChild(scriptRepr, nullptr);
 
         // inform the document, so we can undo
-        DocumentUndo::done(document, SP_VERB_EDIT_ADD_EMBEDDED_SCRIPT, _("Add embedded script..."));
+        DocumentUndo::done(document, _("Add embedded script..."), "");
         populate_script_lists();
     }
 }
@@ -1138,7 +1138,7 @@ void DocumentProperties::removeExternalScript(){
                     sp_repr_unparent(repr);
 
                     // inform the document, so we can undo
-                    DocumentUndo::done(document, SP_VERB_EDIT_REMOVE_EXTERNAL_SCRIPT, _("Remove external script"));
+                    DocumentUndo::done(document, _("Remove external script"), "");
                 }
             }
         }
@@ -1166,7 +1166,7 @@ void DocumentProperties::removeEmbeddedScript(){
                 sp_repr_unparent(repr);
 
                 // inform the document, so we can undo
-                DocumentUndo::done(document, SP_VERB_EDIT_REMOVE_EMBEDDED_SCRIPT, _("Remove embedded script"));
+                DocumentUndo::done(document, _("Remove embedded script"), "");
             }
         }
     }
@@ -1264,7 +1264,7 @@ void DocumentProperties::editEmbeddedScript(){
                 //TODO repr->set_content(_EmbeddedContent.get_buffer()->get_text());
 
                 // inform the document, so we can undo
-                DocumentUndo::done(document, SP_VERB_EDIT_EMBEDDED_SCRIPT, _("Edit embedded script"));
+                DocumentUndo::done(document, _("Edit embedded script"), "");
             }
         }
     }
@@ -1602,7 +1602,7 @@ void DocumentProperties::onRemoveGrid()
             // delete the grid that corresponds with the selected tab
             // when the grid is deleted from SVG, the SPNamedview handler automatically deletes the object, so found_grid becomes an invalid pointer!
             found_grid->repr->parent()->removeChild(found_grid->repr);
-            DocumentUndo::done(document, SP_VERB_DIALOG_DOCPROPERTIES, _("Remove grid"));
+            DocumentUndo::done(document, _("Remove grid"), INKSCAPE_ICON("document-properties"));
         }
     }
 }
@@ -1695,7 +1695,7 @@ void DocumentProperties::onDocUnitChange()
 
     document->setModifiedSinceSave();
 
-    DocumentUndo::done(document, SP_VERB_NONE, _("Changed default display unit"));
+    DocumentUndo::done(document, _("Changed default display unit"), "");
 }
 
 } // namespace Dialog
