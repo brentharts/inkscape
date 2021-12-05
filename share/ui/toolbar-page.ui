@@ -11,7 +11,7 @@
         <property name="can_focus">False</property>
         <property name="action_name">doc.page-new</property>
         <property name="label" translatable="yes">New Page</property>
-        <property name="icon_name">gtk-new</property>
+        <property name="icon_name">pages-add</property>
       </object>
       <packing>
         <property name="expand">False</property>
@@ -51,7 +51,7 @@
         <property name="can_focus">False</property>
         <property name="action_name">win.fit-canvas-to-selection-or-drawing</property>
         <property name="label" translatable="yes">Fit Page to Selection</property>
-        <property name="icon_name">page-resize</property>
+        <property name="icon_name">pages-resize</property>
       </object>
       <packing>
         <property name="expand">False</property>
@@ -74,7 +74,7 @@
         <property name="can_focus">False</property>
         <property name="action_name">doc.page-move-backward</property>
         <property name="label" translatable="yes">Move Before Previous</property>
-        <property name="icon_name">gtk-go-back</property>
+        <property name="icon_name">pages-order-backwards</property>
       </object>
       <packing>
         <property name="expand">False</property>
@@ -104,7 +104,7 @@
         <property name="can_focus">False</property>
         <property name="action_name">doc.page-move-forward</property>
         <property name="label" translatable="yes">Move After Next</property>
-        <property name="icon_name">gtk-go-forward</property>
+        <property name="icon_name">pages-order-forwards</property>
       </object>
       <packing>
         <property name="expand">False</property>
@@ -134,7 +134,7 @@
         <property name="can_focus">False</property>
         <property name="action_name">doc.page-delete</property>
         <property name="label" translatable="yes">New Page</property>
-        <property name="icon_name">gtk-delete</property>
+        <property name="icon_name">pages-remove</property>
       </object>
       <packing>
         <property name="expand">False</property>
@@ -158,7 +158,7 @@
         <property name="action_name">doc.page-move-objects</property>
         <property name="label" translatable="yes">Move Objects</property>
         <property name="use_underline">True</property>
-        <property name="icon_name">gtk-properties</property>
+        <property name="icon_name">pages-move-toggle</property>
       </object>
       <packing>
         <property name="expand">False</property>

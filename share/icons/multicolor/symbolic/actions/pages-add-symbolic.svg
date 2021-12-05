@@ -7,8 +7,8 @@
    width="16"
    height="16"
    viewBox="0 0 16 16"
-   sodipodi:docname="pages-add.svg"
-   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20, custom)"
+   sodipodi:docname="pages-add-symbolic.svg"
+   inkscape:version="1.1.1 (1:1.1+202109281949+c3084ef5ed)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -213,13 +213,13 @@
      guidetolerance="10"
      id="namedview"
      showgrid="true"
-     inkscape:zoom="28.56"
-     inkscape:cx="8.6659664"
-     inkscape:cy="4.7969188"
-     inkscape:window-width="1920"
-     inkscape:window-height="1163"
-     inkscape:window-x="1200"
-     inkscape:window-y="533"
+     inkscape:zoom="27.332502"
+     inkscape:cx="3.0549709"
+     inkscape:cy="7.8843861"
+     inkscape:window-width="1534"
+     inkscape:window-height="843"
+     inkscape:window-x="66"
+     inkscape:window-y="20"
      inkscape:window-maximized="1"
      inkscape:current-layer="snap-page-7"
      pagecolor="#ffffff"
@@ -250,20 +250,15 @@
          id="rect16572-9"
          inkscape:connector-curvature="0" />
       <path
-         id="rect2058"
-         style="color:#000000;fill:#000000;-inkscape-stroke:none;paint-order:markers fill stroke"
-         d="m 3.5,1 v 14 h 9 v -3 h -1 v 2 h -7 V 2 h 5 v 1.9980469 h 2 V 6 h 1 V 3.4882812 L 10.009766,1 Z"
-         transform="translate(979,527.3622)"
-         sodipodi:nodetypes="cccccccccccccccc" />
+         id="rect2058-3"
+         d="M 2,0 V 0.48828125 16 h 12 v -3 h -2 v 1 H 4 V 2 h 6 v 2.0019531 l 2,-0.00391 V 14 h 2 V 3 L 11,0 Z"
+         sodipodi:nodetypes="ccccccccccccccccc"
+         transform="translate(979,527.3622)" />
       <path
-         style="color:#000000;font-variation-settings:normal;opacity:0.5;vector-effect:none;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;-inkscape-stroke:none;paint-order:markers fill stroke;stop-color:#000000"
-         d="m 987,533.3622 v 6 h 6 v -6 z m 1,1 h 4 v 4 h -4 z"
-         id="path12093"
-         sodipodi:nodetypes="cccccccccc" />
-      <path
-         style="font-variation-settings:normal;vector-effect:none;fill:#009909;fill-opacity:1;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;-inkscape-stroke:none;paint-order:markers fill stroke;stop-color:#000000"
-         d="m 988.5,535.8622 h 1 v -1.00087 l 1,8.7e-4 v 1 h 1 v 1 h -1 v 1 h -1 v -1 h -1 z"
-         id="path11604" />
+         d="m 984,535.36394 h 2 v -2.00174 l 2,0.002 v 2 h 2 v 2 h -2 v 2 h -2 v -2 h -2 z"
+         id="path11604"
+         class="success"
+         style="stroke-width:2" />
     </g>
     <path
        inkscape:connector-curvature="0"
