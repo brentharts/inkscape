@@ -1,42 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) and export_objects.py -->
+
 <svg
-   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20, custom)"
-   sodipodi:docname="tool-pages-symbolic-variant-rounded.svg"
-   viewBox="0 0 16 16"
-   height="16"
-   width="16"
-   id="svg1"
    version="1.1"
+   id="svg1"
+   width="16"
+   height="16"
+   viewBox="0 0 16 16"
+   sodipodi:docname="pages-order-backwards.svg"
+   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20, custom)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:dc="http://purl.org/dc/elements/1.1/">
-  <style
-     id="s0">
-   .success { fill: #009909; }
-   .warning { fill: #FF1990; }
-   .error   { fill: #00AAFF; }
-  </style>
-  <style
-     id="s2"> 
-     @import '../../highlights.css'; 
-  </style>
-  <metadata
-     id="metadata1890">
-    <rdf:RDF>
-      <cc:Work
-         rdf:about="">
-        <dc:format>image/svg+xml</dc:format>
-        <dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-      </cc:Work>
-    </rdf:RDF>
-  </metadata>
+   xmlns:svg="http://www.w3.org/2000/svg">
   <defs
-     id="defs1888">
+     id="defs8">
     <inkscape:path-effect
        attempt_force_join="true"
        miter_limit="100"
@@ -230,68 +208,101 @@
        update_on_knot_move="true" />
   </defs>
   <sodipodi:namedview
-     inkscape:document-rotation="0"
-     inkscape:current-layer="snap-page"
-     inkscape:window-maximized="1"
-     inkscape:window-y="533"
-     inkscape:window-x="1200"
-     inkscape:window-height="1163"
-     inkscape:window-width="1920"
-     inkscape:cy="1.75"
-     inkscape:cx="2.78125"
-     inkscape:zoom="16"
-     showgrid="true"
-     id="namedview"
-     guidetolerance="10"
-     gridtolerance="10"
      objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     id="namedview"
+     showgrid="true"
+     inkscape:zoom="16"
+     inkscape:cx="-3.21875"
+     inkscape:cy="6.59375"
+     inkscape:window-width="1200"
+     inkscape:window-height="976"
+     inkscape:window-x="-40"
+     inkscape:window-y="713"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="snap-page-7"
      pagecolor="#ffffff"
-     bordercolor="#999999"
-     borderopacity="1"
+     bordercolor="#666666"
+     borderopacity="1.0"
      inkscape:pageshadow="2"
-     inkscape:pageopacity="0"
+     inkscape:pageopacity="0.0"
      inkscape:pagecheckerboard="0"
-     inkscape:blackoutopacity="0.0">
+     inkscape:snap-grids="true"
+     inkscape:snap-to-guides="false">
     <inkscape:grid
+       type="xygrid"
        id="grid"
-       type="xygrid" />
+       spacingx="0.5"
+       spacingy="0.5" />
   </sodipodi:namedview>
   <g
-     id="snap-page"
+     id="snap-page-7"
      inkscape:label="00334"
      transform="translate(-979,-527.3622)">
-    <path
-       style="opacity:0.4"
-       d="m 989,528.36219 h -6 l -2,2 v 9.00001 h 3 v -6 l 3,-3 h 2 z"
-       id="path205"
-       class="error"
-       sodipodi:nodetypes="ccccccccc" />
-    <path
-       style="opacity:0.8"
-       d="m 993,531.3622 h -5 -1 l -2,2 v 9 h 8 z"
-       id="path90"
-       class="error"
-       sodipodi:nodetypes="ccccccc" />
     <path
        transform="translate(0,512.3622)"
        style="opacity:0;fill:none"
        d="m 979,15 h 16 v 16 h -16 z"
-       id="rect16572"
+       id="rect16572-9"
        inkscape:connector-curvature="0" />
     <path
        id="rect2058"
        style="color:#000000;fill:#000000;-inkscape-stroke:none;paint-order:markers fill stroke"
-       d="M 8 1 A 2 2 0 0 0 6 3 L 4 3 A 2 2 0 0 0 2 5 L 2 13 A 2 2 0 0 0 4 15 L 8 15 A 2 2 0 0 0 10 13 L 12 13 A 2 2 0 0 0 14 11 L 14 4.1894531 C 13.994 3.7572931 13.956001 3.505705 13.712891 3.203125 C 13.708891 3.198125 13.704872 3.1941531 13.701172 3.1894531 L 11.839844 1.328125 C 11.515034 1.049175 11.259567 1.0063 10.804688 1 L 8 1 z M 8 3 L 10.5 3 L 10.5 4.5039062 L 12 4.5 L 12 11 L 10 11 L 10 6.1894531 C 9.9940147 5.7572915 9.955968 5.5057066 9.7128906 5.203125 C 9.7092812 5.1986321 9.7048718 5.1939693 9.7011719 5.1894531 L 8 3.4882812 L 8 3 z M 4 5 L 6.5 5 L 6.5 6.5039062 L 8 6.5 L 8 13 L 4 13 L 4 5 z "
-       transform="translate(979,527.3622)" />
+       d="m 991.5,530.52135 -1.66015,-1.65885 H 986 v 8 h 5.5 z M 987,529.8625 h 2.5 v 0.9987 l 1,10e-4 v 5 H 987 Z"
+       sodipodi:nodetypes="ccccccccccccc" />
+    <g
+       id="path5308"
+       style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:#009909;fill-opacity:1;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;-inkscape-stroke:none;paint-order:markers fill stroke;stop-color:#000000;stop-opacity:1">
+      <path
+         style="color:#000000;fill:#009909;stroke-width:1;-inkscape-stroke:none;paint-order:markers fill stroke;font-variation-settings:normal;vector-effect:none;fill-opacity:1;stroke:none;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;stop-color:#000000;stop-opacity:1"
+         d="m 986,531.3622 h -4.5"
+         id="path919" />
+      <path
+         style="color:#000000;fill:#009909;-inkscape-stroke:none;paint-order:markers fill stroke;font-variation-settings:normal;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;stop-color:#000000;stop-opacity:1"
+         d="m 981.5,530.86133 v 1 h 4.5 v -1 z"
+         id="path921" />
+    </g>
+    <path
+       id="use6327"
+       style="vector-effect:none;fill:#009909;stroke-width:1;paint-order:markers fill stroke;stop-color:#000000;font-variation-settings:normal;opacity:1;fill-opacity:1;stroke:none;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;-inkscape-stroke:none;stop-opacity:1"
+       d="m 981.99996,529.36218 v 4 l -2,-2 z"
+       sodipodi:nodetypes="cccc" />
+    <path
+       id="path8970"
+       style="color:#000000;fill:#000000;-inkscape-stroke:none;paint-order:markers fill stroke"
+       d="m 991,533.8622 v 1 h 1 v 0.99805 l 1,0.002 v 5 h -3.5 v -4.5 h -1 v 5.5 h 5.5 v -6.3418 l -1.66016,-1.6582 z" />
+    <path
+       id="path9052"
+       style="color:#000000;fill:#000000;-inkscape-stroke:none;paint-order:markers fill stroke"
+       d="m 985.5,535.52135 -1.66015,-1.65885 H 980 v 8 h 5.5 z M 981,534.8625 h 2.5 v 0.9987 l 1,10e-4 v 5 H 981 Z"
+       sodipodi:nodetypes="ccccccccccccc" />
   </g>
+  <path
+     inkscape:connector-curvature="0"
+     id="rect16572"
+     d="M 0,0 H 16 V 16 H 0 Z"
+     style="opacity:0;fill:none" />
+  <path
+     style="color:#000000;fill:#000000;-inkscape-stroke:none;font-variation-settings:normal;opacity:0.5;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:markers fill stroke;stop-color:#000000;stop-opacity:1"
+     d="m 7.5,10.5 v 1 h 1 v -1 z"
+     id="path9714" />
+  <path
+     style="color:#000000;fill:#000000;-inkscape-stroke:none;font-variation-settings:normal;opacity:0.5;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:markers fill stroke;stop-color:#000000;stop-opacity:1"
+     d="m 7.5,12 v 1 h 1 v -1 z"
+     id="path9716" />
+  <path
+     style="color:#000000;fill:#000000;-inkscape-stroke:none;font-variation-settings:normal;opacity:0.5;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:markers fill stroke;stop-color:#000000;stop-opacity:1"
+     d="m 7.5,13.5 v 1 h 1 v -1 z"
+     id="path9720" />
   <style
-     id="s0-5">
+     id="s0">
    .success { fill: #009909; }
    .warning { fill: #FF1990; }
    .error   { fill: #00AAFF; }
   </style>
   <style
-     id="s2-6"> 
+     id="s2"> 
      @import '../../highlights.css'; 
   </style>
   <style
@@ -314,6 +325,48 @@
   </style>
   <style
      id="s2-9"> 
+     @import '../../highlights.css'; 
+  </style>
+  <style
+     id="s0-06">
+   .success { fill: #009909; }
+   .warning { fill: #FF1990; }
+   .error   { fill: #00AAFF; }
+  </style>
+  <style
+     id="s2-26"> 
+     @import '../../highlights.css'; 
+  </style>
+  <style
+     id="s0-5">
+   .success { fill: #009909; }
+   .warning { fill: #FF1990; }
+   .error   { fill: #00AAFF; }
+  </style>
+  <style
+     id="s2-6"> 
+     @import '../../highlights.css'; 
+  </style>
+  <style
+     id="s0-6-2">
+   .success { fill: #009909; }
+   .warning { fill: #FF1990; }
+   .error   { fill: #00AAFF; }
+  </style>
+  <style
+     id="s2-0-0"> 
+     @import '../../highlights.css'; 
+  </style>
+  <style
+     id="s0-7-2">
+   .base    { fill: #000000; }
+   .success { fill: #009909; }
+   .warning { fill: #FF1990; }
+   .error   { fill: #00AAFF; }
+   .dark    {  }
+  </style>
+  <style
+     id="s2-9-3"> 
      @import '../../highlights.css'; 
   </style>
   <style
@@ -414,16 +467,6 @@
   </style>
   <style
      id="s2-07"> 
-     @import '../../highlights.css'; 
-  </style>
-  <style
-     id="s0-67">
-   .success { fill: #009909; }
-   .warning { fill: #FF1990; }
-   .error   { fill: #00AAFF; }
-  </style>
-  <style
-     id="s2-53"> 
      @import '../../highlights.css'; 
   </style>
 </svg>
