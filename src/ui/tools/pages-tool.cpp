@@ -31,6 +31,7 @@
 #include "selection.h"
 #include "snap-preferences.h"
 #include "snap.h"
+#include "ui/icon-names.h"
 #include "ui/knot/knot.h"
 #include "ui/widget/canvas.h"
 
@@ -160,7 +161,7 @@ void PagesTool::resizeKnotFinished(SPKnot *knot, guint state)
     if (auto page_manager = getPageManager()) {
         if (on_screen_rect) {
             page_manager->resizePage(on_screen_rect->width(), on_screen_rect->height());
-            Inkscape::DocumentUndo::done(desktop->getDocument(), SP_VERB_NONE, "Resize page");
+            Inkscape::DocumentUndo::done(desktop->getDocument(), "Resize page", INKSCAPE_ICON("tool-pages"));
             delete on_screen_rect;
             on_screen_rect = nullptr;
         }
@@ -256,11 +257,11 @@ bool PagesTool::root_handler(GdkEvent *event)
                     // Move the page object on the canvas.
                     dragging_item->movePage(moveTo(point_dt, snap), page_manager->move_objects());
                 }
-                Inkscape::DocumentUndo::done(desktop->getDocument(), SP_VERB_NONE, "Move page position");
+                Inkscape::DocumentUndo::done(desktop->getDocument(), "Move page position", INKSCAPE_ICON("tool-pages"));
             } else if (on_screen_rect) {
                 // conclude box here (make new page)
                 page_manager->selectPage(page_manager->newDesktopPage(*on_screen_rect));
-                Inkscape::DocumentUndo::done(desktop->getDocument(), SP_VERB_NONE, "Create new drawn page");
+                Inkscape::DocumentUndo::done(desktop->getDocument(), "Create new drawn page", INKSCAPE_ICON("tool-pages"));
             }
             mouse_is_pressed = false;
             drag_origin_dt = point_dt;
@@ -274,7 +275,7 @@ bool PagesTool::root_handler(GdkEvent *event)
             }
             if (event->key.keyval == GDK_KEY_Delete) {
                 page_manager->deletePage(page_manager->move_objects());
-                Inkscape::DocumentUndo::done(desktop->getDocument(), SP_VERB_NONE, "Delete Page");
+                Inkscape::DocumentUndo::done(desktop->getDocument(), "Delete Page", INKSCAPE_ICON("tool-pages"));
                 ret = true;
             }
         }

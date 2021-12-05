@@ -23,6 +23,7 @@
 #include "io/resource.h"
 #include "object/sp-namedview.h"
 #include "object/sp-page.h"
+#include "ui/icon-names.h"
 #include "ui/tools/pages-tool.h"
 #include "util/paper.h"
 #include "util/units.h"
@@ -104,7 +105,7 @@ void PageToolbar::labelEdited()
     if (_page_manager) {
         if (auto page = _page_manager->getSelected()) {
             page->setLabel(text.empty() ? nullptr : text.c_str());
-            DocumentUndo::maybeDone(_document, "page-relabel", SP_VERB_NONE, _("Relabel Page"));
+            DocumentUndo::maybeDone(_document, "page-relabel", _("Relabel Page"), INKSCAPE_ICON("tool-pages"));
         }
     }
 }
@@ -118,7 +119,7 @@ void PageToolbar::sizeChoose()
             auto smaller = ps->unit->convert(ps->smaller, "px");
             auto larger = ps->unit->convert(ps->larger, "px");
             _page_manager->resizePage(smaller, larger);
-            DocumentUndo::maybeDone(_document, "page-resize", SP_VERB_NONE, _("Resize Page"));
+            DocumentUndo::maybeDone(_document, "page-resize", _("Resize Page"), INKSCAPE_ICON("tool-pages"));
         }
     } catch (std::invalid_argument const &e) {
         // Ignore because user is typing into Entry

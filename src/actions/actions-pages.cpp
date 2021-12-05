@@ -19,12 +19,13 @@
 
 #include "page-manager.h"
 #include "object/sp-page.h"
+#include "ui/icon-names.h"
 
 void page_new(SPDocument *document)
 {
     if (auto manager = document->getNamedView()->getPageManager()) {
         manager->selectPage(manager->newPage());
-        Inkscape::DocumentUndo::done(document, SP_VERB_NONE, "New Automatic Page");
+        Inkscape::DocumentUndo::done(document, "New Automatic Page", INKSCAPE_ICON("tool-pages"));
     }
 }
 
@@ -33,7 +34,7 @@ void page_delete(SPDocument *document)
     if (auto manager = document->getNamedView()->getPageManager()) {
         // Delete page's content if move_objects is checked.
         manager->deletePage(manager->move_objects());
-        Inkscape::DocumentUndo::done(document, SP_VERB_NONE, "Delete Page");
+        Inkscape::DocumentUndo::done(document, "Delete Page", INKSCAPE_ICON("tool-pages"));
     }
 }
 
@@ -42,7 +43,7 @@ void page_backward(SPDocument *document)
     if (auto manager = document->getNamedView()->getPageManager()) {
         if (auto page = manager->getSelected()) {
             if (page->setPageIndex(page->getPageIndex() - 1, manager->move_objects())) {
-                Inkscape::DocumentUndo::done(document, SP_VERB_NONE, "Shift Page Backwards");
+                Inkscape::DocumentUndo::done(document, "Shift Page Backwards", INKSCAPE_ICON("tool-pages"));
             }
         }
     }
@@ -53,7 +54,7 @@ void page_forward(SPDocument *document)
     if (auto manager = document->getNamedView()->getPageManager()) {
         if (auto page = manager->getSelected()) {
             if (page->setPageIndex(page->getPageIndex() + 1, manager->move_objects())) {
-                Inkscape::DocumentUndo::done(document, SP_VERB_NONE, "Shift Page Forewards");
+                Inkscape::DocumentUndo::done(document, "Shift Page Forewards", INKSCAPE_ICON("tool-pages"));
             }
         }
     }

@@ -41,9 +41,12 @@
 #include "sp-root.h"
 #include "verbs.h"
 
+#include "actions/actions-canvas-snapping.h"
 #include "display/control/canvas-grid.h"
 #include "display/control/canvas-page.h"
 #include "svg/svg-color.h"
+#include "ui/monitor.h"
+#include "ui/widget/canvas.h"
 #include "util/units.h"
 #include "xml/repr.h"
 

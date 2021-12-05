@@ -1218,7 +1218,7 @@ void FloodTool::finishItem() {
 
         desktop->getSelection()->set(this->item);
 
-        DocumentUndo::done(desktop->getDocument(), SP_VERB_CONTEXT_PAINTBUCKET, _("Fill bounded area"));
+        DocumentUndo::done(desktop->getDocument(), _("Fill bounded area"), INKSCAPE_ICON("color-fill"));
 
         this->item = nullptr;
     }
