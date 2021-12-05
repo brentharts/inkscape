@@ -1610,16 +1610,18 @@ void ink_cairo_draw_drop_shadow(Cairo::RefPtr<Cairo::Context> ctx, const Geom::R
     ctx->set_source(grad_left);
     ctx->fill();
 
+    // bottom corners
     ctx->rectangle(corners[2][X], corners[2][Y], sw, sw);
     ctx->set_source(grad_btm_right);
     ctx->fill();
 
-    ctx->rectangle(corners[1][X], corners[1][Y] - half, sw, sw);
-    ctx->set_source(grad_top_right);
+    ctx->rectangle(corners[3][X] - half, corners[3][Y], std::min(sw, rect.width() + half), sw);
+    ctx->set_source(grad_btm_left);
     ctx->fill();
 
-    ctx->rectangle(corners[3][X] - half, corners[3][Y], sw, sw);
-    ctx->set_source(grad_btm_left);
+    // top corners
+    ctx->rectangle(corners[1][X], corners[1][Y] - half, sw, std::min(sw, rect.height() + half));
+    ctx->set_source(grad_top_right);
     ctx->fill();
 
     ctx->rectangle(corners[0][X] - half, corners[0][Y] - half, half, half);

@@ -30,10 +30,6 @@ namespace Inkscape {
 namespace UI {
 namespace Widget {
 
-void PageProperties::set_background_color(unsigned int rgba) {
-    _background_color = rgba;
-}
-
 // TEMP until page sizes are migrated
 class PageSizes : PageSizer {
     Registry _r;
@@ -43,6 +39,10 @@ public:
 
     const std::map<Glib::ustring, PaperSize>& page_sizes() const {
         return _paperSizeTable;
+    }
+
+    const std::vector<PaperSize>& get_page_sizes() {
+        return _paper_sizes; // paper sizes in original order
     }
 };
 // END TEMP
@@ -89,26 +89,33 @@ public:
 
         _backgnd_color_picker->connectChanged([=](guint rgba) {
             _preview->set_page_color(rgba);
-            _signal_background_color.emit(rgba);
+            if (_update.pending()) return;
+            _signal_color_changed.emit(rgba, Color::Background);
         });
         _border_color_picker->connectChanged([=](guint rgba) {
             _preview->set_border_color(rgba);
+            if (_update.pending()) return;
+            _signal_color_changed.emit(rgba, Color::Border);
         });
         _desk_color_picker->connectChanged([=](guint rgba) {
             _preview->set_desk_color(rgba);
+            if (_update.pending()) return;
+            _signal_color_changed.emit(rgba, Color::Desk);
         });
 
         _display_units = std::make_unique<UnitMenu>(&get_widget<Gtk::ComboBoxText>(_builder, "display-units"));
         _display_units->setUnitType(UNIT_TYPE_LINEAR);
 
-        _page_units = std::make_unique<UnitMenu>(&get_widget<Gtk::ComboBoxText>(_builder, "page-units"));
+        auto& page_units = get_widget<Gtk::ComboBoxText>(_builder, "page-units");
+        _page_units = std::make_unique<UnitMenu>(&page_units);
         _page_units->setUnitType(UNIT_TYPE_LINEAR);
+        page_units.signal_changed().connect([=](){ });
 
-        for (auto&& page : _paper->page_sizes()) {
-            auto item = new Gtk::MenuItem(page.first);
+        for (auto&& page : _paper->get_page_sizes()) {
+            auto item = new Gtk::MenuItem(page.name);
             item->show();
             _page_templates_menu.append(*item);
-            item->signal_activate().connect([=](){ set_page_template(page.second); });
+            item->signal_activate().connect([=](){ set_page_template(page); });
         }
 
         _preview->set_hexpand();
@@ -126,13 +133,27 @@ public:
             _preview->enable_checkerboard(_checkerboard.get_active());
         });
 
+        const char* linked = "entries-linked-symbolic";
+        const char* unlinked = "entries-unlinked-symbolic";
         _link_width_height.signal_clicked().connect([=](){
             // toggle size link
+            if (_size_ratio > 0) {
+                _size_ratio = 0;
+            }
+            else {
+                auto width = _page_width.get_value();
+                auto height = _page_height.get_value();
+                if (width > 0 && height > 0) {
+                    _size_ratio = width / height;
+                }
+            }
+            // set image
+            _link_width_height.set_image_from_icon_name(_size_ratio > 0 ? linked : unlinked, Gtk::ICON_SIZE_LARGE_TOOLBAR);
         });
-        _link_width_height.set_image_from_icon_name("entries-linked-symbolic", Gtk::ICON_SIZE_LARGE_TOOLBAR);
+        _link_width_height.set_image_from_icon_name(unlinked, Gtk::ICON_SIZE_LARGE_TOOLBAR);
 
-        _page_width .signal_value_changed().connect([=](){ set_page_size(); });
-        _page_height.signal_value_changed().connect([=](){ set_page_size(); });
+        _page_width .signal_value_changed().connect([=](){ set_page_size_linked(true); });
+        _page_height.signal_value_changed().connect([=](){ set_page_size_linked(false); });
         _landscape.signal_toggled().connect([=](){ if (_landscape.get_active()) swap_width_height(); });
         _portrait .signal_toggled().connect([=](){ if (_portrait .get_active()) swap_width_height(); });
 
@@ -146,10 +167,28 @@ private:
 
         {
             auto scoped(_update.block());
-            _template_name.set_label(page.name);
+            // _template_name.set_label(page.name);
             _page_width.set_value(page.larger);
             _page_height.set_value(page.smaller);
             if (page.unit) _page_units->setUnit(page.unit->abbr);
+            if (page.larger > 0 && page.smaller > 0 && _size_ratio > 0) {
+                _size_ratio = page.larger / page.smaller;
+            }
+        }
+        set_page_size();
+    }
+
+    void set_page_size_linked(bool width_changing) {
+        if (_size_ratio > 0) {
+            auto scoped(_update.block());
+            if (width_changing) {
+                auto width = _page_width.get_value();
+                _page_height.set_value(width / _size_ratio);
+            }
+            else {
+                auto height = _page_height.get_value();
+                _page_width.set_value(height * _size_ratio);
+            }
         }
         set_page_size();
     }
@@ -171,6 +210,11 @@ private:
             _portrait.set_sensitive(false);
             _landscape.set_sensitive(false);
         }
+
+        if (auto units = _page_units->getUnit()) {
+            auto templ = find_page_template(width, height, *units);
+            _template_name.set_label(templ ? templ->name : _("Custom"));
+        }
     }
 
     void swap_width_height() {
@@ -185,6 +229,34 @@ private:
         }
         set_page_size();
     };
+
+    void set_color(Color element, unsigned int color) override {
+        auto scoped(_update.block());
+
+        switch (element) {
+            case Color::Background:
+                _backgnd_color_picker->setRgba32(color);
+                break;
+
+        }
+    }
+
+    const PaperSize* find_page_template(double width, double height, const Unit& unit) {
+        Quantity w(std::min(width, height), &unit);
+        Quantity h(std::max(width, height), &unit);
+
+        const double eps = 1e-6;
+        for (auto&& page : _paper->get_page_sizes()) {
+            Quantity pw(std::min(page.larger, page.smaller), page.unit);
+            Quantity ph(std::max(page.larger, page.smaller), page.unit);
+
+            if (are_near(w, pw, eps) && are_near(h, ph, eps)) {
+                return &page;
+            }
+        }
+
+        return nullptr;
+    }
 
     Glib::RefPtr<Gtk::Builder> _builder;
     Gtk::Grid& _main_grid;
@@ -213,10 +285,12 @@ private:
     std::unique_ptr<UnitMenu> _display_units;
     std::unique_ptr<UnitMenu> _page_units;
     OperationBlocker _update;
+    double _size_ratio = 0; // width to height ratio
 };
 
 PageProperties* PageProperties::create() {
     return new PagePropertiesBox();
 }
+
 
 } } } // namespace Inkscape/Widget/UI

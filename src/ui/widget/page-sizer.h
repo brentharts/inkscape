@@ -177,6 +177,8 @@ protected:
      */	     
     std::map<Glib::ustring, PaperSize> _paperSizeTable;
 
+    std::vector<PaperSize> _paper_sizes; // paper sizes in original order
+
     /**
      *	Find the closest standard paper size in the table, to the
      */

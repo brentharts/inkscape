@@ -23,12 +23,13 @@ public:
 
     ~PageProperties() override = default;
 
-    void set_background_color(unsigned int rgba);
+    enum class Color { Background, Desk, Border };
+    virtual void set_color(Color element, unsigned int rgba) = 0;
 
-    sigc::signal<void (unsigned int)>& signal_background_color() { return _signal_background_color; }
+    sigc::signal<void (unsigned int, Color)>& signal_color_changed() { return _signal_color_changed; }
 
 protected:
-    sigc::signal<void (unsigned int)> _signal_background_color;
+    sigc::signal<void (unsigned int, Color)> _signal_color_changed;
     unsigned int _background_color = 0xffffff00;
 };
 
