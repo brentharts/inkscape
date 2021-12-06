@@ -68,7 +68,9 @@ public:
         GET(_template_name, "page-template-name"),
         GET(_preview_box, "preview-box"),
         GET(_checkerboard, "checkerboard"),
+        GET(_antialias, "use-antialias"),
         GET(_border, "border"),
+        GET(_border_on_top, "border-top"),
         GET(_shadow, "shadow"),
         GET(_link_width_height, "link-width-height")
     {
@@ -77,7 +79,6 @@ public:
         _backgnd_color_picker = std::make_unique<ColorPicker>(
             _("Background color"), _("Page background color used during editing and exporting"), 0xffffff00, true,
             &get_widget<Gtk::Button>(_builder, "background-color"));
-        _backgnd_color_picker->setRgba32(_background_color);
 
         _border_color_picker = std::make_unique<ColorPicker>(
             _("Border and shadow color"), _("Page border and shadow color"), 0x0000001f, true,
@@ -168,12 +169,17 @@ private:
 
         {
             auto scoped(_update.block());
-            _page_width.set_value(page.larger);
-            _page_height.set_value(page.smaller);
+            auto width = page.larger;
+            auto height = page.smaller;
+            if (_landscape.get_active() != (width > height)) {
+                std::swap(width, height);
+            }
+            _page_width.set_value(width);
+            _page_height.set_value(height);
             _page_units->setUnit(page.unit->abbr);
             _current_page_unit = _page_units->getUnit();
-            if (page.larger > 0 && page.smaller > 0 && _size_ratio > 0) {
-                _size_ratio = page.larger / page.smaller;
+            if (width > 0 && height > 0 && _size_ratio > 0) {
+                _size_ratio = width / height;
             }
         }
         set_page_size();
@@ -269,6 +275,14 @@ private:
         }
     }
 
+    void set_check(Check element, bool checked) override {
+        auto scoped(_update.block());
+
+        get_checkbutton(element).set_active(checked);
+
+        // 
+    }
+
     const PaperSize* find_page_template(double width, double height, const Unit& unit) {
         Quantity w(std::min(width, height), &unit);
         Quantity h(std::max(width, height), &unit);
@@ -284,6 +298,20 @@ private:
         }
 
         return nullptr;
+    }
+
+    Gtk::CheckButton& get_checkbutton(Check check) {
+        switch (check) {
+            case Check::Antialias: return _antialias;
+            case Check::Border: return _border;
+            case Check::Shadow: return _shadow;
+            case Check::BorderOnTop: return _border_on_top;
+            case Check::Checkerboard: return _checkerboard;
+            //todo
+
+            default:
+                throw std::runtime_error("missing case in get_checkbutton");
+        }
     }
 
     Glib::RefPtr<Gtk::Builder> _builder;
@@ -306,8 +334,10 @@ private:
     Gtk::Box& _preview_box;
     std::unique_ptr<PageSizePreview> _preview = std::make_unique<PageSizePreview>();
     Gtk::CheckButton& _border;
+    Gtk::CheckButton& _border_on_top;
     Gtk::CheckButton& _shadow;
     Gtk::CheckButton& _checkerboard;
+    Gtk::CheckButton& _antialias;
     Gtk::Button& _link_width_height;
     std::unique_ptr<PageSizes> _paper = std::make_unique<PageSizes>();
     std::unique_ptr<UnitMenu> _display_units;

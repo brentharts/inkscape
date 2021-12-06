@@ -28,9 +28,14 @@ public:
 
     sigc::signal<void (unsigned int, Color)>& signal_color_changed() { return _signal_color_changed; }
 
+    enum class Check { Checkerboard, Border, Shadow, BorderOnTop, Antialias, AutoViewbox };
+    virtual void set_check(Check element, bool checked) = 0;
+
+    sigc::signal<void (bool, Check)>& signal_check_toggled() { return _signal_check_toggled; }
+
 protected:
     sigc::signal<void (unsigned int, Color)> _signal_color_changed;
-    unsigned int _background_color = 0xffffff00;
+    sigc::signal<void (bool, Check)> _signal_check_toggled;
 };
 
 } } } // namespace Inkscape/Widget/UI
