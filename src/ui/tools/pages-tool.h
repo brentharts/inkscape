@@ -59,6 +59,7 @@ private:
     void clearDragShapes();
     Inkscape::PageManager *getPageManager();
 
+    Geom::Point getSnappedResizePoint(Geom::Point point, guint state, Geom::Point origin, SPObject *target = nullptr);
     void resizeKnotMoved(SPKnot *knot, Geom::Point const &ppointer, guint state);
     void resizeKnotFinished(SPKnot *knot, guint state);
     void pageModified(SPObject *object, guint flags);

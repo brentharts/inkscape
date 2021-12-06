@@ -126,23 +126,13 @@ void PagesTool::setup()
 
 void PagesTool::resizeKnotMoved(SPKnot *knot, Geom::Point const &ppointer, guint state)
 {
-    Geom::Point point = knot->position();
     if (auto page_manager = getPageManager()) {
         if (auto page = page_manager->getSelected()) {
             auto rect = page->getDesktopRect();
+            auto start = rect.corner(2);
+            Geom::Point point = getSnappedResizePoint(knot->position(), state, start, page);
 
-            // Resize snapping
-            if (!(state & GDK_SHIFT_MASK)) {
-                SnapManager &snap_manager = desktop->namedview->snap_manager;
-                snap_manager.setup(desktop, true, page);
-                Inkscape::SnapCandidatePoint scp(point, Inkscape::SNAPSOURCE_OTHER_HANDLE);
-                scp.addOrigin(rect.corner(2));
-                Inkscape::SnappedPoint sp = snap_manager.freeSnap(scp);
-                point = sp.getPoint();
-                snap_manager.unSetup();
-            }
-
-            if (point != rect.corner(2)) {
+            if (point != start) {
                 rect.setMax(point);
                 visual_box->show();
                 visual_box->set_rect(rect);
@@ -154,6 +144,23 @@ void PagesTool::resizeKnotMoved(SPKnot *knot, Geom::Point const &ppointer, guint
             }
         }
     }
+}
+
+/**
+ * Resize snapping allows knot and tool point snapping consistancy.
+ */
+Geom::Point PagesTool::getSnappedResizePoint(Geom::Point point, guint state, Geom::Point origin, SPObject *target)
+{
+    if (!(state & GDK_SHIFT_MASK)) {
+        SnapManager &snap_manager = desktop->namedview->snap_manager;
+        snap_manager.setup(desktop, true, target);
+        Inkscape::SnapCandidatePoint scp(point, Inkscape::SNAPSOURCE_PAGE_CORNER);
+        scp.addOrigin(origin);
+        Inkscape::SnappedPoint sp = snap_manager.freeSnap(scp);
+        point = sp.getPoint();
+        snap_manager.unSetup();
+    }
+    return point;
 }
 
 void PagesTool::resizeKnotFinished(SPKnot *knot, guint state)
@@ -188,6 +195,8 @@ bool PagesTool::root_handler(GdkEvent *event)
                     // Select the clicked on page. Manager ignores the same-page.
                     page_manager->selectPage(page);
                     this->set_cursor("page-dragging.svg");
+                } else {
+                    drag_origin_dt = getSnappedResizePoint(drag_origin_dt, event->button.state, Geom::Point(0, 0));
                 }
             }
             break;
@@ -216,6 +225,7 @@ bool PagesTool::root_handler(GdkEvent *event)
                 } else if (on_screen_rect) {
                     // Continue to drag new box
                     delete on_screen_rect;
+                    point_dt = getSnappedResizePoint(point_dt, event->motion.state, drag_origin_dt);
                     on_screen_rect = new Geom::Rect(drag_origin_dt, point_dt);
                 } else if (Geom::distance(drag_origin_w, point_w) < drag_tolerance) {
                     // do not start draging anything new if we're within tolerance from origin.
@@ -230,7 +240,7 @@ bool PagesTool::root_handler(GdkEvent *event)
                 } else if (!viewboxUnder(drag_origin_dt)) {
                     // Start making a new page.
                     dragging_item = nullptr;
-                    on_screen_rect = new Geom::Rect(point_dt, point_dt);
+                    on_screen_rect = new Geom::Rect(drag_origin_dt, drag_origin_dt);
                     this->set_cursor("page-draw.svg");
                 }
             } else {
