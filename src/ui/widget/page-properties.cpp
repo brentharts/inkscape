@@ -75,16 +75,16 @@ public:
 #undef GET
 
         _backgnd_color_picker = std::make_unique<ColorPicker>(
-            _("Background color"), _("tip"), 0xffffff00, true,
+            _("Background color"), _("Page background color used during editing and exporting"), 0xffffff00, true,
             &get_widget<Gtk::Button>(_builder, "background-color"));
         _backgnd_color_picker->setRgba32(_background_color);
 
         _border_color_picker = std::make_unique<ColorPicker>(
-            _("Border and shadow color"), _("tip"), 0x0000001f, true,
+            _("Border and shadow color"), _("Page border and shadow color"), 0x0000001f, true,
             &get_widget<Gtk::Button>(_builder, "border-color"));
 
         _desk_color_picker = std::make_unique<ColorPicker>(
-            _("Desk color"), _("tip"), 0xd0d0d0ff, true,
+            _("Desk color"), _("Desk color"), 0xd0d0d0ff, true,
             &get_widget<Gtk::Button>(_builder, "desk-color"));
 
         _backgnd_color_picker->connectChanged([=](guint rgba) {
@@ -109,7 +109,8 @@ public:
         auto& page_units = get_widget<Gtk::ComboBoxText>(_builder, "page-units");
         _page_units = std::make_unique<UnitMenu>(&page_units);
         _page_units->setUnitType(UNIT_TYPE_LINEAR);
-        page_units.signal_changed().connect([=](){ });
+        _current_page_unit = _page_units->getUnit();
+        page_units.signal_changed().connect([=](){ set_page_unit(); });
 
         for (auto&& page : _paper->get_page_sizes()) {
             auto item = new Gtk::MenuItem(page.name);
@@ -167,10 +168,10 @@ private:
 
         {
             auto scoped(_update.block());
-            // _template_name.set_label(page.name);
             _page_width.set_value(page.larger);
             _page_height.set_value(page.smaller);
-            if (page.unit) _page_units->setUnit(page.unit->abbr);
+            _page_units->setUnit(page.unit->abbr);
+            _current_page_unit = _page_units->getUnit();
             if (page.larger > 0 && page.smaller > 0 && _size_ratio > 0) {
                 _size_ratio = page.larger / page.smaller;
             }
@@ -198,6 +199,7 @@ private:
 
         auto scoped(_update.block());
 
+        auto unit = _page_units->getUnit();
         auto width = _page_width.get_value();
         auto height = _page_height.get_value();
         _preview->set_page_size(width, height);
@@ -211,10 +213,8 @@ private:
             _landscape.set_sensitive(false);
         }
 
-        if (auto units = _page_units->getUnit()) {
-            auto templ = find_page_template(width, height, *units);
-            _template_name.set_label(templ ? templ->name : _("Custom"));
-        }
+        auto templ = find_page_template(width, height, *unit);
+        _template_name.set_label(templ ? templ->name : _("Custom"));
     }
 
     void swap_width_height() {
@@ -230,6 +230,27 @@ private:
         set_page_size();
     };
 
+    void set_page_unit() {
+        if (_update.pending()) return;
+
+        const auto old_unit = _current_page_unit;
+        _current_page_unit = _page_units->getUnit();
+        const auto new_unit = _current_page_unit;
+
+        if (new_unit == old_unit) return;
+
+        {
+            auto width = _page_width.get_value();
+            auto height = _page_height.get_value();
+            Quantity w(width, old_unit->abbr);
+            Quantity h(height, old_unit->abbr);
+            auto scoped(_update.block());
+            _page_width.set_value(w.value(new_unit));
+            _page_height.set_value(h.value(new_unit));
+        }
+        set_page_size();
+    }
+
     void set_color(Color element, unsigned int color) override {
         auto scoped(_update.block());
 
@@ -238,6 +259,13 @@ private:
                 _backgnd_color_picker->setRgba32(color);
                 break;
 
+            case Color::Desk:
+                _desk_color_picker->setRgba32(color);
+                break;
+
+            case Color::Border:
+                _border_color_picker->setRgba32(color);
+                break;
         }
     }
 
@@ -284,6 +312,7 @@ private:
     std::unique_ptr<PageSizes> _paper = std::make_unique<PageSizes>();
     std::unique_ptr<UnitMenu> _display_units;
     std::unique_ptr<UnitMenu> _page_units;
+    const Unit* _current_page_unit = nullptr;
     OperationBlocker _update;
     double _size_ratio = 0; // width to height ratio
 };
