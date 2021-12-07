@@ -333,15 +333,23 @@ void SPPage::movePage(Geom::Affine translate, bool with_objects)
     if (translate.isTranslation()) {
         if (with_objects) {
             // Move each item that is overlapping this page too
-            auto scale = document->getDocumentScale();
-            for (auto &item : getOverlappingItems()) {
-                if (auto parent_item = dynamic_cast<SPItem *>(item->parent)) {
-                    auto move = item->i2dt_affine() * (translate * parent_item->i2doc_affine().inverse());
-                    item->doWriteTransform(move, &move, false);
-                }
-            }
+            moveItems(translate, getOverlappingItems());
         }
         setDesktopRect(getDesktopRect() * translate);
+    }
+}
+
+/**
+ * This function moves objects along with pages.
+ */
+void SPPage::moveItems(Geom::Affine translate, std::vector<SPItem *> const objects)
+{
+    auto scale = document->getDocumentScale();
+    for (auto &item : objects) {
+        if (auto parent_item = dynamic_cast<SPItem *>(item->parent)) {
+            auto move = item->i2dt_affine() * (translate * parent_item->i2doc_affine().inverse());
+            item->doWriteTransform(move, &move, false);
+        }
     }
 }
 

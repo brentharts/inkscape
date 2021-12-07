@@ -257,12 +257,17 @@ bool PagesTool::root_handler(GdkEvent *event)
             if (dragging_item) {
                 if (dragging_item->isViewportPage()) {
                     // Move the document's viewport first
+                    auto page_items = dragging_item->getOverlappingItems();
                     auto rect = dragging_item->document->preferredBounds();
                     auto affine = moveTo(point_dt, snap);
                     dragging_item->document->fitToRect(*rect * affine, false);
                     // Now move the page back to where we expect it.
-                    dragging_item->movePage(affine, page_manager->move_objects());
+                    dragging_item->movePage(affine, false);
                     dragging_item->setDesktopRect(*rect);
+                    // We have a custom move object because item detection is fubar after fitToRect
+                    if (page_manager->move_objects()) {
+                        dragging_item->moveItems(affine, page_items);
+                    }
                 } else {
                     // Move the page object on the canvas.
                     dragging_item->movePage(moveTo(point_dt, snap), page_manager->move_objects());
