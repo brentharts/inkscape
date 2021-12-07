@@ -361,7 +361,6 @@ PageSizer::setDim (Inkscape::Util::Quantity w, Inkscape::Util::Quantity h, bool 
         if (row)
             _paperSizeListSelection->select(row);
         }
-g_warning("%f x %f", w.quantity, h.quantity);
     _dimensionWidth.setUnit(w.unit->abbr);
     _dimensionWidth.setValue (w.quantity);
     _dimensionHeight.setUnit(h.unit->abbr);
