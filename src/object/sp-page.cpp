@@ -305,8 +305,11 @@ bool SPPage::setPageIndex(int index, bool swap_page)
  */
 SPPage *SPPage::getNextPage()
 {
-    if (_manager) {
-        return _manager->getPage(getPageIndex() + 1);
+    SPObject *item = this;
+    while (item = item->getNext()) {
+        if (auto next = dynamic_cast<SPPage *>(item)) {
+            return next;
+        }
     }
     return nullptr;
 }
@@ -316,8 +319,11 @@ SPPage *SPPage::getNextPage()
  */
 SPPage *SPPage::getPreviousPage()
 {
-    if (_manager) {
-        return _manager->getPage(getPageIndex() - 1);
+    SPObject *item = this;
+    while (item = item->getPrev()) {
+        if (auto prev = dynamic_cast<SPPage *>(item)) {
+            return prev;
+        }
     }
     return nullptr;
 }

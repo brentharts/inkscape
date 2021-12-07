@@ -46,8 +46,14 @@ PageManager::~PageManager()
  */
 void PageManager::addPage(SPPage *page)
 {
-    // TODO: Pages may not always be added at the end.
-    pages.push_back(page);
+    if (auto next = page->getNextPage()) {
+        // Inserted in the middle, probably an undo.
+        auto it = std::find(pages.begin(), pages.end(), next);
+        g_assert (it != pages.end());
+        pages.insert(it, page);
+    } else {
+        pages.push_back(page);
+    }
     page->setManager(this);
     pagesChanged();
 }
