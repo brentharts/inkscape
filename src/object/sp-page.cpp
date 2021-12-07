@@ -353,6 +353,17 @@ void SPPage::movePage(Geom::Affine translate, bool with_objects)
  */
 void SPPage::swapPage(SPPage *other, bool with_objects)
 {
+    // Swapping with the viewport page must be handled gracefully.
+    if (this->isViewportPage()) {
+        auto other_rect = other->getDesktopRect();
+        auto new_rect = Geom::Rect(Geom::Point(0, 0),
+            Geom::Point(other_rect.width(), other_rect.height()));
+        this->document->fitToRect(new_rect, false);
+    } else if (other->isViewportPage()) {
+        other->swapPage(this, with_objects);
+        return;
+    }
+
     auto this_affine = Geom::Translate(getDesktopRect().corner(0));
     auto other_affine = Geom::Translate(other->getDesktopRect().corner(0));
     movePage(this_affine.inverse() * other_affine, with_objects);
