@@ -118,30 +118,35 @@ void PagesTool::setup()
     if (auto page_manager = getPageManager()) {
         _selector_changed_connection =
             page_manager->connectPageSelected(sigc::mem_fun(*this, &PagesTool::selectionChanged));
-        if (auto page = page_manager->getSelected()) {
-            selectionChanged(page);
-        }
+        selectionChanged(page_manager->getSelected());
     }
 }
 
 void PagesTool::resizeKnotMoved(SPKnot *knot, Geom::Point const &ppointer, guint state)
 {
     if (auto page_manager = getPageManager()) {
-        if (auto page = page_manager->getSelected()) {
-            auto rect = page->getDesktopRect();
-            auto start = rect.corner(2);
-            Geom::Point point = getSnappedResizePoint(knot->position(), state, start, page);
+        SPPage *page;
+        Geom::Rect rect;
+        if (page = page_manager->getSelected()) {
+            // Resizing a specific selected page
+            rect = page->getDesktopRect();
+        } else if (auto document = desktop->getDocument()) {
+            // Resizing the naked viewBox
+            rect = *(document->preferredBounds());
+        }
 
-            if (point != start) {
-                rect.setMax(point);
-                visual_box->show();
-                visual_box->set_rect(rect);
-                if (on_screen_rect) {
-                    delete on_screen_rect;
-                }
-                on_screen_rect = new Geom::Rect(rect);
-                mouse_is_pressed = true;
+        auto start = rect.corner(2);
+        Geom::Point point = getSnappedResizePoint(knot->position(), state, start, page);
+
+        if (point != start) {
+            rect.setMax(point);
+            visual_box->show();
+            visual_box->set_rect(rect);
+            if (on_screen_rect) {
+                delete on_screen_rect;
             }
+            on_screen_rect = new Geom::Rect(rect);
+            mouse_is_pressed = true;
         }
     }
 }
@@ -195,6 +200,9 @@ bool PagesTool::root_handler(GdkEvent *event)
                     // Select the clicked on page. Manager ignores the same-page.
                     page_manager->selectPage(page);
                     this->set_cursor("page-dragging.svg");
+                } else if (viewboxUnder(drag_origin_dt)) {
+                    dragging_viewbox = true;
+                    this->set_cursor("page-dragging.svg");
                 } else {
                     drag_origin_dt = getSnappedResizePoint(drag_origin_dt, event->button.state, Geom::Point(0, 0));
                 }
@@ -215,7 +223,7 @@ bool PagesTool::root_handler(GdkEvent *event)
                     mouse_is_pressed = true;
                 }
 
-                if (dragging_item) {
+                if (dragging_item || dragging_viewbox) {
                     // Continue to drag item.
                     Geom::Affine tr = moveTo(point_dt, snap);
                     // XXX Moving the existing shapes would be much better, but it has
@@ -237,7 +245,10 @@ bool PagesTool::root_handler(GdkEvent *event)
                     page_manager->selectPage(page);
                     addDragShapes(page, Geom::Affine());
                     grabPage(page);
-                } else if (!viewboxUnder(drag_origin_dt)) {
+                } else if (viewboxUnder(drag_origin_dt)) {
+                    // Special handling of viewbox dragging
+                    dragging_viewbox = true;
+                } else {
                     // Start making a new page.
                     dragging_item = nullptr;
                     on_screen_rect = new Geom::Rect(drag_origin_dt, drag_origin_dt);
@@ -253,20 +264,23 @@ bool PagesTool::root_handler(GdkEvent *event)
             auto point_w = Geom::Point(event->button.x, event->button.y);
             auto point_dt = desktop->w2d(point_w);
             bool snap = !(event->button.state & GDK_SHIFT_MASK);
+            auto document = desktop->getDocument();
 
-            if (dragging_item) {
-                if (dragging_item->isViewportPage()) {
+            if (dragging_viewbox || dragging_item) {
+                if (dragging_viewbox || dragging_item->isViewportPage()) {
                     // Move the document's viewport first
-                    auto page_items = dragging_item->getOverlappingItems();
-                    auto rect = dragging_item->document->preferredBounds();
+                    auto page_items = page_manager->getOverlappingItems(desktop, dragging_item);
+                    auto rect = document->preferredBounds();
                     auto affine = moveTo(point_dt, snap);
-                    dragging_item->document->fitToRect(*rect * affine, false);
+                    document->fitToRect(*rect * affine, false);
                     // Now move the page back to where we expect it.
-                    dragging_item->movePage(affine, false);
-                    dragging_item->setDesktopRect(*rect);
+                    if (dragging_item) {
+                        dragging_item->movePage(affine, false);
+                        dragging_item->setDesktopRect(*rect);
+                    }
                     // We have a custom move object because item detection is fubar after fitToRect
                     if (page_manager->move_objects()) {
-                        dragging_item->moveItems(affine, page_items);
+                        page_manager->moveItems(affine, page_items);
                     }
                 } else {
                     // Move the page object on the canvas.
@@ -299,7 +313,8 @@ bool PagesTool::root_handler(GdkEvent *event)
     }
 
     // Clean up any finished dragging, doesn't matter how it ends
-    if (!mouse_is_pressed && (dragging_item || on_screen_rect)) {
+    if (!mouse_is_pressed && (dragging_item || on_screen_rect || dragging_viewbox)) {
+        dragging_viewbox = false;
         dragging_item = nullptr;
         on_screen_rect = nullptr;
         clearDragShapes();
@@ -373,21 +388,18 @@ Geom::Affine PagesTool::moveTo(Geom::Point xy, bool snap)
 void PagesTool::addDragShapes(SPPage *page, Geom::Affine tr)
 {
     clearDragShapes();
-    addDragShape(page, tr);
-    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    if (prefs->getBool("/tools/pages/move_objects", true)) {
-        for (auto &item : page->getOverlappingItems()) {
+
+    if (page) {
+        addDragShape(Geom::PathVector(Geom::Path(page->getDesktopRect())), tr);
+    } else {
+        auto doc_rect = desktop->getDocument()->preferredBounds();
+        addDragShape(Geom::PathVector(Geom::Path(*doc_rect)), tr);
+    }
+    if (Inkscape::Preferences::get()->getBool("/tools/pages/move_objects", true)) {
+        for (auto &item : getPageManager()->getOverlappingItems(desktop, page)) {
             addDragShape(item, tr);
         }
     }
-}
-
-/**
- * Add a page the the things being dragged.
- */
-void PagesTool::addDragShape(SPPage *page, Geom::Affine tr)
-{
-    addDragShape(Geom::PathVector(Geom::Path(Geom::Rect(page->getDesktopRect()))), tr);
 }
 
 /**
@@ -488,6 +500,12 @@ void PagesTool::selectionChanged(SPPage *page)
             _page_modified_connection = page->connectModified(sigc::mem_fun(*this, &PagesTool::pageModified));
             page->setSelected(true);
             pageModified(page, 0);
+        } else if (!page_manager->hasPages() && resize_knot) {
+            // This is for viewBox editng directly. A special extra feature
+            if (auto document = desktop->getDocument()) {
+                resize_knot->moveto(document->preferredBounds()->corner(2));
+                resize_knot->show();
+            }
         }
     }
 }

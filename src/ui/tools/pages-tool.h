@@ -53,7 +53,6 @@ private:
     SPPage *pageUnder(Geom::Point pt);
     bool viewboxUnder(Geom::Point pt);
     void addDragShapes(SPPage *page, Geom::Affine tr);
-    void addDragShape(SPPage *page, Geom::Affine tr);
     void addDragShape(SPItem *item, Geom::Affine tr);
     void addDragShape(Geom::PathVector pth, Geom::Affine tr);
     void clearDragShapes();
@@ -70,6 +69,7 @@ private:
     sigc::connection _selector_changed_connection;
     sigc::connection _page_modified_connection;
 
+    bool dragging_viewbox = false;
     bool mouse_is_pressed = false;
     Geom::Point drag_origin_w;
     Geom::Point drag_origin_dt;

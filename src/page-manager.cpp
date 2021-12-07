@@ -377,6 +377,33 @@ void PageManager::resizePage(double width, double height)
 }
 
 /**
+ * Return a list of objects touching this page, or viewbox (of single page document)
+ */
+std::vector<SPItem *> PageManager::getOverlappingItems(SPDesktop *desktop, SPPage *page)
+{
+    if (page) {
+        return page->getOverlappingItems();
+    }
+    auto doc_rect = _document->preferredBounds();
+    return _document->getItemsPartiallyInBox(desktop->dkey, *doc_rect, true, true, true, false);
+}
+
+/**
+ * Move the given items by the given affine (surely this already exists somewhere?)
+ */
+void PageManager::moveItems(Geom::Affine translate, std::vector<SPItem *> const objects)
+{
+    auto scale = _document->getDocumentScale();
+    for (auto &item : objects) {
+        if (auto parent_item = dynamic_cast<SPItem *>(item->parent)) {
+            auto move = item->i2dt_affine() * (translate * parent_item->i2doc_affine().inverse());
+            item->doWriteTransform(move, &move, false);
+        }
+    }
+}
+
+
+/**
  * Manage the page subset of attributes from sp-namedview and store them.
  */
 bool PageManager::subset(SPAttr key, const gchar *value)

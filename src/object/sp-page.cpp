@@ -339,9 +339,6 @@ void SPPage::movePage(Geom::Affine translate, bool with_objects)
     }
 }
 
-/**
- * This function moves objects along with pages.
- */
 void SPPage::moveItems(Geom::Affine translate, std::vector<SPItem *> const objects)
 {
     auto scale = document->getDocumentScale();
