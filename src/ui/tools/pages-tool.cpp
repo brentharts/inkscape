@@ -500,7 +500,7 @@ void PagesTool::selectionChanged(SPPage *page)
             _page_modified_connection = page->connectModified(sigc::mem_fun(*this, &PagesTool::pageModified));
             page->setSelected(true);
             pageModified(page, 0);
-        } else if (!page_manager->hasPages() && resize_knot) {
+        } else if (resize_knot) {
             // This is for viewBox editng directly. A special extra feature
             if (auto document = desktop->getDocument()) {
                 resize_knot->moveto(document->preferredBounds()->corner(2));

@@ -178,8 +178,15 @@ void PageManager::deletePage(SPPage *page, bool content)
         if (_selected_page == page) {
             selectPage(nullptr);
         }
+        // Only adjust if there will be a page after viewport page is deleted
+        bool fit_viewport = page->isViewportPage() && getPageCount() > 2;
+
         // Removal from pages is done automatically via signals.
         page->deleteObject();
+
+        if (fit_viewport) {
+            _document->fitToRect(getFirstPage()->getDesktopRect(), false);
+        }
     }
 
     // As above with the viewbox shadowing, we need go back to a single page

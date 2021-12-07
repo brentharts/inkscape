@@ -306,7 +306,7 @@ bool SPPage::setPageIndex(int index, bool swap_page)
 SPPage *SPPage::getNextPage()
 {
     if (_manager) {
-        _manager->getPage(getPageIndex() + 1);
+        return _manager->getPage(getPageIndex() + 1);
     }
     return nullptr;
 }
@@ -317,7 +317,7 @@ SPPage *SPPage::getNextPage()
 SPPage *SPPage::getPreviousPage()
 {
     if (_manager) {
-        _manager->getPage(getPageIndex() - 1);
+        return _manager->getPage(getPageIndex() - 1);
     }
     return nullptr;
 }
