@@ -78,6 +78,8 @@ void PagesTool::finish()
         drag_group = nullptr;
         drag_shapes.clear(); // Already deleted by group
     }
+
+    _zoom_connection.disconnect();
 }
 
 void PagesTool::setup()
@@ -120,6 +122,12 @@ void PagesTool::setup()
             page_manager->connectPageSelected(sigc::mem_fun(*this, &PagesTool::selectionChanged));
         selectionChanged(page_manager->getSelected());
     }
+
+    _zoom_connection = desktop->signal_zoom_changed.connect([=](double) {
+        // This readjusts the knot on zoom because the viewbox position
+        // becomes detached on zoom, likely a precision problem.
+        selectionChanged(nullptr);
+    });
 }
 
 void PagesTool::resizeKnotMoved(SPKnot *knot, Geom::Point const &ppointer, guint state)
@@ -295,6 +303,9 @@ bool PagesTool::root_handler(GdkEvent *event)
             mouse_is_pressed = false;
             drag_origin_dt = point_dt;
             ret = true;
+
+            // Clear snap indication on mouse up.
+            desktop->snapindicator->remove_snaptarget();
             break;
         }
         case GDK_KEY_RELEASE: {
@@ -512,11 +523,10 @@ void PagesTool::selectionChanged(SPPage *page)
 
 void PagesTool::pageModified(SPObject *object, guint /*flags*/)
 {
+    assert(resize_knot);
     if (auto page = dynamic_cast<SPPage *>(object)) {
-        if (resize_knot) {
-            resize_knot->moveto(page->getDesktopRect().corner(2));
-            resize_knot->show();
-        }
+        resize_knot->moveto(page->getDesktopRect().corner(2));
+        resize_knot->show();
     }
 }
 
