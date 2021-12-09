@@ -182,7 +182,13 @@ void PageManager::deletePage(SPPage *page, bool content)
             }
         }
         if (_selected_page == page) {
-            selectPage(nullptr);
+            if (auto next = page->getNextPage()) {
+                selectPage(next);
+            } else if (auto prev = page->getPreviousPage()) {
+                selectPage(prev);
+            } else {
+                selectPage(nullptr);
+            }
         }
         // Only adjust if there will be a page after viewport page is deleted
         bool fit_viewport = page->isViewportPage() && getPageCount() > 2;

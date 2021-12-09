@@ -453,14 +453,14 @@ SPPage *PagesTool::pageUnder(Geom::Point pt)
     if (auto page_manager = getPageManager()) {
         // If the point is still on the selected, favour that one.
         if (auto selected = page_manager->getSelected()) {
-            if (selected->getDesktopRect().contains(pt)) {
+            if (selected->getSensitiveRect().contains(pt)) {
                 return selected;
             }
         }
         // If multiple pages are at the same point; this currently only gives
         // you the bottom-most page (the first in the stack).
         for (auto &page : page_manager->getPages()) {
-            if (page->getDesktopRect().contains(pt)) {
+            if (page->getSensitiveRect().contains(pt)) {
                 return page;
             }
         }
@@ -476,7 +476,9 @@ bool PagesTool::viewboxUnder(Geom::Point pt)
 {
     if (auto page_manager = getPageManager()) {
         if (auto document = desktop->getDocument()) {
-            return !page_manager->hasPages() && document->preferredBounds().contains(pt);
+            auto rect = document->preferredBounds();
+            rect->expandBy(-0.1); // see sp-page getSensitiveRect
+            return !page_manager->hasPages() && rect.contains(pt);
         }
     }
     return true;

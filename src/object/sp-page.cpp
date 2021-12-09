@@ -108,6 +108,17 @@ Geom::Rect SPPage::getDesktopRect() const
 }
 
 /**
+ * Like getDesktopRect but returns a slightly shrunken rectangle
+ * so interactions don't confuse the border with the object.
+ */
+Geom::Rect SPPage::getSensitiveRect() const
+{
+    auto rect = getDesktopRect();
+    rect.expandBy(-0.1);
+    return rect;
+}
+
+/**
  * Set the page rectangle in it's native units.
  */
 void SPPage::setRect(Geom::Rect rect)

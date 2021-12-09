@@ -56,6 +56,7 @@ public:
 
     Geom::Rect getRect() const;
     Geom::Rect getDesktopRect() const;
+    Geom::Rect getSensitiveRect() const;
     void setRect(Geom::Rect rect);
     void setDesktopRect(Geom::Rect rect);
     void setDesktopSize(double width, double height);
