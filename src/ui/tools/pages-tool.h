@@ -14,6 +14,7 @@
  */
 
 #include "ui/tools/tool-base.h"
+#include "2geom/rect.h"
 
 #define SP_PAGES_CONTEXT(obj) (dynamic_cast<Inkscape::UI::Tools::PagesTool *>((Inkscape::UI::Tools::ToolBase *)obj))
 #define SP_IS_PAGES_CONTEXT(obj) \
@@ -79,7 +80,7 @@ private:
     SPKnot *resize_knot = nullptr;
     SPPage *highlight_item = nullptr;
     SPPage *dragging_item = nullptr;
-    Geom::Rect *on_screen_rect = nullptr;
+    std::optional<Geom::Rect> on_screen_rect;
     Inkscape::CanvasItemRect *visual_box = nullptr;
     Inkscape::CanvasItemGroup *drag_group = nullptr;
     std::vector<Inkscape::CanvasItemBpath *> drag_shapes;

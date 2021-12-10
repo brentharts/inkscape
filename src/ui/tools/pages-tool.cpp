@@ -134,9 +134,10 @@ void PagesTool::setup()
 
 void PagesTool::resizeKnotMoved(SPKnot *knot, Geom::Point const &ppointer, guint state)
 {
-    SPPage *page;
     Geom::Rect rect;
-    if (page = _page_manager->getSelected()) {
+
+    auto page = _page_manager->getSelected();
+    if (page) {
         // Resizing a specific selected page
         rect = page->getDesktopRect();
     } else if (auto document = desktop->getDocument()) {
@@ -151,10 +152,7 @@ void PagesTool::resizeKnotMoved(SPKnot *knot, Geom::Point const &ppointer, guint
         rect.setMax(point);
         visual_box->show();
         visual_box->set_rect(rect);
-        if (on_screen_rect) {
-            delete on_screen_rect;
-        }
-        on_screen_rect = new Geom::Rect(rect);
+        on_screen_rect = Geom::Rect(rect);
         mouse_is_pressed = true;
     }
 }
@@ -181,8 +179,7 @@ void PagesTool::resizeKnotFinished(SPKnot *knot, guint state)
     if (on_screen_rect) {
         _page_manager->resizePage(on_screen_rect->width(), on_screen_rect->height());
         Inkscape::DocumentUndo::done(desktop->getDocument(), "Resize page", INKSCAPE_ICON("tool-pages"));
-        delete on_screen_rect;
-        on_screen_rect = nullptr;
+        on_screen_rect = {};
     }
     visual_box->hide();
     mouse_is_pressed = false;
@@ -235,9 +232,8 @@ bool PagesTool::root_handler(GdkEvent *event)
                     addDragShapes(dragging_item, tr);
                 } else if (on_screen_rect) {
                     // Continue to drag new box
-                    delete on_screen_rect;
                     point_dt = getSnappedResizePoint(point_dt, event->motion.state, drag_origin_dt);
-                    on_screen_rect = new Geom::Rect(drag_origin_dt, point_dt);
+                    on_screen_rect = Geom::Rect(drag_origin_dt, point_dt);
                 } else if (Geom::distance(drag_origin_w, point_w) < drag_tolerance) {
                     // do not start draging anything new if we're within tolerance from origin.
                     // pass
@@ -254,7 +250,7 @@ bool PagesTool::root_handler(GdkEvent *event)
                 } else {
                     // Start making a new page.
                     dragging_item = nullptr;
-                    on_screen_rect = new Geom::Rect(drag_origin_dt, drag_origin_dt);
+                    on_screen_rect = Geom::Rect(drag_origin_dt, drag_origin_dt);
                     this->set_cursor("page-draw.svg");
                 }
             } else {
@@ -322,7 +318,7 @@ bool PagesTool::root_handler(GdkEvent *event)
     if (!mouse_is_pressed && (dragging_item || on_screen_rect || dragging_viewbox)) {
         dragging_viewbox = false;
         dragging_item = nullptr;
-        on_screen_rect = nullptr;
+        on_screen_rect = {};
         clearDragShapes();
         visual_box->hide();
         ret = true;
