@@ -1,3 +1,18 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+/**
+ * @file
+ *
+ * Page size preview widget
+ */
+/*
+ * Authors:
+ *   Mike Kowalski
+ *
+ * Copyright (C) 2021 Authors
+ *
+ * Released under GNU GPL v2+, read the file 'COPYING' for more information.
+ */
+
 #include "page-size-preview.h"
 #include "display/cairo-utils.h"
 #include "2geom/rect.h"

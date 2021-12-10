@@ -33,9 +33,15 @@ public:
 
     sigc::signal<void (bool, Check)>& signal_check_toggled() { return _signal_check_toggled; }
 
+    enum class Dimension { PageSize, ViewboxSize, ViewboxPosition, Scale };
+    virtual void set_dimension(Dimension dim, double x, double y) = 0;
+
+    sigc::signal<void (double, double, Dimension)>& signal_dimmension_changed() { return _signal_dimmension_changed; }
+
 protected:
     sigc::signal<void (unsigned int, Color)> _signal_color_changed;
     sigc::signal<void (bool, Check)> _signal_check_toggled;
+    sigc::signal<void (double, double, Dimension)> _signal_dimmension_changed;
 };
 
 } } } // namespace Inkscape/Widget/UI

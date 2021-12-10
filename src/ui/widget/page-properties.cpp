@@ -1,3 +1,18 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+/**
+ * @file
+ *
+ * Document properties widget: viewbox, document size, colors
+ */
+/*
+ * Authors:
+ *   Mike Kowalski
+ *
+ * Copyright (C) 2021 Authors
+ *
+ * Released under GNU GPL v2+, read the file 'COPYING' for more information.
+ */
+
 #include <glibmm/i18n.h>
 #include <gtkmm/box.h>
 #include <gtkmm/builder.h>
@@ -58,6 +73,7 @@ public:
         GET(_page_height, "page-height"),
         GET(_portrait, "page-portrait"),
         GET(_landscape, "page-landscape"),
+        GET(_auto_viewbox, "auto-viewbox"),
         GET(_scale_x, "scale-x"),
         GET(_scale_y, "scale-y"),
         GET(_viewbox_x, "viewbox-x"),
@@ -114,7 +130,7 @@ public:
         page_units.signal_changed().connect([=](){ set_page_unit(); });
 
         for (auto&& page : _paper->get_page_sizes()) {
-            auto item = new Gtk::MenuItem(page.name);
+            auto item = new Gtk::MenuItem(page.name); //todo getDescription()
             item->show();
             _page_templates_menu.append(*item);
             item->signal_activate().connect([=](){ set_page_template(page); });
@@ -124,6 +140,10 @@ public:
         _preview->set_vexpand();
         _preview_box.add(*_preview);
 
+        for (auto check : {Check::Border, Check::Shadow, Check::Checkerboard, Check::BorderOnTop, Check::Antialias}) {
+            auto checkbutton = &get_checkbutton(check);
+            checkbutton->signal_toggled().connect([=](){ fire_checkbox_toggled(*checkbutton, check); });
+        }
         _border.signal_toggled().connect([=](){
             _preview->draw_border(_border.get_active());
         });
@@ -133,6 +153,9 @@ public:
         });
         _checkerboard.signal_toggled().connect([=](){
             _preview->enable_checkerboard(_checkerboard.get_active());
+        });
+        _auto_viewbox.signal_toggled().connect([=](){
+            // 
         });
 
         const char* linked = "entries-linked-symbolic";
@@ -158,6 +181,14 @@ public:
         _page_height.signal_value_changed().connect([=](){ set_page_size_linked(false); });
         _landscape.signal_toggled().connect([=](){ if (_landscape.get_active()) swap_width_height(); });
         _portrait .signal_toggled().connect([=](){ if (_portrait .get_active()) swap_width_height(); });
+
+        for (auto dim : {Dimension::Scale, Dimension::ViewboxPosition, Dimension::ViewboxSize}) {
+            auto pair = get_dimension(dim);
+            auto b1 = &pair.first;
+            auto b2 = &pair.first;
+            b1->signal_value_changed().connect([=](){ fire_value_changed(*b1, *b2, dim); });
+            b2->signal_value_changed().connect([=](){ fire_value_changed(*b1, *b2, dim); });
+        }
 
         add(_main_grid);
         show();
@@ -221,6 +252,8 @@ private:
 
         auto templ = find_page_template(width, height, *unit);
         _template_name.set_label(templ ? templ->name : _("Custom"));
+
+        _signal_dimmension_changed.emit(width, height, Dimension::PageSize);
     }
 
     void swap_width_height() {
@@ -280,7 +313,29 @@ private:
 
         get_checkbutton(element).set_active(checked);
 
-        // 
+        // todo: special cases
+    }
+
+    void set_dimension(Dimension dimension, double x, double y) override {
+        auto scoped(_update.block());
+
+        auto dim = get_dimension(dimension);
+        dim.first.set_value(x);
+        dim.second.set_value(y);
+
+        set_page_size();
+    }
+
+    void fire_value_changed(Gtk::SpinButton& b1, Gtk::SpinButton& b2, Dimension dim) {
+        if (!_update.pending()) {
+            _signal_dimmension_changed.emit(b1.get_value(), b2.get_value(), dim);
+        }
+    }
+
+    void fire_checkbox_toggled(Gtk::CheckButton& checkbox, Check check) {
+        if (!_update.pending()) {
+            _signal_check_toggled.emit(checkbox.get_active(), check);
+        }
     }
 
     const PaperSize* find_page_template(double width, double height, const Unit& unit) {
@@ -307,10 +362,22 @@ private:
             case Check::Shadow: return _shadow;
             case Check::BorderOnTop: return _border_on_top;
             case Check::Checkerboard: return _checkerboard;
-            //todo
 
             default:
                 throw std::runtime_error("missing case in get_checkbutton");
+        }
+    }
+
+    typedef std::pair<Gtk::SpinButton&, Gtk::SpinButton&> spin_pair;
+    spin_pair get_dimension(Dimension dimension) {
+        switch (dimension) {
+            case Dimension::PageSize: return spin_pair(_page_width, _page_height);
+            case Dimension::Scale: return spin_pair(_scale_x, _scale_y);
+            case Dimension::ViewboxPosition: return spin_pair(_viewbox_x, _viewbox_y);
+            case Dimension::ViewboxSize: return spin_pair(_viewbox_width, _viewbox_height);
+
+            default:
+                throw std::runtime_error("missing case in get_dimension");
         }
     }
 
@@ -320,6 +387,7 @@ private:
     Gtk::SpinButton& _page_height;
     Gtk::RadioButton& _portrait;
     Gtk::RadioButton& _landscape;
+    Gtk::CheckButton& _auto_viewbox;
     Gtk::SpinButton& _scale_x;
     Gtk::SpinButton& _scale_y;
     Gtk::SpinButton& _viewbox_x;

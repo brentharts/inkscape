@@ -14,6 +14,44 @@
     <property name="step-increment">1</property>
     <property name="page-increment">10</property>
   </object>
+  <object class="GtkAdjustment" id="adj-scale-x">
+    <property name="lower">9.9999999999999995e-07</property>
+    <property name="upper">1000000</property>
+    <property name="value">1</property>
+    <property name="step-increment">0.10</property>
+    <property name="page-increment">1</property>
+  </object>
+  <object class="GtkAdjustment" id="adj-scale-y">
+    <property name="lower">9.9999999999999995e-07</property>
+    <property name="upper">1000000</property>
+    <property name="value">1</property>
+    <property name="step-increment">0.10</property>
+    <property name="page-increment">1</property>
+  </object>
+  <object class="GtkAdjustment" id="adj-viewbox-heigh">
+    <property name="lower">0.001</property>
+    <property name="upper">1000000</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="adj-viewbox-width">
+    <property name="lower">0.001</property>
+    <property name="upper">1000000</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="adj-viewbox-x">
+    <property name="lower">-1000000</property>
+    <property name="upper">1000000</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="adj-viewbox-y">
+    <property name="lower">-1000000</property>
+    <property name="upper">1000000</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
   <object class="GtkImage" id="image1">
     <property name="visible">True</property>
     <property name="can-focus">False</property>
@@ -291,6 +329,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="width-chars">9</property>
+            <property name="adjustment">adj-scale-x</property>
             <property name="digits">6</property>
           </object>
           <packing>
@@ -304,6 +343,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="width-chars">9</property>
+            <property name="adjustment">adj-scale-y</property>
             <property name="digits">6</property>
           </object>
           <packing>
@@ -401,6 +441,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="width-chars">9</property>
+            <property name="adjustment">adj-viewbox-x</property>
             <property name="digits">3</property>
           </object>
           <packing>
@@ -414,6 +455,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="width-chars">9</property>
+            <property name="adjustment">adj-viewbox-y</property>
             <property name="digits">3</property>
           </object>
           <packing>
@@ -427,6 +469,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="width-chars">9</property>
+            <property name="adjustment">adj-viewbox-width</property>
             <property name="digits">3</property>
           </object>
           <packing>
@@ -440,6 +483,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="width-chars">9</property>
+            <property name="adjustment">adj-page-heigh</property>
             <property name="digits">3</property>
           </object>
           <packing>
