@@ -56,7 +56,6 @@ private:
     void addDragShape(SPItem *item, Geom::Affine tr);
     void addDragShape(Geom::PathVector pth, Geom::Affine tr);
     void clearDragShapes();
-    Inkscape::PageManager *getPageManager();
 
     Geom::Point getSnappedResizePoint(Geom::Point point, guint state, Geom::Point origin, SPObject *target = nullptr);
     void resizeKnotMoved(SPKnot *knot, Geom::Point const &ppointer, guint state);
@@ -76,6 +75,7 @@ private:
     Geom::Point drag_origin_dt;
     int drag_tolerance = 5;
 
+    PageManager *_page_manager = nullptr;
     SPKnot *resize_knot = nullptr;
     SPPage *highlight_item = nullptr;
     SPPage *dragging_item = nullptr;
