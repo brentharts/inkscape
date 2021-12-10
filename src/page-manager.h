@@ -54,6 +54,7 @@ public:
     int getPageCount() const { return pages.size(); }
     int getPageIndex(SPPage *page) const;
     int getSelectedPageIndex() const;
+    Geom::Rect getSelectedPageRect() const;
 
     void enablePages();
     void disablePages();
@@ -68,8 +69,10 @@ public:
 
     ColorRGBA getDefaultBackgroundColor() const { return ColorRGBA(background_color); }
 
-    void zoomToPage(SPDesktop *desktop, SPPage *page);
-    void zoomToSelectedPage(SPDesktop *desktop) { zoomToPage(desktop, _selected_page); };
+    void zoomToPage(SPDesktop *desktop, SPPage *page, bool width_only = false);
+    void zoomToSelectedPage(SPDesktop *desktop, bool width_only = false) { zoomToPage(desktop, _selected_page, width_only); };
+    void centerToPage(SPDesktop *desktop, SPPage *page);
+    void centerToSelectedPage(SPDesktop *desktop) { centerToPage(desktop, _selected_page); };
 
     SPPage *newPage();
     SPPage *newPage(double width, double height);

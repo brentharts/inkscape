@@ -718,39 +718,25 @@ SPDesktop::zoom_realworld(Geom::Point const &center, double ratio)
 
 
 /**
- * Set display area to origin and current document dimensions.
+ * Set display area in only the width dimention.
  */
-void
-SPDesktop::zoom_page()
+void SPDesktop::set_display_width(Geom::Rect const &rect, Geom::Coord border)
 {
-    Geom::Rect d(Geom::Point(0, 0),
-                 Geom::Point(doc()->getWidth().value("px"), doc()->getHeight().value("px")));
-
-    if (d.minExtent() < 1.0) {
+    if (rect.width() < 1.0)
         return;
-    }
-
-    set_display_area(d, 10);
+    auto const center_y = current_center().y();
+    set_display_area(Geom::Rect(
+        Geom::Point(rect.left(), center_y),
+        Geom::Point(rect.width(), center_y)), border);
 }
 
 /**
- * Set display area to current document width.
+ * Centre Rect, without zooming
  */
-void
-SPDesktop::zoom_page_width()
+void SPDesktop::set_display_center(Geom::Rect const &rect)
 {
-    if (doc()->getWidth().value("px") < 1.0) {
-        return;
-    }
-
-    auto const center_y = current_center().y();
-
-    Geom::Rect d(Geom::Point(0, center_y), //
-                 Geom::Point(doc()->getWidth().value("px"), center_y));
-
-    set_display_area(d, 10);
+    zoom_absolute(rect.midpoint(), this->current_zoom(), false);
 }
-
 
 /**
  * Zoom to whole drawing.
@@ -789,14 +775,6 @@ SPDesktop::zoom_selection()
     }
 
     set_display_area(*d, 10);
-}
-
-/**
- * Centre Page in window, without zooming
- */
-void SPDesktop::zoom_center_page()
-{
-    zoom_absolute(Geom::Point(doc()->getWidth().value("px")/2, doc()->getHeight().value("px")/2), this->current_zoom(), false);
 }
 
 Geom::Point SPDesktop::current_center() const {

@@ -393,7 +393,12 @@ Export::~Export ()
 
 void Export::documentReplaced()
 {
+    _page_selected_connection.disconnect();
     if (auto document = getDocument()) {
+        // when the page selected is changes, update the export area
+        _page_manager = document->getNamedView()->getPageManager();
+        _page_selected_connection = _page_manager->connectPageSelected([=](SPPage*) { refreshArea(); });
+
         unit_selector.setUnit(document->getNamedView()->display_units->abbr);
 
         set_default_filename(document->getDocumentFilename());
@@ -701,17 +706,14 @@ void Export::refreshArea ()
                    otherwise we drop through to the page settings */
                 if (bbox) {
                     // std::cout << "Using selection: DRAWING" << std::endl;
-                    current_key= SELECTION_DRAWING;
+                    current_key = SELECTION_DRAWING;
                     break;
                 }
             }
         case SELECTION_PAGE:
-            if (manual_key == SELECTION_PAGE){
-                bbox = Geom::Rect(Geom::Point(0.0, 0.0),
-                        Geom::Point(doc->getWidth().value("px"), doc->getHeight().value("px")));
-
-                // std::cout << "Using selection: PAGE" << std::endl;
-                current_key= SELECTION_PAGE;
+            if (manual_key == SELECTION_PAGE) {
+                bbox = _page_manager->getSelectedPageRect();
+                current_key = SELECTION_PAGE;
                 break;
             }
         case SELECTION_CUSTOM:
@@ -926,8 +928,7 @@ void Export::_export_raster(Inkscape::Extension::Output *extension)
     auto doc = desktop->getDocument();
 
     // In the future, this could be a different color for each page.
-    auto pm = desktop->getNamedView()->getPageManager();
-    guint32 default_bg = pm->background_color;
+    guint32 default_bg = _page_manager->background_color;
 
     bool exportSuccessful = false;
 
@@ -1390,17 +1391,10 @@ void Export::detectSize() {
         }
 
         case SELECTION_PAGE: {
-            auto doc = getDocument();
-
-            Geom::Point x(0.0, 0.0);
-            Geom::Point y(doc->getWidth().value("px"),
-                          doc->getHeight().value("px"));
-            Geom::Rect bbox(x, y);
-
-            if (bbox_equal(bbox,current_bbox)) {
+            auto bbox = _page_manager->getSelectedPageRect();
+            if (bbox_equal(bbox, current_bbox)) {
                 key = SELECTION_PAGE;
             }
-
             break;
         }
         default:

@@ -258,6 +258,14 @@ int PageManager::getSelectedPageIndex() const
 }
 
 /**
+ * Returns the selected page rect, OR the viewbox rect.
+ */
+Geom::Rect PageManager::getSelectedPageRect() const
+{
+    return _selected_page ? _selected_page->getDesktopRect() : *(_document->preferredBounds());
+}
+
+/**
  * Called when the pages vector is updated, either page
  * deleted or page created (but not if the page is modified)
  */
@@ -370,16 +378,25 @@ Geom::OptRect PageManager::getDesktopRect() const
 /**
  * Center/zoom on the given page.
  */
-void PageManager::zoomToPage(SPDesktop *desktop, SPPage *page)
+void PageManager::zoomToPage(SPDesktop *desktop, SPPage *page, bool width_only)
 {
-    if (!page)
+    Geom::Rect rect = page ? page->getDesktopRect() : *(_document->preferredBounds());
+    if (rect.minExtent() < 1.0)
         return;
+    if (width_only) {
+        desktop->set_display_width(rect, 10);
+    } else {
+        desktop->set_display_area(rect, 10);
+    }
+}
 
-    auto d = page->getDesktopRect();
-    if (d.minExtent() < 1.0)
-        return;
-
-    desktop->set_display_area(d, 10);
+/**
+ * Center without zooming on the given page
+ */
+void PageManager::centerToPage(SPDesktop *desktop, SPPage *page)
+{
+    Geom::Rect rect = page ? page->getDesktopRect() : *(_document->preferredBounds());
+    desktop->set_display_center(rect);
 }
 
 void PageManager::resizePage(double width, double height)

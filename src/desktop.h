@@ -356,16 +356,15 @@ public:
     void set_display_area (Geom::Point const &c, Geom::Point const &w, bool log = true);
     void set_display_area (Geom::Rect const &a, Geom::Coord border, bool log = true);
     Geom::Parallelogram get_display_area(bool use_integer_viewbox = false) const;
+    void set_display_width(Geom::Rect const &a, Geom::Coord border);
+    void set_display_center(Geom::Rect const &a);
 
     void zoom_absolute (Geom::Point const &c, double const zoom, bool keep_point = true);
     void zoom_relative (Geom::Point const &c, double const zoom, bool keep_point = true);
     void zoom_realworld (Geom::Point const &c, double const ratio);
 
-    void zoom_page();
-    void zoom_page_width();
     void zoom_drawing();
     void zoom_selection();
-    void zoom_center_page();
 
     double current_zoom() const { return _current_affine.getZoom(); }
     Geom::Point current_center() const;

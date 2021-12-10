@@ -1563,8 +1563,10 @@ SPDesktopWidget::zoom_populate_popup(Gtk::Menu *menu)
     auto sep = Gtk::manage(new Gtk::SeparatorMenuItem());
     menu->append(*sep);
 
+    auto pm = desktop->getNamedView()->getPageManager();
+
     auto item_page = Gtk::manage(new Gtk::MenuItem(_("Page")));
-    item_page->signal_activate().connect(sigc::mem_fun(desktop, &SPDesktop::zoom_page));
+    item_page->signal_activate().connect([=]() { pm->zoomToSelectedPage(desktop); });
     menu->append(*item_page);
 
     auto item_drawing = Gtk::manage(new Gtk::MenuItem(_("Drawing")));
@@ -1576,7 +1578,7 @@ SPDesktopWidget::zoom_populate_popup(Gtk::Menu *menu)
     menu->append(*item_selection);
 
     auto item_center_page = Gtk::manage(new Gtk::MenuItem(_("Centre Page")));
-    item_center_page->signal_activate().connect(sigc::mem_fun(desktop, &SPDesktop::zoom_center_page));
+    item_center_page->signal_activate().connect([=]() { pm->centerToSelectedPage(desktop); });
     menu->append(*item_center_page);
 
     menu->show_all();
