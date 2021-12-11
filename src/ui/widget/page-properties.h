@@ -38,10 +38,16 @@ public:
 
     sigc::signal<void (double, double, Dimension)>& signal_dimmension_changed() { return _signal_dimmension_changed; }
 
+    enum class Units { Display, Document };
+    virtual void set_unit(Units unit, const Glib::ustring& abbr) = 0;
+
+    sigc::signal<void (const Glib::ustring&, Units)> signalunit_changed() { return _signal_unit_changed; }
+
 protected:
     sigc::signal<void (unsigned int, Color)> _signal_color_changed;
     sigc::signal<void (bool, Check)> _signal_check_toggled;
     sigc::signal<void (double, double, Dimension)> _signal_dimmension_changed;
+    sigc::signal<void (const Glib::ustring&, Units)> _signal_unit_changed;
 };
 
 } } } // namespace Inkscape/Widget/UI

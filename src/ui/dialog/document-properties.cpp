@@ -92,7 +92,7 @@ DocumentProperties& DocumentProperties::getInstance()
 DocumentProperties::DocumentProperties()
     : DialogBase("/dialogs/documentoptions", "DocumentProperties")
     , _page_page(Gtk::manage(new UI::Widget::NotebookPage(1, 1, false, true)))
-    , _page_page2(Gtk::manage(new UI::Widget::NotebookPage(1, 1)))
+    // , _page_page2(Gtk::manage(new UI::Widget::NotebookPage(1, 1)))
     , _page_guides(Gtk::manage(new UI::Widget::NotebookPage(1, 1)))
     , _page_cms(Gtk::manage(new UI::Widget::NotebookPage(1, 1)))
     , _page_scripting(Gtk::manage(new UI::Widget::NotebookPage(1, 1)))
@@ -120,38 +120,6 @@ DocumentProperties::DocumentProperties()
     , _create_guides_btn(_("Create guides around the page"))
     , _delete_guides_btn(_("Delete all guides"))
     //---------------------------------------------------------------
-/*
-    , _rsu_sno(_("Snap _distance"), _("Snap only when _closer than:"), _("Always snap"),
-               _("Snapping distance, in screen pixels, for snapping to objects"), _("Always snap to objects, regardless of their distance"),
-               _("If set, objects only snap to another object when it's within the range specified below"),
-               "objecttolerance", _wr)
-    //Options for snapping to grids
-    , _rsu_sn(_("Snap d_istance"), _("Snap only when c_loser than:"), _("Always snap"),
-              _("Snapping distance, in screen pixels, for snapping to grid"), _("Always snap to grids, regardless of the distance"),
-              _("If set, objects only snap to a grid line when it's within the range specified below"),
-              "gridtolerance", _wr)
-    //Options for snapping to guides
-    , _rsu_gusn(_("Snap dist_ance"), _("Snap only when close_r than:"), _("Always snap"),
-                _("Snapping distance, in screen pixels, for snapping to guides"), _("Always snap to guides, regardless of the distance"),
-                _("If set, objects only snap to a guide when it's within the range specified below"),
-                "guidetolerance", _wr)
-    //Options for alignment snapping
-    , _rsu_assn(_("Snap dista_nce"), _("Snap only when cl_oser than:"), _("Always snap"),
-                _("Snapping distance, in screen pixels, for alignment snapping"), _("Always snap to alignment guides, regardless of the distance"),
-                _("If set, objects only snap to as alignment guide when it's within the range specified below"),
-                "alignmenttolerance", _wr)
-    //Options for distribution snapping
-    , _rsu_dssn(_("Snap distanc_e"), _("Snap only _when closer than:"), _("Always snap"),
-                _("Snapping distance, in screen pixels, for distribution snapping"), _("Always snap objects at equal distance, regardless of the distance"),
-                _("If set, objects only snap to at equal distances when it's within the range specified below"),
-                "distributiontolerance", _wr)
-*/
-    //---------------------------------------------------------------
-    // , _rcb_snclp(_("Snap to clip paths"), _("When snapping to paths, then also try snapping to clip paths"), "inkscape:snap-path-clip", _wr)
-    // , _rcb_snmsk(_("Snap to mask paths"), _("When snapping to paths, then also try snapping to mask paths"), "inkscape:snap-path-mask", _wr)
-    // , _rcb_perp(_("Snap perpendicularly"), _("When snapping to paths or guides, then also try snapping perpendicularly"), "inkscape:snap-perpendicular", _wr)
-    // , _rcb_tang(_("Snap tangentially"), _("When snapping to paths or guides, then also try snapping tangentially"), "inkscape:snap-tangential", _wr)
-    //---------------------------------------------------------------
     , _grids_label_crea("", Gtk::ALIGN_START)
     , _grids_button_new(C_("Grid", "_New"), _("Create new grid."))
     , _grids_button_remove(C_("Grid", "_Remove"), _("Remove selected grid."))
@@ -160,14 +128,13 @@ DocumentProperties::DocumentProperties()
     , _grids_hbox_crea(Gtk::ORIENTATION_HORIZONTAL)
     , _grids_space(Gtk::ORIENTATION_HORIZONTAL)
 {
-    set_spacing (4);
+    set_spacing (0);
     pack_start(_notebook, true, true);
 
     _notebook.append_page(*_page_page,      _("Display"));
-    _notebook.append_page(*_page_page2, _("l"));
+    // _notebook.append_page(*_page_page2, _("l"));
     _notebook.append_page(*_page_guides,    _("Guides"));
     _notebook.append_page(_grids_vbox,      _("Grids"));
-    // _notebook.append_page(*_page_snap,      _("Snap"));
     _notebook.append_page(*_page_cms,       _("Color"));
     _notebook.append_page(*_page_scripting, _("Scripting"));
     _notebook.append_page(*_page_metadata1, _("Metadata"));
@@ -177,7 +144,6 @@ DocumentProperties::DocumentProperties()
     build_page();
     build_guides();
     build_gridspage();
-    // build_snap();
     build_cms();
     build_scripting();
     build_metadata();
@@ -260,8 +226,18 @@ void attach_all(Gtk::Grid &table, Gtk::Widget *const arr[], unsigned const n)
 
 void DocumentProperties::build_page()
 {
-    _page_page->table().attach(*(Inkscape::UI::Widget::PageProperties::create()), 0, 0);
+    using UI::Widget::PageProperties;
+    _page = Gtk::manage(PageProperties::create());
+    _page_page->table().attach(*_page, 0, 0);
+    _page_page->show();
 
+    _page->signal_color_changed().connect([=](unsigned int color, PageProperties::Color element){
+        if (_wr.isUpdating()) return;
+
+        //todo
+    });
+
+/*
     _page_page2->show();
 
     Gtk::Label* label_gen = Gtk::manage (new Gtk::Label);
@@ -324,7 +300,7 @@ void DocumentProperties::build_page()
     _rcb_canb.setSlaveWidgets(_slaveList);
 
     _rcb_shwd.setRange(0, 999);
-
+*/
 }
 
 void DocumentProperties::build_guides()
@@ -363,53 +339,6 @@ void DocumentProperties::build_guides()
     _create_guides_btn.signal_clicked().connect(sigc::mem_fun(*this, &DocumentProperties::create_guides_around_page));
     _delete_guides_btn.signal_clicked().connect(sigc::mem_fun(*this, &DocumentProperties::delete_all_guides));
 }
-
-/*
-void DocumentProperties::build_snap()
-{
-    _page_snap->show();
-
-    Gtk::Label *label_o = Gtk::manage (new Gtk::Label);
-    label_o->set_markup (_("<b>Snap to objects</b>"));
-    Gtk::Label *label_gr = Gtk::manage (new Gtk::Label);
-    label_gr->set_markup (_("<b>Snap to grids</b>"));
-    Gtk::Label *label_gu = Gtk::manage (new Gtk::Label);
-    label_gu->set_markup (_("<b>Snap to guides</b>"));
-    Gtk::Label *label_as = Gtk::manage (new Gtk::Label);
-    label_as->set_markup (_("<b>Alignment Snapping</b>"));
-    Gtk::Label *label_ds = Gtk::manage (new Gtk::Label);
-    label_ds->set_markup (_("<b>Distance Snapping</b>"));
-    // Gtk::Label *label_m = Gtk::manage (new Gtk::Label);
-    // label_m->set_markup (_("<b>Miscellaneous</b>"));
-
-    // auto spacer = Gtk::manage(new Gtk::Label());
-
-    Gtk::Widget *const array[] =
-    {
-        label_o,     nullptr,
-        nullptr,     _rsu_sno._vbox,
-        // &_rcb_snclp, spacer,
-        // nullptr,     &_rcb_snmsk,
-        nullptr,     nullptr,
-        label_gr,    nullptr,
-        nullptr,     _rsu_sn._vbox,
-        nullptr,     nullptr,
-        label_gu,    nullptr,
-        nullptr,     _rsu_gusn._vbox,
-        nullptr,     nullptr,
-        label_as,    nullptr,
-        nullptr,     _rsu_assn._vbox,
-        nullptr,     nullptr,
-        label_ds,    nullptr,
-        nullptr,     _rsu_dssn._vbox,
-        nullptr,     nullptr,
-        // label_m,     nullptr,
-        // nullptr,     &_rcb_perp,
-        // nullptr,     &_rcb_tang
-    };
-    attach_all(_page_snap->table(), array, G_N_ELEMENTS(array));
- }
- */
 
 void DocumentProperties::create_guides_around_page()
 {
@@ -1398,8 +1327,8 @@ void DocumentProperties::update_widgets()
     _rcb_shwd.setValue(pm->shadow_size);
 
     SPRoot *root = document->getRoot();
-    _rcb_antialias.set_xml_target(root->getRepr(), document);
-    _rcb_antialias.setActive(root->style->shape_rendering.computed != SP_CSS_SHAPE_RENDERING_CRISPEDGES);
+    // _rcb_antialias.set_xml_target(root->getRepr(), document);
+    // _rcb_antialias.setActive(root->style->shape_rendering.computed != SP_CSS_SHAPE_RENDERING_CRISPEDGES);
 
     if (nv->display_units) {
         _rum_deflt.setUnit (nv->display_units->abbr);
@@ -1421,6 +1350,26 @@ void DocumentProperties::update_widgets()
         doc_h_unit = "px";
         doc_h = root->viewBox.height();
     }
+
+    using UI::Widget::PageProperties;
+    _page->set_dimension(PageProperties::Dimension::PageSize, doc_w, doc_h);
+    _page->set_unit(PageProperties::Units::Document, doc_w_unit);
+    if (root->viewBox_set) {
+        auto& vb = root->viewBox;
+        _page->set_dimension(PageProperties::Dimension::ViewboxSize, vb.width(), vb.height());
+        _page->set_dimension(PageProperties::Dimension::ViewboxPosition, vb.left(), vb.top());
+
+    }
+    _page->set_unit(PageProperties::Units::Display, nv->display_units->abbr);
+    _page->set_check(PageProperties::Check::Checkerboard, nv->desk_checkerboard);
+    _page->set_color(PageProperties::Color::Desk, nv->desk_color);
+    _page->set_color(PageProperties::Color::Background, pm->background_color);
+    _page->set_check(PageProperties::Check::Border, pm->border_show);
+    _page->set_check(PageProperties::Check::BorderOnTop, pm->border_on_top);
+    _page->set_color(PageProperties::Color::Border, pm->border_color);
+    _page->set_check(PageProperties::Check::Shadow, pm->shadow_show);
+
+    _page->set_check(PageProperties::Check::Antialias, root->style->shape_rendering.computed != SP_CSS_SHAPE_RENDERING_CRISPEDGES);
 
     //-----------------------------------------------------------guide page
 

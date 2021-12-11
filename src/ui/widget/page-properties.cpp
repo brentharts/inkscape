@@ -87,21 +87,17 @@ public:
             _("Desk color"), _("Desk color"), 0xd0d0d0ff, true,
             &get_widget<Gtk::Button>(_builder, "desk-color"));
 
-        _backgnd_color_picker->connectChanged([=](guint rgba) {
-            _preview->set_page_color(rgba);
-            if (_update.pending()) return;
-            _signal_color_changed.emit(rgba, Color::Background);
-        });
-        _border_color_picker->connectChanged([=](guint rgba) {
-            _preview->set_border_color(rgba);
-            if (_update.pending()) return;
-            _signal_color_changed.emit(rgba, Color::Border);
-        });
-        _desk_color_picker->connectChanged([=](guint rgba) {
-            _preview->set_desk_color(rgba);
-            if (_update.pending()) return;
-            _signal_color_changed.emit(rgba, Color::Desk);
-        });
+        for (auto element : {Color::Background, Color::Border, Color::Desk}) {
+            get_color_picker(element).connectChanged([=](guint rgba) {
+                update_preview_color(element, rgba);
+                if (_update.pending()) return;
+                _signal_color_changed.emit(rgba, Color::Background);
+            });
+        }
+
+        // _backgnd_color_picker->connectChanged([=](guint rgba) { _preview->set_page_color(rgba); });
+        // _border_color_picker->connectChanged([=](guint rgba) { _preview->set_border_color(rgba); });
+        // _desk_color_picker->connectChanged([=](guint rgba) { _preview->set_desk_color(rgba); });
 
         _display_units = std::make_unique<UnitMenu>(&get_widget<Gtk::ComboBoxText>(_builder, "display-units"));
         _display_units->setUnitType(UNIT_TYPE_LINEAR);
@@ -113,7 +109,7 @@ public:
         page_units.signal_changed().connect([=](){ set_page_unit(); });
 
         for (auto&& page : PaperSize::getPageSizes()) {
-            auto item = new Gtk::MenuItem(page.name); //todo getDescription()
+            auto item = new Gtk::MenuItem(page.getDescription());
             item->show();
             _page_templates_menu.append(*item);
             item->signal_activate().connect([=](){ set_page_template(page); });
@@ -178,6 +174,14 @@ public:
     }
 
 private:
+    void update_preview_color(Color element, guint rgba) {
+        switch (element) {
+            case Color::Desk: _preview->set_desk_color(rgba); break;
+            case Color::Border: _preview->set_border_color(rgba); break;
+            case Color::Background: _preview->set_page_color(rgba); break;
+        }
+    }
+
     void set_page_template(const PaperSize& page) {
         if (_update.pending()) return;
 
@@ -215,7 +219,7 @@ private:
     }
 
     void set_page_size() {
-        if (_update.pending()) return;
+        auto pending = _update.pending();
 
         auto scoped(_update.block());
 
@@ -236,7 +240,9 @@ private:
         auto templ = find_page_template(width, height, *unit);
         _template_name.set_label(templ ? templ->name : _("Custom"));
 
-        _signal_dimmension_changed.emit(width, height, Dimension::PageSize);
+        if (!pending) {
+            _signal_dimmension_changed.emit(width, height, Dimension::PageSize);
+        }
     }
 
     void swap_width_height() {
@@ -276,19 +282,8 @@ private:
     void set_color(Color element, unsigned int color) override {
         auto scoped(_update.block());
 
-        switch (element) {
-            case Color::Background:
-                _backgnd_color_picker->setRgba32(color);
-                break;
-
-            case Color::Desk:
-                _desk_color_picker->setRgba32(color);
-                break;
-
-            case Color::Border:
-                _border_color_picker->setRgba32(color);
-                break;
-        }
+        get_color_picker(element).setRgba32(color);
+        update_preview_color(element, color);
     }
 
     void set_check(Check element, bool checked) override {
@@ -297,6 +292,9 @@ private:
         get_checkbutton(element).set_active(checked);
 
         // todo: special cases
+        if (element == Check::Checkerboard) _preview->enable_checkerboard(checked);
+        if (element == Check::Shadow) _preview->enable_drop_shadow(checked);
+        if (element == Check::Border) _preview->draw_border(checked);
     }
 
     void set_dimension(Dimension dimension, double x, double y) override {
@@ -307,6 +305,29 @@ private:
         dim.second.set_value(y);
 
         set_page_size();
+    }
+
+    void set_unit(Units unit, const Glib::ustring& abbr) override {
+        auto scoped(_update.block());
+
+        if (unit == Units::Display) {
+            _display_units->setUnit(abbr);
+        }
+        else if (unit == Units::Document) {
+            _page_units->setUnit(abbr);
+            set_page_size();
+        }
+    }
+
+    ColorPicker& get_color_picker(Color element) {
+        switch (element) {
+            case Color::Background: return *_backgnd_color_picker;
+            case Color::Desk: return *_desk_color_picker;
+            case Color::Border: return *_border_color_picker;
+
+            default:
+                throw std::runtime_error("missing case in get_color_picker");
+        }
     }
 
     void fire_value_changed(Gtk::SpinButton& b1, Gtk::SpinButton& b2, Dimension dim) {

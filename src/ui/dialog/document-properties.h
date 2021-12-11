@@ -42,6 +42,7 @@ namespace Inkscape {
         namespace Widget {
             class EntityEntry;
             class NotebookPage;
+            class PageProperties;
         }
         namespace Dialog {
 
@@ -140,6 +141,7 @@ protected:
     Gtk::Button                       _create_guides_btn;
     Gtk::Button                       _delete_guides_btn;
     //---------------------------------------------------------------
+    UI::Widget::PageProperties* _page;
     // UI::Widget::ToleranceSlider       _rsu_sno;
     // UI::Widget::ToleranceSlider       _rsu_sn;
     // UI::Widget::ToleranceSlider       _rsu_gusn;
