@@ -570,8 +570,7 @@ bool TextTool::root_handler(GdkEvent* event) {
                 }
                 indicator->show();
 
-                cursor_filename = "text-insert.svg";
-                this->sp_event_context_update_cursor();
+                this->set_cursor("text-insert.svg");
                 sp_text_context_update_text_selection(this);
                 if (SP_IS_TEXT(item_ungrouped)) {
                     desktop->event_context->defaultMessageContext()->set(
@@ -584,11 +583,10 @@ bool TextTool::root_handler(GdkEvent* event) {
                 }
                 this->over_text = true;
             } else {
-                this->over_text = false;
                 // update cursor and statusbar: we are not over a text object now
-                cursor_filename = "text.svg";
-                this->sp_event_context_update_cursor();
+                this->set_cursor("text.svg");
                 desktop->event_context->defaultMessageContext()->clear();
+                this->over_text = false;
             }
         } break;
 
@@ -740,9 +738,10 @@ bool TextTool::root_handler(GdkEvent* event) {
                                     break;
 
                                 default: {
-                                    if (g_ascii_isxdigit(group0_keyval)) {
+                                    guint32 xdigit = gdk_keyval_to_unicode(group0_keyval);
+                                    if (xdigit <= 255 && g_ascii_isxdigit(xdigit)) {
                                         g_return_val_if_fail(this->unipos < sizeof(this->uni) - 1, TRUE);
-                                        this->uni[this->unipos++] = group0_keyval;
+                                        this->uni[this->unipos++] = xdigit;
                                         this->uni[this->unipos] = '\0';
                                         if (this->unipos == 8) {
                                             /* This behaviour is partly to allow us to continue to
