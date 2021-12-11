@@ -102,6 +102,7 @@ protected:
     Inkscape::XML::SignalObserver _emb_profiles_observer, _scripts_observer;
     Gtk::Notebook  _notebook;
 
+    UI::Widget::NotebookPage* _page_page2;
     UI::Widget::NotebookPage   *_page_page;
     UI::Widget::NotebookPage   *_page_guides;
     // UI::Widget::NotebookPage   *_page_snap;

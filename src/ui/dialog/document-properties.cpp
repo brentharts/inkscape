@@ -91,9 +91,9 @@ DocumentProperties& DocumentProperties::getInstance()
 
 DocumentProperties::DocumentProperties()
     : DialogBase("/dialogs/documentoptions", "DocumentProperties")
-    , _page_page(Gtk::manage(new UI::Widget::NotebookPage(1, 1, true, true)))
+    , _page_page(Gtk::manage(new UI::Widget::NotebookPage(1, 1, false, true)))
+    , _page_page2(Gtk::manage(new UI::Widget::NotebookPage(1, 1)))
     , _page_guides(Gtk::manage(new UI::Widget::NotebookPage(1, 1)))
-    // , _page_snap(Gtk::manage(new UI::Widget::NotebookPage(1, 1)))
     , _page_cms(Gtk::manage(new UI::Widget::NotebookPage(1, 1)))
     , _page_scripting(Gtk::manage(new UI::Widget::NotebookPage(1, 1)))
     , _page_external_scripts(Gtk::manage(new UI::Widget::NotebookPage(1, 1)))
@@ -164,6 +164,7 @@ DocumentProperties::DocumentProperties()
     pack_start(_notebook, true, true);
 
     _notebook.append_page(*_page_page,      _("Display"));
+    _notebook.append_page(*_page_page2, _("l"));
     _notebook.append_page(*_page_guides,    _("Guides"));
     _notebook.append_page(_grids_vbox,      _("Grids"));
     // _notebook.append_page(*_page_snap,      _("Snap"));
@@ -187,11 +188,6 @@ DocumentProperties::DocumentProperties()
 
     _rum_deflt._changed_connection.block();
     _rum_deflt.getUnitMenu()->signal_changed().connect(sigc::mem_fun(*this, &DocumentProperties::onDocUnitChange));
-
-// test
-    UI::Widget::NotebookPage* _page_test = new UI::Widget::NotebookPage(1, 1, false, true);
-    _page_test->table().attach(*(Inkscape::UI::Widget::PageProperties::create()), 0, 0);
-    _notebook.append_page(*_page_test, _("!Test"));
 }
 
 void DocumentProperties::init()
@@ -264,7 +260,9 @@ void attach_all(Gtk::Grid &table, Gtk::Widget *const arr[], unsigned const n)
 
 void DocumentProperties::build_page()
 {
-    _page_page->show();
+    _page_page->table().attach(*(Inkscape::UI::Widget::PageProperties::create()), 0, 0);
+
+    _page_page2->show();
 
     Gtk::Label* label_gen = Gtk::manage (new Gtk::Label);
     label_gen->set_markup (_("<b>General</b>"));
@@ -295,7 +293,7 @@ void DocumentProperties::build_page()
         nullptr,              nullptr,
         &_rcb_doc_props_left, &_rcb_doc_props_right,
     };
-    attach_all(_page_page->table(), widget_array, G_N_ELEMENTS(widget_array));
+    attach_all(_page_page2->table(), widget_array, G_N_ELEMENTS(widget_array));
 
     Gtk::Widget *const widget_array_left[] =
     {

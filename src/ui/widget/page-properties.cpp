@@ -31,7 +31,7 @@
 
 #include "page-properties.h"
 #include "page-size-preview.h"
-#include "page-sizer.h"
+#include "util/paper.h"
 #include "ui/widget/registry.h"
 #include "ui/widget/color-picker.h"
 #include "ui/widget/unit-menu.h"
@@ -44,23 +44,6 @@ using Inkscape::UI::get_widget;
 namespace Inkscape {    
 namespace UI {
 namespace Widget {
-
-// TEMP until page sizes are migrated
-class PageSizes : PageSizer {
-    Registry _r;
-public:
-    PageSizes() : PageSizer(_r) {}
-    ~PageSizes() override = default;
-
-    const std::map<Glib::ustring, PaperSize>& page_sizes() const {
-        return _paperSizeTable;
-    }
-
-    const std::vector<PaperSize>& get_page_sizes() {
-        return _paper_sizes; // paper sizes in original order
-    }
-};
-// END TEMP
 
 #define GET(prop, id) prop(get_widget<std::remove_reference_t<decltype(prop)>>(_builder, id))
 
@@ -129,7 +112,7 @@ public:
         _current_page_unit = _page_units->getUnit();
         page_units.signal_changed().connect([=](){ set_page_unit(); });
 
-        for (auto&& page : _paper->get_page_sizes()) {
+        for (auto&& page : PaperSize::getPageSizes()) {
             auto item = new Gtk::MenuItem(page.name); //todo getDescription()
             item->show();
             _page_templates_menu.append(*item);
@@ -343,7 +326,7 @@ private:
         Quantity h(std::max(width, height), &unit);
 
         const double eps = 1e-6;
-        for (auto&& page : _paper->get_page_sizes()) {
+        for (auto&& page : PaperSize::getPageSizes()) {
             Quantity pw(std::min(page.larger, page.smaller), page.unit);
             Quantity ph(std::max(page.larger, page.smaller), page.unit);
 
@@ -407,7 +390,6 @@ private:
     Gtk::CheckButton& _checkerboard;
     Gtk::CheckButton& _antialias;
     Gtk::Button& _link_width_height;
-    std::unique_ptr<PageSizes> _paper = std::make_unique<PageSizes>();
     std::unique_ptr<UnitMenu> _display_units;
     std::unique_ptr<UnitMenu> _page_units;
     const Unit* _current_page_unit = nullptr;
