@@ -42,6 +42,7 @@
 #include "inkscape-version.h"
 #include "layer-manager.h"
 #include "message-stack.h"
+#include "page-manager.h"
 #include "path-chemistry.h"
 #include "selection-chemistry.h"
 #include "seltrans.h"
@@ -241,45 +242,6 @@ public:
 }; // ContextVerb class
 
 /**
- * A class to encompass all of the verbs which deal with zoom operations.
- */
-class ZoomVerb : public Verb {
-private:
-    static void perform(SPAction *action, void *mydata);
-protected:
-    SPAction *make_action(Inkscape::ActionContext const & context) override;
-public:
-    /** Use the Verb initializer with the same parameters. */
-    ZoomVerb(unsigned int const code,
-             gchar const *id,
-             gchar const *name,
-             gchar const *tip,
-             gchar const *image) :
-        Verb(code, id, name, tip, image, _("View"))
-    { }
-}; // ZoomVerb class
-
-
-/**
- * A class to encompass all of the verbs which deal with dialog operations.
- */
-class DialogVerb : public Verb {
-private:
-    static void perform(SPAction *action, void *mydata);
-protected:
-    SPAction *make_action(Inkscape::ActionContext const & context) override;
-public:
-    /** Use the Verb initializer with the same parameters. */
-    DialogVerb(unsigned int const code,
-               gchar const *id,
-               gchar const *name,
-               gchar const *tip,
-               gchar const *image) :
-        Verb(code, id, name, tip, image, _("Dialog"))
-    { }
-}; // DialogVerb class
-
-/**
  * A class to encompass all of the verbs which deal with text operations.
  */
 class TextVerb : public Verb {
@@ -440,32 +402,6 @@ SPAction *ObjectVerb::make_action(Inkscape::ActionContext const & context)
  * @return The built action.
  */
 SPAction *ContextVerb::make_action(Inkscape::ActionContext const & context)
-{
-    return make_action_helper(context, &perform);
-}
-
-/**
- * Create an action for a \c ZoomVerb.
- *
- * Calls \c make_action_helper with the \c vector.
- *
- * @param  context  Which context the action should be created for.
- * @return The built action.
- */
-SPAction *ZoomVerb::make_action(Inkscape::ActionContext const & context)
-{
-    return make_action_helper(context, &perform);
-}
-
-/**
- * Create an action for a \c DialogVerb.
- *
- * Calls \c make_action_helper with the \c vector.
- *
- * @param  context  Which context the action should be created for.
- * @return The built action.
- */
-SPAction *DialogVerb::make_action(Inkscape::ActionContext const & context)
 {
     return make_action_helper(context, &perform);
 }
@@ -1196,7 +1132,7 @@ void SelectionVerb::perform(SPAction *action, void *data)
             SelectionHelper::reverse(dt);
             break;
         case SP_VERB_SELECTION_TRACE:
-            container->new_dialog(SP_VERB_SELECTION_TRACE);
+            container->new_dialog("Trace");
             break;
         case SP_VERB_SELECTION_CREATE_BITMAP:
             dt->selection->createBitmapCopy();
@@ -1620,87 +1556,7 @@ void ContextVerb::perform(SPAction *action, void *data)
 
     verb = (sp_verb_t)GPOINTER_TO_INT((gpointer)data);
 
-    /** \todo !!! hopefully this can go away soon and actions can look after
-     * themselves
-     */
-    for (vidx = SP_VERB_CONTEXT_SELECT; vidx <= SP_VERB_CONTEXT_LPETOOL; vidx++)
-    {
-        SPAction *tool_action= get((sp_verb_t)vidx)->get_action(action->context);
-        if (tool_action) {
-            sp_action_set_active(tool_action, vidx == (int)verb);
-        }
-    }
-
     switch (verb) {
-        case SP_VERB_CONTEXT_SELECT:
-            break;
-        case SP_VERB_CONTEXT_NODE:
-            set_active_tool(dt, "Node");
-            break;
-        case SP_VERB_CONTEXT_MARKER:
-            set_active_tool(dt, "Marker");
-            break;
-        case SP_VERB_CONTEXT_TWEAK:
-            set_active_tool(dt, "Tweak");
-            break;
-        case SP_VERB_CONTEXT_SPRAY:
-            set_active_tool(dt, "Spray");
-            break;
-        case SP_VERB_CONTEXT_RECT:
-            set_active_tool(dt, "Rect");
-            break;
-        case SP_VERB_CONTEXT_3DBOX:
-            set_active_tool(dt, "3DBox");
-            break;
-        case SP_VERB_CONTEXT_ARC:
-            set_active_tool(dt, "Arc");
-            break;
-        case SP_VERB_CONTEXT_STAR:
-            set_active_tool(dt, "Star");
-            break;
-        case SP_VERB_CONTEXT_SPIRAL:
-            set_active_tool(dt, "Spiral");
-            break;
-        case SP_VERB_CONTEXT_PENCIL:
-            set_active_tool(dt, "Pencil");
-            break;
-        case SP_VERB_CONTEXT_PEN:
-            set_active_tool(dt, "Pen");
-            break;
-        case SP_VERB_CONTEXT_CALLIGRAPHIC:
-            set_active_tool(dt, "Calligraphic");
-            break;
-        case SP_VERB_CONTEXT_TEXT:
-            set_active_tool(dt, "Text");
-            break;
-        case SP_VERB_CONTEXT_GRADIENT:
-            set_active_tool(dt, "Gradient");
-            break;
-        case SP_VERB_CONTEXT_MESH:
-            set_active_tool(dt, "Mesh");
-            break;
-        case SP_VERB_CONTEXT_ZOOM:
-            set_active_tool(dt, "Zoom");
-            break;
-        case SP_VERB_CONTEXT_MEASURE:
-            set_active_tool(dt, "Measure");
-            break;
-        case SP_VERB_CONTEXT_DROPPER:
-            Inkscape::UI::Tools::sp_toggle_dropper(dt); // Functionality defined in event-context.cpp
-            break;
-        case SP_VERB_CONTEXT_CONNECTOR:
-            set_active_tool(dt, "Connector");
-            break;
-        case SP_VERB_CONTEXT_PAINTBUCKET:
-            set_active_tool(dt, "PaintBucket");
-            break;
-        case SP_VERB_CONTEXT_ERASER:
-            set_active_tool(dt, "Eraser");
-            break;
-        case SP_VERB_CONTEXT_LPETOOL:
-            set_active_tool(dt, "LpeTool");
-            break;
-
         case SP_VERB_ALIGN_HORIZONTAL_RIGHT_TO_ANCHOR:
         case SP_VERB_ALIGN_HORIZONTAL_LEFT:
         case SP_VERB_ALIGN_HORIZONTAL_CENTER:
@@ -1743,126 +1599,6 @@ void TextVerb::perform(SPAction *action, void */*data*/)
     (void)repr;
 }
 
-/**
- * Decode the verb code and take appropriate action.
- */
-void ZoomVerb::perform(SPAction *action, void *data)
-{
-    g_return_if_fail(ensure_desktop_valid(action));
-    SPDesktop *dt = sp_action_get_desktop(action);
-    DialogContainer *container = dt->getContainer();
-    SPDocument *doc = dt->getDocument();
-
-    switch (reinterpret_cast<std::size_t>(data)) {
-        case SP_VERB_TOGGLE_COMMAND_PALETTE:
-            dt->toggleCommandPalette();
-            break;
-        case SP_VERB_TOGGLE_RULERS:
-            dt->toggleRulers();
-            break;
-        case SP_VERB_TOGGLE_SCROLLBARS:
-            dt->toggleScrollbars();
-            break;
-        case SP_VERB_TOGGLE_COMMANDS_TOOLBAR:
-            dt->toggleToolbar("commands");
-            break;
-        case SP_VERB_TOGGLE_SNAP_TOOLBAR:
-            dt->toggleToolbar("snaptoolbox");
-            break;
-        case SP_VERB_TOGGLE_TOOL_TOOLBAR:
-            dt->toggleToolbar("toppanel");
-            break;
-        case SP_VERB_TOGGLE_TOOLBOX:
-            dt->toggleToolbar("toolbox");
-            break;
-        case SP_VERB_TOGGLE_PALETTE:
-            dt->toggleToolbar("panels");
-            break;
-        case SP_VERB_TOGGLE_STATUSBAR:
-            dt->toggleToolbar("statusbar");
-            break;
-        case SP_VERB_TOGGLE_GUIDES:
-            sp_namedview_toggle_guides(doc, dt->namedview);
-            break;
-        case SP_VERB_TOGGLE_GRID:
-            dt->toggleGrids();
-            break;
-        case SP_VERB_FULLSCREEN:
-            dt->fullscreen();
-            break;
-        case SP_VERB_FULLSCREENFOCUS:
-            dt->fullscreen();
-            dt->focusMode(!dt->is_fullscreen());
-            break;
-        case SP_VERB_FOCUSTOGGLE:
-            dt->focusMode(!dt->is_focusMode());
-            break;
-        case SP_VERB_VIEW_NEW:
-            sp_ui_new_view();
-            break;
-        case SP_VERB_VIEW_ICON_PREVIEW:
-            container->new_dialog(SP_VERB_VIEW_ICON_PREVIEW);
-            break;
-
-        default:
-            break;
-    }
-    // this is not needed canvas is updated correctly in all
-    // dt->updateNow();
-
-} // end of sp_verb_action_zoom_perform()
-
-/**
- * Decode the verb code and take appropriate action.
- */
-void DialogVerb::perform(SPAction *action, void *data)
-{
-    g_return_if_fail(ensure_desktop_valid(action));
-    SPDesktop *dt = sp_action_get_desktop(action);
-    DialogContainer *container = dt->getContainer();
-
-    switch (reinterpret_cast<std::size_t>(data)) {
-        case SP_VERB_DIALOG_PREFERENCES:
-            container->new_floating_dialog(SP_VERB_DIALOG_PREFERENCES);
-            break;
-#ifdef DEBUG
-        case SP_VERB_DIALOG_PROTOTYPE:
-#endif
-        case SP_VERB_DIALOG_DOCPROPERTIES:
-        case SP_VERB_DIALOG_FILL_STROKE:
-        case SP_VERB_DIALOG_GLYPHS:
-        case SP_VERB_DIALOG_SWATCHES:
-        case SP_VERB_DIALOG_SYMBOLS:
-        case SP_VERB_DIALOG_PAINT:
-        case SP_VERB_DIALOG_TRANSFORM:
-        case SP_VERB_DIALOG_ALIGN_DISTRIBUTE:
-        case SP_VERB_DIALOG_TEXT:
-        case SP_VERB_DIALOG_XML_EDITOR:
-        case SP_VERB_DIALOG_SELECTORS:
-        case SP_VERB_DIALOG_FIND:
-#if WITH_GSPELL
-        case SP_VERB_DIALOG_SPELLCHECK:
-#endif
-        case SP_VERB_DIALOG_DEBUG:
-        case SP_VERB_DIALOG_UNDO_HISTORY:
-        case SP_VERB_DIALOG_CLONETILER:
-        case SP_VERB_DIALOG_ATTR:
-        case SP_VERB_DIALOG_ITEM:
-        case SP_VERB_DIALOG_INPUT:
-        case SP_VERB_DIALOG_EXPORT:
-        case SP_VERB_DIALOG_OBJECTS:
-        case SP_VERB_DIALOG_LIVE_PATH_EFFECT:
-        case SP_VERB_DIALOG_FILTER_EFFECTS:
-        case SP_VERB_DIALOG_SVG_FONTS:
-            container->new_dialog(reinterpret_cast<std::size_t>(data));
-            break;
-        case SP_VERB_DIALOG_TOGGLE:
-            container->toggle_dialogs();
-            break;
-        default:
-            break;
-    }
-} // end of sp_verb_action_dialog_perform()
 
 // *********** Effect Last **********
 
@@ -2412,165 +2148,6 @@ Verb *Verb::_base_verbs[] = {
                    INKSCAPE_ICON("path-clip-edit")),
     new ObjectVerb(SP_VERB_OBJECT_UNSET_CLIPPATH, "ObjectUnSetClipPath", N_("_Release"),
                    N_("Remove clipping path from selection"), nullptr),
-    // Tools
-    new ContextVerb(SP_VERB_CONTEXT_SELECT, "ToolSelector", NC_("ContextVerb", "Select"),
-                    N_("Select and transform objects"), INKSCAPE_ICON("tool-pointer")),
-    new ContextVerb(SP_VERB_CONTEXT_NODE, "ToolNode", NC_("ContextVerb", "Node Edit"), N_("Edit paths by nodes"),
-                    INKSCAPE_ICON("tool-node-editor")),
-    new ContextVerb(SP_VERB_CONTEXT_MARKER, "ToolMarker", NC_("ContextVerb", "Marker"), N_("Edit markers"),
-                    INKSCAPE_ICON("tool-pointer")),
-    new ContextVerb(SP_VERB_CONTEXT_TWEAK, "ToolTweak", NC_("ContextVerb", "Tweak"),
-                    N_("Tweak objects by sculpting or painting"), INKSCAPE_ICON("tool-tweak")),
-    new ContextVerb(SP_VERB_CONTEXT_SPRAY, "ToolSpray", NC_("ContextVerb", "Spray"),
-                    N_("Spray objects by sculpting or painting"), INKSCAPE_ICON("tool-spray")),
-    new ContextVerb(SP_VERB_CONTEXT_RECT, "ToolRect", NC_("ContextVerb", "Rectangle"),
-                    N_("Create rectangles and squares"), INKSCAPE_ICON("draw-rectangle")),
-    new ContextVerb(SP_VERB_CONTEXT_3DBOX, "Tool3DBox", NC_("ContextVerb", "3D Box"), N_("Create 3D boxes"),
-                    INKSCAPE_ICON("draw-cuboid")),
-    new ContextVerb(SP_VERB_CONTEXT_ARC, "ToolArc", NC_("ContextVerb", "Ellipse"),
-                    N_("Create circles, ellipses, and arcs"), INKSCAPE_ICON("draw-ellipse")),
-    new ContextVerb(SP_VERB_CONTEXT_STAR, "ToolStar", NC_("ContextVerb", "Star"), N_("Create stars and polygons"),
-                    INKSCAPE_ICON("draw-polygon-star")),
-    new ContextVerb(SP_VERB_CONTEXT_SPIRAL, "ToolSpiral", NC_("ContextVerb", "Spiral"), N_("Create spirals"),
-                    INKSCAPE_ICON("draw-spiral")),
-    new ContextVerb(SP_VERB_CONTEXT_PENCIL, "ToolPencil", NC_("ContextVerb", "Pencil"), N_("Draw freehand lines"),
-                    INKSCAPE_ICON("draw-freehand")),
-    new ContextVerb(SP_VERB_CONTEXT_PEN, "ToolPen", NC_("ContextVerb", "Pen"),
-                    N_("Draw Bezier curves and straight lines"), INKSCAPE_ICON("draw-path")),
-    new ContextVerb(SP_VERB_CONTEXT_CALLIGRAPHIC, "ToolCalligraphic", NC_("ContextVerb", "Calligraphy"),
-                    N_("Draw calligraphic or brush strokes"), INKSCAPE_ICON("draw-calligraphic")),
-    new ContextVerb(SP_VERB_CONTEXT_TEXT, "ToolText", NC_("ContextVerb", "Text"), N_("Create and edit text objects"),
-                    INKSCAPE_ICON("draw-text")),
-    new ContextVerb(SP_VERB_CONTEXT_GRADIENT, "ToolGradient", NC_("ContextVerb", "Gradient"),
-                    N_("Create and edit gradients"), INKSCAPE_ICON("color-gradient")),
-    new ContextVerb(SP_VERB_CONTEXT_MESH, "ToolMesh", NC_("ContextVerb", "Mesh"), N_("Create and edit meshes"),
-                    INKSCAPE_ICON("mesh-gradient")),
-    new ContextVerb(SP_VERB_CONTEXT_ZOOM, "ToolZoom", NC_("ContextVerb", "Zoom"), N_("Zoom in or out"),
-                    INKSCAPE_ICON("zoom")),
-    new ContextVerb(SP_VERB_CONTEXT_MEASURE, "ToolMeasure", NC_("ContextVerb", "Measure"), N_("Measurement tool"),
-                    INKSCAPE_ICON("tool-measure")),
-    new ContextVerb(SP_VERB_CONTEXT_DROPPER, "ToolDropper", NC_("ContextVerb", "Dropper"), N_("Pick colors from image"),
-                    INKSCAPE_ICON("color-picker")),
-    new ContextVerb(SP_VERB_CONTEXT_CONNECTOR, "ToolConnector", NC_("ContextVerb", "Connector"),
-                    N_("Create diagram connectors"), INKSCAPE_ICON("draw-connector")),
-    new ContextVerb(SP_VERB_CONTEXT_PAINTBUCKET, "ToolPaintBucket", NC_("ContextVerb", "Paint Bucket"),
-                    N_("Fill bounded areas"), INKSCAPE_ICON("color-fill")),
-    new ContextVerb(SP_VERB_CONTEXT_LPE, "ToolLPE", NC_("ContextVerb", "LPE Edit"), N_("Edit Path Effect parameters"),
-                    nullptr),
-    new ContextVerb(SP_VERB_CONTEXT_ERASER, "ToolEraser", NC_("ContextVerb", "Eraser"), N_("Erase existing paths"),
-                    INKSCAPE_ICON("draw-eraser")),
-    new ContextVerb(SP_VERB_CONTEXT_LPETOOL, "ToolLPETool", NC_("ContextVerb", "LPE Tool"),
-                    N_("Do geometric constructions"), "draw-geometry"),
-
-    // Zoom
-
-    // WHY ARE THE FOLLOWING ZoomVerbs???
-
-    // View
-    new ZoomVerb(SP_VERB_TOGGLE_COMMAND_PALETTE, "ToggleCommandPalette", N_("_Command Palette"), N_("Show or hide the on-canvas command palette"), nullptr),
-    new ZoomVerb(SP_VERB_TOGGLE_RULERS, "ToggleRulers", N_("_Rulers"), N_("Show or hide the canvas rulers"), nullptr),
-    new ZoomVerb(SP_VERB_TOGGLE_SCROLLBARS, "ToggleScrollbars", N_("Scroll_bars"),
-                 N_("Show or hide the canvas scrollbars"), nullptr),
-    new ZoomVerb(SP_VERB_TOGGLE_GRID, "ToggleGrid", N_("Page _Grid"), N_("Show or hide the page grid"),
-                 INKSCAPE_ICON("show-grid")),
-    new ZoomVerb(SP_VERB_TOGGLE_GUIDES, "ToggleGuides", N_("G_uides"),
-                 N_("Show or hide guides (drag from a ruler to create a guide)"), INKSCAPE_ICON("show-guides")),
-    new ZoomVerb(SP_VERB_TOGGLE_COMMANDS_TOOLBAR, "ToggleCommandsToolbar", N_("_Commands Bar"),
-                 N_("Show or hide the Commands bar (under the menu)"), nullptr),
-    new ZoomVerb(SP_VERB_TOGGLE_SNAP_TOOLBAR, "ToggleSnapToolbar", N_("Sn_ap Controls Bar"),
-                 N_("Show or hide the snapping controls"), nullptr),
-    new ZoomVerb(SP_VERB_TOGGLE_TOOL_TOOLBAR, "ToggleToolToolbar", N_("T_ool Controls Bar"),
-                 N_("Show or hide the Tool Controls bar"), nullptr),
-    new ZoomVerb(SP_VERB_TOGGLE_TOOLBOX, "ToggleToolbox", N_("_Toolbox"),
-                 N_("Show or hide the main toolbox (on the left)"), nullptr),
-    new ZoomVerb(SP_VERB_TOGGLE_PALETTE, "TogglePalette", N_("_Palette"), N_("Show or hide the color palette"),
-                 nullptr),
-    new ZoomVerb(SP_VERB_TOGGLE_STATUSBAR, "ToggleStatusbar", N_("_Statusbar"),
-                 N_("Show or hide the statusbar (at the bottom of the window)"), nullptr),
-
-    new ZoomVerb(SP_VERB_FULLSCREEN, "FullScreen", N_("_Fullscreen"), N_("Stretch this document window to full screen"),
-                 INKSCAPE_ICON("view-fullscreen")),
-    new ZoomVerb(SP_VERB_FULLSCREENFOCUS, "FullScreenFocus", N_("Fullscreen & Focus Mode"),
-                 N_("Stretch this document window to full screen"), INKSCAPE_ICON("view-fullscreen")),
-    new ZoomVerb(SP_VERB_FOCUSTOGGLE, "FocusToggle", N_("Toggle _Focus Mode"),
-                 N_("Remove excess toolbars to focus on drawing"), nullptr),
-    new ZoomVerb(SP_VERB_VIEW_NEW, "ViewNew", N_("Duplic_ate Window"), N_("Open a new window with the same document"),
-                 INKSCAPE_ICON("window-new")),
-
-    // new ZoomVerb(SP_VERB_VIEW_COLOR_MODE_NORMAL, "ViewColorModeNormal", N_("_Normal"),
-    //              N_("Switch to normal color display mode"), nullptr),
-    // new ZoomVerb(SP_VERB_VIEW_COLOR_MODE_GRAYSCALE, "ViewColorModeGrayscale", N_("_Grayscale"),
-    new ZoomVerb(SP_VERB_VIEW_ICON_PREVIEW, "ViewIconPreview", N_("Icon Preview"), N_("Preview Icon"),
-                 INKSCAPE_ICON("dialog-icon-preview")),
-#ifdef DEBUG
-    new DialogVerb(SP_VERB_DIALOG_PROTOTYPE, "DialogPrototype", N_("Prototype..."), N_("Prototype Dialog"),
-                   INKSCAPE_ICON("document-properties")),
-#endif
-    new DialogVerb(SP_VERB_DIALOG_PREFERENCES, "DialogPreferences", N_("P_references"), N_("Edit global Inkscape preferences"),
-                   INKSCAPE_ICON("preferences-system")),
-    new DialogVerb(SP_VERB_DIALOG_DOCPROPERTIES, "DialogDocumentProperties", N_("_Document Properties..."),
-                   N_("Edit properties of this document (to be saved with the document)"),
-                   INKSCAPE_ICON("document-properties")),
-    new DialogVerb(SP_VERB_DIALOG_FILL_STROKE, "DialogFillStroke", N_("_Fill and Stroke..."),
-                   N_("Edit objects' colors, gradients, arrowheads, and other fill and stroke properties..."),
-                   INKSCAPE_ICON("dialog-fill-and-stroke")),
-    // FIXME: Probably better to either use something from the icon naming spec or ship our own "select-font" icon
-    // Technically what we show are unicode code points and not glyphs. The actual glyphs shown are determined by the
-    // shaping engines.
-    new DialogVerb(SP_VERB_DIALOG_GLYPHS, "DialogGlyphs", N_("_Unicode Characters..."),
-                   N_("Select Unicode characters from a palette"), INKSCAPE_ICON("accessories-character-map")),
-    // FIXME: Probably better to either use something from the icon naming spec or ship our own "select-color" icon
-    // TRANSLATORS: "Swatches" means: color samples
-    new DialogVerb(SP_VERB_DIALOG_SWATCHES, "DialogSwatches", N_("S_watches..."),
-                   N_("Select colors from a swatches palette"), INKSCAPE_ICON("swatches")),
-    new DialogVerb(SP_VERB_DIALOG_SYMBOLS, "DialogSymbols", N_("S_ymbols..."),
-                   N_("Select symbol from a symbols palette"), INKSCAPE_ICON("symbols")),
-    new DialogVerb(SP_VERB_DIALOG_PAINT, "DialogPaintServers", N_("_Paint Servers..."),
-                   // FIXME missing Inkscape Paint Server Icon
-                   N_("Select paint server from a collection"), INKSCAPE_ICON("symbols")),
-    new DialogVerb(SP_VERB_DIALOG_TRANSFORM, "DialogTransform", N_("Transfor_m..."),
-                   N_("Precisely control objects' transformations"), INKSCAPE_ICON("dialog-transform")),
-    new DialogVerb(SP_VERB_DIALOG_ALIGN_DISTRIBUTE, "DialogAlignDistribute", N_("_Align and Distribute..."),
-                   N_("Align and distribute objects"), INKSCAPE_ICON("dialog-align-and-distribute")),
-    new DialogVerb(SP_VERB_DIALOG_UNDO_HISTORY, "DialogUndoHistory", N_("Undo _History..."), N_("Undo History"),
-                   INKSCAPE_ICON("edit-undo-history")),
-    new DialogVerb(SP_VERB_DIALOG_TEXT, "DialogText", N_("_Text and Font..."),
-                   N_("View and select font family, font size and other text properties"),
-                   INKSCAPE_ICON("dialog-text-and-font")),
-    new DialogVerb(SP_VERB_DIALOG_XML_EDITOR, "DialogXMLEditor", N_("_XML Editor..."),
-                   N_("View and edit the XML tree of the document"), INKSCAPE_ICON("dialog-xml-editor")),
-    new DialogVerb(SP_VERB_DIALOG_SELECTORS, "DialogSelectors", N_("_Selectors and CSS..."),
-                   N_("View and edit CSS selectors and styles"), INKSCAPE_ICON("dialog-selectors")),
-    new DialogVerb(SP_VERB_DIALOG_FIND, "DialogFind", N_("_Find/Replace..."), N_("Find objects in document"),
-                   INKSCAPE_ICON("edit-find")),
-#if WITH_GSPELL
-    new DialogVerb(SP_VERB_DIALOG_SPELLCHECK, "DialogSpellcheck", N_("Check Spellin_g..."),
-                   N_("Check spelling of text in document"), INKSCAPE_ICON("tools-check-spelling")),
-#endif
-    new DialogVerb(SP_VERB_DIALOG_DEBUG, "DialogDebug", N_("_Messages..."), N_("View debug messages"),
-                   INKSCAPE_ICON("dialog-messages")),
-    new DialogVerb(SP_VERB_DIALOG_TOGGLE, "DialogsToggle", N_("Show/Hide D_ialogs"),
-                   N_("Show or hide all open dialogs"), INKSCAPE_ICON("show-dialogs")),
-    new DialogVerb(SP_VERB_DIALOG_CLONETILER, "DialogClonetiler", N_("Create Tiled Clones..."),
-                   N_("Create multiple clones of selected object, arranging them into a pattern or scattering"),
-                   INKSCAPE_ICON("dialog-tile-clones")),
-    new DialogVerb(SP_VERB_DIALOG_ATTR, "DialogObjectAttributes", N_("_Object attributes..."),
-                   N_("Edit the object attributes..."), INKSCAPE_ICON("dialog-object-properties")),
-    new DialogVerb(SP_VERB_DIALOG_ITEM, "DialogObjectProperties", N_("_Object Properties..."),
-                   N_("Edit the ID, locked and visible status, and other object properties"),
-                   INKSCAPE_ICON("dialog-object-properties")),
-    new DialogVerb(SP_VERB_DIALOG_INPUT, "DialogInput", N_("_Input Devices..."),
-                   N_("Configure extended input devices, such as a graphics tablet"),
-                   INKSCAPE_ICON("dialog-input-devices")),
-    new DialogVerb(SP_VERB_DIALOG_OBJECTS, "DialogObjects", N_("Layers and Object_s..."), N_("View Layers and Objects"),
-                   INKSCAPE_ICON("dialog-objects")),
-    new DialogVerb(SP_VERB_DIALOG_LIVE_PATH_EFFECT, "DialogLivePathEffect", N_("Path E_ffects..."),
-                   N_("Manage, edit, and apply path effects"), INKSCAPE_ICON("dialog-path-effects")),
-    new DialogVerb(SP_VERB_DIALOG_FILTER_EFFECTS, "DialogFilterEffects", N_("Filter _Editor..."),
-                   N_("Manage, edit, and apply SVG filters"), INKSCAPE_ICON("dialog-filters")),
-    new DialogVerb(SP_VERB_DIALOG_SVG_FONTS, "DialogSVGFonts", N_("SVG Font Editor..."), N_("Edit SVG fonts"), nullptr),
-    new DialogVerb(SP_VERB_DIALOG_EXPORT, "DialogExport", N_("_Export PNG Image..."),
-                   N_("Export this document or a selection as a PNG image"), INKSCAPE_ICON("document-export")),
 
     // Effect -- renamed Extension
     new EffectLastVerb(SP_VERB_EFFECT_LAST, "EffectLast", N_("Previous Exte_nsion"),
@@ -2579,13 +2156,13 @@ Verb *Verb::_base_verbs[] = {
                        N_("Repeat the last extension with new settings"), nullptr),
 
     // Fit Page
-    new FitCanvasVerb(SP_VERB_FIT_CANVAS_TO_SELECTION, "FitCanvasToSelection", N_("Fit Page to Selection"),
-                      N_("Fit the page to the current selection"), nullptr),
-    new FitCanvasVerb(SP_VERB_FIT_CANVAS_TO_DRAWING, "FitCanvasToDrawing", N_("Fit Page to Drawing"),
-                      N_("Fit the page to the drawing"), nullptr),
+    new FitCanvasVerb(SP_VERB_FIT_CANVAS_TO_SELECTION, "FitCanvasToSelection", N_("Fit Preview to Selection"),
+                      N_("Fit the preview box to the current selection"), nullptr),
+    new FitCanvasVerb(SP_VERB_FIT_CANVAS_TO_DRAWING, "FitCanvasToDrawing", N_("Fit Preview to Drawing"),
+                      N_("Fit the preview box to the drawing"), nullptr),
     new FitCanvasVerb(SP_VERB_FIT_CANVAS_TO_SELECTION_OR_DRAWING, "FitCanvasToSelectionOrDrawing",
-                      N_("_Resize Page to Selection"),
-                      N_("Fit the page to the current selection or the drawing if there is no selection"), nullptr),
+                      N_("_Resize Preview to Selection"),
+                      N_("Fit the preview box to the current selection or the drawing if there is no selection"), nullptr),
     // LockAndHide
     new LockAndHideVerb(SP_VERB_UNLOCK_ALL, "UnlockAll", N_("Unlock All"),
                         N_("Unlock all objects in the current layer"), nullptr),

@@ -47,6 +47,9 @@
 #include "sp-use.h"
 
 #include "style.h"
+#include "snap-preferences.h"
+#include "snap-candidate.h"
+
 #include "extract-uri.h"
 
 #include "live_effects/lpeobject.h"

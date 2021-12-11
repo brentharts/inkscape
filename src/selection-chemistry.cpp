@@ -1645,20 +1645,22 @@ void ObjectSet::applyAffine(Geom::Affine const &affine, bool set_i2d, bool compe
     for (auto & i : plist) {
         persp = (Persp3D *) i;
 
-        if (!persp->has_all_boxes_in_selection (this)) {
-            // create a new perspective as a copy of the current one
-            transf_persp = Persp3D::create_xml_element (persp->document);
+        if (persp) {
+            if (!persp->has_all_boxes_in_selection (this)) {
+                // create a new perspective as a copy of the current one
+                transf_persp = Persp3D::create_xml_element (persp->document);
 
-            std::list<SPBox3D *> selboxes = box3DList(persp);
+                std::list<SPBox3D *> selboxes = box3DList(persp);
 
-            for (auto & selboxe : selboxes) {
-                selboxe->switch_perspectives(persp, transf_persp);
+                for (auto & selboxe : selboxes) {
+                    selboxe->switch_perspectives(persp, transf_persp);
+                }
+            } else {
+                transf_persp = persp;
             }
-        } else {
-            transf_persp = persp;
-        }
 
-        transf_persp->apply_affine_transformation(affine);
+            transf_persp->apply_affine_transformation(affine);
+        }
     }
     auto items_copy = items();
     for (auto l=items_copy.begin();l!=items_copy.end() ;++l) {
@@ -4356,8 +4358,7 @@ fit_canvas_to_drawing(SPDesktop *desktop)
 
 /**
  * Fits canvas to selection or drawing with margins from <sodipodi:namedview>
- * "fit-margin-..." attributes.  See SPDocument::fitToRect and
- * ui/dialog/page-sizer.
+ * "fit-margin-..." attributes.  See SPDocument::fitToRect
  */
 void fit_canvas_to_selection_or_drawing(SPDesktop *desktop) {
     g_return_if_fail(desktop != nullptr);
