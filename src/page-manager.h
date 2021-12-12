@@ -110,9 +110,7 @@ protected:
     SVGBool border_on_top;
     SVGBool shadow_show;
 
-    guint32 border_color = 0x000000cc;
-
-    int shadow_size = 0;
+    guint32 border_color = 0x2f000000;
 
 private:
     SPDocument *_document;

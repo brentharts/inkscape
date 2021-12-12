@@ -470,7 +470,7 @@ bool PageManager::subset(SPAttr key, const gchar *value)
             sp_ink_read_opacity(value, &this->background_color, 0xffffff00);
             break;
         case SPAttr::INKSCAPE_PAGESHADOW:
-            this->shadow_size = value ? atoi(value) : 2;
+            // this->shadow_size = value ? atoi(value) : 2;
             break;
         case SPAttr::SHOWPAGESHADOW: // Depricated
             this->shadow_show.readOrUnset(value);
@@ -487,7 +487,7 @@ bool PageManager::subset(SPAttr key, const gchar *value)
 bool PageManager::setDefaultAttributes(Inkscape::CanvasPage *item)
 {
     return item->setAttributes(border_on_top, border_show ? border_color : 0x0, background_color,
-                               border_show && shadow_show ? shadow_size : 0);
+                               border_show && shadow_show ? 2 : 0);
 }
 
 /**

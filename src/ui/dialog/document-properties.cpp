@@ -1324,7 +1324,7 @@ void DocumentProperties::update_widgets()
     _rcb_bord.setActive(pm->border_on_top);
     _rcp_bord.setRgba32(pm->border_color);
     _rcb_shad.setActive(pm->shadow_show);
-    _rcb_shwd.setValue(pm->shadow_size);
+    // _rcb_shwd.setValue(pm->shadow_size);
 
     SPRoot *root = document->getRoot();
     // _rcb_antialias.set_xml_target(root->getRepr(), document);
