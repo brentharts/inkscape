@@ -28,7 +28,7 @@ public:
 
     sigc::signal<void (unsigned int, Color)>& signal_color_changed() { return _signal_color_changed; }
 
-    enum class Check { Checkerboard, Border, Shadow, BorderOnTop, Antialias, AutoViewbox };
+    enum class Check { Checkerboard, Border, Shadow, BorderOnTop, AntiAlias };
     virtual void set_check(Check element, bool checked) = 0;
 
     sigc::signal<void (bool, Check)>& signal_check_toggled() { return _signal_check_toggled; }
@@ -41,7 +41,7 @@ public:
     enum class Units { Display, Document };
     virtual void set_unit(Units unit, const Glib::ustring& abbr) = 0;
 
-    sigc::signal<void (const Glib::ustring&, Units)> signalunit_changed() { return _signal_unit_changed; }
+    sigc::signal<void (const Glib::ustring&, Units)> signal_unit_changed() { return _signal_unit_changed; }
 
 protected:
     sigc::signal<void (unsigned int, Color)> _signal_color_changed;

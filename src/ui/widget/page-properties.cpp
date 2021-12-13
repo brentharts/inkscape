@@ -19,6 +19,7 @@
 #include <gtkmm/button.h>
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/comboboxtext.h>
+#include <gtkmm/expander.h>
 #include <gtkmm/grid.h>
 #include <gtkmm/label.h>
 #include <gtkmm/menu.h>
@@ -52,11 +53,12 @@ public:
     PagePropertiesBox() :
         _builder(create_builder("page-properties.glade")),
         GET(_main_grid, "main-grid"),
+        GET(_left_grid, "left-grid"),
         GET(_page_width, "page-width"),
         GET(_page_height, "page-height"),
         GET(_portrait, "page-portrait"),
         GET(_landscape, "page-landscape"),
-        GET(_auto_viewbox, "auto-viewbox"),
+        // GET(_auto_viewbox, "auto-viewbox"),
         GET(_scale_x, "scale-x"),
         GET(_scale_y, "scale-y"),
         GET(_viewbox_x, "viewbox-x"),
@@ -71,7 +73,8 @@ public:
         GET(_border, "border"),
         GET(_border_on_top, "border-top"),
         GET(_shadow, "shadow"),
-        GET(_link_width_height, "link-width-height")
+        GET(_link_width_height, "link-width-height"),
+        GET(_viewbox_expander, "viewbox-expander")
     {
 #undef GET
 
@@ -119,7 +122,7 @@ public:
         _preview->set_vexpand();
         _preview_box.add(*_preview);
 
-        for (auto check : {Check::Border, Check::Shadow, Check::Checkerboard, Check::BorderOnTop, Check::Antialias}) {
+        for (auto check : {Check::Border, Check::Shadow, Check::Checkerboard, Check::BorderOnTop, Check::AntiAlias}) {
             auto checkbutton = &get_checkbutton(check);
             checkbutton->signal_toggled().connect([=](){ fire_checkbox_toggled(*checkbutton, check); });
         }
@@ -133,9 +136,12 @@ public:
         _checkerboard.signal_toggled().connect([=](){
             _preview->enable_checkerboard(_checkerboard.get_active());
         });
-        _auto_viewbox.signal_toggled().connect([=](){
-            // 
+
+        _viewbox_expander.property_expanded().signal_changed().connect([=](){
+            // hide/show viewbox controls
+            show_viewbox(_viewbox_expander.get_expanded());
         });
+        show_viewbox(_viewbox_expander.get_expanded());
 
         const char* linked = "entries-linked-symbolic";
         const char* unlinked = "entries-unlinked-symbolic";
@@ -174,6 +180,18 @@ public:
     }
 
 private:
+
+    void show_viewbox(bool show_widgets) {
+        auto show = [=](Gtk::Widget* w) { if (show_widgets) w->show(); else w->hide(); };
+
+        for (auto&& widget : _left_grid.get_children()) {
+            g_warning ("wid: %p  has: %d", widget, widget->get_style_context()->has_class("viewbox")?1:0);
+            if (widget->get_style_context()->has_class("viewbox")) {
+                show(widget);
+            }
+        }
+    }
+
     void update_preview_color(Color element, guint rgba) {
         switch (element) {
             case Color::Desk: _preview->set_desk_color(rgba); break;
@@ -361,7 +379,7 @@ private:
 
     Gtk::CheckButton& get_checkbutton(Check check) {
         switch (check) {
-            case Check::Antialias: return _antialias;
+            case Check::AntiAlias: return _antialias;
             case Check::Border: return _border;
             case Check::Shadow: return _shadow;
             case Check::BorderOnTop: return _border_on_top;
@@ -387,11 +405,12 @@ private:
 
     Glib::RefPtr<Gtk::Builder> _builder;
     Gtk::Grid& _main_grid;
+    Gtk::Grid& _left_grid;
     Gtk::SpinButton& _page_width;
     Gtk::SpinButton& _page_height;
     Gtk::RadioButton& _portrait;
     Gtk::RadioButton& _landscape;
-    Gtk::CheckButton& _auto_viewbox;
+    // Gtk::CheckButton& _auto_viewbox;
     Gtk::SpinButton& _scale_x;
     Gtk::SpinButton& _scale_y;
     Gtk::SpinButton& _viewbox_x;
@@ -416,6 +435,7 @@ private:
     const Unit* _current_page_unit = nullptr;
     OperationBlocker _update;
     double _size_ratio = 0; // width to height ratio
+    Gtk::Expander& _viewbox_expander;
 };
 
 PageProperties* PageProperties::create() {

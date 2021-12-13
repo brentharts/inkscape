@@ -237,6 +237,21 @@ void DocumentProperties::build_page()
         //todo
     });
 
+    _page->signal_dimmension_changed().connect([=](double x, double y, PageProperties::Dimension element){
+        if (_wr.isUpdating()) return;
+
+    });
+
+    _page->signal_check_toggled().connect([=](bool checked, PageProperties::Check element){
+        if (_wr.isUpdating()) return;
+
+    });
+
+    _page->signal_unit_changed().connect([=](const Glib::ustring& abbr, PageProperties::Units element){
+        if (_wr.isUpdating()) return;
+
+    });
+
 /*
     _page_page2->show();
 
@@ -1369,7 +1384,7 @@ void DocumentProperties::update_widgets()
     _page->set_color(PageProperties::Color::Border, pm->border_color);
     _page->set_check(PageProperties::Check::Shadow, pm->shadow_show);
 
-    _page->set_check(PageProperties::Check::Antialias, root->style->shape_rendering.computed != SP_CSS_SHAPE_RENDERING_CRISPEDGES);
+    _page->set_check(PageProperties::Check::AntiAlias, root->style->shape_rendering.computed != SP_CSS_SHAPE_RENDERING_CRISPEDGES);
 
     //-----------------------------------------------------------guide page
 

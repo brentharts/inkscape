@@ -78,11 +78,12 @@
   <object class="GtkGrid" id="main-grid">
     <property name="visible">True</property>
     <property name="can-focus">False</property>
+    <property name="no-show-all">True</property>
     <property name="halign">start</property>
     <property name="valign">start</property>
     <child>
       <!-- n-columns=4 n-rows=15 -->
-      <object class="GtkGrid">
+      <object class="GtkGrid" id="left-grid">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
         <property name="halign">start</property>
@@ -174,39 +175,6 @@
           </packing>
         </child>
         <child>
-          <object class="GtkLabel">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="halign">start</property>
-            <property name="valign">center</property>
-            <property name="label" translatable="yes">Viewport</property>
-            <style>
-              <class name="heading"/>
-            </style>
-          </object>
-          <packing>
-            <property name="left-attach">0</property>
-            <property name="top-attach">6</property>
-            <property name="width">3</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkCheckButton" id="auto-viewbox">
-            <property name="label" translatable="yes">Automatic size</property>
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">False</property>
-            <property name="halign">start</property>
-            <property name="valign">center</property>
-            <property name="draw-indicator">True</property>
-          </object>
-          <packing>
-            <property name="left-attach">0</property>
-            <property name="top-attach">7</property>
-            <property name="width">3</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkBox">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
@@ -276,7 +244,7 @@
           <object class="GtkButton" id="page-resize">
             <property name="width-request">50</property>
             <property name="visible">True</property>
-            <property name="can-focus">True</property>
+            <property name="can-focus">False</property>
             <property name="receives-default">True</property>
             <property name="tooltip-text" translatable="yes">Fit the page to the current selection or the drawing if there's no selection</property>
             <property name="halign">end</property>
@@ -306,12 +274,15 @@
           </packing>
         </child>
         <child>
-          <object class="GtkLabel">
+          <object class="GtkLabel" id="scale-x-label">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="halign">start</property>
             <property name="valign">center</property>
             <property name="label" translatable="yes">Scale X:</property>
+            <style>
+              <class name="viewbox"/>
+            </style>
           </object>
           <packing>
             <property name="left-attach">0</property>
@@ -319,12 +290,15 @@
           </packing>
         </child>
         <child>
-          <object class="GtkLabel">
+          <object class="GtkLabel" id="scale-y-label">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="halign">start</property>
             <property name="valign">center</property>
             <property name="label" translatable="yes">Scale Y:</property>
+            <style>
+              <class name="viewbox"/>
+            </style>
           </object>
           <packing>
             <property name="left-attach">0</property>
@@ -338,6 +312,9 @@
             <property name="width-chars">9</property>
             <property name="adjustment">adj-scale-x</property>
             <property name="digits">6</property>
+            <style>
+              <class name="viewbox"/>
+            </style>
           </object>
           <packing>
             <property name="left-attach">1</property>
@@ -352,6 +329,9 @@
             <property name="width-chars">9</property>
             <property name="adjustment">adj-scale-y</property>
             <property name="digits">6</property>
+            <style>
+              <class name="viewbox"/>
+            </style>
           </object>
           <packing>
             <property name="left-attach">1</property>
@@ -378,12 +358,15 @@
           </packing>
         </child>
         <child>
-          <object class="GtkLabel">
+          <object class="GtkLabel" id="viewbox-label">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="halign">start</property>
             <property name="valign">center</property>
             <property name="label" translatable="yes">Viewbox</property>
+            <style>
+              <class name="viewbox"/>
+            </style>
           </object>
           <packing>
             <property name="left-attach">0</property>
@@ -398,6 +381,9 @@
             <property name="halign">start</property>
             <property name="valign">center</property>
             <property name="label" translatable="yes">X:</property>
+            <style>
+              <class name="viewbox"/>
+            </style>
           </object>
           <packing>
             <property name="left-attach">0</property>
@@ -411,6 +397,9 @@
             <property name="halign">start</property>
             <property name="valign">center</property>
             <property name="label" translatable="yes">Y:</property>
+            <style>
+              <class name="viewbox"/>
+            </style>
           </object>
           <packing>
             <property name="left-attach">0</property>
@@ -424,6 +413,9 @@
             <property name="halign">start</property>
             <property name="valign">center</property>
             <property name="label" translatable="yes">Width:</property>
+            <style>
+              <class name="viewbox"/>
+            </style>
           </object>
           <packing>
             <property name="left-attach">0</property>
@@ -437,6 +429,9 @@
             <property name="halign">start</property>
             <property name="valign">center</property>
             <property name="label" translatable="yes">Height:</property>
+            <style>
+              <class name="viewbox"/>
+            </style>
           </object>
           <packing>
             <property name="left-attach">0</property>
@@ -450,6 +445,9 @@
             <property name="width-chars">9</property>
             <property name="adjustment">adj-viewbox-x</property>
             <property name="digits">3</property>
+            <style>
+              <class name="viewbox"/>
+            </style>
           </object>
           <packing>
             <property name="left-attach">1</property>
@@ -464,6 +462,9 @@
             <property name="width-chars">9</property>
             <property name="adjustment">adj-viewbox-y</property>
             <property name="digits">3</property>
+            <style>
+              <class name="viewbox"/>
+            </style>
           </object>
           <packing>
             <property name="left-attach">1</property>
@@ -478,6 +479,9 @@
             <property name="width-chars">9</property>
             <property name="adjustment">adj-viewbox-width</property>
             <property name="digits">3</property>
+            <style>
+              <class name="viewbox"/>
+            </style>
           </object>
           <packing>
             <property name="left-attach">1</property>
@@ -492,6 +496,9 @@
             <property name="width-chars">9</property>
             <property name="adjustment">adj-page-heigh</property>
             <property name="digits">3</property>
+            <style>
+              <class name="viewbox"/>
+            </style>
           </object>
           <packing>
             <property name="left-attach">1</property>
@@ -565,6 +572,41 @@
             <property name="left-attach">2</property>
             <property name="top-attach">1</property>
           </packing>
+        </child>
+        <child>
+          <object class="GtkExpander" id="viewbox-expander">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="margin-top">6</property>
+            <property name="margin-bottom">4</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child type="label">
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">Viewbox settings</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="left-attach">0</property>
+            <property name="top-attach">7</property>
+            <property name="width">2</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
         </child>
         <child>
           <placeholder/>
