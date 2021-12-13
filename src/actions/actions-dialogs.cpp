@@ -145,6 +145,20 @@ add_actions_dialogs(InkscapeWindow* win)
 }
 
 
+const std::vector<DialogAction>& get_dialog_actions() {
+    static std::vector<DialogAction> data;
+
+    if (data.empty()) {
+        data.reserve(raw_data_dialogs.size());
+
+        for (auto&& action : raw_data_dialogs) {
+            data.push_back(DialogAction { .action = action[0], .command_name = action[1] });
+        }
+    }
+
+    return data;
+}
+
 /*
   Local Variables:
   mode:c++

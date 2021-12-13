@@ -17,8 +17,10 @@
 #include <gtkmm/eventbox.h>
 #include <gtkmm/scrollbar.h>
 #include <gtkmm/separatormenuitem.h>
+#include <gtkmm/menu.h>
 
 #include "enums.h"
+#include "actions/actions-dialogs.h"
 #include "ui/dialog/dialog-base.h"
 #include "ui/dialog/dialog-container.h"
 #include "ui/dialog/dialog-multipaned.h"
@@ -59,6 +61,8 @@ DialogNotebook::DialogNotebook(DialogContainer *container)
 
     // ============= Notebook menu ==============
     _menu.set_title("NotebookOptions");
+    _notebook.set_name("DockedDialogNotebook");
+    _notebook.set_show_border(false);
     _notebook.set_group_name("InkscapeDialogGroup");
     _notebook.set_scrollable(true);
 
@@ -86,28 +90,21 @@ DialogNotebook::DialogNotebook(DialogContainer *container)
     new_menu_item = Gtk::manage(new Gtk::SeparatorMenuItem());
     _menu.append(*new_menu_item);
 
-    // Labels radio menu
-    _labels_auto_button.set_label(_("Labels: automatic"));
-    _menu.append(_labels_auto_button);
-
-    _labels_active_button.set_label(_("Labels: active"));
-    _menu.append(_labels_active_button);
-    _labels_active_button.join_group(_labels_auto_button);
-
-    _labels_off_button.set_label(_("Labels: off"));
-    _menu.append(_labels_off_button);
-    _labels_off_button.join_group(_labels_auto_button);
-
-    if (_labels_auto) {
-        _labels_auto_button.set_active();
-    } else if (_labels_off) {
-        _labels_off_button.set_active();
-    } else {
-        _labels_active_button.set_active();
+    auto dialogs = Gtk::make_managed<Gtk::Menu>();
+    auto submenu = Gtk::make_managed<Gtk::MenuItem>(_("Dialogs"));
+    for (auto&& action : get_dialog_actions()) {
+        auto dlg = Gtk::make_managed<Gtk::MenuItem>(action.command_name);
+        dlg->signal_activate().connect([=](){
+            // TODO
+            // find action
+            // a.activate();
+        });
+        dialogs->append(*dlg);
     }
-    // THIS NOT WORK :(
-    //   _conn.emplace_back(
-    //  _labels_auto_button.signal_group_changed().connect(sigc::mem_fun(*this, &DialogNotebook::on_labels_changed)));
+    dialogs->show_all_children();
+    submenu->set_submenu(*dialogs);
+    _menu.append(*submenu);
+
     _conn.emplace_back(
         _labels_auto_button.signal_toggled().connect(sigc::mem_fun(*this, &DialogNotebook::on_labels_changed)));
     _conn.emplace_back(
@@ -115,12 +112,16 @@ DialogNotebook::DialogNotebook(DialogContainer *container)
 
     _menu.show_all_children();
 
-    Gtk::MenuButton *menutabs = Gtk::manage(new Gtk::MenuButton());
-    Gtk::Image *info = Gtk::manage(sp_get_icon_image("open-menu-symbolic", Gtk::ICON_SIZE_MENU));
-    menutabs->set_image(*info);
-    menutabs->set_popup(_menu);
-    _notebook.set_action_widget(menutabs, Gtk::PACK_END);
-    menutabs->show();
+    Gtk::Button* menubtn = Gtk::manage(new Gtk::Button());
+    menubtn->set_image_from_icon_name("go-down-symbolic");
+    menubtn->signal_clicked().connect([=](){ _menu.popup_at_widget(menubtn, Gdk::GRAVITY_SOUTH, Gdk::GRAVITY_NORTH, nullptr); });
+    _notebook.set_action_widget(menubtn, Gtk::PACK_END);
+    menubtn->show();
+    menubtn->set_relief(Gtk::RELIEF_NORMAL);
+    menubtn->set_valign(Gtk::ALIGN_CENTER);
+    menubtn->set_halign(Gtk::ALIGN_CENTER);
+    menubtn->set_can_focus(false);
+    menubtn->set_name("DialogMenuButton");
 
     // =============== Signals ==================
     _conn.emplace_back(signal_size_allocate().connect(sigc::mem_fun(*this, &DialogNotebook::on_size_allocate_scroll)));

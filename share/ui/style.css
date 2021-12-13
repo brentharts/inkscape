@@ -614,3 +614,17 @@ button.square-button image {
 .wide-apply-button {
     min-width: 150px;
 }
+
+#DockedDialogNotebook {
+    border: none;
+}
+
+#DialogMenuButton {
+    padding: 3px;
+    border: none;
+    opacity: 0.5;
+}
+
+#DialogMenuButton:hover {
+    opacity: 1;
+}
