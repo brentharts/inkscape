@@ -313,7 +313,7 @@ void SPNamedView::modified(unsigned int flags)
     // Add desk color, and chckerboard pattern to desk view
     for (auto desktop : views) {
         if (desk_checkerboard) {
-            desktop->getCanvas()->set_background_checkerboard(desk_color);
+            desktop->getCanvas()->set_background_checkerboard(desk_color, false);
         } else {
             desktop->getCanvas()->set_background_color(desk_color);
         }

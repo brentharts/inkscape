@@ -171,8 +171,8 @@ public:
             auto pair = get_dimension(dim);
             auto b1 = &pair.first;
             auto b2 = &pair.first;
-            b1->signal_value_changed().connect([=](){ fire_value_changed(*b1, *b2, dim); });
-            b2->signal_value_changed().connect([=](){ fire_value_changed(*b1, *b2, dim); });
+            b1->signal_value_changed().connect([=](){ fire_value_changed(*b1, *b2, nullptr, dim); });
+            b2->signal_value_changed().connect([=](){ fire_value_changed(*b1, *b2, nullptr, dim); });
         }
 
         add(_main_grid);
@@ -258,7 +258,7 @@ private:
         _template_name.set_label(templ ? templ->name : _("Custom"));
 
         if (!pending) {
-            _signal_dimmension_changed.emit(width, height, Dimension::PageSize);
+            _signal_dimmension_changed.emit(width, height, _page_units->getUnit(), Dimension::PageSize);
         }
     }
 
@@ -347,9 +347,9 @@ private:
         }
     }
 
-    void fire_value_changed(Gtk::SpinButton& b1, Gtk::SpinButton& b2, Dimension dim) {
+    void fire_value_changed(Gtk::SpinButton& b1, Gtk::SpinButton& b2, const Util::Unit* unit, Dimension dim) {
         if (!_update.pending()) {
-            _signal_dimmension_changed.emit(b1.get_value(), b2.get_value(), dim);
+            _signal_dimmension_changed.emit(b1.get_value(), b2.get_value(), unit, dim);
         }
     }
 

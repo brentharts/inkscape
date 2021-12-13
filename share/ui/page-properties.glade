@@ -136,6 +136,7 @@
           <object class="GtkSpinButton" id="page-width">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
+            <property name="tooltip-text" translatable="yes">Width of paper</property>
             <property name="width-chars">9</property>
             <property name="adjustment">adj-page-width</property>
             <property name="digits">3</property>
@@ -150,6 +151,7 @@
           <object class="GtkSpinButton" id="page-height">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
+            <property name="tooltip-text" translatable="yes">Height of paper</property>
             <property name="width-chars">9</property>
             <property name="adjustment">adj-page-heigh</property>
             <property name="digits">3</property>
@@ -309,6 +311,7 @@
           <object class="GtkSpinButton" id="scale-x">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
+            <property name="tooltip-text" translatable="yes">Scale X. Ratio of document size to viewbox size.</property>
             <property name="width-chars">9</property>
             <property name="adjustment">adj-scale-x</property>
             <property name="digits">6</property>
@@ -326,6 +329,8 @@
           <object class="GtkSpinButton" id="scale-y">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
+            <property name="tooltip-text" translatable="yes">While SVG allows non-uniform scaling it is recommended to use only uniform scaling in Inkscape. To set a non-uniform scaling, set the 'viewBox' directly.</property>
+            <property name="editable">False</property>
             <property name="width-chars">9</property>
             <property name="adjustment">adj-scale-y</property>
             <property name="digits">6</property>
@@ -494,7 +499,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="width-chars">9</property>
-            <property name="adjustment">adj-page-heigh</property>
+            <property name="adjustment">adj-viewbox-heigh</property>
             <property name="digits">3</property>
             <style>
               <class name="viewbox"/>

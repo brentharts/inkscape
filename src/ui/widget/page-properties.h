@@ -13,7 +13,8 @@
 
 #include <gtkmm/box.h>
 
-namespace Inkscape {    
+namespace Inkscape {
+    namespace Util { class Unit; }
 namespace UI {
 namespace Widget {
 
@@ -36,7 +37,7 @@ public:
     enum class Dimension { PageSize, ViewboxSize, ViewboxPosition, Scale };
     virtual void set_dimension(Dimension dim, double x, double y) = 0;
 
-    sigc::signal<void (double, double, Dimension)>& signal_dimmension_changed() { return _signal_dimmension_changed; }
+    sigc::signal<void (double, double, const Util::Unit*, Dimension)>& signal_dimmension_changed() { return _signal_dimmension_changed; }
 
     enum class Units { Display, Document };
     virtual void set_unit(Units unit, const Glib::ustring& abbr) = 0;
@@ -46,7 +47,7 @@ public:
 protected:
     sigc::signal<void (unsigned int, Color)> _signal_color_changed;
     sigc::signal<void (bool, Check)> _signal_check_toggled;
-    sigc::signal<void (double, double, Dimension)> _signal_dimmension_changed;
+    sigc::signal<void (double, double, const Util::Unit*, Dimension)> _signal_dimmension_changed;
     sigc::signal<void (const Glib::ustring&, Units)> _signal_unit_changed;
 };
 

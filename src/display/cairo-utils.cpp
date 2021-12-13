@@ -1506,7 +1506,7 @@ int ink_cairo_surface_linear_to_srgb(cairo_surface_t *surface)
 }
 
 cairo_pattern_t *
-ink_cairo_pattern_create_checkerboard(guint32 rgba)
+ink_cairo_pattern_create_checkerboard(guint32 rgba, bool use_alpha)
 {
     int const w = 6;
     int const h = 6;
@@ -1532,6 +1532,16 @@ ink_cairo_pattern_create_checkerboard(guint32 rgba)
     cairo_rectangle(ct, 0, 0, w, h);
     cairo_rectangle(ct, w, h, w, h);
     cairo_fill(ct);
+    if (use_alpha) {
+        // use alpha to show opacity cover checkerboard
+        double a = SP_RGBA32_A_F(rgba);
+        if (a > 0.0) {
+            cairo_set_operator(ct, CAIRO_OPERATOR_OVER);
+            cairo_rectangle(ct, 0, 0, 2 * w, 2 * h);
+            cairo_set_source_rgba(ct, r, g, b, a);
+            cairo_fill(ct);
+        }
+    }
     cairo_destroy(ct);
 
     cairo_pattern_t *p = cairo_pattern_create_for_surface(s);

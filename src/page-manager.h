@@ -109,8 +109,9 @@ protected:
     SVGBool border_show;
     SVGBool border_on_top;
     SVGBool shadow_show;
+    SVGBool _checkerboard;
 
-    guint32 border_color = 0x2f000000;
+    guint32 border_color = 0x0000003f;
 
 private:
     SPDocument *_document;

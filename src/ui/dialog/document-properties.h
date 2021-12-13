@@ -99,6 +99,7 @@ protected:
     void  embedded_create_popup_menu(Gtk::Widget& parent, sigc::slot<void> rem);
     void  load_default_metadata();
     void  save_default_metadata();
+    void update_viewbox(SPDesktop* desktop);
 
     Inkscape::XML::SignalObserver _emb_profiles_observer, _scripts_observer;
     Gtk::Notebook  _notebook;

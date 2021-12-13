@@ -330,8 +330,8 @@ double CanvasItemRect::get_shadow_size() const {
     return size / (scale > 0 ? sqrt(scale) : 1);
 }
 
-void CanvasItemRect::set_background_checkerboard(guint32 rgba) {
-    auto pattern = ink_cairo_pattern_create_checkerboard(rgba);
+void CanvasItemRect::set_background_checkerboard(guint32 rgba, bool use_alpha) {
+    auto pattern = ink_cairo_pattern_create_checkerboard(rgba, use_alpha);
     auto background = Cairo::RefPtr<Cairo::Pattern>(new Cairo::Pattern(pattern));
     _set_background(background);
 }

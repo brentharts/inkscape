@@ -224,7 +224,7 @@ void attach_all(Gtk::Grid &table, Gtk::Widget *const arr[], unsigned const n)
     }
 }
 
-void write_bool_to_xml(SPDesktop* desktop, Glib::ustring key, bool on, const char* active = nullptr, const char* inactive = nullptr) {
+void write_bool_to_xml(SPDesktop* desktop, Glib::ustring name, Glib::ustring key, bool on, const char* active = nullptr, const char* inactive = nullptr) {
     if (!desktop) return;
 
     const char* svgstr = on ? "true" : "false";
@@ -248,10 +248,10 @@ void write_bool_to_xml(SPDesktop* desktop, Glib::ustring key, bool on, const cha
     }
 
     repr->setAttribute(key, svgstr);
-    DocumentUndo::done(doc, "Boolean value", "");
+    DocumentUndo::done(doc, name, "");
 }
 
-void set_color(SPDesktop* desktop, unsigned int rgba, Glib::ustring color_key, Glib::ustring alpha_key) {
+void set_color(SPDesktop* desktop, Glib::ustring name, unsigned int rgba, Glib::ustring color_key, Glib::ustring alpha_key) {
     if (!desktop) return;
 
     SPDocument* doc = desktop->getDocument();
@@ -263,14 +263,32 @@ void set_color(SPDesktop* desktop, unsigned int rgba, Glib::ustring color_key, G
     } else {
         sp_svg_write_color(c, sizeof(c), rgba);
     }
-    bool saved = DocumentUndo::getUndoSensitive(doc);
-    DocumentUndo::setUndoSensitive(doc, false);
+    // bool saved = DocumentUndo::getUndoSensitive(doc);
+    // DocumentUndo::setUndoSensitive(doc, false);
     repr->setAttribute(color_key, c);
     repr->setAttributeCssDouble(alpha_key.c_str(), (rgba & 0xff) / 255.0);
-    DocumentUndo::setUndoSensitive(doc, saved);
+    // DocumentUndo::setUndoSensitive(doc, saved);
 
     doc->setModifiedSinceSave();
-    DocumentUndo::maybeDone(doc, "document-color", "Document color", ""); // TODO Fix description.
+    DocumentUndo::maybeDone(doc, ("document-color-" + name).c_str(), name, "");
+}
+
+void set_document_dimensions(SPDesktop* desktop, double width, double height, const Inkscape::Util::Unit* unit) {
+    if (!desktop) return;
+
+    Inkscape::Util::Quantity w = Inkscape::Util::Quantity(width, unit);
+    Inkscape::Util::Quantity h = Inkscape::Util::Quantity(height, unit);
+bool changeSize = true;
+    SPDocument* doc = desktop->getDocument();
+    Inkscape::Util::Quantity const old_height = doc->getHeight();
+    doc->setWidthAndHeight(w, h, changeSize);
+    // The origin for the user is in the lower left corner; this point should remain stationary when
+    // changing the page size. The SVG's origin however is in the upper left corner, so we must compensate for this
+    if (changeSize && !doc->is_yaxisdown()) {
+        Geom::Translate const vert_offset(Geom::Point(0, (old_height.value("px") - h.value("px"))));
+        doc->getRoot()->translateChildItems(vert_offset);
+    }
+    DocumentUndo::done(doc, _("Set page size"), "");
 }
 
 void DocumentProperties::build_page()
@@ -286,21 +304,36 @@ void DocumentProperties::build_page()
         _wr.setUpdating(true);
         switch (element) {
             case PageProperties::Color::Desk:
-                set_color(_wr.desktop(), color, "inkscape:deskcolor", "inkscape:deskopacity");
+                set_color(_wr.desktop(), _("Desk color"), color, "inkscape:deskcolor", "inkscape:deskopacity");
                 break;
             case PageProperties::Color::Background:
-                set_color(_wr.desktop(), color, "pagecolor", "inkscape:pageopacity");
+                set_color(_wr.desktop(), _("Background color"), color, "pagecolor", "inkscape:pageopacity");
                 break;
             case PageProperties::Color::Border:
-                set_color(_wr.desktop(), color, "bordercolor", "borderopacity");
+                set_color(_wr.desktop(), _("Border color"), color, "bordercolor", "borderopacity");
                 break;
         }
         _wr.setUpdating(false);
     });
 
-    _page->signal_dimmension_changed().connect([=](double x, double y, PageProperties::Dimension element){
+    _page->signal_dimmension_changed().connect([=](double x, double y, const Inkscape::Util::Unit* unit, PageProperties::Dimension element){
         if (_wr.isUpdating() || !_wr.desktop()) return;
 
+        _wr.setUpdating(true);
+        switch (element) {
+            case PageProperties::Dimension::PageSize:
+                set_document_dimensions(_wr.desktop(), x, y, unit);
+                // update viewbox and scale
+                update_viewbox(_wr.desktop());
+                break;
+
+            case PageProperties::Dimension::ViewboxSize:
+            case PageProperties::Dimension::ViewboxPosition:
+            case PageProperties::Dimension::Scale:
+                // todo
+                break;
+        }
+        _wr.setUpdating(false);
     });
 
     _page->signal_check_toggled().connect([=](bool checked, PageProperties::Check element){
@@ -309,19 +342,19 @@ void DocumentProperties::build_page()
         _wr.setUpdating(true);
         switch (element) {
             case PageProperties::Check::Checkerboard:
-                write_bool_to_xml(_wr.desktop(), "inkscape:pagecheckerboard", checked);
+                write_bool_to_xml(_wr.desktop(), _("Toggle checkerboard"), "inkscape:pagecheckerboard", checked);
                 break;
             case PageProperties::Check::Border:
-                write_bool_to_xml(_wr.desktop(), "showborder", checked);
+                write_bool_to_xml(_wr.desktop(), _("Toggle page border"), "showborder", checked);
                 break;
             case PageProperties::Check::BorderOnTop:
-                write_bool_to_xml(_wr.desktop(), "borderlayer", checked);
+                write_bool_to_xml(_wr.desktop(), _("Toggle border on top"), "borderlayer", checked);
                 break;
             case PageProperties::Check::Shadow:
-                write_bool_to_xml(_wr.desktop(), "inkscape:showpageshadow", checked);
+                write_bool_to_xml(_wr.desktop(), _("Toggle page shadow"), "inkscape:showpageshadow", checked);
                 break;
             case PageProperties::Check::AntiAlias:
-                write_bool_to_xml(_wr.desktop(), "inkscape:showpageshadow", checked, "auto", "crispEdges");
+                write_bool_to_xml(_wr.desktop(), _("Toggle anti-aliasing"), "shape-rendering", checked, "auto", "crispEdges");
                 break;
         }
         _wr.setUpdating(false);
@@ -330,6 +363,7 @@ void DocumentProperties::build_page()
     _page->signal_unit_changed().connect([=](const Glib::ustring& abbr, PageProperties::Units element){
         if (_wr.isUpdating() || !_wr.desktop()) return;
 
+        // todo
     });
 
 /*
@@ -1393,6 +1427,23 @@ void DocumentProperties::build_gridspage()
 }
 
 
+void DocumentProperties::update_viewbox(SPDesktop* desktop) {
+    if (!desktop) return;
+
+    auto* document = desktop->getDocument();
+    if (!document) return;
+
+    using UI::Widget::PageProperties;
+    SPRoot* root = document->getRoot();
+    if (root->viewBox_set) {
+        auto& vb = root->viewBox;
+        _page->set_dimension(PageProperties::Dimension::ViewboxSize, vb.width(), vb.height());
+        _page->set_dimension(PageProperties::Dimension::ViewboxPosition, vb.left(), vb.top());
+    }
+
+    Geom::Scale scale = document->getDocumentScale();
+    _page->set_dimension(PageProperties::Dimension::Scale, scale[Geom::X], scale[Geom::Y]);
+}
 
 /**
  * Update dialog widgets from desktop. Also call updateWidget routines of the grids.
@@ -1449,12 +1500,9 @@ void DocumentProperties::update_widgets()
     using UI::Widget::PageProperties;
     _page->set_dimension(PageProperties::Dimension::PageSize, doc_w, doc_h);
     _page->set_unit(PageProperties::Units::Document, doc_w_unit);
-    if (root->viewBox_set) {
-        auto& vb = root->viewBox;
-        _page->set_dimension(PageProperties::Dimension::ViewboxSize, vb.width(), vb.height());
-        _page->set_dimension(PageProperties::Dimension::ViewboxPosition, vb.left(), vb.top());
 
-    }
+    update_viewbox(desktop);
+
     _page->set_unit(PageProperties::Units::Display, nv->display_units->abbr);
     _page->set_check(PageProperties::Check::Checkerboard, nv->desk_checkerboard);
     _page->set_color(PageProperties::Color::Desk, nv->desk_color);
