@@ -46,6 +46,7 @@
 #include "xml/node-event-vector.h"
 
 #include "page-manager.h"
+#include "svg/svg-color.h"
 
 #include "ui/widget/page-properties.h"
 
@@ -92,7 +93,6 @@ DocumentProperties& DocumentProperties::getInstance()
 DocumentProperties::DocumentProperties()
     : DialogBase("/dialogs/documentoptions", "DocumentProperties")
     , _page_page(Gtk::manage(new UI::Widget::NotebookPage(1, 1, false, true)))
-    // , _page_page2(Gtk::manage(new UI::Widget::NotebookPage(1, 1)))
     , _page_guides(Gtk::manage(new UI::Widget::NotebookPage(1, 1)))
     , _page_cms(Gtk::manage(new UI::Widget::NotebookPage(1, 1)))
     , _page_scripting(Gtk::manage(new UI::Widget::NotebookPage(1, 1)))
@@ -224,6 +224,55 @@ void attach_all(Gtk::Grid &table, Gtk::Widget *const arr[], unsigned const n)
     }
 }
 
+void write_bool_to_xml(SPDesktop* desktop, Glib::ustring key, bool on, const char* active = nullptr, const char* inactive = nullptr) {
+    if (!desktop) return;
+
+    const char* svgstr = on ? "true" : "false";
+    if (on && active) {
+        svgstr = active;
+    }
+    else if (!on && inactive) {
+        svgstr = inactive;
+    }
+
+    SPDocument* doc = desktop->getDocument();
+    Inkscape::XML::Node* repr = desktop->getNamedView()->getRepr();
+
+    bool saved = DocumentUndo::getUndoSensitive(doc);
+    DocumentUndo::setUndoSensitive(doc, false);
+    const char* svgstr_old = repr->attribute(key.c_str());
+
+    DocumentUndo::setUndoSensitive(doc, saved);
+    if (svgstr_old && svgstr && strcmp(svgstr_old, svgstr)) {
+        doc->setModifiedSinceSave();
+    }
+
+    repr->setAttribute(key, svgstr);
+    DocumentUndo::done(doc, "Boolean value", "");
+}
+
+void set_color(SPDesktop* desktop, unsigned int rgba, Glib::ustring color_key, Glib::ustring alpha_key) {
+    if (!desktop) return;
+
+    SPDocument* doc = desktop->getDocument();
+    Inkscape::XML::Node* repr = desktop->getNamedView()->getRepr();
+
+    gchar c[32];
+    if (alpha_key == color_key + "_opacity_LPE") { //For LPE parameter we want stored with alpha
+        sprintf(c, "#%08x", rgba);
+    } else {
+        sp_svg_write_color(c, sizeof(c), rgba);
+    }
+    bool saved = DocumentUndo::getUndoSensitive(doc);
+    DocumentUndo::setUndoSensitive(doc, false);
+    repr->setAttribute(color_key, c);
+    repr->setAttributeCssDouble(alpha_key.c_str(), (rgba & 0xff) / 255.0);
+    DocumentUndo::setUndoSensitive(doc, saved);
+
+    doc->setModifiedSinceSave();
+    DocumentUndo::maybeDone(doc, "document-color", "Document color", ""); // TODO Fix description.
+}
+
 void DocumentProperties::build_page()
 {
     using UI::Widget::PageProperties;
@@ -232,23 +281,54 @@ void DocumentProperties::build_page()
     _page_page->show();
 
     _page->signal_color_changed().connect([=](unsigned int color, PageProperties::Color element){
-        if (_wr.isUpdating()) return;
+        if (_wr.isUpdating() || !_wr.desktop()) return;
 
-        //todo
+        _wr.setUpdating(true);
+        switch (element) {
+            case PageProperties::Color::Desk:
+                set_color(_wr.desktop(), color, "inkscape:deskcolor", "inkscape:deskopacity");
+                break;
+            case PageProperties::Color::Background:
+                set_color(_wr.desktop(), color, "pagecolor", "inkscape:pageopacity");
+                break;
+            case PageProperties::Color::Border:
+                set_color(_wr.desktop(), color, "bordercolor", "borderopacity");
+                break;
+        }
+        _wr.setUpdating(false);
     });
 
     _page->signal_dimmension_changed().connect([=](double x, double y, PageProperties::Dimension element){
-        if (_wr.isUpdating()) return;
+        if (_wr.isUpdating() || !_wr.desktop()) return;
 
     });
 
     _page->signal_check_toggled().connect([=](bool checked, PageProperties::Check element){
-        if (_wr.isUpdating()) return;
+        if (_wr.isUpdating() || !_wr.desktop()) return;
 
+        _wr.setUpdating(true);
+        switch (element) {
+            case PageProperties::Check::Checkerboard:
+                write_bool_to_xml(_wr.desktop(), "inkscape:pagecheckerboard", checked);
+                break;
+            case PageProperties::Check::Border:
+                write_bool_to_xml(_wr.desktop(), "showborder", checked);
+                break;
+            case PageProperties::Check::BorderOnTop:
+                write_bool_to_xml(_wr.desktop(), "borderlayer", checked);
+                break;
+            case PageProperties::Check::Shadow:
+                write_bool_to_xml(_wr.desktop(), "inkscape:showpageshadow", checked);
+                break;
+            case PageProperties::Check::AntiAlias:
+                write_bool_to_xml(_wr.desktop(), "inkscape:showpageshadow", checked, "auto", "crispEdges");
+                break;
+        }
+        _wr.setUpdating(false);
     });
 
     _page->signal_unit_changed().connect([=](const Glib::ustring& abbr, PageProperties::Units element){
-        if (_wr.isUpdating()) return;
+        if (_wr.isUpdating() || !_wr.desktop()) return;
 
     });
 
@@ -1330,8 +1410,8 @@ void DocumentProperties::update_widgets()
     set_sensitive (true);
 
     // Desk settings
-    _rcb_checkerboard.setActive(nv->desk_checkerboard);
-    _rcp_blkout.setRgba32(nv->desk_color);
+    // _rcb_checkerboard.setActive(nv->desk_checkerboard);
+    // _rcp_blkout.setRgba32(nv->desk_color);
 
     // Page defaults
     _rcp_bg.setRgba32(pm->background_color);

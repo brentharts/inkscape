@@ -94,7 +94,7 @@ public:
             get_color_picker(element).connectChanged([=](guint rgba) {
                 update_preview_color(element, rgba);
                 if (_update.pending()) return;
-                _signal_color_changed.emit(rgba, Color::Background);
+                _signal_color_changed.emit(rgba, element);
             });
         }
 
@@ -185,7 +185,6 @@ private:
         auto show = [=](Gtk::Widget* w) { if (show_widgets) w->show(); else w->hide(); };
 
         for (auto&& widget : _left_grid.get_children()) {
-            g_warning ("wid: %p  has: %d", widget, widget->get_style_context()->has_class("viewbox")?1:0);
             if (widget->get_style_context()->has_class("viewbox")) {
                 show(widget);
             }
