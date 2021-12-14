@@ -18,13 +18,6 @@ class InkscapeWindow;
 // Standard function to add actions.
 void add_actions_dialogs(InkscapeWindow* win);
 
-struct DialogAction {
-    Glib::ustring action;
-    Glib::ustring command_name;
-};
-
-const std::vector<DialogAction>& get_dialog_actions();
-
 #endif // INK_ACTIONS_DIALOGS_H
 
 /*

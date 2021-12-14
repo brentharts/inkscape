@@ -13,6 +13,7 @@
 
 #include "dialog-notebook.h"
 
+#include <vector>
 #include <glibmm/i18n.h>
 #include <gtkmm/eventbox.h>
 #include <gtkmm/scrollbar.h>
@@ -20,8 +21,8 @@
 #include <gtkmm/menu.h>
 
 #include "enums.h"
-#include "actions/actions-dialogs.h"
 #include "ui/dialog/dialog-base.h"
+#include "ui/dialog/dialog-data.h"
 #include "ui/dialog/dialog-container.h"
 #include "ui/dialog/dialog-multipaned.h"
 #include "ui/dialog/dialog-window.h"
@@ -68,42 +69,96 @@ DialogNotebook::DialogNotebook(DialogContainer *container)
 
     Gtk::MenuItem *new_menu_item = nullptr;
 
+    int row = 0;
     // Close tab
     new_menu_item = Gtk::manage(new Gtk::MenuItem(_("Close Current Tab")));
     _conn.emplace_back(
         new_menu_item->signal_activate().connect(sigc::mem_fun(*this, &DialogNotebook::close_tab_callback)));
-    _menu.append(*new_menu_item);
+    _menu.attach(*new_menu_item, 0, 2, row, row + 1);
+    row++;
 
     // Close notebook
     new_menu_item = Gtk::manage(new Gtk::MenuItem(_("Close Panel")));
     _conn.emplace_back(
         new_menu_item->signal_activate().connect(sigc::mem_fun(*this, &DialogNotebook::close_notebook_callback)));
-    _menu.append(*new_menu_item);
+    _menu.attach(*new_menu_item, 0, 2, row, row + 1);
+    row++;
 
     // Move to new window
     new_menu_item = Gtk::manage(new Gtk::MenuItem(_("Move Tab to New Window")));
     _conn.emplace_back(
         new_menu_item->signal_activate().connect([=]() { pop_tab_callback(); }));
-    _menu.append(*new_menu_item);
+    _menu.attach(*new_menu_item, 0, 2, row, row + 1);
+    row++;
 
     // Separator menu item
     new_menu_item = Gtk::manage(new Gtk::SeparatorMenuItem());
-    _menu.append(*new_menu_item);
+    _menu.attach(*new_menu_item, 0, 2, row, row + 1);
+    row++;
 
-    auto dialogs = Gtk::make_managed<Gtk::Menu>();
-    auto submenu = Gtk::make_managed<Gtk::MenuItem>(_("Dialogs"));
-    for (auto&& action : get_dialog_actions()) {
-        auto dlg = Gtk::make_managed<Gtk::MenuItem>(action.command_name);
-        dlg->signal_activate().connect([=](){
-            // TODO
-            // find action
-            // a.activate();
-        });
-        dialogs->append(*dlg);
+    struct Dialog {
+        Glib::ustring key;
+        Glib::ustring label;
+        Glib::ustring order;
+        Glib::ustring icon_name;
+        DialogData::Category category;
+    };
+    std::vector<Dialog> all_dialogs;
+    all_dialogs.reserve(dialog_data.size());
+    for (auto&& kv : dialog_data) {
+        const auto& key = kv.first;
+        const auto& data = kv.second;
+        if (data.category == DialogData::Other) continue;
+        // for sorting dialogs alphabetically, remove '_'
+        auto order = data.label;
+        auto underscore = order.find('_');
+        if (underscore != Glib::ustring::npos) {
+            order = order.erase(underscore, 1);
+        }
+        all_dialogs.push_back(Dialog { .key = key, .label = data.label, .order = order, .icon_name = data.icon_name, .category = data.category });
     }
-    dialogs->show_all_children();
-    submenu->set_submenu(*dialogs);
-    _menu.append(*submenu);
+    // sort by categories and then by names
+    std::sort(all_dialogs.begin(), all_dialogs.end(), [](const Dialog& a, const Dialog& b){
+        if (a.category != b.category) return a.category < b.category;
+        return a.order < b.order;
+    });
+
+    int col = 0;
+    DialogData::Category category = DialogData::Other;
+    for (auto&& data : all_dialogs) {
+        if (data.category != category) {
+            category = data.category;
+            auto sep = Gtk::make_managed<Gtk::MenuItem>();
+            sep->set_label(dialog_categories[category].uppercase());
+            sep->get_style_context()->add_class("menu-category");
+            sep->set_sensitive(false);
+            if (col > 0) row++;
+            _menu.attach(*sep, 0, 2, row, row + 1);
+            col = 0;
+            row++;
+        }
+        auto key = data.key;
+        auto dlg = Gtk::make_managed<Gtk::MenuItem>();
+        auto box = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, 8);
+        box->pack_start(*Gtk::make_managed<Gtk::Image>(data.icon_name, Gtk::ICON_SIZE_MENU), false, true);
+        box->pack_start(*Gtk::make_managed<Gtk::Label>(data.label, Gtk::ALIGN_START, Gtk::ALIGN_CENTER, true), false, true);
+        dlg->add(*box);
+        dlg->signal_activate().connect([=](){
+            if (auto desktop = _container->get_desktop()) {
+                // get desktop's container, it may be different than current '_container'!
+                desktop->getContainer()->new_dialog(key);
+            }
+        });
+        _menu.attach(*dlg, col, col + 1, row, row + 1);
+        col++;
+        if (col > 1) {
+            col = 0;
+            row++;
+        }
+    }
+    if (prefs->getBool("/theme/symbolicIcons", true)) {
+        _menu.get_style_context()->add_class("symbolic");
+    }
 
     _conn.emplace_back(
         _labels_auto_button.signal_toggled().connect(sigc::mem_fun(*this, &DialogNotebook::on_labels_changed)));

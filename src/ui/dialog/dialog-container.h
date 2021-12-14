@@ -65,6 +65,7 @@ public:
     void toggle_dialogs();
     void update_dialogs(); // Update all linked dialogs
     void set_desktop(SPDesktop *desktop);
+    SPDesktop* get_desktop();
 
     // State saving functionality
     std::unique_ptr<Glib::KeyFile> save_container_state();
@@ -108,6 +109,8 @@ private:
     void column_empty(DialogMultipaned *column);
     DialogBase* find_existing_dialog(const Glib::ustring& dialog_type);
     static bool recreate_dialogs_from_state(const Glib::KeyFile* keyfile);
+
+    SPDesktop* _desktop = nullptr;
 };
 
 } // namespace Dialog
