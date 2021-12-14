@@ -238,7 +238,7 @@ void write_str_to_xml(SPDesktop* desktop, Glib::ustring name, Glib::ustring key,
     if (old && value && strcmp(old, value)) {
         doc->setModifiedSinceSave();
     }
-g_warning("set: %s to %s", key.c_str(), value);
+
     repr->setAttribute(key, value);
     DocumentUndo::done(doc, name, "");
 }
@@ -300,6 +300,73 @@ bool changeSize = true;
     DocumentUndo::done(doc, _("Set page size"), "");
 }
 
+void set_viewbox_pos(SPDesktop* desktop, double x, double y) {
+    if (!desktop) return;
+
+    auto document = desktop->getDocument();
+    if (!document) return;
+
+    auto nv = desktop->getNamedView();
+    auto box = document->getViewBox();
+
+    document->setViewBox(Geom::Rect::from_xywh(x, y, box.width(), box.height()));
+    DocumentUndo::done(document, _("Set viewbox position"), "");
+}
+
+void set_viewbox_size(SPDesktop* desktop, double width, double height) {
+    if (!desktop) return;
+
+    auto document = desktop->getDocument();
+    if (!document) return;
+
+    auto nv = desktop->getNamedView();
+    auto box = document->getViewBox();
+    document->setViewBox(Geom::Rect::from_xywh(box.min()[Geom::X], box.min()[Geom::Y], width, height));
+    DocumentUndo::done(document, _("Set viewbox size"), "");
+}
+
+void set_document_scale(SPDesktop* desktop, double scale_x) {
+    if (!desktop) return;
+
+    auto document = desktop->getDocument();
+    if (!document) return;
+
+    if (scale_x > 0) {
+        // _lock_scale_update
+        document->setDocumentScale(scale_x);
+        // update_viewbox_ui();
+        DocumentUndo::done(document, _("Set page scale"), "");
+    }
+}
+
+void DocumentProperties::update_scale_ui(SPDesktop* desktop) {
+    if (!desktop) return;
+
+    auto document = desktop->getDocument();
+    if (!document) return;
+
+    using UI::Widget::PageProperties;
+
+    // if (!_lockScaleUpdate) {
+        Geom::Scale scale = document->getDocumentScale();
+        _page->set_dimension(PageProperties::Dimension::Scale, scale[Geom::X], scale[Geom::Y]);
+    // }
+}
+
+void DocumentProperties::update_viewbox_ui(SPDesktop* desktop) {
+    if (!desktop) return;
+
+    auto document = desktop->getDocument();
+    if (!document) return;
+
+    using UI::Widget::PageProperties;
+    // if (!_lockViewboxUpdate) {
+        Geom::Rect viewBox = document->getViewBox();
+        _page->set_dimension(PageProperties::Dimension::ViewboxPosition, viewBox.min()[Geom::X], viewBox.min()[Geom::Y]);
+        _page->set_dimension(PageProperties::Dimension::ViewboxSize, viewBox.width(), viewBox.height());
+    // }
+}
+
 void DocumentProperties::build_page()
 {
     using UI::Widget::PageProperties;
@@ -337,10 +404,15 @@ void DocumentProperties::build_page()
                 break;
 
             case PageProperties::Dimension::ViewboxSize:
-            case PageProperties::Dimension::ViewboxPosition:
-            case PageProperties::Dimension::Scale:
-                // todo
+                set_viewbox_size(_wr.desktop(), x, y);
                 break;
+
+            case PageProperties::Dimension::ViewboxPosition:
+                set_viewbox_pos(_wr.desktop(), x, y);
+                break;
+
+            case PageProperties::Dimension::Scale:
+                set_document_scale(_wr.desktop(), x); // uniform scale; y cannot be changed in the UI
         }
         _wr.setUpdating(false);
     });
@@ -1453,8 +1525,8 @@ void DocumentProperties::update_viewbox(SPDesktop* desktop) {
     SPRoot* root = document->getRoot();
     if (root->viewBox_set) {
         auto& vb = root->viewBox;
+        _page->set_dimension(PageProperties::Dimension::ViewboxPosition, vb.min()[Geom::X], vb.min()[Geom::Y]);
         _page->set_dimension(PageProperties::Dimension::ViewboxSize, vb.width(), vb.height());
-        _page->set_dimension(PageProperties::Dimension::ViewboxPosition, vb.left(), vb.top());
     }
 
     Geom::Scale scale = document->getDocumentScale();
@@ -1481,11 +1553,11 @@ void DocumentProperties::update_widgets()
     // _rcp_blkout.setRgba32(nv->desk_color);
 
     // Page defaults
-    _rcp_bg.setRgba32(pm->background_color);
-    _rcb_canb.setActive(pm->border_show);
-    _rcb_bord.setActive(pm->border_on_top);
-    _rcp_bord.setRgba32(pm->border_color);
-    _rcb_shad.setActive(pm->shadow_show);
+    // _rcp_bg.setRgba32(pm->background_color);
+    // _rcb_canb.setActive(pm->border_show);
+    // _rcb_bord.setActive(pm->border_on_top);
+    // _rcp_bord.setRgba32(pm->border_color);
+    // _rcb_shad.setActive(pm->shadow_show);
     // _rcb_shwd.setValue(pm->shadow_size);
 
     SPRoot *root = document->getRoot();
@@ -1517,7 +1589,8 @@ void DocumentProperties::update_widgets()
     _page->set_dimension(PageProperties::Dimension::PageSize, doc_w, doc_h);
     _page->set_unit(PageProperties::Units::Document, doc_w_unit);
 
-    update_viewbox(desktop);
+    update_viewbox_ui(desktop);
+    update_scale_ui(desktop);
 
     if (nv->display_units) {
         _page->set_unit(PageProperties::Units::Display, nv->display_units->abbr);
@@ -1531,6 +1604,7 @@ void DocumentProperties::update_widgets()
     _page->set_check(PageProperties::Check::Shadow, pm->shadow_show);
 
     _page->set_check(PageProperties::Check::AntiAlias, root->style->shape_rendering.computed != SP_CSS_SHAPE_RENDERING_CRISPEDGES);
+
 
     //-----------------------------------------------------------guide page
 

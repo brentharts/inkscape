@@ -100,6 +100,8 @@ protected:
     void  load_default_metadata();
     void  save_default_metadata();
     void update_viewbox(SPDesktop* desktop);
+    void update_scale_ui(SPDesktop* desktop);
+    void update_viewbox_ui(SPDesktop* desktop);
 
     Inkscape::XML::SignalObserver _emb_profiles_observer, _scripts_observer;
     Gtk::Notebook  _notebook;

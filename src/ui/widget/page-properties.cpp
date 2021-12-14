@@ -168,7 +168,7 @@ public:
         for (auto dim : {Dimension::Scale, Dimension::ViewboxPosition, Dimension::ViewboxSize}) {
             auto pair = get_dimension(dim);
             auto b1 = &pair.first;
-            auto b2 = &pair.first;
+            auto b2 = &pair.second;
             b1->signal_value_changed().connect([=](){ fire_value_changed(*b1, *b2, nullptr, dim); });
             b2->signal_value_changed().connect([=](){ fire_value_changed(*b1, *b2, nullptr, dim); });
         }
