@@ -1284,18 +1284,14 @@ bool CommandPalette::execute_action(const ActionPtrName &action_ptr_name, const 
                     if (tokens.size() != 2) {
                         throw std::invalid_argument("requires two numbers");
                     }
-                }
-                catch (...)
-                {
+                } catch (...) {
                     throw;
                 }
 
                 try {
                     d0 = std::stod(tokens[0]);
                     d1 = std::stod(tokens[1]);
-                }
-                catch (...)
-                {
+                } catch (...) {
                     throw;
                 }
 

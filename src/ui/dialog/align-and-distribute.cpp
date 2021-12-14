@@ -94,6 +94,7 @@ AlignAndDistribute::AlignAndDistribute(Inkscape::UI::Dialog::DialogBase* dlg)
         align_move_as_group->signal_clicked().connect(sigc::mem_fun(*this, &AlignAndDistribute::on_align_as_group_clicked));
     }
 
+    // clang-format off
     std::vector<std::pair<std::string, std::string>> align_buttons = {
         {"align-horizontal-right-to-anchor", "right anchor"  },
         {"align-horizontal-left",            "left"          },
@@ -106,6 +107,7 @@ AlignAndDistribute::AlignAndDistribute(Inkscape::UI::Dialog::DialogBase* dlg)
         {"align-vertical-bottom",            "bottom"        },
         {"align-vertical-top-to-anchor",     "top anchor"    }
     };
+    // clang-format on
 
     for (auto align_button: align_buttons) {
         Gtk::Button* button;

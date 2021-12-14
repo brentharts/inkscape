@@ -38,7 +38,7 @@ class AlignAndDistribute : public Gtk::Box
 {
 public:
     AlignAndDistribute(Inkscape::UI::Dialog::DialogBase* dlg);
-    ~AlignAndDistribute() = default;
+    ~AlignAndDistribute() override = default;
 
     void desktop_changed(SPDesktop* desktop);
     void tool_changed(SPDesktop* desktop); // Need to show different widgets for node vs. other tools.

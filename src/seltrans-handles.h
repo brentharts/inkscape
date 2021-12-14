@@ -48,6 +48,7 @@ const int ALIGN_SHIFT_OFFSET = 9;
 const int ALIGN_OFFSET = -13;
 
 // Which handle does what in the alignment (clicking)
+// clang-format off
 const std::vector<Glib::ustring> AlignArguments = {
     // Left Click
     "selection top",
@@ -71,6 +72,7 @@ const std::vector<Glib::ustring> AlignArguments = {
     "selection anchor top left",
     "selection anchor top right"
 };
+// clang-format on
 
 struct SPSelTransHandle;
 

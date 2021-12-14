@@ -41,6 +41,7 @@ class View;
  * which are defined statically in the verb files.  There may be
  * other verbs which are defined dynamically also.
  */
+// clang-format off
 enum {
     /* Header */
     SP_VERB_INVALID, /**< A dummy verb to represent doing something wrong. */
@@ -387,6 +388,7 @@ enum {
     /* Footer */
     SP_VERB_LAST
 };
+// clang-format on
 
 char *sp_action_get_title (const SPAction *action);
 
