@@ -1,12 +1,17 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 /** @file
- * TODO: insert short description here
- *//*
- * Authors: see git history
+ * Color selector using sliders for each components, for multiple color modes
+ */
+/*
+ * Authors:
+ * see git history
+ *   Massinissa Derriche <massinissa.derriche@gmail.com> (HSLuv selector)
  *
- * Copyright (C) 2018 Authors
+ * Copyright (C) 2018-2021 Authors
+ *
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
+
 #ifndef SEEN_SP_COLOR_SCALES_H
 #define SEEN_SP_COLOR_SCALES_H
 
@@ -25,7 +30,8 @@ enum SPColorScalesMode {
     SP_COLOR_SCALES_MODE_RGB = 1,
     SP_COLOR_SCALES_MODE_HSL = 2,
     SP_COLOR_SCALES_MODE_CMYK = 3,
-    SP_COLOR_SCALES_MODE_HSV = 4
+    SP_COLOR_SCALES_MODE_HSV = 4,
+    SP_COLOR_SCALES_MODE_HSLUV = 5
 };
 
 class ColorScales
@@ -44,6 +50,10 @@ public:
 
     void setMode(SPColorScalesMode mode);
     SPColorScalesMode getMode() const;
+
+    static const guchar *hsluvHueMap(gfloat s, gfloat l, std::array<guchar, 4 * 1024> *map);
+    static const guchar *hsluvSaturationMap(gfloat h, gfloat l, std::array<guchar, 4 * 1024> *map);
+    static const guchar *hsluvLightnessMap(gfloat h, gfloat s, std::array<guchar, 4 * 1024> *map);
 
 protected:
     void _onColorChanged();
@@ -72,6 +82,7 @@ protected:
     Inkscape::UI::Widget::ColorSlider *_s[5]; /* Channel sliders */
     GtkWidget *_b[5];                         /* Spinbuttons */
     GtkWidget *_l[5];                         /* Labels */
+    std::array<guchar, 4 * 1024> _hsluv_sliders_maps[3];
 
 private:
     // By default, disallow copy constructor and assignment operator

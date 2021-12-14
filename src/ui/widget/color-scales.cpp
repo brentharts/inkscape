@@ -1,18 +1,22 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 /** @file
- * TODO: insert short description here
- *//*
+ * Color selector using sliders for each components, for multiple color modes
+ */
+/*
  * Authors:
  * see git history
  *   bulia byak <buliabyak@users.sf.net>
+ *   Massinissa Derriche <massinissa.derriche@gmail.com> (HSLuv selector)
  *
- * Copyright (C) 2018 Authors
+ * Copyright (C) 2018-2021 Authors
+ *
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
 #include <gtkmm/adjustment.h>
 #include <gtkmm/spinbutton.h>
 #include <glibmm/i18n.h>
+#include <functional>
 
 #include "ui/dialog-events.h"
 #include "ui/widget/color-scales.h"
@@ -45,8 +49,10 @@ namespace Widget {
 
 
 static const gchar *sp_color_scales_hue_map();
+static const guchar *sp_color_scales_hsluv_map(guchar *map,
+        std::function<void(float*, float)> callback);
 
-const gchar *ColorScales::SUBMODE_NAMES[] = { N_("None"), N_("RGB"), N_("HSL"), N_("CMYK"), N_("HSV") };
+const gchar *ColorScales::SUBMODE_NAMES[] = { N_("None"), N_("RGB"), N_("HSL"), N_("CMYK"), N_("HSV"), N_("HSLuv") };
 
 ColorScales::ColorScales(SelectedColor &color, SPColorScalesMode mode)
     : Gtk::Grid()
@@ -129,7 +135,7 @@ void ColorScales::_initUI(SPColorScalesMode mode)
         gtk_grid_attach(GTK_GRID(t), _b[i], 2, i, 1, 1);
 
         /* Signals */
-	_a[i]->signal_value_changed().connect(sigc::bind(sigc::mem_fun(this, &ColorScales::adjustment_changed),i));
+        _a[i]->signal_value_changed().connect(sigc::bind(sigc::mem_fun(this, &ColorScales::adjustment_changed),i));
         _s[i]->signal_grabbed.connect(sigc::mem_fun(this, &ColorScales::_sliderAnyGrabbed));
         _s[i]->signal_released.connect(sigc::mem_fun(this, &ColorScales::_sliderAnyReleased));
         _s[i]->signal_value_changed.connect(sigc::mem_fun(this, &ColorScales::_sliderAnyChanged));
@@ -154,6 +160,7 @@ void ColorScales::_recalcColor()
         case SP_COLOR_SCALES_MODE_RGB:
         case SP_COLOR_SCALES_MODE_HSL:
         case SP_COLOR_SCALES_MODE_HSV:
+        case SP_COLOR_SCALES_MODE_HSLUV:
             _getRgbaFloatv(c);
             color.set(c[0], c[1], c[2]);
             alpha = c[3];
@@ -208,6 +215,12 @@ void ColorScales::_updateDisplay()
         case SP_COLOR_SCALES_MODE_CMYK:
             color.get_cmyk_floatv(c);
             c[4] = _color.alpha();
+            break;
+        case SP_COLOR_SCALES_MODE_HSLUV:
+            color.get_rgb_floatv(tmp);
+            SPColor::rgb_to_hsluv_floatv(c, tmp[0], tmp[1], tmp[2]);
+            c[3] = _color.alpha();
+            c[4] = 0.0;
             break;
         default:
             g_warning("file %s: line %d: Illegal color selector mode %d", __FILE__, __LINE__, _mode);
@@ -291,6 +304,10 @@ void ColorScales::_getRgbaFloatv(gfloat *rgba)
             SPColor::cmyk_to_rgb_floatv(rgba, getScaled(_a[0]), getScaled(_a[1]), getScaled(_a[2]), getScaled(_a[3]));
             rgba[3] = getScaled(_a[4]);
             break;
+        case SP_COLOR_SCALES_MODE_HSLUV:
+            SPColor::hsluv_to_rgb_floatv(rgba, getScaled(_a[0]), getScaled(_a[1]), getScaled(_a[2]));
+            rgba[3] = getScaled(_a[3]);
+            break;
         default:
             g_warning("file %s: line %d: Illegal color selector mode", __FILE__, __LINE__);
             break;
@@ -310,6 +327,11 @@ void ColorScales::_getCmykaFloatv(gfloat *cmyka)
             break;
         case SP_COLOR_SCALES_MODE_HSL:
             SPColor::hsl_to_rgb_floatv(rgb, getScaled(_a[0]), getScaled(_a[1]), getScaled(_a[2]));
+            SPColor::rgb_to_cmyk_floatv(cmyka, rgb[0], rgb[1], rgb[2]);
+            cmyka[4] = getScaled(_a[3]);
+            break;
+        case SP_COLOR_SCALES_MODE_HSLUV:
+            SPColor::hsluv_to_rgb_floatv(rgb, getScaled(_a[0]), getScaled(_a[1]), getScaled(_a[2]));
             SPColor::rgb_to_cmyk_floatv(cmyka, rgb[0], rgb[1], rgb[2]);
             cmyka[4] = getScaled(_a[3]);
             break;
@@ -347,7 +369,7 @@ void ColorScales::setMode(SPColorScalesMode mode)
         return;
 
     if ((_mode == SP_COLOR_SCALES_MODE_RGB) || (_mode == SP_COLOR_SCALES_MODE_HSL) ||
-        (_mode == SP_COLOR_SCALES_MODE_CMYK) || (_mode == SP_COLOR_SCALES_MODE_HSV)) {
+        (_mode == SP_COLOR_SCALES_MODE_CMYK) || (_mode == SP_COLOR_SCALES_MODE_HSV) || (_mode == SP_COLOR_SCALES_MODE_HSLUV)) {
         _getRgbaFloatv(rgba);
     }
     else {
@@ -486,6 +508,48 @@ void ColorScales::setMode(SPColorScalesMode mode)
             setScaled(_a[3], c[3]);
 
             setScaled(_a[4], rgba[3]);
+            _updateSliders(CSC_CHANNELS_ALL);
+            _updating = FALSE;
+            break;
+        case SP_COLOR_SCALES_MODE_HSLUV:
+            _setRangeLimit(100.0);
+
+            gtk_label_set_markup_with_mnemonic(GTK_LABEL(_l[0]), _("_H:"));
+            _s[0]->set_tooltip_text(_("Hue"));
+            gtk_widget_set_tooltip_text(_b[0], _("Hue"));
+            _a[0]->set_upper(360.0);
+
+            gtk_label_set_markup_with_mnemonic(GTK_LABEL(_l[1]), _("_S:"));
+            _s[1]->set_tooltip_text(_("Saturation"));
+            gtk_widget_set_tooltip_text(_b[1], _("Saturation"));
+
+            gtk_label_set_markup_with_mnemonic(GTK_LABEL(_l[2]), _("_L:"));
+            _s[2]->set_tooltip_text(_("Lightness"));
+            gtk_widget_set_tooltip_text(_b[2], _("Lightness"));
+
+            gtk_label_set_markup_with_mnemonic(GTK_LABEL(_l[3]), _("_A:"));
+            _s[3]->set_tooltip_text(_("Alpha (opacity)"));
+            gtk_widget_set_tooltip_text(_b[3], _("Alpha (opacity)"));
+
+            _s[0]->setMap((guchar *)(hsluvHueMap(0.0f, 0.0f,
+                            &_hsluv_sliders_maps[0])));
+            _s[1]->setMap((guchar *)(hsluvSaturationMap(0.0f, 0.0f,
+                            &_hsluv_sliders_maps[1])));
+            _s[2]->setMap((guchar *)(hsluvLightnessMap(0.0f, 0.0f,
+                            &_hsluv_sliders_maps[2])));
+            gtk_widget_hide(_l[4]);
+            _s[4]->hide();
+            gtk_widget_hide(_b[4]);
+            _updating = TRUE;
+            c[0] = 0.0;
+
+            SPColor::rgb_to_hsluv_floatv(c, rgba[0], rgba[1], rgba[2]);
+
+            setScaled(_a[0], c[0]);
+            setScaled(_a[1], c[1]);
+            setScaled(_a[2], c[2]);
+            setScaled(_a[3], rgba[3]);
+
             _updateSliders(CSC_CHANNELS_ALL);
             _updating = FALSE;
             break;
@@ -672,6 +736,30 @@ void ColorScales::_updateSliders(guint channels)
                                  SP_RGBA32_F_COMPOSE(rgb0[0], rgb0[1], rgb0[2], 1.0));
             }
             break;
+        case SP_COLOR_SCALES_MODE_HSLUV:
+            if ((channels != CSC_CHANNEL_H) && (channels != CSC_CHANNEL_A)) {
+                /* Update hue */
+                _s[0]->setMap((guchar *)(hsluvHueMap(getScaled(_a[1]),
+                                getScaled(_a[2]), &_hsluv_sliders_maps[0])));
+            }
+            if ((channels != CSC_CHANNEL_S) && (channels != CSC_CHANNEL_A)) {
+                /* Update saturation (scaled chroma) */
+                _s[1]->setMap((guchar *)(hsluvSaturationMap(getScaled(_a[0]),
+                                getScaled(_a[2]), &_hsluv_sliders_maps[1])));
+            }
+            if ((channels != CSC_CHANNEL_V) && (channels != CSC_CHANNEL_A)) {
+                /* Update luminescence/lightness */
+                _s[2]->setMap((guchar *)(hsluvLightnessMap(getScaled(_a[0]),
+                                getScaled(_a[1]), &_hsluv_sliders_maps[2])));
+            }
+            if (channels != CSC_CHANNEL_A) {
+                /* Update alpha */
+                SPColor::hsluv_to_rgb_floatv(rgb0, getScaled(_a[0]), getScaled(_a[1]), getScaled(_a[2]));
+                _s[3]->setColors(SP_RGBA32_F_COMPOSE(rgb0[0], rgb0[1], rgb0[2], 0.0),
+                        SP_RGBA32_F_COMPOSE(rgb0[0], rgb0[1], rgb0[2], 0.5),
+                        SP_RGBA32_F_COMPOSE(rgb0[0], rgb0[1], rgb0[2], 1.0));
+            }
+            break;
         default:
             g_warning("file %s: line %d: Illegal color selector mode", __FILE__, __LINE__);
             break;
@@ -705,10 +793,87 @@ static const gchar *sp_color_scales_hue_map()
     return map;
 }
 
+static void sp_color_interp(guchar *out, gint steps, gfloat *start, gfloat *end)
+{
+    gfloat s[3] = {
+    (end[0] - start[0]) / steps,
+    (end[1] - start[1]) / steps,
+    (end[2] - start[2]) / steps
+    };
+
+    guchar *p = out;
+    for (int i = 0; i < steps; i++) {
+    *p++ = SP_COLOR_F_TO_U(start[0] + s[0] * i);
+    *p++ = SP_COLOR_F_TO_U(start[1] + s[1] * i);
+    *p++ = SP_COLOR_F_TO_U(start[2] + s[2] * i);
+    *p++ = 0xFF;
+    }
+}
+
+template <typename T>
+static std::vector<T> range (const int steps, T start, T end)
+{
+    T step = (end - start) / (steps - 1);
+
+    std::vector<T> out;
+    out.reserve(steps);
+
+    for (int i = 0; i < steps-1; i++) {
+    out.emplace_back(start + step * i);
+    }
+    out.emplace_back(end);
+
+    return out;
+}
+
+static const guchar *sp_color_scales_hsluv_map(guchar *map,
+        std::function<void(float*, float)> callback)
+{
+    // Only generate 21 colors and interpolate between them to get 1024
+    static const int STEPS = 21;
+    static const int COLORS = (STEPS+1) * 3;
+
+    std::vector<float> steps = range<float>(STEPS+1, 0.f, 1.f);
+
+    // Generate color steps
+    gfloat colors[COLORS];
+    for (int i = 0; i < STEPS+1; i++) {
+    callback(colors+(i*3), steps[i]);
+    }
+
+    for (int i = 0; i < STEPS; i++) {
+    int a = steps[i] * 1023,
+        b = steps[i+1] * 1023;
+    sp_color_interp(map+(a * 4), b-a, colors+(i*3), colors+((i+1)*3));
+    }
+
+    return map;
+}
+
+const guchar *ColorScales::hsluvHueMap(gfloat s, gfloat l, std::array<guchar, 4 * 1024> *map)
+{
+    return sp_color_scales_hsluv_map(map->data(), [s, l] (float *colors, float h) {
+        SPColor::hsluv_to_rgb_floatv(colors, h, s, l);
+    });
+}
+
+const guchar *ColorScales::hsluvSaturationMap(gfloat h, gfloat l, std::array<guchar, 4 * 1024> *map)
+{
+    return sp_color_scales_hsluv_map(map->data(), [h, l] (float *colors, float s) {
+        SPColor::hsluv_to_rgb_floatv(colors, h, s, l);
+    });
+}
+
+const guchar *ColorScales::hsluvLightnessMap(gfloat h, gfloat s, std::array<guchar, 4 * 1024> *map)
+{
+    return sp_color_scales_hsluv_map(map->data(), [h, s] (float *colors, float l) {
+        SPColor::hsluv_to_rgb_floatv(colors, h, s, l);
+    });
+}
+
 ColorScalesFactory::ColorScalesFactory(SPColorScalesMode submode)
     : _submode(submode)
-{
-}
+{}
 
 ColorScalesFactory::~ColorScalesFactory() = default;
 
@@ -718,7 +883,8 @@ Gtk::Widget *ColorScalesFactory::createWidget(Inkscape::UI::SelectedColor &color
     return w;
 }
 
-Glib::ustring ColorScalesFactory::modeName() const {
+Glib::ustring ColorScalesFactory::modeName() const
+{
     return gettext(ColorScales::SUBMODE_NAMES[_submode]);
 }
 
