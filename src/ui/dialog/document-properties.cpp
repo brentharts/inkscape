@@ -152,8 +152,8 @@ DocumentProperties::DocumentProperties()
     _grids_button_new.signal_clicked().connect(sigc::mem_fun(*this, &DocumentProperties::onNewGrid));
     _grids_button_remove.signal_clicked().connect(sigc::mem_fun(*this, &DocumentProperties::onRemoveGrid));
 
-    _rum_deflt._changed_connection.block();
-    _rum_deflt.getUnitMenu()->signal_changed().connect(sigc::mem_fun(*this, &DocumentProperties::onDocUnitChange));
+    // _rum_deflt._changed_connection.block();
+    // _rum_deflt.getUnitMenu()->signal_changed().connect(sigc::mem_fun(*this, &DocumentProperties::onDocUnitChange));
 }
 
 void DocumentProperties::init()
@@ -224,6 +224,25 @@ void attach_all(Gtk::Grid &table, Gtk::Widget *const arr[], unsigned const n)
     }
 }
 
+void write_str_to_xml(SPDesktop* desktop, Glib::ustring name, Glib::ustring key, const char* value) {
+    if (!desktop) return;
+
+    SPDocument* doc = desktop->getDocument();
+    Inkscape::XML::Node* repr = desktop->getNamedView()->getRepr();
+
+    bool saved = DocumentUndo::getUndoSensitive(doc);
+    DocumentUndo::setUndoSensitive(doc, false);
+    const char* old = repr->attribute(key.c_str());
+
+    DocumentUndo::setUndoSensitive(doc, saved);
+    if (old && value && strcmp(old, value)) {
+        doc->setModifiedSinceSave();
+    }
+g_warning("set: %s to %s", key.c_str(), value);
+    repr->setAttribute(key, value);
+    DocumentUndo::done(doc, name, "");
+}
+
 void write_bool_to_xml(SPDesktop* desktop, Glib::ustring name, Glib::ustring key, bool on, const char* active = nullptr, const char* inactive = nullptr) {
     if (!desktop) return;
 
@@ -235,20 +254,7 @@ void write_bool_to_xml(SPDesktop* desktop, Glib::ustring name, Glib::ustring key
         svgstr = inactive;
     }
 
-    SPDocument* doc = desktop->getDocument();
-    Inkscape::XML::Node* repr = desktop->getNamedView()->getRepr();
-
-    bool saved = DocumentUndo::getUndoSensitive(doc);
-    DocumentUndo::setUndoSensitive(doc, false);
-    const char* svgstr_old = repr->attribute(key.c_str());
-
-    DocumentUndo::setUndoSensitive(doc, saved);
-    if (svgstr_old && svgstr && strcmp(svgstr_old, svgstr)) {
-        doc->setModifiedSinceSave();
-    }
-
-    repr->setAttribute(key, svgstr);
-    DocumentUndo::done(doc, name, "");
+    write_str_to_xml(desktop, name, key, svgstr);
 }
 
 void set_color(SPDesktop* desktop, Glib::ustring name, unsigned int rgba, Glib::ustring color_key, Glib::ustring alpha_key) {
@@ -287,6 +293,9 @@ bool changeSize = true;
     if (changeSize && !doc->is_yaxisdown()) {
         Geom::Translate const vert_offset(Geom::Point(0, (old_height.value("px") - h.value("px"))));
         doc->getRoot()->translateChildItems(vert_offset);
+    }
+    if (unit) {
+        write_str_to_xml(desktop, _("Set document unit"), "unit", unit->abbr.c_str());
     }
     DocumentUndo::done(doc, _("Set page size"), "");
 }
@@ -360,10 +369,17 @@ void DocumentProperties::build_page()
         _wr.setUpdating(false);
     });
 
-    _page->signal_unit_changed().connect([=](const Glib::ustring& abbr, PageProperties::Units element){
+    _page->signal_unit_changed().connect([=](const Inkscape::Util::Unit* unit, PageProperties::Units element){
         if (_wr.isUpdating() || !_wr.desktop()) return;
 
-        // todo
+        if (element == PageProperties::Units::Display) {
+            // display only units
+            display_unit_change(unit);
+        }
+        else if (element == PageProperties::Units::Document) {
+            // document (svg width/height) unit
+            // document_unit_change(unit);
+        }
     });
 
 /*
@@ -439,7 +455,7 @@ void DocumentProperties::build_guides()
     Gtk::Label *label_gui = Gtk::manage (new Gtk::Label);
     label_gui->set_markup (_("<b>Guides</b>"));
 
-    _rum_deflt.set_margin_start(0);
+    // _rum_deflt.set_margin_start(0);
     _rcp_bg.set_margin_start(0);
     _rcp_blkout.set_margin_start(0);
     _rcp_bord.set_margin_start(0);
@@ -1477,7 +1493,7 @@ void DocumentProperties::update_widgets()
     // _rcb_antialias.setActive(root->style->shape_rendering.computed != SP_CSS_SHAPE_RENDERING_CRISPEDGES);
 
     if (nv->display_units) {
-        _rum_deflt.setUnit (nv->display_units->abbr);
+        // _rum_deflt.setUnit (nv->display_units->abbr);
     }
 
     double doc_w = root->width.value;
@@ -1503,7 +1519,9 @@ void DocumentProperties::update_widgets()
 
     update_viewbox(desktop);
 
-    _page->set_unit(PageProperties::Units::Display, nv->display_units->abbr);
+    if (nv->display_units) {
+        _page->set_unit(PageProperties::Units::Display, nv->display_units->abbr);
+    }
     _page->set_check(PageProperties::Check::Checkerboard, nv->desk_checkerboard);
     _page->set_color(PageProperties::Color::Desk, nv->desk_color);
     _page->set_color(PageProperties::Color::Background, pm->background_color);
@@ -1687,10 +1705,14 @@ void DocumentProperties::onRemoveGrid()
     }
 }
 
+// void DocumentProperties::document_unit_change(const Inkscape::Util::Unit* doc_unit) {
+    //
+// }
+
 /** Callback for document unit change. */
 /* This should not effect anything in the SVG tree (other than "inkscape:document-units").
    This should only effect values displayed in the GUI. */
-void DocumentProperties::onDocUnitChange()
+void DocumentProperties::display_unit_change(const Inkscape::Util::Unit* doc_unit)
 {
     SPDocument *document = getDocument();
     // Don't execute when change is being undone
@@ -1702,13 +1724,12 @@ void DocumentProperties::onDocUnitChange()
         return;
     }
 
-
     Inkscape::XML::Node *repr = getDesktop()->getNamedView()->getRepr();
     /*Inkscape::Util::Unit const *old_doc_unit = unit_table.getUnit("px");
     if(repr->attribute("inkscape:document-units")) {
         old_doc_unit = unit_table.getUnit(repr->attribute("inkscape:document-units"));
     }*/
-    Inkscape::Util::Unit const *doc_unit = _rum_deflt.getUnit();
+    // Inkscape::Util::Unit const *doc_unit = _rum_deflt.getUnit();
 
     // Set document unit
     Inkscape::SVGOStringStream os;

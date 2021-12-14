@@ -240,8 +240,9 @@ private:
     void onNewGrid();
     void onRemoveGrid();
 
-    // callback for document unit change
-    void onDocUnitChange();
+    // callback for display unit change
+    void display_unit_change(const Inkscape::Util::Unit* unit);
+    // void document_unit_change(const Inkscape::Util::Unit* doc_unit)
 
     // nodes connected to listeners
     Inkscape::XML::Node *_repr_namedview = nullptr;

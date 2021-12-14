@@ -42,13 +42,13 @@ public:
     enum class Units { Display, Document };
     virtual void set_unit(Units unit, const Glib::ustring& abbr) = 0;
 
-    sigc::signal<void (const Glib::ustring&, Units)> signal_unit_changed() { return _signal_unit_changed; }
+    sigc::signal<void (const Util::Unit*, Units)> signal_unit_changed() { return _signal_unit_changed; }
 
 protected:
     sigc::signal<void (unsigned int, Color)> _signal_color_changed;
     sigc::signal<void (bool, Check)> _signal_check_toggled;
     sigc::signal<void (double, double, const Util::Unit*, Dimension)> _signal_dimmension_changed;
-    sigc::signal<void (const Glib::ustring&, Units)> _signal_unit_changed;
+    sigc::signal<void (const Util::Unit*, Units)> _signal_unit_changed;
 };
 
 } } } // namespace Inkscape/Widget/UI

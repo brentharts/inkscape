@@ -67,7 +67,7 @@ public:
     std::vector<Inkscape::CanvasGrid *> grids;
 
     Inkscape::Util::Unit const *display_units;   // Units used for the UI (*not* the same as units of SVG coordinates)
-    Inkscape::Util::Unit const *page_size_units; // Only used in "Custom size" part of Document Properties dialog 
+    // Inkscape::Util::Unit const *page_size_units; // Only used in "Custom size" part of Document Properties dialog 
     
     GQuark default_layer_id;
 

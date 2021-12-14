@@ -98,12 +98,10 @@ public:
             });
         }
 
-        // _backgnd_color_picker->connectChanged([=](guint rgba) { _preview->set_page_color(rgba); });
-        // _border_color_picker->connectChanged([=](guint rgba) { _preview->set_border_color(rgba); });
-        // _desk_color_picker->connectChanged([=](guint rgba) { _preview->set_desk_color(rgba); });
-
-        _display_units = std::make_unique<UnitMenu>(&get_widget<Gtk::ComboBoxText>(_builder, "display-units"));
+        auto& display_units = get_widget<Gtk::ComboBoxText>(_builder, "display-units");
+        _display_units = std::make_unique<UnitMenu>(&display_units);
         _display_units->setUnitType(UNIT_TYPE_LINEAR);
+        display_units.signal_changed().connect([=](){ set_display_unit(); });
 
         auto& page_units = get_widget<Gtk::ComboBoxText>(_builder, "page-units");
         _page_units = std::make_unique<UnitMenu>(&page_units);
@@ -258,7 +256,7 @@ private:
         _template_name.set_label(templ ? templ->name : _("Custom"));
 
         if (!pending) {
-            _signal_dimmension_changed.emit(width, height, _page_units->getUnit(), Dimension::PageSize);
+            _signal_dimmension_changed.emit(width, height, unit, Dimension::PageSize);
         }
     }
 
@@ -274,6 +272,13 @@ private:
         }
         set_page_size();
     };
+
+    void set_display_unit() {
+        if (_update.pending()) return;
+
+        const auto unit = _display_units->getUnit();
+        _signal_unit_changed.emit(unit, Units::Display);
+    }
 
     void set_page_unit() {
         if (_update.pending()) return;
@@ -294,6 +299,7 @@ private:
             _page_height.set_value(h.value(new_unit));
         }
         set_page_size();
+        _signal_unit_changed.emit(new_unit, Units::Document);
     }
 
     void set_color(Color element, unsigned int color) override {

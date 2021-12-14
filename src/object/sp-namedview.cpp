@@ -77,12 +77,12 @@ SPNamedView::SPNamedView()
     this->guidecolor = 0;
     this->guidehicolor = 0;
     this->views.clear();
-    this->page_size_units = nullptr;
+    // this->page_size_units = nullptr;
     this->window_x = 0;
     this->cy = 0;
     this->window_y = 0;
     this->display_units = nullptr;
-    this->page_size_units = nullptr;
+    // this->page_size_units = nullptr;
     this->cx = 0;
     this->rotation = 0;
     this->window_width = 0;
@@ -528,6 +528,7 @@ void SPNamedView::set(SPAttr key, const gchar* value) {
             this->requestModified(SP_OBJECT_MODIFIED_FLAG);
             break;
     }
+    /*
     case SPAttr::UNITS: {
         // Only used in "Custom size" section of Document Properties dialog
             Inkscape::Util::Unit const *new_unit = nullptr;
@@ -536,22 +537,22 @@ void SPNamedView::set(SPAttr key, const gchar* value) {
                 Inkscape::Util::Unit const *const req_unit = unit_table.getUnit(value);
                 if ( !unit_table.hasUnit(value) ) {
                     g_warning("Unrecognized unit `%s'", value);
-                    /* fixme: Document errors should be reported in the status bar or
+                    / * fixme: Document errors should be reported in the status bar or
                      * the like (e.g. as per
                      * http://www.w3.org/TR/SVG11/implnote.html#ErrorProcessing); g_log
-                     * should be only for programmer errors. */
+                     * should be only for programmer errors. * /
                 } else if ( req_unit->isAbsolute() ) {
                     new_unit = req_unit;
                 } else {
                     g_warning("Document units must be absolute like `mm', `pt' or `px', but found `%s'",
                               value);
-                    /* fixme: Don't use g_log (see above). */
+                    / * fixme: Don't use g_log (see above). * /
                 }
             }
             this->page_size_units = new_unit;
             this->requestModified(SP_OBJECT_MODIFIED_FLAG);
             break;
-    }
+    } */
     default:
             SPObjectGroup::set(key, value);
             break;
