@@ -174,7 +174,7 @@ SPDesktop::init (SPNamedView *nv, Inkscape::UI::Widget::Canvas *acanvas, SPDeskt
     number = namedview->getViewCount();
 
     /* Setup Canvas */
-    canvas->set_background_color(0xffffff00); // Background page sits on.
+    namedview->set_desk_color(this); // Background page sits on.
 
     /* ----------- Canvas Items ------------ */
 

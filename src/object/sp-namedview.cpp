@@ -299,6 +299,16 @@ void SPNamedView::release() {
     SPObjectGroup::release();
 }
 
+void SPNamedView::set_desk_color(SPDesktop* desktop) {
+    if (desktop) {
+        if (desk_checkerboard) {
+            desktop->getCanvas()->set_background_checkerboard(desk_color);
+        } else {
+            desktop->getCanvas()->set_background_color(desk_color);
+        }
+    }
+}
+
 void SPNamedView::modified(unsigned int flags)
 {
     // Copy the page style for the default viewport attributes
@@ -312,11 +322,7 @@ void SPNamedView::modified(unsigned int flags)
     }
     // Add desk color, and chckerboard pattern to desk view
     for (auto desktop : views) {
-        if (desk_checkerboard) {
-            desktop->getCanvas()->set_background_checkerboard(desk_color, false);
-        } else {
-            desktop->getCanvas()->set_background_color(desk_color);
-        }
+        set_desk_color(desktop);
     }
 
     for (auto child : this->childList(false)) {

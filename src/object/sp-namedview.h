@@ -99,6 +99,7 @@ public:
     bool getGuides();
     void lockGuides();
     void updateViewPort();
+    void set_desk_color(SPDesktop* desktop);
 
     Inkscape::PageManager *getPageManager() const { return _page_manager; }
 
