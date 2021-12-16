@@ -63,6 +63,7 @@
 #include "ui/dialog/dialog-container.h"
 #include "ui/dialog/layer-properties.h"
 #include "ui/icon-loader.h"
+#include "ui/icon-names.h"
 #include "ui/shortcuts.h"
 
 using Inkscape::DocumentUndo;
@@ -536,7 +537,7 @@ void ContextMenu::SelectSameObjectType()
 void ContextMenu::ItemProperties()
 {
     _desktop->selection->set(_item);
-    _desktop->getContainer()->new_dialog(SP_VERB_DIALOG_ITEM);
+    _desktop->getContainer()->new_dialog("ObjectProperties");
 }
 
 void ContextMenu::ItemSelectThis()
@@ -568,10 +569,10 @@ void ContextMenu::ItemCreateLink()
     Inkscape::GC::release(repr);
     Inkscape::GC::release(child);
 
-    Inkscape::DocumentUndo::done(object->document, SP_VERB_NONE, _("Create link"));
+    Inkscape::DocumentUndo::done(object->document, _("Create link"), "");
 
     _desktop->selection->set(SP_ITEM(object));
-    _desktop->getContainer()->new_dialog(SP_VERB_DIALOG_ATTR);
+    _desktop->getContainer()->new_dialog("ObjectAttributes");
 }
 
 void ContextMenu::SetMask()
@@ -608,7 +609,7 @@ void sp_group_layer_transform(SPDocument* document, SPGroup* group, SPGroup::Lay
     group->setLayerMode(mode);
     group->updateRepr(SP_OBJECT_WRITE_NO_CHILDREN | SP_OBJECT_WRITE_EXT);
     if (document) {
-        DocumentUndo::done(document, SP_VERB_DIALOG_OBJECTS, mode == SPGroup::GROUP ? _("Layer to group") : _("Group to layer"));
+        DocumentUndo::done(document, mode == SPGroup::GROUP ? _("Layer to group") : _("Group to layer"), INKSCAPE_ICON("dialog-objects"));
     }
 }
 
@@ -729,7 +730,7 @@ void ContextMenu::MakeAnchorMenu()
 
 void ContextMenu::AnchorLinkProperties()
 {
-    _desktop->getContainer()->new_dialog(SP_VERB_DIALOG_ATTR);
+    _desktop->getContainer()->new_dialog("ObjectAttributes");
 }
 
 void ContextMenu::AnchorLinkFollow()
@@ -752,7 +753,7 @@ void ContextMenu::AnchorLinkRemove()
 {
 	std::vector<SPItem*> children;
     sp_item_group_ungroup(static_cast<SPAnchor*>(_item), children, false);
-    Inkscape::DocumentUndo::done(_desktop->doc(), SP_VERB_NONE, _("Remove link"));
+    Inkscape::DocumentUndo::done(_desktop->doc(), _("Remove link"), "");
 }
 
 void ContextMenu::MakeImageMenu ()
@@ -810,7 +811,7 @@ void ContextMenu::MakeImageMenu ()
 
 void ContextMenu::ImageProperties()
 {
-    _desktop->getContainer()->new_dialog(SP_VERB_DIALOG_ATTR);
+    _desktop->getContainer()->new_dialog("ObjectAttributes");
 }
 
 Glib::ustring ContextMenu::getImageEditorName(bool is_svg) {
@@ -914,7 +915,7 @@ void ContextMenu::ImageEdit()
 
 void ContextMenu::ImageTraceBitmap()
 {
-    _desktop->getContainer()->new_dialog(SP_VERB_SELECTION_TRACE);
+    _desktop->getContainer()->new_dialog("Trace");
 }
 
 void ContextMenu::ImageEmbed()
@@ -964,7 +965,7 @@ void ContextMenu::FillSettings()
         _desktop->selection->set(_item);
     }
 
-    _desktop->getContainer()->new_dialog(SP_VERB_DIALOG_FILL_STROKE);
+    _desktop->getContainer()->new_dialog("FillStroke");
 }
 
 void ContextMenu::MakeTextMenu ()
@@ -998,7 +999,7 @@ void ContextMenu::TextSettings ()
         _desktop->selection->set(_item);
     }
 
-    _desktop->getContainer()->new_dialog(SP_VERB_DIALOG_TEXT);
+    _desktop->getContainer()->new_dialog("Text");
 }
 
 void ContextMenu::SpellcheckSettings ()
@@ -1008,7 +1009,7 @@ void ContextMenu::SpellcheckSettings ()
         _desktop->selection->set(_item);
     }
 
-    _desktop->getContainer()->new_dialog(SP_VERB_DIALOG_SPELLCHECK);
+    _desktop->getContainer()->new_dialog("Spellcheck");
 #endif
 }
 

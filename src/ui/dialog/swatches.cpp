@@ -10,19 +10,19 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
+#include "swatches.h"
+
 #include <map>
 #include <algorithm>
 #include <iomanip>
 #include <set>
 
-#include "swatches.h"
-#include <gtkmm/radiomenuitem.h>
-
-#include <gtkmm/menu.h>
 #include <gtkmm/checkmenuitem.h>
+#include <gtkmm/menu.h>
+#include <gtkmm/menubutton.h>
+#include <gtkmm/radiomenuitem.h>
 #include <gtkmm/radiomenuitem.h>
 #include <gtkmm/separatormenuitem.h>
-#include <gtkmm/menubutton.h>
 
 #include <glibmm/i18n.h>
 #include <glibmm/main.h>
@@ -31,31 +31,29 @@
 #include <glibmm/miscutils.h>
 
 #include "color-item.h"
-#include "desktop.h"
-
 #include "desktop-style.h"
-#include "document.h"
+#include "desktop.h"
 #include "document-undo.h"
-#include "extension/db.h"
+#include "document.h"
+#include "gradient-chemistry.h"
 #include "inkscape.h"
-#include "io/sys.h"
-#include "io/resource.h"
 #include "message-context.h"
 #include "path-prefix.h"
 
-#include "ui/previewholder.h"
-#include "widgets/desktop-widget.h"
-#include "ui/widget/gradient-vector-selector.h"
+#include "actions/actions-tools.h" // Invoke gradient tool
 #include "display/cairo-utils.h"
-
+#include "extension/db.h"
+#include "helper/action.h"
+#include "io/resource.h"
+#include "io/sys.h"
 #include "object/sp-defs.h"
 #include "object/sp-gradient-reference.h"
-
 #include "ui/dialog/dialog-container.h"
-#include "verbs.h"
-#include "gradient-chemistry.h"
-#include "helper/action.h"
+#include "ui/icon-names.h"
+#include "ui/previewholder.h"
 #include "ui/widget/color-palette.h"
+#include "ui/widget/gradient-vector-selector.h"
+#include "widgets/desktop-widget.h"
 #include "widgets/ege-paint-def.h"
 
 namespace Inkscape {
@@ -145,7 +143,7 @@ static void editGradientImpl( SPDesktop* desktop, SPGradient* gr )
                         if ( SP_IS_GRADIENT(server) ) {
                             SPGradient* grad = SP_GRADIENT(server);
                             if ( grad->isSwatch() && grad->getId() == gr->getId()) {
-                                desktop->getContainer()->new_dialog(SP_VERB_DIALOG_FILL_STROKE);
+                                desktop->getContainer()->new_dialog("FillStroke");
                                 shown = true;
                             }
                         }
@@ -154,15 +152,9 @@ static void editGradientImpl( SPDesktop* desktop, SPGradient* gr )
             }
         }
 
-        if (!shown) {
+        if (!shown) { // WHEN DOES THIS HAPPEN?
             // Invoke the gradient tool
-            auto verb = Inkscape::Verb::get(SP_VERB_CONTEXT_GRADIENT);
-            if (verb) {
-                auto action = verb->get_action(Inkscape::ActionContext(desktop));
-                if (action) {
-                    sp_action_perform(action, nullptr);
-                }
-            }
+            set_active_tool(desktop, "Gradient");
         }
     }
 }
@@ -202,8 +194,7 @@ void SwatchesPanelHook::convertGradient( GtkMenuItem * /*menuitem*/, gpointer us
 
                 if ( targetName == grad->getId() ) {
                     grad->setSwatch();
-                    DocumentUndo::done(doc, SP_VERB_CONTEXT_GRADIENT,
-                                       _("Add gradient stop"));
+                    DocumentUndo::done(doc, _("Add gradient stop"), INKSCAPE_ICON("color-gradient"));
                     break;
                 }
             }
@@ -709,6 +700,8 @@ void SwatchesPanel::_trackDocument( SwatchesPanel *panel, SPDocument *document )
                     docPalettes[document] = docPalette;
                 }
             }
+            // Always update the palettes if there's a document.
+            panel->updatePalettes();
         }
     }
 }
@@ -742,7 +735,7 @@ SwatchesPanel::SwatchesPanel(gchar const *prefsPath)
     if (docPalettes.empty()) {
         SwatchPage *docPalette = new SwatchPage();
 
-        docPalette->_name = "Auto";
+        docPalette->_name = "Empty";
         docPalettes[nullptr] = docPalette;
     }
 
@@ -754,16 +747,16 @@ SwatchesPanel::SwatchesPanel(gchar const *prefsPath)
             Inkscape::Preferences *prefs = Inkscape::Preferences::get();
             targetName = prefs->getString(_prefs_path + "/palette");
             if (!targetName.empty()) {
-                if (targetName == "Auto") {
+                if (targetName == "Empty") {
                     first = docPalettes[nullptr];
                 } else {
                     std::vector<SwatchPage*> pages = _getSwatchSets();
                     for (auto & page : pages) {
+                        index++;
                         if ( page->_name == targetName ) {
                             first = page;
                             break;
                         }
-                        index++;
                     }
                 }
             }
@@ -775,26 +768,6 @@ SwatchesPanel::SwatchesPanel(gchar const *prefsPath)
         } else {
             _currentIndex = index;
         }
-
-        std::vector<SwatchPage*> swatchSets = _getSwatchSets();
-        std::vector<Inkscape::UI::Widget::ColorPalette::palette_t> palettes;
-        palettes.reserve(swatchSets.size());
-        for (auto curr : swatchSets) {
-            Inkscape::UI::Widget::ColorPalette::palette_t palette;
-            palette.name = curr->_name;
-            for (const auto& color : curr->_colors) {
-                if (color.def.getType() == ege::PaintDef::RGB) {
-                    auto& c = color.def;
-                    palette.colors.push_back(
-                        Inkscape::UI::Widget::ColorPalette::rgb_t { c.getR() / 255.0, c.getG() / 255.0, c.getB() / 255.0 });
-                }
-            }
-            palettes.push_back(palette);
-        }
-
-        // pass list of available palettes
-        _palette->set_palettes(palettes);
-        _rebuild();
 
         // restore palette settings
         Inkscape::Preferences* prefs = Inkscape::Preferences::get();
@@ -843,6 +816,34 @@ SwatchesPanel::~SwatchesPanel()
     if ( _remove ) {
         delete _remove;
     }
+}
+
+/**
+ * Process the list of available palettes and update the list
+ * in the _palette widget. The widget will take care of cleaning.
+ */
+void SwatchesPanel::updatePalettes()
+{
+    std::vector<SwatchPage*> swatchSets = _getSwatchSets();
+
+    std::vector<Inkscape::UI::Widget::ColorPalette::palette_t> palettes;
+    palettes.reserve(swatchSets.size());
+    for (auto curr : swatchSets) {
+        Inkscape::UI::Widget::ColorPalette::palette_t palette;
+        palette.name = curr->_name;
+        for (const auto& color : curr->_colors) {
+            if (color.def.getType() == ege::PaintDef::RGB) {
+                auto& c = color.def;
+                palette.colors.push_back(
+                    Inkscape::UI::Widget::ColorPalette::rgb_t { c.getR() / 255.0, c.getG() / 255.0, c.getB() / 255.0 });
+            }
+        }
+        palettes.push_back(palette);
+    }
+
+    // pass list of available palettes
+    _palette->set_palettes(palettes);
+    _rebuild();
 }
 
 void SwatchesPanel::_updateSettings(int settings, int value)
@@ -924,16 +925,22 @@ void SwatchesPanel::handleGradientsChange(SPDocument *document)
 
         docPalette->_colors.swap(tmpColors);
 
-        // Figure out which SwatchesPanel instances are affected and update them.
+        _rebuildDocumentSwatch(docPalette, document);
+    }
+}
 
-        for (auto & it : docPerPanel) {
-            if (it.second == document) {
-                SwatchesPanel* swp = it.first;
-                std::vector<SwatchPage*> pages = swp->_getSwatchSets();
-                SwatchPage* curr = pages[swp->_currentIndex];
-                if (curr == docPalette) {
-                    swp->_rebuild();
-                }
+/**
+ * Figure out which SwatchesPanel instances are affected and update them.
+ */
+void SwatchesPanel::_rebuildDocumentSwatch(SwatchPage *docPalette, SPDocument *document)
+{
+    for (auto & it : docPerPanel) {
+        if (it.second == document) {
+            SwatchesPanel* swp = it.first;
+            std::vector<SwatchPage*> pages = swp->_getSwatchSets();
+            SwatchPage* curr = pages[swp->_currentIndex];
+            if (curr == docPalette) {
+                swp->_rebuild();
             }
         }
     }
@@ -973,6 +980,7 @@ void SwatchesPanel::handleDefsModified(SPDocument *document)
         for (auto & tmpPrev : tmpPrevs) {
             cairo_pattern_destroy(tmpPrev.second);
         }
+        _rebuildDocumentSwatch(docPalette, document);
     }
 }
 
@@ -990,15 +998,7 @@ std::vector<SwatchPage*> SwatchesPanel::_getSwatchSets() const
     return tmp;
 }
 
-std::vector<SwatchPage*> SwatchesPanel::getSwatchSets() {
-    load_palettes();
-    std::vector<SwatchPage*> tmp;
-    tmp.insert(tmp.end(), userSwatchPages.begin(), userSwatchPages.end());
-    tmp.insert(tmp.end(), systemSwatchPages.begin(), systemSwatchPages.end());
-    return tmp;
-}
-
-void SwatchesPanel::_updateFromSelection()
+void SwatchesPanel::selectionChanged(Selection *selection)
 {
     auto document = getDocument();
     if (!document)

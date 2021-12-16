@@ -30,11 +30,14 @@
 #include <gtkmm/radiotoolbutton.h>
 #include <gtkmm/separatortoolitem.h>
 
+#include "verbs.h"
+
 #include "live_effects/lpe-line_segment.h"
 
 #include "helper/action-context.h"
 #include "helper/action.h"
 
+#include "ui/dialog/dialog-container.h"
 #include "ui/icon-names.h"
 #include "ui/tools/lpe-tool.h"
 #include "ui/widget/combo-tool-item.h"
@@ -333,7 +336,7 @@ void
 LPEToolbar::open_lpe_dialog()
 {
     if (dynamic_cast<LpeTool *>(_desktop->event_context)) {
-        sp_action_perform(Inkscape::Verb::get(SP_VERB_DIALOG_LIVE_PATH_EFFECT)->get_action(Inkscape::ActionContext(_desktop)), nullptr);
+        _desktop->getContainer()->new_dialog("LivePathEffect");
     } else {
         std::cerr << "LPEToolbar::open_lpe_dialog: LPEToolbar active but current tool is not LPE tool!" << std::endl;
     }

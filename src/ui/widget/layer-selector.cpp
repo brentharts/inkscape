@@ -23,7 +23,6 @@
 #include "document-undo.h"
 #include "document.h"
 #include "layer-manager.h"
-#include "verbs.h"
 
 #include "ui/widget/layer-selector.h"
 #include "ui/dialog/dialog-container.h"
@@ -186,8 +185,7 @@ void LayerSelector::_lockLayer()
     bool lock = _lock_toggle.get_active();
     if (auto layer = _desktop->layerManager().currentLayer()) {
         layer->setLocked(lock);
-        DocumentUndo::done(_desktop->getDocument(), SP_VERB_NONE,
-                           lock ? _("Lock layer") : _("Unlock layer"));
+        DocumentUndo::done(_desktop->getDocument(), lock ? _("Lock layer") : _("Unlock layer"), "");
     }
 }
 
@@ -196,16 +194,13 @@ void LayerSelector::_hideLayer()
     bool hide = _eye_toggle.get_active();
     if (auto layer = _desktop->layerManager().currentLayer()) {
         layer->setHidden(hide);
-        DocumentUndo::done(_desktop->getDocument(), SP_VERB_NONE,
-                           hide ? _("Hide layer") : _("Unhide layer"));
+        DocumentUndo::done(_desktop->getDocument(), hide ? _("Hide layer") : _("Unhide layer"), "");
     }
 }
 
 void LayerSelector::_layerChoose()
 {
-    auto prefs = Inkscape::Preferences::get();
-    prefs->setBool("/dialogs/objects/layers_only", true);
-    _desktop->getContainer()->new_dialog(SP_VERB_DIALOG_OBJECTS);
+    _desktop->getContainer()->new_dialog("Objects");
 }
 
 } // namespace Widget

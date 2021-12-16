@@ -17,9 +17,13 @@
 
 #define DRAW_VERBOSE
 
+#include "freehand-base.h"
+
 #include "desktop-style.h"
+#include "id-clash.h"
 #include "message-stack.h"
 #include "selection-chemistry.h"
+#include "style.h"
 
 #include "display/curve.h"
 #include "display/control/canvas-item-bpath.h"
@@ -31,18 +35,17 @@
 #include "live_effects/lpe-simplify.h"
 #include "live_effects/lpe-powerstroke.h"
 
-#include "svg/svg-color.h"
-#include "svg/svg.h"
-
-#include "id-clash.h"
 #include "object/sp-item-group.h"
 #include "object/sp-path.h"
 #include "object/sp-rect.h"
 #include "object/sp-use.h"
-#include "style.h"
+
+#include "svg/svg-color.h"
+#include "svg/svg.h"
 
 #include "ui/clipboard.h"
 #include "ui/draw-anchor.h"
+#include "ui/icon-names.h"
 #include "ui/tools/lpe-tool.h"
 #include "ui/tools/pen-tool.h"
 #include "ui/tools/pencil-tool.h"
@@ -224,8 +227,6 @@ static void spdc_paste_curve_as_freehand_shape(Geom::PathVector const &newpath, 
 
     // TODO: Don't paste path if nothing is on the clipboard
     SPDocument *document = dc->getDesktop()->doc();
-    bool saved = DocumentUndo::getUndoSensitive(document);
-    DocumentUndo::setUndoSensitive(document, false);
     Effect::createAndApply(PATTERN_ALONG_PATH, document, item);
     Effect* lpe = SP_LPE_ITEM(item)->getCurrentLPE();
     static_cast<LPEPatternAlongPath*>(lpe)->pattern.set_new_value(newpath,true);
@@ -237,7 +238,6 @@ static void spdc_paste_curve_as_freehand_shape(Geom::PathVector const &newpath, 
     Inkscape::SVGOStringStream os;
     os << scale;
     lpe->getRepr()->setAttribute("prop_scale", os.str());
-    DocumentUndo::setUndoSensitive(document, saved);
 }
 
 void spdc_apply_style(SPObject *obj)
@@ -303,8 +303,6 @@ static void spdc_apply_powerstroke_shape(std::vector<Geom::Point> points, Freeha
             return;
         }
     }
-    bool saved = DocumentUndo::getUndoSensitive(document);
-    DocumentUndo::setUndoSensitive(document, false);
     Effect::createAndApply(POWERSTROKE, document, item);
     Effect* lpe = SP_LPE_ITEM(item)->getCurrentLPE();
 
@@ -320,7 +318,6 @@ static void spdc_apply_powerstroke_shape(std::vector<Geom::Point> points, Freeha
     lpe->getRepr()->setAttribute("miter_limit", "4");
     lpe->getRepr()->setAttribute("scale_width", "1");
     lpe->getRepr()->setAttribute("linejoin_type", "extrp_arc");
-    DocumentUndo::setUndoSensitive(document, saved);
 }
 
 static void spdc_apply_bend_shape(gchar const *svgd, FreehandBase *dc, SPItem *item)
@@ -335,8 +332,6 @@ static void spdc_apply_bend_shape(gchar const *svgd, FreehandBase *dc, SPItem *i
     if (!document || !desktop) {
         return;
     }
-    bool saved = DocumentUndo::getUndoSensitive(document);
-    DocumentUndo::setUndoSensitive(document, false);
     if(!SP_IS_LPE_ITEM(item) || !SP_LPE_ITEM(item)->hasPathEffectOfType(BEND_PATH)){
         Effect::createAndApply(BEND_PATH, document, item);
     }
@@ -354,7 +349,6 @@ static void spdc_apply_bend_shape(gchar const *svgd, FreehandBase *dc, SPItem *i
     lpe->getRepr()->setAttribute("scale_y_rel", "false");
     lpe->getRepr()->setAttribute("vertical", "false");
     static_cast<LPEBendPath*>(lpe)->bend_path.paste_param_path(svgd);
-    DocumentUndo::setUndoSensitive(document, saved);
 }
 
 static void spdc_apply_simplify(std::string threshold, FreehandBase *dc, SPItem *item)
@@ -364,8 +358,6 @@ static void spdc_apply_simplify(std::string threshold, FreehandBase *dc, SPItem 
     if (!document || !desktop) {
         return;
     }
-    bool saved = DocumentUndo::getUndoSensitive(document);
-    DocumentUndo::setUndoSensitive(document, false);
     using namespace Inkscape::LivePathEffect;
 
     Effect::createAndApply(SIMPLIFY, document, item);
@@ -377,7 +369,6 @@ static void spdc_apply_simplify(std::string threshold, FreehandBase *dc, SPItem 
     lpe->getRepr()->setAttribute("helper_size", "0");
     lpe->getRepr()->setAttribute("simplify_individual_paths", "false");
     lpe->getRepr()->setAttribute("simplify_just_coalesce", "false");
-    DocumentUndo::setUndoSensitive(document, saved);
 }
 
 static shapeType previous_shape_type = NONE;
@@ -933,8 +924,7 @@ static void spdc_flush_white(FreehandBase *dc, SPCurve *gc)
                 dc->selection->set(repr);
             }
         }
-        DocumentUndo::done(doc, SP_IS_PEN_CONTEXT(dc)? SP_VERB_CONTEXT_PEN : SP_VERB_CONTEXT_PENCIL,
-                         _("Draw path"));
+        DocumentUndo::done(doc, _("Draw path"), SP_IS_PEN_CONTEXT(dc)? INKSCAPE_ICON("draw-path") : INKSCAPE_ICON("draw-freehand"));
 
         // When quickly drawing several subpaths with Shift, the next subpath may be finished and
         // flushed before the selection_modified signal is fired by the previous change, which
@@ -1082,7 +1072,7 @@ void spdc_create_single_dot(ToolBase *ec, Geom::Point const &pt, char const *too
     desktop->getSelection()->set(item);
 
     desktop->messageStack()->flash(Inkscape::NORMAL_MESSAGE, _("Creating single dot"));
-    DocumentUndo::done(desktop->getDocument(), SP_VERB_NONE, _("Create single dot"));
+    DocumentUndo::done(desktop->getDocument(), _("Create single dot"), "");
 }
 
 }

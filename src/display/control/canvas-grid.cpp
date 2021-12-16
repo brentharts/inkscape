@@ -33,7 +33,6 @@
 #include "document.h"
 #include "inkscape.h"
 #include "preferences.h"
-#include "verbs.h"
 
 #include "display/cairo-utils.h"
 
@@ -46,6 +45,7 @@
 #include "svg/stringstream.h"
 #include "svg/svg-color.h"
 
+#include "ui/icon-names.h"
 #include "ui/widget/canvas.h"
 
 #include "util/units.h"
@@ -177,7 +177,7 @@ CanvasGrid::writeNewGridToRepr(Inkscape::XML::Node * repr, SPDocument * doc, Gri
     repr->appendChild(newnode);
     Inkscape::GC::release(newnode);
 
-    DocumentUndo::done(doc, SP_VERB_DIALOG_DOCPROPERTIES, _("Create new grid"));
+    DocumentUndo::done(doc, _("Create new grid"), INKSCAPE_ICON("document-properties"));
 }
 
 /*
@@ -842,7 +842,7 @@ CanvasXYGrid::Render (Inkscape::CanvasItemBuffer *buf)
 
     bool xrayactive = prefs->getBool("/desktop/xrayactive", false);
     if (xrayactive) {
-        guint32 bg = namedview->pagecolor;
+        guint32 bg = 0xffffffff;
         _color = SP_RGBA32_F_COMPOSE(
                 CLAMP(((1 - SP_RGBA32_A_F(_color)) * SP_RGBA32_R_F(bg)) + (SP_RGBA32_A_F(_color) * SP_RGBA32_R_F(_color)), 0.0, 1.0),
                 CLAMP(((1 - SP_RGBA32_A_F(_color)) * SP_RGBA32_G_F(bg)) + (SP_RGBA32_A_F(_color) * SP_RGBA32_G_F(_color)), 0.0, 1.0),

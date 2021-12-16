@@ -27,7 +27,6 @@
 #include "layer-manager.h"
 #include "selection-chemistry.h"
 #include "text-editing.h"
-#include "verbs.h"
 
 #include "display/control/canvas-item-rect.h"
 
@@ -41,6 +40,7 @@
 
 #include "ui/dialog/dialog-container.h"
 #include "ui/dialog/inkscape-preferences.h" // for PREFS_PAGE_SPELLCHECK
+#include "ui/icon-names.h"
 #include "ui/tools/text-tool.h"
 
 #include <glibmm/i18n.h>
@@ -79,7 +79,7 @@ std::vector<LanguagePair> SpellCheck::get_available_langs()
 static void show_spellcheck_preferences_dialog()
 {
     Inkscape::Preferences::get()->setInt("/dialogs/preferences/page", PREFS_PAGE_SPELLCHECK);
-    SP_ACTIVE_DESKTOP->getContainer()->new_dialog(SP_VERB_DIALOG_PREFERENCES);
+    SP_ACTIVE_DESKTOP->getContainer()->new_dialog("Spellcheck");
 }
 
 SpellCheck::SpellCheck()
@@ -676,8 +676,7 @@ void SpellCheck::onAccept ()
             // find the end of the word anew
             _end_w = _begin_w;
             _end_w.nextEndOfWord();
-            DocumentUndo::done(getDocument(), SP_VERB_CONTEXT_TEXT,
-                               _("Fix spelling"));
+            DocumentUndo::done(getDocument(), _("Fix spelling"), INKSCAPE_ICON("draw-text"));
         }
     }
 

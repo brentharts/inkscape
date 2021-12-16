@@ -24,16 +24,14 @@
 #include "id-clash.h"
 #include "inkscape.h"
 #include "preferences.h"
-#include "verbs.h"
 
 #include "object/sp-defs.h"
 #include "style.h"
 
+#include "actions/actions-tools.h" // Invoke gradient tool
 #include "helper/action.h"
 #include "ui/icon-loader.h"
-
 #include "ui/icon-names.h"
-
 #include "ui/widget/gradient-vector-selector.h"
 
 namespace Inkscape {
@@ -137,6 +135,7 @@ GradientSelector::GradientSelector()
     _del2->set_relief(Gtk::RELIEF_NONE);
     _del2->set_tooltip_text(_("Delete unused gradient"));
 
+    // The only use of this button is hidden!
     _edit = Gtk::manage(new Gtk::Button());
     style_button(_edit, INKSCAPE_ICON("edit"));
 
@@ -215,7 +214,7 @@ void GradientSelector::onGradientRename(const Glib::ustring &path_string, const 
                 row[_columns->name] = gr_prepare_label(obj);
                 if (!new_text.empty() && new_text != row[_columns->name]) {
                     rename_id(obj, new_text);
-                    Inkscape::DocumentUndo::done(obj->document, SP_VERB_CONTEXT_GRADIENT, _("Rename gradient"));
+                    Inkscape::DocumentUndo::done(obj->document, _("Rename gradient"), INKSCAPE_ICON("color-gradient"));
                 }
             }
         }
@@ -536,14 +535,8 @@ void GradientSelector::delete_vector_clicked()
 
 void GradientSelector::edit_vector_clicked()
 {
-    // Invoke the gradient tool
-    auto verb = Inkscape::Verb::get(SP_VERB_CONTEXT_GRADIENT);
-    if (verb) {
-        auto action = verb->get_action(Inkscape::ActionContext((Inkscape::UI::View::View *)SP_ACTIVE_DESKTOP));
-        if (action) {
-            sp_action_perform(action, nullptr);
-        }
-    }
+    // Invoke the gradient tool.... never actually called as button is hidden in only use!
+    set_active_tool(SP_ACTIVE_DESKTOP, "Gradient");
 }
 
 void GradientSelector::add_vector_clicked()

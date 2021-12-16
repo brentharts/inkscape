@@ -36,19 +36,19 @@
 #include "filter-chemistry.h"
 #include "selection.h"
 #include "seltrans-handles.h"
-#include "verbs.h"
 
 #include "display/control/snap-indicator.h"
 #include "display/control/canvas-item-ctrl.h"
 #include "display/control/canvas-item-curve.h"
 #include "display/control/canvas-item-group.h"
-
+#include "live_effects/effect-enum.h"
 #include "helper/action.h"
 
 #include "object/sp-item-transform.h"
 #include "object/sp-namedview.h"
 #include "object/sp-root.h"
 
+#include "ui/icon-names.h"
 #include "ui/modifiers.h"
 #include "ui/knot/knot.h"
 #include "ui/tools/select-tool.h"
@@ -288,7 +288,7 @@ void Inkscape::SelTrans::grab(Geom::Point const &p, gdouble x, gdouble y, bool s
         /* Snapping a huge number of nodes will take way too long, so limit the number of snappable nodes
         A typical user would rarely ever try to snap such a large number of nodes anyway, because
         (s)he would hardly be able to discern which node would be snapping */
-        std::cout << "Warning: limit of 200 snap sources reached, some will be ignored" << std::endl;
+        std::cerr << "Warning: limit of 200 snap sources reached, some will be ignored" << std::endl;
         _snap_points.resize(200);
         // Unfortunately, by now we will have lost the font-baseline snappoints :-(
     }
@@ -394,6 +394,22 @@ void Inkscape::SelTrans::transform(Geom::Affine const &rel_affine, Geom::Point c
     _updateHandles();
 }
 
+void sp_meassure_lpe_update(SPLPEItem *item, bool root) {
+    SPGroup *group = dynamic_cast<SPGroup *>(item);
+    SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(item);
+    if (group) {
+        std::vector<SPObject*> l = group->childList(false);
+        for(auto o : l){
+            SPLPEItem *olpeitem = dynamic_cast<SPLPEItem *>(o);
+            if (olpeitem) {
+                sp_meassure_lpe_update(olpeitem, false);
+            }
+        }
+    } else if (!root && lpeitem && lpeitem->hasPathEffectOfType(Inkscape::LivePathEffect::EffectType::MEASURE_SEGMENTS)) {
+        sp_lpe_item_update_patheffect(lpeitem, false, false);
+    }
+}
+
 void Inkscape::SelTrans::ungrab()
 {
     g_return_if_fail(_grabbed);
@@ -444,6 +460,10 @@ void Inkscape::SelTrans::ungrab()
                     }
                 }
             }
+            for (unsigned i = 0; i < _items_centers.size(); i++) {
+                SPLPEItem *currentItem = dynamic_cast<SPLPEItem *>(_items[i]);
+                sp_meassure_lpe_update(currentItem, true);
+            }
         }
 
         _items.clear();
@@ -455,17 +475,13 @@ void Inkscape::SelTrans::ungrab()
             // when trying to stretch a perfectly vertical line in horizontal direction, which will not be allowed
             // by the handles; this would be identified as a (zero) translation by isTranslation()
             if (_current_relative_affine.isTranslation()) {
-                DocumentUndo::done(_desktop->getDocument(), SP_VERB_CONTEXT_SELECT,
-                                   _("Move"));
+                DocumentUndo::done(_desktop->getDocument(), _("Move"), INKSCAPE_ICON("tool-pointer"));
             } else if (_current_relative_affine.withoutTranslation().isScale()) {
-                DocumentUndo::done(_desktop->getDocument(), SP_VERB_CONTEXT_SELECT,
-                                   _("Scale"));
+                DocumentUndo::done(_desktop->getDocument(), _("Scale"), INKSCAPE_ICON("tool-pointer"));
             } else if (_current_relative_affine.withoutTranslation().isRotation()) {
-                DocumentUndo::done(_desktop->getDocument(), SP_VERB_CONTEXT_SELECT,
-                                   _("Rotate"));
+                DocumentUndo::done(_desktop->getDocument(), _("Rotate"), INKSCAPE_ICON("tool-pointer"));
             } else {
-                DocumentUndo::done(_desktop->getDocument(), SP_VERB_CONTEXT_SELECT,
-                                   _("Skew"));
+                DocumentUndo::done(_desktop->getDocument(), _("Skew"), INKSCAPE_ICON("tool-pointer"));
             }
         } else {
             _updateHandles();
@@ -480,8 +496,7 @@ void Inkscape::SelTrans::ungrab()
                 SPItem *it = *iter;
                 it->updateRepr();
             }
-            DocumentUndo::done(_desktop->getDocument(), SP_VERB_CONTEXT_SELECT,
-                               _("Set center"));
+            DocumentUndo::done(_desktop->getDocument(), _("Set center"), INKSCAPE_ICON("tool-pointer"));
         }
 
         _items.clear();
@@ -563,8 +578,7 @@ void Inkscape::SelTrans::stamp()
                 sp_lpe_item_update_patheffect(lpeitem, true, true);
             }
         }
-        DocumentUndo::done(_desktop->getDocument(), SP_VERB_CONTEXT_SELECT,
-                           _("Stamp"));
+        DocumentUndo::done(_desktop->getDocument(), _("Stamp"), INKSCAPE_ICON("tool-pointer"));
     }
 
     if ( fixup && !_stamp_cache.empty() ) {
@@ -788,8 +802,7 @@ void Inkscape::SelTrans::handleClick(SPKnot *knot, guint state, SPSelTransHandle
                     _center_is_set = false;  // center has changed
                     _updateHandles();
                 }
-                DocumentUndo::done(_desktop->getDocument(), SP_VERB_CONTEXT_SELECT,
-                                   _("Reset center"));
+                DocumentUndo::done(_desktop->getDocument(), _("Reset center"), INKSCAPE_ICON("tool-pointer"));
             }
             // no break, continue.
         case HANDLE_STRETCH:
@@ -1419,28 +1432,16 @@ gboolean Inkscape::SelTrans::centerRequest(Geom::Point &pt, guint state)
 
 void Inkscape::SelTrans::align(guint state, SPSelTransHandle const &handle)
 {
-    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    bool sel_as_group = prefs->getBool("/dialogs/align/sel-as-groups");
-    int align_to = prefs->getInt("/dialogs/align/align-to", 6);
-
-    int verb_id = -1;
-    if (state & GDK_SHIFT_MASK) {
-        verb_id = AlignVerb[handle.control + AlignHandleToVerb + AlignShiftVerb];
-    } else {
-        verb_id = AlignVerb[handle.control + AlignHandleToVerb];
-    }
-    if(verb_id >= 0) {
-        prefs->setBool("/dialogs/align/sel-as-groups", (state & GDK_CONTROL_MASK) != 0);
-        prefs->setInt("/dialogs/align/align-to", 6);
-        Inkscape::Verb *verb = Inkscape::Verb::get( verb_id );
-        g_assert( verb != NULL );
-        SPAction *action = verb->get_action((Inkscape::UI::View::View *) this->_desktop);
-        sp_action_perform (action, NULL);
+    Glib::ustring argument;
+    int index = handle.control + ALIGN_OFFSET + (state & GDK_SHIFT_MASK) ? ALIGN_SHIFT_OFFSET : 0;
+    if (index < 0 || index >= AlignArguments.size()) {
+        std::cerr << "Inkscape::Seltrans::align: index out of bounds! " << index << std::endl;
+        index = 0;
     }
 
-    // Set the special align point and settings back to nothing so we don't interfere
-    prefs->setBool("/dialogs/align/sel-as-groups", sel_as_group);
-    prefs->setInt("/dialogs/align/align-to", align_to);
+    auto variant = Glib::Variant<Glib::ustring>::create(AlignArguments[index]);
+    auto app = Gio::Application::get_default();
+    app->activate_action("object-align", variant);
 }
 
 /*

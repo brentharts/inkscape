@@ -15,15 +15,14 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
+#include "tile.h"
+
+#include <glibmm/i18n.h>
+
 #include "ui/dialog/grid-arrange-tab.h"
 #include "ui/dialog/polar-arrange-tab.h"
 #include "ui/dialog/align-and-distribute.h"
 #include "ui/icon-names.h"
-
-#include <glibmm/i18n.h>
-
-#include "tile.h"
-#include "verbs.h"
 
 namespace Inkscape {
 namespace UI {
@@ -118,11 +117,7 @@ void ArrangeDialog::_apply()
 void ArrangeDialog::desktopReplaced()
 {
     _gridArrangeTab->setDesktop(getDesktop());
-    _align_tab->desktopReplaced();
-}
-
-void ArrangeDialog::selectionChanged(Inkscape::Selection* sel) {
-    _align_tab->selectionChanged(sel);
+    _align_tab->desktop_changed(getDesktop());
 }
 
 } //namespace Dialog

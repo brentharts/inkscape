@@ -39,7 +39,7 @@
 #include "message-stack.h"
 #include "rubberband.h"
 #include "selection.h"
-#include "verbs.h"
+#include "page-manager.h"
 
 #include "display/cairo-utils.h"
 #include "display/drawing-context.h"
@@ -60,6 +60,7 @@
 #include "trace/imagemap.h"
 #include "trace/potrace/inkscape-potrace.h"
 
+#include "ui/icon-names.h"
 #include "ui/shape-editor.h"
 #include "ui/widget/canvas.h"  // Canvas area
 
@@ -789,8 +790,9 @@ static void sp_flood_do_flood_fill(ToolBase *event_context, GdkEvent *event, boo
         Inkscape::DrawingContext dc(s, Geom::Point(0,0));
         // cairo_translate not necessary here - surface origin is at 0,0
 
-        SPNamedView *nv = desktop->getNamedView();
-        bgcolor = nv->pagecolor;
+        auto pm = desktop->getNamedView()->getPageManager();
+        bgcolor = pm->background_color;
+
         // bgcolor is 0xrrggbbaa, we need 0xaarrggbb
         dtc = (bgcolor >> 8) | (bgcolor << 24);
 
@@ -1075,7 +1077,7 @@ static void sp_flood_do_flood_fill(ToolBase *event_context, GdkEvent *event, boo
 
     g_free(trace_px);
     
-    DocumentUndo::done(document, SP_VERB_CONTEXT_PAINTBUCKET, _("Fill bounded area"));
+    DocumentUndo::done(document, _("Fill bounded area"), INKSCAPE_ICON("color-fill"));
 }
 
 bool FloodTool::item_handler(SPItem* item, GdkEvent* event) {
@@ -1091,7 +1093,7 @@ bool FloodTool::item_handler(SPItem* item, GdkEvent* event) {
             // Set style
             desktop->applyCurrentOrToolStyle(item, "/tools/paintbucket", false);
 
-            DocumentUndo::done(desktop->getDocument(), SP_VERB_CONTEXT_PAINTBUCKET, _("Set style on object"));
+            DocumentUndo::done(desktop->getDocument(), _("Set style on object"), INKSCAPE_ICON("color-fill"));
             // Dead assignment: Value stored to 'ret' is never read
             //ret = TRUE;
         }
@@ -1216,7 +1218,7 @@ void FloodTool::finishItem() {
 
         desktop->getSelection()->set(this->item);
 
-        DocumentUndo::done(desktop->getDocument(), SP_VERB_CONTEXT_PAINTBUCKET, _("Fill bounded area"));
+        DocumentUndo::done(desktop->getDocument(), _("Fill bounded area"), INKSCAPE_ICON("color-fill"));
 
         this->item = nullptr;
     }

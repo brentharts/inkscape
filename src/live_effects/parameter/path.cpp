@@ -29,7 +29,6 @@
 #include "message-stack.h"
 #include "selection.h"
 #include "selection-chemistry.h"
-#include "verbs.h"
 
 #include "actions/actions-tools.h"
 #include "display/curve.h"
@@ -39,6 +38,7 @@
 #include "object/sp-shape.h"
 #include "object/sp-text.h"
 #include "svg/svg.h"
+
 #include "ui/clipboard.h" // clipboard support
 #include "ui/icon-loader.h"
 #include "ui/icon-names.h"
@@ -47,6 +47,7 @@
 #include "ui/tool/multi-path-manipulator.h"
 #include "ui/tool/shape-record.h"
 #include "ui/widget/point.h"
+
 #include "xml/repr.h"
 
 namespace Inkscape {
@@ -77,7 +78,7 @@ PathParam::PathParam( const Glib::ustring& label, const Glib::ustring& tip,
 
 PathParam::~PathParam()
 {
-    remove_link();
+    unlink();
 //TODO: Removed to fix a bug https://bugs.launchpad.net/inkscape/+bug/1716926
 //      Maybe wee need to resurrect, not know when this code is added, but seems also not working now in a few test I do.
 //      in the future and do a deeper fix in multi-path-manipulator
@@ -137,7 +138,7 @@ PathParam::param_readSVGValue(const gchar * strvalue)
 {
     if (strvalue) {
         _pathvector.clear();
-        remove_link();
+        unlink();
         must_recalculate_pwd2 = true;
 
         if (strvalue[0] == '#') {
@@ -322,7 +323,7 @@ PathParam::param_transform_multiply(Geom::Affine const& postmul, bool /*set*/)
 void
 PathParam::set_new_value (Geom::Piecewise<Geom::D2<Geom::SBasis> > const & newpath, bool write_to_svg)
 {
-    remove_link();
+    unlink();
     _pathvector = Geom::path_from_piecewise(newpath, LPE_CONVERSION_TOLERANCE);
 
     if (write_to_svg) {
@@ -353,7 +354,7 @@ PathParam::set_new_value (Geom::Piecewise<Geom::D2<Geom::SBasis> > const & newpa
 void
 PathParam::set_new_value (Geom::PathVector const &newpath, bool write_to_svg)
 {
-    remove_link();
+    unlink();
     if (newpath.empty()) {
         param_set_and_write_default();
         return;
@@ -420,8 +421,7 @@ PathParam::ref_changed(SPObject */*old_ref*/, SPObject *new_ref)
     }
 }
 
-void
-PathParam::remove_link()
+void PathParam::unlink()
 {
     if (href) {
         ref.detach();
@@ -434,7 +434,7 @@ void
 PathParam::linked_delete(SPObject */*deleted*/)
 {
     quit_listening();
-    remove_link();
+    unlink();
     set_new_value (_pathvector, true);
 }
 
@@ -512,7 +512,7 @@ PathParam::paste_param_path(const char *svgd)
     // only recognize a non-null, non-empty string
     if (svgd && *svgd) {
         // remove possible link to path
-        remove_link();
+        unlink();
         SPItem * item = SP_ACTIVE_DESKTOP->getSelection()->singleItem();
         std::string svgd_new;
         if (item != nullptr) {
@@ -533,8 +533,7 @@ PathParam::on_paste_button_click()
     Inkscape::UI::ClipboardManager *cm = Inkscape::UI::ClipboardManager::get();
     Glib::ustring svgd = cm->getPathParameter(SP_ACTIVE_DESKTOP);
     paste_param_path(svgd.data());
-    DocumentUndo::done(param_effect->getSPDoc(), SP_VERB_DIALOG_LIVE_PATH_EFFECT,
-                       _("Paste path parameter"));
+    DocumentUndo::done(param_effect->getSPDoc(), _("Paste path parameter"), INKSCAPE_ICON("dialog-path-effects"));
 }
 
 void
@@ -562,8 +561,7 @@ PathParam::linkitem(Glib::ustring pathid)
         // check if linking to object to which LPE is applied (maybe delegated to PathReference
 
         param_write_to_repr(pathid.c_str());
-        DocumentUndo::done(param_effect->getSPDoc(), SP_VERB_DIALOG_LIVE_PATH_EFFECT,
-                           _("Link path parameter to path"));
+        DocumentUndo::done(param_effect->getSPDoc(), _("Link path parameter to path"), INKSCAPE_ICON("dialog-path-effects"));
     }
 }
 
