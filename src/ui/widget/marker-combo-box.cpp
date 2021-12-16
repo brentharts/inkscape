@@ -850,6 +850,20 @@ MarkerComboBox::create_marker_image(Geom::IntPoint pixel_size, gchar const *mnam
         return g_bad_marker;
     }
 
+    if (auto measure = dynamic_cast<SPItem*>(_sandbox->getObjectById("measure-marker"))) {
+        if (auto box = measure->documentVisualBounds()) {
+            // check size of the marker applied to a path with stroke of 1px
+            auto size = std::max(box->width(), box->height());
+            const double small = 5.0;
+            // if too small, then scale up; clip needs to be enabled for scale to work
+            if (size > 0 && size < small) {
+                auto factor = 1 + small - size;
+                scale *= factor;
+                no_clip = false;
+            }
+        }
+    }
+
     /* Update to renderable state */
     const double device_scale = get_scale_factor();
     auto surface = render_surface(drawing, scale, *dbox, pixel_size, device_scale, checkerboard ? &_background_color : nullptr, no_clip);
@@ -933,8 +947,11 @@ gchar const *buffer = R"A(
 
     <!-- cross at the end of the line to help position marker -->
     <symbol id="cross" width="25" height="25" viewBox="0 0 25 25">
-      <path class="cross" style="mix-blend-mode:difference;stroke:#fff;stroke-width:0.5;stroke-opacity:0.5;fill:none;display:block" d="M 0,0 M 25,25 M 10,10 15,15 M 10,15 15,10" />
+      <path class="cross" style="mix-blend-mode:difference;stroke:#fff;stroke-width:1;stroke-opacity:1;fill:none;display:block;-inkscape-stroke:hairline" d="M 0,0 M 25,25 M 10,10 15,15 M 10,15 15,10" />
     </symbol>
+
+    <!-- very short path with 1px stroke used to measure size of marker -->
+    <path id="measure-marker" style="stroke-width:1.0;stroke-opacity:0.01;marker-start:url(#sample)" d="M 0,9999 m 0,0.1" />
 
     <path id="line-marker-start" class="line colors" style="stroke-width:2;stroke-opacity:0.2" d="M 12.5,12.5 l 1000,0" />
     <!-- <g id="marker-start" class="group" style="filter:url(#softGlow)"> -->
