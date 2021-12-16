@@ -1663,22 +1663,27 @@ void InkscapePreferences::initPageUI()
 
     _page_theme.add_line(true, "", _dark_theme, "", _("Use dark theme"), true);
     {
-        auto font_scale = new Inkscape::UI::Widget::PrefSlider(true);
+        auto font_scale = new Inkscape::UI::Widget::PrefSlider();
         font_scale = Gtk::manage(font_scale);
         font_scale->init("/theme/fontscale", 50, 150, 5, 5, 100, 0); // 50% to 150%
         font_scale->getSlider()->signal_format_value().connect([=](double val) {
             return Glib::ustring::format(std::fixed, std::setprecision(0), val) + "%";
         });
-        font_scale->getSlider()->signal_value_changed().connect([=](){
+        // Live updates commented out; too disruptive
+        // font_scale->getSlider()->signal_value_changed().connect([=](){
             // INKSCAPE.themecontext->adjust_global_font_scale(font_scale->getSlider()->get_value() / 100.0);
-        });
+        // });
         auto space = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL);
-        // space->set_size_request(_sb_width / 3, -1);
-        auto reset = Gtk::make_managed<Gtk::Button>(_("Reset"));
+        space->set_valign(Gtk::ALIGN_CENTER);
+        auto reset = Gtk::make_managed<Gtk::Button>();
+        reset->set_tooltip_text(_("Reset font size to 100%"));
+        reset->set_image_from_icon_name("reset-settings-symbolic");
+        reset->set_size_request(30, -1);
         auto apply = Gtk::make_managed<Gtk::Button>(_("Apply"));
-        apply->set_valign(Gtk::ALIGN_CENTER);
+        apply->set_tooltip_text(_("Apply font size changes to the UI"));
+        apply->set_valign(Gtk::ALIGN_FILL);
         apply->set_margin_right(5);
-        reset->set_valign(Gtk::ALIGN_CENTER);
+        reset->set_valign(Gtk::ALIGN_FILL);
         space->add(*apply);
         space->add(*reset);
         reset->signal_clicked().connect([=](){
