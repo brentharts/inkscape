@@ -15,6 +15,7 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
+#include "attributes.h"
 #include "sp-object-group.h"
 #include "snap.h"
 #include "document.h"
@@ -99,6 +100,11 @@ public:
     bool getGuides();
     void lockGuides();
     void updateViewPort();
+    // page background, border, desk colors
+    void change_color(unsigned int rgba, SPAttr color_key, SPAttr opacity_key = SPAttr::INVALID);
+    // show border, border on top, anti-aliasing, ...
+    void change_bool_setting(SPAttr key, bool value);
+    // sync desk colors
     void set_desk_color(SPDesktop* desktop);
 
     Inkscape::PageManager *getPageManager() const { return _page_manager; }

@@ -716,6 +716,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">False</property>
+            <property name="tooltip-text" translatable="yes">If set, use a colored checkerboard for the desk background</property>
             <property name="halign">start</property>
             <property name="valign">center</property>
             <property name="draw-indicator">True</property>
@@ -732,6 +733,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">False</property>
+            <property name="tooltip-text" translatable="yes">If set, rectangular page border is shown</property>
             <property name="halign">start</property>
             <property name="valign">center</property>
             <property name="draw-indicator">True</property>
@@ -748,6 +750,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">False</property>
+            <property name="tooltip-text" translatable="yes">If set, border is always on top of the drawing</property>
             <property name="halign">start</property>
             <property name="valign">center</property>
             <property name="draw-indicator">True</property>
@@ -767,6 +770,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">False</property>
+            <property name="tooltip-text" translatable="yes">If set, page border shows a shadow on its right and lower side</property>
             <property name="halign">start</property>
             <property name="valign">center</property>
             <property name="draw-indicator">True</property>
@@ -816,6 +820,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">False</property>
+            <property name="tooltip-text" translatable="yes">If unset, no antialiasing will be done on the drawing</property>
             <property name="halign">start</property>
             <property name="valign">center</property>
             <property name="draw-indicator">True</property>
@@ -831,6 +836,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">True</property>
+            <property name="tooltip-text" translatable="yes">Default color of new pages. Used during export.</property>
             <property name="halign">end</property>
           </object>
           <packing>
@@ -843,6 +849,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">True</property>
+            <property name="tooltip-text" translatable="yes">Color of the page border and drop shadow.</property>
             <property name="halign">end</property>
           </object>
           <packing>
@@ -855,6 +862,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">True</property>
+            <property name="tooltip-text" translatable="yes">Color of the desk background</property>
             <property name="halign">end</property>
           </object>
           <packing>

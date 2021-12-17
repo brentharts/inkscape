@@ -606,6 +606,11 @@ button.square-button image {
     font-size: small;
 }
 
+#DocumentProperties #NotebookPage {
+    margin-left: 4px;
+    margin-right: 4px;
+}
+
 /* heading label in dialogs */
 .heading {
     font-weight: bold;

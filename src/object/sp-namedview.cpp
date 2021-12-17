@@ -238,33 +238,6 @@ void SPNamedView::build(SPDocument *document, Inkscape::XML::Node *repr) {
     this->readAttr(SPAttr::INKSCAPE_WINDOW_X);
     this->readAttr(SPAttr::INKSCAPE_WINDOW_Y);
     this->readAttr(SPAttr::INKSCAPE_WINDOW_MAXIMIZED);
-    // this->readAttr(SPAttr::INKSCAPE_SNAP_GLOBAL);
-    // this->readAttr(SPAttr::INKSCAPE_SNAP_BBOX);
-    // this->readAttr(SPAttr::INKSCAPE_SNAP_NODE);
-    // this->readAttr(SPAttr::INKSCAPE_SNAP_OTHERS);
-    // this->readAttr(SPAttr::INKSCAPE_SNAP_FROM_GUIDE);
-    // this->readAttr(SPAttr::INKSCAPE_SNAP_ROTATION_CENTER);
-    // this->readAttr(SPAttr::INKSCAPE_SNAP_NODE_SMOOTH);
-    // this->readAttr(SPAttr::INKSCAPE_SNAP_LINE_MIDPOINT);
-    // this->readAttr(SPAttr::INKSCAPE_SNAP_OBJECT_MIDPOINT);
-    // this->readAttr(SPAttr::INKSCAPE_SNAP_TEXT_BASELINE);
-    // this->readAttr(SPAttr::INKSCAPE_SNAP_BBOX_EDGE_MIDPOINT);
-    // this->readAttr(SPAttr::INKSCAPE_SNAP_BBOX_MIDPOINT);
-    // this->readAttr(SPAttr::INKSCAPE_SNAP_GUIDE);
-    // this->readAttr(SPAttr::INKSCAPE_SNAP_GRID);
-    // this->readAttr(SPAttr::INKSCAPE_SNAP_PATH_INTERSECTION);
-    // this->readAttr(SPAttr::INKSCAPE_SNAP_PATH);
-    // this->readAttr(SPAttr::INKSCAPE_SNAP_PERP);
-    // this->readAttr(SPAttr::INKSCAPE_SNAP_TANG);
-    // this->readAttr(SPAttr::INKSCAPE_SNAP_PATH_CLIP);
-    // this->readAttr(SPAttr::INKSCAPE_SNAP_PATH_MASK);
-    // this->readAttr(SPAttr::INKSCAPE_SNAP_NODE_CUSP);
-    // this->readAttr(SPAttr::INKSCAPE_SNAP_BBOX_EDGE);
-    // this->readAttr(SPAttr::INKSCAPE_SNAP_BBOX_CORNER);
-    // this->readAttr(SPAttr::INKSCAPE_SNAP_PAGE_BORDER);
-    // this->readAttr(SPAttr::INKSCAPE_SNAP_ALIGNMENT);
-    // this->readAttr(SPAttr::INKSCAPE_SNAP_ALIGNMENT_SELF);
-    // this->readAttr(SPAttr::INKSCAPE_SNAP_DISTRIBUTION);
     this->readAttr(SPAttr::INKSCAPE_CURRENT_LAYER);
     this->readAttr(SPAttr::INKSCAPE_CONNECTOR_SPACING);
     this->readAttr(SPAttr::INKSCAPE_LOCKGUIDES);
@@ -351,8 +324,8 @@ void SPNamedView::update(SPCtx *ctx, guint flags)
 }
 
 void SPNamedView::set(SPAttr key, const gchar* value) {
-    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    bool global_snapping = prefs->getBool("/options/snapdefault/value", true);
+    // Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+    // bool global_snapping = prefs->getBool("/options/snapdefault/value", true);
 
     // Send page attributes to the page manager.
     if (this->_page_manager && this->_page_manager->subset(key, value)) {
@@ -1177,6 +1150,27 @@ void SPNamedView::scrollAllDesktops(double dx, double dy, bool is_scrolling) {
     for(auto & view : this->views) {
         view->scroll_relative_in_svg_coords(dx, dy, is_scrolling);
     }
+}
+
+void SPNamedView::change_color(unsigned int rgba, SPAttr color_key, SPAttr opacity_key /*= SPAttr::INVALID*/) {
+    gchar buf[32];
+    sp_svg_write_color(buf, sizeof(buf), rgba);
+    getRepr()->setAttribute(sp_attribute_name(color_key), buf);
+
+    if (opacity_key != SPAttr::INVALID) {
+        getRepr()->setAttributeCssDouble(sp_attribute_name(opacity_key), (rgba & 0xff) / 255.0);
+    }
+}
+
+void SPNamedView::change_bool_setting(SPAttr key, bool value) {
+    const char* str_value = nullptr;
+    if (key == SPAttr::SHAPE_RENDERING) {
+        str_value = value ? "auto" : "crispEdges";
+    }
+    else {
+        str_value = value ? "true" : "false";
+    }
+    getRepr()->setAttribute(sp_attribute_name(key), str_value);
 }
 
 /*

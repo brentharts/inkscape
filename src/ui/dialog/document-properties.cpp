@@ -101,17 +101,6 @@ DocumentProperties::DocumentProperties()
     , _page_metadata1(Gtk::manage(new UI::Widget::NotebookPage(1, 1)))
     , _page_metadata2(Gtk::manage(new UI::Widget::NotebookPage(1, 1)))
     //---------------------------------------------------------------
-    , _rcb_antialias(_("Use antialiasing"), _("If unset, no antialiasing will be done on the drawing"), "shape-rendering", _wr, false, nullptr, nullptr, nullptr, "crispEdges")
-    , _rcb_canb(_("Show page _border"), _("If set, rectangular page border is shown"), "showborder", _wr, false)
-    , _rcb_bord(_("Border on _top of drawing"), _("If set, border is always on top of the drawing"), "borderlayer", _wr, false)
-    , _rcb_shad(_("_Show border shadow"), _("If set, page border shows a shadow on its right and lower side"), "inkscape:showpageshadow", _wr, false)
-    , _rcb_shwd(_("_Border shadow width"), _("Width of page border when set"), "", "inkscape:pageshadow", _wr)
-    , _rcp_bg(_("Page color:"), _("Page color"), _("Default color of new pages."), "pagecolor", "inkscape:pageopacity", _wr)
-    , _rcp_blkout(_("Desk color:"), _("Desk color"), _("Color of the desk background."), "inkscape:deskcolor", "inkscape:deskopacity", _wr)
-    , _rcb_checkerboard(_("Desk Checkerboard"), _("If set, use a colored checkerboard for the desk background"), "inkscape:pagecheckerboard", _wr, false)
-    , _rcp_bord(_("Border _color:"), _("Page border color"), _("Color of the page border"), "bordercolor", "borderopacity", _wr)
-    , _rum_deflt(_("Display _units:"), "inkscape:document-units", _wr)
-    //---------------------------------------------------------------
     //General guide options
     , _rcb_sgui(_("Show _guides"), _("Show or hide guides"), "showguides", _wr)
     , _rcb_lgui(_("Lock all guides"), _("Toggle lock of all guides in the document"), "inkscape:lockguides", _wr)
@@ -224,59 +213,22 @@ void attach_all(Gtk::Grid &table, Gtk::Widget *const arr[], unsigned const n)
     }
 }
 
-void write_str_to_xml(SPDesktop* desktop, Glib::ustring name, Glib::ustring key, const char* value) {
-    if (!desktop) return;
+void set_namedview_bool(SPDesktop* desktop, const Glib::ustring& operation, SPAttr key, bool on) {
+    if (!desktop || !desktop->getDocument()) return;
 
-    SPDocument* doc = desktop->getDocument();
-    Inkscape::XML::Node* repr = desktop->getNamedView()->getRepr();
+    desktop->getNamedView()->change_bool_setting(key, on);
 
-    bool saved = DocumentUndo::getUndoSensitive(doc);
-    DocumentUndo::setUndoSensitive(doc, false);
-    const char* old = repr->attribute(key.c_str());
-
-    DocumentUndo::setUndoSensitive(doc, saved);
-    if (old && value && strcmp(old, value)) {
-        doc->setModifiedSinceSave();
-    }
-
-    repr->setAttribute(key, value);
-    DocumentUndo::done(doc, name, "");
+    desktop->getDocument()->setModifiedSinceSave();
+    DocumentUndo::done(desktop->getDocument(), operation, "");
 }
 
-void write_bool_to_xml(SPDesktop* desktop, Glib::ustring name, Glib::ustring key, bool on, const char* active = nullptr, const char* inactive = nullptr) {
-    if (!desktop) return;
+void set_color(SPDesktop* desktop, Glib::ustring operation, unsigned int rgba, SPAttr color_key, SPAttr opacity_key = SPAttr::INVALID) {
+    if (!desktop || !desktop->getDocument()) return;
 
-    const char* svgstr = on ? "true" : "false";
-    if (on && active) {
-        svgstr = active;
-    }
-    else if (!on && inactive) {
-        svgstr = inactive;
-    }
+    desktop->getNamedView()->change_color(rgba, color_key, opacity_key);
 
-    write_str_to_xml(desktop, name, key, svgstr);
-}
-
-void set_color(SPDesktop* desktop, Glib::ustring name, unsigned int rgba, Glib::ustring color_key, Glib::ustring alpha_key) {
-    if (!desktop) return;
-
-    SPDocument* doc = desktop->getDocument();
-    Inkscape::XML::Node* repr = desktop->getNamedView()->getRepr();
-
-    gchar c[32];
-    if (alpha_key == color_key + "_opacity_LPE") { //For LPE parameter we want stored with alpha
-        sprintf(c, "#%08x", rgba);
-    } else {
-        sp_svg_write_color(c, sizeof(c), rgba);
-    }
-    // bool saved = DocumentUndo::getUndoSensitive(doc);
-    // DocumentUndo::setUndoSensitive(doc, false);
-    repr->setAttribute(color_key, c);
-    repr->setAttributeCssDouble(alpha_key.c_str(), (rgba & 0xff) / 255.0);
-    // DocumentUndo::setUndoSensitive(doc, saved);
-
-    doc->setModifiedSinceSave();
-    DocumentUndo::maybeDone(doc, ("document-color-" + name).c_str(), name, "");
+    desktop->getDocument()->setModifiedSinceSave();
+    DocumentUndo::maybeDone(desktop->getDocument(), ("document-color-" + operation).c_str(), operation, "");
 }
 
 void set_document_dimensions(SPDesktop* desktop, double width, double height, const Inkscape::Util::Unit* unit) {
@@ -284,7 +236,7 @@ void set_document_dimensions(SPDesktop* desktop, double width, double height, co
 
     Inkscape::Util::Quantity w = Inkscape::Util::Quantity(width, unit);
     Inkscape::Util::Quantity h = Inkscape::Util::Quantity(height, unit);
-bool changeSize = true;
+    bool changeSize = true;
     SPDocument* doc = desktop->getDocument();
     Inkscape::Util::Quantity const old_height = doc->getHeight();
     doc->setWidthAndHeight(w, h, changeSize);
@@ -294,9 +246,11 @@ bool changeSize = true;
         Geom::Translate const vert_offset(Geom::Point(0, (old_height.value("px") - h.value("px"))));
         doc->getRoot()->translateChildItems(vert_offset);
     }
-    if (unit) {
-        write_str_to_xml(desktop, _("Set document unit"), "unit", unit->abbr.c_str());
-    }
+    // not needed:
+    // if (unit) {
+        // set_namedview_value(desktop, "", SPAttr::UNITS)
+        // write_str_to_xml(desktop, _("Set document unit"), "unit", unit->abbr.c_str());
+    // }
     DocumentUndo::done(doc, _("Set page size"), "");
 }
 
@@ -306,9 +260,7 @@ void set_viewbox_pos(SPDesktop* desktop, double x, double y) {
     auto document = desktop->getDocument();
     if (!document) return;
 
-    auto nv = desktop->getNamedView();
     auto box = document->getViewBox();
-
     document->setViewBox(Geom::Rect::from_xywh(x, y, box.width(), box.height()));
     DocumentUndo::done(document, _("Set viewbox position"), "");
 }
@@ -319,7 +271,6 @@ void set_viewbox_size(SPDesktop* desktop, double width, double height) {
     auto document = desktop->getDocument();
     if (!document) return;
 
-    auto nv = desktop->getNamedView();
     auto box = document->getViewBox();
     document->setViewBox(Geom::Rect::from_xywh(box.min()[Geom::X], box.min()[Geom::Y], width, height));
     DocumentUndo::done(document, _("Set viewbox size"), "");
@@ -380,13 +331,13 @@ void DocumentProperties::build_page()
         _wr.setUpdating(true);
         switch (element) {
             case PageProperties::Color::Desk:
-                set_color(_wr.desktop(), _("Desk color"), color, "inkscape:deskcolor", "inkscape:deskopacity");
+                set_color(_wr.desktop(), _("Desk color"), color, SPAttr::INKSCAPE_DESK_COLOR);
                 break;
             case PageProperties::Color::Background:
-                set_color(_wr.desktop(), _("Background color"), color, "pagecolor", "inkscape:pageopacity");
+                set_color(_wr.desktop(), _("Background color"), color, SPAttr::PAGECOLOR, SPAttr::INKSCAPE_PAGEOPACITY);
                 break;
             case PageProperties::Color::Border:
-                set_color(_wr.desktop(), _("Border color"), color, "bordercolor", "borderopacity");
+                set_color(_wr.desktop(), _("Border color"), color, SPAttr::BORDERCOLOR, SPAttr::BORDEROPACITY);
                 break;
         }
         _wr.setUpdating(false);
@@ -423,19 +374,19 @@ void DocumentProperties::build_page()
         _wr.setUpdating(true);
         switch (element) {
             case PageProperties::Check::Checkerboard:
-                write_bool_to_xml(_wr.desktop(), _("Toggle checkerboard"), "inkscape:pagecheckerboard", checked);
+                set_namedview_bool(_wr.desktop(), _("Toggle checkerboard"), SPAttr::INKSCAPE_DESK_CHECKERBOARD, checked);
                 break;
             case PageProperties::Check::Border:
-                write_bool_to_xml(_wr.desktop(), _("Toggle page border"), "showborder", checked);
+                set_namedview_bool(_wr.desktop(), _("Toggle page border"), SPAttr::SHOWBORDER, checked);
                 break;
             case PageProperties::Check::BorderOnTop:
-                write_bool_to_xml(_wr.desktop(), _("Toggle border on top"), "borderlayer", checked);
+                set_namedview_bool(_wr.desktop(), _("Toggle border on top"), SPAttr::BORDERLAYER, checked);
                 break;
             case PageProperties::Check::Shadow:
-                write_bool_to_xml(_wr.desktop(), _("Toggle page shadow"), "inkscape:showpageshadow", checked);
+                set_namedview_bool(_wr.desktop(), _("Toggle page shadow"), SPAttr::SHOWPAGESHADOW, checked);
                 break;
             case PageProperties::Check::AntiAlias:
-                write_bool_to_xml(_wr.desktop(), _("Toggle anti-aliasing"), "shape-rendering", checked, "auto", "crispEdges");
+                set_namedview_bool(_wr.desktop(), _("Toggle anti-aliasing"), SPAttr::SHAPE_RENDERING, checked);
                 break;
         }
         _wr.setUpdating(false);
@@ -453,71 +404,6 @@ void DocumentProperties::build_page()
             // document_unit_change(unit);
         }
     });
-
-/*
-    _page_page2->show();
-
-    Gtk::Label* label_gen = Gtk::manage (new Gtk::Label);
-    label_gen->set_markup (_("<b>General</b>"));
-
-    Gtk::Label *label_for = Gtk::manage (new Gtk::Label);
-    label_for->set_markup (_("<b>Page Size</b>"));
-
-    Gtk::Label* label_bkg = Gtk::manage (new Gtk::Label);
-    label_bkg->set_markup (_("<b>Desk</b>"));
-
-    Gtk::Label* label_dsp = Gtk::manage (new Gtk::Label);
-    label_dsp->set_markup (_("<b>Display</b>"));
-
-    _rcb_doc_props_left.set_border_width(4);
-    _rcb_doc_props_left.set_row_spacing(4);
-    _rcb_doc_props_left.set_column_spacing(4);
-    _rcb_doc_props_right.set_border_width(4);
-    _rcb_doc_props_right.set_row_spacing(4);
-    _rcb_doc_props_right.set_column_spacing(4);
-
-    Gtk::Widget *const widget_array[] =
-    {
-        label_gen,            nullptr,
-        nullptr,              &_rum_deflt,
-        nullptr,              nullptr,
-        label_for,            nullptr,
-        nullptr,              nullptr,
-        nullptr,              nullptr,
-        &_rcb_doc_props_left, &_rcb_doc_props_right,
-    };
-    attach_all(_page_page2->table(), widget_array, G_N_ELEMENTS(widget_array));
-
-    Gtk::Widget *const widget_array_left[] =
-    {
-        label_bkg,            nullptr,
-        nullptr,              &_rcb_checkerboard,
-        nullptr,              &_rcp_blkout,
-        label_dsp,            nullptr,
-        nullptr,              &_rcb_antialias,
-    };
-    attach_all(_rcb_doc_props_left, widget_array_left, G_N_ELEMENTS(widget_array_left));
-
-    Gtk::Widget *const widget_array_right[] =
-    {
-        nullptr,              &_rcb_canb,
-        nullptr,              &_rcb_bord,
-        nullptr,              &_rcb_shad,
-        nullptr,              &_rcb_shwd,
-        nullptr,              &_rcp_bord,
-        nullptr,              &_rcp_bg,
-    };
-    attach_all(_rcb_doc_props_right, widget_array_right, G_N_ELEMENTS(widget_array_right));
-
-    std::list<Gtk::Widget*> _slaveList;
-    _slaveList.push_back(&_rcb_bord);
-    _slaveList.push_back(&_rcb_shad);
-    _slaveList.push_back(&_rcb_shwd);
-    _slaveList.push_back(&_rcp_bord);
-    _rcb_canb.setSlaveWidgets(_slaveList);
-
-    _rcb_shwd.setRange(0, 999);
-*/
 }
 
 void DocumentProperties::build_guides()
@@ -527,10 +413,6 @@ void DocumentProperties::build_guides()
     Gtk::Label *label_gui = Gtk::manage (new Gtk::Label);
     label_gui->set_markup (_("<b>Guides</b>"));
 
-    // _rum_deflt.set_margin_start(0);
-    _rcp_bg.set_margin_start(0);
-    _rcp_blkout.set_margin_start(0);
-    _rcp_bord.set_margin_start(0);
     _rcp_gui.set_margin_start(0);
     _rcp_hgui.set_margin_start(0);
     _rcp_gui.set_hexpand();
@@ -1504,6 +1386,7 @@ void DocumentProperties::build_gridspage()
 
     _grids_space.set_size_request (SPACE_SIZE_X, SPACE_SIZE_Y);
 
+    _grids_vbox.set_name("NotebookPage");
     _grids_vbox.set_border_width(4);
     _grids_vbox.set_spacing(4);
     _grids_vbox.pack_start(_grids_label_crea, false, false);
@@ -1548,21 +1431,7 @@ void DocumentProperties::update_widgets()
     _wr.setUpdating (true);
     set_sensitive (true);
 
-    // Desk settings
-    // _rcb_checkerboard.setActive(nv->desk_checkerboard);
-    // _rcp_blkout.setRgba32(nv->desk_color);
-
-    // Page defaults
-    // _rcp_bg.setRgba32(pm->background_color);
-    // _rcb_canb.setActive(pm->border_show);
-    // _rcb_bord.setActive(pm->border_on_top);
-    // _rcp_bord.setRgba32(pm->border_color);
-    // _rcb_shad.setActive(pm->shadow_show);
-    // _rcb_shwd.setValue(pm->shadow_size);
-
     SPRoot *root = document->getRoot();
-    // _rcb_antialias.set_xml_target(root->getRepr(), document);
-    // _rcb_antialias.setActive(root->style->shape_rendering.computed != SP_CSS_SHAPE_RENDERING_CRISPEDGES);
 
     if (nv->display_units) {
         // _rum_deflt.setUnit (nv->display_units->abbr);
@@ -1605,25 +1474,12 @@ void DocumentProperties::update_widgets()
 
     _page->set_check(PageProperties::Check::AntiAlias, root->style->shape_rendering.computed != SP_CSS_SHAPE_RENDERING_CRISPEDGES);
 
-
     //-----------------------------------------------------------guide page
 
     _rcb_sgui.setActive (nv->showguides);
     _rcb_lgui.setActive (nv->lockguides);
     _rcp_gui.setRgba32 (nv->guidecolor);
     _rcp_hgui.setRgba32 (nv->guidehicolor);
-
-    //-----------------------------------------------------------snap page
-
-    // _rsu_sno.setValue (nv->snap_manager.snapprefs.getObjectTolerance());
-    // _rsu_sn.setValue (nv->snap_manager.snapprefs.getGridTolerance());
-    // _rsu_gusn.setValue (nv->snap_manager.snapprefs.getGuideTolerance());
-    // _rsu_assn.setValue (nv->snap_manager.snapprefs.getAlignmentTolerance());
-    // _rsu_dssn.setValue (nv->snap_manager.snapprefs.getDistributionTolerance());
-    // _rcb_snclp.setActive (nv->snap_manager.snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_PATH_CLIP));
-    // _rcb_snmsk.setActive (nv->snap_manager.snapprefs.isSnapButtonEnabled(Inkscape::SNAPTARGET_PATH_MASK));
-    // _rcb_perp.setActive (nv->snap_manager.snapprefs.getSnapPerp());
-    // _rcb_tang.setActive (nv->snap_manager.snapprefs.getSnapTang());
 
     //-----------------------------------------------------------grids page
 
@@ -1668,9 +1524,6 @@ void DocumentProperties::on_response (int id)
 {
     if (id == Gtk::RESPONSE_DELETE_EVENT || id == Gtk::RESPONSE_CLOSE)
     {
-        _rcp_bg.closeWindow();
-        _rcp_blkout.closeWindow();
-        _rcp_bord.closeWindow();
         _rcp_gui.closeWindow();
         _rcp_hgui.closeWindow();
     }
@@ -1779,9 +1632,6 @@ void DocumentProperties::onRemoveGrid()
     }
 }
 
-// void DocumentProperties::document_unit_change(const Inkscape::Util::Unit* doc_unit) {
-    //
-// }
 
 /** Callback for document unit change. */
 /* This should not effect anything in the SVG tree (other than "inkscape:document-units").

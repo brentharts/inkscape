@@ -109,7 +109,6 @@ protected:
     UI::Widget::NotebookPage* _page_page2;
     UI::Widget::NotebookPage   *_page_page;
     UI::Widget::NotebookPage   *_page_guides;
-    // UI::Widget::NotebookPage   *_page_snap;
     UI::Widget::NotebookPage   *_page_cms;
     UI::Widget::NotebookPage   *_page_scripting;
 
@@ -124,19 +123,6 @@ protected:
 
     UI::Widget::Registry _wr;
     //---------------------------------------------------------------
-    Gtk::Grid            _rcb_doc_props_left;
-    Gtk::Grid            _rcb_doc_props_right;
-    UI::Widget::RegisteredCheckButton _rcb_antialias;
-    UI::Widget::RegisteredCheckButton _rcb_checkerboard;
-    UI::Widget::RegisteredCheckButton _rcb_canb;
-    UI::Widget::RegisteredCheckButton _rcb_bord;
-    UI::Widget::RegisteredCheckButton _rcb_shad;
-    UI::Widget::RegisteredSuffixedInteger _rcb_shwd;
-    UI::Widget::RegisteredColorPicker _rcp_bg;
-    UI::Widget::RegisteredColorPicker _rcp_blkout;
-    UI::Widget::RegisteredColorPicker _rcp_bord;
-    UI::Widget::RegisteredUnitMenu    _rum_deflt;
-    //---------------------------------------------------------------
     UI::Widget::RegisteredCheckButton _rcb_sgui;
     UI::Widget::RegisteredCheckButton _rcb_lgui;
     UI::Widget::RegisteredColorPicker _rcp_gui;
@@ -145,15 +131,6 @@ protected:
     Gtk::Button                       _delete_guides_btn;
     //---------------------------------------------------------------
     UI::Widget::PageProperties* _page;
-    // UI::Widget::ToleranceSlider       _rsu_sno;
-    // UI::Widget::ToleranceSlider       _rsu_sn;
-    // UI::Widget::ToleranceSlider       _rsu_gusn;
-    // UI::Widget::ToleranceSlider       _rsu_assn;
-    // UI::Widget::ToleranceSlider       _rsu_dssn;
-    // UI::Widget::RegisteredCheckButton _rcb_snclp;
-    // UI::Widget::RegisteredCheckButton _rcb_snmsk;
-    // UI::Widget::RegisteredCheckButton _rcb_perp;
-    // UI::Widget::RegisteredCheckButton _rcb_tang;
     //---------------------------------------------------------------
     Gtk::Button         _unlink_btn;
     class AvailableProfilesColumns : public Gtk::TreeModel::ColumnRecord
@@ -244,7 +221,6 @@ private:
 
     // callback for display unit change
     void display_unit_change(const Inkscape::Util::Unit* unit);
-    // void document_unit_change(const Inkscape::Util::Unit* doc_unit)
 
     // nodes connected to listeners
     Inkscape::XML::Node *_repr_namedview = nullptr;
