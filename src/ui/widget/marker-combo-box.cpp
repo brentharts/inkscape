@@ -830,9 +830,11 @@ MarkerComboBox::create_marker_image(Geom::IntPoint pixel_size, gchar const *mnam
     }
 
     auto cross = _sandbox->getObjectsBySelector(".cross");
+    double stroke = 0.5;
     for (auto el : cross) {
         if (SPCSSAttr* css = sp_repr_css_attr(el->getRepr(), "style")) {
             sp_repr_css_set_property(css, "display", checkerboard ? "block" : "none");
+            sp_repr_css_set_property_double(css, "stroke-width", stroke);
             el->changeCSS(css, "style");
             sp_repr_css_attr_unref(css);
         }
@@ -860,6 +862,19 @@ MarkerComboBox::create_marker_image(Geom::IntPoint pixel_size, gchar const *mnam
                 auto factor = 1 + small - size;
                 scale *= factor;
                 no_clip = false;
+
+                // adjust cross stroke
+                stroke /= factor;
+                for (auto el : cross) {
+                    if (SPCSSAttr* css = sp_repr_css_attr(el->getRepr(), "style")) {
+                        sp_repr_css_set_property_double(css, "stroke-width", stroke);
+                        el->changeCSS(css, "style");
+                        sp_repr_css_attr_unref(css);
+                    }
+                }
+
+                _sandbox->getRoot()->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+                _sandbox->ensureUpToDate();
             }
         }
     }
@@ -947,7 +962,8 @@ gchar const *buffer = R"A(
 
     <!-- cross at the end of the line to help position marker -->
     <symbol id="cross" width="25" height="25" viewBox="0 0 25 25">
-      <path class="cross" style="mix-blend-mode:difference;stroke:#fff;stroke-width:1;stroke-opacity:1;fill:none;display:block;-inkscape-stroke:hairline" d="M 0,0 M 25,25 M 10,10 15,15 M 10,15 15,10" />
+      <path class="cross" style="mix-blend-mode:difference;stroke:#7ff;stroke-opacity:1;fill:none;display:block" d="M 0,0 M 25,25 M 10,10 15,15 M 10,15 15,10" />
+      <!-- <path class="cross" style="mix-blend-mode:difference;stroke:#7ff;stroke-width:1;stroke-opacity:1;fill:none;display:block;-inkscape-stroke:hairline" d="M 0,0 M 25,25 M 10,10 15,15 M 10,15 15,10" /> -->
     </symbol>
 
     <!-- very short path with 1px stroke used to measure size of marker -->
@@ -956,7 +972,7 @@ gchar const *buffer = R"A(
     <path id="line-marker-start" class="line colors" style="stroke-width:2;stroke-opacity:0.2" d="M 12.5,12.5 l 1000,0" />
     <!-- <g id="marker-start" class="group" style="filter:url(#softGlow)"> -->
     <g id="marker-start" class="group">
-      <path class="colors" style="stroke-width:1.7;stroke-opacity:0;marker-start:url(#sample)"
+      <path class="colors" style="stroke-width:2;stroke-opacity:0;marker-start:url(#sample)"
        d="M 12.5,12.5 L 25,12.5"/>
       <rect x="0" y="0" width="25" height="25" style="fill:none;stroke:none"/>
       <use xlink:href="#cross" width="25" height="25" />
@@ -964,7 +980,7 @@ gchar const *buffer = R"A(
 
     <path id="line-marker-mid" class="line colors" style="stroke-width:2;stroke-opacity:0.2" d="M -1000,12.5 L 1000,12.5" />
     <g id="marker-mid" class="group">
-      <path class="colors" style="stroke-width:1.7;stroke-opacity:0;marker-mid:url(#sample)"
+      <path class="colors" style="stroke-width:2;stroke-opacity:0;marker-mid:url(#sample)"
        d="M 0,12.5 L 12.5,12.5 L 25,12.5"/>
       <rect x="0" y="0" width="25" height="25" style="fill:none;stroke:none"/>
       <use xlink:href="#cross" width="25" height="25" />
@@ -972,7 +988,7 @@ gchar const *buffer = R"A(
 
     <path id="line-marker-end" class="line colors" style="stroke-width:2;stroke-opacity:0.2" d="M -1000,12.5 L 12.5,12.5" />
     <g id="marker-end" class="group">
-      <path class="colors" style="stroke-width:1.7;stroke-opacity:0;marker-end:url(#sample)"
+      <path class="colors" style="stroke-width:2;stroke-opacity:0;marker-end:url(#sample)"
        d="M 0,12.5 L 12.5,12.5"/>
       <rect x="0" y="0" width="25" height="25" style="fill:none;stroke:none"/>
       <use xlink:href="#cross" width="25" height="25" />
