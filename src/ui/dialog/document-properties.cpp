@@ -57,10 +57,7 @@ namespace Dialog {
 #define SPACE_SIZE_X 15
 #define SPACE_SIZE_Y 10
 
-
 //===================================================
-
-//---------------------------------------------------
 
 static void on_child_added(Inkscape::XML::Node *repr, Inkscape::XML::Node *child, Inkscape::XML::Node *ref, void * data);
 static void on_child_removed(Inkscape::XML::Node *repr, Inkscape::XML::Node *child, Inkscape::XML::Node *ref, void * data);
@@ -121,7 +118,6 @@ DocumentProperties::DocumentProperties()
     pack_start(_notebook, true, true);
 
     _notebook.append_page(*_page_page,      _("Display"));
-    // _notebook.append_page(*_page_page2, _("l"));
     _notebook.append_page(*_page_guides,    _("Guides"));
     _notebook.append_page(_grids_vbox,      _("Grids"));
     _notebook.append_page(*_page_cms,       _("Color"));
@@ -140,9 +136,6 @@ DocumentProperties::DocumentProperties()
 
     _grids_button_new.signal_clicked().connect(sigc::mem_fun(*this, &DocumentProperties::onNewGrid));
     _grids_button_remove.signal_clicked().connect(sigc::mem_fun(*this, &DocumentProperties::onRemoveGrid));
-
-    // _rum_deflt._changed_connection.block();
-    // _rum_deflt.getUnitMenu()->signal_changed().connect(sigc::mem_fun(*this, &DocumentProperties::onDocUnitChange));
 }
 
 void DocumentProperties::init()
@@ -153,10 +146,6 @@ void DocumentProperties::init()
 
 DocumentProperties::~DocumentProperties()
 {
-    if (_repr_namedview) {
-        _repr_namedview->removeListenerByData(this);
-        _repr_namedview = nullptr;
-    }
     for (auto & it : _rdflist)
         delete it;
 }
@@ -246,7 +235,7 @@ void set_document_dimensions(SPDesktop* desktop, double width, double height, co
         Geom::Translate const vert_offset(Geom::Point(0, (old_height.value("px") - h.value("px"))));
         doc->getRoot()->translateChildItems(vert_offset);
     }
-    // not needed:
+    // units: this is most likely not needed, units are part of document size attributes
     // if (unit) {
         // set_namedview_value(desktop, "", SPAttr::UNITS)
         // write_str_to_xml(desktop, _("Set document unit"), "unit", unit->abbr.c_str());
@@ -276,7 +265,7 @@ void set_viewbox_size(SPDesktop* desktop, double width, double height) {
     DocumentUndo::done(document, _("Set viewbox size"), "");
 }
 
-void set_document_scale(SPDesktop* desktop, double scale_x) {
+void DocumentProperties::set_document_scale(SPDesktop* desktop, double scale_x) {
     if (!desktop) return;
 
     auto document = desktop->getDocument();
@@ -285,7 +274,7 @@ void set_document_scale(SPDesktop* desktop, double scale_x) {
     if (scale_x > 0) {
         // _lock_scale_update
         document->setDocumentScale(scale_x);
-        // update_viewbox_ui();
+        update_viewbox_ui(desktop);
         DocumentUndo::done(document, _("Set page scale"), "");
     }
 }
@@ -1550,16 +1539,34 @@ void DocumentProperties::save_default_metadata()
     }
 }
 
+void DocumentProperties::watch_connection::connect(Inkscape::XML::Node* node, const Inkscape::XML::NodeEventVector& vector, void* data) {
+    disconnect();
+    if (!node) return;
+
+    _node = node;
+    _data = data;
+    node->addListener(&vector, data);
+}
+
+void DocumentProperties::watch_connection::disconnect() {
+    if (_node) {
+        _node->removeListenerByData(_data);
+        _node = nullptr;
+        _data = nullptr;
+    }
+}
+
 void DocumentProperties::documentReplaced()
 {
-    if (_repr_namedview) {
-        _repr_namedview->removeListenerByData(this);
-        _repr_namedview = nullptr;
-    }
+    _root_connection.disconnect();
+    _namedview_connection.disconnect();
+
     if (auto desktop = getDesktop()) {
         _wr.setDesktop(desktop);
-        _repr_namedview = desktop->getNamedView()->getRepr();
-        _repr_namedview->addListener(&_repr_events, this);
+        _namedview_connection.connect(desktop->getNamedView()->getRepr(), _repr_events, this);
+        if (auto document = desktop->getDocument()) {
+            _root_connection.connect(document->getRoot()->getRepr(), _repr_events, this);
+        }
         populate_linked_profiles_box();
         update_widgets();
     }
@@ -1632,8 +1639,6 @@ void DocumentProperties::onRemoveGrid()
     }
 }
 
-
-/** Callback for document unit change. */
 /* This should not effect anything in the SVG tree (other than "inkscape:document-units").
    This should only effect values displayed in the GUI. */
 void DocumentProperties::display_unit_change(const Inkscape::Util::Unit* doc_unit)

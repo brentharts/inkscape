@@ -102,11 +102,11 @@ protected:
     void update_viewbox(SPDesktop* desktop);
     void update_scale_ui(SPDesktop* desktop);
     void update_viewbox_ui(SPDesktop* desktop);
+    void set_document_scale(SPDesktop* desktop, double scale_x);
 
     Inkscape::XML::SignalObserver _emb_profiles_observer, _scripts_observer;
     Gtk::Notebook  _notebook;
 
-    UI::Widget::NotebookPage* _page_page2;
     UI::Widget::NotebookPage   *_page_page;
     UI::Widget::NotebookPage   *_page_guides;
     UI::Widget::NotebookPage   *_page_cms;
@@ -222,8 +222,17 @@ private:
     // callback for display unit change
     void display_unit_change(const Inkscape::Util::Unit* unit);
 
+    struct watch_connection {
+        ~watch_connection() { disconnect(); }
+        void connect(Inkscape::XML::Node* node, const Inkscape::XML::NodeEventVector& vector, void* data);
+        void disconnect();
+    private:
+        Inkscape::XML::Node* _node = nullptr;
+        void* _data = nullptr;
+    };
     // nodes connected to listeners
-    Inkscape::XML::Node *_repr_namedview = nullptr;
+    watch_connection _namedview_connection;
+    watch_connection _root_connection;
 };
 
 } // namespace Dialog

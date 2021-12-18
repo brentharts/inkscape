@@ -329,7 +329,7 @@
           <object class="GtkSpinButton" id="scale-y">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
-            <property name="tooltip-text" translatable="yes">While SVG allows non-uniform scaling it is recommended to use only uniform scaling in Inkscape. To set a non-uniform scaling, set the 'viewBox' directly.</property>
+            <property name="tooltip-text" translatable="yes">While SVG allows non-uniform scaling it is recommended to use only uniform scaling in Inkscape. To set a non-uniform scaling, set the 'viewBox' and 'preserveAspectRatio' directly.</property>
             <property name="editable">False</property>
             <property name="width-chars">9</property>
             <property name="adjustment">adj-scale-y</property>
@@ -546,6 +546,7 @@
             <property name="can-focus">True</property>
             <property name="focus-on-click">False</property>
             <property name="receives-default">True</property>
+            <property name="tooltip-text" translatable="yes">Predefined paper sizes</property>
             <property name="margin-end">2</property>
             <property name="hexpand">True</property>
             <property name="draw-indicator">True</property>
