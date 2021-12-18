@@ -173,6 +173,9 @@ public:
             b2->signal_value_changed().connect([=](){ fire_value_changed(*b1, *b2, nullptr, dim); });
         }
 
+        auto& page_resize = get_widget<Gtk::Button>(_builder, "page-resize");
+        page_resize.signal_clicked().connect([=](){ _signal_resize_to_fit.emit(); });
+
         add(_main_grid);
         show();
     }

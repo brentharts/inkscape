@@ -44,11 +44,14 @@ public:
 
     sigc::signal<void (const Util::Unit*, Units)> signal_unit_changed() { return _signal_unit_changed; }
 
+    sigc::signal<void ()> signal_resize_to_fit() { return _signal_resize_to_fit; }
+
 protected:
     sigc::signal<void (unsigned int, Color)> _signal_color_changed;
     sigc::signal<void (bool, Check)> _signal_check_toggled;
     sigc::signal<void (double, double, const Util::Unit*, Dimension)> _signal_dimmension_changed;
     sigc::signal<void (const Util::Unit*, Units)> _signal_unit_changed;
+    sigc::signal<void ()> _signal_resize_to_fit;
 };
 
 } } } // namespace Inkscape/Widget/UI

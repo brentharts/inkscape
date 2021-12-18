@@ -393,6 +393,14 @@ void DocumentProperties::build_page()
             // document_unit_change(unit);
         }
     });
+
+    _page->signal_resize_to_fit().connect([=](){
+        if (Verb* verb = Verb::get(SP_VERB_FIT_CANVAS_TO_SELECTION_OR_DRAWING)) {
+            if (SPAction* action = verb->get_action(Inkscape::ActionContext(getDesktop()))) {
+                sp_action_perform(action, nullptr);
+            }
+        }
+    });
 }
 
 void DocumentProperties::build_guides()
