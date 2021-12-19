@@ -243,7 +243,7 @@ void set_document_dimensions(SPDesktop* desktop, double width, double height, co
     DocumentUndo::done(doc, _("Set page size"), "");
 }
 
-void set_viewbox_pos(SPDesktop* desktop, double x, double y) {
+void DocumentProperties::set_viewbox_pos(SPDesktop* desktop, double x, double y) {
     if (!desktop) return;
 
     auto document = desktop->getDocument();
@@ -252,9 +252,10 @@ void set_viewbox_pos(SPDesktop* desktop, double x, double y) {
     auto box = document->getViewBox();
     document->setViewBox(Geom::Rect::from_xywh(x, y, box.width(), box.height()));
     DocumentUndo::done(document, _("Set viewbox position"), "");
+    update_scale_ui(desktop);
 }
 
-void set_viewbox_size(SPDesktop* desktop, double width, double height) {
+void DocumentProperties::set_viewbox_size(SPDesktop* desktop, double width, double height) {
     if (!desktop) return;
 
     auto document = desktop->getDocument();
@@ -263,6 +264,7 @@ void set_viewbox_size(SPDesktop* desktop, double width, double height) {
     auto box = document->getViewBox();
     document->setViewBox(Geom::Rect::from_xywh(box.min()[Geom::X], box.min()[Geom::Y], width, height));
     DocumentUndo::done(document, _("Set viewbox size"), "");
+    update_scale_ui(desktop);
 }
 
 void DocumentProperties::set_document_scale(SPDesktop* desktop, double scale_x) {
@@ -1425,14 +1427,10 @@ void DocumentProperties::update_widgets()
     auto nv = desktop->getNamedView();
     auto pm = nv->getPageManager();
 
-    _wr.setUpdating (true);
-    set_sensitive (true);
+    _wr.setUpdating(true);
+    // set_sensitive(true);
 
     SPRoot *root = document->getRoot();
-
-    if (nv->display_units) {
-        // _rum_deflt.setUnit (nv->display_units->abbr);
-    }
 
     double doc_w = root->width.value;
     Glib::ustring doc_w_unit = unit_table.getUnit(root->width.unit)->abbr;

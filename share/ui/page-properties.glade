@@ -136,7 +136,7 @@
           <object class="GtkSpinButton" id="page-width">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
-            <property name="tooltip-text" translatable="yes">Width of paper</property>
+            <property name="tooltip-text" translatable="yes">Width of front page.</property>
             <property name="width-chars">9</property>
             <property name="adjustment">adj-page-width</property>
             <property name="digits">3</property>
@@ -151,7 +151,7 @@
           <object class="GtkSpinButton" id="page-height">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
-            <property name="tooltip-text" translatable="yes">Height of paper</property>
+            <property name="tooltip-text" translatable="yes">Height of front page.</property>
             <property name="width-chars">9</property>
             <property name="adjustment">adj-page-heigh</property>
             <property name="digits">3</property>
@@ -248,7 +248,7 @@
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="receives-default">True</property>
-            <property name="tooltip-text" translatable="yes">Fit the page to the current selection or the drawing if there's no selection</property>
+            <property name="tooltip-text" translatable="yes">Fit the page to the current selection or the drawing if there's no selection.</property>
             <property name="halign">end</property>
             <property name="image">image-resize</property>
           </object>
@@ -546,7 +546,7 @@
             <property name="can-focus">True</property>
             <property name="focus-on-click">False</property>
             <property name="receives-default">True</property>
-            <property name="tooltip-text" translatable="yes">Predefined paper sizes</property>
+            <property name="tooltip-text" translatable="yes">Predefined paper sizes to choose from.</property>
             <property name="margin-end">2</property>
             <property name="hexpand">True</property>
             <property name="draw-indicator">True</property>
@@ -573,6 +573,7 @@
           <object class="GtkComboBoxText" id="page-units">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
+            <property name="tooltip-text" translatable="yes">Document's units used to specify document size only.</property>
           </object>
           <packing>
             <property name="left-attach">2</property>
@@ -592,6 +593,7 @@
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="tooltip-text" translatable="yes">Advanced scaling options.</property>
                 <property name="label" translatable="yes">Viewbox settings</property>
               </object>
             </child>
@@ -690,6 +692,7 @@
           <object class="GtkComboBoxText" id="display-units">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
+            <property name="tooltip-text" translatable="yes">Units used throughout the user interface.</property>
             <property name="halign">end</property>
           </object>
           <packing>
@@ -703,7 +706,7 @@
             <property name="can-focus">False</property>
             <property name="halign">start</property>
             <property name="valign">center</property>
-            <property name="label" translatable="yes">Background:</property>
+            <property name="label" translatable="yes">Page color:</property>
           </object>
           <packing>
             <property name="left-attach">0</property>
@@ -717,7 +720,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">False</property>
-            <property name="tooltip-text" translatable="yes">If set, use a colored checkerboard for the desk background</property>
+            <property name="tooltip-text" translatable="yes">If set, use a colored checkerboard for the desk background.</property>
             <property name="halign">start</property>
             <property name="valign">center</property>
             <property name="draw-indicator">True</property>
@@ -734,7 +737,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">False</property>
-            <property name="tooltip-text" translatable="yes">If set, rectangular page border is shown</property>
+            <property name="tooltip-text" translatable="yes">If set, rectangular page border is shown.</property>
             <property name="halign">start</property>
             <property name="valign">center</property>
             <property name="draw-indicator">True</property>
@@ -751,7 +754,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">False</property>
-            <property name="tooltip-text" translatable="yes">If set, border is always on top of the drawing</property>
+            <property name="tooltip-text" translatable="yes">If set, border is always on top of the drawing.</property>
             <property name="halign">start</property>
             <property name="valign">center</property>
             <property name="draw-indicator">True</property>
@@ -771,7 +774,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">False</property>
-            <property name="tooltip-text" translatable="yes">If set, page border shows a shadow on its right and lower side</property>
+            <property name="tooltip-text" translatable="yes">If set, page border shows a shadow on its right and lower side.</property>
             <property name="halign">start</property>
             <property name="valign">center</property>
             <property name="draw-indicator">True</property>
@@ -821,7 +824,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">False</property>
-            <property name="tooltip-text" translatable="yes">If unset, no antialiasing will be done on the drawing</property>
+            <property name="tooltip-text" translatable="yes">If unset, no antialiasing will be done on the drawing.</property>
             <property name="halign">start</property>
             <property name="valign">center</property>
             <property name="draw-indicator">True</property>
@@ -837,7 +840,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">True</property>
-            <property name="tooltip-text" translatable="yes">Default color of new pages. Used during export.</property>
+            <property name="tooltip-text" translatable="yes">Page background color used  during editing and exporting.</property>
             <property name="halign">end</property>
           </object>
           <packing>
@@ -850,7 +853,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">True</property>
-            <property name="tooltip-text" translatable="yes">Color of the page border and drop shadow.</property>
+            <property name="tooltip-text" translatable="yes">Page border and drop shadow color.</property>
             <property name="halign">end</property>
           </object>
           <packing>
@@ -863,7 +866,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">True</property>
-            <property name="tooltip-text" translatable="yes">Color of the desk background</property>
+            <property name="tooltip-text" translatable="yes">Desk background color surrounding pages.</property>
             <property name="halign">end</property>
           </object>
           <packing>

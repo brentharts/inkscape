@@ -58,7 +58,6 @@ public:
         GET(_page_height, "page-height"),
         GET(_portrait, "page-portrait"),
         GET(_landscape, "page-landscape"),
-        // GET(_auto_viewbox, "auto-viewbox"),
         GET(_scale_x, "scale-x"),
         GET(_scale_y, "scale-y"),
         GET(_viewbox_x, "viewbox-x"),
@@ -79,15 +78,15 @@ public:
 #undef GET
 
         _backgnd_color_picker = std::make_unique<ColorPicker>(
-            _("Background color"), _("Page background color used during editing and exporting"), 0xffffff00, true,
+            _("Background color"), "", 0xffffff00, true,
             &get_widget<Gtk::Button>(_builder, "background-color"));
 
         _border_color_picker = std::make_unique<ColorPicker>(
-            _("Border and shadow color"), _("Page border and shadow color"), 0x0000001f, true,
+            _("Border and shadow color"), "", 0x0000001f, true,
             &get_widget<Gtk::Button>(_builder, "border-color"));
 
         _desk_color_picker = std::make_unique<ColorPicker>(
-            _("Desk color"), _("Desk color"), 0xd0d0d0ff, true,
+            _("Desk color"), "", 0xd0d0d0ff, true,
             &get_widget<Gtk::Button>(_builder, "desk-color"));
 
         for (auto element : {Color::Background, Color::Border, Color::Desk}) {
@@ -418,7 +417,6 @@ private:
     Gtk::SpinButton& _page_height;
     Gtk::RadioButton& _portrait;
     Gtk::RadioButton& _landscape;
-    // Gtk::CheckButton& _auto_viewbox;
     Gtk::SpinButton& _scale_x;
     Gtk::SpinButton& _scale_y;
     Gtk::SpinButton& _viewbox_x;

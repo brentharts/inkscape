@@ -41,7 +41,10 @@ ColorPicker::ColorPicker (const Glib::ustring& title, const Glib::ustring& tip,
     setupDialog(title);
     _preview->show();
     button->add(*Gtk::manage(_preview));
-    button->set_tooltip_text(tip);
+    // set tooltip if given, otherwise leave original tooltip in place (from external button)
+    if (!tip.empty()) {
+        button->set_tooltip_text(tip);
+    }
     _selected_color.signal_changed.connect(sigc::mem_fun(this, &ColorPicker::_onSelectedColorChanged));
     _selected_color.signal_dragged.connect(sigc::mem_fun(this, &ColorPicker::_onSelectedColorChanged));
     _selected_color.signal_released.connect(sigc::mem_fun(this, &ColorPicker::_onSelectedColorChanged));
