@@ -5,9 +5,8 @@
 /*
  * Authors:
  * see git history
- *   Massinissa Derriche <massinissa.derriche@gmail.com> (HSLuv selector)
  *
- * Copyright (C) 2018-2021 Authors
+ * Copyright (C) 2018 Authors
  *
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
@@ -30,8 +29,7 @@ enum SPColorScalesMode {
     SP_COLOR_SCALES_MODE_RGB = 1,
     SP_COLOR_SCALES_MODE_HSL = 2,
     SP_COLOR_SCALES_MODE_CMYK = 3,
-    SP_COLOR_SCALES_MODE_HSV = 4,
-    SP_COLOR_SCALES_MODE_HSLUV = 5
+    SP_COLOR_SCALES_MODE_HSV = 4
 };
 
 class ColorScales
@@ -82,7 +80,6 @@ protected:
     Inkscape::UI::Widget::ColorSlider *_s[5]; /* Channel sliders */
     GtkWidget *_b[5];                         /* Spinbuttons */
     GtkWidget *_l[5];                         /* Labels */
-    std::array<guchar, 4 * 1024> _hsluv_sliders_maps[3];
 
 private:
     // By default, disallow copy constructor and assignment operator

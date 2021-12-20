@@ -36,10 +36,11 @@ class color_point {
 public:
     color_point() : x(0), y(0), r(0), g(0), b(0) {};
     color_point(double x, double y, double r, double g, double b) : x(x), y(y), r(r), g(g), b(b) {};
-    color_point(double x, double y, guint color) : x(x) , y(y),
-                                                   r(((color & 0xff0000) >> 16)/255.0),
-                                                   g(((color & 0x00ff00) >>  8)/255.0),
-                                                   b(((color & 0x0000ff)      )/255.0) {};
+    color_point(double x, double y, guint color) : x(x), y(y),
+                                                   r(((color&0xff0000)>>16)/255.0),
+                                                   g(((color&0x00ff00)>> 8)/255.0),
+                                                   b(((color&0x0000ff)    )/255.0)
+    {};
     guint32 get_color() { return (int(r*255) << 16 | int(g*255) << 8 | int(b*255)); };
     void set_color(double red, double green, double blue) { r = red, g = green; b = blue; };
     double x;
@@ -108,6 +109,13 @@ static double normalizeAngle(double angle)
 
 } // namespace Geometry
 
+/**
+ * Convert the vertice of the in gamut color polygon (Luv) to pixel coordinates.
+ *
+ * @param point The point in Luv coordinates.
+ * @param scale Zoom amount to fit polygon to outer circle.
+ * @param resize Zoom amount to fit wheel in widget.
+ */
 static Point toPixelCoordinate(const Point& point, double scale, double resize)
 {
     return Point(
@@ -116,6 +124,13 @@ static Point toPixelCoordinate(const Point& point, double scale, double resize)
     );
 }
 
+/**
+ * Convert a point in pixels on the widget to Luv coordinates.
+ *
+ * @param point The point in pixel coordinates.
+ * @param scale Zoom amount to fit polygon to outer circle.
+ * @param resize Zoom amount to fit wheel in widget.
+ */
 static Point fromPixelCoordinate(const Point& point, double scale, double resize)
 {
     return Point(
@@ -124,6 +139,12 @@ static Point fromPixelCoordinate(const Point& point, double scale, double resize
     );
 }
 
+/**
+ * @overload
+ * @param point A vector of points in Luv coordinates.
+ * @param scale Zoom amount to fit polygon to outer circle.
+ * @param resize Zoom amount to fit wheel in widget.
+ */
 static std::vector<Point> toPixelCoordinate(
         const std::vector<Point>& points, double scale, double resize)
 {
@@ -140,23 +161,37 @@ namespace Inkscape {
 namespace UI {
 namespace Widget {
 
+/**
+ * Used to represent the in RGB gamut colors polygon of the color wheel.
+ *
+ * @struct
+ */
 struct PickerGeometry {
     std::vector<Line> lines;
-    // Ordered such that 1st vertex is intersection between first and second
-    // line, 2nd vertex between second and third line etc.
+    /** Ordered such that 1st vertex is intersection between first and second
+     *  line, 2nd vertex between second and third line etc. */
     std::vector<Point> vertices;
-    // Angles from origin to corresponding vertex, in radians
+    /** Angles from origin to corresponding vertex, in radians */
     std::vector<double> angles;
-    // Smallest circle with center at origin such that polygon fits inside
+    /** Smallest circle with center at origin such that polygon fits inside */
     double outerCircleRadius;
-    // Largest circle with center at origin such that it fits inside polygon
+    /** Largest circle with center at origin such that it fits inside polygon */
     double innerCircleRadius;
 };
 
+/**
+ * Update the passed in PickerGeometry structure to the given lightness value.
+ *
+ * @param[out] pickerGeometry The PickerGeometry instance to update.
+ * @param lightness The lightness value.
+ */
 static void getPickerGeometry(PickerGeometry *pickerGeometry, double lightness)
 {
+    // Add a lambda to avoid overlapping intersections
+    lightness = std::clamp(lightness + 0.01, 0.1, 99.9);
+
     // Array of lines
-    std::array<Line, 6> lines = Hsluv::getBounds(lightness);
+    const std::array<Line, 6> lines = Hsluv::getBounds(lightness);
     int numLines = lines.size();
     double outerCircleRadius = 0.0;
 
@@ -175,7 +210,8 @@ static void getPickerGeometry(PickerGeometry *pickerGeometry, double lightness)
     Line closestLine = lines[closestIndex2];
     Line perpendicularLine (0 - (1 / closestLine.slope), 0.0);
 
-    Point intersectionPoint = Geometry::intersectLineLine(closestLine, perpendicularLine);
+    Point intersectionPoint = Geometry::intersectLineLine(closestLine,
+            perpendicularLine);
     double startingAngle = Geometry::angleFromOrigin(intersectionPoint);
 
     std::vector<Intersection> intersections;
@@ -186,50 +222,45 @@ static void getPickerGeometry(PickerGeometry *pickerGeometry, double lightness)
         for (int j = i + 1; j < numLines; j++) {
             intersectionPoint = Geometry::intersectLineLine(lines[i], lines[j]);
             intersectionPointAngle = Geometry::angleFromOrigin(intersectionPoint);
-            relativeAngle = intersectionPointAngle - startingAngle;
+            relativeAngle = Geometry::normalizeAngle(
+                    intersectionPointAngle - startingAngle);
             intersections.emplace_back(i, j, intersectionPoint,
-                    intersectionPointAngle,
-                    Geometry::normalizeAngle(
-                        intersectionPointAngle - startingAngle)
-            );
+                    intersectionPointAngle, relativeAngle);
         }
     }
 
-    std::sort(intersections.begin(), intersections.end(), [] (const Intersection &lhs, const Intersection &rhs) {
-        return lhs.relativeAngle > rhs.relativeAngle;
+    std::sort(intersections.begin(), intersections.end(),
+            [] (const Intersection &lhs, const Intersection &rhs)
+    {
+        return lhs.relativeAngle >= rhs.relativeAngle;
     });
 
     std::vector<Line> orderedLines;
     std::vector<Point> orderedVertices;
     std::vector<double> orderedAngles;
 
-    int nextIndex2;
-    Intersection currentIntersection;
+    int nextIndex;
     double intersectionPointDistance;
+    int currentIndex = closestIndex2;
 
-    int currentIndex2 = closestIndex2;
-    std::vector<int> d;
+    for (Intersection intersection : intersections) {
+        nextIndex = -1;
 
-    for (int i = 0; i < intersections.size(); i++) {
-        currentIntersection = intersections[i];
-        nextIndex2 = -1;
-
-        if (currentIntersection.line1 == currentIndex2) {
-            nextIndex2 = currentIntersection.line2;
+        if (intersection.line1 == currentIndex) {
+            nextIndex = intersection.line2;
         }
-        else if (currentIntersection.line2 == currentIndex2) {
-            nextIndex2 = currentIntersection.line1;
+        else if (intersection.line2 == currentIndex) {
+            nextIndex = intersection.line1;
         }
 
-        if (nextIndex2 > -1) {
-            currentIndex2 = nextIndex2;
+        if (nextIndex > -1) {
+            currentIndex = nextIndex;
 
-            d.emplace_back(currentIndex2);
-            orderedLines.emplace_back(lines[nextIndex2]);
-            orderedVertices.emplace_back(currentIntersection.intersectionPoint);
-            orderedAngles.emplace_back(currentIntersection.intersectionPointAngle);
+            orderedLines.emplace_back(lines[nextIndex]);
+            orderedVertices.emplace_back(intersection.intersectionPoint);
+            orderedAngles.emplace_back(intersection.intersectionPointAngle);
 
-            intersectionPointDistance = Geometry::distanceFromOrigin(currentIntersection.intersectionPoint);
+            intersectionPointDistance = Geometry::distanceFromOrigin(intersection.intersectionPoint);
             if (intersectionPointDistance > outerCircleRadius) {
                 outerCircleRadius = intersectionPointDistance;
             }
@@ -244,11 +275,10 @@ static void getPickerGeometry(PickerGeometry *pickerGeometry, double lightness)
 }
 
 ColorWheelHSLuv::ColorWheelHSLuv ()
-    : _dragging(false)
+    : _adjusting(false)
     , _scale(1.0)
     , _cache_width(0)
     , _cache_height(0)
-    , _lock(false)
     , _square_size(1)
 {
     set_name("ColorWheelHSLuv");
@@ -270,10 +300,6 @@ ColorWheelHSLuv::~ColorWheelHSLuv ()
 
 void ColorWheelHSLuv::set_rgb(double r, double g, double b)
 {
-    if (_lock) {
-        return;
-    }
-
     double h, s ,l;
     Hsluv::rgb_to_hsluv(r, g, b, &h, &s, &l);
 
@@ -301,10 +327,6 @@ guint32 ColorWheelHSLuv::get_rgb() const
 
 void ColorWheelHSLuv::set_hsluv(double h, double s, double l)
 {
-    if (_lock) {
-        return;
-    }
-
     set_hue(h);
     set_saturation(s);
     set_lightness(l);
@@ -312,28 +334,16 @@ void ColorWheelHSLuv::set_hsluv(double h, double s, double l)
 
 void ColorWheelHSLuv::set_hue(double h)
 {
-    if (_lock) {
-        return;
-    }
-
     _hue = std::clamp(h, MIN_HUE, MAX_HUE);
 }
 
 void ColorWheelHSLuv::set_saturation(double s)
 {
-    if (_lock) {
-        return;
-    }
-
     _saturation = std::clamp(s, MIN_SATURATION, MAX_SATURATION);
 }
 
 void ColorWheelHSLuv::set_lightness(double l)
 {
-    if (_lock) {
-        return;
-    }
-
     _lightness = std::clamp(l, MIN_LIGHTNESS, MAX_LIGHTNESS);
 
     // Update polygon
@@ -356,8 +366,6 @@ bool ColorWheelHSLuv::on_draw(const::Cairo::RefPtr<::Cairo::Context>& cr)
     if (_lightness < 1e-4 || _lightness > 99.9999) {
         return true;
     }
-
-    _lock = false;
 
     Gtk::Allocation allocation = get_allocation();
     const int width = allocation.get_width();
@@ -480,7 +488,6 @@ void ColorWheelHSLuv::set_from_xy(const double x, const double y)
     set_hue(h);
     set_saturation(s);
 
-    _lock = true;
     _signal_color_changed.emit();
     queue_draw();
 }
@@ -598,7 +605,7 @@ bool ColorWheelHSLuv::on_button_press_event(GdkEventButton* event)
     const int size = std::min(width, height);
 
     if (x > margin_x && x < (margin_x+size) && y > margin_y && y < (margin_y+size)) {
-        _dragging = true;
+        _adjusting = true;
         grab_focus();
         set_from_xy(x, y);
         return true;
@@ -607,15 +614,15 @@ bool ColorWheelHSLuv::on_button_press_event(GdkEventButton* event)
     return false;
 }
 
-bool ColorWheelHSLuv::on_button_release_event(GdkEventButton* event)
+bool ColorWheelHSLuv::on_button_release_event(GdkEventButton */*event*/)
 {
-    _dragging = false;
+    _adjusting = false;
     return true;
 }
 
 bool ColorWheelHSLuv::on_motion_notify_event(GdkEventMotion* event)
 {
-    if (!_dragging) {
+    if (!_adjusting) {
         return false;
     }
 
@@ -676,12 +683,36 @@ bool ColorWheelHSLuv::on_key_press_event(GdkEventKey* key_event)
         set_hue(h);
         set_saturation(s);
 
-        _lock = true;
+        _adjusting = true;
         _signal_color_changed.emit();
         queue_draw();
     }
 
     return consumed;
+}
+
+bool ColorWheelHSLuv::on_key_release_event(GdkEventKey* key_event)
+{
+    unsigned int key = 0;
+    gdk_keymap_translate_keyboard_state( Gdk::Display::get_default()->get_keymap(),
+                                         key_event->hardware_keycode,
+                                         (GdkModifierType)key_event->state,
+                                         0, &key, nullptr, nullptr, nullptr );
+
+    switch (key) {
+        case GDK_KEY_Up:
+        case GDK_KEY_KP_Up:
+        case GDK_KEY_Down:
+        case GDK_KEY_KP_Down:
+        case GDK_KEY_Left:
+        case GDK_KEY_KP_Left:
+        case GDK_KEY_Right:
+        case GDK_KEY_KP_Right:
+            _adjusting = false;
+            return true;
+    }
+
+    return false;
 }
 
 sigc::signal<void> ColorWheelHSLuv::signal_color_changed()
@@ -692,14 +723,3 @@ sigc::signal<void> ColorWheelHSLuv::signal_color_changed()
 } // namespace Widget
 } // namespace UI
 } // namespace Inkscape
-
-/*
-  Local Variables:
-  mode:c++
-  c-file-style:"stroustrup"
-  c-file-offsets:((innamespace . 0)(inline-open . 0)(case-label . +))
-  indent-tabs-mode:nil
-  fill-column:99
-  End:
-*/
-// vim: filetype=cpp:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:fileencoding=utf-8:textwidth=99 :

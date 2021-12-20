@@ -47,13 +47,49 @@ public:
     double intercept;
 };
 
+// Functions
+/**
+ * Return the bounds of the Luv colors in RGB gamut.
+ *
+ * @param l Lightness. Between 0.0 and 100.0.
+ * @return Bounds of Luv colors in RGB gamut.
+ */
 std::array<Line, 6> getBounds(double l);
 
-// Functions
+/**
+ * Convert Luv to RGB.
+ *
+ * @param l Luminance. Between 0.0 and 100.0.
+ * @param u U coordinate.
+ * @param v V coordinate.
+ * @param[out] pr Red. Between 0.0 and 1.0.
+ * @param[out] pg Green. Between 0.0 and 1.0.
+ * @param[out] pb Blue. Between 0.0 and 1.0.
+ */
 void luv_to_rgb(double l, double u, double v, double *pr, double *pg, double *pb);
 
+/**
+ * Convert HSLuv to Luv.
+ *
+ * @param h Hue. Between 0.0 and 360.0.
+ * @param s Saturation. Between 0.0 and 100.0.
+ * @param l Lightness. Between 0.0 and 100.0.
+ * @param[out] pl Luminance. Between 0.0 and 100.0.
+ * @param[out] pu U coordinate.
+ * @param[out] pv V coordinate.
+ */
 void hsluv_to_luv(double h, double s, double l, double *pl, double *pu, double *pv);
 
+/**
+ * Convert Luv to HSLuv.
+ *
+ * @param l Luminance. Between 0.0 and 100.0.
+ * @param u U coordinate.
+ * @param v V coordinate.
+ * @param[out] ph Hue. Between 0.0 and 360.0.
+ * @param[out] ps Saturation. Between 0.0 and 100.0.
+ * @param[out] pl Lightness. Between 0.0 and 100.0.
+ */
 void luv_to_hsluv(double l, double u, double v, double *ph, double *ps, double *pl);
 
 /**

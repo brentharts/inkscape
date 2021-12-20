@@ -67,6 +67,12 @@ void Line::operator=(const Line& other)
     intercept = other.intercept;
 }
 
+/**
+ * Calculate the bounds of the Luv colors in RGB gamut.
+ *
+ * @param l Lightness. Between 0.0 and 100.0.
+ * @return Bounds of Luv colors in RGB gamut.
+ */
 std::array<Line, 6> getBounds(double l)
 {
     std::array<Line, 6> bounds;
@@ -95,21 +101,50 @@ std::array<Line, 6> getBounds(double l)
     return bounds;
 }
 
+/**
+ * Calculate X coordinate of the intersection point of the two passed in lines.
+ *
+ * @param line1 The first line.
+ * @param line2 The second line.
+ * @return X coordinate of the intersection point.
+ */
 static double intersectLineLine(const Line &line1, const Line &line2)
 {
     return (line1.intercept - line2.intercept) / (line2.slope - line1.slope);
 }
 
+/**
+ * Calculate the squared distance of the passed in point to the pole/origin.
+ *
+ * @param x X coordinate.
+ * @param y Y coordinate.
+ * @return Squared distance of point to pole.
+ */
 static double distFromPoleSquared(double x, double y)
 {
     return x * x + y * y;
 }
 
+/**
+ * Calculate the length of a ray at a given angle until it intersects with the
+ * passed in line.
+ *
+ * @param theta The angle of the ray.
+ * @param line The line to test.
+ * @return The length of the ray.
+ */
 static double rayLengthUntilIntersect(double theta, const Line &line)
 {
     return line.intercept / (std::sin(theta) - line.slope * std::cos(theta));
 }
 
+/**
+ * Calculate the largest safe chromaticity for the given luminance l.
+ * Safe here means that it guarantees to not go out of gamut for every hue.
+ *
+ * @param l Lightness.
+ * @return The maximum safe chromaticity for l.
+ */
 static double maxSafeChromaForL(double l)
 {
     double min_len_squared = std::numeric_limits<double>::max();
@@ -131,6 +166,13 @@ static double maxSafeChromaForL(double l)
     return std::sqrt(min_len_squared);
 }
 
+/**
+ * Calculate the maximum in gamut chromaticity for the given luminance and hue.
+ *
+ * @param l Luminance.
+ * @param h Hue.
+ * @return The maximum chromaticity.
+ */
 static double maxChromaForLh(double l, double h)
 {
     double min_len = std::numeric_limits<double>::max();
@@ -148,12 +190,24 @@ static double maxChromaForLh(double l, double h)
     return min_len;
 }
 
+/**
+ * Calculate the dot product of the given arrays.
+ *
+ * @param t1 The first array.
+ * @param t2 The second array.
+ * @return The resulting dot product.
+ */
 static double dotProduct(const Triplet &t1, const Triplet &t2)
 {
     return (t1[0] * t2[0] + t1[1] * t2[1] + t1[2] * t2[2]);
 }
 
-/* Used for rgb conversions */
+/**
+ * Convenience function used for RGB conversions.
+ *
+ * @param c Value.
+ * @return RGB color component.
+ */
 static double fromLinear(double c)
 {
     if (c <= 0.0031308)
@@ -162,6 +216,12 @@ static double fromLinear(double c)
         return 1.055 * std::pow(c, 1.0 / 2.4) - 0.055;
 }
 
+/**
+ * Convenience function used for RGB conversions.
+ *
+ * @param c Value.
+ * @return XYZ color component.
+ */
 static double toLinear(double c)
 {
     if (c > 0.04045)
@@ -170,11 +230,25 @@ static double toLinear(double c)
         return c / 12.92;
 }
 
+/**
+ * @overload
+ * @param t RGB color components.
+ * @return XYZ color components.
+ */
 static Triplet toLinear(const Triplet &t)
 {
-    return { toLinear(t[0]), toLinear(t[1]), toLinear(t[2]) };
+    return {
+        toLinear(t[0]),
+        toLinear(t[1]),
+        toLinear(t[2])
+    };
 }
 
+/**
+ * Convert a color from the the XYZ colorspace to the RGB colorspace.
+ *
+ * @param in_out[in,out] The XYZ color converted to a RGB color.
+ */
 static void xyz2rgb(Triplet *in_out)
 {
     double r = fromLinear(dotProduct(m[0], *in_out));
@@ -186,6 +260,11 @@ static void xyz2rgb(Triplet *in_out)
     (*in_out)[2] = b;
 }
 
+/**
+ * Convert a color from the the RGB colorspace to the XYZ colorspace.
+ *
+ * @param in_out[in,out] The RGB color converted to a XYZ color.
+ */
 static void rgb2xyz(Triplet *in_out)
 {
     Triplet rgbl = toLinear(*in_out);
@@ -199,10 +278,12 @@ static void rgb2xyz(Triplet *in_out)
     (*in_out)[2] = z;
 }
 
-/* https://en.wikipedia.org/wiki/CIELUV
- * In these formulas, Yn refers to the reference white point. We are using
- * illuminant D65, so Yn (see refY in Maxima file) equals 1. The formula is
- * simplified accordingly.
+/**
+ * Utility function used to convert from the XYZ colorspace to CIELuv.
+ * https://en.wikipedia.org/wiki/CIELUV
+ *
+ * @param y Y component of the XYZ color.
+ * @return Luminance component of Luv color.
  */
 static double y2l(double y)
 {
@@ -212,6 +293,12 @@ static double y2l(double y)
         return 116.0 * std::cbrt(y) - 16.0;
 }
 
+/**
+ * Utility function used to convert from CIELuv colorspace to XYZ.
+ *
+ * @param l Luminance component of Luv color.
+ * @return Y component of the XYZ color.
+ */
 static double l2y(double l)
 {
     if (l <= 8.0) {
@@ -223,6 +310,11 @@ static double l2y(double l)
     }
 }
 
+/**
+ * Convert a color from the the XYZ colorspace to the Luv colorspace.
+ *
+ * @param in_out[in,out] The XYZ color converted to a Luv color.
+ */
 static void xyz2luv(Triplet* in_out)
 {
     double var_u = (4.0 * (*in_out)[0]) / ((*in_out)[0] + (15.0 * (*in_out)[1]) + (3.0 * (*in_out)[2]));
@@ -242,6 +334,11 @@ static void xyz2luv(Triplet* in_out)
     }
 }
 
+/**
+ * Convert a color from the the Luv colorspace to the XYZ colorspace.
+ *
+ * @param in_out[in,out] The Luv color converted to a XYZ color.
+ */
 static void luv2xyz(Triplet* in_out)
 {
     if((*in_out)[0] <= 0.00000001) {
@@ -263,6 +360,11 @@ static void luv2xyz(Triplet* in_out)
     (*in_out)[2] = z;
 }
 
+/**
+ * Convert a color from the the Luv colorspace to the LCH colorspace.
+ *
+ * @param in_out[in,out] The Luv color converted to a LCH color.
+ */
 static void luv2lch(Triplet* in_out)
 {
     double l = (*in_out)[0];
@@ -285,6 +387,11 @@ static void luv2lch(Triplet* in_out)
     (*in_out)[2] = h;
 }
 
+/**
+ * Convert a color from the the LCH colorspace to the Luv colorspace.
+ *
+ * @param in_out[in,out] The LCH color converted to a Luv color.
+ */
 static void lch2luv(Triplet* in_out)
 {
     double hrad = (*in_out)[2] * 0.01745329251994329577;  /* (pi / 180.0) */
@@ -295,6 +402,11 @@ static void lch2luv(Triplet* in_out)
     (*in_out)[2] = v;
 }
 
+/**
+ * Convert a color from the the HSLuv colorspace to the LCH colorspace.
+ *
+ * @param in_out[in,out] The HSLuv color converted to a LCH color.
+ */
 static void hsluv2lch(Triplet* in_out)
 {
     double h = (*in_out)[0];
@@ -317,6 +429,11 @@ static void hsluv2lch(Triplet* in_out)
     (*in_out)[2] = h;
 }
 
+/**
+ * Convert a color from the the LCH colorspace to the HSLuv colorspace.
+ *
+ * @param in_out[in,out] The LCH color converted to a HSLuv color.
+ */
 static void lch2hsluv(Triplet* in_out)
 {
     double l = (*in_out)[0];
@@ -339,6 +456,11 @@ static void lch2hsluv(Triplet* in_out)
     (*in_out)[2] = l;
 }
 
+/**
+ * Convert a color from the the HPLuv colorspace to the LCH colorspace.
+ *
+ * @param in_out[in,out] The HPLuv color converted to a LCH color.
+ */
 static void hpluv2lch(Triplet* in_out)
 {
     double h = (*in_out)[0];
@@ -361,6 +483,11 @@ static void hpluv2lch(Triplet* in_out)
     (*in_out)[2] = h;
 }
 
+/**
+ * Convert a color from the the LCH colorspace to the HPLuv colorspace.
+ *
+ * @param in_out[in,out] The LCH color converted to a HPLuv color.
+ */
 static void lch2hpluv(Triplet* in_out)
 {
     double l = (*in_out)[0];
@@ -384,7 +511,6 @@ static void lch2hpluv(Triplet* in_out)
 }
 
 // Interface functions
-
 void luv_to_rgb(double l, double u, double v, double *pr, double *pg, double *pb)
 {
     Triplet tmp {l, u, v};

@@ -15,7 +15,8 @@
 #ifndef SEEN_SP_COLOR_WHEEL_HSLUV_SELECTOR_H
 #define SEEN_SP_COLOR_WHEEL_HSLUV_SELECTOR_H
 
-#include <gtkmm/grid.h>
+#include <gtkmm/box.h>
+#include <gtkmm/expander.h>
 
 #include "ui/selected-color.h"
 
@@ -26,7 +27,7 @@ namespace Widget {
 class ColorSlider;
 class ColorWheelHSLuv;
 class ColorWheelHSLuvSelector
-    : public Gtk::Grid
+    : public Gtk::Box
 {
 public:
     static const gchar *MODE_NAME;
@@ -43,16 +44,19 @@ protected:
 
     void on_show() override;
 
+    void _show_wheel(bool visible);
+    void _update_wheel_layout();
+
     // Signals
     void _colorChanged();
 
-    void _adjustmentLightnessChanged();
-    void _sliderLightnessGrabbed();
-    void _sliderLightnessReleased();
+    void _sliderGrabbed();
+    void _sliderReleased();
 
+    void _adjustmentHueChanged();
+    void _adjustmentSaturationChanged();
+    void _adjustmentLightnessChanged();
     void _adjustmentAlphaChanged();
-    void _sliderAlphaGrabbed();
-    void _sliderAlphaReleased();
 
     void _wheelChanged();
 
@@ -60,17 +64,17 @@ protected:
 
     // Members
     SelectedColor &_color;
-    bool _updating;
-    Glib::RefPtr<Gtk::Adjustment> _lightness_adjustment;
-    Glib::RefPtr<Gtk::Adjustment> _alpha_adjustment;
-    Inkscape::UI::Widget::ColorWheelHSLuv *_wheel;
-    Inkscape::UI::Widget::ColorSlider *_lightness_slider;
-    Inkscape::UI::Widget::ColorSlider *_alpha_slider;
-    std::array<guchar, 4 * 1024> _lightness_slider_map;
+    bool _updating = false;
+    Inkscape::UI::Widget::ColorWheelHSLuv *_wheel = nullptr;
+    Glib::RefPtr<Gtk::Adjustment> _adjustments[4];
+    Inkscape::UI::Widget::ColorSlider *_sliders[4]{};
+    std::array<guchar, 4 * 1024> _slider_maps[4];
 
 private:
     sigc::connection _color_changed_connection;
     sigc::connection _color_dragged_connection;
+    bool _wheel_visible = true;
+    const Glib::ustring _prefs = "/hsluv-selector";
 };
 
 class ColorWheelHSLuvSelectorFactory : public ColorSelectorFactory {
@@ -84,14 +88,3 @@ public:
 } // namespace Inkscape
 
 #endif // SEEN_SP_COLOR_WHEEL_HSLUV_SELECTOR_H
-
-/*
-  Local Variables:
-  mode:c++
-  c-file-style:"stroustrup"
-  c-file-offsets:((innamespace . 0)(inline-open . 0)(case-label . +))
-  indent-tabs-mode:nil
-  fill-column:99
-  End:
-*/
-// vim: filetype=cpp:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:fileencoding=utf-8:textwidth=99 :

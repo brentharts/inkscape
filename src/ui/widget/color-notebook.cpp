@@ -67,8 +67,7 @@ ColorNotebook::ColorNotebook(SelectedColor &color)
     _available_pages.push_back(new Page(new ColorScalesFactory(SP_COLOR_SCALES_MODE_CMYK), "color-selector-cmyk"));
     _available_pages.push_back(new Page(new ColorWheelSelectorFactory, "color-selector-wheel"));
     _available_pages.push_back(new Page(new ColorICCSelectorFactory, "color-selector-cms"));
-    _available_pages.push_back(new Page(new ColorScalesFactory(SP_COLOR_SCALES_MODE_HSLUV), "color-selector-hsluv"));
-    _available_pages.push_back(new Page(new ColorWheelHSLuvSelectorFactory, "color-selector-wheel-hsluv"));
+    _available_pages.push_back(new Page(new ColorWheelHSLuvSelectorFactory, "color-selector-hsluv"));
 
     _initUI();
 
