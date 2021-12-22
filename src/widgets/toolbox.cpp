@@ -177,6 +177,7 @@ GtkWidget *ToolboxFactory::createToolToolbox()
     auto tb = new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0);
     tb->set_name("ToolToolbox");
     tb->set_homogeneous(false);
+    tb->set_hexpand(false);
 
     Glib::ustring tool_toolbar_builder_file = get_filename(UIS, "toolbar-tool.ui");
     auto builder = Gtk::Builder::create();

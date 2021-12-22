@@ -125,76 +125,62 @@
     <property name="halign">start</property>
     <property name="valign">center</property>
     <child>
-      <object class="GtkBox">
+      <object class="GtkFlowBox">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
         <property name="halign">start</property>
-        <property name="resize_mode">immediate</property>
         <property name="orientation">vertical</property>
+        <property name="max_children_per_line">2</property>
         <child>
-          <object class="GtkFlowBox">
+          <object class="GtkFlowBoxChild">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
+            <property name="can-focus">True</property>
             <property name="halign">start</property>
-            <property name="homogeneous">True</property>
-            <property name="max_children_per_line">2</property>
+            <property name="valign">center</property>
             <child>
-              <object class="GtkFlowBoxChild">
+              <object class="GtkToggleButton">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
-                <property name="halign">start</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Select</property>
+                <property name="halign">center</property>
                 <property name="valign">center</property>
-                <child>
-                  <object class="GtkToggleButton">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Select</property>
-                    <property name="halign">center</property>
-                    <property name="valign">center</property>
-                    <property name="action-name">win.tool-switch</property>
-                    <property name="action-target">'Select'</property>
-                    <property name="image">image1</property>
-                    <property name="relief">none</property>
-                    <style>
-                      <class name="square-button"/>
-                    </style>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkFlowBoxChild">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="halign">start</property>
-                <property name="valign">center</property>
-                <property name="hexpand">True</property>
-                <child>
-                  <object class="GtkToggleButton">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Node</property>
-                    <property name="halign">center</property>
-                    <property name="valign">center</property>
-                    <property name="action-name">win.tool-switch</property>
-                    <property name="action-target">'Node'</property>
-                    <property name="image">image2</property>
-                    <property name="relief">none</property>
-                    <style>
-                      <class name="square-button"/>
-                    </style>
-                  </object>
-                </child>
+                <property name="action-name">win.tool-switch</property>
+                <property name="action-target">'Select'</property>
+                <property name="image">image1</property>
+                <property name="relief">none</property>
+                <style>
+                  <class name="square-button"/>
+                </style>
               </object>
             </child>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
+        </child>
+        <child>
+          <object class="GtkFlowBoxChild">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="halign">start</property>
+            <property name="valign">center</property>
+            <property name="hexpand">True</property>
+            <child>
+              <object class="GtkToggleButton">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Node</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="action-name">win.tool-switch</property>
+                <property name="action-target">'Node'</property>
+                <property name="image">image2</property>
+                <property name="relief">none</property>
+                <style>
+                  <class name="square-button"/>
+                </style>
+              </object>
+            </child>
+          </object>
         </child>
       </object>
       <packing>
@@ -204,330 +190,300 @@
       </packing>
     </child>
     <child>
-      <object class="GtkBox">
+      <object class="GtkSeparator">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">1</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkFlowBox">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
         <property name="halign">start</property>
         <property name="orientation">vertical</property>
+        <property name="max_children_per_line">5</property>
         <child>
-          <object class="GtkSeparator">
+          <object class="GtkFlowBoxChild">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="margin_left">3</property>
-            <property name="margin_right">3</property>
+            <property name="can-focus">True</property>
+            <child>
+              <object class="GtkToggleButton">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Rectangle</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="action-name">win.tool-switch</property>
+                <property name="action-target">'Rect'</property>
+                <property name="image">image3</property>
+                <property name="relief">none</property>
+                <style>
+                  <class name="square-button"/>
+                </style>
+              </object>
+            </child>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
         </child>
         <child>
-          <object class="GtkFlowBox">
+          <object class="GtkFlowBoxChild">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="halign">start</property>
-            <property name="homogeneous">True</property>
-            <property name="max_children_per_line">5</property>
+            <property name="can-focus">True</property>
             <child>
-              <object class="GtkFlowBoxChild">
+              <object class="GtkToggleButton">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
-                <child>
-                  <object class="GtkToggleButton">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Rectangle</property>
-                    <property name="halign">center</property>
-                    <property name="valign">center</property>
-                    <property name="action-name">win.tool-switch</property>
-                    <property name="action-target">'Rect'</property>
-                    <property name="image">image3</property>
-                    <property name="relief">none</property>
-                    <style>
-                      <class name="square-button"/>
-                    </style>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkFlowBoxChild">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <child>
-                  <object class="GtkToggleButton">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Circle/Arc</property>
-                    <property name="halign">center</property>
-                    <property name="valign">center</property>
-                    <property name="action-name">win.tool-switch</property>
-                    <property name="action-target">'Arc'</property>
-                    <property name="image">image4</property>
-                    <property name="relief">none</property>
-                    <style>
-                      <class name="square-button"/>
-                    </style>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkFlowBoxChild">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <child>
-                  <object class="GtkToggleButton">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Star/Polygon</property>
-                    <property name="halign">center</property>
-                    <property name="valign">center</property>
-                    <property name="action-name">win.tool-switch</property>
-                    <property name="action-target">'Star'</property>
-                    <property name="image">image5</property>
-                    <property name="relief">none</property>
-                    <style>
-                      <class name="square-button"/>
-                    </style>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkFlowBoxChild">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <child>
-                  <object class="GtkToggleButton">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">3D Box</property>
-                    <property name="halign">center</property>
-                    <property name="valign">center</property>
-                    <property name="action-name">win.tool-switch</property>
-                    <property name="action-target">'3DBox'</property>
-                    <property name="image">image6</property>
-                    <property name="relief">none</property>
-                    <style>
-                      <class name="square-button"/>
-                    </style>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkFlowBoxChild">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <child>
-                  <object class="GtkToggleButton">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Spiral</property>
-                    <property name="halign">center</property>
-                    <property name="valign">center</property>
-                    <property name="action-name">win.tool-switch</property>
-                    <property name="action-target">'Spiral'</property>
-                    <property name="image">image7</property>
-                    <property name="relief">none</property>
-                    <style>
-                      <class name="square-button"/>
-                    </style>
-                  </object>
-                </child>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Circle/Arc</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="action-name">win.tool-switch</property>
+                <property name="action-target">'Arc'</property>
+                <property name="image">image4</property>
+                <property name="relief">none</property>
+                <style>
+                  <class name="square-button"/>
+                </style>
               </object>
             </child>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
+        </child>
+        <child>
+          <object class="GtkFlowBoxChild">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <child>
+              <object class="GtkToggleButton">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Star/Polygon</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="action-name">win.tool-switch</property>
+                <property name="action-target">'Star'</property>
+                <property name="image">image5</property>
+                <property name="relief">none</property>
+                <style>
+                  <class name="square-button"/>
+                </style>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkFlowBoxChild">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <child>
+              <object class="GtkToggleButton">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">3D Box</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="action-name">win.tool-switch</property>
+                <property name="action-target">'3DBox'</property>
+                <property name="image">image6</property>
+                <property name="relief">none</property>
+                <style>
+                  <class name="square-button"/>
+                </style>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkFlowBoxChild">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <child>
+              <object class="GtkToggleButton">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Spiral</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="action-name">win.tool-switch</property>
+                <property name="action-target">'Spiral'</property>
+                <property name="image">image7</property>
+                <property name="relief">none</property>
+                <style>
+                  <class name="square-button"/>
+                </style>
+              </object>
+            </child>
+          </object>
         </child>
       </object>
       <packing>
         <property name="expand">False</property>
-        <property name="fill">False</property>
+        <property name="fill">True</property>
         <property name="position">2</property>
       </packing>
     </child>
     <child>
-      <object class="GtkBox">
+      <object class="GtkSeparator">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">3</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkFlowBox">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
         <property name="halign">start</property>
         <property name="orientation">vertical</property>
+        <property name="max_children_per_line">6</property>
         <child>
-          <object class="GtkSeparator">
+          <object class="GtkFlowBoxChild">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="margin_left">3</property>
-            <property name="margin_right">3</property>
+            <property name="can-focus">True</property>
+            <child>
+              <object class="GtkToggleButton">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Pen</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="action-name">win.tool-switch</property>
+                <property name="action-target">'Pen'</property>
+                <property name="image">image8</property>
+                <property name="relief">none</property>
+                <style>
+                  <class name="square-button"/>
+                </style>
+              </object>
+            </child>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
         </child>
         <child>
-          <object class="GtkFlowBox">
+          <object class="GtkFlowBoxChild">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="halign">start</property>
-            <property name="homogeneous">True</property>
-            <property name="max_children_per_line">6</property>
+            <property name="can-focus">True</property>
             <child>
-              <object class="GtkFlowBoxChild">
+              <object class="GtkToggleButton">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
-                <child>
-                  <object class="GtkToggleButton">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Pen</property>
-                    <property name="halign">center</property>
-                    <property name="valign">center</property>
-                    <property name="action-name">win.tool-switch</property>
-                    <property name="action-target">'Pen'</property>
-                    <property name="image">image8</property>
-                    <property name="relief">none</property>
-                    <style>
-                      <class name="square-button"/>
-                    </style>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkFlowBoxChild">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <child>
-                  <object class="GtkToggleButton">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Pencil</property>
-                    <property name="halign">center</property>
-                    <property name="valign">center</property>
-                    <property name="action-name">win.tool-switch</property>
-                    <property name="action-target">'Pencil'</property>
-                    <property name="image">image9</property>
-                    <property name="relief">none</property>
-                    <style>
-                      <class name="square-button"/>
-                    </style>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkFlowBoxChild">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <child>
-                  <object class="GtkToggleButton">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Calligraphic</property>
-                    <property name="halign">center</property>
-                    <property name="valign">center</property>
-                    <property name="action-name">win.tool-switch</property>
-                    <property name="action-target">'Calligraphic'</property>
-                    <property name="image">image10</property>
-                    <property name="relief">none</property>
-                    <style>
-                      <class name="square-button"/>
-                    </style>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkFlowBoxChild">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <child>
-                  <object class="GtkToggleButton">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Text</property>
-                    <property name="halign">center</property>
-                    <property name="valign">center</property>
-                    <property name="action-name">win.tool-switch</property>
-                    <property name="action-target">'Text'</property>
-                    <property name="image">image11</property>
-                    <property name="relief">none</property>
-                    <style>
-                      <class name="square-button"/>
-                    </style>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkFlowBoxChild">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <child>
-                  <object class="GtkToggleButton">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Gradient</property>
-                    <property name="halign">center</property>
-                    <property name="valign">center</property>
-                    <property name="action-name">win.tool-switch</property>
-                    <property name="action-target">'Gradient'</property>
-                    <property name="image">image12</property>
-                    <property name="relief">none</property>
-                    <style>
-                      <class name="square-button"/>
-                    </style>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkFlowBoxChild">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <child>
-                  <object class="GtkToggleButton">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Mesh</property>
-                    <property name="action-target">'Mesh'</property>
-                    <property name="halign">center</property>
-                    <property name="valign">center</property>
-                    <property name="action-name">win.tool-switch</property>
-                    <property name="image">image13</property>
-                    <property name="relief">none</property>
-                    <style>
-                      <class name="square-button"/>
-                    </style>
-                  </object>
-                </child>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Pencil</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="action-name">win.tool-switch</property>
+                <property name="action-target">'Pencil'</property>
+                <property name="image">image9</property>
+                <property name="relief">none</property>
+                <style>
+                  <class name="square-button"/>
+                </style>
               </object>
             </child>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">1</property>
-          </packing>
+        </child>
+        <child>
+          <object class="GtkFlowBoxChild">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <child>
+              <object class="GtkToggleButton">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Calligraphic</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="action-name">win.tool-switch</property>
+                <property name="action-target">'Calligraphic'</property>
+                <property name="image">image10</property>
+                <property name="relief">none</property>
+                <style>
+                  <class name="square-button"/>
+                </style>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkFlowBoxChild">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <child>
+              <object class="GtkToggleButton">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Text</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="action-name">win.tool-switch</property>
+                <property name="action-target">'Text'</property>
+                <property name="image">image11</property>
+                <property name="relief">none</property>
+                <style>
+                  <class name="square-button"/>
+                </style>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkFlowBoxChild">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <child>
+              <object class="GtkToggleButton">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Gradient</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="action-name">win.tool-switch</property>
+                <property name="action-target">'Gradient'</property>
+                <property name="image">image12</property>
+                <property name="relief">none</property>
+                <style>
+                  <class name="square-button"/>
+                </style>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkFlowBoxChild">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <child>
+              <object class="GtkToggleButton">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Mesh</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="action-name">win.tool-switch</property>
+                <property name="action-target">'Mesh'</property>
+                <property name="image">image13</property>
+                <property name="relief">none</property>
+                <style>
+                  <class name="square-button"/>
+                </style>
+              </object>
+            </child>
+          </object>
         </child>
       </object>
       <packing>
@@ -537,152 +493,137 @@
       </packing>
     </child>
     <child>
-      <object class="GtkBox">
+      <object class="GtkSeparator">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">5</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkFlowBox">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
         <property name="halign">start</property>
         <property name="orientation">vertical</property>
+        <property name="max_children_per_line">5</property>
         <child>
-          <object class="GtkSeparator">
+          <object class="GtkFlowBoxChild">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="margin_left">3</property>
-            <property name="margin_right">3</property>
+            <property name="can-focus">True</property>
+            <child>
+              <object class="GtkToggleButton">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Dropper</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="action-name">win.tool-switch</property>
+                <property name="action-target">'Dropper'</property>
+                <property name="image">image14</property>
+                <property name="relief">none</property>
+                <style>
+                  <class name="square-button"/>
+                </style>
+              </object>
+            </child>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
         </child>
         <child>
-          <object class="GtkFlowBox">
+          <object class="GtkFlowBoxChild">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="halign">start</property>
-            <property name="homogeneous">True</property>
-            <property name="max_children_per_line">5</property>
+            <property name="can-focus">True</property>
             <child>
-              <object class="GtkFlowBoxChild">
+              <object class="GtkToggleButton">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
-                <child>
-                  <object class="GtkToggleButton">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Dropper</property>
-                    <property name="halign">center</property>
-                    <property name="valign">center</property>
-                    <property name="action-name">win.tool-switch</property>
-                    <property name="action-target">'Dropper'</property>
-                    <property name="image">image14</property>
-                    <property name="relief">none</property>
-                    <style>
-                      <class name="square-button"/>
-                    </style>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkFlowBoxChild">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <child>
-                  <object class="GtkToggleButton">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Paint Bucket</property>
-                    <property name="halign">center</property>
-                    <property name="valign">center</property>
-                    <property name="action-name">win.tool-switch</property>
-                    <property name="action-target">'PaintBucket'</property>
-                    <property name="image">image15</property>
-                    <property name="relief">none</property>
-                    <style>
-                      <class name="square-button"/>
-                    </style>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkFlowBoxChild">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <child>
-                  <object class="GtkToggleButton">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Tweak</property>
-                    <property name="halign">center</property>
-                    <property name="valign">center</property>
-                    <property name="action-name">win.tool-switch</property>
-                    <property name="action-target">'Tweak'</property>
-                    <property name="image">image16</property>
-                    <property name="relief">none</property>
-                    <style>
-                      <class name="square-button"/>
-                    </style>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkFlowBoxChild">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <child>
-                  <object class="GtkToggleButton">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Spray</property>
-                    <property name="halign">center</property>
-                    <property name="valign">center</property>
-                    <property name="action-name">win.tool-switch</property>
-                    <property name="action-target">'Spray'</property>
-                    <property name="image">image17</property>
-                    <property name="relief">none</property>
-                    <style>
-                      <class name="square-button"/>
-                    </style>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkFlowBoxChild">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <child>
-                  <object class="GtkToggleButton">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Eraser</property>
-                    <property name="halign">center</property>
-                    <property name="valign">center</property>
-                    <property name="action-name">win.tool-switch</property>
-                    <property name="action-target">'Eraser'</property>
-                    <property name="image">image18</property>
-                    <property name="relief">none</property>
-                    <style>
-                      <class name="square-button"/>
-                    </style>
-                  </object>
-                </child>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Paint Bucket</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="action-name">win.tool-switch</property>
+                <property name="action-target">'PaintBucket'</property>
+                <property name="image">image15</property>
+                <property name="relief">none</property>
+                <style>
+                  <class name="square-button"/>
+                </style>
               </object>
             </child>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">1</property>
-          </packing>
+        </child>
+        <child>
+          <object class="GtkFlowBoxChild">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <child>
+              <object class="GtkToggleButton">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Tweak</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="action-name">win.tool-switch</property>
+                <property name="action-target">'Tweak'</property>
+                <property name="image">image16</property>
+                <property name="relief">none</property>
+                <style>
+                  <class name="square-button"/>
+                </style>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkFlowBoxChild">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <child>
+              <object class="GtkToggleButton">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Spray</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="action-name">win.tool-switch</property>
+                <property name="action-target">'Spray'</property>
+                <property name="image">image17</property>
+                <property name="relief">none</property>
+                <style>
+                  <class name="square-button"/>
+                </style>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkFlowBoxChild">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <child>
+              <object class="GtkToggleButton">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Eraser</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="action-name">win.tool-switch</property>
+                <property name="action-target">'Eraser'</property>
+                <property name="image">image18</property>
+                <property name="relief">none</property>
+                <style>
+                  <class name="square-button"/>
+                </style>
+              </object>
+            </child>
+          </object>
         </child>
       </object>
       <packing>
@@ -692,152 +633,137 @@
       </packing>
     </child>
     <child>
-      <object class="GtkBox">
+      <object class="GtkSeparator">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">7</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkFlowBox">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
         <property name="halign">start</property>
         <property name="orientation">vertical</property>
+        <property name="max_children_per_line">6</property>
         <child>
-          <object class="GtkSeparator">
+          <object class="GtkFlowBoxChild">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="margin_left">3</property>
-            <property name="margin_right">3</property>
+            <property name="can-focus">True</property>
+            <child>
+              <object class="GtkToggleButton">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Connector</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="action-name">win.tool-switch</property>
+                <property name="action-target">'Connector'</property>
+                <property name="image">image19</property>
+                <property name="relief">none</property>
+                <style>
+                  <class name="square-button"/>
+                </style>
+              </object>
+            </child>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
         </child>
         <child>
-          <object class="GtkFlowBox">
+          <object class="GtkFlowBoxChild">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="halign">start</property>
-            <property name="homogeneous">True</property>
-            <property name="max_children_per_line">6</property>
+            <property name="can-focus">True</property>
             <child>
-              <object class="GtkFlowBoxChild">
+              <object class="GtkToggleButton">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
-                <child>
-                  <object class="GtkToggleButton">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Connector</property>
-                    <property name="halign">center</property>
-                    <property name="valign">center</property>
-                    <property name="action-name">win.tool-switch</property>
-                    <property name="action-target">'Connector'</property>
-                    <property name="image">image19</property>
-                    <property name="relief">none</property>
-                    <style>
-                      <class name="square-button"/>
-                    </style>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkFlowBoxChild">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <child>
-                  <object class="GtkToggleButton">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">LPE Tool</property>
-                    <property name="halign">center</property>
-                    <property name="valign">center</property>
-                    <property name="action-name">win.tool-switch</property>
-                    <property name="action-target">'LPETool'</property>
-                    <property name="image">image20</property>
-                    <property name="relief">none</property>
-                    <style>
-                      <class name="square-button"/>
-                    </style>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkFlowBoxChild">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <child>
-                  <object class="GtkToggleButton">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Zoom</property>
-                    <property name="halign">center</property>
-                    <property name="valign">center</property>
-                    <property name="action-name">win.tool-switch</property>
-                    <property name="action-target">'Zoom'</property>
-                    <property name="image">image21</property>
-                    <property name="relief">none</property>
-                    <style>
-                      <class name="square-button"/>
-                    </style>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkFlowBoxChild">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <child>
-                  <object class="GtkToggleButton">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Measure</property>
-                    <property name="halign">center</property>
-                    <property name="valign">center</property>
-                    <property name="action-name">win.tool-switch</property>
-                    <property name="action-target">'Measure'</property>
-                    <property name="image">image22</property>
-                    <property name="relief">none</property>
-                    <style>
-                      <class name="square-button"/>
-                    </style>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkFlowBoxChild">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <child>
-                  <object class="GtkToggleButton">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Edit and Create Pages</property>
-                    <property name="halign">center</property>
-                    <property name="valign">center</property>
-                    <property name="action-name">win.tool-switch</property>
-                    <property name="action-target">'Pages'</property>
-                    <property name="image">image-pages</property>
-                    <property name="relief">none</property>
-                    <style>
-                      <class name="square-button"/>
-                    </style>
-                  </object>
-                </child>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">LPE Tool</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="action-name">win.tool-switch</property>
+                <property name="action-target">'LPETool'</property>
+                <property name="image">image20</property>
+                <property name="relief">none</property>
+                <style>
+                  <class name="square-button"/>
+                </style>
               </object>
             </child>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">1</property>
-          </packing>
+        </child>
+        <child>
+          <object class="GtkFlowBoxChild">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <child>
+              <object class="GtkToggleButton">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Zoom</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="action-name">win.tool-switch</property>
+                <property name="action-target">'Zoom'</property>
+                <property name="image">image21</property>
+                <property name="relief">none</property>
+                <style>
+                  <class name="square-button"/>
+                </style>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkFlowBoxChild">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <child>
+              <object class="GtkToggleButton">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Measure</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="action-name">win.tool-switch</property>
+                <property name="action-target">'Measure'</property>
+                <property name="image">image22</property>
+                <property name="relief">none</property>
+                <style>
+                  <class name="square-button"/>
+                </style>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkFlowBoxChild">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <child>
+              <object class="GtkToggleButton">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Edit and Create Pages</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="action-name">win.tool-switch</property>
+                <property name="action-target">'Pages'</property>
+                <property name="image">image-pages</property>
+                <property name="relief">none</property>
+                <style>
+                  <class name="square-button"/>
+                </style>
+              </object>
+            </child>
+          </object>
         </child>
       </object>
       <packing>
