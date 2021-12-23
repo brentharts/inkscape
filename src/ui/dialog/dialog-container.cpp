@@ -580,8 +580,6 @@ void DialogContainer::update_dialogs()
 
 void DialogContainer::set_desktop(SPDesktop *desktop)
 {
-    _desktop = desktop;
-
     for_each(dialogs.begin(), dialogs.end(), [&](auto dialog) { dialog.second->setDesktop(desktop); });
 }
 
@@ -1083,10 +1081,6 @@ void DialogContainer::column_empty(DialogMultipaned *column)
             window->close();
         }
     }
-}
-
-SPDesktop* DialogContainer::get_desktop() {
-    return _desktop;
 }
 
 } // namespace Dialog

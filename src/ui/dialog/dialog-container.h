@@ -109,8 +109,6 @@ private:
     void column_empty(DialogMultipaned *column);
     DialogBase* find_existing_dialog(const Glib::ustring& dialog_type);
     static bool recreate_dialogs_from_state(const Glib::KeyFile* keyfile);
-
-    SPDesktop* _desktop = nullptr;
 };
 
 } // namespace Dialog

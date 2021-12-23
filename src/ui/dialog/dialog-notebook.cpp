@@ -21,6 +21,7 @@
 #include <gtkmm/menu.h>
 
 #include "enums.h"
+#include "inkscape.h"
 #include "ui/dialog/dialog-base.h"
 #include "ui/dialog/dialog-data.h"
 #include "ui/dialog/dialog-container.h"
@@ -144,9 +145,11 @@ DialogNotebook::DialogNotebook(DialogContainer *container)
         box->pack_start(*Gtk::make_managed<Gtk::Label>(data.label, Gtk::ALIGN_START, Gtk::ALIGN_CENTER, true), false, true);
         dlg->add(*box);
         dlg->signal_activate().connect([=](){
-            if (auto desktop = _container->get_desktop()) {
-                // get desktop's container, it may be different than current '_container'!
-                desktop->getContainer()->new_dialog(key);
+            // get desktop's container, it may be different than current '_container'!
+            if (auto desktop = SP_ACTIVE_DESKTOP) {
+                if (auto container = desktop->getContainer()) {
+                    container->new_dialog(key);
+                }
             }
         });
         _menu.attach(*dlg, col, col + 1, row, row + 1);
