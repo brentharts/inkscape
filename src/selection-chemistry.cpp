@@ -445,11 +445,24 @@ void ObjectSet::duplicate(bool suppressDone, bool duplicateLayer)
         //TODO: understand why layer management is tied to desktop and not to document.
         return;
     }
-
     SPDocument *doc = document();
 
     if(!doc)
         return;
+
+    if (!duplicateLayer && desktop()) {
+        Inkscape::UI::ClipboardManager *cm = Inkscape::UI::ClipboardManager::get();
+        cm->setBackup();
+        cm->copy(this);
+        if (cm->paste(desktop(), true)) {
+            if ( !suppressDone ) {
+                DocumentUndo::done(document(), _("Duplicate"), INKSCAPE_ICON("edit-duplicate"));
+            }
+        }
+        cm->restoreBackup();
+        cm->emptyBackup();
+        return;
+    }
 
     Inkscape::XML::Document* xml_doc = doc->getReprDoc();
 
@@ -494,15 +507,6 @@ void ObjectSet::duplicate(bool suppressDone, bool duplicateLayer)
 
         if (!duplicateLayer || sp_repr_is_def(old_repr)) {
             parent->appendChild(copy);
-            // 1.1 COPYPASTECLONESTAMPLPEBUG
-            SPItem *newitem = dynamic_cast<SPItem *>(doc->getObjectByRepr(copy));
-            if (_desktop && newitem) {
-                remove_hidder_filter(newitem);
-                gchar * id = strdup(copy->attribute("id"));
-                copy = sp_lpe_item_remove_autoflatten(newitem, id)->getRepr();
-                g_free(id);
-            }
-            // END 1.1 COPYPASTECLONESTAMPLPEBUG fix
         } else if (sp_repr_is_layer(old_repr)) {
             parent->addChild(copy, old_repr);
         } else {
@@ -616,6 +620,7 @@ void ObjectSet::duplicate(bool suppressDone, bool duplicateLayer)
         g_free(name);
     }
 }
+
 
 void sp_edit_clear_all(Inkscape::Selection *selection)
 {
