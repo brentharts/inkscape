@@ -103,6 +103,9 @@ namespace UI {
 class ClipboardManagerImpl : public ClipboardManager {
 public:
     void copy(ObjectSet *set) override;
+    void setBackup() override;
+    void restoreBackup() override;
+    void emptyBackup() override;
     void copyPathParameter(Inkscape::LivePathEffect::PathParam *) override;
     void copySymbol(Inkscape::XML::Node* symbol, gchar const* style, bool user_symbol) override;
     bool paste(SPDesktop *desktop, bool in_place) override;
@@ -150,6 +153,7 @@ private:
 
     // private properites
     std::unique_ptr<SPDocument> _clipboardSPDoc; ///< Document that stores the clipboard until someone requests it
+    std::unique_ptr<SPDocument> _backup; ///< Document that stores the clipboard until someone requests it
     Inkscape::XML::Node *_defs; ///< Reference to the clipboard document's defs node
     Inkscape::XML::Node *_root; ///< Reference to the clipboard's root node
     Inkscape::XML::Node *_clipnode; ///< The node that holds extra information
@@ -202,7 +206,9 @@ ClipboardManagerImpl::ClipboardManagerImpl()
 }
 
 
-ClipboardManagerImpl::~ClipboardManagerImpl() = default;
+ClipboardManagerImpl::~ClipboardManagerImpl() {
+    emptyBackup();
+};
 
 
 /**
@@ -1567,6 +1573,19 @@ void ClipboardManagerImpl::_createInternalClipboard()
     }
 }
 
+void ClipboardManagerImpl::setBackup() {
+    std::swap(_backup,_clipboardSPDoc);
+}
+
+void ClipboardManagerImpl::emptyBackup() {
+    if (_backup) {
+        delete _backup.release();
+    }
+}
+
+void ClipboardManagerImpl::restoreBackup() {
+    std::swap(_backup,_clipboardSPDoc);
+}
 
 /**
  * Deletes the internal clipboard document.

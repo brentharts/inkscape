@@ -49,6 +49,7 @@
 #include "object/sp-root.h"
 
 #include "ui/icon-names.h"
+#include "ui/clipboard.h"
 #include "ui/modifiers.h"
 #include "ui/knot/knot.h"
 #include "ui/tools/select-tool.h"
@@ -354,7 +355,6 @@ void Inkscape::SelTrans::grab(Geom::Point const &p, gdouble x, gdouble y, bool s
     }
 
     _updateHandles();
-    g_return_if_fail(_stamp_cache.empty());
 }
 
 void Inkscape::SelTrans::transform(Geom::Affine const &rel_affine, Geom::Point const &norm)
@@ -446,9 +446,6 @@ void Inkscape::SelTrans::ungrab()
         for (auto & i : _l)
             i->hide();
     }
-    if(!_stamp_cache.empty()){
-        _stamp_cache.clear();
-    }
 
     _message_context.clear();
 
@@ -529,76 +526,17 @@ void Inkscape::SelTrans::ungrab()
 void Inkscape::SelTrans::stamp()
 {
     Inkscape::Selection *selection = _desktop->getSelection();
-
-    bool fixup = !_grabbed;
-    if ( fixup && !_stamp_cache.empty() ) {
-        // TODO - give a proper fix. Simple temporary work-around for the grab() issue
-        _stamp_cache.clear();
-    }
-
-    /* stamping mode */
-    if (!_empty) {
-    	std::vector<SPItem*> l;
-        if (!_stamp_cache.empty()) {
-            l = _stamp_cache;
-        } else {
-            /* Build cache */
-            l.insert(l.end(), selection->items().begin(), selection->items().end());
-            sort(l.begin(), l.end(), sp_object_compare_position_bool);
-            _stamp_cache = l;
-        }
-
-        for(auto original_item : l) {
-            Inkscape::XML::Node *original_repr = original_item->getRepr();
-
-            // remember parent
-            Inkscape::XML::Node *parent = original_repr->parent();
-
-            Inkscape::XML::Node *copy_repr = original_repr->duplicate(parent->document());
-
-            // add the new repr to the parent
-            parent->addChild(copy_repr, original_repr->prev());
-
-            SPItem *copy_item = (SPItem *) _desktop->getDocument()->getObjectByRepr(copy_repr);
-            // 1.1 COPYPASTECLONESTAMPLPEBUG
-            SPItem *newitem = dynamic_cast<SPItem *>(_desktop->getDocument()->getObjectByRepr(copy_repr));
-            if (newitem) {
-                remove_hidder_filter(newitem);
-                gchar * id = strdup(copy_item->getId());
-                copy_item = (SPItem *) sp_lpe_item_remove_autoflatten(newitem, id);
-                copy_repr = copy_item->getRepr();
-                g_free(id);
-            }
-            // END COPYPASTECLONESTAMPLPEBUG
-            Geom::Affine const *new_affine;
-            if (_show == SHOW_OUTLINE) {
-                Geom::Affine const i2d(original_item->i2dt_affine());
-                Geom::Affine const i2dnew( i2d * _current_relative_affine );
-                copy_item->set_i2d_affine(i2dnew);
-                new_affine = &copy_item->transform;
-            } else {
-                new_affine = &original_item->transform;
-            }
-
-            copy_item->doWriteTransform(*new_affine);
-
-            if ( copy_item->isCenterSet() && _center ) {
-                copy_item->setCenter(*_center * _current_relative_affine);
-            }
-            Inkscape::GC::release(copy_repr);
-            SPLPEItem * lpeitem = dynamic_cast<SPLPEItem *>(copy_item);
-            if(lpeitem && lpeitem->hasPathEffectRecursive()) {
-                lpeitem->forkPathEffectsIfNecessary(1);
-                sp_lpe_item_update_patheffect(lpeitem, true, true);
-            }
-        }
+    selection->setBackup();
+    Inkscape::UI::ClipboardManager *cm = Inkscape::UI::ClipboardManager::get();
+    cm->setBackup();
+    cm->copy(selection);
+    if (cm->paste(_desktop, true)) {
         DocumentUndo::done(_desktop->getDocument(), _("Stamp"), INKSCAPE_ICON("tool-pointer"));
     }
-
-    if ( fixup && !_stamp_cache.empty() ) {
-        // TODO - give a proper fix. Simple temporary work-around for the grab() issue
-        _stamp_cache.clear();
-    }
+    cm->restoreBackup();
+    cm->emptyBackup();
+    selection->restoreBackup();
+    selection->emptyBackup();
 }
 
 void Inkscape::SelTrans::_updateHandles()

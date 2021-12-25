@@ -39,6 +39,9 @@ namespace UI {
 class ClipboardManager {
 public:
     virtual void copy(ObjectSet *set) = 0;
+    virtual void setBackup() = 0;
+    virtual void emptyBackup() = 0;
+    virtual void restoreBackup() = 0;
     virtual void copyPathParameter(Inkscape::LivePathEffect::PathParam *) = 0;
     virtual void copySymbol(Inkscape::XML::Node* symbol, gchar const* style, bool user_symbol = true) = 0;
     virtual bool paste(SPDesktop *desktop, bool in_place = false) = 0;
@@ -50,14 +53,16 @@ public:
     virtual std::vector<Glib::ustring> getElementsOfType(SPDesktop *desktop, gchar const* type = "*", gint maxdepth = -1) = 0;
     virtual Glib::ustring getFirstObjectID() = 0;
     static ClipboardManager *get();
+    static ClipboardManager *getVolatil();
 protected:
     ClipboardManager(); // singleton
     virtual ~ClipboardManager();
 private:
     ClipboardManager(const ClipboardManager &) = delete; ///< no copy
-    ClipboardManager &operator=(const ClipboardManager &) = delete; ///< no assign
+    ClipboardManager &operator=(const ClipboardManager &) = delete; ///< no assign 
 
     static ClipboardManager *_instance;
+    static ClipboardManager *_instance2;
 };
 
 } // namespace IO
