@@ -277,6 +277,7 @@ void DocumentProperties::set_document_scale(SPDesktop* desktop, double scale_x) 
         // _lock_scale_update
         document->setDocumentScale(scale_x);
         update_viewbox_ui(desktop);
+        update_scale_ui(desktop);
         DocumentUndo::done(document, _("Set page scale"), "");
     }
 }
