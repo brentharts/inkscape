@@ -143,14 +143,12 @@ InkscapeWindow::InkscapeWindow(SPDocument* document)
     setup_view();
 
     // Show dialogs after the main window, otherwise dialogs may be associated as the main window of the program.
-    if (_app) {
-        // restore short-lived floating dialogs state if this is the first window being opened
-        bool include_short_lived = _app->get_number_of_windows() == 0;
-        DialogManager::singleton().restore_dialogs_state(_desktop->getContainer(), include_short_lived);
+    // Restore short-lived floating dialogs state if this is the first window being opened
+    bool include_short_lived = _app->get_number_of_windows() == 0;
+    DialogManager::singleton().restore_dialogs_state(_desktop->getContainer(), include_short_lived);
 
-        // This pokes the window to request the right size for the dialogs once loaded.
-        g_idle_add(GSourceFunc(&_resize_children), this);
-    }
+    // This pokes the window to request the right size for the dialogs once loaded.
+    g_idle_add(GSourceFunc(&_resize_children), this);
 
     // ================= Shift Icons =================
     // Note: The menu is defined at the app level but shifting icons requires actual widgets and
