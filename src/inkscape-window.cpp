@@ -149,8 +149,7 @@ InkscapeWindow::InkscapeWindow(SPDocument* document)
         DialogManager::singleton().restore_dialogs_state(_desktop->getContainer(), include_short_lived);
 
         // This pokes the window to request the right size for the dialogs once loaded.
-        Gtk::Window *win = _desktop->getToplevel();
-        g_idle_add(GSourceFunc(&_resize_children), win);
+        g_idle_add(GSourceFunc(&_resize_children), this);
     }
 
     // ================= Shift Icons =================
@@ -169,8 +168,7 @@ InkscapeWindow::InkscapeWindow(SPDocument* document)
 
 InkscapeWindow::~InkscapeWindow()
 {
-    Gtk::Window *win = _desktop->getToplevel();
-    g_idle_remove_by_data(win);
+    g_idle_remove_by_data(this);
 }
 
 // Change a document, leaving desktop/view the same. (Eventually move all code here.)
