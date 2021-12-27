@@ -671,8 +671,8 @@ void SPDocument::setDocumentScale(double scaleX, double scaleY) {
 }
 
 /// Sets document scale (by changing viewBox, x and y scaling equal)
-void SPDocument::setDocumentScale( double scale ) {
-    setDocumentScale( scale, scale );
+void SPDocument::setDocumentScale(double scale) {
+    setDocumentScale(scale, scale);
 }
 
 /// Returns document scale as defined by width/height (in pixels) and viewBox (real world to

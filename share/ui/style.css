@@ -543,6 +543,11 @@ button.link:hover image {
     padding: 5px 3px;
 }
 
+.link-edit-button {
+    padding: 5px 3px;
+    min-width: 0.5em;
+}
+
 /* In some themes stack switcher buttons are extra wide forcing dialogs too wide */
 stackswitcher button {
     padding-left: 1px;

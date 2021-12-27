@@ -158,6 +158,8 @@ public:
             _link_width_height.set_image_from_icon_name(_size_ratio > 0 ? linked : unlinked, Gtk::ICON_SIZE_LARGE_TOOLBAR);
         });
         _link_width_height.set_image_from_icon_name(unlinked, Gtk::ICON_SIZE_LARGE_TOOLBAR);
+        // set image for linked scale
+        get_widget<Gtk::Image>(_builder, "linked-scale-img").set_from_icon_name(linked, Gtk::ICON_SIZE_LARGE_TOOLBAR);
 
         _page_width .signal_value_changed().connect([=](){ set_page_size_linked(true); });
         _page_height.signal_value_changed().connect([=](){ set_page_size_linked(false); });
@@ -168,8 +170,15 @@ public:
             auto pair = get_dimension(dim);
             auto b1 = &pair.first;
             auto b2 = &pair.second;
-            b1->signal_value_changed().connect([=](){ fire_value_changed(*b1, *b2, nullptr, dim); });
-            b2->signal_value_changed().connect([=](){ fire_value_changed(*b1, *b2, nullptr, dim); });
+            if (dim == Dimension::Scale) {
+                // uniform scale: report the same x and y
+                b1->signal_value_changed().connect([=](){ fire_value_changed(*b1, *b1, nullptr, dim); });
+                b2->signal_value_changed().connect([=](){ fire_value_changed(*b2, *b2, nullptr, dim); });
+            }
+            else {
+                b1->signal_value_changed().connect([=](){ fire_value_changed(*b1, *b2, nullptr, dim); });
+                b2->signal_value_changed().connect([=](){ fire_value_changed(*b1, *b2, nullptr, dim); });
+            }
         }
 
         auto& page_resize = get_widget<Gtk::Button>(_builder, "page-resize");
@@ -289,8 +298,6 @@ private:
         _current_page_unit = _page_units->getUnit();
         const auto new_unit = _current_page_unit;
 
-        if (new_unit == old_unit) return;
-
         {
             auto width = _page_width.get_value();
             auto height = _page_height.get_value();
@@ -340,6 +347,7 @@ private:
         }
         else if (unit == Units::Document) {
             _page_units->setUnit(abbr);
+            _current_page_unit = _page_units->getUnit();
             set_page_size();
         }
     }

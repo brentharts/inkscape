@@ -265,9 +265,13 @@
             <property name="focus-on-click">False</property>
             <property name="receives-default">True</property>
             <property name="halign">start</property>
+            <property name="margin-left">1</property>
             <property name="margin-top">5</property>
             <property name="margin-bottom">5</property>
             <property name="relief">none</property>
+            <style>
+              <class name="link-edit-button"/>
+            </style>
           </object>
           <packing>
             <property name="left-attach">3</property>
@@ -330,7 +334,6 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="tooltip-text" translatable="yes">While SVG allows non-uniform scaling it is recommended to use only uniform scaling in Inkscape. To set a non-uniform scaling, set the 'viewBox' and 'preserveAspectRatio' directly.</property>
-            <property name="editable">False</property>
             <property name="width-chars">9</property>
             <property name="adjustment">adj-scale-y</property>
             <property name="digits">6</property>
@@ -342,24 +345,6 @@
             <property name="left-attach">1</property>
             <property name="top-attach">9</property>
             <property name="width">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="link-scale">
-            <property name="name">LockGuides</property>
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="focus-on-click">False</property>
-            <property name="receives-default">True</property>
-            <property name="halign">start</property>
-            <property name="margin-top">5</property>
-            <property name="margin-bottom">5</property>
-            <property name="relief">none</property>
-          </object>
-          <packing>
-            <property name="left-attach">3</property>
-            <property name="top-attach">8</property>
-            <property name="height">2</property>
           </packing>
         </child>
         <child>
@@ -512,21 +497,6 @@
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="link-viewbox">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="focus-on-click">False</property>
-            <property name="receives-default">True</property>
-            <property name="halign">start</property>
-            <property name="relief">none</property>
-          </object>
-          <packing>
-            <property name="left-attach">3</property>
-            <property name="top-attach">13</property>
-            <property name="height">2</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkLabel">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
@@ -605,6 +575,30 @@
           </packing>
         </child>
         <child>
+          <object class="GtkImage" id="linked-scale-img">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="halign">center</property>
+            <property name="valign">center</property>
+            <property name="margin-left">1</property>
+            <property name="stock">gtk-missing-image</property>
+            <style>
+              <class name="viewbox"/>
+            </style>
+          </object>
+          <packing>
+            <property name="left-attach">3</property>
+            <property name="top-attach">8</property>
+            <property name="height">2</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
           <placeholder/>
         </child>
         <child>
@@ -650,7 +644,7 @@
       </packing>
     </child>
     <child>
-      <!-- n-columns=5 n-rows=12 -->
+      <!-- n-columns=5 n-rows=5 -->
       <object class="GtkGrid">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
@@ -701,182 +695,8 @@
           </packing>
         </child>
         <child>
-          <object class="GtkLabel">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="halign">start</property>
-            <property name="valign">center</property>
-            <property name="label" translatable="yes">Page color:</property>
-          </object>
-          <packing>
-            <property name="left-attach">0</property>
-            <property name="top-attach">3</property>
-            <property name="width">3</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkCheckButton" id="checkerboard">
-            <property name="label" translatable="yes">Checkerboard</property>
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">False</property>
-            <property name="tooltip-text" translatable="yes">If set, use a colored checkerboard for the desk background.</property>
-            <property name="halign">start</property>
-            <property name="valign">center</property>
-            <property name="draw-indicator">True</property>
-          </object>
-          <packing>
-            <property name="left-attach">0</property>
-            <property name="top-attach">4</property>
-            <property name="width">4</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkCheckButton" id="border">
-            <property name="label" translatable="yes">Border:</property>
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">False</property>
-            <property name="tooltip-text" translatable="yes">If set, rectangular page border is shown.</property>
-            <property name="halign">start</property>
-            <property name="valign">center</property>
-            <property name="draw-indicator">True</property>
-          </object>
-          <packing>
-            <property name="left-attach">0</property>
-            <property name="top-attach">5</property>
-            <property name="width">3</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkCheckButton" id="border-top">
-            <property name="label" translatable="yes">Always on top</property>
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">False</property>
-            <property name="tooltip-text" translatable="yes">If set, border is always on top of the drawing.</property>
-            <property name="halign">start</property>
-            <property name="valign">center</property>
-            <property name="draw-indicator">True</property>
-            <style>
-              <class name="indent"/>
-            </style>
-          </object>
-          <packing>
-            <property name="left-attach">0</property>
-            <property name="top-attach">6</property>
-            <property name="width">4</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkCheckButton" id="shadow">
-            <property name="label" translatable="yes">Show shadow</property>
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">False</property>
-            <property name="tooltip-text" translatable="yes">If set, page border shows a shadow on its right and lower side.</property>
-            <property name="halign">start</property>
-            <property name="valign">center</property>
-            <property name="draw-indicator">True</property>
-            <style>
-              <class name="indent"/>
-            </style>
-          </object>
-          <packing>
-            <property name="left-attach">0</property>
-            <property name="top-attach">7</property>
-            <property name="width">4</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="halign">start</property>
-            <property name="valign">center</property>
-            <property name="label" translatable="yes">Desk color:</property>
-          </object>
-          <packing>
-            <property name="left-attach">0</property>
-            <property name="top-attach">8</property>
-            <property name="width">3</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="halign">start</property>
-            <property name="label" translatable="yes">Render</property>
-            <style>
-              <class name="heading"/>
-            </style>
-          </object>
-          <packing>
-            <property name="left-attach">0</property>
-            <property name="top-attach">9</property>
-            <property name="width">4</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkCheckButton" id="use-antialias">
-            <property name="label" translatable="yes">Use antialiasing</property>
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">False</property>
-            <property name="tooltip-text" translatable="yes">If unset, no antialiasing will be done on the drawing.</property>
-            <property name="halign">start</property>
-            <property name="valign">center</property>
-            <property name="draw-indicator">True</property>
-          </object>
-          <packing>
-            <property name="left-attach">0</property>
-            <property name="top-attach">10</property>
-            <property name="width">4</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="background-color">
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">True</property>
-            <property name="tooltip-text" translatable="yes">Page background color used  during editing and exporting.</property>
-            <property name="halign">end</property>
-          </object>
-          <packing>
-            <property name="left-attach">3</property>
-            <property name="top-attach">3</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="border-color">
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">True</property>
-            <property name="tooltip-text" translatable="yes">Page border and drop shadow color.</property>
-            <property name="halign">end</property>
-          </object>
-          <packing>
-            <property name="left-attach">3</property>
-            <property name="top-attach">5</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="desk-color">
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">True</property>
-            <property name="tooltip-text" translatable="yes">Desk background color surrounding pages.</property>
-            <property name="halign">end</property>
-          </object>
-          <packing>
-            <property name="left-attach">3</property>
-            <property name="top-attach">8</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkBox" id="preview-box">
-            <property name="height-request">108</property>
+            <property name="height-request">132</property>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <child>
@@ -890,37 +710,218 @@
           </packing>
         </child>
         <child>
-          <placeholder/>
+          <!-- n-columns=3 n-rows=2 -->
+          <object class="GtkGrid">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="halign">center</property>
+            <property name="margin-bottom">6</property>
+            <property name="row-spacing">2</property>
+            <property name="column-spacing">4</property>
+            <property name="column-homogeneous">True</property>
+            <child>
+              <object class="GtkButton" id="background-color">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="tooltip-text" translatable="yes">Page background color used  during editing and exporting.</property>
+                <property name="halign">center</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="border-color">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="tooltip-text" translatable="yes">Page border and drop shadow color.</property>
+                <property name="halign">center</property>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="desk-color">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="tooltip-text" translatable="yes">Desk background color surrounding pages.</property>
+                <property name="halign">center</property>
+              </object>
+              <packing>
+                <property name="left-attach">2</property>
+                <property name="top-attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="halign">center</property>
+                <property name="label" translatable="yes">Border</property>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="halign">center</property>
+                <property name="label" translatable="yes">Page</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="halign">center</property>
+                <property name="label" translatable="yes">Desk</property>
+              </object>
+              <packing>
+                <property name="left-attach">2</property>
+                <property name="top-attach">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="left-attach">0</property>
+            <property name="top-attach">3</property>
+            <property name="width">4</property>
+          </packing>
         </child>
         <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkCheckButton" id="checkerboard">
+                <property name="label" translatable="yes">Checkerboard</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">False</property>
+                <property name="tooltip-text" translatable="yes">If set, use a colored checkerboard for the desk background.</property>
+                <property name="halign">start</property>
+                <property name="valign">center</property>
+                <property name="draw-indicator">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="border">
+                <property name="label" translatable="yes">Border</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">False</property>
+                <property name="tooltip-text" translatable="yes">If set, rectangular page border is shown.</property>
+                <property name="halign">start</property>
+                <property name="valign">center</property>
+                <property name="draw-indicator">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="border-top">
+                <property name="label" translatable="yes">Always on top</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">False</property>
+                <property name="tooltip-text" translatable="yes">If set, border is always on top of the drawing.</property>
+                <property name="halign">start</property>
+                <property name="valign">center</property>
+                <property name="draw-indicator">True</property>
+                <style>
+                  <class name="indent"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="shadow">
+                <property name="label" translatable="yes">Show shadow</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">False</property>
+                <property name="tooltip-text" translatable="yes">If set, page border shows a shadow on its right and lower side.</property>
+                <property name="halign">start</property>
+                <property name="valign">center</property>
+                <property name="draw-indicator">True</property>
+                <style>
+                  <class name="indent"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="halign">start</property>
+                <property name="label" translatable="yes">Render</property>
+                <style>
+                  <class name="heading"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">4</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="use-antialias">
+                <property name="label" translatable="yes">Use antialiasing</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">False</property>
+                <property name="tooltip-text" translatable="yes">If unset, no antialiasing will be done on the drawing.</property>
+                <property name="halign">start</property>
+                <property name="valign">center</property>
+                <property name="draw-indicator">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">5</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="left-attach">0</property>
+            <property name="top-attach">4</property>
+            <property name="width">4</property>
+          </packing>
         </child>
         <child>
           <placeholder/>

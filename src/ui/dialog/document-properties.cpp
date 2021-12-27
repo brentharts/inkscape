@@ -267,15 +267,14 @@ void DocumentProperties::set_viewbox_size(SPDesktop* desktop, double width, doub
     update_scale_ui(desktop);
 }
 
-void DocumentProperties::set_document_scale(SPDesktop* desktop, double scale_x) {
+void DocumentProperties::set_document_scale(SPDesktop* desktop, double scale) {
     if (!desktop) return;
 
     auto document = desktop->getDocument();
     if (!document) return;
 
-    if (scale_x > 0) {
-        // _lock_scale_update
-        document->setDocumentScale(scale_x);
+    if (scale > 0) {
+        document->setDocumentScale(scale);
         update_viewbox_ui(desktop);
         update_scale_ui(desktop);
         DocumentUndo::done(document, _("Set page scale"), "");
@@ -289,11 +288,8 @@ void DocumentProperties::update_scale_ui(SPDesktop* desktop) {
     if (!document) return;
 
     using UI::Widget::PageProperties;
-
-    // if (!_lockScaleUpdate) {
-        Geom::Scale scale = document->getDocumentScale();
-        _page->set_dimension(PageProperties::Dimension::Scale, scale[Geom::X], scale[Geom::Y]);
-    // }
+    Geom::Scale scale = document->getDocumentScale();
+    _page->set_dimension(PageProperties::Dimension::Scale, scale[Geom::X], scale[Geom::Y]);
 }
 
 void DocumentProperties::update_viewbox_ui(SPDesktop* desktop) {
@@ -303,11 +299,9 @@ void DocumentProperties::update_viewbox_ui(SPDesktop* desktop) {
     if (!document) return;
 
     using UI::Widget::PageProperties;
-    // if (!_lockViewboxUpdate) {
-        Geom::Rect viewBox = document->getViewBox();
-        _page->set_dimension(PageProperties::Dimension::ViewboxPosition, viewBox.min()[Geom::X], viewBox.min()[Geom::Y]);
-        _page->set_dimension(PageProperties::Dimension::ViewboxSize, viewBox.width(), viewBox.height());
-    // }
+    Geom::Rect viewBox = document->getViewBox();
+    _page->set_dimension(PageProperties::Dimension::ViewboxPosition, viewBox.min()[Geom::X], viewBox.min()[Geom::Y]);
+    _page->set_dimension(PageProperties::Dimension::ViewboxSize, viewBox.width(), viewBox.height());
 }
 
 void DocumentProperties::build_page()
@@ -355,7 +349,7 @@ void DocumentProperties::build_page()
                 break;
 
             case PageProperties::Dimension::Scale:
-                set_document_scale(_wr.desktop(), x); // uniform scale; y cannot be changed in the UI
+                set_document_scale(_wr.desktop(), x); // uniform scale; x and y are linked in the UI
         }
         _wr.setUpdating(false);
     });
