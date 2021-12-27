@@ -126,9 +126,11 @@
     <property name="valign">center</property>
     <child>
       <object class="GtkFlowBox">
+        <property name="homogeneous">True</property>
         <property name="visible">True</property>
         <property name="can-focus">False</property>
         <property name="halign">start</property>
+        <property name="valign">center</property>
         <property name="orientation">vertical</property>
         <property name="max_children_per_line">2</property>
         <child>
@@ -202,9 +204,11 @@
     </child>
     <child>
       <object class="GtkFlowBox">
+        <property name="homogeneous">True</property>
         <property name="visible">True</property>
         <property name="can-focus">False</property>
         <property name="halign">start</property>
+        <property name="valign">center</property>
         <property name="orientation">vertical</property>
         <property name="max_children_per_line">5</property>
         <child>
@@ -342,9 +346,11 @@
     </child>
     <child>
       <object class="GtkFlowBox">
+        <property name="homogeneous">True</property>
         <property name="visible">True</property>
         <property name="can-focus">False</property>
         <property name="halign">start</property>
+        <property name="valign">center</property>
         <property name="orientation">vertical</property>
         <property name="max_children_per_line">6</property>
         <child>
@@ -505,9 +511,11 @@
     </child>
     <child>
       <object class="GtkFlowBox">
+        <property name="homogeneous">True</property>
         <property name="visible">True</property>
         <property name="can-focus">False</property>
         <property name="halign">start</property>
+        <property name="valign">center</property>
         <property name="orientation">vertical</property>
         <property name="max_children_per_line">5</property>
         <child>
@@ -645,11 +653,13 @@
     </child>
     <child>
       <object class="GtkFlowBox">
+        <property name="homogeneous">True</property>
         <property name="visible">True</property>
         <property name="can-focus">False</property>
         <property name="halign">start</property>
+        <property name="valign">center</property>
         <property name="orientation">vertical</property>
-        <property name="max_children_per_line">6</property>
+        <property name="max_children_per_line">5</property>
         <child>
           <object class="GtkFlowBoxChild">
             <property name="visible">True</property>
