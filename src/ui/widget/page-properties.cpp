@@ -88,6 +88,7 @@ public:
         _desk_color_picker = std::make_unique<ColorPicker>(
             _("Desk color"), "", 0xd0d0d0ff, true,
             &get_widget<Gtk::Button>(_builder, "desk-color"));
+        _desk_color_picker->use_transparency(false);
 
         for (auto element : {Color::Background, Color::Border, Color::Desk}) {
             get_color_picker(element).connectChanged([=](guint rgba) {

@@ -75,7 +75,7 @@ void ColorPicker::setRgba32 (guint32 rgba)
 {
     if (_in_use) return;
 
-    _preview->setRgba32 (rgba);
+    set_preview(rgba);
     _rgba = rgba;
     if (_color_selector)
     {
@@ -131,7 +131,7 @@ void ColorPicker::_onSelectedColorChanged() {
     }
 
     guint32 rgba = _selected_color.value();
-    _preview->setRgba32(rgba);
+    set_preview(rgba);
 
     if (_undo && SP_ACTIVE_DESKTOP) {
         DocumentUndo::done(SP_ACTIVE_DESKTOP->getDocument(), /* TODO: annotate */ "color-picker.cpp:129", "");
@@ -141,6 +141,15 @@ void ColorPicker::_onSelectedColorChanged() {
     _in_use = false;
     _changed_signal.emit(rgba);
     _rgba = rgba;
+}
+
+void ColorPicker::set_preview(guint32 rgba) {
+    _preview->setRgba32(_ignore_transparency ? rgba | 0xff : rgba);
+}
+
+void ColorPicker::use_transparency(bool enable) {
+    _ignore_transparency = !enable;
+    set_preview(_rgba);
 }
 
 }//namespace Widget
