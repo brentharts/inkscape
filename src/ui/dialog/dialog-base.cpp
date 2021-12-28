@@ -88,7 +88,10 @@ DialogBase::~DialogBase() {
 
 void DialogBase::ensure_size() {
     if (desktop) {
-        resize_children(desktop->getToplevel());
+        Gtk::Allocation allocation;
+        int             baseline;
+        desktop->getToplevel()->get_allocated_size(allocation, baseline);
+        desktop->getToplevel()->size_allocate(allocation, baseline);
     }
 }
 
