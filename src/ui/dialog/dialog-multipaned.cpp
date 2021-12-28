@@ -1210,7 +1210,10 @@ void DialogMultipaned::on_append_drag_data(const Glib::RefPtr<Gdk::DragContext> 
 // Signals
 sigc::signal<void, const Glib::RefPtr<Gdk::DragContext>> DialogMultipaned::signal_prepend_drag_data()
 {
-    resize_children();
+    Gtk::Allocation allocation;
+    int             baseline;
+    get_allocated_size(allocation, baseline);
+    size_allocate(allocation, baseline);
     return _signal_prepend_drag_data;
 }
 

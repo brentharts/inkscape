@@ -648,7 +648,10 @@ void DialogNotebook::toggle_tab_labels_callback(bool show)
     }
     _labels_set_off = _labels_off;
     if (_prev_alloc_width && prev_tabstatus != tabstatus ) {
-        _notebook.resize_children();
+        Gtk::Allocation allocation;
+        int             baseline;
+        _notebook.get_allocated_size(allocation, baseline);
+        _notebook.size_allocate(allocation, baseline);
     }
     if (show && _single_tab_width) {
         _notebook.set_scrollable(true);
