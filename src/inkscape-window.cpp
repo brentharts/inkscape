@@ -65,7 +65,10 @@ using Inkscape::UI::Dialog::DialogWindow;
 
 static gboolean _resize_children(Gtk::Window *win)
 {
-    win->resize_children();
+    Gtk::Allocation allocation;
+    int             baseline;
+    win->get_allocated_size(allocation, baseline);
+    win->size_allocate(allocation, baseline);
     return false;
 }
 
