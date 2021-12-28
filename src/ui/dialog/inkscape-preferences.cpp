@@ -1682,7 +1682,7 @@ void InkscapePreferences::initPageUI()
         auto apply = Gtk::make_managed<Gtk::Button>(_("Apply"));
         apply->set_tooltip_text(_("Apply font size changes to the UI"));
         apply->set_valign(Gtk::ALIGN_FILL);
-        apply->set_margin_right(5);
+        apply->set_margin_end(5);
         reset->set_valign(Gtk::ALIGN_FILL);
         space->add(*apply);
         space->add(*reset);
