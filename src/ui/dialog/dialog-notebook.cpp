@@ -58,7 +58,6 @@ DialogNotebook::DialogNotebook(DialogContainer *container)
     _labels_off = labelstautus == PREFS_NOTEBOOK_LABELS_OFF;
 
     // ============= Notebook menu ==============
-    _menu.set_title("NotebookOptions");
     _notebook.set_group_name("InkscapeDialogGroup");
     _notebook.set_scrollable(true);
 
