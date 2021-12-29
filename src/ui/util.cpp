@@ -63,6 +63,20 @@ void resize_children(Gtk::Widget *widget) {
     }
 }
 
+
+Gdk::RGBA get_background_color(Glib::RefPtr<Gtk::StyleContext> &context,
+                               Gtk::StateFlags                  state) {
+    GdkRGBA *c;
+
+    gtk_style_context_get(context->gobj(),
+                          static_cast<GtkStateFlags>(state),
+                          GTK_STYLE_PROPERTY_BACKGROUND_COLOR, &c,
+                          nullptr);
+    auto bg_color = Glib::wrap(c);
+
+    return bg_color;
+}
+
 /*
   Local Variables:
   mode:c++

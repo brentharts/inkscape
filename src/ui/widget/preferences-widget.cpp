@@ -34,6 +34,7 @@
 
 #include "ui/dialog/filedialog.h"
 #include "ui/icon-loader.h"
+#include "ui/util.h"
 #include "ui/widget/preferences-widget.h"
 
 
@@ -450,12 +451,8 @@ ZoomCorrRuler::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
     Gdk::RGBA bg;
     bg.set_grey(0.5);
     if (auto wnd = dynamic_cast<Gtk::Window*>(this->get_toplevel())) {
-        GdkRGBA *c;
-        gtk_style_context_get(wnd->get_style_context()->gobj(),
-                              static_cast<GtkStateFlags>(0),
-                              GTK_STYLE_PROPERTY_BACKGROUND_COLOR, &c,
-                              nullptr);
-        bg = Glib::wrap(c);
+        auto sc = wnd->get_style_context();
+        bg = get_background_color(sc);
     }
 
     cr->set_source_rgb(bg.get_red(), bg.get_green(), bg.get_blue());
