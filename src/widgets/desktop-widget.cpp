@@ -60,6 +60,7 @@
 #include "ui/dialog/dialog-multipaned.h"
 #include "ui/dialog/dialog-window.h"
 #include "ui/tools/box3d-tool.h"
+#include "ui/util.h"
 #include "ui/uxmanager.h"
 #include "ui/widget/button.h"
 #include "ui/widget/canvas.h"
@@ -1144,10 +1145,7 @@ void SPDesktopWidget::layoutWidgets()
         snap.set_valign(Gtk::ALIGN_CENTER);
     }
 
-    Gtk::Allocation allocation;
-    int             baseline;
-    _top_toolbars->get_allocated_size(allocation, baseline);
-    _top_toolbars->size_allocate(allocation, baseline);
+    resize_children(_top_toolbars);
 }
 
 Gtk::Toolbar *

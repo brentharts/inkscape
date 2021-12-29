@@ -54,6 +54,15 @@ bool is_widget_effectively_visible(Gtk::Widget* widget) {
     return widget->get_child_visible();
 }
 
+void resize_children(Gtk::Widget *widget) {
+    if(widget) {
+        Gtk::Allocation allocation;
+        int             baseline;
+        widget->get_allocated_size(allocation, baseline);
+        widget->size_allocate(allocation, baseline);
+    }
+}
+
 /*
   Local Variables:
   mode:c++

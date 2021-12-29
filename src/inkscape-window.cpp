@@ -57,6 +57,7 @@
 #include "ui/shortcuts.h"
 
 #include "widgets/desktop-widget.h"
+#include "ui/util.h"
 #include "ui/widget/canvas.h"
 
 using Inkscape::UI::Dialog::DialogManager;
@@ -65,10 +66,7 @@ using Inkscape::UI::Dialog::DialogWindow;
 
 static gboolean _resize_children(Gtk::Window *win)
 {
-    Gtk::Allocation allocation;
-    int             baseline;
-    win->get_allocated_size(allocation, baseline);
-    win->size_allocate(allocation, baseline);
+    resize_children(win);
     return false;
 }
 
