@@ -28,6 +28,7 @@
 #include "ui/tools/tool-base.h"
 #include "widgets/spw-utilities.h"
 #include "ui/widget/canvas.h"
+#include "ui/util.h"
 
 namespace Inkscape {
 namespace UI {
@@ -87,10 +88,7 @@ DialogBase::~DialogBase() {
 
 void DialogBase::ensure_size() {
     if (desktop) {
-        Gtk::Allocation allocation;
-        int             baseline;
-        desktop->getToplevel()->get_allocated_size(allocation, baseline);
-        desktop->getToplevel()->size_allocate(allocation, baseline);
+        resize_children(desktop->getToplevel());
     }
 }
 

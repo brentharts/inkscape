@@ -22,6 +22,7 @@
 #include <numeric>
 
 #include "ui/dialog/dialog-notebook.h"
+#include "ui/util.h"
 #include "ui/widget/canvas-grid.h"
 #include "dialog-window.h"
 
@@ -1210,19 +1211,13 @@ void DialogMultipaned::on_append_drag_data(const Glib::RefPtr<Gdk::DragContext> 
 // Signals
 sigc::signal<void, const Glib::RefPtr<Gdk::DragContext>> DialogMultipaned::signal_prepend_drag_data()
 {
-    Gtk::Allocation allocation;
-    int             baseline;
-    get_allocated_size(allocation, baseline);
-    size_allocate(allocation, baseline);
+    resize_children(this);
     return _signal_prepend_drag_data;
 }
 
 sigc::signal<void, const Glib::RefPtr<Gdk::DragContext>> DialogMultipaned::signal_append_drag_data()
 {
-    Gtk::Allocation allocation;
-    int             baseline;
-    get_allocated_size(allocation, baseline);
-    size_allocate(allocation, baseline);
+    resize_children(this);
     return _signal_append_drag_data;
 }
 

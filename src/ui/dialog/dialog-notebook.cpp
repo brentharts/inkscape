@@ -24,6 +24,7 @@
 #include "ui/dialog/dialog-multipaned.h"
 #include "ui/dialog/dialog-window.h"
 #include "ui/icon-loader.h"
+#include "ui/util.h"
 
 namespace Inkscape {
 namespace UI {
@@ -647,10 +648,7 @@ void DialogNotebook::toggle_tab_labels_callback(bool show)
     }
     _labels_set_off = _labels_off;
     if (_prev_alloc_width && prev_tabstatus != tabstatus ) {
-        Gtk::Allocation allocation;
-        int             baseline;
-        _notebook.get_allocated_size(allocation, baseline);
-        _notebook.size_allocate(allocation, baseline);
+        resize_children(&_notebook);
     }
     if (show && _single_tab_width) {
         _notebook.set_scrollable(true);
