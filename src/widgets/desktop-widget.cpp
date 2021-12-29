@@ -1145,10 +1145,7 @@ void SPDesktopWidget::layoutWidgets()
         snap.set_valign(Gtk::ALIGN_CENTER);
     }
 
-    Gtk::Allocation allocation;
-    int             baseline;
-    _top_toolbars->get_allocated_size(allocation, baseline);
-    _top_toolbars->size_allocate(allocation, baseline);
+    resize_children(_top_toolbars);
 }
 
 Gtk::Toolbar *
