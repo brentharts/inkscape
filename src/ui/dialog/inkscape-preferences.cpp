@@ -3125,7 +3125,9 @@ void InkscapePreferences::on_modifier_selection_changed()
 {
     _kb_is_updated = true;
     Gtk::TreeStore::iterator iter = _mod_tree.get_selection()->get_selected();
-    bool selected = (iter);
+    bool selected = false;
+    if(iter) selected = true;
+
     _kb_mod_ctrl.set_sensitive(selected);
     _kb_mod_shift.set_sensitive(selected);
     _kb_mod_alt.set_sensitive(selected);
