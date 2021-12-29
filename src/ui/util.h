@@ -30,6 +30,9 @@ void reveal_widget(Gtk::Widget *widget, bool show);
 // check if widget in a container is actually visible
 bool is_widget_effectively_visible(Gtk::Widget* widget);
 
+// Utility function to ensure correct sizing after adding child widgets
+void resize_children(Gtk::Widget *widget);
+
 #endif
 
 /*
