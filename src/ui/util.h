@@ -15,13 +15,16 @@
 
 #include <cstddef> // size_t
 
+#include <gdkmm/rgba.h>
+#include <gtkmm/stylecontext.h>
+
 namespace Glib {
 class ustring;
 }
 
 namespace Gtk {
-class Widget;
 class Revealer;
+class Widget;
 }
 
 Glib::ustring ink_ellipsize_text (Glib::ustring const &src, size_t maxlen);
@@ -32,6 +35,10 @@ bool is_widget_effectively_visible(Gtk::Widget* widget);
 
 // Utility function to ensure correct sizing after adding child widgets
 void resize_children(Gtk::Widget *widget);
+
+// Get the background-color style property for a given StyleContext
+Gdk::RGBA get_background_color(Glib::RefPtr<Gtk::StyleContext> &context,
+                               Gtk::StateFlags                  state = static_cast<Gtk::StateFlags>(0));
 
 #endif
 
