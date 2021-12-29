@@ -849,9 +849,21 @@ ObjectsPanel::ObjectsPanel() :
     _buttonsRow.pack_start(_buttonsPrimary, Gtk::PACK_SHRINK);
     _buttonsRow.pack_end(_buttonsSecondary, Gtk::PACK_SHRINK);
 
-    selection_color = _tree.get_style_context()->get_background_color(Gtk::STATE_FLAG_SELECTED);
+    GdkRGBA *c;
+    gtk_style_context_get(_tree.get_style_context()->gobj(),
+                          GTK_STATE_FLAG_SELECTED,
+                          GTK_STYLE_PROPERTY_BACKGROUND_COLOR, &c,
+                          nullptr);
+
+    selection_color = Glib::wrap(c);
     _tree_style = _tree.signal_style_updated().connect([&](){
-        selection_color = _tree.get_style_context()->get_background_color(Gtk::STATE_FLAG_SELECTED);
+        GdkRGBA *d;
+        gtk_style_context_get(_tree.get_style_context()->gobj(),
+                              GTK_STATE_FLAG_SELECTED,
+                              GTK_STYLE_PROPERTY_BACKGROUND_COLOR, &d,
+                              nullptr);
+        selection_color = Glib::wrap(d);
+
         if (!root_watcher) return;
         for (auto&& kv : root_watcher->child_watchers) {
             if (kv.second) {
