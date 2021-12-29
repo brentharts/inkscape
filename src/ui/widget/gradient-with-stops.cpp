@@ -109,7 +109,13 @@ void GradientWithStops::update() {
 // capture background color when styles change
 void GradientWithStops::on_style_updated() {
     if (auto wnd = dynamic_cast<Gtk::Window*>(this->get_toplevel())) {
-        _background_color = wnd->get_style_context()->get_background_color();
+        GdkRGBA *c;
+        gtk_style_context_get(wnd->get_style_context()->gobj(),
+                              static_cast<GtkStateFlags>(0),
+                              GTK_STYLE_PROPERTY_BACKGROUND_COLOR, &c,
+                              nullptr);
+
+        _background_color = Glib::wrap(c);
     }
 
     // load and cache cursors
@@ -537,3 +543,14 @@ void GradientWithStops::set_focused_stop(int index) {
 } // namespace Widget
 } // namespace UI
 } // namespace Inkscape
+
+/*
+  Local Variables:
+  mode:c++
+  c-file-style:"stroustrup"
+  c-file-offsets:((innamespace . 0)(inline-open . 0))
+  indent-tabs-mode:nil
+  fill-column:99
+  End:
+*/
+// vim: filetype=cpp:expandtab:shiftwidth=4:tabstop=8:softtabstop=4 :

@@ -1141,7 +1141,12 @@ void InkscapePreferences::resetIconsColors(bool themechange)
         // This is a hack to fix a proble style is not updated enough fast on
         // change from dark to bright themes
         if (themechange) {
-            base_color = _symbolic_base_color.get_style_context()->get_background_color();
+            GdkRGBA *c;
+            gtk_style_context_get(_symbolic_base_color.get_style_context()->gobj(),
+                                  static_cast<GtkStateFlags>(0),
+                                  GTK_STYLE_PROPERTY_BACKGROUND_COLOR, &c,
+                                  nullptr);
+            base_color = Glib::wrap(c);
         }
         SPColor base_color_sp(base_color.get_red(), base_color.get_green(), base_color.get_blue());
         //we copy highlight to not use
