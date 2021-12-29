@@ -474,9 +474,21 @@ void XmlTree::on_tree_select_row(GtkTreeSelection *selection, gpointer data)
 {
     XmlTree *self = static_cast<XmlTree *>(data);
 
+     // path if selection changes first on the desktop side
     if (self->blocked || !self->getDesktop()) {
+        
+        // Defer the update after all events have been processed. Allows skipping
+        // of invalid intermediate selection states, like the automatic next row
+        // selection after `gtk_tree_store_remove`.
+        if (self->deferred_on_tree_select_row_id == 0) {
+        self->deferred_on_tree_select_row_id = //
+            g_idle_add(XmlTree::deferred_on_tree_select_row, data);
+        }
+        
         return;
     }
+
+    // path if selection changes first on the XML Editor side
 
     // Defer the update after all events have been processed. Allows skipping
     // of invalid intermediate selection states, like the automatic next row
@@ -508,7 +520,7 @@ gboolean XmlTree::deferred_on_tree_select_row(gpointer data)
         self->propagate_tree_select(nullptr);
         self->set_dt_select(nullptr);
         self->on_tree_unselect_row_disable();
-        return FALSE;
+        return false;
     }
 
     Inkscape::XML::Node *repr = sp_xmlview_tree_node_get_repr(model, &iter);
@@ -526,7 +538,7 @@ gboolean XmlTree::deferred_on_tree_select_row(gpointer data)
 
     self->on_tree_select_row_enable(&iter);
 
-    return FALSE;
+    return false;
 }
 
 
