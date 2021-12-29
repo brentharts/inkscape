@@ -450,7 +450,12 @@ ZoomCorrRuler::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
     Gdk::RGBA bg;
     bg.set_grey(0.5);
     if (auto wnd = dynamic_cast<Gtk::Window*>(this->get_toplevel())) {
-        bg = wnd->get_style_context()->get_background_color();
+        GdkRGBA *c;
+        gtk_style_context_get(wnd->get_style_context()->gobj(),
+                              static_cast<GtkStateFlags>(0),
+                              GTK_STYLE_PROPERTY_BACKGROUND_COLOR, &c,
+                              nullptr);
+        bg = Glib::wrap(c);
     }
 
     cr->set_source_rgb(bg.get_red(), bg.get_green(), bg.get_blue());

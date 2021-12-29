@@ -1911,7 +1911,12 @@ bool FilterEffectsDialog::PrimitiveList::on_draw_signal(const Cairo::RefPtr<Cair
 
     // TODO: In Gtk+ 4, the state is not used in get_color
     auto state = sc->get_state();
-    auto bg_color = sc->get_background_color(state);
+    GdkRGBA *c;
+    gtk_style_context_get(sc->gobj(),
+                          static_cast<GtkStateFlags>(state),
+                          GTK_STYLE_PROPERTY_BACKGROUND_COLOR, &c,
+                          nullptr);
+    auto bg_color = Glib::wrap(c);
     auto orig_color = sc->get_color(state);
     Gdk::RGBA fg_color;
     Gdk::RGBA mid_color;
