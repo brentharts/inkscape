@@ -18,6 +18,7 @@
 #include "display/cairo-utils.h"
 #include "io/resource.h"
 #include "ui/cursor-utils.h"
+#include "ui/util.h"
 
 // widget's height; it should take stop template's height into account
 // current value is fine-tuned to make stop handles overlap gradient image just the right amount
@@ -109,13 +110,8 @@ void GradientWithStops::update() {
 // capture background color when styles change
 void GradientWithStops::on_style_updated() {
     if (auto wnd = dynamic_cast<Gtk::Window*>(this->get_toplevel())) {
-        GdkRGBA *c;
-        gtk_style_context_get(wnd->get_style_context()->gobj(),
-                              static_cast<GtkStateFlags>(0),
-                              GTK_STYLE_PROPERTY_BACKGROUND_COLOR, &c,
-                              nullptr);
-
-        _background_color = Glib::wrap(c);
+        auto sc = wnd->get_style_context();
+        _background_color = get_background_color(sc);
     }
 
     // load and cache cursors

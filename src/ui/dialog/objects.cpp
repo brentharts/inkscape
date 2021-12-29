@@ -56,6 +56,7 @@
 #include "ui/tools/node-tool.h"
 
 #include "ui/contextmenu.h"
+#include "ui/util.h"
 #include "ui/widget/canvas.h"
 #include "ui/widget/imagetoggler.h"
 #include "ui/widget/shapeicon.h"
@@ -849,20 +850,10 @@ ObjectsPanel::ObjectsPanel() :
     _buttonsRow.pack_start(_buttonsPrimary, Gtk::PACK_SHRINK);
     _buttonsRow.pack_end(_buttonsSecondary, Gtk::PACK_SHRINK);
 
-    GdkRGBA *c;
-    gtk_style_context_get(_tree.get_style_context()->gobj(),
-                          GTK_STATE_FLAG_SELECTED,
-                          GTK_STYLE_PROPERTY_BACKGROUND_COLOR, &c,
-                          nullptr);
-
-    selection_color = Glib::wrap(c);
+    auto sc = _tree.get_style_context();
+    selection_color = get_background_color(sc, Gtk::STATE_FLAG_SELECTED);
     _tree_style = _tree.signal_style_updated().connect([&](){
-        GdkRGBA *d;
-        gtk_style_context_get(_tree.get_style_context()->gobj(),
-                              GTK_STATE_FLAG_SELECTED,
-                              GTK_STYLE_PROPERTY_BACKGROUND_COLOR, &d,
-                              nullptr);
-        selection_color = Glib::wrap(d);
+        selection_color = get_background_color(sc, Gtk::STATE_FLAG_SELECTED);
 
         if (!root_watcher) return;
         for (auto&& kv : root_watcher->child_watchers) {
