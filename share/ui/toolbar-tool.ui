@@ -130,17 +130,19 @@
         <property name="visible">True</property>
         <property name="can-focus">False</property>
         <property name="halign">start</property>
-        <property name="valign">center</property>
+        <property name="valign">start</property>
         <property name="orientation">vertical</property>
         <property name="max_children_per_line">2</property>
+        <style>
+          <class name="tight-flowbox"/>
+        </style>
         <child>
           <object class="GtkFlowBoxChild">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
-            <property name="halign">start</property>
-            <property name="valign">center</property>
             <child>
               <object class="GtkToggleButton">
+                <property name="name" translatable="yes">Selection Tool</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives_default">False</property>
@@ -162,11 +164,10 @@
           <object class="GtkFlowBoxChild">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
-            <property name="halign">start</property>
-            <property name="valign">center</property>
             <property name="hexpand">True</property>
             <child>
               <object class="GtkToggleButton">
+                <property name="name" translatable="yes">Node Editor</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives_default">False</property>
@@ -198,7 +199,7 @@
       </object>
       <packing>
         <property name="expand">False</property>
-        <property name="fill">True</property>
+        <property name="fill">False</property>
         <property name="position">1</property>
       </packing>
     </child>
@@ -208,15 +209,19 @@
         <property name="visible">True</property>
         <property name="can-focus">False</property>
         <property name="halign">start</property>
-        <property name="valign">center</property>
+        <property name="valign">start</property>
         <property name="orientation">vertical</property>
         <property name="max_children_per_line">5</property>
+        <style>
+          <class name="tight-flowbox"/>
+        </style>
         <child>
           <object class="GtkFlowBoxChild">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <child>
               <object class="GtkToggleButton">
+                <property name="name" translatable="yes">Rectangle Editor</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives_default">False</property>
@@ -240,6 +245,7 @@
             <property name="can-focus">True</property>
             <child>
               <object class="GtkToggleButton">
+                <property name="name" translatable="yes">Circle and Arc Editor</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives_default">False</property>
@@ -263,6 +269,7 @@
             <property name="can-focus">True</property>
             <child>
               <object class="GtkToggleButton">
+                <property name="name" translatable="yes">Star and Polygon Editor</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives_default">False</property>
@@ -286,6 +293,7 @@
             <property name="can-focus">True</property>
             <child>
               <object class="GtkToggleButton">
+                <property name="name" translatable="yes">3D Box Editor</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives_default">False</property>
@@ -309,6 +317,7 @@
             <property name="can-focus">True</property>
             <child>
               <object class="GtkToggleButton">
+                <property name="name" translatable="yes">Spiral Editor</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives_default">False</property>
@@ -329,7 +338,7 @@
       </object>
       <packing>
         <property name="expand">False</property>
-        <property name="fill">True</property>
+        <property name="fill">False</property>
         <property name="position">2</property>
       </packing>
     </child>
@@ -340,7 +349,7 @@
       </object>
       <packing>
         <property name="expand">False</property>
-        <property name="fill">True</property>
+        <property name="fill">False</property>
         <property name="position">3</property>
       </packing>
     </child>
@@ -350,15 +359,19 @@
         <property name="visible">True</property>
         <property name="can-focus">False</property>
         <property name="halign">start</property>
-        <property name="valign">center</property>
+        <property name="valign">start</property>
         <property name="orientation">vertical</property>
         <property name="max_children_per_line">6</property>
+        <style>
+          <class name="tight-flowbox"/>
+        </style>
         <child>
           <object class="GtkFlowBoxChild">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <child>
               <object class="GtkToggleButton">
+                <property name="name" translatable="yes">Pen Drawing</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives_default">False</property>
@@ -382,6 +395,7 @@
             <property name="can-focus">True</property>
             <child>
               <object class="GtkToggleButton">
+                <property name="name" translatable="yes">Pencil Drawing</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives_default">False</property>
@@ -405,6 +419,7 @@
             <property name="can-focus">True</property>
             <child>
               <object class="GtkToggleButton">
+                <property name="name" translatable="yes">Calligraphic Drawing</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives_default">False</property>
@@ -428,6 +443,7 @@
             <property name="can-focus">True</property>
             <child>
               <object class="GtkToggleButton">
+                <property name="name" translatable="yes">Text Editor</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives_default">False</property>
@@ -445,12 +461,43 @@
             </child>
           </object>
         </child>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">False</property>
+        <property name="position">4</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkSeparator">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">False</property>
+        <property name="position">5</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkFlowBox">
+        <property name="homogeneous">True</property>
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="halign">start</property>
+        <property name="valign">start</property>
+        <property name="orientation">vertical</property>
+        <property name="max_children_per_line">5</property>
+        <style>
+          <class name="tight-flowbox"/>
+        </style>
         <child>
           <object class="GtkFlowBoxChild">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <child>
               <object class="GtkToggleButton">
+                <property name="name" translatable="yes">Gradient Editor</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives_default">False</property>
@@ -474,6 +521,7 @@
             <property name="can-focus">True</property>
             <child>
               <object class="GtkToggleButton">
+                <property name="name" translatable="yes">Mesh Gradiant Editor</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives_default">False</property>
@@ -491,39 +539,13 @@
             </child>
           </object>
         </child>
-      </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="fill">False</property>
-        <property name="position">4</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkSeparator">
-        <property name="visible">True</property>
-        <property name="can-focus">False</property>
-      </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="fill">True</property>
-        <property name="position">5</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkFlowBox">
-        <property name="homogeneous">True</property>
-        <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <property name="halign">start</property>
-        <property name="valign">center</property>
-        <property name="orientation">vertical</property>
-        <property name="max_children_per_line">5</property>
         <child>
           <object class="GtkFlowBoxChild">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <child>
               <object class="GtkToggleButton">
+                <property name="name" translatable="yes">Color Dropper</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives_default">False</property>
@@ -547,6 +569,7 @@
             <property name="can-focus">True</property>
             <child>
               <object class="GtkToggleButton">
+                <property name="name" translatable="yes">Paint Bucket</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives_default">False</property>
@@ -564,12 +587,43 @@
             </child>
           </object>
         </child>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">False</property>
+        <property name="position">6</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkSeparator">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">False</property>
+        <property name="position">7</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkFlowBox">
+        <property name="homogeneous">True</property>
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="halign">start</property>
+        <property name="valign">start</property>
+        <property name="orientation">vertical</property>
+        <property name="max_children_per_line">5</property>
+        <style>
+          <class name="tight-flowbox"/>
+        </style>
         <child>
           <object class="GtkFlowBoxChild">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <child>
               <object class="GtkToggleButton">
+                <property name="name" translatable="yes">Tweak Tool</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives_default">False</property>
@@ -593,6 +647,7 @@
             <property name="can-focus">True</property>
             <child>
               <object class="GtkToggleButton">
+                <property name="name" translatable="yes">Spray Can</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives_default">False</property>
@@ -616,6 +671,7 @@
             <property name="can-focus">True</property>
             <child>
               <object class="GtkToggleButton">
+                <property name="name" translatable="yes">Eraser</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives_default">False</property>
@@ -633,39 +689,13 @@
             </child>
           </object>
         </child>
-      </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="fill">False</property>
-        <property name="position">6</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkSeparator">
-        <property name="visible">True</property>
-        <property name="can-focus">False</property>
-      </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="fill">True</property>
-        <property name="position">7</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkFlowBox">
-        <property name="homogeneous">True</property>
-        <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <property name="halign">start</property>
-        <property name="valign">center</property>
-        <property name="orientation">vertical</property>
-        <property name="max_children_per_line">5</property>
         <child>
           <object class="GtkFlowBoxChild">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <child>
               <object class="GtkToggleButton">
+                <property name="name" translatable="yes">Connector Editor</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives_default">False</property>
@@ -689,6 +719,7 @@
             <property name="can-focus">True</property>
             <child>
               <object class="GtkToggleButton">
+                <property name="name" translatable="yes">Live Path Effects Editor</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives_default">False</property>
@@ -712,6 +743,7 @@
             <property name="can-focus">True</property>
             <child>
               <object class="GtkToggleButton">
+                <property name="name" translatable="yes">Zoom</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives_default">False</property>
@@ -729,12 +761,43 @@
             </child>
           </object>
         </child>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">False</property>
+        <property name="position">8</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkSeparator">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">False</property>
+        <property name="position">7</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkFlowBox">
+        <property name="homogeneous">True</property>
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="halign">start</property>
+        <property name="valign">start</property>
+        <property name="orientation">vertical</property>
+        <property name="max_children_per_line">5</property>
+        <style>
+          <class name="tight-flowbox"/>
+        </style>
         <child>
           <object class="GtkFlowBoxChild">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <child>
               <object class="GtkToggleButton">
+                <property name="name" translatable="yes">Ruler</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives_default">False</property>
@@ -758,6 +821,7 @@
             <property name="can-focus">True</property>
             <child>
               <object class="GtkToggleButton">
+                <property name="name" translatable="yes">Multiple Pages Editor</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives_default">False</property>

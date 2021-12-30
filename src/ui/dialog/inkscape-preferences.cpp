@@ -1812,46 +1812,55 @@ void InkscapePreferences::initPageUI()
     // Toolbars
     _page_toolbars.add_group_header(_("Toolbars"));
     {
-        auto custom = Gtk::make_managed<Gtk::MenuButton>();
-        auto dlg = Gtk::make_managed<Gtk::Popover>();
-        custom->set_label(_("Customize..."));
-        custom->set_popover(*dlg);
-        custom->set_direction(Gtk::ARROW_DOWN);
-        auto toolbox = Glib::wrap(ToolboxFactory::createToolToolbox());
-        toolbox->show_all();
-        const int MARGIN = 6;
-        toolbox->set_margin_start(MARGIN);
-        toolbox->set_margin_end(MARGIN);
-        toolbox->set_margin_top(MARGIN);
-        toolbox->set_margin_bottom(MARGIN);
+        auto tree = Gtk::manage(new Gtk::TreeView());
+        auto _tools_model = new ToolListModelColumns();
+        auto _tools_store = Gtk::TreeStore::create(*_tools_model);
+        tree->set_model(_tools_store);
+        tree->set_reorderable(false);
+        tree->set_vexpand(true);
+        auto tools_scroller = new Gtk::ScrolledWindow();
+        tools_scroller->add(*tree);
+        tools_scroller->set_propagate_natural_height();
+        tools_scroller->set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+        tools_scroller->set_valign(Gtk::Align::ALIGN_FILL);
 
-        sp_traverse_widget_tree(toolbox, [=](Gtk::Widget* widget){
-            if (auto flowbox = dynamic_cast<Gtk::FlowBox*>(widget)) {
-                flowbox->set_max_children_per_line(9);
-                flowbox->set_selection_mode();
-            }
-            else if (auto button = dynamic_cast<Gtk::ToggleButton*>(widget)) {
+        Gtk::CellRendererToggle *toggle_enabled = manage(new Gtk::CellRendererToggle());
+        int num_enabled = tree->append_column(_("Enabled"), *toggle_enabled) - 1;
+        Gtk::TreeViewColumn* col_enabled = tree->get_column(num_enabled);
+        toggle_enabled->set_activatable(true);
+        toggle_enabled->signal_toggled().connect([=](const Glib::ustring &path){
+            Gtk::TreeModel::iterator iter = _tools_store->get_iter(path);
+            Gtk::TreeModel::Row row = *iter;
+            std::string pref_path = row[_tools_model->_colPath];
+            bool is_enabled = !row[_tools_model->_colEnabled];
+            row[_tools_model->_colEnabled] = is_enabled;
+            Inkscape::Preferences::get()->setBool(pref_path, is_enabled);
+        });
+        col_enabled->add_attribute(toggle_enabled->property_active(), _tools_model->_colEnabled);
+
+        tools_scroller->set_vexpand(true);
+        tools_scroller->show_all();
+        _page_toolbars.add_line(false, "", *tools_scroller, "", _("Select visible tool buttons"), true);
+
+        Gtk::CellRendererText *text_renderer = manage(new Gtk::CellRendererText());
+        int nameColNum = tree->append_column(_("Tool Name"), *text_renderer) - 1;
+        Gtk::TreeView::Column *name_column = tree->get_column(nameColNum);
+        name_column->add_attribute(text_renderer->property_text(), _tools_model->_colLabel);
+
+        sp_traverse_widget_tree(SP_ACTIVE_DESKTOP->get_toolbox(), [=](Gtk::Widget* widget){
+            if (auto button = dynamic_cast<Gtk::ToggleButton*>(widget)) {
                 assert(GTK_IS_ACTIONABLE(widget->gobj()));
-                // do not execute any action:
-                gtk_actionable_set_action_name(GTK_ACTIONABLE(widget->gobj()), "");
+                
+                std::string path = ToolboxFactory::get_tool_visible_buttons_path(sp_get_action_target(button));
 
-                button->set_margin_start(MARGIN / 2);
-                button->set_margin_end(MARGIN / 2);
-                button->set_margin_top(MARGIN / 2);
-                button->set_margin_bottom(MARGIN / 2);
-                button->set_sensitive();
-                auto path = ToolboxFactory::get_tool_visible_buttons_path(sp_get_action_target(button));
-                auto visible = Inkscape::Preferences::get()->getBool(path, true);
-                button->set_active(visible);
-                button->signal_toggled().connect([=](){
-                    Inkscape::Preferences::get()->setBool(path, button->get_active());
-                });
+                Gtk::TreeModel::iterator iter = _tools_store->append();
+                Gtk::TreeModel::Row row = *iter;
+                row[_tools_model->_colPath] = path;
+                row[_tools_model->_colLabel] = button->get_name();
+                row[_tools_model->_colEnabled] = Inkscape::Preferences::get()->getBool(path, true);
             }
             return false;
         });
-
-        dlg->add(*toolbox);
-        _page_toolbars.add_line(false, _("Toolbox buttons:"), *custom, "", _("Select visible tool buttons"), false);
 
         struct tbar_info {const char* label; const char* prefs;} toolbars[] = {
             {_("Toolbox icon size:"),     ToolboxFactory::tools_icon_size},
@@ -1869,7 +1878,6 @@ void InkscapePreferences::initPageUI()
             for (int i = min; i <= max; i += 8) {
                 slider->getSlider()->add_mark(i, Gtk::POS_BOTTOM, i % min ? "" : (std::to_string(100 * i / min) + "%").c_str());
             }
-            slider->set_margin_bottom(MARGIN);
             _page_toolbars.add_line(false, tbox.label, *slider, "", _("Adjust toolbar icon size"));
         }
 
