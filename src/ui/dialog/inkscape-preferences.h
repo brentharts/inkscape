@@ -128,23 +128,6 @@ protected:
     Glib::RefPtr<Glib::Regex> _rx;
     int _num_results = 0;
 
-    class ToolListModelColumns : public Gtk::TreeModel::ColumnRecord
-    {
-    public:
-        ToolListModelColumns()
-        {
-            add(_colPath);
-            add(_colLabel);
-            add(_colEnabled);
-        }
-        Gtk::TreeModelColumn<std::string> _colPath;
-        Gtk::TreeModelColumn<Glib::ustring> _colLabel;
-        Gtk::TreeModelColumn<bool> _colEnabled;
-    };
-    Gtk::TreeStore *_tools_store;
-    ToolListModelColumns *_tools_model;
-
-
     //Pagelist model columns:
     class PageListModelColumns : public Gtk::TreeModel::ColumnRecord
     {
