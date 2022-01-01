@@ -67,6 +67,7 @@
 #include "ui/widget/combo-tool-item.h"
 #include "ui/widget/ink-ruler.h"
 #include "ui/widget/layer-selector.h"
+#include "ui/widget/page-selector.h"
 #include "ui/widget/selected-style.h"
 #include "ui/widget/spin-button-tool-item.h"
 #include "ui/widget/unit-tracker.h"
@@ -83,10 +84,6 @@
 #include "ui/widget/preview.h"
 #include "ui/dialog/color-item.h"
 #include "widgets/ege-paint-def.h"
-
-#ifdef GDK_WINDOWING_QUARTZ
-#include <gtkosxapplication.h>
-#endif
 
 using Inkscape::DocumentUndo;
 using Inkscape::UI::Dialog::DialogContainer;
@@ -190,6 +187,21 @@ void CMSPrefWatcher::_setCmsSensitive(bool enabled)
 
 static CMSPrefWatcher* watcher = nullptr;
 
+bool SPDesktopWidget::SignalEvent(GdkEvent* event)
+{
+    /**
+     * What we want to do here is pass the keyboard events *up* to the canvas
+     * if the mouse is hovering over the canvas. IF and only if, the canvas
+     * is not currently listening to the event stack because it's not in focus.
+     */
+    if (event->type == GDK_KEY_PRESS || event->type == GDK_KEY_RELEASE) {
+        if (!_canvas->is_focus() && _canvas_grid->mouse_inside) {
+            return sp_desktop_root_handler(event, desktop);
+        }
+    }
+    return false;
+}
+
 SPDesktopWidget::SPDesktopWidget()
 {
     auto *const dtw = this;
@@ -206,46 +218,10 @@ SPDesktopWidget::SPDesktopWidget()
     dtw->_statusbar->set_name("DesktopStatusBar");
     dtw->_vbox->pack_end(*dtw->_statusbar, false, true);
 
-    /* Swatches panel */
-    {
-        // auto panel = Gtk::manage(new Inkscape::UI::Widget::ColorPalette());
-        // auto sets = Inkscape::UI::Dialog::SwatchesPanel::getSwatchSets();
-    /*
-		  std::vector<Widget*> vc;
-		  
-		  Inkscape::UI::Dialog::ColorItem rm(ege::PaintDef::NONE);
-		  vc.push_back(rm.createWidget());
-		  for (auto& c : sets[1]->_colors) {
-			  vc.push_back(c.createWidget());
-			//   getPreview(Inkscape::UI::Widget::PREVIEW_STYLE_ICON, Inkscape::UI::Widget::VIEW_TYPE_GRID,
-			//   Inkscape::UI::Widget::PREVIEW_SIZE_TINY, 100, 0));
-		  }
-		  panel->set_colors(vc);
-		  std::vector<Glib::ustring> names;
-		  for (auto& pal : sets) {
-			  names.push_back(pal->_name);
-		  }
-		  panel->set_palettes(names);
-		  panel->get_palette_selected_signal().connect([=](Glib::ustring name){
-				auto sets = Inkscape::UI::Dialog::SwatchesPanel::getSwatchSets();
-			  auto pal = std::find_if(sets.begin(), sets.end(), [&](auto& set){ return set->_name == name; });
-			  if (pal != sets.end()) {
-				  //
-		  std::vector<Widget*> vc;
-		  for (auto& c : (*pal)->_colors) {
-			  vc.push_back(c.getPreview(Inkscape::UI::Widget::PREVIEW_STYLE_ICON, Inkscape::UI::Widget::VIEW_TYPE_GRID,
-			  Inkscape::UI::Widget::PREVIEW_SIZE_TINY, 100, 0));
-		  }
-		  panel->set_colors(vc);
-			  }
-		  });
-      */
-      //   panel->set_vexpand(false);
-        dtw->_panels = Gtk::manage(new Inkscape::UI::Dialog::SwatchesPanel("/embedded/swatches"));
-        dtw->_panels->set_vexpand(false);
-        dtw->_vbox->pack_end(*dtw->_panels, false, true);
-        // dtw->_vbox->pack_end(*panel, false, true);
-    }
+    /* Swatch Bar */
+    dtw->_panels = Gtk::manage(new Inkscape::UI::Dialog::SwatchesPanel("/embedded/swatches"));
+    dtw->_panels->set_vexpand(false);
+    dtw->_vbox->pack_end(*dtw->_panels, false, true);
 
     /* DesktopHBox (Vertical toolboxes, canvas) */
     dtw->_hbox = Gtk::manage(new Gtk::Box());
@@ -586,6 +562,8 @@ SPDesktopWidget::on_unrealize()
         dtw->_rotation_status_value_changed_connection.disconnect();
         dtw->_rotation_status_populate_popup_connection.disconnect();
 
+        dtw->_panels->setDesktop(nullptr);
+
         delete _container;
 
         _layer_selector->setDesktop(nullptr);
@@ -706,19 +684,6 @@ void SPDesktopWidget::on_size_allocate(Gtk::Allocation &allocation)
     desktop->zoom_absolute(midpoint_dt, zoom, false);
 }
 
-#ifdef GDK_WINDOWING_QUARTZ
-static GtkMenuItem *_get_help_menu(GtkMenuShell *menu)
-{
-    // Assume "Help" is the last child in menu
-    GtkMenuItem *last = nullptr;
-    auto callback = [](GtkWidget *widget, gpointer data) {
-        *static_cast<GtkMenuItem **>(data) = GTK_MENU_ITEM(widget);
-    };
-    gtk_container_foreach(GTK_CONTAINER(menu), callback, &last);
-    return last;
-}
-#endif
-
 /**
  * Callback to realize desktop widget.
  */
@@ -762,21 +727,6 @@ void SPDesktopWidget::on_realize()
         }
         INKSCAPE.themecontext->getChangeThemeSignal().emit();
     }
-
-#ifdef GDK_WINDOWING_QUARTZ
-    // native macOS menu
-    auto osxapp = gtkosx_application_get();
-    auto menushell = static_cast<Gtk::MenuShell *>(dtw->menubar());
-    if (osxapp && menushell && window) {
-        menushell->hide();
-        gtkosx_application_set_menu_bar(osxapp, menushell->gobj());
-        // using quartz accelerators gives menu shortcuts priority over everything else,
-        // messes up text input because Inkscape has single key shortcuts (e.g. 1-6).
-        gtkosx_application_set_use_quartz_accelerators(osxapp, false);
-        gtkosx_application_set_help_menu(osxapp, _get_help_menu(menushell->gobj()));
-        gtkosx_application_set_window_menu(osxapp, nullptr);
-    }
-#endif
 }
 
 /* This is just to provide access to common functionality from sp_desktop_widget_realize() above
@@ -1369,6 +1319,10 @@ SPDesktopWidget::SPDesktopWidget(SPDocument *document)
 
     _layer_selector->setDesktop(dtw->desktop);
 
+    // We never want a page widget if there's no desktop.
+    _page_selector = Gtk::manage(new Inkscape::UI::Widget::PageSelector(desktop));
+    _statusbar->pack_end(*_page_selector, false, false);
+
     dtw->layoutWidgets();
 
     std::vector<GtkWidget *> toolboxes;
@@ -1377,7 +1331,7 @@ SPDesktopWidget::SPDesktopWidget(SPDocument *document)
     toolboxes.push_back(dtw->commands_toolbox);
     toolboxes.push_back(dtw->snap_toolbox);
 
-    dtw->_panels->update();
+    dtw->_panels->setDesktop(dtw->desktop);
 
     UXManager::getInstance()->addTrack(dtw);
     UXManager::getInstance()->connectToDesktop( toolboxes, dtw->desktop );
@@ -1577,8 +1531,10 @@ SPDesktopWidget::zoom_populate_popup(Gtk::Menu *menu)
     auto sep = Gtk::manage(new Gtk::SeparatorMenuItem());
     menu->append(*sep);
 
+    auto pm = desktop->getNamedView()->getPageManager();
+
     auto item_page = Gtk::manage(new Gtk::MenuItem(_("Page")));
-    item_page->signal_activate().connect(sigc::mem_fun(desktop, &SPDesktop::zoom_page));
+    item_page->signal_activate().connect([=]() { pm->zoomToSelectedPage(desktop); });
     menu->append(*item_page);
 
     auto item_drawing = Gtk::manage(new Gtk::MenuItem(_("Drawing")));
@@ -1590,7 +1546,7 @@ SPDesktopWidget::zoom_populate_popup(Gtk::Menu *menu)
     menu->append(*item_selection);
 
     auto item_center_page = Gtk::manage(new Gtk::MenuItem(_("Centre Page")));
-    item_center_page->signal_activate().connect(sigc::mem_fun(desktop, &SPDesktop::zoom_center_page));
+    item_center_page->signal_activate().connect([=]() { pm->centerToSelectedPage(desktop); });
     menu->append(*item_center_page);
 
     menu->show_all();
@@ -1768,14 +1724,21 @@ SPDesktopWidget::update_scrollbars(double scale)
 
     /* The desktop region we always show unconditionally */
     SPDocument *doc = desktop->doc();
-    Geom::Rect darea ( Geom::Point(-doc->getWidth().value("px"), -doc->getHeight().value("px")),
-                     Geom::Point(2 * doc->getWidth().value("px"), 2 * doc->getHeight().value("px"))  );
 
-    Geom::OptRect deskarea;
-    if (Inkscape::Preferences::get()->getInt("/tools/bounding_box") == 0) {
-        deskarea = darea | doc->getRoot()->desktopVisualBounds();
+    auto deskarea = doc->preferredBounds();
+    deskarea->expandBy(doc->getDimensions()); // Double size
+
+    /* The total size of pages should be added unconditionally */
+    if (auto manager = doc->getNamedView()->getPageManager()) {
+        deskarea->unionWith(manager->getDesktopRect());
     } else {
-        deskarea = darea | doc->getRoot()->desktopGeometricBounds();
+        g_warning("No page manager available!");
+    }
+
+    if (Inkscape::Preferences::get()->getInt("/tools/bounding_box") == 0) {
+        deskarea->unionWith(doc->getRoot()->desktopVisualBounds());
+    } else {
+        deskarea->unionWith(doc->getRoot()->desktopGeometricBounds());
     }
 
     /* Canvas region we always show unconditionally */

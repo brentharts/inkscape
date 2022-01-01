@@ -37,7 +37,6 @@ set(inkscape_SRC
   gc-finalized.cpp
   gradient-chemistry.cpp
   gradient-drag.cpp
-  graphlayout.cpp
   guide-snapper.cpp
   id-clash.cpp
   inkscape.cpp
@@ -51,6 +50,7 @@ set(inkscape_SRC
   mod360.cpp
   object-hierarchy.cpp
   object-snapper.cpp
+  page-manager.cpp
   path-chemistry.cpp
   path-prefix.cpp
   perspective-line.cpp
@@ -60,7 +60,6 @@ set(inkscape_SRC
   proj_pt.cpp
   pure-transform.cpp
   rdf.cpp
-  removeoverlap.cpp
   rubberband.cpp
   selcue.cpp
   selection-chemistry.cpp
@@ -79,7 +78,6 @@ set(inkscape_SRC
   text-chemistry.cpp
   text-editing.cpp
   transf_mat_3x4.cpp
-  unclump.cpp
   unicoderange.cpp
   vanishing-point.cpp
   verbs.cpp
@@ -128,7 +126,6 @@ set(inkscape_SRC
   gc-finalized.h
   gradient-chemistry.h
   gradient-drag.h
-  graphlayout.h
   guide-snapper.h
   helper-fns.h
   id-clash.h
@@ -147,6 +144,7 @@ set(inkscape_SRC
   number-opt-number.h
   object-hierarchy.h
   object-snapper.h
+  page-manager.h
   path-chemistry.h
   path-prefix.h
   perspective-line.h
@@ -157,7 +155,6 @@ set(inkscape_SRC
   proj_pt.h
   pure-transform.h
   rdf.h
-  removeoverlap.h
   rubberband.h
   selcue.h
   selection-chemistry.h
@@ -183,7 +180,6 @@ set(inkscape_SRC
   text-editing.h
   text-tag-attributes.h
   transf_mat_3x4.h
-  unclump.h
   undo-stack-observer.h
   unicoderange.h
   vanishing-point.h
@@ -235,6 +231,8 @@ set(inkscape_SRC
   actions/actions-hide-lock.cpp
   actions/actions-layer.h
   actions/actions-layer.cpp
+  actions/actions-node-align.h
+  actions/actions-node-align.cpp
   actions/actions-object.h
   actions/actions-object.cpp
   actions/actions-object-align.h
@@ -257,12 +255,16 @@ set(inkscape_SRC
   actions/actions-tutorial.cpp
   actions/actions-transform.h
   actions/actions-transform.cpp
+  actions/actions-undo-document.h
+  actions/actions-undo-document.cpp
   actions/actions-view-mode.h
   actions/actions-view-mode.cpp
   actions/actions-view-window.h
   actions/actions-view-window.cpp
   actions/actions-window.h
   actions/actions-window.cpp
+  actions/actions-pages.h
+  actions/actions-pages.cpp
 
   inkview-application.h
   inkview-application.cpp

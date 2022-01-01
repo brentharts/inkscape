@@ -40,7 +40,6 @@
 #include "event.h"
 #include "gc-anchored.h"
 #include "gc-finalized.h"
-#include "object/sp-namedview.h"
 
 #include "inkgc/gc-managed.h"
 
@@ -74,6 +73,7 @@ class SPItem;
 class SPObject;
 class SPGroup;
 class SPRoot;
+class SPNamedView;
 
 namespace Inkscape {
     class Selection; 
@@ -161,6 +161,8 @@ public:
     SPObject *getXMLDialogSelectedObject() { return _activexmltree; }
 
     Inkscape::EventLog* get_event_log() { return _event_log; }
+    // allow not update LPE on stylesheet change
+    bool stylesheetchg = false;
 
 private:
     void _importDefsNode(SPDocument *source, Inkscape::XML::Node *defs, Inkscape::XML::Node *target_defs);
@@ -236,6 +238,7 @@ private:
     Geom::Rect getViewBox() const;
 
     Geom::OptRect preferredBounds() const;
+    Geom::OptRect pageBounds();
     void fitToRect(Geom::Rect const &rect, bool with_margins = false);
     void setupViewport(SPItemCtx *ctx);
 
@@ -244,12 +247,14 @@ private:
     void bindObjectToId(char const *id, SPObject *object);
     SPObject *getObjectById(Glib::ustring const &id) const;
     SPObject *getObjectById(char const *id) const;
+    SPObject *getObjectByHref(Glib::ustring const &href) const;
+    SPObject *getObjectByHref(char const *href) const;
 
     void bindObjectToRepr(Inkscape::XML::Node *repr, SPObject *object);
     SPObject *getObjectByRepr(Inkscape::XML::Node *repr) const;
 
     std::vector<SPObject *> getObjectsByClass(Glib::ustring const &klass) const;
-    std::vector<SPObject *> getObjectsByElement(Glib::ustring const &element) const;
+    std::vector<SPObject *> getObjectsByElement(Glib::ustring const &element, bool custom = false) const;
     std::vector<SPObject *> getObjectsBySelector(Glib::ustring const &selector) const;
 
 
@@ -290,6 +295,7 @@ private:
     // Document undo/redo ----------------------
     unsigned long serial() const { return _serial; }  // Returns document's unique number.
     bool isSeeking() const {return seeking;} // In a transition between two "good" states of document?
+    bool isPartial() const {return partial != nullptr;} // In partianl undo/redo transaction
     void reset_key(void *dummy) { actionkey.clear(); }
     bool isSensitive() const { return sensitive; }
 
@@ -389,6 +395,7 @@ private:
     typedef sigc::signal<void> ReconstructionStart;
     typedef sigc::signal<void> ReconstructionFinish;
     typedef sigc::signal<void> CommitSignal;
+    typedef sigc::signal<void> BeforeCommitSignal; // allow to add actions berfore commit to include in undo
 
     typedef std::map<GQuark, SPDocument::IDChangedSignal> IDChangedSignalMap;
     typedef std::map<GQuark, SPDocument::ResourcesChangedSignal> ResourcesChangedSignalMap;
@@ -398,10 +405,10 @@ private:
 
     SPDocument::ModifiedSignal modified_signal;
     SPDocument::FilenameSetSignal filename_set_signal;
-    SPDocument::ResizedSignal resized_signal;
     SPDocument::ReconstructionStart _reconstruction_start_signal;
     SPDocument::ReconstructionFinish  _reconstruction_finish_signal;
     SPDocument::CommitSignal commit_signal; // Used by friend Inkscape::DocumentUndo
+    SPDocument::BeforeCommitSignal before_commit_signal; // Used by friend Inkscape::DocumentUndo
 
     bool oldSignalsConnected;
 
@@ -434,8 +441,8 @@ public:
     sigc::connection connectDestroy(sigc::signal<void>::slot_type slot);
     sigc::connection connectModified(ModifiedSignal::slot_type slot);
     sigc::connection connectFilenameSet(FilenameSetSignal::slot_type slot);
-    sigc::connection connectResized(ResizedSignal::slot_type slot);
     sigc::connection connectCommit(CommitSignal::slot_type slot);
+    sigc::connection connectBeforeCommit(BeforeCommitSignal::slot_type slot);
     sigc::connection connectIdChanged(const char *id, IDChangedSignal::slot_type slot);
     sigc::connection connectResourcesChanged(char const *key, SPDocument::ResourcesChangedSignal::slot_type slot);
     sigc::connection connectReconstructionStart(ReconstructionStart::slot_type slot);
@@ -448,7 +455,6 @@ public:
     void _emitModified();  // Used by SPItem
     void emitReconstructionStart();
     void emitReconstructionFinish();
-    void emitResizedSignal(double width, double height);
 };
 
 namespace std {

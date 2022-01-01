@@ -48,7 +48,6 @@
 
 #include "style.h"
 #include "extract-uri.h"
-
 #include "live_effects/lpeobject.h"
 #include "live_effects/effect.h"
 #include "live_effects/lpeobject-reference.h"
@@ -1602,7 +1601,7 @@ void SPItem::doWriteTransform(Geom::Affine const &transform, Geom::Affine const 
     updateRepr();
 
     if (lpeitem && lpeitem->hasPathEffectRecursive()) {
-        sp_lpe_item_update_patheffect(lpeitem, true, false);
+        sp_lpe_item_update_patheffect(lpeitem, false, false);
     }
 
     // send the relative transform with a _transformed_signal

@@ -68,10 +68,6 @@
 
 #include "widgets/desktop-widget.h" // Access dialog container.
 
-#ifdef GDK_WINDOWING_QUARTZ
-#include <gtkosxapplication.h>
-#endif
-
 #ifdef WITH_DBUS
 # include "extension/dbus/dbus-init.h"
 #endif
@@ -191,7 +187,6 @@ InkscapeApplication::document_swap(InkscapeWindow* window, SPDocument* document)
     SPDesktop* desktop = window->get_desktop();
     SPDocument* old_document = window->get_document();
     desktop->change_document(document);
-    document->emitResizedSignal(document->getWidth().value("px"), document->getHeight().value("px"));
 
     // We need to move window from the old document to the new document.
 
@@ -271,6 +266,8 @@ InkscapeApplication::document_revert(SPDocument* document)
 
             if (reverted) {
                 desktop->zoom_absolute(c, zoom, false);
+                /** Update LPE and Fix legacy LPE system **/
+                sp_file_fix_lpe(desktop->getDocument());
             } else {
                 std::cerr << "InkscapeApplication::revert_document: Revert failed!" << std::endl;
             }
@@ -353,6 +350,8 @@ InkscapeApplication::document_fix(InkscapeWindow* window)
         if ( sp_version_inside_range( document->getRoot()->version.inkscape, 0, 1, 0, 92 ) ) {
             sp_file_convert_dpi(document);
         }
+        /** Update LPE and Fix legacy LPE system **/
+        sp_file_fix_lpe(document);
 
         // Check for font substitutions, requires text to have been rendered.
         Inkscape::UI::Dialog::FontSubstitution::getInstance().checkFontSubstitutions(document);
@@ -614,7 +613,6 @@ InkscapeApplication::InkscapeApplication()
     add_actions_transform(this);            // actions for transforming selected objects
     add_actions_window(this);               // actions for windows
 
-
     // ====================== Command Line ======================
 
     // Will automatically handle character conversions.
@@ -722,16 +720,18 @@ InkscapeApplication::InkscapeApplication()
 
     gapp->signal_handle_local_options().connect(sigc::mem_fun(*this, &InkscapeApplication::on_handle_local_options));
 
+    if (_with_gui) {
+        // On macOS, this enables:
+        //   - DnD via dock icon
+        //   - system menu "Quit"
+        gtk_app()->property_register_session() = true;
+    }
+
     // This is normally called for us... but after the "handle_local_options" signal is emitted. If
     // we want to rely on actions for handling options, we need to call it here. This appears to
     // have no unwanted side-effect. It will also trigger the call to on_startup().
     gapp->register_application();
 }
-
-#ifdef GDK_WINDOWING_QUARTZ
-static gboolean osx_openfile_callback(GtkosxApplication *, gchar const *, InkscapeApplication *);
-static gboolean osx_quit_callback(GtkosxApplication *, InkscapeApplication *);
-#endif
 
 void
 InkscapeApplication::on_startup2()
@@ -763,12 +763,6 @@ InkscapeApplication::on_startup2()
     // before shortcuts are added.
     // Shortcuts for actions can be set before the actions are created.
     Inkscape::Shortcuts::getInstance().init();
-
-#ifdef GDK_WINDOWING_QUARTZ
-    GtkosxApplication *osxapp = gtkosx_application_get();
-    g_signal_connect(G_OBJECT(osxapp), "NSApplicationOpenFile", G_CALLBACK(osx_openfile_callback), this);
-    g_signal_connect(G_OBJECT(osxapp), "NSApplicationBlockTermination", G_CALLBACK(osx_quit_callback), this);
-#endif
 }
 
 /** Create a window given a document. This is used internally in InkscapeApplication.
@@ -794,9 +788,6 @@ InkscapeApplication::create_window(SPDocument *document, bool replace)
                 document_close (old_document);
             }
         }
-
-        document->emitResizedSignal(document->getWidth().value("px"), document->getHeight().value("px"));
-
     } else {
         window = window_open (document);
     }
@@ -833,7 +824,7 @@ InkscapeApplication::create_window(const Glib::RefPtr<Gio::File>& file)
             bool replace = old_document && old_document->getVirgin();
 
             window = create_window (document, replace);
-
+            document_fix(window);
         } else if (!cancelled) {
             std::cerr << "ConcreteInkscapeApplication<T>::create_window: Failed to load: "
                       << file->get_parse_name() << std::endl;
@@ -984,7 +975,9 @@ InkscapeApplication::process_document(SPDocument* document, std::string output_p
     if (_use_shell) {
         shell();
     }
-
+    if (_with_gui && _active_window) {
+        document_fix(_active_window);
+    }
     // Only if --export-filename, --export-type --export-overwrite, or --export-use-hints are used.
     if (_auto_export) {
         // Save... can't use action yet.
@@ -1122,7 +1115,26 @@ InkscapeApplication::parse_actions(const Glib::ustring& input, action_vector_t& 
                 } else if (type.get_string() == "s") {
                     action_vector.push_back(
                         std::make_pair( action, Glib::Variant<Glib::ustring>::create(value) ));
-                } else {
+                 } else if (type.get_string() == "(dd)") {
+                    std::vector<Glib::ustring> tokens3 = Glib::Regex::split_simple(",", value);
+                    if (tokens3.size() != 2) {
+                        std::cerr << "InkscapeApplication::parse_actions: " << action << " requires two comma separated numbers" << std::endl;
+                        continue;
+                    }
+
+                    double d0 = 0;
+                    double d1 = 0;
+                    try {
+                        d0 = std::stod(tokens3[0]);
+                        d1 = std::stod(tokens3[1]);
+                    } catch (...) {
+                        std::cerr << "InkscapeApplication::parse_actions: " << action << " requires two comma separated numbers" << std::endl;
+                        continue;
+                    }
+
+                    action_vector.push_back(
+                        std::make_pair( action, Glib::Variant<std::tuple<double, double>>::create(std::tuple<double, double>(d0, d1))));
+               } else {
                     std::cerr << "InkscapeApplication::parse_actions: unhandled action value: "
                               << action << ": " << type.get_string() << std::endl;
                 }
@@ -1620,30 +1632,6 @@ InkscapeApplication::print_action_list()
                   << ":  " << _action_extra_data.get_tooltip_for_action(fullname) << std::endl;
     }
 }
-
-//   ======================== macOS =============================
-
-#ifdef GDK_WINDOWING_QUARTZ
-/**
- * On macOS, handle dropping files on Inkscape.app icon and "Open With" file association.
- */
-static gboolean osx_openfile_callback(GtkosxApplication *osxapp, gchar const *path, InkscapeApplication *app)
-{
-    auto ptr = Gio::File::create_for_path(path);
-    g_return_val_if_fail(ptr, false);
-    app->create_window(ptr);
-    return true;
-}
-
-/**
- * Handle macOS terminating the application
- */
-static gboolean osx_quit_callback(GtkosxApplication *, InkscapeApplication *app)
-{
-    app->destroy_all();
-    return true;
-}
-#endif
 
 /**
  * Return number of open Inkscape Windows (irrespective of number of documents)

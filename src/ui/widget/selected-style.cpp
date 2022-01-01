@@ -1259,7 +1259,9 @@ RotateableSwatch::do_motion(double by, guint modifier) {
             cursor_filename = "adjust_alpha.svg";
         }
 
-        load_svg_cursor(get_display(), get_window(), cursor_filename);
+        auto window = get_window();
+        auto cursor = load_svg_cursor(get_display(), window, cursor_filename);
+        get_window()->set_cursor(cursor);
     }
 
     guint32 cc;
@@ -1425,12 +1427,8 @@ RotateableStrokeWidth::do_scroll(double by, guint modifier) {
 
 Dialog::FillAndStroke *get_fill_and_stroke_panel(SPDesktop *desktop)
 {
-    Dialog::DialogBase *dialog = desktop->getContainer()->get_dialog("FillStroke");
-    if (!dialog) {
-        desktop->getContainer()->new_dialog("FillStroke");
-        return dynamic_cast<Dialog::FillAndStroke *>(desktop->getContainer()->get_dialog("FillStroke"));
-    }
-    return dynamic_cast<Dialog::FillAndStroke *>(dialog);
+    desktop->getContainer()->new_dialog("FillStroke");
+    return dynamic_cast<Dialog::FillAndStroke *>(desktop->getContainer()->get_dialog("FillStroke"));
 }
 
 } // namespace Widget

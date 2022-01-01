@@ -76,6 +76,10 @@ bool ObjectSet::remove(SPObject* object) {
     return false;
 }
 
+void ObjectSet::_emitChanged(bool persist_selection_context /*= false*/) {
+    _sibling_state.clear();
+}
+
 bool ObjectSet::includes(SPObject *object) {
     g_return_val_if_fail(object != nullptr, false);
     g_return_val_if_fail(SP_IS_OBJECT(object), false);
@@ -257,7 +261,7 @@ Inkscape::XML::Node *ObjectSet::topRepr() const
         return nullptr;
     }
 
-#ifdef __APPLE__
+#ifdef _LIBCPP_VERSION
     // workaround for
     // static_assert(__is_cpp17_forward_iterator<_ForwardIterator>::value
     auto const n = std::vector<Inkscape::XML::Node *>(nodes.begin(), nodes.end());
