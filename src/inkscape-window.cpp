@@ -143,15 +143,12 @@ InkscapeWindow::InkscapeWindow(SPDocument* document)
     setup_view();
 
     // Show dialogs after the main window, otherwise dialogs may be associated as the main window of the program.
-    if (_app) {
-        // restore short-lived floating dialogs state if this is the first window being opened
-        bool include_short_lived = _app->get_number_of_windows() == 0;
-        DialogManager::singleton().restore_dialogs_state(_desktop->getContainer(), include_short_lived);
+    // Restore short-lived floating dialogs state if this is the first window being opened
+    bool include_short_lived = _app->get_number_of_windows() == 0;
+    DialogManager::singleton().restore_dialogs_state(_desktop->getContainer(), include_short_lived);
 
-        // This pokes the window to request the right size for the dialogs once loaded.
-        Gtk::Window *win = _desktop->getToplevel();
-        g_idle_add(GSourceFunc(&_resize_children), win);
-    }
+    // This pokes the window to request the right size for the dialogs once loaded.
+    g_idle_add(GSourceFunc(&_resize_children), this);
 
     // ================= Shift Icons =================
     // Note: The menu is defined at the app level but shifting icons requires actual widgets and
@@ -169,8 +166,7 @@ InkscapeWindow::InkscapeWindow(SPDocument* document)
 
 InkscapeWindow::~InkscapeWindow()
 {
-    Gtk::Window *win = _desktop->getToplevel();
-    g_idle_remove_by_data(win);
+    g_idle_remove_by_data(this);
 }
 
 // Change a document, leaving desktop/view the same. (Eventually move all code here.)
@@ -219,18 +215,6 @@ InkscapeWindow::setup_view()
     }
 }
 
-/**
- * Return true if this is the Cmd-Q shortcut on macOS
- */
-inline bool is_Cmd_Q(GdkEventKey *event)
-{
-#ifdef GDK_WINDOWING_QUARTZ
-    return (event->keyval == 'q' && event->state == (GDK_MOD2_MASK | GDK_META_MASK));
-#else
-    return false;
-#endif
-}
-
 bool
 InkscapeWindow::on_key_press_event(GdkEventKey* event)
 {
@@ -264,8 +248,7 @@ InkscapeWindow::on_key_press_event(GdkEventKey* event)
         }
     }
 
-    // Intercept Cmd-Q on macOS to not bypass confirmation dialog
-    if (!is_Cmd_Q(event) && Gtk::Window::on_key_press_event(event)) {
+    if (Gtk::Window::on_key_press_event(event)) {
         return true;
     }
 

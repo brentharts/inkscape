@@ -250,11 +250,14 @@ SPDesktopWidget::SPDesktopWidget()
 
     auto set_visible_buttons = [=](GtkWidget* tb) {
         int buttons_before_separator = 0;
-        Gtk::Widget* last_one = nullptr;
+        Gtk::Widget* last_sep = nullptr;
+        Gtk::FlowBox* last_box = nullptr;
         sp_traverse_widget_tree(Glib::wrap(tb), [&](Gtk::Widget* widget) {
             if (auto flowbox = dynamic_cast<Gtk::FlowBox*>(widget)) {
                 flowbox->show();
                 flowbox->set_no_show_all();
+                flowbox->set_max_children_per_line(1);
+                last_box = flowbox;
             }
             else if (auto btn = dynamic_cast<Gtk::Button*>(widget)) {
                 auto name = sp_get_action_target(widget);
@@ -263,7 +266,9 @@ SPDesktopWidget::SPDesktopWidget()
                 if (show) {
                     parent->show();
                     ++buttons_before_separator;
-                    last_one = nullptr;
+                    // keep the max_children up to date improves display.
+                    last_box->set_max_children_per_line(buttons_before_separator);
+                    last_sep = nullptr;
                 }
                 else {
                     parent->hide();
@@ -272,19 +277,19 @@ SPDesktopWidget::SPDesktopWidget()
             else if (auto sep = dynamic_cast<Gtk::Separator*>(widget)) {
                 auto parent = sep->get_parent();
                 if (buttons_before_separator <= 0) {
-                    parent->hide();
+                    sep->hide();
                 }
                 else {
-                    parent->show();
+                    sep->show();
                     buttons_before_separator = 0;
-                    last_one = parent;
+                    last_sep = sep;
                 }
             }
             return false;
         });
-        if (last_one) {
+        if (last_sep) {
             // hide trailing separator
-            last_one->hide();
+            last_sep->hide();
         }
     };
     auto set_toolbar_prefs = [=]() {
@@ -683,19 +688,6 @@ void SPDesktopWidget::on_size_allocate(Gtk::Allocation &allocation)
 
     desktop->zoom_absolute(midpoint_dt, zoom, false);
 }
-
-#ifdef GDK_WINDOWING_QUARTZ
-static GtkMenuItem *_get_help_menu(GtkMenuShell *menu)
-{
-    // Assume "Help" is the last child in menu
-    GtkMenuItem *last = nullptr;
-    auto callback = [](GtkWidget *widget, gpointer data) {
-        *static_cast<GtkMenuItem **>(data) = GTK_MENU_ITEM(widget);
-    };
-    gtk_container_foreach(GTK_CONTAINER(menu), callback, &last);
-    return last;
-}
-#endif
 
 /**
  * Callback to realize desktop widget.
