@@ -33,8 +33,12 @@ void reveal_widget(Gtk::Widget *widget, bool show);
 // check if widget in a container is actually visible
 bool is_widget_effectively_visible(Gtk::Widget* widget);
 
+namespace Inkscape {
+namespace UI {
 // Utility function to ensure correct sizing after adding child widgets
 void resize_children(Gtk::Widget *widget);
+}
+}
 
 // Get the background-color style property for a given StyleContext
 Gdk::RGBA get_background_color(Glib::RefPtr<Gtk::StyleContext> &context,

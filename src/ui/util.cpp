@@ -54,6 +54,8 @@ bool is_widget_effectively_visible(Gtk::Widget* widget) {
     return widget->get_child_visible();
 }
 
+namespace Inkscape {
+namespace UI {
 void resize_children(Gtk::Widget *widget) {
     if(widget) {
         Gtk::Allocation allocation;
@@ -61,6 +63,8 @@ void resize_children(Gtk::Widget *widget) {
         widget->get_allocated_size(allocation, baseline);
         widget->size_allocate(allocation, baseline);
     }
+}
+}
 }
 
 
