@@ -1145,7 +1145,7 @@ void SPDesktopWidget::layoutWidgets()
         snap.set_valign(Gtk::ALIGN_CENTER);
     }
 
-    resize_children(_top_toolbars);
+    Inkscape::UI::resize_children(_top_toolbars);
 }
 
 Gtk::Toolbar *
