@@ -389,12 +389,8 @@ EventLog::updateUndoVerbs()
             }
 
             // Enable/disable menu items.
-            bool undo_event = false;
-            if(_getUndoEvent()) undo_event = true;
-            bool redo_event = false;
-            if(_getRedoEvent()) redo_event = true;
-            undo_saction->set_enabled(undo_event);
-            redo_saction->set_enabled(redo_event);
+            undo_saction->set_enabled(static_cast<bool>(_getUndoEvent()));
+            redo_saction->set_enabled(static_cast<bool>(_getRedoEvent()));
         }
     }
 }
