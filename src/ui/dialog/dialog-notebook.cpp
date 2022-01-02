@@ -93,9 +93,9 @@ DialogNotebook::DialogNotebook(DialogContainer *container)
     row++;
 
     // Separator menu item
-    new_menu_item = Gtk::manage(new Gtk::SeparatorMenuItem());
-    _menu.attach(*new_menu_item, 0, 2, row, row + 1);
-    row++;
+    // new_menu_item = Gtk::manage(new Gtk::SeparatorMenuItem());
+    // _menu.attach(*new_menu_item, 0, 2, row, row + 1);
+    // row++;
 
     struct Dialog {
         Glib::ustring key;
@@ -128,12 +128,17 @@ DialogNotebook::DialogNotebook(DialogContainer *container)
     DialogData::Category category = DialogData::Other;
     for (auto&& data : all_dialogs) {
         if (data.category != category) {
+            if (col > 0) row++;
+
+            auto separator = Gtk::make_managed<Gtk::SeparatorMenuItem>();
+            _menu.attach(*separator, 0, 2, row, row + 1);
+            row++;
+
             category = data.category;
             auto sep = Gtk::make_managed<Gtk::MenuItem>();
             sep->set_label(dialog_categories[category].uppercase());
             sep->get_style_context()->add_class("menu-category");
             sep->set_sensitive(false);
-            if (col > 0) row++;
             _menu.attach(*sep, 0, 2, row, row + 1);
             col = 0;
             row++;
