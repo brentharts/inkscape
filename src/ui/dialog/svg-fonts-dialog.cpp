@@ -329,7 +329,7 @@ Glib::ustring create_unicode_name(const Glib::ustring& unicode, int max_chars) {
                 ost << " ";
             }
             unsigned int code = *it++;
-            ost << "U+" << std::hex << std::uppercase << std::setw(code <= 0xffff ? 4 : 6) << std::setfill('0') << code;
+            ost << "U+" << std::hex << std::uppercase << std::setw(6) << std::setfill('0') << code;
         }
         if (it != unicode.end()) {
             ost << "..."; // there's more, but we skip them
