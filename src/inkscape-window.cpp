@@ -66,7 +66,7 @@ using Inkscape::UI::Dialog::DialogWindow;
 
 static gboolean _resize_children(Gtk::Window *win)
 {
-    Inkscape::UI::resize_children(win);
+    Inkscape::UI::resize_widget_children(win);
     return false;
 }
 

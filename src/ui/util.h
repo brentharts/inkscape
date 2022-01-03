@@ -36,7 +36,7 @@ bool is_widget_effectively_visible(Gtk::Widget* widget);
 namespace Inkscape {
 namespace UI {
 // Utility function to ensure correct sizing after adding child widgets
-void resize_children(Gtk::Widget *widget);
+void resize_widget_children(Gtk::Widget *widget);
 }
 }
 

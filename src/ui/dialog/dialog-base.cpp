@@ -88,7 +88,7 @@ DialogBase::~DialogBase() {
 
 void DialogBase::ensure_size() {
     if (desktop) {
-        Inkscape::UI::resize_children(desktop->getToplevel());
+        resize_widget_children(desktop->getToplevel());
     }
 }
 
