@@ -1232,6 +1232,7 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
 
             if (context_menu) {
                 ContextMenu *menu = new ContextMenu(getDesktop(), item);
+                menu->attach_to_widget(*this); // So actions work!
                 menu->show();
                 menu->popup_at_pointer(nullptr);
             }
