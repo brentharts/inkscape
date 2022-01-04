@@ -28,7 +28,6 @@
 #include "actions/actions-dialogs.h"
 #include "actions/actions-edit-window.h"
 #include "actions/actions-file-window.h"
-#include "actions/actions-fit-canvas.h"
 #include "actions/actions-help-url.h"
 #include "actions/actions-hide-lock.h"
 #include "actions/actions-layer.h"
@@ -58,6 +57,7 @@
 #include "ui/shortcuts.h"
 
 #include "widgets/desktop-widget.h"
+#include "ui/util.h"
 #include "ui/widget/canvas.h"
 
 using Inkscape::UI::Dialog::DialogManager;
@@ -66,7 +66,7 @@ using Inkscape::UI::Dialog::DialogWindow;
 
 static gboolean _resize_children(Gtk::Window *win)
 {
-    win->resize_children();
+    Inkscape::UI::resize_widget_children(win);
     return false;
 }
 
@@ -109,7 +109,6 @@ InkscapeWindow::InkscapeWindow(SPDocument* document)
     add_actions_dialogs(this);              // Actions to open dialogs.
     add_actions_edit_window(this);          // Actions to edit.
     add_actions_file_window(this);          // Actions for file actions which are desktop dependent.
-    add_actions_fit_canvas(this);           // Actions to fit canvas
     add_actions_help_url(this);             // Actions to help url.
     add_actions_hide_lock(this);            // Actions to transform dialog.
     add_actions_layer(this);                // Actions for layer.
