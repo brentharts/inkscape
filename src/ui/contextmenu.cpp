@@ -56,7 +56,7 @@ ContextMenu::ContextMenu(SPDesktop *desktop, SPItem *item)
     // in the menu thus it makes the most sense that it is either selected or part of the current
     // selection.
     auto selection = desktop->selection;
-    if (!selection->includes(item)) {
+    if (item && !selection->includes(item)) {
         selection->set(item);
     }
 
@@ -109,6 +109,7 @@ ContextMenu::ContextMenu(SPDesktop *desktop, SPItem *item)
             if (!dynamic_cast<SPAnchor*>(item)) {
                 // Item menu
 
+                // Selection
                 gmenu_section = Gio::Menu::create();
                 auto gmenu_submenu = Gio::Menu::create();
                 AppendItemFromAction(     gmenu_submenu, "win.select-same-fill-and-stroke",     _("Fill _and Stroke"),      "edit-select-same-fill-and-stroke");
@@ -119,6 +120,7 @@ ContextMenu::ContextMenu(SPDesktop *desktop, SPItem *item)
                 gmenu_section->append_submenu(_("Select Sa_me"), gmenu_submenu);
                 gmenu->append_section(gmenu_section);
 
+                // Groups and Layers
                 gmenu_section = Gio::Menu::create();
                 AppendItemFromAction(     gmenu_section, "win.selection-move-to-layer",         _("_Move to Layer..."),     ""                                );
                 AppendItemFromAction(     gmenu_section, "app.selection-link",                  _("Create anchor (hyperlink)"),   ""                          );
@@ -139,14 +141,25 @@ ContextMenu::ContextMenu(SPDesktop *desktop, SPItem *item)
                 }
                 gmenu->append_section(gmenu_section);
 
+                // Clipping and Masking
                 gmenu_section = Gio::Menu::create();
-                AppendItemFromAction(     gmenu_section, "app.object-set-clip",                 _("Set Cl_ip"),             ""                                );
-                AppendItemFromAction(     gmenu_section, "app.object-release-clip",             _("Release C_lip"),         ""                                );
-                AppendItemFromAction(     gmenu_section, "app.object-set-clip-group",           _("Set Clip G_roup"),       ""                                );
-                AppendItemFromAction(     gmenu_section, "app.object-set-mask",                 _("Set Mask"),              ""                                );
-                AppendItemFromAction(     gmenu_section, "app.object-release-mask",             _("Release Mask"),          ""                                );
+                if (selection->size() > 1) {
+                    AppendItemFromAction( gmenu_section, "app.object-set-clip",                 _("Set Cl_ip"),             ""                                );
+                }
+                if (item->getClipObject()) {
+                    AppendItemFromAction( gmenu_section, "app.object-release-clip",             _("Release C_lip"),         ""                                );
+                } else {
+                    AppendItemFromAction( gmenu_section, "app.object-set-clip-group",           _("Set Clip G_roup"),       ""                                );
+                }
+                if (selection->size() > 1) {
+                    AppendItemFromAction( gmenu_section, "app.object-set-mask",                 _("Set Mask"),              ""                                );
+                }
+                if (item->getMaskObject()) {
+                    AppendItemFromAction( gmenu_section, "app.object-release-mask",             _("Release Mask"),          ""                                );
+                }
                 gmenu->append_section(gmenu_section);
 
+                // Hide and Lock
                 gmenu_section = Gio::Menu::create();
                 AppendItemFromAction(     gmenu_section, "app.selection-hide",                  _("Hide Selected Objects"), ""                                );
                 AppendItemFromAction(     gmenu_section, "app.selection-lock",                  _("Lock Selected Objects"), ""                                );

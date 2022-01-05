@@ -160,6 +160,7 @@ hide_lock_hide_selected(InkscapeApplication* app, bool hide)
     if (changed) {
         auto document = app->get_active_document();
         Inkscape::DocumentUndo::done(document, _("Hid/unhid selected items."), "");
+        selection->clear();
     }
 }
 
@@ -183,6 +184,7 @@ hide_lock_lock_selected(InkscapeApplication* app, bool lock)
     if (changed) {
         auto document = app->get_active_document();
         Inkscape::DocumentUndo::done(document, _("Locked/unlocked selected items."), "");
+        selection->clear();
     }
 }
 
