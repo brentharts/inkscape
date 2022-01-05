@@ -317,8 +317,8 @@ void DocumentProperties::update_scale_ui(SPDesktop* desktop) {
 
     using UI::Widget::PageProperties;
     if (auto scale = get_document_scale_helper(*document)) {
-        auto sx = scale.value()[Geom::X];
-        auto sy = scale.value()[Geom::Y];
+        auto sx = (*scale)[Geom::X];
+        auto sy = (*scale)[Geom::Y];
         double eps = 0.0001; // TODO: tweak this value
         bool uniform = fabs(sx - sy) < eps;
         _page->set_dimension(PageProperties::Dimension::Scale, sx, sx); // only report one, only one "scale" is used
