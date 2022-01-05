@@ -82,7 +82,7 @@
     <property name="halign">start</property>
     <property name="valign">start</property>
     <child>
-      <!-- n-columns=4 n-rows=15 -->
+      <!-- n-columns=4 n-rows=16 -->
       <object class="GtkGrid" id="left-grid">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
@@ -284,83 +284,26 @@
             <property name="can-focus">False</property>
             <property name="halign">start</property>
             <property name="valign">center</property>
-            <property name="label" translatable="yes">Scale X:</property>
-            <style>
-              <class name="viewbox"/>
-            </style>
+            <property name="label" translatable="yes">Scale:</property>
           </object>
           <packing>
             <property name="left-attach">0</property>
-            <property name="top-attach">8</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="scale-y-label">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="halign">start</property>
-            <property name="valign">center</property>
-            <property name="label" translatable="yes">Scale Y:</property>
-            <style>
-              <class name="viewbox"/>
-            </style>
-          </object>
-          <packing>
-            <property name="left-attach">0</property>
-            <property name="top-attach">9</property>
+            <property name="top-attach">7</property>
           </packing>
         </child>
         <child>
           <object class="GtkSpinButton" id="scale-x">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
-            <property name="tooltip-text" translatable="yes">Scale X. Ratio of document size to viewbox size.</property>
+            <property name="tooltip-text" translatable="yes">Document scale. Ratio of document size to viewbox size.</property>
             <property name="width-chars">9</property>
             <property name="adjustment">adj-scale-x</property>
             <property name="digits">6</property>
-            <style>
-              <class name="viewbox"/>
-            </style>
           </object>
           <packing>
             <property name="left-attach">1</property>
-            <property name="top-attach">8</property>
+            <property name="top-attach">7</property>
             <property name="width">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkSpinButton" id="scale-y">
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="tooltip-text" translatable="yes">While SVG allows non-uniform scaling it is recommended to use only uniform scaling in Inkscape. To set a non-uniform scaling, set the 'viewBox' and 'preserveAspectRatio' directly.</property>
-            <property name="width-chars">9</property>
-            <property name="adjustment">adj-scale-y</property>
-            <property name="digits">6</property>
-            <style>
-              <class name="viewbox"/>
-            </style>
-          </object>
-          <packing>
-            <property name="left-attach">1</property>
-            <property name="top-attach">9</property>
-            <property name="width">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="viewbox-label">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="halign">start</property>
-            <property name="valign">center</property>
-            <property name="label" translatable="yes">Viewbox</property>
-            <style>
-              <class name="viewbox"/>
-            </style>
-          </object>
-          <packing>
-            <property name="left-attach">0</property>
-            <property name="top-attach">10</property>
-            <property name="width">3</property>
           </packing>
         </child>
         <child>
@@ -563,15 +506,15 @@
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="tooltip-text" translatable="yes">Advanced scaling options.</property>
-                <property name="label" translatable="yes">Viewbox settings</property>
+                <property name="tooltip-text" translatable="yes">Advanced viewbox scaling options.</property>
+                <property name="label" translatable="yes">Advanced viewbox settings</property>
               </object>
             </child>
           </object>
           <packing>
             <property name="left-attach">0</property>
-            <property name="top-attach">7</property>
-            <property name="width">2</property>
+            <property name="top-attach">10</property>
+            <property name="width">4</property>
           </packing>
         </child>
         <child>
@@ -587,9 +530,55 @@
           </object>
           <packing>
             <property name="left-attach">3</property>
-            <property name="top-attach">8</property>
+            <property name="top-attach">13</property>
             <property name="height">2</property>
           </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <child>
+              <object class="GtkLabel" id="nonuniform-scale">
+                <property name="name">non-uniform-scale</property>
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="halign">start</property>
+                <property name="label" translatable="yes">Non-uniform scale!</property>
+                <attributes>
+                  <attribute name="style" value="italic"/>
+                </attributes>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="left-attach">1</property>
+            <property name="top-attach">8</property>
+            <property name="width">2</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
         </child>
         <child>
           <placeholder/>

@@ -46,6 +46,15 @@ namespace Inkscape {
 namespace UI {
 namespace Widget {
 
+void show_widget(Gtk::Widget& widget, bool show) {
+    if (show) {
+        widget.show();
+    }
+    else {
+        widget.hide();
+    }
+};
+
 #define GET(prop, id) prop(get_widget<std::remove_reference_t<decltype(prop)>>(_builder, id))
 
 class PagePropertiesBox : public PageProperties {
@@ -59,7 +68,7 @@ public:
         GET(_portrait, "page-portrait"),
         GET(_landscape, "page-landscape"),
         GET(_scale_x, "scale-x"),
-        GET(_scale_y, "scale-y"),
+        GET(_nonuniform_scale, "nonuniform-scale"),
         GET(_viewbox_x, "viewbox-x"),
         GET(_viewbox_y, "viewbox-y"),
         GET(_viewbox_width, "viewbox-width"),
@@ -145,36 +154,31 @@ public:
         const char* unlinked = "entries-unlinked-symbolic";
         _link_width_height.signal_clicked().connect([=](){
             // toggle size link
-            if (_size_ratio > 0) {
-                _size_ratio = 0;
-            }
-            else {
-                auto width = _page_width.get_value();
-                auto height = _page_height.get_value();
-                if (width > 0 && height > 0) {
-                    _size_ratio = width / height;
-                }
-            }
+            _locked_size_ratio = !_locked_size_ratio;
             // set image
-            _link_width_height.set_image_from_icon_name(_size_ratio > 0 ? linked : unlinked, Gtk::ICON_SIZE_LARGE_TOOLBAR);
+            _link_width_height.set_image_from_icon_name(_locked_size_ratio && _size_ratio > 0 ? linked : unlinked, Gtk::ICON_SIZE_LARGE_TOOLBAR);
         });
         _link_width_height.set_image_from_icon_name(unlinked, Gtk::ICON_SIZE_LARGE_TOOLBAR);
         // set image for linked scale
         get_widget<Gtk::Image>(_builder, "linked-scale-img").set_from_icon_name(linked, Gtk::ICON_SIZE_LARGE_TOOLBAR);
 
+        // report page size changes
         _page_width .signal_value_changed().connect([=](){ set_page_size_linked(true); });
         _page_height.signal_value_changed().connect([=](){ set_page_size_linked(false); });
+        // enforce uniform scale thru viewbox
+        _viewbox_width. signal_value_changed().connect([=](){ set_viewbox_size_linked(true); });
+        _viewbox_height.signal_value_changed().connect([=](){ set_viewbox_size_linked(false); });
+
         _landscape.signal_toggled().connect([=](){ if (_landscape.get_active()) swap_width_height(); });
         _portrait .signal_toggled().connect([=](){ if (_portrait .get_active()) swap_width_height(); });
 
-        for (auto dim : {Dimension::Scale, Dimension::ViewboxPosition, Dimension::ViewboxSize}) {
+        for (auto dim : {Dimension::Scale, Dimension::ViewboxPosition}) {
             auto pair = get_dimension(dim);
             auto b1 = &pair.first;
             auto b2 = &pair.second;
             if (dim == Dimension::Scale) {
                 // uniform scale: report the same x and y
                 b1->signal_value_changed().connect([=](){ fire_value_changed(*b1, *b1, nullptr, dim); });
-                b2->signal_value_changed().connect([=](){ fire_value_changed(*b2, *b2, nullptr, dim); });
             }
             else {
                 b1->signal_value_changed().connect([=](){ fire_value_changed(*b1, *b2, nullptr, dim); });
@@ -192,7 +196,7 @@ public:
 private:
 
     void show_viewbox(bool show_widgets) {
-        auto show = [=](Gtk::Widget* w) { if (show_widgets) w->show(); else w->hide(); };
+        auto show = [=](Gtk::Widget* w) { show_widget(*w, show_widgets); };
 
         for (auto&& widget : _left_grid.get_children()) {
             if (widget->get_style_context()->has_class("viewbox")) {
@@ -223,29 +227,46 @@ private:
             _page_height.set_value(height);
             _page_units->setUnit(page.unit->abbr);
             _current_page_unit = _page_units->getUnit();
-            if (width > 0 && height > 0 && _size_ratio > 0) {
+            if (width > 0 && height > 0) {
                 _size_ratio = width / height;
             }
         }
-        set_page_size();
+        set_page_size(true);
     }
 
-    void set_page_size_linked(bool width_changing) {
+    void changed_linked_value(bool width_changing, Gtk::SpinButton& wedit, Gtk::SpinButton& hedit) {
         if (_size_ratio > 0) {
             auto scoped(_update.block());
             if (width_changing) {
-                auto width = _page_width.get_value();
-                _page_height.set_value(width / _size_ratio);
+                auto width = wedit.get_value();
+                hedit.set_value(width / _size_ratio);
             }
             else {
-                auto height = _page_height.get_value();
-                _page_width.set_value(height * _size_ratio);
+                auto height = hedit.get_value();
+                wedit.set_value(height * _size_ratio);
             }
+        }
+    }
+
+    void set_viewbox_size_linked(bool width_changing) {
+        // viewbox size - always linked to make scaling uniform
+        changed_linked_value(width_changing, _viewbox_width, _viewbox_height);
+        if (!_update.pending()) {
+            auto width  = _viewbox_width.get_value();
+            auto height = _viewbox_height.get_value();
+            _signal_dimmension_changed.emit(width, height, nullptr, Dimension::ViewboxSize);
+        }
+    }
+
+    void set_page_size_linked(bool width_changing) {
+        // if size ratio is locked change the other dimension too
+        if (_locked_size_ratio) {
+            changed_linked_value(width_changing, _page_width, _page_height);
         }
         set_page_size();
     }
 
-    void set_page_size() {
+    void set_page_size(bool template_selected = false) {
         auto pending = _update.pending();
 
         auto scoped(_update.block());
@@ -263,12 +284,15 @@ private:
             _portrait.set_sensitive(false);
             _landscape.set_sensitive(false);
         }
+        if (width > 0 && height > 0) {
+            _size_ratio = width / height;
+        }
 
         auto templ = find_page_template(width, height, *unit);
         _template_name.set_label(templ ? templ->name : _("Custom"));
 
         if (!pending) {
-            _signal_dimmension_changed.emit(width, height, unit, Dimension::PageSize);
+            _signal_dimmension_changed.emit(width, height, unit, template_selected ? Dimension::PageTemplate : Dimension::PageSize);
         }
     }
 
@@ -322,9 +346,15 @@ private:
     void set_check(Check element, bool checked) override {
         auto scoped(_update.block());
 
+        if (element == Check::NonuniformScale) {
+            show_widget(_nonuniform_scale, checked);
+            _scale_x.set_sensitive(!checked);
+            return;
+        }
+
         get_checkbutton(element).set_active(checked);
 
-        // todo: special cases
+        // special cases
         if (element == Check::Checkerboard) _preview->enable_checkerboard(checked);
         if (element == Check::Shadow) _preview->enable_drop_shadow(checked);
         if (element == Check::Border) _preview->draw_border(checked);
@@ -410,7 +440,8 @@ private:
     spin_pair get_dimension(Dimension dimension) {
         switch (dimension) {
             case Dimension::PageSize: return spin_pair(_page_width, _page_height);
-            case Dimension::Scale: return spin_pair(_scale_x, _scale_y);
+            case Dimension::PageTemplate: return spin_pair(_page_width, _page_height);
+            case Dimension::Scale: return spin_pair(_scale_x, _scale_x);
             case Dimension::ViewboxPosition: return spin_pair(_viewbox_x, _viewbox_y);
             case Dimension::ViewboxSize: return spin_pair(_viewbox_width, _viewbox_height);
 
@@ -427,7 +458,7 @@ private:
     Gtk::RadioButton& _portrait;
     Gtk::RadioButton& _landscape;
     Gtk::SpinButton& _scale_x;
-    Gtk::SpinButton& _scale_y;
+    Gtk::Label& _nonuniform_scale;
     Gtk::SpinButton& _viewbox_x;
     Gtk::SpinButton& _viewbox_y;
     Gtk::SpinButton& _viewbox_width;
@@ -449,7 +480,8 @@ private:
     std::unique_ptr<UnitMenu> _page_units;
     const Unit* _current_page_unit = nullptr;
     OperationBlocker _update;
-    double _size_ratio = 0; // width to height ratio
+    double _size_ratio = 1; // width to height ratio
+    bool _locked_size_ratio = false;
     Gtk::Expander& _viewbox_expander;
 };
 

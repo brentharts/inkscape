@@ -220,18 +220,17 @@ void set_color(SPDesktop* desktop, Glib::ustring operation, unsigned int rgba, S
     DocumentUndo::maybeDone(desktop->getDocument(), ("document-color-" + operation).c_str(), operation, "");
 }
 
-void set_document_dimensions(SPDesktop* desktop, double width, double height, const Inkscape::Util::Unit* unit) {
+void set_document_dimensions(SPDesktop* desktop, double width, double height, const Inkscape::Util::Unit* unit, bool change_size = true) {
     if (!desktop) return;
 
     Inkscape::Util::Quantity w = Inkscape::Util::Quantity(width, unit);
     Inkscape::Util::Quantity h = Inkscape::Util::Quantity(height, unit);
-    bool changeSize = true;
     SPDocument* doc = desktop->getDocument();
     Inkscape::Util::Quantity const old_height = doc->getHeight();
-    doc->setWidthAndHeight(w, h, changeSize);
+    doc->setWidthAndHeight(w, h, change_size);
     // The origin for the user is in the lower left corner; this point should remain stationary when
     // changing the page size. The SVG's origin however is in the upper left corner, so we must compensate for this
-    if (changeSize && !doc->is_yaxisdown()) {
+    if (change_size && !doc->is_yaxisdown()) {
         Geom::Translate const vert_offset(Geom::Point(0, (old_height.value("px") - h.value("px"))));
         doc->getRoot()->translateChildItems(vert_offset);
     }
@@ -240,7 +239,9 @@ void set_document_dimensions(SPDesktop* desktop, double width, double height, co
         // set_namedview_value(desktop, "", SPAttr::UNITS)
         // write_str_to_xml(desktop, _("Set document unit"), "unit", unit->abbr.c_str());
     // }
-    DocumentUndo::done(doc, _("Set page size"), "");
+    if (change_size) {
+        DocumentUndo::done(doc, _("Set page size"), "");
+    }
 }
 
 void DocumentProperties::set_viewbox_pos(SPDesktop* desktop, double x, double y) {
@@ -267,6 +268,18 @@ void DocumentProperties::set_viewbox_size(SPDesktop* desktop, double width, doub
     update_scale_ui(desktop);
 }
 
+// helper function to set document scale; uses magnitude of document width/height only, not computed (pixel) values
+void set_document_scale_helper(SPDocument& document, double scale) {
+    if (scale <= 0) return;
+
+    auto root = document.getRoot();
+    auto box = document.getViewBox();
+    document.setViewBox(Geom::Rect::from_xywh(
+        box.min()[Geom::X], box.min()[Geom::Y],
+        root->width.value / scale, root->height.value / scale)
+    );
+}
+
 void DocumentProperties::set_document_scale(SPDesktop* desktop, double scale) {
     if (!desktop) return;
 
@@ -274,11 +287,26 @@ void DocumentProperties::set_document_scale(SPDesktop* desktop, double scale) {
     if (!document) return;
 
     if (scale > 0) {
-        document->setDocumentScale(scale);
+        set_document_scale_helper(*document, scale);
         update_viewbox_ui(desktop);
         update_scale_ui(desktop);
         DocumentUndo::done(document, _("Set page scale"), "");
     }
+}
+
+// document scale as a ratio of document size and viewbox size
+// as described in Wiki: https://wiki.inkscape.org/wiki/index.php/Units_In_Inkscape
+// for example: <svg width="100mm" height="100mm" viewBox="0 0 100 100"> will report 1:1 scale
+std::optional<Geom::Scale> get_document_scale_helper(SPDocument& doc) {
+    auto root = doc.getRoot();
+    if (root->viewBox_set) {
+        auto vw = root->viewBox.width();
+        auto vh = root->viewBox.height();
+        if (vw > 0 && vh > 0) {
+            return Geom::Scale(root->width.value / vw, root->height.value / vh);
+        }
+    }
+    return std::optional<Geom::Scale>();
 }
 
 void DocumentProperties::update_scale_ui(SPDesktop* desktop) {
@@ -288,8 +316,19 @@ void DocumentProperties::update_scale_ui(SPDesktop* desktop) {
     if (!document) return;
 
     using UI::Widget::PageProperties;
-    Geom::Scale scale = document->getDocumentScale();
-    _page->set_dimension(PageProperties::Dimension::Scale, scale[Geom::X], scale[Geom::Y]);
+    if (auto scale = get_document_scale_helper(*document)) {
+        auto sx = scale.value()[Geom::X];
+        auto sy = scale.value()[Geom::Y];
+        double eps = 0.0001; // TODO: tweak this value
+        bool uniform = fabs(sx - sy) < eps;
+        _page->set_dimension(PageProperties::Dimension::Scale, sx, sx); // only report one, only one "scale" is used
+        _page->set_check(PageProperties::Check::NonuniformScale, !uniform);
+    }
+    else {
+        // no scale
+        _page->set_dimension(PageProperties::Dimension::Scale, 1, 1);
+        _page->set_check(PageProperties::Check::NonuniformScale, false);
+    }
 }
 
 void DocumentProperties::update_viewbox_ui(SPDesktop* desktop) {
@@ -335,8 +374,10 @@ void DocumentProperties::build_page()
         _wr.setUpdating(true);
         switch (element) {
             case PageProperties::Dimension::PageSize:
-                set_document_dimensions(_wr.desktop(), x, y, unit);
-                // update viewbox and scale
+            case PageProperties::Dimension::PageTemplate:
+                // when page size or format is selected, reset viewbox (and scale) too
+                set_document_dimensions(_wr.desktop(), x, y, unit, false);
+                set_viewbox_size(_wr.desktop(), x, y);
                 update_viewbox(_wr.desktop());
                 break;
 
@@ -386,15 +427,19 @@ void DocumentProperties::build_page()
             display_unit_change(unit);
         }
         else if (element == PageProperties::Units::Document) {
-            // document (svg width/height) unit
-            // document_unit_change(unit);
+            // not used, fired with page size
         }
     });
 
     _page->signal_resize_to_fit().connect([=](){
-        if (Verb* verb = Verb::get(SP_VERB_FIT_CANVAS_TO_SELECTION_OR_DRAWING)) {
-            if (SPAction* action = verb->get_action(Inkscape::ActionContext(getDesktop()))) {
-                sp_action_perform(action, nullptr);
+        if (_wr.isUpdating() || !_wr.desktop()) return;
+
+        if (auto document = getDocument()) {
+            if (auto pm = document->getNamedView()->getPageManager()) {
+                pm->selectPage(0);
+                // fit page to selection or content, if there's no selection
+                pm->fitToSelection(_wr.desktop()->getSelection());
+                DocumentUndo::done(document, _("Resize page to fit"), INKSCAPE_ICON("tool-pages"));
             }
         }
     });
@@ -1406,8 +1451,7 @@ void DocumentProperties::update_viewbox(SPDesktop* desktop) {
         _page->set_dimension(PageProperties::Dimension::ViewboxSize, vb.width(), vb.height());
     }
 
-    Geom::Scale scale = document->getDocumentScale();
-    _page->set_dimension(PageProperties::Dimension::Scale, scale[Geom::X], scale[Geom::Y]);
+    update_scale_ui(desktop);
 }
 
 /**

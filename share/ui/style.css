@@ -637,6 +637,10 @@ button.square-button image {
     margin-left: 1em;
 }
 
+.small-font {
+    font-size: small;
+}
+
 .toolbar-separator {
     margin: 7px 3px;
 }
