@@ -92,14 +92,22 @@ ContextMenu::ContextMenu(SPDesktop *desktop, SPItem *item)
                 AppendItemFromAction(gmenu_dialogs, "win.dialog-open('FillStroke')",                _("_Fill and Stroke..."),   "dialog-fill-and-stroke"     );
             }
 
+            // Image dialogs (mostly).
             if (dynamic_cast<SPImage*>(item)) {
                 AppendItemFromAction(     gmenu_dialogs, "win.dialog-open('ObjectAttributes')",          _("Image _Properties..."),  "dialog-fill-and-stroke");
-                AppendItemFromAction(     gmenu_dialogs, "app.element-image-edit",                       _("Edit Externally..."),    ""                      );
                 AppendItemFromAction(     gmenu_dialogs, "win.dialog-open('Trace')",                     _("_Trace Bitmap..."),      "bitmap-trace"          );
-                AppendItemFromAction(     gmenu_dialogs, "app.org.inkscape.filter.selected.embed_image", _("Embed Image"),           ""                      );
-                AppendItemFromAction(     gmenu_dialogs, "app.org.inkscape.filter.extract_image",        _("Extract Image..."),      ""                      );
+                auto image = dynamic_cast<SPImage*>(item);
+                if (strncmp(image->href, "data", 4) == 0) {
+                    // Image is embeded.
+                    AppendItemFromAction( gmenu_dialogs, "app.org.inkscape.filter.extract_image",        _("Extract Image..."),      ""                      );
+                } else {
+                    // Image is linked.
+                    AppendItemFromAction( gmenu_dialogs, "app.org.inkscape.filter.selected.embed_image", _("Embed Image"),           ""                      );
+                    AppendItemFromAction( gmenu_dialogs, "app.element-image-edit",                       _("Edit Externally..."),    ""                      );
+                }
             }
 
+            // Text dialogs.
             if (dynamic_cast<SPText*>(item)) {
                 AppendItemFromAction(     gmenu_dialogs, "win.dialog-open('Text')",                      _("_Text and Font..."),     "dialog-text-and-font"  );
                 AppendItemFromAction(     gmenu_dialogs, "win.dialog-open('Spellcheck')",                _("Check Spellin_g..."),    "tools-check-spelling"  );

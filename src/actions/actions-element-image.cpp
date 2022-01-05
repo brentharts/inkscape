@@ -13,9 +13,11 @@
 #include <iostream>
 
 #include <giomm.h>  // Not <gtkmm.h>! To eventually allow a headless version!
+#include <gtkmm.h>  // OK, we lied. We pop-up an message dialog if external editor not found and if we have a GUI.
 #include <glibmm/i18n.h>
 
 #include "inkscape-application.h"
+#include "inkscape-window.h"
 #include "preferences.h"
 
 #include "selection.h"            // Selection
@@ -53,12 +55,17 @@ void image_edit(InkscapeApplication *app)
             const gchar *href = node->attribute("xlink:href");
             if (!href) {
                 std::cerr << "image_edit: no xlink:href" << std::endl;
-                return;
+                continue;
+            }
+
+            if (strncmp (href, "data", 4) == 0) {
+                std::cerr << "image_edit: cannot edit embedded image" << std::endl;
+                continue;
             }
 
             // Find filename.
             std::string filename = href;
-            if (strncmp (href, "file", 5) == 0) {
+            if (strncmp (href, "file", 4) == 0) {
                 filename = Glib::filename_from_uri(href);
             }
 
@@ -96,7 +103,19 @@ void image_edit(InkscapeApplication *app)
             GError* error = nullptr;
             g_spawn_command_line_async(command.c_str(), &error);
             if (error) {
-                g_warning("Problem launching editor (%d). %s", error->code, error->message);
+                Glib::ustring message = _("Failed to edit external image.\n<small>Note: Path to editor can be set in Preferences dialog.</small>");
+                Glib::ustring message2 = Glib::ustring::compose(_("System error message: %1"), error->message);
+                auto window = app->get_active_window();
+                if (window) {
+                    Gtk::MessageDialog dialog(*window, message, true, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_OK);
+                    dialog.property_destroy_with_parent() = true;
+                    dialog.set_name("SetEditorDialog");
+                    dialog.set_title(_("External Edit Image:"));
+                    dialog.set_secondary_text(message2);
+                    dialog.run();
+                } else {
+                    g_warning(message.c_str());
+                }
                 g_error_free(error);
                 error = nullptr;
             }
