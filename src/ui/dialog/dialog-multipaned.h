@@ -42,10 +42,18 @@ class MyDropZone
 {
 public:
     MyDropZone(Gtk::Orientation orientation);
-    ~MyDropZone() override = default;
+    ~MyDropZone() override;
+
+    static void add_highlight_instances();
+    static void remove_highlight_instances();
+
 private:
     void set_size(int size);
     bool _active = false;
+    void add_highlight();
+    void remove_highlight();
+
+    static std::list<MyDropZone *> _instances_list;
 };
 
 /* ============  HANDLE   ============ */
