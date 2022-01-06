@@ -295,7 +295,8 @@
           <object class="GtkSpinButton" id="scale-x">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
-            <property name="tooltip-text" translatable="yes">Document scale. Ratio of document size to viewbox size.</property>
+            <property name="tooltip-text" translatable="yes">Document scale establishes size of user units.
+SVG element positions are expressed in user units.</property>
             <property name="width-chars">9</property>
             <property name="adjustment">adj-scale-x</property>
             <property name="digits">6</property>
@@ -558,15 +559,51 @@
           </object>
           <packing>
             <property name="left-attach">1</property>
-            <property name="top-attach">8</property>
+            <property name="top-attach">9</property>
             <property name="width">2</property>
           </packing>
         </child>
         <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <child>
+              <object class="GtkLabel" id="user-units">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">xx</property>
+                <style>
+                  <class name="small-font"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="margin-start">4</property>
+                <property name="label" translatable="yes">per user unit</property>
+                <style>
+                  <class name="small-font"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="left-attach">1</property>
+            <property name="top-attach">8</property>
+            <property name="width">2</property>
+          </packing>
         </child>
         <child>
           <placeholder/>

@@ -220,13 +220,14 @@ void set_color(SPDesktop* desktop, Glib::ustring operation, unsigned int rgba, S
     DocumentUndo::maybeDone(desktop->getDocument(), ("document-color-" + operation).c_str(), operation, "");
 }
 
-void set_document_dimensions(SPDesktop* desktop, double width, double height, const Inkscape::Util::Unit* unit, bool change_size = true) {
+void set_document_dimensions(SPDesktop* desktop, double width, double height, const Inkscape::Util::Unit* unit) {
     if (!desktop) return;
 
     Inkscape::Util::Quantity w = Inkscape::Util::Quantity(width, unit);
     Inkscape::Util::Quantity h = Inkscape::Util::Quantity(height, unit);
     SPDocument* doc = desktop->getDocument();
     Inkscape::Util::Quantity const old_height = doc->getHeight();
+    bool change_size = true;
     doc->setWidthAndHeight(w, h, change_size);
     // The origin for the user is in the lower left corner; this point should remain stationary when
     // changing the page size. The SVG's origin however is in the upper left corner, so we must compensate for this
@@ -239,9 +240,7 @@ void set_document_dimensions(SPDesktop* desktop, double width, double height, co
         // set_namedview_value(desktop, "", SPAttr::UNITS)
         // write_str_to_xml(desktop, _("Set document unit"), "unit", unit->abbr.c_str());
     // }
-    if (change_size) {
-        DocumentUndo::done(doc, _("Set page size"), "");
-    }
+    DocumentUndo::done(doc, _("Set page size"), "");
 }
 
 void DocumentProperties::set_viewbox_pos(SPDesktop* desktop, double x, double y) {
@@ -373,11 +372,9 @@ void DocumentProperties::build_page()
 
         _wr.setUpdating(true);
         switch (element) {
-            case PageProperties::Dimension::PageSize:
             case PageProperties::Dimension::PageTemplate:
-                // when page size or format is selected, reset viewbox (and scale) too
-                set_document_dimensions(_wr.desktop(), x, y, unit, false);
-                set_viewbox_size(_wr.desktop(), x, y);
+            case PageProperties::Dimension::PageSize:
+                set_document_dimensions(_wr.desktop(), x, y, unit);
                 update_viewbox(_wr.desktop());
                 break;
 
@@ -390,7 +387,7 @@ void DocumentProperties::build_page()
                 break;
 
             case PageProperties::Dimension::Scale:
-                set_document_scale(_wr.desktop(), x); // uniform scale; x and y are linked in the UI
+                set_document_scale(_wr.desktop(), x); // only uniform scale; there's no 'y' in the dialog
         }
         _wr.setUpdating(false);
     });

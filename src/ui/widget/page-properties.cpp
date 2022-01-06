@@ -68,6 +68,7 @@ public:
         GET(_portrait, "page-portrait"),
         GET(_landscape, "page-landscape"),
         GET(_scale_x, "scale-x"),
+        GET(_doc_units, "user-units"),
         GET(_nonuniform_scale, "nonuniform-scale"),
         GET(_viewbox_x, "viewbox-x"),
         GET(_viewbox_y, "viewbox-y"),
@@ -226,6 +227,7 @@ private:
             _page_width.set_value(width);
             _page_height.set_value(height);
             _page_units->setUnit(page.unit->abbr);
+            _doc_units.set_text(page.unit->abbr);
             _current_page_unit = _page_units->getUnit();
             if (width > 0 && height > 0) {
                 _size_ratio = width / height;
@@ -332,6 +334,7 @@ private:
             _page_width.set_value(w.value(new_unit));
             _page_height.set_value(h.value(new_unit));
         }
+        _doc_units.set_text(new_unit->abbr);
         set_page_size();
         _signal_unit_changed.emit(new_unit, Units::Document);
     }
@@ -377,6 +380,7 @@ private:
             _display_units->setUnit(abbr);
         }
         else if (unit == Units::Document) {
+            _doc_units.set_text(abbr);
             _page_units->setUnit(abbr);
             _current_page_unit = _page_units->getUnit();
             set_page_size();
@@ -459,6 +463,7 @@ private:
     Gtk::RadioButton& _landscape;
     Gtk::SpinButton& _scale_x;
     Gtk::Label& _nonuniform_scale;
+    Gtk::Label& _doc_units;
     Gtk::SpinButton& _viewbox_x;
     Gtk::SpinButton& _viewbox_y;
     Gtk::SpinButton& _viewbox_width;
