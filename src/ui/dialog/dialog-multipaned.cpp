@@ -27,6 +27,7 @@
 #include "dialog-window.h"
 
 #define DROPZONE_SIZE 5
+#define DROPZONE_EXPANSION 15
 #define HANDLE_SIZE 12
 #define HANDLE_CROSS_SIZE 25
 
@@ -56,6 +57,8 @@ int get_handle_size() {
 
 /* ============ MyDropZone ============ */
 
+std::list<MyDropZone *> MyDropZone::_instances_list;
+
 MyDropZone::MyDropZone(Gtk::Orientation orientation)
     : Glib::ObjectBase("MultipanedDropZone")
     , Gtk::Orientable()
@@ -70,11 +73,8 @@ MyDropZone::MyDropZone(Gtk::Orientation orientation)
     signal_drag_motion().connect([=](const Glib::RefPtr<Gdk::DragContext>& ctx, int x, int y, guint time) {
         if (!_active) {
             _active = true;
-            const auto& style = get_style_context();
-            style->remove_class("backgnd-passive");
-            style->add_class("backgnd-active");
-
-            set_size(DROPZONE_SIZE + 15);
+            add_highlight();
+            set_size(DROPZONE_SIZE + DROPZONE_EXPANSION);
         }
         return true;
     });
@@ -82,13 +82,45 @@ MyDropZone::MyDropZone(Gtk::Orientation orientation)
     signal_drag_leave().connect([=](const Glib::RefPtr<Gdk::DragContext>&, guint time) {
         if (_active) {
             _active = false;
-            const auto& style = get_style_context();
-            style->remove_class("backgnd-active");
-            style->add_class("backgnd-passive");
-
             set_size(DROPZONE_SIZE);
         }
     });
+
+    _instances_list.push_back(this);
+}
+
+MyDropZone::~MyDropZone()
+{
+    _instances_list.remove(this);
+}
+
+void MyDropZone::add_highlight_instances()
+{
+    for (auto *instance : _instances_list) {
+        instance->add_highlight();
+    }
+}
+
+void MyDropZone::remove_highlight_instances()
+{
+    for (auto *instance : _instances_list) {
+        instance->remove_highlight();
+        // instance->set_size(DROPZONE_SIZE);
+    }
+}
+
+void MyDropZone::add_highlight()
+{
+    const auto &style = get_style_context();
+    style->remove_class("backgnd-passive");
+    style->add_class("backgnd-active");
+}
+
+void MyDropZone::remove_highlight()
+{
+    const auto &style = get_style_context();
+    style->remove_class("backgnd-active");
+    style->add_class("backgnd-passive");
 }
 
 void MyDropZone::set_size(int size)
