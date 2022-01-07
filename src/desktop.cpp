@@ -1445,10 +1445,10 @@ SPDesktop::setDocument (SPDocument *doc)
         activate_guides (true);
     }
 
+    // set new document before firing signal, so handlers can see new value if they query desktop
+    View::setDocument(doc);
 
     _document_replaced_signal.emit (this, doc);
-
-    View::setDocument (doc);
 }
 
 void
