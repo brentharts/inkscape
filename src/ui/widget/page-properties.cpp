@@ -251,16 +251,19 @@ private:
     }
 
     void set_viewbox_size_linked(bool width_changing) {
-        // viewbox size - always linked to make scaling uniform
+        if (_update.pending()) return;
+
+        // viewbox size - width and height always linked to make scaling uniform
         changed_linked_value(width_changing, _viewbox_width, _viewbox_height);
-        if (!_update.pending()) {
-            auto width  = _viewbox_width.get_value();
-            auto height = _viewbox_height.get_value();
-            _signal_dimmension_changed.emit(width, height, nullptr, Dimension::ViewboxSize);
-        }
+
+        auto width  = _viewbox_width.get_value();
+        auto height = _viewbox_height.get_value();
+        _signal_dimmension_changed.emit(width, height, nullptr, Dimension::ViewboxSize);
     }
 
     void set_page_size_linked(bool width_changing) {
+        if (_update.pending()) return;
+
         // if size ratio is locked change the other dimension too
         if (_locked_size_ratio) {
             changed_linked_value(width_changing, _page_width, _page_height);

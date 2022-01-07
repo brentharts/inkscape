@@ -508,7 +508,7 @@ SVG element positions are expressed in user units.</property>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="tooltip-text" translatable="yes">Advanced viewbox scaling options.</property>
-                <property name="label" translatable="yes">Advanced viewbox settings</property>
+                <property name="label" translatable="yes">Viewbox</property>
               </object>
             </child>
           </object>
