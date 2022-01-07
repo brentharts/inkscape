@@ -190,8 +190,30 @@ GtkWidget *ToolboxFactory::createToolToolbox()
     if (!toolbar) {
         std::cerr << "InkscapeWindow: Failed to load tool toolbar!" << std::endl;
     }
-
+    g_signal_connect(G_OBJECT(GTK_WIDGET(toolbar->gobj())), "size_allocate", G_CALLBACK(ToolboxFactory::toolboxresized), G_OBJECT(GTK_WIDGET(toolbar->gobj())));
     return toolboxNewCommon( GTK_WIDGET(toolbar->gobj()), BAR_TOOL, GTK_POS_LEFT );
+}
+
+void ToolboxFactory::toolboxresized(GtkWidget widget, gpointer data) {
+    if (data) {
+        GtkScrolledWindow *sw = reinterpret_cast<GtkScrolledWindow *>(data);
+        if (sw) {
+            auto toolbox = dynamic_cast<Gtk::ScrolledWindow*>(Glib::wrap(sw));
+            if (toolbox){
+                auto viewport = dynamic_cast<Gtk::Viewport*>(toolbox->get_child());
+                if (viewport) {
+                    gint minimum_width = 0;
+                    gint natural_width = 0;
+                    viewport->get_child()->get_preferred_width(minimum_width, natural_width);
+                    gint widthscroll = std::max(toolbox->get_width(), minimum_width);
+                    toolbox->set_size_request(widthscroll,-1);
+                    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+                    prefs->setInt("/toolbox/width", widthscroll);
+                    prefs->setInt("/toolbox/minimumwidth", minimum_width);
+                }
+            }
+        }
+    }
 }
 
 GtkWidget *ToolboxFactory::createAuxToolbox()

@@ -411,7 +411,12 @@ SPCanvas {
 #CMS_Adjust {
     padding: 0;
 }
-
+.toolboxdragger{
+    background-color:@theme_base_color;
+}
+.smalldragger{
+    background-color:@borders;
+}
 /* Keep palette scrollbar from generating warnings. */
 #PreviewHolderScroller .vertical slider {
     min-height: 15px;

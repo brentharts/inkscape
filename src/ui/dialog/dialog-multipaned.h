@@ -43,13 +43,14 @@ class MyDropZone
 public:
     MyDropZone(Gtk::Orientation orientation);
     ~MyDropZone() override;
-
+    void setPaused(bool paused) { _paused = paused; }
     static void add_highlight_instances();
     static void remove_highlight_instances();
 
 private:
     void set_size(int size);
     bool _active = false;
+    bool _paused = false;
     void add_highlight();
     void remove_highlight();
 
@@ -77,6 +78,7 @@ private:
     bool on_button_release_event(GdkEventButton *event) override;
     bool on_motion_notify_event(GdkEventMotion* motion_event) override;
     void toggle_multipaned();
+    int _size;    
     void update_click_indicator(double x, double y);
     void show_click_indicator(bool show);
     bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr) override;

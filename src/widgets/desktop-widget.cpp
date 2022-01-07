@@ -228,8 +228,8 @@ SPDesktopWidget::SPDesktopWidget()
     dtw->_hbox = Gtk::manage(new Gtk::Box());
     dtw->_hbox->set_name("DesktopHbox");
 
-    dtw->_tbbox = Gtk::manage(new Gtk::Paned(Gtk::ORIENTATION_HORIZONTAL));
-    dtw->_tbbox->set_name("ToolboxCanvasPaned");
+    dtw->_tbbox = Gtk::manage(new Gtk::Box());
+
     dtw->_hbox->pack_start(*dtw->_tbbox, true, true);
 
     dtw->_vbox->pack_end(*dtw->_hbox, true, true);
@@ -252,8 +252,6 @@ SPDesktopWidget::SPDesktopWidget()
 
     dtw->tool_toolbox = ToolboxFactory::createToolToolbox();
     ToolboxFactory::setOrientation( dtw->tool_toolbox, GTK_ORIENTATION_VERTICAL );
-    dtw->_tbbox->pack1(*Glib::wrap(dtw->tool_toolbox), false, true);
-
     auto set_visible_buttons = [=](GtkWidget* tb) {
         int buttons_before_separator = 0;
         Gtk::Widget* last_sep = nullptr;
@@ -334,8 +332,9 @@ SPDesktopWidget::SPDesktopWidget()
     _container = Gtk::manage(new DialogContainer());
     _columns = _container->get_columns();
     _columns->set_dropzone_sizes(2, -1);
-    dtw->_tbbox->pack2(*_container, true, true);
+    dtw->_tbbox->add(*_container);
 
+    _canvas_grid->set_name("canvas_grid");
     _canvas_grid->set_hexpand(true);
     _canvas_grid->set_vexpand(true);
     _columns->append(_canvas_grid);

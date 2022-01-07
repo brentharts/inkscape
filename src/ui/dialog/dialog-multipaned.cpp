@@ -71,7 +71,7 @@ MyDropZone::MyDropZone(Gtk::Orientation orientation)
     get_style_context()->add_class("backgnd-passive");
 
     signal_drag_motion().connect([=](const Glib::RefPtr<Gdk::DragContext>& ctx, int x, int y, guint time) {
-        if (!_active) {
+        if (!_active && !_paused) {
             _active = true;
             add_highlight();
             set_size(DROPZONE_SIZE + DROPZONE_EXPANSION);
@@ -80,7 +80,7 @@ MyDropZone::MyDropZone(Gtk::Orientation orientation)
     });
 
     signal_drag_leave().connect([=](const Glib::RefPtr<Gdk::DragContext>&, guint time) {
-        if (_active) {
+        if (_active && !_paused) {
             _active = false;
             set_size(DROPZONE_SIZE);
         }
@@ -97,7 +97,10 @@ MyDropZone::~MyDropZone()
 void MyDropZone::add_highlight_instances()
 {
     for (auto *instance : _instances_list) {
-        instance->add_highlight();
+        if (!instance->_paused) {
+            instance->add_highlight();
+            instance->set_size(DROPZONE_SIZE);
+        }
     }
 }
 
@@ -105,7 +108,7 @@ void MyDropZone::remove_highlight_instances()
 {
     for (auto *instance : _instances_list) {
         instance->remove_highlight();
-        // instance->set_size(DROPZONE_SIZE);
+        instance->set_size(0);
     }
 }
 
@@ -140,6 +143,7 @@ MyHandle::MyHandle(Gtk::Orientation orientation, int size = get_handle_size())
     , Gtk::EventBox()
     , _cross_size(0)
     , _child(nullptr)
+    , _size(size)
 {
     set_name("MultipanedHandle");
     set_orientation(orientation);
@@ -223,6 +227,11 @@ bool MyHandle::on_enter_notify_event(GdkEventCrossing *crossing_event)
     if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL) {
         auto cursor = Gdk::Cursor::create(display, "col-resize");
         window->set_cursor(cursor);
+        if (get_style_context()->has_class("toolboxdragger")) {
+            set_size_request(_size, -1);
+            get_children()[0]->show();
+            get_style_context()->remove_class("smalldragger");
+        }
     } else {
         auto cursor = Gdk::Cursor::create(display, "row-resize");
         window->set_cursor(cursor);
@@ -235,6 +244,11 @@ bool MyHandle::on_enter_notify_event(GdkEventCrossing *crossing_event)
 
 bool MyHandle::on_leave_notify_event(GdkEventCrossing* crossing_event) {
     show_click_indicator(false);
+    if (!_dragging && get_style_context()->has_class("toolboxdragger")) {
+        set_size_request(2, -1);
+        get_children()[0]->hide();
+        get_style_context()->add_class("smalldragger");
+    }
     return false;
 }
 
@@ -1143,7 +1157,7 @@ void DialogMultipaned::on_drag_update(double offset_x, double offset_y)
             auto width = start_width + offset_x;
             bool resizing = false;
             Gtk::Widget* hide = nullptr;
-
+            bool toolbox = handle->get_style_context()->has_class("toolboxdragger");
             if (!child->is_visible() && can_collapse(child, handle)) {
                 child->show();
                 resizing = true;
@@ -1153,12 +1167,19 @@ void DialogMultipaned::on_drag_update(double offset_x, double offset_y)
                 if (can_collapse(child, handle)) {
                     resizing = true;
                     auto w = start_width == 0 ? reveal_curve(width, minimum_size) : collapse_curve(width, minimum_size);
+                    if (toolbox) {
+                        Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+                        w = std::max(w,(double)prefs->getInt("/toolbox/minimumwidth",0));
+                    }
                     offset_x = w - start_width;
                     // facilitate closing/opening panels: users don't have to drag handle all the
                     // way to collapse/expand a panel, they just need to move it fraction of the way;
                     // note: those thresholds correspond to the easing functions used
                     auto threshold = start_width == 0 ? minimum_size * 0.20 : minimum_size * 0.42;
                     hide = width <= threshold ? child : nullptr;
+                    if (toolbox) {
+                        hide = nullptr;
+                    }
                 }
                 else {
                     offset_x = -(start_width - minimum_size) + BIAS;

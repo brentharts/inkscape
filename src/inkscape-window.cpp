@@ -50,6 +50,7 @@
 
 #include "ui/desktop/menubar.h"
 #include "ui/desktop/menu-icon-shift.h"
+#include "ui/dialog/dialog-multipaned.h"
 
 #include "ui/drag-and-drop.h"
 
@@ -145,6 +146,52 @@ InkscapeWindow::InkscapeWindow(SPDocument* document)
     // Restore short-lived floating dialogs state if this is the first window being opened
     bool include_short_lived = _app->get_number_of_windows() == 0;
     DialogManager::singleton().restore_dialogs_state(_desktop->getContainer(), include_short_lived);
+    auto container = _desktop->getContainer();
+    Inkscape::UI::Dialog::DialogMultipaned *columns = container->get_columns();
+    std::vector<Gtk::Widget *> columnswidgets = columns->get_children();
+    gint pos = -1;
+    for (auto column : columnswidgets) {
+        pos += 1;
+        if (column->get_name() == ("canvas_grid")) {
+            /* Toolbox container */
+            Gtk::Widget *widg = _desktop_widget->get_tool_toolbox();
+            Inkscape::UI::Dialog::MyDropZone *dropzone_s = nullptr;
+            if (pos > 1) {
+                auto prev_multipaned = dynamic_cast<Inkscape::UI::Dialog::DialogMultipaned *>(columnswidgets[pos-2]);
+                if (prev_multipaned) {
+                    prev_multipaned[0].prepend(widg);
+                    dropzone_s = dynamic_cast<Inkscape::UI::Dialog::MyDropZone *>(prev_multipaned[0].get_children()[0]);
+                }
+            } else {
+                Inkscape::UI::Dialog::DialogMultipaned *new_column = container->create_column();
+                new_column[0].add(*widg);
+                columns->prepend(new_column);
+                dropzone_s = dynamic_cast<Inkscape::UI::Dialog::MyDropZone *>(new_column[0].get_children()[0]);
+            }
+            if (dropzone_s) {
+                dropzone_s->setPaused(true);
+                dropzone_s->set_size_request(0,0);
+                dropzone_s->set_sensitive(false);
+            }
+            std::vector<Gtk::Widget *> columnswidgets2 = columns->get_children();
+            auto *dragger = dynamic_cast<Inkscape::UI::Dialog::MyHandle *>(columnswidgets2[pos+1]);
+            if (dragger) {
+                dragger->get_children()[0]->hide();
+                dragger->set_size_request(2, -1);
+                dragger->get_style_context()->add_class("toolboxdragger");
+                dragger->get_style_context()->add_class("smalldragger");
+            }
+            Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+            gint widthtoolbox = prefs->getInt("/toolbox/width", 0);
+            if (widthtoolbox) {
+                auto eventbox = dynamic_cast<Gtk::EventBox *>(widg);
+                if (eventbox) {
+                    eventbox->get_child()->set_size_request(widthtoolbox + 1,-1);
+                }
+            }
+            break;
+        }
+    }
 
     // This pokes the window to request the right size for the dialogs once loaded.
     g_idle_add(GSourceFunc(&_resize_children), this);

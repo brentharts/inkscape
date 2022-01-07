@@ -18,6 +18,8 @@
 #include <gtk/gtk.h>
 #include <gtkmm/enums.h>
 
+#include <gdk/gdk.h>
+
 #include "preferences.h"
 
 class SPDesktop;
@@ -45,7 +47,7 @@ public:
 
     static void set_icon_size(GtkWidget* toolbox, int pixel_size);
     ToolboxFactory() = delete;
-
+    static void toolboxresized(GtkWidget widget, gpointer data);
     static constexpr const char* tools_icon_size = "/toolbox/tools/iconsize";
     static constexpr const char* tools_visible_buttons = "/toolbox/tools/buttons"; 
     static constexpr const char* ctrlbars_icon_size = "/toolbox/controlbars/iconsize";
