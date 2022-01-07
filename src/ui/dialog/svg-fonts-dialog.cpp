@@ -953,7 +953,7 @@ void SvgFontsDialog::add_glyph(){
     // initialize "unicode" field; if there are glyphs look for the last one and take next unicode
     gunichar unicode = ' ';
     if (!glyphs.empty()) {
-        auto& last = *(--glyphs.end());
+        const auto& last = glyphs[glyphs.size() - 1];
         if (SPGlyph* last_glyph = last[_GlyphsListColumns.glyph_node]) {
             const Glib::ustring& code = last_glyph->unicode;
             if (!code.empty()) {
