@@ -437,6 +437,8 @@ void DocumentProperties::build_page()
                 // fit page to selection or content, if there's no selection
                 pm->fitToSelection(_wr.desktop()->getSelection());
                 DocumentUndo::done(document, _("Resize page to fit"), INKSCAPE_ICON("tool-pages"));
+
+                update_widgets();
             }
         }
     });
