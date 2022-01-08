@@ -75,7 +75,13 @@ bool SvgFontDrawingArea::on_draw(const Cairo::RefPtr<Cairo::Context> &cr) {
     auto context = get_style_context();
     Gdk::RGBA fg = context->get_color(get_state_flags());
     cr->set_source_rgb(fg.get_red(), fg.get_green(), fg.get_blue());
-    cr->show_text (_text.c_str());
+    // crash on macos: https://gitlab.com/inkscape/inkscape/-/issues/266
+    try {
+        cr->show_text(_text.c_str());
+    }
+    catch (std::exception& ex) {
+        g_warning("Error drawing custom SVG font text: %s", ex.what());
+    }
   }
   return true;
 }
@@ -104,7 +110,13 @@ void SvgGlyphRenderer::render_vfunc(
     }
     Gdk::RGBA fg = context->get_color(sflags);
     cr->set_source_rgb(fg.get_red(), fg.get_green(), fg.get_blue());
-    cr->show_text(glyph);
+    // crash on macos: https://gitlab.com/inkscape/inkscape/-/issues/266
+    try {
+        cr->show_text(glyph);
+    }
+    catch (std::exception& ex) {
+        g_warning("Error drawing custom SVG font glyphs: %s", ex.what());
+    }
 }
 
 bool SvgGlyphRenderer::activate_vfunc(
