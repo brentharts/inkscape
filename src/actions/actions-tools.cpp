@@ -261,7 +261,6 @@ tool_switch(Glib::ustring const &tool, InkscapeWindow *win)
     // Switch to new tool. TODO: Clean this up. This should be one window function. Setting tool via preference path is a bit strange.
     dt->tipsMessageContext()->set(Inkscape::NORMAL_MESSAGE, gettext( tool_msg[tool].c_str() ) );
     dt->setEventContext(tool_data[tool].pref_path);
-    INKSCAPE.eventcontext_set(dt->getEventContext());
 }
 
 /**

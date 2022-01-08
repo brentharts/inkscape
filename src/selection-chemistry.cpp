@@ -407,8 +407,8 @@ void ObjectSet::deleteItems()
     std::vector<SPItem*> selected(items().begin(), items().end());
     clear();
     sp_selection_delete_impl(selected);
-    if (SPDesktop *d = desktop()) {
-        d->layerManager().currentLayer()->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+    if (SPDesktop *dt = desktop()) {
+        dt->layerManager().currentLayer()->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
 
         /* a tool may have set up private information in it's selection context
          * that depends on desktop items.  I think the only sane way to deal with
@@ -416,7 +416,7 @@ void ObjectSet::deleteItems()
          * associated selection context.  For example: deleting an object
          * while moving it around the canvas.
          */
-        set_active_tool (d, get_active_tool(d));
+        dt->setEventContext(dt->getEventContext()->getPrefsPath());
     }
 
     if(document()) {
