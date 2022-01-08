@@ -416,8 +416,7 @@ void ObjectSet::deleteItems()
          * associated selection context.  For example: deleting an object
          * while moving it around the canvas.
          */
-        InkscapeWindow *win = d->getInkscapeWindow();
-        reset_active_tool(win);
+        set_active_tool (d, get_active_tool(d));
     }
 
     if(document()) {
@@ -2930,7 +2929,7 @@ void ObjectSet::removeLPESRecursive(bool keep_paths) {
         } else {
             itemsdone_.push_back(it);
         }
-
+        
     }
     setList(itemsdone_);
 }
