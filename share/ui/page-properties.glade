@@ -265,6 +265,7 @@
             <property name="focus-on-click">False</property>
             <property name="receives-default">True</property>
             <property name="halign">start</property>
+            <property name="margin-start">2</property>
             <property name="margin-top">5</property>
             <property name="margin-bottom">5</property>
             <property name="relief">none</property>
@@ -524,6 +525,7 @@ SVG element positions are expressed in user units.</property>
             <property name="can-focus">False</property>
             <property name="halign">center</property>
             <property name="valign">center</property>
+            <property name="margin-start">2</property>
             <property name="stock">gtk-missing-image</property>
             <style>
               <class name="viewbox"/>
