@@ -57,8 +57,7 @@ public:
     // Geometry
     bool world_point_inside_canvas(Geom::Point const &world); // desktop-events.cpp
     Geom::Point canvas_to_world(Geom::Point const &window);
-    Geom::Rect get_area_world();
-    Geom::IntRect get_area_world_int(); // Shouldn't really need this, only used for rulers.
+    Geom::IntRect get_area_world();
     void set_affine(Geom::Affine const &affine);
     Geom::Affine get_affine() { return _affine; }
 
@@ -66,20 +65,19 @@ public:
     void set_drawing(Inkscape::Drawing *drawing) { _drawing = drawing; }
     void redraw_all();                                // Draw entire surface during idle.
     void redraw_area(Geom::Rect& area);               // Draw specified area during idle.
-    void redraw_now();                                // Draw areas needing update immediately.
     void request_update();                            // Draw after updating canvas items.
-    void scroll_to(Geom::Point const &c, bool clear);
+    void scroll_to(Geom::Point const &c);
 
     void set_background_color(guint32 rgba);
     void set_background_checkerboard(guint32 rgba = 0xC4C4C4FF);
 
     void set_drawing_disabled(bool disable) { _drawing_disabled = disable; } // Disable during path ops, etc.
-    bool is_dragging() {return _is_dragging; }                // selection-chemistry.cpp
+    bool is_dragging() { return _is_dragging; }                // selection-chemistry.cpp
 
     //  Rendering modes
     void set_render_mode(Inkscape::RenderMode mode);
-    void set_color_mode(Inkscape::ColorMode   mode);
-    void set_split_mode(Inkscape::SplitMode   mode);
+    void set_color_mode( Inkscape::ColorMode  mode);
+    void set_split_mode( Inkscape::SplitMode  mode);
     void set_split_direction(Inkscape::SplitDirection dir);
     Inkscape::RenderMode get_render_mode() { return _render_mode; }
     Inkscape::ColorMode  get_color_mode()  { return _color_mode; }
@@ -94,7 +92,7 @@ public:
     bool get_cms_active() { return _cms_active; }
 
     Cairo::RefPtr<Cairo::ImageSurface> get_backing_store() { return _backing_store; } // Background rotation preview
-    Cairo::RefPtr<Cairo::Pattern> get_background_store() { return _background; }
+    Cairo::RefPtr<Cairo::Pattern>      get_background_pattern() { return _background; }
 
     // For a GTK bug (see SelectedStyle::on_opacity_changed()).
     void forced_redraws_start(int count, bool reset = true);
@@ -105,18 +103,19 @@ public:
 
     Inkscape::CanvasItem *get_current_canvas_item() { return _current_canvas_item; }
     void                  set_current_canvas_item(Inkscape::CanvasItem *item) {
-        _current_canvas_item = item; }
+        _current_canvas_item = item;
+    }
     Inkscape::CanvasItem *get_grabbed_canvas_item() { return _grabbed_canvas_item; }
     void                  set_grabbed_canvas_item(Inkscape::CanvasItem *item, Gdk::EventMask mask) {
         _grabbed_canvas_item = item;
         _grabbed_event_mask = mask;
     }
     
-    void           set_need_repick(bool repick = true) { _need_repick = repick; }
-    void           canvas_item_clear(Inkscape::CanvasItem *item);
+    void set_need_repick(bool repick = true) { _need_repick = repick; }
+    void canvas_item_clear(Inkscape::CanvasItem *item);
 
     // Events
-    void           set_all_enter_events(bool on) { _all_enter_events = on; }
+    void set_all_enter_events(bool on) { _all_enter_events = on; }
 
 protected:
 
@@ -135,7 +134,6 @@ protected:
     bool on_key_press_event(     GdkEventKey      *key_event   )   override;
     bool on_key_release_event(   GdkEventKey      *key_event   )   override;
     bool on_motion_notify_event( GdkEventMotion   *motion_event)   override;
-    void on_size_allocate(Gtk::Allocation &) override;
 
     // Painting
     bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr) override;
@@ -146,7 +144,6 @@ private:
 
     // ======== Functions =======
     void add_idle();
-    void remove_idle(); // Not needed?
     bool on_idle();
 
     // Drawing (internal overloads)
@@ -156,14 +153,10 @@ private:
     // Painting
 
     // In order they are called in painting.
-    bool do_update();
     bool paint();
-    bool paint_rect(Cairo::RectangleInt& rect);
-    bool paint_rect_internal(PaintRectSetup const *setup, Geom::IntRect const &this_rect);
+    bool paint_rect_internal(PaintRectSetup const &setup, Geom::IntRect const &this_rect);
     void paint_single_buffer(Geom::IntRect const &paint_rect, Geom::IntRect const &canvas_rect,
                              Cairo::RefPtr<Cairo::ImageSurface> &store);
-
-    void shift_content(Geom::IntPoint shift, Cairo::RefPtr<Cairo::ImageSurface> &store);
     void add_clippath(const Cairo::RefPtr<Cairo::Context>& cr);
     void set_cursor();
 
@@ -172,33 +165,26 @@ private:
     bool emit_event(GdkEvent *event);
 
     // ==== Signal callbacks ====
-    sigc::connection _idle_connection;  // Probably not needed (automatically disconnects).
+    sigc::connection _idle_connection;
 
     // ====== Data members =======
 
     // Structure
-    SPDesktop * _desktop = nullptr;
+    SPDesktop *_desktop = nullptr;
 
     // Geometry
-    int _x0 = 0;                     ///< World coordinate of the leftmost pixels of window.
-    int _y0 = 0;                     ///< World coordinate of the topmost pixels of window.
-    Geom::Point _window_origin;      ///< World coordinate of the upper-leftmost pixel of window.
-    Geom::Affine _affine;            // Only used for canvas items at moment.
-    bool _in_full_redraw = false;
-    int _device_scale = 1;           ///< Scale for high DPI montiors. Probably should be double.
-    Gtk::Allocation _allocation;     ///< Canvas allocation, save so we know when it changes.
-
-    int _width = 0;  ///< Canvas width, tracked by on_size_allocate
-    int _height = 0; ///< Canvas height, tracked by on_size_allocate
+    int _x0 = 0, _y0 = 0;            ///< Coordinates of top-left pixel of canvas view within canvas.
+    Geom::Affine _affine;            // Only used for canvas items at the moment.
+    bool _in_full_redraw = false;    // Hack used to lower idle priority for full redraws.
 
     // Event handling/item picking
-    GdkEvent _pick_event;                       ///< Event used to find currently selected item.
-    bool     _need_repick           = true;     ///< ?
-    bool     _in_repick             = false;    ///< Used internally by pick_current_item().
-    bool     _left_grabbed_item     = false;    ///< ?
-    bool     _all_enter_events      = false;    ///< Keep all enter events. Only set true in connector-tool.cpp.
-    bool     _is_dragging           = false;    ///< Used in selection-chemistry to block undo/redo.
-    int      _state                 = 0;        ///< Last know modifier state (SHIFT, CTRL, etc.).
+    GdkEvent _pick_event;                 ///< Event used to find currently selected item.
+    bool     _need_repick       = true;   ///< ?
+    bool     _in_repick         = false;  ///< Used internally by pick_current_item().
+    bool     _left_grabbed_item = false;  ///< ?
+    bool     _all_enter_events  = false;  ///< Keep all enter events. Only set true in connector-tool.cpp.
+    bool     _is_dragging       = false;  ///< Used in selection-chemistry to block undo/redo.
+    int      _state             = 0;      ///< Last know modifier state (SHIFT, CTRL, etc.).
 
     Inkscape::CanvasItem *_current_canvas_item     = nullptr;  ///< Item containing cursor, nullptr if none.
     Inkscape::CanvasItem *_current_canvas_item_new = nullptr;  ///< Item to become _current_item, nullptr if none.
@@ -235,15 +221,14 @@ private:
 
     // ======= CAIRO ======= ... Keep in one place
 
-    /// Image surface storing the content of the widget.
-    Cairo::RefPtr<Cairo::ImageSurface> _backing_store; ///< The canvas image content. We draw to this then blit.
-    Cairo::RefPtr<Cairo::ImageSurface> _outline_store; ///< The outline image if we are in split/x-ray mode.
+    /// Image surface storing a rendered part of the canvas
+    Cairo::RefPtr<Cairo::ImageSurface> _backing_store; ///< Canvas content.
+    Cairo::RefPtr<Cairo::ImageSurface> _outline_store; ///< Canvas outline content; only exists in split/x-ray mode.
+    Geom::IntRect _store_rect;                         ///< Rectangle of the store in world space.
+    Cairo::RefPtr<Cairo::Region> _clean_region;        ///< Subregion of store with up-to-date content.
+    int _device_scale = 1;                             ///< Scale for high DPI montiors. Probably should be double.
 
-    Cairo::RefPtr<Cairo::Pattern> _background;         ///< The background of the image.
-    bool _background_is_checkerboard = false;
-    
-    Cairo::RefPtr<Cairo::Region> _clean_region;        ///< Area of widget that has up-to-date content.
-
+    Cairo::RefPtr<Cairo::Pattern> _background;         ///< The background of the widget.
 
     // Used to update CanvasItemCtrl's when size changed.
     class CanvasPrefObserver : public Inkscape::Preferences::Observer {

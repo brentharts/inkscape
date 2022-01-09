@@ -153,7 +153,7 @@ CanvasGrid::CanvasGrid(SPDesktopWidget *dtw)
 void
 CanvasGrid::UpdateRulers()
 {
-    Geom::Rect viewbox = _dtw->desktop->get_display_area(true).bounds();
+    Geom::Rect viewbox = _dtw->desktop->get_display_area().bounds();
     // "true" means: Use integer values of the canvas for calculating the display area, similar
     // to the integer values used for positioning the grid lines. (see SPCanvas::scrollTo(), 
     // where ix and iy are rounded integer values; these values are stored in CanvasItemBuffer->rect,
