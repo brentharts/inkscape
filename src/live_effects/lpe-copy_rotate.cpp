@@ -102,6 +102,7 @@ LPECopyRotate::LPECopyRotate(LivePathEffectObject *lpeobject) :
     gap.param_set_range(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
     gap.param_set_increments(0.01, 0.01);
     gap.param_set_digits(5);
+    rotation_angle.param_set_digits(4);
     num_copies.param_set_range(1, std::numeric_limits<gint>::max());
     num_copies.param_make_integer();
     apply_to_clippath_and_mask = true;
@@ -171,7 +172,7 @@ LPECopyRotate::doAfterEffect (SPLPEItem const* lpeitem, SPCurve *curve)
                 active = true;
             }
         }
-        if (!active) {
+        if (!active && !is_load && previous_split) {
             lpesatellites.clear();
             previous_num_copies = 0;
             return;
@@ -231,6 +232,7 @@ LPECopyRotate::doAfterEffect (SPLPEItem const* lpeitem, SPCurve *curve)
         }
         reset = false;
     }
+    previous_split = split_items;
 }
 
 void LPECopyRotate::cloneStyle(SPObject *orig, SPObject *dest)
