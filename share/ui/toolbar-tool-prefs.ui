@@ -131,7 +131,7 @@
         <property name="halign">start</property>
         <property name="label" translatable="yes">SELECTING</property>
         <style>
-          <class name="menu-category"/>
+          <class name="small-heading"/>
           <class name="halfrem-vert-space"/>
         </style>
       </object>
@@ -211,7 +211,7 @@
         <property name="halign">start</property>
         <property name="label" translatable="yes">SHAPES</property>
         <style>
-          <class name="menu-category"/>
+          <class name="small-heading"/>
           <class name="halfrem-vert-space"/>
         </style>
       </object>
@@ -357,7 +357,7 @@
         <property name="halign">start</property>
         <property name="label" translatable="yes">CREATING NEW</property>
         <style>
-          <class name="menu-category"/>
+          <class name="small-heading"/>
           <class name="halfrem-vert-space"/>
         </style>
       </object>
@@ -481,7 +481,7 @@
         <property name="halign">start</property>
         <property name="label" translatable="yes">COLORS AND STYLES</property>
         <style>
-          <class name="menu-category"/>
+          <class name="small-heading"/>
           <class name="halfrem-vert-space"/>
         </style>
       </object>
@@ -605,7 +605,7 @@
         <property name="halign">start</property>
         <property name="label" translatable="yes">OTHER</property>
         <style>
-          <class name="menu-category"/>
+          <class name="small-heading"/>
           <class name="halfrem-vert-space"/>
         </style>
       </object>
@@ -751,7 +751,7 @@
         <property name="halign">start</property>
         <property name="label" translatable="yes">CANVAS TOOLS</property>
         <style>
-          <class name="menu-category"/>
+          <class name="small-heading"/>
           <class name="halfrem-vert-space"/>
         </style>
       </object>
