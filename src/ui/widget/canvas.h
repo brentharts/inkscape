@@ -15,6 +15,8 @@
 #include "config.h"
 #endif
 
+#include <memory>
+
 #include <gtkmm.h>
 
 #include <2geom/rect.h>
@@ -26,9 +28,6 @@
 
 class SPDesktop;
 
-struct PaintRectSetup;
-
-
 namespace Inkscape {
 
 class CanvasItem;
@@ -37,6 +36,9 @@ class Drawing;
 
 namespace UI {
 namespace Widget {
+
+class CanvasPrivate;
+struct PaintRectSetup;
 
 /**
  * A Gtk::DrawingArea widget for Inkscape's canvas.
@@ -91,7 +93,7 @@ public:
     void set_cms_active(bool active) { _cms_active = active; }
     bool get_cms_active() { return _cms_active; }
 
-    Cairo::RefPtr<Cairo::ImageSurface> get_backing_store() { return _backing_store; } // Background rotation preview
+    Cairo::RefPtr<Cairo::ImageSurface> get_backing_store(); // Background rotation preview
     Cairo::RefPtr<Cairo::Pattern>      get_background_pattern() { return _background; }
 
     // For a GTK bug (see SelectedStyle::on_opacity_changed()).
@@ -220,14 +222,6 @@ private:
     bool _in_destruction = false;
 
     // ======= CAIRO ======= ... Keep in one place
-
-    /// Image surface storing a rendered part of the canvas
-    Cairo::RefPtr<Cairo::ImageSurface> _backing_store; ///< Canvas content.
-    Cairo::RefPtr<Cairo::ImageSurface> _outline_store; ///< Canvas outline content; only exists in split/x-ray mode.
-    Geom::IntRect _store_rect;                         ///< Rectangle of the store in world space.
-    Cairo::RefPtr<Cairo::Region> _clean_region;        ///< Subregion of store with up-to-date content.
-    int _device_scale = 1;                             ///< Scale for high DPI montiors. Probably should be double.
-
     Cairo::RefPtr<Cairo::Pattern> _background;         ///< The background of the widget.
 
     // Used to update CanvasItemCtrl's when size changed.
@@ -253,12 +247,15 @@ private:
     };
 
     CanvasPrefObserver _size_observer;
+
+    // Opaque pointer to implementation
+    friend class CanvasPrivate;
+    std::unique_ptr<CanvasPrivate> d;
 };
 
 } // namespace Widget
 } // namespace UI
 } // namespace Inkscape
-
 
 #endif // INKSCAPE_UI_WIDGET_CANVAS_H
 

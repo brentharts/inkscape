@@ -84,6 +84,10 @@
  *   them "externally" (e.g. gradient CanvasItemCurves).
  */
 
+namespace Inkscape {
+namespace UI {
+namespace Widget {
+
 struct PaintRectSetup {
     gint64 start_time;
     Geom::IntRect canvas_rect;
@@ -92,13 +96,21 @@ struct PaintRectSetup {
     bool disable_timeouts;
 };
 
-namespace Inkscape {
-namespace UI {
-namespace Widget {
+class CanvasPrivate
+{
+private:
 
+    friend class Canvas;
+
+    Cairo::RefPtr<Cairo::ImageSurface> _backing_store; ///< Canvas content.
+    Cairo::RefPtr<Cairo::ImageSurface> _outline_store; ///< Canvas outline content; only exists in split/x-ray mode.
+    Geom::IntRect _store_rect;                         ///< Rectangle of the store in world space.
+    Cairo::RefPtr<Cairo::Region> _clean_region;        ///< Subregion of store with up-to-date content.
+    int _device_scale = 1;                             ///< Scale for high DPI montiors. Probably should be double.
+};
 
 Canvas::Canvas()
-    : _size_observer(this, "/options/grabsize/value")
+    : _size_observer(this, "/options/grabsize/value"), d(std::make_unique<CanvasPrivate>())
 {
     set_name("InkscapeCanvas");
 
@@ -120,7 +132,7 @@ Canvas::Canvas()
     _pick_event.crossing.y = 0;
 
     // Drawing
-    _clean_region = Cairo::Region::create();
+    d->_clean_region = Cairo::Region::create();
 
     _background = Cairo::SolidPattern::create_rgb(1.0, 1.0, 1.0);
 
@@ -196,7 +208,7 @@ Canvas::redraw_all()
         return;
     }
     _in_full_redraw = true;
-    _clean_region = Cairo::Region::create(); // Empty region (i.e. everything is dirty).
+    d->_clean_region = Cairo::Region::create(); // Empty region (i.e. everything is dirty).
     add_idle();
 }
 
@@ -233,7 +245,7 @@ Canvas::redraw_area(int x0, int y0, int x1, int y1)
     y1 = std::clamp(y1, min_coord, max_coord);
 
     Cairo::RectangleInt crect = { x0, y0, x1-x0, y1-y0 };
-    _clean_region->subtract(crect);
+    d->_clean_region->subtract(crect);
     add_idle();
 }
 
@@ -361,6 +373,11 @@ Canvas::set_split_direction(Inkscape::SplitDirection dir)
         _split_direction = dir;
         redraw_all();
     }
+}
+
+Cairo::RefPtr<Cairo::ImageSurface> Canvas::get_backing_store()
+{
+     return d->_backing_store;
 }
 
 void
@@ -627,7 +644,7 @@ Canvas::on_motion_notify_event(GdkEventMotion *motion_event)
             return true;
         }
 
-        if (Geom::distance(cursor_position, _split_position) < 20 * _device_scale) {
+        if (Geom::distance(cursor_position, _split_position) < 20 * d->_device_scale) {
 
             // We're hovering over circle, figure out which direction we are in.
             if (difference.y() - difference.x() > 0) {
@@ -645,12 +662,12 @@ Canvas::on_motion_notify_event(GdkEventMotion *motion_event)
             }
         } else if (_split_direction == Inkscape::SplitDirection::NORTH ||
                    _split_direction == Inkscape::SplitDirection::SOUTH) {
-            if (std::abs(difference.y()) < 3 * _device_scale) {
+            if (std::abs(difference.y()) < 3 * d->_device_scale) {
                 // We're hovering over horizontal line
                 hover_direction = Inkscape::SplitDirection::HORIZONTAL;
             }
         } else {
-            if (std::abs(difference.x()) < 3 * _device_scale) {
+            if (std::abs(difference.x()) < 3 * d->_device_scale) {
                // We're hovering over vertical line
                 hover_direction = Inkscape::SplitDirection::VERTICAL;
             }
@@ -699,7 +716,7 @@ Canvas::on_draw(const::Cairo::RefPtr<::Cairo::Context> &cr)
 
     std::cout << "on_draw\n";
 
-    assert(_backing_store/* && _outline_store*/);
+    assert(d->_backing_store/* && _outline_store*/);
     assert(_drawing);
 
     // todo: can minutely optimise this by only running the first part of on_idle()
@@ -714,12 +731,12 @@ Canvas::on_draw(const::Cairo::RefPtr<::Cairo::Context> &cr)
     // todo: remember the solid-colour optimisation to go into this
 
     // Blit from the backing store, without regard for the clean region.
-    cr->set_source(_backing_store, _store_rect.left() - _x0, _store_rect.top() - _y0);
+    cr->set_source(d->_backing_store, d->_store_rect.left() - _x0, d->_store_rect.top() - _y0);
     cr->paint();
 
     // Paint unclean regions in red
     auto reg = Cairo::Region::create( Cairo::RectangleInt{ _x0, _y0, get_allocation().get_width(), get_allocation().get_height() } );
-    reg->subtract(_clean_region);
+    reg->subtract(d->_clean_region);
 
     cr->set_source_rgba(1, 0, 0, 0.07);
     for (int i = 0; i < reg->get_num_rectangles(); i++)
@@ -921,35 +938,35 @@ Canvas::on_idle()
     const auto canvas_rect = Geom::IntRect::from_xywh( _x0, _y0, get_allocation().get_width(), get_allocation().get_height() );
 
     // Assert that _clean_region is a subregion of _store_rect
-    auto tmp = _clean_region->copy();
-    tmp->subtract(geom_to_cairo(_store_rect));
+    auto tmp = d->_clean_region->copy();
+    tmp->subtract(geom_to_cairo(d->_store_rect));
     assert(tmp->empty());
 
     // Ensure store contains canvas_rect
     const auto pad = Geom::IntPoint(200, 200);
     const auto device_scale = get_scale_factor();
 
-    if (!_backing_store || _device_scale != device_scale || !_store_rect.intersects(canvas_rect))
+    if (!d->_backing_store || d->_device_scale != device_scale || !d->_store_rect.intersects(canvas_rect))
     {
         // Recreate the store, using the same memory if possible
-        _store_rect = Geom::IntRect::from_xywh( _x0, _y0, canvas_rect.width(), canvas_rect.height() );
-        _store_rect.expandBy(pad);
-        _device_scale = device_scale;
-        if (!_backing_store || _backing_store->get_width() != _store_rect.width() * _device_scale || _backing_store->get_height() != _store_rect.height() * _device_scale)
-            _backing_store = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, _store_rect.width() * _device_scale, _store_rect.height() * _device_scale);
-       _clean_region = Cairo::Region::create();
+        d->_store_rect = Geom::IntRect::from_xywh( _x0, _y0, canvas_rect.width(), canvas_rect.height() );
+        d->_store_rect.expandBy(pad);
+        d->_device_scale = device_scale;
+        if (!d->_backing_store || d->_backing_store->get_width() != d->_store_rect.width() * d->_device_scale || d->_backing_store->get_height() != d->_store_rect.height() * d->_device_scale)
+            d->_backing_store = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, d->_store_rect.width() * d->_device_scale, d->_store_rect.height() * d->_device_scale);
+       d->_clean_region = Cairo::Region::create();
 
        std::cout << "Recreated store" << std::endl;
     }
-    else if (!_store_rect.contains(canvas_rect))
+    else if (!d->_store_rect.contains(canvas_rect))
     {
         // Create new store, copy usable content across, set as new store
         auto store_rect = Geom::IntRect::from_xywh( _x0, _y0, canvas_rect.width(), canvas_rect.height() );
         store_rect.expandBy(pad);
-        auto backing_store = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, store_rect.width() * _device_scale, store_rect.height() * _device_scale);
+        auto backing_store = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, store_rect.width() * d->_device_scale, store_rect.height() * d->_device_scale);
 
-        auto shift = store_rect.min() - _store_rect.min();
-        auto reuse_rect = store_rect & _store_rect;
+        auto shift = store_rect.min() - d->_store_rect.min();
+        auto reuse_rect = store_rect & d->_store_rect;
         auto cr = Cairo::Context::create(backing_store);
 
         // copy contents of store
@@ -957,22 +974,22 @@ Canvas::on_idle()
         cr->save();
         cr->rectangle(reuse_rect->left() - store_rect.left(), reuse_rect->top() - store_rect.top(), reuse_rect->width(), reuse_rect->height());
         cr->clip();
-        cr->set_source(_backing_store, -shift.x(), -shift.y());
+        cr->set_source(d->_backing_store, -shift.x(), -shift.y());
         cr->paint();
         cr->restore();
 
-        _store_rect = store_rect;
-        _backing_store = std::move(backing_store);
-        _clean_region->intersect(geom_to_cairo(_store_rect));
+        d->_store_rect = store_rect;
+        d->_backing_store = std::move(backing_store);
+        d->_clean_region->intersect(geom_to_cairo(d->_store_rect));
 
         std::cout << "Partially recreated store" << std::endl;
     }
 
-    assert(_store_rect.contains(canvas_rect));
+    assert(d->_store_rect.contains(canvas_rect));
 
     // Get region that requires painting
     auto region = Cairo::Region::create(geom_to_cairo(canvas_rect));
-    region->subtract(_clean_region);
+    region->subtract(d->_clean_region);
 
     // Get mouse position in canvas space
     Geom::IntPoint mouse_loc;
@@ -1113,18 +1130,18 @@ Canvas::paint_rect_internal(PaintRectSetup const &setup, Geom::IntRect const &th
         _drawing->setRenderMode(_render_mode);
         _drawing->setColorMode(_color_mode);
 
-        paint_single_buffer(this_rect, setup.canvas_rect, _backing_store);
+        paint_single_buffer(this_rect, setup.canvas_rect, d->_backing_store);
         /*bool outline_overlay = _drawing->outlineOverlay();
         if (_split_mode != Inkscape::SplitMode::NORMAL || outline_overlay) {
             _drawing->setRenderMode(Inkscape::RenderMode::OUTLINE);
             paint_single_buffer(this_rect, setup.canvas_rect, _outline_store);
             if (outline_overlay) {
-                _drawing->setRenderMode(Inkscape::RenderMode::OUTLINE_OVERLAY);
+                _drawing->setRenderMode(Inkscape::RenderMode::OUSplitTLINE_OVERLAY);
             }
         }*/
 
         Cairo::RectangleInt crect = { this_rect.left(), this_rect.top(), this_rect.width(), this_rect.height() };
-        _clean_region->do_union( crect );
+        d->_clean_region->do_union( crect );
 
         queue_draw_area(this_rect.left() - _x0, this_rect.top() - _y0, this_rect.width(), this_rect.height());
 
@@ -1197,14 +1214,14 @@ Canvas::paint_single_buffer(Geom::IntRect const &paint_rect, Geom::IntRect const
 
     // Make sure the following code does not go outside of store's data
     assert(store->get_format() == Cairo::FORMAT_ARGB32);
-    assert(_store_rect.contains(paint_rect));
+    assert(d->_store_rect.contains(paint_rect));
 
     /*auto cr = Cairo::Context::create(store);
     cr->set_source_rgba((rand() % 255) / 255.0, (rand() % 255) / 255.0, (rand() % 255) / 255.0, 0.2);
     cr->rectangle(paint_rect.left() - _store_rect.left(), paint_rect.top() - _store_rect.top(), paint_rect.width(), paint_rect.height());
     cr->fill();*/
 
-    Inkscape::CanvasItemBuffer buf(paint_rect, _store_rect, _device_scale);
+    Inkscape::CanvasItemBuffer buf(paint_rect, d->_store_rect, d->_device_scale);
 
     // Create temporary surface that draws directly to store.
     store->flush();
@@ -1225,20 +1242,20 @@ Canvas::paint_single_buffer(Geom::IntRect const &paint_rect, Geom::IntRect const
     double x_scale = 1.0;
     double y_scale = 1.0;
     cairo_surface_get_device_scale(store->cobj(), &x_scale, &y_scale); // No C++ API!
-    assert (_device_scale == (int) x_scale);
-    assert (_device_scale == (int) y_scale);
+    assert (d->_device_scale == (int) x_scale);
+    assert (d->_device_scale == (int) y_scale);
 
 
     // Move to the correct row.
-    data += stride * (paint_rect.top() - _store_rect.top()) * (int)y_scale;
+    data += stride * (paint_rect.top() - d->_store_rect.top()) * (int)y_scale;
     // Move to the correct column.
-    data += 4 * (paint_rect.left() - _store_rect.left()) * (int)x_scale;
+    data += 4 * (paint_rect.left() - d->_store_rect.left()) * (int)x_scale;
     auto imgs = Cairo::ImageSurface::create(data, Cairo::FORMAT_ARGB32,
-                                            paint_rect.width()  * _device_scale,
-                                            paint_rect.height() * _device_scale,
+                                            paint_rect.width()  * d->_device_scale,
+                                            paint_rect.height() * d->_device_scale,
                                             stride);
 
-    cairo_surface_set_device_scale(imgs->cobj(), _device_scale, _device_scale); // No C++ API!
+    cairo_surface_set_device_scale(imgs->cobj(), d->_device_scale, d->_device_scale); // No C++ API!
 
     auto cr = Cairo::Context::create(imgs);
 
