@@ -55,6 +55,9 @@ void show_widget(Gtk::Widget& widget, bool show) {
     }
 };
 
+const char* g_linked = "entries-linked-symbolic";
+const char* g_unlinked = "entries-unlinked-symbolic";
+
 #define GET(prop, id) prop(get_widget<std::remove_reference_t<decltype(prop)>>(_builder, id))
 
 class PagePropertiesBox : public PageProperties {
@@ -83,7 +86,8 @@ public:
         GET(_border_on_top, "border-top"),
         GET(_shadow, "shadow"),
         GET(_link_width_height, "link-width-height"),
-        GET(_viewbox_expander, "viewbox-expander")
+        GET(_viewbox_expander, "viewbox-expander"),
+        GET(_linked_viewbox_scale, "linked-scale-img")
     {
 #undef GET
 
@@ -151,17 +155,15 @@ public:
         });
         show_viewbox(_viewbox_expander.get_expanded());
 
-        const char* linked = "entries-linked-symbolic";
-        const char* unlinked = "entries-unlinked-symbolic";
         _link_width_height.signal_clicked().connect([=](){
             // toggle size link
             _locked_size_ratio = !_locked_size_ratio;
             // set image
-            _link_width_height.set_image_from_icon_name(_locked_size_ratio && _size_ratio > 0 ? linked : unlinked, Gtk::ICON_SIZE_LARGE_TOOLBAR);
+            _link_width_height.set_image_from_icon_name(_locked_size_ratio && _size_ratio > 0 ? g_linked : g_unlinked, Gtk::ICON_SIZE_LARGE_TOOLBAR);
         });
-        _link_width_height.set_image_from_icon_name(unlinked, Gtk::ICON_SIZE_LARGE_TOOLBAR);
+        _link_width_height.set_image_from_icon_name(g_unlinked, Gtk::ICON_SIZE_LARGE_TOOLBAR);
         // set image for linked scale
-        get_widget<Gtk::Image>(_builder, "linked-scale-img").set_from_icon_name(linked, Gtk::ICON_SIZE_LARGE_TOOLBAR);
+        _linked_viewbox_scale.set_from_icon_name(g_linked, Gtk::ICON_SIZE_LARGE_TOOLBAR);
 
         // report page size changes
         _page_width .signal_value_changed().connect([=](){ set_page_size_linked(true); });
@@ -253,8 +255,10 @@ private:
     void set_viewbox_size_linked(bool width_changing) {
         if (_update.pending()) return;
 
-        // viewbox size - width and height always linked to make scaling uniform
-        changed_linked_value(width_changing, _viewbox_width, _viewbox_height);
+        if (_scale_is_uniform) {
+            // viewbox size - width and height always linked to make scaling uniform
+            changed_linked_value(width_changing, _viewbox_width, _viewbox_height);
+        }
 
         auto width  = _viewbox_width.get_value();
         auto height = _viewbox_height.get_value();
@@ -354,7 +358,9 @@ private:
 
         if (element == Check::NonuniformScale) {
             show_widget(_nonuniform_scale, checked);
-            _scale_x.set_sensitive(!checked);
+            _scale_is_uniform = !checked;
+            _scale_x.set_sensitive(_scale_is_uniform);
+            _linked_viewbox_scale.set_from_icon_name(_scale_is_uniform ? g_linked : g_unlinked, Gtk::ICON_SIZE_LARGE_TOOLBAR);
             return;
         }
 
@@ -490,7 +496,9 @@ private:
     OperationBlocker _update;
     double _size_ratio = 1; // width to height ratio
     bool _locked_size_ratio = false;
+    bool _scale_is_uniform = true;
     Gtk::Expander& _viewbox_expander;
+    Gtk::Image& _linked_viewbox_scale;
 };
 
 PageProperties* PageProperties::create() {
