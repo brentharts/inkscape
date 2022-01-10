@@ -31,6 +31,8 @@
 #include "display/control/canvas-item-group.h"
 #include "display/control/snap-indicator.h"
 
+#include "../../../../frameclock/frameclock.h"
+
 #include "ui/tools/tool-base.h"      // Default cursor
 
 /*
@@ -101,13 +103,89 @@ class CanvasPrivate
 private:
 
     friend class Canvas;
+    Canvas *q;
 
     Cairo::RefPtr<Cairo::ImageSurface> _backing_store; ///< Canvas content.
     Cairo::RefPtr<Cairo::ImageSurface> _outline_store; ///< Canvas outline content; only exists in split/x-ray mode.
     Geom::IntRect _store_rect;                         ///< Rectangle of the store in world space.
     Cairo::RefPtr<Cairo::Region> _clean_region;        ///< Subregion of store with up-to-date content.
     int _device_scale = 1;                             ///< Scale for high DPI montiors. Probably should be double.
+
+    bool solid_background;
+
+    sigc::connection hipri_idle;
+    sigc::connection lopri_idle;
+
+    struct GdkEventFreer {void operator()(GdkEvent *ev) const {gdk_event_free(ev);}};
+    std::vector<std::unique_ptr<GdkEvent, GdkEventFreer>> bucket;
+    sigc::connection bucket_emptier;
+    guint tickid = std::numeric_limits<guint>::max();
+
+    bool pending_draw = false;
+
+    void schedule_bucket_emptier();
+    void empty_bucket();
 };
+
+void CanvasPrivate::schedule_bucket_emptier()
+{
+    std::cout << (bucket_emptier.connected() ? "already scheduled emptier" : "scheduling emptier") << std::endl;
+
+    if (bucket_emptier.connected()) return;
+
+    bucket_emptier = Glib::signal_idle().connect([this]
+    {
+        bucket_emptier.disconnect();
+        empty_bucket();
+        return false;
+    }
+    , G_PRIORITY_DEFAULT_IDLE - 5); // before lowpri_idle
+}
+
+void CanvasPrivate::empty_bucket()
+{
+    auto f = Prof("bucket_emptier");
+    std::cout << "emptying bucket" << std::endl;
+
+    // todo: check if this hack can now be removed
+    if (q->_in_destruction) return;
+
+    auto bucket2 = std::move(bucket);
+
+    for (auto &event : bucket2)
+    {
+        // Block undo/redo while anything is dragged.
+        if (event->type == GDK_BUTTON_PRESS && event->button.button == 1) {
+            q->_is_dragging = true;
+        } else if (event->type == GDK_BUTTON_RELEASE) {
+            q->_is_dragging = false;
+        }
+
+        bool finished = false; // Can't be bool or "stack smashing detected"!
+
+        if (q->_current_canvas_item) {
+            // Choose where to send event;
+            CanvasItem *item = q->_current_canvas_item;
+
+            if (q->_grabbed_canvas_item && !q->_current_canvas_item->is_descendant_of(q->_grabbed_canvas_item)) {
+                item = q->_grabbed_canvas_item;
+            }
+
+            // Propagate the event up the canvas item hierarchy until handled.
+            while (item) {
+                finished = item->handle_event(event.get());
+                if (finished) break;
+                item = item->get_parent();
+            }
+        }
+
+        if (!finished)
+        {
+            // todo: should really re-fire this event, because it wants to be handled somewhere else
+            // - but I've not observbed any problems from discarding it yet
+        }
+    }
+}
 
 Canvas::Canvas()
     : _size_observer(this, "/options/grabsize/value"), d(std::make_unique<CanvasPrivate>())
@@ -135,12 +213,15 @@ Canvas::Canvas()
     d->_clean_region = Cairo::Region::create();
 
     _background = Cairo::SolidPattern::create_rgb(1.0, 1.0, 1.0);
+    d->solid_background = true;
 
     _canvas_item_root = new Inkscape::CanvasItemGroup(nullptr);
     _canvas_item_root->set_name("CanvasItemGroup:Root");
     _canvas_item_root->set_canvas(this);
 
     srand(g_get_monotonic_time());
+
+    d->q = this;
 }
 
 Canvas::~Canvas()
@@ -318,6 +399,7 @@ Canvas::set_background_color(guint32 rgba)
     double b = SP_RGBA32_B_F(rgba);
 
     _background = Cairo::SolidPattern::create_rgb(r, g, b);
+    d->solid_background = true;
 
     redraw_all();
 }
@@ -330,6 +412,7 @@ Canvas::set_background_checkerboard(guint32 rgba)
 {
     auto pattern = ink_cairo_pattern_create_checkerboard(rgba);
     _background = Cairo::RefPtr<Cairo::Pattern>(new Cairo::Pattern(pattern));
+    d->solid_background = false;
     redraw_all();
 }
 
@@ -711,28 +794,34 @@ Canvas::on_motion_notify_event(GdkEventMotion *motion_event)
 bool
 Canvas::on_draw(const::Cairo::RefPtr<::Cairo::Context> &cr)
 {
+    Prof f;
+
     // sp_canvas_item_recursive_print_tree(0, _root);
     // canvas_item_print_tree(_canvas_item_root);
 
-    std::cout << "on_draw\n";
+    // todo: can minutely optimise this by only running the first part of on_idle()
 
     assert(d->_backing_store/* && _outline_store*/);
     assert(_drawing);
 
-    // todo: can minutely optimise this by only running the first part of on_idle()
-    on_idle();
-
     // Blit background (e.g. checkerboard).
-    cr->save();
-    cr->set_operator(Cairo::OPERATOR_SOURCE);
-    cr->set_source(_background);
-    cr->paint();
-    cr->restore();
-    // todo: remember the solid-colour optimisation to go into this
+    if (!d->solid_background)
+    {
+        f = Prof("background");
+        cr->save();
+        cr->set_operator(Cairo::OPERATOR_SOURCE);
+        cr->set_source(_background);
+        cr->paint();
+        cr->restore();
+    }
 
     // Blit from the backing store, without regard for the clean region.
+    f = Prof("draw");
+    cr->save();
+    if (d->solid_background) cr->set_operator(Cairo::OPERATOR_SOURCE);
     cr->set_source(d->_backing_store, d->_store_rect.left() - _x0, d->_store_rect.top() - _y0);
     cr->paint();
+    cr->restore();
 
     // Paint unclean regions in red
     auto reg = Cairo::Region::create( Cairo::RectangleInt{ _x0, _y0, get_allocation().get_width(), get_allocation().get_height() } );
@@ -744,6 +833,13 @@ Canvas::on_draw(const::Cairo::RefPtr<::Cairo::Context> &cr)
         auto rect = reg->get_rectangle(i);
         cr->rectangle(rect.x - _x0, rect.y - _y0, rect.width, rect.height);
         cr->fill();
+    }
+
+    if (d->pending_draw)
+    {
+        std::cout << "finishing draw, events were not allowed but now are" << std::endl;
+        if (!d->bucket.empty()) d->schedule_bucket_emptier();
+        d->pending_draw = false;
     }
 
 /*
@@ -877,22 +973,19 @@ Canvas::update_canvas_item_ctrl_sizes(int size_index)
 void
 Canvas::add_idle()
 {
+    auto f = FuncProf();
+
     if (_in_destruction) {
         std::cerr << "Canvas::add_idle: Called after canvas destroyed!" << std::endl;
         return;
     }
 
-    if (!_idle_connection.connected()) {
-        Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-        guint redrawPriority = prefs->getIntLimited("/options/redrawpriority/value", G_PRIORITY_HIGH_IDLE, G_PRIORITY_HIGH_IDLE, G_PRIORITY_DEFAULT_IDLE);
-        if (_in_full_redraw) {
-            _in_full_redraw = false;
-            redrawPriority = G_PRIORITY_DEFAULT_IDLE;
-        }
-        // G_PRIORITY_HIGH_IDLE = 100, G_PRIORITY_DEFAULT_IDLE = 200: Higher number => lower priority.
+    if (!d->hipri_idle.connected()) {
+        d->hipri_idle = Glib::signal_idle().connect([this] {on_idle(); return false;}, G_PRIORITY_HIGH_IDLE + 15); // after resize, before draw
+    }
 
-        // TEMP HACK: the high priority idle screws with my redraw implementation, so ignoring it for now
-        _idle_connection = Glib::signal_idle().connect(sigc::mem_fun(*this, &Canvas::on_idle), G_PRIORITY_DEFAULT_IDLE);
+    if (!d->lopri_idle.connected()) {
+        d->lopri_idle = Glib::signal_idle().connect(sigc::mem_fun(*this, &Canvas::on_idle), G_PRIORITY_DEFAULT_IDLE);
     }
 }
 
@@ -918,6 +1011,8 @@ distSq(const Geom::IntPoint pt, const Geom::IntRect &rect)
 bool
 Canvas::on_idle()
 {
+    auto f = FuncProf();
+
     if (_in_destruction) {
         std::cerr << "Canvas::on_idle: Called after canvas destroyed!" << std::endl;
     }
@@ -1043,25 +1138,30 @@ Canvas::on_idle()
             // Timed out. Temporarily return to idle loop, and come back here if still idle.
             std::cout << "timed out: " << g_get_monotonic_time() - setup.start_time << " us \n";
             _forced_redraw_count++;
+            f.subtype = 1;
             return true;
         }
     }
 
-    // Check if suppressed a time out, and adjust counter if so
+    // Check if suppressed a timeout, and adjust counter if so
     if (setup.disable_timeouts)
     {
         auto now = g_get_monotonic_time();
         auto elapsed = now - setup.start_time;
         if (elapsed > 1000) {
             // Timed out
-            std::cout << "ignore timeout: " << g_get_monotonic_time() - setup.start_time << " us \n";
+            std::cout << "ignored timeout: " << g_get_monotonic_time() - setup.start_time << " us \n";
             _forced_redraw_count = 0;
+
+            f.subtype = 2;
+            return false;
         }
     }
 
     // todo: check clean region is what it should be
 
     std::cout << "finished drawing\n";
+    f.subtype = 3;
     return false;
 }
 
@@ -1144,6 +1244,11 @@ Canvas::paint_rect_internal(PaintRectSetup const &setup, Geom::IntRect const &th
         d->_clean_region->do_union( crect );
 
         queue_draw_area(this_rect.left() - _x0, this_rect.top() - _y0, this_rect.width(), this_rect.height());
+        if (!d->pending_draw)
+        {
+            std::cout << "marking pending redraw" << std::endl;
+            d->pending_draw = true;
+        }
 
         return true;
     }
@@ -1245,7 +1350,6 @@ Canvas::paint_single_buffer(Geom::IntRect const &paint_rect, Geom::IntRect const
     assert (d->_device_scale == (int) x_scale);
     assert (d->_device_scale == (int) y_scale);
 
-
     // Move to the correct row.
     data += stride * (paint_rect.top() - d->_store_rect.top()) * (int)y_scale;
     // Move to the correct column.
@@ -1262,7 +1366,7 @@ Canvas::paint_single_buffer(Geom::IntRect const &paint_rect, Geom::IntRect const
     // Clear background
     cr->save();
     cr->set_operator(Cairo::OPERATOR_SOURCE);
-    cr->set_source_rgba(0,0,0,0);
+    if (!d->solid_background) cr->set_source_rgba(0,0,0,0); else cr->set_source(_background);
     cr->paint();
     cr->restore();
 
@@ -1561,6 +1665,8 @@ Canvas::pick_current_item(GdkEvent *event)
 bool
 Canvas::emit_event(GdkEvent *event)
 {
+    auto f = FuncProf();
+
     Gdk::EventMask mask = (Gdk::EventMask)0;
     if (_grabbed_canvas_item) {
         switch (event->type) {
@@ -1621,36 +1727,12 @@ Canvas::emit_event(GdkEvent *event)
             break;
     }
 
-    // Block undo/redo while anything is dragged.
-    if (event->type == GDK_BUTTON_PRESS && event->button.button == 1) {
-        _is_dragging = true;
-    } else if (event->type == GDK_BUTTON_RELEASE) {
-        _is_dragging = false;
-    }
+    std::cout << "adding event to bucket" << std::endl;
+    d->bucket.emplace_back(event_copy);
+    if (!d->pending_draw) {std::cout << "scheduling tick callback" << std::endl; add_tick_callback([this] (const Glib::RefPtr<Gdk::FrameClock>&) {d->schedule_bucket_emptier(); return false;});}
 
-    gint finished = false; // Can't be bool or "stack smashing detected"!
-    
-    if (_current_canvas_item) {
-        // Choose where to send event;
-        CanvasItem *item = _current_canvas_item;
-
-        if (_grabbed_canvas_item && !_current_canvas_item->is_descendant_of(_grabbed_canvas_item)) {
-            item = _grabbed_canvas_item;
-        }
-
-        // Propagate the event up the canvas item hierarchy until handled.
-        while (item) {
-            finished = item->handle_event(event_copy);
-            if (finished) break;
-            item = item->get_parent();
-        }
-    }
-
-    gdk_event_free(event_copy);
-
-    return finished;
+    return true;
 }
-
 
 } // namespace Widget
 } // namespace UI
