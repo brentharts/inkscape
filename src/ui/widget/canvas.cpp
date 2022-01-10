@@ -125,11 +125,13 @@ private:
 
     void schedule_bucket_emptier();
     void empty_bucket();
+
+    GdkEvent *ignore = nullptr;
 };
 
 void CanvasPrivate::schedule_bucket_emptier()
 {
-    std::cout << (bucket_emptier.connected() ? "already scheduled emptier" : "scheduling emptier") << std::endl;
+    //std::cout << (bucket_emptier.connected() ? "already scheduled emptier" : "scheduling emptier") << std::endl;
 
     if (bucket_emptier.connected()) return;
 
@@ -145,7 +147,7 @@ void CanvasPrivate::schedule_bucket_emptier()
 void CanvasPrivate::empty_bucket()
 {
     auto f = Prof("bucket_emptier");
-    std::cout << "emptying bucket" << std::endl;
+    //std::cout << "emptying bucket" << std::endl;
 
     // todo: check if this hack can now be removed
     if (q->_in_destruction) return;
@@ -181,8 +183,10 @@ void CanvasPrivate::empty_bucket()
 
         if (!finished)
         {
-            // todo: should really re-fire this event, because it wants to be handled somewhere else
-            // - but I've not observbed any problems from discarding it yet
+            // UNACCEPTABLE HACK!!! BUT I HAVE NO CHOICE
+            ignore = event.get();
+            q->get_toplevel()->event(event.get());
+            ignore = nullptr;
         }
     }
 }
@@ -288,7 +292,6 @@ Canvas::redraw_all()
         // We need to ignore their requests!
         return;
     }
-    _in_full_redraw = true;
     d->_clean_region = Cairo::Region::create(); // Empty region (i.e. everything is dirty).
     add_idle();
 }
@@ -837,7 +840,7 @@ Canvas::on_draw(const::Cairo::RefPtr<::Cairo::Context> &cr)
 
     if (d->pending_draw)
     {
-        std::cout << "finishing draw, events were not allowed but now are" << std::endl;
+        //std::cout << "finishing draw, events were not allowed but now are" << std::endl;
         if (!d->bucket.empty()) d->schedule_bucket_emptier();
         d->pending_draw = false;
     }
@@ -1160,7 +1163,7 @@ Canvas::on_idle()
 
     // todo: check clean region is what it should be
 
-    std::cout << "finished drawing\n";
+    //std::cout << "finished drawing\n";
     f.subtype = 3;
     return false;
 }
@@ -1246,7 +1249,7 @@ Canvas::paint_rect_internal(PaintRectSetup const &setup, Geom::IntRect const &th
         queue_draw_area(this_rect.left() - _x0, this_rect.top() - _y0, this_rect.width(), this_rect.height());
         if (!d->pending_draw)
         {
-            std::cout << "marking pending redraw" << std::endl;
+            //std::cout << "marking pending redraw" << std::endl;
             d->pending_draw = true;
         }
 
@@ -1667,6 +1670,8 @@ Canvas::emit_event(GdkEvent *event)
 {
     auto f = FuncProf();
 
+    if (event == d->ignore) return false;
+
     Gdk::EventMask mask = (Gdk::EventMask)0;
     if (_grabbed_canvas_item) {
         switch (event->type) {
@@ -1727,9 +1732,9 @@ Canvas::emit_event(GdkEvent *event)
             break;
     }
 
-    std::cout << "adding event to bucket" << std::endl;
+    //std::cout << "adding event to bucket" << std::endl;
     d->bucket.emplace_back(event_copy);
-    if (!d->pending_draw) {std::cout << "scheduling tick callback" << std::endl; add_tick_callback([this] (const Glib::RefPtr<Gdk::FrameClock>&) {d->schedule_bucket_emptier(); return false;});}
+    if (!d->pending_draw) {/*std::cout << "scheduling tick callback" << std::endl;*/ add_tick_callback([this] (const Glib::RefPtr<Gdk::FrameClock>&) {d->schedule_bucket_emptier(); return false;});}
 
     return true;
 }
