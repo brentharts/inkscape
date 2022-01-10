@@ -1293,6 +1293,7 @@ Gtk::Box* SvgFontsDialog::glyphs_tab() {
 
     auto edit = Gtk::make_managed<Gtk::Button>();
     edit->set_label(_("Edit"));
+    edit->set_always_show_image();
     edit->set_image_from_icon_name("edit");
     edit->set_tooltip_text(_("Switch to a layer with the same name as current glyph"));
     edit->signal_clicked().connect([=]() {
