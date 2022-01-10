@@ -45,6 +45,11 @@ ContextMenu::ContextMenu(SPDesktop *desktop, SPItem *item)
     set_name("ContextMenu");
 
     // std::cout << "ContextMenu::ContextMenu: " << (item ? item->getId() : "no item") << std::endl;
+    action_group = Gio::SimpleActionGroup::create();
+    insert_action_group("ctx", action_group);
+    auto document = desktop->getDocument();
+    action_group->add_action("unhide-objects-below-cursor", sigc::bind<SPDocument*, bool>(sigc::mem_fun(this, &ContextMenu::unhide_or_unlock), document, true));
+    action_group->add_action("unlock-objects-below-cursor", sigc::bind<SPDocument*, bool>(sigc::mem_fun(this, &ContextMenu::unhide_or_unlock), document, false));
 
     auto gmenu         = Gio::Menu::create(); // Main menu
     auto gmenu_section = Gio::Menu::create(); // Section (used multiple times)
@@ -59,6 +64,25 @@ ContextMenu::ContextMenu(SPDesktop *desktop, SPItem *item)
     if (item && !selection->includes(item)) {
         selection->set(item);
     }
+
+    // Get a list of items under the cursor, used for unhiding and unlocking.
+    auto point_document = desktop->point() * desktop->dt2doc();
+    Geom::Rect b(point_document, point_document + Geom::Point(1, 1)); // Seems strange to use a rect!
+    items_under_cursor = document->getItemsPartiallyInBox(desktop->dkey, b, true, true, true, true);
+    bool has_hidden_below_cursor = false;
+    bool has_locked_below_cursor = false;
+    for (auto item : items_under_cursor) {
+        if (item->isHidden()) {
+            has_hidden_below_cursor = true;
+        }
+        if (item->isLocked()) {
+            has_locked_below_cursor = true;
+        }
+    }
+    // std::cout << "Items below cursor: " << items_under_cursor.size()
+    //           << "  hidden: " << std::boolalpha << has_hidden_below_cursor
+    //           << "  locked: " << std::boolalpha << has_locked_below_cursor
+    //           << std::endl;
 
     // clang-tidy off
 
@@ -88,7 +112,7 @@ ContextMenu::ContextMenu(SPDesktop *desktop, SPItem *item)
             AppendItemFromAction(gmenu_dialogs,     "win.dialog-open('Objects')",                   _("Layers and Objects..."), "dialog-objects"             );
             AppendItemFromAction(gmenu_dialogs,     "win.dialog-open('ObjectProperties')",          _("_Object Properties..."), "dialog-object-properties"   );
 
-            if (dynamic_cast<SPShape*>(item) || dynamic_cast<SPText*>(item)) {
+            if (dynamic_cast<SPShape*>(item) || dynamic_cast<SPText*>(item) || dynamic_cast<SPGroup*>(item)) {
                 AppendItemFromAction(gmenu_dialogs, "win.dialog-open('FillStroke')",                _("_Fill and Stroke..."),   "dialog-fill-and-stroke"     );
             }
 
@@ -171,10 +195,6 @@ ContextMenu::ContextMenu(SPDesktop *desktop, SPItem *item)
                 gmenu_section = Gio::Menu::create();
                 AppendItemFromAction(     gmenu_section, "app.selection-hide",                  _("Hide Selected Objects"), ""                                );
                 AppendItemFromAction(     gmenu_section, "app.selection-lock",                  _("Lock Selected Objects"), ""                                );
-                if (dynamic_cast<SPGroup*>(item)) {
-                    AppendItemFromAction( gmenu_section, "app.selection-unhide-below",          _("Unhide Objects Below"),  ""                                );
-                    AppendItemFromAction( gmenu_section, "app.selection-unlock-below",          _("Unlock Objects Below"),  ""                                );
-                }
                 gmenu->append_section(gmenu_section);
 
             } else {
@@ -188,13 +208,23 @@ ContextMenu::ContextMenu(SPDesktop *desktop, SPItem *item)
             }
         }
 
+        // Hidden or locked beneath cursor
+        gmenu_section = Gio::Menu::create();
+        if (has_hidden_below_cursor) {
+            AppendItemFromAction( gmenu_section, "ctx.unhide-objects-below-cursor",     _("Unhide Objects Below Cursor"),  ""                         );
+        }
+        if (has_locked_below_cursor) {
+            AppendItemFromAction( gmenu_section, "ctx.unlock-objects-below-cursor",     _("Unlock Objects Below Cursor"),  ""                         );
+        }
+        gmenu->append_section(gmenu_section);
+
     } else {
         // Layers: Only used in "Layers and Objects" dialog.
 
         gmenu_section = Gio::Menu::create();
         AppendItemFromAction(gmenu_section,     "win.layer-new",                _("_Add Layer..."),              "layer-new");
         AppendItemFromAction(gmenu_section,     "win.layer-duplicate",          _("D_uplicate Current Layer"),   "layer-duplicate");
-        AppendItemFromAction(gmenu_section,     "win.layer-delete",             _("_Delete CUrrent Layer"),      "layer-delete");
+        AppendItemFromAction(gmenu_section,     "win.layer-delete",             _("_Delete Current Layer"),      "layer-delete");
         AppendItemFromAction(gmenu_section,     "win.layer-rename",             _("Re_name Layer..."),           "layer-rename");
         AppendItemFromAction(gmenu_section,     "win.layer-to-group",           _("Layer to _Group"),            "dialog-objects");
         gmenu->append_section(gmenu_section);
@@ -241,7 +271,8 @@ ContextMenu::ContextMenu(SPDesktop *desktop, SPItem *item)
     }
 }
 
-void ContextMenu::AppendItemFromAction(Glib::RefPtr<Gio::Menu> gmenu, Glib::ustring action, Glib::ustring label, Glib::ustring icon)
+void
+ContextMenu::AppendItemFromAction(Glib::RefPtr<Gio::Menu> gmenu, Glib::ustring action, Glib::ustring label, Glib::ustring icon)
 {
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     bool show_icons = prefs->getInt("/theme/menuIcons_canvas", true);
@@ -254,6 +285,24 @@ void ContextMenu::AppendItemFromAction(Glib::RefPtr<Gio::Menu> gmenu, Glib::ustr
     gmenu->append_item(menu_item);
 }
 
+void
+ContextMenu::unhide_or_unlock(SPDocument* document, bool unhide)
+{
+    for (auto item : items_under_cursor) {
+        if (unhide) {
+            if (item->isHidden()) {
+                item->setHidden(false);
+            }
+        } else {
+            if (item->isLocked()) {
+                item->setLocked(false);
+            }
+        }
+    }
+
+    // We wouldn't be here if we didn't make a change.
+    Inkscape::DocumentUndo::done(document, (unhide ? _("Unhid objects") : _("Unlocked objects")), "");
+}
 
 /*
   Local Variables:

@@ -76,7 +76,7 @@ hide_lock_unhide_all(InkscapeApplication* app)
     bool changed = hide_lock_recurse(&hide_lock_hide, root, false); // Unhide
 
     if (changed) {
-        Inkscape::DocumentUndo::done(document, _("Unhide all objects in the current layer"), "");
+        Inkscape::DocumentUndo::done(document, _("Unhid all objects in the current layer"), "");
     }
 }
 
@@ -90,7 +90,7 @@ hide_lock_unlock_all(InkscapeApplication* app)
     bool changed = hide_lock_recurse(&hide_lock_lock, root, false); // Unlock
 
     if (changed) {
-        Inkscape::DocumentUndo::done(document, _("Unlock all objects in the current layer"), "");
+        Inkscape::DocumentUndo::done(document, _("Unlocked all objects in the current layer"), "");
     }
 }
 
@@ -159,7 +159,7 @@ hide_lock_hide_selected(InkscapeApplication* app, bool hide)
 
     if (changed) {
         auto document = app->get_active_document();
-        Inkscape::DocumentUndo::done(document, _("Hid/unhid selected items."), "");
+        Inkscape::DocumentUndo::done(document, (hide ? _("Hid selected items.") : _("Unhid selected items.")), "");
         selection->clear();
     }
 }
@@ -183,7 +183,7 @@ hide_lock_lock_selected(InkscapeApplication* app, bool lock)
 
     if (changed) {
         auto document = app->get_active_document();
-        Inkscape::DocumentUndo::done(document, _("Locked/unlocked selected items."), "");
+        Inkscape::DocumentUndo::done(document, (lock ? _("Locked selected items.") : _("Unlocked selected items.")), "");
         selection->clear();
     }
 }

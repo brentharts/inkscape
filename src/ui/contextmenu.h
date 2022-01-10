@@ -13,10 +13,13 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
+#include <vector>
+
 #include <gtkmm/menu.h>
 #include <giomm.h>
 
 class SPDesktop;
+class SPDocument;
 class SPItem;
 
 /**
@@ -24,13 +27,17 @@ class SPItem;
  */
 class ContextMenu : public Gtk::Menu
 {
-    public:
-        ContextMenu(SPDesktop *desktop, SPItem *item);
-        ~ContextMenu() override = default;
+public:
+    ContextMenu(SPDesktop *desktop, SPItem *item);
+    ~ContextMenu() override = default;
 
-    private:
-        void AppendItemFromAction(Glib::RefPtr<Gio::Menu> gmenu, Glib::ustring action, Glib::ustring label, Glib::ustring icon = "");
+private:
+    void AppendItemFromAction(Glib::RefPtr<Gio::Menu> gmenu, Glib::ustring action, Glib::ustring label, Glib::ustring icon = "");
 
+    // Used for unlock and unhide actions
+    Glib::RefPtr<Gio::SimpleActionGroup> action_group;
+    std::vector<SPItem *> items_under_cursor;
+    void unhide_or_unlock(SPDocument* document, bool unhide);
 };
 #endif // SEEN_CONTEXT_MENU_H
 
