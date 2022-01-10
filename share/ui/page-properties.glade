@@ -21,14 +21,7 @@
     <property name="step-increment">0.10</property>
     <property name="page-increment">1</property>
   </object>
-  <object class="GtkAdjustment" id="adj-scale-y">
-    <property name="lower">9.9999999999999995e-07</property>
-    <property name="upper">1000000</property>
-    <property name="value">1</property>
-    <property name="step-increment">0.10</property>
-    <property name="page-increment">1</property>
-  </object>
-  <object class="GtkAdjustment" id="adj-viewbox-heigh">
+  <object class="GtkAdjustment" id="adj-viewbox-height">
     <property name="lower">0.001</property>
     <property name="upper">10000000</property>
     <property name="step-increment">1</property>
@@ -428,7 +421,7 @@ SVG element positions are expressed in user units.</property>
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="width-chars">9</property>
-            <property name="adjustment">adj-viewbox-heigh</property>
+            <property name="adjustment">adj-viewbox-height</property>
             <property name="digits">3</property>
             <style>
               <class name="viewbox"/>
