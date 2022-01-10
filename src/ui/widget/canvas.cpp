@@ -131,8 +131,6 @@ private:
 
 void CanvasPrivate::schedule_bucket_emptier()
 {
-    //std::cout << (bucket_emptier.connected() ? "already scheduled emptier" : "scheduling emptier") << std::endl;
-
     if (bucket_emptier.connected()) return;
 
     bucket_emptier = Glib::signal_idle().connect([this]
@@ -147,10 +145,6 @@ void CanvasPrivate::schedule_bucket_emptier()
 void CanvasPrivate::empty_bucket()
 {
     auto f = Prof("bucket_emptier");
-    //std::cout << "emptying bucket" << std::endl;
-
-    // todo: check if this hack can now be removed
-    if (q->_in_destruction) return;
 
     auto bucket2 = std::move(bucket);
 
@@ -163,10 +157,10 @@ void CanvasPrivate::empty_bucket()
             q->_is_dragging = false;
         }
 
-        bool finished = false; // Can't be bool or "stack smashing detected"!
+        bool finished = false;
 
         if (q->_current_canvas_item) {
-            // Choose where to send event;
+            // Choose where to send event
             CanvasItem *item = q->_current_canvas_item;
 
             if (q->_grabbed_canvas_item && !q->_current_canvas_item->is_descendant_of(q->_grabbed_canvas_item)) {
@@ -302,11 +296,6 @@ Canvas::redraw_all()
 void
 Canvas::redraw_area(int x0, int y0, int x1, int y1)
 {
-    // std::cout << "Canvas::redraw_area: "
-    //           << " x0: " << x0
-    //           << " y0: " << y0
-    //           << " x1: " << x1
-    //           << " y1: " << y1 << std::endl;
     if (_in_destruction) {
         // CanvasItems redraw their area when being deleted... which happens when the Canvas is destroyed.
         // We need to ignore their requests!
@@ -840,7 +829,6 @@ Canvas::on_draw(const::Cairo::RefPtr<::Cairo::Context> &cr)
 
     if (d->pending_draw)
     {
-        //std::cout << "finishing draw, events were not allowed but now are" << std::endl;
         if (!d->bucket.empty()) d->schedule_bucket_emptier();
         d->pending_draw = false;
     }
@@ -1163,7 +1151,6 @@ Canvas::on_idle()
 
     // todo: check clean region is what it should be
 
-    //std::cout << "finished drawing\n";
     f.subtype = 3;
     return false;
 }
@@ -1247,11 +1234,7 @@ Canvas::paint_rect_internal(PaintRectSetup const &setup, Geom::IntRect const &th
         d->_clean_region->do_union( crect );
 
         queue_draw_area(this_rect.left() - _x0, this_rect.top() - _y0, this_rect.width(), this_rect.height());
-        if (!d->pending_draw)
-        {
-            //std::cout << "marking pending redraw" << std::endl;
-            d->pending_draw = true;
-        }
+        d->pending_draw = true;
 
         return true;
     }
@@ -1334,14 +1317,6 @@ Canvas::paint_single_buffer(Geom::IntRect const &paint_rect, Geom::IntRect const
     // Create temporary surface that draws directly to store.
     store->flush();
 
-    // std::cout << "  Writing store to png" << std::endl;
-    // static int i = 0;
-    // ++i;
-    // if (i < 5) {
-    //     std::string file = "paint_single_buffer0_" + std::to_string(i) + ".png";
-    //     store->write_to_png(file);
-    // }
-
     // Create temporary surface that draws directly to store.
     unsigned char *data = store->get_data();
     int stride = store->get_stride();
@@ -1403,23 +1378,6 @@ Canvas::paint_single_buffer(Geom::IntRect const &paint_rect, Geom::IntRect const
     }
 
     store->mark_dirty();
-
-    // if (i < 5) {
-    //     std::cout << "  Writing store to png" << std::endl;
-    //     std::string file = "paint_single_buffer1_" + std::to_string(i) + ".png";
-    //     store->write_to_png(file);
-    // }
-
-    // Uncomment to see how Inkscape paints to rectangles on canvas.
-    // cr->save();
-    // cr->move_to (0.5,                    0.5);
-    // cr->line_to (0.5,                    paint_rect.height()-0.5);
-    // cr->line_to (paint_rect.width()-0.5, paint_rect.height()-0.5);
-    // cr->line_to (paint_rect.width()-0.5, 0.5);
-    // cr->close_path();
-    // cr->set_source_rgba(0.0, 0.0, 0.5, 1.0);
-    // cr->stroke();
-    // cr->restore();
 }
 
 // Sets clip path for Split and X-Ray modes.
@@ -1732,9 +1690,8 @@ Canvas::emit_event(GdkEvent *event)
             break;
     }
 
-    //std::cout << "adding event to bucket" << std::endl;
     d->bucket.emplace_back(event_copy);
-    if (!d->pending_draw) {/*std::cout << "scheduling tick callback" << std::endl;*/ add_tick_callback([this] (const Glib::RefPtr<Gdk::FrameClock>&) {d->schedule_bucket_emptier(); return false;});}
+    if (!d->pending_draw) add_tick_callback([this] (const Glib::RefPtr<Gdk::FrameClock>&) {d->schedule_bucket_emptier(); return false;});
 
     return true;
 }
