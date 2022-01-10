@@ -2,7 +2,7 @@
 <!-- Generated with glade 3.38.2 -->
 <interface>
   <requires lib="gtk+" version="3.24"/>
-  <object class="GtkAdjustment" id="adj-page-heigh">
+  <object class="GtkAdjustment" id="adj-page-height">
     <property name="lower">0.001</property>
     <property name="upper">10000000</property>
     <property name="step-increment">1</property>
@@ -146,7 +146,7 @@
             <property name="can-focus">True</property>
             <property name="tooltip-text" translatable="yes">Height of front page.</property>
             <property name="width-chars">9</property>
-            <property name="adjustment">adj-page-heigh</property>
+            <property name="adjustment">adj-page-height</property>
             <property name="digits">3</property>
           </object>
           <packing>
