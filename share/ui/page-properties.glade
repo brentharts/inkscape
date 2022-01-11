@@ -597,7 +597,7 @@ SVG element positions are expressed in user units.</property>
           <packing>
             <property name="left-attach">1</property>
             <property name="top-attach">8</property>
-            <property name="width">2</property>
+            <property name="width">3</property>
           </packing>
         </child>
         <child>
@@ -615,9 +615,6 @@ SVG element positions are expressed in user units.</property>
             <property name="top-attach">4</property>
             <property name="width">3</property>
           </packing>
-        </child>
-        <child>
-          <placeholder/>
         </child>
         <child>
           <placeholder/>
