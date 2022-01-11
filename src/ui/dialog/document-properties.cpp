@@ -298,13 +298,28 @@ void DocumentProperties::set_document_scale(SPDesktop* desktop, double scale) {
 // for example: <svg width="100mm" height="100mm" viewBox="0 0 100 100"> will report 1:1 scale
 std::optional<Geom::Scale> get_document_scale_helper(SPDocument& doc) {
     auto root = doc.getRoot();
-    if (root->viewBox_set) {
-        auto vw = root->viewBox.width();
-        auto vh = root->viewBox.height();
-        if (vw > 0 && vh > 0) {
-            return Geom::Scale(root->width.value / vw, root->height.value / vh);
+    if (root &&
+        root->width._set  && root->width.unit  != SVGLength::PERCENT &&
+        root->height._set && root->height.unit != SVGLength::PERCENT) {
+        if (root->viewBox_set) {
+            // viewbox and document size present
+            auto vw = root->viewBox.width();
+            auto vh = root->viewBox.height();
+            if (vw > 0 && vh > 0) {
+                return Geom::Scale(root->width.value / vw, root->height.value / vh);
+            }
+        }
+        else {
+            // no viewbox, use SVG size in pixels
+            auto w = root->width.computed;
+            auto h = root->height.computed;
+            if (w > 0 && h > 0) {
+                return Geom::Scale(root->width.value / w, root->height.value / h);
+            }
         }
     }
+
+    // there is no scale concept applicable in the current state
     return std::optional<Geom::Scale>();
 }
 
@@ -322,11 +337,13 @@ void DocumentProperties::update_scale_ui(SPDesktop* desktop) {
         bool uniform = fabs(sx - sy) < eps;
         _page->set_dimension(PageProperties::Dimension::Scale, sx, sx); // only report one, only one "scale" is used
         _page->set_check(PageProperties::Check::NonuniformScale, !uniform);
+        _page->set_check(PageProperties::Check::DisabledScale, false);
     }
     else {
         // no scale
         _page->set_dimension(PageProperties::Dimension::Scale, 1, 1);
         _page->set_check(PageProperties::Check::NonuniformScale, false);
+        _page->set_check(PageProperties::Check::DisabledScale, true);
     }
 }
 

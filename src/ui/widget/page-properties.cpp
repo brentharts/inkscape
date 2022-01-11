@@ -361,15 +361,18 @@ private:
             _scale_is_uniform = !checked;
             _scale_x.set_sensitive(_scale_is_uniform);
             _linked_viewbox_scale.set_from_icon_name(_scale_is_uniform ? g_linked : g_unlinked, Gtk::ICON_SIZE_LARGE_TOOLBAR);
-            return;
         }
+        else if (element == Check::DisabledScale) {
+            _scale_x.set_sensitive(!checked);
+        }
+        else {
+            get_checkbutton(element).set_active(checked);
 
-        get_checkbutton(element).set_active(checked);
-
-        // special cases
-        if (element == Check::Checkerboard) _preview->enable_checkerboard(checked);
-        if (element == Check::Shadow) _preview->enable_drop_shadow(checked);
-        if (element == Check::Border) _preview->draw_border(checked);
+            // special cases
+            if (element == Check::Checkerboard) _preview->enable_checkerboard(checked);
+            if (element == Check::Shadow) _preview->enable_drop_shadow(checked);
+            if (element == Check::Border) _preview->draw_border(checked);
+        }
     }
 
     void set_dimension(Dimension dimension, double x, double y) override {

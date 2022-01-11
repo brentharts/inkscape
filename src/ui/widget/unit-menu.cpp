@@ -23,8 +23,9 @@ UnitMenu::UnitMenu(Gtk::ComboBoxText* external_combo) : _type(UNIT_TYPE_NONE)
     _combo = external_combo ? external_combo : this;
     _combo->set_active(0);
     _combo->add_events(Gdk::SCROLL_MASK | Gdk::SMOOTH_SCROLL_MASK);
-    signal_scroll_event().connect(sigc::mem_fun(*this, &UnitMenu::on_scroll_event));
-    _combo->signal_scroll_event().connect([](GdkEventScroll*){ return true; }, false);
+    if (external_combo) {
+        _combo->signal_scroll_event().connect([](GdkEventScroll*){ return true; }, false);
+    }
 }
 
 UnitMenu::~UnitMenu() = default;
