@@ -12,7 +12,7 @@
  */
 
 #include <iostream>
-#include <algorithm>
+#include <algorithm> // Sort
 
 #include <glibmm/i18n.h>
 
@@ -26,14 +26,43 @@
 #include "desktop.h"
 #include "preferences.h"
 
-#include "display/cairo-utils.h"     // Checkerboard background.
+#include "display/cairo-utils.h"     // Checkerboard background
 #include "display/drawing.h"
 #include "display/control/canvas-item-group.h"
 #include "display/control/snap-indicator.h"
 
-#include "../../../../frameclock/frameclock.h"
-
 #include "ui/tools/tool-base.h"      // Default cursor
+
+// Debugging switches
+#define ENABLE_FRAMECHECK 0
+#define ENABLE_LOGGING 1
+#define ENABLE_SLOW_REDRAW 1
+#define ENABLE_SHOW_REDRAW 0
+#define ENABLE_SHOW_UNCLEAN 1
+
+#if ENABLE_FRAMECHECK
+#include "../../../../framecheck.h"
+#define IF_FRAMECHECK(X) X
+#else
+#define IF_FRAMECHECK(X)
+#endif
+
+#if ENABLE_LOGGING
+#define IF_LOGGING(X) X
+#else
+#define IF_LOGGING(X)
+#endif
+
+#if ENABLE_SLOW_REDRAW
+#define SLOW_REDRAW_SIZE 30 // px
+#define SLOW_REDRAW_TIME 50 // us
+#endif
+
+#if ENABLE_SHOW_UNCLEAN
+#define IF_SHOW_UNCLEAN(X) X
+#else
+#define IF_SHOW_UNCLEAN(X)
+#endif
 
 /*
  *   The canvas is responsible for rendering the SVG drawing with various "control"
@@ -110,6 +139,7 @@ private:
     Geom::IntRect _store_rect;                         ///< Rectangle of the store in world space.
     Cairo::RefPtr<Cairo::Region> _clean_region;        ///< Subregion of store with up-to-date content.
     int _device_scale = 1;                             ///< Scale for high DPI montiors. Probably should be double.
+    bool _store_solid_background;
 
     bool solid_background;
 
@@ -119,7 +149,6 @@ private:
     struct GdkEventFreer {void operator()(GdkEvent *ev) const {gdk_event_free(ev);}};
     std::vector<std::unique_ptr<GdkEvent, GdkEventFreer>> bucket;
     sigc::connection bucket_emptier;
-    guint tickid = std::numeric_limits<guint>::max();
 
     bool pending_draw = false;
 
@@ -144,7 +173,7 @@ void CanvasPrivate::schedule_bucket_emptier()
 
 void CanvasPrivate::empty_bucket()
 {
-    auto f = Prof("bucket_emptier");
+    IF_FRAMECHECK(framecheck_whole_function)
 
     auto bucket2 = std::move(bucket);
 
@@ -287,6 +316,7 @@ Canvas::redraw_all()
         return;
     }
     d->_clean_region = Cairo::Region::create(); // Empty region (i.e. everything is dirty).
+    IF_SHOW_UNCLEAN( queue_draw() );
     add_idle();
 }
 
@@ -319,6 +349,7 @@ Canvas::redraw_area(int x0, int y0, int x1, int y1)
 
     Cairo::RectangleInt crect = { x0, y0, x1-x0, y1-y0 };
     d->_clean_region->subtract(crect);
+    IF_SHOW_UNCLEAN( queue_draw() );
     add_idle();
 }
 
@@ -494,7 +525,7 @@ void
 Canvas::get_preferred_width_vfunc(int &minimum_width,  int &natural_width) const
 {
     minimum_width = natural_width = 256;
-} 	
+}
 
 void
 Canvas::get_preferred_height_vfunc(int &minimum_height, int &natural_height) const
@@ -767,6 +798,23 @@ Canvas::on_motion_notify_event(GdkEventMotion *motion_event)
     return status;
 }
 
+namespace {
+auto geom_to_cairo(Geom::Affine affine)
+{
+    return Cairo::Matrix(affine[0], affine[1], affine[2], affine[3], affine[4], affine[5]);
+}
+}
+
+void
+fill_cairo_region(const Cairo::RefPtr<Cairo::Context> &cr, const Cairo::RefPtr<Cairo::Region> &reg)
+{
+    for (int i = 0; i < reg->get_num_rectangles(); i++) {
+        auto rect = reg->get_rectangle(i);
+        cr->rectangle(rect.x, rect.y, rect.width, rect.height);
+        cr->fill();
+    }
+}
+
 /*
  * The on_draw() function is called whenever Gtk wants to update the window. This function:
  *
@@ -786,12 +834,10 @@ Canvas::on_motion_notify_event(GdkEventMotion *motion_event)
 bool
 Canvas::on_draw(const::Cairo::RefPtr<::Cairo::Context> &cr)
 {
-    Prof f;
+    IF_FRAMECHECK( Prof f; )
 
     // sp_canvas_item_recursive_print_tree(0, _root);
     // canvas_item_print_tree(_canvas_item_root);
-
-    // todo: can minutely optimise this by only running the first part of on_idle()
 
     assert(d->_backing_store/* && _outline_store*/);
     assert(_drawing);
@@ -799,7 +845,7 @@ Canvas::on_draw(const::Cairo::RefPtr<::Cairo::Context> &cr)
     // Blit background (e.g. checkerboard).
     if (!d->solid_background)
     {
-        f = Prof("background");
+        IF_FRAMECHECK( f = Prof("background"); )
         cr->save();
         cr->set_operator(Cairo::OPERATOR_SOURCE);
         cr->set_source(_background);
@@ -807,25 +853,25 @@ Canvas::on_draw(const::Cairo::RefPtr<::Cairo::Context> &cr)
         cr->restore();
     }
 
-    // Blit from the backing store, without regard for the clean region.
-    f = Prof("draw");
+    // Blit backing store to screen.
+    IF_FRAMECHECK( f = Prof("draw"); )
     cr->save();
-    if (d->solid_background) cr->set_operator(Cairo::OPERATOR_SOURCE);
+    cr->set_operator(d->solid_background ? Cairo::OPERATOR_SOURCE : Cairo::OPERATOR_OVER);
     cr->set_source(d->_backing_store, d->_store_rect.left() - _x0, d->_store_rect.top() - _y0);
     cr->paint();
     cr->restore();
 
-    // Paint unclean regions in red
+    #if ENABLE_SHOW_UNCLEAN
+    IF_FRAMECHECK( f = Prof("paint_unclean"); )
+    // Paint unclean regions in red.
     auto reg = Cairo::Region::create( Cairo::RectangleInt{ _x0, _y0, get_allocation().get_width(), get_allocation().get_height() } );
     reg->subtract(d->_clean_region);
-
-    cr->set_source_rgba(1, 0, 0, 0.07);
-    for (int i = 0; i < reg->get_num_rectangles(); i++)
-    {
-        auto rect = reg->get_rectangle(i);
-        cr->rectangle(rect.x - _x0, rect.y - _y0, rect.width, rect.height);
-        cr->fill();
-    }
+    reg->translate(-_x0, -_y0);
+    cr->save();
+    cr->set_source_rgba(1, 0, 0, 0.2);
+    fill_cairo_region(cr, reg);
+    cr->restore();
+    #endif
 
     if (d->pending_draw)
     {
@@ -947,7 +993,7 @@ Canvas::on_draw(const::Cairo::RefPtr<::Cairo::Context> &cr)
     }
 
     dirty_region->subtract(_clean_region);
-    
+
     if (!dirty_region->empty()) {
         add_idle();
     }*/
@@ -964,7 +1010,7 @@ Canvas::update_canvas_item_ctrl_sizes(int size_index)
 void
 Canvas::add_idle()
 {
-    auto f = FuncProf();
+    IF_FRAMECHECK(framecheck_whole_function)
 
     if (_in_destruction) {
         std::cerr << "Canvas::add_idle: Called after canvas destroyed!" << std::endl;
@@ -1002,7 +1048,7 @@ distSq(const Geom::IntPoint pt, const Geom::IntRect &rect)
 bool
 Canvas::on_idle()
 {
-    auto f = FuncProf();
+    IF_FRAMECHECK( auto f = FuncProf(); )
 
     if (_in_destruction) {
         std::cerr << "Canvas::on_idle: Called after canvas destroyed!" << std::endl;
@@ -1032,17 +1078,27 @@ Canvas::on_idle()
     const auto pad = Geom::IntPoint(200, 200);
     const auto device_scale = get_scale_factor();
 
-    if (!d->_backing_store || d->_device_scale != device_scale || !d->_store_rect.intersects(canvas_rect))
+    if (!d->_backing_store || d->_device_scale != device_scale || d->_store_solid_background != d->solid_background  || !d->_store_rect.intersects(canvas_rect))
     {
         // Recreate the store, using the same memory if possible
         d->_store_rect = Geom::IntRect::from_xywh( _x0, _y0, canvas_rect.width(), canvas_rect.height() );
         d->_store_rect.expandBy(pad);
         d->_device_scale = device_scale;
-        if (!d->_backing_store || d->_backing_store->get_width() != d->_store_rect.width() * d->_device_scale || d->_backing_store->get_height() != d->_store_rect.height() * d->_device_scale)
-            d->_backing_store = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, d->_store_rect.width() * d->_device_scale, d->_store_rect.height() * d->_device_scale);
-       d->_clean_region = Cairo::Region::create();
+        d->_store_solid_background = d->solid_background;
+        int desired_width = d->_store_rect.width() * d->_device_scale;
+        int desired_height = d->_store_rect.height() * d->_device_scale;
+        if (!d->_backing_store || d->_backing_store->get_width() != desired_width || d->_backing_store->get_height() != desired_height)
+            d->_backing_store = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, desired_width, desired_height);
+        if (d->solid_background) {
+            auto cr = Cairo::Context::create(d->_backing_store);
+            cr->set_source(_background);
+            cr->set_operator(Cairo::OPERATOR_SOURCE);
+            cr->paint();
+        }
+        d->_clean_region = Cairo::Region::create();
+        IF_SHOW_UNCLEAN( queue_draw() );
 
-       std::cout << "Recreated store" << std::endl;
+       IF_LOGGING( std::cout << "Recreated store" << std::endl; )
     }
     else if (!d->_store_rect.contains(canvas_rect))
     {
@@ -1053,22 +1109,36 @@ Canvas::on_idle()
 
         auto shift = store_rect.min() - d->_store_rect.min();
         auto reuse_rect = store_rect & d->_store_rect;
+        assert(reuse_rect);
         auto cr = Cairo::Context::create(backing_store);
 
-        // copy contents of store
-        assert(reuse_rect);
+        // Paint background where necessary
+        if (d->solid_background) {
+            auto reg = Cairo::Region::create(geom_to_cairo(store_rect));
+            reg->subtract(geom_to_cairo(*reuse_rect));
+            reg->translate(-store_rect.left(), -store_rect.top());
+            cr->save();
+            cr->set_source(_background);
+            cr->set_operator(Cairo::OPERATOR_SOURCE);
+            fill_cairo_region(cr, reg);
+            cr->restore();
+        }
+
+        // Copy usuable contents of store shifted
         cr->save();
         cr->rectangle(reuse_rect->left() - store_rect.left(), reuse_rect->top() - store_rect.top(), reuse_rect->width(), reuse_rect->height());
         cr->clip();
         cr->set_source(d->_backing_store, -shift.x(), -shift.y());
+        cr->set_operator(Cairo::OPERATOR_SOURCE);
         cr->paint();
         cr->restore();
 
         d->_store_rect = store_rect;
         d->_backing_store = std::move(backing_store);
         d->_clean_region->intersect(geom_to_cairo(d->_store_rect));
+        IF_SHOW_UNCLEAN( queue_draw() );
 
-        std::cout << "Partially recreated store" << std::endl;
+        IF_LOGGING( std::cout << "Shifted store" << std::endl; )
     }
 
     assert(d->_store_rect.contains(canvas_rect));
@@ -1087,7 +1157,7 @@ Canvas::on_idle()
         mouse_loc = Geom::IntPoint(_x0 + x, _y0 + y);
     }
     else {
-         mouse_loc = canvas_rect.midpoint();
+        mouse_loc = canvas_rect.midpoint();
     }
 
     // Obtain rectangles list sorted by distance from mouse
@@ -1127,9 +1197,9 @@ Canvas::on_idle()
 
         if (!paint_rect_internal(setup, rect)) {
             // Timed out. Temporarily return to idle loop, and come back here if still idle.
-            std::cout << "timed out: " << g_get_monotonic_time() - setup.start_time << " us \n";
+            IF_LOGGING( std::cout << "Timed out: " << g_get_monotonic_time() - setup.start_time << " us \n"; )
+            IF_FRAMECHECK( f.subtype = 1; )
             _forced_redraw_count++;
-            f.subtype = 1;
             return true;
         }
     }
@@ -1141,17 +1211,17 @@ Canvas::on_idle()
         auto elapsed = now - setup.start_time;
         if (elapsed > 1000) {
             // Timed out
-            std::cout << "ignored timeout: " << g_get_monotonic_time() - setup.start_time << " us \n";
+            IF_LOGGING( std::cout << "Ignored timeout: " << g_get_monotonic_time() - setup.start_time << " us \n"; )
             _forced_redraw_count = 0;
 
-            f.subtype = 2;
+            IF_FRAMECHECK( f.subtype = 2; )
             return false;
         }
     }
 
-    // todo: check clean region is what it should be
+    // todo: check clean region is what it should be (should have finished drawing by now)
 
-    f.subtype = 3;
+    IF_FRAMECHECK( f.subtype = 3; )
     return false;
 }
 
@@ -1162,7 +1232,7 @@ Canvas::on_idle()
 bool
 Canvas::paint_rect_internal(PaintRectSetup const &setup, Geom::IntRect const &this_rect)
 {
-    // Find optimal buffer dimension
+    // Find optimal rectangle dimension
     int bw = this_rect.width();
     int bh = this_rect.height();
 
@@ -1171,9 +1241,9 @@ Canvas::paint_rect_internal(PaintRectSetup const &setup, Geom::IntRect const &th
         return true;
     }
 
-    /*
-    // Uncomment for artificial redraw slowness fun - you won't regret it!
-    if (bw > bh || bw > 10) {
+    #if ENABLE_SLOW_REDRAW
+    // Aggressively subdivide into many small rectangles
+    if (bw > bh || bw > SLOW_REDRAW_SIZE) {
         int mid = this_rect[Geom::X].middle();
 
         Geom::IntRect lo, hi;
@@ -1181,14 +1251,13 @@ Canvas::paint_rect_internal(PaintRectSetup const &setup, Geom::IntRect const &th
         hi = Geom::IntRect(mid,              this_rect.top(), this_rect.right(), this_rect.bottom());
 
         if (setup.mouse_loc[Geom::X] < mid) {
-            // Always paint towards the mouse first
             return paint_rect_internal(setup, lo)
                 && paint_rect_internal(setup, hi);
         } else {
             return paint_rect_internal(setup, hi)
                 && paint_rect_internal(setup, lo);
         }
-    } else if (bh > bw && bh > 10) {
+    } else if (bh > bw && bh > SLOW_REDRAW_SIZE) {
         int mid = this_rect[Geom::Y].middle();
 
         Geom::IntRect lo, hi;
@@ -1196,7 +1265,6 @@ Canvas::paint_rect_internal(PaintRectSetup const &setup, Geom::IntRect const &th
         hi = Geom::IntRect(this_rect.left(), mid,             this_rect.right(), this_rect.bottom());
 
         if (setup.mouse_loc[Geom::Y] < mid) {
-            // Always paint towards the mouse first
             return paint_rect_internal(setup, lo)
                 && paint_rect_internal(setup, hi);
         } else {
@@ -1204,23 +1272,15 @@ Canvas::paint_rect_internal(PaintRectSetup const &setup, Geom::IntRect const &th
                 && paint_rect_internal(setup, lo);
         }
     }
-    */
+    #endif // ENABLE_SLOW_REDRAW
 
     if (bw * bh < setup.max_pixels) {
-        // We are small enough!
-
-        if (!setup.disable_timeouts) {
-            auto now = g_get_monotonic_time();
-            auto elapsed = now - setup.start_time;
-            if (elapsed > 1000) {
-                return false;
-            }
-        }
+        // Rectangle is small enough
 
         _drawing->setRenderMode(_render_mode);
         _drawing->setColorMode(_color_mode);
-
         paint_single_buffer(this_rect, setup.canvas_rect, d->_backing_store);
+
         /*bool outline_overlay = _drawing->outlineOverlay();
         if (_split_mode != Inkscape::SplitMode::NORMAL || outline_overlay) {
             _drawing->setRenderMode(Inkscape::RenderMode::OUTLINE);
@@ -1230,11 +1290,23 @@ Canvas::paint_rect_internal(PaintRectSetup const &setup, Geom::IntRect const &th
             }
         }*/
 
+        #if ENABLE_SLOW_REDRAW
+        usleep(SLOW_REDRAW_TIME); // Introduce an artificial delay for each rectangle
+        #endif
+
         Cairo::RectangleInt crect = { this_rect.left(), this_rect.top(), this_rect.width(), this_rect.height() };
         d->_clean_region->do_union( crect );
 
         queue_draw_area(this_rect.left() - _x0, this_rect.top() - _y0, this_rect.width(), this_rect.height());
         d->pending_draw = true;
+
+        if (!setup.disable_timeouts) {
+            auto now = g_get_monotonic_time();
+            auto elapsed = now - setup.start_time;
+            if (elapsed > 1000) {
+                return false;
+            }
+        }
 
         return true;
     }
@@ -1297,27 +1369,13 @@ void
 Canvas::paint_single_buffer(Geom::IntRect const &paint_rect, Geom::IntRect const &canvas_rect,
                             Cairo::RefPtr<Cairo::ImageSurface> &store)
 {
-    if (!store) {
-        std::cerr << "Canvas::paint_single_buffer: store not created!" << std::endl;
-        return;
-        // Maybe store not created! - todo: check if this can actually happen
-    }
-
     // Make sure the following code does not go outside of store's data
+    assert(store);
     assert(store->get_format() == Cairo::FORMAT_ARGB32);
     assert(d->_store_rect.contains(paint_rect));
 
-    /*auto cr = Cairo::Context::create(store);
-    cr->set_source_rgba((rand() % 255) / 255.0, (rand() % 255) / 255.0, (rand() % 255) / 255.0, 0.2);
-    cr->rectangle(paint_rect.left() - _store_rect.left(), paint_rect.top() - _store_rect.top(), paint_rect.width(), paint_rect.height());
-    cr->fill();*/
-
-    Inkscape::CanvasItemBuffer buf(paint_rect, d->_store_rect, d->_device_scale);
-
     // Create temporary surface that draws directly to store.
     store->flush();
-
-    // Create temporary surface that draws directly to store.
     unsigned char *data = store->get_data();
     int stride = store->get_stride();
 
@@ -1343,34 +1401,44 @@ Canvas::paint_single_buffer(Geom::IntRect const &paint_rect, Geom::IntRect const
 
     // Clear background
     cr->save();
-    cr->set_operator(Cairo::OPERATOR_SOURCE);
-    if (!d->solid_background) cr->set_source_rgba(0,0,0,0); else cr->set_source(_background);
+    if (d->solid_background) {
+        cr->set_source(_background);
+        cr->set_operator(Cairo::OPERATOR_SOURCE);
+    }
+    else {
+        cr->set_operator(Cairo::OPERATOR_CLEAR);
+    }
     cr->paint();
     cr->restore();
 
-    buf.cr = cr;
-
     // Render drawing on top of background.
     if (_canvas_item_root->is_visible()) {
+        Inkscape::CanvasItemBuffer buf(paint_rect, d->_store_rect, d->_device_scale);
+        buf.cr = cr;
         _canvas_item_root->render(&buf);
     }
 
+    #if ENABLE_SHOW_REDRAW
+    // Paint over newly drawn content with a translucent random colour
+    cr->set_source_rgba((rand() % 255) / 255.0, (rand() % 255) / 255.0, (rand() % 255) / 255.0, 0.2);
+    cr->set_operator(Cairo::OPERATOR_OVER);
+    cr->rectangle(0, 0, imgs->get_width(), imgs->get_height());
+    cr->fill();
+    #endif
+
     if (_cms_active) {
-        cmsHTRANSFORM transf = nullptr;
         Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-        bool fromDisplay = prefs->getBool( "/options/displayprofile/from_display");
-        if ( fromDisplay ) {
-            transf = Inkscape::CMSSystem::getDisplayPer(_cms_key);
-        } else {
-            transf = Inkscape::CMSSystem::getDisplayTransform();
-        }
+
+        auto transf = prefs->getBool("/options/displayprofile/from_display")
+                    ? Inkscape::CMSSystem::getDisplayPer(_cms_key)
+                    : Inkscape::CMSSystem::getDisplayTransform();
 
         if (transf) {
             imgs->flush();
             unsigned char *px = imgs->get_data();
             int stride = imgs->get_stride();
-            for (int i=0; i<paint_rect.height(); ++i) {
-                unsigned char *row = px + i*stride;
+            for (int i = 0; i < paint_rect.height(); ++i) {
+                unsigned char *row = px + i * stride;
                 Inkscape::CMSSystem::doTransform(transf, row, row, paint_rect.width());
             }
             imgs->mark_dirty();
@@ -1496,7 +1564,7 @@ Canvas::pick_current_item(GdkEvent *event)
                                 GDK_BUTTON5_MASK);
         if (!button_down) _left_grabbed_item = false;
     }
-        
+
     // Save the event in the canvas.  This is used to synthesize enter and
     // leave events in case the current item changes.  It is also used to
     // re-pick the current item if the current one gets deleted.  Also,
@@ -1626,7 +1694,7 @@ Canvas::pick_current_item(GdkEvent *event)
 bool
 Canvas::emit_event(GdkEvent *event)
 {
-    auto f = FuncProf();
+    IF_FRAMECHECK(framecheck_whole_function)
 
     if (event == d->ignore) return false;
 
