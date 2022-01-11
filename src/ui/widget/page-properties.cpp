@@ -72,6 +72,7 @@ public:
         GET(_landscape, "page-landscape"),
         GET(_scale_x, "scale-x"),
         GET(_doc_units, "user-units"),
+        GET(_unsupported_size, "unsupported"),
         GET(_nonuniform_scale, "nonuniform-scale"),
         GET(_viewbox_x, "viewbox-x"),
         GET(_viewbox_y, "viewbox-y"),
@@ -365,6 +366,9 @@ private:
         else if (element == Check::DisabledScale) {
             _scale_x.set_sensitive(!checked);
         }
+        else if (element == Check::UnsupportedSize) {
+            show_widget(_unsupported_size, checked);
+        }
         else {
             get_checkbutton(element).set_active(checked);
 
@@ -474,6 +478,7 @@ private:
     Gtk::RadioButton& _portrait;
     Gtk::RadioButton& _landscape;
     Gtk::SpinButton& _scale_x;
+    Gtk::Label& _unsupported_size;
     Gtk::Label& _nonuniform_scale;
     Gtk::Label& _doc_units;
     Gtk::SpinButton& _viewbox_x;

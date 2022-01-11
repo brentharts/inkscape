@@ -1483,12 +1483,12 @@ void DocumentProperties::update_widgets()
     auto pm = nv->getPageManager();
 
     _wr.setUpdating(true);
-    // set_sensitive(true);
 
     SPRoot *root = document->getRoot();
 
     double doc_w = root->width.value;
     Glib::ustring doc_w_unit = unit_table.getUnit(root->width.unit)->abbr;
+    bool percent = doc_w_unit == "%";
     if (doc_w_unit == "") {
         doc_w_unit = "px";
     } else if (doc_w_unit == "%" && root->viewBox_set) {
@@ -1497,14 +1497,17 @@ void DocumentProperties::update_widgets()
     }
     double doc_h = root->height.value;
     Glib::ustring doc_h_unit = unit_table.getUnit(root->height.unit)->abbr;
+    percent = percent || doc_h_unit == "%";
     if (doc_h_unit == "") {
         doc_h_unit = "px";
     } else if (doc_h_unit == "%" && root->viewBox_set) {
         doc_h_unit = "px";
         doc_h = root->viewBox.height();
     }
-
     using UI::Widget::PageProperties;
+    // dialog's behavior is not entirely correct when document sizes are expressed in '%', so put up a disclaimer
+    _page->set_check(PageProperties::Check::UnsupportedSize, percent);
+
     _page->set_dimension(PageProperties::Dimension::PageSize, doc_w, doc_h);
     _page->set_unit(PageProperties::Units::Document, doc_w_unit);
 
