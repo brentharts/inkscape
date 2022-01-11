@@ -177,7 +177,12 @@ void Persp3D::set(SPAttr key, gchar const *value) {
         }
     }
 
-    // FIXME: Is this the right place for resetting the draggers?
+    // FIXME: Is this the right place for resetting the draggers? PROBABLY NOT!
+    if (!SP_ACTIVE_DESKTOP) {
+        // Maybe in commandline mode.
+        return;
+    }
+
     Inkscape::UI::Tools::ToolBase *ec = SP_ACTIVE_DESKTOP->getEventContext();
     if (SP_IS_BOX3D_CONTEXT(ec)) {
         Inkscape::UI::Tools::Box3dTool *bc = SP_BOX3D_CONTEXT(ec);
