@@ -54,14 +54,15 @@ public:
 
     // Structure TODO: Remove desktop dependency.
     void set_desktop(SPDesktop *desktop) { _desktop = desktop; }
-    SPDesktop *get_desktop() { return _desktop; }
+    SPDesktop *get_desktop() const { return _desktop; }
 
     // Geometry
-    bool world_point_inside_canvas(Geom::Point const &world); // desktop-events.cpp
-    Geom::Point canvas_to_world(Geom::Point const &window);
-    Geom::IntRect get_area_world();
+    bool world_point_inside_canvas(Geom::Point const &world) const; // desktop-events.cpp
+    Geom::Point canvas_to_world(Geom::Point const &window) const;
+    Geom::IntRect get_area_world() const;
+
     void set_affine(Geom::Affine const &affine);
-    Geom::Affine get_affine() { return _affine; }
+    Geom::Affine get_affine() const { return _affine; }
 
     // Drawing
     void set_drawing(Inkscape::Drawing *drawing) { _drawing = drawing; }
@@ -74,40 +75,40 @@ public:
     void set_background_checkerboard(guint32 rgba = 0xC4C4C4FF);
 
     void set_drawing_disabled(bool disable) { _drawing_disabled = disable; } // Disable during path ops, etc.
-    bool is_dragging() { return _is_dragging; }                // selection-chemistry.cpp
+    bool is_dragging() const { return _is_dragging; }                // selection-chemistry.cpp
 
     //  Rendering modes
     void set_render_mode(Inkscape::RenderMode mode);
     void set_color_mode( Inkscape::ColorMode  mode);
     void set_split_mode( Inkscape::SplitMode  mode);
     void set_split_direction(Inkscape::SplitDirection dir);
-    Inkscape::RenderMode get_render_mode() { return _render_mode; }
-    Inkscape::ColorMode  get_color_mode()  { return _color_mode; }
-    Inkscape::SplitMode  get_split_mode()  { return _split_mode; }
+    Inkscape::RenderMode get_render_mode() const { return _render_mode; }
+    Inkscape::ColorMode  get_color_mode()  const { return _color_mode; }
+    Inkscape::SplitMode  get_split_mode()  const { return _split_mode; }
 
     void set_cms_key(std::string key) {
         _cms_key = key;
         _cms_active = !key.empty();
     }
-    std::string get_cms_key() { return _cms_key; }
+    std::string get_cms_key() const { return _cms_key; }
     void set_cms_active(bool active) { _cms_active = active; }
-    bool get_cms_active() { return _cms_active; }
+    bool get_cms_active() const { return _cms_active; }
 
-    Cairo::RefPtr<Cairo::ImageSurface> get_backing_store(); // Background rotation preview
-    Cairo::RefPtr<Cairo::Pattern>      get_background_pattern() { return _background; }
+    Cairo::RefPtr<Cairo::ImageSurface> get_backing_store() const; // Background rotation preview
+    Cairo::RefPtr<Cairo::Pattern>      get_background_pattern() const { return _background; }
 
     // For a GTK bug (see SelectedStyle::on_opacity_changed()).
     void forced_redraws_start(int count, bool reset = true);
     void forced_redraws_stop() { _forced_redraw_limit = -1; }
 
     // Canvas Items
-    CanvasItemGroup *get_canvas_item_root() { return _canvas_item_root; }
+    CanvasItemGroup *get_canvas_item_root() const { return _canvas_item_root; }
 
-    Inkscape::CanvasItem *get_current_canvas_item() { return _current_canvas_item; }
+    Inkscape::CanvasItem *get_current_canvas_item() const { return _current_canvas_item; }
     void                  set_current_canvas_item(Inkscape::CanvasItem *item) {
         _current_canvas_item = item;
     }
-    Inkscape::CanvasItem *get_grabbed_canvas_item() { return _grabbed_canvas_item; }
+    Inkscape::CanvasItem *get_grabbed_canvas_item() const { return _grabbed_canvas_item; }
     void                  set_grabbed_canvas_item(Inkscape::CanvasItem *item, Gdk::EventMask mask) {
         _grabbed_canvas_item = item;
         _grabbed_event_mask = mask;
@@ -132,7 +133,6 @@ protected:
     bool on_enter_notify_event(  GdkEventCrossing *crossing_event) override;
     bool on_leave_notify_event(  GdkEventCrossing *crossing_event) override;
     bool on_focus_in_event(      GdkEventFocus    *focus_event )   override;
-    bool on_focus_out_event(     GdkEventFocus    *focus_event )   override;
     bool on_key_press_event(     GdkEventKey      *key_event   )   override;
     bool on_key_release_event(   GdkEventKey      *key_event   )   override;
     bool on_motion_notify_event( GdkEventMotion   *motion_event)   override;
@@ -157,8 +157,7 @@ private:
     // In order they are called in painting.
     bool paint();
     bool paint_rect_internal(PaintRectSetup const &setup, Geom::IntRect const &this_rect);
-    void paint_single_buffer(Geom::IntRect const &paint_rect, Geom::IntRect const &canvas_rect,
-                             Cairo::RefPtr<Cairo::ImageSurface> &store);
+    void paint_single_buffer(Geom::IntRect const &paint_rect, Cairo::RefPtr<Cairo::ImageSurface> &store);
     void add_clippath(const Cairo::RefPtr<Cairo::Context>& cr);
     void set_cursor();
 
@@ -177,7 +176,6 @@ private:
     // Geometry
     int _x0 = 0, _y0 = 0;            ///< Coordinates of top-left pixel of canvas view within canvas.
     Geom::Affine _affine;            // Only used for canvas items at the moment.
-    bool _in_full_redraw = false;    // Hack used to lower idle priority for full redraws.
 
     // Event handling/item picking
     GdkEvent _pick_event;                 ///< Event used to find currently selected item.
