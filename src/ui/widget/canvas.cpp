@@ -905,11 +905,8 @@ Canvas::on_draw(const::Cairo::RefPtr<::Cairo::Context> &cr)
         cr->restore();
     }
     else {
-        // Todo: Cairo does not seem to allow antialiasing for clipping to be disabled. This is completely unwanted,
-        // but is killing performance, as well as resulting in line artifacts and allowing garbage data to bleed through,
-        // which we would otherwise be able to guarantee didn't happen.
-        // Related: https://stackoverflow.com/questions/57390954/why-is-clipping-considered-to-be-too-slow-with-cairo
-        // Solution: consider bypassing Cairo just for this final compositing step.
+        // Turn off anti-aliasing for huge performance gains. Only applies to this compositing step.
+        cr->set_antialias(Cairo::ANTIALIAS_NONE);
 
         // Blit background to complement of both clean regions, if solid (and therefore not already drawn).
         if (d->solid_background) {
