@@ -34,11 +34,12 @@
 #include "ui/tools/tool-base.h"      // Default cursor
 
 // Debugging switches
-#define ENABLE_FRAMECHECK 0
-#define ENABLE_LOGGING 0
-#define ENABLE_SLOW_REDRAW 1
+#define ENABLE_FRAMECHECK 1
+#define ENABLE_LOGGING 1
+#define ENABLE_OVERBISECTION 1
+#define ENABLE_SLOW_REDRAW 0
 #define ENABLE_SHOW_REDRAW 0
-#define ENABLE_SHOW_UNCLEAN 1
+#define ENABLE_SHOW_UNCLEAN 0
 
 #if ENABLE_FRAMECHECK
 #include "../../../../framecheck.h"
@@ -53,8 +54,11 @@
 #define IF_LOGGING(X)
 #endif
 
+#if ENABLE_OVERBISECTION
+#define OVERBISECTION_SIZE 400 // 30 // px
+#endif
+
 #if ENABLE_SLOW_REDRAW
-#define SLOW_REDRAW_SIZE 30 // px
 #define SLOW_REDRAW_TIME 50 // us
 #endif
 
@@ -119,10 +123,13 @@ namespace Inkscape {
 namespace UI {
 namespace Widget {
 
+static constexpr int RENDER_TIME_LIMIT = 1000; // Render time limit, in microseconds.
+static constexpr double MAX_AFFINE_DIFF = 1.0; // Threshold for redraw cancel and restart.
+
 struct PaintRectSetup {
-    gint64 start_time;
+    Geom::IntPoint mouse_loc;
     int max_pixels;
-    Geom::Point mouse_loc;
+    gint64 start_time;
     bool disable_timeouts;
 };
 
@@ -133,13 +140,19 @@ private:
     friend class Canvas;
     Canvas *q;
 
-    Cairo::RefPtr<Cairo::ImageSurface> _backing_store; ///< Canvas content.
-    Cairo::RefPtr<Cairo::ImageSurface> _outline_store; ///< Canvas outline content; only exists in split/x-ray mode.
-    Geom::IntRect _store_rect;                         ///< Rectangle of the store in world space.
-    Cairo::RefPtr<Cairo::Region> _clean_region;        ///< Subregion of store with up-to-date content.
-    int _device_scale = 1;                             ///< Scale for high DPI montiors. Probably should be double.
+    // Important global properties of all the stores. If these change, all the stores must be recreated.
+    int _device_scale = 1;
     bool _store_solid_background;
+
+    Geom::IntRect _store_rect;                         ///< Rectangle of the store in world space.
     Geom::Affine _store_affine;
+    Cairo::RefPtr<Cairo::ImageSurface> _backing_store; ///< Canvas content.
+    Cairo::RefPtr<Cairo::Region> _clean_region; ///< Subregion of backing store with up-to-date content.
+
+    Geom::IntRect _snapshot_rect;
+    Geom::Affine _snapshot_affine;
+    Cairo::RefPtr<Cairo::ImageSurface> _snapshot_store;
+    Cairo::RefPtr<Cairo::Region> _snapshot_clean_region;
 
     bool decoupled_mode = false;
 
@@ -212,7 +225,7 @@ void CanvasPrivate::empty_bucket()
 
         if (!finished)
         {
-            // UNACCEPTABLE HACK!!! BUT I HAVE NO CHOICE
+            // Re-fire the event at the window, and ignore it when it comes back here again
             ignore = event.get();
             q->get_toplevel()->event(event.get());
             ignore = nullptr;
@@ -257,7 +270,9 @@ Canvas::Canvas()
     _canvas_item_root->set_name("CanvasItemGroup:Root");
     _canvas_item_root->set_canvas(this);
 
+    #if ENABLE_SHOW_REDRAW
     srand(g_get_monotonic_time());
+    #endif
 
     d->q = this;
 }
@@ -304,14 +319,19 @@ Canvas::get_area_world() const
 }
 
 /**
- * Set the affine for the canvas and flag need for geometry update.
+ * Set the affine for the canvas.
  */
 void
 Canvas::set_affine(Geom::Affine const &affine)
 {
-    if (_affine != affine) {
-        _affine = affine;
+    if (_affine == affine) {
+        return;
     }
+
+    _affine = affine;
+
+    add_idle();
+    queue_draw();
 }
 
 /**
@@ -326,8 +346,8 @@ Canvas::redraw_all()
         return;
     }
     d->_clean_region = Cairo::Region::create(); // Empty region (i.e. everything is dirty).
-    IF_SHOW_UNCLEAN( queue_draw() );
     add_idle();
+    IF_SHOW_UNCLEAN( queue_draw() );
 }
 
 /**
@@ -359,8 +379,8 @@ Canvas::redraw_area(int x0, int y0, int x1, int y1)
 
     Cairo::RectangleInt crect = { x0, y0, x1-x0, y1-y0 };
     d->_clean_region->subtract(crect);
-    IF_SHOW_UNCLEAN( queue_draw() );
     add_idle();
+    IF_SHOW_UNCLEAN( queue_draw() );
 }
 
 void
@@ -392,8 +412,11 @@ Canvas::redraw_area(Geom::Rect& area)
 void
 Canvas::request_update()
 {
+    // Flag geometry as needing update.
     _need_update = true;
-    add_idle(); // Geometry changed, need to redraw.
+
+    // Trigger the idle process to perform the update.
+    add_idle();
 }
 
 /**
@@ -826,12 +849,11 @@ auto geom_act(Geom::Affine a, Geom::IntPoint p)
 }
 
 void
-fill_cairo_region(const Cairo::RefPtr<Cairo::Context> &cr, const Cairo::RefPtr<Cairo::Region> &reg)
+region_to_path(const Cairo::RefPtr<Cairo::Context> &cr, const Cairo::RefPtr<Cairo::Region> &reg)
 {
     for (int i = 0; i < reg->get_num_rectangles(); i++) {
         auto rect = reg->get_rectangle(i);
         cr->rectangle(rect.x, rect.y, rect.width, rect.height);
-        cr->fill();
     }
 }
 
@@ -859,10 +881,10 @@ Canvas::on_draw(const::Cairo::RefPtr<::Cairo::Context> &cr)
     // sp_canvas_item_recursive_print_tree(0, _root);
     // canvas_item_print_tree(_canvas_item_root);
 
-    assert(d->_backing_store/* && _outline_store*/);
+    assert(d->_backing_store);
     assert(_drawing);
 
-    // Blit background (e.g. checkerboard).
+    // Blit background if not solid. (If solid, it is baked into the stores.)
     if (!d->solid_background)
     {
         IF_FRAMECHECK( f = Prof("background"); )
@@ -883,12 +905,57 @@ Canvas::on_draw(const::Cairo::RefPtr<::Cairo::Context> &cr)
         cr->restore();
     }
     else {
-        // Draw transformed store
+        // Todo: Cairo does not seem to allow antialiasing for clipping to be disabled. This is completely unwanted,
+        // but is killing performance, as well as resulting in line artifacts and allowing garbage data to bleed through,
+        // which we would otherwise be able to guarantee didn't happen.
+        // Related: https://stackoverflow.com/questions/57390954/why-is-clipping-considered-to-be-too-slow-with-cairo
+        // Solution: consider bypassing Cairo just for this final compositing step.
+
+        // Blit background to complement of both clean regions, if solid (and therefore not already drawn).
+        if (d->solid_background) {
+            IF_FRAMECHECK( f = Prof("composite", 2); )
+            cr->save();
+            cr->set_fill_rule(Cairo::FILL_RULE_EVEN_ODD);
+            cr->rectangle(0, 0, get_allocation().get_width(), get_allocation().get_height());
+            cr->translate(-_x0, -_y0);
+            cr->transform(geom_to_cairo(_affine * d->_store_affine.inverse()));
+            region_to_path(cr, d->_clean_region);
+            cr->transform(geom_to_cairo(d->_store_affine * d->_snapshot_affine.inverse()));
+            region_to_path(cr, d->_snapshot_clean_region);
+            cr->clip();
+            cr->set_source(_background);
+            cr->set_operator(Cairo::OPERATOR_SOURCE);
+            Cairo::SurfacePattern(cr->get_source()->cobj()).set_filter(Cairo::FILTER_FAST);
+            cr->paint();
+            cr->restore();
+        }
+
+        // Draw transformed snapshot, clipped to its clean region and the complement of the backing store's clean region.
+        IF_FRAMECHECK( f = Prof("composite", 1); )
+        cr->save();
+        cr->set_fill_rule(Cairo::FILL_RULE_EVEN_ODD);
+        cr->rectangle(0, 0, get_allocation().get_width(), get_allocation().get_height());
+        cr->translate(-_x0, -_y0);
+        cr->transform(geom_to_cairo(_affine * d->_store_affine.inverse()));
+        region_to_path(cr, d->_clean_region);
+        cr->clip();
+        cr->transform(geom_to_cairo(d->_store_affine * d->_snapshot_affine.inverse()));
+        region_to_path(cr, d->_snapshot_clean_region);
+        cr->clip();
+        cr->set_source(d->_snapshot_store, d->_snapshot_rect.left(), d->_snapshot_rect.top());
+        cr->set_operator(d->solid_background ? Cairo::OPERATOR_SOURCE : Cairo::OPERATOR_OVER);
+        Cairo::SurfacePattern(cr->get_source()->cobj()).set_filter(Cairo::FILTER_FAST);
+        cr->paint();
+        cr->restore();
+
+        // Draw transformed store, clipped to clean region.
+        IF_FRAMECHECK( f = Prof("composite", 0); )
         cr->save();
         cr->translate(-_x0, -_y0);
         cr->transform(geom_to_cairo(_affine * d->_store_affine.inverse()));
-        cr->translate(d->_store_rect.left(), d->_store_rect.top());
-        cr->set_source(d->_backing_store, 0, 0);
+        region_to_path(cr, d->_clean_region);
+        cr->clip();
+        cr->set_source(d->_backing_store, d->_store_rect.left(), d->_store_rect.top());
         cr->set_operator(d->solid_background ? Cairo::OPERATOR_SOURCE : Cairo::OPERATOR_OVER);
         Cairo::SurfacePattern(cr->get_source()->cobj()).set_filter(Cairo::FILTER_FAST);
         cr->paint();
@@ -906,7 +973,8 @@ Canvas::on_draw(const::Cairo::RefPtr<::Cairo::Context> &cr)
         cr->transform(geom_to_cairo(_affine * d->_store_affine.inverse()));
     }
     cr->set_source_rgba(1, 0, 0, 0.2);
-    fill_cairo_region(cr, reg);
+    region_to_path(cr, reg);
+    cr->fill();
     cr->restore();
     #endif
 
@@ -916,124 +984,7 @@ Canvas::on_draw(const::Cairo::RefPtr<::Cairo::Context> &cr)
         d->pending_draw = false;
     }
 
-/*
-    // Draw overlay if required.
-    if (_drawing->outlineOverlay()) {
-
-        Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-        double outline_overlay_opacity = 1 - (prefs->getIntLimited("/options/rendering/outline-overlay-opacity", 50, 1, 100) / 100.0);
-
-        // Partially obscure drawing by painting semi-transparent white.
-        cr->set_source_rgb(255,255,255);
-        cr->paint_with_alpha(outline_overlay_opacity);
-
-        // Overlay outline
-        cr->set_source(_outline_store, 0, 0);
-        cr->paint();
-    }
-
-    // Draw split if required.
-    if (_split_mode != Inkscape::SplitMode::NORMAL) {
-
-        // Move split position to center if not in canvas.
-        auto const rect = Geom::Rect(0, 0, _width, _height);
-        if (!rect.contains(_split_position)) {
-            _split_position = rect.midpoint();
-        }
-
-        // Add clipping path and blit background.
-        cr->save();
-        cr->set_operator(Cairo::OPERATOR_SOURCE);
-        cr->set_source(_background);
-        add_clippath(cr);
-        cr->paint();
-        cr->restore();
-
-        // Add clipping path and blit outline store.
-        cr->save();
-        cr->set_source(_outline_store, 0, 0);
-        add_clippath(cr);
-        cr->paint();
-        cr->restore();
-    }
-
-    if (_split_mode == Inkscape::SplitMode::SPLIT) {
-
-        // Add dividing line.
-        cr->save();
-        cr->set_source_rgb(0, 0, 0);
-        cr->set_line_width(1);
-        if (_split_direction == Inkscape::SplitDirection::EAST ||
-            _split_direction == Inkscape::SplitDirection::WEST) {
-            cr->move_to((int)_split_position.x() + 0.5,                        0);
-            cr->line_to((int)_split_position.x() + 0.5, _allocation.get_height());
-            cr->stroke();
-        } else {
-            cr->move_to(                      0, (int)_split_position.y() + 0.5);
-            cr->line_to(_allocation.get_width(), (int)_split_position.y() + 0.5);
-            cr->stroke();
-        }
-        cr->restore();
-
-        // Add controller image.
-        double a = _hover_direction == Inkscape::SplitDirection::NONE ? 0.5 : 1.0;
-        cr->save();
-        cr->set_source_rgba(0.2, 0.2, 0.2, a);
-        cr->arc(_split_position.x(), _split_position.y(), 20 * _device_scale, 0, 2 * M_PI);
-        cr->fill();
-        cr->restore();
-
-        cr->save();
-        for (int i = 0; i < 4; ++i) {
-            // The four direction triangles.
-            cr->save();
-
-            // Position triangle.
-            cr->translate(_split_position.x(), _split_position.y());
-            cr->rotate((i+2)*M_PI/2.0);
-
-            // Draw triangle.
-            cr->move_to(-5 * _device_scale,  8 * _device_scale);
-            cr->line_to( 0,                 18 * _device_scale);
-            cr->line_to( 5 * _device_scale,  8 * _device_scale);
-            cr->close_path();
-
-            double b = (int)_hover_direction == (i+1) ? 0.9 : 0.7;
-            cr->set_source_rgba(b, b, b, a);
-            cr->fill();
-
-            cr->restore();
-        }
-        cr->restore();
-    }*/
-
-    // static int i = 0;
-    // ++i;
-    // std::string file = "on_draw_" + std::to_string(i) + ".png";
-    // _backing_store->write_to_png(file);
-/*
-    // This whole section is just to determine if we call add_idle!
-    auto dirty_region = Cairo::Region::create();
-
-    std::vector<Cairo::Rectangle> clip_rectangles;
-    cr->copy_clip_rectangle_list(clip_rectangles);
-    for (auto & rectangle : clip_rectangles) {
-        Geom::Rect dr = Geom::Rect::from_xywh(rectangle.x + _x0,
-                                              rectangle.y + _y0,
-                                              rectangle.width,
-                                              rectangle.height);
-        // "rectangle" is floating point, we must convert to integer. We round outward as it's
-        // better to have a larger dirty region to avoid artifacts.
-        Geom::IntRect ir = dr.roundOutwards();
-        Cairo::RectangleInt irect = { ir.left(), ir.top(), ir.width(), ir.height() };
-        dirty_region->do_union(irect);
-    }
-
-    dirty_region->subtract(_clean_region);
-
-    if (!dirty_region->empty()) {
-        add_idle();
-    }*/
+    // Todo: Add back X-ray view. (Should be easy.)
 
     return true;
 }
@@ -1078,261 +1029,333 @@ empty_int_rect_hack()
     return Geom::IntRect(interval, interval);
 }
 
+auto
+calc_affine_diff(const Geom::Affine &a, const Geom::Affine &b) {
+    auto c = a.inverse() * b;
+    return std::abs(c[0] - 1) + std::abs(c[1]) + std::abs(c[2]) + std::abs(c[3] - 1);
+}
+
+auto
+region_to_rects(const Cairo::RefPtr<Cairo::Region> &region)
+{
+    std::vector<Geom::IntRect> rects;
+    int nrects = region->get_num_rectangles();
+    rects.reserve(nrects);
+    for (int i = 0; i < nrects; i++) {
+        rects.emplace_back(cairo_to_geom(region->get_rectangle(i)));
+    }
+    return rects;
+}
+
 bool
 Canvas::on_idle()
 {
     IF_FRAMECHECK( auto f = FuncProf(); )
 
+    assert(_canvas_item_root);
+
     if (_in_destruction) {
         std::cerr << "Canvas::on_idle: Called after canvas destroyed!" << std::endl;
+        return false;
     }
 
-    // Quit idle process if not supposed to be drawing
+    // Quit idle process if not supposed to be drawing.
     if (!_drawing || _drawing_disabled) {
         return false;
     }
 
-    // Get the device scale
-    const auto device_scale = get_scale_factor();
-
-    // Handle transitions in and out of decoupled mode
-    if (!d->decoupled_mode) {
-        // Enter decoupled mode if the affine has changed from what was last drawn (assuming there is anything)
-        if (d->_backing_store && _affine != d->_store_affine) {
-            d->decoupled_mode = true;
+    const Geom::IntPoint pad(200, 200); // Todo: Tune.
+    auto recreate_store = [&, this] {
+        // Recreate the store at the current affine so that it covers the visible region.
+        d->_store_rect = Geom::IntRect::from_xywh( _x0, _y0, get_allocation().get_width(), get_allocation().get_height() );
+        d->_store_rect.expandBy(pad);
+        d->_store_affine = _affine;
+        int desired_width  = d->_store_rect.width()  * d->_device_scale;
+        int desired_height = d->_store_rect.height() * d->_device_scale;
+        if (!d->_backing_store || d->_backing_store->get_width() != desired_width || d->_backing_store->get_height() != desired_height) {
+            // Todo: Stop cairo unnecessarily pre-filling the store with transparency below if d->solid_background is true.
+            d->_backing_store = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, desired_width, desired_height);
         }
-    }
-    else { // if (d->decoupled_mode)
-        bool exit = false;
-
-        if (!d->_backing_store || d->_device_scale != device_scale || d->_store_solid_background != d->solid_background) {
-            // Exit decoupled mode if the store needs recreating
-            exit = true;
+        auto cr = Cairo::Context::create(d->_backing_store);
+        if (d->solid_background) {
+            cr->set_operator(Cairo::OPERATOR_SOURCE);
+            cr->set_source(_background);
         }
         else {
-            // Also exit if the store has completely gone off the screen
-            auto pl = Geom::Parallelogram(get_area_world());
-            pl *= d->_store_affine * _affine.inverse();
-            if (!pl.intersects(d->_store_rect)) {
-                exit = true;
+            cr->set_operator(Cairo::OPERATOR_CLEAR);
+        }
+        cr->paint();
+        d->_clean_region = Cairo::Region::create();
+        IF_SHOW_UNCLEAN( queue_draw() );
+    };
+
+    // Determine the rendering parameters have changed, and reset if so.
+    if (!d->_backing_store || d->_device_scale != get_scale_factor() || d->_store_solid_background != d->solid_background) {
+        d->_device_scale = get_scale_factor();
+        d->_store_solid_background = d->solid_background;
+        recreate_store();
+        d->decoupled_mode = false;
+        IF_LOGGING( std::cout << "Full reset" << std::endl; )
+    }
+
+    // Todo: Consider incrementally and pre-emptively performing this operation across several frames to avoid lag spikes.
+    auto shift_store = [&, this] {
+        // Recreate the store, but keep re-usable content from the old store.
+        auto store_rect = Geom::IntRect::from_xywh( _x0, _y0, get_allocation().get_width(), get_allocation().get_height() );
+        store_rect.expandBy(pad);
+        // Todo: Stop cairo unnecessarily pre-filling the store with transparency below if d->solid_background is true.
+        auto backing_store = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, store_rect.width() * d->_device_scale, store_rect.height() * d->_device_scale);
+
+        // Determine the geometry of the shift.
+        auto shift = store_rect.min() - d->_store_rect.min();
+        auto reuse_rect = store_rect & d->_store_rect;
+        assert(reuse_rect); // Should not be called if there is no overlap.
+        auto cr = Cairo::Context::create(backing_store);
+
+        // Paint background into region not covered by next operation.
+        if (d->solid_background) {
+            auto reg = Cairo::Region::create(geom_to_cairo(store_rect));
+            reg->subtract(geom_to_cairo(*reuse_rect));
+            reg->translate(-store_rect.left(), -store_rect.top());
+            cr->save();
+            if (d->solid_background) {
+                cr->set_operator(Cairo::OPERATOR_SOURCE);
+                cr->set_source(_background);
+            }
+            else {
+                cr->set_operator(Cairo::OPERATOR_CLEAR);
+            }
+            region_to_path(cr, reg);
+            cr->fill();
+            cr->restore();
+        }
+
+        // Copy re-usuable contents of old store into new store, shifted.
+        cr->save();
+        cr->rectangle(reuse_rect->left() - store_rect.left(), reuse_rect->top() - store_rect.top(), reuse_rect->width(), reuse_rect->height());
+        cr->clip();
+        cr->set_source(d->_backing_store, -shift.x(), -shift.y());
+        cr->set_operator(Cairo::OPERATOR_SOURCE);
+        cr->paint();
+        cr->restore();
+
+        // Set the result as the new backing store.
+        d->_store_rect = store_rect;
+        assert(d->_store_affine == _affine); // Should not be called if the affine has changed.
+        d->_backing_store = std::move(backing_store);
+        d->_clean_region->intersect(geom_to_cairo(d->_store_rect));
+        IF_SHOW_UNCLEAN( queue_draw() );
+    };
+
+    // Handle transitions and actions in response to viewport changes.
+    if (!d->decoupled_mode) {
+        // Enter decoupled mode if the affine has changed from what the backing store was drawn at.
+        if (_affine != d->_store_affine) {
+            // Copy the backing store to the snapshot, leaving it temporarily in an invalid state.
+            std::swap(d->_snapshot_store, d->_backing_store); // This will re-use the old snapshot store later if possible.
+            d->_snapshot_rect = d->_store_rect;
+            d->_snapshot_affine = d->_store_affine;
+            d->_snapshot_clean_region = d->_clean_region;
+
+            // Recreate the backing store, making it valid again.
+            recreate_store();
+
+            // Enter decoupled mode.
+            IF_LOGGING( std::cout << "Entering decoupled mode" << std::endl; )
+            d->decoupled_mode = true;
+
+            // Note: If redrawing is fast enough to finish during the frame, then going into decoupled mode, drawing, and leaving
+            // it again performs exactly the same rendering operations as if we had not gone into it at all. Also, no extra copies
+            // or blits are performed, and the drawing operations done on the screen are the same. Hence this feature comes at zero cost.
+        }
+        else {
+            // Get visible rectangle in canvas coordinates.
+            const auto visible = Geom::IntRect::from_xywh( _x0, _y0, get_allocation().get_width(), get_allocation().get_height() );
+            if (!d->_store_rect.intersects(visible)) {
+                // If the store has gone completely off-screen, recreate it.
+                recreate_store();
+                IF_LOGGING( std::cout << "Recreated store" << std::endl; )
+            }
+            else if (!d->_store_rect.contains(visible))
+            {
+                // If the store has gone partially off-screen, shift it.
+                shift_store();
+                IF_LOGGING( std::cout << "Shifted store" << std::endl; )
+            }
+            // After these operations, the store should now be fully on-screen.
+            assert(d->_store_rect.contains(visible));
+        }
+    }
+    else {
+        // Completely cancel the previous redraw and start again if the viewing parameters have changed too much.
+        auto pl = Geom::Parallelogram(get_area_world());
+        pl *= d->_store_affine * _affine.inverse();
+        if (!pl.intersects(d->_store_rect)) {
+            // Store has gone off the screen.
+            recreate_store();
+            IF_LOGGING( std::cout << "Restarting redraw (store off-screen)" << std::endl; )
+        }
+        else {
+            auto diff = calc_affine_diff(_affine, d->_store_affine);
+            if (diff > MAX_AFFINE_DIFF) {
+                // Affine has changed too much.
+                recreate_store();
+                IF_LOGGING( std::cout << "Restarting redraw (affine changed too much)" << std::endl; )
             }
         }
-
-        if (exit) {
-            d->decoupled_mode = false;
-
-            // Mark store as containing no valid pixels, hence needing recreation
-            d->_store_rect = empty_int_rect_hack();
-            d->_clean_region = Cairo::Region::create();
-        }
     }
 
-    // Ensure geometry is up to date
-    assert(_canvas_item_root);
-    auto affine = d->decoupled_mode ? d->_store_affine : _affine;
-    if (_need_update || d->geom_affine != affine) {
-        d->geom_affine = affine;
-        _canvas_item_root->update(d->geom_affine);
-        _need_update = false;
-    }
-
-    // Assert that _clean_region is a subregion of _store_rect
+    // Assert that _clean_region is a subregion of _store_rect.
+    #ifndef NDEBUG
     auto tmp = d->_clean_region->copy();
     tmp->subtract(geom_to_cairo(d->_store_rect));
     assert(tmp->empty());
+    #endif
 
-    if (!d->decoupled_mode) {
-
-        // Get window rectangle in canvas coordinates
-        const auto canvas_rect = Geom::IntRect::from_xywh( _x0, _y0, get_allocation().get_width(), get_allocation().get_height() );
-
-        // Ensure store contains canvas_rect
-        const auto pad = Geom::IntPoint(200, 200);
-
-        if (!d->_backing_store || d->_device_scale != device_scale || d->_store_solid_background != d->solid_background  || !d->_store_rect.intersects(canvas_rect))
-        {
-            // Recreate the store, using the same memory if possible
-            d->_store_rect = Geom::IntRect::from_xywh( _x0, _y0, canvas_rect.width(), canvas_rect.height() );
-            d->_store_rect.expandBy(pad);
-            d->_device_scale = device_scale;
-            d->_store_solid_background = d->solid_background;
-            d->_store_affine = _affine;
-            int desired_width = d->_store_rect.width() * d->_device_scale;
-            int desired_height = d->_store_rect.height() * d->_device_scale;
-            if (!d->_backing_store || d->_backing_store->get_width() != desired_width || d->_backing_store->get_height() != desired_height)
-                d->_backing_store = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, desired_width, desired_height);
-            if (d->solid_background) {
-                auto cr = Cairo::Context::create(d->_backing_store);
-                cr->set_source(_background);
-                cr->set_operator(Cairo::OPERATOR_SOURCE);
-                cr->paint();
-            }
-            d->_clean_region = Cairo::Region::create();
-            IF_SHOW_UNCLEAN( queue_draw() );
-
-            IF_LOGGING( std::cout << "Recreated store" << std::endl; )
-        }
-        else if (!d->_store_rect.contains(canvas_rect))
-        {
-            // Create new store, copy usable content across, set as new store
-            auto store_rect = Geom::IntRect::from_xywh( _x0, _y0, canvas_rect.width(), canvas_rect.height() );
-            store_rect.expandBy(pad);
-            auto backing_store = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, store_rect.width() * d->_device_scale, store_rect.height() * d->_device_scale);
-
-            auto shift = store_rect.min() - d->_store_rect.min();
-            auto reuse_rect = store_rect & d->_store_rect;
-            assert(reuse_rect);
-            auto cr = Cairo::Context::create(backing_store);
-
-            // Paint background where necessary
-            if (d->solid_background) {
-                auto reg = Cairo::Region::create(geom_to_cairo(store_rect));
-                reg->subtract(geom_to_cairo(*reuse_rect));
-                reg->translate(-store_rect.left(), -store_rect.top());
-                cr->save();
-                cr->set_source(_background);
-                cr->set_operator(Cairo::OPERATOR_SOURCE);
-                fill_cairo_region(cr, reg);
-                cr->restore();
-            }
-
-            // Copy usuable contents of store shifted
-            cr->save();
-            cr->rectangle(reuse_rect->left() - store_rect.left(), reuse_rect->top() - store_rect.top(), reuse_rect->width(), reuse_rect->height());
-            cr->clip();
-            cr->set_source(d->_backing_store, -shift.x(), -shift.y());
-            cr->set_operator(Cairo::OPERATOR_SOURCE);
-            cr->paint();
-            cr->restore();
-
-            d->_store_rect = store_rect;
-            d->_backing_store = std::move(backing_store);
-            d->_clean_region->intersect(geom_to_cairo(d->_store_rect));
-            IF_SHOW_UNCLEAN( queue_draw() );
-
-            IF_LOGGING( std::cout << "Shifted store" << std::endl; )
-        }
-
-        assert(d->_store_rect.contains(canvas_rect));
+    // Ensure the geometry is up-to-date and in the right place.
+    auto affine = d->decoupled_mode ? d->_store_affine : _affine;
+    if (_need_update || d->geom_affine != affine) {
+        _canvas_item_root->update(affine);
+        d->geom_affine = affine;
+        _need_update = false;
     }
 
-    // Get region that requires painting
-    Cairo::RefPtr<Cairo::Region> region;
-    if (!d->decoupled_mode) {
-        // Get the window rectangle transformed into canvas space again
-        const auto canvas_rect = Geom::IntRect::from_xywh( _x0, _y0, get_allocation().get_width(), get_allocation().get_height() );
+    // Todo: if redrawing is measured to be extremely heavy, we could consider deferring the start of redrawing until the viewing parameters have changed sufficiently much.
+    // There are only two main obstructions to implementing this feature. First, having to write timing code to measure whether redraw is heavy. Second, and more importantly,
+    // it can't be implemented without the Canvas being hooked up to a "transforming finished" event, say mouse release. As these are annoying and the benefit is minor, I'm
+    // not considering implementing this feature. But it would go here.
 
-        region = Cairo::Region::create(geom_to_cairo(canvas_rect));
-        assert(d->_store_rect.contains(canvas_rect)); // Painting region already guaranteed to lie within store
+    // Get the rectangle of store that is visible.
+    Geom::OptIntRect visible_rect;
+    if (!d->decoupled_mode) {
+        // By a previous assertion, this always lies within the store.
+        visible_rect = Geom::IntRect::from_xywh( _x0, _y0, get_allocation().get_width(), get_allocation().get_height() );
     }
     else {
-        // Get the window rectangle transformed into canvas space
-        auto pl = Geom::Parallelogram(Geom::IntRect(0, 0, get_allocation().get_width(), get_allocation().get_height()));
-        pl *= Geom::Translate(_x0, _y0);
+        // Get the window rectangle transformed into canvas space.
+        auto pl = Geom::Parallelogram(Geom::IntRect::from_xywh( _x0, _y0, get_allocation().get_width(), get_allocation().get_height() ));
         pl *= d->_store_affine * _affine.inverse();
 
-        // Get bounding box, round outwards
+        // Get its bounding box, rounded outwards.
         auto b = pl.bounds();
         auto bi = Geom::IntRect(b.min().floor(), b.max().ceil());
 
-        // Set as painting region
-        region = Cairo::Region::create(geom_to_cairo(bi));
+        // The visible rect is the intersection of this with the store
+        visible_rect = bi & d->_store_rect;
 
-        // Todo: In the future, consider coarsening pl into a region rather than taking its bounding box.
-        // This reduces the area to paint, but increases the number of rectangles, so is NOT necessarily an optimisation, and could be a pessimisation instead.
-
-        // Painting region MUST lie within store, so clip it if necessary
-        region->intersect(geom_to_cairo(d->_store_rect));
+        // Note: We could have used a smaller region containing pl consisting of many rectangles, rather than a single bounding box.
+        // However, while this uses less pixels it also uses more rectangles, so is NOT necessarily an optimisation and could backfire.
+        // For this reason, and for simplicity, we use the bounding rect.
     }
-    region->subtract(d->_clean_region);
+    // The visible rectangle must be a subrectangle of store.
+    assert(d->_store_rect.contains(visible_rect));
 
-    // Get mouse position in canvas space
+    // Get the region to paint, which is the visible rectangle minus the clean region (both subregions of store).
+    Cairo::RefPtr<Cairo::Region> paint_region;
+    if (visible_rect) {
+        paint_region = Cairo::Region::create(geom_to_cairo(*visible_rect));
+        paint_region->subtract(d->_clean_region);
+    }
+    else {
+        paint_region = Cairo::Region::create();
+    }
+
+    // Todo: The SHOW_UNCLEAN debug switch suggests that sometimes the clean region can become highly fragmented,
+    // ending up as many tiny rectangles. When this happens, it is a disaster for performance, because the render
+    // cost of a rectangle is not just proportional to its area; there is also a constant part.
+    // Consider fixing by implementing region compression/coarsening.
+
+    // Get the mouse position in screen space.
     Geom::IntPoint mouse_loc;
     if (auto window = get_window()) {
         int x;
         int y;
         Gdk::ModifierType mask;
         window->get_device_position(Gdk::Display::get_default()->get_default_seat()->get_pointer(), x, y, mask);
-        mouse_loc = {x, y};
+        mouse_loc = Geom::IntPoint(x, y);
     }
     else {
-        mouse_loc = {get_allocation().get_width() / 2, get_allocation().get_height() / 2};
+        mouse_loc = Geom::IntPoint(0, 0); // Doesn't particularly matter, just as long as it's initialised.
     }
 
+    // Map the mouse to canvas space.
     mouse_loc += Geom::IntPoint(_x0, _y0);
     if (d->decoupled_mode) {
         mouse_loc = geom_act(d->_store_affine * _affine.inverse(), mouse_loc);
     }
 
-    // Obtain rectangles list sorted by distance from mouse
-    std::vector<Geom::IntRect> rects;
-    rects.reserve(region->get_num_rectangles());
-    for (int i = 0; i < region->get_num_rectangles(); i++) {
-        rects.emplace_back(cairo_to_geom(region->get_rectangle(i)));
-    }
-    std::sort(rects.begin(), rects.end(), [&] (const Geom::IntRect &a, const Geom::IntRect &b) {return distSq(mouse_loc, a) < distSq(mouse_loc, b);});
+    // Todo: Consider further subdividing the region if the mouse lies on the edge of a big rectangle.
+    // Otherwise, the whole of the big rectangle will be rendered first, at the expense of points in other
+    // rectangles very near to the mouse.
 
-    // Set up painting info to pass down
+    // Obtain the list of rectangles to paint, sorted by distance from mouse.
+    auto paint_rects = region_to_rects(paint_region);
+    std::sort(paint_rects.begin(), paint_rects.end(), [&] (const Geom::IntRect &a, const Geom::IntRect &b) {
+        return distSq(mouse_loc, a) < distSq(mouse_loc, b);
+    });
+
+    // Set up painting info to pass down the stack.
     PaintRectSetup setup;
     setup.mouse_loc = mouse_loc;
-
-    auto prefs = Inkscape::Preferences::get();
-    auto tile_multiplier = prefs->getIntLimited("/options/rendering/tile-multiplier", 16, 1, 512);
     if (_render_mode != Inkscape::RenderMode::OUTLINE) {
         // Can't be too small or large gradient will be rerendered too many times!
+        auto prefs = Inkscape::Preferences::get();
+        auto tile_multiplier = prefs->getIntLimited("/options/rendering/tile-multiplier", 16, 1, 512);
         setup.max_pixels = 65536 * tile_multiplier;
     } else {
         // Paths only. 1M is catched buffer and we need four channels.
         setup.max_pixels = 262144;
     }
-
-    // Begin painting
     setup.start_time = g_get_monotonic_time();
-    setup.disable_timeouts = _forced_redraw_limit != -1 && _forced_redraw_count >= _forced_redraw_limit;
-    setup.disable_timeouts = false; // TEMP HACK: I WANT TO INVESTIGATE BEHAVIOUR WITHOUT THIS INTERFERING
+    //setup.disable_timeouts = _forced_redraw_limit != -1 && _forced_redraw_count >= _forced_redraw_limit; // Enable a forced redraw if asked.
+    // Todo: Forced redraws are temporarily disabled. They are no longer helpful in all the situations they used to be.
+    // Need to go through all places where forced redraw is requested, and check whether it is helpful or harmful.
+    setup.disable_timeouts = false;
 
-    for (const auto &rect : rects) {
-        //auto area = rect & canvas_rect; // This is strictly not necessary. I am disabling it for now, and will probably remove it completely in a little while.
-
-        /*if (!area || area->hasZeroArea()) { // The same probably goes for this; though it would be worth a check.
+    // Paint the rectangles.
+    for (const auto &rect : paint_rects) {
+        if (rect.hasZeroArea()) {
+            // Todo: I'm not sure if these can get through or not. If not, remove this check. This ia a question about cairo.
             continue;
-        }*/
-
+        }
         if (!paint_rect_internal(setup, rect)) {
-            // Timed out. Temporarily return to idle loop, and come back here if still idle.
-            IF_LOGGING( std::cout << "Timed out: " << g_get_monotonic_time() - setup.start_time << " us \n"; )
+            // Timed out. Temporarily return to GTK main loop, and come back here when next idle.
+            // Todo: Logging reveals that Inkscape often underestimates render times, and can sometimes time out quite badly,
+            // leading to missed frames. Consider fixing the time estimator, possibly based on run-time feedback.
+            //IF_LOGGING( std::cout << "Timed out: " << g_get_monotonic_time() - setup.start_time << " us" << std::endl; )
             IF_FRAMECHECK( f.subtype = 1; )
             _forced_redraw_count++;
             return true;
         }
     }
 
-    // Check if suppressed a timeout, and adjust counter if so
-    if (setup.disable_timeouts)
-    {
+    // Check if suppressed a timeout.
+    if (setup.disable_timeouts) {
         auto now = g_get_monotonic_time();
         auto elapsed = now - setup.start_time;
-        if (elapsed > 1000) {
-            // Timed out
-            IF_LOGGING( std::cout << "Ignored timeout: " << g_get_monotonic_time() - setup.start_time << " us \n"; )
+        if (elapsed > RENDER_TIME_LIMIT) {
+            // Timed out. Reset counter. It will count up again on future timeouts, eventually triggering another forced redraw.
             _forced_redraw_count = 0;
-
+            IF_LOGGING( std::cout << "Ignored timeout: " << g_get_monotonic_time() - setup.start_time << " us" << std::endl; )
             IF_FRAMECHECK( f.subtype = 2; )
             return false;
         }
     }
 
-    // Finished drawing - see if we need to exit decoupled mode and do a final redraw
+    // Finished drawing. If in decoupled mode, see if we need to do a final redraw at the correct affine.
     if (d->decoupled_mode) {
-        // Todo: save the current store as a snapshot store to be rendered to back
-        // do this by swapping the store and the snapshot
-
-        // BTW this is not the right way to do this, and leads to frequent crashes. but it demos the concept.
-        /*d->_backing_store.clear();
+        // Exit decoupled mode.
+        IF_LOGGING( std::cout << "Finished drawing - exiting decoupled mode" << std::endl; )
         d->decoupled_mode = false;
-        return true;*/
+
+        // If the affine of the store is not up-to-date with the requested affine, continue the idle process.
+        if (d->_store_affine != _affine) {
+            IF_LOGGING( std::cout << "Scheduling final redraw" << std::endl; )
+            return true;
+        }
     }
 
+    // All done, quit the idle process.
     IF_FRAMECHECK( f.subtype = 3; )
     return false;
 }
@@ -1353,9 +1376,9 @@ Canvas::paint_rect_internal(PaintRectSetup const &setup, Geom::IntRect const &th
         return true;
     }
 
-    #if ENABLE_SLOW_REDRAW
+    #if ENABLE_OVERBISECTION
     // Aggressively subdivide into many small rectangles
-    if (bw > bh || bw > SLOW_REDRAW_SIZE) {
+    if (bw > bh || bw > OVERBISECTION_SIZE) {
         int mid = this_rect[Geom::X].middle();
 
         Geom::IntRect lo, hi;
@@ -1369,7 +1392,7 @@ Canvas::paint_rect_internal(PaintRectSetup const &setup, Geom::IntRect const &th
             return paint_rect_internal(setup, hi)
                 && paint_rect_internal(setup, lo);
         }
-    } else if (bh > bw && bh > SLOW_REDRAW_SIZE) {
+    } else if (bh > bw && bh > OVERBISECTION_SIZE) {
         int mid = this_rect[Geom::Y].middle();
 
         Geom::IntRect lo, hi;
@@ -1384,7 +1407,7 @@ Canvas::paint_rect_internal(PaintRectSetup const &setup, Geom::IntRect const &th
                 && paint_rect_internal(setup, lo);
         }
     }
-    #endif // ENABLE_SLOW_REDRAW
+    #endif // ENABLE_OVERBISECTION
 
     if (bw * bh < setup.max_pixels) {
         // Rectangle is small enough
@@ -1441,7 +1464,7 @@ Canvas::paint_rect_internal(PaintRectSetup const &setup, Geom::IntRect const &th
         if (!setup.disable_timeouts) {
             auto now = g_get_monotonic_time();
             auto elapsed = now - setup.start_time;
-            if (elapsed > 1000) {
+            if (elapsed > RENDER_TIME_LIMIT) {
                 return false;
             }
         }
@@ -1483,7 +1506,7 @@ Canvas::paint_rect_internal(PaintRectSetup const &setup, Geom::IntRect const &th
     } else {
         int mid = this_rect[Geom::Y].middle();
 
-        lo = Geom::IntRect(this_rect.left(), this_rect.top(), this_rect.right(), mid                );
+        lo = Geom::IntRect(this_rect.left(), this_rect.top(), this_rect.right(), mid               );
         hi = Geom::IntRect(this_rect.left(), mid,             this_rect.right(), this_rect.bottom());
 
         if (setup.mouse_loc[Geom::Y] < mid) {
