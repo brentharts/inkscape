@@ -160,6 +160,8 @@ private:
     GdkEvent *ignore = nullptr;
 
     Geom::Affine geom_affine;
+
+    void queue_draw_area(Geom::IntRect &rect);
 };
 
 void CanvasPrivate::schedule_bucket_emptier()
@@ -216,6 +218,11 @@ void CanvasPrivate::empty_bucket()
             ignore = nullptr;
         }
     }
+}
+
+void CanvasPrivate::queue_draw_area(Geom::IntRect &rect)
+{
+    q->queue_draw_area(rect.left(), rect.top(), rect.width(), rect.height());
 }
 
 Canvas::Canvas()
@@ -1063,6 +1070,14 @@ distSq(const Geom::IntPoint pt, const Geom::IntRect &rect)
     return v.x() * v.x() + v.y() * v.y();
 }
 
+auto
+empty_int_rect_hack()
+{
+    auto min = std::numeric_limits<Geom::IntCoord>::min();
+    auto interval = Geom::GenericInterval<Geom::IntCoord>(min, min);
+    return Geom::IntRect(interval, interval);
+}
+
 bool
 Canvas::on_idle()
 {
@@ -1087,12 +1102,28 @@ Canvas::on_idle()
             d->decoupled_mode = true;
         }
     }
-    else {
-        // Exit decoupled mode if the store needs recreating
-        // todo: It would be nice if this also happened if none of the store was visible on the screen anymore.
-        // todo: Geom::Parallogram lets us check this
+    else { // if (d->decoupled_mode)
+        bool exit = false;
+
         if (!d->_backing_store || d->_device_scale != device_scale || d->_store_solid_background != d->solid_background) {
+            // Exit decoupled mode if the store needs recreating
+            exit = true;
+        }
+        else {
+            // Also exit if the store has completely gone off the screen
+            auto pl = Geom::Parallelogram(get_area_world());
+            pl *= d->_store_affine * _affine.inverse();
+            if (!pl.intersects(d->_store_rect)) {
+                exit = true;
+            }
+        }
+
+        if (exit) {
             d->decoupled_mode = false;
+
+            // Mark store as containing no valid pixels, hence needing recreation
+            d->_store_rect = empty_int_rect_hack();
+            d->_clean_region = Cairo::Region::create();
         }
     }
 
@@ -1192,18 +1223,27 @@ Canvas::on_idle()
         const auto canvas_rect = Geom::IntRect::from_xywh( _x0, _y0, get_allocation().get_width(), get_allocation().get_height() );
 
         region = Cairo::Region::create(geom_to_cairo(canvas_rect));
+        assert(d->_store_rect.contains(canvas_rect)); // Painting region already guaranteed to lie within store
     }
     else {
-        // We get to choose how large this region should be. It could even be infinite, and things would still work. But it is desirable to make it as small as possible
-        // while still containing the window rectangle transformed into canvas space.
+        // Get the window rectangle transformed into canvas space
+        auto pl = Geom::Parallelogram(Geom::IntRect(0, 0, get_allocation().get_width(), get_allocation().get_height()));
+        pl *= Geom::Translate(_x0, _y0);
+        pl *= d->_store_affine * _affine.inverse();
 
-        // Currently, as a placeholder, I just set it to be something fixed and very large:
-        region = Cairo::Region::create(Cairo::RectangleInt { -100000, -100000, 200000, 200000 } );
+        // Get bounding box, round outwards
+        auto b = pl.bounds();
+        auto bi = Geom::IntRect(b.min().floor(), b.max().ceil());
 
-        // In the future we could use the bounding box of the transformed window, or a coarsened version of the actual rectangle.
-        // But both of these are far too fiddly for me to attempt in this initial pass.
+        // Set as painting region
+        region = Cairo::Region::create(geom_to_cairo(bi));
+
+        // Todo: In the future, consider coarsening pl into a region rather than taking its bounding box.
+        // This reduces the area to paint, but increases the number of rectangles, so is NOT necessarily an optimisation, and could be a pessimisation instead.
+
+        // Painting region MUST lie within store, so clip it if necessary
+        region->intersect(geom_to_cairo(d->_store_rect));
     }
-    region->intersect(geom_to_cairo(d->_store_rect)); // for sanity
     region->subtract(d->_clean_region);
 
     // Get mouse position in canvas space
@@ -1370,15 +1410,33 @@ Canvas::paint_rect_internal(PaintRectSetup const &setup, Geom::IntRect const &th
         d->_clean_region->do_union( crect );
 
         if (!d->decoupled_mode) {
-            queue_draw_area(this_rect.left() - _x0, this_rect.top() - _y0, this_rect.width(), this_rect.height());
+            // Get rectangle needing repaint
+            auto repaint_rect = this_rect - Geom::IntPoint(_x0, _y0);
+
+            // Assert that a repaint actually occurs (guaranteed because we are only asked to paint fully on-screen rectangles)
+            auto screen_rect = Geom::IntRect(0, 0, get_allocation().get_width(), get_allocation().get_height());
+            assert(repaint_rect & screen_rect);
+
+            // Schedule repaint
+            d->queue_draw_area(repaint_rect);
+            d->pending_draw = true;
         }
         else {
-            // In decoupled mode, we have to calculate the bounding box of this_rect transformed from canvas space to screen space, rounded outwards, and invalidate that.
-            // Because this is tricky, and not really necessary in a first pass, here I invalidate the whole window. It should not lead to any performance impact on modern compositors modulo gtk/gdk inefficiencies.
-            queue_draw();
-        }
+            // Get rectangle needing repaint (transform into screen space, take bounding box, round outwards)
+            auto pl = Geom::Parallelogram(this_rect);
+            pl *= _affine * d->_store_affine.inverse();
+            pl *= Geom::Translate(-_x0, -_y0);
+            auto b = pl.bounds();
+            auto repaint_rect = Geom::IntRect(b.min().floor(), b.max().ceil());
 
-        d->pending_draw = true;
+            // Check if repaint is necessary - some rectangles could be entirely off-screen
+            auto screen_rect = Geom::IntRect(0, 0, get_allocation().get_width(), get_allocation().get_height());
+            if (repaint_rect & screen_rect) {
+                // Schedule repaint
+                d->queue_draw_area(repaint_rect);
+                d->pending_draw = true;
+            }
+        }
 
         if (!setup.disable_timeouts) {
             auto now = g_get_monotonic_time();
