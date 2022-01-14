@@ -776,7 +776,7 @@ SPDesktop::zoom_selection()
 }
 
 Geom::Point SPDesktop::current_center() const {
-    return Geom::Point(canvas->get_area_world().midpoint()) * _current_affine.w2d();
+    return Geom::Rect(canvas->get_area_world()).midpoint() * _current_affine.w2d();
 }
 
 /**

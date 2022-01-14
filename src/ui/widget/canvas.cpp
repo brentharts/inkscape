@@ -37,7 +37,7 @@
 // Debugging switches
 #define ENABLE_FRAMECHECK 0
 #define ENABLE_LOGGING 0
-#define ENABLE_OVERBISECTION 1 // Current using overbisection at size 400 to work around render time overestimation bug. Without this, expect huge frame drops.
+#define ENABLE_OVERBISECTION 1 // Currently using overbisection at size 400 to work around the render time overestimation bug. Without this, expect huge frame drops.
 #define ENABLE_SLOW_REDRAW 0
 #define ENABLE_SHOW_REDRAW 0
 #define ENABLE_SHOW_UNCLEAN 0
@@ -132,10 +132,11 @@ struct PaintRectSetup {
 
 class CanvasPrivate
 {
-private:
+public:
 
     friend class Canvas;
     Canvas *q;
+    CanvasPrivate(Canvas *q) : q(q) {}
 
     // Important global properties of all the stores. If these change, all the stores must be recreated.
     int _device_scale = 1;
@@ -178,13 +179,11 @@ void CanvasPrivate::schedule_bucket_emptier()
 {
     if (bucket_emptier.connected()) return;
 
-    bucket_emptier = Glib::signal_idle().connect([this]
-    {
+    bucket_emptier = Glib::signal_idle().connect([this] {
         bucket_emptier.disconnect();
         empty_bucket();
         return false;
-    }
-    , G_PRIORITY_DEFAULT_IDLE - 5); // before lowpri_idle
+    }, G_PRIORITY_DEFAULT_IDLE - 5); // before lowpri_idle
 }
 
 void CanvasPrivate::empty_bucket()
@@ -193,8 +192,7 @@ void CanvasPrivate::empty_bucket()
 
     auto bucket2 = std::move(bucket);
 
-    for (auto &event : bucket2)
-    {
+    for (auto &event : bucket2) {
         // Block undo/redo while anything is dragged.
         if (event->type == GDK_BUTTON_PRESS && event->button.button == 1) {
             q->_is_dragging = true;
@@ -205,7 +203,7 @@ void CanvasPrivate::empty_bucket()
         bool finished = false;
 
         if (q->_current_canvas_item) {
-            // Choose where to send event
+            // Choose where to send event.
             CanvasItem *item = q->_current_canvas_item;
 
             if (q->_grabbed_canvas_item && !q->_current_canvas_item->is_descendant_of(q->_grabbed_canvas_item)) {
@@ -220,9 +218,8 @@ void CanvasPrivate::empty_bucket()
             }
         }
 
-        if (!finished)
-        {
-            // Re-fire the event at the window, and ignore it when it comes back here again
+        if (!finished) {
+            // Re-fire the event at the window, and ignore it when it comes back here again.
             ignore = event.get();
             q->get_toplevel()->event(event.get());
             ignore = nullptr;
@@ -236,7 +233,7 @@ void CanvasPrivate::queue_draw_area(Geom::IntRect &rect)
 }
 
 Canvas::Canvas()
-    : _size_observer(this, "/options/grabsize/value"), d(std::make_unique<CanvasPrivate>())
+    : _size_observer(this, "/options/grabsize/value"), d(std::make_unique<CanvasPrivate>(this))
 {
     set_name("InkscapeCanvas");
 
@@ -270,8 +267,6 @@ Canvas::Canvas()
     #if ENABLE_SHOW_REDRAW
     srand(g_get_monotonic_time());
     #endif
-
-    d->q = this;
 }
 
 Canvas::~Canvas()
@@ -882,8 +877,7 @@ Canvas::on_draw(const::Cairo::RefPtr<::Cairo::Context> &cr)
     assert(_drawing);
 
     // Blit background if not solid. (If solid, it is baked into the stores.)
-    if (!d->solid_background)
-    {
+    if (!d->solid_background) {
         IF_FRAMECHECK( f = Prof("background"); )
         cr->save();
         cr->set_operator(Cairo::OPERATOR_SOURCE);
@@ -977,13 +971,14 @@ Canvas::on_draw(const::Cairo::RefPtr<::Cairo::Context> &cr)
     cr->restore();
     #endif
 
-    if (d->pending_draw)
-    {
-        if (!d->bucket.empty()) d->schedule_bucket_emptier();
+    if (d->pending_draw) {
+        if (!d->bucket.empty()) {
+            d->schedule_bucket_emptier();
+        }
         d->pending_draw = false;
     }
 
-    // Todo: Add back X-ray view. (Should be easy.)
+    // Todo: Add back X-ray view.
 
     return true;
 }
@@ -1789,8 +1784,8 @@ Canvas::pick_current_item(GdkEvent *event)
     // Ensure geometry is correct.
     auto affine = d->decoupled_mode ? d->_store_affine : _affine;
     if (_need_update || d->geom_affine != affine) {
+        _canvas_item_root->update(affine);
         d->geom_affine = affine;
-        _canvas_item_root->update(d->geom_affine);
         _need_update = false;
     }
 
@@ -1940,7 +1935,9 @@ Canvas::emit_event(GdkEvent *event)
 {
     IF_FRAMECHECK(framecheck_whole_function)
 
-    if (event == d->ignore) return false;
+    if (event == d->ignore) {
+        return false;
+    }
 
     Gdk::EventMask mask = (Gdk::EventMask)0;
     if (_grabbed_canvas_item) {
@@ -2003,7 +2000,12 @@ Canvas::emit_event(GdkEvent *event)
     }
 
     d->bucket.emplace_back(event_copy);
-    if (!d->pending_draw) add_tick_callback([this] (const Glib::RefPtr<Gdk::FrameClock>&) {d->schedule_bucket_emptier(); return false;});
+    if (!d->pending_draw) {
+        add_tick_callback([this] (const Glib::RefPtr<Gdk::FrameClock>&) {
+            d->schedule_bucket_emptier();
+            return false;
+        });
+    }
 
     return true;
 }

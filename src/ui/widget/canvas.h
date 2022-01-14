@@ -155,9 +155,9 @@ private:
     // Painting
 
     // In order they are called in painting.
-    bool paint();
     bool paint_rect_internal(PaintRectSetup const &setup, Geom::IntRect const &this_rect);
     void paint_single_buffer(Geom::IntRect const &paint_rect, Cairo::RefPtr<Cairo::ImageSurface> &store);
+
     void add_clippath(const Cairo::RefPtr<Cairo::Context>& cr);
     void set_cursor();
 
@@ -175,7 +175,7 @@ private:
 
     // Geometry
     int _x0 = 0, _y0 = 0;            ///< Coordinates of top-left pixel of canvas view within canvas.
-    Geom::Affine _affine;            // Only used for canvas items at the moment.
+    Geom::Affine _affine;            ///< The affine that we have been requested to draw at.
 
     // Event handling/item picking
     GdkEvent _pick_event;                 ///< Event used to find currently selected item.
