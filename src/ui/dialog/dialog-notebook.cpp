@@ -28,10 +28,13 @@
 #include "ui/dialog/dialog-multipaned.h"
 #include "ui/dialog/dialog-window.h"
 #include "ui/icon-loader.h"
+#include "ui/util.h"
 
 namespace Inkscape {
 namespace UI {
 namespace Dialog {
+
+std::list<DialogNotebook *> DialogNotebook::_instances;
 
 /**
  * DialogNotebook constructor.
@@ -62,7 +65,6 @@ DialogNotebook::DialogNotebook(DialogContainer *container)
     _labels_off = labelstautus == PREFS_NOTEBOOK_LABELS_OFF;
 
     // ============= Notebook menu ==============
-    _menu.set_title("NotebookOptions");
     _notebook.set_name("DockedDialogNotebook");
     _notebook.set_show_border(false);
     _notebook.set_group_name("InkscapeDialogGroup");
@@ -188,6 +190,7 @@ DialogNotebook::DialogNotebook(DialogContainer *container)
 
     // =============== Signals ==================
     _conn.emplace_back(signal_size_allocate().connect(sigc::mem_fun(*this, &DialogNotebook::on_size_allocate_scroll)));
+    _conn.emplace_back(_notebook.signal_drag_begin().connect(sigc::mem_fun(*this, &DialogNotebook::on_drag_begin)));
     _conn.emplace_back(_notebook.signal_drag_end().connect(sigc::mem_fun(*this, &DialogNotebook::on_drag_end)));
     _conn.emplace_back(_notebook.signal_page_added().connect(sigc::mem_fun(*this, &DialogNotebook::on_page_added)));
     _conn.emplace_back(_notebook.signal_page_removed().connect(sigc::mem_fun(*this, &DialogNotebook::on_page_removed)));
@@ -197,10 +200,17 @@ DialogNotebook::DialogNotebook(DialogContainer *container)
     _reload_context = true;
     add(_notebook);
     show_all();
+
+    _instances.push_back(this);
 }
 
 DialogNotebook::~DialogNotebook()
 {
+    // disconnect signals first, so no handlers are invoked when removing pages
+    for_each(_conn.begin(), _conn.end(), [&](auto c) { c.disconnect(); });
+    for_each(_connmenu.begin(), _connmenu.end(), [&](auto c) { c.disconnect(); });
+    for_each(_tab_connections.begin(), _tab_connections.end(), [&](auto it) { it.second.disconnect(); });
+
     // Unlink and remove pages
     for (int i = _notebook.get_n_pages(); i >= 0; --i) {
         DialogBase *dialog = dynamic_cast<DialogBase *>(_notebook.get_nth_page(i));
@@ -208,12 +218,23 @@ DialogNotebook::~DialogNotebook()
         _notebook.remove_page(i);
     }
 
-    for_each(_conn.begin(), _conn.end(), [&](auto c) { c.disconnect(); });
-    for_each(_connmenu.begin(), _connmenu.end(), [&](auto c) { c.disconnect(); });
-    for_each(_tab_connections.begin(), _tab_connections.end(), [&](auto it) { it.second.disconnect(); });
     _conn.clear();
     _connmenu.clear();
     _tab_connections.clear();
+
+    _instances.remove(this);
+}
+
+void DialogNotebook::add_highlight_header()
+{
+    const auto &style = _notebook.get_style_context();
+    style->add_class("nb-highlight");
+}
+
+void DialogNotebook::remove_highlight_header()
+{
+    const auto &style = _notebook.get_style_context();
+    style->remove_class("nb-highlight");
 }
 
 /**
@@ -364,6 +385,12 @@ DialogWindow* DialogNotebook::pop_tab_callback()
  */
 void DialogNotebook::on_drag_end(const Glib::RefPtr<Gdk::DragContext> context)
 {
+    // Remove dropzone highlights
+    MyDropZone::remove_highlight_instances();
+    for (auto instance : _instances) {
+        instance->remove_highlight_header();
+    }
+
     bool set_floating = !context->get_dest_window();
     if (!set_floating && context->get_dest_window()->get_window_type() == Gdk::WINDOW_FOREIGN) {
         set_floating = true;
@@ -404,6 +431,14 @@ void DialogNotebook::on_drag_end(const Glib::RefPtr<Gdk::DragContext> context)
     // Update tab labels by comparing the sum of their widths to the allocation
     Gtk::Allocation allocation = get_allocation();
     on_size_allocate_scroll(allocation);
+}
+
+void DialogNotebook::on_drag_begin(const Glib::RefPtr<Gdk::DragContext> context)
+{
+    MyDropZone::add_highlight_instances();
+    for (auto instance : _instances) {
+        instance->add_highlight_header();
+    }
 }
 
 /**
@@ -712,7 +747,7 @@ void DialogNotebook::toggle_tab_labels_callback(bool show)
     }
     _labels_set_off = _labels_off;
     if (_prev_alloc_width && prev_tabstatus != tabstatus ) {
-        _notebook.resize_children();
+        resize_widget_children(&_notebook);
     }
     if (show && _single_tab_width) {
         _notebook.set_scrollable(true);

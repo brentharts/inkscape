@@ -61,6 +61,7 @@
 #include "ui/interface.h"
 #include "ui/shortcuts.h"
 #include "ui/modifiers.h"
+#include "ui/util.h"
 #include "ui/widget/style-swatch.h"
 #include "ui/widget/canvas.h"
 #include "ui/themes.h"
@@ -90,6 +91,8 @@ using Inkscape::UI::Widget::PrefRadioButtons;
 using Inkscape::UI::Widget::PrefSpinButton;
 using Inkscape::UI::Widget::StyleSwatch;
 using Inkscape::CMSSystem;
+using Inkscape::IO::Resource::get_filename;
+using Inkscape::IO::Resource::UIS;
 
 #define REMOVE_SPACES(x)                                                                                               \
     x.erase(0, x.find_first_not_of(' '));                                                                              \
@@ -440,7 +443,9 @@ void InkscapePreferences::on_search_changed()
         _page_list.set_cursor(Gtk::TreePath(iter));
     } else if (_num_results == 0 && key != "") {
         _page_list.set_has_tooltip(false);
-        // TODO:Show all contents
+        _show_all = true;
+        _page_list_model_filter->refilter();
+        _show_all = false;
         show_not_found();
     } else {
         _page_list.expand_all();
@@ -646,6 +651,8 @@ void InkscapePreferences::highlight_results(Glib::ustring const &key, Gtk::TreeM
  */
 bool InkscapePreferences::recursive_filter(Glib::ustring &key, Gtk::TreeModel::const_iterator const &iter)
 {
+    if(_show_all)
+        return true;
     auto row_label = iter->get_value(_page_list_columns._col_name).lowercase();
     if (key == "") {
         return true;
@@ -1141,7 +1148,8 @@ void InkscapePreferences::resetIconsColors(bool themechange)
         // This is a hack to fix a proble style is not updated enough fast on
         // change from dark to bright themes
         if (themechange) {
-            base_color = _symbolic_base_color.get_style_context()->get_background_color();
+            auto sc = _symbolic_base_color.get_style_context();
+            base_color = get_background_color(sc);
         }
         SPColor base_color_sp(base_color.get_red(), base_color.get_green(), base_color.get_blue());
         //we copy highlight to not use
@@ -1682,7 +1690,7 @@ void InkscapePreferences::initPageUI()
         auto apply = Gtk::make_managed<Gtk::Button>(_("Apply"));
         apply->set_tooltip_text(_("Apply font size changes to the UI"));
         apply->set_valign(Gtk::ALIGN_FILL);
-        apply->set_margin_right(5);
+        apply->set_margin_end(5);
         reset->set_valign(Gtk::ALIGN_FILL);
         space->add(*apply);
         space->add(*reset);
@@ -1811,17 +1819,12 @@ void InkscapePreferences::initPageUI()
 
     // Toolbars
     _page_toolbars.add_group_header(_("Toolbars"));
-    {
-        auto vbox = Gtk::manage(new Gtk::Box(Gtk::Orientation::ORIENTATION_VERTICAL));
-        _page_toolbars.add_line(false, "", *vbox, "", _("Select visible tool buttons"), true);
+    try {
+        auto builder = Gtk::Builder::create_from_file(get_filename(UIS, "toolbar-tool-prefs.ui"));
+        Gtk::Widget* toolbox = nullptr;
+        builder->get_widget("tool-toolbar-prefs", toolbox);
 
-        auto toolbox = Glib::wrap(ToolboxFactory::createToolToolbox());
         sp_traverse_widget_tree(toolbox, [=](Gtk::Widget* widget){
-            if (auto flowbox = dynamic_cast<Gtk::FlowBox*>(widget)) {
-                flowbox->set_max_children_per_line(1);
-                flowbox->set_selection_mode();
-                flowbox->reparent(*vbox);
-            }
             if (auto button = dynamic_cast<Gtk::ToggleButton*>(widget)) {
                 assert(GTK_IS_ACTIONABLE(widget->gobj()));
                 // do not execute any action:
@@ -1837,6 +1840,7 @@ void InkscapePreferences::initPageUI()
             }
             return false;
         });
+        _page_toolbars.add_line(false, "", *toolbox, "", _("Select visible tool buttons"), true);
 
         struct tbar_info {const char* label; const char* prefs;} toolbars[] = {
             {_("Toolbox icon size:"),     ToolboxFactory::tools_icon_size},
@@ -1862,6 +1866,8 @@ void InkscapePreferences::initPageUI()
             { _("Advanced"), 0, _("Expose all snapping options for manual control") }
         };
         _page_toolbars.add_line(false, _("Snap controls bar:"), *Gtk::make_managed<PrefRadioButtons>(snap, "/toolbox/simplesnap"), "", "");
+    } catch (const Glib::Error &ex) {
+        g_error("Couldn't load toolbar-tool-prefs user interface file.");
     }
 
     this->AddPage(_page_toolbars, _("Toolbars"), iter_ui, PREFS_PAGE_UI_TOOLBARS);
@@ -3109,7 +3115,8 @@ void InkscapePreferences::on_modifier_selection_changed()
 {
     _kb_is_updated = true;
     Gtk::TreeStore::iterator iter = _mod_tree.get_selection()->get_selected();
-    bool selected = (iter);
+    auto selected = static_cast<bool>(iter);
+
     _kb_mod_ctrl.set_sensitive(selected);
     _kb_mod_shift.set_sensitive(selected);
     _kb_mod_alt.set_sensitive(selected);

@@ -60,6 +60,7 @@
 #include "ui/dialog/dialog-multipaned.h"
 #include "ui/dialog/dialog-window.h"
 #include "ui/tools/box3d-tool.h"
+#include "ui/util.h"
 #include "ui/uxmanager.h"
 #include "ui/widget/button.h"
 #include "ui/widget/canvas.h"
@@ -226,6 +227,11 @@ SPDesktopWidget::SPDesktopWidget()
     /* DesktopHBox (Vertical toolboxes, canvas) */
     dtw->_hbox = Gtk::manage(new Gtk::Box());
     dtw->_hbox->set_name("DesktopHbox");
+
+    dtw->_tbbox = Gtk::manage(new Gtk::Paned(Gtk::ORIENTATION_HORIZONTAL));
+    dtw->_tbbox->set_name("ToolboxCanvasPaned");
+    dtw->_hbox->pack_start(*dtw->_tbbox, true, true);
+
     dtw->_vbox->pack_end(*dtw->_hbox, true, true);
 
     dtw->_top_toolbars = Gtk::make_managed<Gtk::Grid>();
@@ -246,7 +252,7 @@ SPDesktopWidget::SPDesktopWidget()
 
     dtw->tool_toolbox = ToolboxFactory::createToolToolbox();
     ToolboxFactory::setOrientation( dtw->tool_toolbox, GTK_ORIENTATION_VERTICAL );
-    dtw->_hbox->pack_start(*Glib::wrap(dtw->tool_toolbox), false, true);
+    dtw->_tbbox->pack1(*Glib::wrap(dtw->tool_toolbox), false, true);
 
     auto set_visible_buttons = [=](GtkWidget* tb) {
         int buttons_before_separator = 0;
@@ -328,7 +334,7 @@ SPDesktopWidget::SPDesktopWidget()
     _container = Gtk::manage(new DialogContainer());
     _columns = _container->get_columns();
     _columns->set_dropzone_sizes(2, -1);
-    dtw->_hbox->pack_start(*_container, false, true);
+    dtw->_tbbox->pack2(*_container, true, true);
 
     _canvas_grid->set_hexpand(true);
     _canvas_grid->set_vexpand(true);
@@ -1142,7 +1148,8 @@ void SPDesktopWidget::layoutWidgets()
         _top_toolbars->child_property_height(snap) =  2;
         snap.set_valign(Gtk::ALIGN_CENTER);
     }
-    _top_toolbars->resize_children();
+
+    Inkscape::UI::resize_widget_children(_top_toolbars);
 }
 
 Gtk::Toolbar *
@@ -1208,17 +1215,14 @@ SPDesktopWidget::isToolboxButtonActive (const gchar* id)
 
     // The toolbutton could be a few different types so try casting to
     // each of them.
-    // TODO: This will be simpler in Gtk+ 4 when Actions and ToolItems have gone
+    // TODO: This will be simpler in Gtk+ 4 when ToolItems have gone
     auto toggle_button      = dynamic_cast<Gtk::ToggleButton *>(thing);
-    auto toggle_action      = dynamic_cast<Gtk::ToggleAction *>(thing);
     auto toggle_tool_button = dynamic_cast<Gtk::ToggleToolButton *>(thing);
 
     if ( !thing ) {
         //g_message( "Unable to locate item for {%s}", id );
     } else if (toggle_button) {
         isActive = toggle_button->get_active();
-    } else if (toggle_action) {
-        isActive = toggle_action->get_active();
     } else if (toggle_tool_button) {
         isActive = toggle_tool_button->get_active();
     } else {
@@ -1232,9 +1236,7 @@ void SPDesktopWidget::setToolboxPosition(Glib::ustring const& id, GtkPositionTyp
 {
     // Note - later on these won't be individual member variables.
     GtkWidget* toolbox = nullptr;
-    if (id == "ToolToolbar") {
-        toolbox = tool_toolbox;
-    } else if (id == "AuxToolbar") {
+    if (id == "AuxToolbar") {
         toolbox = aux_toolbox;
     } else if (id == "CommandsToolbar") {
         toolbox = commands_toolbox;

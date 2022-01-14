@@ -28,6 +28,7 @@
 #include "ui/tools/tool-base.h"
 #include "widgets/spw-utilities.h"
 #include "ui/widget/canvas.h"
+#include "ui/util.h"
 
 namespace Inkscape {
 namespace UI {
@@ -87,7 +88,7 @@ DialogBase::~DialogBase() {
 
 void DialogBase::ensure_size() {
     if (desktop) {
-        desktop->getToplevel()->resize_children();
+        resize_widget_children(desktop->getToplevel());
     }
 }
 
@@ -173,26 +174,31 @@ bool DialogBase::blink_off()
  */
 void DialogBase::setDesktop(SPDesktop *new_desktop)
 {
-    if (desktop != new_desktop) {
-        unsetDesktop();
+    if (desktop == new_desktop) {
+        return;
+    }
+
+    unsetDesktop();
+
+    if (new_desktop) {
         desktop = new_desktop;
 
-        if (desktop) {
-            _doc_replaced = desktop->connectDocumentReplaced(sigc::hide<0>(sigc::mem_fun(*this, &DialogBase::setDocument)));
-            _desktop_destroyed = desktop->connectDestroy( sigc::mem_fun(*this, &DialogBase::desktopDestroyed));
-            if (desktop->selection) {
-                selection = desktop->selection;
-                _select_changed = selection->connectChanged(sigc::mem_fun(*this, &DialogBase::selectionChanged_impl));
-                _select_modified = selection->connectModified(sigc::mem_fun(*this, &DialogBase::selectionModified_impl));
-            }
+        if (desktop->selection) {
+            selection = desktop->selection;
+            _select_changed = selection->connectChanged(sigc::mem_fun(*this, &DialogBase::selectionChanged_impl));
+            _select_modified = selection->connectModified(sigc::mem_fun(*this, &DialogBase::selectionModified_impl));
         }
-        if (desktop) {
-            this->setDocument(desktop->getDocument());
-        } else {
-            this->setDocument(nullptr);
+
+        _doc_replaced = desktop->connectDocumentReplaced(sigc::hide<0>(sigc::mem_fun(*this, &DialogBase::setDocument)));
+        _desktop_destroyed = desktop->connectDestroy(sigc::mem_fun(*this, &DialogBase::desktopDestroyed));
+        this->setDocument(desktop->getDocument());
+
+        if (desktop->selection) {
+            this->selectionChanged(selection);
         }
-        desktopReplaced();
     }
+
+    desktopReplaced();
 }
 
 /**
