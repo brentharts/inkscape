@@ -34,8 +34,8 @@
 #include "ui/tools/tool-base.h"      // Default cursor
 
 // Debugging switches
-#define ENABLE_FRAMECHECK 1
-#define ENABLE_LOGGING 1
+#define ENABLE_FRAMECHECK 0
+#define ENABLE_LOGGING 0
 #define ENABLE_OVERBISECTION 1
 #define ENABLE_SLOW_REDRAW 0
 #define ENABLE_SHOW_REDRAW 0
@@ -1144,18 +1144,23 @@ Canvas::on_idle()
         IF_SHOW_UNCLEAN( queue_draw() );
     };
 
+    auto take_snapshot = [&, this] {
+        // Copy the backing store to the snapshot, leaving us temporarily in an invalid state.
+        std::swap(d->_snapshot_store, d->_backing_store); // This will re-use the old snapshot store later if possible.
+        d->_snapshot_rect = d->_store_rect;
+        d->_snapshot_affine = d->_store_affine;
+        d->_snapshot_clean_region = d->_clean_region->copy();
+
+        // Recreate the backing store, making the state valid again.
+        recreate_store();
+    };
+
     // Handle transitions and actions in response to viewport changes.
     if (!d->decoupled_mode) {
         // Enter decoupled mode if the affine has changed from what the backing store was drawn at.
         if (_affine != d->_store_affine) {
-            // Copy the backing store to the snapshot, leaving it temporarily in an invalid state.
-            std::swap(d->_snapshot_store, d->_backing_store); // This will re-use the old snapshot store later if possible.
-            d->_snapshot_rect = d->_store_rect;
-            d->_snapshot_affine = d->_store_affine;
-            d->_snapshot_clean_region = d->_clean_region;
-
-            // Recreate the backing store, making it valid again.
-            recreate_store();
+            // Snapshot and reset the backing store.
+            take_snapshot();
 
             // Enter decoupled mode.
             IF_LOGGING( std::cout << "Entering decoupled mode" << std::endl; )
@@ -1294,6 +1299,10 @@ Canvas::on_idle()
     // Set up painting info to pass down the stack.
     PaintRectSetup setup;
     setup.mouse_loc = mouse_loc;
+    // Todo: Logging reveals that Inkscape often underestimates render times, and can sometimes time out quite badly,
+    // leading to missed frames. Consider fixing the time estimator below, possibly based on run-time feedback. May
+    // even wish to consider maintaining a coarse heatmap of the drawing to judge rendering time/order. In the meantime,
+    // this can be worked around be enabling the OVERBISECTION switch with a tile size of about 400.
     if (_render_mode != Inkscape::RenderMode::OUTLINE) {
         // Can't be too small or large gradient will be rerendered too many times!
         auto prefs = Inkscape::Preferences::get();
@@ -1317,8 +1326,6 @@ Canvas::on_idle()
         }
         if (!paint_rect_internal(setup, rect)) {
             // Timed out. Temporarily return to GTK main loop, and come back here when next idle.
-            // Todo: Logging reveals that Inkscape often underestimates render times, and can sometimes time out quite badly,
-            // leading to missed frames. Consider fixing the time estimator, possibly based on run-time feedback.
             //IF_LOGGING( std::cout << "Timed out: " << g_get_monotonic_time() - setup.start_time << " us" << std::endl; )
             IF_FRAMECHECK( f.subtype = 1; )
             _forced_redraw_count++;
@@ -1339,22 +1346,30 @@ Canvas::on_idle()
         }
     }
 
-    // Finished drawing. If in decoupled mode, see if we need to do a final redraw at the correct affine.
+    // Finished drawing. See if we need to do a final redraw at the correct affine.
     if (d->decoupled_mode) {
-        // Exit decoupled mode.
-        IF_LOGGING( std::cout << "Finished drawing - exiting decoupled mode" << std::endl; )
-        d->decoupled_mode = false;
-
-        // If the affine of the store is not up-to-date with the requested affine, continue the idle process.
-        if (d->_store_affine != _affine) {
+        if (d->_store_affine == _affine) {
+            // Content is rendered at the correct affine - exit decoupled mode and quit idle process.
+            IF_LOGGING( std::cout << "Finished drawing - exiting decoupled mode" << std::endl; )
+            // Exit decoupled mode.
+            d->decoupled_mode = false;
+            // Quit idle process.
+            return false;
+        }
+        else {
+            // Content is rendered at the wrong affine - take a new snapshot and continue idle process to continue rendering at the new affine.
             IF_LOGGING( std::cout << "Scheduling final redraw" << std::endl; )
+            // Snapshot and reset the backing store.
+            take_snapshot();
+            // Continue idle process.
             return true;
         }
     }
-
-    // All done, quit the idle process.
-    IF_FRAMECHECK( f.subtype = 3; )
-    return false;
+    else {
+        // All done, quit the idle process.
+        IF_FRAMECHECK( f.subtype = 3; )
+        return false;
+    }
 }
 
 /*
