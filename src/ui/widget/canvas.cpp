@@ -11,8 +11,9 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
-#include <iostream>
+#include <iostream> // Logging
 #include <algorithm> // Sort
+#include <set> // Coarsener
 
 #include <glibmm/i18n.h>
 
@@ -36,10 +37,14 @@
 // Debugging switches
 #define ENABLE_FRAMECHECK 0
 #define ENABLE_LOGGING 0
-#define ENABLE_OVERBISECTION 1
+#define ENABLE_OVERBISECTION 1 // Current using overbisection at size 400 to work around render time overestimation bug. Without this, expect huge frame drops.
 #define ENABLE_SLOW_REDRAW 0
 #define ENABLE_SHOW_REDRAW 0
 #define ENABLE_SHOW_UNCLEAN 0
+#define ENABLE_SHOW_SNAPSHOT 0
+
+#define OVERBISECTION_SIZE 400 // 30 // px
+#define SLOW_REDRAW_TIME 50 // us
 
 #if ENABLE_FRAMECHECK
 #include "../../../../framecheck.h"
@@ -52,14 +57,6 @@
 #define IF_LOGGING(X) X
 #else
 #define IF_LOGGING(X)
-#endif
-
-#if ENABLE_OVERBISECTION
-#define OVERBISECTION_SIZE 400 // 30 // px
-#endif
-
-#if ENABLE_SLOW_REDRAW
-#define SLOW_REDRAW_TIME 50 // us
 #endif
 
 #if ENABLE_SHOW_UNCLEAN
@@ -827,7 +824,7 @@ Canvas::on_motion_notify_event(GdkEventMotion *motion_event)
 auto
 geom_to_cairo(Geom::IntRect rect)
 {
-    return Cairo::RectangleInt { rect.left(), rect.top(), rect.width(), rect.height() };
+    return Cairo::RectangleInt{rect.left(), rect.top(), rect.width(), rect.height()};
 }
 
 auto
@@ -941,8 +938,13 @@ Canvas::on_draw(const::Cairo::RefPtr<::Cairo::Context> &cr)
         cr->clip();
         cr->set_source(d->_snapshot_store, d->_snapshot_rect.left(), d->_snapshot_rect.top());
         cr->set_operator(d->solid_background ? Cairo::OPERATOR_SOURCE : Cairo::OPERATOR_OVER);
-        Cairo::SurfacePattern(cr->get_source()->cobj()).set_filter(Cairo::FILTER_FAST);
         cr->paint();
+        Cairo::SurfacePattern(cr->get_source()->cobj()).set_filter(Cairo::FILTER_FAST);
+        #if ENABLE_SHOW_SNAPSHOT
+        cr->set_source_rgba(0, 0, 1, 0.2);
+        cr->set_operator(Cairo::OPERATOR_OVER);
+        cr->paint();
+        #endif
         cr->restore();
 
         // Draw transformed store, clipped to clean region.
@@ -1019,29 +1021,88 @@ distSq(const Geom::IntPoint pt, const Geom::IntRect &rect)
 }
 
 auto
-empty_int_rect_hack()
-{
-    auto min = std::numeric_limits<Geom::IntCoord>::min();
-    auto interval = Geom::GenericInterval<Geom::IntCoord>(min, min);
-    return Geom::IntRect(interval, interval);
-}
-
-auto
 calc_affine_diff(const Geom::Affine &a, const Geom::Affine &b) {
     auto c = a.inverse() * b;
     return std::abs(c[0] - 1) + std::abs(c[1]) + std::abs(c[2]) + std::abs(c[3] - 1);
 }
 
+// Replace a region with a larger region consisting of fewer, larger rectangles. (Allowed to slightly overlap.)
 auto
-region_to_rects(const Cairo::RefPtr<Cairo::Region> &region)
+coarsen(const Cairo::RefPtr<Cairo::Region> &region)
 {
-    std::vector<Geom::IntRect> rects;
+    IF_FRAMECHECK(framecheck_whole_function);
+
+    // Todo: Possibly further tune these thresholds.
+    constexpr int MIN_SIZE = 200;
+    constexpr int GLUE_SIZE = 80;
+
+    // Sort the rects by minExtent
+    struct Compare
+    {
+        bool operator()(const Geom::IntRect &a, const Geom::IntRect &b) const {
+            return a.minExtent() < b.minExtent();
+        }
+    };
+    std::multiset<Geom::IntRect, Compare> rects;
     int nrects = region->get_num_rectangles();
-    rects.reserve(nrects);
     for (int i = 0; i < nrects; i++) {
-        rects.emplace_back(cairo_to_geom(region->get_rectangle(i)));
+        rects.emplace(cairo_to_geom(region->get_rectangle(i)));
     }
-    return rects;
+
+    // List of processed rectangles.
+    std::vector<Geom::IntRect> processed;
+    processed.reserve(nrects);
+
+    // Repeatedly expand small rectangles by absorbing their nearby small rectangles.
+    while (!rects.empty() && rects.begin()->minExtent() < MIN_SIZE) {
+        // Extract the smallest unprocessed rectangle.
+        auto rect = *rects.begin();
+        rects.erase(rects.begin());
+
+        while (true) {
+            // Find the glue zone.
+            auto glue_zone = rect;
+            glue_zone.expandBy(GLUE_SIZE);
+
+            // Absorb rectangles in the glue zone. We could make this a lot faster, but it's already fast enough.
+            auto orig = rect;
+            for (auto it = rects.begin(); it != rects.end(); ) {
+                if (glue_zone.contains(*it)) {
+                    rect.unionWith(*it);
+                    it = rects.erase(it);
+                }
+                else {
+                    ++it;
+                }
+            }
+            for (auto it = processed.begin(); it != processed.end(); ) {
+                if (glue_zone.contains(*it)) {
+                    rect.unionWith(*it);
+                    *it = processed.back();
+                    processed.pop_back();
+                }
+                else {
+                    ++it;
+                }
+            }
+
+            // Stop growing if not changed or now big enough.
+            bool finished = rect == orig || rect.minExtent() >= MIN_SIZE;
+            if (finished) {
+                break;
+            }
+        }
+
+        // Put the finished rectangle in processed.
+        processed.emplace_back(rect);
+    }
+
+    // Put any remaining rectangles in processed.
+    for (auto &rect : rects) {
+        processed.emplace_back(rect);
+    }
+
+    return processed;
 }
 
 bool
@@ -1247,7 +1308,7 @@ Canvas::on_idle()
 
         // Note: We could have used a smaller region containing pl consisting of many rectangles, rather than a single bounding box.
         // However, while this uses less pixels it also uses more rectangles, so is NOT necessarily an optimisation and could backfire.
-        // For this reason, and for simplicity, we use the bounding rect.
+        // For this reason, and for simplicity, we use the bounding rect. (Note: Slightly invalidated by addition of coarsener below.)
     }
     // The visible rectangle must be a subrectangle of store.
     assert(d->_store_rect.contains(visible_rect));
@@ -1262,10 +1323,21 @@ Canvas::on_idle()
         paint_region = Cairo::Region::create();
     }
 
-    // Todo: The SHOW_UNCLEAN debug switch suggests that sometimes the clean region can become highly fragmented,
-    // ending up as many tiny rectangles. When this happens, it is a disaster for performance, because the render
-    // cost of a rectangle is not just proportional to its area; there is also a constant part.
-    // Consider fixing by implementing region compression/coarsening.
+    // Get the list of rectangles to paint, coarsened to avoid fragmentation.
+    auto paint_rects = coarsen(paint_region);
+
+    // Clip the coarsened rectangles back to the visible rect, in case coarsening made them go outside it. Otherwise, we could render to outside the store!
+    for (auto it = paint_rects.begin(); it != paint_rects.end(); ) {
+        auto opt = *it & *visible_rect;
+        if (opt) {
+            *it = *opt;
+            ++it;
+        }
+        else {
+            *it = paint_rects.back();
+            paint_rects.pop_back();
+        }
+    }
 
     // Get the mouse position in screen space.
     Geom::IntPoint mouse_loc;
@@ -1290,8 +1362,7 @@ Canvas::on_idle()
     // Otherwise, the whole of the big rectangle will be rendered first, at the expense of points in other
     // rectangles very near to the mouse.
 
-    // Obtain the list of rectangles to paint, sorted by distance from mouse.
-    auto paint_rects = region_to_rects(paint_region);
+    // Sort the rectangles to paint, sorted by distance from mouse.
     std::sort(paint_rects.begin(), paint_rects.end(), [&] (const Geom::IntRect &a, const Geom::IntRect &b) {
         return distSq(mouse_loc, a) < distSq(mouse_loc, b);
     });
@@ -1390,7 +1461,7 @@ Canvas::paint_rect_internal(PaintRectSetup const &setup, Geom::IntRect const &th
 
     #if ENABLE_OVERBISECTION
     // Aggressively subdivide into many small rectangles
-    if (bw > bh || bw > OVERBISECTION_SIZE) {
+    if (bw > bh && bw > OVERBISECTION_SIZE) {
         int mid = this_rect[Geom::X].middle();
 
         Geom::IntRect lo, hi;
