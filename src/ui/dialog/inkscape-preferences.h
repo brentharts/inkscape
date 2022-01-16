@@ -323,6 +323,7 @@ protected:
     UI::Widget::PrefSpinButton  _filter_multi_threaded;
     UI::Widget::PrefSpinButton  _rendering_cache_size;
     UI::Widget::PrefSpinButton  _rendering_tile_multiplier;
+    UI::Widget::PrefSpinButton  _rendering_tile_size;
     UI::Widget::PrefSpinButton  _rendering_xray_radius;
     UI::Widget::PrefSpinButton  _rendering_outline_overlay_opacity;
     UI::Widget::PrefRadioButton _blur_quality_best;
@@ -343,6 +344,8 @@ protected:
     UI::Widget::PrefCheckButton _canvas_debug_show_redraw;
     UI::Widget::PrefCheckButton _canvas_debug_show_unclean;
     UI::Widget::PrefCheckButton _canvas_debug_show_snapshot;
+    UI::Widget::PrefCheckButton _canvas_debug_show_clean;
+    UI::Widget::PrefCheckButton _canvas_debug_disable_redraw;
     UI::Widget::PrefCheckButton _canvas_debug_sticky_decoupled;
     UI::Widget::PrefSpinButton  _canvas_debug_overbisection_size;
     UI::Widget::PrefSpinButton  _canvas_debug_slow_redraw_time;

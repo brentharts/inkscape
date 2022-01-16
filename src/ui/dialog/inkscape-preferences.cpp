@@ -2635,6 +2635,10 @@ void InkscapePreferences::initPageRendering()
     _rendering_cache_size.init("/options/renderingcache/size", 0.0, 4096.0, 1.0, 32.0, 64.0, true, false);
     _page_rendering.add_line( false, _("Rendering _cache size:"), _rendering_cache_size, C_("mebibyte (2^20 bytes) abbreviation","MiB"), _("Set the amount of memory per document which can be used to store rendered parts of the drawing for later reuse; set to zero to disable caching"), false);
 
+    // rendering tile size
+    _rendering_tile_size.init("/options/rendering/tile-size", 1.0, 10000.0, 1.0, 0.0, 16.0, true, false);
+    _page_rendering.add_line( false, _("Tile size:"), _rendering_tile_size, "", _("The \"tile size\" parameter previously hard-coded into Inkscape's original tile bisector."), false);
+
     // rendering tile multiplier
     _rendering_tile_multiplier.init("/options/rendering/tile-multiplier", 1.0, 512.0, 1.0, 16.0, 16.0, true, false);
     _page_rendering.add_line( false, _("Rendering tile multiplier:"), _rendering_tile_multiplier, "", _("On modern hardware, increasing this value (default is 16) can help to get a better performance when there are large areas with filtered objects (this includes blur and blend modes) in your drawing. Decrease the value to make zooming and panning in relevant areas faster on low-end hardware in drawings with few or no filters."), false);
@@ -2715,13 +2719,17 @@ void InkscapePreferences::initPageRendering()
     _page_rendering.add_line(true, "", _canvas_debug_show_unclean, "", _("Show the unclean region in red"));
     _canvas_debug_show_snapshot.init(_("Show snapshot"), "/options/rendering/debug/show_snapshot", false);
     _page_rendering.add_line(true, "", _canvas_debug_show_snapshot, "", _("Show the snapshot region in blue"));
+    _canvas_debug_show_clean.init(_("Show clean fragmentation"), "/options/rendering/debug/show_clean", false);
+    _page_rendering.add_line(true, "", _canvas_debug_show_clean, "", _("Show the outlines of the rectangles in the clean region in green"));
+    _canvas_debug_disable_redraw.init(_("Disable redraw"), "/options/rendering/debug/disable_redraw", false);
+    _page_rendering.add_line(true, "", _canvas_debug_disable_redraw, "", _("Temporarily disable the idle redraw process completely"));
     _canvas_debug_sticky_decoupled.init(_("Sticky decoupled mode"), "/options/rendering/debug/sticky_decoupled", false);
     _page_rendering.add_line(true, "", _canvas_debug_sticky_decoupled, "", _("Stay in decoupled mode even after rendering is complete"));
 
     _page_rendering.add_group_header(_("Low-level tuning options"));
     _canvas_render_time_limit.init("/options/rendering/render_time_limit", 100.0, 1000000.0, 1.0, 0.0, 1000.0, true, false);
     _page_rendering.add_line(true, _("Render time limit"), _canvas_render_time_limit, C_("microsecond abbreviation", "μs"), _("The maximum time allowed for a rendering time slice"), false);
-    _canvas_max_affine_diff.init("/options/rendering/max_affine_diff", 0.0, 100.0, 0.1, 0.0, 1.0, false, false);
+    _canvas_max_affine_diff.init("/options/rendering/max_affine_diff", 0.0, 100.0, 0.1, 0.0, 1.8, false, false);
     _page_rendering.add_line(true, _("Max affine diff"), _canvas_max_affine_diff, "", _("How much the viewing transformation can change before throwing away the current redraw and starting again"), false);
     _canvas_pad.init("/options/rendering/pad", 0.0, 1000.0, 1.0, 0.0, 200.0, true, false);
     _page_rendering.add_line(true, _("Buffer padding"), _canvas_pad, C_("pixel abbreviation", "px"), _("Use buffers bigger than the window by this amount"), false);
@@ -3033,7 +3041,7 @@ void InkscapePreferences::onKBTreeEdited (const Glib::ustring& path, guint accel
     event.keyval = accel_key;
     event.state = accel_mods;
     event.hardware_keycode = hardware_keycode;
-    Gtk::AccelKey const new_shortcut_key =  shortcuts.get_from_event(&event, true);
+    Gtk::AccelKey const new_shortcut_key = shortcuts.get_from_event(&event, true);
 
     if (!new_shortcut_key.is_null() &&
         (new_shortcut_key.get_key() != current_shortcut_key.get_key() ||
