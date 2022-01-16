@@ -2627,11 +2627,9 @@ void InkscapePreferences::initPageBehavior()
 
 void InkscapePreferences::initPageRendering()
 {
-
     /* threaded blur */ //related comments/widgets/functions should be renamed and option should be moved elsewhere when inkscape is fully multi-threaded
     _filter_multi_threaded.init("/options/threading/numthreads", 1.0, 8.0, 1.0, 2.0, 4.0, true, false);
-    _page_rendering.add_line( false, _("Number of _Threads:"), _filter_multi_threaded, _("(requires restart)"),
-                           _("Configure number of processors/threads to use when rendering filters"), false);
+    _page_rendering.add_line( false, _("Number of _Threads:"), _filter_multi_threaded, _("(requires restart)"), _("Configure number of processors/threads to use when rendering filters"), false);
 
     // rendering cache
     _rendering_cache_size.init("/options/renderingcache/size", 0.0, 4096.0, 1.0, 32.0, 64.0, true, false);
@@ -2639,32 +2637,16 @@ void InkscapePreferences::initPageRendering()
 
     // rendering tile multiplier
     _rendering_tile_multiplier.init("/options/rendering/tile-multiplier", 1.0, 512.0, 1.0, 16.0, 16.0, true, false);
-    _page_rendering.add_line( false, _("Rendering tile multiplier:"), _rendering_tile_multiplier, "",
-                              _("On modern hardware, increasing this value (default is 16) can help to get a better performance when there are large areas with filtered objects (this includes blur and blend modes) in your drawing. Decrease the value to make zooming and panning in relevant areas faster on low-end hardware in drawings with few or no filters."), false);
+    _page_rendering.add_line( false, _("Rendering tile multiplier:"), _rendering_tile_multiplier, "", _("On modern hardware, increasing this value (default is 16) can help to get a better performance when there are large areas with filtered objects (this includes blur and blend modes) in your drawing. Decrease the value to make zooming and panning in relevant areas faster on low-end hardware in drawings with few or no filters."), false);
+
     // rendering xray radius
     _rendering_xray_radius.init("/options/rendering/xray-radius", 1.0, 1500.0, 1.0, 100.0, 100.0, true, false);
-    _page_rendering.add_line( false, _("X-ray radius:"), _rendering_xray_radius, "",
-                             _("Radius of the circular area around the mouse cursor in X-ray mode"), false);
+    _page_rendering.add_line( false, _("X-ray radius:"), _rendering_xray_radius, "", _("Radius of the circular area around the mouse cursor in X-ray mode"), false);
 
     // rendering outline overlay opcaity
     _rendering_outline_overlay_opacity.init("/options/rendering/outline-overlay-opacity", 1.0, 100.0, 1.0, 5.0, 50.0, true, false);
     _rendering_outline_overlay_opacity.signal_focus_out_event().connect(sigc::mem_fun(*this, &InkscapePreferences::on_outline_overlay_changed));
-    _page_rendering.add_line( false, _("Outline overlay opacity:"), _rendering_outline_overlay_opacity, _("%"),
-                             _("Opacity of the color in outline overlay view mode"), false);
-
-    {
-        // if these GTK constants ever change, consider adding a compatibility shim to SPCanvas::addIdle()
-        static_assert(G_PRIORITY_HIGH_IDLE    == 100, "G_PRIORITY_HIGH_IDLE must be 100 to match preferences.xml");
-        static_assert(G_PRIORITY_DEFAULT_IDLE == 200, "G_PRIORITY_DEFAULT_IDLE must be 200 to match preferences.xml");
-
-        Glib::ustring redrawPriorityLabels[] = {_("Responsive"), _("Conservative")};
-        int redrawPriorityValues[] = {G_PRIORITY_HIGH_IDLE, G_PRIORITY_DEFAULT_IDLE};
-
-        // redraw priority
-        _rendering_redraw_priority.init("/options/redrawpriority/value", redrawPriorityLabels, redrawPriorityValues, G_N_ELEMENTS(redrawPriorityLabels), 0);
-        _page_rendering.add_line(false, _("Redraw while editing:"), _rendering_redraw_priority, "",
-                                        _("Set how quickly the canvas display is updated while editing objects"), false);
-    }
+    _page_rendering.add_line( false, _("Outline overlay opacity:"), _rendering_outline_overlay_opacity, _("%"), _("Opacity of the color in outline overlay view mode"), false);
 
     /* blur quality */
     _blur_quality_best.init ( _("Best quality (slowest)"), "/options/blurquality/value",
@@ -2713,6 +2695,40 @@ void InkscapePreferences::initPageRendering()
                            _("Lower quality (some artifacts), but display is faster"));
     _page_rendering.add_line( true, "", _filter_quality_worst, "",
                            _("Lowest quality (considerable artifacts), but display is fastest"));
+
+    _page_rendering.add_group_header(_("Debugging, profiling, and experiments"));
+    _canvas_debug_framecheck.init(_("Framecheck"), "/options/rendering/debug/framecheck", false);
+    _page_rendering.add_line(true, "", _canvas_debug_framecheck, "", _("Print profiling data of selected operations to a file"));
+    _canvas_debug_logging.init(_("Logging"), "/options/rendering/debug/logging", false);
+    _page_rendering.add_line(true, "", _canvas_debug_logging, "", _("Log certain events to the console"));
+    _canvas_debug_overbisection.init(_("Overbisection"), "/options/rendering/debug/overbisection", false);
+    _page_rendering.add_line(true, "", _canvas_debug_overbisection, "", _("Bisect all tiles until they reach a minimum size"));
+    _canvas_debug_overbisection_size.init("/options/rendering/debug/overbisection_size", 1.0, 10000.0, 1.0, 0.0, 30.0, true, false);
+    _page_rendering.add_line(true, _("Overbisection size"), _canvas_debug_overbisection_size, C_("pixel abbreviation", "px"), _("The maxmimum allowed tile size"), false);
+    _canvas_debug_slow_redraw.init(_("Slow redraw"), "/options/rendering/debug/slow_redraw", false);
+    _page_rendering.add_line(true, "", _canvas_debug_slow_redraw, "", _("Introduce a fixed delay for each tile"));
+    _canvas_debug_slow_redraw_time.init("/options/rendering/debug/slow_redraw_time", 0.0, 1000000.0, 1.0, 0.0, 50.0, true, false);
+    _page_rendering.add_line(true, _("Slow redraw time"), _canvas_debug_slow_redraw_time, C_("microsecond abbreviation", "μs"), _("The delay to introduce for each tile"), false);
+    _canvas_debug_show_redraw.init(_("Show redraw"), "/options/rendering/debug/show_redraw", false);
+    _page_rendering.add_line(true, "", _canvas_debug_show_redraw, "", _("Paint a translucent random colour over each newly drawn tile"));
+    _canvas_debug_show_unclean.init(_("Show unclean region"), "/options/rendering/debug/show_unclean", false);
+    _page_rendering.add_line(true, "", _canvas_debug_show_unclean, "", _("Show the unclean region in red"));
+    _canvas_debug_show_snapshot.init(_("Show snapshot"), "/options/rendering/debug/show_snapshot", false);
+    _page_rendering.add_line(true, "", _canvas_debug_show_snapshot, "", _("Show the snapshot region in blue"));
+    _canvas_debug_sticky_decoupled.init(_("Sticky decoupled mode"), "/options/rendering/debug/sticky_decoupled", false);
+    _page_rendering.add_line(true, "", _canvas_debug_sticky_decoupled, "", _("Stay in decoupled mode even after rendering is complete"));
+
+    _page_rendering.add_group_header(_("Low-level tuning options"));
+    _canvas_render_time_limit.init("/options/rendering/render_time_limit", 100.0, 1000000.0, 1.0, 0.0, 1000.0, true, false);
+    _page_rendering.add_line(true, _("Render time limit"), _canvas_render_time_limit, C_("microsecond abbreviation", "μs"), _("The maximum time allowed for a rendering time slice"), false);
+    _canvas_max_affine_diff.init("/options/rendering/max_affine_diff", 0.0, 100.0, 0.1, 0.0, 1.0, false, false);
+    _page_rendering.add_line(true, _("Max affine diff"), _canvas_max_affine_diff, "", _("How much the viewing transformation can change before throwing away the current redraw and starting again"), false);
+    _canvas_pad.init("/options/rendering/pad", 0.0, 1000.0, 1.0, 0.0, 200.0, true, false);
+    _page_rendering.add_line(true, _("Buffer padding"), _canvas_pad, C_("pixel abbreviation", "px"), _("Use buffers bigger than the window by this amount"), false);
+    _canvas_coarsener_min_size.init("/options/rendering/coarsener_min_size", 0.0, 1000.0, 1.0, 0.0, 200.0, true, false);
+    _page_rendering.add_line(true, _("Coarsener min size"), _canvas_coarsener_min_size, C_("pixel abbreviation", "px"), _("Parameter given to the coarsener algorithm when applied to the paint region. Probably best left alone!"), false);
+    _canvas_coarsener_glue_size.init("/options/rendering/coarsener_glue_size", 0.0, 1000.0, 1.0, 0.0, 80.0, true, false);
+    _page_rendering.add_line(true, _("Coarsener glue size"), _canvas_coarsener_glue_size, C_("pixel abbreviation", "px"), _("Parameter given to the coarsener algorithm when applied to the paint region. Probably best left alone!"), false);
 
     this->AddPage(_page_rendering, _("Rendering"), PREFS_PAGE_RENDERING);
 }
