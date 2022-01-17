@@ -815,8 +815,10 @@ Svg::open (Inkscape::Extension::Input *mod, const gchar *uri)
         prefs->setString("/dialogs/import/scale",           scale );
     }
 
+    bool import_pages = (import_mode_svg == "pages");
+
     // Do we "import" as <image>?
-    if (prefs->getBool("/options/onimport", false) && import_mode_svg != "include") {
+    if (prefs->getBool("/options/onimport", false) && import_mode_svg != "include" && !import_pages) {
         // We import!
 
         // New wrapper document.
@@ -918,7 +920,12 @@ Svg::open (Inkscape::Extension::Input *mod, const gchar *uri)
     }
 
     SPDocument *doc = SPDocument::createNewDoc(uri, true);
-    // SPDocument *doc = SPDocument::createNewDoc(file->get_uri().c_str(), true);
+
+    // Convert single page docs into multi page mode, and visa-versa
+    if (doc) {
+        doc->setPages(import_pages);
+    }
+
     return doc;
 }
 
