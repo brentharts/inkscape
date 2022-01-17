@@ -35,7 +35,7 @@
 #include "ui/tools/tool-base.h"      // Default cursor
 
 #include "framecheck.h"    // For frame profiling
-#define framecheck_whole_function(D) auto framecheckobj = D->prefs.debug_framecheck ? FrameCheck::Event() : FrameCheck::Event(__func__);
+#define framecheck_whole_function(D) auto framecheckobj = D->prefs.debug_framecheck ? FrameCheck::Event(__func__) : FrameCheck::Event();
 
 /*
  *   The canvas is responsible for rendering the SVG drawing with various "control"
@@ -1155,7 +1155,7 @@ coarsen(const Cairo::RefPtr<Cairo::Region> &region, int min_size, int glue_size)
             auto glue_zone = rect;
             glue_zone.expandBy(glue_size);
 
-            // Absorb rectangles in the glue zone. We could make this a lot faster, but it's already fast enough.
+            // Absorb rectangles in the glue zone. We could do better algorithmically speaking, but in real life it's already plenty fast.
             auto orig = rect;
             for (auto it = rects.begin(); it != rects.end(); ) {
                 if (glue_zone.contains(*it)) {
@@ -1222,6 +1222,7 @@ Canvas::on_idle()
         if (!d->_backing_store || d->_backing_store->get_width() != desired_width || d->_backing_store->get_height() != desired_height) {
             // Todo: Stop cairo unnecessarily pre-filling the store with transparency below if d->solid_background is true.
             d->_backing_store = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, desired_width, desired_height);
+            cairo_surface_set_device_scale(d->_backing_store->cobj(), d->_device_scale, d->_device_scale); // No C++ API!
         }
         auto cr = Cairo::Context::create(d->_backing_store);
         if (d->solid_background) {
@@ -1252,6 +1253,7 @@ Canvas::on_idle()
         store_rect.expandBy(pad);
         // Todo: Stop cairo unnecessarily pre-filling the store with transparency below if d->solid_background is true.
         auto backing_store = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, store_rect.width() * d->_device_scale, store_rect.height() * d->_device_scale);
+        cairo_surface_set_device_scale(backing_store->cobj(), d->_device_scale, d->_device_scale); // No C++ API!
 
         // Determine the geometry of the shift.
         auto shift = store_rect.min() - d->_store_rect.min();
