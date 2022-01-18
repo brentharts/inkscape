@@ -16,6 +16,7 @@
 #include <gtkmm/spinbutton.h>
 #include <glibmm/i18n.h>
 #include <functional>
+#include <array>
 
 #include "ui/dialog-events.h"
 #include "ui/widget/color-scales.h"

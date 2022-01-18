@@ -15,6 +15,7 @@
 #ifndef SEEN_SP_COLOR_WHEEL_HSLUV_SELECTOR_H
 #define SEEN_SP_COLOR_WHEEL_HSLUV_SELECTOR_H
 
+#include <array>
 #include <gtkmm/box.h>
 #include <gtkmm/expander.h>
 
