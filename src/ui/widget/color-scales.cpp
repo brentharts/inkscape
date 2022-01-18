@@ -116,7 +116,7 @@ void ColorScales::_initUI(SPColorScalesMode mode, bool add_wheel)
         // wheel shown/hidden
         wheel_frame->property_expanded().signal_changed().connect([=](){
             bool visible = wheel_frame->get_expanded();
-            wheel_frame->set_vexpand(wheel_frame->get_expanded());
+            wheel_frame->set_vexpand(visible);
             Inkscape::Preferences::get()->setBool(_prefs + "/wheel", visible);
         });
         wheel_frame->add(*_wheel);
@@ -140,7 +140,6 @@ void ColorScales::_initUI(SPColorScalesMode mode, bool add_wheel)
         gtk_widget_set_margin_end(_l[i], XPAD);
         gtk_widget_set_margin_top(_l[i], YPAD);
         gtk_widget_set_margin_bottom(_l[i], YPAD);
-        // attach(*_l[i], 0, row + i);
         gtk_grid_attach(GTK_GRID(t), _l[i], 0, row + i, 1, 1);
 
         /* Adjustment */
@@ -154,7 +153,6 @@ void ColorScales::_initUI(SPColorScalesMode mode, bool add_wheel)
         _s[i]->set_margin_top(YPAD);
         _s[i]->set_margin_bottom(YPAD);
         _s[i]->set_hexpand(true);
-        // attach(*_s[i], 1, row + i);
         gtk_grid_attach(GTK_GRID(t), _s[i]->gobj(), 1, row + i, 1, 1);
 
         /* Spinbutton */
@@ -170,7 +168,6 @@ void ColorScales::_initUI(SPColorScalesMode mode, bool add_wheel)
         gtk_widget_set_margin_bottom(_b[i], YPAD);
         gtk_widget_set_halign(_b[i], GTK_ALIGN_END);
         gtk_widget_set_valign(_b[i], GTK_ALIGN_CENTER);
-        // attach(*_b[i], 2, row + i);
         gtk_grid_attach(GTK_GRID(t), _b[i], 2, row + i, 1, 1);
 
         /* Signals */

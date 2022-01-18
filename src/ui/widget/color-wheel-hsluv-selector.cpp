@@ -139,6 +139,7 @@ void ColorWheelHSLuvSelector::_initUI()
 
     // Expander
     auto wheel_frame = Gtk::make_managed<Gtk::Expander>(_("Color Wheel"));
+    wheel_frame->set_margin_bottom(3);
     wheel_frame->set_halign(Gtk::ALIGN_FILL);
     wheel_frame->set_valign(Gtk::ALIGN_FILL);
     wheel_frame->set_hexpand(true);
