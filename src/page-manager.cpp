@@ -33,6 +33,7 @@ PageManager::PageManager(SPDocument *document)
     : border_show(true)
     , border_on_top(true)
     , shadow_show(true)
+    , _checkerboard(false)
 {
     _document = document;
 }
@@ -120,6 +121,15 @@ SPPage *PageManager::newPage()
  */
 SPPage *PageManager::newPage(double width, double height)
 {
+    auto loc = nextPageLocation();
+    return newPage(Geom::Rect::from_xywh(loc, Geom::Point(width, height)));
+}
+
+/**
+ * Return the location of the next created page.
+ */
+Geom::Point PageManager::nextPageLocation() const
+{
     // Get a new location for the page.
     double top = 0.0;
     double left = 0.0;
@@ -129,7 +139,7 @@ SPPage *PageManager::newPage(double width, double height)
             left = rect.right() + 10;
         }
     }
-    return newPage(Geom::Rect(left, top, left + width, top + height));
+    return Geom::Point(left, top);
 }
 
 /**
@@ -164,6 +174,47 @@ SPPage *PageManager::newPage(Geom::Rect rect, bool first_page)
 SPPage *PageManager::newDesktopPage(Geom::Rect rect, bool first_page)
 {
     return newPage(rect * _document->getDocumentScale().inverse(), first_page);
+}
+
+/**
+ * Create a new page from another page. This can be in it's own document
+ * or the same document (cloning) all items are also cloned.
+ */
+SPPage *PageManager::newPage(SPPage *page)
+{
+    auto xml_root = _document->getReprDoc();
+    auto sp_root = _document->getRoot();
+
+    // Record the new location of the new page.
+    enablePages();
+    auto new_loc = nextPageLocation();
+    auto new_page = newDesktopPage(page->getDesktopRect(), false);
+    Geom::Affine page_move = Geom::Translate((new_loc * _document->getDocumentScale()) - new_page->getDesktopRect().min());
+    Geom::Affine item_move = Geom::Translate(new_loc - new_page->getRect().min());
+
+    for (auto &item : page->getOverlappingItems()) {
+        auto new_repr = item->getRepr()->duplicate(xml_root);
+        if (auto new_item = dynamic_cast<SPItem *>(sp_root->appendChildRepr(new_repr))) {
+            Geom::Affine affine = Geom::Affine();
+
+            // 1. apply parent transform (for layers that have been ignored by getOverlappingItems)
+            if (auto parent = dynamic_cast<SPItem *>(item->parent)) {
+                affine *= parent->i2doc_affine();
+            }
+            // 2. unit conversion, add in _document->getDocumentScale()
+            affine *= _document->getDocumentScale().inverse();
+
+            // 3. Add the object's original transform back in.
+            affine *= item->transform;
+
+            // 4. apply item_move to offset it.
+            affine *= item_move;
+
+            new_item->doWriteTransform(affine, &affine, false);
+        }
+    }
+    new_page->movePage(page_move, false);
+    return new_page;
 }
 
 /**
@@ -232,12 +283,11 @@ void PageManager::deletePage(bool content)
  */
 void PageManager::disablePages()
 {
-    if (hasPages()) {
-        for (auto &page : pages) {
-            page->deleteObject();
-        }
+    while (hasPages()) {
+        deletePage(getLastPage(), false);
     }
 }
+
 
 /**
  * Get page index, returns -1 if the page is not found in this document.
@@ -365,6 +415,20 @@ SPPage *PageManager::getPageAt(Geom::Point pos) const
 }
 
 /**
+ * Returns the page attached to the viewport, or nullptr if no pages
+ * or none of the pages are the viewport page.
+ */
+SPPage *PageManager::getViewportPage() const
+{
+    for (auto &page : pages) {
+        if (page->isViewportPage()) {
+            return page;
+        }
+    }
+    return nullptr;
+}
+
+/**
  * Returns the total area of all the pages in desktop units.
  */
 Geom::OptRect PageManager::getDesktopRect() const
@@ -476,6 +540,10 @@ void PageManager::fitToRect(Geom::OptRect rect, SPPage *page)
     }
     if (viewport) {
         _document->fitToRect(*rect);
+        if (page && !page->isViewportPage()) {
+            // The document's fitToRect has slightly mangled the page rect, fix it.
+            page->setDesktopRect(Geom::Rect(Geom::Point(0, 0), rect->dimensions()));
+        }
     }
 }
 
@@ -536,12 +604,12 @@ bool PageManager::subset(SPAttr key, const gchar *value)
         case SPAttr::INKSCAPE_PAGEOPACITY:
             sp_ink_read_opacity(value, &this->background_color, 0xffffff00);
             break;
-        case SPAttr::INKSCAPE_PAGESHADOW:
-            this->shadow_size = value ? atoi(value) : 2;
-            break;
         case SPAttr::SHOWPAGESHADOW: // Depricated
             this->shadow_show.readOrUnset(value);
             break;
+        case SPAttr::INKSCAPE_DESK_CHECKERBOARD:
+            _checkerboard.readOrUnset(value);
+            return false; // propagate further
         default:
             return false;
     }
@@ -553,8 +621,9 @@ bool PageManager::subset(SPAttr key, const gchar *value)
  */
 bool PageManager::setDefaultAttributes(Inkscape::CanvasPage *item)
 {
+    const int shadow_size = 2; // fixed, not configurable; shadow changes size with zoom
     return item->setAttributes(border_on_top, border_show ? border_color : 0x0, background_color,
-                               border_show && shadow_show ? shadow_size : 0);
+                               border_show && shadow_show ? shadow_size : 0, _checkerboard);
 }
 
 /**
