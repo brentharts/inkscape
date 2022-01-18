@@ -97,7 +97,6 @@ public:
     Cairo::RefPtr<Cairo::ImageSurface> get_backing_store() const; // Background rotation preview
     Cairo::RefPtr<Cairo::Pattern>      get_background_pattern() const { return _background; }
 
-    // For a GTK bug (see SelectedStyle::on_opacity_changed()).
     void forced_redraws_start(int count, bool reset = true);
     void forced_redraws_stop() { _forced_redraw_limit = -1; }
 
@@ -199,7 +198,6 @@ private:
     std::string _cms_key;
     bool _cms_active = false;
 
-    // For a GTK bug (see SelectedStyle::on_opacity_changed()).
     int _forced_redraw_limit = -1;
     int _forced_redraw_count =  0;
 
