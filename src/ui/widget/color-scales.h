@@ -23,6 +23,7 @@ namespace UI {
 namespace Widget {
 
 class ColorSlider;
+class ColorWheel;
 
 enum SPColorScalesMode {
     SP_COLOR_SCALES_MODE_NONE = 0,
@@ -41,10 +42,10 @@ public:
     static gfloat getScaled(const Glib::RefPtr<Gtk::Adjustment> &a);
     static void setScaled(Glib::RefPtr<Gtk::Adjustment> &a, gfloat v, bool constrained = false);
 
-    ColorScales(SelectedColor &color, SPColorScalesMode mode);
+    ColorScales(SelectedColor &color, SPColorScalesMode mode, bool add_wheel);
     ~ColorScales() override;
 
-    virtual void _initUI(SPColorScalesMode mode);
+    virtual void _initUI(SPColorScalesMode mode, bool add_wheel);
 
     void setMode(SPColorScalesMode mode);
     SPColorScalesMode getMode() const;
@@ -67,7 +68,8 @@ protected:
     guint32 _getRgba32();
     void _updateSliders(guint channels);
     void _recalcColor();
-    void _updateDisplay();
+    void _updateDisplay(bool update_wheel = true);
+    void _wheelChanged();
 
     void _setRangeLimit(gdouble upper);
 
@@ -80,11 +82,14 @@ protected:
     Inkscape::UI::Widget::ColorSlider *_s[5]; /* Channel sliders */
     GtkWidget *_b[5];                         /* Spinbuttons */
     GtkWidget *_l[5];                         /* Labels */
+    Inkscape::UI::Widget::ColorWheel* _wheel = nullptr;
 
 private:
     // By default, disallow copy constructor and assignment operator
     ColorScales(ColorScales const &obj) = delete;
     ColorScales &operator=(ColorScales const &obj) = delete;
+
+    const Glib::ustring _prefs = "/color-selector";
 };
 
 class ColorScalesFactory : public Inkscape::UI::ColorSelectorFactory

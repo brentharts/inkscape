@@ -138,9 +138,7 @@ void ColorWheelHSLuvSelector::_initUI()
         &ColorWheelHSLuvSelector::_wheelChanged));
 
     // Expander
-    Gtk::Expander *wheel_frame = Gtk::manage(new Gtk::Expander(
-                _("Color Wheel")
-    ));
+    auto wheel_frame = Gtk::make_managed<Gtk::Expander>(_("Color Wheel"));
     wheel_frame->set_halign(Gtk::ALIGN_FILL);
     wheel_frame->set_valign(Gtk::ALIGN_FILL);
     wheel_frame->set_hexpand(true);
@@ -150,7 +148,7 @@ void ColorWheelHSLuvSelector::_initUI()
 
     // Signal
     wheel_frame->property_expanded().signal_changed().connect(
-            [=](){ _show_wheel(wheel_frame->get_expanded()); }
+        [=](){ _show_wheel(wheel_frame->get_expanded()); }
     );
 
     // Add Expander before the color wheel
@@ -162,13 +160,13 @@ void ColorWheelHSLuvSelector::_initUI()
     add(*grid);
     gint row = 0;
 
-    add_slider(grid, row++, "H:", "Hue", 360, _adjustments[HUE],
+    add_slider(grid, row++, _("H*:"), _("Hue"), 360, _adjustments[HUE],
             _sliders[HUE]);
-    add_slider(grid, row++, "S:", "Saturation", 100, _adjustments[SATURATION],
+    add_slider(grid, row++, _("S*:"), _("Saturation"), 100, _adjustments[SATURATION],
             _sliders[SATURATION]);
-    add_slider(grid, row++, "L:", "Lightness", 100, _adjustments[LIGHTNESS],
+    add_slider(grid, row++, _("L*:"), _("Lightness"), 100, _adjustments[LIGHTNESS],
             _sliders[LIGHTNESS]);
-    add_slider(grid, row++, "A:", "Alpha (opacity)", 100, _adjustments[ALPHA],
+    add_slider(grid, row++, _("A:"), _("Alpha (opacity)"), 100, _adjustments[ALPHA],
             _sliders[ALPHA]);
 
     // Setup maps

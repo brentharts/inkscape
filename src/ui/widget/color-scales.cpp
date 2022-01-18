@@ -21,7 +21,9 @@
 #include "ui/dialog-events.h"
 #include "ui/widget/color-scales.h"
 #include "ui/widget/color-slider.h"
+#include "ui/widget/ink-color-wheel.h"
 #include "ui/widget/scrollprotected.h"
+#include "preferences.h"
 
 #define CSC_CHANNEL_R (1 << 0)
 #define CSC_CHANNEL_G (1 << 1)
@@ -54,7 +56,7 @@ static const guchar *sp_color_scales_hsluv_map(guchar *map,
 
 const gchar *ColorScales::SUBMODE_NAMES[] = { N_("None"), N_("RGB"), N_("HSL"), N_("CMYK"), N_("HSV") };
 
-ColorScales::ColorScales(SelectedColor &color, SPColorScalesMode mode)
+ColorScales::ColorScales(SelectedColor &color, SPColorScalesMode mode, bool add_wheel)
     : Gtk::Grid()
     , _color(color)
     , _rangeLimit(255.0)
@@ -68,7 +70,7 @@ ColorScales::ColorScales(SelectedColor &color, SPColorScalesMode mode)
         _b[i] = nullptr;
     }
 
-    _initUI(mode);
+    _initUI(mode, add_wheel);
 
     _color.signal_changed.connect(sigc::mem_fun(this, &ColorScales::_onColorChanged));
     _color.signal_dragged.connect(sigc::mem_fun(this, &ColorScales::_onColorChanged));
@@ -83,17 +85,51 @@ ColorScales::~ColorScales()
     }
 }
 
-void ColorScales::_initUI(SPColorScalesMode mode)
+void ColorScales::_initUI(SPColorScalesMode mode, bool add_wheel)
 {
-    gint i;
-
     _updating = FALSE;
     _dragging = FALSE;
+
+    int row = 0;
+
+    if (add_wheel) {
+        // Wheel
+        _wheel = Gtk::manage(new Inkscape::UI::Widget::ColorWheel());
+        _wheel->set_halign(Gtk::ALIGN_FILL);
+        _wheel->set_valign(Gtk::ALIGN_FILL);
+        _wheel->set_hexpand(true);
+        _wheel->set_vexpand(true);
+        _wheel->show();
+
+        // update color picked in the wheel
+        _wheel->signal_color_changed().connect([=](){ _wheelChanged(); });
+
+        // Expander
+        auto wheel_frame = Gtk::make_managed<Gtk::Expander>(_("Color Wheel"));
+        wheel_frame->show();
+        wheel_frame->set_margin_bottom(3);
+        wheel_frame->set_halign(Gtk::ALIGN_FILL);
+        wheel_frame->set_valign(Gtk::ALIGN_FILL);
+        wheel_frame->set_hexpand(true);
+        wheel_frame->set_vexpand(false);
+
+        // wheel shown/hidden
+        wheel_frame->property_expanded().signal_changed().connect([=](){
+            bool visible = wheel_frame->get_expanded();
+            wheel_frame->set_vexpand(wheel_frame->get_expanded());
+            Inkscape::Preferences::get()->setBool(_prefs + "/wheel", visible);
+        });
+        wheel_frame->add(*_wheel);
+        attach(*wheel_frame, 0, row++, 3);
+
+        auto expanded = Inkscape::Preferences::get()->getBool(_prefs + "/wheel", false);
+        wheel_frame->set_expanded(expanded);
+    }
 
     GtkWidget *t = GTK_WIDGET(gobj());
 
     /* Create components */
-    for (i = 0; i < 5; i++) {
+    for (int i = 0; i < 5; i++) {
         /* Label */
         _l[i] = gtk_label_new("");
 
@@ -104,7 +140,8 @@ void ColorScales::_initUI(SPColorScalesMode mode)
         gtk_widget_set_margin_end(_l[i], XPAD);
         gtk_widget_set_margin_top(_l[i], YPAD);
         gtk_widget_set_margin_bottom(_l[i], YPAD);
-        gtk_grid_attach(GTK_GRID(t), _l[i], 0, i, 1, 1);
+        // attach(*_l[i], 0, row + i);
+        gtk_grid_attach(GTK_GRID(t), _l[i], 0, row + i, 1, 1);
 
         /* Adjustment */
         _a.push_back(Gtk::Adjustment::create(0.0, 0.0, _rangeLimit, 1.0, 10.0, 10.0));
@@ -117,7 +154,8 @@ void ColorScales::_initUI(SPColorScalesMode mode)
         _s[i]->set_margin_top(YPAD);
         _s[i]->set_margin_bottom(YPAD);
         _s[i]->set_hexpand(true);
-        gtk_grid_attach(GTK_GRID(t), _s[i]->gobj(), 1, i, 1, 1);
+        // attach(*_s[i], 1, row + i);
+        gtk_grid_attach(GTK_GRID(t), _s[i]->gobj(), 1, row + i, 1, 1);
 
         /* Spinbutton */
         auto spinbutton = Gtk::manage(new ScrollProtected<Gtk::SpinButton>(_a[i], 1.0));
@@ -132,7 +170,8 @@ void ColorScales::_initUI(SPColorScalesMode mode)
         gtk_widget_set_margin_bottom(_b[i], YPAD);
         gtk_widget_set_halign(_b[i], GTK_ALIGN_END);
         gtk_widget_set_valign(_b[i], GTK_ALIGN_CENTER);
-        gtk_grid_attach(GTK_GRID(t), _b[i], 2, i, 1, 1);
+        // attach(*_b[i], 2, row + i);
+        gtk_grid_attach(GTK_GRID(t), _b[i], 2, row + i, 1, 1);
 
         /* Signals */
         _a[i]->signal_value_changed().connect(sigc::bind(sigc::mem_fun(this, &ColorScales::adjustment_changed),i));
@@ -148,6 +187,29 @@ void ColorScales::_initUI(SPColorScalesMode mode)
 
     /* Initial mode is none, so it works */
     setMode(mode);
+
+    set_no_show_all();
+}
+
+void ColorScales::_wheelChanged()
+{
+    assert(_wheel != nullptr);
+
+    if (_updating) {
+        return;
+    }
+
+    double rgb[3] = { 0, 0, 0 };
+    _wheel->get_rgb(rgb[0], rgb[1], rgb[2]);
+
+    SPColor color(rgb[0], rgb[1], rgb[2]);
+
+    _updating = true;
+    _color.preserveICC();
+    _color.setHeld(_wheel->is_adjusting());
+    _color.setColor(color);
+    _updateDisplay(false);
+    _updating = false;
 }
 
 void ColorScales::_recalcColor()
@@ -182,7 +244,7 @@ void ColorScales::_recalcColor()
     _color.setColorAlpha(color, alpha);
 }
 
-void ColorScales::_updateDisplay()
+void ColorScales::_updateDisplay(bool update_wheel)
 {
 #ifdef DUMP_CHANGE_INFO
     g_message("ColorScales::_onColorChanged( this=%p, %f, %f, %f,   %f)", this, _color.color().v.c[0],
@@ -221,12 +283,19 @@ void ColorScales::_updateDisplay()
     }
 
     _updating = TRUE;
+
     setScaled(_a[0], c[0]);
     setScaled(_a[1], c[1]);
     setScaled(_a[2], c[2]);
     setScaled(_a[3], c[3]);
     setScaled(_a[4], c[4]);
     _updateSliders(CSC_CHANNELS_ALL);
+
+    if (_wheel && update_wheel) {
+        color.get_rgb_floatv(c);
+        _wheel->set_rgb(c[0], c[1], c[2]);
+    }
+
     _updating = FALSE;
 }
 
@@ -797,7 +866,8 @@ ColorScalesFactory::~ColorScalesFactory() = default;
 
 Gtk::Widget *ColorScalesFactory::createWidget(Inkscape::UI::SelectedColor &color) const
 {
-    Gtk::Widget *w = Gtk::manage(new ColorScales(color, _submode));
+    auto wheel = _submode == SP_COLOR_SCALES_MODE_HSL || _submode == SP_COLOR_SCALES_MODE_HSV;
+    Gtk::Widget *w = Gtk::manage(new ColorScales(color, _submode, wheel));
     return w;
 }
 
