@@ -90,6 +90,8 @@ private:
     ColorScales &operator=(ColorScales const &obj) = delete;
 
     const Glib::ustring _prefs = "/color-selector";
+    sigc::slot_iterator<sigc::slot<void ()>> _color_changed;
+    sigc::slot_iterator<sigc::slot<void ()>> _color_dragged;
 };
 
 class ColorScalesFactory : public Inkscape::UI::ColorSelectorFactory

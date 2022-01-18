@@ -72,8 +72,8 @@ ColorScales::ColorScales(SelectedColor &color, SPColorScalesMode mode, bool add_
 
     _initUI(mode, add_wheel);
 
-    _color.signal_changed.connect(sigc::mem_fun(this, &ColorScales::_onColorChanged));
-    _color.signal_dragged.connect(sigc::mem_fun(this, &ColorScales::_onColorChanged));
+    _color_changed = _color.signal_changed.connect(sigc::mem_fun(this, &ColorScales::_onColorChanged));
+    _color_dragged = _color.signal_dragged.connect(sigc::mem_fun(this, &ColorScales::_onColorChanged));
 }
 
 ColorScales::~ColorScales()
@@ -202,11 +202,15 @@ void ColorScales::_wheelChanged()
     SPColor color(rgb[0], rgb[1], rgb[2]);
 
     _updating = true;
+    _color_changed->block();
+    _color_dragged->block();
     _color.preserveICC();
     _color.setHeld(_wheel->is_adjusting());
     _color.setColor(color);
     _updateDisplay(false);
     _updating = false;
+    _color_changed->unblock();
+    _color_dragged->unblock();
 }
 
 void ColorScales::_recalcColor()
@@ -244,8 +248,8 @@ void ColorScales::_recalcColor()
 void ColorScales::_updateDisplay(bool update_wheel)
 {
 #ifdef DUMP_CHANGE_INFO
-    g_message("ColorScales::_onColorChanged( this=%p, %f, %f, %f,   %f)", this, _color.color().v.c[0],
-              _color.color().v.c[1], _color.color().v.c[2], _color.alpha());
+    g_message("ColorScales::_onColorChanged( this=%p, %f, %f, %f,   %f) %d", this, _color.color().v.c[0],
+              _color.color().v.c[1], _color.color().v.c[2], _color.alpha(), int(update_wheel));
 #endif
     gfloat tmp[3];
     gfloat c[5] = { 0.0, 0.0, 0.0, 0.0 };
@@ -290,7 +294,7 @@ void ColorScales::_updateDisplay(bool update_wheel)
 
     if (_wheel && update_wheel) {
         color.get_rgb_floatv(c);
-        _wheel->set_rgb(c[0], c[1], c[2]);
+        _wheel->set_rgb(c[0], c[1], c[2], false);
     }
 
     _updating = FALSE;
