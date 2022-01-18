@@ -122,41 +122,30 @@ public:
 
 protected:
 
-    void get_preferred_width_vfunc( int& minimum_width,  int& natural_width ) const override;
-    void get_preferred_height_vfunc(int& minimum_height, int& natural_height) const override;
+    void get_preferred_width_vfunc (int &minimum_width,  int &natural_width ) const override;
+    void get_preferred_height_vfunc(int &minimum_height, int &natural_height) const override;
 
     // Event handlers
-    bool on_scroll_event(        GdkEventScroll   *scroll_event)   override;
-    bool on_button_event(        GdkEventButton   *button_event);
-    bool on_button_press_event(  GdkEventButton   *button_event)   override;
-    bool on_button_release_event(GdkEventButton   *button_event)   override;
-    bool on_enter_notify_event(  GdkEventCrossing *crossing_event) override;
-    bool on_leave_notify_event(  GdkEventCrossing *crossing_event) override;
-    bool on_focus_in_event(      GdkEventFocus    *focus_event )   override;
-    bool on_key_press_event(     GdkEventKey      *key_event   )   override;
-    bool on_key_release_event(   GdkEventKey      *key_event   )   override;
-    bool on_motion_notify_event( GdkEventMotion   *motion_event)   override;
+    bool on_scroll_event        (GdkEventScroll*  ) override;
+    bool on_button_event        (GdkEventButton*  );
+    bool on_button_press_event  (GdkEventButton*  ) override;
+    bool on_button_release_event(GdkEventButton*  ) override;
+    bool on_enter_notify_event  (GdkEventCrossing*) override;
+    bool on_leave_notify_event  (GdkEventCrossing*) override;
+    bool on_focus_in_event      (GdkEventFocus*   ) override;
+    bool on_key_press_event     (GdkEventKey*     ) override;
+    bool on_key_release_event   (GdkEventKey*     ) override;
+    bool on_motion_notify_event (GdkEventMotion*  ) override;
 
-    // Painting
-    bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr) override;
-
-    void update_canvas_item_ctrl_sizes(int size_index);
+    void on_realize() override;
+    void on_size_allocate(Gtk::Allocation&) override;
+    bool on_draw(const Cairo::RefPtr<Cairo::Context>&) override;
 
 private:
-
-    // ======== Functions =======
-    void add_idle();
-    bool on_idle();
 
     // Drawing (internal overloads)
     void redraw_area(int x0, int y0, int x1, int y1);
     void redraw_area(Geom::Coord x0, Geom::Coord y0, Geom::Coord x1, Geom::Coord y1);
-
-    // Painting
-
-    // In order they are called in painting.
-    bool paint_rect_internal(PaintRectSetup const &setup, Geom::IntRect const &this_rect);
-    void paint_single_buffer(Geom::IntRect const &paint_rect, Cairo::RefPtr<Cairo::ImageSurface> &store);
 
     void add_clippath(const Cairo::RefPtr<Cairo::Context>& cr);
     void set_cursor();
@@ -220,31 +209,7 @@ private:
     bool _in_destruction = false;
 
     // ======= CAIRO ======= ... Keep in one place
-    Cairo::RefPtr<Cairo::Pattern> _background;         ///< The background of the widget.
-
-    // Used to update CanvasItemCtrl's when size changed.
-    class CanvasPrefObserver : public Inkscape::Preferences::Observer {
-    public:
-        CanvasPrefObserver(Inkscape::UI::Widget::Canvas *canvas, Glib::ustring const &path)
-            : Inkscape::Preferences::Observer(path)
-            , _canvas(canvas)
-        {
-            Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-            prefs->addObserver(*this);
-        }
-        ~CanvasPrefObserver() override = default;
-    private:
-        void notify(Inkscape::Preferences::Entry const &entry) override
-        {
-            if (entry.getEntryName() == "value") {
-                int size = entry.getIntLimited(3, 1, 15);
-                _canvas->update_canvas_item_ctrl_sizes(size);
-            }
-        }
-        Inkscape::UI::Widget::Canvas *_canvas = nullptr;
-    };
-
-    CanvasPrefObserver _size_observer;
+    Cairo::RefPtr<Cairo::Pattern> _background; ///< The background of the widget.
 
     // Opaque pointer to implementation
     friend class CanvasPrivate;
