@@ -61,7 +61,7 @@ static void add_slider(Gtk::Grid *widget, int row, const char *label,
     l->set_margin_end(XPAD);
     l->set_margin_top(YPAD);
     l->set_margin_bottom(YPAD);
-    l->set_halign(Gtk::ALIGN_FILL);
+    l->set_halign(Gtk::ALIGN_START);
     l->set_valign(Gtk::ALIGN_FILL);
     widget->attach(*l, 0, row, 1, 1);
 
