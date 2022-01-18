@@ -56,6 +56,7 @@
 #include "ui/tools/node-tool.h"
 
 #include "ui/contextmenu.h"
+#include "ui/util.h"
 #include "ui/widget/canvas.h"
 #include "ui/widget/imagetoggler.h"
 #include "ui/widget/shapeicon.h"
@@ -849,9 +850,10 @@ ObjectsPanel::ObjectsPanel() :
     _buttonsRow.pack_start(_buttonsPrimary, Gtk::PACK_SHRINK);
     _buttonsRow.pack_end(_buttonsSecondary, Gtk::PACK_SHRINK);
 
-    selection_color = _tree.get_style_context()->get_background_color(Gtk::STATE_FLAG_SELECTED);
-    _tree_style = _tree.signal_style_updated().connect([&](){
-        selection_color = _tree.get_style_context()->get_background_color(Gtk::STATE_FLAG_SELECTED);
+    selection_color = get_background_color(_tree.get_style_context(), Gtk::STATE_FLAG_SELECTED);
+    _tree_style = _tree.signal_style_updated().connect([=](){
+        selection_color = get_background_color(_tree.get_style_context(), Gtk::STATE_FLAG_SELECTED);
+
         if (!root_watcher) return;
         for (auto&& kv : root_watcher->child_watchers) {
             if (kv.second) {
@@ -930,7 +932,7 @@ void ObjectsPanel::selectionChanged(Selection *selected)
                 if (parent->getRepr() == root_watcher->getRepr()) {
                     watcher = root_watcher;
                 } else if (watcher) {
-                    if (watcher = watcher->findChild(parent->getRepr())) {
+                    if ((watcher = watcher->findChild(parent->getRepr()))) {
                         if (auto row = watcher->getRow()) {
                             cleanDummyChildren(*row);
                         }
@@ -1224,7 +1226,7 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
                 } else {
                     selection->set(item);
                 }
-            } else {
+            } else if (!context_menu) {
                 selection->set(item);
             }
 

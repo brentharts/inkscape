@@ -54,10 +54,8 @@
 #include "profile-manager.h"
 #include "rdf.h"
 
-#include "actions/actions-canvas-snapping.h"
 #include "actions/actions-edit-document.h"
-#include "actions/actions-tutorial.h"
-#include "actions/actions-text.h"
+#include "actions/actions-undo-document.h"
 #include "actions/actions-pages.h"
 
 #include "display/drawing.h"
@@ -70,6 +68,7 @@
 
 #include "io/dir-util.h"
 #include "layer-manager.h"
+#include "page-manager.h"
 #include "live_effects/lpeobject.h"
 #include "object/persp3d.h"
 #include "object/sp-defs.h"
@@ -156,6 +155,7 @@ SPDocument::SPDocument() :
     action_group = Gio::SimpleActionGroup::create();
     add_actions_edit_document(this);
     add_actions_pages(this);
+    add_actions_undo_document(this);
 }
 
 SPDocument::~SPDocument() {
@@ -302,6 +302,18 @@ void SPDocument::initialize_current_persp3d()
     }
 }
 **/
+
+/**
+ * Enables or disables document pages, usually used in import code.
+ */
+void SPDocument::setPages(bool enabled)
+{
+    if (enabled) {
+        getNamedView()->getPageManager()->enablePages();
+    } else {
+        getNamedView()->getPageManager()->disablePages();
+    }
+}
 
 void SPDocument::queueForOrphanCollection(SPObject *object) {
     g_return_if_fail(object != nullptr);
@@ -476,7 +488,7 @@ SPDocument *SPDocument::createDoc(Inkscape::XML::Document *rdoc,
     }
 
     /** Fix feComposite (pre-1.2 files) **/
-    if (sp_version_inside_range(document->root->version.inkscape, 0, 1, 1, 1)) {
+    if (sp_version_inside_range(document->root->version.inkscape, 0, 1, 1, 2)) {
         sp_file_fix_feComposite(document->getRoot());
     }
 
@@ -654,20 +666,25 @@ Inkscape::Util::Unit const* SPDocument::getDisplayUnit() const
 }
 
 /// Sets document scale (by changing viewBox)
-void SPDocument::setDocumentScale( double scaleX, double scaleY ) {
+void SPDocument::setDocumentScale(double scaleX, double scaleY) {
+    if (scaleX <= 0 || scaleY <= 0) {
+        g_warning("%s: Invalid scale, has to be positive: %f, %f", __func__, scaleX, scaleY);
+        return;
+    }
 
+    // since scale is doc size / viewbox size, then it follows that viewbox size is doc size / scale
     root->viewBox = Geom::Rect::from_xywh(
         root->viewBox.left(),
         root->viewBox.top(),
-        root->width.computed  * scaleX,
-        root->height.computed * scaleY );
+        root->width.computed  / scaleX,
+        root->height.computed / scaleY);
     root->viewBox_set = true;
     root->updateRepr();
 }
 
 /// Sets document scale (by changing viewBox, x and y scaling equal)
-void SPDocument::setDocumentScale( double scale ) {
-    setDocumentScale( scale, scale );
+void SPDocument::setDocumentScale(double scale) {
+    setDocumentScale(scale, scale);
 }
 
 /// Returns document scale as defined by width/height (in pixels) and viewBox (real world to

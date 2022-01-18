@@ -20,6 +20,7 @@
 
 #include "display/curve.h"
 #include "inkscape.h"
+#include "live_effects/effect.h"
 #include "live_effects/lpe-angle_bisector.h"
 #include "live_effects/lpe-attach-path.h"
 #include "live_effects/lpe-bendpath.h"
@@ -1208,18 +1209,20 @@ void Effect::doOnBeforeCommit()
             DocumentUndo::ScopedInsensitive _no_undo(sp_lpe_item->document);
             sp_lpe_item_update_patheffect(sp_lpe_item, false, true);
         }
-        _lpe_action == LPE_NONE;
+        _lpe_action = LPE_NONE;
         return;
     }
     Inkscape::LivePathEffect::SatelliteArrayParam *lpesatellites = nullptr;
+    Inkscape::LivePathEffect::OriginalSatelliteParam *lpesatellite = nullptr;
     std::vector<Inkscape::LivePathEffect::Parameter *>::iterator p;
     for (p = param_vector.begin(); p != param_vector.end(); ++p) {
         lpesatellites = dynamic_cast<SatelliteArrayParam *>(*p);
-        if (lpesatellites) {
+        lpesatellite = dynamic_cast<OriginalSatelliteParam *>(*p);
+        if (lpesatellites || lpesatellite) {
             break;
         }
     }
-    if (!lpesatellites) {
+    if (!lpesatellites && !lpesatellite) {
         return;
     }
     LPEAction lpe_action = _lpe_action;
@@ -1231,8 +1234,15 @@ void Effect::doOnBeforeCommit()
     if (sp_lpe_item) {
         sp_lpe_item_enable_path_effects(sp_lpe_item, false);
     }
-    lpesatellites->read_from_SVG();
-    for (auto &iter : lpesatellites->data()) {
+    std::vector<std::shared_ptr<SatelliteReference> > satelltelist;
+    if (lpesatellites) {
+        lpesatellites->read_from_SVG();
+        satelltelist = lpesatellites->data();
+    } else {
+        lpesatellite->read_from_SVG();
+        satelltelist.push_back(lpesatellite->lperef);
+    }
+    for (auto &iter : satelltelist) {
         SPObject *elemref;
         if (iter && iter->isAttached() && (elemref = iter->getObject())) {
             if (auto *item = dynamic_cast<SPItem *>(elemref)) {
@@ -1243,9 +1253,15 @@ void Effect::doOnBeforeCommit()
                     case LPE_TO_OBJECTS:
                         if (item->isHidden()) {
                             // We set updating because item signal fire a deletion that reset whole parameter satellites
-                            lpesatellites->setUpdating(true);
-                            item->deleteObject(true);
-                            lpesatellites->setUpdating(false);
+                            if (lpesatellites) {
+                                lpesatellites->setUpdating(true);
+                                item->deleteObject(true);
+                                lpesatellites->setUpdating(false);
+                            } else {
+                                lpesatellite->setUpdating(true);
+                                item->deleteObject(true);
+                                lpesatellite->setUpdating(false);
+                            }
                         } else {
                             elemnode->removeAttribute("sodipodi:insensitive");
                             SPDefs *defs = dynamic_cast<SPDefs *>(elemref->parent);
@@ -1257,9 +1273,15 @@ void Effect::doOnBeforeCommit()
 
                     case LPE_ERASE:
                         // We set updating because item signal fire a deletion that reset whole parameter satellites
-                        lpesatellites->setUpdating(true);
-                        item->deleteObject(true);
-                        lpesatellites->setUpdating(false);
+                        if (lpesatellites) {
+                            lpesatellites->setUpdating(true);
+                            item->deleteObject(true);
+                            lpesatellites->setUpdating(false);
+                        } else {
+                            lpesatellite->setUpdating(true);
+                            item->deleteObject(true);
+                            lpesatellite->setUpdating(false);
+                        }
                         break;
 
                     case LPE_VISIBILITY:
@@ -1286,7 +1308,7 @@ void Effect::doOnBeforeCommit()
         }
     }
     if (lpe_action == LPE_ERASE || lpe_action == LPE_TO_OBJECTS) {
-        lpesatellites->clear();
+        satelltelist.clear();
     }
     if (sp_lpe_item) {
         sp_lpe_item_enable_path_effects(sp_lpe_item, true);
@@ -1302,14 +1324,16 @@ void Effect::processObjects(LPEAction lpe_action)
     }
     _lpe_action = lpe_action;
     Inkscape::LivePathEffect::SatelliteArrayParam *lpesatellites = nullptr;
+    Inkscape::LivePathEffect::OriginalSatelliteParam *lpesatellite = nullptr;
     std::vector<Inkscape::LivePathEffect::Parameter *>::iterator p;
     for (p = param_vector.begin(); p != param_vector.end(); ++p) {
         lpesatellites = dynamic_cast<SatelliteArrayParam *>(*p);
-        if (lpesatellites) {
+        lpesatellite = dynamic_cast<OriginalSatelliteParam *>(*p);
+        if (lpesatellites || lpesatellite) {
             break;
         }
     }
-    if (!lpesatellites) {
+    if (!lpesatellites && !lpesatellite) {
         return;
     }
     SPDocument *document = getSPDoc();
@@ -1320,10 +1344,15 @@ void Effect::processObjects(LPEAction lpe_action)
     if (!document || !sp_lpe_item) {
         return;
     }
-    // we check the items are not deleted
-    lpesatellites->read_from_SVG();
-    // end
-    for (auto &iter : lpesatellites->data()) {
+    std::vector<std::shared_ptr<SatelliteReference> > satelltelist;
+    if (lpesatellites) {
+        lpesatellites->read_from_SVG();
+        satelltelist = lpesatellites->data();
+    } else {
+        lpesatellite->read_from_SVG();
+        satelltelist.push_back(lpesatellite->lperef);
+    }
+    for (auto &iter : satelltelist) {
         SPObject *elemref;
         if (iter && iter->isAttached() && (elemref = iter->getObject())) {
             if (auto *item = dynamic_cast<SPItem *>(elemref)) {

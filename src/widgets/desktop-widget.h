@@ -109,6 +109,7 @@ private:
     // The root vbox of the window layout.
     Gtk::Box *_vbox;
 
+    Gtk::Paned *_tbbox;
     Gtk::Box *_hbox;
     Inkscape::UI::Dialog::DialogContainer *_container = nullptr;
     Inkscape::UI::Dialog::DialogMultipaned *_columns;
@@ -216,6 +217,7 @@ public:
     void toggle_rulers();
     void sticky_zoom_toggled();
 
+    Gtk::Widget *get_tool_toolbox() const { return Glib::wrap(tool_toolbox); }
 private:
     GtkWidget *tool_toolbox;
     GtkWidget *aux_toolbox;

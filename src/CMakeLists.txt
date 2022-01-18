@@ -223,8 +223,6 @@ set(inkscape_SRC
   actions/actions-file-window.cpp
   actions/actions-file.h
   actions/actions-file.cpp
-  actions/actions-fit-canvas.h
-  actions/actions-fit-canvas.cpp
   actions/actions-helper.h
   actions/actions-helper.cpp
   actions/actions-help-url.h
@@ -257,6 +255,8 @@ set(inkscape_SRC
   actions/actions-tutorial.cpp
   actions/actions-transform.h
   actions/actions-transform.cpp
+  actions/actions-undo-document.h
+  actions/actions-undo-document.cpp
   actions/actions-view-mode.h
   actions/actions-view-mode.cpp
   actions/actions-view-window.h

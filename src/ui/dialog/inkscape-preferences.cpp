@@ -61,6 +61,7 @@
 #include "ui/interface.h"
 #include "ui/shortcuts.h"
 #include "ui/modifiers.h"
+#include "ui/util.h"
 #include "ui/widget/style-swatch.h"
 #include "ui/widget/canvas.h"
 #include "ui/themes.h"
@@ -90,6 +91,8 @@ using Inkscape::UI::Widget::PrefRadioButtons;
 using Inkscape::UI::Widget::PrefSpinButton;
 using Inkscape::UI::Widget::StyleSwatch;
 using Inkscape::CMSSystem;
+using Inkscape::IO::Resource::get_filename;
+using Inkscape::IO::Resource::UIS;
 
 #define REMOVE_SPACES(x)                                                                                               \
     x.erase(0, x.find_first_not_of(' '));                                                                              \
@@ -440,7 +443,9 @@ void InkscapePreferences::on_search_changed()
         _page_list.set_cursor(Gtk::TreePath(iter));
     } else if (_num_results == 0 && key != "") {
         _page_list.set_has_tooltip(false);
-        // TODO:Show all contents
+        _show_all = true;
+        _page_list_model_filter->refilter();
+        _show_all = false;
         show_not_found();
     } else {
         _page_list.expand_all();
@@ -646,6 +651,8 @@ void InkscapePreferences::highlight_results(Glib::ustring const &key, Gtk::TreeM
  */
 bool InkscapePreferences::recursive_filter(Glib::ustring &key, Gtk::TreeModel::const_iterator const &iter)
 {
+    if(_show_all)
+        return true;
     auto row_label = iter->get_value(_page_list_columns._col_name).lowercase();
     if (key == "") {
         return true;
@@ -1141,7 +1148,8 @@ void InkscapePreferences::resetIconsColors(bool themechange)
         // This is a hack to fix a proble style is not updated enough fast on
         // change from dark to bright themes
         if (themechange) {
-            base_color = _symbolic_base_color.get_style_context()->get_background_color();
+            auto sc = _symbolic_base_color.get_style_context();
+            base_color = get_background_color(sc);
         }
         SPColor base_color_sp(base_color.get_red(), base_color.get_green(), base_color.get_blue());
         //we copy highlight to not use
@@ -1682,7 +1690,7 @@ void InkscapePreferences::initPageUI()
         auto apply = Gtk::make_managed<Gtk::Button>(_("Apply"));
         apply->set_tooltip_text(_("Apply font size changes to the UI"));
         apply->set_valign(Gtk::ALIGN_FILL);
-        apply->set_margin_right(5);
+        apply->set_margin_end(5);
         reset->set_valign(Gtk::ALIGN_FILL);
         space->add(*apply);
         space->add(*reset);
@@ -1811,34 +1819,17 @@ void InkscapePreferences::initPageUI()
 
     // Toolbars
     _page_toolbars.add_group_header(_("Toolbars"));
-    {
-        auto custom = Gtk::make_managed<Gtk::MenuButton>();
-        auto dlg = Gtk::make_managed<Gtk::Popover>();
-        custom->set_label(_("Customize..."));
-        custom->set_popover(*dlg);
-        custom->set_direction(Gtk::ARROW_DOWN);
-        auto toolbox = Glib::wrap(ToolboxFactory::createToolToolbox());
-        toolbox->show_all();
-        const int MARGIN = 6;
-        toolbox->set_margin_start(MARGIN);
-        toolbox->set_margin_end(MARGIN);
-        toolbox->set_margin_top(MARGIN);
-        toolbox->set_margin_bottom(MARGIN);
+    try {
+        auto builder = Gtk::Builder::create_from_file(get_filename(UIS, "toolbar-tool-prefs.ui"));
+        Gtk::Widget* toolbox = nullptr;
+        builder->get_widget("tool-toolbar-prefs", toolbox);
 
         sp_traverse_widget_tree(toolbox, [=](Gtk::Widget* widget){
-            if (auto flowbox = dynamic_cast<Gtk::FlowBox*>(widget)) {
-                flowbox->set_max_children_per_line(9);
-                flowbox->set_selection_mode();
-            }
-            else if (auto button = dynamic_cast<Gtk::ToggleButton*>(widget)) {
+            if (auto button = dynamic_cast<Gtk::ToggleButton*>(widget)) {
                 assert(GTK_IS_ACTIONABLE(widget->gobj()));
                 // do not execute any action:
                 gtk_actionable_set_action_name(GTK_ACTIONABLE(widget->gobj()), "");
 
-                button->set_margin_start(MARGIN / 2);
-                button->set_margin_end(MARGIN / 2);
-                button->set_margin_top(MARGIN / 2);
-                button->set_margin_bottom(MARGIN / 2);
                 button->set_sensitive();
                 auto path = ToolboxFactory::get_tool_visible_buttons_path(sp_get_action_target(button));
                 auto visible = Inkscape::Preferences::get()->getBool(path, true);
@@ -1849,9 +1840,7 @@ void InkscapePreferences::initPageUI()
             }
             return false;
         });
-
-        dlg->add(*toolbox);
-        _page_toolbars.add_line(false, _("Toolbox buttons:"), *custom, "", _("Select visible tool buttons"), false);
+        _page_toolbars.add_line(false, "", *toolbox, "", _("Select visible tool buttons"), true);
 
         struct tbar_info {const char* label; const char* prefs;} toolbars[] = {
             {_("Toolbox icon size:"),     ToolboxFactory::tools_icon_size},
@@ -1869,7 +1858,6 @@ void InkscapePreferences::initPageUI()
             for (int i = min; i <= max; i += 8) {
                 slider->getSlider()->add_mark(i, Gtk::POS_BOTTOM, i % min ? "" : (std::to_string(100 * i / min) + "%").c_str());
             }
-            slider->set_margin_bottom(MARGIN);
             _page_toolbars.add_line(false, tbox.label, *slider, "", _("Adjust toolbar icon size"));
         }
 
@@ -1878,6 +1866,8 @@ void InkscapePreferences::initPageUI()
             { _("Advanced"), 0, _("Expose all snapping options for manual control") }
         };
         _page_toolbars.add_line(false, _("Snap controls bar:"), *Gtk::make_managed<PrefRadioButtons>(snap, "/toolbox/simplesnap"), "", "");
+    } catch (const Glib::Error &ex) {
+        g_error("Couldn't load toolbar-tool-prefs user interface file.");
     }
 
     this->AddPage(_page_toolbars, _("Toolbars"), iter_ui, PREFS_PAGE_UI_TOOLBARS);
@@ -2774,8 +2764,8 @@ void InkscapePreferences::initPageBitmaps()
     }
 
     {
-        Glib::ustring labels[] = {_("Include"), _("Embed"), _("Link")};
-        Glib::ustring values[] = {"include", "embed", "link"};
+        Glib::ustring labels[] = {_("Include"), _("Pages"), _("Embed"), _("Link")};
+        Glib::ustring values[] = {"include", "pages", "embed", "link"};
         _svg_link.init("/dialogs/import/import_mode_svg", labels, values, G_N_ELEMENTS(values), "include");
         _page_bitmaps.add_line( false, _("SVG import mode:"), _svg_link, "", "", false);
     }
@@ -3125,7 +3115,8 @@ void InkscapePreferences::on_modifier_selection_changed()
 {
     _kb_is_updated = true;
     Gtk::TreeStore::iterator iter = _mod_tree.get_selection()->get_selected();
-    bool selected = (iter);
+    auto selected = static_cast<bool>(iter);
+
     _kb_mod_ctrl.set_sensitive(selected);
     _kb_mod_shift.set_sensitive(selected);
     _kb_mod_alt.set_sensitive(selected);

@@ -136,7 +136,9 @@ LPEMirrorSymmetry::doAfterEffect (SPLPEItem const* lpeitem, SPCurve *curve)
                 active = true;
             }
         }
-        if (!active) {
+        // we need to call this when the LPE is "mirrored 1 or + times in split mode"
+        // to prevent satellite hidden as in prev status
+        if (!active && !is_load && prev_split && !prev_discard_orig_path) {
             lpesatellites.clear();
             return;
         }
@@ -145,6 +147,8 @@ LPEMirrorSymmetry::doAfterEffect (SPLPEItem const* lpeitem, SPCurve *curve)
         m *= sp_lpe_item->transform;
         toMirror(m);
     }
+    prev_split = split_items;
+    prev_discard_orig_path = discard_orig_path;
 }
 
 Gtk::Widget *

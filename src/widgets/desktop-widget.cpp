@@ -60,6 +60,7 @@
 #include "ui/dialog/dialog-multipaned.h"
 #include "ui/dialog/dialog-window.h"
 #include "ui/tools/box3d-tool.h"
+#include "ui/util.h"
 #include "ui/uxmanager.h"
 #include "ui/widget/button.h"
 #include "ui/widget/canvas.h"
@@ -84,10 +85,6 @@
 #include "ui/widget/preview.h"
 #include "ui/dialog/color-item.h"
 #include "widgets/ege-paint-def.h"
-
-#ifdef GDK_WINDOWING_QUARTZ
-#include <gtkosxapplication.h>
-#endif
 
 using Inkscape::DocumentUndo;
 using Inkscape::UI::Dialog::DialogContainer;
@@ -230,6 +227,11 @@ SPDesktopWidget::SPDesktopWidget()
     /* DesktopHBox (Vertical toolboxes, canvas) */
     dtw->_hbox = Gtk::manage(new Gtk::Box());
     dtw->_hbox->set_name("DesktopHbox");
+
+    dtw->_tbbox = Gtk::manage(new Gtk::Paned(Gtk::ORIENTATION_HORIZONTAL));
+    dtw->_tbbox->set_name("ToolboxCanvasPaned");
+    dtw->_hbox->pack_start(*dtw->_tbbox, true, true);
+
     dtw->_vbox->pack_end(*dtw->_hbox, true, true);
 
     dtw->_top_toolbars = Gtk::make_managed<Gtk::Grid>();
@@ -250,15 +252,18 @@ SPDesktopWidget::SPDesktopWidget()
 
     dtw->tool_toolbox = ToolboxFactory::createToolToolbox();
     ToolboxFactory::setOrientation( dtw->tool_toolbox, GTK_ORIENTATION_VERTICAL );
-    dtw->_hbox->pack_start(*Glib::wrap(dtw->tool_toolbox), false, true);
+    dtw->_tbbox->pack1(*Glib::wrap(dtw->tool_toolbox), false, true);
 
     auto set_visible_buttons = [=](GtkWidget* tb) {
         int buttons_before_separator = 0;
-        Gtk::Widget* last_one = nullptr;
+        Gtk::Widget* last_sep = nullptr;
+        Gtk::FlowBox* last_box = nullptr;
         sp_traverse_widget_tree(Glib::wrap(tb), [&](Gtk::Widget* widget) {
             if (auto flowbox = dynamic_cast<Gtk::FlowBox*>(widget)) {
                 flowbox->show();
                 flowbox->set_no_show_all();
+                flowbox->set_max_children_per_line(1);
+                last_box = flowbox;
             }
             else if (auto btn = dynamic_cast<Gtk::Button*>(widget)) {
                 auto name = sp_get_action_target(widget);
@@ -267,28 +272,29 @@ SPDesktopWidget::SPDesktopWidget()
                 if (show) {
                     parent->show();
                     ++buttons_before_separator;
-                    last_one = nullptr;
+                    // keep the max_children up to date improves display.
+                    last_box->set_max_children_per_line(buttons_before_separator);
+                    last_sep = nullptr;
                 }
                 else {
                     parent->hide();
                 }
             }
             else if (auto sep = dynamic_cast<Gtk::Separator*>(widget)) {
-                auto parent = sep->get_parent();
                 if (buttons_before_separator <= 0) {
-                    parent->hide();
+                    sep->hide();
                 }
                 else {
-                    parent->show();
+                    sep->show();
                     buttons_before_separator = 0;
-                    last_one = parent;
+                    last_sep = sep;
                 }
             }
             return false;
         });
-        if (last_one) {
+        if (last_sep) {
             // hide trailing separator
-            last_one->hide();
+            last_sep->hide();
         }
     };
     auto set_toolbar_prefs = [=]() {
@@ -328,7 +334,7 @@ SPDesktopWidget::SPDesktopWidget()
     _container = Gtk::manage(new DialogContainer());
     _columns = _container->get_columns();
     _columns->set_dropzone_sizes(2, -1);
-    dtw->_hbox->pack_start(*_container, false, true);
+    dtw->_tbbox->pack2(*_container, true, true);
 
     _canvas_grid->set_hexpand(true);
     _canvas_grid->set_vexpand(true);
@@ -688,19 +694,6 @@ void SPDesktopWidget::on_size_allocate(Gtk::Allocation &allocation)
     desktop->zoom_absolute(midpoint_dt, zoom, false);
 }
 
-#ifdef GDK_WINDOWING_QUARTZ
-static GtkMenuItem *_get_help_menu(GtkMenuShell *menu)
-{
-    // Assume "Help" is the last child in menu
-    GtkMenuItem *last = nullptr;
-    auto callback = [](GtkWidget *widget, gpointer data) {
-        *static_cast<GtkMenuItem **>(data) = GTK_MENU_ITEM(widget);
-    };
-    gtk_container_foreach(GTK_CONTAINER(menu), callback, &last);
-    return last;
-}
-#endif
-
 /**
  * Callback to realize desktop widget.
  */
@@ -744,21 +737,6 @@ void SPDesktopWidget::on_realize()
         }
         INKSCAPE.themecontext->getChangeThemeSignal().emit();
     }
-
-#ifdef GDK_WINDOWING_QUARTZ
-    // native macOS menu
-    auto osxapp = gtkosx_application_get();
-    auto menushell = static_cast<Gtk::MenuShell *>(dtw->menubar());
-    if (osxapp && menushell && window) {
-        menushell->hide();
-        gtkosx_application_set_menu_bar(osxapp, menushell->gobj());
-        // using quartz accelerators gives menu shortcuts priority over everything else,
-        // messes up text input because Inkscape has single key shortcuts (e.g. 1-6).
-        gtkosx_application_set_use_quartz_accelerators(osxapp, false);
-        gtkosx_application_set_help_menu(osxapp, _get_help_menu(menushell->gobj()));
-        gtkosx_application_set_window_menu(osxapp, nullptr);
-    }
-#endif
 }
 
 /* This is just to provide access to common functionality from sp_desktop_widget_realize() above
@@ -1170,7 +1148,8 @@ void SPDesktopWidget::layoutWidgets()
         _top_toolbars->child_property_height(snap) =  2;
         snap.set_valign(Gtk::ALIGN_CENTER);
     }
-    _top_toolbars->resize_children();
+
+    Inkscape::UI::resize_widget_children(_top_toolbars);
 }
 
 Gtk::Toolbar *
@@ -1236,17 +1215,14 @@ SPDesktopWidget::isToolboxButtonActive (const gchar* id)
 
     // The toolbutton could be a few different types so try casting to
     // each of them.
-    // TODO: This will be simpler in Gtk+ 4 when Actions and ToolItems have gone
+    // TODO: This will be simpler in Gtk+ 4 when ToolItems have gone
     auto toggle_button      = dynamic_cast<Gtk::ToggleButton *>(thing);
-    auto toggle_action      = dynamic_cast<Gtk::ToggleAction *>(thing);
     auto toggle_tool_button = dynamic_cast<Gtk::ToggleToolButton *>(thing);
 
     if ( !thing ) {
         //g_message( "Unable to locate item for {%s}", id );
     } else if (toggle_button) {
         isActive = toggle_button->get_active();
-    } else if (toggle_action) {
-        isActive = toggle_action->get_active();
     } else if (toggle_tool_button) {
         isActive = toggle_tool_button->get_active();
     } else {
@@ -1260,9 +1236,7 @@ void SPDesktopWidget::setToolboxPosition(Glib::ustring const& id, GtkPositionTyp
 {
     // Note - later on these won't be individual member variables.
     GtkWidget* toolbox = nullptr;
-    if (id == "ToolToolbar") {
-        toolbox = tool_toolbox;
-    } else if (id == "AuxToolbar") {
+    if (id == "AuxToolbar") {
         toolbox = aux_toolbox;
     } else if (id == "CommandsToolbar") {
         toolbox = commands_toolbox;

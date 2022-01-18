@@ -407,16 +407,16 @@ void ObjectSet::deleteItems()
     std::vector<SPItem*> selected(items().begin(), items().end());
     clear();
     sp_selection_delete_impl(selected);
-    if (SPDesktop *d = desktop()) {
-        d->layerManager().currentLayer()->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
+    if (SPDesktop *dt = desktop()) {
+        dt->layerManager().currentLayer()->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
 
-        /* a tool may have set up private information in it's selection context
+        /* A tool may have set up private information in it's selection context
          * that depends on desktop items.  I think the only sane way to deal with
-         * this currently is to reset the current tool, which will reset it's
+         * this currently is to reset the event context which will reset it's
          * associated selection context.  For example: deleting an object
          * while moving it around the canvas.
          */
-        set_active_tool (d, get_active_tool(d));
+        dt->setEventContext(dt->getEventContext()->getPrefsPath());
     }
 
     if(document()) {
@@ -467,6 +467,29 @@ void ObjectSet::duplicate(bool suppressDone, bool duplicateLayer)
 
     clear();
 
+    std::vector<SPItem *> items;
+    for(auto old_repr : reprs) {
+        SPItem *item = dynamic_cast<SPItem *>(doc->getObjectByRepr(old_repr));
+        if (item) {
+            items.push_back(item);
+            SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(item);
+            if (lpeitem) {
+                for (auto satellite : lpeitem->get_satellites(false, true)) {
+                    if (satellite) {
+                        SPItem *item2 = dynamic_cast<SPItem *>(satellite);
+                        if (item2 && std::find(items.begin(), items.end(), item2) == items.end()) {
+                            items.push_back(item2);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    for(auto item : items) {
+        if (std::find(reprs.begin(), reprs.end(), item->getRepr()) == reprs.end()) {
+            reprs.push_back(item->getRepr());
+        }
+    }
     // sorting items from different parents sorts each parent's subset without possibly mixing
     // them, just what we need
     sort(reprs.begin(),reprs.end(),sp_repr_compare_position_bool);
@@ -494,15 +517,6 @@ void ObjectSet::duplicate(bool suppressDone, bool duplicateLayer)
 
         if (!duplicateLayer || sp_repr_is_def(old_repr)) {
             parent->appendChild(copy);
-            // 1.1 COPYPASTECLONESTAMPLPEBUG
-            SPItem *newitem = dynamic_cast<SPItem *>(doc->getObjectByRepr(copy));
-            if (_desktop && newitem) {
-                remove_hidder_filter(newitem);
-                gchar * id = strdup(copy->attribute("id"));
-                copy = sp_lpe_item_remove_autoflatten(newitem, id)->getRepr();
-                g_free(id);
-            }
-            // END 1.1 COPYPASTECLONESTAMPLPEBUG fix
         } else if (sp_repr_is_layer(old_repr)) {
             parent->addChild(copy, old_repr);
         } else {
@@ -511,20 +525,12 @@ void ObjectSet::duplicate(bool suppressDone, bool duplicateLayer)
             // text_relink will ignore extra nodes in layer children
             copies[0]->appendChild(copy);
         }
-
+        SPObject *old_obj = doc->getObjectByRepr(old_repr);
+        SPObject *new_obj = doc->getObjectByRepr(copy);
+        old_obj->setSuccessor(new_obj);
         if (relink_clones) {
-            SPObject *old_obj = doc->getObjectByRepr(old_repr);
-            SPObject *new_obj = doc->getObjectByRepr(copy);
             add_ids_recursive(old_ids, old_obj);
             add_ids_recursive(new_ids, new_obj);
-        }
-
-        if (fork_livepatheffects) {
-            SPObject *new_obj = doc->getObjectByRepr(copy);
-            SPLPEItem *newLPEObj = dynamic_cast<SPLPEItem *>(new_obj);
-            if (newLPEObj) {
-                newLPEObj->forkPathEffectsIfNecessary(1);
-            }
         }
 
         copies.push_back(copy);
@@ -539,7 +545,12 @@ void ObjectSet::duplicate(bool suppressDone, bool duplicateLayer)
     if (!duplicateLayer) {
         // compute newsel, by removing def nodes from copies
         for (auto node : copies) {
-            if (!sp_repr_is_def(node)) {
+            // hide on duple this is done to dont show autoselected hidden LPE items satellites
+            // is only a make up if at any point we think is better keep selected items reselected on duple
+            // please roll back or make some more loops to handle well, keep as it for speed
+            // and simplicity
+            SPItem *itm = dynamic_cast<SPItem *>(doc->getObjectByRepr(node));
+            if (!sp_repr_is_def(node) && (!itm || !itm->isHidden())) {
                 newsel.push_back(node);
             }
         }
@@ -602,8 +613,25 @@ void ObjectSet::duplicate(bool suppressDone, bool duplicateLayer)
             }
         }
     }
-
-
+    for (auto node : copies) {
+        if (fork_livepatheffects) {
+            SPObject *new_obj = doc->getObjectByRepr(node);
+            SPLPEItem *newLPEObj = dynamic_cast<SPLPEItem *>(new_obj);
+            if (newLPEObj) {
+                // force always fork with 0 some issues on slices drom slices dont fork
+                newLPEObj->forkPathEffectsIfNecessary(0);
+                sp_lpe_item_update_patheffect(newLPEObj, false, true);
+            }
+        }
+    }
+    for(auto old_repr : reprs) {
+        SPObject *old_obj = doc->getObjectByRepr(old_repr);
+        if (old_obj->_successor) {
+            sp_object_unref(old_obj->_successor, nullptr);
+            old_obj->_successor = nullptr;
+            
+        }
+    }
     if ( !suppressDone ) {
         DocumentUndo::done(document(), _("Duplicate"), INKSCAPE_ICON("edit-duplicate"));
     }
@@ -4384,6 +4412,8 @@ ObjectSet::clearSiblingStates()
 /**
  * \param with_margins margins defined in the xml under <sodipodi:namedview>
  *                     "fit-margin-..." attributes.  See SPDocument::fitToRect.
+ *
+ * WARNING: this is a page naive and it will break multi page documents.
  */
 bool
 fit_canvas_to_drawing(SPDocument *doc, bool with_margins)
@@ -4408,25 +4438,6 @@ fit_canvas_to_drawing(SPDesktop *desktop)
         DocumentUndo::done(desktop->getDocument(), _("Fit Page to Drawing"), "");
     }
 }
-
-/**
- * Fits canvas to selection or drawing with margins from <sodipodi:namedview>
- * "fit-margin-..." attributes.  See SPDocument::fitToRect
- */
-void fit_canvas_to_selection_or_drawing(SPDesktop *desktop) {
-    g_return_if_fail(desktop != nullptr);
-    SPDocument *doc = desktop->getDocument();
-
-    g_return_if_fail(doc != nullptr);
-    g_return_if_fail(desktop->selection != nullptr);
-
-    bool const changed = ( desktop->selection->isEmpty()
-                           ? fit_canvas_to_drawing(doc, true)
-                           : desktop->selection->fitCanvas(true,true));
-    if (changed) {
-        DocumentUndo::done(desktop->getDocument(), _("Fit Page to Selection or Drawing"), "");
-    }
-};
 
 static void itemtree_map(void (*f)(SPItem *, SPDesktop *), SPObject *root, SPDesktop *desktop) {
     // don't operate on layers

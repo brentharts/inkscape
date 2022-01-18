@@ -66,6 +66,25 @@ std::vector<SPObject *> SatelliteParam::param_get_satellites()
 bool SatelliteParam::param_readSVGValue(const gchar *strvalue)
 {
     if (strvalue) {
+        bool write = false;
+        auto lpeitems = param_effect->getCurrrentLPEItems();
+        if (!lpeitems.size() && !param_effect->is_applied && !param_effect->getSPDoc()->isSeeking()) {
+            SPObject * old_ref = param_effect->getSPDoc()->getObjectByHref(strvalue);
+            if (old_ref) {
+                SPObject * successor = old_ref->_successor;
+                Glib::ustring id = "";
+                // cast to effect is not possible now
+                if (!g_strcmp0("clone_original", param_effect->getLPEObj()->getAttribute("effect"))) {
+                    id = strvalue;
+                }
+                if (successor) {
+                    id = successor->getId();
+                    id.insert(id.begin(), '#');
+                    write = true;
+                }
+                strvalue = id.c_str();
+            }
+        }
         SPObject *old_ref = lperef->getObject();
         if (old_ref) {
             unlink();
@@ -83,6 +102,12 @@ bool SatelliteParam::param_readSVGValue(const gchar *strvalue)
                 g_warning("%s", e.what());
                 lperef->detach();
             }
+        } else if (!lpeitems.size() && !param_effect->is_applied && !param_effect->getSPDoc()->isSeeking()) {
+            param_write_to_repr("");
+        }
+        if (write) {
+            auto full = param_getSVGValue();
+            param_write_to_repr(full.c_str());
         }
         return true;
     }
