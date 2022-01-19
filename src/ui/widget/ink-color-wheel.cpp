@@ -635,12 +635,14 @@ bool ColorWheelHSL::on_button_press_event(GdkEventButton* event)
     double y = event->y;
 
     if (_is_in_ring(x, y) ) {
+        _adjusting = true;
         _mode = DragMode::HUE;
         grab_focus();
         _focus_on_ring = true;
         _update_ring_color(x, y);
         return true;
     } else if (_is_in_triangle(x, y)) {
+        _adjusting = true;
         _mode = DragMode::SATURATION_VALUE;
         grab_focus();
         _focus_on_ring = false;

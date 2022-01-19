@@ -72,7 +72,7 @@ protected:
     guint32 _getRgba32();
     void _updateSliders(guint channels);
     void _recalcColor();
-    void _updateDisplay();
+    void _updateDisplay(bool update_wheel = true);
     void _showWheel(bool visible);
     void _updateWheelLayout();
 
@@ -91,6 +91,8 @@ protected:
     bool _wheel_visible;
 
     const Glib::ustring _prefs = "/color-scales";
+    sigc::slot_iterator<sigc::slot<void ()>> _color_changed;
+    sigc::slot_iterator<sigc::slot<void ()>> _color_dragged;
 
 private:
     // By default, disallow copy constructor and assignment operator

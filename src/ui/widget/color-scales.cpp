@@ -74,8 +74,8 @@ ColorScales<MODE>::ColorScales(SelectedColor &color)
 
     _initUI();
 
-    _color.signal_changed.connect(sigc::mem_fun(this, &ColorScales::_onColorChanged));
-    _color.signal_dragged.connect(sigc::mem_fun(this, &ColorScales::_onColorChanged));
+    _color_changed = _color.signal_changed.connect([this](){ _onColorChanged(); });
+    _color_dragged = _color.signal_dragged.connect([this](){ _onColorChanged(); });
 }
 
 template <SPColorScalesMode MODE>
@@ -115,8 +115,7 @@ void ColorScales<MODE>::_initUI()
         _wheel->set_margin_bottom(4 * YPAD);
 
         /* Signal */
-        _wheel->signal_color_changed().connect(sigc::mem_fun(*this,
-            &ColorScales<MODE>::_wheelChanged));
+        _wheel->signal_color_changed().connect([this](){ _wheelChanged(); });
 
         /* Expander */
         // Label icon
@@ -203,14 +202,10 @@ void ColorScales<MODE>::_initUI()
         grid->attach(*_b[i], 2, i, 1, 1);
 
         /* Signals */
-        _a[i]->signal_value_changed().connect(sigc::bind(sigc::mem_fun(this,
-                        &ColorScales::_adjustmentChanged),i));
-        _s[i]->signal_grabbed.connect(sigc::mem_fun(this,
-                    &ColorScales::_sliderAnyGrabbed));
-        _s[i]->signal_released.connect(sigc::mem_fun(this,
-                    &ColorScales::_sliderAnyReleased));
-        _s[i]->signal_value_changed.connect(sigc::mem_fun(this,
-                    &ColorScales::_sliderAnyChanged));
+        _a[i]->signal_value_changed().connect([this, i](){ _adjustmentChanged(i); });
+        _s[i]->signal_grabbed.connect([this](){ _sliderAnyGrabbed(); });
+        _s[i]->signal_released.connect([this](){ _sliderAnyReleased(); });
+        _s[i]->signal_value_changed.connect([this](){ _sliderAnyChanged(); });
     }
 
     // Prevent 5th bar from being shown by PanelDialog::show_all_children
@@ -276,12 +271,12 @@ void ColorScales<MODE>::_recalcColor()
 }
 
 template <SPColorScalesMode MODE>
-void ColorScales<MODE>::_updateDisplay()
+void ColorScales<MODE>::_updateDisplay(bool update_wheel)
 {
 #ifdef DUMP_CHANGE_INFO
-    g_message("ColorScales::_onColorChanged( this=%p, %f, %f, %f, %f)", this,
+    g_message("ColorScales::_onColorChanged( this=%p, %f, %f, %f, %f) %d", this,
             _color.color().v.c[0],
-            _color.color().v.c[1], _color.color().v.c[2], _color.alpha());
+            _color.color().v.c[1], _color.color().v.c[2], _color.alpha(), int(update_wheel);
 #endif
 
     gfloat tmp[3];
@@ -298,13 +293,13 @@ void ColorScales<MODE>::_updateDisplay()
         SPColor::rgb_to_hsl_floatv(c, tmp[0], tmp[1], tmp[2]);
         c[3] = _color.alpha();
         c[4] = 0.0;
-        _wheel->setRgb(tmp[0], tmp[1], tmp[2]);
+        if (update_wheel) { _wheel->setRgb(tmp[0], tmp[1], tmp[2]); }
     } else if constexpr (MODE == SPColorScalesMode::HSV) {
         color.get_rgb_floatv(tmp);
         SPColor::rgb_to_hsv_floatv(c, tmp[0], tmp[1], tmp[2]);
         c[3] = _color.alpha();
         c[4] = 0.0;
-        _wheel->setRgb(tmp[0], tmp[1], tmp[2]);
+        if (update_wheel) { _wheel->setRgb(tmp[0], tmp[1], tmp[2]); }
     } else if constexpr (MODE == SPColorScalesMode::CMYK) {
         color.get_cmyk_floatv(c);
         c[4] = _color.alpha();
@@ -313,7 +308,7 @@ void ColorScales<MODE>::_updateDisplay()
         SPColor::rgb_to_hsluv_floatv(c, tmp[0], tmp[1], tmp[2]);
         c[3] = _color.alpha();
         c[4] = 0.0;
-        _wheel->setRgb(tmp[0], tmp[1], tmp[2]);
+        if (update_wheel) { _wheel->setRgb(tmp[0], tmp[1], tmp[2]); }
     } else {
         g_warning("file %s: line %d: Illegal color selector mode NONE", __FILE__, __LINE__);
     }
@@ -733,14 +728,19 @@ void ColorScales<MODE>::_wheelChanged()
     _wheel->getRgbV(rgb);
     SPColor color(rgb[0], rgb[1], rgb[2]);
 
-    // Sliders
-    _updateSliders(CSC_CHANNELS_ALL);
+    _color_changed->block();
+    _color_dragged->block();
 
     // Color
     _color.preserveICC();
     _color.setHeld(_wheel->isAdjusting());
-
     _color.setColor(color);
+
+    // Sliders
+    _updateDisplay(false);
+
+    _color_changed->unblock();
+    _color_dragged->unblock();
 
     _updating = false;
 }
