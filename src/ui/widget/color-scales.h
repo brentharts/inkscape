@@ -37,9 +37,9 @@ class ColorScales
     : public Gtk::Box
 {
 public:
-    static const gchar *SUBMODE_NAMES[];
+    static gchar const *SUBMODE_NAMES[];
 
-    static gfloat getScaled(const Glib::RefPtr<Gtk::Adjustment> &a);
+    static gfloat getScaled(Glib::RefPtr<Gtk::Adjustment> const &a);
     static void setScaled(Glib::RefPtr<Gtk::Adjustment> &a, gfloat v, bool constrained = false);
 
     ColorScales(SelectedColor &color);
@@ -48,11 +48,11 @@ public:
     void setupMode();
     SPColorScalesMode getMode() const;
 
-    static const guchar *hsluvHueMap(gfloat s, gfloat l,
+    static guchar const *hsluvHueMap(gfloat s, gfloat l,
             std::array<guchar, 4 * 1024> *map);
-    static const guchar *hsluvSaturationMap(gfloat h, gfloat l,
+    static guchar const *hsluvSaturationMap(gfloat h, gfloat l,
             std::array<guchar, 4 * 1024> *map);
-    static const guchar *hsluvLightnessMap(gfloat h, gfloat s,
+    static guchar const *hsluvLightnessMap(gfloat h, gfloat s,
             std::array<guchar, 4 * 1024> *map);
 
 protected:
@@ -73,8 +73,6 @@ protected:
     void _updateSliders(guint channels);
     void _recalcColor();
     void _updateDisplay(bool update_wheel = true);
-    void _showWheel(bool visible);
-    void _updateWheelLayout();
 
     void _setRangeLimit(gdouble upper);
 
@@ -88,9 +86,10 @@ protected:
     Gtk::Label *_l[5];                                    /* Labels */
     std::array<guchar, 4 * 1024> _sliders_maps[4];
     Inkscape::UI::Widget::ColorWheel *_wheel;
-    bool _wheel_visible;
 
-    const Glib::ustring _prefs = "/color-scales";
+    const Glib::ustring _prefs = "/color_scales";
+    static gchar const * const _pref_wheel_visibility;
+
     sigc::slot_iterator<sigc::slot<void ()>> _color_changed;
     sigc::slot_iterator<sigc::slot<void ()>> _color_dragged;
 

@@ -48,13 +48,30 @@ namespace Inkscape {
 namespace UI {
 namespace Widget {
 
+
 static guchar const *sp_color_scales_hue_map();
 static guchar const *sp_color_scales_hsluv_map(guchar *map,
         std::function<void(float*, float)> callback);
 
+
 template <SPColorScalesMode MODE>
 gchar const *ColorScales<MODE>::SUBMODE_NAMES[] = { N_("None"), N_("RGB"), N_("HSL"),
     N_("CMYK"), N_("HSV"), N_("HSLuv") };
+
+
+// Preference name for the saved state of toggle-able color wheel
+template <>
+gchar const * const ColorScales<SPColorScalesMode::HSL>::_pref_wheel_visibility =
+    N_("/wheel_vis_hsl");
+
+template <>
+gchar const * const ColorScales<SPColorScalesMode::HSV>::_pref_wheel_visibility =
+    N_("/wheel_vis_hsv");
+
+template <>
+gchar const * const ColorScales<SPColorScalesMode::HSLUV>::_pref_wheel_visibility =
+    N_("/wheel_vis_hsluv");
+
 
 template <SPColorScalesMode MODE>
 ColorScales<MODE>::ColorScales(SelectedColor &color)
@@ -64,7 +81,6 @@ ColorScales<MODE>::ColorScales(SelectedColor &color)
     , _updating(false)
     , _dragging(false)
     , _wheel(nullptr)
-    , _wheel_visible(false)
 {
     for (gint i = 0; i < 5; i++) {
         _l[i] = nullptr;
@@ -146,14 +162,18 @@ void ColorScales<MODE>::_initUI()
         wheel_frame->set_hexpand(true);
         wheel_frame->set_vexpand(false);
         wheel_frame->set_label_widget(*expander_box);
-        // Signal
-        wheel_frame->property_expanded().signal_changed().connect(
-                [=](){ _showWheel(wheel_frame->get_expanded()); }
-        );
 
-        // Add expander before the color wheel
+        // Signal
+        wheel_frame->property_expanded().signal_changed().connect([=](){
+            bool visible = wheel_frame->get_expanded();
+            wheel_frame->set_vexpand(visible);
+
+            // Save wheel visibility
+            Inkscape::Preferences::get()->setBool(_prefs + _pref_wheel_visibility, visible);
+        });
+
+        wheel_frame->add(*_wheel);
         add(*wheel_frame);
-        add(*_wheel);
     }
 
     /* Create sliders */
@@ -221,21 +241,10 @@ void ColorScales<MODE>::_initUI()
             MODE == SPColorScalesMode::HSLUV)
     {
         // Restore the visibility of the wheel
-        Glib::ustring prefName;
-
-        if constexpr (MODE == SPColorScalesMode::HSL) {
-            prefName = "/wheel_vis_hsl";
-        } else if constexpr (MODE == SPColorScalesMode::HSV) {
-            prefName = "/wheel_vis_hsv";
-        } else if constexpr (MODE == SPColorScalesMode::HSLUV) {
-            prefName = "/wheel_vis_hsluv";
-        } else {
-            return;
-        }
-
-        _wheel_visible = Inkscape::Preferences::get()->getBool(_prefs + prefName, false);
-        wheel_frame->set_expanded(_wheel_visible);
-        _updateWheelLayout();
+        bool visible = Inkscape::Preferences::get()->getBool(_prefs + _pref_wheel_visibility,
+            false);
+        wheel_frame->set_expanded(visible);
+        wheel_frame->set_vexpand(visible);
     }
 }
 
@@ -321,38 +330,6 @@ void ColorScales<MODE>::_updateDisplay(bool update_wheel)
     setScaled(_a[4], c[4]);
     _updateSliders(CSC_CHANNELS_ALL);
     _updating = false;
-}
-
-template <SPColorScalesMode MODE>
-void ColorScales<MODE>::_showWheel(bool visible)
-{
-    _wheel_visible = visible;
-    _updateWheelLayout();
-
-    // Save wheel visibility
-    Glib::ustring prefName;
-
-    if constexpr (MODE == SPColorScalesMode::HSL) {
-        prefName = "/wheel_vis_hsl";
-    } else if constexpr (MODE == SPColorScalesMode::HSV) {
-        prefName = "/wheel_vis_hsv";
-    } else if constexpr (MODE == SPColorScalesMode::HSLUV) {
-        prefName = "/wheel_vis_hsluv";
-    } else {
-        return;
-    }
-
-    Inkscape::Preferences::get()->setBool(_prefs + prefName, _wheel_visible);
-}
-
-template <SPColorScalesMode MODE>
-void ColorScales<MODE>::_updateWheelLayout()
-{
-    if (_wheel_visible) {
-        _wheel->show();
-    } else {
-        _wheel->hide();
-    }
 }
 
 /* Helpers for setting color value */
