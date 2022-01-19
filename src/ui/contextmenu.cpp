@@ -40,7 +40,7 @@
 
 #include "ui/desktop/menu-icon-shift.h"
 
-ContextMenu::ContextMenu(SPDesktop *desktop, SPItem *item)
+ContextMenu::ContextMenu(SPDesktop *desktop, SPItem *item, bool hide_layers_and_objects_menu_item)
 {
     set_name("ContextMenu");
 
@@ -87,10 +87,10 @@ ContextMenu::ContextMenu(SPDesktop *desktop, SPItem *item)
     // clang-tidy off
 
     // Undo/redo
-    gmenu_section = Gio::Menu::create();
-    AppendItemFromAction(gmenu_section, "doc.undo",      _("Undo"),       "edit-undo");
-    AppendItemFromAction(gmenu_section, "doc.redo",      _("Redo"),       "edit-redo");
-    gmenu->append_section(gmenu_section);
+    // gmenu_section = Gio::Menu::create();
+    // AppendItemFromAction(gmenu_section, "doc.undo",      _("Undo"),       "edit-undo");
+    // AppendItemFromAction(gmenu_section, "doc.redo",      _("Redo"),       "edit-redo");
+    // gmenu->append_section(gmenu_section);
 
     if (!layer) {
 
@@ -109,7 +109,9 @@ ContextMenu::ContextMenu(SPDesktop *desktop, SPItem *item)
 
             // Dialogs
             auto gmenu_dialogs = Gio::Menu::create();
-            AppendItemFromAction(gmenu_dialogs,     "win.dialog-open('Objects')",                   _("Layers and Objects..."), "dialog-objects"             );
+            if (!hide_layers_and_objects_menu_item) { // Hidden when context menu is popped up in Layers and Objects dialog!
+                AppendItemFromAction(gmenu_dialogs, "win.dialog-open('Objects')",                   _("Layers and Objects..."), "dialog-objects"             );
+            }
             AppendItemFromAction(gmenu_dialogs,     "win.dialog-open('ObjectProperties')",          _("_Object Properties..."), "dialog-object-properties"   );
 
             if (dynamic_cast<SPShape*>(item) || dynamic_cast<SPText*>(item) || dynamic_cast<SPGroup*>(item)) {
@@ -223,8 +225,8 @@ ContextMenu::ContextMenu(SPDesktop *desktop, SPItem *item)
 
         gmenu_section = Gio::Menu::create();
         AppendItemFromAction(gmenu_section,     "win.layer-new",                _("_Add Layer..."),              "layer-new");
-        AppendItemFromAction(gmenu_section,     "win.layer-duplicate",          _("D_uplicate Current Layer"),   "layer-duplicate");
-        AppendItemFromAction(gmenu_section,     "win.layer-delete",             _("_Delete Current Layer"),      "layer-delete");
+        AppendItemFromAction(gmenu_section,     "win.layer-duplicate",          _("D_uplicate Layer"),           "layer-duplicate");
+        AppendItemFromAction(gmenu_section,     "win.layer-delete",             _("_Delete Layer"),              "layer-delete");
         AppendItemFromAction(gmenu_section,     "win.layer-rename",             _("Re_name Layer..."),           "layer-rename");
         AppendItemFromAction(gmenu_section,     "win.layer-to-group",           _("Layer to _Group"),            "dialog-objects");
         gmenu->append_section(gmenu_section);
