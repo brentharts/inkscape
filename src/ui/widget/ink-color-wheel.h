@@ -112,7 +112,7 @@ class ColorWheelHSLuv : public ColorWheel
 {
 public:
     ColorWheelHSLuv();
-    ~ColorWheelHSLuv();
+    ~ColorWheelHSLuv() override;
 
     void setRgb(double r, double g, double b, bool overrideHue = true) override;
     void getRgb(double *r, double *g, double *b) const override;

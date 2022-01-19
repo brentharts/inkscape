@@ -13,6 +13,7 @@
 #define SEEN_SP_COLOR_SCALES_H
 
 #include <gtkmm/box.h>
+#include <array>
 
 #include "ui/selected-color.h"
 
