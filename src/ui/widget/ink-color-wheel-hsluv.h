@@ -26,7 +26,7 @@ class ColorWheelHSLuv : public Gtk::DrawingArea
 {
 public:
     ColorWheelHSLuv();
-    ~ColorWheelHSLuv();
+    ~ColorWheelHSLuv() override;
 
     void set_rgb(double r, double g, double b);
     void get_rgb(double *r, double *g, double *b) const;

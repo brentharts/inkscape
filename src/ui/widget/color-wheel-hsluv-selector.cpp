@@ -190,11 +190,9 @@ void ColorWheelHSLuvSelector::_initUI()
         &ColorWheelHSLuvSelector::_adjustmentLightnessChanged));
     _adjustments[ALPHA]->signal_value_changed().connect(sigc::mem_fun(this,
         &ColorWheelHSLuvSelector::_adjustmentAlphaChanged));
-    for (int i = 0; i < 4; i++) {
-        _sliders[i]->signal_grabbed.connect(sigc::mem_fun(*this,
-            &ColorWheelHSLuvSelector::_sliderGrabbed));
-        _sliders[i]->signal_released.connect(sigc::mem_fun(*this,
-            &ColorWheelHSLuvSelector::_sliderReleased));
+    for (auto slider : _sliders) {
+        slider->signal_grabbed.connect([this](){ _sliderGrabbed(); });
+        slider->signal_released.connect([this](){ _sliderReleased(); });
     }
 
     show_all();
