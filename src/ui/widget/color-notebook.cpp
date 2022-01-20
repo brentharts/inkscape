@@ -41,6 +41,7 @@
 #include "ui/widget/color-notebook.h"
 #include "ui/widget/color-scales.h"
 #include "ui/widget/color-wheel-selector.h"
+#include "ui/widget/color-wheel-hsluv-selector.h"
 
 #include "widgets/spw-utilities.h"
 
@@ -64,8 +65,8 @@ ColorNotebook::ColorNotebook(SelectedColor &color)
     _available_pages.push_back(new Page(new ColorScalesFactory(SP_COLOR_SCALES_MODE_HSV), "color-selector-hsx"));
     _available_pages.push_back(new Page(new ColorScalesFactory(SP_COLOR_SCALES_MODE_RGB), "color-selector-rgb"));
     _available_pages.push_back(new Page(new ColorScalesFactory(SP_COLOR_SCALES_MODE_CMYK), "color-selector-cmyk"));
-    _available_pages.push_back(new Page(new ColorWheelSelectorFactory, "color-selector-wheel"));
     _available_pages.push_back(new Page(new ColorICCSelectorFactory, "color-selector-cms"));
+    _available_pages.push_back(new Page(new ColorWheelHSLuvSelectorFactory, "color-selector-hsluv"));
 
     _initUI();
 
