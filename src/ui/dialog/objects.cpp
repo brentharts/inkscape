@@ -841,11 +841,11 @@ ObjectsPanel::ObjectsPanel() :
     _object_mode.property_active().signal_changed().connect(sigc::mem_fun(*this, &ObjectsPanel::_objects_toggle));
 
     _buttonsPrimary.pack_start(_object_mode, Gtk::PACK_SHRINK);
-    _buttonsPrimary.pack_start(*_addBarButton(INKSCAPE_ICON("layer-new"), _("Add layer..."), (int)SP_VERB_LAYER_NEW), Gtk::PACK_SHRINK);
+    _buttonsPrimary.pack_start(*_addBarButton(INKSCAPE_ICON("layer-new"), _("Add layer..."), "win.layer-new"), Gtk::PACK_SHRINK);
 
-    _buttonsSecondary.pack_end(*_addBarButton(INKSCAPE_ICON("edit-delete"), _("Remove object"), (int)SP_VERB_EDIT_DELETE), Gtk::PACK_SHRINK);
-    _buttonsSecondary.pack_end(*_addBarButton(INKSCAPE_ICON("go-down"), _("Move Down"), (int)SP_VERB_SELECTION_STACK_DOWN), Gtk::PACK_SHRINK);
-    _buttonsSecondary.pack_end(*_addBarButton(INKSCAPE_ICON("go-up"), _("Move Up"), (int)SP_VERB_SELECTION_STACK_UP), Gtk::PACK_SHRINK);
+    _buttonsSecondary.pack_end(*_addBarButton(INKSCAPE_ICON("edit-delete"), _("Remove object"), "app.delete-selection"), Gtk::PACK_SHRINK);
+    _buttonsSecondary.pack_end(*_addBarButton(INKSCAPE_ICON("go-down"), _("Move Down"), "app.selection-stack-down"), Gtk::PACK_SHRINK);
+    _buttonsSecondary.pack_end(*_addBarButton(INKSCAPE_ICON("go-up"), _("Move Up"), "app.selection-stack-up"), Gtk::PACK_SHRINK);
 
     _buttonsRow.pack_start(_buttonsPrimary, Gtk::PACK_SHRINK);
     _buttonsRow.pack_end(_buttonsSecondary, Gtk::PACK_SHRINK);
@@ -916,39 +916,37 @@ void ObjectsPanel::setRootWatcher()
         bool layers_only = prefs->getBool("/dialogs/objects/layers_only", false);
         root_watcher = new ObjectWatcher(this, document->getRoot(), nullptr, layers_only);
         layerChanged(getDesktop()->layerManager().currentLayer());
+        selectionChanged(getSelection());
     }
 }
 
 void ObjectsPanel::selectionChanged(Selection *selected)
 {
-    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    if(!prefs->getBool("/dialogs/objects/layers_only", false)) {
-        root_watcher->setSelectedBitRecursive(SELECTED_OBJECT, false);
+    root_watcher->setSelectedBitRecursive(SELECTED_OBJECT, false);
 
-        for (auto item : selected->items()) {
-            ObjectWatcher *watcher = nullptr;
-            // This both unpacks the tree, and populates lazy loading
-            for (auto &parent : item->ancestorList(true)) {
-                if (parent->getRepr() == root_watcher->getRepr()) {
-                    watcher = root_watcher;
-                } else if (watcher) {
-                    if ((watcher = watcher->findChild(parent->getRepr()))) {
-                        if (auto row = watcher->getRow()) {
-                            cleanDummyChildren(*row);
-                        }
+    for (auto item : selected->items()) {
+        ObjectWatcher *watcher = nullptr;
+        // This both unpacks the tree, and populates lazy loading
+        for (auto &parent : item->ancestorList(true)) {
+            if (parent->getRepr() == root_watcher->getRepr()) {
+                watcher = root_watcher;
+            } else if (watcher) {
+                if ((watcher = watcher->findChild(parent->getRepr()))) {
+                    if (auto row = watcher->getRow()) {
+                        cleanDummyChildren(*row);
                     }
                 }
             }
-            if (watcher) {
-                if (auto final_watcher = watcher->findChild(item->getRepr())) {
-                    final_watcher->setSelectedBit(SELECTED_OBJECT, true);
-                    _tree.expand_to_path(final_watcher->getTreePath());
-                } else {
-                    g_warning("Can't find final step in tree selection!");
-                }
+        }
+        if (watcher) {
+            if (auto final_watcher = watcher->findChild(item->getRepr())) {
+                final_watcher->setSelectedBit(SELECTED_OBJECT, true);
+                _tree.expand_to_path(final_watcher->getTreePath());
             } else {
-                g_warning("Can't find a mid step in tree selection!");
+                g_warning("Can't find final step in tree selection!");
             }
+        } else {
+            g_warning("Can't find a mid step in tree selection!");
         }
     }
 }
@@ -975,7 +973,7 @@ void ObjectsPanel::layerChanged(SPObject *layer)
 /**
  * Stylizes a button using the given icon name and tooltip
  */
-Gtk::Button* ObjectsPanel::_addBarButton(char const* iconName, char const* tooltip, int verb_id)
+Gtk::Button* ObjectsPanel::_addBarButton(char const* iconName, char const* tooltip, char const *action_name)
 {
     Gtk::Button* btn = Gtk::manage(new Gtk::Button());
     auto child = Glib::wrap(sp_get_icon_image(iconName, GTK_ICON_SIZE_SMALL_TOOLBAR));
@@ -983,7 +981,8 @@ Gtk::Button* ObjectsPanel::_addBarButton(char const* iconName, char const* toolt
     btn->add(*child);
     btn->set_relief(Gtk::RELIEF_NONE);
     btn->set_tooltip_text(tooltip);
-    btn->signal_clicked().connect(sigc::bind( sigc::mem_fun(*this, &ObjectsPanel::_takeAction), verb_id));
+    // This c code is required because the gtkmm is broken for actions
+    gtk_actionable_set_action_name(GTK_ACTIONABLE(btn->gobj()), action_name);
     return btn;
 }
 
@@ -999,11 +998,13 @@ bool ObjectsPanel::toggleVisible(GdkEventButton* event, Gtk::TreeModel::Row row)
             if (auto desktop = getDesktop()) {
                 if (desktop->layerManager().isLayer(item)) {
                     desktop->layerManager().toggleLayerSolo(item);
-                    DocumentUndo::done(desktop->getDocument(), _("Toggle layer solo"), "");
+                    DocumentUndo::done(getDocument(), _("Hide other layers"), "");
                 }
             }
         } else {
             item->setHidden(!row[_model->_colInvisible]);
+            // Use maybeDone so user can flip back and forth without making loads of undo items
+            DocumentUndo::maybeDone(getDocument(), "toggle-vis", _("Toggle item visibility"), "");
         }
     }
     return true;
@@ -1022,11 +1023,13 @@ bool ObjectsPanel::toggleLocked(GdkEventButton* event, Gtk::TreeModel::Row row)
             if (auto desktop = getDesktop()) {
                 if (desktop->layerManager().isLayer(item)) {
                     desktop->layerManager().toggleLockOtherLayers(item);
-                    DocumentUndo::done(desktop->getDocument(), _("Lock other layers"), "");
+                    DocumentUndo::done(getDocument(), _("Lock other layers"), "");
                 }
             }
         } else {
             item->setLocked(!row[_model->_colLocked]);
+            // Use maybeDone so user can flip back and forth without making loads of undo items
+            DocumentUndo::maybeDone(getDocument(), "toggle-lock", _("Toggle item locking"), "");
         }
     }
     return true;
@@ -1206,8 +1209,8 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
         // Select items on button release to not confuse drag (unless it's a right-click)
         // Right-click selects too to set up the stage for context menu which frequently relies on current selection!
         if (!_is_editing && (event->type == GDK_BUTTON_RELEASE || context_menu)) {
-            if (event->state & GDK_SHIFT_MASK) {
-                // Select everything between this row and the already seleced item
+            if (event->state & GDK_SHIFT_MASK && !selection->isEmpty()) {
+                // Select everything between this row and the last seleced item
                 selection->setBetween(item);
             } else if (event->state & GDK_CONTROL_MASK) {
                 selection->toggle(item);
@@ -1217,12 +1220,6 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
                     if (getDesktop()->layerManager().currentLayer() != item) {
                         getDesktop()->layerManager().setCurrentLayer(item, true);
                     }
-                }
-                // Clicking on layers firstly switches to that layer.
-                else if (selection->includes(item)) {
-                    selection->clear();
-                } else if (_layer != item) {
-                    getDesktop()->layerManager().setCurrentLayer(item, true);
                 } else {
                     selection->set(item);
                 }
@@ -1243,21 +1240,6 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
         }
     }
     return false;
-}
-
-/**
- * Executes the given button action during the idle time
- */
-void ObjectsPanel::_takeAction(int val)
-{
-    if (auto desktop = getDesktop()) {
-        if (auto verb = Verb::get(val)) {
-            SPAction *action = verb->get_action(desktop);
-            if (action) {
-                sp_action_perform( action, nullptr );
-            }
-        }
-    }
 }
 
 /**
