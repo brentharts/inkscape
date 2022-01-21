@@ -377,8 +377,8 @@ make_updater(int type, Cairo::RefPtr<Cairo::Region> clean_region = Cairo::Region
     switch (type) {
         case 1: return std::make_unique<ResponsiveUpdater>(clean_region);
         case 2: return std::make_unique<FullredrawUpdater>(clean_region);
+        default:
         case 3: return std::make_unique<MultiscaleUpdater>(clean_region);
-        default: assert(false);
     }
 }
 
