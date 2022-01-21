@@ -106,6 +106,7 @@ struct PrefBase
 {
     T t;
     std::unique_ptr<Preferences::PreferencesObserver> obs;
+    std::function<void()> action;
     operator T() const {return t;}
 };
 
@@ -115,24 +116,22 @@ struct Pref {};
 template<>
 struct Pref<bool> : PrefBase<bool>
 {
-    std::function<void()> action;
-    Pref(const char *path)
+    Pref(const char *path, bool def = false)
     {
         auto prefs = Inkscape::Preferences::get();
-        t = prefs->getBool(path);
-        obs = prefs->createObserver(path, [=] (const Preferences::Entry &e) {t = e.getBool(); if (action) action();});
+        t = prefs->getBool(path, def);
+        obs = prefs->createObserver(path, [=] (const Preferences::Entry &e) {t = e.getBool(def); if (action) action();});
     }
 };
 
 template<>
 struct Pref<int> : PrefBase<int>
 {
-    std::function<void(int)> action;
     Pref(const char *path, int def, int min, int max)
     {
         auto prefs = Inkscape::Preferences::get();
         t = prefs->getIntLimited(path, def, min, max);
-        obs = prefs->createObserver(path, [=] (const Preferences::Entry &e) {t = e.getIntLimited(def, min, max); if (action) action(t);});
+        obs = prefs->createObserver(path, [=] (const Preferences::Entry &e) {t = e.getIntLimited(def, min, max); if (action) action();});
     }
 };
 
@@ -143,7 +142,7 @@ struct Pref<double> : PrefBase<double>
     {
         auto prefs = Inkscape::Preferences::get();
         t = prefs->getDoubleLimited(path, def, min, max);
-        obs = prefs->createObserver(path, [=] (const Preferences::Entry &e) {t = e.getDoubleLimited(def, min, max);});
+        obs = prefs->createObserver(path, [=] (const Preferences::Entry &e) {t = e.getDoubleLimited(def, min, max); if (action) action();});
     }
 };
 
@@ -157,6 +156,7 @@ struct Prefs
     Pref<int>    grabsize                 = Pref<int>   ("/options/grabsize/value", 3, 1, 15);
 
     // New parameters
+    Pref<int>    update_strategy          = Pref<int>   ("/options/rendering/update_strategy", 3, 1, 3);
     Pref<int>    render_time_limit        = Pref<int>   ("/options/rendering/render_time_limit", 1000, 100, 1000000);
     Pref<double> max_affine_diff          = Pref<double>("/options/rendering/max_affine_diff", 1.8, 0.0, 100.0);
     Pref<int>    pad                      = Pref<int>   ("/options/rendering/pad", 200, 0, 1000);
@@ -166,8 +166,8 @@ struct Prefs
     // Debug switches
     Pref<bool>   debug_framecheck         = Pref<bool>  ("/options/rendering/debug/framecheck");
     Pref<bool>   debug_logging            = Pref<bool>  ("/options/rendering/debug/logging");
-    Pref<bool>   debug_overbisection      = Pref<bool>  ("/options/rendering/debug/overbisection");
-    Pref<int>    debug_overbisection_size = Pref<int>   ("/options/rendering/debug/overbisection_size", 30, 1, 10000);
+    Pref<bool>   debug_overbisection      = Pref<bool>  ("/options/rendering/debug/overbisection", true);
+    Pref<int>    debug_overbisection_size = Pref<int>   ("/options/rendering/debug/overbisection_size", 400, 1, 10000);
     Pref<bool>   debug_slow_redraw        = Pref<bool>  ("/options/rendering/debug/slow_redraw");
     Pref<int>    debug_slow_redraw_time   = Pref<int>   ("/options/rendering/debug/slow_redraw_time", 50, 0, 1000000);
     Pref<bool>   debug_show_redraw        = Pref<bool>  ("/options/rendering/debug/show_redraw");
@@ -212,94 +212,175 @@ void region_to_path(const Cairo::RefPtr<Cairo::Context> &cr, const Cairo::RefPtr
 
 // Update strategy
 
-enum UpdateStrategy {
-    Responsive,
-    FullRedraw,
-    Multiscale
-};
-
-// A class for controlling when invalidated regions become available for redraw.
+// A class for controlling what order to update invalidated regions.
 class Updater
 {
 public:
+    // The subgregion of the store with up-to-date content.
     Cairo::RefPtr<Cairo::Region> clean_region;
 
     Updater(Cairo::RefPtr<Cairo::Region> clean_region) : clean_region(clean_region) {}
 
-    virtual void reset() {clean_region = Cairo::Region::create();}
-    virtual void intersect(const Geom::IntRect &rect) {clean_region->intersect(geom_to_cairo(rect));}
-    virtual void mark_dirty(const Geom::IntRect &rect) {clean_region->subtract(geom_to_cairo(rect));}
-    virtual void mark_clean(const Geom::IntRect &rect) {clean_region->do_union(geom_to_cairo(rect));}
+    virtual void reset()                               {clean_region = Cairo::Region::create();}       // Reset to clean region to empty.
+    virtual void intersect (const Geom::IntRect &rect) {clean_region->intersect(geom_to_cairo(rect));} // Called when the store changes position to clip everthing to the new store rect.
+    virtual void mark_dirty(const Geom::IntRect &rect) {clean_region->subtract (geom_to_cairo(rect));} // Called on every invalidate event.
+    virtual void mark_clean(const Geom::IntRect &rect) {clean_region->do_union (geom_to_cairo(rect));} // Called on every rectangle redrawn.
 
-    virtual Cairo::RefPtr<Cairo::Region> checkout_clean_region() {return clean_region;};
-    virtual bool report_completed() {return false;}
+    virtual Cairo::RefPtr<Cairo::Region> get_next_clean_region() {return clean_region;}; // Called once in on_idle to determine what regions to consider clean for the current draw.
+    virtual bool                         finished_drawing     () {return false;}         // Called in on_idle if drawing has finished. Returns true to indicate that drawing should continue, because the next clean region will be different.
+    virtual void                         frame                () {}                      // Called by on_draw to notify the end of drawing and the display of the frame.
 };
 
-// Responsive/naive updater: As soon as a region is invalidated, redraw it.
+// Responsive updater: As soon as a region is invalidated, redraw it.
 using ResponsiveUpdater = Updater;
 
-// Full-redraw updater: When a region is invalidated, delay redraw until after the current redraw is completed.
+// Full redraw updater: When a region is invalidated, delay redraw until after the current redraw is completed.
 class FullredrawUpdater : public Updater
 {
-    bool checkedout;
-    Cairo::RefPtr<Cairo::Region> frozen;
+    // Whether we are currently in the middle of a redraw.
+    bool inprogress;
+
+    // If more damage events arrive while a redraw is in progress, save the clean region to here so we can continue the redraw using it.
+    Cairo::RefPtr<Cairo::Region> old_clean_region;
 
 public:
-    FullredrawUpdater(Cairo::RefPtr<Cairo::Region> clean_region) : Updater(clean_region), checkedout(false) {}
+    FullredrawUpdater(Cairo::RefPtr<Cairo::Region> clean_region) : Updater(clean_region), inprogress(false) {}
 
     void reset() override
     {
         Updater::reset();
-        checkedout = false;
-        frozen.clear();
+        inprogress = false;
+        old_clean_region.clear();
     }
 
     void intersect(const Geom::IntRect &rect) override
     {
         Updater::intersect(rect);
-        if (frozen) frozen->intersect(geom_to_cairo(rect));
+        if (old_clean_region) old_clean_region->intersect(geom_to_cairo(rect));
     }
 
     void mark_dirty(const Geom::IntRect &rect) override
     {
-        if (checkedout && !frozen) frozen = clean_region->copy(); // CoW triggered
+        if (inprogress && !old_clean_region) old_clean_region = clean_region->copy(); // CoW
         Updater::mark_dirty(rect);
     }
 
     void mark_clean(const Geom::IntRect &rect) override
     {
         Updater::mark_clean(rect);
-        if (frozen) frozen->do_union(geom_to_cairo(rect));
+        if (old_clean_region) old_clean_region->do_union(geom_to_cairo(rect));
     }
 
-    Cairo::RefPtr<Cairo::Region> checkout_clean_region() override
+    Cairo::RefPtr<Cairo::Region> get_next_clean_region() override
     {
-        if (!frozen) {
-            checkedout = true;
+        // Return the old clean region if it was saved, otherwise return the current one and set a flag indicating redraw in progress.
+        if (!old_clean_region) {
+            inprogress = true;
             return clean_region;
         } else {
-            return frozen;
+            return old_clean_region;
         }
     }
 
-    bool report_completed() override
+    bool finished_drawing() override
     {
-        assert(checkedout);
-        if (!frozen) {
-            checkedout = false;
+        assert(inprogress);
+        if (!old_clean_region) {
+            // Redrawn using the actual clean region --> finished.
+            inprogress = false;
             return false;
         } else {
-            frozen.clear();
+            // Redrawn using the old clean region; new clean region has been damaged --> draw again using the new clean region.
+            old_clean_region.clear();
             return true;
         }
     }
 };
 
+// Multiscale updater: Updates tiles near the mouse faster. Gives the best of both.
 class MultiscaleUpdater : public Updater
 {
+    int counter, depth, counter2;
+    std::vector<Cairo::RefPtr<Cairo::Region>> blocked;
+
 public:
-    MultiscaleUpdater(Cairo::RefPtr<Cairo::Region> clean_region) : Updater(clean_region) {}
+    MultiscaleUpdater(Cairo::RefPtr<Cairo::Region> clean_region) : Updater(clean_region), counter(0), depth(0), counter2(0), blocked({Cairo::Region::create()}) {}
+
+    void reset() override
+    {
+        Updater::reset();
+        counter = depth = counter2 = 0;
+        blocked = {Cairo::Region::create()};
+    }
+
+    void intersect(const Geom::IntRect &rect) override
+    {
+        Updater::intersect(rect);
+        for (auto &reg : blocked) {
+            reg->intersect(geom_to_cairo(rect));
+        }
+    }
+
+    void mark_clean(const Geom::IntRect &rect) override
+    {
+        Updater::mark_clean(rect);
+        blocked[depth]->do_union(geom_to_cairo(rect));
+    }
+
+    Cairo::RefPtr<Cairo::Region> get_next_clean_region() override
+    {
+        auto result = clean_region->copy();
+        result->do_union(blocked[depth]);
+        return result;
+    }
+
+    bool finished_drawing() override
+    {
+        // We have finished work if we have completed a redraw using the depth 0 clean region, which is always the true clean region.
+        bool ret = depth > 0;
+        // Perform a reset of the updating sequence in both cases.
+        counter = depth = counter2 = 0;
+        blocked = {Cairo::Region::create()};
+        return ret;
+    }
+
+    void frame() override
+    {
+        // Stay at the current depth for 2^depth frames.
+        counter2++;
+        if (counter2 < (1 << depth)) return;
+        counter2 = 0;
+
+        // Adjust the counter, which causes depth to hop around the values 0, 1, 2... spending half as much time at each subsequent depth.
+        counter++;
+        depth = 0;
+        for (int tmp = counter; tmp % 2 == 1; tmp /= 2) {
+            depth++;
+        }
+
+        // Ensure enough blocked zones exist.
+        if (depth == blocked.size()) {
+            blocked.emplace_back();
+        }
+
+        // Recreate the current blocked zone as the union of those previous to it.
+        blocked[depth] = Cairo::Region::create();
+        for (int i = 0; i < depth; i++) {
+            blocked[depth]->do_union(blocked[i]);
+        }
+    }
 };
+
+std::unique_ptr<Updater>
+make_updater(int type, Cairo::RefPtr<Cairo::Region> clean_region = Cairo::Region::create())
+{
+    switch (type) {
+        case 1: return std::make_unique<ResponsiveUpdater>(clean_region);
+        case 2: return std::make_unique<FullredrawUpdater>(clean_region);
+        case 3: return std::make_unique<MultiscaleUpdater>(clean_region);
+        default: assert(false);
+    }
+}
 
 // Implementation class
 
@@ -439,11 +520,12 @@ Canvas::Canvas()
                Gdk::SMOOTH_SCROLL_MASK  );
 
     // Preferences
-    d->prefs.grabsize.action = [=] (int size) {_canvas_item_root->update_canvas_item_ctrl_sizes(size);};
+    d->prefs.grabsize.action = [=] {_canvas_item_root->update_canvas_item_ctrl_sizes(d->prefs.grabsize);};
     d->prefs.debug_show_unclean.action = [=] {queue_draw();};
     d->prefs.debug_show_clean.action = [=] {queue_draw();};
     d->prefs.debug_disable_redraw.action = [=] {queue_draw();};
     d->prefs.debug_sticky_decoupled.action = [=] {d->add_idle();};
+    d->prefs.update_strategy.action = [=] {d->updater = make_updater(d->prefs.update_strategy, d->updater->clean_region);};
 
     // Give _pick_event an initial definition.
     _pick_event.type = GDK_LEAVE_NOTIFY;
@@ -451,7 +533,7 @@ Canvas::Canvas()
     _pick_event.crossing.y = 0;
 
     // Drawing
-    d->updater = std::make_unique<FullredrawUpdater>(Cairo::Region::create());
+    d->updater = make_updater(d->prefs.update_strategy);
 
     _background = Cairo::SolidPattern::create_rgb(1.0, 1.0, 1.0);
     d->solid_background = true;
@@ -1181,6 +1263,9 @@ Canvas::on_draw(const::Cairo::RefPtr<::Cairo::Context> &cr)
 
     // Todo: Add back X-ray view.
 
+    // Notify the update strategy that another frame has passed.
+    d->updater->frame();
+
     return true;
 }
 
@@ -1519,10 +1604,11 @@ CanvasPrivate::on_idle()
     assert(_store_rect.contains(visible_rect));
 
     // Get the region to paint, which is the visible rectangle minus the clean region (both subregions of store).
+    Cairo::RefPtr<Cairo::Region> clean_region = updater->get_next_clean_region();
     Cairo::RefPtr<Cairo::Region> paint_region;
     if (visible_rect) {
         paint_region = Cairo::Region::create(geom_to_cairo(*visible_rect));
-        paint_region->subtract(updater->checkout_clean_region());
+        paint_region->subtract(clean_region);
     } else {
         paint_region = Cairo::Region::create();
     }
@@ -1573,12 +1659,8 @@ CanvasPrivate::on_idle()
 
     // Set up painting info to pass down the stack.
     PaintRectSetup setup;
-    setup.clean_region = updater->checkout_clean_region();
+    setup.clean_region = clean_region;
     setup.mouse_loc = mouse_loc;
-    // Todo: Logging reveals that Inkscape often underestimates render times, and can sometimes time out quite badly,
-    // leading to missed frames. Consider fixing the time estimator below, possibly based on run-time feedback. May
-    // even wish to consider maintaining a coarse heatmap of the drawing to judge rendering time/order. In the meantime,
-    // this can be worked around by enabling overbisection with a tile size of about 400.
     if (q->_render_mode != Inkscape::RenderMode::OUTLINE) {
         // Can't be too small or large gradient will be rerendered too many times!
         setup.max_pixels = 65536 * prefs.tile_multiplier;
@@ -1608,7 +1690,7 @@ CanvasPrivate::on_idle()
     }
 
     // Finished redrawing the region requested by the updater. Check if it has any subsequent requests.
-    if (updater->report_completed()) {
+    if (updater->finished_drawing()) {
         // There is another request; continue redrawing.
         return true; // Todo: Would be more logical to jump back to the required point, rather than returning.
     }

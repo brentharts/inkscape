@@ -2705,9 +2705,9 @@ void InkscapePreferences::initPageRendering()
     _page_rendering.add_line(true, "", _canvas_debug_framecheck, "", _("Print profiling data of selected operations to a file"));
     _canvas_debug_logging.init(_("Logging"), "/options/rendering/debug/logging", false);
     _page_rendering.add_line(true, "", _canvas_debug_logging, "", _("Log certain events to the console"));
-    _canvas_debug_overbisection.init(_("Overbisection"), "/options/rendering/debug/overbisection", false);
+    _canvas_debug_overbisection.init(_("Overbisection"), "/options/rendering/debug/overbisection", true);
     _page_rendering.add_line(true, "", _canvas_debug_overbisection, "", _("Bisect all tiles until they reach a minimum size"));
-    _canvas_debug_overbisection_size.init("/options/rendering/debug/overbisection_size", 1.0, 10000.0, 1.0, 0.0, 30.0, true, false);
+    _canvas_debug_overbisection_size.init("/options/rendering/debug/overbisection_size", 1.0, 10000.0, 1.0, 0.0, 400.0, true, false);
     _page_rendering.add_line(true, _("Overbisection size"), _canvas_debug_overbisection_size, C_("pixel abbreviation", "px"), _("The maxmimum allowed tile size"), false);
     _canvas_debug_slow_redraw.init(_("Slow redraw"), "/options/rendering/debug/slow_redraw", false);
     _page_rendering.add_line(true, "", _canvas_debug_slow_redraw, "", _("Introduce a fixed delay for each tile"));
@@ -2726,7 +2726,13 @@ void InkscapePreferences::initPageRendering()
     _canvas_debug_sticky_decoupled.init(_("Sticky decoupled mode"), "/options/rendering/debug/sticky_decoupled", false);
     _page_rendering.add_line(true, "", _canvas_debug_sticky_decoupled, "", _("Stay in decoupled mode even after rendering is complete"));
 
+    // For update strategy.
+    int values[] = {1, 2, 3};
+    Glib::ustring labels[] = {_("Responsive"), _("Full redraw"), _("Multiscale")};
+
     _page_rendering.add_group_header(_("Low-level tuning options"));
+    _canvas_update_strategy.init("/options/rendering/update_strategy", labels, values, 3, 3);
+    _page_rendering.add_line(true, _("Update strategy:"), _canvas_update_strategy, "", _("What order to update stale content when it cannot be drawn fast enough."), false);
     _canvas_render_time_limit.init("/options/rendering/render_time_limit", 100.0, 1000000.0, 1.0, 0.0, 1000.0, true, false);
     _page_rendering.add_line(true, _("Render time limit"), _canvas_render_time_limit, C_("microsecond abbreviation", "μs"), _("The maximum time allowed for a rendering time slice"), false);
     _canvas_max_affine_diff.init("/options/rendering/max_affine_diff", 0.0, 100.0, 0.1, 0.0, 1.8, false, false);

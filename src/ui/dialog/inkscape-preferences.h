@@ -350,6 +350,7 @@ protected:
     UI::Widget::PrefSpinButton  _canvas_debug_overbisection_size;
     UI::Widget::PrefSpinButton  _canvas_debug_slow_redraw_time;
 
+    UI::Widget::PrefCombo       _canvas_update_strategy;
     UI::Widget::PrefSpinButton  _canvas_render_time_limit;
     UI::Widget::PrefSpinButton  _canvas_max_affine_diff;
     UI::Widget::PrefSpinButton  _canvas_pad;
