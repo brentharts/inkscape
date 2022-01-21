@@ -93,10 +93,10 @@ namespace UI {
 namespace Widget {
 
 struct PaintRectSetup {
+    Cairo::RefPtr<Cairo::Region> clean_region;
     Geom::IntPoint mouse_loc;
     int max_pixels;
     gint64 start_time;
-    bool disable_timeouts;
 };
 
 // Preferences system
@@ -178,6 +178,131 @@ struct Prefs
     Pref<bool>   debug_sticky_decoupled   = Pref<bool>  ("/options/rendering/debug/sticky_decoupled");
 };
 
+// Conversion functions
+
+auto geom_to_cairo(Geom::IntRect rect)
+{
+    return Cairo::RectangleInt{rect.left(), rect.top(), rect.width(), rect.height()};
+}
+
+auto cairo_to_geom(Cairo::RectangleInt rect)
+{
+    return Geom::IntRect::from_xywh(rect.x, rect.y, rect.width, rect.height);
+}
+
+auto geom_to_cairo(Geom::Affine affine)
+{
+    return Cairo::Matrix(affine[0], affine[1], affine[2], affine[3], affine[4], affine[5]);
+}
+
+auto geom_act(Geom::Affine a, Geom::IntPoint p)
+{
+    Geom::Point p2 = p;
+    p2 *= a;
+    return Geom::IntPoint(std::round(p2.x()), std::round(p2.y()));
+}
+
+void region_to_path(const Cairo::RefPtr<Cairo::Context> &cr, const Cairo::RefPtr<Cairo::Region> &reg)
+{
+    for (int i = 0; i < reg->get_num_rectangles(); i++) {
+        auto rect = reg->get_rectangle(i);
+        cr->rectangle(rect.x, rect.y, rect.width, rect.height);
+    }
+}
+
+// Update strategy
+
+enum UpdateStrategy {
+    Responsive,
+    FullRedraw,
+    Multiscale
+};
+
+// A class for controlling when invalidated regions become available for redraw.
+class Updater
+{
+public:
+    Cairo::RefPtr<Cairo::Region> clean_region;
+
+    Updater(Cairo::RefPtr<Cairo::Region> clean_region) : clean_region(clean_region) {}
+
+    virtual void reset() {clean_region = Cairo::Region::create();}
+    virtual void intersect(const Geom::IntRect &rect) {clean_region->intersect(geom_to_cairo(rect));}
+    virtual void mark_dirty(const Geom::IntRect &rect) {clean_region->subtract(geom_to_cairo(rect));}
+    virtual void mark_clean(const Geom::IntRect &rect) {clean_region->do_union(geom_to_cairo(rect));}
+
+    virtual Cairo::RefPtr<Cairo::Region> checkout_clean_region() {return clean_region;};
+    virtual bool report_completed() {return false;}
+};
+
+// Responsive/naive updater: As soon as a region is invalidated, redraw it.
+using ResponsiveUpdater = Updater;
+
+// Full-redraw updater: When a region is invalidated, delay redraw until after the current redraw is completed.
+class FullredrawUpdater : public Updater
+{
+    bool checkedout;
+    Cairo::RefPtr<Cairo::Region> frozen;
+
+public:
+    FullredrawUpdater(Cairo::RefPtr<Cairo::Region> clean_region) : Updater(clean_region), checkedout(false) {}
+
+    void reset() override
+    {
+        Updater::reset();
+        checkedout = false;
+        frozen.clear();
+    }
+
+    void intersect(const Geom::IntRect &rect) override
+    {
+        Updater::intersect(rect);
+        if (frozen) frozen->intersect(geom_to_cairo(rect));
+    }
+
+    void mark_dirty(const Geom::IntRect &rect) override
+    {
+        if (checkedout && !frozen) frozen = clean_region->copy(); // CoW triggered
+        Updater::mark_dirty(rect);
+    }
+
+    void mark_clean(const Geom::IntRect &rect) override
+    {
+        Updater::mark_clean(rect);
+        if (frozen) frozen->do_union(geom_to_cairo(rect));
+    }
+
+    Cairo::RefPtr<Cairo::Region> checkout_clean_region() override
+    {
+        if (!frozen) {
+            checkedout = true;
+            return clean_region;
+        } else {
+            return frozen;
+        }
+    }
+
+    bool report_completed() override
+    {
+        assert(checkedout);
+        if (!frozen) {
+            checkedout = false;
+            return false;
+        } else {
+            frozen.clear();
+            return true;
+        }
+    }
+};
+
+class MultiscaleUpdater : public Updater
+{
+public:
+    MultiscaleUpdater(Cairo::RefPtr<Cairo::Region> clean_region) : Updater(clean_region) {}
+};
+
+// Implementation class
+
 class CanvasPrivate
 {
 public:
@@ -198,7 +323,8 @@ public:
     Geom::IntRect _store_rect;                         ///< Rectangle of the store in world space.
     Geom::Affine _store_affine;
     Cairo::RefPtr<Cairo::ImageSurface> _backing_store; ///< Canvas content.
-    Cairo::RefPtr<Cairo::Region> _clean_region; ///< Subregion of backing store with up-to-date content.
+
+    std::unique_ptr<Updater> updater; // Holds the clean region, the subregion of the store with up-to-date content, and decides in what order the unclean regions should be redrawn.
 
     Geom::IntRect _snapshot_rect;
     Geom::Affine _snapshot_affine;
@@ -244,7 +370,7 @@ void CanvasPrivate::schedule_bucket_emptier()
         bucket_emptier.disconnect();
         empty_bucket();
         return false;
-    }, G_PRIORITY_DEFAULT_IDLE - 5); // before lowpri_idle
+    }, G_PRIORITY_DEFAULT_IDLE - 5); // before lopri_idle
 }
 
 void CanvasPrivate::empty_bucket()
@@ -325,7 +451,7 @@ Canvas::Canvas()
     _pick_event.crossing.y = 0;
 
     // Drawing
-    d->_clean_region = Cairo::Region::create();
+    d->updater = std::make_unique<FullredrawUpdater>(Cairo::Region::create());
 
     _background = Cairo::SolidPattern::create_rgb(1.0, 1.0, 1.0);
     d->solid_background = true;
@@ -409,7 +535,7 @@ Canvas::redraw_all()
         // We need to ignore their requests!
         return;
     }
-    d->_clean_region = Cairo::Region::create(); // Empty region (i.e. everything is dirty).
+    d->updater->reset(); // Empty region (i.e. everything is dirty).
     d->add_idle();
     if (d->prefs.debug_show_unclean) queue_draw();
 }
@@ -441,8 +567,8 @@ Canvas::redraw_area(int x0, int y0, int x1, int y1)
     x1 = std::clamp(x1, min_coord, max_coord);
     y1 = std::clamp(y1, min_coord, max_coord);
 
-    Cairo::RectangleInt crect = { x0, y0, x1-x0, y1-y0 };
-    d->_clean_region->subtract(crect);
+    auto rect = Geom::IntRect::from_xywh(x0, y0, x1-x0, y1-y0);
+    d->updater->mark_dirty(rect);
     d->add_idle();
     if (d->prefs.debug_show_unclean) queue_draw();
 }
@@ -586,10 +712,7 @@ Cairo::RefPtr<Cairo::ImageSurface> Canvas::get_backing_store() const
 void
 Canvas::forced_redraws_start(int count, bool reset)
 {
-    _forced_redraw_limit = count;
-    if (reset) {
-        _forced_redraw_count = 0;
-    }
+    // Todo: Likely to be removed, depending on feedback.
 }
 
 /**
@@ -904,39 +1027,6 @@ void Canvas::on_realize()
     d->add_idle();
 }
 
-auto
-geom_to_cairo(Geom::IntRect rect)
-{
-    return Cairo::RectangleInt{rect.left(), rect.top(), rect.width(), rect.height()};
-}
-
-auto
-cairo_to_geom(Cairo::RectangleInt rect)
-{
-    return Geom::IntRect::from_xywh(rect.x, rect.y, rect.width, rect.height);
-}
-
-auto geom_to_cairo(Geom::Affine affine)
-{
-    return Cairo::Matrix(affine[0], affine[1], affine[2], affine[3], affine[4], affine[5]);
-}
-
-auto geom_act(Geom::Affine a, Geom::IntPoint p)
-{
-    Geom::Point p2 = p;
-    p2 *= a;
-    return Geom::IntPoint(std::round(p2.x()), std::round(p2.y()));
-}
-
-void
-region_to_path(const Cairo::RefPtr<Cairo::Context> &cr, const Cairo::RefPtr<Cairo::Region> &reg)
-{
-    for (int i = 0; i < reg->get_num_rectangles(); i++) {
-        auto rect = reg->get_rectangle(i);
-        cr->rectangle(rect.x, rect.y, rect.width, rect.height);
-    }
-}
-
 /*
  * The on_draw() function is called whenever Gtk wants to update the window. This function:
  *
@@ -1002,7 +1092,7 @@ Canvas::on_draw(const::Cairo::RefPtr<::Cairo::Context> &cr)
             cr->rectangle(0, 0, get_allocation().get_width(), get_allocation().get_height());
             cr->translate(-_x0, -_y0);
             cr->transform(geom_to_cairo(_affine * d->_store_affine.inverse()));
-            region_to_path(cr, d->_clean_region);
+            region_to_path(cr, d->updater->clean_region);
             cr->transform(geom_to_cairo(d->_store_affine * d->_snapshot_affine.inverse()));
             region_to_path(cr, d->_snapshot_clean_region);
             cr->clip();
@@ -1020,7 +1110,7 @@ Canvas::on_draw(const::Cairo::RefPtr<::Cairo::Context> &cr)
         cr->rectangle(0, 0, get_allocation().get_width(), get_allocation().get_height());
         cr->translate(-_x0, -_y0);
         cr->transform(geom_to_cairo(_affine * d->_store_affine.inverse()));
-        region_to_path(cr, d->_clean_region);
+        region_to_path(cr, d->updater->clean_region);
         cr->clip();
         cr->transform(geom_to_cairo(d->_store_affine * d->_snapshot_affine.inverse()));
         region_to_path(cr, d->_snapshot_clean_region);
@@ -1041,7 +1131,7 @@ Canvas::on_draw(const::Cairo::RefPtr<::Cairo::Context> &cr)
         cr->save();
         cr->translate(-_x0, -_y0);
         cr->transform(geom_to_cairo(_affine * d->_store_affine.inverse()));
-        region_to_path(cr, d->_clean_region);
+        region_to_path(cr, d->updater->clean_region);
         cr->clip();
         cr->set_source(d->_backing_store, d->_store_rect.left(), d->_store_rect.top());
         cr->set_operator(d->solid_background ? Cairo::OPERATOR_SOURCE : Cairo::OPERATOR_OVER);
@@ -1054,7 +1144,7 @@ Canvas::on_draw(const::Cairo::RefPtr<::Cairo::Context> &cr)
     if (d->prefs.debug_show_unclean) {
         if (d->prefs.debug_framecheck) f = FrameCheck::Event("paint_unclean");
         auto reg = Cairo::Region::create(geom_to_cairo(d->_store_rect));
-        reg->subtract(d->_clean_region);
+        reg->subtract(d->updater->clean_region);
         cr->save();
         cr->translate(-_x0, -_y0);
         if (d->decoupled_mode) {
@@ -1075,7 +1165,7 @@ Canvas::on_draw(const::Cairo::RefPtr<::Cairo::Context> &cr)
             cr->transform(geom_to_cairo(_affine * d->_store_affine.inverse()));
         }
         cr->set_source_rgba(0, 0.7, 0, 0.4);
-        region_to_path(cr, d->_clean_region);
+        region_to_path(cr, d->updater->clean_region);
         cr->stroke();
         cr->restore();
     }
@@ -1260,7 +1350,7 @@ CanvasPrivate::on_idle()
             cr->set_operator(Cairo::OPERATOR_CLEAR);
         }
         cr->paint();
-        _clean_region = Cairo::Region::create();
+        updater->reset();
         if (prefs.debug_show_unclean) q->queue_draw();
     };
 
@@ -1319,7 +1409,7 @@ CanvasPrivate::on_idle()
         _store_rect = store_rect;
         assert(_store_affine == q->_affine); // Should not be called if the affine has changed.
         _backing_store = std::move(backing_store);
-        _clean_region->intersect(geom_to_cairo(_store_rect));
+        updater->intersect(_store_rect);
         if (prefs.debug_show_unclean) q->queue_draw();
     };
 
@@ -1328,7 +1418,7 @@ CanvasPrivate::on_idle()
         std::swap(_snapshot_store, _backing_store); // This will re-use the old snapshot store later if possible.
         _snapshot_rect = _store_rect;
         _snapshot_affine = _store_affine;
-        _snapshot_clean_region = _clean_region->copy();
+        _snapshot_clean_region = updater->clean_region->copy();
 
         // Recreate the backing store, making the state valid again.
         recreate_store();
@@ -1386,7 +1476,7 @@ CanvasPrivate::on_idle()
 
     // Assert that _clean_region is a subregion of _store_rect.
     #ifndef NDEBUG
-    auto tmp = _clean_region->copy();
+    auto tmp = updater->clean_region->copy();
     tmp->subtract(geom_to_cairo(_store_rect));
     assert(tmp->empty());
     #endif
@@ -1421,7 +1511,7 @@ CanvasPrivate::on_idle()
         // The visible rect is the intersection of this with the store
         visible_rect = bi & _store_rect;
 
-        // Note: We could have used a smaller region containing pl consisting of many rectangles, rather than a single bounding box.
+        // Note: We could have used a smaller region containing of consisting of many rectangles, rather than a single bounding box.
         // However, while this uses less pixels it also uses more rectangles, so is NOT necessarily an optimisation and could backfire.
         // For this reason, and for simplicity, we use the bounding rect. (Note: Slightly invalidated by addition of coarsener below.)
     }
@@ -1432,7 +1522,7 @@ CanvasPrivate::on_idle()
     Cairo::RefPtr<Cairo::Region> paint_region;
     if (visible_rect) {
         paint_region = Cairo::Region::create(geom_to_cairo(*visible_rect));
-        paint_region->subtract(_clean_region);
+        paint_region->subtract(updater->checkout_clean_region());
     } else {
         paint_region = Cairo::Region::create();
     }
@@ -1441,7 +1531,7 @@ CanvasPrivate::on_idle()
     auto paint_rects = coarsen(paint_region, prefs.coarsener_min_size, prefs.coarsener_glue_size);
 
     // Clip the coarsened rectangles back to the visible rect, in case coarsening made them go outside it.
-    // Todo: That should be impossible, but somehow it occasionally happens. Understand!
+    // Todo: That should be impossible, but somehow it occasionally happens. Or was that in a bad dream? Understand!
     for (auto it = paint_rects.begin(); it != paint_rects.end(); ) {
         auto opt = *it & *visible_rect;
         if (opt) {
@@ -1474,6 +1564,7 @@ CanvasPrivate::on_idle()
     // Todo: Consider further subdividing the region if the mouse lies on the edge of a big rectangle.
     // Otherwise, the whole of the big rectangle will be rendered first, at the expense of points in other
     // rectangles very near to the mouse.
+    // Todo: Will be fixed by non-recursive heap-based bisector soon.
 
     // Sort the rectangles to paint by distance from mouse.
     std::sort(paint_rects.begin(), paint_rects.end(), [&] (const Geom::IntRect &a, const Geom::IntRect &b) {
@@ -1482,6 +1573,7 @@ CanvasPrivate::on_idle()
 
     // Set up painting info to pass down the stack.
     PaintRectSetup setup;
+    setup.clean_region = updater->checkout_clean_region();
     setup.mouse_loc = mouse_loc;
     // Todo: Logging reveals that Inkscape often underestimates render times, and can sometimes time out quite badly,
     // leading to missed frames. Consider fixing the time estimator below, possibly based on run-time feedback. May
@@ -1495,10 +1587,6 @@ CanvasPrivate::on_idle()
         setup.max_pixels = 262144;
     }
     setup.start_time = g_get_monotonic_time();
-    //setup.disable_timeouts = _forced_redraw_limit != -1 && _forced_redraw_count >= _forced_redraw_limit; // Enable a forced redraw if asked.
-    // Todo: Forced redraws are temporarily disabled. They are no longer helpful in all the situations they used to be.
-    // Need to go through all places where forced redraw is requested, and check whether it is helpful or harmful.
-    setup.disable_timeouts = false;
 
     // If asked to, don't paint anything and instead halt the idle process.
     if (prefs.debug_disable_redraw) {
@@ -1515,26 +1603,18 @@ CanvasPrivate::on_idle()
             // Timed out. Temporarily return to GTK main loop, and come back here when next idle.
             if (prefs.debug_logging) std::cout << "Timed out: " << g_get_monotonic_time() - setup.start_time << " us" << std::endl;
             framecheckobj.subtype = 1;
-            q->_forced_redraw_count++;
             return true;
         }
     }
 
-    // Check if suppressed a timeout.
-    if (setup.disable_timeouts) {
-        auto now = g_get_monotonic_time();
-        auto elapsed = now - setup.start_time;
-        if (elapsed > prefs.render_time_limit) {
-            // Timed out. Reset counter. It will count up again on future timeouts, eventually triggering another forced redraw.
-            q->_forced_redraw_count = 0;
-            if (prefs.debug_logging) std::cout << "Ignored timeout: " << g_get_monotonic_time() - setup.start_time << " us" << std::endl;
-            framecheckobj.subtype = 2;
-            return false;
-        }
+    // Finished redrawing the region requested by the updater. Check if it has any subsequent requests.
+    if (updater->report_completed()) {
+        // There is another request; continue redrawing.
+        return true; // Todo: Would be more logical to jump back to the required point, rather than returning.
     }
 
     // Implement the sticky decoupled mode debug switch.
-    if (decoupled_mode && prefs.debug_sticky_decoupled) return false;
+    if (prefs.debug_sticky_decoupled && decoupled_mode) return false;
 
     // Finished drawing. Handle transitions out of decoupled mode, by checking if we need to do a final redraw at the correct affine.
     if (decoupled_mode) {
@@ -1577,7 +1657,7 @@ CanvasPrivate::paint_rect_internal(PaintRectSetup const &setup, Geom::IntRect co
 
     // Due to coarsening, it's possible for bisected rectangles to lie entirely inside the clean region. These can be discarded, and in fact must be,
     // because otherwise we risk rendering only clean rectangles for the whole frame, which would lead to a render stall.
-    if (_clean_region->contains_rectangle(geom_to_cairo(this_rect)) == Cairo::REGION_OVERLAP_IN) {
+    if (setup.clean_region->contains_rectangle(geom_to_cairo(this_rect)) == Cairo::REGION_OVERLAP_IN) {
         // Rectangle is already clean.
         return true;
     }
@@ -1676,7 +1756,7 @@ CanvasPrivate::paint_rect_internal(PaintRectSetup const &setup, Geom::IntRect co
     if (prefs.debug_slow_redraw) g_usleep(prefs.debug_slow_redraw_time);
 
     // Mark the rectangle as clean.
-    _clean_region->do_union(geom_to_cairo(this_rect));
+    updater->mark_clean(this_rect);
 
     // Mark the screen dirty.
     if (!decoupled_mode) {
@@ -1708,12 +1788,10 @@ CanvasPrivate::paint_rect_internal(PaintRectSetup const &setup, Geom::IntRect co
     }
 
     // Exit if timed out.
-    if (!setup.disable_timeouts) {
-        auto now = g_get_monotonic_time();
-        auto elapsed = now - setup.start_time;
-        if (elapsed > prefs.render_time_limit) {
-            return false;
-        }
+    auto now = g_get_monotonic_time();
+    auto elapsed = now - setup.start_time;
+    if (elapsed > prefs.render_time_limit) {
+        return false;
     }
 
     // Continue rendering.

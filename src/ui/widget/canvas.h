@@ -16,14 +16,9 @@
 #endif
 
 #include <memory>
-
 #include <gtkmm.h>
-
 #include <2geom/rect.h>
 #include <2geom/int-rect.h>
-
-#include "preferences.h" // Update canvas_item_ctrl sizes.
-
 #include "display/rendermode.h"
 
 class SPDesktop;
