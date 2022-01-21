@@ -149,7 +149,9 @@ DialogNotebook::DialogNotebook(DialogContainer *container)
         auto key = data.key;
         auto dlg = Gtk::make_managed<Gtk::MenuItem>();
         auto box = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, 8);
-        box->pack_start(*Gtk::make_managed<Gtk::Image>(data.icon_name, Gtk::ICON_SIZE_MENU), false, true);
+        auto wrapper = Gtk::make_managed<Gtk::Box>();
+        wrapper->pack_start(*Gtk::make_managed<Gtk::Image>(data.icon_name, Gtk::ICON_SIZE_MENU), false, true);
+        box->pack_start(*wrapper, false, true);
         box->pack_start(*Gtk::make_managed<Gtk::Label>(data.label, Gtk::ALIGN_START, Gtk::ALIGN_CENTER, true), false, true);
         dlg->add(*box);
         dlg->signal_activate().connect([=](){
