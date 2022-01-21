@@ -556,17 +556,33 @@ InkscapeApplication::_start_main_option_section(const Glib::ustring& section_nam
 // running independently. In principle one can use --gapplication-app-id to run a new instance of
 // Inkscape but this with our current structure fails with the error message:
 // "g_application_set_application_id: assertion '!application->priv->is_registered' failed".
+// This is probably due to command line options being handled too late (after app is registered).
 // It also require generating new id's for each separate Inkscape instance required.
 
 InkscapeApplication::InkscapeApplication()
 {
     using T = Gio::Application;
 
-    auto app_id = "org.inkscape.Inkscape";
+    auto app_id = Glib::ustring("org.inkscape.Inkscape");
     auto flags = Gio::APPLICATION_HANDLES_OPEN; // Use default file opening.
+    auto non_unique = false;
+
+    // Allow an independent instance of Inkscape to run. Will have matching DBus name and paths
+    // (e.g org.inkscape.Inkscape.tag, /org/inkscape/Inkscape/tag/window/1).
+    // If this flag isn't set, any new instance of Inkscape will be merged with the already running
+    // instance of Inkscape before on_open() or on_activate() is called.
+    if (Glib::getenv("INKSCAPE_APP_ID_TAG") != "") {
+        flags |= Gio::APPLICATION_CAN_OVERRIDE_APP_ID;
+        app_id += "." + Glib::getenv("INKSCAPE_APP_ID_TAG");
+        if (!Gio::Application::id_is_valid(app_id)) {
+            std::cerr << "InkscapeApplication: invalid application id: " << app_id << std::endl;
+            std::cerr << "  tag must be ASCII and not start with a number." << std::endl;
+        }
+        non_unique = true;
+    }
 
     if (gtk_init_check(nullptr, nullptr)) {
-        g_set_prgname(app_id);
+        g_set_prgname(app_id.c_str());
         _gio_application = Gtk::Application::create(app_id, flags);
     } else {
         _gio_application = Gio::Application::create(app_id, flags);
@@ -725,7 +741,7 @@ InkscapeApplication::InkscapeApplication()
 
     gapp->signal_handle_local_options().connect(sigc::mem_fun(*this, &InkscapeApplication::on_handle_local_options));
 
-    if (_with_gui) {
+    if (_with_gui && !non_unique) { // Will fail to register if not unique.
         // On macOS, this enables:
         //   - DnD via dock icon
         //   - system menu "Quit"
@@ -735,6 +751,8 @@ InkscapeApplication::InkscapeApplication()
     // This is normally called for us... but after the "handle_local_options" signal is emitted. If
     // we want to rely on actions for handling options, we need to call it here. This appears to
     // have no unwanted side-effect. It will also trigger the call to on_startup().
+    // Ah, it does seem to block --gapplication-app-id (used with  Gio::APPLICATION_CAN_OVERRIDE_APP_ID),
+    // but that option is removed in GTK4. (One can't change APP_ID after registering application.)
     gapp->register_application();
 }
 

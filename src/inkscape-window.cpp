@@ -121,7 +121,7 @@ InkscapeWindow::InkscapeWindow(SPDocument* document)
 
     auto connection = _app->gio_app()->get_dbus_connection();
     if (connection) {
-        std::string document_action_group_name = "/org/inkscape/Inkscape/document/" + std::to_string(get_id());
+        std::string document_action_group_name = _app->gio_app()->get_dbus_object_path() + "/document/" + std::to_string(get_id());
         connection->export_action_group(document_action_group_name, document->getActionGroup());
     }
 
