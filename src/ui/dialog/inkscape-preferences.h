@@ -337,25 +337,25 @@ protected:
     UI::Widget::PrefRadioButton _filter_quality_worse;
     UI::Widget::PrefRadioButton _filter_quality_worst;
 
+    UI::Widget::PrefCombo       _canvas_update_strategy;
+    UI::Widget::PrefSpinButton  _canvas_render_time_limit;
+    UI::Widget::PrefCheckButton _canvas_use_new_bisector;
+    UI::Widget::PrefSpinButton  _canvas_new_bisector_size;
+    UI::Widget::PrefSpinButton  _canvas_max_affine_diff;
+    UI::Widget::PrefSpinButton  _canvas_pad;
+    UI::Widget::PrefSpinButton  _canvas_coarsener_min_size;
+    UI::Widget::PrefSpinButton  _canvas_coarsener_glue_size;
+
     UI::Widget::PrefCheckButton _canvas_debug_framecheck;
     UI::Widget::PrefCheckButton _canvas_debug_logging;
-    UI::Widget::PrefCheckButton _canvas_debug_overbisection;
     UI::Widget::PrefCheckButton _canvas_debug_slow_redraw;
+    UI::Widget::PrefSpinButton  _canvas_debug_slow_redraw_time;
     UI::Widget::PrefCheckButton _canvas_debug_show_redraw;
     UI::Widget::PrefCheckButton _canvas_debug_show_unclean;
     UI::Widget::PrefCheckButton _canvas_debug_show_snapshot;
     UI::Widget::PrefCheckButton _canvas_debug_show_clean;
     UI::Widget::PrefCheckButton _canvas_debug_disable_redraw;
     UI::Widget::PrefCheckButton _canvas_debug_sticky_decoupled;
-    UI::Widget::PrefSpinButton  _canvas_debug_overbisection_size;
-    UI::Widget::PrefSpinButton  _canvas_debug_slow_redraw_time;
-
-    UI::Widget::PrefCombo       _canvas_update_strategy;
-    UI::Widget::PrefSpinButton  _canvas_render_time_limit;
-    UI::Widget::PrefSpinButton  _canvas_max_affine_diff;
-    UI::Widget::PrefSpinButton  _canvas_pad;
-    UI::Widget::PrefSpinButton  _canvas_coarsener_min_size;
-    UI::Widget::PrefSpinButton  _canvas_coarsener_glue_size;
 
     UI::Widget::PrefCheckButton _trans_scale_stroke;
     UI::Widget::PrefCheckButton _trans_scale_corner;

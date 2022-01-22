@@ -92,13 +92,6 @@ namespace Inkscape {
 namespace UI {
 namespace Widget {
 
-struct PaintRectSetup {
-    Cairo::RefPtr<Cairo::Region> clean_region;
-    Geom::IntPoint mouse_loc;
-    int max_pixels;
-    gint64 start_time;
-};
-
 // Preferences system
 
 template<typename T>
@@ -158,24 +151,24 @@ struct Prefs
     // New parameters
     Pref<int>    update_strategy          = Pref<int>   ("/options/rendering/update_strategy", 3, 1, 3);
     Pref<int>    render_time_limit        = Pref<int>   ("/options/rendering/render_time_limit", 1000, 100, 1000000);
+    Pref<bool>   use_new_bisector         = Pref<bool>  ("/options/rendering/use_new_bisector", true);
+    Pref<int>    new_bisector_size        = Pref<int>   ("/options/rendering/new_bisector_size", 400, 1, 10000);
     Pref<double> max_affine_diff          = Pref<double>("/options/rendering/max_affine_diff", 1.8, 0.0, 100.0);
     Pref<int>    pad                      = Pref<int>   ("/options/rendering/pad", 200, 0, 1000);
     Pref<int>    coarsener_min_size       = Pref<int>   ("/options/rendering/coarsener_min_size", 200, 0, 1000);
     Pref<int>    coarsener_glue_size      = Pref<int>   ("/options/rendering/coarsener_glue_size", 80, 0, 1000);
 
     // Debug switches
-    Pref<bool>   debug_framecheck         = Pref<bool>  ("/options/rendering/debug/framecheck");
-    Pref<bool>   debug_logging            = Pref<bool>  ("/options/rendering/debug/logging");
-    Pref<bool>   debug_overbisection      = Pref<bool>  ("/options/rendering/debug/overbisection", true);
-    Pref<int>    debug_overbisection_size = Pref<int>   ("/options/rendering/debug/overbisection_size", 400, 1, 10000);
-    Pref<bool>   debug_slow_redraw        = Pref<bool>  ("/options/rendering/debug/slow_redraw");
-    Pref<int>    debug_slow_redraw_time   = Pref<int>   ("/options/rendering/debug/slow_redraw_time", 50, 0, 1000000);
-    Pref<bool>   debug_show_redraw        = Pref<bool>  ("/options/rendering/debug/show_redraw");
-    Pref<bool>   debug_show_unclean       = Pref<bool>  ("/options/rendering/debug/show_unclean");
-    Pref<bool>   debug_show_snapshot      = Pref<bool>  ("/options/rendering/debug/show_snapshot");
-    Pref<bool>   debug_show_clean         = Pref<bool>  ("/options/rendering/debug/show_clean");
-    Pref<bool>   debug_disable_redraw     = Pref<bool>  ("/options/rendering/debug/disable_redraw");
-    Pref<bool>   debug_sticky_decoupled   = Pref<bool>  ("/options/rendering/debug/sticky_decoupled");
+    Pref<bool>   debug_framecheck         = Pref<bool>  ("/options/rendering/debug_framecheck");
+    Pref<bool>   debug_logging            = Pref<bool>  ("/options/rendering/debug_logging");
+    Pref<bool>   debug_slow_redraw        = Pref<bool>  ("/options/rendering/debug_slow_redraw");
+    Pref<int>    debug_slow_redraw_time   = Pref<int>   ("/options/rendering/debug_slow_redraw_time", 50, 0, 1000000);
+    Pref<bool>   debug_show_redraw        = Pref<bool>  ("/options/rendering/debug_show_redraw");
+    Pref<bool>   debug_show_unclean       = Pref<bool>  ("/options/rendering/debug_show_unclean");
+    Pref<bool>   debug_show_snapshot      = Pref<bool>  ("/options/rendering/debug_show_snapshot");
+    Pref<bool>   debug_show_clean         = Pref<bool>  ("/options/rendering/debug_show_clean");
+    Pref<bool>   debug_disable_redraw     = Pref<bool>  ("/options/rendering/debug_disable_redraw");
+    Pref<bool>   debug_sticky_decoupled   = Pref<bool>  ("/options/rendering/debug_sticky_decoupled");
 };
 
 // Conversion functions
@@ -227,7 +220,7 @@ public:
     virtual void mark_clean(const Geom::IntRect &rect) {clean_region->do_union (geom_to_cairo(rect));} // Called on every rectangle redrawn.
 
     virtual Cairo::RefPtr<Cairo::Region> get_next_clean_region() {return clean_region;}; // Called once in on_idle to determine what regions to consider clean for the current draw.
-    virtual bool                         finished_drawing     () {return false;}         // Called in on_idle if drawing has finished. Returns true to indicate that drawing should continue, because the next clean region will be different.
+    virtual bool                         report_finished      () {return false;}         // Called in on_idle if drawing has finished. Returns true to indicate that drawing should continue, because the next clean region will be different.
     virtual void                         frame                () {}                      // Called by on_draw to notify the end of drawing and the display of the frame.
 };
 
@@ -282,7 +275,7 @@ public:
         }
     }
 
-    bool finished_drawing() override
+    bool report_finished() override
     {
         assert(inprogress);
         if (!old_clean_region) {
@@ -334,7 +327,7 @@ public:
         return result;
     }
 
-    bool finished_drawing() override
+    bool report_finished() override
     {
         // We have finished work if we have completed a redraw using the depth 0 clean region, which is always the true clean region.
         bool ret = depth > 0;
@@ -394,7 +387,7 @@ public:
 
     void add_idle();
     bool on_idle();
-    bool paint_rect_internal(PaintRectSetup const &setup, Geom::IntRect const &this_rect);
+    void paint_rect_internal(Geom::IntRect const &rect);
     void paint_single_buffer(Geom::IntRect const &paint_rect, Cairo::RefPtr<Cairo::ImageSurface> &store);
 
     // Important global properties of all the stores. If these change, all the stores must be recreated.
@@ -441,6 +434,9 @@ public:
     bool on_lopri_idle();
 
     void update_ctrl_sizes(int size) {q->_canvas_item_root->update_canvas_item_ctrl_sizes(size);}
+
+    std::optional<Geom::Dim2> old_bisector(const Geom::IntRect &rect);
+    std::optional<Geom::Dim2> new_bisector(const Geom::IntRect &rect);
 };
 
 void CanvasPrivate::schedule_bucket_emptier()
@@ -523,7 +519,7 @@ Canvas::Canvas()
     d->prefs.grabsize.action = [=] {_canvas_item_root->update_canvas_item_ctrl_sizes(d->prefs.grabsize);};
     d->prefs.debug_show_unclean.action = [=] {queue_draw();};
     d->prefs.debug_show_clean.action = [=] {queue_draw();};
-    d->prefs.debug_disable_redraw.action = [=] {queue_draw();};
+    d->prefs.debug_disable_redraw.action = [=] {d->add_idle();};
     d->prefs.debug_sticky_decoupled.action = [=] {d->add_idle();};
     d->prefs.update_strategy.action = [=] {d->updater = make_updater(d->prefs.update_strategy, d->updater->clean_region);};
 
@@ -1379,6 +1375,66 @@ coarsen(const Cairo::RefPtr<Cairo::Region> &region, int min_size, int glue_size)
     return processed;
 }
 
+std::optional<Geom::Dim2>
+CanvasPrivate::old_bisector(const Geom::IntRect &rect)
+{
+    int bw = rect.width();
+    int bh = rect.height();
+
+    /*
+     * Determine redraw strategy:
+     *
+     * bw < bh (strips mode): Draw horizontal strips starting from cursor position.
+     *                        Seems to be faster for drawing many smaller objects zoomed out.
+     *
+     * bw > hb (chunks mode): Splits across the larger dimension of the rectangle, painting
+     *                        in almost square chunks (from the cursor.
+     *                        Seems to be faster for drawing a few blurred objects across the entire screen.
+     *                        Seems to be somewhat psychologically faster.
+     *
+     * Default is for strips mode.
+     */
+
+    int max_pixels;
+    if (q->_render_mode != Inkscape::RenderMode::OUTLINE) {
+        // Can't be too small or large gradient will be rerendered too many times!
+        max_pixels = 65536 * prefs.tile_multiplier;
+    } else {
+        // Paths only. 1M is catched buffer and we need four channels.
+        max_pixels = 262144;
+    }
+
+    if (bw * bh > max_pixels) {
+        if (bw < bh || bh < 2 * prefs.tile_size) {
+            return Geom::X;
+        } else {
+            return Geom::Y;
+        }
+    }
+
+    return {};
+}
+
+std::optional<Geom::Dim2>
+CanvasPrivate::new_bisector(const Geom::IntRect &rect)
+{
+    int bw = rect.width();
+    int bh = rect.height();
+
+    // Chop in half along the bigger dimension if the bigger dimension is too big.
+    if (bw > bh) {
+        if (bw > prefs.new_bisector_size) {
+            return Geom::X;
+        }
+    } else {
+        if (bh > prefs.new_bisector_size) {
+            return Geom::Y;
+        }
+    }
+
+    return {};
+}
+
 bool
 CanvasPrivate::on_hipri_idle()
 {
@@ -1448,8 +1504,6 @@ CanvasPrivate::on_idle()
         if (prefs.debug_logging) std::cout << "Full reset" << std::endl;
     }
 
-    // Todo: Consider incrementally and pre-emptively performing this operation across several frames to avoid lag spikes.
-    // Todo: Screw that. Just do it on the GPU.
     auto shift_store = [&, this] {
         // Recreate the store, but keep re-usable content from the old store.
         auto store_rect = Geom::IntRect::from_xywh( q->_x0, q->_y0, q->get_allocation().get_width(), q->get_allocation().get_height() );
@@ -1574,12 +1628,12 @@ CanvasPrivate::on_idle()
         q->_need_update = false;
     }
 
-    // Todo: if redrawing is measured to be extremely heavy, we could consider deferring the start of redrawing until the viewing parameters have changed sufficiently much.
-    // There are only two main obstructions to implementing this feature. First, having to write timing code to measure whether redraw is heavy. Second, and more importantly,
-    // it can't be implemented without the Canvas being hooked up to a "transforming finished" event, say mouse release. As these are annoying and the benefit is minor, I'm
-    // not considering implementing this feature. But it would go here.
+    // If asked to, don't paint anything and instead halt the idle process.
+    if (prefs.debug_disable_redraw) {
+        return false;
+    }
 
-    // Get the rectangle of store that is visible.
+    // Get the subrectangle of store that is visible.
     Geom::OptIntRect visible_rect;
     if (!decoupled_mode) {
         // By a previous assertion, this always lies within the store.
@@ -1595,39 +1649,9 @@ CanvasPrivate::on_idle()
 
         // The visible rect is the intersection of this with the store
         visible_rect = bi & _store_rect;
-
-        // Note: We could have used a smaller region containing of consisting of many rectangles, rather than a single bounding box.
-        // However, while this uses less pixels it also uses more rectangles, so is NOT necessarily an optimisation and could backfire.
-        // For this reason, and for simplicity, we use the bounding rect. (Note: Slightly invalidated by addition of coarsener below.)
     }
     // The visible rectangle must be a subrectangle of store.
     assert(_store_rect.contains(visible_rect));
-
-    // Get the region to paint, which is the visible rectangle minus the clean region (both subregions of store).
-    Cairo::RefPtr<Cairo::Region> clean_region = updater->get_next_clean_region();
-    Cairo::RefPtr<Cairo::Region> paint_region;
-    if (visible_rect) {
-        paint_region = Cairo::Region::create(geom_to_cairo(*visible_rect));
-        paint_region->subtract(clean_region);
-    } else {
-        paint_region = Cairo::Region::create();
-    }
-
-    // Get the list of rectangles to paint, coarsened to avoid fragmentation.
-    auto paint_rects = coarsen(paint_region, prefs.coarsener_min_size, prefs.coarsener_glue_size);
-
-    // Clip the coarsened rectangles back to the visible rect, in case coarsening made them go outside it.
-    // Todo: That should be impossible, but somehow it occasionally happens. Or was that in a bad dream? Understand!
-    for (auto it = paint_rects.begin(); it != paint_rects.end(); ) {
-        auto opt = *it & *visible_rect;
-        if (opt) {
-            *it = *opt;
-            ++it;
-        } else {
-            *it = paint_rects.back();
-            paint_rects.pop_back();
-        }
-    }
 
     // Get the mouse position in screen space.
     Geom::IntPoint mouse_loc;
@@ -1647,60 +1671,95 @@ CanvasPrivate::on_idle()
         mouse_loc = geom_act(_store_affine * q->_affine.inverse(), mouse_loc);
     }
 
-    // Todo: Consider further subdividing the region if the mouse lies on the edge of a big rectangle.
-    // Otherwise, the whole of the big rectangle will be rendered first, at the expense of points in other
-    // rectangles very near to the mouse.
-    // Todo: Will be fixed by non-recursive heap-based bisector soon.
+    // Begin processing redraws.
+    while (true) {
+        // Get the clean region for the next redraw as reported by the updater.
+        auto clean_region = updater->get_next_clean_region();
 
-    // Sort the rectangles to paint by distance from mouse.
-    std::sort(paint_rects.begin(), paint_rects.end(), [&] (const Geom::IntRect &a, const Geom::IntRect &b) {
-        return distSq(mouse_loc, a) < distSq(mouse_loc, b);
-    });
-
-    // Set up painting info to pass down the stack.
-    PaintRectSetup setup;
-    setup.clean_region = clean_region;
-    setup.mouse_loc = mouse_loc;
-    if (q->_render_mode != Inkscape::RenderMode::OUTLINE) {
-        // Can't be too small or large gradient will be rerendered too many times!
-        setup.max_pixels = 65536 * prefs.tile_multiplier;
-    } else {
-        // Paths only. 1M is catched buffer and we need four channels.
-        setup.max_pixels = 262144;
-    }
-    setup.start_time = g_get_monotonic_time();
-
-    // If asked to, don't paint anything and instead halt the idle process.
-    if (prefs.debug_disable_redraw) {
-        return false;
-    }
-
-    // Paint the rectangles.
-    for (const auto &rect : paint_rects) {
-        if (rect.hasZeroArea()) {
-            // Todo: I'm not sure if these can get through or not. If not, remove this check. This is a question about cairo.
-            continue;
+        // Get the region to paint, which is the visible rectangle minus the clean region (both subregions of store).
+        Cairo::RefPtr<Cairo::Region> paint_region;
+        if (visible_rect) {
+            paint_region = Cairo::Region::create(geom_to_cairo(*visible_rect));
+            paint_region->subtract(clean_region);
+        } else {
+            paint_region = Cairo::Region::create();
         }
-        if (!paint_rect_internal(setup, rect)) {
-            // Timed out. Temporarily return to GTK main loop, and come back here when next idle.
-            if (prefs.debug_logging) std::cout << "Timed out: " << g_get_monotonic_time() - setup.start_time << " us" << std::endl;
-            framecheckobj.subtype = 1;
-            return true;
+
+        // Get the list of rectangles to paint, coarsened to avoid fragmentation.
+        auto rects = coarsen(paint_region, prefs.coarsener_min_size, prefs.coarsener_glue_size);
+
+        // Ensure that all the rectangles lie within the visible rect (and therefore within the store).
+        #ifndef NDEBUG
+        for (auto &rect : rects) {
+            assert(visible_rect.contains(rect));
         }
-    }
+        #endif
 
-    // Finished redrawing the region requested by the updater. Check if it has any subsequent requests.
-    if (updater->finished_drawing()) {
-        // There is another request; continue redrawing.
-        return true; // Todo: Would be more logical to jump back to the required point, rather than returning.
-    }
+        // Put the rectangles into a heap sorted by distance from mouse.
+        auto cmp = [&] (const Geom::IntRect &a, const Geom::IntRect &b) {
+            return distSq(mouse_loc, a) > distSq(mouse_loc, b);
+        };
+        std::make_heap(rects.begin(), rects.end(), cmp);
 
-    // Implement the sticky decoupled mode debug switch.
-    if (prefs.debug_sticky_decoupled && decoupled_mode) return false;
+        // Process rectangles until none left or timed out.
+        auto start_time = g_get_monotonic_time();
+        while (!rects.empty()) {
+            // Extract the closest rectangle to the mouse.
+            std::pop_heap(rects.begin(), rects.end(), cmp);
+            auto rect = rects.back();
+            rects.pop_back();
+
+            // Cull empty rectangles.
+            if (rect.width() == 0 || rect.height() == 0) {
+                continue;
+            }
+
+            // Cull rectangles that lie entirely inside the clean region.
+            // (These can be generated by coarsening; they must be discarded to avoid getting stuck re-rendering the same rectangles.)
+            if (clean_region->contains_rectangle(geom_to_cairo(rect)) == Cairo::REGION_OVERLAP_IN) {
+                continue;
+            }
+
+            // Lambda to add a rectangle to the heap.
+            auto add_rect = [&] (const Geom::IntRect &rect) {
+                rects.emplace_back(rect);
+                std::push_heap(rects.begin(), rects.end(), cmp);
+            };
+
+            // If the rectangle needs bisecting, bisect it and put it back on the heap.
+            auto axis = prefs.use_new_bisector ? new_bisector(rect) : old_bisector(rect);
+            if (axis) {
+                int mid = rect[*axis].middle();
+                auto lo = rect; lo[*axis].setMax(mid); add_rect(lo);
+                auto hi = rect; hi[*axis].setMin(mid); add_rect(hi);
+                continue;
+            }
+
+            // Paint the rectangle.
+            paint_rect_internal(rect);
+
+            // Check for timeout.
+            auto now = g_get_monotonic_time();
+            auto elapsed = now - start_time;
+            if (elapsed > prefs.render_time_limit) {
+                // Timed out. Temporarily return to GTK main loop, and come back here when next idle.
+                if (prefs.debug_logging) std::cout << "Timed out: " << g_get_monotonic_time() - start_time << " us" << std::endl;
+                framecheckobj.subtype = 1;
+                return true;
+            }
+        }
+
+        // Report the redraw as finished. Exit if there's no more redraws to process.
+        bool keep_going = updater->report_finished();
+        if (!keep_going) break;
+    }
 
     // Finished drawing. Handle transitions out of decoupled mode, by checking if we need to do a final redraw at the correct affine.
     if (decoupled_mode) {
-        if (_store_affine == q->_affine) {
+        if (prefs.debug_sticky_decoupled) {
+            // Debug feature: quit idle process, but stay in decoupled mode.
+            return false;
+        } else if (_store_affine == q->_affine) {
             // Content is rendered at the correct affine - exit decoupled mode and quit idle process.
             if (prefs.debug_logging) std::cout << "Finished drawing - exiting decoupled mode" << std::endl;
             // Exit decoupled mode.
@@ -1726,124 +1785,24 @@ CanvasPrivate::on_idle()
  * Returns false to bail out in the event of a timeout.
  * Queues Gtk redraw of widget.
  */
-bool
-CanvasPrivate::paint_rect_internal(PaintRectSetup const &setup, Geom::IntRect const &this_rect)
+void
+CanvasPrivate::paint_rect_internal(Geom::IntRect const &rect)
 {
-    int bw = this_rect.width();
-    int bh = this_rect.height();
-
-    if (bw < 1 || bh < 1) {
-        // Nothing to draw!
-        return true;
-    }
-
-    // Due to coarsening, it's possible for bisected rectangles to lie entirely inside the clean region. These can be discarded, and in fact must be,
-    // because otherwise we risk rendering only clean rectangles for the whole frame, which would lead to a render stall.
-    if (setup.clean_region->contains_rectangle(geom_to_cairo(this_rect)) == Cairo::REGION_OVERLAP_IN) {
-        // Rectangle is already clean.
-        return true;
-    }
-
-    // Bisect rectangles that are too big.
-    if (!prefs.debug_overbisection) {
-        // Use original bisector.
-        // Todo: I still don't understand the rationale behind the following strategy. But I'm keeping it default for now.
-
-        /*
-         * Determine redraw strategy:
-         *
-         * bw < bh (strips mode): Draw horizontal strips starting from cursor position.
-         *                        Seems to be faster for drawing many smaller objects zoomed out.
-         *
-         * bw > hb (chunks mode): Splits across the larger dimension of the rectangle, painting
-         *                        in almost square chunks (from the cursor.
-         *                        Seems to be faster for drawing a few blurred objects across the entire screen.
-         *                        Seems to be somewhat psychologically faster.
-         *
-         * Default is for strips mode.
-         */
-
-        if (bw * bh > setup.max_pixels) {
-            if (bw < bh || bh < 2 * prefs.tile_size) {
-                int mid = this_rect[Geom::X].middle();
-
-                auto lo = Geom::IntRect(this_rect.left(), this_rect.top(), mid,               this_rect.bottom());
-                auto hi = Geom::IntRect(mid,              this_rect.top(), this_rect.right(), this_rect.bottom());
-
-                if (setup.mouse_loc[Geom::X] < mid) {
-                    // Always paint towards the mouse first
-                    return paint_rect_internal(setup, lo)
-                        && paint_rect_internal(setup, hi);
-                } else {
-                    return paint_rect_internal(setup, hi)
-                        && paint_rect_internal(setup, lo);
-                }
-            } else {
-                int mid = this_rect[Geom::Y].middle();
-
-                auto lo = Geom::IntRect(this_rect.left(), this_rect.top(), this_rect.right(), mid               );
-                auto hi = Geom::IntRect(this_rect.left(), mid,             this_rect.right(), this_rect.bottom());
-
-                if (setup.mouse_loc[Geom::Y] < mid) {
-                    // Always paint towards the mouse first
-                    return paint_rect_internal(setup, lo)
-                        && paint_rect_internal(setup, hi);
-                } else {
-                    return paint_rect_internal(setup, hi)
-                        && paint_rect_internal(setup, lo);
-                }
-            }
-        }
-    } else {
-        // Use the new bisector, which just chops in half along the larger dimension.
-        if (bw > bh) {
-            if (bw > prefs.debug_overbisection_size) {
-                int mid = this_rect[Geom::X].middle();
-
-                auto lo = Geom::IntRect(this_rect.left(), this_rect.top(), mid,               this_rect.bottom());
-                auto hi = Geom::IntRect(mid,              this_rect.top(), this_rect.right(), this_rect.bottom());
-
-                if (setup.mouse_loc[Geom::X] < mid) {
-                    return paint_rect_internal(setup, lo)
-                        && paint_rect_internal(setup, hi);
-                } else {
-                    return paint_rect_internal(setup, hi)
-                        && paint_rect_internal(setup, lo);
-                }
-            }
-        } else {
-            if (bh > prefs.debug_overbisection_size) {
-                int mid = this_rect[Geom::Y].middle();
-
-                auto lo = Geom::IntRect(this_rect.left(), this_rect.top(), this_rect.right(), mid               );
-                auto hi = Geom::IntRect(this_rect.left(), mid,             this_rect.right(), this_rect.bottom());
-
-                if (setup.mouse_loc[Geom::Y] < mid) {
-                    return paint_rect_internal(setup, lo)
-                        && paint_rect_internal(setup, hi);
-                } else {
-                    return paint_rect_internal(setup, hi)
-                        && paint_rect_internal(setup, lo);
-                }
-            }
-        }
-    }
-
     // Paint the rectangle.
     q->_drawing->setRenderMode(q->_render_mode);
     q->_drawing->setColorMode(q->_color_mode);
-    paint_single_buffer(this_rect, _backing_store);
+    paint_single_buffer(rect, _backing_store);
 
     // Introduce an artificial delay for each rectangle.
     if (prefs.debug_slow_redraw) g_usleep(prefs.debug_slow_redraw_time);
 
     // Mark the rectangle as clean.
-    updater->mark_clean(this_rect);
+    updater->mark_clean(rect);
 
     // Mark the screen dirty.
     if (!decoupled_mode) {
         // Get rectangle needing repaint
-        auto repaint_rect = this_rect - Geom::IntPoint(q->_x0, q->_y0);
+        auto repaint_rect = rect - Geom::IntPoint(q->_x0, q->_y0);
 
         // Assert that a repaint actually occurs (guaranteed because we are only asked to paint fully on-screen rectangles)
         auto screen_rect = Geom::IntRect(0, 0, q->get_allocation().get_width(), q->get_allocation().get_height());
@@ -1854,7 +1813,7 @@ CanvasPrivate::paint_rect_internal(PaintRectSetup const &setup, Geom::IntRect co
         pending_bucket_emptier = true; // On the next call to on_draw, schedules the bucket emptier.
     } else {
         // Get rectangle needing repaint (transform into screen space, take bounding box, round outwards)
-        auto pl = Geom::Parallelogram(this_rect);
+        auto pl = Geom::Parallelogram(rect);
         pl *= q->_affine * _store_affine.inverse();
         pl *= Geom::Translate(-q->_x0, -q->_y0);
         auto b = pl.bounds();
@@ -1868,16 +1827,6 @@ CanvasPrivate::paint_rect_internal(PaintRectSetup const &setup, Geom::IntRect co
             pending_bucket_emptier = true;
         }
     }
-
-    // Exit if timed out.
-    auto now = g_get_monotonic_time();
-    auto elapsed = now - setup.start_time;
-    if (elapsed > prefs.render_time_limit) {
-        return false;
-    }
-
-    // Continue rendering.
-    return true;
 }
 
 /*
