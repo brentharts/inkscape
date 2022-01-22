@@ -1240,6 +1240,7 @@ void MeasureTool::showInfoBox(Geom::Point cursor, bool into_groups)
 
         if (SP_IS_SHAPE(over)) {
 
+            rel_position += Geom::point(0, gap);
             precision_str << _("Length") <<  ": %." << precision << "f %s";
             measure_str = g_strdup_printf(precision_str.str().c_str(), item_length, unit_name.c_str());
             precision_str.str("");
