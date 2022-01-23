@@ -212,16 +212,16 @@ public:
     // The subgregion of the store with up-to-date content.
     Cairo::RefPtr<Cairo::Region> clean_region;
 
-    Updater(Cairo::RefPtr<Cairo::Region> clean_region) : clean_region(clean_region) {}
+    Updater(Cairo::RefPtr<Cairo::Region> clean_region) : clean_region(std::move(clean_region)) {}
 
     virtual void reset()                               {clean_region = Cairo::Region::create();}       // Reset to clean region to empty.
-    virtual void intersect (const Geom::IntRect &rect) {clean_region->intersect(geom_to_cairo(rect));} // Called when the store changes position to clip everthing to the new store rect.
+    virtual void intersect (const Geom::IntRect &rect) {clean_region->intersect(geom_to_cairo(rect));} // Called when the store changes position; clip everthing to the new store rect.
     virtual void mark_dirty(const Geom::IntRect &rect) {clean_region->subtract (geom_to_cairo(rect));} // Called on every invalidate event.
     virtual void mark_clean(const Geom::IntRect &rect) {clean_region->do_union (geom_to_cairo(rect));} // Called on every rectangle redrawn.
 
-    virtual Cairo::RefPtr<Cairo::Region> get_next_clean_region() {return clean_region;}; // Called once in on_idle to determine what regions to consider clean for the current draw.
-    virtual bool                         report_finished      () {return false;}         // Called in on_idle if drawing has finished. Returns true to indicate that drawing should continue, because the next clean region will be different.
-    virtual void                         frame                () {}                      // Called by on_draw to notify the end of drawing and the display of the frame.
+    virtual Cairo::RefPtr<Cairo::Region> get_next_clean_region() {return clean_region;}; // Called by on_idle to determine what regions to consider clean for the current redraw.
+    virtual bool                         report_finished      () {return false;}         // Called in on_idle if the redraw has finished. Returns true to indicate that further redraws are required with a different clean region.
+    virtual void                         frame                () {}                      // Called by on_draw to notify the updater of the display of the frame.
 };
 
 // Responsive updater: As soon as a region is invalidated, redraw it.
@@ -231,13 +231,13 @@ using ResponsiveUpdater = Updater;
 class FullredrawUpdater : public Updater
 {
     // Whether we are currently in the middle of a redraw.
-    bool inprogress;
+    bool inprogress = false;
 
-    // If more damage events arrive while a redraw is in progress, save the clean region to here so we can continue the redraw using it.
+    // Contains a copy of the old clean region if damage events occurred during the current redraw, otherwise null.
     Cairo::RefPtr<Cairo::Region> old_clean_region;
 
 public:
-    FullredrawUpdater(Cairo::RefPtr<Cairo::Region> clean_region) : Updater(clean_region), inprogress(false) {}
+    FullredrawUpdater(Cairo::RefPtr<Cairo::Region> clean_region) : Updater(std::move(clean_region)) {}
 
     void reset() override
     {
@@ -254,7 +254,7 @@ public:
 
     void mark_dirty(const Geom::IntRect &rect) override
     {
-        if (inprogress && !old_clean_region) old_clean_region = clean_region->copy(); // CoW
+        if (inprogress && !old_clean_region) old_clean_region = clean_region->copy();
         Updater::mark_dirty(rect);
     }
 
@@ -266,9 +266,8 @@ public:
 
     Cairo::RefPtr<Cairo::Region> get_next_clean_region() override
     {
-        // Return the old clean region if it was saved, otherwise return the current one and set a flag indicating redraw in progress.
+        inprogress = true;
         if (!old_clean_region) {
-            inprogress = true;
             return clean_region;
         } else {
             return old_clean_region;
@@ -279,11 +278,11 @@ public:
     {
         assert(inprogress);
         if (!old_clean_region) {
-            // Redrawn using the actual clean region --> finished.
+            // Completed redraw without being damaged => finished.
             inprogress = false;
             return false;
         } else {
-            // Redrawn using the old clean region; new clean region has been damaged --> draw again using the new clean region.
+            // Completed redraw but damage events arrived => ask for another redraw, using the up-to-date clean region.
             old_clean_region.clear();
             return true;
         }
@@ -293,73 +292,104 @@ public:
 // Multiscale updater: Updates tiles near the mouse faster. Gives the best of both.
 class MultiscaleUpdater : public Updater
 {
-    int counter, depth, counter2;
-    std::vector<Cairo::RefPtr<Cairo::Region>> blocked;
+    // Whether we are currently in the middle of a redraw.
+    bool inprogress = false;
+    
+    // Whether damage events occurred during the current redraw.
+    bool activated = false;
+    
+    int counter; // A steadily incrementing counter from which the current scale is derived.
+    int scale; // The current scale to process updates at.
+    int elapsed; // How much time has been spent at the current scale.
+    std::vector<Cairo::RefPtr<Cairo::Region>> blocked; // The region blocked from being updated at each scale.
 
 public:
-    MultiscaleUpdater(Cairo::RefPtr<Cairo::Region> clean_region) : Updater(clean_region), counter(0), depth(0), counter2(0), blocked({Cairo::Region::create()}) {}
+    MultiscaleUpdater(Cairo::RefPtr<Cairo::Region> clean_region) : Updater(std::move(clean_region)) {}
 
     void reset() override
     {
         Updater::reset();
-        counter = depth = counter2 = 0;
-        blocked = {Cairo::Region::create()};
+        inprogress = activated = false;
     }
 
     void intersect(const Geom::IntRect &rect) override
     {
         Updater::intersect(rect);
-        for (auto &reg : blocked) {
-            reg->intersect(geom_to_cairo(rect));
+        if (activated) {
+            for (auto &reg : blocked) {
+                reg->intersect(geom_to_cairo(rect));
+            }
         }
     }
 
+    void mark_dirty(const Geom::IntRect &rect) override
+    {
+        Updater::mark_dirty(rect);
+        if (inprogress && !activated) {
+            counter = scale = elapsed = 0;
+            blocked = {Cairo::Region::create()};
+            activated = true;
+        }
+    }
+    
     void mark_clean(const Geom::IntRect &rect) override
     {
         Updater::mark_clean(rect);
-        blocked[depth]->do_union(geom_to_cairo(rect));
+        if (activated) blocked[scale]->do_union(geom_to_cairo(rect));
     }
 
     Cairo::RefPtr<Cairo::Region> get_next_clean_region() override
     {
-        auto result = clean_region->copy();
-        result->do_union(blocked[depth]);
-        return result;
+        inprogress = true;
+        if (!activated) {
+            return clean_region;
+        } else {
+            auto result = clean_region->copy();
+            result->do_union(blocked[scale]);
+            return result;
+        }
     }
 
     bool report_finished() override
     {
-        // We have finished work if we have completed a redraw using the depth 0 clean region, which is always the true clean region.
-        bool ret = depth > 0;
-        // Perform a reset of the updating sequence in both cases.
-        counter = depth = counter2 = 0;
-        blocked = {Cairo::Region::create()};
-        return ret;
+        assert(inprogress);
+        if (!activated) {
+            // Completed redraw without damage => finished.
+            inprogress = false;
+            return false;
+        } else {
+            // Completed redraw but damage events arrived => begin updating any remaining damaged regions.
+            activated = false;
+            blocked.clear();
+            return true;
+        }
     }
 
     void frame() override
     {
-        // Stay at the current depth for 2^depth frames.
-        counter2++;
-        if (counter2 < (1 << depth)) return;
-        counter2 = 0;
+        if (!activated) return;
 
-        // Adjust the counter, which causes depth to hop around the values 0, 1, 2... spending half as much time at each subsequent depth.
+        // Stay at the current scale for 2^scale frames.
+        elapsed++;
+        if (elapsed < (1 << scale)) return;
+        elapsed = 0;
+
+        // Adjust the counter, which causes scale to hop around the values 0, 1, 2... spending half as much time at each subsequent scale.
         counter++;
-        depth = 0;
+        scale = 0;
         for (int tmp = counter; tmp % 2 == 1; tmp /= 2) {
-            depth++;
+            scale++;
         }
 
-        // Ensure enough blocked zones exist.
-        if (depth == blocked.size()) {
+        // Ensure sufficiently many blocked zones exist.
+        if (scale == blocked.size()) {
             blocked.emplace_back();
         }
 
-        // Recreate the current blocked zone as the union of those previous to it.
-        blocked[depth] = Cairo::Region::create();
-        for (int i = 0; i < depth; i++) {
-            blocked[depth]->do_union(blocked[i]);
+        // Recreate the current blocked zone as the union of the clean region and lower-scale blocked zones.
+        blocked[scale] = clean_region->copy();
+        for (int i = 0; i < scale; i++) {
+            blocked[scale]->do_union(blocked[i]);
         }
     }
 };
@@ -790,7 +820,7 @@ Cairo::RefPtr<Cairo::ImageSurface> Canvas::get_backing_store() const
 void
 Canvas::forced_redraws_start(int count, bool reset)
 {
-    // Todo: Likely to be removed, depending on feedback.
+    // Todo: not used; remove when ready.
 }
 
 /**
@@ -1495,7 +1525,7 @@ CanvasPrivate::on_idle()
         if (prefs.debug_show_unclean) q->queue_draw();
     };
 
-    // Determine the rendering parameters have changed, and reset if so.
+    // Determine whether the rendering parameters have changed, and reset if so.
     if (!_backing_store || _device_scale != q->get_scale_factor() || _store_solid_background != solid_background) {
         _device_scale = q->get_scale_factor();
         _store_solid_background = solid_background;
@@ -1584,8 +1614,7 @@ CanvasPrivate::on_idle()
                 // If the store has gone completely off-screen, recreate it.
                 recreate_store();
                 if (prefs.debug_logging) std::cout << "Recreated store" << std::endl;
-            } else if (!_store_rect.contains(visible))
-            {
+            } else if (!_store_rect.contains(visible)) {
                 // If the store has gone partially off-screen, shift it.
                 shift_store();
                 if (prefs.debug_logging) std::cout << "Shifted store" << std::endl;
@@ -1662,7 +1691,7 @@ CanvasPrivate::on_idle()
         window->get_device_position(Gdk::Display::get_default()->get_default_seat()->get_pointer(), x, y, mask);
         mouse_loc = Geom::IntPoint(x, y);
     } else {
-        mouse_loc = Geom::IntPoint(0, 0); // Doesn't particularly matter, just as long as it's initialised.
+        mouse_loc = Geom::IntPoint(); // Doesn't particularly matter, just as long as it's initialised.
     }
 
     // Map the mouse to canvas space.
