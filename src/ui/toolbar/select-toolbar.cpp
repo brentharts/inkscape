@@ -466,10 +466,8 @@ SelectToolbar::toggle_lock() {
 
     if ( _lock_btn->get_active() ) {
         image->set_from_icon_name("object-locked", Gtk::ICON_SIZE_BUTTON);
-        // _lock_btn->set_icon_name(INKSCAPE_ICON("object-locked"));
     } else {
         image->set_from_icon_name("object-unlocked", Gtk::ICON_SIZE_BUTTON);
-        // _lock_btn->set_icon_name(INKSCAPE_ICON("object-unlocked"));
     }
     image->set_pixel_size(size);
 }
