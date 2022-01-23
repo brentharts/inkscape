@@ -217,6 +217,10 @@ set(inkscape_SRC
   actions/actions-edit.cpp
   actions/actions-effect.h
   actions/actions-effect.cpp
+  actions/actions-element-a.h
+  actions/actions-element-a.cpp
+  actions/actions-element-image.h
+  actions/actions-element-image.cpp
   actions/actions-file-window.h
   actions/actions-file-window.cpp
   actions/actions-file.h
@@ -404,10 +408,6 @@ if(NOT APPLE)
     set_target_properties(inkscape_base PROPERTIES INSTALL_RPATH "$ORIGIN/..")
 else()
     set_target_properties(inkscape_base PROPERTIES INSTALL_RPATH "@loader_path/..")
-endif()
-
-if(WITH_DBUS)
-    add_dependencies(inkscape_base inkscape_dbus)
 endif()
 
 target_link_libraries(inkscape_base PUBLIC Boost::filesystem)

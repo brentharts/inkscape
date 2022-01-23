@@ -382,23 +382,6 @@ static void sp_selection_delete_impl(std::vector<SPItem*> const &items, bool pro
 
 void ObjectSet::deleteItems()
 {
-    if (desktop()) {
-        if(dynamic_cast<TextTool*>(desktop()->event_context)) {
-            if (Inkscape::UI::Tools::sp_text_delete_selection(desktop()->event_context)) {
-                DocumentUndo::done(desktop()->getDocument(), _("Delete text"), INKSCAPE_ICON("draw-text"));
-                return;
-            }
-        }
-        // This mirrors the copy() code in clipboard.cpp and allows ::cut() to
-        // do the right thing for selected nodes.
-        auto node_tool = dynamic_cast<Inkscape::UI::Tools::NodeTool *>(desktop()->event_context);
-        if (node_tool && node_tool->_selected_nodes) {
-            Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-            // This takes care of undo internally
-            node_tool->_multipath->deleteNodes(prefs->getBool("/tools/nodes/delete_preserves_shape", true));
-            return;
-        }
-    }
     if (isEmpty()) {
         selection_display_message(desktop(),Inkscape::WARNING_MESSAGE, _("<b>Nothing</b> was deleted."));
         return;
@@ -620,6 +603,7 @@ void ObjectSet::duplicate(bool suppressDone, bool duplicateLayer)
             if (newLPEObj) {
                 // force always fork with 0 some issues on slices drom slices dont fork
                 newLPEObj->forkPathEffectsIfNecessary(0);
+                sp_lpe_item_update_patheffect(newLPEObj, false, true);
             }
         }
     }
@@ -780,7 +764,7 @@ void sp_edit_invert_in_all_layers(SPDesktop *desktop)
     sp_edit_select_all_full(desktop, true, true);
 }
 
-Inkscape::XML::Node* ObjectSet::group() {
+Inkscape::XML::Node* ObjectSet::group(int type) {
     SPDocument *doc = document();
     if(!doc)
         return nullptr;
@@ -789,7 +773,7 @@ Inkscape::XML::Node* ObjectSet::group() {
         return nullptr;
     }
     Inkscape::XML::Document *xml_doc = doc->getReprDoc();
-    Inkscape::XML::Node *group = xml_doc->createElement("svg:g");
+    Inkscape::XML::Node *group = (type == 0) ? xml_doc->createElement("svg:g") : xml_doc->createElement("svg:a");
 
     std::vector<Inkscape::XML::Node*> p(xmlNodes().begin(), xmlNodes().end());
     std::sort(p.begin(), p.end(), sp_repr_compare_position_bool);
@@ -850,7 +834,11 @@ Inkscape::XML::Node* ObjectSet::group() {
     topmost_parent->addChildAtPos(group, topmost + 1);
 
     set(doc->getObjectByRepr(group));
-    DocumentUndo::done(doc, _("Group"), INKSCAPE_ICON("object-group"));
+    if (type == 0) {
+        DocumentUndo::done(doc, _("Group"), INKSCAPE_ICON("object-group"));
+    } else {
+        DocumentUndo::done(doc, _("Anchor"), INKSCAPE_ICON("object-group"));
+    }
 
     return group;
 }

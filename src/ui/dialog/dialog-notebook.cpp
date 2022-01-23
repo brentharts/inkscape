@@ -22,6 +22,7 @@
 
 #include "enums.h"
 #include "inkscape.h"
+#include "inkscape-window.h"
 #include "ui/dialog/dialog-base.h"
 #include "ui/dialog/dialog-data.h"
 #include "ui/dialog/dialog-container.h"
@@ -357,8 +358,9 @@ DialogWindow* DialogNotebook::pop_tab_callback()
         return nullptr;
     }
 
-    // Move page to notebook in new dialog window
-    auto window = new DialogWindow(page);
+    // Move page to notebook in new dialog window (attached to active InkscapeWindow).
+    auto inkscape_window = _container->get_inkscape_window();
+    auto window = new DialogWindow(inkscape_window, page);
     window->show_all();
 
     if (_notebook.get_n_pages() == 0) {
@@ -408,7 +410,9 @@ void DialogNotebook::on_drag_end(const Glib::RefPtr<Gdk::DragContext> context)
             Gtk::Widget *page = old_notebook->get_nth_page(old_notebook->get_current_page());
             if (page) {
                 // Move page to notebook in new dialog window
-                auto window = new DialogWindow(page);
+
+                auto inkscape_window = _container->get_inkscape_window();
+                auto window = new DialogWindow(inkscape_window, page);
 
                 // Move window to mouse pointer
                 if (auto device = context->get_device()) {

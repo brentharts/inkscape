@@ -245,6 +245,16 @@ public:
     SPItem *singleItem();
 
     /**
+     * Returns the first selected item, returns nullptr if no items selected.
+     */
+    SPItem *firstItem() const;
+
+    /**
+     * Returns the last selected item, returns nullptr if no items selected.
+     */
+    SPItem *lastItem() const;
+
+    /**
      * Returns the smallest item from this selection.
      */
     SPItem *smallestItem(CompareSize compare);
@@ -308,6 +318,7 @@ public:
      * @param obj_a - The first item, doesn't have to appear first in the list.
      * @param obj_b - The last item, doesn't have to appear last in the list (optional)
      *                If selection already contains one item, will select from-to that.
+     *                If not set, will use the lastItem selected in the list.
      *
      * @returns the number of items added.
      */
@@ -409,7 +420,7 @@ public:
     void relink();
     void cloneOriginal();
     void cloneOriginalPathLPE(bool allow_transforms = false);
-    Inkscape::XML::Node* group();
+    Inkscape::XML::Node* group(int type = 0);
     void popFromGroup();
     void ungroup(bool skip_undo = false);
     
