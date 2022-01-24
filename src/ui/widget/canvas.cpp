@@ -140,11 +140,12 @@ struct Prefs
     Pref<int>    update_strategy          = Pref<int>   ("/options/rendering/update_strategy", 3, 1, 3);
     Pref<int>    render_time_limit        = Pref<int>   ("/options/rendering/render_time_limit", 1000, 100, 1000000);
     Pref<bool>   use_new_bisector         = Pref<bool>  ("/options/rendering/use_new_bisector", true);
-    Pref<int>    new_bisector_size        = Pref<int>   ("/options/rendering/new_bisector_size", 400, 1, 10000);
+    Pref<int>    new_bisector_size        = Pref<int>   ("/options/rendering/new_bisector_size", 500, 1, 10000);
     Pref<double> max_affine_diff          = Pref<double>("/options/rendering/max_affine_diff", 1.8, 0.0, 100.0);
     Pref<int>    pad                      = Pref<int>   ("/options/rendering/pad", 200, 0, 1000);
     Pref<int>    coarsener_min_size       = Pref<int>   ("/options/rendering/coarsener_min_size", 200, 0, 1000);
     Pref<int>    coarsener_glue_size      = Pref<int>   ("/options/rendering/coarsener_glue_size", 80, 0, 1000);
+    Pref<double> coarsener_min_fullness   = Pref<double>("/options/rendering/coarsener_min_fullness", 0.3, 0.0, 1.0);
 
     // Debug switches
     Pref<bool>   debug_framecheck         = Pref<bool>  ("/options/rendering/debug_framecheck");
@@ -1331,7 +1332,7 @@ calc_affine_diff(const Geom::Affine &a, const Geom::Affine &b) {
 
 // Replace a region with a larger region consisting of fewer, larger rectangles. (Allowed to slightly overlap.)
 auto
-coarsen(const Cairo::RefPtr<Cairo::Region> &region, int min_size, int glue_size)
+coarsen(const Cairo::RefPtr<Cairo::Region> &region, int min_size, int glue_size, double min_fullness)
 {
     // Sort the rects by minExtent
     struct Compare
@@ -1350,42 +1351,75 @@ coarsen(const Cairo::RefPtr<Cairo::Region> &region, int min_size, int glue_size)
     std::vector<Geom::IntRect> processed;
     processed.reserve(nrects);
 
+    // Removal lists.
+    std::vector<decltype(rects)::iterator> remove_rects;
+    std::vector<int> remove_processed;
+
     // Repeatedly expand small rectangles by absorbing their nearby small rectangles.
     while (!rects.empty() && rects.begin()->minExtent() < min_size) {
         // Extract the smallest unprocessed rectangle.
         auto rect = *rects.begin();
         rects.erase(rects.begin());
 
+        // Initialise the effective glue size
+        int effective_glue_size = glue_size;
+
         while (true) {
             // Find the glue zone.
             auto glue_zone = rect;
-            glue_zone.expandBy(glue_size);
+            glue_zone.expandBy(effective_glue_size);
 
             // Absorb rectangles in the glue zone. We could do better algorithmically speaking, but in real life it's already plenty fast.
-            auto orig = rect;
-            for (auto it = rects.begin(); it != rects.end(); ) {
+            auto newrect = rect;
+            int absorbed_area = 0;
+
+            remove_rects.clear();
+            for (auto it = rects.begin(); it != rects.end(); ++it) {
                 if (glue_zone.contains(*it)) {
-                    rect.unionWith(*it);
-                    it = rects.erase(it);
-                } else {
-                    ++it;
+                    newrect.unionWith(*it);
+                    absorbed_area += it->area();
+                    remove_rects.emplace_back(it);
                 }
             }
-            for (auto it = processed.begin(); it != processed.end(); ) {
-                if (glue_zone.contains(*it)) {
-                    rect.unionWith(*it);
-                    *it = processed.back();
-                    processed.pop_back();
-                } else {
-                    ++it;
+
+            remove_processed.clear();
+            for (int i = 0; i < processed.size(); i++) {
+                auto &r = processed[i];
+                if (glue_zone.contains(r)) {
+                    newrect.unionWith(r);
+                    absorbed_area += r.area();
+                    remove_processed.emplace_back(i);
                 }
+            }
+
+            // If the result was too empty, try again with a smaller glue size.
+            double fullness = (double)(rect.area() + absorbed_area) / newrect.area();
+            if (fullness < min_fullness) {
+                effective_glue_size /= 2;
+                continue;
+            }
+
+            // Commit the change
+            rect = newrect;
+
+            for (auto &it : remove_rects) {
+                rects.erase(it);
+            }
+
+            for (int j = (int)remove_processed.size() - 1; j >= 0; j--) {
+                int i = remove_processed[j];
+                processed[i] = processed.back();
+                processed.pop_back();
             }
 
             // Stop growing if not changed or now big enough.
-            bool finished = rect == orig || rect.minExtent() >= min_size;
+            bool finished = absorbed_area == 0 || rect.minExtent() >= min_size;
             if (finished) {
                 break;
             }
+
+            // Otherwise, continue normally.
+            effective_glue_size = glue_size;
         }
 
         // Put the finished rectangle in processed.
@@ -1710,7 +1744,7 @@ CanvasPrivate::on_idle()
         }
 
         // Get the list of rectangles to paint, coarsened to avoid fragmentation.
-        auto rects = coarsen(paint_region, prefs.coarsener_min_size, prefs.coarsener_glue_size);
+        auto rects = coarsen(paint_region, prefs.coarsener_min_size, prefs.coarsener_glue_size, prefs.coarsener_min_fullness);
 
         // Ensure that all the rectangles lie within the visible rect (and therefore within the store).
         #ifndef NDEBUG

@@ -345,6 +345,7 @@ protected:
     UI::Widget::PrefSpinButton  _canvas_pad;
     UI::Widget::PrefSpinButton  _canvas_coarsener_min_size;
     UI::Widget::PrefSpinButton  _canvas_coarsener_glue_size;
+    UI::Widget::PrefSpinButton  _canvas_coarsener_min_fullness;
 
     UI::Widget::PrefCheckButton _canvas_debug_framecheck;
     UI::Widget::PrefCheckButton _canvas_debug_logging;

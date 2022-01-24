@@ -2709,16 +2709,18 @@ void InkscapePreferences::initPageRendering()
     _page_rendering.add_line(true, _("Render time limit"), _canvas_render_time_limit, C_("microsecond abbreviation", "μs"), _("The maximum time allowed for a rendering time slice"), false);
     _canvas_use_new_bisector.init(_("Use new bisector"), "/options/rendering/use_new_bisector", true);
     _page_rendering.add_line(true, "", _canvas_use_new_bisector, "", _("Use an alternative, more obvious bisection strategy: just chop in half along the larger dimension until small enough"));
-    _canvas_new_bisector_size.init("/options/rendering/new_bisector_size", 1.0, 10000.0, 1.0, 0.0, 400.0, true, false);
+    _canvas_new_bisector_size.init("/options/rendering/new_bisector_size", 1.0, 10000.0, 1.0, 0.0, 500.0, true, false);
     _page_rendering.add_line(true, _("New bisector tile size"), _canvas_new_bisector_size, C_("pixel abbreviation", "px"), _("Chop rectangles until largest dimension is this small"), false);
     _canvas_max_affine_diff.init("/options/rendering/max_affine_diff", 0.0, 100.0, 0.1, 0.0, 1.8, false, false);
     _page_rendering.add_line(true, _("Max affine diff"), _canvas_max_affine_diff, "", _("How much the viewing transformation can change before throwing away the current redraw and starting again"), false);
     _canvas_pad.init("/options/rendering/pad", 0.0, 1000.0, 1.0, 0.0, 200.0, true, false);
     _page_rendering.add_line(true, _("Buffer padding"), _canvas_pad, C_("pixel abbreviation", "px"), _("Use buffers bigger than the window by this amount"), false);
     _canvas_coarsener_min_size.init("/options/rendering/coarsener_min_size", 0.0, 1000.0, 1.0, 0.0, 200.0, true, false);
-    _page_rendering.add_line(true, _("Coarsener min size"), _canvas_coarsener_min_size, C_("pixel abbreviation", "px"), _("Parameter given to the coarsener algorithm when applied to the paint region. Probably best left alone!"), false);
+    _page_rendering.add_line(true, _("Coarsener min size"), _canvas_coarsener_min_size, C_("pixel abbreviation", "px"), _("Only coarsen rectangles smaller/thinner than this."), false);
     _canvas_coarsener_glue_size.init("/options/rendering/coarsener_glue_size", 0.0, 1000.0, 1.0, 0.0, 80.0, true, false);
-    _page_rendering.add_line(true, _("Coarsener glue size"), _canvas_coarsener_glue_size, C_("pixel abbreviation", "px"), _("Parameter given to the coarsener algorithm when applied to the paint region. Probably best left alone!"), false);
+    _page_rendering.add_line(true, _("Coarsener glue size"), _canvas_coarsener_glue_size, C_("pixel abbreviation", "px"), _("Absorb nearby rectangles within this distance."), false);
+    _canvas_coarsener_min_fullness.init("/options/rendering/coarsener_min_fullness", 0.0, 1.0, 0.0, 0.0, 0.3, false, false);
+    _page_rendering.add_line(true, _("Coarsener min fullness"), _canvas_coarsener_min_fullness, "", _("Refuse coarsening attempt if result would be more empty than this."), false);
 
     _page_rendering.add_group_header(_("Debugging, profiling, and experiments"));
     _canvas_debug_framecheck.init(_("Framecheck"), "/options/rendering/debug_framecheck", false);
