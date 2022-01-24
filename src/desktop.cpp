@@ -632,7 +632,7 @@ void
 SPDesktop::set_display_area( Geom::Rect const &r, double border, bool log)
 {
     // Create a rectangle the size of the window aligned with origin.
-    Geom::Rect w( Geom::Point(), canvas->get_area_world().dimensions() );
+    Geom::Rect w( Geom::Point(), canvas->get_dimensions() );
 
     // Shrink window to account for border padding.
     w.expandBy( -border );
@@ -901,7 +901,6 @@ SPDesktop::rotate_relative_center_point (Geom::Point const &c, double rotate)
     Geom::Rect viewbox = canvas->get_area_world();
     set_display_area(c, viewbox.midpoint());
 }
-
 
 /**
  * Set new flip direction, keeping the point 'c' fixed in the desktop window.

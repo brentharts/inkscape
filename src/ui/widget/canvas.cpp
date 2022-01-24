@@ -44,39 +44,27 @@
  *
  *   * redraw_all()     Redraws the entire canvas by calling redraw_area() with the canvas area.
  *
- *   * redraw_area()    Redraws the indicated area. Use when there is a change that doesn't effect
+ *   * redraw_area()    Redraws the indicated area. Use when there is a change that doesn't affect
  *                      a CanvasItem's geometry or size.
  *
- *   * request_update() Redraws after recalculating bounds for changed CanvasItem's. Use if a
+ *   * request_update() Redraws after recalculating bounds for changed CanvasItems. Use if a
  *                      CanvasItem's geometry or size has changed.
- *
- *   * redraw_now()     Redraw immediately, skipping the "idle" stage.
  *
  *   The first three functions add a request to the Gtk's "idle" list via
  *
  *   * add_idle()       Which causes Gtk to call when resources are available:
  *
- *   * on_idle()        Which calls:
+ *   * on_idle()        Which sets up the backing stores, divides the area of the canvas that has been marked
+ *                      unclean into rectangles that are small enough to render quickly, and renders them outwards
+ *                      from the mouse with a call to:
  *
- *   * do_update()      Which makes a few checks and then calls:
+ *   * paint_rect_internal() Which paints the rectangle using paint_single_buffer(). It renders onto a Cairo
+ *                           surface "backing_store". After a piece is rendered there is a call to:
  *
- *   * paint()          Which calls for each area of the canvas that has been marked unclean:
- *
- *   * paint_rect()     Which determines the maximum area to draw at once and where the cursor is, then calls:
- *
- *   * paint_rect_internal()  Which recursively divides the area into smaller pieces until a piece is small
- *                            enough to render. It renders the pieces closest to the cursor first. The pieces
- *                            are rendered onto a Cairo surface "backing_store". After a piece is rendered
- *                            there is a call to:
- *
- *   * queue_draw_area() A Gtk function for drawing into a widget which when the time is right calls:
+ *   * queue_draw_area() A Gtk function for marking areas of the window as needing a repaint, which when
+ *                       the time is right calls:
  *
  *   * on_draw()        Which blits the Cairo surface to the screen.
- *
- *   One thing to note is that on_draw() must be called twice to render anything to the screen, as the
- *   first time through it sets up the backing store which must then be drawn to. The second call then
- *   blits the backing store to the screen. It might be better to setup the backing store on a call
- *   to on_allocate() but it is what works now.
  *
  *   The other responsibility of the canvas is to determine where to send GUI events. It does this
  *   by determining which CanvasItem is "picked" and then forwards the events to that item. Not all
@@ -237,6 +225,7 @@ class FullredrawUpdater : public Updater
     Cairo::RefPtr<Cairo::Region> old_clean_region;
 
 public:
+
     FullredrawUpdater(Cairo::RefPtr<Cairo::Region> clean_region) : Updater(std::move(clean_region)) {}
 
     void reset() override
@@ -304,6 +293,7 @@ class MultiscaleUpdater : public Updater
     std::vector<Cairo::RefPtr<Cairo::Region>> blocked; // The region blocked from being updated at each scale.
 
 public:
+
     MultiscaleUpdater(Cairo::RefPtr<Cairo::Region> clean_region) : Updater(std::move(clean_region)) {}
 
     void reset() override
@@ -398,10 +388,10 @@ std::unique_ptr<Updater>
 make_updater(int type, Cairo::RefPtr<Cairo::Region> clean_region = Cairo::Region::create())
 {
     switch (type) {
-        case 1: return std::make_unique<ResponsiveUpdater>(clean_region);
-        case 2: return std::make_unique<FullredrawUpdater>(clean_region);
+        case 1: return std::make_unique<ResponsiveUpdater>(std::move(clean_region));
+        case 2: return std::make_unique<FullredrawUpdater>(std::move(clean_region));
         default:
-        case 3: return std::make_unique<MultiscaleUpdater>(clean_region);
+        case 3: return std::make_unique<MultiscaleUpdater>(std::move(clean_region));
     }
 }
 
@@ -418,30 +408,43 @@ public:
     void add_idle();
     bool on_idle();
     void paint_rect_internal(Geom::IntRect const &rect);
-    void paint_single_buffer(Geom::IntRect const &paint_rect, Cairo::RefPtr<Cairo::ImageSurface> &store);
+    void paint_single_buffer(Geom::IntRect const &paint_rect, Cairo::RefPtr<Cairo::ImageSurface> const &store);
+
+    std::optional<Geom::Dim2> old_bisector(const Geom::IntRect &rect);
+    std::optional<Geom::Dim2> new_bisector(const Geom::IntRect &rect);
 
     // Important global properties of all the stores. If these change, all the stores must be recreated.
     int _device_scale = 1;
     bool _store_solid_background;
+    bool _have_outline_store;
 
-    Geom::IntRect _store_rect;                         ///< Rectangle of the store in world space.
+    // The backing store.
+    Geom::IntRect _store_rect;
     Geom::Affine _store_affine;
-    Cairo::RefPtr<Cairo::ImageSurface> _backing_store; ///< Canvas content.
+    Cairo::RefPtr<Cairo::ImageSurface> _backing_store;
+    Cairo::RefPtr<Cairo::ImageSurface> _outline_store;
 
-    std::unique_ptr<Updater> updater; // Holds the clean region, the subregion of the store with up-to-date content, and decides in what order the unclean regions should be redrawn.
+    // The updater. Holds the clean region, the subregion of the store with up-to-date content, and some additional state determining in what order the unclean regions should be redrawn.
+    std::unique_ptr<Updater> updater;
 
+    // The snapshot store. Used to mask redraw delay on zoom/rotate.
     Geom::IntRect _snapshot_rect;
     Geom::Affine _snapshot_affine;
     Cairo::RefPtr<Cairo::ImageSurface> _snapshot_store;
     Cairo::RefPtr<Cairo::Region> _snapshot_clean_region;
 
+    Geom::Affine geom_affine; // The affine the geometry was last imbued with.
     bool decoupled_mode = false;
 
-    bool solid_background;
+    bool solid_background; // Whether the last background set is solid.
 
+    // Idle system callbacks. The high priority idle ensures at least one idle cycle between add_idle and on_draw.
     sigc::connection hipri_idle;
     sigc::connection lopri_idle;
+    bool on_hipri_idle();
+    bool on_lopri_idle();
 
+    // The event bucket. Events that arrive during a frame are put in the bucket, and the bucket is emptied immediately after the next on_draw, leaving the whole rest of the frame to proces the events.
     struct GdkEventFreer {void operator()(GdkEvent *ev) const {gdk_event_free(ev);}};
     std::vector<std::unique_ptr<GdkEvent, GdkEventFreer>> bucket;
     sigc::connection bucket_emptier;
@@ -454,19 +457,12 @@ public:
 
     GdkEvent *ignore = nullptr;
 
-    Geom::Affine geom_affine;
-
+    // Useful overload of GtkWidget function.
     void queue_draw_area(Geom::IntRect &rect);
 
+    // Preferences system
     Prefs prefs;
-
-    bool on_hipri_idle();
-    bool on_lopri_idle();
-
     void update_ctrl_sizes(int size) {q->_canvas_item_root->update_canvas_item_ctrl_sizes(size);}
-
-    std::optional<Geom::Dim2> old_bisector(const Geom::IntRect &rect);
-    std::optional<Geom::Dim2> new_bisector(const Geom::IntRect &rect);
 };
 
 void CanvasPrivate::schedule_bucket_emptier()
@@ -567,8 +563,6 @@ Canvas::Canvas()
     _canvas_item_root = new Inkscape::CanvasItemGroup(nullptr);
     _canvas_item_root->set_name("CanvasItemGroup:Root");
     _canvas_item_root->set_canvas(this);
-
-    if (d->prefs.debug_show_redraw) srand(g_get_monotonic_time()); // Initialise seed for random colours.
 }
 
 Canvas::~Canvas()
@@ -586,15 +580,19 @@ Canvas::~Canvas()
     delete _canvas_item_root;
 }
 
+Geom::IntPoint Canvas::get_dimensions() const
+{
+    Gtk::Allocation allocation = get_allocation();
+    return {allocation.get_width(), allocation.get_height()};
+}
+
 /**
  * Is world point inside canvas area?
  */
 bool
 Canvas::world_point_inside_canvas(Geom::Point const &world) const
 {
-    Gtk::Allocation allocation = get_allocation();
-    return ( _x0 <= world.x() && world.x() < _x0 + allocation.get_width() &&
-             _y0 <= world.y() && world.y() < _y0 + allocation.get_height() );
+    return get_area_world().contains(world.floor());
 }
 
 /**
@@ -603,7 +601,7 @@ Canvas::world_point_inside_canvas(Geom::Point const &world) const
 Geom::Point
 Canvas::canvas_to_world(Geom::Point const &point) const
 {
-    return Geom::Point(point[Geom::X]+ _x0, point[Geom::Y] + _y0);
+    return point + _pos;
 }
 
 /**
@@ -612,8 +610,7 @@ Canvas::canvas_to_world(Geom::Point const &point) const
 Geom::IntRect
 Canvas::get_area_world() const
 {
-    Gtk::Allocation allocation = get_allocation();
-    return Geom::IntRect::from_xywh(_x0, _y0, allocation.get_width(), allocation.get_height());
+    return Geom::IntRect(_pos, _pos + get_dimensions());
 }
 
 /**
@@ -660,22 +657,21 @@ Canvas::redraw_area(int x0, int y0, int x1, int y1)
         return;
     }
 
-    if (x0 >= x1 || y0 >= y1) {
-        return;
-    }
-
     // Clamp area to Cairo's technically supported max size (-2^30..+2^30-1).
     // This ensures that the rectangle dimensions don't overflow and wrap around.
-
-    constexpr int min_coord = std::numeric_limits<int>::min() / 2;
-    constexpr int max_coord = std::numeric_limits<int>::max() / 2;
+    constexpr int min_coord = -(1 << 30);
+    constexpr int max_coord = (1 << 30) - 1;
 
     x0 = std::clamp(x0, min_coord, max_coord);
     y0 = std::clamp(y0, min_coord, max_coord);
     x1 = std::clamp(x1, min_coord, max_coord);
     y1 = std::clamp(y1, min_coord, max_coord);
 
-    auto rect = Geom::IntRect::from_xywh(x0, y0, x1-x0, y1-y0);
+    if (x0 >= x1 || y0 >= y1) {
+        return;
+    }
+
+    auto rect = Geom::IntRect::from_xywh(x0, y0, x1 - x0, y1 - y0);
     d->updater->mark_dirty(rect);
     d->add_idle();
     if (d->prefs.debug_show_unclean) queue_draw();
@@ -686,20 +682,19 @@ Canvas::redraw_area(Geom::Coord x0, Geom::Coord y0, Geom::Coord x1, Geom::Coord 
 {
     // Handle overflow during conversion gracefully.
     // Round outward to make sure integral coordinates cover the entire area.
-
-    constexpr Geom::Coord min_int = static_cast<Geom::Coord>(std::numeric_limits<int>::min());
-    constexpr Geom::Coord max_int = static_cast<Geom::Coord>(std::numeric_limits<int>::max());
+    constexpr Geom::Coord min_int = std::numeric_limits<int>::min();
+    constexpr Geom::Coord max_int = std::numeric_limits<int>::max();
 
     redraw_area(
-        static_cast<int>(std::floor(std::clamp(x0, min_int, max_int))),
-        static_cast<int>(std::floor(std::clamp(y0, min_int, max_int))),
-        static_cast<int>(std::ceil (std::clamp(x1, min_int, max_int))),
-        static_cast<int>(std::ceil (std::clamp(y1, min_int, max_int)))
+        (int)std::floor(std::clamp(x0, min_int, max_int)),
+        (int)std::floor(std::clamp(y0, min_int, max_int)),
+        (int)std::ceil (std::clamp(x1, min_int, max_int)),
+        (int)std::ceil (std::clamp(y1, min_int, max_int))
     );
 }
 
 void
-Canvas::redraw_area(Geom::Rect& area)
+Canvas::redraw_area(Geom::Rect &area)
 {
     redraw_area(area.left(), area.top(), area.right(), area.bottom());
 }
@@ -724,15 +719,13 @@ Canvas::request_update()
 void
 Canvas::scroll_to(Geom::Point const &c)
 {
-    int x = (int) std::round(c[Geom::X]);
-    int y = (int) std::round(c[Geom::Y]);
+    auto newpos = c.round();
 
-    if (x == _x0 && y == _y0) {
+    if (newpos == _pos) {
         return;
     }
 
-    _x0 = x;
-    _y0 = y;
+    _pos = newpos;
 
     d->add_idle();
     queue_draw();
@@ -768,6 +761,14 @@ Canvas::set_background_checkerboard(guint32 rgba, bool use_alpha)
     _background = Cairo::RefPtr<Cairo::Pattern>(new Cairo::Pattern(pattern));
     d->solid_background = false;
     redraw_all();
+}
+
+void Canvas::set_drawing_disabled(bool disable)
+{
+    _drawing_disabled = disable;
+    if (!disable) {
+        d->add_idle();
+    }
 }
 
 void
@@ -1138,18 +1139,12 @@ void Canvas::on_realize()
 /*
  * The on_draw() function is called whenever Gtk wants to update the window. This function:
  *
- * 1. Sets up the backing and outline stores (images). These stores are drawn to elsewhere during idles.
- *    The backing store is always uses, rendering in which ever "render mode" the user has selected.
- *    The outline store is only used when the "split mode" is set to 'split' or 'x-ray'.
- *    (Changing either the render mode or split mode results in a complete redrawing the store(s).)
+ * 1. Ensures that if the idle process was started, at least one cycle has run.
  *
- * 2. Calls shift_content() if the drawing area has changed.
+ * 2. Blits the store(s) onto the canvas, clipping the outline store as required.
+ *    (Or composites them with the transformed snapshot store in decoupled mode.)
  *
- * 3. Blits the store(s) onto the canvas, clipping the outline store as required.
- *
- * 4. Draws the "controller" in the 'split' split mode.
- *
- * 5. Calls add_idle() to update the drawing if necessary.
+ * 3. Draws the "controller" in the 'split' split mode.
  */
 bool
 Canvas::on_draw(const::Cairo::RefPtr<::Cairo::Context> &cr)
@@ -1185,7 +1180,7 @@ Canvas::on_draw(const::Cairo::RefPtr<::Cairo::Context> &cr)
         if (d->prefs.debug_framecheck) f = FrameCheck::Event("draw");
         cr->save();
         cr->set_operator(d->solid_background ? Cairo::OPERATOR_SOURCE : Cairo::OPERATOR_OVER);
-        cr->set_source(d->_backing_store, d->_store_rect.left() - _x0, d->_store_rect.top() - _y0);
+        cr->set_source(d->_backing_store, d->_store_rect.left() - _pos.x(), d->_store_rect.top() - _pos.y());
         cr->paint();
         cr->restore();
     } else {
@@ -1198,7 +1193,7 @@ Canvas::on_draw(const::Cairo::RefPtr<::Cairo::Context> &cr)
             cr->save();
             cr->set_fill_rule(Cairo::FILL_RULE_EVEN_ODD);
             cr->rectangle(0, 0, get_allocation().get_width(), get_allocation().get_height());
-            cr->translate(-_x0, -_y0);
+            cr->translate(-_pos.x(), -_pos.y());
             cr->transform(geom_to_cairo(_affine * d->_store_affine.inverse()));
             region_to_path(cr, d->updater->clean_region);
             cr->transform(geom_to_cairo(d->_store_affine * d->_snapshot_affine.inverse()));
@@ -1216,7 +1211,7 @@ Canvas::on_draw(const::Cairo::RefPtr<::Cairo::Context> &cr)
         cr->save();
         cr->set_fill_rule(Cairo::FILL_RULE_EVEN_ODD);
         cr->rectangle(0, 0, get_allocation().get_width(), get_allocation().get_height());
-        cr->translate(-_x0, -_y0);
+        cr->translate(-_pos.x(), -_pos.y());
         cr->transform(geom_to_cairo(_affine * d->_store_affine.inverse()));
         region_to_path(cr, d->updater->clean_region);
         cr->clip();
@@ -1237,7 +1232,7 @@ Canvas::on_draw(const::Cairo::RefPtr<::Cairo::Context> &cr)
         // Draw transformed store, clipped to clean region.
         if (d->prefs.debug_framecheck) f = FrameCheck::Event("composite", 0);
         cr->save();
-        cr->translate(-_x0, -_y0);
+        cr->translate(-_pos.x(), -_pos.y());
         cr->transform(geom_to_cairo(_affine * d->_store_affine.inverse()));
         region_to_path(cr, d->updater->clean_region);
         cr->clip();
@@ -1254,7 +1249,7 @@ Canvas::on_draw(const::Cairo::RefPtr<::Cairo::Context> &cr)
         auto reg = Cairo::Region::create(geom_to_cairo(d->_store_rect));
         reg->subtract(d->updater->clean_region);
         cr->save();
-        cr->translate(-_x0, -_y0);
+        cr->translate(-_pos.x(), -_pos.y());
         if (d->decoupled_mode) {
             cr->transform(geom_to_cairo(_affine * d->_store_affine.inverse()));
         }
@@ -1268,7 +1263,7 @@ Canvas::on_draw(const::Cairo::RefPtr<::Cairo::Context> &cr)
     if (d->prefs.debug_show_clean) {
         if (d->prefs.debug_framecheck) f = FrameCheck::Event("paint_clean");
         cr->save();
-        cr->translate(-_x0, -_y0);
+        cr->translate(-_pos.x(), -_pos.y());
         if (d->decoupled_mode) {
             cr->transform(geom_to_cairo(_affine * d->_store_affine.inverse()));
         }
@@ -1503,7 +1498,7 @@ CanvasPrivate::on_idle()
     const Geom::IntPoint pad(prefs.pad, prefs.pad);
     auto recreate_store = [&, this] {
         // Recreate the store at the current affine so that it covers the visible region.
-        _store_rect = Geom::IntRect::from_xywh( q->_x0, q->_y0, q->get_allocation().get_width(), q->get_allocation().get_height() );
+        _store_rect = q->get_area_world();
         _store_rect.expandBy(pad);
         _store_affine = q->_affine;
         int desired_width  = _store_rect.width()  * _device_scale;
@@ -1536,7 +1531,7 @@ CanvasPrivate::on_idle()
 
     auto shift_store = [&, this] {
         // Recreate the store, but keep re-usable content from the old store.
-        auto store_rect = Geom::IntRect::from_xywh( q->_x0, q->_y0, q->get_allocation().get_width(), q->get_allocation().get_height() );
+        auto store_rect = q->get_area_world();
         store_rect.expandBy(pad);
         // Todo: Stop cairo unnecessarily pre-filling the store with transparency below if solid_background is true.
         auto backing_store = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, store_rect.width() * _device_scale, store_rect.height() * _device_scale);
@@ -1609,7 +1604,7 @@ CanvasPrivate::on_idle()
             // or blits are performed, and the drawing operations done on the screen are the same. Hence this feature comes at zero cost.
         } else {
             // Get visible rectangle in canvas coordinates.
-            const auto visible = Geom::IntRect::from_xywh( q->_x0, q->_y0, q->get_allocation().get_width(), q->get_allocation().get_height() );
+            auto const visible = q->get_area_world();
             if (!_store_rect.intersects(visible)) {
                 // If the store has gone completely off-screen, recreate it.
                 recreate_store();
@@ -1666,10 +1661,10 @@ CanvasPrivate::on_idle()
     Geom::OptIntRect visible_rect;
     if (!decoupled_mode) {
         // By a previous assertion, this always lies within the store.
-        visible_rect = Geom::IntRect::from_xywh( q->_x0, q->_y0, q->get_allocation().get_width(), q->get_allocation().get_height() );
+        visible_rect = q->get_area_world();
     } else {
         // Get the window rectangle transformed into canvas space.
-        auto pl = Geom::Parallelogram(Geom::IntRect::from_xywh( q->_x0, q->_y0, q->get_allocation().get_width(), q->get_allocation().get_height() ));
+        auto pl = Geom::Parallelogram(q->get_area_world());
         pl *= _store_affine * q->_affine.inverse();
 
         // Get its bounding box, rounded outwards.
@@ -1695,7 +1690,7 @@ CanvasPrivate::on_idle()
     }
 
     // Map the mouse to canvas space.
-    mouse_loc += Geom::IntPoint(q->_x0, q->_y0);
+    mouse_loc += q->_pos;
     if (decoupled_mode) {
         mouse_loc = geom_act(_store_affine * q->_affine.inverse(), mouse_loc);
     }
@@ -1810,10 +1805,6 @@ CanvasPrivate::on_idle()
     }
 }
 
-/*
- * Returns false to bail out in the event of a timeout.
- * Queues Gtk redraw of widget.
- */
 void
 CanvasPrivate::paint_rect_internal(Geom::IntRect const &rect)
 {
@@ -1831,7 +1822,7 @@ CanvasPrivate::paint_rect_internal(Geom::IntRect const &rect)
     // Mark the screen dirty.
     if (!decoupled_mode) {
         // Get rectangle needing repaint
-        auto repaint_rect = rect - Geom::IntPoint(q->_x0, q->_y0);
+        auto repaint_rect = rect - q->_pos;
 
         // Assert that a repaint actually occurs (guaranteed because we are only asked to paint fully on-screen rectangles)
         auto screen_rect = Geom::IntRect(0, 0, q->get_allocation().get_width(), q->get_allocation().get_height());
@@ -1844,7 +1835,7 @@ CanvasPrivate::paint_rect_internal(Geom::IntRect const &rect)
         // Get rectangle needing repaint (transform into screen space, take bounding box, round outwards)
         auto pl = Geom::Parallelogram(rect);
         pl *= q->_affine * _store_affine.inverse();
-        pl *= Geom::Translate(-q->_x0, -q->_y0);
+        pl *= Geom::Translate(-q->_pos);
         auto b = pl.bounds();
         auto repaint_rect = Geom::IntRect(b.min().floor(), b.max().ceil());
 
@@ -1858,14 +1849,8 @@ CanvasPrivate::paint_rect_internal(Geom::IntRect const &rect)
     }
 }
 
-/*
- * Paint a single buffer.
- * paint_rect: buffer rectangle.
- * canvas_rect: canvas rectangle.
- * store: Cairo surface to draw on.
- */
 void
-CanvasPrivate::paint_single_buffer(Geom::IntRect const &paint_rect, Cairo::RefPtr<Cairo::ImageSurface> &store)
+CanvasPrivate::paint_single_buffer(Geom::IntRect const &paint_rect, const Cairo::RefPtr<Cairo::ImageSurface> &store)
 {
     // Make sure the following code does not go outside of store's data
     assert(store);
@@ -2125,9 +2110,7 @@ Canvas::pick_current_item(GdkEvent *event)
         }
 
         // Convert to world coordinates.
-        x += _x0;
-        y += _y0;
-        Geom::Point p(x, y);
+        auto p = Geom::Point(x, y) + _pos;
 
         _current_canvas_item_new = _canvas_item_root->pick_item(p);
         // if (_current_canvas_item_new) {
@@ -2238,16 +2221,16 @@ Canvas::emit_event(GdkEvent *event)
     switch (event_copy->type) {
         case GDK_ENTER_NOTIFY:
         case GDK_LEAVE_NOTIFY:
-            event_copy->crossing.x += _x0;
-            event_copy->crossing.y += _y0;
+            event_copy->crossing.x += _pos.x();
+            event_copy->crossing.y += _pos.y();
             break;
         case GDK_MOTION_NOTIFY:
         case GDK_BUTTON_PRESS:
         case GDK_2BUTTON_PRESS:
         case GDK_3BUTTON_PRESS:
         case GDK_BUTTON_RELEASE:
-            event_copy->motion.x += _x0;
-            event_copy->motion.y += _y0;
+            event_copy->motion.x += _pos.x();
+            event_copy->motion.y += _pos.y();
             break;
         default:
             break;

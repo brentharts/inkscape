@@ -33,7 +33,6 @@ namespace UI {
 namespace Widget {
 
 class CanvasPrivate;
-struct PaintRectSetup;
 
 /**
  * A Gtk::DrawingArea widget for Inkscape's canvas.
@@ -52,6 +51,7 @@ public:
     SPDesktop *get_desktop() const { return _desktop; }
 
     // Geometry
+    Geom::IntPoint get_dimensions() const;
     bool world_point_inside_canvas(Geom::Point const &world) const; // desktop-events.cpp
     Geom::Point canvas_to_world(Geom::Point const &window) const;
     Geom::IntRect get_area_world() const;
@@ -61,16 +61,16 @@ public:
 
     // Drawing
     void set_drawing(Inkscape::Drawing *drawing) { _drawing = drawing; }
-    void redraw_all();                                // Draw entire surface during idle.
-    void redraw_area(Geom::Rect& area);               // Draw specified area during idle.
-    void request_update();                            // Draw after updating canvas items.
+    void redraw_all();                                // Mark everything as having changed.
+    void redraw_area(Geom::Rect& area);               // Mark a rectangle of world space as having changed.
+    void request_update();                            // Mark geometry as needing recalculation.
     void scroll_to(Geom::Point const &c);
 
     void set_background_color(guint32 rgba);
     void set_background_checkerboard(guint32 rgba = 0xC4C4C4FF, bool use_alpha = false);
 
-    void set_drawing_disabled(bool disable) { _drawing_disabled = disable; } // Disable during path ops, etc.
-    bool is_dragging() const { return _is_dragging; }                // selection-chemistry.cpp
+    void set_drawing_disabled(bool disable);          // Disable during path ops, etc.
+    bool is_dragging() const { return _is_dragging; } // selection-chemistry.cpp
 
     //  Rendering modes
     void set_render_mode(Inkscape::RenderMode mode);
@@ -148,16 +148,13 @@ private:
     bool pick_current_item(GdkEvent *event);
     bool emit_event(GdkEvent *event);
 
-    // ==== Signal callbacks ====
-    sigc::connection _idle_connection;
-
     // ====== Data members =======
 
     // Structure
     SPDesktop *_desktop = nullptr;
 
     // Geometry
-    int _x0 = 0, _y0 = 0;            ///< Coordinates of top-left pixel of canvas view within canvas.
+    Geom::IntPoint _pos;             ///< Coordinates of top-left pixel of canvas view within canvas.
     Geom::Affine _affine;            ///< The affine that we have been requested to draw at.
 
     // Event handling/item picking
@@ -201,7 +198,6 @@ private:
     // Changes to documents should not be triggering changes to closed windows. This fix is a hack.)
     bool _in_destruction = false;
 
-    // ======= CAIRO ======= ... Keep in one place
     Cairo::RefPtr<Cairo::Pattern> _background; ///< The background of the widget.
 
     // Opaque pointer to implementation
