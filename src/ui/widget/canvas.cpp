@@ -820,9 +820,9 @@ Cairo::RefPtr<Cairo::ImageSurface> Canvas::get_backing_store() const
 }
 
 void
-Canvas::forced_redraws_start(int count, bool reset)
+Canvas::forced_redraws_start(int, bool)
 {
-    // Todo: not used; remove when ready.
+    // Not used; remove when ready.
 }
 
 /**
@@ -1375,8 +1375,6 @@ Canvas::on_draw(const Cairo::RefPtr<::Cairo::Context> &cr)
             d->pending_bucket_emptier = false;
         }
     }
-
-    // Todo: Add back X-ray view.
 
     // Notify the update strategy that another frame has passed.
     d->updater->frame();
@@ -2013,7 +2011,7 @@ CanvasPrivate::paint_single_buffer(Geom::IntRect const &paint_rect, const Cairo:
     // Make sure the following code does not go outside of store's data
     assert(store);
     assert(store->get_format() == Cairo::FORMAT_ARGB32);
-    assert(_store_rect.contains(paint_rect)); // OBSERVED TO FAIL!!! Trigger was hitting Ctrl+O during a redraw, but cannot reproduce!
+    assert(_store_rect.contains(paint_rect)); // FIXME: Observed to fail once when hitting Ctrl+O while Canvas was busy. Haven't managed to reproduce it. Doesn't mean it's fixed.
 
     // Create temporary surface that draws directly to store.
     store->flush();
