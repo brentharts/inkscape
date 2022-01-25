@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 /*
- * Author:
+ * Authors:
  *   Tavmjong Bah
+ *   PBS <pbs3141@gmail.com>
  *
- * Rewrite of code originally in sp-canvas.cpp.
- *
- * Copyright (C) 2020 Tavmjong Bah
+ * Copyright (C) 2022 Authors
  *
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */

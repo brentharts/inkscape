@@ -3,10 +3,11 @@
 #ifndef INKSCAPE_UI_WIDGET_CANVAS_H
 #define INKSCAPE_UI_WIDGET_CANVAS_H
 /*
- * Author:
+ * Authors:
  *   Tavmjong Bah
+ *   PBS <pbs3141@gmail.com>
  *
- * Copyright (C) 2020 Tavmjong Bah
+ * Copyright (C) 2022 Authors
  *
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
