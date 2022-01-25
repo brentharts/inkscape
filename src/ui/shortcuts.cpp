@@ -506,9 +506,11 @@ Shortcuts::add_shortcut(Glib::ustring name, const Gtk::AccelKey& shortcut, bool 
         Gio::SimpleAction::parse_detailed_name_variant(action, action_name_old, value_old);
 
         if (action_name_new == action_name_old) {
-            // Action exists
-            app->set_accel_for_action(action, shortcut.get_abbrev());
-            action_user_set[action] = user;
+            // Action exists, add shortcut to list of shortcuts.
+            std::vector<Glib::ustring> accels = app->get_accels_for_action(name);
+            accels.push_back(shortcut.get_abbrev());
+            app->set_accels_for_action(name, accels);
+            action_user_set[name] = user;
             return true;
         }
     }
