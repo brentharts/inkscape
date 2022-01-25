@@ -135,6 +135,7 @@ struct Prefs
     Pref<int>    x_ray_radius             = Pref<int>   ("/options/rendering/xray-radius", 100, 1, 1500);
     Pref<bool>   from_display             = Pref<bool>  ("/options/displayprofile/from_display");
     Pref<int>    grabsize                 = Pref<int>   ("/options/grabsize/value", 3, 1, 15);
+    Pref<int>    outline_overlay_opacity  = Pref<int>   ("/options/rendering/outline-overlay-opacity", 50, 1, 100);
 
     // New parameters
     Pref<int>    update_strategy          = Pref<int>   ("/options/rendering/update_strategy", 3, 1, 3);
@@ -417,13 +418,11 @@ public:
     // Important global properties of all the stores. If these change, all the stores must be recreated.
     int _device_scale = 1;
     bool _store_solid_background;
-    bool _have_outline_store;
 
     // The backing store.
     Geom::IntRect _store_rect;
     Geom::Affine _store_affine;
-    Cairo::RefPtr<Cairo::ImageSurface> _backing_store;
-    Cairo::RefPtr<Cairo::ImageSurface> _outline_store;
+    Cairo::RefPtr<Cairo::ImageSurface> _backing_store, _outline_store;
 
     // The updater. Holds the clean region, the subregion of the store with up-to-date content, and some additional state determining in what order the unclean regions should be redrawn.
     std::unique_ptr<Updater> updater;
@@ -431,13 +430,14 @@ public:
     // The snapshot store. Used to mask redraw delay on zoom/rotate.
     Geom::IntRect _snapshot_rect;
     Geom::Affine _snapshot_affine;
-    Cairo::RefPtr<Cairo::ImageSurface> _snapshot_store;
+    Cairo::RefPtr<Cairo::ImageSurface> _snapshot_store, _snapshot_outline_store;
     Cairo::RefPtr<Cairo::Region> _snapshot_clean_region;
 
     Geom::Affine geom_affine; // The affine the geometry was last imbued with.
     bool decoupled_mode = false;
 
     bool solid_background; // Whether the last background set is solid.
+    bool need_outline_store() const {return q->_split_mode != Inkscape::SplitMode::NORMAL || q->_drawing->outlineOverlay();}
 
     // Idle system callbacks. The high priority idle ensures at least one idle cycle between add_idle and on_draw.
     sigc::connection hipri_idle;
@@ -548,7 +548,8 @@ Canvas::Canvas()
     d->prefs.debug_show_clean.action = [=] {queue_draw();};
     d->prefs.debug_disable_redraw.action = [=] {d->add_idle();};
     d->prefs.debug_sticky_decoupled.action = [=] {d->add_idle();};
-    d->prefs.update_strategy.action = [=] {d->updater = make_updater(d->prefs.update_strategy, d->updater->clean_region);};
+    d->prefs.update_strategy.action = [=] {d->updater = make_updater(d->prefs.update_strategy, std::move(d->updater->clean_region));};
+    d->prefs.outline_overlay_opacity.action = [=] {queue_draw();};
 
     // Give _pick_event an initial definition.
     _pick_event.type = GDK_LEAVE_NOTIFY;
@@ -1143,12 +1144,12 @@ void Canvas::on_realize()
  * 1. Ensures that if the idle process was started, at least one cycle has run.
  *
  * 2. Blits the store(s) onto the canvas, clipping the outline store as required.
- *    (Or composites them with the transformed snapshot store in decoupled mode.)
+ *    (Or composites them with the transformed snapshot store(s) in decoupled mode.)
  *
  * 3. Draws the "controller" in the 'split' split mode.
  */
 bool
-Canvas::on_draw(const::Cairo::RefPtr<::Cairo::Context> &cr)
+Canvas::on_draw(const Cairo::RefPtr<::Cairo::Context> &cr)
 {
     auto f = FrameCheck::Event();
 
@@ -1176,71 +1177,115 @@ Canvas::on_draw(const::Cairo::RefPtr<::Cairo::Context> &cr)
         cr->restore();
     }
 
-    if (!d->decoupled_mode) {
-        // Blit backing store to screen.
-        if (d->prefs.debug_framecheck) f = FrameCheck::Event("draw");
-        cr->save();
-        cr->set_operator(d->solid_background ? Cairo::OPERATOR_SOURCE : Cairo::OPERATOR_OVER);
-        cr->set_source(d->_backing_store, d->_store_rect.left() - _pos.x(), d->_store_rect.top() - _pos.y());
-        cr->paint();
-        cr->restore();
-    } else {
-        // Turn off anti-aliasing for huge performance gains. Only applies to this compositing step.
-        cr->set_antialias(Cairo::ANTIALIAS_NONE);
+    auto draw_store = [&, this] (const Cairo::RefPtr<Cairo::ImageSurface> &store, const Cairo::RefPtr<Cairo::ImageSurface> &snapshot_store) {
+        if (!d->decoupled_mode) {
+            // Blit store to screen.
+            if (d->prefs.debug_framecheck) f = FrameCheck::Event("draw");
+            cr->save();
+            cr->set_operator(d->solid_background ? Cairo::OPERATOR_SOURCE : Cairo::OPERATOR_OVER);
+            cr->set_source(store, d->_store_rect.left() - _pos.x(), d->_store_rect.top() - _pos.y());
+            cr->paint();
+            cr->restore();
+        } else {
+            // Turn off anti-aliasing for huge performance gains. Only applies to this compositing step.
+            cr->set_antialias(Cairo::ANTIALIAS_NONE);
 
-        // Blit background to complement of both clean regions, if solid (and therefore not already drawn).
-        if (d->solid_background) {
-            if (d->prefs.debug_framecheck) f = FrameCheck::Event("composite", 2);
+            // Blit background to complement of both clean regions, if solid (and therefore not already drawn).
+            if (d->solid_background) {
+                if (d->prefs.debug_framecheck) f = FrameCheck::Event("composite", 2);
+                cr->save();
+                cr->set_fill_rule(Cairo::FILL_RULE_EVEN_ODD);
+                cr->rectangle(0, 0, get_allocation().get_width(), get_allocation().get_height());
+                cr->translate(-_pos.x(), -_pos.y());
+                cr->transform(geom_to_cairo(_affine * d->_store_affine.inverse()));
+                region_to_path(cr, d->updater->clean_region);
+                cr->transform(geom_to_cairo(d->_store_affine * d->_snapshot_affine.inverse()));
+                region_to_path(cr, d->_snapshot_clean_region);
+                cr->clip();
+                cr->set_source(_background);
+                cr->set_operator(Cairo::OPERATOR_SOURCE);
+                Cairo::SurfacePattern(cr->get_source()->cobj()).set_filter(Cairo::FILTER_FAST);
+                cr->paint();
+                cr->restore();
+            }
+
+            // Draw transformed snapshot, clipped to its clean region and the complement of the store's clean region.
+            if (d->prefs.debug_framecheck) f = FrameCheck::Event("composite", 1);
             cr->save();
             cr->set_fill_rule(Cairo::FILL_RULE_EVEN_ODD);
             cr->rectangle(0, 0, get_allocation().get_width(), get_allocation().get_height());
             cr->translate(-_pos.x(), -_pos.y());
             cr->transform(geom_to_cairo(_affine * d->_store_affine.inverse()));
             region_to_path(cr, d->updater->clean_region);
+            cr->clip();
             cr->transform(geom_to_cairo(d->_store_affine * d->_snapshot_affine.inverse()));
             region_to_path(cr, d->_snapshot_clean_region);
             cr->clip();
-            cr->set_source(_background);
-            cr->set_operator(Cairo::OPERATOR_SOURCE);
+            cr->set_source(snapshot_store, d->_snapshot_rect.left(), d->_snapshot_rect.top());
+            cr->set_operator(d->solid_background ? Cairo::OPERATOR_SOURCE : Cairo::OPERATOR_OVER);
+            Cairo::SurfacePattern(cr->get_source()->cobj()).set_filter(Cairo::FILTER_FAST);
+            cr->paint();
+            if (d->prefs.debug_show_snapshot) {
+                cr->set_source_rgba(0, 0, 1, 0.2);
+                cr->set_operator(Cairo::OPERATOR_OVER);
+                cr->paint();
+            }
+            cr->restore();
+
+            // Draw transformed store, clipped to clean region.
+            if (d->prefs.debug_framecheck) f = FrameCheck::Event("composite", 0);
+            cr->save();
+            cr->translate(-_pos.x(), -_pos.y());
+            cr->transform(geom_to_cairo(_affine * d->_store_affine.inverse()));
+            region_to_path(cr, d->updater->clean_region);
+            cr->clip();
+            cr->set_source(store, d->_store_rect.left(), d->_store_rect.top());
+            cr->set_operator(d->solid_background ? Cairo::OPERATOR_SOURCE : Cairo::OPERATOR_OVER);
             Cairo::SurfacePattern(cr->get_source()->cobj()).set_filter(Cairo::FILTER_FAST);
             cr->paint();
             cr->restore();
         }
+    };
 
-        // Draw transformed snapshot, clipped to its clean region and the complement of the backing store's clean region.
-        if (d->prefs.debug_framecheck) f = FrameCheck::Event("composite", 1);
-        cr->save();
-        cr->set_fill_rule(Cairo::FILL_RULE_EVEN_ODD);
-        cr->rectangle(0, 0, get_allocation().get_width(), get_allocation().get_height());
-        cr->translate(-_pos.x(), -_pos.y());
-        cr->transform(geom_to_cairo(_affine * d->_store_affine.inverse()));
-        region_to_path(cr, d->updater->clean_region);
-        cr->clip();
-        cr->transform(geom_to_cairo(d->_store_affine * d->_snapshot_affine.inverse()));
-        region_to_path(cr, d->_snapshot_clean_region);
-        cr->clip();
-        cr->set_source(d->_snapshot_store, d->_snapshot_rect.left(), d->_snapshot_rect.top());
-        cr->set_operator(d->solid_background ? Cairo::OPERATOR_SOURCE : Cairo::OPERATOR_OVER);
-        Cairo::SurfacePattern(cr->get_source()->cobj()).set_filter(Cairo::FILTER_FAST);
-        cr->paint();
-        if (d->prefs.debug_show_snapshot) {
-            cr->set_source_rgba(0, 0, 1, 0.2);
-            cr->set_operator(Cairo::OPERATOR_OVER);
-            cr->paint();
+    // Draw the backing store.
+    draw_store(d->_backing_store, d->_snapshot_store);
+
+    // Draw overlay if required.
+    if (_drawing->outlineOverlay()) {
+        assert(d->_outline_store);
+
+        double outline_overlay_opacity = 1.0 - d->prefs.outline_overlay_opacity / 100.0;
+
+        // Partially obscure drawing by painting semi-transparent white.
+        cr->set_source_rgb(1.0, 1.0, 1.0);
+        cr->paint_with_alpha(outline_overlay_opacity);
+
+        // Overlay outline.
+        draw_store(d->_outline_store, d->_snapshot_outline_store);
+    }
+
+    // Draw split if required.
+    if (_split_mode != Inkscape::SplitMode::NORMAL) {
+        assert(d->_outline_store);
+
+        // Move split position to center if not in canvas.
+        auto const rect = Geom::Rect(Geom::Point(), get_dimensions());
+        if (!rect.contains(_split_position)) {
+            _split_position = rect.midpoint();
         }
+
+        // Add clipping path and blit background.
+        cr->save();
+        cr->set_operator(Cairo::OPERATOR_SOURCE);
+        cr->set_source(_background);
+        add_clippath(cr);
+        cr->paint();
         cr->restore();
 
-        // Draw transformed store, clipped to clean region.
-        if (d->prefs.debug_framecheck) f = FrameCheck::Event("composite", 0);
+        // Add clipping path and draw outline store.
         cr->save();
-        cr->translate(-_pos.x(), -_pos.y());
-        cr->transform(geom_to_cairo(_affine * d->_store_affine.inverse()));
-        region_to_path(cr, d->updater->clean_region);
-        cr->clip();
-        cr->set_source(d->_backing_store, d->_store_rect.left(), d->_store_rect.top());
-        cr->set_operator(d->solid_background ? Cairo::OPERATOR_SOURCE : Cairo::OPERATOR_OVER);
-        Cairo::SurfacePattern(cr->get_source()->cobj()).set_filter(Cairo::FILTER_FAST);
-        cr->paint();
+        add_clippath(cr);
+        draw_store(d->_outline_store, d->_snapshot_outline_store);
         cr->restore();
     }
 
@@ -1271,6 +1316,55 @@ Canvas::on_draw(const::Cairo::RefPtr<::Cairo::Context> &cr)
         cr->set_source_rgba(0, 0.7, 0, 0.4);
         region_to_path(cr, d->updater->clean_region);
         cr->stroke();
+        cr->restore();
+    }
+
+    if (_split_mode == Inkscape::SplitMode::SPLIT) {
+        // Add dividing line.
+        cr->save();
+        cr->set_source_rgb(0, 0, 0);
+        cr->set_line_width(1);
+        if (_split_direction == Inkscape::SplitDirection::EAST ||
+            _split_direction == Inkscape::SplitDirection::WEST) {
+            cr->move_to((int)_split_position.x() + 0.5,                    0);
+            cr->line_to((int)_split_position.x() + 0.5, get_dimensions().y());
+            cr->stroke();
+        } else {
+            cr->move_to(                   0, (int)_split_position.y() + 0.5);
+            cr->line_to(get_dimensions().x(), (int)_split_position.y() + 0.5);
+            cr->stroke();
+        }
+        cr->restore();
+
+        // Add controller image.
+        double a = _hover_direction == Inkscape::SplitDirection::NONE ? 0.5 : 1.0;
+        cr->save();
+        cr->set_source_rgba(0.2, 0.2, 0.2, a);
+        cr->arc(_split_position.x(), _split_position.y(), 20 * d->_device_scale, 0, 2 * M_PI);
+        cr->fill();
+        cr->restore();
+
+        cr->save();
+        for (int i = 0; i < 4; ++i) {
+            // The four direction triangles.
+            cr->save();
+
+            // Position triangle.
+            cr->translate(_split_position.x(), _split_position.y());
+            cr->rotate((i + 2) * M_PI / 2.0);
+
+            // Draw triangle.
+            cr->move_to(-5 * d->_device_scale,  8 * d->_device_scale);
+            cr->line_to( 0,                    18 * d->_device_scale);
+            cr->line_to( 5 * d->_device_scale,  8 * d->_device_scale);
+            cr->close_path();
+
+            double b = (int)_hover_direction == (i + 1) ? 0.9 : 0.7;
+            cr->set_source_rgba(b, b, b, a);
+            cr->fill();
+
+            cr->restore();
+        }
         cr->restore();
     }
 
@@ -1399,7 +1493,7 @@ coarsen(const Cairo::RefPtr<Cairo::Region> &region, int min_size, int glue_size,
                 continue;
             }
 
-            // Commit the change
+            // Commit the change.
             rect = newrect;
 
             for (auto &it : remove_rects) {
@@ -1538,7 +1632,6 @@ CanvasPrivate::on_idle()
         int desired_width  = _store_rect.width()  * _device_scale;
         int desired_height = _store_rect.height() * _device_scale;
         if (!_backing_store || _backing_store->get_width() != desired_width || _backing_store->get_height() != desired_height) {
-            // Todo: Stop cairo unnecessarily pre-filling the store with transparency below if solid_background is true.
             _backing_store = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, desired_width, desired_height);
             cairo_surface_set_device_scale(_backing_store->cobj(), _device_scale, _device_scale); // No C++ API!
         }
@@ -1550,12 +1643,21 @@ CanvasPrivate::on_idle()
             cr->set_operator(Cairo::OPERATOR_CLEAR);
         }
         cr->paint();
+        if (need_outline_store()) {
+            if (!_outline_store || _outline_store->get_width() != desired_width || _outline_store->get_height() != desired_height) {
+                _outline_store = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, desired_width, desired_height);
+                cairo_surface_set_device_scale(_outline_store->cobj(), _device_scale, _device_scale); // No C++ API!
+            }
+            auto cr = Cairo::Context::create(_outline_store);
+            cr->set_operator(Cairo::OPERATOR_CLEAR);
+            cr->paint();
+        }
         updater->reset();
         if (prefs.debug_show_unclean) q->queue_draw();
     };
 
     // Determine whether the rendering parameters have changed, and reset if so.
-    if (!_backing_store || _device_scale != q->get_scale_factor() || _store_solid_background != solid_background) {
+    if (!_backing_store || (need_outline_store() && !_outline_store) || _device_scale != q->get_scale_factor() || _store_solid_background != solid_background) {
         _device_scale = q->get_scale_factor();
         _store_solid_background = solid_background;
         recreate_store();
@@ -1563,11 +1665,15 @@ CanvasPrivate::on_idle()
         if (prefs.debug_logging) std::cout << "Full reset" << std::endl;
     }
 
+    // Make sure to clear the outline store when not in use, so we don't accidentally re-use it when it is required again.
+    if (!need_outline_store()) {
+        _outline_store.clear();
+    }
+
     auto shift_store = [&, this] {
         // Recreate the store, but keep re-usable content from the old store.
         auto store_rect = q->get_area_world();
         store_rect.expandBy(pad);
-        // Todo: Stop cairo unnecessarily pre-filling the store with transparency below if solid_background is true.
         auto backing_store = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, store_rect.width() * _device_scale, store_rect.height() * _device_scale);
         cairo_surface_set_device_scale(backing_store->cobj(), _device_scale, _device_scale); // No C++ API!
 
@@ -1586,8 +1692,6 @@ CanvasPrivate::on_idle()
             if (solid_background) {
                 cr->set_operator(Cairo::OPERATOR_SOURCE);
                 cr->set_source(q->_background);
-            } else {
-                cr->set_operator(Cairo::OPERATOR_CLEAR);
             }
             region_to_path(cr, reg);
             cr->fill();
@@ -1595,18 +1699,30 @@ CanvasPrivate::on_idle()
         }
 
         // Copy re-usuable contents of old store into new store, shifted.
-        cr->save();
         cr->rectangle(reuse_rect->left() - store_rect.left(), reuse_rect->top() - store_rect.top(), reuse_rect->width(), reuse_rect->height());
         cr->clip();
         cr->set_source(_backing_store, -shift.x(), -shift.y());
         cr->set_operator(Cairo::OPERATOR_SOURCE);
         cr->paint();
-        cr->restore();
 
         // Set the result as the new backing store.
         _store_rect = store_rect;
         assert(_store_affine == q->_affine); // Should not be called if the affine has changed.
         _backing_store = std::move(backing_store);
+
+        // Do the same for the outline store
+        if (_outline_store) {
+            auto outline_store = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, store_rect.width() * _device_scale, store_rect.height() * _device_scale);
+            cairo_surface_set_device_scale(outline_store->cobj(), _device_scale, _device_scale); // No C++ API!
+            auto cr = Cairo::Context::create(outline_store);
+            cr->rectangle(reuse_rect->left() - store_rect.left(), reuse_rect->top() - store_rect.top(), reuse_rect->width(), reuse_rect->height());
+            cr->clip();
+            cr->set_source(_outline_store, -shift.x(), -shift.y());
+            cr->set_operator(Cairo::OPERATOR_SOURCE);
+            cr->paint();
+            _outline_store = std::move(outline_store);
+        }
+
         updater->intersect(_store_rect);
         if (prefs.debug_show_unclean) q->queue_draw();
     };
@@ -1617,6 +1733,9 @@ CanvasPrivate::on_idle()
         _snapshot_rect = _store_rect;
         _snapshot_affine = _store_affine;
         _snapshot_clean_region = updater->clean_region->copy();
+
+        // Do the same for the outline store
+        std::swap(_snapshot_outline_store, _outline_store);
 
         // Recreate the backing store, making the state valid again.
         recreate_store();
@@ -1847,6 +1966,14 @@ CanvasPrivate::paint_rect_internal(Geom::IntRect const &rect)
     q->_drawing->setColorMode(q->_color_mode);
     paint_single_buffer(rect, _backing_store);
 
+    if (_outline_store) {
+        auto mode = q->_drawing->renderMode();
+        q->_drawing->setRenderMode(Inkscape::RenderMode::OUTLINE);
+        q->_drawing->setColorMode(q->_color_mode);
+        paint_single_buffer(rect, _outline_store);
+        q->_drawing->setRenderMode(mode);
+    }
+
     // Introduce an artificial delay for each rectangle.
     if (prefs.debug_slow_redraw) g_usleep(prefs.debug_slow_redraw_time);
 
@@ -1889,7 +2016,7 @@ CanvasPrivate::paint_single_buffer(Geom::IntRect const &paint_rect, const Cairo:
     // Make sure the following code does not go outside of store's data
     assert(store);
     assert(store->get_format() == Cairo::FORMAT_ARGB32);
-    assert(_store_rect.contains(paint_rect));
+    assert(_store_rect.contains(paint_rect)); // OBSERVED TO FAIL!!! Trigger was hitting Ctrl+O during a redraw, but cannot reproduce!
 
     // Create temporary surface that draws directly to store.
     store->flush();
