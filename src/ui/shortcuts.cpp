@@ -137,15 +137,16 @@ Shortcuts::clear()
 }
 
 // This is only used in ToolBase (for F1, Tab, and Left-Tab).
+// If this is ever used for more things, evaluate "get_from_event()".
 bool
 Shortcuts::invoke_action(GdkEventKey const *event)
 {
-    Gtk::AccelKey shortcut = get_from_event(event);
+    // Gtk::AccelKey shortcut = get_from_event(event);
 
     bool return_value = false;
 
     // This can be simplified in GTK4.
-    Glib::ustring accel = Gtk::AccelGroup::name(shortcut.get_key(), shortcut.get_mod());
+    Glib::ustring accel = Gtk::AccelGroup::name(event->keyval, Gdk::ModifierType(event->state));
     std::vector<Glib::ustring> actions = app->get_actions_for_accel(accel);
     if (!actions.empty()) {
         Glib::ustring action = actions[0];
