@@ -436,7 +436,7 @@ public:
     bool decoupled_mode = false;
 
     bool solid_background; // Whether the last background set is solid.
-    bool need_outline_store() const {return q->_split_mode != Inkscape::SplitMode::NORMAL || q->_drawing->outlineOverlay();}
+    bool need_outline_store() const {return q->_split_mode != Inkscape::SplitMode::NORMAL || q->_render_mode == Inkscape::RenderMode::OUTLINE_OVERLAY;}
 
     // Idle system callbacks. The high priority idle ensures at least one idle cycle between add_idle and on_draw.
     sigc::connection hipri_idle;
@@ -1250,7 +1250,7 @@ Canvas::on_draw(const Cairo::RefPtr<::Cairo::Context> &cr)
     draw_store(d->_backing_store, d->_snapshot_store);
 
     // Draw overlay if required.
-    if (_drawing->outlineOverlay()) {
+    if (_render_mode == Inkscape::RenderMode::OUTLINE_OVERLAY) {
         assert(d->_outline_store);
 
         double outline_overlay_opacity = 1.0 - d->prefs.outline_overlay_opacity / 100.0;
@@ -1962,16 +1962,13 @@ void
 CanvasPrivate::paint_rect_internal(Geom::IntRect const &rect)
 {
     // Paint the rectangle.
-    q->_drawing->setRenderMode(q->_render_mode);
     q->_drawing->setColorMode(q->_color_mode);
+    q->_drawing->setRenderMode(q->_render_mode);
     paint_single_buffer(rect, _backing_store);
 
     if (_outline_store) {
-        auto mode = q->_drawing->renderMode();
         q->_drawing->setRenderMode(Inkscape::RenderMode::OUTLINE);
-        q->_drawing->setColorMode(q->_color_mode);
         paint_single_buffer(rect, _outline_store);
-        q->_drawing->setRenderMode(mode);
     }
 
     // Introduce an artificial delay for each rectangle.
@@ -2261,7 +2258,7 @@ Canvas::pick_current_item(GdkEvent *event)
 
         // If in split mode, look at where cursor is to see if one should pick with outline mode.
         _drawing->setRenderMode(_render_mode);
-        if (_split_mode == Inkscape::SplitMode::SPLIT && !_drawing->outlineOverlay()) {
+        if (_split_mode == Inkscape::SplitMode::SPLIT && _render_mode != Inkscape::RenderMode::OUTLINE_OVERLAY) {
             if ((_split_direction == Inkscape::SplitDirection::NORTH && y > _split_position.y()) ||
                 (_split_direction == Inkscape::SplitDirection::SOUTH && y < _split_position.y()) ||
                 (_split_direction == Inkscape::SplitDirection::WEST  && x > _split_position.x()) ||
