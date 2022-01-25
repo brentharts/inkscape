@@ -1837,8 +1837,6 @@ CanvasPrivate::on_idle()
         Gdk::ModifierType mask;
         window->get_device_position(Gdk::Display::get_default()->get_default_seat()->get_pointer(), x, y, mask);
         mouse_loc = Geom::IntPoint(x, y);
-    } else {
-        mouse_loc = Geom::IntPoint(); // Doesn't particularly matter, just as long as it's initialised.
     }
 
     // Map the mouse to canvas space.
@@ -1862,7 +1860,10 @@ CanvasPrivate::on_idle()
         }
 
         // Get the list of rectangles to paint, coarsened to avoid fragmentation.
-        auto rects = coarsen(paint_region, prefs.coarsener_min_size, prefs.coarsener_glue_size, prefs.coarsener_min_fullness);
+        auto rects = coarsen(paint_region,
+                             std::min<int>(prefs.coarsener_min_size, prefs.new_bisector_size / 2),
+                             std::min<int>(prefs.coarsener_glue_size, prefs.new_bisector_size / 2),
+                             prefs.coarsener_min_fullness);
 
         // Ensure that all the rectangles lie within the visible rect (and therefore within the store).
         #ifndef NDEBUG
