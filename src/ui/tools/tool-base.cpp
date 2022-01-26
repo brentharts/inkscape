@@ -617,7 +617,7 @@ bool ToolBase::root_handler(GdkEvent* event) {
         case GDK_KEY_Tab:
         case GDK_KEY_ISO_Left_Tab:
         case GDK_KEY_F1:
-            ret = Inkscape::Shortcuts::getInstance().invoke_verb(&event->key, SP_ACTIVE_DESKTOP);
+            ret = Inkscape::Shortcuts::getInstance().invoke_action(&event->key);
             break;
 
         case GDK_KEY_Q:
@@ -1306,6 +1306,7 @@ void sp_event_root_menu_popup(SPDesktop *desktop, SPItem *item, GdkEvent *event)
     }
 
     ContextMenu* menu = new ContextMenu(desktop, item);
+    menu->attach_to_widget(*(desktop->getCanvas())); // So actions work!
     menu->show();
 
     switch (event->type) {

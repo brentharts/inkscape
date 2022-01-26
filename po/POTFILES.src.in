@@ -12,6 +12,8 @@
 ../src/actions/actions-edit-window.cpp
 ../src/actions/actions-edit.cpp
 ../src/actions/actions-effect.cpp
+../src/actions/actions-element-a.cpp
+../src/actions/actions-element-image.cpp
 ../src/actions/actions-extra-data.cpp
 ../src/actions/actions-file-window.cpp
 ../src/actions/actions-file.cpp
@@ -402,7 +404,6 @@
 ../src/util/enums.h
 ../src/util/paper.cpp
 ../src/vanishing-point.cpp
-../src/verbs.cpp
 ../src/widgets/desktop-widget.cpp
 ../src/widgets/ege-paint-def.cpp
 ../src/widgets/sp-attribute-widget.cpp

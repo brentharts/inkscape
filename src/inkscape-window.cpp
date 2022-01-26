@@ -29,7 +29,6 @@
 #include "actions/actions-edit-window.h"
 #include "actions/actions-file-window.h"
 #include "actions/actions-help-url.h"
-#include "actions/actions-hide-lock.h"
 #include "actions/actions-layer.h"
 #include "actions/actions-node-align.h" // Node alignment.
 #include "actions/actions-paths.h"  // TEMP
@@ -85,8 +84,6 @@ InkscapeWindow::InkscapeWindow(SPDocument* document)
 
     set_resizable(true);
 
-    insert_action_group("doc", document->getActionGroup());
-
     // =============== Build interface ===============
 
     // Main box
@@ -102,6 +99,7 @@ InkscapeWindow::InkscapeWindow(SPDocument* document)
     _desktop = _desktop_widget->desktop;
 
     // =================== Actions ===================
+
     // After canvas has been constructed.. move to canvas proper.
     add_actions_canvas_mode(this);          // Actions to change canvas display mode.
     add_actions_canvas_snapping(this);      // Actions to toggle on/off snapping modes.
@@ -110,7 +108,6 @@ InkscapeWindow::InkscapeWindow(SPDocument* document)
     add_actions_edit_window(this);          // Actions to edit.
     add_actions_file_window(this);          // Actions for file actions which are desktop dependent.
     add_actions_help_url(this);             // Actions to help url.
-    add_actions_hide_lock(this);            // Actions to transform dialog.
     add_actions_layer(this);                // Actions for layer.
     add_actions_node_align(this);           // Actions to align and distribute nodes (requiring Node tool).
     add_actions_path(this);                 // Actions for paths. TEMP
@@ -118,6 +115,15 @@ InkscapeWindow::InkscapeWindow(SPDocument* document)
     add_actions_tools(this);                // Actions to switch between tools.
     add_actions_view_mode(this);            // Actions to change how Inkscape canvas is displayed.
     add_actions_view_window(this);          // Actions to add/change window of Inkscape
+
+    // Add document action group to window and export to DBus.
+    insert_action_group("doc", document->getActionGroup());
+
+    auto connection = _app->gio_app()->get_dbus_connection();
+    if (connection) {
+        std::string document_action_group_name = _app->gio_app()->get_dbus_object_path() + "/document/" + std::to_string(get_id());
+        connection->export_action_group(document_action_group_name, document->getActionGroup());
+    }
 
     // This is called here (rather than in InkscapeApplication) solely to add win level action
     // tooltips to the menu label-to-tooltip map.
@@ -220,7 +226,7 @@ InkscapeWindow::on_key_press_event(GdkEventKey* event)
 #ifdef EVENT_DEBUG
     ui_dump_event(reinterpret_cast<GdkEvent *>(event), "\nInkscapeWindow::on_key_press_event");
 #endif
-    bool canvas_focused = false;
+
     // Key press and release events are normally sent first to Gtk::Window for processing as
     // accelerators and menomics before bubbling up from the "grab" or "focus" widget (unlike other
     // events which always bubble up). This would means that key combinations used for accelerators
@@ -235,28 +241,13 @@ InkscapeWindow::on_key_press_event(GdkEventKey* event)
         if (focus->event(reinterpret_cast<GdkEvent *>(event))) {
             return true;
         }
-
-        // is canvas focused?
-        canvas_focused = !!dynamic_cast<Inkscape::UI::Widget::Canvas*>(focus);
-    }
-
-    if (canvas_focused) {
-        // if canvas is focused, then promote shortcuts or else docked dialogs may steal them
-        if (Inkscape::Shortcuts::getInstance().invoke_verb(event, _desktop)) {
-            return true;
-        }
     }
 
     if (Gtk::Window::on_key_press_event(event)) {
         return true;
     }
 
-    if (!canvas_focused) {
-        // Verbs get last crack at events.
-        return Inkscape::Shortcuts::getInstance().invoke_verb(event, _desktop);
-    }
-
-    // not handled
+    // Not handled
     return false;
 }
 
