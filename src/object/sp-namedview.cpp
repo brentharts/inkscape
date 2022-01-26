@@ -57,7 +57,7 @@ using Inkscape::Util::unit_table;
 #define DEFAULTGRIDEMPSPACING 5
 #define DEFAULTGUIDECOLOR 0x0000ff7f
 #define DEFAULTGUIDEHICOLOR 0xff00007f
-#define DEFAULTDESKCOLOR 0xffffffff
+#define DEFAULTDESKCOLOR 0xd1d1d1ff
 
 static void sp_namedview_setup_guides(SPNamedView * nv);
 static void sp_namedview_lock_guides(SPNamedView * nv);
@@ -225,7 +225,6 @@ void SPNamedView::build(SPDocument *document, Inkscape::XML::Node *repr) {
     this->readAttr(SPAttr::BORDEROPACITY);
     this->readAttr(SPAttr::PAGECOLOR);
     this->readAttr(SPAttr::INKSCAPE_DESK_COLOR);
-    // this->readAttr(SPAttr::INKSCAPE_DESK_OPACITY);
     this->readAttr(SPAttr::INKSCAPE_DESK_CHECKERBOARD);
     this->readAttr(SPAttr::INKSCAPE_PAGESHADOW);
     this->readAttr(SPAttr::INKSCAPE_ZOOM);
@@ -412,17 +411,19 @@ void SPNamedView::set(SPAttr key, const gchar* value) {
             }
             this->requestModified(SP_OBJECT_MODIFIED_FLAG);
             break;
+    case SPAttr::PAGECOLOR:
+        // if desk color is not defined in a document, then use page color
+        if (value && _default_desk_color) {
+            desk_color = sp_svg_read_color(value, desk_color);
+        }
+        break;
     case SPAttr::INKSCAPE_DESK_COLOR:
-        // desk_color = (desk_color & 0xff) | (DEFAULTDESKCOLOR & 0xffffff00);
         if (value) {
-            desk_color = /*(desk_color & 0xff) |*/ sp_svg_read_color(value, desk_color);
+            desk_color = sp_svg_read_color(value, desk_color);
+            _default_desk_color = false;
         }
         this->requestModified(SP_OBJECT_MODIFIED_FLAG);
         break;
-    // case SPAttr::INKSCAPE_DESK_OPACITY:
-    //     sp_ink_read_opacity(value, &desk_color, DEFAULTDESKCOLOR);
-    //     this->requestModified(SP_OBJECT_MODIFIED_FLAG);
-    //     break;
     case SPAttr::INKSCAPE_DESK_CHECKERBOARD:
         this->desk_checkerboard.readOrUnset(value);
         this->requestModified(SP_OBJECT_MODIFIED_FLAG);
