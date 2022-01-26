@@ -211,7 +211,7 @@ void CanvasItemRect::render(Inkscape::CanvasItemBuffer *buf)
         buf->cr->save();
         Cairo::Matrix m(_affine[0], _affine[1], _affine[2], _affine[3], _affine[4], _affine[5]);
         // if Y axis is pointing up, flip drop shadow
-        if (!Inkscape::Preferences::get()->getBool("/options/yaxisdown", true)) {
+        if (_canvas && _canvas->get_desktop() && !_canvas->get_desktop()->is_yaxisdown()) {
             m.translate(0, rect.height());
             m.scale(1, -1);
         }
