@@ -524,8 +524,6 @@ void Box3dTool::drag(guint /*state*/) {
         // TODO: It would be nice to show the VPs during dragging, but since there is no selection
         //       at this point (only after finishing the box), we must do this "manually"
         /* this._vpdrag->updateDraggers(); */
-
-        forced_redraws_start(5);
     }
 
     g_assert(this->box3d);
@@ -563,8 +561,6 @@ void Box3dTool::finishItem() {
         this->box3d->updateRepr();
 
         this->box3d->relabel_corners();
-
-        forced_redraws_stop();
 
         desktop->getSelection()->set(this->box3d);
         DocumentUndo::done(desktop->getDocument(), _("Create 3D box"), INKSCAPE_ICON("draw-cuboid"));

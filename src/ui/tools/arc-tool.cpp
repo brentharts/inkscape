@@ -331,8 +331,6 @@ void ArcTool::drag(Geom::Point pt, guint state) {
         Inkscape::GC::release(repr);
         this->arc->transform = layer->i2doc_affine().inverse();
         this->arc->updateRepr();
-
-        forced_redraws_start(5);
     }
 
     auto confine = Modifiers::Modifier::get(Modifiers::Type::TRANS_CONFINE)->active(state);
@@ -429,8 +427,6 @@ void ArcTool::finishItem() {
         this->arc->updateRepr();
         this->arc->doWriteTransform(this->arc->transform, nullptr, true);
 
-        forced_redraws_stop();
-
         desktop->getSelection()->set(this->arc);
 
         DocumentUndo::done(desktop->getDocument(), _("Create ellipse"), INKSCAPE_ICON("draw-ellipse"));
@@ -452,8 +448,6 @@ void ArcTool::cancel() {
     this->xp = 0;
     this->yp = 0;
     this->item_to_select = nullptr;
-
-    forced_redraws_stop();
 
     DocumentUndo::cancel(desktop->getDocument());
 }

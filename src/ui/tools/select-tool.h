@@ -42,12 +42,10 @@ public:
 	bool cycling_wrap;
 
 	SPItem *item;
-        Inkscape::CanvasItem *grabbed = nullptr;
+    Inkscape::CanvasItem *grabbed = nullptr;
 	Inkscape::SelTrans *_seltrans;
 	Inkscape::SelectionDescriber *_describer;
-	gchar *no_selection_msg = nullptr;
-
-	static const std::string prefsPath;
+    gchar *no_selection_msg = nullptr;
 
 	void setup() override;
 	void set(const Inkscape::Preferences::Entry& val) override;

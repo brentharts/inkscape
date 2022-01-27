@@ -93,8 +93,8 @@ public:
     Cairo::RefPtr<Cairo::ImageSurface> get_backing_store() const; // Background rotation preview
     Cairo::RefPtr<Cairo::Pattern>      get_background_pattern() const { return _background; }
 
-    void forced_redraws_start(int count, bool reset = true);
-    void forced_redraws_stop() { _forced_redraw_limit = -1; }
+    int gobble_key_events(guint keyval, guint mask) const; // tool-base.cpp
+    void gobble_motion_events(guint mask) const; // tool-base.cpp
 
     // Canvas Items
     CanvasItemGroup *get_canvas_item_root() const { return _canvas_item_root; }
@@ -190,9 +190,6 @@ private:
 
     std::string _cms_key;
     bool _cms_active = false;
-
-    int _forced_redraw_limit = -1;
-    int _forced_redraw_count =  0;
 
     // Some objects (e.g. grids) when destroyed will request redraws. We need to block them when canvas
     // is destructed. (Windows are destroyed before documents as a document may have several windows.

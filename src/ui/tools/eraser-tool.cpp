@@ -414,7 +414,6 @@ bool EraserTool::root_handler(GdkEvent* event) {
 
                 ret = TRUE;
 
-                forced_redraws_start(3);
                 this->is_drawing = true;
             }
             break;
@@ -458,7 +457,6 @@ bool EraserTool::root_handler(GdkEvent* event) {
 
         ungrabCanvasEvents();
 
-        forced_redraws_stop();
         this->is_drawing = false;
 
         if (this->dragging && event->button.button == 1) {

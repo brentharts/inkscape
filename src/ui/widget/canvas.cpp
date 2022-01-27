@@ -448,6 +448,7 @@ public:
     struct GdkEventFreer {void operator()(GdkEvent *ev) const {gdk_event_free(ev);}};
     std::vector<std::unique_ptr<GdkEvent, GdkEventFreer>> bucket;
     sigc::connection bucket_emptier;
+    int bucket_pos;
 
     bool pending_bucket_emptier = false;
     bool idle_running = false;
@@ -462,7 +463,6 @@ public:
 
     // Preferences system
     Prefs prefs;
-    void update_ctrl_sizes(int size) {q->_canvas_item_root->update_canvas_item_ctrl_sizes(size);}
 };
 
 void CanvasPrivate::schedule_bucket_emptier()
@@ -482,9 +482,13 @@ void CanvasPrivate::empty_bucket()
 
     pending_bucket_emptier = false;
 
-    auto bucket2 = std::move(bucket);
+    bucket_pos = 0;
 
-    for (auto &event : bucket2) {
+    while (bucket_pos < bucket.size()) {
+        // Extract next event.
+        auto event = std::move(bucket[bucket_pos]);
+        bucket_pos++;
+
         // Block undo/redo while anything is dragged.
         if (event->type == GDK_BUTTON_PRESS && event->button.button == 1) {
             q->_is_dragging = true;
@@ -517,6 +521,52 @@ void CanvasPrivate::empty_bucket()
             ignore = nullptr;
         }
     }
+
+    bucket.clear();
+}
+
+// Used by some tools to batch backlogs of key events that may have built up after a freeze. Called during 'empty_bucket'.
+int Canvas::gobble_key_events(guint keyval, guint mask) const
+{
+    int count = 0;
+
+    while (d->bucket_pos < d->bucket.size()) {
+        auto &event = d->bucket[d->bucket_pos];
+        if ((event->type == GDK_KEY_PRESS || event->type == GDK_KEY_RELEASE) && event->key.keyval == keyval && (!mask || (event->key.state & mask))) {
+            // Discard event and continue processing.
+            if (event->type == GDK_KEY_PRESS) count++;
+            d->bucket_pos++;
+        }
+        else {
+            // Stop discarding.
+            break;
+        }
+    }
+
+    if (count > 0 && d->prefs.debug_logging) std::cout << "Gobbled " << count << " key presses" << std::endl;
+
+    return count;
+}
+
+// Used by some tools to ignore backlogs of motion events that may have built up after a freeze. Called during 'empty_bucket'.
+void Canvas::gobble_motion_events(guint mask) const
+{
+    int count = 0;
+
+    while (d->bucket_pos < d->bucket.size()) {
+        auto &event = d->bucket[d->bucket_pos];
+        if (event->type == GDK_MOTION_NOTIFY && (event->motion.state & mask)) {
+            // Discard event and continue processing.
+            count++;
+            d->bucket_pos++;
+        }
+        else {
+            // Stop discarding.
+            break;
+        }
+    }
+
+    if (count > 0 && d->prefs.debug_logging) std::cout << "Gobbled " << count << " motion events" << std::endl;
 }
 
 void CanvasPrivate::queue_draw_area(Geom::IntRect &rect)
@@ -816,13 +866,7 @@ Canvas::set_split_direction(Inkscape::SplitDirection dir)
 
 Cairo::RefPtr<Cairo::ImageSurface> Canvas::get_backing_store() const
 {
-     return d->_backing_store;
-}
-
-void
-Canvas::forced_redraws_start(int, bool)
-{
-    // Not used; remove when ready.
+    return d->_backing_store;
 }
 
 /**
@@ -1844,6 +1888,7 @@ CanvasPrivate::on_idle()
     }
 
     // Begin processing redraws.
+    auto start_time = g_get_monotonic_time();
     while (true) {
         // Get the clean region for the next redraw as reported by the updater.
         auto clean_region = updater->get_next_clean_region();
@@ -1877,7 +1922,6 @@ CanvasPrivate::on_idle()
         std::make_heap(rects.begin(), rects.end(), cmp);
 
         // Process rectangles until none left or timed out.
-        auto start_time = g_get_monotonic_time();
         while (!rects.empty()) {
             // Extract the closest rectangle to the mouse.
             std::pop_heap(rects.begin(), rects.end(), cmp);
@@ -2008,7 +2052,7 @@ CanvasPrivate::paint_rect_internal(Geom::IntRect const &rect)
 void
 CanvasPrivate::paint_single_buffer(Geom::IntRect const &paint_rect, const Cairo::RefPtr<Cairo::ImageSurface> &store)
 {
-    // Make sure the following code does not go outside of store's data
+    // Make sure the following code does not go outside of store's data.
     assert(store);
     assert(store->get_format() == Cairo::FORMAT_ARGB32);
     assert(_store_rect.contains(paint_rect)); // FIXME: Observed to fail once when hitting Ctrl+O while Canvas was busy. Haven't managed to reproduce it. Doesn't mean it's fixed.
@@ -2055,7 +2099,7 @@ CanvasPrivate::paint_single_buffer(Geom::IntRect const &paint_rect, const Cairo:
         q->_canvas_item_root->render(&buf);
     }
 
-    // Paint over newly drawn content with a translucent random colour
+    // Paint over newly drawn content with a translucent random colour.
     if (prefs.debug_show_redraw) {
         cr->set_source_rgba((rand() % 255) / 255.0, (rand() % 255) / 255.0, (rand() % 255) / 255.0, 0.2);
         cr->set_operator(Cairo::OPERATOR_OVER);

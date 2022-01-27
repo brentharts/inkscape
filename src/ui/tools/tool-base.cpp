@@ -123,7 +123,6 @@ void ToolBase::setup() {
 }
 
 void ToolBase::finish() {
-    this->desktop->getCanvas()->forced_redraws_stop();
     this->enableSelectionCue(false);
 }
 
@@ -189,56 +188,6 @@ void ToolBase::use_cursor(Glib::RefPtr<Gdk::Cursor> cursor)
     if (auto window = desktop->getCanvas()->get_window()) {
         window->set_cursor(cursor ? cursor : _cursor);
     }
-}
-
-/**
- * Gobbles next key events on the queue with the same keyval and mask. Returns the number of events consumed.
- */
-gint gobble_key_events(guint keyval, gint mask) {
-    GdkEvent *event_next;
-    gint i = 0;
-
-    event_next = gdk_event_get();
-    // while the next event is also a key notify with the same keyval and mask,
-    while (event_next && (event_next->type == GDK_KEY_PRESS || event_next->type
-            == GDK_KEY_RELEASE) && event_next->key.keyval == keyval && (!mask
-            || (event_next->key.state & mask))) {
-        if (event_next->type == GDK_KEY_PRESS)
-            i++;
-        // kill it
-        gdk_event_free(event_next);
-        // get next
-        event_next = gdk_event_get();
-    }
-    // otherwise, put it back onto the queue
-    if (event_next)
-        gdk_event_put(event_next);
-
-    return i;
-}
-
-/**
- * Gobbles next motion notify events on the queue with the same mask. Returns the number of events consumed.
- */
-gint gobble_motion_events(gint mask) {
-    GdkEvent *event_next;
-    gint i = 0;
-
-    event_next = gdk_event_get();
-    // while the next event is also a key notify with the same keyval and mask,
-    while (event_next && event_next->type == GDK_MOTION_NOTIFY
-            && (event_next->motion.state & mask)) {
-        // kill it
-        gdk_event_free(event_next);
-        // get next
-        event_next = gdk_event_get();
-        i++;
-    }
-    // otherwise, put it back onto the queue
-    if (event_next)
-        gdk_event_put(event_next);
-
-    return i;
 }
 
 /**
@@ -311,7 +260,7 @@ static gdouble accelerate_scroll(GdkEvent *event, gdouble acceleration)
 bool ToolBase::_keyboardMove(GdkEventKey const &event, Geom::Point const &dir)
 {
     if (held_control(event)) return false;
-    unsigned num = 1 + combine_key_events(shortcut_key(event), 0);
+    unsigned num = 1 + gobble_key_events(shortcut_key(event), 0);
     Geom::Point delta = dir * num;
 
     if (held_shift(event)) {
@@ -1117,26 +1066,22 @@ void ToolBase::set_high_motion_precision(bool high_precision) {
 }
 
 /**
- * Force canvas to fully update after interruptions.
+ * Discard and count matching key events from top of event bucket.
  * Convenience function that just passes request to canvas.
  */
-void
-ToolBase::forced_redraws_start(int count, bool reset)
+int ToolBase::gobble_key_events(guint keyval, guint mask) const
 {
-    desktop->canvas->forced_redraws_start(count, reset);
+    return desktop->canvas->gobble_key_events(keyval, mask);
 }
-
 
 /**
- * End force canvas full updates.
+ * Discard matching motion events from top of event bucket.
  * Convenience function that just passes request to canvas.
  */
-void
-ToolBase::forced_redraws_stop()
+void ToolBase::gobble_motion_events(guint mask) const
 {
-    desktop->canvas->forced_redraws_stop();
+    desktop->canvas->gobble_motion_events(mask);
 }
-
 
 /**
  * Calls virtual set() function of ToolBase.

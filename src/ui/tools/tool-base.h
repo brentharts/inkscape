@@ -252,8 +252,8 @@ protected:
 
     void set_high_motion_precision(bool high_precision = true);
 
-    void forced_redraws_start(int count, bool reset = false);
-    void forced_redraws_stop();
+    int gobble_key_events(guint keyval, guint mask) const;
+    void gobble_motion_events(guint mask) const;
 
     SPDesktop *desktop = nullptr;
 
@@ -270,9 +270,6 @@ gint sp_event_context_item_handler(ToolBase *ec, SPItem *item, GdkEvent *event);
 gint sp_event_context_virtual_item_handler(ToolBase *ec, SPItem *item, GdkEvent *event);
 
 void sp_event_root_menu_popup(SPDesktop *desktop, SPItem *item, GdkEvent *event);
-
-gint gobble_key_events(guint keyval, gint mask);
-gint gobble_motion_events(gint mask);
 
 void sp_event_show_modifier_tip(Inkscape::MessageContext *message_context, GdkEvent *event,
                                 gchar const *ctrl_tip, gchar const *shift_tip, gchar const *alt_tip);

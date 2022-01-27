@@ -65,12 +65,12 @@ namespace Tools {
 
 static gint rb_escaped = 0; // if non-zero, rubberband was canceled by esc, so the next button release should not deselect
 static gint drag_escaped = 0; // if non-zero, drag was canceled by esc
+static bool is_cycling = false;
 
 const std::string& SelectTool::getPrefsPath() {
-    return SelectTool::prefsPath;
+    static std::string prefsPath = "/tools/select";
+    return prefsPath;
 }
-
-const std::string SelectTool::prefsPath = "/tools/select";
 
 SelectTool::SelectTool()
     : ToolBase("select.svg")
@@ -85,12 +85,6 @@ SelectTool::SelectTool()
     , _describer(nullptr)
 {
 }
-
-//static gint xp = 0, yp = 0; // where drag started
-//static gint tolerance = 0;
-//static bool within_tolerance = false;
-static bool is_cycling = false;
-
 
 SelectTool::~SelectTool() {
     this->enableGrDrag(false);
@@ -111,8 +105,6 @@ SelectTool::~SelectTool() {
         sp_object_unref(item);
         item = nullptr;
     }
-
-    forced_redraws_stop();
 }
 
 void SelectTool::setup() {
@@ -445,7 +437,6 @@ bool SelectTool::root_handler(GdkEvent* event) {
     if (this->item && this->item->document == nullptr) {
         this->sp_select_context_abort();
     }
-    forced_redraws_start(5);
 
     switch (event->type) {
         case GDK_2BUTTON_PRESS:
