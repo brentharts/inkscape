@@ -268,6 +268,17 @@ public:
      * @param document 
      */
     void set_reference_document(SPDocument* document);
+    SPDocument* get_reference_document();
+
+    /**
+     * @brief Object used to temporarily set and then automatically clear reference document.
+     */
+    struct install_reference_document {
+        install_reference_document(SPDocument* inject_into, SPDocument* reference);
+        ~install_reference_document();
+    private:
+        SPDocument* _parent;
+    };
 
     // Find items by geometry --------------------
     void build_flat_item_list(unsigned int dkey, SPGroup *group, gboolean into_groups) const;

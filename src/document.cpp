@@ -2156,6 +2156,16 @@ void SPDocument::set_reference_document(SPDocument* document) {
     _ref_document = document;
 }
 
+SPDocument::install_reference_document::install_reference_document(SPDocument* inject_into, SPDocument* reference) {
+    g_assert(inject_into);
+    _parent = inject_into;
+    _parent->set_reference_document(reference);
+}
+
+SPDocument::install_reference_document::~install_reference_document() {
+    _parent->set_reference_document(nullptr);
+}
+
 /*
   Local Variables:
   mode:c++
