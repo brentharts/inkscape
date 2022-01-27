@@ -882,7 +882,6 @@ MarkerComboBox::create_marker_image(Geom::IntPoint pixel_size, gchar const *mnam
     /* Update to renderable state */
     const double device_scale = get_scale_factor();
     auto surface = render_surface(drawing, scale, *dbox, pixel_size, device_scale, checkerboard ? &_background_color : nullptr, no_clip);
-
     cairo_surface_set_device_scale(surface, device_scale, device_scale);
     return Cairo::RefPtr<Cairo::Surface>(new Cairo::Surface(surface, false));
 }
