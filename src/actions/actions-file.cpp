@@ -18,7 +18,6 @@
 #include "inkscape-application.h"
 
 #include "inkscape.h"             // Inkscape::Application
-#include "helper/action-context.h"
 
 // Actions for file handling (should be integrated with file dialog).
 
