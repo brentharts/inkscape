@@ -44,7 +44,6 @@
 #include "live_effects/effect-enum.h"
 #include "live_effects/effect.h"
 #include "live_effects/lpe-bool.h"
-#include "helper/action.h"
 
 #include "object/sp-item-transform.h"
 #include "object/sp-namedview.h"
@@ -1503,7 +1502,7 @@ gboolean Inkscape::SelTrans::centerRequest(Geom::Point &pt, guint state)
 void Inkscape::SelTrans::align(guint state, SPSelTransHandle const &handle)
 {
     Glib::ustring argument;
-    int index = handle.control + ALIGN_OFFSET + (state & GDK_SHIFT_MASK) ? ALIGN_SHIFT_OFFSET : 0;
+    int index = handle.control + ALIGN_OFFSET + ((state & GDK_SHIFT_MASK) ? ALIGN_SHIFT_OFFSET : 0);
     if (index < 0 || index >= AlignArguments.size()) {
         std::cerr << "Inkscape::Seltrans::align: index out of bounds! " << index << std::endl;
         index = 0;

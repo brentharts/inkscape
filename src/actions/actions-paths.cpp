@@ -209,7 +209,9 @@ std::vector<std::vector<Glib::ustring>> raw_data_path =
     {"win.path-offset",              N_("Offset"),               "Path",   N_("Offset selected paths")},
     {"win.path-offset-dynamic",      N_("Dynamic Offset"),       "Path",   N_("Create a dynamic offset object")},
     {"win.path-offset-linked",       N_("Linked Offset"),        "Path",   N_("Create a dynamic offset object linked to the original path")},
-    {"win.path-reverse",             N_("Reverse"),              "Path",   N_("Reverse the direction of selected paths (useful for flipping markers)")}
+    {"win.path-reverse",             N_("Reverse"),              "Path",   N_("Reverse the direction of selected paths (useful for flipping markers)")},
+    {"win.path-inset-screen",        N_("Inset Screen"),         "Path",   N_("Inset selected paths by screen pixels")},
+    {"win.path-offset-screen",       N_("Offset Screen"),        "Path",   N_("Offset selected paths by screen pixels")},
     // clang-format on
 };
 
@@ -242,12 +244,13 @@ add_actions_path(InkscapeWindow* win)
     Glib::VariantType Double(Glib::VARIANT_TYPE_DOUBLE);
 
     // clang-format off
-    win->add_action(                "path-inset",                  sigc::bind<InkscapeWindow*>(sigc::ptr_fun(&select_path_inset),          win));
-    win->add_action(                "path-offset",                 sigc::bind<InkscapeWindow*>(sigc::ptr_fun(&select_path_offset),         win));
-    win->add_action_with_parameter( "path-inset-screen",   Double, sigc::bind<InkscapeWindow*>(sigc::ptr_fun(&select_path_inset_screen),   win));
-    win->add_action_with_parameter( "path-offset-screen",  Double, sigc::bind<InkscapeWindow*>(sigc::ptr_fun(&select_path_offset_screen),  win));
-    win->add_action(                "path-offset-linked",          sigc::bind<InkscapeWindow*>(sigc::ptr_fun(&select_path_offset_linked),  win));
-    win->add_action(                "path-reverse",                sigc::bind<InkscapeWindow*>(sigc::ptr_fun(&select_path_reverse),        win));
+    win->add_action(                "path-inset",                   sigc::bind<InkscapeWindow*>(sigc::ptr_fun(&select_path_inset),          win));
+    win->add_action(                "path-offset",                  sigc::bind<InkscapeWindow*>(sigc::ptr_fun(&select_path_offset),         win));
+    win->add_action_with_parameter( "path-inset-screen",    Double, sigc::bind<InkscapeWindow*>(sigc::ptr_fun(&select_path_inset_screen),   win));
+    win->add_action_with_parameter( "path-offset-screen",   Double, sigc::bind<InkscapeWindow*>(sigc::ptr_fun(&select_path_offset_screen),  win));
+    win->add_action(                "path-offset-dynamic",          sigc::bind<InkscapeWindow*>(sigc::ptr_fun(&select_path_offset_dynamic), win));
+    win->add_action(                "path-offset-linked",           sigc::bind<InkscapeWindow*>(sigc::ptr_fun(&select_path_offset_linked),  win));
+    win->add_action(                "path-reverse",                 sigc::bind<InkscapeWindow*>(sigc::ptr_fun(&select_path_reverse),        win));
     // clang-format on
 }
 
