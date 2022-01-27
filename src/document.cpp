@@ -2156,6 +2156,10 @@ void SPDocument::set_reference_document(SPDocument* document) {
     _ref_document = document;
 }
 
+SPDocument* SPDocument::get_reference_document() {
+    return _ref_document;
+}
+
 SPDocument::install_reference_document::install_reference_document(SPDocument* inject_into, SPDocument* reference) {
     g_assert(inject_into);
     _parent = inject_into;
