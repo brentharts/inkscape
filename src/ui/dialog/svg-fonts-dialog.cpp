@@ -374,7 +374,6 @@ SPItem* find_layer(SPDesktop* desktop, SPObject* root_layer, const Glib::ustring
     if (!desktop) return nullptr;
 
     const auto& layers = desktop->layerManager();
-    SPItem* layer = nullptr;
     auto root = root_layer == nullptr ? layers.currentRoot() : root_layer;
     if (!root) return nullptr;
 
@@ -958,8 +957,6 @@ void SvgFontsDialog::add_glyph(){
     if (!document) return;
     auto font = get_selected_spfont();
     if (!font) return;
-
-    const int count = _GlyphsListStore->children().size();
 
     auto glyphs = _GlyphsListStore->children();
     // initialize "unicode" field; if there are glyphs look for the last one and take next unicode
