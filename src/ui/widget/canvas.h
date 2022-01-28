@@ -64,6 +64,8 @@ public:
     void set_drawing(Inkscape::Drawing *drawing) { _drawing = drawing; }
     void redraw_all();                                // Mark everything as having changed.
     void redraw_area(Geom::Rect& area);               // Mark a rectangle of world space as having changed.
+    void redraw_area(int x0, int y0, int x1, int y1);
+    void redraw_area(Geom::Coord x0, Geom::Coord y0, Geom::Coord x1, Geom::Coord y1);
     void request_update();                            // Mark geometry as needing recalculation.
     void scroll_to(Geom::Point const &c);
 
@@ -116,7 +118,6 @@ public:
     void set_all_enter_events(bool on) { _all_enter_events = on; }
 
 protected:
-
     void get_preferred_width_vfunc (int &minimum_width,  int &natural_width ) const override;
     void get_preferred_height_vfunc(int &minimum_height, int &natural_height) const override;
 
@@ -137,15 +138,8 @@ protected:
     bool on_draw(const Cairo::RefPtr<Cairo::Context>&) override;
 
 private:
-
-    // Drawing (internal overloads)
-    void redraw_area(int x0, int y0, int x1, int y1);
-    void redraw_area(Geom::Coord x0, Geom::Coord y0, Geom::Coord x1, Geom::Coord y1);
-
     void add_clippath(const Cairo::RefPtr<Cairo::Context>& cr);
     void set_cursor();
-
-    // ====== Data members =======
 
     // Structure
     SPDesktop *_desktop = nullptr;
@@ -177,12 +171,12 @@ private:
 
     Inkscape::RenderMode _render_mode = Inkscape::RenderMode::NORMAL;
     Inkscape::SplitMode  _split_mode  = Inkscape::SplitMode::NORMAL;
+    Inkscape::ColorMode  _color_mode  = Inkscape::ColorMode::NORMAL;
     Geom::Point _split_position{-1, -1}; // initialize with off-canvas coordinates
-    Inkscape::SplitDirection _split_direction   = Inkscape::SplitDirection::EAST;
-    Inkscape::SplitDirection _hover_direction   = Inkscape::SplitDirection::NONE;
+    Inkscape::SplitDirection _split_direction = Inkscape::SplitDirection::EAST;
+    Inkscape::SplitDirection _hover_direction = Inkscape::SplitDirection::NONE;
     bool _split_dragging = false;
     Geom::Point _split_drag_start;
-    Inkscape::ColorMode  _color_mode  = Inkscape::ColorMode::NORMAL;
 
     std::string _cms_key;
     bool _cms_active = false;

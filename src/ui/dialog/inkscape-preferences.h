@@ -323,9 +323,9 @@ protected:
     UI::Widget::PrefSpinButton  _filter_multi_threaded;
     UI::Widget::PrefSpinButton  _rendering_cache_size;
     UI::Widget::PrefSpinButton  _rendering_tile_multiplier;
-    UI::Widget::PrefSpinButton  _rendering_tile_size;
     UI::Widget::PrefSpinButton  _rendering_xray_radius;
     UI::Widget::PrefSpinButton  _rendering_outline_overlay_opacity;
+    UI::Widget::PrefCombo       _canvas_update_strategy;
     UI::Widget::PrefRadioButton _blur_quality_best;
     UI::Widget::PrefRadioButton _blur_quality_better;
     UI::Widget::PrefRadioButton _blur_quality_normal;
@@ -337,16 +337,16 @@ protected:
     UI::Widget::PrefRadioButton _filter_quality_worse;
     UI::Widget::PrefRadioButton _filter_quality_worst;
 
-    UI::Widget::PrefCombo       _canvas_update_strategy;
+    UI::Widget::PrefCheckButton _canvas_developer_mode_enabled;
     UI::Widget::PrefSpinButton  _canvas_render_time_limit;
     UI::Widget::PrefCheckButton _canvas_use_new_bisector;
     UI::Widget::PrefSpinButton  _canvas_new_bisector_size;
+    UI::Widget::PrefSpinButton  _rendering_tile_size;
     UI::Widget::PrefSpinButton  _canvas_max_affine_diff;
     UI::Widget::PrefSpinButton  _canvas_pad;
     UI::Widget::PrefSpinButton  _canvas_coarsener_min_size;
     UI::Widget::PrefSpinButton  _canvas_coarsener_glue_size;
     UI::Widget::PrefSpinButton  _canvas_coarsener_min_fullness;
-
     UI::Widget::PrefCheckButton _canvas_debug_framecheck;
     UI::Widget::PrefCheckButton _canvas_debug_logging;
     UI::Widget::PrefCheckButton _canvas_debug_slow_redraw;

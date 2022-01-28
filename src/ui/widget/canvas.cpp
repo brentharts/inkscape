@@ -84,48 +84,47 @@ namespace Widget {
  */
 
 template<typename T>
+struct Pref {};
+
+template<typename T>
 struct PrefBase
 {
-    T t;
+    const char *path;
+    T t, def;
     std::unique_ptr<Preferences::PreferencesObserver> obs;
     std::function<void()> action;
     operator T() const {return t;}
+    PrefBase(const char *path, T def) : path(path), def(def) {enable();}
+    void act() {if (action) action();}
+    void enable() {t = static_cast<Pref<T>*>(this)->read(); act(); obs = Inkscape::Preferences::get()->createObserver(path, [this] (const Preferences::Entry &e) {t = static_cast<Pref<T>*>(this)->changed(e); act();});}
+    void disable() {t = def; act(); obs.reset();}
+    void set_enabled(bool enabled) {enabled ? enable() : disable();}
 };
-
-template<typename T>
-struct Pref {};
 
 template<>
 struct Pref<bool> : PrefBase<bool>
 {
-    Pref(const char *path, bool def = false)
-    {
-        auto prefs = Inkscape::Preferences::get();
-        t = prefs->getBool(path, def);
-        obs = prefs->createObserver(path, [=] (const Preferences::Entry &e) {t = e.getBool(def); if (action) action();});
-    }
+    Pref(const char *path, bool def = false) : PrefBase(path, def) {}
+    bool read() {return Inkscape::Preferences::get()->getBool(path, def);}
+    bool changed(const Preferences::Entry &e) {return e.getBool(def);}
 };
 
 template<>
 struct Pref<int> : PrefBase<int>
 {
-    Pref(const char *path, int def, int min, int max)
-    {
-        auto prefs = Inkscape::Preferences::get();
-        t = prefs->getIntLimited(path, def, min, max);
-        obs = prefs->createObserver(path, [=] (const Preferences::Entry &e) {t = e.getIntLimited(def, min, max); if (action) action();});
-    }
+    int min, max;
+    Pref(const char *path, int def, int min, int max) : min(min), max(max), PrefBase(path, def) {}
+    int read() {return Inkscape::Preferences::get()->getIntLimited(path, def, min, max);}
+    int changed(const Preferences::Entry &e) {return e.getIntLimited(def, min, max);}
 };
 
 template<>
 struct Pref<double> : PrefBase<double>
 {
-    Pref(const char *path, double def, double min, double max)
-    {
-        auto prefs = Inkscape::Preferences::get();
-        t = prefs->getDoubleLimited(path, def, min, max);
-        obs = prefs->createObserver(path, [=] (const Preferences::Entry &e) {t = e.getDoubleLimited(def, min, max); if (action) action();});
-    }
+    double min, max;
+    Pref(const char *path, double def, double min, double max) : min(min), max(max), PrefBase(path, def) {}
+    double read() {return Inkscape::Preferences::get()->getDoubleLimited(path, def, min, max);}
+    double changed(const Preferences::Entry &e) {return e.getDoubleLimited(def, min, max);}
 };
 
 struct Prefs
@@ -160,7 +159,34 @@ struct Prefs
     Pref<bool>   debug_show_clean         = Pref<bool>  ("/options/rendering/debug_show_clean");
     Pref<bool>   debug_disable_redraw     = Pref<bool>  ("/options/rendering/debug_disable_redraw");
     Pref<bool>   debug_sticky_decoupled   = Pref<bool>  ("/options/rendering/debug_sticky_decoupled");
+
+    // Developer mode
+    Pref<bool> devmode = Pref<bool>("/options/rendering/devmode");
+    void set_devmode(bool on);
 };
+
+void Prefs::set_devmode(bool on)
+{
+    tile_size.set_enabled(on);
+    render_time_limit.set_enabled(on);
+    use_new_bisector.set_enabled(on);
+    new_bisector_size.set_enabled(on);
+    max_affine_diff.set_enabled(on);
+    pad.set_enabled(on);
+    coarsener_min_size.set_enabled(on);
+    coarsener_glue_size.set_enabled(on);
+    coarsener_min_fullness.set_enabled(on);
+    debug_framecheck.set_enabled(on);
+    debug_logging.set_enabled(on);
+    debug_slow_redraw.set_enabled(on);
+    debug_slow_redraw_time.set_enabled(on);
+    debug_show_redraw.set_enabled(on);
+    debug_show_unclean.set_enabled(on);
+    debug_show_snapshot.set_enabled(on);
+    debug_show_clean.set_enabled(on);
+    debug_disable_redraw.set_enabled(on);
+    debug_sticky_decoupled.set_enabled(on);
+}
 
 /*
  * Conversion functions
@@ -1143,13 +1169,8 @@ CanvasPrivate::emit_event(const GdkEvent &event)
 }
 
 /*
- * The Rest
+ * Canvas
  */
-
-void CanvasPrivate::queue_draw_area(Geom::IntRect &rect)
-{
-    q->queue_draw_area(rect.left(), rect.top(), rect.width(), rect.height());
-}
 
 Canvas::Canvas()
     : d(std::make_unique<CanvasPrivate>(this))
@@ -1176,6 +1197,10 @@ Canvas::Canvas()
     d->prefs.debug_sticky_decoupled.action = [=] {d->add_idle();};
     d->prefs.update_strategy.action = [=] {d->updater = make_updater(d->prefs.update_strategy, std::move(d->updater->clean_region));};
     d->prefs.outline_overlay_opacity.action = [=] {queue_draw();};
+
+    // Developer mode master switch
+    d->prefs.devmode.action = [=] {d->prefs.set_devmode(d->prefs.devmode);};
+    d->prefs.devmode.action();
 
     // Give _pick_event an initial definition.
     _pick_event.type = GDK_LEAVE_NOTIFY;
@@ -1208,7 +1233,8 @@ Canvas::~Canvas()
     delete _canvas_item_root;
 }
 
-Geom::IntPoint Canvas::get_dimensions() const
+Geom::IntPoint
+Canvas::get_dimensions() const
 {
     Gtk::Allocation allocation = get_allocation();
     return {allocation.get_width(), allocation.get_height()};
@@ -1255,6 +1281,11 @@ Canvas::set_affine(Geom::Affine const &affine)
 
     d->add_idle();
     queue_draw();
+}
+
+void CanvasPrivate::queue_draw_area(Geom::IntRect &rect)
+{
+    q->queue_draw_area(rect.left(), rect.top(), rect.width(), rect.height());
 }
 
 /**
@@ -1441,7 +1472,8 @@ Canvas::set_split_direction(Inkscape::SplitDirection dir)
     }
 }
 
-Cairo::RefPtr<Cairo::ImageSurface> Canvas::get_backing_store() const
+Cairo::RefPtr<Cairo::ImageSurface>
+Canvas::get_backing_store() const
 {
     return d->_backing_store;
 }
@@ -1470,7 +1502,51 @@ Canvas::canvas_item_clear(Inkscape::CanvasItem* item)
     }
 }
 
-// ============== Protected Functions ==============
+// Change cursor
+void
+Canvas::set_cursor() {
+
+    if (!_desktop) {
+        return;
+    }
+
+    auto display = Gdk::Display::get_default();
+
+    switch (_hover_direction) {
+
+        case Inkscape::SplitDirection::NONE:
+            _desktop->event_context->use_tool_cursor();
+            break;
+
+        case Inkscape::SplitDirection::NORTH:
+        case Inkscape::SplitDirection::EAST:
+        case Inkscape::SplitDirection::SOUTH:
+        case Inkscape::SplitDirection::WEST:
+        {
+            auto cursor = Gdk::Cursor::create(display, "pointer");
+            get_window()->set_cursor(cursor);
+            break;
+        }
+
+        case Inkscape::SplitDirection::HORIZONTAL:
+        {
+            auto cursor = Gdk::Cursor::create(display, "ns-resize");
+            get_window()->set_cursor(cursor);
+            break;
+        }
+
+        case Inkscape::SplitDirection::VERTICAL:
+        {
+            auto cursor = Gdk::Cursor::create(display, "ew-resize");
+            get_window()->set_cursor(cursor);
+            break;
+        }
+
+        default:
+            // Shouldn't reach.
+            std::cerr << "Canvas::set_cursor: Unknown hover direction!" << std::endl;
+    }
+}
 
 void
 Canvas::get_preferred_width_vfunc(int &minimum_width,  int &natural_width) const
@@ -1484,21 +1560,24 @@ Canvas::get_preferred_height_vfunc(int &minimum_height, int &natural_height) con
     minimum_height = natural_height = 256;
 }
 
-/**
- * Resize handler
- */
-void Canvas::on_size_allocate(Gtk::Allocation &allocation)
+void
+Canvas::on_size_allocate(Gtk::Allocation &allocation)
 {
     parent_type::on_size_allocate(allocation);
     assert(allocation == get_allocation());
     d->add_idle(); // Trigger the size update to be applied to the stores before the next call to on_draw.
 }
 
-void Canvas::on_realize()
+void
+Canvas::on_realize()
 {
     parent_type::on_realize();
     d->add_idle();
 }
+
+/*
+ * Drawing
+ */
 
 /*
  * The on_draw() function is called whenever Gtk wants to update the window. This function:
@@ -1747,6 +1826,41 @@ Canvas::on_draw(const Cairo::RefPtr<::Cairo::Context> &cr)
     d->updater->frame();
 
     return true;
+}
+
+// Sets clip path for Split and X-Ray modes.
+void
+Canvas::add_clippath(const Cairo::RefPtr<Cairo::Context>& cr)
+{
+    double width  = get_allocation().get_width();
+    double height = get_allocation().get_height();
+    double sx     = _split_position.x();
+    double sy     = _split_position.y();
+
+    if (_split_mode == Inkscape::SplitMode::SPLIT) {
+        // We're clipping the outline region... so it's backwards.
+        switch (_split_direction) {
+            case Inkscape::SplitDirection::SOUTH:
+                cr->rectangle(0,   0, width,               sy);
+                break;
+            case Inkscape::SplitDirection::NORTH:
+                cr->rectangle(0,  sy, width,      height - sy);
+                break;
+            case Inkscape::SplitDirection::EAST:
+                cr->rectangle(0,   0,         sx, height     );
+                break;
+            case Inkscape::SplitDirection::WEST:
+                cr->rectangle(sx,  0, width - sx, height     );
+                break;
+            default:
+                // no clipping (for NONE, HORIZONTAL, VERTICAL)
+                break;
+        }
+    } else {
+        cr->arc(sx, sy, d->prefs.x_ray_radius, 0, 2 * M_PI);
+    }
+
+    cr->clip();
 }
 
 void
@@ -2450,87 +2564,6 @@ CanvasPrivate::paint_single_buffer(Geom::IntRect const &paint_rect, const Cairo:
     }
 
     store->mark_dirty();
-}
-
-// Sets clip path for Split and X-Ray modes.
-void
-Canvas::add_clippath(const Cairo::RefPtr<Cairo::Context>& cr)
-{
-    double width  = get_allocation().get_width();
-    double height = get_allocation().get_height();
-    double sx     = _split_position.x();
-    double sy     = _split_position.y();
-
-    if (_split_mode == Inkscape::SplitMode::SPLIT) {
-        // We're clipping the outline region... so it's backwards.
-        switch (_split_direction) {
-            case Inkscape::SplitDirection::SOUTH:
-                cr->rectangle(0,   0, width,               sy);
-                break;
-            case Inkscape::SplitDirection::NORTH:
-                cr->rectangle(0,  sy, width,      height - sy);
-                break;
-            case Inkscape::SplitDirection::EAST:
-                cr->rectangle(0,   0,         sx, height     );
-                break;
-            case Inkscape::SplitDirection::WEST:
-                cr->rectangle(sx,  0, width - sx, height     );
-                break;
-            default:
-                // no clipping (for NONE, HORIZONTAL, VERTICAL)
-                break;
-        }
-    } else {
-        cr->arc(sx, sy, d->prefs.x_ray_radius, 0, 2 * M_PI);
-    }
-
-    cr->clip();
-}
-
-// Change cursor
-void
-Canvas::set_cursor() {
-
-    if (!_desktop) {
-        return;
-    }
-
-    auto display = Gdk::Display::get_default();
-
-    switch (_hover_direction) {
-
-        case Inkscape::SplitDirection::NONE:
-            _desktop->event_context->use_tool_cursor();
-            break;
-
-        case Inkscape::SplitDirection::NORTH:
-        case Inkscape::SplitDirection::EAST:
-        case Inkscape::SplitDirection::SOUTH:
-        case Inkscape::SplitDirection::WEST:
-        {
-            auto cursor = Gdk::Cursor::create(display, "pointer");
-            get_window()->set_cursor(cursor);
-            break;
-        }
-
-        case Inkscape::SplitDirection::HORIZONTAL:
-        {
-            auto cursor = Gdk::Cursor::create(display, "ns-resize");
-            get_window()->set_cursor(cursor);
-            break;
-        }
-
-        case Inkscape::SplitDirection::VERTICAL:
-        {
-            auto cursor = Gdk::Cursor::create(display, "ew-resize");
-            get_window()->set_cursor(cursor);
-            break;
-        }
-
-        default:
-            // Shouldn't reach.
-            std::cerr << "Canvas::set_cursor: Unknown hover direction!" << std::endl;
-    }
 }
 
 } // namespace Widget
