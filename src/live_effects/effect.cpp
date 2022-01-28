@@ -1383,8 +1383,18 @@ void Effect::processObjects(LPEAction lpe_action)
 bool Effect::doOnOpen(SPLPEItem const * /*lpeitem*/)
 {
     // Do nothing for simple effects
+    update_satellites();
     return false;
 }
+
+void
+Effect::update_satellites(bool updatelpe) {
+    std::vector<Inkscape::LivePathEffect::Parameter *>::iterator p;
+    for (p = param_vector.begin(); p != param_vector.end(); ++p) {
+        (*p)->update_satellites(updatelpe);
+    }
+}
+
 
 /**
  * Is performed each time before the effect is updated.
@@ -1406,6 +1416,7 @@ Effect::doBeforeEffect (SPLPEItem const*/*lpeitem*/)
 void Effect::doAfterEffect (SPLPEItem const* /*lpeitem*/, SPCurve *curve)
 {
     //Do nothing for simple effects
+    update_satellites();
 }
 
 void Effect::doOnException(SPLPEItem const * /*lpeitem*/)
@@ -1741,7 +1752,7 @@ Effect::defaultParamSet()
     // use manage here, because after deletion of Effect object, others might still be pointing to this widget.
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     Gtk::Box * vbox_expander = Gtk::manage( new Gtk::Box(Gtk::ORIENTATION_VERTICAL) );
-    Glib::ustring effectname = (Glib::ustring)Inkscape::LivePathEffect::LPETypeConverter.get_label(effectType());
+    Glib::ustring effectname = _(Inkscape::LivePathEffect::LPETypeConverter.get_label(effectType()).c_str());
     Glib::ustring effectkey = (Glib::ustring)Inkscape::LivePathEffect::LPETypeConverter.get_key(effectType());
     std::vector<Parameter *>::iterator it = param_vector.begin();
     bool has_params = false;

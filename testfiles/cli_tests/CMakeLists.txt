@@ -531,7 +531,6 @@ add_cli_test(query-height  PARAMETERS --query-id=rect2 --query-height INPUT_FILE
 
 # --action-list / --verb-list
 add_cli_test(action-list   PARAMETERS --action-list PASS_FOR_OUTPUT "file-new")
-add_cli_test(verb-list     PARAMETERS --verb-list   PASS_FOR_OUTPUT "FileNew:")
 
 # --with-gui
 
@@ -730,10 +729,10 @@ add_cli_test(actions-transform-rotate      INPUT_FILENAME pyramids.svg
                                            REFERENCE_FILENAME actions-transform-rotate_expected.png)
 
 # transform-scale
-add_cli_test(actions-transform-scale       INPUT_FILENAME pyramids.svg
-                                           PARAMETERS --actions=select-by-id:quad_snapped_1$<SEMICOLON>transform-scale:10
-                                           OUTPUT_FILENAME actions-transform-scale.png
-                                           REFERENCE_FILENAME actions-transform-scale_expected.png)
+add_cli_test(actions-transform-grow        INPUT_FILENAME pyramids.svg
+                                           PARAMETERS --actions=select-by-id:quad_snapped_1$<SEMICOLON>transform-grow:10
+                                           OUTPUT_FILENAME actions-transform-grow.png
+                                           REFERENCE_FILENAME actions-transform-grow_expected.png)
 
 # transform-translate
 add_cli_test(actions-transform-translate   INPUT_FILENAME pyramids.svg
@@ -751,10 +750,6 @@ add_cli_test(actions-transform-translate   INPUT_FILENAME pyramids.svg
 add_cli_test(actions-user-data-directory   PARAMETERS --actions=user-data-directory ENVIRONMENT unset PASS_FOR_OUTPUT "inkscape\n$")
 
 # vacuum-defs
-# verb
-# verb-list: test = verb-list
-add_cli_test(actions-verb-list             PARAMETERS --actions=verb-list PASS_FOR_OUTPUT "FileNew:")
-
 # window-close
 # window-open
 
@@ -765,12 +760,6 @@ add_cli_test(action_test_multiline_anchoring
                         EXPECTED_FILES multiline-anchoring_out.svg
                         TEST_SCRIPT match_regex_fail.sh multiline-anchoring_out.svg "(x=\"[3-9][0-9]{2}\")|(x=\"[12][0-9]{3}\")|(y=\"[0-9]{2}\")|(y=\"1[0-9]{2}\")")
 
-#############
-### verbs ###
-#############
-
-# TODO
-
 ###########################
 ### file format support ###
 ###########################
@@ -779,7 +768,7 @@ add_cli_test(action_test_multiline_anchoring
 if(WITH_LIBCDR)
   # add_cli_test(import_cdr  PARAMETERS --export-type=png   # fails to open (regression in libcdr 1.6.0)
   #                          INPUT_FILENAME librevenge_formats/corel_draw.cdr OUTPUT_FILENAME format_corel_draw.png
-  #                          REFERENCE_FILENAME librevenge_formats/corel_draw_expected.png)
+  #                          REFERENCE_FILENAME librevenge_formats/corel_draw_expected.png) # check png size is correct
   add_cli_test(import_cdr2 PARAMETERS --export-type=png
                            INPUT_FILENAME librevenge_formats/corel_draw2.cdr OUTPUT_FILENAME format_corel_draw2.png
                            REFERENCE_FILENAME librevenge_formats/corel_draw2_expected.png)

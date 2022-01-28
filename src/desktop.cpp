@@ -51,9 +51,6 @@
 #include "display/control/canvas-item-rect.h"
 #include "display/control/canvas-item-rotate.h"
 
-#include "helper/action-context.h"
-#include "helper/action.h" //sp_action_perform
-
 #include "io/fix-broken-links.h"
 
 #include "object/sp-namedview.h"
@@ -1284,7 +1281,6 @@ SPDesktop::emitToolSubselectionChanged(gpointer data)
 
 void SPDesktop::emitToolSubselectionChangedEx(gpointer data, SPObject* object) {
     _tool_subselection_changed.emit(data, object);
-    INKSCAPE.subselection_changed(this);
 }
 
 sigc::connection SPDesktop::connectToolSubselectionChanged(const sigc::slot<void, gpointer>& slot) {
