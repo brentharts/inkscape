@@ -1,12 +1,16 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 /** @file
- * TODO: insert short description here
- *//*
- * Authors: see git history
+ * Color selector using sliders for each components, for multiple color modes
+ */
+/*
+ * Authors:
+ * see git history
  *
  * Copyright (C) 2018 Authors
+ *
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
+
 #ifndef SEEN_SP_COLOR_SCALES_H
 #define SEEN_SP_COLOR_SCALES_H
 
@@ -44,6 +48,10 @@ public:
 
     void setMode(SPColorScalesMode mode);
     SPColorScalesMode getMode() const;
+
+    static const guchar *hsluvHueMap(gfloat s, gfloat l, std::array<guchar, 4 * 1024> *map);
+    static const guchar *hsluvSaturationMap(gfloat h, gfloat l, std::array<guchar, 4 * 1024> *map);
+    static const guchar *hsluvLightnessMap(gfloat h, gfloat s, std::array<guchar, 4 * 1024> *map);
 
 protected:
     void _onColorChanged();
