@@ -145,10 +145,6 @@ private:
     void add_clippath(const Cairo::RefPtr<Cairo::Context>& cr);
     void set_cursor();
 
-    // Events
-    bool pick_current_item(GdkEvent *event);
-    bool emit_event(GdkEvent *event);
-
     // ====== Data members =======
 
     // Structure

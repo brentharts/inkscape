@@ -79,7 +79,9 @@ namespace Inkscape {
 namespace UI {
 namespace Widget {
 
-// Preferences system
+/*
+ * Preferences system
+ */
 
 template<typename T>
 struct PrefBase
@@ -160,7 +162,9 @@ struct Prefs
     Pref<bool>   debug_sticky_decoupled   = Pref<bool>  ("/options/rendering/debug_sticky_decoupled");
 };
 
-// Conversion functions
+/*
+ * Conversion functions
+ */
 
 auto geom_to_cairo(Geom::IntRect rect)
 {
@@ -192,9 +196,11 @@ void region_to_path(const Cairo::RefPtr<Cairo::Context> &cr, const Cairo::RefPtr
     }
 }
 
-// Update strategy
+/*
+ * Update strategy
+ */
 
-// A class for controlling what order to update invalidated regions.
+// A class hierarchy for controlling what order to update invalidated regions.
 class Updater
 {
 public:
@@ -203,8 +209,8 @@ public:
 
     Updater(Cairo::RefPtr<Cairo::Region> clean_region) : clean_region(std::move(clean_region)) {}
 
-    virtual void reset()                               {clean_region = Cairo::Region::create();}       // Reset to clean region to empty.
-    virtual void intersect (const Geom::IntRect &rect) {clean_region->intersect(geom_to_cairo(rect));} // Called when the store changes position; clip everthing to the new store rect.
+    virtual void reset()                               {clean_region = Cairo::Region::create();}       // Reset the clean region to empty.
+    virtual void intersect (const Geom::IntRect &rect) {clean_region->intersect(geom_to_cairo(rect));} // Called when the store changes position; clip everthing to the new store rectangle.
     virtual void mark_dirty(const Geom::IntRect &rect) {clean_region->subtract (geom_to_cairo(rect));} // Called on every invalidate event.
     virtual void mark_clean(const Geom::IntRect &rect) {clean_region->do_union (geom_to_cairo(rect));} // Called on every rectangle redrawn.
 
@@ -396,7 +402,9 @@ make_updater(int type, Cairo::RefPtr<Cairo::Region> clean_region = Cairo::Region
     }
 }
 
-// Implementation class
+/*
+ * Implementation class
+ */
 
 class CanvasPrivate
 {
@@ -406,13 +414,32 @@ public:
     Canvas *q;
     CanvasPrivate(Canvas *q) : q(q) {}
 
-    void add_idle();
-    bool on_idle();
-    void paint_rect_internal(Geom::IntRect const &rect);
-    void paint_single_buffer(Geom::IntRect const &paint_rect, Cairo::RefPtr<Cairo::ImageSurface> const &store);
+    // Preferences system
+    Prefs prefs;
 
-    std::optional<Geom::Dim2> old_bisector(const Geom::IntRect &rect);
-    std::optional<Geom::Dim2> new_bisector(const Geom::IntRect &rect);
+    // The updater; tracks the unclean region and decides how to redraw it.
+    std::unique_ptr<Updater> updater;
+
+    // Events system. Events that interact with the Canvas are placed into the event bucket until the start of the next frame.
+    std::vector<std::unique_ptr<GdkEvent>> bucket;
+    bool pending_draw = false;
+    sigc::connection bucket_emptier;
+    int bucket_pos;
+    GdkEvent *ignore = nullptr;
+
+    bool add_to_bucket(GdkEvent*);
+    void empty_bucket();
+    bool process_bucketed_event(const GdkEvent&);
+    bool pick_current_item(const GdkEvent&);
+    bool emit_event(const GdkEvent&);
+
+    // Idle system. The high priority idle ensures at least one idle cycle between add_idle and on_draw.
+    void add_idle();
+    sigc::connection hipri_idle;
+    sigc::connection lopri_idle;
+    bool on_hipri_idle();
+    bool on_lopri_idle();
+    bool idle_running = false;
 
     // Important global properties of all the stores. If these change, all the stores must be recreated.
     int _device_scale = 1;
@@ -422,9 +449,6 @@ public:
     Geom::IntRect _store_rect;
     Geom::Affine _store_affine;
     Cairo::RefPtr<Cairo::ImageSurface> _backing_store, _outline_store;
-
-    // The updater. Holds the clean region, the subregion of the store with up-to-date content, and some additional state determining in what order the unclean regions should be redrawn.
-    std::unique_ptr<Updater> updater;
 
     // The snapshot store. Used to mask redraw delay on zoom/rotate.
     Geom::IntRect _snapshot_rect;
@@ -438,50 +462,278 @@ public:
     bool solid_background; // Whether the last background set is solid.
     bool need_outline_store() const {return q->_split_mode != Inkscape::SplitMode::NORMAL || q->_render_mode == Inkscape::RenderMode::OUTLINE_OVERLAY;}
 
-    // Idle system callbacks. The high priority idle ensures at least one idle cycle between add_idle and on_draw.
-    sigc::connection hipri_idle;
-    sigc::connection lopri_idle;
-    bool on_hipri_idle();
-    bool on_lopri_idle();
+    // Drawing
+    bool on_idle();
+    void paint_rect_internal(Geom::IntRect const &rect);
+    void paint_single_buffer(Geom::IntRect const &paint_rect, Cairo::RefPtr<Cairo::ImageSurface> const &store);
+    std::optional<Geom::Dim2> old_bisector(const Geom::IntRect &rect);
+    std::optional<Geom::Dim2> new_bisector(const Geom::IntRect &rect);
 
-    // The event bucket. Events that arrive during a frame are put in the bucket, and the bucket is emptied immediately after the next on_draw, leaving the whole rest of the frame to proces the events.
-    struct GdkEventFreer {void operator()(GdkEvent *ev) const {gdk_event_free(ev);}};
-    std::vector<std::unique_ptr<GdkEvent, GdkEventFreer>> bucket;
-    sigc::connection bucket_emptier;
-    int bucket_pos;
-
-    bool pending_bucket_emptier = false;
-    bool idle_running = false;
-
-    void schedule_bucket_emptier();
-    void empty_bucket();
-
-    GdkEvent *ignore = nullptr;
-
-    // Useful overload of GtkWidget function.
+    // Trivial overload of GtkWidget function.
     void queue_draw_area(Geom::IntRect &rect);
-
-    // Preferences system
-    Prefs prefs;
 };
 
-void CanvasPrivate::schedule_bucket_emptier()
-{
-    if (bucket_emptier.connected()) return;
+/*
+ * Events system
+ */
 
-    bucket_emptier = Glib::signal_idle().connect([this] {
-        bucket_emptier.disconnect();
-        empty_bucket();
-        return false;
-    }, G_PRIORITY_DEFAULT_IDLE - 5); // before lopri_idle
+// The following protected functions of Canvas are where all incoming events initially arrive.
+// Those that do not interact with the Canvas are processed instantaneously, while the rest are
+// delayed by placing them into the bucket.
+
+bool
+Canvas::on_scroll_event(GdkEventScroll *scroll_event)
+{
+    return d->add_to_bucket(reinterpret_cast<GdkEvent*>(scroll_event));
 }
 
-void CanvasPrivate::empty_bucket()
+bool
+Canvas::on_button_press_event(GdkEventButton *button_event)
+{
+    return on_button_event(button_event);
+}
+
+bool
+Canvas::on_button_release_event(GdkEventButton *button_event)
+{
+    return on_button_event(button_event);
+}
+
+// Unified handler for press and release events.
+bool
+Canvas::on_button_event(GdkEventButton *button_event)
+{
+    // Sanity-check event type.
+    switch (button_event->type) {
+        case GDK_BUTTON_PRESS:
+        case GDK_2BUTTON_PRESS:
+        case GDK_3BUTTON_PRESS:
+        case GDK_BUTTON_RELEASE:
+            break; // Good
+        default:
+            std::cerr << "Canvas::on_button_event: illegal event type!" << std::endl;
+            return false;
+    }
+
+    // Drag the split view controller.
+    switch (button_event->type) {
+        case GDK_BUTTON_PRESS:
+            if (_hover_direction != Inkscape::SplitDirection::NONE) {
+                _split_dragging = true;
+                _split_drag_start = Geom::Point(button_event->x, button_event->y);
+                return true;
+            }
+            break;
+        case GDK_2BUTTON_PRESS:
+            if (_hover_direction != Inkscape::SplitDirection::NONE) {
+                _split_direction = _hover_direction;
+                _split_dragging = false;
+                queue_draw();
+                return true;
+            }
+            break;
+        case GDK_BUTTON_RELEASE:
+            _split_dragging = false;
+            break;
+    }
+
+    // Otherwise, handle as a delayed event.
+    return d->add_to_bucket(reinterpret_cast<GdkEvent*>(button_event));
+}
+
+bool
+Canvas::on_enter_notify_event(GdkEventCrossing *crossing_event)
+{
+    if (crossing_event->window != get_window()->gobj()) {
+        std::cout << "  WHOOPS... this does really happen" << std::endl;
+        return false;
+    }
+    return d->add_to_bucket(reinterpret_cast<GdkEvent*>(crossing_event));
+}
+
+bool
+Canvas::on_leave_notify_event(GdkEventCrossing *crossing_event)
+{
+    if (crossing_event->window != get_window()->gobj()) {
+        std::cout << "  WHOOPS... this does really happen" << std::endl;
+        return false;
+    }
+    return d->add_to_bucket(reinterpret_cast<GdkEvent*>(crossing_event));
+}
+
+bool
+Canvas::on_focus_in_event(GdkEventFocus *focus_event)
+{
+    grab_focus();
+    return false;
+}
+
+bool
+Canvas::on_key_press_event(GdkEventKey *key_event)
+{
+    return d->add_to_bucket(reinterpret_cast<GdkEvent*>(key_event));
+}
+
+bool
+Canvas::on_key_release_event(GdkEventKey *key_event)
+{
+    return d->add_to_bucket(reinterpret_cast<GdkEvent*>(key_event));
+}
+
+bool
+Canvas::on_motion_notify_event(GdkEventMotion *motion_event)
+{
+    // Handle interactions with the split view controller.
+    if (_desktop) {
+        Geom::IntPoint cursor_position = Geom::IntPoint(motion_event->x, motion_event->y);
+
+        // Check if we are near the edge. If so, revert to normal mode.
+        if (_split_mode == Inkscape::SplitMode::SPLIT && _split_dragging) {
+            if (cursor_position.x() < 5                                  ||
+                cursor_position.y() < 5                                  ||
+                cursor_position.x() - get_allocation().get_width()  > -5 ||
+                cursor_position.y() - get_allocation().get_height() > -5 ) {
+
+                // Reset everything.
+                _split_mode = Inkscape::SplitMode::NORMAL;
+                _split_position = Geom::Point(-1, -1);
+                _hover_direction = Inkscape::SplitDirection::NONE;
+                set_cursor();
+                queue_draw();
+
+                // Update action (turn into utility function?).
+                auto window = dynamic_cast<Gtk::ApplicationWindow *>(get_toplevel());
+                if (!window) {
+                    std::cerr << "Canvas::on_motion_notify_event: window missing!" << std::endl;
+                    return true;
+                }
+
+                auto action = window->lookup_action("canvas-split-mode");
+                if (!action) {
+                    std::cerr << "Canvas::on_motion_notify_event: action 'canvas-split-mode' missing!" << std::endl;
+                    return true;
+                }
+
+                auto saction = Glib::RefPtr<Gio::SimpleAction>::cast_dynamic(action);
+                if (!saction) {
+                    std::cerr << "Canvas::on_motion_notify_event: action 'canvas-split-mode' not SimpleAction!" << std::endl;
+                    return true;
+                }
+
+                saction->change_state((int)Inkscape::SplitMode::NORMAL);
+
+                return true;
+            }
+        }
+
+        if (_split_mode == Inkscape::SplitMode::XRAY) {
+            _split_position = cursor_position;
+            queue_draw();
+        }
+
+        if (_split_mode == Inkscape::SplitMode::SPLIT) {
+            Inkscape::SplitDirection hover_direction = Inkscape::SplitDirection::NONE;
+            Geom::Point difference(cursor_position - _split_position);
+
+            // Move controller
+            if (_split_dragging) {
+                Geom::Point delta = cursor_position - _split_drag_start; // We don't use _split_position
+                if (_hover_direction == Inkscape::SplitDirection::HORIZONTAL) {
+                    _split_position += Geom::Point(0, delta.y());
+                } else if (_hover_direction == Inkscape::SplitDirection::VERTICAL) {
+                    _split_position += Geom::Point(delta.x(), 0);
+                } else {
+                    _split_position += delta;
+                }
+                _split_drag_start = cursor_position;
+                queue_draw();
+                return true;
+            }
+
+            if (Geom::distance(cursor_position, _split_position) < 20 * d->_device_scale) {
+                // We're hovering over circle, figure out which direction we are in.
+                if (difference.y() - difference.x() > 0) {
+                    if (difference.y() + difference.x() > 0) {
+                        hover_direction = Inkscape::SplitDirection::SOUTH;
+                    } else {
+                        hover_direction = Inkscape::SplitDirection::WEST;
+                    }
+                } else {
+                    if (difference.y() + difference.x() > 0) {
+                        hover_direction = Inkscape::SplitDirection::EAST;
+                    } else {
+                        hover_direction = Inkscape::SplitDirection::NORTH;
+                    }
+                }
+            } else if (_split_direction == Inkscape::SplitDirection::NORTH ||
+                       _split_direction == Inkscape::SplitDirection::SOUTH) {
+                if (std::abs(difference.y()) < 3 * d->_device_scale) {
+                    // We're hovering over horizontal line
+                    hover_direction = Inkscape::SplitDirection::HORIZONTAL;
+                }
+            } else {
+                if (std::abs(difference.x()) < 3 * d->_device_scale) {
+                   // We're hovering over vertical line
+                    hover_direction = Inkscape::SplitDirection::VERTICAL;
+                }
+            }
+
+            if (_hover_direction != hover_direction) {
+                _hover_direction = hover_direction;
+                set_cursor();
+                queue_draw();
+            }
+
+            if (_hover_direction != Inkscape::SplitDirection::NONE) {
+                // We're hovering, don't pick or emit event.
+                return true;
+            }
+        }
+    } // if (_desktop)
+
+    // Otherwise, handle as a delayed event.
+    return d->add_to_bucket(reinterpret_cast<GdkEvent*>(motion_event));
+}
+
+// Most events end up here. We store them in the bucket, and process them as soon as possible after
+// the next 'on_draw'. If 'on_draw' isn't pending, we use the 'tick_callback' signal to process them
+// when 'on_draw' would have run anyway. If 'on_draw' later becomes pending, we remove this signal.
+
+// Add an event to the bucket and ensure it will be emptied in the near future.
+bool
+CanvasPrivate::add_to_bucket(GdkEvent *event)
 {
     framecheck_whole_function(this)
 
-    pending_bucket_emptier = false;
+    // Prevent re-fired events from going through again.
+    if (event == ignore) {
+        return false;
+    }
 
+    // If this is the first event, make sure the bucket will be emptied in the near future.
+    if (bucket.empty() && !pending_draw) {
+        q->add_tick_callback([this] (const Glib::RefPtr<Gdk::FrameClock>&) {
+            empty_bucket();
+            return false;
+        });
+    }
+
+    // Add a copy to the queue.
+    bucket.emplace_back(std::make_unique<GdkEvent>(*event));
+
+    // Tell GTK the event was handled.
+    return true;
+}
+
+// The following functions run at the start of the next frame.
+
+// Process bucketed events.
+void
+CanvasPrivate::empty_bucket()
+{
+    framecheck_whole_function(this)
+
+    // Initialise iteration index; may be incremented externally by gobblers.
     bucket_pos = 0;
 
     while (bucket_pos < bucket.size()) {
@@ -489,32 +741,10 @@ void CanvasPrivate::empty_bucket()
         auto event = std::move(bucket[bucket_pos]);
         bucket_pos++;
 
-        // Block undo/redo while anything is dragged.
-        if (event->type == GDK_BUTTON_PRESS && event->button.button == 1) {
-            q->_is_dragging = true;
-        } else if (event->type == GDK_BUTTON_RELEASE) {
-            q->_is_dragging = false;
-        }
+        // Process the event and see if it was handled.
+        bool handled = process_bucketed_event(*event);
 
-        bool finished = false;
-
-        if (q->_current_canvas_item) {
-            // Choose where to send event.
-            CanvasItem *item = q->_current_canvas_item;
-
-            if (q->_grabbed_canvas_item && !q->_current_canvas_item->is_descendant_of(q->_grabbed_canvas_item)) {
-                item = q->_grabbed_canvas_item;
-            }
-
-            // Propagate the event up the canvas item hierarchy until handled.
-            while (item) {
-                finished = item->handle_event(event.get());
-                if (finished) break;
-                item = item->get_parent();
-            }
-        }
-
-        if (!finished) {
+        if (!handled) {
             // Re-fire the event at the window, and ignore it when it comes back here again.
             ignore = event.get();
             q->get_toplevel()->event(event.get());
@@ -525,15 +755,16 @@ void CanvasPrivate::empty_bucket()
     bucket.clear();
 }
 
-// Used by some tools to batch backlogs of key events that may have built up after a freeze. Called during 'empty_bucket'.
-int Canvas::gobble_key_events(guint keyval, guint mask) const
+// Called during 'empty_bucket' by some tools to batch backlogs of key events that may have built up after a freeze.
+int
+Canvas::gobble_key_events(guint keyval, guint mask) const
 {
     int count = 0;
 
     while (d->bucket_pos < d->bucket.size()) {
         auto &event = d->bucket[d->bucket_pos];
         if ((event->type == GDK_KEY_PRESS || event->type == GDK_KEY_RELEASE) && event->key.keyval == keyval && (!mask || (event->key.state & mask))) {
-            // Discard event and continue processing.
+            // Discard event and continue.
             if (event->type == GDK_KEY_PRESS) count++;
             d->bucket_pos++;
         }
@@ -543,20 +774,21 @@ int Canvas::gobble_key_events(guint keyval, guint mask) const
         }
     }
 
-    if (count > 0 && d->prefs.debug_logging) std::cout << "Gobbled " << count << " key presses" << std::endl;
+    if (count > 0 && d->prefs.debug_logging) std::cout << "Gobbled " << count << " key press(es)" << std::endl;
 
     return count;
 }
 
-// Used by some tools to ignore backlogs of motion events that may have built up after a freeze. Called during 'empty_bucket'.
-void Canvas::gobble_motion_events(guint mask) const
+// Called during 'empty_bucket' by some tools to ignore backlogs of motion events that may have built up after a freeze.
+void
+Canvas::gobble_motion_events(guint mask) const
 {
     int count = 0;
 
     while (d->bucket_pos < d->bucket.size()) {
         auto &event = d->bucket[d->bucket_pos];
         if (event->type == GDK_MOTION_NOTIFY && (event->motion.state & mask)) {
-            // Discard event and continue processing.
+            // Discard event and continue.
             count++;
             d->bucket_pos++;
         }
@@ -566,8 +798,353 @@ void Canvas::gobble_motion_events(guint mask) const
         }
     }
 
-    if (count > 0 && d->prefs.debug_logging) std::cout << "Gobbled " << count << " motion events" << std::endl;
+    if (count > 0 && d->prefs.debug_logging) std::cout << "Gobbled " << count << " motion event(s)" << std::endl;
 }
+
+// From now on Inkscape's regular event processing logic takes place. The only thing to remember is that
+// all of this happens at a slight delay after the original GTK events. Therefore, it's important to make
+// sure that stateful variables like '_current_canvas_item' and friends are ONLY read/written within these
+// functions, not during the earlier GTK event handlers. Otherwise state confusion will ensue.
+
+bool
+CanvasPrivate::process_bucketed_event(const GdkEvent &event)
+{
+    auto calc_button_mask = [&] () -> int {
+        switch (event.button.button) {
+            case 1:  return GDK_BUTTON1_MASK; break; // Fixme: These all used to be GDK_BUTTON1_MASK! Was that intentional? I changed it just in case. Revert on breakage.
+            case 2:  return GDK_BUTTON2_MASK; break;
+            case 3:  return GDK_BUTTON3_MASK; break;
+            case 4:  return GDK_BUTTON4_MASK; break;
+            case 5:  return GDK_BUTTON5_MASK; break;
+            default: return 0;  // Buttons can range at least to 9 but mask defined only to 5.
+        }
+    };
+
+    // Do event-specific processing.
+    switch (event.type) {
+
+        case GDK_SCROLL:
+            return emit_event(event);
+
+        case GDK_BUTTON_PRESS:
+        case GDK_2BUTTON_PRESS:
+        case GDK_3BUTTON_PRESS:
+        {
+            // Pick the current item as if the button were not pressed...
+            q->_state = event.button.state;
+            pick_current_item(event);
+
+            // ...then process the event.
+            q->_state ^= calc_button_mask();
+            bool retval = emit_event(event);
+
+            return retval;
+        }
+
+        case GDK_BUTTON_RELEASE:
+        {
+            // Process the event as if the button were pressed...
+            q->_state = event.button.state;
+            bool retval = emit_event(event);
+
+            // ...then repick after the button has been released.
+            auto event_copy = event;
+            event_copy.button.state ^= calc_button_mask();
+            q->_state = event_copy.button.state;
+            pick_current_item(event_copy);
+
+            return retval;
+        }
+
+        case GDK_ENTER_NOTIFY:
+            q->_state = event.crossing.state;
+            return pick_current_item(event);
+
+        case GDK_LEAVE_NOTIFY:
+            q->_state = event.crossing.state;
+            // This is needed to remove alignment or distribution snap indicators.
+            if (q->_desktop) {
+                q->_desktop->snapindicator->remove_snaptarget();
+            }
+            return pick_current_item(event);
+
+        case GDK_KEY_PRESS:
+        case GDK_KEY_RELEASE:
+            return emit_event(event);
+
+        case GDK_MOTION_NOTIFY:
+            q->_state = event.motion.state;
+            pick_current_item(event);
+            return emit_event(event);
+
+        default:
+            return false;
+    }
+}
+
+// This function is called by 'process_bucketed_event' to manipulate the state variables relating
+// to the current object under the mouse, for example, to generate enter and leave events.
+// (A more detailed explanation by Tavmjong follows.)
+// --------
+// This routine reacts to events from the canvas. It's main purpose is to find the canvas item
+// closest to the cursor where the event occurred and then send the event (sometimes modified) to
+// that item. The event then bubbles up the canvas item tree until an object handles it. If the
+// widget is redrawn, this routine may be called again for the same event.
+//
+// Canvas items register their interest by connecting to the "event" signal.
+// Example in desktop.cpp:
+//   canvas_catchall->connect_event(sigc::bind(sigc::ptr_fun(sp_desktop_root_handler), this));
+bool
+CanvasPrivate::pick_current_item(const GdkEvent &event)
+{
+    // Ensure geometry is correct.
+    auto affine = decoupled_mode ? _store_affine : q->_affine;
+    if (q->_need_update || geom_affine != affine) {
+        q->_canvas_item_root->update(affine);
+        geom_affine = affine;
+        q->_need_update = false;
+    }
+
+    int button_down = 0;
+    if (!q->_all_enter_events) {
+        // Only set true in connector-tool.cpp.
+
+        // If a button is down, we'll perform enter and leave events on the
+        // current item, but not enter on any other item.  This is more or
+        // less like X pointer grabbing for canvas items.
+        button_down = q->_state & (GDK_BUTTON1_MASK |
+                                   GDK_BUTTON2_MASK |
+                                   GDK_BUTTON3_MASK |
+                                   GDK_BUTTON4_MASK |
+                                   GDK_BUTTON5_MASK);
+        if (!button_down) q->_left_grabbed_item = false;
+    }
+
+    // Save the event in the canvas.  This is used to synthesize enter and
+    // leave events in case the current item changes.  It is also used to
+    // re-pick the current item if the current one gets deleted.  Also,
+    // synthesize an enter event.
+    if (&event != &q->_pick_event) {
+        if (event.type == GDK_MOTION_NOTIFY || event.type == GDK_BUTTON_RELEASE) {
+            // Convert to GDK_ENTER_NOTIFY
+
+            // These fields have the same offsets in both types of events.
+            q->_pick_event.crossing.type       = GDK_ENTER_NOTIFY;
+            q->_pick_event.crossing.window     = event.motion.window;
+            q->_pick_event.crossing.send_event = event.motion.send_event;
+            q->_pick_event.crossing.subwindow  = nullptr;
+            q->_pick_event.crossing.x          = event.motion.x;
+            q->_pick_event.crossing.y          = event.motion.y;
+            q->_pick_event.crossing.mode       = GDK_CROSSING_NORMAL;
+            q->_pick_event.crossing.detail     = GDK_NOTIFY_NONLINEAR;
+            q->_pick_event.crossing.focus      = false;
+            q->_pick_event.crossing.state      = event.motion.state;
+
+            // These fields don't have the same offsets in both types of events.
+            if (event.type == GDK_MOTION_NOTIFY) {
+                q->_pick_event.crossing.x_root = event.motion.x_root;
+                q->_pick_event.crossing.y_root = event.motion.y_root;
+            } else {
+                q->_pick_event.crossing.x_root = event.button.x_root;
+                q->_pick_event.crossing.y_root = event.button.y_root;
+            }
+
+        } else {
+            q->_pick_event = event;
+        }
+    }
+
+    if (q->_in_repick) {
+        // Don't do anything else if this is a recursive call.
+        return false;
+    }
+
+    // Find new item
+    q->_current_canvas_item_new = nullptr;
+
+    if (q->_pick_event.type != GDK_LEAVE_NOTIFY && q->_canvas_item_root->is_visible()) {
+        // Leave notify means there is no current item.
+        // Find closest item.
+        double x = 0.0;
+        double y = 0.0;
+
+        if (q->_pick_event.type == GDK_ENTER_NOTIFY) {
+            x = q->_pick_event.crossing.x;
+            y = q->_pick_event.crossing.y;
+        } else {
+            x = q->_pick_event.motion.x;
+            y = q->_pick_event.motion.y;
+        }
+
+        // If in split mode, look at where cursor is to see if one should pick with outline mode.
+        q->_drawing->setRenderMode(q->_render_mode);
+        if (q->_split_mode == Inkscape::SplitMode::SPLIT && q->_render_mode != Inkscape::RenderMode::OUTLINE_OVERLAY) {
+            if ((q->_split_direction == Inkscape::SplitDirection::NORTH && y > q->_split_position.y()) ||
+                (q->_split_direction == Inkscape::SplitDirection::SOUTH && y < q->_split_position.y()) ||
+                (q->_split_direction == Inkscape::SplitDirection::WEST  && x > q->_split_position.x()) ||
+                (q->_split_direction == Inkscape::SplitDirection::EAST  && x < q->_split_position.x()) ) {
+                q->_drawing->setRenderMode(Inkscape::RenderMode::OUTLINE);
+            }
+        }
+        // Convert to world coordinates.
+        auto p = Geom::Point(x, y) + q->_pos;
+        if (decoupled_mode) {
+            p *= _store_affine * q->_affine.inverse();
+        }
+
+        q->_current_canvas_item_new = q->_canvas_item_root->pick_item(p);
+        // if (q->_current_canvas_item_new) {
+        //     std::cout << "  PICKING: FOUND ITEM: " << q->_current_canvas_item_new->get_name() << std::endl;
+        // } else {
+        //     std::cout << "  PICKING: DID NOT FIND ITEM" << std::endl;
+        // }
+    }
+
+    if (q->_current_canvas_item_new == q->_current_canvas_item && !q->_left_grabbed_item) {
+        // Current item did not change!
+        return false;
+    }
+
+    // Synthesize events for old and new current items.
+    bool retval = false;
+    if (q->_current_canvas_item_new != q->_current_canvas_item &&
+        q->_current_canvas_item != nullptr                     &&
+        !q->_left_grabbed_item                                 ) {
+
+        GdkEvent new_event;
+        new_event = q->_pick_event;
+        new_event.type = GDK_LEAVE_NOTIFY;
+        new_event.crossing.detail = GDK_NOTIFY_ANCESTOR;
+        new_event.crossing.subwindow = nullptr;
+        q->_in_repick = true;
+        retval = emit_event(new_event);
+        q->_in_repick = false;
+    }
+
+    if (q->_all_enter_events == false) {
+        // new_current_item may have been set to nullptr during the call to emitEvent() above.
+        if (q->_current_canvas_item_new != q->_current_canvas_item && button_down) {
+            q->_left_grabbed_item = true;
+            return retval;
+        }
+    }
+
+    // Handle the rest of cases
+    q->_left_grabbed_item = false;
+    q->_current_canvas_item = q->_current_canvas_item_new;
+
+    if (q->_current_canvas_item != nullptr) {
+        GdkEvent new_event;
+        new_event = q->_pick_event;
+        new_event.type = GDK_ENTER_NOTIFY;
+        new_event.crossing.detail = GDK_NOTIFY_ANCESTOR;
+        new_event.crossing.subwindow = nullptr;
+        retval = emit_event(new_event);
+    }
+
+    return retval;
+}
+
+// Fires an event at the canvas, after a little pre-processing. Returns true if handled.
+bool
+CanvasPrivate::emit_event(const GdkEvent &event)
+{
+    // Handle grabbed items.
+    if (q->_grabbed_canvas_item) {
+        auto mask = (Gdk::EventMask)0;
+
+        switch (event.type) {
+            case GDK_ENTER_NOTIFY:
+                mask = Gdk::ENTER_NOTIFY_MASK;
+                break;
+            case GDK_LEAVE_NOTIFY:
+                mask = Gdk::LEAVE_NOTIFY_MASK;
+                break;
+            case GDK_MOTION_NOTIFY:
+                mask = Gdk::POINTER_MOTION_MASK;
+                break;
+            case GDK_BUTTON_PRESS:
+            case GDK_2BUTTON_PRESS:
+            case GDK_3BUTTON_PRESS:
+                mask = Gdk::BUTTON_PRESS_MASK;
+                break;
+            case GDK_BUTTON_RELEASE:
+                mask = Gdk::BUTTON_RELEASE_MASK;
+                break;
+            case GDK_KEY_PRESS:
+                mask = Gdk::KEY_PRESS_MASK;
+                break;
+            case GDK_KEY_RELEASE:
+                mask = Gdk::KEY_RELEASE_MASK;
+                break;
+            case GDK_SCROLL:
+                mask = Gdk::SCROLL_MASK;
+                mask |= Gdk::SMOOTH_SCROLL_MASK;
+                break;
+            default:
+                break;
+        }
+
+        if (!(mask & q->_grabbed_event_mask)) {
+            return false;
+        }
+    }
+
+    // Convert to world coordinates. We have two different cases due to different event structures.
+    auto conv = [&, this] (double &x, double &y) {
+       auto p = Geom::Point(x, y) + q->_pos;
+       if (decoupled_mode) {
+           p *= _store_affine * q->_affine.inverse();
+       }
+       x = p.x();
+       y = p.y();
+    };
+
+    auto event_copy = event;
+    switch (event.type) {
+        case GDK_ENTER_NOTIFY:
+        case GDK_LEAVE_NOTIFY:
+            conv(event_copy.crossing.x, event_copy.crossing.y);
+            break;
+        case GDK_MOTION_NOTIFY:
+        case GDK_BUTTON_PRESS:
+        case GDK_2BUTTON_PRESS:
+        case GDK_3BUTTON_PRESS:
+        case GDK_BUTTON_RELEASE:
+            conv(event_copy.motion.x, event_copy.motion.y);
+            break;
+        default:
+            break;
+    }
+
+    // Block undo/redo while anything is dragged.
+    if (event.type == GDK_BUTTON_PRESS && event.button.button == 1) {
+        q->_is_dragging = true;
+    } else if (event.type == GDK_BUTTON_RELEASE) {
+        q->_is_dragging = false;
+    }
+
+    if (q->_current_canvas_item) {
+        // Choose where to send event.
+        auto item = q->_current_canvas_item;
+
+        if (q->_grabbed_canvas_item && !q->_current_canvas_item->is_descendant_of(q->_grabbed_canvas_item)) {
+            item = q->_grabbed_canvas_item;
+        }
+
+        // Propagate the event up the canvas item hierarchy until handled.
+        while (item) {
+            if (item->handle_event(&event_copy)) return true;
+            item = item->get_parent();
+        }
+    }
+
+    return false;
+}
+
+/*
+ * The Rest
+ */
 
 void CanvasPrivate::queue_draw_area(Geom::IntRect &rect)
 {
@@ -907,264 +1484,6 @@ Canvas::get_preferred_height_vfunc(int &minimum_height, int &natural_height) con
     minimum_height = natural_height = 256;
 }
 
-// ******* Event handlers ******
-bool
-Canvas::on_scroll_event(GdkEventScroll *scroll_event)
-{
-    // Scroll canvas and in Select Tool, cycle selection through objects under cursor.
-    return emit_event(reinterpret_cast<GdkEvent*>(scroll_event));
-}
-
-// Our own function that combines press and release.
-bool
-Canvas::on_button_event(GdkEventButton *button_event)
-{
-    // Dispatch normally regardless of the event's window if an item
-    // has a pointer grab in effect.
-    auto window = get_window();
-    if (!_grabbed_canvas_item && window->gobj() != button_event->window) {
-        return false;
-    }
-
-    int mask = 0;
-    switch (button_event->button) {
-        case 1:  mask = GDK_BUTTON1_MASK; break;
-        case 2:  mask = GDK_BUTTON1_MASK; break;
-        case 3:  mask = GDK_BUTTON1_MASK; break;
-        case 4:  mask = GDK_BUTTON1_MASK; break;
-        case 5:  mask = GDK_BUTTON1_MASK; break;
-        default: mask = 0;  // Buttons can range at least to 9 but mask defined only to 5.
-    }
-
-    bool retval = false;
-    switch (button_event->type) {
-        case GDK_BUTTON_PRESS:
-
-            if (_hover_direction != Inkscape::SplitDirection::NONE) {
-                // We're hovering over Split controller.
-                _split_dragging = true;
-                _split_drag_start = Geom::Point(button_event->x, button_event->y);
-                break;
-            }
-            // Fallthrough
-
-        case GDK_2BUTTON_PRESS:
-
-            if (_hover_direction != Inkscape::SplitDirection::NONE) {
-                _split_direction = _hover_direction;
-                _split_dragging = false;
-                queue_draw();
-                break;
-            }
-            // Fallthrough
-
-        case GDK_3BUTTON_PRESS:
-            // Pick the current item as if the button were not pressed and then process event.
-
-            _state = button_event->state;
-            pick_current_item(reinterpret_cast<GdkEvent*>(button_event));
-            _state ^= mask;
-            retval = emit_event(reinterpret_cast<GdkEvent*>(button_event));
-            break;
-
-        case GDK_BUTTON_RELEASE:
-            // Process the event as if the button were pressed, then repick after the button has
-            // been released.
-            _split_dragging = false;
-
-            _state = button_event->state;
-            retval = emit_event(reinterpret_cast<GdkEvent*>(button_event));
-            button_event->state ^= mask;
-            _state = button_event->state;
-            pick_current_item(reinterpret_cast<GdkEvent*>(button_event));
-            button_event->state ^= mask;
-            break;
-
-        default:
-            std::cerr << "Canvas::on_button_event: illegal event type!" << std::endl;
-    }
-
-    return retval;
-}
-
-bool
-Canvas::on_button_press_event(GdkEventButton *button_event)
-{
-    return on_button_event(button_event);
-}
-
-bool
-Canvas::on_button_release_event(GdkEventButton *button_event)
-{
-    return on_button_event(button_event);
-}
-
-bool
-Canvas::on_enter_notify_event(GdkEventCrossing *crossing_event)
-{
-    auto window = get_window();
-    if (window->gobj() != crossing_event->window) {
-        std::cout << "  WHOOPS... this does really happen" << std::endl;
-        return false;
-    }
-    _state = crossing_event->state;
-    return pick_current_item(reinterpret_cast<GdkEvent *>(crossing_event));
-}
-
-bool
-Canvas::on_leave_notify_event(GdkEventCrossing *crossing_event)
-{
-    auto window = get_window();
-    if (window->gobj() != crossing_event->window) {
-        std::cout << "  WHOOPS... this does really happen" << std::endl;
-        return false;
-    }
-    _state = crossing_event->state;
-    // this is needed to remove alignment or distribution snap indicators
-    if (_desktop)
-        _desktop->snapindicator->remove_snaptarget();
-    return pick_current_item(reinterpret_cast<GdkEvent *>(crossing_event));
-}
-
-bool
-Canvas::on_focus_in_event(GdkEventFocus *focus_event)
-{
-    grab_focus();
-    return false;
-}
-
-// Actually, key events never reach here.
-bool
-Canvas::on_key_press_event(GdkEventKey *key_event)
-{
-    return emit_event(reinterpret_cast<GdkEvent *>(key_event));
-}
-
-// Actually, key events never reach here.
-bool
-Canvas::on_key_release_event(GdkEventKey *key_event)
-{
-    return emit_event(reinterpret_cast<GdkEvent *>(key_event));
-}
-
-bool
-Canvas::on_motion_notify_event(GdkEventMotion *motion_event)
-{
-    Geom::IntPoint cursor_position = Geom::IntPoint(motion_event->x, motion_event->y);
-
-    if (_desktop) {
-    // Check if we are near the edge. If so, revert to normal mode.
-    if (_split_mode == Inkscape::SplitMode::SPLIT && _split_dragging) {
-        if (cursor_position.x() < 5                                  ||
-            cursor_position.y() < 5                                  ||
-            cursor_position.x() - get_allocation().get_width()  > -5 ||
-            cursor_position.y() - get_allocation().get_height() > -5 ) {
-
-            // Reset everything.
-            _split_mode = Inkscape::SplitMode::NORMAL;
-            _split_position = Geom::Point(-1, -1);
-            _hover_direction = Inkscape::SplitDirection::NONE;
-            set_cursor();
-            queue_draw();
-
-            // Update action (turn into utility function?).
-            auto window = dynamic_cast<Gtk::ApplicationWindow *>(get_toplevel());
-            if (!window) {
-                std::cerr << "Canvas::on_motion_notify_event: window missing!" << std::endl;
-                return true;
-            }
-
-            auto action = window->lookup_action("canvas-split-mode");
-            if (!action) {
-                std::cerr << "Canvas::on_motion_notify_event: action 'canvas-split-mode' missing!" << std::endl;
-                return true;
-            }
-
-            auto saction = Glib::RefPtr<Gio::SimpleAction>::cast_dynamic(action);
-            if (!saction) {
-                std::cerr << "Canvas::on_motion_notify_event: action 'canvas-split-mode' not SimpleAction!" << std::endl;
-                return true;
-            }
-
-            saction->change_state((int)Inkscape::SplitMode::NORMAL);
-
-            return true;
-        }
-    }
-
-    if (_split_mode == Inkscape::SplitMode::XRAY) {
-        _split_position = cursor_position;
-        queue_draw(); // Re-blit
-    }
-
-    if (_split_mode == Inkscape::SplitMode::SPLIT) {
-
-        Inkscape::SplitDirection hover_direction = Inkscape::SplitDirection::NONE;
-        Geom::Point difference(cursor_position - _split_position);
-
-        // Move controller
-        if (_split_dragging) {
-            Geom::Point delta = cursor_position - _split_drag_start; // We don't use _split_position
-            if (_hover_direction == Inkscape::SplitDirection::HORIZONTAL) {
-                _split_position += Geom::Point(0, delta.y());
-            } else if (_hover_direction == Inkscape::SplitDirection::VERTICAL) {
-                _split_position += Geom::Point(delta.x(), 0);
-            } else {
-                _split_position += delta;
-            }
-            _split_drag_start = cursor_position;
-            queue_draw();
-            return true;
-        }
-
-        if (Geom::distance(cursor_position, _split_position) < 20 * d->_device_scale) {
-
-            // We're hovering over circle, figure out which direction we are in.
-            if (difference.y() - difference.x() > 0) {
-                if (difference.y() + difference.x() > 0) {
-                    hover_direction = Inkscape::SplitDirection::SOUTH;
-                } else {
-                    hover_direction = Inkscape::SplitDirection::WEST;
-                }
-            } else {
-                if (difference.y() + difference.x() > 0) {
-                    hover_direction = Inkscape::SplitDirection::EAST;
-                } else {
-                    hover_direction = Inkscape::SplitDirection::NORTH;
-                }
-            }
-        } else if (_split_direction == Inkscape::SplitDirection::NORTH ||
-                   _split_direction == Inkscape::SplitDirection::SOUTH) {
-            if (std::abs(difference.y()) < 3 * d->_device_scale) {
-                // We're hovering over horizontal line
-                hover_direction = Inkscape::SplitDirection::HORIZONTAL;
-            }
-        } else {
-            if (std::abs(difference.x()) < 3 * d->_device_scale) {
-               // We're hovering over vertical line
-                hover_direction = Inkscape::SplitDirection::VERTICAL;
-            }
-        }
-
-        if (_hover_direction != hover_direction) {
-            _hover_direction = hover_direction;
-            set_cursor();
-            queue_draw();
-        }
-
-        if (_hover_direction != Inkscape::SplitDirection::NONE) {
-            // We're hovering, don't pick or emit event.
-            return true;
-        }
-    }
-    } // End if(desktop)
-
-    _state = motion_event->state;
-    pick_current_item(reinterpret_cast<GdkEvent*>(motion_event));
-    bool status = emit_event(reinterpret_cast<GdkEvent*>(motion_event));
-    return status;
-}
-
 /**
  * Resize handler
  */
@@ -1411,14 +1730,18 @@ Canvas::on_draw(const Cairo::RefPtr<::Cairo::Context> &cr)
         cr->restore();
     }
 
-    // Process bucketed events as soon as possible after draw.
-    if (d->pending_bucket_emptier) {
-        if (!d->bucket.empty()) {
-            d->schedule_bucket_emptier();
-        } else {
-            d->pending_bucket_emptier = false;
-        }
+    // Process bucketed events as soon as possible after draw. We cannot process them now, because we have
+    // a frame to get out as soon as possible, and processing events may take a while. Instead, we schedule
+    // it with a signal callback that runs as soon as this function is completed.
+    if (!d->bucket.empty()) {
+        Glib::signal_idle().connect([this] {
+            d->empty_bucket();
+            return false;
+        }, G_PRIORITY_DEFAULT_IDLE - 5); // before lopri_idle
     }
+
+    // Record the fact that a draw is no longer pending.
+    d->pending_draw = false;
 
     // Notify the update strategy that another frame has passed.
     d->updater->frame();
@@ -1469,7 +1792,7 @@ calc_affine_diff(const Geom::Affine &a, const Geom::Affine &b) {
 auto
 coarsen(const Cairo::RefPtr<Cairo::Region> &region, int min_size, int glue_size, double min_fullness)
 {
-    // Sort the rects by minExtent
+    // Sort the rects by minExtent.
     struct Compare
     {
         bool operator()(const Geom::IntRect &a, const Geom::IntRect &b) const {
@@ -1496,7 +1819,7 @@ coarsen(const Cairo::RefPtr<Cairo::Region> &region, int min_size, int glue_size,
         auto rect = *rects.begin();
         rects.erase(rects.begin());
 
-        // Initialise the effective glue size
+        // Initialise the effective glue size.
         int effective_glue_size = glue_size;
 
         while (true) {
@@ -2030,7 +2353,8 @@ CanvasPrivate::paint_rect_internal(Geom::IntRect const &rect)
 
         // Schedule repaint
         queue_draw_area(repaint_rect); // Guarantees on_draw will be called in the future.
-        pending_bucket_emptier = true; // On the next call to on_draw, schedules the bucket emptier.
+        bucket_emptier.disconnect();
+        pending_draw = true;
     } else {
         // Get rectangle needing repaint (transform into screen space, take bounding box, round outwards)
         auto pl = Geom::Parallelogram(rect);
@@ -2044,7 +2368,8 @@ CanvasPrivate::paint_rect_internal(Geom::IntRect const &rect)
         if (repaint_rect & screen_rect) {
             // Schedule repaint
             queue_draw_area(repaint_rect);
-            pending_bucket_emptier = true;
+            bucket_emptier.disconnect();
+            pending_draw = true;
         }
     }
 }
@@ -2206,246 +2531,6 @@ Canvas::set_cursor() {
             // Shouldn't reach.
             std::cerr << "Canvas::set_cursor: Unknown hover direction!" << std::endl;
     }
-}
-
-
-// This routine reacts to events from the canvas. It's main purpose is to find the canvas item
-// closest to the cursor where the event occurred and then send the event (sometimes modified) to
-// that item. The event then bubbles up the canvas item tree until an object handles it. If the
-// widget is redrawn, this routine may be called again for the same event.
-//
-// Canvas items register their interest by connecting to the "event" signal.
-// Example in desktop.cpp:
-//   canvas_catchall->connect_event(sigc::bind(sigc::ptr_fun(sp_desktop_root_handler), this));
-bool
-Canvas::pick_current_item(GdkEvent *event)
-{
-    // Ensure geometry is correct.
-    auto affine = d->decoupled_mode ? d->_store_affine : _affine;
-    if (_need_update || d->geom_affine != affine) {
-        _canvas_item_root->update(affine);
-        d->geom_affine = affine;
-        _need_update = false;
-    }
-
-    int button_down = 0;
-    if (_all_enter_events == false) {
-        // Only set true in connector-tool.cpp.
-
-        // If a button is down, we'll perform enter and leave events on the
-        // current item, but not enter on any other item.  This is more or
-        // less like X pointer grabbing for canvas items.
-        button_down = _state & (GDK_BUTTON1_MASK |
-                                GDK_BUTTON2_MASK |
-                                GDK_BUTTON3_MASK |
-                                GDK_BUTTON4_MASK |
-                                GDK_BUTTON5_MASK);
-        if (!button_down) _left_grabbed_item = false;
-    }
-
-    // Save the event in the canvas.  This is used to synthesize enter and
-    // leave events in case the current item changes.  It is also used to
-    // re-pick the current item if the current one gets deleted.  Also,
-    // synthesize an enter event.
-    if (event != &_pick_event) {
-        if (event->type == GDK_MOTION_NOTIFY || event->type == GDK_BUTTON_RELEASE) {
-            // Convert to GDK_ENTER_NOTIFY
-
-            // These fields have the same offsets in both types of events.
-            _pick_event.crossing.type       = GDK_ENTER_NOTIFY;
-            _pick_event.crossing.window     = event->motion.window;
-            _pick_event.crossing.send_event = event->motion.send_event;
-            _pick_event.crossing.subwindow  = nullptr;
-            _pick_event.crossing.x          = event->motion.x;
-            _pick_event.crossing.y          = event->motion.y;
-            _pick_event.crossing.mode       = GDK_CROSSING_NORMAL;
-            _pick_event.crossing.detail     = GDK_NOTIFY_NONLINEAR;
-            _pick_event.crossing.focus      = false;
-            _pick_event.crossing.state      = event->motion.state;
-
-            // These fields don't have the same offsets in both types of events.
-            if (event->type == GDK_MOTION_NOTIFY) {
-                _pick_event.crossing.x_root = event->motion.x_root;
-                _pick_event.crossing.y_root = event->motion.y_root;
-            } else {
-                _pick_event.crossing.x_root = event->button.x_root;
-                _pick_event.crossing.y_root = event->button.y_root;
-            }
-        } else {
-            _pick_event = *event;
-        }
-    }
-
-    if (_in_repick) {
-        // Don't do anything else if this is a recursive call.
-        return false;
-    }
-
-    // Find new item
-    _current_canvas_item_new = nullptr;
-
-    if (_pick_event.type != GDK_LEAVE_NOTIFY && _canvas_item_root->is_visible()) {
-        // Leave notify means there is no current item.
-        // Find closest item.
-        double x = 0.0;
-        double y = 0.0;
-
-        if (_pick_event.type == GDK_ENTER_NOTIFY) {
-            x = _pick_event.crossing.x;
-            y = _pick_event.crossing.y;
-        } else {
-            x = _pick_event.motion.x;
-            y = _pick_event.motion.y;
-        }
-
-        // If in split mode, look at where cursor is to see if one should pick with outline mode.
-        _drawing->setRenderMode(_render_mode);
-        if (_split_mode == Inkscape::SplitMode::SPLIT && _render_mode != Inkscape::RenderMode::OUTLINE_OVERLAY) {
-            if ((_split_direction == Inkscape::SplitDirection::NORTH && y > _split_position.y()) ||
-                (_split_direction == Inkscape::SplitDirection::SOUTH && y < _split_position.y()) ||
-                (_split_direction == Inkscape::SplitDirection::WEST  && x > _split_position.x()) ||
-                (_split_direction == Inkscape::SplitDirection::EAST  && x < _split_position.x()) ) {
-                _drawing->setRenderMode(Inkscape::RenderMode::OUTLINE);
-            }
-        }
-
-        // Convert to world coordinates.
-        auto p = Geom::Point(x, y) + _pos;
-
-        _current_canvas_item_new = _canvas_item_root->pick_item(p);
-        // if (_current_canvas_item_new) {
-        //     std::cout << "  PICKING: FOUND ITEM: " << _current_canvas_item_new->get_name() << std::endl;
-        // } else {
-        //     std::cout << "  PICKING: DID NOT FIND ITEM" << std::endl;
-        // }
-    }
-
-    if (_current_canvas_item_new == _current_canvas_item &&
-        !_left_grabbed_item                               ) {
-        // Current item did not change!
-        return false;
-    }
-
-    // Synthesize events for old and new current items.
-    bool retval = false;
-    if (_current_canvas_item_new != _current_canvas_item &&
-        _current_canvas_item != nullptr                  &&
-        !_left_grabbed_item                               ) {
-
-        GdkEvent new_event;
-        new_event = _pick_event;
-        new_event.type = GDK_LEAVE_NOTIFY;
-        new_event.crossing.detail = GDK_NOTIFY_ANCESTOR;
-        new_event.crossing.subwindow = nullptr;
-        _in_repick = true;
-        retval = emit_event(&new_event);
-        _in_repick = false;
-    }
-
-    if (_all_enter_events == false) {
-        // new_current_item may have been set to nullptr during the call to emitEvent() above.
-        if (_current_canvas_item_new != _current_canvas_item &&
-            button_down                                       ) {
-            _left_grabbed_item = true;
-            return retval;
-        }
-    }
-
-    // Handle the rest of cases
-    _left_grabbed_item = false;
-    _current_canvas_item = _current_canvas_item_new;
-
-    if (_current_canvas_item != nullptr ) {
-        GdkEvent new_event;
-        new_event = _pick_event;
-        new_event.type = GDK_ENTER_NOTIFY;
-        new_event.crossing.detail = GDK_NOTIFY_ANCESTOR;
-        new_event.crossing.subwindow = nullptr;
-        retval = emit_event(&new_event);
-    }
-
-    return retval;
-}
-
-bool
-Canvas::emit_event(GdkEvent *event)
-{
-    framecheck_whole_function(d)
-
-    if (event == d->ignore) {
-        return false;
-    }
-
-    Gdk::EventMask mask = (Gdk::EventMask)0;
-    if (_grabbed_canvas_item) {
-        switch (event->type) {
-        case GDK_ENTER_NOTIFY:
-            mask = Gdk::ENTER_NOTIFY_MASK;
-            break;
-        case GDK_LEAVE_NOTIFY:
-            mask = Gdk::LEAVE_NOTIFY_MASK;
-            break;
-        case GDK_MOTION_NOTIFY:
-            mask = Gdk::POINTER_MOTION_MASK;
-            break;
-        case GDK_BUTTON_PRESS:
-        case GDK_2BUTTON_PRESS:
-        case GDK_3BUTTON_PRESS:
-            mask = Gdk::BUTTON_PRESS_MASK;
-            break;
-        case GDK_BUTTON_RELEASE:
-            mask = Gdk::BUTTON_RELEASE_MASK;
-            break;
-        case GDK_KEY_PRESS:
-            mask = Gdk::KEY_PRESS_MASK;
-            break;
-        case GDK_KEY_RELEASE:
-            mask = Gdk::KEY_RELEASE_MASK;
-            break;
-        case GDK_SCROLL:
-            mask = Gdk::SCROLL_MASK;
-            mask |= Gdk::SMOOTH_SCROLL_MASK;
-            break;
-        default:
-            break;
-        }
-
-        if (!(mask & _grabbed_event_mask)) {
-            return false;
-        }
-    }
-
-    // Convert to world coordinates. We have two different cases due to
-    // different event structures.
-    GdkEvent *event_copy = gdk_event_copy(event);
-    switch (event_copy->type) {
-        case GDK_ENTER_NOTIFY:
-        case GDK_LEAVE_NOTIFY:
-            event_copy->crossing.x += _pos.x();
-            event_copy->crossing.y += _pos.y();
-            break;
-        case GDK_MOTION_NOTIFY:
-        case GDK_BUTTON_PRESS:
-        case GDK_2BUTTON_PRESS:
-        case GDK_3BUTTON_PRESS:
-        case GDK_BUTTON_RELEASE:
-            event_copy->motion.x += _pos.x();
-            event_copy->motion.y += _pos.y();
-            break;
-        default:
-            break;
-    }
-
-    d->bucket.emplace_back(event_copy);
-    if (!d->pending_bucket_emptier) {
-        add_tick_callback([this] (const Glib::RefPtr<Gdk::FrameClock>&) {
-            d->schedule_bucket_emptier();
-            d->pending_bucket_emptier = true;
-            return false;
-        });
-    }
-
-    return true;
 }
 
 } // namespace Widget
