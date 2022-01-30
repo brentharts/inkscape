@@ -19,7 +19,6 @@
 #include "ui/tool/transform-handle-set.h"
 #include "ui/tool/node.h"
 #include "display/control/snap-indicator.h"
-#include "ui/tools/tool-base.h"
 #include "ui/widget/canvas.h"
 
 

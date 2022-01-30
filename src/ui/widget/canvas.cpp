@@ -497,6 +497,9 @@ public:
 
     // Trivial overload of GtkWidget function.
     void queue_draw_area(Geom::IntRect &rect);
+
+    // For tracking the last known mouse position. (The function Gdk::Window::get_device_position cannot be used because of slow X11 round-trips. Remove this workaround when X11 dies.)
+    std::optional<Geom::Point> last_mouse;
 };
 
 /*
@@ -584,6 +587,7 @@ Canvas::on_leave_notify_event(GdkEventCrossing *crossing_event)
         std::cout << "  WHOOPS... this does really happen" << std::endl;
         return false;
     }
+    d->last_mouse = {};
     return d->add_to_bucket(reinterpret_cast<GdkEvent*>(crossing_event));
 }
 
@@ -609,6 +613,9 @@ Canvas::on_key_release_event(GdkEventKey *key_event)
 bool
 Canvas::on_motion_notify_event(GdkEventMotion *motion_event)
 {
+    // Record the last mouse position.
+    d->last_mouse = Geom::Point(motion_event->x, motion_event->y);
+
     // Handle interactions with the split view controller.
     if (_desktop) {
         Geom::IntPoint cursor_position = Geom::IntPoint(motion_event->x, motion_event->y);
@@ -2309,14 +2316,7 @@ CanvasPrivate::on_idle()
     assert(_store_rect.contains(visible_rect));
 
     // Get the mouse position in screen space.
-    Geom::IntPoint mouse_loc;
-    if (auto window = q->get_window()) {
-        int x;
-        int y;
-        Gdk::ModifierType mask;
-        window->get_device_position(Gdk::Display::get_default()->get_default_seat()->get_pointer(), x, y, mask);
-        mouse_loc = Geom::IntPoint(x, y);
-    }
+    Geom::IntPoint mouse_loc = (last_mouse ? *last_mouse : Geom::Point(q->get_dimensions()) / 2).round();
 
     // Map the mouse to canvas space.
     mouse_loc += q->_pos;
