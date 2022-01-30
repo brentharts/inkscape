@@ -281,6 +281,10 @@ void SPDesktop::destroy()
         snapindicator = nullptr;
     }
 
+    if (event_context) {
+        sp_event_context_discard_delayed_snap_event(event_context);
+    }
+
     if (temporary_item_list) {
         delete temporary_item_list;
         temporary_item_list = nullptr;
