@@ -82,7 +82,7 @@ LPECopy::LPECopy(LivePathEffectObject *lpeobject) :
     offset_type(_("Offset type"), _("Offset Type (rows/cols)"), "offset_type", &wr, this, false),
     interpolate_scalex(_("Interpolate scale X"), _("Interpolate rotate X"), "interpolate_scalex", &wr, this, false),
     interpolate_scaley(_("Interpolate scale Y"), _("Interpolate rotate Y"), "interpolate_scaley", &wr, this, false),
-    shrink_interp(_("Shirnk gap"), _("Minimice offsets on scale interpolated, not works with rotations"), "shrink_interp", &wr, this, false),
+    shrink_interp(_("Shirnk gap"), _("Minimize offsets on scale interpolated, not works with rotations"), "shrink_interp", &wr, this, false),
     interpolate_rotatex(_("Interpolate rotate X"), _("Interpolate rotate X"), "interpolate_rotatex", &wr, this, false),
     interpolate_rotatey(_("Interpolate rotate Y"), _("Interpolate rotate Y"), "interpolate_rotatey", &wr, this, false),
     split_items(_("Split elements"), _("Split elements, so each can have its own style"), "split_items", &wr, this, false),
