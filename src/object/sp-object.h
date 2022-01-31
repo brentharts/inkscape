@@ -67,6 +67,7 @@ class SPObject;
 #include <sigc++/signal.h>
 #include <vector>
 #include <boost/intrusive/list.hpp>
+#include "2geom/point.h" // Used for dpi only
 #include "version.h"
 #include "util/forward-pointer-iterator.h"
 
@@ -355,6 +356,18 @@ public:
     bool setDesc(char const *desc, bool verbatim=false);
 
     /**
+     * Get and set the exportable filename on this object. Usually sp-item or sp-page
+     */
+    Glib::ustring getExportFilename() const;
+    void setExportFilename(Glib::ustring filename);
+
+    /**
+     * Get and set the exported DPI for this objet, if available.
+     */
+    Geom::Point getExportDpi() const;
+    void setExportDpi(Geom::Point dpi);
+
+    /**
      * Set the policy under which this object will be orphan-collected.
      *
      * Orphan-collection is the process of deleting all objects which no longer have
@@ -466,7 +479,8 @@ public:
     /**
      * Removes all children except for the given object, it's children and it's ancesstors.
      */
-     void cropToObject(SPObject *except);
+    void cropToObject(SPObject *except);
+    void cropToObjects(std::vector<SPObject *> except_objects);
 
     /**
      * Connects a slot to be called when an object is deleted.
