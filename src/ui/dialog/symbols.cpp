@@ -1222,6 +1222,8 @@ SymbolsDialog::drawSymbol(SPObject *symbol)
       symbol_old->deleteObject(false);
   }
 
+  SPDocument::install_reference_document scoped(preview_document, getDocument());
+
   // First look for default style stored in <symbol>
   gchar const* style = repr->attribute("inkscape:symbol-style");
   if(!style) {
@@ -1233,16 +1235,11 @@ SymbolsDialog::drawSymbol(SPObject *symbol)
       style = symbol->document->getReprRoot()->attribute("style");
     }
   }
-  // Last ditch effort to provide some default styling
-  if( !style ) style = "fill:#bbbbbb;stroke:#808080";
 
   // This is for display in Symbols dialog only
   if( style ) repr->setAttribute( "style", style );
 
-  // BUG: Symbols don't work if defined outside of <defs>. Causes Inkscape
-  // crash when trying to read in such a file.
   root->appendChild(repr);
-  //defsrepr->appendChild(repr);
   Inkscape::GC::release(repr);
 
   // Uncomment this to get the preview_document documents saved (useful for debugging)
@@ -1256,8 +1253,6 @@ SymbolsDialog::drawSymbol(SPObject *symbol)
 
   // Make sure we have symbol in preview_document
   SPObject *object_temp = preview_document->getObjectById( "the_use" );
-  preview_document->getRoot()->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
-  preview_document->ensureUpToDate();
 
   SPItem *item = dynamic_cast<SPItem *>(object_temp);
   g_assert(item != nullptr);
