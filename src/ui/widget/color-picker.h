@@ -71,6 +71,8 @@ protected:
     Gtk::Dialog _colorSelectorDialog;
     SelectedColor _selected_color;
     Gtk::Widget *_color_selector;
+private:
+    bool _fully_initialized = false;
 };
 
 

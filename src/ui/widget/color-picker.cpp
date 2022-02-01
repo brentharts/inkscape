@@ -52,9 +52,6 @@ ColorPicker::~ColorPicker()
 
 void ColorPicker::setupDialog(const Glib::ustring &title)
 {
-    GtkWidget *dlg = GTK_WIDGET(_colorSelectorDialog.gobj());
-    sp_transientize(dlg);
-
     _colorSelectorDialog.hide();
     _colorSelectorDialog.set_title (title);
     _colorSelectorDialog.set_border_width (4);
@@ -93,6 +90,11 @@ void ColorPicker::on_clicked()
         _updating = true;
         _selected_color.setValue(_rgba);
         _updating = false;
+    }
+    if (!_fully_initialized) {
+        _fully_initialized = true;
+        GtkWidget *dlg = GTK_WIDGET(_colorSelectorDialog.gobj());
+        sp_transientize(dlg);
     }
     _colorSelectorDialog.show();
     Glib::RefPtr<Gdk::Window> window = _colorSelectorDialog.get_parent_window();
