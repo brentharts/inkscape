@@ -398,8 +398,7 @@ void PathManipulator::duplicateNodes()
 void PathManipulator::copySelectedPath(Geom::PathBuilder *builder)
 {
     // Ignore LivePathEffect paths
-    SPPath *path = dynamic_cast<SPPath *>(_path);
-    if (!path)
+    if (!_path || dynamic_cast<LivePathEffectObject *>(_path))
         return;
     // Rebuild the selected parts of each subpath
     for (auto &subpath : _subpaths) {
@@ -1560,7 +1559,7 @@ void PathManipulator::_setGeometry()
         if (path->curveBeforeLPE()) {
             path->setCurveBeforeLPE(_spcurve.get());
             if (!path->hasPathEffectOfTypeRecursive(Inkscape::LivePathEffect::SLICE)) {
-                sp_lpe_item_update_patheffect(path, false, false);
+                sp_lpe_item_update_patheffect(path, true, false);
             } else {
                 path->setCurve(_spcurve.get());
             }

@@ -14,6 +14,13 @@
 #include <regex>
 #include <numeric>
 
+// checking if dithering is supported
+#ifdef  WITH_PATCHED_CAIRO
+#include "3rdparty/cairo/src/cairo.h"
+#else
+#include <cairo.h>
+#endif
+
 #include <glibmm/i18n.h>  // Internationalization
 
 #ifdef HAVE_CONFIG_H
@@ -29,7 +36,6 @@
 #include "file.h"                   // sp_file_convert_dpi
 #include "inkscape.h"               // Inkscape::Application
 #include "path-prefix.h"            // Data directory
-#include "helper/action-context.h"  // TEMP
 
 #include "include/glibmm_version.h"
 
@@ -220,11 +226,9 @@ InkscapeApplication::document_swap(InkscapeWindow* window, SPDocument* document)
     INKSCAPE.add_document(document);
     INKSCAPE.remove_document(old_document);
 
-    // ActionContext should be removed once verbs are gone but we use it for now.
-    Inkscape::ActionContext context = INKSCAPE.action_context_for_document(document);
     _active_document  = document;
-    _active_selection = context.getSelection();
-    _active_view      = context.getView();
+    _active_selection = desktop->getSelection();
+    _active_view      = desktop;
     _active_window    = window;
     return true;
 }
@@ -392,12 +396,10 @@ InkscapeApplication::window_open(SPDocument* document)
     // To be removed (add once per window)!
     INKSCAPE.add_document(document);
 
-    // ActionContext should be removed once verbs are gone but we use it for now.
-    Inkscape::ActionContext context = INKSCAPE.action_context_for_document(document);
-    _active_selection = context.getSelection();
-    _active_view      = context.getView();
-    _active_document  = document;
     _active_window    = window;
+    _active_view      = window->get_desktop();
+    _active_selection = window->get_desktop()->getSelection();
+    _active_document  = document;
 
     auto it = _documents.find(document);
     if (it != _documents.end()) {
@@ -690,6 +692,7 @@ InkscapeApplication::InkscapeApplication()
     // FIXME: Opacity should really be a DOUBLE, but an upstream bug means 0.0 is detected as NULL
     gapp->add_main_option_entry(T::OPTION_TYPE_STRING,   "export-background-opacity", 'y', N_("Background opacity for exported bitmaps (0.0 to 1.0, or 1 to 255)"), N_("VALUE")); // Bxx
     gapp->add_main_option_entry(T::OPTION_TYPE_STRING,   "export-png-color-mode", '\0', N_("Color mode (bit depth and color type) for exported bitmaps (Gray_1/Gray_2/Gray_4/Gray_8/Gray_16/RGB_8/RGB_16/GrayAlpha_8/GrayAlpha_16/RGBA_8/RGBA_16)"), N_("COLOR-MODE")); // Bxx
+    gapp->add_main_option_entry(T::OPTION_TYPE_STRING,      "export-png-use-dithering", '\0', N_("Force dithering or disables it"), "false|true"); // Bxx
 
     // Query - Geometry
     _start_main_option_section(_("Query object/document geometry"));
@@ -929,15 +932,15 @@ InkscapeApplication::process_document(SPDocument* document, std::string output_p
     bool replace = _use_pipe || _batch_process;
 
     // Open window if needed (reuse window if we are doing one file at a time inorder to save overhead).
+    _active_document  = document;
     if (_with_gui) {
         _active_window = create_window(document, replace);
+        _active_view = _active_window->get_desktop();
+    } else {
+        _active_window = nullptr;
+        _active_view = nullptr;
+        _active_selection = document->getSelection();
     }
-
-    // ActionContext should be removed once verbs are gone but we use it for now.
-    Inkscape::ActionContext context = INKSCAPE.action_context_for_document(document);
-    _active_document  = document;
-    _active_selection = context.getSelection();
-    _active_view      = context.getView();
 
     document->ensureUpToDate(); // Or queries don't work!
 
@@ -1005,6 +1008,11 @@ InkscapeApplication::on_activate()
 
     // Process document (command line actions, shell, create window)
     process_document (document, output);
+
+    if (_batch_process) {
+        // If with_gui, we've reused a window for each file. We must quit to destroy it.
+        gio_app()->quit();
+    }
 }
 
 // Open document window for each file. Either this or on_activate() is called.
@@ -1280,6 +1288,7 @@ InkscapeApplication::shell()
 int
 InkscapeApplication::on_handle_local_options(const Glib::RefPtr<Glib::VariantDict>& options)
 {
+    auto prefs = Inkscape::Preferences::get();
     if (!options) {
         std::cerr << "InkscapeApplication::on_handle_local_options: options is null!" << std::endl;
         return -1; // Keep going
@@ -1383,7 +1392,9 @@ InkscapeApplication::on_handle_local_options(const Glib::RefPtr<Glib::VariantDic
     if (options->contains("with-gui")        ||
         options->contains("batch-process")
         ) {
-        _with_gui = true; // Override turning GUI off
+        _with_gui = bool(gtk_app()); // Override turning GUI off
+        if (!_with_gui)
+            std::cerr << "No GUI available, some actions may fail" << std::endl;
     }
 
     if (options->contains("batch-process"))  _batch_process = true;
@@ -1556,6 +1567,17 @@ InkscapeApplication::on_handle_local_options(const Glib::RefPtr<Glib::VariantDic
         options->lookup_value("export-png-color-mode", _file_export.export_png_color_mode);
     }
 
+    if (options->contains("export-png-use-dithering")) {
+#ifndef CAIRO_HAS_DITHER
+        std::cerr << "Your cairo version does not support dithering! Option will be ignored." << std::endl;
+#endif
+        Glib::ustring val;
+        options->lookup_value("export-png-use-dithering", val);
+        if (val == "true") _file_export.export_png_use_dithering = true;
+        else if (val == "false") _file_export.export_png_use_dithering = false;
+        else std::cerr << "invalid value for export-png-use-dithering. Ignoring." << std::endl;
+    } else _file_export.export_png_use_dithering = prefs->getBool("/options/dithering/value", true);
+
 
     GVariantDict *options_copy = options->gobj_copy();
     GVariant *options_var = g_variant_dict_end(options_copy);
@@ -1587,6 +1609,15 @@ InkscapeApplication::on_quit()
         }
     }
 
+    gio_app()->quit();
+}
+
+/*
+ * Quit without checking for data loss.
+ */
+void
+InkscapeApplication::on_quit_immediate()
+{
     gio_app()->quit();
 }
 

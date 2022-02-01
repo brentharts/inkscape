@@ -66,7 +66,8 @@ LPEMirrorSymmetry::LPEMirrorSymmetry(LivePathEffectObject *lpeobject) :
     split_open(_("Keep open paths on split"), _("Do not automatically close paths along the split line."), "split_open", &wr, this, false),
     start_point(_("Mirror line start"), _("Start point of mirror line"), "start_point", &wr, this, _("Adjust start point of mirror line")),
     end_point(_("Mirror line end"), _("End point of mirror line"), "end_point", &wr, this, _("Adjust end point of mirror line")),
-    center_point(_("Mirror line mid"), _("Center point of mirror line"), "center_point", &wr, this, _("Adjust center point of mirror line"))
+    center_point(_("Mirror line mid"), _("Center point of mirror line"), "center_point", &wr, this, _("Adjust center point of mirror line")),
+    link_styles(_("Link styles"), _("Link styles on split mode"), "link_styles", &wr, this, false)
 {
     registerParameter(&lpesatellites);
     registerParameter(&mode);
@@ -75,6 +76,7 @@ LPEMirrorSymmetry::LPEMirrorSymmetry(LivePathEffectObject *lpeobject) :
     registerParameter(&oposite_fuse);
     registerParameter(&split_items);
     registerParameter(&split_open);
+    registerParameter(&link_styles);
     registerParameter(&start_point);
     registerParameter(&end_point);
     registerParameter(&center_point);
@@ -82,7 +84,7 @@ LPEMirrorSymmetry::LPEMirrorSymmetry(LivePathEffectObject *lpeobject) :
     apply_to_clippath_and_mask = true;
     previous_center = Geom::Point(0,0);
     center_point.param_widget_is_visible(false);
-    reset = false;
+    reset = link_styles;
     center_horiz = false;
     center_vert = false;
     satellitestoclipboard = true;
@@ -114,8 +116,8 @@ bool LPEMirrorSymmetry::doOnOpen(SPLPEItem const *lpeitem)
         fixed = true;
         lpesatellites.write_to_SVG();
     }
-    lpesatellites.read_from_SVG();
-    lpesatellites.update_satellites(true);
+    lpesatellites.start_listening();
+    lpesatellites.connect_selection_changed();
     container = dynamic_cast<SPObject *>(lpeitem->parent);
     return fixed;
 }
@@ -181,21 +183,15 @@ LPEMirrorSymmetry::newWidget()
         ++it;
     }
     Gtk::Box * hbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL,0));
-    Gtk::Box * hbox2 = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL,0));
     Gtk::Button * center_vert_button = Gtk::manage(new Gtk::Button(Glib::ustring(_("Vertical center"))));
     center_vert_button->signal_clicked().connect(sigc::mem_fun (*this,&LPEMirrorSymmetry::centerVert));
     center_vert_button->set_size_request(110,20);
     Gtk::Button * center_horiz_button = Gtk::manage(new Gtk::Button(Glib::ustring(_("Horizontal center"))));
     center_horiz_button->signal_clicked().connect(sigc::mem_fun (*this,&LPEMirrorSymmetry::centerHoriz));
     center_horiz_button->set_size_request(110,20);
-    Gtk::Button * reset_button = Gtk::manage(new Gtk::Button(Glib::ustring(_("Reset styles"))));
-    reset_button->signal_clicked().connect(sigc::mem_fun (*this,&LPEMirrorSymmetry::resetStyles));
-    reset_button->set_size_request(110,20);
     vbox->pack_start(*hbox, true,true,2);
-    vbox->pack_start(*hbox2, true,true,2);
-    hbox->pack_start(*reset_button, false, false,2);
-    hbox2->pack_start(*center_vert_button, false, false,2);
-    hbox2->pack_start(*center_horiz_button, false, false,2);
+    hbox->pack_start(*center_vert_button, false, false,2);
+    hbox->pack_start(*center_horiz_button, false, false,2);
     if(Gtk::Widget* widg = defaultParamSet()) {
         vbox->pack_start(*widg, true, true, 2);
     }
@@ -222,6 +218,9 @@ LPEMirrorSymmetry::doBeforeEffect (SPLPEItem const* lpeitem)
     using namespace Geom;
     if ((!split_items || discard_orig_path) && lpesatellites.data().size()) {
         processObjects(LPE_ERASE);
+    }
+    if (link_styles) {
+        reset = true;
     }
     if (!lpesatellites.data().size()) {
         lpesatellites.read_from_SVG();
@@ -358,6 +357,9 @@ void LPEMirrorSymmetry::cloneD(SPObject *orig, SPObject *dest)
             index++;
         }
         return;
+    } else if( SP_IS_GROUP(orig) && SP_IS_GROUP(dest) && SP_GROUP(orig)->getItemCount() != SP_GROUP(dest)->getItemCount()) {
+        split_items.param_setValue(false);
+        return;
     }
 
     if (SP_IS_TEXT(orig) && SP_IS_TEXT(dest) && SP_TEXT(orig)->children.size() == SP_TEXT(dest)->children.size()) {
@@ -458,7 +460,7 @@ LPEMirrorSymmetry::toMirror(Geom::Affine transform)
         Inkscape::GC::release(phantom);
     }
     cloneD(sp_lpe_item, elemref);
-    reset = false;
+    reset = link_styles;
     elemref->getRepr()->setAttributeOrRemoveIfEmpty("transform", sp_svg_transform_write(transform));
     // Alow work in clones
     /* if (elemref->parent != container) {
@@ -488,13 +490,6 @@ LPEMirrorSymmetry::toMirror(Geom::Affine transform)
         lpesatellites.start_listening();
         lpesatellites.update_satellites(true);
     }
-}
-
-
-void
-LPEMirrorSymmetry::resetStyles(){
-    reset = true;
-    doAfterEffect(sp_lpe_item, nullptr);
 }
 
 

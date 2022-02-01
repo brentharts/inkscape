@@ -57,7 +57,7 @@
         <attribute name='icon'>document-import</attribute>
       </item>
       <item>
-        <attribute name='label' translatable="yes">_Export PNG Image...</attribute>
+        <attribute name='label' translatable="yes">_Export...</attribute>
         <attribute name='action'>win.dialog-open</attribute>
         <attribute name='target'>Export</attribute>
         <attribute name='icon'>document-export</attribute>
@@ -1027,7 +1027,7 @@
       </item>
       <item>
         <attribute name='label' translatable="yes">Outs_et</attribute>
-        <attribute name='action'>win.path-outset</attribute>
+        <attribute name='action'>win.path-offset</attribute>
         <attribute name='icon'>path-outset</attribute>
         <attribute name='use-icon'>true</attribute>
       </item>

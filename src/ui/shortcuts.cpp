@@ -30,8 +30,6 @@
 #include "inkscape-application.h"
 #include "inkscape-window.h"
 
-#include "helper/action-context.h"
-
 #include "io/resource.h"
 #include "io/dir-util.h"
 
@@ -307,7 +305,6 @@ Shortcuts::_read(XML::Node const &keysnode, bool user_set)
             }
             continue;
         } else if (strcmp(iter->name(), "keys") == 0) {
-            std::cout << iter->name() << std::endl;
             _read(*iter, user_set);
             continue;
         } else if (strcmp(iter->name(), "bind") != 0) {

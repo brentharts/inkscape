@@ -232,6 +232,20 @@ bool PathArrayParam::_selectIndex(const Gtk::TreeIter &iter, int *i)
     return false;
 }
 
+std::vector<SPObject *> PathArrayParam::param_get_satellites()
+{
+    std::vector<SPObject *> objs;
+    for (auto &iter : _vector) {
+        if (iter && iter->ref.isAttached()) {
+            SPObject *obj = iter->ref.getObject();
+            if (obj) {
+                objs.push_back(obj);
+            }
+        }
+    }
+    return objs;
+}
+
 void PathArrayParam::on_up_button_click()
 {
     Gtk::TreeModel::iterator iter = _tree->get_selection()->get_selected();
@@ -452,14 +466,18 @@ void PathArrayParam::setPathVector(SPObject *linked_obj, guint /*flags*/, PathAn
 
 void PathArrayParam::linked_modified(SPObject *linked_obj, guint flags, PathAndDirectionAndVisible *to)
 {
-    if (!to) {
-        return;
-    }
-    setPathVector(linked_obj, flags, to);
-    param_effect->getLPEObj()->requestModified(SP_OBJECT_MODIFIED_FLAG);
-    if (_store.get()) {
-        _store->foreach_iter(
-            sigc::bind<PathAndDirectionAndVisible *>(sigc::mem_fun(*this, &PathArrayParam::_updateLink), to));
+    if (flags & (SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_STYLE_MODIFIED_FLAG |
+                 SP_OBJECT_CHILD_MODIFIED_FLAG | SP_OBJECT_VIEWPORT_MODIFIED_FLAG)) 
+    {
+        if (!to) {
+            return;
+        }
+        setPathVector(linked_obj, flags, to);
+        param_effect->getLPEObj()->requestModified(SP_OBJECT_MODIFIED_FLAG);
+        if (_store.get()) {
+            _store->foreach_iter(
+                sigc::bind<PathAndDirectionAndVisible *>(sigc::mem_fun(*this, &PathArrayParam::_updateLink), to));
+        }
     }
 }
 
@@ -476,9 +494,21 @@ bool PathArrayParam::param_readSVGValue(const gchar *strvalue)
         }
 
         gchar ** strarray = g_strsplit(strvalue, "|", 0);
+        bool write = false;
         for (gchar ** iter = strarray; *iter != nullptr; iter++) {
             if ((*iter)[0] == '#') {
                 gchar ** substrarray = g_strsplit(*iter, ",", 0);
+                SPObject * old_ref = param_effect->getSPDoc()->getObjectByHref(*substrarray);
+                if (old_ref) {
+                    SPObject * successor = old_ref->_successor;
+                    Glib::ustring id = *substrarray;
+                    if (successor) {
+                        id = successor->getId();
+                        id.insert(id.begin(), '#');
+                        write = true;
+                    }
+                    *(substrarray) = g_strdup(id.c_str());
+                }
                 PathAndDirectionAndVisible* w = new PathAndDirectionAndVisible((SPObject *)param_effect->getLPEObj());
                 w->href = g_strdup(*substrarray);
                 w->reversed = *(substrarray+1) != nullptr && (*(substrarray+1))[0] == '1';
@@ -503,7 +533,12 @@ bool PathArrayParam::param_readSVGValue(const gchar *strvalue)
             }
         }
         g_strfreev (strarray);
+        if (write) {
+            auto full = param_getSVGValue();
+            param_write_to_repr(full.c_str());
+        }
         return true;
+        
     }
     return false;
 }

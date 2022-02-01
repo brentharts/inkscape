@@ -163,14 +163,12 @@ public:
     SPObject *getXMLDialogSelectedObject() { return _activexmltree; }
 
     Inkscape::EventLog* get_event_log() { return _event_log; }
-    // allow not update LPE on stylesheet change
-    bool stylesheetchg = false;
 
 private:
     void _importDefsNode(SPDocument *source, Inkscape::XML::Node *defs, Inkscape::XML::Node *target_defs);
     SPObject *_activexmltree;
 
-  public:
+public:
     void importDefs(SPDocument *source);
 
     unsigned int vacuumDocument();
@@ -202,6 +200,8 @@ private:
 
     SPDocument *getParent() { return _parent_document; }
     SPDocument const *getParent() const { return _parent_document; }
+
+    Inkscape::Selection *getSelection() { return _selection; }
 
     // Styling
     CRCascade    *getStyleCascade() { return style_cascade; }
@@ -244,6 +244,19 @@ private:
     void fitToRect(Geom::Rect const &rect, bool with_margins = false);
     void setupViewport(SPItemCtx *ctx);
 
+    // Desktop geometry ------------------------
+    /// Document to desktop coordinate transformation.
+    const Geom::Affine &doc2dt() const;
+    /// Desktop to document coordinate transformation.
+    const Geom::Affine &dt2doc() const
+    {
+        // Note: doc2dt().inverse() happens to be identical to doc2dt()
+        return doc2dt();
+    }
+    /// True if the desktop Y-axis points down, false if it points up.
+    bool is_yaxisdown() const { return yaxisdir() > 0; }
+    /// "1" if the desktop Y-axis points down, "-1" if it points up.
+    double yaxisdir() const { return _doc2dt[3]; }
 
     // Find items -----------------------------
     void bindObjectToId(char const *id, SPObject *object);
@@ -259,6 +272,26 @@ private:
     std::vector<SPObject *> getObjectsByElement(Glib::ustring const &element, bool custom = false) const;
     std::vector<SPObject *> getObjectsBySelector(Glib::ustring const &selector) const;
 
+    /**
+     * @brief Set the reference document object.
+     * Use this function to extend functionality of getObjectById() - it will search in reference document.
+     * This is useful when rendering objects that have been copied from this document into a sandbox document.
+     * Setting reference will allow sandbox document to find gradients, or linked objects that may have been
+     * referenced by copied object.
+     * @param document 
+     */
+    void set_reference_document(SPDocument* document);
+    SPDocument* get_reference_document();
+
+    /**
+     * @brief Object used to temporarily set and then automatically clear reference document.
+     */
+    struct install_reference_document {
+        install_reference_document(SPDocument* inject_into, SPDocument* reference);
+        ~install_reference_document();
+    private:
+        SPDocument* _parent;
+    };
 
     // Find items by geometry --------------------
     void build_flat_item_list(unsigned int dkey, SPGroup *group, gboolean into_groups) const;
@@ -314,8 +347,9 @@ private:
 private:
 
     // Document ------------------------------
-    Inkscape::ProfileManager* profileManager;   // Color profile.
-    Avoid::Router *router; // Instance of the connector router
+    Inkscape::ProfileManager* profileManager = nullptr;   // Color profile.
+    Avoid::Router *router = nullptr; // Instance of the connector router
+    Inkscape::Selection * _selection = nullptr;
 
     // Document status -----------------------
 
@@ -338,9 +372,14 @@ private:
     SPDocument *_parent_document;
     // When copying documents, this can refer to it's original
     SPDocument const *_original_document;
+    // Reference document to fall back to when getObjectById cannot find element in '*this' document
+    SPDocument* _ref_document = nullptr;
 
     // Styling
     CRCascade *style_cascade;
+
+    // Desktop geometry
+    mutable Geom::Affine _doc2dt;
 
     // File information ----------------------
     char *document_filename;   ///< A filename, or NULL
@@ -421,22 +460,7 @@ private:
 
     sigc::signal<void> destroySignal;
 
-    mutable Geom::Affine _doc2dt;
-
 public:
-    /// Document to desktop coordinate transformation.
-    const Geom::Affine &doc2dt() const;
-    /// Desktop to document coordinate transformation.
-    const Geom::Affine &dt2doc() const
-    {
-        // Note: doc2dt().inverse() happens to be identical to doc2dt()
-        return doc2dt();
-    }
-    /// True if the desktop Y-axis points down, false if it points up.
-    bool is_yaxisdown() const { return yaxisdir() > 0; }
-    /// "1" if the desktop Y-axis points down, "-1" if it points up.
-    double yaxisdir() const { return _doc2dt[3]; }
-
     void addUndoObserver(Inkscape::UndoStackObserver& observer);
     void removeUndoObserver(Inkscape::UndoStackObserver& observer);
 

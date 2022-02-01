@@ -1037,6 +1037,13 @@ void InkscapePreferences::initPageTools()
     _page_gradient.add_line( false, _("Linear gradient _angle:"), _misc_gradientangle, "",
                            _("Default angle of new linear gradients in degrees (clockwise from horizontal)"), false);
 
+    _misc_gradient_collect.init(_("Auto delete gradients that are not used"), "/option/gradient/auto_collect", true);
+    _page_gradient.add_line(
+        false, "", _misc_gradient_collect, "",
+        _("When enabled, the gradients that are not used will be auto deleted (auto collected) "
+          "from the SVG file. If disabled, the gradients that are not used will be preserved in "
+          "the SVG file for latter use.(Note: This setting will be applied only on the new gradients.)"),
+        true);
 
     //Dropper
     this->AddSelcueCheckbox(_page_dropper, "/tools/dropper", true);
@@ -1583,10 +1590,6 @@ void InkscapePreferences::initPageUI()
     _ui_realworldzoom.init( _("Show zoom percentage corrected by factor"), "/options/zoomcorrection/shown", true);
     _page_ui.add_line( false, "", _ui_realworldzoom, "", _("Zoom percentage can be either by the physical units or by pixels."));
 
-    _ui_partialdynamic.init( _("Enable dynamic relayout for incomplete sections"), "/options/workarounds/dynamicnotdone", false);
-    _page_ui.add_line( false, "", _ui_partialdynamic, "",
-                       _("When on, will allow dynamic layout of components that are not completely finished being refactored"), true);
-
     /* show infobox */
     _show_filters_info_box.init( _("Show filter primitives infobox (requires restart)"), "/options/showfiltersinfobox/value", true);
     _page_ui.add_line(false, "", _show_filters_info_box, "",
@@ -2101,6 +2104,10 @@ void InkscapePreferences::initPageIO()
     _misc_default_metadata.init( _("Add default metadata to new documents"), "/metadata/addToNewFile", false);
     _page_io.add_line( false, "", _misc_default_metadata, "",
                            _("Add default metadata to new documents. Default metadata can be set from Document Properties->Metadata."), true);
+
+    _export_all_extensions.init( _("Show all outputs in Export Dialog"), "/dialogs/export/show_all_extensions", false);
+    _page_io.add_line( false, "", _export_all_extensions, "",
+                           _("Will list all possible output extensions in the Export Dialog selection."), true);
 
     // Input devices options
     _mouse_sens.init ( "/options/cursortolerance/value", 0.0, 30.0, 1.0, 1.0, 8.0, true, false);
@@ -2622,6 +2629,12 @@ void InkscapePreferences::initPageBehavior()
     _page_cleanup.add_line( true, "", _cleanup_swatches, "",
                            _("Remove unused swatches when doing a document cleanup")); // tooltip
     this->AddPage(_page_cleanup, _("Cleanup"), iter_behavior, PREFS_PAGE_BEHAVIOR_CLEANUP);
+
+    _page_lpe.add_group_header( _("Copy"));
+    _lpe_copy_mirroricons.init ( _("Use icons instead less checks on LPE copy"), "/live_effects/copy/mirroricons", true); // text label
+    _page_lpe.add_line( true, "", _lpe_copy_mirroricons, "",
+                           _("Use 16 icons instead 4 checks on LPE copy in mirror zone")); // tooltip
+    this->AddPage(_page_lpe, _("Live Path Effects (LPE)"), iter_behavior, PREFS_PAGE_BEHAVIOR_LPE);
 }
 
 void InkscapePreferences::initPageRendering()
@@ -2651,7 +2664,7 @@ void InkscapePreferences::initPageRendering()
     int values[] = {1, 2, 3};
     Glib::ustring labels[] = {_("Responsive"), _("Full redraw"), _("Multiscale")};
     _canvas_update_strategy.init("/options/rendering/update_strategy", labels, values, 3, 3);
-    _page_rendering.add_line(true, _("Update strategy:"), _canvas_update_strategy, "", _("How to update continually changing content when it can't be redrawn fast enough"), false);
+    _page_rendering.add_line(false, _("Update strategy:"), _canvas_update_strategy, "", _("How to update continually changing content when it can't be redrawn fast enough"), false);
 
     /* blur quality */
     _blur_quality_best.init ( _("Best quality (slowest)"), "/options/blurquality/value",
@@ -2700,6 +2713,11 @@ void InkscapePreferences::initPageRendering()
                            _("Lower quality (some artifacts), but display is faster"));
     _page_rendering.add_line( true, "", _filter_quality_worst, "",
                            _("Lowest quality (considerable artifacts), but display is fastest"));
+
+#ifdef CAIRO_HAS_DITHER
+    _cairo_dithering.init(_("Use dithering"), "/options/dithering/value", true);
+    _page_rendering.add_line(false, "", _cairo_dithering, "",  _("Makes gradients smoother. This can significantly impact the size of generated PNG files. To update the display after changing this option, just zoom out/in."));
+#endif
 
     auto grid = Gtk::make_managed<Gtk::Grid>();
     grid->set_border_width(12);

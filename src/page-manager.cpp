@@ -292,7 +292,7 @@ void PageManager::disablePages()
 /**
  * Get page index, returns -1 if the page is not found in this document.
  */
-int PageManager::getPageIndex(SPPage *page) const
+int PageManager::getPageIndex(const SPPage *page) const
 {
     if (page) {
         auto it = std::find(pages.begin(), pages.end(), page);
@@ -599,6 +599,7 @@ bool PageManager::subset(SPAttr key, const gchar *value)
             this->background_color = this->background_color & 0xff;
             if (value) {
                 this->background_color = this->background_color | sp_svg_read_color(value, this->background_color);
+                return false; // propagate further
             }
             break;
         case SPAttr::INKSCAPE_PAGEOPACITY:

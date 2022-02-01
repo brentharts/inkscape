@@ -980,9 +980,17 @@ void SPGroup::update_patheffect(bool write) {
     g_message("sp_group_update_patheffect: %p\n", lpeitem);
 #endif
     std::vector<SPItem*> const item_list = sp_item_group_item_list(this);
-
     for (auto sub_item : item_list) {
         if (sub_item) {
+            // not need lpe version < 1 (issue only relpy on lower LPE on nested LPEs
+            // this not happends because is done at very first stage
+            // we need to be sure performed to inform lpe original bounds ok, 
+            // if not original_bbox function fail on update groups
+            SPShape* sub_shape = dynamic_cast<SPShape *>(sub_item);
+            if (sub_shape && sub_shape->hasPathEffectRecursive()) {
+                sub_shape->bbox_vis_cache_is_valid = false;
+                sub_shape->bbox_geom_cache_is_valid = false;
+            }
             SPLPEItem *lpe_item = dynamic_cast<SPLPEItem *>(sub_item);
             if (lpe_item) {
                 lpe_item->update_patheffect(write);
@@ -998,9 +1006,6 @@ void SPGroup::update_patheffect(bool write) {
             if (lpeobj) {
                 Inkscape::LivePathEffect::Effect *lpe = lpeobj->get_lpe();
                 if (lpe && lpe->isVisible()) {
-                    if (document->stylesheetchg && lpe->is_load) {
-                        break;
-                    }
                     lpeobj->get_lpe()->doBeforeEffect_impl(this);
                     sp_group_perform_patheffect(this, this, lpe, write);
                     lpeobj->get_lpe()->doAfterEffect_impl(this, nullptr);

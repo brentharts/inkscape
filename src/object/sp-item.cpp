@@ -50,10 +50,7 @@
 #include "snap-preferences.h"
 #include "snap-candidate.h"
 
-#include "util/find-last-if.h"
-
 #include "extract-uri.h"
-
 #include "live_effects/lpeobject.h"
 #include "live_effects/effect.h"
 #include "live_effects/lpeobject-reference.h"
@@ -186,7 +183,6 @@ bool SPItem::isHidden(unsigned display_key) const {
     }
     return true;
 }
-
 
 void SPItem::setHighlight(guint32 color) {
     _highlightColor = color;
@@ -328,11 +324,12 @@ bool is_item(SPObject const &object) {
 }
 
 void SPItem::raiseToTop() {
-    using Inkscape::Algorithms::find_last_if;
-
-    auto topmost = find_last_if(++parent->children.iterator_to(*this), parent->children.end(), &is_item);
-    if (topmost != parent->children.end()) {
-        getRepr()->parent()->changeOrder( getRepr(), topmost->getRepr() );
+    auto& list = parent->children;
+    auto end = SPObject::ChildrenList::reverse_iterator(list.iterator_to(*this));
+    auto topmost = std::find_if(list.rbegin(), end, &is_item);
+    // auto topmost = find_last_if(++parent->children.iterator_to(*this), parent->children.end(), &is_item);
+    if (topmost != list.rend()) {
+        getRepr()->parent()->changeOrder(getRepr(), topmost->getRepr());
     }
 }
 
@@ -347,17 +344,18 @@ bool SPItem::raiseOne() {
 }
 
 bool SPItem::lowerOne() {
-    using Inkscape::Algorithms::find_last_if;
-
-    auto next_lower = find_last_if(parent->children.begin(), parent->children.iterator_to(*this), &is_item);
-    if (next_lower != parent->children.iterator_to(*this)) {
-        Inkscape::XML::Node *ref = nullptr;
-        if (next_lower != parent->children.begin()) {
-            next_lower--;
-            ref = next_lower->getRepr();
+    auto& list = parent->children;
+    auto self = list.iterator_to(*this);
+    auto start = SPObject::ChildrenList::reverse_iterator(self);
+    auto next_lower = std::find_if(start, list.rend(), &is_item);
+    if (next_lower != list.rend()) {
+        auto next = list.iterator_to(*next_lower);
+        if (next != list.begin()) {
+            --next;
+            auto ref = next->getRepr();
+            getRepr()->parent()->changeOrder(getRepr(), ref);
+            return true;
         }
-        getRepr()->parent()->changeOrder(getRepr(), ref);
-        return true;
     }
     return false;
 }
@@ -1605,7 +1603,7 @@ void SPItem::doWriteTransform(Geom::Affine const &transform, Geom::Affine const 
     updateRepr();
 
     if (lpeitem && lpeitem->hasPathEffectRecursive()) {
-        sp_lpe_item_update_patheffect(lpeitem, false, false);
+        sp_lpe_item_update_patheffect(lpeitem, true, false);
     }
 
     // send the relative transform with a _transformed_signal

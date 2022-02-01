@@ -113,7 +113,7 @@ endif()
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(INKSCAPE_DEP REQUIRED
                   harfbuzz
-                  pangocairo
+                  pangocairo>=1.44
                   pangoft2
                   fontconfig
                   gsl
@@ -391,6 +391,10 @@ if(WITH_X11)
         message(FATAL_ERROR "GTK+3 doesn't targets X11, this is required for WITH_X11")
     endif()
 endif(WITH_X11)
+
+if(WITH_INTERNAL_CAIRO)
+    add_definitions(-DWITH_PATCHED_CAIRO)
+endif()
 
 # end Dependencies
 

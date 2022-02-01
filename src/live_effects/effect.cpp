@@ -32,6 +32,7 @@
 #include "live_effects/lpe-clone-original.h"
 #include "live_effects/lpe-constructgrid.h"
 #include "live_effects/lpe-copy_rotate.h"
+#include "live_effects/lpe-copy.h"
 #include "live_effects/lpe-curvestitch.h"
 #include "live_effects/lpe-dashed-stroke.h"
 #include "live_effects/lpe-dynastroke.h"
@@ -636,6 +637,20 @@ const EnumEffectData<EffectType> LPETypeData[] = {
         false ,//on_text
         false ,//experimental
     },
+    /* 1.2 */
+    {
+        COPY,
+        NC_("path effect", "Copies") ,//label
+        "copy" ,//key
+        "copy" ,//icon
+        N_("Create multiple copies of an object. The copies can be styled independently.") ,//description
+        true  ,//on_path
+        true  ,//on_shape
+        true  ,//on_group
+        false ,//on_image
+        false ,//on_text
+        false ,//experimental
+    },
     // VISIBLE experimental LPE
     {
         ANGLE_BISECTOR,
@@ -1025,6 +1040,9 @@ Effect::New(EffectType lpenr, LivePathEffectObject *lpeobj)
         case SLICE:
             neweffect = static_cast<Effect *>(new LPESlice(lpeobj));
             break;
+        case COPY:
+            neweffect = static_cast<Effect*> ( new LPECopy(lpeobj) );
+            break;
         default:
             g_warning("LivePathEffect::Effect::New called with invalid patheffect type (%d)", lpenr);
             neweffect = nullptr;
@@ -1383,8 +1401,18 @@ void Effect::processObjects(LPEAction lpe_action)
 bool Effect::doOnOpen(SPLPEItem const * /*lpeitem*/)
 {
     // Do nothing for simple effects
+    update_satellites();
     return false;
 }
+
+void
+Effect::update_satellites(bool updatelpe) {
+    std::vector<Inkscape::LivePathEffect::Parameter *>::iterator p;
+    for (p = param_vector.begin(); p != param_vector.end(); ++p) {
+        (*p)->update_satellites(updatelpe);
+    }
+}
+
 
 /**
  * Is performed each time before the effect is updated.
@@ -1406,6 +1434,7 @@ Effect::doBeforeEffect (SPLPEItem const*/*lpeitem*/)
 void Effect::doAfterEffect (SPLPEItem const* /*lpeitem*/, SPCurve *curve)
 {
     //Do nothing for simple effects
+    update_satellites();
 }
 
 void Effect::doOnException(SPLPEItem const * /*lpeitem*/)
@@ -1449,7 +1478,6 @@ void Effect::doOnOpen_impl()
     std::vector<SPLPEItem *> lpeitems = getCurrrentLPEItems();
     if (lpeitems.size() == 1) {
         is_load = true;
-        lpeitems[0]->document->stylesheetchg = false;
         doOnOpen(lpeitems[0]);
     }
 }
@@ -1741,7 +1769,7 @@ Effect::defaultParamSet()
     // use manage here, because after deletion of Effect object, others might still be pointing to this widget.
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     Gtk::Box * vbox_expander = Gtk::manage( new Gtk::Box(Gtk::ORIENTATION_VERTICAL) );
-    Glib::ustring effectname = (Glib::ustring)Inkscape::LivePathEffect::LPETypeConverter.get_label(effectType());
+    Glib::ustring effectname = _(Inkscape::LivePathEffect::LPETypeConverter.get_label(effectType()).c_str());
     Glib::ustring effectkey = (Glib::ustring)Inkscape::LivePathEffect::LPETypeConverter.get_key(effectType());
     std::vector<Parameter *>::iterator it = param_vector.begin();
     bool has_params = false;

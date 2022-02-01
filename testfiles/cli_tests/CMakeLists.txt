@@ -30,6 +30,9 @@ function(add_cli_test name)
 
     set(testname  cli_${name})
 
+    #disable dithering
+    set(ARG_PARAMETERS ${ARG_PARAMETERS}  "--export-png-use-dithering=false")
+
     if(DEFINED ARG_OUTPUT_FILENAME)
         # for actions: if an export-do is present do not append export-filename option to prevent
         if(NOT ARG_PARAMETERS MATCHES "export-do")
@@ -768,7 +771,7 @@ add_cli_test(action_test_multiline_anchoring
 if(WITH_LIBCDR)
   # add_cli_test(import_cdr  PARAMETERS --export-type=png   # fails to open (regression in libcdr 1.6.0)
   #                          INPUT_FILENAME librevenge_formats/corel_draw.cdr OUTPUT_FILENAME format_corel_draw.png
-  #                          REFERENCE_FILENAME librevenge_formats/corel_draw_expected.png)
+  #                          REFERENCE_FILENAME librevenge_formats/corel_draw_expected.png) # check png size is correct
   add_cli_test(import_cdr2 PARAMETERS --export-type=png
                            INPUT_FILENAME librevenge_formats/corel_draw2.cdr OUTPUT_FILENAME format_corel_draw2.png
                            REFERENCE_FILENAME librevenge_formats/corel_draw2_expected.png)

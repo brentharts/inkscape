@@ -117,6 +117,7 @@ SPDocument::SPDocument() :
     _event_log(new Inkscape::EventLog(this)),
     profileManager(nullptr), // deferred until after other initialization
     router(new Avoid::Router(Avoid::PolyLineRouting|Avoid::OrthogonalRouting)),
+    _selection(new Inkscape::Selection(this)),
     oldSignalsConnected(false),
     current_persp3d(nullptr),
     current_persp3d_impl(nullptr),
@@ -1065,6 +1066,9 @@ SPObject *SPDocument::getObjectById(Glib::ustring const &id) const
         return (rv->second);
     } else if (_parent_document) {
         return _parent_document->getObjectById(id);
+    }
+    else if (_ref_document) {
+        return _ref_document->getObjectById(id);
     } else {
         return nullptr;
     }
@@ -1381,8 +1385,6 @@ SPDocument::idle_handler()
     if (!status) {
         modified_connection.disconnect();
     }
-    // this hack prevent update LPE items on load documents with stylesheet
-    stylesheetchg = false;
     return status;
 }
 
@@ -2147,6 +2149,24 @@ SPDocument::emitReconstructionFinish()
     // Reference to the old persp3d object is invalid after reconstruction.
     initialize_current_persp3d();
 **/
+}
+
+void SPDocument::set_reference_document(SPDocument* document) {
+    _ref_document = document;
+}
+
+SPDocument* SPDocument::get_reference_document() {
+    return _ref_document;
+}
+
+SPDocument::install_reference_document::install_reference_document(SPDocument* inject_into, SPDocument* reference) {
+    g_assert(inject_into);
+    _parent = inject_into;
+    _parent->set_reference_document(reference);
+}
+
+SPDocument::install_reference_document::~install_reference_document() {
+    _parent->set_reference_document(nullptr);
 }
 
 /*

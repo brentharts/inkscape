@@ -115,6 +115,8 @@ set(ui_SRC
 	dialog/dialog-window.cpp
 	dialog/document-properties.cpp
 	dialog/export.cpp
+	dialog/export-batch.cpp
+	dialog/export-single.cpp
 	dialog/filedialog.cpp
 	dialog/filedialogimpl-gtkmm.cpp
 	dialog/fill-and-stroke.cpp
@@ -173,12 +175,13 @@ set(ui_SRC
 	widget/color-preview.cpp	icon-loader.cpp
 	widget/color-scales.cpp
 	widget/color-slider.cpp
-	widget/color-wheel-selector.cpp
 	widget/combo-box-entry-tool-item.cpp
 	widget/combo-tool-item.cpp
 	widget/dash-selector.cpp
 	widget/entity-entry.cpp
 	widget/entry.cpp
+	widget/export-lists.cpp
+	widget/export-preview.cpp
 	widget/filter-effect-chooser.cpp
 	widget/fill-style.cpp
 	widget/font-button.cpp
@@ -290,6 +293,8 @@ set(ui_SRC
 	dialog/dialog-window.h
 	dialog/document-properties.h
 	dialog/export.h
+	dialog/export-batch.h
+	dialog/export-single.h
 	dialog/filedialog.h
 	dialog/filedialogimpl-gtkmm.h
 	dialog/filedialogimpl-win32.h
@@ -425,13 +430,14 @@ set(ui_SRC
 	widget/color-preview.h
 	widget/color-scales.h
 	widget/color-slider.h
-	widget/color-wheel-selector.h
 	widget/combo-enums.h
 	widget/combo-box-entry-tool-item.h
 	widget/combo-tool-item.h
 	widget/dash-selector.h
 	widget/entity-entry.h
 	widget/entry.h
+	widget/export-lists.h
+	widget/export-preview.h
 	widget/fill-style.h
 	widget/filter-effect-chooser.h
 	widget/font-button.h

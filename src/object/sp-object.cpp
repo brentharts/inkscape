@@ -33,6 +33,7 @@
 #include "style.h"
 #include "live_effects/lpeobject.h"
 #include "sp-factory.h"
+#include "sp-font.h"
 #include "sp-paint-server.h"
 #include "sp-root.h"
 #include "sp-style-elem.h"
@@ -462,6 +463,8 @@ void SPObject::requestOrphanCollection() {
         // leave it
     } else if (dynamic_cast<SPScript *>(this)) {
         // leave it
+    } else if (dynamic_cast<SPFont*>(this)) {
+        // leave it
     } else if ((! prefs->getBool("/options/cleanupswatches/value", false)) && SP_IS_PAINT_SERVER(this) && static_cast<SPPaintServer*>(this)->isSwatch() ) {
         // leave it
     } else if (IS_COLORPROFILE(this)) {
@@ -518,18 +521,62 @@ void SPObject::deleteObject(bool propagate, bool propagate_descendants)
 
 void SPObject::cropToObject(SPObject *except)
 {
-    std::vector<SPObject*> toDelete;
-    for (auto& child: children) {
+    std::vector<SPObject *> toDelete;
+    for (auto &child : children) {
         if (SP_IS_ITEM(&child)) {
             if (child.isAncestorOf(except)) {
                 child.cropToObject(except);
-            } else if(&child != except) {
+            } else if (&child != except) {
                 sp_object_ref(&child, nullptr);
                 toDelete.push_back(&child);
             }
         }
     }
-    for (auto & i : toDelete) {
+    for (auto &i : toDelete) {
+        i->deleteObject(true, true);
+        sp_object_unref(i, nullptr);
+    }
+}
+
+/**
+ * Removes objects which are not related to given list of objects.
+ *
+ * Use Case: Group[MyRect1 , MyRect2] , MyRect3
+ * List Provided: MyRect1, MyRect3
+ * Output doc: Group[MyRect1], MyRect3
+ * List Provided: MyRect1, Group
+ * Output doc: Group[MyRect1, MyRect2] (notice MyRect2 is not deleted as it is related to Group)
+ */
+void SPObject::cropToObjects(std::vector<SPObject *> except_objects)
+{
+    if (except_objects.empty()) {
+        return;
+    }
+    std::vector<SPObject *> toDelete;
+    for (auto &child : children) {
+        if (SP_IS_ITEM(&child)) {
+            std::vector<SPObject *> except_in_child;
+            bool child_delete_flag = true;
+            for (auto except : except_objects) {
+                if (&child == except) {
+                    child_delete_flag = false;
+                    except_in_child.clear();
+                    break;
+                }
+                if (child.isAncestorOf(except)) {
+                    except_in_child.push_back(except);
+                    child_delete_flag = false;
+                }
+            }
+            if (child_delete_flag) {
+                sp_object_ref(&child, nullptr);
+                toDelete.push_back(&child);
+            } else {
+                child.cropToObjects(except_in_child);
+            }
+        }
+    }
+    for (auto &i : toDelete) {
         i->deleteObject(true, true);
         sp_object_unref(i, nullptr);
     }
@@ -1668,6 +1715,37 @@ Glib::ustring SPObject::textualContent() const
         }
     }
     return text;
+}
+
+Glib::ustring SPObject::getExportFilename() const
+{
+    if (auto filename = repr->attribute("inkscape:export-filename")) {
+        return Glib::ustring(filename);
+    }
+    return "";
+}
+
+void SPObject::setExportFilename(Glib::ustring filename)
+{
+    repr->setAttributeOrRemoveIfEmpty("inkscape:export-filename", filename.c_str());
+}
+
+Geom::Point SPObject::getExportDpi() const
+{
+    return Geom::Point(
+        repr->getAttributeDouble("inkscape:export-xdpi", 0.0),
+        repr->getAttributeDouble("inkscape:export-ydpi", 0.0));
+}
+
+void SPObject::setExportDpi(Geom::Point dpi)
+{
+    if (!dpi.x() || !dpi.y()) {
+        repr->removeAttribute("inkscape:export-xdpi");
+        repr->removeAttribute("inkscape:export-ydpi");
+    } else {
+        repr->setAttributeSvgDouble("inkscape:export-xdpi", dpi.x());
+        repr->setAttributeSvgDouble("inkscape:export-ydpi", dpi.y());
+    }
 }
 
 // For debugging: Print SP tree structure.

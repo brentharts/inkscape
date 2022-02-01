@@ -149,6 +149,7 @@
 ../src/live_effects/lpe-circle_with_radius.cpp
 ../src/live_effects/lpe-clone-original.cpp
 ../src/live_effects/lpe-constructgrid.cpp
+../src/live_effects/lpe-copy.cpp
 ../src/live_effects/lpe-copy_rotate.cpp
 ../src/live_effects/lpe-curvestitch.cpp
 ../src/live_effects/lpe-dashed-stroke.cpp
@@ -226,6 +227,7 @@
 ../src/object/sp-marker.cpp
 ../src/object/sp-namedview.cpp
 ../src/object/sp-offset.cpp
+../src/object/sp-page.cpp
 ../src/object/sp-path.cpp
 ../src/object/sp-polygon.cpp
 ../src/object/sp-polyline.cpp
@@ -269,6 +271,8 @@
 ../src/ui/dialog/dialog-notebook.cpp
 ../src/ui/dialog/dialog-window.cpp
 ../src/ui/dialog/document-properties.cpp
+../src/ui/dialog/export-batch.cpp
+../src/ui/dialog/export-single.cpp
 ../src/ui/dialog/export.cpp
 ../src/ui/dialog/filedialogimpl-gtkmm.cpp
 ../src/ui/dialog/filedialogimpl-win32.cpp
@@ -373,7 +377,6 @@
 ../src/ui/widget/color-icc-selector.cpp
 ../src/ui/widget/color-notebook.cpp
 ../src/ui/widget/color-scales.cpp
-../src/ui/widget/color-wheel-selector.cpp
 ../src/ui/widget/combo-enums.h
 ../src/ui/widget/dash-selector.cpp
 ../src/ui/widget/entity-entry.cpp
