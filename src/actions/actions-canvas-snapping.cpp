@@ -51,7 +51,7 @@ SnapVector snap_bbox = {
 SnapVector snap_node = {
     { "snap-node-category",      SNAPTARGET_NODE_CATEGORY,      true },
     { "snap-path",               SNAPTARGET_PATH,               true },
-    { "snap-path-intersection",  SNAPTARGET_PATH_INTERSECTION,  true },
+    { "snap-path-intersection",  SNAPTARGET_PATH_INTERSECTION,  false }, // Note: OFF by default, as it is extremely slow in large documents!
     { "snap-node-cusp",          SNAPTARGET_NODE_CUSP,          true },
     { "snap-node-smooth",        SNAPTARGET_NODE_SMOOTH,        true },
     { "snap-line-midpoint",      SNAPTARGET_LINE_MIDPOINT,      true },
