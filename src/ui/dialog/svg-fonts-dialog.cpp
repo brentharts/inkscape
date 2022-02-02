@@ -36,9 +36,11 @@
 #include "object/sp-font.h"
 #include "object/sp-glyph-kerning.h"
 #include "object/sp-glyph.h"
+#include "object/sp-guide.h"
 #include "object/sp-missing-glyph.h"
 #include "object/sp-path.h"
 #include "svg/svg.h"
+#include "util/units.h"
 #include "xml/repr.h"
 
 SvgFontDrawingArea::SvgFontDrawingArea():
@@ -185,7 +187,7 @@ SvgFontsDialog::AttrSpin::AttrSpin(SvgFontsDialog* d, gchar* lbl, Glib::ustring 
     _label->show();
     _label->set_halign(Gtk::ALIGN_START);
     spin.set_range(0, 4096);
-    spin.set_increments(16, 0);
+    spin.set_increments(10, 0);
     spin.signal_value_changed().connect(sigc::mem_fun(*this, &SvgFontsDialog::AttrSpin::on_attr_changed));
 }
 
@@ -771,6 +773,65 @@ void SvgFontsDialog::set_selected_glyph(SPGlyph* glyph) {
     });
 }
 
+SPGuide* get_guide(SPDocument& doc, const Glib::ustring& id) {
+    auto object = doc.getObjectById(id);
+    if (!object) return nullptr;
+
+    // get guide line
+    if (auto guide = dynamic_cast<SPGuide*>(object)) {
+        return guide;
+    }
+    // remove colliding object
+    object->deleteObject();
+    return nullptr;
+}
+
+SPGuide* create_guide(SPDocument& doc, double x0, double y0, double x1, double y1) {
+    return SPGuide::createSPGuide(&doc, Geom::Point(x0, y1), Geom::Point(x1, y1));
+}
+
+void set_up_typography_canvas(SPDocument* document, double em, double asc, double cap, double xheight, double des) {
+    if (!document || em <= 0) return;
+
+    // set size and viewbox
+    auto size = Inkscape::Util::Quantity(em, "px");
+    bool change_size = false;
+    document->setWidthAndHeight(size, size, change_size);
+    document->setViewBox(Geom::Rect::from_xywh(0, 0, em, em));
+
+    // baseline
+    double base = des;
+
+    // add/move guide lines
+    struct { double pos; const char* name; const char* id; } guides[5] = {
+        {base + asc, _("ascender"), "ink-font-guide-ascender"},
+        {base + cap, _("caps"), "ink-font-guide-caps"},
+        {base + xheight, _("x-height"), "ink-font-guide-x-height"},
+        {base, _("baseline"), "ink-font-guide-baseline"},
+        {base - des, _("descender"), "ink-font-guide-descender"},
+    };
+
+    double left = 0;
+    double right = em;
+
+    for (auto&& g : guides) {
+        double y = em - g.pos;
+        auto guide = get_guide(*document, g.id);
+        if (guide) {
+            guide->set_locked(false, true);
+            guide->moveto(Geom::Point(left, y), true);
+        }
+        else {
+            guide = create_guide(*document, left, y, right, y);
+            guide->getRepr()->setAttributeOrRemoveIfEmpty("id", g.id);
+        }
+        guide->set_label(g.name, true);
+        guide->set_locked(true, true);
+    }
+
+    DocumentUndo::done(document, _("Set up typography canvas"), "");
+}
+
 const int MARGIN_SPACE = 4;
 
 Gtk::Box* SvgFontsDialog::global_settings_tab(){
@@ -838,6 +899,20 @@ Gtk::Box* SvgFontsDialog::global_settings_tab(){
         _grid.attach(*spin->get_label(), 0, row);
         _grid.attach(*spin->getSpin(), 1, row++);
     }
+    auto setup = Gtk::make_managed<Gtk::Button>(_("Set up canvas"));
+    _grid.attach(*setup, 0, row++, 2);
+    setup->set_halign(Gtk::ALIGN_START);
+    setup->signal_clicked().connect([=](){
+        // set up typography canvas
+        set_up_typography_canvas(
+            getDocument(),
+            _units_per_em_spin->getSpin()->get_value(),
+            _ascent_spin->getSpin()->get_value(),
+            _cap_height_spin->getSpin()->get_value(),
+            _x_height_spin->getSpin()->get_value(),
+            _descent_spin->getSpin()->get_value()
+        );
+    });
 
     global_vbox.set_border_width(2);
     global_vbox.pack_start(_grid, false, true);
@@ -1539,22 +1614,26 @@ SPFont *new_font(SPDocument *document)
     // create a new font
     Inkscape::XML::Node *repr = xml_doc->createElement("svg:font");
 
-    //By default, set the horizontal advance to 1024 units
-    repr->setAttribute("horiz-adv-x", "1024");
+    //By default, set the horizontal advance to 1000 units
+    repr->setAttribute("horiz-adv-x", "1000");
 
     // Append the new font node to defs
     defs->getRepr()->appendChild(repr);
 
-    //create a missing glyph
+    // add some default values
     Inkscape::XML::Node *fontface;
     fontface = xml_doc->createElement("svg:font-face");
-    fontface->setAttribute("units-per-em", "1024");
+    fontface->setAttribute("units-per-em", "1000");
+    fontface->setAttribute("ascent", "750");
+    fontface->setAttribute("cap-height", "600");
+    fontface->setAttribute("x-height", "400");
+    fontface->setAttribute("descent", "200");
     repr->appendChild(fontface);
 
     //create a missing glyph
     Inkscape::XML::Node *mg;
     mg = xml_doc->createElement("svg:missing-glyph");
-    mg->setAttribute("d", "M0,0h1000v1024h-1000z");
+    mg->setAttribute("d", "M0,0h1000v1000h-1000z");
     repr->appendChild(mg);
 
     // get corresponding object
@@ -1597,7 +1676,7 @@ void SvgFontsDialog::add_font(){
     }
 
     update_fonts(false);
-//    select_font(font);
+    on_font_selection_changed();
 
     DocumentUndo::done(doc, _("Add font"), "");
 }
