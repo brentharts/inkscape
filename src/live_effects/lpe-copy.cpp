@@ -1174,12 +1174,12 @@ void LPECopy::addKnotHolderEntities(KnotHolder *knotholder, SPItem *item)
     _knotholder = knotholder;
     KnotHolderEntity *e = new CoS::KnotHolderEntityCopyGapX(this);
     e->create(nullptr, item, knotholder, Inkscape::CANVAS_ITEM_CTRL_TYPE_LPE, "LPE:CopiesGapX",
-              _("<b>Gap Y for the copies</b>: drag to gap all copies, <b>Shift+click</b> reset o origin"));
+              _("<b>Gap X for the copies</b>: drag to gap all copies, <b>Shift+click</b> reset to origin"));
     knotholder->add(e);
 
     KnotHolderEntity *f = new CoS::KnotHolderEntityCopyGapY(this);
     f->create(nullptr, item, knotholder, Inkscape::CANVAS_ITEM_CTRL_TYPE_LPE, "LPE:CopiesGapY",
-              _("<b>Gap Y for the copies</b>: drag to gap all copies, <b>Shift+click</b> reset o origin"));
+              _("<b>Gap Y for the copies</b>: drag to gap all copies, <b>Shift+click</b> reset to origin"));
     knotholder->add(f);
 }
 
