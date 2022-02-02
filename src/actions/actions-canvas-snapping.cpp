@@ -74,7 +74,7 @@ SnapVector snap_all_the_rest = {
     { "snap-path-mask",          SNAPTARGET_PATH_MASK,          true },
     { "snap-path-clip",          SNAPTARGET_PATH_CLIP,          true },
 
-    { "snap-page-border",        SNAPTARGET_PAGE_BORDER,        false },
+    { "snap-page-border",        SNAPTARGET_PAGE_BORDER,        true },
     { "snap-grid",               SNAPTARGET_GRID,               true },
     { "snap-guide",              SNAPTARGET_GUIDE,              true },
 };
