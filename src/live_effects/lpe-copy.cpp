@@ -77,7 +77,7 @@ LPECopy::LPECopy(LivePathEffectObject *lpeobject) :
     gapx(_("Gap X"), _("Gap between copies in X"), "gapx", &wr, this, 0.0),
     gapy(_("Gap Y"), _("Gap between copies in Y"), "gapy", &wr, this, 0.0),
     scale(_("Scale %"), _("Scale copies"), "scale", &wr, this, 100.0),
-    rotate(_("Rotate°"), _("Rotate copies"), "rotate", &wr, this, 0.0),
+    rotate(_("Rotate°"), _("Rotate °"), "rotate", &wr, this, 0.0),
     offset(_("Offset %"), _("Offset copies"), "offset", &wr, this, 0.0),
     offset_type(_("Offset type"), _("Offset Type (rows/cols)"), "offset_type", &wr, this, false),
     interpolate_scalex(_("Interpolate scale X"), _("Interpolate rotate X"), "interpolate_scalex", &wr, this, false),
