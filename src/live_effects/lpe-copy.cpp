@@ -91,7 +91,7 @@ LPECopy::LPECopy(LivePathEffectObject *lpeobject) :
     mirrorcolsx(_("Mirror cols in X"), _("Mirror cols in X"), "mirrorcolsx", &wr, this, false),
     mirrorcolsy(_("Mirror cols in Y"), _("Mirror cols in Y"), "mirrorcolsy", &wr, this, false),
     mirrortrans(_("Mirror transforms"), _("Mirror transforms"), "mirrortrans", &wr, this, false),
-    link_styles(_("Link styles"), _("Link styles on split mode"), "link_styles", &wr, this, false)
+    link_styles(_("Link styles"), _("Link styles in split mode"), "link_styles", &wr, this, false)
     
 {
     show_orig_path = true;
