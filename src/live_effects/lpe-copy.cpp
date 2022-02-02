@@ -88,8 +88,8 @@ LPECopy::LPECopy(LivePathEffectObject *lpeobject) :
     split_items(_("Split elements"), _("Split elements, so each can have its own style"), "split_items", &wr, this, false),
     mirrorrowsx(_("Mirror rows in X"), _("Mirror rows in X"), "mirrorrowsx", &wr, this, false),
     mirrorrowsy(_("Mirror rows in Y"), _("Mirror rows in Y"), "mirrorrowsy", &wr, this, false),
-    mirrorcolsx(_("Mirror cols in X"), _("Mirror cols in X"), "mirrorcolsx", &wr, this, false),
-    mirrorcolsy(_("Mirror cols in Y"), _("Mirror cols in Y"), "mirrorcolsy", &wr, this, false),
+    mirrorcolsx(_("Mirror cols in X"), _("Mirror columns in X"), "mirrorcolsx", &wr, this, false),
+    mirrorcolsy(_("Mirror cols in Y"), _("Mirror columns in Y"), "mirrorcolsy", &wr, this, false),
     mirrortrans(_("Mirror transforms"), _("Mirror transforms"), "mirrortrans", &wr, this, false),
     link_styles(_("Link styles"), _("Link styles in split mode"), "link_styles", &wr, this, false)
     
