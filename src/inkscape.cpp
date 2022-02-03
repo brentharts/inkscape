@@ -38,12 +38,7 @@
 #include "debug/simple-event.h"
 #include "debug/event-tracker.h"
 
-#include "extension/db.h"
-#include "extension/init.h"
-#include "extension/system.h"
-
 #include "io/resource.h"
-#include "io/fix-broken-links.h"
 #include "io/sys.h"
 
 #include "libnrtype/FontFactory.h"
@@ -51,13 +46,9 @@
 #include "object/sp-item-group.h"
 #include "object/sp-root.h"
 
-#include "ui/desktop/menubar.h"
 #include "ui/themes.h"
 #include "ui/dialog/debug.h"
 #include "ui/tools/tool-base.h"
-
-/* Backbones of configuration xml data */
-#include "menus-skeleton.h"
 
 #include <fstream>
 
@@ -259,9 +250,6 @@ Application::Application(bool use_gui) :
             }
         });
     }
-
-    /* Initialize the extensions */
-    Inkscape::Extension::init();
 
     /* Initialize font factory */
     font_factory *factory = font_factory::Default();

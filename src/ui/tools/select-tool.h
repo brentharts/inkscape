@@ -29,31 +29,27 @@ namespace Tools {
 
 class SelectTool : public ToolBase {
 public:
-    SelectTool();
+    SelectTool(SPDesktop *desktop);
     ~SelectTool() override;
 
     bool dragging;
     bool moved;
     guint button_press_state;
 
-    std::vector<SPItem*> cycling_items;
-    std::vector<SPItem*> cycling_items_cmp;
-    SPItem *cycling_cur_item;
+        std::vector<SPItem *> cycling_items;
+        std::vector<SPItem *> cycling_items_cmp;
+        SPItem *cycling_cur_item;
     bool cycling_wrap;
 
     SPItem *item;
-    Inkscape::CanvasItem *grabbed = nullptr;
+        Inkscape::CanvasItem *grabbed = nullptr;
     Inkscape::SelTrans *_seltrans;
     Inkscape::SelectionDescriber *_describer;
     gchar *no_selection_msg = nullptr;
 
-    void setup() override;
-    void set(const Inkscape::Preferences::Entry &val) override;
+    void set(const Inkscape::Preferences::Entry& val) override;
     bool root_handler(GdkEvent* event) override;
-    bool item_handler(SPItem* item, GdkEvent *event) override;
-
-    const std::string& getPrefsPath() override;
-
+    bool item_handler(SPItem* item, GdkEvent* event) override;
 private:
     bool sp_select_context_abort();
     void sp_select_context_cycle_through_items(Inkscape::Selection *selection, GdkEventScroll *scroll_event);
