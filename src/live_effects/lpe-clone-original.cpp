@@ -164,7 +164,7 @@ LPECloneOriginal::cloneAttributes(SPObject *origin, SPObject *dest, const gchar 
         }
         sp_lpe_item_enable_path_effects(sp_lpe_item, true);
     } else if (group_origin || group_dest) {
-        g_warning("LPE Clone Original, spect same type and the same number of childs to work propely");
+        g_warning("LPE Clone Original: for this path effect to work properly, the same type and the same number of children are required");
     }
     if (group_origin && group_dest) {
         std::vector< SPObject * > childs = group_origin->childList(true);
