@@ -366,7 +366,10 @@ void SpiralTool::finishItem() {
 
         spiral->set_shape();
         spiral->updateRepr(SP_OBJECT_WRITE_EXT);
+        // compensate stroke scaling couldent be done in doWriteTransform
+        double const expansion = spiral->transform.descrim();
         spiral->doWriteTransform(spiral->transform, nullptr, true);
+        spiral->adjust_stroke_width_recursive(expansion);
 
         _desktop->getSelection()->set(this->spiral);
         DocumentUndo::done(_desktop->getDocument(), _("Create spiral"), INKSCAPE_ICON("draw-spiral"));

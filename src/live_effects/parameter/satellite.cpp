@@ -241,7 +241,8 @@ void SatelliteParam::linked_transformed(Geom::Affine const *rel_transf, SPItem *
             if (hreflist.size()) {
                 SPLPEItem *sp_lpe_item = dynamic_cast<SPLPEItem *>(*hreflist.begin());
                 if (sp_lpe_item) {
-                    if (selection->includes(moved_item)) {
+                    SPGroup *movedgroup = dynamic_cast<SPGroup *>(moved_item);
+                    if (selection->includes(moved_item) && !movedgroup) {
                         SPItem *item = sp_lpe_item;
                         Geom::Affine m(*rel_transf);
                         Inkscape::Preferences *prefs = Inkscape::Preferences::get();
@@ -293,6 +294,10 @@ void SatelliteParam::addCanvasIndicators(SPLPEItem const * /*lpeitem*/, std::vec
 void SatelliteParam::on_link_button_click()
 {
     Inkscape::UI::ClipboardManager *cm = Inkscape::UI::ClipboardManager::get();
+    // here prevent item is reseted tranform on link
+    if (effectType() == CLONE_ORIGINAL) {
+        param_effect->is_load = false;
+    }
     auto itemid = cm->getFirstObjectID();
     if (itemid.empty()) {
         return;
