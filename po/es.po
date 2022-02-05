@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Inkscape 1.1\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
-"POT-Creation-Date: 2022-01-17 14:44+0000\n"
-"PO-Revision-Date: 2022-01-18 14:49+0100\n"
+"POT-Creation-Date: 2022-02-04 22:13+0000\n"
+"PO-Revision-Date: 2022-02-05 16:25+0100\n"
 "Last-Translator: Lucas Vieites <lucas.vieites@gmail.com>\n"
 "Language-Team: Español; Castellano <inkscape-translator@lists.inkscape.org>\n"
 "Language: es\n"
@@ -20,7 +20,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.4.2\n"
+"X-Generator: Poedit 3.0.1\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-Basepath: .\n"
 "X-Poedit-SearchPath-0: .\n"
@@ -5068,13 +5068,13 @@ msgstr ""
 msgid "Move guide"
 msgstr "Mover guía"
 
-#: ../src/desktop-events.cpp:339 ../src/desktop-events.cpp:396
+#: ../src/desktop-events.cpp:340 ../src/desktop-events.cpp:400
 #: ../src/ui/dialog/guides.cpp:149
 msgid "Delete guide"
 msgstr "Borrar guía"
 
 #  create dialog
-#: ../src/desktop-events.cpp:372
+#: ../src/desktop-events.cpp:375
 #, c-format
 msgid "<b>Guideline</b>: %s"
 msgstr "<b>Línea guía</b>: %s"
@@ -8764,39 +8764,39 @@ msgstr "PovRay (*.pov) (solo trayectos y formas)"
 msgid "PovRay Raytracer File"
 msgstr "Archivo de trazado de rayos PovRay"
 
-#: ../src/extension/internal/svg.cpp:728
+#: ../src/extension/internal/svg.cpp:737
 msgid "SVG Input"
 msgstr "Entrada SVG"
 
-#: ../src/extension/internal/svg.cpp:734
+#: ../src/extension/internal/svg.cpp:743
 msgid "Scalable Vector Graphic (*.svg)"
 msgstr "Gráficos Vectoriales Escalables (*.svg)"
 
-#: ../src/extension/internal/svg.cpp:735
+#: ../src/extension/internal/svg.cpp:744
 msgid "Inkscape native file format and W3C standard"
 msgstr "El formato nativo de Inkscape y estándar W3C"
 
-#: ../src/extension/internal/svg.cpp:742
+#: ../src/extension/internal/svg.cpp:751
 msgid "SVG Output Inkscape"
 msgstr "Salida SVG Inkscape"
 
-#: ../src/extension/internal/svg.cpp:747
+#: ../src/extension/internal/svg.cpp:756
 msgid "Inkscape SVG (*.svg)"
 msgstr "SVG de Inkscape (*.svg)"
 
-#: ../src/extension/internal/svg.cpp:748
+#: ../src/extension/internal/svg.cpp:757
 msgid "SVG format with Inkscape extensions"
 msgstr "Formato SVG con extensiones de Inkscape"
 
-#: ../src/extension/internal/svg.cpp:756 ../share/extensions/output_scour.inx:37
+#: ../src/extension/internal/svg.cpp:765 ../share/extensions/output_scour.inx:37
 msgid "SVG Output"
 msgstr "Salida SVG"
 
-#: ../src/extension/internal/svg.cpp:761
+#: ../src/extension/internal/svg.cpp:770
 msgid "Plain SVG (*.svg)"
 msgstr "SVG plano (*.svg)"
 
-#: ../src/extension/internal/svg.cpp:762
+#: ../src/extension/internal/svg.cpp:771
 msgid "Scalable Vector Graphics format as defined by the W3C"
 msgstr "Formato de gráficos vectoriales escalables (SVG) definido por W3C"
 
@@ -9197,17 +9197,17 @@ msgstr "Guardando documento..."
 msgid "en"
 msgstr "es"
 
-#: ../src/file.cpp:1182 ../src/ui/dialog/command-palette.cpp:262
+#: ../src/file.cpp:1181 ../src/ui/dialog/command-palette.cpp:262
 #: ../src/ui/dialog/inkscape-preferences.cpp:2615
 msgid "Import"
 msgstr "Importar"
 
-#: ../src/file.cpp:1185 ../src/inkscape-application.cpp:816
+#: ../src/file.cpp:1184 ../src/inkscape-application.cpp:816
 #, c-format
 msgid "Failed to load the requested file %s"
 msgstr "Error al cargar el archivo pedido %s"
 
-#: ../src/file.cpp:1232
+#: ../src/file.cpp:1231
 msgid "Select file to import"
 msgstr "Seleccionar el archivo a importar"
 
@@ -12521,7 +12521,7 @@ msgstr "Calcular sólo valores de proyección máx/mín"
 #: ../share/extensions/jessyink_effects.inx:26
 #: ../share/extensions/jessyink_export.inx:14
 #: ../share/extensions/jessyink_install.inx:7
-#: ../share/extensions/jessyink_key_bindings.inx:54
+#: ../share/extensions/jessyink_key_bindings.inx:56
 #: ../share/extensions/jessyink_master_slide.inx:10
 #: ../share/extensions/jessyink_mouse_handler.inx:13
 #: ../share/extensions/jessyink_summary.inx:6
@@ -14140,7 +14140,7 @@ msgstr "Mover elemento abajo"
 msgid "Remove item"
 msgstr "Eliminar elemento"
 
-#: ../src/live_effects/parameter/originalitemarray.cpp:305
+#: ../src/live_effects/parameter/originalitemarray.cpp:310
 msgid "Link itemarray parameter to item"
 msgstr "Asociar el parámetro del array de elementos al elemento"
 
@@ -14701,19 +14701,19 @@ msgstr "Objeto a trayecto"
 msgid "<b>No objects</b> to convert to path in the selection."
 msgstr "<b>No hay objetos</b> que se puedan convertir en trayectos en la selección."
 
-#: ../src/path-chemistry.cpp:574
+#: ../src/path-chemistry.cpp:573
 msgid "Select <b>path(s)</b> to reverse."
 msgstr "Seleccione los <b>trayectos</b> que desea revertir."
 
-#: ../src/path-chemistry.cpp:582
+#: ../src/path-chemistry.cpp:581
 msgid "Reversing paths..."
 msgstr "Revirtiendo trayectos..."
 
-#: ../src/path-chemistry.cpp:617
+#: ../src/path-chemistry.cpp:616
 msgid "Reverse path"
 msgstr "Revertir trayecto"
 
-#: ../src/path-chemistry.cpp:620
+#: ../src/path-chemistry.cpp:619
 msgid "<b>No paths</b> to reverse in the selection."
 msgstr "<b>No hay trayectos</b> reversibles en la selección."
 
@@ -15874,49 +15874,49 @@ msgstr "Vectorizar mapa de bits"
 msgid "Trace: Done. %ld nodes created"
 msgstr "Vectorizar: Terminado. Se han creado %ld nodos"
 
-#: ../src/ui/clipboard.cpp:314
+#: ../src/ui/clipboard.cpp:318
 msgid "Nothing was copied."
 msgstr "No se ha copiado nada."
 
-#: ../src/ui/clipboard.cpp:451
+#: ../src/ui/clipboard.cpp:455
 msgid "Can't paste text outside of the text tool."
 msgstr "No se puede pegar fuera de la herramienta de texto."
 
-#: ../src/ui/clipboard.cpp:454 ../src/ui/clipboard.cpp:730
-#: ../src/ui/clipboard.cpp:758 ../src/ui/clipboard.cpp:799
+#: ../src/ui/clipboard.cpp:458 ../src/ui/clipboard.cpp:750
+#: ../src/ui/clipboard.cpp:778 ../src/ui/clipboard.cpp:819
 msgid "Nothing on the clipboard."
 msgstr "No hay nada en el portapapeles."
 
-#: ../src/ui/clipboard.cpp:572
+#: ../src/ui/clipboard.cpp:591
 msgid "Select <b>object(s)</b> to paste style to."
 msgstr "Seleccione los <b>objetos</b> a los que pegar el estilo."
 
-#: ../src/ui/clipboard.cpp:583 ../src/ui/clipboard.cpp:600
+#: ../src/ui/clipboard.cpp:603 ../src/ui/clipboard.cpp:620
 msgid "No style on the clipboard."
 msgstr "No hay estilo en el portapapeles."
 
-#: ../src/ui/clipboard.cpp:625
+#: ../src/ui/clipboard.cpp:645
 msgid "Select <b>object(s)</b> to paste size to."
 msgstr "Seleccione los <b>objetos</b> a los que pegar el tamaño."
 
-#: ../src/ui/clipboard.cpp:633
+#: ../src/ui/clipboard.cpp:653
 msgid "No size on the clipboard."
 msgstr "No hay tamaño en el portapapeles."
 
-#: ../src/ui/clipboard.cpp:690
+#: ../src/ui/clipboard.cpp:710
 msgid "Select <b>object(s)</b> to paste live path effect to."
 msgstr ""
 "Seleccione los <b>objetos</b> a los que pegar el el efecto de trayecto vivo."
 
-#: ../src/ui/clipboard.cpp:717
+#: ../src/ui/clipboard.cpp:737
 msgid "No effect on the clipboard."
 msgstr "No hay efecto en el portapapeles."
 
-#: ../src/ui/clipboard.cpp:736 ../src/ui/clipboard.cpp:782
+#: ../src/ui/clipboard.cpp:756 ../src/ui/clipboard.cpp:802
 msgid "Clipboard does not contain a path."
 msgstr "El portapapeles no contiene ningún trayecto."
 
-#: ../src/ui/clipboard.cpp:829
+#: ../src/ui/clipboard.cpp:849
 msgid "Clipboard does not contain any objects of type \"%1\"."
 msgstr "El portapapeles no contiene ningun objeto de tipo «%1»."
 
@@ -35181,15 +35181,6 @@ msgstr "Gestión de color"
 msgid "Total number of objects not converted: {}\n"
 msgstr "Cantidad de objetos no convertidos: {}\n"
 
-#: ../share/extensions/dxf_input.py:715
-#, python-format
-msgid ""
-"%d ENTITIES of type POLYLINE encountered and ignored. Please try to convert to "
-"Release 13 format using QCad."
-msgstr ""
-"Encontradas e ignoradas %d ENTIDADES de tipo POLYLINE. Intente convertir al "
-"formato de Release 13 mediante QCad."
-
 #: ../share/extensions/funcplot.py:82
 msgid "Invalid function specification"
 msgstr "Especificación de función no-válida"
@@ -35698,7 +35689,7 @@ msgstr ""
 msgid "No paths where found. Please convert objects to paths."
 msgstr "No se han encontrado trayectos. Convierta objetos en trayectos."
 
-#: ../share/extensions/print_win32_vector.py:175
+#: ../share/extensions/print_win32_vector.py:181
 msgid "Failed to open default printer"
 msgstr "No se ha podido abrir la impresora predeterminada"
 
@@ -38186,13 +38177,13 @@ msgstr ""
 msgid ""
 "A tool to replace text with stroke fonts\n"
 "\n"
-"Version 3.0.4, 2020-06-01\n"
+"Version 3.0.5, 2021-05-17\n"
 "\n"
 "\n"
 msgstr ""
 "Una herramienta que reemplaza texto con fuentes de trazo\n"
 "\n"
-"Versión 3.0.4, 2020-06-01\n"
+"Versión 3.0.5, 2021-05-17\n"
 "\n"
 "\n"
 
@@ -38907,7 +38898,7 @@ msgstr ""
 #: ../share/extensions/jessyink_autotexts.inx:21
 #: ../share/extensions/jessyink_effects.inx:33
 #: ../share/extensions/jessyink_install.inx:14
-#: ../share/extensions/jessyink_key_bindings.inx:61
+#: ../share/extensions/jessyink_key_bindings.inx:63
 #: ../share/extensions/jessyink_master_slide.inx:17
 #: ../share/extensions/jessyink_mouse_handler.inx:20
 #: ../share/extensions/jessyink_summary.inx:13
@@ -39056,12 +39047,12 @@ msgid "Next (without effects):"
 msgstr "Siguiente (sin efectos):"
 
 #: ../share/extensions/jessyink_key_bindings.inx:11
-#: ../share/extensions/jessyink_key_bindings.inx:47
+#: ../share/extensions/jessyink_key_bindings.inx:49
 msgid "First slide:"
 msgstr "Primera diapositiva:"
 
 #: ../share/extensions/jessyink_key_bindings.inx:12
-#: ../share/extensions/jessyink_key_bindings.inx:48
+#: ../share/extensions/jessyink_key_bindings.inx:50
 msgid "Last slide:"
 msgstr "Última diapositiva:"
 
@@ -39094,7 +39085,7 @@ msgid "Export presentation:"
 msgstr "Exportar presentación:"
 
 #: ../share/extensions/jessyink_key_bindings.inx:22
-#: ../share/extensions/jessyink_key_bindings.inx:49
+#: ../share/extensions/jessyink_key_bindings.inx:51
 msgid "Switch to slide mode:"
 msgstr "Cambiar a modo diapositiva:"
 
@@ -39123,86 +39114,90 @@ msgid "Set path width to 9:"
 msgstr "Fijar anchura de trayecto a 9:"
 
 #: ../share/extensions/jessyink_key_bindings.inx:29
-msgid "Set path color to blue:"
-msgstr "Fijar color de trayecto a azul:"
-
-#: ../share/extensions/jessyink_key_bindings.inx:30
-msgid "Set path color to cyan:"
-msgstr "Fijar color de trayecto a cian:"
-
-#: ../share/extensions/jessyink_key_bindings.inx:31
-msgid "Set path color to green:"
-msgstr "Fijar color de trayecto a verde:"
-
-#: ../share/extensions/jessyink_key_bindings.inx:32
-msgid "Set path color to black:"
-msgstr "Fijar color de trayecto a negro:"
-
-#: ../share/extensions/jessyink_key_bindings.inx:33
-msgid "Set path color to magenta:"
-msgstr "Fijar color de trayecto a magenta:"
-
-#: ../share/extensions/jessyink_key_bindings.inx:34
-msgid "Set path color to orange:"
-msgstr "Fijar color de trayecto a naranja:"
-
-#: ../share/extensions/jessyink_key_bindings.inx:35
-msgid "Set path color to red:"
-msgstr "Fijar color de trayecto a rojo:"
-
-#: ../share/extensions/jessyink_key_bindings.inx:36
-msgid "Set path color to white:"
-msgstr "Fijar color de trayecto a blanco:"
-
-#: ../share/extensions/jessyink_key_bindings.inx:37
-msgid "Set path color to yellow:"
-msgstr "Fijar color de trayecto a amarillo:"
-
-#: ../share/extensions/jessyink_key_bindings.inx:38
 msgid "Undo last path segment:"
 msgstr "Deshacer último segmento de trayecto:"
 
+#: ../share/extensions/jessyink_key_bindings.inx:31
+msgid "Path Colors"
+msgstr "Colores de trayecto"
+
+#: ../share/extensions/jessyink_key_bindings.inx:32
+msgid "Set path color to blue:"
+msgstr "Fijar color de trayecto a azul:"
+
+#: ../share/extensions/jessyink_key_bindings.inx:33
+msgid "Set path color to cyan:"
+msgstr "Fijar color de trayecto a cian:"
+
+#: ../share/extensions/jessyink_key_bindings.inx:34
+msgid "Set path color to green:"
+msgstr "Fijar color de trayecto a verde:"
+
+#: ../share/extensions/jessyink_key_bindings.inx:35
+msgid "Set path color to black:"
+msgstr "Fijar color de trayecto a negro:"
+
+#: ../share/extensions/jessyink_key_bindings.inx:36
+msgid "Set path color to magenta:"
+msgstr "Fijar color de trayecto a magenta:"
+
+#: ../share/extensions/jessyink_key_bindings.inx:37
+msgid "Set path color to orange:"
+msgstr "Fijar color de trayecto a naranja:"
+
+#: ../share/extensions/jessyink_key_bindings.inx:38
+msgid "Set path color to red:"
+msgstr "Fijar color de trayecto a rojo:"
+
+#: ../share/extensions/jessyink_key_bindings.inx:39
+msgid "Set path color to white:"
+msgstr "Fijar color de trayecto a blanco:"
+
 #: ../share/extensions/jessyink_key_bindings.inx:40
+msgid "Set path color to yellow:"
+msgstr "Fijar color de trayecto a amarillo:"
+
+#: ../share/extensions/jessyink_key_bindings.inx:42
 msgid "Index mode"
 msgstr "Modo índice"
 
-#: ../share/extensions/jessyink_key_bindings.inx:41
+#: ../share/extensions/jessyink_key_bindings.inx:43
 msgid "Select the slide to the left:"
 msgstr "Seleccionar la diapositiva a la izquierda:"
 
-#: ../share/extensions/jessyink_key_bindings.inx:42
+#: ../share/extensions/jessyink_key_bindings.inx:44
 msgid "Select the slide to the right:"
 msgstr "Seleccionar la diapositiva a la derecha:"
 
-#: ../share/extensions/jessyink_key_bindings.inx:43
+#: ../share/extensions/jessyink_key_bindings.inx:45
 msgid "Select the slide above:"
 msgstr "Seleccionar la diapositiva encima:"
 
-#: ../share/extensions/jessyink_key_bindings.inx:44
+#: ../share/extensions/jessyink_key_bindings.inx:46
 msgid "Select the slide below:"
 msgstr "Seleccionar la diapositiva debajo:"
 
-#: ../share/extensions/jessyink_key_bindings.inx:45
+#: ../share/extensions/jessyink_key_bindings.inx:47
 msgid "Previous page:"
 msgstr "Página anterior:"
 
-#: ../share/extensions/jessyink_key_bindings.inx:46
+#: ../share/extensions/jessyink_key_bindings.inx:48
 msgid "Next page:"
 msgstr "Página siguiente :"
 
-#: ../share/extensions/jessyink_key_bindings.inx:50
+#: ../share/extensions/jessyink_key_bindings.inx:52
 msgid "Decrease number of columns:"
 msgstr "Reducir número de columnas:"
 
-#: ../share/extensions/jessyink_key_bindings.inx:51
+#: ../share/extensions/jessyink_key_bindings.inx:53
 msgid "Increase number of columns:"
 msgstr "Incrementar número de columnas:"
 
-#: ../share/extensions/jessyink_key_bindings.inx:52
+#: ../share/extensions/jessyink_key_bindings.inx:54
 msgid "Set number of columns to default:"
 msgstr "Fijar número de columnas a predeterminado:"
 
-#: ../share/extensions/jessyink_key_bindings.inx:55
+#: ../share/extensions/jessyink_key_bindings.inx:57
 msgid ""
 "This extension allows you customize the key bindings JessyInk uses. Please see "
 "code.google.com/p/jessyink for more details."
@@ -40638,7 +40633,7 @@ msgstr "Espacio entre copias:"
 msgid "Normal offset:"
 msgstr "Desvío normal:"
 
-#: ../share/extensions/pathalongpath.inx:20 ../share/extensions/pathscatter.inx:12
+#: ../share/extensions/pathalongpath.inx:20
 msgid "Tangential offset:"
 msgstr "Desvío tangencial:"
 
@@ -40713,6 +40708,10 @@ msgstr "Seguir orientación del trayecto"
 #: ../share/extensions/pathscatter.inx:9
 msgid "Stretch spaces to fit skeleton length"
 msgstr "Estirar espacios para ajustarse a la longitud del esqueleto"
+
+#: ../share/extensions/pathscatter.inx:12
+msgid "Tangential offset (percentage of pattern length):"
+msgstr "Desvío tangencial (porcentaje de la longitud del patrón):"
 
 #: ../share/extensions/pathscatter.inx:13
 msgid "Rotate pattern 90° clockwise"
@@ -43783,6 +43782,13 @@ msgstr "medias emes"
 #: ../share/ui/units.xml:99
 msgid "Half of font height"
 msgstr "La mitad de la altura de la fuente"
+
+#~ msgid ""
+#~ "%d ENTITIES of type POLYLINE encountered and ignored. Please try to convert to "
+#~ "Release 13 format using QCad."
+#~ msgstr ""
+#~ "Encontradas e ignoradas %d ENTIDADES de tipo POLYLINE. Intente convertir al "
+#~ "formato de Release 13 mediante QCad."
 
 #~ msgid " %1\n"
 #~ msgstr " %1\n"
