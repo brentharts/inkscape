@@ -633,6 +633,11 @@
         <attribute name='target' type='i'>0</attribute>
       </item>
       <item>
+        <attribute name='label' translatable="yes">Narrow</attribute>
+        <attribute name='action'>win.canvas-interface-mode</attribute>
+        <attribute name='target' type='i'>1</attribute>
+      </item>
+      <item>
         <attribute name='label' translatable="yes">Wide</attribute>
         <attribute name='action'>win.canvas-interface-mode</attribute>
         <attribute name='target' type='i'>2</attribute>

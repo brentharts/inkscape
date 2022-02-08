@@ -15,10 +15,11 @@
 #include <glibmm/i18n.h>
 
 #include "ui/interface.h"
-#include "ui/uxmanager.h"
 #include "ui/view/view.h"
 
 #include "actions-view-mode.h"
+
+#include "widgets/desktop-widget.h"
 
 #include "inkscape-application.h"
 #include "inkscape-window.h"
@@ -331,30 +332,23 @@ canvas_interface_mode(int value, InkscapeWindow *win)
         return;
     }
 
-    // Setting Message
-    Glib::ustring tip;
-    if (value == 0) {
-        tip = _("Default interface setup");
-    }
-    else if (value == 1) {
-        tip = _("Setup for custom task");
-    }
-    else if (value == 2) {
-        tip = _("Setup for widescreen work");
-    }
-
     // Change state
     saction->change_state(value);
 
-    // Set Interface
-    SPDesktop* dt = win->get_desktop();
-    Inkscape::UI::UXManager::getInstance()->setTask(dt, value);
+    // Save to preferences
+    auto prefs = Inkscape::Preferences::get();
+    Glib::ustring pref_root = "/window/";
+    auto desktop = win->get_desktop();
+    if (desktop && desktop->is_focusMode()) {
+        pref_root = "/focus/";
+    } else if (desktop && desktop->is_fullscreen()) {
+        pref_root = "/fullscreen/";
+    }
+    prefs->setInt(pref_root + "interface_mode", value);
 
-    // Message FIXME having some error
-    // dt->tipsMessageContext()->clear();
-    // dt->tipsMessageContext()->set(Inkscape::NORMAL_MESSAGE, gettext( tip.c_str() )  );
-    // similar =  dt->tipsMessageContext()->set(Inkscape::NORMAL_MESSAGE, gettext( tool_msg[tool].c_str() ) );
-
+    // Update Interface
+    auto desktop_widget = win->get_desktop_widget();
+    desktop_widget->layoutWidgets();
 }
 
 std::vector<std::vector<Glib::ustring>> raw_data_view_mode =
@@ -375,9 +369,9 @@ std::vector<std::vector<Glib::ustring>> raw_data_view_mode =
     {"win.canvas-command-palette",          N_("Command Palette"),          "Canvas Display",   N_("Show or hide the on-canvas command palette")},
     {"win.view-fullscreen",                 N_("Fullscreen"),               "Canvas Display",   N_("Stretch this document window to full screen")},
 
-    {"win.canvas-interface-mode(0)",        N_("Default"),                  "Canvas Display",   N_("Default interface setup")},
-    {"win.canvas-interface-mode(1)",        N_("Custom"),                   "Canvas Display",   N_("Setup for custom task")},
-    {"win.canvas-interface-mode(2)",        N_("Wide"),                     "Canvas Display",   N_("Setup for widescreen work")}
+    {"win.canvas-interface-mode(0)",        N_("Default"),                  "Canvas Display",   N_("Default setup, layout chosen by display aspect ratio.")},
+    {"win.canvas-interface-mode(1)",        N_("Narrow"),                   "Canvas Display",   N_("Setup for non-widescreen display")},
+    {"win.canvas-interface-mode(2)",        N_("Wide"),                     "Canvas Display",   N_("Setup for widescreen display")}
     // clang-format on
 };
 
@@ -385,25 +379,32 @@ void
 add_actions_view_mode(InkscapeWindow* win)
 {
     auto prefs = Inkscape::Preferences::get();
-    SPDesktop* dt = win->get_desktop();
+    SPDesktop* desktop = win->get_desktop();
 
-    if (!dt) {
+    if (!desktop) {
         std::cerr << "add_actions_view_mode: no desktop!" << std::endl;
+    }
+
+    Glib::ustring pref_root = "/window/";
+    if (desktop && desktop->is_focusMode()) {
+        pref_root = "/focus/";
+    } else if (desktop && desktop->is_fullscreen()) {
+        pref_root = "/fullscreen/";
     }
 
     // clang-format off
 
     // Initial States of Actions
-    bool commands_toggle    = prefs->getBool("/window/commands/state", true);
-    bool snaptoolbox_toggle = prefs->getBool("/window/snaptoolbox/state", true);
-    bool toppanel_toggle    = prefs->getBool("/window/toppanel/state", true);
-    bool toolbox_toggle     = prefs->getBool("/window/toolbox/state", true);
-    bool panels_toggle      = prefs->getBool("/window/panels/state", true);
-    bool statusbar_toggle   = prefs->getBool("/window/statusbar/state", true);
-    bool scrollbars_toggle  = prefs->getBool("/window/scrollbars/state", true);
-    bool rulers_toggle      = prefs->getBool("/window/rulers/state", true);
+    bool commands_toggle    = prefs->getBool(pref_root + "commands/state", true);
+    bool snaptoolbox_toggle = prefs->getBool(pref_root + "snaptoolbox/state", true);
+    bool toppanel_toggle    = prefs->getBool(pref_root + "toppanel/state", true);
+    bool toolbox_toggle     = prefs->getBool(pref_root + "toolbox/state", true);
+    bool panels_toggle      = prefs->getBool(pref_root + "panels/state", true);
+    bool statusbar_toggle   = prefs->getBool(pref_root + "statusbar/state", true);
+    bool scrollbars_toggle  = prefs->getBool(pref_root + "scrollbars/state", true);
+    bool rulers_toggle      = prefs->getBool(pref_root + "rulers/state", true);
     bool guides_toggle      = win->get_desktop()->namedview->getRepr()->getAttributeBoolean("showguides", true);    // Should set it true or retrive the state (every time it set to true on restart)
-    int  interface_mode     = Inkscape::UI::UXManager::getInstance()->getDefaultTask(dt);
+    int  interface_mode     = prefs->getInt(pref_root + "interface_mode", 0);
 
     win->add_action_bool(          "canvas-show-grid",              sigc::bind<InkscapeWindow*>(sigc::ptr_fun(&canvas_show_grid_toggle),            win));
     win->add_action_bool(          "canvas-show-guides",            sigc::bind<InkscapeWindow*>(sigc::ptr_fun(&canvas_show_guides_toggle),          win), guides_toggle);
@@ -427,3 +428,14 @@ add_actions_view_mode(InkscapeWindow* win)
     }
     app->get_action_extra_data().add_data(raw_data_view_mode);
 }
+
+/*
+  Local Variables:
+  mode:c++
+  c-file-style:"stroustrup"
+  c-file-offsets:((innamespace .0)(inline-open . 0)(case-label . +))
+  indent-tabs-mode:nil
+  fill-column:99
+  End:
+*/
+// vim:filetype=cpp:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:fileencoding=utf-8:textwidth=99:
