@@ -1139,30 +1139,13 @@ void SPDesktopWidget::layoutWidgets()
     _canvas_grid->ShowRulers(    prefs->getBool(pref_root + "rulers/state",     true));
 
     // Move command toolbar as required.
-    bool at_top = false;
-    switch (prefs->getInt(pref_root + "interface_mode", 0)) {
-        case 0:
-        {
-            // Depends on screen aspect ratio.
-            Gdk::Rectangle monitor_geometry = Inkscape::UI::get_monitor_geometry_primary();
-            double const width  = monitor_geometry.get_width();
-            double const height = monitor_geometry.get_height();
-            if (height > 0 && width/height > 1.65) {
-                at_top = false;
-            } else {
-                at_top = true;
-            }
-            break;
-        }
-        case 1:
-            at_top = true;
-            break;
-        case 2:
-            at_top = false;
-            break;
-        default:
-            std::cerr << "SPDesktopWidget::layoutWidgets(): Unhandled interface_mode value!" << std::endl;
-    }
+
+    // If interface_mode unset, use screen aspect ratio. Needs to be synced with "canvas-interface-mode" action.
+    Gdk::Rectangle monitor_geometry = Inkscape::UI::get_monitor_geometry_primary();
+    double const width  = monitor_geometry.get_width();
+    double const height = monitor_geometry.get_height();
+    bool widescreen = (height > 0 && width/height > 1.65);
+    widescreen = prefs->getInt(pref_root + "interface_mode", widescreen);
 
     auto commands_toolbox_cpp = dynamic_cast<Gtk::Bin *>(Glib::wrap(commands_toolbox));
     if (commands_toolbox_cpp) {
@@ -1175,7 +1158,7 @@ void SPDesktopWidget::layoutWidgets()
         auto orientation = Gtk::ORIENTATION_HORIZONTAL;
         auto orientation_c = GTK_ORIENTATION_HORIZONTAL;
         // Link command toolbar back.
-        if (at_top) {
+        if (!widescreen) {
             _top_toolbars->attach(*commands_toolbox_cpp, 0, 0); // Always first
             gtk_box_set_child_packing(_vbox->gobj(), commands_toolbox, false, true, 0, GTK_PACK_START); // expand, fill, padding, pack_type
             orientation = Gtk::ORIENTATION_HORIZONTAL;
