@@ -132,7 +132,7 @@ void ColorScales<MODE>::_initUI()
         _wheel->set_hexpand(true);
         _wheel->set_vexpand(true);
         _wheel->set_name("ColorWheel");
-        _wheel->set_size_request(-1, 30); // minimal size
+        _wheel->set_size_request(-1, 130); // minimal size
 
         /* Signal */
         _wheel->signal_color_changed().connect([this](){ _wheelChanged(); });
