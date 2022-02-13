@@ -818,6 +818,7 @@ bool ToolBase::root_handler(GdkEvent* event) {
 #endif
                 double delta_y_clamped = CLAMP(delta_y, -1.0, 1.0); // values > 1 result in excessive rotating
                 rotate_inc = rotate_inc * -delta_y_clamped;
+                ret = TRUE;
                 break;
             }
 
@@ -829,6 +830,7 @@ bool ToolBase::root_handler(GdkEvent* event) {
             if (rotate_inc != 0.0) {
                 Geom::Point const scroll_dt = desktop->point();
                 desktop->rotate_relative_keep_point(scroll_dt, rotate_inc);
+                ret = TRUE;
             }
 
         } else if (action == Type::CANVAS_PAN_X) {
