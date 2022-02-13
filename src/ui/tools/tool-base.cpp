@@ -19,6 +19,8 @@
 #include <gdkmm/display.h>
 #include <glibmm/i18n.h>
 
+#include <set>
+
 #include "desktop-events.h"
 #include "desktop-style.h"
 #include "desktop.h"
@@ -84,6 +86,7 @@ static guint scroll_keyval = 0;
 // globals for key processing
 static bool latin_keys_group_valid = FALSE;
 static gint latin_keys_group;
+static std::set<int> latin_keys_groups;
 
 namespace Inkscape {
 namespace UI {
@@ -1305,8 +1308,12 @@ static void update_latin_keys_group() {
     gint n_keys;
 
     latin_keys_group_valid = FALSE;
+    latin_keys_groups.clear();
+
     if (gdk_keymap_get_entries_for_keyval(Gdk::Display::get_default()->get_keymap(), GDK_KEY_a, &keys, &n_keys)) {
         for (gint i = 0; i < n_keys; i++) {
+            latin_keys_groups.insert(keys[i].group);
+
             if (!latin_keys_group_valid || keys[i].group < latin_keys_group) {
                 latin_keys_group = keys[i].group;
                 latin_keys_group_valid = TRUE;
@@ -1332,6 +1339,11 @@ void init_latin_keys_group() {
  * work regardless of layouts (e.g., in Cyrillic).
  */
 guint get_latin_keyval(GdkEventKey const *event, guint *consumed_modifiers /*= NULL*/) {
+    if (latin_keys_groups.count(event->group)) {
+        // Keyboard group is a latin layout, so just return the actual keyval.
+        return event->keyval;
+    }
+
     guint keyval = 0;
     GdkModifierType modifiers;
     gint group = latin_keys_group_valid ? latin_keys_group : event->group;
