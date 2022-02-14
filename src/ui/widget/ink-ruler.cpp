@@ -311,7 +311,7 @@ Ruler::draw_scale(const::Cairo::RefPtr<::Cairo::Context>& cr_in)
 
             if (_orientation == Gtk::ORIENTATION_HORIZONTAL) {
                 layout->set_text(label);
-                cr->move_to (position+2, border.get_top());
+                cr->move_to (position+4, border.get_top()); // Magic number offset lables
                 layout->show_in_cairo_context(cr);
             } else {
                 cr->move_to (border.get_left(), position);
