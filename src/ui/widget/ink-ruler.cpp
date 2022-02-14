@@ -323,7 +323,7 @@ Ruler::draw_scale(const::Cairo::RefPtr<::Cairo::Context>& cr_in)
                     int text_height;
                     layout->get_pixel_size(text_width, text_height);
                     cr->move_to(border.get_left() + (aheight-text_width)/2.0 - 1,
-                                position + n*0.7*text_height - 1);
+                                position + n*0.7*text_height + 3);
                     layout->show_in_cairo_context(cr);
                     ++n;
                 }
