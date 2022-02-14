@@ -1339,14 +1339,14 @@ void init_latin_keys_group() {
  * work regardless of layouts (e.g., in Cyrillic).
  */
 guint get_latin_keyval(GdkEventKey const *event, guint *consumed_modifiers /*= NULL*/) {
-    if (latin_keys_groups.count(event->group)) {
-        // Keyboard group is a latin layout, so just return the actual keyval.
-        return event->keyval;
-    }
-
     guint keyval = 0;
     GdkModifierType modifiers;
     gint group = latin_keys_group_valid ? latin_keys_group : event->group;
+
+    if (latin_keys_groups.count(event->group)) {
+        // Keyboard group is a latin layout, so just use it.
+        group = event->group;
+    }
 
     gdk_keymap_translate_keyboard_state(
             Gdk::Display::get_default()->get_keymap(),
