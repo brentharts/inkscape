@@ -55,6 +55,8 @@ Ancetre(Inkscape::XML::Node *a, Inkscape::XML::Node *who)
     return Ancetre(a->parent(), who);
 }
 
+static void force_apply_transform(SPLPEItem* subject, Geom::Affine &transformation,
+                                  char const *const transform_attribute);
 
 bool Inkscape::ObjectSet::pathUnion(const bool skip_undo) {
     BoolOpErrors result = pathBoolOp(bool_op_union, skip_undo, false, INKSCAPE_ICON("path-union"), _("Union"));
@@ -815,10 +817,12 @@ BoolOpErrors Inkscape::ObjectSet::pathBoolOp(bool_op bop, const bool skip_undo, 
         }
     }
 
-    // premultiply by the inverse of parent's repr
+    // Later we need to premultiply by the inverse of parent's transform
     SPItem *parent_item = SP_ITEM(doc->getObjectByRepr(parent));
-    Geom::Affine local (parent_item->i2doc_affine());
-    auto transform = sp_svg_transform_write(local.inverse());
+    Geom::Affine inverse_parent_transform(parent_item->i2doc_affine().inverse());
+
+    // Store the transform attribute of the source element
+    char const *const old_transform_attibute = repr_source->attribute("transform");
 
     // now that we have the result, add it on the canvas
     if ( bop == bool_op_cut || bop == bool_op_slice ) {
@@ -873,11 +877,14 @@ BoolOpErrors Inkscape::ObjectSet::pathBoolOp(bool_op bop, const bool skip_undo, 
                 sp_repr_css_attr_unref(css);
             }
 
-            repr->setAttributeOrRemoveIfEmpty("transform", transform);
+            repr->setAttributeOrRemoveIfEmpty("transform", old_transform_attibute);
 
             // add the new repr to the parent
             // move to the saved position
             parent->addChildAtPos(repr, pos);
+
+            SPLPEItem *injected = dynamic_cast<SPLPEItem *>(doc->getObjectByRepr(repr));
+            force_apply_transform(injected, inverse_parent_transform, old_transform_attibute);
 
             selection.push_back(repr);
             Inkscape::GC::release(repr);
@@ -888,6 +895,11 @@ BoolOpErrors Inkscape::ObjectSet::pathBoolOp(bool_op bop, const bool skip_undo, 
         if ( resPath ) free(resPath);
 
     } else {
+        // We still need to apply the inverse parent transform to the result,
+        // but doing res->Transform(inverse_parent_transform) won't work here because
+        // the Transform() function from Livarot library is hopelessly broken.
+        // So we must inject the item into the document first and then transform it.
+
         gchar *d = res->svg_dump_path();
 
         Inkscape::XML::Document *xml_doc = doc->getReprDoc();
@@ -901,17 +913,62 @@ BoolOpErrors Inkscape::ObjectSet::pathBoolOp(bool_op bop, const bool skip_undo, 
         repr->setAttribute("d", d);
         g_free(d);
 
-        repr->setAttributeOrRemoveIfEmpty("transform", transform);
+        // Part of the transformation is done via the "transform" atribute, which is copied
+        // verbatim from the source object (this preserves the units for clip paths)
+        repr->setAttributeOrRemoveIfEmpty("transform", old_transform_attibute);
 
         parent->addChildAtPos(repr, pos);
 
         set(repr);
+
+        // The rest of the transformation is applied directly to the path definition
+        SPLPEItem *injected = dynamic_cast<SPLPEItem *>(doc->getObjectByRepr(repr));
+        force_apply_transform(injected, inverse_parent_transform, old_transform_attibute);
+
         Inkscape::GC::release(repr);
     }
 
     delete res;
 
     return DONE;
+}
+
+/**
+ * @brief Applies an affine transformation, a part of which is contained in the `transform` attribute
+ * @param subject : A pointer to the SPLPEItem to be transformed
+ * @param transformation : The total affine transform to apply (via transform attribute and directly)
+ * @param transform_attribute : The string value of the transform attribute of this element
+ */
+static void force_apply_transform(SPLPEItem* subject, Geom::Affine &transformation,
+                                  char const *const transform_attribute)
+{
+    if (!subject) {
+        g_printerr("path-boolop.cpp: Failed injecting the result path into the document!\n");
+        return;
+    }
+
+    // If there are Live Path Effects enabled, we must temporarily disable them,
+    // or else set_transform() will bail out when clip or mask are set (issue inkscape#1364)
+    bool lpes_were_enabled = false;
+
+    if (subject->pathEffectsEnabled()) {
+        lpes_were_enabled = true;
+        sp_lpe_item_enable_path_effects(subject, false); // Disable
+    }
+
+    Geom::Affine factor_from_attribute;
+    bool success = sp_svg_transform_read(transform_attribute, &factor_from_attribute);
+    if (!success) {
+        factor_from_attribute = Geom::identity();
+    }
+
+    Geom::Affine const correction = factor_from_attribute.inverse();
+    subject->set_transform(transformation * correction);
+    subject->updateRepr();
+
+    if (lpes_were_enabled) {
+        sp_lpe_item_enable_path_effects(subject, true);
+    }
 }
 
 /*
