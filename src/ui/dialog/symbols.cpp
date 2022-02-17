@@ -176,7 +176,12 @@ SymbolsDialog::SymbolsDialog(gchar const *prefsPath)
   scroller->add(*Gtk::manage(icon_view));
   scroller->set_hexpand();
   scroller->set_vexpand();
-
+  scroller->signal_map().connect([=]() {
+    scroller->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_NEVER);
+  });
+  scroller->signal_unmap().connect([=]() {
+    scroller->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+  });
   overlay = new Gtk::Overlay();
   overlay->set_hexpand();
   overlay->set_vexpand();

@@ -125,6 +125,12 @@ PaintServersDialog::PaintServersDialog()
     scroller->set_hexpand();
     scroller->set_vexpand();
     scroller->add(*icon_view);
+    scroller->signal_map().connect([=]() {
+        scroller->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_NEVER);
+    });
+    scroller->signal_unmap().connect([=]() {
+        scroller->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+    });
     grid->attach(*scroller, 0, 2, 2, 1);
 
     // Events

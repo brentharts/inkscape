@@ -812,6 +812,12 @@ ObjectsPanel::ObjectsPanel() :
     _scroller.set_overlay_scrolling(false);
     _scroller.add(_tree);
     _scroller.set_policy( Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC );
+    _scroller.signal_map().connect([=]() {
+        _scroller.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_NEVER);
+    });
+    _scroller.signal_unmap().connect([=]() {
+        _scroller.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+    });
     _scroller.set_shadow_type(Gtk::SHADOW_IN);
     Gtk::Requisition sreq;
     Gtk::Requisition sreq_natural;
