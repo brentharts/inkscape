@@ -55,6 +55,7 @@ DialogNotebook::DialogNotebook(DialogContainer *container)
     set_shadow_type(Gtk::SHADOW_NONE);
     set_vexpand(true);
     set_hexpand(true);
+    set_overlay_scrolling(false);
 
     // =========== Getting preferences ==========
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
@@ -238,6 +239,10 @@ void DialogNotebook::remove_highlight_header()
     style->remove_class("nb-highlight");
 }
 
+auto dialog_notebook_handle_unmap = [](Gtk::Widget *child) {
+    child->hide();
+};
+
 /**
  * Adds a widget as a new page with a tab.
  */
@@ -247,6 +252,16 @@ void DialogNotebook::add_page(Gtk::Widget &page, Gtk::Widget &tab, Glib::ustring
     page.set_vexpand();
 
     int page_number = _notebook.append_page(page, tab);
+    auto container = dynamic_cast<Gtk::Container *>(&page);
+    if (container) {
+        std::vector<Gtk::Widget *> widgets = container->get_children();
+        if (widgets.size()) {
+            Gtk::Widget *child = widgets[0];
+            if (child) {
+                child->signal_unmap().connect([=]() { dialog_notebook_handle_unmap(child);});
+            }
+        }
+    }
     _notebook.set_tab_reorderable(page);
     _notebook.set_tab_detachable(page);
     _notebook.show_all();
@@ -764,6 +779,16 @@ void DialogNotebook::toggle_tab_labels_callback(bool show)
 
 void DialogNotebook::on_page_switch(Gtk::Widget *curr_page, guint page_number)
 {
+    auto container = dynamic_cast<Gtk::Container *>(curr_page);
+    if (container) {
+        std::vector<Gtk::Widget *> widgets = container->get_children();
+        if (widgets.size()) {
+            Gtk::Widget *child = widgets[0];
+            if (child) {
+                child->show();
+            }
+        }
+    }
     for (auto const &page : _notebook.get_children()) {
         if (_prev_alloc_width) {
             auto dialogbase = dynamic_cast<DialogBase*>(page);
@@ -817,6 +842,14 @@ void DialogNotebook::on_page_switch(Gtk::Widget *curr_page, guint page_number)
     if (_prev_alloc_width && !_label_visible) {
         queue_allocate(); 
     }
+    // fix a issue with subnotebook that make scrool move to subtab on show
+    auto swin = dynamic_cast<Gtk::ScrolledWindow *>(_notebook.get_parent());
+    if (swin) {
+        const auto adjustment = swin->get_vadjustment();
+        if (adjustment) {
+            adjustment->set_value(adjustment->get_lower());
+        }
+    }
 }
 
 /**
@@ -825,6 +858,16 @@ void DialogNotebook::on_page_switch(Gtk::Widget *curr_page, guint page_number)
 void DialogNotebook::change_page(size_t pagenum)
 {
     _notebook.set_current_page(pagenum);
+    auto container = dynamic_cast<Gtk::Container *>(_notebook.get_nth_page(pagenum));
+    if (container) {
+        std::vector<Gtk::Widget *> widgets = container->get_children();
+        if (widgets.size()) {
+            Gtk::Widget *child = widgets[0];
+            if (child) {
+                child->show();
+            }
+        }
+    }
 }
 
 /**
