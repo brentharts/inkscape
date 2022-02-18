@@ -20,8 +20,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: inkscape\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
-"POT-Creation-Date: 2022-02-18 05:57+0900\n"
-"PO-Revision-Date: 2022-02-18 05:58+0900\n"
+"POT-Creation-Date: 2022-02-19 08:11+0900\n"
+"PO-Revision-Date: 2022-02-19 08:13+0900\n"
 "Last-Translator: Masato Hashimoto <cabezon.hashimoto@gmail.com>\n"
 "Language-Team: Japanese <inkscape-translator@lists.sourceforge.net>\n"
 "Language: ja\n"
@@ -16998,7 +16998,7 @@ msgstr "結節点のインデックスを変更"
 
 #: ../src/live_effects/lpe-transform_2pts.cpp:367
 #: ../src/ui/dialog/inkscape-preferences.cpp:3014
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1243
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1360
 #: ../src/ui/widget/preferences-widget.cpp:800
 msgid "Reset"
 msgstr " リセット"
@@ -17182,7 +17182,7 @@ msgstr "表示"
 #: ../src/ui/dialog/attrdialog.cpp:151
 #: ../src/ui/dialog/inkscape-preferences.cpp:2913
 #: ../src/ui/dialog/inkscape-preferences.cpp:2959
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1268
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1385
 #: ../src/ui/widget/gradient-selector.cpp:75
 #: ../share/ui/dialog-livepatheffect-add.glade:396
 msgid "Name"
@@ -17798,27 +17798,27 @@ msgid "<b>No paths</b> to inset/outset in the selection."
 msgstr ""
 "選択オブジェクトに、インセット/アウトセットする<b>パスがありません</b>。"
 
-#: ../src/preferences-skeleton.h:511
+#: ../src/preferences-skeleton.h:520
 msgid "Dip pen"
 msgstr "つけペン"
 
-#: ../src/preferences-skeleton.h:512
+#: ../src/preferences-skeleton.h:521
 msgid "Marker"
 msgstr "マーカー"
 
-#: ../src/preferences-skeleton.h:513
+#: ../src/preferences-skeleton.h:522
 msgid "Brush"
 msgstr "ブラシ"
 
-#: ../src/preferences-skeleton.h:514
+#: ../src/preferences-skeleton.h:523
 msgid "Wiggly"
 msgstr "うねり"
 
-#: ../src/preferences-skeleton.h:515
+#: ../src/preferences-skeleton.h:524
 msgid "Splotchy"
 msgstr "汚れ"
 
-#: ../src/preferences-skeleton.h:516
+#: ../src/preferences-skeleton.h:525
 msgid "Tracing"
 msgstr "トレーシング"
 
@@ -20289,9 +20289,9 @@ msgstr "リンクカラープロファイル"
 #: ../src/ui/dialog/document-properties.cpp:678
 #: ../src/ui/dialog/document-properties.cpp:687
 #: ../src/ui/dialog/filter-effects-dialog.cpp:1332
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:521
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:531
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:540
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:524
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:534
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:543
 msgid "_Remove"
 msgstr "削除(_R)"
 
@@ -26014,7 +26014,7 @@ msgid "Rendering"
 msgstr "レンダリング"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2816
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1292
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1409
 msgid "Edit"
 msgstr "編集"
 
@@ -26685,7 +26685,7 @@ msgid "_Add"
 msgstr "追加(_A)"
 
 #: ../src/ui/dialog/layer-properties.cpp:378
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:490
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:493
 msgid "Add layer"
 msgstr "レイヤーを追加"
 
@@ -27377,280 +27377,312 @@ msgstr "現在の値"
 msgid "Used in %1"
 msgstr "%1 で使用"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:172
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:242
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:175
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:245
 msgid "Set SVG Font attribute"
 msgstr "SVG フォント属性を設定"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:293
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:296
 msgid "Adjust kerning value"
 msgstr "カーニング値の調整"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:499
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:502
 msgid "_Edit current glyph"
 msgstr "現在のグリフを編集(_E)"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:510
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:513
 msgid "_Sort glyphs"
 msgstr "グリフを並べ替え(_S)"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:795
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:807
+#: ../share/extensions/setup_typography_canvas.py:68
+msgid "ascender"
+msgstr "アセンダー"
+
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:808
+#: ../share/extensions/setup_typography_canvas.py:69
+msgid "caps"
+msgstr "大文字"
+
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:809
+msgid "x-height"
+msgstr "小文字の高さ"
+
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:810
+#: ../share/extensions/setup_typography_canvas.py:67
+msgid "baseline"
+msgstr "ベースライン"
+
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:811
+#: ../share/extensions/setup_typography_canvas.py:71
+msgid "descender"
+msgstr "ディセンダー"
+
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:832
+msgid "Set up typography canvas"
+msgstr "タイポグラフィキャンバスを設定"
+
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:859
 msgid "Font Attributes"
 msgstr "フォントの属性"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:796
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:860
 msgid "Horizontal advance X:"
 msgstr "水平アドバンス X:"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:796
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:860
 msgid "Default glyph width for horizontal text"
 msgstr "横書きテキスト用のデフォルトのグリフ幅"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:797
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:861
 msgid "Horizontal origin X:"
 msgstr "水平ポイント X:"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:797
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:861
 msgid "Default X-coordinate of the origin of a glyph (for horizontal text)"
 msgstr "グリフの基点のデフォルトの X 座標 (横書きテキスト用)"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:798
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:862
 msgid "Horizontal origin Y:"
 msgstr "水平ポイント Y:"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:798
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:862
 msgid "Default Y-coordinate of the origin of a glyph (for horizontal text)"
 msgstr "グリフの基点のデフォルトの Y 座標 (横書きテキスト用)"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:799
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:863
 msgid "Font face attributes"
 msgstr "フォントフェースの属性"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:800
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:864
 msgid "Family name:"
 msgstr "ファミリ名:"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:800
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:864
 msgid ""
 "Name of the font as it appears in font selectors and css font-family "
 "properties"
 msgstr "フォントセレクターや CSS の font-family 属性で使用するフォントの名前"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:801
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:865
 msgid "Em-size:"
 msgstr "Em サイズ:"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:801
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:865
 msgid ""
 "Display units per <italic>em</italic> (nominally width of 'M' character)"
 msgstr "<italic>em</italic> ごとの表示単位 (一般的には文字 'M' の幅)"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:802
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:866
 msgid "Ascender:"
 msgstr "アセンダー:"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:802
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:866
 msgid ""
 "Amount of space taken up by ascenders like the tall line on the letter 'h'"
 msgstr "文字 'h' のおしまいの部分のようなアセンダーに割り当てるスペース"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:803
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:867
 msgid "Caps height:"
 msgstr "大文字の高さ:"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:803
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:867
 msgid ""
 "The height of a capital letter above the baseline like the letter 'H' or 'I'"
 msgstr "文字 'H' や 'I' のような大文字のベースラインからの高さ"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:804
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:868
 msgid "x-height:"
 msgstr "x 高さ"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:804
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:868
 msgid ""
 "The height of a lower-case letter above the baseline like the letter 'x'"
 msgstr "文字 'x' のような小文字のベースラインからの高さ"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:805
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:869
 msgid "Descender:"
 msgstr "ディセンダー:"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:805
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:869
 msgid "Amount of space taken up by descenders like the tail on the letter 'g'"
 msgstr "文字 'g' のおしまいの部分のようなディセンダーに割り当てるスペース"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:982
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:902
+msgid "Set up canvas"
+msgstr "キャンバスを設定"
+
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1060
 msgid "Add glyph"
 msgstr "グリフを追加"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1010
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1046
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1103
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1143
 msgid "Select a <b>path</b> to define the curves of a glyph"
 msgstr "グリフの曲線を定義する<b>パス</b>を選択してください。"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1018
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1054
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1111
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1151
 msgid "The selected object does not have a <b>path</b> description."
 msgstr "選択したオブジェクトは<b>パス</b>説明を持っていません。"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1025
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1118
 msgid "No glyph selected in the SVGFonts dialog."
 msgstr "SVG フォントダイアログでグリフが選択されていません。"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1034
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1066
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1128
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1163
 msgid "Set glyph curves"
 msgstr "グリフ曲線の設定"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1078
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1175
 msgid "Reset missing-glyph"
 msgstr "不足グリフのリセット"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1110
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1207
 msgid "Edit glyph name"
 msgstr "グリフ名の編集"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1125
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1222
 msgid "Set glyph unicode"
 msgstr "グリフの unicode を設定"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1144
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1241
 msgid "Set glyph advance"
 msgstr "グリフのアドバンスを設定"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1158
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1255
 msgid "Remove font"
 msgstr "フォントの削除"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1169
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1266
 msgid "Remove glyph"
 msgstr "グリフの削除"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1180
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1277
 msgid "Remove kerning pair"
 msgstr "カーニングペアの削除"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1210
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1327
 msgid "Toggle layer solo"
 msgstr "他のレイヤーの表示/非表示"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1231
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1348
 msgid "Missing glyph"
 msgstr "不足グリフ"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1240
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1357
 msgid "From selection"
 msgstr "選択オブジェクトから"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1264
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1381
 msgid "Glyph"
 msgstr "グリフ"
 
 #
 # File: ../share/extensions/nicechart.inx, line: 54
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1269
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1386
 msgid "Characters"
 msgstr "文字数"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1270
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1387
 msgid "Unicode"
 msgstr "Unicode"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1271
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1388
 msgid "Advance"
 msgstr "アドバンス"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1279
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1396
 msgid "Add new glyph"
 msgstr "新規グリフを追加"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1282
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1399
 msgid "Delete current glyph"
 msgstr "現在のグリフを削除"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1285
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1402
 msgid "Get curves"
 msgstr "曲線を取得"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1288
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1405
 msgid "Get curves from selection to replace current glyph"
 msgstr "現在のグリフを置き換えるために選択オブジェクトから曲線を取得"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1295
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1412
 msgid "Switch to a layer with the same name as current glyph"
 msgstr "現在のグリフと同じ名前のレイヤーに切替え"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1358
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1475
 msgid "Glyph list view"
 msgstr "グリフを一覧で表示"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1364
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1481
 msgid "Glyph grid view"
 msgstr "グリフをグリッド表示"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1444
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1561
 msgid "Add kerning pair"
 msgstr "カーニングペアの追加"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1456
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1573
 msgid "Select glyphs:"
 msgstr "グリフを選択:"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1460
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1577
 msgid "Add pair"
 msgstr "ペアを追加"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1471
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1588
 msgid "First glyph"
 msgstr "1 番目のグリフ"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1472
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1589
 msgid "Second glyph"
 msgstr "2 番目のグリフ"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1480
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1597
 msgid "Kerning value:"
 msgstr "カーニング値:"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1537
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1658
 msgid "Set font family"
 msgstr "フォントファミリの設定"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1546
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1667
 msgid "font"
 msgstr "フォント"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1560
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1681
 msgid "Add font"
 msgstr "フォントの追加"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1581
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1702
 msgid "_Fonts"
 msgstr "フォント(_F)"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1591
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1712
 msgid "Set SVG font name"
 msgstr "SVG フォント名を設定"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1602
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1723
 msgid "_Global settings"
 msgstr "全体設定(_G)"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1603
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1724
 msgid "_Glyphs"
 msgstr "グリフ(_G)"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1604
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1725
 msgid "_Kerning"
 msgstr "カーニング(_K)"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1620
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1621
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1741
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1742
 msgid "Sample text"
 msgstr "サンプルテキスト"
 
-#: ../src/ui/dialog/svg-fonts-dialog.cpp:1625
+#: ../src/ui/dialog/svg-fonts-dialog.cpp:1746
 msgid "Preview text:"
 msgstr "プレビューテキスト:"
 
@@ -35398,28 +35430,28 @@ msgid "Video UHD 8k"
 msgstr "動画 UHD 8k"
 
 #: ../share/ui/inkscape-start.glade:901
-msgid "Classic Inkscape (default)"
-msgstr "クラシック Inkscape (デフォルト)"
-
-#: ../share/ui/inkscape-start.glade:915
-msgid "Classic Symbolic"
-msgstr "クラシック シンボル風"
-
-#: ../share/ui/inkscape-start.glade:929
 msgid "Colorful"
 msgstr "カラフル"
 
-#: ../share/ui/inkscape-start.glade:943
+#: ../share/ui/inkscape-start.glade:915
 msgid "Grayscale"
 msgstr "グレースケール"
 
-#: ../share/ui/inkscape-start.glade:957
+#: ../share/ui/inkscape-start.glade:929
+msgid "Classic Symbolic"
+msgstr "クラシック シンボル風"
+
+#: ../share/ui/inkscape-start.glade:943
 msgid "Compacted (Small Screens)"
 msgstr "コンパクト (スクリーン小)"
 
-#: ../share/ui/inkscape-start.glade:971
+#: ../share/ui/inkscape-start.glade:957
 msgid "System Default"
 msgstr "システムデフォルト"
+
+#: ../share/ui/inkscape-start.glade:971
+msgid "Classic Inkscape"
+msgstr "クラシック Inkscape"
 
 #: ../share/ui/inkscape-start.glade:991
 msgid "Inkscape 1.1"
@@ -37154,25 +37186,9 @@ msgstr "置き換えるフォントを置換ボックスに入力してくださ
 msgid "Please enter a replacement font in the replace all box."
 msgstr "置き換えるフォントをすべて置換ボックスに入力してください。"
 
-#: ../share/extensions/setup_typography_canvas.py:67
-msgid "baseline"
-msgstr "ベースライン"
-
-#: ../share/extensions/setup_typography_canvas.py:68
-msgid "ascender"
-msgstr "アセンダー"
-
-#: ../share/extensions/setup_typography_canvas.py:69
-msgid "caps"
-msgstr "大文字"
-
 #: ../share/extensions/setup_typography_canvas.py:70
 msgid "xheight"
 msgstr "小文字の高さ"
-
-#: ../share/extensions/setup_typography_canvas.py:71
-msgid "descender"
-msgstr "ディセンダー"
 
 #: ../share/extensions/text_split.py:154
 msgid ""
@@ -42257,9 +42273,6 @@ msgstr ""
 #~ msgid "Exports the document to PDF using Scribus"
 #~ msgstr "ドキュメントを Scribus を使ってPDFにエクスポート"
 
-#~ msgid "1 - Setup Typography Canvas"
-#~ msgstr "1 - タイポグラフィキャンバスのセットアップ"
-
 #~ msgid "Caps Height:"
 #~ msgstr "キャップハイト:"
 
@@ -43487,9 +43500,6 @@ msgstr ""
 
 #~ msgid "Font height"
 #~ msgstr "フォントの高さ"
-
-#~ msgid "x-height"
-#~ msgstr "小文字の高さ"
 
 #~ msgid "x-heights"
 #~ msgstr "x 高さ"
