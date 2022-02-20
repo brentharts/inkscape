@@ -72,3 +72,9 @@ notebook notebook header image {
     padding:0px;
     margin:0px;
 }
+
+#Objects .search {
+    padding:3px 4px;
+    min-height:16px;
+    font-size:small;
+}
