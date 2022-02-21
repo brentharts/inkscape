@@ -18,15 +18,6 @@ spinbutton undershoot {
     outline-style: none;
 }
 
-spinbutton entry {
-    padding-left: 2px;
-    padding-right: 0;
-}
-
-spinbutton undershoot {
-    outline-style: none;
-}
-
 .inkswitch slider {
     min-width: 18px;
     min-height: 18px;

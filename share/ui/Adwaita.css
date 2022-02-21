@@ -10,8 +10,9 @@ spinbutton {
     outline-style: none;
 }
 
-spinbutton undershoot {
-    outline-style: none;
+spinbutton entry {
+    padding-left: 2px;
+    padding-right: 0;
 }
 
 spinbutton undershoot {
@@ -71,4 +72,18 @@ notebook notebook header image {
 #StrokeSelector{
     padding:0px;
     margin:0px;
+}
+
+#AlignDistribute .toggle,
+#AlignDistribute .radio,
+#AlignDistribute button{
+    padding:4px;
+}
+
+#AlignDistribute spinbutton button{
+    padding:0px;
+}
+
+#AlignDistribute #align {
+    margin-top:-15px;
 }
