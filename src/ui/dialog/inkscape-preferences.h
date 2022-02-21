@@ -312,6 +312,7 @@ protected:
     UI::Widget::PrefCheckButton _pencil_average_all_sketches;
 
     UI::Widget::PrefCheckButton _calligrapy_keep_selected;
+    UI::Widget::PrefSpinButton  _calligrapy_tolerance;
 
     UI::Widget::PrefCheckButton _connector_ignore_text;
 

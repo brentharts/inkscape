@@ -991,6 +991,9 @@ void InkscapePreferences::initPageTools()
     _page_calligraphy.add_line( false, "", _calligrapy_keep_selected, "",
                             _("If on, each newly created object will be selected (deselecting previous selection)"));
 
+    _calligrapy_tolerance.init("/tools/calligraphic/tolerance", 0.0, 100.0, 1.0, 1.0, 0.1, false, false);
+    _page_calligraphy.add_line( false, _("Tolerance"), _calligrapy_tolerance, "", _("Change the smoothness of the calligraphic tool"));
+
     //Text
     this->AddSelcueCheckbox(_page_text, "/tools/text", true);
     this->AddGradientCheckbox(_page_text, "/tools/text", true);
