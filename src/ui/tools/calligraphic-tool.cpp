@@ -77,8 +77,6 @@ using Inkscape::Util::unit_table;
 
 #define DDC_RED_RGBA 0xff0000ff
 
-#define TOLERANCE_CALLIGRAPHIC 0.1
-
 #define DYNA_EPSILON 0.5e-6
 #define DYNA_EPSILON_START 0.5e-2
 #define DYNA_VEL_START 1e-5
@@ -1037,7 +1035,9 @@ static double square(double const x)
 }
 
 void CalligraphicTool::fit_and_split(bool release) {
-    double const tolerance_sq = square(_desktop->w2d().descrim() * TOLERANCE_CALLIGRAPHIC);
+    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+    double tolerance = prefs->getDouble("/tools/calligraphic/tolerance", 0.1);
+    double const tolerance_sq = square(_desktop->w2d().descrim() * tolerance);
 
 #ifdef DYNA_DRAW_VERBOSE
     g_print("[F&S:R=%c]", release?'T':'F');
