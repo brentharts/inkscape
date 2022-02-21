@@ -143,3 +143,9 @@ button.toggle:checked {
     background-color: transparent;
     background-image: image(@theme_selected_bg_color);
 }
+
+#Objects .search {
+  padding:2px 4px;
+  min-height:16px;
+  font-size:small;
+}

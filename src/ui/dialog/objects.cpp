@@ -685,6 +685,24 @@ ObjectsPanel::ObjectsPanel() :
     // when at least one row is selected
     _tree.set_reorderable(true);
     _tree.enable_model_drag_dest (Gdk::ACTION_MOVE);
+    _tree.get_selection()->set_mode(Gtk::SELECTION_NONE);
+    // Search
+    auto *search = Gtk::manage(new Gtk::SearchEntry());
+    search->signal_focus_in_event().connect([=](GdkEventFocus*) { 
+        _tree.get_selection()->set_mode(Gtk::SELECTION_SINGLE);
+        _tree.expand_all();
+        return false;
+    });
+    search->signal_focus_out_event().connect([=](GdkEventFocus*) { 
+        _tree.get_selection()->set_mode(Gtk::SELECTION_NONE);
+        return false;
+    });
+    search->set_margin_end(3);
+    search->set_valign(Gtk::ALIGN_CENTER);
+    
+    _tree.set_search_entry(*search);
+    _tree.set_search_column(1);
+    _tree.set_enable_search(true);
 
     //Label
     _name_column = Gtk::manage(new Gtk::TreeViewColumn());
@@ -768,10 +786,6 @@ ObjectsPanel::ObjectsPanel() :
 
     //Set the expander and search columns
     _tree.set_expander_column(*_name_column);
-    // Disable search (it doesn't make much sense)
-    _tree.set_search_column(-1);
-    _tree.set_enable_search(false);
-    _tree.get_selection()->set_mode(Gtk::SELECTION_NONE);
 
     //Set up tree signals
     _tree.signal_button_press_event().connect(sigc::mem_fun(*this, &ObjectsPanel::_handleButtonEvent), false);
@@ -843,7 +857,11 @@ ObjectsPanel::ObjectsPanel() :
     _buttonsSecondary.pack_end(*_addBarButton(INKSCAPE_ICON("edit-delete"), _("Remove object"), "app.delete-selection"), Gtk::PACK_SHRINK);
     _buttonsSecondary.pack_end(*_addBarButton(INKSCAPE_ICON("go-down"), _("Move Down"), "app.selection-stack-down"), Gtk::PACK_SHRINK);
     _buttonsSecondary.pack_end(*_addBarButton(INKSCAPE_ICON("go-up"), _("Move Up"), "app.selection-stack-up"), Gtk::PACK_SHRINK);
-
+    _buttonsSecondary.pack_start(*search, Gtk::PACK_SHRINK);
+    _buttonsSecondary.set_margin_top(1);
+    _buttonsSecondary.set_margin_bottom(1);
+    _buttonsPrimary.set_margin_top(1);
+    _buttonsPrimary.set_margin_bottom(1);
     _buttonsRow.pack_start(_buttonsPrimary, Gtk::PACK_SHRINK);
     _buttonsRow.pack_end(_buttonsSecondary, Gtk::PACK_SHRINK);
 
