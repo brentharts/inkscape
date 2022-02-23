@@ -475,7 +475,7 @@ SPCanvas {
     padding: 0px;
     margin: 0px;
 }
-#InkSpinScale trough,
+
 #InkSpinScale slider,
 #InkSpinScale highlight {
     border-top-right-radius: 0;
@@ -484,12 +484,11 @@ SPCanvas {
 
 #InkSpinScale scale {
     padding: 0px;
-    margin:0;
 }
 
 #InkSpinScale trough {
     min-height: 26px;
-    padding: 2px; /* some themes have humongous scale margins; rein in */
+    margin: 2px; /* some themes have humongous scale margins; rein in */
 }
 
 #InkSpinScale box.active {
@@ -497,13 +496,8 @@ SPCanvas {
 }
 
 #InkSpinScale spinbutton entry {
-    min-height: 30px;
+    padding: 0;
     outline-style: none;
-}
-#InkSpinScale spinbutton {
-    border-left:0;
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
 }
 
 #UnicodeIconView {
