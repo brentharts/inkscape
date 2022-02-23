@@ -37,32 +37,6 @@
   </metadata>
   <defs
      id="defs19">
-    <filter
-       id="selectable_hidder_filter"
-       width="1"
-       height="1"
-       x="0"
-       y="0"
-       style="color-interpolation-filters:sRGB;"
-       inkscape:label="LPE boolean visibility">
-      <feComposite
-         id="boolops_hidder_primitive"
-         result="composite1"
-         operator="arithmetic"
-         in2="SourceGraphic"
-         in="BackgroundImage" />
-    </filter>
-    <inkscape:path-effect
-       effect="bool_op"
-       operand-path="#path26011"
-       id="path-effect3144"
-       is_visible="true"
-       lpeversion="1"
-       operation="union"
-       swap-operands="false"
-       filltype-this="from-curve"
-       filter=""
-       filltype-operand="from-curve" />
     <inkscape:path-effect
        effect="fillet_chamfer"
        id="path-effect2406"
@@ -92,16 +66,6 @@
        attempt_force_join="true" />
     <inkscape:path-effect
        effect="join_type"
-       id="path-effect32287"
-       is_visible="true"
-       lpeversion="1"
-       linecap_type="round"
-       line_width="1"
-       linejoin_type="extrp_arc"
-       miter_limit="100"
-       attempt_force_join="true" />
-    <inkscape:path-effect
-       effect="join_type"
        id="path-effect20976"
        is_visible="true"
        lpeversion="1"
@@ -110,23 +74,6 @@
        linejoin_type="extrp_arc"
        miter_limit="100"
        attempt_force_join="true" />
-    <inkscape:path-effect
-       effect="fillet_chamfer"
-       id="path-effect15599"
-       is_visible="true"
-       lpeversion="1"
-       nodesatellites_param="F,0,0,1,0,0,0,1 @ F,0,0,1,0,0.99589321,0,1 @ F,0,0,1,0,0.99589321,0,1 @ F,0,0,1,0,0,0,1"
-       unit="px"
-       method="auto"
-       mode="F"
-       radius="0"
-       chamfer_steps="1"
-       flexible="false"
-       use_knot_distance="true"
-       apply_no_radius="true"
-       apply_with_radius="true"
-       only_selected="false"
-       hide_knots="false" />
     <inkscape:path-effect
        effect="fillet_chamfer"
        id="path-effect13041"
@@ -170,10 +117,10 @@
      inkscape:window-x="54"
      inkscape:window-height="1177"
      inkscape:window-width="1858"
-     inkscape:cy="5.6554455"
-     inkscape:cx="7.1683168"
-     inkscape:zoom="63.125001"
-     showgrid="true"
+     inkscape:cy="9.6950494"
+     inkscape:cx="-3.390099"
+     inkscape:zoom="15.78125"
+     showgrid="false"
      id="namedview"
      guidetolerance="10"
      gridtolerance="10"
