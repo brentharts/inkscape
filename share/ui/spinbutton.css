@@ -1,14 +1,5 @@
 /* those styles make spin buttons narrow; if enabled in preferences they are applied to all themes */
 
-spinbutton {
-    padding: 0;
-    outline-style: none;
-}
-
-spinbutton undershoot {
-    outline-style: none;
-}
-
 spinbutton > button {
     padding-left: 0;
     padding-right: 0;
