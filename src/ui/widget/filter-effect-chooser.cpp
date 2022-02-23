@@ -79,10 +79,10 @@ SimpleFilterModifier::SimpleFilterModifier(int flags)
         _hb_blend.pack_start(_lb_blend, false, false, 0);
         _hb_blend.pack_start(_blend, false, false, 0);
         /*
-        * For best fit inkscape-browsers with no GUI to isolation we need all groups, 
-        * clonesm and symbols with isolation == isolate to not show to the Inkscape 
-        * user "strange" behaviour from the designer point of view. 
-        * It's strange because it only happends when object doesn't have: clip, mask, 
+        * For best fit inkscape-browsers with no GUI to isolation we need all groups,
+        * clones, and symbols with isolation == isolate to not show to the Inkscape
+        * user "strange" behaviour from the designer point of view.
+        * It's strange because it only happens when object doesn't have: clip, mask,
         * filter, blending, or opacity.
         * Anyway the feature is a no-gui feature and renders as expected.
         */
