@@ -56,7 +56,8 @@ TEST_F(PathBoolopTest, UnionInside){
 TEST_F(PathBoolopTest, UnionInsideSwap){
     // test that the union of two objects where one is completely inside the other is the larger shape, even when the order is swapped
     Geom::PathVector pvRectangleUnion  = sp_pathvector_boolop(pvRectangleSmaller, pvRectangleBigger, bool_op_union, fill_oddEven, fill_oddEven);
-    comparePaths(pvRectangleUnion, pvRectangleBigger);
+    // reversed by 2GEOM:78c7c23bdc1b88d7df5c7cdaa53877bdb04e2a8f
+    comparePaths(pvRectangleUnion, pvRectangleBigger.reversed());
 }
 
 TEST_F(PathBoolopTest, IntersectionInside){
@@ -74,8 +75,8 @@ TEST_F(PathBoolopTest, DifferenceInside){
 TEST_F(PathBoolopTest, DifferenceOutside){
     // test that the difference of two objects where one is completely outside the other is multiple shapes
     Geom::PathVector pvRectangleDifference = sp_pathvector_boolop(pvRectangleSmaller, pvRectangleBigger, bool_op_diff, fill_oddEven, fill_oddEven);
-    std::string bothPaths = rectangle_bigger + rectangle_smaller;
-    Geom::PathVector pvBothPaths = pvRectangleBigger;
+    // reversed by 2GEOM:78c7c23bdc1b88d7df5c7cdaa53877bdb04e2a8f
+    Geom::PathVector pvBothPaths = pvRectangleBigger.reversed();
     
     for(Geom::Path _path : pvRectangleSmaller){
         pvBothPaths.push_back(_path);
