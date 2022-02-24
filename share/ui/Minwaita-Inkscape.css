@@ -133,3 +133,19 @@ button.toggle:checked {
     background-color: transparent;
     background-image: image(@theme_selected_bg_color);
 }
+
+#ToolboxCommon flowboxchild,
+toolbutton{
+  margin:0;
+  padding:0;
+}
+#ToolboxCommon flowboxchild button,
+toolbutton button {
+  margin:0;
+  padding:4px;
+}
+#ToolboxCommon flowboxchild button  *,
+toolbutton button *{
+  margin:0;
+  padding:0px;
+}
