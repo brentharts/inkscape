@@ -11,6 +11,7 @@
 #include <iomanip>
 #include <sstream>
 #include <unordered_map>
+#include <boost/functional/hash.hpp>
 
 #include "cursor-utils.h"
 
@@ -33,6 +34,13 @@ using Inkscape::IO::Resource::SYSTEM;
 using Inkscape::IO::Resource::ICONS;
 
 namespace Inkscape {
+
+// SVG cursor unique ID/key
+typedef std::tuple<std::string, std::string, std::string, guint32, guint32, double, double, bool, int> Key;
+
+struct KeyHasher {
+    std::size_t operator () (const Key& k) const { return boost::hash_value(k); }
+};
 
 /**
  * Loads an SVG cursor from the specified file name.
@@ -90,19 +98,14 @@ load_svg_cursor(Glib::RefPtr<Gdk::Display> display,
         scale = window->get_scale_factor(); // Adjust for HiDPI screens.
     }
 #endif
+    static std::unordered_map<Key, Glib::RefPtr<Gdk::Cursor>, KeyHasher> cursor_cache;
+    Key cursor_key;
 
-    static std::unordered_map<std::string, Glib::RefPtr<Gdk::Cursor>> cursor_cache;
-    std::string cache_key;
     const auto cache_enabled = prefs->getBool("/options/cache_svg_cursors", true);
     if (cache_enabled) {
         // construct a key
-        std::ostringstream ost;
-        ost << theme_names[0] << '\n' << theme_names[1] << '\n' << file_name << '\n';
-        ost << fill << ' ' << stroke << ' ' << fill_opacity << ' ' << stroke_opacity << ' ';
-        ost << enable_drop_shadow << ' ' << scale;
-        cache_key = ost.str();
-        cursor = cursor_cache[cache_key];
-        if (cursor) {
+        cursor_key = std::make_tuple(std::string(theme_names[0]), std::string(theme_names[1]), file_name, fill, stroke, fill_opacity, stroke_opacity, enable_drop_shadow, scale);
+        if (auto cursor = cursor_cache[cursor_key]) {
             return cursor;
         }
     }
@@ -226,7 +229,7 @@ load_svg_cursor(Glib::RefPtr<Gdk::Display> display,
     delete document.release();
 
     if (cache_enabled) {
-        cursor_cache[cache_key] = cursor;
+        cursor_cache[cursor_key] = cursor;
     }
 
     return cursor;
