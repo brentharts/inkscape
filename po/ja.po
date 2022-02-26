@@ -20,8 +20,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: inkscape\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
-"POT-Creation-Date: 2022-02-26 10:56+0900\n"
-"PO-Revision-Date: 2022-02-26 11:57+0900\n"
+"POT-Creation-Date: 2022-02-27 08:28+0900\n"
+"PO-Revision-Date: 2022-02-27 08:29+0900\n"
 "Last-Translator: Masato Hashimoto <cabezon.hashimoto@gmail.com>\n"
 "Language-Team: Japanese <inkscape-translator@lists.sourceforge.net>\n"
 "Language: ja\n"
@@ -9219,7 +9219,7 @@ msgstr "ページ / 全 %i ページ中"
 #: ../src/ui/desktop/document-check.cpp:57
 #: ../src/ui/desktop/document-check.cpp:102
 #: ../src/ui/dialog/calligraphic-profile-rename.cpp:51
-#: ../src/ui/dialog/export-batch.cpp:674 ../src/ui/dialog/export-single.cpp:864
+#: ../src/ui/dialog/export-batch.cpp:679 ../src/ui/dialog/export-single.cpp:872
 #: ../src/ui/dialog/filedialogimpl-gtkmm.cpp:244
 #: ../src/ui/dialog/filedialogimpl-gtkmm.cpp:556
 #: ../src/ui/dialog/guides.cpp:182 ../src/ui/dialog/layer-properties.cpp:42
@@ -9759,7 +9759,7 @@ msgstr "拡散光"
 
 #: ../src/extension/internal/filter/bumps.h:100
 #: ../src/extension/internal/filter/bumps.h:335
-#: ../src/ui/tools/measure-tool.cpp:1159 ../share/ui/dialog-export.glade:273
+#: ../src/ui/tools/measure-tool.cpp:1159 ../share/ui/dialog-export.glade:288
 #: ../share/extensions/interp_att_g.inx:9
 msgid "Height"
 msgstr "高さ"
@@ -10650,7 +10650,7 @@ msgid "Open"
 msgstr "開く"
 
 #: ../src/extension/internal/filter/morphology.h:67
-#: ../src/ui/tools/measure-tool.cpp:1165 ../share/ui/dialog-export.glade:286
+#: ../src/ui/tools/measure-tool.cpp:1165 ../share/ui/dialog-export.glade:301
 #: ../share/extensions/interp_att_g.inx:8
 msgid "Width"
 msgstr "幅"
@@ -11133,7 +11133,7 @@ msgstr "外部"
 
 #: ../src/extension/internal/filter/textures.h:83
 #: ../src/ui/toolbar/page-toolbar.cpp:207
-#: ../src/ui/widget/page-properties.cpp:300 ../share/ui/dialog-export.glade:521
+#: ../src/ui/widget/page-properties.cpp:300 ../share/ui/dialog-export.glade:536
 #: ../share/ui/toolbar-page.ui:33 ../share/extensions/color_custom.inx:3
 #: ../share/extensions/markers_strokepaint.inx:15
 #: ../share/extensions/restack.inx:19
@@ -12563,7 +12563,7 @@ msgstr "ビットマップおよびフィルターのラスタライズの解像
 
 #: ../src/inkscape-application.cpp:712
 #: ../src/ui/widget/rendering-options.cpp:34
-#: ../share/ui/dialog-export.glade:408 ../share/extensions/layer2png.inx:12
+#: ../share/ui/dialog-export.glade:423 ../share/extensions/layer2png.inx:12
 msgid "DPI"
 msgstr "DPI"
 
@@ -16655,7 +16655,7 @@ msgstr "<b>オプション</b> ラフのオプションを変更"
 
 #: ../src/live_effects/lpe-ruler.cpp:23
 #: ../src/live_effects/lpe-taperstroke.cpp:80
-#: ../share/ui/dialog-export.glade:299 ../share/extensions/restack.inx:25
+#: ../share/ui/dialog-export.glade:314 ../share/extensions/restack.inx:25
 #: ../share/extensions/text_extract.inx:12
 #: ../share/extensions/text_merge.inx:12
 msgid "Left"
@@ -16663,7 +16663,7 @@ msgstr "左"
 
 #: ../src/live_effects/lpe-ruler.cpp:24
 #: ../src/live_effects/lpe-taperstroke.cpp:81
-#: ../share/ui/dialog-export.glade:312 ../share/extensions/restack.inx:27
+#: ../share/ui/dialog-export.glade:327 ../share/extensions/restack.inx:27
 #: ../share/extensions/text_extract.inx:14
 #: ../share/extensions/text_merge.inx:14
 msgid "Right"
@@ -20568,7 +20568,7 @@ msgid "Remove"
 msgstr "削除"
 
 #: ../src/ui/dialog/document-properties.cpp:889
-#: ../share/ui/dialog-export.glade:768 ../share/ui/dialog-export.glade:1065
+#: ../share/ui/dialog-export.glade:783 ../share/ui/dialog-export.glade:1080
 msgid "Filename"
 msgstr "ファイル名"
 
@@ -20670,33 +20670,33 @@ msgstr[0] "%d ページ"
 msgid "No items selected."
 msgstr "アイテムが選択されていません。"
 
-#: ../src/ui/dialog/export-batch.cpp:546 ../src/ui/dialog/export-batch.cpp:548
+#: ../src/ui/dialog/export-batch.cpp:551 ../src/ui/dialog/export-batch.cpp:553
 msgid "Exporting %1 files"
 msgstr "%1 個のファイルをエクスポートしています"
 
-#: ../src/ui/dialog/export-batch.cpp:567 ../src/ui/dialog/export-single.cpp:554
+#: ../src/ui/dialog/export-batch.cpp:572 ../src/ui/dialog/export-single.cpp:562
 msgid "Exporting %1"
 msgstr "%1 個をエクスポート"
 
-#: ../src/ui/dialog/export-batch.cpp:595 ../src/ui/dialog/export-single.cpp:627
+#: ../src/ui/dialog/export-batch.cpp:600 ../src/ui/dialog/export-single.cpp:635
 msgid "Select a filename for exporting"
 msgstr "エクスポートするファイル名"
 
-#: ../src/ui/dialog/export-batch.cpp:665 ../src/ui/dialog/export-single.cpp:855
+#: ../src/ui/dialog/export-batch.cpp:670 ../src/ui/dialog/export-single.cpp:863
 msgid "Export in progress"
 msgstr "エクスポートの進捗"
 
-#: ../src/ui/dialog/export-single.cpp:314
+#: ../src/ui/dialog/export-single.cpp:315
 msgid "First Page"
 msgstr "最初のページ"
 
 #. TRANSLATORS: %1 will be the filename, %2 the width, and %3 the height of the image
-#: ../src/ui/dialog/export-single.cpp:541
-#: ../src/ui/dialog/export-single.cpp:543
+#: ../src/ui/dialog/export-single.cpp:549
+#: ../src/ui/dialog/export-single.cpp:551
 msgid "Exporting %1 (%2 x %3)"
 msgstr "%1 (%2 x %3) をエクスポートしています"
 
-#: ../src/ui/dialog/export-single.cpp:603
+#: ../src/ui/dialog/export-single.cpp:611
 msgid "Set Export Options"
 msgstr "エクスポートオプションを設定"
 
@@ -20708,11 +20708,11 @@ msgstr "指定されたエクスポート領域は無効です。"
 msgid "The chosen area to be exported is invalid"
 msgstr "指定されたエクスポート領域は無効です"
 
-#: ../src/ui/dialog/export.cpp:221 ../src/ui/dialog/export.cpp:334
+#: ../src/ui/dialog/export.cpp:221 ../src/ui/dialog/export.cpp:329
 msgid "You have to enter a filename."
 msgstr "ファイル名を入力してください。"
 
-#: ../src/ui/dialog/export.cpp:222 ../src/ui/dialog/export.cpp:335
+#: ../src/ui/dialog/export.cpp:222 ../src/ui/dialog/export.cpp:330
 msgid "You have to enter a filename"
 msgstr "ファイル名を入力してください"
 
@@ -20724,41 +20724,41 @@ msgstr "ラスター エクスポート エラー"
 msgid "Raster export Method is used for NON RASTER EXTENSION"
 msgstr "非ラスターの拡張機能に、ラスター エクスポート方式が使用されています"
 
-#: ../src/ui/dialog/export.cpp:255 ../src/ui/dialog/export.cpp:353
+#: ../src/ui/dialog/export.cpp:250 ../src/ui/dialog/export.cpp:348
 #, c-format
 msgid "Directory <b>%s</b> does not exist or is not a directory.\n"
 msgstr "ディレクトリ %s が存在しないか、ディレクトリではありません。\n"
 
-#: ../src/ui/dialog/export.cpp:292 ../src/ui/dialog/export.cpp:435
+#: ../src/ui/dialog/export.cpp:287 ../src/ui/dialog/export.cpp:429
 #, c-format
 msgid "Could not export to filename <b>%s</b>.\n"
 msgstr "ファイル名 <b>%s</b> にエクスポートできませんでした。\n"
 
-#: ../src/ui/dialog/export.cpp:306
+#: ../src/ui/dialog/export.cpp:301
 msgid "Export aborted."
 msgstr "エクスポートを中止しました。"
 
-#: ../src/ui/dialog/export.cpp:317 ../src/ui/dialog/export.cpp:449
+#: ../src/ui/dialog/export.cpp:312 ../src/ui/dialog/export.cpp:443
 #, c-format
 msgid "Drawing exported to <b>%s</b>."
 msgstr "画像は <b>%s</b> にエクスポートされました。"
 
-#: ../src/ui/dialog/export.cpp:340
+#: ../src/ui/dialog/export.cpp:335
 msgid "Vector Export Error"
 msgstr "ベクター エクスポート エラー"
 
-#: ../src/ui/dialog/export.cpp:341
+#: ../src/ui/dialog/export.cpp:336
 msgid "Vector export Method is used for RASTER EXTENSION"
 msgstr "ラスターの拡張機能にベクターエクスポート方式が使用されています"
 
-#: ../src/ui/dialog/export.cpp:404
+#: ../src/ui/dialog/export.cpp:399
 #, c-format
 msgid "Could not export to filename <b>%s</b>. (missing object)\n"
 msgstr ""
 "ファイル名 <b>%s</b> にエクスポートできませんでした。(オブジェクトが見つかり"
 "ません)\n"
 
-#: ../src/ui/dialog/export.cpp:456 ../src/ui/dialog/export.cpp:495
+#: ../src/ui/dialog/export.cpp:450 ../src/ui/dialog/export.cpp:489
 msgid "bitmap"
 msgstr "ビットマップ"
 
@@ -26273,7 +26273,7 @@ msgid "_SVG editor:"
 msgstr "SVG エディター(_S):"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2824
-#: ../share/ui/dialog-export.glade:801 ../share/ui/dialog-export.glade:1074
+#: ../share/ui/dialog-export.glade:816 ../share/ui/dialog-export.glade:1089
 #: ../share/extensions/guillotine.inx:15 ../share/extensions/layer2png.inx:29
 #: ../share/extensions/plotter.inx:98
 #: ../share/extensions/prepare_file_save_as.inx:8
@@ -26356,7 +26356,7 @@ msgid "Include"
 msgstr "読み込み"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2859
-#: ../share/ui/dialog-export.glade:942
+#: ../share/ui/dialog-export.glade:957
 msgid "Pages"
 msgstr "ページ"
 
@@ -28655,7 +28655,7 @@ msgid "Canvas"
 msgstr "キャンバス"
 
 #: ../src/ui/modifiers.cpp:61 ../src/widgets/desktop-widget.cpp:1556
-#: ../share/ui/dialog-export.glade:467 ../share/ui/dialog-export.glade:907
+#: ../share/ui/dialog-export.glade:482 ../share/ui/dialog-export.glade:922
 #: ../share/extensions/printing_marks.inx:18
 msgid "Selection"
 msgstr "選択範囲"
@@ -34662,7 +34662,7 @@ msgstr ""
 msgid "Note:"
 msgstr "メモ:"
 
-#: ../src/widgets/desktop-widget.cpp:1548 ../share/ui/dialog-export.glade:503
+#: ../src/widgets/desktop-widget.cpp:1548 ../share/ui/dialog-export.glade:518
 #: ../share/ui/page-properties.glade:799 ../share/ui/align-and-distribute.ui:60
 #: ../share/extensions/voronoi2svg.inx:15
 msgid "Page"
@@ -34764,19 +34764,31 @@ msgstr "画像サイズ"
 msgid "Export Selected only"
 msgstr "選択中のもののみエクスポート"
 
-#: ../share/ui/dialog-export.glade:325 ../share/extensions/restack.inx:32
+#: ../share/ui/dialog-export.glade:230
+msgid "Default Format Settings"
+msgstr "デフォルトフォーマット設定"
+
+#: ../share/ui/dialog-export.glade:234
+msgid ""
+"Don't pop up the export options and use the previously used or default "
+"options."
+msgstr ""
+"エクスポートオプションをポップアップせずに、最後に使用したもの、またはデフォ"
+"ルトオプションを使用します。"
+
+#: ../share/ui/dialog-export.glade:340 ../share/extensions/restack.inx:32
 #: ../share/extensions/text_extract.inx:19
 #: ../share/extensions/text_merge.inx:19
 msgid "Bottom"
 msgstr "下"
 
-#: ../share/ui/dialog-export.glade:338 ../share/extensions/restack.inx:30
+#: ../share/ui/dialog-export.glade:353 ../share/extensions/restack.inx:30
 #: ../share/extensions/text_extract.inx:17
 #: ../share/extensions/text_merge.inx:17
 msgid "Top"
 msgstr "上"
 
-#: ../share/ui/dialog-export.glade:351
+#: ../share/ui/dialog-export.glade:366
 msgid ""
 "Width\n"
 "(px)"
@@ -34784,7 +34796,7 @@ msgstr ""
 "幅\n"
 "(px)"
 
-#: ../share/ui/dialog-export.glade:365
+#: ../share/ui/dialog-export.glade:380
 msgid ""
 "Height\n"
 "(px)"
@@ -34792,85 +34804,85 @@ msgstr ""
 "高さ\n"
 "(px)"
 
-#: ../share/ui/dialog-export.glade:473
+#: ../share/ui/dialog-export.glade:488
 msgid "Export selected Objects"
 msgstr "選択オブジェクトをエクスポート"
 
-#: ../share/ui/dialog-export.glade:485
+#: ../share/ui/dialog-export.glade:500
 #: ../share/extensions/doc_ai_convert.inx:33 ../share/extensions/docinfo.inx:8
 #: ../share/extensions/dpi90to96.inx:11 ../share/extensions/dpi96to90.inx:11
 msgid "Document"
 msgstr "ドキュメント"
 
-#: ../share/ui/dialog-export.glade:491
+#: ../share/ui/dialog-export.glade:506
 msgid "Export everything inside Document"
 msgstr "ドキュメント内のすべてをエクスポート"
 
-#: ../share/ui/dialog-export.glade:509
+#: ../share/ui/dialog-export.glade:524
 msgid "Export cropped content inside the page"
 msgstr "ページ内にあるトリミングされたコンテンツをエクスポート"
 
-#: ../share/ui/dialog-export.glade:527
+#: ../share/ui/dialog-export.glade:542
 msgid "Export Custom Area by specifying coordinates"
 msgstr "座標を指定してカスタム領域をエクスポート"
 
-#: ../share/ui/dialog-export.glade:553
+#: ../share/ui/dialog-export.glade:568
 msgid "Select the previous page"
 msgstr "前のページを選択"
 
-#: ../share/ui/dialog-export.glade:573
+#: ../share/ui/dialog-export.glade:588
 msgid "{name}"
 msgstr "{name}"
 
-#: ../share/ui/dialog-export.glade:586
+#: ../share/ui/dialog-export.glade:601
 msgid "Select the next page"
 msgstr "次のページを選択"
 
-#: ../share/ui/dialog-export.glade:767
+#: ../share/ui/dialog-export.glade:782
 msgid "Browse Export Directory"
 msgstr "エクスポートディレクトリを参照"
 
-#: ../share/ui/dialog-export.glade:779
+#: ../share/ui/dialog-export.glade:794
 msgid "Select export format"
 msgstr "エクスポート形式を選択"
 
-#: ../share/ui/dialog-export.glade:828
+#: ../share/ui/dialog-export.glade:843
 msgid "Export a part of document"
 msgstr "ドキュメントの一部をエクスポート"
 
-#: ../share/ui/dialog-export.glade:829
+#: ../share/ui/dialog-export.glade:844
 msgid "Single Image"
 msgstr "単一画像"
 
-#: ../share/ui/dialog-export.glade:912
+#: ../share/ui/dialog-export.glade:927
 msgid "Export selected Objects/Groups to separate file"
 msgstr "選択オブジェクト/グループを個別のファイルとしてエクスポート"
 
-#: ../share/ui/dialog-export.glade:924
+#: ../share/ui/dialog-export.glade:939
 msgid "Layers"
 msgstr "レイヤー"
 
-#: ../share/ui/dialog-export.glade:929
+#: ../share/ui/dialog-export.glade:944
 msgid "Export Layers as separate files"
 msgstr "レイヤーを個別のファイルとしてエクスポート"
 
-#: ../share/ui/dialog-export.glade:947
+#: ../share/ui/dialog-export.glade:962
 msgid "Export Pages as separate files"
 msgstr "ページを個別のファイルとしてエクスポート"
 
-#: ../share/ui/dialog-export.glade:967
+#: ../share/ui/dialog-export.glade:982
 msgid "Preview"
 msgstr "プレビュー"
 
-#: ../share/ui/dialog-export.glade:986
+#: ../share/ui/dialog-export.glade:1001
 msgid "5 Items"
 msgstr "5項目"
 
-#: ../share/ui/dialog-export.glade:995
+#: ../share/ui/dialog-export.glade:1010
 msgid "Export Selected Only"
 msgstr "選択中のもののみエクスポート"
 
-#: ../share/ui/dialog-export.glade:1110
+#: ../share/ui/dialog-export.glade:1125
 msgid "Batch Export"
 msgstr "バッチエクスポート"
 
