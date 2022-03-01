@@ -20,8 +20,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: inkscape\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
-"POT-Creation-Date: 2022-02-27 08:28+0900\n"
-"PO-Revision-Date: 2022-02-27 08:29+0900\n"
+"POT-Creation-Date: 2022-03-01 10:45+0900\n"
+"PO-Revision-Date: 2022-03-01 10:46+0900\n"
 "Last-Translator: Masato Hashimoto <cabezon.hashimoto@gmail.com>\n"
 "Language-Team: Japanese <inkscape-translator@lists.sourceforge.net>\n"
 "Language: ja\n"
@@ -11132,7 +11132,7 @@ msgid "External"
 msgstr "外部"
 
 #: ../src/extension/internal/filter/textures.h:83
-#: ../src/ui/toolbar/page-toolbar.cpp:207
+#: ../src/ui/toolbar/page-toolbar.cpp:214
 #: ../src/ui/widget/page-properties.cpp:300 ../share/ui/dialog-export.glade:536
 #: ../share/ui/toolbar-page.ui:33 ../share/extensions/color_custom.inx:3
 #: ../share/extensions/markers_strokepaint.inx:15
@@ -30606,36 +30606,36 @@ msgstr "アウトラインを表示"
 msgid "Show path outline (without path effects)"
 msgstr "パスのアウトラインを表示 (パスエフェクトなし)"
 
-#: ../src/ui/toolbar/page-toolbar.cpp:117
-msgid "Relabel Page"
-msgstr "ページのラベルを変更"
-
-#: ../src/ui/toolbar/page-toolbar.cpp:131
-msgid "Resize Page"
-msgstr "ページをサイズ変更"
-
-#: ../src/ui/toolbar/page-toolbar.cpp:201
+#: ../src/ui/toolbar/page-toolbar.cpp:60
 msgid "ex.: 100x100cm"
 msgstr "例: 100x100cm"
 
-#: ../src/ui/toolbar/page-toolbar.cpp:202
+#: ../src/ui/toolbar/page-toolbar.cpp:61
 msgid ""
-"Type in width & height of a page. (ex.: 100x100cm, 10cmx100mm)\n"
+"Type in width & height of a page. (ex.: 15x10cm, 10in x 100mm)\n"
 "or choose preset from dropdown."
 msgstr ""
-"ページの縦横の長さ。(例: 100x100cm, 10cmx100mm)\n"
+"ページの縦横の長さ。(例: 15x10cm, 10in x 100mm)\n"
 "またはドロップダウンからサイズ名を選択"
 
-#: ../src/ui/toolbar/page-toolbar.cpp:220
+#: ../src/ui/toolbar/page-toolbar.cpp:124
+msgid "Relabel Page"
+msgstr "ページのラベルを変更"
+
+#: ../src/ui/toolbar/page-toolbar.cpp:138
+msgid "Resize Page"
+msgstr "ページをサイズ変更"
+
+#: ../src/ui/toolbar/page-toolbar.cpp:231
 msgid "Page label"
 msgstr "ページのラベル"
 
-#: ../src/ui/toolbar/page-toolbar.cpp:234
+#: ../src/ui/toolbar/page-toolbar.cpp:245
 #, c-format
 msgid "%d/%d"
 msgstr "%d/%d"
 
-#: ../src/ui/toolbar/page-toolbar.cpp:249
+#: ../src/ui/toolbar/page-toolbar.cpp:260
 msgid "Single Page Document"
 msgstr "単一ページのドキュメント"
 
