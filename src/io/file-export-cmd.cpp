@@ -46,29 +46,6 @@
 #include <boost/filesystem.hpp>
 namespace filesystem = boost::filesystem;
 
-static void convert_text_to_curves(SPDocument *doc)
-{
-    std::vector<SPItem *> items;
-    doc->ensureUpToDate();
-
-    for (auto &child : doc->getRoot()->children) {
-        auto item = dynamic_cast<SPItem *>(&child);
-        if (!(SP_IS_TEXT(item) ||     //
-              SP_IS_FLOWTEXT(item) || //
-              SP_IS_GROUP(item))) {
-            continue;
-        }
-
-        te_update_layout_now_recursive(item);
-        items.push_back(item);
-    }
-
-    std::vector<SPItem *> selected;               // Not used
-    std::vector<Inkscape::XML::Node *> to_select; // Not used
-
-    sp_item_list_to_curves(items, selected, to_select);
-}
-
 InkFileExportCmd::InkFileExportCmd()
     : export_overwrite(false)
     , export_area_drawing(false)
@@ -342,7 +319,7 @@ int InkFileExportCmd::do_export_svg(SPDocument *doc, std::string const &filename
 {
     // Start with options that are once per document.
     if (export_text_to_path) {
-        convert_text_to_curves(doc);
+        Inkscape::convert_text_to_curves(doc);
     }
 
     if (export_margin != 0) {
@@ -764,12 +741,6 @@ int InkFileExportCmd::do_export_ps_pdf(SPDocument *doc, std::string const &filen
     // Set export options.
     if (export_text_to_path) {
         extension.set_param_optiongroup("textToPath", "paths");
-
-        // textToPath=paths would do the text-to-path conversion directly with
-        // Cairo, but that method has numerical precision and font matching
-        // issues (https://gitlab.com/inkscape/inkscape/-/issues/1979).
-        // We get better results by using Inkscape's Object-to-Path method.
-        convert_text_to_curves(doc);
     } else if (export_latex) {
         extension.set_param_optiongroup("textToPath", "LaTeX");
     } else {
