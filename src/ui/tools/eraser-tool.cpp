@@ -9,6 +9,7 @@
  *   MenTaLguY <mental@rydia.net>
  *   Jon A. Cruz <jon@joncruz.org>
  *   Abhishek Sharma
+ *   Rafael Siejakowski <rs@rs-math.net>
  *
  * The original dynadraw code:
  *   Paul Haeberli <paul@sgi.com>
@@ -46,6 +47,7 @@
 #include "document.h"
 #include "layer-manager.h"
 #include "message-context.h"
+#include "message-stack.h"
 #include "path-chemistry.h"
 #include "rubberband.h"
 #include "selection-chemistry.h"
@@ -57,6 +59,7 @@
 #include "include/macros.h"
 
 #include "object/sp-clippath.h"
+#include "object/sp-image.h"
 #include "object/sp-item-group.h"
 #include "object/sp-path.h"
 #include "object/sp-rect.h"
@@ -617,7 +620,7 @@ void EraserTool::_setToAccumulated()
     if (!accumulated->is_empty()) {
         if (!repr) {
             /* Create object */
-            Inkscape::XML::Document *xml_doc = _desktop->doc()->getReprDoc();
+            Inkscape::XML::Document *xml_doc = document->getReprDoc();
             Inkscape::XML::Node *eraser_repr = xml_doc->createElement("svg:path");
 
             /* Set style */
@@ -637,8 +640,7 @@ void EraserTool::_setToAccumulated()
             bool was_selection = false;
             Inkscape::Selection *selection = _desktop->getSelection();
             _updateMode();
-            Inkscape::XML::Document *xml_doc = _desktop->doc()->getReprDoc();
-            SPItem *acid = SP_ITEM(_desktop->doc()->getObjectByRepr(repr));
+            SPItem *acid = SP_ITEM(document->getObjectByRepr(repr));
             eraser_bbox = acid->documentVisualBounds();
             std::vector<SPItem *> remaining_items;
             std::vector<SPItem *> to_work_on;
@@ -654,9 +656,12 @@ void EraserTool::_setToAccumulated()
             } else {
                 if (mode == EraserToolMode::DELETE) {
                     Inkscape::Rubberband *r = Inkscape::Rubberband::get(_desktop);
+                    auto selected_items = selection->items();
                     std::vector<SPItem *> touched = document->getItemsAtPoints(_desktop->dkey, r->getPoints());
-                    for (auto i : touched) {
-                        if (selection->includes(i)) {
+                    for (auto i : selected_items) {
+                        if (std::find(touched.begin(), touched.end(), i) == touched.end()) {
+                            remaining_items.push_back(i);
+                        } else {
                             to_work_on.push_back(i);
                         }
                     }
@@ -666,88 +671,55 @@ void EraserTool::_setToAccumulated()
                 was_selection = true;
             }
 
-            if (!to_work_on.empty()) {
+            if (to_work_on.empty()) {
+                _clearStatusBar();
+            } else {
+                selection->clear();
                 if (mode == EraserToolMode::CUT) {
-                    for (auto i : to_work_on) { // TODO: Move the loop body to a separate function
-                        SPItem *item = i;
-
-                        // Unlink a clone before cutting it
-                        if (SPUse *use = dynamic_cast<SPUse *>(item)) {
-                            item = use->unlink();
-                            if (!item) {
-                                continue;
-                            }
-                        }
-                        if (SP_IS_PATH(item) && SP_PATH(item)->nodesInPath() == 2) {
-                            SPItem *item = i;
-                            item->deleteObject(true);
+                    Error status = ALL_GOOD;
+                    for (auto item : to_work_on) {
+                        Error retval = _cutErase(item, eraser_bbox, remaining_items);
+                        if (retval == ALL_GOOD) {
                             work_done = true;
-                        } else if (!SP_IS_GROUP(item)) {
-                            Geom::OptRect bbox = item->documentVisualBounds();
-                            if (bbox && bbox->intersects(*eraser_bbox)) {
-                                Inkscape::XML::Node *dup = repr->duplicate(xml_doc);
-                                repr->parent()->appendChild(dup);
-                                Inkscape::GC::release(dup); // parent takes over
-                                Inkscape::ObjectSet w_selection(_desktop);
-                                w_selection.set(dup);
-                                if (!nowidth) {
-                                    w_selection.pathUnion(true);
-                                }
-                                w_selection.add(item);
-                                if (item->style->fill_rule.value == SP_WIND_RULE_EVENODD) {
-                                    SPCSSAttr *css = sp_repr_css_attr_new();
-                                    sp_repr_css_set_property(css, "fill-rule", "evenodd");
-                                    sp_desktop_set_style(_desktop, css);
-                                    sp_repr_css_attr_unref(css);
-                                    css = nullptr;
-                                }
-                                if (nowidth) {
-                                    w_selection.pathCut(true);
-                                } else {
-                                    w_selection.pathDiff(true);
-                                }
-                                work_done = true; // TODO set this only if something was cut.
+                        } else {
+                            status |= retval;
+                        }
+                    }
 
-                                Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-                                bool break_apart = prefs->getBool("/tools/eraser/break_apart", false);
-                                if (!break_apart) {
-                                    w_selection.combine(true);
-                                } else if (!nowidth) {
-                                    w_selection.breakApart(true, false);
-                                }
-                                if (!w_selection.isEmpty()) {
-                                    // If the item was not completely erased, track the new remainder.
-                                    std::vector<SPItem*> nowSel(w_selection.items().begin(), w_selection.items().end());
-                                    for (auto i2 : nowSel) {
-                                        remaining_items.push_back(i2);
-                                    }
-                                }
-                            } else {
-                                remaining_items.push_back(item);
-                            }
+                    status &= ~(NOT_IN_BOUNDS | NON_EXISTENT); // Clear flags not handled at the moment
+                    if (status == ALL_GOOD) {
+                        _clearStatusBar();
+                    } else { // Something went wrong during the cut operation
+                        if (status & RASTER_IMAGE) {
+                            _setStatusBarMessage(_("Cannot cut out from a bitmap, use <b>Clip</b> mode "
+                                                   "instead."));
+                        } else if (status & ERROR_GROUP) {
+                            _setStatusBarMessage(_("Cannot cut out from a group, ungroup the objects "
+                                                   "first."));
+                        } else if (status & NO_AREA_PATH) {
+                            _setStatusBarMessage(_("Cannot cut out from a path with zero area, use "
+                                                   "<b>Clip</b> mode instead."));
                         }
                     }
                 } else if (mode == EraserToolMode::CLIP) {
                     if (!nowidth) {
-                        remaining_items.clear();
                         for (auto item : to_work_on) {
                             _clipErase(item, item_repr->parent, eraser_bbox);
-                            if (was_selection) {
-                                remaining_items.push_back(item);
-                            }
+                        }
+                        if (was_selection) {
+                            remaining_items = to_work_on;
                         }
                         work_done = true;
                     }
+                    _clearStatusBar();
                 } else if (mode == EraserToolMode::DELETE) {
                     for (auto item : to_work_on) {
                         item->deleteObject(true);
                     }
-                    selection->deleteItems();
-                    remaining_items.clear();
                     work_done = true;
+                    _clearStatusBar();
                 }
 
-                selection->clear();
                 if (was_selection && !remaining_items.empty()) {
                     selection->add(remaining_items.begin(), remaining_items.end());
                 }
@@ -768,6 +740,136 @@ void EraserTool::_setToAccumulated()
     }
 }
 
+/**
+ * @brief Erases from a shape by cutting
+ * @param item - the item to be erased
+ * @param eraser_bbox - bounding box of the eraser stroke
+ * @param survivers - items that survived the erase operation will be added to this vector
+ * @return type of error encountered
+ */
+EraserTool::Error EraserTool::_cutErase(SPItem* item, Geom::OptRect const &eraser_bbox,
+                                        std::vector<SPItem *> &survivers)
+{
+    // If the item cannot be cut, preserve it
+    if (Error error = EraserTool::_uncuttableItemType(item)) {
+        survivers.push_back(item);
+        return error;
+    }
+
+    Geom::OptRect bbox = item->documentVisualBounds();
+    if (!bbox || !bbox->intersects(eraser_bbox)) {
+        survivers.push_back(item);
+        return NOT_IN_BOUNDS;
+    }
+
+    // If the item is a clone, we check if the original is cuttable before unlinking it
+    if (SPUse *use = dynamic_cast<SPUse *>(item)) {
+        int depth = use->cloneDepth();
+        if (depth < 0) {
+            survivers.push_back(item);
+            return NON_EXISTENT;
+        }
+        // We recurse into the chain of uses until we reach the original item
+        SPItem *original_item = item;
+        for (int i = 0; i < depth; ++i) {
+            SPUse *intermediate_clone = dynamic_cast<SPUse *>(original_item);
+            original_item = intermediate_clone->get_original();
+        }
+        if (Error error = EraserTool::_uncuttableItemType(original_item)) {
+            survivers.push_back(item);
+            return error;
+        }
+        item = use->unlink();
+    }
+
+    _booleanErase(item, survivers);
+    return ALL_GOOD;
+}
+
+/** Returns error flags for items that cannot be meaningfully erased in CUT mode */
+EraserTool::Error EraserTool::_uncuttableItemType(SPItem *item)
+{
+    if (!item) {
+        return NON_EXISTENT;
+    } else if (dynamic_cast<SPGroup *>(item)) {
+        return ERROR_GROUP; // TODO: handle groups in the future
+    } else if (dynamic_cast<SPImage *>(item)) {
+        return RASTER_IMAGE;
+    } else if (_isStraightSegment(item)) {
+        return NO_AREA_PATH;
+    } else {
+        return ALL_GOOD;
+    }
+}
+
+/**
+ * @brief Performs a boolean difference or cut operation which implements the CUT mode operation
+ * @param erasee - the item to be erased
+ * @param survivers - items that survived the erase operation will be added to this vector
+ */
+void EraserTool::_booleanErase(SPItem *erasee, std::vector<SPItem *> &survivers) const
+{
+    XML::Document *xml_doc = _desktop->doc()->getReprDoc();
+    XML::Node *duplicate_stroke = repr->duplicate(xml_doc);
+    repr->parent()->appendChild(duplicate_stroke);
+    GC::release(duplicate_stroke); // parent takes over
+    ObjectSet operands(_desktop);
+    operands.set(duplicate_stroke);
+    if (!nowidth) {
+        operands.pathUnion(true, true);
+    }
+    operands.add(erasee);
+    operands.removeLPESRecursive(true);
+
+    _handleStrokeStyle(erasee);
+
+    if (nowidth) {
+        operands.pathCut(true, true);
+    } else {
+        operands.pathDiff(true, true);
+    }
+
+    auto *prefs = Preferences::get();
+    bool break_apart = prefs->getBool("/tools/eraser/break_apart", false);
+    if (!break_apart) {
+        operands.combine(true, true);
+    } else if (!nowidth) {
+        operands.breakApart(true, false, true);
+    }
+    survivers.insert(survivers.end(), operands.items().begin(), operands.items().end());
+}
+
+/** Handles the "evenodd" stroke style */
+void EraserTool::_handleStrokeStyle(SPItem *item) const
+{
+    if (item->style->fill_rule.value == SP_WIND_RULE_EVENODD) {
+        SPCSSAttr *css = sp_repr_css_attr_new();
+        sp_repr_css_set_property(css, "fill-rule", "evenodd");
+        sp_desktop_set_style(_desktop, css);
+        sp_repr_css_attr_unref(css);
+        css = nullptr;
+    }
+}
+
+/** Sets an error message in the status bar */
+void EraserTool::_setStatusBarMessage(char *message)
+{
+    MessageId id = _desktop->messageStack()->flash(WARNING_MESSAGE, message);
+    _our_messages.push_back(id);
+}
+
+/** Clears all of messages sent by us to the status bar */
+void EraserTool::_clearStatusBar()
+{
+    if (!_our_messages.empty()) {
+        auto ms = _desktop->messageStack();
+        for (MessageId id : _our_messages) {
+            ms->cancel(id);
+        }
+        _our_messages.clear();
+    }
+}
+
 /** Clips through an item */
 void EraserTool::_clipErase(SPItem *item, SPObject *parent, Geom::OptRect &eraser_box)
 {
@@ -779,6 +881,7 @@ void EraserTool::_clipErase(SPItem *item, SPObject *parent, Geom::OptRect &erase
     Inkscape::GC::release(dup); // parent takes over
     w_selection.set(dup);
     w_selection.pathUnion(true);
+    bool delete_old_clip_path = false;
     if (bbox && bbox->intersects(*eraser_box)) {
         SPClipPath *clip_path = item->getClipObject();
         if (clip_path) {
@@ -799,10 +902,10 @@ void EraserTool::_clipErase(SPItem *item, SPObject *parent, Geom::OptRect &erase
                     if (dup_clip_obj) {
                         dup_clip_obj->transform *= item->getRelativeTransform(SP_ITEM(parent));
                         dup_clip_obj->updateRepr();
-                        clip_path->deleteObject(true);
+                        delete_old_clip_path = true;
                         w_selection.raiseToTop(true);
                         w_selection.add(dup_clip);
-                        w_selection.pathDiff(true);
+                        w_selection.pathDiff(true, true);
                     }
                 }
             }
@@ -818,17 +921,52 @@ void EraserTool::_clipErase(SPItem *item, SPObject *parent, Geom::OptRect &erase
             rect->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
             w_selection.raiseToTop(true);
             w_selection.add(rect);
-            w_selection.pathDiff(true);
+            w_selection.pathDiff(true, true);
         }
         w_selection.raiseToTop(true);
         w_selection.add(item);
         w_selection.setMask(true, false, true);
+        if (delete_old_clip_path) {
+            clip_path->deleteObject(true);
+        }
     } else {
         SPItem *erase_clip = w_selection.singleItem();
         if (erase_clip) {
             erase_clip->deleteObject(true);
         }
     }
+}
+
+/** Detects whether the given path is a straight line segment which encloses no area
+ or consists of several such segments */
+bool EraserTool::_isStraightSegment(SPItem *path)
+{
+    SPPath *as_path = dynamic_cast<SPPath *>(path);
+    if (!as_path) {
+        return false;
+    }
+
+    auto const &curve = as_path->curve();
+    if (!curve) {
+        return false;
+    }
+    auto const &pathvector = curve->get_pathvector();
+
+    // Check if all segments are straight and collinear
+    for (auto const &path : pathvector) {
+        Geom::Point initial_tangent = path.front().unitTangentAt(0.0);
+        for (auto const &segment : path) {
+            if (!segment.isLineSegment()) {
+                return false;
+            } else {
+                Geom::Point dir = segment.unitTangentAt(0.0);
+                if (!Geom::are_near(dir, initial_tangent) && !Geom::are_near(-dir, initial_tangent)) {
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
 }
 
 void EraserTool::_addCap(SPCurve &curve, Geom::Point const &pre, Geom::Point const &from, Geom::Point const &to,
@@ -864,14 +1002,12 @@ void EraserTool::_accumulate()
 {
     // construct a crude outline of the eraser's path.
     // this desperately needs to be rewritten to use the path outliner...
-    if (cal1->is_empty() || cal2->is_empty()) {
+    if (!cal1->get_segment_count() || !cal2->get_segment_count()) {
         return;
     }
-    accumulated->reset(); /*  Is this required ?? */
+
     auto rev_cal2 = cal2->create_reverse();
 
-    g_assert(cal1->get_segment_count() > 0);
-    g_assert(rev_cal2->get_segment_count() > 0);
     g_assert(!cal1->first_path()->closed());
     g_assert(!rev_cal2->first_path()->closed());
 
