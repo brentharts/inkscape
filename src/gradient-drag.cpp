@@ -1996,12 +1996,11 @@ void GrDrag::setSelected(GrDragger *dragger, bool add_to_selection, bool overrid
 
     // Don't allow selecting a mesh handle or mesh tensor.
     // We might want to rethink since a dragger can have draggables of different types.
-    if ( dragger->isA( POINT_MG_HANDLE ) || dragger->isA( POINT_MG_TENSOR ) ) return;
+    if ( !dragger || dragger->isA( POINT_MG_HANDLE ) || dragger->isA( POINT_MG_TENSOR ) ) return;
 
     if (add_to_selection) {
-        if (!dragger) return;
         if (override) {
-                selected.insert(dragger);
+            selected.insert(dragger);
             dragger->select();
             seldragger = dragger;
         } else { // toggle
@@ -2019,11 +2018,9 @@ void GrDrag::setSelected(GrDragger *dragger, bool add_to_selection, bool overrid
         }
     } else {
         deselect_all();
-        if (dragger) {
-            selected.insert(dragger);
-            dragger->select();
-            seldragger = dragger;
-        }
+        selected.insert(dragger);
+        dragger->select();
+        seldragger = dragger;
     }
     if (seldragger) {
         desktop->emit_gradient_stop_selected(this, nullptr);
