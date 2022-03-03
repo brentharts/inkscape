@@ -20,8 +20,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: inkscape\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
-"POT-Creation-Date: 2022-03-02 09:36+0900\n"
-"PO-Revision-Date: 2022-03-02 09:36+0900\n"
+"POT-Creation-Date: 2022-03-04 07:15+0900\n"
+"PO-Revision-Date: 2022-03-04 07:24+0900\n"
 "Last-Translator: Masato Hashimoto <cabezon.hashimoto@gmail.com>\n"
 "Language-Team: Japanese <inkscape-translator@lists.sourceforge.net>\n"
 "Language: ja\n"
@@ -6610,7 +6610,7 @@ msgstr "ふたつ先に移動"
 msgid "Move page forwards in the page order"
 msgstr "ページ順を前に移動"
 
-#: ../src/actions/actions-paths.cpp:196 ../src/path/path-boolop.cpp:60
+#: ../src/actions/actions-paths.cpp:196 ../src/path/path-boolop.cpp:61
 msgid "Union"
 msgstr "統合"
 
@@ -6619,7 +6619,7 @@ msgid "Create union of selected paths"
 msgstr "選択パスを統合したパスを作成します"
 
 #: ../src/actions/actions-paths.cpp:197
-#: ../src/extension/internal/filter/color.h:1643 ../src/path/path-boolop.cpp:74
+#: ../src/extension/internal/filter/color.h:1643 ../src/path/path-boolop.cpp:77
 #: ../src/ui/widget/filter-effect-chooser.cpp:32
 msgid "Difference"
 msgstr "差分"
@@ -6628,7 +6628,7 @@ msgstr "差分"
 msgid "Create difference of selected paths (bottom minus top)"
 msgstr "選択パスの差分 (背面側マイナス前面側) を作成します"
 
-#: ../src/actions/actions-paths.cpp:198 ../src/path/path-boolop.cpp:67
+#: ../src/actions/actions-paths.cpp:198 ../src/path/path-boolop.cpp:69
 msgid "Intersection"
 msgstr "交差"
 
@@ -6637,7 +6637,7 @@ msgid "Create intersection of selected paths"
 msgstr "選択パスの交差部分を作成します"
 
 #: ../src/actions/actions-paths.cpp:199
-#: ../src/extension/internal/filter/color.h:1652 ../src/path/path-boolop.cpp:81
+#: ../src/extension/internal/filter/color.h:1652 ../src/path/path-boolop.cpp:85
 #: ../src/ui/widget/filter-effect-chooser.cpp:33
 msgid "Exclusion"
 msgstr "排他"
@@ -6648,7 +6648,7 @@ msgid ""
 "path)"
 msgstr "選択パスの排他的 OR を作成します (複数の部分が単一のパスに属します)"
 
-#: ../src/actions/actions-paths.cpp:200 ../src/path/path-boolop.cpp:88
+#: ../src/actions/actions-paths.cpp:200 ../src/path/path-boolop.cpp:93
 msgid "Division"
 msgstr "分割"
 
@@ -6664,7 +6664,7 @@ msgstr "パスをカット"
 msgid "Cut the bottom path's stroke into pieces, removing fill"
 msgstr "背面側のパスのストロークを部分に切断し、フィルは削除します"
 
-#: ../src/actions/actions-paths.cpp:202 ../src/path-chemistry.cpp:176
+#: ../src/actions/actions-paths.cpp:202 ../src/path-chemistry.cpp:179
 msgid "Combine"
 msgstr "結合"
 
@@ -9065,132 +9065,132 @@ msgstr "作成するオブジェクトのインセット/アウトセットコ�
 msgid "Generate from Path"
 msgstr "パスから生成"
 
-#: ../src/extension/internal/cairo-ps-out.cpp:329
+#: ../src/extension/internal/cairo-ps-out.cpp:338
 #: ../share/extensions/ps_input.inx:11
 msgid "PostScript"
 msgstr "PostScript"
 
-#: ../src/extension/internal/cairo-ps-out.cpp:331
-#: ../src/extension/internal/cairo-ps-out.cpp:375
+#: ../src/extension/internal/cairo-ps-out.cpp:340
+#: ../src/extension/internal/cairo-ps-out.cpp:384
 msgid "Restrict to PS level:"
 msgstr "PS レベル制限:"
 
-#: ../src/extension/internal/cairo-ps-out.cpp:332
-#: ../src/extension/internal/cairo-ps-out.cpp:376
+#: ../src/extension/internal/cairo-ps-out.cpp:341
+#: ../src/extension/internal/cairo-ps-out.cpp:385
 msgid "PostScript level 3"
 msgstr "PostScript level 3"
 
-#: ../src/extension/internal/cairo-ps-out.cpp:333
-#: ../src/extension/internal/cairo-ps-out.cpp:377
-msgid "PostScript level 2"
-msgstr "PostScript level 2"
-
-#: ../src/extension/internal/cairo-ps-out.cpp:335
-#: ../src/extension/internal/cairo-ps-out.cpp:379
-#: ../src/extension/internal/cairo-renderer-pdf-out.cpp:299
-msgid "Text output options:"
-msgstr "テキスト出力オプション:"
-
-#: ../src/extension/internal/cairo-ps-out.cpp:336
-#: ../src/extension/internal/cairo-ps-out.cpp:380
-#: ../src/extension/internal/cairo-renderer-pdf-out.cpp:300
-msgid "Embed fonts"
-msgstr "フォントを埋め込む"
-
-#: ../src/extension/internal/cairo-ps-out.cpp:337
-#: ../src/extension/internal/cairo-ps-out.cpp:381
-#: ../src/extension/internal/cairo-renderer-pdf-out.cpp:301
-msgid "Convert text to paths"
-msgstr "テキストをパスに変換"
-
-#: ../src/extension/internal/cairo-ps-out.cpp:338
-#: ../src/extension/internal/cairo-ps-out.cpp:382
-#: ../src/extension/internal/cairo-renderer-pdf-out.cpp:302
-msgid "Omit text in PDF and create LaTeX file"
-msgstr "PDF のテキストを除外して LaTeX ファイルを生成"
-
-#: ../src/extension/internal/cairo-ps-out.cpp:340
-#: ../src/extension/internal/cairo-ps-out.cpp:384
-#: ../src/extension/internal/cairo-renderer-pdf-out.cpp:304
-msgid "Rasterize filter effects"
-msgstr "フィルターエフェクトをラスタライズする"
-
-#: ../src/extension/internal/cairo-ps-out.cpp:341
-#: ../src/extension/internal/cairo-ps-out.cpp:385
-#: ../src/extension/internal/cairo-renderer-pdf-out.cpp:305
-msgid "Resolution for rasterization (dpi):"
-msgstr "ラスタライズ解像度 (dpi):"
-
 #: ../src/extension/internal/cairo-ps-out.cpp:342
 #: ../src/extension/internal/cairo-ps-out.cpp:386
-msgid "Output page size"
-msgstr "出力ページサイズ"
-
-#: ../src/extension/internal/cairo-ps-out.cpp:343
-#: ../src/extension/internal/cairo-ps-out.cpp:387
-#: ../src/extension/internal/cairo-renderer-pdf-out.cpp:307
-msgid "Use document's page size"
-msgstr "ドキュメントのページサイズを使用"
+msgid "PostScript level 2"
+msgstr "PostScript level 2"
 
 #: ../src/extension/internal/cairo-ps-out.cpp:344
 #: ../src/extension/internal/cairo-ps-out.cpp:388
 #: ../src/extension/internal/cairo-renderer-pdf-out.cpp:308
-msgid "Use exported object's size"
-msgstr "エクスポートオブジェクトのサイズを使用"
+msgid "Text output options:"
+msgstr "テキスト出力オプション:"
+
+#: ../src/extension/internal/cairo-ps-out.cpp:345
+#: ../src/extension/internal/cairo-ps-out.cpp:389
+#: ../src/extension/internal/cairo-renderer-pdf-out.cpp:309
+msgid "Embed fonts"
+msgstr "フォントを埋め込む"
 
 #: ../src/extension/internal/cairo-ps-out.cpp:346
+#: ../src/extension/internal/cairo-ps-out.cpp:390
 #: ../src/extension/internal/cairo-renderer-pdf-out.cpp:310
-msgid "Bleed/margin (mm):"
-msgstr "裁ち落し/マージン (mm):"
+msgid "Convert text to paths"
+msgstr "テキストをパスに変換"
 
 #: ../src/extension/internal/cairo-ps-out.cpp:347
 #: ../src/extension/internal/cairo-ps-out.cpp:391
 #: ../src/extension/internal/cairo-renderer-pdf-out.cpp:311
+msgid "Omit text in PDF and create LaTeX file"
+msgstr "PDF のテキストを除外して LaTeX ファイルを生成"
+
+#: ../src/extension/internal/cairo-ps-out.cpp:349
+#: ../src/extension/internal/cairo-ps-out.cpp:393
+#: ../src/extension/internal/cairo-renderer-pdf-out.cpp:313
+msgid "Rasterize filter effects"
+msgstr "フィルターエフェクトをラスタライズする"
+
+#: ../src/extension/internal/cairo-ps-out.cpp:350
+#: ../src/extension/internal/cairo-ps-out.cpp:394
+#: ../src/extension/internal/cairo-renderer-pdf-out.cpp:314
+msgid "Resolution for rasterization (dpi):"
+msgstr "ラスタライズ解像度 (dpi):"
+
+#: ../src/extension/internal/cairo-ps-out.cpp:351
+#: ../src/extension/internal/cairo-ps-out.cpp:395
+msgid "Output page size"
+msgstr "出力ページサイズ"
+
+#: ../src/extension/internal/cairo-ps-out.cpp:352
+#: ../src/extension/internal/cairo-ps-out.cpp:396
+#: ../src/extension/internal/cairo-renderer-pdf-out.cpp:316
+msgid "Use document's page size"
+msgstr "ドキュメントのページサイズを使用"
+
+#: ../src/extension/internal/cairo-ps-out.cpp:353
+#: ../src/extension/internal/cairo-ps-out.cpp:397
+#: ../src/extension/internal/cairo-renderer-pdf-out.cpp:317
+msgid "Use exported object's size"
+msgstr "エクスポートオブジェクトのサイズを使用"
+
+#: ../src/extension/internal/cairo-ps-out.cpp:355
+#: ../src/extension/internal/cairo-renderer-pdf-out.cpp:319
+msgid "Bleed/margin (mm):"
+msgstr "裁ち落し/マージン (mm):"
+
+#: ../src/extension/internal/cairo-ps-out.cpp:356
+#: ../src/extension/internal/cairo-ps-out.cpp:400
+#: ../src/extension/internal/cairo-renderer-pdf-out.cpp:320
 msgid "Limit export to the object with ID:"
 msgstr "オブジェクトのエクスポートを ID で制限する:"
 
-#: ../src/extension/internal/cairo-ps-out.cpp:351
+#: ../src/extension/internal/cairo-ps-out.cpp:360
 #: ../share/extensions/ps_input.inx:10
 msgid "PostScript (*.ps)"
 msgstr "PostScript (*.ps)"
 
-#: ../src/extension/internal/cairo-ps-out.cpp:352
+#: ../src/extension/internal/cairo-ps-out.cpp:361
 msgid "PostScript File"
 msgstr "PostScript ファイル"
 
-#: ../src/extension/internal/cairo-ps-out.cpp:373
+#: ../src/extension/internal/cairo-ps-out.cpp:382
 #: ../share/extensions/eps_input.inx:12
 msgid "Encapsulated PostScript"
 msgstr "EPS (Encapsulated PostScript)"
 
-#: ../src/extension/internal/cairo-ps-out.cpp:390
+#: ../src/extension/internal/cairo-ps-out.cpp:399
 msgid "Bleed/margin (mm)"
 msgstr "裁ち落し/マージン (mm)"
 
-#: ../src/extension/internal/cairo-ps-out.cpp:395
+#: ../src/extension/internal/cairo-ps-out.cpp:404
 #: ../share/extensions/eps_input.inx:11
 msgid "Encapsulated PostScript (*.eps)"
 msgstr "EPS - Encapsulated PostScript (*.eps)"
 
-#: ../src/extension/internal/cairo-ps-out.cpp:396
+#: ../src/extension/internal/cairo-ps-out.cpp:405
 msgid "Encapsulated PostScript File"
 msgstr "EPS (Encapsulated PostScript) ファイル"
 
-#: ../src/extension/internal/cairo-renderer-pdf-out.cpp:295
+#: ../src/extension/internal/cairo-renderer-pdf-out.cpp:304
 msgid "Restrict to PDF version:"
 msgstr "PDF バージョン制限:"
 
-#: ../src/extension/internal/cairo-renderer-pdf-out.cpp:296
+#: ../src/extension/internal/cairo-renderer-pdf-out.cpp:305
 #: ../share/extensions/scribus_export_pdf.inx:12
 msgid "PDF 1.5"
 msgstr "PDF 1.5"
 
-#: ../src/extension/internal/cairo-renderer-pdf-out.cpp:297
+#: ../src/extension/internal/cairo-renderer-pdf-out.cpp:306
 #: ../share/extensions/scribus_export_pdf.inx:11
 msgid "PDF 1.4"
 msgstr "PDF 1.4"
 
-#: ../src/extension/internal/cairo-renderer-pdf-out.cpp:306
+#: ../src/extension/internal/cairo-renderer-pdf-out.cpp:315
 msgid "Output page size:"
 msgstr "出力ページサイズ:"
 
@@ -17876,88 +17876,88 @@ msgstr "…"
 msgid "of: %s"
 msgstr "%s"
 
-#: ../src/path-chemistry.cpp:69
+#: ../src/path-chemistry.cpp:70
 msgid "Select <b>object(s)</b> to combine."
 msgstr "結合する<b>オブジェクト</b>を選択してください。"
 
-#: ../src/path-chemistry.cpp:74
+#: ../src/path-chemistry.cpp:76
 msgid "Combining paths..."
 msgstr "パスを結合しています..."
 
-#: ../src/path-chemistry.cpp:184
+#: ../src/path-chemistry.cpp:186
 msgid "<b>No path(s)</b> to combine in the selection."
 msgstr "選択した中に<b>結合するパスがありません</b>。"
 
-#: ../src/path-chemistry.cpp:196
+#: ../src/path-chemistry.cpp:198
 msgid "Select <b>path(s)</b> to break apart."
 msgstr "分解する<b>パス</b>を選択してください。"
 
-#: ../src/path-chemistry.cpp:200
+#: ../src/path-chemistry.cpp:203
 msgid "Breaking apart paths..."
 msgstr "パスを分解しています..."
 
-#: ../src/path-chemistry.cpp:277
+#: ../src/path-chemistry.cpp:281
 msgid "Break apart"
 msgstr "分解"
 
-#: ../src/path-chemistry.cpp:281
+#: ../src/path-chemistry.cpp:284
 msgid "<b>No path(s)</b> to break apart in the selection."
 msgstr "分解する<b>パスが選択されていません</b>。"
 
-#: ../src/path-chemistry.cpp:289
+#: ../src/path-chemistry.cpp:292
 msgid "Select <b>object(s)</b> to convert to path."
 msgstr "パスに変換する<b>オブジェクト</b>を選択してください。"
 
-#: ../src/path-chemistry.cpp:295
+#: ../src/path-chemistry.cpp:298
 msgid "Converting objects to paths..."
 msgstr "ビットマップをパスに変換しています..."
 
-#: ../src/path-chemistry.cpp:315
+#: ../src/path-chemistry.cpp:318
 msgid "Object to path"
 msgstr "オブジェクトをパスへ"
 
-#: ../src/path-chemistry.cpp:318
+#: ../src/path-chemistry.cpp:321
 msgid "<b>No objects</b> to convert to path in the selection."
 msgstr "選択された中に、パスに変換する<b>オブジェクトがありません</b>。"
 
-#: ../src/path-chemistry.cpp:569
+#: ../src/path-chemistry.cpp:598
 msgid "Select <b>path(s)</b> to reverse."
 msgstr "向きを逆にする<b>パス</b>を選択してください。"
 
-#: ../src/path-chemistry.cpp:577
+#: ../src/path-chemistry.cpp:606
 msgid "Reversing paths..."
 msgstr "パスの方向を逆にしています..."
 
-#: ../src/path-chemistry.cpp:611
+#: ../src/path-chemistry.cpp:640
 msgid "Reverse path"
 msgstr "パスの方向を逆に"
 
-#: ../src/path-chemistry.cpp:614
+#: ../src/path-chemistry.cpp:643
 msgid "<b>No paths</b> to reverse in the selection."
 msgstr "選択された中に、向きを逆にする<b>パスがありません</b>。"
 
-#: ../src/path/path-boolop.cpp:95
+#: ../src/path/path-boolop.cpp:101
 msgid "Cut path"
 msgstr "パスをカット"
 
-#: ../src/path/path-boolop.cpp:424
+#: ../src/path/path-boolop.cpp:434
 msgid "Select <b>at least 1 path</b> to perform a boolean union."
 msgstr ""
 "ブーリアン統合を行うための<b>少なくとも 1 個のパス</b>を選択してください。"
 
-#: ../src/path/path-boolop.cpp:427
+#: ../src/path/path-boolop.cpp:440
 msgid "Select <b>at least 2 paths</b> to perform a boolean operation."
 msgstr ""
 "ブーリアン演算を行うための<b>少なくとも 2 個のパス</b>を選択してください。"
 
-#: ../src/path/path-boolop.cpp:430
+#: ../src/path/path-boolop.cpp:446
 msgid ""
 "One of the objects is <b>not a path</b>, cannot perform boolean operation."
 msgstr ""
 "オブジェクトの中の少なくとも 1 個が<b>パスではない</b>ため、ブーリアン演算で"
 "きません。"
 
-#: ../src/path/path-boolop.cpp:433
+#: ../src/path/path-boolop.cpp:452
 msgid ""
 "Unable to determine the <b>z-order</b> of the objects selected for "
 "difference, XOR, division, or path cut."
@@ -22834,11 +22834,11 @@ msgid "Append text"
 msgstr "テキストの追加"
 
 # Undo history
-#: ../src/ui/dialog/grid-arrange-tab.cpp:317
+#: ../src/ui/dialog/grid-arrange-tab.cpp:258
 msgid "Arrange in a grid"
 msgstr "グリッドに配置"
 
-#: ../src/ui/dialog/grid-arrange-tab.cpp:532
+#: ../src/ui/dialog/grid-arrange-tab.cpp:473
 #: ../src/ui/dialog/object-attributes.cpp:55
 #: ../src/ui/dialog/object-attributes.cpp:63
 #: ../src/ui/toolbar/node-toolbar.cpp:267
@@ -22847,11 +22847,11 @@ msgstr "グリッドに配置"
 msgid "X:"
 msgstr "X:"
 
-#: ../src/ui/dialog/grid-arrange-tab.cpp:532
+#: ../src/ui/dialog/grid-arrange-tab.cpp:473
 msgid "Horizontal spacing between columns."
 msgstr "水平方向の列間隔です。"
 
-#: ../src/ui/dialog/grid-arrange-tab.cpp:533
+#: ../src/ui/dialog/grid-arrange-tab.cpp:474
 #: ../src/ui/dialog/object-attributes.cpp:56
 #: ../src/ui/dialog/object-attributes.cpp:64
 #: ../src/ui/toolbar/node-toolbar.cpp:283
@@ -22860,55 +22860,55 @@ msgstr "水平方向の列間隔です。"
 msgid "Y:"
 msgstr "Y:"
 
-#: ../src/ui/dialog/grid-arrange-tab.cpp:533
+#: ../src/ui/dialog/grid-arrange-tab.cpp:474
 msgid "Vertical spacing between rows."
 msgstr "垂直方向の行間隔です。"
 
-#: ../src/ui/dialog/grid-arrange-tab.cpp:551
+#: ../src/ui/dialog/grid-arrange-tab.cpp:492
 msgid "_Rows:"
 msgstr "行数(_R):"
 
-#: ../src/ui/dialog/grid-arrange-tab.cpp:560
+#: ../src/ui/dialog/grid-arrange-tab.cpp:501
 msgid "Number of rows"
 msgstr "行の数"
 
-#: ../src/ui/dialog/grid-arrange-tab.cpp:564
+#: ../src/ui/dialog/grid-arrange-tab.cpp:505
 msgid "Equal _height"
 msgstr "同じ高さ(_H)"
 
-#: ../src/ui/dialog/grid-arrange-tab.cpp:575
+#: ../src/ui/dialog/grid-arrange-tab.cpp:516
 msgid "If not set, each row has the height of the tallest object in it"
 msgstr ""
 "チェックマークをつけないと、各行の高さはその行で最も高いオブジェクトの高さに"
 "なります"
 
-#: ../src/ui/dialog/grid-arrange-tab.cpp:592
+#: ../src/ui/dialog/grid-arrange-tab.cpp:533
 msgid "_Columns:"
 msgstr "列数(_C):"
 
-#: ../src/ui/dialog/grid-arrange-tab.cpp:601
+#: ../src/ui/dialog/grid-arrange-tab.cpp:542
 msgid "Number of columns"
 msgstr "列の数"
 
-#: ../src/ui/dialog/grid-arrange-tab.cpp:605
+#: ../src/ui/dialog/grid-arrange-tab.cpp:546
 msgid "Equal _width"
 msgstr "同じ幅(_W)"
 
-#: ../src/ui/dialog/grid-arrange-tab.cpp:615
+#: ../src/ui/dialog/grid-arrange-tab.cpp:556
 msgid "If not set, each column has the width of the widest object in it"
 msgstr ""
 "チェックマークをつけないと、各列の幅はその列の最大幅のオブジェクトの幅になり"
 "ます"
 
-#: ../src/ui/dialog/grid-arrange-tab.cpp:627
+#: ../src/ui/dialog/grid-arrange-tab.cpp:568
 msgid "Alignment:"
 msgstr "配列:"
 
-#: ../src/ui/dialog/grid-arrange-tab.cpp:637
+#: ../src/ui/dialog/grid-arrange-tab.cpp:578
 msgid "_Fit into selection box"
 msgstr "選択枠にフィット(_F)"
 
-#: ../src/ui/dialog/grid-arrange-tab.cpp:644
+#: ../src/ui/dialog/grid-arrange-tab.cpp:585
 msgid "_Set spacing:"
 msgstr "間隔を設定(_S):"
 
@@ -32122,11 +32122,30 @@ msgstr "カーソル位置の値"
 msgid "<b>Release mouse</b> to set color."
 msgstr "<b>マウスボタンを離すと</b>色を設定します。"
 
-#: ../src/ui/tools/eraser-tool.cpp:426
+#: ../src/ui/tools/eraser-tool.cpp:429
 msgid "<b>Drawing</b> an eraser stroke"
 msgstr "消しゴムストロークを<b>引いています</b>。"
 
-#: ../src/ui/tools/eraser-tool.cpp:765
+#: ../src/ui/tools/eraser-tool.cpp:694
+msgid "Cannot cut out from a bitmap, use <b>Clip</b> mode instead."
+msgstr ""
+"ビットマップから切り取ることができません。<b>クリップ</b>モードを使用してくだ"
+"さい。"
+
+#: ../src/ui/tools/eraser-tool.cpp:697
+msgid "Cannot cut out from a group, ungroup the objects first."
+msgstr ""
+"グループから切り離すことができません。先にオブジェクトをグループ解除してくだ"
+"さい。"
+
+#: ../src/ui/tools/eraser-tool.cpp:700
+msgid ""
+"Cannot cut out from a path with zero area, use <b>Clip</b> mode instead."
+msgstr ""
+"何もない領域からパスを切り取ることはできません。<b>クリップ</b>モードを使用し"
+"てください。"
+
+#: ../src/ui/tools/eraser-tool.cpp:737
 msgid "Draw eraser stroke"
 msgstr "消しゴムで消す"
 
