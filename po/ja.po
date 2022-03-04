@@ -20,8 +20,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: inkscape\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
-"POT-Creation-Date: 2022-03-04 07:15+0900\n"
-"PO-Revision-Date: 2022-03-04 07:24+0900\n"
+"POT-Creation-Date: 2022-03-05 07:19+0900\n"
+"PO-Revision-Date: 2022-03-05 07:20+0900\n"
 "Last-Translator: Masato Hashimoto <cabezon.hashimoto@gmail.com>\n"
 "Language-Team: Japanese <inkscape-translator@lists.sourceforge.net>\n"
 "Language: ja\n"
@@ -5246,7 +5246,8 @@ msgid "Edit image externally (image must be selected and not embedded)."
 msgstr "画像を外部で編集 (埋め込まれていない画像を選択する必要あり)。"
 
 #: ../src/actions/actions-file-window.cpp:115
-#: ../src/ui/dialog/document-properties.cpp:899
+#: ../src/ui/dialog/document-properties.cpp:900
+#: ../src/ui/dialog/inkscape-preferences.cpp:2859
 msgid "New"
 msgstr "新規"
 
@@ -6570,7 +6571,7 @@ msgid "Give input 0/1 for No/Yes to use dithering"
 msgstr "ディザリング使用に No/Yes の値として0/1 の入力を与える"
 
 #: ../src/actions/actions-pages.cpp:75 ../share/ui/toolbar-page.ui:13
-#: ../share/ui/toolbar-page.ui:136
+#: ../share/ui/toolbar-page.ui:137
 msgid "New Page"
 msgstr "新規ページ"
 
@@ -6602,7 +6603,7 @@ msgstr "ふたつ前に移動"
 msgid "Move page backwards in the page order"
 msgstr "ページ順を後ろに移動"
 
-#: ../src/actions/actions-pages.cpp:79 ../share/ui/toolbar-page.ui:106
+#: ../src/actions/actions-pages.cpp:79 ../share/ui/toolbar-page.ui:107
 msgid "Move After Next"
 msgstr "ふたつ先に移動"
 
@@ -6771,7 +6772,7 @@ msgid "Offset selected paths by screen pixels"
 msgstr "選択パスを画面ピクセル分オフセットします"
 
 #: ../src/actions/actions-selection-object.cpp:147
-#: ../src/ui/dialog/document-properties.cpp:454
+#: ../src/ui/dialog/document-properties.cpp:455
 msgid "Resize page to fit"
 msgstr "ページのサイズを合わせて変更"
 
@@ -9641,7 +9642,7 @@ msgstr "浸食"
 #: ../src/extension/internal/filter/blurs.h:354
 #: ../src/extension/internal/filter/color.h:1336
 #: ../src/extension/internal/filter/color.h:1452
-#: ../src/ui/dialog/document-properties.cpp:376
+#: ../src/ui/dialog/document-properties.cpp:377
 #: ../src/ui/widget/page-properties.cpp:96
 msgid "Background color"
 msgstr "背景色"
@@ -9667,7 +9668,7 @@ msgstr "ブレンド方式:"
 #: ../src/extension/internal/filter/paint.h:724
 #: ../src/extension/internal/filter/textures.h:79
 #: ../src/extension/internal/filter/transparency.h:63
-#: ../src/live_effects/lpe-copy.cpp:816 ../src/live_effects/lpe-copy.cpp:844
+#: ../src/live_effects/lpe-copy.cpp:807 ../src/live_effects/lpe-copy.cpp:835
 #: ../src/live_effects/lpe-copy_rotate.cpp:45
 #: ../src/ui/dialog/inkscape-preferences.cpp:1897
 #: ../src/ui/dialog/inkscape-preferences.cpp:1945
@@ -14116,57 +14117,57 @@ msgstr "乱数シード"
 msgid "Randomice seed"
 msgstr "乱数シード"
 
-#: ../src/live_effects/lpe-copy.cpp:637
+#: ../src/live_effects/lpe-copy.cpp:634
 msgid "Mirroring mode"
 msgstr "鏡面モード"
 
-#: ../src/live_effects/lpe-copy.cpp:671
+#: ../src/live_effects/lpe-copy.cpp:668
 #: ../share/extensions/color_randomize.inx:3
 #: ../share/extensions/render_alphabetsoup.inx:8
 msgid "Randomize"
 msgstr "ランダム化"
 
-#: ../src/live_effects/lpe-copy.cpp:672
+#: ../src/live_effects/lpe-copy.cpp:669
 msgid "Randomize seed for random mode on scale, rotate and gaps"
 msgstr "拡大縮小、回転、間隔のランダムモード用の乱数シード"
 
-#: ../src/live_effects/lpe-copy.cpp:706
+#: ../src/live_effects/lpe-copy.cpp:703
 msgid "Offset rows"
 msgstr "オフセット行"
 
-#: ../src/live_effects/lpe-copy.cpp:708
+#: ../src/live_effects/lpe-copy.cpp:705
 msgid "Offset alternate rows"
 msgstr "代替行をオフセット"
 
-#: ../src/live_effects/lpe-copy.cpp:709
+#: ../src/live_effects/lpe-copy.cpp:706
 msgid "Offset cols"
 msgstr "オフセット列"
 
-#: ../src/live_effects/lpe-copy.cpp:711
+#: ../src/live_effects/lpe-copy.cpp:708
 msgid "Offset alternate cols"
 msgstr "代替列をオフセット"
 
-#: ../src/live_effects/lpe-copy.cpp:728 ../src/live_effects/lpe-copy.cpp:773
+#: ../src/live_effects/lpe-copy.cpp:722 ../src/live_effects/lpe-copy.cpp:764
 msgid "Interpolate X"
 msgstr "補間 X"
 
-#: ../src/live_effects/lpe-copy.cpp:730 ../src/live_effects/lpe-copy.cpp:775
+#: ../src/live_effects/lpe-copy.cpp:724 ../src/live_effects/lpe-copy.cpp:766
 msgid "Interpolate Y"
 msgstr "補間 Y"
 
-#: ../src/live_effects/lpe-copy.cpp:732 ../src/live_effects/lpe-copy.cpp:777
+#: ../src/live_effects/lpe-copy.cpp:726 ../src/live_effects/lpe-copy.cpp:768
 msgid "Interpolate both"
 msgstr "両方補間"
 
-#: ../src/live_effects/lpe-copy.cpp:734
+#: ../src/live_effects/lpe-copy.cpp:728
 msgid "interpolate none"
 msgstr "補間なし"
 
-#: ../src/live_effects/lpe-copy.cpp:736 ../src/live_effects/lpe-copy.cpp:781
+#: ../src/live_effects/lpe-copy.cpp:730 ../src/live_effects/lpe-copy.cpp:772
 msgid "Interpolate random"
 msgstr "ランダム補間"
 
-#: ../src/live_effects/lpe-copy.cpp:749
+#: ../src/live_effects/lpe-copy.cpp:743
 msgid ""
 "Blend scale from <b>left to right</b> (left is original scale, right is new "
 "scale)"
@@ -14174,7 +14175,7 @@ msgstr ""
 "表示倍率を<b>左から右</b>へブレンド (左がオリジナルの表示倍率、右が新しい表示"
 "倍率)"
 
-#: ../src/live_effects/lpe-copy.cpp:750
+#: ../src/live_effects/lpe-copy.cpp:744
 msgid ""
 "Blend scale from <b>top to bottom</b> (top is original scale, bottom is new "
 "scale)"
@@ -14182,7 +14183,7 @@ msgstr ""
 "表示倍率を<b>上から下</b>へブレンド (上がオリジナルの表示倍率、下が新しい表示"
 "倍率)"
 
-#: ../src/live_effects/lpe-copy.cpp:751
+#: ../src/live_effects/lpe-copy.cpp:745
 msgid ""
 "Blend scale in <b>Z-patten</b> (top left clone is original scale, bottom "
 "right is new scale)"
@@ -14190,33 +14191,33 @@ msgstr ""
 "表示倍率を <b>Z パターン</b>でブレンド (左上のクローンがオリジナルの表示倍"
 "率、右下が新しい表示倍率)"
 
-#: ../src/live_effects/lpe-copy.cpp:752
+#: ../src/live_effects/lpe-copy.cpp:746
 msgid "Uniform scale"
 msgstr "均一な拡大縮小"
 
-#: ../src/live_effects/lpe-copy.cpp:753
+#: ../src/live_effects/lpe-copy.cpp:747
 msgid "Random scale (hit <b>randomize</b> button to shuffle order)"
 msgstr ""
 "表示倍率をランダムに決定 (順番をシャッフルするには<b>ランダム化</b>ボタンをク"
 "リック)"
 
-#: ../src/live_effects/lpe-copy.cpp:779
+#: ../src/live_effects/lpe-copy.cpp:770
 msgid "Interpolate none"
 msgstr "補間なし"
 
-#: ../src/live_effects/lpe-copy.cpp:794
+#: ../src/live_effects/lpe-copy.cpp:785
 msgid ""
 "Blend rotation from <b>left to right</b> (left is original rotation, right "
 "is new rotation)"
 msgstr "回転を<b>左から右</b>へブレンド (左がオリジナルの回転、右が新しい回転)"
 
-#: ../src/live_effects/lpe-copy.cpp:795
+#: ../src/live_effects/lpe-copy.cpp:786
 msgid ""
 "Blend rotation from <b>top to bottom</b> (top is original rotation, bottom "
 "is new rotation)"
 msgstr "回転を<b>上から下</b>へブレンド (上がオリジナルの回転、下が新しい回転)"
 
-#: ../src/live_effects/lpe-copy.cpp:796
+#: ../src/live_effects/lpe-copy.cpp:787
 msgid ""
 "Blend rotation in <b>Z-patten</b> (top left clone is original rotation, "
 "bottom right is new rotation)"
@@ -14224,35 +14225,35 @@ msgstr ""
 "回転を <b>Z パターンで</b>へブレンド (左上がオリジナルの回転、右下が新しい回"
 "転)"
 
-#: ../src/live_effects/lpe-copy.cpp:797
+#: ../src/live_effects/lpe-copy.cpp:788
 msgid "Uniform rotation"
 msgstr "均一な回転"
 
-#: ../src/live_effects/lpe-copy.cpp:798
+#: ../src/live_effects/lpe-copy.cpp:789
 msgid "Random rotation (hit <b>randomize</b> button to shuffle order)"
 msgstr ""
 "回転角をランダムに決定 (順番をシャッフルするには<b>ランダム化</b>ボタンをク"
 "リック)"
 
-#: ../src/live_effects/lpe-copy.cpp:818 ../src/live_effects/lpe-copy.cpp:846
+#: ../src/live_effects/lpe-copy.cpp:809 ../src/live_effects/lpe-copy.cpp:837
 msgid "Random"
 msgstr "ランダム"
 
-#: ../src/live_effects/lpe-copy.cpp:825
+#: ../src/live_effects/lpe-copy.cpp:816
 msgid "Keep uniform gaps in rows (X)"
 msgstr "行 (X軸) の間隔を均一にする"
 
-#: ../src/live_effects/lpe-copy.cpp:826 ../src/live_effects/lpe-copy.cpp:854
+#: ../src/live_effects/lpe-copy.cpp:817 ../src/live_effects/lpe-copy.cpp:845
 msgid "Make gaps random (hit <b>randomize</b> button to shuffle order)"
 msgstr ""
 "間隔をランダムに決定 (順番をシャッフルするには<b>ランダム化</b>ボタンをクリッ"
 "ク)"
 
-#: ../src/live_effects/lpe-copy.cpp:853
+#: ../src/live_effects/lpe-copy.cpp:844
 msgid "Keep uniform gaps in rows (Y)"
 msgstr "列 (Y軸) の間隔を均一にする"
 
-#: ../src/live_effects/lpe-copy.cpp:1457
+#: ../src/live_effects/lpe-copy.cpp:1448
 msgid ""
 "<b>Gap X for the copies</b>: drag to gap all copies, <b>Shift+click</b> "
 "reset to origin"
@@ -14260,7 +14261,7 @@ msgstr ""
 "<b>コピー間に X 軸上の隙間</b>: ドラッグですべてのコピーに隙間, <b>Shift"
 "+click</b> で初期状態に戻します"
 
-#: ../src/live_effects/lpe-copy.cpp:1462
+#: ../src/live_effects/lpe-copy.cpp:1453
 msgid ""
 "<b>Gap Y for the copies</b>: drag to gap all copies, <b>Shift+click</b> "
 "reset to origin"
@@ -14728,7 +14729,7 @@ msgid "Reverses the second path order"
 msgstr "二番目のパスの方向を逆転"
 
 #: ../src/live_effects/lpe-fillet-chamfer.cpp:32
-#: ../src/ui/toolbar/text-toolbar.cpp:588
+#: ../src/ui/toolbar/text-toolbar.cpp:590
 #: ../share/extensions/render_barcode_qrcode.inx:8
 msgid "Auto"
 msgstr "自動"
@@ -15385,7 +15386,7 @@ msgid "Determines on which side the line or line segment is infinite."
 msgstr "直線または直線セグメントの開放する側を指定してください"
 
 #: ../src/live_effects/lpe-measure-segments.cpp:62
-#: ../src/live_effects/lpe-slice.cpp:114 ../src/ui/toolbar/text-toolbar.cpp:547
+#: ../src/live_effects/lpe-slice.cpp:114 ../src/ui/toolbar/text-toolbar.cpp:549
 msgid "Horizontal"
 msgstr "横書き"
 
@@ -20466,62 +20467,62 @@ msgstr "メタデータ"
 msgid "License"
 msgstr "ライセンス"
 
-#: ../src/ui/dialog/document-properties.cpp:241
+#: ../src/ui/dialog/document-properties.cpp:242
 msgid "Set page size"
 msgstr "ページサイズの設定"
 
-#: ../src/ui/dialog/document-properties.cpp:252
+#: ../src/ui/dialog/document-properties.cpp:253
 msgid "Set viewbox position"
 msgstr "'viewBox' の位置を設定"
 
-#: ../src/ui/dialog/document-properties.cpp:264
+#: ../src/ui/dialog/document-properties.cpp:265
 msgid "Set viewbox size"
 msgstr "'viewBox' のサイズを設定"
 
-#: ../src/ui/dialog/document-properties.cpp:290
+#: ../src/ui/dialog/document-properties.cpp:291
 msgid "Set page scale"
 msgstr "ページの表示倍率を設定"
 
-#: ../src/ui/dialog/document-properties.cpp:373
+#: ../src/ui/dialog/document-properties.cpp:374
 #: ../src/ui/widget/page-properties.cpp:104
 msgid "Desk color"
 msgstr "デスクの色"
 
-#: ../src/ui/dialog/document-properties.cpp:379
+#: ../src/ui/dialog/document-properties.cpp:380
 msgid "Border color"
 msgstr "境界線の色"
 
-#: ../src/ui/dialog/document-properties.cpp:416
+#: ../src/ui/dialog/document-properties.cpp:417
 msgid "Toggle checkerboard"
 msgstr "市松模様の使用を切り替える"
 
-#: ../src/ui/dialog/document-properties.cpp:419
+#: ../src/ui/dialog/document-properties.cpp:420
 msgid "Toggle page border"
 msgstr "ページ境界の使用を切り替える"
 
-#: ../src/ui/dialog/document-properties.cpp:422
+#: ../src/ui/dialog/document-properties.cpp:423
 msgid "Toggle border on top"
 msgstr "境界線を最前面に表示するかどうかを切り替える"
 
-#: ../src/ui/dialog/document-properties.cpp:425
+#: ../src/ui/dialog/document-properties.cpp:426
 msgid "Toggle page shadow"
 msgstr "ページの影の使用を切り替える"
 
-#: ../src/ui/dialog/document-properties.cpp:428
+#: ../src/ui/dialog/document-properties.cpp:429
 msgid "Toggle anti-aliasing"
 msgstr "アンチエイリアスの使用を切り替える"
 
-#: ../src/ui/dialog/document-properties.cpp:465
+#: ../src/ui/dialog/document-properties.cpp:466
 msgid "<b>Guides</b>"
 msgstr "<b>ガイド</b>"
 
-#: ../src/ui/dialog/document-properties.cpp:599
+#: ../src/ui/dialog/document-properties.cpp:600
 msgid "Link Color Profile"
 msgstr "リンクカラープロファイル"
 
-#: ../src/ui/dialog/document-properties.cpp:668
-#: ../src/ui/dialog/document-properties.cpp:678
-#: ../src/ui/dialog/document-properties.cpp:687
+#: ../src/ui/dialog/document-properties.cpp:669
+#: ../src/ui/dialog/document-properties.cpp:679
+#: ../src/ui/dialog/document-properties.cpp:688
 #: ../src/ui/dialog/filter-effects-dialog.cpp:1332
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:524
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:534
@@ -20529,126 +20530,126 @@ msgstr "リンクカラープロファイル"
 msgid "_Remove"
 msgstr "削除(_R)"
 
-#: ../src/ui/dialog/document-properties.cpp:720
+#: ../src/ui/dialog/document-properties.cpp:721
 msgid "Remove linked color profile"
 msgstr "リンクカラープロファイルの削除"
 
-#: ../src/ui/dialog/document-properties.cpp:740
+#: ../src/ui/dialog/document-properties.cpp:741
 msgid "<b>Linked Color Profiles:</b>"
 msgstr "<b>リンクされたカラープロファイル</b>"
 
-#: ../src/ui/dialog/document-properties.cpp:742
+#: ../src/ui/dialog/document-properties.cpp:743
 msgid "<b>Available Color Profiles:</b>"
 msgstr "<b>利用可能なカラープロファイル:</b>"
 
-#: ../src/ui/dialog/document-properties.cpp:744
+#: ../src/ui/dialog/document-properties.cpp:745
 msgid "Unlink Profile"
 msgstr "プロファイルのリンクを解除"
 
-#: ../src/ui/dialog/document-properties.cpp:798
+#: ../src/ui/dialog/document-properties.cpp:799
 msgid "Profile Name"
 msgstr "プロファイル名"
 
-#: ../src/ui/dialog/document-properties.cpp:833
+#: ../src/ui/dialog/document-properties.cpp:834
 msgid "External scripts"
 msgstr "外部スクリプト"
 
-#: ../src/ui/dialog/document-properties.cpp:834
+#: ../src/ui/dialog/document-properties.cpp:835
 msgid "Embedded scripts"
 msgstr "埋め込みスクリプト"
 
-#: ../src/ui/dialog/document-properties.cpp:839
+#: ../src/ui/dialog/document-properties.cpp:840
 msgid "<b>External script files:</b>"
 msgstr "<b>外部スクリプトファイル:</b>"
 
-#: ../src/ui/dialog/document-properties.cpp:841
+#: ../src/ui/dialog/document-properties.cpp:842
 msgid "Add the current file name or browse for a file"
 msgstr "現在のファイル名を追加するかファイルを参照します"
 
-#: ../src/ui/dialog/document-properties.cpp:844
-#: ../src/ui/dialog/document-properties.cpp:902
+#: ../src/ui/dialog/document-properties.cpp:845
+#: ../src/ui/dialog/document-properties.cpp:903
 #: ../src/ui/widget/selected-style.cpp:348
 msgid "Remove"
 msgstr "削除"
 
-#: ../src/ui/dialog/document-properties.cpp:889
+#: ../src/ui/dialog/document-properties.cpp:890
 #: ../share/ui/dialog-export.glade:783 ../share/ui/dialog-export.glade:1080
 msgid "Filename"
 msgstr "ファイル名"
 
-#: ../src/ui/dialog/document-properties.cpp:897
+#: ../src/ui/dialog/document-properties.cpp:898
 msgid "<b>Embedded script files:</b>"
 msgstr "<b>埋め込みスクリプトファイル:</b>"
 
-#: ../src/ui/dialog/document-properties.cpp:941
+#: ../src/ui/dialog/document-properties.cpp:942
 msgid "Script ID"
 msgstr "スクリプト ID"
 
-#: ../src/ui/dialog/document-properties.cpp:947
+#: ../src/ui/dialog/document-properties.cpp:948
 msgid "<b>Content:</b>"
 msgstr "<b>内容:</b>"
 
-#: ../src/ui/dialog/document-properties.cpp:1016
+#: ../src/ui/dialog/document-properties.cpp:1017
 msgid "<b>Dublin Core Entities</b>"
 msgstr "<b>ダブリンコア要素</b>"
 
-#: ../src/ui/dialog/document-properties.cpp:1039
+#: ../src/ui/dialog/document-properties.cpp:1040
 msgid "_Save as default"
 msgstr "デフォルトとして保存(_S)"
 
-#: ../src/ui/dialog/document-properties.cpp:1040
+#: ../src/ui/dialog/document-properties.cpp:1041
 msgid "Save this metadata as the default metadata"
 msgstr "このメタデータをデフォルトメタデータとして保存します"
 
-#: ../src/ui/dialog/document-properties.cpp:1041
+#: ../src/ui/dialog/document-properties.cpp:1042
 msgid "Use _default"
 msgstr "デフォルトを使用(_D)"
 
-#: ../src/ui/dialog/document-properties.cpp:1042
+#: ../src/ui/dialog/document-properties.cpp:1043
 msgid "Use the previously saved default metadata here"
 msgstr "あらかじめここで保存されたデフォルトメタデータを使用します"
 
-#: ../src/ui/dialog/document-properties.cpp:1059
+#: ../src/ui/dialog/document-properties.cpp:1060
 msgid "<b>License</b>"
 msgstr "<b>ライセンス</b>"
 
-#: ../src/ui/dialog/document-properties.cpp:1093
+#: ../src/ui/dialog/document-properties.cpp:1094
 msgid "Add external script..."
 msgstr "外部スクリプトの追加..."
 
-#: ../src/ui/dialog/document-properties.cpp:1130
+#: ../src/ui/dialog/document-properties.cpp:1131
 msgid "Select a script to load"
 msgstr "読み込むスクリプトを選択してください"
 
-#: ../src/ui/dialog/document-properties.cpp:1155
+#: ../src/ui/dialog/document-properties.cpp:1156
 msgid "Add embedded script..."
 msgstr "埋め込みスクリプトの追加..."
 
-#: ../src/ui/dialog/document-properties.cpp:1187
+#: ../src/ui/dialog/document-properties.cpp:1188
 msgid "Remove external script"
 msgstr "外部スクリプトの削除"
 
-#: ../src/ui/dialog/document-properties.cpp:1215
+#: ../src/ui/dialog/document-properties.cpp:1216
 msgid "Remove embedded script"
 msgstr "埋め込みスクリプトの除去"
 
-#: ../src/ui/dialog/document-properties.cpp:1313
+#: ../src/ui/dialog/document-properties.cpp:1314
 msgid "Edit embedded script"
 msgstr "埋め込みスクリプトの編集"
 
-#: ../src/ui/dialog/document-properties.cpp:1407
+#: ../src/ui/dialog/document-properties.cpp:1408
 msgid "<b>Creation</b>"
 msgstr " <b>作成</b> "
 
-#: ../src/ui/dialog/document-properties.cpp:1408
+#: ../src/ui/dialog/document-properties.cpp:1409
 msgid "<b>Defined grids</b>"
 msgstr "<b>定義されたグリッド</b>"
 
-#: ../src/ui/dialog/document-properties.cpp:1676
+#: ../src/ui/dialog/document-properties.cpp:1677
 msgid "Remove grid"
 msgstr "グリッドの削除"
 
-#: ../src/ui/dialog/document-properties.cpp:1765
+#: ../src/ui/dialog/document-properties.cpp:1766
 msgid "Changed default display unit"
 msgstr "変更したドキュメントの表示単位"
 
@@ -26490,7 +26491,7 @@ msgid "Export custom keyboard shortcuts to a file"
 msgstr "カスタムキーボードショートカットをファイルにエクスポートします"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:3036
-#: ../share/ui/inkscape-start.glade:1240
+#: ../share/ui/inkscape-start.glade:1239
 msgid "Keyboard"
 msgstr "キーボード"
 
@@ -27612,6 +27613,14 @@ msgstr "<i>チェックしています...</i>"
 msgid "Fix spelling"
 msgstr "スペルの修正"
 
+#: ../src/ui/dialog/startup.cpp:335
+msgid "Browse for other files..."
+msgstr "他のファイルを参照..."
+
+#: ../src/ui/dialog/startup.cpp:483
+msgid "Open a different file"
+msgstr "別のファイルを開く"
+
 #: ../src/ui/dialog/styledialog.cpp:505 ../src/ui/dialog/styledialog.cpp:692
 #: ../src/ui/dialog/styledialog.cpp:834
 msgid "property"
@@ -28653,7 +28662,7 @@ msgstr "オブジェクトの変形時にスナップを無効"
 msgid "No Category"
 msgstr "カテゴリーなし"
 
-#: ../src/ui/modifiers.cpp:60 ../share/ui/inkscape-start.glade:1225
+#: ../src/ui/modifiers.cpp:60 ../share/ui/inkscape-start.glade:1224
 #: ../share/extensions/printing_marks.inx:17
 msgid "Canvas"
 msgstr "キャンバス"
@@ -30634,14 +30643,19 @@ msgstr "ページをサイズ変更"
 msgid "Page label"
 msgstr "ページのラベル"
 
+#. TRANSLATORS: "%1" is replaced with the page we are on, and "%2" is the total number of pages.
 #: ../src/ui/toolbar/page-toolbar.cpp:245
-#, c-format
-msgid "%d/%d"
-msgstr "%d/%d"
+msgid "%1/%2"
+msgstr "%1/%2"
 
-#: ../src/ui/toolbar/page-toolbar.cpp:260
+#: ../src/ui/toolbar/page-toolbar.cpp:259
 msgid "Single Page Document"
 msgstr "単一ページのドキュメント"
+
+#. TRANSLATORS: This is a fixed value meaning a single page document
+#: ../src/ui/toolbar/page-toolbar.cpp:260 ../share/ui/toolbar-page.ui:93
+msgid "1/-"
+msgstr "1/-"
 
 #: ../src/ui/toolbar/paintbucket-toolbar.cpp:68
 msgid "Fill by"
@@ -31510,7 +31524,7 @@ msgid "Font style"
 msgstr "フォントスタイル"
 
 #: ../src/ui/toolbar/text-toolbar.cpp:310
-#: ../src/ui/toolbar/text-toolbar.cpp:1969
+#: ../src/ui/toolbar/text-toolbar.cpp:1971
 #: ../src/ui/widget/font-selector.cpp:32 ../src/ui/widget/font-selector.cpp:152
 msgid "Font size"
 msgstr "フォントサイズ"
@@ -31524,8 +31538,8 @@ msgid "Smaller spacing"
 msgstr "小さい間隔"
 
 #: ../src/ui/toolbar/text-toolbar.cpp:337
-#: ../src/ui/toolbar/text-toolbar.cpp:453
-#: ../src/ui/toolbar/text-toolbar.cpp:471
+#: ../src/ui/toolbar/text-toolbar.cpp:455
+#: ../src/ui/toolbar/text-toolbar.cpp:473
 msgctxt "Text tool"
 msgid "Normal"
 msgstr "標準"
@@ -31579,197 +31593,201 @@ msgstr "上付き"
 msgid "Toggle subscript"
 msgstr "下付き"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:439
+#: ../src/ui/toolbar/text-toolbar.cpp:440
 msgid "Kerning, word spacing, character positioning"
 msgstr "カーニング、単語間隔、文字位置"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:453
-#: ../src/ui/toolbar/text-toolbar.cpp:471
+#: ../src/ui/toolbar/text-toolbar.cpp:441
+msgid "Spacing"
+msgstr "間隔"
+
+#: ../src/ui/toolbar/text-toolbar.cpp:455
+#: ../src/ui/toolbar/text-toolbar.cpp:473
 msgid "Negative spacing"
 msgstr "狭い間隔"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:453
-#: ../src/ui/toolbar/text-toolbar.cpp:471
+#: ../src/ui/toolbar/text-toolbar.cpp:455
+#: ../src/ui/toolbar/text-toolbar.cpp:473
 msgid "Positive spacing"
 msgstr "広い間隔"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:457
+#: ../src/ui/toolbar/text-toolbar.cpp:459
 msgid "Letter:"
 msgstr "字間:"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:458
+#: ../src/ui/toolbar/text-toolbar.cpp:460
 msgid "Spacing between letters (px)"
 msgstr "文字間隔 (px)"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:475
+#: ../src/ui/toolbar/text-toolbar.cpp:477
 msgid "Word:"
 msgstr "語間:"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:476
+#: ../src/ui/toolbar/text-toolbar.cpp:478
 msgid "Spacing between words (px)"
 msgstr "単語間隔 (px)"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:492
+#: ../src/ui/toolbar/text-toolbar.cpp:494
 msgid "Kern:"
 msgstr "カーニング:"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:494
+#: ../src/ui/toolbar/text-toolbar.cpp:496
 msgid "Horizontal kerning (px)"
 msgstr "水平カーニング (px)"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:509
+#: ../src/ui/toolbar/text-toolbar.cpp:511
 msgid "Vert:"
 msgstr "垂直:"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:510
+#: ../src/ui/toolbar/text-toolbar.cpp:512
 msgid "Vertical kerning (px)"
 msgstr "垂直カーニング (px)"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:525
+#: ../src/ui/toolbar/text-toolbar.cpp:527
 msgid "Rot:"
 msgstr "角度:"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:526
+#: ../src/ui/toolbar/text-toolbar.cpp:528
 msgid "Character rotation (degrees)"
 msgstr "文字の回転 (度)"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:548
+#: ../src/ui/toolbar/text-toolbar.cpp:550
 msgid "Horizontal text"
 msgstr "横書き"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:553
+#: ../src/ui/toolbar/text-toolbar.cpp:555
 msgid "Vertical — RL"
 msgstr "縦書き — RL"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:554
+#: ../src/ui/toolbar/text-toolbar.cpp:556
 msgid "Vertical text — lines: right to left"
 msgstr "縦書き — 行: 右から左"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:559
+#: ../src/ui/toolbar/text-toolbar.cpp:561
 msgid "Vertical — LR"
 msgstr "縦書き — LR"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:560
+#: ../src/ui/toolbar/text-toolbar.cpp:562
 msgid "Vertical text — lines: left to right"
 msgstr "縦書き — 行: 左から右"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:565
+#: ../src/ui/toolbar/text-toolbar.cpp:567
 msgid "Writing mode"
 msgstr "書く方向"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:566
+#: ../src/ui/toolbar/text-toolbar.cpp:568
 msgid "Block progression"
 msgstr "文章の方向"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:589
+#: ../src/ui/toolbar/text-toolbar.cpp:591
 msgid "Auto glyph orientation"
 msgstr "グリフの向きを自動判定"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:594
+#: ../src/ui/toolbar/text-toolbar.cpp:596
 msgid "Upright"
 msgstr "縦長"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:595
+#: ../src/ui/toolbar/text-toolbar.cpp:597
 msgid "Upright glyph orientation"
 msgstr "グリフの縦方向の基点"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:600
+#: ../src/ui/toolbar/text-toolbar.cpp:602
 msgid "Sideways"
 msgstr "片側"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:601
+#: ../src/ui/toolbar/text-toolbar.cpp:603
 msgid "Sideways glyph orientation"
 msgstr "片側のグリフ基点"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:606
+#: ../src/ui/toolbar/text-toolbar.cpp:608
 msgid "Text orientation"
 msgstr "文字の方向"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:607
+#: ../src/ui/toolbar/text-toolbar.cpp:609
 msgid "Text (glyph) orientation in vertical text."
 msgstr "縦書きテキストのテキスト (グリフ) の基点。"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:629
+#: ../src/ui/toolbar/text-toolbar.cpp:631
 msgid "LTR"
 msgstr "LTR"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:630
+#: ../src/ui/toolbar/text-toolbar.cpp:632
 msgid "Left to right text"
 msgstr "左から右のテキスト"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:635
+#: ../src/ui/toolbar/text-toolbar.cpp:637
 msgid "RTL"
 msgstr "RTL"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:636
+#: ../src/ui/toolbar/text-toolbar.cpp:638
 msgid "Right to left text"
 msgstr "右から左のテキスト"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:641
+#: ../src/ui/toolbar/text-toolbar.cpp:643
 msgid "Text direction"
 msgstr "テキストの方向"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:642
+#: ../src/ui/toolbar/text-toolbar.cpp:644
 msgid "Text direction for normally horizontal text."
 msgstr "標準的な横書きテキストの方向。"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:751
+#: ../src/ui/toolbar/text-toolbar.cpp:753
 msgid "Text: Change font family"
 msgstr "テキスト: フォントファミリの変更"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:832
+#: ../src/ui/toolbar/text-toolbar.cpp:834
 msgid "Text: Change font size"
 msgstr "テキスト: フォントサイズの変更"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:874
+#: ../src/ui/toolbar/text-toolbar.cpp:876
 msgid "Text: Change font style"
 msgstr "テキスト: フォントスタイルの変更"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:957
+#: ../src/ui/toolbar/text-toolbar.cpp:959
 msgid "Text: Change superscript or subscript"
 msgstr "テキスト: 上付き文字/下付き文字の切り替え"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:1100
+#: ../src/ui/toolbar/text-toolbar.cpp:1102
 msgid "Text: Change alignment"
 msgstr "テキスト: 割り付けの変更"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:1154
+#: ../src/ui/toolbar/text-toolbar.cpp:1156
 msgid "Text: Change writing mode"
 msgstr "テキスト: 方向の変更"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:1208
+#: ../src/ui/toolbar/text-toolbar.cpp:1210
 msgid "Text: Change orientation"
 msgstr "テキスト: 方向の変更"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:1255
+#: ../src/ui/toolbar/text-toolbar.cpp:1257
 msgid "Text: Change direction"
 msgstr "テキスト: 方向の変更"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:1356
+#: ../src/ui/toolbar/text-toolbar.cpp:1358
 msgid "Text: Change line-height"
 msgstr "テキスト: 行間隔の変更"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:1577
+#: ../src/ui/toolbar/text-toolbar.cpp:1579
 msgid "Text: Change line-height unit"
 msgstr "テキスト: 行高さの変更"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:1638
+#: ../src/ui/toolbar/text-toolbar.cpp:1640
 msgid "Text: Change word-spacing"
 msgstr "テキスト: 単語間隔の変更"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:1675
+#: ../src/ui/toolbar/text-toolbar.cpp:1677
 msgid "Text: Change letter-spacing"
 msgstr "テキスト: 文字間隔の変更"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:1712
+#: ../src/ui/toolbar/text-toolbar.cpp:1714
 msgid "Text: Change dx (kern)"
 msgstr "テキスト: 水平シフト (カーニング) の変更"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:1746
+#: ../src/ui/toolbar/text-toolbar.cpp:1748
 msgid "Text: Change dy"
 msgstr "テキスト: 垂直シフトの変更"
 
-#: ../src/ui/toolbar/text-toolbar.cpp:1781
+#: ../src/ui/toolbar/text-toolbar.cpp:1783
 msgid "Text: Change rotate"
 msgstr "テキスト: 回転角度の変更"
 
@@ -35404,7 +35422,7 @@ msgstr "デバッグ情報をコピーしました！"
 msgid "Click to copy debug info to the clipboard"
 msgstr "クリックしてデバッグ情報をクリップボードにコピー"
 
-#: ../share/ui/inkscape-start.glade:57 ../share/ui/inkscape-start.glade:1446
+#: ../share/ui/inkscape-start.glade:57 ../share/ui/inkscape-start.glade:1445
 msgid "Dark"
 msgstr "ダーク"
 
@@ -35770,21 +35788,17 @@ msgstr "システムデフォルト"
 msgid "Classic Inkscape"
 msgstr "クラシック Inkscape"
 
-#: ../share/ui/inkscape-start.glade:991
-msgid "Inkscape 1.1"
-msgstr "Inkscape 1.1"
-
 #. Not automatic, but will be turned into start-welcome-text.svg
-#: ../share/ui/inkscape-start.glade:1037
+#: ../share/ui/inkscape-start.glade:1036
 msgid "Welcome!"
 msgstr "ようこそ！"
 
 #. Not automatic, but will be turned into start-welcome-text.svg
-#: ../share/ui/inkscape-start.glade:1043
+#: ../share/ui/inkscape-start.glade:1042
 msgid "Let's set up a few things..."
 msgstr "いくつか簡単に設定しましょう"
 
-#: ../share/ui/inkscape-start.glade:1151
+#: ../share/ui/inkscape-start.glade:1150
 msgid ""
 "<b>Warning:</b> Using a non-standard shortcut keyboard layout could make it "
 "harder to follow tutorials."
@@ -35792,23 +35806,23 @@ msgstr ""
 "<b>警告:</b> 標準以外のキーボードレイアウトでショートカットを使用すると、"
 "チュートリアルの内容が理解しづらくなる可能性があります。"
 
-#: ../share/ui/inkscape-start.glade:1210
+#: ../share/ui/inkscape-start.glade:1209
 msgid "Appearance"
 msgstr "外観"
 
-#: ../share/ui/inkscape-start.glade:1411
+#: ../share/ui/inkscape-start.glade:1410
 msgid "Select the default color background for the canvas"
 msgstr "キャンバスのデフォルトの背景色を選択します"
 
-#: ../share/ui/inkscape-start.glade:1458
+#: ../share/ui/inkscape-start.glade:1457
 msgid "Set to dark theme"
 msgstr "ダークテーマを使用"
 
-#: ../share/ui/inkscape-start.glade:1557
+#: ../share/ui/inkscape-start.glade:1556
 msgid "Quick Setup"
 msgstr "クイック設定"
 
-#: ../share/ui/inkscape-start.glade:1577
+#: ../share/ui/inkscape-start.glade:1576
 msgid ""
 "<big><b>The Inkscape project is supported by users like you.</b> Through our "
 "collective time, money and skill, we have made this software for everyone in "
@@ -35824,7 +35838,7 @@ msgstr ""
 "お考えなら、今日にでも Inksape プロジェクトに参加することを考えてみてくださ"
 "い。</b></big>"
 
-#: ../share/ui/inkscape-start.glade:1639
+#: ../share/ui/inkscape-start.glade:1638
 msgid ""
 "Learn how to\n"
 "Contribute Time"
@@ -35832,7 +35846,7 @@ msgstr ""
 "活動に参加する\n"
 "方法を学ぶ"
 
-#: ../share/ui/inkscape-start.glade:1697
+#: ../share/ui/inkscape-start.glade:1696
 msgid ""
 "Learn how to\n"
 "Fund Inkscape"
@@ -35840,63 +35854,63 @@ msgstr ""
 "資金提供の\n"
 "方法を学ぶ"
 
-#: ../share/ui/inkscape-start.glade:1745
+#: ../share/ui/inkscape-start.glade:1744
 msgid "Thanks!"
 msgstr "どうも！"
 
-#: ../share/ui/inkscape-start.glade:1779
+#: ../share/ui/inkscape-start.glade:1778
 msgid "Supported by You"
 msgstr "サポートする"
 
-#: ../share/ui/inkscape-start.glade:1814
+#: ../share/ui/inkscape-start.glade:1813
 msgctxt "Welcome dialog"
 msgid "Recent Files"
 msgstr "最近開いたファイル"
 
-#: ../share/ui/inkscape-start.glade:1833
+#: ../share/ui/inkscape-start.glade:1832
 msgctxt "Welcome dialog"
 msgid "Existing Files"
 msgstr "既存のファイル"
 
-#: ../share/ui/inkscape-start.glade:1890
+#: ../share/ui/inkscape-start.glade:1889
 msgctxt "Document format category"
 msgid "Print"
 msgstr "プリント"
 
-#: ../share/ui/inkscape-start.glade:1949
+#: ../share/ui/inkscape-start.glade:1948
 msgctxt "Document format category"
 msgid "Screen"
 msgstr "スクリーン"
 
-#: ../share/ui/inkscape-start.glade:2007
+#: ../share/ui/inkscape-start.glade:2006
 msgctxt "Document format category"
 msgid "Video"
 msgstr "動画"
 
 #. Social Media
-#: ../share/ui/inkscape-start.glade:2065
+#: ../share/ui/inkscape-start.glade:2064
 msgctxt "Document format category"
 msgid "Social"
 msgstr "ソーシャル"
 
-#: ../share/ui/inkscape-start.glade:2123
+#: ../share/ui/inkscape-start.glade:2122
 msgctxt "Document format category"
 msgid "Other"
 msgstr "その他"
 
-#: ../share/ui/inkscape-start.glade:2147
+#: ../share/ui/inkscape-start.glade:2146
 msgid "Load"
 msgstr "開く"
 
-#: ../share/ui/inkscape-start.glade:2164
+#: ../share/ui/inkscape-start.glade:2163
 msgid "Show this every time"
 msgstr "毎回表示する"
 
-#: ../share/ui/inkscape-start.glade:2180
+#: ../share/ui/inkscape-start.glade:2179
 msgid "New Document"
 msgstr "新規ドキュメント"
 
-#: ../share/ui/inkscape-start.glade:2211
+#: ../share/ui/inkscape-start.glade:2210
 msgid "Time to Draw"
 msgstr "絵を描く"
 
@@ -36775,15 +36789,11 @@ msgstr "ヒントやコツ(_T)"
 msgid "_About Inkscape"
 msgstr "Inkscapeについて(_A)"
 
-#: ../share/ui/toolbar-page.ui:92
-msgid "1/-"
-msgstr "1/-"
-
-#: ../share/ui/toolbar-page.ui:122
+#: ../share/ui/toolbar-page.ui:123
 msgid "Page Label"
 msgstr "ページのラベル"
 
-#: ../share/ui/toolbar-page.ui:159
+#: ../share/ui/toolbar-page.ui:160
 msgid "Move Objects"
 msgstr "オブジェクトを移動"
 
@@ -46317,6 +46327,13 @@ msgstr "半 em"
 #: ../share/ui/units.xml:99
 msgid "Half of font height"
 msgstr "フォントの高さの半分"
+
+#, c-format
+#~ msgid "%d/%d"
+#~ msgstr "%d/%d"
+
+#~ msgid "Inkscape 1.1"
+#~ msgstr "Inkscape 1.1"
 
 #~ msgid "Snap to nodes"
 #~ msgstr "ノードにスナップ"
