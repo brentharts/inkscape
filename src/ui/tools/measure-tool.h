@@ -62,16 +62,8 @@ public:
     void setMeasureCanvasText(bool is_angle, double precision, double amount, double fontsize,
                               Glib::ustring unit_name, Geom::Point position, guint32 background,
                               Inkscape::CanvasItemTextAnchor text_anchor, bool to_item, bool to_phantom,
-                              Inkscape::XML::Node *measure_repr);
-
-    //added by Giambattista Caltabiano:
-    //  use the first Label parameter to add a label before the measurement
-    //  use setMeasureCanvasText if you don't need a Label
-    //  the label is not checked: checking and localization should be done before passing the label to the function
-    void setMeasureCanvasTextWithLabel(Glib::ustring label, bool is_angle, double precision, double amount, double fontsize,
-                                       Glib::ustring unit_name, Geom::Point position, guint32 background,
-                                       Inkscape::CanvasItemTextAnchor text_anchor, bool to_item,
-                                       bool to_phantom, Inkscape::XML::Node *measure_repr);
+                              Inkscape::XML::Node *measure_repr, Glib::ustring label = "NoLabel");
+                                  //please check & localize the label before passing it to the function
 
     void setMeasureCanvasItem(Geom::Point position, bool to_item, bool to_phantom,
                               Inkscape::XML::Node *measure_repr);
