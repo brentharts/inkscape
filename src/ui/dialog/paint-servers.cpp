@@ -230,7 +230,7 @@ void PaintServersDialog::load_sources()
     }
 
     // Extract out paints from files in share/paint.
-    for (auto &path : get_filenames(Inkscape::IO::Resource::PAINT, { ".svg" })) {
+    for (auto const &path : get_filenames(Inkscape::IO::Resource::PAINT, { ".svg" })) {
         SPDocument *doc = SPDocument::createNewDoc(path.c_str(), FALSE);
         load_document(doc);
     }
@@ -323,7 +323,7 @@ void PaintServersDialog::load_document(SPDocument *document)
     }
 
     // iterating though servers
-    for (auto paint : paints) {
+    for (auto const &paint : paints) {
         Glib::RefPtr<Gdk::Pixbuf> pixbuf(nullptr);
         Glib::ustring id;
         pixbuf = get_pixbuf(document, paint, &id);
@@ -377,9 +377,8 @@ void PaintServersDialog::load_current_document()
         }
     }
 
-    for (auto s : paints) {
+    for (auto const &s : paints) {
         if (std::find(paints_current.begin(), paints_current.end(), s) == paints_current.end()) {
-            std::cout << "missing " << s << std::endl;
             paints_missing.push_back(s);
         }
     }
@@ -388,7 +387,7 @@ void PaintServersDialog::load_current_document()
         return;
     }
 
-    for (auto paint : paints_missing) {
+    for (auto const &paint : paints_missing) {
         Glib::RefPtr<Gdk::Pixbuf> pixbuf(nullptr);
         Glib::ustring id;
         pixbuf = get_pixbuf(getDocument(), paint, &id);
@@ -430,18 +429,19 @@ void PaintServersDialog::on_item_activated(const Gtk::TreeModel::Path& path)
     Glib::ustring id = (*iter)[columns->id];
     Glib::ustring paint = (*iter)[columns->paint];
     Glib::RefPtr<Gdk::Pixbuf> pixbuf = (*iter)[columns->pixbuf];
-    Glib::ustring document_title = (*iter)[columns->document];
-    SPDocument *document = document_map[document_title];
-    SPObject *paint_server = document->getObjectById(id);
+    Glib::ustring hatches_document_title = (*iter)[columns->document];
+    SPDocument *hatches_document = document_map[hatches_document_title];
+    SPObject *paint_server = hatches_document->getObjectById(id);
 
     bool paint_server_exists = false;
-    for (auto server : store[CURRENTDOC]->children()) {
+    for (auto const &server : store[CURRENTDOC]->children()) {
         if (server[columns->id] == id) {
             paint_server_exists = true;
             break;
         }
     }
 
+    SPDocument *document = getDocument();
     if (!paint_server_exists) {
         // Add the paint server to the current document definition
         Inkscape::XML::Document *xml_doc = document->getReprDoc();
@@ -454,7 +454,7 @@ void PaintServersDialog::on_item_activated(const Gtk::TreeModel::Path& path)
         (*iter)[columns->id] = id;
         (*iter)[columns->paint] = paint;
         (*iter)[columns->pixbuf] = pixbuf;
-        (*iter)[columns->document] = document_title;
+        (*iter)[columns->document] = CURRENTDOC;
     }
 
     // Recursively find elements in groups, if any
@@ -469,7 +469,37 @@ void PaintServersDialog::on_item_activated(const Gtk::TreeModel::Path& path)
         item->updateRepr();
     }
 
-    document->collectOrphans();
+    _cleanupUnused();
+}
+
+/** Cleans up hatches that aren't used in the document anymore and updates our store accordingly */
+void PaintServersDialog::_cleanupUnused()
+{
+    auto doc = getDocument();
+    if (!doc) {
+        return;
+    }
+    doc->collectOrphans();
+
+    // We check if the removal of orphans deleted some of our hatches from the defs,
+    // and then remove these from our tree store.
+    std::vector<Gtk::ListStore::Path> removed;
+    auto const id_column = getColumns()->id;
+
+    store[CURRENTDOC]->foreach(
+        [&removed, &id_column, doc](const Gtk::ListStore::Path &path,
+                                    const Gtk::ListStore::iterator &it) -> bool
+        {
+            if (!doc->getObjectById((*it)[id_column])) {
+                removed.push_back(path);
+            }
+            return false;
+        }
+    );
+
+    for (auto const &path : removed) {
+        store[CURRENTDOC]->erase(store[CURRENTDOC]->get_iter(path));
+    }
 }
 
 std::vector<SPObject*> PaintServersDialog::extract_elements(SPObject* item)
