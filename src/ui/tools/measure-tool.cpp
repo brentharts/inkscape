@@ -987,14 +987,7 @@ void MeasureTool::setMeasureCanvasText(bool is_angle, double precision, double a
     Glib::ustring measure = Glib::ustring::format(std::setprecision(precision), std::fixed, amount);
     measure += " ";
     measure += (is_angle ? "°" : unit_name);
-    Glib::ustring outText = "";
-    if (label == "NoLabel") {
-        outText = measure;
-    }
-    else {
-        outText = label + ": " + measure;
-    }
-    auto canvas_tooltip = new Inkscape::CanvasItemText(_desktop->getCanvasTemp(), position, outText);
+    auto canvas_tooltip = new Inkscape::CanvasItemText(_desktop->getCanvasTemp(), position, label.empty() ? measure : label + ": " + measure);
     canvas_tooltip->set_fontsize(fontsize);
     canvas_tooltip->set_fill(0xffffffff);
     canvas_tooltip->set_background(background);
@@ -1325,7 +1318,6 @@ void MeasureTool::showCanvasItems(bool to_guides, bool to_item, bool to_phantom,
                              Inkscape::CANVAS_ITEM_TEXT_ANCHOR_LEFT, to_item, to_phantom, measure_repr);
     }
 
-    // added by Giambattista Caltabiano: displaying dX & dY
     {
         Geom::Point dPoint = end_p - start_p;
         double dX = dPoint[Geom::X];
@@ -1340,7 +1332,6 @@ void MeasureTool::showCanvasItems(bool to_guides, bool to_item, bool to_phantom,
         setMeasureCanvasText(false, precision, dY * scale, fontsize, unit_name, origin, 0x3333337f,
                              Inkscape::CANVAS_ITEM_TEXT_ANCHOR_LEFT, to_item, to_phantom, measure_repr, "dY");
     }
-    //end added by Giambattista Caltabiano
 
     if (intersections.size() > 2) {
         double totallengthval = (intersections[intersections.size()-1] - intersections[0]).length();

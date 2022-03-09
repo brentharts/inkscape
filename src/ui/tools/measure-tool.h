@@ -62,7 +62,7 @@ public:
     void setMeasureCanvasText(bool is_angle, double precision, double amount, double fontsize,
                               Glib::ustring unit_name, Geom::Point position, guint32 background,
                               Inkscape::CanvasItemTextAnchor text_anchor, bool to_item, bool to_phantom,
-                              Inkscape::XML::Node *measure_repr, Glib::ustring label = "NoLabel");
+                              Inkscape::XML::Node *measure_repr, Glib::ustring label = "");
                                   //please check & localize the label before passing it to the function
 
     void setMeasureCanvasItem(Geom::Point position, bool to_item, bool to_phantom,
