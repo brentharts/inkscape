@@ -982,12 +982,19 @@ void MeasureTool::reset()
 void MeasureTool::setMeasureCanvasText(bool is_angle, double precision, double amount, double fontsize,
                                        Glib::ustring unit_name, Geom::Point position, guint32 background,
                                        Inkscape::CanvasItemTextAnchor text_anchor, bool to_item,
-                                       bool to_phantom, Inkscape::XML::Node *measure_repr)
+                                       bool to_phantom, Inkscape::XML::Node *measure_repr, Glib::ustring label)
 {
     Glib::ustring measure = Glib::ustring::format(std::setprecision(precision), std::fixed, amount);
     measure += " ";
     measure += (is_angle ? "°" : unit_name);
-    auto canvas_tooltip = new Inkscape::CanvasItemText(_desktop->getCanvasTemp(), position, measure);
+    Glib::ustring outText = "";
+    if (label == "NoLabel") {
+        outText = measure;
+    }
+    else {
+        outText = label + ": " + measure;
+    }
+    auto canvas_tooltip = new Inkscape::CanvasItemText(_desktop->getCanvasTemp(), position, outText);
     canvas_tooltip->set_fontsize(fontsize);
     canvas_tooltip->set_fill(0xffffffff);
     canvas_tooltip->set_background(background);
@@ -1317,6 +1324,23 @@ void MeasureTool::showCanvasItems(bool to_guides, bool to_item, bool to_phantom,
         setMeasureCanvasText(false, precision, totallengthval * scale, fontsize, unit_name, origin, 0x3333337f,
                              Inkscape::CANVAS_ITEM_TEXT_ANCHOR_LEFT, to_item, to_phantom, measure_repr);
     }
+
+    // added by Giambattista Caltabiano: displaying dX & dY
+    {
+        Geom::Point dPoint = end_p - start_p;
+        double dX = dPoint[Geom::X];
+        double dY = dPoint[Geom::Y];
+        dX = Inkscape::Util::Quantity::convert(dX, "px", unit_name);
+        dY = Inkscape::Util::Quantity::convert(dY, "px", unit_name);
+        // the labels dX and dY are universal mathematical symbols and don't need localization
+        Geom::Point origin = end_p + _desktop->w2d(Geom::Point(5 * fontsize, 0.7 * fontsize));
+        setMeasureCanvasText(false, precision, dX * scale, fontsize, unit_name, origin, 0x3333337f,
+                             Inkscape::CANVAS_ITEM_TEXT_ANCHOR_LEFT, to_item, to_phantom, measure_repr, "dX");
+        origin = end_p + _desktop->w2d(Geom::Point(5 * fontsize, 2.3 * fontsize));
+        setMeasureCanvasText(false, precision, dY * scale, fontsize, unit_name, origin, 0x3333337f,
+                             Inkscape::CANVAS_ITEM_TEXT_ANCHOR_LEFT, to_item, to_phantom, measure_repr, "dY");
+    }
+    //end added by Giambattista Caltabiano
 
     if (intersections.size() > 2) {
         double totallengthval = (intersections[intersections.size()-1] - intersections[0]).length();
