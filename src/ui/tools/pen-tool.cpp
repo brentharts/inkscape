@@ -100,6 +100,8 @@ PenTool::PenTool(SPDesktop *desktop, std::string prefs_path, const std::string &
     if (prefs->getBool("/tools/freehand/pen/selcue")) {
         this->enableSelectionCue();
     }
+
+    _desktop->connectDestroy([=](SPDesktop *) {state = State::DEAD;});
 }
 
 PenTool::~PenTool() {
@@ -108,7 +110,9 @@ PenTool::~PenTool() {
     if (this->npoints != 0) {
         // switching context - finish path
         this->ea = nullptr; // unset end anchor if set (otherwise crashes)
-        this->_finish(false);
+        if (state != State::DEAD) {
+            _finish(false);
+        }
     }
 
     if (this->c0) {
@@ -1148,6 +1152,12 @@ bool PenTool::_handleKeyPress(GdkEvent *event) {
         case GDK_KEY_Delete:
         case GDK_KEY_KP_Delete:
             ret = _undoLastPoint();
+            break;
+        case GDK_KEY_Z:
+        case GDK_KEY_z:
+            if (event->key.state & INK_GDK_PRIMARY_MASK) {
+                ret = _undoLastPoint();
+            }
             break;
         default:
             break;
