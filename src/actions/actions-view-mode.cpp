@@ -214,7 +214,6 @@ view_fullscreen(InkscapeWindow *win)
     dt->fullscreen();
 }
 
-
 void
 view_full_screen_focus(InkscapeWindow *win)
 {
@@ -229,7 +228,6 @@ view_focus_toggle(InkscapeWindow *win)
     SPDesktop* dt = win->get_desktop();
     dt->focusMode(!dt->is_focusMode());
 }
-
 
 void
 canvas_command_palette(InkscapeWindow *win)
