@@ -102,6 +102,8 @@ TextEdit::TextEdit()
     builder->get_widget("feat_box", feat_box);
     builder->get_widget("preview_label", preview_label);
     builder->get_widget("preview_label2", preview_label2);
+    preview_label->hide();
+    preview_label2->hide();
     builder->get_widget("text_view", text_view);
     builder->get_widget("setasdefault_button", setasdefault_button);
     builder->get_widget("apply_button", apply_button);
@@ -167,7 +169,7 @@ void TextEdit::onReadSelection ( gboolean dostyle, gboolean /*docontent*/ )
         apply_button->set_sensitive(false);
         setasdefault_button->set_sensitive(true);
 
-        Glib::ustring str = sp_te_get_string_multiline(text);
+        /*Glib::ustring str = sp_te_get_string_multiline(text);
         if (!str.empty()) {
             if (has_one_item) {
                 text_buffer->set_text(str);
@@ -177,7 +179,7 @@ void TextEdit::onReadSelection ( gboolean dostyle, gboolean /*docontent*/ )
 
         } else {
             text_buffer->set_text("");
-        }
+        }*/
 
         text->getRepr(); // was being called but result ignored. Check this.
     } else {
@@ -236,8 +238,8 @@ void TextEdit::onReadSelection ( gboolean dostyle, gboolean /*docontent*/ )
 void TextEdit::setPreviewText (Glib::ustring font_spec, Glib::ustring font_features, Glib::ustring phrase)
 {
     if (font_spec.empty()) {
-        preview_label->set_markup("");
-        preview_label2->set_markup("");
+        //preview_label->set_markup("");
+        //preview_label2->set_markup("");
         return;
     }
 
@@ -270,7 +272,7 @@ void TextEdit::setPreviewText (Glib::ustring font_spec, Glib::ustring font_featu
     pt_size = std::min(pt_size, 100.0);
 
     // Pango font size is in 1024ths of a point
-    Glib::ustring size = std::to_string( int(pt_size * PANGO_SCALE) );
+    /*Glib::ustring size = std::to_string( int(pt_size * PANGO_SCALE) );
     Glib::ustring markup = "<span font=\'" + font_spec_escaped +
         "\' size=\'" + size + "\'";
     if (!font_features.empty()) {
@@ -279,7 +281,7 @@ void TextEdit::setPreviewText (Glib::ustring font_spec, Glib::ustring font_featu
     markup += ">" + phrase_escaped + "</span>";
 
     preview_label->set_markup (markup);
-    preview_label2->set_markup (markup);
+    preview_label2->set_markup (markup);*/
 }
 
 
