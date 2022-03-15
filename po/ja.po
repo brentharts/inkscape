@@ -20,8 +20,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: inkscape\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
-"POT-Creation-Date: 2022-03-05 07:19+0900\n"
-"PO-Revision-Date: 2022-03-05 07:20+0900\n"
+"POT-Creation-Date: 2022-03-16 06:12+0900\n"
+"PO-Revision-Date: 2022-03-16 06:13+0900\n"
 "Last-Translator: Masato Hashimoto <cabezon.hashimoto@gmail.com>\n"
 "Language-Team: Japanese <inkscape-translator@lists.sourceforge.net>\n"
 "Language: ja\n"
@@ -4902,7 +4902,7 @@ msgstr "開いているすべてのダイアログの表示/非表示を切り�
 
 #: ../src/actions/actions-edit-document.cpp:44
 #: ../src/actions/actions-edit-document.cpp:54
-#: ../src/selection-chemistry.cpp:4382
+#: ../src/selection-chemistry.cpp:4348
 msgid "Fit Page to Drawing"
 msgstr "ページを描画全体に合わせる"
 
@@ -4928,7 +4928,7 @@ msgid "Fit the page to the drawing"
 msgstr "ページを描画全体に合わせる"
 
 #: ../src/actions/actions-edit-window.cpp:82
-#: ../src/selection-chemistry.cpp:1361
+#: ../src/selection-chemistry.cpp:1327
 msgid "Paste"
 msgstr "貼り付け"
 
@@ -5085,7 +5085,7 @@ msgstr ""
 "垂直方向に拡大縮小"
 
 #: ../src/actions/actions-edit.cpp:280 ../src/filter-enums.cpp:95
-#: ../src/selection-chemistry.cpp:619
+#: ../src/selection-chemistry.cpp:585
 msgid "Duplicate"
 msgstr "複製"
 
@@ -5146,9 +5146,9 @@ msgid ""
 msgstr ""
 "新しくパスを作成し、クローンオリジナル LPE を適用し、選択パスへの参照にします"
 
-#: ../src/actions/actions-edit.cpp:287 ../src/selection-chemistry.cpp:406
+#: ../src/actions/actions-edit.cpp:287 ../src/selection-chemistry.cpp:372
 #: ../src/ui/dialog/swatches.cpp:269 ../src/ui/toolbar/eraser-toolbar.cpp:65
-#: ../src/ui/tools/text-tool.cpp:968
+#: ../src/ui/tools/text-tool.cpp:971
 msgid "Delete"
 msgstr "削除"
 
@@ -5180,7 +5180,7 @@ msgstr "パスエフェクトを除去"
 msgid "Remove any path effects from selected objects"
 msgstr "選択オブジェクトからあらゆるパスエフェクトを除去します"
 
-#: ../src/actions/actions-edit.cpp:291 ../src/selection-chemistry.cpp:4151
+#: ../src/actions/actions-edit.cpp:291 ../src/selection-chemistry.cpp:4117
 #: ../share/ui/toolbar-page.ui:53
 msgid "Fit Page to Selection"
 msgstr "ページを選択オブジェクトに合わせる"
@@ -5312,7 +5312,7 @@ msgstr "テンプレートを保存"
 msgid "Save a copy of the document as template"
 msgstr "ドキュメントのコピーをテンプレートとして保存"
 
-#: ../src/actions/actions-file-window.cpp:123 ../src/file.cpp:1161
+#: ../src/actions/actions-file-window.cpp:123 ../src/file.cpp:1166
 #: ../src/ui/dialog/command-palette.cpp:266
 #: ../src/ui/dialog/inkscape-preferences.cpp:2833
 #: ../share/extensions/other/clipart/import_from_internet.inx:7
@@ -5739,7 +5739,7 @@ msgstr "選択オブジェクトを現在のレイヤーの背面のレイヤー
 msgid "Move Selection to Layer..."
 msgstr "選択オブジェクトをレイヤーに移動..."
 
-#: ../src/actions/actions-layer.cpp:468 ../src/selection-chemistry.cpp:1622
+#: ../src/actions/actions-layer.cpp:468 ../src/selection-chemistry.cpp:1588
 msgid "Move selection to layer"
 msgstr "選択オブジェクトをレイヤーに移動"
 
@@ -6100,11 +6100,11 @@ msgstr "カンマで区切った数字をふたつ入力"
 msgid "_Set Inverse (LPE)"
 msgstr "反転して設定(_S) (LPE)"
 
-#: ../src/actions/actions-object.cpp:132 ../src/selection-chemistry.cpp:4126
+#: ../src/actions/actions-object.cpp:132 ../src/selection-chemistry.cpp:4092
 msgid "Release clipping path"
 msgstr "クリッピングパスを解除"
 
-#: ../src/actions/actions-object.cpp:172 ../src/selection-chemistry.cpp:4128
+#: ../src/actions/actions-object.cpp:172 ../src/selection-chemistry.cpp:4094
 msgid "Release mask"
 msgstr "マスクを解除"
 
@@ -6777,7 +6777,7 @@ msgid "Resize page to fit"
 msgstr "ページのサイズを合わせて変更"
 
 #: ../src/actions/actions-selection-object.cpp:153
-#: ../src/object/sp-item-group.cpp:315 ../src/selection-chemistry.cpp:838
+#: ../src/object/sp-item-group.cpp:315 ../src/selection-chemistry.cpp:804
 msgid "Group"
 msgstr "グループ化"
 
@@ -6786,7 +6786,7 @@ msgid "Group selected objects"
 msgstr "選択オブジェクトをグループ化"
 
 #: ../src/actions/actions-selection-object.cpp:154
-#: ../src/object/sp-item-group.cpp:739 ../src/selection-chemistry.cpp:966
+#: ../src/object/sp-item-group.cpp:739 ../src/selection-chemistry.cpp:932
 msgid "Ungroup"
 msgstr "グループ解除"
 
@@ -6888,65 +6888,65 @@ msgstr ""
 "ページを現在の選択オブジェクトに合わせるか、選択オブジェクトがない場合は描画"
 "全体にあわせます"
 
-#: ../src/actions/actions-selection-window.cpp:132
+#: ../src/actions/actions-selection-window.cpp:114
 msgid "Select All"
 msgstr "すべて選択"
 
-#: ../src/actions/actions-selection-window.cpp:132
+#: ../src/actions/actions-selection-window.cpp:114
 msgid "Select all objects or all nodes"
 msgstr "全オブジェクトまたは全ノードを選択"
 
-#: ../src/actions/actions-selection-window.cpp:133
+#: ../src/actions/actions-selection-window.cpp:115
 msgid "Select All in All Layers"
 msgstr "全レイヤーの全オブジェクトを選択"
 
-#: ../src/actions/actions-selection-window.cpp:133
+#: ../src/actions/actions-selection-window.cpp:115
 #: ../src/ui/toolbar/select-toolbar.cpp:78
 msgid "Select all objects in all visible and unlocked layers"
 msgstr "表示かつロックされていない全レイヤーの全オブジェクトを選択"
 
-#: ../src/actions/actions-selection-window.cpp:134
+#: ../src/actions/actions-selection-window.cpp:116
 msgid "Fill and Stroke"
 msgstr "フィル/ストローク"
 
-#: ../src/actions/actions-selection-window.cpp:134
+#: ../src/actions/actions-selection-window.cpp:116
 msgid ""
 "Select all objects with the same fill and stroke as the selected objects"
 msgstr ""
 "フィルとストロークが選択オブジェクトと同じオブジェクトをすべて選択します"
 
-#: ../src/actions/actions-selection-window.cpp:135
+#: ../src/actions/actions-selection-window.cpp:117
 msgid "Fill Color"
 msgstr "フィルの色が同じ"
 
-#: ../src/actions/actions-selection-window.cpp:135
+#: ../src/actions/actions-selection-window.cpp:117
 msgid "Select all objects with the same fill as the selected objects"
 msgstr "フィルが選択オブジェクトと同じオブジェクトをすべて選択します"
 
-#: ../src/actions/actions-selection-window.cpp:136
+#: ../src/actions/actions-selection-window.cpp:118
 msgid "Stroke Color"
 msgstr "ストロークの色が同じ"
 
-#: ../src/actions/actions-selection-window.cpp:136
+#: ../src/actions/actions-selection-window.cpp:118
 msgid "Select all objects with the same stroke as the selected objects"
 msgstr "ストロークが選択オブジェクトと同じオブジェクトをすべて選択します"
 
-#: ../src/actions/actions-selection-window.cpp:137
+#: ../src/actions/actions-selection-window.cpp:119
 msgid "Stroke Style"
 msgstr "ストロークのスタイルが同じ"
 
-#: ../src/actions/actions-selection-window.cpp:137
+#: ../src/actions/actions-selection-window.cpp:119
 msgid ""
 "Select all objects with the same stroke style (width, dash, markers) as the "
 "selected objects"
 msgstr ""
 "ストロークのスタイルが選択オブジェクトと同じオブジェクトをすべて選択します"
 
-#: ../src/actions/actions-selection-window.cpp:138
+#: ../src/actions/actions-selection-window.cpp:120
 msgid "Object Type"
 msgstr "オブジェクトタイプが同じ"
 
-#: ../src/actions/actions-selection-window.cpp:138
+#: ../src/actions/actions-selection-window.cpp:120
 msgid ""
 "Select all objects with the same object type (rect, arc, text, path, bitmap "
 "etc) as the selected objects"
@@ -6954,39 +6954,23 @@ msgstr ""
 "オブジェクトタイプ (矩形、円/弧、テキスト、パス、ビットマップなど) が選択オブ"
 "ジェクトと同じオブジェクトをすべて選択します"
 
-#: ../src/actions/actions-selection-window.cpp:139
+#: ../src/actions/actions-selection-window.cpp:121
 #: ../src/actions/actions-selection.cpp:247
 msgid "Invert Selection"
 msgstr "選択範囲を反転"
 
-#: ../src/actions/actions-selection-window.cpp:139
+#: ../src/actions/actions-selection-window.cpp:121
 msgid "Invert selection (unselect what is selected and select everything else)"
 msgstr "現在の選択を解除し、その他すべてを選択"
 
-#: ../src/actions/actions-selection-window.cpp:140
+#: ../src/actions/actions-selection-window.cpp:122
 #: ../src/actions/actions-selection.cpp:240
 msgid "Deselect"
 msgstr "選択解除"
 
-#: ../src/actions/actions-selection-window.cpp:140
+#: ../src/actions/actions-selection-window.cpp:122
 msgid "Deselect any selected objects or nodes"
 msgstr "選択オブジェクトまたはノードのすべてを選択解除"
-
-#: ../src/actions/actions-selection-window.cpp:141
-msgid "Select Next"
-msgstr "次を選択"
-
-#: ../src/actions/actions-selection-window.cpp:141
-msgid "Select next object in stack"
-msgstr "スタック内の次のオブジェクトを選択"
-
-#: ../src/actions/actions-selection-window.cpp:142
-msgid "Select Previous"
-msgstr "前を選択"
-
-#: ../src/actions/actions-selection-window.cpp:142
-msgid "Select previous object in stack"
-msgstr "スタック内の前のオブジェクトを選択"
 
 #: ../src/actions/actions-selection.cpp:238
 msgid "Clear Selection"
@@ -7226,7 +7210,7 @@ msgstr ""
 "<b>ドラッグ</b>でカリグラフィ線を描きます。<b>Ctrl</b> でガイドパスをトラック"
 "し、<b>方向キー</b>で幅 (←→) と角度 (↑↓) を調節します。"
 
-#: ../src/actions/actions-tools.cpp:91 ../src/ui/tools/text-tool.cpp:1770
+#: ../src/actions/actions-tools.cpp:91 ../src/ui/tools/text-tool.cpp:1773
 msgid ""
 "<b>Click</b> to select or create text, <b>drag</b> to create flowed text; "
 "then type."
@@ -7519,7 +7503,7 @@ msgstr "翻訳"
 msgid "Translate selected objects (dx,dy)"
 msgstr "選択オブジェクト (dx,dy) を平行移動"
 
-#: ../src/actions/actions-transform.cpp:115 ../src/selection-chemistry.cpp:1996
+#: ../src/actions/actions-transform.cpp:115 ../src/selection-chemistry.cpp:1962
 #: ../src/seltrans.cpp:516 ../src/ui/dialog/transformation.cpp:837
 msgid "Rotate"
 msgstr "回転"
@@ -7713,112 +7697,125 @@ msgstr "やり直し"
 msgid "Do again the last undone action"
 msgstr "最後に戻した操作を再実行"
 
-#: ../src/actions/actions-view-mode.cpp:275
+#: ../src/actions/actions-view-mode.cpp:290
 msgid "Page Grid"
 msgstr "ページグリッド"
 
-#: ../src/actions/actions-view-mode.cpp:275
+#: ../src/actions/actions-view-mode.cpp:290
 msgid "Show or hide the page grid"
 msgstr "ページへのグリッドの表示/非表示を切り替えます"
 
-#: ../src/actions/actions-view-mode.cpp:276
+#: ../src/actions/actions-view-mode.cpp:291
 #: ../src/ui/dialog/document-properties.cpp:119
 msgid "Guides"
 msgstr "ガイド"
 
-#: ../src/actions/actions-view-mode.cpp:276
+#: ../src/actions/actions-view-mode.cpp:291
 msgid "Show or hide guides (drag from a ruler to create a guide)"
 msgstr ""
 "ガイドの表示/非表示を切り替えます (ガイドを作成するにはルーラーをドラッグしま"
 "す)"
 
-#: ../src/actions/actions-view-mode.cpp:278
+#: ../src/actions/actions-view-mode.cpp:293
 msgid "Commands Bar"
 msgstr "コマンドバー"
 
-#: ../src/actions/actions-view-mode.cpp:278
+#: ../src/actions/actions-view-mode.cpp:293
 msgid "Show or hide the Commands bar (under the menu)"
 msgstr "コマンドバー (メニューの下) の表示/非表示を切り替えます"
 
-#: ../src/actions/actions-view-mode.cpp:279
+#: ../src/actions/actions-view-mode.cpp:294
 msgid "Snap Controls Bar"
 msgstr "スナップコントロールバー"
 
-#: ../src/actions/actions-view-mode.cpp:279
+#: ../src/actions/actions-view-mode.cpp:294
 msgid "Show or hide the snapping controls"
 msgstr "スナップコントロールバーの表示/非表示を切り替えます"
 
-#: ../src/actions/actions-view-mode.cpp:280
+#: ../src/actions/actions-view-mode.cpp:295
 msgid "Tool Controls Bar"
 msgstr "ツールコントロールバー"
 
-#: ../src/actions/actions-view-mode.cpp:280
+#: ../src/actions/actions-view-mode.cpp:295
 msgid "Show or hide the Tool Controls bar"
 msgstr "ツールコントロールバーの表示/非表示を切り替えます"
 
-#: ../src/actions/actions-view-mode.cpp:281
+#: ../src/actions/actions-view-mode.cpp:296
 msgid "Toolbox"
 msgstr "ツールボックス"
 
-#: ../src/actions/actions-view-mode.cpp:281
+#: ../src/actions/actions-view-mode.cpp:296
 msgid "Show or hide the main toolbox (on the left)"
 msgstr "ツールボックス (左側) の表示/非表示を切り替えます"
 
-#: ../src/actions/actions-view-mode.cpp:282
+#: ../src/actions/actions-view-mode.cpp:297
 msgid "Rulers"
 msgstr "ルーラー"
 
-#: ../src/actions/actions-view-mode.cpp:282
+#: ../src/actions/actions-view-mode.cpp:297
 msgid "Show or hide the canvas rulers"
 msgstr "キャンバスルーラーの表示/非表示を切り替えます"
 
-#: ../src/actions/actions-view-mode.cpp:283
+#: ../src/actions/actions-view-mode.cpp:298
 msgid "Scroll bars"
 msgstr "スクロールバー"
 
-#: ../src/actions/actions-view-mode.cpp:283
+#: ../src/actions/actions-view-mode.cpp:298
 msgid "Show or hide the canvas scrollbars"
 msgstr "キャンバススクロールバーの表示/非表示を切り替えます"
 
-#: ../src/actions/actions-view-mode.cpp:284
+#: ../src/actions/actions-view-mode.cpp:299
 #: ../share/extensions/webslicer_create_rect.inx:28
 msgid "Palette"
 msgstr "パレット"
 
-#: ../src/actions/actions-view-mode.cpp:284
+#: ../src/actions/actions-view-mode.cpp:299
 msgid "Show or hide the color palette"
 msgstr "カラーパレットの表示/非表示を切り替えます"
 
-#: ../src/actions/actions-view-mode.cpp:285
+#: ../src/actions/actions-view-mode.cpp:300
 msgid "Statusbar"
 msgstr "ステータスバー"
 
-#: ../src/actions/actions-view-mode.cpp:285
+#: ../src/actions/actions-view-mode.cpp:300
 msgid "Show or hide the statusbar (at the bottom of the window)"
 msgstr "ステータスバー (ウィンドウの下端部) の表示/非表示を切り替えます"
 
-#: ../src/actions/actions-view-mode.cpp:287
+#: ../src/actions/actions-view-mode.cpp:302
 #: ../src/ui/dialog/inkscape-preferences.cpp:2048
 msgid "Command Palette"
 msgstr "コマンドパレット"
 
-#: ../src/actions/actions-view-mode.cpp:287
+#: ../src/actions/actions-view-mode.cpp:302
 msgid "Show or hide the on-canvas command palette"
 msgstr "キャンバス上のコマンドパレットの表示/非表示を切り替えます"
 
-#: ../src/actions/actions-view-mode.cpp:288
+#: ../src/actions/actions-view-mode.cpp:303
 msgid "Fullscreen"
 msgstr "フルスクリーン"
 
-#: ../src/actions/actions-view-mode.cpp:288
+#: ../src/actions/actions-view-mode.cpp:303
+#: ../src/actions/actions-view-mode.cpp:305
 msgid "Stretch this document window to full screen"
 msgstr "このドキュメントウィンドウを画面全体に引き伸ばす"
 
-#: ../src/actions/actions-view-mode.cpp:290
+#: ../src/actions/actions-view-mode.cpp:305
+msgid "Fullscreen & Focus Mode"
+msgstr "フルスクリーンとフォーカスモード"
+
+#: ../src/actions/actions-view-mode.cpp:306
+msgid "Focus Mode"
+msgstr "フォーカスモード"
+
+#: ../src/actions/actions-view-mode.cpp:306
+msgid "Remove excess toolbars to focus on drawing"
+msgstr "描画にフォーカスのある余分なツールバーを除去"
+
+#: ../src/actions/actions-view-mode.cpp:308
 msgid "Interface Mode"
 msgstr "インタフェースモード"
 
-#: ../src/actions/actions-view-mode.cpp:290
+#: ../src/actions/actions-view-mode.cpp:308
 msgid "Toggle wide or narrow screen setup"
 msgstr "画面設定の縦長と横長を切替え"
 
@@ -8349,6 +8346,11 @@ msgstr "  説明: "
 #: ../src/extension/effect.cpp:143 ../src/extension/effect.cpp:150
 msgid "(No preferences)"
 msgstr "(設定なし)"
+
+#: ../src/extension/effect.cpp:165
+#, c-format
+msgid "%s..."
+msgstr "%s..."
 
 #: ../src/extension/execution-env.cpp:132
 #, c-format
@@ -12097,16 +12099,16 @@ msgstr "保存が必要な変更がされていません。"
 msgid "Saving document..."
 msgstr "ドキュメントを保存しています..."
 
-#: ../src/file.cpp:1061
+#: ../src/file.cpp:1066
 msgid "Import Pages"
 msgstr "ページをインポート"
 
-#: ../src/file.cpp:1164 ../src/inkscape-application.cpp:836
+#: ../src/file.cpp:1169 ../src/inkscape-application.cpp:836
 #, c-format
 msgid "Failed to load the requested file %s"
 msgstr "要求されたファイル %s の読み込みに失敗しました"
 
-#: ../src/file.cpp:1230
+#: ../src/file.cpp:1234
 msgid "Select file to import"
 msgstr "インポートするファイルの選択"
 
@@ -17371,11 +17373,11 @@ msgstr "パスをコピー"
 msgid "Paste path"
 msgstr "パスを貼り付け"
 
-#: ../src/live_effects/parameter/path.cpp:575
+#: ../src/live_effects/parameter/path.cpp:577
 msgid "Paste path parameter"
 msgstr "パスパラメーターの貼り付け"
 
-#: ../src/live_effects/parameter/path.cpp:603
+#: ../src/live_effects/parameter/path.cpp:605
 #: ../src/live_effects/parameter/patharray.cpp:142
 msgid "Link path parameter to path"
 msgstr "パスパラメーターをパスへリンク"
@@ -17454,7 +17456,7 @@ msgstr "ランダムパラメーターの変更"
 msgid "Link item parameter to path"
 msgstr "アイテムパラメーターをパスへリンク"
 
-#: ../src/live_effects/parameter/satellite.cpp:271
+#: ../src/live_effects/parameter/satellite.cpp:273
 msgid "Link to item on clipboard"
 msgstr "クリップボードのアイテムへリンク"
 
@@ -17575,8 +17577,8 @@ msgstr "流し込みテキスト"
 msgid "Linked Flowed Text"
 msgstr "リンク付き流し込みテキスト"
 
-#: ../src/object/sp-flowtext.cpp:299 ../src/object/sp-text.cpp:363
-#: ../src/ui/tools/text-tool.cpp:1662
+#: ../src/object/sp-flowtext.cpp:299 ../src/object/sp-text.cpp:365
+#: ../src/ui/tools/text-tool.cpp:1665
 msgid " [truncated]"
 msgstr " [溢れあり]"
 
@@ -17796,15 +17798,15 @@ msgstr " (%d 個の頂点)"
 msgid "Conditional Group"
 msgstr "条件付きグループ"
 
-#: ../src/object/sp-text.cpp:339
+#: ../src/object/sp-text.cpp:341
 msgid "Auto-wrapped text"
 msgstr "自動折り返しテキスト"
 
-#: ../src/object/sp-text.cpp:341
+#: ../src/object/sp-text.cpp:343
 msgid "Text in-a-shape"
 msgstr "テキストのシェイプへの流し込み"
 
-#: ../src/object/sp-text.cpp:343 ../share/extensions/hershey.inx:125
+#: ../src/object/sp-text.cpp:345 ../share/extensions/hershey.inx:125
 #: ../share/extensions/lorem_ipsum.inx:19
 #: ../share/extensions/replace_font.inx:29
 #: ../share/extensions/text_braille.inx:8
@@ -17820,12 +17822,12 @@ msgstr "テキストのシェイプへの流し込み"
 msgid "Text"
 msgstr "テキスト"
 
-#: ../src/object/sp-text.cpp:367
+#: ../src/object/sp-text.cpp:369
 #, c-format
 msgid "on path%s (%s, %s)"
 msgstr "パス上%s (%s、%s)"
 
-#: ../src/object/sp-text.cpp:368
+#: ../src/object/sp-text.cpp:370
 #, c-format
 msgid "%s (%s, %s)"
 msgstr "%s (%s、%s)"
@@ -17941,24 +17943,24 @@ msgstr "選択された中に、向きを逆にする<b>パスがありません
 msgid "Cut path"
 msgstr "パスをカット"
 
-#: ../src/path/path-boolop.cpp:434
+#: ../src/path/path-boolop.cpp:437
 msgid "Select <b>at least 1 path</b> to perform a boolean union."
 msgstr ""
 "ブーリアン統合を行うための<b>少なくとも 1 個のパス</b>を選択してください。"
 
-#: ../src/path/path-boolop.cpp:440
+#: ../src/path/path-boolop.cpp:443
 msgid "Select <b>at least 2 paths</b> to perform a boolean operation."
 msgstr ""
 "ブーリアン演算を行うための<b>少なくとも 2 個のパス</b>を選択してください。"
 
-#: ../src/path/path-boolop.cpp:446
+#: ../src/path/path-boolop.cpp:449
 msgid ""
 "One of the objects is <b>not a path</b>, cannot perform boolean operation."
 msgstr ""
 "オブジェクトの中の少なくとも 1 個が<b>パスではない</b>ため、ブーリアン演算で"
 "きません。"
 
-#: ../src/path/path-boolop.cpp:452
+#: ../src/path/path-boolop.cpp:455
 msgid ""
 "Unable to determine the <b>z-order</b> of the objects selected for "
 "difference, XOR, division, or path cut."
@@ -18271,295 +18273,295 @@ msgstr "フラグメント:"
 msgid "XML fragment for the RDF 'License' section"
 msgstr "RDF のライセンス部の XML フラグメント"
 
-#: ../src/selection-chemistry.cpp:386
+#: ../src/selection-chemistry.cpp:352
 msgid "<b>Nothing</b> was deleted."
 msgstr "<b>何も</b>削除されませんでした。"
 
-#: ../src/selection-chemistry.cpp:441
+#: ../src/selection-chemistry.cpp:407
 msgid "Select <b>object(s)</b> to duplicate."
 msgstr "複製するオブジェクトを選択してください。"
 
-#: ../src/selection-chemistry.cpp:625
+#: ../src/selection-chemistry.cpp:591
 #, c-format
 msgid "%s copy"
 msgstr "%s コピー"
 
-#: ../src/selection-chemistry.cpp:648
+#: ../src/selection-chemistry.cpp:614
 msgid "Delete all"
 msgstr "すべて削除"
 
-#: ../src/selection-chemistry.cpp:772
+#: ../src/selection-chemistry.cpp:738
 msgid "Select <b>some objects</b> to group."
 msgstr "グループ化する<b>複数のオブジェクト</b>を選択してください。"
 
-#: ../src/selection-chemistry.cpp:840
+#: ../src/selection-chemistry.cpp:806
 msgid "Anchor"
 msgstr "リンク先"
 
-#: ../src/selection-chemistry.cpp:848
+#: ../src/selection-chemistry.cpp:814
 msgid "<b>No objects selected</b> to pop out of group."
 msgstr "<b>オブジェクトが選択されていない</b>ためグループから取り出せません。"
 
-#: ../src/selection-chemistry.cpp:857
+#: ../src/selection-chemistry.cpp:823
 msgid "Selection <b>not in a group</b>."
 msgstr "選択オブジェクトは<b>グループ化</b>されていません。"
 
-#: ../src/selection-chemistry.cpp:867
+#: ../src/selection-chemistry.cpp:833
 msgid "Objects in selection must have the same grandparents."
 msgstr "選択範囲の親の親は同じものでなくてはなりません。"
 
-#: ../src/selection-chemistry.cpp:874
+#: ../src/selection-chemistry.cpp:840
 msgid "Pop selection from group"
 msgstr "選択オブジェクトをグループから取り出す"
 
-#: ../src/selection-chemistry.cpp:939
+#: ../src/selection-chemistry.cpp:905
 msgid "Select a <b>group</b> to ungroup."
 msgstr "グループ解除する<b>グループ</b>を選択してください。"
 
-#: ../src/selection-chemistry.cpp:945
+#: ../src/selection-chemistry.cpp:911
 msgid "<b>No groups</b> to ungroup in the selection."
 msgstr "解除するグループが選択されていません。"
 
-#: ../src/selection-chemistry.cpp:1047 ../src/selection-chemistry.cpp:1097
+#: ../src/selection-chemistry.cpp:1013 ../src/selection-chemistry.cpp:1063
 msgid "Select <b>object(s)</b> to raise."
 msgstr "前面へ移動する<b>オブジェクト</b>を選択してください"
 
-#: ../src/selection-chemistry.cpp:1054 ../src/selection-chemistry.cpp:1103
-#: ../src/selection-chemistry.cpp:1127 ../src/selection-chemistry.cpp:1182
+#: ../src/selection-chemistry.cpp:1020 ../src/selection-chemistry.cpp:1069
+#: ../src/selection-chemistry.cpp:1093 ../src/selection-chemistry.cpp:1148
 msgid ""
 "You cannot raise/lower objects from <b>different groups</b> or <b>layers</b>."
 msgstr ""
 "<b>異なるグループ</b>または<b>レイヤー</b>のオブジェクトは前面/背面へ移動でき"
 "ません。"
 
-#: ../src/selection-chemistry.cpp:1090
+#: ../src/selection-chemistry.cpp:1056
 msgctxt "Undo action"
 msgid "Raise"
 msgstr "前面へ移動"
 
 # undo history
-#: ../src/selection-chemistry.cpp:1115
+#: ../src/selection-chemistry.cpp:1081
 msgid "Raise to top"
 msgstr "最前面へ移動"
 
-#: ../src/selection-chemistry.cpp:1121
+#: ../src/selection-chemistry.cpp:1087
 msgid "Select <b>object(s)</b> to lower."
 msgstr "背面へ移動する<b>オブジェクト</b>を選択してください。"
 
 # undo history
-#: ../src/selection-chemistry.cpp:1168
+#: ../src/selection-chemistry.cpp:1134
 msgctxt "Undo action"
 msgid "Lower"
 msgstr "背面へ移動"
 
-#: ../src/selection-chemistry.cpp:1176
+#: ../src/selection-chemistry.cpp:1142
 msgid "Select <b>object(s)</b> to lower to bottom."
 msgstr "最背面に移動させる<b>オブジェクト</b>を選択してください。"
 
 # undo history
-#: ../src/selection-chemistry.cpp:1205
+#: ../src/selection-chemistry.cpp:1171
 msgid "Lower to bottom"
 msgstr "最背面へ移動"
 
-#: ../src/selection-chemistry.cpp:1211
+#: ../src/selection-chemistry.cpp:1177
 msgid "Select <b>object(s)</b> to stack up."
 msgstr "積み重ねる<b>オブジェクト</b>を選択してください。"
 
 # undo history
-#: ../src/selection-chemistry.cpp:1222
+#: ../src/selection-chemistry.cpp:1188
 msgid "We hit top."
 msgstr "これが最前面です。"
 
-#: ../src/selection-chemistry.cpp:1228
+#: ../src/selection-chemistry.cpp:1194
 msgctxt "Undo action"
 msgid "stack up"
 msgstr "ひとつ前面へ"
 
-#: ../src/selection-chemistry.cpp:1233
+#: ../src/selection-chemistry.cpp:1199
 msgid "Select <b>object(s)</b> to stack down."
 msgstr "背面に移動する<b>オブジェクト</b>を選択してください。"
 
 # undo history
-#: ../src/selection-chemistry.cpp:1244
+#: ../src/selection-chemistry.cpp:1210
 msgid "We hit bottom."
 msgstr "これが最背面です。"
 
-#: ../src/selection-chemistry.cpp:1250
+#: ../src/selection-chemistry.cpp:1216
 msgctxt "Undo action"
 msgid "stack down"
 msgstr "ひとつ背面へ"
 
-#: ../src/selection-chemistry.cpp:1261
+#: ../src/selection-chemistry.cpp:1227
 msgid "Nothing to undo."
 msgstr "元に戻せません。"
 
-#: ../src/selection-chemistry.cpp:1272
+#: ../src/selection-chemistry.cpp:1238
 msgid "Nothing to redo."
 msgstr "やり直しできません。"
 
-#: ../src/selection-chemistry.cpp:1283
+#: ../src/selection-chemistry.cpp:1249
 msgid "Cut text"
 msgstr "テキストを切り取り"
 
-#: ../src/selection-chemistry.cpp:1369
+#: ../src/selection-chemistry.cpp:1335
 msgid "Paste style"
 msgstr "スタイルを貼り付け"
 
-#: ../src/selection-chemistry.cpp:1377
+#: ../src/selection-chemistry.cpp:1343
 msgid "Paste live path effect"
 msgstr "ライブパスエフェクトの貼り付け"
 
-#: ../src/selection-chemistry.cpp:1397
+#: ../src/selection-chemistry.cpp:1363
 msgid "Select <b>object(s)</b> to remove live path effects from."
 msgstr ""
 "ライブパスエフェクトから除去する<b>オブジェクト</b>を選択してください。"
 
-#: ../src/selection-chemistry.cpp:1409
+#: ../src/selection-chemistry.cpp:1375
 msgid "Remove live path effect"
 msgstr "ライブパスエフェクトの除去"
 
-#: ../src/selection-chemistry.cpp:1419
+#: ../src/selection-chemistry.cpp:1385
 msgid "Select <b>object(s)</b> to remove filters from."
 msgstr "フィルターから除去する<b>オブジェクト</b>を選択してください。"
 
-#: ../src/selection-chemistry.cpp:1434
+#: ../src/selection-chemistry.cpp:1400
 #: ../src/ui/dialog/filter-effects-dialog.cpp:1633
 msgid "Remove filter"
 msgstr "フィルを削除"
 
-#: ../src/selection-chemistry.cpp:1443
+#: ../src/selection-chemistry.cpp:1409
 msgid "Paste size"
 msgstr "サイズを貼り付け"
 
-#: ../src/selection-chemistry.cpp:1451
+#: ../src/selection-chemistry.cpp:1417
 msgid "Paste size separately"
 msgstr "サイズを個別に貼り付け"
 
-#: ../src/selection-chemistry.cpp:1480
+#: ../src/selection-chemistry.cpp:1446
 msgid "Select <b>object(s)</b> to move to the layer above."
 msgstr "前面レイヤーに移動する<b>オブジェクト</b>を選択してください。"
 
-#: ../src/selection-chemistry.cpp:1505
+#: ../src/selection-chemistry.cpp:1471
 msgid "Raise to next layer"
 msgstr "前面のレイヤーに移動"
 
-#: ../src/selection-chemistry.cpp:1512
+#: ../src/selection-chemistry.cpp:1478
 msgid "No more layers above."
 msgstr "これより前面のレイヤーはありません。"
 
-#: ../src/selection-chemistry.cpp:1525
+#: ../src/selection-chemistry.cpp:1491
 msgid "Select <b>object(s)</b> to move to the layer below."
 msgstr "背面レイヤーに移動する<b>オブジェクト</b>を選択してください。"
 
-#: ../src/selection-chemistry.cpp:1550
+#: ../src/selection-chemistry.cpp:1516
 msgid "Lower to previous layer"
 msgstr "背面のレイヤーに移動"
 
-#: ../src/selection-chemistry.cpp:1557
+#: ../src/selection-chemistry.cpp:1523
 msgid "No more layers below."
 msgstr "これより背面のレイヤーはありません。"
 
-#: ../src/selection-chemistry.cpp:1597
+#: ../src/selection-chemistry.cpp:1563
 msgid "Select <b>object(s)</b> to move."
 msgstr "移動する<b>オブジェクト</b>を選択してください。"
 
-#: ../src/selection-chemistry.cpp:1725 ../src/seltrans.cpp:384
+#: ../src/selection-chemistry.cpp:1691 ../src/seltrans.cpp:384
 msgid "Cannot transform an embedded SVG."
 msgstr "埋め込み SVG は変形できません。"
 
-#: ../src/selection-chemistry.cpp:1876
+#: ../src/selection-chemistry.cpp:1842
 msgid "Remove transform"
 msgstr "変形を解除"
 
-#: ../src/selection-chemistry.cpp:1977 ../share/ui/menus.ui:893
+#: ../src/selection-chemistry.cpp:1943 ../share/ui/menus.ui:893
 msgid "Rotate 90° CCW"
 msgstr "90°回転、反時計回り"
 
-#: ../src/selection-chemistry.cpp:1977 ../share/ui/menus.ui:887
+#: ../src/selection-chemistry.cpp:1943 ../share/ui/menus.ui:887
 msgid "Rotate 90° CW"
 msgstr "90°回転、時計回り"
 
-#: ../src/selection-chemistry.cpp:2355
+#: ../src/selection-chemistry.cpp:2321
 msgid "Rotate by pixels"
 msgstr "ピクセル数で回転"
 
-#: ../src/selection-chemistry.cpp:2382
+#: ../src/selection-chemistry.cpp:2348
 msgid "Grow"
 msgstr "大きく"
 
-#: ../src/selection-chemistry.cpp:2382
+#: ../src/selection-chemistry.cpp:2348
 msgid "Shrink"
 msgstr "小さく"
 
-#: ../src/selection-chemistry.cpp:2406
+#: ../src/selection-chemistry.cpp:2372
 msgid "Scale by whole factor"
 msgstr "すべての係数での拡大縮小"
 
-#: ../src/selection-chemistry.cpp:2419
+#: ../src/selection-chemistry.cpp:2385
 msgid "Move vertically"
 msgstr "垂直方向に移動"
 
-#: ../src/selection-chemistry.cpp:2421
+#: ../src/selection-chemistry.cpp:2387
 msgid "Move horizontally"
 msgstr "水平方向に移動"
 
-#: ../src/selection-chemistry.cpp:2423 ../src/selection-chemistry.cpp:2446
+#: ../src/selection-chemistry.cpp:2389 ../src/selection-chemistry.cpp:2412
 #: ../src/seltrans.cpp:512 ../src/ui/dialog/transformation.cpp:750
 msgid "Move"
 msgstr "移動"
 
-#: ../src/selection-chemistry.cpp:2442
+#: ../src/selection-chemistry.cpp:2408
 msgid "Move vertically by pixels"
 msgstr "ピクセル単位に垂直移動"
 
-#: ../src/selection-chemistry.cpp:2444
+#: ../src/selection-chemistry.cpp:2410
 msgid "Move horizontally by pixels"
 msgstr "ピクセル単位に水平移動"
 
-#: ../src/selection-chemistry.cpp:2650
+#: ../src/selection-chemistry.cpp:2616
 msgid "The selection has no applied path effect."
 msgstr "選択オブジェクトに適用されているパスエフェクトはありません。"
 
-#: ../src/selection-chemistry.cpp:2708 ../src/ui/dialog/clonetiler.cpp:2081
+#: ../src/selection-chemistry.cpp:2674 ../src/ui/dialog/clonetiler.cpp:2081
 msgid "Select an <b>object</b> to clone."
 msgstr "クローンを作成する<b>オブジェクト</b>を選択してください。"
 
-#: ../src/selection-chemistry.cpp:2744
+#: ../src/selection-chemistry.cpp:2710
 msgctxt "Action"
 msgid "Clone"
 msgstr "クローン"
 
-#: ../src/selection-chemistry.cpp:2753
+#: ../src/selection-chemistry.cpp:2719
 msgid "Select <b>clones</b> to relink."
 msgstr "再リンクする<b>クローン</b>を選択してください。"
 
-#: ../src/selection-chemistry.cpp:2761
+#: ../src/selection-chemistry.cpp:2727
 msgid "Copy an <b>object</b> to clipboard to relink clones to."
 msgstr ""
 "クローンを再リンクする<b>オブジェクト</b>をクリップボードにコピーしてくださ"
 "い。"
 
-#: ../src/selection-chemistry.cpp:2781
+#: ../src/selection-chemistry.cpp:2747
 msgid "<b>No clones to relink</b> in the selection."
 msgstr "選択オブジェクトに<b>再リンクするクローンがありません</b>。"
 
-#: ../src/selection-chemistry.cpp:2783
+#: ../src/selection-chemistry.cpp:2749
 msgid "Relink clone"
 msgstr "クローンを再リンク"
 
-#: ../src/selection-chemistry.cpp:2792 ../src/selection-chemistry.cpp:2881
+#: ../src/selection-chemistry.cpp:2758 ../src/selection-chemistry.cpp:2847
 msgid "Select <b>clones</b> to unlink."
 msgstr "リンクを解除する<b>クローン</b>を選択してください。"
 
-#: ../src/selection-chemistry.cpp:2869 ../src/selection-chemistry.cpp:2907
+#: ../src/selection-chemistry.cpp:2835 ../src/selection-chemistry.cpp:2873
 msgid "<b>No clones to unlink</b> in the selection."
 msgstr "選択オブジェクトに<b>リンクを解除するクローンがありません</b>。"
 
-#: ../src/selection-chemistry.cpp:2873
+#: ../src/selection-chemistry.cpp:2839
 msgid "Unlink clone"
 msgstr "クローンのリンク解除"
 
-#: ../src/selection-chemistry.cpp:2888
+#: ../src/selection-chemistry.cpp:2854
 msgid ""
 "Unable to unlink. Check the setting for 'Unlinking Clones' in your "
 "preferences."
@@ -18567,11 +18569,11 @@ msgstr ""
 "リンク解除できません。環境設定の中にある 'クローンのリンク解除' の設定を確認"
 "してください。"
 
-#: ../src/selection-chemistry.cpp:2910
+#: ../src/selection-chemistry.cpp:2876
 msgid "Unlink clone recursively"
 msgstr "クローンを再帰的にリンク解除"
 
-#: ../src/selection-chemistry.cpp:2954
+#: ../src/selection-chemistry.cpp:2920
 msgid ""
 "Select a <b>clone</b> to go to its original. Select a <b>linked offset</b> "
 "to go to its source. Select a <b>text on path</b> to go to the path. Select "
@@ -18581,7 +18583,7 @@ msgstr ""
 "b>を選択するとそのソースを選択します。<b>パス上テキスト</b>を選択するとそのパ"
 "スを選択します。<b>流し込みテキスト</b>を選択するとそのフレームを選択します。"
 
-#: ../src/selection-chemistry.cpp:2995
+#: ../src/selection-chemistry.cpp:2961
 msgid ""
 "<b>Cannot find</b> the object to select (orphaned clone, offset, textpath, "
 "flowed text?)"
@@ -18589,7 +18591,7 @@ msgstr ""
 "選択すべきオブジェクトが<b>見つかりませんでした</b> (オリジナルのないクロー"
 "ン、オフセット、パス上テキスト、流し込みテキストではありませんか?)"
 
-#: ../src/selection-chemistry.cpp:3002
+#: ../src/selection-chemistry.cpp:2968
 msgid ""
 "The object you're trying to select is <b>not visible</b> (it is in &lt;"
 "defs&gt;)"
@@ -18597,121 +18599,121 @@ msgstr ""
 "選択しようとしているオリジナルは<b>可視ではありません</b> (&lt;defs&gt; にあ"
 "ります)"
 
-#: ../src/selection-chemistry.cpp:3102
+#: ../src/selection-chemistry.cpp:3068
 msgid "Fill between many"
 msgstr "複数の間を塗りつぶす"
 
-#: ../src/selection-chemistry.cpp:3104
+#: ../src/selection-chemistry.cpp:3070
 msgid "Clone original"
 msgstr "クローンオリジナル"
 
-#: ../src/selection-chemistry.cpp:3109
+#: ../src/selection-chemistry.cpp:3075
 msgid "Select path(s) to fill."
 msgstr "塗るパスを選択"
 
-#: ../src/selection-chemistry.cpp:3124
+#: ../src/selection-chemistry.cpp:3090
 msgid "Select <b>object(s)</b> to convert to marker."
 msgstr "マーカーに変換する<b>オブジェクト</b>を選択してください。"
 
-#: ../src/selection-chemistry.cpp:3187
+#: ../src/selection-chemistry.cpp:3153
 msgid "Objects to marker"
 msgstr "オブジェクトをマーカーに"
 
-#: ../src/selection-chemistry.cpp:3210
+#: ../src/selection-chemistry.cpp:3176
 msgid "Select <b>object(s)</b> to convert to guides."
 msgstr "ガイドに変換する<b>オブジェクト</b>を選択してください。"
 
-#: ../src/selection-chemistry.cpp:3231
+#: ../src/selection-chemistry.cpp:3197
 msgid "Objects to guides"
 msgstr "オブジェクトをガイドに"
 
-#: ../src/selection-chemistry.cpp:3262
+#: ../src/selection-chemistry.cpp:3228
 msgid "Select <b>objects</b> to convert to symbol."
 msgstr "シンボルに変換する<b>オブジェクト</b>を選択してください。"
 
-#: ../src/selection-chemistry.cpp:3397
+#: ../src/selection-chemistry.cpp:3363
 msgid "Group to symbol"
 msgstr "グループをシンボルに"
 
-#: ../src/selection-chemistry.cpp:3414
+#: ../src/selection-chemistry.cpp:3380
 msgid "unSymbol all selected symbols"
 msgstr "選択したすべてのシンボルを解除"
 
-#: ../src/selection-chemistry.cpp:3428
+#: ../src/selection-chemistry.cpp:3394
 msgid "Select <b>object(s)</b> to convert to pattern."
 msgstr "パターンに変換する<b>オブジェクト</b>を選択してください。"
 
-#: ../src/selection-chemistry.cpp:3514
+#: ../src/selection-chemistry.cpp:3480
 msgid "Objects to pattern"
 msgstr "オブジェクトをパターンに"
 
-#: ../src/selection-chemistry.cpp:3526
+#: ../src/selection-chemistry.cpp:3492
 msgid "Select an <b>object with pattern fill</b> to extract objects from."
 msgstr ""
 "オブジェクトを抜き出す元となる<b>パターンフィルを有するオブジェクト</b>を選択"
 "してください。"
 
-#: ../src/selection-chemistry.cpp:3586
+#: ../src/selection-chemistry.cpp:3552
 msgid "<b>No pattern fills</b> in the selection."
 msgstr "選択オブジェクトは<b>パターンフィルを有していません</b>。"
 
-#: ../src/selection-chemistry.cpp:3588
+#: ../src/selection-chemistry.cpp:3554
 msgid "Pattern to objects"
 msgstr "パターンをオブジェクトに"
 
-#: ../src/selection-chemistry.cpp:3602
+#: ../src/selection-chemistry.cpp:3568
 msgid "Select <b>object(s)</b> to make a bitmap copy."
 msgstr "ビットマップコピーを作成する<b>オブジェクト</b>を選択してください。"
 
-#: ../src/selection-chemistry.cpp:3607
+#: ../src/selection-chemistry.cpp:3573
 msgid "Rendering bitmap..."
 msgstr "ビットマップをレンダリングしています..."
 
-#: ../src/selection-chemistry.cpp:3694
+#: ../src/selection-chemistry.cpp:3660
 msgid "Create bitmap"
 msgstr "ビットマップを作成"
 
-#: ../src/selection-chemistry.cpp:3715 ../src/selection-chemistry.cpp:3822
+#: ../src/selection-chemistry.cpp:3681 ../src/selection-chemistry.cpp:3788
 msgid "Select <b>object(s)</b> to create clippath or mask from."
 msgstr ""
 "クリップパスまたはマスクを作成する<b>オブジェクト</b>を選択してください。"
 
-#: ../src/selection-chemistry.cpp:3798
+#: ../src/selection-chemistry.cpp:3764
 msgid "Create Clip Group"
 msgstr "クリップグループを作成"
 
-#: ../src/selection-chemistry.cpp:3826
+#: ../src/selection-chemistry.cpp:3792
 msgid "Select mask object and <b>object(s)</b> to apply clippath or mask to."
 msgstr ""
 "マスクオブジェクトと、クリップパスまたはマスクを適用する<b>オブジェクト</b>を"
 "選択してください。"
 
-#: ../src/selection-chemistry.cpp:3993
+#: ../src/selection-chemistry.cpp:3959
 msgid "Set clipping path"
 msgstr "クリッピングパスを設定"
 
-#: ../src/selection-chemistry.cpp:3995
+#: ../src/selection-chemistry.cpp:3961
 msgid "Set mask"
 msgstr "マスクを設定"
 
-#: ../src/selection-chemistry.cpp:4007
+#: ../src/selection-chemistry.cpp:3973
 msgid "Select <b>object(s)</b> to remove clippath or mask from."
 msgstr ""
 "クリップパスまたはマスクを解除する<b>オブジェクト</b>を選択してください。"
 
-#: ../src/selection-chemistry.cpp:4144
+#: ../src/selection-chemistry.cpp:4110
 msgid "Select <b>object(s)</b> to fit canvas to."
 msgstr "キャンバスサイズを合わせる<b>オブジェクト</b>を選択してください。"
 
-#: ../src/selection-chemistry.cpp:4227
+#: ../src/selection-chemistry.cpp:4193
 msgid "Swap fill and stroke of an object"
 msgstr "オブジェクトのフィルとストロークを交換"
 
-#: ../src/selection-chemistry.cpp:4246
+#: ../src/selection-chemistry.cpp:4212
 msgid "Select <b>path(s)</b> to create fill between."
 msgstr "間にフィルを作成する<b>パス</b>を選択してください。"
 
-#: ../src/selection-chemistry.cpp:4301
+#: ../src/selection-chemistry.cpp:4267
 msgid "Create linked fill object between paths"
 msgstr "リンクした塗りつぶしオブジェクトをパスの間に作成"
 
@@ -19059,49 +19061,49 @@ msgstr "ビットマップをトレース"
 msgid "Trace: Done. %ld nodes created"
 msgstr "トレース: 完了しました。 %ld 個のノードが作成されました"
 
-#: ../src/ui/clipboard.cpp:330
+#: ../src/ui/clipboard.cpp:280
 msgid "Nothing was copied."
 msgstr "何もコピーされていません。"
 
-#: ../src/ui/clipboard.cpp:493
+#: ../src/ui/clipboard.cpp:443
 msgid "Can't paste text outside of the text tool."
 msgstr "テキストツール以外のテキストは貼り付けることができません。"
 
-#: ../src/ui/clipboard.cpp:496 ../src/ui/clipboard.cpp:820
-#: ../src/ui/clipboard.cpp:848 ../src/ui/clipboard.cpp:889
+#: ../src/ui/clipboard.cpp:446 ../src/ui/clipboard.cpp:841
+#: ../src/ui/clipboard.cpp:876 ../src/ui/clipboard.cpp:917
 msgid "Nothing on the clipboard."
 msgstr "クリップボードが空です。"
 
-#: ../src/ui/clipboard.cpp:661
+#: ../src/ui/clipboard.cpp:682
 msgid "Select <b>object(s)</b> to paste style to."
 msgstr "スタイルを貼り付ける対象の<b>オブジェクト</b>を選択してください。"
 
-#: ../src/ui/clipboard.cpp:673 ../src/ui/clipboard.cpp:690
+#: ../src/ui/clipboard.cpp:694 ../src/ui/clipboard.cpp:711
 msgid "No style on the clipboard."
 msgstr "クリップボードにスタイルはありません。"
 
-#: ../src/ui/clipboard.cpp:715
+#: ../src/ui/clipboard.cpp:736
 msgid "Select <b>object(s)</b> to paste size to."
 msgstr "サイズをペーストする対象の<b>オブジェクト</b>を選択してください。"
 
-#: ../src/ui/clipboard.cpp:723
+#: ../src/ui/clipboard.cpp:744
 msgid "No size on the clipboard."
 msgstr "クリップボードにサイズはありません。"
 
-#: ../src/ui/clipboard.cpp:780
+#: ../src/ui/clipboard.cpp:801
 msgid "Select <b>object(s)</b> to paste live path effect to."
 msgstr ""
 "ライブパスエフェクトへ貼り付ける<b>オブジェクト</b>を選択してください。"
 
-#: ../src/ui/clipboard.cpp:807
+#: ../src/ui/clipboard.cpp:828
 msgid "No effect on the clipboard."
 msgstr "クリップボードにエフェクトはありません。"
 
-#: ../src/ui/clipboard.cpp:826 ../src/ui/clipboard.cpp:872
+#: ../src/ui/clipboard.cpp:850 ../src/ui/clipboard.cpp:900
 msgid "Clipboard does not contain a path."
 msgstr "クリップボードにパスは含まれていません。"
 
-#: ../src/ui/clipboard.cpp:919
+#: ../src/ui/clipboard.cpp:947
 msgid "Clipboard does not contain any objects of type \"%1\"."
 msgstr "クリップボードに \"%1\" タイプのオブジェクトは含まれていません。"
 
@@ -19370,7 +19372,7 @@ msgstr ""
 msgid "_Save as Inkscape SVG"
 msgstr "Inkscape SVG として保存(_S)"
 
-#: ../src/ui/dialog/attrdialog.cpp:106 ../src/ui/tools/text-tool.cpp:1872
+#: ../src/ui/dialog/attrdialog.cpp:106 ../src/ui/tools/text-tool.cpp:1875
 msgid "Type text"
 msgstr "テキストの入力"
 
@@ -20222,18 +20224,18 @@ msgstr "ログメッセージを解放"
 msgid "Close Tab"
 msgstr "タブを閉じる"
 
-#: ../src/ui/dialog/dialog-data.h:41
+#: ../src/ui/dialog/dialog-data.h:45
 #: ../share/extensions/image_attributes.inx:10
 msgid "Basic"
 msgstr "基本"
 
-#: ../src/ui/dialog/dialog-data.h:42
+#: ../src/ui/dialog/dialog-data.h:46
 #: ../src/ui/dialog/inkscape-preferences.cpp:1875
-#: ../share/ui/toolbar-snap.ui:1082
+#: ../share/ui/toolbar-snap.ui:1062
 msgid "Advanced"
 msgstr "上級者用"
 
-#: ../src/ui/dialog/dialog-data.h:43
+#: ../src/ui/dialog/dialog-data.h:47
 #: ../share/extensions/jessyink_autotexts.inx:6
 #: ../share/extensions/jessyink_effects.inx:6
 #: ../share/extensions/jessyink_export.inx:7
@@ -20243,127 +20245,127 @@ msgstr "上級者用"
 msgid "Settings"
 msgstr "設定"
 
-#: ../src/ui/dialog/dialog-data.h:44
+#: ../src/ui/dialog/dialog-data.h:48
 msgid "Diagnostic"
 msgstr "診断"
 
-#: ../src/ui/dialog/dialog-data.h:45 ../share/extensions/interp_att_g.inx:15
+#: ../src/ui/dialog/dialog-data.h:49 ../share/extensions/interp_att_g.inx:15
 msgid "Other"
 msgstr "その他"
 
-#: ../src/ui/dialog/dialog-data.h:56
+#: ../src/ui/dialog/dialog-data.h:60
 msgid "_Align and Distribute"
 msgstr "整列と配置(_A)"
 
-#: ../src/ui/dialog/dialog-data.h:57
+#: ../src/ui/dialog/dialog-data.h:61
 msgid "Create Tiled Clones"
 msgstr "タイルクローンを作成"
 
-#: ../src/ui/dialog/dialog-data.h:58
+#: ../src/ui/dialog/dialog-data.h:62
 msgid "_Document Properties"
 msgstr "ドキュメントのプロパティ(_D)"
 
-#: ../src/ui/dialog/dialog-data.h:59
+#: ../src/ui/dialog/dialog-data.h:63
 msgid "_Export"
 msgstr "エクスポート(_E)"
 
-#: ../src/ui/dialog/dialog-data.h:60
+#: ../src/ui/dialog/dialog-data.h:64
 msgid "_Fill and Stroke"
 msgstr "フィル/ストローク(_F)"
 
-#: ../src/ui/dialog/dialog-data.h:61
+#: ../src/ui/dialog/dialog-data.h:65
 msgid "Filter _Editor"
 msgstr "フィルターエディター(_E)"
 
-#: ../src/ui/dialog/dialog-data.h:62
+#: ../src/ui/dialog/dialog-data.h:66
 msgid "_Find/Replace"
 msgstr "検索/置換(_F)"
 
-#: ../src/ui/dialog/dialog-data.h:63
+#: ../src/ui/dialog/dialog-data.h:67
 msgid "_Unicode Characters"
 msgstr "Unicode 文字(_U)"
 
-#: ../src/ui/dialog/dialog-data.h:64 ../share/ui/menus.ui:611
+#: ../src/ui/dialog/dialog-data.h:68 ../share/ui/menus.ui:611
 msgid "Icon Preview"
 msgstr "アイコンプレビュー"
 
-#: ../src/ui/dialog/dialog-data.h:65
+#: ../src/ui/dialog/dialog-data.h:69
 msgid "_Input Devices"
 msgstr "入力デバイス(_I)"
 
-#: ../src/ui/dialog/dialog-data.h:66
+#: ../src/ui/dialog/dialog-data.h:70
 msgid "Path E_ffects"
 msgstr "パスエフェクト(_F)"
 
-#: ../src/ui/dialog/dialog-data.h:67 ../share/ui/menus.ui:1272
+#: ../src/ui/dialog/dialog-data.h:71 ../share/ui/menus.ui:1272
 msgid "About _Memory"
 msgstr "メモリ情報(_M)"
 
-#: ../src/ui/dialog/dialog-data.h:68
+#: ../src/ui/dialog/dialog-data.h:72
 msgid "_Messages"
 msgstr "デバッグメッセージ(_M)"
 
-#: ../src/ui/dialog/dialog-data.h:69
+#: ../src/ui/dialog/dialog-data.h:73
 msgid "_Object attributes"
 msgstr "オブジェクトの属性(_O)"
 
-#: ../src/ui/dialog/dialog-data.h:70
+#: ../src/ui/dialog/dialog-data.h:74
 msgid "_Object Properties"
 msgstr "オブジェクトのプロパティ(_O)"
 
-#: ../src/ui/dialog/dialog-data.h:71
+#: ../src/ui/dialog/dialog-data.h:75
 msgid "Layers and Object_s"
 msgstr "レイヤーとオブジェクト(_S)"
 
-#: ../src/ui/dialog/dialog-data.h:72
+#: ../src/ui/dialog/dialog-data.h:76
 msgid "_Paint Servers"
 msgstr "ペイントサーバー(_P)"
 
-#: ../src/ui/dialog/dialog-data.h:73 ../share/ui/menus.ui:341
+#: ../src/ui/dialog/dialog-data.h:77 ../share/ui/menus.ui:341
 msgid "P_references"
 msgstr "環境設定(_P)"
 
-#: ../src/ui/dialog/dialog-data.h:74
+#: ../src/ui/dialog/dialog-data.h:78
 msgid "_Selectors and CSS"
 msgstr "セレクターとCSS(_S)"
 
-#: ../src/ui/dialog/dialog-data.h:75
+#: ../src/ui/dialog/dialog-data.h:79
 msgid "SVG Font Editor"
 msgstr "SVG フォントエディター"
 
-#: ../src/ui/dialog/dialog-data.h:76
+#: ../src/ui/dialog/dialog-data.h:80
 msgid "S_watches"
 msgstr "スウォッチ(_W)"
 
-#: ../src/ui/dialog/dialog-data.h:77
+#: ../src/ui/dialog/dialog-data.h:81
 msgid "S_ymbols"
 msgstr "シンボル(_Y)"
 
-#: ../src/ui/dialog/dialog-data.h:78
+#: ../src/ui/dialog/dialog-data.h:82
 msgid "_Text and Font"
 msgstr "テキストとフォント(_T)"
 
-#: ../src/ui/dialog/dialog-data.h:79
+#: ../src/ui/dialog/dialog-data.h:83
 msgid "_Trace Bitmap"
 msgstr "ビットマップのトレース(_T)"
 
-#: ../src/ui/dialog/dialog-data.h:80
+#: ../src/ui/dialog/dialog-data.h:84
 msgid "Transfor_m"
 msgstr "変形(_M)"
 
-#: ../src/ui/dialog/dialog-data.h:81
+#: ../src/ui/dialog/dialog-data.h:85
 msgid "Undo _History"
 msgstr "作業履歴(_H)"
 
-#: ../src/ui/dialog/dialog-data.h:82
+#: ../src/ui/dialog/dialog-data.h:86
 msgid "_XML Editor"
 msgstr "XML エディター(_X)"
 
-#: ../src/ui/dialog/dialog-data.h:84
+#: ../src/ui/dialog/dialog-data.h:88
 msgid "Check Spellin_g"
 msgstr "スペルチェック(_G)"
 
-#: ../src/ui/dialog/dialog-data.h:87
+#: ../src/ui/dialog/dialog-data.h:91
 msgid "Prototype"
 msgstr "プロトタイプ"
 
@@ -28101,7 +28103,7 @@ msgstr "キーワード"
 msgid "AaBbCcIiPpQq12369$€¢?.;/()"
 msgstr "AaBbCcIiPpQq12369$€¢?.;/()"
 
-#: ../src/ui/dialog/text-edit.cpp:445 ../src/ui/tools/text-tool.cpp:1531
+#: ../src/ui/dialog/text-edit.cpp:445 ../src/ui/tools/text-tool.cpp:1534
 msgid "Set text style"
 msgstr "テキストスタイルの設定"
 
@@ -32334,7 +32336,7 @@ msgstr "<b>Ctrl</b>: グラデーション角度をスナップします。"
 msgid "<b>Shift</b>: draw gradient around the starting point"
 msgstr "<b>Shift</b>: 始点を中心にグラデーションを描画します。"
 
-#: ../src/ui/tools/gradient-tool.cpp:786 ../src/ui/tools/mesh-tool.cpp:952
+#: ../src/ui/tools/gradient-tool.cpp:800 ../src/ui/tools/mesh-tool.cpp:952
 #, c-format
 msgid "<b>Gradient</b> for %d object; with <b>Ctrl</b> to snap angle"
 msgid_plural "<b>Gradient</b> for %d objects; with <b>Ctrl</b> to snap angle"
@@ -32342,7 +32344,7 @@ msgstr[0] ""
 "%d 個のオブジェクトの<b>グラデーション</b>。<b>Ctrl</b>で角度をスナップしま"
 "す。"
 
-#: ../src/ui/tools/gradient-tool.cpp:790 ../src/ui/tools/mesh-tool.cpp:956
+#: ../src/ui/tools/gradient-tool.cpp:804 ../src/ui/tools/mesh-tool.cpp:956
 msgid "Select <b>objects</b> on which to create gradient."
 msgstr "グラデーションを作成する<b>オブジェクト</b>を選択してください。"
 
@@ -32459,7 +32461,7 @@ msgid "Create mesh"
 msgstr "メッシュを作成"
 
 # This 'toggle' means more like 'fasten'.
-#: ../src/ui/tools/node-tool.cpp:621
+#: ../src/ui/tools/node-tool.cpp:630
 msgctxt "Node tool tip"
 msgid ""
 "<b>Shift</b>: drag to add nodes to the selection, click to toggle object "
@@ -32468,22 +32470,22 @@ msgstr ""
 "<b>Shift</b>: ドラッグで選択範囲にノードを追加、クリックで選択オブジェクトに"
 "追加します。"
 
-#: ../src/ui/tools/node-tool.cpp:625
+#: ../src/ui/tools/node-tool.cpp:634
 msgctxt "Node tool tip"
 msgid "<b>Shift</b>: drag to add nodes to the selection"
 msgstr "<b>Shift</b>: ドラッグで選択範囲にノードを追加します。"
 
-#: ../src/ui/tools/node-tool.cpp:638
+#: ../src/ui/tools/node-tool.cpp:647
 #, c-format
 msgid "<b>%u of %u</b> node selected."
 msgid_plural "<b>%u of %u</b> nodes selected."
 msgstr[0] "<b>%u</b> 個のノードを選択 (全 %u ノード)。"
 
-#: ../src/ui/tools/node-tool.cpp:657
+#: ../src/ui/tools/node-tool.cpp:666
 msgid "Angle: %1°."
 msgstr "角度: %1°."
 
-#: ../src/ui/tools/node-tool.cpp:664
+#: ../src/ui/tools/node-tool.cpp:673
 #, c-format
 msgctxt "Node tool tip"
 msgid "%s Drag to select nodes, click to edit only this object (more: Shift)"
@@ -32491,30 +32493,30 @@ msgstr ""
 "%s ドラッグでノードを選択、クリックでこのオブジェクトのみを編集します (もっ"
 "と: Shift)"
 
-#: ../src/ui/tools/node-tool.cpp:670
+#: ../src/ui/tools/node-tool.cpp:679
 #, c-format
 msgctxt "Node tool tip"
 msgid "%s Drag to select nodes, click clear the selection"
 msgstr "%s ドラッグでノードを選択、クリックで選択範囲を解除します"
 
-#: ../src/ui/tools/node-tool.cpp:678
+#: ../src/ui/tools/node-tool.cpp:687
 msgctxt "Node tool tip"
 msgid "Drag to select nodes, click to edit only this object"
 msgstr "ドラッグでノードを選択、クリックでこのオブジェクトのみを編集します。"
 
-#: ../src/ui/tools/node-tool.cpp:681
+#: ../src/ui/tools/node-tool.cpp:690
 msgctxt "Node tool tip"
 msgid "Drag to select nodes, click to clear the selection"
 msgstr "ドラッグでノードを選択、クリックで選択を解除します。"
 
-#: ../src/ui/tools/node-tool.cpp:686
+#: ../src/ui/tools/node-tool.cpp:695
 msgctxt "Node tool tip"
 msgid "Drag to select objects to edit, click to edit this object (more: Shift)"
 msgstr ""
 "ドラッグして編集するオブジェクトを選択してください。クリックでこのオブジェク"
 "トを編集します。(もっと: Shift)"
 
-#: ../src/ui/tools/node-tool.cpp:689
+#: ../src/ui/tools/node-tool.cpp:698
 msgctxt "Node tool tip"
 msgid "Drag to select objects to edit"
 msgstr "ドラッグして編集するオブジェクトを選択してください。"
@@ -32523,29 +32525,29 @@ msgstr "ドラッグして編集するオブジェクトを選択してくださ
 msgid "Resize page"
 msgstr "ページのサイズを変更"
 
-#: ../src/ui/tools/pen-tool.cpp:158 ../src/ui/tools/pencil-tool.cpp:516
+#: ../src/ui/tools/pen-tool.cpp:162 ../src/ui/tools/pencil-tool.cpp:516
 msgid "Drawing cancelled"
 msgstr "描画をキャンセルしました"
 
-#: ../src/ui/tools/pen-tool.cpp:382 ../src/ui/tools/pencil-tool.cpp:213
+#: ../src/ui/tools/pen-tool.cpp:386 ../src/ui/tools/pencil-tool.cpp:213
 msgid "Continuing selected path"
 msgstr "選択パスを延長"
 
-#: ../src/ui/tools/pen-tool.cpp:392 ../src/ui/tools/pencil-tool.cpp:221
+#: ../src/ui/tools/pen-tool.cpp:396 ../src/ui/tools/pencil-tool.cpp:221
 #: ../src/ui/tools/pencil-tool.cpp:227
 msgid "Creating new path"
 msgstr "新規パスを作成"
 
-#: ../src/ui/tools/pen-tool.cpp:394 ../src/ui/tools/pencil-tool.cpp:230
+#: ../src/ui/tools/pen-tool.cpp:398 ../src/ui/tools/pencil-tool.cpp:230
 msgid "Appending to selected path"
 msgstr "選択パスに追加"
 
-#: ../src/ui/tools/pen-tool.cpp:558
+#: ../src/ui/tools/pen-tool.cpp:562
 msgid "<b>Click</b> or <b>click and drag</b> to close and finish the path."
 msgstr ""
 "<b>クリック</b>または<b>クリック+ドラッグ</b>すると、パスを閉じて終了します。"
 
-#: ../src/ui/tools/pen-tool.cpp:560
+#: ../src/ui/tools/pen-tool.cpp:564
 msgid ""
 "<b>Click</b> or <b>click and drag</b> to close and finish the path. Shift"
 "+Click make a cusp node"
@@ -32553,14 +32555,14 @@ msgstr ""
 "<b>クリック</b>または<b>クリック+ドラッグ</b>すると、パスを閉じて終了します。"
 "Shift+クリックでシャープノードを作成"
 
-#: ../src/ui/tools/pen-tool.cpp:572
+#: ../src/ui/tools/pen-tool.cpp:576
 msgid ""
 "<b>Click</b> or <b>click and drag</b> to continue the path from this point."
 msgstr ""
 "<b>クリック</b>または<b>クリック+ドラッグ</b>すると、この点からパスを延長しま"
 "す。"
 
-#: ../src/ui/tools/pen-tool.cpp:574
+#: ../src/ui/tools/pen-tool.cpp:578
 msgid ""
 "<b>Click</b> or <b>click and drag</b> to continue the path from this point. "
 "Shift+Click make a cusp node"
@@ -32568,7 +32570,7 @@ msgstr ""
 "<b>クリック</b>または<b>クリック+ドラッグ</b>すると、この点からパスを延長しま"
 "す。Shift+クリックでシャープノードを作成"
 
-#: ../src/ui/tools/pen-tool.cpp:1721
+#: ../src/ui/tools/pen-tool.cpp:1731
 #, c-format
 msgid ""
 "<b>Curve segment</b>: angle %3.2f&#176;; <b>Shift+Click</b> creates cusp "
@@ -32578,7 +32580,7 @@ msgstr ""
 "を作成、<b>ALT</b> で前に移動、<b>Enter</b> または <b>Shift+Enter</b> でパス"
 "を完了します。"
 
-#: ../src/ui/tools/pen-tool.cpp:1722
+#: ../src/ui/tools/pen-tool.cpp:1732
 #, c-format
 msgid ""
 "<b>Line segment</b>: angle %3.2f&#176;; <b>Shift+Click</b> creates cusp "
@@ -32588,7 +32590,7 @@ msgstr ""
 "ド作成、<b>ALT</b> で前のノードに移動、<b>Enter</b> または <b>Shift+Enter</"
 "b> でパスを完了します。"
 
-#: ../src/ui/tools/pen-tool.cpp:1726
+#: ../src/ui/tools/pen-tool.cpp:1736
 #, c-format
 msgid ""
 "<b>Curve segment</b>: angle %3.2f&#176;, distance %s; with <b>Ctrl</b> to "
@@ -32597,7 +32599,7 @@ msgstr ""
 "<b>曲線セグメント</b>: 角度 %3.2f&#176;、距離 %s; <b>Ctrl</b> で角度をスナッ"
 "プ、<b>Enter</b> または <b>Shift+Enter</b> でパスを完了します。"
 
-#: ../src/ui/tools/pen-tool.cpp:1727
+#: ../src/ui/tools/pen-tool.cpp:1737
 #, c-format
 msgid ""
 "<b>Line segment</b>: angle %3.2f&#176;, distance %s; with <b>Ctrl</b> to "
@@ -32606,7 +32608,7 @@ msgstr ""
 "<b>直線セグメント</b>: 角度 %3.2f&#176;、距離 %s; <b>Ctrl</b> で角度をスナッ"
 "プ、<b>Enter</b> または <b>Shift+Enter</b> でパスを完了します。"
 
-#: ../src/ui/tools/pen-tool.cpp:1745
+#: ../src/ui/tools/pen-tool.cpp:1755
 #, c-format
 msgid ""
 "<b>Curve handle</b>: angle %3.2f&#176;, length %s; with <b>Ctrl</b> to snap "
@@ -32615,7 +32617,7 @@ msgstr ""
 "<b>曲線ハンドル</b>: 角度 %3.2f&#176;、長さ %s。<b>Ctrl</b> で角度をスナップ"
 "します。"
 
-#: ../src/ui/tools/pen-tool.cpp:1769
+#: ../src/ui/tools/pen-tool.cpp:1779
 #, c-format
 msgid ""
 "<b>Curve handle, symmetric</b>: angle %3.2f&#176;, length %s; with <b>Ctrl</"
@@ -32624,7 +32626,7 @@ msgstr ""
 "<b>曲線ハンドル、対称</b>: 角度 %3.2f&#176;、長さ %s; <b>Ctrl</b> で角度をス"
 "ナップ、<b>Shift</b> でこのハンドルのみ移動します。"
 
-#: ../src/ui/tools/pen-tool.cpp:1770
+#: ../src/ui/tools/pen-tool.cpp:1780
 #, c-format
 msgid ""
 "<b>Curve handle</b>: angle %3.2f&#176;, length %s; with <b>Ctrl</b> to snap "
@@ -32633,7 +32635,7 @@ msgstr ""
 "<b>曲線ハンドル</b>: 角度 %3.2f&#176;、長さ %s; <b>Ctrl</b> で角度をスナッ"
 "プ、<b>Shift</b> でこのハンドルのみ移動します。"
 
-#: ../src/ui/tools/pen-tool.cpp:1922
+#: ../src/ui/tools/pen-tool.cpp:1932
 msgid "Drawing finished"
 msgstr "描画完了"
 
@@ -32737,7 +32739,7 @@ msgstr "移動をキャンセルしました。"
 msgid "Selection canceled."
 msgstr "選択をキャンセルしました。"
 
-#: ../src/ui/tools/select-tool.cpp:605
+#: ../src/ui/tools/select-tool.cpp:609
 #, c-format
 msgid ""
 "<b>Draw over</b> objects to select them; release <b>%s</b> to switch to "
@@ -32746,7 +32748,7 @@ msgstr ""
 "オブジェクト上に<b>線を引く</b>と選択します。<b>%s</b> を放すとラバーバンド選"
 "択に切り替わります"
 
-#: ../src/ui/tools/select-tool.cpp:608
+#: ../src/ui/tools/select-tool.cpp:612
 #, c-format
 msgid ""
 "<b>Drag near</b> objects to select them; press <b>%s</b> to switch to touch "
@@ -32755,7 +32757,7 @@ msgstr ""
 "オブジェクトの<b>周囲をドラッグ</b>すると選択します。<b>%s</b> を押すとタッチ"
 "選択に切り替わります。"
 
-#: ../src/ui/tools/select-tool.cpp:611
+#: ../src/ui/tools/select-tool.cpp:615
 #, c-format
 msgid ""
 "<b>Drag around</b> objects to select them; press <b>%s</b> to switch to "
@@ -32764,7 +32766,7 @@ msgstr ""
 "オブジェクトの<b>周囲をドラッグ</b>すると選択します。<b>%s</b> を押すとタッチ"
 "選択に切り替わります。"
 
-#: ../src/ui/tools/select-tool.cpp:1041
+#: ../src/ui/tools/select-tool.cpp:1045
 msgid "Selected object is not a group. Cannot enter."
 msgstr "選択オブジェクトはグループでありません。グループに入れません。"
 
@@ -32876,7 +32878,7 @@ msgstr "Unicode 文字を挿入"
 msgid "Unicode (<b>Enter</b> to finish): %s: %s"
 msgstr "Unicode (<b>Enter</b> で完了): %s: %s"
 
-#: ../src/ui/tools/text-tool.cpp:430 ../src/ui/tools/text-tool.cpp:805
+#: ../src/ui/tools/text-tool.cpp:430 ../src/ui/tools/text-tool.cpp:808
 msgid "Unicode (<b>Enter</b> to finish): "
 msgstr "Unicode (<b>Enter</b> で完了): "
 
@@ -32918,75 +32920,75 @@ msgstr ""
 "そのフレームは現在のフォントサイズに対して<b>小さすぎます</b>。流し込みテキス"
 "トは作成されません。"
 
-#: ../src/ui/tools/text-tool.cpp:791
+#: ../src/ui/tools/text-tool.cpp:794
 msgid "No-break space"
 msgstr "ノーブレークスペース"
 
-#: ../src/ui/tools/text-tool.cpp:792
+#: ../src/ui/tools/text-tool.cpp:795
 msgid "Insert no-break space"
 msgstr "ノーブレークスペースの挿入"
 
-#: ../src/ui/tools/text-tool.cpp:828
+#: ../src/ui/tools/text-tool.cpp:831
 msgid "Make bold"
 msgstr "太字にする"
 
-#: ../src/ui/tools/text-tool.cpp:845
+#: ../src/ui/tools/text-tool.cpp:848
 msgid "Make italic"
 msgstr "斜体にする"
 
-#: ../src/ui/tools/text-tool.cpp:889
+#: ../src/ui/tools/text-tool.cpp:892
 msgid "New line"
 msgstr "改行"
 
-#: ../src/ui/tools/text-tool.cpp:930
+#: ../src/ui/tools/text-tool.cpp:933
 msgid "Backspace"
 msgstr "バックスペース"
 
-#: ../src/ui/tools/text-tool.cpp:984
+#: ../src/ui/tools/text-tool.cpp:987
 msgid "Kern to the left"
 msgstr "左に揃える"
 
-#: ../src/ui/tools/text-tool.cpp:1008
+#: ../src/ui/tools/text-tool.cpp:1011
 msgid "Kern to the right"
 msgstr "右に揃える"
 
-#: ../src/ui/tools/text-tool.cpp:1032
+#: ../src/ui/tools/text-tool.cpp:1035
 msgid "Kern up"
 msgstr "上に詰める"
 
-#: ../src/ui/tools/text-tool.cpp:1056
+#: ../src/ui/tools/text-tool.cpp:1059
 msgid "Kern down"
 msgstr "下に詰める"
 
-#: ../src/ui/tools/text-tool.cpp:1128
+#: ../src/ui/tools/text-tool.cpp:1131
 msgid "Rotate counterclockwise"
 msgstr "反時計回りに回転"
 
-#: ../src/ui/tools/text-tool.cpp:1148
+#: ../src/ui/tools/text-tool.cpp:1151
 msgid "Rotate clockwise"
 msgstr "時計回りに回転"
 
-#: ../src/ui/tools/text-tool.cpp:1164
+#: ../src/ui/tools/text-tool.cpp:1167
 msgid "Contract line spacing"
 msgstr "行間隔を縮める"
 
-#: ../src/ui/tools/text-tool.cpp:1170
+#: ../src/ui/tools/text-tool.cpp:1173
 msgid "Contract letter spacing"
 msgstr "文字間隔を縮める"
 
-#: ../src/ui/tools/text-tool.cpp:1187
+#: ../src/ui/tools/text-tool.cpp:1190
 msgid "Expand line spacing"
 msgstr "行間隔を広げる"
 
-#: ../src/ui/tools/text-tool.cpp:1193
+#: ../src/ui/tools/text-tool.cpp:1196
 msgid "Expand letter spacing"
 msgstr "文字間隔を広げる"
 
-#: ../src/ui/tools/text-tool.cpp:1341
+#: ../src/ui/tools/text-tool.cpp:1344
 msgid "Paste text"
 msgstr "テキストの貼り付け"
 
-#: ../src/ui/tools/text-tool.cpp:1680
+#: ../src/ui/tools/text-tool.cpp:1683
 #, c-format
 msgid ""
 "Type or edit flowed text (%d character%s); <b>Enter</b> to start new "
@@ -32998,7 +33000,7 @@ msgstr[0] ""
 "流し込みテキストの編集 (%d 個の文字%s); <b>Enter</b> で新しい段落を開始しま"
 "す。"
 
-#: ../src/ui/tools/text-tool.cpp:1705
+#: ../src/ui/tools/text-tool.cpp:1708
 #, c-format
 msgid "Type or edit text (%d character%s); <b>Enter</b> to start new line."
 msgid_plural ""
@@ -36093,7 +36095,7 @@ msgstr "アンチエイリアスを使用する"
 msgid "If unset, no antialiasing will be done on the drawing."
 msgstr "チェックを外すと、描画に対してアンチエイリアスが行われません。"
 
-#: ../share/ui/page-properties.glade:972 ../share/ui/toolbar-snap.ui:795
+#: ../share/ui/page-properties.glade:972
 msgid "        "
 msgstr "        "
 
@@ -36797,7 +36799,7 @@ msgstr "ページのラベル"
 msgid "Move Objects"
 msgstr "オブジェクトを移動"
 
-#: ../share/ui/toolbar-snap.ui:20 ../share/ui/toolbar-snap.ui:960
+#: ../share/ui/toolbar-snap.ui:20 ../share/ui/toolbar-snap.ui:940
 msgid "Enable snapping"
 msgstr "スナップを有効"
 
@@ -36861,66 +36863,59 @@ msgstr "ガイドラインにスナップ"
 msgid "Snap to page border"
 msgstr "ページ境界線にスナップ"
 
-#: ../share/ui/toolbar-snap.ui:314
-msgid " "
-msgstr " "
-
-#: ../share/ui/toolbar-snap.ui:328 ../share/ui/toolbar-snap.ui:342
-#: ../share/ui/toolbar-snap.ui:356 ../share/ui/toolbar-snap.ui:386
-#: ../share/ui/toolbar-snap.ui:430 ../share/ui/toolbar-snap.ui:1070
-#: ../share/ui/toolbar-snap.ui:1098
-msgid "       "
-msgstr "       "
-
-#: ../share/ui/toolbar-snap.ui:368
+#: ../share/ui/toolbar-snap.ui:312
 msgid "Alignment snapping"
 msgstr "整列のスナップ"
 
-#: ../share/ui/toolbar-snap.ui:398
+#: ../share/ui/toolbar-snap.ui:328
 msgid "Self snap path nodes"
 msgstr "パスのノード同士をスナップ"
 
-#: ../share/ui/toolbar-snap.ui:413
+#: ../share/ui/toolbar-snap.ui:343
 msgid "Reset to simple"
 msgstr "簡易設定にリセット"
 
-#: ../share/ui/toolbar-snap.ui:637
+#: ../share/ui/toolbar-snap.ui:553
 msgid "Path mask"
 msgstr "マスクのパス"
 
-#: ../share/ui/toolbar-snap.ui:652
+#: ../share/ui/toolbar-snap.ui:568
 msgid "Path clip"
 msgstr "クリップのパス"
 
-#: ../share/ui/toolbar-snap.ui:693
+#: ../share/ui/toolbar-snap.ui:609
 msgid "Distribution snap"
 msgstr "配置のスナップ"
 
-#: ../share/ui/toolbar-snap.ui:741
+#: ../share/ui/toolbar-snap.ui:657
 msgid "Perpendicular lines"
 msgstr "垂直線"
 
-#: ../share/ui/toolbar-snap.ui:756
+#: ../share/ui/toolbar-snap.ui:672
 msgid "Tangential lines"
 msgstr "接線"
 
-#: ../share/ui/toolbar-snap.ui:980
+#: ../share/ui/toolbar-snap.ui:960
 msgid "Include:"
 msgstr "次のもの:"
 
-#: ../share/ui/toolbar-snap.ui:1007
+#: ../share/ui/toolbar-snap.ui:987
 msgid "Bounding boxes"
 msgstr "境界枠"
 
-#: ../share/ui/toolbar-snap.ui:1033
+#: ../share/ui/toolbar-snap.ui:1013
 msgid "Nodes"
 msgstr "ノード"
 
-#: ../share/ui/toolbar-snap.ui:1059
+#: ../share/ui/toolbar-snap.ui:1039
 msgid "Alignment snap"
 msgstr "整列スナップ"
 
-#: ../share/ui/toolbar-snap.ui:1182
+#: ../share/ui/toolbar-snap.ui:1050 ../share/ui/toolbar-snap.ui:1078
+msgid "       "
+msgstr "       "
+
+#: ../share/ui/toolbar-snap.ui:1162
 msgid "Snapping New"
 msgstr "新規にスナップ"
 
@@ -46328,6 +46323,21 @@ msgstr "半 em"
 msgid "Half of font height"
 msgstr "フォントの高さの半分"
 
+#~ msgid "Select Next"
+#~ msgstr "次を選択"
+
+#~ msgid "Select next object in stack"
+#~ msgstr "スタック内の次のオブジェクトを選択"
+
+#~ msgid "Select Previous"
+#~ msgstr "前を選択"
+
+#~ msgid "Select previous object in stack"
+#~ msgstr "スタック内の前のオブジェクトを選択"
+
+#~ msgid " "
+#~ msgstr " "
+
 #, c-format
 #~ msgid "%d/%d"
 #~ msgstr "%d/%d"
@@ -47342,15 +47352,6 @@ msgstr "フォントの高さの半分"
 
 #~ msgid "Dialog"
 #~ msgstr "ダイアログ"
-
-#~ msgid "Fullscreen & Focus Mode"
-#~ msgstr "フルスクリーンとフォーカスモード"
-
-#~ msgid "Toggle _Focus Mode"
-#~ msgstr "フォーカスモードの切り替え(_F)"
-
-#~ msgid "Remove excess toolbars to focus on drawing"
-#~ msgstr "描画にフォーカスのある余分なツールバーを除去"
 
 #~ msgid "Show or hide all open dialogs"
 #~ msgstr "開いている全ダイアログの表示/非表示を切り替えます"
