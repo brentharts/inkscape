@@ -384,9 +384,7 @@ void NodeTool::selection_changed(Inkscape::Selection *sel) {
 
     std::set<ShapeRecord> shapes;
 
-    auto items= sel->items();
-    for(auto i=items.begin();i!=items.end();++i){
-        SPItem *item = *i;
+    for (auto item : sel->items()) {
         if (item) {
             gather_items(this, nullptr, item, SHAPE_ROLE_NORMAL, shapes);
         }
@@ -420,6 +418,14 @@ void NodeTool::selection_changed(Inkscape::Selection *sel) {
     this->_multipath->setItems(shapes);
     this->update_tip(nullptr);
     sp_update_helperpath(_desktop);
+
+    for (auto item : sel->items()) {
+        SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(item);
+        if (lpeitem && lpeitem->hasPathEffectRecursive()) {
+            sp_lpe_item_update_patheffect(lpeitem, true, true);
+        }
+    }
+
     // This not need to be called canvas is updated on selection change on setItems
     // _desktop->updateNow();
 }
