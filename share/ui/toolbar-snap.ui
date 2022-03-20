@@ -1145,7 +1145,6 @@
         <property name="visible">True</property>
         <property name="can-focus">False</property>
         <property name="action-name">win.snap-global-toggle</property>
-        <property name="label" translatable="yes">Snapping New</property>
         <property name="icon-name">snap</property>
       </object>
       <packing>
