@@ -476,7 +476,7 @@
                             <property name="image">image-align-horizontal-center</property>
                             <property name="relief">none</property>
                             <property name="always-show-image">True</property>
-                            <property name="tooltip-text" translatable="yes">Center of vertical axis</property>
+                            <property name="tooltip-text" translatable="yes">Center on vertical axis</property>
                           </object>
                           <packing>
                             <property name="left-attach">2</property>
