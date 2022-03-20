@@ -1015,7 +1015,7 @@
                         <property name="input-purpose">number</property>
                         <property name="adjustment">RemoveOverlap_HGap</property>
                         <property name="numeric">True</property>
-                        <property name="tooltip-text" translatable="yes">Mininum horizontal gap (in pixel units) between bounding boxes.</property>
+                        <property name="tooltip-text" translatable="yes">Minimum horizontal gap (in pixel units) between bounding boxes.</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
