@@ -20,8 +20,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: inkscape\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
-"POT-Creation-Date: 2022-03-26 11:35+0900\n"
-"PO-Revision-Date: 2022-03-26 11:36+0900\n"
+"POT-Creation-Date: 2022-03-27 06:55+0900\n"
+"PO-Revision-Date: 2022-03-27 06:56+0900\n"
 "Last-Translator: Masato Hashimoto <cabezon.hashimoto@gmail.com>\n"
 "Language-Team: Japanese <inkscape-translator@lists.sourceforge.net>\n"
 "Language: ja\n"
@@ -5791,7 +5791,7 @@ msgstr "グループからレイヤー"
 msgid "Convert the a group to a layer"
 msgstr "グループをレイヤーに変換"
 
-#: ../src/actions/actions-layer.cpp:479 ../src/ui/contextmenu.cpp:208
+#: ../src/actions/actions-layer.cpp:479 ../src/ui/contextmenu.cpp:225
 msgid "Enter Group"
 msgstr "グループへ入る"
 
@@ -5803,7 +5803,7 @@ msgstr "グループへ入る"
 msgid "Exit Group"
 msgstr "グループから抜ける"
 
-#: ../src/actions/actions-layer.cpp:480 ../src/ui/contextmenu.cpp:173
+#: ../src/actions/actions-layer.cpp:480 ../src/ui/contextmenu.cpp:190
 msgid "Exit group"
 msgstr "グループから抜ける"
 
@@ -7209,7 +7209,7 @@ msgstr ""
 "<b>ドラッグ</b>でカリグラフィ線を描きます。<b>Ctrl</b> でガイドパスをトラック"
 "し、<b>方向キー</b>で幅 (←→) と角度 (↑↓) を調節します。"
 
-#: ../src/actions/actions-tools.cpp:91 ../src/ui/tools/text-tool.cpp:1773
+#: ../src/actions/actions-tools.cpp:91 ../src/ui/tools/text-tool.cpp:1769
 msgid ""
 "<b>Click</b> to select or create text, <b>drag</b> to create flowed text; "
 "then type."
@@ -7503,7 +7503,7 @@ msgid "Translate selected objects (dx,dy)"
 msgstr "選択オブジェクト (dx,dy) を平行移動"
 
 #: ../src/actions/actions-transform.cpp:115 ../src/selection-chemistry.cpp:1962
-#: ../src/seltrans.cpp:516 ../src/ui/dialog/transformation.cpp:837
+#: ../src/seltrans.cpp:520 ../src/ui/dialog/transformation.cpp:837
 msgid "Rotate"
 msgstr "回転"
 
@@ -7512,7 +7512,7 @@ msgid "Rotate selected objects by degrees"
 msgstr "選択オブジェクトを角度指定して回転"
 
 #: ../src/actions/actions-transform.cpp:116
-#: ../src/live_effects/lpe-measure-segments.cpp:81 ../src/seltrans.cpp:514
+#: ../src/live_effects/lpe-measure-segments.cpp:81 ../src/seltrans.cpp:518
 #: ../src/ui/dialog/transformation.cpp:812
 #: ../share/extensions/interp_att_g.inx:10
 msgid "Scale"
@@ -9226,7 +9226,7 @@ msgstr "ページ / 全 %i ページ中"
 #: ../src/ui/desktop/document-check.cpp:57
 #: ../src/ui/desktop/document-check.cpp:102
 #: ../src/ui/dialog/calligraphic-profile-rename.cpp:51
-#: ../src/ui/dialog/export-batch.cpp:669 ../src/ui/dialog/export-single.cpp:872
+#: ../src/ui/dialog/export-batch.cpp:669 ../src/ui/dialog/export-single.cpp:873
 #: ../src/ui/dialog/filedialogimpl-gtkmm.cpp:244
 #: ../src/ui/dialog/filedialogimpl-gtkmm.cpp:556
 #: ../src/ui/dialog/guides.cpp:182 ../src/ui/dialog/layer-properties.cpp:42
@@ -17381,11 +17381,11 @@ msgstr "パスをコピー"
 msgid "Paste path"
 msgstr "パスを貼り付け"
 
-#: ../src/live_effects/parameter/path.cpp:577
+#: ../src/live_effects/parameter/path.cpp:578
 msgid "Paste path parameter"
 msgstr "パスパラメーターの貼り付け"
 
-#: ../src/live_effects/parameter/path.cpp:605
+#: ../src/live_effects/parameter/path.cpp:606
 #: ../src/live_effects/parameter/patharray.cpp:142
 msgid "Link path parameter to path"
 msgstr "パスパラメーターをパスへリンク"
@@ -17586,7 +17586,7 @@ msgid "Linked Flowed Text"
 msgstr "リンク付き流し込みテキスト"
 
 #: ../src/object/sp-flowtext.cpp:299 ../src/object/sp-text.cpp:365
-#: ../src/ui/tools/text-tool.cpp:1665
+#: ../src/ui/tools/text-tool.cpp:1664
 msgid " [truncated]"
 msgstr " [溢れあり]"
 
@@ -17951,24 +17951,24 @@ msgstr "選択された中に、向きを逆にする<b>パスがありません
 msgid "Cut path"
 msgstr "パスをカット"
 
-#: ../src/path/path-boolop.cpp:437
+#: ../src/path/path-boolop.cpp:434
 msgid "Select <b>at least 1 path</b> to perform a boolean union."
 msgstr ""
 "ブーリアン統合を行うための<b>少なくとも 1 個のパス</b>を選択してください。"
 
-#: ../src/path/path-boolop.cpp:443
+#: ../src/path/path-boolop.cpp:440
 msgid "Select <b>at least 2 paths</b> to perform a boolean operation."
 msgstr ""
 "ブーリアン演算を行うための<b>少なくとも 2 個のパス</b>を選択してください。"
 
-#: ../src/path/path-boolop.cpp:449
+#: ../src/path/path-boolop.cpp:446
 msgid ""
 "One of the objects is <b>not a path</b>, cannot perform boolean operation."
 msgstr ""
 "オブジェクトの中の少なくとも 1 個が<b>パスではない</b>ため、ブーリアン演算で"
 "きません。"
 
-#: ../src/path/path-boolop.cpp:455
+#: ../src/path/path-boolop.cpp:452
 msgid ""
 "Unable to determine the <b>z-order</b> of the objects selected for "
 "difference, XOR, division, or path cut."
@@ -18514,7 +18514,7 @@ msgid "Move horizontally"
 msgstr "水平方向に移動"
 
 #: ../src/selection-chemistry.cpp:2389 ../src/selection-chemistry.cpp:2412
-#: ../src/seltrans.cpp:512 ../src/ui/dialog/transformation.cpp:750
+#: ../src/seltrans.cpp:516 ../src/ui/dialog/transformation.cpp:750
 msgid "Move"
 msgstr "移動"
 
@@ -18812,19 +18812,19 @@ msgid "; <i>%d filtered object</i> "
 msgid_plural "; <i>%d filtered objects</i> "
 msgstr[0] "; <i>%d 個のフィルター適用オブジェクト</i> "
 
-#: ../src/seltrans.cpp:518 ../src/ui/dialog/transformation.cpp:933
+#: ../src/seltrans.cpp:522 ../src/ui/dialog/transformation.cpp:933
 msgid "Skew"
 msgstr "傾斜"
 
-#: ../src/seltrans.cpp:533
+#: ../src/seltrans.cpp:537
 msgid "Set center"
 msgstr "中心を設定"
 
-#: ../src/seltrans.cpp:672
+#: ../src/seltrans.cpp:676
 msgid "Stamp"
 msgstr "スタンプ"
 
-#: ../src/seltrans.cpp:789
+#: ../src/seltrans.cpp:793
 msgid ""
 "<b>Scale</b> selection; with <b>%1</b> to scale uniformly; with <b>%2</b> to "
 "scale around rotation center"
@@ -18832,7 +18832,7 @@ msgstr ""
 "選択オブジェクトを<b>拡大縮小</b>します。<b>%1</b> で縦横比を維持、<b>%2</b> "
 "で回転中心で拡大縮小します。"
 
-#: ../src/seltrans.cpp:795
+#: ../src/seltrans.cpp:799
 msgid ""
 "<b>Skew</b> selection; with <b>%1</b> to snap angle; with <b>%2</b> to skew "
 "around the opposite side"
@@ -18840,7 +18840,7 @@ msgstr ""
 "選択オブジェクトを<b>傾斜</b>します。<b>%1</b> で角度をスナップ、<b>%2</b> で"
 "反対の端を中心に傾斜します。"
 
-#: ../src/seltrans.cpp:801
+#: ../src/seltrans.cpp:805
 msgid ""
 "<b>Rotate</b> selection; with <b>%1</b> to snap angle; with <b>%2</b> to "
 "rotate around the opposite corner"
@@ -18848,7 +18848,7 @@ msgstr ""
 "選択オブジェクトを<b>回転</b>します。<b>%1</b> で角度をスナップ、<b>%2</b> で"
 "対角線上の端を中心に回転します。"
 
-#: ../src/seltrans.cpp:807
+#: ../src/seltrans.cpp:811
 msgid ""
 "<b>Center</b> of transformation: drag to reposition; scaling, rotation and "
 "skew with %1 also uses this center"
@@ -18858,7 +18858,7 @@ msgstr ""
 
 #
 # File: ../src/seltrans-handles.cpp, line: 23
-#: ../src/seltrans.cpp:813
+#: ../src/seltrans.cpp:817
 msgid ""
 "<b>Align</b> objects to the side clicked; <b>Shift</b> click to invert side; "
 "<b>Ctrl</b> to group whole selection."
@@ -18866,7 +18866,7 @@ msgstr ""
 "選択した辺にオブジェクトを<b>整列</b>; <b>Shift</b>+クリックで向きを反転; "
 "<b>Ctrl</b> で選択範囲をグループ化。"
 
-#: ../src/seltrans.cpp:818
+#: ../src/seltrans.cpp:822
 msgid ""
 "<b>Align</b> objects to the corner clicked; <b>Shift</b> click to invert "
 "side; <b>Ctrl</b> to group whole selection."
@@ -18876,7 +18876,7 @@ msgstr ""
 
 #
 # File: ../src/seltrans-handles.cpp, line: 24
-#: ../src/seltrans.cpp:823
+#: ../src/seltrans.cpp:827
 msgid ""
 "<b>Align</b> objects to center; <b>Shift</b> click to center vertically "
 "instead of horizontally."
@@ -18884,35 +18884,35 @@ msgstr ""
 "オブジェクトを中央に<b>整列</b>; <b>Shift</b>+クリックで水平方向ではなく垂直"
 "方向の中央に整列。"
 
-#: ../src/seltrans.cpp:895
+#: ../src/seltrans.cpp:899
 msgid "Reset center"
 msgstr "中心をリセット"
 
-#: ../src/seltrans.cpp:1155 ../src/seltrans.cpp:1258
+#: ../src/seltrans.cpp:1159 ../src/seltrans.cpp:1262
 #, c-format
 msgid "<b>Scale</b>: %0.2f%% x %0.2f%%; with <b>%s</b> to lock ratio"
 msgstr "<b>拡大縮小</b>: %0.2f%% x %0.2f%%。<b>%s</b>で縦横比を固定します。"
 
 #. TRANSLATORS: don't modify the first ";"
 #. (it will NOT be displayed as ";" - only the second one will be)
-#: ../src/seltrans.cpp:1401
+#: ../src/seltrans.cpp:1405
 #, c-format
 msgid "<b>Skew</b>: %0.2f&#176;; with <b>%s</b> to snap angle"
 msgstr "<b>傾斜</b>: %0.2f&#176;。<b>%s</b> で角度をスナップします。"
 
 #. TRANSLATORS: don't modify the first ";"
 #. (it will NOT be displayed as ";" - only the second one will be)
-#: ../src/seltrans.cpp:1481
+#: ../src/seltrans.cpp:1485
 #, c-format
 msgid "<b>Rotate</b>: %0.2f&#176;; with <b>%s</b> to snap angle"
 msgstr "<b>回転</b>: %0.2f&#176;。<b>%s</b> で角度をスナップします。"
 
-#: ../src/seltrans.cpp:1518
+#: ../src/seltrans.cpp:1522
 #, c-format
 msgid "Move <b>center</b> to %s, %s"
 msgstr "<b>中心</b>を %s, %s に移動します。"
 
-#: ../src/seltrans.cpp:1681
+#: ../src/seltrans.cpp:1685
 #, c-format
 msgid ""
 "<b>Move</b> by %s, %s; with <b>%s</b> to restrict to horizontal/vertical; "
@@ -19115,226 +19115,242 @@ msgstr "クリップボードにパスは含まれていません。"
 msgid "Clipboard does not contain any objects of type \"%1\"."
 msgstr "クリップボードに \"%1\" タイプのオブジェクトは含まれていません。"
 
-#: ../src/ui/contextmenu.cpp:98 ../share/ui/menus.ui:125
+#: ../src/ui/contextmenu.cpp:96
+msgid "_New Page"
+msgstr "新規ページ(_N)"
+
+#: ../src/ui/contextmenu.cpp:100
+msgid "_Delete Page"
+msgstr "ページを削除(_D)"
+
+#: ../src/ui/contextmenu.cpp:101
+msgid "Move Page _Backward"
+msgstr "前のページに移動(_B)"
+
+#: ../src/ui/contextmenu.cpp:102
+msgid "Move Page _Forward"
+msgstr "次のページに移動(_F)"
+
+#: ../src/ui/contextmenu.cpp:115 ../share/ui/menus.ui:125
 msgid "Cu_t"
 msgstr "切り取り(_T)"
 
-#: ../src/ui/contextmenu.cpp:99 ../share/ui/menus.ui:130
+#: ../src/ui/contextmenu.cpp:116 ../share/ui/menus.ui:130
 msgid "_Copy"
 msgstr "コピー(_C)"
 
-#: ../src/ui/contextmenu.cpp:100 ../share/ui/menus.ui:135
+#: ../src/ui/contextmenu.cpp:117 ../share/ui/menus.ui:135
 msgid "_Paste"
 msgstr "貼り付け(_P)"
 
-#: ../src/ui/contextmenu.cpp:104 ../share/ui/menus.ui:195
+#: ../src/ui/contextmenu.cpp:121 ../share/ui/menus.ui:195
 msgid "Duplic_ate"
 msgstr "複製(_A)"
 
-#: ../src/ui/contextmenu.cpp:105
+#: ../src/ui/contextmenu.cpp:122
 #: ../src/ui/dialog/calligraphic-profile-rename.cpp:55
 #: ../src/ui/dialog/guides.cpp:181 ../share/ui/menus.ui:248
 msgid "_Delete"
 msgstr "削除(_D)"
 
-#: ../src/ui/contextmenu.cpp:113 ../share/ui/menus.ui:641
+#: ../src/ui/contextmenu.cpp:130 ../share/ui/menus.ui:641
 #: ../share/ui/menus.ui:747
 msgid "Layers and Objects..."
 msgstr "レイヤーとオブジェクト..."
 
-#: ../src/ui/contextmenu.cpp:115 ../share/ui/menus.ui:759
+#: ../src/ui/contextmenu.cpp:132 ../share/ui/menus.ui:759
 msgid "_Object Properties..."
 msgstr "オブジェクトのプロパティ(_O)..."
 
-#: ../src/ui/contextmenu.cpp:118 ../share/ui/menus.ui:753
+#: ../src/ui/contextmenu.cpp:135 ../share/ui/menus.ui:753
 msgid "_Fill and Stroke..."
 msgstr "フィル/ストローク(_F)..."
 
-#: ../src/ui/contextmenu.cpp:123
+#: ../src/ui/contextmenu.cpp:140
 msgid "Image _Properties..."
 msgstr "画像のプロパティ(_P)..."
 
-#: ../src/ui/contextmenu.cpp:124 ../share/ui/menus.ui:951
+#: ../src/ui/contextmenu.cpp:141 ../share/ui/menus.ui:951
 msgid "_Trace Bitmap..."
 msgstr "ビットマップのトレース(_T)..."
 
-#: ../src/ui/contextmenu.cpp:128
+#: ../src/ui/contextmenu.cpp:145
 msgid "Extract Image..."
 msgstr "画像の抽出..."
 
-#: ../src/ui/contextmenu.cpp:131
+#: ../src/ui/contextmenu.cpp:148
 msgid "Embed Image"
 msgstr "画像の埋め込み"
 
-#: ../src/ui/contextmenu.cpp:132
+#: ../src/ui/contextmenu.cpp:149
 msgid "Edit Externally..."
 msgstr "外部で編集..."
 
-#: ../src/ui/contextmenu.cpp:138 ../share/ui/menus.ui:1081
+#: ../src/ui/contextmenu.cpp:155 ../share/ui/menus.ui:1081
 msgid "_Text and Font..."
 msgstr "テキストとフォント(_T)..."
 
-#: ../src/ui/contextmenu.cpp:139 ../share/ui/menus.ui:1141
+#: ../src/ui/contextmenu.cpp:156 ../share/ui/menus.ui:1141
 msgid "Check Spellin_g..."
 msgstr "スペルチェック(_G)..."
 
-#: ../src/ui/contextmenu.cpp:149 ../share/ui/menus.ui:268
+#: ../src/ui/contextmenu.cpp:166 ../share/ui/menus.ui:268
 msgid "Fill _and Stroke"
 msgstr "フィル/ストローク(_A)"
 
-#: ../src/ui/contextmenu.cpp:150 ../share/ui/menus.ui:273
+#: ../src/ui/contextmenu.cpp:167 ../share/ui/menus.ui:273
 msgid "_Fill Color"
 msgstr "フィルの色が同じ(_F)"
 
-#: ../src/ui/contextmenu.cpp:151 ../share/ui/menus.ui:278
+#: ../src/ui/contextmenu.cpp:168 ../share/ui/menus.ui:278
 msgid "_Stroke Color"
 msgstr "ストロークの色が同じ(_S)"
 
-#: ../src/ui/contextmenu.cpp:152 ../share/ui/menus.ui:283
+#: ../src/ui/contextmenu.cpp:169 ../share/ui/menus.ui:283
 msgid "Stroke St_yle"
 msgstr "ストロークのスタイルが同じ(_Y)"
 
-#: ../src/ui/contextmenu.cpp:153 ../share/ui/menus.ui:288
+#: ../src/ui/contextmenu.cpp:170 ../share/ui/menus.ui:288
 msgid "_Object Type"
 msgstr "オブジェクトタイプが同じ(_O)"
 
-#: ../src/ui/contextmenu.cpp:154 ../share/ui/menus.ui:265
+#: ../src/ui/contextmenu.cpp:171 ../share/ui/menus.ui:265
 msgid "Select Sa_me"
 msgstr "同じオブジェクトを選択(_M)"
 
-#: ../src/ui/contextmenu.cpp:159
+#: ../src/ui/contextmenu.cpp:176
 msgid "_Move to Layer..."
 msgstr "他のレイヤーへ移動(_M)..."
 
-#: ../src/ui/contextmenu.cpp:160
+#: ../src/ui/contextmenu.cpp:177
 msgid "Create anchor (hyperlink)"
 msgstr "リンクを作成"
 
-#: ../src/ui/contextmenu.cpp:161 ../share/ui/menus.ui:785
+#: ../src/ui/contextmenu.cpp:178 ../share/ui/menus.ui:785
 msgid "_Group"
 msgstr "グループ化(_G)"
 
-#: ../src/ui/contextmenu.cpp:163 ../share/ui/menus.ui:790
+#: ../src/ui/contextmenu.cpp:180 ../share/ui/menus.ui:790
 msgid "_Ungroup"
 msgstr "グループ解除(_U)"
 
-#: ../src/ui/contextmenu.cpp:164
+#: ../src/ui/contextmenu.cpp:181
 msgid "Enter group %1"
 msgstr "グループ %1 へ入る"
 
-#: ../src/ui/contextmenu.cpp:168
+#: ../src/ui/contextmenu.cpp:185
 msgid "Group to Layer"
 msgstr "グループをレイヤーに"
 
-#: ../src/ui/contextmenu.cpp:174
+#: ../src/ui/contextmenu.cpp:191
 msgid "_Pop selection out of group"
 msgstr "選択オブジェクトをグループから取り出す(_P)"
 
-#: ../src/ui/contextmenu.cpp:181
+#: ../src/ui/contextmenu.cpp:198
 msgid "Set Cl_ip"
 msgstr "クリップを設定(_I)"
 
-#: ../src/ui/contextmenu.cpp:184
+#: ../src/ui/contextmenu.cpp:201
 msgid "Release C_lip"
 msgstr "クリップを解除(_L)"
 
-#: ../src/ui/contextmenu.cpp:186
+#: ../src/ui/contextmenu.cpp:203
 msgid "Set Clip G_roup"
 msgstr "クリップグループを作成(_R)"
 
-#: ../src/ui/contextmenu.cpp:189
+#: ../src/ui/contextmenu.cpp:206
 msgid "Set Mask"
 msgstr "マスクを設定"
 
-#: ../src/ui/contextmenu.cpp:192
+#: ../src/ui/contextmenu.cpp:209
 msgid "Release Mask"
 msgstr "マスクを解除"
 
-#: ../src/ui/contextmenu.cpp:198
+#: ../src/ui/contextmenu.cpp:215
 msgid "Hide Selected Objects"
 msgstr "選択オブジェクトを非表示"
 
-#: ../src/ui/contextmenu.cpp:199
+#: ../src/ui/contextmenu.cpp:216
 msgid "Lock Selected Objects"
 msgstr "選択オブジェクトをロック"
 
-#: ../src/ui/contextmenu.cpp:205
+#: ../src/ui/contextmenu.cpp:222
 msgid "Link _Properties..."
 msgstr "リンクのプロパティ(_P)..."
 
-#: ../src/ui/contextmenu.cpp:206
+#: ../src/ui/contextmenu.cpp:223
 msgid "_Open link in browser"
 msgstr "リンクをブラウザで表示(_O)"
 
-#: ../src/ui/contextmenu.cpp:207
+#: ../src/ui/contextmenu.cpp:224
 msgid "_Remove Link"
 msgstr "リンクを削除(_R)"
 
-#: ../src/ui/contextmenu.cpp:216
+#: ../src/ui/contextmenu.cpp:233
 msgid "Unhide Objects Below Cursor"
 msgstr "カーソルの下のオブジェクトを表示"
 
-#: ../src/ui/contextmenu.cpp:219
+#: ../src/ui/contextmenu.cpp:236
 msgid "Unlock Objects Below Cursor"
 msgstr "カーソルの下のオブジェクトをロック解除"
 
-#: ../src/ui/contextmenu.cpp:227 ../share/ui/menus.ui:649
+#: ../src/ui/contextmenu.cpp:244 ../share/ui/menus.ui:649
 msgid "_Add Layer..."
 msgstr "新規レイヤー(_A)..."
 
-#: ../src/ui/contextmenu.cpp:228
+#: ../src/ui/contextmenu.cpp:245
 msgid "D_uplicate Layer"
 msgstr "レイヤーを複製(_U)"
 
-#: ../src/ui/contextmenu.cpp:229
+#: ../src/ui/contextmenu.cpp:246
 msgid "_Delete Layer"
 msgstr "レイヤーを削除(_D)"
 
-#: ../src/ui/contextmenu.cpp:230 ../share/ui/menus.ui:654
+#: ../src/ui/contextmenu.cpp:247 ../share/ui/menus.ui:654
 msgid "Re_name Layer..."
 msgstr "レイヤー名を変更(_N)..."
 
-#: ../src/ui/contextmenu.cpp:231
+#: ../src/ui/contextmenu.cpp:248
 msgid "Layer to _Group"
 msgstr "レイヤーをグループへ(_G)"
 
-#: ../src/ui/contextmenu.cpp:235 ../share/ui/menus.ui:711
+#: ../src/ui/contextmenu.cpp:252 ../share/ui/menus.ui:711
 msgid "_Raise Layer"
 msgstr "レイヤーを前面へ(_R)"
 
-#: ../src/ui/contextmenu.cpp:236 ../share/ui/menus.ui:717
+#: ../src/ui/contextmenu.cpp:253 ../share/ui/menus.ui:717
 msgid "_Lower Layer"
 msgstr "レイヤーを背面へ(_L)"
 
-#: ../src/ui/contextmenu.cpp:240
+#: ../src/ui/contextmenu.cpp:257
 msgid "_Hide/show other layers"
 msgstr "他のレイヤーの表示/非表示(_H)"
 
-#: ../src/ui/contextmenu.cpp:241
+#: ../src/ui/contextmenu.cpp:258
 msgid "_Hide all layers"
 msgstr "全レイヤーを非表示(_H)"
 
-#: ../src/ui/contextmenu.cpp:242
+#: ../src/ui/contextmenu.cpp:259
 msgid "_Show all layers"
 msgstr "全レイヤーを表示(_S)"
 
-#: ../src/ui/contextmenu.cpp:246
+#: ../src/ui/contextmenu.cpp:263
 msgid "_Lock/unlock other layers"
 msgstr "他のレイヤーのロック/ロック解除(_L)"
 
-#: ../src/ui/contextmenu.cpp:247
+#: ../src/ui/contextmenu.cpp:264
 msgid "_Lock all layers"
 msgstr "全レイヤーをロック(_L)"
 
-#: ../src/ui/contextmenu.cpp:248
+#: ../src/ui/contextmenu.cpp:265
 msgid "_Unlock all layers"
 msgstr "全レイヤーのロックを解除(_U)"
 
-#: ../src/ui/contextmenu.cpp:310
+#: ../src/ui/contextmenu.cpp:327
 msgid "Unhid objects"
 msgstr "オブジェクトを表示"
 
-#: ../src/ui/contextmenu.cpp:310
+#: ../src/ui/contextmenu.cpp:327
 msgid "Unlocked objects"
 msgstr "ロック解除したオブジェクト"
 
@@ -19380,7 +19396,7 @@ msgstr ""
 msgid "_Save as Inkscape SVG"
 msgstr "Inkscape SVG として保存(_S)"
 
-#: ../src/ui/dialog/attrdialog.cpp:106 ../src/ui/tools/text-tool.cpp:1875
+#: ../src/ui/dialog/attrdialog.cpp:106 ../src/ui/tools/text-tool.cpp:1871
 msgid "Type text"
 msgstr "テキストの入力"
 
@@ -20689,29 +20705,29 @@ msgstr "アイテムが選択されていません。"
 msgid "Exporting %1 files"
 msgstr "%1 個のファイルをエクスポートしています"
 
-#: ../src/ui/dialog/export-batch.cpp:562 ../src/ui/dialog/export-single.cpp:562
+#: ../src/ui/dialog/export-batch.cpp:562 ../src/ui/dialog/export-single.cpp:563
 msgid "Exporting %1"
 msgstr "%1 個をエクスポート"
 
-#: ../src/ui/dialog/export-batch.cpp:590 ../src/ui/dialog/export-single.cpp:635
+#: ../src/ui/dialog/export-batch.cpp:590 ../src/ui/dialog/export-single.cpp:636
 msgid "Select a filename for exporting"
 msgstr "エクスポートするファイル名"
 
-#: ../src/ui/dialog/export-batch.cpp:660 ../src/ui/dialog/export-single.cpp:863
+#: ../src/ui/dialog/export-batch.cpp:660 ../src/ui/dialog/export-single.cpp:864
 msgid "Export in progress"
 msgstr "エクスポートの進捗"
 
-#: ../src/ui/dialog/export-single.cpp:315
+#: ../src/ui/dialog/export-single.cpp:316
 msgid "First Page"
 msgstr "最初のページ"
 
 #. TRANSLATORS: %1 will be the filename, %2 the width, and %3 the height of the image
-#: ../src/ui/dialog/export-single.cpp:549
-#: ../src/ui/dialog/export-single.cpp:551
+#: ../src/ui/dialog/export-single.cpp:550
+#: ../src/ui/dialog/export-single.cpp:552
 msgid "Exporting %1 (%2 x %3)"
 msgstr "%1 (%2 x %3) をエクスポートしています"
 
-#: ../src/ui/dialog/export-single.cpp:611
+#: ../src/ui/dialog/export-single.cpp:612
 msgid "Set Export Options"
 msgstr "エクスポートオプションを設定"
 
@@ -32248,23 +32264,23 @@ msgstr ""
 "<b>線を引いた</b>領域にフィルを追加します。<b>Alt</b> を押しっ放しで触れたオ"
 "ブジェクトを塗りつぶします。"
 
-#: ../src/ui/tools/freehand-base.cpp:766 ../src/ui/tools/freehand-base.cpp:828
+#: ../src/ui/tools/freehand-base.cpp:769 ../src/ui/tools/freehand-base.cpp:831
 msgid "Path is closed."
 msgstr "パスは閉じています。"
 
-#: ../src/ui/tools/freehand-base.cpp:780
+#: ../src/ui/tools/freehand-base.cpp:783
 msgid "Closing path."
 msgstr "閉じたパス"
 
-#: ../src/ui/tools/freehand-base.cpp:915
+#: ../src/ui/tools/freehand-base.cpp:918
 msgid "Draw path"
 msgstr "パスを描画"
 
-#: ../src/ui/tools/freehand-base.cpp:1056
+#: ../src/ui/tools/freehand-base.cpp:1059
 msgid "Creating single dot"
 msgstr "単一ドットを作成しています"
 
-#: ../src/ui/tools/freehand-base.cpp:1057
+#: ../src/ui/tools/freehand-base.cpp:1060
 msgid "Create single dot"
 msgstr "単一ドットの作成"
 
@@ -32991,7 +33007,14 @@ msgstr "文字間隔を広げる"
 msgid "Paste text"
 msgstr "テキストの貼り付け"
 
-#: ../src/ui/tools/text-tool.cpp:1683
+#: ../src/ui/tools/text-tool.cpp:1661
+#, c-format
+msgid "Type or edit text (%d character%s); <b>Enter</b> to start new line."
+msgid_plural ""
+"Type or edit text (%d characters%s); <b>Enter</b> to start new line."
+msgstr[0] "テキストの編集 (%d 個の文字%s); <b>Enter</b> で改行します。"
+
+#: ../src/ui/tools/text-tool.cpp:1662
 #, c-format
 msgid ""
 "Type or edit flowed text (%d character%s); <b>Enter</b> to start new "
@@ -33002,13 +33025,6 @@ msgid_plural ""
 msgstr[0] ""
 "流し込みテキストの編集 (%d 個の文字%s); <b>Enter</b> で新しい段落を開始しま"
 "す。"
-
-#: ../src/ui/tools/text-tool.cpp:1708
-#, c-format
-msgid "Type or edit text (%d character%s); <b>Enter</b> to start new line."
-msgid_plural ""
-"Type or edit text (%d characters%s); <b>Enter</b> to start new line."
-msgstr[0] "テキストの編集 (%d 個の文字%s); <b>Enter</b> で改行します。"
 
 #: ../src/ui/tools/tool-base.cpp:666
 msgid "<b>Space+mouse move</b> to pan canvas"
