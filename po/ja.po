@@ -20,8 +20,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: inkscape\n"
 "Report-Msgid-Bugs-To: inkscape-translator@lists.inkscape.org\n"
-"POT-Creation-Date: 2022-03-19 09:25+0900\n"
-"PO-Revision-Date: 2022-03-19 09:26+0900\n"
+"POT-Creation-Date: 2022-03-26 11:35+0900\n"
+"PO-Revision-Date: 2022-03-26 11:36+0900\n"
 "Last-Translator: Masato Hashimoto <cabezon.hashimoto@gmail.com>\n"
 "Language-Team: Japanese <inkscape-translator@lists.sourceforge.net>\n"
 "Language: ja\n"
@@ -4269,7 +4269,7 @@ msgid "Toggle between normal and color managed modes"
 msgstr "通常表示モードとカラーマネージドモードを切り替えます"
 
 #: ../src/actions/actions-canvas-snapping.cpp:241
-#: ../src/ui/dialog/inkscape-preferences.cpp:2503
+#: ../src/ui/dialog/inkscape-preferences.cpp:2500
 msgid "Snapping"
 msgstr "スナップ"
 
@@ -5008,7 +5008,7 @@ msgid "Cut selection to clipboard"
 msgstr "選択範囲をクリップボードへ切り取る"
 
 #: ../src/actions/actions-edit.cpp:272
-#: ../src/ui/dialog/inkscape-preferences.cpp:2632
+#: ../src/ui/dialog/inkscape-preferences.cpp:2629
 msgid "Copy"
 msgstr "コピー"
 
@@ -5247,7 +5247,7 @@ msgstr "画像を外部で編集 (埋め込まれていない画像を選択す�
 
 #: ../src/actions/actions-file-window.cpp:115
 #: ../src/ui/dialog/document-properties.cpp:900
-#: ../src/ui/dialog/inkscape-preferences.cpp:2859
+#: ../src/ui/dialog/inkscape-preferences.cpp:2856
 msgid "New"
 msgstr "新規"
 
@@ -5312,9 +5312,9 @@ msgstr "テンプレートを保存"
 msgid "Save a copy of the document as template"
 msgstr "ドキュメントのコピーをテンプレートとして保存"
 
-#: ../src/actions/actions-file-window.cpp:123 ../src/file.cpp:1166
+#: ../src/actions/actions-file-window.cpp:123 ../src/file.cpp:1167
 #: ../src/ui/dialog/command-palette.cpp:266
-#: ../src/ui/dialog/inkscape-preferences.cpp:2833
+#: ../src/ui/dialog/inkscape-preferences.cpp:2830
 #: ../share/extensions/other/clipart/import_from_internet.inx:7
 msgid "Import"
 msgstr "インポート"
@@ -5878,7 +5878,6 @@ msgstr "キャンバス上の整列を有効にする"
 #
 # File: ../src/ui/dialog/align-and-distribute.cpp, line: 1107
 #: ../src/actions/actions-object-align.cpp:755
-#: ../share/ui/align-and-distribute.ui:336
 msgid "Enable on-canvas alignment handles."
 msgstr "キャンバス上の整列ハンドルを有効にする"
 
@@ -6238,7 +6237,7 @@ msgid "Object Rotate 90"
 msgstr "90°回転のオブジェクト"
 
 #: ../src/actions/actions-object.cpp:284
-#: ../src/ui/toolbar/select-toolbar.cpp:117
+#: ../src/ui/toolbar/select-toolbar.cpp:118
 msgid "Rotate selection 90° clockwise"
 msgstr "時計回りに 90°回転"
 
@@ -6247,7 +6246,7 @@ msgid "Object Rotate 90 CCW"
 msgstr "90°反時計回り回転のオブジェクト"
 
 #: ../src/actions/actions-object.cpp:285
-#: ../src/ui/toolbar/select-toolbar.cpp:107
+#: ../src/ui/toolbar/select-toolbar.cpp:108
 msgid "Rotate selection 90° counter-clockwise"
 msgstr "反時計回りに 90°回転"
 
@@ -6256,7 +6255,7 @@ msgid "Object Flip Horizontal"
 msgstr "水平方向に反転のオブジェクト"
 
 #: ../src/actions/actions-object.cpp:286
-#: ../src/ui/toolbar/select-toolbar.cpp:127
+#: ../src/ui/toolbar/select-toolbar.cpp:128
 msgid "Flip selected objects horizontally"
 msgstr "選択オブジェクトを水平方向に反転"
 
@@ -6265,7 +6264,7 @@ msgid "Object Flip Vertical"
 msgstr "垂直方向に反転のオブジェクト"
 
 #: ../src/actions/actions-object.cpp:287
-#: ../src/ui/toolbar/select-toolbar.cpp:137
+#: ../src/ui/toolbar/select-toolbar.cpp:138
 msgid "Flip selected objects vertically"
 msgstr "選択オブジェクトを垂直方向に反転"
 
@@ -6805,8 +6804,8 @@ msgstr "選択オブジェクトをグループから取り出す"
 #: ../src/actions/actions-selection-object.cpp:156
 #: ../src/extension/internal/gdkpixbuf-input.cpp:201
 #: ../src/object/sp-anchor.cpp:145
-#: ../src/ui/dialog/inkscape-preferences.cpp:2852
-#: ../src/ui/dialog/inkscape-preferences.cpp:2859
+#: ../src/ui/dialog/inkscape-preferences.cpp:2849
+#: ../src/ui/dialog/inkscape-preferences.cpp:2856
 msgid "Link"
 msgstr "リンク"
 
@@ -6819,7 +6818,7 @@ msgid "Raise to Top"
 msgstr "最前面へ"
 
 #: ../src/actions/actions-selection-object.cpp:158
-#: ../src/ui/toolbar/select-toolbar.cpp:149
+#: ../src/ui/toolbar/select-toolbar.cpp:150
 msgid "Raise selection to top"
 msgstr "最前面に移動"
 
@@ -6829,7 +6828,7 @@ msgid "Raise"
 msgstr "隆起"
 
 #: ../src/actions/actions-selection-object.cpp:159
-#: ../src/ui/toolbar/select-toolbar.cpp:159
+#: ../src/ui/toolbar/select-toolbar.cpp:160
 msgid "Raise selection one step"
 msgstr "選択オブジェクトを前面に1段階移動"
 
@@ -6839,7 +6838,7 @@ msgid "Lower"
 msgstr "下限"
 
 #: ../src/actions/actions-selection-object.cpp:160
-#: ../src/ui/toolbar/select-toolbar.cpp:169
+#: ../src/ui/toolbar/select-toolbar.cpp:170
 msgid "Lower selection one step"
 msgstr "選択オブジェクトを背面に1段階移動"
 
@@ -6848,7 +6847,7 @@ msgid "Lower to Bottom"
 msgstr "最背面へ"
 
 #: ../src/actions/actions-selection-object.cpp:161
-#: ../src/ui/toolbar/select-toolbar.cpp:179
+#: ../src/ui/toolbar/select-toolbar.cpp:180
 msgid "Lower selection to bottom"
 msgstr "最背面に移動"
 
@@ -6901,7 +6900,7 @@ msgid "Select All in All Layers"
 msgstr "全レイヤーの全オブジェクトを選択"
 
 #: ../src/actions/actions-selection-window.cpp:115
-#: ../src/ui/toolbar/select-toolbar.cpp:78
+#: ../src/ui/toolbar/select-toolbar.cpp:79
 msgid "Select all objects in all visible and unlocked layers"
 msgstr "表示かつロックされていない全レイヤーの全オブジェクトを選択"
 
@@ -8102,7 +8101,7 @@ msgstr "境界枠の中間点"
 msgid "Bounding box side midpoint"
 msgstr "境界枠辺の中間点"
 
-#: ../src/display/control/snap-indicator.cpp:44 ../src/ui/tool/node.cpp:1693
+#: ../src/display/control/snap-indicator.cpp:44 ../src/ui/tool/node.cpp:1699
 msgid "Smooth node"
 msgstr "スムーズノード"
 
@@ -8362,7 +8361,7 @@ msgstr "%s..."
 msgid "'%s' working, please wait..."
 msgstr "'%s' を実行中です。しばらくお待ちください..."
 
-#: ../src/extension/extension.cpp:307
+#: ../src/extension/extension.cpp:306
 msgid ""
 "  This is caused by an improper .inx file for this extension.  An improper ."
 "inx file could have been caused by a faulty installation of Inkscape."
@@ -8371,49 +8370,49 @@ msgstr ""
 "れます。不適切な .inx ファイルは Inkscape の不完全なインストールによって引き"
 "起こされた可能性があります。"
 
-#: ../src/extension/extension.cpp:311
+#: ../src/extension/extension.cpp:310
 msgid "the XML description of it got lost."
 msgstr "XML の説明が失われました。"
 
-#: ../src/extension/extension.cpp:315
+#: ../src/extension/extension.cpp:314
 msgid "no implementation was defined for the extension."
 msgstr "エクステンションの定義は実装されていません。"
 
-#: ../src/extension/extension.cpp:322
+#: ../src/extension/extension.cpp:321
 msgid "a dependency was not met."
 msgstr "(プログラムの) 依存関係が満たされませんでした。"
 
-#: ../src/extension/extension.cpp:345
+#: ../src/extension/extension.cpp:344
 msgid "Extension \"%1\" failed to load because %2"
 msgstr "エクステンション \"%1\" は次の理由により読み込みに失敗しました: %2"
 
-#: ../src/extension/extension.cpp:943
+#: ../src/extension/extension.cpp:942
 #, c-format
 msgid "Could not create extension error log file '%s'"
 msgstr "エクステンションのエラーログ '%s' を作成できませんでした"
 
-#: ../src/extension/extension.cpp:1051
+#: ../src/extension/extension.cpp:1050
 #: ../share/extensions/webslicer_create_rect.inx:6
 msgid "Name:"
 msgstr "名前:"
 
-#: ../src/extension/extension.cpp:1052
+#: ../src/extension/extension.cpp:1051
 msgid "ID:"
 msgstr "ID:"
 
-#: ../src/extension/extension.cpp:1053
+#: ../src/extension/extension.cpp:1052
 msgid "State:"
 msgstr "状態:"
 
-#: ../src/extension/extension.cpp:1053
+#: ../src/extension/extension.cpp:1052
 msgid "Loaded"
 msgstr "ロード済み"
 
-#: ../src/extension/extension.cpp:1053
+#: ../src/extension/extension.cpp:1052
 msgid "Unloaded"
 msgstr "未ロード"
 
-#: ../src/extension/extension.cpp:1053
+#: ../src/extension/extension.cpp:1052
 msgid "Deactivated"
 msgstr "非アクティベート"
 
@@ -8928,7 +8927,7 @@ msgstr "ノイズの低減"
 
 #. TRANSLATORS: Paint order determines the order the 'fill', 'stroke', and 'markers are painted.
 #: ../src/extension/internal/bitmap/reduceNoise.cpp:44
-#: ../src/ui/widget/stroke-style.cpp:356
+#: ../src/ui/widget/stroke-style.cpp:354
 #: ../share/extensions/jessyink_effects.inx:8
 #: ../share/extensions/jessyink_effects.inx:17
 #: ../share/extensions/jessyink_view.inx:7
@@ -9227,7 +9226,7 @@ msgstr "ページ / 全 %i ページ中"
 #: ../src/ui/desktop/document-check.cpp:57
 #: ../src/ui/desktop/document-check.cpp:102
 #: ../src/ui/dialog/calligraphic-profile-rename.cpp:51
-#: ../src/ui/dialog/export-batch.cpp:679 ../src/ui/dialog/export-single.cpp:872
+#: ../src/ui/dialog/export-batch.cpp:669 ../src/ui/dialog/export-single.cpp:872
 #: ../src/ui/dialog/filedialogimpl-gtkmm.cpp:244
 #: ../src/ui/dialog/filedialogimpl-gtkmm.cpp:556
 #: ../src/ui/dialog/guides.cpp:182 ../src/ui/dialog/layer-properties.cpp:42
@@ -11140,7 +11139,7 @@ msgid "External"
 msgstr "外部"
 
 #: ../src/extension/internal/filter/textures.h:83
-#: ../src/ui/toolbar/page-toolbar.cpp:214
+#: ../src/ui/toolbar/page-toolbar.cpp:235
 #: ../src/ui/widget/page-properties.cpp:300 ../share/ui/dialog-export.glade:536
 #: ../share/ui/toolbar-page.ui:33 ../share/extensions/color_custom.inx:3
 #: ../share/extensions/markers_strokepaint.inx:15
@@ -11256,8 +11255,8 @@ msgstr ""
 "ントを移動する際に埋め込んだ画像ファイルも一緒に移動しなければなりません。"
 
 #: ../src/extension/internal/gdkpixbuf-input.cpp:200
-#: ../src/ui/dialog/inkscape-preferences.cpp:2852
-#: ../src/ui/dialog/inkscape-preferences.cpp:2859
+#: ../src/ui/dialog/inkscape-preferences.cpp:2849
+#: ../src/ui/dialog/inkscape-preferences.cpp:2856
 msgid "Embed"
 msgstr "埋め込み"
 
@@ -11298,19 +11297,19 @@ msgstr ""
 
 #: ../src/extension/internal/gdkpixbuf-input.cpp:210
 #: ../src/extension/internal/svg.h:32
-#: ../src/ui/dialog/inkscape-preferences.cpp:2866
+#: ../src/ui/dialog/inkscape-preferences.cpp:2863
 msgid "None (auto)"
 msgstr "なし (自動)"
 
 #: ../src/extension/internal/gdkpixbuf-input.cpp:211
 #: ../src/extension/internal/svg.h:33
-#: ../src/ui/dialog/inkscape-preferences.cpp:2866
+#: ../src/ui/dialog/inkscape-preferences.cpp:2863
 msgid "Smooth (optimizeQuality)"
 msgstr "平滑化 (optimizeQuality)"
 
 #: ../src/extension/internal/gdkpixbuf-input.cpp:212
 #: ../src/extension/internal/svg.h:34
-#: ../src/ui/dialog/inkscape-preferences.cpp:2866
+#: ../src/ui/dialog/inkscape-preferences.cpp:2863
 msgid "Blocky (optimizeSpeed)"
 msgstr "そのまま拡大 (optimizeSpeed)"
 
@@ -11362,7 +11361,7 @@ msgid "Vertical Offset:"
 msgstr "垂直オフセット:"
 
 #: ../src/extension/internal/grid.cpp:204
-#: ../src/ui/dialog/inkscape-preferences.cpp:2880
+#: ../src/ui/dialog/inkscape-preferences.cpp:2877
 #: ../share/ui/page-properties.glade:909
 #: ../share/extensions/draw_from_triangle.inx:69
 #: ../share/extensions/foldablebox.inx:20 ../share/extensions/frame.inx:42
@@ -11540,27 +11539,27 @@ msgctxt "PDF input precision"
 msgid "very fine"
 msgstr "高精細"
 
-#: ../src/extension/internal/pdfinput/pdf-input.cpp:957
+#: ../src/extension/internal/pdfinput/pdf-input.cpp:956
 msgid "PDF Input"
 msgstr " PDF入力"
 
-#: ../src/extension/internal/pdfinput/pdf-input.cpp:962
+#: ../src/extension/internal/pdfinput/pdf-input.cpp:961
 msgid "Portable Document Format (*.pdf)"
 msgstr "Portable Document Format (*.pdf)"
 
-#: ../src/extension/internal/pdfinput/pdf-input.cpp:963
+#: ../src/extension/internal/pdfinput/pdf-input.cpp:962
 msgid "Portable Document Format"
 msgstr "Portable Document Format"
 
-#: ../src/extension/internal/pdfinput/pdf-input.cpp:972
+#: ../src/extension/internal/pdfinput/pdf-input.cpp:971
 msgid "AI Input"
 msgstr "AI 入力"
 
-#: ../src/extension/internal/pdfinput/pdf-input.cpp:977
+#: ../src/extension/internal/pdfinput/pdf-input.cpp:976
 msgid "Adobe Illustrator 9.0 and above (*.ai)"
 msgstr "Adobe Illustrator 9.0 以降 (*.ai)"
 
-#: ../src/extension/internal/pdfinput/pdf-input.cpp:978
+#: ../src/extension/internal/pdfinput/pdf-input.cpp:977
 msgid "Open files saved in Adobe Illustrator 9.0 and newer versions"
 msgstr "Adobe Illustrator 9.0 以降で保存されたファイルを開きます"
 
@@ -11668,40 +11667,40 @@ msgstr "PovRay (*.pov) (パスとシェイプのみ)"
 msgid "PovRay Raytracer File"
 msgstr "PovRay レイトレーサーファイル"
 
-#: ../src/extension/internal/svg.cpp:733
+#: ../src/extension/internal/svg.cpp:737
 msgid "SVG Input"
 msgstr "SVG 入力"
 
-#: ../src/extension/internal/svg.cpp:739
+#: ../src/extension/internal/svg.cpp:743
 msgid "Scalable Vector Graphic (*.svg)"
 msgstr "スケーラブル ベクター グラフィック (*.svg)"
 
-#: ../src/extension/internal/svg.cpp:740
+#: ../src/extension/internal/svg.cpp:744
 msgid "Inkscape native file format and W3C standard"
 msgstr "Inkscape ネイティブファイル形式および W3C 標準"
 
-#: ../src/extension/internal/svg.cpp:747
+#: ../src/extension/internal/svg.cpp:751
 msgid "SVG Output Inkscape"
 msgstr "SVG Inkscape 出力"
 
-#: ../src/extension/internal/svg.cpp:752
+#: ../src/extension/internal/svg.cpp:756
 msgid "Inkscape SVG (*.svg)"
 msgstr "Inkscape SVG (*.svg)"
 
-#: ../src/extension/internal/svg.cpp:753
+#: ../src/extension/internal/svg.cpp:757
 msgid "SVG format with Inkscape extensions"
 msgstr "Inkscape 拡張を含む SVG 形式"
 
-#: ../src/extension/internal/svg.cpp:761
+#: ../src/extension/internal/svg.cpp:765
 #: ../share/extensions/output_scour.inx:37
 msgid "SVG Output"
 msgstr "SVG 出力"
 
-#: ../src/extension/internal/svg.cpp:766
+#: ../src/extension/internal/svg.cpp:770
 msgid "Plain SVG (*.svg)"
 msgstr "プレーン SVG (*.svg)"
 
-#: ../src/extension/internal/svg.cpp:767
+#: ../src/extension/internal/svg.cpp:771
 msgid "Scalable Vector Graphics format as defined by the W3C"
 msgstr "W3C により定義されたスケーラブル ベクター グラフィックス形式"
 
@@ -11728,6 +11727,10 @@ msgstr "画像タグ内で SVG ファイルをリンク (このドキュメン�
 #: ../src/extension/internal/svg.h:28
 msgid "Open SVG image directly using its path"
 msgstr "パスを使用して SVG 画像を直接開く"
+
+#: ../src/extension/internal/svg.h:30
+msgid "DPI for rendered SVG"
+msgstr "レンダリングされた SVG の DPI"
 
 #: ../src/extension/internal/svgz.cpp:45
 msgid "SVGZ Input"
@@ -12104,16 +12107,16 @@ msgstr "保存が必要な変更がされていません。"
 msgid "Saving document..."
 msgstr "ドキュメントを保存しています..."
 
-#: ../src/file.cpp:1066
+#: ../src/file.cpp:1067
 msgid "Import Pages"
 msgstr "ページをインポート"
 
-#: ../src/file.cpp:1169 ../src/inkscape-application.cpp:836
+#: ../src/file.cpp:1170 ../src/inkscape-application.cpp:836
 #, c-format
 msgid "Failed to load the requested file %s"
 msgstr "要求されたファイル %s の読み込みに失敗しました"
 
-#: ../src/file.cpp:1234
+#: ../src/file.cpp:1235
 msgid "Select file to import"
 msgstr "インポートするファイルの選択"
 
@@ -14983,7 +14986,7 @@ msgstr "ストロークの終端の形"
 #: ../src/live_effects/lpe-jointype.cpp:64
 #: ../src/live_effects/lpe-offset.cpp:83
 #: ../src/live_effects/lpe-powerstroke.cpp:167
-#: ../src/ui/widget/stroke-style.cpp:273
+#: ../src/ui/widget/stroke-style.cpp:271
 msgid "Join:"
 msgstr "角:"
 
@@ -16238,7 +16241,7 @@ msgid "Determines the shape of the path's start"
 msgstr "パスの始点の形状を決定します"
 
 #: ../src/live_effects/lpe-powerstroke.cpp:168
-#: ../src/ui/widget/stroke-style.cpp:313
+#: ../src/ui/widget/stroke-style.cpp:311
 msgid "Maximum length of the miter (in units of stroke width)"
 msgstr "継ぎ目の限界長 (ストローク幅を基準とする)"
 
@@ -17130,7 +17133,7 @@ msgstr "パスの終端の方向"
 msgid "Limit for miter joins"
 msgstr "留め継ぎの限界"
 
-#: ../src/live_effects/lpe-taperstroke.cpp:469
+#: ../src/live_effects/lpe-taperstroke.cpp:471
 msgid ""
 "<b>Start point of the taper</b>: drag to alter the taper, <b>Shift+click</b> "
 "changes the taper direction"
@@ -17138,7 +17141,7 @@ msgstr ""
 "<b>先細の開始点</b>: ドラッグで先細を変化, <b>Shift+click</b> で先細の方向を"
 "変更"
 
-#: ../src/live_effects/lpe-taperstroke.cpp:474
+#: ../src/live_effects/lpe-taperstroke.cpp:476
 msgid ""
 "<b>End point of the taper</b>: drag to alter the taper, <b>Shift+click</b> "
 "changes the taper direction"
@@ -17211,7 +17214,7 @@ msgid "Change index of knot"
 msgstr "結節点のインデックスを変更"
 
 #: ../src/live_effects/lpe-transform_2pts.cpp:367
-#: ../src/ui/dialog/inkscape-preferences.cpp:3013
+#: ../src/ui/dialog/inkscape-preferences.cpp:3010
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:1360
 #: ../src/ui/widget/preferences-widget.cpp:800
 msgid "Reset"
@@ -17394,8 +17397,8 @@ msgstr "表示"
 #: ../src/live_effects/parameter/patharray.cpp:116
 #: ../src/live_effects/parameter/satellitearray.cpp:81
 #: ../src/ui/dialog/attrdialog.cpp:151
-#: ../src/ui/dialog/inkscape-preferences.cpp:2912
-#: ../src/ui/dialog/inkscape-preferences.cpp:2958
+#: ../src/ui/dialog/inkscape-preferences.cpp:2909
+#: ../src/ui/dialog/inkscape-preferences.cpp:2955
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:1386
 #: ../src/ui/widget/gradient-selector.cpp:75
 #: ../share/ui/dialog-livepatheffect-add.glade:396
@@ -17512,7 +17515,7 @@ msgstr "ベクターパラメーターの変更"
 msgid "Change unit parameter"
 msgstr "単位パラメーターの変更"
 
-#: ../src/object/box3d.cpp:243 ../src/object/box3d.cpp:1299
+#: ../src/object/box3d.cpp:243 ../src/object/box3d.cpp:1302
 #: ../src/ui/dialog/inkscape-preferences.cpp:847
 msgid "3D Box"
 msgstr "3D ボックス"
@@ -17658,26 +17661,26 @@ msgstr "<b>%d</b> 個のオブジェクト"
 msgid "of <b>%d</b> objects"
 msgstr "<b>%d</b> 個のオブジェクト"
 
-#: ../src/object/sp-item.cpp:1080
+#: ../src/object/sp-item.cpp:1082
 msgid "Object"
 msgstr "オブジェクト"
 
-#: ../src/object/sp-item.cpp:1092
+#: ../src/object/sp-item.cpp:1094
 #, c-format
 msgid "%s; <i>clipped</i>"
 msgstr "%s; <i>被クリップ</i>"
 
-#: ../src/object/sp-item.cpp:1098
+#: ../src/object/sp-item.cpp:1100
 #, c-format
 msgid "%s; <i>masked</i>"
 msgstr "%s; <i>被マスク</i>"
 
-#: ../src/object/sp-item.cpp:1108
+#: ../src/object/sp-item.cpp:1110
 #, c-format
 msgid "%s; <i>filtered (%s)</i>"
 msgstr "%s; <i>フィルター適用 (%s)</i>"
 
-#: ../src/object/sp-item.cpp:1110
+#: ../src/object/sp-item.cpp:1112
 #, c-format
 msgid "%s; <i>filtered</i>"
 msgstr "%s; <i>フィルター適用</i>"
@@ -20678,23 +20681,23 @@ msgid "%d Page"
 msgid_plural "%d Pages"
 msgstr[0] "%d ページ"
 
-#: ../src/ui/dialog/export-batch.cpp:462
+#: ../src/ui/dialog/export-batch.cpp:461
 msgid "No items selected."
 msgstr "アイテムが選択されていません。"
 
-#: ../src/ui/dialog/export-batch.cpp:551 ../src/ui/dialog/export-batch.cpp:553
+#: ../src/ui/dialog/export-batch.cpp:546 ../src/ui/dialog/export-batch.cpp:548
 msgid "Exporting %1 files"
 msgstr "%1 個のファイルをエクスポートしています"
 
-#: ../src/ui/dialog/export-batch.cpp:572 ../src/ui/dialog/export-single.cpp:562
+#: ../src/ui/dialog/export-batch.cpp:562 ../src/ui/dialog/export-single.cpp:562
 msgid "Exporting %1"
 msgstr "%1 個をエクスポート"
 
-#: ../src/ui/dialog/export-batch.cpp:600 ../src/ui/dialog/export-single.cpp:635
+#: ../src/ui/dialog/export-batch.cpp:590 ../src/ui/dialog/export-single.cpp:635
 msgid "Select a filename for exporting"
 msgstr "エクスポートするファイル名"
 
-#: ../src/ui/dialog/export-batch.cpp:670 ../src/ui/dialog/export-single.cpp:863
+#: ../src/ui/dialog/export-batch.cpp:660 ../src/ui/dialog/export-single.cpp:863
 msgid "Export in progress"
 msgstr "エクスポートの進捗"
 
@@ -23515,7 +23518,7 @@ msgid "Additional font directories"
 msgstr "追加のフォントディレクトリ"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1022
-#: ../src/ui/dialog/inkscape-preferences.cpp:3558
+#: ../src/ui/dialog/inkscape-preferences.cpp:3555
 msgid "Load additional fonts from custom locations (one path per line)"
 msgstr "任意に指定した場所 (1 行ごとにパスひとつ) から追加フォントを読み込む"
 
@@ -24138,17 +24141,17 @@ msgid "Change GTK theme:"
 msgstr "GTKテーマ:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1678
-#: ../src/ui/dialog/inkscape-preferences.cpp:3486
+#: ../src/ui/dialog/inkscape-preferences.cpp:3483
 msgid "Open themes folder"
 msgstr "テーマフォルダーを開く"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1679
-#: ../src/ui/dialog/inkscape-preferences.cpp:3487
+#: ../src/ui/dialog/inkscape-preferences.cpp:3484
 msgid "User themes:"
 msgstr "ユーザーテーマ:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1679
-#: ../src/ui/dialog/inkscape-preferences.cpp:3487
+#: ../src/ui/dialog/inkscape-preferences.cpp:3484
 msgid "Location of the user’s themes"
 msgstr "ユーザーテーマの格納場所"
 
@@ -24194,7 +24197,7 @@ msgid "Change icon theme:"
 msgstr "アイコンテーマ:"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1767
-#: ../src/ui/dialog/inkscape-preferences.cpp:3490
+#: ../src/ui/dialog/inkscape-preferences.cpp:3487
 msgid "Open icons folder"
 msgstr "アイコンフォルダーを開く"
 
@@ -24203,7 +24206,7 @@ msgid "User icons: "
 msgstr "ユーザーアイコン: "
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:1768
-#: ../src/ui/dialog/inkscape-preferences.cpp:3491
+#: ../src/ui/dialog/inkscape-preferences.cpp:3488
 msgid "Location of the user’s icons"
 msgstr "ユーザーアイコンの格納場所"
 
@@ -24687,9 +24690,9 @@ msgstr "選択の感度(_G):"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2113
 #: ../src/ui/dialog/inkscape-preferences.cpp:2116
-#: ../src/ui/dialog/inkscape-preferences.cpp:2444
-#: ../src/ui/dialog/inkscape-preferences.cpp:2448
-#: ../src/ui/dialog/inkscape-preferences.cpp:2458 ../share/ui/units.xml:12
+#: ../src/ui/dialog/inkscape-preferences.cpp:2441
+#: ../src/ui/dialog/inkscape-preferences.cpp:2445
+#: ../src/ui/dialog/inkscape-preferences.cpp:2455 ../share/ui/units.xml:12
 msgid "pixels"
 msgstr "ピクセル"
 
@@ -24789,7 +24792,7 @@ msgid "Relative"
 msgstr "相対座標"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2143
-#: ../src/ui/dialog/inkscape-preferences.cpp:2418
+#: ../src/ui/dialog/inkscape-preferences.cpp:2419
 msgid "Optimized"
 msgstr "最適化"
 
@@ -25213,7 +25216,7 @@ msgid "Color custom markers the same color as object"
 msgstr "カスタムマーカーはオブジェクトと同じ色にする"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2366
-#: ../src/ui/dialog/inkscape-preferences.cpp:2621
+#: ../src/ui/dialog/inkscape-preferences.cpp:2618
 msgid "Update marker color when object color changes"
 msgstr "オブジェクトの色が変更されたときマーカーの色も更新する"
 
@@ -25341,7 +25344,7 @@ msgid "Selecting"
 msgstr "選択"
 
 #: ../src/ui/dialog/inkscape-preferences.cpp:2414
-#: ../src/ui/toolbar/select-toolbar.cpp:270
+#: ../src/ui/toolbar/select-toolbar.cpp:271
 msgid "Scale stroke width"
 msgstr "ストローク幅を拡大縮小する"
 
@@ -25357,67 +25360,63 @@ msgstr "グラデーションを変形する"
 msgid "Transform patterns"
 msgstr "パターンを変形する"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2419
+#: ../src/ui/dialog/inkscape-preferences.cpp:2418
+msgid "Scale dashes with stroke"
+msgstr "ストロークと一緒に破線を拡大/縮小"
+
+#: ../src/ui/dialog/inkscape-preferences.cpp:2420
 msgid "Preserved"
 msgstr "保護"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2422
-#: ../src/ui/toolbar/select-toolbar.cpp:271
+#: ../src/ui/dialog/inkscape-preferences.cpp:2423
+#: ../src/ui/toolbar/select-toolbar.cpp:272
 msgid "When scaling objects, scale the stroke width by the same proportion"
 msgstr "オブジェクトの拡大縮小時にストローク幅も同じ比率で拡大縮小"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2424
-#: ../src/ui/toolbar/select-toolbar.cpp:278
+#: ../src/ui/dialog/inkscape-preferences.cpp:2425
+#: ../src/ui/toolbar/select-toolbar.cpp:279
 msgid "When scaling rectangles, scale the radii of rounded corners"
 msgstr "矩形の拡大縮小時に丸められた角の半径も拡大縮小"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2426
-#: ../src/ui/toolbar/select-toolbar.cpp:285
+#: ../src/ui/dialog/inkscape-preferences.cpp:2427
+#: ../src/ui/toolbar/select-toolbar.cpp:286
 msgid "Move gradients (in fill or stroke) along with the objects"
 msgstr ""
 "オブジェクトの変形に従って (フィルまたはストロークの) グラデーションも変形"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2428
-#: ../src/ui/toolbar/select-toolbar.cpp:292
+#: ../src/ui/dialog/inkscape-preferences.cpp:2429
+#: ../src/ui/toolbar/select-toolbar.cpp:293
 msgid "Move patterns (in fill or stroke) along with the objects"
 msgstr "オブジェクトの変形に従って (フィルまたはストロークの) パターンも変形"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2429
+#: ../src/ui/dialog/inkscape-preferences.cpp:2430
+msgid "When changing stroke width, scale dash array"
+msgstr "ストローク幅を変更するとき破線の配列を拡大/縮小"
+
+#: ../src/ui/dialog/inkscape-preferences.cpp:2431
 msgid "Store transformation"
 msgstr "移動/変形の記録"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2431
+#: ../src/ui/dialog/inkscape-preferences.cpp:2433
 msgid ""
 "If possible, apply transformation to objects without adding a transform= "
 "attribute"
 msgstr ""
 "可能であれば、transform= 属性を追加せずにオブジェクトに移動/変形を適用します"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2433
+#: ../src/ui/dialog/inkscape-preferences.cpp:2435
 msgid "Always store transformation as a transform= attribute on objects"
 msgstr "常にオブジェクトの transform= 属性によって移動/変形を記録します"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2435
+#: ../src/ui/dialog/inkscape-preferences.cpp:2437
 msgid "Transforms"
 msgstr "変形"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2437
-msgid "Scale dashes with stroke"
-msgstr "ストロークと一緒に破線を拡大/縮小"
-
-#: ../src/ui/dialog/inkscape-preferences.cpp:2438
-msgid "When changing stroke width, scale dash array"
-msgstr "ストローク幅を変更するとき破線の配列を拡大/縮小"
-
-#: ../src/ui/dialog/inkscape-preferences.cpp:2440
-msgid "Dashes"
-msgstr "破線"
-
-#: ../src/ui/dialog/inkscape-preferences.cpp:2444
+#: ../src/ui/dialog/inkscape-preferences.cpp:2441
 msgid "Mouse _wheel scrolls by:"
 msgstr "マウスホイールによるスクロール(_W):"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2445
+#: ../src/ui/dialog/inkscape-preferences.cpp:2442
 msgid ""
 "One mouse wheel notch scrolls by this distance in screen pixels "
 "(horizontally with Shift)"
@@ -25425,23 +25424,23 @@ msgstr ""
 "マウスホイールを 1 ノッチ分動かしたときにスクロールする距離 (画面ピクセル数) "
 "です (Shift を押しながらホイールで水平にスクロールします)"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2446
+#: ../src/ui/dialog/inkscape-preferences.cpp:2443
 msgid "Ctrl+arrows"
 msgstr "Ctrl+矢印キー"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2448
+#: ../src/ui/dialog/inkscape-preferences.cpp:2445
 msgid "Sc_roll by:"
 msgstr "スクロール量(_R):"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2449
+#: ../src/ui/dialog/inkscape-preferences.cpp:2446
 msgid "Pressing Ctrl+arrow key scrolls by this distance (in screen pixels)"
 msgstr "Ctrl+矢印キーを押したときのスクロール量 (画面ピクセル数) です"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2451
+#: ../src/ui/dialog/inkscape-preferences.cpp:2448
 msgid "_Acceleration:"
 msgstr "加速度(_A):"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2452
+#: ../src/ui/dialog/inkscape-preferences.cpp:2449
 msgid ""
 "Pressing and holding Ctrl+arrow will gradually speed up scrolling (0 for no "
 "acceleration)"
@@ -25449,15 +25448,15 @@ msgstr ""
 "Ctrl+矢印キーを押し続けていると徐々に速くなるスクロールの加速度です (0 で加速"
 "なし)"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2453
+#: ../src/ui/dialog/inkscape-preferences.cpp:2450
 msgid "Autoscrolling"
 msgstr "自動スクロール"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2455
+#: ../src/ui/dialog/inkscape-preferences.cpp:2452
 msgid "_Speed:"
 msgstr "速度(_S):"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2456
+#: ../src/ui/dialog/inkscape-preferences.cpp:2453
 msgid ""
 "How fast the canvas autoscrolls when you drag beyond canvas edge (0 to turn "
 "autoscroll off)"
@@ -25465,11 +25464,11 @@ msgstr ""
 "キャンバスの端を越えてドラッグしたときに、キャンバスが自動スクロール速さです "
 "(0 で自動スクロールをオフ)"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2458
+#: ../src/ui/dialog/inkscape-preferences.cpp:2455
 msgid "_Threshold:"
 msgstr "しきい値(_T):"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2459
+#: ../src/ui/dialog/inkscape-preferences.cpp:2456
 msgid ""
 "How far (in screen pixels) you need to be from the canvas edge to trigger "
 "autoscroll; positive is outside the canvas, negative is within the canvas"
@@ -25477,65 +25476,65 @@ msgstr ""
 "自動スクロールを開始するキャンバスの端からの距離 (画面ピクセル) です。正の値"
 "でキャンバスより外、負の値でキャンバスの中になります。"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2460
+#: ../src/ui/dialog/inkscape-preferences.cpp:2457
 msgid "Mouse move pans when Space is pressed"
 msgstr "スペースを押したときマウス移動で視点を移動"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2462
+#: ../src/ui/dialog/inkscape-preferences.cpp:2459
 msgid "When on, pressing and holding Space and dragging pans canvas"
 msgstr ""
 "有効にするとスペースキーを押し下げてドラッグするとキャンバスの視点を移動"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2463
+#: ../src/ui/dialog/inkscape-preferences.cpp:2460
 msgid "Scrolling"
 msgstr "スクロール"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2466
+#: ../src/ui/dialog/inkscape-preferences.cpp:2463
 msgid "Snap indicator"
 msgstr "スナップインジケーター"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2468
+#: ../src/ui/dialog/inkscape-preferences.cpp:2465
 msgid "Enable snap indicator"
 msgstr "スナップインジケーターを有効にする"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2470
+#: ../src/ui/dialog/inkscape-preferences.cpp:2467
 msgid "After snapping, a symbol is drawn at the point that has snapped"
 msgstr "スナップ後、スナップされたポイントにシンボルが描画されます"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2475
+#: ../src/ui/dialog/inkscape-preferences.cpp:2472
 msgid "Snap indicator persistence (in seconds):"
 msgstr "スナップインジケーターの持続時間 (秒指定)"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2476
+#: ../src/ui/dialog/inkscape-preferences.cpp:2473
 msgid ""
 "Controls how long the snap indicator message will be shown, before it "
 "disappears"
 msgstr ""
 "スナップインジケーターのメッセージが消える前にどれだけの時間表示するかを制御"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2478
-#: ../src/ui/dialog/inkscape-preferences.cpp:2480
+#: ../src/ui/dialog/inkscape-preferences.cpp:2475
+#: ../src/ui/dialog/inkscape-preferences.cpp:2477
 msgid "Show snap distance in case of alignment or distribution snap"
 msgstr "整列または配置スナップ時にはスナップ距離を表示"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2482
+#: ../src/ui/dialog/inkscape-preferences.cpp:2479
 msgid "What should snap"
 msgstr "スナップするもの"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2484
+#: ../src/ui/dialog/inkscape-preferences.cpp:2481
 msgid "Only snap the node closest to the pointer"
 msgstr "ポインターに最も近いノードのみスナップする"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2486
+#: ../src/ui/dialog/inkscape-preferences.cpp:2483
 msgid ""
 "Only try to snap the node that is initially closest to the mouse pointer"
 msgstr "最初マウスポインターに最も近いノードのみスナップしようとします"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2489
+#: ../src/ui/dialog/inkscape-preferences.cpp:2486
 msgid "_Weight factor:"
 msgstr "重み付け(_W):"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2490
+#: ../src/ui/dialog/inkscape-preferences.cpp:2487
 msgid ""
 "When multiple snap solutions are found, then Inkscape can either prefer the "
 "closest transformation (when set to 0), or prefer the node that was "
@@ -25545,12 +25544,12 @@ msgstr ""
 "番近かったところかのどちらかにするかを選択できます。0 にすると変形後に、1 に"
 "すると最初に近いところになります。"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2492
+#: ../src/ui/dialog/inkscape-preferences.cpp:2489
 msgid "Snap the mouse pointer when dragging a constrained knot"
 msgstr "制約付き結節点をドラッグしたときマウスポインターをスナップする"
 
 # FIXME:
-#: ../src/ui/dialog/inkscape-preferences.cpp:2494
+#: ../src/ui/dialog/inkscape-preferences.cpp:2491
 msgid ""
 "When dragging a knot along a constraint line, then snap the position of the "
 "mouse pointer instead of snapping the projection of the knot onto the "
@@ -25559,15 +25558,15 @@ msgstr ""
 "制約線上の結節点をドラッグしたとき、制約線上の結節点をスナップする代わりにマ"
 "ウスポインターの位置をスナップします"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2496
+#: ../src/ui/dialog/inkscape-preferences.cpp:2493
 msgid "Delayed snap"
 msgstr "遅延スナップ"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2499
+#: ../src/ui/dialog/inkscape-preferences.cpp:2496
 msgid "Delay (in seconds):"
 msgstr "遅延 (秒)"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2500
+#: ../src/ui/dialog/inkscape-preferences.cpp:2497
 msgid ""
 "Postpone snapping as long as the mouse is moving, and then wait an "
 "additional fraction of a second. This additional delay is specified here. "
@@ -25577,37 +25576,37 @@ msgstr ""
 "ここでそのほんの一瞬の待ち時間を指定します。0 あるいは非常に小さい値が設定さ"
 "れると、スナップは直ちに行われます。"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2508
+#: ../src/ui/dialog/inkscape-preferences.cpp:2505
 msgid "_Arrow keys move by:"
 msgstr "矢印キーでの移動量(_A):"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2509
+#: ../src/ui/dialog/inkscape-preferences.cpp:2506
 msgid ""
 "Pressing an arrow key moves selected object(s) or node(s) by this distance"
 msgstr "矢印キーが押されたときにこの距離で選択オブジェクトやノードを移動します"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2512
+#: ../src/ui/dialog/inkscape-preferences.cpp:2509
 msgid "&gt; and &lt; _scale by:"
 msgstr "&gt; または &lt; キーでの拡大/縮小量:"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2513
+#: ../src/ui/dialog/inkscape-preferences.cpp:2510
 msgid "Pressing > or < scales selection up or down by this increment"
 msgstr ""
 "> または < キーが押されたときに、この変化量で選択範囲が拡大または縮小されます"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2515
+#: ../src/ui/dialog/inkscape-preferences.cpp:2512
 msgid "_Inset/Outset by:"
 msgstr "インセット/アウトセット量(_I):"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2516
+#: ../src/ui/dialog/inkscape-preferences.cpp:2513
 msgid "Inset and Outset commands displace the path by this distance"
 msgstr "インセット/アウトセットを実行すると、パスがこの距離だけ変位します"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2517
+#: ../src/ui/dialog/inkscape-preferences.cpp:2514
 msgid "Compass-like display of angles"
 msgstr "方位コンパスのような角度表示"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2519
+#: ../src/ui/dialog/inkscape-preferences.cpp:2516
 msgid ""
 "When on, angles are displayed with 0 at north, 0 to 360 range, positive "
 "clockwise; otherwise with 0 at east, -180 to 180 range, positive "
@@ -25617,21 +25616,21 @@ msgstr ""
 "360 の範囲で表示されます。つけないと、東で 0 となり、反時計回りに正の向きで "
 "-180 から 180 の範囲で表示されます。"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2521
+#: ../src/ui/dialog/inkscape-preferences.cpp:2518
 msgctxt "Rotation angle"
 msgid "None"
 msgstr "なし"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2525
+#: ../src/ui/dialog/inkscape-preferences.cpp:2522
 msgid "_Rotation snaps every:"
 msgstr "回転のスナップ単位(_R):"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2525
-#: ../src/ui/dialog/inkscape-preferences.cpp:2537 ../share/ui/units.xml:54
+#: ../src/ui/dialog/inkscape-preferences.cpp:2522
+#: ../src/ui/dialog/inkscape-preferences.cpp:2534 ../share/ui/units.xml:54
 msgid "degrees"
 msgstr "度"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2526
+#: ../src/ui/dialog/inkscape-preferences.cpp:2523
 msgid ""
 "Rotating with Ctrl pressed snaps every that much degrees; also, pressing "
 "[ or ] rotates by this amount"
@@ -25639,11 +25638,11 @@ msgstr ""
 "Ctrl キーを押しながら回転すると、この角度ごとにスナップします。また、[ キー"
 "や ] キーを押したときはこの角度ずつ回転します。"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2527
+#: ../src/ui/dialog/inkscape-preferences.cpp:2524
 msgid "Relative snapping of guideline angles"
 msgstr "ガイドラインの角度は相対的にスナップする"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2529
+#: ../src/ui/dialog/inkscape-preferences.cpp:2526
 msgid ""
 "When on, the snap angles when rotating a guideline will be relative to the "
 "original angle"
@@ -25651,17 +25650,17 @@ msgstr ""
 "チェックマークをつけるとガイドラインを回転したときオリジナルに対して相対的な"
 "角度にスナップします"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2531
+#: ../src/ui/dialog/inkscape-preferences.cpp:2528
 msgid "_Zoom in/out by:"
 msgstr "ズームイン/アウト量(_Z):"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2531
-#: ../src/ui/dialog/inkscape-preferences.cpp:2660 ../share/ui/units.xml:4
+#: ../src/ui/dialog/inkscape-preferences.cpp:2528
+#: ../src/ui/dialog/inkscape-preferences.cpp:2657 ../share/ui/units.xml:4
 #: ../share/ui/units.xml:5
 msgid "%"
 msgstr "%"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2532
+#: ../src/ui/dialog/inkscape-preferences.cpp:2529
 msgid ""
 "Zoom tool click, +/- keys, and middle click zoom in and out by this "
 "multiplier"
@@ -25669,11 +25668,11 @@ msgstr ""
 "ズームツールのクリック、+/- キー、中央クリックにより、この変化率でズームイン/"
 "アウトします"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2533
+#: ../src/ui/dialog/inkscape-preferences.cpp:2530
 msgid "Zoom with middle mouse click"
 msgstr "マウスの中ボタンクリックで拡大"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2535
+#: ../src/ui/dialog/inkscape-preferences.cpp:2532
 msgid ""
 "When activated, clicking the middle mouse button (usually the mouse wheel) "
 "zooms."
@@ -25681,51 +25680,51 @@ msgstr ""
 "有効にすると、マウスの中央ボタン (通常はマウスホイール) のクリックで拡大しま"
 "す。"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2537
+#: ../src/ui/dialog/inkscape-preferences.cpp:2534
 msgid "_Rotate canvas by:"
 msgstr "回転のスナップ単位(_R):"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2538
+#: ../src/ui/dialog/inkscape-preferences.cpp:2535
 msgid "Rotate canvas clockwise and counter-clockwise by this amount."
 msgstr "ここで指定した量だけキャンバスを時計回りまたは反時計回りに回転します。"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2539
+#: ../src/ui/dialog/inkscape-preferences.cpp:2536
 msgid "Steps"
 msgstr "変化量"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2542
+#: ../src/ui/dialog/inkscape-preferences.cpp:2539
 msgid "Move in parallel"
 msgstr "平行移動"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2544
+#: ../src/ui/dialog/inkscape-preferences.cpp:2541
 msgid "Stay unmoved"
 msgstr "動かずに静止"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2546
+#: ../src/ui/dialog/inkscape-preferences.cpp:2543
 msgid "Move according to transform"
 msgstr "transform に従って移動"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2548
+#: ../src/ui/dialog/inkscape-preferences.cpp:2545
 msgid "Are unlinked"
 msgstr "リンクを解除"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2550
+#: ../src/ui/dialog/inkscape-preferences.cpp:2547
 msgid "Are deleted"
 msgstr "削除"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2553
+#: ../src/ui/dialog/inkscape-preferences.cpp:2550
 msgid "Moving original: clones and linked offsets"
 msgstr "オリジナルを移動したときのクローンおよびリンクオフセット"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2555
+#: ../src/ui/dialog/inkscape-preferences.cpp:2552
 msgid "Clones are translated by the same vector as their original"
 msgstr "クローンはオリジナルと同じ方向に移動します"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2557
+#: ../src/ui/dialog/inkscape-preferences.cpp:2554
 msgid "Clones preserve their positions when their original is moved"
 msgstr "オリジナルが移動してもクローンはその位置を維持します"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2559
+#: ../src/ui/dialog/inkscape-preferences.cpp:2556
 msgid ""
 "Each clone moves according to the value of its transform= attribute; for "
 "example, a rotated clone will move in a different direction than its original"
@@ -25733,27 +25732,27 @@ msgstr ""
 "それぞれのクローンを transform= 属性の値に合わせて移動します。例えば、回転さ"
 "れているクローンはオリジナルと違う方向に移動します。"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2560
+#: ../src/ui/dialog/inkscape-preferences.cpp:2557
 msgid "Deleting original: clones"
 msgstr "オリジナルが削除されたときのクローン"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2562
+#: ../src/ui/dialog/inkscape-preferences.cpp:2559
 msgid "Orphaned clones are converted to regular objects"
 msgstr "オリジナルのなくなったクローンは通常のオブジェクトに変換されます"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2564
+#: ../src/ui/dialog/inkscape-preferences.cpp:2561
 msgid "Orphaned clones are deleted along with their original"
 msgstr "オリジナルのなくなったクローンはオリジナルと一緒に削除されます"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2566
+#: ../src/ui/dialog/inkscape-preferences.cpp:2563
 msgid "Duplicating original+clones/linked offset"
 msgstr "オリジナルとクローン/リンクオフセットが複製されたとき"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2568
+#: ../src/ui/dialog/inkscape-preferences.cpp:2565
 msgid "Relink duplicated clones"
 msgstr "複製したクローンを再リンクする"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2570
+#: ../src/ui/dialog/inkscape-preferences.cpp:2567
 msgid ""
 "When duplicating a selection containing both a clone and its original "
 "(possibly in groups), relink the duplicated clone to the duplicated original "
@@ -25763,15 +25762,15 @@ msgstr ""
 "複製したとき、複製したクローンを元のオリジナルではなく複製されたオリジナルと"
 "再リンクします。"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2572
+#: ../src/ui/dialog/inkscape-preferences.cpp:2569
 msgid "Unlinking clones"
 msgstr "クローンのリンク解除"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2573
+#: ../src/ui/dialog/inkscape-preferences.cpp:2570
 msgid "Path operations unlink clones"
 msgstr "パス操作でクローン解除"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2575
+#: ../src/ui/dialog/inkscape-preferences.cpp:2572
 msgid ""
 "The following path operations will unlink clones: Stroke to path, Object to "
 "path, Boolean operations, Combine, Break apart"
@@ -25780,36 +25779,36 @@ msgstr ""
 "アン操作、結合、分解"
 
 #. TRANSLATORS: Heading for the Inkscape Preferences "Clones" Page
-#: ../src/ui/dialog/inkscape-preferences.cpp:2578
+#: ../src/ui/dialog/inkscape-preferences.cpp:2575
 msgid "Clones"
 msgstr "クローン"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2581
+#: ../src/ui/dialog/inkscape-preferences.cpp:2578
 msgid "When applying, use the topmost selected object as clippath/mask"
 msgstr ""
 "適用したとき、最前面の選択オブジェクトをクリップパスまたはマスクとして使用す"
 "る"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2583
+#: ../src/ui/dialog/inkscape-preferences.cpp:2580
 msgid ""
 "Uncheck this to use the bottom selected object as the clipping path or mask"
 msgstr ""
 "最背面の選択オブジェクトをクリッピングパスまたはマスクとして使うには、チェッ"
 "クマークを外します"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2584
+#: ../src/ui/dialog/inkscape-preferences.cpp:2581
 msgid "When ungroup, clip/mask is preserved in childrens"
 msgstr "グループ化解除時、子孫のクリップ/マスクを保持する"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2586
+#: ../src/ui/dialog/inkscape-preferences.cpp:2583
 msgid "Uncheck this to remove clip/mask on ungroup"
 msgstr "チェックをはずすと、グループ化解除時にクリップ/マスクを削除します"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2587
+#: ../src/ui/dialog/inkscape-preferences.cpp:2584
 msgid "Remove clippath/mask object after applying"
 msgstr "適用後にクリップパスまたはマスクオブジェクトを削除する"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2589
+#: ../src/ui/dialog/inkscape-preferences.cpp:2586
 msgid ""
 "After applying, remove the object used as the clipping path or mask from the "
 "drawing"
@@ -25817,56 +25816,56 @@ msgstr ""
 "適用後に、クリッピングパスまたはマスクとして使用されたオブジェクトを図面から"
 "削除します"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2591
+#: ../src/ui/dialog/inkscape-preferences.cpp:2588
 msgid "Before applying"
 msgstr "適用前"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2593
+#: ../src/ui/dialog/inkscape-preferences.cpp:2590
 msgid "Do not group clipped/masked objects"
 msgstr "クリップ/マスクオブジェクトをグループ化しない"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2594
+#: ../src/ui/dialog/inkscape-preferences.cpp:2591
 msgid "Put every clipped/masked object in its own group"
 msgstr "各クリップ/マスクオブジェクトをそれぞれのグループに収める"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2595
+#: ../src/ui/dialog/inkscape-preferences.cpp:2592
 msgid "Put all clipped/masked objects into one group"
 msgstr "すべてのクリップ/マスクオブジェクトを一つのグループに収める"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2598
+#: ../src/ui/dialog/inkscape-preferences.cpp:2595
 msgid "Apply clippath/mask to every object"
 msgstr "オブジェクトごとにクリップ/マスクを適用します"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2601
+#: ../src/ui/dialog/inkscape-preferences.cpp:2598
 msgid "Apply clippath/mask to groups containing single object"
 msgstr "一つのオブジェクトが含まれるグループにクリップ/マスクを適用します"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2604
+#: ../src/ui/dialog/inkscape-preferences.cpp:2601
 msgid "Apply clippath/mask to group containing all objects"
 msgstr "すべてのオブジェクトが含まれるグループにクリップ/マスクを適用します"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2606
+#: ../src/ui/dialog/inkscape-preferences.cpp:2603
 msgid "After releasing"
 msgstr "解除後"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2608
+#: ../src/ui/dialog/inkscape-preferences.cpp:2605
 msgid "Ungroup automatically created groups"
 msgstr "生成されたグループを自動的解除する"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2610
+#: ../src/ui/dialog/inkscape-preferences.cpp:2607
 msgid "Ungroup groups created when setting clip/mask"
 msgstr "クリップ/マスクの指定時に生成されたグループを解除します"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2612
+#: ../src/ui/dialog/inkscape-preferences.cpp:2609
 msgid "Clippaths and masks"
 msgstr "クリップパスとマスク"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2615
+#: ../src/ui/dialog/inkscape-preferences.cpp:2612
 msgid "Stroke Style Markers"
 msgstr "ストロークスタイルマーカー"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2617
-#: ../src/ui/dialog/inkscape-preferences.cpp:2619
+#: ../src/ui/dialog/inkscape-preferences.cpp:2614
+#: ../src/ui/dialog/inkscape-preferences.cpp:2616
 msgid ""
 "Stroke color same as object, fill color either object fill color or marker "
 "fill color"
@@ -25874,54 +25873,54 @@ msgstr ""
 "ストロークの色はオブジェクトと同じ、フィルの色はオブジェクトまたはマーカーの"
 "フィルの色と同じになります"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2623
+#: ../src/ui/dialog/inkscape-preferences.cpp:2620
 msgid "Markers"
 msgstr "マーカー"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2626
+#: ../src/ui/dialog/inkscape-preferences.cpp:2623
 msgid "Document cleanup"
 msgstr "ドキュメントのクリーンアップ"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2627
-#: ../src/ui/dialog/inkscape-preferences.cpp:2629
+#: ../src/ui/dialog/inkscape-preferences.cpp:2624
+#: ../src/ui/dialog/inkscape-preferences.cpp:2626
 msgid "Remove unused swatches when doing a document cleanup"
 msgstr "ドキュメントのクリーンアップ時に未使用のスウォッチを除去する"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2630
+#: ../src/ui/dialog/inkscape-preferences.cpp:2627
 msgid "Cleanup"
 msgstr "整理"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2633
+#: ../src/ui/dialog/inkscape-preferences.cpp:2630
 msgid "Use icons instead less checks on LPE copy"
 msgstr "LPE コピーで少数の格子の代わりにアイコンを使用"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2635
+#: ../src/ui/dialog/inkscape-preferences.cpp:2632
 msgid "Use 16 icons instead 4 checks on LPE copy in mirror zone"
 msgstr ""
 "LPE コピーの鏡面領域で 4 個の格子の代わりに 16 個のアイコンを使用します"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2636
+#: ../src/ui/dialog/inkscape-preferences.cpp:2633
 msgid "Live Path Effects (LPE)"
 msgstr "ライブパスエフェクト (LPE)"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2643
+#: ../src/ui/dialog/inkscape-preferences.cpp:2640
 msgid "Number of _Threads:"
 msgstr "スレッド数(_T):"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2643
+#: ../src/ui/dialog/inkscape-preferences.cpp:2640
 msgid "Configure number of processors/threads to use when rendering filters"
 msgstr "フィルターのレンダリングで使用するプロセッサー/スレッド数を設定します"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2647
+#: ../src/ui/dialog/inkscape-preferences.cpp:2644
 msgid "Rendering _cache size:"
 msgstr "レンダリングキャッシュサイズ(_C):"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2647
+#: ../src/ui/dialog/inkscape-preferences.cpp:2644
 msgctxt "mebibyte (2^20 bytes) abbreviation"
 msgid "MiB"
 msgstr "MiB"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2647
+#: ../src/ui/dialog/inkscape-preferences.cpp:2644
 msgid ""
 "Set the amount of memory per document which can be used to store rendered "
 "parts of the drawing for later reuse; set to zero to disable caching"
@@ -25929,11 +25928,11 @@ msgstr ""
 "ドキュメントごとに描画のレンダリング部を再利用するためにキャッシュしておくメ"
 "モリ量を設定します。0 を設定するとキャッシュしません。"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2651
+#: ../src/ui/dialog/inkscape-preferences.cpp:2648
 msgid "Rendering tile multiplier:"
 msgstr "レンダリングタイル乗数:"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2651
+#: ../src/ui/dialog/inkscape-preferences.cpp:2648
 msgid ""
 "On modern hardware, increasing this value (default is 16) can help to get a "
 "better performance when there are large areas with filtered objects (this "
@@ -25947,75 +25946,75 @@ msgstr ""
 "いはほとんど使用していない画像の表示拡大や視点移動がローエンドのハードウェア"
 "上で速くなります。"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2655
+#: ../src/ui/dialog/inkscape-preferences.cpp:2652
 msgid "X-ray radius:"
 msgstr "X線半径:"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2655
+#: ../src/ui/dialog/inkscape-preferences.cpp:2652
 msgid "Radius of the circular area around the mouse cursor in X-ray mode"
 msgstr "X 線モードでマウスカーソルを囲む円の半径"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2660
+#: ../src/ui/dialog/inkscape-preferences.cpp:2657
 msgid "Outline overlay opacity:"
 msgstr "アウトラインオーバーレイ不透明度:"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2660
+#: ../src/ui/dialog/inkscape-preferences.cpp:2657
 msgid "Opacity of the color in outline overlay view mode"
 msgstr "アウトラインオーバーレイビューモードの色の不透明度"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2664
+#: ../src/ui/dialog/inkscape-preferences.cpp:2661
 msgid "Responsive"
 msgstr "レスポンシブ"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2664
+#: ../src/ui/dialog/inkscape-preferences.cpp:2661
 msgid "Full redraw"
 msgstr "完全再描画"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2664
+#: ../src/ui/dialog/inkscape-preferences.cpp:2661
 msgid "Multiscale"
 msgstr "マルチスケール"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2666
+#: ../src/ui/dialog/inkscape-preferences.cpp:2663
 msgid "Update strategy:"
 msgstr "更新方法:"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2666
+#: ../src/ui/dialog/inkscape-preferences.cpp:2663
 msgid ""
 "How to update continually changing content when it can't be redrawn fast "
 "enough"
 msgstr "十分な速度で再描画できないときに持続的に内容を更新する方法"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2669
-#: ../src/ui/dialog/inkscape-preferences.cpp:2693
+#: ../src/ui/dialog/inkscape-preferences.cpp:2666
+#: ../src/ui/dialog/inkscape-preferences.cpp:2690
 msgid "Best quality (slowest)"
 msgstr "最高品質 (最も低速)"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2671
-#: ../src/ui/dialog/inkscape-preferences.cpp:2695
+#: ../src/ui/dialog/inkscape-preferences.cpp:2668
+#: ../src/ui/dialog/inkscape-preferences.cpp:2692
 msgid "Better quality (slower)"
 msgstr "高品質 (低速)"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2673
-#: ../src/ui/dialog/inkscape-preferences.cpp:2697
+#: ../src/ui/dialog/inkscape-preferences.cpp:2670
+#: ../src/ui/dialog/inkscape-preferences.cpp:2694
 msgid "Average quality"
 msgstr "通常品質"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2675
-#: ../src/ui/dialog/inkscape-preferences.cpp:2699
+#: ../src/ui/dialog/inkscape-preferences.cpp:2672
+#: ../src/ui/dialog/inkscape-preferences.cpp:2696
 msgid "Lower quality (faster)"
 msgstr "低品質 (高速)"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2677
-#: ../src/ui/dialog/inkscape-preferences.cpp:2701
+#: ../src/ui/dialog/inkscape-preferences.cpp:2674
+#: ../src/ui/dialog/inkscape-preferences.cpp:2698
 msgid "Lowest quality (fastest)"
 msgstr "最低品質 (最も高速)"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2680
+#: ../src/ui/dialog/inkscape-preferences.cpp:2677
 msgid "Gaussian blur quality for display"
 msgstr "ガウスぼかしの表示品質"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2682
-#: ../src/ui/dialog/inkscape-preferences.cpp:2706
+#: ../src/ui/dialog/inkscape-preferences.cpp:2679
+#: ../src/ui/dialog/inkscape-preferences.cpp:2703
 msgid ""
 "Best quality, but display may be very slow at high zooms (bitmap export "
 "always uses best quality)"
@@ -26023,35 +26022,35 @@ msgstr ""
 "最高の品質ですが、高いズーム率では表示が非常に遅くなるかもしれません (ビット"
 "マップへのエクスポートは常に最高品質を使います)"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2684
-#: ../src/ui/dialog/inkscape-preferences.cpp:2708
+#: ../src/ui/dialog/inkscape-preferences.cpp:2681
+#: ../src/ui/dialog/inkscape-preferences.cpp:2705
 msgid "Better quality, but slower display"
 msgstr "高品質ですが、表示は遅くなります"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2686
-#: ../src/ui/dialog/inkscape-preferences.cpp:2710
+#: ../src/ui/dialog/inkscape-preferences.cpp:2683
+#: ../src/ui/dialog/inkscape-preferences.cpp:2707
 msgid "Average quality, acceptable display speed"
 msgstr "通常の品質で、許容できる表示速度です"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2688
-#: ../src/ui/dialog/inkscape-preferences.cpp:2712
+#: ../src/ui/dialog/inkscape-preferences.cpp:2685
+#: ../src/ui/dialog/inkscape-preferences.cpp:2709
 msgid "Lower quality (some artifacts), but display is faster"
 msgstr "低品質 (多少の劣化) ですが、表示は速くなります"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2690
-#: ../src/ui/dialog/inkscape-preferences.cpp:2714
+#: ../src/ui/dialog/inkscape-preferences.cpp:2687
+#: ../src/ui/dialog/inkscape-preferences.cpp:2711
 msgid "Lowest quality (considerable artifacts), but display is fastest"
 msgstr "最低の品質 (相当量の劣化) ですが、表示は最速です"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2704
+#: ../src/ui/dialog/inkscape-preferences.cpp:2701
 msgid "Filter effects quality for display"
 msgstr "フィルターエフェクトの表示品質"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2717
+#: ../src/ui/dialog/inkscape-preferences.cpp:2714
 msgid "Use dithering"
 msgstr "ディザリングを使用"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2718
+#: ../src/ui/dialog/inkscape-preferences.cpp:2715
 msgid ""
 "Makes gradients smoother. This can significantly impact the size of "
 "generated PNG files. To update the display after changing this option, just "
@@ -26061,41 +26060,41 @@ msgstr ""
 "大きく影響する可能性があります。このオプションを変更した後に表示を更新するに"
 "は、表示拡大または縮小します。"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2729
+#: ../src/ui/dialog/inkscape-preferences.cpp:2726
 msgid "Enable developer mode"
 msgstr "開発者モードを有効にする"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2731
+#: ../src/ui/dialog/inkscape-preferences.cpp:2728
 msgid "Developer mode"
 msgstr "開発者モード"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2732
+#: ../src/ui/dialog/inkscape-preferences.cpp:2729
 msgid "Enable additional debugging options"
 msgstr "追加のデバッグオプションを有効にします"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2767
+#: ../src/ui/dialog/inkscape-preferences.cpp:2764
 msgid "Low-level tuning options"
 msgstr "低レベルのチューニングオプション"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2769
+#: ../src/ui/dialog/inkscape-preferences.cpp:2766
 msgid "Render time limit"
 msgstr "レンダリング時間上限"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2769
-#: ../src/ui/dialog/inkscape-preferences.cpp:2795
+#: ../src/ui/dialog/inkscape-preferences.cpp:2766
+#: ../src/ui/dialog/inkscape-preferences.cpp:2792
 msgctxt "microsecond abbreviation"
 msgid "μs"
 msgstr "μs"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2769
+#: ../src/ui/dialog/inkscape-preferences.cpp:2766
 msgid "The maximum time allowed for a rendering time slice"
 msgstr "タイムスライスの描画にかける最長時間"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2771
+#: ../src/ui/dialog/inkscape-preferences.cpp:2768
 msgid "Use new bisector"
 msgstr "新しい二等分線を使用"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2771
+#: ../src/ui/dialog/inkscape-preferences.cpp:2768
 msgid ""
 "Use an alternative, more obvious bisection strategy: just chop in half along "
 "the larger dimension until small enough"
@@ -26103,28 +26102,28 @@ msgstr ""
 "別のもっとわかりやすい二分割手法を使用: 十分小さくなるまで大きい方を半分にす"
 "る"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2773
+#: ../src/ui/dialog/inkscape-preferences.cpp:2770
 msgid "New bisector tile size"
 msgstr "新しいタイルサイズの二等分線を使用"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2773
-#: ../src/ui/dialog/inkscape-preferences.cpp:2779
-#: ../src/ui/dialog/inkscape-preferences.cpp:2781
-#: ../src/ui/dialog/inkscape-preferences.cpp:2783
+#: ../src/ui/dialog/inkscape-preferences.cpp:2770
+#: ../src/ui/dialog/inkscape-preferences.cpp:2776
+#: ../src/ui/dialog/inkscape-preferences.cpp:2778
+#: ../src/ui/dialog/inkscape-preferences.cpp:2780
 msgctxt "pixel abbreviation"
 msgid "px"
 msgstr "px"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2773
+#: ../src/ui/dialog/inkscape-preferences.cpp:2770
 msgid "Chop rectangles until largest dimension is this small"
 msgstr "最大の寸法がこの大きさになるまで矩形を切り分ける"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2775
+#: ../src/ui/dialog/inkscape-preferences.cpp:2772
 #: ../share/ui/color-palette.glade:271
 msgid "Tile size:"
 msgstr "タイルサイズ:"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2775
+#: ../src/ui/dialog/inkscape-preferences.cpp:2772
 msgid ""
 "The \"tile size\" parameter previously hard-coded into Inkscape's original "
 "tile bisector."
@@ -26132,159 +26131,159 @@ msgstr ""
 "以前は Inkscape のオリジナルなタイルの二等分線としてプログラム中の埋め込み値"
 "となっていた「タイルサイズ」"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2777
+#: ../src/ui/dialog/inkscape-preferences.cpp:2774
 msgid "Max affine diff"
 msgstr "最大アフィン差分"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2777
+#: ../src/ui/dialog/inkscape-preferences.cpp:2774
 msgid ""
 "How much the viewing transformation can change before throwing away the "
 "current redraw and starting again"
 msgstr "現在の再描画を破棄してやり直す前にどれだけ表示を変化させられるか"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2779
+#: ../src/ui/dialog/inkscape-preferences.cpp:2776
 msgid "Buffer padding"
 msgstr "バッファパディング"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2779
+#: ../src/ui/dialog/inkscape-preferences.cpp:2776
 msgid "Use buffers bigger than the window by this amount"
 msgstr "ここで指定したウィンドウサイズより大きいバッファを使用"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2781
+#: ../src/ui/dialog/inkscape-preferences.cpp:2778
 msgid "Coarsener min size"
 msgstr "宰相サイズを粗くする"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2781
+#: ../src/ui/dialog/inkscape-preferences.cpp:2778
 msgid "Only coarsen rectangles smaller/thinner than this."
 msgstr "これより小さい/細い矩形だけを粗くします"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2783
+#: ../src/ui/dialog/inkscape-preferences.cpp:2780
 msgid "Coarsener glue size"
 msgstr "グルーサイズを粗くする"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2783
+#: ../src/ui/dialog/inkscape-preferences.cpp:2780
 msgid "Absorb nearby rectangles within this distance."
 msgstr "この距離内にある矩形を吸収します。"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2785
+#: ../src/ui/dialog/inkscape-preferences.cpp:2782
 msgid "Coarsener min fullness"
 msgstr "最小フルネスを粗くする"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2785
+#: ../src/ui/dialog/inkscape-preferences.cpp:2782
 msgid "Refuse coarsening attempt if result would be more empty than this."
 msgstr "結果がこれ以上空白になる場合には粗くしない"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2787
+#: ../src/ui/dialog/inkscape-preferences.cpp:2784
 msgid "Debugging, profiling, and experiments"
 msgstr "デバッグ、プロファイリング、および試験的機能"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2789
+#: ../src/ui/dialog/inkscape-preferences.cpp:2786
 msgid "Framecheck"
 msgstr "フレームチェック"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2789
+#: ../src/ui/dialog/inkscape-preferences.cpp:2786
 msgid "Print profiling data of selected operations to a file"
 msgstr "選択した操作のプロファイリングデータをファイルに出力します"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2791
+#: ../src/ui/dialog/inkscape-preferences.cpp:2788
 msgid "Logging"
 msgstr "ログ"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2791
+#: ../src/ui/dialog/inkscape-preferences.cpp:2788
 msgid "Log certain events to the console"
 msgstr "特定のイベントのログをコンソール上に出力します"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2793
+#: ../src/ui/dialog/inkscape-preferences.cpp:2790
 msgid "Slow redraw"
 msgstr "低速な再描画"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2793
+#: ../src/ui/dialog/inkscape-preferences.cpp:2790
 msgid "Introduce a fixed delay for each tile"
 msgstr "ファイル毎に固定遅延を挿入"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2795
+#: ../src/ui/dialog/inkscape-preferences.cpp:2792
 msgid "Slow redraw time"
 msgstr "再描画時間を遅延"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2795
+#: ../src/ui/dialog/inkscape-preferences.cpp:2792
 msgid "The delay to introduce for each tile"
 msgstr "ファイル毎に挿入する遅延"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2797
+#: ../src/ui/dialog/inkscape-preferences.cpp:2794
 msgid "Show redraw"
 msgstr "再描画を表示"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2797
+#: ../src/ui/dialog/inkscape-preferences.cpp:2794
 msgid "Paint a translucent random colour over each newly drawn tile"
 msgstr "新しく描画されたタイルごとに半透明のランダムな色をつけます"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2799
+#: ../src/ui/dialog/inkscape-preferences.cpp:2796
 msgid "Show unclean region"
 msgstr "非クリーン領域を表示"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2799
+#: ../src/ui/dialog/inkscape-preferences.cpp:2796
 msgid "Show the unclean region in red"
 msgstr "非クリーン領域を赤で表示します"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2801
+#: ../src/ui/dialog/inkscape-preferences.cpp:2798
 msgid "Show snapshot"
 msgstr "スナップショットを表示"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2801
+#: ../src/ui/dialog/inkscape-preferences.cpp:2798
 msgid "Show the snapshot region in blue"
 msgstr "スナップショット領域を青で表示します"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2803
+#: ../src/ui/dialog/inkscape-preferences.cpp:2800
 msgid "Show clean fragmentation"
 msgstr "クリーンなフラグメンテーションを表示"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2803
+#: ../src/ui/dialog/inkscape-preferences.cpp:2800
 msgid "Show the outlines of the rectangles in the clean region in green"
 msgstr "クリーン領域内にある矩形アウトラインを緑で表示します"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2805
+#: ../src/ui/dialog/inkscape-preferences.cpp:2802
 msgid "Disable redraw"
 msgstr "再描画を無効"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2805
+#: ../src/ui/dialog/inkscape-preferences.cpp:2802
 msgid "Temporarily disable the idle redraw process completely"
 msgstr "アイドル再描画処理を完全に一時的に無効化します"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2807
+#: ../src/ui/dialog/inkscape-preferences.cpp:2804
 msgid "Sticky decoupled mode"
 msgstr "スティッキー分離モード"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2807
+#: ../src/ui/dialog/inkscape-preferences.cpp:2804
 msgid "Stay in decoupled mode even after rendering is complete"
 msgstr "レンダリング完了後も分離モードのままとする"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2809
+#: ../src/ui/dialog/inkscape-preferences.cpp:2806
 #: ../src/ui/dialog/print.cpp:107
 msgid "Rendering"
 msgstr "レンダリング"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2815
+#: ../src/ui/dialog/inkscape-preferences.cpp:2812
 #: ../src/ui/dialog/svg-fonts-dialog.cpp:1410
 msgid "Edit"
 msgstr "編集"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2816
+#: ../src/ui/dialog/inkscape-preferences.cpp:2813
 msgid "Automatically reload images"
 msgstr "画像を自動的に再読み込みする"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2818
+#: ../src/ui/dialog/inkscape-preferences.cpp:2815
 msgid "Automatically reload linked images when file is changed on disk"
 msgstr "リンクされた画像ファイルが変更されたときに自動的に再読み込みします"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2820
+#: ../src/ui/dialog/inkscape-preferences.cpp:2817
 msgid "_Bitmap editor:"
 msgstr "ビットマップエディター(_B):"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2822
+#: ../src/ui/dialog/inkscape-preferences.cpp:2819
 msgid "_SVG editor:"
 msgstr "SVG エディター(_S):"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2824
+#: ../src/ui/dialog/inkscape-preferences.cpp:2821
 #: ../share/ui/dialog-export.glade:816 ../share/ui/dialog-export.glade:1089
 #: ../share/extensions/guillotine.inx:15 ../share/extensions/layer2png.inx:29
 #: ../share/extensions/plotter.inx:98
@@ -26293,57 +26292,57 @@ msgstr "SVG エディター(_S):"
 msgid "Export"
 msgstr "エクスポート"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2826
+#: ../src/ui/dialog/inkscape-preferences.cpp:2823
 msgid "Default export _resolution:"
 msgstr "デフォルトのエクスポート解像度(_R):"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2826
-#: ../src/ui/dialog/inkscape-preferences.cpp:2830
-#: ../src/ui/dialog/inkscape-preferences.cpp:2874
+#: ../src/ui/dialog/inkscape-preferences.cpp:2823
+#: ../src/ui/dialog/inkscape-preferences.cpp:2827
+#: ../src/ui/dialog/inkscape-preferences.cpp:2871
 msgid "dpi"
 msgstr "dpi"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2827
+#: ../src/ui/dialog/inkscape-preferences.cpp:2824
 msgid "Default image resolution (in dots per inch) in the Export dialog"
 msgstr ""
 "エクスポートダイアログでの画像解像度 (インチあたりのドット数) のデフォルト値"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2828
+#: ../src/ui/dialog/inkscape-preferences.cpp:2825
 msgid "Create"
 msgstr "作成"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2830
+#: ../src/ui/dialog/inkscape-preferences.cpp:2827
 msgid "Resolution for Create Bitmap _Copy:"
 msgstr "作成するビットマップコピーの解像度(_C):"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2831
+#: ../src/ui/dialog/inkscape-preferences.cpp:2828
 msgid "Resolution used by the Create Bitmap Copy command"
 msgstr "ビットマップコピーの作成コマンドで使用される解像度です"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2834
+#: ../src/ui/dialog/inkscape-preferences.cpp:2831
 msgid "Ask about linking and scaling when importing bitmap images"
 msgstr "ビットマップ画像インポート時にリンクおよび拡大縮小について尋ねる"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2836
+#: ../src/ui/dialog/inkscape-preferences.cpp:2833
 msgid "Pop-up linking and scaling dialog when importing bitmap image."
 msgstr ""
 "ビットマップ画像のインポート時にリンクおよび拡大縮小に関するダイアログを表示"
 "します。"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2837
+#: ../src/ui/dialog/inkscape-preferences.cpp:2834
 msgid "Ask about linking and scaling when importing SVG images"
 msgstr "SVG画像インポート時にリンクおよび拡大縮小について尋ねる"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2839
+#: ../src/ui/dialog/inkscape-preferences.cpp:2836
 msgid "Pop-up linking and scaling dialog when importing SVG image."
 msgstr ""
 "SVG画像のインポート時にリンクおよび拡大縮小に関するダイアログを表示します。"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2841
+#: ../src/ui/dialog/inkscape-preferences.cpp:2838
 msgid "Store absolute file path for linked images"
 msgstr "リンク画像の絶対ファイルパスを保存"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2845
+#: ../src/ui/dialog/inkscape-preferences.cpp:2842
 msgid ""
 "By default, image links are stored as relative paths whenever possible. If "
 "this option is enabled, Inkscape will additionally add an absolute path "
@@ -26359,50 +26358,50 @@ msgstr ""
 "人情報が含まれている場合には、それをさらしてしまうことになるので注意してくだ"
 "さい。"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2855
+#: ../src/ui/dialog/inkscape-preferences.cpp:2852
 msgid "Bitmap import/open mode:"
 msgstr "ビットマップのインポートモード"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2859
+#: ../src/ui/dialog/inkscape-preferences.cpp:2856
 msgid "Include"
 msgstr "読み込み"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2859
+#: ../src/ui/dialog/inkscape-preferences.cpp:2856
 #: ../share/ui/dialog-export.glade:957
 msgid "Pages"
 msgstr "ページ"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2862
+#: ../src/ui/dialog/inkscape-preferences.cpp:2859
 msgid "SVG import mode:"
 msgstr "SVG インポートモード:"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2869
+#: ../src/ui/dialog/inkscape-preferences.cpp:2866
 msgid "Image scale (image-rendering):"
 msgstr "ビットマップの拡大縮小 (画像のレンダリング):"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2874
+#: ../src/ui/dialog/inkscape-preferences.cpp:2871
 msgid "Default _import resolution:"
 msgstr "デフォルトのインポート解像度(_I):"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2875
+#: ../src/ui/dialog/inkscape-preferences.cpp:2872
 msgid "Default import resolution (in dots per inch) for bitmap and SVG import"
 msgstr ""
 "ビットマップおよび SVG インポート時のデフォルトの解像度 (インチあたりのドット"
 "数)"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2876
+#: ../src/ui/dialog/inkscape-preferences.cpp:2873
 msgid "Override file resolution"
 msgstr "ファイルの解像度を無視する"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2878
+#: ../src/ui/dialog/inkscape-preferences.cpp:2875
 msgid "Use default bitmap resolution in favor of information from file"
 msgstr "ファイルの情報ではなくインポートのデフォルト解像度を使用します"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2882
+#: ../src/ui/dialog/inkscape-preferences.cpp:2879
 msgid "Images in Outline Mode"
 msgstr "アウトラインモードでも描画する"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2883
+#: ../src/ui/dialog/inkscape-preferences.cpp:2880
 msgid ""
 "When active will render images while in outline mode instead of a red box "
 "with an x. This is useful for manual tracing."
@@ -26410,11 +26409,11 @@ msgstr ""
 "このオプションを有効にすると、アウトラインモードでも赤い枠線ではなく画像を描"
 "画します。これは手作業でトレースするときに便利です。"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2885
+#: ../src/ui/dialog/inkscape-preferences.cpp:2882
 msgid "Imported Images"
 msgstr "インポートした画像"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2895
+#: ../src/ui/dialog/inkscape-preferences.cpp:2892
 msgid ""
 "Select a file of predefined shortcuts and modifiers to use. Any "
 "customizations you create will be added separately to %1"
@@ -26422,58 +26421,58 @@ msgstr ""
 "定義済みショートカットのファイルを選択します。カスタマイズショートカットはす"
 "べて %1 に保存されます。"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2899
+#: ../src/ui/dialog/inkscape-preferences.cpp:2896
 msgid "Keyboard file:"
 msgstr "キーボードファイル:"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2913
+#: ../src/ui/dialog/inkscape-preferences.cpp:2910
 #: ../share/ui/command-palette-operation.glade:81
 msgid "Shortcut"
 msgstr "ショートカット"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2914
+#: ../src/ui/dialog/inkscape-preferences.cpp:2911
 #: ../share/ui/dialog-livepatheffect-add.glade:430
 #: ../share/ui/dialog-livepatheffect-effect.glade:98
 msgid "Description"
 msgstr "詳細"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2915
-#: ../src/ui/dialog/inkscape-preferences.cpp:2960
+#: ../src/ui/dialog/inkscape-preferences.cpp:2912
+#: ../src/ui/dialog/inkscape-preferences.cpp:2957
 #: ../share/ui/marker-popup.glade:430
 msgid "ID"
 msgstr "ID"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2946
+#: ../src/ui/dialog/inkscape-preferences.cpp:2943
 msgid "Shortcuts"
 msgstr "ショートカット"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2953
+#: ../src/ui/dialog/inkscape-preferences.cpp:2950
 #: ../src/ui/dialog/template-load-tab.cpp:47
 msgid "Search:"
 msgstr "検索:"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2964
+#: ../src/ui/dialog/inkscape-preferences.cpp:2961
 msgid "Modifier"
 msgstr "装飾キー"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2965
+#: ../src/ui/dialog/inkscape-preferences.cpp:2962
 msgid "All keys specified must be held down to activate this functionality."
 msgstr ""
 "この機能を有効にするためには指定されたすべてのキーを押す必要があります。"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2975
+#: ../src/ui/dialog/inkscape-preferences.cpp:2972
 msgid "Enabled"
 msgstr "有効にする"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2986
+#: ../src/ui/dialog/inkscape-preferences.cpp:2983
 msgid "Change:"
 msgstr "変更:"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:2991
+#: ../src/ui/dialog/inkscape-preferences.cpp:2988
 msgid "Modifiers"
 msgstr "修飾キー"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3015
+#: ../src/ui/dialog/inkscape-preferences.cpp:3012
 msgid ""
 "Remove all your customized keyboard shortcuts, and revert to the shortcuts "
 "in the shortcut file listed above"
@@ -26481,39 +26480,39 @@ msgstr ""
 "カスタマイズされたすべてのショートカットを除去し、上のショートカットファイル"
 "で定義されたショートカットに戻します"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3019
+#: ../src/ui/dialog/inkscape-preferences.cpp:3016
 msgid "Import ..."
 msgstr "インポート..."
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3021
+#: ../src/ui/dialog/inkscape-preferences.cpp:3018
 msgid "Import custom keyboard shortcuts from a file"
 msgstr "ファイルからカスタムキーボードショートカットをインポートします"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3024
+#: ../src/ui/dialog/inkscape-preferences.cpp:3021
 msgid "Export ..."
 msgstr "エクスポート..."
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3026
+#: ../src/ui/dialog/inkscape-preferences.cpp:3023
 msgid "Export custom keyboard shortcuts to a file"
 msgstr "カスタムキーボードショートカットをファイルにエクスポートします"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3036
+#: ../src/ui/dialog/inkscape-preferences.cpp:3033
 #: ../share/ui/inkscape-start.glade:1239
 msgid "Keyboard"
 msgstr "キーボード"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3040
-#: ../src/ui/dialog/inkscape-preferences.cpp:3048
+#: ../src/ui/dialog/inkscape-preferences.cpp:3037
+#: ../src/ui/dialog/inkscape-preferences.cpp:3045
 msgid "Loading ..."
 msgstr "読み込み中..."
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3050
+#: ../src/ui/dialog/inkscape-preferences.cpp:3047
 msgid "Unable to load keyboard modifier list."
 msgstr "キーボード装飾キーリストを読み込めませんでした。"
 
 #
 # File: ../src/ui/dialog/inkscape-preferences.cpp, line: 2149
-#: ../src/ui/dialog/inkscape-preferences.cpp:3130
+#: ../src/ui/dialog/inkscape-preferences.cpp:3127
 msgid ""
 "Keyboard shortcut \"%1\"\n"
 "is already assigned to \"%2\""
@@ -26523,56 +26522,56 @@ msgstr ""
 
 #
 # File: ../src/ui/dialog/inkscape-preferences.cpp, line: 2152
-#: ../src/ui/dialog/inkscape-preferences.cpp:3133
+#: ../src/ui/dialog/inkscape-preferences.cpp:3130
 msgid "Reassign shortcut?"
 msgstr "ショートカットを再割り当てしますか？"
 
 #
 # File: ../src/ui/dialog/inkscape-preferences.cpp, line: 2153
-#: ../src/ui/dialog/inkscape-preferences.cpp:3134
+#: ../src/ui/dialog/inkscape-preferences.cpp:3131
 msgid "Are you sure you want to reassign this shortcut?"
 msgstr "本当にこのショートカットを再割り当てしますか？"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3332 ../src/ui/shortcuts.cpp:636
+#: ../src/ui/dialog/inkscape-preferences.cpp:3329 ../src/ui/shortcuts.cpp:636
 msgid "Numpad"
 msgstr "テンキー"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3431
+#: ../src/ui/dialog/inkscape-preferences.cpp:3428
 msgid "Ignore words with digits"
 msgstr "数値を含む単語を無視する"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3433
+#: ../src/ui/dialog/inkscape-preferences.cpp:3430
 msgid "Ignore words containing digits, such as \"R2D2\""
 msgstr "数値を含む単語を無視します。たとえば \"R2D2\" みたいな。"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3435
+#: ../src/ui/dialog/inkscape-preferences.cpp:3432
 msgid "Ignore words in ALL CAPITALS"
 msgstr "すべて大文字の単語を無視する"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3437
+#: ../src/ui/dialog/inkscape-preferences.cpp:3434
 msgid "Ignore words in all capitals, such as \"IUPAC\""
 msgstr "すべて大文字の単語を無視します。たとえば \"IUPAC\" みたいな。"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3439
+#: ../src/ui/dialog/inkscape-preferences.cpp:3436
 msgid "Spellcheck"
 msgstr "スペルチェック"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3456
+#: ../src/ui/dialog/inkscape-preferences.cpp:3453
 msgid "Latency _skew:"
 msgstr "レイテンシ スキュー(_S):"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3457
+#: ../src/ui/dialog/inkscape-preferences.cpp:3454
 msgid ""
 "Factor by which the event clock is skewed from the actual time (0.9766 on "
 "some systems)"
 msgstr ""
 "イベントクロックが実際の時刻からずれる係数です (一部のシステムは 0.9766)"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3459
+#: ../src/ui/dialog/inkscape-preferences.cpp:3456
 msgid "Pre-render named icons"
 msgstr "名前付きアイコンの事前描画"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3461
+#: ../src/ui/dialog/inkscape-preferences.cpp:3458
 msgid ""
 "When on, named icons will be rendered before displaying the ui. This is for "
 "working around bugs in GTK+ named icon notification"
@@ -26580,191 +26579,191 @@ msgstr ""
 "チェックマークをつけると、名前付きアイコンは UI 表示される前にレンダリングさ"
 "れます。これは GTK+ 名前付きアイコン通知のバグに対処するためのものです。"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3463
+#: ../src/ui/dialog/inkscape-preferences.cpp:3460
 msgid "System info"
 msgstr "システム情報"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3467
+#: ../src/ui/dialog/inkscape-preferences.cpp:3464
 msgid "Reset Preferences"
 msgstr "環境設定を初期化"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3470
+#: ../src/ui/dialog/inkscape-preferences.cpp:3467
 msgid "User preferences:"
 msgstr "ユーザー設定ファイル:"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3471
+#: ../src/ui/dialog/inkscape-preferences.cpp:3468
 msgid "Location of the user’s preferences file"
 msgstr "ユーザー設定ファイルの格納場所"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3473
+#: ../src/ui/dialog/inkscape-preferences.cpp:3470
 msgid "Open preferences folder"
 msgstr "環境設定フォルダーを開く"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3474
+#: ../src/ui/dialog/inkscape-preferences.cpp:3471
 msgid "User config:"
 msgstr "ユーザー構成設定:"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3474
+#: ../src/ui/dialog/inkscape-preferences.cpp:3471
 msgid "Location of users configuration"
 msgstr "ユーザーの構成設定の格納場所"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3478
+#: ../src/ui/dialog/inkscape-preferences.cpp:3475
 msgid "Open extensions folder"
 msgstr "エクステンションフォルダーを開く"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3479
+#: ../src/ui/dialog/inkscape-preferences.cpp:3476
 msgid "User extensions:"
 msgstr "ユーザーエクステンション:"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3480
+#: ../src/ui/dialog/inkscape-preferences.cpp:3477
 msgid "Location of the user’s extensions"
 msgstr "ユーザーエクステンションの格納場所"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3483
+#: ../src/ui/dialog/inkscape-preferences.cpp:3480
 msgid "Open fonts folder"
 msgstr "フォントフォルダーを開く"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3484
+#: ../src/ui/dialog/inkscape-preferences.cpp:3481
 msgid "User fonts:"
 msgstr "ユーザーフォント:"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3484
+#: ../src/ui/dialog/inkscape-preferences.cpp:3481
 msgid "Location of the user’s fonts"
 msgstr "ユーザーフォントの格納場所"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3491
+#: ../src/ui/dialog/inkscape-preferences.cpp:3488
 msgid "User icons:"
 msgstr "ユーザーアイコン:"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3494
+#: ../src/ui/dialog/inkscape-preferences.cpp:3491
 msgid "Open templates folder"
 msgstr "テンプレートフォルダーを開く"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3495
+#: ../src/ui/dialog/inkscape-preferences.cpp:3492
 msgid "User templates:"
 msgstr "ユーザーテンプレート:"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3496
+#: ../src/ui/dialog/inkscape-preferences.cpp:3493
 msgid "Location of the user’s templates"
 msgstr "ユーザーテンプレートの格納場所"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3499
+#: ../src/ui/dialog/inkscape-preferences.cpp:3496
 msgid "Open symbols folder"
 msgstr "シンボルフォルダーを開く"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3501
+#: ../src/ui/dialog/inkscape-preferences.cpp:3498
 msgid "User symbols:"
 msgstr "ユーザーシンボル:"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3501
+#: ../src/ui/dialog/inkscape-preferences.cpp:3498
 msgid "Location of the user’s symbols"
 msgstr "ユーザーシンボルの格納場所"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3505
+#: ../src/ui/dialog/inkscape-preferences.cpp:3502
 msgid "Open paint servers folder"
 msgstr "ペイントサーバーフォルダーを開く"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3507
+#: ../src/ui/dialog/inkscape-preferences.cpp:3504
 msgid "User paint servers:"
 msgstr "ユーザーペイントサーバー:"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3508
+#: ../src/ui/dialog/inkscape-preferences.cpp:3505
 msgid "Location of the user’s paint servers"
 msgstr "ユーザーペイントサーバーの格納場所"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3511
+#: ../src/ui/dialog/inkscape-preferences.cpp:3508
 msgid "Open palettes folder"
 msgstr "パレットフォルダーを開く"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3512
+#: ../src/ui/dialog/inkscape-preferences.cpp:3509
 msgid "User palettes:"
 msgstr "ユーザーパレット:"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3512
+#: ../src/ui/dialog/inkscape-preferences.cpp:3509
 msgid "Location of the user’s palettes"
 msgstr "ユーザーパレットの格納場所"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3516
+#: ../src/ui/dialog/inkscape-preferences.cpp:3513
 msgid "Open keyboard shortcuts folder"
 msgstr "キーボードショートカットフォルダーを開く"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3517
+#: ../src/ui/dialog/inkscape-preferences.cpp:3514
 msgid "User keys:"
 msgstr "ユーザーキー:"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3518
+#: ../src/ui/dialog/inkscape-preferences.cpp:3515
 msgid "Location of the user’s keyboard mapping files"
 msgstr "ユーザーキーボードマッピングファイルの格納場所"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3521
+#: ../src/ui/dialog/inkscape-preferences.cpp:3518
 msgid "Open user interface folder"
 msgstr "ユーザーインタフェースフォルダーを開く"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3522
+#: ../src/ui/dialog/inkscape-preferences.cpp:3519
 msgid "User UI:"
 msgstr "ユーザー UI:"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3523
+#: ../src/ui/dialog/inkscape-preferences.cpp:3520
 msgid "Location of the user’s user interface description files"
 msgstr "ユーザーインタフェース定義ファイルの格納場所"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3527
+#: ../src/ui/dialog/inkscape-preferences.cpp:3524
 msgid "User cache:"
 msgstr "ユーザーキャッシュ:"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3527
+#: ../src/ui/dialog/inkscape-preferences.cpp:3524
 msgid "Location of user’s cache"
 msgstr "ユーザーキャッシュの場所"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3535
+#: ../src/ui/dialog/inkscape-preferences.cpp:3532
 msgid "Temporary files:"
 msgstr "テンポラリファイル:"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3535
+#: ../src/ui/dialog/inkscape-preferences.cpp:3532
 msgid "Location of the temporary files used for autosave"
 msgstr "自動保存で使用されるテンポラリファイルの格納場所"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3539
+#: ../src/ui/dialog/inkscape-preferences.cpp:3536
 msgid "Inkscape data:"
 msgstr "Inkscape データ:"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3539
+#: ../src/ui/dialog/inkscape-preferences.cpp:3536
 msgid "Location of Inkscape data"
 msgstr "Inkscape データの格納場所"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3544
+#: ../src/ui/dialog/inkscape-preferences.cpp:3541
 msgid "Inkscape extensions:"
 msgstr "Inkscape エクステンション:"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3544
+#: ../src/ui/dialog/inkscape-preferences.cpp:3541
 msgid "Location of the Inkscape extensions"
 msgstr "Inkscape エクステンションの格納場所"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3555
+#: ../src/ui/dialog/inkscape-preferences.cpp:3552
 msgid "System data:"
 msgstr "システムデータ:"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3555
+#: ../src/ui/dialog/inkscape-preferences.cpp:3552
 msgid "Locations of system data"
 msgstr "システムデータの格納場所"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3558
+#: ../src/ui/dialog/inkscape-preferences.cpp:3555
 msgid "Custom Font directories"
 msgstr "カスタムフォントディレクトリ"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3570
+#: ../src/ui/dialog/inkscape-preferences.cpp:3567
 msgid "Icon theme:"
 msgstr "アイコンテーマ:"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3570
+#: ../src/ui/dialog/inkscape-preferences.cpp:3567
 msgid "Locations of icon themes"
 msgstr "アイコンテーマの格納場所"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3572
+#: ../src/ui/dialog/inkscape-preferences.cpp:3569
 msgid "System"
 msgstr "システム"
 
-#: ../src/ui/dialog/inkscape-preferences.cpp:3643
+#: ../src/ui/dialog/inkscape-preferences.cpp:3640
 msgid "<span size='large'><b>No Results</b></span>"
 msgstr "<span size='large'><b>検索結果なし</b></span>"
 
@@ -27367,30 +27366,29 @@ msgstr "オブジェクトのロック/ロック解除"
 msgid "Rename object"
 msgstr "オブジェクトの名前を変更"
 
-#: ../src/ui/dialog/paint-servers.cpp:74
+#: ../src/ui/dialog/paint-servers.cpp:56
 msgid "All paint servers"
 msgstr "すべてのペイントサーバー"
 
-#: ../src/ui/dialog/paint-servers.cpp:75 ../src/ui/dialog/symbols.cpp:102
+#: ../src/ui/dialog/paint-servers.cpp:57 ../src/ui/dialog/symbols.cpp:102
 msgid "Current document"
 msgstr "現在のドキュメント"
 
-#: ../src/ui/dialog/paint-servers.cpp:91
+#: ../src/ui/dialog/paint-servers.cpp:74
 msgid "Server"
 msgstr "サーバー"
 
-#: ../src/ui/dialog/paint-servers.cpp:102
+#: ../src/ui/dialog/paint-servers.cpp:85
 msgid "Change"
 msgstr "変更"
 
-#: ../src/ui/dialog/paint-servers.cpp:106
-#: ../src/ui/dialog/paint-servers.cpp:108 ../share/extensions/frame.inx:25
-#: ../share/extensions/interp_att_g.inx:13
+#: ../src/ui/dialog/paint-servers.cpp:89 ../src/ui/dialog/paint-servers.cpp:91
+#: ../share/extensions/frame.inx:25 ../share/extensions/interp_att_g.inx:13
 #: ../share/extensions/markers_strokepaint.inx:17
 msgid "Fill"
 msgstr "フィル"
 
-#: ../src/ui/dialog/paint-servers.cpp:107 ../share/extensions/frame.inx:22
+#: ../src/ui/dialog/paint-servers.cpp:90 ../share/extensions/frame.inx:22
 #: ../share/extensions/markers_strokepaint.inx:21
 msgid "Stroke"
 msgstr "ストローク"
@@ -29035,12 +29033,12 @@ msgstr "対称ノードハンドル"
 msgid "Auto-smooth node handle"
 msgstr "自動スムーズノードハンドル"
 
-#: ../src/ui/tool/node.cpp:614
+#: ../src/ui/tool/node.cpp:613
 msgctxt "Path handle tip"
 msgid "node control handle"
 msgstr "ノードのコントロールハンドル"
 
-#: ../src/ui/tool/node.cpp:620
+#: ../src/ui/tool/node.cpp:619
 #, c-format
 msgctxt "Path handle tip"
 msgid ""
@@ -29050,24 +29048,24 @@ msgstr ""
 "<b>Shift+Ctrl+Alt</b>: 両方のハンドルを長さを維持し、回転角度を %g°単位にス"
 "ナップして両方のハンドルを回転します"
 
-#: ../src/ui/tool/node.cpp:627
+#: ../src/ui/tool/node.cpp:626
 #, c-format
 msgctxt "Path handle tip"
 msgid ""
 "<b>Ctrl+Alt</b>: preserve length and snap rotation angle to %g° increments"
 msgstr "<b>Ctrl+Alt</b>: 長さを維持し、回転角度を %g°単位にスナップします。"
 
-#: ../src/ui/tool/node.cpp:635
+#: ../src/ui/tool/node.cpp:634
 msgctxt "Path handle tip"
 msgid "<b>Shift+Alt</b>: preserve handle length and rotate both handles"
 msgstr "<b>Shift+Alt</b>: 両方のハンドルの長さと回転角度を維持します。"
 
-#: ../src/ui/tool/node.cpp:639
+#: ../src/ui/tool/node.cpp:638
 msgctxt "Path handle tip"
 msgid "<b>Alt</b>: preserve handle length while dragging"
 msgstr "<b>Alt</b>: ドラッグ中ハンドルの長さを維持します。"
 
-#: ../src/ui/tool/node.cpp:647
+#: ../src/ui/tool/node.cpp:646
 #, c-format
 msgctxt "Path handle tip"
 msgid ""
@@ -29076,47 +29074,47 @@ msgid ""
 msgstr ""
 "<b>Shift+Ctrl</b>: 回転角度を %g°単位にスナップし両方のハンドルを回転します"
 
-#: ../src/ui/tool/node.cpp:653
+#: ../src/ui/tool/node.cpp:652
 msgctxt "Path handle tip"
 msgid "<b>Ctrl</b>: Snap handle to steps defined in BSpline Live Path Effect"
 msgstr ""
 "<b>Ctrl</b>: ハンドルを B スプライン LPE で定義した角度ずつスナップします"
 
-#: ../src/ui/tool/node.cpp:658
+#: ../src/ui/tool/node.cpp:657
 #, c-format
 msgctxt "Path handle tip"
 msgid "<b>Ctrl</b>: snap rotation angle to %g° increments, click to retract"
 msgstr ""
 "<b>Ctrl</b>: 回転角度を %g°単位にスナップします。クリックで引き込みます。"
 
-#: ../src/ui/tool/node.cpp:665
+#: ../src/ui/tool/node.cpp:664
 msgctxt "Path handle tip"
 msgid "<b>Shift</b>: rotate both handles by the same angle"
 msgstr "<b>Shift</b>: 両方のハンドルを同じ角度で回転します"
 
-#: ../src/ui/tool/node.cpp:669
+#: ../src/ui/tool/node.cpp:668
 msgctxt "Path handle tip"
 msgid "<b>Shift</b>: move handle"
 msgstr "<b>Shift</b>: ハンドルを移動"
 
-#: ../src/ui/tool/node.cpp:677
+#: ../src/ui/tool/node.cpp:676
 msgctxt "Path handle tip"
 msgid "Shift, Ctrl, Alt"
 msgstr "Shift, Ctrl, Alt"
 
 #
 # File: ../src/ui/tool/node.cpp, line: 611
-#: ../src/ui/tool/node.cpp:681
+#: ../src/ui/tool/node.cpp:680
 msgctxt "Path handle tip"
 msgid "Ctrl"
 msgstr "Ctrl"
 
-#: ../src/ui/tool/node.cpp:685
+#: ../src/ui/tool/node.cpp:684
 msgctxt "Path handle tip"
 msgid "Ctrl, Alt"
 msgstr "Ctrl、Alt"
 
-#: ../src/ui/tool/node.cpp:690
+#: ../src/ui/tool/node.cpp:689
 #, c-format
 msgctxt "Path handle tip"
 msgid ""
@@ -29126,7 +29124,7 @@ msgstr ""
 "<b>%s</b>: ドラッグでパスを成形します。マウスカーソルを上に置くと固定し、"
 "Shift+S でスムーズに、Shift+Y で対称ノードにします。 (もっと: %s)"
 
-#: ../src/ui/tool/node.cpp:700
+#: ../src/ui/tool/node.cpp:699
 #, c-format
 msgctxt "Path handle tip"
 msgid ""
@@ -29136,7 +29134,7 @@ msgstr ""
 "<b>%s</b>: ドラッグでパスを成形します。マウスカーソルを上に置くと固定し、"
 "Shift+Y で対称ノードにします。 (もっと: %s)"
 
-#: ../src/ui/tool/node.cpp:709
+#: ../src/ui/tool/node.cpp:708
 #, c-format
 msgctxt "Path handle tip"
 msgid ""
@@ -29146,13 +29144,13 @@ msgstr ""
 "<b>%s</b>: ドラッグしてスムーズに、マウスを上に置いてロック、Shift+Y で対称に"
 "します。 (もっと: %s)"
 
-#: ../src/ui/tool/node.cpp:718
+#: ../src/ui/tool/node.cpp:717
 #, c-format
 msgctxt "Path handle tip"
 msgid "<b>%s</b>: drag to shape the path. (more: %s)"
 msgstr "<b>%s</b>: ドラッグでパスを成形します。(もっと: %s)"
 
-#: ../src/ui/tool/node.cpp:726
+#: ../src/ui/tool/node.cpp:725
 #, c-format
 msgctxt "Path handle tip"
 msgid ""
@@ -29162,60 +29160,60 @@ msgstr ""
 "<b>B スプラインノードハンドル</b> (%.3g 乗): Shift+ドラッグで移動、ダブルク"
 "リックで初期化。(もっと: %s)"
 
-#: ../src/ui/tool/node.cpp:734
+#: ../src/ui/tool/node.cpp:733
 msgctxt "Path handle tip"
 msgid "<b>unknown node handle</b>"
 msgstr "<b>不明なノードハンドル</b>"
 
-#: ../src/ui/tool/node.cpp:757
+#: ../src/ui/tool/node.cpp:756
 #, c-format
 msgctxt "Path handle tip"
 msgid "Move handle by %s, %s; angle %.2f°, length %s"
 msgstr "ハンドルの移動: %s, %s; 角度 %.2f°, 長さ %s"
 
-#: ../src/ui/tool/node.cpp:1584
+#: ../src/ui/tool/node.cpp:1590
 msgctxt "Path node tip"
 msgid "node handle"
 msgstr "ノードのハンドル"
 
 # This 'toggle' means more like 'fasten'.
-#: ../src/ui/tool/node.cpp:1597
+#: ../src/ui/tool/node.cpp:1603
 msgctxt "Path node tip"
 msgid "<b>Shift</b>: drag out a handle, click to toggle selection"
 msgstr ""
 "<b>Shift</b>: ドラッグでハンドルを引き出し、クリックで選択範囲に追加します。"
 
 # This 'toggle' means more like 'fasten'.
-#: ../src/ui/tool/node.cpp:1601
+#: ../src/ui/tool/node.cpp:1607
 msgctxt "Path node tip"
 msgid "<b>Shift</b>: click to toggle selection"
 msgstr "<b>Shift</b>: クリックで選択範囲に追加します。"
 
-#: ../src/ui/tool/node.cpp:1608
+#: ../src/ui/tool/node.cpp:1614
 msgctxt "Path node tip"
 msgid "<b>Ctrl+Alt</b>: move along handle lines, click to delete node"
 msgstr ""
 "<b>Ctrl+Alt</b>: ハンドルの方向に沿って移動します。クリックでノードを削除しま"
 "す。"
 
-#: ../src/ui/tool/node.cpp:1612
+#: ../src/ui/tool/node.cpp:1618
 msgctxt "Path node tip"
 msgid "<b>Ctrl</b>: move along axes, click to change node type"
 msgstr ""
 "<b>Ctrl</b>: 軸方向に沿って移動します。クリックでノードタイプを変更します。"
 
-#: ../src/ui/tool/node.cpp:1618
+#: ../src/ui/tool/node.cpp:1624
 msgctxt "Path node tip"
 msgid "<b>Alt</b>: sculpt nodes"
 msgstr "<b>Alt</b>: 複数ノードを形を整えながら成形します (スカルプトモード)。"
 
-#: ../src/ui/tool/node.cpp:1629
+#: ../src/ui/tool/node.cpp:1635
 #, c-format
 msgctxt "Path node tip"
 msgid "<b>%s</b>: drag to shape the path. (more: Shift, Ctrl, Alt)"
 msgstr "<b>%s</b>: ドラッグでパスを成形します。(もっと: Shift、Ctrl、Alt)"
 
-#: ../src/ui/tool/node.cpp:1636
+#: ../src/ui/tool/node.cpp:1642
 #, c-format
 msgctxt "Path node tip"
 msgid ""
@@ -29225,7 +29223,7 @@ msgstr ""
 "<b>B スプラインノード</b> (%.3g 乗): ドラッグしてパスを成形。(もっと: Shift、"
 "Ctrl、Alt)"
 
-#: ../src/ui/tool/node.cpp:1644
+#: ../src/ui/tool/node.cpp:1650
 #, c-format
 msgctxt "Path node tip"
 msgid ""
@@ -29235,7 +29233,7 @@ msgstr ""
 "<b>%s</b>: ドラッグでパスを成形します。クリックで拡大縮小/回転ハンドルに切り"
 "替えます。(もっと: Shift、Ctrl、Alt)"
 
-#: ../src/ui/tool/node.cpp:1653
+#: ../src/ui/tool/node.cpp:1659
 #, c-format
 msgctxt "Path node tip"
 msgid ""
@@ -29245,7 +29243,7 @@ msgstr ""
 "<b>%s</b>: ドラッグでパスを成形します。クリックでこのノードのみを選択します。"
 "(もっと: Shift、Ctrl、Alt)"
 
-#: ../src/ui/tool/node.cpp:1661
+#: ../src/ui/tool/node.cpp:1667
 #, c-format
 msgctxt "Path node tip"
 msgid ""
@@ -29255,21 +29253,21 @@ msgstr ""
 "<b>B スプラインノード</b> (%.3g 乗): ドラッグしてパスを成形、クリックしてこの"
 "ノードのみ選択。 (もっと: Shift、Ctrl、Alt)"
 
-#: ../src/ui/tool/node.cpp:1680
+#: ../src/ui/tool/node.cpp:1686
 #, c-format
 msgctxt "Path node tip"
 msgid "Move node by %s, %s"
 msgstr "ノードを移動: %s, %s"
 
-#: ../src/ui/tool/node.cpp:1691
+#: ../src/ui/tool/node.cpp:1697
 msgid "Corner node"
 msgstr "角ノード"
 
-#: ../src/ui/tool/node.cpp:1695
+#: ../src/ui/tool/node.cpp:1701
 msgid "Symmetric node"
 msgstr "対称ノード"
 
-#: ../src/ui/tool/node.cpp:1697
+#: ../src/ui/tool/node.cpp:1703
 msgid "Auto-smooth node"
 msgstr "自動スムーズノード"
 
@@ -29443,7 +29441,7 @@ msgstr "円/弧の垂直半径"
 #: ../src/ui/toolbar/node-toolbar.cpp:296
 #: ../src/ui/toolbar/paintbucket-toolbar.cpp:112
 #: ../src/ui/toolbar/rect-toolbar.cpp:174
-#: ../src/ui/toolbar/select-toolbar.cpp:265
+#: ../src/ui/toolbar/select-toolbar.cpp:266
 #: ../src/ui/toolbar/text-toolbar.cpp:329
 #: ../src/ui/toolbar/text-toolbar.cpp:355 ../share/ui/dialog-export.glade:137
 msgid "Units"
@@ -30638,29 +30636,29 @@ msgstr ""
 "ページの縦横の長さ。(例: 15x10cm, 10in x 100mm)\n"
 "またはドロップダウンからサイズ名を選択"
 
-#: ../src/ui/toolbar/page-toolbar.cpp:124
+#: ../src/ui/toolbar/page-toolbar.cpp:128
 msgid "Relabel Page"
 msgstr "ページのラベルを変更"
 
-#: ../src/ui/toolbar/page-toolbar.cpp:138
+#: ../src/ui/toolbar/page-toolbar.cpp:148
 msgid "Resize Page"
 msgstr "ページをサイズ変更"
 
-#: ../src/ui/toolbar/page-toolbar.cpp:231
+#: ../src/ui/toolbar/page-toolbar.cpp:252
 msgid "Page label"
 msgstr "ページのラベル"
 
 #. TRANSLATORS: "%1" is replaced with the page we are on, and "%2" is the total number of pages.
-#: ../src/ui/toolbar/page-toolbar.cpp:245
+#: ../src/ui/toolbar/page-toolbar.cpp:266
 msgid "%1/%2"
 msgstr "%1/%2"
 
-#: ../src/ui/toolbar/page-toolbar.cpp:259
+#: ../src/ui/toolbar/page-toolbar.cpp:280
 msgid "Single Page Document"
 msgstr "単一ページのドキュメント"
 
 #. TRANSLATORS: This is a fixed value meaning a single page document
-#: ../src/ui/toolbar/page-toolbar.cpp:260 ../share/ui/toolbar-page.ui:93
+#: ../src/ui/toolbar/page-toolbar.cpp:281 ../share/ui/toolbar-page.ui:93
 msgid "1/-"
 msgstr "1/-"
 
@@ -30880,143 +30878,143 @@ msgstr "角をシャープに"
 msgid "Change rectangle"
 msgstr "矩形の変更"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:68 ../share/ui/menus.ui:255
+#: ../src/ui/toolbar/select-toolbar.cpp:69 ../share/ui/menus.ui:255
 msgid "Select Al_l"
 msgstr "すべて選択(_L)"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:69
+#: ../src/ui/toolbar/select-toolbar.cpp:70
 msgid "Select all objects"
 msgstr "すべてのオブジェクトを選択"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:77 ../share/ui/menus.ui:260
+#: ../src/ui/toolbar/select-toolbar.cpp:78 ../share/ui/menus.ui:260
 msgid "Select All in All La_yers"
 msgstr "全レイヤーの全オブジェクトを選択(_Y)"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:86 ../share/ui/menus.ui:300
+#: ../src/ui/toolbar/select-toolbar.cpp:87 ../share/ui/menus.ui:300
 msgid "D_eselect"
 msgstr "選択解除(_E)"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:87
+#: ../src/ui/toolbar/select-toolbar.cpp:88
 msgid "Deselect any selected objects"
 msgstr "選択オブジェクトをすべて選択解除"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:95
+#: ../src/ui/toolbar/select-toolbar.cpp:96
 msgid "Select by touch"
 msgstr "タッチで選択"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:96
+#: ../src/ui/toolbar/select-toolbar.cpp:97
 msgid "Toggle selection box to select all touched objects."
 msgstr "触れたすべてのオブジェクトを選択する選択ボックスを切り替えます"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:106
+#: ../src/ui/toolbar/select-toolbar.cpp:107
 msgid "Rotate _90° CCW"
 msgstr "90°回転、半時計回り(_9)"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:116
+#: ../src/ui/toolbar/select-toolbar.cpp:117
 msgid "Rotate _90° CW"
 msgstr "90°回転、時計回り(_9)"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:126 ../share/ui/menus.ui:899
+#: ../src/ui/toolbar/select-toolbar.cpp:127 ../share/ui/menus.ui:899
 msgid "Flip _Horizontal"
 msgstr "水平に反転(_H)"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:136 ../share/ui/menus.ui:905
+#: ../src/ui/toolbar/select-toolbar.cpp:137 ../share/ui/menus.ui:905
 msgid "Flip _Vertical"
 msgstr "垂直に反転(_V)"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:148 ../share/ui/menus.ui:861
+#: ../src/ui/toolbar/select-toolbar.cpp:149 ../share/ui/menus.ui:861
 msgid "Raise to _Top"
 msgstr "最前面へ(_T)"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:158 ../share/ui/menus.ui:867
+#: ../src/ui/toolbar/select-toolbar.cpp:159 ../share/ui/menus.ui:867
 msgid "_Raise"
 msgstr "前面へ(_R)"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:168 ../share/ui/menus.ui:873
+#: ../src/ui/toolbar/select-toolbar.cpp:169 ../share/ui/menus.ui:873
 msgid "_Lower"
 msgstr "背面へ(_L)"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:178 ../share/ui/menus.ui:879
+#: ../src/ui/toolbar/select-toolbar.cpp:179 ../share/ui/menus.ui:879
 msgid "Lower to _Bottom"
 msgstr "最背面へ(_B)"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:199
+#: ../src/ui/toolbar/select-toolbar.cpp:200
 msgctxt "Select toolbar"
 msgid "X:"
 msgstr "X:"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:204
+#: ../src/ui/toolbar/select-toolbar.cpp:205
 msgctxt "Select toolbar"
 msgid "Horizontal coordinate of selection"
 msgstr "選択オブジェクトの水平座標"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:215
+#: ../src/ui/toolbar/select-toolbar.cpp:216
 msgctxt "Select toolbar"
 msgid "Y:"
 msgstr "Y:"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:220
+#: ../src/ui/toolbar/select-toolbar.cpp:221
 msgctxt "Select toolbar"
 msgid "Vertical coordinate of selection"
 msgstr "選択オブジェクトの垂直座標"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:231
+#: ../src/ui/toolbar/select-toolbar.cpp:232
 msgctxt "Select toolbar"
 msgid "W:"
 msgstr "幅:"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:236
+#: ../src/ui/toolbar/select-toolbar.cpp:237
 msgctxt "Select toolbar"
 msgid "Width of selection"
 msgstr "選択オブジェクトの幅"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:241
+#: ../src/ui/toolbar/select-toolbar.cpp:242
 msgid "Lock width and height"
 msgstr "縦横比を固定"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:242
+#: ../src/ui/toolbar/select-toolbar.cpp:243
 msgid "When locked, change both width and height by the same proportion"
 msgstr "ロックすると幅と高さの比率を維持して拡大縮小"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:255
+#: ../src/ui/toolbar/select-toolbar.cpp:256
 msgctxt "Select toolbar"
 msgid "H:"
 msgstr "高さ:"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:260
+#: ../src/ui/toolbar/select-toolbar.cpp:261
 msgctxt "Select toolbar"
 msgid "Height of selection"
 msgstr "選択オブジェクトの高さ"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:277
+#: ../src/ui/toolbar/select-toolbar.cpp:278
 msgid "Scale rounded corners"
 msgstr "矩形の丸められた角も拡大縮小"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:284
+#: ../src/ui/toolbar/select-toolbar.cpp:285
 msgid "Move gradients"
 msgstr "グラデーションも移動"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:291
+#: ../src/ui/toolbar/select-toolbar.cpp:292
 msgid "Move patterns"
 msgstr "パターンも移動"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:449
+#: ../src/ui/toolbar/select-toolbar.cpp:442
 msgid "Transform by toolbar"
 msgstr "ツールバーから変形"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:560
+#: ../src/ui/toolbar/select-toolbar.cpp:573
 msgid "Now <b>stroke width</b> is <b>scaled</b> when objects are scaled."
 msgstr ""
 "これ以後、オブジェクトが拡大縮小されたとき、<b>ストローク幅</b>も<b>拡大縮小"
 "されます</b>。"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:562
+#: ../src/ui/toolbar/select-toolbar.cpp:575
 msgid "Now <b>stroke width</b> is <b>not scaled</b> when objects are scaled."
 msgstr ""
 "これ以後、オブジェクトが拡大縮小されたとき、<b>ストローク幅</b>は<b>拡大縮小"
 "されません</b>。"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:573
+#: ../src/ui/toolbar/select-toolbar.cpp:586
 msgid ""
 "Now <b>rounded rectangle corners</b> are <b>scaled</b> when rectangles are "
 "scaled."
@@ -31024,7 +31022,7 @@ msgstr ""
 "これ以後、矩形が拡大縮小されたとき、<b>矩形の丸められた角</b>も<b>拡大縮小さ"
 "れます</b>。"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:575
+#: ../src/ui/toolbar/select-toolbar.cpp:588
 msgid ""
 "Now <b>rounded rectangle corners</b> are <b>not scaled</b> when rectangles "
 "are scaled."
@@ -31032,7 +31030,7 @@ msgstr ""
 "これ以後、矩形が拡大縮小されたとき、<b>矩形の丸められた角</b>は<b>拡大縮小さ"
 "れません</b>。"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:586
+#: ../src/ui/toolbar/select-toolbar.cpp:599
 msgid ""
 "Now <b>gradients</b> are <b>transformed</b> along with their objects when "
 "those are transformed (moved, scaled, rotated, or skewed)."
@@ -31040,7 +31038,7 @@ msgstr ""
 "これ以降、オブジェクトが変形 (移動、拡大縮小、回転、傾斜) されたとき、<b>グラ"
 "デーション</b>はオブジェクトに合わせて<b>変形されます</b>。"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:588
+#: ../src/ui/toolbar/select-toolbar.cpp:601
 msgid ""
 "Now <b>gradients</b> remain <b>fixed</b> when objects are transformed "
 "(moved, scaled, rotated, or skewed)."
@@ -31048,7 +31046,7 @@ msgstr ""
 "これ以降、オブジェクトが変形 (移動、拡大縮小、回転、傾斜) しても、<b>グラデー"
 "ション</b>は<b>変形せず固定されます</b>。"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:599
+#: ../src/ui/toolbar/select-toolbar.cpp:612
 msgid ""
 "Now <b>patterns</b> are <b>transformed</b> along with their objects when "
 "those are transformed (moved, scaled, rotated, or skewed)."
@@ -31056,7 +31054,7 @@ msgstr ""
 "これ以降、オブジェクトが変形 (移動、拡大縮小、回転、傾斜) されたとき、<b>パ"
 "ターン</b>はオブジェクトに合わせて<b>変形されます</b>。"
 
-#: ../src/ui/toolbar/select-toolbar.cpp:601
+#: ../src/ui/toolbar/select-toolbar.cpp:614
 msgid ""
 "Now <b>patterns</b> remain <b>fixed</b> when objects are transformed (moved, "
 "scaled, rotated, or skewed)."
@@ -31146,7 +31144,7 @@ msgstr ""
 msgid "Change spiral"
 msgstr "らせんの変更"
 
-#: ../src/ui/toolbar/spray-toolbar.cpp:78 ../src/ui/tools/spray-tool.cpp:1361
+#: ../src/ui/toolbar/spray-toolbar.cpp:78 ../src/ui/tools/spray-tool.cpp:1366
 msgid "Spray with copies"
 msgstr "コピーでスプレー"
 
@@ -31154,7 +31152,7 @@ msgstr "コピーでスプレー"
 msgid "Spray copies of the initial selection"
 msgstr "最初に選択したオブジェクトのコピーをスプレー"
 
-#: ../src/ui/toolbar/spray-toolbar.cpp:83 ../src/ui/tools/spray-tool.cpp:1364
+#: ../src/ui/toolbar/spray-toolbar.cpp:83 ../src/ui/tools/spray-tool.cpp:1369
 msgid "Spray with clones"
 msgstr "クローンでスプレー"
 
@@ -32831,12 +32829,12 @@ msgstr ""
 "%s。ドラッグ、クリック、またはクリック+マウススクロールで最初の選択範囲を<b>"
 "単一パス</b>でスプレーします。"
 
-#: ../src/ui/tools/spray-tool.cpp:1287
+#: ../src/ui/tools/spray-tool.cpp:1292
 msgid "<b>Nothing selected!</b> Select objects to spray."
 msgstr ""
 "<b>何も選択されていません!</b> スプレーするオブジェクトを選択してください。"
 
-#: ../src/ui/tools/spray-tool.cpp:1367
+#: ../src/ui/tools/spray-tool.cpp:1372
 msgid "Spray in single path"
 msgstr "単一パスのスプレー"
 
@@ -34329,7 +34327,7 @@ msgstr "、ドラッグで調整、中央クリックで削除"
 
 #: ../src/ui/widget/selected-style.cpp:1056
 #: ../src/ui/widget/selected-style.cpp:1057
-#: ../src/ui/widget/stroke-style.cpp:182 ../src/ui/widget/style-swatch.cpp:313
+#: ../src/ui/widget/stroke-style.cpp:181 ../src/ui/widget/style-swatch.cpp:313
 #: ../src/ui/widget/style-swatch.cpp:316
 msgid "Hairline"
 msgstr "ヘアライン"
@@ -34437,113 +34435,125 @@ msgctxt "Stroke width"
 msgid "_Width:"
 msgstr "幅(_W):"
 
-#: ../src/ui/widget/stroke-style.cpp:199
+#: ../src/ui/widget/stroke-style.cpp:197
 msgid "Dashes:"
 msgstr "線種:"
 
-#: ../src/ui/widget/stroke-style.cpp:217
+#: ../src/ui/widget/stroke-style.cpp:215
 msgid "_Pattern:"
 msgstr "パターン(_P):"
 
-#: ../src/ui/widget/stroke-style.cpp:218
+#: ../src/ui/widget/stroke-style.cpp:216
 msgid "Repeating \"dash gap ...\" pattern"
 msgstr "\"隙間を点線で埋める ...\" パターンを繰り返す"
 
 #. TRANSLATORS: Path markers are an SVG feature that allows you to attach arbitrary shapes
 #. (arrowheads, bullets, faces, whatever) to the start, end, or middle nodes of a path.
-#: ../src/ui/widget/stroke-style.cpp:240
+#: ../src/ui/widget/stroke-style.cpp:238
 msgid "Markers:"
 msgstr "マーカー:"
 
-#: ../src/ui/widget/stroke-style.cpp:246
+#: ../src/ui/widget/stroke-style.cpp:244
 msgid "Start Markers are drawn on the first node of a path or shape"
 msgstr "始点マーカーはパスまたはシェイプの最初のノードに描画されます"
 
-#: ../src/ui/widget/stroke-style.cpp:254
+#: ../src/ui/widget/stroke-style.cpp:252
 msgid ""
 "Mid Markers are drawn on every node of a path or shape except the first and "
 "last nodes"
 msgstr ""
 "中間マーカーはパスまたはシェイプの最初と最後を除く各ノードに描画されます"
 
-#: ../src/ui/widget/stroke-style.cpp:262
+#: ../src/ui/widget/stroke-style.cpp:260
 msgid "End Markers are drawn on the last node of a path or shape"
 msgstr "終点マーカーはパスまたはシェイプの最後のノードに描画されます"
 
 #. TRANSLATORS: Bevel join: joining lines with a blunted (flattened) corner.
 #. For an example, draw a triangle with a large stroke width and modify the
 #. "Join" option (in the Fill and Stroke dialog).
-#: ../src/ui/widget/stroke-style.cpp:285
+#: ../src/ui/widget/stroke-style.cpp:283
 msgid "Bevel join"
 msgstr "斜結合"
 
 #. TRANSLATORS: Round join: joining lines with a rounded corner.
 #. For an example, draw a triangle with a large stroke width and modify the
 #. "Join" option (in the Fill and Stroke dialog).
-#: ../src/ui/widget/stroke-style.cpp:293
+#: ../src/ui/widget/stroke-style.cpp:291
 msgid "Round join"
 msgstr "丸結合"
 
 #. TRANSLATORS: Miter join: joining lines with a sharp (pointed) corner.
 #. For an example, draw a triangle with a large stroke width and modify the
 #. "Join" option (in the Fill and Stroke dialog).
-#: ../src/ui/widget/stroke-style.cpp:301
+#: ../src/ui/widget/stroke-style.cpp:299
 msgid "Miter join"
 msgstr "角結合"
 
 #. TRANSLATORS: cap type specifies the shape for the ends of lines
 #. spw_label(t, _("_Cap:"), 0, i);
-#: ../src/ui/widget/stroke-style.cpp:325
+#: ../src/ui/widget/stroke-style.cpp:323
 msgid "Cap:"
 msgstr "端:"
 
 #. TRANSLATORS: Butt cap: the line shape does not extend beyond the end point
 #. of the line; the ends of the line are square
-#: ../src/ui/widget/stroke-style.cpp:336
+#: ../src/ui/widget/stroke-style.cpp:334
 msgid "Butt cap"
 msgstr "角"
 
 #. TRANSLATORS: Round cap: the line shape extends beyond the end point of the
 #. line; the ends of the line are rounded
-#: ../src/ui/widget/stroke-style.cpp:343
+#: ../src/ui/widget/stroke-style.cpp:341
 msgid "Round cap"
 msgstr "丸"
 
 #. TRANSLATORS: Square cap: the line shape extends beyond the end point of the
 #. line; the ends of the line are square
-#: ../src/ui/widget/stroke-style.cpp:350
+#: ../src/ui/widget/stroke-style.cpp:348
 msgid "Square cap"
 msgstr "四角"
 
-#: ../src/ui/widget/stroke-style.cpp:364
+#: ../src/ui/widget/stroke-style.cpp:362
 msgid "Fill, Stroke, Markers"
 msgstr "フィル、ストローク、マーカー"
 
-#: ../src/ui/widget/stroke-style.cpp:368
+#: ../src/ui/widget/stroke-style.cpp:366
 msgid "Stroke, Fill, Markers"
 msgstr "ストローク、フィル、マーカー"
 
-#: ../src/ui/widget/stroke-style.cpp:372
+#: ../src/ui/widget/stroke-style.cpp:370
 msgid "Fill, Markers, Stroke"
 msgstr "フィル、マーカー、ストローク"
 
-#: ../src/ui/widget/stroke-style.cpp:380
+#: ../src/ui/widget/stroke-style.cpp:378
 msgid "Markers, Fill, Stroke"
 msgstr "マーカー、フィル、ストローク"
 
-#: ../src/ui/widget/stroke-style.cpp:384
+#: ../src/ui/widget/stroke-style.cpp:382
 msgid "Stroke, Markers, Fill"
 msgstr "ストローク、マーカー、フィル"
 
-#: ../src/ui/widget/stroke-style.cpp:388
+#: ../src/ui/widget/stroke-style.cpp:386
 msgid "Markers, Stroke, Fill"
 msgstr "マーカー、ストローク、フィル"
 
-#: ../src/ui/widget/stroke-style.cpp:520
+#: ../src/ui/widget/stroke-style.cpp:518
 msgid "Set markers"
 msgstr "マーカーの設定"
 
-#: ../src/ui/widget/stroke-style.cpp:986 ../src/ui/widget/stroke-style.cpp:1085
+#: ../src/ui/widget/stroke-style.cpp:950
+msgid "Set stroke width"
+msgstr "ストロークの幅を設定"
+
+#: ../src/ui/widget/stroke-style.cpp:991
+msgid "Set stroke dash"
+msgstr "ストロークの破線を設定"
+
+#: ../src/ui/widget/stroke-style.cpp:1012
+msgid "Set stroke miter"
+msgstr "ストロークの継ぎを設定"
+
+#: ../src/ui/widget/stroke-style.cpp:1069
 msgid "Set stroke style"
 msgstr "ストロークのスタイルの設定"
 
@@ -36150,17 +36160,23 @@ msgstr "最小オブジェクト"
 msgid "Selection Area"
 msgstr "選択範囲"
 
-#: ../share/ui/align-and-distribute.ui:352
-msgid "Treat selection as group."
-msgstr "選択オブジェクトをグループとして扱います。"
+#
+# File: ../src/ui/dialog/align-and-distribute.cpp, line: 1107
+#: ../share/ui/align-and-distribute.ui:336
+msgid "Enable on-canvas alignment handles"
+msgstr "キャンバス上の整列ハンドルを有効にします"
+
+#: ../share/ui/align-and-distribute.ui:352 ../share/extensions/frame.inx:10
+msgid "Treat selection as group"
+msgstr "選択オブジェクトをグループとして扱う"
 
 #: ../share/ui/align-and-distribute.ui:364
-msgid "Alignment handles with third click."
-msgstr "3 回目のクリックでハンドルを整列します。"
+msgid "Alignment handles with third click"
+msgstr "3 回目のクリックでハンドルを整列します"
 
 #: ../share/ui/align-and-distribute.ui:377
-msgid "Move/align selection as group."
-msgstr "選択オブジェクトをグループとして移動/整列します。"
+msgid "Move/align selection as group"
+msgstr "選択オブジェクトをグループとして移動/整列します"
 
 #: ../share/ui/align-and-distribute.ui:400
 #: ../share/ui/align-and-distribute.ui:1131
@@ -36168,80 +36184,80 @@ msgid "Relative to:"
 msgstr "基準: "
 
 #: ../share/ui/align-and-distribute.ui:449
-msgid "Align right edges of objects to the left edge of anchor."
-msgstr "オブジェクトの右端を基準の左端に揃えます。"
+msgid "Align right edges of objects to the left edge of anchor"
+msgstr "オブジェクトの右端を基準の左端に揃えます"
 
 #: ../share/ui/align-and-distribute.ui:464
-msgid "Align left edges."
-msgstr "左端で揃えます。"
+msgid "Align left edges"
+msgstr "左端で揃えます"
 
 #: ../share/ui/align-and-distribute.ui:479
-msgid "Center of vertical axis."
-msgstr "中心を垂直軸に合わせます。"
+msgid "Center on vertical axis"
+msgstr "中心を垂直軸に合わせます"
 
 #: ../share/ui/align-and-distribute.ui:494
-msgid "Align right edges."
-msgstr "右端で揃えます。"
+msgid "Align right edges"
+msgstr "右端で揃えます"
 
 #: ../share/ui/align-and-distribute.ui:509
-msgid "Align left edges of objects to the right edge of anchor."
-msgstr "オブジェクトの左端を基準の右端に揃えます。"
+msgid "Align left edges of objects to the right edge of anchor"
+msgstr "オブジェクトの左端を基準の右端に揃えます"
 
 #: ../share/ui/align-and-distribute.ui:524
-msgid "Align baseline anchors of texts horizontally."
-msgstr "テキストのベースラインアンカーを水平方向に揃えます。"
+msgid "Align baseline anchors of texts horizontally"
+msgstr "テキストのベースラインアンカーを水平方向に揃えます"
 
 #: ../share/ui/align-and-distribute.ui:539
-msgid "Align bottom edges of objects to the top edge of anchor."
-msgstr "オブジェクトの下端を基準の上端に揃えます。"
+msgid "Align bottom edges of objects to the top edge of anchor"
+msgstr "オブジェクトの下端を基準の上端に揃えます"
 
 #: ../share/ui/align-and-distribute.ui:554
-msgid "Align top edges."
-msgstr "上端で揃える"
+msgid "Align top edges"
+msgstr "上端で揃えます"
 
 #: ../share/ui/align-and-distribute.ui:569
-msgid "Center on horizontal axis."
-msgstr "水平軸の中心に揃えます。"
+msgid "Center on horizontal axis"
+msgstr "水平軸の中心に揃えます"
 
 #: ../share/ui/align-and-distribute.ui:584
-msgid "Align bottom edges."
-msgstr "下端で揃えます。"
+msgid "Align bottom edges"
+msgstr "下端で揃えます"
 
 #: ../share/ui/align-and-distribute.ui:599
-msgid "Align top edges of objects to bottom edge of anchor."
-msgstr "オブジェクトの上端を基準の下端に揃えます。"
+msgid "Align top edges of objects to bottom edge of anchor"
+msgstr "オブジェクトの上端を基準の下端に揃えます"
 
 #: ../share/ui/align-and-distribute.ui:614
-msgid "Align baselines of texts."
-msgstr "テキストのベースラインを揃えます。"
+msgid "Align baselines of texts"
+msgstr "テキストのベースラインを揃えます"
 
 #: ../share/ui/align-and-distribute.ui:1018
-msgid "Mininum horizontal gap (in pixel units) between bounding boxes."
-msgstr "境界枠の間の最小水平間隔 (px単位) です。"
+msgid "Minimum horizontal gap (in pixel units) between bounding boxes"
+msgstr "境界枠の間の最小水平間隔 (px単位) です"
 
 #: ../share/ui/align-and-distribute.ui:1031
 msgid "V:"
 msgstr "V:"
 
 #: ../share/ui/align-and-distribute.ui:1046
-msgid "Mininum vertical gap (in pixel units) between bounding boxes."
-msgstr "境界枠の間の最小垂直間隔 (px単位) です。"
+msgid "Mininum vertical gap (in pixel units) between bounding boxes"
+msgstr "境界枠の間の最小垂直間隔 (px単位) です"
 
 #: ../share/ui/align-and-distribute.ui:1063
 msgid ""
 "Move objects as little as possible so that their bounding boxes do not "
-"overlap."
+"overlap"
 msgstr ""
 "各オブジェクトの境界枠同士が重ならないようにオブジェクトを最小限だけ動かしま"
-"す。"
+"す"
 
 #: ../share/ui/align-and-distribute.ui:1180
-msgid "Align selected nodes to a common horizontal line."
-msgstr "選択ノードを共通の水平線上に整列します。"
+msgid "Align selected nodes to a common horizontal line"
+msgstr "選択ノードを共通の水平線上に整列します"
 
 #: ../share/ui/align-and-distribute.ui:1195
-msgid "Align selected nodes to a common vertical line."
-msgstr "選択ノードを共通の垂直線上に整列します。"
+msgid "Align selected nodes to a common vertical line"
+msgstr "選択ノードを共通の垂直線上に整列します"
 
 #: ../share/ui/align-and-distribute.ui:1218
 msgid "Align Nodes"
@@ -38995,10 +39011,6 @@ msgstr "フレームタイプ"
 #: ../share/extensions/frame.inx:9
 msgid "Rectangle corner radius"
 msgstr "矩形の角の半径"
-
-#: ../share/extensions/frame.inx:10
-msgid "Treat selection as group"
-msgstr "選択オブジェクトをグループとして扱う"
 
 #: ../share/extensions/frame.inx:13
 msgid "Absolute offset (user units)"
@@ -46339,6 +46351,12 @@ msgstr "半 em"
 #: ../share/ui/units.xml:99
 msgid "Half of font height"
 msgstr "フォントの高さの半分"
+
+#~ msgid "Dashes"
+#~ msgstr "破線"
+
+#~ msgid "Treat selection as group."
+#~ msgstr "選択オブジェクトをグループとして扱います。"
 
 #~ msgid "Select Next"
 #~ msgstr "次を選択"
