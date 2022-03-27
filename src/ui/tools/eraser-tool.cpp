@@ -694,8 +694,8 @@ void EraserTool::_setToAccumulated()
                             _setStatusBarMessage(_("Cannot cut out from a bitmap, use <b>Clip</b> mode "
                                                    "instead."));
                         } else if (status & ERROR_GROUP) {
-                            _setStatusBarMessage(_("Cannot cut out from a group, ungroup the objects "
-                                                   "first."));
+                            _setStatusBarMessage(_("Cannot cut out from a group, select a component from "
+                                                   "the group or ungroup the objects first."));
                         } else if (status & NO_AREA_PATH) {
                             _setStatusBarMessage(_("Cannot cut out from a path with zero area, use "
                                                    "<b>Clip</b> mode instead."));
