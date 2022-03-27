@@ -840,7 +840,7 @@
           <object class="GtkLabel">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="tooltip-text" translatable="yes">Export a part of document</property>
+            <property name="tooltip-text" translatable="yes">Export into a single image</property>
             <property name="label" translatable="yes">Single Image</property>
             <property name="justify">right</property>
           </object>
@@ -1122,6 +1122,7 @@
           <object class="GtkLabel">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
+            <property name="tooltip-text" translatable="yes">Export into multiple images</property>
             <property name="label" translatable="yes">Batch Export</property>
           </object>
           <packing>
