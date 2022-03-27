@@ -278,7 +278,7 @@ std::vector<std::vector<Glib::ustring>> raw_data_object =
     {"app.object-release-clip",         N_("Object Clip Release"),              "Object",     N_("Remove clipping path from selection")},
     {"app.object-set-clip-group",       N_("Object Clip Set Group"),            "Object",     N_("Create a self-clipping group to which objects (not contributing to the clip-path) can be added")},
     {"app.object-set-mask",             N_("Object Mask Set"),                  "Object",     N_("Apply mask to selection (using the topmost object as mask)")},
-    {"app.object-set-inverse-mask",     N_("Object Mask Set Inverse"),          "Object",     N_("Set Inverse (LPE)")},
+    {"app.object-set-inverse-mask",     N_("Object Mask Set Inverse"),          "Object",     N_("Set Inverse Power mask (LPE)")},
     {"app.object-release-mask",         N_("Object Mask Release"),              "Object",     N_("Remove mask from selection")},
 
     {"app.object-rotate-90-cw",         N_("Object Rotate 90"),                 "Object",     N_("Rotate selection 90° clockwise")},
