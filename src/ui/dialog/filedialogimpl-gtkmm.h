@@ -49,14 +49,6 @@ void
 fileDialogExtensionToPattern(Glib::ustring &pattern,
                       Glib::ustring &extension);
 
-void
-findEntryWidgets(Gtk::Container *parent,
-                 std::vector<Gtk::Entry *> &result);
-
-void
-findExpanderWidgets(Gtk::Container *parent,
-                    std::vector<Gtk::Expander *> &result);
-
 class FileType
 {
     public:
@@ -75,7 +67,7 @@ class FileType
  * This class is the base implementation for the others.  This
  * reduces redundancies and bugs.
  */
-class FileDialogBaseGtk : public Gtk::FileChooserDialog
+class FileDialogBaseGtk : public Gtk::FileChooserNative
 {
 public:
 
@@ -84,19 +76,7 @@ public:
      */
     FileDialogBaseGtk(Gtk::Window& parentWindow, const Glib::ustring &title,
     		Gtk::FileChooserAction dialogType, FileDialogType type, gchar const* preferenceBase) :
-        Gtk::FileChooserDialog(parentWindow, title, dialogType),
-        preferenceBase(preferenceBase ? preferenceBase : "unknown"),
-        _dialogType(type)
-    {
-        internalSetup();
-    }
-
-    /**
-     *
-     */
-    FileDialogBaseGtk(Gtk::Window& parentWindow, const char *title,
-                   Gtk::FileChooserAction dialogType, FileDialogType type, gchar const* preferenceBase) :
-        Gtk::FileChooserDialog(parentWindow, title, dialogType),
+        Gtk::FileChooserNative(title, parentWindow, dialogType, accept_label(dialogType), cancel_label()),
         preferenceBase(preferenceBase ? preferenceBase : "unknown"),
         _dialogType(type)
     {
@@ -130,6 +110,9 @@ protected:
     Gtk::CheckButton svgexportCheckbox;
 
 private:
+    const char * accept_label(Gtk::FileChooserAction dialogType);
+    const char * cancel_label();
+
     void internalSetup();
 
     /**
@@ -281,9 +264,8 @@ private:
     Inkscape::Extension::Extension *extension;
 
     /**
-     * Callback for user input into fileNameEntry
+     * Callback for file name changed
      */
-    void fileNameEntryChangedCallback();
     void fileNameChanged();
     bool fromCB;
 };

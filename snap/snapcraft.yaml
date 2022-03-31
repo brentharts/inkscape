@@ -162,12 +162,14 @@ parts:
       - ibus-gtk3
       - libibus-1.0-5
       - fcitx-frontend-gtk3
+      - librsvg2-common # SVG pixbuf loader
     prime:
       - -*canberra*so* # We don't have sound permissions anyway
       - -usr/lib/*/gtk-2.0
     override-prime: |
       snapcraftctl prime
       glib-compile-schemas ${SNAPCRAFT_PRIME}/usr/share/glib-2.0/schemas/
+    after: [inkscape, snap-helpers, python-deps] # Last so we compile all the schemas
 
 apps:
   inkscape:
@@ -183,9 +185,6 @@ apps:
       - dot-config-inkscape
       - raw-usb # plotter support
       - network # for extension manager
-# TODO: Remove with portals
-      - home
-      - removable-media
     slots:
       - inkscape-dbus
     desktop: share/applications/org.inkscape.Inkscape.desktop
@@ -202,9 +201,6 @@ apps:
       - x11
       - unity7
       - dot-config-inkscape
-# TODO: Remove with portals
-      - home
-      - removable-media
 
 hooks:
   configure:

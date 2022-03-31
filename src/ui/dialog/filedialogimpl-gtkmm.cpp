@@ -78,40 +78,25 @@ void fileDialogExtensionToPattern(Glib::ustring &pattern, Glib::ustring &extensi
     }
 }
 
-
-void findEntryWidgets(Gtk::Container *parent, std::vector<Gtk::Entry *> &result)
-{
-    if (!parent) {
-        return;
-    }
-    std::vector<Gtk::Widget *> children = parent->get_children();
-    for (auto child : children) {
-        GtkWidget *wid = child->gobj();
-        if (GTK_IS_ENTRY(wid))
-            result.push_back(dynamic_cast<Gtk::Entry *>(child));
-        else if (GTK_IS_CONTAINER(wid))
-            findEntryWidgets(dynamic_cast<Gtk::Container *>(child), result);
-    }
-}
-
-void findExpanderWidgets(Gtk::Container *parent, std::vector<Gtk::Expander *> &result)
-{
-    if (!parent)
-        return;
-    std::vector<Gtk::Widget *> children = parent->get_children();
-    for (auto child : children) {
-        GtkWidget *wid = child->gobj();
-        if (GTK_IS_EXPANDER(wid))
-            result.push_back(dynamic_cast<Gtk::Expander *>(child));
-        else if (GTK_IS_CONTAINER(wid))
-            findExpanderWidgets(dynamic_cast<Gtk::Container *>(child), result);
-    }
-}
-
-
 /*#########################################################################
 ### F I L E     D I A L O G    B A S E    C L A S S
 #########################################################################*/
+
+// Small function so the translatable strings stay out of the header
+const char * FileDialogBaseGtk::accept_label(Gtk::FileChooserAction dialogType)
+{
+    if (dialogType == Gtk::FILE_CHOOSER_ACTION_OPEN) {
+        return _("_Open");
+    } else {
+        return _("_Save");
+    }
+}
+
+// Small function so the translatable strings stay out of the header
+const char * FileDialogBaseGtk::cancel_label()
+{
+    return _("_Cancel");
+}
 
 void FileDialogBaseGtk::internalSetup()
 {
@@ -220,7 +205,7 @@ FileOpenDialogImplGtk::FileOpenDialogImplGtk(Gtk::Window &parentWindow, const Gl
 
 
     /* Set the pwd and/or the filename */
-    if (dir.size() > 0) {
+    if (dir.size() > 0 && Glib::getenv("GTK_USE_PORTAL").empty()) {
         Glib::ustring udir(dir);
         Glib::ustring::size_type len = udir.length();
         // leaving a trailing backslash on the directory name leads to the infamous
@@ -240,9 +225,6 @@ FileOpenDialogImplGtk::FileOpenDialogImplGtk(Gtk::Window &parentWindow, const Gl
 
     //###### Add the file types menu
     createFilterMenu();
-
-    add_button(_("_Cancel"), Gtk::RESPONSE_CANCEL);
-    set_default(*add_button(_("_Open"), Gtk::RESPONSE_OK));
 
     //###### Allow easy access to our examples folder
 
@@ -372,12 +354,11 @@ void FileOpenDialogImplGtk::createFilterMenu()
 bool FileOpenDialogImplGtk::show()
 {
     set_modal(TRUE); // Window
-    sp_transientize(GTK_WIDGET(gobj())); // Make transient
     gint b = run(); // Dialog
     svgPreview.showNoPreview();
     hide();
 
-    if (b == Gtk::RESPONSE_OK) {
+    if (b == Gtk::RESPONSE_ACCEPT) {
         // This is a hack, to avoid the warning messages that
         // Gtk::FileChooser::get_filter() returns
         // should be:  Gtk::FileFilter *filter = get_filter();
@@ -515,32 +496,11 @@ FileSaveDialogImplGtk::FileSaveDialogImplGtk(Gtk::Window &parentWindow, const Gl
     checksBox.pack_start(previewCheckbox);
     checksBox.pack_start(svgexportCheckbox);
 
+    childBox.show();
     set_extra_widget(childBox);
 
-    // Let's do some customization
-    fileNameEntry = nullptr;
-    Gtk::Container *cont = get_toplevel();
-    std::vector<Gtk::Entry *> entries;
-    findEntryWidgets(cont, entries);
-    // g_message("Found %d entry widgets\n", entries.size());
-    if (!entries.empty()) {
-        // Catch when user hits [return] on the text field
-        fileNameEntry = entries[0];
-        fileNameEntry->signal_activate().connect(
-            sigc::mem_fun(*this, &FileSaveDialogImplGtk::fileNameEntryChangedCallback));
-    }
     signal_selection_changed().connect(
         sigc::mem_fun(*this, &FileSaveDialogImplGtk::fileNameChanged));
-
-    // Let's do more customization
-    std::vector<Gtk::Expander *> expanders;
-    findExpanderWidgets(cont, expanders);
-    // g_message("Found %d expander widgets\n", expanders.size());
-    if (!expanders.empty()) {
-        // Always show the file list
-        Gtk::Expander *expander = expanders[0];
-        expander->set_expanded(true);
-    }
 
     // allow easy access to the user's own templates folder
     using namespace Inkscape::IO::Resource;
@@ -549,14 +509,6 @@ FileSaveDialogImplGtk::FileSaveDialogImplGtk(Gtk::Window &parentWindow, const Gl
         Inkscape::IO::file_test(templates, G_FILE_TEST_IS_DIR) && g_path_is_absolute(templates)) {
         add_shortcut_folder(templates);
     }
-
-    // if (extension == NULL)
-    //    checkbox.set_sensitive(FALSE);
-
-    add_button(_("_Cancel"), Gtk::RESPONSE_CANCEL);
-    set_default(*add_button(_("_Save"), Gtk::RESPONSE_OK));
-
-    show_all_children();
 }
 
 /**
@@ -566,44 +518,7 @@ FileSaveDialogImplGtk::~FileSaveDialogImplGtk()
 = default;
 
 /**
- * Callback for fileNameEntry widget
- */
-void FileSaveDialogImplGtk::fileNameEntryChangedCallback()
-{
-    if (!fileNameEntry)
-        return;
-
-    Glib::ustring fileName = fileNameEntry->get_text();
-    if (!Glib::get_charset()) // If we are not utf8
-        fileName = Glib::filename_to_utf8(fileName);
-
-    // g_message("User hit return.  Text is '%s'\n", fileName.c_str());
-
-    if (!Glib::path_is_absolute(fileName)) {
-        // try appending to the current path
-        // not this way: fileName = get_current_folder() + "/" + fileName;
-        std::vector<Glib::ustring> pathSegments;
-        pathSegments.emplace_back(get_current_folder());
-        pathSegments.push_back(fileName);
-        fileName = Glib::build_filename(pathSegments);
-    }
-
-    // g_message("path:'%s'\n", fileName.c_str());
-
-    if (Glib::file_test(fileName, Glib::FILE_TEST_IS_DIR)) {
-        set_current_folder(fileName);
-    } else if (/*Glib::file_test(fileName, Glib::FILE_TEST_IS_REGULAR)*/ true) {
-        // dialog with either (1) select a regular file or (2) cd to dir
-        // simulate an 'OK'
-        set_filename(fileName);
-        response(Gtk::RESPONSE_OK);
-    }
-}
-
-
-
-/**
- * Callback for fileNameEntry widget
+ * Callback for fileType widget changing
  */
 void FileSaveDialogImplGtk::fileTypeChangedCallback()
 {
@@ -704,13 +619,12 @@ bool FileSaveDialogImplGtk::show()
 {
     change_path(myFilename);
     set_modal(TRUE); // Window
-    sp_transientize(GTK_WIDGET(gobj())); // Make transient
     gint b = run(); // Dialog
     svgPreview.showNoPreview();
     set_preview_widget_active(false);
     hide();
 
-    if (b == Gtk::RESPONSE_OK) {
+    if (b == Gtk::RESPONSE_ACCEPT) {
         updateNameAndExtension();
         Inkscape::Preferences *prefs = Inkscape::Preferences::get();
 
@@ -799,6 +713,11 @@ FileSaveDialogImplGtk::change_title(const Glib::ustring& title)
   */
 void FileSaveDialogImplGtk::change_path(const Glib::ustring &path)
 {
+    if (!Glib::getenv("GTK_USE_PORTAL").empty()) {
+        // If we're using the portal we can't control the path
+        return;
+    }
+
     myFilename = path;
 
     if (Glib::file_test(myFilename, Glib::FILE_TEST_IS_DIR)) {
