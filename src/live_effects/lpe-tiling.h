@@ -3,7 +3,7 @@
 #define INKSCAPE_LPE_TILING_H
 
 /** \file
- * LPE <tiling> implementation, see lpe-copy.cpp.
+ * LPE <tiling> implementation, see lpe-tilling.cpp.
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
