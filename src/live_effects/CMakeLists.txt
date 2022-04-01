@@ -9,7 +9,6 @@ set(live_effects_SRC
 	lpe-bounding-box.cpp
 	lpe-bspline.cpp
 	lpe-circle_3pts.cpp
-	lpe-transform_2pts.cpp
 	lpe-circle_with_radius.cpp
 	lpe-clone-original.cpp
 	lpe-constructgrid.cpp
@@ -44,6 +43,7 @@ set(live_effects_SRC
 	lpe-powerclip.cpp
 	lpe-powermask.cpp
 	lpe-powerstroke.cpp
+	lpe-pts2ellipse.cpp
 	lpe-recursiveskeleton.cpp
 	lpe-rough-hatches.cpp
 	lpe-roughen.cpp
@@ -56,16 +56,16 @@ set(live_effects_SRC
 	lpe-spiro.cpp
 	lpe-tangent_to_curve.cpp
 	lpe-taperstroke.cpp
-	lpe-tiling.cpp
 	lpe-test-doEffect-stack.cpp
 	lpe-text_label.cpp
+	lpe-tiling.cpp
+	lpe-transform_2pts.cpp
 	lpegroupbbox.cpp
 	lpeobject-reference.cpp
 	lpe-vonkoch.cpp
 	lpeobject.cpp
 	spiro-converters.cpp
 	spiro.cpp
-	lpe-pts2ellipse.cpp
 
 	parameter/array.cpp
 	parameter/bool.cpp
@@ -105,7 +105,6 @@ set(live_effects_SRC
 	lpe-bounding-box.h
 	lpe-bspline.h
 	lpe-circle_3pts.h
-	lpe-transform_2pts.h
 	lpe-circle_with_radius.h
 	lpe-clone-original.h
 	lpe-constructgrid.h
@@ -141,6 +140,7 @@ set(live_effects_SRC
 	lpe-powerclip.h
 	lpe-powermask.h
 	lpe-powerstroke.h
+	lpe-pts2ellipse.h
 	lpe-recursiveskeleton.h
 	lpe-rough-hatches.h
 	lpe-roughen.h
@@ -156,13 +156,13 @@ set(live_effects_SRC
 	lpe-test-doEffect-stack.h
 	lpe-text_label.h
 	lpe-tiling.h
+	lpe-transform_2pts.h
 	lpe-vonkoch.h
 	lpegroupbbox.h
 	lpeobject-reference.h
 	lpeobject.h
 	spiro-converters.h
 	spiro.h
-	lpe-pts2ellipse.h
 
 	parameter/array.h
 	parameter/bool.h

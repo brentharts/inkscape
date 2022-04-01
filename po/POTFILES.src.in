@@ -188,8 +188,8 @@
 ../src/live_effects/lpe-slice.cpp
 ../src/live_effects/lpe-tangent_to_curve.cpp
 ../src/live_effects/lpe-taperstroke.cpp
-../src/live_effects/lpe-transform_2pts.cpp
 ../src/live_effects/lpe-tiling.cpp
+../src/live_effects/lpe-transform_2pts.cpp
 ../src/live_effects/lpe-vonkoch.cpp
 ../src/live_effects/parameter/bool.cpp
 ../src/live_effects/parameter/colorpicker.cpp
