@@ -111,10 +111,14 @@ void FileDialogBaseGtk::internalSetup()
 
         previewCheckbox.signal_toggled().connect(sigc::mem_fun(*this, &FileDialogBaseGtk::_updatePreviewCallback));
 
+        previewCheckbox.show();
+
         svgexportCheckbox.set_label(Glib::ustring(_("Export as SVG 1.1 per settings in Preferences dialog")));
         svgexportCheckbox.set_active(enableSVGExport);
 
         svgexportCheckbox.signal_toggled().connect(sigc::mem_fun(*this, &FileDialogBaseGtk::_svgexportEnabledCB));
+
+        svgexportCheckbox.show();
 
         // Catch selection-changed events, so we can adjust the text widget
         signal_update_preview().connect(sigc::mem_fun(*this, &FileDialogBaseGtk::_updatePreviewCallback));
@@ -492,11 +496,13 @@ FileSaveDialogImplGtk::FileSaveDialogImplGtk(Gtk::Window &parentWindow, const Gl
 
     childBox.pack_start(checksBox);
     childBox.pack_end(fileTypeComboBox);
+    childBox.show();
+
     checksBox.pack_start(fileTypeCheckbox);
     checksBox.pack_start(previewCheckbox);
     checksBox.pack_start(svgexportCheckbox);
+    checksBox.show();
 
-    childBox.show();
     set_extra_widget(childBox);
 
     signal_selection_changed().connect(
