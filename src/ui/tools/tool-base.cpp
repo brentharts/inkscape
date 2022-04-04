@@ -19,8 +19,6 @@
 #include <gdkmm/display.h>
 #include <glibmm/i18n.h>
 
-#include <set>
-
 #include "desktop-events.h"
 #include "desktop-style.h"
 #include "desktop.h"
@@ -69,24 +67,6 @@
 #include "widgets/desktop-widget.h"
 
 #include "xml/node-event-vector.h"
-
-// globals for temporary switching to selector by space
-static bool selector_toggled = FALSE;
-static Glib::ustring switch_selector_to;
-
-// globals for temporary switching to dropper by 'D'
-static bool dropper_toggled = FALSE;
-static Glib::ustring switch_dropper_to;
-
-// globals for keeping track of keyboard scroll events in order to accelerate
-static guint32 scroll_event_time = 0;
-static gdouble scroll_multiply = 1;
-static guint scroll_keyval = 0;
-
-// globals for key processing
-static bool latin_keys_group_valid = FALSE;
-static gint latin_keys_group;
-static std::set<int> latin_keys_groups;
 
 namespace Inkscape {
 namespace UI {
