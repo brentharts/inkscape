@@ -15,6 +15,7 @@
 
 #include <cstddef>
 #include <string>
+#include <set>
 #include <memory>
 
 #include <gdkmm/device.h>  // EventMask
@@ -118,6 +119,25 @@ private:
 };
 
 void sp_event_context_snap_delay_handler(ToolBase *ec, gpointer const dse_item, gpointer const dse_item2, GdkEventMotion *event, DelayedSnapEvent::DelayedSnapEventOrigin origin);
+
+// global variables
+// for temporary switching to selector by space
+static bool selector_toggled = FALSE;
+static Glib::ustring switch_selector_to;
+
+// for temporary switching to dropper by 'D'
+static bool dropper_toggled = FALSE;
+static Glib::ustring switch_dropper_to;
+
+// for keeping track of keyboard scroll events in order to accelerate
+static guint32 scroll_event_time = 0;
+static gdouble scroll_multiply = 1;
+static guint scroll_keyval = 0;
+
+// for key processing
+static bool latin_keys_group_valid = FALSE;
+static gint latin_keys_group;
+static std::set<int> latin_keys_groups;
 
 
 /**
