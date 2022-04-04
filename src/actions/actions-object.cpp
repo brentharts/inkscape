@@ -118,7 +118,7 @@ object_clip_set_inverse(InkscapeApplication *app)
     // Object Clip Set Inverse
     selection->setMask(true, false);
     Inkscape::LivePathEffect::sp_inverse_powerclip(app->get_active_selection());
-    Inkscape::DocumentUndo::done(app->get_active_document(), _("_Set Inverse (LPE)"), "");
+    Inkscape::DocumentUndo::done(app->get_active_document(), _("Set Inverse Clip(LPE)"), "");
 }
 
 void
@@ -158,7 +158,7 @@ object_mask_set_inverse(InkscapeApplication *app)
     // Object Mask Set Inverse
     selection->setMask(false, false);
     Inkscape::LivePathEffect::sp_inverse_powermask(app->get_active_selection());
-    Inkscape::DocumentUndo::done(app->get_active_document(), _("_Set Inverse (LPE)"), "");
+    Inkscape::DocumentUndo::done(app->get_active_document(), _("Set Inverse Mask (LPE)"), "");
 }
 
 void
@@ -274,11 +274,11 @@ std::vector<std::vector<Glib::ustring>> raw_data_object =
     {"app.object-stroke-to-path",       N_("Stroke to Path"),                   "Object",     N_("Convert strokes to paths")},
 
     {"app.object-set-clip",             N_("Object Clip Set"),                  "Object",     N_("Apply clipping path to selection (using the topmost object as clipping path)")},
-    {"app.object-set-inverse-clip",     N_("Object Clip Set Inverse"),          "Object",     N_("Apply inverse clipping path to selection (using the topmost object as clipping path)")},
+    {"app.object-set-inverse-clip",     N_("Object Clip Set Inverse"),          "Object",     N_("Apply inverse clipping path to selection (Power Clip LPE)")},
     {"app.object-release-clip",         N_("Object Clip Release"),              "Object",     N_("Remove clipping path from selection")},
     {"app.object-set-clip-group",       N_("Object Clip Set Group"),            "Object",     N_("Create a self-clipping group to which objects (not contributing to the clip-path) can be added")},
     {"app.object-set-mask",             N_("Object Mask Set"),                  "Object",     N_("Apply mask to selection (using the topmost object as mask)")},
-    {"app.object-set-inverse-mask",     N_("Object Mask Set Inverse"),          "Object",     N_("Set Inverse (LPE)")},
+    {"app.object-set-inverse-mask",     N_("Object Mask Set Inverse"),          "Object",     N_("Apply inverse mask to selection (Power Mask LPE)")},
     {"app.object-release-mask",         N_("Object Mask Release"),              "Object",     N_("Remove mask from selection")},
 
     {"app.object-rotate-90-cw",         N_("Object Rotate 90"),                 "Object",     N_("Rotate selection 90° clockwise")},
@@ -291,8 +291,8 @@ std::vector<std::vector<Glib::ustring>> raw_data_object =
 std::vector<std::vector<Glib::ustring>> hint_data_object =
 {
     // clang-format off
-    {"app.object-set-attribute",        N_("Give two String input for Attribute Name, Attribute Value") },
-    {"app.object-set-property",         N_("Give two String input for Property Name, Property Value")  }
+    {"app.object-set-attribute",        N_("Enter comma-separated string for attribute name, attribute value") },
+    {"app.object-set-property",         N_("Enter comma-separated string for property name, property value")  }
     // clang-format on
 };
 

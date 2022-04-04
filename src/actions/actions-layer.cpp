@@ -453,7 +453,7 @@ std::vector<std::vector<Glib::ustring>> raw_data_layer =
 {
     // clang-format off
     {"win.layer-new",                       N_("Add Layer"),                        "Layers",     N_("Create a new layer")},
-    {"win.layer-duplicate",                 N_("Duplicate Current Layer"),          "Layers",     N_("Duplicate an existing layer")},
+    {"win.layer-duplicate",                 N_("Duplicate Current Layer"),          "Layers",     N_("Duplicate the current layer")},
     {"win.layer-delete",                    N_("Delete Current Layer"),             "Layers",     N_("Delete the current layer")},
     {"win.layer-rename",                    N_("Rename Layer"),                     "Layers",     N_("Rename the current layer")},
 
@@ -473,7 +473,7 @@ std::vector<std::vector<Glib::ustring>> raw_data_layer =
     {"win.layer-bottom",                    N_("Layer to Bottom"),                  "Layers",     N_("Lower the current layer to the bottom")},
 
     {"win.layer-to-group",                  N_("Layer to Group"),                   "Layers",     N_("Convert the current layer to a group")},
-    {"win.layer-from-group",                N_("Layer from Group"),                 "Layers",     N_("Convert the a group to a layer")},
+    {"win.layer-from-group",                N_("Layer from Group"),                 "Layers",     N_("Convert the group to a layer")},
 
     // These use Layer technology even if they don't act on layers.
     {"win.selection-group-enter",           N_("Enter Group"),                      "Select",     N_("Enter group")},
