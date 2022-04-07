@@ -523,7 +523,7 @@ void SPObject::deleteObject(bool propagate, bool propagate_descendants)
     }
     
     Inkscape::XML::Node *repr = getRepr();
-    if (repr && repr->parent()) {
+    if (repr && getRepr()->parent()) {
         sp_repr_unparent(repr);
     }
 
@@ -770,12 +770,12 @@ void SPObject::build(SPDocument *document, Inkscape::XML::Node *repr) {
         lang = object->parent->lang;
     }
 
-    if(object->cloned && (repr->attribute("id")) ) // The cases where this happens are when the "original" has no id. This happens
+    if(object->cloned && (getRepr()->attribute("id")) ) // The cases where this happens are when the "original" has no id. This happens
                                                    // if it is a SPString (a TextNode, e.g. in a <title>), or when importing
                                                    // stuff externally modified to have no id. 
-        object->clone_original = document->getObjectById(repr->attribute("id"));
+        object->clone_original = document->getObjectById(getRepr()->attribute("id"));
 
-    for (Inkscape::XML::Node *rchild = repr->firstChild() ; rchild != nullptr; rchild = rchild->next()) {
+    for (Inkscape::XML::Node *rchild = getRepr()->firstChild() ; rchild != nullptr; rchild = rchild->next()) {
         const std::string typeString = NodeTraits::get_type_string(*rchild);
 
         SPObject* child = SPFactory::createObject(typeString);
@@ -830,7 +830,7 @@ void SPObject::invoke_build(SPDocument *document, Inkscape::XML::Node *repr, uns
 
         if (Inkscape::XML::id_permitted(this->repr)) {
             /* If we are not cloned, and not seeking, force unique id */
-            gchar const *id = this->repr->attribute("id");
+            gchar const *id = this->getRepr()->attribute("id");
             if (!document->isSeeking()) {
                 {
                     gchar *realid = sp_object_get_unique_id(this, id);
@@ -843,7 +843,7 @@ void SPObject::invoke_build(SPDocument *document, Inkscape::XML::Node *repr, uns
 
                 /* Redefine ID, if required */
                 if ((id == nullptr) || (std::strcmp(id, this->getId()) != 0)) {
-                    this->repr->setAttribute("id", this->getId());
+                    this->getRepr()->setAttribute("id", this->getId());
                 }
             } else if (id) {
                 // bind if id, but no conflict -- otherwise, we can expect
@@ -875,13 +875,13 @@ int SPObject::getIntAttribute(char const *key, int def)
 unsigned SPObject::getPosition(){
     g_assert(this->repr);
 
-    return repr->position();
+    return getRepr()->position();
 }
 
 void SPObject::appendChild(Inkscape::XML::Node *child) {
     g_assert(this->repr);
 
-    repr->appendChild(child);
+    getRepr()->appendChild(child);
 }
 
 SPObject* SPObject::nthChild(unsigned index) {
@@ -903,7 +903,7 @@ void SPObject::addChild(Inkscape::XML::Node *child, Inkscape::XML::Node * prev)
 {
     g_assert(this->repr);
 
-    repr->addChild(child,prev);
+    getRepr()->addChild(child,prev);
 }
 
 void SPObject::releaseReferences() {
@@ -1182,23 +1182,23 @@ Inkscape::XML::Node* SPObject::write(Inkscape::XML::Document *doc, Inkscape::XML
     if (!repr && (flags & SP_OBJECT_WRITE_BUILD)) {
         repr = this->getRepr()->duplicate(doc);
         if (!( flags & SP_OBJECT_WRITE_EXT )) {
-            repr->removeAttribute("inkscape:collect");
+            getRepr()->removeAttribute("inkscape:collect");
         }
     } else if (repr) {
-        repr->setAttribute("id", this->getId());
+        getRepr()->setAttribute("id", this->getId());
 
         if (this->xml_space.set) {
             char const *xml_space;
             xml_space = sp_xml_get_space_string(this->xml_space.value);
-            repr->setAttribute("xml:space", xml_space);
+            getRepr()->setAttribute("xml:space", xml_space);
         }
 
         if ( flags & SP_OBJECT_WRITE_EXT &&
              this->collectionPolicy() == SPObject::ALWAYS_COLLECT )
         {
-            repr->setAttribute("inkscape:collect", "always");
+            getRepr()->setAttribute("inkscape:collect", "always");
         } else {
-            repr->removeAttribute("inkscape:collect");
+            getRepr()->removeAttribute("inkscape:collect");
         }
 
         if (style) {
@@ -1211,7 +1211,7 @@ Inkscape::XML::Node* SPObject::write(Inkscape::XML::Document *doc, Inkscape::XML
             for (auto * prop : properties) {
                 if(prop->shall_write(SP_STYLE_FLAG_IFSET | SP_STYLE_FLAG_IFSRC, SPStyleSrc::ATTRIBUTE)) {
                     // WARNING: We don't know for sure if the css names are the same as the attribute names
-                    repr->setAttributeOrRemoveIfEmpty(prop->name(), prop->get_value());
+                    getRepr()->setAttributeOrRemoveIfEmpty(prop->name(), prop->get_value());
                     any_written = true;
                 }
             }
@@ -1231,7 +1231,7 @@ Inkscape::XML::Node* SPObject::write(Inkscape::XML::Document *doc, Inkscape::XML
                 style_prop = sp_attribute_clean_style(repr, style_prop.c_str(), flags);
             }
 
-            repr->setAttributeOrRemoveIfEmpty("style", style_prop);
+            getRepr()->setAttributeOrRemoveIfEmpty("style", style_prop);
         } else {
             /** \todo I'm not sure what to do in this case.  Bug #1165868
              * suggests that it can arise, but the submitter doesn't know
@@ -1240,7 +1240,7 @@ Inkscape::XML::Node* SPObject::write(Inkscape::XML::Document *doc, Inkscape::XML
              * Must also consider what to do with property attributes for
              * the element; see below.
              */
-            char const *style_str = repr->attribute("style");
+            char const *style_str = getRepr()->attribute("style");
             if (!style_str) {
                 style_str = "NULL";
             }
@@ -1266,7 +1266,7 @@ Inkscape::XML::Node * SPObject::updateRepr(unsigned int flags)
 #ifdef OBJECT_TRACE
             objectTrace( "SPObject::updateRepr 1", false );
 #endif
-            return updateRepr(repr->document(), repr, flags);
+            return updateRepr(getRepr()->document(), repr, flags);
         } else {
             g_critical("Attempt to update non-existent repr");
 #ifdef OBJECT_TRACE
@@ -1683,7 +1683,7 @@ bool SPObject::setTitleOrDesc(gchar const *value, gchar const *svg_tagname, bool
         // create a new 'title' or 'desc' element, putting it at the
         // beginning (in accordance with the spec's recommendations)
         Inkscape::XML::Node *xml_elem = xml_doc->createElement(svg_tagname);
-        repr->addChild(xml_elem, nullptr);
+        getRepr()->addChild(xml_elem, nullptr);
         elem = document->getObjectByRepr(xml_elem);
         Inkscape::GC::release(xml_elem);
     }
@@ -1705,8 +1705,8 @@ SPObject* SPObject::findFirstChild(gchar const *tagname) const
 {
     for (auto& child: const_cast<SPObject*>(this)->children)
     {
-        if (child.repr->type() == Inkscape::XML::NodeType::ELEMENT_NODE &&
-            !std::strcmp(child.repr->name(), tagname)) {
+        if (child.getRepr()->type() == Inkscape::XML::NodeType::ELEMENT_NODE &&
+            !std::strcmp(child.getRepr()->name(), tagname)) {
             return &child;
         }
     }
@@ -1719,13 +1719,13 @@ Glib::ustring SPObject::textualContent() const
 
     for (auto& child: children)
     {
-        Inkscape::XML::NodeType child_type = child.repr->type();
+        Inkscape::XML::NodeType child_type = child.getRepr()->type();
 
         if (child_type == Inkscape::XML::NodeType::ELEMENT_NODE) {
             text += child.textualContent();
         }
         else if (child_type == Inkscape::XML::NodeType::TEXT_NODE) {
-            text += child.repr->content();
+            text += child.getRepr()->content();
         }
     }
     return text;
@@ -1733,7 +1733,7 @@ Glib::ustring SPObject::textualContent() const
 
 Glib::ustring SPObject::getExportFilename() const
 {
-    if (auto filename = repr->attribute("inkscape:export-filename")) {
+    if (auto filename = getRepr()->attribute("inkscape:export-filename")) {
         return Glib::ustring(filename);
     }
     return "";
@@ -1746,24 +1746,24 @@ void SPObject::setExportFilename(Glib::ustring filename)
     std::string base = Glib::path_get_dirname(doc_filename ? doc_filename : filename);
 
     filename = Inkscape::convertPathToRelative(filename, base);
-    repr->setAttributeOrRemoveIfEmpty("inkscape:export-filename", filename.c_str());
+    getRepr()->setAttributeOrRemoveIfEmpty("inkscape:export-filename", filename.c_str());
 }
 
 Geom::Point SPObject::getExportDpi() const
 {
     return Geom::Point(
-        repr->getAttributeDouble("inkscape:export-xdpi", 0.0),
-        repr->getAttributeDouble("inkscape:export-ydpi", 0.0));
+        getRepr()->getAttributeDouble("inkscape:export-xdpi", 0.0),
+        getRepr()->getAttributeDouble("inkscape:export-ydpi", 0.0));
 }
 
 void SPObject::setExportDpi(Geom::Point dpi)
 {
     if (!dpi.x() || !dpi.y()) {
-        repr->removeAttribute("inkscape:export-xdpi");
-        repr->removeAttribute("inkscape:export-ydpi");
+        getRepr()->removeAttribute("inkscape:export-xdpi");
+        getRepr()->removeAttribute("inkscape:export-ydpi");
     } else {
-        repr->setAttributeSvgDouble("inkscape:export-xdpi", dpi.x());
-        repr->setAttributeSvgDouble("inkscape:export-ydpi", dpi.y());
+        getRepr()->setAttributeSvgDouble("inkscape:export-xdpi", dpi.x());
+        getRepr()->setAttributeSvgDouble("inkscape:export-ydpi", dpi.y());
     }
 }
 
