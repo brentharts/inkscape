@@ -16,7 +16,7 @@
 #include "composite.h"
 
 #include "attributes.h"
-#include "helper-fns.h"
+#include "util/helper-read-fns.h"
 
 #include "display/nr-filter.h"
 #include "display/nr-filter-composite.h"

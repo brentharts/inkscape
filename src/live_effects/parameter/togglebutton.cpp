@@ -12,7 +12,7 @@
 
 #include <glibmm/i18n.h>
 
-#include "helper-fns.h"
+#include "util/helper-read-fns.h"
 #include "inkscape.h"
 #include "selection.h"
 

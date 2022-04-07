@@ -11,7 +11,7 @@
 
 #include <gtest/gtest.h>
 #include <src/file.h>
-#include <src/helper-fns.h>
+#include <src/util/helper-read-fns.h>
 #include <src/inkscape.h>
 #include <src/object/sp-root.h>
 #include <src/svg/svg.h>

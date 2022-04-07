@@ -17,6 +17,7 @@ set(util_SRC
 	fixed_point.h
 	format.h
 	forward-pointer-iterator.h
+	helper-read-fns.h
 	longest-common-suffix.h
 	pages-skeleton.h
 	paper.h
