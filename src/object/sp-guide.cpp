@@ -24,7 +24,7 @@
 #include "desktop.h"
 #include "desktop-events.h"
 #include "document-undo.h"
-#include "helper-fns.h"
+#include "util/helper-read-fns.h"
 #include "inkscape.h"
 
 #include "sp-guide.h"

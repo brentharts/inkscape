@@ -21,7 +21,7 @@
 #include "componenttransfer.h"
 #include "componenttransfer-funcnode.h"
 #include "xml/repr.h"
-#include "helper-fns.h"
+#include "util/helper-read-fns.h"
 
 /* FeFuncNode class */
 SPFeFuncNode::SPFeFuncNode(SPFeFuncNode::Channel channel)

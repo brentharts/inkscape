@@ -16,7 +16,7 @@
 #include "displacementmap.h"
 
 #include "attributes.h"
-#include "helper-fns.h"
+#include "util/helper-read-fns.h"
 
 #include "display/nr-filter-displacement-map.h"
 #include "display/nr-filter.h"
