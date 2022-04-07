@@ -94,50 +94,6 @@ auto make_unique_copy(const GdkEvent &ev) {return GdkEventUniqPtr(gdk_event_copy
  * Preferences
  */
 
-template<typename T>
-struct Pref {};
-
-template<typename T>
-struct PrefBase
-{
-    const char *path;
-    T t, def;
-    std::unique_ptr<Preferences::PreferencesObserver> obs;
-    std::function<void()> action;
-    operator T() const {return t;}
-    PrefBase(const char *path, T def) : path(path), def(def) {enable();}
-    void act() {if (action) action();}
-    void enable() {t = static_cast<Pref<T>*>(this)->read(); act(); obs = Inkscape::Preferences::get()->createObserver(path, [this] (const Preferences::Entry &e) {t = static_cast<Pref<T>*>(this)->changed(e); act();});}
-    void disable() {t = def; act(); obs.reset();}
-    void set_enabled(bool enabled) {enabled ? enable() : disable();}
-};
-
-template<>
-struct Pref<bool> : PrefBase<bool>
-{
-    Pref(const char *path, bool def = false) : PrefBase(path, def) {}
-    bool read() {return Inkscape::Preferences::get()->getBool(path, def);}
-    bool changed(const Preferences::Entry &e) {return e.getBool(def);}
-};
-
-template<>
-struct Pref<int> : PrefBase<int>
-{
-    int min, max;
-    Pref(const char *path, int def, int min, int max) : min(min), max(max), PrefBase(path, def) {}
-    int read() {return Inkscape::Preferences::get()->getIntLimited(path, def, min, max);}
-    int changed(const Preferences::Entry &e) {return e.getIntLimited(def, min, max);}
-};
-
-template<>
-struct Pref<double> : PrefBase<double>
-{
-    double min, max;
-    Pref(const char *path, double def, double min, double max) : min(min), max(max), PrefBase(path, def) {}
-    double read() {return Inkscape::Preferences::get()->getDoubleLimited(path, def, min, max);}
-    double changed(const Preferences::Entry &e) {return e.getDoubleLimited(def, min, max);}
-};
-
 struct Prefs
 {
     // Original parameters
@@ -147,6 +103,11 @@ struct Prefs
     Pref<bool>   from_display             = Pref<bool>  ("/options/displayprofile/from_display");
     Pref<int>    grabsize                 = Pref<int>   ("/options/grabsize/value", 3, 1, 15);
     Pref<int>    outline_overlay_opacity  = Pref<int>   ("/options/rendering/outline-overlay-opacity", 50, 1, 100);
+
+    // Things that require redraws
+    Pref<void>   softproof                = Pref<void>  ("/options/softproof");
+    Pref<void>   displayprofile           = Pref<void>  ("/options/displayprofile");
+    Pref<bool>   imageoutlinemode         = Pref<bool>  ("/options/rendering/imageinoutlinemode");
 
     // New parameters
     Pref<int>    update_strategy          = Pref<int>   ("/options/rendering/update_strategy", 3, 1, 3);
@@ -557,6 +518,10 @@ Canvas::Canvas()
     d->eventprocessor = std::make_shared<CanvasPrivate::EventProcessor>();
     d->eventprocessor->canvasprivate = d.get();
 
+    // Developer mode master switch
+    d->prefs.devmode.action = [=] {d->prefs.set_devmode(d->prefs.devmode);};
+    d->prefs.devmode.action();
+
     // Updater
     d->updater = make_updater(d->prefs.update_strategy);
 
@@ -568,10 +533,9 @@ Canvas::Canvas()
     d->prefs.debug_sticky_decoupled.action = [=] {d->add_idle();};
     d->prefs.update_strategy.action = [=] {d->updater = make_updater(d->prefs.update_strategy, std::move(d->updater->clean_region));};
     d->prefs.outline_overlay_opacity.action = [=] {queue_draw();};
-
-    // Developer mode master switch
-    d->prefs.devmode.action = [=] {d->prefs.set_devmode(d->prefs.devmode);};
-    d->prefs.devmode.action();
+    d->prefs.softproof.action = [=] {redraw_all();};
+    d->prefs.displayprofile.action = [=] {redraw_all();};
+    d->prefs.imageoutlinemode.action = [=] {redraw_all();};
 
     // Cavas item root
     _canvas_item_root = new Inkscape::CanvasItemGroup(nullptr);
@@ -1671,6 +1635,13 @@ Canvas::set_split_mode(Inkscape::SplitMode mode)
         _split_mode = mode;
         redraw_all();
     }
+}
+
+void Canvas::set_cms_key(std::string key)
+{
+    _cms_key = std::move(key);
+    _cms_active = !_cms_key.empty();
+    redraw_all();
 }
 
 Cairo::RefPtr<Cairo::ImageSurface>
