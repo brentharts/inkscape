@@ -131,6 +131,7 @@ public:
 private:
     gchar     *_id = nullptr;                  /**< The unique identifier for the Extension */
     gchar     *_name = nullptr;                /**< A user friendly name for the Extension */
+    gchar     *_action_name = nullptr;         /**< The action name for the Extension */
     state_t    _state = STATE_UNLOADED;        /**< Which state the Extension is currently in */
     std::vector<Dependency *>  _deps;          /**< Dependencies for this extension */
     static FILE *error_file;                   /**< This is the place where errors get reported */
@@ -153,6 +154,7 @@ private:
     std::string _gettext_catalog_dir;          /**< Directory containing the gettext catalog for _translationdomain */
 
     void lookup_translation_catalog();
+    void format_id_for_action_name();
 
 public:
     Extension(Inkscape::XML::Node *in_repr, Implementation::Implementation *in_imp, std::string *base_directory);
@@ -165,6 +167,7 @@ public:
     Inkscape::XML::Node *      get_repr     ();
     gchar *       get_id       () const;
     const gchar * get_name     () const;
+    gchar *       get_action_name   () const;
     void          deactivate   ();
     bool          deactivated  ();
     void          printFailure (Glib::ustring reason);
