@@ -118,6 +118,7 @@ Extension::Extension(Inkscape::XML::Node *in_repr, Implementation::Implementatio
             const char *id = child_repr->firstChild() ? child_repr->firstChild()->content() : nullptr;
             if (id) {
                 _id = g_strdup(id);
+                format_id_for_action_name();
             } else {
                 throw extension_no_id();
             }
@@ -197,6 +198,7 @@ Extension::~Extension ()
 
     g_free(_id);
     g_free(_name);
+    g_free(_action_name);
 
     delete timer;
     timer = nullptr;
@@ -373,6 +375,40 @@ const gchar *
 Extension::get_name () const
 {
     return get_translation(_name, nullptr);
+}
+
+/**
+    \return  The textual action name of this extension
+    \brief   Get the action name of this extension
+*/
+gchar *Extension::get_action_name() const
+{
+    return _action_name;
+}
+
+/**
+    \brief   Format the id to get the action name of extension 
+    
+    This function is used to get the action name for the extension
+    using its id. A valid action name consist only of alphanumeric 
+    characters, plus '-' and '.'. So, this function replaces '_'
+    character with '-'.
+
+*/
+void
+Extension::format_id_for_action_name() {
+
+    //_action_name = g_strcanon(g_strdup(_id), "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.", '-');
+
+    gchar *p = g_strdup(_id);
+    _action_name = p; 
+    while (*p != '\0') {
+        if (*p == '_') {
+            *p = '-';
+        }
+        ++p;
+    }
+    
 }
 
 /**
