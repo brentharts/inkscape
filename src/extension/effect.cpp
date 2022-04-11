@@ -122,13 +122,13 @@ Effect::Effect (Inkscape::XML::Node *in_repr, Implementation::Implementation *in
         } // children of "inkscape-extension"
     } // if we have an XML file
 
-    std::string action_id = "app." + std::string(get_id());
+    std::string action_id = "app." + std::string(get_action_name());
 
     static auto gapp = InkscapeApplication::instance()->gtk_app();
     if (gapp) {
         // Might be in command line mode without GUI (testing).
-        gapp->add_action( this->get_id(), sigc::bind<Effect*>(sigc::ptr_fun(&action_effect), this, true));
-        gapp->add_action( Glib::ustring(get_id()) + ".noprefs", sigc::bind<Effect*>(sigc::ptr_fun(&action_effect), this, false));
+        gapp->add_action( this->get_action_name(), sigc::bind<Effect*>(sigc::ptr_fun(&action_effect), this, true));
+        gapp->add_action( Glib::ustring(get_action_name()) + ".noprefs", sigc::bind<Effect*>(sigc::ptr_fun(&action_effect), this, false));
     }
 
     if (!hidden) {
@@ -164,7 +164,7 @@ Effect::Effect (Inkscape::XML::Node *in_repr, Implementation::Implementation *in
         // Add submenu to effect data
         gchar *ellipsized_name = widget_visible_count() ? g_strdup_printf(_("%s..."), get_name()) : nullptr;
         Glib::ustring menu_name = ellipsized_name ? ellipsized_name : get_name();
-        app->get_action_effect_data().add_data(get_id(), sub_menu_list, menu_name);
+        app->get_action_effect_data().add_data(get_action_name(), sub_menu_list, menu_name);
         g_free(ellipsized_name);
     }
 }
