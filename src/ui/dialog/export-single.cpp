@@ -624,8 +624,8 @@ void SingleExport::onBrowse(Gtk::EntryIconPosition pos, const GdkEventButton *ev
     if (!_app || !_document) {
         return;
     }
+    browseConn.disconnect();
     Gtk::Window *window = _app->get_active_window();
-    browseConn.block();
     Glib::ustring filename = Glib::filename_from_utf8(si_filename_entry->get_text());
 
     if (filename.empty()) {
@@ -650,7 +650,7 @@ void SingleExport::onBrowse(Gtk::EntryIconPosition pos, const GdkEventButton *ev
     } else {
         delete dialog;
     }
-    browseConn.unblock();
+    browseConn = si_filename_entry->signal_icon_press().connect(sigc::mem_fun(*this, &SingleExport::onBrowse));
 }
 
 // Utils Functions

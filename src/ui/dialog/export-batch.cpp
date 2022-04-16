@@ -580,8 +580,9 @@ void BatchExport::onBrowse(Gtk::EntryIconPosition pos, const GdkEventButton *ev)
     if (!_app) {
         return;
     }
+    browseConn.disconnect();
+
     Gtk::Window *window = _app->get_active_window();
-    browseConn.block();
     Glib::ustring filename = Glib::filename_from_utf8(filename_entry->get_text());
 
     if (filename.empty()) {
@@ -607,7 +608,7 @@ void BatchExport::onBrowse(Gtk::EntryIconPosition pos, const GdkEventButton *ev)
     } else {
         delete dialog;
     }
-    browseConn.unblock();
+    browseConn = filename_entry->signal_icon_press().connect(sigc::mem_fun(*this, &BatchExport::onBrowse));
 }
 
 void BatchExport::setDefaultSelectionMode()
