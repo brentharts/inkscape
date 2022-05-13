@@ -33,7 +33,7 @@ PageManager::PageManager(SPDocument *document)
     : border_show(true)
     , border_on_top(true)
     , shadow_show(true)
-    , _checkerboard(false)
+    , checkerboard(false)
 {
     _document = document;
 }
@@ -119,7 +119,7 @@ void PageManager::reorderPage(Inkscape::XML::Node *child)
 void PageManager::enablePages()
 {
     if (!hasPages()) {
-        _selected_page = newDesktopPage(*_document->preferredBounds(), true);
+        _selected_page = newDocumentPage(*_document->preferredBounds(), true);
     }
 }
 
@@ -192,6 +192,15 @@ SPPage *PageManager::newPage(Geom::Rect rect, bool first_page)
  */
 SPPage *PageManager::newDesktopPage(Geom::Rect rect, bool first_page)
 {
+    rect *= _document->dt2doc();
+    return newDocumentPage(rect, first_page);
+}
+
+/**
+ * Create a new page, using document coordinates.
+ */
+SPPage *PageManager::newDocumentPage(Geom::Rect rect, bool first_page)
+{
     return newPage(rect * _document->getDocumentScale().inverse(), first_page);
 }
 
@@ -207,7 +216,7 @@ SPPage *PageManager::newPage(SPPage *page)
     // Record the new location of the new page.
     enablePages();
     auto new_loc = nextPageLocation();
-    auto new_page = newDesktopPage(page->getDesktopRect(), false);
+    auto new_page = newDocumentPage(page->getDocumentRect(), false);
     Geom::Affine page_move = Geom::Translate((new_loc * _document->getDocumentScale()) - new_page->getDesktopRect().min());
     Geom::Affine item_move = Geom::Translate(new_loc - new_page->getRect().min());
 
@@ -540,7 +549,7 @@ void PageManager::fitToSelection(ObjectSet *selection)
             std::set_difference(prev_items.begin(), prev_items.end(), selected.begin(), selected.end(),
                                 std::insert_iterator<std::vector<SPItem *> >(page_items, page_items.begin()));
 
-            moveItems(Geom::Translate(rect->min() - origin), page_items);
+            SPPage::moveItems(Geom::Translate(rect->min() - origin), page_items);
         } else {
             fitToRect(rect, _selected_page);
         }
@@ -581,23 +590,6 @@ std::vector<SPItem *> PageManager::getOverlappingItems(SPDesktop *desktop, SPPag
 }
 
 /**
- * Move the given items by the given affine (surely this already exists somewhere?)
- */
-void PageManager::moveItems(Geom::Affine translate, std::vector<SPItem *> const &objects)
-{
-    for (auto &item : objects) {
-        if (item->isLocked()) {
-            continue;
-        }
-        if (auto parent_item = dynamic_cast<SPItem *>(item->parent)) {
-            auto move = item->i2dt_affine() * (translate * parent_item->i2doc_affine().inverse());
-            item->doWriteTransform(move, &move, false);
-        }
-    }
-}
-
-
-/**
  * Manage the page subset of attributes from sp-namedview and store them.
  */
 bool PageManager::subset(SPAttr key, const gchar *value)
@@ -619,20 +611,15 @@ bool PageManager::subset(SPAttr key, const gchar *value)
             sp_ink_read_opacity(value, &this->border_color, 0x000000ff);
             break;
         case SPAttr::PAGECOLOR:
-            this->background_color = this->background_color & 0xff;
             if (value) {
-                this->background_color = this->background_color | sp_svg_read_color(value, this->background_color);
-                return false; // propagate further
+                this->background_color = sp_svg_read_color(value, this->background_color) | 0xff;
             }
-            break;
-        case SPAttr::INKSCAPE_PAGEOPACITY:
-            sp_ink_read_opacity(value, &this->background_color, 0xffffff00);
             break;
         case SPAttr::SHOWPAGESHADOW: // Deprecated
             this->shadow_show.readOrUnset(value);
             break;
         case SPAttr::INKSCAPE_DESK_CHECKERBOARD:
-            _checkerboard.readOrUnset(value);
+            checkerboard.readOrUnset(value);
             return false; // propagate further
         default:
             return false;
@@ -646,8 +633,11 @@ bool PageManager::subset(SPAttr key, const gchar *value)
 bool PageManager::setDefaultAttributes(Inkscape::CanvasPage *item)
 {
     const int shadow_size = 2; // fixed, not configurable; shadow changes size with zoom
-    return item->setAttributes(border_on_top, border_show ? border_color : 0x0, background_color,
-                               border_show && shadow_show ? shadow_size : 0, _checkerboard);
+    // note: page background color doesn't have configurable transparency; it is considered to be opaque;
+    // here alpha gets manipulated to reveal checkerboard pattern, if needed
+    auto bgcolor = checkerboard ? background_color & ~0xff : background_color | 0xff;
+    return item->setAttributes(border_on_top, border_show ? border_color : 0x0, bgcolor,
+                               border_show && shadow_show ? shadow_size : 0);
 }
 
 /**

@@ -68,10 +68,6 @@ CanvasItemDrawing::CanvasItemDrawing(CanvasItemGroup *group)
     root->setPickChildren(true);
     _drawing->setRoot(root);
 
-    // _drawing->signal_request_update.connect(...);  Not needed now.
-    // _drawing->signal_request_render.connect(...);  Not needed now.
-    // _drawing->signal_item_deleted.connect(...);    Not needed now.
-
     _observer = new CachePref2Observer(this);
 }
 
@@ -144,6 +140,7 @@ void CanvasItemDrawing::update(Geom::Affine const &affine)
         _bounds.expandBy(1); // Avoid aliasing artifacts.
     }
 
+    // Todo: This should be managed elsewhere.
     if (_cursor) {
         /* Mess with enter/leave notifiers */
         DrawingItem *new_drawing_item = _drawing->pick(_c, _delta, _sticky);

@@ -32,6 +32,8 @@
 #include "device-manager.h"
 #include "document.h"
 #include "inkscape.h"
+#include "inkscape-application.h"
+#include "inkscape-window.h"
 #include "message-stack.h"
 #include "path-prefix.h"
 
@@ -48,6 +50,8 @@
 
 #include "ui/themes.h"
 #include "ui/dialog/debug.h"
+#include "ui/dialog/dialog-manager.h"
+#include "ui/dialog/dialog-window.h"
 #include "ui/tools/tool-base.h"
 
 #include <fstream>
@@ -220,6 +224,13 @@ Application::Application(bool use_gui) :
     if(!ui_language.empty())
     {
         setenv("LANGUAGE", ui_language, true);
+#ifdef _WIN32
+        // locale may be set to C with some Windows Region Formats (like English(Europe)).
+        // forcing the LANGUAGE variable to be ignored
+        // see :guess_category_value:gettext-runtime/intl/dcigettext.c,
+        // and :gl_locale_name_from_win32_LANGID:gettext-runtime/gnulib-lib/localename.c
+        setenv("LANG", ui_language, true);
+#endif
     }
 
     /* DebugDialog redirection.  On Linux, default to OFF, on Win32, default to ON.
@@ -247,6 +258,19 @@ Application::Application(bool use_gui) :
         themecontext->getChangeThemeSignal().connect([=](){
             if (auto desktop = active_desktop()) {
                 set_default_highlight_colors(themecontext->getHighlightColors(desktop->getToplevel()));
+            }
+            // sync "dark" class between app window and floating dialog windows to ensure that
+            // CSS providers relying on it apply in dialog windows too
+            if (auto inkscape_window = InkscapeApplication::instance()->get_active_window()) {
+                auto dark = inkscape_window->get_style_context()->has_class("dark");
+                for (auto wnd : Inkscape::UI::Dialog::DialogManager::singleton().get_all_floating_dialog_windows()) {
+                    if (dark) {
+                        wnd->get_style_context()->add_class("dark");
+                    }
+                    else {
+                        wnd->get_style_context()->remove_class("dark");
+                    }
+                }
             }
         });
     }
@@ -798,15 +822,6 @@ Application::sole_desktop_for_document(SPDesktop const &desktop) {
 /*#####################
 # HELPERS
 #####################*/
-
-void
-Application::refresh_display ()
-{
-    for (auto & _desktop : *_desktops) {
-        _desktop->requestRedraw();
-    }
-}
-
 
 /**
  *  Handler for Inkscape's Exit verb.  This emits the shutdown signal,

@@ -30,6 +30,7 @@
 #include "ui/dialog/dialog-multipaned.h"
 #include "ui/dialog/dialog-notebook.h"
 #include "ui/shortcuts.h"
+#include "ui/util.h"
 
 // Sizing constants
 const int MINIMUM_WINDOW_WIDTH = 210;
@@ -62,11 +63,6 @@ DialogWindow::DialogWindow(InkscapeWindow *inkscape_window, Gtk::Widget *page)
     // ============ Initialization ===============
     // Setting the window type
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    bool window_above = true;
-    if (prefs) {
-        window_above =
-            prefs->getInt("/options/transientpolicy/value", PREFS_DIALOGS_WINDOWS_NORMAL) != PREFS_DIALOGS_WINDOWS_NONE;
-    }
 
     set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
     set_transient_for(*inkscape_window);
@@ -92,12 +88,32 @@ DialogWindow::DialogWindow(InkscapeWindow *inkscape_window, Gtk::Widget *page)
 
     // ============ Theming: icons ==============
 
-    if (prefs->getBool("/theme/symbolicIcons", false)) {
-        get_style_context()->add_class("symbolic");
-        get_style_context()->remove_class("regular");
-    } else {
-        get_style_context()->add_class("regular");
-        get_style_context()->remove_class("symbolic");
+
+    // Set the style and icon theme of the new menu based on the desktop
+    if (auto desktop = SP_ACTIVE_DESKTOP) {
+        if (Gtk::Window *window = desktop->getToplevel()) {
+            if (!get_style_context()->has_class("os")) {
+                get_style_context()->add_class(ink_get_current_os_class_name());
+            }
+            if (window->get_style_context()->has_class("dark")) {
+                get_style_context()->add_class("dark");
+                get_style_context()->remove_class("bright");
+            } else {
+                get_style_context()->add_class("bright");
+                get_style_context()->remove_class("dark");
+            }
+            if (prefs->getBool("/theme/symbolicIcons", false)) {
+                get_style_context()->add_class("symbolic");
+                get_style_context()->remove_class("regular");
+            } else {
+                get_style_context()->add_class("regular");
+                get_style_context()->remove_class("symbolic");
+            }
+        }
+    }
+    // floating dialog windows don't inherit "dark" theme class
+    if (inkscape_window && inkscape_window->get_style_context()->has_class("dark")) {
+        get_style_context()->add_class("dark");
     }
 
     // ================ Window ==================
@@ -271,7 +287,7 @@ bool DialogWindow::on_key_press_event(GdkEventKey *key_event)
     }
 
     // Pass key event to active InkscapeWindow to handle win (and app) level shortcuts.
-    if (_app->get_active_window()->on_key_press_event(key_event)) {
+    if (auto win = _app->get_active_window(); win && win->on_key_press_event(key_event)) {
         return true;
     }
 

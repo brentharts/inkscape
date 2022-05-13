@@ -15,14 +15,12 @@
 
 ### dependencies ###############################################################
 
-# shellcheck disable=SC1090 # can't point to a single source here
-for script in "$(dirname "${BASH_SOURCE[0]}")"/0??-*.sh; do
-  source "$script";
-done
+source "$(dirname "${BASH_SOURCE[0]}")"/jhb-custom.conf.sh
+source "$(dirname "${BASH_SOURCE[0]}")"/jhb/etc/jhb.conf.sh
 
 ### variables ##################################################################
 
-# Nothing here.
+SELF_DIR=$(dirname "${BASH_SOURCE[0]}")
 
 ### functions ##################################################################
 
@@ -30,11 +28,12 @@ done
 
 ### main #######################################################################
 
-error_trace_enable
+cp "$SELF_DIR"/jhb-custom.conf.sh "$SELF_DIR"/jhb/etc/jhb-custom.conf.sh
 
-toolset_install
+"$SELF_DIR"/jhb/usr/bin/archive install_dmg 3
 
 if [ "$1" = "restore_overlay" ]; then
   # restore files fronm build stage
-  tar -C "$VER_DIR" -xpJf "$ARTIFACT_DIR"/toolset_overlay.tar.xz
+  gtar -C "$VER_DIR" -xpJf "$ARTIFACT_DIR"/toolset_overlay.tar.xz
 fi
+

@@ -453,18 +453,18 @@ std::vector<std::vector<Glib::ustring>> raw_data_layer =
 {
     // clang-format off
     {"win.layer-new",                       N_("Add Layer"),                        "Layers",     N_("Create a new layer")},
-    {"win.layer-duplicate",                 N_("Duplicate Current Layer"),          "Layers",     N_("Duplicate an existing layer")},
+    {"win.layer-duplicate",                 N_("Duplicate Current Layer"),          "Layers",     N_("Duplicate the current layer")},
     {"win.layer-delete",                    N_("Delete Current Layer"),             "Layers",     N_("Delete the current layer")},
     {"win.layer-rename",                    N_("Rename Layer"),                     "Layers",     N_("Rename the current layer")},
 
     {"win.layer-toggle-hide",               N_("Show/Hide Current Layer"),          "Layers",     N_("Toggle visibility of current layer")},
     {"win.layer-toggle-lock",               N_("Lock/Unlock Current Layer"),        "Layers",     N_("Toggle lock on current layer")},
 
-    {"win.layer-previous",                  N_("Switch to Layer Abov_e"),           "Layers",     N_("Switch to the layer above the current")},
-    {"win.layer-next",                      N_("Switch to Layer Belo_w"),           "Layers",     N_("Switch to the layer below the current")},
+    {"win.layer-previous",                  N_("Switch to Layer Above"),            "Layers",     N_("Switch to the layer above the current")},
+    {"win.layer-next",                      N_("Switch to Layer Below"),            "Layers",     N_("Switch to the layer below the current")},
 
     {"win.selection-move-to-layer-above",   N_("Move Selection to Layer Above"),    "Layers",     N_("Move selection to the layer above the current")},
-    {"win.selection-move-to-layer-below",   N_("Move Selection to Layer Bel_ow"),   "Layers",     N_("Move selection to the layer below the current")},
+    {"win.selection-move-to-layer-below",   N_("Move Selection to Layer Below"),    "Layers",     N_("Move selection to the layer below the current")},
     {"win.selection-move-to-layer",         N_("Move Selection to Layer..."),       "Layers",     N_("Move selection to layer")},
 
     {"win.layer-top",                       N_("Layer to Top"),                     "Layers",     N_("Raise the current layer to the top")},
@@ -473,7 +473,7 @@ std::vector<std::vector<Glib::ustring>> raw_data_layer =
     {"win.layer-bottom",                    N_("Layer to Bottom"),                  "Layers",     N_("Lower the current layer to the bottom")},
 
     {"win.layer-to-group",                  N_("Layer to Group"),                   "Layers",     N_("Convert the current layer to a group")},
-    {"win.layer-from-group",                N_("Layer from Group"),                 "Layers",     N_("Convert the a group to a layer")},
+    {"win.layer-from-group",                N_("Layer from Group"),                 "Layers",     N_("Convert the group to a layer")},
 
     // These use Layer technology even if they don't act on layers.
     {"win.selection-group-enter",           N_("Enter Group"),                      "Select",     N_("Enter group")},

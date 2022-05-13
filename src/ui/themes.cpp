@@ -265,10 +265,7 @@ void ThemeContext::add_gtk_css(bool only_providers, bool cached)
         bool preferdarktheme = prefs->getBool("/theme/preferDarkTheme", false);
         g_object_set(settings, "gtk-application-prefer-dark-theme", preferdarktheme, nullptr);
         themeiconname = prefs->getString("/theme/iconTheme");
-        // legacy cleanup
-        if (themeiconname == prefs->getString("/theme/defaultIconTheme")) {
-            prefs->setString("/theme/iconTheme", "");
-        } else if (themeiconname != "") {
+        if (themeiconname != "") {
             g_object_set(settings, "gtk-icon-theme-name", themeiconname.c_str(), nullptr);
         }
     }
@@ -509,7 +506,7 @@ void ThemeContext::adjust_global_font_scale(double factor) {
 
     Inkscape::CSSOStringStream os;
     os.precision(3);
-    os << "widget, menuitem { font-size: " << factor << "rem; }";
+    os << "widget, menuitem, popover { font-size: " << factor << "rem; }";
     _fontsizeprovider->load_from_data(os.str());
 
     // note: priority set to APP - 1 to make sure styles.css take precedence over generic font-size

@@ -12,7 +12,6 @@ set(display_SRC
 	drawing-surface.cpp
 	drawing-text.cpp
 	drawing.cpp
-	grayscale.cpp
 	nr-3dutils.cpp
 	nr-filter-blend.cpp
 	nr-filter-colormatrix.cpp
@@ -56,7 +55,6 @@ set(display_SRC
         control/canvas-item-guideline.cpp
         control/canvas-item-quad.cpp
         control/canvas-item-rect.cpp
-        control/canvas-item-rotate.cpp
         control/canvas-item-text.cpp
         control/canvas-page.cpp
 
@@ -74,7 +72,6 @@ set(display_SRC
 	drawing-surface.h
 	drawing-text.h
 	drawing.h
-	grayscale.h
 	nr-3dutils.h
 	nr-filter-blend.h
 	nr-filter-colormatrix.h
@@ -124,7 +121,6 @@ set(display_SRC
         control/canvas-item-guideline.h
         control/canvas-item-quad.h
         control/canvas-item-rect.h
-        control/canvas-item-rotate.h
         control/canvas-item-text.h
         control/canvas-page.h
 )

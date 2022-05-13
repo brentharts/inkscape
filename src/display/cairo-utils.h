@@ -21,66 +21,8 @@ struct SPColor;
 typedef struct _GdkPixbuf GdkPixbuf;
 
 void ink_cairo_pixbuf_cleanup(unsigned char *, void *);
-void convert_pixbuf_argb32_to_normal(GdkPixbuf *pb);
 
 namespace Inkscape {
-
-/**
- * RAII idiom for Cairo groups.
- * Groups are temporary surfaces used when rendering e.g. masks and opacity.
- * Use this class to ensure that each group push is matched with a pop.
- */
-class CairoGroup {
-public:
-    CairoGroup(cairo_t *_ct);
-    ~CairoGroup();
-    void push();
-    void push_with_content(cairo_content_t content);
-    cairo_pattern_t *pop();
-    Cairo::RefPtr<Cairo::Pattern> popmm();
-    void pop_to_source();
-private:
-    cairo_t *ct;
-    bool pushed;
-};
-
-/** RAII idiom for Cairo state saving. */
-class CairoSave {
-public:
-    CairoSave(cairo_t *_ct, bool save=false)
-        : ct(_ct)
-        , saved(save)
-    {
-        if (save) {
-            cairo_save(ct);
-        }
-    }
-    void save() {
-        if (!saved) {
-            cairo_save(ct);
-            saved = true;
-        }
-    }
-    ~CairoSave() {
-        if (saved)
-            cairo_restore(ct);
-    }
-private:
-    cairo_t *ct;
-    bool saved;
-};
-
-/** Cairo context with Inkscape-specific operations. */
-class CairoContext : public Cairo::Context {
-public:
-    CairoContext(cairo_t *obj, bool ref = false);
-
-    void transform(Geom::Affine const &m);
-    void set_source_rgba32(guint32 color);
-    void append_path(Geom::PathVector const &pv);
-
-    static Cairo::RefPtr<CairoContext> create(Cairo::RefPtr<Cairo::Surface> const &target);
-};
 
 /** Class to hold image data for raster images.
  * Allows easy interoperation with GdkPixbuf and Cairo. */
@@ -143,7 +85,6 @@ public:
 
 // TODO: these declarations may not be needed in the header
 extern cairo_user_data_key_t ink_color_interpolation_key;
-extern cairo_user_data_key_t ink_pixbuf_key;
 
 SPColorInterpolation get_cairo_surface_ci(cairo_surface_t *surface);
 void set_cairo_surface_ci(cairo_surface_t *surface, SPColorInterpolation cif);
@@ -180,7 +121,7 @@ int ink_cairo_surface_linear_to_srgb(cairo_surface_t *surface);
 
 cairo_pattern_t *ink_cairo_pattern_create_checkerboard(guint32 rgba = 0xC4C4C4FF, bool use_alpha = false);
 // draw drop shadow around the 'rect' with given 'size' and 'color'; shadow extends to the right and bottom of rect
-void ink_cairo_draw_drop_shadow(Cairo::RefPtr<Cairo::Context> ctx, const Geom::Rect& rect, double size, guint32 color, double color_alpha);
+void ink_cairo_draw_drop_shadow(const Cairo::RefPtr<Cairo::Context> &ctx, const Geom::Rect& rect, double size, guint32 color, double color_alpha);
 
 GdkPixbuf *ink_pixbuf_create_from_cairo_surface(cairo_surface_t *s);
 void convert_pixels_pixbuf_to_argb32(guchar *data, int w, int h, int rs);

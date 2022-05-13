@@ -41,6 +41,7 @@
 #include "object/sp-text.h"
 
 #include "ui/desktop/menu-icon-shift.h"
+#include "ui/util.h"
 
 ContextMenu::ContextMenu(SPDesktop *desktop, SPObject *object, bool hide_layers_and_objects_menu_item)
 {
@@ -142,10 +143,10 @@ ContextMenu::ContextMenu(SPDesktop *desktop, SPObject *object, bool hide_layers_
                 auto image = dynamic_cast<SPImage*>(item);
                 if (strncmp(image->href, "data", 4) == 0) {
                     // Image is embedded.
-                    AppendItemFromAction( gmenu_dialogs, "app.org.inkscape.filter.extract_image",        _("Extract Image..."),      ""                      );
+                    AppendItemFromAction( gmenu_dialogs, "app.org.inkscape.filter.extract-image",        _("Extract Image..."),      ""                      );
                 } else {
                     // Image is linked.
-                    AppendItemFromAction( gmenu_dialogs, "app.org.inkscape.filter.selected.embed_image", _("Embed Image"),           ""                      );
+                    AppendItemFromAction( gmenu_dialogs, "app.org.inkscape.filter.selected.embed-image", _("Embed Image"),           ""                      );
                     AppendItemFromAction( gmenu_dialogs, "app.element-image-edit",                       _("Edit Externally..."),    ""                      );
                 }
             }
@@ -281,6 +282,9 @@ ContextMenu::ContextMenu(SPDesktop *desktop, SPObject *object, bool hide_layers_
     // Set the style and icon theme of the new menu based on the desktop
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     if (Gtk::Window *window = desktop->getToplevel()) {
+        if (!window->get_style_context()->has_class("os")) {
+            get_style_context()->add_class(ink_get_current_os_class_name());
+        }
         if (window->get_style_context()->has_class("dark")) {
             get_style_context()->add_class("dark");
         } else {

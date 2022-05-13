@@ -50,7 +50,6 @@ namespace Tools {
 GradientTool::GradientTool(SPDesktop *desktop)
     : ToolBase(desktop, "/tools/gradient", "gradient.svg")
     , cursor_addnode(false)
-    , node_added(false)
 // TODO: Why are these connections stored as pointers?
     , selcon(nullptr)
     , subselcon(nullptr)
@@ -450,7 +449,6 @@ bool GradientTool::root_handler(GdkEvent* event) {
                     SPGradient *priv = sp_item_set_gradient(item, vector, new_type, fsmode);
                     sp_gradient_reset_to_userspace(priv, item);
                 }
-                _desktop->redrawDesktop();;
                 DocumentUndo::done(_desktop->getDocument(), _("Create default gradient"), INKSCAPE_ICON("color-gradient"));
             }
             ret = TRUE;

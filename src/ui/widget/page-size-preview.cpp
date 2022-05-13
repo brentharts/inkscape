@@ -17,7 +17,7 @@
 #include "display/cairo-utils.h"
 #include "2geom/rect.h"
 
-namespace Inkscape {    
+namespace Inkscape {
 namespace UI {
 namespace Widget {
 
@@ -102,6 +102,7 @@ bool PageSizePreview::on_draw(const Cairo::RefPtr<Cairo::Context>& ctx) {
     }
 
     // draw cross
+    /*
     {
         double gradient_size = 4;
         double cx = std::round(x + (width - gradient_size) / 2);
@@ -131,7 +132,7 @@ bool PageSizePreview::on_draw(const Cairo::RefPtr<Cairo::Context>& ctx) {
     ctx->rectangle(rect.left(), rect.top(), rect.width(), rect.height());
     set_source_rgba(ctx, _page_color);
     ctx->fill();
-
+*/
     if (_draw_border) {
         // stoke; not pixel aligned, just like page on canvas
         ctx->rectangle(rect.left(), rect.top(), rect.width(), rect.height());

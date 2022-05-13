@@ -115,12 +115,12 @@ DialogNotebook::DialogNotebook(DialogContainer *container)
         const auto& data = kv.second;
         if (data.category == DialogData::Other) continue;
         // for sorting dialogs alphabetically, remove '_'
-        auto order = data.label;
+        Glib::ustring order = _(data.label.c_str());
         auto underscore = order.find('_');
         if (underscore != Glib::ustring::npos) {
             order = order.erase(underscore, 1);
         }
-        all_dialogs.push_back(Dialog { .key = key, .label = data.label, .order = order, .icon_name = data.icon_name, .category = data.category, .provide_scroll = data.provide_scroll});
+        all_dialogs.push_back(Dialog { .key = key, .label = _(data.label.c_str()), .order = order, .icon_name = data.icon_name, .category = data.category, .provide_scroll = data.provide_scroll});
     }
     // sort by categories and then by names
     std::sort(all_dialogs.begin(), all_dialogs.end(), [](const Dialog& a, const Dialog& b){
@@ -290,6 +290,7 @@ void DialogNotebook::add_page(Gtk::Widget &page, Gtk::Widget &tab, Glib::ustring
         wrapper->set_propagate_natural_height(true);
         wrapper->set_valign(Gtk::ALIGN_FILL);
         wrapper->set_overlay_scrolling(false);
+        wrapper->set_can_focus(false);
         wrapper->get_style_context()->add_class("noborder");
         auto *wrapperbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL,0));
         wrapperbox->set_valign(Gtk::ALIGN_FILL);
@@ -661,7 +662,7 @@ void DialogNotebook::on_size_allocate_notebook(Gtk::Allocation &a)
     _notebook.get_preferred_width(total_width, nat_width); // get full notebook allocation (all open)
     prev_tabstatus = tabstatus;
     if (_single_tab_width != _none_tab_width && 
-        (_none_tab_width && _none_tab_width > alloc_width || 
+        ((_none_tab_width && _none_tab_width > alloc_width) || 
         (_single_tab_width > alloc_width && _single_tab_width < total_width)))
     {
         tabstatus = TabsStatus::NONE;

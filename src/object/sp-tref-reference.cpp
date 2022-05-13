@@ -33,10 +33,9 @@ void SPTRefReference::updateObserver()
     if (referred) {
         if (subtreeObserved) {
             subtreeObserved->removeObserver(*this);
-            delete subtreeObserved;
         }
 
-        subtreeObserved = new Inkscape::XML::Subtree(*referred->getRepr());
+        subtreeObserved = std::make_unique<Inkscape::XML::Subtree>(*referred->getRepr());
         subtreeObserved->addObserver(*this);
     }
 }

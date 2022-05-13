@@ -204,7 +204,6 @@ private:
     std::vector<SvgGraphicsState> _state_stack;
 
     SPCSSAttr *_font_style;          // Current font style
-    GfxFont *_current_font;
     const char *_font_specification;
     double _font_scaling;
     bool _need_font_update;
@@ -229,7 +228,6 @@ private:
     double _ttm[6]; ///< temporary transform matrix
     bool _ttm_is_set;
     
-    Inkscape::XML::Node *_nv = nullptr; // XML NameView xml
     Inkscape::XML::Node *_page = nullptr; // XML Page definition
     int _page_num = 0; // Are we on a page
     double _page_left = 0 ; // Move to the left for more pages

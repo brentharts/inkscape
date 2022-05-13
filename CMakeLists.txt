@@ -42,9 +42,9 @@ set(PROJECT_NAME inkscape)
 
 # see https://gitlab.com/inkscape/inkscape/-/issues/551 for versioning suffixes
 set(INKSCAPE_VERSION_MAJOR  1)
-set(INKSCAPE_VERSION_MINOR  2)
+set(INKSCAPE_VERSION_MINOR  3)
 set(INKSCAPE_VERSION_PATCH  0)
-set(INKSCAPE_VERSION_SUFFIX "-alpha1")
+set(INKSCAPE_VERSION_SUFFIX "-dev")
 
 set(INKSCAPE_VERSION ${INKSCAPE_VERSION_MAJOR}.${INKSCAPE_VERSION_MINOR})
 if(INKSCAPE_VERSION_PATCH)
@@ -298,7 +298,6 @@ message("")
 message("HAVE_MINGW64:            ${HAVE_MINGW64}")
 message("MINGW_PATH:              ${MINGW_PATH}")
 message("MINGW_ARCH:              ${MINGW_ARCH}")
-message("MINGW_ARCH_PATH:         ${MINGW_ARCH_PATH}")
 endif()
 
 message("------------------------------------------------------------------------")

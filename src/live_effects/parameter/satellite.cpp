@@ -66,21 +66,21 @@ bool SatelliteParam::param_readSVGValue(const gchar *strvalue)
     if (strvalue) {
         bool write = false;
         auto lpeitems = param_effect->getCurrrentLPEItems();
+        Glib::ustring id_tmp;
         if (!lpeitems.size() && !param_effect->is_applied && !param_effect->getSPDoc()->isSeeking()) {
             SPObject * old_ref = param_effect->getSPDoc()->getObjectByHref(strvalue);
             if (old_ref) {
                 SPObject * successor = old_ref->_successor;
-                Glib::ustring id = "";
                 // cast to effect is not possible now
                 if (!g_strcmp0("clone_original", param_effect->getLPEObj()->getAttribute("effect"))) {
-                    id = strvalue;
+                    id_tmp = strvalue;
                 }
                 if (successor) {
-                    id = successor->getId();
-                    id.insert(id.begin(), '#');
+                    id_tmp = successor->getId();
+                    id_tmp.insert(id_tmp.begin(), '#');
                     write = true;
                 }
-                strvalue = id.c_str();
+                strvalue = id_tmp.c_str();
             }
         }
         SPObject *old_ref = lperef->getObject();
@@ -220,7 +220,7 @@ void SatelliteParam::linked_released(SPObject *released)
 
 void SatelliteParam::linked_modified(SPObject *linked_obj, guint flags)
 {
-    if ((!param_effect->is_load || ownerlocator || !SP_ACTIVE_DESKTOP) &&
+    if (!_updating && (!param_effect->is_load || ownerlocator || !SP_ACTIVE_DESKTOP) &&
         flags & (SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_STYLE_MODIFIED_FLAG |
                  SP_OBJECT_CHILD_MODIFIED_FLAG | SP_OBJECT_VIEWPORT_MODIFIED_FLAG)) 
     {
@@ -234,7 +234,9 @@ void SatelliteParam::linked_modified(SPObject *linked_obj, guint flags)
 
 void SatelliteParam::linked_transformed(Geom::Affine const *rel_transf, SPItem *moved_item)
 {
-    update_satellites();
+    if (!_updating) {
+        update_satellites();
+    }
 }
 
 // UI

@@ -28,11 +28,11 @@
 #include "live_effects/lpe-bool.h"
 #include "live_effects/lpe-clone-original.h"
 #include "live_effects/lpe-copy_rotate.h"
-#include "live_effects/lpe-copy.h"
 #include "live_effects/lpe-lattice2.h"
 #include "live_effects/lpe-measure-segments.h"
 #include "live_effects/lpe-slice.h"
 #include "live_effects/lpe-mirror_symmetry.h"
+#include "live_effects/lpe-tiling.h"
 #include "message-stack.h"
 #include "path-chemistry.h"
 #include "sp-clippath.h"
@@ -357,7 +357,7 @@ bool SPLPEItem::optimizeTransforms()
         }
     }
     // LPEs with satellites (and his satellites) has this class auto
-    gchar *classes = g_strdup(getRepr()->attribute("class"));
+    gchar *classes = g_strdup(getAttribute("class"));
     if (classes) {
         Glib::ustring classdata = classes;
         size_t pos = classdata.find("UnoptimicedTransforms");
@@ -387,7 +387,7 @@ void SPLPEItem::notifyTransform(Geom::Affine const &postmul)
         if (lpeobj) {
             Inkscape::LivePathEffect::Effect *lpe = lpeobj->get_lpe();
             if (lpe && !lpe->is_load) {
-                lpe->transform_multiply(postmul, this);
+                lpe->transform_multiply_impl(postmul, this);
             }
         }
     }
@@ -594,11 +594,6 @@ sp_lpe_item_cleanup_original_path_recursive(SPLPEItem *lpeitem, bool keep_paths,
                 /* Rotation center */
                 gchar const *transform_center_x = shape->getRepr()->attribute("inkscape:transform-center-x");
                 gchar const *transform_center_y = shape->getRepr()->attribute("inkscape:transform-center-y");
-
-                // remember highlight color
-                guint32 highlight_color = 0;
-                if (shape->isHighlightSet())
-                    highlight_color = shape->highlight_color();
 
                 // It's going to resurrect, so we delete without notifying listeners.
                 SPDocument * doc = shape->document;
@@ -822,6 +817,24 @@ void SPLPEItem::upCurrentPathEffect()
     this->setAttributeOrRemoveIfEmpty("inkscape:path-effect", patheffectlist_svg_string(new_list));
 
     sp_lpe_item_cleanup_original_path_recursive(this, false);
+}
+
+void
+SPLPEItem::update_satellites(bool updatelpe) {
+    if (path_effect_list->empty()) {
+        return;
+    }
+
+    // go through the list; if some are unknown or invalid, return true
+    PathEffectList path_effect_list(*this->path_effect_list);
+    for (auto &lperef : path_effect_list) {
+        LivePathEffectObject *lpeobj = lperef->lpeobject;
+        if (lpeobj) {
+            if (auto *lpe = lpeobj->get_lpe()) {
+                lpe->update_satellites(updatelpe);
+            }
+        }
+    }
 }
 
 /** used for shapes so they can see if they should also disable shape calculation and read from d= */

@@ -376,8 +376,11 @@ static char const preferences_skeleton[] =
        theme="colorful" />
   </group>
 
-  <group id="extensions">
-  </group>
+  <group
+     id="extensions"
+     org.inkscape.output.png.inkscape.png_bitdepth="99"
+     org.inkscape.output.png.inkscape.png_compression="6"
+     org.inkscape.output.png.inkscape.png_antialias="2" />
 
   <group id="desktop"
          style="fill:#000000">
@@ -504,13 +507,13 @@ static char const preferences_skeleton[] =
   <group
      id="theme"
      defaultPreferDarkTheme="1"
+     defaultIconTheme="multicolor"
+     defaultGtkTheme="Adwaita"
      narrowSpinButton="1"
      preferDarkTheme="1"
      darkTheme="1"
-     gtkTheme="Adwaita"
-     iconTheme="multicolor"
      symbolicIcons="1"
-     symbolicDefaultBaseColors="0"
+     symbolicDefaultBaseColors="1"
      symbolicDefaultHighColors="0"/>
 </inkscape>
 )=====";

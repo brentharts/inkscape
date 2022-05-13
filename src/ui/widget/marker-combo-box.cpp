@@ -180,6 +180,7 @@ MarkerComboBox::MarkerComboBox(Glib::ustring id, int l) :
 
     auto set_scale = [=](bool changeWidth) {
         if (_update.pending()) return;
+
         if (auto marker = get_current()) {
             auto sx = _scale_x.get_value();
             auto sy = _scale_y.get_value();
@@ -202,6 +203,23 @@ MarkerComboBox::MarkerComboBox(Glib::ustring id, int l) :
         }
     };
 
+    // delay setting scale to idle time; if invoked by focus change due to new marker selection
+    // it leads to marker list rebuild and apparent flowbox content corruption
+    auto idle_set_scale = [=](bool changeWidth) {
+        if (_update.pending()) return;
+
+        if (auto orig_marker = get_current()) {
+            _idle = Glib::signal_idle().connect([=](){
+                if (auto marker = get_current()) {
+                    if (marker == orig_marker) {
+                        set_scale(changeWidth);
+                    }
+                }
+                return false; // don't call again
+            });
+        }
+    };
+
     _link_scale.signal_clicked().connect([=](){
         if (_update.pending()) return;
         _scale_linked = !_scale_linked;
@@ -209,8 +227,8 @@ MarkerComboBox::MarkerComboBox(Glib::ustring id, int l) :
         update_scale_link();
     });
 
-    _scale_x.signal_value_changed().connect([=]() { set_scale(true); });
-    _scale_y.signal_value_changed().connect([=]() { set_scale(false); });
+    _scale_x.signal_value_changed().connect([=]() { idle_set_scale(true); });
+    _scale_y.signal_value_changed().connect([=]() { idle_set_scale(false); });
 
     _scale_with_stroke.signal_toggled().connect([=](){
         if (_update.pending()) return;
@@ -236,6 +254,9 @@ MarkerComboBox::MarkerComboBox(Glib::ustring id, int l) :
 }
 
 MarkerComboBox::~MarkerComboBox() {
+    if (_idle) {
+        _idle.disconnect();
+    }
     if (_document) {
         modified_connection.disconnect();
     }
@@ -316,7 +337,7 @@ void MarkerComboBox::update_preview(Glib::RefPtr<MarkerItem> item) {
 
     _preview.set(surface);
     std::ostringstream ost;
-    ost << "<small>" << label << "</small>";
+    ost << "<small>" << label.raw() << "</small>";
     _marker_name.set_markup(ost.str().c_str());
 }
 
@@ -716,10 +737,10 @@ auto old_time =  std::chrono::high_resolution_clock::now();
         item->height = ITEM_HEIGHT;
 
         if (history) {
-            _history_items.push_back(item);
+            _history_items.emplace_back(std::move(item));
         }
         else {
-            _stock_items.push_back(item);
+            _stock_items.emplace_back(std::move(item));
         }
     }
 
@@ -884,7 +905,7 @@ MarkerComboBox::create_marker_image(Geom::IntPoint pixel_size, gchar const *mnam
     const double device_scale = get_scale_factor();
     auto surface = render_surface(drawing, scale, *dbox, pixel_size, device_scale, checkerboard ? &_background_color : nullptr, no_clip);
     cairo_surface_set_device_scale(surface, device_scale, device_scale);
-    return Cairo::RefPtr<Cairo::Surface>(new Cairo::Surface(surface, false));
+    return Cairo::RefPtr<Cairo::Surface>(new Cairo::Surface(surface, true));
 }
 
 // capture background color when styles change

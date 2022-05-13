@@ -378,13 +378,10 @@ static void do_trace(bitmap_coords_info bci, guchar *trace_px, SPDesktop *deskto
     //XML Tree being used here directly while it shouldn't be...."
     Inkscape::XML::Document *xml_doc = desktop->doc()->getReprDoc();
 
-    long totalNodeCount = 0L;
-
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     double offset = prefs->getDouble("/tools/paintbucket/offset", 0.0);
 
     for (auto result : results) {
-        totalNodeCount += result.getNodeCount();
 
         Inkscape::XML::Node *pathRepr = xml_doc->createElement("svg:path");
         /* Set style */
@@ -783,7 +780,7 @@ static void sp_flood_do_flood_fill(SPDesktop *desktop, GdkEvent *event,
         bgcolor = document->getPageManager().background_color;
 
         // bgcolor is 0xrrggbbaa, we need 0xaarrggbb
-        dtc = (bgcolor >> 8) | (bgcolor << 24);
+        dtc = bgcolor >> 8; // keep color transparent; page color doesn't support transparency anymore
 
         dc.setSource(bgcolor);
         dc.setOperator(CAIRO_OPERATOR_SOURCE);

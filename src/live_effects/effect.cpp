@@ -32,7 +32,6 @@
 #include "live_effects/lpe-clone-original.h"
 #include "live_effects/lpe-constructgrid.h"
 #include "live_effects/lpe-copy_rotate.h"
-#include "live_effects/lpe-copy.h"
 #include "live_effects/lpe-curvestitch.h"
 #include "live_effects/lpe-dashed-stroke.h"
 #include "live_effects/lpe-dynastroke.h"
@@ -76,6 +75,7 @@
 #include "live_effects/lpe-taperstroke.h"
 #include "live_effects/lpe-test-doEffect-stack.h"
 #include "live_effects/lpe-text_label.h"
+#include "live_effects/lpe-tiling.h"
 #include "live_effects/lpe-transform_2pts.h"
 #include "live_effects/lpe-vonkoch.h"
 #include "live_effects/lpeobject.h"
@@ -639,11 +639,11 @@ const EnumEffectData<EffectType> LPETypeData[] = {
     },
     /* 1.2 */
     {
-        COPY,
-        NC_("path effect", "Copies") ,//label
-        "copy" ,//key
-        "copy" ,//icon
-        N_("Create multiple copies of an object. The copies can be styled independently.") ,//description
+        TILING,
+        NC_("path effect", "Tiling") ,//label
+        "tiling" ,//key
+        "tiling" ,//icon
+        N_("Create multiple copies of an object following a grid layout. Customize size, rotation, distances, style and tiling symmetry.") ,//description
         true  ,//on_path
         true  ,//on_shape
         true  ,//on_group
@@ -651,7 +651,7 @@ const EnumEffectData<EffectType> LPETypeData[] = {
         false ,//on_text
         false ,//experimental
     },
-    // VISIBLE experimental LPE
+    // VISIBLE experimental LPEs
     {
         ANGLE_BISECTOR,
         NC_("path effect", "Angle bisector") ,//label
@@ -1040,8 +1040,8 @@ Effect::New(EffectType lpenr, LivePathEffectObject *lpeobj)
         case SLICE:
             neweffect = static_cast<Effect *>(new LPESlice(lpeobj));
             break;
-        case COPY:
-            neweffect = static_cast<Effect*> ( new LPECopy(lpeobj) );
+        case TILING:
+            neweffect = static_cast<Effect*> ( new LPETiling(lpeobj) );
             break;
         default:
             g_warning("LivePathEffect::Effect::New called with invalid patheffect type (%d)", lpenr);
@@ -1164,7 +1164,7 @@ void Effect::transform_multiply(Geom::Affine const &postmul, bool /*set*/) {}
  * FIXME Probably only makes sense if this effect is referenced by exactly one
  * item (`this->lpeobj->hrefList` contains exactly one element)?
  */
-void Effect::transform_multiply(Geom::Affine const &postmul, SPLPEItem *lpeitem)
+void Effect::transform_multiply_impl(Geom::Affine const &postmul, SPLPEItem *lpeitem)
 {
     assert("pre: effect is referenced by lpeitem" &&
            std::any_of(lpeobj->hrefList.begin(), lpeobj->hrefList.end(),
@@ -1326,7 +1326,21 @@ void Effect::doOnBeforeCommit()
         }
     }
     if (lpe_action == LPE_ERASE || lpe_action == LPE_TO_OBJECTS) {
-        satelltelist.clear();
+        Inkscape::LivePathEffect::SatelliteArrayParam *lpesatellites = nullptr;
+        Inkscape::LivePathEffect::OriginalSatelliteParam *lpesatellite = nullptr;
+        std::vector<Inkscape::LivePathEffect::Parameter *>::iterator p;
+        for (p = param_vector.begin(); p != param_vector.end(); ++p) {
+            lpesatellites = dynamic_cast<SatelliteArrayParam *>(*p);
+            lpesatellite = dynamic_cast<OriginalSatelliteParam *>(*p);
+            if (lpesatellites) {
+                lpesatellites->clear();
+                lpesatellites->write_to_SVG();
+            }
+            if (lpesatellite) {
+                lpesatellite->unlink();
+                lpesatellite->write_to_SVG();
+            }
+        }
     }
     if (sp_lpe_item) {
         sp_lpe_item_enable_path_effects(sp_lpe_item, true);

@@ -49,19 +49,22 @@ PagesTool::PagesTool(SPDesktop *desktop)
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     drag_tolerance = prefs->getIntLimited("/options/dragtolerance/value", 0, 0, 100);
 
-    if (!resize_knot) {
-        resize_knot = new SPKnot(desktop, _("Resize page"), Inkscape::CANVAS_ITEM_CTRL_TYPE_SHAPER, "PageTool:Resize");
-        resize_knot->setShape(Inkscape::CANVAS_ITEM_CTRL_SHAPE_SQUARE);
-        resize_knot->setFill(0xffffff00, 0x0000ff00, 0x000000ff, 0x000000ff);
-        resize_knot->setSize(9);
-        resize_knot->setAnchor(SP_ANCHOR_CENTER);
-        resize_knot->updateCtrl();
-        resize_knot->hide();
-        resize_knot->moved_signal.connect(sigc::mem_fun(*this, &PagesTool::resizeKnotMoved));
-        resize_knot->ungrabbed_signal.connect(sigc::mem_fun(*this, &PagesTool::resizeKnotFinished));
-        if (auto window = desktop->getCanvas()->get_window()) {
-            resize_knot->setCursor(SP_KNOT_STATE_DRAGGING, this->get_cursor(window, "page-resizing.svg"));
-            resize_knot->setCursor(SP_KNOT_STATE_MOUSEOVER, this->get_cursor(window, "page-resize.svg"));
+    if (resize_knots.empty()) {
+        for (int i = 0; i < 4; i++) {
+            auto knot = new SPKnot(desktop, _("Resize page"), Inkscape::CANVAS_ITEM_CTRL_TYPE_SHAPER, "PageTool:Resize");
+            knot->setShape(Inkscape::CANVAS_ITEM_CTRL_SHAPE_SQUARE);
+            knot->setFill(0xffffff00, 0x0000ff00, 0x000000ff, 0x000000ff);
+            knot->setSize(9);
+            knot->setAnchor(SP_ANCHOR_CENTER);
+            knot->updateCtrl();
+            knot->hide();
+            knot->moved_signal.connect(sigc::mem_fun(*this, &PagesTool::resizeKnotMoved));
+            knot->ungrabbed_signal.connect(sigc::mem_fun(*this, &PagesTool::resizeKnotFinished));
+            if (auto window = desktop->getCanvas()->get_window()) {
+                knot->setCursor(SP_KNOT_STATE_DRAGGING, this->get_cursor(window, "page-resizing.svg"));
+                knot->setCursor(SP_KNOT_STATE_MOUSEOVER, this->get_cursor(window, "page-resize.svg"));
+            }
+            resize_knots.push_back(knot);
         }
     }
 
@@ -74,31 +77,25 @@ PagesTool::PagesTool(SPDesktop *desktop)
         drag_group = new Inkscape::CanvasItemGroup(desktop->getCanvasTemp());
         drag_group->set_name("CanvasItemGroup:PagesDragShapes");
     }
-    auto &page_manager = desktop->getDocument()->getPageManager();
-    _selector_changed_connection =
-            page_manager.connectPageSelected(sigc::mem_fun(*this, &PagesTool::selectionChanged));
-    selectionChanged(page_manager.getSelected());
 
-    _doc_modified_connection = desktop->getDocument()->connectModified([=](guint){
-        // This readjusts the knot when in single page mode.
-        if (!desktop->getDocument()->getPageManager().hasPages()) {
-            selectionChanged(nullptr);
-        }
+    _doc_replaced_connection = desktop->connectDocumentReplaced([=](SPDesktop *desktop, SPDocument *doc) {
+        connectDocument(desktop->getDocument());
     });
+    connectDocument(desktop->getDocument());
 
     _zoom_connection = desktop->signal_zoom_changed.connect([=](double) {
         // This readjusts the knot on zoom because the viewbox position
         // becomes detached on zoom, likely a precision problem.
         if (!desktop->getDocument()->getPageManager().hasPages()) {
-            selectionChanged(nullptr);
+            selectionChanged(desktop->getDocument(), nullptr);
         }
     });
 }
 
+
 PagesTool::~PagesTool()
 {
-    _selector_changed_connection.disconnect();
-    selectionChanged(nullptr);
+    connectDocument(nullptr);
 
     ungrabCanvasEvents();
 
@@ -109,10 +106,10 @@ PagesTool::~PagesTool()
         visual_box = nullptr;
     }
 
-    if (resize_knot) {
-        delete resize_knot;
-        resize_knot = nullptr;
+    for (auto knot : resize_knots) {
+        delete knot;
     }
+    resize_knots.clear();
 
     if (drag_group) {
         delete drag_group;
@@ -121,8 +118,15 @@ PagesTool::~PagesTool()
     }
 
     _doc_replaced_connection.disconnect();
-    _doc_modified_connection.disconnect();
     _zoom_connection.disconnect();
+}
+
+void PagesTool::resizeKnotSet(Geom::Rect rect)
+{
+    for (int i = 0; i < resize_knots.size(); i++) {
+        resize_knots[i]->moveto(rect.corner(i));
+        resize_knots[i]->show();
+    }
 }
 
 void PagesTool::resizeKnotMoved(SPKnot *knot, Geom::Point const &ppointer, guint state)
@@ -138,11 +142,26 @@ void PagesTool::resizeKnotMoved(SPKnot *knot, Geom::Point const &ppointer, guint
         rect = *(document->preferredBounds());
     }
 
-    auto start = rect.corner(2);
+    int index;
+    for (index = 0; index < 4; index++) {
+        if (knot == resize_knots[index]) {
+            break;
+        }
+    }
+    Geom::Point start = rect.corner(index);
     Geom::Point point = getSnappedResizePoint(knot->position(), state, start, page);
 
     if (point != start) {
-        rect.setMax(point);
+        if (index % 3 == 0)
+            rect[Geom::X].setMin(point[Geom::X]);
+        else
+            rect[Geom::X].setMax(point[Geom::X]);
+
+        if (index < 2)
+            rect[Geom::Y].setMin(point[Geom::Y]);
+        else
+            rect[Geom::Y].setMax(point[Geom::Y]);
+
         visual_box->show();
         visual_box->set_rect(rect);
         on_screen_rect = Geom::Rect(rect);
@@ -169,10 +188,15 @@ Geom::Point PagesTool::getSnappedResizePoint(Geom::Point point, guint state, Geo
 
 void PagesTool::resizeKnotFinished(SPKnot *knot, guint state)
 {
+    auto document = _desktop->getDocument();
+    auto page = document->getPageManager().getSelected();
     if (on_screen_rect) {
-        _desktop->getDocument()->getPageManager().resizePage(
-                on_screen_rect->width(), on_screen_rect->height());
-        Inkscape::DocumentUndo::done(_desktop->getDocument(), "Resize page", INKSCAPE_ICON("tool-pages"));
+        if (!page || page->isViewportPage()) {
+            // Adjust viewport so it's scroll adjustment is correct
+            *on_screen_rect *= document->dt2doc();
+        }
+        document->getPageManager().fitToRect(*on_screen_rect, page);
+        Inkscape::DocumentUndo::done(document, "Resize page", INKSCAPE_ICON("tool-pages"));
         on_screen_rect = {};
     }
     visual_box->hide();
@@ -268,7 +292,7 @@ bool PagesTool::root_handler(GdkEvent *event)
                     // Move the document's viewport first
                     auto page_items = page_manager.getOverlappingItems(_desktop, dragging_item);
                     auto rect = document->preferredBounds();
-                    auto affine = moveTo(point_dt, snap);
+                    auto affine = moveTo(point_dt, snap) * document->dt2doc();
                     document->fitToRect(*rect * affine, false);
                     // Now move the page back to where we expect it.
                     if (dragging_item) {
@@ -277,7 +301,7 @@ bool PagesTool::root_handler(GdkEvent *event)
                     }
                     // We have a custom move object because item detection is fubar after fitToRect
                     if (page_manager.move_objects()) {
-                        page_manager.moveItems(affine, page_items);
+                        SPPage::moveItems(affine, page_items);
                     }
                 } else {
                     // Move the page object on the canvas.
@@ -497,39 +521,58 @@ bool PagesTool::viewboxUnder(Geom::Point pt)
     return true;
 }
 
-void PagesTool::selectionChanged(SPPage *page)
+void PagesTool::connectDocument(SPDocument *doc)
+{
+    _selector_changed_connection.disconnect();
+    if (doc) {
+        auto &page_manager = doc->getPageManager();
+        _selector_changed_connection =
+            page_manager.connectPageSelected([=](SPPage *page) {
+                selectionChanged(doc, page);
+            });
+        selectionChanged(doc, page_manager.getSelected());
+    } else {
+        selectionChanged(doc, nullptr);
+    }
+}
+
+void PagesTool::selectionChanged(SPDocument *doc, SPPage *page)
 {
     if (_page_modified_connection) {
         _page_modified_connection.disconnect();
-        resize_knot->hide();
+        for (auto knot : resize_knots) {
+            knot->hide();
+        }
     }
 
     // Loop existing pages because highlight_item is unsafe.
-    for (auto &possible : _desktop->getDocument()->getPageManager().getPages()) {
-        if (highlight_item == possible) {
-            highlight_item->setSelected(false);
+    if (doc) {
+        for (auto &possible : doc->getPageManager().getPages()) {
+            if (highlight_item == possible) {
+                highlight_item->setSelected(false);
+            }
         }
     }
     highlight_item = page;
-    if (page) {
-        _page_modified_connection = page->connectModified(sigc::mem_fun(*this, &PagesTool::pageModified));
-        page->setSelected(true);
-        pageModified(page, 0);
-    } else if (resize_knot) {
-        // This is for viewBox editng directly. A special extra feature
-        if (auto document = _desktop->getDocument()) {
-            resize_knot->moveto(document->preferredBounds()->corner(2));
-            resize_knot->show();
+    if (doc) {
+        if (page) {
+            _page_modified_connection = page->connectModified(sigc::mem_fun(*this, &PagesTool::pageModified));
+            page->setSelected(true);
+            pageModified(page, 0);
+        } else {
+            // This is for viewBox editng directly. A special extra feature
+            _page_modified_connection = doc->connectModified([=](guint){
+            resizeKnotSet(*(doc->preferredBounds()));
+            });
+            resizeKnotSet(*(doc->preferredBounds()));
         }
     }
 }
 
 void PagesTool::pageModified(SPObject *object, guint /*flags*/)
 {
-    assert(resize_knot);
     if (auto page = dynamic_cast<SPPage *>(object)) {
-        resize_knot->moveto(page->getDesktopRect().corner(2));
-        resize_knot->show();
+        resizeKnotSet(page->getDesktopRect());
     }
 }
 

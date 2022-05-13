@@ -299,7 +299,13 @@ void ClipboardManagerImpl::copyPathParameter(Inkscape::LivePathEffect::PathParam
     if ( pp == nullptr ) {
         return;
     }
-    auto svgd = sp_svg_write_path(pp->get_pathvector());
+    SPItem * item = SP_ACTIVE_DESKTOP->getSelection()->singleItem();
+    Geom::PathVector pv = pp->get_pathvector();
+    if (item != nullptr) {
+        pv *= item->i2doc_affine();
+    }
+    auto svgd = sp_svg_write_path(pv);
+
     if (svgd.empty()) {
         return;
     }
@@ -1170,6 +1176,12 @@ void ClipboardManagerImpl::_copyUsedDefs(SPItem *item)
     // Copy clipping objects
     if (SPObject *clip = item->getClipObject()) {
         _copyNode(clip->getRepr(), _doc, _defs);
+        // recurse
+        for (auto &o : clip->children) {
+            if (auto childItem = dynamic_cast<SPItem *>(&o)) {
+                _copyUsedDefs(childItem);
+            }
+        }
     }
     // Copy mask objects
     if (SPObject *mask = item->getMaskObject()) {
@@ -1655,10 +1667,8 @@ void ClipboardManagerImpl::_createInternalClipboard()
  */
 void ClipboardManagerImpl::_discardInternalClipboard()
 {
-    if ( _clipboardSPDoc != nullptr ) {
-        // Explicit delete required to free SPDocument
-        // see https://gitlab.com/inkscape/inkscape/-/issues/2723
-        delete _clipboardSPDoc.release();
+    if (_clipboardSPDoc) {
+        _clipboardSPDoc.reset();
         _defs = nullptr;
         _doc = nullptr;
         _root = nullptr;

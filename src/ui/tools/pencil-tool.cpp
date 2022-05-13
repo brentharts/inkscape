@@ -17,6 +17,7 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
+#include <numeric> // For std::accumulate
 #include <gdk/gdkkeysyms.h>
 #include <glibmm/i18n.h>
 
@@ -779,10 +780,6 @@ void PencilTool::addPowerStrokePencil()
                 pspreview->getRepr()->setAttribute("end_linecap_type", LineCapTypeConverter.get_key(cap));
                 pspreview->getRepr()->setAttribute("sort_points", "true");
                 pspreview->getRepr()->setAttribute("not_jump", "true");
-                if (!this->points.size()) {
-                    Geom::Point default_point((path.size()/2.0), 0.5);
-                    this->points.push_back(default_point);
-                }
                 pspreview->offset_points.param_set_and_write_new_value(this->points);
                 sp_lpe_item_enable_path_effects(lpeitem, true);
                 sp_lpe_item_update_patheffect(lpeitem, false, true);
@@ -824,13 +821,12 @@ void PencilTool::_addFreehandPoint(Geom::Point const &p, guint /*state*/, bool l
             min = max;
         }
         double dezoomify_factor = 0.05 * 1000 / _desktop->current_zoom();
-        double pressure_shrunk = (((this->pressure - 0.25) * 1.25) * (max - min)) + min;
+        double const pressure_shrunk = pressure * (max - min) + min; // C++20 -> use std::lerp()
         double pressure_computed = std::abs(pressure_shrunk * dezoomify_factor);
         double pressure_computed_scaled = std::abs(pressure_computed * _desktop->getDocument()->getDocumentScale().inverse()[Geom::X]);
         if (p != this->p[this->_npoints - 1]) {
             this->_wps.emplace_back(distance, pressure_computed_scaled);
         }
-        pressure_computed = std::abs(pressure_computed);
         if (pressure_computed) {
             Geom::Circle pressure_dot(p, pressure_computed);
             Geom::Piecewise<Geom::D2<Geom::SBasis>> pressure_piecewise;
@@ -912,7 +908,15 @@ void PencilTool::powerStrokeInterpolate(Geom::Path const path)
             prev_pressure = point[Geom::Y];
         }
     }
-    tmp_points.clear();
+    if (points.empty() && !_wps.empty()) {
+        // Synthesize a pressure data point based on the average pressure
+        double average_pressure = std::accumulate(_wps.begin(), _wps.end(), 0.0,
+            [](double const &sum_so_far, Geom::Point const &point) -> double {
+                return sum_so_far + point[Geom::Y];
+        }) / (double)_wps.size();
+        points.emplace_back(0.5 * path.size(), /* place halfway along the path */
+                            2.0 * average_pressure /* 2.0 - for correct average thickness of a kite */);
+    }
 }
 
 void PencilTool::_interpolate() {

@@ -151,7 +151,6 @@ private:
 
     unsigned int _interaction_disabled_counter = 0;
 
-    bool SignalEvent(GdkEvent* event);
 public:
     Geom::Point _ruler_origin;
     double _dt2r;
@@ -163,12 +162,10 @@ private:
     Inkscape::UI::Widget::LayerSelector* _layer_selector;
     Inkscape::UI::Widget::PageSelector* _page_selector;
 
-
 public:
     EgeColorProfTracker* _tracker;
 
     void setMessage(Inkscape::MessageType type, gchar const *message);
-    Geom::Point window_get_pointer();
     void viewSetPosition (Geom::Point p);
     void letZoomGrabFocus();
     void getWindowGeometry (gint &x, gint &y, gint &w, gint &h);
@@ -183,9 +180,6 @@ public:
     void setToolboxAdjustmentValue (gchar const * id, double value);
     bool isToolboxButtonActive (gchar const *id);
     void setCoordinateStatus(Geom::Point p);
-    void storeDesktopPosition(bool store_maximize = true);
-    void requestCanvasUpdate();
-    void requestCanvasUpdateAndWait();
     void enableInteraction();
     void disableInteraction();
     void updateTitle(gchar const *uri);

@@ -67,7 +67,6 @@ static std::string sp_svg_number_write_d( double val, unsigned int tprec, unsign
 
     std::string buf;
     /* Process sign */
-    int i = 0;
     if (val < 0.0) {
         buf.append("-");
         val = fabs(val);
@@ -92,7 +91,6 @@ static std::string sp_svg_number_write_d( double val, unsigned int tprec, unsign
         for(unsigned int j=0; j<(unsigned int)idigits-tprec; j++) {
             buf.append("0");
         }
-        i += idigits-tprec;
     } else {
        buf.append(std::to_string((unsigned int)dival));
     }
@@ -583,6 +581,35 @@ void SVGLength::readOrUnset(gchar const *str, Unit u, float v, float c)
     }
 }
 
+namespace Inkscape {
+char const *refX_named_to_percent(char const *str)
+{
+    if (str) {
+        if (g_str_equal(str, "left")) {
+            return "0%";
+        } else if (g_str_equal(str, "center")) {
+            return "50%";
+        } else if (g_str_equal(str, "right")) {
+            return "100%";
+        }
+    }
+    return str;
+}
+
+char const *refY_named_to_percent(char const *str)
+{
+    if (str) {
+        if (g_str_equal(str, "top")) {
+            return "0%";
+        } else if (g_str_equal(str, "center")) {
+            return "50%";
+        } else if (g_str_equal(str, "bottom")) {
+            return "100%";
+        }
+    }
+    return str;
+}
+} // namespace Inkscape
 
 /*
   Local Variables:

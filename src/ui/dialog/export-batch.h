@@ -27,6 +27,9 @@ namespace Inkscape {
     class Selection;
 
 namespace UI {
+    namespace Widget {
+        class ColorPicker;
+    }
 namespace Dialog {
 
 class ExportList;
@@ -81,7 +84,6 @@ private:
     // Store all items to be displayed in flowbox
     std::map<std::string, BatchItem *> current_items;
 
-    bool filename_modified;
     Glib::ustring original_name;
     Glib::ustring doc_export_name;
 
@@ -145,6 +147,8 @@ private:
     sigc::connection selectionChangedConn;
     // SVG Signals
     sigc::connection _pages_changed_connection;
+
+    std::unique_ptr<Inkscape::UI::Widget::ColorPicker> _bgnd_color_picker;
 };
 } // namespace Dialog
 } // namespace UI

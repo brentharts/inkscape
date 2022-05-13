@@ -124,9 +124,7 @@ SVGViewWidget::SVGViewWidget(SPDocument* document)
 
 SVGViewWidget::~SVGViewWidget()
 {
-    if (_document) {
-        _document = nullptr;
-    }
+    setDocument(nullptr);
 }
 
 void
@@ -137,11 +135,11 @@ SVGViewWidget::setDocument(SPDocument* document)
         _document->getRoot()->invoke_hide(_dkey); // Removed from display tree
     }
 
-    // Add new document
-    if (document) {
-        _document = document;
+    _document = document;
 
-        Inkscape::DrawingItem *drawing_item = document->getRoot()->invoke_show(
+    // Add new document
+    if (_document) {
+        Inkscape::DrawingItem *drawing_item = _document->getRoot()->invoke_show(
             *_drawing->get_drawing(),
             _dkey,
             SP_ITEM_SHOW_DISPLAY);
@@ -150,7 +148,7 @@ SVGViewWidget::setDocument(SPDocument* document)
             _drawing->get_drawing()->root()->prependChild(drawing_item);
         }
 
-        doRescale ();
+        doRescale();
     }
 }
 

@@ -20,6 +20,7 @@
 #define SP_IS_PAGES_CONTEXT(obj) \
     (dynamic_cast<const Inkscape::UI::Tools::PagesTool *>((const Inkscape::UI::Tools::ToolBase *)obj) != NULL)
 
+class SPDocument;
 class SPObject;
 class SPPage;
 class SPKnot;
@@ -43,7 +44,8 @@ public:
     bool root_handler(GdkEvent *event) override;
     void menu_popup(GdkEvent *event, SPObject *obj = nullptr) override;
 private:
-    void selectionChanged(SPPage *page);
+    void selectionChanged(SPDocument *doc, SPPage *page);
+    void connectDocument(SPDocument *doc);
     SPPage *pageUnder(Geom::Point pt, bool retain_selected = true);
     bool viewboxUnder(Geom::Point pt);
     void addDragShapes(SPPage *page, Geom::Affine tr);
@@ -52,6 +54,7 @@ private:
     void clearDragShapes();
 
     Geom::Point getSnappedResizePoint(Geom::Point point, guint state, Geom::Point origin, SPObject *target = nullptr);
+    void resizeKnotSet(Geom::Rect rect);
     void resizeKnotMoved(SPKnot *knot, Geom::Point const &ppointer, guint state);
     void resizeKnotFinished(SPKnot *knot, guint state);
     void pageModified(SPObject *object, guint flags);
@@ -62,7 +65,6 @@ private:
     sigc::connection _selector_changed_connection;
     sigc::connection _page_modified_connection;
     sigc::connection _doc_replaced_connection;
-    sigc::connection _doc_modified_connection;
     sigc::connection _zoom_connection;
 
     bool dragging_viewbox = false;
@@ -71,7 +73,7 @@ private:
     Geom::Point drag_origin_dt;
     int drag_tolerance = 5;
 
-    SPKnot *resize_knot = nullptr;
+    std::vector<SPKnot *> resize_knots;
     SPPage *highlight_item = nullptr;
     SPPage *dragging_item = nullptr;
     std::optional<Geom::Rect> on_screen_rect;

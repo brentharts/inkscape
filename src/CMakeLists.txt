@@ -128,7 +128,6 @@ set(inkscape_SRC
   gradient-chemistry.h
   gradient-drag.h
   guide-snapper.h
-  helper-fns.h
   id-clash.h
   inkscape-version.h
   inkscape-version-info.h
@@ -301,6 +300,7 @@ list(APPEND inkscape_SRC
 # All folders for internal inkscape
 # these call add_inkscape_source
 add_subdirectory(actions)
+add_subdirectory(color)
 add_subdirectory(debug)
 add_subdirectory(display)
 add_subdirectory(extension)

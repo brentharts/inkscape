@@ -163,19 +163,18 @@ PathParam::param_readSVGValue(const gchar * strvalue)
         if (strvalue[0] == '#') {
             bool write = false;
             SPObject * old_ref = param_effect->getSPDoc()->getObjectByHref(strvalue);
+            Glib::ustring id_tmp;
             if (old_ref) {
                 SPObject * successor = old_ref->_successor;
-                Glib::ustring id = strvalue;
                 if (successor) {
-                    id = successor->getId();
-                    id.insert(id.begin(), '#');
+                    id_tmp = successor->getId();
+                    id_tmp.insert(id_tmp.begin(), '#');
                     write = true;
                 }
-                strvalue = id.c_str();
             }
             if (href)
                 g_free(href);
-            href = g_strdup(strvalue);
+            href = g_strdup(id_tmp.empty() ? strvalue : id_tmp.c_str());
 
             // Now do the attaching, which emits the changed signal.
             try {
@@ -488,7 +487,7 @@ void PathParam::linked_transformed(Geom::Affine const *rel_transf, SPItem *moved
 void
 PathParam::linked_modified_callback(SPObject *linked_obj, guint flags)
 {
-    if (flags & (SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_STYLE_MODIFIED_FLAG |
+    if (!_updating && flags & (SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_STYLE_MODIFIED_FLAG |
                  SP_OBJECT_CHILD_MODIFIED_FLAG | SP_OBJECT_VIEWPORT_MODIFIED_FLAG)) 
     {
         std::unique_ptr<SPCurve> curve;
@@ -559,7 +558,6 @@ PathParam::paste_param_path(const char *svgd)
         if (item != nullptr) {
             Geom::PathVector path_clipboard =  sp_svg_read_pathv(svgd);
             path_clipboard *= item->i2doc_affine().inverse();
-            path_clipboard *= item->document->getDocumentScale();
             svgd_new = sp_svg_write_path(path_clipboard);
             svgd = svgd_new.c_str();
         }

@@ -65,6 +65,8 @@
 #include "ui/widget/canvas.h"
 #include "ui/themes.h"
 
+#include "util/trim.h"
+
 #include "widgets/desktop-widget.h"
 #include "widgets/toolbox.h"
 #include "widgets/spw-utilities.h"
@@ -92,10 +94,6 @@ using Inkscape::UI::Widget::StyleSwatch;
 using Inkscape::CMSSystem;
 using Inkscape::IO::Resource::get_filename;
 using Inkscape::IO::Resource::UIS;
-
-#define REMOVE_SPACES(x)                                                                                               \
-    x.erase(0, x.find_first_not_of(' '));                                                                              \
-    x.erase(x.find_last_not_of(' ') + 1);
 
 std::function<Gtk::Image*()> reset_icon = []() {
     auto image = Gtk::make_managed<Gtk::Image>();
@@ -352,6 +350,12 @@ InkscapePreferences::InkscapePreferences()
     _page_list.expand_all();
     _page_list_model->foreach_iter(sigc::mem_fun(*this, &InkscapePreferences::GetSizeRequest));
     _page_list.collapse_all();
+
+    // Set Custom theme
+    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+    _theme_oberver = prefs->createObserver("/theme/", [=]() {
+        prefs->setString("/options/boot/theme", "custom");
+    });
 }
 
 InkscapePreferences::~InkscapePreferences()
@@ -1045,12 +1049,12 @@ void InkscapePreferences::initPageTools()
     _page_gradient.add_line( false, _("Linear gradient _angle:"), _misc_gradientangle, "",
                            _("Default angle of new linear gradients in degrees (clockwise from horizontal)"), false);
 
-    _misc_gradient_collect.init(_("Auto delete gradients that are not used"), "/option/gradient/auto_collect", true);
+    _misc_gradient_collect.init(_("Auto-delete unused gradients"), "/option/gradient/auto_collect", true);
     _page_gradient.add_line(
         false, "", _misc_gradient_collect, "",
-        _("When enabled, the gradients that are not used will be auto deleted (auto collected) "
-          "from the SVG file. If disabled, the gradients that are not used will be preserved in "
-          "the SVG file for latter use.(Note: This setting will be applied only on the new gradients.)"),
+        _("When enabled, gradients that are not used will be deleted (auto-collected) automatically "
+          "from the SVG file. When disabled, unused gradients will be preserved in "
+          "the file for later use. (Note: This setting only affects new gradients.)"),
         true);
 
     //Dropper
@@ -1091,7 +1095,7 @@ void InkscapePreferences::get_highlight_colors(guint32 &colorsetbase, guint32 &c
             size_t startposin = result.find("fill:");
             size_t endposin = result.find(";");
             result = result.substr(startposin + 5, endposin - (startposin + 5));
-            REMOVE_SPACES(result);
+            Util::trim(result);
             Gdk::RGBA base_color = Gdk::RGBA(result);
             SPColor base_color_sp(base_color.get_red(), base_color.get_green(), base_color.get_blue());
             colorsetbase = base_color_sp.toRGBA32(base_color.get_alpha());
@@ -1104,7 +1108,7 @@ void InkscapePreferences::get_highlight_colors(guint32 &colorsetbase, guint32 &c
             size_t startposin = result.find("fill:");
             size_t endposin = result.find(";");
             result = result.substr(startposin + 5, endposin - (startposin + 5));
-            REMOVE_SPACES(result);
+            Util::trim(result);
             Gdk::RGBA success_color = Gdk::RGBA(result);
             SPColor success_color_sp(success_color.get_red(), success_color.get_green(), success_color.get_blue());
             colorsetsuccess = success_color_sp.toRGBA32(success_color.get_alpha());
@@ -1117,7 +1121,7 @@ void InkscapePreferences::get_highlight_colors(guint32 &colorsetbase, guint32 &c
             size_t startposin = result.find("fill:");
             size_t endposin = result.find(";");
             result = result.substr(startposin + 5, endposin - (startposin + 5));
-            REMOVE_SPACES(result);
+            Util::trim(result);
             Gdk::RGBA warning_color = Gdk::RGBA(result);
             SPColor warning_color_sp(warning_color.get_red(), warning_color.get_green(), warning_color.get_blue());
             colorsetwarning = warning_color_sp.toRGBA32(warning_color.get_alpha());
@@ -1130,7 +1134,7 @@ void InkscapePreferences::get_highlight_colors(guint32 &colorsetbase, guint32 &c
             size_t startposin = result.find("fill:");
             size_t endposin = result.find(";");
             result = result.substr(startposin + 5, endposin - (startposin + 5));
-            REMOVE_SPACES(result);
+            Util::trim(result);
             Gdk::RGBA error_color = Gdk::RGBA(result);
             SPColor error_color_sp(error_color.get_red(), error_color.get_green(), error_color.get_blue());
             colorseterror = error_color_sp.toRGBA32(error_color.get_alpha());
@@ -1611,7 +1615,7 @@ void InkscapePreferences::initPageUI()
     _page_ui.add_line(false, "", _ui_rotationlock, "",
                        _("Prevent accidental canvas rotation by disabling on-canvas keyboard and mouse actions for rotation"), true);
 
-    _page_ui.add_group_header(_("UI"));
+    _page_ui.add_group_header(_("User Interface"));
     // _page_ui.add_group_header(_("Handle size"));
     _mouse_grabsize.init("/options/grabsize/value", 1, 15, 1, 2, 3, 0);
     _page_ui.add_line(true, _("Handle size"), _mouse_grabsize, "", _("Set the relative size of node handles"), true);
@@ -1820,7 +1824,7 @@ void InkscapePreferences::initPageUI()
         int menu_icons_values[] = {1, -1, 0};
         _menu_icons.init("/theme/menuIcons", menu_icons_labels, menu_icons_values, G_N_ELEMENTS(menu_icons_labels), 0);
         _page_theme.add_line(false, _("Show icons in menus:"), _menu_icons, "",
-                             _("You can either enable or disable all icons in menus. By default, the setting for the 'show-icons' attribute in the 'menus.ui' file determines whether to display icons in menus."), false, reset_icon());
+                             _("You can either enable or disable all icons in menus. By default, the setting for the 'use-icon' attribute in the 'menus.ui' file determines whether to display icons in menus."), false, reset_icon());
 
 
     this->AddPage(_page_theme, _("Theming"), iter_ui, PREFS_PAGE_UI_THEME);
@@ -1943,7 +1947,7 @@ void InkscapePreferences::initPageUI()
     std::vector<PrefItem> on_top = {
         { C_("Dialog on top", "None"), PREFS_DIALOGS_WINDOWS_NONE, _("Dialogs are treated as regular windows") },
         { _("Normal"),    PREFS_DIALOGS_WINDOWS_NORMAL,     _("Dialogs stay on top of document windows"), true },
-        { _("Aggresive"), PREFS_DIALOGS_WINDOWS_AGGRESSIVE, _("Same as Normal but may work better with some window managers") }
+        { _("Aggressive"), PREFS_DIALOGS_WINDOWS_AGGRESSIVE, _("Same as Normal but may work better with some window managers") }
     };
     _page_windows.add_line(true, _("Dialog on top"), *Gtk::make_managed<PrefRadioButtons>(on_top, "/options/transientpolicy/value"), "", "");
 #endif
@@ -2626,10 +2630,10 @@ void InkscapePreferences::initPageBehavior()
                            _("Remove unused swatches when doing a document cleanup")); // tooltip
     this->AddPage(_page_cleanup, _("Cleanup"), iter_behavior, PREFS_PAGE_BEHAVIOR_CLEANUP);
 
-    _page_lpe.add_group_header( _("Copy"));
-    _lpe_copy_mirroricons.init ( _("Use icons instead less checks on LPE copy"), "/live_effects/copy/mirroricons", true); // text label
+    _page_lpe.add_group_header( _("Tiling"));
+    _lpe_copy_mirroricons.init ( _("Add advanced tiling options"), "/live_effects/copy/mirroricons", true); // text label
     _page_lpe.add_line( true, "", _lpe_copy_mirroricons, "",
-                           _("Use 16 icons instead 4 checks on LPE copy in mirror zone")); // tooltip
+                           _("Enables using 16 advanced mirror options between the copies (so there can be copies that are mirrored differently between the rows and the columns) for Tiling LPE")); // tooltip
     this->AddPage(_page_lpe, _("Live Path Effects (LPE)"), iter_behavior, PREFS_PAGE_BEHAVIOR_LPE);
 }
 
@@ -2657,10 +2661,16 @@ void InkscapePreferences::initPageRendering()
     _page_rendering.add_line( false, _("Outline overlay opacity:"), _rendering_outline_overlay_opacity, _("%"), _("Opacity of the color in outline overlay view mode"), false);
 
     // update strategy
-    int values[] = {1, 2, 3};
-    Glib::ustring labels[] = {_("Responsive"), _("Full redraw"), _("Multiscale")};
-    _canvas_update_strategy.init("/options/rendering/update_strategy", labels, values, 3, 3);
-    _page_rendering.add_line(false, _("Update strategy:"), _canvas_update_strategy, "", _("How to update continually changing content when it can't be redrawn fast enough"), false);
+    {
+        int values[] = {1, 2, 3};
+        Glib::ustring labels[] = {_("Responsive"), _("Full redraw"), _("Multiscale")};
+        _canvas_update_strategy.init("/options/rendering/update_strategy", labels, values, 3, 3);
+        _page_rendering.add_line(false, _("Update strategy:"), _canvas_update_strategy, "", _("How to update continually changing content when it can't be redrawn fast enough"), false);
+    }
+
+    // opengl
+    _canvas_request_opengl.init("", "/options/rendering/request_opengl", false);
+    _page_rendering.add_line( false, _("Enable OpenGL:"), _canvas_request_opengl, "", _("Request that the canvas should be painted with OpenGL rather than Cairo. If OpenGL is unsupported, it will fall back to Cairo."), false);
 
     /* blur quality */
     _blur_quality_best.init ( _("Best quality (slowest)"), "/options/blurquality/value",
@@ -2761,27 +2771,37 @@ void InkscapePreferences::initPageRendering()
         grid->add(*label_widget);
     };
 
+    //TRANSLATORS: The following are options for fine-tuning rendering, meant to be used by developers, 
+    //find more explanations at https://gitlab.com/inkscape/inbox/-/issues/6544#note_886540227
     add_devmode_group_header(_("Low-level tuning options"));
     _canvas_render_time_limit.init("/options/rendering/render_time_limit", 100.0, 1000000.0, 1.0, 0.0, 1000.0, true, false);
     add_devmode_line(_("Render time limit"), _canvas_render_time_limit, C_("microsecond abbreviation", "μs"), _("The maximum time allowed for a rendering time slice"));
     _canvas_use_new_bisector.init("", "/options/rendering/use_new_bisector", true);
-    add_devmode_line(_("Use new bisector"), _canvas_use_new_bisector, "", _("Use an alternative, more obvious bisection strategy: just chop in half along the larger dimension until small enough"));
+    add_devmode_line(_("Use new bisector algorithm"), _canvas_use_new_bisector, "", _("Use an alternative, more obvious bisection strategy: just chop tile in half along the larger dimension until small enough"));
     _canvas_new_bisector_size.init("/options/rendering/new_bisector_size", 1.0, 10000.0, 1.0, 0.0, 500.0, true, false);
-    add_devmode_line(_("New bisector tile size"), _canvas_new_bisector_size, C_("pixel abbreviation", "px"), _("Chop rectangles until largest dimension is this small"));
+    add_devmode_line(_("Smallest tile size for new bisector"), _canvas_new_bisector_size, C_("pixel abbreviation", "px"), _("Halve rendering tile rectangles until their largest dimension is this small"));
     _rendering_tile_size.init("/options/rendering/tile-size", 1.0, 10000.0, 1.0, 0.0, 16.0, true, false);
     add_devmode_line(_("Tile size:"), _rendering_tile_size, "", _("The \"tile size\" parameter previously hard-coded into Inkscape's original tile bisector."));
-    _canvas_max_affine_diff.init("/options/rendering/max_affine_diff", 0.0, 100.0, 0.1, 0.0, 1.8, false, false);
-    add_devmode_line(_("Max affine diff"), _canvas_max_affine_diff, "", _("How much the viewing transformation can change before throwing away the current redraw and starting again"));
-    _canvas_pad.init("/options/rendering/pad", 0.0, 1000.0, 1.0, 0.0, 200.0, true, false);
+    _canvas_pad.init("/options/rendering/pad", 0.0, 1000.0, 1.0, 0.0, 350.0, true, false);
     add_devmode_line(_("Buffer padding"), _canvas_pad, C_("pixel abbreviation", "px"), _("Use buffers bigger than the window by this amount"));
+    _canvas_margin.init("/options/rendering/margin", 0.0, 1000.0, 1.0, 0.0, 100.0, true, false);
+    add_devmode_line(_("Prerender margin"), _canvas_margin, "", _("Pre-render a margin around the visible region."));
+    _canvas_preempt.init("/options/rendering/preempt", 0.0, 1000.0, 1.0, 0.0, 250.0, true, false);
+    add_devmode_line(_("Preempt size"), _canvas_preempt, "", _("Prevent thin tiles at the rendering edge by making them at least this size."));
     _canvas_coarsener_min_size.init("/options/rendering/coarsener_min_size", 0.0, 1000.0, 1.0, 0.0, 200.0, true, false);
-    add_devmode_line(_("Coarsener min size"), _canvas_coarsener_min_size, C_("pixel abbreviation", "px"), _("Only coarsen rectangles smaller/thinner than this."));
+    add_devmode_line(_("Min size for coarsener algorithm"), _canvas_coarsener_min_size, C_("pixel abbreviation", "px"), _("Coarsener algorithm only processes rectangles smaller/thinner than this."));
     _canvas_coarsener_glue_size.init("/options/rendering/coarsener_glue_size", 0.0, 1000.0, 1.0, 0.0, 80.0, true, false);
-    add_devmode_line(_("Coarsener glue size"), _canvas_coarsener_glue_size, C_("pixel abbreviation", "px"), _("Absorb nearby rectangles within this distance."));
+    add_devmode_line(_("Glue size for coarsener algorithm"), _canvas_coarsener_glue_size, C_("pixel abbreviation", "px"), _("Coarsener algorithm absorbs nearby rectangles within this distance."));
     _canvas_coarsener_min_fullness.init("/options/rendering/coarsener_min_fullness", 0.0, 1.0, 0.0, 0.0, 0.3, false, false);
-    add_devmode_line(_("Coarsener min fullness"), _canvas_coarsener_min_fullness, "", _("Refuse coarsening attempt if result would be more empty than this."));
+    add_devmode_line(_("Min fullness for coarsener algorithm"), _canvas_coarsener_min_fullness, "", _("Refuse coarsening algorithm's attempt if the result would be more empty than this."));
+    {
+        int values[] = {1, 2, 3, 4};
+        Glib::ustring labels[] = {_("Auto"), _("Persistent"), _("Asynchronous"), _("Synchronous")};
+        _canvas_pixelstreamer_method.init("/options/rendering/pixelstreamer_method", labels, values, 4, 1);
+        add_devmode_line(_("Pixel streaming method"), _canvas_pixelstreamer_method, "", _("Change the method used for streaming pixel data to the GPU. The default is Auto, which picks the best method available at runtime. As for the other options, higher up is better. Be warned! No attempt is made to stop you from selecting a method that isn't supported! (This is dev mode, afer all.) If you do so, it will be an instant crash."));
+    }
 
-    add_devmode_group_header(_("Debugging, profiling, and experiments"));
+    add_devmode_group_header(_("Debugging, profiling and experiments"));
     _canvas_debug_framecheck.init("", "/options/rendering/debug_framecheck", false);
     add_devmode_line(_("Framecheck"), _canvas_debug_framecheck, "", _("Print profiling data of selected operations to a file"));
     _canvas_debug_logging.init("", "/options/rendering/debug_logging", false);
@@ -2793,15 +2813,19 @@ void InkscapePreferences::initPageRendering()
     _canvas_debug_show_redraw.init("", "/options/rendering/debug_show_redraw", false);
     add_devmode_line(_("Show redraw"), _canvas_debug_show_redraw, "", _("Paint a translucent random colour over each newly drawn tile"));
     _canvas_debug_show_unclean.init("", "/options/rendering/debug_show_unclean", false);
-    add_devmode_line(_("Show unclean region"), _canvas_debug_show_unclean, "", _("Show the unclean region in red"));
+    add_devmode_line(_("Show unclean region"), _canvas_debug_show_unclean, "", _("Show the region that needs to be redrawn in red (only in Cairo mode)"));
     _canvas_debug_show_snapshot.init("", "/options/rendering/debug_show_snapshot", false);
-    add_devmode_line(_("Show snapshot"), _canvas_debug_show_snapshot, "", _("Show the snapshot region in blue"));
+    add_devmode_line(_("Show snapshot region"), _canvas_debug_show_snapshot, "", _("Show the region that still contains a saved copy of previously rendered content in blue (only in Cairo mode)"));
     _canvas_debug_show_clean.init("", "/options/rendering/debug_show_clean", false);
-    add_devmode_line(_("Show clean fragmentation"), _canvas_debug_show_clean, "", _("Show the outlines of the rectangles in the clean region in green"));
+    add_devmode_line(_("Show clean region's fragmentation"), _canvas_debug_show_clean, "", _("Show the outlines of the rectangles in the region where rendering is complete in green (only in Cairo mode)"));
     _canvas_debug_disable_redraw.init("", "/options/rendering/debug_disable_redraw", false);
     add_devmode_line(_("Disable redraw"), _canvas_debug_disable_redraw, "", _("Temporarily disable the idle redraw process completely"));
     _canvas_debug_sticky_decoupled.init("", "/options/rendering/debug_sticky_decoupled", false);
     add_devmode_line(_("Sticky decoupled mode"), _canvas_debug_sticky_decoupled, "", _("Stay in decoupled mode even after rendering is complete"));
+    _canvas_debug_animate.init("", "/options/rendering/debug_animate", false);
+    add_devmode_line(_("Animate"), _canvas_debug_animate, "", _("Continuously adjust viewing parameters in an animation loop."));
+    _canvas_debug_idle_starvation.init("", "/options/rendering/debug_idle_starvation", false);
+    add_devmode_line(_("Print render time stats"), _canvas_debug_idle_starvation, "", _("On display of each frame, log to the console how much time was taken away from rendering, and whether rendering is still busy. A high value would explain lag/fragmentation problems, and a low value with 'still busy' would explain tearing."));
 
     this->AddPage(_page_rendering, _("Rendering"), PREFS_PAGE_RENDERING);
 }

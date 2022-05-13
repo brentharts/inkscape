@@ -51,7 +51,6 @@
 #include "display/control/canvas-item-drawing.h"
 #include "display/control/canvas-item-group.h"
 #include "display/control/canvas-item-rect.h"
-#include "display/control/canvas-item-rotate.h"
 
 #include "io/fix-broken-links.h"
 
@@ -122,7 +121,6 @@ SPDesktop::SPDesktop()
     , _widget(nullptr) // DesktopWidget
     , _guides_message_context(nullptr)
     , _active(false)
-    , _image_render_observer(this, "/options/rendering/imageinoutlinemode")
     , grids_visible(false)
 {
     _layer_manager = std::make_unique<Inkscape::LayerManager>(this);
@@ -234,10 +232,6 @@ SPDesktop::init (SPNamedView *nv, Inkscape::UI::Widget::Canvas *acanvas, SPDeskt
         canvas_drawing->get_drawing()->root()->prependChild(drawing_item);
     }
 
-    // Must be the top most item.
-    canvas_rotate = new Inkscape::CanvasItemRotate(canvas_item_root);
-    canvas_rotate->hide();
-
     temporary_item_list = new Inkscape::Display::TemporaryItemList( this );
     snapindicator = new Inkscape::Display::SnapIndicator ( this );
 
@@ -298,7 +292,6 @@ void SPDesktop::destroy()
 
     namedview->hide(this);
 
-    _sel_changed_connection.disconnect();
     _reconstruction_start_connection.disconnect();
     _reconstruction_finish_connection.disconnect();
 
@@ -356,10 +349,6 @@ SPDesktop::remove_temporary_canvasitem (Inkscape::Display::TemporaryItem * tempi
     if (tempitem && temporary_item_list) {
         temporary_item_list->delete_item(tempitem);
     }
-}
-
-void SPDesktop::redrawDesktop() {
-    canvas->set_affine(_current_affine.d2w()); // For CanvasItem's.
 }
 
 /**
@@ -485,21 +474,12 @@ SPItem *SPDesktop::getGroupAtPoint(Geom::Point const &p) const
  * Returns the mouse point in document coordinates; if mouse is
  * outside the canvas, returns the center of canvas viewpoint.
  */
-Geom::Point SPDesktop::point(bool outside_canvas) const
+Geom::Point SPDesktop::point() const
 {
-    Geom::Point p = _widget->window_get_pointer();
-    Geom::Point pw = canvas->canvas_to_world(p);
-    Geom::Rect const r = canvas->get_area_world();
-
-    if (r.interiorContains(pw) || outside_canvas) {
-        p = w2d(pw);
-        return p;
-    }
-    Geom::Point r0 = w2d(r.min());
-    Geom::Point r1 = w2d(r.max());
-    return (r0 + r1) / 2.0;
+    auto ret = canvas->get_last_mouse();
+    auto pt = ret ? *ret : Geom::Point(canvas->get_dimensions()) / 2.0;
+    return w2d(canvas->canvas_to_world(pt));
 }
-
 
 /**
  * Revert back to previous transform if possible. Note: current transform is
@@ -527,7 +507,6 @@ SPDesktop::prev_transform()
     // restore previous transform
     _current_affine = transforms_past.front();
     set_display_area (false);
-
 }
 
 
@@ -582,12 +561,12 @@ SPDesktop::set_display_area (bool log)
     // Scroll
     Geom::Point offset = _current_affine.getOffset();
     canvas->set_pos(offset);
-    canvas->set_affine(_current_affine.d2w()); // For CanvasItem's.
+    canvas->set_affine(_current_affine.d2w()); // For CanvasItems.
 
     /* Update perspective lines if we are in the 3D box tool (so that infinite ones are shown
      * correctly) */
-    if (SP_IS_BOX3D_CONTEXT(event_context)) {
-    	SP_BOX3D_CONTEXT(event_context)->_vpdrag->updateLines();
+    if (auto boxtool = dynamic_cast<Inkscape::UI::Tools::Box3dTool*>(event_context)) {
+        boxtool->_vpdrag->updateLines();
     }
 
     // Update GUI (TODO: should be handled by CanvasGrid).
@@ -964,16 +943,15 @@ SPDesktop::is_flipped (CanvasFlip flip)
  * Scroll canvas by to a particular point (window coordinates).
  */
 void
-SPDesktop::scroll_absolute (Geom::Point const &point, bool is_scrolling)
+SPDesktop::scroll_absolute (Geom::Point const &point)
 {
     canvas->set_pos(point);
     _current_affine.setOffset( point );
 
     /*  update perspective lines if we are in the 3D box tool (so that infinite ones are shown correctly) */
-    //sp_box3d_context_update_lines(event_context);
-    if (SP_IS_BOX3D_CONTEXT(event_context)) {
-		SP_BOX3D_CONTEXT(event_context)->_vpdrag->updateLines();
-	}
+    if (auto boxtool = dynamic_cast<Inkscape::UI::Tools::Box3dTool*>(event_context)) {
+        boxtool->_vpdrag->updateLines();
+    }
 
     _widget->update_rulers();
     _widget->update_scrollbars(_current_affine.getZoom());
@@ -984,10 +962,10 @@ SPDesktop::scroll_absolute (Geom::Point const &point, bool is_scrolling)
  * Scroll canvas by specific coordinate amount (window coordinates).
  */
 void
-SPDesktop::scroll_relative (Geom::Point const &delta, bool is_scrolling)
+SPDesktop::scroll_relative (Geom::Point const &delta)
 {
     Geom::Rect const viewbox = canvas->get_area_world();
-    scroll_absolute( viewbox.min() - delta, is_scrolling );
+    scroll_absolute( viewbox.min() - delta );
 }
 
 
@@ -995,10 +973,10 @@ SPDesktop::scroll_relative (Geom::Point const &delta, bool is_scrolling)
  * Scroll canvas by specific coordinate amount in svg coordinates.
  */
 void
-SPDesktop::scroll_relative_in_svg_coords (double dx, double dy, bool is_scrolling)
+SPDesktop::scroll_relative_in_svg_coords (double dx, double dy)
 {
     double scale = _current_affine.getZoom();
-    scroll_relative(Geom::Point(dx*scale, dy*scale), is_scrolling);
+    scroll_relative(Geom::Point(dx*scale, dy*scale));
 }
 
 
@@ -1302,9 +1280,13 @@ void SPDesktop::disableInteraction()
 
 void SPDesktop::setWaitingCursor()
 {
+    auto window = canvas->get_window();
+    if (!window) {
+        return;
+    }
     Glib::RefPtr<Gdk::Display> display = Gdk::Display::get_default();
     Glib::RefPtr<Gdk::Cursor> waiting = Gdk::Cursor::create(display, "wait");
-    canvas->get_window()->set_cursor(waiting);
+    window->set_cursor(waiting);
     // GDK needs the flush for the cursor change to take effect
     display->flush();
     waiting_cursor = true;
@@ -1321,9 +1303,9 @@ void SPDesktop::toggleColorProfAdjust()
     _widget->toggle_color_prof_adj();
 }
 
-void SPDesktop::toggleGuidesLock()
+void SPDesktop::toggleLockGuides()
 {
-    sp_namedview_guides_toggle_lock(this->getDocument(), namedview);
+    namedview->toggleLockGuides();
 }
 
 bool SPDesktop::colorProfAdjustEnabled()
@@ -1360,33 +1342,6 @@ void
 SPDesktop::onResized (double /*x*/, double /*y*/)
 {
    // Nothing called here
-}
-
-/**
- * Redraw callback; queues Gtk redraw; connected by View.
- */
-void SPDesktop::storeDesktopPosition()
-{
-    if (_widget) {
-        _widget->storeDesktopPosition();
-    }
-}
-
-/**
- * Redraw callback; queues Gtk redraw; connected by View.
- */
-void
-SPDesktop::onRedrawRequested ()
-{
-    if (_widget) {
-        _widget->requestCanvasUpdate();
-    }
-}
-
-void
-SPDesktop::updateCanvasNow()
-{
-  _widget->requestCanvasUpdateAndWait();
 }
 
 /**

@@ -316,7 +316,10 @@ static void spdc_apply_bend_shape(gchar const *svgd, FreehandBase *dc, SPItem *i
     if (!document || !desktop) {
         return;
     }
-    if(!SP_IS_LPE_ITEM(item) || !SP_LPE_ITEM(item)->hasPathEffectOfType(BEND_PATH)){
+    if (!SP_IS_LPE_ITEM(item)) {
+        return;
+    }
+    if(!SP_LPE_ITEM(item)->hasPathEffectOfType(BEND_PATH)){
         Effect::createAndApply(BEND_PATH, document, item);
     }
     Effect* lpe = SP_LPE_ITEM(item)->getCurrentLPE();
@@ -332,10 +335,7 @@ static void spdc_apply_bend_shape(gchar const *svgd, FreehandBase *dc, SPItem *i
     lpe->getRepr()->setAttribute("prop_scale", os.str());
     lpe->getRepr()->setAttribute("scale_y_rel", "false");
     lpe->getRepr()->setAttribute("vertical", "false");
-    Geom::PathVector path_clipboard =  sp_svg_read_pathv(svgd);
-    path_clipboard *= item->i2doc_affine().inverse();
-    Glib::ustring svgd_new = sp_svg_write_path(path_clipboard);
-    static_cast<LPEBendPath*>(lpe)->bend_path.paste_param_path(svgd_new.c_str());
+    static_cast<LPEBendPath*>(lpe)->bend_path.paste_param_path(svgd);
 }
 
 static void spdc_apply_simplify(std::string threshold, FreehandBase *dc, SPItem *item)
@@ -373,7 +373,7 @@ static void spdc_check_for_and_apply_waiting_LPE(FreehandBase *dc, SPItem *item,
 #define SHAPE_HEIGHT defsize
         //Store the clipboard path to apply in the future without the use of clipboard
         static Geom::PathVector previous_shape_pathv;
-        static SPItem *bend_item;
+        static SPItem *bend_item = nullptr;
         shapeType shape = (shapeType)prefs->getInt(tool_name(dc) + "/shape", 0);
         if (previous_shape_type == NONE) {
             previous_shape_type = shape;
@@ -896,7 +896,7 @@ static void spdc_flush_white(FreehandBase *dc, SPCurve *gc)
         }
         if (!dc->white_item) {
             // Attach repr
-            SPItem *item = SP_ITEM(layer->appendChildRepr(repr));
+            SPItem *item = dynamic_cast<SPItem *>(layer->appendChildRepr(repr));
             dc->white_item = item;
             //Bend needs the transforms applied after, Other effects best before
             spdc_check_for_and_apply_waiting_LPE(dc, item, c.get(), true);
@@ -907,11 +907,12 @@ static void spdc_flush_white(FreehandBase *dc, SPCurve *gc)
             spdc_check_for_and_apply_waiting_LPE(dc, item, c.get(), false);
             if(previous_shape_type == BEND_CLIPBOARD){
                 repr->parent()->removeChild(repr);
+                dc->white_item = nullptr;
             } else {
                 dc->selection->set(repr);
             }
         }
-        SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(dc->white_item); 
+        SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(dc->white_item);
         if (lpeitem && lpeitem->hasPathEffectRecursive()) {
             sp_lpe_item_update_patheffect(lpeitem, true, false);
         }

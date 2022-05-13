@@ -18,6 +18,7 @@
 #include <glibmm/miscutils.h>
 #include <gtkmm.h>
 #include <png.h>
+#include <regex>
 
 #include "desktop.h"
 #include "document-undo.h"
@@ -44,6 +45,7 @@
 #include "ui/dialog/dialog-notebook.h"
 #include "ui/dialog/filedialog.h"
 #include "ui/interface.h"
+#include "ui/widget/color-picker.h"
 #include "ui/widget/export-lists.h"
 #include "ui/widget/export-preview.h"
 #include "ui/widget/scrollprotected.h"
@@ -64,7 +66,7 @@ public:
     SPItem *getItem() { return _item; }
     SPPage *getPage() { return _page; }
     bool isActive() { return _selector.get_active(); }
-    void refresh(bool hide = false);
+    void refresh(bool hide, guint32 bg_color);
     void refreshHide(const std::vector<SPItem *> *list) { _preview.refreshHide(list); }
     void setDocument(SPDocument *doc) { _preview.setDocument(doc); }
 
@@ -139,15 +141,17 @@ void BatchItem::init(SPDocument *doc, Glib::ustring label) {
     this->set_tooltip_text(label);
 
     // This initially packs the widgets with a hidden preview.
-    refresh(!is_hide);
+    refresh(!is_hide, 0);
 }
 
-void BatchItem::refresh(bool hide)
+void BatchItem::refresh(bool hide, guint32 bg_color)
 {
     if (_page) {
         auto b = _page->getDesktopRect();
         _preview.setDbox(b.left(), b.right(), b.top(), b.bottom());
     }
+
+    _preview.set_background_color(bg_color);
 
     // When hiding the preview, we show the items as a checklist
     // So all items must be packed differently on refresh.
@@ -199,6 +203,12 @@ void BatchExport::initialise(const Glib::RefPtr<Gtk::Builder> &builder)
     Inkscape::UI::Widget::ScrollTransfer<Gtk::ScrolledWindow> *temp = nullptr;
     builder->get_widget_derived("b_pbox_scroll", temp);
     builder->get_widget_derived("b_scroll", temp);
+
+    Gtk::Button* button = nullptr;
+    builder->get_widget("b_backgnd", button); 
+    assert(button);
+    _bgnd_color_picker = std::make_unique<Inkscape::UI::Widget::ColorPicker>(
+        _("Background color"), _("Color used to fill background"), 0xffffff00, true, button);
 }
 
 void BatchExport::selectionModified(Inkscape::Selection *selection, guint flags)
@@ -277,8 +287,14 @@ void BatchExport::setup()
     show_preview->signal_toggled().connect(sigc::mem_fun(*this, &BatchExport::refreshPreview));
     filenameConn = filename_entry->signal_changed().connect(sigc::mem_fun(*this, &BatchExport::onFilenameModified));
     exportConn = export_btn->signal_clicked().connect(sigc::mem_fun(*this, &BatchExport::onExport));
-    browseConn = filename_entry->signal_icon_press().connect(sigc::mem_fun(*this, &BatchExport::onBrowse));
+    browseConn = filename_entry->signal_icon_release().connect(sigc::mem_fun(*this, &BatchExport::onBrowse));
     hide_all->signal_toggled().connect(sigc::mem_fun(*this, &BatchExport::refreshPreview));
+    _bgnd_color_picker->connectChanged([=](guint32 color){
+        if (_desktop) {
+            Inkscape::UI::Dialog::set_export_bg_color(_desktop->getNamedView(), color);
+        }
+        refreshPreview();
+    });
 }
 
 void BatchExport::refreshItems()
@@ -405,7 +421,7 @@ void BatchExport::refreshPreview()
                 val->refreshHide(&selected);
             }
         }
-        val->refresh(!preview);
+        val->refresh(!preview, _bgnd_color_picker->get_current_color());
     }
 }
 
@@ -531,10 +547,11 @@ void BatchExport::onExport()
 
             Glib::ustring item_filename = filename + "_" + id;
             if (!suffix.empty()) {
+                if (omod->is_raster()) {
+                    // Put the dpi in at the user's requested location.
+                    suffix = std::regex_replace(suffix.c_str(), std::regex("\\{dpi\\}"), std::to_string((int)dpi));
+                }
                 item_filename = item_filename + "_" + suffix;
-            }
-            if (omod->is_raster()) {
-                item_filename = item_filename + "_" + std::to_string((int)dpi);
             }
 
             bool found = Export::unConflictFilename(_document, item_filename, omod->get_extension());
@@ -556,7 +573,8 @@ void BatchExport::onExport()
                 unsigned long int height = (int)(area.height() * dpi / DPI_BASE + 0.5);
 
                 Export::exportRaster(
-                    area, width, height, dpi, item_filename, true, onProgressCallback,
+                    area, width, height, dpi, _bgnd_color_picker->get_current_color(),
+                    item_filename, true, onProgressCallback,
                     prog_dlg, omod, hide ? &show_only : nullptr);
             } else {
                 setExporting(true, Glib::ustring::compose(_("Exporting %1"), filename));
@@ -575,7 +593,7 @@ void BatchExport::onExport()
 
 void BatchExport::onBrowse(Gtk::EntryIconPosition pos, const GdkEventButton *ev)
 {
-    if (!_app) {
+    if (!_app || !_app->get_active_window()) {
         return;
     }
     Gtk::Window *window = _app->get_active_window();
@@ -745,6 +763,10 @@ void BatchExport::setDocument(SPDocument *document)
     if (document) {
         // when the page selected is changes, update the export area
         _pages_changed_connection = document->getPageManager().connectPagesChanged([=]() { pagesChanged(); });
+
+        auto bg_color = get_export_bg_color(document->getNamedView(), 0xffffff00);
+        _bgnd_color_picker->setRgba32(bg_color);
+        refreshPreview();
     }
     for (auto &[key, val] : current_items) {
         val->setDocument(document);
