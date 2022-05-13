@@ -570,6 +570,10 @@ void FileSaveDialogImplGtk::addFileType(Glib::ustring name, Glib::ustring patter
     fileTypeComboBox.append(guessType.name);
     fileTypes.push_back(guessType);
 
+    auto filter = Gtk::FileFilter::create();
+    filter->set_name(guessType.name);
+    filter->add_pattern(guessType.pattern);
+    add_filter(filter);
 
     fileTypeComboBox.set_active(0);
     fileTypeChangedCallback(); // call at least once to set the filter
@@ -577,8 +581,13 @@ void FileSaveDialogImplGtk::addFileType(Glib::ustring name, Glib::ustring patter
 
 void FileSaveDialogImplGtk::createFilterMenu()
 {
+    if (_dialogType == CUSTOM_TYPE) {
+        return;
+    }
+
     Inkscape::Extension::DB::OutputList extension_list;
     Inkscape::Extension::db.get_output_list(extension_list);
+
     knownExtensions.clear();
 
     bool is_raster = _dialogType == RASTER_TYPES;
@@ -601,6 +610,11 @@ void FileSaveDialogImplGtk::createFilterMenu()
         type.extension = omod;
         fileTypeComboBox.append(type.name);
         fileTypes.push_back(type);
+
+        auto filter = Gtk::FileFilter::create();
+        filter->set_name(type.name);
+        filter->add_pattern(type.pattern);
+        add_filter(filter);
     }
 
     //#Let user choose
@@ -611,6 +625,10 @@ void FileSaveDialogImplGtk::createFilterMenu()
     fileTypeComboBox.append(guessType.name);
     fileTypes.push_back(guessType);
 
+    auto filter = Gtk::FileFilter::create();
+    filter->set_name(guessType.name);
+    filter->add_pattern(guessType.pattern);
+    add_filter(filter);
 
     fileTypeComboBox.set_active(0);
     fileTypeChangedCallback(); // call at least once to set the filter
@@ -769,6 +787,22 @@ void FileSaveDialogImplGtk::updateNameAndExtension()
 
     if (!Glib::getenv("GTK_USE_PORTAL").empty()) {
         // If we're using the portal we can't change the filename
+	// and we need to use the filter to find the extension
+        GtkFileChooser *gtkFileChooser = Gtk::FileChooser::gobj();
+        GtkFileFilter *filter = gtk_file_chooser_get_filter(gtkFileChooser);
+
+        extension = nullptr;
+        if (filter) {
+            auto name = gtk_file_filter_get_name(filter);
+
+            for (auto type : fileTypes) {
+                if (type.name == name) {
+                    extension = type.extension;
+                    break;
+                }
+            }
+        }
+
         return;
     }
 
