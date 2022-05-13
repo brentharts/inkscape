@@ -767,6 +767,11 @@ void FileSaveDialogImplGtk::updateNameAndExtension()
         myFilename = tmp;
     }
 
+    if (!Glib::getenv("GTK_USE_PORTAL").empty()) {
+        // If we're using the portal we can't change the filename
+        return;
+    }
+
     Inkscape::Extension::Output *newOut = extension ? dynamic_cast<Inkscape::Extension::Output *>(extension) : nullptr;
     if (fileTypeCheckbox.get_active() && newOut) {
         // Append the file extension if it's not already present and display it in the file name entry field
