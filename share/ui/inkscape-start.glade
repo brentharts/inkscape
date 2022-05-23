@@ -513,6 +513,14 @@ along with Inkscape Extensions Manager.  If not, see <http://www.gnu.org/license
         <col id="5">1125px × 2436px</col>
       </row>
       <row>
+        <col id="0" translatable="yes">Mobile-fruit Phone 2</col>
+        <col id="1">resources/template_mobile_portrait.svg</col>
+        <col id="2">-</col>
+        <col id="3">411px</col>
+        <col id="4">731px</col>
+        <col id="5">411px x 731px</col>
+      </row>
+      <row>
         <col id="0" translatable="yes">Mobile-smallest</col>
         <col id="1">resources/template_mobile_portrait.svg</col>
         <col id="2">-</col>
