@@ -773,19 +773,21 @@ MarkerComboBox::create_marker_image(Geom::IntPoint pixel_size, gchar const *mnam
     if (oldmarker) {
         oldmarker->deleteObject(false);
     }
-
-    // Create a copy repr of the marker with id="sample"
     Inkscape::XML::Document *xml_doc = _sandbox->getReprDoc();
-    Inkscape::XML::Node *mrepr = marker->getRepr()->duplicate(xml_doc);
-    mrepr->setAttribute("id", "sample");
-
-    // Replace the old sample in the sandbox by the new one
     Inkscape::XML::Node *defsrepr = _sandbox->getObjectById("defs")->getRepr();
 
-    // TODO - This causes a SIGTRAP on windows
-    defsrepr->appendChild(mrepr);
-
-    Inkscape::GC::release(mrepr);
+    // install reference document in a sanbox document: we are duplicating a source gradient now;
+    // if it is a clone, we want sp-use object to find its source in a marker's document
+    {
+        SPDocument::install_reference_document scoped(_sandbox.get(), marker->document);
+        // Create a copy repr of the marker with id="sample"
+        Inkscape::XML::Node *mrepr = marker->getRepr()->duplicate(xml_doc);
+        mrepr->setAttribute("id", "sample");
+        // Replace the old sample in the sandbox by the new one
+        // TODO - This causes a SIGTRAP on windows
+        defsrepr->appendChild(mrepr);
+        Inkscape::GC::release(mrepr);
+    }
 
     // If the marker color is a url link to a pattern or gradient copy that too
     SPObject *mk = source->getObjectById(mname);
@@ -859,8 +861,6 @@ MarkerComboBox::create_marker_image(Geom::IntPoint pixel_size, gchar const *mnam
             sp_repr_css_attr_unref(css);
         }
     }
-
-    SPDocument::install_reference_document scoped(_sandbox.get(), marker->document);
 
     _sandbox->getRoot()->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
     _sandbox->ensureUpToDate();
