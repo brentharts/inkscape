@@ -46,7 +46,8 @@ using Inkscape::UI::create_builder;
 // size of marker image in a list
 static const int ITEM_WIDTH = 40;
 static const int ITEM_HEIGHT = 32;
-
+static const double PIXBUF_SCALE = 1.50;
+static int REFRESH_DELAY = 250; // time in ms; throttle marker refresh requests
 namespace Inkscape {
 namespace UI {
 namespace Widget {
@@ -106,7 +107,6 @@ MarkerComboBox::MarkerComboBox(Glib::ustring id, int l) :
     _edit_marker(get_widget<Gtk::Button>(_builder, "edit-marker"))
 {
     _background_color = 0x808080ff;
-    _foreground_color = 0x808080ff;
 
     if (!g_image_none) {
         auto device_scale = get_scale_factor();
@@ -246,7 +246,12 @@ MarkerComboBox::MarkerComboBox(Glib::ustring id, int l) :
     _edit_marker.signal_clicked().connect([=]() { _menu_btn.get_popover()->popdown(); edit_signal(); });
 
     // before showing popover refresh marker attributes
-    _menu_btn.get_popover()->signal_show().connect([=](){ update_ui(get_current(), false); }, false);
+    _menu_btn.get_popover()->signal_show().connect([=](){
+        if (_list_is_stale) {
+            refresh_after_markers_modified();
+        }
+        update_ui(get_current(), false);
+    }, false);
 
     update_scale_link();
     _current_img.set(g_image_none);
@@ -447,13 +452,39 @@ void MarkerComboBox::setDocument(SPDocument *document)
         _document = document;
 
         if (_document) {
+            // watch document for modifications
             modified_connection = _document->getDefs()->connectModified([=](SPObject*, unsigned int){
-                refresh_after_markers_modified();
+                if (_update.pending() || _idle_refresh) {
+                    // update is pending or refresh is already scheduled; skip
+                    return;
+                }
+
+                if (_menu_btn.get_popover()->get_visible()) {
+                    // popover is visible - refresh all markers on idle
+                    _idle_refresh = Glib::signal_timeout().connect([=]() {
+                        refresh_after_markers_modified();
+                        _idle_refresh.disconnect();
+                        return false;
+                    }, REFRESH_DELAY, Glib::PRIORITY_DEFAULT_IDLE);
+                }
+                else {
+                    // full refresh can wait until popover is visible; mark marker list as stale
+                    _list_is_stale = true;
+                    // now only refresh current marker
+                    _idle_refresh = Glib::signal_timeout().connect([=]() {
+                        auto current = get_current();
+                        if (auto marker = find_marker_item(current)) {
+                            marker->pix = create_marker_pixbuf(current);
+                            update_menu_btn(marker);
+                        }
+                        _idle_refresh.disconnect();
+                        return false;
+                    }, REFRESH_DELAY, Glib::PRIORITY_DEFAULT_IDLE);
+                }
             });
         }
 
         _current_marker_id = "";
-
         refresh_after_markers_modified();
     }
 }
@@ -486,6 +517,8 @@ void MarkerComboBox::refresh_after_markers_modified() {
     auto marker = find_marker_item(get_current());
     update_menu_btn(marker);
     update_preview(marker);
+
+    _list_is_stale = false;
 }
 
 Glib::RefPtr<MarkerComboBox::MarkerItem> MarkerComboBox::add_separator(bool filler) {
@@ -535,13 +568,16 @@ MarkerComboBox::init_combo()
 /**
  * Sets the current marker in the marker combobox.
  */
-void MarkerComboBox::set_current(SPObject *marker)
-{
-    auto sp_marker = dynamic_cast<SPMarker*>(marker);
+void MarkerComboBox::set_current(SPObject* marker_object) {
+    auto marker = dynamic_cast<SPMarker*>(marker_object);
 
-    bool reselect = sp_marker != get_current();
+    bool reselect = marker != get_current();
 
-    update_ui(sp_marker, reselect);
+    if (auto marker_item = find_marker_item(marker)) {
+        marker_item->pix = create_marker_pixbuf(marker);
+    }
+
+    update_ui(marker, reselect);
 }
 
 void MarkerComboBox::update_ui(SPMarker* marker, bool select) {
@@ -688,6 +724,22 @@ void MarkerComboBox::remove_markers (gboolean history)
     }
 }
 
+
+Cairo::RefPtr<Cairo::Surface> MarkerComboBox::create_marker_pixbuf(SPMarker* marker) {
+    if (!marker || !_document) return Cairo::RefPtr<Cairo::Surface>();
+
+    Inkscape::Drawing drawing;
+    unsigned const visionkey = SPItem::display_key_new(1);
+    drawing.setRoot(_sandbox->getRoot()->invoke_show(drawing, visionkey, SP_ITEM_SHOW_DISPLAY));
+
+    Inkscape::XML::Node* repr = marker->getRepr();
+    auto pixbuf = create_marker_image(Geom::IntPoint(ITEM_WIDTH, ITEM_HEIGHT), repr->attribute("id"), _document, drawing, visionkey, false, true, PIXBUF_SCALE);
+
+    _sandbox->getRoot()->invoke_hide(visionkey);
+
+    return pixbuf;
+}
+
 /**
  * Adds markers in marker_list to the combo
  */
@@ -717,12 +769,11 @@ auto old_time =  std::chrono::high_resolution_clock::now();
 #endif
 
     for (auto i:marker_list) {
-
         Inkscape::XML::Node *repr = i->getRepr();
         gchar const *markid = repr->attribute("inkscape:stockid") ? repr->attribute("inkscape:stockid") : repr->attribute("id");
 
         // generate preview
-        auto pixbuf = create_marker_image(Geom::IntPoint(ITEM_WIDTH, ITEM_HEIGHT), repr->attribute("id"), source, drawing, visionkey, false, true, 1.50);
+        auto pixbuf = create_marker_image(Geom::IntPoint(ITEM_WIDTH, ITEM_HEIGHT), repr->attribute("id"), source, drawing, visionkey, false, true, PIXBUF_SCALE);
 
         auto item = Glib::RefPtr<MarkerItem>(new MarkerItem);
         item->source = source;
@@ -903,7 +954,14 @@ MarkerComboBox::create_marker_image(Geom::IntPoint pixel_size, gchar const *mnam
 
     /* Update to renderable state */
     const double device_scale = get_scale_factor();
-    auto surface = render_surface(drawing, scale, *dbox, pixel_size, device_scale, checkerboard ? &_background_color : nullptr, no_clip);
+    cairo_surface_t* surface;
+    {
+        // install reference document in case we are rendering clip masks;
+        // they need to find referenced objects in marker->document
+        // Note: referencing objects from other document currently modifies it
+        SPDocument::install_reference_document scoped(_sandbox.get(), marker->document);
+        surface = render_surface(drawing, scale, *dbox, pixel_size, device_scale, checkerboard ? &_background_color : nullptr, no_clip);
+    }
     cairo_surface_set_device_scale(surface, device_scale, device_scale);
     return Cairo::RefPtr<Cairo::Surface>(new Cairo::Surface(surface, true));
 }
@@ -928,8 +986,7 @@ void MarkerComboBox::on_style_updated() {
         gint32(0xff * color.get_green()) << 16 |
         gint32(0xff * color.get_blue()) << 8 |
         0xff;
-    if (foreground != _foreground_color || background != _background_color) {
-        _foreground_color = foreground;
+    if (background != _background_color) {
         _background_color = background;
         // theme changed?
         init_combo();
