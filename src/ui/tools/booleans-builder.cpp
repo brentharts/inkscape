@@ -33,7 +33,7 @@ BooleanBuilder::BooleanBuilder(ObjectSet *set, bool flatten)
     // Current state of all the items
     _work_items = (flatten ? SubItem::build_flatten : SubItem::build_mosaic)(set->items_vector());
 
-    auto root = _set->desktop()->getCanvas()->get_canvas_item_root();
+    auto root = _set->desktop()->get_active_canvas()->get_canvas_item_root();
     _group = make_canvasitem<CanvasItemGroup>(root);
 
     auto nv = _set->desktop()->getNamedView();

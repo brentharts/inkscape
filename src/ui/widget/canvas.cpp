@@ -913,7 +913,7 @@ bool Canvas::on_button_pressed(GtkGestureMultiPress *controller, int n_press, do
 
     // Close the command palette if it loses focus; it can't do it itself since signal_focus() appears to be broken.
     // Todo: (GTK4) Try to get rid of this using GtkEventControllerFocus.
-    _desktop->getDesktopWidget()->get_canvas_grid()->getCommandPalette()->close();
+    _desktop->getDesktopWidget()->_canvas_grid_page[_desktop->get_active_canvas_idx()]->getCommandPalette()->close();
 
     if (gdkevent->button.button == 3) {
         _desktop->getCanvasDrawing()->set_sticky(_state & GDK_SHIFT_MASK);

@@ -118,7 +118,7 @@ TextTool::TextTool(SPDesktop *desktop)
 
     this->imc = gtk_im_multicontext_new();
     if (this->imc) {
-        GtkWidget *canvas = GTK_WIDGET(desktop->getCanvas()->gobj());
+        GtkWidget *canvas = GTK_WIDGET(desktop->get_active_canvas()->gobj());
 
         /* im preedit handling is very broken in inkscape for
          * multi-byte characters.  See bug 1086769.
@@ -173,7 +173,7 @@ TextTool::TextTool(SPDesktop *desktop)
 TextTool::~TextTool()
 {
     if (_desktop) {
-        sp_signal_disconnect_by_data(_desktop->getCanvas()->gobj(), this);
+        sp_signal_disconnect_by_data(_desktop->get_active_canvas()->gobj(), this);
     }
 
     this->enableGrDrag(false);

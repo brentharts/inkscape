@@ -190,7 +190,7 @@ ConnectorTool::ConnectorTool(SPDesktop *desktop)
 
     // Make sure we see all enter events for canvas items,
     // even if a mouse button is depressed.
-    desktop->getCanvas()->set_all_enter_events(true);
+    desktop->get_active_canvas()->set_all_enter_events(true);
 }
 
 ConnectorTool::~ConnectorTool()
@@ -206,7 +206,7 @@ ConnectorTool::~ConnectorTool()
     this->cc_clear_active_conn();
 
     // Restore the default event generating behaviour.
-    _desktop->getCanvas()->set_all_enter_events(false);
+    _desktop->get_active_canvas()->set_all_enter_events(false);
 
     this->sel_changed_connection.disconnect();
 

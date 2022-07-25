@@ -347,6 +347,11 @@ override) the bindings in the main default.xml.
   <bind gaction="app.remove-path-effect"/>
   <bind gaction="win.path-effect-parameter-next"         keys="7"/>
 
+  <!-- Tab Structure -->
+  <!-- <bind gaction="win.canvas-add-tab"               keys="1"/> -->
+  <!-- <bind gaction="win.canvas-add-tab-with-template" keys="1"/> -->
+  <!-- <bind gaction="win.canvas-tab-open"              keys="1"/> -->
+
   <!-- Text -->
   <bind gaction="app.text-flow-into-frame"               keys="&lt;alt&gt;w" />
   <bind gaction="app.text-unflow"                        keys="&lt;alt&gt;&lt;shift&gt;w" />

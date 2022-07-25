@@ -365,8 +365,8 @@ bool DropperTool::root_handler(GdkEvent* event) {
                                         (this->stroke ? "dropper-pick-stroke.svg" : "dropper-pick-fill.svg") );
 
     // We do this ourselves to get color correct.
-    auto display = _desktop->getCanvas()->get_display();
-    auto window = _desktop->getCanvas()->get_window();
+    auto display = _desktop->get_active_canvas()->get_display();
+    auto window = _desktop->get_active_canvas()->get_window();
     auto cursor = load_svg_cursor(display, window, _cursor_filename, get_color(invert));
     window->set_cursor(cursor);
 

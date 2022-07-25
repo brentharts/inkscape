@@ -695,6 +695,16 @@ button.menu-btn-tight {
     opacity: 1;
 }
 
+#TabMenuButton {
+    padding: 3px;
+    border: none;
+    opacity: 0.5;
+}
+
+#TabMenuButton:hover {
+    opacity: 1;
+}
+
 #DesktopStatusBar {
     margin-right: 1em;
 }

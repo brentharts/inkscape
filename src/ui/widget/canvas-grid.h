@@ -24,6 +24,7 @@ class SPDesktopWidget;
 
 namespace Inkscape {
 class CanvasEvent;
+class CanvasItemDrawing;
 
 namespace UI {
 
@@ -71,6 +72,9 @@ public:
     Gtk::ToggleButton *GetCmsAdjust()  { return &_cms_adjust; }
     Gtk::ToggleButton *GetStickyZoom();
     Dialog::CommandPalette *getCommandPalette() { return _command_palette.get(); }
+
+    Inkscape::CanvasItemDrawing *canvas_drawing = nullptr; ///< CanvasItem containing the actual SVG Drawing.
+    void set_canvas_drawing(Inkscape::CanvasItemDrawing *canvas_drawing);
 
 private:
     // Signal callbacks

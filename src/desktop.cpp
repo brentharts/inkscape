@@ -93,7 +93,7 @@ static void _pinch_scale_changed_handler(GtkGesture *gesture, gdouble delta, SPD
     const GdkEvent *event = gtk_gesture_get_last_event(gesture, sequence);
 
     Geom::Point button_window(event->button.x, event->button.y);
-    Geom::Point button_world = desktop->getCanvas()->canvas_to_world(button_window);
+    Geom::Point button_world = desktop->get_active_canvas()->canvas_to_world(button_window);
     Geom::Point button_dt(desktop->w2d(button_world));
 
     desktop->zoom_absolute(button_dt, _pinch_begin_zoom * delta);
@@ -101,7 +101,7 @@ static void _pinch_scale_changed_handler(GtkGesture *gesture, gdouble delta, SPD
 
 SPDesktop::SPDesktop()
     : namedview(nullptr)
-    , canvas(nullptr)
+    , _active_canvas_idx(0)
     , temporary_item_list(nullptr)
     , snapindicator(nullptr)
     , current(nullptr)  // current style
@@ -132,7 +132,7 @@ void
 SPDesktop::init (SPNamedView *nv, Inkscape::UI::Widget::Canvas *acanvas, SPDesktopWidget *widget)
 {
     namedview = nv;
-    canvas = acanvas;
+    _canvas_all.emplace_back(acanvas);
     _widget = widget;
 
     // Temporary workaround for link order issues:
@@ -164,8 +164,6 @@ SPDesktop::init (SPNamedView *nv, Inkscape::UI::Widget::Canvas *acanvas, SPDeskt
     }
     dkey = SPItem::display_key_new(1);
 
-    /* Connect document */
-    setDocument (document);
 
     namedview->viewcount++;
 
@@ -180,7 +178,7 @@ SPDesktop::init (SPNamedView *nv, Inkscape::UI::Widget::Canvas *acanvas, SPDeskt
      * It would probably make sense to move most of this code to the Canvas.
      */
 
-    Inkscape::CanvasItemGroup *canvas_item_root = canvas->get_canvas_item_root();
+    auto canvas_item_root = acanvas->get_canvas_item_root();
 
     // The order in which these canvas items are added determines the z-order. It's therefore
     // important to add the tempgroup (which will contain the snapindicator) before adding the
@@ -217,9 +215,9 @@ SPDesktop::init (SPNamedView *nv, Inkscape::UI::Widget::Canvas *acanvas, SPDeskt
     canvas_item_root->connect_event(sigc::bind(sigc::ptr_fun(sp_desktop_root_handler), this));
     canvas_catchall->connect_event(sigc::bind(sigc::ptr_fun(sp_desktop_root_handler), this));
 
-    canvas_drawing = new Inkscape::CanvasItemDrawing(canvas_group_drawing);
+    auto canvas_drawing = new Inkscape::CanvasItemDrawing(canvas_group_drawing);
     canvas_drawing->connect_drawing_event(sigc::bind(sigc::ptr_fun(_drawing_handler), this));
-    canvas->set_drawing(canvas_drawing->get_drawing()); // Canvas needs access.
+    acanvas->set_drawing(canvas_drawing->get_drawing()); // Canvas needs access.
 
     Inkscape::DrawingItem *drawing_item = document->getRoot()->invoke_show(
         *canvas_drawing->get_drawing(),
@@ -229,6 +227,7 @@ SPDesktop::init (SPNamedView *nv, Inkscape::UI::Widget::Canvas *acanvas, SPDeskt
         canvas_drawing->get_drawing()->root()->prependChild(drawing_item);
     }
 
+    _canvas_drawing_all.push_back(canvas_drawing);
     temporary_item_list = new Inkscape::Display::TemporaryItemList();
     snapindicator = new Inkscape::Display::SnapIndicator ( this );
 
@@ -244,7 +243,7 @@ SPDesktop::init (SPNamedView *nv, Inkscape::UI::Widget::Canvas *acanvas, SPDeskt
     // display rect and zoom are now handled in sp_desktop_widget_realize()
 
     // pinch zoom
-    zoomgesture = gtk_gesture_zoom_new(GTK_WIDGET(canvas->gobj()));
+    zoomgesture = gtk_gesture_zoom_new(GTK_WIDGET(acanvas->gobj()));
     gtk_event_controller_set_propagation_phase (GTK_EVENT_CONTROLLER (zoomgesture), GTK_PHASE_CAPTURE);
     g_signal_connect(zoomgesture, "begin", G_CALLBACK(_pinch_begin_handler), this);
     g_signal_connect(zoomgesture, "scale-changed", G_CALLBACK(_pinch_scale_changed_handler), this);
@@ -256,14 +255,20 @@ SPDesktop::init (SPNamedView *nv, Inkscape::UI::Widget::Canvas *acanvas, SPDeskt
     _reconstruction_finish_connection =
         document->connectReconstructionFinish(sigc::bind(sigc::ptr_fun(_reconstruction_finish), this));
     _reconstruction_old_layer_id.clear();
+
+    /* Connect document */
+    _canvas_document_all.emplace_back(document);
+    setDocument(document, _canvas_document_all.size() - 1);
 }
 
 void SPDesktop::destroy()
 {
     _destroy_signal.emit(this);
 
-    canvas->set_drawing(nullptr); // Ensures deactivation
-    canvas->set_desktop(nullptr); // Todo: Remove desktop dependency.
+    for (auto canvas : _canvas_all) {
+        canvas->set_drawing(nullptr); // Ensures deactivation
+        canvas->set_desktop(nullptr); // Todo: Remove desktop dependency.
+    }
 
     if (event_context) {
         delete event_context;
@@ -292,8 +297,10 @@ void SPDesktop::destroy()
         g_clear_object(&zoomgesture);
     }
 
-    if (canvas_drawing) {
-        doc()->getRoot()->invoke_hide(dkey);
+    for (auto canvas_drawing_page : _canvas_drawing_all) {
+        if (canvas_drawing_page) {
+            doc()->getRoot()->invoke_hide(dkey);
+        }
     }
 
     _guides_message_context = nullptr;
@@ -384,7 +391,7 @@ SPDesktop::change_document (SPDocument *theDocument)
     // Reset any tool actions currently in progress.
     setEventContext(std::string(event_context->getPrefsPath()));
 
-    setDocument (theDocument);
+    setDocument(theDocument, 0);
 
     /* update the rulers, connect the desktop widget's signal to the new namedview etc.
        (this can probably be done in a better way) */
@@ -472,6 +479,7 @@ SPItem *SPDesktop::getGroupAtPoint(Geom::Point const &p) const
  */
 Geom::Point SPDesktop::point() const
 {
+    auto canvas = get_active_canvas();
     auto ret = canvas->get_last_mouse();
     auto pt = ret ? *ret : Geom::Point(canvas->get_dimensions()) / 2.0;
     return w2d(canvas->canvas_to_world(pt));
@@ -556,8 +564,8 @@ SPDesktop::set_display_area (bool log)
 
     // Scroll
     Geom::Point offset = _current_affine.getOffset();
-    canvas->set_pos(offset);
-    canvas->set_affine(_current_affine.d2w()); // For CanvasItems.
+    get_active_canvas()->set_pos(offset);
+    get_active_canvas()->set_affine(_current_affine.d2w()); // For CanvasItems.
 
     /* Update perspective lines if we are in the 3D box tool (so that infinite ones are shown
      * correctly) */
@@ -599,7 +607,7 @@ void
 SPDesktop::set_display_area( Geom::Rect const &r, double border, bool log)
 {
     // Create a rectangle the size of the window aligned with origin.
-    Geom::Rect w( Geom::Point(), canvas->get_dimensions() );
+    auto w = Geom::Rect(Geom::Point(), get_active_canvas()->get_dimensions());
 
     // Shrink window to account for border padding.
     w.expandBy( -border );
@@ -628,7 +636,7 @@ SPDesktop::set_display_area( Geom::Rect const &r, double border, bool log)
 Geom::Parallelogram SPDesktop::get_display_area() const
 {
     // viewbox in world coordinates
-    Geom::Rect const viewbox = canvas->get_area_world();
+    Geom::Rect const viewbox = get_active_canvas()->get_area_world();
 
     // display area in desktop coordinates
     return Geom::Parallelogram(viewbox) * w2d();
@@ -646,7 +654,7 @@ SPDesktop::zoom_absolute(Geom::Point const &center, double zoom, bool keep_point
 {
     Geom::Point w = d2w(center); // Must be before zoom changed.
     if(!keep_point) {
-        w = Geom::Rect(canvas->get_area_world()).midpoint();
+        w = Geom::Rect(get_active_canvas()->get_area_world()).midpoint();
     }
     zoom = CLAMP (zoom, SP_DESKTOP_ZOOM_MIN, SP_DESKTOP_ZOOM_MAX);
     _current_affine.setScale( Geom::Scale(zoom, yaxisdir() * zoom) );
@@ -743,7 +751,7 @@ SPDesktop::zoom_selection()
 }
 
 Geom::Point SPDesktop::current_center() const {
-    return Geom::Rect(canvas->get_area_world()).midpoint() * _current_affine.w2d();
+    return Geom::Rect(get_active_canvas()->get_area_world()).midpoint() * _current_affine.w2d();
 }
 
 /**
@@ -786,7 +794,7 @@ void SPDesktop::zoom_quick(bool enable)
         }
 
         if (!zoomed) {
-            Geom::Rect const d_canvas = canvas->get_area_world();
+            Geom::Rect const d_canvas = get_active_canvas()->get_area_world();
             Geom::Point midpoint = w2d(d_canvas.midpoint()); // Midpoint of drawing on canvas.
             zoom_relative(midpoint, 2.0, false);
         }
@@ -850,7 +858,7 @@ void
 SPDesktop::rotate_absolute_center_point (Geom::Point const &c, double rotate)
 {
     _current_affine.setRotate( rotate );
-    Geom::Rect viewbox = canvas->get_area_world();
+    Geom::Rect viewbox = get_active_canvas()->get_area_world();
     set_display_area(c, viewbox.midpoint());
 }
 
@@ -865,7 +873,7 @@ void
 SPDesktop::rotate_relative_center_point (Geom::Point const &c, double rotate)
 {
     _current_affine.addRotate( rotate );
-    Geom::Rect viewbox = canvas->get_area_world();
+    Geom::Rect viewbox = get_active_canvas()->get_area_world();
     set_display_area(c, viewbox.midpoint());
 }
 
@@ -909,7 +917,7 @@ void
 SPDesktop::flip_absolute_center_point (Geom::Point const &c, CanvasFlip flip)
 {
     _current_affine.setFlip(flip);
-    Geom::Rect viewbox = canvas->get_area_world();
+    Geom::Rect viewbox = get_active_canvas()->get_area_world();
     set_display_area(c, viewbox.midpoint());
 }
 
@@ -924,7 +932,7 @@ void
 SPDesktop::flip_relative_center_point (Geom::Point const &c, CanvasFlip flip)
 {
     _current_affine.addFlip(flip);
-    Geom::Rect viewbox = canvas->get_area_world();
+    Geom::Rect viewbox = get_active_canvas()->get_area_world();
     set_display_area(c, viewbox.midpoint());
 }
 
@@ -941,7 +949,7 @@ SPDesktop::is_flipped (CanvasFlip flip)
 void
 SPDesktop::scroll_absolute (Geom::Point const &point)
 {
-    canvas->set_pos(point);
+    get_active_canvas()->set_pos(point);
     _current_affine.setOffset( point );
 
     /*  update perspective lines if we are in the 3D box tool (so that infinite ones are shown correctly) */
@@ -960,7 +968,7 @@ SPDesktop::scroll_absolute (Geom::Point const &point)
 void
 SPDesktop::scroll_relative (Geom::Point const &delta)
 {
-    Geom::Rect const viewbox = canvas->get_area_world();
+    Geom::Rect const viewbox = get_active_canvas()->get_area_world();
     scroll_absolute( viewbox.min() - delta );
 }
 
@@ -988,7 +996,7 @@ bool SPDesktop::scroll_to_point(Geom::Point const &p, double)
     // autoscrolldistance is in screen pixels.
     double const autoscrolldistance = prefs->getIntLimited("/options/autoscrolldistance/value", 0, -1000, 10000);
 
-    auto w = Geom::Rect(canvas->get_area_world()); // Window in screen coordinates.
+    auto w = Geom::Rect(get_active_canvas()->get_area_world()); // Window in screen coordinates.
     w.expandBy(-autoscrolldistance);  // Shrink window
 
     auto const c = d2w(p);  // Point 'p' in screen coordinates.
@@ -1159,7 +1167,7 @@ void SPDesktop::setTempHideOverlays(bool hide)
         if (_saved_guides_visible) {
             namedview->temporarily_show_guides(false);
         }
-        if (canvas && !canvas->has_focus()) {
+        if (auto canvas = get_active_canvas(); canvas && !canvas->has_focus()) {
             canvas->grab_focus(); // Ensure we receive the key up event
         }
         _overlays_visible = false;
@@ -1176,7 +1184,7 @@ void SPDesktop::setTempHideOverlays(bool hide)
 // (De)Activate preview mode: hide overlays (grid, guides, etc) and crop content to page areas
 void SPDesktop::quick_preview(bool activate) {
     setTempHideOverlays(activate);
-    if (canvas) {
+    if (auto canvas = get_active_canvas()) {
         canvas->set_clip_to_page_mode(activate ? true : static_cast<bool>(namedview->clip_to_page));
     }
 }
@@ -1308,7 +1316,7 @@ void SPDesktop::disableInteraction()
 
 void SPDesktop::setWaitingCursor()
 {
-    auto window = canvas->get_window();
+    auto window = get_active_canvas()->get_window();
     if (!window) {
         return;
     }
@@ -1344,7 +1352,7 @@ SPDesktop::onResized (double /*x*/, double /*y*/)
  * Associate document with desktop.
  */
 void
-SPDesktop::setDocument (SPDocument *doc)
+SPDesktop::setDocument(SPDocument *doc, int idx)
 {
     if (!doc) return;
 
@@ -1359,13 +1367,14 @@ SPDesktop::setDocument (SPDocument *doc)
     /// inside is NOT called on initialization, only on replacement. But there
     /// are surely more safe methods to accomplish this.
     // TODO since the comment had reversed logic, check the intent of this block of code:
-    if (canvas_drawing) {
+
+    if (auto canvas_drawing = _canvas_drawing_all[idx]) {
 
         namedview = doc->getNamedView();
         namedview->viewcount++;
 
         Inkscape::DrawingItem *drawing_item = doc->getRoot()->invoke_show(
-            *(canvas_drawing->get_drawing()),
+            *canvas_drawing->get_drawing(),
             dkey,
             SP_ITEM_SHOW_DISPLAY);
         if (drawing_item) {

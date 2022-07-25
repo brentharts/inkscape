@@ -20,6 +20,7 @@
 #endif
 
 #include <cstddef>
+#include <set>
 #include <2geom/point.h>
 #include <sigc++/connection.h>
 #include <gtkmm.h>
@@ -78,8 +79,8 @@ public:
     SPDesktopWidget(InkscapeWindow *inkscape_window, SPDocument *document);
     ~SPDesktopWidget() override;
 
-    Inkscape::UI::Widget::CanvasGrid *get_canvas_grid() { return _canvas_grid; }  // Temp, I hope!
-    Inkscape::UI::Widget::Canvas     *get_canvas()      { return _canvas; }
+    std::vector<Inkscape::UI::Widget::CanvasGrid*> get_canvas_grid_page() { return _canvas_grid_page; }
+    std::vector<Inkscape::UI::Widget::Canvas*>     get_canvas_page()      { return _canvas_page; }
 
     Gio::ActionMap* get_action_map();
 
@@ -144,16 +145,39 @@ private:
 
     Inkscape::UI::Widget::SelectedStyle *_selected_style;
 
-    /** A grid for display the canvas, rulers, and scrollbars. */
-    Inkscape::UI::Widget::CanvasGrid *_canvas_grid;
+    /* Tab Notebook */
+    Gtk::Notebook   *_tab_note;
+    Gtk::Widget     *_tab_notebook;
+    Gtk::Menu       _menu;
+    std::set<int>   _active_idx;
+    bool _tab_operation = false;
+
+    Gtk::Widget *create_notebook_tab(Glib::ustring label);
+    void set_page(int idx);
+    bool on_tab_click_event(GdkEventButton *event, Gtk::Widget *page, int idx);
+    void on_close_button_click_event(Gtk::Widget *page, int idx);
+    void add_close_tab_callback(Gtk::Widget *tab, Gtk::Widget *page, int idx);
 
     unsigned int _interaction_disabled_counter = 0;
 
 public:
+    void add_new_tab_with_template();
+    void add_new_tab_open();
+    void add_new_tab(bool after = false);
+    void set_document_name(SPDocument *doc);
+    void add_new_tab_with_document(SPDocument *document);
+    bool is_tab_operation() { return _tab_operation; }
+    void close_all_tabs();
+
+    std::vector<Inkscape::UI::Widget::CanvasGrid*> _canvas_grid_page;
+    std::vector<Inkscape::UI::Widget::Canvas*> _canvas_page;
+    std::vector<Gtk::Widget*> _page_data;
+    std::vector<Gtk::Widget*> _tab_data;
+
+    Geom::Point _ruler_origin;
     double _dt2r;
 
 private:
-    Inkscape::UI::Widget::Canvas *_canvas = nullptr;
     std::vector<sigc::connection> _connections;
     Inkscape::PrefObserver _statusbar_preferences_observer;
     Inkscape::UI::Widget::LayerSelector* _layer_selector;

@@ -164,7 +164,7 @@ Geom::Point calcAngleDisplayAnchor(SPDesktop *desktop, double angle, double base
 
     // We now have the ideal position, but need to see if it will fit/work.
 
-    Geom::Rect screen_world = desktop->getCanvas()->get_area_world();
+    Geom::Rect screen_world = desktop->get_active_canvas()->get_area_world();
     if (screen_world.interiorContains(desktop->d2w(startPoint)) ||
         screen_world.interiorContains(desktop->d2w(endPoint))) {
         screen_world.expandBy(fontsize * -3, fontsize / -2);

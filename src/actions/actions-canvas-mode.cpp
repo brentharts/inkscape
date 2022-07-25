@@ -46,8 +46,10 @@ canvas_set_display_mode(Inkscape::RenderMode value, InkscapeWindow *win, Glib::R
     pref->setInt("/options/displaymode", (int)value);
 
     SPDesktop* dt = win->get_desktop();
-    auto canvas = dt->getCanvas();
-    canvas->set_render_mode(Inkscape::RenderMode(value));
+
+    for (auto canvas : dt->_canvas_all) {
+        canvas->set_render_mode(Inkscape::RenderMode(value));
+    }
 }
 
 /**
@@ -171,8 +173,10 @@ canvas_split_mode(int value, InkscapeWindow *win)
     saction->change_state(value);
 
     SPDesktop* dt = win->get_desktop();
-    auto canvas = dt->getCanvas();
-    canvas->set_split_mode(Inkscape::SplitMode(value));
+
+    for (auto canvas : dt->_canvas_all) {
+        canvas->set_split_mode(Inkscape::SplitMode(value));
+    }
 }
 
 /**
@@ -223,8 +227,10 @@ canvas_color_mode_toggle(InkscapeWindow *win)
     }
 
     SPDesktop* dt = win->get_desktop();
-    auto canvas = dt->getCanvas();
-    canvas->set_color_mode(state ? Inkscape::ColorMode::GRAYSCALE : Inkscape::ColorMode::NORMAL);
+
+    for (auto canvas : dt->_canvas_all) {
+        canvas->set_color_mode(state ? Inkscape::ColorMode::GRAYSCALE : Inkscape::ColorMode::NORMAL);
+    }
 }
 
 
@@ -256,9 +262,11 @@ canvas_color_manage_toggle(InkscapeWindow *win)
     pref->setBool("/options/displayprofile/enable", state);
 
     SPDesktop* dt = win->get_desktop();
-    auto canvas = dt->getCanvas();
-    canvas->set_cms_active(state);
-    canvas->redraw_all();
+
+    for (auto canvas : dt->_canvas_all) {
+        canvas->set_cms_active(state);
+        canvas->redraw_all();
+    }
 }
 
 std::vector<std::vector<Glib::ustring>> raw_data_canvas_mode =
@@ -294,9 +302,10 @@ add_actions_canvas_mode(InkscapeWindow* win)
 
     SPDesktop* dt = win->get_desktop();
     if (dt) {
-        auto canvas = dt->getCanvas();
-        canvas->set_render_mode(Inkscape::RenderMode(display_mode));
-        canvas->set_cms_active(color_manage);
+        for (auto canvas : dt->_canvas_all) {
+            canvas->set_render_mode(Inkscape::RenderMode(display_mode));
+            canvas->set_cms_active(color_manage);
+        }
     } else {
         show_output("add_actions_canvas_mode: no desktop!");
     }

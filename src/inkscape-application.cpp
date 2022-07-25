@@ -447,6 +447,14 @@ InkscapeApplication::get_documents()
 InkscapeWindow*
 InkscapeApplication::window_open(SPDocument* document)
 {
+    if (auto window = get_active_window()) {
+        auto desktop_widget = window->get_desktop()->get_desktop_widget();
+        if (desktop_widget->is_tab_operation()) {
+            desktop_widget->add_new_tab_with_document(document);
+            return window;
+        }
+    }
+
     // Once we've removed Inkscape::Application (separating GUI from non-GUI stuff)
     // it will be more easy to start up the GUI after-the-fact. Until then, prevent
     // opening a window if GUI not selected at start-up time.

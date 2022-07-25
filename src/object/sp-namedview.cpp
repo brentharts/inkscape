@@ -169,16 +169,18 @@ void SPNamedView::release() {
 
 void SPNamedView::set_clip_to_page(SPDesktop* desktop, bool enable) {
     if (desktop) {
-        desktop->getCanvas()->set_clip_to_page_mode(enable);
+        desktop->get_active_canvas()->set_clip_to_page_mode(enable);
     }
 }
 
 void SPNamedView::set_desk_color(SPDesktop* desktop) {
     if (desktop) {
-        if (desk_checkerboard) {
-            desktop->getCanvas()->set_desk(desk_color);
-        } else {
-            desktop->getCanvas()->set_desk(desk_color | 0xff);
+        for (auto canvas : desktop->getCanvasAll()) {
+            if (desk_checkerboard) {
+                canvas->set_desk(desk_color);
+            } else {
+                canvas->set_desk(desk_color | 0xff);
+            }
         }
         // Update pages, who's colours sometimes change whe the desk color changes.
         document->getPageManager().setDefaultAttributes(_viewport);
@@ -210,7 +212,9 @@ void SPNamedView::modified(unsigned int flags)
         set_desk_color(desktop);
         set_clip_to_page(desktop, clip_to_page);
         if (desktop) {
-            desktop->getCanvas()->set_antialiasing_enabled(antialias_rendering);
+            for (auto canvas : desktop->getCanvasAll()) {
+                canvas->set_antialiasing_enabled(antialias_rendering);
+            }
         }
     }
 
@@ -471,7 +475,7 @@ void SPNamedView::child_added(Inkscape::XML::Node *child, Inkscape::XML::Node *r
                     g->SPGuide::showSPGuide(view->getCanvasGuides());
 
                     if (view->guides_active) {
-                        g->sensitize(view->getCanvas(), TRUE);
+                        g->sensitize(view->get_active_canvas(), TRUE);
                     }
 
                     this->setShowGuideSingle(g);
@@ -537,7 +541,7 @@ void SPNamedView::show(SPDesktop *desktop)
         guide->showSPGuide( desktop->getCanvasGuides() );
 
         if (desktop->guides_active) {
-            guide->sensitize(desktop->getCanvas(), TRUE);
+            guide->sensitize(desktop->get_active_canvas(), TRUE);
         }
         this->setShowGuideSingle(guide);
     }
@@ -725,19 +729,19 @@ void sp_namedview_document_from_window(SPDesktop *desktop)
     view->setAttribute("inkscape:current-layer", desktop->layerManager().currentLayer()->getId());
 }
 
-void SPNamedView::hide(SPDesktop const *desktop)
+void SPNamedView::hide(SPDesktop *desktop)
 {
     g_assert(desktop != nullptr);
     g_assert(std::find(views.begin(),views.end(),desktop)!=views.end());
     for (auto guide : guides) {
-        guide->hideSPGuide(desktop->getCanvas());
+        guide->hideSPGuide(desktop->get_active_canvas());
     }
     for (auto grid : grids) {
         grid->hide(desktop);
     }
-    _viewport->remove(desktop->getCanvas());
+    _viewport->remove(desktop->get_active_canvas());
     for (auto page : document->getPageManager().getPages()) {
-        page->hidePage(desktop->getCanvas());
+        page->hidePage(desktop->get_active_canvas());
     }
     views.erase(std::remove(views.begin(),views.end(),desktop),views.end());
 }
@@ -773,7 +777,7 @@ void SPNamedView::activateGuides(void* desktop, bool active)
 
     SPDesktop *dt = static_cast<SPDesktop*>(desktop);
     for(auto & guide : this->guides) {
-        guide->sensitize(dt->getCanvas(), active);
+        guide->sensitize(dt->get_active_canvas(), active);
     }
 }
 
@@ -900,7 +904,9 @@ void SPNamedView::updateGuides()
 
         for (auto desktop : views) {
             auto dt_widget = desktop->getDesktopWidget();
-            dt_widget->get_canvas_grid()->GetGuideLock()->set_active(is_locked);
+            // FIXME: Put back
+            (void)dt_widget;
+            // dt_widget->get_canvas_grid()->GetGuideLock()->set_active(is_locked);
         }
     }
 

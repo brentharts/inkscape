@@ -33,6 +33,7 @@
 #include "actions/actions-node-align.h" // Node alignment.
 #include "actions/actions-paths.h"  // TEMP
 #include "actions/actions-selection-window.h"
+#include "actions/actions-tab-structure.h"
 #include "actions/actions-tools.h"
 #include "actions/actions-view-mode.h"
 #include "actions/actions-view-window.h"
@@ -112,6 +113,7 @@ InkscapeWindow::InkscapeWindow(SPDocument* document)
     add_actions_node_align(this);           // Actions to align and distribute nodes (requiring Node tool).
     add_actions_path(this);                 // Actions for paths. TEMP
     add_actions_select_window(this);        // Actions with desktop selection
+    add_actions_tab_structure(this);        // Actions for Tab Structure.
     add_actions_tools(this);                // Actions to switch between tools.
     add_actions_view_mode(this);            // Actions to change how Inkscape canvas is displayed.
     add_actions_view_window(this);          // Actions to add/change window of Inkscape

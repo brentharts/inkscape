@@ -374,6 +374,11 @@ CanvasGrid::on_size_allocate(Gtk::Allocation& allocation)
     }
 }
 
+void CanvasGrid::set_canvas_drawing(Inkscape::CanvasItemDrawing *canvas_drawing)
+{
+    this->canvas_drawing = canvas_drawing;
+}
+
 // TODO Add actions so we can set shortcuts.
 // * Sticky Zoom
 // * CMS Adjust

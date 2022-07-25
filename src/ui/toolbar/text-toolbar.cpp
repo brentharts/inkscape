@@ -325,7 +325,7 @@ TextToolbar::TextToolbar(SPDesktop *desktop)
                                                                50,                // Extra list width
                                                                (gpointer)font_lister_cell_data_func2, // Cell layout
                                                                (gpointer)font_lister_separator_func2,
-                                                               GTK_WIDGET(desktop->getCanvas()->gobj()))); // Focus widget
+                                                               GTK_WIDGET(desktop->get_active_canvas()->gobj()))); // Focus widget
         _font_family_item->popup_enable(); // Enable entry completion
         gchar *const info = _("Select all text with this font-family");
         _font_family_item->set_info( info ); // Show selection icon
@@ -369,7 +369,7 @@ TextToolbar::TextToolbar(SPDesktop *desktop)
                                                                0,      // Extra list width
                                                                nullptr,   // Cell layout
                                                                nullptr,   // Separator
-                                                               GTK_WIDGET(desktop->getCanvas()->gobj()))); // Focus widget
+                                                               GTK_WIDGET(desktop->get_active_canvas()->gobj()))); // Focus widget
 
         _font_style_item->signal_changed().connect([=](){ fontstyle_value_changed(); });
         _font_style_item->focus_on_click(false);
@@ -399,7 +399,7 @@ TextToolbar::TextToolbar(SPDesktop *desktop)
                                                                0,      // Extra list width
                                                                nullptr,   // Cell layout
                                                                nullptr,   // Separator
-                                                               GTK_WIDGET(desktop->getCanvas()->gobj()))); // Focus widget
+                                                               GTK_WIDGET(desktop->get_active_canvas()->gobj()))); // Focus widget
 
         _font_size_item->signal_changed().connect([=](){ fontsize_value_changed(); });
         _font_size_item->focus_on_click(false);
@@ -424,7 +424,7 @@ TextToolbar::TextToolbar(SPDesktop *desktop)
             Gtk::manage(new UI::Widget::SpinButtonToolItem("text-line-height", "", _line_height_adj, 0.1, 2));
         _line_height_item->set_tooltip_text(_("Spacing between baselines"));
         _line_height_item->set_custom_numeric_menu_data(values, labels);
-        _line_height_item->set_focus_widget(desktop->getCanvas());
+        _line_height_item->set_focus_widget(desktop->get_active_canvas());
         _line_height_adj->signal_value_changed().connect([=](){ lineheight_value_changed(); });
         //_tracker->addAdjustment(_line_height_adj->gobj()); // (Alex V) Why is this commented out?
         _line_height_item->set_sensitive(true);
@@ -539,7 +539,7 @@ TextToolbar::TextToolbar(SPDesktop *desktop)
         _letter_spacing_item = Gtk::manage(new UI::Widget::SpinButtonToolItem("text-letter-spacing", _("Letter:"), _letter_spacing_adj, 0.1, 2));
         _letter_spacing_item->set_tooltip_text(_("Spacing between letters (px)"));
         _letter_spacing_item->set_custom_numeric_menu_data(values, labels);
-        _letter_spacing_item->set_focus_widget(desktop->getCanvas());
+        _letter_spacing_item->set_focus_widget(desktop->get_active_canvas());
         _letter_spacing_adj->signal_value_changed().connect(sigc::mem_fun(*this, &TextToolbar::letterspacing_value_changed));
         _letter_spacing_item->set_sensitive(true);
         _letter_spacing_item->set_icon(INKSCAPE_ICON("text_letter_spacing"));
@@ -557,7 +557,7 @@ TextToolbar::TextToolbar(SPDesktop *desktop)
         _word_spacing_item = Gtk::manage(new UI::Widget::SpinButtonToolItem("text-word-spacing", _("Word:"), _word_spacing_adj, 0.1, 2));
         _word_spacing_item->set_tooltip_text(_("Spacing between words (px)"));
         _word_spacing_item->set_custom_numeric_menu_data(values, labels);
-        _word_spacing_item->set_focus_widget(desktop->getCanvas());
+        _word_spacing_item->set_focus_widget(desktop->get_active_canvas());
         _word_spacing_adj->signal_value_changed().connect(sigc::mem_fun(*this, &TextToolbar::wordspacing_value_changed));
         _word_spacing_item->set_sensitive(true);
         _word_spacing_item->set_icon(INKSCAPE_ICON("text_word_spacing"));
@@ -574,7 +574,7 @@ TextToolbar::TextToolbar(SPDesktop *desktop)
         _dx_item = Gtk::manage(new UI::Widget::SpinButtonToolItem("text-dx", _("Kern:"), _dx_adj, 0.1, 2));
         _dx_item->set_custom_numeric_menu_data(values);
         _dx_item->set_tooltip_text(_("Horizontal kerning (px)"));
-        _dx_item->set_focus_widget(desktop->getCanvas());
+        _dx_item->set_focus_widget(desktop->get_active_canvas());
         _dx_adj->signal_value_changed().connect(sigc::mem_fun(*this, &TextToolbar::dx_value_changed));
         _dx_item->set_sensitive(true);
         _dx_item->set_icon(INKSCAPE_ICON("text_horz_kern"));
@@ -591,7 +591,7 @@ TextToolbar::TextToolbar(SPDesktop *desktop)
         _dy_item = Gtk::manage(new UI::Widget::SpinButtonToolItem("text-dy", _("Vert:"), _dy_adj, 0.1, 2));
         _dy_item->set_tooltip_text(_("Vertical kerning (px)"));
         _dy_item->set_custom_numeric_menu_data(values);
-        _dy_item->set_focus_widget(desktop->getCanvas());
+        _dy_item->set_focus_widget(desktop->get_active_canvas());
         _dy_adj->signal_value_changed().connect(sigc::mem_fun(*this, &TextToolbar::dy_value_changed));
         _dy_item->set_sensitive(true);
         _dy_item->set_icon(INKSCAPE_ICON("text_vert_kern"));
@@ -607,7 +607,7 @@ TextToolbar::TextToolbar(SPDesktop *desktop)
         _rotation_item = Gtk::manage(new UI::Widget::SpinButtonToolItem("text-rotation", _("Rot:"), _rotation_adj, 0.1, 2));
         _rotation_item->set_tooltip_text(_("Character rotation (degrees)"));
         _rotation_item->set_custom_numeric_menu_data(values);
-        _rotation_item->set_focus_widget(desktop->getCanvas());
+        _rotation_item->set_focus_widget(desktop->get_active_canvas());
         _rotation_adj->signal_value_changed().connect(sigc::mem_fun(*this, &TextToolbar::rotation_value_changed));
         _rotation_item->set_sensitive();
         _rotation_item->set_icon(INKSCAPE_ICON("text_rotation"));
@@ -1147,9 +1147,7 @@ TextToolbar::align_mode_changed(int mode)
         DocumentUndo::done(_desktop->getDocument(), _("Text: Change alignment"), INKSCAPE_ICON("draw-text"));
     }
     sp_repr_css_attr_unref (css);
-
-    desktop->getCanvas()->grab_focus();
-
+    desktop->get_active_canvas()->grab_focus();
     _freeze = false;
 }
 
@@ -1188,9 +1186,7 @@ TextToolbar::writing_mode_changed(int mode)
         DocumentUndo::done(_desktop->getDocument(), _("Text: Change writing mode"), INKSCAPE_ICON("draw-text"));
     }
     sp_repr_css_attr_unref (css);
-
-    _desktop->getCanvas()->grab_focus();
-
+    _desktop->get_active_canvas()->grab_focus();
     _freeze = false;
 }
 
@@ -1229,7 +1225,7 @@ TextToolbar::orientation_changed(int mode)
         DocumentUndo::done(_desktop->getDocument(), _("Text: Change orientation"), INKSCAPE_ICON("draw-text"));
     }
     sp_repr_css_attr_unref (css);
-    _desktop->canvas->grab_focus();
+    _desktop->get_active_canvas()->grab_focus();
 
     _freeze = false;
 }
@@ -1263,9 +1259,7 @@ TextToolbar::direction_changed(int mode)
         DocumentUndo::done(_desktop->getDocument(), _("Text: Change direction"), INKSCAPE_ICON("draw-text"));
     }
     sp_repr_css_attr_unref (css);
-
-    _desktop->getCanvas()->grab_focus();
-
+    _desktop->get_active_canvas()->grab_focus();
     _freeze = false;
 }
 

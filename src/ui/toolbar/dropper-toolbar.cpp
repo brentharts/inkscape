@@ -46,14 +46,14 @@ void DropperToolbar::on_pick_alpha_button_toggled()
     prefs->setInt( "/tools/dropper/pick", active );
 
     _set_alpha_button->set_sensitive(active);
-    _desktop->canvas->grab_focus();
+    _desktop->get_active_canvas()->grab_focus();
 }
 
 void DropperToolbar::on_set_alpha_button_toggled()
 {
     auto prefs = Inkscape::Preferences::get();
     prefs->setBool( "/tools/dropper/setalpha", _set_alpha_button->get_active( ) );
-    _desktop->canvas->grab_focus();
+    _desktop->get_active_canvas()->grab_focus();
 }
 
 /*

@@ -337,7 +337,7 @@ void sp_knot_handler_request_position(GdkEvent *event, SPKnot *knot) {
     Geom::Point p = motion_dt - knot->grabbed_rel_pos;
 
     knot->requestPosition(p, event->motion.state);
-    knot->desktop->getCanvas()->enable_autoscroll();
+    knot->desktop->get_active_canvas()->enable_autoscroll();
     knot->desktop->set_coordinate_status(knot->pos); // display the coordinate of knot, not cursor - they may be different!
 
     if (event->motion.state & GDK_BUTTON1_MASK) {

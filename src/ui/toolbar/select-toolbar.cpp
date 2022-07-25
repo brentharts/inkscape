@@ -203,7 +203,7 @@ SelectToolbar::SelectToolbar(SPDesktop *desktop) :
                                                                 _adj_x,
                                                                 SPIN_STEP, 3));
     x_btn->get_spin_button()->addUnitTracker(_tracker.get());
-    x_btn->set_focus_widget(_desktop->getCanvas());
+    x_btn->set_focus_widget(_desktop->get_active_canvas());
     x_btn->set_all_tooltip_text(C_("Select toolbar", "Horizontal coordinate of selection"));
     _context_items.push_back(x_btn);
     add(*x_btn);
@@ -219,7 +219,7 @@ SelectToolbar::SelectToolbar(SPDesktop *desktop) :
                                                                 _adj_y,
                                                                 SPIN_STEP, 3));
     y_btn->get_spin_button()->addUnitTracker(_tracker.get());
-    y_btn->set_focus_widget(_desktop->getCanvas());
+    y_btn->set_focus_widget(_desktop->get_active_canvas());
     y_btn->set_all_tooltip_text(C_("Select toolbar", "Vertical coordinate of selection"));
     _context_items.push_back(y_btn);
     add(*y_btn);
@@ -235,7 +235,7 @@ SelectToolbar::SelectToolbar(SPDesktop *desktop) :
                                                                 _adj_w,
                                                                 SPIN_STEP, 3));
     w_btn->get_spin_button()->addUnitTracker(_tracker.get());
-    w_btn->set_focus_widget(_desktop->getCanvas());
+    w_btn->set_focus_widget(_desktop->get_active_canvas());
     w_btn->set_all_tooltip_text(C_("Select toolbar", "Width of selection"));
     _context_items.push_back(w_btn);
     add(*w_btn);
@@ -259,7 +259,7 @@ SelectToolbar::SelectToolbar(SPDesktop *desktop) :
                                                                 _adj_h,
                                                                 SPIN_STEP, 3));
     h_btn->get_spin_button()->addUnitTracker(_tracker.get());
-    h_btn->set_focus_widget(_desktop->getCanvas());
+    h_btn->set_focus_widget(_desktop->get_active_canvas());
     h_btn->set_all_tooltip_text(C_("Select toolbar", "Height of selection"));
     _context_items.push_back(h_btn);
     add(*h_btn);

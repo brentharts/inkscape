@@ -741,7 +741,7 @@ void DialogContainer::load_container_state(Glib::KeyFile *keyfile, bool include_
                     column->set_restored_width(width);
                 }
 
-                before_canvas ? active_columns->prepend(column) : active_columns->append(column);
+                before_canvas ? active_columns->append(column) : active_columns->prepend(column);
             }
 
             // Step 3.2.2: for each noteboook, load its dialogs

@@ -217,7 +217,7 @@ MeshToolbar::MeshToolbar(SPDesktop *desktop)
         auto row_item = Gtk::manage(new UI::Widget::SpinButtonToolItem("mesh-row", _("Rows:"), _row_adj, 1.0, 0));
         row_item->set_tooltip_text(_("Number of rows in new mesh"));
         row_item->set_custom_numeric_menu_data(values);
-        row_item->set_focus_widget(desktop->canvas);
+        row_item->set_focus_widget(desktop->get_active_canvas());
         _row_adj->signal_value_changed().connect(sigc::mem_fun(*this, &MeshToolbar::row_changed));
         add(*row_item);
         row_item->set_sensitive(true);
@@ -231,7 +231,7 @@ MeshToolbar::MeshToolbar(SPDesktop *desktop)
         auto col_item = Gtk::manage(new UI::Widget::SpinButtonToolItem("mesh-col", _("Columns:"), _col_adj, 1.0, 0));
         col_item->set_tooltip_text(_("Number of columns in new mesh"));
         col_item->set_custom_numeric_menu_data(values);
-        col_item->set_focus_widget(desktop->canvas);
+        col_item->set_focus_widget(desktop->get_active_canvas());
         _col_adj->signal_value_changed().connect(sigc::mem_fun(*this, &MeshToolbar::col_changed));
         add(*col_item);
         col_item->set_sensitive(true);
