@@ -1165,7 +1165,9 @@ void SPDesktop::setTempHideOverlays(bool hide)
         canvas_group_controls->hide();
         canvas_group_grids->hide();
         _saved_guides_visible = namedview->getShowGuides();
-        namedview->setShowGuides(false);
+        if (_saved_guides_visible) {
+            namedview->temporarily_show_guides(false);
+        }
         if (canvas && !canvas->has_focus()) {
             canvas->grab_focus(); // Ensure we receive the key up event
             canvas->redraw_all();
@@ -1175,9 +1177,17 @@ void SPDesktop::setTempHideOverlays(bool hide)
         canvas_group_controls->show();
         showGrids(grids_visible, false);
         if (_saved_guides_visible) {
-            namedview->setShowGuides(true);
+            namedview->temporarily_show_guides(true);
         }
         _overlays_visible = true;
+    }
+}
+
+// (De)Activate preview mode: hide overlays (grid, guides, etc) and crop content to page areas
+void SPDesktop::quick_preview(bool activate) {
+    setTempHideOverlays(activate);
+    if (canvas) {
+        canvas->set_clip_to_page_mode(activate ? true : static_cast<bool>(namedview->clip_to_page));
     }
 }
 
@@ -1282,11 +1292,11 @@ void SPDesktop::emitToolSubselectionChangedEx(gpointer data, SPObject* object) {
     _tool_subselection_changed.emit(data, object);
 }
 
-sigc::connection SPDesktop::connectToolSubselectionChanged(const sigc::slot<void, gpointer>& slot) {
+sigc::connection SPDesktop::connectToolSubselectionChanged(const sigc::slot<void (gpointer)>& slot) {
     return _tool_subselection_changed.connect([=](gpointer ptr, SPObject*) { slot(ptr); });
 }
 
-sigc::connection SPDesktop::connectToolSubselectionChangedEx(const sigc::slot<void, gpointer, SPObject*>& slot) {
+sigc::connection SPDesktop::connectToolSubselectionChangedEx(const sigc::slot<void (gpointer, SPObject*)>& slot) {
     return _tool_subselection_changed.connect(slot);
 }
 
@@ -1514,15 +1524,15 @@ Geom::Point SPDesktop::dt2doc(Geom::Point const &p) const
     return p * dt2doc();
 }
 
-sigc::connection SPDesktop::connect_gradient_stop_selected(const sigc::slot<void, void*, SPStop*>& slot) {
+sigc::connection SPDesktop::connect_gradient_stop_selected(const sigc::slot<void (void*, SPStop*)>& slot) {
     return _gradient_stop_selected.connect(slot);
 }
 
-sigc::connection SPDesktop::connect_control_point_selected(const sigc::slot<void, void*, Inkscape::UI::ControlPointSelection*>& slot) {
+sigc::connection SPDesktop::connect_control_point_selected(const sigc::slot<void (void*, Inkscape::UI::ControlPointSelection*)>& slot) {
     return _control_point_selected.connect(slot);
 }
 
-sigc::connection SPDesktop::connect_text_cursor_moved(const sigc::slot<void, void*, Inkscape::UI::Tools::TextTool*>& slot) {
+sigc::connection SPDesktop::connect_text_cursor_moved(const sigc::slot<void (void*, Inkscape::UI::Tools::TextTool*)>& slot) {
     return _text_cursor_moved.connect(slot);
 }
 

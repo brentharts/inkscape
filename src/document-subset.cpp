@@ -121,9 +121,9 @@ struct DocumentSubset::Relations
     typedef std::map<SPObject *, Record> Map;
     Map records;
 
-    sigc::signal<void> changed_signal;
-    sigc::signal<void, SPObject *> added_signal;
-    sigc::signal<void, SPObject *> removed_signal;
+    sigc::signal<void ()> changed_signal;
+    sigc::signal<void (SPObject *)> added_signal;
+    sigc::signal<void (SPObject *)> removed_signal;
 
     Relations() { records[nullptr]; }
 
@@ -159,11 +159,11 @@ private:
         Record &record=records[obj];
         record.release_connection
           = obj->connectRelease(
-              sigc::mem_fun(this, &Relations::_release_object)
+              sigc::mem_fun(*this, &Relations::_release_object)
             );
         record.position_changed_connection
           = obj->connectPositionChanged(
-              sigc::mem_fun(this, &Relations::reorder)
+              sigc::mem_fun(*this, &Relations::reorder)
             );
         return record;
     }
@@ -373,17 +373,17 @@ SPObject *DocumentSubset::nthChildOf(SPObject *obj, unsigned n) const {
     return ( record ? record->children[n] : nullptr );
 }
 
-sigc::connection DocumentSubset::connectChanged(sigc::slot<void> slot) const {
+sigc::connection DocumentSubset::connectChanged(sigc::slot<void ()> slot) const {
     return _relations->changed_signal.connect(slot);
 }
 
 sigc::connection
-DocumentSubset::connectAdded(sigc::slot<void, SPObject *> slot) const {
+DocumentSubset::connectAdded(sigc::slot<void (SPObject *)> slot) const {
     return _relations->added_signal.connect(slot);
 }
 
 sigc::connection
-DocumentSubset::connectRemoved(sigc::slot<void, SPObject *> slot) const {
+DocumentSubset::connectRemoved(sigc::slot<void (SPObject *)> slot) const {
     return _relations->removed_signal.connect(slot);
 }
 

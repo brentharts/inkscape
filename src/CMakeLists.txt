@@ -146,6 +146,10 @@ set(inkscape_SRC
   page-manager.h
   path-chemistry.h
   path-prefix.h
+  pattern-manager.cpp
+  pattern-manager.h
+  pattern-manipulation.cpp
+  pattern-manipulation.h
   perspective-line.h
   preferences-skeleton.h
   preferences.h
@@ -270,6 +274,9 @@ set(inkscape_SRC
   inkview-application.cpp
   inkview-window.h
   inkview-window.cpp
+
+  manipulation/copy-resource.h
+  manipulation/copy-resource.cpp
 )
   
 # -----------------------------------------------------------------------------

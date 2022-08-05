@@ -430,6 +430,9 @@ void DocumentProperties::build_page()
             case PageProperties::Check::AntiAlias:
                 set_namedview_bool(_wr.desktop(), _("Toggle anti-aliasing"), SPAttr::SHAPE_RENDERING, checked);
                 break;
+            case PageProperties::Check::ClipToPage:
+                set_namedview_bool(_wr.desktop(), _("Toggle clipping to page mode"), SPAttr::INKSCAPE_CLIP_TO_PAGE_RENDERING, checked);
+                break;
         }
         _wr.setUpdating(false);
     });
@@ -666,7 +669,7 @@ void DocumentProperties::linked_profiles_list_button_release(GdkEventButton* eve
     }
 }
 
-void DocumentProperties::cms_create_popup_menu(Gtk::Widget& parent, sigc::slot<void> rem)
+void DocumentProperties::cms_create_popup_menu(Gtk::Widget& parent, sigc::slot<void ()> rem)
 {
     Gtk::MenuItem* mi = Gtk::manage(new Gtk::MenuItem(_("_Remove"), true));
     _EmbProfContextMenu.append(*mi);
@@ -676,7 +679,7 @@ void DocumentProperties::cms_create_popup_menu(Gtk::Widget& parent, sigc::slot<v
 }
 
 
-void DocumentProperties::external_create_popup_menu(Gtk::Widget& parent, sigc::slot<void> rem)
+void DocumentProperties::external_create_popup_menu(Gtk::Widget& parent, sigc::slot<void ()> rem)
 {
     Gtk::MenuItem* mi = Gtk::manage(new Gtk::MenuItem(_("_Remove"), true));
     _ExternalScriptsContextMenu.append(*mi);
@@ -685,7 +688,7 @@ void DocumentProperties::external_create_popup_menu(Gtk::Widget& parent, sigc::s
     _ExternalScriptsContextMenu.accelerate(parent);
 }
 
-void DocumentProperties::embedded_create_popup_menu(Gtk::Widget& parent, sigc::slot<void> rem)
+void DocumentProperties::embedded_create_popup_menu(Gtk::Widget& parent, sigc::slot<void ()> rem)
 {
     Gtk::MenuItem* mi = Gtk::manage(new Gtk::MenuItem(_("_Remove"), true));
     _EmbeddedScriptsContextMenu.append(*mi);
@@ -1504,6 +1507,7 @@ void DocumentProperties::update_widgets()
     _page->set_check(PageProperties::Check::Shadow, page_manager.shadow_show);
 
     _page->set_check(PageProperties::Check::AntiAlias, root->style->shape_rendering.computed != SP_CSS_SHAPE_RENDERING_CRISPEDGES);
+    _page->set_check(PageProperties::Check::ClipToPage, nv->clip_to_page);
 
     //-----------------------------------------------------------guide page
 

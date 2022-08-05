@@ -31,16 +31,12 @@ class SPHatchPath;
 class SPItem;
 
 namespace Inkscape {
-
 class Drawing;
 class DrawingPattern;
-
 namespace XML {
-
 class Node;
-
-}
-}
+} // namespace XML
+} // namespace Inkscape
 
 #define SP_HATCH(obj) (dynamic_cast<SPHatch *>((SPObject *)obj))
 #define SP_IS_HATCH(obj) (dynamic_cast<const SPHatch *>((SPObject *)obj) != NULL)
@@ -89,8 +85,8 @@ public:
 
     bool isValid() const override;
 
-    Inkscape::DrawingPattern *show(Inkscape::Drawing &drawing, unsigned int key, Geom::OptRect bbox) override;
-    void hide(unsigned int key) override;
+    Inkscape::DrawingPattern *show(Inkscape::Drawing &drawing, unsigned key, Geom::OptRect const &bbox) override;
+    void hide(unsigned key) override;
 
     RenderInfo calculateRenderInfo(unsigned key) const;
     Geom::Interval bounds() const;

@@ -55,7 +55,7 @@ SPHatch::SPHatch()
       _display()
 {
     ref = new SPHatchReference(this);
-    ref->changedSignal().connect(sigc::mem_fun(this, &SPHatch::_onRefChanged));
+    ref->changedSignal().connect(sigc::mem_fun(*this, &SPHatch::_onRefChanged));
 
     // TODO check that these should start already as unset:
     _x.unset();
@@ -340,7 +340,7 @@ void SPHatch::_onRefChanged(SPObject *old_ref, SPObject *ref)
 
     SPHatch *hatch = dynamic_cast<SPHatch *>(ref);
     if (hatch) {
-        _modified_connection = ref->connectModified(sigc::mem_fun(this, &SPHatch::_onRefModified));
+        _modified_connection = ref->connectModified(sigc::mem_fun(*this, &SPHatch::_onRefModified));
     }
 
     if (!_hasHatchPatchChildren(this)) {
@@ -562,7 +562,7 @@ bool SPHatch::isValid() const
     return valid;
 }
 
-Inkscape::DrawingPattern *SPHatch::show(Inkscape::Drawing &drawing, unsigned int key, Geom::OptRect bbox)
+Inkscape::DrawingPattern *SPHatch::show(Inkscape::Drawing &drawing, unsigned key, Geom::OptRect const &bbox)
 {
     Inkscape::DrawingPattern *ai = new Inkscape::DrawingPattern(drawing);
     _display.push_front({ai, bbox, key});

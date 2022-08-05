@@ -96,16 +96,16 @@ int ParamInt::set(int in)
 class ParamIntAdjustment : public Gtk::Adjustment {
     /** The parameter to adjust. */
     ParamInt *_pref;
-    sigc::signal<void> *_changeSignal;
+    sigc::signal<void ()> *_changeSignal;
 public:
     /** Make the adjustment using an extension and the string describing the parameter. */
-    ParamIntAdjustment(ParamInt *param, sigc::signal<void> *changeSignal)
+    ParamIntAdjustment(ParamInt *param, sigc::signal<void ()> *changeSignal)
         : Gtk::Adjustment(0.0, param->min(), param->max(), 1.0, 10.0, 0)
         , _pref(param)
         , _changeSignal(changeSignal)
     {
         this->set_value(_pref->get());
-        this->signal_value_changed().connect(sigc::mem_fun(this, &ParamIntAdjustment::val_changed));
+        this->signal_value_changed().connect(sigc::mem_fun(*this, &ParamIntAdjustment::val_changed));
     };
 
     void val_changed ();
@@ -131,7 +131,7 @@ void ParamIntAdjustment::val_changed()
  * Builds a hbox with a label and a int adjustment in it.
  */
 Gtk::Widget *
-ParamInt::get_widget(sigc::signal<void> *changeSignal)
+ParamInt::get_widget(sigc::signal<void ()> *changeSignal)
 {
     if (_hidden) {
         return nullptr;

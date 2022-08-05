@@ -445,6 +445,7 @@ SPCanvas {
     -GtkComboBox-appears-as-list: true;
 }
 
+#QuickActions,
 #StickyZoom ,#StickyZoom *,
 #LockGuides, #LockGuides *,
 #PreviewMode,#PreviewMode  *,
@@ -452,6 +453,9 @@ SPCanvas {
     padding: 0;
     min-height:3px;
     font-size:16px;
+}
+#QuickActions {
+    padding: 2px 0;
 }
 
 /* Keep palette scrollbar from generating warnings. */
@@ -525,6 +529,28 @@ SPCanvas {
 
 #UnicodeIconView {
     font-size: 16px;
+}
+
+#ObjectsTreeView.view:focus {
+    outline-style: double;
+    outline-width: 5px;
+    outline-color: alpha (@theme_fg_color, 0.1);
+    -gtk-outline-radius: 50%;
+}
+#ObjectsTreeView.view:hover {
+    border-color: alpha (@theme_fg_color, 0.1);
+    border-style: solid;
+    border-width: 1px 0px;
+}
+#ObjectsTreeView {
+    -GtkTreeView-expander-size: 12;
+    -GtkTreeView-horizontal-separator: 2;
+    -GtkTreeView-vertical-separator: 2;
+}
+#Objects .search {
+  padding: 2px 4px;
+  min-height: 16px;
+  font-size: small;
 }
 
 /* GtkTreeView: clarify drop locations (especially important for XML editor) */
@@ -653,6 +679,11 @@ stackswitcher button {
     padding: 4px;
 }
 
+/* slider with tighter margins */
+scale.tight-slider {
+    padding: 8px 4px 7px 4px;
+}
+
 /* add .small-marks class to Gtk::Scale to have smaller font used, since markup didn't work there */
 scale.small-marks.marks-after {
     font-size: small;
@@ -742,4 +773,16 @@ button.square-button image {
 }
 #ExportDialog #export_preview_batch {
     border: 1px solid;
+}
+
+.key {
+    border-radius: 3px;
+    background-color: alpha(@theme_fg_color, 0.15);
+    padding: 2px;
+}
+
+combobox.flat-combobox button {
+    border: none;
+    background-color: transparent;
+    background-image: image(transparent);
 }

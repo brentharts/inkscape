@@ -43,7 +43,9 @@ Inkscape::Pixbuf *sp_generate_internal_bitmap(SPDocument *document,
                                               Geom::Rect const &area,
                                               double dpi,
                                               std::vector<SPItem *> items,
-                                              bool opaque)
+                                              bool opaque,
+                                              unsigned int* checkerboard_color,
+                                              double device_scale)
 {
     // Geometry
     if (area.hasZeroArea()) {
@@ -95,8 +97,24 @@ Inkscape::Pixbuf *sp_generate_internal_bitmap(SPDocument *document,
     if (cairo_surface_status(surface) == CAIRO_STATUS_SUCCESS) {
         Inkscape::DrawingContext dc(surface, Geom::Point(0,0));
 
+        if (checkerboard_color) {
+            guint rgba = *checkerboard_color;
+            auto pattern = ink_cairo_pattern_create_checkerboard(rgba);
+            dc.save();
+            dc.transform(Geom::Scale(device_scale));
+            dc.setOperator(CAIRO_OPERATOR_SOURCE);
+            dc.setSource(pattern);
+            dc.paint();
+            dc.restore();
+            cairo_pattern_destroy(pattern);
+        }
+
         // render items
         drawing.render(dc, final_area, Inkscape::DrawingItem::RENDER_BYPASS_CACHE);
+
+        if (device_scale != 1.0) {
+            cairo_surface_set_device_scale(surface, device_scale, device_scale);
+        }
 
         pixbuf = new Inkscape::Pixbuf(surface);
 

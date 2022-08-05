@@ -114,20 +114,20 @@ void ParamPath::string_to_value(const std::string &in)
 class ParamPathEntry : public Gtk::Entry {
 private:
     ParamPath *_pref;
-    sigc::signal<void> *_changeSignal;
+    sigc::signal<void ()> *_changeSignal;
 public:
     /**
      * Build a string preference for the given parameter.
      * @param  pref  Where to get the string from, and where to put it
      *                when it changes.
      */
-    ParamPathEntry(ParamPath *pref, sigc::signal<void> *changeSignal)
+    ParamPathEntry(ParamPath *pref, sigc::signal<void ()> *changeSignal)
         : Gtk::Entry()
         , _pref(pref)
         , _changeSignal(changeSignal)
     {
         this->set_text(_pref->get());
-        this->signal_changed().connect(sigc::mem_fun(this, &ParamPathEntry::changed_text));
+        this->signal_changed().connect(sigc::mem_fun(*this, &ParamPathEntry::changed_text));
     };
     void changed_text();
 };
@@ -153,7 +153,7 @@ void ParamPathEntry::changed_text()
  *
  * Builds a hbox with a label and a text box in it.
  */
-Gtk::Widget *ParamPath::get_widget(sigc::signal<void> *changeSignal)
+Gtk::Widget *ParamPath::get_widget(sigc::signal<void ()> *changeSignal)
 {
     if (_hidden) {
         return nullptr;

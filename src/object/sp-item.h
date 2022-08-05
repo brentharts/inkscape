@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "sp-object.h"
+#include "sp-marker-loc.h"
 
 #include "xml/repr.h"
 
@@ -92,6 +93,16 @@ struct SPItemView
     Inkscape::DrawingItem *drawingitem;
 };
 
+enum SPItemKey
+{
+    ITEM_KEY_CLIP,
+    ITEM_KEY_MASK,
+    ITEM_KEY_FILL,
+    ITEM_KEY_STROKE,
+    ITEM_KEY_MARKERS,
+    ITEM_KEY_SIZE = ITEM_KEY_MARKERS + SP_MARKER_LOC_QTY
+};
+
 /* flags */
 
 #define SP_ITEM_BBOX_VISUAL 1
@@ -147,6 +158,10 @@ public:
     double transform_center_y;
     bool freeze_stroke_width;
 
+    // Used in the layers/objects dialog, this remembers if this item's
+    // children are visible in the expanded state in the tree.
+    bool _is_expanded = false;
+
     Geom::Affine transform;
     mutable Geom::OptRect doc_bbox;
     Geom::Rect viewport;  // Cache viewport information
@@ -169,7 +184,7 @@ public:
   public:
     std::vector<SPItemView> views;
 
-    sigc::signal<void, Geom::Affine const *, SPItem *> _transformed_signal;
+    sigc::signal<void (Geom::Affine const *, SPItem *)> _transformed_signal;
 
     bool isLocked() const;
     void setLocked(bool lock);
@@ -237,7 +252,7 @@ public:
      */
     void moveTo(SPItem *target, bool intoafter);
 
-    sigc::connection connectTransformed(sigc::slot<void, Geom::Affine const *, SPItem *> slot)  {
+    sigc::connection connectTransformed(sigc::slot<void (Geom::Affine const *, SPItem *)> slot)  {
         return _transformed_signal.connect(slot);
     }
 
@@ -328,7 +343,15 @@ public:
      * @return First allocated key; hence if the returned key is n
      * you can use n, n + 1, ..., n + (numkeys - 1)
      */
-    static unsigned int display_key_new(unsigned int numkeys);
+    static unsigned int display_key_new(unsigned numkeys);
+
+    /**
+     * Ensures that a drawing item's key is the first of a block of ITEM_KEY_SIZE keys,
+     * assigning it such a key if necessary.
+     *
+     * @return The value of di->key() after assignment.
+     */
+    static unsigned ensure_key(Inkscape::DrawingItem *di);
 
     Inkscape::DrawingItem *invoke_show(Inkscape::Drawing &drawing, unsigned int key, unsigned int flags);
 
@@ -406,6 +429,9 @@ public:
     Geom::Affine dt2i_affine() const;
 
     guint32 _highlightColor;
+
+    bool isExpanded() const { return _is_expanded; }
+    void setExpanded(bool expand) { _is_expanded = expand; }
 
 private:
     enum EvaluatedStatus

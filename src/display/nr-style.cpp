@@ -20,10 +20,7 @@
 
 void NRStyle::Paint::clear()
 {
-    if (server) {
-        sp_object_unref(server, nullptr);
-        server = nullptr;
-    }
+    server.reset();
     type = PAINT_NONE;
 }
 
@@ -39,8 +36,7 @@ void NRStyle::Paint::set(SPPaintServer *ps)
     clear();
     if (ps) {
         type = PAINT_SERVER;
-        server = ps;
-        sp_object_ref(server, nullptr);
+        server = ps->create_drawing_paintserver();
     }
 }
 
@@ -298,45 +294,62 @@ void NRStyle::set(SPStyle const *style, SPStyle const *context_style)
     update();
 }
 
-NRStyle::CairoPatternUniqPtr NRStyle::preparePaint(Inkscape::DrawingContext &dc, Geom::OptRect const &paintbox, Inkscape::DrawingPattern *pattern, Paint &paint)
+void NRStyle::preparePaint(Inkscape::DrawingContext &dc, Geom::IntRect const &area, Geom::OptRect const &paintbox, Inkscape::DrawingPattern *pattern, Paint &paint, CairoPatternUniqPtr &cp)
 {
+    if (paint.type == PAINT_SERVER && pattern) {
+        // If a DrawingPattern, then always regenerate the pattern, because it may depend on 'area'.
+        // Even if not, regenerating the pattern is a no-op because DrawingPattern has a cache.
+        cp = CairoPatternUniqPtr(pattern->renderPattern(area, paint.opacity, dc.surface()->device_scale()));
+        return;
+    }
+
+    // Otherwise, re-use the cached pattern if it exists.
+    if (cp) {
+        return;
+    }
+
+    // Handle remaining non-DrawingPattern cases.
     switch (paint.type) {
         case PAINT_SERVER:
-            if (pattern) {
-                return CairoPatternUniqPtr(pattern->renderPattern(paint.opacity));
+            if (paint.server) {
+                cp = CairoPatternUniqPtr(paint.server->create_pattern(dc.raw(), paintbox, paint.opacity));
             } else {
-                return CairoPatternUniqPtr(paint.server->pattern_new(dc.raw(), paintbox, paint.opacity));
+                std::cerr << "Null pattern detected" << std::endl;
+                cp = CairoPatternUniqPtr(cairo_pattern_create_rgba(0, 0, 0, 0));
             }
+            break;
         case PAINT_COLOR: {
             auto const &c = paint.color.v.c;
-            return CairoPatternUniqPtr(cairo_pattern_create_rgba(c[0], c[1], c[2], paint.opacity));
+            cp = CairoPatternUniqPtr(cairo_pattern_create_rgba(c[0], c[1], c[2], paint.opacity));
+            break;
         }
         default:
-            return {};
+            cp.reset();
+            break;
     }
 }
 
-bool NRStyle::prepareFill(Inkscape::DrawingContext &dc, Geom::OptRect const &paintbox, Inkscape::DrawingPattern *pattern)
+bool NRStyle::prepareFill(Inkscape::DrawingContext &dc, Geom::IntRect const &area, Geom::OptRect const &paintbox, Inkscape::DrawingPattern *pattern)
 {
-    if (!fill_pattern) fill_pattern = preparePaint(dc, paintbox, pattern, fill);
+    preparePaint(dc, area, paintbox, pattern, fill, fill_pattern);
     return (bool)fill_pattern;
 }
 
-bool NRStyle::prepareStroke(Inkscape::DrawingContext &dc, Geom::OptRect const &paintbox, Inkscape::DrawingPattern *pattern)
+bool NRStyle::prepareStroke(Inkscape::DrawingContext &dc, Geom::IntRect const &area, Geom::OptRect const &paintbox, Inkscape::DrawingPattern *pattern)
 {
-    if (!stroke_pattern) stroke_pattern = preparePaint(dc, paintbox, pattern, stroke);
+    preparePaint(dc, area, paintbox, pattern, stroke, stroke_pattern);
     return (bool)stroke_pattern;
 }
 
-bool NRStyle::prepareTextDecorationFill(Inkscape::DrawingContext &dc, Geom::OptRect const &paintbox, Inkscape::DrawingPattern *pattern)
+bool NRStyle::prepareTextDecorationFill(Inkscape::DrawingContext &dc, Geom::IntRect const &area, Geom::OptRect const &paintbox, Inkscape::DrawingPattern *pattern)
 {
-    if (!text_decoration_fill_pattern) text_decoration_fill_pattern = preparePaint(dc, paintbox, pattern, text_decoration_fill);
+    preparePaint(dc, area, paintbox, pattern, text_decoration_fill, text_decoration_fill_pattern);
     return (bool)text_decoration_fill_pattern;
 }
 
-bool NRStyle::prepareTextDecorationStroke(Inkscape::DrawingContext &dc, Geom::OptRect const &paintbox, Inkscape::DrawingPattern *pattern)
+bool NRStyle::prepareTextDecorationStroke(Inkscape::DrawingContext &dc, Geom::IntRect const &area, Geom::OptRect const &paintbox, Inkscape::DrawingPattern *pattern)
 {
-    if (!text_decoration_stroke_pattern) text_decoration_stroke_pattern = preparePaint(dc, paintbox, pattern, text_decoration_stroke);
+    preparePaint(dc, area, paintbox, pattern, text_decoration_stroke, text_decoration_stroke_pattern);
     return (bool)text_decoration_stroke_pattern;
 }
 

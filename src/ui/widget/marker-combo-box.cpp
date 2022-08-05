@@ -24,6 +24,7 @@
 #include "helper/stock-items.h"
 #include "io/resource.h"
 #include "io/sys.h"
+#include "manipulation/copy-resource.h"
 #include "object/sp-defs.h"
 #include "object/sp-marker.h"
 #include "object/sp-root.h"
@@ -271,8 +272,6 @@ void MarkerComboBox::update_widgets_from_marker(SPMarker* marker) {
     _input_grid.set_sensitive(marker != nullptr);
 
     if (marker) {
-        marker->updateRepr();
-
         _scale_x.set_value(get_attrib_num(marker, "markerWidth"));
         _scale_y.set_value(get_attrib_num(marker, "markerHeight"));
         auto units = get_attrib(marker, "markerUnits");
@@ -500,10 +499,6 @@ void MarkerComboBox::refresh_after_markers_modified() {
     if (_update.pending()) return;
 
     auto scoped(_update.block());
-
-    // collect orphaned markers, so they are not listed; if they are listed then
-    // they disappear upon selection leaving dangling URLs
-    if (_document) _document->collectOrphans();
 
     /*
      * Seems to be no way to get notified of changes just to markers,

@@ -37,6 +37,7 @@
 #include "display/drawing.h"
 #include "display/curve.h"
 #include "display/cairo-utils.h"
+#include "display/drawing-paintserver.h"
 
 #include "object/sp-item.h"
 #include "object/sp-item-group.h"
@@ -1124,7 +1125,7 @@ CairoRenderContext::_createPatternPainter(SPPaintServer const *const paintserver
 {
     g_assert( SP_IS_PATTERN(paintserver) );
 
-    SPPattern *pat = SP_PATTERN (paintserver);
+    SPPattern *pat = const_cast<SPPattern*>(SP_PATTERN(paintserver));
 
     Geom::Affine ps2user, pcs2dev;
     ps2user = Geom::identity();
@@ -1209,7 +1210,7 @@ CairoRenderContext::_createPatternPainter(SPPaintServer const *const paintserver
     unsigned dkey = SPItem::display_key_new(1);
 
     // show items and render them
-    for (SPPattern *pat_i = pat; pat_i != nullptr; pat_i = pat_i->ref ? pat_i->ref->getObject() : nullptr) {
+    for (SPPattern *pat_i = pat; pat_i != nullptr; pat_i = pat_i->ref.getObject()) {
         if (pat_i && pattern_hasItemChildren(pat_i)) { // find the first one with item children
             for (auto& child: pat_i->children) {
                 if (SP_IS_ITEM(&child)) {
@@ -1238,7 +1239,7 @@ CairoRenderContext::_createPatternPainter(SPPaintServer const *const paintserver
     delete pattern_ctx;
 
     // hide all items
-    for (SPPattern *pat_i = pat; pat_i != nullptr; pat_i = pat_i->ref ? pat_i->ref->getObject() : nullptr) {
+    for (SPPattern *pat_i = pat; pat_i != nullptr; pat_i = pat_i->ref.getObject()) {
         if (pat_i && pattern_hasItemChildren(pat_i)) { // find the first one with item children
             for (auto& child: pat_i->children) {
                 if (SP_IS_ITEM(&child)) {
@@ -1380,7 +1381,7 @@ CairoRenderContext::_createPatternForPaintServer(SPPaintServer const *const pain
             cairo_pattern_add_color_stop_rgba(pattern, rg->vector.stops[i].offset, rgb[0], rgb[1], rgb[2], rg->vector.stops[i].opacity * alpha);
         }
     } else if (auto mg = dynamic_cast<SPMeshGradient *>(paintserver_mutable)) {
-        pattern = mg->pattern_new(_cr, pbox, 1.0);
+        pattern = mg->create_drawing_paintserver()->create_pattern(_cr, pbox, 1.0);
     } else if (SP_IS_PATTERN (paintserver)) {
         pattern = _createPatternPainter(paintserver, pbox);
     } else if ( dynamic_cast<SPHatch const *>(paintserver) ) {
