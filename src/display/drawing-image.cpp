@@ -23,45 +23,40 @@ namespace Inkscape {
 
 DrawingImage::DrawingImage(Drawing &drawing)
     : DrawingItem(drawing)
+    , style_image_rendering(SP_CSS_IMAGE_RENDERING_AUTO)
     , _pixbuf(nullptr)
-{}
+{
+}
 
 DrawingImage::~DrawingImage()
 {
-    // _pixbuf is owned by SPImage - do not delete it
 }
 
-void
-DrawingImage::setPixbuf(Inkscape::Pixbuf *pb)
+void DrawingImage::setPixbuf(std::shared_ptr<Inkscape::Pixbuf const> pb)
 {
-    _pixbuf = pb;
-
+    _pixbuf = std::move(pb);
     _markForUpdate(STATE_ALL, false);
 }
 
-void
-DrawingImage::setScale(double sx, double sy)
+void DrawingImage::setScale(double sx, double sy)
 {
     _scale = Geom::Scale(sx, sy);
     _markForUpdate(STATE_ALL, false);
 }
 
-void
-DrawingImage::setOrigin(Geom::Point const &o)
+void DrawingImage::setOrigin(Geom::Point const &o)
 {
     _origin = o;
     _markForUpdate(STATE_ALL, false);
 }
 
-void
-DrawingImage::setClipbox(Geom::Rect const &box)
+void DrawingImage::setClipbox(Geom::Rect const &box)
 {
     _clipbox = box;
     _markForUpdate(STATE_ALL, false);
 }
 
-Geom::Rect
-DrawingImage::bounds() const
+Geom::Rect DrawingImage::bounds() const
 {
     if (!_pixbuf) return _clipbox;
 
@@ -77,8 +72,17 @@ DrawingImage::bounds() const
     return ret;
 }
 
-unsigned
-DrawingImage::_updateItem(Geom::IntRect const &, UpdateContext const &, unsigned, unsigned)
+void DrawingImage::setStyle(SPStyle const *style, SPStyle const *context_style)
+{
+    DrawingItem::setStyle(style, context_style);
+    if (_style) {
+        style_image_rendering = _style->image_rendering.computed;
+    } else {
+        style_image_rendering = SP_CSS_IMAGE_RENDERING_AUTO;
+    }
+}
+
+unsigned DrawingImage::_updateItem(Geom::IntRect const &, UpdateContext const &, unsigned, unsigned)
 {
     _markForRendering();
 
@@ -111,31 +115,32 @@ unsigned DrawingImage::_renderItem(DrawingContext &dc, Geom::IntRect const &/*ar
 
         dc.translate(_origin);
         dc.scale(_scale);
-        dc.setSource(_pixbuf->getSurfaceRaw(), 0, 0);
+        // const_cast required since Cairo needs to modify the internal refcount variable, but we do not want to give up the
+        // benefits of const for the rest of our code. The underlying object is guaranteed to be non-const, so this is well-defined.
+        // It is also thread-safe to modify the refcount in this way, since Cairo uses atomics internally.
+        dc.setSource(const_cast<cairo_surface_t*>(_pixbuf->getSurfaceRaw()), 0, 0);
         dc.patternSetExtend(CAIRO_EXTEND_PAD);
 
-        if (_style) {
-            // See: http://www.w3.org/TR/SVG/painting.html#ImageRenderingProperty
-            //      https://drafts.csswg.org/css-images-3/#the-image-rendering
-            //      style.h/style.cpp, cairo-render-context.cpp
-            //
-            // CSS 3 defines:
-            //   'optimizeSpeed' as alias for "pixelated"
-            //   'optimizeQuality' as alias for "smooth"
-            switch (_style->image_rendering.computed) {
-                case SP_CSS_IMAGE_RENDERING_OPTIMIZESPEED:
-                case SP_CSS_IMAGE_RENDERING_PIXELATED:
-                // we don't have an implementation for crisp-edges, but it should *not* smooth or blur
-                case SP_CSS_IMAGE_RENDERING_CRISPEDGES:
-                    dc.patternSetFilter( CAIRO_FILTER_NEAREST );
-                    break;
-                case SP_CSS_IMAGE_RENDERING_AUTO:
-                case SP_CSS_IMAGE_RENDERING_OPTIMIZEQUALITY:
-                default:
-                    // In recent Cairo, BEST used Lanczos3, which is prohibitively slow
-                    dc.patternSetFilter( CAIRO_FILTER_GOOD );
-                    break;
-            }
+        // See: http://www.w3.org/TR/SVG/painting.html#ImageRenderingProperty
+        //      https://drafts.csswg.org/css-images-3/#the-image-rendering
+        //      style.h/style.cpp, cairo-render-context.cpp
+        //
+        // CSS 3 defines:
+        //   'optimizeSpeed' as alias for "pixelated"
+        //   'optimizeQuality' as alias for "smooth"
+        switch (style_image_rendering) {
+            case SP_CSS_IMAGE_RENDERING_OPTIMIZESPEED:
+            case SP_CSS_IMAGE_RENDERING_PIXELATED:
+            // we don't have an implementation for crisp-edges, but it should *not* smooth or blur
+            case SP_CSS_IMAGE_RENDERING_CRISPEDGES:
+                dc.patternSetFilter( CAIRO_FILTER_NEAREST );
+                break;
+            case SP_CSS_IMAGE_RENDERING_AUTO:
+            case SP_CSS_IMAGE_RENDERING_OPTIMIZEQUALITY:
+            default:
+                // In recent Cairo, BEST used Lanczos3, which is prohibitively slow
+                dc.patternSetFilter( CAIRO_FILTER_GOOD );
+                break;
         }
 
         dc.paint(1);
@@ -205,7 +210,7 @@ DrawingImage::_pickItem(Geom::Point const &p, double delta, unsigned /*sticky*/)
         return nullptr;
 
     } else {
-        unsigned char *const pixels = _pixbuf->pixels();
+        auto pixels = _pixbuf->pixels();
         int width = _pixbuf->width();
         int height = _pixbuf->height();
         size_t rowstride = _pixbuf->rowstride();
@@ -224,7 +229,7 @@ DrawingImage::_pickItem(Geom::Point const &p, double delta, unsigned /*sticky*/)
         if ((ix < 0) || (iy < 0) || (ix >= width) || (iy >= height))
             return nullptr;
 
-        unsigned char *pix_ptr = pixels + iy * rowstride + ix * 4;
+        auto pix_ptr = pixels + iy * rowstride + ix * 4;
         // pick if the image is less than 99% transparent
         guint32 alpha = 0;
         if (_pixbuf->pixelFormat() == Inkscape::Pixbuf::PF_CAIRO) {

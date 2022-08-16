@@ -485,13 +485,16 @@ public:
     void createBitmapCopy();
     void setMask(bool apply_clip_path, bool apply_to_layer = false, bool skip_undo = false);
     void editMask(bool clip);
-    void unsetMask(const bool apply_clip_path, const bool skip_undo = false);
+    void unsetMask(const bool apply_clip_path, const bool skip_undo = false,
+                   const bool delete_helper_group = true);
     void setClipGroup();
     
     // moves
     // in selection-chemistry.cpp
     void removeLPE();
     void removeFilter();
+    void reapplyAffine();
+    void clearLastAffine();
     void applyAffine(Geom::Affine const &affine, bool set_i2d=true,bool compensate=true, bool adjust_transf_center=true);
     void removeTransform();
     void setScaleAbsolute(double, double, double, double);
@@ -546,6 +549,7 @@ private:
     void _disconnect(SPObject* object);
     std::map<SPObject *, SiblingState> _sibling_state;
 
+    Geom::Affine _last_affine;
 };
 
 typedef ObjectSet::SPItemRange SPItemRange;

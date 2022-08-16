@@ -449,7 +449,7 @@ Shortcuts::list_all_actions()
 
     std::vector<Glib::ustring> actions = app->list_actions();
     std::sort(actions.begin(), actions.end());
-    for (auto action : actions) {
+    for (auto const &action : actions) {
         all_actions.emplace_back("app." + action);
     }
 
@@ -458,7 +458,7 @@ Shortcuts::list_all_actions()
     if (window) {
         std::vector<Glib::ustring> actions = window->list_actions();
         std::sort(actions.begin(), actions.end());
-        for (auto action : actions) {
+        for (auto const &action : actions) {
             all_actions.emplace_back("win." + action);
         }
 
@@ -467,7 +467,7 @@ Shortcuts::list_all_actions()
             auto map = document->getActionGroup();
             if (map) {
                 std::vector<Glib::ustring> actions = map->list_actions();
-                for (auto action : actions) {
+                for (auto const &action : actions) {
                     all_actions.emplace_back("doc." + action);
                 }
             } else {
@@ -486,8 +486,8 @@ Shortcuts::add_shortcut(Glib::ustring name, const Gtk::AccelKey& shortcut, bool 
 {
     // Remove previous use of shortcut (already removed if new user shortcut).
     if (Glib::ustring old_name = remove_shortcut(shortcut); old_name != "") {
-        std::cerr << "Shortcut::add_shortcut: duplicate shortcut found for: " << shortcut.get_abbrev()
-                  << "  Old: " << old_name << "  New: " << name << " !" << std::endl;
+        std::cerr << "Shortcut::add_shortcut: duplicate shortcut found for: " << shortcut.get_abbrev().raw()
+                  << "  Old: " << old_name.raw() << "  New: " << name.raw() << " !" << std::endl;
     }
 
     // Add shortcut
@@ -497,7 +497,7 @@ Shortcuts::add_shortcut(Glib::ustring name, const Gtk::AccelKey& shortcut, bool 
     Glib::VariantBase value_new;
     Gio::SimpleAction::parse_detailed_name_variant(name, action_name_new, value_new);
 
-    for (auto action : list_all_detailed_action_names()) {
+    for (auto const &action : list_all_detailed_action_names()) {
         Glib::ustring action_name_old;
         Glib::VariantBase value_old;
         Gio::SimpleAction::parse_detailed_name_variant(action, action_name_old, value_old);
@@ -508,12 +508,13 @@ Shortcuts::add_shortcut(Glib::ustring name, const Gtk::AccelKey& shortcut, bool 
             accels.push_back(shortcut.get_abbrev());
             app->set_accels_for_action(name, accels);
             action_user_set[name] = user;
+            _changed.emit();
             return true;
         }
     }
 
     // Oops, not an action!
-    std::cerr << "Shortcuts::add_shortcut: No Action for " << name << std::endl;
+    std::cerr << "Shortcuts::add_shortcut: No Action for " << name.raw() << std::endl;
     return false;
 }
 
@@ -534,7 +535,7 @@ Shortcuts::add_user_shortcut(Glib::ustring name, const Gtk::AccelKey& shortcut)
         return write_user();
     }
 
-    std::cerr << "Shortcut::add_user_shortcut: Failed to add: " << name << " with shortcut " << shortcut.get_abbrev() << std::endl;
+    std::cerr << "Shortcut::add_user_shortcut: Failed to add: " << name.raw() << " with shortcut " << shortcut.get_abbrev().raw() << std::endl;
     return false;
 };
 
@@ -549,13 +550,14 @@ Shortcuts::remove_shortcut(const Gtk::AccelKey& shortcut)
     }
 
     Glib::ustring action_name;
-    for (auto action : actions) {
+    for (auto const &action : actions) {
         // Remove just the one shortcut, leaving the others intact.
         std::vector<Glib::ustring> accels = app->get_accels_for_action(action);
         auto it = std::find(accels.begin(), accels.end(), shortcut.get_abbrev());
         if (it != accels.end()) {
             action_name = action;
             accels.erase(it);
+            _changed.emit();
         }
         app->set_accels_for_action(action, accels);
     }
@@ -568,11 +570,12 @@ Shortcuts::remove_shortcut(const Gtk::AccelKey& shortcut)
 bool
 Shortcuts::remove_shortcut(Glib::ustring name)
 {
-    for (auto action : list_all_detailed_action_names()) {
+    for (auto const &action : list_all_detailed_action_names()) {
         if (action == name) {
             // Action exists
             app->unset_accels_for_action(action);
             action_user_set.erase(action);
+            _changed.emit();
             return true;
         }
     }
@@ -601,7 +604,7 @@ Shortcuts::remove_user_shortcut(Glib::ustring name)
         return true;
     }
 
-    std::cerr << "Shortcuts::remove_user_shortcut: Failed to remove shortcut for: " << name << std::endl;
+    std::cerr << "Shortcuts::remove_user_shortcut: Failed to remove shortcut for: " << name.raw() << std::endl;
     return false;
 }
 
@@ -621,6 +624,7 @@ Shortcuts::clear_user_shortcuts()
     
     // Re-read everything!
     init();
+    _changed.emit();
     return true;
 }
 
@@ -717,7 +721,7 @@ Shortcuts::get_file_names()
 
         XML::Document *document = sp_repr_read_file(filename.c_str(), nullptr);
         if (!document) {
-            std::cerr << "Shortcut::get_file_names: could not parse file: " << filename << std::endl;
+            std::cerr << "Shortcut::get_file_names: could not parse file: " << filename.raw() << std::endl;
             continue;
         }
 
@@ -734,7 +738,7 @@ Shortcuts::get_file_names()
             }
         }
         if (!iter) {
-            std::cerr << "Shortcuts::get_File_names: not a shortcut keys file: " << filename << std::endl;
+            std::cerr << "Shortcuts::get_File_names: not a shortcut keys file: " << filename.raw() << std::endl;
         }
 
         Inkscape::GC::release(document);
@@ -794,7 +798,7 @@ Shortcuts::update_gui_text_recursive(Gtk::Widget* widget)
                     variant = std::to_string(g_variant_get_int32(gvariant));
                     action += "(" + variant + ")";
                 } else {
-                    std::cerr << "Shortcuts::update_gui_text_recursive: unhandled variant type: " << type << std::endl;
+                    std::cerr << "Shortcuts::update_gui_text_recursive: unhandled variant type: " << type.raw() << std::endl;
                 }
             }
 
@@ -909,6 +913,11 @@ Shortcuts::export_shortcuts() {
     return success;
 };
 
+/** Connects to a signal emitted whenever the shortcuts change */
+sigc::connection Shortcuts::connect_changed(sigc::slot<void ()> const &slot)
+{
+    return _changed.connect(slot);
+}
 
 // For debugging.
 void

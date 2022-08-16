@@ -101,7 +101,6 @@ static void _pinch_scale_changed_handler(GtkGesture *gesture, gdouble delta, SPD
 SPDesktop::SPDesktop()
     : namedview(nullptr)
     , canvas(nullptr)
-    , selection(nullptr)
     , temporary_item_list(nullptr)
     , snapindicator(nullptr)
     , current(nullptr)  // current style
@@ -121,10 +120,11 @@ SPDesktop::SPDesktop()
     , _widget(nullptr) // DesktopWidget
     , _guides_message_context(nullptr)
     , _active(false)
-    , grids_visible(false)
 {
+    // Moving this into the list initializer breaks the application because this->_document_replaced_signal
+    // is accessed before it is initialized
     _layer_manager = std::make_unique<Inkscape::LayerManager>(this);
-    selection = Inkscape::GC::release(new Inkscape::Selection(this));
+    _selection = std::make_unique<Inkscape::Selection>(this);
 }
 
 void
@@ -285,10 +285,7 @@ void SPDesktop::destroy()
         temporary_item_list = nullptr;
     }
 
-    if (selection) {
-        delete selection;
-        selection = nullptr;
-    }
+    _selection.reset();
 
     namedview->hide(this);
 
@@ -389,10 +386,10 @@ SPDesktop::change_document (SPDocument *theDocument)
     g_return_if_fail (theDocument != nullptr);
 
     /* unselect everything before switching documents */
-    selection->clear();
+    _selection->clear();
 
     // Reset any tool actions currently in progress.
-    setEventContext(event_context->getPrefsPath());
+    setEventContext(std::string(event_context->getPrefsPath()));
 
     setDocument (theDocument);
 
@@ -650,7 +647,7 @@ SPDesktop::zoom_absolute(Geom::Point const &center, double zoom, bool keep_point
 {
     Geom::Point w = d2w(center); // Must be before zoom changed.
     if(!keep_point) {
-        w = canvas->get_area_world().midpoint();
+        w = Geom::Rect(canvas->get_area_world()).midpoint();
     }
     zoom = CLAMP (zoom, SP_DESKTOP_ZOOM_MIN, SP_DESKTOP_ZOOM_MAX);
     _current_affine.setScale( Geom::Scale(zoom, yaxisdir() * zoom) );
@@ -737,7 +734,7 @@ SPDesktop::zoom_drawing()
 void
 SPDesktop::zoom_selection()
 {
-    Geom::OptRect const d = selection->visualBounds();
+    Geom::OptRect const d = _selection->visualBounds();
 
     if ( !d || d->minExtent() < 0.1 ) {
         return;
@@ -782,7 +779,7 @@ void SPDesktop::zoom_quick(bool enable)
         }
 
         if (!zoomed) {
-            Geom::OptRect const d = selection->visualBounds();
+            Geom::OptRect const d = _selection->visualBounds();
             if (d) {
                 set_display_area(*d, true);
                 zoomed = true;
@@ -1153,6 +1150,47 @@ SPDesktop::toggleScrollbars()
     _widget->toggle_scrollbars();
 }
 
+/**
+ * Shows or hides the on-canvas overlays and controls, such as grids, guides, manipulation handles,
+ * knots, selection cues, etc.
+ * @param hide - whether the aforementioned UI elements should be hidden
+ */
+void SPDesktop::setTempHideOverlays(bool hide)
+{
+    if (_overlays_visible != hide) {
+        return; // Nothing to do
+    }
+
+    if (hide) {
+        canvas_group_controls->hide();
+        canvas_group_grids->hide();
+        _saved_guides_visible = namedview->getShowGuides();
+        if (_saved_guides_visible) {
+            namedview->temporarily_show_guides(false);
+        }
+        if (canvas && !canvas->has_focus()) {
+            canvas->grab_focus(); // Ensure we receive the key up event
+            canvas->redraw_all();
+        }
+        _overlays_visible = false;
+    } else {
+        canvas_group_controls->show();
+        showGrids(grids_visible, false);
+        if (_saved_guides_visible) {
+            namedview->temporarily_show_guides(true);
+        }
+        _overlays_visible = true;
+    }
+}
+
+// (De)Activate preview mode: hide overlays (grid, guides, etc) and crop content to page areas
+void SPDesktop::quick_preview(bool activate) {
+    setTempHideOverlays(activate);
+    if (canvas) {
+        canvas->set_clip_to_page_mode(activate ? true : static_cast<bool>(namedview->clip_to_page));
+    }
+}
+
 void SPDesktop::toggleToolbar(gchar const *toolbar_name)
 {
     Glib::ustring pref_path = getLayoutPrefPath(this) + toolbar_name + "/state";
@@ -1254,11 +1292,11 @@ void SPDesktop::emitToolSubselectionChangedEx(gpointer data, SPObject* object) {
     _tool_subselection_changed.emit(data, object);
 }
 
-sigc::connection SPDesktop::connectToolSubselectionChanged(const sigc::slot<void, gpointer>& slot) {
+sigc::connection SPDesktop::connectToolSubselectionChanged(const sigc::slot<void (gpointer)>& slot) {
     return _tool_subselection_changed.connect([=](gpointer ptr, SPObject*) { slot(ptr); });
 }
 
-sigc::connection SPDesktop::connectToolSubselectionChangedEx(const sigc::slot<void, gpointer, SPObject*>& slot) {
+sigc::connection SPDesktop::connectToolSubselectionChangedEx(const sigc::slot<void (gpointer, SPObject*)>& slot) {
     return _tool_subselection_changed.connect(slot);
 }
 
@@ -1357,7 +1395,7 @@ SPDesktop::setDocument (SPDocument *doc)
         this->doc()->getRoot()->invoke_hide(dkey);
     }
 
-    selection->setDocument(doc);
+    _selection->setDocument(doc);
 
     /// \todo fixme: This condition exists to make sure the code
     /// inside is NOT called on initialization, only on replacement. But there
@@ -1431,7 +1469,7 @@ static void _reconstruction_start(SPDesktop * desktop)
     desktop->_reconstruction_old_layer_id = layer->getId() ? layer->getId() : "";
     desktop->layerManager().reset();
 
-    desktop->selection->clear();
+    desktop->getSelection()->clear();
 }
 
 /// Called when document rebuild is finished.
@@ -1486,15 +1524,15 @@ Geom::Point SPDesktop::dt2doc(Geom::Point const &p) const
     return p * dt2doc();
 }
 
-sigc::connection SPDesktop::connect_gradient_stop_selected(const sigc::slot<void, void*, SPStop*>& slot) {
+sigc::connection SPDesktop::connect_gradient_stop_selected(const sigc::slot<void (void*, SPStop*)>& slot) {
     return _gradient_stop_selected.connect(slot);
 }
 
-sigc::connection SPDesktop::connect_control_point_selected(const sigc::slot<void, void*, Inkscape::UI::ControlPointSelection*>& slot) {
+sigc::connection SPDesktop::connect_control_point_selected(const sigc::slot<void (void*, Inkscape::UI::ControlPointSelection*)>& slot) {
     return _control_point_selected.connect(slot);
 }
 
-sigc::connection SPDesktop::connect_text_cursor_moved(const sigc::slot<void, void*, Inkscape::UI::Tools::TextTool*>& slot) {
+sigc::connection SPDesktop::connect_text_cursor_moved(const sigc::slot<void (void*, Inkscape::UI::Tools::TextTool*)>& slot) {
     return _text_cursor_moved.connect(slot);
 }
 

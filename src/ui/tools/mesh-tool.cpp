@@ -77,14 +77,14 @@ MeshTool::MeshTool(SPDesktop *desktop)
     Inkscape::Selection *selection = desktop->getSelection();
 
     this->selcon = new sigc::connection(selection->connectChanged(
-    	sigc::mem_fun(this, &MeshTool::selection_changed)
+        sigc::mem_fun(*this, &MeshTool::selection_changed)
     ));
 
     this->subselcon = new sigc::connection(desktop->connectToolSubselectionChanged(
-    	sigc::hide(sigc::bind(
-    		sigc::mem_fun(*this, &MeshTool::selection_changed),
-    		(Inkscape::Selection*)nullptr)
-    	)
+        sigc::hide(sigc::bind(
+            sigc::mem_fun(*this, &MeshTool::selection_changed),
+            (Inkscape::Selection*)nullptr)
+        )
     ));
 
     sp_event_context_read(this, "show_handles");
@@ -315,7 +315,7 @@ void MeshTool::corner_operation(MeshCornerOperation operation)
                     break;
 
                 default:
-                    std::cout << "sp_mesh_corner_operation: unknown operation" << std::endl;
+                    std::cerr << "sp_mesh_corner_operation: unknown operation" << std::endl;
             }                    
 
             if( noperation > 0 ) {
@@ -355,7 +355,7 @@ void MeshTool::corner_operation(MeshCornerOperation operation)
                         break;
 
                     default:
-                        std::cout << "sp_mesh_corner_operation: unknown operation" << std::endl;
+                        std::cerr << "sp_mesh_corner_operation: unknown operation" << std::endl;
                 }
             }
         }
@@ -874,7 +874,7 @@ bool MeshTool::root_handler(GdkEvent* event) {
     }
 
     if (!ret) {
-    	ret = ToolBase::root_handler(event);
+        ret = ToolBase::root_handler(event);
     }
 
     return ret;

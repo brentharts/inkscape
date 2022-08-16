@@ -37,6 +37,7 @@
 #include "display/drawing.h"
 #include "display/curve.h"
 #include "display/cairo-utils.h"
+#include "display/drawing-paintserver.h"
 
 #include "object/sp-item.h"
 #include "object/sp-item-group.h"
@@ -49,9 +50,6 @@
 #include "object/sp-clippath.h"
 
 #include "util/units.h"
-#ifdef _WIN32
-#include "libnrtype/FontFactory.h" // USE_PANGO_WIN32
-#endif
 
 #include "cairo-renderer.h"
 #include "extension/system.h"
@@ -111,6 +109,8 @@ static cairo_status_t _write_callback(void *closure, const unsigned char *data, 
 CairoRenderContext::CairoRenderContext(CairoRenderer *parent) :
     _dpi(72),
     _pdf_level(1),
+    _is_pdf(false),
+    _is_ps(false),
     _ps_level(1),
     _eps(false),
     _is_texttopath(FALSE),
@@ -408,6 +408,8 @@ bool CairoRenderContext::setPsTarget(gchar const *utf8_fn)
 void CairoRenderContext::setPSLevel(unsigned int level)
 {
     _ps_level = level;
+    _is_pdf = false;
+    _is_ps = true;
 }
 
 void CairoRenderContext::setEPS(bool eps)
@@ -423,6 +425,8 @@ unsigned int CairoRenderContext::getPSLevel()
 void CairoRenderContext::setPDFLevel(unsigned int level)
 {
     _pdf_level = level;
+    _is_pdf = true;
+    _is_ps = false;
 }
 
 void CairoRenderContext::setTextToPath(bool texttopath)
@@ -971,10 +975,16 @@ CairoRenderContext::nextPage(double width, double height, char const *label)
     _width = width;
     _height = height;
     _is_show_page = false;
-    cairo_pdf_surface_set_size(_surface, width, height);
 
-    if (label) {
-        cairo_pdf_surface_set_page_label(_surface, label);
+    if (_is_pdf) {
+        cairo_pdf_surface_set_size(_surface, width, height);
+
+        if (label) {
+            cairo_pdf_surface_set_page_label(_surface, label);
+        }
+    }
+    if (_is_ps) {
+        cairo_ps_surface_set_size(_surface, width, height);
     }
 
     auto status = cairo_surface_status(_surface);
@@ -1115,7 +1125,7 @@ CairoRenderContext::_createPatternPainter(SPPaintServer const *const paintserver
 {
     g_assert( SP_IS_PATTERN(paintserver) );
 
-    SPPattern *pat = SP_PATTERN (paintserver);
+    SPPattern *pat = const_cast<SPPattern*>(SP_PATTERN(paintserver));
 
     Geom::Affine ps2user, pcs2dev;
     ps2user = Geom::identity();
@@ -1200,7 +1210,7 @@ CairoRenderContext::_createPatternPainter(SPPaintServer const *const paintserver
     unsigned dkey = SPItem::display_key_new(1);
 
     // show items and render them
-    for (SPPattern *pat_i = pat; pat_i != nullptr; pat_i = pat_i->ref ? pat_i->ref->getObject() : nullptr) {
+    for (SPPattern *pat_i = pat; pat_i != nullptr; pat_i = pat_i->ref.getObject()) {
         if (pat_i && pattern_hasItemChildren(pat_i)) { // find the first one with item children
             for (auto& child: pat_i->children) {
                 if (SP_IS_ITEM(&child)) {
@@ -1229,7 +1239,7 @@ CairoRenderContext::_createPatternPainter(SPPaintServer const *const paintserver
     delete pattern_ctx;
 
     // hide all items
-    for (SPPattern *pat_i = pat; pat_i != nullptr; pat_i = pat_i->ref ? pat_i->ref->getObject() : nullptr) {
+    for (SPPattern *pat_i = pat; pat_i != nullptr; pat_i = pat_i->ref.getObject()) {
         if (pat_i && pattern_hasItemChildren(pat_i)) { // find the first one with item children
             for (auto& child: pat_i->children) {
                 if (SP_IS_ITEM(&child)) {
@@ -1371,7 +1381,7 @@ CairoRenderContext::_createPatternForPaintServer(SPPaintServer const *const pain
             cairo_pattern_add_color_stop_rgba(pattern, rg->vector.stops[i].offset, rgb[0], rgb[1], rgb[2], rg->vector.stops[i].opacity * alpha);
         }
     } else if (auto mg = dynamic_cast<SPMeshGradient *>(paintserver_mutable)) {
-        pattern = mg->pattern_new(_cr, pbox, 1.0);
+        pattern = mg->create_drawing_paintserver()->create_pattern(_cr, pbox, 1.0);
     } else if (SP_IS_PATTERN (paintserver)) {
         pattern = _createPatternPainter(paintserver, pbox);
     } else if ( dynamic_cast<SPHatch const *>(paintserver) ) {
@@ -1697,7 +1707,7 @@ CairoRenderContext::renderPathVector(Geom::PathVector const & pathv, SPStyle con
     return true;
 }
 
-bool CairoRenderContext::renderImage(Inkscape::Pixbuf *pb,
+bool CairoRenderContext::renderImage(Inkscape::Pixbuf const *pb,
                                      Geom::Affine const &image_transform, SPStyle const *style)
 {
     g_assert( _is_valid );
@@ -1713,8 +1723,8 @@ bool CairoRenderContext::renderImage(Inkscape::Pixbuf *pb,
 
     // TODO: reenable merge_opacity if useful
 
-    cairo_surface_t *image_surface = pb->getSurfaceRaw();
-    if (cairo_surface_status(image_surface)) {
+    cairo_surface_t const *image_surface = pb->getSurfaceRaw();
+    if (cairo_surface_status(const_cast<cairo_surface_t*>(image_surface))) { // cairo_surface_status does not modify argument
         TRACE(("Image surface creation failed:\n%s\n", cairo_status_to_string(cairo_surface_status(image_surface))));
         return false;
     }
@@ -1724,7 +1734,8 @@ bool CairoRenderContext::renderImage(Inkscape::Pixbuf *pb,
     // scaling by width & height is not needed because it will be done by Cairo
     transform(image_transform);
 
-    cairo_set_source_surface(_cr, image_surface, 0.0, 0.0);
+    // cairo_set_source_surface only modifies refcount of 'image_surface', which is an implementation detail
+    cairo_set_source_surface(_cr, const_cast<cairo_surface_t*>(image_surface), 0.0, 0.0);
 
     // set clip region so that the pattern will not be repeated (bug in Cairo-PDF)
     if (_vector_based_target) {
@@ -1832,21 +1843,6 @@ CairoRenderContext::renderGlyphtext(PangoFont *font, Geom::Affine const &font_ma
 
     FcPattern *fc_pattern = nullptr;
 
-#ifdef USE_PANGO_WIN32
-# ifdef CAIRO_HAS_WIN32_FONT
-    LOGFONTA *lfa = pango_win32_font_logfont(font);
-    LOGFONTW lfw;
-
-    ZeroMemory(&lfw, sizeof(LOGFONTW));
-    memcpy(&lfw, lfa, sizeof(LOGFONTA));
-    MultiByteToWideChar(CP_OEMCP, MB_PRECOMPOSED, lfa->lfFaceName, LF_FACESIZE, lfw.lfFaceName, LF_FACESIZE);
-
-    if(font_face == NULL) {
-        font_face = cairo_win32_font_face_create_for_logfontw(&lfw);
-        font_table[fonthash] = font_face;
-    }
-# endif
-#else
 # ifdef CAIRO_HAS_FT_FONT
     PangoFcFont *fc_font = PANGO_FC_FONT(font);
     fc_pattern = fc_font->font_pattern;
@@ -1855,7 +1851,6 @@ CairoRenderContext::renderGlyphtext(PangoFont *font, Geom::Affine const &font_ma
         font_table[fonthash] = font_face;
     }
 # endif
-#endif
 
     cairo_save(_cr);
     cairo_set_font_face(_cr, font_face);

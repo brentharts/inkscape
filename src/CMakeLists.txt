@@ -146,6 +146,10 @@ set(inkscape_SRC
   page-manager.h
   path-chemistry.h
   path-prefix.h
+  pattern-manager.cpp
+  pattern-manager.h
+  pattern-manipulation.cpp
+  pattern-manipulation.h
   perspective-line.h
   preferences-skeleton.h
   preferences.h
@@ -270,6 +274,9 @@ set(inkscape_SRC
   inkview-application.cpp
   inkview-window.h
   inkview-window.cpp
+
+  manipulation/copy-resource.h
+  manipulation/copy-resource.cpp
 )
   
 # -----------------------------------------------------------------------------
@@ -383,10 +390,8 @@ endif()
 set(INKSCAPE_TARGET_LIBS
         # order from automake
         #sp_LIB
-        #nrtype_LIB
         #inkscape_LIB
         #sp_LIB # annoying, we need both!
-        nrtype_LIB # annoying, we need both!
         croco_LIB
         avoid_LIB
         cola_LIB

@@ -14,6 +14,7 @@
 #define SEEN_INKSCAPE_DISPLAY_DRAWING_H
 
 #include <2geom/rect.h>
+#include <2geom/pathvector.h>
 #include <boost/operators.hpp>
 #include <boost/utility.hpp>
 #include <set>
@@ -54,6 +55,7 @@ public:
     bool outline() const;
     bool visibleHairlines() const;
     bool outlineOverlay() const;
+    bool previewMode() const;
     bool renderFilters() const;
     int blurQuality() const;
     int filterQuality() const;
@@ -65,9 +67,9 @@ public:
     bool getExact() const { return _exact; };
     void setOutlineSensitive(bool e);
     bool getOutlineSensitive() const { return _outline_sensitive; };
-
+    Geom::PathVector clip;
     Geom::OptIntRect const &cacheLimit() const;
-    void setCacheLimit(Geom::OptIntRect const &r, bool update_cache = true);
+    void setCacheLimit(Geom::OptIntRect const &r);
     void setCacheBudget(size_t bytes);
 
     OutlineColors const &colors() const { return _colors; }
@@ -81,6 +83,9 @@ public:
     DrawingItem *pick(Geom::Point const &p, double delta, unsigned flags);
 
     void average_color(Geom::IntRect const &area, double &R, double &G, double &B, double &A);
+
+    void set_clip_to_page(bool clip);
+    bool get_clip_to_page() const;
 
 private:
     void _pickItemsForCaching();
@@ -98,6 +103,7 @@ public:
 
 private:
     bool _exact = false;  // if true then rendering must be exact
+    bool _clip_to_page = false;
     RenderMode _rendermode = RenderMode::NORMAL;
     ColorMode _colormode = ColorMode::NORMAL;
     int _blur_quality = BLUR_QUALITY_BEST;

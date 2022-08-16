@@ -15,6 +15,7 @@
 #include "display/control/canvas-item-drawing.h"
 #include "nr-filter-gaussian.h"
 #include "nr-filter-types.h"
+#include "ui/widget/canvas.h"
 
 //grayscale colormode:
 #include "cairo-templates.h"
@@ -79,6 +80,13 @@ Drawing::outlineOverlay() const
 {
     return renderMode() == RenderMode::OUTLINE_OVERLAY;
 }
+
+bool
+Drawing::previewMode() const
+{
+    return _clip_to_page;
+}
+
 bool
 Drawing::renderFilters() const
 {
@@ -137,16 +145,14 @@ Drawing::cacheLimit() const
     return _cache_limit;
 }
 void
-Drawing::setCacheLimit(Geom::OptIntRect const &r, bool update_cache)
+Drawing::setCacheLimit(Geom::OptIntRect const &r)
 {
     _cache_limit = r;
-    if (update_cache) {
-        for (auto _cached_item : _cached_items)
-        {
-            _cached_item->_markForUpdate(DrawingItem::STATE_CACHE, false);
-        }
+    for (auto _cached_item : _cached_items) {
+        _cached_item->_markForUpdate(DrawingItem::STATE_CACHE, false);
     }
 }
+
 void
 Drawing::setCacheBudget(size_t bytes)
 {
@@ -167,7 +173,7 @@ Drawing::update(Geom::IntRect const &area, unsigned flags, unsigned reset)
         auto ctx = _canvas_item_drawing ? _canvas_item_drawing->get_context() : UpdateContext();
         _root->update(area, ctx, flags, reset);
     }
-    if ((flags & DrawingItem::STATE_CACHE) || (flags & DrawingItem::STATE_ALL)) {
+    if (flags & DrawingItem::STATE_CACHE) {
         // process the updated cache scores
         _pickItemsForCaching();
     }
@@ -180,7 +186,15 @@ Drawing::render(DrawingContext &dc, Geom::IntRect const &area, unsigned flags, i
         int prev_a = _root->_antialias;
         if(antialiasing >= 0)
             _root->setAntialiasing(antialiasing);
+        if (previewMode() && !clip.empty()) {
+            dc.save();
+            dc.path(clip * _root->_ctm);
+            dc.clip();
+        }
         _root->render(dc, area, flags);
+        if (previewMode() && !clip.empty()) {
+            dc.restore();
+        }
         _root->setAntialiasing(prev_a);
     }
 
@@ -250,6 +264,13 @@ Drawing::average_color(Geom::IntRect const &area, double &R, double &G, double &
     ink_cairo_surface_average_color_premul(surface->cobj(), R, G, B, A);
 }
 
+void Drawing::set_clip_to_page(bool clip) {
+    _clip_to_page = clip;
+}
+
+bool Drawing::get_clip_to_page() const {
+    return _clip_to_page;
+}
 
 } // end namespace Inkscape
 

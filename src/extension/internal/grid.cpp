@@ -85,7 +85,7 @@ void
 Grid::effect (Inkscape::Extension::Effect *module, Inkscape::UI::View::View *view, Inkscape::Extension::Implementation::ImplementationDocumentCache * /*docCache*/)
 {
     auto desktop = dynamic_cast<SPDesktop *>(view);
-    Inkscape::Selection *selection = desktop->selection;
+    Inkscape::Selection *selection = desktop->getSelection();
     SPDocument *doc = desktop->doc();
 
     Geom::Rect bounding_area = Geom::Rect(Geom::Point(0,0), Geom::Point(100,100));
@@ -142,7 +142,7 @@ public:
     PrefAdjustment(Inkscape::Extension::Extension * ext, char * pref) :
             Gtk::Adjustment(0.0, 0.0, 10.0, 0.1), _ext(ext), _pref(pref) {
         this->set_value(_ext->get_param_float(_pref));
-        this->signal_value_changed().connect(sigc::mem_fun(this, &PrefAdjustment::val_changed));
+        this->signal_value_changed().connect(sigc::mem_fun(*this, &PrefAdjustment::val_changed));
         return;
     };
 
@@ -170,7 +170,7 @@ PrefAdjustment::val_changed ()
     Uses AutoGUI for creating the GUI.
 */
 Gtk::Widget *
-Grid::prefs_effect(Inkscape::Extension::Effect *module, Inkscape::UI::View::View * view, sigc::signal<void> * changeSignal, Inkscape::Extension::Implementation::ImplementationDocumentCache * /*docCache*/)
+Grid::prefs_effect(Inkscape::Extension::Effect *module, Inkscape::UI::View::View * view, sigc::signal<void ()> * changeSignal, Inkscape::Extension::Implementation::ImplementationDocumentCache * /*docCache*/)
 {
     SPDocument * current_document = view->doc();
 

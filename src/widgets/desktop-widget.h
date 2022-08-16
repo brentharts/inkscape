@@ -85,6 +85,8 @@ public:
     Inkscape::UI::Widget::CanvasGrid *get_canvas_grid() { return _canvas_grid; }  // Temp, I hope!
     Inkscape::UI::Widget::Canvas     *get_canvas()      { return _canvas; }
 
+    Gio::ActionMap* get_action_map();
+
     void on_size_allocate(Gtk::Allocation &) override;
     void on_realize() override;
     void on_unrealize() override;
@@ -198,6 +200,7 @@ public:
     void update_zoom();
     void update_rotation();
     void update_rulers();
+    void repack_snaptoolbar();
 
     void iconify();
     void maximize();
@@ -217,6 +220,7 @@ private:
     GtkWidget *aux_toolbox;
     GtkWidget *commands_toolbox;
     GtkWidget *snap_toolbox;
+    Inkscape::PrefObserver _tb_snap_pos;
     Inkscape::PrefObserver _tb_icon_sizes1;
     Inkscape::PrefObserver _tb_icon_sizes2;
     Inkscape::PrefObserver _tb_visible_buttons;

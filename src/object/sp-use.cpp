@@ -61,7 +61,7 @@ SPUse::SPUse()
     this->height.unset(SVGLength::PERCENT, 1.0, 1.0);
 
     this->_changed_connection = this->ref->changedSignal().connect(
-        sigc::hide(sigc::hide(sigc::mem_fun(this, &SPUse::href_changed)))
+        sigc::hide(sigc::hide(sigc::mem_fun(*this, &SPUse::href_changed)))
     );
 }
 
@@ -379,6 +379,39 @@ SPItem *SPUse::trueOriginal() const
 }
 
 /**
+ * @brief Test the passed predicate on all items in a chain of uses.
+ *
+ * The chain includes this item, all of its intermediate ancestors in a chain of uses, as well as
+ * the ultimate original item.
+ *
+ * @return Whether any of the items in the chain satisfies the predicate.
+ */
+bool SPUse::anyInChain(bool (*predicate)(SPItem const *)) const
+{
+    int const depth = cloneDepth();
+    if (depth < 0) {
+        return predicate(this);
+    }
+
+    SPItem const *item = this;
+    if (predicate(item)) {
+        return true;
+    }
+
+    for (int i = 0; i < depth; ++i) {
+        if (auto const *intermediate_clone = dynamic_cast<SPUse const *>(item)) {
+            item = intermediate_clone->get_original();
+            if (predicate(item)) {
+                return true;
+            }
+        } else {
+            break;
+        }
+    }
+    return false;
+}
+
+/**
  * Get the number of dereferences or calls to get_original() needed to get an object
  * which is not an svg:use. Returns -1 if there is no original object.
  */
@@ -579,11 +612,10 @@ void SPUse::href_changed() {
 
                 this->child->invoke_build(refobj->document, childrepr, TRUE);
 
-                for (SPItemView *v = this->display; v != nullptr; v = v->next) {
-                    Inkscape::DrawingItem *ai = this->child->invoke_show(v->arenaitem->drawing(), v->key, v->flags);
-
+                for (auto &v : views) {
+                    auto ai = this->child->invoke_show(v.drawingitem->drawing(), v.key, v.flags);
                     if (ai) {
-                        v->arenaitem->prependChild(ai);
+                        v.drawingitem->prependChild(ai);
                     }
                 }
             } else {
@@ -592,11 +624,11 @@ void SPUse::href_changed() {
             }
 
             this->_delete_connection = refobj->connectDelete(
-                sigc::hide(sigc::mem_fun(this, &SPUse::delete_self))
+                sigc::hide(sigc::mem_fun(*this, &SPUse::delete_self))
             );
 
             this->_transformed_connection = refobj->connectTransformed(
-                sigc::hide(sigc::mem_fun(this, &SPUse::move_compensate))
+                sigc::hide(sigc::mem_fun(*this, &SPUse::move_compensate))
             );
         }
     }
@@ -654,17 +686,17 @@ void SPUse::update(SPCtx *ctx, unsigned flags) {
     SPItem::update(ctx, flags);
 
     if (flags & SP_OBJECT_STYLE_MODIFIED_FLAG) {
-        for (SPItemView *v = this->display; v != nullptr; v = v->next) {
-            Inkscape::DrawingGroup *g = dynamic_cast<Inkscape::DrawingGroup *>(v->arenaitem);
-            this->context_style = this->style;
-            g->setStyle(this->style, this->context_style);
+        for (auto &v : views) {
+            auto g = dynamic_cast<Inkscape::DrawingGroup*>(v.drawingitem);
+            context_style = style;
+            g->setStyle(style, context_style);
         }
     }
 
     /* As last step set additional transform of arena group */
-    for (SPItemView *v = this->display; v != nullptr; v = v->next) {
-        Inkscape::DrawingGroup *g = dynamic_cast<Inkscape::DrawingGroup *>(v->arenaitem);
-        Geom::Affine t(Geom::Translate(this->x.computed, this->y.computed));
+    for (auto &v : views) {
+        auto g = dynamic_cast<Inkscape::DrawingGroup*>(v.drawingitem);
+        auto t = Geom::Translate(x.computed, y.computed);
         g->setChildTransform(t);
     }
 }
@@ -678,10 +710,10 @@ void SPUse::modified(unsigned int flags) {
     flags &= SP_OBJECT_MODIFIED_CASCADE;
 
     if (flags & SP_OBJECT_STYLE_MODIFIED_FLAG) {
-      for (SPItemView *v = this->display; v != nullptr; v = v->next) {
-        Inkscape::DrawingGroup *g = dynamic_cast<Inkscape::DrawingGroup *>(v->arenaitem);
-        this->context_style = this->style;
-        g->setStyle(this->style, this->context_style);
+      for (auto &v : views) {
+        auto g = dynamic_cast<Inkscape::DrawingGroup*>(v.drawingitem);
+        context_style = style;
+        g->setStyle(style, context_style);
       }
     }
 

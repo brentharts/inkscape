@@ -61,13 +61,14 @@ DrawingItem::DrawingItem(Drawing &drawing)
     , _key(0)
     , _style(nullptr)
     , _context_style(nullptr)
+    , style_vector_effect_size(false)
+    , style_vector_effect_rotate(false)
+    , style_vector_effect_fixed(false)
     , _opacity(1.0)
-    , _transform(nullptr)
     , _clip(nullptr)
     , _mask(nullptr)
     , _fill_pattern(nullptr)
     , _stroke_pattern(nullptr)
-    , _filter(nullptr)
     , _item(nullptr)
     , _cache(nullptr)
     , _state(0)
@@ -80,13 +81,13 @@ DrawingItem::DrawingItem(Drawing &drawing)
     , _cached_persistent(0)
     , _has_cache_iterator(0)
     , _propagate(0)
-    //    , _renders_opacity(0)
     , _pick_children(0)
     , _antialias(2)
     , _prev_nir(false)
     , _isolation(SP_CSS_ISOLATION_AUTO)
     , _mix_blend_mode(SP_CSS_BLEND_NORMAL)
-{}
+{
+}
 
 DrawingItem::~DrawingItem()
 {
@@ -137,21 +138,19 @@ DrawingItem::~DrawingItem()
     }
 
     if (_parent) {
-        _parent->_markForUpdate(STATE_ALL, false);
+        bool propagate = _child_type == CHILD_CLIP || _child_type == CHILD_MASK;
+        _parent->_markForUpdate(STATE_ALL, propagate);
     }
     clearChildren();
-    delete _transform;
     delete _stroke_pattern;
     delete _fill_pattern;
     delete _clip;
     delete _mask;
-    delete _filter;
-    if(_style)
-        sp_style_unref(_style);
+    _filter.reset();
+    if (_style) sp_style_unref(_style);
 }
 
-DrawingItem *
-DrawingItem::parent() const
+DrawingItem *DrawingItem::parent() const
 {
     // initially I wanted to return NULL if we are a clip or mask child,
     // but the previous behavior was just to return the parent regardless of child type
@@ -159,8 +158,7 @@ DrawingItem::parent() const
 }
 
 /// Returns true if item is among the descendants. Will return false if item == this.
-bool
-DrawingItem::isAncestorOf(DrawingItem *item) const
+bool DrawingItem::isAncestorOf(DrawingItem *item) const
 {
     for (DrawingItem *i = item->_parent; i; i = i->_parent) {
         if (i == this) return true;
@@ -168,8 +166,7 @@ DrawingItem::isAncestorOf(DrawingItem *item) const
     return false;
 }
 
-void
-DrawingItem::appendChild(DrawingItem *item)
+void DrawingItem::appendChild(DrawingItem *item)
 {
     item->_parent = this;
     assert(item->_child_type == CHILD_ORPHAN);
@@ -185,8 +182,7 @@ DrawingItem::appendChild(DrawingItem *item)
     item->_markForUpdate(STATE_ALL, true);
 }
 
-void
-DrawingItem::prependChild(DrawingItem *item)
+void DrawingItem::prependChild(DrawingItem *item)
 {
     item->_parent = this;
     assert(item->_child_type == CHILD_ORPHAN);
@@ -198,8 +194,7 @@ DrawingItem::prependChild(DrawingItem *item)
 }
 
 /// Delete all regular children of this item (not mask or clip).
-void
-DrawingItem::clearChildren()
+void DrawingItem::clearChildren()
 {
     if (_children.empty()) return;
 
@@ -216,29 +211,28 @@ DrawingItem::clearChildren()
 }
 
 /// Set the incremental transform for this item
-void
-DrawingItem::setTransform(Geom::Affine const &new_trans)
+void DrawingItem::setTransform(Geom::Affine const &new_trans)
 {
+    double constexpr EPS = 1e-18;
+
     Geom::Affine current;
     if (_transform) {
         current = *_transform;
     }
-    
-    if (!Geom::are_near(current, new_trans, 1e-18)) {
+
+    if (!Geom::are_near(current, new_trans, EPS)) {
         // mark the area where the object was for redraw.
         _markForRendering();
-        delete _transform;
-        if (new_trans.isIdentity()) {
-            _transform = nullptr;
+        if (new_trans.isIdentity(EPS)) {
+            _transform.reset();
         } else {
-            _transform = new Geom::Affine(new_trans);
+            _transform = std::make_unique<Geom::Affine>(new_trans);
         }
         _markForUpdate(STATE_ALL, true);
     }
 }
 
-void
-DrawingItem::setOpacity(float opacity)
+void DrawingItem::setOpacity(float opacity)
 {
     if (_opacity != opacity) {
         _opacity = opacity;
@@ -246,8 +240,7 @@ DrawingItem::setOpacity(float opacity)
     }
 }
 
-void
-DrawingItem::setAntialiasing(unsigned a)
+void DrawingItem::setAntialiasing(unsigned a)
 {
     if (_antialias != a) {
         _antialias = a;
@@ -255,24 +248,21 @@ DrawingItem::setAntialiasing(unsigned a)
     }
 }
 
-void
-DrawingItem::setIsolation(bool isolation)
+void DrawingItem::setIsolation(bool isolation)
 {
     _isolation = isolation;
     //if( isolation != 0 ) std::cout << "isolation: " << isolation << std::endl;
     _markForRendering();
 }
 
-void
-DrawingItem::setBlendMode(SPBlendMode mix_blend_mode)
+void DrawingItem::setBlendMode(SPBlendMode mix_blend_mode)
 {
     _mix_blend_mode = mix_blend_mode;
     //if( mix_blend_mode != 0 ) std::cout << "setBlendMode: " << mix_blend_mode << std::endl;
     _markForRendering();
 }
 
-void
-DrawingItem::setVisible(bool v)
+void DrawingItem::setVisible(bool v)
 {
     if (_visible != v) {
         _visible = v;
@@ -281,8 +271,7 @@ DrawingItem::setVisible(bool v)
 }
 
 /// This is currently unused
-void
-DrawingItem::setSensitive(bool s)
+void DrawingItem::setSensitive(bool s)
 {
     _sensitive = s;
 }
@@ -291,8 +280,7 @@ DrawingItem::setSensitive(bool s)
  * Enable / disable storing the rendering in memory.
  * Calling setCached(false, true) will also remove the persistent status
  */
-void
-DrawingItem::setCached(bool cached, bool persistent)
+void DrawingItem::setCached(bool cached, bool persistent)
 {
     static const char *cache_env = getenv("_INKSCAPE_DISABLE_CACHE");
     if (cache_env) return;
@@ -320,28 +308,17 @@ DrawingItem::setCached(bool cached, bool persistent)
  *
  * Note: _style is not used by DrawingGlyphs which uses its parent style.
  */
-void
-DrawingItem::setStyle(SPStyle *style, SPStyle *context_style)
+void DrawingItem::setStyle(SPStyle const *style, SPStyle const *context_style)
 {
     // std::cout << "DrawingItem::setStyle: " << name() << " " << style
     //           << " " << context_style << std::endl;
 
-    if( style != _style ) {
+    _markForRendering();
+
+    if (style != _style) {
         if (style) sp_style_ref(style);
         if (_style) sp_style_unref(_style);
         _style = style;
-    }
-    
-    if (style && style->filter.set && style->getFilter()) {
-        if (!_filter) {
-            int primitives = style->getFilter()->primitive_count();
-            _filter = new Inkscape::Filters::Filter(primitives);
-        }
-        style->getFilter()->build_renderer(_filter);
-    } else {
-        // no filter set for this group
-        delete _filter;
-        _filter = nullptr;
     }
 
     if (style && style->enable_background.set) {
@@ -363,9 +340,18 @@ DrawingItem::setStyle(SPStyle *style, SPStyle *context_style)
         _context_style = _parent->_context_style;
     }
 
+    if (_style) {
+        style_vector_effect_size   = _style->vector_effect.size;
+        style_vector_effect_rotate = _style->vector_effect.rotate;
+        style_vector_effect_fixed  = _style->vector_effect.fixed;
+    } else {
+        style_vector_effect_size   = false;
+        style_vector_effect_rotate = false;
+        style_vector_effect_fixed  = false;
+    }
+
     _markForUpdate(STATE_ALL, false);
 }
-
 
 /**
  * Recursively update children style.
@@ -374,18 +360,15 @@ DrawingItem::setStyle(SPStyle *style, SPStyle *context_style)
  * updated like other 'clones' as marker instances are not included the SP object tree.
  * Note: this is a virtual function.
  */
-void
-DrawingItem::setChildrenStyle(SPStyle* context_style)
+void DrawingItem::setChildrenStyle(SPStyle const *context_style)
 {
     _context_style = context_style;
-    for (auto & i : _children) {
-        i.setChildrenStyle( context_style );
+    for (auto &i : _children) {
+        i.setChildrenStyle(context_style);
     }
 }
 
-
-void
-DrawingItem::setClip(DrawingItem *item)
+void DrawingItem::setClip(DrawingItem *item)
 {
     _markForRendering();
     delete _clip;
@@ -398,13 +381,12 @@ DrawingItem::setClip(DrawingItem *item)
     _markForUpdate(STATE_ALL, true);
 }
 
-void
-DrawingItem::setMask(DrawingItem *item)
+void DrawingItem::setMask(DrawingItem *item)
 {
     _markForRendering();
     delete _mask;
     _mask = item;
-        if (item) {
+    if (item) {
         item->_parent = this;
         assert(item->_child_type == CHILD_ORPHAN);
         item->_child_type = CHILD_MASK;
@@ -412,8 +394,7 @@ DrawingItem::setMask(DrawingItem *item)
     _markForUpdate(STATE_ALL, true);
 }
 
-void
-DrawingItem::setFillPattern(DrawingPattern *pattern)
+void DrawingItem::setFillPattern(DrawingPattern *pattern)
 {
     _markForRendering();
     delete _fill_pattern;
@@ -423,11 +404,10 @@ DrawingItem::setFillPattern(DrawingPattern *pattern)
         assert(pattern->_child_type == CHILD_ORPHAN);
         pattern->_child_type = CHILD_FILL_PATTERN;
     }
-    _markForUpdate(STATE_ALL, true);
+    _markForUpdate(STATE_ALL, false);
 }
 
-void
-DrawingItem::setStrokePattern(DrawingPattern *pattern)
+void DrawingItem::setStrokePattern(DrawingPattern *pattern)
 {
     _markForRendering();
     delete _stroke_pattern;
@@ -437,13 +417,12 @@ DrawingItem::setStrokePattern(DrawingPattern *pattern)
         assert(pattern->_child_type == CHILD_ORPHAN);
         pattern->_child_type = CHILD_STROKE_PATTERN;
     }
-    _markForUpdate(STATE_ALL, true);
+    _markForUpdate(STATE_ALL, false);
 }
 
 /// Move this item to the given place in the Z order of siblings.
 /// Does nothing if the item has no parent.
-void
-DrawingItem::setZOrder(unsigned z)
+void DrawingItem::setZOrder(unsigned z)
 {
     if (!_parent) return;
 
@@ -456,10 +435,14 @@ DrawingItem::setZOrder(unsigned z)
     _markForRendering();
 }
 
-void
-DrawingItem::setItemBounds(Geom::OptRect const &bounds)
+void DrawingItem::setItemBounds(Geom::OptRect const &bounds)
 {
     _item_bbox = bounds;
+}
+
+void DrawingItem::setFilterRenderer(std::unique_ptr<Filters::Filter> renderer)
+{
+    _filter = std::move(renderer);
 }
 
 /**
@@ -484,10 +467,8 @@ DrawingItem::setItemBounds(Geom::OptRect const &bounds)
  *              propagating bounding box recomputation to children when the item's
  *              transform changes.
  */
-void
-DrawingItem::update(Geom::IntRect const &area, UpdateContext const &ctx, unsigned flags, unsigned reset)
+void DrawingItem::update(Geom::IntRect const &area, UpdateContext const &ctx, unsigned flags, unsigned reset)
 {
-
     // We don't need to update what is not visible
     if (!visible()) {
         _state = STATE_ALL; // Touch the state for future change to this item
@@ -527,29 +508,26 @@ DrawingItem::update(Geom::IntRect const &area, UpdateContext const &ctx, unsigne
     }
 
     // Vector effects
-    if (_style) {
+    if (style_vector_effect_fixed) {
+        child_ctx.ctm.setTranslation(Geom::Point(0, 0));
+    }
 
-        if (_style->vector_effect.fixed) {
-            child_ctx.ctm.setTranslation(Geom::Point(0,0));
+    if (style_vector_effect_size) {
+        double value = child_ctx.ctm.descrim();
+        if (value > 0.0) {
+            child_ctx.ctm[0] /= value;
+            child_ctx.ctm[1] /= value;
+            child_ctx.ctm[2] /= value;
+            child_ctx.ctm[3] /= value;
         }
+    }
 
-        if (_style->vector_effect.size) {
-            double value = sqrt(child_ctx.ctm.det());
-            if (value > 0 ) {
-                child_ctx.ctm[0] = child_ctx.ctm[0]/value;
-                child_ctx.ctm[1] = child_ctx.ctm[1]/value;
-                child_ctx.ctm[2] = child_ctx.ctm[2]/value;
-                child_ctx.ctm[3] = child_ctx.ctm[3]/value;
-            }
-        }
-
-        if (_style->vector_effect.rotate) {
-            double value = sqrt(child_ctx.ctm.det());
-            child_ctx.ctm[0] = value;
-            child_ctx.ctm[1] = 0;
-            child_ctx.ctm[2] = 0;
-            child_ctx.ctm[3] = value;
-        }
+    if (style_vector_effect_rotate) {
+        double value = child_ctx.ctm.descrim();
+        child_ctx.ctm[0] = value;
+        child_ctx.ctm[1] = 0.0;
+        child_ctx.ctm[2] = 0.0;
+        child_ctx.ctm[3] = value;
     }
 
     /* Remember the transformation matrix */
@@ -649,8 +627,10 @@ DrawingItem::update(Geom::IntRect const &area, UpdateContext const &ctx, unsigne
     }
 }
 
-struct MaskLuminanceToAlpha {
-    guint32 operator()(guint32 in) {
+struct MaskLuminanceToAlpha
+{
+    guint32 operator()(guint32 in)
+    {
         guint r = 0, g = 0, b = 0;
         Display::ExtractRGB32(in, r, g, b);
         // the operation of unpremul -> luminance-to-alpha -> multiply by alpha
@@ -671,11 +651,11 @@ struct MaskLuminanceToAlpha {
  *
  * @param flags Rendering options. This deals mainly with cache control.
  */
-unsigned
-DrawingItem::render(DrawingContext &dc, Geom::IntRect const &area, unsigned flags, DrawingItem *stop_at)
+unsigned DrawingItem::render(DrawingContext &dc, Geom::IntRect const &area, unsigned flags, DrawingItem *stop_at)
 {
     bool outline = _drawing.outline();
     bool render_filters = _drawing.renderFilters();
+    bool forcecache = _filter && render_filters;
     // stop_at is handled in DrawingGroup, but this check is required to handle the case
     // where a filtered item with background-accessing filter has enable-background: new
     if (this == stop_at) {
@@ -697,21 +677,14 @@ DrawingItem::render(DrawingContext &dc, Geom::IntRect const &area, unsigned flag
         return RENDER_OK;
     }
 
-    // carea is the area to paint
-    Geom::OptIntRect carea = Geom::intersect(area, _drawbox);
-
+    Geom::OptIntRect carea = area & _drawbox;
     if (!carea) {
         return RENDER_OK;
     }
-    // iarea is the bounding box for intermediate rendering
-    // Note 1: Pixels inside iarea but outside carea are invalid
-    //         (incomplete filter dependence region).
-    // Note 2: We only need to render carea of clip and mask, but
-    //         iarea of the object.
-    
+
     Geom::OptIntRect iarea = carea;
     // expand carea to contain the dependent area of filters.
-    if (_filter && render_filters) {
+    if (forcecache) {
         iarea = _cacheRect();
         if (!iarea) {
             iarea = carea;
@@ -722,11 +695,12 @@ DrawingItem::render(DrawingContext &dc, Geom::IntRect const &area, unsigned flag
             setCached(true, true);
         }
     }
-
-    if (!iarea) {
+    // carea is the area to paint
+    carea = iarea & _drawbox;
+    if (!carea) {
         return RENDER_OK;
     }
-    
+
     // Device scale for HiDPI screens (typically 1 or 2)
     int device_scale = dc.surface()->device_scale();
 
@@ -743,7 +717,7 @@ DrawingItem::render(DrawingContext &dc, Geom::IntRect const &area, unsigned flag
         if (_cache) {
             _cache->prepare();
             dc.setOperator(ink_css_blend_to_cairo_operator(_mix_blend_mode));
-            _cache->paintFromCache(dc, carea, _filter && render_filters);
+            _cache->paintFromCache(dc, carea, forcecache);
             if (!carea) {
                 dc.setSource(0, 0, 0, 0);
                 return RENDER_OK;
@@ -752,13 +726,13 @@ DrawingItem::render(DrawingContext &dc, Geom::IntRect const &area, unsigned flag
             // There is no cache. This could be because caching of this item
             // was just turned on after the last update phase, or because
             // we were previously outside of the canvas.
-            if (iarea) {
-                _cache = new DrawingCache(*iarea, device_scale);
-            }
+            Geom::OptIntRect cl = _cacheRect();
+            if (!cl) 
+                cl = carea;
+            _cache = new DrawingCache(*cl, device_scale);
         }
     } else {
-        // if our caching was turned off after the last update, it was already
-        // deleted in setCached()
+        // if our caching was turned off after the last update, it was already deleted in setCached()
     }
 
     // determine whether this shape needs intermediate rendering.
@@ -778,7 +752,7 @@ DrawingItem::render(DrawingContext &dc, Geom::IntRect const &area, unsigned flag
         setCached(false, true);
     }
     _prev_nir = needs_intermediate_rendering;
-    nir |= (_cache != nullptr);                      // 5. it is to be cached
+    nir |= (_cache != nullptr);                      // 8. it is to be cached
 
     /* How the rendering is done.
      *
@@ -799,11 +773,10 @@ DrawingItem::render(DrawingContext &dc, Geom::IntRect const &area, unsigned flag
 
     if ((flags & RENDER_FILTER_BACKGROUND) || !needs_intermediate_rendering) {
         dc.setOperator(ink_css_blend_to_cairo_operator(SP_CSS_BLEND_NORMAL));
-        return _renderItem(dc, *iarea, flags & ~RENDER_FILTER_BACKGROUND, stop_at);
+        return _renderItem(dc, *carea, flags & ~RENDER_FILTER_BACKGROUND, stop_at);
     }
 
-
-    DrawingSurface intermediate(*iarea, device_scale);
+    DrawingSurface intermediate(*carea, device_scale);
     DrawingContext ict(intermediate);
 
     // This path fails for patterns/hatches when stepping the pattern to handle overflows.
@@ -852,7 +825,7 @@ DrawingItem::render(DrawingContext &dc, Geom::IntRect const &area, unsigned flag
 
     // 3. Render object itself
     ict.pushGroup();
-    render_result = _renderItem(ict, *iarea, flags, stop_at);
+    render_result = _renderItem(ict, *carea, flags, stop_at);
 
     // 4. Apply filter.
     if (_filter && render_filters) {
@@ -863,9 +836,9 @@ DrawingItem::render(DrawingContext &dc, Geom::IntRect const &area, unsigned flag
                 if (bg_root->_background_new) break;
             }
             if (bg_root) {
-                DrawingSurface bg(*iarea, device_scale);
+                DrawingSurface bg(*carea, device_scale);
                 DrawingContext bgdc(bg);
-                bg_root->render(bgdc, *iarea, flags | RENDER_FILTER_BACKGROUND, this);
+                bg_root->render(bgdc, *carea, flags | RENDER_FILTER_BACKGROUND, this);
                 _filter->render(this, ict, &bgdc);
                 rendered = true;
             }
@@ -886,34 +859,28 @@ DrawingItem::render(DrawingContext &dc, Geom::IntRect const &area, unsigned flag
     // 6. Paint the completed rendering onto the base context (or into cache)
     if (_cached && _cache) {
         DrawingContext cachect(*_cache);
-        cachect.rectangle(*iarea);
+        cachect.rectangle(*carea);
         cachect.setOperator(CAIRO_OPERATOR_SOURCE);
         cachect.setSource(&intermediate);
         cachect.fill();
-        Geom::OptIntRect cl = _cacheRect();
-        if (_filter && render_filters && cl) {
-            _cache->markClean(*cl);
-        } else {
-            _cache->markClean(*iarea);
-        }
+        _cache->markClean(*carea);
     }
 
     dc.rectangle(*carea);
     dc.setSource(&intermediate);
+
     // 7. Render blend mode
     dc.setOperator(ink_css_blend_to_cairo_operator(_mix_blend_mode));
     dc.fill();
     dc.setSource(0,0,0,0);
     // Web isolation only works if parent doesn't have transform
 
-
     // the call above is to clear a ref on the intermediate surface held by dc
 
     return render_result;
 }
 
-void
-DrawingItem::_renderOutline(DrawingContext &dc, Geom::IntRect const &area, unsigned flags)
+void DrawingItem::_renderOutline(DrawingContext &dc, Geom::IntRect const &area, unsigned flags)
 {
     // intersect with bbox rather than drawbox, as we want to render things outside
     // of the clipping path as well
@@ -948,8 +915,7 @@ DrawingItem::_renderOutline(DrawingContext &dc, Geom::IntRect const &area, unsig
  * the result of this call using the IN operator. See the implementation
  * of render() for details.
  */
-void
-DrawingItem::clip(Inkscape::DrawingContext &dc, Geom::IntRect const &area)
+void DrawingItem::clip(Inkscape::DrawingContext &dc, Geom::IntRect const &area)
 {
     // don't bother if the object does not implement clipping (e.g. DrawingImage)
     if (!_canClip()) return;
@@ -989,14 +955,12 @@ DrawingItem::clip(Inkscape::DrawingContext &dc, Geom::IntRect const &area)
  *               When false, only visible and sensitive objects are considered.
  *               When true, invisible and insensitive objects can also be picked.
  */
-DrawingItem *
-DrawingItem::pick(Geom::Point const &p, double delta, unsigned flags)
+DrawingItem *DrawingItem::pick(Geom::Point const &p, double delta, unsigned flags)
 {
     // Sometimes there's no BBOX in state, reason unknown (bug 992817)
     // I made this not an assert to remove the warning
     if (!(_state & STATE_BBOX) || !(_state & STATE_PICK)) {
-        g_warning("Invalid state when picking: STATE_BBOX = %d, STATE_PICK = %d",
-                  _state & STATE_BBOX, _state & STATE_PICK);
+        g_warning("Invalid state when picking: STATE_BBOX = %d, STATE_PICK = %d", _state & STATE_BBOX, _state & STATE_PICK);
         return nullptr;
     }
     // ignore invisible and insensitive items unless sticky
@@ -1030,9 +994,9 @@ DrawingItem::pick(Geom::Point const &p, double delta, unsigned flags)
 
     Geom::Rect expanded = *box;
     expanded.expandBy(delta);
-    DrawingGlyphs *dglyps = dynamic_cast<DrawingGlyphs *>(this);
+    auto dglyps = dynamic_cast<DrawingGlyphs *>(this);
     if (dglyps && !(flags & PICK_AS_CLIP)) {
-        expanded = (Geom::Rect)dglyps->getPickBox();
+        expanded = dglyps->getPickBox();
     }
 
     if (expanded.contains(p)) {
@@ -1042,8 +1006,7 @@ DrawingItem::pick(Geom::Point const &p, double delta, unsigned flags)
 }
 
 // For debugging
-Glib::ustring
-DrawingItem::name()
+Glib::ustring DrawingItem::name()
 {
     if (_item) {
         if (_item->getId())
@@ -1056,31 +1019,28 @@ DrawingItem::name()
 }
 
 // For debugging: Print drawing tree structure.
-void
-DrawingItem::recursivePrintTree( unsigned level )
+void DrawingItem::recursivePrintTree(unsigned level)
 {
     if (level == 0) {
         std::cout << "Display Item Tree" << std::endl;
     }
     std::cout << "DI: ";
-    for (unsigned i = 0; i < level; ++i) {
+    for (int i = 0; i < level; i++) {
         std::cout << "  ";
     }
     std::cout << name() << std::endl;
-    for (auto & i : _children) {
-        i.recursivePrintTree( level+1 );
+    for (auto &i : _children) {
+        i.recursivePrintTree(level + 1);
     }
 }
 
- 
 /**
  * Marks the current visual bounding box of the item for redrawing.
  * This is called whenever the object changes its visible appearance.
  * For some cases (such as setting opacity) this is enough, but for others
  * _markForUpdate() also needs to be called.
  */
-void
-DrawingItem::_markForRendering()
+void DrawingItem::_markForRendering()
 {
     // TODO: this function does too much work when a large subtree
     // is invalidated - fix
@@ -1099,6 +1059,7 @@ DrawingItem::_markForRendering()
         if (i->_cache) {
             i->_cache->markDirty(*dirty);
         }
+        i->_dropPatternCache();
         if (i->_background_accumulate) {
             bkg_root = i;
         }
@@ -1118,8 +1079,7 @@ DrawingItem::_markForRendering()
 
 }
 
-void
-DrawingItem::_invalidateFilterBackground(Geom::IntRect const &area)
+void DrawingItem::_invalidateFilterBackground(Geom::IntRect const &area)
 {
     if (!_drawbox.intersects(area)) return;
 
@@ -1147,8 +1107,7 @@ DrawingItem::_invalidateFilterBackground(Geom::IntRect const &area)
  * With _propagate we do this during the update call, when we have to recurse
  * into children anyway.
  */
-void
-DrawingItem::_markForUpdate(unsigned flags, bool propagate)
+void DrawingItem::_markForUpdate(unsigned flags, bool propagate)
 {
     if (propagate) {
         _propagate_state |= flags;
@@ -1181,8 +1140,7 @@ DrawingItem::_markForUpdate(unsigned flags, bool propagate)
  * Higher scores mean the item is more aggressively prioritized for automatic
  * caching by Inkscape::Drawing.
  */
-double
-DrawingItem::_cacheScore()
+double DrawingItem::_cacheScore()
 {
     Geom::OptIntRect cache_rect = _cacheRect();
     if (!cache_rect) return -1.0;
@@ -1196,9 +1154,8 @@ DrawingItem::_cacheScore()
         Geom::IntRect test_area = ref_area;
         Geom::IntRect limit_area(0, INT_MIN, 16, INT_MAX);
         _filter->area_enlarge(test_area, this);
-        // area_enlarge never shrinks the rect, so the result of intersection below
-        // must be non-empty
-        score *= double((test_area & limit_area)->area()) / ref_area.area();
+        // area_enlarge never shrinks the rect, so the result of intersection below must be non-empty
+        score *= (double)(test_area & limit_area)->area() / ref_area.area();
     }
     // if the object is clipped, add 1/2 of its bbox pixels
     if (_clip && _clip->_bbox) {
@@ -1218,7 +1175,6 @@ inline void expandByScale(Geom::IntRect &rect, double scale)
     rect.expandBy(rect.width() * fraction, rect.height() * fraction);
 }
 
-
 Geom::OptIntRect DrawingItem::_cacheRect()
 {
     Geom::OptIntRect r = _drawbox & _drawing.cacheLimit();
@@ -1232,8 +1188,8 @@ Geom::OptIntRect DrawingItem::_cacheRect()
             // contract the item _bbox to get reduced size to render. $ seems good enough
             expandByScale(*valid, 0.5);
             // now we get the nearest point to cache area
-            Geom::IntPoint center = (*_drawing.cacheLimit()).midpoint();
-            Geom::IntPoint nearest = (*valid).nearestEdgePoint(center);
+            Geom::IntPoint center = _drawing.cacheLimit()->midpoint();
+            Geom::IntPoint nearest = valid->nearestEdgePoint(center);
             r.expandTo(nearest);
         }
         return _drawbox & r;
@@ -1262,7 +1218,7 @@ void DrawingItem::_applyAntialias(DrawingContext &dc, unsigned _antialias)
     }
 }
 
-} // end namespace Inkscape
+} // namespace Inkscape
 
 /*
   Local Variables:

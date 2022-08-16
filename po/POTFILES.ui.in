@@ -8,11 +8,13 @@
 ../share/ui/dialog-save-template.glade
 ../share/ui/dialog-text-edit.glade
 ../share/ui/dialog-trace.glade
+../share/ui/display-popup.glade
 ../share/ui/gradient-edit.glade
 ../share/ui/inkscape-about.glade
 ../share/ui/inkscape-start.glade
 ../share/ui/marker-popup.glade
 ../share/ui/page-properties.glade
+../share/ui/pattern-edit.glade
 ../share/ui/align-and-distribute.ui
 ../share/ui/menus.ui
 ../share/ui/toolbar-commands.ui
@@ -20,3 +22,4 @@
 ../share/ui/toolbar-snap.ui
 ../share/ui/toolbar-tool-prefs.ui
 ../share/ui/toolbar-zoom.ui
+../share/ui/widget-new-from-template.ui

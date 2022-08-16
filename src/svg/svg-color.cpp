@@ -507,12 +507,11 @@ sp_svg_create_color_hash()
 }
 
 
-void icc_color_to_sRGB(SVGICCColor* icc, guchar* r, guchar* g, guchar* b)
+void icc_color_to_sRGB(SVGICCColor const* icc, guchar* r, guchar* g, guchar* b)
 {
     if (icc) {
         g_message("profile name: %s", icc->colorProfile.c_str());
-        Inkscape::ColorProfile* prof = SP_ACTIVE_DOCUMENT->getProfileManager()->find(icc->colorProfile.c_str());
-        if ( prof ) {
+        if (auto prof = SP_ACTIVE_DOCUMENT->getProfileManager().find(icc->colorProfile.c_str())) {
             guchar color_out[4] = {0,0,0,0};
             cmsHTRANSFORM trans = prof->getTransfToSRGB8();
             if ( trans ) {

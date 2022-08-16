@@ -42,7 +42,7 @@
 #include "ui/widget/canvas.h"  // Target, canvas to world transform.
 
 #include "widgets/desktop-widget.h"
-#include "widgets/ege-paint-def.h"
+#include "widgets/paintdef.h"
 
 using Inkscape::DocumentUndo;
 
@@ -77,6 +77,13 @@ static GtkTargetEntry *completeDropTargets = nullptr;
 static int completeDropTargetsCount = 0;
 
 static guint nui_drop_target_entries = G_N_ELEMENTS(ui_drop_target_entries);
+
+/** Convert screen (x, y) coordinates to desktop coordinates. */
+inline Geom::Point world2desktop(SPDesktop *desktop, int x, int y)
+{
+    g_assert(desktop);
+    return (Geom::Point(x, y) + desktop->canvas->get_area_world().min()) * desktop->w2d();
+}
 
 /* Drag and Drop */
 static
@@ -180,27 +187,22 @@ ink_drag_data_received(GtkWidget *widget,
             bool worked = false;
             Glib::ustring colorspec;
             if ( gtk_selection_data_get_format (data) == 8 ) {
-                ege::PaintDef color;
+                PaintDef color;
                 worked = color.fromMIMEData("application/x-oswb-color",
-                                            reinterpret_cast<char const *>(gtk_selection_data_get_data (data)),
-                                            gtk_selection_data_get_length (data),
-                                            gtk_selection_data_get_format (data));
+                                            reinterpret_cast<char const*>(gtk_selection_data_get_data(data)),
+                                            gtk_selection_data_get_length(data));
                 if ( worked ) {
-                    if ( color.getType() == ege::PaintDef::CLEAR ) {
-                        colorspec = ""; // TODO check if this is sufficient
-                    } else if ( color.getType() == ege::PaintDef::NONE ) {
+                    if ( color.get_type() == PaintDef::NONE ) {
                         colorspec = "none";
                     } else {
-                        unsigned int r = color.getR();
-                        unsigned int g = color.getG();
-                        unsigned int b = color.getB();
+                        auto [r, g, b] = color.get_rgb();
 
                         SPGradient* matches = nullptr;
                         std::vector<SPObject *> gradients = doc->getResourceList("gradient");
                         for (auto gradient : gradients) {
                             SPGradient* grad = SP_GRADIENT(gradient);
-                            if ( color.descr == grad->getId() ) {
-                                if ( grad->hasStops() ) {
+                            if (color.get_description() == grad->getId()) {
+                                if (grad->hasStops()) {
                                     matches = grad;
                                     break;
                                 }
@@ -340,9 +342,9 @@ ink_drag_data_received(GtkWidget *widget,
         }
 
         case APP_X_INK_PASTE: {
-            Inkscape::UI::ClipboardManager *cm = Inkscape::UI::ClipboardManager::get();
-            cm->paste(desktop);
-            DocumentUndo::done( doc, _("Drop Symbol"), "" );
+            auto *cm = Inkscape::UI::ClipboardManager::get();
+            cm->insertSymbol(desktop, world2desktop(desktop, x, y));
+            DocumentUndo::done(doc, _("Drop Symbol"), "");
             break;
         }
 

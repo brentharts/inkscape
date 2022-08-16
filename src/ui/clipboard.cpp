@@ -104,7 +104,8 @@ class ClipboardManagerImpl : public ClipboardManager {
 public:
     void copy(ObjectSet *set) override;
     void copyPathParameter(Inkscape::LivePathEffect::PathParam *) override;
-    void copySymbol(Inkscape::XML::Node* symbol, gchar const* style, SPDocument *source) override;
+    void copySymbol(Inkscape::XML::Node* symbol, gchar const* style, SPDocument *source, Geom::Rect const &bbox) override;
+    void insertSymbol(SPDesktop *desktop, Geom::Point const &shift_dt) override;
     bool paste(SPDesktop *desktop, bool in_place) override;
     bool pasteStyle(ObjectSet *set) override;
     bool pasteSize(ObjectSet *set, bool separately, bool apply_x, bool apply_y) override;
@@ -324,9 +325,14 @@ void ClipboardManagerImpl::copyPathParameter(Inkscape::LivePathEffect::PathParam
 
 /**
  * Copy a symbol from the symbol dialog.
+ *
  * @param symbol The Inkscape::XML::Node for the symbol.
+ * @param style The style to be applied to the symbol.
+ * @param source The source document of the symbol.
+ * @param bbox The bounding box of the symbol, in desktop coordinates.
  */
-void ClipboardManagerImpl::copySymbol(Inkscape::XML::Node* symbol, gchar const* style, SPDocument *source)
+void ClipboardManagerImpl::copySymbol(Inkscape::XML::Node* symbol, gchar const* style, SPDocument *source,
+                                      Geom::Rect const &bbox)
 {
     if (!symbol)
         return;
@@ -383,12 +389,40 @@ void ClipboardManagerImpl::copySymbol(Inkscape::XML::Node* symbol, gchar const* 
         use->doWriteTransform(affine, &affine, false);
     }
 
-    // This min and max sets offsets, we don't have any so set to zero.
-    _clipnode->setAttributePoint("min", Geom::Point(0, 0));
-    _clipnode->setAttributePoint("max", Geom::Point(0, 0));
+    // Set min and max offsets based on the bounding rectangle.
+    _clipnode->setAttributePoint("min", bbox.min());
+    _clipnode->setAttributePoint("max", bbox.max());
 
     fit_canvas_to_drawing(_clipboardSPDoc.get());
     _setClipboardTargets();
+}
+
+/**
+ * Insert a symbol into the document at the prescribed position (at the end of a drag).
+ *
+ * @param desktop The desktop onto which the symbol has been dropped.
+ * @param shift_dt The vector by which the symbol position should be shifted, in desktop coordinates.
+ */
+void ClipboardManagerImpl::insertSymbol(SPDesktop *desktop, Geom::Point const &shift_dt)
+{
+    if (!desktop || !Inkscape::have_viable_layer(desktop, desktop->getMessageStack())) {
+        return;
+    }
+    auto symbol = _retrieveClipboard("image/x-inkscape-svg");
+    if (!symbol) {
+        return;
+    }
+
+    prevent_id_clashes(symbol.get(), desktop->getDocument(), true);
+    auto *root = symbol->getRoot();
+
+    // Synthesize a clipboard position in order to paste the symbol where it got dropped.
+    if (auto *clipnode = sp_repr_lookup_name(root->getRepr(), "inkscape:clipboard", 1)) {
+        clipnode->setAttributePoint("min", clipnode->getAttributePoint("min") + shift_dt);
+        clipnode->setAttributePoint("max", clipnode->getAttributePoint("max") + shift_dt);
+    }
+
+    sp_import_document(desktop, symbol.get(), true);
 }
 
 /**
@@ -446,12 +480,12 @@ bool ClipboardManagerImpl::paste(SPDesktop *desktop, bool in_place)
     // _copySelection() has put all items in groups, now ungroup them (preserves transform
     // relationships of clones, text-on-path, etc.)
     if (target == "image/x-inkscape-svg") {
-        desktop->selection->ungroup(true);
-        std::vector<SPItem *> vec2(desktop->selection->items().begin(), desktop->selection->items().end());
+        desktop->getSelection()->ungroup(true);
+        std::vector<SPItem *> vec2(desktop->getSelection()->items().begin(), desktop->getSelection()->items().end());
         for (auto item : vec2) {
             // just a bit beauty on paste hidden items unselect
             if (vec2.size() > 1 && item->isHidden()) {
-                desktop->selection->remove(item);
+                desktop->getSelection()->remove(item);
             }
             SPLPEItem *pasted_lpe_item = dynamic_cast<SPLPEItem *>(item);
             if (pasted_lpe_item) {
@@ -536,10 +570,10 @@ bool ClipboardManagerImpl::_copyNodes(SPDesktop *desktop, ObjectSet *set)
 bool ClipboardManagerImpl::_pasteNodes(SPDesktop *desktop, SPDocument *clipdoc, bool in_place)
 {
     auto node_tool = dynamic_cast<Inkscape::UI::Tools::NodeTool *>(desktop->event_context);
-    if (!node_tool || desktop->selection->objects().size() != 1)
+    if (!node_tool || desktop->getSelection()->objects().size() != 1)
         return false;
 
-    SPObject *obj = desktop->selection->objects().back();
+    SPObject *obj = desktop->getSelection()->objects().back();
     auto target_path = dynamic_cast<SPPath *>(obj);
     if (!target_path)
         return false;
@@ -563,34 +597,34 @@ bool ClipboardManagerImpl::_pasteNodes(SPDesktop *desktop, SPDocument *clipdoc, 
         }
 
         if (auto source_path = dynamic_cast<SPPath *>(source_obj)) {
-            auto source_curve = SPCurve::copy(source_path->curveForEdit());
-            auto target_curve = SPCurve::copy(target_path->curveForEdit());
+            auto source_curve = *source_path->curveForEdit();
+            auto target_curve = *target_path->curveForEdit();
 
             // Apply group transformation which is usually the old translation plus document scaling factor
-            source_curve->transform(group_affine);
+            source_curve.transform(group_affine);
             // Convert curve from source units (usually px so 1:1)
-            source_curve->transform(source_scale);
+            source_curve.transform(source_scale);
 
             if (!in_place) {
                 // Move the source curve to the mouse pointer, units are px so do before target_trans
                 auto bbox = *(source_path->geometricBounds()) * group_affine;
                 auto to_mouse = Geom::Translate(desktop->point() - bbox.midpoint());
-                source_curve->transform(to_mouse);
+                source_curve.transform(to_mouse);
             } else if (auto clipnode = sp_repr_lookup_name(clipdoc->getReprRoot(), "inkscape:clipboard", 1)) {
                 // Force translation so a foreign path will end up in the right place.
                 auto bbox = *(source_path->visualBounds()) * group_affine;
                 auto to_origin = Geom::Translate(clipnode->getAttributePoint("min") - bbox.min());
-                source_curve->transform(to_origin);
+                source_curve.transform(to_origin);
             }
 
             // Finally convert the curve into path item's coordinate system
-            source_curve->transform(target_trans.inverse());
+            source_curve.transform(target_trans.inverse());
 
             // Add the source curve to the target copy
-            target_curve->append(*source_curve);
+            target_curve.append(std::move(source_curve));
 
             // Set the attribute to keep the document up to date (fixes undo)
-            auto str = sp_svg_write_path(target_curve->get_pathvector());
+            auto str = sp_svg_write_path(target_curve.get_pathvector());
             target_path->setAttribute("d", str);
         }
     }
@@ -1260,12 +1294,7 @@ void ClipboardManagerImpl::_copyPattern(SPPattern *pattern)
                 _copyUsedDefs(childItem);
             }
         }
-        if (pattern->ref){
-            pattern = pattern->ref->getObject();
-        }
-        else{
-            pattern = nullptr;
-        }
+        pattern = pattern->ref.getObject();
     }
 }
 

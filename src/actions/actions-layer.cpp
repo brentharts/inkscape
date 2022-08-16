@@ -51,7 +51,7 @@ layer_duplicate (InkscapeWindow* win)
 
     if (!dt->layerManager().isRoot()) {
 
-        dt->selection->duplicate(true, true); // This requires the selection to be a layer!
+        dt->getSelection()->duplicate(true, true); // This requires the selection to be a layer!
         Inkscape::DocumentUndo::done(dt->getDocument(), _("Duplicate layer"), INKSCAPE_ICON("layer-duplicate"));
         dt->messageStack()->flash(Inkscape::NORMAL_MESSAGE, _("Duplicated layer."));
 
@@ -243,7 +243,7 @@ selection_move_to_layer_above (InkscapeWindow* win)
     SPDesktop* dt = win->get_desktop();
 
     // Layer Rise
-    dt->selection->toNextLayer();
+    dt->getSelection()->toNextLayer();
 }
 
 void
@@ -252,7 +252,7 @@ selection_move_to_layer_below (InkscapeWindow* win)
     SPDesktop* dt = win->get_desktop();
 
     // Layer Lower
-    dt->selection->toPrevLayer();
+    dt->getSelection()->toPrevLayer();
 }
 
 void
@@ -420,7 +420,7 @@ void
 group_enter (InkscapeWindow* win)
 {
     SPDesktop* dt = win->get_desktop();
-    auto selection = dt->selection;
+    auto selection = dt->getSelection();
 
     std::vector<SPItem*> items(selection->items().begin(), selection->items().end());
     if (items.size() == 1 && dynamic_cast<SPGroup*>(items[0])) {
@@ -435,7 +435,7 @@ void
 group_exit (InkscapeWindow* win)
 {
     SPDesktop* dt = win->get_desktop();
-    auto selection = dt->selection;
+    auto selection = dt->getSelection();
 
     auto parent = dt->layerManager().currentLayer()->parent;
     dt->layerManager().setCurrentLayer(parent);
@@ -457,8 +457,8 @@ std::vector<std::vector<Glib::ustring>> raw_data_layer =
     {"win.layer-delete",                    N_("Delete Current Layer"),             "Layers",     N_("Delete the current layer")},
     {"win.layer-rename",                    N_("Rename Layer"),                     "Layers",     N_("Rename the current layer")},
 
-    {"win.layer-toggle-hide",               N_("Show/Hide Current Layer"),          "Layers",     N_("Toggle visibility of current layer")},
-    {"win.layer-toggle-lock",               N_("Lock/Unlock Current Layer"),        "Layers",     N_("Toggle lock on current layer")},
+    {"win.layer-hide-toggle",               N_("Show/Hide Current Layer"),          "Layers",     N_("Toggle visibility of current layer")},
+    {"win.layer-lock-toggle",               N_("Lock/Unlock Current Layer"),        "Layers",     N_("Toggle lock on current layer")},
 
     {"win.layer-previous",                  N_("Switch to Layer Above"),            "Layers",     N_("Switch to the layer above the current")},
     {"win.layer-next",                      N_("Switch to Layer Below"),            "Layers",     N_("Switch to the layer below the current")},

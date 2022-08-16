@@ -43,6 +43,7 @@
 #include "object/sp-shape.h"
 #include "object/sp-text.h"
 
+#include "ui/knot/knot-holder.h"
 #include "ui/shape-editor.h" // temporary!
 #include "ui/tool/control-point-selection.h"
 #include "ui/tool/curve-drag-point.h"
@@ -147,11 +148,11 @@ NodeTool::NodeTool(SPDesktop *desktop)
 
     this->_selection_changed_connection.disconnect();
     this->_selection_changed_connection =
-        selection->connectChanged(sigc::mem_fun(this, &NodeTool::selection_changed));
+        selection->connectChanged(sigc::mem_fun(*this, &NodeTool::selection_changed));
 
     this->_mouseover_changed_connection.disconnect();
     this->_mouseover_changed_connection = 
-        Inkscape::UI::ControlPoint::signal_mouseover_change.connect(sigc::mem_fun(this, &NodeTool::mouseover_changed));
+        Inkscape::UI::ControlPoint::signal_mouseover_change.connect(sigc::mem_fun(*this, &NodeTool::mouseover_changed));
 
     if (this->_transform_handle_group) {
         this->_selected_nodes = new Inkscape::UI::ControlPointSelection(desktop, this->_transform_handle_group);
@@ -160,8 +161,8 @@ NodeTool::NodeTool(SPDesktop *desktop)
 
     this->_multipath = new Inkscape::UI::MultiPathManipulator(data, this->_selection_changed_connection);
 
-    this->_selector->signal_point.connect(sigc::mem_fun(this, &NodeTool::select_point));
-    this->_selector->signal_area.connect(sigc::mem_fun(this, &NodeTool::select_area));
+    this->_selector->signal_point.connect(sigc::mem_fun(*this, &NodeTool::select_point));
+    this->_selector->signal_area.connect(sigc::mem_fun(*this, &NodeTool::select_area));
 
     this->_multipath->signal_coords_changed.connect([=](){
         desktop->emit_control_point_selected(this, _selected_nodes);
@@ -169,11 +170,11 @@ NodeTool::NodeTool(SPDesktop *desktop)
 
     this->_selected_nodes->signal_selection_changed.connect(
         // Hide both signal parameters and bind the function parameter to 0
-        // sigc::signal<void, SelectableControlPoint *, bool>
+        // sigc::signal<void (SelectableControlPoint *, bool)>
         // <=>
         // void update_tip(GdkEvent *event)
         sigc::hide(sigc::hide(sigc::bind(
-                sigc::mem_fun(this, &NodeTool::update_tip),
+                sigc::mem_fun(*this, &NodeTool::update_tip),
                 (GdkEvent*)nullptr
         )))
     );
@@ -286,17 +287,16 @@ void sp_update_helperpath(SPDesktop *desktop)
                 }
                 lpe->setSelectedNodePoints(selectedNodesPositions);
                 lpe->setCurrentZoom(desktop->current_zoom());
-                auto c = std::make_unique<SPCurve>();
+                SPCurve c;
                 std::vector<Geom::PathVector> cs = lpe->getCanvasIndicators(lpeitem);
                 for (auto &p : cs) {
                     p *= desktop->dt2doc();
-                    c->append(p);
+                    c.append(p);
                 }
-                if (!c->is_empty()) {
-                    auto helperpath = new Inkscape::CanvasItemBpath(desktop->getCanvasTemp(), c.get(), true);
+                if (!c.is_empty()) {
+                    auto helperpath = new Inkscape::CanvasItemBpath(desktop->getCanvasTemp(), c.get_pathvector(), true);
                     helperpath->set_stroke(0x0000ff9a);
                     helperpath->set_fill(0x0, SP_WIND_RULE_NONZERO); // No fill
-
                     nt->_helperpath_tmpitem.emplace_back(desktop->add_temporary_canvasitem(helperpath, 0));
                 }
             }
@@ -332,10 +332,10 @@ void NodeTool::set(const Inkscape::Preferences::Entry& value) {
             this->show_transform_handles, this->single_node_transform_handles);
     } else if (entry_name == "edit_clipping_paths") {
         this->edit_clipping_paths = value.getBool();
-        this->selection_changed(_desktop->selection);
+        this->selection_changed(_desktop->getSelection());
     } else if (entry_name == "edit_masks") {
         this->edit_masks = value.getBool();
-        this->selection_changed(_desktop->selection);
+        this->selection_changed(_desktop->getSelection());
     } else {
         ToolBase::set(value);
     }
@@ -432,7 +432,7 @@ bool NodeTool::root_handler(GdkEvent* event) {
      */
     using namespace Inkscape::UI; // pull in event helpers
 
-    Inkscape::Selection *selection = _desktop->selection;
+    Inkscape::Selection *selection = _desktop->getSelection();
     static Inkscape::Preferences *prefs = Inkscape::Preferences::get();
 
     if (this->_multipath->event(this, event)) {
@@ -462,7 +462,7 @@ bool NodeTool::root_handler(GdkEvent* event) {
 
         // We will show a pre-snap indication for when the user adds a node through double-clicking
         // Adding a node will only work when a path has been selected; if that's not the case then snapping is useless
-        if (!_desktop->selection->isEmpty()) {
+        if (!_desktop->getSelection()->isEmpty()) {
             if (!(event->motion.state & GDK_SHIFT_MASK)) {
                 m.setup(_desktop);
                 Inkscape::SnapCandidatePoint scp(motion_dt, Inkscape::SNAPSOURCE_OTHER_HANDLE);
@@ -504,15 +504,13 @@ bool NodeTool::root_handler(GdkEvent* event) {
             }
 
             this->flashed_item = over_item;
-            auto c = SPCurve::copy(shape->curveForEdit());
-
-            if (!c) {
+            if (!shape->curveForEdit()) {
                 break; // break out when curve doesn't exist
             }
 
-            c->transform(over_item->i2dt_affine());
+            auto c = shape->curveForEdit()->transformed(over_item->i2dt_affine());
 
-            auto flash = new Inkscape::CanvasItemBpath(_desktop->getCanvasTemp(), c.get(), true);
+            auto flash = new Inkscape::CanvasItemBpath(_desktop->getCanvasTemp(), c.get_pathvector(), true);
             flash->set_stroke(over_item->highlight_color());
             flash->set_fill(0x0, SP_WIND_RULE_NONZERO); // No fill.
             flash_tempitem =
@@ -615,6 +613,23 @@ bool NodeTool::root_handler(GdkEvent* event) {
     return ToolBase::root_handler(event);
 }
 
+bool NodeTool::item_handler(SPItem *item, GdkEvent *event)
+{
+    bool ret = ToolBase::item_handler(item, event);
+
+    // Node shape editors are handled differently than shape tools
+    if (!ret && event->type == GDK_BUTTON_PRESS && event->button.button == 1) {
+        for (auto &se : _shape_editors) {
+            // This allows users to select an arbitary position in a pattern to edit on canvas.
+            if (auto knotholder = se.second->knotholder; knotholder->getItem() == item) {
+                auto point = _desktop->w2d(Geom::Point(event->button.x, event->button.y));
+                ret = knotholder->set_item_clickpos(point * _desktop->dt2doc());
+            }
+        }
+    }
+    return ret;
+}
+
 void NodeTool::update_tip(GdkEvent *event) {
     using namespace Inkscape::UI;
     if (event && (event->type == GDK_KEY_PRESS || event->type == GDK_KEY_RELEASE)) {
@@ -708,7 +723,7 @@ void NodeTool::select_area(Geom::Rect const &sel, GdkEventButton *event) {
     
     if (this->_multipath->empty()) {
         // if multipath is empty, select rubberbanded items rather than nodes
-        Inkscape::Selection *selection = _desktop->selection;
+        Inkscape::Selection *selection = _desktop->getSelection();
         auto sel_doc = _desktop->dt2doc() * sel;
         std::vector<SPItem *> items = _desktop->getDocument()->getItemsInBox(_desktop->dkey, sel_doc);
         selection->setList(items);
@@ -745,7 +760,7 @@ void NodeTool::select_point(Geom::Point const &/*sel*/, GdkEventButton *event) {
         return;
     }
 
-    Inkscape::Selection *selection = _desktop->selection;
+    Inkscape::Selection *selection = _desktop->getSelection();
 
     SPItem *item_clicked = sp_event_context_find_item (_desktop, event_point(*event),
                     (event->state & GDK_MOD1_MASK) && !(event->state & GDK_CONTROL_MASK), TRUE);
@@ -764,7 +779,7 @@ void NodeTool::select_point(Geom::Point const &/*sel*/, GdkEventButton *event) {
     } else {
         if (held_shift(*event)) {
             selection->toggle(item_clicked);
-        } else {
+        } else if (!selection->includes(item_clicked)) {
             selection->set(item_clicked);
         }
         // This not need to be called canvas is updated on selection change

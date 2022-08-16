@@ -52,12 +52,13 @@ DialogBase::DialogBase(gchar const *prefs_path, Glib::ustring dialog_type)
     , _dialog_type(dialog_type)
     , _app(InkscapeApplication::instance())
 {
+    auto const &dialog_data = get_dialog_data();
+
     // Derive a pretty display name for the dialog.
     auto it = dialog_data.find(dialog_type);
     if (it != dialog_data.end()) {
 
-        // get translated verb name
-        _name = _(it->second.label.c_str());
+        _name = it->second.label; // Already translated
 
         // remove ellipsis and mnemonics
         int pos = _name.find("...", 0);
@@ -127,7 +128,7 @@ void DialogBase::blink()
         notebook->get_style_context()->add_class("blink");
 
         // Add timer to turn off blink.
-        sigc::slot<bool> slot = sigc::mem_fun(*this, &DialogBase::blink_off);
+        sigc::slot<bool ()> slot = sigc::mem_fun(*this, &DialogBase::blink_off);
         sigc::connection connection = Glib::signal_timeout().connect(slot, 1000); // msec
     }
 }
@@ -187,8 +188,8 @@ void DialogBase::setDesktop(SPDesktop *new_desktop)
     if (new_desktop) {
         desktop = new_desktop;
 
-        if (desktop->selection) {
-            selection = desktop->selection;
+        if (auto sel = desktop->getSelection()) {
+            selection = sel;
             _select_changed = selection->connectChanged(sigc::mem_fun(*this, &DialogBase::selectionChanged_impl));
             _select_modified = selection->connectModified(sigc::mem_fun(*this, &DialogBase::selectionModified_impl));
         }
@@ -197,7 +198,7 @@ void DialogBase::setDesktop(SPDesktop *new_desktop)
         _desktop_destroyed = desktop->connectDestroy(sigc::mem_fun(*this, &DialogBase::desktopDestroyed));
         this->setDocument(desktop->getDocument());
 
-        if (desktop->selection) {
+        if (desktop->getSelection()) {
             this->selectionChanged(selection);
         }
         set_sensitive(true);
@@ -288,6 +289,7 @@ void DialogBase::desktopDestroyed(SPDesktop* old_desktop)
 {
     if (old_desktop == desktop && desktop) {
         unsetDesktop();
+        desktopReplaced();
         set_sensitive(false);
     }
 }

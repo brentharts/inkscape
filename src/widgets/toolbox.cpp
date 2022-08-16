@@ -34,6 +34,7 @@
 #include <glibmm/i18n.h>
 
 #include "actions/actions-canvas-snapping.h"
+#include "actions/actions-tools.h"
 #include "io/resource.h"
 #include "ui/widget/style-swatch.h"
 #include "widgets/spw-utilities.h" // sp_traverse_widget_tree()
@@ -172,7 +173,7 @@ static GtkWidget* toolboxNewCommon( GtkWidget* tb, BarId id, GtkPositionType /*h
     return hb;
 }
 
-GtkWidget *ToolboxFactory::createToolToolbox()
+GtkWidget *ToolboxFactory::createToolToolbox(InkscapeWindow *window)
 {
     Glib::ustring tool_toolbar_builder_file = get_filename(UIS, "toolbar-tool.ui");
     auto builder = Gtk::Builder::create();
@@ -182,7 +183,7 @@ GtkWidget *ToolboxFactory::createToolToolbox()
     }
     catch (const Glib::Error& ex)
     {
-        std::cerr << "ToolboxFactor::createToolToolbox: " << tool_toolbar_builder_file << " file not read! " << ex.what().raw() << std::endl;
+        std::cerr << "ToolboxFactor::createToolToolbox: " << tool_toolbar_builder_file.raw() << " file not read! " << ex.what().raw() << std::endl;
     }
 
     Gtk::Widget* toolbar = nullptr;
@@ -191,7 +192,39 @@ GtkWidget *ToolboxFactory::createToolToolbox()
         std::cerr << "InkscapeWindow: Failed to load tool toolbar!" << std::endl;
     }
 
+    _attachDoubleClickHandlers(builder, window);
+
     return toolboxNewCommon( GTK_WIDGET(toolbar->gobj()), BAR_TOOL, GTK_POS_LEFT );
+}
+
+/**
+ * @brief Attach double click handlers to all tool buttons, so that double-clicking on a tool
+ *        in the toolbar opens up that tool's preferences.
+ * @param builder The builder that contains a loaded UI structure containing RadioButton's.
+ * @param win The Inkscape window which will display the preferences dialog.
+ */
+void ToolboxFactory::_attachDoubleClickHandlers(Glib::RefPtr<Gtk::Builder> builder, InkscapeWindow *win)
+{
+    for (auto &object : builder->get_objects()) {
+        if (auto radio = dynamic_cast<Gtk::RadioButton *>(object.get())) {
+
+            Glib::VariantBase action_target;
+            radio->get_property("action-target", action_target);
+            if (!action_target.is_of_type(Glib::VARIANT_TYPE_STRING)) {
+                continue;
+            }
+
+            auto tool_name = Glib::ustring((gchar const *)action_target.get_data());
+            radio->signal_button_press_event().connect([=](GdkEventButton *ev) -> bool {
+                // Open tool preferences upon double click
+                if (ev->type == GDK_2BUTTON_PRESS && ev->button == 1) {
+                    tool_preferences(tool_name, win);
+                    return true;
+                }
+                return false;
+            });
+        }
+    }
 }
 
 GtkWidget *ToolboxFactory::createAuxToolbox()
@@ -222,7 +255,7 @@ GtkWidget *ToolboxFactory::createCommandsToolbox()
     }
     catch (const Glib::Error& ex)
     {
-        std::cerr << "ToolboxFactor::createCommandsToolbox: " << commands_toolbar_builder_file << " file not read! " << ex.what().raw() << std::endl;
+        std::cerr << "ToolboxFactor::createCommandsToolbox: " << commands_toolbar_builder_file.raw() << " file not read! " << ex.what().raw() << std::endl;
     }
 
     Gtk::Toolbar* toolbar = nullptr;
@@ -259,7 +292,6 @@ GtkWidget *ToolboxFactory::createSnapToolbox()
 {
     auto tb = new SnapBar();
     tb->set_name("SnapToolbox");
-    tb->set_orientation(Gtk::ORIENTATION_VERTICAL);
     tb->set_homogeneous(false);
 
     Glib::ustring snap_toolbar_builder_file = get_filename(UIS, "toolbar-snap.ui");
@@ -270,7 +302,7 @@ GtkWidget *ToolboxFactory::createSnapToolbox()
     }
     catch (const Glib::Error& ex)
     {
-        std::cerr << "ToolboxFactor::createSnapToolbox: " << snap_toolbar_builder_file << " file not read! " << ex.what().raw() << std::endl;
+        std::cerr << "ToolboxFactor::createSnapToolbox: " << snap_toolbar_builder_file.raw() << " file not read! " << ex.what().raw() << std::endl;
     }
 
     bool simple_snap = true;

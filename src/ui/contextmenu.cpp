@@ -53,8 +53,8 @@ ContextMenu::ContextMenu(SPDesktop *desktop, SPObject *object, bool hide_layers_
     action_group = Gio::SimpleActionGroup::create();
     insert_action_group("ctx", action_group);
     auto document = desktop->getDocument();
-    action_group->add_action("unhide-objects-below-cursor", sigc::bind<SPDocument*, bool>(sigc::mem_fun(this, &ContextMenu::unhide_or_unlock), document, true));
-    action_group->add_action("unlock-objects-below-cursor", sigc::bind<SPDocument*, bool>(sigc::mem_fun(this, &ContextMenu::unhide_or_unlock), document, false));
+    action_group->add_action("unhide-objects-below-cursor", sigc::bind<SPDocument*, bool>(sigc::mem_fun(*this, &ContextMenu::unhide_or_unlock), document, true));
+    action_group->add_action("unlock-objects-below-cursor", sigc::bind<SPDocument*, bool>(sigc::mem_fun(*this, &ContextMenu::unhide_or_unlock), document, false));
 
     auto gmenu         = Gio::Menu::create(); // Main menu
     auto gmenu_section = Gio::Menu::create(); // Section (used multiple times)
@@ -107,7 +107,7 @@ ContextMenu::ContextMenu(SPDesktop *desktop, SPObject *object, bool hide_layers_
         // "item" is the object that was under the mouse when right-clicked. It determines what is shown
         // in the menu thus it makes the most sense that it is either selected or part of the current
         // selection.
-        auto selection = desktop->selection;
+        auto selection = desktop->getSelection();
         if (object && !selection->includes(object)) {
             selection->set(object);
         }
@@ -137,10 +137,13 @@ ContextMenu::ContextMenu(SPDesktop *desktop, SPObject *object, bool hide_layers_
             }
 
             // Image dialogs (mostly).
-            if (dynamic_cast<SPImage*>(item)) {
+            if (auto image = dynamic_cast<SPImage*>(item)) {
                 AppendItemFromAction(     gmenu_dialogs, "win.dialog-open('ObjectAttributes')",          _("Image _Properties..."),  "dialog-fill-and-stroke");
                 AppendItemFromAction(     gmenu_dialogs, "win.dialog-open('Trace')",                     _("_Trace Bitmap..."),      "bitmap-trace"          );
-                auto image = dynamic_cast<SPImage*>(item);
+
+                if (image->getClipObject()) {
+                    AppendItemFromAction( gmenu_dialogs, "app.element-image-crop",                       _("Crop Image to Clip"),    ""                      );
+                }
                 if (strncmp(image->href, "data", 4) == 0) {
                     // Image is embedded.
                     AppendItemFromAction( gmenu_dialogs, "app.org.inkscape.filter.extract-image",        _("Extract Image..."),      ""                      );
@@ -274,17 +277,13 @@ ContextMenu::ContextMenu(SPDesktop *desktop, SPObject *object, bool hide_layers_
     // Do not install this CSS provider; it messes up menus with icons (like popup menu with all dialogs).
     // It doesn't work well with context menu either, introducing disturbing visual glitch 
     // where menu shifts upon opening.
-#if 0
-    // Install CSS to shift icons into the space reserved for toggles (i.e. check and radio items).
-    signal_map().connect(sigc::bind<Gtk::MenuShell *>(sigc::ptr_fun(shift_icons), this));
-#endif
-
-    // Set the style and icon theme of the new menu based on the desktop
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+    if (prefs->getInt("/theme/shiftIcons", true)) {
+        get_style_context()->add_class("shifticonmenu");
+        shift_icons(this);
+    }
+    // Set the style and icon theme of the new menu based on the desktop
     if (Gtk::Window *window = desktop->getToplevel()) {
-        if (!window->get_style_context()->has_class("os")) {
-            get_style_context()->add_class(ink_get_current_os_class_name());
-        }
         if (window->get_style_context()->has_class("dark")) {
             get_style_context()->add_class("dark");
         } else {
@@ -302,7 +301,7 @@ void
 ContextMenu::AppendItemFromAction(Glib::RefPtr<Gio::Menu> gmenu, Glib::ustring action, Glib::ustring label, Glib::ustring icon)
 {
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    bool show_icons = prefs->getInt("/theme/menuIcons_canvas", true);
+    bool show_icons = prefs->getInt("/theme/menuIcons", true);
 
     auto menu_item = Gio::MenuItem::create(label, action);
     if (icon != "" && show_icons) {

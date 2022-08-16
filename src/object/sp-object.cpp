@@ -73,7 +73,8 @@ Inkscape::XML::NodeEventVector object_event_vector = {
     SPObject::repr_child_removed,
     SPObject::repr_attr_changed,
     SPObject::repr_content_changed,
-    SPObject::repr_order_changed
+    SPObject::repr_order_changed,
+    SPObject::repr_name_changed
 };
 
 /**
@@ -748,6 +749,10 @@ void SPObject::order_changed(Inkscape::XML::Node *child, Inkscape::XML::Node * /
     ochild->_position_changed_signal.emit(ochild);
 }
 
+void SPObject::tag_name_changed(gchar const* oldname, gchar const* newname) {
+    g_warning("XML Element renamed from %s to %s!", oldname, newname);
+}
+
 void SPObject::build(SPDocument *document, Inkscape::XML::Node *repr) {
 
 #ifdef OBJECT_TRACE
@@ -904,7 +909,7 @@ void SPObject::addChild(Inkscape::XML::Node *child, Inkscape::XML::Node * prev)
 void SPObject::releaseReferences() {
     g_assert(this->document);
     g_assert(this->repr);
-    g_assert(repr->_anchored_refcount() > 0);
+    g_assert(cloned || repr->_anchored_refcount() > 0);
 
     sp_repr_remove_listener_by_data(this->repr, this);
 
@@ -979,6 +984,13 @@ void SPObject::repr_order_changed(Inkscape::XML::Node * /*repr*/, Inkscape::XML:
     auto object = static_cast<SPObject *>(data);
 
     object->order_changed(child, old, newer);
+}
+
+void SPObject::repr_name_changed(Inkscape::XML::Node* repr, gchar const* oldname, gchar const* newname, void *data)
+{
+    auto object = static_cast<SPObject *>(data);
+
+    object->tag_name_changed(oldname, newname);
 }
 
 void SPObject::set(SPAttr key, gchar const* value) {
@@ -1318,7 +1330,7 @@ void SPObject::requestDisplayUpdate(unsigned int flags)
     // expect no nested update calls
     if (document->update_in_progress) {
         // observed with LPE on <rect>
-        g_print("WARNING: Requested update while update in progress, counter = %d\n", document->update_in_progress);
+        g_warning("WARNING: Requested update while update in progress, counter = %d", document->update_in_progress);
     }
 #endif
 
@@ -1384,11 +1396,13 @@ void SPObject::updateDisplay(SPCtx *ctx, unsigned int flags)
      * done immediately. I think this is correct (Lauris).
      */
     if (style) {
+        style->block_filter_bbox_updates = true;
         if ((flags & SP_OBJECT_STYLESHEET_MODIFIED_FLAG)) {
             style->readFromObject(this);
         } else if (parent && (flags & SP_OBJECT_STYLE_MODIFIED_FLAG) && (flags & SP_OBJECT_PARENT_MODIFIED_FLAG)) {
             style->cascade( this->parent->style );
         }
+        style->block_filter_bbox_updates = false;
     }
 
     try

@@ -31,6 +31,7 @@
 #include "ui/icon-loader.h"
 #include "ui/widget/canvas.h"
 #include "ui/widget/ink-ruler.h"
+#include "io/resource.h"
 
 #include "widgets/desktop-widget.h"  // Hopefully temp.
 
@@ -75,9 +76,8 @@ CanvasGrid::CanvasGrid(SPDesktopWidget *dtw)
     _guide_lock.set_name("LockGuides");
     _guide_lock.add(*Gtk::make_managed<Gtk::Image>("object-locked", Gtk::ICON_SIZE_MENU));
     // To be replaced by Gio::Action:
-    _guide_lock.signal_toggled().connect(sigc::mem_fun(_dtw, &SPDesktopWidget::update_guides_lock));
+    _guide_lock.signal_toggled().connect(sigc::mem_fun(*_dtw, &SPDesktopWidget::update_guides_lock));
     _guide_lock.set_tooltip_text(_("Toggle lock of all guides in the document"));
-
     // Subgrid
     _subgrid.attach(_guide_lock,     0, 0, 1, 1);
     _subgrid.attach(*_vruler,        0, 1, 1, 1);
@@ -86,38 +86,46 @@ CanvasGrid::CanvasGrid(SPDesktopWidget *dtw)
 
     // Horizontal Scrollbar
     _hadj = Gtk::Adjustment::create(0.0, -4000.0, 4000.0, 10.0, 100.0, 4.0);
-    _hadj->signal_value_changed().connect(sigc::mem_fun(_dtw, &SPDesktopWidget::on_adjustment_value_changed));
+    _hadj->signal_value_changed().connect(sigc::mem_fun(*_dtw, &SPDesktopWidget::on_adjustment_value_changed));
     _hscrollbar = Gtk::Scrollbar(_hadj, Gtk::ORIENTATION_HORIZONTAL);
     _hscrollbar.set_name("CanvasScrollbar");
     _hscrollbar.set_hexpand(true);
 
     // Vertical Scrollbar
     _vadj = Gtk::Adjustment::create(0.0, -4000.0, 4000.0, 10.0, 100.0, 4.0);
-    _vadj->signal_value_changed().connect(sigc::mem_fun(_dtw, &SPDesktopWidget::on_adjustment_value_changed));
+    _vadj->signal_value_changed().connect(sigc::mem_fun(*_dtw, &SPDesktopWidget::on_adjustment_value_changed));
     _vscrollbar = Gtk::Scrollbar(_vadj, Gtk::ORIENTATION_VERTICAL);
     _vscrollbar.set_name("CanvasScrollbar");
     _vscrollbar.set_vexpand(true);
 
-    // CMS Adjust
+    // CMS Adjust (To be replaced by Gio::Action)
     _cms_adjust.set_name("CMS_Adjust");
     _cms_adjust.add(*Gtk::make_managed<Gtk::Image>("color-management", Gtk::ICON_SIZE_MENU));
     // Can't access via C++ API, fixed in Gtk4.
     gtk_actionable_set_action_name( GTK_ACTIONABLE(_cms_adjust.gobj()), "win.canvas-color-manage");
     _cms_adjust.set_tooltip_text(_("Toggle color-managed display for this document window"));
 
-    // Sticky Zoom
-    _sticky_zoom.set_name("StickyZoom");
-    _sticky_zoom.add(*Gtk::manage(sp_get_icon_image("zoom-original", Gtk::ICON_SIZE_MENU)));
+    // popover with some common display mode related options
+    auto builder = Gtk::Builder::create_from_file(Inkscape::IO::Resource::get_filename(Inkscape::IO::Resource::UIS, "display-popup.glade"));
+    _display_popup = builder;
+    Gtk::Popover* popover;
+    _display_popup->get_widget("popover", popover);
+    Gtk::CheckButton* sticky_zoom;
+    _display_popup->get_widget("zoom-resize", sticky_zoom);
     // To be replaced by Gio::Action:
-    _sticky_zoom.signal_toggled().connect(sigc::mem_fun(_dtw, &SPDesktopWidget::sticky_zoom_toggled));
-    _sticky_zoom.set_tooltip_text(_("Zoom drawing if window size changes"));
+    sticky_zoom->signal_toggled().connect([=](){ _dtw->sticky_zoom_toggled(); });
+    _quick_actions.set_name("QuickActions");
+    _quick_actions.set_popover(*popover);
+    _quick_actions.set_image_from_icon_name("display-symbolic");
+    _quick_actions.set_direction(Gtk::ARROW_LEFT);
+    _quick_actions.set_tooltip_text(_("Display options"));
 
     // Main grid
-    attach(_subgrid,     0, 0, 1, 2);
-    attach(_sticky_zoom, 1, 0, 1, 1);
-    attach(_vscrollbar,  1, 1, 1, 1);
-    attach(_hscrollbar,  0, 2, 1, 1);
-    attach(_cms_adjust,  1, 2, 1, 1);
+    attach(_subgrid,       0, 0, 1, 2);
+    attach(_hscrollbar,    0, 2, 1, 1);
+    attach(_cms_adjust,    1, 2, 1, 1);
+    attach(_quick_actions, 1, 0, 1, 1);
+    attach(_vscrollbar,    1, 1, 1, 1);
 
     // For creating guides, etc.
     _hruler->signal_button_press_event().connect(
@@ -140,6 +148,66 @@ CanvasGrid::CanvasGrid(SPDesktopWidget *dtw)
 
 CanvasGrid::~CanvasGrid()
 {
+}
+
+void CanvasGrid::on_realize() {
+    // actions should be available now
+
+    if (auto map = _dtw->get_action_map()) {
+        auto set_display_icon = [=]() {
+            Glib::ustring id;
+            auto mode = _canvas->get_render_mode();
+            switch (mode) {
+                case RenderMode::NORMAL: id = "display";
+                    break;
+                case RenderMode::OUTLINE: id = "display-outline";
+                    break;
+                case RenderMode::OUTLINE_OVERLAY: id = "display-outline-overlay";
+                    break;
+                case RenderMode::VISIBLE_HAIRLINES: id = "display-enhance-stroke";
+                    break;
+                case RenderMode::NO_FILTERS: id = "display-no-filter";
+                    break;
+                default:
+                    g_warning("Unknown display mode in canvas-grid");
+                    break;
+            }
+
+            if (!id.empty()) {
+                // if CMS is ON show alternative icons
+                if (_canvas->get_cms_active()) {
+                    id += "-alt";
+                }
+                _quick_actions.set_image_from_icon_name(id + "-symbolic");
+            }
+        };
+
+        set_display_icon();
+
+        // when display mode state changes, update icon
+        auto cms_action = Glib::RefPtr<Gio::SimpleAction>::cast_dynamic(map->lookup_action("canvas-color-manage"));
+        auto disp_action = Glib::RefPtr<Gio::SimpleAction>::cast_dynamic(map->lookup_action("canvas-display-mode"));
+
+        if (cms_action && disp_action) {
+            disp_action->signal_activate().connect([=](const Glib::VariantBase& state){ set_display_icon(); });
+            cms_action-> signal_activate().connect([=](const Glib::VariantBase& state){ set_display_icon(); });
+        }
+        else {
+            g_warning("No canvas-display-mode and/or canvas-color-manage action available to canvas-grid");
+        }
+    }
+    else {
+        g_warning("No action map available to canvas-grid");
+    }
+
+    parent_type::on_realize();
+}
+
+// TODO: remove when sticky zoom gets replaced by Gio::Action:
+Gtk::ToggleButton* CanvasGrid::GetStickyZoom() {
+    Gtk::CheckButton* sticky_zoom;
+    _display_popup->get_widget("zoom-resize", sticky_zoom);
+    return sticky_zoom;
 }
 
 // _dt2r should be a member of _canvas.
@@ -180,14 +248,13 @@ CanvasGrid::ShowScrollbars(bool state)
         _vscrollbar.show();
         _cms_adjust.show();
         _cms_adjust.show_all_children();
-        _sticky_zoom.show();
-        _sticky_zoom.show_all_children();
+        _quick_actions.show();
     } else {
         // Hide scrollbars
         _hscrollbar.hide();
         _vscrollbar.hide();
         _cms_adjust.hide();
-        _sticky_zoom.hide();
+        _quick_actions.hide();
     }
 }
 

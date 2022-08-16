@@ -73,7 +73,7 @@ StarTool::StarTool(SPDesktop *desktop)
 
     this->sel_changed_connection.disconnect();
 
-    this->sel_changed_connection = selection->connectChanged(sigc::mem_fun(this, &StarTool::selection_changed));
+    this->sel_changed_connection = selection->connectChanged(sigc::mem_fun(*this, &StarTool::selection_changed));
 
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     if (prefs->getBool("/tools/shapes/selcue")) {
@@ -206,7 +206,7 @@ bool StarTool::root_handler(GdkEvent* event) {
                 // no dragging, select clicked item if any
                 if (event->button.state & GDK_SHIFT_MASK) {
                     selection->toggle(this->item_to_select);
-                } else {
+                } else if (!selection->includes(this->item_to_select)) {
                     selection->set(this->item_to_select);
                 }
             } else {

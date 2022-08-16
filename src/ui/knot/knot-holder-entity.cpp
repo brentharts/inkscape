@@ -18,22 +18,19 @@
 
 #include "knot-holder-entity.h"
 
-#include "knot-holder.h"
-
 #include "desktop.h"
+#include "display/control/canvas-item-ctrl.h"
 #include "inkscape.h"
-#include "preferences.h"
-#include "snap.h"
-#include "style.h"
-
+#include "knot-holder.h"
 #include "live_effects/effect.h"
 #include "object/sp-hatch.h"
 #include "object/sp-item.h"
+#include "object/sp-marker.h"
 #include "object/sp-namedview.h"
 #include "object/sp-pattern.h"
-#include "object/sp-marker.h"
-
-#include "display/control/canvas-item-ctrl.h"
+#include "preferences.h"
+#include "snap.h"
+#include "style.h"
 
 void KnotHolderEntity::create(SPDesktop *desktop, SPItem *item, KnotHolder *parent,
                               Inkscape::CanvasItemCtrlType type,
@@ -57,6 +54,7 @@ void KnotHolderEntity::create(SPDesktop *desktop, SPItem *item, KnotHolder *pare
     knot = new SPKnot(desktop, tip, type, name);
     knot->fill [SP_KNOT_STATE_NORMAL] = color;
     knot->ctrl->set_fill(color);
+    on_created();
     update_knot();
     knot->show();
 
@@ -110,8 +108,8 @@ KnotHolderEntity::snap_knot_position(Geom::Point const &p, guint state)
     Geom::Affine const i2dt (parent_holder->getEditTransform() * item->i2dt_affine());
     Geom::Point s = p * i2dt;
 
-    if (!desktop) std::cout << "No desktop" << std::endl;
-    if (!desktop->namedview) std::cout << "No named view" << std::endl;
+    if (!desktop) std::cerr << "No desktop" << std::endl;
+    if (!desktop->namedview) std::cerr << "No named view" << std::endl;
     SnapManager &m = desktop->namedview->snap_manager;
     m.setup(desktop, true, item);
     m.freeSnapReturnByRef(s, Inkscape::SNAPSOURCE_NODE_HANDLE);
@@ -154,7 +152,82 @@ LPEKnotHolderEntity::knot_ungrabbed(Geom::Point const &p, Geom::Point const &ori
 
 /* Pattern manipulation */
 
-/*  TODO: this pattern manipulation is not able to handle general transformation matrices. Only matrices that are the result of a pure scale times a pure rotation. */
+void PatternKnotHolderEntity::on_created()
+{
+    // Setup an initial pattern transformation in the center
+    if (auto rect = item->documentGeometricBounds()) {
+        set_offset(rect->midpoint());
+    }
+}
+
+/**
+ * Returns the position based on the pattern's origin, shifted by the percent x/y of it's size.
+ */
+Geom::Point PatternKnotHolderEntity::_get_pos(gdouble x, gdouble y, bool transform) const
+{
+    auto pat = _pattern();
+    auto pt = Geom::Point((_cell[Geom::X] + x) * pat->width(),
+                          (_cell[Geom::Y] + y) * pat->height());
+    return transform ? pt * pat->getTransform() : pt;
+}
+
+bool PatternKnotHolderEntity::set_item_clickpos(Geom::Point loc)
+{
+    set_offset(loc);
+    update_knot();
+    return true;
+}
+
+void PatternKnotHolderEntity::set_offset(Geom::Point loc)
+{
+    auto pat = _pattern();
+
+    // 1. Turn the location into the pattern grid coordinate
+    auto scale = Geom::Scale(pat->width(), pat->height());
+    auto d2i = item->i2doc_affine().inverse();
+    auto i2p = pat->getTransform().inverse();
+
+    // Get grid index of nearest pattern repetition.
+    _cell = (loc * d2i * i2p * scale.inverse()).floor();
+}
+
+SPPattern *PatternKnotHolderEntity::_pattern() const
+{
+    return _fill ? SP_PATTERN(item->style->getFillPaintServer()) : SP_PATTERN(item->style->getStrokePaintServer());
+}
+
+bool PatternKnotHolderEntity::knot_missing() const
+{
+    return (_pattern() == nullptr);
+}
+
+/* Pattern X/Y knot */
+
+void PatternKnotHolderEntityXY::on_created()
+{
+    PatternKnotHolderEntity::on_created();
+    // TODO: Move to constructor when desktop is generally available
+    _quad = std::make_unique<Inkscape::CanvasItemQuad>(desktop->getCanvasControls());
+    _quad->set_z_position(0);
+    _quad->set_fill(0x00000000);
+    _quad->set_stroke(0x808080ff);
+    _quad->set_inverted(true);
+    _quad->hide();
+}
+
+void PatternKnotHolderEntityXY::update_knot()
+{
+    KnotHolderEntity::update_knot();
+    auto tr = item->i2dt_affine();
+    _quad->set_coords(_get_pos(0, 0) * tr, _get_pos(0, 1) * tr,
+                      _get_pos(1, 1) * tr, _get_pos(1, 0) * tr);
+    _quad->show();
+}
+
+Geom::Point PatternKnotHolderEntityXY::knot_get() const
+{
+    return _get_pos(0, 0);
+}
 
 void
 PatternKnotHolderEntityXY::knot_set(Geom::Point const &p, Geom::Point const &origin, guint state)
@@ -178,43 +251,11 @@ PatternKnotHolderEntityXY::knot_set(Geom::Point const &p, Geom::Point const &ori
     item->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
 }
 
-static Geom::Point sp_pattern_knot_get(SPPattern const *pat, gdouble x, gdouble y)
-{
-    return Geom::Point(x, y) * pat->getTransform();
-}
+/* Pattern Angle knot */
 
-bool
-PatternKnotHolderEntity::knot_missing() const
+Geom::Point PatternKnotHolderEntityAngle::knot_get() const
 {
-    SPPattern *pat = _pattern();
-    return (pat == nullptr);
-}
-
-SPPattern*
-PatternKnotHolderEntity::_pattern() const
-{
-    return _fill ? SP_PATTERN(item->style->getFillPaintServer()) : SP_PATTERN(item->style->getStrokePaintServer());
-}
-
-Geom::Point
-PatternKnotHolderEntityXY::knot_get() const
-{
-    SPPattern *pat = _pattern();
-    return sp_pattern_knot_get(pat, 0, 0);
-}
-
-Geom::Point
-PatternKnotHolderEntityAngle::knot_get() const
-{
-    SPPattern *pat = _pattern();
-    return sp_pattern_knot_get(pat, pat->width(), 0);
-}
-
-Geom::Point
-PatternKnotHolderEntityScale::knot_get() const
-{
-    SPPattern *pat = _pattern();
-    return sp_pattern_knot_get(pat, pat->width(), pat->height());
+    return _get_pos(1.0, 0);
 }
 
 void
@@ -223,10 +264,8 @@ PatternKnotHolderEntityAngle::knot_set(Geom::Point const &p, Geom::Point const &
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     int const snaps = prefs->getInt("/options/rotationsnapsperpi/value", 12);
 
-    SPPattern *pat = _fill ? SP_PATTERN(item->style->getFillPaintServer()) : SP_PATTERN(item->style->getStrokePaintServer());
-
     // get the angle from pattern 0,0 to the cursor pos
-    Geom::Point transform_origin = sp_pattern_knot_get(pat, 0, 0);
+    Geom::Point transform_origin = _get_pos(0, 0);
     gdouble theta = atan2(p - transform_origin);
     gdouble theta_old = atan2(knot_get() - transform_origin);
 
@@ -243,33 +282,55 @@ PatternKnotHolderEntityAngle::knot_set(Geom::Point const &p, Geom::Point const &
     item->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
 }
 
-void
-PatternKnotHolderEntityScale::knot_set(Geom::Point const &p, Geom::Point const &origin, guint state)
+/* Pattern scale knot */
+
+Geom::Point PatternKnotHolderEntityScale::knot_get() const
 {
-    SPPattern *pat = _pattern();
+    return _get_pos(1.0, 1.0);
+}
 
-    // FIXME: this snapping should be done together with knowing whether control was pressed. If GDK_CONTROL_MASK, then constrained snapping should be used.
-    Geom::Point p_snapped = snap_knot_position(p, state);
+/** Store pattern geometry info when the scale knot is first grabbed. */
+void PatternKnotHolderEntityScale::knot_grabbed(Geom::Point const &grab_pos, unsigned)
+{
+    _cached_transform = _pattern()->getTransform();
+    _cached_origin = _get_pos(0, 0);
+    _cached_inverse_linear = _cached_transform.withoutTranslation().inverse();
+    _cached_diagonal = (grab_pos - _cached_origin) * _cached_inverse_linear;
 
-    // Get the new scale from the position of the knotholder
-    Geom::Affine transform = pat->getTransform();
-    Geom::Affine transform_inverse = transform.inverse();
-    Geom::Point d = p_snapped * transform_inverse;
-    Geom::Point d_origin = origin * transform_inverse;
-    Geom::Point origin_dt;
-    gdouble pat_x = pat->width();
-    gdouble pat_y = pat->height();
-    if ( state & GDK_CONTROL_MASK ) {
-        // if ctrl is pressed: use 1:1 scaling
-        d = d_origin * (d.length() / d_origin.length());
+    if (auto bounding_box = item->documentVisualBounds()) {
+        // Compare the areas of the pattern and the item to find the number of repetitions.
+        double const pattern_area = std::abs(_cached_diagonal[Geom::X] * _cached_diagonal[Geom::Y]);
+        double const item_area = bounding_box->area() * _cached_inverse_linear.descrim2() /
+                                 (item->i2doc_affine().descrim2() ?: 1e-3);
+        _cached_min_scale = std::sqrt(item_area / (pattern_area * MAX_REPETITIONS));
+    } else {
+        _cached_min_scale = 1e-6;
     }
+}
 
-    Geom::Affine rot = Geom::Translate(-origin_dt)
-                     * Geom::Scale(d.x() / pat_x, d.y() / pat_y)
-                     * Geom::Translate(origin_dt)
-                     * transform;
+void
+PatternKnotHolderEntityScale::knot_set(Geom::Point const &p, Geom::Point const &, guint state)
+{
+    using namespace Geom;
+    // FIXME: this snapping should be done together with knowing whether control was pressed.
+    // If GDK_CONTROL_MASK, then constrained snapping should be used.
+    Point p_snapped = snap_knot_position(p, state);
 
-    item->adjust_pattern(rot, true, _fill ? TRANSFORM_FILL : TRANSFORM_STROKE);
+    Point const new_extent = (p_snapped - _cached_origin) * _cached_inverse_linear;
+
+    // 1. Calculate absolute scale factor first
+    double scale_x = std::clamp(new_extent[X] / _cached_diagonal[X], _cached_min_scale, 1e9);
+    double scale_y = std::clamp(new_extent[Y] / _cached_diagonal[Y], _cached_min_scale, 1e9);
+
+    Affine new_transform = (state & GDK_CONTROL_MASK) ? Scale(lerp(0.5, scale_x, scale_y))
+                                                      : Scale(scale_x, scale_y);
+
+    // 2. Calculate offset to keep pattern origin aligned
+    new_transform *= _cached_transform;
+    auto const new_uncompensated_origin = _get_pos(0, 0, false) * new_transform;
+    new_transform *= Translate(_cached_origin - new_uncompensated_origin);
+
+    item->adjust_pattern(new_transform, true, _fill ? TRANSFORM_FILL : TRANSFORM_STROKE);
     item->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
 }
 

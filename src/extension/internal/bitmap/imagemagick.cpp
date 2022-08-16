@@ -61,7 +61,7 @@ ImageMagickDocCache::ImageMagickDocCache(Inkscape::UI::View::View * view) :
     _imageItems(NULL)
 {
     SPDesktop *desktop = (SPDesktop*)view;
-    auto selectedItemList = desktop->selection->items();
+    auto selectedItemList = desktop->getSelection()->items();
     int selectCount = (int) boost::distance(selectedItemList);
     
     // Init the data-holders
@@ -236,7 +236,7 @@ ImageMagick::effect (Inkscape::Extension::Effect *module, Inkscape::UI::View::Vi
     Uses AutoGUI for creating the GUI.
 */
 Gtk::Widget *
-ImageMagick::prefs_effect(Inkscape::Extension::Effect *module, Inkscape::UI::View::View * view, sigc::signal<void> * changeSignal, Inkscape::Extension::Implementation::ImplementationDocumentCache * /*docCache*/)
+ImageMagick::prefs_effect(Inkscape::Extension::Effect *module, Inkscape::UI::View::View * view, sigc::signal<void ()> * changeSignal, Inkscape::Extension::Implementation::ImplementationDocumentCache * /*docCache*/)
 {
     SPDocument * current_document = view->doc();
 

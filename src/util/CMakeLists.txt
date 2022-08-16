@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 set(util_SRC
+	action-accel.cpp
 	expression-evaluator.cpp
 	share.cpp
 	paper.cpp
@@ -11,13 +12,17 @@ set(util_SRC
 
 	# -------
 	# Headers
+	action-accel.h
+	cached_map.h
 	const_char_ptr.h
 	enums.h
 	expression-evaluator.h
 	fixed_point.h
 	format.h
+	format_size.h
 	forward-pointer-iterator.h
 	longest-common-suffix.h
+	optstr.h
 	pages-skeleton.h
 	paper.h
 	preview.h

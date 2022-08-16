@@ -10,7 +10,6 @@
 
 #include <iostream>
 #include <map>
-#include <chrono>
 
 #include <giomm.h>  // Not <gtkmm.h>! To eventually allow a headless version!
 #include <glibmm/i18n.h>
@@ -46,9 +45,13 @@ public:
     Glib::ustring pref_path;
 };
 
-// clang-format off
-static std::map<Glib::ustring, ToolData> tool_data =
+static std::map<Glib::ustring, ToolData> const &get_tool_data()
 {
+    static std::map<Glib::ustring, ToolData> tool_data;
+
+    if (tool_data.empty()) {
+        tool_data = {
+        // clang-format off
     {"Select",       {TOOLS_SELECT,          PREFS_PAGE_TOOLS_SELECTOR,       "/tools/select",          }},
     {"Node",         {TOOLS_NODES,           PREFS_PAGE_TOOLS_NODE,           "/tools/nodes",           }},
     {"Marker",       {TOOLS_MARKER,          PREFS_PAGE_TOOLS,/*No Page*/     "/tools/marker",          }},
@@ -73,36 +76,48 @@ static std::map<Glib::ustring, ToolData> tool_data =
     {"Eraser",       {TOOLS_ERASER,          PREFS_PAGE_TOOLS_ERASER,         "/tools/eraser",          }},
     {"LPETool",      {TOOLS_LPETOOL,         PREFS_PAGE_TOOLS, /* No Page */  "/tools/lpetool",         }},
     {"Pages",        {TOOLS_PAGES,           PREFS_PAGE_TOOLS,                "/tools/pages",           }}
-};
+        // clang-format on
+        };
+    }
+    return tool_data;
+}
 
-static std::map<Glib::ustring, Glib::ustring> tool_msg =
+static std::map<Glib::ustring, Glib::ustring> const &get_tool_msg()
 {
-    {"Select",      N_("<b>Click</b> to Select and Transform objects, <b>Drag</b> to select many objects.")                                                                                                                   },
-    {"Node",        N_("Modify selected path points (nodes) directly.")                                                                                                                                                       },
-    {"Rect",        N_("<b>Drag</b> to create a rectangle. <b>Drag controls</b> to round corners and resize. <b>Click</b> to select.")                                                                                        },
-    {"Arc",         N_("<b>Drag</b> to create an ellipse. <b>Drag controls</b> to make an arc or segment. <b>Click</b> to select.")                                                                                           },
-    {"Star",        N_("<b>Drag</b> to create a star. <b>Drag controls</b> to edit the star shape. <b>Click</b> to select.")                                                                                                  },
-    {"3DBox",       N_("<b>Drag</b> to create a 3D box. <b>Drag controls</b> to resize in perspective. <b>Click</b> to select (with <b>Ctrl+Alt</b> for single faces).")                                                      },
-    {"Spiral",      N_("<b>Drag</b> to create a spiral. <b>Drag controls</b> to edit the spiral shape. <b>Click</b> to select.")                                                                                              },
-    {"Marker",      N_("<b>Click</b> a shape to start editing its markers. <b>Drag controls</b> to change orientation, scale, and position.")                                                                                 },
-    {"Pencil",      N_("<b>Drag</b> to create a freehand line. <b>Shift</b> appends to selected path, <b>Alt</b> activates sketch mode.")                                                                                     },
-    {"Pen",         N_("<b>Click</b> or <b>click and drag</b> to start a path; with <b>Shift</b> to append to selected path. <b>Ctrl+click</b> to create single dots (straight line modes only).")                            },
-    {"Calligraphic",N_("<b>Drag</b> to draw a calligraphic stroke; with <b>Ctrl</b> to track a guide path. <b>Arrow keys</b> adjust width (left/right) and angle (up/down).")                                                 },
-    {"Text",        N_("<b>Click</b> to select or create text, <b>drag</b> to create flowed text; then type.")                                                                                                                },
-    {"Gradient",    N_("<b>Drag</b> or <b>double click</b> to create a gradient on selected objects, <b>drag handles</b> to adjust gradients.")                                                                               },
-    {"Mesh",        N_("<b>Drag</b> or <b>double click</b> to create a mesh on selected objects, <b>drag handles</b> to adjust meshes.")                                                                                      },
-    {"Zoom",        N_("<b>Click</b> or <b>drag around an area</b> to zoom in, <b>Shift+click</b> to zoom out.")                                                                                                              },
-    {"Measure",     N_("<b>Drag</b> to measure the dimensions of objects.")                                                                                                                                                   },
-    {"Dropper",     N_("<b>Click</b> to set fill, <b>Shift+click</b> to set stroke; <b>drag</b> to average color in area; with <b>Alt</b> to pick inverse color; <b>Ctrl+C</b> to copy the color under mouse to clipboard")   },
-    {"Tweak",       N_("To tweak a path by pushing, select it and drag over it.")                                                                                                                                             },
-    {"Spray",       N_("<b>Drag</b>, <b>click</b> or <b>click and scroll</b> to spray the selected objects.")                                                                                                                 },
-    {"Connector",   N_("<b>Click and drag</b> between shapes to create a connector.")                                                                                                                                         },
-    {"PaintBucket", N_("<b>Click</b> to paint a bounded area, <b>Shift+click</b> to union the new fill with the current selection, <b>Ctrl+click</b> to change the clicked object's fill and stroke to the current setting.") },
-    {"Eraser",      N_("<b>Drag</b> to erase.")                                                                                                                                                                               },
-    {"LPETool",     N_("Choose a subtool from the toolbar")                                                                                                                                                                   },
-    {"Pages",       N_("Create and manage pages.")}
-};
-// clang-format on
+    static std::map<Glib::ustring, Glib::ustring> tool_msg;
+
+    if (tool_msg.empty()) {
+        tool_msg = {
+        // clang-format off
+    {"Select",       _("<b>Click</b> to Select and Transform objects, <b>Drag</b> to select many objects.")                                                                                                                   },
+    {"Node",         _("Modify selected path points (nodes) directly.")                                                                                                                                                       },
+    {"Rect",         _("<b>Drag</b> to create a rectangle. <b>Drag controls</b> to round corners and resize. <b>Click</b> to select.")                                                                                        },
+    {"Arc",          _("<b>Drag</b> to create an ellipse. <b>Drag controls</b> to make an arc or segment. <b>Click</b> to select.")                                                                                           },
+    {"Star",         _("<b>Drag</b> to create a star. <b>Drag controls</b> to edit the star shape. <b>Click</b> to select.")                                                                                                  },
+    {"3DBox",        _("<b>Drag</b> to create a 3D box. <b>Drag controls</b> to resize in perspective. <b>Click</b> to select (with <b>Ctrl+Alt</b> for single faces).")                                                      },
+    {"Spiral",       _("<b>Drag</b> to create a spiral. <b>Drag controls</b> to edit the spiral shape. <b>Click</b> to select.")                                                                                              },
+    {"Marker",       _("<b>Click</b> a shape to start editing its markers. <b>Drag controls</b> to change orientation, scale, and position.")                                                                                 },
+    {"Pencil",       _("<b>Drag</b> to create a freehand line. <b>Shift</b> appends to selected path, <b>Alt</b> activates sketch mode.")                                                                                     },
+    {"Pen",          _("<b>Click</b> or <b>click and drag</b> to start a path; with <b>Shift</b> to append to selected path. <b>Ctrl+click</b> to create single dots (straight line modes only).")                            },
+    {"Calligraphic", _("<b>Drag</b> to draw a calligraphic stroke; with <b>Ctrl</b> to track a guide path. <b>Arrow keys</b> adjust width (left/right) and angle (up/down).")                                                 },
+    {"Text",         _("<b>Click</b> to select or create text, <b>drag</b> to create flowed text; then type.")                                                                                                                },
+    {"Gradient",     _("<b>Drag</b> or <b>double click</b> to create a gradient on selected objects, <b>drag handles</b> to adjust gradients.")                                                                               },
+    {"Mesh",         _("<b>Drag</b> or <b>double click</b> to create a mesh on selected objects, <b>drag handles</b> to adjust meshes.")                                                                                      },
+    {"Zoom",         _("<b>Click</b> or <b>drag around an area</b> to zoom in, <b>Shift+click</b> to zoom out.")                                                                                                              },
+    {"Measure",      _("<b>Drag</b> to measure the dimensions of objects.")                                                                                                                                                   },
+    {"Dropper",      _("<b>Click</b> to set fill, <b>Shift+click</b> to set stroke; <b>drag</b> to average color in area; with <b>Alt</b> to pick inverse color; <b>Ctrl+C</b> to copy the color under mouse to clipboard")   },
+    {"Tweak",        _("To tweak a path by pushing, select it and drag over it.")                                                                                                                                             },
+    {"Spray",        _("<b>Drag</b>, <b>click</b> or <b>click and scroll</b> to spray the selected objects.")                                                                                                                 },
+    {"Connector",    _("<b>Click and drag</b> between shapes to create a connector.")                                                                                                                                         },
+    {"PaintBucket",  _("<b>Click</b> to paint a bounded area, <b>Shift+click</b> to union the new fill with the current selection, <b>Ctrl+click</b> to change the clicked object's fill and stroke to the current setting.") },
+    {"Eraser",       _("<b>Drag</b> to erase.")                                                                                                                                                                               },
+    {"LPETool",      _("Choose a subtool from the toolbar")                                                                                                                                                                   },
+    {"Pages",        _("Create and manage pages.")}
+        // clang-format on
+        };
+    }
+    return tool_msg;
+}
 
 Glib::ustring
 get_active_tool(InkscapeWindow *win)
@@ -111,13 +126,13 @@ get_active_tool(InkscapeWindow *win)
 
     auto action = win->lookup_action("tool-switch");
     if (!action) {
-        std::cerr << "git_active_tool: action 'tool-switch' missing!" << std::endl;
+        std::cerr << "get_active_tool: action 'tool-switch' missing!" << std::endl;
         return state;
     }
 
     auto saction = Glib::RefPtr<Gio::SimpleAction>::cast_dynamic(action);
     if (!saction) {
-        std::cerr << "git_active_tool: action 'tool-switch' not SimpleAction!" << std::endl;
+        std::cerr << "get_active_tool: action 'tool-switch' not SimpleAction!" << std::endl;
         return state;
     }
 
@@ -129,11 +144,10 @@ get_active_tool(InkscapeWindow *win)
 int
 get_active_tool_enum(InkscapeWindow *win)
 {
-    return tool_data[get_active_tool(win)].tool;
+    return get_tool_data().at(get_active_tool(win)).tool;
 }
 
 void tool_switch(Glib::ustring const &tool, InkscapeWindow *win);
-void tool_preferences(Glib::ustring const &tool, InkscapeWindow *win);
 
 void
 set_active_tool(InkscapeWindow *win, Glib::ustring const &tool)
@@ -193,10 +207,11 @@ set_active_tool(InkscapeWindow *win, SPItem *item, Geom::Point const p)
 void
 tool_switch(Glib::ustring const &tool, InkscapeWindow *win)
 {
+    auto const &tool_data = get_tool_data();
     // Valid tool?
     auto tool_it = tool_data.find(tool);
     if (tool_it == tool_data.end()) {
-        std::cerr << "tool-switch: invalid tool name: " << tool << std::endl;
+        std::cerr << "tool-switch: invalid tool name: " << tool.raw() << std::endl;
         return;
     }
 
@@ -219,48 +234,15 @@ tool_switch(Glib::ustring const &tool, InkscapeWindow *win)
         return;
     }
 
-    // Get current state
-    Glib::ustring current_tool;
-    saction->get_state(current_tool);
-
-    // Initialize time to zero.
-    static std::chrono::time_point old_time = std::chrono::time_point<std::chrono::high_resolution_clock>();
-
-    if (tool == current_tool) {
-        /*
-         * This happens under two circumstances:
-         * 1. The user double clicks a tool. In this case we pop-up the Preference Dialog opened to the
-         *    tool's page. (This only works if the Preference Dialog was not open.)
-         * 2. The user is switching tools. This happens as a RadioButton triggers the action both when
-         *    toggling on and when toggling off. We want to ignore the toggling off event.
-         *    Note, if a user clicks on two different tool buttons quickly, it will trigger opening
-         *    the first tool's preference page. If this is a problem, we could connect to
-         *    the "button_pressed" signal of the buttons via code, but this would be messier.
-         */
-        auto current_time =  std::chrono::high_resolution_clock::now();
-        std::chrono::duration<double> elapsed_seconds = current_time - old_time; // In seconds
-        // std::cout << "  elapased time: " << elapsed_seconds.count() << std::endl;
-        auto settings = Gtk::Settings::get_default();
-        Glib::PropertyProxy<int> double_click_time = settings->property_gtk_double_click_time(); // In ms. Default: 400ms.
-        if (elapsed_seconds.count() * 1000 < double_click_time.get_value()) {
-            // User double clicked!
-            tool_preferences(tool, win);
-        }
-
-        old_time = current_time; // So if tool is already open, double clicking will still work.
-        return;
-    }
-
-    old_time = std::chrono::high_resolution_clock::now();
-
     // Update button states.
     saction->set_enabled(false); // Avoid infinite loop when called by tool_toogle().
     saction->change_state(tool);
     saction->set_enabled(true);
 
-    // Switch to new tool. TODO: Clean this up. This should be one window function. Setting tool via preference path is a bit strange.
-    dt->tipsMessageContext()->set(Inkscape::NORMAL_MESSAGE, gettext( tool_msg[tool].c_str() ) );
-    dt->setEventContext(tool_data[tool].pref_path);
+    // Switch to new tool. TODO: Clean this up. This should be one window function.
+    // Setting tool via preference path is a bit strange.
+    dt->tipsMessageContext()->set(Inkscape::NORMAL_MESSAGE, get_tool_msg().at(tool).c_str());
+    dt->setEventContext(tool_data.at(tool).pref_path);
 }
 
 /**
@@ -269,10 +251,11 @@ tool_switch(Glib::ustring const &tool, InkscapeWindow *win)
 void
 tool_preferences(Glib::ustring const &tool, InkscapeWindow *win)
 {
+    auto const &tool_data = get_tool_data();
     // Valid tool?
     auto tool_it = tool_data.find(tool);
     if (tool_it == tool_data.end()) {
-        std::cerr << "tool-preferences: invalid tool name: " << tool << std::endl;
+        std::cerr << "tool-preferences: invalid tool name: " << tool.raw() << std::endl;
         return;
     }
 

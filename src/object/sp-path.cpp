@@ -152,26 +152,19 @@ void SPPath::build(SPDocument *document, Inkscape::XML::Node *repr) {
 
             if (matchInfo.matches()) {
                 Glib::ustring  value = matchInfo.fetch(1);
-                Geom::PathVector pv = sp_svg_read_pathv(value.c_str());
 
-                auto curve = std::make_unique<SPCurve>(pv);
-                if (curve) {
+                // Update curve
+                setCurveInsync(SPCurve(sp_svg_read_pathv(value.c_str())));
 
-                    // Update curve
-                    setCurveInsync(std::move(curve));
+                // Convert from property to attribute (convert back on write)
+                setAttributeOrRemoveIfEmpty("d", value);
 
-                    // Convert from property to attribute (convert back on write)
-                    setAttributeOrRemoveIfEmpty("d", value);
+                SPCSSAttr *css = sp_repr_css_attr( getRepr(), "style");
+                sp_repr_css_unset_property ( css, "d");
+                sp_repr_css_set ( getRepr(), css, "style" );
+                sp_repr_css_attr_unref ( css );
 
-                    SPCSSAttr *css = sp_repr_css_attr( getRepr(), "style");
-                    sp_repr_css_unset_property ( css, "d");
-                    sp_repr_css_set ( getRepr(), css, "style" );
-                    sp_repr_css_attr_unref ( css );
-
-                    style->d.style_src = SPStyleSrc::ATTRIBUTE;
-                } else {
-                    std::cerr << "SPPath::build: Failed to create curve: " << input << std::endl;
-                }
+                style->d.style_src = SPStyleSrc::ATTRIBUTE;
             }
         }
         // If any if statement is false, do nothing... don't overwrite 'd' from attribute
@@ -205,36 +198,34 @@ void SPPath::set(SPAttr key, const gchar* value) {
     switch (key) {
         case SPAttr::INKSCAPE_ORIGINAL_D:
             if (value) {
-                Geom::PathVector pv = sp_svg_read_pathv(value);
-                setCurveBeforeLPE(std::make_unique<SPCurve>(pv));
+                setCurveBeforeLPE(SPCurve(sp_svg_read_pathv(value)));
             } else {
-                this->setCurveBeforeLPE(nullptr);
+                setCurveBeforeLPE(nullptr);
             }
             break;
 
        case SPAttr::D:
             if (value) {
-                Geom::PathVector pv = sp_svg_read_pathv(value);
-                setCurve(std::make_unique<SPCurve>(pv));
+                setCurve(SPCurve(sp_svg_read_pathv(value)));
             } else {
-                this->setCurve(nullptr);
+                setCurve(nullptr);
             }
             break;
 
         case SPAttr::MARKER:
-            sp_shape_set_marker(this, SP_MARKER_LOC, value);
+            set_marker(SP_MARKER_LOC, value);
             this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
             break;
         case SPAttr::MARKER_START:
-            sp_shape_set_marker(this, SP_MARKER_LOC_START, value);
+            set_marker(SP_MARKER_LOC_START, value);
             this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
             break;
         case SPAttr::MARKER_MID:
-            sp_shape_set_marker(this, SP_MARKER_LOC_MID, value);
+            set_marker(SP_MARKER_LOC_MID, value);
             this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
             break;
         case SPAttr::MARKER_END:
-            sp_shape_set_marker(this, SP_MARKER_LOC_END, value);
+            set_marker(SP_MARKER_LOC_END, value);
             this->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
             break;
 
@@ -269,8 +260,8 @@ g_message("sp_path_write writes 'd' attribute");
     }
 
     if (flags & SP_OBJECT_WRITE_EXT) {
-        if ( this->_curve_before_lpe != nullptr ) {
-            repr->setAttribute("inkscape:original-d", sp_svg_write_path(this->_curve_before_lpe->get_pathvector()));
+        if (_curve_before_lpe) {
+            repr->setAttribute("inkscape:original-d", sp_svg_write_path(_curve_before_lpe->get_pathvector()));
         } else {
             repr->removeAttribute("inkscape:original-d");
         }
@@ -308,13 +299,13 @@ Geom::Affine SPPath::set_transform(Geom::Affine const &transform) {
             // we are inside a LPE group creating a new element 
             // and the original-d curve is not defined, 
             // This fix a issue with calligrapic tool that make a transform just when draw
-            setCurveBeforeLPE(std::move(_curve));
+            setCurveBeforeLPE(_curve.get());
         }
         _curve_before_lpe->transform(transform);
         // fix issue https://gitlab.com/inkscape/inbox/-/issues/5460
         sp_lpe_item_update_patheffect(this, false, false);
     } else {
-        _curve->transform(transform);
+        setCurve(_curve->transformed(transform));
     }
     // Adjust stroke
     this->adjust_stroke(transform.descrim());

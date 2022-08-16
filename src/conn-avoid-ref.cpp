@@ -185,7 +185,7 @@ Geom::Point SPAvoidRef::getConnectionPointPos()
     return (bbox) ? bbox->midpoint() : Geom::Point(0, 0);
 }
 
-static std::vector<Geom::Point> approxCurveWithPoints(SPCurve *curve)
+static std::vector<Geom::Point> approxCurveWithPoints(SPCurve const *curve)
 {
     // The number of segments to use for not straight curves approximation
     const unsigned NUM_SEGS = 4;
@@ -235,42 +235,38 @@ static std::vector<Geom::Point> approxCurveWithPoints(SPCurve *curve)
 
 static std::vector<Geom::Point> approxItemWithPoints(SPItem const *item, const Geom::Affine& item_transform)
 {
-    // The structure to hold the output
-    std::vector<Geom::Point> poly_points;
-    std::unique_ptr<SPCurve> item_curve;
-
     auto item_mutable = const_cast<SPItem *>(item);
 
     if (auto group = dynamic_cast<SPGroup *>(item_mutable)) {
+        std::vector<Geom::Point> poly_points;
         // consider all first-order children
         std::vector<SPItem*> itemlist = sp_item_group_item_list(group);
         for (auto child_item : itemlist) {
             std::vector<Geom::Point> child_points = approxItemWithPoints(child_item, item_transform * child_item->transform);
             poly_points.insert(poly_points.end(), child_points.begin(), child_points.end());
         }
+        return poly_points;
     } else if (auto shape = dynamic_cast<SPShape *>(item_mutable)) {
         shape->set_shape();
-        item_curve = SPCurve::copy(shape->curve());
         // make sure it has an associated curve
-        if (item_curve)
-        {
+        if (shape->curve()) {
+            auto item_curve = *shape->curve();
             // apply transformations (up to common ancestor)
-            item_curve->transform(item_transform);
+            item_curve.transform(item_transform);
+            return approxCurveWithPoints(&item_curve);
+        } else {
+            return {};
         }
     } else {
-        auto bbox = item->documentPreferredBounds();
-        if (bbox) {
-            item_curve = SPCurve::new_from_rect(*bbox);
+        if (auto bbox = item->documentPreferredBounds()) {
+            auto item_curve = SPCurve(*bbox);
+            return approxCurveWithPoints(&item_curve);
+        } else {
+            return {};
         }
     }
-
-    if (item_curve) {
-        std::vector<Geom::Point> curve_points = approxCurveWithPoints(item_curve.get());
-        poly_points.insert(poly_points.end(), curve_points.begin(), curve_points.end());
-    }
-
-    return poly_points;
 }
+
 static Avoid::Polygon avoid_item_poly(SPItem const *item)
 {
     SPDesktop *desktop = SP_ACTIVE_DESKTOP;
@@ -319,7 +315,7 @@ static Avoid::Polygon avoid_item_poly(SPItem const *item)
             else
             {
                 // something went wrong...
-                std::cout<<"conn-avoid-ref.cpp: avoid_item_poly: Geom:intersection failed."<<std::endl;
+                std::cerr<<"conn-avoid-ref.cpp: avoid_item_poly: Geom:intersection failed."<<std::endl;
             }
         }
         catch (Geom::InfiniteSolutions const &e) {
@@ -332,9 +328,16 @@ static Avoid::Polygon avoid_item_poly(SPItem const *item)
     return poly;
 }
 
+static inline void get_avoided_items_rec(std::vector<SPItem *> &list, SPObject *from, SPDesktop *desktop, bool initialised);
 
-std::vector<SPItem *> get_avoided_items(std::vector<SPItem *> &list, SPObject *from, SPDesktop *desktop,
-        bool initialised)
+std::vector<SPItem *> get_avoided_items(SPObject *from, SPDesktop *desktop, bool initialised)
+{
+    std::vector<SPItem *> list;
+    get_avoided_items_rec(list, from, desktop, initialised);
+    return list;
+}
+
+static inline void get_avoided_items_rec(std::vector<SPItem *> &list, SPObject *from, SPDesktop *desktop, bool initialised)
 {
     for (auto& child: from->children) {
         if (SP_IS_ITEM(&child) &&
@@ -348,11 +351,9 @@ std::vector<SPItem *> get_avoided_items(std::vector<SPItem *> &list, SPObject *f
         }
 
         if (SP_IS_ITEM(&child) && desktop->layerManager().isLayer(SP_ITEM(&child))) {
-            list = get_avoided_items(list, &child, desktop, initialised);
+            get_avoided_items_rec(list, &child, desktop, initialised);
         }
     }
-
-    return list;
 }
 
 
@@ -377,9 +378,7 @@ void init_avoided_shape_geometry(SPDesktop *desktop)
     DocumentUndo::ScopedInsensitive _no_undo(document);
 
     bool initialised = false;
-    std::vector<SPItem *> tmp;
-    std::vector<SPItem *> items = get_avoided_items(tmp, desktop->layerManager().currentRoot(), desktop,
-            initialised);
+    auto items = get_avoided_items(desktop->layerManager().currentRoot(), desktop, initialised);
 
     for (auto item : items) {
         item->getAvoidRef().handleSettingChange();

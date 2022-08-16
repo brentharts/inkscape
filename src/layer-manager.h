@@ -16,7 +16,6 @@
 #include <glibmm/ustring.h>
 
 #include "document-subset.h"
-#include "inkgc/gc-soft-ptr.h"
 #include "object/sp-item-group.h"
 
 class SPDesktop;
@@ -29,12 +28,12 @@ class LayerManager : public DocumentSubset
 {
 public:
     LayerManager(SPDesktop *desktop);
-    ~LayerManager() override;
+    ~LayerManager();
 
     void renameLayer( SPObject* obj, char const *label, bool uniquify );
     Glib::ustring getNextLayerName( SPObject* obj, char const *label);
 
-    sigc::connection connectCurrentLayerChanged(const sigc::slot<void, SPGroup *> & slot) {
+    sigc::connection connectCurrentLayerChanged(const sigc::slot<void (SPGroup *)> & slot) {
         return _layer_changed_signal.connect(slot);
     }
 
@@ -76,7 +75,7 @@ private:
     SPDocument *_document;
 
     std::unique_ptr<Inkscape::ObjectHierarchy> _layer_hierarchy;
-    sigc::signal<void, SPGroup *> _layer_changed_signal;
+    sigc::signal<void (SPGroup *)> _layer_changed_signal;
 };
 
 enum LayerRelativePosition {

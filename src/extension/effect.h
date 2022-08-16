@@ -56,7 +56,10 @@ public:
     void         effect  (Inkscape::UI::View::View * doc);
 
     /** \brief  Whether a working dialog should be shown */
-    bool _workingDialog;
+    bool _workingDialog = true;
+
+    /** \brief  If stderr log should be shown, when process return code is 0 */
+    bool ignore_stderr = false;
 
     /** \brief  Static function to get the last effect used */
     static Effect *  get_last_effect () { return _last_effect; };
@@ -74,6 +77,7 @@ public:
     void        set_pref_dialog (PrefDialog * prefdialog);
 private:
     static gchar *   remove_ (gchar * instr);
+    static void _sanitizeId(std::string &id);
 };
 
 } }  /* namespace Inkscape, Extension */

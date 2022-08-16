@@ -365,7 +365,7 @@ void ObjectSet::deleteItems()
          * associated selection context.  For example: deleting an object
          * while moving it around the canvas.
          */
-        dt->setEventContext(dt->getEventContext()->getPrefsPath());
+        dt->setEventContext(std::string(dt->getEventContext()->getPrefsPath()));
     }
 
     if(document()) {
@@ -1378,7 +1378,6 @@ void ObjectSet::removeLPE()
 
 void ObjectSet::removeFilter()
 {
-
     // check if something is selected
     if (isEmpty()) {
         if(desktop())
@@ -1388,14 +1387,19 @@ void ObjectSet::removeFilter()
 
     SPCSSAttr *css = sp_repr_css_attr_new();
     sp_repr_css_unset_property(css, "filter");
-    sp_desktop_set_style(this, desktop(), css);
-    sp_repr_css_attr_unref(css);
     if (SPDesktop *d = desktop()) {
+        sp_desktop_set_style(this, desktop(), css);
         // Refreshing the current tool (by switching to same tool)
         // will refresh tool's private information in it's selection context that
         // depends on desktop items.
         set_active_tool (d, get_active_tool(d));
+    } else {
+        auto list = items();
+        for (auto itemlist=list.begin();itemlist!=list.end();++itemlist) {
+            sp_desktop_apply_css_recursive(*itemlist, css, true);
+        }
     }
+    sp_repr_css_attr_unref(css);
     if (document()) {
         DocumentUndo::done(document(), _("Remove filter"), "");
     }
@@ -1437,8 +1441,9 @@ void sp_selection_change_layer_maintain_clones(std::vector<SPItem*> const &items
 
 void ObjectSet::toNextLayer(bool skip_undo)
 {
-    if(!desktop())
+    if (!desktop()) {
         return;
+    }
     SPDesktop *dt=desktop(); //TODO make it desktop-independent
 
     // check if something is selected
@@ -1482,8 +1487,9 @@ void ObjectSet::toNextLayer(bool skip_undo)
 
 void ObjectSet::toPrevLayer(bool skip_undo)
 {
-    if(!desktop())
+    if (!desktop()) {
         return;
+    }
     SPDesktop *dt=desktop(); //TODO make it desktop-independent
 
     // check if something is selected
@@ -1634,6 +1640,21 @@ object_set_contains_both_clone_and_original(ObjectSet *set)
     return clone_with_original;
 }
 
+/**
+ * Reapply the same transform again.
+ */
+void ObjectSet::reapplyAffine()
+{
+    auto cached = _last_affine;
+    applyAffine(_last_affine);
+    _last_affine = cached;
+}
+
+void ObjectSet::clearLastAffine()
+{
+    _last_affine = Geom::identity(); // Clear last affine
+}
+
 /** Apply matrix to the selection.  \a set_i2d is normally true, which means objects are in the
 original transform, synced with their reprs, and need to jump to the new transform in one go. A
 value of set_i2d==false is only used by seltrans when it's dragging objects live (not outlines); in
@@ -1646,6 +1667,8 @@ void ObjectSet::applyAffine(Geom::Affine const &affine, bool set_i2d, bool compe
 {
     if (isEmpty())
         return;
+
+    _last_affine = affine;
 
     // For each perspective with a box in selection, check whether all boxes are selected and
     // unlink all non-selected boxes.
@@ -2978,15 +3001,14 @@ void ObjectSet::cloneOriginal()
             Geom::OptRect b = original->desktopVisualBounds();
             if ( a && b && desktop()) {
                 // draw a flashing line between the objects
-                auto curve = std::make_unique<SPCurve>();
-                curve->moveto(a->midpoint());
-                curve->lineto(b->midpoint());
+                SPCurve curve;
+                curve.moveto(a->midpoint());
+                curve.lineto(b->midpoint());
 
                 // We use a bpath as it supports dashes.
-                auto canvas_item_bpath = new Inkscape::CanvasItemBpath(desktop()->getCanvasTemp(), curve.get());
+                auto canvas_item_bpath = new Inkscape::CanvasItemBpath(desktop()->getCanvasTemp(), curve.get_pathvector());
                 canvas_item_bpath->set_stroke(0x0000ddff);
-                static std::vector<double> dashes = { 5, 3 };
-                canvas_item_bpath->set_dashes(dashes);
+                canvas_item_bpath->set_dashes({5.0, 3.0});
                 canvas_item_bpath->show();
                 desktop()->add_temporary_canvasitem(canvas_item_bpath, 1000);
             }
@@ -3931,7 +3953,7 @@ void ObjectSet::setClipGroup()
         if (apply_clip_path) {
             mask_id = SPClipPath::create(mask_items_dup, doc);
         } else {
-            mask_id = sp_mask_create(mask_items_dup, doc);
+            mask_id = SPMask::create(mask_items_dup, doc);
         }
 
         // inverted object transform should be applied to a mask object,
@@ -3962,7 +3984,9 @@ void ObjectSet::setClipGroup()
     }
 }
 
-void ObjectSet::unsetMask(const bool apply_clip_path, const bool skip_undo) {
+void ObjectSet::unsetMask(const bool apply_clip_path, const bool skip_undo,
+                          const bool delete_helper_group)
+{
     SPDocument *doc = document();
     Inkscape::XML::Document *xml_doc = doc->getReprDoc();
 
@@ -4011,7 +4035,7 @@ void ObjectSet::unsetMask(const bool apply_clip_path, const bool skip_undo) {
         i->setAttribute(attributeName, "none");
 
         SPGroup *group = dynamic_cast<SPGroup *>(i);
-        if (ungroup_masked && group) {
+        if (ungroup_masked && group && delete_helper_group) {
                 // if we had previously enclosed masked object in group,
                 // add it to list so we can ungroup it later
 
@@ -4122,9 +4146,6 @@ bool ObjectSet::fitCanvas(bool with_margins, bool skip_undo)
 
 void ObjectSet::swapFillStroke()
 {
-    if (desktop() == nullptr) {
-        return;
-    }
 
     SPIPaint *paint;
     SPPaintServer *server;
@@ -4182,9 +4203,13 @@ void ObjectSet::swapFillStroke()
             }
         }
 
-        Inkscape::ObjectSet set{};
-        set.add(item);
-        sp_desktop_set_style(&set, desktop(), css);
+        if (desktop()) {
+            Inkscape::ObjectSet set{};
+            set.add(item);
+            sp_desktop_set_style(&set, desktop(), css);
+        } else {
+            sp_desktop_apply_css_recursive(item, css, true);
+        }
 
         sp_repr_css_attr_unref (css);
     }

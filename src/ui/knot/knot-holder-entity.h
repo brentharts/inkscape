@@ -21,6 +21,7 @@
 #include "snapper.h"
 
 #include "display/control/canvas-item-enums.h"
+#include "display/control/canvas-item-quad.h"
 
 class SPHatch;
 class SPItem;
@@ -55,14 +56,17 @@ public:
     /* the get/set/click handlers are virtual functions; each handler class for a knot
        should be derived from KnotHolderEntity and override these functions */
     virtual void knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state) = 0;
+    virtual void knot_grabbed(Geom::Point const &/*grab_position*/, unsigned /*state*/) {}
     virtual void knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, unsigned int state) = 0;
     virtual bool knot_missing() const { return false; }
     virtual Geom::Point knot_get() const = 0;
     virtual void knot_click(unsigned int /*state*/) {}
+    virtual bool set_item_clickpos(Geom::Point loc) { return false; }
 
-    void update_knot();
+    virtual void on_created() {}
+    virtual void update_knot();
 
-//private:
+    // private:
     Geom::Point snap_knot_position(Geom::Point const &p, unsigned int state);
     Geom::Point snap_knot_position_constrained(Geom::Point const &p, Inkscape::Snapper::SnapConstraint const &constraint, unsigned int state);
 
@@ -102,20 +106,33 @@ protected:
 class PatternKnotHolderEntity : public KnotHolderEntity {
   public:
     PatternKnotHolderEntity(bool fill) : KnotHolderEntity(), _fill(fill) {}
+    void on_created() override;
     bool knot_missing() const override;
     void knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) override{};
+    bool set_item_clickpos(Geom::Point loc) override;
+    void set_offset(Geom::Point loc);
 
-  protected:
+protected:
     // true if the entity tracks fill, false for stroke
     bool _fill;
     SPPattern *_pattern() const;
+    Geom::Point _get_pos(gdouble x, gdouble y, bool transform = true) const;
+    Geom::IntPoint _cell;
 };
 
 class PatternKnotHolderEntityXY : public PatternKnotHolderEntity {
 public:
     PatternKnotHolderEntityXY(bool fill) : PatternKnotHolderEntity(fill) {}
+    ~PatternKnotHolderEntityXY() override = default;
+
+    void on_created() override;
+    void update_knot() override;
     Geom::Point knot_get() const override;
     void knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state) override;
+
+private:
+    // Extra visual element to show the pattern editing area
+    std::unique_ptr<Inkscape::CanvasItemQuad> _quad;
 };
 
 class PatternKnotHolderEntityAngle : public PatternKnotHolderEntity {
@@ -130,6 +147,14 @@ public:
     PatternKnotHolderEntityScale(bool fill) : PatternKnotHolderEntity(fill) {}
     Geom::Point knot_get() const override;
     void knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state) override;
+    void knot_grabbed(Geom::Point const &grab_pos, unsigned state) override;
+
+private:
+    /// Maximum number of pattern repetitons allowed in an item
+    inline static double const MAX_REPETITIONS = 1e6;
+    Geom::Affine _cached_transform, _cached_inverse_linear;
+    Geom::Point _cached_origin, _cached_diagonal;
+    double _cached_min_scale;
 };
 
 /* Hatch manipulation */

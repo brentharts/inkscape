@@ -54,6 +54,12 @@ class SPObject;
 /* Flags that will propagate downstreams */
 /* Parent, Style, Viewport, User */
 #define SP_OBJECT_MODIFIED_CASCADE (SP_OBJECT_FLAGS_ALL & ~(SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_CHILD_MODIFIED_FLAG))
+inline unsigned cascade_flags(unsigned flags)
+{
+    // Unset object-modified and child-modified, set parent-modified if object-modified.
+    static_assert(SP_OBJECT_PARENT_MODIFIED_FLAG == SP_OBJECT_MODIFIED_FLAG << 2);
+    return (flags & SP_OBJECT_MODIFIED_CASCADE) | (flags & SP_OBJECT_MODIFIED_FLAG) << 2;
+}
 
 /* Write flags */
 #define SP_OBJECT_WRITE_BUILD (1 << 0)
@@ -223,7 +229,7 @@ public:
      *
      * @return the sigc::connection formed
      */
-    sigc::connection connectRelease(sigc::slot<void, SPObject *> slot) {
+    sigc::connection connectRelease(sigc::slot<void (SPObject *)> slot) {
         return _release_signal.connect(slot);
     }
 
@@ -497,11 +503,11 @@ public:
      *
      * @see SPObject::deleteObject
      */
-    sigc::connection connectDelete(sigc::slot<void, SPObject *> slot) {
+    sigc::connection connectDelete(sigc::slot<void (SPObject *)> slot) {
         return _delete_signal.connect(slot);
     }
 
-    sigc::connection connectPositionChanged(sigc::slot<void, SPObject *> slot) {
+    sigc::connection connectPositionChanged(sigc::slot<void (SPObject *)> slot) {
         return _position_changed_signal.connect(slot);
     }
 
@@ -643,7 +649,7 @@ public:
      * @return the connection formed thereby
      */
     sigc::connection connectModified(
-      sigc::slot<void, SPObject *, unsigned int> slot
+      sigc::slot<void (SPObject *, unsigned int)> slot
     ) {
         return _modified_signal.connect(slot);
     }
@@ -665,10 +671,10 @@ public:
      */
     void _requireSVGVersion(Inkscape::Version version);
 
-    sigc::signal<void, SPObject *> _release_signal;
-    sigc::signal<void, SPObject *> _delete_signal;
-    sigc::signal<void, SPObject *> _position_changed_signal;
-    sigc::signal<void, SPObject *, unsigned int> _modified_signal;
+    sigc::signal<void (SPObject *)> _release_signal;
+    sigc::signal<void (SPObject *)> _delete_signal;
+    sigc::signal<void (SPObject *)> _position_changed_signal;
+    sigc::signal<void (SPObject *, unsigned int)> _modified_signal;
     SPObject *_successor;
     CollectionPolicy _collection_policy;
     char *_label;
@@ -823,6 +829,11 @@ public:
      */
     static void repr_order_changed(Inkscape::XML::Node *repr, Inkscape::XML::Node *child, Inkscape::XML::Node *old, Inkscape::XML::Node *newer, void* data);
 
+    /**
+    * Callback for name_changed node event
+    */
+    static void repr_name_changed(Inkscape::XML::Node* repr, gchar const* oldname, gchar const* newname, void * data);
+
     friend class SPObjectImpl;
 
 protected:
@@ -833,6 +844,7 @@ protected:
 	virtual void remove_child(Inkscape::XML::Node* child);
 
 	virtual void order_changed(Inkscape::XML::Node* child, Inkscape::XML::Node* old_repr, Inkscape::XML::Node* new_repr);
+    virtual void tag_name_changed(gchar const* oldname, gchar const* newname);
 
 	virtual void set(SPAttr key, const char* value);
 

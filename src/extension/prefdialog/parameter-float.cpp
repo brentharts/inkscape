@@ -33,9 +33,8 @@ ParamFloat::ParamFloat(Inkscape::XML::Node *xml, Inkscape::Extension::Extension 
     // get value
     if (xml->firstChild()) {
         const char *value = xml->firstChild()->content();
-        if (value) {
-            _value = g_ascii_strtod(value, nullptr);
-        }
+        if (value)
+            string_to_value(value);
     }
 
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
@@ -108,20 +107,25 @@ std::string ParamFloat::value_to_string() const
     return Glib::ustring::format(std::setprecision(digits10), _value);
 }
 
+void ParamFloat::string_to_value(const std::string &in)
+{
+    _value = g_ascii_strtod(in.c_str(), nullptr);
+}
+
 /** A class to make an adjustment that uses Extension params. */
 class ParamFloatAdjustment : public Gtk::Adjustment {
     /** The parameter to adjust. */
     ParamFloat *_pref;
-    sigc::signal<void> *_changeSignal;
+    sigc::signal<void ()> *_changeSignal;
 public:
     /** Make the adjustment using an extension and the string
                 describing the parameter. */
-    ParamFloatAdjustment(ParamFloat *param, sigc::signal<void> *changeSignal)
+    ParamFloatAdjustment(ParamFloat *param, sigc::signal<void ()> *changeSignal)
         : Gtk::Adjustment(0.0, param->min(), param->max(), 0.1, 1.0, 0)
         , _pref(param)
         , _changeSignal(changeSignal) {
         this->set_value(_pref->get());
-        this->signal_value_changed().connect(sigc::mem_fun(this, &ParamFloatAdjustment::val_changed));
+        this->signal_value_changed().connect(sigc::mem_fun(*this, &ParamFloatAdjustment::val_changed));
         return;
     };
 
@@ -148,7 +152,7 @@ void ParamFloatAdjustment::val_changed()
  *
  * Builds a hbox with a label and a float adjustment in it.
  */
-Gtk::Widget *ParamFloat::get_widget(sigc::signal<void> *changeSignal)
+Gtk::Widget *ParamFloat::get_widget(sigc::signal<void ()> *changeSignal)
 {
     if (_hidden) {
         return nullptr;

@@ -51,6 +51,25 @@ SPGenericEllipse::SPGenericEllipse()
 SPGenericEllipse::~SPGenericEllipse()
 = default;
 
+/*
+ * Ellipse is the only SP object who's repr element tag name changes
+ * during it's lifetime. During undo and redo these changes can cause
+ * the SP object to become unstuck from the repr's true state.
+ */
+void SPGenericEllipse::tag_name_changed(gchar const* oldname, gchar const* newname)
+{
+    const std::string typeString = newname;
+    if (typeString == "svg:circle") {
+        type = SP_GENERIC_ELLIPSE_CIRCLE;
+    } else if (typeString == "svg:ellipse") {
+        type = SP_GENERIC_ELLIPSE_ELLIPSE;
+    } else if (typeString == "svg:path") {
+        type = SP_GENERIC_ELLIPSE_ARC;
+    } else {
+        type = SP_GENERIC_ELLIPSE_UNDEFINED;
+    }
+}
+
 void SPGenericEllipse::build(SPDocument *document, Inkscape::XML::Node *repr)
 {
     // std::cout << "SPGenericEllipse::build: Entrance: " << this->type
@@ -165,6 +184,9 @@ void SPGenericEllipse::set(SPAttr key, gchar const *value)
     case SPAttr::SODIPODI_OPEN:
         // This is for reading in old files.
         if ((!value) || strcmp(value,"true")) {
+            // We rely on this to reset arc_type when changing an arc to
+            // an ellipse/circle, so it is drawn as a closed path.
+            // A clone will not even change it's this->type
             this->arc_type = SP_GENERIC_ELLIPSE_ARC_TYPE_SLICE;
         } else {
             this->arc_type = SP_GENERIC_ELLIPSE_ARC_TYPE_ARC;
@@ -454,13 +476,13 @@ void SPGenericEllipse::set_shape()
         pb.lineTo(Geom::Point(0, 0));
     }
 
-    if ((this->arc_type != SP_GENERIC_ELLIPSE_ARC_TYPE_ARC) || (this->type != SP_GENERIC_ELLIPSE_ARC)) {
+    if (this->arc_type != SP_GENERIC_ELLIPSE_ARC_TYPE_ARC) {
         pb.closePath();
     } else {
         pb.flush();
     }
 
-    auto c = std::make_unique<SPCurve>(pb.peek());
+    auto c = SPCurve(pb.peek());
 
     // gchar *str = sp_svg_write_path(curve->get_pathvector());
     // std::cout << "  path: " << str << std::endl;
@@ -468,9 +490,8 @@ void SPGenericEllipse::set_shape()
 
     // Stretching / moving the calculated shape to fit the actual dimensions.
     Geom::Affine aff = Geom::Scale(rx.computed, ry.computed) * Geom::Translate(cx.computed, cy.computed);
-    c->transform(aff);
-    // this is a memory leak? is done this way in al object/shapes
-    if (prepareShapeForLPE(c.get())) {
+    c.transform(aff);
+    if (prepareShapeForLPE(&c)) {
         return;
     }
     // This happends on undo, fix bug:#1791784

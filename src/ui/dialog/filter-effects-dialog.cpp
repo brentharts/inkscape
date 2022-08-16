@@ -435,10 +435,10 @@ public:
             if(SP_IS_FECONVOLVEMATRIX(o)) {
                 SPFeConvolveMatrix* conv = SP_FECONVOLVEMATRIX(o);
                 int cols, rows;
-                cols = (int)conv->order.getNumber();
+                cols = (int)conv->get_order().getNumber();
                 if(cols > 5)
                     cols = 5;
-                rows = conv->order.optNumber_set ? (int)conv->order.getOptNumber() : cols;
+                rows = conv->get_order().optNumIsSet() ? (int)conv->get_order().getOptNumber() : cols;
                 update(o, rows, cols);
             }
             else if(SP_IS_FECOLORMATRIX(o))
@@ -467,11 +467,11 @@ private:
 
         _tree.remove_all_columns();
 
-        std::vector<gdouble>* values = nullptr;
+        std::vector<gdouble> const *values = nullptr;
         if(SP_IS_FECOLORMATRIX(o))
-            values = &SP_FECOLORMATRIX(o)->values;
+            values = &SP_FECOLORMATRIX(o)->get_values();
         else if(SP_IS_FECONVOLVEMATRIX(o))
-            values = &SP_FECONVOLVEMATRIX(o)->kernelMatrix;
+            values = &SP_FECONVOLVEMATRIX(o)->get_kernel_matrix();
         else
             return;
 
@@ -542,7 +542,7 @@ public:
         if(SP_IS_FECOLORMATRIX(o)) {
             SPFeColorMatrix* col = SP_FECOLORMATRIX(o);
             remove();
-            switch(col->type) {
+            switch(col->get_type()) {
                 case COLORMATRIX_SATURATE:
                     add(_saturation);
                     if(_use_stored)
@@ -753,7 +753,7 @@ private:
 class FilterEffectsDialog::Settings
 {
 public:
-    typedef sigc::slot<void, const AttrWidget*> SetAttrSlot;
+    typedef sigc::slot<void (const AttrWidget*)> SetAttrSlot;
 
     Settings(FilterEffectsDialog& d, Gtk::Box& b, SetAttrSlot slot, const int maxtypes)
         : _dialog(d), _set_attr_slot(std::move(slot)), _current_type(-1), _max_types(maxtypes)
@@ -1118,7 +1118,7 @@ public:
                     if( _funcNode ) {
                         _funcNode->setAttribute( "type", "identity" );
                     } else {
-                        //std::cout << "ERROR ERROR: feFuncX not found!" << std::endl;
+                        //std::cerr << "ERROR ERROR: feFuncX not found!" << std::endl;
                     }
                 }
             }
@@ -1319,8 +1319,8 @@ FilterEffectsDialog::LightSourceControl* FilterEffectsDialog::Settings::add_ligh
 }
 
 static Gtk::Menu * create_popup_menu(Gtk::Widget& parent,
-                                     sigc::slot<void> dup,
-                                     sigc::slot<void> rem)
+                                     sigc::slot<void ()> dup,
+                                     sigc::slot<void ()> rem)
 {
     auto menu = Gtk::manage(new Gtk::Menu);
 
@@ -1715,8 +1715,8 @@ void FilterEffectsDialog::CellRendererConnection::get_preferred_height_vfunc(Gtk
                                                                              int& natural_height) const
 {
     // Scale the height depending on the number of inputs, unless it's
-    // the first primitive, in which case there are no connections
-    SPFilterPrimitive* prim = SP_FILTER_PRIMITIVE(_primitive.get_value());
+    // the first primitive, in which case there are no connections.
+    auto prim = reinterpret_cast<SPFilterPrimitive*>(_primitive.get_value());
     minimum_height = natural_height = size * input_count(prim);
 }
 
@@ -1783,7 +1783,7 @@ void FilterEffectsDialog::PrimitiveList::init_text()
     }
 }
 
-sigc::signal<void>& FilterEffectsDialog::PrimitiveList::signal_primitive_changed()
+sigc::signal<void ()>& FilterEffectsDialog::PrimitiveList::signal_primitive_changed()
 {
     return _signal_primitive_changed;
 }
@@ -1855,8 +1855,8 @@ void FilterEffectsDialog::PrimitiveList::update()
 }
 
 void FilterEffectsDialog::PrimitiveList::set_menu(Gtk::Widget& parent,
-                                                  sigc::slot<void> dup,
-                                                  sigc::slot<void> rem)
+                                                  sigc::slot<void ()> dup,
+                                                  sigc::slot<void ()> rem)
 {
     _primitive_menu = create_popup_menu(parent, dup, rem);
 }
@@ -2202,7 +2202,7 @@ const Gtk::TreeIter FilterEffectsDialog::PrimitiveList::find_result(const Gtk::T
         bool found = false;
         for (auto& o: prim->children) {
             if(c == pos && SP_IS_FEMERGENODE(&o)) {
-                image = SP_FEMERGENODE(&o)->input;
+                image = SP_FEMERGENODE(&o)->get_in();
                 found = true;
             }
             ++c;
@@ -2212,14 +2212,14 @@ const Gtk::TreeIter FilterEffectsDialog::PrimitiveList::find_result(const Gtk::T
     }
     else {
         if(attr == SPAttr::IN_)
-            image = prim->image_in;
+            image = prim->get_in();
         else if(attr == SPAttr::IN2) {
             if(SP_IS_FEBLEND(prim))
-                image = SP_FEBLEND(prim)->in2;
+                image = SP_FEBLEND(prim)->get_in2();
             else if(SP_IS_FECOMPOSITE(prim))
-                image = SP_FECOMPOSITE(prim)->in2;
+                image = SP_FECOMPOSITE(prim)->get_in2();
             else if(SP_IS_FEDISPLACEMENTMAP(prim))
-                image = SP_FEDISPLACEMENTMAP(prim)->in2;
+                image = SP_FEDISPLACEMENTMAP(prim)->get_in2();
             else
                 return target;
         }
@@ -2230,7 +2230,7 @@ const Gtk::TreeIter FilterEffectsDialog::PrimitiveList::find_result(const Gtk::T
     if(image >= 0) {
         for(Gtk::TreeIter i = _model->children().begin();
             i != start; ++i) {
-            if(((SPFilterPrimitive*)(*i)[_columns.primitive])->image_out == image)
+            if(((SPFilterPrimitive*)(*i)[_columns.primitive])->get_out() == image)
                 target = i;
         }
         return target;
@@ -2455,20 +2455,20 @@ bool FilterEffectsDialog::PrimitiveList::on_button_release_event(GdkEventButton*
 static void check_single_connection(SPFilterPrimitive* prim, const int result)
 {
     if (prim && (result >= 0)) {
-        if (prim->image_in == result) {
+        if (prim->get_in() == result) {
             prim->removeAttribute("in");
         }
 
         if (SP_IS_FEBLEND(prim)) {
-            if (SP_FEBLEND(prim)->in2 == result) {
+            if (SP_FEBLEND(prim)->get_in2() == result) {
                 prim->removeAttribute("in2");
             }
         } else if (SP_IS_FECOMPOSITE(prim)) {
-            if (SP_FECOMPOSITE(prim)->in2 == result) {
+            if (SP_FECOMPOSITE(prim)->get_in2() == result) {
                 prim->removeAttribute("in2");
             }
         } else if (SP_IS_FEDISPLACEMENTMAP(prim)) {
-            if (SP_FEDISPLACEMENTMAP(prim)->in2 == result) {
+            if (SP_FEDISPLACEMENTMAP(prim)->get_in2() == result) {
                 prim->removeAttribute("in2");
             }
         }
@@ -2488,9 +2488,9 @@ void FilterEffectsDialog::PrimitiveList::sanitize_connections(const Gtk::TreeIte
         else {
             SPFilterPrimitive* cur_prim = (*iter)[_columns.primitive];
             if(before)
-                check_single_connection(cur_prim, prim->image_out);
+                check_single_connection(cur_prim, prim->get_out());
             else
-                check_single_connection(prim, cur_prim->image_out);
+                check_single_connection(prim, cur_prim->get_out());
         }
     }
 }
@@ -3087,12 +3087,11 @@ void FilterEffectsDialog::update_settings_view()
 void FilterEffectsDialog::update_settings_sensitivity()
 {
     SPFilterPrimitive* prim = _primitive_list.get_selected();
-    const bool use_k = SP_IS_FECOMPOSITE(prim) && SP_FECOMPOSITE(prim)->composite_operator == COMPOSITE_ARITHMETIC;
+    const bool use_k = SP_IS_FECOMPOSITE(prim) && SP_FECOMPOSITE(prim)->get_composite_operator() == COMPOSITE_ARITHMETIC;
     _k1->set_sensitive(use_k);
     _k2->set_sensitive(use_k);
     _k3->set_sensitive(use_k);
     _k4->set_sensitive(use_k);
-
 }
 
 void FilterEffectsDialog::update_color_matrix()

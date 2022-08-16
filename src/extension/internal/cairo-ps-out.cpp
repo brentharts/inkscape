@@ -116,8 +116,9 @@ ps_print_document_to_file(SPDocument *doc, gchar const *filename, unsigned int l
         /* Render document */
         ret = renderer->setupDocument(ctx, doc, pageBoundingBox, bleedmargin_px, base);
         if (ret) {
-            renderer->renderItem(ctx, root);
-            ret = ctx->finish();
+            /* Render multiple pages */
+            ret = renderer->renderPages(ctx, doc, false);
+            ctx->finish();
         }
     }
 

@@ -11,8 +11,6 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
-#include "export-batch.h"
-
 #include <glibmm/convert.h>
 #include <glibmm/i18n.h>
 #include <glibmm/miscutils.h>
@@ -42,6 +40,7 @@
 #include "selection-chemistry.h"
 #include "ui/dialog-events.h"
 #include "ui/dialog/export.h"
+#include "ui/dialog/export-batch.h"
 #include "ui/dialog/dialog-notebook.h"
 #include "ui/dialog/filedialog.h"
 #include "ui/interface.h"
@@ -54,34 +53,6 @@
 namespace Inkscape {
 namespace UI {
 namespace Dialog {
-
-class BatchItem : public Gtk::FlowBoxChild
-{
-public:
-    BatchItem(SPItem *item);
-    BatchItem(SPPage *page);
-    ~BatchItem() override = default;
-
-    Glib::ustring getLabel() { return _label_str; }
-    SPItem *getItem() { return _item; }
-    SPPage *getPage() { return _page; }
-    bool isActive() { return _selector.get_active(); }
-    void refresh(bool hide, guint32 bg_color);
-    void refreshHide(const std::vector<SPItem *> *list) { _preview.refreshHide(list); }
-    void setDocument(SPDocument *doc) { _preview.setDocument(doc); }
-
-private:
-    void init(SPDocument *doc, Glib::ustring label);
-
-    Glib::ustring _label_str;
-    Gtk::Grid _grid;
-    Gtk::Label _label;
-    Gtk::CheckButton _selector;
-    ExportPreview _preview;
-    SPItem *_item = nullptr;
-    SPPage *_page = nullptr;
-    bool is_hide = false;
-};
 
 BatchItem::BatchItem(SPItem *item)
 {
@@ -301,8 +272,6 @@ void BatchExport::refreshItems()
 {
     if (!_desktop || !_document) return;
 
-    _document->ensureUpToDate();
-
     // Create New List of Items
     std::set<SPItem *> itemsList;
     std::set<SPPage *> pageList;
@@ -366,9 +335,8 @@ void BatchExport::refreshItems()
     }
 
     // now remove all the items
-    for (auto key : toRemove) {
+    for (auto const &key : toRemove) {
         if (current_items[key]) {
-            // Preview Boxes are GTK managed so simply removing from container will handle delete
             preview_container->remove(*current_items[key]);
             current_items.erase(key);
         }
@@ -382,7 +350,7 @@ void BatchExport::refreshItems()
                 continue;
             }
             // Add new item to the end of list
-            current_items[id] = Gtk::manage(new BatchItem(item));
+            current_items[id] = std::make_unique<BatchItem>(item);
             preview_container->insert(*current_items[id], -1);
         }
     }
@@ -391,7 +359,7 @@ void BatchExport::refreshItems()
             if (current_items[id] && current_items[id]->getPage() == page) {
                 continue;
             }
-            current_items[id] = Gtk::manage(new BatchItem(page));
+            current_items[id] = std::make_unique<BatchItem>(page);
             preview_container->insert(*current_items[id], -1);
         }
     }
@@ -410,16 +378,16 @@ void BatchExport::refreshPreview()
 
     for (auto &[key, val] : current_items) {
         if (preview) {
-            if (!hide) {
-                val->refreshHide(nullptr);
-            } else if (auto item = val->getItem()) {
-                std::vector<SPItem *> selected = {item};
-                val->refreshHide(&selected);
-            } else if (val->getPage()) {
-                auto sels = _desktop->getSelection()->items();
-                std::vector<SPItem *> selected(sels.begin(), sels.end());
-                val->refreshHide(&selected);
+            std::vector<SPItem *> selected;
+            if (hide) {
+                if (auto item = val->getItem()) {
+                    selected = std::vector<SPItem *>({item});
+                } else if (val->getPage()) {
+                    auto sels = _desktop->getSelection()->items();
+                    selected = std::vector<SPItem *>(sels.begin(), sels.end());
+                }
             }
+            val->refreshHide(selected);
         }
         val->refresh(!preview, _bgnd_color_picker->get_current_color());
     }
@@ -516,7 +484,7 @@ void BatchExport::onExport()
         for (auto i = current_items.begin(); i != current_items.end() && !interrupted; ++i) {
             count++;
 
-            BatchItem *batchItem = i->second;
+            auto &batchItem = i->second;
             if (!batchItem->isActive()) {
                 continue;
             }
@@ -545,7 +513,13 @@ void BatchExport::onExport()
                 continue;
             }
 
-            Glib::ustring item_filename = filename + "_" + id;
+            Glib::ustring item_filename;
+            Glib::ustring::value_type last_char = filename.at(filename.length() - 1);
+            if (last_char != '/' && last_char != '\\') {
+                item_filename = filename + "_" + id;
+            } else {
+                item_filename = filename + id;
+            }
             if (!suffix.empty()) {
                 if (omod->is_raster()) {
                     // Put the dpi in at the user's requested location.
@@ -581,7 +555,6 @@ void BatchExport::onExport()
                 auto copy_doc = _document->copy();
                 Export::exportVector(omod, copy_doc.get(), item_filename, true, &show_only, page);
             }
-            setExporting(false);
 
             if (prog_dlg) {
                 delete prog_dlg;
@@ -589,6 +562,8 @@ void BatchExport::onExport()
             }
         }
     }
+    // Do this right at the end to finish up
+    setExporting(false);
 }
 
 void BatchExport::onBrowse(Gtk::EntryIconPosition pos, const GdkEventButton *ev)
@@ -761,7 +736,7 @@ void BatchExport::setDocument(SPDocument *document)
     _document = document;
     _pages_changed_connection.disconnect();
     if (document) {
-        // when the page selected is changes, update the export area
+        // when the page selected is changed, update the export area
         _pages_changed_connection = document->getPageManager().connectPagesChanged([=]() { pagesChanged(); });
 
         auto bg_color = get_export_bg_color(document->getNamedView(), 0xffffff00);

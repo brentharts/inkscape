@@ -25,6 +25,7 @@
 #include <cstddef>
 #include <sigc++/sigc++.h>
 #include <glibmm/ustring.h>
+#include <gtkmm.h> // Many downstream includes
 
 #include <2geom/affine.h>
 #include <2geom/transforms.h>
@@ -36,7 +37,6 @@
 
 #include "object/sp-gradient.h" // TODO refactor enums out to their own .h file
 
-#include "ui/dialog/print.h"
 #include "ui/view/view.h"
 
 namespace Gtk
@@ -136,16 +136,12 @@ class SPDesktop : public Inkscape::UI::View::View
 {
 public:
     SPNamedView               *namedview;
-    /// current selection; will never generally be NULL
-    Inkscape::Selection       *selection;
     Inkscape::UI::Tools::ToolBase *event_context = nullptr;
     Inkscape::Display::TemporaryItemList *temporary_item_list;
     Inkscape::Display::SnapIndicator *snapindicator;
-    /// Stored settings for print dialogue
-    Inkscape::UI::Dialog::PrinterSettings printer_settings;
 
     Inkscape::UI::Tools::ToolBase* getEventContext() const { return event_context; }
-    Inkscape::Selection* getSelection() const { return selection; }
+    Inkscape::Selection* getSelection() const { return _selection.get(); }
     SPDocument* getDocument() const { return doc(); }
     Inkscape::UI::Widget::Canvas* getCanvas() const { return canvas; }
     Inkscape::MessageStack* getMessageStack() const { return messageStack().get(); }
@@ -167,6 +163,9 @@ public:
     Inkscape::CanvasItemDrawing  *getCanvasDrawing()  const { return canvas_drawing; }
 
 private:
+    /// current selection; will never generally be NULL
+    std::unique_ptr<Inkscape::Selection> _selection;
+
     // Groups
     Inkscape::CanvasItemGroup    *canvas_group_controls  = nullptr; ///< Handles, knots, nodes, etc.
     Inkscape::CanvasItemGroup    *canvas_group_drawing   = nullptr; ///< SVG Drawing
@@ -203,55 +202,55 @@ public:
 
     Glib::ustring _reconstruction_old_layer_id;
 
-    sigc::signal<bool, const SPCSSAttr *, bool>::accumulated<StopOnTrue> _set_style_signal;
-    sigc::signal<int, SPStyle *, int>::accumulated<StopOnNonZero> _query_style_signal;
+    sigc::signal<bool (const SPCSSAttr *, bool)>::accumulated<StopOnTrue> _set_style_signal;
+    sigc::signal<int (SPStyle *, int)>::accumulated<StopOnNonZero> _query_style_signal;
 
     /// Emitted when the zoom factor changes (not emitted when scrolling).
     /// The parameter is the new zoom factor
-    sigc::signal<void, double> signal_zoom_changed;
+    sigc::signal<void (double)> signal_zoom_changed;
 
-    sigc::connection connectDestroy(const sigc::slot<void, SPDesktop*> &slot)
+    sigc::connection connectDestroy(const sigc::slot<void (SPDesktop*)> &slot)
     {
         return _destroy_signal.connect(slot);
     }
 
-    sigc::connection connectDocumentReplaced (const sigc::slot<void,SPDesktop*,SPDocument*> & slot)
+    sigc::connection connectDocumentReplaced (const sigc::slot<void (SPDesktop*,SPDocument*)> & slot)
     {
         return _document_replaced_signal.connect (slot);
     }
 
-    sigc::connection connectEventContextChanged (const sigc::slot<void,SPDesktop*,Inkscape::UI::Tools::ToolBase*> & slot)
+    sigc::connection connectEventContextChanged (const sigc::slot<void (SPDesktop*,Inkscape::UI::Tools::ToolBase*)> & slot)
     {
         return _event_context_changed_signal.connect (slot);
     }
-    sigc::connection connectSetStyle (const sigc::slot<bool, const SPCSSAttr *> & slot)
+    sigc::connection connectSetStyle (const sigc::slot<bool (const SPCSSAttr *)> & slot)
     {
         return _set_style_signal.connect([=](const SPCSSAttr* css, bool) { return slot(css); });
     }
-    sigc::connection connectSetStyleEx(const sigc::slot<bool, const SPCSSAttr *, bool> & slot)
+    sigc::connection connectSetStyleEx(const sigc::slot<bool (const SPCSSAttr *, bool)> & slot)
     {
         return _set_style_signal.connect(slot);
     }
-    sigc::connection connectQueryStyle (const sigc::slot<int, SPStyle *, int> & slot)
+    sigc::connection connectQueryStyle (const sigc::slot<int (SPStyle *, int)> & slot)
     {
         return _query_style_signal.connect (slot);
     }
      // subselection is some sort of selection which is specific to the tool, such as a handle in gradient tool, or a text selection
-    sigc::connection connectToolSubselectionChanged(const sigc::slot<void, gpointer> & slot);
-    sigc::connection connectToolSubselectionChangedEx(const sigc::slot<void, gpointer, SPObject*>& slot);
+    sigc::connection connectToolSubselectionChanged(const sigc::slot<void (gpointer)> & slot);
+    sigc::connection connectToolSubselectionChangedEx(const sigc::slot<void (gpointer, SPObject*)>& slot);
 
     void emitToolSubselectionChanged(gpointer data);
     void emitToolSubselectionChangedEx(gpointer data, SPObject* object);
 
     // there's an object selected and it has a gradient fill and/or stroke; one of the gradient stops has been selected
     // callback receives sender pointer and selected stop pointer
-    sigc::connection connect_gradient_stop_selected(const sigc::slot<void, void*, SPStop*>& slot);
+    sigc::connection connect_gradient_stop_selected(const sigc::slot<void (void*, SPStop*)>& slot);
     // a path is being edited and one of its control points has been (de)selected using node tool
     // callback receives sender pointer and control spoints selection pointer
-    sigc::connection connect_control_point_selected(const sigc::slot<void, void*, Inkscape::UI::ControlPointSelection*>& slot);
+    sigc::connection connect_control_point_selected(const sigc::slot<void (void*, Inkscape::UI::ControlPointSelection*)>& slot);
     // there's an active text frame and user moves or clicks text cursor within it using text tool
     // callback receives sender pointer and text tool pointer
-    sigc::connection connect_text_cursor_moved(const sigc::slot<void, void*, Inkscape::UI::Tools::TextTool*>& slot);
+    sigc::connection connect_text_cursor_moved(const sigc::slot<void (void*, Inkscape::UI::Tools::TextTool*)>& slot);
 
     void emit_gradient_stop_selected(void* sender, SPStop* stop);
     void emit_control_point_selected(void* sender, Inkscape::UI::ControlPointSelection* selection);
@@ -319,6 +318,8 @@ public:
     /** \brief  Returns whether the desktop is in quick zoom mode or not */
     bool quick_zoomed() { return _quick_zoom_enabled; }
 
+    void quick_preview(bool activate);
+
     void set_rotation_lock(bool lock) { rotation_locked = lock; }
     bool get_rotation_lock() const { return rotation_locked; }
 
@@ -360,6 +361,7 @@ public:
     void toggleCommandPalette();
     void toggleRulers();
     void toggleScrollbars();
+    void setTempHideOverlays(bool hide);
     void layoutWidget();
     void setToolboxFocusTo (gchar const* label);
     Gtk::Toolbar *get_toolbar_by_name(const Glib::ustring& name);
@@ -522,18 +524,19 @@ private:
     bool _quick_zoom_enabled; ///< Signifies that currently we're in quick zoom mode
     DesktopAffine _quick_zoom_affine;  ///< The transform of the screen before quick zoom
 
-    bool grids_visible; /* don't set this variable directly, use the method below */
-    void set_grids_visible(bool visible);
+    bool grids_visible = false;
+    bool _overlays_visible = true; ///< Whether the overlays are temporarily hidden
+    bool _saved_guides_visible = false; ///< Remembers guides' visibility when hiding overlays
 
     std::unique_ptr<Inkscape::LayerManager> _layer_manager;
 
-    sigc::signal<void, SPDesktop*> _destroy_signal;
-    sigc::signal<void,SPDesktop*,SPDocument*>     _document_replaced_signal;
-    sigc::signal<void,SPDesktop*,Inkscape::UI::Tools::ToolBase*> _event_context_changed_signal;
-    sigc::signal<void, gpointer, SPObject*> _tool_subselection_changed;
-    sigc::signal<void, void*, SPStop*> _gradient_stop_selected;
-    sigc::signal<void, void*, Inkscape::UI::ControlPointSelection*> _control_point_selected;
-    sigc::signal<void, void*, Inkscape::UI::Tools::TextTool*> _text_cursor_moved;
+    sigc::signal<void (SPDesktop*)> _destroy_signal;
+    sigc::signal<void (SPDesktop*,SPDocument*)>     _document_replaced_signal;
+    sigc::signal<void (SPDesktop*,Inkscape::UI::Tools::ToolBase*)> _event_context_changed_signal;
+    sigc::signal<void (gpointer, SPObject*)> _tool_subselection_changed;
+    sigc::signal<void (void*, SPStop*)> _gradient_stop_selected;
+    sigc::signal<void (void*, Inkscape::UI::ControlPointSelection*)> _control_point_selected;
+    sigc::signal<void (void*, Inkscape::UI::Tools::TextTool*)> _text_cursor_moved;
 
     sigc::connection _reconstruction_start_connection;
     sigc::connection _reconstruction_finish_connection;

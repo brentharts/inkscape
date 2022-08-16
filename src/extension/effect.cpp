@@ -10,6 +10,8 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
+#include <regex>
+
 #include "effect.h"
 
 #include "execution-env.h"
@@ -38,10 +40,11 @@ Effect * Effect::_last_effect = nullptr;
 void
 action_effect (Effect* effect, bool show_prefs)
 {
+    auto doc = InkscapeApplication::instance()->get_active_view();
     if (effect->_workingDialog && show_prefs) {
-        effect->prefs(InkscapeApplication::instance()->get_active_view());
+        effect->prefs(doc);
     } else {
-        effect->effect(InkscapeApplication::instance()->get_active_view());
+        effect->effect(doc);
     }
 }
 
@@ -60,7 +63,7 @@ action_menu_name (std::string menu)
 
 Effect::Effect (Inkscape::XML::Node *in_repr, Implementation::Implementation *in_imp, std::string *base_directory)
     : Extension(in_repr, in_imp, base_directory)
-    , _menu_node(nullptr), _workingDialog(true)
+    , _menu_node(nullptr)
     , _prefDialog(nullptr)
 {
     Inkscape::XML::Node * local_effects_menu = nullptr;
@@ -102,6 +105,7 @@ Effect::Effect (Inkscape::XML::Node *in_repr, Implementation::Implementation *in
                 }
                 if (child->attribute("implements-custom-gui") && !strcmp(child->attribute("implements-custom-gui"), "true")) {
                     _workingDialog = false;
+                    ignore_stderr = true;
                 }
                 for (Inkscape::XML::Node *effect_child = child->firstChild(); effect_child != nullptr; effect_child = effect_child->next()) {
                     if (!strcmp(effect_child->name(), INKSCAPE_EXTENSION_NS "effects-menu")) {
@@ -122,9 +126,8 @@ Effect::Effect (Inkscape::XML::Node *in_repr, Implementation::Implementation *in
         } // children of "inkscape-extension"
     } // if we have an XML file
 
-    // Replace any dashes with underscores
     std::string aid = std::string(get_id());
-    std::replace(aid.begin(), aid.end(), '_', '-');
+    _sanitizeId(aid);
     std::string action_id = "app." + aid;
 
     static auto gapp = InkscapeApplication::instance()->gtk_app();
@@ -169,6 +172,24 @@ Effect::Effect (Inkscape::XML::Node *in_repr, Implementation::Implementation *in
         Glib::ustring menu_name = ellipsized_name ? ellipsized_name : get_name();
         app->get_action_effect_data().add_data(aid, sub_menu_list, menu_name);
         g_free(ellipsized_name);
+    }
+}
+
+/** Sanitizes the passed id in place. If an invalid character is found in the ID, a warning
+ *  is printed to stderr. All invalid characters are replaced with an 'X'.
+ */
+void Effect::_sanitizeId(std::string &id)
+{
+    static std::regex const prohibited_id_chars{"[^A-Za-z0-9.-]"};
+
+    // Silently replace any underscores with dashes.
+    std::replace(id.begin(), id.end(), '_', '-');
+
+    // Detect remaining invalid characters and print a warning if found
+    if (std::regex_search(id, prohibited_id_chars)) {
+        auto message = std::string{"Invalid extension action ID found: \""} + id + "\".";
+        g_warn_message("Inkscape", __FILE__, __LINE__, "Effect::_sanitizeId()", message.c_str());
+        id = std::regex_replace(id, prohibited_id_chars, "X");
     }
 }
 
@@ -222,7 +243,7 @@ Effect::prefs (Inkscape::UI::View::View * doc)
         return true;
     }
 
-    if (widget_visible_count() == 0) {
+    if (!widget_visible_count()) {
         effect(doc);
         return true;
     }

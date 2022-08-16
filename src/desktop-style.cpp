@@ -409,6 +409,7 @@ sp_desktop_apply_style_tool(SPDesktop *desktop, Inkscape::XML::Node *repr, Glib:
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
 
     if (prefs->getBool(tool_path + "/usecurrent") && css_current) {
+        sp_repr_css_unset_property(css_current, "shape-inside");
         sp_repr_css_unset_property(css_current, "mix-blend-mode");
         sp_repr_css_unset_property(css_current, "filter");
         sp_repr_css_set(repr, css_current, "style");
@@ -1829,7 +1830,7 @@ objects_query_blur (const std::vector<SPItem*> &objects, SPStyle *style_res)
                     //if primitive is gaussianblur
                     SPGaussianBlur * spblur = dynamic_cast<SPGaussianBlur *>(primitive);
                     if (spblur) {
-                        float num = spblur->stdDeviation.getNumber();
+                        float num = spblur->get_std_deviation().getNumber();
                         float dummy = num * i2d.descrim();
                         if (!std::isnan(dummy)) {
                             blur_sum += dummy;
@@ -1931,8 +1932,8 @@ sp_desktop_query_style(SPDesktop *desktop, SPStyle *style, int property)
         return ret; // subselection returned a style, pass it on
 
     // otherwise, do querying and averaging over selection
-    if (desktop->selection != nullptr) {
-        std::vector<SPItem *> vec(desktop->selection->items().begin(), desktop->selection->items().end());
+    if (auto selection = desktop->getSelection()) {
+        std::vector<SPItem *> vec(selection->items().begin(), selection->items().end());
         return sp_desktop_query_style_from_list (vec, style, property);
     }
 

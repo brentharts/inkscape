@@ -57,6 +57,7 @@ public:
     void knot_mousedown_handler(SPKnot *knot, unsigned int state);
     void knot_moved_handler(SPKnot *knot, Geom::Point const &p, unsigned int state);
     void knot_clicked_handler(SPKnot *knot, unsigned int state);
+    void knot_grabbed_handler(SPKnot *knot, unsigned state);
     void knot_ungrabbed_handler(SPKnot *knot, unsigned int state);
     void transform_selected(Geom::Affine transform);
     void add(KnotHolderEntity *e);
@@ -74,6 +75,8 @@ public:
     SPDesktop *getDesktop() { return desktop; }
     SPItem *getItem() { return item; }
     bool is_dragging() const { return dragging; }
+
+    bool set_item_clickpos(Geom::Point loc);
 
     friend class Inkscape::UI::ShapeEditor; // FIXME why?
     friend class Inkscape::LivePathEffect::NodeSatelliteArrayParam;                    // why?

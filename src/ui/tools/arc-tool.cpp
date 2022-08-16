@@ -64,7 +64,7 @@ ArcTool::ArcTool(SPDesktop *desktop)
 
     this->sel_changed_connection.disconnect();
     this->sel_changed_connection = selection->connectChanged(
-        sigc::mem_fun(this, &ArcTool::selection_changed)
+        sigc::mem_fun(*this, &ArcTool::selection_changed)
     );
 
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
@@ -192,7 +192,7 @@ bool ArcTool::root_handler(GdkEvent* event) {
                     // no dragging, select clicked item if any
                     if (event->button.state & GDK_SHIFT_MASK) {
                         selection->toggle(this->item_to_select);
-                    } else {
+                    } else if (!selection->includes(this->item_to_select)) {
                         selection->set(this->item_to_select);
                     }
                 } else {

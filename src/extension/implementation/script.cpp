@@ -13,6 +13,8 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
+#include "script.h"
+
 #include <glib/gstdio.h>
 #include <glibmm.h>
 #include <glibmm/convert.h>
@@ -23,13 +25,6 @@
 #include <gtkmm/textview.h>
 
 #include "desktop.h"
-#include "inkscape.h"
-#include "inkscape-window.h"
-#include "path-prefix.h"
-#include "preferences.h"
-#include "script.h"
-#include "selection.h"
-
 #include "extension/db.h"
 #include "extension/effect.h"
 #include "extension/execution-env.h"
@@ -37,10 +32,16 @@
 #include "extension/input.h"
 #include "extension/output.h"
 #include "extension/system.h"
+#include "extension/template.h"
+#include "inkscape-window.h"
+#include "inkscape.h"
 #include "io/resource.h"
 #include "layer-manager.h"
 #include "object/sp-namedview.h"
 #include "object/sp-path.h"
+#include "path-prefix.h"
+#include "preferences.h"
+#include "selection.h"
 #include "ui/desktop/menubar.h"
 #include "ui/dialog-events.h"
 #include "ui/tool/control-point-selection.h"
@@ -324,33 +325,23 @@ ImplementationDocumentCache *Script::newDocCache( Inkscape::Extension::Extension
     return new ScriptDocCache(view);
 }
 
-
 /**
-    \return   A dialog for preferences
-    \brief    A stub function right now
-    \param    module    Module who's preferences need getting
-    \param    filename  Hey, the file you're getting might be important
-
-    This function should really do something, right now it doesn't.
-*/
-Gtk::Widget *Script::prefs_input(Inkscape::Extension::Input *module,
-                    const gchar */*filename*/)
+ * Create a new document based on the given template.
+ */
+SPDocument *Script::new_from_template(Inkscape::Extension::Template *module)
 {
-    return module->autogui(nullptr, nullptr);
-}
+    std::list<std::string> params;
+    module->paramListString(params);
+    module->set_environment();
 
+    if (auto in_file = module->get_template_filename()) {
+        file_listener fileout;
+        execute(command, params, in_file->get_path(), fileout);
+        auto svg = fileout.string();
+        return SPDocument::createNewDocFromMem(svg.c_str(), svg.length(), false);
+    }
 
-
-/**
-    \return   A dialog for preferences
-    \brief    A stub function right now
-    \param    module    Module whose preferences need getting
-
-    This function should really do something, right now it doesn't.
-*/
-Gtk::Widget *Script::prefs_output(Inkscape::Extension::Output *module)
-{
-    return module->autogui(nullptr, nullptr);
+    return nullptr;
 }
 
 /**
@@ -623,7 +614,7 @@ void Script::effect(Inkscape::Extension::Effect *module,
     }
 
     file_listener fileout;
-    int data_read = execute(command, params, dc->_filename, fileout);
+    int data_read = execute(command, params, dc->_filename, fileout, module->ignore_stderr);
     fileout.toFile(tempfilename_out);
 
     pump_events();
@@ -857,7 +848,8 @@ bool Script::cancelProcessing () {
 int Script::execute (const std::list<std::string> &in_command,
                  const std::list<std::string> &in_params,
                  const Glib::ustring &filein,
-                 file_listener &fileout)
+                 file_listener &fileout,
+                 bool ignore_stderr)
 {
     g_return_val_if_fail(!in_command.empty(), 0);
 
@@ -905,7 +897,7 @@ int Script::execute (const std::list<std::string> &in_command,
         Glib::spawn_async_with_pipes(working_directory, // working directory
                                      argv,  // arg v
                                      static_cast<Glib::SpawnFlags>(0), // no flags
-                                     sigc::slot<void>(),
+                                     sigc::slot<void ()>(),
                                      &_pid,          // Pid
                                      nullptr,           // STDIN
                                      &stdout_pipe,   // STDOUT
@@ -943,9 +935,7 @@ int Script::execute (const std::list<std::string> &in_command,
     }
 
     Glib::ustring stderr_data = fileerr.string();
-    if (stderr_data.length() != 0 &&
-        INKSCAPE.use_gui()
-       ) {
+    if (stderr_data.length() != 0 && INKSCAPE.use_gui() && !ignore_stderr) {
         checkStderr(stderr_data, Gtk::MESSAGE_INFO,
                                  _("Inkscape has received additional data from the script executed.  "
                                    "The script did not return an error, but this may indicate the results will not be as expected."));

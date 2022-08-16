@@ -71,6 +71,9 @@ public:
     void set_desk  (uint32_t rgba);
     void set_border(uint32_t rgba);
     void set_page  (uint32_t rgba);
+    uint32_t  get_desk_color  ();
+    uint32_t  get_border_color();
+    uint32_t  get_page_color  ();
     uint32_t get_effective_background() const; // This function is now wrong.
 
     //  Rendering modes
@@ -80,6 +83,7 @@ public:
     Inkscape::RenderMode get_render_mode() const { return _render_mode; }
     Inkscape::ColorMode  get_color_mode()  const { return _color_mode; }
     Inkscape::SplitMode  get_split_mode()  const { return _split_mode; }
+    void set_clip_to_page_mode(bool clip);
 
     // CMS
     void set_cms_key(std::string key);

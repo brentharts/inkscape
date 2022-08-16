@@ -110,7 +110,7 @@ TweakTool::TweakTool(SPDesktop *desktop)
 
     this->style_set_connection = desktop->connectSetStyle( // catch style-setting signal in this tool
         //sigc::bind(sigc::ptr_fun(&sp_tweak_context_style_set), this)
-   		sigc::mem_fun(this, &TweakTool::set_style)
+        sigc::mem_fun(*this, &TweakTool::set_style)
     );
     
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
@@ -152,8 +152,8 @@ void TweakTool::update_cursor (bool with_shift) {
     guint num = 0;
     gchar *sel_message = nullptr;
 
-    if (!_desktop->selection->isEmpty()) {
-        num = (guint)boost::distance(_desktop->selection->items());
+    if (!_desktop->getSelection()->isEmpty()) {
+        num = (guint)boost::distance(_desktop->getSelection()->items());
         sel_message = g_strdup_printf(ngettext("<b>%i</b> object selected","<b>%i</b> objects selected",num), num);
     } else {
         sel_message = g_strdup_printf("%s", _("<b>Nothing</b> selected"));
@@ -327,7 +327,7 @@ sp_tweak_dilate_recursive (Inkscape::Selection *selection, SPItem *item, Geom::P
     }
 
     if (dynamic_cast<SPText *>(item) || dynamic_cast<SPFlowtext *>(item)) {
-    	std::vector<SPItem*> items;
+        std::vector<SPItem*> items;
         items.push_back(item);
         std::vector<SPItem*> selected;
         std::vector<Inkscape::XML::Node*> to_select;
@@ -928,7 +928,7 @@ sp_tweak_color_recursive (guint mode, SPItem *item, SPItem *item_at_point,
                         //if primitive is gaussianblur
                         SPGaussianBlur * spblur = dynamic_cast<SPGaussianBlur *>(primitive);
                         if (spblur) {
-                            float num = spblur->stdDeviation.getNumber();
+                            float num = spblur->get_std_deviation().getNumber();
                             blur_now += num * i2dt.descrim(); // sum all blurs in the filter
                         }
                     }
@@ -1170,8 +1170,8 @@ bool TweakTool::root_handler(GdkEvent* event) {
             dilate_area->show();
 
             guint num = 0;
-            if (!_desktop->selection->isEmpty()) {
-                num = (guint)boost::distance(_desktop->selection->items());
+            if (!_desktop->getSelection()->isEmpty()) {
+                num = (guint)boost::distance(_desktop->getSelection()->items());
             }
             if (num == 0) {
                 this->message_context->flash(Inkscape::ERROR_MESSAGE, _("<b>Nothing selected!</b> Select objects to tweak."));
@@ -1467,7 +1467,7 @@ bool TweakTool::root_handler(GdkEvent* event) {
     }
 
     if (!ret) {
-    	ret = ToolBase::root_handler(event);
+        ret = ToolBase::root_handler(event);
     }
 
     return ret;

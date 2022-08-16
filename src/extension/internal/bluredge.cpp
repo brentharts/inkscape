@@ -59,7 +59,7 @@ BlurEdge::effect (Inkscape::Extension::Effect *module, Inkscape::UI::View::View 
         std::cerr << "BlurEdge::effect: view is not desktop!" << std::endl;
         return;
     }
-    Inkscape::Selection * selection     = desktop->selection;
+    Inkscape::Selection * selection     = desktop->getSelection();
 
     double width = module->get_param_float("blur-width");
     int    steps = module->get_param_int("num-steps");
@@ -122,7 +122,7 @@ BlurEdge::effect (Inkscape::Extension::Effect *module, Inkscape::UI::View::View 
 }
 
 Gtk::Widget *
-BlurEdge::prefs_effect(Inkscape::Extension::Effect * module, Inkscape::UI::View::View * /*view*/, sigc::signal<void> * changeSignal, Inkscape::Extension::Implementation::ImplementationDocumentCache * /*docCache*/)
+BlurEdge::prefs_effect(Inkscape::Extension::Effect * module, Inkscape::UI::View::View * /*view*/, sigc::signal<void ()> * changeSignal, Inkscape::Extension::Implementation::ImplementationDocumentCache * /*docCache*/)
 {
     return module->autogui(nullptr, nullptr, changeSignal);
 }

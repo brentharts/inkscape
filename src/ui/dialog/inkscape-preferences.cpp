@@ -1797,10 +1797,10 @@ void InkscapePreferences::initPageUI()
     _symbolic_success_color.get_style_context()->add_class("symboliccolors");
     _symbolic_warning_color.get_style_context()->add_class("symboliccolors");
     _symbolic_error_color.get_style_context()->add_class("symboliccolors");
-    _symbolic_base_color.connectChanged(sigc::mem_fun(this, &InkscapePreferences::changeIconsColor));
-    _symbolic_warning_color.connectChanged(sigc::mem_fun(this, &InkscapePreferences::changeIconsColor));
-    _symbolic_success_color.connectChanged(sigc::mem_fun(this, &InkscapePreferences::changeIconsColor));
-    _symbolic_error_color.connectChanged(sigc::mem_fun(this, &InkscapePreferences::changeIconsColor));
+    _symbolic_base_color.connectChanged(sigc::mem_fun(*this, &InkscapePreferences::changeIconsColor));
+    _symbolic_warning_color.connectChanged(sigc::mem_fun(*this, &InkscapePreferences::changeIconsColor));
+    _symbolic_success_color.connectChanged(sigc::mem_fun(*this, &InkscapePreferences::changeIconsColor));
+    _symbolic_error_color.connectChanged(sigc::mem_fun(*this, &InkscapePreferences::changeIconsColor));
     /* _complementary_colors = Gtk::manage(new Gtk::Image()); */
     Gtk::Box *icon_buttons = Gtk::manage(new Gtk::Box());
     icon_buttons->pack_start(_symbolic_base_color, true, true, 4);
@@ -1825,6 +1825,9 @@ void InkscapePreferences::initPageUI()
         _menu_icons.init("/theme/menuIcons", menu_icons_labels, menu_icons_values, G_N_ELEMENTS(menu_icons_labels), 0);
         _page_theme.add_line(false, _("Show icons in menus:"), _menu_icons, "",
                              _("You can either enable or disable all icons in menus. By default, the setting for the 'use-icon' attribute in the 'menus.ui' file determines whether to display icons in menus."), false, reset_icon());
+        _shift_icons.init(_("Shift icons in menus"), "/theme/shiftIcons", true);
+        _page_theme.add_line(true, "", _shift_icons, "",
+                             _("This preference fixes icon positions in menus."), false, reset_icon());
 
 
     this->AddPage(_page_theme, _("Theming"), iter_ui, PREFS_PAGE_UI_THEME);
@@ -1876,7 +1879,8 @@ void InkscapePreferences::initPageUI()
 
         std::vector<PrefItem> snap = {
             { _("Simple"), 1, _("Present simplified snapping options that manage all advanced settings"), true },
-            { _("Advanced"), 0, _("Expose all snapping options for manual control") }
+            { _("Advanced"), 0, _("Expose all snapping options for manual control") },
+            { _("Permanent"), 2, _("All advanced snap options appear in a permanent bar") },
         };
         _page_toolbars.add_line(false, _("Snap controls bar:"), *Gtk::make_managed<PrefRadioButtons>(snap, "/toolbox/simplesnap"), "", "");
     } catch (const Glib::Error &ex) {
@@ -2582,7 +2586,7 @@ void InkscapePreferences::initPageBehavior()
     _mask_mask_on_top.init ( _("When applying, use the topmost selected object as clippath/mask"), "/options/maskobject/topmost", true);
     _page_mask.add_line(false, "", _mask_mask_on_top, "",
                         _("Uncheck this to use the bottom selected object as the clipping path or mask"));
-    _mask_mask_on_ungroup.init ( _("When ungroup, clip/mask is preserved in childrens"), "/options/maskobject/maskonungroup", true);
+    _mask_mask_on_ungroup.init ( _("When ungroup, clip/mask is preserved in children"), "/options/maskobject/maskonungroup", true);
     _page_mask.add_line(false, "", _mask_mask_on_ungroup, "",
                         _("Uncheck this to remove clip/mask on ungroup"));
     _mask_mask_remove.init ( _("Remove clippath/mask object after applying"), "/options/maskobject/remove", true);
@@ -3209,7 +3213,7 @@ void InkscapePreferences::onKBShortcutRenderer(Gtk::CellRenderer *renderer, Gtk:
     unsigned int user_set = (*iter)[onKBGetCols().user_set];
     Gtk::CellRendererAccel *accel = dynamic_cast<Gtk::CellRendererAccel *>(renderer);
     if (user_set) {
-        accel->property_markup() = Glib::ustring("<span foreground=\"blue\"> " + shortcut + " </span>").c_str();
+        accel->property_markup() = Glib::ustring("<span font-weight='bold'> " + shortcut + " </span>").c_str();
     } else {
         accel->property_markup() = Glib::ustring("<span> " + shortcut + " </span>").c_str();
     }

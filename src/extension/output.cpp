@@ -16,10 +16,8 @@
 #include "io/sys.h"
 #include "implementation/implementation.h"
 
-#include "prefdialog/prefdialog.h"
-
 #include "xml/repr.h"
-
+#include "xml/attribute-record.h"
 
 /* Inkscape::Extension::Output */
 
@@ -51,8 +49,6 @@ Output::Output (Inkscape::XML::Node *in_repr, Implementation::Implementation *in
     filetypetooltip = nullptr;
     dataloss = true;
     savecopyonly = false;
-    exported = false;
-    raster = false;
 
     if (repr != nullptr) {
         Inkscape::XML::Node * child_repr;
@@ -62,11 +58,15 @@ Output::Output (Inkscape::XML::Node *in_repr, Implementation::Implementation *in
         while (child_repr != nullptr) {
             if (!strcmp(child_repr->name(), INKSCAPE_EXTENSION_NS "output")) {
 
-                if (child_repr->attribute("raster") && !strcmp(child_repr->attribute("raster"), "true")) {
-                     raster = true;
-                }
-                if (child_repr->attribute("is_exported") && !strcmp(child_repr->attribute("is_exported"), "true")) {
-                     exported = true;
+                for (const auto &iter : child_repr->attributeList()) {
+                    std::string name = g_quark_to_string(iter.key);
+                    std::string value = std::string(iter.value);
+                    if (name == "raster")
+                        raster = value == "true";
+                    else if (name == "is_exported")
+                        exported = value == "true";
+                    else if (name == "priority")
+                        set_sort_priority(strtol(value.c_str(), nullptr, 0));
                 }
 
                 child_repr = child_repr->firstChild();
@@ -196,36 +196,6 @@ Output::get_filetypetooltip(bool translated)
     } else {
         return filetypetooltip;
     }
-}
-
-/**
-    \return  A dialog to get settings for this extension
-	\brief   Create a dialog for preference for this extension
-
-	Calls the implementation to get the preferences.
-*/
-bool
-Output::prefs ()
-{
-    if (!loaded())
-        set_state(Extension::STATE_LOADED);
-    if (!loaded()) return false;
-
-    Gtk::Widget * controls;
-    controls = imp->prefs_output(this);
-    if (controls == nullptr) {
-        // std::cout << "No preferences for Output" << std::endl;
-        return true;
-    }
-
-    Glib::ustring title = this->get_name();
-    PrefDialog *dialog = new PrefDialog(title, controls);
-    int response = dialog->run();
-    dialog->hide();
-
-    delete dialog;
-
-    return (response == Gtk::RESPONSE_OK);
 }
 
 /**

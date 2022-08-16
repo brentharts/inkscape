@@ -116,11 +116,11 @@ void Parameter::param_higlight(bool highlight, bool select)
         if (highlight) {
             if (lpeitems.size() == 1 && param_effect->is_visible) {
                 if (select && !lpeitems[0]->isHidden()) {
-                    desktop->selection->clear();
-                    desktop->selection->add(lpeitems[0]);
+                    desktop->getSelection()->clear();
+                    desktop->getSelection()->add(lpeitems[0]);
                     return;
                 }
-                auto c = std::make_unique<SPCurve>();
+                SPCurve c;
                 std::vector<Geom::PathVector> cs; // = param_effect->getCanvasIndicators(lpeitems[0]);
                 Geom::OptRect bbox = lpeitems[0]->documentVisualBounds();
 
@@ -141,11 +141,11 @@ void Parameter::param_higlight(bool highlight, bool select)
                 cs.push_back(out);
                 for (auto &p2 : cs) {
                     p2 *= desktop->dt2doc();
-                    c->append(p2);
+                    c.append(p2);
                 }
-                if (!c->is_empty()) {
+                if (!c.is_empty()) {
                     desktop->remove_temporary_canvasitem(ownerlocator);
-                    auto tmpitem = new Inkscape::CanvasItemBpath(desktop->getCanvasTemp(), c.get(), true);
+                    auto tmpitem = new Inkscape::CanvasItemBpath(desktop->getCanvasTemp(), c.get_pathvector(), true);
                     tmpitem->set_stroke(0x0000ff9a);
                     tmpitem->set_fill(0x0, SP_WIND_RULE_NONZERO); // No fill
                     ownerlocator = desktop->add_temporary_canvasitem(tmpitem, 0);
@@ -164,7 +164,7 @@ void Parameter::connect_selection_changed()
 {
     SPDesktop *desktop = SP_ACTIVE_DESKTOP;
     if (desktop) {
-        Inkscape::Selection *selection = desktop->selection;
+        Inkscape::Selection *selection = desktop->getSelection();
         if (selection) {
             std::vector<SPObject *> satellites = param_get_satellites();
             if (!selection_changed_connection) {
@@ -180,43 +180,43 @@ void Parameter::update_satellites(bool updatelpe)
     if (paramType() == ParamType::SATELLITE || paramType() == ParamType::SATELLITE_ARRAY || paramType() == ParamType::PATH ||
         paramType() == ParamType::PATH_ARRAY || paramType() == ParamType::ORIGINAL_PATH || paramType() == ParamType::ORIGINAL_SATELLITE) {
         SPDesktop *desktop = SP_ACTIVE_DESKTOP;
-        if (desktop) {
-            DocumentUndo::ScopedInsensitive _no_undo(desktop->getDocument());
-            param_higlight(false, false);
-            Inkscape::Selection *selection = desktop->selection;
-            if (selection) {
-                std::vector<SPObject *> satellites = param_get_satellites();
-                connect_selection_changed();
-                if (selection->singleItem()) {
-                    if (param_effect->isOnClipboard()) {
-                        return;
-                    }
-                    // we always start hiding helper path
-                    for (auto iter : satellites) {
-                        sp_add_class(iter, "UnoptimicedTransforms");
-                        // if selection is current ref we highlight original sp_lpe_item to
-                        // give visual feedback to the user to know what's the LPE item that generated the selection
-                        if (iter && selection->includes(iter, true)) {
-                            const gchar *classtoparentchar = iter->getAttribute("class");
-                            if (classtoparentchar) {
-                                Glib::ustring classtoparent = classtoparentchar;
-                                if (classtoparent.find("lpeselectparent ") != Glib::ustring::npos) {
-                                    param_higlight(true, true);
+        std::vector<SPLPEItem *> lpeitems = param_effect->getCurrrentLPEItems();
+        if (lpeitems.size() == 1){
+            if (desktop) {
+                DocumentUndo::ScopedInsensitive _no_undo(desktop->getDocument());
+                param_higlight(false, false);
+                Inkscape::Selection *selection = desktop->getSelection();
+                if (selection) {
+                    std::vector<SPObject *> satellites = param_get_satellites();
+                    connect_selection_changed();
+                    if (selection->singleItem()) {
+                        if (param_effect->isOnClipboard()) {
+                            return;
+                        }
+                        // we always start hiding helper path
+                        for (auto iter : satellites) {
+                            sp_add_class(iter, "UnoptimicedTransforms");
+                            // if selection is current ref we highlight original sp_lpe_item to
+                            // give visual feedback to the user to know what's the LPE item that generated the selection
+                            if (iter && selection->includes(iter, true)) {
+                                const gchar *classtoparentchar = iter->getAttribute("class");
+                                if (classtoparentchar) {
+                                    Glib::ustring classtoparent = classtoparentchar;
+                                    if (classtoparent.find("lpeselectparent ") != Glib::ustring::npos) {
+                                        param_higlight(true, true);
+                                    } else {
+                                        param_higlight(true, false);
+                                    }
                                 } else {
                                     param_higlight(true, false);
                                 }
-                            } else {
-                                param_higlight(true, false);
+                                break;
                             }
-                            break;
                         }
                     }
                 }
             }
-        }
-        if (updatelpe) {
-            std::vector<SPLPEItem *> lpeitems = param_effect->getCurrrentLPEItems();
-            if (lpeitems.size() == 1 && param_effect->is_visible) {
+            if (updatelpe && param_effect->is_visible) {
                 sp_lpe_item_update_patheffect(lpeitems[0], false, false);
             }
         }

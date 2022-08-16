@@ -80,9 +80,10 @@ public:
     // Geometry
     void request_update();
     virtual void update(Geom::Affine const &affine) = 0;
+    virtual void visit_page_rects(std::function<void(const Geom::Rect&)>) const {}
     Geom::Affine get_affine() const { return _affine; }
     Geom::Rect get_bounds() const { return _bounds; }
-    virtual void visit_page_rects(std::function<void(const Geom::Rect&)>) const {}
+    double get_scale() const { return std::sqrt(std::abs(_affine.det())); }
 
     // Selection
     virtual bool contains(Geom::Point const &p, double tolerance = 0) { return _bounds.interiorContains(p); }
@@ -108,7 +109,7 @@ public:
     // Events
     void set_pickable(bool pickable) { _pickable = pickable; }
     bool is_pickable() const { return _pickable; }
-    sigc::connection connect_event(sigc::slot<bool, GdkEvent*> slot) {
+    sigc::connection connect_event(sigc::slot<bool (GdkEvent*)> slot) {
         return _event_signal.connect(slot);
     }
     virtual bool handle_event(GdkEvent *event) {
@@ -143,7 +144,7 @@ protected:
     std::string _name; // For debugging
 
     // Events
-    sigc::signal<bool, GdkEvent*> _event_signal;
+    sigc::signal<bool (GdkEvent*)> _event_signal;
 };
 
 } // namespace Inkscape

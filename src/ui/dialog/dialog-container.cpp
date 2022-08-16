@@ -161,7 +161,7 @@ DialogBase *DialogContainer::dialog_factory(const Glib::ustring& dialog_type)
     else if(dialog_type == "Prototype")           return &Inkscape::UI::Dialog::Prototype::getInstance();
 #endif
     else {
-        std::cerr << "DialogContainer::dialog_factory: Unhandled dialog: " << dialog_type << std::endl;
+        std::cerr << "DialogContainer::dialog_factory: Unhandled dialog: " << dialog_type.raw() << std::endl;
         return nullptr;
     }
     // clang-format on
@@ -281,7 +281,7 @@ void DialogContainer::new_dialog(const Glib::ustring& dialog_type, DialogNoteboo
     DialogBase *dialog = dialog_factory(dialog_type);
 
     if (!dialog) {
-        std::cerr << "DialogContainer::new_dialog(): couldn't find dialog for: " << dialog_type << std::endl;
+        std::cerr << "DialogContainer::new_dialog(): couldn't find dialog for: " << dialog_type.raw() << std::endl;
         return;
     }
 
@@ -289,6 +289,7 @@ void DialogContainer::new_dialog(const Glib::ustring& dialog_type, DialogNoteboo
     dialog = Gtk::manage(dialog);
 
     // Create the notebook tab
+    auto const &dialog_data = get_dialog_data();
     Glib::ustring image("inkscape-logo");
     auto it = dialog_data.find(dialog_type);
     if (it != dialog_data.end()) {
@@ -432,6 +433,7 @@ bool DialogContainer::recreate_dialogs_from_state(InkscapeWindow* inkscape_windo
                 }
 
                 DialogNotebook *notebook = nullptr;
+                auto const &dialog_data = get_dialog_data();
 
                 // Step 3.2.2.1 create each dialog in the current notebook
                 for (auto type : dialogs) {
@@ -447,7 +449,7 @@ bool DialogContainer::recreate_dialogs_from_state(InkscapeWindow* inkscape_windo
                         }
                         active_container->new_dialog(type, notebook);
                     } else {
-                        std::cerr << "recreate_dialogs_from_state: invalid dialog type: " << type << std::endl;
+                        std::cerr << "recreate_dialogs_from_state: invalid dialog type: " << type.raw() << std::endl;
                     }
                 }
             }
@@ -500,7 +502,7 @@ DialogWindow *DialogContainer::create_new_floating_dialog(const Glib::ustring& d
     DialogBase *dialog = dialog_factory(dialog_type);
 
     if (!dialog) {
-        std::cerr << "DialogContainer::new_dialog(): couldn't find dialog for: " << dialog_type << std::endl;
+        std::cerr << "DialogContainer::new_dialog(): couldn't find dialog for: " << dialog_type.raw() << std::endl;
         return nullptr;
     }
 
@@ -755,6 +757,7 @@ void DialogContainer::load_container_state(Glib::KeyFile *keyfile, bool include_
                     column->append(notebook);
                 }
 
+                auto const &dialog_data = get_dialog_data();
                 // Step 3.2.2.1 create each dialog in the current notebook
                 for (auto type : dialogs) {
 
@@ -765,7 +768,7 @@ void DialogContainer::load_container_state(Glib::KeyFile *keyfile, bool include_
                             dialog_window = create_new_floating_dialog(type, false);
                         }
                     } else {
-                        std::cerr << "load_container_state: invalid dialog type: " << type << std::endl;
+                        std::cerr << "load_container_state: invalid dialog type: " << type.raw() << std::endl;
                     }
                 }
             }

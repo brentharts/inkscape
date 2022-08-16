@@ -1,4 +1,5 @@
 ../share/filters/filters.svg.h
+../share/markers/markers.svg.h
 ../share/palettes/palettes.h
 ../share/paint/patterns.svg.h
 ../share/symbols/symbols.h
@@ -121,12 +122,19 @@
 ../src/extension/internal/svg.cpp
 ../src/extension/internal/svg.h
 ../src/extension/internal/svgz.cpp
+../src/extension/internal/template-from-file.cpp
+../src/extension/internal/template-other.cpp
+../src/extension/internal/template-paper.cpp
+../src/extension/internal/template-screen.cpp
+../src/extension/internal/template-social.cpp
+../src/extension/internal/template-video.cpp
 ../src/extension/internal/vsd-input.cpp
 ../src/extension/internal/wmf-inout.cpp
 ../src/extension/internal/wpg-input.cpp
 ../src/extension/prefdialog/parameter-path.cpp
 ../src/extension/prefdialog/prefdialog.cpp
 ../src/extension/system.cpp
+../src/extension/template.cpp
 ../src/file-update.cpp
 ../src/file.cpp
 ../src/filter-enums.cpp
@@ -139,7 +147,7 @@
 ../src/inkview-application.cpp
 ../src/io/fix-broken-links.cpp
 ../src/io/resource.cpp
-../src/libnrtype/FontFactory.cpp
+../src/libnrtype/font-factory.cpp
 ../src/live_effects/effect.cpp
 ../src/live_effects/lpe-angle_bisector.cpp
 ../src/live_effects/lpe-attach-path.cpp
@@ -243,6 +251,8 @@
 ../src/path/path-boolop.cpp
 ../src/path/path-object-set.cpp
 ../src/path/path-offset.cpp
+../src/pattern-manager.cpp
+../src/pattern-manipulation.cpp
 ../src/preferences-skeleton.h
 ../src/preferences.cpp
 ../src/rdf.cpp
@@ -258,14 +268,15 @@
 ../src/ui/clipboard.cpp
 ../src/ui/contextmenu.cpp
 ../src/ui/desktop/document-check.cpp
+../src/ui/desktop/menubar.cpp
 ../src/ui/dialog/attrdialog.cpp
 ../src/ui/dialog/calligraphic-profile-rename.cpp
 ../src/ui/dialog/clonetiler.cpp
 ../src/ui/dialog/color-item.cpp
 ../src/ui/dialog/command-palette.cpp
 ../src/ui/dialog/debug.cpp
-../src/ui/dialog/dialog-base.cpp
 ../src/ui/dialog/dialog-container.cpp
+../src/ui/dialog/dialog-data.cpp
 ../src/ui/dialog/dialog-data.h
 ../src/ui/dialog/dialog-multipaned.cpp
 ../src/ui/dialog/dialog-notebook.cpp
@@ -308,10 +319,7 @@
 ../src/ui/dialog/styledialog.cpp
 ../src/ui/dialog/svg-fonts-dialog.cpp
 ../src/ui/dialog/svg-preview.cpp
-../src/ui/dialog/swatches.cpp
 ../src/ui/dialog/symbols.cpp
-../src/ui/dialog/template-load-tab.cpp
-../src/ui/dialog/template-widget.cpp
 ../src/ui/dialog/text-edit.cpp
 ../src/ui/dialog/tile.cpp
 ../src/ui/dialog/transformation.cpp
@@ -397,6 +405,7 @@
 ../src/ui/widget/page-properties.cpp
 ../src/ui/widget/page-selector.cpp
 ../src/ui/widget/paint-selector.cpp
+../src/ui/widget/pattern-editor.cpp
 ../src/ui/widget/preferences-widget.cpp
 ../src/ui/widget/random.cpp
 ../src/ui/widget/registered-widget.cpp
@@ -410,6 +419,6 @@
 ../src/util/paper.cpp
 ../src/vanishing-point.cpp
 ../src/widgets/desktop-widget.cpp
-../src/widgets/ege-paint-def.cpp
+../src/widgets/paintdef.cpp
 ../src/widgets/sp-attribute-widget.cpp
 ../src/widgets/toolbox.cpp

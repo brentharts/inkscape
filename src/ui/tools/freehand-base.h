@@ -22,6 +22,7 @@
 
 #include "ui/tools/tool-base.h"
 #include "live_effects/effect-enum.h"
+#include "display/curve.h"
 
 class SPCurve;
 class SPCanvasItem;
@@ -46,42 +47,41 @@ public:
 
     Inkscape::Selection *selection;
 
-    bool attach;
-
+protected:
     guint32 red_color;
     guint32 blue_color;
     guint32 green_color;
     guint32 highlight_color;
 
+public:
     // Red - Last segment as it's drawn.
     Inkscape::CanvasItemBpath *red_bpath;
-    std::unique_ptr<SPCurve> red_curve;
+    SPCurve red_curve;
     std::optional<Geom::Point> red_curve_get_last_point();
 
     // Blue - New path after LPE as it's drawn.
     Inkscape::CanvasItemBpath *blue_bpath;
-    std::unique_ptr<SPCurve> blue_curve;
+    SPCurve blue_curve;
 
     // Green - New path as it's drawn.
     std::vector<Inkscape::CanvasItemBpath *> green_bpaths;
-    std::unique_ptr<SPCurve> green_curve;
+    std::shared_ptr<SPCurve> green_curve;
     std::unique_ptr<SPDrawAnchor> green_anchor;
-    gboolean green_closed; // a flag meaning we hit the green anchor, so close the path on itself
+    bool green_closed; // a flag meaning we hit the green anchor, so close the path on itself
 
     // White
     SPItem *white_item;
-    std::list<std::unique_ptr<SPCurve>> white_curves;
+    std::vector<std::shared_ptr<SPCurve>> white_curves;
     std::vector<std::unique_ptr<SPDrawAnchor>> white_anchors;
 
     // Temporary modified curve when start anchor
-    std::unique_ptr<SPCurve> sa_overwrited;
+    std::shared_ptr<SPCurve> sa_overwrited;
 
     // Start anchor
     SPDrawAnchor *sa;
 
     // End anchor
     SPDrawAnchor *ea;
-
 
     /* Type of the LPE that is to be applied automatically to a finished path (if any) */
     Inkscape::LivePathEffect::EffectType waiting_LPE_type;
@@ -100,8 +100,11 @@ public:
     gdouble pressure;
     void set(const Inkscape::Preferences::Entry& val) override;
 
+    void onSelectionModified();
+
 protected:
     bool root_handler(GdkEvent* event) override;
+    void _attachSelection();
 };
 
 /**

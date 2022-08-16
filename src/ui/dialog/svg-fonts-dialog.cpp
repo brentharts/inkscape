@@ -495,7 +495,7 @@ SPItem* get_or_create_layer_for_glyph(SPDesktop* desktop, const Glib::ustring& f
     return dynamic_cast<SPItem*>(layer);
 }
 
-void SvgFontsDialog::create_glyphs_popup_menu(Gtk::Widget& parent, sigc::slot<void> rem)
+void SvgFontsDialog::create_glyphs_popup_menu(Gtk::Widget& parent, sigc::slot<void ()> rem)
 {
     // - edit glyph (show its layer)
     // - sort glyphs and their layers
@@ -530,7 +530,7 @@ void SvgFontsDialog::create_glyphs_popup_menu(Gtk::Widget& parent, sigc::slot<vo
     _GlyphsContextMenu.accelerate(parent);
 }
 
-void SvgFontsDialog::create_kerning_pairs_popup_menu(Gtk::Widget& parent, sigc::slot<void> rem)
+void SvgFontsDialog::create_kerning_pairs_popup_menu(Gtk::Widget& parent, sigc::slot<void ()> rem)
 {
     auto mi = Gtk::manage(new Gtk::MenuItem(_("_Remove"), true));
     _KerningPairsContextMenu.append(*mi);
@@ -539,7 +539,7 @@ void SvgFontsDialog::create_kerning_pairs_popup_menu(Gtk::Widget& parent, sigc::
     _KerningPairsContextMenu.accelerate(parent);
 }
 
-void SvgFontsDialog::create_fonts_popup_menu(Gtk::Widget& parent, sigc::slot<void> rem)
+void SvgFontsDialog::create_fonts_popup_menu(Gtk::Widget& parent, sigc::slot<void ()> rem)
 {
     auto mi = Gtk::manage(new Gtk::MenuItem(_("_Remove"), true));
     _FontsContextMenu.append(*mi);
@@ -1255,7 +1255,7 @@ void SvgFontsDialog::glyph_advance_edit(const Glib::ustring&, const Glib::ustrin
 
         update_glyphs(glyph);
     } else {
-        std::cerr << "SvgFontDialog::glyph_advance_edit: Error in input: " << str << std::endl;
+        std::cerr << "SvgFontDialog::glyph_advance_edit: Error in input: " << str.raw() << std::endl;
     }
 }
 

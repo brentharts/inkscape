@@ -83,6 +83,7 @@ static SPStyleProp const props[] = {
     {SPAttr::BORDERCOLOR, "bordercolor"},
     {SPAttr::BORDEROPACITY, "borderopacity"},
     {SPAttr::PAGECOLOR, "pagecolor"},
+    {SPAttr::PAGELABELSTYLE, "labelstyle"},
     {SPAttr::FIT_MARGIN_TOP, "fit-margin-top"},
     {SPAttr::FIT_MARGIN_LEFT, "fit-margin-left"},
     {SPAttr::FIT_MARGIN_RIGHT, "fit-margin-right"},
@@ -568,7 +569,8 @@ static SPStyleProp const props[] = {
     {SPAttr::INKSCAPE_DESK_COLOR, "inkscape:deskcolor"},
     {SPAttr::INKSCAPE_DESK_OPACITY, "inkscape:deskopacity"},
     {SPAttr::INKSCAPE_DESK_CHECKERBOARD, "inkscape:pagecheckerboard"}, // old attr
-
+    // rendering mode
+    {SPAttr::INKSCAPE_CLIP_TO_PAGE_RENDERING, "inkscape:clip-to-page"},
 };
 
 #define n_attrs (sizeof(props) / sizeof(props[0]))

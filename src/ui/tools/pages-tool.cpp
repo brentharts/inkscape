@@ -43,8 +43,8 @@ PagesTool::PagesTool(SPDesktop *desktop)
     : ToolBase(desktop, "/tools/pages", "select.svg")
 {
     // Stash the regular object selection so we don't modify them in base-tools root handler.
-    desktop->selection->setBackup();
-    desktop->selection->clear();
+    desktop->getSelection()->setBackup();
+    desktop->getSelection()->clear();
 
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     drag_tolerance = prefs->getIntLimited("/options/dragtolerance/value", 0, 0, 100);
@@ -99,7 +99,7 @@ PagesTool::~PagesTool()
 
     ungrabCanvasEvents();
 
-    _desktop->selection->restoreBackup();
+    _desktop->getSelection()->restoreBackup();
 
     if (visual_box) {
         delete visual_box;
@@ -131,7 +131,7 @@ void PagesTool::resizeKnotSet(Geom::Rect rect)
 
 void PagesTool::resizeKnotMoved(SPKnot *knot, Geom::Point const &ppointer, guint state)
 {
-    Geom::Rect rect;
+    Geom::Rect rect; ///< Page rectangle in desktop coordinates.
 
     auto page = _desktop->getDocument()->getPageManager().getSelected();
     if (page) {
@@ -139,7 +139,7 @@ void PagesTool::resizeKnotMoved(SPKnot *knot, Geom::Point const &ppointer, guint
         rect = page->getDesktopRect();
     } else if (auto document = _desktop->getDocument()) {
         // Resizing the naked viewBox
-        rect = *(document->preferredBounds());
+        rect = *(document->preferredBounds()) * document->doc2dt();
     }
 
     int index;
@@ -164,7 +164,7 @@ void PagesTool::resizeKnotMoved(SPKnot *knot, Geom::Point const &ppointer, guint
 
         visual_box->show();
         visual_box->set_rect(rect);
-        on_screen_rect = Geom::Rect(rect);
+        on_screen_rect = rect;
         mouse_is_pressed = true;
     }
 }
@@ -191,11 +191,7 @@ void PagesTool::resizeKnotFinished(SPKnot *knot, guint state)
     auto document = _desktop->getDocument();
     auto page = document->getPageManager().getSelected();
     if (on_screen_rect) {
-        if (!page || page->isViewportPage()) {
-            // Adjust viewport so it's scroll adjustment is correct
-            *on_screen_rect *= document->dt2doc();
-        }
-        document->getPageManager().fitToRect(*on_screen_rect, page);
+        document->getPageManager().fitToRect(*on_screen_rect * document->dt2doc(), page);
         Inkscape::DocumentUndo::done(document, "Resize page", INKSCAPE_ICON("tool-pages"));
         on_screen_rect = {};
     }
@@ -536,6 +532,8 @@ void PagesTool::connectDocument(SPDocument *doc)
     }
 }
 
+
+
 void PagesTool::selectionChanged(SPDocument *doc, SPPage *page)
 {
     if (_page_modified_connection) {
@@ -546,11 +544,10 @@ void PagesTool::selectionChanged(SPDocument *doc, SPPage *page)
     }
 
     // Loop existing pages because highlight_item is unsafe.
-    if (doc) {
-        for (auto &possible : doc->getPageManager().getPages()) {
-            if (highlight_item == possible) {
-                highlight_item->setSelected(false);
-            }
+    // Use desktop's document instead of doc, which may be nullptr.
+    for (auto &possible : _desktop->getDocument()->getPageManager().getPages()) {
+        if (highlight_item == possible) {
+            highlight_item->setSelected(false);
         }
     }
     highlight_item = page;

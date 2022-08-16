@@ -66,7 +66,7 @@ KnotHolder::KnotHolder(SPDesktop *desktop, SPItem *item, SPKnotHolderReleasedFun
     _edit_transform(Geom::identity())
 {
     if (!desktop || !item) {
-        g_print ("Error! Throw an exception, please!\n");
+        g_warning ("Error! Throw an exception, please!");
     }
 
     sp_object_ref(item);
@@ -236,11 +236,26 @@ KnotHolder::unselect_knots(){
     }
 }
 
+/** Notifies an entity that its knot has just been grabbed. */
+void KnotHolder::knot_grabbed_handler(SPKnot *knot, unsigned state)
+{
+    auto grab_entity = std::find_if(entity.begin(), entity.end(),
+                                    [=](KnotHolderEntity *khe) -> bool { return khe->knot == knot; });
+    if (grab_entity == entity.end()) {
+        return;
+    }
+    auto const item_origin = (*grab_entity)->knot->drag_origin * item->dt2i_affine()
+                             * _edit_transform.inverse();
+    (*grab_entity)->knot_grabbed(item_origin, state);
+}
+
 void
 KnotHolder::knot_moved_handler(SPKnot *knot, Geom::Point const &p, guint state)
 {
-    if (this->dragging == false) {
-    	this->dragging = true;
+    if (!dragging) {
+        // The knot has just been grabbed
+        knot_grabbed_handler(knot, state);
+        dragging = true;
     }
 
     // this was a local change and the knotholder does not need to be recreated:
@@ -352,7 +367,7 @@ void KnotHolder::add_pattern_knotholder()
         PatternKnotHolderEntityXY *entity_xy = new PatternKnotHolderEntityXY(true);
         PatternKnotHolderEntityAngle *entity_angle = new PatternKnotHolderEntityAngle(true);
         PatternKnotHolderEntityScale *entity_scale = new PatternKnotHolderEntityScale(true);
-        entity_xy->create(desktop, item, this, Inkscape::CANVAS_ITEM_CTRL_TYPE_POINT, "Pattern:Fill:xy",
+        entity_xy->create(desktop, item, this, Inkscape::CANVAS_ITEM_CTRL_TYPE_SIZER, "Pattern:Fill:xy",
                           // TRANSLATORS: This refers to the pattern that's inside the object
                           _("<b>Move</b> the pattern fill inside the object"));
 
@@ -441,6 +456,19 @@ void KnotHolder::add_filter_knotholder() {
                       _("<b>Resize</b> the filter effect region"));
     entity.push_back(entity_tl);
     entity.push_back(entity_br);
+}
+
+/**
+ * When editing an object, this extra information tells out knots
+ * where the user has clicked on the item.
+ */
+bool KnotHolder::set_item_clickpos(Geom::Point loc)
+{
+    bool ret = false;
+    for (auto i : entity) {
+        ret = i->set_item_clickpos(loc) || ret;
+    }
+    return ret;
 }
 
 /*

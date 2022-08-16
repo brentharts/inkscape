@@ -29,36 +29,6 @@
 
 #include <gdk/gdk.h>
 
-// TODO look for copy-n-paste duplication of this function:
-/**
- * Hide all items that are not in list, recursively, skipping groups and defs.
- */
-static void hide_other_items_recursively(SPObject *object, const std::vector<SPItem*> &items, unsigned dkey)
-{
-    SPItem *item = dynamic_cast<SPItem *>(object);
-    if (!item) {
-        // <defs>, <metadata>, etc.
-        return;
-    }
-
-    if (std::find (items.begin(), items.end(), item) != items.end()) {
-        // It's in our list, don't hide!
-        return;
-    }
-
-    if ( !dynamic_cast<SPRoot  *>(item) &&
-         !dynamic_cast<SPGroup *>(item) &&
-         !dynamic_cast<SPUse   *>(item) ) {
-        // Hide if not container or def.
-        item->invoke_hide(dkey);
-    }
-
-    for (auto& child: object->children) {
-        hide_other_items_recursively(&child, items, dkey);
-    }
-}
-
-
 /**
     generates a bitmap from given items
     the bitmap is stored in RAM and not written to file
@@ -73,7 +43,9 @@ Inkscape::Pixbuf *sp_generate_internal_bitmap(SPDocument *document,
                                               Geom::Rect const &area,
                                               double dpi,
                                               std::vector<SPItem *> items,
-                                              bool opaque)
+                                              bool opaque,
+                                              unsigned int* checkerboard_color,
+                                              double device_scale)
 {
     // Geometry
     if (area.hasZeroArea()) {
@@ -103,7 +75,7 @@ Inkscape::Pixbuf *sp_generate_internal_bitmap(SPDocument *document,
     // Hide all items we don't want, instead of showing only requested items,
     // because that would not work if the shown item references something in defs.
     if (!items.empty()) {
-        hide_other_items_recursively(document->getRoot(), items, dkey);
+        document->getRoot()->invoke_hide_except(dkey, items);
     }
 
     Geom::IntRect final_area = Geom::IntRect::from_xywh(0, 0, width, height);
@@ -125,8 +97,24 @@ Inkscape::Pixbuf *sp_generate_internal_bitmap(SPDocument *document,
     if (cairo_surface_status(surface) == CAIRO_STATUS_SUCCESS) {
         Inkscape::DrawingContext dc(surface, Geom::Point(0,0));
 
+        if (checkerboard_color) {
+            guint rgba = *checkerboard_color;
+            auto pattern = ink_cairo_pattern_create_checkerboard(rgba);
+            dc.save();
+            dc.transform(Geom::Scale(device_scale));
+            dc.setOperator(CAIRO_OPERATOR_SOURCE);
+            dc.setSource(pattern);
+            dc.paint();
+            dc.restore();
+            cairo_pattern_destroy(pattern);
+        }
+
         // render items
         drawing.render(dc, final_area, Inkscape::DrawingItem::RENDER_BYPASS_CACHE);
+
+        if (device_scale != 1.0) {
+            cairo_surface_set_device_scale(surface, device_scale, device_scale);
+        }
 
         pixbuf = new Inkscape::Pixbuf(surface);
 

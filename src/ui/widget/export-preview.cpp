@@ -34,22 +34,14 @@ void ExportPreview::resetPixels()
 
 ExportPreview::~ExportPreview()
 {
-    if (drawing) {
-        if (_document) {
-            _document->getRoot()->invoke_hide(visionkey);
-        }
-        delete drawing;
-        drawing = nullptr;
+    if (drawing && _document) {
+        _document->getRoot()->invoke_hide(visionkey);
     }
     if (timer) {
         timer->stop();
-        delete timer;
-        timer = nullptr;
     }
     if (renderTimer) {
         renderTimer->stop();
-        delete renderTimer;
-        renderTimer = nullptr;
     }
     _item = nullptr;
     _document = nullptr;
@@ -78,12 +70,11 @@ void ExportPreview::setDocument(SPDocument *document)
         if (_document) {
             _document->getRoot()->invoke_hide(visionkey);
         }
-        delete drawing;
-        drawing = nullptr;
+        drawing.reset();
     }
     _document = document;
     if (_document) {
-        drawing = new Inkscape::Drawing();
+        drawing = std::make_unique<Inkscape::Drawing>();
         visionkey = SPItem::display_key_new(1);
         DrawingItem *ai = _document->getRoot()->invoke_show(*drawing, visionkey, SP_ITEM_SHOW_DISPLAY);
         if (ai) {
@@ -92,18 +83,20 @@ void ExportPreview::setDocument(SPDocument *document)
     }
 }
 
-void ExportPreview::refreshHide(const std::vector<SPItem *> *list)
+void ExportPreview::refreshHide(std::vector<SPItem *> const &list)
+{
+    _hidden_excluded = list;
+    _hidden_requested = true;
+}
+
+void ExportPreview::performHide()
 {
     if (_document) {
         if (isLastHide) {
             if (drawing) {
-                if (_document) {
-                    _document->getRoot()->invoke_hide(visionkey);
-                }
-                delete drawing;
-                drawing = nullptr;
+                _document->getRoot()->invoke_hide(visionkey);
             }
-            drawing = new Inkscape::Drawing();
+            drawing = std::make_unique<Inkscape::Drawing>();
             visionkey = SPItem::display_key_new(1);
             DrawingItem *ai = _document->getRoot()->invoke_show(*drawing, visionkey, SP_ITEM_SHOW_DISPLAY);
             if (ai) {
@@ -111,24 +104,9 @@ void ExportPreview::refreshHide(const std::vector<SPItem *> *list)
             }
             isLastHide = false;
         }
-        if (list && !list->empty()) {
-            hide_other_items_recursively(_document->getRoot(), *list);
+        if (!_hidden_excluded.empty()) {
+            _document->getRoot()->invoke_hide_except(visionkey, _hidden_excluded);
             isLastHide = true;
-        }
-    }
-}
-
-void ExportPreview::hide_other_items_recursively(SPObject *o, const std::vector<SPItem *> &list)
-{
-    if (SP_IS_ITEM(o) && !SP_IS_DEFS(o) && !SP_IS_ROOT(o) && !SP_IS_GROUP(o) &&
-        list.end() == find(list.begin(), list.end(), o)) {
-        SP_ITEM(o)->invoke_hide(visionkey);
-    }
-
-    // recurse
-    if (list.end() == find(list.begin(), list.end(), o)) {
-        for (auto &child : o->children) {
-            hide_other_items_recursively(&child, list);
         }
     }
 }
@@ -141,9 +119,9 @@ void ExportPreview::queueRefresh()
     if (!pending) {
         pending = true;
         if (!timer) {
-            timer = new Glib::Timer();
+            timer = std::make_unique<Glib::Timer>();
         }
-        Glib::signal_idle().connect(sigc::mem_fun(this, &ExportPreview::refreshCB), Glib::PRIORITY_DEFAULT_IDLE);
+        Glib::signal_idle().connect(sigc::mem_fun(*this, &ExportPreview::refreshCB), Glib::PRIORITY_DEFAULT_IDLE);
     }
 }
 
@@ -151,7 +129,7 @@ bool ExportPreview::refreshCB()
 {
     bool callAgain = true;
     if (!timer) {
-        timer = new Glib::Timer();
+        timer = std::make_unique<Glib::Timer>();
     }
     if (timer->elapsed() > minDelay) {
         callAgain = false;
@@ -165,7 +143,7 @@ void ExportPreview::refreshPreview()
 {
     auto document = _document;
     if (!timer) {
-        timer = new Glib::Timer();
+        timer = std::make_unique<Glib::Timer>();
     }
     if (timer->elapsed() < minDelay) {
         // Do not refresh too quickly
@@ -185,13 +163,17 @@ If both are not given then simply we do nothing.
 void ExportPreview::renderPreview()
 {
     if (!renderTimer) {
-        renderTimer = new Glib::Timer();
+        renderTimer = std::make_unique<Glib::Timer>();
     }
     renderTimer->reset();
     if (drawing == nullptr) {
         return;
     }
 
+    if (_hidden_requested) {
+        performHide();
+        _hidden_requested = false;
+    }
     if (_document) {
         GdkPixbuf *pb = nullptr;
         if (_item) {

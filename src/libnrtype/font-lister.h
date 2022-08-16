@@ -27,6 +27,8 @@
 #include <gtkmm/treemodelcolumn.h>
 #include <gtkmm/treepath.h>
 
+#define FONT_FAMILIES_GROUP_SIZE 30
+
 class SPObject;
 class SPDocument;
 class SPCSSAttr;
@@ -294,11 +296,15 @@ public:
      * Handlers should block signals.
      * Input is fontspec to set.
      */
-    sigc::connection connectUpdate(sigc::slot<void> slot) {
+    sigc::connection connectUpdate(sigc::slot<void ()> slot) {
         return update_signal.connect(slot);
     }
 
     bool blocked() { return block; }
+
+    int get_font_families_size();
+
+    void init_font_families(int group_offset = -1, int group_size = -1);
 
 private:
     FontLister();
@@ -325,7 +331,7 @@ private:
 
     bool block;
     void emit_update();
-    sigc::signal<void> update_signal;
+    sigc::signal<void ()> update_signal;
 };
 
 } // namespace Inkscape
@@ -339,6 +345,8 @@ gboolean font_lister_separator_func2(GtkTreeModel *model,
                                     gpointer /*data*/);
 
 void font_lister_cell_data_func (Gtk::CellRenderer *renderer, Gtk::TreeIter const &iter);
+
+void font_lister_cell_data_func_markup (Gtk::CellRenderer *renderer, Gtk::TreeIter const &iter);
 
 void font_lister_cell_data_func2(GtkCellLayout * /*cell_layout*/,
                                 GtkCellRenderer *cell,

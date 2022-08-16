@@ -90,7 +90,7 @@ SelectTool::SelectTool(SPDesktop *desktop)
         select_click.c_str(), select_scroll.c_str());
 
     this->_describer = new Inkscape::SelectionDescriber(
-                desktop->selection, 
+                desktop->getSelection(),
                 desktop->messageStack(),
                 _("Click selection again to toggle scale/rotation handles"),
                 no_selection_msg);
@@ -793,7 +793,7 @@ bool SelectTool::root_handler(GdkEvent* event) {
             while(item != nullptr) {
                 this->cycling_items.push_back(item);
                 item = _desktop->getItemAtPoint(p, true, item);
-                if (selection->includes(item)) tmp = item;
+                if (item && selection->includes(item)) tmp = item;
             }
 
             /* Compare current item list with item list during previous scroll ... */
@@ -1071,7 +1071,7 @@ bool SelectTool::root_handler(GdkEvent* event) {
                 case GDK_KEY_g:
                 case GDK_KEY_G:
                     if (MOD__SHIFT_ONLY(event)) {
-                        _desktop->selection->toGuides();
+                        _desktop->getSelection()->toGuides();
                         ret = true;
                     }
                     break;
@@ -1128,6 +1128,14 @@ bool SelectTool::root_handler(GdkEvent* event) {
     }
 
     return ret;
+}
+
+/**
+ * Update the toolbar description to this selection.
+ */
+void SelectTool::updateDescriber(Inkscape::Selection *selection)
+{
+    _describer->updateMessage(selection);
 }
 
 }

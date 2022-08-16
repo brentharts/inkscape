@@ -115,10 +115,7 @@ SPDocument::SPDocument() :
     document_name(nullptr),
     actionkey(),
     object_id_counter(1),
-    _event_log(new Inkscape::EventLog(this)),
-    profileManager(nullptr), // deferred until after other initialization
-    router(new Avoid::Router(Avoid::PolyLineRouting|Avoid::OrthogonalRouting)),
-    _selection(new Inkscape::Selection(this)),
+    _router(std::make_unique<Avoid::Router>(Avoid::PolyLineRouting|Avoid::OrthogonalRouting)),
     oldSignalsConnected(false),
     current_persp3d(nullptr),
     current_persp3d_impl(nullptr),
@@ -126,6 +123,11 @@ SPDocument::SPDocument() :
     _node_cache_valid(false),
     _activexmltree(nullptr)
 {
+    // This is kept here so that members are not accessed before they are initialized
+
+    _event_log = std::make_unique<Inkscape::EventLog>(this);
+    _selection = std::make_unique<Inkscape::Selection>(this);
+
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
 
     if (!prefs->getBool("/options/yaxisdown", true)) {
@@ -134,7 +136,7 @@ SPDocument::SPDocument() :
 
     // Penalise libavoid for choosing paths with needless extra segments.
     // This results in much better looking orthogonal connector paths.
-    router->setRoutingPenalty(Avoid::segmentPenalty);
+    _router->setRoutingPenalty(Avoid::segmentPenalty);
 
     _serial = next_serial++;
 
@@ -144,7 +146,7 @@ SPDocument::SPDocument() :
     seeking = false;
 
     // Once things are set, hook in the manager
-    profileManager = new Inkscape::ProfileManager(this);
+    _profileManager = std::make_unique<Inkscape::ProfileManager>(this);
 
     // For undo/redo
     undoStackObservers.add(*_event_log);
@@ -166,19 +168,7 @@ SPDocument::~SPDocument() {
     destroySignal.emit();
 
     // kill/unhook this first
-    if ( profileManager ) {
-        Inkscape::GC::release(profileManager);
-        assert(profileManager->_anchored_refcount() == 0);
-        delete profileManager;
-        profileManager = nullptr;
-    }
-
-    Inkscape::GC::release(_selection);
-
-    if (router) {
-        delete router;
-        router = nullptr;
-    }
+    _profileManager.reset();
 
     if (oldSignalsConnected) {
         selChangeConnection.disconnect();
@@ -235,10 +225,6 @@ SPDocument::~SPDocument() {
     if (this->current_persp3d_impl)
         delete this->current_persp3d_impl;
     this->current_persp3d_impl = nullptr;
-
-    if (_event_log) {
-        delete _event_log;
-    }
 
     // This is at the end of the destructor, because preceding code adds new orphans to the queue
     collectOrphans();
@@ -895,65 +881,52 @@ Geom::OptRect SPDocument::pageBounds()
  * this function fits the canvas to that rect by resizing the canvas
  * and translating the document root into position.
  * \param rect fit document size to this, in document coordinates
- * \param with_margins add margins to rect, by taking margins from this
- *        document's namedview (<sodipodi:namedview> "fit-margin-..."
- *        attributes, and "units")
+ * \param (unused)
  */
-void SPDocument::fitToRect(Geom::Rect const &rect, bool with_margins)
+void SPDocument::fitToRect(Geom::Rect const &rect, bool)
 {
-    double const w = rect.width();
-    double const h = rect.height();
+    using namespace Inkscape::Util;
+    Unit const *nv_units = unit_table.getUnit("px");
 
-    Inkscape::Util::Unit const *nv_units = unit_table.getUnit("px");
-    if (root->height.unit && (root->height.unit != SVGLength::PERCENT))
+    if (root->height.unit && (root->height.unit != SVGLength::PERCENT)) {
         nv_units = unit_table.getUnit(root->height.unit);
-    SPNamedView *nv = this->getNamedView();
-
-    /* in px */
-    double margin_top = 0.0;
-    double margin_left = 0.0;
-    double margin_right = 0.0;
-    double margin_bottom = 0.0;
-
-    if (with_margins && nv) {
-        margin_top = nv->getMarginLength("fit-margin-top", nv_units, unit_table.getUnit("px"), w, h, false);
-        margin_left = nv->getMarginLength("fit-margin-left", nv_units, unit_table.getUnit("px"), w, h, true);
-        margin_right = nv->getMarginLength("fit-margin-right", nv_units, unit_table.getUnit("px"), w, h, true);
-        margin_bottom = nv->getMarginLength("fit-margin-bottom", nv_units, unit_table.getUnit("px"), w, h, false);
-        margin_top = Inkscape::Util::Quantity::convert(margin_top, nv_units, "px");
-        margin_left = Inkscape::Util::Quantity::convert(margin_left, nv_units, "px");
-        margin_right = Inkscape::Util::Quantity::convert(margin_right, nv_units, "px");
-        margin_bottom = Inkscape::Util::Quantity::convert(margin_bottom, nv_units, "px");
     }
 
-    double y_dir = yaxisdir();
+    // 1. Calculate geometric transformations that must be applied to the drawing,
+    //    pages, grids and guidelines to compensate for the changed origin.
+    bool y_down = is_yaxisdown();
+    double const old_height = root->height.computed;
+    double const tr_x = -rect[Geom::X].min();
+    double const tr_y_items = -rect[Geom::Y].min() * yaxisdir();
+    double const tr_y_gadgets = y_down ? -rect[Geom::Y].min() : rect[Geom::Y].max() - old_height;
 
-    Geom::Rect const rect_with_margins(
-            rect.min() - Geom::Point(margin_left, margin_top),
-            rect.max() + Geom::Point(margin_right, margin_bottom));
+    // Item translation (in desktop coordinates)
+    auto const item_translation = Geom::Translate(tr_x, tr_y_items);
+    // Translation of grids and guides (in document coordinates)
+    auto const gadget_translation = Geom::Translate(tr_x, tr_y_gadgets);
 
-    // rect in desktop coordinates before changing document dimensions
-    auto rect_with_margins_dt_old = rect_with_margins * doc2dt();
+    // 2. Translate the guides.
+    auto *nv = getNamedView();
+    if (nv) {
+        // It's important to do it BEFORE the document is resized, in order to ensure
+        // the correct undo sequence. During undo, the document height will be restored
+        // first, so the guides can then correctly recalculate their own position.
+        // See https://gitlab.com/inkscape/inkscape/-/issues/615
+        nv->translateGuides(gadget_translation);
+    }
 
-    setWidthAndHeight(
-        Inkscape::Util::Quantity(Inkscape::Util::Quantity::convert(rect_with_margins.width(),  "px", nv_units), nv_units),
-        Inkscape::Util::Quantity(Inkscape::Util::Quantity::convert(rect_with_margins.height(), "px", nv_units), nv_units)
-        );
+    // 3. Resize the document. This changes the SVG origin relative to the drawing.
+    setWidthAndHeight(Quantity(Quantity::convert(rect.width(),  "px", nv_units), nv_units),
+                      Quantity(Quantity::convert(rect.height(), "px", nv_units), nv_units));
 
-    // rect in desktop coordinates after changing document dimensions
-    auto rect_with_margins_dt_new = rect_with_margins * doc2dt();
+    // 4. Translate everything to cancel out the change in the origin position.
+    root->translateChildItems(item_translation);
+    if (nv) {
+        nv->translateGrids(gadget_translation);
+        _page_manager->movePages(item_translation);
 
-    Geom::Translate const tr(-rect_with_margins_dt_new.min());
-    root->translateChildItems(tr);
-
-    if(nv) {
-        Geom::Translate tr2(-rect_with_margins_dt_old.min());
-        nv->translateGuides(tr2);
-        nv->translateGrids(tr2);
-        _page_manager->movePages(tr2);
-
-        // update the viewport so the drawing appears to stay where it was
-        nv->scrollAllDesktops(-tr2[0], -tr2[1] * y_dir);
+        // FIXME: The scroll state isn't restored during undo.
+        nv->scrollAllDesktops(-tr_x, -tr_y_gadgets * yaxisdir());
     }
 }
 
@@ -1382,7 +1355,7 @@ gint SPDocument::ensureUpToDate()
         // changed objects and provide new routings.  This may cause some objects
             // to be modified, hence the second update pass.
         if (pass == 1) {
-            router->processTransaction();
+            _router->processTransaction();
         }
     }
 
@@ -1416,7 +1389,7 @@ SPDocument::rerouting_handler()
     // Process any queued movement actions and determine new routings for
     // object-avoiding connectors.  Callbacks will be used to update and
     // redraw affected connectors.
-    router->processTransaction();
+    _router->processTransaction();
 
     // We don't need to handle rerouting again until there are further
     // diagram updates.
@@ -2103,7 +2076,7 @@ SPDocument::removeUndoObserver(Inkscape::UndoStackObserver& observer)
     this->undoStackObservers.remove(observer);
 }
 
-sigc::connection SPDocument::connectDestroy(sigc::signal<void>::slot_type slot)
+sigc::connection SPDocument::connectDestroy(sigc::signal<void ()>::slot_type slot)
 {
     return destroySignal.connect(slot);
 }

@@ -39,11 +39,14 @@ public:
     Pixbuf(Inkscape::Pixbuf const &other);
     ~Pixbuf();
 
-    GdkPixbuf *getPixbufRaw(bool convert_format = true);
-    //Glib::RefPtr<Gdk::Pixbuf> getPixbuf(bool convert_format = true);
+    Pixbuf *cropTo(const Geom::IntRect &area) const;
 
-    cairo_surface_t *getSurfaceRaw(bool convert_format = true);
-    Cairo::RefPtr<Cairo::Surface> getSurface(bool convert_format = true);
+    GdkPixbuf *getPixbufRaw(bool convert_format = true);
+    GdkPixbuf *getPixbufRaw() const;
+
+    cairo_surface_t *getSurfaceRaw();
+    cairo_surface_t *getSurfaceRaw() const;
+    Cairo::RefPtr<Cairo::Surface> getSurface();
 
     int width() const;
     int height() const;
@@ -59,6 +62,8 @@ public:
 
     PixelFormat pixelFormat() const { return _pixel_format; }
     void ensurePixelFormat(PixelFormat fmt);
+    static void ensure_pixbuf(GdkPixbuf *pb);
+    static void ensure_argb32(GdkPixbuf *pb);
 
     static Pixbuf *create_from_data_uri(gchar const *uri, double svgdpi = 0);
     static Pixbuf *create_from_file(std::string const &fn, double svgddpi = 0);

@@ -1137,15 +1137,19 @@ sp_style_object_release(SPObject *object, SPStyle *style)
 /**
  * Emit style modified signal on style's object if the filter changed.
  */
-static void
-sp_style_filter_ref_modified(SPObject *obj, guint flags, SPStyle *style)
+static void sp_style_filter_ref_modified(SPObject *obj, unsigned flags, SPStyle *style)
 {
-    (void)flags; // TODO
-    SPFilter *filter=static_cast<SPFilter *>(obj);
-    if (style->getFilter() == filter)
-    {
+    auto filter = static_cast<SPFilter*>(obj);
+
+    g_assert(style->getFilter() == filter);
+
+    if (flags & (SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_CHILD_MODIFIED_FLAG)) {
         if (style->object) {
+            // FIXME: This line results in now-unnecessary filter recreation.
             style->object->requestModified(SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_STYLE_MODIFIED_FLAG);
+            if (!style->block_filter_bbox_updates) {
+                style->object->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG); // To update bbox.
+            }
         }
     }
 }
@@ -1154,71 +1158,60 @@ sp_style_filter_ref_modified(SPObject *obj, guint flags, SPStyle *style)
 /**
  * Gets called when the filter is (re)attached to the style
  */
-void
-sp_style_filter_ref_changed(SPObject *old_ref, SPObject *ref, SPStyle *style)
+void sp_style_filter_ref_changed(SPObject *old_ref, SPObject *ref, SPStyle *style)
 {
     if (old_ref) {
-        (dynamic_cast<SPFilter *>( old_ref ))->_refcount--;
+        static_cast<SPFilter*>(old_ref)->_refcount--;
         style->filter_modified_connection.disconnect();
     }
-    if ( SP_IS_FILTER(ref))
-    {
-       (dynamic_cast<SPFilter *>( ref ))->_refcount++;
-        style->filter_modified_connection =
-           ref->connectModified(sigc::bind(sigc::ptr_fun(&sp_style_filter_ref_modified), style));
+
+    if (SP_IS_FILTER(ref)) {
+        static_cast<SPFilter*>(ref)->_refcount++;
+        style->filter_modified_connection = ref->connectModified(sigc::bind(sigc::ptr_fun(&sp_style_filter_ref_modified), style));
     }
 
-    sp_style_filter_ref_modified(ref, 0, style);
+    style->signal_filter_changed.emit(old_ref, ref);
+    sp_style_filter_ref_modified(ref, SP_OBJECT_FLAGS_ALL, style);
 }
 
 /**
  * Emit style modified signal on style's object if server is style's fill
  * or stroke paint server.
  */
-static void
-sp_style_paint_server_ref_modified(SPObject *obj, guint flags, SPStyle *style)
+static void sp_style_paint_server_ref_modified(SPObject *obj, unsigned /*flags*/, SPStyle *style)
 {
-    (void)flags; // TODO
-    SPPaintServer *server = static_cast<SPPaintServer *>(obj);
+    // todo: use flags
+    auto server = static_cast<SPPaintServer*>(obj);
 
-    if ((style->fill.isPaintserver())
-        && style->getFillPaintServer() == server)
-    {
-        if (style->object) {
-            /** \todo
-             * fixme: I do not know, whether it is optimal - we are
-             * forcing reread of everything (Lauris)
-             */
-            /** \todo
-             * fixme: We have to use object_modified flag, because parent
-             * flag is only available downstreams.
-             */
-            style->object->requestModified(SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_STYLE_MODIFIED_FLAG);
-        }
-    } else if ((style->stroke.isPaintserver())
-        && style->getStrokePaintServer() == server)
-    {
-        if (style->object) {
-            /// \todo fixme:
-            style->object->requestModified(SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_STYLE_MODIFIED_FLAG);
-        }
-    } else if (server) {
-        g_assert_not_reached();
+    g_assert((style->fill  .isPaintserver() && style->getFillPaintServer()   == server) ||
+             (style->stroke.isPaintserver() && style->getStrokePaintServer() == server) ||
+             !server);
+
+    if (style->object) {
+        /** \todo
+         * fixme: I do not know, whether it is optimal - we are
+         * forcing reread of everything (Lauris)
+         */
+        /** \todo
+         * fixme: We have to use object_modified flag, because parent
+         * flag is only available downstreams.
+         */
+        // FIXME: For patterns and hatches, this line results in now-unnecessary pattern recreation.
+        style->object->requestModified(SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_STYLE_MODIFIED_FLAG);
     }
 }
 
 /**
  * Gets called when the paintserver is (re)attached to the style
  */
-void
-sp_style_fill_paint_server_ref_changed(SPObject *old_ref, SPObject *ref, SPStyle *style)
+void sp_style_fill_paint_server_ref_changed(SPObject *old_ref, SPObject *ref, SPStyle *style)
 {
     if (old_ref) {
         style->fill_ps_modified_connection.disconnect();
     }
+
     if (SP_IS_PAINT_SERVER(ref)) {
-        style->fill_ps_modified_connection =
-           ref->connectModified(sigc::bind(sigc::ptr_fun(&sp_style_paint_server_ref_modified), style));
+        style->fill_ps_modified_connection = ref->connectModified(sigc::bind(sigc::ptr_fun(&sp_style_paint_server_ref_modified), style));
     }
 
     style->signal_fill_ps_changed.emit(old_ref, ref);
@@ -1228,15 +1221,14 @@ sp_style_fill_paint_server_ref_changed(SPObject *old_ref, SPObject *ref, SPStyle
 /**
  * Gets called when the paintserver is (re)attached to the style
  */
-void
-sp_style_stroke_paint_server_ref_changed(SPObject *old_ref, SPObject *ref, SPStyle *style)
+void sp_style_stroke_paint_server_ref_changed(SPObject *old_ref, SPObject *ref, SPStyle *style)
 {
     if (old_ref) {
         style->stroke_ps_modified_connection.disconnect();
     }
+
     if (SP_IS_PAINT_SERVER(ref)) {
-        style->stroke_ps_modified_connection =
-          ref->connectModified(sigc::bind(sigc::ptr_fun(&sp_style_paint_server_ref_modified), style));
+        style->stroke_ps_modified_connection = ref->connectModified(sigc::bind(sigc::ptr_fun(&sp_style_paint_server_ref_modified), style));
     }
 
     style->signal_stroke_ps_changed.emit(old_ref, ref);
@@ -1247,29 +1239,22 @@ sp_style_stroke_paint_server_ref_changed(SPObject *old_ref, SPObject *ref, SPSty
 /**
  * Increase refcount of style.
  */
-SPStyle *
-sp_style_ref(SPStyle *style)
+void sp_style_ref(SPStyle const *style)
 {
-    g_return_val_if_fail(style != nullptr, NULL);
-
-    style->style_ref(); // Increase ref count
-
-    return style;
+    if (style) {
+        style->style_ref(); // Increase ref count
+    }
 }
 
 // Called in display/drawing-item.cpp, display/nr-filter-primitive.cpp, libnrtype/Layout-TNG-Input.cpp
 /**
  * Decrease refcount of style with possible destruction.
  */
-SPStyle *
-sp_style_unref(SPStyle *style)
+void sp_style_unref(SPStyle const *style)
 {
-    g_return_val_if_fail(style != nullptr, NULL);
-    if (style->style_unref() < 1) {
+    if (style && style->style_unref() < 1) {
         delete style;
-        return nullptr;
     }
-    return style;
 }
 
 static CRSelEng *

@@ -165,7 +165,7 @@ public:
     void setXMLDialogSelectedObject(SPObject *activexmltree) { _activexmltree = activexmltree; }
     SPObject *getXMLDialogSelectedObject() { return _activexmltree; }
 
-    Inkscape::EventLog* get_event_log() { return _event_log; }
+    Inkscape::EventLog *get_event_log() { return _event_log.get(); }
 
     Inkscape::PageManager& getPageManager() { return *_page_manager; }
     const Inkscape::PageManager& getPageManager() const { return *_page_manager; }
@@ -187,8 +187,8 @@ public:
     /******** Getters and Setters **********/
 
     // Document structure -----------------
-    Inkscape::ProfileManager* getProfileManager() const { return profileManager; }
-    Avoid::Router* getRouter() const { return router; }
+    Inkscape::ProfileManager &getProfileManager() const { return *_profileManager; }
+    Avoid::Router* getRouter() const { return _router.get(); }
 
     
     /** Returns our SPRoot */
@@ -212,7 +212,7 @@ public:
     SPDocument *getParent() { return _parent_document; }
     SPDocument const *getParent() const { return _parent_document; }
 
-    Inkscape::Selection *getSelection() { return _selection; }
+    Inkscape::Selection *getSelection() { return _selection.get(); }
 
     // Styling
     CRCascade    *getStyleCascade() { return style_cascade; }
@@ -366,9 +366,9 @@ public:
 private:
 
     // Document ------------------------------
-    Inkscape::ProfileManager* profileManager = nullptr;   // Color profile.
-    Avoid::Router *router = nullptr; // Instance of the connector router
-    Inkscape::Selection * _selection = nullptr;
+    std::unique_ptr<Inkscape::ProfileManager> _profileManager;   // Color profile.
+    std::unique_ptr<Avoid::Router> _router; // Instance of the connector router
+    std::unique_ptr<Inkscape::Selection> _selection;
 
     // Document status -----------------------
 
@@ -419,7 +419,7 @@ private:
 
     // Document undo/redo ----------------------
     friend Inkscape::DocumentUndo;
-    Inkscape::EventLog *_event_log = nullptr;
+    std::unique_ptr<Inkscape::EventLog> _event_log;
 
     /* Undo/Redo state */
     bool sensitive; /* If we save actions to undo stack */
@@ -448,15 +448,15 @@ private:
 
     /*********** Signals **************/
 
-    typedef sigc::signal<void, SPObject *> IDChangedSignal;
-    typedef sigc::signal<void> ResourcesChangedSignal;
-    typedef sigc::signal<void, unsigned> ModifiedSignal;
-    typedef sigc::signal<void, char const *> FilenameSetSignal;
-    typedef sigc::signal<void, double, double> ResizedSignal;
-    typedef sigc::signal<void> ReconstructionStart;
-    typedef sigc::signal<void> ReconstructionFinish;
-    typedef sigc::signal<void> CommitSignal;
-    typedef sigc::signal<void> BeforeCommitSignal; // allow to add actions berfore commit to include in undo
+    typedef sigc::signal<void (SPObject *)> IDChangedSignal;
+    typedef sigc::signal<void ()> ResourcesChangedSignal;
+    typedef sigc::signal<void (unsigned)> ModifiedSignal;
+    typedef sigc::signal<void (char const *)> FilenameSetSignal;
+    typedef sigc::signal<void (double, double)> ResizedSignal;
+    typedef sigc::signal<void ()> ReconstructionStart;
+    typedef sigc::signal<void ()> ReconstructionFinish;
+    typedef sigc::signal<void ()> CommitSignal;
+    typedef sigc::signal<void ()> BeforeCommitSignal; // allow to add actions berfore commit to include in undo
 
     typedef std::map<GQuark, SPDocument::IDChangedSignal> IDChangedSignalMap;
     typedef std::map<GQuark, SPDocument::ResourcesChangedSignal> ResourcesChangedSignalMap;
@@ -478,7 +478,7 @@ private:
     sigc::connection selChangeConnection;
     sigc::connection desktopActivatedConnection;
 
-    sigc::signal<void> destroySignal;
+    sigc::signal<void ()> destroySignal;
 
 public:
     /**
@@ -489,7 +489,7 @@ public:
     void addUndoObserver(Inkscape::UndoStackObserver& observer);
     void removeUndoObserver(Inkscape::UndoStackObserver& observer);
 
-    sigc::connection connectDestroy(sigc::signal<void>::slot_type slot);
+    sigc::connection connectDestroy(sigc::signal<void ()>::slot_type slot);
     sigc::connection connectModified(ModifiedSignal::slot_type slot);
     sigc::connection connectFilenameSet(FilenameSetSignal::slot_type slot);
     sigc::connection connectCommit(CommitSignal::slot_type slot);

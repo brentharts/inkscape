@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "sp-object.h"
+#include "sp-marker-loc.h"
 
 #include "xml/repr.h"
 
@@ -85,12 +86,21 @@ public:
     Inkscape::UI::View::SVGViewWidget* view;
 };
 
-class SPItemView {
-public:
-    SPItemView *next;
-    unsigned int flags;
-    unsigned int key;
-    Inkscape::DrawingItem *arenaitem;
+struct SPItemView
+{
+    unsigned flags;
+    unsigned key;
+    Inkscape::DrawingItem *drawingitem;
+};
+
+enum SPItemKey
+{
+    ITEM_KEY_CLIP,
+    ITEM_KEY_MASK,
+    ITEM_KEY_FILL,
+    ITEM_KEY_STROKE,
+    ITEM_KEY_MARKERS,
+    ITEM_KEY_SIZE = ITEM_KEY_MARKERS + SP_MARKER_LOC_QTY
 };
 
 /* flags */
@@ -148,6 +158,10 @@ public:
     double transform_center_y;
     bool freeze_stroke_width;
 
+    // Used in the layers/objects dialog, this remembers if this item's
+    // children are visible in the expanded state in the tree.
+    bool _is_expanded = false;
+
     Geom::Affine transform;
     mutable Geom::OptRect doc_bbox;
     Geom::Rect viewport;  // Cache viewport information
@@ -168,9 +182,9 @@ public:
     SPAvoidRef *avoidRef;
 
   public:
-    SPItemView *display;
+    std::vector<SPItemView> views;
 
-    sigc::signal<void, Geom::Affine const *, SPItem *> _transformed_signal;
+    sigc::signal<void (Geom::Affine const *, SPItem *)> _transformed_signal;
 
     bool isLocked() const;
     void setLocked(bool lock);
@@ -238,7 +252,7 @@ public:
      */
     void moveTo(SPItem *target, bool intoafter);
 
-    sigc::connection connectTransformed(sigc::slot<void, Geom::Affine const *, SPItem *> slot)  {
+    sigc::connection connectTransformed(sigc::slot<void (Geom::Affine const *, SPItem *)> slot)  {
         return _transformed_signal.connect(slot);
     }
 
@@ -329,12 +343,21 @@ public:
      * @return First allocated key; hence if the returned key is n
      * you can use n, n + 1, ..., n + (numkeys - 1)
      */
-    static unsigned int display_key_new(unsigned int numkeys);
+    static unsigned int display_key_new(unsigned numkeys);
+
+    /**
+     * Ensures that a drawing item's key is the first of a block of ITEM_KEY_SIZE keys,
+     * assigning it such a key if necessary.
+     *
+     * @return The value of di->key() after assignment.
+     */
+    static unsigned ensure_key(Inkscape::DrawingItem *di);
 
     Inkscape::DrawingItem *invoke_show(Inkscape::Drawing &drawing, unsigned int key, unsigned int flags);
 
     // Removed item from display tree.
     void invoke_hide(unsigned int key);
+    void invoke_hide_except(unsigned key, const std::vector<SPItem *> &to_keep);
 
     void getSnappoints(std::vector<Inkscape::SnapCandidatePoint> &p, Inkscape::SnapPreferences const *snapprefs=nullptr) const;
     void adjust_pattern(/* Geom::Affine const &premul, */ Geom::Affine const &postmul, bool set = false,
@@ -407,37 +430,42 @@ public:
 
     guint32 _highlightColor;
 
+    bool isExpanded() const { return _is_expanded; }
+    void setExpanded(bool expand) { _is_expanded = expand; }
+
 private:
     enum EvaluatedStatus
     {
-        StatusUnknown, StatusCalculated, StatusSet
+        StatusUnknown,
+        StatusCalculated,
+        StatusSet
     };
 
     mutable bool _is_evaluated;
     mutable EvaluatedStatus _evaluated_status;
 
-    static SPItemView *sp_item_view_new_prepend(SPItemView *list, SPItem *item, unsigned flags, unsigned key, Inkscape::DrawingItem *arenaitem);
-    static void clip_ref_changed(SPObject *old_clip, SPObject *clip, SPItem *item);
-    static void mask_ref_changed(SPObject *old_clip, SPObject *clip, SPItem *item);
-    static void fill_ps_ref_changed(SPObject *old_clip, SPObject *clip, SPItem *item);
-    static void stroke_ps_ref_changed(SPObject *old_clip, SPObject *clip, SPItem *item);
+    void clip_ref_changed(SPObject *old_clip, SPObject *clip);
+    void mask_ref_changed(SPObject *old_mask, SPObject *mask);
+    void fill_ps_ref_changed(SPObject *old_ps, SPObject *ps);
+    void stroke_ps_ref_changed(SPObject *old_ps, SPObject *ps);
+    void filter_ref_changed(SPObject *old_obj, SPObject *obj);
 
 public:
-        void rotate_rel(Geom::Rotate const &rotation);
-        void scale_rel(Geom::Scale const &scale);
-        void skew_rel(double skewX, double skewY);
-        void move_rel( Geom::Translate const &tr);
+    void rotate_rel(Geom::Rotate const &rotation);
+    void scale_rel(Geom::Scale const &scale);
+    void skew_rel(double skewX, double skewY);
+    void move_rel( Geom::Translate const &tr);
 	void build(SPDocument *document, Inkscape::XML::Node *repr) override;
 	void release() override;
 	void set(SPAttr key, char const* value) override;
 	void update(SPCtx *ctx, unsigned int flags) override;
-        void modified(unsigned int flags) override;
+    void modified(unsigned int flags) override;
 	Inkscape::XML::Node* write(Inkscape::XML::Document *xml_doc, Inkscape::XML::Node *repr, unsigned int flags) override;
 
 	virtual Geom::OptRect bbox(Geom::Affine const &transform, SPItem::BBoxType type) const;
 	virtual void print(SPPrintContext *ctx);
-        virtual const char* typeName() const;
-        virtual const char* displayName() const;
+    virtual const char* typeName() const;
+    virtual const char* displayName() const;
 	virtual char* description() const;
 	virtual Inkscape::DrawingItem* show(Inkscape::Drawing &drawing, unsigned int key, unsigned int flags);
 	virtual void hide(unsigned int key);
@@ -448,7 +476,6 @@ public:
 
     virtual int event(SPEvent *event);
 };
-
 
 // Utility
 

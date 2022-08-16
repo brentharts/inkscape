@@ -123,20 +123,25 @@
     border-width:0;
 }
 
-/* blinking animation for dialogs */
+/* blinking animation for dialogs reopen*/
 @keyframes blink_border {
-  from { border-color: @theme_selected_fg_color; }
-  to   { border-color: @theme_selected_bg_color; }
+  0% { border-color: @theme_selected_fg_color;}
+  90%   { border-color: @theme_selected_bg_color; }
+  100%   { border-color: @theme_selected_fg_color;  }
 }
 @keyframes blink_background {
-  from { background-color: @theme_bg_color; }
-  to   { background-color: @theme_selected_bg_color; }
+  0% { background-color: @theme_bg_color;  }
+  90%   { background-color: @theme_selected_bg_color; }
+  100%   { background-color: @theme_bg_color;  }
 }
+
+
 notebook.blink {
-  animation: blink_border 333ms ease-in-out infinite;
+  animation: 0.5s blink_border 0.1s ease 1;
 }
+
 notebook.blink > header > tabs > tab:checked {
-  animation: blink_background 333ms ease-in-out infinite;
+  animation: 0.5s blink_background 0.1s ease 1;
 }
 
 
@@ -206,6 +211,13 @@ iconview *:hover {
     background-color:@theme_selected_bg_color;
     border-radius:5px;
     border-width:0;
+}
+
+#start-screen-window .combo {
+    padding:15px 20px;
+}
+#start-screen-window notebook > *:nth-child(2) label{
+    font-size:12px;
 }
 
 .inksmall {
@@ -433,10 +445,17 @@ SPCanvas {
     -GtkComboBox-appears-as-list: true;
 }
 
-#LockGuides,
-#StickyZoom,
-#CMS_Adjust {
+#QuickActions,
+#StickyZoom ,#StickyZoom *,
+#LockGuides, #LockGuides *,
+#PreviewMode,#PreviewMode  *,
+#CMS_Adjust, #CMS_Adjust * {
     padding: 0;
+    min-height:3px;
+    font-size:16px;
+}
+#QuickActions {
+    padding: 2px 0;
 }
 
 /* Keep palette scrollbar from generating warnings. */
@@ -510,6 +529,28 @@ SPCanvas {
 
 #UnicodeIconView {
     font-size: 16px;
+}
+
+#ObjectsTreeView.view:focus {
+    outline-style: double;
+    outline-width: 5px;
+    outline-color: alpha (@theme_fg_color, 0.1);
+    -gtk-outline-radius: 50%;
+}
+#ObjectsTreeView.view:hover {
+    border-color: alpha (@theme_fg_color, 0.1);
+    border-style: solid;
+    border-width: 1px 0px;
+}
+#ObjectsTreeView {
+    -GtkTreeView-expander-size: 12;
+    -GtkTreeView-horizontal-separator: 2;
+    -GtkTreeView-vertical-separator: 2;
+}
+#Objects .search {
+  padding: 2px 4px;
+  min-height: 16px;
+  font-size: small;
 }
 
 /* GtkTreeView: clarify drop locations (especially important for XML editor) */
@@ -638,6 +679,11 @@ stackswitcher button {
     padding: 4px;
 }
 
+/* slider with tighter margins */
+scale.tight-slider {
+    padding: 8px 4px 7px 4px;
+}
+
 /* add .small-marks class to Gtk::Scale to have smaller font used, since markup didn't work there */
 scale.small-marks.marks-after {
     font-size: small;
@@ -729,7 +775,14 @@ button.square-button image {
     border: 1px solid;
 }
 
-/* This fix a bad performance on Mac (maybe others) on some themes */
-.mac button,
-.mac spinbutton,
-.mac combobox {box-shadow: none;}
+.key {
+    border-radius: 3px;
+    background-color: alpha(@theme_fg_color, 0.15);
+    padding: 2px;
+}
+
+combobox.flat-combobox button {
+    border: none;
+    background-color: transparent;
+    background-image: image(transparent);
+}
