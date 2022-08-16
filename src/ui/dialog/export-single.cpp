@@ -127,6 +127,11 @@ void SingleExport::initialise(const Glib::RefPtr<Gtk::Builder> &builder)
     assert(button);
     _bgnd_color_picker = std::make_unique<Inkscape::UI::Widget::ColorPicker>(
         _("Background color"), _("Color used to fill background"), 0xffffff00, true, button);
+
+    // Don't encourage people to edit the text, it won't work out
+    if (!Glib::getenv("GTK_USE_PORTAL").empty()) {
+	si_filename_entry->set_sensitive(false);
+    }
 }
 
 // Inkscape Selection Modified CallBack
@@ -384,8 +389,12 @@ void SingleExport::loadExportHints()
     }
 
     original_name = filename;
-    si_filename_entry->set_text(filename);
-    si_filename_entry->set_position(filename.length());
+
+    // Only set it if we're not using portals or it exists
+    if (Glib::getenv("GTK_USE_PORTAL").empty() || Inkscape::IO::file_test(filename.c_str(), G_FILE_TEST_EXISTS)) {
+        si_filename_entry->set_text(filename);
+        si_filename_entry->set_position(filename.length());
+    }
 
     if (dpi.x() != 0.0) { // XXX Should this deal with dpi.y() ?
         spin_buttons[SPIN_DPI]->set_value(dpi.x());
@@ -511,6 +520,11 @@ void SingleExport::onExtensionChanged()
         si_extension_cb->removeExtension(filename);
         ext->add_extension(filename);
     }
+
+    if (!Glib::getenv("GTK_USE_PORTAL").empty() && !Inkscape::IO::file_test(filename.c_str(), G_FILE_TEST_EXISTS)) {
+	filename = "";
+    }
+
     si_filename_entry->set_text(filename);
     si_filename_entry->set_position(filename.length());
     filenameConn.unblock();
