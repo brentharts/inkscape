@@ -412,10 +412,18 @@ ink_drag_setup(SPDesktopWidget* dtw)
                 types.push_back(i);
             }
         }
+
+        // Check to see if we're using portals, then we can't take URLs from
+        // outside of the application
+        auto isportal = !Glib::getenv("GTK_USE_PORTAL").empty();
+
         completeDropTargetsCount = nui_drop_target_entries + types.size();
         completeDropTargets = new GtkTargetEntry[completeDropTargetsCount];
         for ( int i = 0; i < (int)nui_drop_target_entries; i++ ) {
             completeDropTargets[i] = ui_drop_target_entries[i];
+            if (isportal && completeDropTargets[i].info == URI_LIST) {
+                    completeDropTargets[i].flags = GTK_TARGET_SAME_APP;
+            }
         }
         int pos = nui_drop_target_entries;
 
