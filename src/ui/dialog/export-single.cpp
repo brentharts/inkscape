@@ -118,6 +118,10 @@ void SingleExport::initialise(const Glib::RefPtr<Gtk::Builder> &builder)
 
     builder->get_widget_derived("si_extention", si_extension_cb);
     builder->get_widget("si_filename", si_filename_entry);
+    // Don't encourage people to edit the text, it won't work out
+    if (!Glib::getenv("GTK_USE_PORTAL").empty()) {
+	si_filename_entry->set_sensitive(false);
+    }
     builder->get_widget("si_export", si_export);
 
     builder->get_widget("si_progress", _prog);
@@ -127,11 +131,6 @@ void SingleExport::initialise(const Glib::RefPtr<Gtk::Builder> &builder)
     assert(button);
     _bgnd_color_picker = std::make_unique<Inkscape::UI::Widget::ColorPicker>(
         _("Background color"), _("Color used to fill background"), 0xffffff00, true, button);
-
-    // Don't encourage people to edit the text, it won't work out
-    if (!Glib::getenv("GTK_USE_PORTAL").empty()) {
-	si_filename_entry->set_sensitive(false);
-    }
 }
 
 // Inkscape Selection Modified CallBack
