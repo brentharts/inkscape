@@ -111,14 +111,14 @@ private:
     Gtk::Button& _edit_marker;
     bool _scale_linked = true;
     guint32 _background_color;
-    guint32 _foreground_color;
     Glib::ustring _combo_id;
     int _loc;
     OperationBlocker _update;
     SPDocument *_document = nullptr;
     std::unique_ptr<SPDocument> _sandbox;
     Gtk::CellRendererPixbuf _image_renderer;
-
+    sigc::connection _idle_refresh;
+    bool _list_is_stale = true;
     class MarkerColumns : public Gtk::TreeModel::ColumnRecord {
     public:
         Gtk::TreeModelColumn<Glib::ustring> label;
@@ -152,6 +152,7 @@ private:
     void add_markers (std::vector<SPMarker *> const& marker_list, SPDocument *source,  gboolean history);
     void remove_markers (gboolean history);
     std::unique_ptr<SPDocument> ink_markers_preview_doc(const Glib::ustring& group_id);
+    Cairo::RefPtr<Cairo::Surface> create_marker_pixbuf(SPMarker* marker);
     Cairo::RefPtr<Cairo::Surface> create_marker_image(Geom::IntPoint pixel_size, gchar const *mname,
         SPDocument *source, Inkscape::Drawing &drawing, unsigned /*visionkey*/, bool checkerboard, bool no_clip, double scale);
     void refresh_after_markers_modified();
