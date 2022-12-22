@@ -368,6 +368,9 @@ void AttrDialog::setRepr(Inkscape::XML::Node * repr)
         bool show_content = is_text_or_comment_node(*_repr);
         _scrolledWindow.set_visible(!show_content);
         _content_sw->set_visible(show_content);
+    } else {
+        // if repr is null or none of the attributes selected, then hide popover
+        AttrDialog::valueCanceledPop();
     }
 }
 
