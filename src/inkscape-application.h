@@ -180,6 +180,12 @@ protected:
     void redirect_output();
     void shell(bool active_window = false);
 
+    // Splash screen functions
+    class Splash;
+    std::unique_ptr<Splash> _splash;
+    void show_splash();
+    void close_splash();
+
     void _start_main_option_section(const Glib::ustring& section_name = "");
 };
 

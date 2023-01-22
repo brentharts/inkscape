@@ -605,6 +605,47 @@ InkscapeApplication::_start_main_option_section(const Glib::ustring& section_nam
     }
 }
 
+class InkscapeApplication::Splash : public Gtk::Window
+{
+public:
+    Splash() : Gtk::Window()
+    {
+        auto splash = Inkscape::IO::Resource::get_filename(
+            Inkscape::IO::Resource::SCREENS, "start-splash.png");
+        image.set(splash);
+        set_decorated(false);
+        set_position(Gtk::WindowPosition::WIN_POS_CENTER_ALWAYS);
+        set_resizable(false);
+
+        add(image);
+        show_all_children();
+        show();
+
+        // The main loop won't get called until the main window is initialized,
+        // so we need to iterate the loop a few times here to show the splash screen.
+        while(Gtk::Main::events_pending())
+            Gtk::Main::iteration(false);
+    }
+
+    ~Splash() override {
+        close();
+    }
+
+private:
+    Gtk::Image image;
+};
+
+void InkscapeApplication::show_splash()
+{
+    if (_with_gui)
+        _splash = std::make_unique<Splash>();
+}
+
+void InkscapeApplication::close_splash()
+{
+    _splash.reset();
+}
+
 InkscapeApplication::InkscapeApplication()
 {
     if (_instance) {
@@ -660,6 +701,8 @@ InkscapeApplication::InkscapeApplication()
     gapp->signal_startup().connect([this]() { this->on_startup(); });
     gapp->signal_activate().connect([this]() { this->on_activate(); });
     gapp->signal_open().connect(sigc::mem_fun(*this, &InkscapeApplication::on_open));
+
+    show_splash();
 
     // ==================== Initializations =====================
     // Garbage Collector
@@ -845,6 +888,8 @@ InkscapeApplication::create_window(SPDocument *document, bool replace)
         window = window_open (document);
     }
     window->show();
+
+    close_splash();
 
     return window;
 }
@@ -1088,6 +1133,7 @@ InkscapeApplication::on_activate()
 
         // add start window to gtk_app to ensure proper closing on quit
         gtk_app()->add_window(start_screen);
+        close_splash();
 
         start_screen.run();
         document = start_screen.get_document();
