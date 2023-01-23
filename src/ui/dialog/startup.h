@@ -61,6 +61,11 @@ private:
     void on_recent_changed();
     void on_kind_changed(Gtk::Widget *tab, guint page_num);
 
+protected:
+    // Support for transparent background
+    void set_transparent(bool transparent);
+    bool on_draw(const ::Cairo::RefPtr<::Cairo::Context> &cr) override;
+    bool _use_alpha = false;
 
 private:
     Glib::RefPtr<Gtk::Builder> builder;

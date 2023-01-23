@@ -154,6 +154,7 @@ void StartScreen::setup_splash()
 {
     set_decorated(false);
     set_resizable(false);
+    set_transparent(true);
 
     auto splash = Inkscape::IO::Resource::get_filename(Inkscape::IO::Resource::SCREENS, "start-splash.png");
     Gtk::Image image(splash);
@@ -815,6 +816,37 @@ void StartScreen::refresh_dark_switch()
         dark_toggle->set_sensitive(true);
     }
     dark_toggle->set_active(dark);
+}
+
+// Transparency support
+void StartScreen::set_transparent(bool transparent)
+{
+    set_app_paintable(transparent);
+    _use_alpha = false;
+
+    if (transparent) {
+        auto screen = get_screen();
+        auto visual = screen->get_rgba_visual();
+
+        // Screen supports alpha
+        if (visual)
+            _use_alpha = true;
+
+        gtk_widget_set_visual(GTK_WIDGET(gobj()), visual->gobj());
+    }
+}
+
+bool StartScreen::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
+{
+    if (_use_alpha) {
+        cr->save();
+        cr->set_source_rgba(1.0, 1.0, 1.0, 0.0);
+        cr->set_operator(Cairo::OPERATOR_SOURCE);
+        cr->paint();
+        cr->restore();
+    }
+
+    return Gtk::Window::on_draw(cr);
 }
 
 } // namespace Dialog
