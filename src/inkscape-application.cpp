@@ -605,47 +605,6 @@ InkscapeApplication::_start_main_option_section(const Glib::ustring& section_nam
     }
 }
 
-class InkscapeApplication::Splash : public Gtk::Window
-{
-public:
-    Splash() : Gtk::Window()
-    {
-        auto splash = Inkscape::IO::Resource::get_filename(
-            Inkscape::IO::Resource::SCREENS, "start-splash.png");
-        image.set(splash);
-        set_decorated(false);
-        set_position(Gtk::WindowPosition::WIN_POS_CENTER_ALWAYS);
-        set_resizable(false);
-
-        add(image);
-        show_all_children();
-        show();
-
-        // The main loop won't get called until the main window is initialized,
-        // so we need to iterate the loop a few times here to show the splash screen.
-        while(Gtk::Main::events_pending())
-            Gtk::Main::iteration(false);
-    }
-
-    ~Splash() override {
-        close();
-    }
-
-private:
-    Gtk::Image image;
-};
-
-void InkscapeApplication::show_splash()
-{
-    if (_with_gui)
-        _splash = std::make_unique<Splash>();
-}
-
-void InkscapeApplication::close_splash()
-{
-    _splash.reset();
-}
-
 InkscapeApplication::InkscapeApplication()
 {
     if (_instance) {
@@ -702,8 +661,6 @@ InkscapeApplication::InkscapeApplication()
     gapp->signal_activate().connect([this]() { this->on_activate(); });
     gapp->signal_open().connect(sigc::mem_fun(*this, &InkscapeApplication::on_open));
 
-    show_splash();
-
     // ==================== Initializations =====================
     // Garbage Collector
     Inkscape::GC::init();
@@ -717,6 +674,10 @@ InkscapeApplication::InkscapeApplication()
     // Native Language Support (shouldn't this always be used?).
     Inkscape::initialize_gettext();
 #endif
+
+    if (_with_gui && Inkscape::Preferences::get()->getBool("/options/splash/enabled", true)) {
+        _start_screen = Inkscape::UI::Dialog::StartScreen::show_splash();
+    }
 
     // Autosave
     Inkscape::AutoSave::getInstance().init(this);
@@ -889,7 +850,7 @@ InkscapeApplication::create_window(SPDocument *document, bool replace)
     }
     window->show();
 
-    close_splash();
+    startup_close();
 
     return window;
 }
@@ -1128,21 +1089,15 @@ InkscapeApplication::on_activate()
     } else if(prefs->getBool("/options/boot/enabled", true)
                && !_use_command_line_argument
                && (gtk_app() && gtk_app()->get_windows().empty())) {
+        _start_screen = Inkscape::UI::Dialog::StartScreen::show_welcome();
 
-        Inkscape::UI::Dialog::StartScreen start_screen;
-
-        // add start window to gtk_app to ensure proper closing on quit
-        gtk_app()->add_window(start_screen);
-        close_splash();
-
-        start_screen.run();
-        document = start_screen.get_document();
+        _start_screen->run();
+        document = _start_screen->get_document();
     } else {
 
         // Create a blank document from template
         document = document_new();
     }
-    startup_close();
 
     if (!document) {
         std::cerr << "ConcreteInkscapeApplication::on_activate: failed to create document!" << std::endl;
@@ -1161,14 +1116,7 @@ InkscapeApplication::on_activate()
 void
 InkscapeApplication::startup_close()
 {
-    if (auto app = gtk_app()) {
-        // Close any open start screens preventing double opens
-        for (auto win : app->get_windows()) {
-            if (auto start = dynamic_cast<Inkscape::UI::Dialog::StartScreen *>(win)) {
-                start->close();
-            }
-        }
-    }
+    _start_screen.reset();
 }
 
 // Open document window for each file. Either this or on_activate() is called.

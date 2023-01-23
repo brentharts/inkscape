@@ -141,6 +141,44 @@ StartScreen::StartScreen()
     set_urgency_hint(true);  // Draw user's attention to this window!
     set_modal(true);
     set_position(Gtk::WIN_POS_CENTER_ALWAYS);
+}
+
+std::unique_ptr<StartScreen> StartScreen::show_splash()
+{
+    auto start_screen = std::make_unique<StartScreen>();
+    start_screen->setup_splash();
+    return start_screen;
+}
+
+void StartScreen::setup_splash()
+{
+    set_decorated(false);
+    set_resizable(false);
+
+    auto splash = Inkscape::IO::Resource::get_filename(Inkscape::IO::Resource::SCREENS, "start-splash.png");
+    Gtk::Image image(splash);
+    get_content_area()->add(image);
+
+    show_all_children();
+    show();
+
+    // The main loop won't get called until the main window is initialized,
+    // so we need to iterate the loop a few times here to show the splash screen.
+    while (Gtk::Main::events_pending())
+        Gtk::Main::iteration(false);
+}
+
+std::unique_ptr<StartScreen> StartScreen::show_welcome()
+{
+    auto start_screen = std::make_unique<StartScreen>();
+    start_screen->setup_welcome();
+    return start_screen;
+}
+
+void StartScreen::setup_welcome()
+{
+    set_decorated(true);
+    set_resizable(true);
     set_default_size(700, 360);
 
     Glib::ustring gladefile = Resource::get_filename(Resource::UIS, "inkscape-start.glade");
@@ -261,8 +299,10 @@ StartScreen::StartScreen()
 StartScreen::~StartScreen()
 {
     // These are "owned" by builder... don't delete them!
-    banners->get_parent()->remove(*banners);
-    tabs->get_parent()->remove(*tabs);
+    if (banners)
+        banners->get_parent()->remove(*banners);
+    if (tabs)
+        tabs->get_parent()->remove(*tabs);
 }
 
 /**
