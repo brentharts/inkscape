@@ -30,26 +30,25 @@
 #ifndef SEEN_DIALOGS_ITEM_PROPERTIES_H
 #define SEEN_DIALOGS_ITEM_PROPERTIES_H
 
-
-#include <gtkmm/checkbutton.h>
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/expander.h>
 #include <gtkmm/frame.h>
+#include <gtkmm/grid.h>
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/textview.h>
 
 #include "ui/dialog/dialog-base.h"
-#include "ui/widget/scrollprotected.h"
 #include "ui/widget/color-picker.h"
-#include "ui/widget/frame.h"
+#include "ui/widget/scrollprotected.h"
+#include "ui/widget/spinbutton.h"
 
 class SPAttributeTable;
 class SPItem;
 
-namespace Gtk {
-class Grid;
-}
+using Inkscape::UI::Widget::ScrollProtected;
+using Inkscape::UI::Widget::SpinButton;
+using Inkscape::UI::Widget::ColorPicker;
 
 namespace Inkscape {
 namespace UI {
@@ -65,54 +64,80 @@ class ObjectProperties : public DialogBase
 {
 public:
     ObjectProperties();
-    ~ObjectProperties() override {};
+    ~ObjectProperties() override = default;
 
     /// Updates entries and other child widgets on selection change, object modification, etc.
     void update_entries();
     void selectionChanged(Selection *selection) override;
 
 private:
+
     bool _blocked;
-    SPItem *_current_item; //to store the current item, for not wasting resources
+    SPItem *_current_item = nullptr; //to store the current item, for not wasting resources
     std::vector<Glib::ustring> _int_attrs;
     std::vector<Glib::ustring> _int_labels;
 
-    Gtk::Label _label_id; //the label for the object ID
-    Gtk::Entry _entry_id; //the entry for the object ID
-    Gtk::Label _label_label; //the label for the object label
-    Gtk::Entry _entry_label; //the entry for the object label
-    Gtk::Label _label_title; //the label for the object title
-    Gtk::Entry _entry_title; //the entry for the object title
+    Glib::RefPtr<Gtk::Builder> _builder; // Builder for glade widgets, declare before widgets
 
-    Gtk::Label _label_color; //the label for the object highlight
-    Inkscape::UI::Widget::ColorPicker _highlight_color; // color picker for the object highlight
+    Gtk::Expander &_expander_interactivity;
 
-    Gtk::Label _label_image_rendering; // the label for 'image-rendering'
-    Inkscape::UI::Widget::ScrollProtected<Gtk::ComboBoxText> _combo_image_rendering; // the combo box text for 'image-rendering'
-    
-    Gtk::Frame  _ft_description; //the frame for the text of the object description
-    Gtk::TextView _tv_description; //the text view object showing the object description
+    Gtk::Grid &_grid_main;
+    Gtk::Grid &_grid_top;
+    Gtk::Grid &_grid_bottom;
+    Gtk::Grid &_grid_interactivity;
 
-    Gtk::CheckButton _cb_hide; //the check button hide
-    Gtk::CheckButton _cb_lock; //the check button lock
-    Gtk::CheckButton _cb_aspect_ratio; //the preserve aspect ratio of images
+    Gtk::Label &_label_id;
+    Gtk::Entry &_entry_id;
+    Gtk::Entry &_entry_label;
+    Gtk::Entry &_entry_title;
 
-    Gtk::Label _label_dpi; //the entry for the dpi value
-    Gtk::SpinButton _spin_dpi; //the expander for interactivity
-    Gtk::Expander _exp_interactivity; //the expander for interactivity
+    Gtk::Entry &_entry_onclick;
+    Gtk::Entry &_entry_onmouseover;
+    Gtk::Entry &_entry_onmouseout;
+    Gtk::Entry &_entry_onmousedown;
+    Gtk::Entry &_entry_onmouseup;
+    Gtk::Entry &_entry_onmousemove;
+    Gtk::Entry &_entry_onfocusin;
+    Gtk::Entry &_entry_onfocusout;
+    Gtk::Entry &_entry_onload;
+
+    std::unique_ptr<ColorPicker> _picker_highlight_color;
+    ScrollProtected<Gtk::TextView> &_textview_description;
+
+    Gtk::ComboBoxText &_combo_image_rendering;
+    Gtk::Label &_label_image_rendering;
+
+    Gtk::CheckButton &_checkbox_hide;
+    Gtk::CheckButton &_checkbox_lock;
+    Gtk::CheckButton &_checkbox_preserve_ratio;
+
+    SpinButton &_spin_dpi;
+    Gtk::Label &_label_dpi;
+    Glib::RefPtr<Gtk::Adjustment> _adjustment_spin_dpi;
+
+    Gtk::Button &_button_set;
+
     SPAttributeTable *_attr_table; //the widget for showing the on... names at the bottom
 
-    /// Constructor auxiliary function creating the child widgets.
-    void _init();
+    void _setButtonCallback();
 
-    /// Sets object properties (ID, label, title, description) on user input.
-    void _labelChanged();
+    /// Sets object properties ID on user input.
+    void _idChanged();
+
+    /// Callback for object's title
+    void _titleChanged();
+
+    /// Callback for object's description
+    void _descriptionChanged();
 
     // Callback for highlight color
     void _highlightChanged(guint rgba);
 
     /// Callback for 'image-rendering'.
     void _imageRenderingChanged();
+
+    /// Callback for DPI spin button
+    void _dpiChanged();
 
     /// Callback for checkbox Lock.
     void _sensitivityToggled();

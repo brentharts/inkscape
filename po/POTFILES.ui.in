@@ -22,6 +22,7 @@
 ../share/ui/inkscape-about.glade
 ../share/ui/inkscape-start.glade
 ../share/ui/marker-popup.glade
+../share/ui/object-properties.glade
 ../share/ui/page-properties.glade
 ../share/ui/pattern-edit.glade
 ../share/ui/align-and-distribute.ui
