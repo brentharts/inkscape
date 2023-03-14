@@ -64,8 +64,7 @@ LPEPerspectiveEnvelope::LPEPerspectiveEnvelope(LivePathEffectObject *lpeobject) 
     apply_to_clippath_and_mask = true;
 }
 
-LPEPerspectiveEnvelope::~LPEPerspectiveEnvelope()
-= default;
+LPEPerspectiveEnvelope::~LPEPerspectiveEnvelope() = default;
 
 void LPEPerspectiveEnvelope::transform_multiply(Geom::Affine const &postmul, bool /*set*/)
 {
@@ -333,9 +332,6 @@ LPEPerspectiveEnvelope::newWidget()
     reset_button->set_size_request(140,30);
     vbox->pack_start(*hbox, true,true,2);
     hbox->pack_start(*reset_button, false, false,2);
-    if(Gtk::Widget* widg = defaultParamSet()) {
-        vbox->pack_start(*widg, true, true, 2);
-    }
     return dynamic_cast<Gtk::Widget *>(vbox);
 }
 
@@ -556,7 +552,7 @@ void
 LPEPerspectiveEnvelope::resetDefaults(SPItem const* item)
 {
     Effect::resetDefaults(item);
-    original_bbox(SP_LPE_ITEM(item), false, true);
+    original_bbox(cast<SPLPEItem>(item), false, true);
     setDefaults();
     resetGrid();
 }

@@ -11,12 +11,14 @@
 #include "template.h"
 
 #include <glibmm/i18n.h>
+#include <glibmm/regex.h>
 
 #include "implementation/implementation.h"
 #include "io/file.h"
 #include "io/resource.h"
 #include "xml/attribute-record.h"
 #include "xml/repr.h"
+#include "document.h"
 
 using namespace Inkscape::IO::Resource;
 using Inkscape::Util::unit_table;
@@ -32,8 +34,7 @@ TemplatePreset::TemplatePreset(Template *mod, const Inkscape::XML::Node *repr, T
     , _prefs(prefs)
     , _name("Unnamed")
     , _label("")
-    , _selectable(false)
-    , _searchable(true)
+    , _visibility(mod->get_visibility())
     , _priority(priority)
 {
     // Default icon and priority aren't a prefs, though they may at first look like it.
@@ -51,11 +52,9 @@ TemplatePreset::TemplatePreset(Template *mod, const Inkscape::XML::Node *repr, T
                 _icon = value;
             else if (name == "priority")
                 _priority = strtol(value.c_str(), nullptr, 0);
-            else if (name == "selectable")
-                _selectable = (value == "true");
-            else if (name == "searchable")
-                _searchable = (value != "false");
-            else {
+            else if (name == "visibility") {
+                _visibility = mod->parse_visibility(value);
+            } else {
                 _prefs[name] = value;
             }
         }
@@ -98,24 +97,77 @@ Glib::ustring TemplatePreset::_get_icon_path(const std::string &name) const
 }
 
 /**
+ * Setup the preferences and ask the user to fill in the remaineder.
+ *
+ * @param others - populate with these prefs on top of internal prefs.
+ *
+ * Can cause a GUI popup.
+ */
+bool TemplatePreset::setup_prefs(const TemplatePrefs &others)
+{
+    _add_prefs(_prefs);
+    _add_prefs(others);
+
+    bool ret = _mod->prefs();
+    for (auto pref : _prefs) {
+        try {
+            _mod->set_param_hidden(pref.first.c_str(), false);
+        } catch (Extension::param_not_exist) {
+            // pass
+        }
+    }
+    return ret;
+}
+
+/**
+ * Called by setup_prefs to save the given prefs into this extension.
+ */
+void TemplatePreset::_add_prefs(const TemplatePrefs &prefs)
+{
+    for (auto pref : prefs) {
+        try {
+            _mod->set_param_any(pref.first.c_str(), pref.second);
+            _mod->set_param_hidden(pref.first.c_str(), true);
+        } catch (Extension::param_not_exist) {
+            // pass
+        }
+    }
+}
+
+/**
  * Generate a new document from this preset.
  *
  * Sets the preferences and then calls back to it's parent extension.
  */
-SPDocument *TemplatePreset::new_from_template()
+SPDocument *TemplatePreset::new_from_template(const TemplatePrefs &others)
 {
-    for (auto pref : _prefs) {
-        _mod->set_param_any(pref.first.c_str(), pref.second);
-        _mod->set_param_hidden(pref.first.c_str(), true);
+    if (setup_prefs(others)) {
+        return _mod->new_from_template();
     }
-    SPDocument *ret = nullptr;
-    if (_mod->prefs()) {
-        ret = _mod->new_from_template();
+    return nullptr;
+}
+
+/**
+ * Resize the given page to however the page format requires it to be.
+ */
+void TemplatePreset::resize_to_template(SPDocument *doc, SPPage *page, const TemplatePrefs &others)
+{
+    if (_mod->can_resize() && setup_prefs(others)) {
+        _mod->resize_to_template(doc, page);
     }
-    for (auto pref : _prefs) {
-        _mod->set_param_hidden(pref.first.c_str(), false);
+}
+
+/**
+ * Reverse match for templates, allowing page duplication and labeling
+ */
+bool TemplatePreset::match_size(double width, double height, const TemplatePrefs &others)
+{
+    if (is_visible(TEMPLATE_SIZE_SEARCH) || is_visible(TEMPLATE_SIZE_LIST)) {
+        _add_prefs(_prefs);
+        _add_prefs(others);
+        return _mod->imp->match_template_size(_mod, width, height);
     }
-    return ret;
+    return false;
 }
 
 /**
@@ -140,6 +192,8 @@ Template::Template(Inkscape::XML::Node *in_repr, Implementation::Implementation 
                 std::string value = std::string(iter.value);
                 if (name == "icon") {
                     _icon = value;
+                } else if (name == "visibility") {
+                    _visibility = parse_visibility(value);
                 } else if (name == "priority") {
                     set_sort_priority(strtol(value.c_str(), nullptr, 0));
                 } else {
@@ -150,8 +204,14 @@ Template::Template(Inkscape::XML::Node *in_repr, Implementation::Implementation 
             // Default priority will incriment to keep inx order where possible.
             int priority = get_sort_priority();
             for (auto p_node : sp_repr_lookup_name_many(t_node, INKSCAPE_EXTENSION_NS "preset")) {
-                _presets.emplace_back(new TemplatePreset(this, p_node, prefs, priority));
+                auto preset = new TemplatePreset(this, p_node, prefs, priority);
+                _presets.emplace_back(preset);
                 priority += 1;
+                // If any preset is resizable, then the module is considered to support it.
+                if ( preset->is_visible(TEMPLATE_SIZE_SEARCH)
+                  || preset->is_visible(TEMPLATE_SIZE_LIST)) {
+                    _can_resize = true;
+                }
             }
             // Keep presets sorted internally for simple use cases.
             std::sort(std::begin(_presets), std::end(_presets),
@@ -163,6 +223,22 @@ Template::Template(Inkscape::XML::Node *in_repr, Implementation::Implementation 
     }
 
     return;
+}
+
+/**
+ * Parse the expected value for the visibility value, turn into enum.
+ */
+int Template::parse_visibility(const std::string &value)
+{
+    int ret = 0;
+    auto values = Glib::Regex::split_simple("," , value);
+    for (auto val : values) {
+        ret |= (val == "icon") * TEMPLATE_NEW_ICON;
+        ret |= (val == "list") * TEMPLATE_SIZE_LIST;
+        ret |= (val == "search") * TEMPLATE_SIZE_SEARCH;
+        ret |= (val == "all") * TEMPLATE_ALL;
+    }
+    return ret;
 }
 
 /**
@@ -197,23 +273,49 @@ SPDocument *Template::new_from_template()
     }
 
     SPDocument *const doc = imp->new_from_template(this);
+    DocumentUndo::clearUndo(doc);
+    doc->setModifiedSinceSave(false);
     return doc;
+}
+
+/**
+ * Takes an existing page and resizes it to the required dimentions.
+ *
+ * @param doc - The active document to change
+ * @param page - The select page to resize, or nullptr if not multipage.
+ */
+void Template::resize_to_template(SPDocument *doc, SPPage *page)
+{
+    if (!loaded()) {
+        set_state(Extension::STATE_LOADED);
+    }
+    if (!loaded()) {
+        return;
+    }
+    imp->resize_to_template(this, doc, page);
 }
 
 /**
  * Return a list of all template presets.
  */
-TemplatePresets Template::get_presets() const
+TemplatePresets Template::get_presets(TemplateShow visibility) const
 {
-    auto ret = _presets;
-    imp->get_template_presets(this, ret);
+    auto all_presets = _presets;
+    imp->get_template_presets(this, all_presets);
+
+    TemplatePresets ret;
+    for (auto preset : all_presets) {
+        if (preset->is_visible(visibility)) {
+            ret.push_back(preset);
+        }
+    }
     return ret;
 }
 
 /**
  * Return the template preset based on the key from this template class.
  */
-std::shared_ptr<TemplatePreset> Template::get_preset(std::string key)
+std::shared_ptr<TemplatePreset> Template::get_preset(const std::string &key)
 {
     for (auto preset : get_presets()) {
         if (preset->get_key() == key) {
@@ -224,31 +326,48 @@ std::shared_ptr<TemplatePreset> Template::get_preset(std::string key)
 }
 
 /**
- * Return a list of selectable page-sizes/modes for this template.
+ * Matches the given page against the given page.
  */
-TemplatePresets Template::get_selectable_presets() const
+std::shared_ptr<TemplatePreset> Template::get_preset(double width, double height)
 {
-    TemplatePresets ret;
     for (auto preset : get_presets()) {
-        if (preset->is_selectable()) {
-            ret.push_back(preset);
+        if (preset->match_size(width, height)) {
+            return preset;
         }
     }
-    return ret;
+    return nullptr;
 }
 
 /**
- * Return a list of searchable page sizes shown to page-tool dropdown.
+ * Return the template preset based on the key from any template class (static method).
  */
-TemplatePresets Template::get_searchable_presets() const
+std::shared_ptr<TemplatePreset> Template::get_any_preset(const std::string &key)
 {
-    TemplatePresets ret;
-    for (auto preset : get_presets()) {
-        if (preset->is_searchable()) {
-            ret.push_back(preset);
+    Inkscape::Extension::DB::TemplateList extensions;
+    Inkscape::Extension::db.get_template_list(extensions);
+    for (auto tmod : extensions) {
+        if (auto preset = tmod->get_preset(key)) {
+            return preset;
         }
-    }
-    return ret;
+    }   
+    return nullptr;
+}
+
+/**
+ * Return the template preset based on the key from any template class (static method).
+ */
+std::shared_ptr<TemplatePreset> Template::get_any_preset(double width, double height)
+{
+    Inkscape::Extension::DB::TemplateList extensions;
+    Inkscape::Extension::db.get_template_list(extensions);
+    for (auto tmod : extensions) {
+        if (!tmod->can_resize())
+            continue;
+        if (auto preset = tmod->get_preset(width, height)) {
+            return preset;
+        }
+    }   
+    return nullptr;
 }
 
 /**

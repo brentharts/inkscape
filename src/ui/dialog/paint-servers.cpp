@@ -35,6 +35,7 @@
 #include "object/sp-root.h"
 #include "ui/cache/svg_preview_cache.h"
 #include "ui/widget/scrollprotected.h"
+#include "xml/href-attribute-helper.h"
 
 namespace Inkscape {
 namespace UI {
@@ -208,7 +209,7 @@ void PaintServersDialog::_findPaints(SPObject *in, std::vector<Glib::ustring> &l
     g_return_if_fail(in != nullptr);
 
     // Add paint servers in <defs> section.
-    if (dynamic_cast<SPPaintServer *>(in)) {
+    if (is<SPPaintServer>(in)) {
         if (in->getId()) {
             // Need to check as one can't construct Glib::ustring with nullptr.
             list.push_back(Glib::ustring("url(#") + in->getId() + ")");
@@ -218,7 +219,7 @@ void PaintServersDialog::_findPaints(SPObject *in, std::vector<Glib::ustring> &l
     }
 
     // Add paint servers referenced by shapes.
-    if (dynamic_cast<SPShape *>(in)) {
+    if (is<SPShape>(in)) {
         auto const style = in->style;
         list.push_back(style->fill.get_value());
         list.push_back(style->stroke.get_value());
@@ -432,12 +433,10 @@ void PaintServersDialog::_generateBitmapPreview(PaintDescription &paint)
         defs->appendChild(new_repr->duplicate(xml_doc));
 
         // Check for cross-references in the paint
-        auto const xlink = new_repr->attribute("xlink:href");
-        auto const href = new_repr->attribute("href");
-        if (xlink || href) {
+        auto ref = Inkscape::getHrefAttribute(*new_repr).second;
+        if (ref) {
             // Paint is cross-referencing another object (probably another paint);
             // we must copy the referenced object as well
-            auto const ref = (href ? href : xlink); // Prefer "href" since "xlink:href" is obsolete
             new_paint = paint.source_document->getObjectByHref(ref);
             using namespace std;
             if (find(begin(encountered), end(encountered), new_paint) == end(encountered)) {

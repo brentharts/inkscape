@@ -156,7 +156,7 @@ void SvgFontsDialog::AttrEntry::on_attr_changed(){
     for (auto& node: dialog->get_selected_spfont()->children) {
         switch(this->attr){
             case SPAttr::FONT_FAMILY:
-                if (SP_IS_FONTFACE(&node)){
+                if (is<SPFontFace>(&node)){
                     o = &node;
                     continue;
                 }
@@ -223,7 +223,7 @@ void SvgFontsDialog::AttrSpin::on_attr_changed(){
         case SPAttr::CAP_HEIGHT:
         case SPAttr::X_HEIGHT:
             for (auto& node: dialog->get_selected_spfont()->children){
-                if (SP_IS_FONTFACE(&node)){
+                if (is<SPFontFace>(&node)){
                     o = &node;
                     continue;
                 }
@@ -270,7 +270,7 @@ void GlyphComboBox::update(SPFont* spfont){
     this->remove_all();
 
     for (auto& node: spfont->children) {
-        if (SP_IS_GLYPH(&node)){
+        if (is<SPGlyph>(&node)){
             this->append((static_cast<SPGlyph*>(&node))->unicode);
         }
     }
@@ -492,7 +492,7 @@ SPItem* get_or_create_layer_for_glyph(SPDesktop* desktop, const Glib::ustring& f
     layers.renameLayer(layer, name.c_str(), false);
 
     DocumentUndo::done(desktop->getDocument(), _("Add layer"), "");
-    return dynamic_cast<SPItem*>(layer);
+    return cast<SPItem>(layer);
 }
 
 void SvgFontsDialog::create_glyphs_popup_menu(Gtk::Widget& parent, sigc::slot<void ()> rem)
@@ -603,7 +603,7 @@ void SvgFontsDialog::update_fonts(bool document_replaced)
         _model->clear();
         for (auto font : fonts) {
             Gtk::TreeModel::Row row = *_model->append();
-            SPFont* f = SP_FONT(font);
+            auto f = cast<SPFont>(font);
             row[_columns.spfont] = f;
             row[_columns.svgfont] = new SvgFont(f);
             row[_columns.label] = get_font_label(f);
@@ -621,7 +621,7 @@ void SvgFontsDialog::update_fonts(bool document_replaced)
         // list of fonts is the same, but attributes may have changed
         auto it = fonts.begin();
         for (auto&& node : children) {
-            if (auto font = dynamic_cast<SPFont*>(*it++)) {
+            if (auto font = cast<SPFont>(*it++)) {
                 node[_columns.label] = get_font_label(font);
             }
         }
@@ -670,13 +670,13 @@ void SvgFontsDialog::update_global_settings_tab(){
     _horiz_origin_y_spin->set_value(font->horiz_origin_y);
 
     for (auto& obj: font->children) {
-        if (SP_IS_FONTFACE(&obj)){
-            _familyname_entry->set_text((SP_FONTFACE(&obj))->font_family);
-            _units_per_em_spin->set_value((SP_FONTFACE(&obj))->units_per_em);
-            _ascent_spin->set_value((SP_FONTFACE(&obj))->ascent);
-            _descent_spin->set_value((SP_FONTFACE(&obj))->descent);
-            _x_height_spin->set_value((SP_FONTFACE(&obj))->x_height);
-            _cap_height_spin->set_value((SP_FONTFACE(&obj))->cap_height);
+        if (is<SPFontFace>(&obj)){
+            _familyname_entry->set_text((cast<SPFontFace>(&obj))->font_family);
+            _units_per_em_spin->set_value((cast<SPFontFace>(&obj))->units_per_em);
+            _ascent_spin->set_value((cast<SPFontFace>(&obj))->ascent);
+            _descent_spin->set_value((cast<SPFontFace>(&obj))->descent);
+            _x_height_spin->set_value((cast<SPFontFace>(&obj))->x_height);
+            _cap_height_spin->set_value((cast<SPFontFace>(&obj))->cap_height);
         }
     }
 }
@@ -779,7 +779,7 @@ SPGuide* get_guide(SPDocument& doc, const Glib::ustring& id) {
     if (!object) return nullptr;
 
     // get guide line
-    if (auto guide = dynamic_cast<SPGuide*>(object)) {
+    if (auto guide = cast<SPGuide>(object)) {
         return guide;
     }
     // remove colliding object
@@ -966,7 +966,7 @@ SvgFontsDialog::populate_glyphs_box()
 
     if (spfont) {
         for (auto& node: spfont->children) {
-            if (SP_IS_GLYPH(&node)) {
+            if (is<SPGlyph>(&node)) {
                 auto& glyph = static_cast<SPGlyph&>(node);
                 Gtk::TreeModel::Row row = *_GlyphsListStore->append();
                 set_glyph_row(row, glyph);
@@ -994,7 +994,7 @@ SvgFontsDialog::populate_kerning_pairs_box()
 
     if (SPFont* spfont = get_selected_spfont()) {
         for (auto& node: spfont->children) {
-            if (SP_IS_HKERN(&node)){
+            if (is<SPHkern>(&node)){
                 Gtk::TreeModel::Row row = *(_KerningPairsListStore->append());
                 row[_KerningPairsListColumns.first_glyph] = (static_cast<SPGlyphKerning*>(&node))->u1->attribute_string().c_str();
                 row[_KerningPairsListColumns.second_glyph] = (static_cast<SPGlyphKerning*>(&node))->u2->attribute_string().c_str();
@@ -1080,7 +1080,7 @@ double get_font_units_per_em(const SPFont* font) {
     double units_per_em = 0.0;
     if (font) {
         for (auto& obj: font->children) {
-            if (SP_IS_FONTFACE(&obj)){
+            if (is<SPFontFace>(&obj)){
                 //XML Tree being directly used here while it shouldn't be.
                 units_per_em = obj.getRepr()->getAttributeDouble("units-per-em", units_per_em);
                 break;
@@ -1170,7 +1170,7 @@ void SvgFontsDialog::missing_glyph_description_from_selected_path(){
 
     auto units_per_em = get_font_units_per_em(font);
     for (auto& obj: font->children) {
-        if (SP_IS_MISSING_GLYPH(&obj)){
+        if (is<SPMissingGlyph>(&obj)){
             //XML Tree being directly used here while it shouldn't be.
             obj.setAttribute("d", sp_svg_write_path(flip_coordinate_system(pathv, font, units_per_em)));
             DocumentUndo::done(getDocument(),  _("Set glyph curves"), "");
@@ -1182,7 +1182,7 @@ void SvgFontsDialog::missing_glyph_description_from_selected_path(){
 
 void SvgFontsDialog::reset_missing_glyph_description(){
     for (auto& obj: get_selected_spfont()->children) {
-        if (SP_IS_MISSING_GLYPH(&obj)){
+        if (is<SPMissingGlyph>(&obj)){
             //XML Tree being directly used here while it shouldn't be.
             obj.setAttribute("d", "M0,0h1000v1024h-1000z");
             DocumentUndo::done(getDocument(), _("Reset missing-glyph"), "");
@@ -1296,7 +1296,7 @@ Inkscape::XML::Node* create_path_from_glyph(const SPGlyph& glyph) {
     Geom::PathVector pathv = sp_svg_read_pathv(glyph.getAttribute("d"));
     auto path = glyph.document->getReprDoc()->createElement("svg:path");
     // auto path = new SPPath();
-    auto font = dynamic_cast<SPFont*>(glyph.parent);
+    auto font = cast<SPFont>(glyph.parent);
     auto units_per_em = get_font_units_per_em(font);
     path->setAttribute("d", sp_svg_write_path(flip_coordinate_system(pathv, font, units_per_em)));
     return path;
@@ -1315,7 +1315,7 @@ void SvgFontsDialog::edit_glyph(SPGlyph* glyph) {
     auto name = get_glyph_full_name(*glyph);
     if (name.empty()) return;
     // font's name to match parent layer name
-    auto font_label = get_font_label(dynamic_cast<SPFont*>(glyph->parent));
+    auto font_label = get_font_label(cast<SPFont>(glyph->parent));
     if (font_label.empty()) return;
 
     auto layer = get_or_create_layer_for_glyph(desktop, font_label, name);
@@ -1536,7 +1536,7 @@ void SvgFontsDialog::add_kerning_pair(){
     for (auto& node: get_selected_spfont()->children) {
         //TODO: It is not really correct to get only the first byte of each string.
         //TODO: We should also support vertical kerning
-        if (SP_IS_HKERN(&node) && (static_cast<SPGlyphKerning*>(&node))->u1->contains((gchar) first_glyph.get_active_text().c_str()[0])
+        if (is<SPHkern>(&node) && (static_cast<SPGlyphKerning*>(&node))->u1->contains((gchar) first_glyph.get_active_text().c_str()[0])
             && (static_cast<SPGlyphKerning*>(&node))->u2->contains((gchar) second_glyph.get_active_text().c_str()[0]) ){
             this->kerning_pair = static_cast<SPGlyphKerning*>(&node);
             continue;
@@ -1559,7 +1559,7 @@ void SvgFontsDialog::add_kerning_pair(){
     Inkscape::GC::release(repr);
 
     // get corresponding object
-    this->kerning_pair = SP_HKERN( getDocument()->getObjectByRepr(repr) );
+    kerning_pair = cast<SPHkern>(getDocument()->getObjectByRepr(repr));
 
     // select newly added pair
     if (auto selection = _KerningPairsList.get_selection()) {
@@ -1651,10 +1651,9 @@ SPFont *new_font(SPDocument *document)
     repr->appendChild(mg);
 
     // get corresponding object
-    SPFont *f = SP_FONT( document->getObjectByRepr(repr) );
+    auto f = cast<SPFont>( document->getObjectByRepr(repr) );
 
     g_assert(f != nullptr);
-    g_assert(SP_IS_FONT(f));
     Inkscape::GC::release(mg);
     Inkscape::GC::release(repr);
     return f;
@@ -1663,7 +1662,7 @@ SPFont *new_font(SPDocument *document)
 void set_font_family(SPFont* font, char* str){
     if (!font) return;
     for (auto& obj: font->children) {
-        if (SP_IS_FONTFACE(&obj)){
+        if (is<SPFontFace>(&obj)){
             //XML Tree being directly used here while it shouldn't be.
             obj.setAttribute("font-family", str);
         }
@@ -1683,7 +1682,7 @@ void SvgFontsDialog::add_font(){
 
     os2 << "SVGFont " << count;
     for (auto& obj: font->children) {
-        if (SP_IS_FONTFACE(&obj)){
+        if (is<SPFontFace>(&obj)){
             //XML Tree being directly used here while it shouldn't be.
             obj.setAttribute("font-family", os2.str());
         }

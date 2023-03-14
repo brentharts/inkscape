@@ -29,6 +29,7 @@
 #include "actions/actions-extra-data.h"
 #include "actions/actions-hint-data.h"
 #include "io/file-export-cmd.h"   // File export (non-verb)
+#include "extension/internal/pdfinput/enums.h"
 
 typedef std::vector<std::pair<std::string, Glib::VariantBase> > action_vector_t;
 
@@ -41,10 +42,12 @@ class InkscapeApplication
     Glib::RefPtr<Gio::Application> _gio_application;
 
 public:
-    /// Singleton instance
-    static InkscapeApplication &singleton();
     /// Singleton instance, if it exists (will not create it)
     static InkscapeApplication *instance();
+
+    /// Exclusively for the creation of the singleton instance inside main().
+    InkscapeApplication();
+    ~InkscapeApplication();
 
     /// The Gtk application instance, or NULL if running headless without display
     Gtk::Application *gtk_app() { return dynamic_cast<Gtk::Application *>(_gio_application.get()); }
@@ -136,10 +139,10 @@ protected:
     bool _use_shell   = false;
     bool _use_pipe    = false;
     bool _auto_export = false;
-    int _pdf_page     = 1;
     int _pdf_poppler  = false;
+    FontStrategy _pdf_font_strategy = FontStrategy::RENDER_MISSING;
     bool _use_command_line_argument = false;
-    InkscapeApplication();
+    Glib::ustring _pages;
 
     // Documents are owned by the application which is responsible for opening/saving/exporting. WIP
     // std::vector<SPDocument*> _documents;   For a true headless version
@@ -174,7 +177,8 @@ protected:
     void parse_actions(const Glib::ustring& input, action_vector_t& action_vector);
 
     void on_about();
-    void shell();
+    void redirect_output();
+    void shell(bool active_window = false);
 
     void _start_main_option_section(const Glib::ustring& section_name = "");
 };

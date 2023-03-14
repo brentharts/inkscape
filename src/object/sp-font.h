@@ -16,10 +16,11 @@
 #include "sp-object.h"
 class SPGlyph;
 
-class SPFont : public SPObject {
+class SPFont final : public SPObject {
 public:
 	SPFont();
 	~SPFont() override;
+    int tag() const override { return tag_of<decltype(*this)>; }
 
     double horiz_origin_x;
     double horiz_origin_y;
@@ -50,8 +51,5 @@ protected:
 private:
     bool _block = false;
 };
-
-MAKE_SP_OBJECT_DOWNCAST_FUNCTIONS(SP_FONT, SPFont)
-MAKE_SP_OBJECT_TYPECHECK_FUNCTIONS(SP_IS_FONT, SPFont)
 
 #endif //#ifndef SP_FONT_H_SEEN

@@ -54,6 +54,8 @@
 #include "ui/dialog/dialog-window.h"
 #include "ui/tools/tool-base.h"
 
+#include "util/units.h"
+
 #include <fstream>
 
 // Inkscape::Application static members
@@ -184,6 +186,26 @@ Application::Application(bool use_gui) :
     using namespace Inkscape::IO::Resource;
     /* fixme: load application defaults */
 
+    /* If we're running from inside a macOS application bundle, we haven't
+     * loaded the units.xml file from a user data location yet (see
+     * UnitTable::UnitTable()). This has been deferred to this point so
+     * the environment has been set up for macOS (especially XDG variables).
+     */
+    if (g_str_has_suffix(get_program_dir(), "Contents/MacOS")) {
+        using namespace Inkscape::IO::Resource;
+        Util::unit_table.load(get_filename(UIS, "units.xml", false, true));
+    }
+
+    // we need a app runing to know shared path
+    auto extensiondir_shared = get_path_string(SHARED, EXTENSIONS);
+    if (!extensiondir_shared.empty()) {
+        std::string pythonpath = extensiondir_shared;
+        auto pythonpath_old = Glib::getenv("PYTHONPATH");
+        if (!pythonpath_old.empty()) {
+            pythonpath += G_SEARCHPATH_SEPARATOR + pythonpath_old;
+        }
+        Glib::setenv("PYTHONPATH", pythonpath);
+    }
     segv_handler = signal (SIGSEGV, Application::crash_handler);
     abrt_handler = signal (SIGABRT, Application::crash_handler);
     fpe_handler  = signal (SIGFPE,  Application::crash_handler);
@@ -211,11 +233,13 @@ Application::Application(bool use_gui) :
         using namespace Inkscape::IO::Resource;
         auto icon_theme = Gtk::IconTheme::get_default();
         icon_theme->prepend_search_path(get_path_ustring(SYSTEM, ICONS));
+        icon_theme->prepend_search_path(get_path_ustring(SHARED, ICONS));
         icon_theme->prepend_search_path(get_path_ustring(USER, ICONS));
         themecontext = new Inkscape::UI::ThemeContext();
         themecontext->add_gtk_css(false);
-        auto scale = prefs->getDoubleLimited("/theme/fontscale", 100, 50, 150);
-        themecontext->adjust_global_font_scale(scale / 100.0);
+        auto scale = prefs->getDoubleLimited(UI::ThemeContext::get_font_scale_pref_path(), 100, 50, 150);
+        themecontext->adjustGlobalFontScale(scale / 100.0);
+        Inkscape::UI::ThemeContext::initialize_source_syntax_styles();
         Inkscape::DeviceManager::getManager().loadConfig();
     }
 
@@ -272,6 +296,10 @@ Application::Application(bool use_gui) :
                     }
                 }
             }
+            // select default syntax coloring theme, if needed
+            if (auto desktop = active_desktop()) {
+                UI::ThemeContext::select_default_syntax_style(themecontext->isCurrentThemeDark(desktop->getToplevel()));
+            }
         });
     }
 
@@ -281,7 +309,12 @@ Application::Application(bool use_gui) :
         char const *fontsdir = get_path(SYSTEM, FONTS);
         factory.AddFontsDir(fontsdir);
     }
+    // we keep user font dir for simplicity
     if (prefs->getBool("/options/font/use_fontsdir_user", true)) {
+        char const *fontsdirshared = get_path(SHARED, FONTS);
+        if (fontsdirshared) {
+            factory.AddFontsDir(fontsdirshared);
+        }
         char const *fontsdir = get_path(USER, FONTS);
         factory.AddFontsDir(fontsdir);
     }
@@ -433,6 +466,21 @@ Application::crash_handler (int /*signum*/)
                 sp_repr_save_stream (repr->document(), file, SP_SVG_NS_URI);
                 savednames.push_back(g_strdup (c));
                 fclose (file);
+
+                // Attempt to add the emergency save to the recent files, so users can find it on restart
+                auto recentmanager = Gtk::RecentManager::get_default();
+                if (recentmanager && Glib::path_is_absolute(c)) {
+                    Glib::ustring uri = Glib::filename_to_uri(c);
+                    recentmanager->add_item(uri, {
+                        docname,                 // Name
+                        "Emergency Saved Image", // Description
+                        "image/svg+xml",         // Mime type
+                        "org.inkscape.Inkscape", // App name
+                        "",                      // Execute
+                        {"Crash"},               // Groups
+                        true,                    // Private
+                    });
+                }
             } else {
                 failednames.push_back((doc->getDocumentName()) ? g_strdup(doc->getDocumentName()) : g_strdup (_("Untitled document")));
             }

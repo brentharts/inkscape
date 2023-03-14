@@ -39,8 +39,6 @@
 #include "ui/icon-names.h"
 #include "ui/shape-editor.h"
 
-#include "xml/node-event-vector.h"
-
 using Inkscape::DocumentUndo;
 
 namespace Inkscape {
@@ -327,7 +325,7 @@ void StarTool::drag(Geom::Point p, guint state)
         // Set style
         sp_desktop_apply_style_tool(_desktop, repr, "/tools/shapes/star", false);
 
-        this->star = SP_STAR(currentLayer()->appendChildRepr(repr));
+        this->star = cast<SPStar>(currentLayer()->appendChildRepr(repr));
 
         Inkscape::GC::release(repr);
         this->star->transform = currentLayer()->i2doc_affine().inverse();

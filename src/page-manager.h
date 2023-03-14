@@ -38,6 +38,8 @@ public:
 
     static bool move_objects();
     const std::vector<SPPage *> &getPages() const { return pages; }
+    std::vector<SPPage *> getPages(const std::string &pages, bool inverse) const;
+    std::vector<SPPage *> getPages(std::set<unsigned int> indexes, bool inverse = false) const;
 
     void addPage(SPPage *page);
     void removePage(Inkscape::XML::Node *child);
@@ -51,12 +53,14 @@ public:
     SPPage *getLastPage() const { return getPage(pages.size() - 1); }
     SPPage *getViewportPage() const;
     std::vector<SPPage *> getPagesFor(SPItem *item, bool contains) const;
+    SPPage *getPageFor(SPItem *item, bool contains) const;
     Geom::OptRect getDesktopRect() const;
     bool hasPages() const { return !pages.empty(); }
     int getPageCount() const { return pages.size(); }
     int getPageIndex(const SPPage *page) const;
     int getSelectedPageIndex() const;
     Geom::Rect getSelectedPageRect() const;
+    Geom::Affine getSelectedPageAffine() const;
     Geom::Point nextPageLocation() const;
 
     void enablePages();
@@ -87,12 +91,14 @@ public:
     void deletePage(bool contents = false);
     void resizePage(double width, double height);
     void changeOrientation();
-    void fitToSelection(ObjectSet *selection);
-    void fitToRect(Geom::OptRect box, SPPage *page);
+    void fitToSelection(ObjectSet *selection, bool add_margins = true);
+    void fitToRect(Geom::OptRect box, SPPage *page, bool add_margins = false);
 
     bool subset(SPAttr key, const gchar *value);
     bool setDefaultAttributes(CanvasPage *item);
     bool showDefaultLabel() const { return label_style == "below"; }
+    std::string getSizeLabel(SPPage *page = nullptr);
+    std::string getSizeLabel(double width, double height);
 
     static void enablePages(SPDocument *document) { document->getPageManager().enablePages(); }
     static void disablePages(SPDocument *document) { document->getPageManager().disablePages(); }
@@ -102,10 +108,19 @@ public:
     {
         return _page_selected_signal.connect(slot);
     }
-    sigc::connection connectPagesChanged(const sigc::slot<void ()> &slot) { return _pages_changed_signal.connect(slot); }
+    sigc::connection connectPageModified(const sigc::slot<void (SPPage *)> &slot)
+    {
+        return _page_modified_signal.connect(slot);
+    }
+    sigc::connection connectPagesChanged(const sigc::slot<void ()> &slot)
+    {
+        return _pages_changed_signal.connect(slot);
+    }
 
     // Access from export.cpp and others for the guint32
     guint32 background_color = 0xffffff00;
+    guint32 margin_color = 0x1699d751;
+    guint32 bleed_color = 0xbe310e31;
 
     void movePages(Geom::Affine tr);
     std::vector<SPItem *> getOverlappingItems(SPDesktop *desktop, SPPage *page);
@@ -128,7 +143,10 @@ private:
     std::vector<SPPage *> pages;
 
     sigc::signal<void (SPPage *)> _page_selected_signal;
+    sigc::signal<void (SPPage *)> _page_modified_signal;
     sigc::signal<void ()> _pages_changed_signal;
+
+    sigc::connection _page_modified_connection;
 };
 
 } // namespace Inkscape

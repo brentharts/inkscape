@@ -15,6 +15,7 @@
 #include <glibmm/i18n.h>
 
 #include "actions-undo-document.h"
+#include "actions-helper.h"
 
 #include "document.h"
 #include "document-undo.h"
@@ -23,6 +24,7 @@
 // ifdef out for headless operation!
 #include "desktop.h"
 #include "inkscape-window.h"
+#include "ui/tools/tool-base.h"
 #include "ui/widget/canvas.h"
 
 void
@@ -30,11 +32,14 @@ undo(SPDocument* document)
 {
     auto app = InkscapeApplication::instance();
     auto win = app->get_active_window();
+
+    // Undo can be used in headless mode.
     if (win) {
-        // Could be in headless mode.
         auto desktop = win->get_desktop();
-        // No undo while dragging, too dangerous.
-        if (desktop->getCanvas()->is_dragging()) {
+        auto tool = desktop->getEventContext();
+
+        // No undo while dragging, or if the tool handled this undo.
+        if (desktop->getCanvas()->is_dragging() || (tool && tool->catch_undo())) {
             return;
         }
     }
@@ -47,16 +52,41 @@ redo(SPDocument* document)
 {
     auto app = InkscapeApplication::instance();
     auto win = app->get_active_window();
+
+    // Redo can be used in headless mode.
     if (win) {
-        // Could be in headless mode.
         auto desktop = win->get_desktop();
-        // No redo while dragging, too dangerous.
-        if (desktop->getCanvas()->is_dragging()) {
+        auto tool = desktop->getEventContext();
+
+        // No redo while dragging, or if the tool handled this redo
+        if (desktop->getCanvas()->is_dragging() || (tool && tool->catch_undo(true))) {
             return;
         }
     }
 
     Inkscape::DocumentUndo::redo(document);
+}
+
+void
+enable_undo_actions(SPDocument* document, bool undo, bool redo)
+{
+    auto group = document->getActionGroup();
+    if (!group)
+        return;
+    auto undo_action = group->lookup_action("undo");
+    auto redo_action = group->lookup_action("redo");
+    auto undo_saction = Glib::RefPtr<Gio::SimpleAction>::cast_dynamic(undo_action);
+    auto redo_saction = Glib::RefPtr<Gio::SimpleAction>::cast_dynamic(redo_action);
+    // GTK4
+    // auto undo_saction = dynamic_cast<Gio::SimpleAction*>(undo_action);
+    // auto redo_saction = dynamic_cast<Gio::SimpleAction*>(redo_action);
+    if (!undo_saction || !redo_saction) {
+        show_output("UndoActions: can't find undo or redo action!");
+        return;
+    }
+    // Enable/disable menu items.
+    undo_saction->set_enabled(undo);
+    redo_saction->set_enabled(redo);
 }
 
 std::vector<std::vector<Glib::ustring>> raw_data_undo_document =
@@ -79,7 +109,7 @@ add_actions_undo_document(SPDocument* document)
 
     auto app = InkscapeApplication::instance();
     if (!app) {
-        std::cerr << "add_actions_undo: no app!" << std::endl;
+        show_output("add_actions_undo: no app!");
         return;
     }
     app->get_action_extra_data().add_data(raw_data_undo_document);

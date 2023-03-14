@@ -12,48 +12,50 @@
 
 #include <2geom/bezier-curve.h>
 
-#include "display/drawing.h"
-#include "display/drawing-context.h"
-#include "display/drawing-image.h"
-#include "preferences.h"
-
-#include "display/cairo-utils.h"
+#include "drawing.h"
+#include "drawing-context.h"
+#include "drawing-image.h"
+#include "cairo-utils.h"
+#include "cairo-templates.h"
 
 namespace Inkscape {
 
 DrawingImage::DrawingImage(Drawing &drawing)
     : DrawingItem(drawing)
     , style_image_rendering(SP_CSS_IMAGE_RENDERING_AUTO)
-    , _pixbuf(nullptr)
 {
 }
 
-DrawingImage::~DrawingImage()
+void DrawingImage::setPixbuf(std::shared_ptr<Inkscape::Pixbuf const> pixbuf)
 {
-}
-
-void DrawingImage::setPixbuf(std::shared_ptr<Inkscape::Pixbuf const> pb)
-{
-    _pixbuf = std::move(pb);
-    _markForUpdate(STATE_ALL, false);
+    defer([this, pixbuf = std::move(pixbuf)] () mutable {
+        _pixbuf = std::move(pixbuf);
+        _markForUpdate(STATE_ALL, false);
+    });
 }
 
 void DrawingImage::setScale(double sx, double sy)
 {
-    _scale = Geom::Scale(sx, sy);
-    _markForUpdate(STATE_ALL, false);
+    defer([=] {
+        _scale = Geom::Scale(sx, sy);
+        _markForUpdate(STATE_ALL, false);
+    });
 }
 
-void DrawingImage::setOrigin(Geom::Point const &o)
+void DrawingImage::setOrigin(Geom::Point const &origin)
 {
-    _origin = o;
-    _markForUpdate(STATE_ALL, false);
+    defer([=] {
+        _origin = origin;
+        _markForUpdate(STATE_ALL, false);
+    });
 }
 
 void DrawingImage::setClipbox(Geom::Rect const &box)
 {
-    _clipbox = box;
-    _markForUpdate(STATE_ALL, false);
+    defer([=] {
+        _clipbox = box;
+        _markForUpdate(STATE_ALL, false);
+    });
 }
 
 Geom::Rect DrawingImage::bounds() const
@@ -75,17 +77,19 @@ Geom::Rect DrawingImage::bounds() const
 void DrawingImage::setStyle(SPStyle const *style, SPStyle const *context_style)
 {
     DrawingItem::setStyle(style, context_style);
+
+    auto image_rendering = SP_CSS_IMAGE_RENDERING_AUTO;
     if (_style) {
-        style_image_rendering = _style->image_rendering.computed;
-    } else {
-        style_image_rendering = SP_CSS_IMAGE_RENDERING_AUTO;
+        image_rendering = _style->image_rendering.computed;
     }
+
+    defer([=] {
+        style_image_rendering = image_rendering;
+    });
 }
 
 unsigned DrawingImage::_updateItem(Geom::IntRect const &, UpdateContext const &, unsigned, unsigned)
 {
-    _markForRendering();
-
     // Calculate bbox
     if (_pixbuf) {
         Geom::Rect r = bounds() * _ctm;
@@ -97,14 +101,11 @@ unsigned DrawingImage::_updateItem(Geom::IntRect const &, UpdateContext const &,
     return STATE_ALL;
 }
 
-unsigned DrawingImage::_renderItem(DrawingContext &dc, Geom::IntRect const &/*area*/, unsigned /*flags*/, DrawingItem * /*stop_at*/)
+unsigned DrawingImage::_renderItem(DrawingContext &dc, RenderContext &rc, Geom::IntRect const &/*area*/, unsigned flags, DrawingItem const */*stop_at*/) const
 {
-    bool outline = _drawing.outline();
+    bool const outline = (flags & RENDER_OUTLINE) && !_drawing.imageOutlineMode();
 
-    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    bool imgoutline = prefs->getBool("/options/rendering/imageinoutlinemode", false);
-
-    if (!outline || imgoutline) {
+    if (!outline) {
         if (!_pixbuf) return RENDER_OK;
 
         Inkscape::DrawingContext::Save save(dc);
@@ -143,11 +144,23 @@ unsigned DrawingImage::_renderItem(DrawingContext &dc, Geom::IntRect const &/*ar
                 break;
         }
 
-        dc.paint(1);
+        // Handle an exceptional case where the greyscale color mode needs to be applied per-image.
+        bool const greyscale_exception = (flags & RENDER_OUTLINE) && _drawing.colorMode() == ColorMode::GRAYSCALE;
+        if (greyscale_exception) {
+            dc.pushGroup();
+        }
+
+        dc.paint();
+
+        if (greyscale_exception) {
+            ink_cairo_surface_filter(dc.rawTarget(), dc.rawTarget(), _drawing.grayscaleMatrix());
+            dc.popGroupToSource();
+            dc.paint();
+        }
 
     } else { // outline; draw a rect instead
 
-        guint32 rgba = prefs->getInt("/options/wireframecolors/images", 0xff0000ff);
+        auto rgba = _drawing.imageOutlineColor();
 
         {   Inkscape::DrawingContext::Save save(dc);
             dc.transform(_ctm);
@@ -179,20 +192,18 @@ unsigned DrawingImage::_renderItem(DrawingContext &dc, Geom::IntRect const &/*ar
 }
 
 /** Calculates the closest distance from p to the segment a1-a2*/
-static double
-distance_to_segment (Geom::Point const &p, Geom::Point const &a1, Geom::Point const &a2)
+static double distance_to_segment(Geom::Point const &p, Geom::Point const &a1, Geom::Point const &a2)
 {
     Geom::LineSegment l(a1, a2);
     Geom::Point np = l.pointAt(l.nearestTime(p));
     return Geom::distance(np, p);
 }
 
-DrawingItem *
-DrawingImage::_pickItem(Geom::Point const &p, double delta, unsigned /*sticky*/)
+DrawingItem *DrawingImage::_pickItem(Geom::Point const &p, double delta, unsigned flags)
 {
     if (!_pixbuf) return nullptr;
 
-    bool outline = _drawing.outline() || _drawing.outlineOverlay() || _drawing.getOutlineSensitive();
+    bool outline = (flags & PICK_OUTLINE) && !_drawing.imageOutlineMode();
 
     if (outline) {
         Geom::Rect r = bounds();
@@ -245,7 +256,7 @@ DrawingImage::_pickItem(Geom::Point const &p, double delta, unsigned /*sticky*/)
     }
 }
 
-} // end namespace Inkscape
+} // namespace Inkscape
 
 /*
   Local Variables:

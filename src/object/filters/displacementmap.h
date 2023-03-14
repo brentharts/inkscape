@@ -25,10 +25,12 @@ enum FilterDisplacementMapChannelSelector
     DISPLACEMENTMAP_CHANNEL_ENDTYPE
 };
 
-class SPFeDisplacementMap
+class SPFeDisplacementMap final
     : public SPFilterPrimitive
 {
 public:
+    int tag() const override { return tag_of<decltype(*this)>; }
+
     int get_in2() const { return in2_slot; }
 
 protected:
@@ -47,9 +49,6 @@ private:
     std::optional<std::string> in2_name;
     int in2_slot = Inkscape::Filters::NR_FILTER_SLOT_NOT_SET;
 };
-
-MAKE_SP_OBJECT_DOWNCAST_FUNCTIONS(SP_FEDISPLACEMENTMAP, SPFeDisplacementMap)
-MAKE_SP_OBJECT_TYPECHECK_FUNCTIONS(SP_IS_FEDISPLACEMENTMAP, SPFeDisplacementMap)
 
 #endif // SP_FEDISPLACEMENTMAP_H_SEEN
 

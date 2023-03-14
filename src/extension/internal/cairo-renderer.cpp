@@ -148,28 +148,100 @@ static void sp_image_render(SPImage *image, CairoRenderContext *ctx);
 static void sp_symbol_render(SPSymbol *symbol, CairoRenderContext *ctx, SPItem *origin, SPPage *page);
 static void sp_asbitmap_render(SPItem *item, CairoRenderContext *ctx, SPPage *page = nullptr);
 
-static void sp_shape_render_invoke_marker_rendering(SPMarker* marker, Geom::Affine tr, SPStyle* style, CairoRenderContext *ctx, SPItem *origin)
+static void sp_shape_render_invoke_marker_rendering(SPMarker* marker, Geom::Affine tr, CairoRenderContext *ctx, SPItem *origin)
 {
-    bool render = true;
-    if (marker->markerUnits == SP_MARKER_UNITS_STROKEWIDTH) {
-        if (style->stroke_width.computed > 1e-9) {
-            tr = Geom::Scale(style->stroke_width.computed) * tr;
-        } else {
-            render = false; // stroke width zero and marker is thus scaled down to zero, skip
+    if (auto marker_item = sp_item_first_item_child(marker)) {
+        tr = marker_item->transform * marker->c2p * tr;
+        Geom::Affine old_tr = marker_item->transform;
+        marker_item->transform = tr;
+        ctx->getRenderer()->renderItem (ctx, marker_item, origin);
+        marker_item->transform = old_tr;
+    }
+}
+
+/** A helper RAII class to manage the temporary rewriting of styles
+ * needed to support context-fill and context-stroke values for fill
+ * and stroke paints. The destructor restores the old values.
+ */
+class ContextPaintManager
+{
+public:
+    ContextPaintManager(SPStyle *target_style, SPItem *style_origin)
+        : _managed_style{target_style}
+        , _origin{style_origin}
+    {
+        auto const fill_origin = target_style->fill.paintOrigin;
+        if (fill_origin == SP_CSS_PAINT_ORIGIN_CONTEXT_FILL) {
+            _copyPaint(&target_style->fill, _findContextPaint(true));
+        } else if (fill_origin == SP_CSS_PAINT_ORIGIN_CONTEXT_STROKE) {
+            _copyPaint(&target_style->fill, _findContextPaint(false));
+        }
+
+        auto const stroke_origin = target_style->stroke.paintOrigin;
+        if (stroke_origin == SP_CSS_PAINT_ORIGIN_CONTEXT_FILL) {
+            _copyPaint(&target_style->stroke, _findContextPaint(true));
+        } else if (stroke_origin == SP_CSS_PAINT_ORIGIN_CONTEXT_STROKE) {
+            _copyPaint(&target_style->stroke, _findContextPaint(false));
         }
     }
 
-    if (render) {
-        SPItem* marker_item = sp_item_first_item_child(marker);
-        if (marker_item) {
-            tr = (Geom::Affine)marker_item->transform * (Geom::Affine)marker->c2p * tr;
-            Geom::Affine old_tr = marker_item->transform;
-            marker_item->transform = tr;
-            ctx->getRenderer()->renderItem (ctx, marker_item, origin);
-            marker_item->transform = old_tr;
+    ~ContextPaintManager()
+    {
+        // Restore rewritten paints.
+        if (_rewrote_fill) {
+            _managed_style->fill = _old_fill;
+        }
+        if (_rewrote_stroke) {
+            _managed_style->stroke = _old_stroke;
         }
     }
-}
+
+private:
+    /** @brief Find the paint that context-fill or context-stroke is referring to.
+     *
+     * @param is_fill If true, handle context-fill, otherwise context-stroke.
+     * @return The paint relevant to the specified context.
+     */
+    SPIPaint _findContextPaint(bool is_fill) const
+    {
+        if (auto *clone = cast<SPUse>(_origin); clone && clone->child) {
+            // Copy the paint of the child and merge with the parent's. This is similar
+            // to style merge operations performed when unlinking a clone, but here it's
+            // done only for a paint.
+            SPIPaint paint = *clone->child->style->getFillOrStroke(is_fill);
+            paint.merge(clone->style->getFillOrStroke(is_fill));
+            return paint;
+        }
+        return *_origin->style->getFillOrStroke(is_fill);
+    }
+
+    /** Copy paint from origin to destination, saving a copy of the old paint. */
+    template<typename PainT>
+    void _copyPaint(PainT *destination, SPIPaint paint)
+    {
+        // Keep a copy of the old paint
+        if constexpr (std::is_same<PainT, decltype(_old_fill)>::value) {
+            _rewrote_fill = true;
+            _old_fill = *destination;
+        } else if constexpr (std::is_same<PainT, decltype(_old_stroke)>::value) {
+            _rewrote_stroke = true;
+            _old_stroke = *destination;
+        } else {
+            static_assert("ContextPaintManager::_copyPaint() instantiated with neither fill nor stroke type.");
+        }
+
+        PainT new_value;
+        new_value.upcast()->operator=(paint);
+        *destination = new_value;
+    }
+
+    SPStyle *_managed_style;
+    SPItem *_origin;
+    decltype(_managed_style->fill) _old_fill;
+    decltype(_managed_style->stroke) _old_stroke;
+    bool _rewrote_fill = false;
+    bool _rewrote_stroke = false;
+};
 
 static void sp_shape_render(SPShape *shape, CairoRenderContext *ctx, SPItem *origin)
 {
@@ -177,84 +249,27 @@ static void sp_shape_render(SPShape *shape, CairoRenderContext *ctx, SPItem *ori
         return;
     }
 
+    Geom::PathVector const &pathv = shape->curve()->get_pathvector();
+    if (pathv.empty()) {
+        return;
+    }
+
     Geom::OptRect pbox = shape->geometricBounds();
-    
     SPStyle* style = shape->style;
-    auto fill_origin = style->fill.paintOrigin;
-    auto stroke_origin = style->stroke.paintOrigin;
-
-    /** An RAII class to temporarily replace a paint server href. */
-    using PaintHref = decltype(style->fill.value.href);
-    class TemporaryReplace
-    {
-    public:
-        TemporaryReplace(PaintHref *where, PaintHref what)
-            : _where{where}
-            , _oldval{*where}
-        {
-            *where = what;
-        }
-        ~TemporaryReplace() { *_where = _oldval; }
-
-    private:
-        PaintHref *const _where;
-        PaintHref const _oldval;
-    };
-    std::unique_ptr<TemporaryReplace> replace_fill, replace_stroke;
+    std::unique_ptr<ContextPaintManager> context_fs_manager;
 
     if (origin) {
         // If the shape is a child of a marker, we must set styles from the origin.
-        SPMarker *marker = nullptr;
         auto parentobj = shape->parent;
         while (parentobj) {
-            marker = dynamic_cast<SPMarker *>(parentobj);
-            if (marker) {
+            if (is<SPMarker>(parentobj)) {
+                // Create a manager to temporarily rewrite any fill/stroke properties
+                // set to context-fill/context-stroke with usable values.
+                context_fs_manager = std::make_unique<ContextPaintManager>(style, origin);
                 break;
             }
             parentobj = parentobj->parent;
         }
-        if (marker) {
-            // Origin will ultimately be either the original object the marker
-            // was added to OR a use tag. See sp_use_render for where this object
-            // comes from when it's a clone.
-            SPStyle *styleorig   = origin->style;
-            bool iscolorfill     = styleorig->fill.isColor() || (styleorig->fill.isPaintserver() && !styleorig->getFillPaintServer()->isValid());
-            bool iscolorstroke   = styleorig->stroke.isColor() || (styleorig->stroke.isPaintserver() && !styleorig->getStrokePaintServer()->isValid());
-            bool fillctxfill     = style->fill.paintOrigin == SP_CSS_PAINT_ORIGIN_CONTEXT_FILL;
-            bool fillctxstroke   = style->fill.paintOrigin == SP_CSS_PAINT_ORIGIN_CONTEXT_STROKE;
-            bool strokectxfill   = style->stroke.paintOrigin == SP_CSS_PAINT_ORIGIN_CONTEXT_FILL;
-            bool strokectxstroke = style->stroke.paintOrigin == SP_CSS_PAINT_ORIGIN_CONTEXT_STROKE;
-
-            if (fillctxfill || fillctxstroke) {
-                if (fillctxfill ? iscolorfill : iscolorstroke) {
-                    style->fill.setColor(fillctxfill ? styleorig->fill.value.color : styleorig->stroke.value.color);
-                } else if (fillctxfill ? styleorig->fill.isPaintserver() : styleorig->stroke.isPaintserver()) {
-                    replace_fill = std::make_unique<TemporaryReplace>(&style->fill.value.href,
-                                                                      fillctxfill ? styleorig->fill.value.href
-                                                                                  : styleorig->stroke.value.href);
-                } else {
-                    style->fill.setNone();
-                }
-            }
-            if (strokectxfill || strokectxstroke) {
-                if (strokectxfill ? iscolorfill : iscolorstroke) {
-                    style->stroke.setColor(strokectxfill ? styleorig->fill.value.color : styleorig->stroke.value.color);
-                } else if (strokectxfill ? styleorig->fill.isPaintserver() : styleorig->stroke.isPaintserver()) {
-                    replace_stroke = std::make_unique<TemporaryReplace>(&style->stroke.value.href,
-                                                                        strokectxfill ? styleorig->fill.value.href
-                                                                                      : styleorig->stroke.value.href);
-                } else {
-                    style->stroke.setNone();
-                }
-            }
-            style->fill.paintOrigin = SP_CSS_PAINT_ORIGIN_NORMAL;
-            style->stroke.paintOrigin = SP_CSS_PAINT_ORIGIN_NORMAL;
-        }
-    }
-
-    Geom::PathVector const &pathv = shape->curve()->get_pathvector();
-    if (pathv.empty()) {
-        return;
     }
 
     if (style->paint_order.layer[0] == SP_CSS_PAINT_ORDER_NORMAL ||
@@ -272,19 +287,14 @@ static void sp_shape_render(SPShape *shape, CairoRenderContext *ctx, SPItem *ori
         ctx->renderPathVector(pathv, style, pbox, CairoRenderContext::FILL_ONLY);
     }
 
+    // TODO: Factor marker rendering out into a separate function; reduce code duplication.
     // START marker
     for (int i = 0; i < 2; i++) {  // SP_MARKER_LOC and SP_MARKER_LOC_START
         if ( shape->_marker[i] ) {
             SPMarker* marker = shape->_marker[i];
-            Geom::Affine tr;
-            if (marker->orient_mode == MARKER_ORIENT_AUTO) {
-                tr = sp_shape_marker_get_transform_at_start(pathv.begin()->front());
-            } else if (marker->orient_mode == MARKER_ORIENT_AUTO_START_REVERSE) {
-                tr = Geom::Rotate::from_degrees( 180.0 ) * sp_shape_marker_get_transform_at_start(pathv.begin()->front());
-            } else {
-                tr = Geom::Rotate::from_degrees(marker->orient.computed) * Geom::Translate(pathv.begin()->front().pointAt(0));
-            }
-            sp_shape_render_invoke_marker_rendering(marker, tr, style, ctx, origin ? origin : shape);
+            Geom::Affine tr(sp_shape_marker_get_transform_at_start(pathv.begin()->front()));
+            tr = marker->get_marker_transform(tr, style->stroke_width.computed, true);
+            sp_shape_render_invoke_marker_rendering(marker, tr, ctx, origin ? origin : shape);
         }
     }
     // MID marker
@@ -296,13 +306,9 @@ static void sp_shape_render(SPShape *shape, CairoRenderContext *ctx, SPItem *ori
             if ( path_it != pathv.begin()
                  && ! ((path_it == (pathv.end()-1)) && (path_it->size_default() == 0)) ) // if this is the last path and it is a moveto-only, there is no mid marker there
             {
-                Geom::Affine tr;
-                if (marker->orient_mode != MARKER_ORIENT_ANGLE) {
-                    tr = sp_shape_marker_get_transform_at_start(path_it->front());
-                } else {
-                    tr = Geom::Rotate::from_degrees(marker->orient.computed) * Geom::Translate(path_it->front().pointAt(0));
-                }
-                sp_shape_render_invoke_marker_rendering(marker, tr, style, ctx, origin ? origin : shape);
+                Geom::Affine tr(sp_shape_marker_get_transform_at_start(path_it->front()));
+                tr = marker->get_marker_transform(tr, style->stroke_width.computed, false);
+                sp_shape_render_invoke_marker_rendering(marker, tr, ctx, origin ? origin : shape);
             }
             // MID position
             if (path_it->size_default() > 1) {
@@ -313,14 +319,9 @@ static void sp_shape_render(SPShape *shape, CairoRenderContext *ctx, SPItem *ori
                     /* Put marker between curve_it1 and curve_it2.
                      * Loop to end_default (so including closing segment), because when a path is closed,
                      * there should be a midpoint marker between last segment and closing straight line segment */
-                    Geom::Affine tr;
-                    if (marker->orient_mode != MARKER_ORIENT_ANGLE) {
-                        tr = sp_shape_marker_get_transform(*curve_it1, *curve_it2);
-                    } else {
-                        tr = Geom::Rotate::from_degrees(marker->orient.computed) * Geom::Translate(curve_it1->pointAt(1));
-                    }
-
-                    sp_shape_render_invoke_marker_rendering(marker, tr, style, ctx, origin ? origin : shape);
+                    Geom::Affine tr(sp_shape_marker_get_transform(*curve_it1, *curve_it2));
+                    tr = marker->get_marker_transform(tr, style->stroke_width.computed, false);
+                    sp_shape_render_invoke_marker_rendering(marker, tr, ctx, origin ? origin : shape);
 
                     ++curve_it1;
                     ++curve_it2;
@@ -329,13 +330,9 @@ static void sp_shape_render(SPShape *shape, CairoRenderContext *ctx, SPItem *ori
             // END position
             if ( path_it != (pathv.end()-1) && !path_it->empty()) {
                 Geom::Curve const &lastcurve = path_it->back_default();
-                Geom::Affine tr;
-                if (marker->orient_mode != MARKER_ORIENT_ANGLE) {
-                    tr = sp_shape_marker_get_transform_at_end(lastcurve);
-                } else {
-                    tr = Geom::Rotate::from_degrees(marker->orient.computed) * Geom::Translate(lastcurve.pointAt(1));
-                }
-                sp_shape_render_invoke_marker_rendering(marker, tr, style, ctx, origin ? origin : shape);
+                Geom::Affine tr = sp_shape_marker_get_transform_at_end(lastcurve);
+                tr = marker->get_marker_transform(tr, style->stroke_width.computed, false);
+                sp_shape_render_invoke_marker_rendering(marker, tr, ctx, origin ? origin : shape);
             }
         }
     }
@@ -352,15 +349,9 @@ static void sp_shape_render(SPShape *shape, CairoRenderContext *ctx, SPItem *ori
                 index--;
             }
             Geom::Curve const &lastcurve = path_last[index];
-
-            Geom::Affine tr;
-            if (marker->orient_mode != MARKER_ORIENT_ANGLE) {
-                tr = sp_shape_marker_get_transform_at_end(lastcurve);
-            } else {
-                tr = Geom::Rotate::from_degrees(marker->orient.computed) * Geom::Translate(lastcurve.pointAt(1));
-            }
-
-            sp_shape_render_invoke_marker_rendering(marker, tr, style, ctx, origin ? origin : shape);
+            Geom::Affine tr = sp_shape_marker_get_transform_at_end(lastcurve);
+            tr = marker->get_marker_transform(tr, style->stroke_width.computed, false);
+            sp_shape_render_invoke_marker_rendering(marker, tr, ctx, origin ? origin : shape);
         }
     }
 
@@ -377,18 +368,13 @@ static void sp_shape_render(SPShape *shape, CairoRenderContext *ctx, SPItem *ori
                style->paint_order.layer[1] == SP_CSS_PAINT_ORDER_MARKER ) {
         ctx->renderPathVector(pathv, style, pbox, CairoRenderContext::FILL_ONLY);
     }
-
-    // Put the style's paint origin back, in case this shape is a marker
-    // which is rendered multple times.
-    style->fill.paintOrigin = fill_origin;
-    style->stroke.paintOrigin = stroke_origin;
 }
 
 static void sp_group_render(SPGroup *group, CairoRenderContext *ctx, SPItem *origin, SPPage *page)
 {
     CairoRenderer *renderer = ctx->getRenderer();
     for (auto obj : group->childList(false)) {
-        if (SPItem *item = dynamic_cast<SPItem *>(obj)) {
+        if (auto item = cast<SPItem>(obj)) {
             renderer->renderItem(ctx, item, origin, page);
         }
     }
@@ -470,7 +456,7 @@ static void sp_anchor_render(SPAnchor *a, CairoRenderContext *ctx)
     if (a->href)
         ctx->tagBegin(a->href);
     for(auto x : l){
-        SPItem *item = dynamic_cast<SPItem*>(x);
+        auto item = cast<SPItem>(x);
         if (item) {
             renderer->renderItem(ctx, item);
         }
@@ -610,62 +596,37 @@ static void sp_asbitmap_render(SPItem *item, CairoRenderContext *ctx, SPPage *pa
 
 static void sp_item_invoke_render(SPItem *item, CairoRenderContext *ctx, SPItem *origin, SPPage *page)
 {
-    SPRoot *root = dynamic_cast<SPRoot *>(item);
-    if (root) {
+    if (auto root = cast<SPRoot>(item)) {
         TRACE(("root\n"));
         sp_root_render(root, ctx);
-    } else {
-        SPSymbol *symbol = dynamic_cast<SPSymbol *>(item);
-        if (symbol) {
-            TRACE(("symbol\n"));
-            sp_symbol_render(symbol, ctx, origin, page);
-        } else {
-            SPAnchor *anchor = dynamic_cast<SPAnchor *>(item);
-            if (anchor) {
-                TRACE(("<a>\n"));
-                sp_anchor_render(anchor, ctx);
-            } else {
-                SPShape *shape = dynamic_cast<SPShape *>(item);
-                if (shape) {
-                    TRACE(("shape\n"));
-                    sp_shape_render(shape, ctx, origin);
-                } else {
-                    SPUse *use = dynamic_cast<SPUse *>(item);
-                    if (use) {
-                        TRACE(("use begin---\n"));
-                        sp_use_render(use, ctx, page);
-                        TRACE(("---use end\n"));
-                    } else {
-                        SPText *text = dynamic_cast<SPText *>(item);
-                        if (text) {
-                            TRACE(("text\n"));
-                            sp_text_render(text, ctx);
-                        } else {
-                            SPFlowtext *flowtext = dynamic_cast<SPFlowtext *>(item);
-                            if (flowtext) {
-                                TRACE(("flowtext\n"));
-                                sp_flowtext_render(flowtext, ctx);
-                            } else {
-                                SPImage *image = dynamic_cast<SPImage *>(item);
-                                if (image) {
-                                    TRACE(("image\n"));
-                                    sp_image_render(image, ctx);
-                                } else if (dynamic_cast<SPMarker *>(item)) {
-                                    // Marker contents shouldn't be rendered, even outside of <defs>.
-                                    return;
-                                } else {
-                                    SPGroup *group = dynamic_cast<SPGroup *>(item);
-                                    if (group) {
-                                        TRACE(("<g>\n"));
-                                        sp_group_render(group, ctx, origin, page);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+    } else if (auto symbol = cast<SPSymbol>(item)) {
+        TRACE(("symbol\n"));
+        sp_symbol_render(symbol, ctx, origin, page);
+    } else if (auto anchor = cast<SPAnchor>(item)) {
+        TRACE(("<a>\n"));
+        sp_anchor_render(anchor, ctx);
+    } else if (auto shape = cast<SPShape>(item)) {
+        TRACE(("shape\n"));
+        sp_shape_render(shape, ctx, origin);
+    } else if (auto use = cast<SPUse>(item)) {
+        TRACE(("use begin---\n"));
+        sp_use_render(use, ctx, page);
+        TRACE(("---use end\n"));
+    } else if (auto text = cast<SPText>(item)) {
+        TRACE(("text\n"));
+        sp_text_render(text, ctx);
+    } else if (auto flowtext = cast<SPFlowtext>(item)) {
+        TRACE(("flowtext\n"));
+        sp_flowtext_render(flowtext, ctx);
+    } else if (auto image = cast<SPImage>(item)) {
+        TRACE(("image\n"));
+        sp_image_render(image, ctx);
+    } else if (is<SPMarker>(item)) {
+        // Marker contents shouldn't be rendered, even outside of <defs>.
+        return;
+    } else if (auto group = cast<SPGroup>(item)) {
+        TRACE(("<g>\n"));
+        sp_group_render(group, ctx, origin, page);
     }
 }
 
@@ -684,7 +645,7 @@ CairoRenderer::setStateForItem(CairoRenderContext *ctx, SPItem const *item)
     // This is so because we use the image's/(flow)text's transform for positioning
     // instead of explicitly specifying it and letting the renderer do the
     // transformation before rendering the item.
-    if (dynamic_cast<SPText const *>(item) || dynamic_cast<SPFlowtext const *>(item) || dynamic_cast<SPImage const *>(item)) {
+    if (is<SPText>(item) || is<SPFlowtext>(item) || is<SPImage>(item)) {
         state->parent_has_userspace = TRUE;
     }
     TRACE(("setStateForItem opacity: %f\n", state->opacity));
@@ -697,7 +658,7 @@ bool CairoRenderer::_shouldRasterize(CairoRenderContext *ctx, SPItem const *item
     // TODO: might apply to some degree to masks with filtered elements as well;
     //       we need to figure out where in the stack it would be safe to rasterize
     if (ctx->getFilterToBitmap() && !item->isInClipPath()) {
-        if (auto const *clone = dynamic_cast<SPUse const *>(item)) {
+        if (auto const *clone = cast<SPUse>(item)) {
             return clone->anyInChain([](SPItem const *i) { return i && i->isFiltered(); });
         } else {
             return item->isFiltered();
@@ -729,12 +690,12 @@ void CairoRenderer::renderItem(CairoRenderContext *ctx, SPItem *item, SPItem *or
     CairoRenderState *state = ctx->getCurrentState();
     state->need_layer = ( state->mask || state->clip_path || state->opacity != 1.0 );
     SPStyle* style = item->style;
-    SPGroup * group = dynamic_cast<SPGroup *>(item);
+    auto group = cast<SPGroup>(item);
     bool blend = false;
     if (group && style->mix_blend_mode.set && style->mix_blend_mode.value != SP_CSS_BLEND_NORMAL) {
         state->need_layer = true;
         blend = true;
-    } 
+    }
     // Draw item on a temporary surface so a mask, clip-path, or opacity can be applied to it.
     if (state->need_layer) {
         state->merge_opacity = FALSE;
@@ -928,7 +889,7 @@ CairoRenderer::renderPage(CairoRenderContext *ctx, SPDocument *doc, SPPage *page
 
         // This process does not return layers, so those affines are added manually.
         for (auto anc : child->ancestorList(true)) {
-            if (auto layer = dynamic_cast<SPItem *>(anc)) {
+            if (auto layer = cast<SPItem>(anc)) {
                 if (layer != child && layer != root) {
                     ctx->transform(layer->transform);
                 }
@@ -969,7 +930,7 @@ CairoRenderer::applyClipPath(CairoRenderContext *ctx, SPClipPath const *cp)
     TRACE(("BEGIN clip\n"));
     SPObject const *co = cp;
     for (auto& child: co->children) {
-        SPItem const *item = dynamic_cast<SPItem const *>(&child);
+        SPItem const *item = cast<SPItem>(&child);
         if (item) {
 
             // combine transform of the item in clippath and the item using clippath:
@@ -1027,7 +988,7 @@ CairoRenderer::applyMask(CairoRenderContext *ctx, SPMask const *mask)
     TRACE(("BEGIN mask\n"));
     SPObject const *co = mask;
     for (auto& child: co->children) {
-        SPItem const *item = dynamic_cast<SPItem const *>(&child);
+        SPItem const *item = cast<SPItem>(&child);
         if (item) {
             // TODO fix const correctness:
             renderItem(ctx, const_cast<SPItem*>(item));

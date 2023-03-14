@@ -24,6 +24,7 @@ install(DIRECTORY extensions DESTINATION ${INKSCAPE_SHARE_INSTALL}
     PATTERN ".git*" EXCLUDE
     PATTERN "tests" EXCLUDE
     PATTERN "*.pyc" EXCLUDE
+    PATTERN "*.sh" EXCLUDE
     PATTERN "print_win32_vector.*" EXCLUDE
     PATTERN "other/inkman" EXCLUDE
     PATTERN "other/*/*/tests" EXCLUDE
@@ -32,8 +33,9 @@ install(DIRECTORY extensions DESTINATION ${INKSCAPE_SHARE_INSTALL}
 )
 
 install(DIRECTORY extensions/other/inkman DESTINATION ${INKSCAPE_SHARE_INSTALL}/extensions/inkman/
-    COMPONENT extension_manager
+    COMPONENT extension-manager
     PATTERN "tests" EXCLUDE
+    PATTERN ".git*" EXCLUDE
     PATTERN "MANIFEST.in" EXCLUDE
     PATTERN "requirements.txt" EXCLUDE
 )
@@ -73,17 +75,16 @@ if(UNIX)
 	  "application/postscript"
 	  "image/x-eps"
 	  "application/illustrator"
-	  "image/cgm"
 	  "image/x-wmf"
+	  "image/x-emf"
 	  "application/x-xccx"
-	  "application/x-xcgm"
 	  "application/x-xcdt"
-	  "application/x-xsk1"
 	  "application/x-xcmx"
 	  "image/x-xcdr"
 	  "application/visio"
 	  "application/x-visio"
 	  "application/vnd.visio"
+	  "application/vnd.ms-visio.viewer"
 	  "application/visio.drawing"
 	  "application/vsd"
 	  "application/x-vsd"

@@ -197,7 +197,6 @@ SpellCheck::SpellCheck()
 
 SpellCheck::~SpellCheck()
 {
-    clearRects();
     disconnect();
 }
 
@@ -212,10 +211,6 @@ void SpellCheck::documentReplaced()
 
 void SpellCheck::clearRects()
 {
-    for(auto rect : _rects) {
-        rect->hide();
-        delete rect;
-    }
     _rects.clear();
 }
 
@@ -231,7 +226,7 @@ void SpellCheck::disconnect()
 
 void SpellCheck::allTextItems (SPObject *r, std::vector<SPItem *> &l, bool hidden, bool locked)
 {
-    if (SP_IS_DEFS(r))
+    if (is<SPDefs>(r))
         return; // we're not interested in items in defs
 
     if (!strcmp(r->getRepr()->name(), "svg:metadata")) {
@@ -240,10 +235,10 @@ void SpellCheck::allTextItems (SPObject *r, std::vector<SPItem *> &l, bool hidde
 
     if (auto desktop = getDesktop()) {
         for (auto& child: r->children) {
-            if (auto item = dynamic_cast<SPItem *>(&child)) {
+            if (auto item = cast<SPItem>(&child)) {
                 if (!child.cloned && !desktop->layerManager().isLayer(item)) {
                     if ((hidden || !desktop->itemIsHidden(item)) && (locked || !item->isLocked())) {
-                        if (SP_IS_TEXT(item) || SP_IS_FLOWTEXT(item))
+                        if (is<SPText>(item) || is<SPFlowtext>(item))
                             l.push_back(item);
                     }
                 }
@@ -421,13 +416,13 @@ SpellCheck::nextWord()
     SPObject *char_item = nullptr;
     Glib::ustring::iterator text_iter;
     _layout->getSourceOfCharacter(_end_w, &char_item, &text_iter);
-    if (SP_IS_STRING(char_item)) {
+    if (is<SPString>(char_item)) {
         int this_char = *text_iter;
         if (this_char == '\'' || this_char == 0x2019) {
             Inkscape::Text::Layout::iterator end_t = _end_w;
             end_t.nextCharacter();
             _layout->getSourceOfCharacter(end_t, &char_item, &text_iter);
-            if (SP_IS_STRING(char_item)) {
+            if (is<SPString>(char_item)) {
                 int this_char = *text_iter;
                 if (g_ascii_isalpha(this_char)) { // 's
                     _end_w.nextEndOfWord();
@@ -519,7 +514,7 @@ SpellCheck::nextWord()
             auto rect = new Inkscape::CanvasItemRect(desktop->getCanvasSketch(), area);
             rect->set_stroke(0xff0000ff);
             rect->show();
-            _rects.push_back(rect);
+            _rects.emplace_back(rect);
 
             // scroll to make it all visible
             Geom::Point const center = desktop->current_center();
@@ -532,7 +527,7 @@ SpellCheck::nextWord()
                     scrollto = area.corner(corner);
                 }
             }
-            desktop->scroll_to_point (scrollto, 1.0);
+            desktop->scroll_to_point(scrollto);
         }
 
         // select text; if in Text tool, position cursor to the beginning of word
@@ -592,14 +587,9 @@ SpellCheck::nextWord()
     return false;
 }
 
-
-
-void
-SpellCheck::deleteLastRect ()
+void SpellCheck::deleteLastRect()
 {
     if (!_rects.empty()) {
-        _rects.back()->hide();
-        delete _rects.back();
         _rects.pop_back();
     }
 }

@@ -16,30 +16,27 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
+#include "sp-guide.h"
+
 #include <cstring>
-#include <vector>
 #include <glibmm/i18n.h>
+#include <vector>
 
 #include "attributes.h"
-#include "desktop.h"
 #include "desktop-events.h"
+#include "desktop.h"
+#include "display/control/canvas-item-guideline.h"
 #include "document-undo.h"
 #include "inkscape.h"
-
-#include "sp-guide.h"
+#include "object/sp-page.h"
+#include "page-manager.h"
 #include "sp-namedview.h"
 #include "sp-root.h"
-
-#include "display/control/canvas-item-guideline.h"
-
 #include "svg/stringstream.h"
 #include "svg/svg-color.h"
 #include "svg/svg.h"
-
 #include "ui/widget/canvas.h" // Should really be here
-
 #include "util/numeric/converters.h"
-
 #include "xml/repr.h"
 
 using Inkscape::DocumentUndo;
@@ -58,7 +55,7 @@ SPGuide::SPGuide()
 void SPGuide::setColor(guint32 color)
 {
     this->color = color;
-    for (auto view : views) {
+    for (auto &view : views) {
         view->set_stroke(color);
     }
 }
@@ -79,10 +76,7 @@ void SPGuide::build(SPDocument *document, Inkscape::XML::Node *repr)
 
 void SPGuide::release()
 {
-    for(auto view : views) {
-        delete view;
-    }
-    this->views.clear();
+    views.clear();
 
     if (this->document) {
         // Unregister ourselves
@@ -246,7 +240,7 @@ SPGuide *SPGuide::createSPGuide(SPDocument *doc, Geom::Point const &pt1, Geom::P
     }
     Inkscape::GC::release(repr);
 
-    SPGuide *guide= SP_GUIDE(doc->getObjectByRepr(repr));
+    auto guide = cast<SPGuide>(doc->getObjectByRepr(repr));
     return guide;
 }
 
@@ -272,25 +266,22 @@ void sp_guide_create_guides_around_page(SPDocument *doc)
 {
     std::list<std::pair<Geom::Point, Geom::Point> > pts;
 
-    Geom::Point A(0, 0);
-    Geom::Point C(doc->getWidth().value("px"), doc->getHeight().value("px"));
-    Geom::Point B(C[Geom::X], 0);
-    Geom::Point D(0, C[Geom::Y]);
+    Geom::Rect bounds = doc->getPageManager().getSelectedPageRect();
 
-    pts.emplace_back(A, B);
-    pts.emplace_back(B, C);
-    pts.emplace_back(C, D);
-    pts.emplace_back(D, A);
+    pts.emplace_back(bounds.corner(0), bounds.corner(1));
+    pts.emplace_back(bounds.corner(1), bounds.corner(2));
+    pts.emplace_back(bounds.corner(2), bounds.corner(3));
+    pts.emplace_back(bounds.corner(3), bounds.corner(0));
 
     sp_guide_pt_pairs_to_guides(doc, pts);
-    DocumentUndo::done(doc, _("Create Guides Around the Page"),"");
+    DocumentUndo::done(doc, _("Create Guides Around the Current Page"), "");
 }
 
 void sp_guide_delete_all_guides(SPDocument *doc)
 {
     std::vector<SPObject *> current = doc->getResourceList("guide");
     while (!current.empty()){
-        SPGuide* guide = SP_GUIDE(*(current.begin()));
+        auto guide = cast<SPGuide>(*(current.begin()));
         guide->remove(true);
         current = doc->getResourceList("guide");
     }
@@ -313,12 +304,12 @@ void SPGuide::showSPGuide(Inkscape::CanvasItemGroup *group)
     auto dot_handler = [=](GdkEvent *ev) { return sp_dt_guide_event(ev, item, this); };
     dot->connect_event(dot_handler);
 
-    views.push_back(item);
+    views.emplace_back(item);
 }
 
 void SPGuide::showSPGuide()
 {
-    for (auto view : views) {
+    for (auto &view : views) {
         view->show();
     }
 }
@@ -329,7 +320,6 @@ void SPGuide::hideSPGuide(Inkscape::UI::Widget::Canvas *canvas)
     g_assert(canvas != nullptr);
     for (auto it = views.begin(); it != views.end(); ++it) {
         if (canvas == (*it)->get_canvas()) { // A guide can be displayed on more than one desktop with the same document.
-            delete (*it);
             views.erase(it);
             return;
         }
@@ -340,7 +330,7 @@ void SPGuide::hideSPGuide(Inkscape::UI::Widget::Canvas *canvas)
 
 void SPGuide::hideSPGuide()
 {
-    for(auto view : views) {
+    for (auto &view : views) {
         view->hide();
     }
 }
@@ -349,9 +339,9 @@ void SPGuide::sensitize(Inkscape::UI::Widget::Canvas *canvas, bool sensitive)
 {
     g_assert(canvas != nullptr);
 
-    for (auto view : views) {
+    for (auto &view : views) {
         if (canvas == view->get_canvas()) {
-            view->set_sensitive(sensitive);
+            view->set_pickable(sensitive);
             return;
         }
     }
@@ -370,7 +360,7 @@ void SPGuide::moveto(Geom::Point const point_on_line, bool const commit)
         return;
     }
 
-    for(auto view : this->views) {
+    for (auto &view : views) {
         view->set_origin(point_on_line);
     }
 
@@ -414,7 +404,7 @@ void SPGuide::set_normal(Geom::Point const normal_to_line, bool const commit)
     if(this->locked) {
         return;
     }
-    for(auto view : this->views) {
+    for (auto &view : views) {
         view->set_normal(normal_to_line);
     }
 

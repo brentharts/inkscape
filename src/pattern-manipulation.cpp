@@ -27,8 +27,9 @@ std::vector<SPPattern*> sp_get_pattern_list(SPDocument* source) {
 
     std::vector<SPObject*> patterns = source->getResourceList("pattern");
     for (auto pattern : patterns) {
-        if (SP_PATTERN(pattern) == SP_PATTERN(pattern)->rootPattern()) { // only if this is a root pattern
-            list.push_back(SP_PATTERN(pattern));
+        auto p = cast<SPPattern>(pattern);
+        if (p && p == p->rootPattern() && p->hasChildren()) { // only if this is a vali root pattern
+            list.push_back(cast<SPPattern>(pattern));
         }
     }
 
@@ -129,7 +130,9 @@ std::string sp_get_pattern_label(SPPattern* pattern) {
 
     Inkscape::XML::Node* repr = pattern->getRepr();
     if (auto label = pattern->getAttribute("inkscape:label")) {
-        return std::string(label);
+        if (*label) {
+            return std::string(gettext(label));
+        }
     }
     const char* stock_id = _(repr->attribute("inkscape:stockid"));
     const char* pat_id = stock_id ? stock_id : _(repr->attribute("id"));

@@ -118,8 +118,10 @@ void FillNStroke::setDesktop(SPDesktop *desktop)
         }
         _desktop = desktop;
         if (desktop && desktop->getSelection()) {
-            // subselChangedConn =
-                // desktop->connectToolSubselectionChanged(sigc::hide(sigc::mem_fun(*this, &FillNStroke::performUpdate)));
+            subselChangedConn = desktop->connect_text_cursor_moved([=](void* sender, Inkscape::UI::Tools::TextTool* tool) {
+                performUpdate();
+            });
+
             eventContextConn = desktop->connectEventContextChanged(sigc::hide(sigc::bind(
                 sigc::mem_fun(*this, &FillNStroke::eventContextCB), (Inkscape::UI::Tools::ToolBase *)nullptr)));
 
@@ -175,7 +177,7 @@ void FillNStroke::performUpdate()
     const int property = kind == FILL ? QUERY_STYLE_PROPERTY_FILL : QUERY_STYLE_PROPERTY_STROKE;
     int result = sp_desktop_query_style(_desktop, &query, property);
     SPIPaint& paint = *query.getFillOrStroke(kind == FILL);
-    auto stop = dynamic_cast<SPStop*>(paint.getTag());
+    auto stop = cast<SPStop>(paint.getTag());
     if (stop) {
        // there's a stop selected, which is part of subselection, now query selection only to find selected gradient
        if (auto selection = _desktop->getSelection()) {
@@ -212,29 +214,29 @@ void FillNStroke::performUpdate()
                 SPPaintServer* server = (kind == FILL) ? query.getFillPaintServer() : query.getStrokePaintServer();
 
                 if (server) {
-                    if (SP_IS_GRADIENT(server) && SP_GRADIENT(server)->getVector()->isSwatch()) {
-                        SPGradient *vector = SP_GRADIENT(server)->getVector();
+                    if (is<SPGradient>(server) && cast<SPGradient>(server)->getVector()->isSwatch()) {
+                        auto vector = cast<SPGradient>(server)->getVector();
                         _psel->setSwatch(vector);
-                    } else if (SP_IS_LINEARGRADIENT(server)) {
-                        SPGradient *vector = SP_GRADIENT(server)->getVector();
-                        SPLinearGradient *lg = SP_LINEARGRADIENT(server);
+                    } else if (is<SPLinearGradient>(server)) {
+                        auto vector = cast<SPGradient>(server)->getVector();
+                        auto lg = cast<SPLinearGradient>(server);
                         _psel->setGradientLinear(vector, lg, stop);
 
                         _psel->setGradientProperties(lg->getUnits(), lg->getSpread());
-                    } else if (SP_IS_RADIALGRADIENT(server)) {
-                        SPGradient *vector = SP_GRADIENT(server)->getVector();
-                        SPRadialGradient *rg = SP_RADIALGRADIENT(server);
+                    } else if (is<SPRadialGradient>(server)) {
+                        auto vector = cast<SPGradient>(server)->getVector();
+                        auto rg = cast<SPRadialGradient>(server);
                         _psel->setGradientRadial(vector, rg, stop);
 
                         _psel->setGradientProperties(rg->getUnits(), rg->getSpread());
 #ifdef WITH_MESH
-                    } else if (SP_IS_MESHGRADIENT(server)) {
-                        SPGradient *array = SP_GRADIENT(server)->getArray();
-                        _psel->setGradientMesh(SP_MESHGRADIENT(array));
-                        _psel->updateMeshList(SP_MESHGRADIENT(array));
+                    } else if (is<SPMeshGradient>(server)) {
+                        auto array = cast<SPGradient>(server)->getArray();
+                        _psel->setGradientMesh(cast<SPMeshGradient>(array));
+                        _psel->updateMeshList(cast<SPMeshGradient>(array));
 #endif
-                    } else if (SP_IS_PATTERN(server)) {
-                        _psel->updatePatternList(SP_PATTERN(server));
+                    } else if (is<SPPattern>(server)) {
+                        _psel->updatePatternList(cast<SPPattern>(server));
                     }
                 }
             }
@@ -440,18 +442,9 @@ void FillNStroke::updateFromPaint(bool switch_style)
                                                                                           : SP_GRADIENT_TYPE_RADIAL);
                 bool createSwatch = (_psel->get_mode() == UI::Widget::PaintSelector::MODE_SWATCH);
 
-                SPCSSAttr *css = nullptr;
-                if (kind == FILL) {
-                    // HACK: reset fill-opacity - that 0.75 is annoying; BUT remove this when we have an opacity slider
-                    // for all tabs
-                    css = sp_repr_css_attr_new();
-                    sp_repr_css_set_property(css, "fill-opacity", "1.0");
-                }
-
                 auto vector = _psel->getGradientVector();
                 if (!vector) {
                     /* No vector in paint selector should mean that we just changed mode */
-
                     SPStyle query(_desktop->doc());
                     int result = objects_query_fillstroke(items, &query, kind == FILL);
                     if (result == QUERY_STYLE_MULTIPLE_SAME) {
@@ -462,24 +455,18 @@ void FillNStroke::updateFromPaint(bool switch_style)
                         } else {
                             common = targPaint.value.color;
                         }
-                        vector = sp_document_default_gradient_vector(document, common, createSwatch);
-                        if (vector && createSwatch) {
-                            vector->setSwatch();
-                        }
+                        vector = sp_document_default_gradient_vector(document, common, 1.0, createSwatch);
                     }
+                    if (vector)
+                        vector->setSwatch(createSwatch);
 
                     for (auto item : items) {
-                        // FIXME: see above
-                        if (kind == FILL) {
-                            sp_repr_css_change_recursive(item->getRepr(), css, "style");
-                        }
-
                         if (!vector) {
                             auto gr = sp_gradient_vector_for_object(
                                 document, _desktop, item,
                                 (kind == FILL) ? Inkscape::FOR_FILL : Inkscape::FOR_STROKE, createSwatch);
-                            if (gr && createSwatch) {
-                                gr->setSwatch();
+                            if (gr) {
+                                gr->setSwatch(createSwatch);
                             }
                             sp_item_set_gradient(item, gr, gradient_type,
                                                  (kind == FILL) ? Inkscape::FOR_FILL : Inkscape::FOR_STROKE);
@@ -493,22 +480,17 @@ void FillNStroke::updateFromPaint(bool switch_style)
                     // this gradient type.
                     vector = sp_gradient_ensure_vector_normalized(vector);
                     for (auto item : items) {
-                        // FIXME: see above
-                        if (kind == FILL) {
-                            sp_repr_css_change_recursive(item->getRepr(), css, "style");
-                        }
-
                         SPGradient *gr = sp_item_set_gradient(
                             item, vector, gradient_type, (kind == FILL) ? Inkscape::FOR_FILL : Inkscape::FOR_STROKE);
                         _psel->pushAttrsToGradient(gr);
                     }
                 }
 
-                if (css) {
-                    sp_repr_css_attr_unref(css);
-                    css = nullptr;
+                for (auto item : items) {
+                    // fill and stroke opacity should never be set on gradients since in our user interface
+                    // these are controlled by the gradient stops themselves.
+                    item->style->clear(kind == FILL ? SPAttr::FILL_OPACITY : SPAttr::STROKE_OPACITY);
                 }
-
                 DocumentUndo::done(document, (kind == FILL) ? _("Set gradient on fill") : _("Set gradient on stroke"), INKSCAPE_ICON("dialog-fill-and-stroke"));
             }
             break;
@@ -543,7 +525,7 @@ void FillNStroke::updateFromPaint(bool switch_style)
                     if (style) {
                         SPPaintServer *server =
                             (kind == FILL) ? style->getFillPaintServer() : style->getStrokePaintServer();
-                        if (server && SP_IS_MESHGRADIENT(server))
+                        if (server && is<SPMeshGradient>(server))
                             has_mesh = true;
                     }
 
@@ -565,7 +547,7 @@ void FillNStroke::updateFromPaint(bool switch_style)
                         SPMeshGradient *mg = static_cast<SPMeshGradient *>(document->getObjectByRepr(repr));
                         mg->array.create(mg, item, (kind == FILL) ? item->geometricBounds() : item->visualBounds());
 
-                        bool isText = SP_IS_TEXT(item);
+                        bool isText = is<SPText>(item);
                         sp_style_set_property_url(item, ((kind == FILL) ? "fill" : "stroke"), mg, isText);
 
                         // (*i)->requestModified(SP_OBJECT_MODIFIED_FLAG|SP_OBJECT_STYLE_MODIFIED_FLAG);
@@ -592,7 +574,7 @@ void FillNStroke::updateFromPaint(bool switch_style)
                         Geom::OptRect item_bbox = (kind == FILL) ? item->geometricBounds() : item->visualBounds();
                         mg->array.fill_box(item_bbox);
 
-                        bool isText = SP_IS_TEXT(item);
+                        bool isText = is<SPText>(item);
                         sp_style_set_property_url(item, ((kind == FILL) ? "fill" : "stroke"), mg, isText);
                     }
                 }
@@ -663,7 +645,7 @@ void FillNStroke::updateFromPaint(bool switch_style)
                         if (style && ((kind == FILL) ? style->fill.isPaintserver() : style->stroke.isPaintserver())) {
                             SPPaintServer *server = (kind == FILL) ? selobj->style->getFillPaintServer()
                                                                    : selobj->style->getStrokePaintServer();
-                            if (SP_IS_PATTERN(server) && SP_PATTERN(server)->rootPattern() == root_pattern)
+                            if (is<SPPattern>(server) && cast<SPPattern>(server)->rootPattern() == root_pattern)
                                 // only if this object's pattern is not rooted in our selected pattern, apply
                                 continue;
                         }

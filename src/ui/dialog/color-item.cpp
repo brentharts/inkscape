@@ -7,6 +7,8 @@
 #include <glibmm/i18n.h>
 #include <gdkmm/general.h>
 
+#include "helper/sigc-track-obj.h"
+#include "inkscape-preferences.h"
 #include "io/resource.h"
 #include "io/sys.h"
 #include "object/sp-gradient.h"
@@ -74,11 +76,14 @@ ColorItem::ColorItem(PaintDef const &paintdef, DialogBase *dialog)
     : dialog(dialog)
 {
     if (paintdef.get_type() == PaintDef::RGB) {
+        pinned_default = false;
         data = RGBData{paintdef.get_rgb()};
     } else {
+        pinned_default = true;
         data = NoneData{};
     }
     description = paintdef.get_description();
+    color_id = paintdef.get_color_id();
 
     common_setup();
 }
@@ -87,19 +92,27 @@ ColorItem::ColorItem(SPGradient *gradient, DialogBase *dialog)
     : dialog(dialog)
 {
     data = GradientData{gradient};
-    description = gradient->getId();
+    description = gradient->defaultLabel();
+    color_id = gradient->getId();
 
-    gradient->connectRelease(sigc::track_obj([this] (SPObject*) {
+    gradient->connectRelease(SIGC_TRACKING_ADAPTOR([this] (SPObject*) {
         boost::get<GradientData>(data).gradient = nullptr;
     }, *this));
 
-    gradient->connectModified(sigc::track_obj([this] (SPObject*, unsigned flags) {
+    gradient->connectModified(SIGC_TRACKING_ADAPTOR([this] (SPObject *obj, unsigned flags) {
         if (flags & SP_OBJECT_STYLE_MODIFIED_FLAG) {
             cache_dirty = true;
             queue_draw();
         }
+        description = obj->defaultLabel();
+        _signal_modified.emit();
+        if (is_pinned() != was_grad_pinned) {
+            was_grad_pinned = is_pinned();
+            _signal_pinned.emit();
+        }
     }, *this));
 
+    was_grad_pinned = is_pinned();
     common_setup();
 }
 
@@ -112,6 +125,11 @@ void ColorItem::common_setup()
                Gdk::BUTTON_PRESS_MASK |
                Gdk::BUTTON_RELEASE_MASK);
     drag_source_set(Globals::get().mimetargets, Gdk::BUTTON1_MASK, Gdk::ACTION_MOVE | Gdk::ACTION_COPY);
+}
+
+void ColorItem::set_pinned_pref(const std::string &path)
+{
+    pinned_pref = path + "/pinned/" + color_id;
 }
 
 void ColorItem::draw_color(Cairo::RefPtr<Cairo::Context> const &cr, int w, int h) const
@@ -286,7 +304,7 @@ void ColorItem::on_rightclick(GdkEventButton *event)
     auto additem = [&, this] (Glib::ustring const &name, sigc::slot<void()> slot) {
         auto item = Gtk::make_managed<Gtk::MenuItem>(name);
         menu->append(*item);
-        item->signal_activate().connect(sigc::track_obj(slot, *this));
+        item->signal_activate().connect(SIGC_TRACKING_ADAPTOR(slot, *this));
     };
 
     // TRANSLATORS: An item in context menu on a colour in the swatches
@@ -317,7 +335,7 @@ void ColorItem::on_rightclick(GdkEventButton *event)
                 int result = objects_query_fillstroke(items, &query, true);
                 if (result == QUERY_STYLE_MULTIPLE_SAME || result == QUERY_STYLE_SINGLE) {
                     if (query.fill.isPaintserver()) {
-                        if (dynamic_cast<SPGradient*>(query.getFillPaintServer()) == grad) {
+                        if (cast<SPGradient>(query.getFillPaintServer()) == grad) {
                             desktop->getContainer()->new_dialog("FillStroke");
                             return;
                         }
@@ -329,6 +347,18 @@ void ColorItem::on_rightclick(GdkEventButton *event)
             set_active_tool(desktop, "Gradient");
         });
     }
+
+    additem(is_pinned() ? _("Unpin Color") : _("Pin Color"), [this] {
+        if (boost::get<GradientData>(&data)) {
+            auto grad = boost::get<GradientData>(data).gradient;
+            if (!grad) return;
+
+            grad->setPinned(!is_pinned());
+            DocumentUndo::done(grad->document, is_pinned() ? _("Pin swatch") : _("Unpin swatch"), INKSCAPE_ICON("color-gradient"));
+        } else {
+            Inkscape::Preferences::get()->setBool(pinned_pref, !is_pinned());
+        }
+    });
 
     Gtk::Menu *convert_submenu = nullptr;
 
@@ -386,7 +416,8 @@ PaintDef ColorItem::to_paintdef() const
     } else if (auto rgbdata = boost::get<RGBData>(&data)) {
         return PaintDef(rgbdata->rgb, description);
     } else if (boost::get<GradientData>(&data)) {
-        return PaintDef({0, 0, 0}, description);
+        auto grad = boost::get<GradientData>(data).gradient;
+        return PaintDef({0, 0, 0}, grad->getId());
     }
 
     // unreachable
@@ -430,6 +461,19 @@ void ColorItem::set_stroke(bool b)
 {
     is_stroke = b;
     queue_draw();
+}
+
+bool ColorItem::is_pinned() const
+{
+    if (boost::get<GradientData>(&data)) {
+        auto grad = boost::get<GradientData>(data).gradient;
+        if (!grad) {
+            return false;
+        }
+        return grad->isPinned();
+    } else {
+        return Inkscape::Preferences::get()->getBool(pinned_pref, pinned_default);
+    }
 }
 
 std::array<double, 3> ColorItem::average_color() const

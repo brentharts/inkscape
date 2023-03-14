@@ -23,10 +23,12 @@
 
 class SlotResolver;
 
-class SPFeMergeNode
+class SPFeMergeNode final
     : public SPObject
 {
 public:
+    int tag() const override { return tag_of<decltype(*this)>; }
+
     int get_in() const { return in_slot; }
 
     void invalidate_parent_slots();
@@ -40,9 +42,6 @@ private:
     std::optional<std::string> in_name;
     int in_slot = Inkscape::Filters::NR_FILTER_SLOT_NOT_SET;
 };
-
-MAKE_SP_OBJECT_DOWNCAST_FUNCTIONS(SP_FEMERGENODE, SPFeMergeNode)
-MAKE_SP_OBJECT_TYPECHECK_FUNCTIONS(SP_IS_FEMERGENODE, SPFeMergeNode)
 
 #endif // SP_FEMERGENODE_H_SEEN
 

@@ -15,6 +15,7 @@
 #include <giomm.h>  // Not <gtkmm.h>! To eventually allow a headless version!
 #include <glibmm/i18n.h>
 
+#include "actions-helper.h"
 #include "actions-canvas-snapping.h"
 #include "actions/actions-extra-data.h"
 #include "inkscape-application.h"
@@ -74,7 +75,8 @@ SnapVector snap_all_the_rest = {
     { "snap-path-mask",          SNAPTARGET_PATH_MASK,          true },
     { "snap-path-clip",          SNAPTARGET_PATH_CLIP,          true },
 
-    { "snap-page-border",        SNAPTARGET_PAGE_BORDER,        true },
+    { "snap-page-border",        SNAPTARGET_PAGE_EDGE_BORDER,   true },
+    { "snap-page-margin",        SNAPTARGET_PAGE_MARGIN_BORDER, true },
     { "snap-grid",               SNAPTARGET_GRID,               true },
     { "snap-guide",              SNAPTARGET_GUIDE,              true },
 };
@@ -190,7 +192,7 @@ void set_simple_snap(SimpleSnap option, bool value) {
         vect = &snap_all_the_rest;
         break;
     default:
-        std::cerr << "missing case statement in " << __func__ << std::endl;
+        show_output(Glib::ustring("missing case statement in ") + __func__);
         break;
     }
 
@@ -266,6 +268,7 @@ std::vector<std::vector<Glib::ustring>> raw_data_canvas_snapping =
     {"win.snap-text-baseline",        N_("Snap Text Baselines"),               "Snap",  N_("Toggle snapping to text baseline and text anchors")  },
 
     {"win.snap-page-border",          N_("Snap Page Border"),                  "Snap",  N_("Toggle snapping to page border")                     },
+    {"win.snap-page-margin",          N_("Snap Page Margin"),                  "Snap",  N_("Toggle snapping to page margin")                     },
     {"win.snap-grid",                 N_("Snap Grids"),                        "Snap",  N_("Toggle snapping to grids")                           },
     {"win.snap-guide",                N_("Snap Guide Lines"),                  "Snap",  N_("Toggle snapping to guide lines")                     },
 
@@ -300,7 +303,7 @@ void add_actions_canvas_snapping(Gio::ActionMap* map) {
     // Check if there is already an application instance (GUI or non-GUI).
     auto app = InkscapeApplication::instance();
     if (!app) {
-        std::cerr << "add_actions_canvas_snapping: no app!" << std::endl;
+        show_output("add_actions_canvas_snapping: no app!");
         return;
     }
     app->get_action_extra_data().add_data(raw_data_canvas_snapping);
@@ -318,13 +321,13 @@ set_actions_canvas_snapping_helper(Gio::ActionMap& map, Glib::ustring action_nam
     // "set" it! We need to cast to Gio::SimpleAction)
     Glib::RefPtr<Gio::Action> action = map.lookup_action(action_name);
     if (!action) {
-        std::cerr << "set_actions_canvas_snapping_helper: action " << action_name.raw() << " missing!" << std::endl;
+        show_output(Glib::ustring("set_actions_canvas_snapping_helper: action ") + action_name.raw() + " missing!");
         return;
     }
 
     auto simple = Glib::RefPtr<Gio::SimpleAction>::cast_dynamic(action);
     if (!simple) {
-        std::cerr << "set_actions_canvas_snapping_helper: action " << action_name.raw() << " not SimpleAction!" << std::endl;
+        show_output(Glib::ustring("set_actions_canvas_snapping_helper: action ") + action_name.raw() + " not SimpleAction!");
         return;
     }
 
@@ -369,7 +372,8 @@ void set_actions_canvas_snapping(Gio::ActionMap& map) {
         { "snap-rotation-center",    snapprefs.isSnapButtonEnabled(SNAPTARGET_ROTATION_CENTER),    global && other },
         { "snap-text-baseline",      snapprefs.isSnapButtonEnabled(SNAPTARGET_TEXT_BASELINE),      global && other },
 
-        { "snap-page-border",        snapprefs.isSnapButtonEnabled(SNAPTARGET_PAGE_BORDER),        global },
+        { "snap-page-border",        snapprefs.isSnapButtonEnabled(SNAPTARGET_PAGE_EDGE_BORDER),   global },
+        { "snap-page-margin",        snapprefs.isSnapButtonEnabled(SNAPTARGET_PAGE_MARGIN_BORDER), global },
         { "snap-grid",               snapprefs.isSnapButtonEnabled(SNAPTARGET_GRID),               global },
         { "snap-guide",              snapprefs.isSnapButtonEnabled(SNAPTARGET_GUIDE),              global },
 

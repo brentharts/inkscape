@@ -134,7 +134,7 @@ static void remove_marker_auto_start_reverse(Inkscape::XML::Node *repr,
     if (!value.empty()) {
 
         // Find reference <marker>
-        static Glib::RefPtr<Glib::Regex> regex = Glib::Regex::create("url\\(#([A-z0-9#]*)\\)");
+        static Glib::RefPtr<Glib::Regex> regex = Glib::Regex::create("url\\(#([^\\)]*)\\)");
         Glib::MatchInfo matchInfo;
         regex->match(value, matchInfo);
 
@@ -380,9 +380,10 @@ static void insert_text_fallback( Inkscape::XML::Node *repr, const SPDocument *o
             }
 
             // We will keep this text node but replace all children.
-	    // Text object must be visible for the text calculatons to work
-	    bool was_hidden = text->isHidden();
-	    text->setHidden(false);
+            // Text object must be visible for the text calculatons to work
+            bool was_hidden = text->isHidden();
+            text->setHidden(false);
+            text->rebuildLayout();
 
             // For text in a shape, We need to unset 'text-anchor' or SVG 1.1 fallback won't work.
             // Note 'text' here refers to original document while 'repr' refers to new document copy.
@@ -393,7 +394,7 @@ static void insert_text_fallback( Inkscape::XML::Node *repr, const SPDocument *o
                 sp_repr_css_attr_unref(css);
             }
 
-            // We need to put trailing white space into it's own tspan for inline size so
+            // We need to put trailing white space into its own tspan for inline size so
             // it is excluded during calculation of line position in SVG 1.1 renderers.
             bool trim = text->has_inline_size() &&
                 !(text->style->text_anchor.computed == SP_CSS_TEXT_ANCHOR_START);
@@ -487,7 +488,7 @@ static void insert_text_fallback( Inkscape::XML::Node *repr, const SPDocument *o
                     text->layout.getSourceOfCharacter(it, &source_obj, &span_text_start_iter);
 
                     // Set tspan style
-                    Glib::ustring style_text = (dynamic_cast<SPString *>(source_obj) ? source_obj->parent : source_obj)
+                    Glib::ustring style_text = (is<SPString>(source_obj) ? source_obj->parent : source_obj)
                                                    ->style->writeIfDiff(text->style);
                     if (!style_text.empty()) {
                         span_tspan->setAttributeOrRemoveIfEmpty("style", style_text);
@@ -503,7 +504,7 @@ static void insert_text_fallback( Inkscape::XML::Node *repr, const SPDocument *o
                     }
 
                     // Add text node
-                    SPString *str = dynamic_cast<SPString *>(source_obj);
+                    auto str = cast<SPString>(source_obj);
                     if (str) {
                         Glib::ustring *string = &(str->string); // TODO fixme: dangerous, unsafe premature-optimization
                         SPObject *span_end_obj = nullptr;
@@ -819,6 +820,10 @@ Svg::open (Inkscape::Extension::Input *mod, const gchar *uri)
     Glib::ustring import_mode_svg  = prefs->getString("/dialogs/import/import_mode_svg");
     Glib::ustring scale            = prefs->getString("/dialogs/import/scale");
 
+    // Selecting some of the pages (via command line) in some future update
+    // we could add an option which would allow user page selection.
+    auto page_nums = INKSCAPE.get_pages();
+
     // If we popped up a window asking about import preferences, get values from
     // there and update preferences.
     if(mod->get_gui() && ask_svg) {
@@ -945,6 +950,12 @@ Svg::open (Inkscape::Extension::Input *mod, const gchar *uri)
     }
 
     SPDocument *doc = SPDocument::createNewDoc(uri, true);
+
+    // Page selection is achieved by removing any page not in the found list, the exports
+    // Can later figure out how they'd like to process the remaining pages.
+    if (doc && !page_nums.empty()) {
+        doc->prunePages(page_nums, true);
+    }
 
     // Convert single page docs into multi page mode, and visa-versa if
     // we are importing. We never change the mode for opening.

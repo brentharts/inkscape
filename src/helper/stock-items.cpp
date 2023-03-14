@@ -15,11 +15,10 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
-#define noSP_SS_VERBOSE
-
 #include <cstring>
 #include <glibmm/fileutils.h>
 
+#include "libnrtype/font-factory.h"
 #include "path-prefix.h"
 
 #include <xml/repr.h>
@@ -34,20 +33,38 @@
 #include "object/sp-pattern.h"
 #include "object/sp-marker.h"
 #include "object/sp-defs.h"
+#include "util/statics.h"
+
+// Stock objects kept in documents with controlled life time
+struct Documents {
+    static Documents& get();
+    std::vector<std::shared_ptr<SPDocument>> documents;
+};
+
+Documents& Documents::get() {
+    // make sure font factory is initialized first, that way Documents will be destructed before it
+    FontFactory::get();
+
+    static auto factory = Inkscape::Util::Static<Documents>();
+    return factory.get();
+}
 
 std::vector<std::shared_ptr<SPDocument>> sp_get_paint_documents(const std::function<bool (SPDocument*)>& filter) {
-    static std::vector<std::shared_ptr<SPDocument>> documents;
+    auto& storage = Documents::get();
 
-    if (documents.empty()) {
+    if (storage.documents.empty()) {
         using namespace Inkscape::IO::Resource;
         auto files = get_filenames(SYSTEM, PAINT, {".svg"});
-        auto user = get_filenames(USER, PAINT, {".svg"});
+        auto share = get_filenames(SHARED, PAINT, {".svg"});
+        auto user  = get_filenames(USER,   PAINT, {".svg"});
         files.insert(files.end(), user.begin(), user.end());
+        files.insert(files.end(), share.begin(), share.end());
         for (auto&& file : files) {
             if (Glib::file_test(file, Glib::FILE_TEST_IS_REGULAR)) {
                 std::shared_ptr<SPDocument> doc(SPDocument::createNewDoc(file.c_str(), false));
                 if (doc) {
-                    documents.push_back(std::move(doc));
+                    doc->ensureUpToDate(); // update, so patterns referencing clippaths render properly
+                    storage.documents.push_back(std::move(doc));
                 }
                 else {
                     g_warning("File %s not loaded.", file.c_str());
@@ -57,7 +74,7 @@ std::vector<std::shared_ptr<SPDocument>> sp_get_paint_documents(const std::funct
     }
 
     std::vector<std::shared_ptr<SPDocument>> out;
-    std::copy_if(documents.begin(), documents.end(), std::back_inserter(out), [=](const std::shared_ptr<SPDocument>& doc) {
+    std::copy_if(storage.documents.begin(), storage.documents.end(), std::back_inserter(out), [=](const std::shared_ptr<SPDocument>& doc) {
         return filter(doc.get());
     });
 
@@ -99,7 +116,7 @@ static SPObject * sp_marker_load_from_svg(gchar const *name, SPDocument *current
     if (doc) {
         /* Get the marker we want */
         SPObject *object = doc->getObjectById(name);
-        if (object && SP_IS_MARKER(object)) {
+        if (object && is<SPMarker>(object)) {
             SPDefs *defs = current_doc->getDefs();
             Inkscape::XML::Document *xml_doc = current_doc->getReprDoc();
             Inkscape::XML::Node *mark_repr = object->getRepr()->duplicate(xml_doc);
@@ -119,7 +136,7 @@ static SPObject* sp_pattern_load_from_svg(gchar const *name, SPDocument *current
     }
     // Try to load from document
     // Get the pattern we want
-    if (auto pattern = dynamic_cast<SPPattern*>(source_doc->getObjectById(name))) {
+    if (auto pattern = cast<SPPattern>(source_doc->getObjectById(name))) {
         return sp_copy_resource(pattern, current_doc);
     }
     return nullptr;
@@ -138,7 +155,7 @@ sp_gradient_load_from_svg(gchar const *name, SPDocument *current_doc)
     if (doc) {
         /* Get the gradient we want */
         SPObject *object = doc->getObjectById(name);
-        if (object && SP_IS_GRADIENT(object)) {
+        if (object && is<SPGradient>(object)) {
             SPDefs *defs = current_doc->getDefs();
             Inkscape::XML::Document *xml_doc = current_doc->getReprDoc();
             Inkscape::XML::Node *pat_repr = object->getRepr()->duplicate(xml_doc);
@@ -188,7 +205,7 @@ SPObject *get_stock_item(gchar const *urn, bool stock, SPDocument* stock_doc)
             {
                 if (child.getRepr()->attribute("inkscape:stockid") &&
                     !strcmp(name_p, child.getRepr()->attribute("inkscape:stockid")) &&
-                    SP_IS_MARKER(&child))
+                    is<SPMarker>(&child))
                 {
                     object = &child;
                 }
@@ -199,7 +216,7 @@ SPObject *get_stock_item(gchar const *urn, bool stock, SPDocument* stock_doc)
             {
                 if (child.getRepr()->attribute("inkscape:stockid") &&
                     !strcmp(name_p, child.getRepr()->attribute("inkscape:stockid")) &&
-                    SP_IS_PATTERN(&child))
+                    is<SPPattern>(&child))
                 {
                     object = &child;
                 }
@@ -210,7 +227,7 @@ SPObject *get_stock_item(gchar const *urn, bool stock, SPDocument* stock_doc)
             {
                 if (child.getRepr()->attribute("inkscape:stockid") &&
                     !strcmp(name_p, child.getRepr()->attribute("inkscape:stockid")) &&
-                    SP_IS_GRADIENT(&child))
+                    is<SPGradient>(&child))
                 {
                     object = &child;
                 }

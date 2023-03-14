@@ -18,12 +18,13 @@
 
 #include "object/sp-object.h"
 
-class SPFeDistantLight
+class SPFeDistantLight final
     : public SPObject
 {
 public:
 	SPFeDistantLight();
 	~SPFeDistantLight() override;
+    int tag() const override { return tag_of<decltype(*this)>; }
 
     /// azimuth attribute
     float azimuth;
@@ -38,9 +39,6 @@ protected:
     void set(SPAttr key, char const *value) override;
     Inkscape::XML::Node *write(Inkscape::XML::Document *doc, Inkscape::XML::Node *repr, unsigned flags) override;
 };
-
-MAKE_SP_OBJECT_DOWNCAST_FUNCTIONS(SP_FEDISTANTLIGHT, SPFeDistantLight)
-MAKE_SP_OBJECT_TYPECHECK_FUNCTIONS(SP_IS_FEDISTANTLIGHT, SPFeDistantLight)
 
 #endif // SP_FEDISTANTLIGHT_H_SEEN
 

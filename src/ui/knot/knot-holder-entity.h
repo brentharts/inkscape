@@ -22,12 +22,16 @@
 
 #include "display/control/canvas-item-enums.h"
 #include "display/control/canvas-item-quad.h"
+#include "display/control/canvas-item-curve.h"
+#include "helper/auto-connection.h"
+#include "display/control/canvas-item-ptr.h"
 
 class SPHatch;
 class SPItem;
 class SPKnot;
 class SPDesktop;
 class SPPattern;
+class SPGaussianBlur;
 class KnotHolder;
 
 namespace Inkscape {
@@ -111,13 +115,16 @@ class PatternKnotHolderEntity : public KnotHolderEntity {
     void knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) override{};
     bool set_item_clickpos(Geom::Point loc) override;
     void set_offset(Geom::Point loc);
+    void update_knot() override;
 
 protected:
     // true if the entity tracks fill, false for stroke
     bool _fill;
     SPPattern *_pattern() const;
     Geom::Point _get_pos(gdouble x, gdouble y, bool transform = true) const;
+    Geom::IntPoint offset_to_cell(Geom::Point loc) const;
     Geom::IntPoint _cell;
+    std::optional<Geom::Point> _location;
 };
 
 class PatternKnotHolderEntityXY : public PatternKnotHolderEntity {
@@ -132,7 +139,7 @@ public:
 
 private:
     // Extra visual element to show the pattern editing area
-    std::unique_ptr<Inkscape::CanvasItemQuad> _quad;
+    CanvasItemPtr<Inkscape::CanvasItemQuad> _quad;
 };
 
 class PatternKnotHolderEntityAngle : public PatternKnotHolderEntity {
@@ -214,6 +221,25 @@ class FilterKnotHolderEntity : public KnotHolderEntity {
     void knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state) override;
 private:
     bool _topleft; // true for topleft point, false for bottomright
+};
+
+class BlurKnotHolderEntity : public KnotHolderEntity {
+  public:
+    BlurKnotHolderEntity(int direction) : KnotHolderEntity(), _dir(direction) {}
+    void on_created() override;
+    void update_knot() override;
+    Geom::Point knot_get() const override;
+    void knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) override {};
+    void knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state) override;
+
+  private:
+    SPGaussianBlur *_blur() const;
+    Geom::Point _pos() const;
+
+    int _dir;
+    CanvasItemPtr<Inkscape::CanvasItemCurve> _line;
+    Inkscape::auto_connection _watch_filter;
+    Inkscape::auto_connection _watch_blur;
 };
 
 #endif /* !SEEN_KNOT_HOLDER_ENTITY_H */

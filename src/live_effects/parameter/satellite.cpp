@@ -41,8 +41,7 @@ SatelliteParam::SatelliteParam(const Glib::ustring &label, const Glib::ustring &
     , last_transform(Geom::identity())
 {}
 
-SatelliteParam::~SatelliteParam()
-{
+SatelliteParam::~SatelliteParam() {
     quit_listening();
 }
 
@@ -70,13 +69,13 @@ bool SatelliteParam::param_readSVGValue(const gchar *strvalue)
         if (!lpeitems.size() && !param_effect->is_applied && !param_effect->getSPDoc()->isSeeking()) {
             SPObject * old_ref = param_effect->getSPDoc()->getObjectByHref(strvalue);
             if (old_ref) {
-                SPObject * successor = old_ref->_successor;
+                SPObject * tmpsuccessor = old_ref->_tmpsuccessor;
                 // cast to effect is not possible now
                 if (!g_strcmp0("clone_original", param_effect->getLPEObj()->getAttribute("effect"))) {
                     id_tmp = strvalue;
                 }
-                if (successor) {
-                    id_tmp = successor->getId();
+                if (tmpsuccessor && tmpsuccessor->getId()) {
+                    id_tmp = tmpsuccessor->getId();
                     id_tmp.insert(id_tmp.begin(), '#');
                     write = true;
                 }
@@ -156,14 +155,13 @@ void SatelliteParam::link(Glib::ustring itemid)
     }
     auto *document = param_effect->getSPDoc();
     SPObject *object = document->getObjectById(itemid);
-
     if (object && object != getObject()) {
         itemid.insert(itemid.begin(), '#');
         param_write_to_repr(itemid.c_str());
     } else {
         param_write_to_repr("");
     }
-    DocumentUndo::done(document, _("Link item parameter to path"), "");
+    param_effect->makeUndoDone(_("Link item parameter to path"));
 }
 
 // SIGNALS
@@ -175,7 +173,7 @@ void SatelliteParam::start_listening(SPObject *to)
     }
     quit_listening();
     linked_changed_connection = lperef->changedSignal().connect(sigc::mem_fun(*this, &SatelliteParam::linked_changed));
-    SPItem *item = dynamic_cast<SPItem *>(to);
+    auto item = cast<SPItem>(to);
     if (item) {
         linked_released_connection = item->connectRelease(sigc::mem_fun(*this, &SatelliteParam::linked_released));
         linked_modified_connection = item->connectModified(sigc::mem_fun(*this, &SatelliteParam::linked_modified));
@@ -213,14 +211,16 @@ void SatelliteParam::linked_changed(SPObject *old_obj, SPObject *new_obj)
 
 void SatelliteParam::linked_released(SPObject *released)
 {
-    unlink();
-    param_effect->processObjects(LPE_UPDATE);
+    if (param_effect->getLPEObj()) {
+        unlink();
+        param_effect->processObjects(LPE_UPDATE);
+    }
 }
 
 
 void SatelliteParam::linked_modified(SPObject *linked_obj, guint flags)
 {
-    if (!_updating && (!param_effect->is_load || ownerlocator || !SP_ACTIVE_DESKTOP) &&
+    if (!_updating && (!param_effect->is_load || ownerlocator || !SP_ACTIVE_DESKTOP && param_effect->isReady()) &&
         flags & (SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_STYLE_MODIFIED_FLAG |
                  SP_OBJECT_CHILD_MODIFIED_FLAG | SP_OBJECT_VIEWPORT_MODIFIED_FLAG)) 
     {
@@ -250,7 +250,16 @@ void SatelliteParam::on_link_button_click()
     if (effectType() == CLONE_ORIGINAL) {
         param_effect->is_load = false;
     }
-    auto itemid = cm->getFirstObjectID();
+    Glib::ustring itemid;
+    if (lookup) {
+        std::vector<Glib::ustring> clones = cm->getElementsOfType(nullptr, "svg:use", 2);
+        if (!clones.empty()) {
+            itemid = clones[0];
+        }
+    }
+    if (itemid.empty()) {
+        itemid = cm->getFirstObjectID();
+    }
     if (itemid.empty()) {
         return;
     }

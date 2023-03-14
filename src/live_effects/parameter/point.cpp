@@ -34,8 +34,7 @@ PointParam::PointParam( const Glib::ustring& label, const Glib::ustring& tip,
     handle_tip = g_strdup(htip);
 }
 
-PointParam::~PointParam()
-{
+PointParam::~PointParam() {
     if (handle_tip)
         g_free(handle_tip);
 }
@@ -223,8 +222,8 @@ PointParamKnotHolderEntity::knot_set(Geom::Point const &p, Geom::Point const &or
 void
 PointParamKnotHolderEntity::knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state)
 {
-    pparam->param_setValue(*pparam, true);
     pparam->param_effect->refresh_widgets = true;
+    pparam->param_effect->makeUndoDone(_("Move handle"));
 }
 
 Geom::Point

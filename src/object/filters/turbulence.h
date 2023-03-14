@@ -18,9 +18,12 @@
 #include "number-opt-number.h"
 #include "display/nr-filter-turbulence.h"
 
-class SPFeTurbulence
+class SPFeTurbulence final
     : public SPFilterPrimitive
 {
+public:
+    int tag() const override { return tag_of<decltype(*this)>; }
+
 private:
     int numOctaves = 0;
     double seed = 0.0f;
@@ -38,9 +41,6 @@ protected:
 
     std::unique_ptr<Inkscape::Filters::FilterPrimitive> build_renderer(Inkscape::DrawingItem *item) const override;
 };
-
-MAKE_SP_OBJECT_DOWNCAST_FUNCTIONS(SP_IS_FETURBULENCE, SPFeTurbulence)
-MAKE_SP_OBJECT_TYPECHECK_FUNCTIONS(SP_FETURBULENCE, SPFeTurbulence)
 
 #endif // SP_FETURBULENCE_H_SEEN
 

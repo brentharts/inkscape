@@ -62,8 +62,10 @@
 
 #include "object/sp-defs.h"
 #include "object/sp-namedview.h"
+#include "object/sp-page.h"
 #include "object/sp-root.h"
 #include "object/sp-use.h"
+#include "page-manager.h"
 #include "style.h"
 
 #include "ui/dialog/filedialog.h"
@@ -363,7 +365,7 @@ sp_file_open_dialog(Gtk::Window &parentWindow, gpointer /*object*/, gpointer /*d
     Glib::ustring fileName = openDialogInstance->getFilename();
 
     // Inkscape::Extension::Extension *fileType =
-    //         openDialogInstance->getSelectionType();
+    //         openDialogInstance->getExtension();
 
     //# Code to check & open if multiple files.
     std::vector<Glib::ustring> flist = openDialogInstance->getFilenames();
@@ -634,7 +636,7 @@ sp_file_save_dialog(Gtk::Window &parentWindow, SPDocument *doc, Inkscape::Extens
             save_method
             );
 
-    saveDialog->setSelectionType(extension);
+    saveDialog->setExtension(extension);
 
     bool success = saveDialog->show();
     if (!success) {
@@ -647,7 +649,7 @@ sp_file_save_dialog(Gtk::Window &parentWindow, SPDocument *doc, Inkscape::Extens
     rdf_set_work_entity(doc, rdf_find_entity("title"), saveDialog->getDocTitle().c_str());
 
     Glib::ustring fileName = saveDialog->getFilename();
-    Inkscape::Extension::Extension *selectionType = saveDialog->getSelectionType();
+    Inkscape::Extension::Extension *selectionType = saveDialog->getExtension();
 
     delete saveDialog;
     saveDialog = nullptr;
@@ -788,7 +790,7 @@ sp_file_save_template(Gtk::Window &parentWindow, Glib::ustring name,
 
     auto document = SP_ACTIVE_DOCUMENT;
 
-    DocumentUndo::setUndoSensitive(document, false);
+    DocumentUndo::ScopedInsensitive _no_undo(document);
 
     auto root = document->getReprRoot();
     auto xml_doc = document->getReprDoc();
@@ -874,8 +876,6 @@ sp_file_save_template(Gtk::Window &parentWindow, Glib::ustring name,
     // remove this node from current document after saving it as template
     root->removeChild(templateinfo_node);
 
-    DocumentUndo::setUndoSensitive(document, true);
-
     return operation_confirmed;
 }
 
@@ -891,7 +891,7 @@ sp_file_save_template(Gtk::Window &parentWindow, Glib::ustring name,
  * @param in_place Whether to paste the selection where it was when copied
  * @pre @c clipdoc is not empty and items can be added to the current layer
  */
-void sp_import_document(SPDesktop *desktop, SPDocument *clipdoc, bool in_place)
+void sp_import_document(SPDesktop *desktop, SPDocument *clipdoc, bool in_place, bool on_page)
 {
     //TODO: merge with file_import()
 
@@ -901,8 +901,12 @@ void sp_import_document(SPDesktop *desktop, SPDocument *clipdoc, bool in_place)
 
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
 
+    // Get page manager for on_page pasting, this must be done before selection changes
+    Inkscape::PageManager &pm = target_document->getPageManager();
+    SPPage *to_page = pm.getSelected();
+
     auto *node_after = desktop->getSelection()->topRepr();
-    if (node_after && prefs->getBool("/options/paste/aboveselected", true)) {
+    if (node_after && prefs->getBool("/options/paste/aboveselected", true) && node_after != target_parent) {
         target_parent = node_after->parent();
     } else {
         node_after = target_parent->lastChild();
@@ -939,7 +943,8 @@ void sp_import_document(SPDesktop *desktop, SPDocument *clipdoc, bool in_place)
 
         // if we are pasting a clone to an already existing object, its
         // transform is relative to the document, not to its original (see ui/clipboard.cpp)
-        SPUse *use = dynamic_cast<SPUse *>(obj_copy);
+        auto spobject = target_document->getObjectByRepr(obj_copy);
+        auto use = cast<SPUse>(spobject);
         if (use) {
             SPItem *original = use->get_original();
             if (original) {
@@ -953,7 +958,12 @@ void sp_import_document(SPDesktop *desktop, SPDocument *clipdoc, bool in_place)
     auto layer = desktop->layerManager().currentLayer();
     Geom::Affine doc2parent = layer->i2doc_affine().inverse();
 
+    Geom::OptRect from_page;
     if (clipboard) {
+        if (clipboard->attribute("page-min")) {
+            from_page = Geom::OptRect(clipboard->getAttributePoint("page-min"), clipboard->getAttributePoint("page-max"));
+        }
+
         for (Inkscape::XML::Node *obj = clipboard->firstChild(); obj; obj = obj->next()) {
             if (target_document->getObjectById(obj->attribute("id")))
                 continue;
@@ -972,7 +982,7 @@ void sp_import_document(SPDesktop *desktop, SPDocument *clipdoc, bool in_place)
     // Change the selection to the freshly pasted objects
     selection->setReprList(pasted_objects);
     for (auto item : selection->items()) {
-        SPLPEItem *pasted_lpe_item = dynamic_cast<SPLPEItem *>(item);
+        auto pasted_lpe_item = cast<SPLPEItem>(item);
         if (pasted_lpe_item) {
             sp_lpe_item_enable_path_effects(pasted_lpe_item, false);
         }
@@ -980,10 +990,9 @@ void sp_import_document(SPDesktop *desktop, SPDocument *clipdoc, bool in_place)
     // Apply inverse of parent transform
     selection->applyAffine(desktop->dt2doc() * doc2parent * desktop->doc2dt(), true, false, false);
 
-
-
     // Update (among other things) all curves in paths, for bounds() to work
     target_document->ensureUpToDate();
+
 
     // move selection either to original position (in_place) or to mouse pointer
     Geom::OptRect sel_bbox = selection->visualBounds();
@@ -1008,11 +1017,16 @@ void sp_import_document(SPDesktop *desktop, SPDocument *clipdoc, bool in_place)
             Geom::Point mouse_offset = desktop->point() - sel_bbox->midpoint();
             offset = m.multipleOfGridPitch(mouse_offset - offset, sel_bbox->midpoint() + offset) + offset;
             m.unSetup();
+        } else if (on_page && from_page && to_page) {
+            // Moving to the same location on a different page requires us to remove the original page translation
+            offset *= Geom::Translate(from_page->min()).inverse();
+            // Then add the new page's transform on top.
+            offset *= Geom::Translate(to_page->getDesktopRect().min());
         }
 
         selection->moveRelative(offset);
         for (auto po : pasted_objects) {
-            SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(target_document->getObjectByRepr(po));
+            auto lpeitem = cast<SPLPEItem>(target_document->getObjectByRepr(po));
             if (lpeitem) {
                 sp_lpe_item_enable_path_effects(lpeitem, true);
             }
@@ -1081,7 +1095,7 @@ file_import(SPDocument *in_doc, const Glib::ustring &uri,
         guint items_count = 0;
         SPObject *o = nullptr;
         for (auto& child: doc->getRoot()->children) {
-            if (SP_IS_ITEM(&child)) {
+            if (is<SPItem>(&child)) {
                 items_count++;
                 o = &child;
             }
@@ -1089,9 +1103,9 @@ file_import(SPDocument *in_doc, const Glib::ustring &uri,
 
         //ungroup if necessary
         bool did_ungroup = false;
-        while(items_count==1 && o && SP_IS_GROUP(o) && o->children.size()==1){
+        while(items_count==1 && o && is<SPGroup>(o) && o->children.size()==1){
             std::vector<SPItem *>v;
-            sp_item_group_ungroup(SP_GROUP(o),v,false);
+            sp_item_group_ungroup(cast<SPGroup>(o), v);
             o = v.empty() ? nullptr : v[0];
             did_ungroup=true;
         }
@@ -1120,7 +1134,7 @@ file_import(SPDocument *in_doc, const Glib::ustring &uri,
         // and insert it into the current document.
         SPObject *new_obj = nullptr;
         for (auto& child: doc->getRoot()->children) {
-            if (SP_IS_ITEM(&child)) {
+            if (is<SPItem>(&child)) {
                 Inkscape::XML::Node *newitem = did_ungroup ? o->getRepr()->duplicate(xml_in_doc) : child.getRepr()->duplicate(xml_in_doc);
 
                 // convert layers to groups, and make sure they are unlocked
@@ -1149,14 +1163,14 @@ file_import(SPDocument *in_doc, const Glib::ustring &uri,
         if (style) sp_repr_css_attr_unref(style);
 
         // select and move the imported item
-        if (new_obj && SP_IS_ITEM(new_obj)) {
+        if (new_obj && is<SPItem>(new_obj)) {
             Inkscape::Selection *selection = desktop->getSelection();
-            selection->set(SP_ITEM(new_obj));
+            selection->set(cast<SPItem>(new_obj));
 
             // preserve parent and viewBox transformations
             // c2p is identity matrix at this point unless ensureUpToDate is called
             doc->ensureUpToDate();
-            Geom::Affine affine = doc->getRoot()->c2p * SP_ITEM(place_to_insert)->i2doc_affine().inverse();
+            Geom::Affine affine = doc->getRoot()->c2p * cast<SPItem>(place_to_insert)->i2doc_affine().inverse();
             selection->applyAffine(desktop->dt2doc() * affine * desktop->doc2dt(), true, false, false);
 
             // move to mouse pointer
@@ -1251,7 +1265,7 @@ sp_file_import(Gtk::Window &parentWindow)
 
     // Get file name and extension type
     Glib::ustring fileName = importDialogInstance->getFilename();
-    Inkscape::Extension::Extension *selection = importDialogInstance->getSelectionType();
+    Inkscape::Extension::Extension *selection = importDialogInstance->getExtension();
 
     delete importDialogInstance;
     importDialogInstance = nullptr;

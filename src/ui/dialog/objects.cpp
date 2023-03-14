@@ -14,12 +14,25 @@
 
 #include "objects.h"
 
+#include <glibmm/ustring.h>
+#include <gtkmm/builder.h>
+#include <gtkmm/button.h>
 #include <gtkmm/cellrenderer.h>
+#include <gtkmm/checkbutton.h>
+#include <gtkmm/enums.h>
 #include <gtkmm/icontheme.h>
 #include <gtkmm/imagemenuitem.h>
+#include <gtkmm/modelbutton.h>
+#include <gtkmm/object.h>
+#include <gtkmm/popover.h>
+#include <gtkmm/scale.h>
+#include <gtkmm/searchentry.h>
 #include <gtkmm/separatormenuitem.h>
 #include <glibmm/main.h>
 #include <glibmm/i18n.h>
+#include <iomanip>
+#include <pango/pango-utils.h>
+#include <string>
 
 #include "desktop-style.h"
 #include "desktop.h"
@@ -42,8 +55,10 @@
 #include "object/sp-mask.h"
 #include "object/sp-root.h"
 #include "object/sp-shape.h"
+#include "style-enums.h"
 #include "style.h"
-
+#include "svg/css-ostringstream.h"
+#include "ui/builder-utils.h"
 #include "ui/dialog-events.h"
 #include "ui/icon-loader.h"
 #include "ui/icon-names.h"
@@ -54,9 +69,11 @@
 #include "ui/contextmenu.h"
 #include "ui/util.h"
 #include "ui/widget/canvas.h"
+#include "ui/widget/filter-effect-chooser.h"
 #include "ui/widget/imagetoggler.h"
 #include "ui/widget/shapeicon.h"
 #include "ui/widget/objects-dialog-cells.h"
+#include "util/numeric/converters.h"
 
 // alpha (transparency) multipliers corresponding to item selection state combinations (SelectionState)
 // when 0 - do not color item's background
@@ -176,6 +193,11 @@ public:
         add(_colAncestorInvisible);
         add(_colAncestorLocked);
         add(_colHover);
+        add(_colItemStateSet);
+        add(_colBlendMode);
+        add(_colOpacity);
+        add(_colItemState);
+        add(_colHoverColor);
     }
     ~ModelColumns() override = default;
     Gtk::TreeModelColumn<Node*> _colNode;
@@ -189,15 +211,13 @@ public:
     Gtk::TreeModelColumn<bool> _colAncestorInvisible;
     Gtk::TreeModelColumn<bool> _colAncestorLocked;
     Gtk::TreeModelColumn<bool> _colHover;
+    Gtk::TreeModelColumn<bool> _colItemStateSet;
+    Gtk::TreeModelColumn<SPBlendMode> _colBlendMode;
+    Gtk::TreeModelColumn<double> _colOpacity;
+    Gtk::TreeModelColumn<Glib::ustring> _colItemState;
+    // Set when hovering over the color tag cell
+    Gtk::TreeModelColumn<bool> _colHoverColor;
 };
-
-/**
- * Gets an instance of the Objects panel
- */
-ObjectsPanel& ObjectsPanel::getInstance()
-{
-    return *new ObjectsPanel();
-}
 
 /**
  * Creates a new ObjectWatcher, a gtk TreeView iterated watching device.
@@ -224,7 +244,7 @@ ObjectWatcher::ObjectWatcher(ObjectsPanel* panel, SPItem* obj, Gtk::TreeRow *row
     node->addObserver(*this);
 
     // Only show children for groups (and their subclasses like SPAnchor or SPRoot)
-    if (!dynamic_cast<SPGroup const*>(obj)) {
+    if (!is<SPGroup>(obj)) {
         return;
     }
 
@@ -256,7 +276,7 @@ void ObjectWatcher::initRowInfo()
  */
 void ObjectWatcher::updateRowInfo()
 {
-    if (auto item = dynamic_cast<SPItem *>(panel->getObject(node))) {
+    if (auto item = cast<SPItem>(panel->getObject(node))) {
         assert(row_ref);
         assert(row_ref.get_path());
 
@@ -274,6 +294,25 @@ void ObjectWatcher::updateRowInfo()
             (item->getMaskObject() ? Inkscape::UI::Widget::OVERLAY_MASK : 0);
         row[_model->_colInvisible] = item->isHidden();
         row[_model->_colLocked] = !item->isSensitive();
+        auto blend = item->style && item->style->mix_blend_mode.set ? item->style->mix_blend_mode.value : SP_CSS_BLEND_NORMAL;
+        row[_model->_colBlendMode] = blend;
+        auto opacity = 1.0;
+        if (item->style && item->style->opacity.set) {
+            opacity = SP_SCALE24_TO_FLOAT(item->style->opacity.value);
+        }
+        row[_model->_colOpacity] = opacity;
+        std::string item_state;
+        if (opacity == 0.0) {
+            item_state = "object-transparent";
+        }
+        else if (blend != SP_CSS_BLEND_NORMAL) {
+            item_state = opacity == 1.0 ? "object-blend-mode" : "object-translucent-blend-mode";
+        }
+        else if (opacity < 1.0) {
+            item_state = "object-translucent";
+        }
+        row[_model->_colItemState] = item_state;
+        row[_model->_colItemStateSet] = !item_state.empty();
 
         updateRowHighlight();
         updateRowAncestorState(row[_model->_colAncestorInvisible], row[_model->_colAncestorLocked]);
@@ -284,7 +323,7 @@ void ObjectWatcher::updateRowInfo()
  * Propagate changes to the highlight color to all children.
  */
 void ObjectWatcher::updateRowHighlight() {
-    if (auto item = dynamic_cast<SPItem *>(panel->getObject(node))) {
+    if (auto item = cast<SPItem>(panel->getObject(node))) {
         auto row = *panel->_store->get_iter(row_ref.get_path());
         auto new_color = item->highlight_color();
         if (new_color != row[panel->_model->_colIconColor]) {
@@ -379,7 +418,7 @@ void ObjectWatcher::setSelectedBitChildren(SelectionState mask, bool enabled)
  */
 void ObjectWatcher::rememberExtendedItems()
 {
-    if (auto item = dynamic_cast<SPItem *>(panel->getObject(node))) {
+    if (auto item = cast<SPItem>(panel->getObject(node))) {
         if (item->isExpanded())
             panel->_tree.expand_row(row_ref.get_path(), false);
     }
@@ -459,7 +498,7 @@ void ObjectWatcher::addChildren(SPItem *obj, bool dummy)
     assert(child_watchers.empty());
 
     for (auto &child : obj->children) {
-        if (auto item = dynamic_cast<SPItem *>(&child)) {
+        if (auto item = cast<SPItem>(&child)) {
             if (addChild(item, dummy) && dummy) {
                 // one dummy child is enough to make the group expandable
                 break;
@@ -483,7 +522,7 @@ void ObjectWatcher::moveChild(Node &child, Node *sibling)
 
     // sibling might not be an SPItem and thus not be represented in the
     // TreeView. Find the closest SPItem and use that for the reordering.
-    while (sibling && !dynamic_cast<SPItem const *>(panel->getObject(sibling))) {
+    while (sibling && !is<SPItem>(panel->getObject(sibling))) {
         sibling = sibling->prev();
     }
 
@@ -535,7 +574,7 @@ void ObjectWatcher::notifyChildAdded( Node &node, Node &child, Node *prev )
 {
     assert(this->node == &node);
     // Ignore XML nodes which are not displayable items
-    if (auto item = dynamic_cast<SPItem *>(panel->getObject(&child))) {
+    if (auto item = cast<SPItem>(panel->getObject(&child))) {
         addChild(item);
         moveChild(child, prev);
     }
@@ -625,14 +664,21 @@ ObjectWatcher* ObjectsPanel::getWatcher(Node *node)
 /**
  * Constructor
  */
-ObjectsPanel::ObjectsPanel() :
-    DialogBase("/dialogs/objects", "Objects"),
-    root_watcher(nullptr),
-    _model(new ModelColumns()),
-    _layer(nullptr),
-    _is_editing(false),
-    _page(Gtk::ORIENTATION_VERTICAL),
-    _color_picker(_("Highlight color"), "", 0, true)
+ObjectsPanel::ObjectsPanel()
+    : DialogBase("/dialogs/objects", "Objects")
+    , root_watcher(nullptr)
+    , _model(new ModelColumns())
+    , _layer(nullptr)
+    , _is_editing(false)
+    , _page(Gtk::ORIENTATION_VERTICAL)
+    , _color_picker(_("Highlight color"), "", 0, true)
+    , _builder(create_builder("dialog-objects.glade"))
+    , _settings_menu(get_widget<Gtk::Popover>(_builder, "settings-menu"))
+    , _object_menu(get_widget<Gtk::Popover>(_builder, "object-menu"))
+    , _searchBox(get_widget<Gtk::SearchEntry>(_builder, "search"))
+    , _opacity_slider(get_widget<Gtk::Scale>(_builder, "opacity-slider"))
+    , _setting_layers(get_derived_widget<PrefCheckButton, Glib::ustring, bool>(_builder, "setting-layers", "/dialogs/objects/layers_only", false))
+    , _setting_track(get_derived_widget<PrefCheckButton, Glib::ustring, bool>(_builder, "setting-track", "/dialogs/objects/expand_to_layer", true))
 {
     _store = Gtk::TreeStore::create(*_model);
     _color_picker.hide();
@@ -645,9 +691,8 @@ ObjectsPanel::ObjectsPanel() :
     _tree.enable_model_drag_dest (Gdk::ACTION_MOVE);
     _tree.set_name("ObjectsTreeView");
 
+    auto& header = get_widget<Gtk::Box>(_builder, "header");
     // Search
-    _searchBox.set_valign(Gtk::ALIGN_FILL);
-    _searchBox.set_margin_end(3);
     _searchBox.signal_activate().connect(sigc::mem_fun(*this, &ObjectsPanel::_searchActivated));
     _searchBox.signal_search_changed().connect(sigc::mem_fun(*this, &ObjectsPanel::_searchChanged));
 
@@ -681,6 +726,105 @@ ObjectsPanel::ObjectsPanel() :
     _name_column->add_attribute(icon_renderer->property_clipmask(), _model->_colClipMask);
     _name_column->add_attribute(icon_renderer->property_cell_background_rgba(), _model->_colBgColor);
 
+    // blend mode and opacity icon(s)
+    _item_state_toggler = Gtk::manage(new Inkscape::UI::Widget::ImageToggler(
+        INKSCAPE_ICON("object-blend-mode"), INKSCAPE_ICON("object-opaque")));
+    int modeColNum = _tree.append_column("mode", *_item_state_toggler) - 1;
+    if (auto col = _tree.get_column(modeColNum)) {
+        col->add_attribute(_item_state_toggler->property_active(), _model->_colItemStateSet);
+        col->add_attribute(_item_state_toggler->property_active_icon(), _model->_colItemState);
+        col->add_attribute(_item_state_toggler->property_cell_background_rgba(), _model->_colBgColor);
+        col->add_attribute(_item_state_toggler->property_activatable(), _model->_colHover);
+        col->set_fixed_width(icon_col_width);
+        _blend_mode_column = col;
+    }
+
+    _tree.set_has_tooltip();
+    _tree.signal_query_tooltip().connect([=](int x, int y, bool kbd, const Glib::RefPtr<Gtk::Tooltip>& tooltip){
+        Gtk::TreeModel::iterator iter;
+        if (!_tree.get_tooltip_context_iter(x, y, kbd, iter) || !iter) {
+            return false;
+        }
+        auto blend = (*iter)[_model->_colBlendMode];
+        auto opacity = (*iter)[_model->_colOpacity];
+        auto templt = !pango_version_check(1, 50, 0) ?
+            "<span>%1 %2%%\n</span><span line_height=\"0.5\">\n</span><span>%3\n<i>%4</i></span>" :
+            "<span>%1 %2%%\n</span><span>\n</span><span>%3\n<i>%4</i></span>";
+        auto label = Glib::ustring::compose(templt,
+            _("Opacity:"), Util::format_number(opacity * 100.0, 1),
+            _("Blend mode:"), _blend_mode_names[blend]);
+        tooltip->set_markup(label);
+        _tree.set_tooltip_cell(tooltip, nullptr, _blend_mode_column, _item_state_toggler);
+        return true;
+    });
+
+    _object_menu.set_relative_to(_tree);
+    _object_menu.signal_closed().connect([=](){ _item_state_toggler->set_active(false); _tree.queue_draw(); });
+    auto& modes = get_widget<Gtk::Grid>(_builder, "modes");
+    _opacity_slider.signal_format_value().connect([](double val){
+        return Util::format_number(val, 1) + "%";
+    });
+    const int min = 0, max = 100;
+    for (int i = min; i <= max; i += 50) {
+        _opacity_slider.add_mark(i, Gtk::POS_BOTTOM, "");
+    }
+    _opacity_slider.signal_value_changed().connect([=](){
+        if (current_item) {
+            auto value = _opacity_slider.get_value() / 100.0;
+            Inkscape::CSSOStringStream os;
+            os << CLAMP(value, 0.0, 1.0);
+            auto css = sp_repr_css_attr_new();
+            sp_repr_css_set_property(css, "opacity", os.str().c_str());
+            current_item->changeCSS(css, "style");
+            sp_repr_css_attr_unref(css);
+            DocumentUndo::maybeDone(current_item->document, ":opacity", _("Change opacity"), INKSCAPE_ICON("dialog-object-properties"));
+        }
+    });
+
+    // object blend mode and opacity popup
+    int top = 0;
+    int left = 0;
+    int width = 2;
+    for (size_t i = 0; i < Inkscape::SPBlendModeConverter._length; ++i) {
+        auto& data = Inkscape::SPBlendModeConverter.data(i);
+        if (Inkscape::SPBlendModeConverter.get_key(data.id) == "-") {
+            if (top >= (Inkscape::SPBlendModeConverter._length + 1) / 2) {
+                ++left;
+                top = 2;
+            } else if (!left) {
+                auto sep = Gtk::make_managed<Gtk::Separator>();
+                sep->show();
+                modes.attach(*sep, left, top, 2, 1);
+            }
+        } else {
+            // Manual correction that indicates this should all be done in glade
+            if (left == 1 && top == 9)
+                top++;
+
+            auto check = Gtk::make_managed<Gtk::ModelButton>();
+            check->set_label(data.label);
+            check->property_role().set_value(Gtk::BUTTON_ROLE_RADIO);
+            check->property_inverted().set_value(true);
+            check->property_centered().set_value(false);
+            check->set_halign(Gtk::ALIGN_START);
+            check->signal_clicked().connect([=](){
+                // set blending mode
+                if (set_blend_mode(current_item, data.id)) {
+                    for (auto btn : _blend_items) {
+                        btn.second->property_active().set_value(btn.first == data.id);
+                    }
+                    DocumentUndo::done(getDocument(), "set-blend-mode", _("Change blend mode"));
+                }
+            });
+            _blend_items[data.id] = check;
+            _blend_mode_names[data.id] = data.label;
+            check->show();
+            modes.attach(*check, left, top, width, 1);
+            width = 1; // First element takes whole width
+        }
+        top++;
+    }
+
     // Visible icon
     auto *eyeRenderer = Gtk::manage( new Inkscape::UI::Widget::ImageToggler(
             INKSCAPE_ICON("object-hidden"), INKSCAPE_ICON("object-visible")));
@@ -712,7 +856,9 @@ ObjectsPanel::ObjectsPanel() :
     int tag_column = _tree.append_column("tag", *tag_renderer) - 1;
     if (auto tag = _tree.get_column(tag_column)) {
         tag->add_attribute(tag_renderer->property_color(), _model->_colIconColor);
+        tag->add_attribute(tag_renderer->property_hover(), _model->_colHoverColor);
         tag->set_fixed_width(tag_renderer->get_width());
+        _color_tag_column = tag;
     }
     tag_renderer->signal_clicked().connect([=](const Glib::ustring& path) {
         // object's color indicator clicked - open color picker
@@ -799,31 +945,9 @@ ObjectsPanel::ObjectsPanel() :
         _scroller.set_size_request(sreq.width, minHeight);
     }
 
-    _page.pack_start(_buttonsRow, Gtk::PACK_SHRINK);
-    _page.pack_start(_searchBox, Gtk::PACK_SHRINK);
+    _page.pack_start(header, false, true);
     _page.pack_end(_scroller, Gtk::PACK_EXPAND_WIDGET);
     pack_start(_page, Gtk::PACK_EXPAND_WIDGET);
-
-    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    {
-        auto child = Glib::wrap(sp_get_icon_image("layer-duplicate", GTK_ICON_SIZE_SMALL_TOOLBAR));
-        child->show();
-        _object_mode.add(*child);
-        _object_mode.set_relief(Gtk::RELIEF_NONE);
-    }
-    _object_mode.set_tooltip_text(_("Switch to layers only view."));
-    _object_mode.property_active() = prefs->getBool("/dialogs/objects/layers_only", false);
-    _object_mode.property_active().signal_changed().connect(sigc::mem_fun(*this, &ObjectsPanel::_objects_toggle));
-
-    _buttonsPrimary.pack_start(_object_mode, Gtk::PACK_SHRINK);
-    _buttonsPrimary.pack_start(*_addBarButton(INKSCAPE_ICON("layer-new"), _("Add layer..."), "win.layer-new"), Gtk::PACK_SHRINK);
-
-    _buttonsSecondary.pack_end(*_addBarButton(INKSCAPE_ICON("edit-delete"), _("Remove object"), "app.delete-selection"), Gtk::PACK_SHRINK);
-    _buttonsSecondary.pack_end(*_addBarButton(INKSCAPE_ICON("go-down"), _("Move Down"), "app.selection-stack-down"), Gtk::PACK_SHRINK);
-    _buttonsSecondary.pack_end(*_addBarButton(INKSCAPE_ICON("go-up"), _("Move Up"), "app.selection-stack-up"), Gtk::PACK_SHRINK);
-
-    _buttonsRow.pack_start(_buttonsPrimary, Gtk::PACK_SHRINK);
-    _buttonsRow.pack_end(_buttonsSecondary, Gtk::PACK_SHRINK);
 
     selection_color = get_background_color(_tree.get_style_context(), Gtk::STATE_FLAG_SELECTED);
     _tree_style = _tree.signal_style_updated().connect([=](){
@@ -837,6 +961,7 @@ ObjectsPanel::ObjectsPanel() :
         }
     });
     // Clear and update entire tree (do not use this in changed/modified signals)
+    auto prefs = Inkscape::Preferences::get();
     _watch_object_mode = prefs->createObserver("/dialogs/objects/layers_only", [=]() { setRootWatcher(); });
 
     update();
@@ -857,12 +982,6 @@ ObjectsPanel::~ObjectsPanel()
         delete _model;
         _model = nullptr;
     }
-}
-
-void ObjectsPanel::_objects_toggle()
-{
-    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    prefs->setBool("/dialogs/objects/layers_only", _object_mode.get_active());
 }
 
 void ObjectsPanel::desktopReplaced()
@@ -910,7 +1029,7 @@ bool ObjectsPanel::showChildInTree(SPItem *item) {
 
     // Filter by object type, the layers dialog here.
     if (prefs->getBool("/dialogs/objects/layers_only", false)) {
-        auto group = dynamic_cast<SPGroup *>(item);
+        auto group = cast<SPGroup>(item);
         if (!group || group->layerMode() != SPGroup::LAYER) {
             show_child = false;
         }
@@ -938,7 +1057,7 @@ bool ObjectsPanel::showChildInTree(SPItem *item) {
     for (auto child_obj : item->childList(false)) {
         if (show_child)
             break;
-        if (auto child = dynamic_cast<SPItem *>(child_obj)) {
+        if (auto child = cast<SPItem>(child_obj)) {
             show_child = showChildInTree(child);
         }
     }
@@ -968,6 +1087,7 @@ ObjectWatcher *ObjectsPanel::unpackToObject(SPObject *item)
 
 void ObjectsPanel::selectionChanged(Selection *selected)
 {
+    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     root_watcher->setSelectedBitRecursive(SELECTED_OBJECT, false);
     bool keep_current_item = false;
 
@@ -978,11 +1098,16 @@ void ObjectsPanel::selectionChanged(Selection *selected)
         if (auto watcher = unpackToObject(item)) {
             if (auto child_watcher = watcher->findChild(item->getRepr())) {
                 // Expand layers themselves, but do not expand groups.
-                auto group = dynamic_cast<SPGroup *>(item);
+                auto group = cast<SPGroup>(item);
                 auto focus_watcher = (group && group->isLayer()) ? child_watcher : watcher;
                 child_watcher->setSelectedBit(SELECTED_OBJECT, true);
-                _tree.expand_to_path(focus_watcher->getTreePath());
-                _tree.scroll_to_row(child_watcher->getTreePath(), 0.5);
+
+                if (prefs->getBool("/dialogs/objects/expand_to_layer", true)) {
+                    _tree.expand_to_path(focus_watcher->getTreePath());
+                    if (!_scroll_lock) {
+                        _tree.scroll_to_row(child_watcher->getTreePath(), 0.5);
+                    }
+                }
             }
         }
     }
@@ -1057,6 +1182,33 @@ bool ObjectsPanel::toggleVisible(unsigned int state, Gtk::TreeModel::Row row)
         return visible;
     }
     return false;
+}
+
+// show blend mode popup menu for current item
+bool ObjectsPanel::blendModePopup(GdkEventButton* event, Gtk::TreeModel::Row row) {
+    if (SPItem* item = getItem(row)) { 
+        current_item = nullptr;
+        auto blend = SP_CSS_BLEND_NORMAL;
+        if (item->style && item->style->mix_blend_mode.set) {
+            blend = item->style->mix_blend_mode.value;
+        }
+        auto opacity = 1.0;
+        if (item->style && item->style->opacity.set) {
+            opacity = SP_SCALE24_TO_FLOAT(item->style->opacity.value);
+        }
+        for (auto btn : _blend_items) {
+            btn.second->property_active().set_value(btn.first == blend);
+        }
+        _opacity_slider.set_value(opacity * 100);
+        current_item = item;
+
+        Gdk::Rectangle rect(event->x, event->y, 1, 1);
+        _object_menu.set_pointing_to(rect);
+        _item_state_toggler->set_active();
+        _object_menu.popup();
+    }
+
+    return true;
 }
 
 /**
@@ -1209,8 +1361,10 @@ bool ObjectsPanel::_handleMotionEvent(GdkEventMotion* motion_event)
 
     // Unhover any existing hovered row.
     if (_hovered_row_ref) {
-        if (auto row = *_store->get_iter(_hovered_row_ref.get_path()))
+        if (auto row = *_store->get_iter(_hovered_row_ref.get_path())) {
             row[_model->_colHover] = false;
+            row[_model->_colHoverColor] = false;
+        }
     }
     // Allow this function to be called by LEAVE motion
     if (!motion_event) {
@@ -1233,6 +1387,10 @@ bool ObjectsPanel::_handleMotionEvent(GdkEventMotion* motion_event)
             row[_model->_colHover] = true;
             _hovered_row_ref = Gtk::TreeModel::RowReference(_store, path);
             _tree.set_cursor(path);
+
+            if (col == _color_tag_column) {
+                row[_model->_colHoverColor] = true;
+            }
 
             // Dragging over the eye or locks will set them all
             auto item = getItem(row);
@@ -1297,7 +1455,7 @@ void ObjectsPanel::_generateTranslucentItems(SPItem *parent)
         return;
     if (parent->isAncestorOf(_solid_item)) {
         for (auto &child: parent->children) {
-            if (auto item = dynamic_cast<SPItem *>(&child)) {
+            if (auto item = cast<SPItem>(&child)) {
                 _generateTranslucentItems(item);
             }
         }
@@ -1334,6 +1492,9 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
                 } else if (col == _lock_column) {
                     _drag_flip = toggleLocked(event->state, row);
                 }
+                else if (col == _blend_mode_column) {
+                    return blendModePopup(event, row);
+                }
             }
         }
 
@@ -1358,7 +1519,7 @@ bool ObjectsPanel::_handleButtonEvent(GdkEventButton* event)
         SPItem *item = getItem(row);
 
         if (!item) return false;
-        SPGroup *group = SP_GROUP(item);
+        auto group = cast<SPGroup>(item);
 
         // Load the right click menu
         const bool context_menu = event->type == GDK_BUTTON_PRESS && event->button == 3;
@@ -1430,7 +1591,7 @@ Node *ObjectsPanel::getRepr(Gtk::TreeModel::Row const &row) const
 SPItem *ObjectsPanel::getItem(Gtk::TreeModel::Row const &row) const
 {
     auto const this_const = const_cast<ObjectsPanel *>(this);
-    return dynamic_cast<SPItem *>(this_const->getObject(getRepr(row)));
+    return cast<SPItem>(this_const->getObject(getRepr(row)));
 }
 
 /**
@@ -1511,7 +1672,7 @@ bool ObjectsPanel::on_drag_motion(const Glib::RefPtr<Gdk::DragContext> &context,
         }
 
         // only groups can have children
-        if (drop_into && !dynamic_cast<SPGroup const *>(item)) {
+        if (drop_into && !is<SPGroup>(item)) {
             goto finally;
         }
 
@@ -1552,8 +1713,9 @@ bool ObjectsPanel::on_drag_drop(const Glib::RefPtr<Gdk::DragContext> &context, i
             selection->toLayer(document->getObjectByRepr(drop_repr));
         } else {
             Node *after = (pos == Gtk::TREE_VIEW_DROP_BEFORE) ? drop_repr : drop_repr->prev();
-            selection->toLayer(document->getObjectByRepr(drop_repr->parent()), false, after);
+            selection->toLayer(document->getObjectByRepr(drop_repr->parent()), after);
         }
+        DocumentUndo::done(document, _("Move items"), INKSCAPE_ICON("selection-move-to-layer"));
     }
 
     on_drag_end(context);
@@ -1625,7 +1787,8 @@ bool ObjectsPanel::selectCursorItem(unsigned int state)
         toggleLocked(state, row);
     } else if (column == _name_column) {
         auto item = getItem(row);
-        auto group = dynamic_cast<SPGroup *>(item);
+        auto group = cast<SPGroup>(item);
+        _scroll_lock = true; // Clicking to select shouldn't scroll the treeview.
         if (state & GDK_SHIFT_MASK && !selection->isEmpty()) {
             // Select everything between this row and the last selected item
             selection->setBetween(item);
@@ -1640,6 +1803,7 @@ bool ObjectsPanel::selectCursorItem(unsigned int state)
             }
             selection->set(item);
         }
+        _scroll_lock = false;
         return true;
     }
     return false;
@@ -1665,7 +1829,7 @@ void ObjectsPanel::_searchChanged()
     }
 }
 
-} //namespace Dialogs
+} //namespace Dialog
 } //namespace UI
 } //namespace Inkscape
 

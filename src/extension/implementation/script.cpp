@@ -36,22 +36,27 @@
 #include "inkscape-window.h"
 #include "inkscape.h"
 #include "io/resource.h"
+#include "io/file.h"
 #include "layer-manager.h"
 #include "object/sp-namedview.h"
+#include "object/sp-page.h"
 #include "object/sp-path.h"
+#include "object/sp-root.h"
 #include "path-prefix.h"
 #include "preferences.h"
 #include "selection.h"
+#include "io/dir-util.h"
 #include "ui/desktop/menubar.h"
 #include "ui/dialog-events.h"
 #include "ui/tool/control-point-selection.h"
 #include "ui/tool/multi-path-manipulator.h"
 #include "ui/tool/path-manipulator.h"
 #include "ui/tools/node-tool.h"
+#include "ui/util.h"
 #include "ui/view/view.h"
 #include "widgets/desktop-widget.h"
 #include "xml/attribute-record.h"
-#include "xml/node.h"
+#include "xml/rebase-hrefs.h"
 
 /* Namespaces */
 namespace Inkscape {
@@ -281,50 +286,6 @@ bool Script::check(Inkscape::Extension::Extension *module)
     return true;
 }
 
-class ScriptDocCache : public ImplementationDocumentCache {
-    friend class Script;
-protected:
-    std::string _filename;
-    int _tempfd;
-public:
-    ScriptDocCache (Inkscape::UI::View::View * view);
-    ~ScriptDocCache ( ) override;
-};
-
-ScriptDocCache::ScriptDocCache (Inkscape::UI::View::View * view) :
-    ImplementationDocumentCache(view),
-    _filename(""),
-    _tempfd(0)
-{
-    try {
-        _tempfd = Glib::file_open_tmp(_filename, "ink_ext_XXXXXX.svg");
-    } catch (...) {
-        /// \todo Popup dialog here
-        return;
-    }
-
-    SPDesktop *desktop = (SPDesktop *) view;
-    sp_namedview_document_from_window(desktop);
-
-    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    prefs->setBool("/options/svgoutput/disable_optimizations", true);
-    Inkscape::Extension::save(
-              Inkscape::Extension::db.get(SP_MODULE_KEY_OUTPUT_SVG_INKSCAPE),
-              view->doc(), _filename.c_str(), false, false, Inkscape::Extension::FILE_SAVE_METHOD_TEMPORARY);
-    prefs->setBool("/options/svgoutput/disable_optimizations", false);
-    return;
-}
-
-ScriptDocCache::~ScriptDocCache ( )
-{
-    close(_tempfd);
-    unlink(_filename.c_str());
-}
-
-ImplementationDocumentCache *Script::newDocCache( Inkscape::Extension::Extension * /*ext*/, Inkscape::UI::View::View * view ) {
-    return new ScriptDocCache(view);
-}
-
 /**
  * Create a new document based on the given template.
  */
@@ -338,10 +299,33 @@ SPDocument *Script::new_from_template(Inkscape::Extension::Template *module)
         file_listener fileout;
         execute(command, params, in_file->get_path(), fileout);
         auto svg = fileout.string();
-        return SPDocument::createNewDocFromMem(svg.c_str(), svg.length(), false);
+        auto rdoc = sp_repr_read_mem(svg.c_str(), svg.length(), SP_SVG_NS_URI);
+        if (rdoc) {
+            auto name = g_strdup_printf(_("New document %d"), SPDocument::get_new_doc_number());
+            return SPDocument::createDoc(rdoc, nullptr, nullptr, name, false, nullptr);
+        }
     }
 
     return nullptr;
+}
+
+/**
+ * Take an existing document and selected page and resize or add items as needed.
+ */
+void Script::resize_to_template(Inkscape::Extension::Template *tmod, SPDocument *doc, SPPage *page)
+{
+    std::list<std::string> params;
+    {
+        std::string param = "--page=";
+        if (page) {
+            param += page->getId();
+        } else {
+            // This means 'resize the svg document'
+            param += doc->getRoot()->getId();
+        }
+        params.push_back(param);
+    }
+    _change_extension(tmod, doc, params, true);
 }
 
 /**
@@ -553,14 +537,6 @@ void Script::effect(Inkscape::Extension::Effect *module,
                Inkscape::UI::View::View *doc,
                ImplementationDocumentCache * docCache)
 {
-    if (docCache == nullptr) {
-        docCache = newDocCache(module, doc);
-    }
-    ScriptDocCache * dc = dynamic_cast<ScriptDocCache *>(docCache);
-    if (dc == nullptr) {
-        printf("TOO BAD TO LIVE!!!");
-        exit(1);
-    }
     if (doc == nullptr)
     {
         g_warning("Script::effect: View not defined");
@@ -570,19 +546,17 @@ void Script::effect(Inkscape::Extension::Effect *module,
     SPDesktop *desktop = reinterpret_cast<SPDesktop *>(doc);
     sp_namedview_document_from_window(desktop);
 
-    std::list<std::string> params;
-    module->paramListString(params);
-    module->set_environment(desktop->getDocument());
-
-    parent_window = module->get_execution_env()->get_working_dialog();
-
     if (module->no_doc) {
         // this is a no-doc extension, e.g. a Help menu command;
         // just run the command without any files, ignoring errors
 
+        std::list<std::string> params;
+        module->paramListString(params);
+        module->set_environment(desktop->getDocument());
+
         Glib::ustring empty;
         file_listener outfile;
-        execute(command, params, empty, outfile);
+        execute(command, {}, empty, outfile);
 
         // Hack to allow for extension manager to reload extensions
         // TODO: Find a better way to do this, e.g. implement an action and have extensions (or users)
@@ -595,172 +569,98 @@ void Script::effect(Inkscape::Extension::Effect *module,
         return;
     }
 
-    std::string tempfilename_out;
-    int tempfd_out = 0;
-    try {
-        tempfd_out = Glib::file_open_tmp(tempfilename_out, "ink_ext_XXXXXX.svg");
-    } catch (...) {
-        /// \todo Popup dialog here
-        return;
-    }
-
+    std::list<std::string> params;
     if (desktop) {
         Inkscape::Selection * selection = desktop->getSelection();
         if (selection) {
             params = selection->params;
-            module->paramListString(params);
             selection->clear();
         }
     }
+    _change_extension(module, desktop->getDocument(), params, module->ignore_stderr);
+}
+
+//uncomment if issues on ref extensions links
+/* void sp_change_hrefs(Inkscape::XML::Node *repr, gchar const *const oldfilename, gchar const *const filename)
+{
+    gchar *new_document_base = nullptr;
+    gchar *new_document_filename = nullptr;
+    gchar *old_document_base = nullptr;
+    gchar *old_document_filename = nullptr;
+    if (filename) {
+
+#ifndef _WIN32
+        new_document_filename = prepend_current_dir_if_relative(filename);
+        old_document_filename = prepend_current_dir_if_relative(oldfilename);
+#else
+        // FIXME: it may be that prepend_current_dir_if_relative works OK on windows too, test!
+        new_document_filename = g_strdup(filename);
+        old_document_filename = g_strdup(oldfilename);
+#endif
+
+        new_document_base = g_path_get_dirname(new_document_filename);
+        old_document_base = g_path_get_dirname(old_document_filename);
+    } else {
+        new_document_base = nullptr;
+        old_document_base = nullptr;
+    }
+    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+    bool use_sodipodi_absref = prefs->getBool("/options/svgoutput/usesodipodiabsref", false);
+    Inkscape::XML::rebase_hrefs(repr, old_document_base, new_document_base, use_sodipodi_absref);
+    g_free(new_document_base);
+    g_free(old_document_base);
+    g_free(new_document_filename);
+    g_free(old_document_filename);
+} */
+
+/**
+ * Internally, any modification of an existing document, used by effect and resize_page extensions.
+ */
+void Script::_change_extension(Inkscape::Extension::Extension *module, SPDocument *doc, std::list<std::string> &params, bool ignore_stderr)
+{
+    module->paramListString(params);
+    module->set_environment(doc);
+
+    if (auto env = module->get_execution_env()) {
+        parent_window = env->get_working_dialog();
+    }
+
+    auto tempfile_out = Inkscape::IO::TempFilename("ink_ext_XXXXXX.svg");
+    auto tempfile_in = Inkscape::IO::TempFilename("ink_ext_XXXXXX.svg");
+
+    // Save current document to a temporary file we can send to the extension
+    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+    prefs->setBool("/options/svgoutput/disable_optimizations", true);
+    Inkscape::Extension::save(
+              Inkscape::Extension::db.get(SP_MODULE_KEY_OUTPUT_SVG_INKSCAPE),
+              doc, tempfile_in.get_filename().c_str(), false, false,
+              Inkscape::Extension::FILE_SAVE_METHOD_TEMPORARY);
+    prefs->setBool("/options/svgoutput/disable_optimizations", false);
 
     file_listener fileout;
-    int data_read = execute(command, params, dc->_filename, fileout, module->ignore_stderr);
-    fileout.toFile(tempfilename_out);
+    int data_read = execute(command, params, tempfile_in.get_filename(), fileout, ignore_stderr);
+    if (data_read == 0) {
+        return;
+    }
+    fileout.toFile(tempfile_out.get_filename());
 
     pump_events();
-
-    SPDocument * mydoc = nullptr;
+    Inkscape::XML::Document *new_xmldoc = nullptr;
     if (data_read > 10) {
-        try {
-            mydoc = Inkscape::Extension::open(
-                  Inkscape::Extension::db.get(SP_MODULE_KEY_INPUT_SVG),
-                  tempfilename_out.c_str());
-        } catch (const Inkscape::Extension::Input::open_failed &e) {
-            g_warning("Extension returned output that could not be parsed: %s", e.what());
-            Gtk::MessageDialog warning(
-                    _("The output from the extension could not be parsed."),
-                    false, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_OK, true);
-            warning.set_transient_for( parent_window ? *parent_window : *(INKSCAPE.active_desktop()->getToplevel()) );
-            warning.run();
-        }
+        new_xmldoc = sp_repr_read_file(tempfile_out.get_filename().c_str(), SP_SVG_NS_URI);
     } // data_read
 
     pump_events();
 
-    // make sure we don't leak file descriptors from Glib::file_open_tmp
-    close(tempfd_out);
-
-    g_unlink(tempfilename_out.c_str());
-
-    if (mydoc) {
-        SPDocument* vd=doc->doc();
-        if (vd != nullptr)
-        {
-            mydoc->changeFilenameAndHrefs(vd->getDocumentFilename());
-
-            vd->emitReconstructionStart();
-            copy_doc(vd->getReprRoot(), mydoc->getReprRoot());
-            vd->emitReconstructionFinish();
-
-            // Getting the named view from the document generated by the extension
-            SPNamedView *nv = mydoc->getNamedView();
-
-            //Check if it has a default layer set up
-            SPObject *layer = nullptr;
-            if ( nv != nullptr)
-            {
-                SPDocument *document = desktop->doc();
-                if (document != nullptr) {
-                    //If so, get that layer
-                    if( nv->default_layer_id != 0 ) {
-                        layer = document->getObjectById(g_quark_to_string(nv->default_layer_id));
-                    }
-                    desktop->showGrids(nv->grids_visible);
-                }
-            }
-
-            sp_namedview_update_layers_from_document(desktop);
-            //If that layer exists,
-            if (layer) {
-                //set the current layer
-                desktop->layerManager().setCurrentLayer(layer);
-            }
-        }
-        mydoc->release();
+    if (new_xmldoc) {
+        //uncomment if issues on ref extensions links (with previous function)
+        //sp_change_hrefs(new_xmldoc, tempfile_out.get_filename().c_str(), doc->getDocumentFilename());
+        doc->rebase(new_xmldoc);
+    } else {
+        Inkscape::UI::gui_warning(_("The output from the extension could not be parsed."), parent_window);
     }
 
     return;
-}
-
-
-
-/**
-    \brief  A function to replace all the elements in an old document
-            by those from a new document.
-            document and repinserts them into an emptied old document.
-    \param  oldroot  The root node of the old (destination) document.
-    \param  newroot  The root node of the new (source) document.
-
-    This function first deletes all the root attributes in the old document followed
-    by copying all the root attributes from the new document to the old document.
-
-    It then deletes all the elements in the old document by
-    making two passes, the first to create a list of the old elements and
-    the second to actually delete them. This two pass approach removes issues
-    with the list being changed while parsing through it... lots of nasty bugs.
-
-    Then, it copies all the element in the new document into the old document.
-
-    Finally, it copies the attributes in namedview.
-*/
-void Script::copy_doc (Inkscape::XML::Node * oldroot, Inkscape::XML::Node * newroot)
-{
-    if ((oldroot == nullptr) ||(newroot == nullptr))
-    {
-        g_warning("Error on copy_doc: NULL pointer input.");
-        return;
-    }
-
-    // For copying attributes in root and in namedview
-    std::vector<gchar const *> attribs;
-
-    // Must explicitly copy root attributes. This must be done first since
-    // copying grid lines calls "SPGuide::set()" which needs to know the
-    // width, height, and viewBox of the root element.
-
-    // Make a list of all attributes of the old root node.
-    for (const auto & iter : oldroot->attributeList()) {
-        attribs.push_back(g_quark_to_string(iter.key));
-    }
-
-    // Delete the attributes of the old root node.
-    for (auto attrib : attribs) {
-        oldroot->removeAttribute(attrib);
-    }
-
-    // Set the new attributes.
-    for (const auto & iter : newroot->attributeList()) {
-        gchar const *name = g_quark_to_string(iter.key);
-        oldroot->setAttribute(name, newroot->attribute(name));
-    }
-
-    // Question: Why is the "sodipodi:namedview" special? Treating it as a normal
-    // element results in crashes.
-    // Seems to be a bug:
-    // http://inkscape.13.x6.nabble.com/Effect-that-modifies-the-document-properties-tt2822126.html
-
-    std::vector<Inkscape::XML::Node *> delete_list;
-
-    // Make list
-    for (Inkscape::XML::Node * child = oldroot->firstChild();
-            child != nullptr;
-            child = child->next()) {
-        if (!strcmp("sodipodi:namedview", child->name())) {
-            for (Inkscape::XML::Node * oldroot_namedview_child = child->firstChild();
-                    oldroot_namedview_child != nullptr;
-                    oldroot_namedview_child = oldroot_namedview_child->next()) {
-                delete_list.push_back(oldroot_namedview_child);
-            }
-            break;
-        }
-    }
-
-    // Unparent (delete)
-    for (auto & i : delete_list) {
-        sp_repr_unparent(i);
-    }
-    attribs.clear();
-    oldroot->mergeFrom(newroot, "id", true, true);
 }
 
 /**  \brief  This function checks the stderr file, and if it has data,
@@ -942,11 +842,6 @@ int Script::execute (const std::list<std::string> &in_command,
     }
 
     Glib::ustring stdout_data = fileout.string();
-    if (stdout_data.length() == 0) {
-        return 0;
-    }
-
-    // std::cout << "Finishing Execution." << std::endl;
     return stdout_data.length();
 }
 

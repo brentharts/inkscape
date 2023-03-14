@@ -11,30 +11,29 @@
 
 #include "display/cairo-utils.h"
 
-#include <stdexcept>
-
-#include <glib/gstdio.h>
-#include <glibmm/fileutils.h>
-#include <gdk-pixbuf/gdk-pixbuf.h>
-
-#include <2geom/pathvector.h>
-#include <2geom/curves.h>
 #include <2geom/affine.h>
-#include <2geom/point.h>
+#include <2geom/curves.h>
+#include <2geom/path-sink.h>
 #include <2geom/path.h>
-#include <2geom/transforms.h>
+#include <2geom/pathvector.h>
+#include <2geom/point.h>
 #include <2geom/sbasis-to-bezier.h>
-
+#include <2geom/transforms.h>
+#include <atomic>
 #include <boost/algorithm/string.hpp>
 #include <boost/operators.hpp>
 #include <boost/optional/optional.hpp>
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib/gstdio.h>
+#include <glibmm/fileutils.h>
+#include <stdexcept>
 
-#include "color.h"
 #include "cairo-templates.h"
+#include "color.h"
 #include "document.h"
+#include "helper/pixbuf-ops.h"
 #include "preferences.h"
 #include "util/units.h"
-#include "helper/pixbuf-ops.h"
 
 #if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 17, 6)
 #define CAIRO_HAS_HAIRLINE
@@ -45,7 +44,7 @@
  * Only the address of the structure is used, it is never initialized. See:
  * http://www.cairographics.org/manual/cairo-Types.html#cairo-user-data-key-t
  */
-cairo_user_data_key_t ink_color_interpolation_key;
+static cairo_user_data_key_t ink_color_interpolation_key;
 
 namespace Inkscape {
 
@@ -245,13 +244,20 @@ Pixbuf *Pixbuf::create_from_data_uri(gchar const *uri_data, double svgdpi)
             GdkPixbuf *buf = gdk_pixbuf_loader_get_pixbuf(loader);
             if (buf) {
                 g_object_ref(buf);
+                bool has_ori = Pixbuf::get_embedded_orientation(buf) != Geom::identity();
                 buf = Pixbuf::apply_embedded_orientation(buf);
                 pixbuf = new Pixbuf(buf);
 
-                GdkPixbufFormat *fmt = gdk_pixbuf_loader_get_format(loader);
-                gchar *fmt_name = gdk_pixbuf_format_get_name(fmt);
-                pixbuf->_setMimeData(decoded, decoded_len, fmt_name);
-                g_free(fmt_name);
+                if (!has_ori) {
+                    // We DO NOT want to store the original data if it contains orientation
+                    // data since many exports that will use the surface do not handle it.
+                    // TODO: Preserve the original meta data from the file by stripping out
+                    // orientation but keeping all other aspects of the raster.
+                    GdkPixbufFormat *fmt = gdk_pixbuf_loader_get_format(loader);
+                    gchar *fmt_name = gdk_pixbuf_format_get_name(fmt);
+                    pixbuf->_setMimeData(decoded, decoded_len, fmt_name);
+                    g_free(fmt_name);
+                }
             } else {
                 g_free(decoded);
             }
@@ -353,6 +359,36 @@ GdkPixbuf *Pixbuf::apply_embedded_orientation(GdkPixbuf *buf)
     return buf;
 }
 
+/**
+ * Gets any available orientation data and returns it as an affine.
+ */
+Geom::Affine Pixbuf::get_embedded_orientation(GdkPixbuf *buf)
+{
+    // See gdk_pixbuf_apply_embedded_orientation in gdk-pixbuf
+    if (auto opt_str = gdk_pixbuf_get_option(buf, "orientation")) {
+        switch ((int)g_ascii_strtoll(opt_str, NULL, 10)) {
+            case 2: // Flip Horz
+                return Geom::Scale(-1, 1);
+            case 3: // +180 Rotate
+                return Geom::Scale(-1, -1);
+            case 4: // Flip Vert
+                return Geom::Scale(1, -1);
+            case 5: // +90 Rotate & Flip Horz
+                return Geom::Rotate(90) * Geom::Scale(-1, 1);
+            case 6: // +90 Rotate
+                return Geom::Rotate(90);
+            case 7: // +90 Rotate * Flip Vert
+                return Geom::Rotate(90) * Geom::Scale(1, -1);
+            case 8: // -90 Rotate
+                return Geom::Rotate(-90);
+            default:
+                break;
+
+        }
+    }
+    return Geom::identity();
+}
+
 Pixbuf *Pixbuf::create_from_buffer(std::string const &buffer, double svgdpi, std::string const &fn)
 {
 #if GLIB_CHECK_VERSION(2,67,3)
@@ -365,6 +401,7 @@ Pixbuf *Pixbuf::create_from_buffer(std::string const &buffer, double svgdpi, std
 
 Pixbuf *Pixbuf::create_from_buffer(gchar *&&data, gsize len, double svgdpi, std::string const &fn)
 {
+    bool has_ori = false;
     Pixbuf *pb = nullptr;
     GError *error = nullptr;
     {
@@ -376,8 +413,7 @@ Pixbuf *Pixbuf::create_from_buffer(gchar *&&data, gsize len, double svgdpi, std:
         if(idx != std::string::npos)
         {
             if (boost::iequals(fn.substr(idx+1).c_str(), "svg")) {
-
-                std::unique_ptr<SPDocument> svgDoc(SPDocument::createNewDocFromMem(data, len, true));
+                std::unique_ptr<SPDocument> svgDoc(SPDocument::createNewDocFromMem(data, len, true, fn.c_str()));
 
                 // Check the document loaded properly
                 if (!svgDoc || !svgDoc->getRoot()) {
@@ -438,6 +474,7 @@ Pixbuf *Pixbuf::create_from_buffer(gchar *&&data, gsize len, double svgdpi, std:
             if (buf) {
                 // gdk_pixbuf_loader_get_pixbuf returns a borrowed reference
                 g_object_ref(buf);
+                has_ori = Pixbuf::get_embedded_orientation(buf) != Geom::identity();
                 buf = Pixbuf::apply_embedded_orientation(buf);
                 pb = new Pixbuf(buf);
             }
@@ -445,14 +482,16 @@ Pixbuf *Pixbuf::create_from_buffer(gchar *&&data, gsize len, double svgdpi, std:
 
         if (pb) {
             pb->_path = fn;
-            if (!is_svg) {
+            if (is_svg) {
+                pb->_setMimeData((guchar *) data, len, "svg");
+            } else if(!has_ori) {
+                // We DO NOT want to store the original data if it contains orientation
+                // data since many exports that will use the surface do not handle it.
                 GdkPixbufFormat *fmt = gdk_pixbuf_loader_get_format(loader);
                 gchar *fmt_name = gdk_pixbuf_format_get_name(fmt);
                 pb->_setMimeData((guchar *) data, len, fmt_name);
                 g_free(fmt_name);
                 g_object_unref(loader);
-            } else {
-                pb->_setMimeData((guchar *) data, len, "svg");
             }
         } else {
             std::cerr << "Pixbuf::create_from_file: failed to load contents: " << fn << std::endl;
@@ -867,6 +906,71 @@ feed_pathvector_to_cairo (cairo_t *ct, Geom::PathVector const &pathv)
     }
 }
 
+/*
+ * Pulls out the last cairo path context and reconstitutes it
+ * into a local geom path vector for inkscape use.
+ *
+ * @param ct - The cairo context
+ *
+ * @returns an optioal Geom::PathVector object
+ */
+std::optional<Geom::PathVector> extract_pathvector_from_cairo(cairo_t *ct)
+{
+    cairo_path_t *path = cairo_copy_path(ct);
+    if (!path)
+        return std::nullopt;
+
+    Geom::PathBuilder res;
+    auto end = &path->data[path->num_data];
+    for (auto p = &path->data[0]; p < end; p += p->header.length) {
+        switch (p->header.type) {
+            case CAIRO_PATH_MOVE_TO:
+                if (p->header.length != 2)
+                    return std::nullopt;
+                res.moveTo(Geom::Point(p[1].point.x, p[1].point.y));
+                break;
+
+            case CAIRO_PATH_LINE_TO:
+                if (p->header.length != 2)
+                    return std::nullopt;
+                res.lineTo(Geom::Point(p[1].point.x, p[1].point.y));
+                break;
+
+            case CAIRO_PATH_CURVE_TO:
+                if (p->header.length != 4)
+                    return std::nullopt;
+                res.curveTo(Geom::Point(p[1].point.x, p[1].point.y), Geom::Point(p[2].point.x, p[2].point.y),
+                            Geom::Point(p[3].point.x, p[3].point.y));
+                break;
+
+            case CAIRO_PATH_CLOSE_PATH:
+                if (p->header.length != 1)
+                    return std::nullopt;
+                res.closePath();
+                break;
+            default:
+                return std::nullopt;
+        }
+    }
+
+    res.flush();
+    return res.peek();
+finish:
+    cairo_path_destroy(path);
+}
+
+static std::atomic<int> num_filter_threads = 4;
+
+int get_num_filter_threads()
+{
+    return num_filter_threads.load(std::memory_order_relaxed);
+}
+
+void set_num_filter_threads(int n)
+{
+    num_filter_threads.store(n, std::memory_order_relaxed);
+}
+
 SPColorInterpolation
 get_cairo_surface_ci(cairo_surface_t *surface) {
     void* data = cairo_surface_get_user_data( surface, &ink_color_interpolation_key );
@@ -962,6 +1066,13 @@ ink_cairo_set_hairline(cairo_t *ct)
     double x = 1.0, y = 0.0;
     cairo_device_to_user_distance(ct, &x, &y);
     cairo_set_line_width(ct, std::hypot(x, y));
+#endif
+}
+
+void ink_cairo_set_dither(cairo_surface_t *surface, bool enabled)
+{
+#ifdef CAIRO_HAS_DITHER
+    cairo_image_surface_set_dither(surface, enabled ? CAIRO_DITHER_BEST : CAIRO_DITHER_NONE);
 #endif
 }
 

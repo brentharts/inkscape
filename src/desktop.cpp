@@ -44,7 +44,6 @@
 
 #include "display/drawing.h"
 #include "display/control/canvas-temporary-item-list.h"
-#include "display/control/canvas-grid.h" // Grid types
 #include "display/control/snap-indicator.h"
 
 #include "display/control/canvas-item-catchall.h"
@@ -157,10 +156,10 @@ SPDesktop::init (SPNamedView *nv, Inkscape::UI::Widget::Canvas *acanvas, SPDeskt
      * A proper fix would involve modifying the way ensureUpToDate() works,
      * so that the LPE results are not rewritten.
      */
-    Inkscape::DocumentUndo::setUndoSensitive(document, false);
-    document->ensureUpToDate();
-    Inkscape::DocumentUndo::setUndoSensitive(document, true);
-
+    {
+        Inkscape::DocumentUndo::ScopedInsensitive _no_undo(document);
+        document->ensureUpToDate();
+    }
     dkey = SPItem::display_key_new(1);
 
     /* Connect document */
@@ -215,24 +214,19 @@ SPDesktop::init (SPNamedView *nv, Inkscape::UI::Widget::Canvas *acanvas, SPDeskt
     canvas_item_root->connect_event(sigc::bind(sigc::ptr_fun(sp_desktop_root_handler), this));
     canvas_catchall->connect_event(sigc::bind(sigc::ptr_fun(sp_desktop_root_handler), this));
 
-    // Drawing
-    Geom::Rect const d(Geom::Point(0.0, 0.0),
-                       Geom::Point(document->getWidth().value("px"), document->getHeight().value("px")));
-
     canvas_drawing = new Inkscape::CanvasItemDrawing(canvas_group_drawing);
-    canvas_drawing->get_drawing()->delta = prefs->getDouble("/options/cursortolerance/value", 1.0);
     canvas_drawing->connect_drawing_event(sigc::bind(sigc::ptr_fun(_drawing_handler), this));
     canvas->set_drawing(canvas_drawing->get_drawing()); // Canvas needs access.
 
     Inkscape::DrawingItem *drawing_item = document->getRoot()->invoke_show(
-        *(canvas_drawing->get_drawing()),
+        *canvas_drawing->get_drawing(),
         dkey,
         SP_ITEM_SHOW_DISPLAY);
     if (drawing_item) {
         canvas_drawing->get_drawing()->root()->prependChild(drawing_item);
     }
 
-    temporary_item_list = new Inkscape::Display::TemporaryItemList( this );
+    temporary_item_list = new Inkscape::Display::TemporaryItemList();
     snapindicator = new Inkscape::Display::SnapIndicator ( this );
 
     /* --------- End Canvas Items ----------- */
@@ -259,8 +253,6 @@ SPDesktop::init (SPNamedView *nv, Inkscape::UI::Widget::Canvas *acanvas, SPDeskt
     _reconstruction_finish_connection =
         document->connectReconstructionFinish(sigc::bind(sigc::ptr_fun(_reconstruction_finish), this));
     _reconstruction_old_layer_id.clear();
-
-    showGrids(namedview->grids_visible, false);
 }
 
 void SPDesktop::destroy()
@@ -299,16 +291,12 @@ void SPDesktop::destroy()
 
     if (canvas_drawing) {
         doc()->getRoot()->invoke_hide(dkey);
-        delete canvas_drawing; // Why is canvas_drawing special?
-        canvas_drawing = nullptr;
     }
 
     _guides_message_context = nullptr;
 }
 
-SPDesktop::~SPDesktop()
-= default;
-
+SPDesktop::~SPDesktop() = default;
 
 //--------------------------------------------------------------------
 /* Public methods */
@@ -339,6 +327,8 @@ SPDesktop::add_temporary_canvasitem (Inkscape::CanvasItem *item, guint lifetime,
 
 /** It is perfectly safe to call this function while the object has already been deleted due to a timeout.
 */
+// Note: This function may free the wrong temporary item if it is called on a freed pointer that
+// has had another TemporaryItem reallocated in its place.
 void
 SPDesktop::remove_temporary_canvasitem (Inkscape::Display::TemporaryItem * tempitem)
 {
@@ -416,6 +406,7 @@ void SPDesktop::setEventContext(const std::string& toolName)
 {
     // Tool should be able to be replaced with itself. See commit 29df5ca05d
     if (event_context) {
+        event_context->switching_away(toolName);
         delete event_context;
         event_context = nullptr;
     }
@@ -976,37 +967,29 @@ SPDesktop::scroll_relative_in_svg_coords (double dx, double dy)
     scroll_relative(Geom::Point(dx*scale, dy*scale));
 }
 
-
 /**
  * Scroll screen so as to keep point 'p' visible in window.
- * (Used, for example, when a node is being dragged.)
+ * (Used, for example, during spellcheck.)
  * 'p': The point in desktop coordinates.
- * 'autoscrollspeed': The scroll speed (or zero to use preferences' value).
  */
-bool
-SPDesktop::scroll_to_point (Geom::Point const &p, gdouble autoscrollspeed)
+// Todo: Eliminate second argument and return value.
+bool SPDesktop::scroll_to_point(Geom::Point const &p, double)
 {
-    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+    auto prefs = Inkscape::Preferences::get();
 
     // autoscrolldistance is in screen pixels.
-    gdouble autoscrolldistance = (gdouble) prefs->getIntLimited("/options/autoscrolldistance/value", 0, -1000, 10000);
+    double const autoscrolldistance = prefs->getIntLimited("/options/autoscrolldistance/value", 0, -1000, 10000);
 
-    Geom::Rect w = canvas->get_area_world(); // Window in screen coordinates.
+    auto w = Geom::Rect(canvas->get_area_world()); // Window in screen coordinates.
     w.expandBy(-autoscrolldistance);  // Shrink window
 
-    Geom::Point c = d2w(p);  // Point 'p' in screen coordinates.
+    auto const c = d2w(p);  // Point 'p' in screen coordinates.
     if (!w.contains(c)) {
-
-        Geom::Point c2 = w.clamp(c); // Constrain c to window.
-
-        if (autoscrollspeed == 0)
-            autoscrollspeed = prefs->getDoubleLimited("/options/autoscrollspeed/value", 1, 0, 10);
-
-        if (autoscrollspeed != 0)
-            scroll_relative (autoscrollspeed * (c2 - c) );
-
+        auto const c2 = w.clamp(c); // Constrain c to window.
+        scroll_relative(c2 - c);
         return true;
     }
+
     return false;
 }
 
@@ -1175,10 +1158,10 @@ void SPDesktop::setTempHideOverlays(bool hide)
         _overlays_visible = false;
     } else {
         canvas_group_controls->show();
-        showGrids(grids_visible, false);
         if (_saved_guides_visible) {
             namedview->temporarily_show_guides(true);
         }
+        canvas_group_grids->show();
         _overlays_visible = true;
     }
 }
@@ -1351,28 +1334,6 @@ bool SPDesktop::colorProfAdjustEnabled()
     return _widget->get_color_prof_adj_enabled();
 }
 
-void SPDesktop::toggleGrids()
-{
-    if (! namedview->grids.empty()) {
-            showGrids(!grids_visible);
-    } else {
-        //there is no grid present at the moment. add a rectangular grid and make it visible
-        namedview->writeNewGrid(this->getDocument(), Inkscape::GRID_RECTANGULAR);
-        showGrids(true);
-    }
-}
-
-void SPDesktop::showGrids(bool show, bool dirty_document)
-{
-    grids_visible = show;
-    sp_namedview_show_grids(namedview, grids_visible, dirty_document);
-    if (show) {
-        canvas_group_grids->show();
-    } else {
-        canvas_group_grids->hide();
-    }
-}
-
 //----------------------------------------------------------------------
 // Callback implementations. The virtual ones are connected by the view.
 
@@ -1415,12 +1376,17 @@ SPDesktop::setDocument (SPDocument *doc)
         }
 
         namedview->show(this);
+
+        namedview->setShowGrids(namedview->getShowGrids());
+
         /* Ugly hack */
         activate_guides (true);
     }
 
     // set new document before firing signal, so handlers can see new value if they query desktop
     View::setDocument(doc);
+
+    sp_namedview_update_layers_from_document(this);
 
     _document_replaced_signal.emit (this, doc);
 }

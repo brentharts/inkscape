@@ -114,14 +114,13 @@ protected:
             local_repr = reinterpret_cast<SPObject *>(dt->getNamedView())->getRepr();
             local_doc = dt->getDocument();
         }
-
-        bool saved = DocumentUndo::getUndoSensitive(local_doc);
-        DocumentUndo::setUndoSensitive(local_doc, false);
         const char * svgstr_old = local_repr->attribute(_key.c_str());
-        if (!write_undo) {
-            local_repr->setAttribute(_key, svgstr);
+        {
+            DocumentUndo::ScopedInsensitive _no_undo(local_doc);
+            if (!write_undo) {
+                local_repr->setAttribute(_key, svgstr);
+            }
         }
-        DocumentUndo::setUndoSensitive(local_doc, saved);
         if (svgstr_old && svgstr && strcmp(svgstr_old,svgstr)) {
             local_doc->setModifiedSinceSave();
         }
@@ -145,7 +144,7 @@ protected:
 
 class RegisteredCheckButton : public RegisteredWidget<Gtk::CheckButton> {
 public:
-    ~RegisteredCheckButton() override;
+    ~RegisteredCheckButton() override = default;
     RegisteredCheckButton (const Glib::ustring& label, const Glib::ustring& tip, const Glib::ustring& key, Registry& wr, bool right=false, Inkscape::XML::Node* repr_in=nullptr, SPDocument *doc_in=nullptr, char const *active_str = "true", char const *inactive_str = "false");
 
     void setActive (bool);
@@ -164,13 +163,12 @@ public:
 
 protected:
     char const *_active_str, *_inactive_str;
-    sigc::connection  _toggled_connection;
     void on_toggled() override;
 };
 
 class RegisteredToggleButton : public RegisteredWidget<Gtk::ToggleButton> {
 public:
-    ~RegisteredToggleButton() override;
+    ~RegisteredToggleButton() override = default;
     RegisteredToggleButton (const Glib::ustring& label, const Glib::ustring& tip, const Glib::ustring& key, Registry& wr, bool right=true, Inkscape::XML::Node* repr_in=nullptr, SPDocument *doc_in=nullptr, char const *icon_active = "true", char const *icon_inactive = "false");
 
     void setActive (bool);
@@ -188,7 +186,6 @@ public:
                                 // if a callback checks it, it must reset it back to false
 
 protected:
-    sigc::connection  _toggled_connection;
     void on_toggled() override;
 };
 

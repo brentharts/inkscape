@@ -139,6 +139,24 @@ static SPStyleProp const props[] = {
     {SPAttr::POSITION, "position"},
     {SPAttr::INKSCAPE_COLOR, "inkscape:color"},
     {SPAttr::INKSCAPE_LOCKED, "inkscape:locked"},
+    /* SPPage */
+    {SPAttr::PAGE_MARGIN, "margin"},
+    {SPAttr::PAGE_BLEED, "bleed"},
+    {SPAttr::PAGE_SIZE, "page-size"},
+    /* SPGrid */
+    {SPAttr::ORIGINX, "originx"},
+    {SPAttr::ORIGINY, "originy"},
+    {SPAttr::SPACINGX, "spacingx"},
+    {SPAttr::SPACINGY, "spacingy"},
+    {SPAttr::ANGLE_X, "gridanglex"},
+    {SPAttr::ANGLE_Z, "gridanglez"},
+    {SPAttr::VISIBLE, "visible"},
+    {SPAttr::ENABLED, "enabled"},
+    {SPAttr::EMPOPACITY, "empopacity"},
+    {SPAttr::EMPCOLOR, "empcolor"},
+    {SPAttr::MAJOR_LINE_INTERVAL, "empspacing"},
+    {SPAttr::DOTTED, "dotted"},
+    {SPAttr::SNAP_TO_VISIBLE_ONLY, "snapvisiblegridlinesonly"},
     /* SPImage */
     {SPAttr::X, "x"},
     {SPAttr::Y, "y"},
@@ -303,6 +321,7 @@ static SPStyleProp const props[] = {
     {SPAttr::GRADIENTTRANSFORM, "gradientTransform"},
     {SPAttr::SPREADMETHOD, "spreadMethod"},
     {SPAttr::INKSCAPE_SWATCH, "inkscape:swatch"},
+    {SPAttr::INKSCAPE_PINNED, "inkscape:pinned"},
     /* SPRadialGradient */
     {SPAttr::FX, "fx"},
     {SPAttr::FY, "fy"},
@@ -597,6 +616,9 @@ class AttributeLookupImpl {
 
             m_map[props[i].name] = props[i].code;
         }
+
+        // SVG 2.0 alias for xlink:href
+        m_map["href"] = SPAttr::XLINK_HREF;
     }
 };
 

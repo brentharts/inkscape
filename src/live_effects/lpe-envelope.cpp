@@ -32,8 +32,7 @@ LPEEnvelope::LPEEnvelope(LivePathEffectObject *lpeobject) :
     apply_to_clippath_and_mask = true;
 }
 
-LPEEnvelope::~LPEEnvelope()
-= default;
+LPEEnvelope::~LPEEnvelope() = default;
 
 bool 
 LPEEnvelope::doOnOpen(SPLPEItem const *lpeitem)
@@ -251,7 +250,7 @@ LPEEnvelope::resetDefaults(SPItem const* item)
 {
     Effect::resetDefaults(item);
 
-    original_bbox(SP_LPE_ITEM(item), false, true);
+    original_bbox(cast<SPLPEItem>(item), false, true);
 
     Geom::Point Up_Left(boundingbox_X.min(), boundingbox_Y.min());
     Geom::Point Up_Right(boundingbox_X.max(), boundingbox_Y.min());

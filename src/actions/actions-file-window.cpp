@@ -16,6 +16,8 @@
 #include <glibmm/i18n.h>
 
 #include "actions-file-window.h"
+#include "actions-helper.h"
+
 #include "inkscape-application.h"
 #include "inkscape-window.h"
 #include "desktop.h"
@@ -122,7 +124,7 @@ std::vector<std::vector<Glib::ustring>> raw_data_dialog_window =
     {"win.document-save-template",      N_("Save Template"),        "Window-File",     N_("Save a copy of the document as template")},
     {"win.document-import",             N_("Import"),               "Window-File",     N_("Import a bitmap or SVG image into this document")},
     {"win.document-print",              N_("Print"),                "Window-File",     N_("Print document")},
-    {"win.document-cleanup",            N_("Clean Up Document"),    "Window-File",     N_("Remove unused definitions (such as gradients or clipping paths) from the <defs> of the document")},
+    {"win.document-cleanup",            N_("Clean Up Document"),    "Window-File",     N_("Remove unused definitions (such as gradients or clipping paths) from the document")},
     {"win.document-close",              N_("Close"),                "Window-File",     N_("Close window (unless last window)")},
     // clang-format on
 };
@@ -147,7 +149,7 @@ add_actions_file_window(InkscapeWindow* win)
 
     auto app = InkscapeApplication::instance();
     if (!app) {
-        std::cerr << "add_actions_file_window: no app!" << std::endl;
+        show_output("add_actions_file_window: no app!");
         return;
     }
     app->get_action_extra_data().add_data(raw_data_dialog_window);

@@ -9,6 +9,7 @@
  */
 
 #include "actions-element-a.h"
+#include "actions-helper.h"
 
 #include <iostream>
 
@@ -41,14 +42,14 @@ void anchor_open_link(InkscapeApplication* app)
     if (window) {
         auto selection = app->get_active_selection();
         for (auto item : selection->items()) {
-            auto anchor = dynamic_cast<SPAnchor *>(item);
+            auto anchor = cast<SPAnchor>(item);
             if (anchor) {
                 const char* href = anchor->href;
                 if (href) {
                     try {
                         window->show_uri(href, GDK_CURRENT_TIME);
                     } catch (const Glib::Error &e) {
-                        std::cerr << "anchor_open_link: cannot open " << href << " " << e.what().raw() << std::endl;
+                        show_output(Glib::ustring("anchor_open_link: cannot open ") + href + " " + e.what().raw());
                     }
                 }
             }

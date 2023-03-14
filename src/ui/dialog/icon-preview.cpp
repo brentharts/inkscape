@@ -52,16 +52,6 @@ namespace Inkscape {
 namespace UI {
 namespace Dialog {
 
-
-IconPreviewPanel &IconPreviewPanel::getInstance()
-{
-    IconPreviewPanel *instance = new IconPreviewPanel();
-
-    instance->refreshPreview();
-
-    return *instance;
-}
-
 //#########################################################################
 //## E V E N T S
 //#########################################################################
@@ -241,6 +231,8 @@ IconPreviewPanel::IconPreviewPanel()
     pack_start(iconBox, Gtk::PACK_SHRINK);
 
     show_all_children();
+
+    refreshPreview();
 }
 
 IconPreviewPanel::~IconPreviewPanel()
@@ -472,15 +464,14 @@ sp_icon_doc_icon( SPDocument *doc, Inkscape::Drawing &drawing,
 
     if (doc) {
         SPObject *object = doc->getObjectById(name);
-        if (object && SP_IS_ITEM(object)) {
-            SPItem *item = SP_ITEM(object);
+        if (object && is<SPItem>(object)) {
+            auto item = cast<SPItem>(object);
             // Find bbox in document
             Geom::OptRect dbox = item->documentVisualBounds();
 
             if ( object->parent == nullptr )
             {
-                dbox = Geom::Rect(Geom::Point(0, 0),
-                                Geom::Point(doc->getWidth().value("px"), doc->getHeight().value("px")));
+                dbox = *(doc->preferredBounds());
             }
 
             /* This is in document coordinates, i.e. pixels */

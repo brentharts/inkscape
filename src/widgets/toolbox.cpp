@@ -36,6 +36,7 @@
 #include "actions/actions-canvas-snapping.h"
 #include "actions/actions-tools.h"
 #include "io/resource.h"
+#include "ui/builder-utils.h"
 #include "ui/widget/style-swatch.h"
 #include "widgets/spw-utilities.h" // sp_traverse_widget_tree()
 #include "widgets/widget-sizes.h"
@@ -51,6 +52,7 @@
 #include "ui/toolbar/mesh-toolbar.h"
 #include "ui/toolbar/measure-toolbar.h"
 #include "ui/toolbar/node-toolbar.h"
+#include "ui/toolbar/booleans-toolbar.h"
 #include "ui/toolbar/rect-toolbar.h"
 #include "ui/toolbar/marker-toolbar.h"
 #include "ui/toolbar/page-toolbar.h"
@@ -122,6 +124,7 @@ static struct {
     // clang-format off
     { "/tools/select",          "Select",       Inkscape::UI::Toolbar::SelectToolbar::create,        nullptr},
     { "/tools/nodes",           "Node",         Inkscape::UI::Toolbar::NodeToolbar::create,          nullptr},
+    { "/tools/booleans",        "Booleans",     Inkscape::UI::Toolbar::BooleansToolbar::create,      nullptr},
     { "/tools/marker",          "Marker",       Inkscape::UI::Toolbar::MarkerToolbar::create,        nullptr},
     { "/tools/shapes/rect",     "Rect",         Inkscape::UI::Toolbar::RectToolbar::create,          N_("Style of new rectangles")},
     { "/tools/shapes/arc",      "Arc",          Inkscape::UI::Toolbar::ArcToolbar::create,           N_("Style of new ellipses")},
@@ -175,35 +178,55 @@ static GtkWidget* toolboxNewCommon( GtkWidget* tb, BarId id, GtkPositionType /*h
 
 GtkWidget *ToolboxFactory::createToolToolbox(InkscapeWindow *window)
 {
-    Glib::ustring tool_toolbar_builder_file = get_filename(UIS, "toolbar-tool.ui");
-    auto builder = Gtk::Builder::create();
-    try
-    {
-        builder->add_from_file(tool_toolbar_builder_file);
-    }
-    catch (const Glib::Error& ex)
-    {
-        std::cerr << "ToolboxFactor::createToolToolbox: " << tool_toolbar_builder_file.raw() << " file not read! " << ex.what().raw() << std::endl;
-    }
-
     Gtk::Widget* toolbar = nullptr;
+
+    auto builder = Inkscape::UI::create_builder("toolbar-tool.ui");
     builder->get_widget("tool-toolbar", toolbar);
     if (!toolbar) {
         std::cerr << "InkscapeWindow: Failed to load tool toolbar!" << std::endl;
     }
 
-    _attachDoubleClickHandlers(builder, window);
+    _attachHandlers(builder, window);
 
     return toolboxNewCommon( GTK_WIDGET(toolbar->gobj()), BAR_TOOL, GTK_POS_LEFT );
 }
 
 /**
- * @brief Attach double click handlers to all tool buttons, so that double-clicking on a tool
- *        in the toolbar opens up that tool's preferences.
+ * @brief Create a context menu for a tool button.
+ * @param tool_name The tool name (parameter to the tool-switch action)
+ * @param win The Inkscape window which will display the preferences dialog.
+ */
+Gtk::Menu *ToolboxFactory::_getContextMenu(Glib::ustring tool_name, InkscapeWindow *win)
+{
+    auto menu = new Gtk::Menu();
+    auto gio_menu = Gio::Menu::create();
+    auto action_group = Gio::SimpleActionGroup::create();
+    menu->insert_action_group("ctx", action_group);
+    action_group->add_action("open-tool-preferences", sigc::bind<Glib::ustring, InkscapeWindow *>(
+                                                          sigc::ptr_fun(&tool_preferences), tool_name, win));
+
+    auto menu_item = Gio::MenuItem::create(_("Open tool preferences"), "ctx.open-tool-preferences");
+
+    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+    if (prefs->getInt("/theme/menuIcons", true)) {
+        auto _icon = Gio::Icon::create("preferences-system");
+        menu_item->set_icon(_icon);
+    }
+
+    gio_menu->append_item(menu_item);
+    menu->bind_model(gio_menu, true);
+    menu->show();
+    return menu;
+}
+
+/**
+ * @brief Attach handlers to all tool buttons, so that double-clicking on a tool
+ *        in the toolbar opens up that tool's preferences, and a right click opens a
+ *        context menu with the same functionality.
  * @param builder The builder that contains a loaded UI structure containing RadioButton's.
  * @param win The Inkscape window which will display the preferences dialog.
  */
-void ToolboxFactory::_attachDoubleClickHandlers(Glib::RefPtr<Gtk::Builder> builder, InkscapeWindow *win)
+void ToolboxFactory::_attachHandlers(Glib::RefPtr<Gtk::Builder> builder, InkscapeWindow *win)
 {
     for (auto &object : builder->get_objects()) {
         if (auto radio = dynamic_cast<Gtk::RadioButton *>(object.get())) {
@@ -215,11 +238,18 @@ void ToolboxFactory::_attachDoubleClickHandlers(Glib::RefPtr<Gtk::Builder> build
             }
 
             auto tool_name = Glib::ustring((gchar const *)action_target.get_data());
+
+            auto menu = _getContextMenu(tool_name, win);
+            menu->attach_to_widget(*radio);
+
             radio->signal_button_press_event().connect([=](GdkEventButton *ev) -> bool {
                 // Open tool preferences upon double click
                 if (ev->type == GDK_2BUTTON_PRESS && ev->button == 1) {
                     tool_preferences(tool_name, win);
                     return true;
+                }
+                if (ev->button == 3) {
+                    menu->popup_at_pointer(reinterpret_cast<GdkEvent *>(ev));
                 }
                 return false;
             });
@@ -247,18 +277,9 @@ GtkWidget *ToolboxFactory::createCommandsToolbox()
     tb->set_orientation(Gtk::ORIENTATION_VERTICAL);
     tb->set_homogeneous(false);
 
-    Glib::ustring commands_toolbar_builder_file = get_filename(UIS, "toolbar-commands.ui");
-    auto builder = Gtk::Builder::create();
-    try
-    {
-        builder->add_from_file(commands_toolbar_builder_file);
-    }
-    catch (const Glib::Error& ex)
-    {
-        std::cerr << "ToolboxFactor::createCommandsToolbox: " << commands_toolbar_builder_file.raw() << " file not read! " << ex.what().raw() << std::endl;
-    }
-
     Gtk::Toolbar* toolbar = nullptr;
+
+    auto builder = Inkscape::UI::create_builder("toolbar-commands.ui");
     builder->get_widget("commands-toolbar", toolbar);
     if (!toolbar) {
         std::cerr << "ToolboxFactory: Failed to load commands toolbar!" << std::endl;
@@ -294,19 +315,10 @@ GtkWidget *ToolboxFactory::createSnapToolbox()
     tb->set_name("SnapToolbox");
     tb->set_homogeneous(false);
 
-    Glib::ustring snap_toolbar_builder_file = get_filename(UIS, "toolbar-snap.ui");
-    auto builder = Gtk::Builder::create();
-    try
-    {
-        builder->add_from_file(snap_toolbar_builder_file);
-    }
-    catch (const Glib::Error& ex)
-    {
-        std::cerr << "ToolboxFactor::createSnapToolbox: " << snap_toolbar_builder_file.raw() << " file not read! " << ex.what().raw() << std::endl;
-    }
-
     bool simple_snap = true;
     Gtk::Toolbar* toolbar = nullptr;
+
+    auto builder = Inkscape::UI::create_builder("toolbar-snap.ui");
     builder->get_widget("snap-toolbar", toolbar);
     if (!toolbar) {
         std::cerr << "InkscapeWindow: Failed to load snap toolbar!" << std::endl;

@@ -58,8 +58,8 @@ set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
 
 file(RELATIVE_PATH
     INKSCAPE_INSTALL_LIBDIR_RELATIVE_TO_BINDIR
-    "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}"
-    "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/inkscape")
+    "${CMAKE_INSTALL_FULL_BINDIR}"
+    "${CMAKE_INSTALL_FULL_LIBDIR}/inkscape")
 
 if(APPLE)
     SET(CMAKE_MACOSX_RPATH TRUE)
@@ -81,20 +81,20 @@ endif()
 # Define a very strict set of build flags that will prevent any use of deprecated symbols.
 # This will almost certainly cause compilation failure and is intended only for developer use.
 set(CMAKE_CXX_FLAGS_STRICT "${CMAKE_CXX_FLAGS_DEBUG} -Werror=deprecated-declarations -DGTK_DISABLE_DEPRECATED -DGDK_DISABLE_DEPRECATED -DGTKMM_DISABLE_DEPRECATED -DGDKMM_DISABLE_DEPRECATED -DGLIBMM_DISABLE_DEPRECATED"
-	CACHE STRING
-	"Flags used by C++ compiler during Strict builds"
-	FORCE)
+    CACHE STRING
+    "Flags used by C++ compiler during Strict builds"
+    FORCE)
 set(CMAKE_C_FLAGS_STRICT   "${CMAKE_C_FLAGS_DEBUG}   -Werror=deprecated-declarations -DGTK_DISABLE_DEPRECATED -DGDK_DISABLE_DEPRECATED -DGTKMM_DISABLE_DEPRECATED -DGDKMM_DISABLE_DEPRECATED"
-	CACHE STRING
-	"Flags used by C compiler during Strict builds"
-	FORCE)
+    CACHE STRING
+    "Flags used by C compiler during Strict builds"
+    FORCE)
 mark_as_advanced(
-	CMAKE_CXX_FLAGS_STRICT
-	CMAKE_C_FLAGS_STRICT)
+    CMAKE_CXX_FLAGS_STRICT
+    CMAKE_C_FLAGS_STRICT)
 
 set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE STRING
-	"Choose the type of build, options are: None(CMAKE_CXXFLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel Strict."
-	FORCE)
+    "Choose the type of build, options are: None(CMAKE_CXXFLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel Strict."
+    FORCE)
 
 # -----------------------------------------------------------------------------
 # Redirect output files
@@ -123,6 +123,7 @@ option(WITH_LIBCDR "Compile with support of libcdr for CorelDRAW Diagrams" ON)
 option(WITH_LIBVISIO "Compile with support of libvisio for Microsoft Visio Diagrams" ON)
 option(WITH_LIBWPG "Compile with support of libwpg for WordPerfect Graphics" ON)
 option(WITH_GSPELL "Compile with support of gspell" ON)
+option(WITH_GSOURCEVIEW "Compile with support of gsourceview (text syntax coloring)" ON)
 option(WITH_NLS "Compile with Native Language Support (using gettext)" ON)
 option(WITH_JEMALLOC "Compile with JEMALLOC support" OFF)
 option(WITH_ASAN "Compile with Clang's AddressSanitizer (for debugging purposes)" OFF)
@@ -133,7 +134,7 @@ option(WITH_FUZZ "Compile for fuzzing purpose (use 'make fuzz' only)" OFF)
 mark_as_advanced(WITH_FUZZ)
 option(WITH_MANPAGE_COMPRESSION "gzips manpages if gzip is available" ON)
 mark_as_advanced(WITH_MANPAGE_COMPRESSION)
-if(UNIX)
+if(UNIX OR "$ENV{MSYSTEM}" STREQUAL "CLANGARM64")
     option(WITH_INTERNAL_CAIRO "Use a patched version of cairo" OFF)
 else()
     option(WITH_INTERNAL_CAIRO "Use a patched version of cairo" ON)
@@ -282,6 +283,7 @@ message("ENABLE_POPPLER:          ${ENABLE_POPPLER}")
 message("ENABLE_POPPLER_CAIRO:    ${ENABLE_POPPLER_CAIRO}")
 message("WITH_GNU_READLINE:       ${WITH_GNU_READLINE}")
 message("WITH_GSPELL:             ${WITH_GSPELL}")
+message("WITH_GSOURCEVIEW:        ${WITH_GSOURCEVIEW}")
 message("WITH_IMAGE_MAGICK:       ${WITH_IMAGE_MAGICK}")
 message("WITH_GRAPHICS_MAGICK:    ${WITH_GRAPHICS_MAGICK}")
 message("WITH_LIBCDR:             ${WITH_LIBCDR}")

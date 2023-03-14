@@ -419,19 +419,14 @@ void SPStar::set_shape() {
 
     c.closepath();
 
-    if (prepareShapeForLPE(&c)) {
-        return;
-    }
+    prepareShapeForLPE(&c);
 
-    // This happends on undo, fix bug:#1791784
-    setCurveInsync(std::move(c));
 }
 
 void
 sp_star_position_set (SPStar *star, gint sides, Geom::Point center, gdouble r1, gdouble r2, gdouble arg1, gdouble arg2, bool isflat, double rounded, double randomized)
 {
     g_return_if_fail (star != nullptr);
-    g_return_if_fail (SP_IS_STAR (star));
 
     star->flatsided = isflat;
     star->center = center;

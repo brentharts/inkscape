@@ -13,6 +13,7 @@
 #include "desktop.h"
 #include "display/control/canvas-page.h"
 #include "document.h"
+#include "extension/template.h"
 #include "object/object-set.h"
 #include "object/sp-item.h"
 #include "object/sp-namedview.h"
@@ -20,6 +21,8 @@
 #include "object/sp-root.h"
 #include "selection-chemistry.h"
 #include "svg/svg-color.h"
+#include "util/parse-int-range.h"
+#include "util/numeric/converters.h"
 
 namespace Inkscape {
 
@@ -105,7 +108,7 @@ void PageManager::reorderPage(Inkscape::XML::Node *child)
     auto nv = _document->getNamedView();
     pages.clear();
     for (auto &child : nv->children) {
-        if (auto page = dynamic_cast<SPPage *>(&child)) {
+        if (auto page = cast<SPPage>(&child)) {
             pages.push_back(page);
         }
     }
@@ -132,7 +135,9 @@ SPPage *PageManager::newPage()
 {
     enablePages();
     auto rect = _selected_page->getRect();
-    return newPage(rect.width(), rect.height());
+    auto new_page = newPage(rect.width(), rect.height());
+    new_page->copyFrom(_selected_page);
+    return new_page;
 }
 
 /**
@@ -179,7 +184,7 @@ SPPage *PageManager::newPage(Geom::Rect rect, bool first_page)
     repr->setAttributeSvgDouble("width", rect.width());
     repr->setAttributeSvgDouble("height", rect.height());
     if (auto nv = _document->getNamedView()) {
-        if (auto page = dynamic_cast<SPPage *>(nv->appendChildRepr(repr))) {
+        if (auto page = cast<SPPage>(nv->appendChildRepr(repr))) {
             Inkscape::GC::release(repr);
             return page;
         }
@@ -217,19 +222,23 @@ SPPage *PageManager::newPage(SPPage *page)
     enablePages();
     auto new_loc = nextPageLocation();
     auto new_page = newDocumentPage(page->getDocumentRect(), false);
+
+    // Set the margin, bleed, etc
+    new_page->copyFrom(page);
+
     Geom::Affine page_move = Geom::Translate((new_loc * _document->getDocumentScale()) - new_page->getDesktopRect().min());
     Geom::Affine item_move = Geom::Translate(new_loc - new_page->getRect().min());
 
     for (auto &item : page->getOverlappingItems()) {
         auto new_repr = item->getRepr()->duplicate(xml_root);
-        if (auto new_item = dynamic_cast<SPItem *>(sp_root->appendChildRepr(new_repr))) {
+        if (auto new_item = cast<SPItem>(sp_root->appendChildRepr(new_repr))) {
             Geom::Affine affine = Geom::Affine();
 
             // a. Add the object's original transform back in.
             affine *= item->transform;
 
             // b. apply parent transform (for layers that have been ignored by getOverlappingItems)
-            if (auto parent = dynamic_cast<SPItem *>(item->parent)) {
+            if (auto parent = cast<SPItem>(item->parent)) {
                 affine *= parent->i2doc_affine();
             }
 
@@ -279,10 +288,12 @@ void PageManager::deletePage(SPPage *page, bool content)
 
     // As above with the viewbox shadowing, we need go back to a single page
     // (which is zero pages) when needed.
-    if (getPageCount() == 1) {
-        if (auto page = getFirstPage()) {
+    if (auto page = getFirstPage()) {
+        if (getPageCount() == 1) {
             auto rect = page->getDesktopRect();
-            deletePage(page, false);
+            // We delete the page, only if it's bare (no margins etc)
+            if (page->isBarePage())
+                deletePage(page, false);
             _document->fitToRect(rect, false);
          }
     }
@@ -340,6 +351,11 @@ Geom::Rect PageManager::getSelectedPageRect() const
     return _selected_page ? _selected_page->getDesktopRect() : *(_document->preferredBounds());
 }
 
+Geom::Affine PageManager::getSelectedPageAffine() const
+{
+    return _selected_page ? _selected_page->getDesktopAffine() : Geom::identity();
+}
+
 /**
  * Called when the pages vector is updated, either page
  * deleted or page created (but not if the page is modified)
@@ -371,6 +387,15 @@ bool PageManager::selectPage(SPPage *page)
         if (_selected_page != page) {
             _selected_page = page;
             _page_selected_signal.emit(_selected_page);
+
+            // Modified signal for when the attributes themselves are modified.
+            _page_modified_connection.disconnect();
+            if (page) {
+                _page_modified_connection = page->connectModified([=](SPObject *, unsigned int) {
+                    _page_modified_signal.emit(_selected_page);
+                });
+            }
+
             return true;
         }
     }
@@ -408,6 +433,39 @@ SPPage *PageManager::getPage(int index) const
 }
 
 /**
+ * Get the pages from a set of pages in the given set.
+ *
+ * @param pages - A set of page positions in the format "1,2-3...etc"
+ * @param inverse - Reverse the selection, selecting pages not in page_pos.
+ *
+ * @returns A vector of SPPage objects found. Not found pages are ignored.
+ */
+std::vector<SPPage *> PageManager::getPages(const std::string &pages, bool inverse) const
+{
+    return getPages(parseIntRange(pages, 1, getPageCount()), inverse);
+}
+
+/**
+ * Get the pages from a set of pages in the given set.
+ *
+ * @param page_pos - A set of page positions indexed from 1.
+ * @param inverse - Reverse the selection, selecting pages not in page_pos.
+ *
+ * @returns A vector of SPPage objects found. Not found pages are ignored.
+ */
+std::vector<SPPage *> PageManager::getPages(std::set<unsigned int> page_pos, bool inverse) const
+{
+    std::vector<SPPage *> ret;
+    for (auto page : pages) {
+        bool contains = page_pos.find(page->getPagePosition()) != page_pos.end();
+        if (contains != inverse) {
+            ret.push_back(page);
+        }
+    }
+    return ret;
+}
+
+/**
  * Return a list of pages this item is on.
  */
 std::vector<SPPage *> PageManager::getPagesFor(SPItem *item, bool contains) const
@@ -419,6 +477,18 @@ std::vector<SPPage *> PageManager::getPagesFor(SPItem *item, bool contains) cons
         }
     }
     return ret;
+}
+
+/**
+ * Return the first page that contains the given item
+ */
+SPPage *PageManager::getPageFor(SPItem *item, bool contains) const
+{
+    for (auto &page : pages) {
+        if (page->itemOnPage(item, contains))
+            return page;
+    }
+    return nullptr;
 }
 
 /**
@@ -514,7 +584,7 @@ void PageManager::changeOrientation()
  * Resize the page to the given selection. If nothing is selected,
  * Resize to all the items on the selected page.
  */
-void PageManager::fitToSelection(ObjectSet *selection)
+void PageManager::fitToSelection(ObjectSet *selection, bool add_margins)
 {
     auto desktop = selection->desktop();
 
@@ -522,32 +592,33 @@ void PageManager::fitToSelection(ObjectSet *selection)
         // This means there aren't any pages, so revert to the default assumption
         // that the viewport is resized around ALL objects.
         if (!_selected_page) {
-            fitToRect(_document->getRoot()->documentVisualBounds(), _selected_page);
+            fitToRect(_document->getRoot()->documentVisualBounds(), _selected_page, add_margins);
         } else {
             // This allows the pages to be resized around the items related to the page only.
             auto contents = ObjectSet();
             contents.setList(getOverlappingItems(desktop, _selected_page));
             if (contents.isEmpty()) {
-                fitToRect(_document->getRoot()->documentVisualBounds(), _selected_page);
+                fitToRect(_document->getRoot()->documentVisualBounds(), _selected_page, add_margins);
             } else {
-                fitToSelection(&contents);
+                fitToSelection(&contents, add_margins);
             }
         }
     } else if (auto rect = selection->documentBounds(SPItem::VISUAL_BBOX)) {
-        fitToRect(rect, _selected_page);
+        fitToRect(rect, _selected_page, add_margins);
     }
 }
 
 /**
  * Fit the selected page to the given rectangle.
  */
-void PageManager::fitToRect(Geom::OptRect rect, SPPage *page)
+void PageManager::fitToRect(Geom::OptRect rect, SPPage *page, bool add_margins)
 {
     if (!rect) return;
     bool viewport = true;
     if (page) {
         viewport = page->isViewportPage();
-        page->setDocumentRect(*rect);
+        page->setDocumentRect(*rect, add_margins);
+        rect = page->getDocumentRect();
     }
     if (viewport) {
         _document->fitToRect(*rect);
@@ -628,10 +699,47 @@ bool PageManager::setDefaultAttributes(Inkscape::CanvasPage *item)
     auto dkcolor = _document->getNamedView()->desk_color;
     bool ret = item->setOnTop(border_on_top);
     // fixed shadow size, not configurable; shadow changes size with zoom
-    ret = item->setShadow(border_show && shadow_show ? 2 : 0) || ret;
-    ret = item->setPageColor(border_show ? border_color : 0x0, bgcolor, dkcolor) || ret;
-    ret = item->setLabelStyle(label_style) || ret;
+    ret |= item->setShadow(border_show && shadow_show ? 2 : 0);
+    ret |= item->setPageColor(border_show ? border_color : 0x0, bgcolor, dkcolor, margin_color, bleed_color);
+    ret |= item->setLabelStyle(label_style);
     return ret;
+}
+
+/**
+ * Return a page's size label, or match via width and height.
+ */
+std::string PageManager::getSizeLabel(SPPage *page)
+{
+    auto box = *_document->preferredBounds();
+    if (page) {
+        box = page->getDesktopRect();
+        auto label = page->getSizeLabel();
+        if (!label.empty())
+            return label;
+    }
+    return getSizeLabel(box.width(), box.height());
+}
+
+/**
+ * Loop through all page sizes to find a matching one for this width and height.
+ *
+ * @param width - The X axis size in pixels
+ * @param height - The Y axis size in pixels
+ */
+std::string PageManager::getSizeLabel(double width, double height)
+{
+    using namespace Inkscape::Util;
+
+    if (auto preset = Inkscape::Extension::Template::get_any_preset(width, height)) {
+        return preset->get_name();
+    }
+
+    static auto px = Inkscape::Util::unit_table.getUnit("px");
+    auto unit = _document->getDisplayUnit();
+    return format_number(Quantity::convert(width, px, unit), 2)
+             + " × " +
+           format_number(Quantity::convert(height, px, unit), 2)
+             + " " + unit->abbr;
 }
 
 /**

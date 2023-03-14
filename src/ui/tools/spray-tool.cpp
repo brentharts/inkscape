@@ -61,7 +61,7 @@
 #include "ui/icon-names.h"
 #include "ui/toolbar/spray-toolbar.h"
 #include "ui/tools/spray-tool.h"
-
+#include "ui/widget/canvas.h"
 
 using Inkscape::DocumentUndo;
 
@@ -146,7 +146,6 @@ SprayTool::SprayTool(SPDesktop *desktop)
     , is_drawing(false)
     , is_dilating(false)
     , has_dilated(false)
-    , dilate_area(nullptr)
     , no_overlap(false)
     , picker(false)
     , pick_center(true)
@@ -167,7 +166,7 @@ SprayTool::SprayTool(SPDesktop *desktop)
     , gamma_picked(0)
     , rand_picked(0)
 {
-    dilate_area = new Inkscape::CanvasItemBpath(desktop->getCanvasControls());
+    dilate_area = make_canvasitem<CanvasItemBpath>(desktop->getCanvasControls());
     dilate_area->set_stroke(0xff9900ff);
     dilate_area->set_fill(0x0, SP_WIND_RULE_EVENODD);
     dilate_area->hide();
@@ -216,11 +215,6 @@ SprayTool::~SprayTool() {
     _desktop->getSelection()->restoreBackup();
     this->enableGrDrag(false);
     this->style_set_connection.disconnect();
-
-    if (this->dilate_area) {
-        delete this->dilate_area;
-        this->dilate_area = nullptr;
-    }
 }
 
 void SprayTool::update_cursor(bool /*with_shift*/) {
@@ -431,12 +425,12 @@ static guint32 getPickerData(Geom::IntRect area, SPDesktop *desktop)
     Inkscape::CanvasItemDrawing *canvas_item_drawing = desktop->getCanvasDrawing();
     Inkscape::Drawing *drawing = canvas_item_drawing->get_drawing();
 
-    // Ensure drawing up-to-date. (Is this really necessary?)
-    drawing->update();
+    // Non-reentrancy workaround.
+    desktop->canvas->wait_for_drawing_inactive();
 
     // Get average color.
     double R, G, B, A;
-    drawing->average_color(area, R, G, B, A);
+    drawing->averageColor(area, R, G, B, A);
 
     //this can fix the bug #1511998 if confirmed
     if ( A < 1e-6) {
@@ -873,13 +867,12 @@ static bool sp_spray_recursive(SPDesktop *desktop,
     {
         // convert 3D boxes to ordinary groups before spraying their shapes
         // TODO: ideally the original object is preserved.
-        SPBox3D *box = dynamic_cast<SPBox3D *>(item);
-        if (box) {
-            desktop->getSelection()->remove(dynamic_cast<SPObject *>(item));
+        if (auto box = cast<SPBox3D>(item)) {
+            desktop->getSelection()->remove(item);
             set->remove(item);
             item = box->convert_to_group();
             set->add(item);
-            desktop->getSelection()->add(dynamic_cast<SPObject *>(item));
+            desktop->getSelection()->add(item);
         }
     }
 
@@ -955,7 +948,7 @@ static bool sp_spray_recursive(SPDesktop *desktop,
                 }
                 parent->appendChild(copy);
                 SPObject *new_obj = doc->getObjectByRepr(copy);
-                item_copied = dynamic_cast<SPItem *>(new_obj);   // Conversion object->item
+                item_copied = cast<SPItem>(new_obj);   // Conversion object->item
                 sp_spray_scale_rel(center,desktop, item_copied, Geom::Scale(_scale));
                 sp_spray_scale_rel(center,desktop, item_copied, Geom::Scale(scale));
                 sp_spray_rotate_rel(center,desktop,item_copied, Geom::Rotate(angle));
@@ -989,7 +982,7 @@ static bool sp_spray_recursive(SPDesktop *desktop,
                     }
                     parent->appendChild(copy);
                     SPObject *new_obj = doc->getObjectByRepr(copy);
-                    SPItem *item_copied = dynamic_cast<SPItem *>(new_obj);
+                    auto item_copied = cast<SPItem>(new_obj);
 
                     // Move around the cursor
                     Geom::Point move = (Geom::Point(cos(tilt)*cos(dp)*dr/(1-ratio)+sin(tilt)*sin(dp)*dr/(1+ratio), -sin(tilt)*cos(dp)*dr/(1-ratio)+cos(tilt)*sin(dp)*dr/(1+ratio)))+(p-a->midpoint());
@@ -1006,7 +999,7 @@ static bool sp_spray_recursive(SPDesktop *desktop,
                     object_set_tmp.clear();
                     object_set_tmp.add(item_copied);
                     object_set_tmp.removeLPESRecursive(true);
-                    if (dynamic_cast<SPUse*>(object_set_tmp.objects().front())) {
+                    if (is<SPUse>(object_set_tmp.objects().front())) {
                         object_set_tmp.unlinkRecursive(true);
                     }
                     if (single_path_output) { // Previous result
@@ -1095,7 +1088,7 @@ static bool sp_spray_recursive(SPDesktop *desktop,
 
                 SPObject *clone_object = doc->getObjectByRepr(clone);
                 // Conversion object->item
-                item_copied = dynamic_cast<SPItem *>(clone_object);
+                item_copied = cast<SPItem>(clone_object);
                 sp_spray_scale_rel(center, desktop, item_copied, Geom::Scale(_scale, _scale));
                 sp_spray_scale_rel(center, desktop, item_copied, Geom::Scale(scale, scale));
                 sp_spray_rotate_rel(center, desktop, item_copied, Geom::Rotate(angle));

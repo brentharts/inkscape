@@ -35,6 +35,8 @@
 #include "libnrtype/font-instance.h"
 #include "libnrtype/OpenTypeUtil.h"
 
+#include "util/statics.h"
+
 #ifdef _WIN32
 #include <glibmm.h>
 #include <windows.h>
@@ -192,10 +194,14 @@ static void FactorySubstituteFunc(FcPattern *pattern, gpointer /*data*/)
 
 FontFactory &FontFactory::get()
 {
-    // FIXME: This intentionally leaks at program exit. It is a workaround for the fact the
-    // destructor crashes at program exit due to Pango being unloaded first.
-    static auto factory = new FontFactory();
-    return *factory;
+    /*
+     * Using Static<FontFactory> to ensure destruction before main() exits, otherwise Harfbuzz's internal
+     * FreeType instance will come before us in the static destruction order and our destructor will crash.
+     * Related - https://gitlab.com/inkscape/inkscape/-/issues/3765.
+     */
+    struct ConstructibleFontFactory : FontFactory {};
+    static auto factory = Inkscape::Util::Static<ConstructibleFontFactory>();
+    return factory.get();
 }
 
 FontFactory::FontFactory()
@@ -212,6 +218,8 @@ FontFactory::FontFactory()
 
 FontFactory::~FontFactory()
 {
+    loaded.clear();
+    g_object_unref(fontContext);
     g_object_unref(fontServer);
 }
 
@@ -262,13 +270,11 @@ Glib::ustring FontFactory::ConstructFontSpecification(FontInstance *font)
  */
 char const *sp_font_description_get_family(PangoFontDescription const *fontDescr)
 {
-    static std::map<Glib::ustring, Glib::ustring> fontNameMap;
-
-    if (fontNameMap.empty()) {
-        fontNameMap.emplace("Sans", "sans-serif");
-        fontNameMap.emplace("Serif", "serif");
-        fontNameMap.emplace("Monospace", "monospace");
-    }
+    static auto const fontNameMap = std::map<Glib::ustring, Glib::ustring>{
+        { "Sans", "sans-serif" },
+        { "Serif", "serif" },
+        { "Monospace", "monospace" }
+    };
 
     char const *pangoFamily = pango_font_description_get_family(fontDescr);
 
@@ -279,6 +285,17 @@ char const *sp_font_description_get_family(PangoFontDescription const *fontDescr
     }
 
     return pangoFamily;
+}
+
+std::string getSubstituteFontName(std::string const &font)
+{
+    auto descr = pango_font_description_new();
+    pango_font_description_set_family(descr, font.c_str());
+    auto fontinstance = FontFactory::get().Face(descr);
+    auto descr2 = pango_font_describe(fontinstance->get_font());
+    auto name = std::string(sp_font_description_get_family(descr2));
+    pango_font_description_free(descr);
+    return name;
 }
 
 Glib::ustring FontFactory::GetUIFamilyString(PangoFontDescription const *fontDescr)
@@ -346,25 +363,43 @@ static gint StyleNameCompareInternalGlib(gconstpointer a, gconstpointer b)
            StyleNameValue(((StyleNames*)b)->CssName) ? -1 : 1;
 }
 
-static bool ustringPairSort(std::pair<PangoFontFamily*, Glib::ustring> const& first, std::pair<PangoFontFamily*, Glib::ustring> const& second)
+/**
+ * Returns a list of all font names available in this font config
+ */
+std::vector<std::string> FontFactory::GetAllFontNames()
 {
-    // well, this looks weird.
-    return first.second < second.second;
+    std::vector<std::string> ret;
+    PangoFontFamily **families = nullptr;
+    int numFamilies = 0;
+    pango_font_map_list_families(fontServer, &families, &numFamilies);
+    // When pango version is newer, this can become a c++11 loop
+    for (int currentFamily = 0; currentFamily < numFamilies; ++currentFamily) {
+        ret.emplace_back(pango_font_family_get_name(families[currentFamily]));
+    }
+    return ret;
 }
 
-void FontFactory::GetUIFamilies(std::vector<PangoFontFamily*> &out)
+/*
+ * Returns true if the font family is in the local font server map.
+ */
+bool FontFactory::hasFontFamily(const std::string &family)
 {
+    return getSubstituteFontName(family) == family;
+}
+
+std::map <std::string, PangoFontFamily*> FontFactory::GetUIFamilies()
+{
+    std::map <std::string, PangoFontFamily*> out;
+
     // Gather the family names as listed by Pango
     PangoFontFamily **families = nullptr;
     int numFamilies = 0;
     pango_font_map_list_families(fontServer, &families, &numFamilies);
-    
-    std::vector<std::pair<PangoFontFamily*, Glib::ustring>> sorted;
 
     // not size_t
     for (int currentFamily = 0; currentFamily < numFamilies; ++currentFamily) {
         char const *displayName = pango_font_family_get_name(families[currentFamily]);
-        
+
         if (!displayName || *displayName == '\0') {
             std::cerr << "FontFactory::GetUIFamilies: Missing displayName! " << std::endl;
             continue;
@@ -375,14 +410,10 @@ void FontFactory::GetUIFamilies(std::vector<PangoFontFamily*> &out)
             std::cerr << "Ignoring font '" << displayName << "'" << std::endl;
             continue;
         }
-        sorted.emplace_back(families[currentFamily], displayName);
+        out.insert({displayName, families[currentFamily]});
     }
 
-    std::sort(sorted.begin(), sorted.end(), ustringPairSort);
-    
-    for (auto &i : sorted) {
-        out.push_back(i.first);
-    }
+    return out;
 }
 
 GList *FontFactory::GetUIStyles(PangoFontFamily *in)

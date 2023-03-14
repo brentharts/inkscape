@@ -210,11 +210,6 @@ void StyleDialog::_nodeChanged(Inkscape::XML::Node &object)
  */
 StyleDialog::StyleDialog()
     : DialogBase("/dialogs/style", "Style")
-    , _updating(false)
-    , _textNode(nullptr)
-    , _scrollpos(0)
-    , _deleted_pos(0)
-    , _deletion(false)
 {
     g_debug("StyleDialog::StyleDialog");
 
@@ -318,7 +313,6 @@ Inkscape::XML::Node *StyleDialog::_getStyleTextNode(bool create_if_missing)
     return textNode;
 }
 
-
 Glib::RefPtr<Gtk::TreeModel> StyleDialog::_selectTree(Glib::ustring selector)
 {
     g_debug("StyleDialog::_selectTree");
@@ -383,7 +377,7 @@ void StyleDialog::readStyleElement()
     g_debug("StyleDialog::readStyleElement");
 
     auto document = getDocument();
-    if (_updating || !document)
+    if (_updating || !document || _deletion)
         return; // Don't read if we wrote style element.
     _updating = true;
     _scrollock = true;
@@ -994,6 +988,7 @@ void StyleDialog::_onPropDelete(Glib::ustring path, Glib::RefPtr<Gtk::TreeStore>
         store->erase(row);
         _deletion = true;
         _writeStyleElement(store, selector);
+        _deletion = false;
     }
 }
 
@@ -1127,9 +1122,9 @@ void StyleDialog::_writeStyleElement(Glib::RefPtr<Gtk::TreeStore> store, Glib::u
         std::string pos = std::to_string(selectorpos);
         std::string selectormatch = "(";
         for (; selectorpos > 1; selectorpos--) {
-            selectormatch = selectormatch + "[^}]*?}";
+            selectormatch = selectormatch + "[^\\}]*?\\}";
         }
-        selectormatch = selectormatch + ")([^}]*?})((.|\n)*)";
+        selectormatch = selectormatch + ")([^\\}]*?\\})((.|\n)*)";
 
         Inkscape::XML::Node *textNode = _getStyleTextNode(true);
         std::regex e(selectormatch.c_str());
@@ -1236,7 +1231,6 @@ void
 StyleDialog::_startValueEdit(Gtk::CellEditable* cell, const Glib::ustring& path, Glib::RefPtr<Gtk::TreeStore> store)
 {
     g_debug("StyleDialog::_startValueEdit");
-    _deletion = false;
     _scrollock = true;
     Gtk::TreeModel::Row row = *store->get_iter(path);
     if (row) {
@@ -1296,7 +1290,6 @@ StyleDialog::_startValueEdit(Gtk::CellEditable* cell, const Glib::ustring& path,
 
 void StyleDialog::_startNameEdit(Gtk::CellEditable *cell, const Glib::ustring &path)
 {
-    _deletion = false;
     g_debug("StyleDialog::_startNameEdit");
     _scrollock = true;
     Glib::RefPtr<Gtk::ListStore> completionModel = Gtk::ListStore::create(_mCSSData);
@@ -1320,14 +1313,15 @@ void StyleDialog::_startNameEdit(Gtk::CellEditable *cell, const Glib::ustring &p
 gboolean sp_styledialog_store_move_to_next(gpointer data)
 {
     StyleDialog *styledialog = reinterpret_cast<StyleDialog *>(data);
-    if (!styledialog->_deletion) {
-        auto selection = styledialog->_current_css_tree->get_selection();
-        Gtk::TreeIter iter = *(selection->get_selected());
-        Gtk::TreeModel::Path model = (Gtk::TreeModel::Path)iter;
-        if (model == styledialog->_current_path) {
-            styledialog->_current_css_tree->set_cursor(styledialog->_current_path, *styledialog->_current_value_col,
-                                                       true);
-        }
+    auto selection = styledialog->_current_css_tree->get_selection();
+    Gtk::TreeIter iter = *(selection->get_selected());
+    if (!iter) {
+        return FALSE;
+    }
+    Gtk::TreeModel::Path model = (Gtk::TreeModel::Path)iter;
+    if (model == styledialog->_current_path) {
+        styledialog->_current_css_tree->set_cursor(styledialog->_current_path, *styledialog->_current_value_col,
+                                                   true);
     }
     return FALSE;
 }

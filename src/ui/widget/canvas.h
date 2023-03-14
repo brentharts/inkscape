@@ -57,7 +57,7 @@ public:
     void set_drawing(Inkscape::Drawing *drawing);
 
     // Canvas item root
-    CanvasItemGroup *get_canvas_item_root() const { return _canvas_item_root; }
+    CanvasItemGroup *get_canvas_item_root() const;
 
     // Geometry
     void set_pos   (const Geom::IntPoint &pos);
@@ -71,9 +71,6 @@ public:
     void set_desk  (uint32_t rgba);
     void set_border(uint32_t rgba);
     void set_page  (uint32_t rgba);
-    uint32_t  get_desk_color  ();
-    uint32_t  get_border_color();
-    uint32_t  get_page_color  ();
     uint32_t get_effective_background() const; // This function is now wrong.
 
     //  Rendering modes
@@ -109,18 +106,16 @@ public:
 
     // Invalidation
     void redraw_all();                  // Mark everything as having changed.
-    void redraw_area(Geom::Rect &area); // Mark a rectangle of world space as having changed.
+    void redraw_area(Geom::Rect const &area); // Mark a rectangle of world space as having changed.
     void redraw_area(int x0, int y0, int x1, int y1);
     void redraw_area(Geom::Coord x0, Geom::Coord y0, Geom::Coord x1, Geom::Coord y1);
     void request_update();              // Mark geometry as needing recalculation.
 
-    // Event compression and gobbling (tool-base.cpp)
-    void set_event_compression(bool enabled);
-    int gobble_key_events(guint keyval, guint mask);
-    void gobble_motion_events(guint mask);
-
     // Callback run on destructor of any canvas item
     void canvas_item_destructed(Inkscape::CanvasItem *item);
+
+    // Wait for background process to become inactive. (Todo: Remove this non-reentrancy workaround when possible.)
+    void wait_for_drawing_inactive() const;
 
     // State
     Inkscape::CanvasItem *get_current_canvas_item() const { return _current_canvas_item; }
@@ -134,6 +129,8 @@ public:
     }
     void set_drawing_disabled(bool disable); // Disable during path ops, etc.
     void set_all_enter_events(bool on) { _all_enter_events = on; }
+
+    void enable_autoscroll();
 
 protected:
     void get_preferred_width_vfunc (int &minimum_width,  int &natural_width ) const override;
@@ -166,9 +163,6 @@ private:
 
     // Drawing
     Inkscape::Drawing *_drawing = nullptr;
-
-    // Canvas item root
-    CanvasItemGroup *_canvas_item_root = nullptr;
 
     // Geometry
     Geom::IntPoint _pos = {0, 0}; ///< Coordinates of top-left pixel of canvas view within canvas.
@@ -207,7 +201,7 @@ private:
     Geom::Point _split_frac;
     Inkscape::SplitDirection _hover_direction;
     bool _split_dragging;
-    Geom::Point _split_drag_start;
+    Geom::IntPoint _split_drag_start;
 
     void set_cursor();
 

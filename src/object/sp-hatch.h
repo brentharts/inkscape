@@ -16,7 +16,7 @@
 #ifndef SEEN_SP_HATCH_H
 #define SEEN_SP_HATCH_H
 
-#include <list>
+#include <vector>
 #include <cstddef>
 #include <glibmm/ustring.h>
 #include <sigc++/connection.h>
@@ -25,6 +25,7 @@
 #include "svg/svg-angle.h"
 #include "sp-paint-server.h"
 #include "uri-references.h"
+#include "display/drawing-item-ptr.h"
 
 class SPHatchReference;
 class SPHatchPath;
@@ -33,15 +34,10 @@ class SPItem;
 namespace Inkscape {
 class Drawing;
 class DrawingPattern;
-namespace XML {
-class Node;
-} // namespace XML
+namespace XML { class Node; }
 } // namespace Inkscape
 
-#define SP_HATCH(obj) (dynamic_cast<SPHatch *>((SPObject *)obj))
-#define SP_IS_HATCH(obj) (dynamic_cast<const SPHatch *>((SPObject *)obj) != NULL)
-
-class SPHatch : public SPPaintServer
+class SPHatch final : public SPPaintServer
 {
 public:
     enum HatchUnits
@@ -63,6 +59,7 @@ public:
 
     SPHatch();
     ~SPHatch() override;
+    int tag() const override { return tag_of<decltype(*this)>; }
 
     // Reference (href)
     Glib::ustring href;
@@ -103,15 +100,12 @@ protected:
 private:
     struct View
     {
-        Inkscape::DrawingPattern *arenaitem;
+        DrawingItemPtr<Inkscape::DrawingPattern> drawingitem;
         Geom::OptRect bbox;
         unsigned key;
+        View(DrawingItemPtr<Inkscape::DrawingPattern> drawingitem, Geom::OptRect const &bbox, unsigned key);
     };
-
-    using ChildIterator = std::vector<SPHatchPath *>::iterator;
-    using ConstChildIterator = std::vector<SPHatchPath const *>::const_iterator;
-    using ViewIterator = std::list<View>::iterator;
-    using ConstViewIterator = std::list<View>::const_iterator;
+    std::vector<View> views;
 
     static bool _hasHatchPatchChildren(SPHatch const *hatch);
 
@@ -151,8 +145,6 @@ private:
     SVGAngle _rotate;
 
     sigc::connection _modified_connection;
-
-    std::list<View> _display;
 };
 
 class SPHatchReference : public Inkscape::URIReference
@@ -170,7 +162,7 @@ public:
 protected:
     bool _acceptObject(SPObject *obj) const override
     {
-        return dynamic_cast<SPHatch*>(obj) && URIReference::_acceptObject(obj);
+        return is<SPHatch>(obj) && URIReference::_acceptObject(obj);
     }
 };
 

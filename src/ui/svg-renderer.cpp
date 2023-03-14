@@ -84,15 +84,13 @@ double svg_renderer::get_height_px() const {
     return _document->getHeight().value("px");
 }
 
-Inkscape::Pixbuf* svg_renderer::do_render(double scale) {
-    auto w = _document->getWidth().value("px");
-    auto h = _document->getHeight().value("px");
+Inkscape::Pixbuf *svg_renderer::do_render(double scale)
+{
     auto dpi = 96 * scale;
-    auto area = Geom::Rect(0, 0, w, h);
+    auto area = *(_document->preferredBounds());
 
-    unsigned int color = _checkerboard.value_or(0);
-    return sp_generate_internal_bitmap(_document.get(), area, dpi, std::vector<SPItem*>(), false,
-        _checkerboard.has_value() ? &color : nullptr, scale);
+    auto checkerboard_ptr = _checkerboard ? &*_checkerboard : nullptr;
+    return sp_generate_internal_bitmap(_document.get(), area, dpi, {}, false, checkerboard_ptr, scale);
 }
 
 Glib::RefPtr<Gdk::Pixbuf> svg_renderer::render(double scale) {

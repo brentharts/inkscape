@@ -36,7 +36,6 @@ list(APPEND INKSCAPE_CXX_FLAGS "-DGTKMM_DISABLE_DEPRECATED")
 list(APPEND INKSCAPE_CXX_FLAGS "-DGDKMM_DISABLE_DEPRECATED")
 list(APPEND INKSCAPE_CXX_FLAGS "-DGTK_DISABLE_DEPRECATED")
 list(APPEND INKSCAPE_CXX_FLAGS "-DGDK_DISABLE_DEPRECATED")
-list(APPEND INKSCAPE_CXX_FLAGS "-DSIGCXX_DISABLE_DEPRECATED")
 
 # Errors for common mistakes
 list(APPEND INKSCAPE_CXX_FLAGS "-fstack-protector-strong")
@@ -45,6 +44,7 @@ list(APPEND INKSCAPE_CXX_FLAGS "-Werror=format-security")       # e.g.: printf(v
 list(APPEND INKSCAPE_CXX_FLAGS "-Werror=ignored-qualifiers")    # e.g.: const int foo();
 list(APPEND INKSCAPE_CXX_FLAGS "-Werror=return-type")           # non-void functions that don't return a value
 list(APPEND INKSCAPE_CXX_FLAGS "-Wno-switch")                   # See !849 for discussion
+list(APPEND INKSCAPE_CXX_FLAGS "-Wmisleading-indentation")
 list(APPEND INKSCAPE_CXX_FLAGS_DEBUG "-Og")                     # -Og for _FORTIFY_SOURCE. One could add -Weffc++ here to see approx. 6000 warnings
 list(APPEND INKSCAPE_CXX_FLAGS_DEBUG "-Wcomment")
 list(APPEND INKSCAPE_CXX_FLAGS_DEBUG "-Wunused-function")
@@ -160,7 +160,7 @@ add_definitions(${Intl_DEFINITIONS})
 
 # Check for system-wide version of 2geom and fallback to internal copy if not found
 if(NOT WITH_INTERNAL_2GEOM)
-    pkg_check_modules(2Geom QUIET IMPORTED_TARGET GLOBAL 2geom>=1.1.0)
+    pkg_check_modules(2Geom QUIET IMPORTED_TARGET GLOBAL 2geom>=1.3.0)
     if(2Geom_FOUND)
         add_library(2Geom::2geom ALIAS PkgConfig::2Geom)
     else()
@@ -282,6 +282,18 @@ if(WITH_GSPELL)
     endif()
 endif()
 
+if(WITH_GSOURCEVIEW)
+    pkg_check_modules(GSOURCEVIEW gtksourceview-4)
+    if("${GSOURCEVIEW_FOUND}")
+        message(STATUS "Using gtksourceview-4")
+        list(APPEND INKSCAPE_INCS_SYS ${GSOURCEVIEW_INCLUDE_DIRS})
+        sanitize_ldflags_for_libs(GSOURCEVIEW_LDFLAGS)
+        list(APPEND INKSCAPE_LIBS ${GSOURCEVIEW_LDFLAGS})
+    else()
+        set(WITH_GSOURCEVIEW OFF)
+    endif()
+endif()
+
 find_package(Boost 1.19.0 REQUIRED COMPONENTS filesystem)
 
 if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 7 AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9)
@@ -386,7 +398,7 @@ endif(WITH_NLS)
 pkg_check_modules(SIGC++ REQUIRED sigc++-2.0 )
 sanitize_ldflags_for_libs(SIGC++_LDFLAGS)
 list(APPEND INKSCAPE_LIBS ${SIGC++_LDFLAGS})
-list(APPEND INKSCAPE_CXX_FLAGS ${SIGC++_CFLAGS_OTHER})
+list(APPEND INKSCAPE_CXX_FLAGS ${SIGC++_CFLAGS_OTHER} "-DSIGCXX_DISABLE_DEPRECATED")
 
 pkg_check_modules(EPOXY REQUIRED epoxy )
 sanitize_ldflags_for_libs(EPOXY_LDFLAGS)

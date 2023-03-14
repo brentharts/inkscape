@@ -115,6 +115,8 @@ public:
     virtual bool root_handler(GdkEvent *event);
     virtual bool item_handler(SPItem *item, GdkEvent *event);
     virtual void menu_popup(GdkEvent *event, SPObject *obj = nullptr);
+    virtual bool catch_undo(bool redo = false) { return false; }
+    virtual bool can_undo(bool redo = false) { return false; }
 
     void set_on_buttons(GdkEvent *event);
     bool are_buttons_1_and_3_on() const;
@@ -136,6 +138,7 @@ public:
                           Gdk::BUTTON_PRESS_MASK);
     void ungrabCanvasEvents();
 
+    virtual void switching_away(const std::string &new_tool) {}
 private:
     std::unique_ptr<Inkscape::Preferences::PreferencesObserver> pref_observer;
     std::string _prefs_path;
@@ -209,9 +212,6 @@ protected:
 
     void set_high_motion_precision(bool high_precision = true);
 
-    int gobble_key_events(guint keyval, guint mask) const;
-    void gobble_motion_events(guint mask) const;
-
     SPDesktop *_desktop = nullptr;
 
 private:
@@ -226,6 +226,9 @@ private:
 void sp_event_context_read(ToolBase *ec, char const *key);
 
 void sp_event_root_menu_popup(SPDesktop *desktop, SPItem *item, GdkEvent *event);
+
+gint gobble_key_events(guint keyval, guint mask);
+void gobble_motion_events(guint mask);
 
 void sp_event_show_modifier_tip(Inkscape::MessageContext *message_context, GdkEvent *event,
                                 char const *ctrl_tip, char const *shift_tip, char const *alt_tip);

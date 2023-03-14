@@ -24,6 +24,7 @@
 #include "sp-paint-server.h"
 #include "uri-references.h"
 #include "viewbox.h"
+#include "display/drawing-item-ptr.h"
 
 class SPPattern;
 class SPItem;
@@ -45,7 +46,7 @@ protected:
     bool _acceptObject(SPObject *obj) const override;
 };
 
-class SPPattern
+class SPPattern final
     : public SPPaintServer
     , public SPViewBox
 {
@@ -58,6 +59,7 @@ public:
 
     SPPattern();
     ~SPPattern() override;
+    int tag() const override { return tag_of<decltype(*this)>; }
 
     // Reference (href)
     Glib::ustring href;
@@ -163,17 +165,14 @@ private:
 
     struct View
     {
-        std::unique_ptr<Inkscape::DrawingPattern> drawingitem;
+        DrawingItemPtr<Inkscape::DrawingPattern> drawingitem;
         Geom::OptRect bbox;
         unsigned key;
-        View(std::unique_ptr<Inkscape::DrawingPattern> drawingitem, Geom::OptRect const &bbox, unsigned key);
+        View(DrawingItemPtr<Inkscape::DrawingPattern> drawingitem, Geom::OptRect const &bbox, unsigned key);
     };
     std::vector<View> views;
     void update_view(View &v);
 };
-
-MAKE_SP_OBJECT_DOWNCAST_FUNCTIONS(SP_PATTERN, SPPattern)
-MAKE_SP_OBJECT_TYPECHECK_FUNCTIONS(SP_IS_PATTERN, SPPattern)
 
 #endif // SEEN_SP_PATTERN_H
 

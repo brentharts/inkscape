@@ -562,14 +562,10 @@ Glib::RefPtr<Gdk::Pixbuf> InputDialogImpl::getPix(PixId id)
     return pix;
 }
 
-
-// Now that we've defined the *Impl class, we can do the method to acquire one.
-InputDialog &InputDialog::getInstance()
+std::unique_ptr<InputDialog> InputDialog::create()
 {
-    InputDialog *dialog = new InputDialogImpl();
-    return *dialog;
+    return std::make_unique<InputDialogImpl>();
 }
-
 
 InputDialogImpl::InputDialogImpl() :
     InputDialog(),
@@ -1780,11 +1776,9 @@ bool InputDialogImpl::eventSnoop(GdkEvent* event)
     return false;
 }
 
-
 } // end namespace Inkscape
 } // end namespace UI
 } // end namespace Dialog
-
 
 /*
   Local Variables:

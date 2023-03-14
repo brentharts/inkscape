@@ -24,9 +24,7 @@
  * obsolete versions the user might have. */
 static char const preferences_skeleton[] =
     R"=====(
-<inkscape version="1"
-  xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-  xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+<inkscape version="1">
   <group id="window">
     <group id="menu"        state="1"/>
     <group id="commands"    state="1"/>
@@ -62,9 +60,10 @@ static char const preferences_skeleton[] =
   </group>
 
   <group id="template">
-    <sodipodi:namedview
+    <group
        id="base"
        pagecolor="#ffffff"
+       deskcolor="#d1d1d1"
        pageopacity="0.0"
        pagecheckerboard="0"
        bordercolor="#000000"
@@ -185,7 +184,22 @@ static char const preferences_skeleton[] =
     </group>
   </group>
 
-  <group id="colorselector" page="0" switcher="1" />
+  <group id="colorselector" page="1" switcher="1">
+    <group id="RGB"
+      visible="1" />
+    <group id="HSL"
+      visible="1" />
+    <group id="CMYK"
+      visible="1" />
+    <group id="HSV"
+      visible="1" />
+    <group id="HSLuv"
+      visible="1" />
+    <group id="OKLAB"
+      visible="1" />
+    <group id="CMS"
+      visible="1" />
+  </group>
 
   <group id="embedded">
     <group id="swatches"
@@ -193,7 +207,13 @@ static char const preferences_skeleton[] =
       panel_mode="1"
       panel_ratio="100"
       panel_wrap="0"
-      palette="Inkscape default" />
+      palette="Inkscape default">
+      <group id="pinned"
+         none="1"
+         rgb000000="1" black="1"
+         rgb808080="1" gray-50="1"
+         rgbffffff="1" white="1" />
+    </group>
   </group>
 
   <group id="dialogs">
@@ -224,7 +244,7 @@ static char const preferences_skeleton[] =
     <group id="extension-error" show-on-startup="0"/>
     <group id="memory" />
     <group id="messages" />
-    <group id="swatches" />
+    <group id="swatches" palette="Auto"/>
     <group id="iconpreview" />
     <group id="aboutextensions" />
     <group id="treeeditor" />
@@ -310,7 +330,6 @@ static char const preferences_skeleton[] =
     <group id="maskobject" topmost="1" remove="1"/>
     <group id="blurquality" value="0"/>
     <group id="filterquality" value="1"/>
-    <group id="showfiltersinfobox" value="1" />
     <group id="startmode" outline="0"/>
     <group id="outlinemode" value="0"/>
 
@@ -344,7 +363,6 @@ static char const preferences_skeleton[] =
            allow_net_access="0"/>
     </group>
     <group id="forkgradientvectors" value="1"/>
-    <group id="iconrender" named_nodelay="0"/>
     <group id="autosave" enable="1" interval="10" path="" max="50"/>
     <group id="grids"
       no_emphasize_when_zoomedout="0">
@@ -497,7 +515,6 @@ static char const preferences_skeleton[] =
     </group>
   </group>
   <group id="debug">
-    <group id="latency" skew="1"/>
   </group>
   <group id="ui"
     language=""/>

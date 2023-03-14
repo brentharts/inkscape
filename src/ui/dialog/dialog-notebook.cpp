@@ -852,7 +852,7 @@ void DialogNotebook::toggle_tab_labels_callback(bool show)
         }
     }
     _labels_set_off = _labels_off;
-    if (_prev_alloc_width && prev_tabstatus != tabstatus && show) {
+    if (_prev_alloc_width && prev_tabstatus != tabstatus && (show || tabstatus != TabsStatus::NONE || !_labels_off)) {
         resize_widget_children(&_notebook);
     }
     if (show && _single_tab_width) {
@@ -981,6 +981,24 @@ void DialogNotebook::remove_close_tab_callback(Gtk::Widget *page)
         _tab_connections.erase(tab_connection_it);
         tab_connection_it = _tab_connections.find(page);
     }
+}
+
+void DialogNotebook::get_preferred_height_for_width_vfunc(int width, int& minimum_height, int& natural_height) const {
+    Gtk::ScrolledWindow::get_preferred_height_for_width_vfunc(width, minimum_height, natural_height);
+    if (_natural_height > natural_height) {
+        natural_height = _natural_height;
+    }
+}
+
+void DialogNotebook::get_preferred_height_vfunc(int& minimum_height, int& natural_height) const {
+    Gtk::ScrolledWindow::get_preferred_height_vfunc(minimum_height, natural_height);
+    if (_natural_height > natural_height) {
+        natural_height = _natural_height;
+    }
+}
+
+void DialogNotebook::set_requested_height(int height) {
+    _natural_height = height;
 }
 
 } // namespace Dialog

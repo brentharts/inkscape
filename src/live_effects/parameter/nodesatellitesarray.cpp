@@ -328,7 +328,7 @@ void FilletChamferKnotHolderEntity::knot_set(Geom::Point const &p,
     filletchamfer->helperpath = true;
     _pparam->updateAmmount(nodesatellite.amount);
     _pparam->_vector[satelite_index][subsatelite_index] = nodesatellite;
-    sp_lpe_item_update_patheffect(SP_LPE_ITEM(item), false, false);
+    sp_lpe_item_update_patheffect(cast<SPLPEItem>(item), false, false);
 }
 
 void
@@ -338,8 +338,7 @@ FilletChamferKnotHolderEntity::knot_ungrabbed(Geom::Point const &p, Geom::Point 
     if (filletchamfer) {
         filletchamfer->refresh_widgets = true;
         filletchamfer->helperpath = false;
-        filletchamfer->writeParamsToSVG();
-        sp_lpe_item_update_patheffect(SP_LPE_ITEM(item), false, false);
+        filletchamfer->makeUndoDone(_("Move handle"));
     }
 }
 
@@ -432,7 +431,7 @@ void FilletChamferKnotHolderEntity::knot_click(guint state)
     if (state & GDK_CONTROL_MASK) {
         if (state & GDK_MOD1_MASK) {
             _pparam->_vector[satelite_index][subsatelite_index].amount = 0.0;
-            sp_lpe_item_update_patheffect(SP_LPE_ITEM(item), false, false);
+            sp_lpe_item_update_patheffect(cast<SPLPEItem>(item), false, false);
         } else {
             using namespace Geom;
             NodeSatelliteType type = _pparam->_vector[satelite_index][subsatelite_index].nodesatellite_type;
@@ -451,7 +450,7 @@ void FilletChamferKnotHolderEntity::knot_click(guint state)
                 break;
             }
             _pparam->_vector[satelite_index][subsatelite_index].nodesatellite_type = type;
-            sp_lpe_item_update_patheffect(SP_LPE_ITEM(item), false, false);
+            sp_lpe_item_update_patheffect(cast<SPLPEItem>(item), false, false);
             const gchar *tip;
             if (type == CHAMFER) {
                 tip = _("<b>Chamfer</b>: <b>Ctrl+Click</b> toggles type, "
@@ -547,10 +546,7 @@ void FilletChamferKnotHolderEntity::knot_set_offset(NodeSatellite nodesatellite)
     nodesatellite.amount = amount;
     _pparam->_vector[satelite_index][subsatelite_index] = nodesatellite;
     this->parent_holder->knot_ungrabbed_handler(this->knot, 0);
-    SPLPEItem *splpeitem = dynamic_cast<SPLPEItem *>(item);
-    if (splpeitem) {
-        sp_lpe_item_update_patheffect(splpeitem, false, false);
-    }
+    _pparam->write_to_SVG();
 }
 
 } /* namespace LivePathEffect */

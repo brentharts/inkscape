@@ -30,8 +30,9 @@
 #include "inkscape-application.h"
 #include "inkscape-window.h"
 
-#include "io/resource.h"
 #include "io/dir-util.h"
+#include "io/resource.h"
+#include "io/sys.h"
 
 #include "ui/modifiers.h"
 #include "ui/tools/tool-base.h"    // For latin keyval
@@ -112,9 +113,14 @@ Shortcuts::init() {
         std::cerr << "Shortcut::Shortcut: Failed to read file inkscape.xml; giving up!" << std::endl;
     }
 
- 
+    // ------------ Open Shared shortcut file -------------
+    Glib::RefPtr<Gio::File> file = Gio::File::create_for_path(get_path_string(SHARED, KEYS, "default.xml"));
+    // Test if file exists before attempting to read to avoid generating warning message.
+    if (file->query_exists()) {
+        read(file, true);
+    }
     // ------------ Open User shortcut file -------------
-    Glib::RefPtr<Gio::File> file = Gio::File::create_for_path(get_path_string(USER, KEYS, "default.xml"));
+    file = Gio::File::create_for_path(get_path_string(USER, KEYS, "default.xml"));
     // Test if file exists before attempting to read to avoid generating warning message.
     if (file->query_exists()) {
         read(file, true);
@@ -486,8 +492,8 @@ Shortcuts::add_shortcut(Glib::ustring name, const Gtk::AccelKey& shortcut, bool 
 {
     // Remove previous use of shortcut (already removed if new user shortcut).
     if (Glib::ustring old_name = remove_shortcut(shortcut); old_name != "") {
-        std::cerr << "Shortcut::add_shortcut: duplicate shortcut found for: " << shortcut.get_abbrev().raw()
-                  << "  Old: " << old_name.raw() << "  New: " << name.raw() << " !" << std::endl;
+        // std::cerr << "Shortcut::add_shortcut: duplicate shortcut found for: " << shortcut.get_abbrev().raw()
+                //   << "  Old: " << old_name.raw() << "  New: " << name.raw() << " !" << std::endl;
     }
 
     // Add shortcut
@@ -503,8 +509,14 @@ Shortcuts::add_shortcut(Glib::ustring name, const Gtk::AccelKey& shortcut, bool 
         Gio::SimpleAction::parse_detailed_name_variant(action, action_name_old, value_old);
 
         if (action_name_new == action_name_old) {
-            // Action exists, add shortcut to list of shortcuts.
-            std::vector<Glib::ustring> accels = app->get_accels_for_action(name);
+            std::vector<Glib::ustring> accels;
+            // Action exists, add shortcut to list of shortcuts, if it's not a user shortcut.
+            // If it is a user-defined shortcut, then it replaces any defaults that might have been present.
+            // That's what we show in the UI when we define shortcuts (only new one) and that's also
+            // the only way to let user "overwrite" default shortcut, as there's no removal possible.
+            if (!user) {
+                accels = app->get_accels_for_action(name);
+            }
             accels.push_back(shortcut.get_abbrev());
             app->set_accels_for_action(name, accels);
             action_user_set[name] = user;
@@ -710,8 +722,11 @@ Shortcuts::get_file_names()
     // Make a list of all key files from System and User.  Glib::ustring should be std::string!
     std::vector<Glib::ustring> filenames = get_filenames(SYSTEM, KEYS, {".xml"});
     // Exclude default.xml as it only contains user modifications.
+    std::vector<Glib::ustring> filenames_shared = get_filenames(SHARED, KEYS, {".xml"}, {"default.xml"});
+    // Exclude default.xml as it only contains user modifications.
     std::vector<Glib::ustring> filenames_user = get_filenames(USER, KEYS, {".xml"}, {"default.xml"});
     filenames.insert(filenames.end(), filenames_user.begin(), filenames_user.end());
+    filenames.insert(filenames.end(), filenames_shared.begin(), filenames_shared.end());
 
     // Check file exists and extract out label if it does.
     std::vector<std::pair<Glib::ustring, Glib::ustring>> names_and_paths;
@@ -807,7 +822,7 @@ Shortcuts::update_gui_text_recursive(Gtk::Widget* widget)
             Glib::ustring tooltip;
             auto *iapp = InkscapeApplication::instance();
             if (iapp) {
-                tooltip = iapp->get_action_extra_data().get_tooltip_for_action(action);
+                tooltip = iapp->get_action_extra_data().get_tooltip_for_action(action, true, true);
             }
 
             // Add new primary accelerator.
@@ -826,7 +841,7 @@ Shortcuts::update_gui_text_recursive(Gtk::Widget* widget)
             }
 
             // Update tooltip.
-            widget->set_tooltip_text(tooltip);
+            widget->set_tooltip_markup(tooltip);
         }
     }
 
@@ -892,12 +907,16 @@ Shortcuts::export_shortcuts() {
     Inkscape::UI::Dialog::FileSaveDialog *saveFileDialog =
         Inkscape::UI::Dialog::FileSaveDialog::create(*window, directory, Inkscape::UI::Dialog::CUSTOM_TYPE, _("Select a filename for export"),
                                                      "", "", Inkscape::Extension::FILE_SAVE_METHOD_SAVE_AS);
-    saveFileDialog->addFileType(_("Inkscape shortcuts (*.xml)"), "*.xml");
+    saveFileDialog->addFilterMenu(_("Inkscape shortcuts (*.xml)"), "*.xml");
+    saveFileDialog->setFilename("shortcuts.xml");
     bool success = saveFileDialog->show();
 
     // Get file name and write.
     if (success) {
         Glib::ustring path = saveFileDialog->getFilename(); // It's a full path, not just a filename!
+        if (Inkscape::IO::get_file_extension(path) != ".xml") {
+            path += ".xml";
+        }
         if (path.size() > 0) {
             Glib::ustring newFileName = Glib::filename_to_utf8(path);  // Is this really correct? (Paths should be std::string.)
             Glib::RefPtr<Gio::File> file = Gio::File::create_for_path(path);

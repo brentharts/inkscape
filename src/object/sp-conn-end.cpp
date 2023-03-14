@@ -55,12 +55,12 @@ static bool try_get_intersect_point_with_item_recursive(Geom::PathVector& conn_p
 {
     double initial_pos = intersect_pos;
     // if this is a group...
-    if (SP_IS_GROUP(item)) {
-        SPGroup* group = SP_GROUP(item);
+    if (is<SPGroup>(item)) {
+        auto group = cast<SPGroup>(item);
 
         // consider all first-order children
         double child_pos = 0.0;
-        std::vector<SPItem*> g = sp_item_group_item_list(group);
+        std::vector<SPItem*> g = group->item_list();
         for (auto child_item : g) {
             try_get_intersect_point_with_item_recursive(conn_pv, child_item,
                     item_transform * child_item->transform, child_pos);
@@ -71,7 +71,7 @@ static bool try_get_intersect_point_with_item_recursive(Geom::PathVector& conn_p
     }
 
     // if this is not a shape, nothing to be done
-    auto shape = dynamic_cast<SPShape const *>(item);
+    auto shape = cast<SPShape>(item);
     if (!shape)
         return false;
 
@@ -277,13 +277,13 @@ void sp_conn_end_href_changed(SPObject */*old_ref*/, SPObject */*ref*/,
             // This allows the connector tool to dive into a group's children
             // And connect to their children's centers.
             SPObject *parent = refobj->parent;
-            if (SP_IS_GROUP(parent) && ! SP_IS_LAYER(parent)) {
+            if (is<SPGroup>(parent) && ! SP_IS_LAYER(parent)) {
                 connEnd._group_connection
-                    = SP_ITEM(parent)->connectModified(sigc::bind(sigc::ptr_fun(&sp_conn_end_shape_modified),
+ = cast<SPItem>(parent)->connectModified(sigc::bind(sigc::ptr_fun(&sp_conn_end_shape_modified),
                                                                  path));
             }
             connEnd._transformed_connection
-                = SP_ITEM(refobj)->connectModified(sigc::bind(sigc::ptr_fun(&sp_conn_end_shape_modified),
+ = cast<SPItem>(refobj)->connectModified(sigc::bind(sigc::ptr_fun(&sp_conn_end_shape_modified),
                                                                  path));
         }
     }

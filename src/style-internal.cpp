@@ -23,6 +23,8 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
+#include <algorithm>
+#include <cmath>
 #include <glibmm/regex.h>
 
 #include "style-internal.h"
@@ -1411,11 +1413,7 @@ void SPIColor::read( gchar const *str ) {
             std::cerr << "SPIColor::read(): value is 'currentColor' but 'color' not available." << std::endl;
         }
     } else {
-        guint32 const rgb0 = sp_svg_read_color(str, 0xff);
-        if (rgb0 != 0xff) {
-            setColor(rgb0);
-            set = true;
-        }
+        set = value.color.fromString(str);
     }
 }
 
@@ -1460,12 +1458,8 @@ bool
 SPIColor::operator==(const SPIBase& rhs) const {
     if( const SPIColor* r = dynamic_cast<const SPIColor*>(&rhs) ) {
 
-        if ( (this->currentcolor    != r->currentcolor    ) ||
-             (this->value.color     != r->value.color     ) ||
-             (this->value.color.icc != r->value.color.icc ) ||
-             (this->value.color.icc && r->value.color.icc &&
-              this->value.color.icc->colorProfile != r->value.color.icc->colorProfile &&
-              this->value.color.icc->colors       != r->value.color.icc->colors ) ) {
+        // ICC support is handled by SPColor==
+        if (currentcolor != r->currentcolor || value.color != r->value.color) {
             return false;
         }
 
@@ -1485,14 +1479,6 @@ SPIColor::operator==(const SPIBase& rhs) const {
 // It is needed for computed value when value is 'currentColor'. It is also needed to
 // find the object for creating an href (this is done through document but should be done
 // directly so document not needed.. FIXME).
-
-SPIPaint::~SPIPaint() {
-    if( value.href ) {
-        clear();
-        delete value.href;
-        value.href = nullptr;
-    }
-}
 
 /**
  * Set SPIPaint object from string.
@@ -1542,9 +1528,9 @@ SPIPaint::read( gchar const *str ) {
                 if (!value.href) {
 
                     if (style->object) {
-                        value.href = new SPPaintServerReference(style->object);
+                        value.href = std::make_shared<SPPaintServerReference>(style->object);
                     } else if (document) {
-                        value.href = new SPPaintServerReference(document);
+                        value.href = std::make_shared<SPPaintServerReference>(document);
                     } else {
                         std::cerr << "SPIPaint::read: No valid object or document!" << std::endl;
                         return;
@@ -1588,24 +1574,9 @@ SPIPaint::read( gchar const *str ) {
         } else if (streq(str, "none")) {
             set = true;
             noneSet = true;
-        } else {
-            guint32 const rgb0 = sp_svg_read_color(str, &str, 0xff);
-            if (rgb0 != 0xff) {
-                setColor( rgb0 );
-                set = true;
-
-                while (g_ascii_isspace(*str)) {
-                    ++str;
-                }
-                if (strneq(str, "icc-color(", 10)) {
-                    SVGICCColor* tmp = new SVGICCColor();
-                    if ( ! sp_svg_read_icc_color( str, &str, tmp ) ) {
-                        delete tmp;
-                        tmp = nullptr;
-                    }
-                    value.color.icc = tmp;
-                }
-            }
+        } else if (value.color.fromString(str)) {
+            set = true;
+            colorSet = true;
         }
     }
 }
@@ -1643,18 +1614,8 @@ const Glib::ustring SPIPaint::get_value() const
             break;
         case SP_CSS_PAINT_ORIGIN_NORMAL:
             if (this->colorSet) {
-                char color_buf[8];
-                sp_svg_write_color(color_buf, sizeof(color_buf), this->value.color.toRGBA32(0));
                 if (!ret.empty()) ret += " ";
-                ret += color_buf;
-            }
-            if (this->value.color.icc) {
-                ret += " icc-color(";
-                ret += this->value.color.icc->colorProfile;
-                for(auto i: this->value.color.icc->colors) {
-                    ret += ", " + Glib::ustring::format(i);
-                }
-                ret += ")";
+                ret += value.color.toString();
             }
             break;
     }
@@ -1675,20 +1636,13 @@ SPIPaint::reset( bool init ) {
     paintOrigin = SP_CSS_PAINT_ORIGIN_NORMAL;
     colorSet = false;
     noneSet = false;
-    value.color.set( false );
+    value.color.set(0x0);
+    value.color.unsetColorProfile();
     tag = nullptr;
-    if (value.href){
-        if (value.href->getObject()) {
-            value.href->detach();
-        }
-    }
-    if( init ) {
-        if (id() == SPAttr::FILL) {
-            // 'black' is default for 'fill'
-            setColor(0.0, 0.0, 0.0);
-        } else if (id() == SPAttr::TEXT_DECORATION_COLOR) {
-            // currentcolor = true;
-        }
+    value.href.reset();
+
+    if (init && id() == SPAttr::FILL) {
+        setColor(0.0, 0.0, 0.0); // 'black' is default for 'fill'
     }
 }
 
@@ -1764,11 +1718,8 @@ SPIPaint::operator==(const SPIBase& rhs) const {
         }
 
         if ( this->isColor() ) {
-            if ( (this->value.color     != r->value.color     ) ||
-                 (this->value.color.icc != r->value.color.icc ) ||
-                 (this->value.color.icc && r->value.color.icc &&
-                  this->value.color.icc->colorProfile != r->value.color.icc->colorProfile &&
-                  this->value.color.icc->colors       != r->value.color.icc->colors ) ) {
+            // ICC handled by SPColor==
+            if (value.color != r->value.color) {
                 return false;
             }
         }
@@ -2157,6 +2108,15 @@ SPIDashArray::operator==(const SPIBase& rhs) const {
     return SPIBase::operator==(rhs);
 }
 
+bool SPIDashArray::is_valid() const {
+    // If any value in the list is negative, the <dasharray> value is invalid.
+    // https://svgwg.org/svg2-draft/painting.html#StrokeDashing
+
+    bool invalid = std::any_of(values.begin(), values.end(), [](const SPILength& len){
+        return len.value < 0 || !std::isfinite(len.value);
+    });
+    return !invalid;
+}
 
 // SPIFontSize ----------------------------------------------------------
 

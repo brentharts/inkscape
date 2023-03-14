@@ -41,7 +41,6 @@
 #include "inkscape-window.h"
 #include "inkscape-version.h"
 
-#include "display/control/canvas-axonomgrid.h"
 #include "display/control/canvas-item-drawing.h"
 #include "display/control/canvas-item-guideline.h"
 
@@ -50,6 +49,7 @@
 #include "object/sp-image.h"
 #include "object/sp-namedview.h"
 #include "object/sp-root.h"
+#include "object/sp-grid.h"
 
 #include "ui/shortcuts.h"
 #include "ui/dialog/swatches.h"
@@ -788,11 +788,7 @@ SPDesktopWidget::update_guides_lock()
 
     if (down != lock) {
         nv->toggleLockGuides();
-        if (down) {
-            setMessage (Inkscape::NORMAL_MESSAGE, _("Locked all guides"));
-        } else {
-            setMessage (Inkscape::NORMAL_MESSAGE, _("Unlocked all guides"));
-        }
+        setMessage(Inkscape::NORMAL_MESSAGE, down ? _("Locked all guides") : _("Unlocked all guides"));
     }
 }
 
@@ -1205,8 +1201,6 @@ SPDesktopWidget::SPDesktopWidget(InkscapeWindow *inkscape_window, SPDocument *do
 
     dtw->_dt2r = 1. / namedview->display_units->factor;
 
-    dtw->_ruler_origin = Geom::Point(0,0); //namedview->gridorigin;   Why was the grid origin used here?
-
     // This section seems backwards!
     dtw->desktop = new SPDesktop();
     dtw->desktop->init (namedview, dtw->_canvas, this);
@@ -1294,11 +1288,10 @@ SPDesktopWidget::update_rulers()
 
 void SPDesktopWidget::namedviewModified(SPObject *obj, guint flags)
 {
-    SPNamedView *nv=SP_NAMEDVIEW(obj);
+    auto nv = cast<SPNamedView>(obj);
 
     if (flags & SP_OBJECT_MODIFIED_FLAG) {
         _dt2r = 1. / nv->display_units->factor;
-        _ruler_origin = Geom::Point(0,0); //nv->gridorigin;   Why was the grid origin used here?
 
         _canvas_grid->GetVRuler()->set_unit(nv->getDisplayUnit());
         _canvas_grid->GetHRuler()->set_unit(nv->getDisplayUnit());
@@ -1366,7 +1359,7 @@ bool SPDesktopWidget::onFocusInEvent(GdkEventFocus*)
     if (prefs->getBool("/options/bitmapautoreload/value", true)) {
         std::vector<SPObject *> imageList = (desktop->doc())->getResourceList("image");
         for (auto it : imageList) {
-            SPImage* image = SP_IMAGE(it);
+            auto image = cast<SPImage>(it);
             image->refresh_if_outdated();
         }
     }
@@ -1807,8 +1800,7 @@ SPDesktopWidget::on_ruler_box_button_release_event(GdkEventButton *event, Gtk::W
             ruler_snap_new_guide(desktop, event_dt, normal);
         }
 
-        delete _active_guide;
-        _active_guide = nullptr;
+        _active_guide.reset();
         if ((horiz ? wy : wx) >= 0) {
             Inkscape::XML::Document *xml_doc = desktop->doc()->getReprDoc();
             Inkscape::XML::Node *repr = xml_doc->createElement("sodipodi:guide");
@@ -1882,17 +1874,18 @@ SPDesktopWidget::on_ruler_box_button_press_event(GdkEventButton *event, Gtk::Wid
         Geom::Point normal_tr_to_bl(-1., y_dir); //topright to bottomleft
         normal_bl_to_tr.normalize();
         normal_tr_to_bl.normalize();
-        Inkscape::CanvasGrid * grid = sp_namedview_get_first_enabled_grid(desktop->namedview);
-        if (grid){
-            if (grid->getGridType() == Inkscape::GRID_AXONOMETRIC ) {
-                Inkscape::CanvasAxonomGrid *axonomgrid = dynamic_cast<Inkscape::CanvasAxonomGrid *>(grid);
+        SPGrid * grid = desktop->namedview->getFirstEnabledGrid();
+        if (grid) {
+            if (grid->getType() == GridType::AXONOMETRIC ) {
+                auto angle_x = Geom::rad_from_deg(grid->getAngleX());
+                auto angle_z = Geom::rad_from_deg(grid->getAngleZ());
                 if (event->state & GDK_CONTROL_MASK) {
                     // guidelines normal to gridlines
-                    normal_bl_to_tr = Geom::Point::polar(-axonomgrid->angle_rad[0], 1.0);
-                    normal_tr_to_bl = Geom::Point::polar(axonomgrid->angle_rad[2], 1.0);
+                    normal_bl_to_tr = Geom::Point::polar(-angle_x, 1.0);
+                    normal_tr_to_bl = Geom::Point::polar(angle_z, 1.0);
                 } else {
-                    normal_bl_to_tr = rot90(Geom::Point::polar(axonomgrid->angle_rad[2], 1.0));
-                    normal_tr_to_bl = rot90(Geom::Point::polar(-axonomgrid->angle_rad[0], 1.0));
+                    normal_bl_to_tr = Geom::rot90(Geom::Point::polar(angle_z, 1.0));
+                    normal_tr_to_bl = Geom::rot90(Geom::Point::polar(-angle_x, 1.0));
                 }
             }
         }
@@ -1914,7 +1907,7 @@ SPDesktopWidget::on_ruler_box_button_press_event(GdkEventButton *event, Gtk::Wid
             }
         }
 
-        _active_guide = new Inkscape::CanvasItemGuideLine(desktop->getCanvasGuides(), Glib::ustring(), event_dt, _normal);
+        _active_guide = make_canvasitem<Inkscape::CanvasItemGuideLine>(desktop->getCanvasGuides(), Glib::ustring(), event_dt, _normal);
         _active_guide->set_stroke(desktop->namedview->guidehicolor);
 
         // Ruler grabs all events until button release.

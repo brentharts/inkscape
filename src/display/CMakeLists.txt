@@ -39,8 +39,6 @@ set(display_SRC
     nr-style.cpp
     nr-svgfonts.cpp
 
-    control/canvas-axonomgrid.cpp
-    control/canvas-grid.cpp
     control/canvas-temporary-item-list.cpp
     control/canvas-temporary-item.cpp
     control/snap-indicator.cpp
@@ -48,6 +46,7 @@ set(display_SRC
     control/canvas-item.cpp
     control/canvas-item-bpath.cpp
     control/canvas-item-catchall.cpp
+    control/canvas-item-context.cpp
     control/canvas-item-ctrl.cpp
     control/canvas-item-curve.cpp
     control/canvas-item-drawing.cpp
@@ -64,16 +63,19 @@ set(display_SRC
     cairo-templates.h
     cairo-utils.h
     curve.h
+    dither-lock.h
     drawing-context.h
     drawing-group.h
     drawing-image.h
     drawing-item.h
+    drawing-item-ptr.h
     drawing-paintserver.h
     drawing-pattern.h
     drawing-shape.h
     drawing-surface.h
     drawing-text.h
     drawing.h
+    initlock.h
     nr-3dutils.h
     nr-filter-blend.h
     nr-filter-colormatrix.h
@@ -103,9 +105,8 @@ set(display_SRC
     nr-style.h
     nr-svgfonts.h
     rendermode.h
+    tags.h
 
-    control/canvas-axonomgrid.h
-    control/canvas-grid.h
     control/canvas-temporary-item-list.h
     control/canvas-temporary-item.h
     control/snap-indicator.h
@@ -114,6 +115,7 @@ set(display_SRC
     control/canvas-item-bpath.h
     control/canvas-item-buffer.h
     control/canvas-item-catchall.h
+    control/canvas-item-context.h
     control/canvas-item-ctrl.h
     control/canvas-item-curve.h
     control/canvas-item-drawing.h
@@ -121,6 +123,7 @@ set(display_SRC
     control/canvas-item-grid.h
     control/canvas-item-group.h
     control/canvas-item-guideline.h
+    control/canvas-item-ptr.h
     control/canvas-item-quad.h
     control/canvas-item-rect.h
     control/canvas-item-text.h

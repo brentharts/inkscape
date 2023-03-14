@@ -19,10 +19,12 @@
 #include "number-opt-number.h"
 #include "display/nr-filter-convolve-matrix.h"
 
-class SPFeConvolveMatrix
+class SPFeConvolveMatrix final
     : public SPFilterPrimitive
 {
 public:
+    int tag() const override { return tag_of<decltype(*this)>; }
+
     NumberOptNumber get_order() const { return order; }
     std::vector<double> const &get_kernel_matrix() const { return kernelMatrix; }
 
@@ -50,9 +52,6 @@ protected:
 
     std::unique_ptr<Inkscape::Filters::FilterPrimitive> build_renderer(Inkscape::DrawingItem *item) const override;
 };
-
-MAKE_SP_OBJECT_DOWNCAST_FUNCTIONS(SP_FECONVOLVEMATRIX, SPFeConvolveMatrix)
-MAKE_SP_OBJECT_TYPECHECK_FUNCTIONS(SP_IS_FECONVOLVEMATRIX, SPFeConvolveMatrix)
 
 #endif // SP_FECONVOLVEMATRIX_H_SEEN
 

@@ -30,7 +30,7 @@
 #include "display/control/canvas-item-ctrl.h"
 #include "ui/tools/tool-base.h"
 #include "ui/tools/node-tool.h"
-#include "ui/widget/canvas.h"
+#include "ui/widget/canvas.h" // autoscroll
 
 using Inkscape::DocumentUndo;
 
@@ -78,9 +78,8 @@ SPKnot::SPKnot(SPDesktop *desktop, gchar const *tip, Inkscape::CanvasItemCtrlTyp
     image[SP_KNOT_STATE_DRAGGING] = nullptr;
     image[SP_KNOT_STATE_SELECTED] = nullptr;
 
-    ctrl = new Inkscape::CanvasItemCtrl(desktop->getCanvasControls(), type); // Shape, mode set
-    Glib::ustring ctrl_name = "CanvasItemCtrl:Knot: " + name;
-    ctrl->set_name(ctrl_name);
+    ctrl = make_canvasitem<Inkscape::CanvasItemCtrl>(desktop->getCanvasControls(), type); // Shape, mode set
+    ctrl->set_name("CanvasItemCtrl:Knot:" + name);
 
     // Are these needed?
     ctrl->set_fill(0xffffff00);
@@ -101,9 +100,7 @@ SPKnot::~SPKnot() {
         gdk_seat_ungrab(seat);
     }
 
-    if (ctrl) {
-        delete ctrl;
-    }
+    ctrl.reset();
 
     if (this->tip) {
         g_free(this->tip);
@@ -132,7 +129,8 @@ void SPKnot::startDragging(Geom::Point const &p, gint x, gint y, guint32 etime) 
     grabbed = true;
 }
 
-void SPKnot::selectKnot(bool select){
+void SPKnot::selectKnot(bool select)
+{
     setFlag(SP_KNOT_SELECTED, select);
 }
 
@@ -246,7 +244,8 @@ bool SPKnot::eventHandler(GdkEvent *event)
             // motion notify coordinates as given (no snapping back to origin)
             within_tolerance = false;
 
-            if (gdk_event_get_axis (event, GDK_AXIS_PRESSURE, &pressure)) {
+            // Note: Synthesized events don't have a device.
+            if (event->motion.device && gdk_event_get_axis(event, GDK_AXIS_PRESSURE, &pressure)) {
                 pressure = CLAMP (pressure, 0, 1);
             } else {
                 pressure = 0.5;
@@ -339,11 +338,11 @@ void sp_knot_handler_request_position(GdkEvent *event, SPKnot *knot) {
     Geom::Point p = motion_dt - knot->grabbed_rel_pos;
 
     knot->requestPosition(p, event->motion.state);
-    knot->desktop->scroll_to_point (motion_dt);
+    knot->desktop->getCanvas()->enable_autoscroll();
     knot->desktop->set_coordinate_status(knot->pos); // display the coordinate of knot, not cursor - they may be different!
 
     if (event->motion.state & GDK_BUTTON1_MASK) {
-        knot->desktop->canvas->gobble_motion_events(GDK_BUTTON1_MASK);
+        Inkscape::UI::Tools::gobble_motion_events(GDK_BUTTON1_MASK);
     }
 }
 
@@ -431,7 +430,6 @@ void SPKnot::updateCtrl() {
         }
         ctrl->set_angle(angle);
         ctrl->set_anchor(anchor);
-        ctrl->set_pixbuf(static_cast<GdkPixbuf *>(pixbuf));
     }
 
     _setCtrlState();
@@ -470,10 +468,6 @@ void SPKnot::setAnchor(guint i) {
 
 void SPKnot::setMode(Inkscape::CanvasItemCtrlMode m) {
     mode = m;
-}
-
-void SPKnot::setPixbuf(gpointer p) {
-    pixbuf = p;
 }
 
 void SPKnot::setAngle(double i) {

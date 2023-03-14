@@ -10,14 +10,13 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
-#ifndef SEEN_INKSCAPE_DISPLAY_DRAWING_IMAGE_H
-#define SEEN_INKSCAPE_DISPLAY_DRAWING_IMAGE_H
+#ifndef INKSCAPE_DISPLAY_DRAWING_IMAGE_H
+#define INKSCAPE_DISPLAY_DRAWING_IMAGE_H
 
 #include <memory>
-
-#include <cairo.h>
-#include <gdk-pixbuf/gdk-pixbuf.h>
 #include <2geom/transforms.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <cairo.h>
 
 #include "display/drawing-item.h"
 
@@ -29,7 +28,7 @@ class DrawingImage
 {
 public:
     DrawingImage(Drawing &drawing);
-    ~DrawingImage() override;
+    int tag() const override { return tag_of<decltype(*this)>; }
 
     void setStyle(SPStyle const *style, SPStyle const *context_style = nullptr) override;
 
@@ -40,8 +39,10 @@ public:
     Geom::Rect bounds() const;
 
 protected:
+    ~DrawingImage() override = default;
+
     unsigned _updateItem(Geom::IntRect const &area, UpdateContext const &ctx, unsigned flags, unsigned reset) override;
-    unsigned _renderItem(DrawingContext &dc, Geom::IntRect const &area, unsigned flags, DrawingItem *stop_at) override;
+    unsigned _renderItem(DrawingContext &dc, RenderContext &rc, Geom::IntRect const &area, unsigned flags, DrawingItem const *stop_at) const override;
     DrawingItem *_pickItem(Geom::Point const &p, double delta, unsigned flags) override;
 
     std::shared_ptr<Inkscape::Pixbuf const> _pixbuf;
@@ -54,9 +55,9 @@ protected:
     Geom::Scale _scale;
 };
 
-} // end namespace Inkscape
+} // namespace Inkscape
 
-#endif // !SEEN_INKSCAPE_DISPLAY_DRAWING_ITEM_H
+#endif // INKSCAPE_DISPLAY_DRAWING_IMAGE_H
 
 /*
   Local Variables:

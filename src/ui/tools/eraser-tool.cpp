@@ -80,14 +80,12 @@ namespace Inkscape {
 namespace UI {
 namespace Tools {
 
-extern EraserToolMode const DEFAULT_ERASER_MODE = EraserToolMode::CUT;
-
 EraserTool::EraserTool(SPDesktop *desktop)
     : DynamicBase(desktop, "/tools/eraser", "eraser.svg")
     , _break_apart{"/tools/eraser/break_apart", false}
     , _mode_int{"/tools/eraser/mode", 1} // Cut mode is default
 {
-    currentshape = new Inkscape::CanvasItemBpath(desktop->getCanvasSketch());
+    currentshape = make_canvasitem<CanvasItemBpath>(desktop->getCanvasSketch());
     currentshape->set_stroke(0x0);
     currentshape->set_fill(trace_color_rgba, trace_wind_rule);
 
@@ -118,11 +116,7 @@ EraserTool::EraserTool(SPDesktop *desktop)
     enableSelectionCue();
 }
 
-EraserTool::~EraserTool()
-{
-    delete currentshape;
-    currentshape = nullptr;
-}
+EraserTool::~EraserTool() = default;
 
 /**  Reads the current Eraser mode from Preferences and sets `mode` accordingly. */
 void EraserTool::_updateMode()
@@ -353,21 +347,12 @@ void EraserTool::_cancel()
     is_drawing = false;
     ungrabCanvasEvents();
 
-    _removeTemporarySegments();
+    segments.clear();
 
     /* reset accumulated curve */
     accumulated.reset();
     _clearCurrent();
     repr = nullptr;
-}
-
-/** Removes all temporary line segments */
-void EraserTool::_removeTemporarySegments()
-{
-    for (auto segment : segments) {
-        delete segment;
-    }
-    segments.clear();
 }
 
 bool EraserTool::root_handler(GdkEvent* event)
@@ -451,7 +436,7 @@ bool EraserTool::root_handler(GdkEvent* event)
                 dragging = false;
 
                 _apply(motion_dt);
-                _removeTemporarySegments();
+                segments.clear();
 
                 // Create eraser stroke shape
                 _fitAndSplit(true);
@@ -599,13 +584,13 @@ bool EraserTool::_handleKeypress(const GdkEventKey *key)
 SPItem *EraserTool::_insertAcidIntoDocument(SPDocument *document)
 {
     auto *top_layer = _desktop->layerManager().currentRoot();
-    auto *eraser_item = dynamic_cast<SPItem *>(top_layer->appendChildRepr(repr));
+    auto *eraser_item = cast<SPItem>(top_layer->appendChildRepr(repr));
     Inkscape::GC::release(repr);
     eraser_item->updateRepr();
     Geom::PathVector pathv = accumulated.get_pathvector() * _desktop->dt2doc();
     pathv *= eraser_item->i2doc_affine().inverse();
     repr->setAttribute("d", sp_svg_write_path(pathv));
-    return dynamic_cast<SPItem *>(document->getObjectByRepr(repr));
+    return cast<SPItem>(document->getObjectByRepr(repr));
 }
 
 void EraserTool::_clearCurrent()
@@ -685,14 +670,14 @@ bool EraserTool::_doWork()
 bool EraserTool::_cutErase(EraseTarget target, bool store_survivers)
 {
     // If the item is a clone, we check if the original is cuttable before unlinking it
-    if (SPUse *use = dynamic_cast<SPUse *>(target.item)) {
+    if (auto use = cast<SPUse>(target.item)) {
         auto original = use->trueOriginal();
         if (_uncuttableItemType(original)) {
             if (store_survivers && target.was_selected) {
                 _survivers.push_back(target.item);
             }
             return false;
-        } else if (auto *group = dynamic_cast<SPGroup *>(original)) {
+        } else if (auto *group = cast<SPGroup>(original)) {
             return _probeUnlinkCutClonedGroup(target, use, group, store_survivers);
         }
         // A simple clone of a cuttable item: unlink and erase it.
@@ -725,14 +710,14 @@ bool EraserTool::_probeUnlinkCutClonedGroup(EraseTarget &original_target, SPUse 
     children.reserve(cloned_group->getItemCount());
 
     for (auto *child : cloned_group->childList(false)) {
-        children.emplace_back(dynamic_cast<SPItem *>(child), false);
+        children.emplace_back(cast<SPItem>(child), false);
     }
     auto const filtered_children = _filterCutEraseables(children, true);
 
     // We must now check if any of the eraseable items in the original group, after transforming
     // to the coordinates of the clone, actually intersect the eraser stroke.
     Geom::Affine parent_inverse_transform;
-    if (auto *parent_item = dynamic_cast<SPItem *>(cloned_group->parent)) {
+    if (auto *parent_item = cast<SPItem>(cloned_group->parent)) {
         parent_inverse_transform = parent_item->i2doc_affine().inverse();
     }
     auto const relative_transform = parent_inverse_transform * clone->i2doc_affine();
@@ -749,7 +734,7 @@ bool EraserTool::_probeUnlinkCutClonedGroup(EraseTarget &original_target, SPUse 
         }
     }
     if (found_collision) {
-        auto *unlinked = dynamic_cast<SPGroup *>(clone->unlink());
+        auto *unlinked = cast<SPGroup>(clone->unlink());
         if (!unlinked) {
             return false;
         }
@@ -757,7 +742,7 @@ bool EraserTool::_probeUnlinkCutClonedGroup(EraseTarget &original_target, SPUse 
         unlinked_children.reserve(filtered_children.size());
 
         for (auto *child : unlinked->childList(false)) {
-            unlinked_children.emplace_back(dynamic_cast<SPItem *>(child), false);
+            unlinked_children.emplace_back(cast<SPItem>(child), false);
         }
         auto overlapping = _filterCutEraseables(_filterByCollision(unlinked_children, _acid));
 
@@ -791,7 +776,7 @@ EraserTool::Error EraserTool::_uncuttableItemType(SPItem *item)
 {
     if (!item) {
         return NON_EXISTENT;
-    } else if (dynamic_cast<SPImage *>(item)) {
+    } else if (is<SPImage>(item)) {
         return RASTER_IMAGE;
     } else if (_isStraightSegment(item)) {
         return NO_AREA_PATH;
@@ -928,21 +913,21 @@ void EraserTool::_clipErase(SPItem *item) const
     SPClipPath *clip_path = item->getClipObject();
     if (clip_path) {
         std::vector<SPItem *> selected;
-        selected.push_back(SP_ITEM(clip_path->firstChild()));
+        selected.push_back(cast<SPItem>(clip_path->firstChild()));
         std::vector<Inkscape::XML::Node *> to_select;
         std::vector<SPItem *> items(selected);
         sp_item_list_to_curves(items, selected, to_select);
-        Inkscape::XML::Node *clip_data = SP_ITEM(clip_path->firstChild())->getRepr();
+        Inkscape::XML::Node *clip_data = cast<SPItem>(clip_path->firstChild())->getRepr();
         if (!clip_data && !to_select.empty()) {
             clip_data = *(to_select.begin());
         }
         if (clip_data) {
             Inkscape::XML::Node *dup_clip = clip_data->duplicate(xml_doc);
             if (dup_clip) {
-                SPItem *dup_clip_obj = SP_ITEM(item->parent->appendChildRepr(dup_clip));
+                auto dup_clip_obj = cast<SPItem>(item->parent->appendChildRepr(dup_clip));
                 Inkscape::GC::release(dup_clip);
                 if (dup_clip_obj) {
-                    dup_clip_obj->transform *= item->getRelativeTransform(SP_ITEM(item->parent));
+                    dup_clip_obj->transform *= item->getRelativeTransform(cast<SPItem>(item->parent));
                     dup_clip_obj->updateRepr();
                     delete_old_clip_path = true;
                     w_selection.raiseToTop(true);
@@ -954,10 +939,10 @@ void EraserTool::_clipErase(SPItem *item) const
     } else {
         Inkscape::XML::Node *rect_repr = xml_doc->createElement("svg:rect");
         sp_desktop_apply_style_tool(_desktop, rect_repr, "/tools/eraser", false);
-        SPRect *rect = SP_RECT(item->parent->appendChildRepr(rect_repr));
+        auto rect = cast<SPRect>(item->parent->appendChildRepr(rect_repr));
         Inkscape::GC::release(rect_repr);
         rect->setPosition(bbox->left(), bbox->top(), bbox->width(), bbox->height());
-        rect->transform = SP_ITEM(rect->parent)->i2doc_affine().inverse();
+        rect->transform = cast<SPItem>(rect->parent)->i2doc_affine().inverse();
 
         rect->updateRepr();
         rect->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
@@ -977,7 +962,7 @@ void EraserTool::_clipErase(SPItem *item) const
  or consists of several such segments */
 bool EraserTool::_isStraightSegment(SPItem *path)
 {
-    SPPath *as_path = dynamic_cast<SPPath *>(path);
+    auto as_path = cast<SPPath>(path);
     if (!as_path) {
         return false;
     }
@@ -1380,7 +1365,7 @@ void EraserTool::_fitDrawLastPoint()
 
     /* fixme: Cannot we cascade it to root more clearly? */
     cbp->connect_event(sigc::bind(sigc::ptr_fun(sp_desktop_root_handler), _desktop));
-    segments.push_back(cbp);
+    segments.emplace_back(cbp);
 
     if (mode == EraserToolMode::DELETE) {
         cbp->hide();

@@ -18,9 +18,12 @@
 #include "sp-filter-primitive.h"
 #include "svg/svg-icc-color.h"
 
-class SPFeFlood
+class SPFeFlood final
     : public SPFilterPrimitive
 {
+public:
+    int tag() const override { return tag_of<decltype(*this)>; }
+
 private:
     uint32_t color = 0x0;
     double opacity = 1.0;
@@ -32,9 +35,6 @@ protected:
 
     std::unique_ptr<Inkscape::Filters::FilterPrimitive> build_renderer(Inkscape::DrawingItem *item) const override;
 };
-
-MAKE_SP_OBJECT_DOWNCAST_FUNCTIONS(SP_FEFLOOD, SPFeFlood)
-MAKE_SP_OBJECT_TYPECHECK_FUNCTIONS(SP_IS_FEFLOOD, SPFeFlood)
 
 #endif // SP_FEFLOOD_H_SEEN
 

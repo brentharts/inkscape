@@ -20,10 +20,14 @@
 #include "desktop.h"
 #include "document-undo.h"
 #include "document.h"
+#include "extension/db.h"
+#include "extension/template.h"
 #include "io/resource.h"
 #include "object/sp-namedview.h"
 #include "object/sp-page.h"
+#include "ui/builder-utils.h"
 #include "ui/icon-names.h"
+#include "ui/themes.h"
 #include "ui/tools/pages-tool.h"
 #include "util/paper.h"
 #include "util/units.h"
@@ -34,6 +38,21 @@ namespace Inkscape {
 namespace UI {
 namespace Toolbar {
 
+class SearchCols : public Gtk::TreeModel::ColumnRecord
+{
+public:
+    // These types must match those for the model in the ui file
+    SearchCols()
+    {
+        this->add(this->name);
+        this->add(this->label);
+        this->add(this->key);
+    }
+    Gtk::TreeModelColumn<Glib::ustring> name;
+    Gtk::TreeModelColumn<Glib::ustring> label;
+    Gtk::TreeModelColumn<Glib::ustring> key;
+};
+
 PageToolbar::PageToolbar(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &builder, SPDesktop *desktop)
     : Gtk::Toolbar(cobject)
     , _desktop(desktop)
@@ -41,6 +60,8 @@ PageToolbar::PageToolbar(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
     , text_page_label(nullptr)
 {
     builder->get_widget("page_sizes", combo_page_sizes);
+    builder->get_widget("page_margins", text_page_margins);
+    builder->get_widget("page_bleeds", text_page_bleeds);
     builder->get_widget("page_label", text_page_label);
     builder->get_widget("page_pos", label_page_pos);
     builder->get_widget("page_backward", btn_page_backward);
@@ -49,12 +70,59 @@ PageToolbar::PageToolbar(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
     builder->get_widget("page_move_objects", btn_move_toggle);
     builder->get_widget("sep1", sep1);
 
+    sizes_list = Glib::RefPtr<Gtk::ListStore>::cast_dynamic(
+        builder->get_object("page_sizes_list")
+    );
+    sizes_search = Glib::RefPtr<Gtk::ListStore>::cast_dynamic(
+        builder->get_object("page_sizes_search")
+    );
+    sizes_searcher = Glib::RefPtr<Gtk::EntryCompletion>::cast_dynamic(
+        builder->get_object("sizes_searcher")
+    );
+
+    builder->get_widget("margin_popover", margin_popover);
+    builder->get_widget_derived("margin_top", margin_top);
+    builder->get_widget_derived("margin_right", margin_right);
+    builder->get_widget_derived("margin_bottom", margin_bottom);
+    builder->get_widget_derived("margin_left", margin_left);
+
     if (text_page_label) {
         text_page_label->signal_changed().connect(sigc::mem_fun(*this, &PageToolbar::labelEdited));
     }
+    if (sizes_searcher) {
+        sizes_searcher->signal_match_selected().connect([=](const Gtk::TreeModel::iterator &iter) {
+            SearchCols cols;
+            Gtk::TreeModel::Row row = *(iter);
+            Glib::ustring preset_key = row[cols.key];
+            sizeChoose(preset_key);
+            return false;
+        }, false);
+    }
+    text_page_bleeds->signal_activate().connect(sigc::mem_fun(*this, &PageToolbar::bleedsEdited));
+    text_page_margins->signal_activate().connect(sigc::mem_fun(*this, &PageToolbar::marginsEdited));
+    text_page_margins->signal_icon_press().connect([=](Gtk::EntryIconPosition, const GdkEventButton*){
+        if (auto page = _document->getPageManager().getSelected()) {
+            auto margin = page->getMargin();
+            auto unit = _document->getDisplayUnit()->abbr;
+            margin_top->set_value(margin.top().toValue(unit));
+            margin_right->set_value(margin.right().toValue(unit));
+            margin_bottom->set_value(margin.bottom().toValue(unit));
+            margin_left->set_value(margin.left().toValue(unit));
+            text_page_bleeds->set_text(page->getBleedLabel());
+        }
+        margin_popover->show();
+    });
+    margin_top->signal_value_changed().connect(sigc::mem_fun(*this, &PageToolbar::marginTopEdited));
+    margin_right->signal_value_changed().connect(sigc::mem_fun(*this, &PageToolbar::marginRightEdited));
+    margin_bottom->signal_value_changed().connect(sigc::mem_fun(*this, &PageToolbar::marginBottomEdited));
+    margin_left->signal_value_changed().connect(sigc::mem_fun(*this, &PageToolbar::marginLeftEdited));
 
     if (combo_page_sizes) {
-        combo_page_sizes->signal_changed().connect(sigc::mem_fun(*this, &PageToolbar::sizeChoose));
+        combo_page_sizes->set_id_column(2);
+        combo_page_sizes->signal_changed().connect([=] {
+            std::string preset_key = combo_page_sizes->get_active_id();
+            sizeChoose(preset_key);
+        });
         entry_page_sizes = dynamic_cast<Gtk::Entry *>(combo_page_sizes->get_child());
         if (entry_page_sizes) {
             entry_page_sizes->set_placeholder_text(_("ex.: 100x100cm"));
@@ -72,13 +140,11 @@ PageToolbar::PageToolbar(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
                 return false;
             });
             entry_page_sizes->signal_focus_out_event().connect([=](GdkEventFocus *) {
-               setSizeText(nullptr, true);
+               if (_document)
+                   setSizeText(nullptr, true);
                return false;
             });
-        }
-        auto& page_sizes = Inkscape::PaperSize::getPageSizes();
-        for (size_t i = 0; i < page_sizes.size(); i++) {
-            combo_page_sizes->append(std::to_string(i), page_sizes[i].getDescription(false));
+            populate_sizes();
         }
     }
 
@@ -93,6 +159,38 @@ PageToolbar::PageToolbar(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
     // Constructed by a builder, so we're going to protect the widget from destruction.
     this->reference();
     was_referenced = true;
+}
+
+/**
+ * Take all selectable page sizes and add to search and dropdowns
+ */
+void PageToolbar::populate_sizes()
+{
+    SearchCols cols;
+
+    Inkscape::Extension::DB::TemplateList extensions;
+    Inkscape::Extension::db.get_template_list(extensions);
+
+    for (auto tmod : extensions) {
+        if (!tmod->can_resize())
+            continue;
+        for (auto preset : tmod->get_presets()) {
+            if (preset->is_visible(Inkscape::Extension::TEMPLATE_SIZE_LIST)) {
+                // Goes into drop down
+                Gtk::TreeModel::Row row = *(sizes_list->append());
+                row[cols.name] = preset->get_name();
+                row[cols.label] = " <small><span fgalpha=\"50%\">" + preset->get_label() + "</span></small>";
+                row[cols.key] = preset->get_key();
+            }
+            if (preset->is_visible(Inkscape::Extension::TEMPLATE_SIZE_SEARCH)) {
+                // Goes into text search
+                Gtk::TreeModel::Row row = *(sizes_search->append());
+                row[cols.name] = preset->get_name();
+                row[cols.label] = preset->get_label();
+                row[cols.key] = preset->get_key();
+            }
+        }
+    }
 }
 
 void PageToolbar::on_parent_changed(Gtk::Widget *)
@@ -141,32 +239,95 @@ void PageToolbar::labelEdited()
     }
 }
 
-void PageToolbar::sizeChoose()
+void PageToolbar::bleedsEdited()
 {
-    auto &pm = _document->getPageManager();
-    try {
-        auto p_rect = pm.getSelectedPageRect();
-        bool landscape = p_rect.width() > p_rect.height();
+    auto text = text_page_bleeds->get_text();
 
-        auto page_id = std::stoi(combo_page_sizes->get_active_id());
-        auto& page_sizes = Inkscape::PaperSize::getPageSizes();
-        if (page_id >= 0 && page_id < page_sizes.size()) {
-            auto&& ps = page_sizes[page_id];
-            // Keep page orientation while selecting size
-            auto width = ps.unit->convert(ps.size[landscape], "px");
-            auto height = ps.unit->convert(ps.size[!landscape], "px");
-            pm.resizePage(width, height);
-            setSizeText();
-            DocumentUndo::maybeDone(_document, "page-resize", _("Resize Page"), INKSCAPE_ICON("tool-pages"));
-        } else {
-            // Page not found, i.e., "Custom" was selected.
-            entry_page_sizes->grab_focus();
-        }
-    } catch (std::invalid_argument const &e) {
-        // Ignore because user is typing into Entry
+    // And modifiction to the bleed causes pages to be enabled
+    auto &pm = _document->getPageManager();
+    pm.enablePages();
+
+    if (auto page = pm.getSelected()) {
+        page->setBleed(text);
+        DocumentUndo::maybeDone(_document, "page-bleed", _("Edit Page Bleed"), INKSCAPE_ICON("tool-pages"));
+
+        auto bleed = page->getBleed();
+        text_page_bleeds->set_text(page->getBleedLabel());
     }
 }
 
+void PageToolbar::marginsEdited()
+{
+    auto text = text_page_margins->get_text();
+
+    // And modifiction to the margin causes pages to be enabled
+    auto &pm = _document->getPageManager();
+    pm.enablePages();
+
+    if (auto page = pm.getSelected()) {
+        page->setMargin(text);
+        DocumentUndo::maybeDone(_document, "page-margin", _("Edit Page Margin"), INKSCAPE_ICON("tool-pages"));
+        setMarginText(page);
+    }
+}
+
+void PageToolbar::marginTopEdited()
+{
+    marginSideEdited(0, margin_top->get_text());
+}
+void PageToolbar::marginRightEdited()
+{
+    marginSideEdited(1, margin_right->get_text());
+}
+void PageToolbar::marginBottomEdited()
+{
+    marginSideEdited(2, margin_bottom->get_text());
+}
+void PageToolbar::marginLeftEdited()
+{
+    marginSideEdited(3, margin_left->get_text());
+}
+void PageToolbar::marginSideEdited(int side, const Glib::ustring &value)
+{
+    // And modifiction to the margin causes pages to be enabled
+    auto &pm = _document->getPageManager();
+    pm.enablePages();
+
+    if (auto page = pm.getSelected()) {
+        page->setMarginSide(side, value, false);
+        DocumentUndo::maybeDone(_document, "page-margin", _("Edit Page Margin"), INKSCAPE_ICON("tool-pages"));
+        setMarginText(page);
+    }
+}
+
+void PageToolbar::sizeChoose(const std::string &preset_key)
+{
+    if (auto preset = Extension::Template::get_any_preset(preset_key)) {
+        auto &pm = _document->getPageManager();
+        // The page orientation is a part of the toolbar widget, so we pass this
+        // as a specially named pref, the extension can then decide to use it or not.
+        auto p_rect = pm.getSelectedPageRect();
+        std::string orient = p_rect.width() > p_rect.height() ? "land" : "port";
+
+        auto page = pm.getSelected();
+        preset->resize_to_template(_document, page, {
+            {"orientation", orient},
+        });
+        if (page) {
+            page->setSizeLabel(preset->get_name());
+        }
+
+        setSizeText();
+        DocumentUndo::maybeDone(_document, "page-resize", _("Resize Page"), INKSCAPE_ICON("tool-pages"));
+    } else {
+        // Page not found, i.e., "Custom" was selected or user is typing in.
+        entry_page_sizes->grab_focus();
+    }
+}
+
+/**
+ * Convert the parsed sections of a text input into a desktop pixel value.
+ */
 double PageToolbar::_unit_to_size(std::string number, std::string unit_str, std::string backup)
 {
     // We always support comma, even if not in that particular locale.
@@ -210,6 +371,7 @@ void PageToolbar::sizeChanged()
 
     std::smatch matches;
     if (std::regex_match(text, matches, re_size)) {
+        // Convert the desktop px back into document units for 'resizePage'
         double width = _unit_to_size(matches[1], matches[2], matches[5]);
         double height = _unit_to_size(matches[4], matches[5], matches[2]);
         if (width > 0 && height > 0) {
@@ -224,51 +386,46 @@ void PageToolbar::sizeChanged()
  */
 void PageToolbar::setSizeText(SPPage *page, bool display_only)
 {
+    SearchCols cols;
+
     if (!page)
         page = _document->getPageManager().getSelected();
 
-    auto unit = _document->getDisplayUnit();
-    double width = _document->getWidth().value(unit);
-    double height = _document->getHeight().value(unit);
-    if (page) {
-        auto px = Inkscape::Util::unit_table.getUnit("px");
-        auto rect = page->getDesktopRect();
-        width = px->convert(rect.width(), unit);
-        height = px->convert(rect.height(), unit);
+    auto label = _document->getPageManager().getSizeLabel(page);
+
+    // If this is a known size in our list, add the size paren to it.
+    for (auto iter : sizes_search->children()) {
+        auto row = *iter;
+        if (label == row[cols.name]) {
+            label = label + " (" + row[cols.label] + ")";
+            break;
+        }
     }
+    entry_page_sizes->set_text(label);
+
+
     // Orientation button
-    std::string icon = width > height ? "page-landscape" : "page-portrait";
-    if (width == height) {
+    auto box = page ? page->getDesktopRect() : *_document->preferredBounds();
+    std::string icon = box.width() > box.height() ? "page-landscape" : "page-portrait";
+    if (box.width() == box.height()) {
         entry_page_sizes->unset_icon(Gtk::ENTRY_ICON_SECONDARY);
     } else {
         entry_page_sizes->set_icon_from_icon_name(INKSCAPE_ICON(icon), Gtk::ENTRY_ICON_SECONDARY);
     }
 
-    if (display_only) {
-        // We simply set the contents of the combo box.
-        if (auto page_size = PaperSize::findPaperSize(width, height, unit)) {
-            entry_page_sizes->set_text(page_size->getDescription(width > height));
-        } else {
-            entry_page_sizes->set_text(PaperSize::toDescription(_("Custom"), width, height, unit));
-        }
-    } else {
+    if (!display_only) {
         // The user has started editing the combo box; we set up a convenient initial state.
-        if (auto page_size = PaperSize::findPaperSize(width, height, unit)) {
-            // Set a raw dimension string without a name, e.g., 210 x 297 mm for A4.
-            bool const landscape = width > height;
-            entry_page_sizes->set_text(PaperSize::toDimsString(page_size->size[landscape],
-                                                               page_size->size[!landscape],
-                                                               page_size->unit));
-        } else {
-            // If the size is custom, use the current document unit.
-            entry_page_sizes->set_text(PaperSize::toDimsString(width, height, unit));
-        }
-
         // Select text if box is currently in focus.
         if (entry_page_sizes->has_focus()) {
             entry_page_sizes->select_region(0, -1);
         }
     }
+}
+
+void PageToolbar::setMarginText(SPPage *page)
+{
+    text_page_margins->set_text(page ? page->getMarginLabel() : "");
+    text_page_margins->set_sensitive(true);
 }
 
 void PageToolbar::pagesChanged()
@@ -282,6 +439,8 @@ void PageToolbar::selectionChanged(SPPage *page)
     auto &page_manager = _document->getPageManager();
     text_page_label->set_tooltip_text(_("Page label"));
 
+    setMarginText(page);
+
     // Set label widget content with page label.
     if (page) {
         text_page_label->set_sensitive(true);
@@ -293,12 +452,13 @@ void PageToolbar::selectionChanged(SPPage *page)
             text_page_label->set_text("");
         }
 
+
         // TRANSLATORS: "%1" is replaced with the page we are on, and "%2" is the total number of pages.
         auto label = Glib::ustring::compose(_("%1/%2"), page->getPagePosition(), page_manager.getPageCount());
         label_page_pos->set_label(label);
 
         _page_modified = page->connectModified([=](SPObject *obj, unsigned int flags) {
-            if (auto page = dynamic_cast<SPPage *>(obj)) {
+            if (auto page = cast<SPPage>(obj)) {
                 // Make sure we don't 'select' on removal of the page
                 if (flags & SP_OBJECT_MODIFIED_FLAG) {
                     selectionChanged(page);
@@ -338,23 +498,15 @@ void PageToolbar::selectionChanged(SPPage *page)
 
 GtkWidget *PageToolbar::create(SPDesktop *desktop)
 {
-    Glib::ustring page_toolbar_builder_file = get_filename(UIS, "toolbar-page.ui");
     PageToolbar *toolbar = nullptr;
+    auto builder = Inkscape::UI::create_builder("toolbar-page.ui");
+    builder->get_widget_derived("page-toolbar", toolbar, desktop);
 
-    try {
-        auto builder = Gtk::Builder::create_from_file(page_toolbar_builder_file);
-        builder->get_widget_derived("page-toolbar", toolbar, desktop);
-
-        if (!toolbar) {
-            std::cerr << "InkscapeWindow: Failed to load page toolbar!" << std::endl;
-            return nullptr;
-        }
-        // Usually we should be packing this widget into a parent before the builder
-        // is destroyed, but the create method expects a blind widget so this widget
-        // contains a special keep-alive pattern which can be removed when refactoring.
-    } catch (const Glib::Error &ex) {
-        std::cerr << "PageToolbar: " << page_toolbar_builder_file.raw() << " file not read! " << ex.what().raw() << std::endl;
+    if (!toolbar) {
+        std::cerr << "InkscapeWindow: Failed to load page toolbar!" << std::endl;
+        return nullptr;
     }
+    // This widget will be auto-freed by the builder unless you have called reference();
     return GTK_WIDGET(toolbar->gobj());
 }
 

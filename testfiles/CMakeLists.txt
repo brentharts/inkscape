@@ -58,6 +58,9 @@ if(${CMAKE_SIZEOF_VOID_P} EQUAL 8)
 endif()
 
 set(TEST_SOURCES
+    async_channel-test
+    async_funclog-test
+    async_progress-test
     uri-test
     util-test
     drag-and-drop-svgz
@@ -66,15 +69,20 @@ set(TEST_SOURCES
     attributes-test
     color-profile-test
     dir-util-test
+    min-bbox-test
+    oklab-color-test
     sp-object-test
+    sp-object-tags-test
     object-set-test
     object-style-test
     path-boolop-test
+    path-reverse-lpe-test
     rebase-hrefs-test
     style-elem-test
     style-internal-test
     style-test
     svg-affine-test
+    svg-box-test
     svg-color-test
     svg-length-test
     svg-stringstream-test

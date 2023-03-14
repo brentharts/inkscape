@@ -41,7 +41,6 @@
 #include "ui/tools/tool-base.h"
 
 #include "xml/repr.h"
-#include "xml/node-event-vector.h"
 
 using Inkscape::DocumentUndo;
 
@@ -313,7 +312,7 @@ void ArcTool::drag(Geom::Point pt, guint state) {
         sp_desktop_apply_style_tool(_desktop, repr, "/tools/shapes/arc", false);
 
         auto layer = currentLayer();
-        this->arc = SP_GENERICELLIPSE(layer->appendChildRepr(repr));
+        this->arc = cast<SPGenericEllipse>(layer->appendChildRepr(repr));
         Inkscape::GC::release(repr);
         this->arc->transform = layer->i2doc_affine().inverse();
         this->arc->updateRepr();

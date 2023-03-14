@@ -16,7 +16,7 @@
 #define INKSCAPE_UI_DIALOG_DOCUMENT_PREFERENCES_H
 
 #ifdef HAVE_CONFIG_H
-# include "config.h"  // only include where actually required!
+#include "config.h" // only include where actually required!
 #endif
 
 #include <cstddef>
@@ -33,24 +33,29 @@
 #include "ui/widget/registry.h"
 #include "ui/widget/tolerance-slider.h"
 #include "xml/helper-observer.h"
+#include "xml/node-observer.h"
 
 namespace Inkscape {
-    namespace XML {
-        class Node;
-    }
-    namespace UI {
-        namespace Widget {
-            class EntityEntry;
-            class NotebookPage;
-            class PageProperties;
-        }
-        namespace Dialog {
+namespace XML { class Node; }
+namespace UI {
 
-typedef std::list<UI::Widget::EntityEntry*> RDElist;
+namespace Widget {
+class AlignmentSelector;
+class EntityEntry;
+class NotebookPage;
+class PageProperties;
+} // namespace Widget
+
+namespace Dialog {
+
+using RDEList = std::vector<UI::Widget::EntityEntry *>;
 
 class DocumentProperties : public DialogBase
 {
 public:
+    DocumentProperties();
+    ~DocumentProperties() override;
+
     void  update_widgets();
     static DocumentProperties &getInstance();
     static void destroy();
@@ -70,7 +75,6 @@ protected:
     void  build_cms();
     void  build_scripting();
     void  build_metadata();
-    void  init();
 
     virtual void  on_response (int);
     void  populate_available_profiles();
@@ -206,15 +210,12 @@ protected:
     Gtk::Box        _grids_space;
     //---------------------------------------------------------------
 
-    RDElist _rdflist;
+    RDEList _rdflist;
     UI::Widget::Licensor _licensor;
 
     Gtk::Box& _createPageTabLabel(const Glib::ustring& label, const char *label_image);
 
 private:
-    DocumentProperties();
-    ~DocumentProperties() override;
-
     // callback methods for buttons on grids page.
     void onNewGrid();
     void onRemoveGrid();
@@ -222,17 +223,38 @@ private:
     // callback for display unit change
     void display_unit_change(const Inkscape::Util::Unit* unit);
 
-    struct watch_connection {
-        ~watch_connection() { disconnect(); }
-        void connect(Inkscape::XML::Node* node, const Inkscape::XML::NodeEventVector& vector, void* data);
+    Gtk::Widget *createNewGridWidget(SPGrid *grid);
+    Gtk::Widget *createRightGridColumn(SPGrid *grid);
+    static void *notifyGridWidgetsDestroyed(void *data);
+
+    UI::Widget::RegisteredCheckButton *_grid_rcb_enabled = nullptr;
+    UI::Widget::RegisteredCheckButton *_grid_rcb_snap_visible_only = nullptr;
+    UI::Widget::RegisteredCheckButton *_grid_rcb_visible = nullptr;
+    UI::Widget::RegisteredCheckButton *_grid_rcb_dotted = nullptr;
+    UI::Widget::AlignmentSelector     *_grid_as_alignment = nullptr;
+
+    class WatchConnection : private XML::NodeObserver
+    {
+    public:
+        WatchConnection(DocumentProperties *dialog)
+            : _dialog(dialog)
+        {}
+        ~WatchConnection() override { disconnect(); }
+        void connect(Inkscape::XML::Node *node);
         void disconnect();
+
     private:
-        Inkscape::XML::Node* _node = nullptr;
-        void* _data = nullptr;
+        void notifyChildAdded(XML::Node &node, XML::Node &child, XML::Node *prev) final;
+        void notifyChildRemoved(XML::Node &node, XML::Node &child, XML::Node *prev) final;
+        void notifyAttributeChanged(XML::Node &node, GQuark name, Util::ptr_shared old_value,
+                                    Util::ptr_shared new_value) final;
+
+        Inkscape::XML::Node *_node{nullptr};
+        DocumentProperties *_dialog;
     };
     // nodes connected to listeners
-    watch_connection _namedview_connection;
-    watch_connection _root_connection;
+    WatchConnection _namedview_connection;
+    WatchConnection _root_connection;
 };
 
 } // namespace Dialog

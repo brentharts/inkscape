@@ -30,10 +30,12 @@ enum FeCompositeOperator
     COMPOSITE_ENDOPERATOR        /* Cairo Saturate is not included in CSS */
 };
 
-class SPFeComposite
+class SPFeComposite final
     : public SPFilterPrimitive
 {
 public:
+    int tag() const override { return tag_of<decltype(*this)>; }
+
     FeCompositeOperator get_composite_operator() const { return composite_operator; }
     int get_in2() const { return in2_slot; }
 
@@ -55,9 +57,6 @@ private:
     std::optional<std::string> in2_name;
     int in2_slot = Inkscape::Filters::NR_FILTER_SLOT_NOT_SET;
 };
-
-MAKE_SP_OBJECT_DOWNCAST_FUNCTIONS(SP_FECOMPOSITE, SPFeComposite)
-MAKE_SP_OBJECT_TYPECHECK_FUNCTIONS(SP_IS_FECOMPOSITE, SPFeComposite)
 
 #endif // SP_FECOMPOSITE_H_SEEN
 

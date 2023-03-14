@@ -81,7 +81,6 @@ namespace Tools {
 
 static Geom::Point pen_drag_origin_w(0, 0);
 static bool pen_within_tolerance = false;
-const double HANDLE_CUBIC_GAP = 0.001;
 
 PenTool::PenTool(SPDesktop *desktop, std::string prefs_path, const std::string &cursor_filename)
     : FreehandBase(desktop, prefs_path, cursor_filename)
@@ -93,13 +92,13 @@ PenTool::PenTool(SPDesktop *desktop, std::string prefs_path, const std::string &
     // Pen indicators (temporary handles shown when adding a new node).
     auto canvas = desktop->getCanvasControls();
     for (int i = 0; i < 4; i++) {
-        ctrl[i] = new Inkscape::CanvasItemCtrl(canvas, ctrl_types[i]);
+        ctrl[i] = make_canvasitem<CanvasItemCtrl>(canvas, ctrl_types[i]);
         ctrl[i]->set_fill(0x0);
         ctrl[i]->hide();
     }
 
-    cl0 = new Inkscape::CanvasItemCurve(canvas);
-    cl1 = new Inkscape::CanvasItemCurve(canvas);
+    cl0 = make_canvasitem<CanvasItemCurve>(canvas);
+    cl1 = make_canvasitem<CanvasItemCurve>(canvas);
     cl0->hide();
     cl1->hide();
 
@@ -130,16 +129,10 @@ PenTool::~PenTool() {
     }
 
     for (auto &c : ctrl) {
-        delete c;
-        c = nullptr;
+        c.reset();
     }
-
-    if (this->cl0) {
-        delete cl0;
-    }
-    if (this->cl1) {
-        delete cl1;
-    }
+    cl0.reset();
+    cl1.reset();
 
     if (this->waiting_item && this->expecting_clicks_for_LPE > 0) {
         // we received too few clicks to sanely set the parameter path so we remove the LPE from the item
@@ -165,7 +158,7 @@ void PenTool::setPolylineMode() {
 void PenTool::_cancel() {
     this->state = PenTool::STOP;
     this->_resetColors();
-    for (auto c : ctrl) {
+    for (auto &c : ctrl) {
         c->hide();
     }
     cl0->hide();
@@ -407,7 +400,7 @@ bool PenTool::_handleButtonPress(GdkEventButton const &bevent) {
                                     // so don't append to an existing one
                                     selection->clear();
                                     _desktop->messageStack()->flash(Inkscape::NORMAL_MESSAGE, _("Creating new path"));
-                                } else if (selection->singleItem() && SP_IS_PATH(selection->singleItem())) {
+                                } else if (selection->singleItem() && is<SPPath>(selection->singleItem())) {
                                     _desktop->messageStack()->flash(Inkscape::NORMAL_MESSAGE, _("Appending to selected path"));
                                 }
 
@@ -637,9 +630,9 @@ bool PenTool::_handleMotionNotify(GdkEventMotion const &mevent) {
             break;
     }
     // calls the function "bspline_spiro_motion" when the mouse starts or stops moving
-    if(this->bspline){
+    if (this->bspline) {
         this->_bsplineSpiroMotion(mevent.state);
-    }else{
+    } else {
         if ( Geom::LInfty( event_w - pen_drag_origin_w ) > (tolerance/2) || mevent.time == 0) {
             this->_bsplineSpiroMotion(mevent.state);
             pen_drag_origin_w = event_w;
@@ -761,7 +754,7 @@ bool PenTool::_handleButtonRelease(GdkEventButton const &revent) {
 
         if (this->waiting_LPE) {
             // we have an already created LPE waiting for a path
-            this->waiting_LPE->acceptParamPath(SP_PATH(selection->singleItem()));
+            this->waiting_LPE->acceptParamPath(cast<SPPath>(selection->singleItem()));
             selection->add(this->waiting_item);
             this->waiting_LPE = nullptr;
         } else {
@@ -787,16 +780,13 @@ void PenTool::_redrawAll() {
     // green
     if (! this->green_bpaths.empty()) {
         // remove old piecewise green canvasitems
-        for (auto path : this->green_bpaths) {
-            delete path;
-        }
         this->green_bpaths.clear();
 
         // one canvas bpath for all of green_curve
         auto canvas_shape = new Inkscape::CanvasItemBpath(_desktop->getCanvasSketch(), copy_pathvector_optional(green_curve), true);
         canvas_shape->set_stroke(green_color);
         canvas_shape->set_fill(0x0, SP_WIND_RULE_NONZERO);
-        this->green_bpaths.push_back(canvas_shape);
+        this->green_bpaths.emplace_back(canvas_shape);
     }
     if (this->green_anchor) {
         this->green_anchor->ctrl->set_position(this->green_anchor->dp);
@@ -807,7 +797,7 @@ void PenTool::_redrawAll() {
     red_curve.curveto(p[1], p[2], p[3]);
     red_bpath->set_bpath(&red_curve, true);
 
-    for (auto c : ctrl) {
+    for (auto &c : ctrl) {
         c->hide();
     }
     // handles
@@ -847,7 +837,7 @@ void PenTool::_redrawAll() {
 
     // simply redraw the spiro. because its a redrawing, we don't call the global function,
     // but we call the redrawing at the ending.
-     this->_bsplineSpiroBuild();
+    this->_bsplineSpiroBuild();
 }
 
 void PenTool::_lastpointMove(gdouble x, gdouble y) {
@@ -1185,9 +1175,6 @@ void PenTool::_resetColors() {
     blue_bpath->set_bpath(nullptr);
 
     // Green
-    for (auto path : this->green_bpaths) {
-        delete path;
-    }
     this->green_bpaths.clear();
     this->green_curve->reset();
     this->green_anchor.reset();
@@ -1273,16 +1260,13 @@ void PenTool::_bsplineSpiroColor()
     //transparency recently modified
     if (!this->green_bpaths.empty()) {
         // remove old piecewise green canvasitems
-        for (auto path : this->green_bpaths) {
-            delete path;
-        }
         this->green_bpaths.clear();
 
         // one canvas bpath for all of green_curve
         auto canvas_shape = new Inkscape::CanvasItemBpath(_desktop->getCanvasSketch(), copy_pathvector_optional(green_curve), true);
         canvas_shape->set_stroke(green_color);
         canvas_shape->set_fill(0x0, SP_WIND_RULE_NONZERO);
-        this->green_bpaths.push_back(canvas_shape);
+        green_bpaths.emplace_back(canvas_shape);
     }
 
     this->red_bpath->set_stroke(red_color);
@@ -1302,13 +1286,10 @@ void PenTool::_bsplineSpiro(bool shift)
 void PenTool::_bsplineSpiroOn()
 {
     if(!this->red_curve.is_unset()){
-        using Geom::X;
-        using Geom::Y;
         this->npoints = 5;
         this->p[0] = *this->red_curve.first_point();
         this->p[3] = this->red_curve.first_segment()->finalPoint();
         this->p[2] = this->p[3] + (1./3)*(this->p[0] - this->p[3]);
-        this->p[2] = Geom::Point(this->p[2][X] + HANDLE_CUBIC_GAP,this->p[2][Y] + HANDLE_CUBIC_GAP);
     }
 }
 
@@ -1330,9 +1311,9 @@ void PenTool::_bsplineSpiroStartAnchor(bool shift)
 
     LivePathEffect::LPEBSpline *lpe_bsp = nullptr;
 
-    if (SP_IS_LPE_ITEM(this->white_item) && SP_LPE_ITEM(this->white_item)->hasPathEffect()){
+    if (is<SPLPEItem>(this->white_item) && cast<SPLPEItem>(this->white_item)->hasPathEffect()){
         Inkscape::LivePathEffect::Effect *thisEffect =
-            SP_LPE_ITEM(this->white_item)->getFirstPathEffectOfType(Inkscape::LivePathEffect::BSPLINE);
+            cast<SPLPEItem>(this->white_item)->getFirstPathEffectOfType(Inkscape::LivePathEffect::BSPLINE);
         if(thisEffect){
             lpe_bsp = dynamic_cast<LivePathEffect::LPEBSpline*>(thisEffect->getLPEObj()->get_lpe());
         }
@@ -1344,9 +1325,9 @@ void PenTool::_bsplineSpiroStartAnchor(bool shift)
     }
     LivePathEffect::LPESpiro *lpe_spi = nullptr;
 
-    if (SP_IS_LPE_ITEM(this->white_item) && SP_LPE_ITEM(this->white_item)->hasPathEffect()){
+    if (is<SPLPEItem>(this->white_item) && cast<SPLPEItem>(this->white_item)->hasPathEffect()){
         Inkscape::LivePathEffect::Effect *thisEffect =
-            SP_LPE_ITEM(this->white_item)->getFirstPathEffectOfType(Inkscape::LivePathEffect::SPIRO);
+            cast<SPLPEItem>(this->white_item)->getFirstPathEffectOfType(Inkscape::LivePathEffect::SPIRO);
         if(thisEffect){
             lpe_spi = dynamic_cast<LivePathEffect::LPESpiro*>(thisEffect->getLPEObj()->get_lpe());
         }
@@ -1376,17 +1357,16 @@ void PenTool::_bsplineSpiroStartAnchorOn()
     Geom::Point point_a = this->sa_overwrited->last_segment()->initialPoint();
     Geom::Point point_d = *this->sa_overwrited->last_point();
     Geom::Point point_c = point_d + (1./3)*(point_a - point_d);
-    point_c = Geom::Point(point_c[X] + HANDLE_CUBIC_GAP, point_c[Y] + HANDLE_CUBIC_GAP);
-    if(cubic){
+    if (cubic) {
         last_segment->moveto(point_a);
         last_segment->curveto((*cubic)[1],point_c,point_d);
-    }else{
+    } else {
         last_segment->moveto(point_a);
         last_segment->curveto(point_a,point_c,point_d);
     }
-    if( this->sa_overwrited->get_segment_count() == 1){
+    if ( this->sa_overwrited->get_segment_count() == 1){
         this->sa_overwrited = std::move(last_segment);
-    }else{
+    } else {
         //we eliminate the last segment
         this->sa_overwrited->backspace();
         //and we add it again with the recreation
@@ -1423,11 +1403,9 @@ void PenTool::_bsplineSpiroMotion(guint const state){
     this->npoints = 5;
     SPCurve tmp_curve;
     this->p[2] = this->p[3] + (1./3)*(this->p[0] - this->p[3]);
-    this->p[2] = Geom::Point(this->p[2][X] + HANDLE_CUBIC_GAP,this->p[2][Y] + HANDLE_CUBIC_GAP);
     if (this->green_curve->is_unset() && !this->sa) {
         this->p[1] = this->p[0] + (1./3)*(this->p[3] - this->p[0]);
-        this->p[1] = Geom::Point(this->p[1][X] + HANDLE_CUBIC_GAP, this->p[1][Y] + HANDLE_CUBIC_GAP);
-        if(shift){
+        if (shift) {
             this->p[2] = this->p[3];
         }
     } else if (!this->green_curve->is_unset()){
@@ -1477,9 +1455,7 @@ void PenTool::_bsplineSpiroMotion(guint const state){
                 weight_power.lineto(*red_curve.last_point());
                 auto SBasisweight_power = weight_power.first_segment()->toSBasis();
                 this->p[1] = SBasisweight_power.valueAt(0.33334);
-                if(!Geom::are_near(this->p[1],this->p[0])){
-                    this->p[1] = Geom::Point(this->p[1][X] + HANDLE_CUBIC_GAP,this->p[1][Y] + HANDLE_CUBIC_GAP);
-                } else {
+                if (Geom::are_near(this->p[1],this->p[0])) {
                     this->p[1] = this->p[0];
                 }
                 if (shift) {
@@ -1513,16 +1489,13 @@ void PenTool::_bsplineSpiroMotion(guint const state){
     }
 
     // remove old piecewise green canvasitems
-    for (auto path: this->green_bpaths) {
-        delete path;
-    }
-    this->green_bpaths.clear();
+    green_bpaths.clear();
 
     // one canvas bpath for all of green_curve
     auto canvas_shape = new Inkscape::CanvasItemBpath(_desktop->getCanvasSketch(), copy_pathvector_optional(green_curve), true);
     canvas_shape->set_stroke(green_color);
     canvas_shape->set_fill(0x0, SP_WIND_RULE_NONZERO);
-    this->green_bpaths.push_back(canvas_shape);
+    green_bpaths.emplace_back(canvas_shape);
 
     this->_bsplineSpiroBuild();
 }
@@ -1533,7 +1506,6 @@ void PenTool::_bsplineSpiroEndAnchorOn()
     using Geom::X;
     using Geom::Y;
     this->p[2] = this->p[3] + (1./3)*(this->p[0] - this->p[3]);
-    this->p[2] = Geom::Point(this->p[2][X] + HANDLE_CUBIC_GAP,this->p[2][Y] + HANDLE_CUBIC_GAP);
     SPCurve tmp_curve;
     SPCurve last_segment;
     Geom::Point point_c(0,0);
@@ -1550,20 +1522,19 @@ void PenTool::_bsplineSpiroEndAnchorOn()
     Geom::CubicBezier const * cubic = dynamic_cast<Geom::CubicBezier const*>(tmp_curve.last_segment());
     if(this->bspline){
         point_c = *tmp_curve.last_point() + (1./3)*(tmp_curve.last_segment()->initialPoint() - *tmp_curve.last_point());
-        point_c = Geom::Point(point_c[X] + HANDLE_CUBIC_GAP, point_c[Y] + HANDLE_CUBIC_GAP);
-    }else{
+    } else {
         point_c = this->p[3] + this->p[3] - this->p[2];
     }
-    if(cubic){
+    if (cubic) {
         last_segment.moveto((*cubic)[0]);
         last_segment.curveto((*cubic)[1],point_c,(*cubic)[3]);
-    }else{
+    } else {
         last_segment.moveto(tmp_curve.last_segment()->initialPoint());
         last_segment.lineto(*tmp_curve.last_point());
     }
-    if( tmp_curve.get_segment_count() == 1){
+    if ( tmp_curve.get_segment_count() == 1){
         tmp_curve  = std::move(last_segment);
-    }else{
+    } else {
         //we eliminate the last segment
         tmp_curve.backspace();
         //and we add it again with the recreation
@@ -1595,16 +1566,16 @@ void PenTool::_bsplineSpiroEndAnchorOff()
         return;
     }
     Geom::CubicBezier const * cubic = dynamic_cast<Geom::CubicBezier const*>(tmp_curve.last_segment());
-    if(cubic){
+    if (cubic) {
         last_segment.moveto((*cubic)[0]);
         last_segment.curveto((*cubic)[1],(*cubic)[3],(*cubic)[3]);
-    }else{
+    } else {
         last_segment.moveto(tmp_curve.last_segment()->initialPoint());
         last_segment.lineto(*tmp_curve.last_point());
     }
-    if( tmp_curve.get_segment_count() == 1){
+    if ( tmp_curve.get_segment_count() == 1){
         tmp_curve  = std::move(last_segment);
-    }else{
+    } else{
         //we eliminate the last segment
         tmp_curve.backspace();
         //and we add it again with the recreation
@@ -1664,8 +1635,14 @@ void PenTool::_bsplineSpiroBuild()
         //Effect *spr = static_cast<Effect*> ( new LPEbspline(lpeobj) );
         //spr->doEffect(curve);
         if (bspline) {
+            Inkscape::Preferences *prefs = Inkscape::Preferences::get();
             Geom::PathVector hp;
-            LivePathEffect::sp_bspline_do_effect(curve, 0, hp);
+            bool uniform = false;
+            Glib::ustring pref_path = "/live_effects/bspline/uniform";
+            if (prefs->getEntry(pref_path).isValid()) {
+                uniform = prefs->getString(pref_path) == "true";
+            }
+            LivePathEffect::sp_bspline_do_effect(curve, 0, hp, uniform); 
         } else {
             LivePathEffect::sp_spiro_do_effect(curve);
         }
@@ -1676,7 +1653,7 @@ void PenTool::_bsplineSpiroBuild()
 
         blue_curve.reset();
         //We hide the holders that doesn't contribute anything
-        for (auto c : ctrl) {
+        for (auto &c : ctrl) {
             c->hide();
         }
         if (spiro){
@@ -1748,7 +1725,7 @@ void PenTool::_setSubsequentPoint(Geom::Point const p, bool statusbar, guint sta
 void PenTool::_setCtrl(Geom::Point const q, guint const state)
 {
     // use 'q' as 'p' shadows member variable.
-    for (auto c : ctrl) {
+    for (auto &c : ctrl) {
         c->hide();
     }
 
@@ -1826,7 +1803,7 @@ void PenTool::_finishSegment(Geom::Point const q, guint const state) { // use 'q
         auto canvas_shape = new Inkscape::CanvasItemBpath(_desktop->getCanvasSketch(), curve.get_pathvector(), true);
         canvas_shape->set_stroke(green_color);
         canvas_shape->set_fill(0x0, SP_WIND_RULE_NONZERO);
-        this->green_bpaths.push_back(canvas_shape);
+        green_bpaths.emplace_back(canvas_shape);
 
         this->p[0] = this->p[3];
         this->p[1] = this->p[4];
@@ -1877,14 +1854,12 @@ bool PenTool::_undoLastPoint(bool user_undo) {
         if (this->green_curve->get_segment_count() == 1) {
             this->npoints = 5;
             if (!this->green_bpaths.empty()) {
-                delete this->green_bpaths.back();
                 this->green_bpaths.pop_back();
             }
             this->green_curve->reset();
         } else {
             this->green_curve->backspace();
             if (this->green_bpaths.size() > 1) {
-                delete this->green_bpaths.back();
                 this->green_bpaths.pop_back();
             } else if (this->green_bpaths.size() == 1) {
                 green_bpaths.back()->set_bpath(green_curve.get(), true);
@@ -1902,7 +1877,7 @@ bool PenTool::_undoLastPoint(bool user_undo) {
             }
         }
 
-        for (auto c : ctrl) {
+        for (auto &c : ctrl) {
             c->hide();
         }
         cl0->hide();
@@ -1943,7 +1918,7 @@ bool PenTool::_redoLastPoint()
     if (auto const *last_seg = green_curve->last_segment()) {
         Geom::Path freshly_added;
         freshly_added.append(*last_seg);
-        green_bpaths.push_back(new CanvasItemBpath(_desktop->getCanvasSketch(), freshly_added, true));
+        green_bpaths.emplace_back(make_canvasitem<CanvasItemBpath>(_desktop->getCanvasSketch(), freshly_added, true));
     }
     green_bpaths.back()->set_stroke(green_color);
     green_bpaths.back()->set_fill(0x0, SP_WIND_RULE_NONZERO);
@@ -1980,7 +1955,7 @@ void PenTool::_finish(gboolean const closed) {
     this->npoints = 0;
     this->state = PenTool::POINT;
 
-    for (auto c : ctrl) {
+    for (auto &c : ctrl) {
         c->hide();
     }
 

@@ -15,10 +15,12 @@
 #include <2geom/path-sink.h>
 
 #include <utility>
+#include <vector>
 
 #include "display/curve.h"
 #include "display/control/canvas-item-bpath.h"
 
+#include "forward.h"
 #include "helper/geom.h"
 
 #include "live_effects/lpeobject.h"
@@ -29,6 +31,7 @@
 #include "live_effects/parameter/path.h"
 
 #include "object/sp-path.h"
+#include "point.h"
 #include "style.h"
 
 #include "ui/icon-names.h"
@@ -36,9 +39,10 @@
 #include "ui/tool/curve-drag-point.h"
 #include "ui/tool/event-utils.h"
 #include "ui/tool/multi-path-manipulator.h"
+#include "ui/tool/node-types.h"
 #include "ui/tool/path-manipulator.h"
 #include "ui/tools/node-tool.h"
-
+#include "path/splinefit/bezier-fit.h"
 #include "xml/node-observer.h"
 
 namespace Inkscape {
@@ -52,7 +56,6 @@ enum PathChange {
 };
 
 } // anonymous namespace
-const double HANDLE_CUBIC_GAP = 0.001;
 const double NO_POWER = 0.0;
 const double DEFAULT_START_POWER = 1.0/3.0;
 
@@ -115,8 +118,8 @@ PathManipulator::PathManipulator(MultiPathManipulator &mpm, SPObject *path,
     , _edit_transform(et)
     , _lpe_key(std::move(lpe_key))
 {
-    LivePathEffectObject *lpeobj = dynamic_cast<LivePathEffectObject *>(_path);
-    SPPath *pathshadow = dynamic_cast<SPPath *>(_path);
+    auto lpeobj = cast<LivePathEffectObject>(_path);
+    auto pathshadow = cast<SPPath>(_path);
     if (!lpeobj) {
         _i2d_transform = pathshadow->i2dt_affine();
     } else {
@@ -127,7 +130,7 @@ PathManipulator::PathManipulator(MultiPathManipulator &mpm, SPObject *path,
 
     _getGeometry();
 
-    _outline = new Inkscape::CanvasItemBpath(_multi_path_manipulator._path_data.outline_group);
+    _outline = make_canvasitem<Inkscape::CanvasItemBpath>(_multi_path_manipulator._path_data.outline_group);
     _outline->hide();
     _outline->set_stroke(outline_color);
     _outline->set_fill(0x0, SP_WIND_RULE_NONZERO);
@@ -139,16 +142,16 @@ PathManipulator::PathManipulator(MultiPathManipulator &mpm, SPObject *path,
     _desktop->signal_zoom_changed.connect(
         sigc::hide( sigc::mem_fun(*this, &PathManipulator::_updateOutlineOnZoomChange)));
 
-    _createControlPointsFromGeometry();
     //Define if the path is BSpline on construction
     _recalculateIsBSpline();
+    _createControlPointsFromGeometry();
 }
 
 PathManipulator::~PathManipulator()
 {
     delete _dragpoint;
     delete _observer;
-    delete _outline;
+    _outline.reset();
     clear();
 }
 
@@ -402,7 +405,7 @@ void PathManipulator::duplicateNodes()
 void PathManipulator::copySelectedPath(Geom::PathBuilder *builder)
 {
     // Ignore LivePathEffect paths
-    if (!_path || dynamic_cast<LivePathEffectObject *>(_path))
+    if (!_path || cast<LivePathEffectObject>(_path))
         return;
     // Rebuild the selected parts of each subpath
     for (auto &subpath : _subpaths) {
@@ -618,7 +621,7 @@ void PathManipulator::breakNodes()
 
 /** Delete selected nodes in the path, optionally substituting deleted segments with bezier curves
  * in a way that attempts to preserve the original shape of the curve. */
-void PathManipulator::deleteNodes(bool keep_shape)
+void PathManipulator::deleteNodes(NodeDeleteMode keep_shape)
 {
     if (_selection.empty()) return;
     hideDragPoint();
@@ -667,6 +670,16 @@ void PathManipulator::deleteNodes(bool keep_shape)
     }
 }
 
+double get_angle(const Geom::Point& p0, const Geom::Point& p1, const Geom::Point& p2) {
+    auto d1 = p1 - p0;
+    auto d2 = p1 - p2;
+    if (d1.isZero() || d2.isZero()) return M_PI;
+
+    auto a1 = atan2(d1);
+    auto a2 = atan2(d2);
+    return a1 - a2;
+}
+
 /**
  * Delete nodes between the two iterators.
  * The given range can cross the beginning of the subpath in closed subpaths.
@@ -676,7 +689,7 @@ void PathManipulator::deleteNodes(bool keep_shape)
  *                   the shape before deletion
  * @return Number of deleted nodes
  */
-unsigned PathManipulator::_deleteStretch(NodeList::iterator start, NodeList::iterator end, bool keep_shape)
+unsigned PathManipulator::_deleteStretch(NodeList::iterator start, NodeList::iterator end, NodeDeleteMode mode)
 {
     unsigned const samples_per_segment = 10;
     double const t_step = 1.0 / samples_per_segment;
@@ -687,31 +700,61 @@ unsigned PathManipulator::_deleteStretch(NodeList::iterator start, NodeList::ite
     }
     if (del_len == 0) return 0;
 
+    bool keep_shape = mode == NodeDeleteMode::automatic || mode == NodeDeleteMode::curve_fit;
+
+    if ((mode == NodeDeleteMode::automatic || mode == NodeDeleteMode::inverse_auto) && start.prev() && end) {
+        for (NodeList::iterator cur = start; cur != end; cur = cur.next()) {
+            auto back =  cur->back() ->isDegenerate() ? cur.prev()->position() : cur->back() ->position();
+            auto front = cur->front()->isDegenerate() ? cur.next()->position() : cur->front()->position();
+            auto angle = get_angle(back, cur->position(), front);
+            auto a = fmod(fabs(angle), 2*M_PI);
+            auto diff = fabs(a - M_PI);
+            bool flat = diff < M_PI / 4; // flat if *somewhat* close to 180 degrees (+-45deg)
+            if (!flat && Geom::distance(back, front) > 1) {
+                // detected a cusp, so we'll try to remove nodes and insert line segment, rather than fitting a curve
+                // if in auto mode, or the opposite in inverse_auto
+                keep_shape = !keep_shape;
+                break;
+            }
+        }
+    }
+
     // set surrounding node types to cusp if:
-    // 1. keep_shape is on, or
+    // 1. keep_shape is off, or
     // 2. we are deleting at the end or beginning of an open path
-    if ((keep_shape || !end) && start.prev()) start.prev()->setType(NODE_CUSP, false);
-    if ((keep_shape || !start.prev()) && end) end->setType(NODE_CUSP, false);
+    if ((!keep_shape || !end) && start.prev()) {
+        auto p = start.prev();
+        p->setType(NODE_CUSP, false);
+        p->front()->retract();
+    }
+    if ((!keep_shape || !start.prev()) && end) {
+        end->setType(NODE_CUSP, false);
+        end->back()->retract();
+    }
 
     if (keep_shape && start.prev() && end) {
-        unsigned num_samples = (del_len + 1) * samples_per_segment + 1;
-        Geom::Point *bezier_data = new Geom::Point[num_samples];
+        std::vector<InputPoint> input;
         Geom::Point result[4];
+        Geom::LineSegment s;
         unsigned seg = 0;
 
         for (NodeList::iterator cur = start.prev(); cur != end; cur = cur.next()) {
-            Geom::CubicBezier bc(*cur, *cur->front(), *cur.next(), *cur.next()->back());
+            Geom::CubicBezier bc(*cur, *cur->front(), *cur.next()->back(), *cur.next());
             for (unsigned s = 0; s < samples_per_segment; ++s) {
-                bezier_data[seg * samples_per_segment + s] = bc.pointAt(t_step * s);
+                auto t = t_step * s;
+                input.emplace_back(InputPoint(bc.pointAt(t), t));
             }
             ++seg;
         }
         // Fill last point
-        bezier_data[num_samples - 1] = end->position();
+        // last point + its slope
+        input.emplace_back(InputPoint(end->position(), Geom::Point(), end->back()->position(), 1.0));
+
+        // get slope for the first point
+        input.front() = InputPoint(start.prev()->position(), start.prev()->front()->position(), Geom::Point(), 0.0);
+
         // Compute replacement bezier curve
-        // TODO the fitting algorithm sucks - rewrite it to be awesome
-        bezier_fit_cubic(result, bezier_data, num_samples, 0.5);
-        delete[] bezier_data;
+        bezier_fit(result, input);
 
         start.prev()->front()->setPosition(result[1]);
         end->back()->setPosition(result[2]);
@@ -726,7 +769,7 @@ unsigned PathManipulator::_deleteStretch(NodeList::iterator start, NodeList::ite
         start = next;
     }
     // if we are removing, we readjust the handlers
-    if(_isBSpline()){
+    if (!keep_shape && _isBSpline()){
         if(start.prev()){
             double bspline_weight = _bsplineHandlePosition(start.prev()->back(), false);
             start.prev()->front()->setPosition(_bsplineHandleReposition(start.prev()->front(), bspline_weight));
@@ -1069,7 +1112,6 @@ NodeList::iterator PathManipulator::subdivideSegment(NodeList::iterator first, d
                 line_inside_nodes.lineto(second->position());
                 sbasis_inside_nodes = line_inside_nodes.first_segment()->toSBasis();
                 Geom::Point next = sbasis_inside_nodes.valueAt(DEFAULT_START_POWER);
-                next = Geom::Point(next[Geom::X] + HANDLE_CUBIC_GAP,next[Geom::Y] + HANDLE_CUBIC_GAP);
                 line_inside_nodes.reset();
                 n->front()->setPosition(next);
             }else{
@@ -1080,7 +1122,6 @@ NodeList::iterator PathManipulator::subdivideSegment(NodeList::iterator first, d
                 line_inside_nodes.lineto(first->position());
                 sbasis_inside_nodes = line_inside_nodes.first_segment()->toSBasis();
                 Geom::Point previous = sbasis_inside_nodes.valueAt(DEFAULT_START_POWER);
-                previous = Geom::Point(previous[Geom::X] + HANDLE_CUBIC_GAP,previous[Geom::Y] + HANDLE_CUBIC_GAP);
                 n->back()->setPosition(previous);
             }else{
                 n->back()->setPosition(seg1[2]);
@@ -1166,7 +1207,7 @@ void PathManipulator::_externalChange(unsigned type)
         _updateOutline();
         } break;
     case PATH_CHANGE_TRANSFORM: {
-        SPPath *path = dynamic_cast<SPPath *>(_path);
+        auto path = cast<SPPath>(_path);
         if (path) {
             Geom::Affine i2d_change = _d2i_transform;
             _i2d_transform = path->i2dt_affine();
@@ -1191,7 +1232,12 @@ void PathManipulator::_createControlPointsFromGeometry()
 
     // sanitize pathvector and store it in SPCurve,
     // so that _updateDragPoint doesn't crash on paths with naked movetos
-    Geom::PathVector pathv = pathv_to_linear_and_cubic_beziers(_spcurve.get_pathvector());
+    Geom::PathVector pathv;
+    if (_is_bspline) {
+        pathv = pathv_to_cubicbezier(_spcurve.get_pathvector(), false);
+    } else {
+        pathv = pathv_to_linear_and_cubic_beziers(_spcurve.get_pathvector());
+    }
     for (Geom::PathVector::iterator i = pathv.begin(); i != pathv.end(); ) {
         // NOTE: this utilizes the fact that Geom::PathVector is an std::vector.
         // When we erase an element, the next one slides into position,
@@ -1283,7 +1329,7 @@ int PathManipulator::_bsplineGetSteps() const {
 
     LivePathEffect::LPEBSpline const *lpe_bsp = nullptr;
 
-    SPLPEItem * path = dynamic_cast<SPLPEItem *>(_path);
+    auto path = cast<SPLPEItem>(_path);
     if (path){
         if(path->hasPathEffect()){
             Inkscape::LivePathEffect::Effect const *this_effect =
@@ -1302,7 +1348,7 @@ int PathManipulator::_bsplineGetSteps() const {
 
 // determines if the trace has bspline effect
 void PathManipulator::_recalculateIsBSpline(){
-    SPPath *path = dynamic_cast<SPPath *>(_path);
+    auto path = cast<SPPath>(_path);
     if (path && path->hasPathEffect()) {
         Inkscape::LivePathEffect::Effect const *this_effect =
             path->getFirstPathEffectOfType(Inkscape::LivePathEffect::BSPLINE);
@@ -1332,7 +1378,7 @@ double PathManipulator::_bsplineHandlePosition(Handle *h, bool check_other)
         line_inside_nodes.moveto(n->position());
         line_inside_nodes.lineto(next_node->position());
         if(!are_near(h->position(), n->position())){
-            pos = Geom::nearest_time(Geom::Point(h->position()[X] - HANDLE_CUBIC_GAP, h->position()[Y] - HANDLE_CUBIC_GAP), *line_inside_nodes.first_segment());
+            pos = Geom::nearest_time(h->position(), *line_inside_nodes.first_segment());
         }
     }
     if (pos == NO_POWER && check_other){
@@ -1363,8 +1409,7 @@ Geom::Point PathManipulator::_bsplineHandleReposition(Handle *h,double pos){
         line_inside_nodes.lineto(next_node->position());
         sbasis_inside_nodes = line_inside_nodes.first_segment()->toSBasis();
         ret = sbasis_inside_nodes.valueAt(pos);
-        ret = Geom::Point(ret[X] + HANDLE_CUBIC_GAP, ret[Y] + HANDLE_CUBIC_GAP);
-    }else{
+    } else{
         if(pos == NO_POWER){
             ret = n->position();
         }
@@ -1426,15 +1471,13 @@ void PathManipulator::_createGeometryFromControlPoints(bool alert_LPE)
     _spcurve = SPCurve(pathv);
     if (alert_LPE) {
         /// \todo note that _path can be an Inkscape::LivePathEffect::Effect* too, kind of confusing, rework member naming?
-        SPPath *path = dynamic_cast<SPPath *>(_path);
+        auto path = cast<SPPath>(_path);
         if (path && path->hasPathEffect()) {
-            Inkscape::LivePathEffect::Effect *this_effect =
+            Inkscape::LivePathEffect::Effect *this_effect = 
                 path->getFirstPathEffectOfType(Inkscape::LivePathEffect::POWERSTROKE);
-            if(this_effect){
-                LivePathEffect::LPEPowerStroke *lpe_pwr = dynamic_cast<LivePathEffect::LPEPowerStroke*>(this_effect->getLPEObj()->get_lpe());
-                if (lpe_pwr) {
-                    lpe_pwr->adjustForNewPath(pathv);
-                }
+            LivePathEffect::LPEPowerStroke *lpe_pwr = dynamic_cast<LivePathEffect::LPEPowerStroke*>(this_effect);
+            if (lpe_pwr) {
+               lpe_pwr->adjustForNewPath();
             }
         }
     }
@@ -1518,8 +1561,8 @@ void PathManipulator::_updateOutline()
 void PathManipulator::_getGeometry()
 {
     using namespace Inkscape::LivePathEffect;
-    LivePathEffectObject *lpeobj = dynamic_cast<LivePathEffectObject *>(_path);
-    SPPath *path = dynamic_cast<SPPath *>(_path);
+    auto lpeobj = cast<LivePathEffectObject>(_path);
+    auto path = cast<SPPath>(_path);
     if (lpeobj) {
         Effect *lpe = lpeobj->get_lpe();
         if (lpe) {
@@ -1539,8 +1582,8 @@ void PathManipulator::_getGeometry()
 void PathManipulator::_setGeometry()
 {
     using namespace Inkscape::LivePathEffect;
-    LivePathEffectObject *lpeobj = dynamic_cast<LivePathEffectObject *>(_path);
-    SPPath *path = dynamic_cast<SPPath *>(_path);
+    auto lpeobj = cast<LivePathEffectObject>(_path);
+    auto path = cast<SPPath>(_path);
     if (lpeobj) {
         // copied from nodepath.cpp
         // NOTE: if we are editing an LPE param, _path is not actually an SPPath, it is
@@ -1560,10 +1603,8 @@ void PathManipulator::_setGeometry()
         if (empty()) return;
         if (path->curveBeforeLPE()) {
             path->setCurveBeforeLPE(&_spcurve);
-            if (!path->hasPathEffectOfTypeRecursive(Inkscape::LivePathEffect::SLICE)) {
+            if (path->hasPathEffectRecursive()) {
                 sp_lpe_item_update_patheffect(path, true, false);
-            } else {
-                path->setCurve(&_spcurve);
             }
         } else {
             path->setCurve(&_spcurve);
@@ -1574,7 +1615,7 @@ void PathManipulator::_setGeometry()
 /** Figure out in what attribute to store the nodetype string. */
 Glib::ustring PathManipulator::_nodetypesKey()
 {
-    LivePathEffectObject *lpeobj = dynamic_cast<LivePathEffectObject *>(_path);
+    auto lpeobj = cast<LivePathEffectObject>(_path);
     if (!lpeobj) {
         return "sodipodi:nodetypes";
     } else {
@@ -1587,7 +1628,7 @@ Glib::ustring PathManipulator::_nodetypesKey()
 Inkscape::XML::Node *PathManipulator::_getXMLNode()
 {
     //XML Tree being used here directly while it shouldn't be.
-    LivePathEffectObject *lpeobj = dynamic_cast<LivePathEffectObject *>(_path);
+    auto lpeobj = cast<LivePathEffectObject>(_path);
     if (!lpeobj)
         return _path->getRepr();
     //XML Tree being used here directly while it shouldn't be.
@@ -1608,7 +1649,7 @@ bool PathManipulator::_nodeClicked(Node *n, GdkEventButton *event)
             nl.kill();
         } else {
             // In other cases, delete the node under cursor
-            _deleteStretch(iter, iter.next(), true);
+            _deleteStretch(iter, iter.next(), NodeDeleteMode::curve_fit);
         }
 
         if (!empty()) { 

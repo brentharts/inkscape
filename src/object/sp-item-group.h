@@ -28,6 +28,7 @@ class SPGroup : public SPLPEItem {
 public:
 	SPGroup();
 	~SPGroup() override;
+    int tag() const override { return tag_of<decltype(*this)>; }
 
     enum LayerMode { GROUP, LAYER, MASK_HELPER };
 
@@ -59,6 +60,8 @@ public:
     int getItemCount() const;
     virtual void _showChildren (Inkscape::Drawing &drawing, Inkscape::DrawingItem *ai, unsigned int key, unsigned int flags);
 
+    std::vector<SPItem*> item_list();
+
 private:
     void _updateLayerMode(unsigned int display_key=0);
 
@@ -89,6 +92,11 @@ public:
     void update_patheffect(bool write) override;
 
     guint32 highlight_color() const override;
+
+    /**
+     * Return the result of recursively ungrouping all groups in \a items.
+     */
+    static std::vector<SPItem*> get_expanded(std::vector<SPItem*> const &items);
 };
 
 /**
@@ -101,19 +109,14 @@ public:
  */
 void sp_item_group_ungroup_handle_clones(SPItem *parent, Geom::Affine const g);
 
-void sp_item_group_ungroup (SPGroup *group, std::vector<SPItem*> &children, bool do_done = true);
-
-
-std::vector<SPItem*> sp_item_group_item_list (SPGroup *group);
+void sp_item_group_ungroup (SPGroup *group, std::vector<SPItem*> &children);
 
 SPObject *sp_item_group_get_child_by_name (SPGroup *group, SPObject *ref, const char *name);
 
-MAKE_SP_OBJECT_DOWNCAST_FUNCTIONS(SP_GROUP, SPGroup)
-MAKE_SP_OBJECT_TYPECHECK_FUNCTIONS(SP_IS_GROUP, SPGroup)
 
 inline bool SP_IS_LAYER(SPObject const *obj)
 {
-    auto group = dynamic_cast<SPGroup const *>(obj);
+    auto group = cast<SPGroup>(obj);
     return group && group->layerMode() == SPGroup::LAYER;
 }
 

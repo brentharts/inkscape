@@ -14,6 +14,7 @@
 #define SEEN_SP_SVG_LENGTH_H
 
 #include <string>
+#include <optional>
 
 /**
  *  SVG length type
@@ -55,6 +56,20 @@ public:
         return v;
     }
 
+    bool operator==(const SVGLength& rhs) const {
+        if (rhs.unit == unit) {
+            if (unit == SVGLength::PERCENT)
+                return value == rhs.value;
+            return computed == rhs.computed;
+        }
+        return false;
+    }
+    bool operator!=(const SVGLength& rhs) const {
+        return !(*this == rhs);
+    }
+
+    operator bool() const { return _set; }
+
     bool read(char const *str);
     void readOrUnset(char const *str, Unit u = NONE, float v = 0, float c = 0);
     bool readAbsolute(char const *str);
@@ -62,6 +77,10 @@ public:
     bool isAbsolute();
 
     std::string write() const;
+    std::string toString(const std::string &unit, std::optional<unsigned int> precision = {}, bool add_unit = true) const;
+    double toValue(const std::string &out_unit) const;
+    bool fromString(const std::string &input, const std::string &unit);
+
     // To set 'v' use '='
     void set(Unit u, float v); // Sets computed value based on u and v.
     void set(Unit u, float v, float c); // Sets all three values.

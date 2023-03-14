@@ -16,8 +16,6 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
-#define noSP_SS_VERBOSE
-
 #include "stroke-style.h"
 
 #include "object/sp-marker.h"
@@ -501,7 +499,7 @@ void StrokeStyle::markerSelectCB(MarkerComboBox *marker_combo, SPMarkerLoc const
     sp_repr_css_set_property(css, combo_id, marker.c_str());
 
     for (auto item : desktop->getSelection()->items()) {
-        if (!SP_IS_SHAPE(item)) {
+        if (!is<SPShape>(item)) {
             continue;
         }
         if (Inkscape::XML::Node* selrepr = item->getRepr()) {
@@ -555,12 +553,16 @@ void StrokeStyle::unitChangedCB()
         widthSpin->set_value(100);
     } else {
         // Remove the non-scaling-stroke effect and the hairline extensions
-        SPCSSAttr *css = sp_repr_css_attr_new();
-        sp_repr_css_unset_property(css, "vector-effect");
-        sp_repr_css_unset_property(css, "-inkscape-stroke");
-        sp_desktop_set_style(desktop, css);
-        sp_repr_css_attr_unref(css);
-        css = nullptr;
+        if (!update) {
+            SPCSSAttr *css = sp_repr_css_attr_new();
+            sp_repr_css_unset_property(css, "vector-effect");
+            sp_repr_css_unset_property(css, "-inkscape-stroke");
+            sp_desktop_set_style(desktop, css);
+            sp_repr_css_attr_unref(css);
+            css = nullptr;
+            DocumentUndo::done(desktop->getDocument(), _("Remove hairline stroke"),
+                INKSCAPE_ICON("dialog-fill-and-stroke"));
+        }
         if (_old_unit->type == Inkscape::Util::UNIT_TYPE_DIMENSIONLESS) {
             // Prevent update of unit (inf-loop) in updateLine
             _old_unit = new_unit;
@@ -1127,7 +1129,7 @@ StrokeStyle::setPaintOrderButtons(Gtk::ToggleButton *active)
  */
 static void buildGroupedItemList(SPObject *element, std::vector<SPObject*> &simple_list)
 {
-    if (SP_IS_GROUP(element)) {
+    if (is<SPGroup>(element)) {
         for (SPObject *i = element->firstChild(); i; i = i->getNext()) {
             buildGroupedItemList(i, simple_list);
         }
@@ -1158,7 +1160,7 @@ StrokeStyle::updateAllMarkers(std::vector<SPItem*> const &objects, bool skip_und
     }
 
     for (SPObject *object : simplified_list) {
-        if (!SP_IS_TEXT(object)) {
+        if (!is<SPText>(object)) {
             all_texts = false;
             break;
         }

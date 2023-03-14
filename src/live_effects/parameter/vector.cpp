@@ -32,8 +32,7 @@ VectorParam::VectorParam( const Glib::ustring& label, const Glib::ustring& tip,
 {
 }
 
-VectorParam::~VectorParam()
-= default;
+VectorParam::~VectorParam() = default;
 
 void
 VectorParam::param_set_default()
@@ -174,7 +173,7 @@ public:
         Geom::Point const s = snap_knot_position(p, state);
         param->setOrigin(s);
         param->set_and_write_new_values(param->origin, param->vector);
-        sp_lpe_item_update_patheffect(SP_LPE_ITEM(item), false, false);
+        sp_lpe_item_update_patheffect(cast<SPLPEItem>(item), false, false);
     };
     Geom::Point knot_get() const override {
         return param->origin;
@@ -182,7 +181,7 @@ public:
     void knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) override
     {
         param->param_effect->refresh_widgets = true;
-        param->write_to_SVG();
+        param->param_effect->makeUndoDone(_("Move handle"));
     };
     void knot_click(guint /*state*/) override{
         g_message ("This is the origin handle associated to parameter '%s'", param->param_key.c_str());
@@ -202,7 +201,7 @@ public:
         /// @todo implement angle snapping when holding CTRL
         param->setVector(s);
         param->set_and_write_new_values(param->origin, param->vector);
-        sp_lpe_item_update_patheffect(SP_LPE_ITEM(item), false, false);
+        sp_lpe_item_update_patheffect(cast<SPLPEItem>(item), false, false);
     };
     Geom::Point knot_get() const override {
         return param->origin + param->vector;
@@ -210,8 +209,8 @@ public:
     void knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) override
     {
         param->param_effect->refresh_widgets = true;
-        param->write_to_SVG();
-    };
+        param->param_effect->makeUndoDone(_("Move handle"));
+    }
     void knot_click(guint /*state*/) override{
         g_message ("This is the vector handle associated to parameter '%s'", param->param_key.c_str());
     };

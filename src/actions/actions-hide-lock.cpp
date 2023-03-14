@@ -13,6 +13,7 @@
  */
 
 #include "actions-hide-lock.h"
+#include "actions-helper.h"
 
 #include <giomm.h>  // Not <gtkmm.h>! To eventually allow a headless version!
 #include <glibmm/i18n.h>
@@ -33,7 +34,7 @@ hide_lock_recurse(bool (*f)(SPItem*, bool), SPItem *item, bool hide_or_lock)
     }
 
     for (auto& child : item->children) {
-        auto item = dynamic_cast<SPItem*>(&child);
+        auto item = cast<SPItem>(&child);
         if (item && hide_lock_recurse(f, item, hide_or_lock)) {
             changed = true;
         }
@@ -100,7 +101,7 @@ hide_lock_unhide_below(InkscapeApplication *app)
 {
     auto selection = app->get_active_selection();
     if (!selection) {
-        std::cerr << "hide_lock_unhide_below: no selection!" << std::endl;
+        show_output("hide_lock_unhide_below: no selection!");
         return;
     }
 
@@ -123,7 +124,7 @@ hide_lock_unlock_below(InkscapeApplication *app)
 {
     auto selection = app->get_active_selection();
     if (!selection) {
-        std::cerr << "hide_lock_unhide_below: no selection!" << std::endl;
+        show_output("hide_lock_unhide_below: no selection!");
         return;
     }
 
@@ -146,7 +147,7 @@ hide_lock_hide_selected(InkscapeApplication* app, bool hide)
 {
     auto selection = app->get_active_selection();
     if (!selection) {
-        std::cerr << "hide_lock_hide_selected: no selection!" << std::endl;
+        show_output("hide_lock_hide_selected: no selection!");
         return;
     }
 
@@ -170,7 +171,7 @@ hide_lock_lock_selected(InkscapeApplication* app, bool lock)
 {
     auto selection = app->get_active_selection();
     if (!selection) {
-        std::cerr << "hide_lock_lock_selected: no selection!" << std::endl;
+        show_output("hide_lock_lock_selected: no selection!");
         return;
     }
 

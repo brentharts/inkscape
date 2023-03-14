@@ -76,14 +76,14 @@ void LayerManager::_setDocument(SPDesktop *, SPDocument *document) {
 
 void LayerManager::_layer_activated(SPObject *layer)
 {
-    if (auto group = dynamic_cast<SPGroup *>(layer)) {
+    if (auto group = cast<SPGroup>(layer)) {
         group->setLayerDisplayMode(_desktop->dkey, SPGroup::LAYER);
     }
 }
 
 void LayerManager::_layer_deactivated(SPObject *layer)
 {
-    if (auto group = dynamic_cast<SPGroup *>(layer)) {
+    if (auto group = cast<SPGroup>(layer)) {
         group->setLayerDisplayMode(_desktop->dkey, SPGroup::GROUP);
     }
 }
@@ -93,7 +93,7 @@ void LayerManager::_layer_deactivated(SPObject *layer)
  */
 SPGroup *LayerManager::currentRoot() const
 {
-    return dynamic_cast<SPGroup *>(_layer_hierarchy->top());
+    return cast<SPGroup>(_layer_hierarchy->top());
 }
 
 /**
@@ -101,7 +101,7 @@ SPGroup *LayerManager::currentRoot() const
  */
 SPGroup *LayerManager::currentLayer() const
 {
-    return dynamic_cast<SPGroup *>(_layer_hierarchy->bottom());
+    return cast<SPGroup>(_layer_hierarchy->bottom());
 }
 
 /**
@@ -180,9 +180,10 @@ void LayerManager::renameLayer( SPObject* obj, gchar const *label, bool uniquify
  * Make \a object the top layer.
  */
 void LayerManager::setCurrentLayer(SPObject *object, bool clear) {
-    if (currentRoot()) {
-        g_return_if_fail(SP_IS_GROUP(object));
-        g_return_if_fail( currentRoot() == object || (currentRoot() && currentRoot()->isAncestorOf(object)) );
+    if (auto root = currentRoot()) {
+        if (root != object && !root->isAncestorOf(object))
+            return;
+        g_return_if_fail(is<SPGroup>(object));
         _layer_hierarchy->setBottom(object);
 
         Inkscape::Preferences *prefs = Inkscape::Preferences::get();
@@ -197,7 +198,7 @@ std::list<SPItem *> LayerManager::getAllLayers()
     std::list<SPItem *> layers;
     for (SPObject *obj = Inkscape::previous_layer(currentRoot(), currentRoot()); obj;
          obj = Inkscape::previous_layer(currentRoot(), obj)) {
-        auto item = SP_ITEM(obj);
+        auto item = cast<SPItem>(obj);
         layers.push_back(item);
     }
     return layers;
@@ -205,12 +206,12 @@ std::list<SPItem *> LayerManager::getAllLayers()
 
 void LayerManager::toggleHideAllLayers(bool hide) {
     for ( SPObject* obj = Inkscape::previous_layer(currentRoot(), currentRoot()); obj; obj = Inkscape::previous_layer(currentRoot(), obj) ) {
-        SP_ITEM(obj)->setHidden(hide);
+        cast<SPItem>(obj)->setHidden(hide);
     }
 }
 void LayerManager::toggleLockAllLayers(bool lock) {
     for ( SPObject* obj = Inkscape::previous_layer(currentRoot(), currentRoot()); obj; obj = Inkscape::previous_layer(currentRoot(), obj) ) {
-        SP_ITEM(obj)->setLocked(lock);
+        cast<SPItem>(obj)->setLocked(lock);
     }
 }
 
@@ -236,7 +237,7 @@ void LayerManager::_rebuild() {
             if (root->isAncestorOf(layer)) {
                 needsAdd = true;
                 for (SPObject* curr = layer; curr && (curr != root) && needsAdd; curr = curr->parent) {
-                    if (auto group = dynamic_cast<SPGroup *>(curr)) {
+                    if (auto group = cast<SPGroup>(curr)) {
                         if (group->isLayer()) {
                             // If we have a layer-group as the one or a parent, ensure it is listed as a valid layer.
                             needsAdd &= ( std::find(layers.begin(),layers.end(),curr) != layers.end() );
@@ -259,7 +260,7 @@ void LayerManager::_rebuild() {
             }
             if (needsAdd) {
                 if (!includes(layer)) {
-                    layersToAdd.insert(SP_GROUP(layer));
+                    layersToAdd.insert(cast<SPGroup>(layer));
                 }
                 for (auto it : additional) {
                     if (!includes(it)) {
@@ -288,13 +289,13 @@ void LayerManager::_rebuild() {
 }
 
 static bool is_layer(SPObject &object) {
-    return SP_IS_GROUP(&object) &&
-           SP_GROUP(&object)->layerMode() == SPGroup::LAYER;
+    return is<SPGroup>(&object) &&
+           cast<SPGroup>(&object)->layerMode() == SPGroup::LAYER;
 }
 
 void LayerManager::_selectedLayerChanged(SPObject *top, SPObject *bottom)
 {
-    if (auto group = dynamic_cast<SPGroup *>(bottom)) {
+    if (auto group = cast<SPGroup>(bottom)) {
         _layer_changed_signal.emit(group);
     }
 }
@@ -447,7 +448,7 @@ SPObject *create_layer(SPObject *root, SPObject *layer, LayerRelativePosition po
         layer_repr->parent()->addChild(repr, layer_repr);
 
         if ( LPOS_BELOW == position ) {
-            SP_ITEM(document->getObjectByRepr(repr))->lowerOne();
+            cast<SPItem>(document->getObjectByRepr(repr))->lowerOne();
         }
     }
 
@@ -456,7 +457,7 @@ SPObject *create_layer(SPObject *root, SPObject *layer, LayerRelativePosition po
 
 std::vector<SPItem*> get_layers_to_toggle(SPObject* layer, SPObject* current_root) {
     std::vector<SPItem*> layers;
-    if (!SP_IS_GROUP(layer) ||
+    if (!is<SPGroup>(layer) ||
         !(current_root == layer || (current_root && current_root->isAncestorOf(layer)))) {
         g_warning("Bogus input to get_layers_to_toggle_toggle");
         return layers;
@@ -464,13 +465,13 @@ std::vector<SPItem*> get_layers_to_toggle(SPObject* layer, SPObject* current_roo
 
     for (SPObject* obj = Inkscape::next_layer(current_root, layer); obj; obj = Inkscape::next_layer(current_root, obj)) {
         // skip ancestors
-        auto item = SP_ITEM(obj);
+        auto item = cast<SPItem>(obj);
         if (!obj->isAncestorOf(layer) && item) {
             layers.push_back(item);
         }
     }
     for (SPObject* obj = Inkscape::previous_layer(current_root, layer); obj; obj = Inkscape::previous_layer(current_root, obj)) {
-        auto item = SP_ITEM(obj);
+        auto item = cast<SPItem>(obj);
         if (!obj->isAncestorOf(layer) && item) {
             layers.push_back(item);
         }
@@ -488,7 +489,7 @@ void LayerManager::toggleLockOtherLayers(SPObject *object, bool force_lock) {
 
     bool othersLocked = force_lock ? true : std::any_of(layers.begin(), layers.end(), [](SPItem* l){ return !l->isLocked(); });
 
-    if (SPItem* item = SP_ITEM(object)) {
+    if (auto item = cast<SPItem>(object)) {
         if (item->isLocked()) {
             item->setLocked(false);
         }
@@ -510,7 +511,7 @@ void LayerManager::toggleLayerSolo(SPObject *object, bool force_hide) {
 
     bool othersShowing = force_hide ? true : std::any_of(layers.begin(), layers.end(), [](SPItem* l){ return !l->isHidden(); });
 
-    if (SPItem* item = SP_ITEM(object)) {
+    if (auto item = cast<SPItem>(object)) {
         if (item->isHidden()) {
             item->setHidden(false);
         }
@@ -536,7 +537,7 @@ SPObject *LayerManager::layerForObject(SPObject *object) {
     object = object->parent;
     while ( object && object != root && !isLayer(object) ) {
         // Objects in defs have no layer and are NOT in the root layer
-        if(SP_IS_DEFS(object))
+        if(is<SPDefs>(object))
             return nullptr;
         object = object->parent;
     }
@@ -548,7 +549,7 @@ SPObject *LayerManager::layerForObject(SPObject *object) {
  */
 bool LayerManager::isLayer(SPObject *object) const
 {
-    if (auto group = dynamic_cast<SPGroup *>(object)) {
+    if (auto group = cast<SPGroup>(object)) {
         return group->effectiveLayerMode(_desktop->dkey) == SPGroup::LAYER;
     }
     return false;
@@ -559,7 +560,7 @@ bool LayerManager::isLayer(SPObject *object) const
  */
 SPGroup *LayerManager::asLayer(SPObject *object)
 {
-    if (auto group = dynamic_cast<SPGroup *>(object)) {
+    if (auto group = cast<SPGroup>(object)) {
         return group->isLayer() ? group : nullptr;
     }
     return nullptr;

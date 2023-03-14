@@ -19,6 +19,7 @@ set(xml_SRC
 	subtree.cpp
 	helper-observer.cpp
 	rebase-hrefs.cpp
+	href-attribute-helper.cpp
 
 
 	# -------
@@ -34,7 +35,6 @@ set(xml_SRC
 	helper-observer.h
 	invalid-operation-exception.h
 	log-builder.h
-	node-event-vector.h
 	node-fns.h
 	node-iterators.h
 	node-observer.h
@@ -51,6 +51,7 @@ set(xml_SRC
 	sp-css-attr.h
 	subtree.h
 	text-node.h
+	href-attribute-helper.h
 )
 
 # add_inkscape_lib(xml_LIB "${xml_SRC}")

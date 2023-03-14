@@ -420,6 +420,9 @@ std::vector<AttributeInfo> getKnownAttrs()
         AttributeInfo("inkscape:layoutOptions", true),
         AttributeInfo("inkscape:lockguides", true),
         AttributeInfo("inkscape:locked", true),
+        AttributeInfo("margin", true),
+        AttributeInfo("bleed", true),
+        AttributeInfo("page-size", true),
         // AttributeInfo("inkscape:object-nodes", true),
         // AttributeInfo("inkscape:object-paths", true),
         AttributeInfo("inkscape:original", true),
@@ -474,6 +477,7 @@ std::vector<AttributeInfo> getKnownAttrs()
         AttributeInfo("inkscape:zoom", true),
         AttributeInfo("inkscape:svg-dpi", true),
         AttributeInfo("inkscape:swatch", true),
+        AttributeInfo("inkscape:pinned", true),
         AttributeInfo("sodipodi:arc-type", true),
         AttributeInfo("sodipodi:arg1", true),
         AttributeInfo("sodipodi:arg2", true),
@@ -541,6 +545,21 @@ std::vector<AttributeInfo> getKnownAttrs()
         AttributeInfo("pagecolor", true),
         AttributeInfo("labelstyle", true),
 
+        // SPGrid
+        AttributeInfo("originx", true),
+        AttributeInfo("originy", true),
+        AttributeInfo("spacingx", true),
+        AttributeInfo("spacingy", true),
+        AttributeInfo("gridanglex", true),
+        AttributeInfo("gridanglez", true),
+        AttributeInfo("enabled", true),
+        AttributeInfo("visible", true),
+        AttributeInfo("empopacity", true),
+        AttributeInfo("empcolor", true),
+        AttributeInfo("empspacing", true),
+        AttributeInfo("dotted", true),
+        AttributeInfo("snapvisiblegridlinesonly", true),
+
         // SPGuide
         AttributeInfo("position", true),
 
@@ -599,6 +618,12 @@ TEST(AttributesTest, NameRoundTrip)
             }
         }
     }
+}
+
+// Equivalent aliases, e.g. with and without namespace
+TEST(AttributesTest, Aliases)
+{
+    EXPECT_EQ(sp_attribute_lookup("href"), SPAttr::XLINK_HREF);
 }
 
 /* Test for any attributes that this test program doesn't know about.

@@ -48,6 +48,7 @@
 #include "object/sp-string.h"
 
 #include "svg/css-ostringstream.h"
+#include "ui/dialog/dialog-container.h"
 #include "ui/icon-names.h"
 #include "ui/tools/select-tool.h"
 #include "ui/tools/text-tool.h"
@@ -57,6 +58,7 @@
 #include "ui/widget/spin-button-tool-item.h"
 #include "ui/widget/unit-tracker.h"
 #include "util/units.h"
+#include "util/font-collections.h"
 
 #include "widgets/style-utils.h"
 
@@ -169,8 +171,7 @@ static void sp_text_toolbox_select_cb( GtkEntry* entry, GtkEntryIconPosition /*p
 
   SPDesktop *desktop = SP_ACTIVE_DESKTOP;
   SPDocument *document = desktop->getDocument();
-  std::vector<SPItem*> x,y;
-  std::vector<SPItem*> allList = get_all_items(x, document->getRoot(), desktop, false, false, true, y);
+  auto allList = get_all_items(document->getRoot(), desktop, false, false, true);
   for(std::vector<SPItem*>::const_reverse_iterator i=allList.rbegin();i!=allList.rend(); ++i){
       SPItem *item = *i;
     SPStyle *style = item->style;
@@ -227,6 +228,81 @@ TextToolbar::TextToolbar(SPDesktop *desktop)
 
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
 
+    /* Font Collections popover */
+    {
+        auto font_collection_item = Gtk::manage(new Gtk::ToolItem);
+        add(*font_collection_item);
+
+        auto font_collection_button = Gtk::manage(new Gtk::MenuButton);
+        font_collection_button->set_image_from_icon_name(INKSCAPE_ICON("font_collections"));
+        font_collection_button->set_always_show_image(true);
+        font_collection_button->set_tooltip_text(_("Select Font Collections"));
+        font_collection_item->add(*font_collection_button);
+
+        // Popover.
+        auto font_collection_popover = Gtk::manage(new Gtk::Popover(*font_collection_button));
+        // font_collection_popover->set_modal(false); // Stay open until button clicked again.
+        font_collection_button->set_popover(*font_collection_popover);
+
+        // Grid inside the popover.
+        auto popover_grid = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
+        popover_grid->set_margin_top(4);
+        popover_grid->set_margin_bottom(4);
+        popover_grid->set_margin_start(4);
+        popover_grid->set_margin_end(4);
+        popover_grid->show_all();
+
+        // This frame will contain the list of the font collections.
+        auto popover_frame = Gtk::manage(new Gtk::Frame);
+        popover_frame->show_all();
+        popover_frame->set_label(_("Font Collections"));
+        popover_frame->set_margin_top(4);
+        popover_grid->add(*popover_frame);
+
+        // The ListBox widget will display the names of the font collections.
+        font_collections_list = Gtk::manage(new Gtk::ListBox);
+        popover_frame->add(*font_collections_list);
+        font_collections_list->show_all();
+
+        // To open the Font Collections Manager dialogue.
+        auto fcm_btn = Gtk::manage(new Gtk::Button);
+        fcm_btn->set_tooltip_text(_("Open the Font Collections Manager dialogue"));
+        fcm_btn->set_label(_("Open Collections Editor"));
+        fcm_btn->set_margin_top(4);
+        popover_grid->add(*fcm_btn);
+        fcm_btn->show_all();
+        fcm_btn->signal_clicked().connect([=](){ TextToolbar::on_fcm_button_pressed(); });
+
+        // To reset the selected font collections and the font list.
+        auto reset_item = Gtk::manage(new Gtk::ToolItem);
+        add(*reset_item);
+
+        auto reset_btn = Gtk::manage(new Gtk::Button);
+        reset_btn->set_tooltip_text(_("Reset selected collections"));
+        reset_btn->set_image_from_icon_name(INKSCAPE_ICON("view-refresh"));
+        reset_btn->set_always_show_image(true);
+        reset_item->add(*reset_btn);
+        reset_btn->show_all();
+        // reset_btn->set_hexpand(false);
+        reset_btn->signal_clicked().connect([=](){ TextToolbar::on_reset_button_pressed(); });
+        font_collection_popover->add(*popover_grid);
+
+        // Attach the signal to display the popover.
+        font_collection_popover->signal_show().connect([=](){
+                display_font_collections();
+        }, false);
+
+        FontCollections *font_collections = Inkscape::FontCollections::get();
+
+        // This signal will keep both the Text and Font dialogue and
+        // TextToolbar popovers in sync with each other.
+        font_collections->connect_selection_update([=]() { display_font_collections(); });
+
+        // This one will keep the text toolbar Font Collections
+        // updated in case of any change in the Font Collections.
+        font_collections->connect_update([=]() { display_font_collections(); });
+    }
+
     /* Font family */
     {
         // Font list
@@ -255,7 +331,7 @@ TextToolbar::TextToolbar(SPDesktop *desktop)
         _font_family_item->set_warning_cb( (gpointer)sp_text_toolbox_select_cb );
 
         //ink_comboboxentry_action_set_warning_callback( act, sp_text_fontfamily_select_all );
-        _font_family_item->signal_changed().connect( sigc::mem_fun(*this, &TextToolbar::fontfamily_value_changed) );
+        _font_family_item->signal_changed().connect([=](){ fontfamily_value_changed(); });
         add(*_font_family_item);
 
         // Change style of drop-down from menu to list
@@ -290,7 +366,7 @@ TextToolbar::TextToolbar(SPDesktop *desktop)
                                                                nullptr,   // Separator
                                                                GTK_WIDGET(desktop->getCanvas()->gobj()))); // Focus widget
 
-        _font_style_item->signal_changed().connect(sigc::mem_fun(*this, &TextToolbar::fontstyle_value_changed));
+        _font_style_item->signal_changed().connect([=](){ fontstyle_value_changed(); });
         _font_style_item->focus_on_click(false);
         add(*_font_style_item);
     }
@@ -320,7 +396,7 @@ TextToolbar::TextToolbar(SPDesktop *desktop)
                                                                nullptr,   // Separator
                                                                GTK_WIDGET(desktop->getCanvas()->gobj()))); // Focus widget
 
-        _font_size_item->signal_changed().connect(sigc::mem_fun(*this, &TextToolbar::fontsize_value_changed));
+        _font_size_item->signal_changed().connect([=](){ fontsize_value_changed(); });
         _font_size_item->focus_on_click(false);
         add(*_font_size_item);
     }
@@ -344,7 +420,7 @@ TextToolbar::TextToolbar(SPDesktop *desktop)
         _line_height_item->set_tooltip_text(_("Spacing between baselines"));
         _line_height_item->set_custom_numeric_menu_data(values, labels);
         _line_height_item->set_focus_widget(desktop->getCanvas());
-        _line_height_adj->signal_value_changed().connect(sigc::mem_fun(*this, &TextToolbar::lineheight_value_changed));
+        _line_height_adj->signal_value_changed().connect([=](){ lineheight_value_changed(); });
         //_tracker->addAdjustment(_line_height_adj->gobj()); // (Alex V) Why is this commented out?
         _line_height_item->set_sensitive(true);
         _line_height_item->set_icon(INKSCAPE_ICON("text_line_spacing"));
@@ -447,7 +523,6 @@ TextToolbar::TextToolbar(SPDesktop *desktop)
 
     auto positioning_grid = Gtk::manage(new Gtk::Grid);
     positioning_popover->add(*positioning_grid);
-
 
     /* Letter spacing */
     {
@@ -671,9 +746,8 @@ void TextToolbar::text_outer_set_style(SPCSSAttr *css)
     SPDesktop *desktop = _desktop;
     if(_outer) {
         // Apply css to parent text objects directly.
-        for (auto i : desktop->getSelection()->items()) {
-            SPItem *item = dynamic_cast<SPItem *>(i);
-            if (dynamic_cast<SPText *>(item) || dynamic_cast<SPFlowtext *>(item)) {
+        for (auto item : desktop->getSelection()->items()) {
+            if (is<SPText>(item) || is<SPFlowtext>(item)) {
                 // Scale by inverse of accumulated parent transform
                 SPCSSAttr *css_set = sp_repr_css_attr_new();
                 sp_repr_css_merge(css_set, css);
@@ -711,13 +785,16 @@ TextToolbar::fontfamily_value_changed()
     }
     _freeze = true;
 
+    Inkscape::FontLister *fontlister = Inkscape::FontLister::get_instance();
+    SPDocument *document = _desktop->getDocument();
+    fontlister->add_document_fonts_at_top(document);
+
     Glib::ustring new_family = _font_family_item->get_active_text();
     css_font_family_unquote( new_family ); // Remove quotes around font family names.
 
     // TODO: Think about how to handle handle multiple selections. While
     // the font-family may be the same for all, the styles might be different.
     // See: TextEdit::onApply() for example of looping over selected items.
-    Inkscape::FontLister* fontlister = Inkscape::FontLister::get_instance();
 #ifdef DEBUG_TEXT
     std::cout << "  Old family: " << fontlister->get_font_family() << std::endl;
     std::cout << "  New family: " << new_family << std::endl;
@@ -979,8 +1056,8 @@ TextToolbar::align_mode_changed(int mode)
     Inkscape::Selection *selection = desktop->getSelection();
     auto itemlist= selection->items();
     for (auto i : itemlist) {
-        SPText *text = dynamic_cast<SPText *>(i);
-        // SPFlowtext *flowtext = dynamic_cast<SPFlowtext *>(i);
+        auto text = cast<SPText>(i);
+        // auto flowtext = cast<SPFlowtext>(i);
         if (text) {
             SPItem *item = i;
 
@@ -1042,13 +1119,13 @@ TextToolbar::align_mode_changed(int mode)
                         break;
                 }
             }
-            Geom::Point XY = SP_TEXT(item)->attributes.firstXY();
+            Geom::Point XY = cast<SPText>(item)->attributes.firstXY();
             if (axis == Geom::X) {
                 XY = XY + Geom::Point (move, 0);
             } else {
                 XY = XY + Geom::Point (0, move);
             }
-            SP_TEXT(item)->attributes.setFirstXY(XY);
+            cast<SPText>(item)->attributes.setFirstXY(XY);
             item->updateRepr();
             item->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
         }
@@ -1299,7 +1376,7 @@ TextToolbar::lineheight_value_changed()
         // Special else makes this different from other uses of text_outer_set_style
         text_outer_set_style(css);
     } else {
-        SPItem *parent = dynamic_cast<SPItem *>(*itemlist.begin());
+        auto parent = itemlist.front();
         SPStyle *parent_style = parent->style;
         SPCSSAttr *parent_cssatr = sp_css_attr_from_style(parent_style, SP_STYLE_FLAG_IFSET);
         Glib::ustring parent_lineheight = sp_repr_css_property(parent_cssatr, "line-height", "1.25");
@@ -1311,7 +1388,7 @@ TextToolbar::lineheight_value_changed()
         }
         if (minheight) {
             for (auto i : parent->childList(false)) {
-                SPItem *child = dynamic_cast<SPItem *>(i);
+                auto child = cast<SPItem>(i);
                 if (!child) {
                     continue;
                 }
@@ -1329,8 +1406,8 @@ TextToolbar::lineheight_value_changed()
     itemlist = selection->items();
     bool modmade = false;
     for (auto i : itemlist) {
-        SPText *text = dynamic_cast<SPText *>(i);
-        SPFlowtext *flowtext = dynamic_cast<SPFlowtext *>(i);
+        auto text = cast<SPText>(i);
+        auto flowtext = cast<SPFlowtext>(i);
         if (text || flowtext) {
             modmade = true;
             break;
@@ -1346,8 +1423,8 @@ TextToolbar::lineheight_value_changed()
 
         desktop->getDocument()->ensureUpToDate();
         for (auto i : itemlist) {
-            SPText *text = dynamic_cast<SPText *>(i);
-            SPFlowtext *flowtext = dynamic_cast<SPFlowtext *>(i);
+            auto text = cast<SPText>(i);
+            auto flowtext = cast<SPFlowtext>(i);
             if (text || flowtext) {
                 (i)->updateRepr();
             }
@@ -1414,8 +1491,8 @@ TextToolbar::lineheight_unit_changed(int /* Not Used */)
     int count = 0;
 
     for (auto i : itemlist) {
-        SPText *text = dynamic_cast<SPText *>(i);
-        SPFlowtext *flowtext = dynamic_cast<SPFlowtext *>(i);
+        auto text = cast<SPText>(i);
+        auto flowtext = cast<SPFlowtext>(i);
         if (text || flowtext) {
             doc_scale = Geom::Affine(i->i2dt_affine()).descrim();
             font_size += i->style->font_size.computed * doc_scale;
@@ -1491,7 +1568,7 @@ TextToolbar::lineheight_unit_changed(int /* Not Used */)
         _line_height_adj->set_page_increment(1.0);
     }
     // Internal function to set line-height which is spacing mode dependent.
-    SPItem *parent = itemlist.empty() ? nullptr : dynamic_cast<SPItem *>(*itemlist.begin());
+    SPItem *parent = itemlist.empty() ? nullptr : itemlist.front();
     SPStyle *parent_style = nullptr;
     if (parent) {
         parent_style = parent->style;
@@ -1500,7 +1577,7 @@ TextToolbar::lineheight_unit_changed(int /* Not Used */)
     if (_outer) {
         if (!selection->singleItem() || !parent_style || parent_style->line_height.computed != 0) {
             for (auto i = itemlist.begin(); i != itemlist.end(); ++i) {
-                if (dynamic_cast<SPText *>(*i) || dynamic_cast<SPFlowtext *>(*i)) {
+                if (is<SPText>(*i) || is<SPFlowtext>(*i)) {
                     SPItem *item = *i;
                     // Scale by inverse of accumulated parent transform
                     SPCSSAttr *css_set = sp_repr_css_attr_new();
@@ -1529,7 +1606,7 @@ TextToolbar::lineheight_unit_changed(int /* Not Used */)
         }
         if (minheight) {
             for (auto i : parent->childList(false)) {
-                SPItem *child = dynamic_cast<SPItem *>(i);
+                auto child = cast<SPItem>(i);
                 if (!child) {
                     continue;
                 }
@@ -1547,8 +1624,8 @@ TextToolbar::lineheight_unit_changed(int /* Not Used */)
     // Only need to save for undo if a text item has been changed.
     bool modmade = false;
     for (auto i : itemlist) {
-        SPText *text = dynamic_cast<SPText *>(i);
-        SPFlowtext *flowtext = dynamic_cast<SPFlowtext *>(i);
+        auto text = cast<SPText>(i);
+        auto flowtext = cast<SPFlowtext>(i);
         if (text || flowtext) {
             modmade = true;
             break;
@@ -1563,8 +1640,8 @@ TextToolbar::lineheight_unit_changed(int /* Not Used */)
 
         desktop->getDocument()->ensureUpToDate();
         for (auto i : itemlist) {
-            SPText *text = dynamic_cast<SPText *>(i);
-            SPFlowtext *flowtext = dynamic_cast<SPFlowtext *>(i);
+            auto text = cast<SPText>(i);
+            auto flowtext = cast<SPFlowtext>(i);
             if (text || flowtext) {
                 (i)->updateRepr();
             }
@@ -1844,8 +1921,8 @@ void TextToolbar::selection_changed(Inkscape::Selection *selection) // don't bot
     gboolean isFlow = false;
     std::vector<SPItem *> to_work;
     for (auto i : itemlist) {
-        SPText *text = dynamic_cast<SPText *>(i);
-        SPFlowtext *flowtext = dynamic_cast<SPFlowtext *>(i);
+        auto text = cast<SPText>(i);
+        auto flowtext = cast<SPFlowtext>(i);
         if (text || flowtext) {
             to_work.push_back(i);
         }
@@ -1891,7 +1968,7 @@ void TextToolbar::selection_changed(Inkscape::Selection *selection) // don't bot
     if (!outside) {
         if (_outer && this->_sub_active_item) {
             std::vector<SPItem *> qactive{ this->_sub_active_item };
-            SPItem *parent = dynamic_cast<SPItem *>(this->_sub_active_item->parent);
+            auto parent = cast<SPItem>(this->_sub_active_item->parent);
             std::vector<SPItem *> qparent{ parent };
             result_numbers =
                 sp_desktop_query_style_from_list(qactive, &query, QUERY_STYLE_PROPERTY_FONTNUMBERS);
@@ -2283,11 +2360,11 @@ void TextToolbar::prepare_inner()
     if (!layout) {
       return;
     }
-    SPDocument              *doc      = _desktop->getDocument();
-    SPObject                *spobject = dynamic_cast<SPObject   *>(tc->text);
-    SPItem                  *spitem   = dynamic_cast<SPItem     *>(tc->text);
-    SPText                  *text     = dynamic_cast<SPText     *>(tc->text);
-    SPFlowtext              *flowtext = dynamic_cast<SPFlowtext *>(tc->text);
+    auto doc = _desktop->getDocument();
+    auto spobject = tc->text;
+    auto spitem = tc->text;
+    auto text = cast<SPText>(tc->text);
+    auto flowtext = cast<SPFlowtext>(tc->text);
     Inkscape::XML::Document *xml_doc = doc->getReprDoc();
     if (!spobject) {
         return;
@@ -2299,7 +2376,7 @@ void TextToolbar::prepare_inner()
         bool changed = false;
         std::vector<SPObject *> childs = spitem->childList(false);
         for (auto child : childs) {
-            SPString *spstring = dynamic_cast<SPString *>(child);
+            auto spstring = cast<SPString>(child);
             if (spstring) {
                 Glib::ustring content = spstring->string;
                 if (content != "\n") {
@@ -2375,9 +2452,9 @@ void TextToolbar::prepare_inner()
         Inkscape::XML::Node *prevchild = container->getRepr();
         std::vector<SPObject*> childs = container->childList(false);
         for (auto child : childs) {
-            SPString    *spstring  = dynamic_cast<SPString    *>(child);
-            SPFlowtspan *flowtspan = dynamic_cast<SPFlowtspan *>(child);
-            SPTSpan     *tspan     = dynamic_cast<SPTSpan     *>(child);
+            auto spstring = cast<SPString>(child);
+            auto flowtspan = cast<SPFlowtspan>(child);
+            auto tspan = cast<SPTSpan>(child);
             // we need to upper all flowtspans to container level
             // to do this we need to change the element from flowspan to flowpara
             if (flowtspan) {
@@ -2467,6 +2544,97 @@ Inkscape::XML::Node *TextToolbar::unindent_node(Inkscape::XML::Node *repr, Inksc
     return repr;
 }
 
+void TextToolbar::display_font_collections()
+{
+    for (auto row : font_collections_list->get_children()) {
+        if (row) {
+            font_collections_list->remove(*row);
+        }
+    }
+
+    FontCollections *font_collections = Inkscape::FontCollections::get();
+
+    // Insert system collections.
+    for(auto const& col: font_collections->get_collections(true)) {
+        auto btn = Gtk::make_managed<Gtk::CheckButton>(col);
+        btn->set_margin_bottom(2);
+        btn->set_active(font_collections->is_collection_selected(col));
+        btn->signal_toggled().connect([=](){
+            // toggle font system collection
+            font_collections->update_selected_collections(col);
+        });
+// g_message("tag: %s", tag.display_name.c_str());
+        auto row = Gtk::make_managed<Gtk::ListBoxRow>();
+        row->set_can_focus(false);
+        row->add(*btn);
+        row->show_all();
+        font_collections_list->append(*row);
+    }
+
+    // Insert row separator.
+    auto sep = Gtk::manage(new Gtk::Separator());
+    sep->set_margin_bottom(2);
+    auto sep_row = Gtk::make_managed<Gtk::ListBoxRow>();
+    sep_row->set_can_focus(false);
+    sep_row->add(*sep);
+    sep_row->show_all();
+    font_collections_list->append(*sep_row);
+
+    // Insert user collections.
+    for (auto const& col: font_collections->get_collections()) {
+        auto btn = Gtk::make_managed<Gtk::CheckButton>(col);
+        btn->set_margin_bottom(2);
+        btn->set_active(font_collections->is_collection_selected(col));
+        btn->signal_toggled().connect([=](){
+            // toggle font collection
+            font_collections->update_selected_collections(col);
+        });
+// g_message("tag: %s", tag.display_name.c_str());
+        auto row = Gtk::make_managed<Gtk::ListBoxRow>();
+        row->set_can_focus(false);
+        row->add(*btn);
+        row->show_all();
+        font_collections_list->append(*row);
+    }
+
+    Inkscape::FontLister* font_lister = Inkscape::FontLister::get_instance();
+    SPDocument *document = _desktop->getDocument();
+
+    if(!document) {
+        return;
+    }
+
+    font_lister->add_document_fonts_at_top(document);
+}
+
+void TextToolbar::on_fcm_button_pressed()
+{
+    // Inkscape::UI::Dialog::FontCollectionsManager::getInstance();
+    if(auto desktop = SP_ACTIVE_DESKTOP) {
+        if (auto container = desktop->getContainer()) {
+            container->new_floating_dialog("FontCollections");
+        }
+    }
+}
+
+void TextToolbar::on_reset_button_pressed()
+{
+    FontCollections *font_collections = Inkscape::FontCollections::get();
+    font_collections->clear_selected_collections();
+
+    Inkscape::FontLister* font_lister = Inkscape::FontLister::get_instance();
+    font_lister->init_font_families();
+    font_lister->init_default_styles();
+
+    SPDocument *document = _desktop->getDocument();
+
+    if(!document) {
+        return;
+    }
+
+    font_lister->add_document_fonts_at_top(document);
+}
+
 void TextToolbar::subselection_changed(Inkscape::UI::Tools::TextTool* tc)
 {
 #ifdef DEBUG_TEXT
@@ -2499,7 +2667,7 @@ void TextToolbar::subselection_changed(Inkscape::UI::Tools::TextTool* tc)
                 this->_outer = true;
                 gint counter = 0;
                 for (auto child : tc->text->childList(false)) {
-                    SPItem *item = dynamic_cast<SPItem *>(child);
+                    auto item = cast<SPItem>(child);
                     if (item && counter == startline) {
                         this->_sub_active_item = item;
                         int origin_selection = layout->iteratorToCharIndex(start_selection);

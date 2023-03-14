@@ -25,6 +25,8 @@
 #include "ui/tools/node-tool.h"
 #include "xml/sp-css-attr.h"
 
+#include "util/optstr.h"
+#include <cstddef>
 // TODO due to internal breakage in glibmm headers, this must be last:
 #include <glibmm/i18n.h>
 
@@ -43,7 +45,7 @@ LPECloneOriginal::LPECloneOriginal(LivePathEffectObject *lpeobject)
     : Effect(lpeobject)
     , linkeditem(_("Linked Item:"), _("Item from which to take the original data"), "linkeditem", &wr, this)
     , method(_("Shape"), _("Linked shape"), "method", CLMConverter, &wr, this, CLM_D)
-    , attributes(_("Attributes"), _("Attributes of the original that the clone should copy, written as a comma-separated list; e.g. 'transform, X, Y'."),
+    , attributes(_("Attributes"), _("Attributes of the original that the clone should copy, written as a comma-separated list; e.g. 'transform, style, clip-path, X, Y'."),
                  "attributes", &wr, this, "")
     , css_properties(_("CSS Properties"),
                        _("CSS properties of the original that the clone should copy, written as a comma-separated list; e.g. 'fill, filter, opacity'."),
@@ -73,10 +75,7 @@ LPECloneOriginal::LPECloneOriginal(LivePathEffectObject *lpeobject)
     css_properties.param_hide_canvas_text();
 }
 
-LPECloneOriginal::~LPECloneOriginal()
-{
-    doOnRemove(nullptr);
-}
+LPECloneOriginal::~LPECloneOriginal() = default;
 
 bool LPECloneOriginal::doOnOpen(SPLPEItem const *lpeitem)
 {
@@ -134,9 +133,6 @@ LPECloneOriginal::newWidget()
     Gtk::Button * sync_button = Gtk::manage(new Gtk::Button(Glib::ustring(_("No Shape Sync to Current"))));
     sync_button->signal_clicked().connect(sigc::mem_fun (*this,&LPECloneOriginal::syncOriginal));
     vbox->pack_start(*sync_button, true, true, 2);
-    if(Gtk::Widget* widg = defaultParamSet()) {
-        vbox->pack_start(*widg, true, true, 2);
-    }
     return dynamic_cast<Gtk::Widget *>(vbox);
 }
 
@@ -148,8 +144,8 @@ LPECloneOriginal::cloneAttributes(SPObject *origin, SPObject *dest, const gchar 
         return;
     }
     bool root = dest == sp_lpe_item;
-    SPGroup * group_origin = dynamic_cast<SPGroup *>(origin);
-    SPGroup * group_dest = dynamic_cast<SPGroup *>(dest);
+    auto group_origin = cast<SPGroup>(origin);
+    auto group_dest = cast<SPGroup>(dest);
     if (group_origin && group_dest && group_origin->getItemCount() == group_dest->getItemCount()) {
         std::vector< SPObject * > childs = group_origin->childList(true);
         size_t index = 0;
@@ -165,39 +161,9 @@ LPECloneOriginal::cloneAttributes(SPObject *origin, SPObject *dest, const gchar 
         return;
     }
     //Attributes
-    SPShape * shape_origin = dynamic_cast<SPShape *>(origin);
-    SPShape * shape_dest   = dynamic_cast<SPShape *>(dest);
-    SPItem  * item_origin  = dynamic_cast<SPItem  *>(origin);
-    SPItem  * item_dest    = dynamic_cast<SPItem  *>(dest);
-    SPMask  * mask_origin  = dynamic_cast<SPMask  *>(item_origin->getMaskObject());
-    SPMask  * mask_dest    = dynamic_cast<SPMask  *>(item_dest->getMaskObject());
-    if(mask_origin && mask_dest) {
-        std::vector<SPObject*> mask_list = mask_origin->childList(true);
-        std::vector<SPObject*> mask_list_dest = mask_dest->childList(true);
-        if (mask_list.size() == mask_list_dest.size()) {
-            size_t i = 0;
-            for (auto mask_data : mask_list) {
-                SPObject * mask_dest_data = mask_list_dest[i];
-                cloneAttributes(mask_data, mask_dest_data, attributes, css_properties, init);
-                i++;
-            }
-        }
-    }
-
-    SPClipPath *clippath_origin = SP_ITEM(origin)->getClipObject();
-    SPClipPath *clippath_dest = SP_ITEM(dest)->getClipObject();
-    if(clippath_origin && clippath_dest) {
-        std::vector<SPObject*> clippath_list = clippath_origin->childList(true);
-        std::vector<SPObject*> clippath_list_dest = clippath_dest->childList(true);
-        if (clippath_list.size() == clippath_list_dest.size()) {
-            size_t i = 0;
-            for (auto clippath_data : clippath_list) {
-                SPObject * clippath_dest_data = clippath_list_dest[i];
-                cloneAttributes(clippath_data, clippath_dest_data, attributes, css_properties, init);
-                i++;
-            }
-        }
-    }
+    auto shape_origin = cast<SPShape>(origin);
+    auto shape_dest   = cast<SPShape>(dest);
+    auto path_dest   = cast<SPPath>(dest);
 
     gchar ** attarray = g_strsplit(old_attributes.c_str(), ",", 0);
     gchar ** iter = attarray;
@@ -219,7 +185,7 @@ LPECloneOriginal::cloneAttributes(SPObject *origin, SPObject *dest, const gchar 
                 std::optional<SPCurve> c;
                 if (method == CLM_BSPLINESPIRO) {
                     c = SPCurve::ptr_to_opt(shape_origin->curveForEdit());
-                    SPLPEItem * lpe_item = SP_LPE_ITEM(origin);
+                    auto lpe_item = cast<SPLPEItem>(origin);
                     if (lpe_item) {
                         PathEffectList lpelist = lpe_item->getEffectList();
                         PathEffectList::iterator i;
@@ -227,9 +193,9 @@ LPECloneOriginal::cloneAttributes(SPObject *origin, SPObject *dest, const gchar 
                             LivePathEffectObject *lpeobj = (*i)->lpeobject;
                             if (lpeobj) {
                                 Inkscape::LivePathEffect::Effect *lpe = lpeobj->get_lpe();
-                                if (dynamic_cast<Inkscape::LivePathEffect::LPEBSpline *>(lpe)) {
+                                if (auto bspline = dynamic_cast<Inkscape::LivePathEffect::LPEBSpline *>(lpe)) {
                                     Geom::PathVector hp;
-                                    LivePathEffect::sp_bspline_do_effect(*c, 0, hp);
+                                    LivePathEffect::sp_bspline_do_effect(*c, 0, hp, bspline->uniform);
                                 } else if (dynamic_cast<Inkscape::LivePathEffect::LPESpiro *>(lpe)) {
                                     LivePathEffect::sp_spiro_do_effect(*c);
                                 }
@@ -246,7 +212,11 @@ LPECloneOriginal::cloneAttributes(SPObject *origin, SPObject *dest, const gchar 
                     c->set_pathvector(c_pv);
                     auto str = sp_svg_write_path(c_pv);
                     if (sync){
-                        dest->setAttribute("inkscape:original-d", str);
+                        if (path_dest) {
+                            dest->setAttribute("inkscape:original-d", str);
+                        } else {
+                            dest->setAttribute("d", str);
+                        }
                     }
                     shape_dest->setCurveInsync(std::move(*c));
                     dest->setAttribute("d", str);
@@ -256,6 +226,8 @@ LPECloneOriginal::cloneAttributes(SPObject *origin, SPObject *dest, const gchar 
             } else {
                 dest->setAttribute(attribute, origin->getAttribute(attribute));
             }
+        } else if (strlen(attribute)) {
+            dest->setAttribute(attribute, origin->getAttribute(attribute));
         }
         iter++;
     }
@@ -310,8 +282,6 @@ LPECloneOriginal::doBeforeEffect (SPLPEItem const* lpeitem){
     if (!document) {
         return;
     }
-
-    
     bool active = true;
     if (linkeditem.lperef && linkeditem.lperef->isAttached() && linkeditem.lperef.get()->getObject() == nullptr) {
         active = false;
@@ -324,7 +294,7 @@ LPECloneOriginal::doBeforeEffect (SPLPEItem const* lpeitem){
     if (linkeditem.linksToItem()) {
         if (!linkeditem.isConnected() && linkeditem.getObject()) {
             linkeditem.start_listening(linkeditem.getObject());
-            linkeditem.update_satellites(true);
+            sp_lpe_item_update_patheffect(sp_lpe_item, false, false, true);
             return;
         }
         sp_lpe_item = nullptr;
@@ -332,21 +302,28 @@ LPECloneOriginal::doBeforeEffect (SPLPEItem const* lpeitem){
         if (lpeitems.size()) {
             sp_lpe_item = lpeitems[0];
         }
-        SPItem *orig = dynamic_cast<SPItem *>(linkeditem.getObject());
+        auto orig = cast<SPItem>(linkeditem.getObject());
         if(!orig) {
             return;
         }
-        SPText  *text_origin = dynamic_cast<SPText *>(orig);
-        SPItem *dest = dynamic_cast<SPItem *>(sp_lpe_item);
+        auto text_origin = cast<SPText>(orig);
+        auto *dest = sp_lpe_item;
+        auto *dest_path = cast<SPPath>(sp_lpe_item);
+        auto *dest_shape = cast<SPShape>(sp_lpe_item);
         const gchar * id = orig->getId();
-        bool init = !is_load && g_strcmp0(id, linked.c_str()) != 0;
+        bool init = is_load || g_strcmp0(id, linked.c_str()) != 0;
         /* if (sp_lpe_item->getRepr()->attribute("style")) {
             init = false;
         } */
         Glib::ustring attr = "d,";
-        if (text_origin) {
+        if (text_origin && dest_shape) {
             auto curve = text_origin->getNormalizedBpath();
-            dest->setAttribute("inkscape:original-d", sp_svg_write_path(curve.get_pathvector()));
+            if (dest_path) {
+                dest->setAttribute("inkscape:original-d", sp_svg_write_path(curve.get_pathvector()));
+            } else {
+                dest_shape->setCurveInsync(curve);
+                dest_shape->setAttribute("d", sp_svg_write_path(curve.get_pathvector()));
+            }
             attr = "";
         }
         if (g_strcmp0(linked.c_str(), id) && !is_load) {
@@ -383,8 +360,8 @@ void LPECloneOriginal::doOnRemove(SPLPEItem const *lpeitem)
         if (sp_lpe_item && sp_lpe_item->getAttribute("class")) {
             Glib::ustring fromclone = sp_lpe_item->getAttribute("class");
             size_t pos = fromclone.find("fromclone");
-            if (pos != Glib::ustring::npos) {
-                gchar *transform =  g_strdup(sp_lpe_item->getAttribute("transform"));
+            if (pos != Glib::ustring::npos && !sp_lpe_item->document->isSeeking()) {
+                auto transform_copy = Util::to_opt(sp_lpe_item->getAttribute("transform"));
                 linkeditem.quit_listening();
                 SPObject *owner = linkeditem.lperef->getObject();
                 if (owner) {
@@ -392,15 +369,14 @@ void LPECloneOriginal::doOnRemove(SPLPEItem const *lpeitem)
                     if (desktop) {
                         desktop->getSelection()->clone();
                         SPUse *clone;
-                        if (( clone = dynamic_cast<SPUse*>(desktop->getSelection()->singleItem()))) {
+                        if (( clone = cast<SPUse>(desktop->getSelection()->singleItem()))) {
                             gchar *href_str = g_strdup_printf("#%s", owner->getAttribute("id"));
                             clone->setAttribute("xlink:href", href_str);
-                            clone->setAttribute("transform", transform);
+                            clone->setAttribute("transform", Util::to_cstr(transform_copy));
                             g_free(href_str);
                         }
                     }
                 }
-                g_free(transform);
             }
         }
     }
@@ -410,6 +386,10 @@ void LPECloneOriginal::doOnRemove(SPLPEItem const *lpeitem)
 void
 LPECloneOriginal::doEffect (SPCurve * curve)
 {
+    SPCurve const *current_curve_before = current_shape->curveBeforeLPE();
+    if (!current_curve_before || current_curve_before->get_pathvector() == sp_svg_read_pathv("M 0 0")) {
+        syncOriginal();
+    }
     if (method != CLM_NONE) {
         SPCurve const *current_curve = current_shape->curve();
         if (current_curve != nullptr) {

@@ -60,8 +60,7 @@ LPECurveStitch::LPECurveStitch(LivePathEffectObject *lpeobject) :
     transformed = false;
 }
 
-LPECurveStitch::~LPECurveStitch()
-= default;
+LPECurveStitch::~LPECurveStitch() = default;
 
 bool 
 LPECurveStitch::doOnOpen(SPLPEItem const *lpeitem)
@@ -167,7 +166,7 @@ LPECurveStitch::resetDefaults(SPItem const* item)
 {
     Effect::resetDefaults(item);
 
-    if (!SP_IS_PATH(item)) return;
+    if (!is<SPPath>(item)) return;
 
     using namespace Geom;
 

@@ -25,11 +25,12 @@
 
 namespace Inkscape {
     class CanvasPage;
-    class CanvasGrid;
     namespace Util {
         class Unit;
     }
 }
+
+class SPGrid;
 
 typedef unsigned int guint32;
 typedef guint32 GQuark;
@@ -39,10 +40,11 @@ enum {
     SP_BORDER_LAYER_TOP
 };
 
-class SPNamedView : public SPObjectGroup {
+class SPNamedView final : public SPObjectGroup {
 public:
     SPNamedView();
     ~SPNamedView() override;
+    int tag() const override { return tag_of<decltype(*this)>; }
 
     unsigned int editable : 1;
 
@@ -64,7 +66,6 @@ public:
     int window_maximized;
 
     SnapManager snap_manager;
-    std::vector<Inkscape::CanvasGrid *> grids;
 
     Inkscape::Util::Unit const *display_units;   // Units used for the UI (*not* the same as units of SVG coordinates)
     // Inkscape::Util::Unit const *page_size_units; // Only used in "Custom size" part of Document Properties dialog 
@@ -77,6 +78,7 @@ public:
     guint32 guidehicolor;
 
     std::vector<SPGuide *> guides;
+    std::vector<SPGrid *> grids;
     std::vector<SPDesktop *> views;
 
     int viewcount;
@@ -94,10 +96,13 @@ public:
     void translateGuides(Geom::Translate const &translation);
     void translateGrids(Geom::Translate const &translation);
     void scrollAllDesktops(double dx, double dy);
-    void writeNewGrid(SPDocument *document,int gridtype);
+
+    bool getShowGrids();
+    void setShowGrids(bool v);
 
     void toggleShowGuides();
     void toggleLockGuides();
+    void toggleShowGrids();
 
     bool getLockGuides();
     void setLockGuides(bool v);
@@ -118,11 +123,14 @@ public:
     // immediate show/hide guides request, not recorded in a named view
     void temporarily_show_guides(bool show);
 
+    SPGrid *getFirstEnabledGrid();
+
 private:
     void updateGuides();
+    void updateGrids();
+
     void setShowGuideSingle(SPGuide *guide);
 
-    double getMarginLength(gchar const * const key,Inkscape::Util::Unit const * const margin_units,Inkscape::Util::Unit const * const return_units,double const width,double const height,bool const use_width);
     friend class SPDocument;
 
     Inkscape::CanvasPage *_viewport = nullptr;
@@ -148,13 +156,9 @@ void sp_namedview_zoom_and_view_from_document(SPDesktop *desktop);
 void sp_namedview_document_from_window(SPDesktop *desktop);
 void sp_namedview_update_layers_from_document (SPDesktop *desktop);
 
-void sp_namedview_show_grids(SPNamedView *namedview, bool show, bool dirty_document);
-Inkscape::CanvasGrid * sp_namedview_get_first_enabled_grid(SPNamedView *namedview);
 
-MAKE_SP_OBJECT_DOWNCAST_FUNCTIONS(SP_NAMEDVIEW, SPNamedView)
 
 #endif /* !INKSCAPE_SP_NAMEDVIEW_H */
-
 
 /*
   Local Variables:

@@ -16,6 +16,7 @@
 #include <2geom/forward.h>
 
 #include "libnrtype/Layout-TNG.h"
+#include "libnrtype/style-attachments.h"
 #include "sp-item.h"
 #include "desktop.h"
 #include "display/curve.h"
@@ -28,10 +29,11 @@ class DrawingGroup;
 
 } // namespace Inkscape
 
-class SPFlowtext : public SPItem {
+class SPFlowtext final : public SPItem {
 public:
 	SPFlowtext();
 	~SPFlowtext() override;
+    int tag() const override { return tag_of<decltype(*this)>; }
 
     /** Completely recalculates the layout. */
     void rebuildLayout();
@@ -52,6 +54,7 @@ public:
 
 //semiprivate:  (need to be accessed by the C-style functions still)
     Inkscape::Text::Layout layout;
+    std::unordered_map<unsigned, Inkscape::Text::StyleAttachments> view_style_attachments;
 
     /** discards the drawing objects representing this text. */
     void _clearFlow(Inkscape::DrawingGroup* in_arena);
@@ -64,8 +67,7 @@ public:
     SPCurve getNormalizedBpath() const;
 
     /** Optimize scaled flow text on next set_transform. */
-    void optimizeScaledText()
-        {_optimizeScaledText = true;}
+    void optimizeScaledText() { _optimizeScaledText = true; }
 
 private:
     /** Recursively walks the xml tree adding tags and their contents. */
@@ -77,6 +79,7 @@ private:
 
 public:
 	void build(SPDocument* doc, Inkscape::XML::Node* repr) override;
+    void release() override;
 
 	void child_added(Inkscape::XML::Node* child, Inkscape::XML::Node* ref) override;
 	void remove_child(Inkscape::XML::Node* child) override;
@@ -101,9 +104,6 @@ public:
 };
 
 SPItem *create_flowtext_with_internal_frame (SPDesktop *desktop, Geom::Point p1, Geom::Point p2);
-
-MAKE_SP_OBJECT_DOWNCAST_FUNCTIONS(SP_FLOWTEXT, SPFlowtext)
-MAKE_SP_OBJECT_TYPECHECK_FUNCTIONS(SP_IS_FLOWTEXT, SPFlowtext)
 
 #endif // SEEN_SP_ITEM_FLOWTEXT_H
 

@@ -11,23 +11,24 @@ endif()
 
 if(WITH_INTERNAL_CAIRO)
     include(ExternalProject)
-    if(WIN32)
-    execute_process(
-      COMMAND cygpath "${CMAKE_CURRENT_SOURCE_DIR}/cairo/autogen.sh"
-      OUTPUT_VARIABLE AUTOGEN_PATH
-      )
-  set(CAIRO_CONF mintty.exe -w hide /bin/env MSYSTEM=$ENV{MSYSTEM} LDFLAGS=-lssp /bin/bash -l ${AUTOGEN_PATH} --prefix=${CMAKE_INSTALL_PREFIX} --disable-trace --disable-script-interpreter --libdir=${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR} && make clean)
-  else()
-      set(CAIRO_CONF "${CMAKE_CURRENT_SOURCE_DIR}/cairo/autogen.sh" --prefix=${CMAKE_INSTALL_PREFIX} --disable-trace --disable-script-interpreter --libdir=${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR} && make clean)
-  endif()
+    # Used by windows CI/CD/packaging, Linux appimages
+
+    # Change, don't remove options.
+    # Otherwise the values are not reset in existing builds.
+    set(CAIRO_CONF --buildtype=debugoptimized -Dgtk_doc=false)
+    if (NOT WIN32)
+    set(CAIRO_CONF ${CAIRO_CONF} --prefix=${CMAKE_INSTALL_PREFIX})
+    endif()
+
     ExternalProject_Add(cairo_ext
         PREFIX cairo
-        GIT_REPOSITORY https://gitlab.freedesktop.org/cairo/cairo.git
-        GIT_TAG 1.17.6
+        GIT_REPOSITORY https://gitlab.com/inkscape/deps/cairo.git
+        GIT_TAG NAMED_12cd2bcbb260f4ed64a72b64bd2fdd593f683bbc
         GIT_SHALLOW TRUE
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cairo
         PATCH_COMMAND git checkout ${CMAKE_CURRENT_SOURCE_DIR}/cairo/src && git apply --unsafe-paths --directory ${CMAKE_CURRENT_SOURCE_DIR}/cairo/ ${CMAKE_SOURCE_DIR}/packaging/cairo.patch
-        BUILD_COMMAND make -j16
-        CONFIGURE_COMMAND ${CAIRO_CONF}
+        CONFIGURE_COMMAND meson setup . ${CMAKE_CURRENT_SOURCE_DIR}/cairo && meson setup --reconfigure ${CAIRO_CONF} . ${CMAKE_CURRENT_SOURCE_DIR}/cairo
+        BUILD_COMMAND meson compile
+        INSTALL_COMMAND meson install
         )
 endif()

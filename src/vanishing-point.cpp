@@ -253,7 +253,7 @@ std::list<SPBox3D *> VanishingPoint::selectedBoxes(Inkscape::Selection *sel)
     auto itemlist = sel->items();
     for (auto i = itemlist.begin(); i != itemlist.end(); ++i) {
         SPItem *item = *i;
-        SPBox3D *box = dynamic_cast<SPBox3D *>(item);
+        auto box = cast<SPBox3D>(item);
         if (box && this->hasBox(box)) {
             sel_boxes.push_back(box);
         }
@@ -391,7 +391,7 @@ std::set<VanishingPoint *> VPDragger::VPsOfSelectedBoxes()
     auto itemlist = sel->items();
     for (auto i = itemlist.begin(); i != itemlist.end(); ++i) {
         SPItem *item = *i;
-        SPBox3D *box = dynamic_cast<SPBox3D *>(item);
+        auto box = cast<SPBox3D>(item);
         if (box) {
             vp = this->findVPWithBox(box);
             if (vp) {
@@ -504,9 +504,6 @@ VPDrag::~VPDrag()
     }
     this->draggers.clear();
 
-    for (auto item_curve : item_curves) {
-        delete item_curve;
-    }
     item_curves.clear();
 }
 
@@ -554,7 +551,7 @@ void VPDrag::updateDraggers()
     auto itemlist = this->selection->items();
     for (auto i = itemlist.begin(); i != itemlist.end(); ++i) {
         SPItem *item = *i;
-        SPBox3D *box = dynamic_cast<SPBox3D *>(item);
+        auto box = cast<SPBox3D>(item);
         if (box) {
             VanishingPoint vp;
             for (int i = 0; i < 3; ++i) {
@@ -572,9 +569,6 @@ of a dragger, so that lines are always in sync with the actual perspective
 void VPDrag::updateLines()
 {
     // Delete old lines
-    for (auto curve : item_curves) {
-        delete curve;
-    }
     item_curves.clear();
 
     // do nothing if perspective lines are currently disabled
@@ -586,7 +580,7 @@ void VPDrag::updateLines()
     auto itemlist = this->selection->items();
     for (auto i = itemlist.begin(); i != itemlist.end(); ++i) {
         SPItem *item = *i;
-        SPBox3D *box = dynamic_cast<SPBox3D *>(item);
+        auto box = cast<SPBox3D>(item);
         if (box) {
             this->drawLinesForFace(box, Proj::X);
             this->drawLinesForFace(box, Proj::Y);
@@ -746,7 +740,7 @@ void VPDrag::addCurve(Geom::Point const &p1, Geom::Point const &p2, Inkscape::Ca
     auto item_curve = new Inkscape::CanvasItemCurve(SP_ACTIVE_DESKTOP->getCanvasControls(), p1, p2);
     item_curve->set_name("3DBoxCurve");
     item_curve->set_stroke(color);
-    item_curves.push_back(item_curve);
+    item_curves.emplace_back(item_curve);
 }
 
 } // namespace Box3D

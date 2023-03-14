@@ -39,6 +39,7 @@ set(inkscape_SRC
   gradient-chemistry.cpp
   gradient-drag.cpp
   guide-snapper.cpp
+  grid-snapper.cpp
   id-clash.cpp
   inkscape.cpp
   inkscape-version-info.cpp
@@ -51,6 +52,7 @@ set(inkscape_SRC
   mod360.cpp
   object-hierarchy.cpp
   object-snapper.cpp
+  oklab.cpp
   page-manager.cpp
   path-chemistry.cpp
   path-prefix.cpp
@@ -128,6 +130,7 @@ set(inkscape_SRC
   gradient-chemistry.h
   gradient-drag.h
   guide-snapper.h
+  grid-snapper.h
   id-clash.h
   inkscape-version.h
   inkscape-version-info.h
@@ -143,6 +146,7 @@ set(inkscape_SRC
   number-opt-number.h
   object-hierarchy.h
   object-snapper.h
+  oklab.h
   page-manager.h
   path-chemistry.h
   path-prefix.h
@@ -307,6 +311,7 @@ list(APPEND inkscape_SRC
 # All folders for internal inkscape
 # these call add_inkscape_source
 add_subdirectory(actions)
+add_subdirectory(async)
 add_subdirectory(color)
 add_subdirectory(debug)
 add_subdirectory(display)
@@ -406,6 +411,7 @@ set(INKSCAPE_TARGET_LIBS
 
 # Build everything except main and inkview.c in a shared library.
 add_library(inkscape_base ${inkscape_SRC} ${sp_SRC})
+set_target_properties(inkscape_base PROPERTIES SOVERSION "${INKSCAPE_VERSION_MAJOR}.${INKSCAPE_VERSION_MINOR}.${INKSCAPE_VERSION_PATCH}.0")
 
 # added so that locally installed inkscape can find lib2geom if it's not installed systemwide
 if(NOT APPLE)

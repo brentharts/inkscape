@@ -17,27 +17,29 @@
 #include "config.h"  // #ifdef WITH_GSPELL
 
 #include "actions-dialogs.h"
+#include "actions-helper.h"
 
 #include "inkscape-application.h"
 #include "inkscape-window.h"
 
 #include "ui/dialog/dialog-container.h"
 #include "ui/dialog/dialog-data.h"
-#include "ui/icon-names.h"
 
 // Note the "AttrDialog" is now part of the "XMLDialog" and the "Style" dialog is part of the "Selectors" dialog.
 // Also note that the "AttrDialog" does not correspond to SP_VERB_DIALOG_ATTR!!!!! (That would be the "ObjectAttributes" dialog.)
 
-std::vector<std::vector<Glib::ustring>> raw_data_dialogs =
+static const std::vector<std::vector<Glib::ustring>> raw_data_dialogs =
 {
     // clang-format off
     {"win.dialog-open('AlignDistribute')",    N_("Open Align and Distribute"), "Dialog",  N_("Align and distribute objects")                                                           },
     {"win.dialog-open('CloneTiler')",         N_("Open Clone Tiler"),          "Dialog",  N_("Create multiple clones of selected object, arranging them into a pattern or scattering") },
     {"win.dialog-open('DocumentProperties')", N_("Open Document Properties"),  "Dialog",  N_("Edit properties of this document (to be saved with the document)")                       },
+    {"win.dialog-open('DocumentResources')",  N_("Open Document Resources"),   "Dialog",  N_("Show document overview and resources") },
     {"win.dialog-open('Export')",             N_("Open Export"),               "Dialog",  N_("Export this document or a selection as a PNG image")                                     },
-    {"win.dialog-open('FillStroke')",         N_("Open Fill and Stroke"),          "Dialog",  N_("Edit objects' colors, gradients, arrowheads, and other fill and stroke properties...")   },
+    {"win.dialog-open('FillStroke')",         N_("Open Fill and Stroke"),      "Dialog",  N_("Edit objects' colors, gradients, arrowheads, and other fill and stroke properties...")   },
     {"win.dialog-open('FilterEffects')",      N_("Open Filter Effects"),       "Dialog",  N_("Manage, edit, and apply SVG filters")                                                    },
     {"win.dialog-open('Find')",               N_("Open Find"),                 "Dialog",  N_("Find objects in document")                                                               },
+    {"win.dialog-open('FontCollections')",    N_("Open Font Collections"),     "Dialog",  N_("Manage Font Collections")                                                                },
     {"win.dialog-open('Glyphs')",             N_("Open Glyphs"),               "Dialog",  N_("Select Unicode characters from a palette")                                               },
     {"win.dialog-open('IconPreview')",        N_("Open Icon Preview"),         "Dialog",  N_("Preview Icon")                                                                           },
     {"win.dialog-open('Input')",              N_("Open Input"),                "Dialog",  N_("Configure extended input devices, such as a graphics tablet")                            },
@@ -51,7 +53,8 @@ std::vector<std::vector<Glib::ustring>> raw_data_dialogs =
     {"win.dialog-open('Preferences')",        N_("Open Preferences"),          "Dialog",  N_("Edit global Inkscape preferences")                                                       },
     {"win.dialog-open('Selectors')",          N_("Open Selectors"),            "Dialog",  N_("View and edit CSS selectors and styles")                                                 },
     {"win.dialog-open('SVGFonts')",           N_("Open SVG Fonts"),            "Dialog",  N_("Edit SVG fonts")                                                                         },
-    {"win.dialog-open('Swatches')",           N_("Open Swatches"),             "Dialog",  N_("Select colors from a swatches palette") /* TRANSLATORS: "Swatches" -> color samples */   },
+    // TRANSLATORS: "Swatches" -> color samples
+    {"win.dialog-open('Swatches')",           N_("Open Swatches"),             "Dialog",  N_("Select colors from a swatches palette")                                                  },
     {"win.dialog-open('Symbols')",            N_("Open Symbols"),              "Dialog",  N_("Select symbol from a symbols palette")                                                   },
     {"win.dialog-open('Text')",               N_("Open Text"),                 "Dialog",  N_("View and select font family, font size and other text properties")                       },
     {"win.dialog-open('Trace')",              N_("Open Trace"),                "Dialog",  N_("Create one or more paths from a bitmap by tracing it")                                   },
@@ -82,13 +85,13 @@ dialog_open(const Glib::VariantBase& value, InkscapeWindow *win)
     auto const &dialog_data = get_dialog_data();
     auto dialog_it = dialog_data.find(dialog);
     if (dialog_it == dialog_data.end()) {
-        std::cerr << "dialog_open: invalid dialog name: " << dialog.raw() << std::endl;
+        show_output(Glib::ustring("dialog_open: invalid dialog name: ") + dialog.raw());
         return;
     }
 
     SPDesktop* dt = win->get_desktop();
     if (!dt) {
-        std::cerr << "dialog_toggle: no desktop!" << std::endl;
+        show_output("dialog_toggle: no desktop!");
         return;
     }
 
@@ -104,20 +107,20 @@ dialog_toggle(InkscapeWindow *win)
 {
     SPDesktop* dt = win->get_desktop();
     if (!dt) {
-        std::cerr << "dialog_toggle: no desktop!" << std::endl;
+        show_output("dialog_toggle: no desktop!");
         return;
     }
 
     // Keep track of state?
     // auto action = win->lookup_action("dialog-toggle");
     // if (!action) {
-    //     std::cerr << "dialog_toggle: action 'dialog-toggle' missing!" << std::endl;
+    //     show_output("dialog_toggle: action 'dialog-toggle' missing!");
     //     return;
     // }
 
     // auto saction = Glib::RefPtr<Gio::SimpleAction>::cast_dynamic(action);
     // if (!saction) {
-    //     std::cerr << "dialog_toogle: action 'dialog_switch' not SimpleAction!" << std::endl;
+    //     show_output("dialog_toogle: action 'dialog_switch' not SimpleAction!");
     //     return;
     // }
 
@@ -127,10 +130,18 @@ dialog_toggle(InkscapeWindow *win)
     container->toggle_dialogs();
 }
 
-void
-add_actions_dialogs(InkscapeWindow* win)
+void add_actions_dialogs(InkscapeApplication *app)
 {
-    Glib::VariantType String(Glib::VARIANT_TYPE_STRING);
+    // macOS automatically uses app.preferences in the application menu
+    auto gapp = app->gio_app();
+    gapp->add_action("preferences", [app] { dialog_open(Glib::Variant<Glib::ustring>::create("Preferences"), app->get_active_window()); });
+
+    app->get_action_extra_data().add_data(raw_data_dialogs);
+}
+
+void add_actions_dialogs(InkscapeWindow *win)
+{
+    auto String = Glib::VARIANT_TYPE_STRING;
 
     // clang-format off
     win->add_action_with_parameter( "dialog-open",  String, sigc::bind<InkscapeWindow*>(sigc::ptr_fun(&dialog_open),   win));
@@ -139,13 +150,9 @@ add_actions_dialogs(InkscapeWindow* win)
 
     auto app = InkscapeApplication::instance();
     if (!app) {
-        std::cerr << "add_actions_dialog: no app!" << std::endl;
+        show_output("add_actions_dialogs: no app!");
         return;
     }
-
-    // macOS automatically uses app.preferences in the application menu
-    auto gapp = app->gio_app();
-    gapp->add_action("preferences", sigc::track_obj([=] { dialog_open(Glib::Variant<Glib::ustring>::create("Preferences"), win); }, *win));
 
     app->get_action_extra_data().add_data(raw_data_dialogs);
 }

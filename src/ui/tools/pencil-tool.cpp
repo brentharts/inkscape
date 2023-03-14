@@ -70,7 +70,6 @@ static Geom::Point pencil_drag_origin_w(0, 0);
 static bool pencil_within_tolerance = false;
 
 static bool in_svg_plane(Geom::Point const &p) { return Geom::LInfty(p) < 1e18; }
-const double HANDLE_CUBIC_GAP = 0.01;
 
 PencilTool::PencilTool(SPDesktop *desktop)
     : FreehandBase(desktop, "/tools/freehand/pencil", "pencil.svg")
@@ -225,7 +224,7 @@ bool PencilTool::_handleButtonPress(GdkEventButton const &bevent) {
                         selection->clear();
                         _desktop->messageStack()->flash(Inkscape::NORMAL_MESSAGE, _("Creating new path"));
                         m.freeSnapReturnByRef(p, Inkscape::SNAPSOURCE_NODE_HANDLE);
-                    } else if (selection->singleItem() && SP_IS_PATH(selection->singleItem())) {
+                    } else if (selection->singleItem() && is<SPPath>(selection->singleItem())) {
                         _desktop->messageStack()->flash(Inkscape::NORMAL_MESSAGE, _("Appending to selected path"));
                         m.freeSnapReturnByRef(p, Inkscape::SNAPSOURCE_NODE_HANDLE);
                     }
@@ -399,8 +398,8 @@ bool PencilTool::_handleButtonRelease(GdkEventButton const &revent) {
                     using namespace Inkscape::LivePathEffect;
                     SPItem *item = sp_event_context_find_item(_desktop, Geom::Point(revent.x, revent.y), FALSE, FALSE);
                     if (item && (!this->white_item || item != white_item)) {
-                        if (SP_IS_LPE_ITEM(item)) {
-                            Effect* lpe = SP_LPE_ITEM(item)->getCurrentLPE();
+                        if (is<SPLPEItem>(item)) {
+                            Effect* lpe = cast<SPLPEItem>(item)->getCurrentLPE();
                             if (lpe) {
                                 LPEPowerStroke* ps = static_cast<LPEPowerStroke*>(lpe);
                                 if (ps) {
@@ -504,9 +503,6 @@ void PencilTool::_cancel() {
     this->red_curve.reset();
     this->red_bpath->set_bpath(&red_curve);
 
-    for (auto path : this->green_bpaths) {
-        delete path;
-    }
     this->green_bpaths.clear();
     this->green_curve->reset();
     this->green_anchor.reset();
@@ -704,8 +700,8 @@ void PencilTool::addPowerStrokePencil()
             pp->setAttribute("id", "power_stroke_preview");
             Inkscape::GC::release(pp);
 
-            SPShape *powerpreview = SP_SHAPE(currentLayer()->appendChildRepr(pp));
-            SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(powerpreview);
+            auto powerpreview = cast<SPShape>(currentLayer()->appendChildRepr(pp));
+            auto lpeitem = powerpreview;
             if (!lpeitem) {
                 return;
             }
@@ -954,9 +950,7 @@ void PencilTool::_interpolate() {
             // if we are in BSpline we modify the trace to create adhoc nodes 
             if (mode == 2) {
                 Geom::Point point_at1 = b[4 * c + 0] + (1./3) * (b[4 * c + 3] - b[4 * c + 0]);
-                point_at1 = Geom::Point(point_at1[X] + HANDLE_CUBIC_GAP, point_at1[Y] + HANDLE_CUBIC_GAP);
                 Geom::Point point_at2 = b[4 * c + 3] + (1./3) * (b[4 * c + 0] - b[4 * c + 3]);
-                point_at2 = Geom::Point(point_at2[X] + HANDLE_CUBIC_GAP, point_at2[Y] + HANDLE_CUBIC_GAP);
                 this->green_curve->curveto(point_at1,point_at2,b[4*c+3]);
             } else {
                 if (!tablet_enabled || c != n_segs - 1) {
@@ -1117,9 +1111,7 @@ void PencilTool::_fitAndSplit() {
         guint mode = prefs->getInt("/tools/freehand/pencil/freehand-mode", 0);
         if(mode == 2){
             Geom::Point point_at1 = b[0] + (1./3)*(b[3] - b[0]);
-            point_at1 = Geom::Point(point_at1[X] + HANDLE_CUBIC_GAP, point_at1[Y] + HANDLE_CUBIC_GAP);
             Geom::Point point_at2 = b[3] + (1./3)*(b[0] - b[3]);
-            point_at2 = Geom::Point(point_at2[X] + HANDLE_CUBIC_GAP, point_at2[Y] + HANDLE_CUBIC_GAP);
             this->red_curve.curveto(point_at1,point_at2,b[3]);
         }else{
             this->red_curve.curveto(b[1], b[2], b[3]);
@@ -1163,7 +1155,7 @@ void PencilTool::_fitAndSplit() {
         cshape->set_stroke(green_color);
         cshape->set_fill(0x0, SP_WIND_RULE_NONZERO);
 
-        this->green_bpaths.push_back(cshape);
+        this->green_bpaths.emplace_back(cshape);
 
         this->red_curve_is_valid = false;
     }

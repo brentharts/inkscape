@@ -31,28 +31,19 @@
 #include "sp-defs.h"
 
 #include "display/drawing-group.h"
+#include "display/drawing-item-ptr.h"
 #include "object/object-set.h"
 #include "svg/css-ostringstream.h"
 #include "svg/svg.h"
 #include "ui/icon-names.h"
 #include "xml/repr.h"
 
-
 using Inkscape::DocumentUndo;
 using Inkscape::ObjectSet;
 
-class SPMarkerView {
-
-public:
-
-    SPMarkerView() = default;;
-    ~SPMarkerView() {
-        for (auto & item : items) {
-            delete item;
-        }
-        items.clear();
-    }
-    std::vector<Inkscape::DrawingItem *> items;
+struct SPMarkerView
+{
+    std::vector<DrawingItemPtr<Inkscape::DrawingItem>> items;
 };
 
 SPMarker::SPMarker() : SPGroup(), SPViewBox(),
@@ -115,15 +106,13 @@ void SPMarker::build(SPDocument *document, Inkscape::XML::Node *repr) {
  */
 void SPMarker::release() {
 
-    std::map<unsigned int, SPMarkerView>::iterator it;
-    for (it = views_map.begin(); it != views_map.end(); ++it) {
-        SPGroup::hide( it->first );
+    for (auto &it : views_map) {
+        SPGroup::hide(it.first);
     }
     views_map.clear();
 
     SPGroup::release();
 }
-
 
 void SPMarker::set(SPAttr key, const gchar* value) {
 	switch (key) {
@@ -227,12 +216,11 @@ void SPMarker::update(SPCtx *ctx, guint flags) {
     SPGroup::update((SPCtx *) &rctx, flags);
 
     // As last step set additional transform of drawing group
-    std::map<unsigned int, SPMarkerView>::iterator it;
-    for (it = views_map.begin(); it != views_map.end(); ++it) {
-        for (auto & item : it->second.items) {
+    for (auto &it : views_map) {
+        for (auto &item : it.second.items) {
             if (item) {
-                Inkscape::DrawingGroup *g = dynamic_cast<Inkscape::DrawingGroup *>(item);
-                g->setChildTransform(this->c2p);
+                auto g = cast<Inkscape::DrawingGroup>(item.get());
+                g->setChildTransform(c2p);
             }
         }
     }
@@ -311,6 +299,30 @@ void SPMarker::hide(unsigned int key) {
 	SPGroup::hide(key);
 }
 
+/**
+ * Calculate the transformation for this marker.
+ */
+Geom::Affine SPMarker::get_marker_transform(const Geom::Affine &base, double linewidth, bool start_marker)
+{
+    // Default is MARKER_ORIENT_AUTO
+    Geom::Affine result = base;
+
+    if (this->orient_mode == MARKER_ORIENT_AUTO_START_REVERSE) {
+        if (start_marker) {
+            result = Geom::Rotate::from_degrees( 180.0 ) * base;
+        }
+    } else if (this->orient_mode != MARKER_ORIENT_AUTO) {
+        /* fixme: Orient units (Lauris) */
+        result = Geom::Rotate::from_degrees(this->orient.computed);
+        result *= Geom::Translate(base.translation());
+    }
+
+    if (this->markerUnits == SP_MARKER_UNITS_STROKEWIDTH) {
+        result = Geom::Scale(linewidth) * result;
+    }
+    return result;
+}
+
 /* 
 - used to validate the marker item before passing it into the shape editor from the marker-tool. 
 - sets any missing properties that are needed before editing starts.
@@ -326,7 +338,7 @@ void sp_validate_marker(SPMarker *sp_marker, SPDocument *doc) {
 
     Geom::OptRect r;
     for (auto *i : items) {
-        SPItem *item = dynamic_cast<SPItem*>(i);
+        auto item = cast<SPItem>(i);
         r.unionWith(item->desktopVisualBounds());
     }
 
@@ -410,7 +422,7 @@ void SPMarker::print(SPPrintContext* /*ctx*/) {
 void
 sp_marker_show_dimension (SPMarker *marker, unsigned int key, unsigned int size)
 {
-    std::map<unsigned int, SPMarkerView>::iterator it = marker->views_map.find(key);
+    auto it = marker->views_map.find(key);
     if (it != marker->views_map.end()) {
         if (it->second.items.size() != size ) {
             // Need to change size of vector! (We should not really need to do this.)
@@ -444,52 +456,40 @@ sp_marker_show_instance ( SPMarker *marker, Inkscape::DrawingItem *parent,
         return nullptr;
     }
 
-    std::map<unsigned int, SPMarkerView>::iterator it = marker->views_map.find(key);
+    auto it = marker->views_map.find(key);
     if (it == marker->views_map.end()) {
         // Key not found
         return nullptr;
     }
 
-    SPMarkerView *view = &(it->second);
+    SPMarkerView *view = &it->second;
     if (pos >= view->items.size() ) {
         // Position index too large, doesn't exist.
         return nullptr;
     }
 
     // If not already created
-    if (view->items[pos] == nullptr) {
+    if (!view->items[pos]) {
 
         /* Parent class ::show method */
-        view->items[pos] = marker->private_show(parent->drawing(), key, SP_ITEM_REFERENCE_FLAGS);
+        view->items[pos].reset(marker->private_show(parent->drawing(), key, SP_ITEM_REFERENCE_FLAGS));
 
         if (view->items[pos]) {
             /* fixme: Position (Lauris) */
-            parent->prependChild(view->items[pos]);
-            Inkscape::DrawingGroup *g = dynamic_cast<Inkscape::DrawingGroup *>(view->items[pos]);
-            if (g) g->setChildTransform(marker->c2p);
+            parent->prependChild(view->items[pos].get());
+            if (auto g = cast<Inkscape::DrawingGroup>(view->items[pos].get())) {
+                g->setChildTransform(marker->c2p);
+            }
         }
     }
 
     if (view->items[pos]) {
-        Geom::Affine m;
-        if (marker->orient_mode == MARKER_ORIENT_AUTO) {
-            m = base;
-        } else if (marker->orient_mode == MARKER_ORIENT_AUTO_START_REVERSE) {
-            // m = Geom::Rotate::from_degrees( 180.0 ) * base;
-            // Rotating is done at rendering time if necessary
-            m = base;
-        } else {
-            /* fixme: Orient units (Lauris) */
-            m = Geom::Rotate::from_degrees(marker->orient.computed);
-            m *= Geom::Translate(base.translation());
-        }
-        if (marker->markerUnits == SP_MARKER_UNITS_STROKEWIDTH) {
-            m = Geom::Scale(linewidth) * m;
-        }
-        view->items[pos]->setTransform(m);
+        // Rotating for reversed-marker option is done at rendering time if necessary
+        // so always pass in start_marker is false.
+        view->items[pos]->setTransform(marker->get_marker_transform(base, linewidth, false));
     }
 
-    return view->items[pos];
+    return view->items[pos].get();
 }
 
 /**
@@ -529,7 +529,7 @@ const gchar *generate_marker(std::vector<Inkscape::XML::Node*> &reprs, Geom::Rec
     SPObject *mark_object = document->getObjectById(mark_id);
 
     for (auto node : reprs){
-        SPItem *copy = SP_ITEM(mark_object->appendChildRepr(node));
+        auto copy = cast<SPItem>(mark_object->appendChildRepr(node));
 
         Geom::Affine dup_transform;
         if (!sp_svg_transform_read (node->attribute("transform"), &dup_transform))
@@ -631,7 +631,7 @@ void sp_marker_flip_horizontally(SPMarker* marker) {
     if (!marker) return;
 
     ObjectSet set(marker->document);
-    set.addList(sp_item_group_item_list(marker));
+    set.addList(marker->item_list());
     Geom::OptRect bbox = set.visualBounds();
     if (bbox) {
         set.setScaleRelative(bbox->midpoint(), Geom::Scale(-1.0, 1.0));

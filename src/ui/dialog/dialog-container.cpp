@@ -30,10 +30,12 @@
 #include "ui/dialog/dialog-notebook.h"
 #include "ui/dialog/dialog-window.h"
 #include "ui/dialog/document-properties.h"
+#include "ui/dialog/document-resources.h"
 #include "ui/dialog/export.h"
 #include "ui/dialog/fill-and-stroke.h"
 #include "ui/dialog/filter-effects-dialog.h"
 #include "ui/dialog/find.h"
+#include "ui/dialog/font-collections-manager.h"
 #include "ui/dialog/glyphs.h"
 #include "ui/dialog/icon-preview.h"
 #include "ui/dialog/inkscape-preferences.h"
@@ -45,13 +47,10 @@
 #include "ui/dialog/object-properties.h"
 #include "ui/dialog/objects.h"
 #include "ui/dialog/paint-servers.h"
-#include "ui/dialog/prototype.h"
 #include "ui/dialog/selectorsdialog.h"
-#include "ui/shortcuts.h"
 #if WITH_GSPELL
 #include "ui/dialog/spellcheck.h"
 #endif
-#include "ui/dialog/styledialog.h"
 #include "ui/dialog/svg-fonts-dialog.h"
 #include "ui/dialog/swatches.h"
 #include "ui/dialog/symbols.h"
@@ -123,42 +122,43 @@ DialogMultipaned *DialogContainer::create_column()
 /**
  * Get an instance of a DialogBase dialog using the associated dialog name.
  */
-DialogBase *DialogContainer::dialog_factory(const Glib::ustring& dialog_type)
+std::unique_ptr<DialogBase> DialogContainer::dialog_factory(Glib::ustring const &dialog_type)
 {
-
     // clang-format off
-    if(     dialog_type == "AlignDistribute")     return &Inkscape::UI::Dialog::ArrangeDialog::getInstance();
-    else if(dialog_type == "CloneTiler")          return &Inkscape::UI::Dialog::CloneTiler::getInstance();
-    else if(dialog_type == "DocumentProperties")  return &Inkscape::UI::Dialog::DocumentProperties::getInstance();
-    else if(dialog_type == "Export")              return &Inkscape::UI::Dialog::Export::getInstance();
-    else if(dialog_type == "FillStroke")          return &Inkscape::UI::Dialog::FillAndStroke::getInstance();
-    else if(dialog_type == "FilterEffects")       return &Inkscape::UI::Dialog::FilterEffectsDialog::getInstance();
-    else if(dialog_type == "Find")                return &Inkscape::UI::Dialog::Find::getInstance();
-    else if(dialog_type == "Glyphs")              return &Inkscape::UI::Dialog::GlyphsPanel::getInstance();
-    else if(dialog_type == "IconPreview")         return &Inkscape::UI::Dialog::IconPreviewPanel::getInstance();
-    else if(dialog_type == "Input")               return &Inkscape::UI::Dialog::InputDialog::getInstance();
-    else if(dialog_type == "LivePathEffect")      return &Inkscape::UI::Dialog::LivePathEffectEditor::getInstance();
-    else if(dialog_type == "Memory")              return &Inkscape::UI::Dialog::Memory::getInstance();
-    else if(dialog_type == "Messages")            return &Inkscape::UI::Dialog::Messages::getInstance();
-    else if(dialog_type == "ObjectAttributes")    return &Inkscape::UI::Dialog::ObjectAttributes::getInstance();
-    else if(dialog_type == "ObjectProperties")    return &Inkscape::UI::Dialog::ObjectProperties::getInstance();
-    else if(dialog_type == "Objects")             return &Inkscape::UI::Dialog::ObjectsPanel::getInstance();
-    else if(dialog_type == "PaintServers")        return &Inkscape::UI::Dialog::PaintServersDialog::getInstance();
-    else if(dialog_type == "Preferences")         return &Inkscape::UI::Dialog::InkscapePreferences::getInstance();
-    else if(dialog_type == "Selectors")           return &Inkscape::UI::Dialog::SelectorsDialog::getInstance();
-    else if(dialog_type == "SVGFonts")            return &Inkscape::UI::Dialog::SvgFontsDialog::getInstance();
-    else if(dialog_type == "Swatches")            return &Inkscape::UI::Dialog::SwatchesPanel::getInstance();
-    else if(dialog_type == "Symbols")             return &Inkscape::UI::Dialog::SymbolsDialog::getInstance();
-    else if(dialog_type == "Text")                return &Inkscape::UI::Dialog::TextEdit::getInstance();
-    else if(dialog_type == "Trace")               return &Inkscape::UI::Dialog::TraceDialog::getInstance();
-    else if(dialog_type == "Transform")           return &Inkscape::UI::Dialog::Transformation::getInstance();
-    else if(dialog_type == "UndoHistory")         return &Inkscape::UI::Dialog::UndoHistory::getInstance();
-    else if(dialog_type == "XMLEditor")           return &Inkscape::UI::Dialog::XmlTree::getInstance();
+         if (dialog_type == "AlignDistribute")    return std::make_unique<ArrangeDialog>();
+    else if (dialog_type == "CloneTiler")         return std::make_unique<CloneTiler>();
+    else if (dialog_type == "DocumentProperties") return std::make_unique<DocumentProperties>();
+    else if (dialog_type == "DocumentResources")  return std::make_unique<DocumentResources>();
+    else if (dialog_type == "Export")             return std::make_unique<Export>();
+    else if (dialog_type == "FillStroke")         return std::make_unique<FillAndStroke>();
+    else if (dialog_type == "FilterEffects")      return std::make_unique<FilterEffectsDialog>();
+    else if (dialog_type == "Find")               return std::make_unique<Find>();
+    else if (dialog_type == "FontCollections")    return std::make_unique<FontCollectionsManager>();
+    else if (dialog_type == "Glyphs")             return std::make_unique<GlyphsPanel>();
+    else if (dialog_type == "IconPreview")        return std::make_unique<IconPreviewPanel>();
+    else if (dialog_type == "Input")              return InputDialog::create();
+    else if (dialog_type == "LivePathEffect")     return std::make_unique<LivePathEffectEditor>();
+    else if (dialog_type == "Memory")             return std::make_unique<Memory>();
+    else if (dialog_type == "Messages")           return std::make_unique<Messages>();
+    else if (dialog_type == "ObjectAttributes")   return std::make_unique<ObjectAttributes>();
+    else if (dialog_type == "ObjectProperties")   return std::make_unique<ObjectProperties>();
+    else if (dialog_type == "Objects")            return std::make_unique<ObjectsPanel>();
+    else if (dialog_type == "PaintServers")       return std::make_unique<PaintServersDialog>();
+    else if (dialog_type == "Preferences")        return std::make_unique<InkscapePreferences>();
+    else if (dialog_type == "Selectors")          return std::make_unique<SelectorsDialog>();
+    else if (dialog_type == "SVGFonts")           return std::make_unique<SvgFontsDialog>();
+    else if (dialog_type == "Swatches")           return std::make_unique<SwatchesPanel>();
+    else if (dialog_type == "Symbols")            return std::make_unique<SymbolsDialog>();
+    else if (dialog_type == "Text")               return std::make_unique<TextEdit>();
+    else if (dialog_type == "Trace")              return TraceDialog::create();
+    else if (dialog_type == "Transform")          return std::make_unique<Transformation>();
+    else if (dialog_type == "UndoHistory")        return std::make_unique<UndoHistory>();
+    else if (dialog_type == "XMLEditor")          return std::make_unique<XmlTree>();
 #if WITH_GSPELL
-    else if(dialog_type == "Spellcheck")          return &Inkscape::UI::Dialog::SpellCheck::getInstance();
+    else if (dialog_type == "Spellcheck")         return std::make_unique<SpellCheck>();
 #endif
 #ifdef DEBUG
-    else if(dialog_type == "Prototype")           return &Inkscape::UI::Dialog::Prototype::getInstance();
+    else if (dialog_type == "Prototype")          return std::make_unique<Prototype>();
 #endif
     else {
         std::cerr << "DialogContainer::dialog_factory: Unhandled dialog: " << dialog_type.raw() << std::endl;
@@ -278,7 +278,7 @@ void DialogContainer::new_dialog(const Glib::ustring& dialog_type, DialogNoteboo
     }
 
     // Create the dialog widget
-    DialogBase *dialog = dialog_factory(dialog_type);
+    DialogBase *dialog = dialog_factory(dialog_type).release(); // Evil, but necessitated by GTK.
 
     if (!dialog) {
         std::cerr << "DialogContainer::new_dialog(): couldn't find dialog for: " << dialog_type.raw() << std::endl;
@@ -331,7 +331,7 @@ void DialogContainer::new_dialog(const Glib::ustring& dialog_type, DialogNoteboo
 
     if (auto panel = dynamic_cast<DialogMultipaned*>(notebook->get_parent())) {
         // if panel is collapsed, show it now, or else new dialog will be mysteriously missing
-        panel->show();
+        panel->show_all();
     }
 }
 
@@ -499,7 +499,7 @@ DialogWindow *DialogContainer::create_new_floating_dialog(const Glib::ustring& d
     }
 
     // Create the dialog widget
-    DialogBase *dialog = dialog_factory(dialog_type);
+    DialogBase *dialog = dialog_factory(dialog_type).release(); // Evil, but necessitated by GTK.
 
     if (!dialog) {
         std::cerr << "DialogContainer::new_dialog(): couldn't find dialog for: " << dialog_type.raw() << std::endl;
@@ -732,6 +732,11 @@ void DialogContainer::load_container_state(Glib::KeyFile *keyfile, bool include_
                     continue;
                 }
 
+                if (keyfile->has_key(column_group_name, "ColumnWidth")) {
+                    auto width = keyfile->get_integer(column_group_name, "ColumnWidth");
+                    column->set_restored_width(width);
+                }
+
                 before_canvas ? active_columns->prepend(column) : active_columns->append(column);
             }
 
@@ -769,6 +774,21 @@ void DialogContainer::load_container_state(Glib::KeyFile *keyfile, bool include_
                         }
                     } else {
                         std::cerr << "load_container_state: invalid dialog type: " << type.raw() << std::endl;
+                    }
+                }
+
+                if (notebook) {
+                    Glib::ustring row = "Notebook" + std::to_string(notebook_idx) + "Height";
+                    if (keyfile->has_key(column_group_name, row)) {
+                        auto height = keyfile->get_integer(column_group_name, row);
+                        notebook->set_requested_height(height);
+                    }
+                    Glib::ustring tab = "Notebook" + std::to_string(notebook_idx) + "ActiveTab";
+                    if (keyfile->has_key(column_group_name, tab)) {
+                        if (auto nb = notebook->get_notebook()) {
+                            auto page = keyfile->get_integer(column_group_name, tab);
+                            nb->set_current_page(page);
+                        }
                     }
                 }
             }
@@ -940,6 +960,7 @@ std::unique_ptr<Glib::KeyFile> DialogContainer::save_container_state()
         for (int column_idx = 0; column_idx < (int)multipanes.size(); ++column_idx) {
             Glib::ustring group_name = "Window" + std::to_string(window_idx) + "Column" + std::to_string(column_idx);
             int notebook_count = 0; // non-empty notebooks count
+            int width = multipanes[column_idx]->get_allocated_width();
 
             // Step 3.1.0: for each notebook, get its dialogs' types
             for (auto const &columns_widget : multipanes[column_idx]->get_children()) {
@@ -958,6 +979,13 @@ std::unique_ptr<Glib::KeyFile> DialogContainer::save_container_state()
                     // save the dialogs type
                     Glib::ustring key = "Notebook" + std::to_string(notebook_count) + "Dialogs";
                     keyfile->set_string_list(group_name, key, dialogs);
+                    // save height; useful when there are multiple "rows" of docked dialogs
+                    Glib::ustring row = "Notebook" + std::to_string(notebook_count) + "Height";
+                    keyfile->set_integer(group_name, row, dialog_notebook->get_allocated_height());
+                    if (auto notebook = dialog_notebook->get_notebook()) {
+                        Glib::ustring row = "Notebook" + std::to_string(notebook_count) + "ActiveTab";
+                        keyfile->set_integer(group_name, row, notebook->get_current_page());
+                    }
 
                     // increase the notebook count
                     notebook_count++;
@@ -968,6 +996,8 @@ std::unique_ptr<Glib::KeyFile> DialogContainer::save_container_state()
             if (notebook_count != 0) {
                 column_count++;
             }
+
+            keyfile->set_integer(group_name, "ColumnWidth", width);
 
             // Step 3.1.2: Save the column's data
             keyfile->set_integer(group_name, "NotebookCount", notebook_count);

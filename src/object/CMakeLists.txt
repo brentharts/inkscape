@@ -28,6 +28,7 @@ set(object_SRC
   sp-glyph.cpp
   sp-gradient-reference.cpp
   sp-gradient.cpp
+  sp-grid.cpp
   sp-guide.cpp
   sp-hatch-path.cpp
   sp-hatch.cpp
@@ -116,6 +117,7 @@ set(object_SRC
   sp-gradient-units.h
   sp-gradient-vector.h
   sp-gradient.h
+  sp-grid.h
   sp-guide.h
   sp-hatch-path.h
   sp-hatch.h
@@ -174,6 +176,8 @@ set(object_SRC
   uri-references.h
   uri.h
   viewbox.h
+  weakptr.h
+  tags.h
 )
 
 add_inkscape_source("${object_SRC}")

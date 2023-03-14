@@ -267,7 +267,7 @@ PatternEditor::PatternEditor(const char* prefs, Inkscape::PatternManager& manage
     });
 
     // current pattern category
-    _combo_set.set_active(Inkscape::Preferences::get()->getIntLimited(_prefs + "/currentSet", 1, 0, std::max(cat_count - 1, 0)));
+    _combo_set.set_active(Inkscape::Preferences::get()->getIntLimited(_prefs + "/currentSet", 0, 0, std::max(cat_count - 1, 0)));
 
     update_scale_link();
     pack_start(_main_grid);
@@ -290,8 +290,9 @@ void PatternEditor::bind_store(Gtk::FlowBox& list, PatternStore& pat) {
         auto box = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL);
         auto image = Gtk::make_managed<Gtk::Image>(item->pix);
         box->pack_start(*image);
+        auto name = Glib::ustring(item->label.c_str());
         if (_show_names.get_active()) {
-            auto label = Gtk::make_managed<Gtk::Label>(Glib::ustring(item->label.c_str()));
+            auto label = Gtk::make_managed<Gtk::Label>(name);
             label->get_style_context()->add_class("small-font");
             // limit label size to tile size
             label->set_ellipsize(Pango::EllipsizeMode::ELLIPSIZE_END);
@@ -299,6 +300,7 @@ void PatternEditor::bind_store(Gtk::FlowBox& list, PatternStore& pat) {
             label->set_size_request(_tile_size);
             box->pack_end(*label);
         }
+        image->set_tooltip_text(name);
         box->show_all();
         auto cbox = Gtk::make_managed<Gtk::FlowBoxChild>();
         cbox->add(*box);
@@ -481,7 +483,7 @@ std::vector<Glib::RefPtr<PatternItem>> PatternEditor::update_doc_pattern_list(SP
         else {
             if (!item->pix) {
                 // generate preview for newly added pattern
-                item->pix = _manager.get_image(dynamic_cast<SPPattern*>(document->getObjectById(item->id)), _tile_size, _tile_size, device_scale);
+                item->pix = _manager.get_image(cast<SPPattern>(document->getObjectById(item->id)), _tile_size, _tile_size, device_scale);
             }
             modified = true;
             _cached_items[item->id] = item;
@@ -659,7 +661,7 @@ SPPattern* get_pattern(const PatternItem& item, SPDocument* document) {
     auto doc = item.collection ? item.collection : document;
     if (!doc) return nullptr;
 
-    return dynamic_cast<SPPattern*>(doc->getObjectById(item.id));
+    return cast<SPPattern>(doc->getObjectById(item.id));
 }
 
 void regenerate_tile_images(PatternManager& manager, PatternStore& pat_store, int tile_size, double device_scale, SPDocument* current) {

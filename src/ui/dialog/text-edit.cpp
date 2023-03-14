@@ -41,6 +41,8 @@
 
 #include "desktop-style.h"
 #include "desktop.h"
+#include "dialog-notebook.h"
+#include "dialog-container.h"
 #include "document-undo.h"
 #include "document.h"
 #include "inkscape.h"
@@ -53,17 +55,13 @@
 
 #include "object/sp-flowtext.h"
 #include "object/sp-text.h"
-#include "object/sp-textpath.h"
 
 #include "io/resource.h"
 #include "svg/css-ostringstream.h"
 #include "ui/icon-names.h"
-#include "ui/shortcuts.h"
-#include "ui/toolbar/text-toolbar.h"
 #include "ui/widget/font-selector.h"
 
 #include "util/units.h"
-
 
 namespace Inkscape {
 namespace UI {
@@ -71,9 +69,6 @@ namespace Dialog {
 
 TextEdit::TextEdit()
     : DialogBase("/dialogs/textandfont", "Text")
-    , selectChangedConn()
-    , subselChangedConn()
-    , selectModifiedConn()
     , blocked(false)
       /*
            TRANSLATORS: Test string used in text and font dialog (when no
@@ -84,7 +79,6 @@ TextEdit::TextEdit()
     , _undo{"doc.undo"}
     , _redo{"doc.redo"}
 {
-
     std::string gladefile = get_filename_string(Inkscape::IO::Resource::UIS, "dialog-text-edit.glade");
     Glib::RefPtr<Gtk::Builder> builder;
     try {
@@ -93,6 +87,8 @@ TextEdit::TextEdit()
         g_warning("GtkBuilder file loading failed for save template dialog");
         return;
     }
+
+    Inkscape::FontCollections *font_collections = Inkscape::FontCollections::get();
 
     Gtk::Box *contents;
     Gtk::Notebook *notebook;
@@ -109,12 +105,34 @@ TextEdit::TextEdit()
     builder->get_widget("setasdefault_button", setasdefault_button);
     builder->get_widget("apply_button", apply_button);
 
+    builder->get_widget("settings_and_filters_box", settings_and_filters_box);
+    builder->get_widget("filter_menu_button", filter_menu_button);
+    builder->get_widget("reset_button", reset_button);
+    builder->get_widget("search_entry", search_entry);
+    builder->get_widget("font_count_label", font_count_label);
+    builder->get_widget("filter_popover", filter_popover);
+    builder->get_widget("popover_box", popover_box);
+    builder->get_widget("frame", frame);
+    builder->get_widget("frame_label", frame_label);
+    builder->get_widget("collection_editor_button", collection_editor_button);
+    builder->get_widget("collections_list", collections_list);
+
     text_buffer = Glib::RefPtr<Gtk::TextBuffer>::cast_static(builder->get_object("text_buffer"));
 
     font_box->pack_start(font_selector, true, true);
-    font_box->reorder_child(font_selector, 0);
+    font_box->reorder_child(font_selector, 2);
     feat_box->pack_start(font_features, true, true);
-    feat_box->reorder_child(font_features, 0);
+    feat_box->reorder_child(font_features, 1);
+
+    // filter_popover->set_modal(false); // Stay open until button clicked again.
+    filter_popover->signal_show().connect([=](){
+        // update font collections checkboxes
+        display_font_collections();
+    }, false);
+
+    filter_menu_button->set_image_from_icon_name(INKSCAPE_ICON("font_collections"));
+    filter_menu_button->set_always_show_image(true);
+    filter_menu_button->set_label(_("Collections"));
 
 #ifdef WITH_GSPELL
     /*
@@ -131,14 +149,21 @@ TextEdit::TextEdit()
 
     /* Signal handlers */
     text_view->signal_key_press_event().connect(sigc::mem_fun(*this, &TextEdit::captureUndo));
-    text_buffer->signal_changed().connect(sigc::mem_fun(*this, &TextEdit::onChange));
-    setasdefault_button->signal_clicked().connect(sigc::mem_fun(*this, &TextEdit::onSetDefault));
-    apply_button->signal_clicked().connect(sigc::mem_fun(*this, &TextEdit::onApply));
+    text_buffer->signal_changed().connect([=](){ onChange(); });
+    setasdefault_button->signal_clicked().connect([=](){ onSetDefault(); });
+    apply_button->signal_clicked().connect([=](){ onApply(); });
     fontChangedConn = font_selector.connectChanged(sigc::mem_fun(*this, &TextEdit::onFontChange));
-    fontFeaturesChangedConn = font_features.connectChanged(sigc::mem_fun(*this, &TextEdit::onChange));
+    fontFeaturesChangedConn = font_features.connectChanged([=](){ onChange(); });
     notebook->signal_switch_page().connect(sigc::mem_fun(*this, &TextEdit::onFontFeatures));
+    search_entry->signal_search_changed().connect([=](){ on_search_entry_changed(); });
+    reset_button->signal_clicked().connect([=](){ on_reset_button_pressed(); });
+    collection_editor_button->signal_clicked().connect([=](){ on_fcm_button_clicked(); });
+    Inkscape::FontLister::get_instance()->connectUpdate(sigc::mem_fun(*this, &TextEdit::change_font_count_label));
+    fontCollectionsUpdate = font_collections->connect_update([=]() { display_font_collections(); });
+    fontCollectionsChangedSelection = font_collections->connect_selection_update([=]() { display_font_collections(); });
 
     font_selector.set_name("TextEdit");
+    change_font_count_label();
 
     show_all_children();
 }
@@ -308,7 +333,7 @@ SPItem *TextEdit::getSelectedTextItem ()
     auto tmp= getDesktop()->getSelection()->items();
 	for(auto i=tmp.begin();i!=tmp.end();++i)
     {
-        if (SP_IS_TEXT(*i) || SP_IS_FLOWTEXT(*i))
+        if (is<SPText>(*i) || is<SPFlowtext>(*i))
             return *i;
     }
 
@@ -326,7 +351,7 @@ unsigned TextEdit::getSelectedTextCount ()
     auto tmp= getDesktop()->getSelection()->items();
 	for(auto i=tmp.begin();i!=tmp.end();++i)
     {
-        if (SP_IS_TEXT(*i) || SP_IS_FLOWTEXT(*i))
+        if (is<SPText>(*i) || is<SPFlowtext>(*i))
             ++items;
     }
 
@@ -422,7 +447,7 @@ void TextEdit::onApply()
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     for(auto i=item_list.begin();i!=item_list.end();++i){
         // apply style to the reprs of all text objects in the selection
-        if (SP_IS_TEXT (*i) || (SP_IS_FLOWTEXT (*i)) ) {
+        if (is<SPText>(*i) || (is<SPFlowtext>(*i)) ) {
             ++items;
         }
     }
@@ -440,10 +465,10 @@ void TextEdit::onApply()
     } else if (items == 1) {
         // exactly one text object; now set its text, too
         SPItem *item = desktop->getSelection()->singleItem();
-        if (SP_IS_TEXT (item) || SP_IS_FLOWTEXT(item)) {
+        if (is<SPText>(item) || is<SPFlowtext>(item)) {
             updateObjectText (item);
             SPStyle *item_style = item->style;
-            if (SP_IS_TEXT(item) && item_style->inline_size.value == 0) {
+            if (is<SPText>(item) && item_style->inline_size.value == 0) {
                 css = sp_css_attr_from_style(item_style, SP_STYLE_FLAG_IFSET);
                 sp_repr_css_unset_property(css, "inline-size");
                 item->changeCSS(css, "style");
@@ -463,11 +488,68 @@ void TextEdit::onApply()
     apply_button->set_sensitive ( false );
 
     sp_repr_css_attr_unref (css);
-
-    Inkscape::FontLister* font_lister = Inkscape::FontLister::get_instance();
-    font_lister->update_font_list(desktop->getDocument());
+    Inkscape::FontLister::get_instance()->update_font_list(desktop->getDocument());
 
     blocked = false;
+}
+
+void TextEdit::display_font_collections()
+{
+    // std::cout << "TextEdit::display_font_collections()" << std::endl;
+
+    for (auto row : collections_list->get_children()) {
+        if (row) {
+            collections_list->remove(*row);
+        }
+    }
+
+    FontCollections *font_collections = Inkscape::FontCollections::get();
+
+    // Insert system collections.
+    for(auto const& col: font_collections->get_collections(true)) {
+        auto btn = Gtk::make_managed<Gtk::CheckButton>(col);
+        btn->set_margin_bottom(2);
+        btn->set_active(font_collections->is_collection_selected(col));
+        btn->signal_toggled().connect([=](){
+            // toggle font system collection
+            font_collections->update_selected_collections(col);
+        });
+// g_message("tag: %s", tag.display_name.c_str());
+        auto row = Gtk::make_managed<Gtk::ListBoxRow>();
+        row->set_can_focus(false);
+        row->add(*btn);
+        row->show_all();
+        collections_list->append(*row);
+    }
+
+    // Insert row separator.
+    auto sep = Gtk::make_managed<Gtk::Separator>();
+    sep->set_margin_bottom(2);
+    auto sep_row = Gtk::make_managed<Gtk::ListBoxRow>();
+    sep_row->set_can_focus(false);
+    sep_row->add(*sep);
+    sep_row->show_all();
+    collections_list->append(*sep_row);
+
+    // Insert user collections.
+    for (auto const& col: font_collections->get_collections()) {
+        auto btn = Gtk::make_managed<Gtk::CheckButton>(col);
+        btn->set_margin_bottom(2);
+        btn->set_active(font_collections->is_collection_selected(col));
+        btn->signal_toggled().connect([=](){
+            // toggle font collection
+            font_collections->update_selected_collections(col);
+        });
+// g_message("tag: %s", tag.display_name.c_str());
+        auto row = Gtk::make_managed<Gtk::ListBoxRow>();
+        row->set_can_focus(false);
+        row->add(*btn);
+        row->show_all();
+        collections_list->append(*row);
+    }
+    Inkscape::FontLister *font_lister = Inkscape::FontLister::get_instance();
+    SPDocument *document = getDesktop()->getDocument();
+    font_lister->add_document_fonts_at_top(document);
 }
 
 void TextEdit::onFontFeatures(Gtk::Widget * widgt, int pos)
@@ -479,6 +561,48 @@ void TextEdit::onFontFeatures(Gtk::Widget * widgt, int pos)
             if (res) {
                 font_features.update_opentype(fontspec);
             }
+        }
+    }
+}
+
+void TextEdit::on_search_entry_changed()
+{
+    auto search_txt = search_entry->get_text();
+    font_selector.unset_model();
+    Inkscape::FontLister *font_lister = Inkscape::FontLister::get_instance();
+    font_lister->show_results(search_txt);
+    SPDocument *document = getDesktop()->getDocument();
+    font_lister->add_document_fonts_at_top(document);
+    font_selector.set_model();
+}
+
+void TextEdit::on_reset_button_pressed()
+{
+    FontCollections *font_collections = Inkscape::FontCollections::get();
+    search_entry->set_text("");
+
+    // Un-select all the selected font collections.
+    font_collections->clear_selected_collections();
+
+    Inkscape::FontLister *font_lister = Inkscape::FontLister::get_instance();
+    font_lister->init_font_families();
+    font_lister->init_default_styles();
+    SPDocument *document = getDesktop()->getDocument();
+    font_lister->add_document_fonts_at_top(document);
+}
+
+void TextEdit::change_font_count_label()
+{
+    auto label = Inkscape::FontLister::get_instance()->get_font_count_label();
+    font_count_label->set_label(label);
+}
+
+void TextEdit::on_fcm_button_clicked()
+{
+    // Inkscape::UI::Dialog::FontCollectionsManager::getInstance();
+    if(auto desktop = SP_ACTIVE_DESKTOP) {
+        if (auto container = desktop->getContainer()) {
+            container->new_floating_dialog("FontCollections");
         }
     }
 }

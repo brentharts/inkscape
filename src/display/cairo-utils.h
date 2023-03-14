@@ -71,6 +71,7 @@ public:
 
   private:
     static Pixbuf *create_from_buffer(gchar *&&, gsize, double svgddpi = 0, std::string const &fn = "");
+    static Geom::Affine get_embedded_orientation(GdkPixbuf *buf);
     static GdkPixbuf *apply_embedded_orientation(GdkPixbuf *buf);
 
     void _ensurePixelsARGB32();
@@ -88,8 +89,9 @@ public:
 
 } // namespace Inkscape
 
-// TODO: these declarations may not be needed in the header
-extern cairo_user_data_key_t ink_color_interpolation_key;
+// Atomic accessors to global variable governing number of filter threads.
+int  get_num_filter_threads();
+void set_num_filter_threads(int);
 
 SPColorInterpolation get_cairo_surface_ci(cairo_surface_t *surface);
 void set_cairo_surface_ci(cairo_surface_t *surface, SPColorInterpolation cif);
@@ -101,6 +103,7 @@ void ink_cairo_set_source_rgba32(cairo_t *ct, guint32 rgba);
 void ink_cairo_transform(cairo_t *ct, Geom::Affine const &m);
 void ink_cairo_pattern_set_matrix(cairo_pattern_t *cp, Geom::Affine const &m);
 void ink_cairo_set_hairline(cairo_t *ct);
+void ink_cairo_set_dither(cairo_surface_t *surface, bool enabled);
 
 void ink_matrix_to_2geom(Geom::Affine &, cairo_matrix_t const &);
 void ink_matrix_to_cairo(cairo_matrix_t &, Geom::Affine const &);
@@ -157,6 +160,8 @@ unpremul_alpha(const guint32 color, const guint32 alpha)
 // TODO: move those to 2Geom
 void feed_pathvector_to_cairo (cairo_t *ct, Geom::PathVector const &pathv, Geom::Affine trans, Geom::OptRect area, bool optimize_stroke, double stroke_width);
 void feed_pathvector_to_cairo (cairo_t *ct, Geom::PathVector const &pathv);
+
+std::optional<Geom::PathVector> extract_pathvector_from_cairo(cairo_t *ct);
 
 #define EXTRACT_ARGB32(px,a,r,g,b) \
     guint32 a, r, g, b; \

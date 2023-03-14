@@ -35,7 +35,7 @@
 #include "document.h"
 #include "preferences.h"
 
-#include "3rdparty/libcroco/cr-sel-eng.h"
+#include "3rdparty/libcroco/src/cr-sel-eng.h"
 
 #include "object/sp-paint-server.h"
 #include "object/uri-references.h"
@@ -59,7 +59,7 @@ using Inkscape::CSSOStringStream;
 
 struct SPStyleEnum;
 
-int SPStyle::_count = 0;
+// static int _count = 0;
 
 /*#########################
 ## FORWARD DECLARATIONS
@@ -388,7 +388,7 @@ SPStyle::SPStyle(SPDocument *document_in, SPObject *object_in) :
     stop_color(             false),       // SPIColor, does not inherit
     stop_opacity(           false)        // Does not inherit
 {
-    // std::cout << "SPStyle::SPStyle( SPDocument ): Entrance: (" << _count << ")" << std::endl;
+    // std::cout << "SPStyle::SPStyle( SPDocument ): Entrance" << std::endl;
     // std::cout << "                      Document: " << (document_in?"present":"null") << std::endl;
     // std::cout << "                        Object: "
     //           << (object_in?(object_in->getId()?object_in->getId():"id null"):"object null") << std::endl;
@@ -409,15 +409,13 @@ SPStyle::SPStyle(SPDocument *document_in, SPObject *object_in) :
     //     first = false;
     // }
 
-    ++_count; // Poor man's memory leak detector
-
-    _refcount = 1;
+    // ++_count; // Poor man's memory leak detector
+    // std::cout << "Style count: " << _count << std::endl;
 
     cloned = false;
 
     object = object_in;
     if( object ) {
-        g_assert( SP_IS_OBJECT(object) );
         document = object->document;
         release_connection =
             object->connectRelease(sigc::bind<1>(sigc::ptr_fun(&sp_style_object_release), this));
@@ -474,7 +472,7 @@ SPStyle::SPStyle(SPDocument *document_in, SPObject *object_in) :
 SPStyle::~SPStyle() {
 
     // std::cout << "SPStyle::~SPStyle" << std::endl;
-    --_count; // Poor man's memory leak detector.
+    // --_count; // Poor man's memory leak detector.
 
     // Remove connections
     release_connection.disconnect();
@@ -495,13 +493,6 @@ SPStyle::~SPStyle() {
         filter_modified_connection.disconnect();
     }
 
-    // Conjecture: all this SPStyle ref counting is not needed. SPObject creates an instance of
-    // SPStyle when it is constructed and deletes it when it is destructed. The refcount is
-    // incremented and decremented only in the files: display/drawing-item.cpp,
-    // display/nr-filter-primitive.cpp, and libnrtype/Layout-TNG-Input.cpp.
-    if( _refcount > 1 ) {
-        std::cerr << "SPStyle::~SPStyle: ref count greater than 1! " << _refcount << std::endl;
-    }
     // std::cout << "SPStyle::~SPStyle(): Exit\n" << std::endl;
 }
 
@@ -526,17 +517,9 @@ SPStyle::clear() {
     // Release connection to object, created in constructor.
     release_connection.disconnect();
 
-    // href->detach() called in fill->clear()...
     fill_ps_modified_connection.disconnect();
-    if (fill.value.href) {
-        delete fill.value.href;
-        fill.value.href = nullptr;
-    }
     stroke_ps_modified_connection.disconnect();
-    if (stroke.value.href) {
-        delete stroke.value.href;
-        stroke.value.href = nullptr;
-    }
+
     filter_modified_connection.disconnect();
     if (filter.href) {
         delete filter.href;
@@ -547,10 +530,10 @@ SPStyle::clear() {
         filter.href = new SPFilterReference(document);
         filter_changed_connection = filter.href->changedSignal().connect(sigc::bind(sigc::ptr_fun(sp_style_filter_ref_changed), this));
 
-        fill.value.href = new SPPaintServerReference(document);
+        fill.value.href = std::make_shared<SPPaintServerReference>(document);
         fill_ps_changed_connection = fill.value.href->changedSignal().connect(sigc::bind(sigc::ptr_fun(sp_style_fill_paint_server_ref_changed), this));
 
-        stroke.value.href = new SPPaintServerReference(document);
+        stroke.value.href = std::make_shared<SPPaintServerReference>(document);
         stroke_ps_changed_connection = stroke.value.href->changedSignal().connect(sigc::bind(sigc::ptr_fun(sp_style_stroke_paint_server_ref_changed), this));
     }
 
@@ -630,7 +613,6 @@ SPStyle::readFromObject( SPObject *object ) {
     // std::cout << "SPStyle::readFromObject: "<< (object->getId()?object->getId():"null") << std::endl;
 
     g_return_if_fail(object != nullptr);
-    g_return_if_fail(SP_IS_OBJECT(object));
 
     Inkscape::XML::Node *repr = object->getRepr();
     g_return_if_fail(repr != nullptr);
@@ -1165,7 +1147,7 @@ void sp_style_filter_ref_changed(SPObject *old_ref, SPObject *ref, SPStyle *styl
         style->filter_modified_connection.disconnect();
     }
 
-    if (SP_IS_FILTER(ref)) {
+    if (is<SPFilter>(ref)) {
         static_cast<SPFilter*>(ref)->_refcount++;
         style->filter_modified_connection = ref->connectModified(sigc::bind(sigc::ptr_fun(&sp_style_filter_ref_modified), style));
     }
@@ -1210,7 +1192,7 @@ void sp_style_fill_paint_server_ref_changed(SPObject *old_ref, SPObject *ref, SP
         style->fill_ps_modified_connection.disconnect();
     }
 
-    if (SP_IS_PAINT_SERVER(ref)) {
+    if (is<SPPaintServer>(ref)) {
         style->fill_ps_modified_connection = ref->connectModified(sigc::bind(sigc::ptr_fun(&sp_style_paint_server_ref_modified), style));
     }
 
@@ -1227,34 +1209,12 @@ void sp_style_stroke_paint_server_ref_changed(SPObject *old_ref, SPObject *ref, 
         style->stroke_ps_modified_connection.disconnect();
     }
 
-    if (SP_IS_PAINT_SERVER(ref)) {
+    if (is<SPPaintServer>(ref)) {
         style->stroke_ps_modified_connection = ref->connectModified(sigc::bind(sigc::ptr_fun(&sp_style_paint_server_ref_modified), style));
     }
 
     style->signal_stroke_ps_changed.emit(old_ref, ref);
     sp_style_paint_server_ref_modified(ref, 0, style);
-}
-
-// Called in display/drawing-item.cpp, display/nr-filter-primitive.cpp, libnrtype/Layout-TNG-Input.cpp
-/**
- * Increase refcount of style.
- */
-void sp_style_ref(SPStyle const *style)
-{
-    if (style) {
-        style->style_ref(); // Increase ref count
-    }
-}
-
-// Called in display/drawing-item.cpp, display/nr-filter-primitive.cpp, libnrtype/Layout-TNG-Input.cpp
-/**
- * Decrease refcount of style with possible destruction.
- */
-void sp_style_unref(SPStyle const *style)
-{
-    if (style && style->style_unref() < 1) {
-        delete style;
-    }
 }
 
 static CRSelEng *
@@ -1288,12 +1248,10 @@ sp_style_set_ipaint_to_uri(SPStyle *style, SPIPaint *paint, const Inkscape::URI 
 
         if (style->object) {
             // Should not happen as href should have been created in SPIPaint. (TODO: Removed code duplication.)
-            paint->value.href = new SPPaintServerReference(style->object);
-
+            paint->value.href = std::make_shared<SPPaintServerReference>(style->object);
         } else if (document) {
             // Used by desktop style (no object to attach to!).
-            paint->value.href = new SPPaintServerReference(document);
-
+            paint->value.href = std::make_shared<SPPaintServerReference>(document);
         } else {
             std::cerr << "sp_style_set_ipaint_to_uri: No valid object or document!" << std::endl;
             return;

@@ -37,15 +37,23 @@ LPEObjectReference::LPEObjectReference(SPObject* i_owner) : URIReference(i_owner
 
 LPEObjectReference::~LPEObjectReference()
 {
+    std::vector<SPLPEItem *> lpeitems;
+    if (lpeobject && lpeobject->get_lpe()) {
+        lpeitems = lpeobject->get_lpe()->getCurrrentLPEItems();
+        lpeobject->get_lpe()->doOnBeforeCommit();
+        lpeobject->get_lpe()->sp_lpe_item = nullptr;
+    } 
     _changed_connection.disconnect(); // to do before unlinking
-
     quit_listening();
     unlink();
+    for (auto lpeitem : lpeitems) {
+        sp_lpe_item_update_patheffect(lpeitem,false,false);
+    }
 }
 
 bool LPEObjectReference::_acceptObject(SPObject * const obj) const
 {
-    LivePathEffectObject *lpobj = dynamic_cast<LivePathEffectObject *>(obj);
+    auto lpobj = cast<LivePathEffectObject>(obj);
     if (lpobj) {
         return URIReference::_acceptObject(obj);
     } else {
@@ -113,7 +121,7 @@ static void
 lpeobjectreference_href_changed(SPObject */*old_ref*/, SPObject */*ref*/, LPEObjectReference *lpeobjref)
 {
     //lpeobjref->quit_listening();
-    LivePathEffectObject *refobj = dynamic_cast<LivePathEffectObject *>( lpeobjref->getObject() );
+    auto refobj = cast<LivePathEffectObject>( lpeobjref->getObject() );
     if ( refobj ) {
         lpeobjref->start_listening(refobj);
     }

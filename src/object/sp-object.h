@@ -2,7 +2,6 @@
 #ifndef SP_OBJECT_H_SEEN
 #define SP_OBJECT_H_SEEN
 
-
 /*
  * Authors:
  *   Lauris Kaplinski <lauris@kaplinski.com>
@@ -19,20 +18,10 @@
 #include <set>
 #include <glibmm/ustring.h>
 #include "util/const_char_ptr.h"
+#include "xml/node-observer.h"
 /* SPObject flags */
 
 class SPObject;
-
-#define MAKE_SP_OBJECT_DOWNCAST_FUNCTIONS(func, T)                                                                 \
-    inline T *func(SPObject *obj) { return dynamic_cast<T *>(obj); }                                               \
-    inline T const *func(SPObject const *obj) { return dynamic_cast<T const *>(obj); } \
-    inline T *func(T *derived) = delete;                                               \
-    inline T const *func(T const *derived) = delete;
-
-#define MAKE_SP_OBJECT_TYPECHECK_FUNCTIONS(func, T)                                                       \
-    inline bool func(SPObject const *obj) { return dynamic_cast<T const *>(obj); }
-
-#define SP_IS_OBJECT(obj) (dynamic_cast<const SPObject*>(obj) != nullptr)
 
 /* Async modification flags */
 #define SP_OBJECT_MODIFIED_FLAG (1 << 0)
@@ -67,39 +56,33 @@ inline unsigned cascade_flags(unsigned flags)
 #define SP_OBJECT_WRITE_ALL (1 << 2)
 #define SP_OBJECT_WRITE_NO_CHILDREN (1 << 3)
 
+#include <vector>
 #include <cassert>
 #include <cstddef>
+#include <boost/intrusive/list.hpp>
+#include <2geom/point.h> // Used for dpi only
 #include <sigc++/connection.h>
 #include <sigc++/functors/slot.h>
 #include <sigc++/signal.h>
-#include <vector>
-#include <boost/intrusive/list.hpp>
-#include "2geom/point.h" // Used for dpi only
-#include "version.h"
 #include "util/forward-pointer-iterator.h"
+#include "tags.h"
+#include "version.h"
 
 enum class SPAttr;
 
 class SPCSSAttr;
 class SPStyle;
 
-namespace Inkscape {
-namespace XML {
-class Node;
-struct Document;
-}
-}
-
-namespace Glib {
-    class ustring;
-}
+namespace Inkscape::XML { class Node; struct Document; }
 
 /// Unused
-struct SPCtx {
+struct SPCtx
+{
     unsigned int flags;
 };
 
-enum {
+enum
+{
     SP_XML_SPACE_DEFAULT,
     SP_XML_SPACE_PRESERVE
 };
@@ -159,37 +142,39 @@ SPObject *sp_object_unref(SPObject *object, SPObject *owner=nullptr);
  * provides document level functionality such as the undo stack,
  * dictionary and so on. Source: doc/architecture.txt
  */
-class SPObject {
+class SPObject : private Inkscape::XML::NodeObserver
+{
 public:
-    enum CollectionPolicy {
+    enum CollectionPolicy
+    {
         COLLECT_WITH_PARENT,
         ALWAYS_COLLECT
     };
 
     SPObject();
-    virtual ~SPObject();
+    SPObject(SPObject const &) = delete;
+    SPObject &operator=(SPObject const &) = delete;
+    ~SPObject() override;
+    virtual int tag() const { return tag_of<decltype(*this)>; }
 
     unsigned int cloned : 1;
-    SPObject *clone_original;
+    SPObject *clone_original{nullptr};
     unsigned int uflags : 8;
     unsigned int mflags : 8;
     SPIXmlSpace xml_space;
     Glib::ustring lang;
-    unsigned int hrefcount; /* number of xlink:href references */
-    unsigned int _total_hrefcount; /* our hrefcount + total descendants */
-    SPDocument *document; /* Document we are part of */
-    SPObject *parent; /* Our parent (only one allowed) */
+    unsigned int hrefcount{0};        /* number of xlink:href references */
+    unsigned int _total_hrefcount{0}; /* our hrefcount + total descendants */
+    SPDocument *document{nullptr};    /* Document we are part of */
+    SPObject *parent{nullptr};        /* Our parent (only one allowed) */
 
 private:
-    SPObject(const SPObject&);
-    SPObject& operator=(const SPObject&);
-
-    char *id; /* Our very own unique id */
-    Inkscape::XML::Node *repr; /* Our xml representation */
+    char *id{nullptr};                  /* Our very own unique id */
+    Inkscape::XML::Node *repr{nullptr}; /* Our xml representation */
 
 public:
-    int refCount;
-    std::list<SPObject*> hrefList;
+    int refCount{1};
+    std::list<SPObject *> hrefList;
 
     /**
      * Returns the objects current ID string.
@@ -267,6 +252,11 @@ public:
     }
 
     /**
+     * True if object is linked to us
+     */
+    virtual void getLinked(std::vector<SPObject *> &objects) const;
+
+    /**
      * True if object is non-NULL and this is some in/direct parent of object.
      */
     bool isAncestorOf(SPObject const *object) const;
@@ -275,6 +265,11 @@ public:
      * Returns youngest object being parent to this and object.
      */
     SPObject const *nearestCommonAncestor(SPObject const *object) const;
+
+    /**
+     * Returns ancestor non layer.
+     */
+    SPObject const * getTopAncestorNonLayer() const;
 
     /* Returns next object in sibling list or NULL. */
     SPObject *getNext();
@@ -492,6 +487,16 @@ public:
     void cropToObjects(std::vector<SPObject *> except_objects);
 
     /**
+     * Get all child objects except for any in the list.
+     */
+    void getObjectsExcept(std::vector<SPObject *> &objects, const std::vector<SPObject *> &except);
+
+    /**
+     * Grows the input list with any and all linked items.
+     */
+    void getLinkedObjects(std::vector<SPObject *> &objects) const;
+
+    /**
      * Connects a slot to be called when an object is deleted.
      *
      * This connects a slot to an object's internal delete signal, which is invoked when the object
@@ -529,6 +534,21 @@ public:
         sp_object_ref(successor, nullptr);
         _successor = successor;
     }
+
+    /**
+     * Indicates that another object supercedes temporaty this one.
+     */
+    void setTmpSuccessor(SPObject *tmpsuccessor);
+
+    /**
+     * Unset object supercedes.
+     */
+    void unsetTmpSuccessor();
+
+    /**
+     * Fix temporary successors in duple stamp.
+     */
+    void fixTmpSuccessors();
 
     /* modifications; all three sets of methods should probably ultimately be protected, as they
      * are not really part of its public interface.  However, other parts of the code to
@@ -662,9 +682,7 @@ public:
      */
     void _updateTotalHRefCount(int increment);
 
-    void _requireSVGVersion(unsigned major, unsigned minor) {
-        _requireSVGVersion(Inkscape::Version(major, minor));
-    }
+    void _requireSVGVersion(unsigned major, unsigned minor) { _requireSVGVersion(Inkscape::Version(major, minor)); }
 
     /**
      * Lifts SVG version of all root objects to version.
@@ -675,10 +693,11 @@ public:
     sigc::signal<void (SPObject *)> _delete_signal;
     sigc::signal<void (SPObject *)> _position_changed_signal;
     sigc::signal<void (SPObject *, unsigned int)> _modified_signal;
-    SPObject *_successor;
-    CollectionPolicy _collection_policy;
-    char *_label;
-    mutable char *_default_label;
+    SPObject *_successor{nullptr};
+    SPObject *_tmpsuccessor{nullptr};
+    CollectionPolicy _collection_policy{SPObject::COLLECT_WITH_PARENT};
+    char *_label{nullptr};
+    mutable char *_default_label{nullptr};
 
     // WARNING:
     // Methods below should not be used outside of the SP tree,
@@ -801,74 +820,61 @@ private:
 
     /* Real handlers of repr signals */
 
-public:
-    /**
-     * Callback for attr_changed node event.
-     */
-    static void repr_attr_changed(Inkscape::XML::Node *repr, char const *key, char const *oldval, char const *newval, bool is_interactive, void* data);
+private:
+    // XML::NodeObserver functions
+    void notifyAttributeChanged(Inkscape::XML::Node &node, GQuark key, Inkscape::Util::ptr_shared oldval,
+                                Inkscape::Util::ptr_shared newval) final;
 
-    /**
-     * Callback for content_changed node event.
-     */
-    static void repr_content_changed(Inkscape::XML::Node *repr, char const *oldcontent, char const *newcontent, void* data);
+    void notifyContentChanged(Inkscape::XML::Node &node, Inkscape::Util::ptr_shared oldcontent,
+                              Inkscape::Util::ptr_shared newcontent) final;
 
-    /**
-     * Callback for child_added node event.
-     */
-    static void repr_child_added(Inkscape::XML::Node *repr, Inkscape::XML::Node *child, Inkscape::XML::Node *ref, void* data);
+    void notifyChildAdded(Inkscape::XML::Node &node, Inkscape::XML::Node &child,
+                          Inkscape::XML::Node *prev) final;
 
-    /**
-     * Callback for remove_child node event.
-     */
-    static void repr_child_removed(Inkscape::XML::Node *repr, Inkscape::XML::Node *child, Inkscape::XML::Node *ref, void *data);
+    void notifyChildRemoved(Inkscape::XML::Node &node, Inkscape::XML::Node &child,
+                            Inkscape::XML::Node *prev) final;
 
-    /**
-     * Callback for order_changed node event.
-     *
-     * \todo fixme:
-     */
-    static void repr_order_changed(Inkscape::XML::Node *repr, Inkscape::XML::Node *child, Inkscape::XML::Node *old, Inkscape::XML::Node *newer, void* data);
+    void notifyChildOrderChanged(Inkscape::XML::Node &node, Inkscape::XML::Node &child, Inkscape::XML::Node *old_prev,
+                                 Inkscape::XML::Node *new_prev) final;
 
-    /**
-    * Callback for name_changed node event
-    */
-    static void repr_name_changed(Inkscape::XML::Node* repr, gchar const* oldname, gchar const* newname, void * data);
+    void notifyElementNameChanged(Inkscape::XML::Node &node, GQuark old_name, GQuark new_name) final;
 
     friend class SPObjectImpl;
 
 protected:
-	virtual void build(SPDocument* doc, Inkscape::XML::Node* repr);
-	virtual void release();
+    virtual void build(SPDocument *doc, Inkscape::XML::Node *repr);
+    virtual void release();
 
-	virtual void child_added(Inkscape::XML::Node* child, Inkscape::XML::Node* ref);
-	virtual void remove_child(Inkscape::XML::Node* child);
+    virtual void child_added(Inkscape::XML::Node *child, Inkscape::XML::Node *ref);
+    virtual void remove_child(Inkscape::XML::Node *child);
 
-	virtual void order_changed(Inkscape::XML::Node* child, Inkscape::XML::Node* old_repr, Inkscape::XML::Node* new_repr);
-    virtual void tag_name_changed(gchar const* oldname, gchar const* newname);
+    virtual void order_changed(Inkscape::XML::Node *child, Inkscape::XML::Node *old_repr,
+                               Inkscape::XML::Node *new_repr);
+    virtual void tag_name_changed(gchar const *oldname, gchar const *newname);
 
-	virtual void set(SPAttr key, const char* value);
+    virtual void set(SPAttr key, const char *value);
 
-	virtual void update(SPCtx* ctx, unsigned int flags);
-	virtual void modified(unsigned int flags);
+    virtual void update(SPCtx *ctx, unsigned int flags);
+    virtual void modified(unsigned int flags);
 
-	virtual Inkscape::XML::Node* write(Inkscape::XML::Document* doc, Inkscape::XML::Node* repr, unsigned int flags);
+    virtual Inkscape::XML::Node *write(Inkscape::XML::Document *doc, Inkscape::XML::Node *repr, unsigned int flags);
 
     typedef boost::intrusive::list_member_hook<> ListHook;
     ListHook _child_hook;
 
 public:
-    typedef boost::intrusive::list<
+    using ChildrenList = boost::intrusive::list<
+        SPObject,
+        boost::intrusive::member_hook<
             SPObject,
-            boost::intrusive::member_hook<
-                    SPObject,
-                    ListHook,
-                    &SPObject::_child_hook
-            >> ChildrenList;
+            ListHook,
+            &SPObject::_child_hook
+        >>;
     ChildrenList children;
-	virtual void read_content();
+    virtual void read_content();
 
-    void recursivePrintTree(unsigned level = 0);  // For debugging
-    void objectTrace(std::string const&, bool in = true, unsigned flags = 0);
+    void recursivePrintTree(unsigned level = 0); // For debugging
+    void objectTrace(std::string const &, bool in = true, unsigned flags = 0);
 
     /**
      * @brief Generate a document-wide unique id for this object.

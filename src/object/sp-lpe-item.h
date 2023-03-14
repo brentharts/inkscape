@@ -41,6 +41,7 @@ class SPLPEItem : public SPItem {
 public:
     SPLPEItem();
     ~SPLPEItem() override;
+    int tag() const override { return tag_of<decltype(*this)>; }
 
     int path_effects_enabled;
 
@@ -76,6 +77,7 @@ public:
     bool hasPathEffectOfType(int const type, bool is_ready = true) const;
     bool hasPathEffectOfTypeRecursive(int const type, bool is_ready = true) const;
     bool hasPathEffectRecursive() const;
+    SPLPEItem const * getTopPathEffect() const;
     bool hasPathEffectOnClipOrMask(SPLPEItem * shape) const;
     bool hasPathEffectOnClipOrMaskRecursive(SPLPEItem * shape) const;
     size_t getLPEIndex(Inkscape::LivePathEffect::Effect* lpe) const;
@@ -87,38 +89,44 @@ public:
     std::vector<Inkscape::LivePathEffect::Effect const *> getPathEffectsOfType(int type) const;
     std::vector<Inkscape::LivePathEffect::Effect *> getPathEffects();
     std::vector<Inkscape::LivePathEffect::Effect const *> getPathEffects() const;
-    std::vector<SPObject *> get_satellites(bool force = true, bool recursive = false);
+    std::vector<SPObject *> get_satellites(bool force = true, bool recursive = false, bool onchilds = false);
     bool isOnClipboard();
+    bool isOnSymbol() const;
+    bool onsymbol = false;
     bool hasBrokenPathEffect() const;
+    bool lpe_initialized = false;
     PathEffectList getEffectList();
     PathEffectList const getEffectList() const;
 
+    void duplicateCurrentPathEffect();
     void downCurrentPathEffect();
     void upCurrentPathEffect();
+    void movePathEffect(gint origin, gint dest, bool select_moved = false);
+    SPLPEItem * flattenCurrentPathEffect();
     std::shared_ptr<Inkscape::LivePathEffect::LPEObjectReference> getCurrentLPEReference();
     Inkscape::LivePathEffect::Effect* getCurrentLPE();
     std::shared_ptr<Inkscape::LivePathEffect::LPEObjectReference> getPrevLPEReference(std::shared_ptr<Inkscape::LivePathEffect::LPEObjectReference> lperef);
     Inkscape::LivePathEffect::Effect* getPrevLPE(Inkscape::LivePathEffect::Effect* lpe);
     std::shared_ptr<Inkscape::LivePathEffect::LPEObjectReference> getNextLPEReference(std::shared_ptr<Inkscape::LivePathEffect::LPEObjectReference>);
     Inkscape::LivePathEffect::Effect* getNextLPE(Inkscape::LivePathEffect::Effect* lpe);
+    std::shared_ptr<Inkscape::LivePathEffect::LPEObjectReference> getLastLPEReference();
+    Inkscape::LivePathEffect::Effect* getLastLPE();
     bool setCurrentPathEffect(std::shared_ptr<Inkscape::LivePathEffect::LPEObjectReference> lperef);
-    void removeCurrentPathEffect(bool keep_paths);
-    void removeAllPathEffects(bool keep_paths, bool recursive = false);
+    bool setCurrentPathEffect(LivePathEffectObject const * lopeobj);
+    SPLPEItem * removeCurrentPathEffect(bool keep_paths);
+    SPLPEItem * removeAllPathEffects(bool keep_paths, bool recursive = false);
     void addPathEffect(std::string value, bool reset);
     void addPathEffect(LivePathEffectObject * new_lpeobj);
     void resetClipPathAndMaskLPE(bool fromrecurse = false);
     void applyToMask(SPItem* to, Inkscape::LivePathEffect::Effect *lpe = nullptr);
     void applyToClipPath(SPItem* to, Inkscape::LivePathEffect::Effect *lpe = nullptr);
     void applyToClipPathOrMask(SPItem * clip_mask, SPItem* to, Inkscape::LivePathEffect::Effect *lpe = nullptr);
-    bool forkPathEffectsIfNecessary(unsigned int nr_of_allowed_users = 1, bool recursive = true);
+    bool forkPathEffectsIfNecessary(unsigned int nr_of_allowed_users = 1, bool recursive = true, bool force = false);
     void editNextParamOncanvas(SPDesktop *dt);
-    void update_satellites(bool updatelpe);
+    void update_satellites(bool recursive = true);
 };
-void sp_lpe_item_update_patheffect (SPLPEItem *lpeitem, bool wholetree, bool write); // careful, class already has method with *very* similar name!
+void sp_lpe_item_update_patheffect (SPLPEItem *lpeitem, bool wholetree, bool write, bool with_satellites = false); // careful, class already has method with *very* similar name!
 void sp_lpe_item_enable_path_effects(SPLPEItem *lpeitem, bool enable);
-
-MAKE_SP_OBJECT_DOWNCAST_FUNCTIONS(SP_LPE_ITEM, SPLPEItem)
-MAKE_SP_OBJECT_TYPECHECK_FUNCTIONS(SP_IS_LPE_ITEM, SPLPEItem)
 
 #endif /* !SP_LPE_ITEM_H_SEEN */
 

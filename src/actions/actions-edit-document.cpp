@@ -16,6 +16,7 @@
 
 #include "actions-edit-document.h"
 #include "actions/actions-extra-data.h"
+#include "actions-helper.h"
 #include "inkscape-application.h"
 #include "document.h"
 #include "inkscape.h"
@@ -77,15 +78,21 @@ void toggle_clip_to_page(SPDocument* document) {
     Inkscape::DocumentUndo::done(document, _("Clip to page"), "");
 }
 
-std::vector<std::vector<Glib::ustring>> raw_data_edit_document =
+void
+show_grids(SPDocument *document)
 {
+    document->getNamedView()->toggleShowGrids();
+}
+
+std::vector<std::vector<Glib::ustring>> raw_data_edit_document = {
     // clang-format off
-    {"doc.create-guides-around-page",            N_("Create Guides Around the Page"),    "Edit Document",     N_("Create four guides aligned with the page borders")},
-    {"doc.lock-all-guides",                      N_("Lock All Guides"),                  "Edit Document",     N_("Toggle lock of all guides in the document")},
-    {"doc.show-all-guides",                      N_("Show All Guides"),                  "Edit Document",     N_("Toggle visibility of all guides in the document")},
-    {"doc.delete-all-guides",                    N_("Delete All Guides"),                "Edit Document",     N_("Delete all the guides in the document")},
-    {"doc.fit-canvas-to-drawing",                N_("Fit Page to Drawing"),              "Edit Document",     N_("Fit the page to the drawing")},
-    {"doc.clip-to-page"                      ,   N_("Toggle Clip to Page"),              "Edit Document",     N_("Toggle between clipped to page and complete rendering")},
+    {"doc.create-guides-around-page",            N_("Create Guides Around the Current Page"),    "Edit Document",     N_("Create four guides aligned with the page borders of the current page")},
+    {"doc.lock-all-guides",                      N_("Lock All Guides"),                          "Edit Document",     N_("Toggle lock of all guides in the document")},
+    {"doc.show-all-guides",                      N_("Show All Guides"),                          "Edit Document",     N_("Toggle visibility of all guides in the document")},
+    {"doc.delete-all-guides",                    N_("Delete All Guides"),                        "Edit Document",     N_("Delete all the guides in the document")},
+    {"doc.fit-canvas-to-drawing",                N_("Fit Page to Drawing"),                      "Edit Document",     N_("Fit the page to the drawing")},
+    {"doc.clip-to-page"                      ,   N_("Toggle Clip to Page"),                      "Edit Document",     N_("Toggle between clipped to page and complete rendering")},
+    {"doc.show-grids",                           N_("Show Grids"),                               "Edit Document",     N_("Toggle the visibility of grids")},
     // clang-format on
 };
 
@@ -100,6 +107,8 @@ add_actions_edit_document(SPDocument* document)
     map->add_action( "fit-canvas-to-drawing",               sigc::bind<SPDocument*>(sigc::ptr_fun(&fit_canvas_drawing),  document));
     map->add_action_bool( "lock-all-guides",                sigc::bind<SPDocument*>(sigc::ptr_fun(&lock_all_guides),   document));
     map->add_action_bool( "show-all-guides",                sigc::bind<SPDocument*>(sigc::ptr_fun(&show_all_guides),   document));
+    map->add_action_bool( "show-grids",                     sigc::bind<SPDocument*>(sigc::ptr_fun(&show_grids),   document));
+
     map->add_action_radio_string("set-display-unit",        sigc::bind<SPDocument*>(sigc::ptr_fun(&set_display_unit), document), "px");
     map->add_action("clip-to-page",                         [=](){ toggle_clip_to_page(document); });
     // clang-format on
@@ -107,7 +116,7 @@ add_actions_edit_document(SPDocument* document)
     // Check if there is already an application instance (GUI or non-GUI).
     auto app = InkscapeApplication::instance();
     if (!app) {
-        std::cerr << "add_actions_edit_document: no app!" << std::endl;
+        show_output("add_actions_edit_document: no app!");
         return;
     }
     app->get_action_extra_data().add_data(raw_data_edit_document);

@@ -22,6 +22,7 @@
 #include <2geom/affine.h>
 #include <list>
 #include <sigc++/connection.h>
+#include "helper/auto-connection.h"
 
 namespace Inkscape {
 namespace UI {
@@ -77,7 +78,9 @@ public:
     bool is_dragging() const { return dragging; }
 
     bool set_item_clickpos(Geom::Point loc);
+    void install_modification_watch();
 
+    std::list<KnotHolderEntity *> entity;
     friend class Inkscape::UI::ShapeEditor; // FIXME why?
     friend class Inkscape::LivePathEffect::NodeSatelliteArrayParam;                    // why?
     friend class Inkscape::LivePathEffect::PowerStrokePointArrayParamKnotHolderEntity; // why?
@@ -88,7 +91,6 @@ protected:
     SPDesktop *desktop;
     SPItem *item; // TODO: Remove this and keep the actual item (e.g., SPRect etc.) in the item-specific knotholders
     Inkscape::XML::Node *repr; ///< repr of the item, for setting and releasing listeners.
-    std::list<KnotHolderEntity *> entity;
 
     SPKnotHolderReleasedFunc released;
 
@@ -97,6 +99,8 @@ protected:
     bool dragging;
 
     Geom::Affine _edit_transform;
+    Inkscape::auto_connection _watch_fill;
+    Inkscape::auto_connection _watch_stroke;
 };
 
 /**

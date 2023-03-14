@@ -167,7 +167,6 @@ PencilToolbar::create_pencil(SPDesktop *desktop)
 PencilToolbar::~PencilToolbar()
 {
     if(_repr) {
-        _repr->removeListenerByData(this);
         GC::release(_repr);
         _repr = nullptr;
     }
@@ -308,7 +307,7 @@ PencilToolbar::shapewidth_value_changed()
     SPItem *item = selection->singleItem();
     SPLPEItem *lpeitem = nullptr;
     if (item) {
-        lpeitem = dynamic_cast<SPLPEItem *>(item);
+        lpeitem = cast<SPLPEItem>(item);
     }
     using namespace Inkscape::LivePathEffect;
     double width = _shapescale_adj->get_value();
@@ -528,7 +527,7 @@ PencilToolbar::simplify_flatten()
     auto selected = _desktop->getSelection()->items();
     SPLPEItem* lpeitem = nullptr;
     for (auto it(selected.begin()); it != selected.end(); ++it){
-        lpeitem = dynamic_cast<SPLPEItem*>(*it);
+        lpeitem = cast<SPLPEItem>(*it);
         if (lpeitem && lpeitem->hasPathEffect()){
             PathEffectList lpelist = lpeitem->getEffectList();
             PathEffectList::iterator i;
@@ -537,7 +536,7 @@ PencilToolbar::simplify_flatten()
                 if (lpeobj) {
                     Inkscape::LivePathEffect::Effect *lpe = lpeobj->get_lpe();
                     if (dynamic_cast<Inkscape::LivePathEffect::LPESimplify *>(lpe)) {
-                        SPShape * shape = dynamic_cast<SPShape *>(lpeitem);
+                        auto shape = cast<SPShape>(lpeitem);
                         if(shape){
                             auto c = *shape->curveForEdit();
                             lpe->doEffect(&c);
@@ -570,7 +569,7 @@ PencilToolbar::flatten_spiro_bspline()
     SPLPEItem* lpeitem = nullptr;
 
     for (auto it(selected.begin()); it != selected.end(); ++it){
-        lpeitem = dynamic_cast<SPLPEItem*>(*it);
+        lpeitem = cast<SPLPEItem>(*it);
         if (lpeitem && lpeitem->hasPathEffect()){
             PathEffectList lpelist = lpeitem->getEffectList();
             PathEffectList::iterator i;
@@ -581,7 +580,7 @@ PencilToolbar::flatten_spiro_bspline()
                     if (dynamic_cast<Inkscape::LivePathEffect::LPEBSpline *>(lpe) || 
                         dynamic_cast<Inkscape::LivePathEffect::LPESpiro *>(lpe)) 
                     {
-                        SPShape * shape = dynamic_cast<SPShape *>(lpeitem);
+                        auto shape = cast<SPShape>(lpeitem);
                         if(shape){
                             auto c = *shape->curveForEdit();
                             lpe->doEffect(&c);
@@ -631,7 +630,7 @@ PencilToolbar::tolerance_value_changed()
     _freeze = false;
     auto selected = _desktop->getSelection()->items();
     for (auto it(selected.begin()); it != selected.end(); ++it){
-        SPLPEItem* lpeitem = dynamic_cast<SPLPEItem*>(*it);
+        auto lpeitem = cast<SPLPEItem>(*it);
         if (lpeitem && lpeitem->hasPathEffect()){
             Inkscape::LivePathEffect::Effect *simplify =
                 lpeitem->getFirstPathEffectOfType(Inkscape::LivePathEffect::SIMPLIFY);
@@ -650,7 +649,7 @@ PencilToolbar::tolerance_value_changed()
                         if(lpe_powerstroke){
                             lpe_powerstroke->getRepr()->setAttribute("is_visible", "false");
                             sp_lpe_item_update_patheffect(lpeitem, false, false);
-                            SPShape *sp_shape = dynamic_cast<SPShape *>(lpeitem);
+                            auto sp_shape = cast<SPShape>(lpeitem);
                             if (sp_shape) {
                                 guint previous_curve_length = sp_shape->curve()->get_segment_count();
                                 lpe_simplify->getRepr()->setAttribute("threshold", ss.str());

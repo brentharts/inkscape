@@ -48,7 +48,6 @@
 #include <2geom/rect.h>
 #include "svg/svg-length.h"
 //#include "sp-filter-units.h"
-#include "preferences.h"
 
 namespace Inkscape {
 namespace Filters {
@@ -90,7 +89,14 @@ void Filter::_common_init()
     _primitive_units = SP_FILTER_UNITS_USERSPACEONUSE;
 }
 
-int Filter::render(Inkscape::DrawingItem const *item, DrawingContext &graphic, DrawingContext *bgdc) const
+void Filter::update()
+{
+    for (auto &p : primitives) {
+        p->update();
+    }
+}
+
+int Filter::render(Inkscape::DrawingItem const *item, DrawingContext &graphic, DrawingContext *bgdc, RenderContext &rc) const
 {
     // std::cout << "Filter::render() for: " << const_cast<Inkscape::DrawingItem *>(item)->name() << std::endl;
     // std::cout << "  graphic drawing_scale: " << graphic.surface()->device_scale() << std::endl;
@@ -103,9 +109,6 @@ int Filter::render(Inkscape::DrawingItem const *item, DrawingContext &graphic, D
         graphic.setOperator(CAIRO_OPERATOR_OVER);
         return 1;
     }
-    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    item->drawing().setFilterQuality(prefs->getInt("/options/filterquality/value", 0));
-    item->drawing().setBlurQuality(prefs->getInt("/options/blurquality/value", 0));
     FilterQuality filterquality = (FilterQuality)item->drawing().filterQuality();
     int blurquality = item->drawing().blurQuality();
 
@@ -146,10 +149,7 @@ int Filter::render(Inkscape::DrawingItem const *item, DrawingContext &graphic, D
         }
     }
 
-    FilterSlot slot(bgdc, graphic, units);
-    slot.set_quality(filterquality);
-    slot.set_blurquality(blurquality);
-    slot.set_device_scale(graphic.surface()->device_scale());
+    auto slot = FilterSlot(bgdc, graphic, units, rc, blurquality);
 
     for (auto &i : primitives) {
         i->render_cairo(slot);
@@ -195,8 +195,7 @@ void Filter::area_enlarge(Geom::IntRect &bbox, Inkscape::DrawingItem const *item
   TODO: something. See images at the bottom of filters.svg with medium-low
   filtering quality.
 
-    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    FilterQuality const filterquality = (FilterQuality)prefs->getInt("/options/filterquality/value");
+    FilterQuality const filterquality = ...
 
     if (_x_pixels <= 0 && (filterquality == FILTER_QUALITY_BEST ||
                            filterquality == FILTER_QUALITY_BETTER)) {

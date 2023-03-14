@@ -28,9 +28,14 @@
 #include "object/sp-marker.h"
 #include "object/sp-namedview.h"
 #include "object/sp-pattern.h"
+#include "object/filters/gaussian-blur.h"
 #include "preferences.h"
 #include "snap.h"
 #include "style.h"
+#include "object/sp-marker.h"
+
+#include "display/control/canvas-item-ctrl.h"
+#include <glibmm/i18n.h>
 
 void KnotHolderEntity::create(SPDesktop *desktop, SPItem *item, KnotHolder *parent,
                               Inkscape::CanvasItemCtrlType type,
@@ -143,10 +148,9 @@ KnotHolderEntity::snap_knot_position_constrained(Geom::Point const &p, Inkscape:
 void
 LPEKnotHolderEntity::knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state)
 {
-    Inkscape::LivePathEffect::Effect *effect = _effect;
-    if (effect) {
-        effect->refresh_widgets = true;
-        effect->writeParamsToSVG();
+    if (_effect) {
+        _effect->refresh_widgets = true;
+        _effect->makeUndoDone(_("Move handle"));
     }
 }
 
@@ -178,8 +182,14 @@ bool PatternKnotHolderEntity::set_item_clickpos(Geom::Point loc)
     return true;
 }
 
-void PatternKnotHolderEntity::set_offset(Geom::Point loc)
-{
+void PatternKnotHolderEntity::update_knot() {
+    if (_location) {
+        _cell = offset_to_cell(*_location);
+    }
+    KnotHolderEntity::update_knot();
+}
+
+Geom::IntPoint PatternKnotHolderEntity::offset_to_cell(Geom::Point loc) const {
     auto pat = _pattern();
 
     // 1. Turn the location into the pattern grid coordinate
@@ -188,17 +198,22 @@ void PatternKnotHolderEntity::set_offset(Geom::Point loc)
     auto i2p = pat->getTransform().inverse();
 
     // Get grid index of nearest pattern repetition.
-    _cell = (loc * d2i * i2p * scale.inverse()).floor();
+    return (loc * d2i * i2p * scale.inverse()).floor();
+}
+
+void PatternKnotHolderEntity::set_offset(Geom::Point loc)
+{
+    _location = loc;
 }
 
 SPPattern *PatternKnotHolderEntity::_pattern() const
 {
-    return _fill ? SP_PATTERN(item->style->getFillPaintServer()) : SP_PATTERN(item->style->getStrokePaintServer());
+    return _fill ? cast<SPPattern>(item->style->getFillPaintServer()) : cast<SPPattern>(item->style->getStrokePaintServer());
 }
 
 bool PatternKnotHolderEntity::knot_missing() const
 {
-    return (_pattern() == nullptr);
+    return !_pattern();
 }
 
 /* Pattern X/Y knot */
@@ -207,8 +222,8 @@ void PatternKnotHolderEntityXY::on_created()
 {
     PatternKnotHolderEntity::on_created();
     // TODO: Move to constructor when desktop is generally available
-    _quad = std::make_unique<Inkscape::CanvasItemQuad>(desktop->getCanvasControls());
-    _quad->set_z_position(0);
+    _quad = make_canvasitem<Inkscape::CanvasItemQuad>(desktop->getCanvasControls());
+    _quad->lower_to_bottom();
     _quad->set_fill(0x00000000);
     _quad->set_stroke(0x808080ff);
     _quad->set_inverted(true);
@@ -217,7 +232,7 @@ void PatternKnotHolderEntityXY::on_created()
 
 void PatternKnotHolderEntityXY::update_knot()
 {
-    KnotHolderEntity::update_knot();
+    PatternKnotHolderEntity::update_knot();
     auto tr = item->i2dt_affine();
     _quad->set_coords(_get_pos(0, 0) * tr, _get_pos(0, 1) * tr,
                       _get_pos(1, 1) * tr, _get_pos(1, 0) * tr);
@@ -343,7 +358,7 @@ bool HatchKnotHolderEntity::knot_missing() const
 
 SPHatch *HatchKnotHolderEntity::_hatch() const
 {
-    return _fill ? SP_HATCH(item->style->getFillPaintServer()) : SP_HATCH(item->style->getStrokePaintServer());
+    return _fill ? cast<SPHatch>(item->style->getFillPaintServer()) : cast<SPHatch>(item->style->getStrokePaintServer());
 }
 
 static Geom::Point sp_hatch_knot_get(SPHatch const *hatch, gdouble x, gdouble y)
@@ -440,7 +455,7 @@ void HatchKnotHolderEntityScale::knot_set(Geom::Point const &p, Geom::Point cons
     item->requestDisplayUpdate(SP_OBJECT_MODIFIED_FLAG);
 }
 
-/* Filter manipulation */
+/* Filter visible size manipulation */
 void FilterKnotHolderEntity::knot_set(Geom::Point const &p, Geom::Point const &origin, unsigned int state)
 {
     // FIXME: this snapping should be done together with knowing whether control was pressed. If GDK_CONTROL_MASK, then constrained snapping should be used.
@@ -501,6 +516,116 @@ Geom::Point FilterKnotHolderEntity::knot_get() const
     Geom::OptRect r = item->visualBounds();
     if (_topleft) return Geom::Point(r->min());
     else return Geom::Point(r->max());
+}
+
+/* Blur manipulation */
+
+void BlurKnotHolderEntity::on_created()
+{
+    KnotHolderEntity::on_created();
+    // TODO: Move to constructor when desktop is generally available
+
+    _line = make_canvasitem<Inkscape::CanvasItemCurve>(desktop->getCanvasControls());
+    _line->set_z_position(0);
+    _line->set_stroke(0x0033cccc);
+    _line->hide();
+
+    // This watcher makes sure that adding or removing a blur results in updated knots.
+    _watch_filter = item->style->signal_filter_changed.connect([=] (auto old_obj, auto obj) {
+        update_knot();
+    }); 
+}
+
+void BlurKnotHolderEntity::update_knot()
+{
+    auto blur = _blur();
+    if (blur) {
+        knot->show();
+        // This watcher makes sure anything outside that modifies the blur changes the knot.
+        _watch_blur = blur->connectModified([=](auto item, int flags) {
+            KnotHolderEntity::update_knot();
+        });
+
+    } else {
+        knot->hide();
+        _watch_blur.disconnect();
+        _line->hide();
+    }
+    KnotHolderEntity::update_knot();
+}
+
+
+
+/* Return the first blur primitive of any applied filter. */
+SPGaussianBlur *BlurKnotHolderEntity::_blur() const
+{
+    if (auto filter = item->style->getFilter()) {
+        for (auto &primitive : filter->children) {
+            if (auto blur = cast<SPGaussianBlur>(&primitive)) {
+                return blur;
+            }
+        }
+    }
+    return nullptr;
+}
+
+Geom::Point BlurKnotHolderEntity::_pos() const
+{
+    auto box = item->bbox(Geom::identity(), SPItem::VISUAL_BBOX);
+    if (_dir == Geom::Y) {
+        return Geom::Point(box->midpoint()[Geom::X], box->top());
+    }
+    return Geom::Point(box->right(), box->midpoint()[Geom::Y]);
+}
+
+Geom::Point BlurKnotHolderEntity::knot_get() const
+{
+    auto blur = _blur();
+    if (!blur)
+        return Geom::Point(0, 0);
+
+    // First let's find where the gradient is
+    auto tr = item->i2dt_affine();
+    auto dev = blur->get_std_deviation();
+
+    // Blur visibility is 2.4 times the deviation in that direction.
+    double x = dev.getNumber();
+    double y = dev.getOptNumber(true);
+
+    auto p0 = _pos();
+    auto p1 = p0 + Geom::Point(x * 2.4, 0);
+    if (_dir == Geom::Y) {
+        p1 = p0 - Geom::Point(0, y * 2.4);
+    }
+    _line->show();
+    _line->set_coords(p0 * tr, p1 * tr);
+
+    return p1;
+}
+void BlurKnotHolderEntity::knot_set(Geom::Point const &p, Geom::Point const &origin, guint state)
+{
+    auto blur = _blur();
+    if (!blur)
+        return;
+
+    NumberOptNumber dev = blur->get_std_deviation();
+    auto dp = Geom::Point(dev.getNumber(), dev.getOptNumber(true));
+    auto val = std::max(0.0, (((p - _pos()) * Geom::Scale(1, -1))[_dir]) / 2.4);
+
+    if (state & GDK_CONTROL_MASK) {
+        if (state & GDK_SHIFT_MASK) {
+            dp[!_dir] *= (val / dp[_dir]);
+        } else {
+            dp[!_dir] = val;
+        }
+    }
+    dp[_dir] = val;
+
+    // When X is set to zero the Opt blur disapears
+    dev.setNumber(std::max(0.001, dp[Geom::X]));
+    dev.setOptNumber(std::max(0.0, dp[Geom::Y]));
+
+    blur->set_deviation(dev);
 }
 
 /*

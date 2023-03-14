@@ -100,17 +100,9 @@ enum ui_drop_target_info {
     APP_OSWB_COLOR
 };
 
-//TODO: warning: deprecated conversion from string constant to ‘gchar*’
-//
-//Turn out to be warnings that we should probably leave in place. The
-// pointers/types used need to be read-only. So until we correct the using
-// code, those warnings are actually desired. They say "Hey! Fix this". We
-// definitely don't want to hide/ignore them. --JonCruz
-static const GtkTargetEntry ui_drop_target_entries [] = {
-    {g_strdup("application/x-oswb-color"), 0, APP_OSWB_COLOR}
+static const std::vector<Gtk::TargetEntry> ui_drop_target_entries = {
+    Gtk::TargetEntry("application/x-oswb-color", Gtk::TargetFlags(0), APP_OSWB_COLOR)
 };
-
-static guint nui_drop_target_entries = G_N_ELEMENTS(ui_drop_target_entries);
 
 /* convenience function */
 static Dialog::FillAndStroke *get_fill_and_stroke_panel(SPDesktop *desktop);
@@ -906,28 +898,23 @@ SelectedStyle::update()
             place->add(_na[i]);
             place->set_tooltip_text(__na[i]);
             _mode[i] = SS_NA;
-            if ( _dropEnabled[i] ) {
-                gtk_drag_dest_unset( GTK_WIDGET((i==SS_FILL) ? _fill_place.gobj():_stroke_place.gobj()) );
+            if (_dropEnabled[i]) {
+                auto widget = i == SS_FILL ? &_fill_place : &_stroke_place;
+                widget->drag_dest_unset();
                 _dropEnabled[i] = false;
             }
             break;
         case QUERY_STYLE_SINGLE:
         case QUERY_STYLE_MULTIPLE_AVERAGED:
-        case QUERY_STYLE_MULTIPLE_SAME:
-            if ( !_dropEnabled[i] ) {
-                gtk_drag_dest_set( GTK_WIDGET( (i==SS_FILL) ? _fill_place.gobj():_stroke_place.gobj()),
-                                   GTK_DEST_DEFAULT_ALL,
-                                   ui_drop_target_entries,
-                                   nui_drop_target_entries,
-                                   GdkDragAction(GDK_ACTION_COPY | GDK_ACTION_MOVE) );
+        case QUERY_STYLE_MULTIPLE_SAME: {
+            if (!_dropEnabled[i]) {
+                auto widget = i == SS_FILL ? &_fill_place : &_stroke_place;
+                widget->drag_dest_set(ui_drop_target_entries,
+                                      Gtk::DestDefaults::DEST_DEFAULT_ALL,
+                                      Gdk::DragAction::ACTION_COPY | Gdk::DragAction::ACTION_MOVE);
                 _dropEnabled[i] = true;
             }
-            SPIPaint *paint;
-            if (i == SS_FILL) {
-                paint = &(query.fill);
-            } else {
-                paint = &(query.stroke);
-            }
+            auto paint = i == SS_FILL ? query.fill.upcast() : query.stroke.upcast();
             if (paint->set && paint->isPaintserver()) {
                 SPPaintServer *server = (i == SS_FILL)? SP_STYLE_FILL_SERVER (&query) : SP_STYLE_STROKE_SERVER (&query);
                 if ( server ) {
@@ -936,31 +923,31 @@ SelectedStyle::update()
                     _paintserver_id[i] += srepr->attribute("id");
                     _paintserver_id[i] += ")";
 
-                    if (SP_IS_LINEARGRADIENT(server)) {
-                        SPGradient *vector = SP_GRADIENT(server)->getVector();
+                    if (is<SPLinearGradient>(server)) {
+                        auto vector = cast<SPGradient>(server)->getVector();
                         _gradient_preview_l[i]->set_gradient(vector);
                         place->add(_gradient_box_l[i]);
                         place->set_tooltip_text(__lgradient[i]);
                         _mode[i] = SS_LGRADIENT;
-                    } else if (SP_IS_RADIALGRADIENT(server)) {
-                        SPGradient *vector = SP_GRADIENT(server)->getVector();
+                    } else if (is<SPRadialGradient>(server)) {
+                        auto vector = cast<SPGradient>(server)->getVector();
                         _gradient_preview_r[i]->set_gradient(vector);
                         place->add(_gradient_box_r[i]);
                         place->set_tooltip_text(__rgradient[i]);
                         _mode[i] = SS_RGRADIENT;
 #ifdef WITH_MESH
-                    } else if (SP_IS_MESHGRADIENT(server)) {
-                        SPGradient *array = SP_GRADIENT(server)->getArray();
+                    } else if (is<SPMeshGradient>(server)) {
+                        auto array = cast<SPGradient>(server)->getArray();
                         _gradient_preview_m[i]->set_gradient(array);
                         place->add(_gradient_box_m[i]);
                         place->set_tooltip_text(__mgradient[i]);
                         _mode[i] = SS_MGRADIENT;
 #endif
-                    } else if (SP_IS_PATTERN(server)) {
+                    } else if (is<SPPattern>(server)) {
                         place->add(_pattern[i]);
                         place->set_tooltip_text(__pattern[i]);
                         _mode[i] = SS_PATTERN;
-                    } else if (SP_IS_HATCH(server)) {
+                    } else if (is<SPHatch>(server)) {
                         place->add(_hatch[i]);
                         place->set_tooltip_text(__hatch[i]);
                         _mode[i] = SS_HATCH;
@@ -999,6 +986,7 @@ SelectedStyle::update()
                 flag_place->set_tooltip_text(__multiple[i]);
             }
             break;
+        }
         case QUERY_STYLE_MULTIPLE_DIFFERENT:
             place->add(_many[i]);
             place->set_tooltip_text(__many[i]);

@@ -15,10 +15,12 @@
 
 #include "sp-filter-primitive.h"
 
-class SPFeOffset
+class SPFeOffset final
     : public SPFilterPrimitive
 {
 public:
+    int tag() const override { return tag_of<decltype(*this)>; }
+
     Geom::Rect calculate_region(Geom::Rect const &region) const override;
 
 private:
@@ -30,9 +32,6 @@ private:
 
     std::unique_ptr<Inkscape::Filters::FilterPrimitive> build_renderer(Inkscape::DrawingItem *item) const override;
 };
-
-MAKE_SP_OBJECT_DOWNCAST_FUNCTIONS(SP_FEOFFSET, SPFeOffset)
-MAKE_SP_OBJECT_TYPECHECK_FUNCTIONS(SP_IS_FEOFFSET, SPFeOffset)
 
 #endif // SP_FEOFFSET_H_SEEN
 

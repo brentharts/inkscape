@@ -38,13 +38,11 @@ class ColorItem;
  * the "/embedded/swatches" is the horizontal color palette at the bottom
  * of the window.
  */
-class SwatchesPanel : public DialogBase, boost::noncopyable
+class SwatchesPanel : public DialogBase
 {
 public:
-    SwatchesPanel(char const* prefsPath = "/dialogs/swatches");
+    SwatchesPanel(char const *prefsPath = "/dialogs/swatches");
     ~SwatchesPanel() override;
-
-    static SwatchesPanel& getInstance();
 
 protected:
     void documentReplaced() override;
@@ -94,6 +92,8 @@ private:
     std::vector<ColorItem*> current_fill;
     std::vector<ColorItem*> current_stroke;
     void update_fillstroke_indicators();
+
+    Inkscape::PrefObserver _pinned_observer;
 };
 
 } // namespace Dialog

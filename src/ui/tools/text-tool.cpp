@@ -61,7 +61,6 @@
 #include "ui/event-debug.h"
 
 #include "xml/attribute-record.h"
-#include "xml/node-event-vector.h"
 #include "xml/sp-css-attr.h"
 
 using Inkscape::DocumentUndo;
@@ -93,24 +92,24 @@ TextTool::TextTool(SPDesktop *desktop)
         timeout /= 2;
     }
 
-    cursor = new Inkscape::CanvasItemCurve(desktop->getCanvasControls());
+    cursor = make_canvasitem<CanvasItemCurve>(desktop->getCanvasControls());
     cursor->set_stroke(0x000000ff);
     cursor->hide();
 
     // The rectangle box tightly wrapping text object when selected or under cursor.
-    indicator = new Inkscape::CanvasItemRect(desktop->getCanvasControls());
+    indicator = make_canvasitem<CanvasItemRect>(desktop->getCanvasControls());
     indicator->set_stroke(0x0000ff7f);
     indicator->set_shadow(0xffffff7f, 1);
     indicator->hide();
 
     // The shape that the text is flowing into
-    frame = new Inkscape::CanvasItemBpath(desktop->getCanvasControls());
+    frame = make_canvasitem<CanvasItemBpath>(desktop->getCanvasControls());
     frame->set_fill(0x00 /* zero alpha */, SP_WIND_RULE_NONZERO);
     frame->set_stroke(0x0000ff7f);
     frame->hide();
 
     // A second frame for showing the padding of the above frame
-    padding_frame = new Inkscape::CanvasItemBpath(desktop->getCanvasControls());
+    padding_frame = make_canvasitem<CanvasItemBpath>(desktop->getCanvasControls());
     padding_frame->set_fill(0x00 /* zero alpha */, SP_WIND_RULE_NONZERO);
     padding_frame->set_stroke(0xccccccdf);
     padding_frame->hide();
@@ -143,7 +142,7 @@ TextTool::TextTool(SPDesktop *desktop)
     this->shape_editor = new ShapeEditor(desktop);
 
     SPItem *item = desktop->getSelection()->singleItem();
-    if (item && (SP_IS_FLOWTEXT(item) || SP_IS_TEXT(item))) {
+    if (item && (is<SPFlowtext>(item) || is<SPText>(item))) {
         this->shape_editor->set_item(item);
     }
 
@@ -196,30 +195,10 @@ TextTool::~TextTool()
         this->timeout = 0;
     }
 
-    if (cursor) {
-        delete cursor;
-        cursor = nullptr;
-    }
-
-    if (this->indicator) {
-        delete indicator;
-        this->indicator = nullptr;
-    }
-
-    if (this->frame) {
-        delete frame;
-        this->frame = nullptr;
-    }
-
-    if (this->padding_frame) {
-        delete padding_frame;
-        this->padding_frame = nullptr;
-    }
-
-    for (auto & text_selection_quad : text_selection_quads) {
-        text_selection_quad->hide();
-        delete text_selection_quad;
-    }
+    cursor.reset();
+    indicator.reset();
+    frame.reset();
+    padding_frame.reset();
     text_selection_quads.clear();
 
     delete this->shape_editor;
@@ -250,7 +229,7 @@ bool TextTool::item_handler(SPItem* item, GdkEvent* event) {
                 // reducing it to cursor iteracion, mouseup and down
                 // find out clicked item, disregarding groups
                 item_ungrouped = _desktop->getItemAtPoint(Geom::Point(event->button.x, event->button.y), TRUE);
-                if (SP_IS_TEXT(item_ungrouped) || SP_IS_FLOWTEXT(item_ungrouped)) {
+                if (is<SPText>(item_ungrouped) || is<SPFlowtext>(item_ungrouped)) {
                     _desktop->getSelection()->set(item_ungrouped);
                     if (this->text) {
                         // find out click point in document coordinates
@@ -342,7 +321,7 @@ static void sp_text_context_setup_text(TextTool *tc)
     Inkscape::XML::Node *rstring = xml_doc->createTextNode("");
     rtspan->addChild(rstring, nullptr);
     Inkscape::GC::release(rstring);
-    SPItem *text_item = SP_ITEM(tc->currentLayer()->appendChildRepr(rtext));
+    auto text_item = cast<SPItem>(tc->currentLayer()->appendChildRepr(rtext));
     /* fixme: Is selection::changed really immediate? */
     /* yes, it's immediate .. why does it matter? */
     desktop->getSelection()->set(text_item);
@@ -547,7 +526,7 @@ bool TextTool::root_handler(GdkEvent* event) {
             // find out item under mouse, disregarding groups
             SPItem *item_ungrouped =
                 _desktop->getItemAtPoint(Geom::Point(event->button.x, event->button.y), TRUE, nullptr);
-            if (SP_IS_TEXT(item_ungrouped) || SP_IS_FLOWTEXT(item_ungrouped)) {
+            if (is<SPText>(item_ungrouped) || is<SPFlowtext>(item_ungrouped)) {
                 Inkscape::Text::Layout const *layout = te_get_layout(item_ungrouped);
                 if (layout->inputTruncated()) {
                     indicator->set_stroke(0xff0000ff);
@@ -562,7 +541,7 @@ bool TextTool::root_handler(GdkEvent* event) {
 
                 this->set_cursor("text-insert.svg");
                 sp_text_context_update_text_selection(this);
-                if (SP_IS_TEXT(item_ungrouped)) {
+                if (is<SPText>(item_ungrouped)) {
                     _desktop->event_context->defaultMessageContext()->set(
                         Inkscape::NORMAL_MESSAGE,
                         _("<b>Click</b> to edit the text, <b>drag</b> to select part of the text."));
@@ -874,7 +853,7 @@ bool TextTool::root_handler(GdkEvent* event) {
                                     this->nascent_object = false; // we don't need it anymore, having created a real <text>
                                 }
 
-                                SPText* text_element = dynamic_cast<SPText*>(text);
+                                auto text_element = cast<SPText>(text);
                                 if (text_element && (text_element->has_shape_inside() || text_element->has_inline_size())) {
                                     // Handle new line like any other character.
                                     this->text_sel_start = this->text_sel_end = sp_te_insert(this->text, this->text_sel_start, "\n");
@@ -1275,13 +1254,13 @@ bool sp_text_paste_inline(ToolBase *ec)
         if (!clip_text.empty()) {
 
             bool is_svg2 = false;
-            SPText *textitem = dynamic_cast<SPText *>(tc->text);
+            auto textitem = cast<SPText>(tc->text);
             if (textitem) {
                 is_svg2 = textitem->has_shape_inside() /*|| textitem->has_inline_size()*/; // Do now since hiding messes this up.
                 textitem->hide_shape_inside();
             }
 
-            SPFlowtext *flowtext = dynamic_cast<SPFlowtext *>(tc->text);
+            auto flowtext = cast<SPFlowtext>(tc->text);
             if (flowtext) {
                 flowtext->fix_overflow_flowregion(false);
             }
@@ -1489,7 +1468,7 @@ void TextTool::_selectionChanged(Inkscape::Selection *selection)
     this->text = nullptr;
 
     shape_editor->unset_item();
-    if (SP_IS_TEXT(item) || SP_IS_FLOWTEXT(item)) {
+    if (is<SPText>(item) || is<SPFlowtext>(item)) {
         shape_editor->set_item(item);
 
         this->text = item;
@@ -1527,7 +1506,7 @@ bool TextTool::_styleSet(SPCSSAttr const *css)
     // change which requires rewriting the 'x' and 'y' attributes of the tpsans for Inkscape
     // multi-line text (with sodipodi:role="line"). We need to rewrite the repr after this is
     // done. rebuldLayout() will be called a second time unnecessarily.
-    SPText* sptext = dynamic_cast<SPText*>(text);
+    auto sptext = cast<SPText>(text);
     if (sptext) {
         sptext->rebuildLayout();
         sptext->updateRepr();
@@ -1574,7 +1553,7 @@ int TextTool::_styleQueried(SPStyle *style, int property)
         if (! pos_obj->parent) // the string is not in the document anymore (deleted)
             return 0;
 
-        if ( SP_IS_STRING(pos_obj) ) {
+        if ( is<SPString>(pos_obj) ) {
            pos_obj = pos_obj->parent;   // SPStrings don't have style
         }
         styles_list.insert(styles_list.begin(),(SPItem*)pos_obj);
@@ -1615,13 +1594,13 @@ static void sp_text_context_update_cursor(TextTool *tc,  bool scroll_to_see)
             // We don't want to scroll outside the text box area (i.e. when there is hidden text)
             // or we could end up in Timbuktu.
             bool scroll = true;
-            if (SP_IS_TEXT(tc->text)) {
-                Geom::OptRect opt_frame = SP_TEXT(tc->text)->get_frame();
+            if (is<SPText>(tc->text)) {
+                Geom::OptRect opt_frame = cast<SPText>(tc->text)->get_frame();
                 if (opt_frame && (!opt_frame->contains(p0))) {
                     scroll = false;
                 }
-            } else if (SP_IS_FLOWTEXT(tc->text)) {
-                SPItem *frame = SP_FLOWTEXT(tc->text)->get_frame(nullptr); // first frame only
+            } else if (is<SPFlowtext>(tc->text)) {
+                SPItem *frame = cast<SPFlowtext>(tc->text)->get_frame(nullptr); // first frame only
                 Geom::OptRect opt_frame = frame->geometricBounds();
                 if (opt_frame && (!opt_frame->contains(p0))) {
                     scroll = false;
@@ -1632,9 +1611,9 @@ static void sp_text_context_update_cursor(TextTool *tc,  bool scroll_to_see)
                 Geom::Point const center = desktop->current_center();
                 if (Geom::L2(d0 - center) > Geom::L2(d1 - center))
                     // unlike mouse moves, here we must scroll all the way at first shot, so we override the autoscrollspeed
-                    desktop->scroll_to_point(d0, 1.0);
+                    desktop->scroll_to_point(d0);
                 else
-                    desktop->scroll_to_point(d1, 1.0);
+                    desktop->scroll_to_point(d1);
             }
         }
 
@@ -1676,13 +1655,13 @@ static void sp_text_context_update_cursor(TextTool *tc,  bool scroll_to_see)
         double padding = 0.0;
 
         // Frame around text
-        if (SP_IS_FLOWTEXT(tc->text)) {
-            SPItem *frame = SP_FLOWTEXT(tc->text)->get_frame (nullptr); // first frame only
+        if (is<SPFlowtext>(tc->text)) {
+            SPItem *frame = cast<SPFlowtext>(tc->text)->get_frame (nullptr); // first frame only
             shapes.push_back(frame);
 
             tc->message_context->setF(Inkscape::NORMAL_MESSAGE, edit_message_flowed, nChars, trunc);
 
-        } else if (auto text = dynamic_cast<SPText *>(tc->text)) {
+        } else if (auto text = cast<SPText>(tc->text)) {
             if (text->style->shape_inside.set) {
                 for (auto const *href : text->style->shape_inside.hrefs) {
                     shapes.push_back(href->getObject());
@@ -1698,7 +1677,7 @@ static void sp_text_context_update_cursor(TextTool *tc,  bool scroll_to_see)
                 tc->message_context->setF(Inkscape::NORMAL_MESSAGE, edit_message_flowed, nChars, trunc);
             } else {
                 for (SPObject &child : tc->text->children) {
-                    if (auto textpath = dynamic_cast<SPTextPath *>(&child)) {
+                    if (auto textpath = cast<SPTextPath>(&child)) {
                         shapes.push_back(sp_textpath_get_path_item(textpath));
                     }
                 }
@@ -1708,7 +1687,7 @@ static void sp_text_context_update_cursor(TextTool *tc,  bool scroll_to_see)
 
         SPCurve curve;
         for (auto const *shape_item : shapes) {
-            if (auto shape = dynamic_cast<SPShape const *>(shape_item)) {
+            if (auto shape = cast<SPShape>(shape_item)) {
                 if (shape->curve()) {
                     curve.append(shape->curve()->transformed(shape->transform));
                 }
@@ -1802,10 +1781,6 @@ static void sp_text_context_update_text_selection(TextTool *tc)
     // the selection update (can't do both atomically, alas)
     if (!tc->getDesktop()) return;
 
-    for (auto & text_selection_quad : tc->text_selection_quads) {
-        text_selection_quad->hide();
-        delete text_selection_quad;
-    }
     tc->text_selection_quads.clear();
 
     std::vector<Geom::Point> quads;
@@ -1815,10 +1790,10 @@ static void sp_text_context_update_text_selection(TextTool *tc)
         auto quad = new CanvasItemQuad(tc->getDesktop()->getCanvasControls(), quads[i], quads[i+1], quads[i+2], quads[i+3]);
         quad->set_fill(0x00777777); // Semi-transparent blue as Cairo cannot do inversion.
         quad->show();
-        tc->text_selection_quads.push_back(quad);
+        tc->text_selection_quads.emplace_back(quad);
     }
 
-    if (tc->shape_editor != nullptr) {
+    if (tc->shape_editor) {
         if (tc->shape_editor->knotholder) {
             tc->shape_editor->knotholder->update_knots();
         }
@@ -1854,7 +1829,7 @@ static void sp_text_context_forget_text(TextTool *tc)
     So don't create an empty flowtext in the first place? Create it when first character is typed.
     */
 /*
-    if ((SP_IS_TEXT(ti) || SP_IS_FLOWTEXT(ti)) && sp_te_input_is_empty(ti)) {
+    if ((is<SPText>(ti) || is<SPFlowtext>(ti)) && sp_te_input_is_empty(ti)) {
         Inkscape::XML::Node *text_repr = ti->getRepr();
         // the repr may already have been unparented
         // if we were called e.g. as the result of

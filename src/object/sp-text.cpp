@@ -91,7 +91,9 @@ void SPText::build(SPDocument *doc, Inkscape::XML::Node *repr) {
     this->readAttr(SPAttr::SODIPODI_LINESPACING);    // has to happen after the styles are read
 }
 
-void SPText::release() {
+void SPText::release()
+{
+    view_style_attachments.clear();
     SPItem::release();
 }
 
@@ -195,11 +197,13 @@ void SPText::update(SPCtx *ctx, guint flags) {
         Geom::OptRect paintbox = this->geometricBounds();
 
         for (auto &v : views) {
-            auto g = dynamic_cast<Inkscape::DrawingGroup *>(v.drawingitem);
+            auto &sa = view_style_attachments[v.key];
+            sa.unattachAll();
+            auto g = cast<Inkscape::DrawingGroup>(v.drawingitem.get());
             _clearFlow(g);
             g->setStyle(style, parent->style);
             // pass the bbox of this as paintbox (used for paintserver fills)
-            layout.show(g, paintbox);
+            layout.show(g, sa, paintbox);
         }
     }
 }
@@ -221,10 +225,12 @@ void SPText::modified(guint flags) {
         Geom::OptRect paintbox = geometricBounds();
 
         for (auto &v : views) {
-            auto g = dynamic_cast<Inkscape::DrawingGroup *>(v.drawingitem);
+            auto &sa = view_style_attachments[v.key];
+            sa.unattachAll();
+            auto g = cast<Inkscape::DrawingGroup>(v.drawingitem.get());
             _clearFlow(g);
             g->setStyle(style, parent->style);
-            layout.show(g, paintbox);
+            layout.show(g, sa, paintbox);
         }
     }
 
@@ -254,14 +260,14 @@ Inkscape::XML::Node *SPText::write(Inkscape::XML::Document *xml_doc, Inkscape::X
         std::vector<Inkscape::XML::Node *> l;
 
         for (auto& child: children) {
-            if (SP_IS_TITLE(&child) || SP_IS_DESC(&child)) {
+            if (is<SPTitle>(&child) || is<SPDesc>(&child)) {
                 continue;
             }
 
             Inkscape::XML::Node *crepr = nullptr;
 
-            if (SP_IS_STRING(&child)) {
-                crepr = xml_doc->createTextNode(SP_STRING(&child)->string.c_str());
+            if (is<SPString>(&child)) {
+                crepr = xml_doc->createTextNode(cast<SPString>(&child)->string.c_str());
             } else {
                 crepr = child.updateRepr(xml_doc, nullptr, flags);
             }
@@ -277,12 +283,12 @@ Inkscape::XML::Node *SPText::write(Inkscape::XML::Document *xml_doc, Inkscape::X
         }
     } else {
         for (auto& child: children) {
-            if (SP_IS_TITLE(&child) || SP_IS_DESC(&child)) {
+            if (is<SPTitle>(&child) || is<SPDesc>(&child)) {
                 continue;
             }
 
-            if (SP_IS_STRING(&child)) {
-                child.getRepr()->setContent(SP_STRING(&child)->string.c_str());
+            if (is<SPString>(&child)) {
+                child.getRepr()->setContent(cast<SPString>(&child)->string.c_str());
             } else {
                 child.updateRepr(flags);
             }
@@ -301,13 +307,13 @@ Geom::OptRect SPText::bbox(Geom::Affine const &transform, SPItem::BBoxType type)
     return this->layout.bounds(transform, type == SPItem::VISUAL_BBOX);
 }
 
-Inkscape::DrawingItem* SPText::show(Inkscape::Drawing &drawing, unsigned /*key*/, unsigned /*flags*/) {
+Inkscape::DrawingItem* SPText::show(Inkscape::Drawing &drawing, unsigned key, unsigned /*flags*/) {
     Inkscape::DrawingGroup *flowed = new Inkscape::DrawingGroup(drawing);
     flowed->setPickChildren(false);
     flowed->setStyle(this->style, this->parent->style);
 
     // pass the bbox of the text object as paintbox (used for paintserver fills)
-    this->layout.show(flowed, this->geometricBounds());
+    layout.show(flowed, view_style_attachments[key], geometricBounds());
 
     return flowed;
 }
@@ -315,9 +321,10 @@ Inkscape::DrawingItem* SPText::show(Inkscape::Drawing &drawing, unsigned /*key*/
 
 void SPText::hide(unsigned key)
 {
+    view_style_attachments.erase(key);
     for (auto &v : views) {
         if (v.key == key) {
-            auto g = dynamic_cast<Inkscape::DrawingGroup*>(v.drawingitem);
+            auto g = cast<Inkscape::DrawingGroup>(v.drawingitem.get());
             _clearFlow(g);
         }
     }
@@ -382,7 +389,7 @@ void SPText::snappoints(std::vector<Inkscape::SnapCandidatePoint> &p, Inkscape::
 
 void SPText::hide_shape_inside()
 {
-    SPText *text = dynamic_cast<SPText *>(this);
+    auto text = this;
     SPStyle *item_style = this->style;
     if (item_style && text && item_style->shape_inside.set) {
         SPCSSAttr *css_unset = sp_css_attr_from_style(item_style, SP_STYLE_FLAG_IFSET);
@@ -397,8 +404,7 @@ void SPText::hide_shape_inside()
 
 void SPText::show_shape_inside()
 {
-    SPText *text = dynamic_cast<SPText *>(this);
-    if (text && css) {
+    if (css) {
         this->changeCSS(css, "style");
     }
 }
@@ -594,10 +600,10 @@ unsigned SPText::_buildLayoutInput(SPObject *object, Inkscape::Text::Layout::Opt
         return 0;
     }
 
-    SPText*  text_object  = dynamic_cast<SPText*>(object);
-    SPTSpan* tspan_object = dynamic_cast<SPTSpan*>(object);
-    SPTRef*  tref_object  = dynamic_cast<SPTRef*>(object);
-    SPTextPath* textpath_object = dynamic_cast<SPTextPath*>(object);
+    auto text_object = cast<SPText>(object);
+    auto tspan_object = cast<SPTSpan>(object);
+    auto tref_object = cast<SPTRef>(object);
+    auto textpath_object = cast<SPTextPath>(object);
 
     if (text_object) {
 
@@ -679,7 +685,7 @@ unsigned SPText::_buildLayoutInput(SPObject *object, Inkscape::Text::Layout::Opt
 
             // Insert paragraph break before text if not first tspan.
             SPObject *prev_object = object->getPrev();
-            if (prev_object && dynamic_cast<SPTSpan*>(prev_object)) {
+            if (prev_object && cast<SPTSpan>(prev_object)) {
                 if (!layout.inputExists()) {
                     // Add an object to store style, needed even if there is no text. When does this happen?
                     layout.appendText("", prev_object->style, prev_object, &optional_attrs);
@@ -720,7 +726,7 @@ unsigned SPText::_buildLayoutInput(SPObject *object, Inkscape::Text::Layout::Opt
 
     // Recurse
     for (auto& child: object->children) {
-        SPString *str = dynamic_cast<SPString *>(&child);
+        auto str = cast<SPString>(&child);
         if (str) {
             Glib::ustring const &string = str->string;
             // std::cout << "  Appending: >" << string << "<" << std::endl;
@@ -820,8 +826,8 @@ SPText::_getFirstXLength()
 
     if (!x) {
         for (auto& child: children) {
-            if (SP_IS_TSPAN(&child)) {
-                SPTSpan *tspan = SP_TSPAN(&child);
+            if (is<SPTSpan>(&child)) {
+                auto tspan = cast<SPTSpan>(&child);
                 x = tspan->attributes.getFirstXLength();
                 break;
             }
@@ -839,8 +845,8 @@ SPText::_getFirstYLength()
 
     if (!y) {
         for (auto& child: children) {
-            if (SP_IS_TSPAN(&child)) {
-                SPTSpan *tspan = SP_TSPAN(&child);
+            if (is<SPTSpan>(&child)) {
+                auto tspan = cast<SPTSpan>(&child);
                 y = tspan->attributes.getFirstYLength();
                 break;
             }
@@ -866,8 +872,8 @@ void SPText::rebuildLayout()
     layout.calculateFlow();
 
     for (auto& child: children) {
-        if (SP_IS_TEXTPATH(&child)) {
-            SPTextPath const *textpath = SP_TEXTPATH(&child);
+        if (is<SPTextPath>(&child)) {
+            SPTextPath const *textpath = cast<SPTextPath>(&child);
             if (textpath->originalPath != nullptr) {
 #if DEBUG_TEXTLAYOUT_DUMPASTEXT
                 g_print("%s", layout.dumpAsText().c_str());
@@ -882,8 +888,8 @@ void SPText::rebuildLayout()
 
     // set the x,y attributes on role:line spans
     for (auto& child: children) {
-        if (SP_IS_TSPAN(&child)) {
-            SPTSpan *tspan = SP_TSPAN(&child);
+        if (is<SPTSpan>(&child)) {
+            auto tspan = cast<SPTSpan>(&child);
             if ((tspan->role != SP_TSPAN_ROLE_UNSPECIFIED)
                  && tspan->attributes.singleXYCoordinates() ) {
                 Inkscape::Text::Layout::iterator iter = layout.sourceToIterator(tspan);
@@ -919,8 +925,8 @@ void SPText::_adjustFontsizeRecursive(SPItem *item, double ex, bool is_root)
     }
 
     for(auto& o: item->children) {
-        if (SP_IS_ITEM(&o))
-            _adjustFontsizeRecursive(SP_ITEM(&o), ex, false);
+        if (is<SPItem>(&o))
+            _adjustFontsizeRecursive(cast<SPItem>(&o), ex, false);
     }
 }
 
@@ -939,7 +945,7 @@ void
 remove_newlines_recursive(SPObject* object, bool is_svg2)
 {
     // Replace '\n' by space.
-    SPString* string = dynamic_cast<SPString *>(object);
+    auto string = cast<SPString>(object);
     if (string) {
         static Glib::RefPtr<Glib::Regex> r = Glib::Regex::create("\n+");
         string->string = r->replace(string->string, 0, " ", (Glib::RegexMatchFlags)0);
@@ -951,7 +957,7 @@ remove_newlines_recursive(SPObject* object, bool is_svg2)
     }
 
     // Add space at end of a line if line is created by sodipodi:role="line".
-    SPTSpan* tspan = dynamic_cast<SPTSpan *>(object);
+    auto tspan = cast<SPTSpan>(object);
     if (tspan                             &&
         tspan->role == SP_TSPAN_ROLE_LINE &&
         tspan->getNext() != nullptr       &&  // Don't add space at end of last line.
@@ -961,7 +967,7 @@ remove_newlines_recursive(SPObject* object, bool is_svg2)
 
         // Find last string (could be more than one if there is tspan in the middle of a tspan).
         for (auto it = children.rbegin(); it != children.rend(); ++it) {
-            SPString* string = dynamic_cast<SPString *>(*it);
+            auto string = cast<SPString>(*it);
             if (string) {
                 string->string += ' ';
                 string->getRepr()->setContent(string->string.c_str());
@@ -983,23 +989,23 @@ SPText::remove_newlines()
 
 void SPText::_adjustCoordsRecursive(SPItem *item, Geom::Affine const &m, double ex, bool is_root)
 {
-    if (SP_IS_TSPAN(item))
-        SP_TSPAN(item)->attributes.transform(m, ex, ex, is_root);
+    if (is<SPTSpan>(item))
+        cast<SPTSpan>(item)->attributes.transform(m, ex, ex, is_root);
               // it doesn't matter if we change the x,y for role=line spans because we'll just overwrite them anyway
-    else if (SP_IS_TEXT(item))
-        SP_TEXT(item)->attributes.transform(m, ex, ex, is_root);
-    else if (SP_IS_TEXTPATH(item))
-        SP_TEXTPATH(item)->attributes.transform(m, ex, ex, is_root);
-    else if (SP_IS_TREF(item)) {
-        SP_TREF(item)->attributes.transform(m, ex, ex, is_root);
+    else if (is<SPText>(item))
+        cast<SPText>(item)->attributes.transform(m, ex, ex, is_root);
+    else if (is<SPTextPath>(item))
+        cast<SPTextPath>(item)->attributes.transform(m, ex, ex, is_root);
+    else if (is<SPTRef>(item)) {
+        cast<SPTRef>(item)->attributes.transform(m, ex, ex, is_root);
     } else {
         g_warning("element is not text");
 	return;
     }
 
     for(auto& o: item->children) {
-        if (SP_IS_ITEM(&o))
-            _adjustCoordsRecursive(SP_ITEM(&o), m, ex, false);
+        if (is<SPItem>(&o))
+            _adjustCoordsRecursive(cast<SPItem>(&o), m, ex, false);
     }
 }
 
@@ -1053,7 +1059,7 @@ void SPText::sodipodi_to_newline() {
 
     // tspans with sodipodi:role="line" are only direct children of a <text> element.
     for (auto child : childList(false)) {
-        auto tspan = dynamic_cast<SPTSpan *>(child);  // Could have <desc> or <title>.
+        auto tspan = cast<SPTSpan>(child);  // Could have <desc> or <title>.
         if (tspan && tspan->role == SP_TSPAN_ROLE_LINE) {
 
             // Remove sodipodi:role attribute.
@@ -1065,7 +1071,7 @@ void SPText::sodipodi_to_newline() {
             if (tspan != lastChild()) {
                 tspan->style->white_space.computed = SP_CSS_WHITE_SPACE_PRE; // Set so '\n' is not immediately stripped out before CSS recascaded!
                 auto last_child = tspan->lastChild();
-                auto last_string = dynamic_cast<SPString *>(last_child);
+                auto last_string = cast<SPString>(last_child);
                 if (last_string) {
                     // Add '\n' to string.
                     last_string->string += "\n";
@@ -1155,7 +1161,7 @@ Inkscape::XML::Node* SPText::get_first_rectangle()
 
         for (auto *href : style->shape_inside.hrefs) {
             auto *shape = href->getObject();
-            if (dynamic_cast<SPRect*>(shape)) {
+            if (is<SPRect>(shape)) {
                 auto *item = shape->getRepr();
                 g_return_val_if_fail(item, nullptr);
                 assert(strncmp("svg:rect", item->name(), 8) == 0);
@@ -1167,6 +1173,14 @@ Inkscape::XML::Node* SPText::get_first_rectangle()
     return nullptr;
 }
 
+void SPText::getLinked(std::vector<SPObject *> &objects) const
+{
+    for (auto item : get_all_shape_dependencies()) {
+        objects.push_back(item);
+    }
+    SPObject::getLinked(objects);
+}
+
 /**
  * Get the first shape reference which affects the position and layout of
  * this text item. This can be either a shape-inside or a textPath referenced
@@ -1174,15 +1188,23 @@ Inkscape::XML::Node* SPText::get_first_rectangle()
  */
 SPItem *SPText::get_first_shape_dependency()
 {
+    for (auto item : get_all_shape_dependencies()) {
+        return item;
+    }
+    return nullptr;
+}
+
+const std::vector<SPItem *> SPText::get_all_shape_dependencies() const
+{
+    std::vector<SPItem *> ret;
     if (style->shape_inside.set) {
         for (auto *href : style->shape_inside.hrefs) {
-            return href->getObject();
+            ret.push_back(href->getObject());
         }
-    } else if (auto textpath = dynamic_cast<SPTextPath *>(firstChild())) {
-        return sp_textpath_get_path_item(textpath);
+    } else if (auto textpath = cast<SPTextPath>(firstChild())) {
+        ret.push_back(sp_textpath_get_path_item(textpath));
     }
-
-    return nullptr;
+    return ret;
 }
 
 SPItem *create_text_with_inline_size (SPDesktop *desktop, Geom::Point p0, Geom::Point p1)
@@ -1196,7 +1218,7 @@ SPItem *create_text_with_inline_size (SPDesktop *desktop, Geom::Point p0, Geom::
     auto layer = desktop->layerManager().currentLayer();
     g_assert(layer != nullptr);
 
-    SPText *text_object = dynamic_cast<SPText *>(layer->appendChildRepr(text_repr));
+    auto text_object = cast<SPText>(layer->appendChildRepr(text_repr));
     g_assert(text_object != nullptr);
 
     // Invert coordinate system?
@@ -1238,7 +1260,7 @@ SPItem *create_text_with_rectangle (SPDesktop *desktop, Geom::Point p0, Geom::Po
     text_repr->setAttribute("xml:space", "preserve"); // we preserve spaces in the text objects we create
     text_repr->setAttributeOrRemoveIfEmpty("transform", sp_svg_transform_write(parent->i2doc_affine().inverse()));
 
-    SPText *text_object = dynamic_cast<SPText *>(parent->appendChildRepr(text_repr));
+    auto text_object = cast<SPText>(parent->appendChildRepr(text_repr));
     g_assert(text_object != nullptr);
 
     // Invert coordinate system?

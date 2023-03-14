@@ -9,6 +9,7 @@
  */
 
 #include "actions-element-image.h"
+#include "actions-helper.h"
 
 #include <iostream>
 
@@ -27,6 +28,7 @@
 #include "object/sp-rect.h"
 #include "ui/tools/select-tool.h"
 #include "util/format_size.h"
+#include "xml/href-attribute-helper.h"
 
 Glib::ustring image_get_editor_name(bool is_svg)
 {
@@ -53,18 +55,18 @@ void image_edit(InkscapeApplication *app)
     auto document = selection->document();
 
     for (auto item : selection->items()) {
-        auto image = dynamic_cast<SPImage *>(item);
+        auto image = cast<SPImage>(item);
         if (image) {
 
             Inkscape::XML::Node *node = item->getRepr();
-            const gchar *href = node->attribute("xlink:href");
+            const gchar *href = Inkscape::getHrefAttribute(*node).second;
             if (!href) {
-                std::cerr << "image_edit: no xlink:href" << std::endl;
+                show_output("image_edit: no xlink:href");
                 continue;
             }
 
             if (strncmp (href, "data", 4) == 0) {
-                std::cerr << "image_edit: cannot edit embedded image" << std::endl;
+                show_output("image_edit: cannot edit embedded image");
                 continue;
             }
 
@@ -119,7 +121,7 @@ void image_edit(InkscapeApplication *app)
                     dialog.set_secondary_text(message2);
                     dialog.run();
                 } else {
-                    std::cerr << "image_edit: " << message.raw() << std::endl;
+                    show_output(Glib::ustring("image_edit: ") + message.raw());
                 }
                 g_error_free(error);
                 error = nullptr;
@@ -151,7 +153,7 @@ void image_crop(InkscapeApplication *app)
     Geom::OptRect target;
     SPRect *rect = nullptr;
     for (auto item : selection->items()) {
-        rect = dynamic_cast<SPRect *>(item);
+        rect = cast<SPRect>(item);
         if (rect) {
             target = rect->geometricBounds(rect->i2doc_affine());
             break;
@@ -161,7 +163,7 @@ void image_crop(InkscapeApplication *app)
     // For each selected item, we loop through and attempt to crop the
     // raster image to the geometric bounds of the clipping object.
     for (auto item : selection->items()) {
-        if (auto image = dynamic_cast<SPImage *>(item)) {
+        if (auto image = cast<SPImage>(item)) {
             bytes -= std::strlen(image->href);
             Geom::OptRect area;
             if (target) {

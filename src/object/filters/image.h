@@ -27,11 +27,12 @@ class Drawing;
 class Pixbuf;
 } // namespace Inksacpe
 
-class SPFeImage
+class SPFeImage final
     : public SPFilterPrimitive
 {
 public:
     SPFeImage();
+    int tag() const override { return tag_of<decltype(*this)>; }
 
 private:
     std::string href;
@@ -82,9 +83,6 @@ protected:
 
     std::unique_ptr<Inkscape::Filters::FilterPrimitive> build_renderer(Inkscape::DrawingItem *item) const override;
 };
-
-MAKE_SP_OBJECT_DOWNCAST_FUNCTIONS(SP_FEIMAGE, SPFeImage)
-MAKE_SP_OBJECT_TYPECHECK_FUNCTIONS(SP_IS_FEIMAGE, SPFeImage)
 
 #endif // SP_FEIMAGE_H_SEEN
 

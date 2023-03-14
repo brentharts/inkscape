@@ -2,10 +2,18 @@
 
 set(util_SRC
 	action-accel.cpp
+    document-fonts.cpp
 	expression-evaluator.cpp
+	format_size.cpp
+	funclog.cpp
+	pool.cpp
+    font-collections.cpp
 	share.cpp
+    object-renderer.cpp
 	paper.cpp
 	preview.cpp
+	statics.cpp
+    recently-used-fonts.cpp
 	units.cpp
 	ziptool.cpp
 
@@ -14,21 +22,31 @@ set(util_SRC
 	# Headers
 	action-accel.h
 	cached_map.h
+	cast.h
 	const_char_ptr.h
+    document-fonts.h
 	enums.h
 	expression-evaluator.h
+    font-collections.h
 	fixed_point.h
 	format.h
 	format_size.h
 	forward-pointer-iterator.h
+	funclog.h
 	longest-common-suffix.h
+    object-renderer.h
 	optstr.h
 	pages-skeleton.h
 	paper.h
+	parse-int-range.h
+	pool.h
 	preview.h
+    recently-used-fonts.h
 	reference.h
+	scope_exit.h
 	share.h
 	signal-blocker.h
+	statics.h
 	trim.h
 	units.h
 	ziptool.h

@@ -109,7 +109,7 @@ Geom::OptRect SPMask::geometricBounds(Geom::Affine const &transform) const
     Geom::OptRect bbox;
 
     for (auto &c : children) {
-        if (auto item = dynamic_cast<SPItem const*>(&c)) {
+        if (auto item = cast<SPItem>(&c)) {
             bbox.unionWith(item->geometricBounds(item->transform * transform));
         }
     }
@@ -122,7 +122,7 @@ Geom::OptRect SPMask::visualBounds(Geom::Affine const &transform) const
     Geom::OptRect bbox;
 
     for (auto &c : children) {
-        if (auto item = dynamic_cast<SPItem const*>(&c)) {
+        if (auto item = cast<SPItem>(&c)) {
             bbox.unionWith(item->visualBounds(item->transform * transform));
         }
     }
@@ -134,7 +134,7 @@ void SPMask::child_added(Inkscape::XML::Node *child, Inkscape::XML::Node *ref)
 {
     SPObjectGroup::child_added(child, ref);
 
-    if (auto item = dynamic_cast<SPItem*>(document->getObjectByRepr(child))) {
+    if (auto item = cast<SPItem>(document->getObjectByRepr(child))) {
         for (auto &v : views) {
             auto ac = item->invoke_show(v.drawingitem->drawing(), v.key, SP_ITEM_REFERENCE_FLAGS);
             if (ac) {
@@ -220,12 +220,12 @@ char const *SPMask::create(std::vector<Inkscape::XML::Node*> &reprs, SPDocument 
 
 Inkscape::DrawingItem *SPMask::show(Inkscape::Drawing &drawing, unsigned key, Geom::OptRect const &bbox)
 {
-    views.emplace_back(std::make_unique<Inkscape::DrawingGroup>(drawing), bbox, key);
+    views.emplace_back(make_drawingitem<Inkscape::DrawingGroup>(drawing), bbox, key);
     auto &v = views.back();
     auto root = v.drawingitem.get();
 
     for (auto &child : children) {
-        if (auto item = dynamic_cast<SPItem*>(&child)) {
+        if (auto item = cast<SPItem>(&child)) {
             auto ac = item->invoke_show(drawing, key, SP_ITEM_REFERENCE_FLAGS);
             if (ac) {
                 root->appendChild(ac);
@@ -241,7 +241,7 @@ Inkscape::DrawingItem *SPMask::show(Inkscape::Drawing &drawing, unsigned key, Ge
 void SPMask::hide(unsigned key)
 {
     for (auto &child : children) {
-        if (auto item = dynamic_cast<SPItem*>(&child)) {
+        if (auto item = cast<SPItem>(&child)) {
             item->invoke_hide(key);
         }
     }
@@ -266,14 +266,14 @@ void SPMask::setBBox(unsigned key, Geom::OptRect const &bbox)
     update_view(v);
 }
 
-SPMask::View::View(std::unique_ptr<Inkscape::DrawingGroup> drawingitem, Geom::OptRect const &bbox, unsigned key)
+SPMask::View::View(DrawingItemPtr<Inkscape::DrawingGroup> drawingitem, Geom::OptRect const &bbox, unsigned key)
     : drawingitem(std::move(drawingitem))
     , bbox(bbox)
     , key(key) {}
 
 bool SPMaskReference::_acceptObject(SPObject *obj) const
 {
-    if (!dynamic_cast<SPMask*>(obj)) {
+    if (!is<SPMask>(obj)) {
         return false;
     }
 

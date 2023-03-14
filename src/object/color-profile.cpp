@@ -36,6 +36,7 @@
 #include <lcms2.h>
 
 #include "xml/repr.h"
+#include "xml/href-attribute-helper.h"
 #include "color.h"
 #include "color-profile.h"
 #include "cms-system.h"
@@ -60,7 +61,6 @@ namespace
 cmsHPROFILE getSystemProfileHandle();
 cmsHPROFILE getProofProfileHandle();
 void loadProfiles();
-Glib::ustring getNameFromProfile(cmsHPROFILE profile);
 }
 
 #ifdef DEBUG_LCMS
@@ -411,7 +411,7 @@ Inkscape::XML::Node* ColorProfile::write(Inkscape::XML::Document *xml_doc, Inksc
     }
 
     if ( (flags & SP_OBJECT_WRITE_ALL) || this->href ) {
-        repr->setAttribute( "xlink:href", this->href );
+        Inkscape::setHrefAttribute(*repr, this->href );
     }
 
     if ( (flags & SP_OBJECT_WRITE_ALL) || this->local ) {
@@ -490,7 +490,7 @@ static ColorProfile *bruteFind(SPDocument *document, gchar const *name)
 {
     std::vector<SPObject *> current = document->getResourceList("iccprofile");
     for (auto *obj : current) {
-        if (auto prof = dynamic_cast<ColorProfile*>(obj)) {
+        if (auto prof = cast<ColorProfile>(obj)) {
             if ( prof->name && (strcmp(prof->name, name) == 0) ) {
                 return prof;
             }
@@ -603,11 +603,11 @@ private:
     cmsProfileClassSignature _profileClass;
 };
 
-ProfileInfo::ProfileInfo( cmsHPROFILE prof, Glib::ustring  path ) :
-    _path(std::move( path )),
-    _name( getNameFromProfile(prof) ),
-    _profileSpace( cmsGetColorSpace( prof ) ),
-    _profileClass( cmsGetDeviceClass( prof ) )
+ProfileInfo::ProfileInfo(cmsHPROFILE prof, Glib::ustring path)
+    : _path(std::move(path))
+    , _name(ColorProfile::getNameFromProfile(prof))
+    , _profileSpace(cmsGetColorSpace(prof))
+    , _profileClass(cmsGetDeviceClass(prof))
 {
 }
 
@@ -677,13 +677,13 @@ bool Inkscape::CMSSystem::isPrintColorSpace(ColorProfile const *profile)
 
 gint Inkscape::CMSSystem::getChannelCount(ColorProfile const *profile)
 {
-    gint count = 0;
-    if ( profile ) {
-        count = cmsChannelsOf( asICColorSpaceSig(profile->getColorSpace()) );
-    }
-    return count;
+    return profile ? profile->getChannelCount() : 0;
 }
 
+gint ColorProfile::getChannelCount() const
+{
+    return cmsChannelsOf(asICColorSpaceSig(getColorSpace()));
+}
 
 // the bool return value tells if it's a user's directory or a system location
 // note that this will treat places under $HOME as system directories when they are found via $XDG_DATA_DIRS
@@ -827,10 +827,7 @@ void errorHandlerCB(cmsContext /*contextID*/, cmsUInt32Number errorCode, char co
     //g_message("lcms: Error %d; %s", errorCode, errorText);
 }
 
-namespace
-{
-
-Glib::ustring getNameFromProfile(cmsHPROFILE profile)
+Glib::ustring ColorProfile::getNameFromProfile(cmsHPROFILE profile)
 {
     Glib::ustring nameStr;
     if ( profile ) {
@@ -852,6 +849,41 @@ Glib::ustring getNameFromProfile(cmsHPROFILE profile)
     }
     return nameStr;
 }
+
+/**
+ * Cleans up name to remove disallowed characters.
+ * Some discussion at http://markmail.org/message/bhfvdfptt25kgtmj
+ * Allowed ASCII first characters:  ':', 'A'-'Z', '_', 'a'-'z'
+ * Allowed ASCII remaining chars add: '-', '.', '0'-'9',
+ *
+ * @param str the string to clean up.
+ */
+void ColorProfile::sanitizeName(std::string &str)
+{
+    if (str.size() > 0) {
+        char val = str.at(0);
+        if (((val < 'A') || (val > 'Z')) && ((val < 'a') || (val > 'z')) && (val != '_') && (val != ':')) {
+            str.insert(0, "_");
+        }
+        for (int i = 1; i < str.size(); i++) {
+            char val = str.at(i);
+            if (((val < 'A') || (val > 'Z')) && ((val < 'a') || (val > 'z')) && ((val < '0') || (val > '9')) &&
+                (val != '_') && (val != ':') && (val != '-') && (val != '.')) {
+                if (str.at(i - 1) == '-') {
+                    str.erase(i, 1);
+                    i--;
+                } else {
+                    str.replace(i, 1, "-");
+                }
+            }
+        }
+        if (str.at(str.size() - 1) == '-') {
+            str.pop_back();
+        }
+    }
+}
+
+namespace {
 
 /**
  * This function loads or refreshes data in knownProfiles.

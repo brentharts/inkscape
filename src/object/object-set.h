@@ -90,20 +90,20 @@ struct random_access{};
 
 struct is_item {
     bool operator()(SPObject* obj) {
-        return SP_IS_ITEM(obj);
+        return is<SPItem>(obj);
     }
 };
 
 struct is_group {
     bool operator()(SPObject* obj) {
-        return SP_IS_GROUP(obj);
+        return is<SPGroup>(obj);
     }
 };
 
 struct object_to_item {
     typedef SPItem* result_type;
     SPItem* operator()(SPObject* obj) const {
-        return SP_ITEM(obj);
+        return cast<SPItem>(obj);
     }
 };
 
@@ -117,7 +117,7 @@ struct object_to_node {
 struct object_to_group {
     typedef SPGroup* result_type;
     SPGroup* operator()(SPObject* obj) const {
-        return SP_GROUP(obj);
+        return cast<SPGroup>(obj);
     }
 };
 
@@ -200,6 +200,7 @@ public:
      * Returns true if the given object is selected.
      */
     bool includes(SPObject *object, bool anyAncestor = false);
+    bool includes(Inkscape::XML::Node *node, bool anyAncestor = false);
 
     /**
      * Returns ancestor if the given object has ancestor selected.
@@ -278,6 +279,11 @@ public:
            | boost::adaptors::filtered(is_item())
            | boost::adaptors::transformed(object_to_item()));
     };
+
+    std::vector<SPItem*> items_vector() {
+        auto i = items();
+        return {i.begin(), i.end()};
+    }
 
     /** Returns a range of selected groups. */
     SPGroupRange groups() {
@@ -406,7 +412,7 @@ public:
 
     //item groups operations
     //in selection-chemistry.cpp
-    void deleteItems();
+    void deleteItems(bool skip_undo = false);
     void duplicate(bool suppressDone = false, bool duplicateLayer = false);
     void clone();
 
@@ -415,20 +421,21 @@ public:
      * @param skip_undo If this is set to true the call to DocumentUndo::done is omitted.
      * @return True if anything was unlinked, otherwise false.
      */
-    bool unlink(const bool skip_undo = false);
+    bool unlink(const bool skip_undo = false, const bool silent = false);
     /**
      * @brief Recursively unlink any clones present in the current selection,
      * including clones which are used to clip other objects, groups of clones etc.
      * @return true if anything was unlinked, otherwise false.
      */
-    bool unlinkRecursive(const bool skip_undo = false, const bool force = false);
+    bool unlinkRecursive(const bool skip_undo = false, const bool force = false, const bool silent = false);
     void removeLPESRecursive(bool keep_paths);
     void relink();
     void cloneOriginal();
-    void cloneOriginalPathLPE(bool allow_transforms = false);
-    Inkscape::XML::Node* group(int type = 0);
+    void cloneOriginalPathLPE(bool allow_transforms = false, bool sync = false, bool skip_undo = false);
+    Inkscape::XML::Node* group(bool is_anchor = false);
     void popFromGroup();
     void ungroup(bool skip_undo = false);
+    void ungroup_all(bool skip_undo = false);
     
     //z-order management
     //in selection-chemistry.cpp
@@ -440,8 +447,8 @@ public:
     void lowerToBottom(bool skip_undo = false);
     void toNextLayer(bool skip_undo = false);
     void toPrevLayer(bool skip_undo = false);
-    void toLayer(SPObject *layer, bool skip_undo = false);
-    void toLayer(SPObject *layer, bool skip_undo, Inkscape::XML::Node *after);
+    void toLayer(SPObject *layer);
+    void toLayer(SPObject *layer, Inkscape::XML::Node *after);
 
     //clipboard management
     //in selection-chemistry.cpp
@@ -456,7 +463,7 @@ public:
     //in path-chemistry.cpp
     void combine(bool skip_undo = false, bool silent = false);
     void breakApart(bool skip_undo = false, bool overlapping = true, bool silent = false);
-    void toCurves(bool skip_undo = false);
+    void toCurves(bool skip_undo = false, bool clonesjustunlink = false);
     void toLPEItems();
     void pathReverse();
 
@@ -483,10 +490,9 @@ public:
     void tile(bool apply = true); //"Object to Pattern"
     void untile();
     void createBitmapCopy();
-    void setMask(bool apply_clip_path, bool apply_to_layer = false, bool skip_undo = false);
+    void setMask(bool apply_clip_path, bool apply_to_layer, bool remove_original);
     void editMask(bool clip);
-    void unsetMask(const bool apply_clip_path, const bool skip_undo = false,
-                   const bool delete_helper_group = true);
+    void unsetMask(const bool apply_clip_path, const bool delete_helper_group, bool remove_original);
     void setClipGroup();
     
     // moves
@@ -503,7 +509,6 @@ public:
     void skewRelative(const Geom::Point&, double, double);
     void moveRelative(const Geom::Point &move, bool compensate = true);
     void moveRelative(double dx, double dy);
-    void rotate90(bool ccw);
     void rotate(double);
     void rotateScreen(double);
     void scaleGrow(double);

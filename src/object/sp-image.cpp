@@ -40,6 +40,7 @@
 #include "sp-image.h"
 #include "sp-clippath.h"
 #include "xml/quote.h"
+#include "xml/href-attribute-helper.h"
 #include "preferences.h"
 #include "io/sys.h"
 
@@ -309,7 +310,6 @@ void SPImage::apply_profile(Inkscape::Pixbuf *pixbuf) {
 }
 
 void SPImage::update(SPCtx *ctx, unsigned int flags) {
-
     SPItem::update(ctx, flags);
 
     if (flags & SP_IMAGE_HREF_MODIFIED_FLAG) {
@@ -321,14 +321,18 @@ void SPImage::update(SPCtx *ctx, unsigned int flags) {
                 svgdpi = g_ascii_strtod(getRepr()->attribute("inkscape:svg-dpi"), nullptr);
             }
             dpi = svgdpi;
-            pb = readImage(getRepr()->attribute("xlink:href"),
+            pb = readImage(Inkscape::getHrefAttribute(*getRepr()).second,
                            getRepr()->attribute("sodipodi:absref"),
                            document->getDocumentBase(), svgdpi);
             if (!pb) {
+                missing = true;
                 // Passing in our previous size allows us to preserve the image's expected size.
                 auto broken_width = width._set ? width.computed : 640;
                 auto broken_height = height._set ? height.computed : 640;
                 pb = getBrokenImage(broken_width, broken_height);
+            }
+            else {
+                missing = false;
             }
 
             if (pb) {
@@ -429,19 +433,18 @@ void SPImage::modified(unsigned int flags) {
 
     if (flags & SP_OBJECT_STYLE_MODIFIED_FLAG) {
         for (auto &v : views) {
-            auto img = dynamic_cast<Inkscape::DrawingImage *>(v.drawingitem);
+            auto img = cast<Inkscape::DrawingImage>(v.drawingitem.get());
             img->setStyle(style);
         }
     }
 }
-
 
 Inkscape::XML::Node *SPImage::write(Inkscape::XML::Document *xml_doc, Inkscape::XML::Node *repr, guint flags ) {
     if ((flags & SP_OBJECT_WRITE_BUILD) && !repr) {
         repr = xml_doc->createElement("svg:image");
     }
 
-    repr->setAttribute("xlink:href", this->href);
+    Inkscape::setHrefAttribute(*repr, this->href);
 
     /* fixme: Reset attribute if needed (Lauris) */
     if (this->x._set) {
@@ -538,7 +541,7 @@ gchar* SPImage::description() const {
         if (this->getRepr()->attribute("inkscape:svg-dpi")) {
             svgdpi = g_ascii_strtod(this->getRepr()->attribute("inkscape:svg-dpi"), nullptr);
         }
-        pb = readImage(this->getRepr()->attribute("xlink:href"),
+        pb = readImage(Inkscape::getHrefAttribute(*this->getRepr()).second,
                        this->getRepr()->attribute("sodipodi:absref"),
                        this->document->getDocumentBase(), svgdpi);
 
@@ -667,7 +670,7 @@ sp_image_update_arenaitem (SPImage *image, Inkscape::DrawingImage *ai)
 static void sp_image_update_canvas_image(SPImage *image)
 {
     for (auto &v : image->views) {
-        sp_image_update_arenaitem(image, dynamic_cast<Inkscape::DrawingImage*>(v.drawingitem));
+        sp_image_update_arenaitem(image, cast<Inkscape::DrawingImage>(v.drawingitem.get()));
     }
 }
 
@@ -799,7 +802,7 @@ void sp_embed_image(Inkscape::XML::Node *image_node, Inkscape::Pixbuf *pb)
     // TODO: this is very wasteful memory-wise.
     // It would be better to only keep the binary data around,
     // and base64 encode on the fly when saving the XML.
-    image_node->setAttribute("xlink:href", buffer);
+    Inkscape::setHrefAttribute(*image_node, buffer);
 
     g_free(buffer);
     if (free_data) g_free(data);
@@ -852,7 +855,7 @@ void sp_embed_svg(Inkscape::XML::Node *image_node, std::string const &fn)
         // TODO: this is very wasteful memory-wise.
         // It would be better to only keep the binary data around,
         // and base64 encode on the fly when saving the XML.
-        image_node->setAttribute("xlink:href", buffer);
+        Inkscape::setHrefAttribute(*image_node, buffer);
 
         g_free(buffer);
         g_free(data);

@@ -100,6 +100,8 @@ inkscape:linux:
 
 
 appimage:linux:
+  image: registry.gitlab.com/inkscape/inkscape-ci-docker/ubuntu-2004
+  # appimage creator script does not support recent OS (yet)
   stage: build
   rules:
     - *do_not_run_for_schedules
@@ -117,32 +119,41 @@ appimage:linux:
       - Inkscape*.AppImage*
 
 
-inkscape:macos:
+inkscape:macos:arm:
   stage: build
   tags:
-    - mac
+    - macarm
   rules:
     - *do_not_run_for_schedules
     # Mac runner is restricted to "inkscape" and "dehesselle" namespaces; only generate pipelines for those
     - if: '$CI_PROJECT_NAMESPACE == "inkscape"'
     - if: '$CI_PROJECT_NAMESPACE == "dehesselle"'
   variables:
-    SDKROOT: /opt/sdks/MacOSX10.13.sdk
-  before_script:
-    # workaround: after_script doesn't run for cancelled/timed out jobs, leaving
-    #             non-ephemeral runners in an unclean state
-    #             https://gitlab.com/gitlab-org/gitlab/-/issues/15603
-    - packaging/macos/uninstall_toolset.sh
-    - packaging/macos/install_toolset.sh
+    SDKROOT: /opt/sdks/MacOSX11.3.sdk
+    INK_BUILD: $CI_PIPELINE_IID
   script:
-    - packaging/macos/build_inkscape.sh
-  after_script:
-    - packaging/macos/uninstall_toolset.sh save_overlay
+    - packaging/macos/build.sh
   artifacts:
     expire_in: 1 year
     paths:
-      - Inkscape.dmg
+      - Inkscape*.dmg
       - toolset_overlay.tar.xz
+
+
+inkscape:macos:x64:
+  extends: inkscape:macos:arm
+  tags:
+    - shared-macos-amd64
+  image: macos-12-xcode-13
+  variables:
+    CCACHE_DIR: $CI_PROJECT_DIR/ccache
+    SYS_USRLOCAL_IGNORE: "true"
+    SDKROOT: ""
+    MACOSX_DEPLOYMENT_TARGET: "10.13"
+  cache:
+    key: "cache-macos"
+    paths:
+      - $CI_PROJECT_DIR/ccache
 
 
 inkscape:windows:x64: &windows_job
@@ -199,32 +210,17 @@ test:linux:
   artifacts:
     paths:
       - build/testfiles
+      - build/Testing
     when: on_failure
 
-test:macos:
+test:macos:x64:
+  extends: inkscape:macos:x64
   stage: test
-  tags:
-    - mac
-  rules:
-    - *do_not_run_for_schedules
-    # Mac runner is restricted to "inkscape" and "dehesselle" namespaces; only generate pipelines for those
-    - if: '$CI_PROJECT_NAMESPACE == "inkscape"'
-    - if: '$CI_PROJECT_NAMESPACE == "dehesselle"'
   dependencies:
-    - inkscape:macos
-  needs: ["inkscape:macos"]
-  variables:
-    SDKROOT: /opt/sdks/MacOSX10.13.sdk
-  before_script:
-    # workaround: after_script doesn't run for cancelled/timed out jobs, leaving
-    #             non-ephemeral runners in an unclean state
-    #             https://gitlab.com/gitlab-org/gitlab/-/issues/15603
-    - packaging/macos/uninstall_toolset.sh
-    - packaging/macos/install_toolset.sh restore_overlay
+    - inkscape:macos:x64
+  needs: ["inkscape:macos:x64"]
   script:
-    - packaging/macos/310-inkscape_test.sh
-  after_script:
-    - packaging/macos/uninstall_toolset.sh save_testfiles
+    - packaging/macos/test.sh
   artifacts:
     paths:
       - testfiles.tar.xz

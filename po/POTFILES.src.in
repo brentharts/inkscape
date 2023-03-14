@@ -1,9 +1,9 @@
-../share/filters/filters.svg.h
-../share/markers/markers.svg.h
-../share/palettes/palettes.h
-../share/paint/patterns.svg.h
-../share/symbols/symbols.h
-../share/templates/templates.h
+${CMAKE_BINARY_DIR}/share/filters/filters.svg.h
+${CMAKE_BINARY_DIR}/share/markers/markers.svg.h
+${CMAKE_BINARY_DIR}/share/palettes/palettes.h
+${CMAKE_BINARY_DIR}/share/paint/patterns.svg.h
+${CMAKE_BINARY_DIR}/share/symbols/symbols.h
+${CMAKE_BINARY_DIR}/share/templates/templates.h
 ../src/actions/actions-base.cpp
 ../src/actions/actions-canvas-mode.cpp
 ../src/actions/actions-canvas-snapping.cpp
@@ -42,9 +42,8 @@
 ../src/auto-save.cpp
 ../src/context-fns.cpp
 ../src/desktop-events.cpp
+../src/desktop-style.cpp
 ../src/desktop.cpp
-../src/display/control/canvas-axonomgrid.cpp
-../src/display/control/canvas-grid.cpp
 ../src/display/control/canvas-item-text.cpp
 ../src/display/control/snap-indicator.cpp
 ../src/document.cpp
@@ -140,14 +139,17 @@
 ../src/filter-enums.cpp
 ../src/gradient-chemistry.cpp
 ../src/gradient-drag.cpp
+../src/helper/choose-file.cpp
 ../src/helper/gettext.cpp
 ../src/helper/gettext.h
+../src/helper/save-image.cpp
 ../src/inkscape-application.cpp
 ../src/inkscape.cpp
 ../src/inkview-application.cpp
 ../src/io/fix-broken-links.cpp
 ../src/io/resource.cpp
 ../src/libnrtype/font-factory.cpp
+../src/libnrtype/font-lister.cpp
 ../src/live_effects/effect.cpp
 ../src/live_effects/lpe-angle_bisector.cpp
 ../src/live_effects/lpe-attach-path.cpp
@@ -202,6 +204,7 @@
 ../src/live_effects/parameter/bool.cpp
 ../src/live_effects/parameter/colorpicker.cpp
 ../src/live_effects/parameter/enum.h
+../src/live_effects/parameter/enumarray.h
 ../src/live_effects/parameter/fontbutton.cpp
 ../src/live_effects/parameter/nodesatellitesarray.cpp
 ../src/live_effects/parameter/originalpath.cpp
@@ -214,6 +217,7 @@
 ../src/live_effects/parameter/random.cpp
 ../src/live_effects/parameter/satellite.cpp
 ../src/live_effects/parameter/satellitearray.cpp
+../src/live_effects/parameter/scalararray.cpp
 ../src/live_effects/parameter/text.cpp
 ../src/live_effects/parameter/togglebutton.cpp
 ../src/live_effects/parameter/transformedpoint.cpp
@@ -226,6 +230,7 @@
 ../src/object/sp-ellipse.cpp
 ../src/object/sp-flowregion.cpp
 ../src/object/sp-flowtext.cpp
+../src/object/sp-grid.cpp
 ../src/object/sp-guide.cpp
 ../src/object/sp-image.cpp
 ../src/object/sp-item-group.cpp
@@ -233,7 +238,6 @@
 ../src/object/sp-line.cpp
 ../src/object/sp-lpe-item.cpp
 ../src/object/sp-marker.cpp
-../src/object/sp-namedview.cpp
 ../src/object/sp-offset.cpp
 ../src/object/sp-page.cpp
 ../src/object/sp-path.cpp
@@ -262,8 +266,6 @@
 ../src/seltrans.cpp
 ../src/text-chemistry.cpp
 ../src/text-editing.cpp
-../src/trace/depixelize/inkscape-depixelize.cpp
-../src/trace/potrace/inkscape-potrace.cpp
 ../src/trace/trace.cpp
 ../src/ui/clipboard.cpp
 ../src/ui/contextmenu.cpp
@@ -282,6 +284,7 @@
 ../src/ui/dialog/dialog-notebook.cpp
 ../src/ui/dialog/dialog-window.cpp
 ../src/ui/dialog/document-properties.cpp
+../src/ui/dialog/document-resources.cpp
 ../src/ui/dialog/export-batch.cpp
 ../src/ui/dialog/export-single.cpp
 ../src/ui/dialog/export.cpp
@@ -290,6 +293,7 @@
 ../src/ui/dialog/fill-and-stroke.cpp
 ../src/ui/dialog/filter-effects-dialog.cpp
 ../src/ui/dialog/find.cpp
+../src/ui/dialog/font-collections-manager.cpp
 ../src/ui/dialog/font-substitution.cpp
 ../src/ui/dialog/glyphs.cpp
 ../src/ui/dialog/grid-arrange-tab.cpp
@@ -326,6 +330,7 @@
 ../src/ui/dialog/xml-tree.cpp
 ../src/ui/drag-and-drop.cpp
 ../src/ui/interface.cpp
+../src/ui/knot/knot-holder-entity.cpp
 ../src/ui/knot/knot-holder.cpp
 ../src/ui/knot/knot.cpp
 ../src/ui/modifiers.cpp
@@ -381,6 +386,7 @@
 ../src/ui/tools/text-tool.cpp
 ../src/ui/tools/tool-base.cpp
 ../src/ui/tools/tweak-tool.cpp
+../src/ui/util.cpp
 ../src/ui/widget/canvas-grid.cpp
 ../src/ui/widget/color-entry.cpp
 ../src/ui/widget/color-icc-selector.cpp
@@ -392,12 +398,14 @@
 ../src/ui/widget/export-lists.cpp
 ../src/ui/widget/fill-style.cpp
 ../src/ui/widget/filter-effect-chooser.cpp
+../src/ui/widget/font-collection-selector.cpp
 ../src/ui/widget/font-selector-toolbar.cpp
 ../src/ui/widget/font-selector.cpp
 ../src/ui/widget/font-variants.cpp
 ../src/ui/widget/gradient-editor.cpp
 ../src/ui/widget/gradient-selector.cpp
 ../src/ui/widget/gradient-vector-selector.cpp
+../src/ui/widget/image-properties.cpp
 ../src/ui/widget/layer-selector.cpp
 ../src/ui/widget/licensor.cpp
 ../src/ui/widget/marker-combo-box.cpp
@@ -411,11 +419,11 @@
 ../src/ui/widget/registered-widget.cpp
 ../src/ui/widget/rendering-options.cpp
 ../src/ui/widget/selected-style.cpp
-../src/ui/widget/spin-scale.cpp
 ../src/ui/widget/stroke-style.cpp
 ../src/ui/widget/style-swatch.cpp
 ../src/ui/widget/swatch-selector.cpp
 ../src/util/enums.h
+../src/util/font-collections.h
 ../src/util/paper.cpp
 ../src/vanishing-point.cpp
 ../src/widgets/desktop-widget.cpp

@@ -24,6 +24,7 @@
 #include "extension/db.h"
 #include "extension/output.h"
 #include "file.h"
+#include "helper/auto-connection.h"
 #include "helper/png-write.h"
 #include "inkscape-window.h"
 #include "inkscape.h"
@@ -54,7 +55,7 @@ namespace Inkscape {
 namespace UI {
 namespace Dialog {
 
-BatchItem::BatchItem(SPItem *item)
+BatchItem::BatchItem(SPItem *item, std::shared_ptr<PreviewDrawing> drawing)
 {
     _item = item;
 
@@ -66,10 +67,10 @@ BatchItem::BatchItem(SPItem *item)
             id = "no-id";
         }
     }
-    init(_item->document, id);
+    init(id, drawing);
 }
 
-BatchItem::BatchItem(SPPage *page)
+BatchItem::BatchItem(SPPage *page, std::shared_ptr<PreviewDrawing> drawing)
 {
     _page = page;
 
@@ -77,10 +78,11 @@ BatchItem::BatchItem(SPPage *page)
     if (auto id = _page->label()) {
         label = id;
     }
-    init(_page->document, label);
+    init(label, drawing);
 }
 
-void BatchItem::init(SPDocument *doc, Glib::ustring label) {
+void BatchItem::init(Glib::ustring label, std::shared_ptr<PreviewDrawing> drawing) {
+
     _label_str = label;
 
     _grid.set_row_spacing(5);
@@ -91,10 +93,17 @@ void BatchItem::init(SPDocument *doc, Glib::ustring label) {
     _selector.set_can_focus(false);
     _selector.set_margin_start(2);
     _selector.set_margin_bottom(2);
+    _selector.set_valign(Gtk::ALIGN_END);
+
+    _option.set_active(false);
+    _option.set_can_focus(false);
+    _option.set_margin_start(2);
+    _option.set_margin_bottom(2);
+    _option.set_valign(Gtk::ALIGN_END);
 
     _preview.set_name("export_preview_batch");
     _preview.setItem(_item);
-    _preview.setDocument(doc);
+    _preview.setDrawing(drawing);
     _preview.setSize(64);
     _preview.set_halign(Gtk::ALIGN_CENTER);
     _preview.set_valign(Gtk::ALIGN_CENTER);
@@ -111,24 +120,94 @@ void BatchItem::init(SPDocument *doc, Glib::ustring label) {
     this->set_can_focus(false);
     this->set_tooltip_text(label);
 
+    _selector.signal_toggled().connect([=]() {
+        set_selected(_selector.get_active());
+    });
+    _option.signal_toggled().connect([=]() {
+        set_selected(_option.get_active());
+    });
+
     // This initially packs the widgets with a hidden preview.
     refresh(!is_hide, 0);
 }
 
+/**
+ * Syncronise the FlowBox selection to the active widget activity.
+ */
+void BatchItem::set_selected(bool selected)
+{
+    auto box = dynamic_cast<Gtk::FlowBox *>(get_parent());
+    if (box && selected != is_selected()) {
+        if (selected) {
+            box->select_child(*this);
+        } else {
+            box->unselect_child(*this);
+        }
+    }
+}
+
+/**
+ * Syncronise the FlowBox selection to the existing active widget state.
+ */
+void BatchItem::update_selected()
+{
+    if (auto parent = dynamic_cast<Gtk::FlowBox *>(get_parent()))
+        on_mode_changed(parent->get_selection_mode());
+    if (_selector.get_visible()) {
+        set_selected(_selector.get_active());
+    } else if (_option.get_visible()) {
+        set_selected(_option.get_active());
+    }
+}
+
+/**
+ * A change in the selection mode for the flow box.
+ */
+void BatchItem::on_mode_changed(Gtk::SelectionMode mode)
+{
+    _selector.set_visible(mode == Gtk::SELECTION_MULTIPLE);
+    _option.set_visible(mode == Gtk::SELECTION_SINGLE);
+}
+
+/**
+ * Update the connection to the parent FlowBox
+ */
+void BatchItem::on_parent_changed(Gtk::Widget *previous) {
+    auto parent = dynamic_cast<Gtk::FlowBox *>(get_parent());
+    if (!parent)
+        return;
+
+    _selection_widget_changed_conn = parent->signal_selected_children_changed().connect([=]() {
+        // Syncronise the active widget state to the Flowbox selection.
+        if (_selector.get_visible()) {
+            _selector.set_active(is_selected());
+        } else if (_option.get_visible()) {
+            _option.set_active(is_selected());
+        }
+    });
+    update_selected();
+
+    if (auto first = dynamic_cast<BatchItem *>(parent->get_child_at_index(0))) {
+        auto group = first->get_radio_group();
+        _option.set_group(group);
+    }
+}
+
+
 void BatchItem::refresh(bool hide, guint32 bg_color)
 {
     if (_page) {
-        auto b = _page->getDesktopRect();
-        _preview.setDbox(b.left(), b.right(), b.top(), b.bottom());
+        _preview.setBox(_page->getDocumentRect());
     }
 
-    _preview.set_background_color(bg_color);
+    _preview.setBackgroundColor(bg_color);
 
     // When hiding the preview, we show the items as a checklist
     // So all items must be packed differently on refresh.
     if (hide != is_hide) {
         is_hide = hide;
         _grid.remove(_selector);
+        _grid.remove(_option);
         _grid.remove(_label);
         _grid.remove(_preview);
 
@@ -136,15 +215,18 @@ void BatchItem::refresh(bool hide, guint32 bg_color)
             _selector.set_valign(Gtk::Align::ALIGN_BASELINE);
             _label.set_xalign(0.0);
             _grid.attach(_selector, 0, 1, 1, 1);
+            _grid.attach(_option, 0, 1, 1, 1);
             _grid.attach(_label, 1, 1, 1, 1);
         } else {
             _selector.set_valign(Gtk::Align::ALIGN_END);
             _label.set_xalign(0.5);
             _grid.attach(_selector, 0, 1, 1, 1);
+            _grid.attach(_option, 0, 1, 1, 1);
             _grid.attach(_label, 0, 2, 2, 1);
             _grid.attach(_preview, 0, 0, 2, 2);
         }
         show_all_children();
+        update_selected();
     }
 
     if (!hide) {
@@ -153,8 +235,10 @@ void BatchItem::refresh(bool hide, guint32 bg_color)
 }
 
 
-void BatchExport::initialise(const Glib::RefPtr<Gtk::Builder> &builder)
-{
+BatchExport::BatchExport(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>& builder)
+    : Gtk::Box(cobject) {
+    prefs = Inkscape::Preferences::get();
+
     builder->get_widget("b_s_selection", selection_buttons[SELECTION_SELECTION]);
     selection_names[SELECTION_SELECTION] = "selection";
     builder->get_widget("b_s_layers", selection_buttons[SELECTION_LAYER]);
@@ -168,18 +252,19 @@ void BatchExport::initialise(const Glib::RefPtr<Gtk::Builder> &builder)
     builder->get_widget("b_hide_all", hide_all);
     builder->get_widget("b_filename", filename_entry);
     builder->get_widget("b_export", export_btn);
-    builder->get_widget("b_progress_bar", _prog);
-    builder->get_widget_derived("b_export_list", export_list);
+    builder->get_widget("b_cancel", cancel_btn);
+    builder->get_widget("b_inprogress", progress_box);
 
-    Inkscape::UI::Widget::ScrollTransfer<Gtk::ScrolledWindow> *temp = nullptr;
-    builder->get_widget_derived("b_pbox_scroll", temp);
-    builder->get_widget_derived("b_scroll", temp);
+    builder->get_widget("b_progress", _prog);
+    builder->get_widget("b_progress_batch", _prog_batch);
+    builder->get_widget_derived("b_export_list", export_list);
 
     Gtk::Button* button = nullptr;
     builder->get_widget("b_backgnd", button); 
     assert(button);
     _bgnd_color_picker = std::make_unique<Inkscape::UI::Widget::ColorPicker>(
         _("Background color"), _("Color used to fill background"), 0xffffff00, true, button);
+    setup();
 }
 
 void BatchExport::selectionModified(Inkscape::Selection *selection, guint flags)
@@ -190,7 +275,7 @@ void BatchExport::selectionModified(Inkscape::Selection *selection, guint flags)
     if (!(flags & (SP_OBJECT_MODIFIED_FLAG | SP_OBJECT_PARENT_MODIFIED_FLAG | SP_OBJECT_CHILD_MODIFIED_FLAG))) {
         return;
     }
-    refreshItems();
+    queueRefreshItems();
 }
 
 void BatchExport::selectionChanged(Inkscape::Selection *selection)
@@ -214,8 +299,7 @@ void BatchExport::selectionChanged(Inkscape::Selection *selection)
             return;
         }
     }
-    refreshItems();
-    loadExportHints();
+    queueRefresh();
 }
 
 void BatchExport::pagesChanged()
@@ -230,8 +314,7 @@ void BatchExport::pagesChanged()
         selection_buttons[SELECTION_LAYER]->set_active();
     }
 
-    refreshItems();
-    loadExportHints();
+    queueRefresh();
 }
 
 // Setup Single Export.Called by export on realize
@@ -241,24 +324,23 @@ void BatchExport::setup()
         return;
     }
     setupDone = true;
-    prefs = Inkscape::Preferences::get();
 
     export_list->setup();
 
     // set them before connecting to signals
     setDefaultSelectionMode();
-    loadExportHints();
-
-    refreshItems();
+    setExporting(false);
+    queueRefresh();
 
     // Connect Signals
     for (auto [key, button] : selection_buttons) {
         button->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &BatchExport::onAreaTypeToggle), key));
     }
     show_preview->signal_toggled().connect(sigc::mem_fun(*this, &BatchExport::refreshPreview));
-    filenameConn = filename_entry->signal_changed().connect(sigc::mem_fun(*this, &BatchExport::onFilenameModified));
-    exportConn = export_btn->signal_clicked().connect(sigc::mem_fun(*this, &BatchExport::onExport));
-    browseConn = filename_entry->signal_icon_release().connect(sigc::mem_fun(*this, &BatchExport::onBrowse));
+    filename_conn = filename_entry->signal_changed().connect(sigc::mem_fun(*this, &BatchExport::onFilenameModified));
+    export_conn = export_btn->signal_clicked().connect(sigc::mem_fun(*this, &BatchExport::onExport));
+    cancel_conn = cancel_btn->signal_clicked().connect(sigc::mem_fun(*this, &BatchExport::onCancel));
+    browse_conn = filename_entry->signal_icon_release().connect(sigc::mem_fun(*this, &BatchExport::onBrowse));
     hide_all->signal_toggled().connect(sigc::mem_fun(*this, &BatchExport::refreshPreview));
     _bgnd_color_picker->connectChanged([=](guint32 color){
         if (_desktop) {
@@ -274,7 +356,8 @@ void BatchExport::refreshItems()
 
     // Create New List of Items
     std::set<SPItem *> itemsList;
-    std::set<SPPage *> pageList;
+    std::set<SPPage *, SPPage::PageIndexOrder> pageList;
+    std::set<SPPage *> pageUnsorted;
 
     char *num_str = nullptr;
     switch (current_key) {
@@ -304,6 +387,7 @@ void BatchExport::refreshItems()
         case SELECTION_PAGE: {
             for (auto page : _desktop->getDocument()->getPageManager().getPages()) {
                 pageList.insert(page);
+                pageUnsorted.insert(page);
             }
             num_str = g_strdup_printf(ngettext("%d Page", "%d Pages", pageList.size()), (int)pageList.size());
             break;
@@ -327,8 +411,8 @@ void BatchExport::refreshItems()
             }
         }
         if (SPPage *page = val->getPage()) {
-            auto pageItr = pageList.find(page);
-            if (pageItr == pageList.end() || !(*pageItr)->getId() || (*pageItr)->getId() != key) {
+            auto pageItr = pageUnsorted.find(page);
+            if (pageItr == pageUnsorted.end() || !(*pageItr)->getId() || (*pageItr)->getId() != key) {
                 toRemove.push_back(key);
             }
         }
@@ -350,8 +434,9 @@ void BatchExport::refreshItems()
                 continue;
             }
             // Add new item to the end of list
-            current_items[id] = std::make_unique<BatchItem>(item);
+            current_items[id] = std::make_unique<BatchItem>(item, _preview_drawing);
             preview_container->insert(*current_items[id], -1);
+            current_items[id]->set_selected(true);
         }
     }
     for (auto &page : pageList) {
@@ -359,8 +444,9 @@ void BatchExport::refreshItems()
             if (current_items[id] && current_items[id]->getPage() == page) {
                 continue;
             }
-            current_items[id] = std::make_unique<BatchItem>(page);
+            current_items[id] = std::make_unique<BatchItem>(page, _preview_drawing);
             preview_container->insert(*current_items[id], -1);
+            current_items[id]->set_selected(true);
         }
     }
 
@@ -376,25 +462,33 @@ void BatchExport::refreshPreview()
     bool preview = show_preview->get_active();
     preview_container->set_orientation(preview ? Gtk::ORIENTATION_HORIZONTAL : Gtk::ORIENTATION_VERTICAL);
 
-    for (auto &[key, val] : current_items) {
-        if (preview) {
-            std::vector<SPItem *> selected;
+    if (preview) {
+        std::vector<SPItem *> selected;
+        for (auto &[key, val] : current_items) {
             if (hide) {
+                // Assumption: This will never alternate between these branches in the same
+                // list of current_items. Either it's a selection, layers xor pages.
                 if (auto item = val->getItem()) {
-                    selected = std::vector<SPItem *>({item});
+                    selected.push_back(item);
                 } else if (val->getPage()) {
                     auto sels = _desktop->getSelection()->items();
                     selected = std::vector<SPItem *>(sels.begin(), sels.end());
+                    break;
                 }
             }
-            val->refreshHide(selected);
         }
-        val->refresh(!preview, _bgnd_color_picker->get_current_color());
+        _preview_drawing->set_shown_items(std::move(selected));
+
+        for (auto &[key, val] : current_items) {
+            val->refresh(!preview, _bgnd_color_picker->get_current_color());
+        }
     }
 }
 
 void BatchExport::loadExportHints()
 {
+    if (!_desktop) return;
+
     SPDocument *doc = _desktop->getDocument();
     auto old_filename = filename_entry->get_text();
     if (old_filename.empty()) {
@@ -423,13 +517,17 @@ void BatchExport::onAreaTypeToggle(selection_mode key)
     current_key = key;
     prefs->setString("/dialogs/export/batchexportarea/value", selection_names[current_key]);
 
-    refreshItems();
-    loadExportHints();
+    queueRefresh();
 }
 
 void BatchExport::onFilenameModified()
 {
-    ;
+}
+
+void BatchExport::onCancel()
+{
+    interrupted = true;
+    setExporting(false);
 }
 
 void BatchExport::onExport()
@@ -437,15 +535,15 @@ void BatchExport::onExport()
     interrupted = false;
     if (!_desktop)
         return;
-    export_btn->set_sensitive(false);
 
     // If there are no selected button, simply flash message in status bar
     int num = current_items.size();
     if (current_items.size() == 0) {
         _desktop->messageStack()->flash(Inkscape::ERROR_MESSAGE, _("No items selected."));
-        export_btn->set_sensitive(true);
         return;
     }
+
+    setExporting(true);
 
     // Find and remove any extension from filename so that we can add suffix to it.
     Glib::ustring filename = filename_entry->get_text();
@@ -462,19 +560,16 @@ void BatchExport::onExport()
         dpis.push_back(export_list->get_dpi(i));
     }
 
-    // We are exporting standalone items only for now
-    // std::vector<SPItem *> selected(_desktop->getSelection()->items().begin(),
-    // _desktop->getSelection()->items().end());
     bool hide = hide_all->get_active();
-
     auto sels = _desktop->getSelection()->items();
     std::vector<SPItem *> selected_items(sels.begin(), sels.end());
 
     // Start Exporting Each Item
-    for (int i = 0; i < num_rows; i++) {
-        auto suffix = suffixs[i];
-        auto omod = extensions[i];
-        float dpi = dpis[i];
+    for (int j = 0; j < num_rows && !interrupted; j++) {
+
+        auto suffix = suffixs[j];
+        auto omod = extensions[j];
+        float dpi = dpis[j];
 
         if (!omod || omod->deactivated() || !omod->prefs()) {
             continue;
@@ -485,7 +580,7 @@ void BatchExport::onExport()
             count++;
 
             auto &batchItem = i->second;
-            if (!batchItem->isActive()) {
+            if (!batchItem->is_selected()) {
                 continue;
             }
 
@@ -513,13 +608,19 @@ void BatchExport::onExport()
                 continue;
             }
 
-            Glib::ustring item_filename;
-            Glib::ustring::value_type last_char = filename.at(filename.length() - 1);
-            if (last_char != '/' && last_char != '\\') {
-                item_filename = filename + "_" + id;
-            } else {
-                item_filename = filename + id;
+            Glib::ustring item_filename = filename;
+            if (!filename.empty()) {
+                Glib::ustring::value_type last_char = filename.at(filename.length() - 1);
+                if (last_char != '/' && last_char != '\\') {
+                    item_filename += "_";
+                }
             }
+            if (id.at(0) == '#' && batchItem->getItem() && !batchItem->getItem()->label()) {
+                item_filename += id.substr(1);
+            } else {
+                item_filename += id;
+            }
+
             if (!suffix.empty()) {
                 if (omod->is_raster()) {
                     // Put the dpi in at the user's requested location.
@@ -533,14 +634,14 @@ void BatchExport::onExport()
                 continue;
             }
 
-            delete prog_dlg;
-            prog_dlg = create_progress_dialog(Glib::ustring::compose(_("Exporting %1 files"), num));
-            prog_dlg->set_export_panel(this);
-            setExporting(true, Glib::ustring::compose(_("Exporting %1 files"), num));
-            prog_dlg->set_current(count);
-            prog_dlg->set_total(num);
+            // Set the progress bar with our updated information
+            double progress = (((double)count / num) + j) / num_rows;
+            _prog_batch->set_fraction(progress);
 
-            onProgressCallback(0.0, prog_dlg);
+            setExporting(true,
+                         Glib::ustring::compose(_("Exporting %1"), item_filename),
+                         Glib::ustring::compose(_("Format %1, Selection %2"), j + 1, count));
+
 
             if (omod->is_raster()) {
                 unsigned long int width = (int)(area.width() * dpi / DPI_BASE + 0.5);
@@ -548,17 +649,10 @@ void BatchExport::onExport()
 
                 Export::exportRaster(
                     area, width, height, dpi, _bgnd_color_picker->get_current_color(),
-                    item_filename, true, onProgressCallback,
-                    prog_dlg, omod, hide ? &show_only : nullptr);
+                    item_filename, true, onProgressCallback, this, omod, hide ? &show_only : nullptr);
             } else {
-                setExporting(true, Glib::ustring::compose(_("Exporting %1"), filename));
                 auto copy_doc = _document->copy();
-                Export::exportVector(omod, copy_doc.get(), item_filename, true, &show_only, page);
-            }
-
-            if (prog_dlg) {
-                delete prog_dlg;
-                prog_dlg = nullptr;
+                Export::exportVector(omod, copy_doc.get(), item_filename, true, show_only, page);
             }
         }
     }
@@ -572,7 +666,7 @@ void BatchExport::onBrowse(Gtk::EntryIconPosition pos, const GdkEventButton *ev)
         return;
     }
     Gtk::Window *window = _app->get_active_window();
-    browseConn.block();
+    browse_conn.block();
     Glib::ustring filename = Glib::filename_from_utf8(filename_entry->get_text());
 
     if (filename.empty()) {
@@ -580,7 +674,7 @@ void BatchExport::onBrowse(Gtk::EntryIconPosition pos, const GdkEventButton *ev)
     }
 
     Inkscape::UI::Dialog::FileSaveDialog *dialog = Inkscape::UI::Dialog::FileSaveDialog::create(
-        *window, filename, Inkscape::UI::Dialog::RASTER_TYPES, _("Select a filename for exporting"), "", "",
+        *window, filename, Inkscape::UI::Dialog::EXPORT_TYPES, _("Select a filename for exporting"), "", "",
         Inkscape::Extension::FILE_SAVE_METHOD_EXPORT);
 
     if (dialog->show()) {
@@ -594,11 +688,10 @@ void BatchExport::onBrowse(Gtk::EntryIconPosition pos, const GdkEventButton *ev)
         // deleting dialog before exporting is important
         // proper delete function should be made for dialog IMO
         delete dialog;
-        onExport();
     } else {
         delete dialog;
     }
-    browseConn.unblock();
+    browse_conn.unblock();
 }
 
 void BatchExport::setDefaultSelectionMode()
@@ -632,91 +725,33 @@ void BatchExport::setDefaultSelectionMode()
     prefs->setString("/dialogs/export/batchexportarea/value", pref_key_name);
 }
 
-void BatchExport::setExporting(bool exporting, Glib::ustring const &text)
+void BatchExport::setExporting(bool exporting, Glib::ustring const &text, Glib::ustring const &text_batch)
 {
     if (exporting) {
+        set_sensitive(false);
+        set_opacity(0.2);
+        progress_box->show();
         _prog->set_text(text);
         _prog->set_fraction(0.0);
-        _prog->set_sensitive(true);
-        export_btn->set_sensitive(false);
+        _prog_batch->set_text(text_batch);
     } else {
+        set_sensitive(true);
+        set_opacity(1.0);
+        progress_box->hide();
         _prog->set_text("");
         _prog->set_fraction(0.0);
-        _prog->set_sensitive(false);
-        export_btn->set_sensitive(true);
+        _prog_batch->set_text("");
     }
 }
 
-ExportProgressDialog *BatchExport::create_progress_dialog(Glib::ustring progress_text)
+unsigned int BatchExport::onProgressCallback(float value, void *data)
 {
-    // dont forget to delete it later
-    auto dlg = new ExportProgressDialog(_("Export in progress"), true);
-    dlg->set_transient_for(*(INKSCAPE.active_desktop()->getToplevel()));
-
-    Gtk::ProgressBar *prg = Gtk::manage(new Gtk::ProgressBar());
-    prg->set_text(progress_text);
-    dlg->set_progress(prg);
-    auto CA = dlg->get_content_area();
-    CA->pack_start(*prg, FALSE, FALSE, 4);
-
-    Gtk::Button *btn = dlg->add_button(_("_Cancel"), Gtk::RESPONSE_CANCEL);
-
-    btn->signal_clicked().connect(sigc::mem_fun(*this, &BatchExport::onProgressCancel));
-    dlg->signal_delete_event().connect(sigc::mem_fun(*this, &BatchExport::onProgressDelete));
-
-    dlg->show_all();
-    return dlg;
-}
-
-/// Called when dialog is deleted
-bool BatchExport::onProgressDelete(GdkEventAny * /*event*/)
-{
-    interrupted = true;
-    prog_dlg->set_stopped();
-    return TRUE;
-}
-
-/// Called when progress is cancelled
-void BatchExport::onProgressCancel()
-{
-    interrupted = true;
-    prog_dlg->set_stopped();
-}
-
-/// Called for every progress iteration
-unsigned int BatchExport::onProgressCallback(float value, void *dlg)
-{
-    auto dlg2 = reinterpret_cast<ExportProgressDialog *>(dlg);
-
-    auto self = dynamic_cast<BatchExport *>(dlg2->get_export_panel());
-
-    if (!self || self->interrupted)
-        return FALSE;
-
-    auto current = dlg2->get_current();
-    auto total = dlg2->get_total();
-    if (total > 0) {
-        double completed = current;
-        completed /= static_cast<double>(total);
-
-        value = completed + (value / static_cast<double>(total));
-    }
-
-    auto prg = dlg2->get_progress();
-    prg->set_fraction(value);
-
-    if (self) {
-        self->_prog->set_fraction(value);
-    }
-
-    int evtcount = 0;
-    while ((evtcount < 16) && gdk_events_pending()) {
+    if (auto bi = static_cast<BatchExport *>(data)) {
+        bi->_prog->set_fraction(value);
         Gtk::Main::iteration(false);
-        evtcount += 1;
+        return !bi->interrupted;
     }
-
-    Gtk::Main::iteration(false);
-    return TRUE;
+    return false;
 }
 
 void BatchExport::setDesktop(SPDesktop *desktop)
@@ -732,6 +767,8 @@ void BatchExport::setDocument(SPDocument *document)
     if (!_desktop) {
         document = nullptr;
     }
+    if (_document == document)
+        return;
 
     _document = document;
     _pages_changed_connection.disconnect();
@@ -741,11 +778,36 @@ void BatchExport::setDocument(SPDocument *document)
 
         auto bg_color = get_export_bg_color(document->getNamedView(), 0xffffff00);
         _bgnd_color_picker->setRgba32(bg_color);
-        refreshPreview();
+        _preview_drawing = std::make_shared<PreviewDrawing>(document);
+    } else {
+        _preview_drawing.reset();
     }
-    for (auto &[key, val] : current_items) {
-        val->setDocument(document);
+
+    refreshItems();
+}
+
+void BatchExport::queueRefreshItems()
+{
+    if (refresh_items_conn) {
+        return;
     }
+    // Asynchronously refresh the preview
+    refresh_items_conn = Glib::signal_idle().connect([this] {
+        refreshItems();
+        return false;
+    }, Glib::PRIORITY_HIGH);
+}
+
+void BatchExport::queueRefresh()
+{
+    if (refresh_conn) {
+        return;
+    }
+    refresh_conn = Glib::signal_idle().connect([this] {
+        refreshItems();
+        loadExportHints();
+        return false;
+    }, Glib::PRIORITY_HIGH);
 }
 
 } // namespace Dialog

@@ -17,6 +17,8 @@ ensure_command()
     command -v $1 >/dev/null 2>&1 || { echo >&2 "Required command '$1' not found. Aborting."; exit 1; }
 }
 
+export LANG=C # Needed to force . as the decimal separator
+
 ensure_command "convert"
 ensure_command "compare"
 ensure_command "bc"
@@ -56,11 +58,17 @@ then
     DPI_OPTION="-density $DPI"
 fi
 
-if ! convert $DPI_OPTION "${OUTPUT_FILENAME}${OUTFILE_SUFFIX}" $CONVERSION_OPTIONS "${OUTPUT_FILENAME}-output.png"
+if [[ $(identify -format "%m" "${OUTPUT_FILENAME}") != "PNG" ]]
 then
-    echo "Warning: Failed to convert test file '${OUTPUT_FILENAME}' to PNG format. Skipping comparison test."
-    exit 42
+    if ! convert $DPI_OPTION "${OUTPUT_FILENAME}${OUTFILE_SUFFIX}" $CONVERSION_OPTIONS "${OUTPUT_FILENAME}-output.png"
+    then
+        echo "Warning: Failed to convert test file '${OUTPUT_FILENAME}' to PNG format. Skipping comparison test."
+        exit 42
+    fi
+else
+    cp "${OUTPUT_FILENAME}" "${OUTPUT_FILENAME}-output.png"
 fi
+
 
 # Copy the reference file
 cp "${REFERENCE_FILENAME}" "${OUTPUT_FILENAME}-reference.png"
@@ -77,7 +85,7 @@ then
 fi
 
 # Check if the difference between the files is within tolerance
-CONDITION="$RELATIVE_ERROR * 100 <= $PERCENTAGE_DIFFERENCE_ALLOWED"
+CONDITION=$(printf "%.12f * 100 <= $PERCENTAGE_DIFFERENCE_ALLOWED" "$RELATIVE_ERROR")
 WITHIN_TOLERANCE=$(echo "${CONDITION}" | bc)
 if [[ $? -ne 0 ]]
 then
@@ -85,7 +93,8 @@ then
     exit 42
 fi
 
-PERCENTAGE_ERROR=$(echo "$RELATIVE_ERROR * 100" | bc)
+PERCENTAGE_ERROR_FORMULA=$(printf "%.4f * 100" "$RELATIVE_ERROR")
+PERCENTAGE_ERROR=$(echo "${PERCENTAGE_ERROR_FORMULA}" | bc)
 if (( $WITHIN_TOLERANCE ))
 then
     # Test passed: print stats and clean up the files.

@@ -31,8 +31,6 @@ public:
     Glib::ustring param_getDefaultSVGValue() const override;
     void param_set_default() override;
     void param_update_default(const gchar *default_value) override{};
-    void setUpdating(bool updating) { _updating = updating; }
-    bool getUpdating() const { return _updating; }
     bool linksToItem() const;
     SPObject *getObject() const;
     // UI
@@ -46,6 +44,7 @@ public:
     bool isConnected() {return !(!linked_changed_connection);}
     void start_listening(SPObject *to);
     void unlink();
+    bool lookup = false;
     ParamType paramType() const override { return ParamType::SATELLITE; };
 protected:
     void link(Glib::ustring itemid);
@@ -60,7 +59,6 @@ protected:
 
 private:
     std::vector<SPObject *> param_get_satellites() override;
-    bool _updating = false;
     sigc::connection linked_released_connection;
     sigc::connection linked_modified_connection;
     sigc::connection linked_transformed_connection;

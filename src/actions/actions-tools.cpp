@@ -15,6 +15,7 @@
 #include <glibmm/i18n.h>
 
 #include "actions-tools.h"
+#include "actions-helper.h"
 
 #include "inkscape-application.h"
 #include "inkscape-window.h"
@@ -54,6 +55,7 @@ static std::map<Glib::ustring, ToolData> const &get_tool_data()
         // clang-format off
     {"Select",       {TOOLS_SELECT,          PREFS_PAGE_TOOLS_SELECTOR,       "/tools/select",          }},
     {"Node",         {TOOLS_NODES,           PREFS_PAGE_TOOLS_NODE,           "/tools/nodes",           }},
+    {"Booleans",     {TOOLS_BOOLEANS,        PREFS_PAGE_TOOLS,/*No Page*/     "/tools/booleans",        }},
     {"Marker",       {TOOLS_MARKER,          PREFS_PAGE_TOOLS,/*No Page*/     "/tools/marker",          }},
     {"Rect",         {TOOLS_SHAPES_RECT,     PREFS_PAGE_TOOLS_SHAPES_RECT,    "/tools/shapes/rect",     }},
     {"Arc",          {TOOLS_SHAPES_ARC,      PREFS_PAGE_TOOLS_SHAPES_ELLIPSE, "/tools/shapes/arc",      }},
@@ -91,6 +93,7 @@ static std::map<Glib::ustring, Glib::ustring> const &get_tool_msg()
         // clang-format off
     {"Select",       _("<b>Click</b> to Select and Transform objects, <b>Drag</b> to select many objects.")                                                                                                                   },
     {"Node",         _("Modify selected path points (nodes) directly.")                                                                                                                                                       },
+    {"Booleans",     _("Construct shapes with the interactive boolean tool.")                                                                                                                                                 },
     {"Rect",         _("<b>Drag</b> to create a rectangle. <b>Drag controls</b> to round corners and resize. <b>Click</b> to select.")                                                                                        },
     {"Arc",          _("<b>Drag</b> to create an ellipse. <b>Drag controls</b> to make an arc or segment. <b>Click</b> to select.")                                                                                           },
     {"Star",         _("<b>Drag</b> to create a star. <b>Drag controls</b> to edit the star shape. <b>Click</b> to select.")                                                                                                  },
@@ -126,13 +129,13 @@ get_active_tool(InkscapeWindow *win)
 
     auto action = win->lookup_action("tool-switch");
     if (!action) {
-        std::cerr << "get_active_tool: action 'tool-switch' missing!" << std::endl;
+        show_output("get_active_tool: action 'tool-switch' missing!");
         return state;
     }
 
     auto saction = Glib::RefPtr<Gio::SimpleAction>::cast_dynamic(action);
     if (!saction) {
-        std::cerr << "get_active_tool: action 'tool-switch' not SimpleAction!" << std::endl;
+        show_output("get_active_tool: action 'tool-switch' not SimpleAction!");
         return state;
     }
 
@@ -169,34 +172,34 @@ open_tool_preferences(InkscapeWindow *win, Glib::ustring const &tool)
 void
 set_active_tool(InkscapeWindow *win, SPItem *item, Geom::Point const p)
 {
-    if (dynamic_cast<SPRect *>(item)) {
+    if (is<SPRect>(item)) {
         tool_switch("Rect", win);
-    } else if (dynamic_cast<SPGenericEllipse *>(item)) {
+    } else if (is<SPGenericEllipse>(item)) {
         tool_switch("Arc", win);
-    } else if (dynamic_cast<SPStar *>(item)) {
+    } else if (is<SPStar>(item)) {
         tool_switch("Star", win);
-    } else if (dynamic_cast<SPBox3D *>(item)) {
+    } else if (is<SPBox3D>(item)) {
         tool_switch("3DBox", win);
-    } else if (dynamic_cast<SPSpiral *>(item)) {
+    } else if (is<SPSpiral>(item)) {
         tool_switch("Spiral", win);
-    } else if (dynamic_cast<SPMarker *>(item)) {
+    } else if (is<SPMarker>(item)) {
         tool_switch("Marker", win);
-    } else if (dynamic_cast<SPPath *>(item)) {
+    } else if (is<SPPath>(item)) {
         if (Inkscape::UI::Tools::cc_item_is_connector(item)) {
             tool_switch("Connector", win);
         }
         else {
             tool_switch("Node", win);
         }
-    } else if (dynamic_cast<SPText *>(item) || dynamic_cast<SPFlowtext *>(item))  {
+    } else if (is<SPText>(item) || is<SPFlowtext>(item))  {
         tool_switch("Text", win);
         SPDesktop* dt = win->get_desktop();
         if (!dt) {
-            std::cerr << "set_active_tool: no desktop!" << std::endl;
+            show_output("set_active_tool: no desktop!");
             return;
         }
         sp_text_context_place_cursor_at (SP_TEXT_CONTEXT(dt->event_context), item, p);
-    } else if (dynamic_cast<SPOffset *>(item))  {
+    } else if (is<SPOffset>(item))  {
         tool_switch("Node", win);
     }
 }
@@ -211,33 +214,41 @@ tool_switch(Glib::ustring const &tool, InkscapeWindow *win)
     // Valid tool?
     auto tool_it = tool_data.find(tool);
     if (tool_it == tool_data.end()) {
-        std::cerr << "tool-switch: invalid tool name: " << tool.raw() << std::endl;
+        show_output(Glib::ustring("tool-switch: invalid tool name: ") + tool.raw());
         return;
     }
 
     // Have desktop?
     SPDesktop* dt = win->get_desktop();
     if (!dt) {
-        std::cerr << "tool_switch: no desktop!" << std::endl;
+        show_output("tool_switch: no desktop!");
         return;
     }
 
     auto action = win->lookup_action("tool-switch");
     if (!action) {
-        std::cerr << "tool-switch: action 'tool-switch' missing!" << std::endl;
+        show_output("tool-switch: action 'tool-switch' missing!");
         return;
     }
 
     auto saction = Glib::RefPtr<Gio::SimpleAction>::cast_dynamic(action);
     if (!saction) {
-        std::cerr << "tool-switch: action 'tool-switch' not SimpleAction!" << std::endl;
+        show_output("tool-switch: action 'tool-switch' not SimpleAction!");
         return;
     }
+
+    // Gtk sometimes fires multiple actions at us, including when switch 'away' from
+    // an option. So we catch duplications here and don't switch to ourselves.
+    Glib::ustring current_tool;
+    saction->get_state(current_tool);
+    if (current_tool == tool)
+        return;
 
     // Update button states.
     saction->set_enabled(false); // Avoid infinite loop when called by tool_toogle().
     saction->change_state(tool);
     saction->set_enabled(true);
+
 
     // Switch to new tool. TODO: Clean this up. This should be one window function.
     // Setting tool via preference path is a bit strange.
@@ -255,14 +266,14 @@ tool_preferences(Glib::ustring const &tool, InkscapeWindow *win)
     // Valid tool?
     auto tool_it = tool_data.find(tool);
     if (tool_it == tool_data.end()) {
-        std::cerr << "tool-preferences: invalid tool name: " << tool.raw() << std::endl;
+        show_output(Glib::ustring("tool-preferences: invalid tool name: ") + tool.raw());
         return;
     }
 
     // Have desktop?
     SPDesktop* dt = win->get_desktop();
     if (!dt) {
-        std::cerr << "tool-preferences: no desktop!" << std::endl;
+        show_output("tool-preferences: no desktop!");
         return;
     }
 
@@ -291,19 +302,19 @@ tool_toggle(InkscapeWindow *win)
 {
     SPDesktop* dt = win->get_desktop();
     if (!dt) {
-        std::cerr << "tool_toggle: no desktop!" << std::endl;
+        show_output("tool_toggle: no desktop!");
         return;
     }
 
     auto action = win->lookup_action("tool-switch");
     if (!action) {
-        std::cerr << "tool_toggle: action 'tool_switch' missing!" << std::endl;
+        show_output("tool_toggle: action 'tool_switch' missing!");
         return;
     }
 
     auto saction = Glib::RefPtr<Gio::SimpleAction>::cast_dynamic(action);
     if (!saction) {
-        std::cerr << "tool_toogle: action 'tool_switch' not SimpleAction!" << std::endl;
+        show_output("tool_toogle: action 'tool_switch' not SimpleAction!");
         return;
     }
 
@@ -350,6 +361,7 @@ std::vector<std::vector<Glib::ustring>> raw_data_tools =
     // clang-format off
     {"win.tool-switch('Select')",       N_("Select Tool"),        "Tool Switch",   N_("Select and transform objects")                  },
     {"win.tool-switch('Node')",         N_("Node Tool"),          "Tool Switch",   N_("Edit paths by nodes")                           },
+    {"win.tool-switch('Booleans')",     N_("Shape Builder Tool"), "Tool Switch",   N_("Build shapes with the boolean tools")           },
 
     {"win.tool-switch('Rect')",         N_("Rectangle Tool"),     "Tool Switch",   N_("Create rectangles and squares")                 },
     {"win.tool-switch('Arc')",          N_("Ellipse/Arc Tool"),   "Tool Switch",   N_("Create circles, ellipses and arcs")             },
@@ -393,7 +405,7 @@ add_actions_tools(InkscapeWindow* win)
 
     auto app = InkscapeApplication::instance();
     if (!app) {
-        std::cerr << "add_actions_tools: no app!" << std::endl;
+        show_output("add_actions_tools: no app!");
         return;
     }
 

@@ -103,8 +103,7 @@ LPEOffset::LPEOffset(LivePathEffectObject *lpeobject) :
     fillrule = fill_nonZero;
 }
 
-LPEOffset::~LPEOffset()
-{
+LPEOffset::~LPEOffset() {
     modified_connection.disconnect();
 };
 
@@ -135,7 +134,7 @@ LPEOffset::doOnApply(SPLPEItem const* lpeitem)
 void
 LPEOffset::modified(SPObject *obj, guint flags)
 {
-    if (flags & SP_OBJECT_STYLE_MODIFIED_FLAG) {
+    if (flags & SP_OBJECT_STYLE_MODIFIED_FLAG && sp_lpe_item) {
         // Get the used fillrule
         SPCSSAttr *css;
         const gchar *val;
@@ -224,18 +223,21 @@ LPEOffset::addCanvasIndicators(SPLPEItem const *lpeitem, std::vector<Geom::PathV
 void
 LPEOffset::doBeforeEffect (SPLPEItem const* lpeitem)
 {
-    SPObject *obj = dynamic_cast<SPObject *>(sp_lpe_item);
+    auto obj = sp_lpe_item;
     if (is_load && obj) {
         modified_connection = obj->connectModified(sigc::mem_fun(*this, &LPEOffset::modified));
     }
     original_bbox(lpeitem);
-    SPGroup *group = dynamic_cast<SPGroup *>(sp_lpe_item);
+    auto group = cast<SPGroup>(sp_lpe_item);
     if (group) {
         mix_pathv_all.clear();
     }
     this->scale = lpeitem->i2doc_affine().descrim();
     if (!is_load && prev_unit != unit.get_abbreviation()) {
+        offset.param_set_undo(false);
         offset.param_set_value(Inkscape::Util::Quantity::convert(offset, prev_unit, unit.get_abbreviation()));
+    } else {
+        offset.param_set_undo(true);
     }
     prev_unit = unit.get_abbreviation();
 }
@@ -265,9 +267,9 @@ void LPEOffset::doAfterEffect(SPLPEItem const * /*lpeitem*/, SPCurve *curve)
     if (_knot_entity && sp_lpe_item && !liveknot) {
         Geom::PathVector out;
         // we don do this on groups, editing is joining ito so no need to update knot
-        SPShape *shape = dynamic_cast<SPShape *>(sp_lpe_item);
+        auto shape = cast<SPShape>(sp_lpe_item);
         if (shape) {
-            out = SP_SHAPE(sp_lpe_item)->curve()->get_pathvector();
+            out = cast<SPShape>(sp_lpe_item)->curve()->get_pathvector();
             offset_pt = get_nearest_point(out, offset_pt);
             _knot_entity->knot_get();
         }
@@ -490,7 +492,7 @@ LPEOffset::doEffect_path(Geom::PathVector const & path_in)
     for (auto path : closed_pathv) {
         mix_pathv.push_back(path);
     }
-    SPGroup *group = dynamic_cast<SPGroup *>(sp_lpe_item);
+    auto group = cast<SPGroup>(sp_lpe_item);
     // Calculate the original pathvector used outside this function
     // to calculate the offset
     if (group) {
@@ -638,7 +640,7 @@ void KnotHolderEntityOffsetPoint::knot_set(Geom::Point const &p, Geom::Point con
     if (lpe->update_on_knot_move) {
         lpe->liveknot = true;
         lpe->offset.param_set_value(offset);
-        sp_lpe_item_update_patheffect (SP_LPE_ITEM(item), false, false);
+        sp_lpe_item_update_patheffect (cast<SPLPEItem>(item), false, false);
     } else {
         lpe->liveknot = false;
     }
@@ -653,7 +655,7 @@ void KnotHolderEntityOffsetPoint::knot_ungrabbed(Geom::Point const &p, Geom::Poi
     Geom::Point s = lpe->offset_pt;
     double offset = lpe->sp_get_offset(s);
     lpe->offset.param_set_value(offset);
-    sp_lpe_item_update_patheffect(SP_LPE_ITEM(item), false, false);
+    lpe->makeUndoDone(_("Move handle"));
 }
 
 Geom::Point KnotHolderEntityOffsetPoint::knot_get() const
@@ -668,12 +670,12 @@ Geom::Point KnotHolderEntityOffsetPoint::knot_get() const
     Geom::Point nearest = lpe->offset_pt;
     if (nearest == Geom::Point(Geom::infinity(), Geom::infinity())) {
         Geom::PathVector out;
-        SPGroup *group = dynamic_cast<SPGroup *>(item);
-        SPShape *shape = dynamic_cast<SPShape *>(item);
+        auto group = cast<SPGroup>(item);
+        auto shape = cast<SPShape>(item);
         if (group) {
-            std::vector<SPItem *> item_list = sp_item_group_item_list(group);
+            std::vector<SPItem *> item_list = group->item_list();
             for (auto child : item_list) {
-                SPShape *subchild = dynamic_cast<SPShape *>(child);
+                auto subchild = cast<SPShape>(child);
                 if (subchild) {
                     Geom::PathVector tmp = subchild->curve()->get_pathvector();
                     out.insert(out.begin(), tmp.begin(), tmp.end());

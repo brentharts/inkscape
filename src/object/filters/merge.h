@@ -13,13 +13,15 @@
 
 #include "sp-filter-primitive.h"
 
-class SPFeMerge
+class SPFeMerge final
     : public SPFilterPrimitive
 {
+public:
+    int tag() const override { return tag_of<decltype(*this)>; }
+
 protected:
     void modified(unsigned flags) override;
 
-protected:
     void child_added(Inkscape::XML::Node *child, Inkscape::XML::Node *ref) override;
     void remove_child(Inkscape::XML::Node *child) override;
     void order_changed(Inkscape::XML::Node *child, Inkscape::XML::Node *old_ref, Inkscape::XML::Node *new_ref) override;
@@ -27,9 +29,6 @@ protected:
     void resolve_slots(SlotResolver &) override;
     std::unique_ptr<Inkscape::Filters::FilterPrimitive> build_renderer(Inkscape::DrawingItem *item) const override;
 };
-
-MAKE_SP_OBJECT_DOWNCAST_FUNCTIONS(SP_FEMERGE, SPFeMerge)
-MAKE_SP_OBJECT_TYPECHECK_FUNCTIONS(SP_IS_FEMERGE, SPFeMerge)
 
 #endif // SP_FEMERGE_H_SEEN
 

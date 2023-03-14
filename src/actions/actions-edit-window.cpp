@@ -15,6 +15,7 @@
 #include <glibmm/i18n.h>
 
 #include "actions-edit-window.h"
+#include "actions-helper.h"
 #include "inkscape-application.h"
 #include "inkscape-window.h"
 #include "desktop.h"
@@ -36,6 +37,15 @@ paste_in_place(InkscapeWindow* win)
 
     // Paste In Place
     sp_selection_paste(dt, true);
+}
+
+void
+paste_on_page(InkscapeWindow* win)
+{
+    SPDesktop* dt = win->get_desktop();
+
+    // Paste In Place
+    sp_selection_paste(dt, true, true);
 }
 
 void
@@ -62,12 +72,13 @@ add_actions_edit_window(InkscapeWindow* win)
     // clang-format off
     win->add_action(        "paste",                           sigc::bind<InkscapeWindow*>(sigc::ptr_fun(&paste), win));
     win->add_action(        "paste-in-place",                  sigc::bind<InkscapeWindow*>(sigc::ptr_fun(&paste_in_place), win));
+    win->add_action(        "paste-on-page",                   sigc::bind<InkscapeWindow*>(sigc::ptr_fun(&paste_on_page), win));
     win->add_action(        "path-effect-parameter-next",      sigc::bind<InkscapeWindow*>(sigc::ptr_fun(&path_effect_parameter_next), win));
     // clang-format on
 
     auto app = InkscapeApplication::instance();
     if (!app) {
-        std::cerr << "add_actions_edit_window: no app!" << std::endl;
+        show_output("add_actions_edit_window: no app!");
         return;
     }
     app->get_action_extra_data().add_data(raw_data_edit_window);

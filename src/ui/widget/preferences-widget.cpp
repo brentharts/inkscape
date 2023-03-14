@@ -178,7 +178,8 @@ void PrefCheckButton::init(Glib::ustring const &label, Glib::ustring const &pref
 {
     _prefs_path = prefs_path;
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    this->set_label(label);
+    if (!label.empty())
+        this->set_label(label);
     this->set_active( prefs->getBool(_prefs_path, default_value) );
 }
 
@@ -446,26 +447,15 @@ ZoomCorrRuler::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
 
     auto context = get_style_context();
     Gdk::RGBA fg = context->get_color(get_state_flags());
-    Gdk::RGBA bg;
-    bg.set_grey(0.5);
-    if (auto wnd = dynamic_cast<Gtk::Window*>(this->get_toplevel())) {
-        auto sc = wnd->get_style_context();
-        bg = get_background_color(sc);
-    }
 
-    cr->set_source_rgb(bg.get_red(), bg.get_green(), bg.get_blue());
-    cr->set_fill_rule(Cairo::FILL_RULE_WINDING);
-    cr->rectangle(0, 0, w, _height + _border*2);
-    cr->fill();
+    context->render_background(cr, 0, 0, w, _height + _border * 2);
 
-    cr->set_source_rgb(0.0, 0.0, 0.0);
-    cr->set_line_width(0.5);
+    cr->set_line_width(1);
+    cr->set_source_rgb(fg.get_red(), fg.get_green(), fg.get_blue());
 
     cr->translate(_border, _border); // so that we have a small white border around the ruler
     cr->move_to (0, _height);
     cr->line_to (_drawing_width, _height);
-
-    cr->set_source_rgb(fg.get_red(), fg.get_green(), fg.get_blue());
 
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     Glib::ustring abbr = prefs->getString("/options/zoomcorrection/unit");
@@ -660,7 +650,7 @@ PrefSlider::init(Glib::ustring const &prefs_path,
 }
 
 void PrefCombo::init(Glib::ustring const &prefs_path,
-                     Glib::ustring labels[], int values[], int num_items, int default_value)
+                     Glib::ustring const labels[], int const values[], int num_items, int default_value)
 {
     _prefs_path = prefs_path;
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
@@ -1035,6 +1025,15 @@ void PrefEntry::on_changed()
     {
         Inkscape::Preferences *prefs = Inkscape::Preferences::get();
         prefs->setString(_prefs_path, this->get_text());
+    }
+}
+
+void PrefEntryFile::on_changed()
+{
+    if (this->get_visible()) //only take action if user changed value
+    {
+        Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+        prefs->setString(_prefs_path, Glib::filename_to_utf8(this->get_text()));
     }
 }
 

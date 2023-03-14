@@ -41,6 +41,7 @@ class SPFilterPrimitive
 public:
 	SPFilterPrimitive();
 	~SPFilterPrimitive() override;
+    int tag() const override { return tag_of<decltype(*this)>; }
 
     int get_in() const { return in_slot; }
     int get_out() const { return out_slot; }
@@ -78,9 +79,6 @@ private:
     int in_slot = Inkscape::Filters::NR_FILTER_SLOT_NOT_SET;
     int out_slot = Inkscape::Filters::NR_FILTER_SLOT_NOT_SET;
 };
-
-MAKE_SP_OBJECT_DOWNCAST_FUNCTIONS(SP_FILTER_PRIMITIVE, SPFilterPrimitive)
-MAKE_SP_OBJECT_TYPECHECK_FUNCTIONS(SP_IS_FILTER_PRIMITIVE, SPFilterPrimitive)
 
 #endif // SEEN_SP_FILTER_PRIMITIVE_H
 

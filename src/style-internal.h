@@ -171,6 +171,10 @@ public:
             style_src = SPStyleSrc::STYLE_PROP;
         }
     }
+    void overwrite(const SPIBase* const other) {
+        clear();
+        merge(other);
+    }
 
     virtual void cascade( const SPIBase* const parent ) = 0;
     virtual void merge(   const SPIBase* const parent ) = 0;
@@ -732,16 +736,9 @@ class SPIPaint : public SPIBase
 {
 
 public:
-    SPIPaint()
-        : paintOrigin(SP_CSS_PAINT_ORIGIN_NORMAL),
-          colorSet(false),
-          noneSet(false) {
-        value.href = nullptr;
-        tag = nullptr;
-        clear();
-    }
+    SPIPaint() { clear(); }
 
-    ~SPIPaint() override;  // Clear and delete href.
+    ~SPIPaint() override = default;
     void read( gchar const *str ) override;
     virtual void read( gchar const *str, SPStyle &style, SPDocument *document = nullptr);
     const Glib::ustring get_value() const override;
@@ -805,10 +802,10 @@ public:
     bool colorSet : 1;
     bool noneSet : 1;
     struct {
-         SPPaintServerReference *href;
+         std::shared_ptr<SPPaintServerReference> href;
          SPColor color;
     } value;
-    SPObject* tag;
+    SPObject *tag = nullptr;
 };
 
 
@@ -904,6 +901,8 @@ public:
     SPIDashArray& operator=(const SPIDashArray& rhs) = default;
 
     bool operator==(const SPIBase& rhs) const override;
+
+    bool is_valid() const;
 
   // To do: make private, change double to SVGLength
 public:

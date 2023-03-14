@@ -24,11 +24,12 @@
 #include <2geom/forward.h>
 #include <2geom/affine.h>
 #include <2geom/rect.h>
+#include "live_effects/effect-enum.h"
 #include <vector>
 
 #include "sp-object.h"
 #include "sp-marker-loc.h"
-
+#include "display/drawing-item-ptr.h"
 #include "xml/repr.h"
 
 class SPGroup;
@@ -90,7 +91,8 @@ struct SPItemView
 {
     unsigned flags;
     unsigned key;
-    Inkscape::DrawingItem *drawingitem;
+    DrawingItemPtr<Inkscape::DrawingItem> drawingitem;
+    SPItemView(unsigned flags, unsigned key, DrawingItemPtr<Inkscape::DrawingItem> drawingitem);
 };
 
 enum SPItemKey
@@ -150,6 +152,7 @@ public:
 
     SPItem();
     ~SPItem() override;
+    int tag() const override { return tag_of<decltype(*this)>; }
 
     unsigned int sensitive : 1;
     unsigned int stop_paint: 1;
@@ -173,7 +176,7 @@ public:
     SPMaskReference &getMaskRef();
 
     SPAvoidRef &getAvoidRef();
-
+    std::vector<std::pair <Glib::ustring, Glib::ustring> > rootsatellites;
   private:
     SPClipPathReference *clip_ref;
     SPMaskReference *mask_ref;
@@ -206,7 +209,7 @@ public:
     bool isEvaluated() const;
     void setEvaluated(bool visible);
     void resetEvaluated();
-
+    bool unoptimized();
     bool isHidden(unsigned display_key) const;
 
     /**
@@ -387,6 +390,15 @@ public:
     bool collidesWith(SPItem const &other) const;
 
     /**
+     * Combine all the pathvectors for this SPShape and SPGroup children
+     * into a single pathvector with multiple curves.
+     *
+     * @param depth - Number of group depths to recurse for shapes.
+     */
+
+    Geom::PathVector combined_pathvector(int depth = -1) const;
+
+    /**
      * Set a new transform on an object.
      *
      * Compensate for stroke scaling and gradient/pattern fill transform, if
@@ -412,7 +424,7 @@ public:
 
     /**
      * Returns the accumulated transformation of the item and all its ancestors, including root's viewport.
-     * @pre (item != NULL) and SP_IS_ITEM(item).
+     * @pre (item != NULL) and is<SPItem>(item).
      */
     Geom::Affine i2doc_affine() const;
 
@@ -499,12 +511,8 @@ inline bool sp_item_repr_compare_position_bool(SPObject const *first, SPObject c
             second->getRepr())<0;
 }
 
-
 SPItem *sp_item_first_item_child (SPObject *obj);
 SPItem const *sp_item_first_item_child (SPObject const *obj);
-
-MAKE_SP_OBJECT_DOWNCAST_FUNCTIONS(SP_ITEM, SPItem)
-MAKE_SP_OBJECT_TYPECHECK_FUNCTIONS(SP_IS_ITEM, SPItem)
 
 #endif // SEEN_SP_ITEM_H
 

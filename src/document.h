@@ -35,7 +35,7 @@
 #include <2geom/affine.h>
 #include <2geom/forward.h>
 
-#include "3rdparty/libcroco/cr-cascade.h"
+#include "3rdparty/libcroco/src/cr-cascade.h"
 
 #include "document-undo.h"
 #include "event.h"
@@ -119,6 +119,7 @@ public:
     SPDocument(SPDocument const &) = delete; // no copy
     void operator=(SPDocument const &) = delete; // no assign
 
+    static gint get_new_doc_number();
 
     // Document creation ------------------
     static SPDocument *createDoc(Inkscape::XML::Document *rdoc, char const *filename,
@@ -126,14 +127,21 @@ public:
             SPDocument *parent);
     static SPDocument *createNewDoc(char const *filename, bool keepalive,
             bool make_new = false, SPDocument *parent=nullptr );
-    static SPDocument *createNewDocFromMem(char const*buffer, int length, bool keepalive);
-           SPDocument *createChildDoc(std::string const &filename);
+    static SPDocument *createNewDocFromMem(char const *buffer, int length, bool keepalive,
+                                           Glib::ustring const &filename = "");
+    SPDocument *createChildDoc(std::string const &filename);
 
     void setPages(bool enabled);
+    void prunePages(const std::string &page_nums, bool invert = false);
 
     // Make a copy, you are responsible for the copy.
     std::unique_ptr<SPDocument> copy() const;
-
+    // Substitute doc root
+    void rebase(Inkscape::XML::Document * new_xmldoc, bool keep_namedview = true);
+    // Substitute doc root with a file
+    void rebase(const gchar * file, bool keep_namedview = true);
+    // Substitute doc root with file in disk
+    void rebase(bool keep_namedview = true);
     // Document status --------------------
     void setVirgin(bool Virgin) { virgin = Virgin; }
     bool getVirgin() { return virgin; }
@@ -334,7 +342,7 @@ public:
      * perspective in the defs. If no perspective exists, returns NULL.
      */
     Persp3D * getCurrentPersp3D();
-
+    void fix_lpe_data();
     void setCurrentPersp3DImpl(Persp3DImpl * const persp_impl) { current_persp3d_impl = persp_impl; }
     Persp3DImpl * getCurrentPersp3DImpl() { return current_persp3d_impl; }
 
@@ -353,7 +361,6 @@ public:
     void reset_key(void *dummy) { actionkey.clear(); }
     bool isSensitive() const { return sensitive; }
 
-
     // Garbage collecting ----------------------
     void queueForOrphanCollection(SPObject *object);
     void collectOrphans();
@@ -362,6 +369,12 @@ public:
     // Actions ---------------------------------
     Glib::RefPtr<Gio::SimpleActionGroup> getActionGroup() { return action_group; }
 
+protected:
+    friend class Inkscape::DocumentUndo;
+    bool isUndoBusy() const { return _undobusy; }
+    void setUndoBusy(bool undobussy) { _undobusy = undobussy; }
+    Glib::ustring getEventDescriptionStacked() const { return _event_description_stacked; }
+    void setEventDescriptionStacked(Glib::ustring event_description_stacked) { _event_description_stacked = event_description_stacked; }
     /************* Data ***************/
 private:
 
@@ -427,7 +440,8 @@ private:
     int history_size;
     std::vector<Inkscape::Event *> undo; /* Undo stack of reprs */
     std::vector<Inkscape::Event *> redo; /* Redo stack of reprs */
-
+    bool _undobusy = false;
+    Glib::ustring _event_description_stacked = "";  
     /* Undo listener */
     Inkscape::CompositeUndoStackObserver undoStackObservers;
 
@@ -471,12 +485,7 @@ private:
     SPDocument::CommitSignal commit_signal; // Used by friend Inkscape::DocumentUndo
     SPDocument::BeforeCommitSignal before_commit_signal; // Used by friend Inkscape::DocumentUndo
 
-    bool oldSignalsConnected;
-
-    sigc::connection _selection_changed_connection;
     sigc::connection _desktop_activated_connection;
-    sigc::connection selChangeConnection;
-    sigc::connection desktopActivatedConnection;
 
     sigc::signal<void ()> destroySignal;
 

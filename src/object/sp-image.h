@@ -31,10 +31,11 @@
 #define SP_IMAGE_HREF_MODIFIED_FLAG SP_OBJECT_USER_MODIFIED_FLAG_A
 
 namespace Inkscape { class Pixbuf; }
-class SPImage : public SPItem, public SPViewBox, public SPDimensions {
+class SPImage final : public SPItem, public SPViewBox, public SPDimensions {
 public:
     SPImage();
     ~SPImage() override;
+    int tag() const override { return tag_of<decltype(*this)>; }
 
     Geom::Rect clipbox;
     double sx, sy;
@@ -48,6 +49,7 @@ public:
     char *color_profile;
 
     std::shared_ptr<Inkscape::Pixbuf const> pixbuf;
+    bool missing = true;
 
     void build(SPDocument *document, Inkscape::XML::Node *repr) override;
     void release() override;
@@ -79,8 +81,5 @@ private:
 /* Return duplicate of curve or NULL */
 void sp_embed_image(Inkscape::XML::Node *imgnode, Inkscape::Pixbuf *pb);
 void sp_embed_svg(Inkscape::XML::Node *image_node, std::string const &fn);
-
-MAKE_SP_OBJECT_DOWNCAST_FUNCTIONS(SP_IMAGE, SPImage)
-MAKE_SP_OBJECT_TYPECHECK_FUNCTIONS(SP_IS_IMAGE, SPImage)
 
 #endif

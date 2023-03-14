@@ -138,6 +138,24 @@ enum class SPAttr {
     POSITION,
     INKSCAPE_COLOR,
     INKSCAPE_LOCKED,
+    /* SPPage */
+    PAGE_MARGIN,
+    PAGE_BLEED,
+    PAGE_SIZE,
+    /* SPGrid */
+    ORIGINX,
+    ORIGINY,
+    SPACINGX,
+    SPACINGY,
+    ANGLE_X,
+    ANGLE_Z,
+    VISIBLE,
+    ENABLED,
+    EMPOPACITY,
+    EMPCOLOR,
+    MAJOR_LINE_INTERVAL,
+    DOTTED,
+    SNAP_TO_VISIBLE_ONLY,
     /* SPImage, SPRect, etc. */
     X,
     Y,
@@ -303,6 +321,7 @@ enum class SPAttr {
     GRADIENTTRANSFORM,
     SPREADMETHOD,
     INKSCAPE_SWATCH,
+    INKSCAPE_PINNED,
     /* SPRadialGradient */
     FX,
     FY,

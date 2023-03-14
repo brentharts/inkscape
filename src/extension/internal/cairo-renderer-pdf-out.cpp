@@ -78,7 +78,7 @@ pdf_render_document_to_file(SPDocument *doc, gchar const *filename, unsigned int
     bool pageBoundingBox = !flags.drawing_only;
     if (exportId && strcmp(exportId, "")) {
         // we want to export the given item only
-        base = SP_ITEM(doc->getObjectById(exportId));
+        base = cast<SPItem>(doc->getObjectById(exportId));
         if (!base) {
             throw Inkscape::Extension::Output::export_id_not_found(exportId);
         }
@@ -92,11 +92,11 @@ pdf_render_document_to_file(SPDocument *doc, gchar const *filename, unsigned int
         return false;
     }
     
-    /* Create new arena */
+    /* Create new drawing */
     Inkscape::Drawing drawing;
-    drawing.setExact(true);
     unsigned dkey = SPItem::display_key_new(1);
-    root->invoke_show(drawing, dkey, SP_ITEM_SHOW_DISPLAY);
+    drawing.setRoot(root->invoke_show(drawing, dkey, SP_ITEM_SHOW_DISPLAY));
+    drawing.setExact();
 
     /* Create renderer and context */
     CairoRenderer *renderer = new CairoRenderer();
@@ -284,7 +284,7 @@ CairoRendererPdfOutput::init ()
             "</param><spacer size=\"10\" />"
             "<param name=\"bleed\" gui-text=\"" N_("Bleed/margin (mm):") "\" type=\"float\" min=\"-10000\" max=\"10000\">0</param>\n"
             "<param name=\"exportId\" gui-text=\"" N_("Limit export to the object with ID:") "\" type=\"string\"></param>\n"
-            "<output is_exported='true'>\n"
+            "<output is_exported='true' priority='5'>\n"
                 "<extension>.pdf</extension>\n"
                 "<mimetype>application/pdf</mimetype>\n"
                 "<filetypename>Portable Document Format (*.pdf)</filetypename>\n"

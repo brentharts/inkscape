@@ -17,9 +17,13 @@
 #include "number-opt-number.h"
 #include "display/nr-filter-morphology.h"
 
-class SPFeMorphology
+class SPFeMorphology final
     : public SPFilterPrimitive
 {
+public:
+    int tag() const override { return tag_of<decltype(*this)>; }
+    Geom::Rect calculate_region(Geom::Rect const &region) const override;
+
 private:
     Inkscape::Filters::FilterMorphologyOperator Operator = Inkscape::Filters::MORPHOLOGY_OPERATOR_ERODE;
     NumberOptNumber radius = NumberOptNumber(0);
@@ -30,9 +34,6 @@ protected:
 
     std::unique_ptr<Inkscape::Filters::FilterPrimitive> build_renderer(Inkscape::DrawingItem *item) const override;
 };
-
-MAKE_SP_OBJECT_DOWNCAST_FUNCTIONS(SP_FEMORPHOLOGY, SPFeMorphology)
-MAKE_SP_OBJECT_TYPECHECK_FUNCTIONS(SP_IS_FEMORPHOLOGY, SPFeMorphology)
 
 #endif // SP_FEMORPHOLOGY_H_SEEN
 

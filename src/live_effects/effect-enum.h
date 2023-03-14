@@ -11,11 +11,12 @@
  */
 
 #include "util/enums.h"
+#include <map>
 
 namespace Inkscape {
 namespace LivePathEffect {
 
-//Please fill in the same order than in effect.cpp:98
+// Please fill in the same order than in effect.cpp:98
 enum EffectType {
     BEND_PATH = 0,
     GEARS,
@@ -45,7 +46,6 @@ enum EffectType {
     MIRROR_SYMMETRY,
     COPY_ROTATE,
     ATTACH_PATH,
-    FILL_BETWEEN_STROKES,
     FILL_BETWEEN_MANY,
     ELLIPSE_5PTS,
     BOUNDING_BOX,
@@ -69,6 +69,7 @@ enum EffectType {
     PARALLEL,
     PERP_BISECTOR,
     TANGENT_TO_CURVE,
+    FILL_BETWEEN_STROKES,
     // Hidden Experimental LPE's
     DOEFFECTSTACK_TEST,
     DYNASTROKE,
@@ -80,12 +81,13 @@ enum EffectType {
     INVALID_LPE // This must be last (I made it such that it is not needed anymore I think..., Don't trust on it being
                 // last. - johan)
 };
-//ALPHABETIC
+// ALPHABETIC
 enum ParamType {
     ARRAY = 0,
     BOOL,
     COLOR_PICKER,
     ENUM,
+    ENUM_ARRAY,
     FONT_BUTTON,
     HIDDEN,
     MESSAGE,
@@ -100,6 +102,8 @@ enum ParamType {
     RANDOM,
     SATELLITE,
     SATELLITE_ARRAY,
+    SCALAR,
+    SCALAR_ARRAY,
     TEXT,
     TOGGLE_BUTTON,
     TRANSFORMED_POINT,
@@ -108,6 +112,8 @@ enum ParamType {
     INVALID_PARAM // This must be last
 };
 
+enum class LPECategory { Undefined, Favorites, EditTools, Distort, Generate, Convert, Experimental };
+
 template <typename E>
 struct EnumEffectData {
     E id;
@@ -115,6 +121,7 @@ struct EnumEffectData {
     const Glib::ustring key;
     const Glib::ustring icon;
     const Glib::ustring description;
+    const LPECategory category;
     const bool on_path;
     const bool on_shape;
     const bool on_group;
@@ -219,6 +226,16 @@ class EnumEffectDataConverter {
         }
 
         return empty_string;
+    }
+
+    LPECategory get_category(const E id) const
+    {
+        for (unsigned int i = 0; i < _length; ++i) {
+            if (_data[i].id == id)
+                return _data[i].category;
+        }
+
+        return LPECategory::Undefined;
     }
 
     bool get_on_path(const E id) const

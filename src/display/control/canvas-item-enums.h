@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-#ifndef SEEN_CANVAS_ITEM_ENUMS_H
-#define SEEN_CANVAS_ITEM_ENUMS_H
-
 /**
- * Enums for CanvasControlItem's.
+ * @file
+ * Enums for CanvasItems.
  */
-
 /*
  * Author:
  *   Tavmjong Bah
  *
  * Copyright (C) 2020 Tavmjong Bah
  */
+
+#ifndef SEEN_CANVAS_ITEM_ENUMS_H
+#define SEEN_CANVAS_ITEM_ENUMS_H
 
 namespace Inkscape {
 
@@ -53,6 +53,7 @@ enum CanvasItemCtrlType {
     CANVAS_ITEM_CTRL_TYPE_ANCHOR,
     CANVAS_ITEM_CTRL_TYPE_POINT,
     CANVAS_ITEM_CTRL_TYPE_ROTATE,
+    CANVAS_ITEM_CTRL_TYPE_MARGIN,
     CANVAS_ITEM_CTRL_TYPE_CENTER,
     CANVAS_ITEM_CTRL_TYPE_SIZER,
     CANVAS_ITEM_CTRL_TYPE_SHAPER,

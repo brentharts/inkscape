@@ -18,12 +18,13 @@
 
 #include "object/sp-object.h"
 
-class SPFeSpotLight
+class SPFeSpotLight final
     : public SPObject
 {
 public:
 	SPFeSpotLight();
 	~SPFeSpotLight() override;
+    int tag() const override { return tag_of<decltype(*this)>; }
 
     /// x coordinate of the light source
     float x; 
@@ -56,9 +57,6 @@ protected:
     void set(SPAttr key, char const *value) override;
     Inkscape::XML::Node *write(Inkscape::XML::Document *doc, Inkscape::XML::Node *repr, unsigned flags) override;
 };
-
-MAKE_SP_OBJECT_DOWNCAST_FUNCTIONS(SP_FESPOTLIGHT, SPFeSpotLight)
-MAKE_SP_OBJECT_TYPECHECK_FUNCTIONS(SP_IS_FESPOTLIGHT, SPFeSpotLight)
 
 #endif // SP_FESPOTLIGHT_H_SEEN
 

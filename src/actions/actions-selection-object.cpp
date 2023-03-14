@@ -37,9 +37,8 @@ void
 select_object_group(InkscapeApplication* app)
 {
     Inkscape::Selection *selection = app->get_active_selection();
-
-    // Group
     selection->group();
+    Inkscape::DocumentUndo::done(selection->document(), C_("Verb", "Group"), INKSCAPE_ICON("object-group"));
 }
 
 void
@@ -47,8 +46,8 @@ select_object_ungroup(InkscapeApplication* app)
 {
     Inkscape::Selection *selection = app->get_active_selection();
 
-    // Ungroup
     selection->ungroup();
+    Inkscape::DocumentUndo::done(selection->document(), _("Ungroup"), INKSCAPE_ICON("object-ungroup"));
 }
 
 void
@@ -66,13 +65,12 @@ select_object_link(InkscapeApplication* app)
     Inkscape::Selection *selection = app->get_active_selection();
 
     // Group with <a>
-    auto anchor = selection->group(1);
+    auto anchor = selection->group(true);
     selection->set(anchor);
 
     // Open dialog to set link.
-    if (app->get_active_window()) {
-        app->get_active_window()->get_desktop()->getContainer()->new_dialog("ObjectAttributes");
-    }
+    selection->desktop()->getContainer()->new_dialog("ObjectAttributes");
+    Inkscape::DocumentUndo::done(selection->document(), _("Anchor"), INKSCAPE_ICON("object-group"));
 }
 
 void
@@ -150,10 +148,10 @@ page_fit_to_selection(InkscapeApplication *app)
 std::vector<std::vector<Glib::ustring>> raw_data_selection_object =
 {
     // clang-format off
-    { "app.selection-group",                N_("Group"),                                 "Select",   N_("Group selected objects")},
+    { "app.selection-group",                NC_("Verb", "Group"),                        "Select",   N_("Group selected objects")},
     { "app.selection-ungroup",              N_("Ungroup"),                               "Select",   N_("Ungroup selected objects")},
     { "app.selection-ungroup-pop",          N_("Pop Selected Objects out of Group"),     "Select",   N_("Pop selected objects out of group")},
-    { "app.selection-link",                 N_("Link"),                                  "Select",   N_("Add an anchor to selected objects")},
+    { "app.selection-link",                 NC_("Hyperlink|Verb", "Link"),               "Select",   N_("Add an anchor to selected objects")},
 
     { "app.selection-top",                  N_("Raise to Top"),                          "Select",   N_("Raise selection to top")},
     { "app.selection-raise",                N_("Raise"),                                 "Select",   N_("Raise selection one step")},

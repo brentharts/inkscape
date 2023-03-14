@@ -41,6 +41,8 @@
 #include <string>
 #include <cstring>
 
+#include <boost/range/adaptor/reversed.hpp>
+
 #include <2geom/transforms.h>
 
 #include "desktop.h"
@@ -48,11 +50,12 @@
 #include "event-log.h"
 #include "file.h"
 #include "id-clash.h"
-#include "inkscape-version.h"
 #include "inkscape.h"
 #include "inkscape-window.h"
 #include "profile-manager.h"
 #include "rdf.h"
+
+#include "live_effects/effect.h"
 
 #include "actions/actions-edit-document.h"
 #include "actions/actions-undo-document.h"
@@ -62,9 +65,8 @@
 
 #include "3rdparty/adaptagrams/libavoid/router.h"
 
-#include "3rdparty/libcroco/cr-parser.h"
-#include "3rdparty/libcroco/cr-sel-eng.h"
-#include "3rdparty/libcroco/cr-selector.h"
+#include "3rdparty/libcroco/src/cr-sel-eng.h"
+#include "3rdparty/libcroco/src/cr-selector.h"
 
 #include "io/dir-util.h"
 #include "layer-manager.h"
@@ -116,7 +118,6 @@ SPDocument::SPDocument() :
     actionkey(),
     object_id_counter(1),
     _router(std::make_unique<Avoid::Router>(Avoid::PolyLineRouting|Avoid::OrthogonalRouting)),
-    oldSignalsConnected(false),
     current_persp3d(nullptr),
     current_persp3d_impl(nullptr),
     _parent_document(nullptr),
@@ -127,6 +128,10 @@ SPDocument::SPDocument() :
 
     _event_log = std::make_unique<Inkscape::EventLog>(this);
     _selection = std::make_unique<Inkscape::Selection>(this);
+
+    _desktop_activated_connection = INKSCAPE.signal_activate_desktop.connect(
+                sigc::hide(sigc::bind(
+                sigc::ptr_fun(&DocumentUndo::resetKey), this)));
 
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
 
@@ -169,14 +174,7 @@ SPDocument::~SPDocument() {
 
     // kill/unhook this first
     _profileManager.reset();
-
-    if (oldSignalsConnected) {
-        selChangeConnection.disconnect();
-        desktopActivatedConnection.disconnect();
-    } else {
-        _selection_changed_connection.disconnect();
-        _desktop_activated_connection.disconnect();
-    }
+    _desktop_activated_connection.disconnect();
 
     if (partial) {
         sp_repr_free_log(partial);
@@ -230,6 +228,10 @@ SPDocument::~SPDocument() {
     collectOrphans();
 }
 
+gint SPDocument::get_new_doc_number() {
+    return ++doc_count;
+}
+
 Inkscape::XML::Node *SPDocument::getReprNamedView()
 {
     return sp_repr_lookup_name (rroot, "sodipodi:namedview");
@@ -248,7 +250,7 @@ SPNamedView *SPDocument::getNamedView()
         rroot->addChildAtPos(xml, 0);
         Inkscape::GC::release(xml);
     }
-    return dynamic_cast<SPNamedView *> (getObjectByRepr(xml));
+    return cast<SPNamedView> (getObjectByRepr(xml));
 }
 
 SPDefs *SPDocument::getDefs()
@@ -281,9 +283,9 @@ void SPDocument::setCurrentPersp3D(Persp3D * const persp) {
 
 void SPDocument::getPerspectivesInDefs(std::vector<Persp3D*> &list) const
 {
-    for (auto& i: root->defs->children) {
-        if (SP_IS_PERSP3D(&i)) {
-            list.push_back(SP_PERSP3D(&i));
+    for (auto &c : root->defs->children) {
+        if (auto p = cast<Persp3D>(&c)) {
+            list.emplace_back(p);
         }
     }
 }
@@ -308,6 +310,23 @@ void SPDocument::setPages(bool enabled)
     } else {
         _page_manager->disablePages();
     }
+}
+
+/**
+ * Remove pages in bulk using the integer range format "1,2,3-4" etc.
+ *
+ * @param page_nums - A string containing a range of page numbers
+ * @param invert - Keep the pages and remove the rest.
+ */
+void SPDocument::prunePages(const std::string &page_nums, bool invert)
+{
+    auto pages = _page_manager->getPages(page_nums, invert);
+    for (auto page : pages) {
+        if (page->getId()) {
+            ensureUpToDate();
+            _page_manager->deletePage(page, true);
+        }
+    }    
 }
 
 void SPDocument::queueForOrphanCollection(SPObject *object) {
@@ -381,7 +400,7 @@ SPDocument *SPDocument::createDoc(Inkscape::XML::Document *rdoc,
     // Create SPRoot element
     const std::string typeString = NodeTraits::get_type_string(*rroot);
     SPObject* rootObj = SPFactory::createObject(typeString);
-    document->root = dynamic_cast<SPRoot*>(rootObj);
+    document->root = cast<SPRoot>(rootObj);
 
     if (document->root == nullptr) {
     	// Node is not a valid root element
@@ -404,20 +423,13 @@ SPDocument *SPDocument::createDoc(Inkscape::XML::Document *rdoc,
     auto nv = document->getNamedView();
 
     // Set each of the defaults in new or existing namedview (allows for per-attr overriding)
-    nv->setDefaultAttribute("pagecolor",                 "/template/base/pagecolor", "");
+    nv->setDefaultAttribute("pagecolor",                 "/template/base/pagecolor", "#ffffff");
     nv->setDefaultAttribute("bordercolor",               "/template/base/bordercolor", "");
     nv->setDefaultAttribute("borderopacity",             "/template/base/borderopacity", "");
     nv->setDefaultAttribute("inkscape:showpageshadow",   "/template/base/pageshadow", "2");
     nv->setDefaultAttribute("inkscape:pageopacity",      "/template/base/pageopacity", "0.0");
     nv->setDefaultAttribute("inkscape:pagecheckerboard", "/template/base/pagecheckerboard", "0");
-    if (!nv->getAttribute("inkscape:deskcolor")) {
-        auto page = nv->getAttribute("pagecolor");
-        auto color = "#d1d1d1"; // default gray desk
-        if (page && strcasecmp(page, "#ffffff") != 0) {
-            color = page;
-        }
-        nv->setDefaultAttribute("inkscape:deskcolor",    "/template/base/deskcolor", color);
-    }
+    nv->setDefaultAttribute("inkscape:deskcolor",        "/template/base/deskcolor", "#d1d1d1");
 
     // If no units are set in the document, try and guess them from the width/height
     // XXX Replace these calls with nv->setDocumentUnit(document->root->width.getUnit());
@@ -452,18 +464,6 @@ SPDocument *SPDocument::createDoc(Inkscape::XML::Document *rdoc,
     }
 
     DocumentUndo::setUndoSensitive(document, true);
-
-    // reset undo key when selection changes, so that same-key actions on different objects are not coalesced
-    document->selChangeConnection = INKSCAPE.signal_selection_changed.connect(
-                sigc::hide(sigc::bind(
-                sigc::ptr_fun(&DocumentUndo::resetKey), document)
-    ));
-    document->desktopActivatedConnection = INKSCAPE.signal_activate_desktop.connect(
-                sigc::hide(sigc::bind(
-                sigc::ptr_fun(&DocumentUndo::resetKey), document)
-    ));
-    document->oldSignalsConnected = true;
-
 
     // ************* Fix Document **************
     // Move to separate function?
@@ -533,6 +533,86 @@ std::unique_ptr<SPDocument> SPDocument::copy() const
     return std::unique_ptr<SPDocument>(doc);
 }
 
+/*
+    Rebase the document with de a new XMLDoc.
+    passing the same file is like revert but keep history
+*/
+void SPDocument::rebase(const gchar * file, bool keep_namedview)
+{
+    if (file == nullptr)
+    {
+        g_warning("Error on rebase_doc: no file.");
+        return;
+    }
+    Inkscape::XML::Document *new_xmldoc = sp_repr_read_file(file, SP_SVG_NS_URI);
+
+    if (new_xmldoc) {
+        rebase(new_xmldoc, keep_namedview);
+    } else {
+        g_warning("Error on rebase_doc: The file could not be parsed.");
+    }
+}
+
+/*
+    Rebase the document with de a new XMLDoc.
+    \brief  A function to replace all the elements in a document
+            by those from a new XML::Document.
+            document and repinserts them into an emptied old document.
+    \param  new_xmldoc  The root node to inject into.
+
+    This function first deletes all the root attributes in the old document followed
+    by copying all the root attributes from the new document to the old document.    
+
+    Then, it copies all the element in the new XML::Document into the root of document.
+    keep a diferent approach for namedview to not erase it and merge new value
+*/
+void SPDocument::rebase(Inkscape::XML::Document * new_xmldoc, bool keep_namedview)
+{
+    if (new_xmldoc == nullptr)
+    {
+        g_warning("Error on rebase_doc: NULL pointer input.");
+        return;
+    }
+    emitReconstructionStart();
+    Inkscape::XML::Document * origin_xmldoc = getReprDoc();
+    Inkscape::XML::Node *namedview = nullptr;
+    for ( Inkscape::XML::Node *child = origin_xmldoc->root()->lastChild() ; child != nullptr ;)
+    {
+        Inkscape::XML::Node *prevchild = child->prev();
+        if (!g_strcmp0(child->name(),"sodipodi:namedview") && keep_namedview) {
+            namedview = child;
+        } else {
+            origin_xmldoc->root()->removeChild(child);
+        }
+        child = prevchild;
+    }
+    for ( Inkscape::XML::Node *child = new_xmldoc->root()->firstChild() ; child != nullptr ; child = child->next() )
+    {
+        if (!g_strcmp0(child->name(),"sodipodi:namedview") && keep_namedview) {
+            namedview->mergeFrom(child, "id", true, true);
+        } else {
+            Inkscape::XML::Node *new_child = child->duplicate(origin_xmldoc);
+            origin_xmldoc->root()->appendChild(new_child);
+            Inkscape::GC::release(new_child);
+        }
+    }
+    emitReconstructionFinish();
+    new_xmldoc->release();
+}
+
+/*
+    Rebase the document from data in disk
+*/
+void SPDocument::rebase(bool keep_namedview)
+{
+    if (document_filename == nullptr)
+    {
+        g_warning("Error on rebase_doc: NULL file");
+        return;
+    }
+    rebase(document_filename, keep_namedview);
+}
+
 /**
  * Fetches a document and attaches it to the current document as a child href
  */
@@ -571,6 +651,37 @@ SPDocument *SPDocument::createChildDoc(std::string const &filename)
     }
     return document;
 }
+
+void SPDocument::fix_lpe_data() {
+    std::vector<SPObject*> l(getDefs()->childList(true));
+    std::reverse(l.begin(), l.end());
+    for(auto child : l){
+        std::vector<SPObject*> l2(child->childList(true));
+        auto *lpeobj = cast<LivePathEffectObject>(child);
+        if (lpeobj) {
+            auto lpe = lpeobj->get_lpe();
+            if (lpe) {
+                std::vector<SPLPEItem *> lpeitems = lpe->getCurrrentLPEItems();
+                if (lpeitems.size()) {
+                    lpe->sp_lpe_item = lpeitems[0];
+                }
+                if (lpe->on_undo  && lpe->sp_lpe_item) {
+                    Inkscape::DocumentUndo::ScopedInsensitive tmp(lpe->sp_lpe_item->document);
+                    sp_lpe_item_update_patheffect(lpe->sp_lpe_item, true, true);
+                }
+                lpe->on_undo = false;
+            }
+        } else { // TODO: get a better wey to uplate clipmask lpe item (eye in athumgaze.svg duplicate)
+            for(auto child2 : l2){
+                auto lpeitem = cast<SPLPEItem>(child2);
+                if (lpeitem) {
+                    sp_lpe_item_update_patheffect(lpeitem, true, true);
+                }
+            }
+        }
+    }
+}
+
 /**
  * Fetches document from filename, or creates new, if NULL; public document
  * appears in document list.
@@ -625,7 +736,8 @@ SPDocument *SPDocument::createNewDoc(gchar const *filename, bool keepalive, bool
     return doc;
 }
 
-SPDocument *SPDocument::createNewDocFromMem(gchar const *buffer, gint length, bool keepalive)
+SPDocument *SPDocument::createNewDocFromMem(gchar const *buffer, gint length, bool keepalive,
+                                            Glib::ustring const &filename)
 {
     SPDocument *doc = nullptr;
 
@@ -637,8 +749,12 @@ SPDocument *SPDocument::createNewDocFromMem(gchar const *buffer, gint length, bo
             // If xml file is not svg, return NULL without warning
             // TODO fixme: destroy document
         } else {
+            Glib::ustring document_base = g_path_get_dirname(filename.c_str());
+            if (document_base == ".")
+                document_base = "";
+
             Glib::ustring document_name = Glib::ustring::compose( _("Memory document %1"), ++doc_mem_count );
-            doc = createDoc(rdoc, nullptr, nullptr, document_name.c_str(), keepalive, nullptr);
+            doc = createDoc(rdoc, filename.c_str(), document_base.c_str(), document_name.c_str(), keepalive, nullptr);
         }
     }
 
@@ -832,7 +948,7 @@ Geom::Rect SPDocument::getViewBox() const
     if (root->viewBox_set) {
         viewBox = root->viewBox;
     } else {
-        viewBox = Geom::Rect::from_xywh( 0, 0, getWidth().value("px"), getHeight().value("px"));
+        viewBox = *preferredBounds();
     }
     return viewBox;
 }
@@ -958,27 +1074,27 @@ void SPDocument::do_change_filename(gchar const *const filename, bool const reba
         new_document_base = g_path_get_dirname(new_document_filename);
         new_document_name = g_path_get_basename(new_document_filename);
     } else {
-        new_document_filename = g_strdup_printf(_("Unnamed document %d"), ++doc_count);
+        new_document_name = g_strdup_printf(_("Unnamed document %d"), ++doc_count);
         new_document_base = nullptr;
-        new_document_name = g_strdup(this->document_filename);
+        new_document_filename = nullptr;
     }
 
     // Update saveable repr attributes.
     Inkscape::XML::Node *repr = getReprRoot();
 
     // Changing filename in the document repr must not be not undoable.
-    bool const saved = DocumentUndo::getUndoSensitive(this);
-    DocumentUndo::setUndoSensitive(this, false);
+    {
+        DocumentUndo::ScopedInsensitive _no_undo(this);
 
-    if (rebase) {
-        Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-        bool use_sodipodi_absref = prefs->getBool("/options/svgoutput/usesodipodiabsref", false);
-        Inkscape::XML::rebase_hrefs(this, new_document_base, use_sodipodi_absref);
+        if (rebase) {
+            Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+            bool use_sodipodi_absref = prefs->getBool("/options/svgoutput/usesodipodiabsref", false);
+            Inkscape::XML::rebase_hrefs(this, new_document_base, use_sodipodi_absref);
+        }
+
+        if (strncmp(new_document_name, "ink_ext_XXXXXX", 14))	// do not use temporary filenames
+            repr->setAttribute("sodipodi:docname", new_document_name);
     }
-
-    if (strncmp(new_document_name, "ink_ext_XXXXXX", 14))	// do not use temporary filenames
-        repr->setAttribute("sodipodi:docname", new_document_name);
-    DocumentUndo::setUndoSensitive(this, saved);
 
 
     g_free(this->document_name);
@@ -1418,10 +1534,10 @@ static std::vector<SPItem*> &find_items_in_area(std::vector<SPItem*> &s,
                                                 bool take_groups = true,
                                                 bool enter_groups = false)
 {
-    g_return_val_if_fail(SP_IS_GROUP(group), s);
+    g_return_val_if_fail(group, s);
 
     for (auto& o: group->children) {
-        if (SPItem *item = dynamic_cast<SPItem *>(&o)) {
+        if (auto item = cast<SPItem>(&o)) {
             if (!take_insensitive && item->isLocked()) {
                 continue;
             }
@@ -1430,7 +1546,7 @@ static std::vector<SPItem*> &find_items_in_area(std::vector<SPItem*> &s,
                 continue;
             }
 
-            if (SPGroup * childgroup = dynamic_cast<SPGroup *>(item)) {
+            if (auto childgroup = cast<SPGroup>(item)) {
                 bool is_layer = childgroup->effectiveLayerMode(dkey) == SPGroup::LAYER;
                 if (is_layer || (enter_groups)) {
                     s = find_items_in_area(s, childgroup, dkey, area, test, take_hidden, take_insensitive, take_groups, enter_groups);
@@ -1448,40 +1564,33 @@ static std::vector<SPItem*> &find_items_in_area(std::vector<SPItem*> &s,
     return s;
 }
 
-SPItem *SPDocument::getItemFromListAtPointBottom(unsigned int dkey, SPGroup *group, std::vector<SPItem*> const &list,Geom::Point const &p, bool take_insensitive)
+SPItem *SPDocument::getItemFromListAtPointBottom(unsigned dkey, SPGroup *group, std::vector<SPItem*> const &list, Geom::Point const &p, bool take_insensitive)
 {
-    g_return_val_if_fail(group, NULL);
-    SPItem *bottomMost = nullptr;
+    if (!group) {
+        return nullptr;
+    }
 
-    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    gdouble delta = prefs->getDouble("/options/cursortolerance/value", 1.0);
+    double const delta = Inkscape::Preferences::get()->getDouble("/options/cursortolerance/value", 1.0);
 
-    for (auto& o: group->children) {
-        if (bottomMost) {
-            break;
-        }
-        if (SP_IS_ITEM(&o)) {
-            SPItem *item = SP_ITEM(&o);
-            Inkscape::DrawingItem *arenaitem = item->get_arenaitem(dkey);
-
-            if (arenaitem) {
-                arenaitem->drawing().update();
-            }
-
-            if (arenaitem && arenaitem->pick(p, delta, 1) != nullptr
-                && (take_insensitive || item->isVisibleAndUnlocked(dkey))) {
-                if (find(list.begin(), list.end(), item) != list.end()) {
-                    bottomMost = item;
+    for (auto &c: group->children) {
+        if (auto item = cast<SPItem>(&c)) {
+            if (auto di = item->get_arenaitem(dkey)) {
+                if (di->pick(p, delta, Inkscape::DrawingItem::PICK_STICKY) && (take_insensitive || item->isVisibleAndUnlocked(dkey))) {
+                    if (std::find(list.begin(), list.end(), item) != list.end()) {
+                        return item;
+                    }
                 }
             }
 
-            if (!bottomMost && SP_IS_GROUP(&o)) {
-                // return null if not found:
-                bottomMost = getItemFromListAtPointBottom(dkey, SP_GROUP(&o), list, p, take_insensitive);
+            if (auto group = cast<SPGroup>(item)) {
+                if (auto ret = getItemFromListAtPointBottom(dkey, group, list, p, take_insensitive)) {
+                    return ret;
+                }
             }
         }
     }
-    return bottomMost;
+
+    return nullptr;
 }
 
 /**
@@ -1492,14 +1601,14 @@ The list can be persisted, which improves "find at multiple points" speed.
 void SPDocument::build_flat_item_list(unsigned int dkey, SPGroup *group, gboolean into_groups) const
 {
     for (auto& o: group->children) {
-        if (!SP_IS_ITEM(&o)) {
+        if (!is<SPItem>(&o)) {
             continue;
         }
 
-        if (SP_IS_GROUP(&o) && (SP_GROUP(&o)->effectiveLayerMode(dkey) == SPGroup::LAYER || into_groups)) {
-            build_flat_item_list(dkey, SP_GROUP(&o), into_groups);
+        if (is<SPGroup>(&o) && (cast<SPGroup>(&o)->effectiveLayerMode(dkey) == SPGroup::LAYER || into_groups)) {
+            build_flat_item_list(dkey, cast<SPGroup>(&o), into_groups);
         } else {
-            SPItem *child = SP_ITEM(&o);
+            auto child = cast<SPItem>(&o);
             if (child->isVisibleAndUnlocked(dkey)) {
                 _node_cache.push_front(child);
             }
@@ -1516,27 +1625,24 @@ upwards in z-order and returns what it has found so far (i.e. the found items ar
 guaranteed to be lower than upto). Requires a list of nodes built by build_flat_item_list.
 If items_count > 0, it'll return the topmost (in z-order) items_count items.
  */
-static std::vector<SPItem*> find_items_at_point(std::deque<SPItem*> *nodes, unsigned int dkey,
-                                                 Geom::Point const &p, int items_count=0, SPItem* upto=nullptr)
+static std::vector<SPItem*> find_items_at_point(std::deque<SPItem*> const &nodes, unsigned dkey,
+                                                Geom::Point const &p, int items_count = 0, SPItem *upto = nullptr)
 {
-    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    gdouble delta = prefs->getDouble("/options/cursortolerance/value", 1.0);
+    double const delta = Inkscape::Preferences::get()->getDouble("/options/cursortolerance/value", 1.0);
 
-    SPItem *child;
     std::vector<SPItem*> result;
-    bool seen_upto = (!upto);
-    for (auto node : *nodes) {
-        child = node;
-        if (!seen_upto){
-            if(child == upto)
+
+    bool seen_upto = !upto;
+    for (auto node : nodes) {
+        if (!seen_upto) {
+            if (node == upto) {
                 seen_upto = true;
+            }
             continue;
         }
-        Inkscape::DrawingItem *arenaitem = child->get_arenaitem(dkey);
-        if (arenaitem) {
-            arenaitem->drawing().update();
-            if (arenaitem->pick(p, delta, 1) != nullptr) {
-                result.push_back(child);
+        if (auto di = node->get_arenaitem(dkey)) {
+            if (di->pick(p, delta, Inkscape::DrawingItem::PICK_STICKY)) {
+                result.emplace_back(node);
                 if (--items_count == 0) {
                     break;
                 }
@@ -1547,7 +1653,7 @@ static std::vector<SPItem*> find_items_at_point(std::deque<SPItem*> *nodes, unsi
     return result;
 }
 
-static SPItem *find_item_at_point(std::deque<SPItem*> *nodes, unsigned int dkey, Geom::Point const &p, SPItem* upto=nullptr)
+static SPItem *find_item_at_point(std::deque<SPItem*> const &nodes, unsigned dkey, Geom::Point const &p, SPItem *upto = nullptr)
 {
     auto items = find_items_at_point(nodes, dkey, p, 1, upto);
     if (items.empty()) {
@@ -1557,41 +1663,29 @@ static SPItem *find_item_at_point(std::deque<SPItem*> *nodes, unsigned int dkey,
 }
 
 /**
-Returns the topmost non-layer group from the descendants of group which is at point
-p, or NULL if none. Recurses into layers but not into groups.
+ * Returns the topmost non-layer group from the descendants of group which is at point p,
+ * or null if none. Recurses into layers but not into groups.
  */
-static SPItem *find_group_at_point(unsigned int dkey, SPGroup *group, Geom::Point const &p)
+static SPItem *find_group_at_point(unsigned dkey, SPGroup *group, Geom::Point const &p)
 {
-    SPItem *seen = nullptr;
-    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    gdouble delta = prefs->getDouble("/options/cursortolerance/value", 1.0);
+    double const delta = Inkscape::Preferences::get()->getDouble("/options/cursortolerance/value", 1.0);
 
-    for (auto& o: group->children) {
-        if (!SP_IS_ITEM(&o)) {
-            continue;
-        }
-        if (SP_IS_GROUP(&o) && SP_GROUP(&o)->effectiveLayerMode(dkey) == SPGroup::LAYER) {
-            SPItem *newseen = find_group_at_point(dkey, SP_GROUP(&o), p);
-            if (newseen) {
-                seen = newseen;
-            }
-        }
-        if (SP_IS_GROUP(&o) && SP_GROUP(&o)->effectiveLayerMode(dkey) != SPGroup::LAYER ) {
-            SPItem *child = SP_ITEM(&o);
-            Inkscape::DrawingItem *arenaitem = child->get_arenaitem(dkey);
-            if (arenaitem) {
-                arenaitem->drawing().update();
-            }
-
-            // seen remembers the last (topmost) of groups pickable at this point
-            if (arenaitem && arenaitem->pick(p, delta, 1) != nullptr) {
-                seen = child;
+    for (auto &c : boost::adaptors::reverse(group->children)) {
+        if (auto group = cast<SPGroup>(&c)) {
+            if (group->effectiveLayerMode(dkey) == SPGroup::LAYER) {
+                if (auto ret = find_group_at_point(dkey, group, p)) {
+                    return ret;
+                }
+            } else if (auto di = group->get_arenaitem(dkey)) {
+                if (di->pick(p, delta, Inkscape::DrawingItem::PICK_STICKY)) {
+                    return group;
+                }
             }
         }
     }
-    return seen;
-}
 
+    return nullptr;
+}
 
 /**
  * Return list of items, contained in box
@@ -1646,7 +1740,7 @@ std::vector<SPItem*> SPDocument::getItemsAtPoints(unsigned const key, std::vecto
     }
     size_t item_counter = 0;
     for(int i = points.size()-1;i>=0; i--) {
-        std::vector<SPItem*> items = find_items_at_point(&_node_cache, key, points[i], topmost_only);
+        std::vector<SPItem*> items = find_items_at_point(_node_cache, key, points[i], topmost_only);
         for (SPItem *item : items) {
             if (item && result.end()==find(result.begin(), result.end(), item))
                 if(all_layers || (desktop && desktop->layerManager().layerForObject(item) == current_layer)){
@@ -1682,7 +1776,7 @@ SPItem *SPDocument::getItemAtPoint( unsigned const key, Geom::Point const &p,
         _node_cache_valid=true;
     }
 
-    SPItem *res = find_item_at_point(&_node_cache, key, p, upto);
+    SPItem *res = find_item_at_point(_node_cache, key, p, upto);
     if(!into_groups)
         _node_cache = bak;
     return res;
@@ -1700,7 +1794,6 @@ bool SPDocument::addResource(gchar const *key, SPObject *object)
     g_return_val_if_fail(key != nullptr, false);
     g_return_val_if_fail(*key != '\0', false);
     g_return_val_if_fail(object != nullptr, false);
-    g_return_val_if_fail(SP_IS_OBJECT(object), false);
 
     bool result = false;
 
@@ -1717,7 +1810,7 @@ bool SPDocument::addResource(gchar const *key, SPObject *object)
         [this check should be more generally presend on emit() calls since
         the backtrace is unusable with crashed from this cause]
         */
-        if (object->getId() || dynamic_cast<SPGroup*>(object) || dynamic_cast<SPPage*>(object)) {
+        if (object->getId() || is<SPGroup>(object) || is<SPPage>(object)) {
             resources_changed_signals[q].emit();
         } else {
             pending_resource_changes.emplace(q);
@@ -1734,7 +1827,6 @@ bool SPDocument::removeResource(gchar const *key, SPObject *object)
     g_return_val_if_fail(key != nullptr, false);
     g_return_val_if_fail(*key != '\0', false);
     g_return_val_if_fail(object != nullptr, false);
-    g_return_val_if_fail(SP_IS_OBJECT(object), false);
 
     bool result = false;
 
@@ -1803,7 +1895,7 @@ static unsigned int objects_in_document(SPDocument *document)
  */
 static void vacuum_document_recursive(SPObject *obj)
 {
-    if (SP_IS_DEFS(obj)) {
+    if (is<SPDefs>(obj)) {
         for (auto& def: obj->children) {
             // fixme: some inkscape-internal nodes in the future might not be collectable
             def.requestOrphanCollection();
@@ -1933,11 +2025,11 @@ void SPDocument::_importDefsNode(SPDocument *source, Inkscape::XML::Node *defs, 
         SPObject *src = source->getObjectByRepr(def);
 
         // Prevent duplicates of solid swatches by checking if equivalent swatch already exists
-        SPGradient *s_gr = dynamic_cast<SPGradient *>(src);
-        LivePathEffectObject *s_lpeobj = dynamic_cast<LivePathEffectObject *>(src);
+        auto s_gr = cast<SPGradient>(src);
+        auto s_lpeobj = cast<LivePathEffectObject>(src);
         if (src && (s_gr || s_lpeobj)) {
             for (auto& trg: getDefs()->children) {
-                SPGradient *t_gr = dynamic_cast<SPGradient *>(&trg);
+                auto t_gr = cast<SPGradient>(&trg);
                 if (src != &trg && s_gr && t_gr) {
                     if (s_gr->isEquivalent(t_gr)) {
                         // Change object references to the existing equivalent gradient
@@ -1951,7 +2043,7 @@ void SPDocument::_importDefsNode(SPDocument *source, Inkscape::XML::Node *defs, 
                         // do NOT break here, there could be more than 1 duplicate!
                     }
                 }
-                LivePathEffectObject *t_lpeobj = dynamic_cast<LivePathEffectObject *>(&trg);
+                auto t_lpeobj = cast<LivePathEffectObject>(&trg);
                 if (src != &trg && s_lpeobj && t_lpeobj) {
                     if (t_lpeobj->is_similar(s_lpeobj)) {
                         // Change object references to the existing equivalent gradient
@@ -1975,12 +2067,12 @@ void SPDocument::_importDefsNode(SPDocument *source, Inkscape::XML::Node *defs, 
         Glib::ustring defid = def->attribute("id");
         if( defid.find( DuplicateDefString ) != Glib::ustring::npos )continue; // this one already handled
         SPObject *src = source->getObjectByRepr(def);
-        LivePathEffectObject *s_lpeobj = dynamic_cast<LivePathEffectObject *>(src);
-        SPGradient *s_gr = dynamic_cast<SPGradient *>(src);
+        auto s_lpeobj = cast<LivePathEffectObject>(src);
+        auto s_gr = cast<SPGradient>(src);
         if (src && (s_gr || s_lpeobj)) {
             for (Inkscape::XML::Node *laterDef = def->next() ; laterDef ; laterDef = laterDef->next()) {
                 SPObject *trg = source->getObjectByRepr(laterDef);
-                SPGradient *t_gr = dynamic_cast<SPGradient *>(trg);
+                auto t_gr = cast<SPGradient>(trg);
                 if (trg && (src != trg) && s_gr && t_gr) {
                     Glib::ustring newid = trg->getId();
                     if (newid.find(DuplicateDefString) != Glib::ustring::npos)
@@ -1995,7 +2087,7 @@ void SPDocument::_importDefsNode(SPDocument *source, Inkscape::XML::Node *defs, 
                         // do NOT break here, there could be more than 1 duplicate!
                     }
                 }
-                LivePathEffectObject *t_lpeobj = dynamic_cast<LivePathEffectObject *>(trg);
+                auto t_lpeobj = cast<LivePathEffectObject>(trg);
                 if (trg && (src != trg) && s_lpeobj && t_lpeobj) {
                     Glib::ustring newid = trg->getId();
                     if (newid.find(DuplicateDefString) != Glib::ustring::npos)
@@ -2028,7 +2120,7 @@ void SPDocument::_importDefsNode(SPDocument *source, Inkscape::XML::Node *defs, 
         // Prevent duplication of symbols... could be more clever.
         // The tag "_inkscape_duplicate" is added to "id" by ClipboardManagerImpl::copySymbol().
         // We assume that symbols are in defs section (not required by SVG spec).
-        if (src && SP_IS_SYMBOL(src)) {
+        if (src && is<SPSymbol>(src)) {
 
             Glib::ustring id = src->getRepr()->attribute("id");
             size_t pos = id.find( "_inkscape_duplicate" );
@@ -2039,7 +2131,7 @@ void SPDocument::_importDefsNode(SPDocument *source, Inkscape::XML::Node *defs, 
 
                 // Check that it really is a duplicate
                 for (auto& trg: getDefs()->children) {
-                    if (SP_IS_SYMBOL(&trg) && src != &trg) {
+                    if (is<SPSymbol>(&trg) && src != &trg) {
                         std::string id2 = trg.getRepr()->attribute("id");
 
                         if( !id.compare( id2 ) ) {

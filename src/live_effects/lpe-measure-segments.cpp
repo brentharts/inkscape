@@ -207,10 +207,7 @@ LPEMeasureSegments::LPEMeasureSegments(LivePathEffectObject *lpeobject) :
                     "<b><i>Set Defaults:</i></b> For every LPE, default values can be set at the bottom."));
 }
 
-LPEMeasureSegments::~LPEMeasureSegments() {
-    keep_paths = false;
-    doOnRemove(nullptr);
-}
+LPEMeasureSegments::~LPEMeasureSegments() = default;
 
 Gtk::Widget *
 LPEMeasureSegments::newWidget()
@@ -296,15 +293,6 @@ LPEMeasureSegments::newWidget()
     vbox->pack_start(*notebook, true, true, 2);
     notebook->set_current_page(pagenumber);
     notebook->signal_switch_page().connect(sigc::mem_fun(*this, &LPEMeasureSegments::on_my_switch_page));
-    if(Gtk::Widget* widg = defaultParamSet()) {
-        //Wrap to make it more omogenious
-        Gtk::Box *vbox4 = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
-        vbox4->set_border_width(5);
-        vbox4->set_homogeneous(false);
-        vbox4->set_spacing(2);
-        vbox4->pack_start(*widg, true, true, 2);
-        vbox->pack_start(*vbox4, true, true, 2);
-    }
     return dynamic_cast<Gtk::Widget *>(vbox);
 }
 
@@ -511,7 +499,7 @@ LPEMeasureSegments::createTextLabel(Geom::Point pos, size_t counter, double leng
     rstring->setContent(label_value.c_str());
     // this boring hack is to update the text with document scale inituialy loaded without root transform
     if (elemref) {
-        Geom::OptRect bounds = SP_ITEM(elemref)->geometricBounds();
+        Geom::OptRect bounds = cast<SPItem>(elemref)->geometricBounds();
         if (bounds) {
             anotation_width = bounds->width();
             rtext->setAttributeSvgDouble("x", pos[Geom::X] - (anotation_width / 2.0));
@@ -652,15 +640,14 @@ LPEMeasureSegments::createLine(Geom::Point start,Geom::Point end, Glib::ustring 
 void
 LPEMeasureSegments::doOnApply(SPLPEItem const* lpeitem)
 {
-    if (!SP_IS_SHAPE(lpeitem)) {
+    if (!is<SPShape>(lpeitem)) {
         g_warning("LPE measure line can only be applied to shapes (not groups).");
         SPLPEItem * item = const_cast<SPLPEItem*>(lpeitem);
         item->removeCurrentPathEffect(false);
         return;
     }
     SPDocument *document = getSPDoc();
-    bool saved = DocumentUndo::getUndoSensitive(document);
-    DocumentUndo::setUndoSensitive(document, false);
+    DocumentUndo::ScopedInsensitive _no_undo(document);
     Inkscape::XML::Node *styleNode = nullptr;
     Inkscape::XML::Node* textNode = nullptr;
     Inkscape::XML::Node *root = document->getReprRoot();
@@ -701,7 +688,6 @@ LPEMeasureSegments::doOnApply(SPLPEItem const* lpeitem)
         textNode->setContent(styleContent.c_str());
     }
     linked_items.update_satellites();
-    DocumentUndo::setUndoSensitive(document, saved);
 }
 
 bool
@@ -754,14 +740,14 @@ std::vector< Point >
 getNodes(SPItem * item, Geom::Affine transform, bool onbbox, bool centers, bool bboxonly, double angle_projection)
 {
     std::vector< Point > current_nodes;
-    SPShape    * shape    = dynamic_cast<SPShape     *> (item);
-    SPText     * text     = dynamic_cast<SPText      *> (item);
-    SPGroup    * group    = dynamic_cast<SPGroup     *> (item);
-    SPFlowtext * flowtext = dynamic_cast<SPFlowtext  *> (item);
+    SPShape    * shape    = cast<SPShape> (item);
+    SPText     * text     = cast<SPText> (item);
+    SPGroup    * group    = cast<SPGroup> (item);
+    SPFlowtext * flowtext = cast<SPFlowtext> (item);
     //TODO handle clones/use
 
     if (group) {
-        std::vector<SPItem*> const item_list = sp_item_group_item_list(group);
+        std::vector<SPItem*> const item_list = group->item_list();
         for (auto sub_item : item_list) {
             std::vector< Point > nodes = transformNodes(getNodes(sub_item, sub_item->transform, onbbox, centers, bboxonly, angle_projection), transform);
             current_nodes.insert(current_nodes.end(), nodes.begin(), nodes.end());
@@ -822,7 +808,7 @@ static void extractFirstPoint(Geom::Point & dest, const Glib::ustring & lpobjid,
     id += Glib::ustring::format(idx);
     id += "-";
     id += lpobjid;
-    auto path = dynamic_cast<SPPath *>(document->getObjectById(id));
+    auto path = cast<SPPath>(document->getObjectById(id));
     if (path) {
         SPCurve const *curve = path->curve();
         if (curve) {
@@ -895,13 +881,13 @@ LPEMeasureSegments::doBeforeEffect (SPLPEItem const* lpeitem)
             auto satellites = linked_items.data();
             if (satellites.size() != prevsatellitecount ) {
                 prevsatellitecount = satellites.size();
-                linked_items.update_satellites(true);
+                sp_lpe_item_update_patheffect(sp_lpe_item, false, false, true);
             }
             prevsatellitecount = satellites.size();
             for (auto & iter : satellites) {
                 SPObject *obj;
-                if (iter && iter->isAttached() && iter->getActive() && (obj = iter->getObject()) && SP_IS_ITEM(obj)) {
-                    SPItem * item = dynamic_cast<SPItem *>(obj);
+                if (iter && iter->isAttached() && iter->getActive() && (obj = iter->getObject()) && is<SPItem>(obj)) {
+                    auto item = cast<SPItem>(obj);
                     if (item) {
                         Geom::Affine affinetransform_sub = i2anc_affine(item, document->getRoot());
                         Geom::Affine transform = affinetransform_sub ;
@@ -957,7 +943,7 @@ LPEMeasureSegments::doBeforeEffect (SPLPEItem const* lpeitem)
     }
 
     //end projection prepare
-    SPShape *shape = dynamic_cast<SPShape *>(splpeitem);
+    auto shape = cast<SPShape>(splpeitem);
     if (shape) {
         //only check constrain viewbox on X
         display_unit = document->getDisplayUnit()->abbr.c_str();
@@ -1077,8 +1063,8 @@ LPEMeasureSegments::doBeforeEffect (SPLPEItem const* lpeitem)
                         hstart[Geom::X] = xpos;
                         hend[Geom::X] = xpos;
                         if (hstart[Geom::Y] > hend[Geom::Y]) {
-                            swap(hstart,hend);
-                            swap(start,end);
+                            std::swap(hstart,hend);
+                            std::swap(start,end);
                         }
                         if (Geom::are_near(hstart[Geom::Y], hend[Geom::Y])) {
                             remove = true;
@@ -1091,8 +1077,8 @@ LPEMeasureSegments::doBeforeEffect (SPLPEItem const* lpeitem)
                         hstart[Geom::Y] = ypos;
                         hend[Geom::Y] = ypos;
                         if (hstart[Geom::X] < hend[Geom::X]) {
-                            swap(hstart,hend);
-                            swap(start,end);
+                            std::swap(hstart,hend);
+                            std::swap(start,end);
                         }
                         if (Geom::are_near(hstart[Geom::X], hend[Geom::X])) {
                             remove = true;
@@ -1256,7 +1242,7 @@ LPEMeasureSegments::processObjects(LPEAction lpe_action)
     if (!document) {
         return;
     }
-    sp_lpe_item = dynamic_cast<SPLPEItem *>(*getLPEObj()->hrefList.begin());
+    sp_lpe_item = cast<SPLPEItem>(*getLPEObj()->hrefList.begin());
     if (!document || !sp_lpe_item) {
         return;
     }
@@ -1265,7 +1251,7 @@ LPEMeasureSegments::processObjects(LPEAction lpe_action)
         SPObject *elemref = nullptr;
         if ((elemref = document->getObjectById(id.c_str()))) {
             Inkscape::XML::Node * elemnode = elemref->getRepr();
-            auto item = dynamic_cast<SPItem *>(elemref);
+            auto item = cast<SPItem>(elemref);
             SPCSSAttr *css;
             Glib::ustring css_str;
             switch (lpe_action){
@@ -1274,7 +1260,7 @@ LPEMeasureSegments::processObjects(LPEAction lpe_action)
                     item->deleteObject(true);
                 } else {
                     elemnode->removeAttribute("sodipodi:insensitive");
-                    if (!SP_IS_DEFS(item->parent)) {
+                    if (!is<SPDefs>(item->parent)) {
                         item->moveTo(sp_lpe_item, false);
                     }
                 }

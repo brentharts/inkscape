@@ -47,7 +47,7 @@ ContextMenu::ContextMenu(SPDesktop *desktop, SPObject *object, bool hide_layers_
 {
     set_name("ContextMenu");
 
-    SPItem *item = dynamic_cast<SPItem *>(object);
+    auto item = cast<SPItem>(object);
 
     // std::cout << "ContextMenu::ContextMenu: " << (item ? item->getId() : "no item") << std::endl;
     action_group = Gio::SimpleActionGroup::create();
@@ -89,7 +89,7 @@ ContextMenu::ContextMenu(SPDesktop *desktop, SPObject *object, bool hide_layers_
     // AppendItemFromAction(gmenu_section, "doc.redo",      _("Redo"),       "edit-redo");
     // gmenu->append_section(gmenu_section);
 
-    if (auto page = dynamic_cast<SPPage *>(object)) {
+    if (auto page = cast<SPPage>(object)) {
         auto &page_manager = document->getPageManager();
         page_manager.selectPage(page);
 
@@ -112,18 +112,23 @@ ContextMenu::ContextMenu(SPDesktop *desktop, SPObject *object, bool hide_layers_
             selection->set(object);
         }
 
-        gmenu_section = Gio::Menu::create();
-        AppendItemFromAction(gmenu_section, "app.cut",       _("Cu_t"),       "edit-cut");
-        AppendItemFromAction(gmenu_section, "app.copy",      _("_Copy"),      "edit-copy");
-        AppendItemFromAction(gmenu_section, "win.paste",     _("_Paste"),     "edit-paste");
-        gmenu->append_section(gmenu_section);
+        if (!item) {
+            // Even when there's no item, we should still have the Paste action on top
+            // (see https://gitlab.com/inkscape/inkscape/-/issues/4150)
+            gmenu->append_section(create_clipboard_actions(true));
 
-        gmenu_section = Gio::Menu::create();
-        AppendItemFromAction(gmenu_section, "app.duplicate", _("Duplic_ate"), "edit-duplicate");
-        AppendItemFromAction(gmenu_section, "app.delete-selection", _("_Delete"), "edit-delete");
-        gmenu->append_section(gmenu_section);
+            gmenu_section = Gio::Menu::create();
+            AppendItemFromAction(gmenu_section, "win.dialog-open('DocumentProperties')", _("Document Properties..."), "document-properties");
+            gmenu->append_section(gmenu_section);
+        } else {
+            // When an item is selected, show all three of Cut, Copy and Paste.
+            gmenu->append_section(create_clipboard_actions());
 
-        if (item) {
+            gmenu_section = Gio::Menu::create();
+            AppendItemFromAction(gmenu_section, "app.duplicate", _("Duplic_ate"), "edit-duplicate");
+            AppendItemFromAction(gmenu_section, "app.clone", _("_Clone"), "edit-clone");
+            AppendItemFromAction(gmenu_section, "app.delete-selection", _("_Delete"), "edit-delete");
+            gmenu->append_section(gmenu_section);
 
             // Dialogs
             auto gmenu_dialogs = Gio::Menu::create();
@@ -132,12 +137,12 @@ ContextMenu::ContextMenu(SPDesktop *desktop, SPObject *object, bool hide_layers_
             }
             AppendItemFromAction(gmenu_dialogs,     "win.dialog-open('ObjectProperties')",          _("_Object Properties..."), "dialog-object-properties"   );
 
-            if (dynamic_cast<SPShape*>(item) || dynamic_cast<SPText*>(item) || dynamic_cast<SPGroup*>(item)) {
+            if (is<SPShape>(item) || is<SPText>(item) || is<SPGroup>(item)) {
                 AppendItemFromAction(gmenu_dialogs, "win.dialog-open('FillStroke')",                _("_Fill and Stroke..."),   "dialog-fill-and-stroke"     );
             }
 
             // Image dialogs (mostly).
-            if (auto image = dynamic_cast<SPImage*>(item)) {
+            if (auto image = cast<SPImage>(item)) {
                 AppendItemFromAction(     gmenu_dialogs, "win.dialog-open('ObjectAttributes')",          _("Image _Properties..."),  "dialog-fill-and-stroke");
                 AppendItemFromAction(     gmenu_dialogs, "win.dialog-open('Trace')",                     _("_Trace Bitmap..."),      "bitmap-trace"          );
 
@@ -155,13 +160,13 @@ ContextMenu::ContextMenu(SPDesktop *desktop, SPObject *object, bool hide_layers_
             }
 
             // Text dialogs.
-            if (dynamic_cast<SPText*>(item)) {
+            if (is<SPText>(item)) {
                 AppendItemFromAction(     gmenu_dialogs, "win.dialog-open('Text')",                      _("_Text and Font..."),     "dialog-text-and-font"  );
                 AppendItemFromAction(     gmenu_dialogs, "win.dialog-open('Spellcheck')",                _("Check Spellin_g..."),    "tools-check-spelling"  );
             }
             gmenu->append_section(gmenu_dialogs); // We might add to it later...
 
-            if (!dynamic_cast<SPAnchor*>(item)) {
+            if (!is<SPAnchor>(item)) {
                 // Item menu
 
                 // Selection
@@ -180,7 +185,7 @@ ContextMenu::ContextMenu(SPDesktop *desktop, SPObject *object, bool hide_layers_
                 AppendItemFromAction(     gmenu_section, "win.selection-move-to-layer",         _("_Move to Layer..."),     ""                                );
                 AppendItemFromAction(     gmenu_section, "app.selection-link",                  _("Create anchor (hyperlink)"),   ""                          );
                 AppendItemFromAction(     gmenu_section, "app.selection-group",                 _("_Group"),                ""                                );
-                if (dynamic_cast<SPGroup*>(item)) {
+                if (is<SPGroup>(item)) {
                     AppendItemFromAction( gmenu_section, "app.selection-ungroup",               _("_Ungroup"),              ""                                );
                     Glib::ustring label = Glib::ustring::compose(_("Enter group %1"), item->defaultLabel());
                     AppendItemFromAction( gmenu_section, "win.selection-group-enter",           label,                      ""                                );
@@ -189,7 +194,7 @@ ContextMenu::ContextMenu(SPDesktop *desktop, SPObject *object, bool hide_layers_
                         AppendItemFromAction( gmenu_section, "win.layer-from-group",            _("Group to Layer"),        ""                                );
                     }
                 }
-                auto group = dynamic_cast<SPGroup*>(item->parent);
+                auto group = cast<SPGroup>(item->parent);
                 if (group && !group->isLayer()) {
                     AppendItemFromAction( gmenu_section, "win.selection-group-exit",            _("Exit group"),            ""                                );
                     AppendItemFromAction( gmenu_section, "app.selection-ungroup-pop",           _("_Pop selection out of group"), ""                          );
@@ -295,6 +300,23 @@ ContextMenu::ContextMenu(SPDesktop *desktop, SPObject *object, bool hide_layers_
             get_style_context()->add_class("regular");
         }
     }
+}
+
+/** @brief Create a menu section containing the standard editing actions:
+ *         Cut, Copy, Paste.
+ *
+ *  @param paste_only If true, only the Paste action will be included.
+ *  @return A new menu containing the requested actions.
+ */
+Glib::RefPtr<Gio::Menu> ContextMenu::create_clipboard_actions(bool paste_only)
+{
+    auto result = Gio::Menu::create();
+    if (!paste_only) {
+        AppendItemFromAction(result, "app.cut",  _("Cu_t"),  "edit-cut");
+        AppendItemFromAction(result, "app.copy", _("_Copy"), "edit-copy");
+    }
+    AppendItemFromAction(result, "win.paste", _("_Paste"), "edit-paste");
+    return result;
 }
 
 void

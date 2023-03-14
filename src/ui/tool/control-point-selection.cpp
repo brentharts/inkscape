@@ -163,11 +163,11 @@ void ControlPointSelection::selectAll()
     }
 }
 /** Select all points inside the given rectangle (in desktop coordinates). */
-void ControlPointSelection::selectArea(Geom::Rect const &r, bool invert)
+void ControlPointSelection::selectArea(Geom::Path const &path, bool invert)
 {
     std::vector<SelectableControlPoint *> out;
     for (auto _all_point : _all_points) {
-        if (r.contains(*_all_point)) {
+        if (path.winding(*_all_point) % 2 != 0) {
             if (invert) {
                 erase(_all_point);
             } else {
@@ -520,7 +520,7 @@ void ControlPointSelection::_updateTransformHandles(bool preserve_center)
 bool ControlPointSelection::_keyboardMove(GdkEventKey const &event, Geom::Point const &dir)
 {
     if (held_control(event)) return false;
-    unsigned num = 1 + _desktop->canvas->gobble_key_events(shortcut_key(event), 0);
+    unsigned num = 1 + Tools::gobble_key_events(shortcut_key(event), 0);
 
     Geom::Point delta = dir * num; 
     if (held_shift(event)) delta *= 10;

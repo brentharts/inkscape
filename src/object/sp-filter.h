@@ -26,9 +26,7 @@
 namespace Inkscape {
 class Drawing;
 class DrawingItem;
-namespace Filters {
-class Filter;
-} // namespace Filters
+namespace Filters { class Filter; }
 } // namespace Inkscape
 
 class SPFilterReference;
@@ -41,6 +39,7 @@ class SPFilter
 public:
     SPFilter();
     ~SPFilter() override;
+    int tag() const override { return tag_of<decltype(*this)>; }
 
     /// Returns a renderer for this filter, for use by the DrawingItem item.
     std::unique_ptr<Inkscape::Filters::Filter> build_renderer(Inkscape::DrawingItem *item);
@@ -95,9 +94,6 @@ private:
 
     std::vector<Inkscape::DrawingItem*> views;
 };
-
-MAKE_SP_OBJECT_DOWNCAST_FUNCTIONS(SP_FILTER, SPFilter)
-MAKE_SP_OBJECT_TYPECHECK_FUNCTIONS(SP_IS_FILTER, SPFilter)
 
 #endif // SP_FILTER_H_SEEN
 

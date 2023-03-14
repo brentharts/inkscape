@@ -41,6 +41,7 @@
 #include "object/sp-namedview.h"
 #include "object/sp-root.h"
 #include "object/sp-page.h"
+#include "object/weakptr.h"
 #include "preferences.h"
 #include "selection-chemistry.h"
 #include "ui/dialog-events.h"
@@ -76,23 +77,19 @@ Export::Export()
 
     prefs = Inkscape::Preferences::get();
 
-    builder->get_widget("Export Dialog Box", container);
+    builder->get_widget("export-box", container);
     add(*container);
     show_all_children();
 
-    builder->get_widget("Export Notebook", export_notebook);
+    builder->get_widget("export-notebook", export_notebook);
 
     // Initialise Single Export and its objects
-    builder->get_widget_derived("Single Image", single_image);
-    single_image->initialise(builder);
+    builder->get_widget_derived("single-image", single_image);
 
     // Initialise Batch Export and its objects
-    builder->get_widget_derived("Batch Export", batch_export);
-    batch_export->initialise(builder);
+    builder->get_widget_derived("batch-export", batch_export);
 
     container->signal_realize().connect([=]() {
-        single_image->setup();
-        batch_export->setup();
         setDefaultNotebookPage();
         notebook_signal = export_notebook->signal_switch_page().connect(sigc::mem_fun(*this, &Export::onNotebookPageSwitch));
     });
@@ -104,8 +101,8 @@ Export::Export()
 // Set current page based on preference/last visited page
 void Export::setDefaultNotebookPage()
 {
-    pages[BATCH_EXPORT] = export_notebook->page_num(*batch_export);
-    pages[SINGLE_IMAGE] = export_notebook->page_num(*single_image);
+    pages[BATCH_EXPORT] = export_notebook->page_num(*batch_export->get_parent());
+    pages[SINGLE_IMAGE] = export_notebook->page_num(*single_image->get_parent());
     export_notebook->set_current_page(pages[SINGLE_IMAGE]);
 }
 
@@ -198,7 +195,7 @@ bool Export::unConflictFilename(SPDocument *doc, Glib::ustring &filename, Glib::
 bool Export::exportRaster(
         Geom::Rect const &area, unsigned long int const &width, unsigned long int const &height,
         float const &dpi, guint32 bg_color, Glib::ustring const &filename, bool overwrite,
-        unsigned (*callback)(float, void *), ExportProgressDialog *&prog_dialog,
+        unsigned (*callback)(float, void *), void *data,
         Inkscape::Extension::Output *extension, std::vector<SPItem *> *items)
 {
     SPDesktop *desktop = SP_ACTIVE_DESKTOP;
@@ -269,12 +266,11 @@ bool Export::exportRaster(
 
     ExportResult result = sp_export_png_file(desktop->getDocument(), png_filename.c_str(), area, width, height, pHYs,
                                              pHYs, // previously xdpi, ydpi.
-                                             bg_color, callback, (void *)prog_dialog, true, selected,
+                                             bg_color, callback, data, true, selected,
                                              use_interlacing, color_type, bit_depth, zlib, antialiasing);
 
-    bool failed = result == EXPORT_ERROR || prog_dialog->get_stopped();
-    delete prog_dialog;
-    prog_dialog = nullptr;
+    bool failed = result == EXPORT_ERROR; // || prog_dialog->get_stopped();
+
     if (failed) {
         Glib::ustring safeFile = Inkscape::IO::sanitizeString(path.c_str());
         Glib::ustring error = g_strdup_printf(_("Could not export to filename <b>%s</b>.\n"), safeFile.c_str());
@@ -312,7 +308,18 @@ bool Export::exportRaster(
 bool Export::exportVector(
         Inkscape::Extension::Output *extension, SPDocument *doc,
         Glib::ustring const &filename,
-        bool overwrite, std::vector<SPItem *> *items, SPPage *page)
+        bool overwrite, const std::vector<SPItem *> &items, SPPage *page)
+{
+    std::vector<SPPage *> pages;
+    if (page)
+        pages.push_back(page);
+    return exportVector(extension, doc, filename, overwrite, items, pages);
+}
+
+bool Export::exportVector(
+        Inkscape::Extension::Output *extension, SPDocument *copy_doc,
+        Glib::ustring const &filename,
+        bool overwrite, const std::vector<SPItem *> &items, const std::vector<SPPage *> &pages)
 {
     SPDesktop *desktop = SP_ACTIVE_DESKTOP;
     if (!desktop)
@@ -330,7 +337,7 @@ bool Export::exportVector(
         return false;
     }
 
-    std::string path = absolutizePath(doc, Glib::filename_from_utf8(filename));
+    std::string path = absolutizePath(copy_doc, Glib::filename_from_utf8(filename));
     Glib::ustring dirname = Glib::path_get_dirname(path);
     Glib::ustring safeFile = Inkscape::IO::sanitizeString(path.c_str());
     Glib::ustring safeDir = Inkscape::IO::sanitizeString(dirname.c_str());
@@ -350,39 +357,60 @@ bool Export::exportVector(
     if (!overwrite && !sp_ui_overwrite_file(path.c_str())) {
         return false;
     }
-    doc->ensureUpToDate();
-    auto copy_doc = doc->copy();
     copy_doc->ensureUpToDate();
 
-    std::vector<SPItem *> objects = *items;
+    std::vector<SPItem *> objects = items;
+    std::set<std::string> obj_ids;
     std::set<std::string> page_ids;
-    if (page) {
+    Geom::OptRect page_rect;
+    for (auto page : pages) {
+        // Save the first page rect, must be done before everything else
+        if (!page_rect)
+            page_rect = page->getDesktopRect();
+
+        if (auto _id = page->getId()) {
+            page_ids.insert(std::string(_id));
+        }
         // If page then our item set is limited to the overlapping items
         auto page_items = page->getOverlappingItems();
 
-        if (items->size() == 0) {
+        if (items.empty()) {
             // Items is page_items, remove all items not in this page.
-            objects = page_items;
+            objects.insert(objects.end(), page_items.begin(), page_items.end());
         } else {
             for (auto &item : page_items) {
-                item->getIds(page_ids);
+                item->getIds(obj_ids);
             }
         }
     }
 
-    // Save the page rect, must be done before disabledPages in case page is from copy doc.
-    Geom::OptRect page_rect = page ? page->getDesktopRect() : Geom::OptRect();
+    // Delete any pages not specified, delete all pages if none specified
+    auto &pm = copy_doc->getPageManager();
 
-    // We never export multiple pages here, must be done before fitToRect and fitCanvas
-    copy_doc->getPageManager().disablePages();
+    // Make weak pointers to pages, since deletePage() can delete more than just the requested page.
+    std::vector<SPWeakPtr<SPPage>> copy_pages;
+    copy_pages.reserve(pm.getPageCount());
+    for (auto *page : pm.getPages()) {
+        copy_pages.emplace_back(page);
+    }
+
+    // We refuse to delete anything if everything would be deleted.
+    for (auto &page : copy_pages) {
+        if (page) {
+            auto _id = page->getId();
+            if (_id && page_ids.find(_id) == page_ids.end()) {
+                pm.deletePage(page.get(), false);
+            }
+        }
+    }
 
     // Page export ALWAYS restricts, even if nothing would be on the page.
-    if (objects.size() > 0 || page) {
+    if (!objects.empty() || !pages.empty()) {
         std::vector<SPObject *> objects_to_export;
-        Inkscape::ObjectSet object_set(copy_doc.get());
+        Inkscape::ObjectSet object_set(copy_doc);
         for (auto &object : objects) {
             auto _id = object->getId();
-            if (!_id || (!page_ids.empty() && page_ids.find(_id) == page_ids.end())) {
+            if (!_id || (!obj_ids.empty() && obj_ids.find(_id) == obj_ids.end())) {
                 // This item is off the page so can be ignored for export
                 continue;
             }
@@ -404,10 +432,7 @@ bool Export::exportVector(
 
         copy_doc->getRoot()->cropToObjects(objects_to_export);
 
-        if (page) {
-            // Resize to page here.
-            copy_doc->fitToRect(*page_rect, true);
-        } else {
+        if (pages.empty()) {
             object_set.fitCanvas(true, true);
         }
     }
@@ -416,7 +441,7 @@ bool Export::exportVector(
     copy_doc->vacuumDocument();
 
     try {
-        extension->save(copy_doc.get(), path.c_str());
+        extension->save(copy_doc, path.c_str());
     } catch (Inkscape::Extension::Output::save_failed &e) {
         Glib::ustring safeFile = Inkscape::IO::sanitizeString(path.c_str());
         Glib::ustring error = g_strdup_printf(_("Could not export to filename <b>%s</b>.\n"), safeFile.c_str());
@@ -466,7 +491,7 @@ std::string Export::filePathFromId(SPDocument *doc, Glib::ustring id, const Glib
     }
 
     if (directory.empty()) {
-        directory = Inkscape::IO::Resource::homedir_path(nullptr);
+        directory = Inkscape::IO::Resource::homedir_path();
     }
 
     return Glib::build_filename(directory, Glib::filename_from_utf8(id));

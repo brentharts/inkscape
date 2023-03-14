@@ -163,26 +163,27 @@ void GradientTool::select_next()
 {
     g_assert(_grdrag);
     GrDragger *d = _grdrag->select_next();
-    _desktop->scroll_to_point(d->point, 1.0);
+    _desktop->scroll_to_point(d->point);
 }
 
 void GradientTool::select_prev()
 {
     g_assert(_grdrag);
     GrDragger *d = _grdrag->select_prev();
-    _desktop->scroll_to_point(d->point, 1.0);
+    _desktop->scroll_to_point(d->point);
 }
 
 SPItem *GradientTool::is_over_curve(Geom::Point event_p)
 {
-    //Translate mouse point into proper coord system: needed later.
+    // Translate mouse point into proper coord system: needed later.
     mousepoint_doc = _desktop->w2d(event_p);
 
-    for (auto curve : _grdrag->item_curves) {
-        if (curve->contains(event_p, tolerance)) {
-            return curve->get_item();
+    for (auto &it : _grdrag->item_curves) {
+        if (it.curve->contains(event_p, tolerance)) {
+            return it.item;
         }
     }
+
     return nullptr;
 }
 
@@ -313,11 +314,11 @@ void GradientTool::add_stops_between_selected_stops()
         SPStop *next_stop = *j;
         gfloat offset = 0.5*(this_stop->offset + next_stop->offset);
         SPObject *parent = this_stop->parent;
-        if (SP_IS_GRADIENT (parent)) {
+        if (is<SPGradient>(parent)) {
             doc = parent->document;
-            SPStop *new_stop = sp_vector_add_stop (SP_GRADIENT (parent), this_stop, next_stop, offset);
+            SPStop *new_stop = sp_vector_add_stop (cast<SPGradient>(parent), this_stop, next_stop, offset);
             new_stops.push_back(new_stop);
-            SP_GRADIENT(parent)->ensureVector();
+            cast<SPGradient>(parent)->ensureVector();
         }
     }
 
@@ -467,7 +468,7 @@ bool GradientTool::root_handler(GdkEvent* event) {
             dragging = true;
 
             Geom::Point button_dt = _desktop->w2d(button_w);
-            if (event->button.state & GDK_SHIFT_MASK) {
+            if (event->button.state & GDK_SHIFT_MASK && !(event->button.state & GDK_CONTROL_MASK)) {
                 Inkscape::Rubberband::get(_desktop)->start(_desktop, button_dt);
             } else {
                 // remember clicked item, disregarding groups, honoring Alt; do nothing with Crtl to
@@ -555,8 +556,9 @@ bool GradientTool::root_handler(GdkEvent* event) {
                 dragging = false;
 
                 // unless clicked with Ctrl (to enable Ctrl+doubleclick).
-                if (event->button.state & GDK_CONTROL_MASK) {
+                if (event->button.state & GDK_CONTROL_MASK && !(event->button.state & GDK_SHIFT_MASK)) {
                     ret = TRUE;
+                    Inkscape::Rubberband::get(_desktop)->stop();
                     break;
                 }
 

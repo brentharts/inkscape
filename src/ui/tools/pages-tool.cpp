@@ -33,7 +33,12 @@
 #include "snap.h"
 #include "ui/icon-names.h"
 #include "ui/knot/knot.h"
+#include "ui/modifiers.h"
 #include "ui/widget/canvas.h"
+
+using Inkscape::Modifiers::Modifier;
+
+#define INDEX_OF(v, k) (std::distance(v.begin(), std::find(v.begin(), v.end(), k)));
 
 namespace Inkscape {
 namespace UI {
@@ -60,21 +65,35 @@ PagesTool::PagesTool(SPDesktop *desktop)
             knot->hide();
             knot->moved_signal.connect(sigc::mem_fun(*this, &PagesTool::resizeKnotMoved));
             knot->ungrabbed_signal.connect(sigc::mem_fun(*this, &PagesTool::resizeKnotFinished));
+            resize_knots.push_back(knot);
+
+            auto m_knot = new SPKnot(desktop, _("Set page margin"), Inkscape::CANVAS_ITEM_CTRL_TYPE_MARGIN, "PageTool:Margin");
+            m_knot->setFill(0xffffff00, 0x0000ff00, 0x000000ff, 0x000000ff);
+            m_knot->setStroke(0x1699d791, 0xff99d791, 0x000000ff, 0x000000ff);
+            m_knot->setSize(11);
+            m_knot->setAnchor(SP_ANCHOR_CENTER);
+            m_knot->updateCtrl();
+            m_knot->hide();
+            m_knot->request_signal.connect(sigc::mem_fun(*this, &PagesTool::marginKnotMoved));
+            m_knot->ungrabbed_signal.connect(sigc::mem_fun(*this, &PagesTool::marginKnotFinished));
+            margin_knots.push_back(m_knot);
+
             if (auto window = desktop->getCanvas()->get_window()) {
                 knot->setCursor(SP_KNOT_STATE_DRAGGING, this->get_cursor(window, "page-resizing.svg"));
                 knot->setCursor(SP_KNOT_STATE_MOUSEOVER, this->get_cursor(window, "page-resize.svg"));
+                m_knot->setCursor(SP_KNOT_STATE_DRAGGING, this->get_cursor(window, "page-resizing.svg"));
+                m_knot->setCursor(SP_KNOT_STATE_MOUSEOVER, this->get_cursor(window, "page-resize.svg"));
             }
-            resize_knots.push_back(knot);
         }
     }
 
     if (!visual_box) {
-        visual_box = new Inkscape::CanvasItemRect(desktop->getCanvasControls());
+        visual_box = make_canvasitem<CanvasItemRect>(desktop->getCanvasControls());
         visual_box->set_stroke(0x0000ff7f);
         visual_box->hide();
     }
     if (!drag_group) {
-        drag_group = new Inkscape::CanvasItemGroup(desktop->getCanvasTemp());
+        drag_group = make_canvasitem<CanvasItemGroup>(desktop->getCanvasTemp());
         drag_group->set_name("CanvasItemGroup:PagesDragShapes");
     }
 
@@ -101,10 +120,7 @@ PagesTool::~PagesTool()
 
     _desktop->getSelection()->restoreBackup();
 
-    if (visual_box) {
-        delete visual_box;
-        visual_box = nullptr;
-    }
+    visual_box.reset();
 
     for (auto knot : resize_knots) {
         delete knot;
@@ -112,8 +128,7 @@ PagesTool::~PagesTool()
     resize_knots.clear();
 
     if (drag_group) {
-        delete drag_group;
-        drag_group = nullptr;
+        drag_group.reset();
         drag_shapes.clear(); // Already deleted by group
     }
 
@@ -127,6 +142,22 @@ void PagesTool::resizeKnotSet(Geom::Rect rect)
         resize_knots[i]->moveto(rect.corner(i));
         resize_knots[i]->show();
     }
+}
+
+void PagesTool::marginKnotSet(Geom::Rect margin_rect)
+{
+    for (int i = 0; i < margin_knots.size(); i++) {
+        margin_knots[i]->moveto(middleOfSide(i, margin_rect));
+        margin_knots[i]->show();
+    }
+}
+
+/*
+ * Get the middle of the side of the rectangle.
+ */
+Geom::Point PagesTool::middleOfSide(int side, const Geom::Rect &rect)
+{
+    return Geom::middle_point(rect.corner(side), rect.corner((side + 1) % 4));
 }
 
 void PagesTool::resizeKnotMoved(SPKnot *knot, Geom::Point const &ppointer, guint state)
@@ -199,6 +230,46 @@ void PagesTool::resizeKnotFinished(SPKnot *knot, guint state)
     mouse_is_pressed = false;
 }
 
+
+bool PagesTool::marginKnotMoved(SPKnot *knot, Geom::Point *ppointer, guint state)
+{
+    auto document = _desktop->getDocument();
+    auto &pm = document->getPageManager();
+
+    // Editing margins creates a page for the margin to be stored in.
+    pm.enablePages();
+
+    if (auto page = pm.getSelected()) {
+        Geom::Point point = *ppointer;
+
+        // Confine knot to edge
+        auto confine = Modifiers::Modifier::get(Modifiers::Type::TRANS_CONFINE)->active(state);
+        if (!Modifiers::Modifier::get(Modifiers::Type::MOVE_SNAPPING)->active(state)) {
+            point = getSnappedResizePoint(point, state, knot->drag_origin, page);
+        }
+
+        // Calculate what we're acting on, clamp it depending on the side.
+        int side = INDEX_OF(margin_knots, knot);
+        auto axis = (side & 1) ? Geom::X : Geom::Y;
+        auto delta = (point - page->getDesktopRect().corner(side))[axis];
+        auto value = std::max(0.0, (side + 1) & 2 ? -delta : delta);
+
+        // Set to page and back to to knot to inform confinement.
+        page->setMarginSide(side, value, confine);
+        knot->setPosition(middleOfSide(side, page->getDesktopMargin()), state);
+
+        Inkscape::DocumentUndo::maybeDone(document, "page-margin", ("Adjust page margin"), INKSCAPE_ICON("tool-pages"));
+    } else {
+        g_warning("Can't add margin, pages not enabled correctly!");
+    }
+    return true;
+}
+
+void PagesTool::marginKnotFinished(SPKnot *knot, guint state)
+{
+    // Margins are updated in real time.
+}
+
 bool PagesTool::root_handler(GdkEvent *event)
 {
     bool ret = false;
@@ -245,6 +316,7 @@ bool PagesTool::root_handler(GdkEvent *event)
                     // a weird bug which stops it from working well.
                     // drag_group->update(tr * drag_group->get_parent()->get_affine());
                     addDragShapes(dragging_item, tr);
+                    _desktop->getCanvas()->enable_autoscroll();
                 } else if (on_screen_rect) {
                     // Continue to drag new box
                     point_dt = getSnappedResizePoint(point_dt, event->motion.state, drag_origin_dt);
@@ -395,10 +467,10 @@ Geom::Affine PagesTool::moveTo(Geom::Point xy, bool snap)
         snap_manager.setup(_desktop, true, dragging_item);
         snap_manager.snapprefs.clearTargetMask(0); // Disable all snapping targets
         snap_manager.snapprefs.setTargetMask(SNAPTARGET_ALIGNMENT_CATEGORY, -1);
-        snap_manager.snapprefs.setTargetMask(SNAPTARGET_ALIGNMENT_PAGE_CORNER, -1);
-        snap_manager.snapprefs.setTargetMask(SNAPTARGET_ALIGNMENT_PAGE_CENTER, -1);
-        snap_manager.snapprefs.setTargetMask(SNAPTARGET_PAGE_CORNER, -1);
-        snap_manager.snapprefs.setTargetMask(SNAPTARGET_PAGE_CENTER, -1);
+        snap_manager.snapprefs.setTargetMask(SNAPTARGET_ALIGNMENT_PAGE_EDGE_CORNER, -1);
+        snap_manager.snapprefs.setTargetMask(SNAPTARGET_ALIGNMENT_PAGE_EDGE_CENTER, -1);
+        snap_manager.snapprefs.setTargetMask(SNAPTARGET_PAGE_EDGE_CORNER, -1);
+        snap_manager.snapprefs.setTargetMask(SNAPTARGET_PAGE_EDGE_CENTER, -1);
         snap_manager.snapprefs.setTargetMask(SNAPTARGET_GRID_INTERSECTION, -1);
         snap_manager.snapprefs.setTargetMask(SNAPTARGET_GUIDE, -1);
         snap_manager.snapprefs.setTargetMask(SNAPTARGET_GUIDE_INTERSECTION, -1);
@@ -456,7 +528,7 @@ void PagesTool::addDragShape(SPItem *item, Geom::Affine tr)
  */
 void PagesTool::addDragShape(Geom::PathVector &&pth, Geom::Affine tr)
 {
-    auto shape = new CanvasItemBpath(drag_group, pth * tr, false);
+    auto shape = new CanvasItemBpath(drag_group.get(), pth * tr, false);
     shape->set_stroke(0x00ff007f);
     shape->set_fill(0x00000000, SP_WIND_RULE_EVENODD);
     drag_shapes.push_back(shape);
@@ -468,7 +540,7 @@ void PagesTool::addDragShape(Geom::PathVector &&pth, Geom::Affine tr)
 void PagesTool::clearDragShapes()
 {
     for (auto &shape : drag_shapes) {
-        delete shape;
+        shape->unlink();
     }
     drag_shapes.clear();
 }
@@ -541,6 +613,9 @@ void PagesTool::selectionChanged(SPDocument *doc, SPPage *page)
         for (auto knot : resize_knots) {
             knot->hide();
         }
+        for (auto knot : margin_knots) {
+            knot->hide();
+        }
     }
 
     // Loop existing pages because highlight_item is unsafe.
@@ -559,17 +634,21 @@ void PagesTool::selectionChanged(SPDocument *doc, SPPage *page)
         } else {
             // This is for viewBox editng directly. A special extra feature
             _page_modified_connection = doc->connectModified([=](guint){
-            resizeKnotSet(*(doc->preferredBounds()));
+                resizeKnotSet(*(doc->preferredBounds()));
+                marginKnotSet(*(doc->preferredBounds()));
             });
             resizeKnotSet(*(doc->preferredBounds()));
+            marginKnotSet(*(doc->preferredBounds()));
         }
     }
 }
 
+
 void PagesTool::pageModified(SPObject *object, guint /*flags*/)
 {
-    if (auto page = dynamic_cast<SPPage *>(object)) {
+    if (auto page = cast<SPPage>(object)) {
         resizeKnotSet(page->getDesktopRect());
+        marginKnotSet(page->getDesktopMargin());
     }
 }
 

@@ -15,6 +15,7 @@
  *
  */
 
+#include "actions-helper.h"
 #include "actions-object-align.h"
 
 #include <iostream>
@@ -62,13 +63,13 @@ object_align_on_canvas(InkscapeApplication *app)
     auto *gapp = app->gio_app();
     auto action = gapp->lookup_action("object-align-on-canvas");
     if (!action) {
-        std::cerr << "object_align_on_canvas: action missing!" << std::endl;
+        show_output("object_align_on_canvas: action missing!");
         return;
     }
 
     auto saction = Glib::RefPtr<Gio::SimpleAction>::cast_dynamic(action);
     if (!saction) {
-        std::cerr << "object_align_on_canvas: action not SimpleAction!" << std::endl;
+        show_output("object_align_on_canvas: action not SimpleAction!");
         return;
     }
 
@@ -138,11 +139,11 @@ object_align(const Glib::VariantBase& value, InkscapeApplication *app)
             else if (token == "bottom"  ) { my0 = 0.0; my1 = 1.0; sy0 = 0.0; sy1 = 1.0; }
         } else {
             if      (token == "left"    ) { mx0 = 0.0; mx1 = 1.0; sx0 = 1.0; sx1 = 0.0; }
-            else if (token == "hcenter" ) std::cerr << "'anchor' cannot be used with 'hcenter'" << std::endl;
+            else if (token == "hcenter" ) show_output("'anchor' cannot be used with 'hcenter'");
             else if (token == "right"   ) { mx0 = 1.0; mx1 = 0.0; sx0 = 0.0; sx1 = 1.0; }
 
             else if (token == "top"     ) { my0 = 0.0; my1 = 1.0; sy0 = 1.0; sy1 = 0.0; }
-            else if (token == "vcenter" ) std::cerr << "'anchor' cannot be used with 'vcenter'" << std::endl;
+            else if (token == "vcenter" ) show_output("'anchor' cannot be used with 'vcenter'");
             else if (token == "bottom"  ) { my0 = 1.0; my1 = 0.0; sy0 = 0.0; sy1 = 1.0; }
         }
     }
@@ -159,10 +160,9 @@ object_align(const Glib::VariantBase& value, InkscapeApplication *app)
     std::size_t total = std::distance(list.begin(), list.end());
     std::vector<SPItem *> selected;
     std::vector<Inkscape::LivePathEffect::Effect *> bools;
-    for (auto itemlist = list.begin(); itemlist != list.end(); ++itemlist) {
-        SPItem *item = dynamic_cast<SPItem *>(*itemlist);
+    for (auto item : list) {
         if (total == 2) {
-            SPLPEItem *lpeitem = dynamic_cast<SPLPEItem *>(item);
+            auto lpeitem = cast<SPLPEItem>(item);
             if (lpeitem) {
                 for (auto lpe : lpeitem->getPathEffectsOfType(Inkscape::LivePathEffect::EffectType::BOOL_OP)) {
                     if (!g_strcmp0(lpe->getRepr()->attribute("is_visible"), "true")) {
@@ -431,7 +431,7 @@ object_distribute_text(const Glib::VariantBase& value, InkscapeApplication *app)
     Geom::Point b_max = Geom::Point (-HUGE_VAL, -HUGE_VAL);
 
     for (auto item : selection->items()) {
-        if (dynamic_cast<SPText *>(item) || dynamic_cast<SPFlowtext *>(item)) {
+        if (is<SPText>(item) || cast<SPFlowtext>(item)) {
             Inkscape::Text::Layout const *layout = te_get_layout(item);
             std::optional<Geom::Point> pt = layout->baselineAnchorPoint();
             if (pt) {
@@ -541,7 +541,7 @@ object_align_text(const Glib::VariantBase& value, InkscapeApplication *app)
 
     Geom::Point ref_point;
     if (focus) {
-        if (dynamic_cast<SPText *>(focus) || dynamic_cast<SPFlowtext *>(focus)) {
+        if (is<SPText>(focus) || cast<SPFlowtext>(focus)) {
             ref_point = *(te_get_layout(focus)->baselineAnchorPoint())*(focus->i2dt_affine());
         } else {
             ref_point = focus->desktopPreferredBounds()->min();
@@ -551,7 +551,7 @@ object_align_text(const Glib::VariantBase& value, InkscapeApplication *app)
     }
 
     for (auto item : selection->items()) {
-        if (dynamic_cast<SPText *>(item) || dynamic_cast<SPFlowtext *>(item)) {
+        if (is<SPText>(item) || cast<SPFlowtext>(item)) {
             Inkscape::Text::Layout const *layout = te_get_layout(item);
             std::optional<Geom::Point> pt = layout->baselineAnchorPoint();
             if (pt) {
@@ -717,7 +717,7 @@ object_rearrange(const Glib::VariantBase& value, InkscapeApplication *app)
     else if (token == "randomize" ) { randomize(selection); }
     else if (token == "unclump"   ) { unclump(items); }
     else {
-        std::cerr << "object_rearrange: unhandled argument: " << token.raw() << std::endl;
+        show_output(Glib::ustring("object_rearrange: unhandled argument: ") + token.raw());
      }
     // clang-format on
 
@@ -744,7 +744,7 @@ object_remove_overlaps(const Glib::VariantBase& value, InkscapeApplication *app)
 
     // We used tuple so as not to convert from double to string and back again (from Align and Distribute dialog).
     if (value.get_type_string() != "(dd)") {
-        std::cerr << "object_remove_overlaps:  wrong variant type: " << value.get_type_string() << " (should be '(dd)')" << std::endl;
+        show_output(Glib::ustring("object_remove_overlaps:  wrong variant type: ") + Glib::ustring::format(value.get_type_string()) + " (should be '(dd)')");
     }
 
     auto tuple = Glib::VariantBase::cast_dynamic<Glib::Variant<std::tuple<double, double>>>(value);
@@ -780,26 +780,26 @@ std::vector<std::vector<Glib::ustring>> raw_data_object_align =
     {"app.object-align-text",              N_("Align text objects"), "Object", N_("Align selected text alignment points; usage: [[vertical | horizontal] [last|first|biggest|smallest|page|drawing|selection]?"            )},
 
     {"app.object-distribute",              N_("Distribute objects"),          "Object", N_("Distribute selected objects; usage: [hgap | left | hcenter | right | vgap | top | vcenter | bottom]"                           )},
-    {"app.object-distribute('hgap')",      N_("Even horizontal gaps"),        "Object", N_("Distribute horizontally with even horizontal gaps."                                                                            )},
-    {"app.object-distribute('left')",      N_("Even left edges"),             "Object", N_("Distribute horizontally with even spacing between left edges."                                                                 )},
-    {"app.object-distribute('hcenter')",   N_("Even horizontal centers"),     "Object", N_("Distribute horizontally with even spacing between centers."                                                                    )},
-    {"app.object-distribute('right')",     N_("Even right edges"),            "Object", N_("Distribute horizontally with even spacing between right edges."                                                                )},
-    {"app.object-distribute('vgap')",      N_("Even vertical gaps"),          "Object", N_("Distribute vertically with even vertical gaps."                                                                                )},
-    {"app.object-distribute('top')",       N_("Even top edges"),              "Object", N_("Distribute vertically with even spacing between top edges."                                                                    )},
-    {"app.object-distribute('vcenter')",   N_("Even vertical centers"),       "Object", N_("Distribute vertically with even spacing between centers."                                                                      )},
-    {"app.object-distribute('bottom')",    N_("Even bottom edges"),           "Object", N_("Distribute vertically with even spacing between bottom edges."                                                                 )},
+    {"app.object-distribute('hgap')",      N_("Even horizontal gaps"),        "Object", N_("Distribute horizontally with even horizontal gaps"                                                                            )},
+    {"app.object-distribute('left')",      N_("Even left edges"),             "Object", N_("Distribute horizontally with even spacing between left edges"                                                                 )},
+    {"app.object-distribute('hcenter')",   N_("Even horizontal centers"),     "Object", N_("Distribute horizontally with even spacing between centers"                                                                    )},
+    {"app.object-distribute('right')",     N_("Even right edges"),            "Object", N_("Distribute horizontally with even spacing between right edges"                                                                )},
+    {"app.object-distribute('vgap')",      N_("Even vertical gaps"),          "Object", N_("Distribute vertically with even vertical gaps"                                                                                )},
+    {"app.object-distribute('top')",       N_("Even top edges"),              "Object", N_("Distribute vertically with even spacing between top edges"                                                                    )},
+    {"app.object-distribute('vcenter')",   N_("Even vertical centers"),       "Object", N_("Distribute vertically with even spacing between centers"                                                                      )},
+    {"app.object-distribute('bottom')",    N_("Even bottom edges"),           "Object", N_("Distribute vertically with even spacing between bottom edges"                                                                 )},
 
     {"app.object-distribute-text",         N_("Distribute text objects"),     "Object", N_("Distribute text alignment points; usage [vertical | horizontal]"                                                               )},
     {"app.object-distribute-text('horizontal')", N_("Distribute text objects"),     "Object", N_("Distribute text alignment points horizontally"                                                                           )},
     {"app.object-distribute-text('vertical')",   N_("Distribute text objects"),     "Object", N_("Distribute text alignment points vertically"                                                                             )},
 
     {"app.object-rearrange",               N_("Rearrange objects"),           "Object", N_("Rearrange selected objects; usage: [graph | exchange | exchangez | rotate | randomize | unclump]"                              )},
-    {"app.object-rearrange('graph')",      N_("Rearrange as graph"),          "Object", N_("Nicely arrange selected connector network."                                                                                    )},
-    {"app.object-rearrange('exchange')",   N_("Exchange in selection order"), "Object", N_("Exchange positions of selected objects - selection order."                                                                     )},
-    {"app.object-rearrange('exchangez')",  N_("Exchange in z-order"),         "Object", N_("Exchange positions of selected objects - stacking order."                                                                      )},
-    {"app.object-rearrange('rotate')",     N_("Exchange around center"),      "Object", N_("Exchange positions of selected objects - rotate around center point."                                                          )},
-    {"app.object-rearrange('randomize')",  N_("Random exchange"),             "Object", N_("Randomize centers in both dimensions."                                                                                         )},
-    {"app.object-rearrange('unclump')",    N_("Unclump"),                     "Object", N_("Unclump objects: try to equalize edge-to-edge distances."                                                                      )},
+    {"app.object-rearrange('graph')",      N_("Rearrange as graph"),          "Object", N_("Nicely arrange selected connector network"                                                                                    )},
+    {"app.object-rearrange('exchange')",   N_("Exchange in selection order"), "Object", N_("Exchange positions of selected objects - selection order"                                                                     )},
+    {"app.object-rearrange('exchangez')",  N_("Exchange in z-order"),         "Object", N_("Exchange positions of selected objects - stacking order"                                                                      )},
+    {"app.object-rearrange('rotate')",     N_("Exchange around center"),      "Object", N_("Exchange positions of selected objects - rotate around center point"                                                          )},
+    {"app.object-rearrange('randomize')",  N_("Random exchange"),             "Object", N_("Randomize centers in both dimensions"                                                                                         )},
+    {"app.object-rearrange('unclump')",    N_("Unclump"),                     "Object", N_("Unclump objects: try to equalize edge-to-edge distances"                                                                      )},
 
     {"app.object-remove-overlaps",         N_("Remove overlaps"),             "Object", N_("Remove overlaps between objects: requires two comma separated numbers (horizontal and vertical gaps)."                         )},
     // clang-format on

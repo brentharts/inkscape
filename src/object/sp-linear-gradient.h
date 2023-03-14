@@ -18,12 +18,13 @@
 #include "svg/svg-length.h"
 
 /** Linear gradient. */
-class SPLinearGradient
+class SPLinearGradient final
     : public SPGradient
 {
 public:
     SPLinearGradient();
     ~SPLinearGradient() override;
+    int tag() const override { return tag_of<decltype(*this)>; }
 
     SVGLength x1;
     SVGLength y1;
@@ -38,9 +39,6 @@ protected:
     void update(SPCtx *ctx, guint flags) override;
     Inkscape::XML::Node* write(Inkscape::XML::Document *xml_doc, Inkscape::XML::Node *repr, unsigned int flags) override;
 };
-
-MAKE_SP_OBJECT_DOWNCAST_FUNCTIONS(SP_LINEARGRADIENT, SPLinearGradient)
-MAKE_SP_OBJECT_TYPECHECK_FUNCTIONS(SP_IS_LINEARGRADIENT, SPLinearGradient)
 
 #endif /* !SP_LINEAR_GRADIENT_H */
 

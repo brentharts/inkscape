@@ -17,12 +17,13 @@
 #include "sp-filter-primitive.h"
 #include "display/nr-filter-blend.h"
 
-class SPFeBlend
+class SPFeBlend final
     : public SPFilterPrimitive
 {
 public:
     SPBlendMode get_blend_mode() const { return blend_mode; }
     int get_in2() const { return in2_slot; }
+    int tag() const override { return tag_of<decltype(*this)>; }
 
 protected:
     void build(SPDocument *doc, Inkscape::XML::Node *repr) override;
@@ -38,9 +39,6 @@ private:
     std::optional<std::string> in2_name;
     int in2_slot = Inkscape::Filters::NR_FILTER_SLOT_NOT_SET;
 };
-
-MAKE_SP_OBJECT_DOWNCAST_FUNCTIONS(SP_FEBLEND, SPFeBlend)
-MAKE_SP_OBJECT_TYPECHECK_FUNCTIONS(SP_IS_FEBLEND, SPFeBlend)
 
 #endif // SP_FEBLEND_H_SEEN
 

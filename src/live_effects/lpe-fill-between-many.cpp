@@ -48,8 +48,7 @@ LPEFillBetweenMany::LPEFillBetweenMany(LivePathEffectObject *lpeobject)
     linked_paths.setUpdating(true);
 }
 
-LPEFillBetweenMany::~LPEFillBetweenMany()
-= default;
+LPEFillBetweenMany::~LPEFillBetweenMany() = default;
 
 void
 LPEFillBetweenMany::doOnApply(SPLPEItem const* lpeitem)
@@ -112,12 +111,12 @@ LPEFillBetweenMany::transform_multiply_nested(Geom::Affine const &postmul)
         }
         for (auto & iter : linked_paths._vector) {
             SPItem *item;
-            if (iter->ref.isAttached() && (( item = dynamic_cast<SPItem*>(iter->ref.getObject()) )) &&
+            if (iter->ref.isAttached() && (( item = cast<SPItem>(iter->ref.getObject()) )) &&
                 !iter->_pathvector.empty() && iter->visibled) {
                 if (iter->_pathvector.front().closed() && linked_paths._vector.size() > 1) {
                     continue;
                 }
-                if (selection && !selection->includes(item, true) && selection->includes(sp_lpe_item, true)) {
+                if (item->document->isSensitive() && selection && !selection->includes(item, true) && selection->includes(sp_lpe_item, true)) {
                     item->transform *= i2anc_affine(item->parent, item->document->getRoot());
                     item->transform *=  postmul.inverse();
                     item->transform *= i2anc_affine(item->parent, item->document->getRoot()).inverse();
@@ -149,30 +148,26 @@ LPEFillBetweenMany::doEffect (SPCurve * curve)
     if (!autoreverse) {
         for (auto & iter : linked_paths._vector) {
             SPItem *item;
-            if (iter->ref.isAttached() && (( item = dynamic_cast<SPItem*>(iter->ref.getObject()) )) &&
+            if (iter->ref.isAttached() && (( item = cast<SPItem>(iter->ref.getObject()) )) &&
                 !iter->_pathvector.empty() && iter->visibled) {
-                Geom::Path linked_path;
-                if (iter->_pathvector.front().closed() && linked_paths._vector.size() > 1) {
-                    continue;
-                }
-                if (iter->reversed) {
-                    linked_path = iter->_pathvector.front().reversed();
-                } else {
-                    linked_path = iter->_pathvector.front();
-                }
-                linked_path *= item->getRelativeTransform(sp_lpe_item);
-                if (!res_pathv.empty() && join) {
-                    if (!are_near(res_pathv.front().finalPoint(), linked_path.initialPoint(), 0.1)) {
-                        res_pathv.front().appendNew<Geom::LineSegment>(linked_path.initialPoint());
+                for (auto linked_path : iter->_pathvector) {
+                    if (iter->reversed) {
+                        linked_path = linked_path.reversed();
+                    }
+                    linked_path *= item->getRelativeTransform(sp_lpe_item);
+                    if (!res_pathv.empty() && join) {
+                        if (!are_near(res_pathv.front().finalPoint(), linked_path.initialPoint(), 0.1)) {
+                            res_pathv.front().appendNew<Geom::LineSegment>(linked_path.initialPoint());
+                        } else {
+                            linked_path.setInitial(res_pathv.front().finalPoint());
+                        }
+                        res_pathv.front().append(linked_path);
                     } else {
-                        linked_path.setInitial(res_pathv.front().finalPoint());
+                        if (close && !join) {
+                            linked_path.close();
+                        }
+                        res_pathv.push_back(linked_path);
                     }
-                    res_pathv.front().append(linked_path);
-                } else {
-                    if (close && !join) {
-                        linked_path.close();
-                    }
-                    res_pathv.push_back(linked_path);
                 }
             }
         }
@@ -183,7 +178,7 @@ LPEFillBetweenMany::doEffect (SPCurve * curve)
         std::vector<unsigned int> done;
         for (auto & iter : linked_paths._vector) {
             SPItem *item;
-            if (iter->ref.isAttached() && (( item = dynamic_cast<SPItem*>(iter->ref.getObject()) )) &&
+            if (iter->ref.isAttached() && (( item = cast<SPItem>(iter->ref.getObject()) )) &&
                 !iter->_pathvector.empty() && iter->visibled) {
                 Geom::Path linked_path;
                 if (iter->_pathvector.front().closed() && linked_paths._vector.size() > 1) {
@@ -209,7 +204,7 @@ LPEFillBetweenMany::doEffect (SPCurve * curve)
                 PathAndDirectionAndVisible *nearest = nullptr;
                 for (auto & iter2 : linked_paths._vector) {
                     SPItem *item2;
-                    if (iter2->ref.isAttached() && (( item2 = dynamic_cast<SPItem*>(iter2->ref.getObject()) )) &&
+                    if (iter2->ref.isAttached() && (( item2 = cast<SPItem>(iter2->ref.getObject()) )) &&
                         !iter2->_pathvector.empty() && iter2->visibled) {
                         if (item == item2 || std::find(done.begin(), done.end(), counter2) != done.end()) {
                             counter2++;
@@ -257,10 +252,16 @@ LPEFillBetweenMany::doEffect (SPCurve * curve)
                         current = end;
                     }
                     SPItem *itemnear;
-                    if (nearest->ref.isAttached() && (( itemnear = dynamic_cast<SPItem*>(nearest->ref.getObject()) ))) {
+                    if (nearest->ref.isAttached() && (( itemnear = cast<SPItem>(nearest->ref.getObject()) ))) {
                         linked_path *= itemnear->getRelativeTransform(sp_lpe_item);
                     }
                     if (!res_pathv.empty() && join) {
+                        if (!sp_version_inside_range( getSPDoc()->getRoot()->version.inkscape, 0, 1, 1, 1 ) && // not in tests
+                            Geom::distance(res_pathv.front().finalPoint(), linked_path.initialPoint()) > 
+                            Geom::distance(res_pathv.front().finalPoint(), linked_path.finalPoint())) 
+                        {
+                            linked_path = linked_path.reversed();
+                        }
                         if (!are_near(res_pathv.front().finalPoint(), linked_path.initialPoint(), 0.1)) {
                             res_pathv.front().appendNew<Geom::LineSegment>(linked_path.initialPoint());
                         } else {

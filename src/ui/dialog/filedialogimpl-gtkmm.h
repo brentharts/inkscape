@@ -45,19 +45,14 @@ namespace Dialog {
 /*#########################################################################
 ### Utility
 #########################################################################*/
-void
-fileDialogExtensionToPattern(Glib::ustring &pattern,
-                      Glib::ustring &extension);
 
-class FileType
-{
-    public:
-    FileType(): name(), pattern(),extension(nullptr) {}
-    ~FileType() = default;
-    Glib::ustring name;
-    Glib::ustring pattern;
-    Inkscape::Extension::Extension *extension;
-};
+void
+findEntryWidgets(Gtk::Container *parent,
+                 std::vector<Gtk::Entry *> &result);
+
+void
+findExpanderWidgets(Gtk::Container *parent,
+                    std::vector<Gtk::Expander *> &result);
 
 /*#########################################################################
 ### F I L E     D I A L O G    B A S E    C L A S S
@@ -71,9 +66,6 @@ class FileDialogBaseGtk : public Gtk::FileChooserNative
 {
 public:
 
-    /**
-     *
-     */
     FileDialogBaseGtk(Gtk::Window& parentWindow, const Glib::ustring &title,
     		Gtk::FileChooserAction dialogType, FileDialogType type, gchar const* preferenceBase) :
         Gtk::FileChooserNative(title, parentWindow, dialogType, accept_label(dialogType), cancel_label()),
@@ -83,11 +75,26 @@ public:
         internalSetup();
     }
 
+    FileDialogBaseGtk(Gtk::Window& parentWindow, const char *title,
+                   Gtk::FileChooserAction dialogType, FileDialogType type, gchar const* preferenceBase) :
+        Gtk::FileChooserNative(title, parentWindow, dialogType, accept_label(dialogType), cancel_label()),
+        preferenceBase(preferenceBase ? preferenceBase : "unknown"),
+        _dialogType(type)
+    {
+        internalSetup();
+    }
+
+    ~FileDialogBaseGtk() override = default;
+
     /**
-     *
+     * Add a Gtk filter to our specially controlled filter dropdown.
      */
-    ~FileDialogBaseGtk() override
-        = default;
+    Glib::RefPtr<Gtk::FileFilter> addFilter(const Glib::ustring &name, Glib::ustring pattern = "",
+                                            Inkscape::Extension::Extension *mod = nullptr);
+
+    Glib::ustring extToPattern(const Glib::ustring &extension) const;
+
+    virtual void filterChangedCallback() {}
 
 protected:
     void cleanup( bool showConfirmed );
@@ -109,6 +116,11 @@ protected:
     Gtk::CheckButton previewCheckbox;
     Gtk::CheckButton svgexportCheckbox;
 
+    /**
+     * Aquired Widgets
+     */
+    Gtk::ComboBoxText *filterComboBox;
+
 private:
     const char * accept_label(Gtk::FileChooserAction dialogType);
     const char * cancel_label();
@@ -124,6 +136,11 @@ private:
      * Callback to for SVG 2 to SVG 1.1 export.
      */
     void _svgexportEnabledCB();
+
+    /**
+     * Overriden filter store.
+     */
+    Glib::RefPtr<Gtk::ListStore> filterStore;
 };
 
 
@@ -145,23 +162,21 @@ public:
                        FileDialogType fileTypes,
                        const Glib::ustring &title);
 
-    ~FileOpenDialogImplGtk() override;
+    ~FileOpenDialogImplGtk() override = default;
 
     bool show() override;
-
-    Inkscape::Extension::Extension *getSelectionType() override;
 
     Glib::ustring getFilename();
 
     std::vector<Glib::ustring> getFilenames() override;
 
-	Glib::ustring getCurrentDirectory() override;
+    Glib::ustring getCurrentDirectory() override;
 
-    /// Add a custom file filter menu item
-    /// @param name - Name of the filter (such as "Javscript")
-    /// @param pattern - File filtering pattern (such as "*.js")
-    /// Use the FileDialogType::CUSTOM_TYPE in constructor to not include other file types
-    void addFilterMenu(Glib::ustring name, Glib::ustring pattern) override;
+    void addFilterMenu(const Glib::ustring &name, Glib::ustring pattern = "",
+                       Inkscape::Extension::Extension *mod = nullptr) override
+    {
+        addFilter(name, pattern, mod);
+    }
 
 private:
 
@@ -169,18 +184,6 @@ private:
      *  Create a filter menu for this type of dialog
      */
     void createFilterMenu();
-
-
-    /**
-     * Filter name->extension lookup
-     */
-    std::map<Glib::ustring, Inkscape::Extension::Extension *> extensionMap;
-
-    /**
-     * The extension to use to write this file
-     */
-    Inkscape::Extension::Extension *extension;
-
 };
 
 
@@ -204,15 +207,19 @@ public:
                           const gchar* docTitle,
                           const Inkscape::Extension::FileSaveMethod save_method);
 
-    ~FileSaveDialogImplGtk() override;
+    ~FileSaveDialogImplGtk() override = default;
 
     bool show() override;
 
-    Inkscape::Extension::Extension *getSelectionType() override;
-    void setSelectionType( Inkscape::Extension::Extension * key ) override;
-
     Glib::ustring getCurrentDirectory() override;
-    void addFileType(Glib::ustring name, Glib::ustring pattern) override;
+
+    void setExtension(Inkscape::Extension::Extension *key) override;
+
+    void addFilterMenu(const Glib::ustring &name, Glib::ustring pattern = "",
+                       Inkscape::Extension::Extension *mod = nullptr) override
+    {
+        addFilter(name, pattern, mod);
+    }
 
 private:
     //void change_title(const Glib::ustring& title);
@@ -229,29 +236,14 @@ private:
      * Fix to allow the user to type the file name
      */
     Gtk::Entry *fileNameEntry;
-
-
-    /**
-     * Allow the specification of the output file type
-     */
-    Gtk::ComboBoxText fileTypeComboBox;
-
-
-    /**
-     *  Data mirror of the combo box
-     */
-    std::vector<FileType> fileTypes;
-
-    //# Child widgets
     Gtk::Box childBox;
     Gtk::Box checksBox;
-
     Gtk::CheckButton fileTypeCheckbox;
 
     /**
      * Callback for user input into fileNameEntry
      */
-    void fileTypeChangedCallback();
+    void filterChangedCallback() override;
 
     /**
      *  Create a filter menu for this type of dialog
@@ -259,12 +251,7 @@ private:
     void createFilterMenu();
 
     /**
-     * The extension to use to write this file
-     */
-    Inkscape::Extension::Extension *extension;
-
-    /**
-     * Callback for file name changed
+     * Callback for user input into fileNameEntry
      */
     void fileNameChanged();
     bool fromCB;

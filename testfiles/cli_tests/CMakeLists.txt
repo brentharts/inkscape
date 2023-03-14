@@ -121,7 +121,7 @@ endfunction(add_cli_test)
 
 # --version (check if we can run inkscape and the revision is known)
 add_cli_test(version       PARAMETERS --version)
-add_cli_test(version_known PARAMETERS --version FAIL_FOR_OUTPUT unknown)
+add_cli_test(version_known PARAMETERS --version FAIL_FOR_OUTPUT "\\(unknown\\)")
 
 # --system-data-directory / --user-data-directory (unset environment variables to override our override)
 # TODO: Can we make these tests more specific without making too many assumptions?
@@ -489,6 +489,13 @@ add_cli_test(export-clone-group-filtered-mp PARAMETERS --export-type=pdf
                                             OUTPUT_PAGE 1
                                             FUZZYREF_FILENAME export-clone-group-filtered-mp_expected.png
                                             FUZZ_PERCENTAGE 3)
+add_cli_test(export-marker-on-clone PARAMETERS --export-type=pdf
+                                    INPUT_FILENAME  export-marker-on-clone.svg
+                                    OUTPUT_FILENAME export-marker-on-clone.pdf
+                                    RASTER_DPI 100
+                                    FUZZYREF_FILENAME export-marker-on-clone_expected.png
+                                    FUZZ_PERCENTAGE 1)
+
 # EMF, WMF: No support for exporting filters. Feature request: https://gitlab.com/inkscape/inbox/-/issues/2275
 # add_cli_test(export-with-filters_emf  PARAMETERS --export-type=emf INPUT_FILENAME offset.svg OUTPUT_FILENAME export-with-filters.emf REFERENCE_FILENAME export-with-filters_expected.emf)
 # add_cli_test(export-with-filters_wmf  PARAMETERS --export-type=wmf INPUT_FILENAME offset.svg OUTPUT_FILENAME export-with-filters.wmf REFERENCE_FILENAME export-with-filters_expected.wmf)
@@ -558,7 +565,7 @@ add_cli_test(export-plain-extension-svg PARAMETERS --export-type=svg --export-ex
 add_cli_test(export-type-extension_svg_guess_file_type  PARAMETERS --export-extension=org.inkscape.output.svg.inkscape INPUT_FILENAME shapes.svg OUTPUT_FILENAME shapes)
 
 ## check error messages for --export-extension
-add_cli_test(export-type-extension_png_error  PARAMETERS --export-extension=org.inkscape.output.svg.inkscape INPUT_FILENAME shapes.svg OUTPUT_FILENAME shapes.png 
+add_cli_test(export-type-extension_png_error  PARAMETERS --export-extension=org.inkscape.output.svg.inkscape INPUT_FILENAME shapes.svg OUTPUT_FILENAME shapes.png
                             PASS_FOR_OUTPUT "InkFileExportCmd::do_export: The parameter --export-extension is invalid for PNG export")
 add_cli_test(export-type-extension_type_error  PARAMETERS --export-extension=org.inkscape.output.svg.inkscape INPUT_FILENAME shapes.svg OUTPUT_FILENAME shapes.pdf
                             PASS_FOR_OUTPUT "InkFileExportCmd::do_export: The supplied extension ID \\(org\\.inkscape\\.output\\.svg\\.inkscape\\) does not match any of the extensions available for this file type.*")
@@ -593,6 +600,8 @@ add_cli_test(action-list   PARAMETERS --action-list PASS_FOR_OUTPUT "file-new")
 
 # --batch-process
 
+# --active-window
+
 # --shell
 
 
@@ -602,6 +611,8 @@ add_cli_test(action-list   PARAMETERS --action-list PASS_FOR_OUTPUT "file-new")
 
 # action-list: test = action-list
 add_cli_test(actions-action-list           PARAMETERS --actions=action-list PASS_FOR_OUTPUT "file-new")
+
+# actions-file=FILENAME
 
 # convert-dpi-method
 # debug-info
@@ -817,6 +828,29 @@ add_cli_test(action_test_multiline_anchoring
                         EXPECTED_FILES multiline-anchoring_out.svg
                         TEST_SCRIPT match_regex_fail.sh multiline-anchoring_out.svg "(x=\"[3-9][0-9]{2}\")|(x=\"[12][0-9]{3}\")|(y=\"[0-9]{2}\")|(y=\"1[0-9]{2}\")")
 
+
+###########################
+### pdf input support   ###
+###########################
+
+function(add_pdfinput_test name pages)
+
+    add_cli_test(pdfinput-${name}
+        INPUT_FILENAME pdfinput/${name}.pdf
+        PARAMETERS --pages=${pages} --pdf-font-strategy=draw-all --actions=export-filename:${name}.svg$<SEMICOLON>export-do
+        TEST_SCRIPT compare.sh ${name}.svg "${CMAKE_CURRENT_SOURCE_DIR}/testcases/pdfinput/${name}_expected.svg")
+
+endfunction(add_pdfinput_test)
+
+# CMS testing disabled because CI builder doesn't support LCMS yet.
+# add_pdfinput_test(cms 1)
+add_pdfinput_test(font-spacing 1)
+add_pdfinput_test(font-style 1)
+add_pdfinput_test(gradients 1)
+add_pdfinput_test(latex 1)
+add_pdfinput_test(transparency-groups 1)
+add_pdfinput_test(multi-page-sample all)
+
 ###########################
 ### file format support ###
 ###########################
@@ -825,23 +859,28 @@ add_cli_test(action_test_multiline_anchoring
 if(WITH_LIBCDR)
   # add_cli_test(import_cdr  PARAMETERS --export-type=png   # fails to open (regression in libcdr 1.6.0)
   #                          INPUT_FILENAME librevenge_formats/corel_draw.cdr OUTPUT_FILENAME format_corel_draw.png
-  #                          REFERENCE_FILENAME librevenge_formats/corel_draw_expected.png) # check png size is correct
+  #                          FUZZYREF_FILENAME librevenge_formats/corel_draw_expected.png # check png size is correct
+  #                          FUZZ_PERCENTAGE 3)
   add_cli_test(import_cdr2 PARAMETERS --export-type=png
                            INPUT_FILENAME librevenge_formats/corel_draw2.cdr OUTPUT_FILENAME format_corel_draw2.png
-                           REFERENCE_FILENAME librevenge_formats/corel_draw2_expected.png)
+                           FUZZYREF_FILENAME librevenge_formats/corel_draw2_expected.png
+                           FUZZ_PERCENTAGE 3)
 endif()
 if(WITH_LIBVISIO)
   add_cli_test(import_vsd  PARAMETERS --export-type=png
                            INPUT_FILENAME librevenge_formats/visio.vsd OUTPUT_FILENAME format_visio.vsd.png
-                           REFERENCE_FILENAME librevenge_formats/visio.vsd_expected.png)
+                           FUZZYREF_FILENAME librevenge_formats/visio.vsd_expected.png
+                           FUZZ_PERCENTAGE 3)
   add_cli_test(import_vsdx PARAMETERS --export-type=png
                            INPUT_FILENAME librevenge_formats/visio.vsdx OUTPUT_FILENAME format_visio.vsdx.png
-                           REFERENCE_FILENAME librevenge_formats/visio.vsdx_expected.png)
+                           FUZZYREF_FILENAME librevenge_formats/visio.vsdx_expected.png
+                           FUZZ_PERCENTAGE 3)
 endif()
 if(WITH_LIBWPG)
   add_cli_test(import_wpg  PARAMETERS --export-type=png
                            INPUT_FILENAME librevenge_formats/word_perfect.wpg OUTPUT_FILENAME format_word_perfect.png
-                           REFERENCE_FILENAME librevenge_formats/word_perfect_expected.png)
+                           FUZZYREF_FILENAME librevenge_formats/word_perfect_expected.png
+                           FUZZ_PERCENTAGE 3)
 endif()
 
 

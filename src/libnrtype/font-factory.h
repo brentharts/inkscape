@@ -33,6 +33,9 @@ PangoFontDescription *ink_font_description_from_style(SPStyle const *style);
 // Wraps calls to pango_font_description_get_family with some name substitution
 char const *sp_font_description_get_family(PangoFontDescription const *fontDescr);
 
+// Map a non-existent font name to an existing one.
+std::string getSubstituteFontName(std::string const &font);
+
 // Class for style strings: both CSS and as suggested by font.
 struct StyleNames
 {
@@ -60,12 +63,15 @@ public:
     Glib::ustring ConstructFontSpecification(PangoFontDescription *font);
     Glib::ustring ConstructFontSpecification(FontInstance *font);
 
+    std::vector<std::string> GetAllFontNames();
+
     /// Returns strings to be used in the UI for family and face (or "style" as the column is labeled)
     Glib::ustring GetUIFamilyString(PangoFontDescription const *fontDescr);
     Glib::ustring GetUIStyleString(PangoFontDescription const *fontDescr);
+    bool hasFontFamily(const std::string &family);
 
-    // Helpfully inserts all font families into the provided vector
-    void GetUIFamilies(std::vector<PangoFontFamily*> &out);
+    // Helpfully inserts all font families into the provided map.
+    std::map <std::string, PangoFontFamily*> GetUIFamilies();
     // Retrieves style information about a family in a newly allocated GList.
     GList *GetUIStyles(PangoFontFamily *in);
 

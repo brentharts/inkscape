@@ -57,7 +57,6 @@ namespace CoS {
         ~KnotHolderEntityCopyGapX() override;
         void knot_set(Geom::Point const &p, Geom::Point const &origin, guint state) override;
         void knot_click(guint state) override;
-        void knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) override;
         Geom::Point knot_get() const override;
         double startpos = dynamic_cast<LPETiling const*> (_effect)->gapx_unit;
     };
@@ -67,7 +66,6 @@ namespace CoS {
         ~KnotHolderEntityCopyGapY() override;
         void knot_set(Geom::Point const &p, Geom::Point const &origin, guint state) override;
         void knot_click(guint state) override;
-        void knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state) override;
         Geom::Point knot_get() const override;
         double startpos = dynamic_cast<LPETiling const*> (_effect)->gapy_unit;
     };
@@ -162,15 +160,9 @@ LPETiling::LPETiling(LivePathEffectObject *lpeobject) :
     prev_num_rows = num_rows;
     _knotholder = nullptr;
     reset = link_styles;
-    prev_unit = unit.get_abbreviation();
 }
 
-LPETiling::~LPETiling()
-{
-    keep_paths = false;
-    doOnRemove(nullptr);
-};
-
+LPETiling::~LPETiling() = default;
 bool LPETiling::doOnOpen(SPLPEItem const *lpeitem)
 {
     bool fixed = false;
@@ -213,7 +205,7 @@ LPETiling::doAfterEffect (SPLPEItem const* lpeitem, SPCurve *curve)
             size_t pos = 0;
             for (auto lpereference : lpesatellites.data()) {
                 if (lpereference && lpereference->isAttached()) {
-                    SPItem *copies = dynamic_cast<SPItem *>(lpereference->getObject());
+                    auto copies = cast<SPItem>(lpereference->getObject());
                     if (copies) {
                         if (pos > num_cols * num_rows - 2) {
                             copies->setHidden(true);
@@ -463,7 +455,11 @@ LPETiling::doAfterEffect (SPLPEItem const* lpeitem, SPCurve *curve)
         if (forcewrite || !connected) {
             lpesatellites.write_to_SVG();
             lpesatellites.start_listening();
-            lpesatellites.update_satellites(!connected);
+            if (!connected) {
+                sp_lpe_item_update_patheffect(sp_lpe_item, false, false, true);
+            } else {
+                lpesatellites.update_satellites();
+            }
         }
         reset = link_styles;
     }
@@ -495,7 +491,7 @@ void LPETiling::cloneD(SPObject *orig, SPObject *dest)
     if (!document) {
         return;
     }
-    if ( SP_IS_GROUP(orig) && SP_IS_GROUP(dest) && SP_GROUP(orig)->getItemCount() == SP_GROUP(dest)->getItemCount() ) {
+    if ( is<SPGroup>(orig) && is<SPGroup>(dest) && cast<SPGroup>(orig)->getItemCount() == cast<SPGroup>(dest)->getItemCount() ) {
         if (reset) {
             cloneStyle(orig, dest);
         }
@@ -507,25 +503,25 @@ void LPETiling::cloneD(SPObject *orig, SPObject *dest)
             index++;
         }
         return;
-    }  else if( SP_IS_GROUP(orig) && SP_IS_GROUP(dest) && SP_GROUP(orig)->getItemCount() != SP_GROUP(dest)->getItemCount()) {
+    }  else if( is<SPGroup>(orig) && is<SPGroup>(dest) && cast<SPGroup>(orig)->getItemCount() != cast<SPGroup>(dest)->getItemCount()) {
         split_items.param_setValue(false);
         return;
     }
 
-    if ( SP_IS_TEXT(orig) && SP_IS_TEXT(dest) && SP_TEXT(orig)->children.size() == SP_TEXT(dest)->children.size()) {
+    if ( is<SPText>(orig) && is<SPText>(dest) && cast<SPText>(orig)->children.size() == cast<SPText>(dest)->children.size()) {
         if (reset) {
             cloneStyle(orig, dest);
         }
         size_t index = 0;
-        for (auto & child : SP_TEXT(orig)->children) {
+        for (auto & child : cast<SPText>(orig)->children) {
             SPObject *dest_child = dest->nthChild(index);
             cloneD(&child, dest_child);
             index++;
         }
     }
     
-    SPShape * shape =  SP_SHAPE(orig);
-    SPPath * path =  SP_PATH(dest);
+    auto shape = cast<SPShape>(orig);
+    auto path = cast<SPPath>(dest);
     if (shape) {
         SPCurve const *c = shape->curve();
         if (c) {
@@ -538,7 +534,7 @@ void LPETiling::cloneD(SPObject *orig, SPObject *dest)
                 dest_node->setAttribute("id", id);
                 dest_node->setAttribute("style", style);
                 dest->updateRepr(xml_doc, dest_node, SP_OBJECT_WRITE_ALL);
-                path =  SP_PATH(dest);
+                path =  cast<SPPath>(dest);
             }
             path->setAttribute("d", str);
         } else {
@@ -558,7 +554,7 @@ LPETiling::createPathBase(SPObject *elemref) {
     }
     Inkscape::XML::Document *xml_doc = document->getReprDoc();
     Inkscape::XML::Node *prev = elemref->getRepr();
-    SPGroup *group = dynamic_cast<SPGroup *>(elemref);
+    auto group = cast<SPGroup>(elemref);
     if (group) {
         Inkscape::XML::Node *container = xml_doc->createElement("svg:g");
         container->setAttribute("transform", prev->attribute("transform"));
@@ -566,7 +562,7 @@ LPETiling::createPathBase(SPObject *elemref) {
         container->setAttribute("clip-path", prev->attribute("clip-path"));
         container->setAttribute("class", prev->attribute("class"));
         container->setAttribute("style", prev->attribute("style"));
-        std::vector<SPItem*> const item_list = sp_item_group_item_list(group);
+        std::vector<SPItem*> const item_list = group->item_list();
         Inkscape::XML::Node *previous = nullptr;
         for (auto sub_item : item_list) {
             Inkscape::XML::Node *resultnode = createPathBase(sub_item);
@@ -620,7 +616,7 @@ LPETiling::toItem(size_t i, bool reset, bool &write)
         write = true;
         lpesatellites.link(elemref, i);
     }
-    return dynamic_cast<SPItem *>(elemref);
+    return cast<SPItem>(elemref);
 }
 
 Gtk::RadioButton* create_radio_button(Gtk::RadioButtonGroup& group, const Glib::ustring& tooltip, const Glib::ustring& icon_name) {
@@ -717,6 +713,7 @@ Gtk::Widget * LPETiling::newWidget()
             Glib::ustring *tip = param->param_getTooltip();
             if (widg) {
                 if (param->param_key == "unit") {
+                    prev_unit = unit.get_abbreviation();
                     auto widgcombo = dynamic_cast<Inkscape::UI::Widget::RegisteredUnitMenu*>(widg);
                     delete widgcombo->get_children()[0];
                     combo = dynamic_cast<Gtk::Widget*>(widgcombo);
@@ -974,7 +971,7 @@ Gtk::Widget * LPETiling::newWidget()
                     widg->set_has_tooltip(false);
                 }                
             
-                if (auto scalar = dynamic_cast<ScalarParam*>(param)) {
+                if (dynamic_cast<ScalarParam*>(param)) {
                     scalars.push_back(widg);
                 }
             }
@@ -986,9 +983,6 @@ Gtk::Widget * LPETiling::newWidget()
     vbox->show_all();
     align_widgets(scalars, 5);
 
-    if(Gtk::Widget* widg = defaultParamSet()) {
-        vbox->pack_start(*widg, true, true, 2);
-    }
     return dynamic_cast<Gtk::Widget *>(vbox);
 }
 
@@ -1529,7 +1523,7 @@ void
 LPETiling::resetDefaults(SPItem const* item)
 {
     Effect::resetDefaults(item);
-    original_bbox(SP_LPE_ITEM(item), false, true);
+    original_bbox(cast<SPLPEItem>(item), false, true);
 }
 
 void
@@ -1553,6 +1547,7 @@ LPETiling::doOnVisibilityToggled(SPLPEItem const* lpeitem)
     }
     processObjects(LPE_VISIBILITY);
 }
+
 
 void 
 LPETiling::doOnRemove (SPLPEItem const* lpeitem)
@@ -1596,20 +1591,6 @@ KnotHolderEntityCopyGapY::~KnotHolderEntityCopyGapY()
     }
 }
 
-void KnotHolderEntityCopyGapX::knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state)
-{
-    LPETiling* lpe = dynamic_cast<LPETiling *>(_effect);
-    lpe->refresh_widgets = true;
-    sp_lpe_item_update_patheffect(SP_LPE_ITEM(item), false, false);
-}
-
-void KnotHolderEntityCopyGapY::knot_ungrabbed(Geom::Point const &p, Geom::Point const &origin, guint state)
-{
-    LPETiling* lpe = dynamic_cast<LPETiling *>(_effect);
-    lpe->refresh_widgets = true;
-    sp_lpe_item_update_patheffect(SP_LPE_ITEM(item), false, false);
-}
-
 void KnotHolderEntityCopyGapX::knot_click(guint state)
 {
     if (!(state & GDK_SHIFT_MASK)) {
@@ -1620,7 +1601,7 @@ void KnotHolderEntityCopyGapX::knot_click(guint state)
 
     lpe->gapx.param_set_value(0);
     startpos = 0;
-    sp_lpe_item_update_patheffect(SP_LPE_ITEM(item), false, false);
+    sp_lpe_item_update_patheffect(cast<SPLPEItem>(item), false, false);
 }
 
 void KnotHolderEntityCopyGapY::knot_click(guint state)
@@ -1633,7 +1614,7 @@ void KnotHolderEntityCopyGapY::knot_click(guint state)
 
     lpe->gapy.param_set_value(0);
     startpos = 0;
-    sp_lpe_item_update_patheffect(SP_LPE_ITEM(item), false, false);
+    sp_lpe_item_update_patheffect(cast<SPLPEItem>(item), false, false);
 }
 
 void KnotHolderEntityCopyGapX::knot_set(Geom::Point const &p, Geom::Point const&/*origin*/, guint state)

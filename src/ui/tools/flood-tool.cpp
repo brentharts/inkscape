@@ -28,6 +28,7 @@
 
 #include <2geom/pathvector.h>
 
+#include "async/progress.h"
 #include "color.h"
 #include "context-fns.h"
 #include "desktop-style.h"
@@ -63,8 +64,6 @@
 #include "ui/icon-names.h"
 #include "ui/shape-editor.h"
 #include "ui/widget/canvas.h"  // Canvas area
-
-#include "xml/node-event-vector.h"
 
 using Inkscape::DocumentUndo;
 
@@ -368,7 +367,8 @@ static void do_trace(bitmap_coords_info bci, guchar *trace_px, SPDesktop *deskto
     }
 
     Trace::Potrace::PotraceTracingEngine pte;
-    auto results = pte.traceGrayMap(gray_map);
+    auto progress = Async::ProgressAlways<double>();
+    auto results = pte.traceGrayMap(gray_map, progress);
 
     // XML Tree being used here directly while it shouldn't be...."
     Inkscape::XML::Document *xml_doc = desktop->doc()->getReprDoc();
@@ -382,9 +382,8 @@ static void do_trace(bitmap_coords_info bci, guchar *trace_px, SPDesktop *deskto
         /* Set style */
         sp_desktop_apply_style_tool (desktop, pathRepr, "/tools/paintbucket", false);
 
-        Geom::PathVector pathv = sp_svg_read_pathv(result.pathData.c_str());
         Path *path = new Path;
-        path->LoadPathVector(pathv);
+        path->LoadPathVector(result.path);
 
         if (offset != 0) {
         
@@ -435,7 +434,7 @@ static void do_trace(bitmap_coords_info bci, guchar *trace_px, SPDesktop *deskto
 
         SPObject *reprobj = document->getObjectByRepr(pathRepr);
         if (reprobj) {
-            SP_ITEM(reprobj)->doWriteTransform(transform);
+            cast<SPItem>(reprobj)->doWriteTransform(transform);
             
             // premultiply the item transform by the accumulated parent transform in the paste layer
             Geom::Affine local (layer->i2doc_affine());
@@ -456,13 +455,13 @@ static void do_trace(bitmap_coords_info bci, guchar *trace_px, SPDesktop *deskto
             if (union_with_selection) {
                 desktop->messageStack()->flashF( Inkscape::WARNING_MESSAGE,
                     ngettext("Area filled, path with <b>%d</b> node created and unioned with selection.","Area filled, path with <b>%d</b> nodes created and unioned with selection.",
-                    SP_PATH(reprobj)->nodesInPath()), SP_PATH(reprobj)->nodesInPath() );
+                    cast<SPPath>(reprobj)->nodesInPath()), cast<SPPath>(reprobj)->nodesInPath() );
                 selection->add(reprobj);
                 selection->pathUnion(true);
             } else {
                 desktop->messageStack()->flashF( Inkscape::WARNING_MESSAGE,
                     ngettext("Area filled, path with <b>%d</b> node created.","Area filled, path with <b>%d</b> nodes created.",
-                    SP_PATH(reprobj)->nodesInPath()), SP_PATH(reprobj)->nodesInPath() );
+                    cast<SPPath>(reprobj)->nodesInPath()), cast<SPPath>(reprobj)->nodesInPath() );
                 selection->set(reprobj);
             }
 
@@ -773,7 +772,7 @@ static void sp_flood_do_flood_fill(SPDesktop *desktop, GdkEvent *event,
         // cairo_translate not necessary here - surface origin is at 0,0
 
         bgcolor = document->getPageManager().background_color;
-
+        bgcolor &= 0xffffff00; // make color transparent for 'alpha' flood mode to work
         // bgcolor is 0xrrggbbaa, we need 0xaarrggbb
         dtc = bgcolor >> 8; // keep color transparent; page color doesn't support transparency anymore
 

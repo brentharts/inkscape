@@ -67,6 +67,7 @@
 
 #include "ui/icon-names.h"
 #include "ui/tools/freehand-base.h"
+#include "ui/widget/canvas.h"
 
 #include "util/units.h"
 
@@ -107,14 +108,14 @@ CalligraphicTool::CalligraphicTool(SPDesktop *desktop)
     this->cap_rounding = 0.0;
     this->abs_width = false;
 
-    currentshape = new Inkscape::CanvasItemBpath(desktop->getCanvasSketch());
+    currentshape = make_canvasitem<CanvasItemBpath>(desktop->getCanvasSketch());
     currentshape->set_stroke(0x0);
     currentshape->set_fill(DDC_RED_RGBA, SP_WIND_RULE_EVENODD);
 
     /* fixme: Cannot we cascade it to root more clearly? */
     currentshape->connect_event(sigc::bind(sigc::ptr_fun(sp_desktop_root_handler), desktop));
 
-    hatch_area = new Inkscape::CanvasItemBpath(desktop->getCanvasControls());
+    hatch_area = make_canvasitem<CanvasItemBpath>(desktop->getCanvasControls());
     hatch_area->set_fill(0x0, SP_WIND_RULE_EVENODD);
     hatch_area->set_stroke(0x0000007f);
     hatch_area->set_pickable(false);
@@ -142,13 +143,7 @@ CalligraphicTool::CalligraphicTool(SPDesktop *desktop)
     }
 }
 
-CalligraphicTool::~CalligraphicTool()
-{
-    if (hatch_area) {
-        delete hatch_area;
-        hatch_area = nullptr;
-    }
-}
+CalligraphicTool::~CalligraphicTool() = default;
 
 void CalligraphicTool::set(const Inkscape::Preferences::Entry& val) {
     Glib::ustring path = val.getEntryName();
@@ -331,12 +326,12 @@ void CalligraphicTool::brush() {
         Inkscape::CanvasItemDrawing *canvas_item_drawing = _desktop->getCanvasDrawing();
         Inkscape::Drawing *drawing = canvas_item_drawing->get_drawing();
 
-        // Ensure drawing up-to-date. (Is this really necessary?)
-        drawing->update();
+        // Non-reentrancy workaround.
+        _desktop->canvas->wait_for_drawing_inactive();
 
         // Get average color.
         double R, G, B, A;
-        drawing->average_color(area, R, G, B, A);
+        drawing->averageColor(area, R, G, B, A);
 
         // Convert to thickness.
         double max = MAX (MAX (R, G), B);
@@ -403,9 +398,6 @@ void CalligraphicTool::cancel() {
     ungrabCanvasEvents();
 
     /* Remove all temporary line segments */
-    for (auto segment : segments) {
-        delete segment;
-    }
     segments.clear();
 
     /* reset accumulated curve */
@@ -462,7 +454,7 @@ bool CalligraphicTool::root_handler(GdkEvent* event) {
             if (event->motion.state & GDK_CONTROL_MASK) { // hatching - sense the item
 
                 SPItem *selected = _desktop->getSelection()->singleItem();
-                if (selected && (SP_IS_SHAPE(selected) || SP_IS_TEXT(selected))) {
+                if (selected && (is<SPShape>(selected) || is<SPText>(selected))) {
                     // One item selected, and it's a path;
                     // let's try to track it as a guide
 
@@ -663,7 +655,7 @@ bool CalligraphicTool::root_handler(GdkEvent* event) {
                     Geom::Affine const sm (Geom::Scale(hatch_dist, hatch_dist) * Geom::Translate(c));
                     path *= sm;
 
-                    hatch_area->set_bpath(path, true);
+                    hatch_area->set_bpath(std::move(path), true);
                     hatch_area->set_stroke(0x7f7f7fff);
                     hatch_area->show();
 
@@ -674,7 +666,7 @@ bool CalligraphicTool::root_handler(GdkEvent* event) {
                     Geom::Affine const sm (Geom::Scale(this->hatch_spacing, this->hatch_spacing) * Geom::Translate(c));
                     path *= sm;
 
-                    hatch_area->set_bpath(path, true);
+                    hatch_area->set_bpath(std::move(path), true);
                     hatch_area->set_stroke(0x00FF00ff);
                     hatch_area->show();
 
@@ -685,7 +677,7 @@ bool CalligraphicTool::root_handler(GdkEvent* event) {
                     Geom::Affine const sm (Geom::Scale(this->hatch_spacing, this->hatch_spacing) * Geom::Translate(c));
                     path *= sm;
 
-                    hatch_area->set_bpath(path, true);
+                    hatch_area->set_bpath(std::move(path), true);
                     hatch_area->set_stroke(0xff0000ff);
                     hatch_area->show();
 
@@ -697,7 +689,7 @@ bool CalligraphicTool::root_handler(GdkEvent* event) {
                         Geom::Affine const sm (Geom::Scale(this->hatch_spacing, this->hatch_spacing) * Geom::Translate(c));
                         path *= sm;
 
-                        hatch_area->set_bpath(path, true);
+                        hatch_area->set_bpath(std::move(path), true);
                         hatch_area->set_stroke(0x7f7f7fff);
                         hatch_area->show();
                     }
@@ -725,9 +717,6 @@ bool CalligraphicTool::root_handler(GdkEvent* event) {
             this->apply(motion_dt);
 
             /* Remove all temporary line segments */
-            for (auto segment : segments) {
-                delete segment;
-            }
             segments.clear();
 
             /* Create object */
@@ -909,7 +898,7 @@ void CalligraphicTool::set_to_accumulated(bool unionize, bool subtract) {
             this->repr = repr;
 
             auto layer = currentLayer();
-            SPItem *item=SP_ITEM(layer->appendChildRepr(this->repr));
+            auto item = cast<SPItem>(layer->appendChildRepr(this->repr));
             Inkscape::GC::release(this->repr);
             item->transform = layer->i2doc_affine().inverse();
             item->updateRepr();
@@ -934,7 +923,7 @@ void CalligraphicTool::set_to_accumulated(bool unionize, bool subtract) {
         // First, find out whether our repr is still linked to a valid object. In this case,
         // we need to write the transform data only for this element.
         // Either there was no boolean op or it failed.
-        SPItem *result = SP_ITEM(_desktop->doc()->getObjectByRepr(this->repr));
+        auto result = cast<SPItem>(_desktop->doc()->getObjectByRepr(this->repr));
 
         if (result == nullptr) {
             // The boolean operation succeeded.
@@ -1127,7 +1116,7 @@ void CalligraphicTool::fit_and_split(bool release) {
             /* fixme: Cannot we cascade it to root more clearly? */
             cbp->connect_event(sigc::bind(sigc::ptr_fun(sp_desktop_root_handler), _desktop));
 
-            segments.push_back(cbp);
+            segments.emplace_back(cbp);
         }
 
         this->point1[0] = this->point1[this->npoints - 1];

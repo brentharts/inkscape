@@ -36,25 +36,24 @@
 #include "page-manager.h"
 #include "preferences.h"
 #include "sp-guide.h"
+#include "sp-grid.h"
 #include "sp-page.h"
 #include "sp-item-group.h"
 #include "sp-root.h"
 
 #include "actions/actions-canvas-snapping.h"
-#include "display/control/canvas-grid.h"
 #include "display/control/canvas-page.h"
 #include "svg/svg-color.h"
 #include "ui/monitor.h"
 #include "ui/widget/canvas.h"
+#include "ui/widget/canvas-grid.h"
 #include "util/units.h"
+#include "widgets/desktop-widget.h"
 #include "xml/repr.h"
 
 using Inkscape::DocumentUndo;
 using Inkscape::Util::unit_table;
 
-#define DEFAULTGRIDCOLOR 0x3f3fff25
-#define DEFAULTGRIDEMPCOLOR 0x3f3fff60
-#define DEFAULTGRIDEMPSPACING 5
 #define DEFAULTGUIDECOLOR   0x0086e599
 #define DEFAULTGUIDEHICOLOR 0xff00007f
 #define DEFAULTDESKCOLOR 0xd1d1d1ff
@@ -86,9 +85,7 @@ SPNamedView::SPNamedView()
     this->desk_color = DEFAULTDESKCOLOR;
 
     this->editable = TRUE;
-    this->guides.clear();
     this->viewcount = 0;
-    this->grids.clear();
 
     this->default_layer_id = 0;
 
@@ -101,94 +98,6 @@ SPNamedView::SPNamedView()
 SPNamedView::~SPNamedView()
 {
     delete _viewport;
-}
-
-static void sp_namedview_generate_old_grid(SPNamedView * /*nv*/, SPDocument *document, Inkscape::XML::Node *repr) {
-    bool old_grid_settings_present = false;
-
-    // set old settings
-    const char* gridspacingx    = "1px";
-    const char* gridspacingy    = "1px";
-    const char* gridoriginy     = "0px";
-    const char* gridoriginx     = "0px";
-    const char* gridempspacing  = "5";
-    const char* gridcolor       = "#3f3fff";
-    const char* gridempcolor    = "#3f3fff";
-    const char* gridopacity     = "0.15";
-    const char* gridempopacity  = "0.38";
-
-    const char* value = nullptr;
-    if ((value = repr->attribute("gridoriginx"))) {
-        gridoriginx = value;
-        old_grid_settings_present = true;
-    }
-    if ((value = repr->attribute("gridoriginy"))) {
-        gridoriginy = value;
-        old_grid_settings_present = true;
-    }
-    if ((value = repr->attribute("gridspacingx"))) {
-        gridspacingx = value;
-        old_grid_settings_present = true;
-    }
-    if ((value = repr->attribute("gridspacingy"))) {
-        gridspacingy = value;
-        old_grid_settings_present = true;
-    }
-    if ((value = repr->attribute("gridcolor"))) {
-        gridcolor = value;
-        old_grid_settings_present = true;
-    }
-    if ((value = repr->attribute("gridempcolor"))) {
-        gridempcolor = value;
-        old_grid_settings_present = true;
-    }
-    if ((value = repr->attribute("gridempspacing"))) {
-        gridempspacing = value;
-        old_grid_settings_present = true;
-    }
-    if ((value = repr->attribute("gridopacity"))) {
-        gridopacity = value;
-        old_grid_settings_present = true;
-    }
-    if ((value = repr->attribute("gridempopacity"))) {
-        gridempopacity = value;
-        old_grid_settings_present = true;
-    }
-
-    if (old_grid_settings_present) {
-        // generate new xy grid with the correct settings
-        // first create the child xml node, then hook it to repr. This order is important, to not set off listeners to repr before the new node is complete.
-
-        Inkscape::XML::Document *xml_doc = document->getReprDoc();
-        Inkscape::XML::Node *newnode = xml_doc->createElement("inkscape:grid");
-        newnode->setAttribute("id", "GridFromPre046Settings");
-        newnode->setAttribute("type", Inkscape::CanvasGrid::getSVGName(Inkscape::GRID_RECTANGULAR));
-        newnode->setAttribute("originx", gridoriginx);
-        newnode->setAttribute("originy", gridoriginy);
-        newnode->setAttribute("spacingx", gridspacingx);
-        newnode->setAttribute("spacingy", gridspacingy);
-        newnode->setAttribute("color", gridcolor);
-        newnode->setAttribute("empcolor", gridempcolor);
-        newnode->setAttribute("opacity", gridopacity);
-        newnode->setAttribute("empopacity", gridempopacity);
-        newnode->setAttribute("empspacing", gridempspacing);
-
-        repr->appendChild(newnode);
-        Inkscape::GC::release(newnode);
-
-        // remove all old settings
-        repr->removeAttribute("gridoriginx");
-        repr->removeAttribute("gridoriginy");
-        repr->removeAttribute("gridspacingx");
-        repr->removeAttribute("gridspacingy");
-        repr->removeAttribute("gridcolor");
-        repr->removeAttribute("gridempcolor");
-        repr->removeAttribute("gridopacity");
-        repr->removeAttribute("gridempopacity");
-        repr->removeAttribute("gridempspacing");
-
-//        SPDocumentUndo::done(doc, _("Create new grid from pre0.46 grid settings"), "");
-    }
 }
 
 void SPNamedView::build(SPDocument *document, Inkscape::XML::Node *repr) {
@@ -234,29 +143,26 @@ void SPNamedView::build(SPDocument *document, Inkscape::XML::Node *repr) {
 
     /* Construct guideline and pages list */
     for (auto &child : children) {
-        if (auto guide = dynamic_cast<SPGuide *>(&child)) {
+        if (auto guide = cast<SPGuide>(&child)) {
             this->guides.push_back(guide);
             //g_object_set(G_OBJECT(g), "color", nv->guidecolor, "hicolor", nv->guidehicolor, NULL);
             guide->setColor(this->guidecolor);
             guide->setHiColor(this->guidehicolor);
             guide->readAttr(SPAttr::INKSCAPE_COLOR);
         }
-        if (auto page = dynamic_cast<SPPage *>(&child)) {
+        if (auto page = cast<SPPage>(&child)) {
             document->getPageManager().addPage(page);
         }
+        if (auto grid = cast<SPGrid>(&child)) {
+            grids.emplace_back(grid);
+        }
     }
-
-    // backwards compatibility with grid settings (pre 0.46)
-    sp_namedview_generate_old_grid(this, document, repr);
 }
 
 void SPNamedView::release() {
     this->guides.clear();
-
-    // delete grids:
-    for(auto grid : this->grids)
-        delete grid;
     this->grids.clear();
+
     SPObjectGroup::release();
 }
 
@@ -297,6 +203,7 @@ void SPNamedView::modified(unsigned int flags)
         }
 
         updateGuides();
+        updateGrids();
     }
     // Add desk color and checkerboard pattern to desk view
     for (auto desktop : views) {
@@ -503,45 +410,6 @@ void SPNamedView::set(SPAttr key, const gchar* value) {
 }
 
 /**
-* add a grid item from SVG-repr. Check if this namedview already has a gridobject for this one! If desktop=null, add grid-canvasitem to all desktops of this namedview,
-* otherwise only add it to the specified desktop.
-*/
-static Inkscape::CanvasGrid*
-sp_namedview_add_grid(SPNamedView *nv, Inkscape::XML::Node *repr, SPDesktop *desktop) {
-    Inkscape::CanvasGrid* grid = nullptr;
-    //check if namedview already has an object for this grid
-    for(auto it : nv->grids) {
-        if (repr == it->repr) {
-            grid = it;
-            break;
-        }
-    }
-
-    if (!grid) {
-        //create grid object
-        Inkscape::GridType gridtype = Inkscape::CanvasGrid::getGridTypeFromSVGName(repr->attribute("type"));
-        if (!nv->document) {
-            g_warning("sp_namedview_add_grid - how come doc is null here?!");
-            return nullptr;
-        }
-        grid = Inkscape::CanvasGrid::NewGrid(nv, repr, nv->document, gridtype);
-        nv->grids.push_back(grid);
-    }
-
-    if (!desktop) {
-        //add canvasitem to all desktops
-        for(auto view : nv->views) {
-            grid->createCanvasItem(view);
-        }
-    } else {
-        //add canvasitem only for specified desktop
-        grid->createCanvasItem(desktop);
-    }
-
-    return grid;
-}
-
-/**
  * Update the visibility of the viewport space. This can look like a page
  * if there's no multi-pages, or invisible if it shadows the first page.
  */
@@ -555,7 +423,7 @@ void SPNamedView::updateViewPort()
     } else {
         // Otherwise we are showing the viewport item.
         _viewport->show();
-        _viewport->update(*box, nullptr, document->getPageManager().hasPages());
+        _viewport->update(*box, {}, {}, nullptr, document->getPageManager().hasPages());
     }
 }
 
@@ -566,17 +434,20 @@ void SPNamedView::child_added(Inkscape::XML::Node *child, Inkscape::XML::Node *r
     if (!no)
         return;
 
-    if (!strcmp(child->name(), "inkscape:grid")) {
-        sp_namedview_add_grid(this, child, nullptr);
+    if (auto grid = cast<SPGrid>(no)) {
+        grids.emplace_back(grid);
+        for (auto view : views) {
+            grid->show(view);
+        }
     } else if (!strcmp(child->name(), "inkscape:page")) {
-        if (auto page = dynamic_cast<SPPage *>(no)) {
+        if (auto page = cast<SPPage>(no)) {
             document->getPageManager().addPage(page);
             for (auto view : this->views) {
                 page->showPage(view->getCanvasPagesBg(), view->getCanvasPagesFg());
             }
         }
     } else {
-        if (auto g = dynamic_cast<SPGuide *>(no)) {
+        if (auto g = cast<SPGuide>(no)) {
             this->guides.push_back(g);
 
             //g_object_set(G_OBJECT(g), "color", this->guidecolor, "hicolor", this->guidehicolor, NULL);
@@ -600,16 +471,19 @@ void SPNamedView::child_added(Inkscape::XML::Node *child, Inkscape::XML::Node *r
 }
 
 void SPNamedView::remove_child(Inkscape::XML::Node *child) {
-    if (!strcmp(child->name(), "inkscape:grid")) {
-        for(std::vector<Inkscape::CanvasGrid *>::iterator it=this->grids.begin();it!=this->grids.end();++it ) {
-            if ( (*it)->repr == child ) {
-                delete (*it);
-                this->grids.erase(it);
+    if (!strcmp(child->name(), "inkscape:page")) {
+        document->getPageManager().removePage(child);
+    } else if (!strcmp(child->name(), "inkscape:grid")) {
+        for (auto it = grids.begin(); it != grids.end(); ++it) {
+            auto grid = *it;
+            if (grid->getRepr() == child) {
+                for (auto view : views) {
+                    grid->hide(view);
+                }
+                grids.erase(it);
                 break;
             }
         }
-    } else if (!strcmp(child->name(), "inkscape:page")) {
-        document->getPageManager().removePage(child);
     } else {
         for(std::vector<SPGuide *>::iterator it=this->guides.begin();it!=this->guides.end();++it ) {
             if ( (*it)->getRepr() == child ) {
@@ -648,13 +522,17 @@ Inkscape::XML::Node* SPNamedView::write(Inkscape::XML::Document *xml_doc, Inksca
 void SPNamedView::show(SPDesktop *desktop)
 {
 
-    for(auto guide : this->guides) {
+    for (auto guide : this->guides) {
         guide->showSPGuide( desktop->getCanvasGuides() );
 
         if (desktop->guides_active) {
             guide->sensitize(desktop->getCanvas(), TRUE);
         }
         this->setShowGuideSingle(guide);
+    }
+
+    for (auto grid : grids) {
+        grid->show(desktop);
     }
 
     auto box = document->preferredBounds();
@@ -667,18 +545,6 @@ void SPNamedView::show(SPDesktop *desktop)
     }
 
     views.push_back(desktop);
-
-    // generate grids specified in SVG:
-    Inkscape::XML::Node *repr = this->getRepr();
-    if (repr) {
-        for (Inkscape::XML::Node * child = repr->firstChild() ; child != nullptr; child = child->next() ) {
-            if (!strcmp(child->name(), "inkscape:grid")) {
-                sp_namedview_add_grid(this, child, desktop);
-            }
-        }
-    }
-
-    desktop->showGrids(grids_visible, false);
 }
 
 /*
@@ -787,12 +653,6 @@ void sp_namedview_zoom_and_view_from_document(SPDesktop *desktop)
     }
 }
 
-void SPNamedView::writeNewGrid(SPDocument *document,int gridtype)
-{
-    g_assert(this->getRepr() != nullptr);
-    Inkscape::CanvasGrid::writeNewGridToRepr(this->getRepr(),document,static_cast<Inkscape::GridType>(gridtype));
-}
-
 void sp_namedview_update_layers_from_document (SPDesktop *desktop)
 {
     SPObject *layer = nullptr;
@@ -802,7 +662,7 @@ void sp_namedview_update_layers_from_document (SPDesktop *desktop)
         layer = document->getObjectById(g_quark_to_string(nv->default_layer_id));
     }
     // don't use that object if it's not at least group
-    if ( !layer || !SP_IS_GROUP(layer) ) {
+    if ( !layer || !is<SPGroup>(layer) ) {
         layer = nullptr;
     }
     // if that didn't work out, look for the topmost layer
@@ -830,8 +690,7 @@ void sp_namedview_document_from_window(SPDesktop *desktop)
     Inkscape::XML::Node *view = desktop->namedview->getRepr();
 
     // saving window geometry is not undoable
-    bool saved = DocumentUndo::getUndoSensitive(desktop->getDocument());
-    DocumentUndo::setUndoSensitive(desktop->getDocument(), false);
+    DocumentUndo::ScopedInsensitive _no_undo(desktop->getDocument());
 
     if (save_viewport_in_file) {
         view->setAttributeSvgDouble("inkscape:zoom", desktop->current_zoom());
@@ -853,20 +712,20 @@ void sp_namedview_document_from_window(SPDesktop *desktop)
     }
 
     view->setAttribute("inkscape:current-layer", desktop->layerManager().currentLayer()->getId());
-
-    // restore undoability
-    DocumentUndo::setUndoSensitive(desktop->getDocument(), saved);
 }
 
 void SPNamedView::hide(SPDesktop const *desktop)
 {
     g_assert(desktop != nullptr);
     g_assert(std::find(views.begin(),views.end(),desktop)!=views.end());
-    for(auto & guide : this->guides) {
+    for (auto guide : guides) {
         guide->hideSPGuide(desktop->getCanvas());
     }
+    for (auto grid : grids) {
+        grid->hide(desktop);
+    }
     _viewport->remove(desktop->getCanvas());
-    for (auto &page : document->getPageManager().getPages()) {
+    for (auto page : document->getPageManager().getPages()) {
         page->hidePage(desktop->getCanvas());
     }
     views.erase(std::remove(views.begin(),views.end(),desktop),views.end());
@@ -907,25 +766,6 @@ void SPNamedView::activateGuides(void* desktop, bool active)
     }
 }
 
-void sp_namedview_show_grids(SPNamedView * namedview, bool show, bool dirty_document)
-{
-    namedview->grids_visible = show;
-
-    SPDocument *doc = namedview->document;
-    Inkscape::XML::Node *repr = namedview->getRepr();
-
-    bool saved = DocumentUndo::getUndoSensitive(doc);
-    DocumentUndo::setUndoSensitive(doc, false);
-    repr->setAttributeBoolean("showgrid", namedview->grids_visible);
-    DocumentUndo::setUndoSensitive(doc, saved);
-
-    /* we don't want the document to get dirty on startup; that's when
-       we call this function with dirty_document = false */
-    if (dirty_document) {
-        doc->setModifiedSinceSave();
-    }
-}
-
 gchar const *SPNamedView::getName() const
 {
     return this->getAttribute("id");
@@ -946,15 +786,37 @@ void SPNamedView::toggleLockGuides()
     setLockGuides(!getLockGuides());
 }
 
+void SPNamedView::toggleShowGrids()
+{
+    setShowGrids(!getShowGrids());
+}
+
+void SPNamedView::setShowGrids(bool v)
+{
+    bool saved = DocumentUndo::getUndoSensitive(document);
+    DocumentUndo::setUndoSensitive(document, false);
+
+    if (v && grids.empty())
+        SPGrid::create_new(document, this->getRepr(), GridType::RECTANGULAR);
+
+    getRepr()->setAttributeBoolean("showgrid", v);
+
+    DocumentUndo::setUndoSensitive(document, saved);
+    requestModified(SP_OBJECT_MODIFIED_FLAG);
+}
+
+bool SPNamedView::getShowGrids()
+{
+    return grids_visible;
+}
+
 void SPNamedView::setShowGuides(bool v)
 {
     if (auto repr = getRepr()) {
-        bool saved = DocumentUndo::getUndoSensitive(document);
-        DocumentUndo::setUndoSensitive(document, false);
-
-        repr->setAttributeBoolean("showguides", v);
-
-        DocumentUndo::setUndoSensitive(document, saved);
+        {
+            DocumentUndo::ScopedInsensitive _no_undo(document);
+            repr->setAttributeBoolean("showguides", v);
+        }
         requestModified(SP_OBJECT_MODIFIED_FLAG);
     }
 }
@@ -962,12 +824,10 @@ void SPNamedView::setShowGuides(bool v)
 void SPNamedView::setLockGuides(bool v)
 {
     if (auto repr = getRepr()) {
-        bool saved = DocumentUndo::getUndoSensitive(document);
-        DocumentUndo::setUndoSensitive(document, false);
-
-        repr->setAttributeBoolean("inkscape:lockguides", v);
-
-        DocumentUndo::setUndoSensitive(document, saved);
+        {
+            DocumentUndo::ScopedInsensitive _no_undo(document);
+            repr->setAttributeBoolean("inkscape:lockguides", v);
+        }
         requestModified(SP_OBJECT_MODIFIED_FLAG);
     }
 }
@@ -999,6 +859,19 @@ bool SPNamedView::getLockGuides()
     return false;
 }
 
+void SPNamedView::updateGrids()
+{
+    if (auto saction = Glib::RefPtr<Gio::SimpleAction>::cast_dynamic(
+                document->getActionGroup()->lookup_action("show-grids"))) {
+
+        saction->change_state(getShowGrids());
+    }
+
+    for (auto grid : grids) {
+        grid->setVisible(getShowGrids());
+    }
+}
+
 void SPNamedView::updateGuides()
 {
     if (auto saction = Glib::RefPtr<Gio::SimpleAction>::cast_dynamic(
@@ -1010,46 +883,19 @@ void SPNamedView::updateGuides()
     if (auto saction = Glib::RefPtr<Gio::SimpleAction>::cast_dynamic(
                 document->getActionGroup()->lookup_action("lock-all-guides"))) {
 
-        saction->change_state(getLockGuides());
+        bool is_locked = getLockGuides();
+        saction->change_state(is_locked);
+
+        for (auto desktop : views) {
+            auto dt_widget = desktop->getDesktopWidget();
+            dt_widget->get_canvas_grid()->GetGuideLock()->set_active(is_locked);
+        }
     }
 
     for (SPGuide *guide : guides) {
         setShowGuideSingle(guide);
         guide->set_locked(this->getLockGuides(), true);
     }
-}
-
-/**
- * Gets page fitting margin information from the namedview node in the XML.
- * \param nv_repr reference to this document's namedview
- * \param key
- * \param margin_units units for the margin
- * \param return_units units to return the result in
- * \param width width in px (for percentage margins)
- * \param height height in px (for percentage margins)
- * \param use_width true if the this key is left or right margins, false
- *        otherwise.  Used for percentage margins.
- * \return the margin size in px, else 0.0 if anything is invalid.
- */
-double SPNamedView::getMarginLength(gchar const * const key,
-                             Inkscape::Util::Unit const * const margin_units,
-                             Inkscape::Util::Unit const * const return_units,
-                             double const width,
-                             double const height,
-                             bool const use_width)
-{
-    double value;
-    static Inkscape::Util::Unit const *percent = unit_table.getUnit("%");
-    if(!this->storeAsDouble(key,&value)) {
-        return 0.0;
-    }
-    if (*margin_units == *percent) {
-        return (use_width)? width * value : height * value;
-    }
-    if (!margin_units->compatibleWith(return_units)) {
-        return 0.0;
-    }
-    return value;
 }
 
 /**
@@ -1080,9 +926,9 @@ void SPNamedView::setDisplayUnit(Inkscape::Util::Unit const *unit)
 /**
  * Returns the first grid it could find that isEnabled(). Returns NULL, if none is enabled
  */
-Inkscape::CanvasGrid * sp_namedview_get_first_enabled_grid(SPNamedView *namedview)
+SPGrid *SPNamedView::getFirstEnabledGrid()
 {
-    for(auto grid : namedview->grids) {
+    for (auto grid : grids) {
         if (grid->isEnabled())
             return grid;
     }
@@ -1100,8 +946,8 @@ void SPNamedView::translateGuides(Geom::Translate const &tr) {
 }
 
 void SPNamedView::translateGrids(Geom::Translate const &tr) {
-    for(auto & grid : this->grids) {
-        grid->setOrigin(grid->origin * tr);
+    for (auto grid : grids) {
+        grid->setOrigin( grid->getOrigin() * tr );
     }
 }
 
@@ -1136,7 +982,7 @@ void SPNamedView::change_bool_setting(SPAttr key, bool value) {
 // show/hide guide lines without modifying view; used to quickly and temporarily hide them and restore them
 void SPNamedView::temporarily_show_guides(bool show) {
     for (auto& child : children) {
-        if (auto guide = dynamic_cast<SPGuide*>(&child)) {
+        if (auto guide = cast<SPGuide>(&child)) {
             show ? guide->showSPGuide() : guide->hideSPGuide();
         }
     }

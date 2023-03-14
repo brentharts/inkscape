@@ -196,29 +196,29 @@ void MeshTool::select_next()
 {
     g_assert(_grdrag);
     GrDragger *d = _grdrag->select_next();
-    _desktop->scroll_to_point(d->point, 1.0);
+    _desktop->scroll_to_point(d->point);
 }
 
 void MeshTool::select_prev()
 {
     g_assert(_grdrag);
     GrDragger *d = _grdrag->select_prev();
-    _desktop->scroll_to_point(d->point, 1.0);
+    _desktop->scroll_to_point(d->point);
 }
 
 /**
  * Returns vector of control curves mouse is over. Returns only first if 'first' is true.
  * event_p is in canvas (world) units.
  */
-std::vector<CanvasItemCurve *> MeshTool::over_curve(Geom::Point event_p, bool first)
+std::vector<GrDrag::ItemCurve*> MeshTool::over_curve(Geom::Point event_p, bool first)
 {
-    //Translate mouse point into proper coord system: needed later.
+    // Translate mouse point into proper coord system: needed later.
     mousepoint_doc = _desktop->w2d(event_p);
-    std::vector<CanvasItemCurve *> selected;
+    std::vector<GrDrag::ItemCurve*> selected;
 
-    for (auto curve : _grdrag->item_curves) {
-        if (curve->contains(event_p, tolerance)) {
-            selected.push_back(&*curve);
+    for (auto &it : _grdrag->item_curves) {
+        if (it.curve->contains(event_p, tolerance)) {
+            selected.emplace_back(&it);
             if (first) {
                 break;
             }
@@ -226,7 +226,6 @@ std::vector<CanvasItemCurve *> MeshTool::over_curve(Geom::Point event_p, bool fi
     }
     return selected;
 }
-
 
 /**
 Split row/column near the mouse point.
@@ -268,7 +267,7 @@ void MeshTool::corner_operation(MeshCornerOperation operation)
             if( d->point_type != POINT_MG_CORNER ) continue;
 
             // Find the gradient
-            SPMeshGradient *gradient = SP_MESHGRADIENT( getGradient (d->item, d->fill_or_stroke) );
+            auto gradient = cast<SPMeshGradient>( getGradient (d->item, d->fill_or_stroke) );
 
             // Collect points together for same gradient
             points[gradient].push_back( d->point_i );
@@ -389,10 +388,10 @@ void MeshTool::fit_mesh_in_bbox()
 
             if (style->fill.isPaintserver()) {
                 SPPaintServer *server = item->style->getFillPaintServer();
-                if ( SP_IS_MESHGRADIENT(server) ) {
+                if ( is<SPMeshGradient>(server) ) {
 
                     Geom::OptRect item_bbox = item->geometricBounds();
-                    SPMeshGradient *gradient = SP_MESHGRADIENT(server);
+                    auto gradient = cast<SPMeshGradient>(server);
                     if (gradient->array.fill_box( item_bbox )) {
                         changed = true;
                     }
@@ -401,10 +400,10 @@ void MeshTool::fit_mesh_in_bbox()
 
             if (style->stroke.isPaintserver()) {
                 SPPaintServer *server = item->style->getStrokePaintServer();
-                if ( SP_IS_MESHGRADIENT(server) ) {
+                if ( is<SPMeshGradient>(server) ) {
 
                     Geom::OptRect item_bbox = item->visualBounds();
-                    SPMeshGradient *gradient = SP_MESHGRADIENT(server);
+                    auto gradient = cast<SPMeshGradient>(server);
                     if (gradient->array.fill_box( item_bbox )) {
                         changed = true;
                     }
@@ -471,7 +470,7 @@ bool MeshTool::root_handler(GdkEvent* event) {
                             (fill_or_stroke_pref == Inkscape::FOR_FILL) ?
                             style->getFillPaintServer():
                             style->getStrokePaintServer();
-                        if (server && SP_IS_MESHGRADIENT(server)) 
+                        if (server && is<SPMeshGradient>(server)) 
                             has_mesh = true;
                     }
                 }
@@ -501,11 +500,9 @@ bool MeshTool::root_handler(GdkEvent* event) {
 
             if (!over_curve.empty()) {
                 for (auto it : over_curve) {
-                    SPItem *item = it->get_item();
-                    Inkscape::PaintTarget fill_or_stroke =
-                        it->get_is_fill() ? Inkscape::FOR_FILL : Inkscape::FOR_STROKE;
-                    GrDragger* dragger0 = _grdrag->getDraggerFor(item, POINT_MG_CORNER, it->get_corner0(), fill_or_stroke);
-                    GrDragger* dragger1 = _grdrag->getDraggerFor(item, POINT_MG_CORNER, it->get_corner1(), fill_or_stroke);
+                    Inkscape::PaintTarget fill_or_stroke = it->is_fill ? Inkscape::FOR_FILL : Inkscape::FOR_STROKE;
+                    GrDragger *dragger0 = _grdrag->getDraggerFor(it->item, POINT_MG_CORNER, it->corner0, fill_or_stroke);
+                    GrDragger *dragger1 = _grdrag->getDraggerFor(it->item, POINT_MG_CORNER, it->corner1, fill_or_stroke);
                     bool add    = (event->button.state & GDK_SHIFT_MASK);
                     bool toggle = (event->button.state & GDK_CONTROL_MASK);
                     if ( !add && !toggle ) {
@@ -538,12 +535,12 @@ bool MeshTool::root_handler(GdkEvent* event) {
                         (fill_or_stroke_pref == Inkscape::FOR_FILL) ?
                         style->getFillPaintServer():
                         style->getStrokePaintServer();
-                    if (server && SP_IS_MESHGRADIENT(server)) 
+                    if (server && is<SPMeshGradient>(server)) 
                         has_mesh = true;
                 }
             }
 
-            if (has_mesh) {
+            if (has_mesh && !(event->button.state & GDK_CONTROL_MASK)) {
                 Inkscape::Rubberband::get(_desktop)->start(_desktop, button_dt);
             }
 
@@ -649,15 +646,16 @@ bool MeshTool::root_handler(GdkEvent* event) {
 
             if ( (event->button.state & GDK_CONTROL_MASK) && (event->button.state & GDK_MOD1_MASK ) ) {
                 if (!over_curve.empty()) {
-                    split_near_point(over_curve[0]->get_item(), this->mousepoint_doc, 0);
+                    split_near_point(over_curve[0]->item, mousepoint_doc, 0);
                     ret = TRUE;
                 }
             } else {
                 dragging = false;
 
                 // unless clicked with Ctrl (to enable Ctrl+doubleclick).
-                if (event->button.state & GDK_CONTROL_MASK) {
+                if (event->button.state & GDK_CONTROL_MASK && !(event->button.state & GDK_SHIFT_MASK)) {
                     ret = TRUE;
+                    Inkscape::Rubberband::get(_desktop)->stop();
                     break;
                 }
 
@@ -673,7 +671,7 @@ bool MeshTool::root_handler(GdkEvent* event) {
                                 (fill_or_stroke_pref == Inkscape::FOR_FILL) ?
                                 style->getFillPaintServer():
                                 style->getStrokePaintServer();
-                            if (server && SP_IS_MESHGRADIENT(server)) 
+                            if (server && is<SPMeshGradient>(server)) 
                                 has_mesh = true;
                         }
                     }
@@ -728,7 +726,6 @@ bool MeshTool::root_handler(GdkEvent* event) {
                 this->item_to_select = nullptr;
                 ret = TRUE;
             }
-
             Inkscape::Rubberband::get(_desktop)->stop();
         }
         break;
@@ -930,7 +927,7 @@ void MeshTool::new_default()
             mg->array.create(mg, *i, (fill_or_stroke_pref == Inkscape::FOR_FILL) ?
                              (*i)->geometricBounds() : (*i)->visualBounds());
 
-            bool isText = SP_IS_TEXT(*i);
+            bool isText = is<SPText>(*i);
             sp_style_set_property_url(*i,
                                       ((fill_or_stroke_pref == Inkscape::FOR_FILL) ? "fill":"stroke"),
                                       mg, isText);

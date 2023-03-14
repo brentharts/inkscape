@@ -22,6 +22,7 @@
 #include <2geom/rect.h>
 #include "sp-object-group.h"
 #include "uri-references.h"
+#include "display/drawing-item-ptr.h"
 
 namespace Inkscape {
 class Drawing;
@@ -29,12 +30,13 @@ class DrawingItem;
 class DrawingGroup;
 } // namespace Inkscape
 
-class SPClipPath
+class SPClipPath final
     : public SPObjectGroup
 {
 public:
 	SPClipPath();
     ~SPClipPath() override;
+    int tag() const override { return tag_of<decltype(*this)>; }
 
     bool clippath_units() const { return clipPathUnits; }
 
@@ -65,10 +67,10 @@ private:
 
     struct View
     {
-        std::unique_ptr<Inkscape::DrawingGroup> drawingitem;
+        DrawingItemPtr<Inkscape::DrawingGroup> drawingitem;
         Geom::OptRect bbox;
         unsigned key;
-        View(std::unique_ptr<Inkscape::DrawingGroup> drawingitem, Geom::OptRect const &bbox, unsigned key);
+        View(DrawingItemPtr<Inkscape::DrawingGroup> drawingitem, Geom::OptRect const &bbox, unsigned key);
     };
     std::vector<View> views;
     void update_view(View &v);

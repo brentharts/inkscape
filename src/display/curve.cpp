@@ -18,7 +18,8 @@
 #include <2geom/sbasis-geometric.h>
 #include <2geom/sbasis-to-bezier.h>
 #include <2geom/point.h>
-#include <helper/geom.h>
+#include "helper/geom.h"
+#include "helper/geom-pathstroke.h"
 
 /**
  * Routines for SPCurve and for its Geom::PathVector
@@ -85,20 +86,10 @@ std::vector<SPCurve> SPCurve::split_non_overlapping() const
 {
     std::vector<SPCurve> result;
 
-    for (auto const &path_it : _pathv) {
-        Geom::PathVector newpathv;
-        newpathv.push_back(path_it);
+    auto curves = Inkscape::split_non_intersecting_paths(Geom::PathVector(_pathv));
 
-        for (auto &existing : result) {
-            if (is_intersecting(existing._pathv, newpathv)) {
-                existing.append(newpathv, false);
-                goto nested_continue;
-            }
-        }
-
-        result.emplace_back(std::move(newpathv));
-
-        nested_continue:;
+    for (auto &curve : curves) {
+        result.emplace_back(std::move(curve));
     }
 
     return result;
@@ -218,7 +209,11 @@ void SPCurve::curveto(double x0, double y0, double x1, double y1, double x2, dou
  */
 void SPCurve::closepath()
 {
-    _pathv.back().close(true);
+    if (_pathv.empty()) {
+        g_message("%s - path is empty", __PRETTY_FUNCTION__);
+    } else {
+        _pathv.back().close(true);
+    }
 }
 
 /** Like SPCurve::closepath() but sets the end point of the last subpath

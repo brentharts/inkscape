@@ -13,9 +13,9 @@
 #ifndef INKSCAPE_DISPLAY_DRAWING_PATTERN_H
 #define INKSCAPE_DISPLAY_DRAWING_PATTERN_H
 
+#include <mutex>
 #include <cairomm/surface.h>
 #include "drawing-group.h"
-#include "drawing-surface.h"
 
 using cairo_pattern_t = struct _cairo_pattern;
 
@@ -34,17 +34,19 @@ class DrawingPattern
 {
 public:
     DrawingPattern(Drawing &drawing);
-    ~DrawingPattern() override;
+    int tag() const override { return tag_of<decltype(*this)>; }
 
     /**
      * Set the transformation from pattern to user coordinate systems.
      * @see SPPattern description for explanation of coordinate systems.
      */
-    void setPatternToUserTransform(Geom::Affine const &new_trans);
+    void setPatternToUserTransform(Geom::Affine const &);
+
     /**
      * Set the tile rect position and dimensions in content coordinate system
      */
-    void setTileRect(Geom::Rect const &tile_rect);
+    void setTileRect(Geom::Rect const &);
+
     /**
      * Turn on overflow rendering.
      *
@@ -52,14 +54,17 @@ public:
      * a translation transform is applied.
      */
     void setOverflow(Geom::Affine const &initial_transform, int steps, Geom::Affine const &step_transform);
+
     /**
      * Render the pattern.
      *
      * Returns cairo_pattern_t structure that can be set as source surface.
      */
-    cairo_pattern_t *renderPattern(Geom::IntRect const &area, float opacity, int device_scale);
+    cairo_pattern_t *renderPattern(RenderContext &rc, Geom::IntRect const &area, float opacity, int device_scale) const;
 
 protected:
+    ~DrawingPattern() override = default;
+
     unsigned _updateItem(Geom::IntRect const &area, UpdateContext const &ctx, unsigned flags, unsigned reset) override;
 
     void _dropPatternCache() override;
@@ -83,11 +88,11 @@ protected:
         Cairo::RefPtr<Cairo::ImageSurface> surface;
     };
 
-    // Parts of the pattern tile that have been rendered. Read/written on render, cleared on update.
-    std::vector<Surface> surfaces;
-};
+    mutable std::mutex mutables;
 
-bool is_drawing_group(DrawingItem const *item);
+    // Parts of the pattern tile that have been rendered. Read/written on render, cleared on update.
+    mutable std::vector<Surface> surfaces;
+};
 
 } // namespace Inkscape
 

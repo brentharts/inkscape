@@ -34,13 +34,13 @@ object_set_attribute(const Glib::VariantBase& value, InkscapeApplication *app)
 
     std::vector<Glib::ustring> tokens = Glib::Regex::split_simple(",", s.get());
     if (tokens.size() != 2) {
-        std::cerr << "action:object_set_attribute: requires 'attribute name, attribute value'" << std::endl;
+        show_output("action:object_set_attribute: requires 'attribute name, attribute value'");
         return;
     }
 
     auto selection = app->get_active_selection();
     if (selection->isEmpty()) {
-        std::cerr << "action:object_set_attribute: selection empty!" << std::endl;
+        show_output("action:object_set_attribute: selection empty!");
         return;
     }
 
@@ -64,13 +64,13 @@ object_set_property(const Glib::VariantBase& value, InkscapeApplication *app)
 
     std::vector<Glib::ustring> tokens = Glib::Regex::split_simple(",", s.get());
     if (tokens.size() != 2) {
-        std::cerr << "action:object_set_property: requires 'property name, property value'" << std::endl;
+        show_output("action:object_set_property: requires 'property name, property value'");
         return;
     }
 
     auto selection = app->get_active_selection();
     if (selection->isEmpty()) {
-        std::cerr << "action:object_set_property: selection empty!" << std::endl;
+        show_output("action:object_set_property: selection empty!");
         return;
     }
 
@@ -101,13 +101,20 @@ object_unlink_clones(InkscapeApplication *app)
     selection->unlink();
 }
 
+bool
+should_remove_original()
+{
+    return Inkscape::Preferences::get()->getBool("/options/maskobject/remove", true);
+}
+
 void
 object_clip_set(InkscapeApplication *app)
 {
     Inkscape::Selection *selection = app->get_active_selection();
 
     // Object Clip Set
-    selection->setMask(true, false);
+    selection->setMask(true, false, should_remove_original());
+    Inkscape::DocumentUndo::done(selection->document(), _("Set clipping path"), "");
 }
 
 void
@@ -116,7 +123,7 @@ object_clip_set_inverse(InkscapeApplication *app)
     Inkscape::Selection *selection = app->get_active_selection();
 
     // Object Clip Set Inverse
-    selection->setMask(true, false);
+    selection->setMask(true, false, should_remove_original());
     Inkscape::LivePathEffect::sp_inverse_powerclip(app->get_active_selection());
     Inkscape::DocumentUndo::done(app->get_active_document(), _("Set Inverse Clip(LPE)"), "");
 }
@@ -128,7 +135,7 @@ object_clip_release(InkscapeApplication *app)
 
     // Object Clip Release
     Inkscape::LivePathEffect::sp_remove_powerclip(app->get_active_selection());
-    selection->unsetMask(true);
+    selection->unsetMask(true, true, should_remove_original());
     Inkscape::DocumentUndo::done(app->get_active_document(), _("Release clipping path"), "");
 }
 
@@ -146,8 +153,8 @@ object_mask_set(InkscapeApplication *app)
     Inkscape::Selection *selection = app->get_active_selection();
 
     // Object Mask Set
-    selection->setMask(false, false);
-    // Undo added in setMask().
+    selection->setMask(false, false, should_remove_original());
+    Inkscape::DocumentUndo::done(selection->document(), _("Set mask"), "");
 }
 
 void
@@ -156,7 +163,7 @@ object_mask_set_inverse(InkscapeApplication *app)
     Inkscape::Selection *selection = app->get_active_selection();
 
     // Object Mask Set Inverse
-    selection->setMask(false, false);
+    selection->setMask(false, false, should_remove_original());
     Inkscape::LivePathEffect::sp_inverse_powermask(app->get_active_selection());
     Inkscape::DocumentUndo::done(app->get_active_document(), _("Set Inverse Mask (LPE)"), "");
 }
@@ -168,7 +175,7 @@ object_mask_release(InkscapeApplication *app)
 
     // Object Mask Release
     Inkscape::LivePathEffect::sp_remove_powermask(app->get_active_selection());
-    selection->unsetMask(false);
+    selection->unsetMask(false, true, should_remove_original());
     Inkscape::DocumentUndo::done(app->get_active_document(), _("Release mask"), "");
 }
 
@@ -178,7 +185,8 @@ object_rotate_90_cw(InkscapeApplication *app)
     Inkscape::Selection *selection = app->get_active_selection();
 
     // Object Rotate 90
-    selection->rotate90(false);
+    auto desktop = selection->desktop();
+    selection->rotate((!desktop || desktop->is_yaxisdown()) ? 90 : -90);
 }
 
 void
@@ -187,7 +195,8 @@ object_rotate_90_ccw(InkscapeApplication *app)
     Inkscape::Selection *selection = app->get_active_selection();
 
     // Object Rotate 90 CCW
-    selection->rotate90(true);
+    auto desktop = selection->desktop();
+    selection->rotate((!desktop || desktop->is_yaxisdown()) ? -90 : 90);
 }
 
 void
@@ -245,8 +254,7 @@ object_to_path(InkscapeApplication *app)
     // We should not have to do this!
     auto document  = app->get_active_document();
     selection->setDocument(document);
-
-    selection->toCurves();  // TODO: Rename toPaths()
+    selection->toCurves(false, Inkscape::Preferences::get()->getBool("/options/clonestocurvesjustunlink/value", true));
 }
 
 
