@@ -400,7 +400,7 @@ void ink_drag_setup(SPDesktopWidget *dtw)
         auto isportal = !Glib::getenv("GTK_USE_PORTAL").empty();
 
         for (auto const &entry : ui_drop_target_entries) {
-            if (entry == URI_LIST && isportal) {
+            if (entry.get_info() == URI_LIST && isportal) {
                 continue;
             }
             completeDropTargets.emplace_back(entry);
