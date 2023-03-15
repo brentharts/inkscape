@@ -71,34 +71,10 @@ namespace Inkscape {
 namespace UI {
 namespace Dialog {
 
-<<<<<<< HEAD
-
-
-//########################################################################
-//### U T I L I T Y
-//########################################################################
-
-void fileDialogExtensionToPattern(Glib::ustring &pattern, Glib::ustring &extension)
-{
-    for (unsigned int ch : extension) {
-        if (Glib::Unicode::isalpha(ch)) {
-            pattern += '[';
-            pattern += Glib::Unicode::toupper(ch);
-            pattern += Glib::Unicode::tolower(ch);
-            pattern += ']';
-        } else {
-            pattern += ch;
-        }
-    }
-}
-
-=======
->>>>>>> master
 /*#########################################################################
 ### F I L E     D I A L O G    B A S E    C L A S S
 #########################################################################*/
 
-<<<<<<< HEAD
 // Small function so the translatable strings stay out of the header
 const char * FileDialogBaseGtk::accept_label(Gtk::FileChooserAction dialogType)
 {
@@ -115,8 +91,6 @@ const char * FileDialogBaseGtk::cancel_label()
     return _("_Cancel");
 }
 
-=======
->>>>>>> master
 void FileDialogBaseGtk::internalSetup()
 {
     filterComboBox = dynamic_cast<Gtk::ComboBoxText *>(get_widget_by_name(this, "GtkComboBoxText"));
@@ -363,21 +337,9 @@ bool FileOpenDialogImplGtk::show()
     svgPreview.showNoPreview();
     hide();
 
-<<<<<<< HEAD
     if (b == Gtk::RESPONSE_ACCEPT) {
-        // This is a hack, to avoid the warning messages that
-        // Gtk::FileChooser::get_filter() returns
-        // should be:  Gtk::FileFilter *filter = get_filter();
-        GtkFileChooser *gtkFileChooser = Gtk::FileChooser::gobj();
-        GtkFileFilter *filter = gtk_file_chooser_get_filter(gtkFileChooser);
-        if (filter) {
-            // Get which extension was chosen, if any
-            extension = extensionMap[gtk_file_filter_get_name(filter)];
-=======
-    if (b == Gtk::RESPONSE_OK) {
         if (auto iter = filterComboBox->get_active()) {
             setExtension((*iter)[FilterList.extension]);
->>>>>>> master
         }
 
         auto fn = get_filename();
@@ -473,12 +435,6 @@ FileSaveDialogImplGtk::FileSaveDialogImplGtk(Gtk::Window &parentWindow, const Gl
         createFilterMenu();
 
     childBox.pack_start(checksBox);
-<<<<<<< HEAD
-    childBox.pack_end(fileTypeComboBox);
-    childBox.show();
-
-=======
->>>>>>> master
     checksBox.pack_start(fileTypeCheckbox);
     checksBox.pack_start(previewCheckbox);
     checksBox.pack_start(svgexportCheckbox);
@@ -486,10 +442,6 @@ FileSaveDialogImplGtk::FileSaveDialogImplGtk(Gtk::Window &parentWindow, const Gl
 
     set_extra_widget(childBox);
 
-<<<<<<< HEAD
-    signal_selection_changed().connect(
-        sigc::mem_fun(*this, &FileSaveDialogImplGtk::fileNameChanged));
-=======
     // Let's do some customization
     fileNameEntry = dynamic_cast<Gtk::Entry *>(get_widget_by_name(this, "GtkEntry"));
     if (fileNameEntry) {
@@ -503,7 +455,6 @@ FileSaveDialogImplGtk::FileSaveDialogImplGtk(Gtk::Window &parentWindow, const Gl
     }
 
     signal_selection_changed().connect(sigc::mem_fun(*this, &FileSaveDialogImplGtk::fileNameChanged));
->>>>>>> master
 
     // allow easy access to the user's own templates folder
     using namespace Inkscape::IO::Resource;
@@ -512,21 +463,9 @@ FileSaveDialogImplGtk::FileSaveDialogImplGtk(Gtk::Window &parentWindow, const Gl
         Inkscape::IO::file_test(templates, G_FILE_TEST_IS_DIR) && g_path_is_absolute(templates)) {
         add_shortcut_folder(templates);
     }
-<<<<<<< HEAD
-}
 
-/**
- * Destructor
- */
-FileSaveDialogImplGtk::~FileSaveDialogImplGtk()
-= default;
-
-/**
- * Callback for fileType widget changing
-=======
-
-    add_button(_("_Cancel"), Gtk::RESPONSE_CANCEL);
-    set_default(*add_button(_("_Save"), Gtk::RESPONSE_OK));
+    add_button(cancel_label(), Gtk::RESPONSE_CANCEL);
+    set_default(accept_label(), Gtk::RESPONSE_OK);
 
     show_all_children();
 }
@@ -570,7 +509,6 @@ void FileSaveDialogImplGtk::fileNameEntryChangedCallback()
 
 /**
  * Callback for fileNameEntry widget
->>>>>>> master
  */
 void FileSaveDialogImplGtk::filterChangedCallback()
 {
@@ -590,30 +528,7 @@ void FileSaveDialogImplGtk::fileNameChanged() {
             return;
     if (knownExtensions.find(ext) == knownExtensions.end()) return;
     fromCB = true;
-<<<<<<< HEAD
-    fileTypeComboBox.set_active_text(knownExtensions[ext]->get_filetypename(true));
-}
-
-void FileSaveDialogImplGtk::addFileType(Glib::ustring name, Glib::ustring pattern)
-{
-    //#Let user choose
-    FileType guessType;
-    guessType.name = name;
-    guessType.pattern = pattern;
-    guessType.extension = nullptr;
-    fileTypeComboBox.append(guessType.name);
-    fileTypes.push_back(guessType);
-
-    auto filter = Gtk::FileFilter::create();
-    filter->set_name(guessType.name);
-    filter->add_pattern(guessType.pattern);
-    add_filter(filter);
-
-    fileTypeComboBox.set_active(0);
-    fileTypeChangedCallback(); // call at least once to set the filter
-=======
     filterComboBox->set_active_text(knownExtensions[ext]->get_filetypename(true));
->>>>>>> master
 }
 
 void FileSaveDialogImplGtk::createFilterMenu()
@@ -641,39 +556,10 @@ void FileSaveDialogImplGtk::createFilterMenu()
         Glib::ustring extension = omod->get_extension();
         addFilter(omod->get_filetypename(true), extension, omod);
         knownExtensions.insert(std::pair<Glib::ustring, Inkscape::Extension::Output*>(extension.casefold(), omod));
-<<<<<<< HEAD
-        fileDialogExtensionToPattern(type.pattern, extension);
-        type.extension = omod;
-        fileTypeComboBox.append(type.name);
-        fileTypes.push_back(type);
-
-        auto filter = Gtk::FileFilter::create();
-        filter->set_name(type.name);
-        filter->add_pattern(type.pattern);
-        add_filter(filter);
-    }
-
-    //#Let user choose
-    FileType guessType;
-    guessType.name = _("Guess from extension");
-    guessType.pattern = "*";
-    guessType.extension = nullptr;
-    fileTypeComboBox.append(guessType.name);
-    fileTypes.push_back(guessType);
-
-    auto filter = Gtk::FileFilter::create();
-    filter->set_name(guessType.name);
-    filter->add_pattern(guessType.pattern);
-    add_filter(filter);
-
-    fileTypeComboBox.set_active(0);
-    fileTypeChangedCallback(); // call at least once to set the filter
-=======
     }
 
     filterComboBox->set_active(0);
     filterChangedCallback(); // call at least once to set the filter
->>>>>>> master
 }
 
 /**
@@ -743,16 +629,12 @@ Glib::ustring FileSaveDialogImplGtk::getCurrentDirectory()
   */
 void FileSaveDialogImplGtk::change_path(const Glib::ustring &path)
 {
-<<<<<<< HEAD
     if (!Glib::getenv("GTK_USE_PORTAL").empty()) {
         // If we're using the portal we can't control the path
         return;
     }
 
-    myFilename = path;
-=======
     setFilename(path);
->>>>>>> master
 
     if (Glib::file_test(_filename, Glib::FILE_TEST_IS_DIR)) {
         // fprintf(stderr,"set_current_folder(%s)\n",_filename.c_str());
