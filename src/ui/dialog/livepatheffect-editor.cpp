@@ -643,7 +643,7 @@ LivePathEffectEditor::showParams(std::pair<Gtk::Expander *, std::shared_ptr<Inks
     if (lpeobj) {
         Inkscape::LivePathEffect::Effect *lpe = lpeobj->get_lpe();
         if (lpe) {
-            if (effectwidget && !lpe->refresh_widgets && expanderdata == current_lperef && !changed) {
+            if (effectwidget && (!lpe->refresh_widgets || lpe->lpeui) && expanderdata == current_lperef && !changed) {
                 return;
             }
             if (effectwidget) {
@@ -662,7 +662,9 @@ LivePathEffectEditor::showParams(std::pair<Gtk::Expander *, std::shared_ptr<Inks
             }
             expanderdata.first->add(*effectwidget);
             expanderdata.first->show_all_children();
-            align(effectwidget);
+            if (!lpe->lpeui) {
+               align(effectwidget);
+            }
             // fixme: add resizing of dialog
             lpe->refresh_widgets = false;
             ensure_size();

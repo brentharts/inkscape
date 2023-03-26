@@ -20,10 +20,16 @@
 #include "live_effects/parameter/hidden.h"
 #include "live_effects/parameter/nodesatellitesarray.h"
 #include "live_effects/parameter/unit.h"
+#include "ui/live_effects/lpe-fillet-chamfer.h"
+
 
 namespace Inkscape {
+    namespace UI {
+        namespace LivePathEffect {
+            class LPEFilletChamfer;
+        }
+    }
 namespace LivePathEffect {
-
 enum Filletmethod {
     FM_AUTO,
     FM_ARC,
@@ -48,12 +54,12 @@ public:
     void updateAmount();
     void refreshKnots();
     bool helperpath;
-    NodeSatelliteArrayParam nodesatellites_param;
-
-private:
+    Inkscape::LivePathEffect::NodeSatelliteArrayParam nodesatellites_param;
+    friend class Inkscape::UI::LivePathEffect::LPEFilletChamfer;
+protected:
+    ScalarParam radius;
     UnitParam unit;
     EnumParam<Filletmethod> method;
-    ScalarParam radius;
     ScalarParam chamfer_steps;
     BoolParam flexible;
     HiddenParam mode;
@@ -62,10 +68,12 @@ private:
     BoolParam hide_knots;
     BoolParam apply_no_radius;
     BoolParam apply_with_radius;
+private:
     bool _degenerate_hide;
     PathVectorNodeSatellites *_pathvector_nodesatellites;
     Geom::PathVector _hp;
     Glib::ustring previous_unit;
+    Inkscape::UI::LivePathEffect::LPEFilletChamfer *effectui;
     LPEFilletChamfer(const LPEFilletChamfer &);
     LPEFilletChamfer &operator=(const LPEFilletChamfer &);
 

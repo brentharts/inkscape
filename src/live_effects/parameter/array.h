@@ -22,9 +22,14 @@
 #include "svg/svg.h"
 
 namespace Inkscape {
-
+namespace UI {
+    namespace LivePathEffect {
+        class FilletChamferKnotHolderEntity;
+        class NodeSatelliteArrayParam;
+    }
+}
 namespace LivePathEffect {
-
+class NodeSatelliteArrayParam;
 namespace TpS {
 // we need a separate namespace to avoid clashes with other LPEs
 class KnotHolderEntityAttachBegin;
@@ -97,11 +102,15 @@ public:
         g_free(str);
     }
     ParamType paramType() const override { return ParamType::ARRAY; };
-protected:
     friend class TpS::KnotHolderEntityAttachBegin;
     friend class TpS::KnotHolderEntityAttachEnd;
+    friend class Inkscape::UI::LivePathEffect::FilletChamferKnotHolderEntity;
+    friend class Inkscape::UI::LivePathEffect::NodeSatelliteArrayParam;
+    friend class Inkscape::LivePathEffect::NodeSatelliteArrayParam;
     std::vector<StorageType> _vector;
     size_t _default_size;
+protected:
+
 
     void writesvg(SVGOStringStream &str, std::vector<StorageType> const &vector) const {
         for (unsigned int i = 0; i < vector.size(); ++i) {

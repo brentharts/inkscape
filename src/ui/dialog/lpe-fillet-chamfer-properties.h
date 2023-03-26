@@ -13,11 +13,20 @@
 #include <gtkmm.h>
 
 #include "live_effects/parameter/nodesatellitesarray.h"
+#include "ui/live_effects/parameter/nodesatellitesarray.h"
+#include "ui/live_effects/parameter/knotholderentities.h"
 
 class SPDesktop;
 
 namespace Inkscape {
+    namespace LivePathEffect {
+        class NodeSatelliteArrayParam;
+    }
 namespace UI {
+    namespace LivePathEffect {
+        class NodeSatelliteArrayParam;
+        class FilletChamferKnotHolderEntity;
+    }
 namespace Dialogs {
 
 class FilletChamferPropertiesDialog : public Gtk::Dialog {
@@ -31,13 +40,12 @@ public:
     }
 
     static void showDialog(SPDesktop *desktop, double _amount,
-                           const Inkscape::LivePathEffect::FilletChamferKnotHolderEntity *pt, bool _use_distance,
+                           const Inkscape::UI::LivePathEffect::FilletChamferKnotHolderEntity *pt, bool _use_distance,
                            bool _aprox_radius, NodeSatellite _nodesatellite);
 
 protected:
 
-    Inkscape::LivePathEffect::FilletChamferKnotHolderEntity *
-    _knotpoint;
+    Inkscape::UI::LivePathEffect::FilletChamferKnotHolderEntity *_knotpoint;
 
     Gtk::Label _fillet_chamfer_position_label;
     Gtk::SpinButton _fillet_chamfer_position_numeric;
@@ -63,8 +71,7 @@ protected:
         return instance;
     }
 
-    void _setPt(const Inkscape::LivePathEffect::
-                FilletChamferKnotHolderEntity *pt);
+    void _setPt(const Inkscape::UI::LivePathEffect::FilletChamferKnotHolderEntity *pt);
     void _setUseDistance(bool use_knot_distance);
     void _setAprox(bool aprox_radius);
     void _setAmount(double amount);
@@ -82,8 +89,7 @@ protected:
     double _amount;
     bool _aprox;
 
-    friend class Inkscape::LivePathEffect::
-        FilletChamferKnotHolderEntity;
+    friend class Inkscape::UI::LivePathEffect::FilletChamferKnotHolderEntity;
 
 private:
     FilletChamferPropertiesDialog(

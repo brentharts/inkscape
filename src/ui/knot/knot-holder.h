@@ -27,6 +27,10 @@
 namespace Inkscape {
 namespace UI {
 class ShapeEditor;
+namespace LivePathEffect {
+    class FilletChamferKnotHolderEntity;
+    class NodeSatelliteArrayParam;
+}
 }
 namespace XML {
 class Node;
@@ -85,6 +89,9 @@ public:
     friend class Inkscape::LivePathEffect::NodeSatelliteArrayParam;                    // why?
     friend class Inkscape::LivePathEffect::PowerStrokePointArrayParamKnotHolderEntity; // why?
     friend class Inkscape::LivePathEffect::FilletChamferKnotHolderEntity; // why?
+    friend class Inkscape::UI::LivePathEffect::FilletChamferKnotHolderEntity; // why?
+    friend class Inkscape::UI::LivePathEffect::NodeSatelliteArrayParam;                    // why?
+    
 
 protected:
 

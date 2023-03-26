@@ -58,10 +58,11 @@ LPEFilletChamfer::LPEFilletChamfer(LivePathEffectObject *lpeobject)
                         "use_knot_distance", &wr, this, true),
       hide_knots(_("Hide knots"), _("Hide knots"), "hide_knots", &wr, this,
                  false),
-      apply_no_radius(_("Apply changes if radius = 0"), _("Apply changes if radius = 0"), "apply_no_radius", &wr, this, true),
-      apply_with_radius(_("Apply changes if radius > 0"), _("Apply changes if radius > 0"), "apply_with_radius", &wr, this, true),
+      apply_no_radius(_("Apply changes to nodes that are not changed"), _("Apply changes to nodes that are not changed"), "apply_no_radius", &wr, this, true),
+      apply_with_radius(_("Apply changes to nodes that are changed"), _("Apply changes to nodes that are changed"), "apply_with_radius", &wr, this, true),
       _pathvector_nodesatellites(nullptr),
-      _degenerate_hide(false)
+      _degenerate_hide(false),
+      effectui(new Inkscape::UI::LivePathEffect::LPEFilletChamfer(this))
 {
     // fix legacy < 1.2:
     const gchar * satellites_param = getLPEObj()->getAttribute("satellites_param");
@@ -80,7 +81,7 @@ LPEFilletChamfer::LPEFilletChamfer(LivePathEffectObject *lpeobject)
     registerParameter(&apply_with_radius);
     registerParameter(&only_selected);
     registerParameter(&hide_knots);
-
+    lpeui = true; 
     radius.param_set_range(0.0, std::numeric_limits<double>::max());
     radius.param_set_increments(1, 1);
     radius.param_set_digits(4);
@@ -180,86 +181,7 @@ void LPEFilletChamfer::doOnApply(SPLPEItem const *lpeItem)
 
 Gtk::Widget *LPEFilletChamfer::newWidget()
 {
-    // use manage here, because after deletion of Effect object, others might
-    // still be pointing to this widget.
-    Gtk::Box *vbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
-
-    vbox->set_border_width(5);
-    vbox->set_homogeneous(false);
-    vbox->set_spacing(0);
-    std::vector<Parameter *>::iterator it = param_vector.begin();
-    while (it != param_vector.end()) {
-        if ((*it)->widget_is_visible) {
-            Parameter *param = *it;
-            Gtk::Widget *widg = param->param_newWidget();
-            if (param->param_key == "radius") {
-                Inkscape::UI::Widget::Scalar *widg_registered =
-                    Gtk::manage(dynamic_cast<Inkscape::UI::Widget::Scalar *>(widg));
-                widg_registered->signal_value_changed().connect(
-                    sigc::mem_fun(*this, &LPEFilletChamfer::updateAmount));
-                widg = widg_registered;
-                if (widg) {
-                    Gtk::Box *scalar_parameter = dynamic_cast<Gtk::Box *>(widg);
-                    std::vector<Gtk::Widget *> childList = scalar_parameter->get_children();
-                    Gtk::Entry *entry_widget = dynamic_cast<Gtk::Entry *>(childList[1]);
-                    entry_widget->set_width_chars(6);
-                }
-            } else if (param->param_key == "chamfer_steps") {
-                Inkscape::UI::Widget::Scalar *widg_registered =
-                    Gtk::manage(dynamic_cast<Inkscape::UI::Widget::Scalar *>(widg));
-                widg_registered->signal_value_changed().connect(
-                    sigc::mem_fun(*this, &LPEFilletChamfer::updateChamferSteps));
-                widg = widg_registered;
-                if (widg) {
-                    Gtk::Box *scalar_parameter = dynamic_cast<Gtk::Box *>(widg);
-                    std::vector<Gtk::Widget *> childList = scalar_parameter->get_children();
-                    Gtk::Entry *entry_widget = dynamic_cast<Gtk::Entry *>(childList[1]);
-                    entry_widget->set_width_chars(3);
-                }
-            } else if (param->param_key == "only_selected") {
-                Gtk::manage(widg);
-            }
-            Glib::ustring *tip = param->param_getTooltip();
-            if (widg) {
-                vbox->pack_start(*widg, true, true, 2);
-                if (tip) {
-                    widg->set_tooltip_text(*tip);
-                } else {
-                    widg->set_tooltip_text("");
-                    widg->set_has_tooltip(false);
-                }
-            }
-        }
-        ++it;
-    }
-    
- // Fillet and chanffer containers
-
-    Gtk::Box *fillet_container = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 0));
-    Gtk::Button *fillet =  Gtk::manage(new Gtk::Button(Glib::ustring(_("Fillet"))));
-    fillet->signal_clicked().connect(
-        sigc::bind<NodeSatelliteType>(sigc::mem_fun(*this, &LPEFilletChamfer::updateNodeSatelliteType), FILLET));
-
-    fillet_container->pack_start(*fillet, true, true, 2);
-    Gtk::Button *inverse_fillet = Gtk::manage(new Gtk::Button(Glib::ustring(_("Inverse fillet"))));
-    inverse_fillet->signal_clicked().connect(sigc::bind<NodeSatelliteType>(
-        sigc::mem_fun(*this, &LPEFilletChamfer::updateNodeSatelliteType), INVERSE_FILLET));
-    fillet_container->pack_start(*inverse_fillet, true, true, 2);
-
-    Gtk::Box *chamfer_container = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 0));
-    Gtk::Button *chamfer = Gtk::manage(new Gtk::Button(Glib::ustring(_("Chamfer"))));
-    chamfer->signal_clicked().connect(
-        sigc::bind<NodeSatelliteType>(sigc::mem_fun(*this, &LPEFilletChamfer::updateNodeSatelliteType), CHAMFER));
-
-    chamfer_container->pack_start(*chamfer, true, true, 2);
-    Gtk::Button *inverse_chamfer = Gtk::manage(new Gtk::Button(Glib::ustring(_("Inverse chamfer"))));
-    inverse_chamfer->signal_clicked().connect(sigc::bind<NodeSatelliteType>(
-        sigc::mem_fun(*this, &LPEFilletChamfer::updateNodeSatelliteType), INVERSE_CHAMFER));
-    chamfer_container->pack_start(*inverse_chamfer, true, true, 2);
-
-    vbox->pack_start(*fillet_container, true, true, 2);
-    vbox->pack_start(*chamfer_container, true, true, 2);
-    return vbox;
+    return effectui->newWidget();
 }
 
 void LPEFilletChamfer::refreshKnots()

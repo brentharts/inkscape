@@ -102,7 +102,7 @@ FilletChamferPropertiesDialog::~FilletChamferPropertiesDialog()
 }
 
 void FilletChamferPropertiesDialog::showDialog(SPDesktop *desktop, double _amount,
-                                               const Inkscape::LivePathEffect::FilletChamferKnotHolderEntity *pt,
+                                               const Inkscape::UI::LivePathEffect::FilletChamferKnotHolderEntity *pt,
                                                bool _use_distance, bool _aprox_radius, NodeSatellite _nodesatellite)
 {
     FilletChamferPropertiesDialog *dialog = new FilletChamferPropertiesDialog();
@@ -213,11 +213,10 @@ void FilletChamferPropertiesDialog::_setNodeSatellite(NodeSatellite nodesatellit
 }
 
 void FilletChamferPropertiesDialog::_setPt(
-    const Inkscape::LivePathEffect::
-    FilletChamferKnotHolderEntity *pt)
+    const Inkscape::UI::LivePathEffect::FilletChamferKnotHolderEntity *pt)
 {
     _knotpoint = const_cast<
-                 Inkscape::LivePathEffect::FilletChamferKnotHolderEntity *>(
+                 Inkscape::UI::LivePathEffect::FilletChamferKnotHolderEntity *>(
                      pt);
 }
 
