@@ -1327,7 +1327,7 @@ void PathManipulator::_createControlPointsFromGeometry()
 //determines if the trace has a bspline effect and the number of steps that it takes
 int PathManipulator::_bsplineGetSteps() const {
 
-    LivePathEffect::LPEBSpline const *lpe_bsp = nullptr;
+    Inkscape::LivePathEffect::LPEBSpline const *lpe_bsp = nullptr;
 
     auto path = cast<SPLPEItem>(_path);
     if (path){
@@ -1335,7 +1335,7 @@ int PathManipulator::_bsplineGetSteps() const {
             Inkscape::LivePathEffect::Effect const *this_effect =
                 path->getFirstPathEffectOfType(Inkscape::LivePathEffect::BSPLINE);
             if(this_effect){
-                lpe_bsp = dynamic_cast<LivePathEffect::LPEBSpline const*>(this_effect->getLPEObj()->get_lpe());
+                lpe_bsp = dynamic_cast<Inkscape::LivePathEffect::LPEBSpline const*>(this_effect->getLPEObj()->get_lpe());
             }
         }
     }
@@ -1475,7 +1475,7 @@ void PathManipulator::_createGeometryFromControlPoints(bool alert_LPE)
         if (path && path->hasPathEffect()) {
             Inkscape::LivePathEffect::Effect *this_effect = 
                 path->getFirstPathEffectOfType(Inkscape::LivePathEffect::POWERSTROKE);
-            LivePathEffect::LPEPowerStroke *lpe_pwr = dynamic_cast<LivePathEffect::LPEPowerStroke*>(this_effect);
+            Inkscape::LivePathEffect::LPEPowerStroke *lpe_pwr = dynamic_cast<Inkscape::LivePathEffect::LPEPowerStroke*>(this_effect);
             if (lpe_pwr) {
                lpe_pwr->adjustForNewPath();
             }

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   version="1.1"
+   id="svg1"
+   width="16"
+   height="16"
+   viewBox="0 0 16 16"
+   sodipodi:docname="lpe-radius-fillet-symbolic.svg"
+   inkscape:version="1.3-dev (4435d25a64, 2023-03-12, custom)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <style
+     id="s0" />
+  <style
+     id="s2"> 
+     @import '../../highlights.css'; 
+  </style>
+  <metadata
+     id="metadata895">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs893">
+  </defs>
+  <sodipodi:namedview
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     id="namedview"
+     showgrid="true"
+     inkscape:zoom="8"
+     inkscape:cx="1.1875"
+     inkscape:cy="0.6875"
+     inkscape:window-width="1920"
+     inkscape:window-height="1011"
+     inkscape:window-x="0"
+     inkscape:window-y="32"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g22449"
+     inkscape:document-rotation="0"
+     inkscape:snap-global="true"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:showpageshadow="2"
+     inkscape:deskcolor="#d1d1d1">
+    <inkscape:grid
+       spacingy="1"
+       spacingx="1"
+       type="xygrid"
+       id="grid"
+       visible="true" />
+  </sodipodi:namedview>
+  <g
+     transform="matrix(0.666667,0,0,0.666666,-696.00001,-446.9076)"
+     inkscape:label="00277"
+     id="align-horizontal-baseline">
+    <g
+       inkscape:label="#al_baselines_vert"
+       transform="matrix(-1,0,0,0.997921,1039.197,589.8441)"
+       id="g22449">
+      <path
+         inkscape:connector-curvature="0"
+         id="rect22453"
+         d="M 80.685799,-28.802999 H 104.7358 V -4.8029995 H 80.685799 Z"
+         style="opacity:0;fill:none"
+         transform="matrix(0,1,1,0,0,0)" />
+      <path
+         d="m -7.8024912,97.220107 c 0,-3.006253 -2.8135798,-9.018759 -8.9067878,-9.018759 -6.093205,0 -9.093204,6.012506 -9.093204,9.018759 z"
+         id="path1033-0"
+         sodipodi:nodetypes="czcc" />
+    </g>
+  </g>
+</svg>

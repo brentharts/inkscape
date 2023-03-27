@@ -148,6 +148,7 @@ public:
     bool is_applied;
     bool on_remove_all;
     bool refresh_widgets;
+    bool lpeui = false;
     bool finishiddle = false;
     bool satellitestoclipboard = false;
     bool helperLineSatellites = false;

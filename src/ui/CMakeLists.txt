@@ -548,7 +548,7 @@ if(WIN32)
 endif()
 
 add_inkscape_source("${ui_SRC}")
-
+add_subdirectory(live_effects)
 set ( ui_spellcheck_SRC
 	dialog/spellcheck.cpp
 	dialog/spellcheck.h

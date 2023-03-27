@@ -1309,13 +1309,13 @@ void PenTool::_bsplineSpiroStartAnchor(bool shift)
         return;
     }
 
-    LivePathEffect::LPEBSpline *lpe_bsp = nullptr;
+    Inkscape::LivePathEffect::LPEBSpline *lpe_bsp = nullptr;
 
     if (is<SPLPEItem>(this->white_item) && cast<SPLPEItem>(this->white_item)->hasPathEffect()){
         Inkscape::LivePathEffect::Effect *thisEffect =
             cast<SPLPEItem>(this->white_item)->getFirstPathEffectOfType(Inkscape::LivePathEffect::BSPLINE);
         if(thisEffect){
-            lpe_bsp = dynamic_cast<LivePathEffect::LPEBSpline*>(thisEffect->getLPEObj()->get_lpe());
+            lpe_bsp = dynamic_cast<Inkscape::LivePathEffect::LPEBSpline*>(thisEffect->getLPEObj()->get_lpe());
         }
     }
     if(lpe_bsp){
