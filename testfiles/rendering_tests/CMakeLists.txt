@@ -24,6 +24,7 @@ set(RENDERING_TESTS
 
     multi-style
     style-parsing
+    test-peppercarrot-text
 
     # -- Text tests --
     ## Many (if not all) of these tests are sensitive to the text rendering stack: FreeType, HarfBuzz, Pango.
