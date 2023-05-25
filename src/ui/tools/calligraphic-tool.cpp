@@ -375,6 +375,7 @@ void CalligraphicTool::brush() {
 
     this->point1[this->npoints] = brush + del_left;
     this->point2[this->npoints] = brush - del_right;
+    this->point0[this->npoints] = Geom::middle_point(this->point1[this->npoints], this->point2[this->npoints]);
 
     this->del = 0.5*(del_left + del_right);
 
@@ -456,7 +457,11 @@ bool CalligraphicTool::root_handler(GdkEvent* event) {
 
                     if (selected != hatch_item) {
                         hatch_item = selected;
-                        hatch_livarot_path = Path_for_item(hatch_item, true, true);
+                        if (auto pen_d = hatch_item->getAttribute("inkscape:pen-d")) {
+                            hatch_livarot_path = Path_for_curve(hatch_item, SPCurve(sp_svg_read_pathv(pen_d)), true, true);
+                        } else {
+                            hatch_livarot_path = Path_for_item (hatch_item, true, true);
+                        }
                         if (hatch_livarot_path) {
                             hatch_livarot_path->ConvertWithBackData(0.01);
                         }
@@ -720,6 +725,9 @@ bool CalligraphicTool::root_handler(GdkEvent* event) {
             else
                 g_warning ("Failed to create path: invalid data in dc->cal1 or dc->cal2");
 
+            cal0.reset();
+            cal1.reset();
+            cal2.reset();
             /* reset accumulated curve */
             accumulated.reset();
 
@@ -872,6 +880,7 @@ void CalligraphicTool::clear_current() {
 
     /* reset curve */
     currentcurve.reset();
+    cal0.reset();
     cal1.reset();
     cal2.reset();
 
@@ -925,6 +934,13 @@ void CalligraphicTool::set_to_accumulated(bool unionize, bool subtract) {
             // This is its result.
             result = _desktop->getSelection()->singleItem();
         }
+
+        // Store the original mouse line as an pen-d attribute for later use
+        if (!cal0.is_empty()) {
+            Geom::PathVector penv = cal0.get_pathvector() * _desktop->dt2doc();
+            repr->setAttribute("inkscape:pen-d", sp_svg_write_path(penv * result->transform));
+        }
+
         result->doWriteTransform(result->transform, nullptr, true);
     } else {
         if (this->repr) {
@@ -953,26 +969,11 @@ add_cap(SPCurve &curve,
 }
 
 bool CalligraphicTool::accumulate() {
-	if (
-        cal1.is_empty() ||
-        cal2.is_empty() ||
-        (cal1.get_segment_count() <= 0) ||
-        cal1.first_path()->closed()
-		) {
-
-        cal1.reset();
-        cal2.reset();
-
-		return false; // failure
-	}
-
         auto rev_cal2 = cal2.reversed();
-
-    if ((rev_cal2.get_segment_count() <= 0) || rev_cal2.first_path()->closed()) {
-        cal1.reset();
-        cal2.reset();
-
-		return false; // failure
+    if (cal1.is_empty() || cal2.is_empty() ||
+       (cal1.get_segment_count() <= 0) || cal1.first_path()->closed() ||
+       (rev_cal2.get_segment_count() <= 0) || rev_cal2.first_path()->closed()) {
+        return false;
 	}
 
     Geom::Curve const * dc_cal1_firstseg  = cal1.first_segment();
@@ -992,10 +993,7 @@ bool CalligraphicTool::accumulate() {
 
     accumulated.closepath();
 
-    cal1.reset();
-    cal2.reset();
-
-	return true; // success
+    return true;
 }
 
 static double square(double const x)
@@ -1028,12 +1026,19 @@ void CalligraphicTool::fit_and_split(bool release) {
         if ( cal1.is_empty() || cal2.is_empty() ) {
             /* dc->npoints > 0 */
             /* g_print("calligraphics(1|2) reset\n"); */
+            cal0.reset();
             cal1.reset();
             cal2.reset();
 
+            cal0.moveto(this->point0[0]);
             cal1.moveto(this->point1[0]);
             cal2.moveto(this->point2[0]);
         }
+
+        Geom::Point b0[BEZIER_MAX_LENGTH];
+        gint const nb0 = Geom::bezier_fit_cubic_r(b0, this->point0, this->npoints,
+                                               tolerance_sq, BEZIER_MAX_BEZIERS);
+        g_assert( nb0 * BEZIER_SIZE <= gint(G_N_ELEMENTS(b0)) );
 
         Geom::Point b1[BEZIER_MAX_LENGTH];
         gint const nb1 = Geom::bezier_fit_cubic_r(b1, this->point1, this->npoints,
@@ -1045,7 +1050,7 @@ void CalligraphicTool::fit_and_split(bool release) {
                                                tolerance_sq, BEZIER_MAX_BEZIERS);
         g_assert( nb2 * BEZIER_SIZE <= gint(G_N_ELEMENTS(b2)) );
 
-        if ( nb1 != -1 && nb2 != -1 ) {
+        if ( nb0 != -1 && nb1 != -1 && nb2 != -1 ) {
             /* Fit and draw and reset state */
 #ifdef DYNA_DRAW_VERBOSE
             g_print("nb1:%d nb2:%d\n", nb1, nb2);
@@ -1070,6 +1075,9 @@ void CalligraphicTool::fit_and_split(bool release) {
             }
 
             /* Current calligraphic */
+            for (Geom::Point *bp0 = b0; bp0 < b0 + BEZIER_SIZE * nb0; bp0 += BEZIER_SIZE) {
+                cal0.curveto(bp0[1], bp0[2], bp0[3]);
+            }
             for (Geom::Point *bp1 = b1; bp1 < b1 + BEZIER_SIZE * nb1; bp1 += BEZIER_SIZE) {
                 cal1.curveto(bp1[1], bp1[2], bp1[3]);
             }
@@ -1083,6 +1091,9 @@ void CalligraphicTool::fit_and_split(bool release) {
 #endif
             this->draw_temporary_box();
 
+            for (gint i = 1; i < this->npoints; i++) {
+                cal0.lineto(this->point0[i]);
+            }
             for (gint i = 1; i < this->npoints; i++) {
                 cal1.lineto(this->point1[i]);
             }
@@ -1113,6 +1124,7 @@ void CalligraphicTool::fit_and_split(bool release) {
             segments.emplace_back(cbp);
         }
 
+        this->point0[0] = this->point0[this->npoints - 1];
         this->point1[0] = this->point1[this->npoints - 1];
         this->point2[0] = this->point2[this->npoints - 1];
         this->npoints = 1;

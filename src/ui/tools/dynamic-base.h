@@ -63,11 +63,17 @@ protected:
     /** shape of red "leading" segment */
     SPCurve currentcurve;
 
+    /** center of the stroke; combined to get accumulated */
+    SPCurve cal0;
+
     /** left edge of the stroke; combined to get accumulated */
     SPCurve cal1;
 
     /** right edge of the stroke; combined to get accumulated */
     SPCurve cal2;
+
+    /** center points for this segment */
+    Geom::Point point0[SAMPLING_SIZE];
 
     /** left edge points for this segment */
     Geom::Point point1[SAMPLING_SIZE];
