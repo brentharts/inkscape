@@ -61,7 +61,7 @@ private:
   RandomParam top_smth_variation;
   RandomParam bot_smth_variation;
 
-  BoolParam fat_output, do_bend;
+  BoolParam fat_output, do_bend, single_direction;
   ScalarParam stroke_width_top;
   ScalarParam stroke_width_bot;
   ScalarParam front_thickness, back_thickness;
