@@ -62,13 +62,13 @@ findExpanderWidgets(Gtk::Container *parent,
  * This class is the base implementation for the others.  This
  * reduces redundancies and bugs.
  */
-class FileDialogBaseGtk : public Gtk::FileChooserDialog
+class FileDialogBaseGtk : public Gtk::FileChooserNative
 {
 public:
 
     FileDialogBaseGtk(Gtk::Window& parentWindow, const Glib::ustring &title,
     		Gtk::FileChooserAction dialogType, FileDialogType type, gchar const* preferenceBase) :
-        Gtk::FileChooserDialog(parentWindow, title, dialogType),
+        Gtk::FileChooserNative(title, parentWindow, dialogType, accept_label(dialogType), cancel_label()),
         preferenceBase(preferenceBase ? preferenceBase : "unknown"),
         _dialogType(type)
     {
@@ -77,7 +77,7 @@ public:
 
     FileDialogBaseGtk(Gtk::Window& parentWindow, const char *title,
                    Gtk::FileChooserAction dialogType, FileDialogType type, gchar const* preferenceBase) :
-        Gtk::FileChooserDialog(parentWindow, title, dialogType),
+        Gtk::FileChooserNative(title, parentWindow, dialogType, accept_label(dialogType), cancel_label()),
         preferenceBase(preferenceBase ? preferenceBase : "unknown"),
         _dialogType(type)
     {
@@ -122,6 +122,9 @@ protected:
     Gtk::ComboBoxText *filterComboBox;
 
 private:
+    const char * accept_label(Gtk::FileChooserAction dialogType);
+    const char * cancel_label();
+
     void internalSetup();
 
     /**
@@ -250,7 +253,6 @@ private:
     /**
      * Callback for user input into fileNameEntry
      */
-    void fileNameEntryChangedCallback();
     void fileNameChanged();
     bool fromCB;
 };

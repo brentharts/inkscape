@@ -395,7 +395,14 @@ static void ink_drag_leave( GtkWidget */*widget*/,
 void ink_drag_setup(SPDesktopWidget *dtw)
 {
     if (completeDropTargets.empty()) {
+        // Check to see if we're using portals, then we can't take URLs from
+        // outside of the application
+        auto isportal = !Glib::getenv("GTK_USE_PORTAL").empty();
+
         for (auto const &entry : ui_drop_target_entries) {
+            if (entry.get_info() == URI_LIST && isportal) {
+                continue;
+            }
             completeDropTargets.emplace_back(entry);
         }
         for (auto const &fmt : Gdk::Pixbuf::get_formats()) {

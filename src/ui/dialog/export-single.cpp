@@ -110,6 +110,10 @@ SingleExport::SingleExport(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     pref_button_box->add(*si_extension_cb->getPrefButton());
 
     builder->get_widget("si_filename", si_filename_entry);
+    // Don't encourage people to edit the text, it won't work out
+    if (!Glib::getenv("GTK_USE_PORTAL").empty()) {
+	si_filename_entry->set_sensitive(false);
+    }
     builder->get_widget("si_export", si_export);
 
     builder->get_widget("si_progress", _prog);
@@ -463,8 +467,12 @@ void SingleExport::loadExportHints()
     }
 
     original_name = filename;
-    si_filename_entry->set_text(filename);
-    si_filename_entry->set_position(filename.length());
+
+    // Only set it if we're not using portals or it exists
+    if (Glib::getenv("GTK_USE_PORTAL").empty() || Inkscape::IO::file_test(filename.c_str(), G_FILE_TEST_EXISTS)) {
+        si_filename_entry->set_text(filename);
+        si_filename_entry->set_position(filename.length());
+    }
 
     if (dpi.x() != 0.0) { // XXX Should this deal with dpi.y() ?
         spin_buttons[SPIN_DPI]->set_value(dpi.x());
@@ -575,6 +583,10 @@ void SingleExport::onFilenameModified()
         filename_modified = false;
     } else {
         filename_modified = true;
+    }
+
+    if (!Glib::getenv("GTK_USE_PORTAL").empty() && !Inkscape::IO::file_test(filename.c_str(), G_FILE_TEST_EXISTS)) {
+	filename = "";
     }
 
     si_extension_cb->setExtensionFromFilename(filename);
