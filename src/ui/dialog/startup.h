@@ -28,6 +28,9 @@ public:
     StartScreen();
     ~StartScreen() override;
 
+    static std::unique_ptr<StartScreen> show_splash();
+    static std::unique_ptr<StartScreen> show_welcome();
+
     SPDocument* get_document() { return _document; }
 
 protected:
@@ -35,6 +38,9 @@ protected:
     void on_response(int response_id) override;
 
 private:
+    void setup_splash();
+    void setup_welcome();
+
     void notebook_next(Gtk::Widget *button);
     Gtk::TreeModel::Row active_combo(std::string widget_name);
     void set_active_combo(std::string widget_name, std::string unique_id);
@@ -55,6 +61,11 @@ private:
     void on_recent_changed();
     void on_kind_changed(Gtk::Widget *tab, guint page_num);
 
+protected:
+    // Support for transparent background
+    void set_transparent(bool transparent);
+    bool on_draw(const ::Cairo::RefPtr<::Cairo::Context> &cr) override;
+    bool _use_alpha = false;
 
 private:
     Glib::RefPtr<Gtk::Builder> builder;

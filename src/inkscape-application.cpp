@@ -676,6 +676,10 @@ InkscapeApplication::InkscapeApplication()
     Inkscape::initialize_gettext();
 #endif
 
+    if (_with_gui && Inkscape::Preferences::get()->getBool("/options/splash/enabled", true)) {
+        _start_screen = Inkscape::UI::Dialog::StartScreen::show_splash();
+    }
+
     // Autosave
     Inkscape::AutoSave::getInstance().init(this);
 
@@ -846,6 +850,8 @@ InkscapeApplication::create_window(SPDocument *document, bool replace)
         window = window_open (document);
     }
     window->show();
+
+    startup_close();
 
     return window;
 }
@@ -1084,20 +1090,15 @@ InkscapeApplication::on_activate()
     } else if(prefs->getBool("/options/boot/enabled", true)
                && !_use_command_line_argument
                && (gtk_app() && gtk_app()->get_windows().empty())) {
+        _start_screen = Inkscape::UI::Dialog::StartScreen::show_welcome();
 
-        Inkscape::UI::Dialog::StartScreen start_screen;
-
-        // add start window to gtk_app to ensure proper closing on quit
-        gtk_app()->add_window(start_screen);
-
-        start_screen.run();
-        document = start_screen.get_document();
+        _start_screen->run();
+        document = _start_screen->get_document();
     } else {
 
         // Create a blank document from template
         document = document_new();
     }
-    startup_close();
 
     if (!document) {
         std::cerr << "ConcreteInkscapeApplication::on_activate: failed to create document!" << std::endl;
@@ -1116,14 +1117,7 @@ InkscapeApplication::on_activate()
 void
 InkscapeApplication::startup_close()
 {
-    if (auto app = gtk_app()) {
-        // Close any open start screens preventing double opens
-        for (auto win : app->get_windows()) {
-            if (auto start = dynamic_cast<Inkscape::UI::Dialog::StartScreen *>(win)) {
-                start->close();
-            }
-        }
-    }
+    _start_screen.reset();
 }
 
 // Open document window for each file. Either this or on_activate() is called.
