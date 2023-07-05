@@ -11,8 +11,10 @@
 #ifndef DOCUMENT_CHECK_H
 
 class InkscapeWindow;
+class SPDocument;
 
-bool document_check_for_data_loss(InkscapeWindow* window);
+bool document_check_for_data_loss(InkscapeWindow *window);
+bool document_check_for_data_loss(InkscapeWindow *window, SPDocument *document);
 
 #endif // DOCUMENT_CHECK_H
 

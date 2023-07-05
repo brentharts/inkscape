@@ -39,7 +39,7 @@ undo(SPDocument* document)
         auto tool = desktop->getEventContext();
 
         // No undo while dragging, or if the tool handled this undo.
-        if (desktop->getCanvas()->is_dragging() || (tool && tool->catch_undo())) {
+        if (desktop->get_active_canvas()->is_dragging() || (tool && tool->catch_undo())) {
             return;
         }
     }
@@ -59,7 +59,7 @@ redo(SPDocument* document)
         auto tool = desktop->getEventContext();
 
         // No redo while dragging, or if the tool handled this redo
-        if (desktop->getCanvas()->is_dragging() || (tool && tool->catch_undo(true))) {
+        if (desktop->get_active_canvas()->is_dragging() || (tool && tool->catch_undo(true))) {
             return;
         }
     }

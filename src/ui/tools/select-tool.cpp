@@ -586,7 +586,7 @@ bool SelectTool::root_handler(GdkEvent* event) {
                             _seltrans->moveTo(p, event->button.state);
                         }
 
-                        _desktop->getCanvas()->enable_autoscroll();
+                        _desktop->get_active_canvas()->enable_autoscroll();
                         gobble_motion_events(GDK_BUTTON1_MASK);
                         ret = TRUE;
                     } else {
@@ -815,10 +815,10 @@ bool SelectTool::root_handler(GdkEvent* event) {
 
             ret = TRUE;
 
-            GtkWindow *w = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(_desktop->getCanvas()->gobj())));
+            GtkWindow *w = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(_desktop->get_active_canvas()->gobj())));
             if (w) {
                 gtk_window_present(w);
-                _desktop->getCanvas()->grab_focus();
+                _desktop->get_active_canvas()->grab_focus();
             }
             break;
         }

@@ -85,7 +85,7 @@ ArcToolbar::ArcToolbar(SPDesktop *desktop)
         _rx_item->set_custom_numeric_menu_data(values);
         _tracker->addAdjustment(_rx_adj->gobj());
         _rx_item->get_spin_button()->addUnitTracker(_tracker);
-        _rx_item->set_focus_widget(desktop->canvas);
+        _rx_item->set_focus_widget(desktop->get_active_canvas());
         _rx_adj->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &ArcToolbar::value_changed),
                                                            _rx_adj, "rx"));
         _rx_item->set_sensitive(false);
@@ -104,7 +104,7 @@ ArcToolbar::ArcToolbar(SPDesktop *desktop)
         _ry_item->set_custom_numeric_menu_data(values);
         _tracker->addAdjustment(_ry_adj->gobj());
         _ry_item->get_spin_button()->addUnitTracker(_tracker);
-        _ry_item->set_focus_widget(desktop->canvas);
+        _ry_item->set_focus_widget(desktop->get_active_canvas());
         _ry_adj->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &ArcToolbar::value_changed),
                                                            _ry_adj, "ry"));
         _ry_item->set_sensitive(false);
@@ -125,7 +125,7 @@ ArcToolbar::ArcToolbar(SPDesktop *desktop)
         _start_adj = Gtk::Adjustment::create(start_val, -360.0, 360.0, 1.0, 10.0);
         auto eact = Gtk::manage(new UI::Widget::SpinButtonToolItem("arc-start", _("Start:"), _start_adj));
         eact->set_tooltip_text(_("The angle (in degrees) from the horizontal to the arc's start point"));
-        eact->set_focus_widget(desktop->canvas);
+        eact->set_focus_widget(desktop->get_active_canvas());
         add(*eact);
     }
 
@@ -135,7 +135,7 @@ ArcToolbar::ArcToolbar(SPDesktop *desktop)
         _end_adj = Gtk::Adjustment::create(end_val, -360.0, 360.0, 1.0, 10.0);
         auto eact = Gtk::manage(new UI::Widget::SpinButtonToolItem("arc-end", _("End:"), _end_adj));
         eact->set_tooltip_text(_("The angle (in degrees) from the horizontal to the arc's end point"));
-        eact->set_focus_widget(desktop->canvas);
+        eact->set_focus_widget(desktop->get_active_canvas());
         add(*eact);
     }
     _start_adj->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &ArcToolbar::startend_value_changed),
@@ -393,7 +393,9 @@ ArcToolbar::defaults()
     _start_adj->set_value(0.0);
     _end_adj->set_value(0.0);
 
-    if(_desktop->canvas) _desktop->canvas->grab_focus();
+    if (auto canvas = _desktop->get_active_canvas()) {
+        canvas->grab_focus();
+    }
 }
 
 void

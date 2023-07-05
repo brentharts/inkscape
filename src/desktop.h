@@ -143,13 +143,18 @@ public:
     Inkscape::UI::Tools::ToolBase* getEventContext() const { return event_context; }
     Inkscape::Selection* getSelection() const { return _selection.get(); }
     SPDocument* getDocument() const { return doc(); }
-    Inkscape::UI::Widget::Canvas* getCanvas() const { return canvas; }
+    std::vector<Inkscape::UI::Widget::Canvas*> getCanvasAll() const { return _canvas_all; }
+
+    Inkscape::UI::Widget::Canvas *get_active_canvas() const { return _canvas_all[_active_canvas_idx]; }
+    int get_active_canvas_idx() { return _active_canvas_idx; }
+
     Inkscape::MessageStack* getMessageStack() const { return messageStack().get(); }
     SPNamedView* getNamedView() const { return namedview; }
     SPDesktopWidget *getDesktopWidget() const { return _widget; }
 
     // ------- Canvas Items -------
-    Inkscape::UI::Widget::Canvas *canvas;
+    std::vector<Inkscape::UI::Widget::Canvas*> _canvas_all;
+    int _active_canvas_idx = 0;
 
      // Move these into UI::Widget::Canvas:
     Inkscape::CanvasItemGroup    *getCanvasControls() const { return canvas_group_controls; }
@@ -161,7 +166,10 @@ public:
     Inkscape::CanvasItemGroup    *getCanvasTemp()     const { return canvas_group_temp; }
 
     Inkscape::CanvasItemCatchall *getCanvasCatchall() const { return canvas_catchall; }
-    Inkscape::CanvasItemDrawing  *getCanvasDrawing()  const { return canvas_drawing; }
+    Inkscape::CanvasItemDrawing  *getCanvasDrawing()  const { return _canvas_drawing_all[_active_canvas_idx]; }
+
+    std::vector<Inkscape::CanvasItemDrawing*> getCanvasDrawingAll() { return _canvas_drawing_all; }
+    std::vector<SPDocument*> _canvas_document_all;
 
 private:
     /// current selection; will never generally be NULL
@@ -179,9 +187,9 @@ private:
 
     // Individual items
     Inkscape::CanvasItemCatchall *canvas_catchall        = nullptr; ///< The bottom item for unclaimed events.
-    Inkscape::CanvasItemDrawing  *canvas_drawing         = nullptr; ///< The actual SVG drawing (a.k.a. arena).
 
 public:
+    std::vector<Inkscape::CanvasItemDrawing*> _canvas_drawing_all;
     SPCSSAttr     *current;     ///< current style
     bool           _focusMode;  ///< Whether we're focused working or general working
 
@@ -408,11 +416,13 @@ public:
     bool is_yaxisdown() const { return doc2dt()[3] > 0; }
     double yaxisdir() const { return doc2dt()[3]; }
 
-    void setDocument (SPDocument* doc) override;
+    void setDocument(SPDocument* doc, int idx);
 
     virtual bool onWindowStateEvent (GdkEventWindowState* event);
 
     void applyCurrentOrToolStyle(SPObject *obj, Glib::ustring const &tool_path, bool with_text);
+
+    SPDesktopWidget *get_desktop_widget() const { return _widget; }
 
 private:
     GtkGesture *zoomgesture = nullptr;

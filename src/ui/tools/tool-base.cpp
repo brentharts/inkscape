@@ -101,7 +101,7 @@ ToolBase::ToolBase(SPDesktop *desktop, std::string prefs_path, std::string curso
 {
     pref_observer = Inkscape::Preferences::PreferencesObserver::create(_prefs_path, [this] (auto &val) { set(val); });
     set_cursor(_cursor_default);
-    _desktop->getCanvas()->grab_focus();
+    _desktop->get_active_canvas()->grab_focus();
 
     message_context = std::make_unique<Inkscape::MessageContext>(desktop->messageStack());
 
@@ -173,7 +173,7 @@ Glib::RefPtr<Gdk::Cursor> ToolBase::get_cursor(Glib::RefPtr<Gdk::Window> window,
  */
 void ToolBase::use_tool_cursor()
 {
-    if (auto window = _desktop->getCanvas()->get_window()) {
+    if (auto window = _desktop->get_active_canvas()->get_window()) {
         _cursor = get_cursor(window, _cursor_filename);
         window->set_cursor(_cursor);
     }
@@ -187,7 +187,7 @@ void ToolBase::use_tool_cursor()
  */
 void ToolBase::use_cursor(Glib::RefPtr<Gdk::Cursor> cursor)
 {
-    if (auto window = _desktop->getCanvas()->get_window()) {
+    if (auto window = _desktop->get_active_canvas()->get_window()) {
         window->set_cursor(cursor ? cursor : _cursor);
     }
 }
@@ -370,8 +370,8 @@ bool ToolBase::root_handler(GdkEvent *event)
     auto compute_angle = [&] {
         // Hack: Undo coordinate transformation applied by canvas to get events back to window coordinates.
         // Real solution: Move all this functionality out of this file to somewhere higher up in the chain.
-        auto cursor = Geom::Point(event->motion.x, event->motion.y) * _desktop->canvas->get_geom_affine().inverse() * _desktop->canvas->get_affine() - _desktop->canvas->get_pos();
-        return Geom::deg_from_rad(Geom::atan2(cursor - Geom::Point(_desktop->canvas->get_dimensions()) / 2.0));
+        auto cursor = Geom::Point(event->motion.x, event->motion.y) * _desktop->get_active_canvas()->get_geom_affine().inverse() * _desktop->get_active_canvas()->get_affine() - _desktop->get_active_canvas()->get_pos();
+        return Geom::deg_from_rad(Geom::atan2(cursor - Geom::Point(_desktop->get_active_canvas()->get_dimensions()) / 2.0));
     };
 
     switch (event->type) {
@@ -508,8 +508,8 @@ bool ToolBase::root_handler(GdkEvent *event)
 
                 if (panning_cursor == 0) {
                     panning_cursor = 1;
-                    auto display = _desktop->getCanvas()->get_display();
-                    auto window = _desktop->getCanvas()->get_window();
+                    auto display = _desktop->get_active_canvas()->get_display();
+                    auto window = _desktop->get_active_canvas()->get_window();
                     auto cursor = Gdk::Cursor::create(display, "move");
                     window->set_cursor(cursor);
                 }
@@ -568,7 +568,7 @@ bool ToolBase::root_handler(GdkEvent *event)
             }
             angle = start_angle + delta_angle;
 
-            _desktop->rotate_relative_keep_point(_desktop->w2d(Geom::Rect(_desktop->canvas->get_area_world()).midpoint()),
+            _desktop->rotate_relative_keep_point(_desktop->w2d(Geom::Rect(_desktop->get_active_canvas()->get_area_world()).midpoint()),
                                                  Geom::rad_from_deg(angle - current_angle));
             current_angle = angle;
             ret = true;
@@ -582,7 +582,7 @@ bool ToolBase::root_handler(GdkEvent *event)
 
         if (panning_cursor == 1) {
             panning_cursor = 0;
-            _desktop->getCanvas()->get_window()->set_cursor(_cursor);
+            _desktop->get_active_canvas()->get_window()->set_cursor(_cursor);
         }
 
         if (event->button.button == 2 && rotating) {
@@ -791,7 +791,7 @@ bool ToolBase::root_handler(GdkEvent *event)
 
         if (panning_cursor == 1) {
             panning_cursor = 0;
-            _desktop->getCanvas()->get_window()->set_cursor(_cursor);
+            _desktop->get_active_canvas()->get_window()->set_cursor(_cursor);
         }
 
         switch (get_latin_keyval(&event->key)) {
@@ -1341,7 +1341,7 @@ void ToolBase::menu_popup(GdkEvent *event, SPObject *obj)
     }
 
     auto menu = new ContextMenu(_desktop, obj);
-    menu->attach_to_widget(*_desktop->getCanvas()); // So actions work!
+    menu->attach_to_widget(*_desktop->get_active_canvas()); // So actions work!
     menu->show();
 
     switch (event->type) {

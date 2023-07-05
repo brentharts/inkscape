@@ -1309,8 +1309,8 @@ bool ObjectsPanel::_handleKeyPress(GdkEventKey *event)
     Gtk::AccelKey shortcut = Inkscape::Shortcuts::get_from_event(event);
     switch (shortcut.get_key()) {
         case GDK_KEY_Escape:
-            if (desktop->canvas) {
-                desktop->canvas->grab_focus();
+            if (auto canvas = desktop->get_active_canvas()) {
+                canvas->grab_focus();
                 return true;
             }
             break;

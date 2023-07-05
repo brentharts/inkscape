@@ -158,7 +158,7 @@ void DialogBase::defocus_dialog() {
 
         // for docked dialogs, move focus to canvas
         if (auto desktop = getDesktop()) {
-            desktop->getCanvas()->grab_focus();
+            desktop->get_active_canvas()->grab_focus();
         }
     }
 }

@@ -92,7 +92,7 @@ ConnectorToolbar::ConnectorToolbar(SPDesktop *desktop)
     _curvature_adj = Gtk::Adjustment::create(curvature_val, 0, 100, 1.0, 10.0);
     auto curvature_item = Gtk::manage(new UI::Widget::SpinButtonToolItem("inkscape:connector-curvature", _("Curvature:"), _curvature_adj, 1, 0));
     curvature_item->set_tooltip_text(_("The amount of connectors curvature"));
-    curvature_item->set_focus_widget(desktop->canvas);
+    curvature_item->set_focus_widget(_desktop->get_active_canvas());
     _curvature_adj->signal_value_changed().connect(sigc::mem_fun(*this, &ConnectorToolbar::curvature_changed));
     add(*curvature_item);
 
@@ -101,7 +101,7 @@ ConnectorToolbar::ConnectorToolbar(SPDesktop *desktop)
     _spacing_adj = Gtk::Adjustment::create(spacing_val, 0, 100, 1.0, 10.0);
     auto spacing_item = Gtk::manage(new UI::Widget::SpinButtonToolItem("inkscape:connector-spacing", _("Spacing:"), _spacing_adj, 1, 0));
     spacing_item->set_tooltip_text(_("The amount of space left around objects by auto-routing connectors"));
-    spacing_item->set_focus_widget(desktop->canvas);
+    spacing_item->set_focus_widget(_desktop->get_active_canvas());
     _spacing_adj->signal_value_changed().connect(sigc::mem_fun(*this, &ConnectorToolbar::spacing_changed));
     add(*spacing_item);
 
@@ -119,7 +119,7 @@ ConnectorToolbar::ConnectorToolbar(SPDesktop *desktop)
     _length_adj = Gtk::Adjustment::create(length_val, 10, 1000, 10.0, 100.0);
     auto length_item = Gtk::manage(new UI::Widget::SpinButtonToolItem("inkscape:connector-length", _("Length:"), _length_adj, 1, 0));
     length_item->set_tooltip_text(_("Ideal length for connectors when layout is applied"));
-    length_item->set_focus_widget(desktop->canvas);
+    length_item->set_focus_widget(_desktop->get_active_canvas());
     _length_adj->signal_value_changed().connect(sigc::mem_fun(*this, &ConnectorToolbar::length_changed));
     add(*length_item);
 
@@ -390,8 +390,8 @@ void ConnectorToolbar::notifyAttributeChanged(Inkscape::XML::Node &repr, GQuark 
 
         _spacing_adj->set_value(spacing);
 
-        if (_desktop->canvas) {
-            _desktop->canvas->grab_focus();
+        if (auto canvas = _desktop->get_active_canvas()) {
+            canvas->grab_focus();
         }
     }
 }

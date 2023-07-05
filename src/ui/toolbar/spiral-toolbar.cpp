@@ -69,7 +69,7 @@ SpiralToolbar::SpiralToolbar(SPDesktop *desktop)
         _revolution_item = Gtk::manage(new UI::Widget::SpinButtonToolItem("spiral-revolutions", _("Turns:"), _revolution_adj, 1, 2));
         _revolution_item->set_tooltip_text(_("Number of revolutions"));
         _revolution_item->set_custom_numeric_menu_data(values, labels);
-        _revolution_item->set_focus_widget(desktop->getCanvas());
+        _revolution_item->set_focus_widget(desktop->get_active_canvas());
         _revolution_adj->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &SpiralToolbar::value_changed),
                                                                    _revolution_adj, "revolution"));
         add(*_revolution_item);
@@ -85,7 +85,7 @@ SpiralToolbar::SpiralToolbar(SPDesktop *desktop)
         _expansion_item = Gtk::manage(new UI::Widget::SpinButtonToolItem("spiral-expansion", _("Divergence:"), _expansion_adj));
         _expansion_item->set_tooltip_text(_("How much denser/sparser are outer revolutions; 1 = uniform"));
         _expansion_item->set_custom_numeric_menu_data(values, labels);
-        _expansion_item->set_focus_widget(desktop->getCanvas());
+        _expansion_item->set_focus_widget(desktop->get_active_canvas());
         _expansion_adj->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &SpiralToolbar::value_changed),
                                                                   _expansion_adj, "expansion"));
         add(*_expansion_item);
@@ -100,7 +100,7 @@ SpiralToolbar::SpiralToolbar(SPDesktop *desktop)
         _t0_item = Gtk::manage(new UI::Widget::SpinButtonToolItem("spiral-t0", _("Inner radius:"), _t0_adj));
         _t0_item->set_tooltip_text(_("Radius of the innermost revolution (relative to the spiral size)"));
         _t0_item->set_custom_numeric_menu_data(values, labels);
-        _t0_item->set_focus_widget(desktop->getCanvas());
+        _t0_item->set_focus_widget(desktop->get_active_canvas());
         _t0_adj->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &SpiralToolbar::value_changed),
                                                            _t0_adj, "t0"));
         add(*_t0_item);
@@ -196,7 +196,9 @@ SpiralToolbar::defaults()
     _expansion_adj->set_value(exp);
     _t0_adj->set_value(t0);
 
-    if(_desktop->getCanvas()) _desktop->getCanvas()->grab_focus();
+    if (auto canvas = _desktop->get_active_canvas()) {
+        canvas->grab_focus();
+    }
 }
 
 void

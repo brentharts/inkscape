@@ -96,7 +96,7 @@ void Inkscape::Rubberband::move(Geom::Point const &p)
 
     _end = p;
     _moved = true;
-    _desktop->getCanvas()->enable_autoscroll();
+    _desktop->get_active_canvas()->enable_autoscroll();
     _touchpath_curve->lineto(p);
 
     Geom::Point next = _desktop->d2w(p);

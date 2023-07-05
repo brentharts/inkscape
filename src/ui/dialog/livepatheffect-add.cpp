@@ -73,7 +73,7 @@ void sp_add_top_window_classes_callback(Gtk::Widget *widg)
 {
     SPDesktop *desktop = SP_ACTIVE_DESKTOP;
     if (desktop) {
-        Gtk::Widget *canvas = desktop->canvas;
+        Gtk::Widget *canvas = desktop->get_active_canvas();
         Gtk::Window *toplevel_window = dynamic_cast<Gtk::Window *>(canvas->get_toplevel());
         if (toplevel_window) {
             Gtk::Window *current_window = dynamic_cast<Gtk::Window *>(widg);

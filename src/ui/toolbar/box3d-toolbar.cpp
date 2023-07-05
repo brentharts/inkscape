@@ -65,7 +65,7 @@ Box3DToolbar::Box3DToolbar(SPDesktop *desktop)
         // TRANSLATORS: PL is short for 'perspective line'
         _angle_x_item->set_tooltip_text(_("Angle of PLs in X direction"));
         _angle_x_item->set_custom_numeric_menu_data(values);
-        _angle_x_item->set_focus_widget(desktop->canvas);
+        _angle_x_item->set_focus_widget(desktop->get_active_canvas());
         _angle_x_adj->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &Box3DToolbar::angle_value_changed),
                                                                 _angle_x_adj, Proj::X));
         add(*_angle_x_item);
@@ -97,7 +97,7 @@ Box3DToolbar::Box3DToolbar(SPDesktop *desktop)
         _angle_y_item->set_tooltip_text(_("Angle of PLs in Y direction"));
         std::vector<double> values = {-90, -60, -30, 0, 30, 60, 90};
         _angle_y_item->set_custom_numeric_menu_data(values);
-        _angle_y_item->set_focus_widget(desktop->canvas);
+        _angle_y_item->set_focus_widget(desktop->get_active_canvas());
         _angle_y_adj->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &Box3DToolbar::angle_value_changed),
                                                                 _angle_y_adj, Proj::Y));
         add(*_angle_y_item);
@@ -129,7 +129,7 @@ Box3DToolbar::Box3DToolbar(SPDesktop *desktop)
         _angle_z_item->set_tooltip_text(_("Angle of PLs in Z direction"));
         std::vector<double> values = {-90, -60, -30, 0, 30, 60, 90};
         _angle_z_item->set_custom_numeric_menu_data(values);
-        _angle_z_item->set_focus_widget(desktop->canvas);
+        _angle_z_item->set_focus_widget(desktop->get_active_canvas());
         _angle_z_adj->signal_value_changed().connect(sigc::bind(sigc::mem_fun(*this, &Box3DToolbar::angle_value_changed),
                                                                 _angle_z_adj, Proj::Z));
         add(*_angle_z_item);

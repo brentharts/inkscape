@@ -73,6 +73,14 @@
 #include "ui/widget/spin-button-tool-item.h"
 #include "ui/widget/unit-tracker.h"
 #include "ui/themes.h"
+#include "ui/icon-loader.h"
+#include "ui/dialog/new-from-template.h"
+#include "ui/desktop/document-check.h"
+
+#include "src/actions/actions-tools.h"
+
+#include "io/file.h"
+#include "io/resource.h"
 
 #include "util/units.h"
 
@@ -95,6 +103,223 @@ using Inkscape::Util::unit_table;
 
 //---------------------------------------------------------------------
 /* SPDesktopWidget */
+
+bool SPDesktopWidget::on_tab_click_event(GdkEventButton *event, Gtk::Widget *page, int idx)
+{
+    set_page(idx);
+    return false;
+}
+
+void SPDesktopWidget::on_close_button_click_event(Gtk::Widget *page, int idx)
+{
+    int page_number = _tab_note->page_num(*page);
+
+    bool abort = document_check_for_data_loss(window, desktop->_canvas_document_all[idx]);
+    if (abort) {
+        // Cancel Clicked
+        return;
+    }
+
+    _active_idx.erase(idx);
+
+    _tab_note->remove_page(page_number);
+
+    // When all the tabs are closed => close the window
+    if (_active_idx.size() == 0) {
+        auto *app = InkscapeApplication::instance();
+
+        app->window_close(window);
+
+        if (app->get_number_of_windows() == 0) {
+            // No Inkscape windows left, remove dialog windows.
+            for (auto const &window : app->gtk_app()->get_windows()) {
+                window->close();
+            }
+        }
+    } else if (idx == desktop->get_active_canvas_idx()) {
+        // Set the first tab as active
+        set_page(*_active_idx.begin());
+    }
+}
+
+void SPDesktopWidget::close_all_tabs()
+{
+    for (auto page_idx : _active_idx) {
+        on_close_button_click_event(_page_data[page_idx], page_idx);
+    }
+}
+
+void SPDesktopWidget::add_close_tab_callback(Gtk::Widget *tab, Gtk::Widget *page, int idx)
+{
+    _active_idx.insert(idx);
+
+    auto *eventbox = static_cast<Gtk::EventBox *>(tab);
+
+    auto *box = static_cast<Gtk::Box *>(*eventbox->get_children().begin());
+    auto children = box->get_children();
+    auto *close = static_cast<Gtk::Button *>(*children.crbegin());
+
+    close->signal_clicked().connect(
+            sigc::bind<Gtk::Widget *>(sigc::mem_fun(*this, &SPDesktopWidget::on_close_button_click_event), page, idx), true);
+
+    tab->signal_button_press_event().connect(
+        sigc::bind<Gtk::Widget *>(sigc::mem_fun(*this, &SPDesktopWidget::on_tab_click_event), page, idx), true);
+}
+
+void SPDesktopWidget::set_document_name(SPDocument *doc)
+{
+    int current_idx = desktop->get_active_canvas_idx();
+
+    _tab_data[current_idx] = create_notebook_tab(doc->getDocumentName());
+    _tab_note->set_tab_label(*_page_data[current_idx], *_tab_data[current_idx]);
+
+    // To make the new tab sensitive to click
+    add_close_tab_callback(_tab_data[current_idx], _page_data[current_idx], current_idx);
+}
+
+Gtk::Widget *SPDesktopWidget::create_notebook_tab(Glib::ustring label_str)
+{
+    auto label = Gtk::make_managed<Gtk::Label>(label_str);
+    auto close = Gtk::make_managed<Gtk::Button>();
+    auto tab = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, 2);
+    // Using close window (x) icon in tabs
+    close->set_image_from_icon_name("window-close");
+    close->set_halign(Gtk::ALIGN_END);
+    close->set_tooltip_text(_("Close Tab"));
+    close->get_style_context()->add_class("close-button");
+    Glib::ustring label_str_fix = label_str;
+    label_str_fix = Glib::Regex::create("\\W")->replace_literal(label_str_fix, 0, "-", (Glib::RegexMatchFlags)0);
+    tab->get_style_context()->add_class(label_str_fix);
+    tab->pack_end(*close);
+    tab->pack_end(*label);
+    tab->show_all();
+
+    // Workaround to the fact that Gtk::Box doesn't receive on_button_press event
+    auto cover = Gtk::make_managed<Gtk::EventBox>();
+    cover->add(*tab);
+
+    return cover;
+}
+
+void SPDesktopWidget::set_page(int idx)
+{
+    // same page
+    if (desktop->get_active_canvas_idx() == idx) {
+        return;
+    }
+
+    auto tool_str = get_active_tool(desktop);
+    set_active_tool(desktop, tool_str);
+
+    desktop->getSelection()->clear();
+
+    desktop->_active_canvas_idx = idx;
+    desktop->setDocument(desktop->_canvas_document_all[idx], idx);
+
+    int page_number = _tab_note->page_num(*_page_data[idx]);
+    _tab_note->set_current_page(page_number);
+
+    _canvas_page[idx]->grab_focus();
+
+    desktop->event_context->use_tool_cursor();
+}
+
+void SPDesktopWidget::add_new_tab(bool after)
+{
+    auto prefs = Inkscape::Preferences::get();
+
+    _canvas_grid_page.emplace_back(new Inkscape::UI::Widget::CanvasGrid(this));
+    _canvas_page.push_back(_canvas_grid_page.back()->GetCanvas());
+    _canvas_page.back()->set_cms_active(prefs->getBool("/options/displayprofile/enable"));
+
+    auto box = Gtk::make_managed<Gtk::Box>();
+    box->pack_start(*_canvas_grid_page.back(), true, true, 2);
+
+    Gtk::Widget *box_widget = box;
+    Glib::ustring label_str = Glib::ustring("New Document " + std::to_string(_canvas_page.size()));
+
+    auto tab = create_notebook_tab(label_str);
+
+    _page_data.push_back(box_widget);
+    _tab_data.push_back(tab);
+
+    add_close_tab_callback(tab, box_widget, _canvas_grid_page.size()-1);
+    _tab_note->prepend_page(*box_widget, *tab);
+    _tab_notebook->show_all();
+
+    for (int i = 0; i < _canvas_grid_page.size(); i++) {
+        _canvas_grid_page[i]->ShowCommandPalette(false);
+        _canvas_page[i]->grab_focus();
+    }
+
+    if (after) {
+        auto *app = InkscapeApplication::instance();
+        std::string templ = Inkscape::IO::Resource::get_filename_string(Inkscape::IO::Resource::TEMPLATES, "default.svg", true);
+        SPDocument* document = app->document_new(templ);
+        SPNamedView *namedview = document->getNamedView();
+
+        // desktop init call
+        desktop->init(namedview, _canvas_page.back(), this);
+
+        _canvas_page.back()->set_desktop(desktop);
+        set_page(_canvas_grid_page.size() - 1);
+        zoom_value_changed();
+    }
+}
+
+void SPDesktopWidget::add_new_tab_with_document(SPDocument *document)
+{
+    auto prefs = Inkscape::Preferences::get();
+
+    _canvas_grid_page.push_back(new Inkscape::UI::Widget::CanvasGrid(this));
+    _canvas_page.push_back(_canvas_grid_page.back()->GetCanvas());
+    _canvas_page.back()->set_cms_active(prefs->getBool("/options/displayprofile/enable"));
+
+    auto box = Gtk::make_managed<Gtk::Box>();
+    box->pack_start(*_canvas_grid_page.back(), true, true, 2);
+
+    Gtk::Widget *box_widget = box;
+    auto label_str = Glib::ustring(document->getDocumentName());
+
+    auto tab = create_notebook_tab(label_str);
+
+    _page_data.push_back(box_widget);
+    _tab_data.push_back(tab);
+
+    add_close_tab_callback(tab, box_widget, _canvas_grid_page.size() - 1);
+
+    _tab_note->prepend_page(*box_widget, *tab);
+    _tab_notebook->show_all();
+
+    for (int i = 0; i < _canvas_grid_page.size(); i++) {
+        _canvas_grid_page[i]->ShowCommandPalette(false);
+        _canvas_page[i]->grab_focus();
+    }
+
+    std::string templ = Inkscape::IO::Resource::get_filename_string(Inkscape::IO::Resource::TEMPLATES, "default.svg", true);
+
+    SPNamedView *namedview = document->getNamedView();
+    desktop->init (namedview, _canvas_page.back(), this);
+    _canvas_page.back()->set_desktop(desktop);
+
+    set_page(_canvas_grid_page.size() - 1);
+
+    zoom_value_changed();
+}
+
+void SPDesktopWidget::add_new_tab_with_template()
+{
+    _tab_operation = true;
+    Inkscape::UI::NewFromTemplate::load_new_from_template();
+    _tab_operation = false;
+}
+
+void SPDesktopWidget::add_new_tab_open()
+{
+    _tab_operation = true;
+    sp_file_open_dialog(*window, nullptr, nullptr);
+    _tab_operation = false;
+}
 
 SPDesktopWidget::SPDesktopWidget(InkscapeWindow* inkscape_window)
     : window (inkscape_window)
@@ -215,12 +440,51 @@ SPDesktopWidget::SPDesktopWidget(InkscapeWindow* inkscape_window)
     apply_ctrlbar_settings();
     set_visible_buttons(tool_toolbox);
 
-    /* Canvas Grid (canvas, rulers, scrollbars, etc.) */
-    // desktop widgets owns it
-    _canvas_grid = new Inkscape::UI::Widget::CanvasGrid(this);
+    /* Tab Notebook */
+    _tab_note = Gtk::make_managed<Gtk::Notebook>();
+    _tab_note->set_scrollable();
+    _active_idx.clear();
 
-    /* Canvas */
-    dtw->_canvas = _canvas_grid->GetCanvas();
+    Gtk::MenuItem *new_menu_item = nullptr;
+
+    int row = 0;
+
+    // New Tab
+    new_menu_item = Gtk::make_managed<Gtk::MenuItem>(_("New Tab"));
+    new_menu_item->signal_activate().connect(sigc::bind(sigc::mem_fun(*this, &SPDesktopWidget::add_new_tab), true));
+    _menu.attach(*new_menu_item, 0, 2, row, row + 1);
+    row++;
+
+    // New Tab from Template
+    new_menu_item = Gtk::make_managed<Gtk::MenuItem>(_("New Tab from Template"));
+    new_menu_item->signal_activate().connect(sigc::mem_fun(*this, &SPDesktopWidget::add_new_tab_with_template));
+    _menu.attach(*new_menu_item, 0, 2, row, row + 1);
+    row++;
+
+    // New Tab Open
+    new_menu_item = Gtk::make_managed<Gtk::MenuItem>(_("Open"));
+    new_menu_item->signal_activate().connect(sigc::mem_fun(*this, &SPDesktopWidget::add_new_tab_open));
+    _menu.attach(*new_menu_item, 0, 2, row, row + 1);
+    row++;
+
+    _menu.show_all_children();
+
+    auto menubtn = Gtk::make_managed<Gtk::Button>();
+    menubtn->set_image_from_icon_name("list-add");
+    menubtn->signal_clicked().connect([=](){ _menu.popup_at_widget(menubtn, Gdk::GRAVITY_SOUTH, Gdk::GRAVITY_NORTH, nullptr); });
+    _tab_note->set_action_widget(menubtn, Gtk::PACK_END);
+    menubtn->show();
+    menubtn->set_relief(Gtk::RELIEF_NORMAL);
+    menubtn->set_valign(Gtk::ALIGN_CENTER);
+    menubtn->set_halign(Gtk::ALIGN_CENTER);
+    menubtn->set_can_focus(false);
+    menubtn->set_name("TabMenuButton");
+
+    dtw->_tab_notebook = _tab_note;
+    dtw->_tab_notebook->show_all();
+
+    // One tab at the start
+    add_new_tab(false);
 
     /* Dialog Container */
     _container = Gtk::manage(new DialogContainer(inkscape_window));
@@ -228,9 +492,9 @@ SPDesktopWidget::SPDesktopWidget(InkscapeWindow* inkscape_window)
     _columns->set_dropzone_sizes(2, -1);
     dtw->_tbbox->pack2(*_container, true, true);
 
-    _canvas_grid->set_hexpand(true);
-    _canvas_grid->set_vexpand(true);
-    _columns->append(_canvas_grid);
+    dtw->_tab_notebook->set_hexpand(true);
+    dtw->_tab_notebook->set_vexpand(true);
+    _columns->prepend(dtw->_tab_notebook);
 
     // --------------- Status Tool Bar ------------------//
 
@@ -271,7 +535,10 @@ SPDesktopWidget::SPDesktopWidget(InkscapeWindow* inkscape_window)
     auto zoom_adj = Gtk::Adjustment::create(100.0, log(SP_DESKTOP_ZOOM_MIN)/log(2), log(SP_DESKTOP_ZOOM_MAX)/log(2), 0.1);
     dtw->_zoom_status = Gtk::manage(new Inkscape::UI::Widget::SpinButton(zoom_adj));
 
-    dtw->_zoom_status->set_defocus_widget(dtw->_canvas);
+    for (auto canvas_page : _canvas_page) {
+        dtw->_zoom_status->set_defocus_widget(canvas_page);
+    }
+
     dtw->_zoom_status->set_tooltip_text(_("Zoom"));
     dtw->_zoom_status->set_size_request(STATUS_ZOOM_WIDTH, -1);
     dtw->_zoom_status->set_width_chars(6);
@@ -303,7 +570,10 @@ SPDesktopWidget::SPDesktopWidget(InkscapeWindow* inkscape_window)
     //        degree symbol.  It would be better to improve ExpressionEvaluator so it copes
     dtw->_rotation_status->set_dont_evaluate(true);
 
-    dtw->_rotation_status->set_defocus_widget(dtw->_canvas);
+    for (auto canvas_page : _canvas_page) {
+        dtw->_rotation_status->set_defocus_widget(canvas_page);
+    }
+
     dtw->_rotation_status->set_tooltip_text(_("Rotation. (Also Ctrl+Shift+Scroll)"));
     dtw->_rotation_status->set_size_request(STATUS_ROTATION_WIDTH, -1);
     dtw->_rotation_status->set_width_chars(7);
@@ -381,9 +651,11 @@ SPDesktopWidget::SPDesktopWidget(InkscapeWindow* inkscape_window)
 
     // ------------------ Finish Up -------------------- //
     dtw->_vbox->show_all();
-    dtw->_canvas_grid->ShowCommandPalette(false);
 
-    dtw->_canvas->grab_focus();
+    for (int i = 0; i < dtw->_canvas_grid_page.size(); i++){
+        dtw->_canvas_grid_page[i]->ShowCommandPalette(false);
+        dtw->_canvas_page[0]->grab_focus();
+    }
 }
 
 void SPDesktopWidget::apply_ctrlbar_settings() {
@@ -439,8 +711,8 @@ SPDesktopWidget::on_unrealize()
         }
 
         // Canvas
-        dtw->_canvas->set_drawing(nullptr); // Ensures deactivation
-        dtw->_canvas->set_desktop(nullptr); // Todo: Remove desktop dependency.
+        dtw->_canvas_page[desktop->get_active_canvas_idx()]->set_drawing(nullptr); // Ensures deactivation
+        dtw->_canvas_page[desktop->get_active_canvas_idx()]->set_desktop(nullptr); // Todo: Remove desktop dependency.
 
         // Zoom
         dtw->_zoom_status_input_connection.disconnect();
@@ -472,7 +744,8 @@ SPDesktopWidget::on_unrealize()
 }
 
 SPDesktopWidget::~SPDesktopWidget() {
-    delete _canvas_grid;
+    // FIXME: Leak of non-managed widgets.
+    _canvas_grid_page.clear();
 }
 
 /**
@@ -502,8 +775,8 @@ SPDesktopWidget::updateTitle(gchar const* uri)
         }
         Name += " (";
 
-        auto render_mode = desktop->getCanvas()->get_render_mode();
-        auto color_mode  = desktop->getCanvas()->get_color_mode();
+        auto render_mode = desktop->get_active_canvas()->get_render_mode();
+        auto color_mode  = desktop->get_active_canvas()->get_color_mode();
 
         if (render_mode == Inkscape::RenderMode::OUTLINE) {
             Name += N_("outline");
@@ -549,7 +822,7 @@ DialogContainer *SPDesktopWidget::getDialogContainer()
 
 void SPDesktopWidget::showNotice(Glib::ustring const &msg, unsigned timeout)
 {
-    _canvas_grid->showNotice(msg, timeout);
+    _canvas_grid_page[desktop->get_active_canvas_idx()]->showNotice(msg, timeout);
 }
 
 /**
@@ -565,7 +838,7 @@ void SPDesktopWidget::on_size_allocate(Gtk::Allocation &allocation)
         return;
     }
 
-    Geom::Rect const d_canvas = _canvas->get_area_world();
+    Geom::Rect const d_canvas = _canvas_page[desktop->get_active_canvas_idx()]->get_area_world();
 
     parent_type::on_size_allocate(allocation);
 
@@ -576,10 +849,10 @@ void SPDesktopWidget::on_size_allocate(Gtk::Allocation &allocation)
     Geom::Point const midpoint_dt = desktop->w2d(d_canvas.midpoint());
     double zoom = desktop->current_zoom();
 
-    if (_canvas_grid->GetStickyZoom()->get_active()) {
+    if (_canvas_grid_page[desktop->get_active_canvas_idx()]->GetStickyZoom()->get_active()) {
         /* Calculate adjusted zoom */
         double oldshortside = d_canvas.minExtent();
-        double newshortside = _canvas->get_area_world().minExtent();
+        double newshortside = _canvas_page[desktop->get_active_canvas_idx()]->get_area_world().minExtent();
         zoom *= newshortside / oldshortside;
     }
 
@@ -630,7 +903,7 @@ void SPDesktopWidget::updateNamedview()
 void
 SPDesktopWidget::update_guides_lock()
 {
-    bool down = _canvas_grid->GetGuideLock()->get_active();
+    bool down = _canvas_grid_page[desktop->get_active_canvas_idx()]->GetGuideLock()->get_active();
     auto nv   = desktop->getNamedView();
     bool lock = nv->getLockGuides();
 
@@ -776,7 +1049,7 @@ bool SPDesktopWidget::warnDialog (Glib::ustring const &text)
 void
 SPDesktopWidget::iconify()
 {
-    GtkWindow *topw = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(_canvas->gobj())));
+    GtkWindow *topw = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(_canvas_page[desktop->get_active_canvas_idx()]->gobj())));
     if (GTK_IS_WINDOW(topw)) {
         if (desktop->is_iconified()) {
             gtk_window_deiconify(topw);
@@ -789,7 +1062,7 @@ SPDesktopWidget::iconify()
 void
 SPDesktopWidget::maximize()
 {
-    GtkWindow *topw = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(_canvas->gobj())));
+    GtkWindow *topw = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(_canvas_page[desktop->get_active_canvas_idx()]->gobj())));
     if (GTK_IS_WINDOW(topw)) {
         if (desktop->is_maximized()) {
             gtk_window_unmaximize(topw);
@@ -802,7 +1075,7 @@ SPDesktopWidget::maximize()
 void
 SPDesktopWidget::fullscreen()
 {
-    GtkWindow *topw = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(_canvas->gobj())));
+    GtkWindow *topw = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(_canvas_page[desktop->get_active_canvas_idx()]->gobj())));
     if (GTK_IS_WINDOW(topw)) {
         if (desktop->is_fullscreen()) {
             gtk_window_unfullscreen(topw);
@@ -870,8 +1143,10 @@ void SPDesktopWidget::layoutWidgets()
         dtw->_panels->show_all();
     }
 
-    _canvas_grid->ShowScrollbars(prefs->getBool(pref_root + "scrollbars/state", true));
-    _canvas_grid->ShowRulers(    prefs->getBool(pref_root + "rulers/state",     true));
+    for (auto canvas_grid : _canvas_grid_page) {
+        canvas_grid->ShowScrollbars(prefs->getBool(pref_root + "scrollbars/state", true));
+        canvas_grid->ShowRulers(    prefs->getBool(pref_root + "rulers/state",     true));
+    }
 
     // Move command toolbar as required.
 
@@ -1024,8 +1299,9 @@ SPDesktopWidget::SPDesktopWidget(InkscapeWindow *inkscape_window, SPDocument *do
 
     // This section seems backwards!
     dtw->desktop = new SPDesktop();
-    dtw->desktop->init (namedview, dtw->_canvas, this);
-    dtw->_canvas->set_desktop(desktop);
+    // desktop init call
+    dtw->desktop->init (namedview, dtw->_canvas_page[desktop->get_active_canvas_idx()], this);
+    dtw->_canvas_page[desktop->get_active_canvas_idx()]->set_desktop(desktop);
     INKSCAPE.add_desktop (dtw->desktop);
 
     // Add the shape geometry to libavoid for autorouting connectors.
@@ -1035,7 +1311,7 @@ SPDesktopWidget::SPDesktopWidget(InkscapeWindow *inkscape_window, SPDocument *do
     dtw->_selected_style->setDesktop(dtw->desktop);
 
     /* Once desktop is set, we can update rulers */
-    dtw->_canvas_grid->UpdateRulers();
+    dtw->_canvas_grid_page[desktop->get_active_canvas_idx()]->UpdateRulers();
 
     dtw->setView(dtw->desktop);
 
@@ -1103,7 +1379,7 @@ void SPDesktopWidget::repack_snaptoolbar()
 void
 SPDesktopWidget::update_rulers()
 {
-    _canvas_grid->UpdateRulers();
+    _canvas_grid_page[desktop->get_active_canvas_idx()]->UpdateRulers();
 }
 
 
@@ -1114,11 +1390,11 @@ void SPDesktopWidget::namedviewModified(SPObject *obj, guint flags)
     if (flags & SP_OBJECT_MODIFIED_FLAG) {
         _dt2r = 1. / nv->display_units->factor;
 
-        _canvas_grid->GetVRuler()->set_unit(nv->getDisplayUnit());
-        _canvas_grid->GetHRuler()->set_unit(nv->getDisplayUnit());
-        _canvas_grid->GetVRuler()->set_tooltip_text(gettext(nv->display_units->name_plural.c_str()));
-        _canvas_grid->GetHRuler()->set_tooltip_text(gettext(nv->display_units->name_plural.c_str()));
-        _canvas_grid->UpdateRulers();
+        _canvas_grid_page[desktop->get_active_canvas_idx()]->GetVRuler()->set_unit(nv->getDisplayUnit());
+        _canvas_grid_page[desktop->get_active_canvas_idx()]->GetHRuler()->set_unit(nv->getDisplayUnit());
+        _canvas_grid_page[desktop->get_active_canvas_idx()]->GetVRuler()->set_tooltip_text(gettext(nv->display_units->name_plural.c_str()));
+        _canvas_grid_page[desktop->get_active_canvas_idx()]->GetHRuler()->set_tooltip_text(gettext(nv->display_units->name_plural.c_str()));
+        _canvas_grid_page[desktop->get_active_canvas_idx()]->UpdateRulers();
 
         /* This loops through all the grandchildren of aux toolbox,
          * and for each that it finds, it performs an sp_search_by_name_recursive(),
@@ -1167,8 +1443,8 @@ SPDesktopWidget::on_adjustment_value_changed()
     update = true;
 
     // Do not call canvas->scrollTo directly... messes up 'offset'.
-    desktop->scroll_absolute(Geom::Point(_canvas_grid->GetHAdj()->get_value(),
-                                         _canvas_grid->GetVAdj()->get_value()));
+    desktop->scroll_absolute(Geom::Point(_canvas_grid_page[desktop->get_active_canvas_idx()]->GetHAdj()->get_value(),
+                                        _canvas_grid_page[desktop->get_active_canvas_idx()]->GetVAdj()->get_value()));
 
     update = false;
 }
@@ -1232,7 +1508,7 @@ SPDesktopWidget::zoom_value_changed()
     double const zoom_factor = pow (2, _zoom_status->get_value());
 
     // Zoom around center of window
-    Geom::Rect const d_canvas = _canvas->get_area_world();
+    Geom::Rect const d_canvas = _canvas_page[desktop->get_active_canvas_idx()]->get_area_world();
     Geom::Point midpoint = desktop->w2d(d_canvas.midpoint());
 
     _zoom_status_value_changed_connection.block();
@@ -1316,7 +1592,7 @@ void
 SPDesktopWidget::sticky_zoom_toggled()
 {
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    prefs->setBool("/options/stickyzoom/value", _canvas_grid->GetStickyZoom()->get_active());
+    prefs->setBool("/options/stickyzoom/value", _canvas_grid_page[desktop->get_active_canvas_idx()]->GetStickyZoom()->get_active());
 }
 
 
@@ -1363,7 +1639,7 @@ SPDesktopWidget::rotation_value_changed()
     //           << "  (" << rotate_factor << ")" <<std::endl;
 
     // Rotate around center of window
-    Geom::Rect const d_canvas = _canvas->get_area_world();
+    Geom::Rect const d_canvas = _canvas_page[desktop->get_active_canvas_idx()]->get_area_world();
     _rotation_status_value_changed_connection.block();
     Geom::Point midpoint = desktop->w2d(d_canvas.midpoint());
     desktop->rotate_absolute_center_point (midpoint, rotate_factor);
@@ -1425,21 +1701,21 @@ SPDesktopWidget::update_rotation()
 void
 SPDesktopWidget::toggle_command_palette() {
     // TODO: Turn into action and remove this function.
-    _canvas_grid->ToggleCommandPalette();
+    _canvas_grid_page[desktop->get_active_canvas_idx()]->ToggleCommandPalette();
 }
 
 void
 SPDesktopWidget::toggle_rulers()
 {
     // TODO: Turn into action and remove this function.
-    _canvas_grid->ToggleRulers();
+    _canvas_grid_page[desktop->get_active_canvas_idx()]->ToggleRulers();
 }
 
 void
 SPDesktopWidget::toggle_scrollbars()
 {
     // TODO: Turn into action and remove this function.
-    _canvas_grid->ToggleScrollbars();
+    _canvas_grid_page[desktop->get_active_canvas_idx()]->ToggleScrollbars();
 }
 
 static void
@@ -1484,13 +1760,13 @@ SPDesktopWidget::update_scrollbars(double scale)
     Geom::Rect carea( Geom::Point(deskarea->left()  * scale - 64, (deskarea->top()    * scale + 64) * y_dir),
                       Geom::Point(deskarea->right() * scale + 64, (deskarea->bottom() * scale - 64) * y_dir) );
 
-    Geom::Rect viewbox = _canvas->get_area_world();
+    Geom::Rect viewbox = _canvas_page[desktop->get_active_canvas_idx()]->get_area_world();
 
     /* Viewbox is always included into scrollable region */
     carea = Geom::unify(carea, viewbox);
 
-    auto _hadj = _canvas_grid->GetHAdj();
-    auto _vadj = _canvas_grid->GetVAdj();
+    auto _hadj = _canvas_grid_page[desktop->get_active_canvas_idx()]->GetHAdj();
+    auto _vadj = _canvas_grid_page[desktop->get_active_canvas_idx()]->GetVAdj();
     set_adjustment(_hadj, carea.min()[Geom::X], carea.max()[Geom::X],
                    viewbox.dimensions()[Geom::X],
                    0.1 * viewbox.dimensions()[Geom::X],
@@ -1535,7 +1811,7 @@ SPDesktopWidget::on_ruler_box_motion_notify_event(GdkEventMotion *event, Gtk::Wi
 
     int wx, wy;
 
-    GdkWindow *window = gtk_widget_get_window(GTK_WIDGET(_canvas->gobj()));
+    GdkWindow *window = gtk_widget_get_window(GTK_WIDGET(_canvas_page[desktop->get_active_canvas_idx()]->gobj()));
 
     gint width, height;
 
@@ -1545,7 +1821,7 @@ SPDesktopWidget::on_ruler_box_motion_notify_event(GdkEventMotion *event, Gtk::Wi
     Geom::Point const event_win(wx, wy);
 
     if (_ruler_clicked) {
-        Geom::Point event_w(_canvas->canvas_to_world(event_win));
+        Geom::Point event_w(_canvas_page[desktop->get_active_canvas_idx()]->canvas_to_world(event_win));
         Geom::Point event_dt(desktop->w2d(event_w));
 
         Inkscape::Preferences *prefs = Inkscape::Preferences::get();
@@ -1581,7 +1857,7 @@ SPDesktopWidget::on_ruler_box_button_release_event(GdkEventButton *event, Gtk::W
 {
     int wx, wy;
 
-    GdkWindow *window = gtk_widget_get_window(GTK_WIDGET(_canvas->gobj()));
+    GdkWindow *window = gtk_widget_get_window(GTK_WIDGET(_canvas_page[desktop->get_active_canvas_idx()]->gobj()));
 
     gint width, height;
 
@@ -1593,7 +1869,7 @@ SPDesktopWidget::on_ruler_box_button_release_event(GdkEventButton *event, Gtk::W
     if (_ruler_clicked && event->button == 1) {
         desktop->event_context->discard_delayed_snap_event();
 
-        Geom::Point const event_w(_canvas->canvas_to_world(event_win));
+        Geom::Point const event_w(_canvas_page[desktop->get_active_canvas_idx()]->canvas_to_world(event_win));
         Geom::Point event_dt(desktop->w2d(event_w));
 
         Geom::Point normal = _normal;
@@ -1650,7 +1926,7 @@ SPDesktopWidget::on_ruler_box_button_press_event(GdkEventButton *event, Gtk::Wid
 
     int wx, wy;
 
-    GdkWindow *window = gtk_widget_get_window(GTK_WIDGET(_canvas->gobj()));
+    GdkWindow *window = gtk_widget_get_window(GTK_WIDGET(_canvas_page[desktop->get_active_canvas_idx()]->gobj()));
 
     gint width, height;
 
@@ -1666,7 +1942,7 @@ SPDesktopWidget::on_ruler_box_button_press_event(GdkEventButton *event, Gtk::Wid
         _xp = (gint) event->x;
         _yp = (gint) event->y;
 
-        Geom::Point const event_w(_canvas->canvas_to_world(event_win));
+        Geom::Point const event_w(_canvas_page[desktop->get_active_canvas_idx()]->canvas_to_world(event_win));
         Geom::Point const event_dt(desktop->w2d(event_w));
 
         // calculate the normal of the guidelines when dragged from the edges of rulers.
@@ -1718,7 +1994,7 @@ SPDesktopWidget::on_ruler_box_button_press_event(GdkEventButton *event, Gtk::Wid
 void
 SPDesktopWidget::ruler_snap_new_guide(SPDesktop *desktop, Geom::Point &event_dt, Geom::Point &normal)
 {
-    desktop->getCanvas()->grab_focus();
+    desktop->get_active_canvas()->grab_focus();
     SnapManager &m = desktop->namedview->snap_manager;
     m.setup(desktop);
     // We're dragging a brand new guide, just pulled of the rulers seconds ago. When snapping to a

@@ -78,7 +78,7 @@ PagesTool::PagesTool(SPDesktop *desktop)
             m_knot->ungrabbed_signal.connect(sigc::mem_fun(*this, &PagesTool::marginKnotFinished));
             margin_knots.push_back(m_knot);
 
-            if (auto window = desktop->getCanvas()->get_window()) {
+            if (auto window = desktop->get_active_canvas()->get_window()) {
                 knot->setCursor(SP_KNOT_STATE_DRAGGING, this->get_cursor(window, "page-resizing.svg"));
                 knot->setCursor(SP_KNOT_STATE_MOUSEOVER, this->get_cursor(window, "page-resize.svg"));
                 m_knot->setCursor(SP_KNOT_STATE_DRAGGING, this->get_cursor(window, "page-resizing.svg"));
@@ -316,7 +316,7 @@ bool PagesTool::root_handler(GdkEvent *event)
                     // a weird bug which stops it from working well.
                     // drag_group->update(tr * drag_group->get_parent()->get_affine());
                     addDragShapes(dragging_item, tr);
-                    _desktop->getCanvas()->enable_autoscroll();
+                    _desktop->get_active_canvas()->enable_autoscroll();
                 } else if (on_screen_rect) {
                     // Continue to drag new box
                     point_dt = getSnappedResizePoint(point_dt, event->motion.state, drag_origin_dt);

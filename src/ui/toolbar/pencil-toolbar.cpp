@@ -81,7 +81,7 @@ PencilToolbar::PencilToolbar(SPDesktop *desktop,
             _minpressure =
                 Gtk::manage(new UI::Widget::SpinButtonToolItem("pencil-minpressure", _("Min:"), _minpressure_adj, 0, 0));
             _minpressure->set_tooltip_text(_("Min percent of pressure"));
-            _minpressure->set_focus_widget(desktop->canvas);
+            _minpressure->set_focus_widget(desktop->get_active_canvas());
             _minpressure_adj->signal_value_changed().connect(
                 sigc::mem_fun(*this, &PencilToolbar::minpressure_value_changed));
             add(*_minpressure);
@@ -93,7 +93,7 @@ PencilToolbar::PencilToolbar(SPDesktop *desktop,
             _maxpressure =
                 Gtk::manage(new UI::Widget::SpinButtonToolItem("pencil-maxpressure", _("Max:"), _maxpressure_adj, 0, 0));
             _maxpressure->set_tooltip_text(_("Max percent of pressure"));
-            _maxpressure->set_focus_widget(desktop->canvas);
+            _maxpressure->set_focus_widget(desktop->get_active_canvas());
             _maxpressure_adj->signal_value_changed().connect(
                 sigc::mem_fun(*this, &PencilToolbar::maxpressure_value_changed));
             add(*_maxpressure);
@@ -115,7 +115,7 @@ PencilToolbar::PencilToolbar(SPDesktop *desktop,
                 Gtk::manage(new UI::Widget::SpinButtonToolItem("pencil-tolerance", _("Smoothing:"), _tolerance_adj, 1, 2));
             tolerance_item->set_tooltip_text(_("How much smoothing (simplifying) is applied to the line"));
             tolerance_item->set_custom_numeric_menu_data(values, labels);
-            tolerance_item->set_focus_widget(desktop->canvas);
+            tolerance_item->set_focus_widget(desktop->get_active_canvas());
             _tolerance_adj->signal_value_changed().connect(sigc::mem_fun(*this, &PencilToolbar::tolerance_value_changed));
             add(*tolerance_item);
         }
@@ -436,7 +436,7 @@ PencilToolbar::add_advanced_shape_options()
         _shapescale =
             Gtk::manage(new UI::Widget::SpinButtonToolItem("pencil-maxpressure", _("Scale:"), _shapescale_adj, 1, 2));
         _shapescale->set_tooltip_text(_("Scale of the width of the power stroke shape."));
-        _shapescale->set_focus_widget(_desktop->canvas);
+        _shapescale->set_focus_widget(_desktop->get_active_canvas());
         _shapescale_adj->signal_value_changed().connect(sigc::mem_fun(*this, &PencilToolbar::shapewidth_value_changed));
         update_width_value(shape);
         add(*_shapescale);

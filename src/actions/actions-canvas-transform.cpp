@@ -85,7 +85,7 @@ canvas_transform(InkscapeWindow *win, const int& option)
     rotate_inc *= M_PI/180.0;
 
     // Get document dependent parameters
-    Geom::Rect const canvas = dt->getCanvas()->get_area_world();
+    Geom::Rect canvas = dt->get_active_canvas()->get_area_world();
     Geom::Point midpoint = dt->w2d(canvas.midpoint());        // Midpoint of drawing on canvas.
 
     switch (option) {

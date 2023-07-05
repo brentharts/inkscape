@@ -248,8 +248,7 @@ bool sp_dt_guide_event_gdkevent(GdkEvent *event, Inkscape::CanvasItemGuideLine *
                 }
                 moved = true;
                 desktop->set_coordinate_status(motion_dt);
-                desktop->getCanvas()->grab_focus();
-
+                desktop->get_active_canvas()->grab_focus();
                 ret = true;
             }
             break;
@@ -355,15 +354,15 @@ bool sp_dt_guide_event_gdkevent(GdkEvent *event, Inkscape::CanvasItemGuideLine *
         {
             // This is a UX thing. Check if the canvas has focus, so the user knows they can
             // use hotkeys. See issue: https://gitlab.com/inkscape/inkscape/-/issues/2439
-            if (!guide->getLocked() && desktop->getCanvas()->has_focus()) {
+            if (!guide->getLocked() && desktop->get_active_canvas()->has_focus()) {
                 guide_item->set_stroke(guide->getHiColor());
             }
 
             // set move or rotate cursor
             Geom::Point const event_w(event->crossing.x, event->crossing.y);
 
-            auto display = desktop->getCanvas()->get_display();
-            auto window  = desktop->getCanvas()->get_window();
+            auto display = desktop->get_active_canvas()->get_display();
+            auto window  = desktop->get_active_canvas()->get_window();
 
             Glib::RefPtr<Gdk::Cursor> cursor;
             if (guide->getLocked()) {
@@ -412,8 +411,8 @@ bool sp_dt_guide_event_gdkevent(GdkEvent *event, Inkscape::CanvasItemGuideLine *
                 case GDK_KEY_Shift_R:
                     if (drag_type != SP_DRAG_MOVE_ORIGIN) {
 
-                        auto display = desktop->getCanvas()->get_display();
-                        auto window  = desktop->getCanvas()->get_window();
+                        auto display = desktop->get_active_canvas()->get_display();
+                        auto window  = desktop->get_active_canvas()->get_window();
 
                         auto cursor = Inkscape::load_svg_cursor(display, window, "rotate.svg");
                         window->set_cursor(cursor);
@@ -434,7 +433,7 @@ bool sp_dt_guide_event_gdkevent(GdkEvent *event, Inkscape::CanvasItemGuideLine *
                 {
                     auto display = Gdk::Display::get_default();
                     auto guide_cursor = Gdk::Cursor::create(display, "grab");
-                    desktop->getCanvas()->get_window()->set_cursor(guide_cursor);
+                    desktop->get_active_canvas()->get_window()->set_cursor(guide_cursor);
                     break;
                 }
                 default:

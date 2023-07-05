@@ -556,6 +556,11 @@ file_save(Gtk::Window &parentWindow, SPDocument *doc, const Glib::ustring &uri,
         msg = Glib::ustring::format(_("Document saved."), " ", doc->getDocumentFilename());
     }
     SP_ACTIVE_DESKTOP->messageStack()->flash(Inkscape::NORMAL_MESSAGE, msg.c_str());
+
+    // Change to Tab label to doc name
+    std::string docuemnt_name = doc->getDocumentName();
+    SP_ACTIVE_DESKTOP->get_desktop_widget()->set_document_name(doc);
+
     return true;
 }
 

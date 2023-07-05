@@ -123,7 +123,7 @@ ExecutionEnv::createWorkingDialog () {
     }
 
     SPDesktop *desktop = (SPDesktop *)_doc;
-    Gtk::Widget *toplevel = desktop->getCanvas()->get_toplevel();
+    Gtk::Widget *toplevel = desktop->get_active_canvas()->get_toplevel();
     Gtk::Window *window = dynamic_cast<Gtk::Window *>(toplevel);
     if (!window) {
         return;
