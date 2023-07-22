@@ -116,11 +116,6 @@ protected:
     Gtk::CheckButton previewCheckbox;
     Gtk::CheckButton svgexportCheckbox;
 
-    /**
-     * Aquired Widgets
-     */
-    Gtk::ComboBoxText *filterComboBox;
-
 private:
     const char * accept_label(Gtk::FileChooserAction dialogType);
     const char * cancel_label();

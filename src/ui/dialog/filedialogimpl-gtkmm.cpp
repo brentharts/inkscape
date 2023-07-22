@@ -288,10 +288,6 @@ bool FileOpenDialogImplGtk::show()
     hide();
 
     if (b == Gtk::RESPONSE_ACCEPT) {
-        if (auto iter = filterComboBox->get_active()) {
-            setExtension((*iter)[FilterList.extension]);
-        }
-
         auto fn = get_filename();
         setFilename(fn.empty() ? get_uri() : Glib::ustring(fn));
 
@@ -387,8 +383,6 @@ FileSaveDialogImplGtk::FileSaveDialogImplGtk(Gtk::Window &parentWindow, const Gl
  */
 void FileSaveDialogImplGtk::filterChangedCallback()
 {
-    if (auto iter = filterComboBox->get_active())
-        setExtension((*iter)[FilterList.extension]);
     if (!fromCB)
         updateNameAndExtension();
 }
@@ -403,7 +397,6 @@ void FileSaveDialogImplGtk::fileNameChanged() {
             return;
     if (knownExtensions.find(ext) == knownExtensions.end()) return;
     fromCB = true;
-    filterComboBox->set_active_text(knownExtensions[ext]->get_filetypename(true));
 }
 
 void FileSaveDialogImplGtk::createFilterMenu()
@@ -433,7 +426,6 @@ void FileSaveDialogImplGtk::createFilterMenu()
         knownExtensions.insert(std::pair<Glib::ustring, Inkscape::Extension::Output*>(extension.casefold(), omod));
     }
 
-    filterComboBox->set_active(0);
     filterChangedCallback(); // call at least once to set the filter
 }
 
@@ -486,11 +478,6 @@ void FileSaveDialogImplGtk::setExtension(Inkscape::Extension::Extension *key)
     }
 
     FileDialog::setExtension(key);
-
-    // Ensure the proper entry in the combo box is selected.
-    if (auto omod = dynamic_cast<Inkscape::Extension::Output *>(key)) {
-        filterComboBox->set_active_text(omod->get_filetypename(true));
-    }
 }
 
 Glib::ustring FileSaveDialogImplGtk::getCurrentDirectory()
