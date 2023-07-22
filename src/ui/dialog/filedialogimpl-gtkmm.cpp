@@ -148,15 +148,6 @@ Glib::RefPtr<Gtk::FileFilter> FileDialogBaseGtk::addFilter(const Glib::ustring &
         filter->add_pattern(extToPattern(ext));
     }
 
-    // ListStore is populated by add_filter, so get the last row to add the rest
-    Gtk::TreeRow row;
-    for (auto child : filterStore->children()) {
-        row = child;
-    }
-    if (row) {
-        row[FilterList.extension] = extension;
-        row[FilterList.enabled] = !extension || !extension->deactivated();
-    }
     return filter;
 }
 

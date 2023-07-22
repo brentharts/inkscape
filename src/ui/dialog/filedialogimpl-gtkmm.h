@@ -136,11 +136,6 @@ private:
      * Callback to for SVG 2 to SVG 1.1 export.
      */
     void _svgexportEnabledCB();
-
-    /**
-     * Overriden filter store.
-     */
-    Glib::RefPtr<Gtk::ListStore> filterStore;
 };
 
 
