@@ -274,6 +274,7 @@ bool FileOpenDialogImplGtk::show()
     if (b == Gtk::RESPONSE_ACCEPT) {
         auto fn = get_filename();
         setFilename(fn.empty() ? get_uri() : Glib::ustring(fn));
+        setExtension(filterExtensionTable[get_filter()]);
 
         cleanup(true);
         return true;
