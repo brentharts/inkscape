@@ -130,6 +130,8 @@ Glib::RefPtr<Gtk::FileFilter> FileDialogBaseGtk::addFilter(const Glib::ustring &
         filter->add_pattern(extToPattern(ext));
     }
 
+    filterExtensionTable[filter] = extension;
+
     return filter;
 }
 
@@ -522,6 +524,8 @@ void FileSaveDialogImplGtk::updateNameAndExtension()
     if (!tmp.empty()) {
         setFilename(tmp);
     }
+
+    setExtension(filterExtensionTable[get_filter()]);
 
     auto output = dynamic_cast<Inkscape::Extension::Output *>(getExtension());
     if (fileTypeCheckbox.get_active() && output && Glib::getenv("GTK_USE_PORTAL").empty()) {

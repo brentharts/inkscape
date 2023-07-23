@@ -116,6 +116,11 @@ protected:
     Gtk::CheckButton previewCheckbox;
     Gtk::CheckButton svgexportCheckbox;
 
+    /**
+     * Tracker to look up filters back to extensions
+     */
+    std::map<Glib::RefPtr<Gtk::FileFilter>, Inkscape::Extension::Extension *> filterExtensionTable;
+
 private:
     const char * accept_label(Gtk::FileChooserAction dialogType);
     const char * cancel_label();
