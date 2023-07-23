@@ -49,24 +49,6 @@ void dump_str(const gchar *str, const gchar *prefix);
 void dump_ustr(const Glib::ustring &ustr);
 #endif
 
-/**
- * Information stored about all save and open filters applied to the dialog.
- */
-struct FilterListClass : public Gtk::TreeModelColumnRecord
-{
-    Gtk::TreeModelColumn<Glib::ustring> label;
-    Gtk::TreeModelColumn<Inkscape::Extension::Extension *> extension;
-    Gtk::TreeModelColumn<bool> enabled;
-
-    FilterListClass()
-    {
-        add(label);
-        add(extension);
-        add(enabled);
-    }
-};
-FilterListClass FilterList;
-
 namespace Inkscape {
 namespace UI {
 namespace Dialog {
