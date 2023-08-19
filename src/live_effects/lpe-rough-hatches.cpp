@@ -429,137 +429,106 @@ LPERoughHatches::linearSnake(Piecewise<D2<SBasis> > const &f, Point const &org){
 //-------------------------------------------------------
 // Smooth the linear hatches according to params...
 //-------------------------------------------------------
-Piecewise<D2<SBasis>> LPERoughHatches::smoothSnake(std::vector<std::vector<Point>> const &linearSnake)
-{
-    Piecewise<D2<SBasis>> result;
-    for (const auto &comp : linearSnake) {
-        if (comp.size() >= 2) {
+Piecewise<D2<SBasis> >
+LPERoughHatches::smoothSnake(std::vector<std::vector<Point> > const &linearSnake){
+
+    Piecewise<D2<SBasis> > result;
+    for (const auto & comp : linearSnake){
+        if (comp.size()>=2){
             Point last_pt = comp[0];
-            // Point last_top = linearSnake[comp][0];
-            // Point last_bot = linearSnake[comp][0];
+            //Point last_top = linearSnake[comp][0];
+            //Point last_bot = linearSnake[comp][0];
             Point last_hdle = comp[0];
             Point last_top_hdle = comp[0];
             Point last_bot_hdle = comp[0];
             Geom::Path res_comp(last_pt);
             Geom::Path res_comp_top(last_pt);
             Geom::Path res_comp_bot(last_pt);
-            Geom::PathVector res_paths;
-            unsigned i = 1;
-            // bool is_top = true;//Inversion here; due to downward y?
-            bool is_top = (comp[0][Y] < comp[1][Y]);
+            unsigned i=1;
+            //bool is_top = true;//Inversion here; due to downward y?
+            bool is_top = ( comp[0][Y] < comp[1][Y] );
 
-            while (i + 1 < comp.size()) {
+            while( i+1<comp.size() ){
                 Point pt0 = comp[i];
-                Point pt1 = comp[i + 1];
-                Point new_pt = (pt0 + pt1) / 2;
-                if (single_direction) {
-                    new_pt = is_top ? pt1 : pt0;
-                }
-                double scale_in = (is_top ? scale_tf : scale_bf);
-                double scale_out = (is_top ? scale_tb : scale_bb);
-                if (is_top) {
+                Point pt1 = comp[i+1];
+                Point new_pt = (pt0+pt1)/2;
+                double scale_in = (is_top ? scale_tf : scale_bf );
+                double scale_out = (is_top ? scale_tb : scale_bb );
+                if (is_top){
                     if (top_edge_variation.get_value() != 0)
-                        new_pt[Y] += double(top_edge_variation) - top_edge_variation.get_value() / 2.;
+                        new_pt[Y] += double(top_edge_variation)-top_edge_variation.get_value()/2.;
                     if (top_tgt_variation.get_value() != 0)
-                        new_pt[X] += double(top_tgt_variation) - top_tgt_variation.get_value() / 2.;
+                        new_pt[X] += double(top_tgt_variation)-top_tgt_variation.get_value()/2.;
                     if (top_smth_variation.get_value() != 0) {
-                        scale_in *= (100. - double(top_smth_variation)) / 100.;
-                        scale_out *= (100. - double(top_smth_variation)) / 100.;
+                        scale_in*=(100.-double(top_smth_variation))/100.;
+                        scale_out*=(100.-double(top_smth_variation))/100.;
                     }
-                } else {
+                }else{
                     if (bot_edge_variation.get_value() != 0)
-                        new_pt[Y] += double(bot_edge_variation) - bot_edge_variation.get_value() / 2.;
+                        new_pt[Y] += double(bot_edge_variation)-bot_edge_variation.get_value()/2.;
                     if (bot_tgt_variation.get_value() != 0)
-                        new_pt[X] += double(bot_tgt_variation) - bot_tgt_variation.get_value() / 2.;
+                        new_pt[X] += double(bot_tgt_variation)-bot_tgt_variation.get_value()/2.;
                     if (bot_smth_variation.get_value() != 0) {
-                        scale_in *= (100. - double(bot_smth_variation)) / 100.;
-                        scale_out *= (100. - double(bot_smth_variation)) / 100.;
+                        scale_in*=(100.-double(bot_smth_variation))/100.;
+                        scale_out*=(100.-double(bot_smth_variation))/100.;
                     }
                 }
-                Point new_hdle_in = new_pt + (pt0 - pt1) * (scale_in / 2.);
-                Point new_hdle_out = new_pt - (pt0 - pt1) * (scale_out / 2.);
+                Point new_hdle_in  = new_pt + (pt0-pt1) * (scale_in /2.);
+                Point new_hdle_out = new_pt - (pt0-pt1) * (scale_out/2.);
 
-                if (fat_output.get_value()) {
-                    // double scaled_width = double((is_top ? stroke_width_top : stroke_width_bot))/(pt1[X]-pt0[X]);
-                    // double scaled_width = 1./(pt1[X]-pt0[X]);
-                    // Point hdle_offset = (pt1-pt0)*scaled_width;
+                if ( fat_output.get_value() ){
+                    //double scaled_width = double((is_top ? stroke_width_top : stroke_width_bot))/(pt1[X]-pt0[X]);
+                    //double scaled_width = 1./(pt1[X]-pt0[X]);
+                    //Point hdle_offset = (pt1-pt0)*scaled_width;
                     Point inside = new_pt;
                     Point inside_hdle_in;
                     Point inside_hdle_out;
-                    if (!single_direction) {
-                        inside[Y] += double((is_top ? -stroke_width_top : stroke_width_bot));
-                    }
-                    inside_hdle_in = inside + (new_hdle_in - new_pt);   // + hdle_offset * double((is_top ?
-                                                                        // front_thickness : back_thickness));
-                    inside_hdle_out = inside + (new_hdle_out - new_pt); // - hdle_offset * double((is_top ?
-                                                                        // back_thickness : front_thickness));
+                    inside[Y]+= double((is_top ? -stroke_width_top : stroke_width_bot));
+                    inside_hdle_in  = inside + (new_hdle_in -new_pt);// + hdle_offset * double((is_top ? front_thickness : back_thickness));
+                    inside_hdle_out = inside + (new_hdle_out-new_pt);// - hdle_offset * double((is_top ? back_thickness : front_thickness));
 
-                    double in_thickness = double((is_top ? front_thickness : back_thickness));
-                    double out_thickness = double((is_top ? back_thickness : front_thickness));
-                    if (single_direction) {
-                        double change = is_top ? stroke_width_top : stroke_width_bot;
-                        in_thickness += change;
-                        out_thickness += change;
-                    }
-                    inside_hdle_in += (pt1 - pt0) / 2 * (in_thickness / (pt1[X] - pt0[X]));
-                    inside_hdle_out -= (pt1 - pt0) / 2 * (out_thickness / (pt1[X] - pt0[X]));
+                    inside_hdle_in  +=  (pt1-pt0)/2*( double((is_top ? front_thickness : back_thickness)) / (pt1[X]-pt0[X]) );
+                    inside_hdle_out -=  (pt1-pt0)/2*( double((is_top ? back_thickness : front_thickness)) / (pt1[X]-pt0[X]) );
 
-                    new_hdle_in -= (pt1 - pt0) / 2 * (in_thickness / (pt1[X] - pt0[X]));
-                    new_hdle_out += (pt1 - pt0) / 2 * (out_thickness / (pt1[X] - pt0[X]));
-                    // TODO: find a good way to handle limit cases (small smoothness, large stroke).
-                    // if (inside_hdle_in[X]  > inside[X]) inside_hdle_in = inside;
-                    // if (inside_hdle_out[X] < inside[X]) inside_hdle_out = inside;
+                    new_hdle_in  -=  (pt1-pt0)/2*( double((is_top ? front_thickness : back_thickness)) / (pt1[X]-pt0[X]) );
+                    new_hdle_out +=  (pt1-pt0)/2*( double((is_top ? back_thickness : front_thickness)) / (pt1[X]-pt0[X]) );
+                    //TODO: find a good way to handle limit cases (small smoothness, large stroke).
+                    //if (inside_hdle_in[X]  > inside[X]) inside_hdle_in = inside;
+                    //if (inside_hdle_out[X] < inside[X]) inside_hdle_out = inside;
 
-                    if (is_top) {
-                        if (single_direction) {
-                            res_comp = res_comp_bot;
-                            res_comp.setStitching(true);
-                            res_comp.append(res_comp_top.reversed());
-                            res_paths.push_back(res_comp);
-
-                            res_comp_bot = Path(new_pt);
-                            res_comp_top = Path(new_pt);
-                        } else {
-                            res_comp_top.appendNew<CubicBezier>(last_top_hdle, new_hdle_in, new_pt);
-                            res_comp_bot.appendNew<CubicBezier>(last_bot_hdle, inside_hdle_in, inside);
-                        }
+                    if (is_top){
+                        res_comp_top.appendNew<CubicBezier>(last_top_hdle,new_hdle_in,new_pt);
+                        res_comp_bot.appendNew<CubicBezier>(last_bot_hdle,inside_hdle_in,inside);
                         last_top_hdle = new_hdle_out;
                         last_bot_hdle = inside_hdle_out;
-                    } else {
-                        res_comp_top.appendNew<CubicBezier>(last_top_hdle, inside_hdle_in, inside);
-                        res_comp_bot.appendNew<CubicBezier>(last_bot_hdle, new_hdle_in, new_pt);
+                    }else{
+                        res_comp_top.appendNew<CubicBezier>(last_top_hdle,inside_hdle_in,inside);
+                        res_comp_bot.appendNew<CubicBezier>(last_bot_hdle,new_hdle_in,new_pt);
                         last_top_hdle = inside_hdle_out;
                         last_bot_hdle = new_hdle_out;
                     }
-                } else {
-                    if (is_top && single_direction) {
-                        res_paths.push_back(res_comp);
-                        res_comp = Path(new_pt);
-                    } else {
-                        res_comp.appendNew<CubicBezier>(last_hdle, new_hdle_in, new_pt);
-                    }
+                }else{
+                    res_comp.appendNew<CubicBezier>(last_hdle,new_hdle_in,new_pt);
                 }
 
                 last_hdle = new_hdle_out;
-                i += 2;
+                i+=2;
                 is_top = !is_top;
             }
-            if (i < comp.size() && !(single_direction && is_top)) {
-                if (fat_output.get_value()) {
-                    res_comp_top.appendNew<CubicBezier>(last_top_hdle, comp[i], comp[i]);
-                    res_comp_bot.appendNew<CubicBezier>(last_bot_hdle, comp[i], comp[i]);
-                } else {
-                    res_comp.appendNew<CubicBezier>(last_hdle, comp[i], comp[i]);
+            if ( i<comp.size() ){
+                if ( fat_output.get_value() ){
+                    res_comp_top.appendNew<CubicBezier>(last_top_hdle,comp[i],comp[i]);
+                    res_comp_bot.appendNew<CubicBezier>(last_bot_hdle,comp[i],comp[i]);
+                }else{
+                    res_comp.appendNew<CubicBezier>(last_hdle,comp[i],comp[i]);
                 }
             }
-
-            if (fat_output.get_value()) {
+            if ( fat_output.get_value() ){
                 res_comp = res_comp_bot;
                 res_comp.setStitching(true);
                 res_comp.append(res_comp_top.reversed());
             }
-            res_paths.push_back(res_comp);
-            result.concat(paths_to_pw(res_paths));
+            result.concat(res_comp.toPwSb());
         }
     }
     return result;
