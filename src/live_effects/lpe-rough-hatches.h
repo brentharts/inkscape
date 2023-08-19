@@ -46,6 +46,8 @@ public:
 
   Geom::Piecewise<Geom::D2<Geom::SBasis> > 
   smoothSnake(std::vector<std::vector<Geom::Point> > const &linearSnake);
+  Geom::Piecewise<Geom::D2<Geom::SBasis> >
+  smoothSnakeStripes(std::vector<std::vector<Geom::Point> > const &linearSnake);
     
 private:
   double hatch_dist;
