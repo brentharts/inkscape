@@ -19,30 +19,35 @@
 
 using namespace Inkscape::IO;
 
-static bool use_active_window = false;
-static Inkscape::XML::Document *active_window_data = nullptr; 
+static bool log_actions= false;
+static Inkscape::XML::Document *log_data = nullptr; 
 
 // this function is called when in command line we call with parameter --active-window | -q
 // is called by a auto add new start and end action that fire first this action
 // and keep on till last inserted action is done
 void
-active_window_start_helper() {
-    use_active_window = true;
-    active_window_data = sp_repr_document_new("activewindowdata");
+log_start_helper() {
+    //cleanup (we can need to use withot redirect_output to pass file multiple times in a command)
+    std::string tmpfile = Glib::build_filename(Glib::get_tmp_dir(), "log_commands.xml");
+    if (Glib::file_test(tmpfile, Glib::FILE_TEST_EXISTS)) {
+        unlink(tmpfile.c_str());
+    } 
+    log_actions = true;
+    log_data = sp_repr_document_new("logfiledata");
 }
 
 // this is the end of previous function. Finish the wrap of actions to active desktop
 // it also save a file to allow print in the caller terminal the output to be redeable by
 // external programs like extensions.
 void
-active_window_end_helper() {
-    std::string tmpfile = Glib::build_filename(Glib::get_tmp_dir(), "active_desktop_commands.xml");
-    Glib::ustring utf8name = Glib::filename_to_utf8(Glib::build_filename(Glib::get_tmp_dir(), "active_desktop_commands_prev.xml"));
-    sp_repr_save_file(active_window_data, utf8name.c_str());
+log_end_helper() {
+    std::string tmpfile = Glib::build_filename(Glib::get_tmp_dir(), "log_commands.xml");
+    Glib::ustring utf8name = Glib::filename_to_utf8(Glib::build_filename(Glib::get_tmp_dir(), "log_commands_prev.xml"));
+    sp_repr_save_file(log_data, utf8name.c_str());
     std::rename(utf8name.c_str(), tmpfile.c_str());
-    use_active_window = false;
-    Inkscape::GC::release(active_window_data);
-    active_window_data = nullptr;
+    log_actions = false;
+    Inkscape::GC::release(log_data);
+    log_data = nullptr;
 }
 
 void 
@@ -52,17 +57,17 @@ show_output(Glib::ustring data, bool is_cerr = true) {
     } else {
         std::cout << data << std::endl;
     }
-    if (use_active_window) {
-        if (auto root = active_window_data->root()) {
+    if (log_actions) {
+        if (auto root = log_data->root()) {
             Inkscape::XML::Node * node = nullptr;
             if (is_cerr) {
-                node = active_window_data->createElement("cerr");
+                node = log_data->createElement("cerr");
             } else {
-                node = active_window_data->createElement("cout");
+                node = log_data->createElement("cout");
             }
             root->appendChild(node);
             Inkscape::GC::release(node);
-            auto txtnode = active_window_data->createTextNode("", true);
+            auto txtnode = log_data->createTextNode("", true);
             node->appendChild(txtnode);
             Inkscape::GC::release(txtnode);
             txtnode->setContent(data.c_str());

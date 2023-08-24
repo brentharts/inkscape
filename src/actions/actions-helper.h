@@ -19,8 +19,8 @@ namespace Inkscape {
   class Selection;
 }
 
-void active_window_start_helper();
-void active_window_end_helper();
+void log_start_helper();
+void log_end_helper();
 void show_output(Glib::ustring data, bool is_cerr = true);
 bool get_document_and_selection(InkscapeApplication* app, SPDocument** document, Inkscape::Selection** selection);
 
