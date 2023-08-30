@@ -46,6 +46,8 @@
 #include "util/trim.h"
 #include "xml/attribute-record.h"
 #include "xml/sp-css-attr.h"
+#include "io/resource.h"
+
 
 // G_MESSAGES_DEBUG=DEBUG_SELECTORSDIALOG  gdb ./inkscape
 // #define DEBUG_SELECTORSDIALOG
@@ -282,7 +284,14 @@ void SelectorsDialog::_showWidgets()
     _scrolled_window_selectors.set_overlay_scrolling(false);
     _vadj = _scrolled_window_selectors.get_vadjustment();
     _vadj->signal_value_changed().connect(sigc::mem_fun(*this, &SelectorsDialog::_vscroll));
+
     UI::pack_start(_selectors_box, _scrolled_window_selectors, UI::PackOptions::expand_widget);
+    for (const auto& value : selectors)
+    {
+        _dropdown_menu.append(value);
+    }
+    UI::pack_start(_selectors_box,_dropdown_menu,UI::PackOptions::shrink_widget)
+    _dropdown_menu.signal_changed().connect(sigc::mem_fun(*this, &Inkscape::UI::Dialog::SelectorsDialog::on_dropdown_menu_changed));
     /* auto const dirtogglerlabel = Gtk::make_managed<Gtk::Label>(_("Paned vertical"));
     dirtogglerlabel->get_style_context()->add_class("inksmall");
     _direction.property_active() = dir;
@@ -1004,6 +1013,9 @@ void SelectorsDialog::_addSelector()
          */
         originalValue = Glib::ustring(textEditPtr->get_text());
         selectorValue = _style_dialog->fixCSSSelectors(originalValue);
+        selectors.push_back(selectorValue);
+        _dropdown_menu.append(selectorValue);
+        _dropdown_menu.set_active(selectors.size() - 1);
         _del.set_visible(true);
         if (originalValue.find("@import ") == std::string::npos && selectorValue.empty()) {
             textLabelPtr->set_visible(true);
@@ -1071,6 +1083,7 @@ void SelectorsDialog::_addSelector()
     _writeStyleElement();
     _scrollock = false;
     _vadj->set_value(std::min(_scrollpos, _vadj->get_upper()));
+    on_dropdown_menu_changed();
 }
 
 void SelectorsDialog::_closeDialog(Gtk::Dialog *textDialogPtr) { textDialogPtr->response(Gtk::RESPONSE_OK); }
@@ -1302,6 +1315,17 @@ void SelectorsDialog::_styleButton(Gtk::Button &btn, char const *iconName, char 
     btn.set_tooltip_text (tooltip);
 }
 
+void SelectorsDialog::on_dropdown_menu_changed()
+{
+    Glib::ustring selector = _dropdown_menu.get_active_text();
+    auto it = std::find(selectors.begin(), selectors.end(), selector);
+    gint position = std::distance(selectors.begin(), it);
+    if (selector.empty()) {
+        return;
+    }
+    _style_dialog->SelectorCSS(selector,selectors.size()-position);
+    
+}
 } // namespace Inkscape::UI::Dialog
 
 /*

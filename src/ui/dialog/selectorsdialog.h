@@ -133,6 +133,8 @@ public:
     StyleDialog *_style_dialog;
     Gtk::Paned _paned;
     Glib::RefPtr<Gtk::Adjustment> _vadj;
+    Gtk::ComboBoxText _dropdown_menu;
+    std::vector<Glib::ustring> selectors;
     Gtk::Box _button_box;
     Gtk::Box _selectors_box;
     Gtk::ScrolledWindow _scrolled_window_selectors;
@@ -143,6 +145,7 @@ public:
     Inkscape::XML::Node *_getStyleTextNode(bool create_if_missing = false);
     void _readStyleElement();
     void _writeStyleElement();
+    void on_dropdown_menu_changed();
 
     // Update watchers
     std::unique_ptr<Inkscape::XML::NodeObserver> m_nodewatcher;
