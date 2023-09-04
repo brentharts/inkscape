@@ -34,13 +34,13 @@ print_inkscape_version()
 }
 
 void
-active_window_start() {
-    active_window_start_helper();
+log_start() {
+    log_start_helper();
 }
 
 void
-active_window_end() {
-    active_window_end_helper();
+log_end() {
+    log_end_helper();
 }
 
 void
@@ -201,8 +201,8 @@ std::vector<std::vector<Glib::ustring>> raw_data_base =
 {
     // clang-format off
     {"app.inkscape-version",          N_("Inkscape Version"),        "Base",       N_("Print Inkscape version and exit")                   },
-    {"app.active-window-start",       N_("Active Window: Start Call"), "Base",     N_("Start execution in active window")                          },
-    {"app.active-window-end",         N_("Active Window: End Call"), "Base",       N_("End execution in active window")                            },
+    {"app.log-start",                 N_("Log: Start Call"),         "Base",       N_("Start execution to log output to file")             },
+    {"app.log-end",                   N_("Log: End Call"),           "Base",       N_("End execution to log output to file")               },
     {"app.debug-info",                N_("Debug Info"),              "Base",       N_("Print debugging information and exit")              },
     {"app.system-data-directory",     N_("System Directory"),        "Base",       N_("Print system data directory and exit")              },
     {"app.user-data-directory",       N_("User Directory"),          "Base",       N_("Print user data directory and exit")                },
@@ -230,8 +230,8 @@ add_actions_base(InkscapeApplication* app)
     // Note: "radio" actions are just an easy way to set type without using templating.
     // clang-format off
     gapp->add_action(               "inkscape-version",                                    sigc::ptr_fun(&print_inkscape_version)                 );
-    gapp->add_action(               "active-window-start",                                 sigc::ptr_fun(&active_window_start)                    );
-    gapp->add_action(               "active-window-end",                                   sigc::ptr_fun(&active_window_end)                      );
+    gapp->add_action(               "log-start",                                           sigc::ptr_fun(&log_start)                    );
+    gapp->add_action(               "log-end",                                             sigc::ptr_fun(&log_end)                      );
     gapp->add_action(               "debug-info",                                          sigc::ptr_fun(&print_debug_info)                       );
     gapp->add_action(               "system-data-directory",                               sigc::ptr_fun(&print_system_data_directory)            );
     gapp->add_action(               "user-data-directory",                                 sigc::ptr_fun(&print_user_data_directory)              );

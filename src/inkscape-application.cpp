@@ -1375,7 +1375,7 @@ InkscapeApplication::shell(bool active_window)
 
         action_vector_t action_vector;
         if (active_window) {
-            input = "active-window-start;" + input + ";active-window-end";
+            input = "log-start;" + input + ";log-end";
         }
         parse_actions(input, action_vector);
         for (auto action: action_vector) {
@@ -1407,7 +1407,7 @@ InkscapeApplication::shell(bool active_window)
 // Todo: Code can be improved by using proper IPC rather than temporary file polling.
 void InkscapeApplication::redirect_output()
 {
-    auto const tmpfile = Glib::build_filename(Glib::get_tmp_dir(), "active_desktop_commands.xml");
+    auto const tmpfile = Glib::build_filename(Glib::get_tmp_dir(), "log_commands.xml");
 
     for (int counter = 0; ; counter++) {
         if (Glib::file_test(tmpfile, Glib::FILE_TEST_EXISTS)) {
@@ -1822,8 +1822,8 @@ InkscapeApplication::on_handle_local_options(const Glib::RefPtr<Glib::VariantDic
         if (_use_shell) {
             shell(true);
         } else {
-            _command_line_actions.emplace(_command_line_actions.begin(), "active-window-start", base);
-            _command_line_actions_input = _command_line_actions_input + ";active-window-end";
+            _command_line_actions.emplace(_command_line_actions.begin(), "log-start", base);
+            _command_line_actions_input = _command_line_actions_input + ";log-end";
             parse_actions(_command_line_actions_input, _command_line_actions);
             for (auto const &[name, param] : _command_line_actions) {
                 _gio_application->activate_action(name, param);
@@ -1913,6 +1913,35 @@ void action_effect(Inkscape::Extension::Effect* effect, bool show_prefs) {
         effect->effect(desktop);
     }
 }
+/* FUNCTION COMMENTED 
+this function chage to onv no desktop is done
+basicaly add this to params.push_back("--log-action=" + tmpfile + ";");
+    void action_effect(const Glib::VariantBase& value, Inkscape::Extension::Effect* effect, bool show_prefs, InkscapeApplication *app) {
+    Glib::Variant<Glib::ustring> s = Glib::VariantBase::cast_dynamic<Glib::Variant<Glib::ustring> >(value);
+    Glib::ustring paramstr = s.get();
+    SPDesktop *desktop = nullptr;
+    std::list<std::string> params;
+    if (paramstr != "--from_ui=true;") {
+        std::stringstream ss(s.get());
+        std::string p;
+        std::string tmpfile = Glib::build_filename(Glib::get_tmp_dir(), "log_commands.xml");
+        if (Glib::file_test(tmpfile, Glib::FILE_TEST_EXISTS)) {
+            params.push_back("--log-action=" + tmpfile + ";");
+        } 
+        while (getline (ss, p, ' ')) {
+            p.erase(p.find_last_not_of(' ')+1);
+            p.erase(0, p.find_first_not_of(' '));
+            params.push_back(p);
+        }
+    } else {
+        desktop = InkscapeApplication::instance()->get_active_desktop();
+    }
+    if (effect->_workingDialog && show_prefs && desktop) {
+        effect->prefs(desktop, params);
+    } else {
+        effect->effect(desktop, params);
+    }
+} */
 
 // Modifying string to get submenu id
 std::string action_menu_name(std::string menu) {
