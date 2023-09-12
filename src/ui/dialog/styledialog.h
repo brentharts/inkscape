@@ -168,7 +168,7 @@ public:
     void _valueEdited(const Glib::ustring &path, const Glib::ustring &value, Glib::RefPtr<Gtk::TreeStore> store);
     void _startNameEdit(Gtk::CellEditable *cell, const Glib::ustring &path);
     void _startValueEdit(Gtk::CellEditable *cell, const Glib::ustring &path, Glib::RefPtr<Gtk::TreeStore> store);
-
+    void _propToggle(const Glib::ustring &path, Glib::RefPtr<Gtk::TreeStore> store);
     void _setAutocompletion(Gtk::Entry *entry, SPStyleEnum const cssenum[]);
     void _setAutocompletion(Gtk::Entry *entry, Glib::ustring name);
     bool _on_foreach_iter(const Gtk::TreeModel::iterator &iter);
@@ -185,8 +185,8 @@ public:
 
     // Manipulate Tree
     std::vector<SPObject *> _getObjVec(Glib::ustring selector);
-    AttrProp parseStyle(Glib::ustring style_string);
     AttrProp _owner_style;
+    std::map<Glib::ustring, std::pair<Glib::ustring, bool>> parseStyle(Glib::ustring style_string);
     void _addOwnerStyle(Glib::ustring name, Glib::ustring selector);
 
     // Variables
