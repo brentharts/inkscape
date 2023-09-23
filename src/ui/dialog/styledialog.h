@@ -83,7 +83,6 @@ public:
     bool _deletion{false};
     Glib::ustring fixCSSSelectors(Glib::ustring selector);
     void readStyleElement();
-    void SelectorCSS(Glib::ustring selector, gint selectorpos);
   private:
     using AttrProp = std::map<Glib::ustring, Glib::ustring>;
 
