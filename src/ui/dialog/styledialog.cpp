@@ -551,10 +551,8 @@ void StyleDialog::readStyleElement()
                         row[_mColumns._colLinked] = true;
                     }
                 }
+                _addOwnerStyle(iter.first, _("Used in style attribute"));
             }
-            _addOwnerStyle(name, _("Used in style attribute"));
-        }
-
         // this is to fix a bug on cairo win:
         // https://gitlab.freedesktop.org/cairo/airo/issues/338
         // TODO: check if inkscape min cairo version has applied the patch proposed and remove (3 times)
@@ -706,10 +704,12 @@ void StyleDialog::readStyleElement()
         }
         Glib::ustring style = properties;
         std::map<Glib::ustring, std::pair<Glib::ustring, bool>> result_props = parseStyle(style);
-        empty = true;
-        css_selector_event_add->signal_button_release_event().connect(
+        empty = result_props.empty();
+        get_widget<Gtk::Button>(_builder, "CSSSelectorAddButton").signal_clicked().connect(
             sigc::bind(
                 sigc::mem_fun(*this, &StyleDialog::_addRow), store, css_tree, selector_orig, selectorpos));
+
+
 
         for (auto const &[name, pair] : result_props) {
             auto const &[value, active] = pair;
@@ -976,15 +976,15 @@ void StyleDialog::_addOwnerStyle(Glib::ustring name, Glib::ustring selector)
             style_string = style_string.erase(beg, end - beg + 2);
         }
     }
+    static auto const r_props = Glib::Regex::create("\\s*;\\s*");
     std::vector<Glib::ustring> props = r_props->split(style_string);
     std::vector<Glib::ustring> comments_props = r_props->split(comments);
-
+    static auto const r_pair = Glib::Regex::create("\\s*:\\s*");
     for (auto &&token : props) {
         Util::trim(token);
         if (token.empty())
             break;
 
-        static auto const r_pair = Glib::Regex::create("\\s*:\\s*");
         std::vector<Glib::ustring> pair = r_pair->split(token);
 
         if (pair.size() > 1) {
@@ -997,6 +997,7 @@ void StyleDialog::_addOwnerStyle(Glib::ustring name, Glib::ustring selector)
 
         if (token.empty())
             break;
+        
         std::vector<Glib::ustring> pair = r_pair->split(token);
 
         if (pair.size() > 1) {

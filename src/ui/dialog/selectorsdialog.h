@@ -27,6 +27,7 @@
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treestore.h>
 #include <gtkmm/treeview.h>
+#include <gtkmm/combobox.h>
 
 #include "ui/dialog/dialog-base.h"
 #include "xml/helper-observer.h"

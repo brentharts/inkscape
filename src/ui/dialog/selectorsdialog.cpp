@@ -284,13 +284,6 @@ void SelectorsDialog::_showWidgets()
     _scrolled_window_selectors.set_overlay_scrolling(false);
     _vadj = _scrolled_window_selectors.get_vadjustment();
     _vadj->signal_value_changed().connect(sigc::mem_fun(*this, &SelectorsDialog::_vscroll));
-
-    UI::pack_start(_selectors_box, _scrolled_window_selectors, UI::PackOptions::expand_widget);
-    for (const auto& value : selectors)
-    {
-        _dropdown_menu.append(value);
-    }
-    UI::pack_start(_selectors_box,_dropdown_menu,UI::PackOptions::shrink_widget)
     _dropdown_menu.signal_changed().connect(sigc::mem_fun(*this, &Inkscape::UI::Dialog::SelectorsDialog::on_dropdown_menu_changed));
     /* auto const dirtogglerlabel = Gtk::make_managed<Gtk::Label>(_("Paned vertical"));
     dirtogglerlabel->get_style_context()->add_class("inksmall");
@@ -299,11 +292,10 @@ void SelectorsDialog::_showWidgets()
     _direction.get_style_context()->add_class("inkswitch"); */
     _styleButton(_create, "list-add", "Add a new CSS Selector");
     _create.set_label("+ Add a new CSS Selector");
-    _selectors_box.pack_start(_create, Gtk::PACK_SHRINK);
-    _selectors_box.pack_start(_scrolled_window_selectors, Gtk::PACK_EXPAND_WIDGET);
+    UI::pack_start(_selectors_box,_create,UI::PackOptions::shrink);
     _create.signal_clicked().connect(sigc::mem_fun(*this, &SelectorsDialog::_addSelector));
+    UI::pack_start(_selectors_box, _scrolled_window_selectors, UI::PackOptions::expand_widget);
     _styleButton(_del, "list-remove", "Remove a CSS Selector");
-    UI::pack_start(_button_box, _create, UI::PackOptions::shrink);
     UI::pack_start(_button_box, _del, UI::PackOptions::shrink);
     Gtk::RadioButton::Group group;
     _horizontal->set_image_from_icon_name(INKSCAPE_ICON("horizontal"));
@@ -339,7 +331,7 @@ void SelectorsDialog::_showWidgets()
     contents->child_property_fill(_paned);
     UI::pack_start(*this, *contents, UI::PackOptions::expand_widget);
     _dropdown_menu.set_model(_store);
-    UI::pack_start(*_style_dialog,_dropdown_menu, UI::PackOptions::shrink_widget)
+    UI::pack_start(*_style_dialog,_dropdown_menu, UI::PackOptions::shrink);
     _dropdown_menu.pack_start(_mColumns._colSelector);
     _dropdown_menu.signal_changed().connect(sigc::mem_fun(*this, &Inkscape::UI::Dialog::SelectorsDialog::on_dropdown_menu_changed));
     show_all();
