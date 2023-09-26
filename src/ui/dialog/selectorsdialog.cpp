@@ -46,6 +46,8 @@
 #include "util/trim.h"
 #include "xml/attribute-record.h"
 #include "xml/sp-css-attr.h"
+#include "io/resource.h"
+
 
 // G_MESSAGES_DEBUG=DEBUG_SELECTORSDIALOG  gdb ./inkscape
 // #define DEBUG_SELECTORSDIALOG
@@ -213,7 +215,7 @@ SelectorsDialog::SelectorsDialog()
     : DialogBase("/dialogs/selectors", "Selectors")
 {
     g_debug("SelectorsDialog::SelectorsDialog");
-
+    _paned.signal_size_allocate().connect(sigc::mem_fun(*this, &SelectorsDialog::_checkAndChangeOrientation));
     m_nodewatcher = std::make_unique<NodeWatcher>(this);
     m_styletextwatcher = std::make_unique<NodeObserver>(this);
 
@@ -282,37 +284,45 @@ void SelectorsDialog::_showWidgets()
     _scrolled_window_selectors.set_overlay_scrolling(false);
     _vadj = _scrolled_window_selectors.get_vadjustment();
     _vadj->signal_value_changed().connect(sigc::mem_fun(*this, &SelectorsDialog::_vscroll));
-    UI::pack_start(_selectors_box, _scrolled_window_selectors, UI::PackOptions::expand_widget);
+    _dropdown_menu.signal_changed().connect(sigc::mem_fun(*this, &Inkscape::UI::Dialog::SelectorsDialog::on_dropdown_menu_changed));
     /* auto const dirtogglerlabel = Gtk::make_managed<Gtk::Label>(_("Paned vertical"));
     dirtogglerlabel->get_style_context()->add_class("inksmall");
     _direction.property_active() = dir;
     _direction.property_active().signal_changed().connect(sigc::mem_fun(*this, &SelectorsDialog::_toggleDirection));
     _direction.get_style_context()->add_class("inkswitch"); */
     _styleButton(_create, "list-add", "Add a new CSS Selector");
+    _create.set_label("+ Add a new CSS Selector");
+    UI::pack_start(_selectors_box,_create,UI::PackOptions::shrink);
     _create.signal_clicked().connect(sigc::mem_fun(*this, &SelectorsDialog::_addSelector));
+    UI::pack_start(_selectors_box, _scrolled_window_selectors, UI::PackOptions::expand_widget);
     _styleButton(_del, "list-remove", "Remove a CSS Selector");
-    UI::pack_start(_button_box, _create, UI::PackOptions::shrink);
     UI::pack_start(_button_box, _del, UI::PackOptions::shrink);
     Gtk::RadioButton::Group group;
-    auto const _horizontal = Gtk::make_managed<Gtk::RadioButton>();
-    auto const _vertical = Gtk::make_managed<Gtk::RadioButton>();
     _horizontal->set_image_from_icon_name(INKSCAPE_ICON("horizontal"));
     _vertical->set_image_from_icon_name(INKSCAPE_ICON("vertical"));
+    _automatic->set_image_from_icon_name(INKSCAPE_ICON("layout-auto"));
     _horizontal->set_group(group);
     _vertical->set_group(group);
+    _automatic->set_group(group);
     _vertical->set_active(dir);
     _vertical->signal_toggled().connect(
         sigc::bind(sigc::mem_fun(*this, &SelectorsDialog::_toggleDirection), _vertical));
+    _horizontal->signal_toggled().connect(
+        sigc::bind(sigc::mem_fun(*this, &SelectorsDialog::_toggleDirection), _horizontal));
+    _automatic->signal_toggled().connect(
+        sigc::bind(sigc::mem_fun(*this, &SelectorsDialog::_toggleDirection), _automatic));
     _horizontal->property_draw_indicator() = false;
     _vertical->property_draw_indicator() = false;
+    _automatic->property_draw_indicator() = false;
     UI::pack_end(_button_box, *_horizontal, false, false);
     UI::pack_end(_button_box, *_vertical, false, false);
+    UI::pack_end(_button_box,*_automatic, false, false);
     _del.signal_clicked().connect(sigc::mem_fun(*this, &SelectorsDialog::_delSelector));
     _del.set_visible(false);
     _style_dialog = Gtk::make_managed<StyleDialog>();
     _style_dialog->set_name("StyleDialog");
-    _paned.pack1(*_style_dialog, Gtk::SHRINK);
-    _paned.pack2(_selectors_box, true, true);
+    _paned.pack1(_selectors_box, true, true);
+    _paned.pack2(*_style_dialog, Gtk::SHRINK);
     _paned.set_wide_handle(true);
     auto const contents = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL);
     UI::pack_start(*contents, _paned, UI::PackOptions::expand_widget);
@@ -320,6 +330,10 @@ void SelectorsDialog::_showWidgets()
     contents->set_valign(Gtk::ALIGN_FILL);
     contents->child_property_fill(_paned);
     UI::pack_start(*this, *contents, UI::PackOptions::expand_widget);
+    _dropdown_menu.set_model(_store);
+    UI::pack_start(*_style_dialog,_dropdown_menu, UI::PackOptions::shrink);
+    _dropdown_menu.pack_start(_mColumns._colSelector);
+    _dropdown_menu.signal_changed().connect(sigc::mem_fun(*this, &Inkscape::UI::Dialog::SelectorsDialog::on_dropdown_menu_changed));
     show_all();
     _updating = true;
     _paned.property_position() = 200;
@@ -328,17 +342,39 @@ void SelectorsDialog::_showWidgets()
     set_name("SelectorsAndStyleDialog");
 }
 
-void SelectorsDialog::_toggleDirection(Gtk::RadioButton *vertical)
+void SelectorsDialog::_toggleDirection(Gtk::RadioButton *button)
 {
     g_debug("SelectorsDialog::_toggleDirection");
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
-    bool dir = vertical->get_active();
+    bool dir = false;
+    _orientation=0;
+    if (button == _vertical) {
+        dir = true;
+    } else if (button == _horizontal) {
+        dir = false; 
+    } else if (button == _automatic) {
+        _orientation=1;
+    }
     prefs->setBool("/dialogs/selectors/vertical", dir);
     _paned.set_orientation(dir ? Gtk::ORIENTATION_VERTICAL : Gtk::ORIENTATION_HORIZONTAL);
     _paned.check_resize();
     int widthpos = _paned.property_max_position() - _paned.property_min_position();
     prefs->setInt("/dialogs/selectors/panedpos", widthpos / 2);
     _paned.property_position() = widthpos / 2;
+}
+
+void SelectorsDialog::_checkAndChangeOrientation(Gtk::Allocation& allocation){
+    if(!_orientation) return;
+    int width = allocation.get_width();
+    int height = allocation.get_height();
+    if(width > height){
+        _paned.set_orientation(Gtk::ORIENTATION_HORIZONTAL);
+    }else{
+        _paned.set_orientation(Gtk::ORIENTATION_VERTICAL);
+    }
+    int widthpos = _paned.property_max_position() - _paned.property_min_position();
+    _paned.property_position() = widthpos / 2;
+
 }
 
 /**
@@ -1239,12 +1275,8 @@ void SelectorsDialog::_selectRow()
         _del.set_visible(true);
     }
     if (_updating || !getDesktop()) return; // Avoid updating if we have set row via dialog.
-
     Gtk::TreeModel::Children children = _store->children();
     Inkscape::Selection* selection = getDesktop()->getSelection();
-    if (selection->isEmpty()) {
-        _style_dialog->setCurrentSelector("");
-    }
     for (auto row : children) {
         row[_mColumns._colSelected] = 400;
         Gtk::TreeModel::Children subchildren = row->children();
@@ -1302,6 +1334,28 @@ void SelectorsDialog::_styleButton(Gtk::Button &btn, char const *iconName, char 
     btn.set_tooltip_text (tooltip);
 }
 
+void SelectorsDialog::on_dropdown_menu_changed()
+{
+    Gtk::TreeModel::iterator iter = _dropdown_menu.get_active();
+    if (iter) {
+        Gtk::TreeModel::Row row = *iter;
+        if (row[_mColumns._colObj]) {
+            getDesktop()->getSelection()->add(row[_mColumns._colObj]);
+        }
+        Gtk::TreeModel::Children children = row.children();
+        if (children.empty() || children.size() == 1) {
+            _del.set_visible(true);
+        }
+        for (auto child : row.children()) {
+            Gtk::TreeModel::Row child_row = *child;
+            if (child[_mColumns._colObj]) {
+                getDesktop()->getSelection()->add(child[_mColumns._colObj]);
+            }
+        }
+    }
+    g_debug("SelectorsDialog::NodeObserver::notifyContentChanged");
+ 
+}
 } // namespace Inkscape::UI::Dialog
 
 /*

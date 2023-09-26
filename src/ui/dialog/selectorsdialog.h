@@ -27,6 +27,7 @@
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treestore.h>
 #include <gtkmm/treeview.h>
+#include <gtkmm/combobox.h>
 
 #include "ui/dialog/dialog-base.h"
 #include "xml/helper-observer.h"
@@ -133,16 +134,23 @@ public:
     StyleDialog *_style_dialog;
     Gtk::Paned _paned;
     Glib::RefPtr<Gtk::Adjustment> _vadj;
+    Gtk::ComboBox _dropdown_menu;
+    std::vector<Glib::ustring> selectors;
     Gtk::Box _button_box;
     Gtk::Box _selectors_box;
     Gtk::ScrolledWindow _scrolled_window_selectors;
 
+    int _orientation;
     Gtk::Button _del;
     Gtk::Button _create;
+    Gtk::RadioButton *_horizontal = Gtk::make_managed<Gtk::RadioButton>();
+    Gtk::RadioButton *_vertical = Gtk::make_managed<Gtk::RadioButton>();
+    Gtk::RadioButton *_automatic = Gtk::make_managed<Gtk::RadioButton>();
     // Reading and writing the style element.
     Inkscape::XML::Node *_getStyleTextNode(bool create_if_missing = false);
     void _readStyleElement();
     void _writeStyleElement();
+    void on_dropdown_menu_changed();
 
     // Update watchers
     std::unique_ptr<Inkscape::XML::NodeObserver> m_nodewatcher;
@@ -158,6 +166,7 @@ public:
     void _removeClass(const std::vector<SPObject *> &objVec, const Glib::ustring &className, bool all = false);
     void _removeClass(SPObject *obj, const Glib::ustring &className, bool all = false);
     void _toggleDirection(Gtk::RadioButton *vertical);
+    void _checkAndChangeOrientation(Gtk::Allocation& allocation);
     void _showWidgets();
 
     void _selectObjects(int, int);
