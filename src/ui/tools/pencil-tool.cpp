@@ -17,7 +17,11 @@
  * Released under GNU GPL v2+, read the file 'COPYING' for more information.
  */
 
-#include <numeric> // For std::accumulate
+#include "pencil-tool.h"
+
+#include <cmath>   // std::lerp
+#include <numeric> // std::accumulate
+
 #include <gdk/gdkkeysyms.h>
 #include <glibmm/i18n.h>
 
@@ -26,7 +30,6 @@
 #include <2geom/sbasis-to-bezier.h>
 #include <2geom/svg-path-parser.h>
 
-#include "pencil-tool.h"
 
 #include "context-fns.h"
 #include "desktop.h"
@@ -814,7 +817,7 @@ void PencilTool::_addFreehandPoint(Geom::Point const &p, guint /*state*/, bool l
             min = max;
         }
         double dezoomify_factor = 0.05 * 1000 / _desktop->current_zoom();
-        double const pressure_shrunk = pressure * (max - min) + min; // C++20 -> use std::lerp()
+        double const pressure_shrunk = std::lerp(min, max, pressure);
         double pressure_computed = std::abs(pressure_shrunk * dezoomify_factor);
         double pressure_computed_scaled = std::abs(pressure_computed * _desktop->getDocument()->getDocumentScale().inverse()[Geom::X]);
         if (p != this->p[this->_npoints - 1]) {
