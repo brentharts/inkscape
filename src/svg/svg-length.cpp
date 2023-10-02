@@ -80,13 +80,37 @@ std::string sp_svg_number_write_de(double val, unsigned int tprec, int min_exp)
     using double_conversion::DoubleToStringConverter;
     // The number of padding zeros corresponds to "e-X" when exponent < 0
     // or "eX" + decimal point when exponent > 0
-    static const DoubleToStringConverter conv(DoubleToStringConverter::UNIQUE_ZERO |
-                                                  DoubleToStringConverter::NO_TRAILING_ZERO,
-                                              "inf", "NaN", 'e', 0, 0, 3, 3);
+    static const DoubleToStringConverter conv(
+        DoubleToStringConverter::UNIQUE_ZERO, // | DoubleToStringConverter::NO_TRAILING_ZERO,
+        "inf", "NaN", 'e', 0, 0, 3, 3);
     std::string ret(' ', 32);
     double_conversion::StringBuilder builder(&ret[0], 32);
     conv.ToPrecision(val, tprec, &builder);
     ret.resize(builder.position());
+
+    // TODO: the following code is to bypass a missing `NO_TRAILING_ZERO` feature in
+    // double-conversion 3.1.5, which is used in macos and appimage builds.
+    // Once the package is updated, these can be removed.
+    bool has_decimal = ret.find('.') != std::string::npos;
+    if (!has_decimal) {
+        return ret;
+    }
+
+    auto exp = ret.find_last_of('e');
+    std::size_t lastMantissa = (exp == std::string::npos) ? (ret.size() - 1) : (exp - 1);
+    if (ret.at(lastMantissa) == '0') {
+        while (ret.at(lastMantissa) == '0') {
+            lastMantissa--;
+        }
+        if (ret.at(lastMantissa) == '.') {
+            lastMantissa--;
+        }
+        if (exp == std::string::npos) {
+            return ret.substr(0, lastMantissa + 1);
+        }
+        return ret.substr(0, lastMantissa + 1) + ret.substr(exp);
+    }
+
     return ret;
 }
 
