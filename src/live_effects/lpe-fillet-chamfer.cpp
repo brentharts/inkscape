@@ -338,8 +338,8 @@ void LPEFilletChamfer::doBeforeEffect(SPLPEItem const *lpeItem)
                 }
             }
             if (pathv.size() > i && !pathv[i].closed()) {
-                nodesatellites[i][0].amount = 0;
-                nodesatellites[i][count_path_nodes(pathv[i]) - 1].amount = 0;
+                nodesatellites[i].front().amount = 0;
+                nodesatellites[i].back().amount = 0;
             }
         } 
         if (!_pathvector_nodesatellites) {
