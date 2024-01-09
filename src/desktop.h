@@ -572,6 +572,7 @@ private:
     Inkscape::auto_connection _reconstruction_start_connection;
     Inkscape::auto_connection _reconstruction_finish_connection;
     Inkscape::auto_connection _schedule_zoom_from_document_connection;
+    Inkscape::auto_connection _layer_changed_connection;
 
     // pinch zoom
     std::optional<double> _motion_x, _motion_y, _begin_zoom;
@@ -583,6 +584,8 @@ private:
 
     void onStatusMessage(Inkscape::MessageType type, char const *message);
     void onDocumentFilenameSet(char const *filename);
+
+    void updateTranslucenyGroups();
 };
 
 #endif // SEEN_SP_DESKTOP_H
