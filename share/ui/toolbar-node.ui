@@ -353,12 +353,15 @@
       </packing>
     </child>
     <child>
-      <object class="GtkButton">
+      <object class="GtkToggleButton" id="_corners_btn">
         <property name="visible">True</property>
         <property name="can-focus">True</property>
+        <property name="receives-default">False</property>
         <property name="tooltip-text" translatable="yes">Add corners live path effect</property>
-        <property name="action-name">app.object-add-corners-lpe</property>
         <property name="relief">none</property>
+        <style>
+          <class name="tag2"/>
+        </style>
         <child>
           <object class="GtkImage" id="image12">
             <property name="visible">True</property>
