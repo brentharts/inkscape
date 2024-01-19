@@ -333,6 +333,10 @@ bool InkscapeWindow::on_configure_event(GdkEventConfigure *event)
     bool full = _desktop->is_fullscreen();
     prefs->setBool("/desktop/geometry/fullscreen", full);
     prefs->setBool("/desktop/geometry/maximized", maxed);
+    if (_desktop->attached) {
+        prefs->setBool("/desktop/geometry/fullscreen_multidoc", full);
+        prefs->setBool("/desktop/geometry/maximized_multidoc", maxed);
+    }
 
     // Don't save geom for maximized, fullscreen or iconified windows.
     // It just tells you the current maximized size, which is not

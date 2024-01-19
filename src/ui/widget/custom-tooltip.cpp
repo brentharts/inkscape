@@ -30,7 +30,7 @@ void sp_clear_custom_tooltip()
 }
 
 bool
-sp_query_custom_tooltip(int x, int y, bool keyboard_tooltip, const Glib::RefPtr<Gtk::Tooltip>& tooltipw, gint id, Glib::ustring tooltip, Glib::ustring icon, Gtk::IconSize iconsize, int delaytime)
+sp_query_custom_tooltip(int x, int y, bool keyboard_tooltip, const Glib::RefPtr<Gtk::Tooltip>& tooltipw, gint id, Glib::ustring tooltip, Glib::ustring icon, Gtk::IconSize iconsize, Cairo::RefPtr<Cairo::Surface> surface, Gtk::Orientation orientation, int delaytime)
 {
     sp_clear_custom_tooltip();
 
@@ -41,7 +41,15 @@ sp_query_custom_tooltip(int x, int y, bool keyboard_tooltip, const Glib::RefPtr<
         start = std::chrono::steady_clock::now();
         last = id;
     }
-    auto const box = Gtk::make_managed<Gtk::Box>();
+    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    if (elapsed.count() / delaytime < 0.5) {
+        GdkDisplay *display = gdk_display_get_default();
+        if (display) {
+            timeoutid = g_timeout_add(501-elapsed.count(), delaytooltip, display);
+        }
+        return false;
+    }
+    auto const box = Gtk::make_managed<Gtk::Box>(orientation);
     auto const label = Gtk::make_managed<Gtk::Label>();
     label->set_line_wrap(true);
     label->set_markup(tooltip);
@@ -49,16 +57,12 @@ sp_query_custom_tooltip(int x, int y, bool keyboard_tooltip, const Glib::RefPtr<
     if (icon != "") {
 	    Inkscape::UI::pack_start(*box, *Gtk::make_managed<Gtk::Image>(icon, iconsize), true, true, 2);
     }
+    if (surface) {
+        Inkscape::UI::pack_start(*box, *Gtk::make_managed<Gtk::Image>(surface), true, true, 2);
+    }
     Inkscape::UI::pack_start(*box, *label, true, true, 2);
     tooltipw->set_custom(*box);
     box->get_style_context()->add_class("symbolic");
     box->show_all_children();
-    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    if (elapsed.count() / delaytime < 0.5) {
-        GdkDisplay *display = gdk_display_get_default();
-        if (display) {
-            timeoutid = g_timeout_add(501-elapsed.count(), delaytooltip, display);
-        }
-    }
-    return elapsed.count() / delaytime > 0.5;
+    return true;
 }

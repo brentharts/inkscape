@@ -78,6 +78,7 @@ namespace Toolbar {
 class Toolbars;
 class CommandToolbar;
 class SnapToolbar;
+class InstancesToolbar;
 } // namespace Toolbars
 
 namespace Widget {
@@ -183,11 +184,13 @@ public:
 
     Gtk::Widget *get_tool_toolbox() const { return tool_toolbox; }
     Gtk::Widget *get_hbox() const { return _hbox; }
+    void instances_toolbar_visibility(bool menu);
 
 private:
     Gtk::Widget *tool_toolbox;
     Inkscape::UI::Toolbar::Toolbars *tool_toolbars;
     Inkscape::UI::Toolbar::CommandToolbar *command_toolbar;
+    Inkscape::UI::Toolbar::InstancesToolbar *instances_toolbar;
     Inkscape::UI::Toolbar::SnapToolbar *snap_toolbar;
     Inkscape::PrefObserver _tb_snap_pos;
     Inkscape::PrefObserver _tb_icon_sizes1;

@@ -35,7 +35,7 @@ public:
     SPDesktop*       get_desktop()        { return _desktop; }
     SPDesktopWidget* get_desktop_widget() { return _desktop_widget; }
     void change_document(SPDocument* document);
-
+    void on_is_active_changed();
 private:
     InkscapeApplication *_app = nullptr;
     SPDocument*          _document = nullptr;
@@ -52,7 +52,6 @@ public:
 
 private:
     bool on_window_state_changed(GdkEventWindowState const *event);
-    void on_is_active_changed();
     bool on_delete_event(GdkEventAny* event) final;
     bool on_configure_event(GdkEventConfigure *event) final;
 

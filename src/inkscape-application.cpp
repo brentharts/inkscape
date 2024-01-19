@@ -65,6 +65,7 @@
 #include "inkscape.h"               // Inkscape::Application
 #include "selection.h"
 #include "path-prefix.h"            // Data directory
+#include "preferences.h"
 
 #include "actions/actions-base.h"
 #include "actions/actions-dialogs.h"
@@ -285,6 +286,10 @@ InkscapeApplication::document_swap(InkscapeWindow* window, SPDocument* document)
     _active_selection = desktop->getSelection();
     _active_desktop   = desktop;
     _active_window    = window;
+    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+    if (desktop->attached && prefs->getBool("/window/instances/state", true) ) {
+        window->on_is_active_changed();
+    }
     return true;
 }
 
@@ -903,15 +908,25 @@ InkscapeApplication::create_window(const Glib::RefPtr<Gio::File>& file)
 /** Destroy a window and close the document it contains. Aborts if document needs saving.
  *  Replaces document and keeps window open if last window and keep_alive is true.
  *  Returns true if window destroyed.
+ *  @with_required_instances allow optionaly destroy all instances
  */
 bool
-InkscapeApplication::destroy_window(InkscapeWindow* window, bool keep_alive)
+InkscapeApplication::destroy_window(InkscapeWindow* window, bool keep_alive, bool with_required_instances, bool force)
 {
     if (!gtk_app()) {
         g_assert_not_reached();
         return false;
     }
-
+    auto desktop = window->get_desktop();
+    if (!force && !with_required_instances && desktop && !desktop->attached) {
+        return true;
+    }
+    if (!force && with_required_instances && desktop && desktop->attached) {
+        Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+        if (prefs->getBool("/window/instances/state", true)) {
+            return destroy_all(keep_alive);
+        }
+    }
     SPDocument* document = window->get_document();
 
     if (!document) {
@@ -962,18 +977,31 @@ InkscapeApplication::destroy_window(InkscapeWindow* window, bool keep_alive)
 }
 
 bool
-InkscapeApplication::destroy_all()
+InkscapeApplication::destroy_all(bool keep_alive, bool force)
 {
     if (!gtk_app()) {
         g_assert_not_reached();
         return false;
     }
 
-    while (_documents.size() != 0) {
+    size_t noremoved = 0;
+    while (_documents.size() != noremoved) {
         auto it = _documents.begin();
+        std::advance(it, noremoved);
         if (!it->second.empty()) {
             auto it2 = it->second.begin();
-            if (!destroy_window (*it2)) {
+            auto desktop = (*it2)->get_desktop();
+            // force set only on full close app
+            // attached is true in caller (destroy window)
+            // so we want to close only atttached windows
+            // and kepp unattached
+            if (desktop && !force) {
+                if (!desktop->attached || (get_number_of_windows() == 1 && keep_alive)) {
+                    noremoved++;
+                    continue;
+                }
+            }
+            if (!destroy_window (*it2, keep_alive, false, force)) {
                 return false; // If destroy aborted, we need to stop exit.
             }
         }
@@ -1882,7 +1910,7 @@ void
 InkscapeApplication::on_quit()
 {
     if (gtk_app()) {
-        if (!destroy_all()) return; // Quit aborted.
+        if (!destroy_all(false, true)) return; // Quit aborted.
         // For mac, ensure closing the gtk_app windows
         for (auto window : gtk_app()->get_windows()) {
             window->close();

@@ -158,7 +158,7 @@ SPDesktop::init (SPNamedView *nv, Inkscape::UI::Widget::Canvas *acanvas, SPDeskt
         document->ensureUpToDate();
     }
     dkey = SPItem::display_key_new(1);
-
+    attached = true;
     /* Connect document */
     setDocument (document);
 
@@ -1181,7 +1181,7 @@ void SPDesktop::quick_preview(bool activate) {
 
 void SPDesktop::toggleToolbar(char const * const toolbar_name)
 {
-    Glib::ustring pref_path = getLayoutPrefPath(this) + toolbar_name + "/state";
+    Glib::ustring pref_path = (toolbar_name == "instances" ? "/window/" : getLayoutPrefPath(this)) + toolbar_name + "/state";
 
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
     gboolean visible = prefs->getBool(pref_path, true);

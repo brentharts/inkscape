@@ -206,6 +206,7 @@ See "inkscape.xml" for information about file structure.
   <bind gaction="doc.show-grids"                         keys="&lt;shift&gt;numbersign, numbersign" /> <!-- # -->
   <bind gaction="doc.show-all-guides"                    keys="&lt;shift&gt;bar,        bar" />        <!-- | -->
   <bind gaction="win.canvas-commands-bar" />
+  <bind gaction="win.canvas-instances" />
   <bind gaction="win.canvas-snap-controls-bar" />
   <bind gaction="win.canvas-tool-control-bar" />
   <bind gaction="win.canvas-toolbox" />

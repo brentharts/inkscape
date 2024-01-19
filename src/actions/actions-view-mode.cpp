@@ -88,6 +88,17 @@ canvas_commands_bar_toggle(InkscapeWindow *win)
 }
 
 void
+canvas_instances_toggle(InkscapeWindow *win)
+{
+    // Toggle State
+    canvas_toggle_state(win, "canvas-instances");
+
+    // Do Action
+    SPDesktop* dt = win->get_desktop();
+    dt->toggleToolbar("instances");
+}
+
+void
 canvas_snap_controls_bar_toggle(InkscapeWindow *win)
 {
     // Toggle State
@@ -248,6 +259,8 @@ view_set_gui(InkscapeWindow* win)
     bool statusbar_state   = prefs->getBool(pref_root + "statusbar/state", true);
     bool scrollbars_state  = prefs->getBool(pref_root + "scrollbars/state", true);
     bool rulers_state      = prefs->getBool(pref_root + "rulers/state", true);
+    // same root
+    bool instances_state   = prefs->getBool("/window/instances/state", true);
 
     canvas_set_state(win, "canvas-commands-bar",      commands_state);
     canvas_set_state(win, "canvas-snap-controls-bar", snaptoolbox_state);
@@ -257,6 +270,7 @@ view_set_gui(InkscapeWindow* win)
     canvas_set_state(win, "canvas-scroll-bars",       scrollbars_state);
     canvas_set_state(win, "canvas-palette",           palette_state);
     canvas_set_state(win, "canvas-statusbar",         statusbar_state);
+    canvas_set_state(win, "canvas-instances",         instances_state);
     // clang-format on
 }
 
@@ -266,6 +280,7 @@ std::vector<std::vector<Glib::ustring>> raw_data_view_mode =
     {"win.canvas-commands-bar",             N_("Commands Bar"),             "Canvas Display",   N_("Show or hide the Commands bar (under the menu)")},
     {"win.canvas-snap-controls-bar",        N_("Snap Controls Bar"),        "Canvas Display",   N_("Show or hide the snapping controls")},
     {"win.canvas-tool-control-bar",         N_("Tool Controls Bar"),        "Canvas Display",   N_("Show or hide the Tool Controls bar")},
+    {"win.canvas-instances",                N_("Instances"),                "Canvas Display",   N_("Show or hide the curren documents opened")},
     {"win.canvas-toolbox",                  N_("Toolbox"),                  "Canvas Display",   N_("Show or hide the main toolbox (on the left)")},
     {"win.canvas-rulers",                   N_("Rulers"),                   "Canvas Display",   N_("Show or hide the canvas rulers")},
     {"win.canvas-scroll-bars",              N_("Scroll bars"),              "Canvas Display",   N_("Show or hide the canvas scrollbars")},
@@ -316,11 +331,13 @@ add_actions_view_mode(InkscapeWindow* win)
     bool scrollbars_toggle  = prefs->getBool(pref_root + "scrollbars/state", true);
     bool palette_toggle     = prefs->getBool(pref_root + "panels/state", true);
     bool statusbar_toggle   = prefs->getBool(pref_root + "statusbar/state", true);
-
     bool interface_mode     = prefs->getBool(pref_root + "interface_mode", widescreen);
+    // same root
+    bool instances_toggle   = prefs->getBool("/window/instances/state", true);
 
     win->add_action_bool(          "canvas-commands-bar",           sigc::bind(sigc::ptr_fun(&canvas_commands_bar_toggle),         win), commands_toggle);
     win->add_action_bool(          "canvas-snap-controls-bar",      sigc::bind(sigc::ptr_fun(&canvas_snap_controls_bar_toggle),    win), snaptoolbox_toggle);
+    win->add_action_bool(          "canvas-instances",              sigc::bind(sigc::ptr_fun(&canvas_instances_toggle),            win), instances_toggle);
     win->add_action_bool(          "canvas-tool-control-bar",       sigc::bind(sigc::ptr_fun(&canvas_tool_control_bar_toggle),     win), toppanel_toggle);
     win->add_action_bool(          "canvas-toolbox",                sigc::bind(sigc::ptr_fun(&canvas_toolbox_toggle),              win), toolbox_toggle);
     win->add_action_bool(          "canvas-rulers",                 sigc::bind(sigc::ptr_fun(&canvas_rulers_toggle),               win), rulers_toggle);
