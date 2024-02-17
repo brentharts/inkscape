@@ -222,6 +222,7 @@ public:
     SPCSSAttr     *current;     ///< current style
     bool           _focusMode;  ///< Whether we're focused working or general working
 
+    bool attached; // on single desktop allow this desktop be out and floating along
     unsigned int dkey;
     unsigned window_state{};
     unsigned int interaction_disabled_counter;

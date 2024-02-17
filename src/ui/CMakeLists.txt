@@ -72,6 +72,7 @@ set(ui_SRC
 	toolbar/text-toolbar.cpp
 	toolbar/toolbar.cpp
 	toolbar/tweak-toolbar.cpp
+    toolbar/instances-toolbar.cpp
 	toolbar/zoom-toolbar.cpp
 
 	toolbar/command-toolbar.cpp
@@ -416,6 +417,7 @@ set(ui_SRC
 	toolbar/text-toolbar.h
 	toolbar/toolbar.h
 	toolbar/tweak-toolbar.h
+    toolbar/instances-toolbar.h
 	toolbar/zoom-toolbar.h
 
 	toolbar/toolbar-constants.h

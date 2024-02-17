@@ -66,7 +66,13 @@ document_check_for_data_loss(InkscapeWindow* window)
 
     if (document->isModifiedSinceSave()) {
         // Document has been modified!
-
+        auto w = GTK_WIDGET(window->gobj());
+        if (w) {
+            auto const gdkw = gtk_widget_get_window(w);
+            if (gdkw) {
+                gdk_window_focus(gdkw, GDK_CURRENT_TIME);
+            }
+        }
         int const response = run_dialog(*window, _("_Save"),
             _("<span weight=\"bold\" size=\"larger\">Save changes to document \"%s\" before closing?</span>\n\n"
               "If you close without saving, your changes will be discarded."),

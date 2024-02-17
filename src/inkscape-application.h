@@ -57,8 +57,8 @@ public:
 
     InkscapeWindow *create_window(SPDocument *document, bool replace);
     void create_window(const Glib::RefPtr<Gio::File> &file = Glib::RefPtr<Gio::File>());
-    bool destroy_window(InkscapeWindow *window, bool keep_alive = false);
-    bool destroy_all();
+    bool destroy_window(InkscapeWindow *window, bool keep_alive = false, bool with_required_instances = true, bool force = false);
+    bool destroy_all(bool keep_alive = false, bool force = false);
     void print_action_list();
     void print_input_type_list() const;
 

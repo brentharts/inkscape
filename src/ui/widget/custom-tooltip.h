@@ -4,6 +4,7 @@
 #define INKSCAPE_UI_WIDGET_CUSTOM_TOOLTIP_H
 
 #include <gtkmm/tooltip.h>
+#include <gtkmm/image.h>
 
 void sp_clear_custom_tooltip();
 
@@ -17,6 +18,8 @@ sp_query_custom_tooltip(
     Glib::ustring tooltip, 
     Glib::ustring icon = "", 
     Gtk::IconSize iconsize = Gtk::ICON_SIZE_DIALOG, 
-    int delaytime = 1000.0);
+    Cairo::RefPtr<Cairo::Surface> surface = Cairo::RefPtr<Cairo::Surface>(), 
+    Gtk::Orientation orientation = Gtk::ORIENTATION_HORIZONTAL,
+    int delaytime = 1000);
 
 #endif // INKSCAPE_UI_WIDGET_CUSTOM_TOOLTIP_H

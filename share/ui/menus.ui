@@ -580,6 +580,10 @@
               <attribute name="label" translatable="yes">_Statusbar</attribute>
               <attribute name="action">win.canvas-statusbar</attribute>
             </item>
+            <item>
+              <attribute name="label" translatable="yes">_Documents Bar</attribute>
+              <attribute name="action">win.canvas-instances</attribute>
+            </item>
           </section>
         </submenu>
         <item>

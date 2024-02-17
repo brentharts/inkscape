@@ -62,6 +62,7 @@
 #include "ui/toolbar/toolbar-constants.h"
 #include "ui/toolbar/toolbars.h"
 #include "ui/toolbar/tool-toolbar.h"
+#include "ui/toolbar/instances-toolbar.h"
 #include "ui/util.h"
 #include "ui/widget/canvas-grid.h"
 #include "ui/widget/canvas.h"
@@ -110,6 +111,9 @@ SPDesktopWidget::SPDesktopWidget(InkscapeWindow *inkscape_window, SPDocument *do
     Inkscape::UI::pack_start(*_hbox, *_tbbox, true, true);
 
     Inkscape::UI::pack_end(*this, *_hbox, true, true);
+
+    instances_toolbar = Gtk::make_managed<Inkscape::UI::Toolbar::InstancesToolbar>();
+    Inkscape::UI::pack_end(*this, *instances_toolbar, false, true);
 
     _top_toolbars = Gtk::make_managed<Gtk::Grid>();
     _top_toolbars->set_name("TopToolbars");
@@ -571,6 +575,57 @@ SPDesktopWidget::fullscreen()
 }
 
 /**
+ * Hide instances toolbar with fixed prefpath, this toolbar must wotk the same in all states
+ */
+void
+SPDesktopWidget::instances_toolbar_visibility(bool menu) {
+    Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+    auto desktops = INKSCAPE.get_desktops();
+    int ndesktops = 0;
+    for (auto & desktop : *desktops) {
+        if (desktop->attached) {
+            ndesktops++;
+        }
+    }
+    if (!menu) {
+        if (_desktop->attached) {
+            instances_toolbar->activate_instance(_desktop.get());
+        }
+        for (auto & desktop : *desktops) {
+            InkscapeWindow *parent = desktop->getInkscapeWindow();
+            g_assert(parent != nullptr);
+            auto w = GTK_WINDOW(parent->gobj());
+            if (w) {
+                auto const gdkw = gtk_widget_get_window(GTK_WIDGET(w));
+                if (gdkw) {
+                    if (prefs->getBool("/window/instances/state", true)) {
+                        if (desktop->attached &&
+                            ndesktops > 1 && 
+                            desktop != (*desktops->begin())) 
+                        {
+                            gdk_window_set_opacity(gdkw,0);
+                            gtk_window_set_skip_pager_hint(w, true);
+                            gtk_window_set_skip_taskbar_hint(w, true);
+                        } else {
+                            gdk_window_set_opacity(gdkw,1);
+                            gtk_window_set_skip_pager_hint(w, false);
+                            gtk_window_set_skip_taskbar_hint(w, false);
+                        }
+                    }
+                }
+            }
+        } 
+    }
+    if (!_desktop->attached) {
+        instances_toolbar->set_visible(false); 
+    } else if (ndesktops > 1 && prefs->getBool("/window/instances/state", true)) {
+        instances_toolbar->set_visible(true); // Not show_all()!
+    } else {
+        instances_toolbar->set_visible(false); 
+    }
+}
+
+/**
  * Hide whatever the user does not want to see in the window.
  * Also move command toolbar to top or side as required.
  */
@@ -604,6 +659,8 @@ void SPDesktopWidget::layoutWidgets()
     } else {
         tool_toolbars->set_visible(true); // Not show_all()!
     }
+
+    instances_toolbar_visibility(true);
 
     if (!prefs->getBool(pref_root + "toolbox/state", true)) {
         tool_toolbox->set_visible(false);
@@ -815,9 +872,11 @@ void SPDesktopWidget::namedviewModified(SPObject *obj, guint flags)
 // We make the desktop window with focus active. Signal is connected in inkscape-window.cpp
 void SPDesktopWidget::onFocus(bool const has_focus)
 {
-    if (!has_focus) return;
-
     Inkscape::Preferences *prefs = Inkscape::Preferences::get();
+    if (!has_focus && !prefs->getBool("/window/instances/state", true)) {
+        return;
+    }
+
     if (prefs->getBool("/options/bitmapautoreload/value", true)) {
         auto const &imageList = _desktop->doc()->getResourceList("image");
         for (auto it : imageList) {
@@ -827,6 +886,7 @@ void SPDesktopWidget::onFocus(bool const has_focus)
     }
 
     INKSCAPE.activate_desktop(_desktop.get());
+    instances_toolbar_visibility(false);
 }
 
 // ------------------------ Zoom ------------------------
