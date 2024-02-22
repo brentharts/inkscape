@@ -54,6 +54,7 @@ public:
     Geom::PathVector getPathVector(Geom::Affine const &transform) const;
     void transform_multiply(Geom::Affine postmul, bool set = true);
     void removeTransformsRecursively(SPObject const *root);
+    void toggleChildrenVisibility(bool visible);
 
 protected:
     void build(SPDocument *doc, Inkscape::XML::Node *repr) override;

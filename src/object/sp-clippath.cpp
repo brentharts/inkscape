@@ -238,6 +238,15 @@ void SPClipPath::removeTransformsRecursively(SPObject const *root)
     }
 }
 
+void SPClipPath::toggleChildrenVisibility(bool visible)
+{
+    for (auto &clip : children) {
+        if (auto item = cast<SPItem>(&clip)) {
+            item->setHidden(visible);
+        }
+    }
+}
+
 /**
  * This gets a compiled path vector from all the objects. Sub-groups are not allowed
  * in clipping path objects (SVG spec) so we assume we are non-recursive.

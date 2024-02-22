@@ -1205,7 +1205,15 @@ bool ObjectsPanel::toggleVisible(unsigned int state, Gtk::TreeModel::Row row)
     auto desktop = getDesktop();
     auto selection = getSelection();
 
-    if (SPItem* item = getItem(row)) { 
+    if (SPItem *item = getItem(row)) {
+        bool visible = !row[_model->_colInvisible];
+
+        // Check if this item is a clip group
+        if (item->getClipObject()) {
+            // Toggle the visibility of all the children of the clip group.
+            item->getClipObject()->toggleChildrenVisibility(visible);
+        }
+
         if (state & GDK_SHIFT_MASK) {
             // Toggle Visible for layers (hide all other layers)
             if (desktop->layerManager().isLayer(item)) {
@@ -1214,7 +1222,6 @@ bool ObjectsPanel::toggleVisible(unsigned int state, Gtk::TreeModel::Row row)
             }
             return true;
         }
-        bool visible = !row[_model->_colInvisible];
         if (state & GDK_CONTROL_MASK || !selection->includes(item)) {
             item->setHidden(visible);
         } else {
@@ -1222,6 +1229,7 @@ bool ObjectsPanel::toggleVisible(unsigned int state, Gtk::TreeModel::Row row)
                 sitem->setHidden(visible);
             }
         }
+
         // Use maybeDone so user can flip back and forth without making loads of undo items
         DocumentUndo::maybeDone(getDocument(), "toggle-vis", _("Toggle item visibility"), "");
         return visible;
