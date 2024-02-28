@@ -27,7 +27,9 @@ public:
     bool root_handler(CanvasEvent const &event) override;
 
 private:
+    void button_up(int button, const Geom::Point& point, unsigned int modifiers);
     bool escaped = false;
+    bool _rubberband = false;
 };
 
 } // namespace Inkscape::UI::Tools
