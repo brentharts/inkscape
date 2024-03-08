@@ -283,7 +283,9 @@ bool PagesTool::root_handler(CanvasEvent const &event)
                 } else {
                     drag_origin_dt = getSnappedResizePoint(drag_origin_dt, event.modifiers, {});
                 }
-            }
+            } else if (event.button == 3) {
+		menu_popup(event, page_manager.getSelected());
+	    }
         },
         [&] (MotionEvent const &event) {
             auto point_w = event.pos;
@@ -428,9 +430,7 @@ void PagesTool::menu_popup(CanvasEvent const &event, SPObject *obj)
         [&] (CanvasEvent const &event) {}
     );
 
-    if (page) {
-        ToolBase::menu_popup(event, page);
-    }
+    ToolBase::menu_popup(event, page);
 }
 
 /**
