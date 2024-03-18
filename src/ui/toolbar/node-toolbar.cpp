@@ -43,6 +43,8 @@
 #include "object/sp-namedview.h"
 #include "page-manager.h"
 #include "selection.h"
+#include "inkscape-application.h"
+#include "live_effects/lpe-fillet-chamfer.h"
 #include "ui/builder-utils.h"
 #include "ui/simple-pref-pusher.h"
 #include "ui/tool/control-point-selection.h"
@@ -86,6 +88,7 @@ NodeToolbar::NodeToolbar(SPDesktop *desktop)
     , _object_edit_clip_path_btn(&get_widget<Gtk::ToggleButton>(_builder, "_object_edit_clip_path_btn"))
     , _nodes_x_item(get_derived_widget<UI::Widget::SpinButton>(_builder, "_nodes_x_item"))
     , _nodes_y_item(get_derived_widget<UI::Widget::SpinButton>(_builder, "_nodes_y_item"))
+    , _corners_btn(&get_widget<Gtk::ToggleButton>(_builder, "_corners_btn"))
 {
     Unit doc_units = *desktop->getNamedView()->display_units;
     _tracker->setActiveUnit(&doc_units);
@@ -174,6 +177,14 @@ NodeToolbar::NodeToolbar(SPDesktop *desktop)
     _pusher_show_handles.reset(new UI::SimplePrefPusher(_show_handles_btn, "/tools/nodes/show_handles"));
     _show_handles_btn->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &NodeToolbar::on_pref_toggled),
                                                            _show_handles_btn, "/tools/nodes/show_handles"));
+
+    _corners_btn->signal_toggled().connect([=]() {
+        if (_freeze) {
+            return;
+        }
+        auto const base = Glib::VariantBase();
+        Gio::Application::get_default()->activate_action("object-add-corners-lpe", base);
+    });
 
     _pusher_show_transform_handles.reset(
         new UI::SimplePrefPusher(_show_transform_handles_btn, "/tools/nodes/show_transform_handles"));
@@ -274,15 +285,24 @@ void NodeToolbar::value_changed(Geom::Dim2 d)
 void NodeToolbar::sel_changed(Inkscape::Selection *selection)
 {
     SPItem *item = selection->singleItem();
+    _freeze = true;
     if (item && is<SPLPEItem>(item)) {
-        if (cast_unsafe<SPLPEItem>(item)->hasPathEffect()) {
+        if (auto lpeitem = cast_unsafe<SPLPEItem>(item);lpeitem->hasPathEffect()) {
             _nodes_lpeedit_btn.set_sensitive(true);
+            if (lpeitem->hasPathEffectOfType(Inkscape::LivePathEffect::FILLET_CHAMFER)) {
+                _corners_btn->set_active(true);
+            } else {
+                _corners_btn->set_active(false);
+            }
         } else {
+            _corners_btn->set_active(false);
             _nodes_lpeedit_btn.set_sensitive(false);
         }
     } else {
+        _corners_btn->set_active(false);
         _nodes_lpeedit_btn.set_sensitive(false);
     }
+    _freeze = false;
 }
 
 void NodeToolbar::watch_ec(SPDesktop *desktop, Inkscape::UI::Tools::ToolBase *tool)
