@@ -285,8 +285,8 @@ bool PagesTool::root_handler(CanvasEvent const &event)
                 }
             } else if (event.button == 3) {
 	   	 menu_popup(event, page_manager.getSelected());
-		 ret = true;
-	    }
+                ret = true;
+            }
         },
         [&] (MotionEvent const &event) {
             auto point_w = event.pos;
