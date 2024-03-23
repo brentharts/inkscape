@@ -73,10 +73,10 @@ workflow:
 #  Building inkscape  #
 #                     #
 #######################
-# Linux, Appimage, macOS, Windows.
+# Linux (deb and Appimage), macOS, Windows (7z, exe and msi).
 
 
-inkscape:linux:
+inkscape:deb-64:
   stage: build
   rules:
     - *do_not_run_for_schedules
@@ -99,7 +99,7 @@ inkscape:linux:
       - build/
 
 
-appimage:linux:
+inkscape:appimage-64:
   image: registry.gitlab.com/inkscape/inkscape-ci-docker/ubuntu-2004
   # appimage creator script does not support recent OS (yet)
   stage: build
@@ -119,7 +119,7 @@ appimage:linux:
       - Inkscape*.AppImage*
 
 
-inkscape:macos:
+inkscape:macos-64:
   stage: build
   parallel:
     matrix:
@@ -175,7 +175,7 @@ inkscape:macos:
     - 7z x -oC:/ $IDW_ARCHIVE
 
 
-inkscape:windows:build:
+inkscape:windows-64:prepare:
   extends: .windows
   retry: 2
   script:
@@ -195,7 +195,7 @@ inkscape:windows:build:
       - build.7z
 
 
-inkscape:windows:dist:
+inkscape:windows-64:
   extends: .windows
   parallel:
     matrix:
@@ -207,9 +207,9 @@ inkscape:windows:dist:
       allow_failure: true
     - *run_otherwise
   dependencies:
-    - inkscape:windows:build
+    - inkscape:windows-64:prepare
   needs:
-    - inkscape:windows:build
+    - inkscape:windows-64:prepare
   script:
     - 7z x build.7z
     - C:/msys64/msys2_shell.cmd -defterm -no-start -ucrt64 -here -c "ninja -C build dist-win-${DIST}"
@@ -225,8 +225,8 @@ test:linux:
     - *do_not_run_for_schedules
     - *run_otherwise
   dependencies:
-    - inkscape:linux
-  needs: ["inkscape:linux"]
+    - inkscape:deb-64
+  needs: ["inkscape:deb-64"]
   script:
     - sed -i '/<policy domain="coder" rights="none"/d' /etc/ImageMagick-6/policy.xml
     - cd build
@@ -238,13 +238,13 @@ test:linux:
     when: on_failure
 
 test:macos:
-  extends: inkscape:macos
+  extends: inkscape:macos-64
   stage: test
   parallel:
     matrix:
       - RUNNER: [ "macosintel" ]
   needs:
-    - job: inkscape:macos
+    - job: inkscape:macos-64
       parallel:
         matrix:
           - RUNNER: macosintel
